@@ -57,9 +57,10 @@ YFINANCE_TICKERS = {
     'Silver': {'ticker': 'SI=F', 'type': 'COMMODITY'},
     'Copper': {'ticker': 'HG=F', 'type': 'COMMODITY'},
     'Uranium ETF (URA)': {'ticker': 'URA', 'type': 'COMMODITY'},
+    'Wheat Futures': {'ticker': 'ZW=F', 'type': 'COMMODITY'},
 
     # --- 지수 및 금리 ---
-    'VIX Index': {'ticker': '^VIX', 'type': 'INDEX'},
+    'VIX Index': {'ticker': '^VIX', 'type': 'INDEX_US'},
     'US 10 Year Treasury Yield': {'ticker': '^TNX', 'type': 'INTEREST_RATE'},
 
     # --- 환율 (FX) ---

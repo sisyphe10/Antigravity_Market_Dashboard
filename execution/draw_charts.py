@@ -24,25 +24,26 @@ CATEGORY_MAP = {
     'OCEAN_FREIGHT': 'Shipping'
 }
 
+def get_category_for_item(item_name, data_type):
+    """Determine category based on item name and data type"""
+    # Special handling for DDR items (they're DRAM but should be in Memory)
+    if 'DDR4' in item_name or 'DDR5' in item_name:
+        return 'Memory'
+    # Use data type mapping
+    return CATEGORY_MAP.get(data_type, 'Other')
+
 def smart_format_yaxis(y, pos):
     """
-    Smart Y-axis formatter that adjusts precision based on value range.
-    - Large values (>1000): no decimals
-    - Medium values (1-1000): 1-2 decimals
-    - Small values (<1): 2-4 decimals
+    Smart Y-axis formatter - no more than 1 decimal place.
+    - Large values (>=100): no decimals
+    - Medium/small values: max 1 decimal
     """
-    if abs(y) >= 1000:
-        return f'{y:,.0f}'  # No decimals for large numbers
-    elif abs(y) >= 100:
-        return f'{y:.0f}'   # No decimals for hundreds
-    elif abs(y) >= 10:
-        return f'{y:.1f}'   # 1 decimal for tens
+    if abs(y) >= 100:
+        return f'{y:,.0f}'  # No decimals for >= 100
     elif abs(y) >= 1:
-        return f'{y:.2f}'   # 2 decimals for single digits
-    elif abs(y) >= 0.01:
-        return f'{y:.3f}'   # 3 decimals for cents
+        return f'{y:.1f}'   # Max 1 decimal for 1-100
     else:
-        return f'{y:.4f}'   # 4 decimals for very small values
+        return f'{y:.2f}'   # Max 2 decimals for very small values < 1
 
 def setup_charts_dir():
     """Create charts directory if it doesn't exist."""
@@ -102,53 +103,53 @@ def draw_charts():
                 continue
 
             # Forward-fill missing dates
-            # Create a complete date range
             date_range = pd.date_range(start=filtered_data['날짜'].min(), 
                                       end=filtered_data['날짜'].max(), 
                                       freq='D')
             
-            # Reindex to include all dates, forward-fill missing values
             filtered_data = filtered_data.set_index('날짜')
             filtered_data = filtered_data.reindex(date_range, method='ffill')
             filtered_data.index.name = '날짜'
             filtered_data = filtered_data.reset_index()
 
             # Plotting
-            plt.figure(figsize=(10, 6))
+            fig, ax = plt.subplots(figsize=(10, 6))
             
             # Plot line
-            plt.plot(filtered_data['날짜'], filtered_data['가격'], color=LINE_COLOR, label=name)
+            ax.plot(filtered_data['날짜'], filtered_data['가격'], color=LINE_COLOR, label=name)
             
-            # Formatting
-            plt.title(f"{name} (Last 6 Months)", fontsize=14)
-            plt.xlabel("Date")
-            plt.ylabel("Price")
+            # Title without "(Last 6 Months)" - just the item name
+            ax.set_title(f"{name}", fontsize=14)
+            
+            # Axis labels positioned as requested
+            # X-axis label at bottom right
+            ax.set_xlabel("Date", fontsize=10, loc='right')
+            # Y-axis label at top left
+            ax.set_ylabel("Price", fontsize=10, loc='top')
             
             # X-axis date formatting
-            plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
-            plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
-            plt.gcf().autofmt_xdate() # Rotate dates
+            ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+            ax.xaxis.set_major_locator(mdates.MonthLocator())
+            fig.autofmt_xdate()
 
             # Y-axis: Smart formatting with ~8 ticks
-            ax = plt.gca()
             ax.yaxis.set_major_locator(MaxNLocator(nbins=8, prune='both'))
             ax.yaxis.set_major_formatter(FuncFormatter(smart_format_yaxis))
 
             # Y-axis tight margins
-            plt.margins(y=0.02) 
+            ax.margins(y=0.02)
 
-            # Legend at top center
-            plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.1), ncol=1)
+            # Legend at top center (without redundant title info)
+            ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.1), ncol=1)
 
             # Grid
-            plt.grid(True, linestyle='--', alpha=0.5)
+            ax.grid(True, linestyle='--', alpha=0.5)
 
-            # Save with category metadata in filename for later grouping
-            # Get category from data type if available
+            # Get category from data type
             category = 'Other'
             if '데이터 타입' in group.columns:
                 data_type = group['데이터 타입'].iloc[0]
-                category = CATEGORY_MAP.get(data_type, 'Other')
+                category = get_category_for_item(name, data_type)
             
             # Clean filename
             safe_name = "".join([c if c.isalnum() else "_" for c in name])
