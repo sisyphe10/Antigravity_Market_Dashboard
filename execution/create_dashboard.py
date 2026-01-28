@@ -14,86 +14,86 @@ HTML_TEMPLATE = """
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Market Data Dashboard</title>
     <style>
-        :root {
+        :root {{
             --bg-color: #1a1a1a;
             --card-bg: #2d2d2d;
             --text-color: #e0e0e0;
             --accent-color: #4a90e2;
-        }
+        }}
 
-        body {
+        body {{
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
             padding: 20px;
-        }
+        }}
 
-        header {
+        header {{
             text-align: center;
             margin-bottom: 40px;
             padding: 20px 0;
             border-bottom: 1px solid #333;
-        }
+        }}
 
-        h1 {
+        h1 {{
             margin: 0;
             font-size: 2.5rem;
             color: var(--text-color);
-        }
+        }}
 
-        .last-updated {
+        .last-updated {{
             margin-top: 10px;
             color: #888;
             font-style: italic;
-        }
+        }}
 
-        .dashboard-grid {
+        .dashboard-grid {{
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
             gap: 20px;
             max_width: 1600px;
             margin: 0 auto;
-        }
+        }}
 
-        @media (max-width: 768px) {
-            .dashboard-grid {
+        @media (max-width: 768px) {{
+            .dashboard-grid {{
                 grid-template-columns: 1fr;
-            }
-        }
+            }}
+        }}
 
-        .chart-card {
+        .chart-card {{
             background-color: var(--card-bg);
             border-radius: 12px;
             padding: 15px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
             transition: transform 0.2s ease;
             text-align: center;
-        }
+        }}
 
-        .chart-card:hover {
+        .chart-card:hover {{
             transform: translateY(-5px);
-        }
+        }}
 
-        .chart-card h3 {
+        .chart-card h3 {{
             margin-top: 0;
             margin-bottom: 15px;
             font-size: 1.2rem;
             color: #ccc;
-        }
+        }}
 
-        .chart-card img {
+        .chart-card img {{
             max-width: 100%;
             height: auto;
             border-radius: 8px;
-        }
+        }}
 
-        footer {
+        footer {{
             text-align: center;
             margin-top: 50px;
             color: #666;
             font-size: 0.9rem;
-        }
+        }}
     </style>
 </head>
 <body>
