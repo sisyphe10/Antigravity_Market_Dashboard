@@ -39,6 +39,12 @@ jobs:
         env:
           TZ: 'Asia/Seoul'
 
+      - name: Import Memory Historical Data (Excel)
+        run: |
+          python execution/import_memory_data.py
+        env:
+          TZ: 'Asia/Seoul'
+
       - name: Run Crawler
         run: |
           python execution/market_crawler.py
