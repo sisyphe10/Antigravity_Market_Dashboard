@@ -3,6 +3,7 @@ import os
 import glob
 from datetime import datetime
 
+# Version 2.0 - Fixed CSS curly brace issue with f-strings
 CHARTS_DIR = 'charts'
 OUTPUT_FILE = 'index.html'
 
