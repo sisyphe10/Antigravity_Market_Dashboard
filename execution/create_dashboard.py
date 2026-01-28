@@ -6,8 +6,44 @@ from datetime import datetime
 CHARTS_DIR = 'charts'
 OUTPUT_FILE = 'index.html'
 
-HTML_TEMPLATE = """
-<!DOCTYPE html>
+def create_dashboard():
+    # Check if charts directory exists
+    if not os.path.exists(CHARTS_DIR):
+        print(f"Charts directory not found: {CHARTS_DIR}")
+        return
+
+    # Get all png files
+    chart_files = glob.glob(os.path.join(CHARTS_DIR, '*.png'))
+    chart_files.sort()
+
+    if not chart_files:
+        print("No charts found.")
+        charts_html = "<p style='text-align:center; width:100%;'>No charts available yet.</p>"
+    else:
+        charts_html = ""
+        for file_path in chart_files:
+            # Get filename for display
+            filename = os.path.basename(file_path)
+            # Remove extension for title
+            title = os.path.splitext(filename)[0].replace('_', ' ')
+            
+            # Create HTML block for this chart using relative path
+            relative_path = f"charts/{filename}"
+            
+            charts_html += f"""
+            <div class="chart-card">
+                <h3>{title}</h3>
+                <a href="{relative_path}" target="_blank">
+                    <img src="{relative_path}" alt="{title}" loading="lazy">
+                </a>
+            </div>
+            """
+
+    # Generate full HTML
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S KST")
+    
+    # Build HTML without using .format() to avoid curly brace conflicts
+    html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -52,7 +88,7 @@ HTML_TEMPLATE = """
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
             gap: 20px;
-            max_width: 1600px;
+            max-width: 1600px;
             margin: 0 auto;
         }}
 
@@ -99,7 +135,7 @@ HTML_TEMPLATE = """
 <body>
     <header>
         <h1>📊 Market Data Dashboard</h1>
-        <div class="last-updated">Last Updated: {timestamp}</div>
+        <div class="last-updated">Last Updated: {now}</div>
     </header>
 
     <div class="dashboard-grid">
@@ -113,52 +149,11 @@ HTML_TEMPLATE = """
 </html>
 """
 
-def create_dashboard():
-    # Check if charts directory exists
-    if not os.path.exists(CHARTS_DIR):
-        print(f"⚠️ Charts directory not found: {CHARTS_DIR}")
-        return
-
-    # Get all png files
-    chart_files = glob.glob(os.path.join(CHARTS_DIR, '*.png'))
-    chart_files.sort()
-
-    if not chart_files:
-        print("⚠️ No charts found.")
-        charts_html = "<p style='text-align:center; width:100%;'>No charts available yet.</p>"
-    else:
-        charts_html = ""
-        for file_path in chart_files:
-            # Get filename for display
-            filename = os.path.basename(file_path)
-            # Remove extension for title
-            title = os.path.splitext(filename)[0].replace('_', ' ')
-            
-            # Create HTML block for this chart using relative path
-            # IMPORTANT: Path should be relative to index.html, so 'charts/filename.png'
-            relative_path = f"charts/{filename}"
-            
-            charts_html += f"""
-            <div class="chart-card">
-                <h3>{title}</h3>
-                <a href="{relative_path}" target="_blank">
-                    <img src="{relative_path}" alt="{title}" loading="lazy">
-                </a>
-            </div>
-            """
-
-    # Generate full HTML
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S KST")
-    html_content = HTML_TEMPLATE.format(
-        timestamp=now,
-        charts_html=charts_html
-    )
-
     # Write to file
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
         f.write(html_content)
 
-    print(f"✅ Dashboard generated: {OUTPUT_FILE}")
+    print(f"Dashboard generated: {OUTPUT_FILE}")
 
 if __name__ == "__main__":
     create_dashboard()
