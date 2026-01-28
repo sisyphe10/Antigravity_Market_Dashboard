@@ -127,8 +127,8 @@ def draw_charts():
             # Y-axis label at top left
             ax.set_ylabel("Price", fontsize=10, loc='top')
             
-            # X-axis date formatting
-            ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+            # X-axis date formatting - YY/MM format
+            ax.xaxis.set_major_formatter(mdates.DateFormatter('%y/%m'))
             ax.xaxis.set_major_locator(mdates.MonthLocator())
             fig.autofmt_xdate()
 

@@ -29,7 +29,8 @@ def get_item_category(item_name):
         return 'Memory'
     
     # Special handling for S&P 500 related items (should be in US Indices)
-    if 'S&P 500' in item_name or 'S_P_500' in item_name:
+    # Handle all variations: "S&P 500", "S_P_500", "S P 500"
+    if 'S&P 500' in item_name or 'S_P_500' in item_name or 'S P 500' in item_name:
         return 'US Indices'
     
     try:
