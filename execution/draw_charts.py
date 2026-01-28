@@ -2,7 +2,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import MaxNLocator, FuncFormatter
 import os
 from datetime import datetime, timedelta
 
@@ -23,6 +23,26 @@ CATEGORY_MAP = {
     'INDEX': 'Market Indices',
     'OCEAN_FREIGHT': 'Shipping'
 }
+
+def smart_format_yaxis(y, pos):
+    """
+    Smart Y-axis formatter that adjusts precision based on value range.
+    - Large values (>1000): no decimals
+    - Medium values (1-1000): 1-2 decimals
+    - Small values (<1): 2-4 decimals
+    """
+    if abs(y) >= 1000:
+        return f'{y:,.0f}'  # No decimals for large numbers
+    elif abs(y) >= 100:
+        return f'{y:.0f}'   # No decimals for hundreds
+    elif abs(y) >= 10:
+        return f'{y:.1f}'   # 1 decimal for tens
+    elif abs(y) >= 1:
+        return f'{y:.2f}'   # 2 decimals for single digits
+    elif abs(y) >= 0.01:
+        return f'{y:.3f}'   # 3 decimals for cents
+    else:
+        return f'{y:.4f}'   # 4 decimals for very small values
 
 def setup_charts_dir():
     """Create charts directory if it doesn't exist."""
@@ -109,9 +129,10 @@ def draw_charts():
             plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
             plt.gcf().autofmt_xdate() # Rotate dates
 
-            # Y-axis: Fix tick density for high-value items
-            # MaxNLocator limits the number of ticks to prevent overcrowding
-            plt.gca().yaxis.set_major_locator(MaxNLocator(nbins=8, prune='both'))
+            # Y-axis: Smart formatting with ~8 ticks
+            ax = plt.gca()
+            ax.yaxis.set_major_locator(MaxNLocator(nbins=8, prune='both'))
+            ax.yaxis.set_major_formatter(FuncFormatter(smart_format_yaxis))
 
             # Y-axis tight margins
             plt.margins(y=0.02) 
