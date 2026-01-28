@@ -1,0 +1,51 @@
+
+name: Daily Market Crawl
+
+on:
+  schedule:
+    - cron: '0 14 * * *'  # 11:00 PM KST (14:00 UTC)
+  workflow_dispatch:      # Allow manual trigger
+
+jobs:
+  crawl-and-chart:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Crawler
+        run: |
+          python execution/market_crawler.py
+        env:
+          TZ: 'Asia/Seoul'
+
+      - name: Draw Charts
+        run: |
+          python execution/draw_charts.py
+        env:
+           TZ: 'Asia/Seoul'
+      
+      - name: Generate Dashboard
+        run: |
+          python execution/create_dashboard.py
+        env:
+            TZ: 'Asia/Seoul'
+
+      - name: Commit and Push
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Auto-update: Market data and dashboard [skip ci]"
+          file_pattern: 'dataset.csv charts/*.png index.html'

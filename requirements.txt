@@ -1,0 +1,11 @@
+python-telegram-bot
+twscrape
+deep-translator
+python-dotenv
+asyncio
+schedule
+selenium
+webdriver-manager
+yfinance
+pandas
+matplotlib
