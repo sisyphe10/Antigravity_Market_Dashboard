@@ -33,6 +33,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Backfill Historical Data (yfinance)
+        run: |
+          python execution/backfill_yfinance_history.py
+        env:
+          TZ: 'Asia/Seoul'
+
       - name: Run Crawler
         run: |
           python execution/market_crawler.py
