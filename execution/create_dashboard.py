@@ -1,10 +1,39 @@
+
 import os
 import glob
 from datetime import datetime
+import csv
 
-# Version 2.0 - Fixed CSS curly brace issue with f-strings
+# Version 3.0 - Added category grouping
 CHARTS_DIR = 'charts'
 OUTPUT_FILE = 'index.html'
+CSV_FILE = 'dataset.csv'
+
+# Category mapping (must match draw_charts.py)
+CATEGORY_MAP = {
+    'DRAM': 'Memory',
+    'NAND': 'Memory',
+    'CRYPTO': 'Cryptocurrency',
+    'COMMODITY': 'Commodities',
+    'FX': 'Foreign Exchange',
+    'INDEX_US': 'US Indices',
+    'INTEREST_RATE': 'Interest Rates',
+    'INDEX': 'Market Indices',
+    'OCEAN_FREIGHT': 'Shipping'
+}
+
+def get_item_category(item_name):
+    """Get category for an item by looking up in dataset.csv"""
+    try:
+        with open(CSV_FILE, 'r', encoding='utf-8-sig') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row.get('제품명', '').strip() == item_name:
+                    data_type = row.get('데이터 타입', '').strip()
+                    return CATEGORY_MAP.get(data_type, 'Other')
+    except:
+        pass
+    return 'Other'
 
 def create_dashboard():
     # Check if charts directory exists
@@ -20,29 +49,65 @@ def create_dashboard():
         print("No charts found.")
         charts_html = "<p style='text-align:center; width:100%;'>No charts available yet.</p>"
     else:
-        charts_html = ""
+        # Group charts by category
+        charts_by_category = {}
+        
         for file_path in chart_files:
-            # Get filename for display
             filename = os.path.basename(file_path)
-            # Remove extension for title
-            title = os.path.splitext(filename)[0].replace('_', ' ')
+            # Extract item name from filename (remove .png and replace _ with space)
+            item_name = os.path.splitext(filename)[0].replace('_', ' ')
             
-            # Create HTML block for this chart using relative path
-            relative_path = f"charts/{filename}"
+            # Get category
+            category = get_item_category(item_name)
             
+            if category not in charts_by_category:
+                charts_by_category[category] = []
+            
+            charts_by_category[category].append({
+                'filename': filename,
+                'title': item_name,
+                'path': f"charts/{filename}"
+            })
+        
+        # Build HTML with category sections
+        charts_html = ""
+        
+        # Define category order for better organization
+        category_order = ['Memory', 'Cryptocurrency', 'US Indices', 'Market Indices', 
+                         'Commodities', 'Foreign Exchange', 'Interest Rates', 'Shipping', 'Other']
+        
+        for category in category_order:
+            if category not in charts_by_category:
+                continue
+                
+            charts = charts_by_category[category]
+            
+            # Add category header
             charts_html += f"""
-            <div class="chart-card">
-                <h3>{title}</h3>
-                <a href="{relative_path}" target="_blank">
-                    <img src="{relative_path}" alt="{title}" loading="lazy">
-                </a>
+            <div class="category-section">
+                <h2 class="category-title">{category}</h2>
+                <div class="dashboard-grid">
+            """
+            
+            # Add charts in this category
+            for chart in charts:
+                charts_html += f"""
+                <div class="chart-card">
+                    <h3>{chart['title']}</h3>
+                    <a href="{chart['path']}" target="_blank">
+                        <img src="{chart['path']}" alt="{chart['title']}" loading="lazy">
+                    </a>
+                </div>
+                """
+            
+            charts_html += """
+                </div>
             </div>
             """
 
     # Generate full HTML
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S KST")
     
-    # Build HTML without using .format() to avoid curly brace conflicts
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -55,6 +120,7 @@ def create_dashboard():
             --card-bg: #2d2d2d;
             --text-color: #e0e0e0;
             --accent-color: #4a90e2;
+            --category-bg: #252525;
         }}
 
         body {{
@@ -82,6 +148,18 @@ def create_dashboard():
             margin-top: 10px;
             color: #888;
             font-style: italic;
+        }}
+
+        .category-section {{
+            margin-bottom: 50px;
+        }}
+
+        .category-title {{
+            font-size: 1.8rem;
+            color: var(--accent-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent-color);
         }}
 
         .dashboard-grid {{
@@ -138,9 +216,7 @@ def create_dashboard():
         <div class="last-updated">Last Updated: {now}</div>
     </header>
 
-    <div class="dashboard-grid">
-        {charts_html}
-    </div>
+    {charts_html}
 
     <footer>
         <p>Auto-generated by Antigravity Agent</p>

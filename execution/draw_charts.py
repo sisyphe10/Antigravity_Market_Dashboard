@@ -2,6 +2,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from matplotlib.ticker import MaxNLocator
 import os
 from datetime import datetime, timedelta
 
@@ -10,16 +11,29 @@ CSV_FILE = 'dataset.csv'
 CHARTS_DIR = 'charts'
 LINE_COLOR = '#404040'  # RGB(64, 64, 64)
 
+# Category mapping for grouping
+CATEGORY_MAP = {
+    'DRAM': 'Memory',
+    'NAND': 'Memory',
+    'CRYPTO': 'Cryptocurrency',
+    'COMMODITY': 'Commodities',
+    'FX': 'Foreign Exchange',
+    'INDEX_US': 'US Indices',
+    'INTEREST_RATE': 'Interest Rates',
+    'INDEX': 'Market Indices',
+    'OCEAN_FREIGHT': 'Shipping'
+}
+
 def setup_charts_dir():
     """Create charts directory if it doesn't exist."""
     if not os.path.exists(CHARTS_DIR):
         os.makedirs(CHARTS_DIR)
-        print(f"✅ Created directory: {CHARTS_DIR}")
+        print(f"Created directory: {CHARTS_DIR}")
 
 def draw_charts():
     """Draw charts for each item in dataset.csv."""
     if not os.path.exists(CSV_FILE):
-        print(f"❌ File not found: {CSV_FILE}")
+        print(f"File not found: {CSV_FILE}")
         return
 
     try:
@@ -32,48 +46,52 @@ def draw_charts():
         # Check required columns
         required_cols = ['날짜', '제품명', '가격']
         if not all(col in df.columns for col in required_cols):
-            print(f"❌ Missing columns. Required: {required_cols}")
+            print(f"Missing columns. Required: {required_cols}")
             return
 
         # Convert date column to datetime
         df['날짜'] = pd.to_datetime(df['날짜'])
         
+        # Convert price to numeric, handling commas
+        df['가격'] = pd.to_numeric(df['가격'].astype(str).str.replace(',', ''), errors='coerce')
+        
         # Sort by date
         df = df.sort_values(by='날짜')
 
-        # Get the latest date across all data (latest 'collected' or 'available' date)
+        # Get the latest date across all data
         if df.empty:
-            print("⚠️ Dataset is empty.")
+            print("Dataset is empty.")
             return
 
         global_latest_date = df['날짜'].max()
         start_date = global_latest_date - timedelta(days=180) # Approx 6 months
 
-        print(f"📅 Latest Data: {global_latest_date.strftime('%Y-%m-%d')}")
-        print(f"📉 Filter Start Date: {start_date.strftime('%Y-%m-%d')}")
+        print(f"Latest Data: {global_latest_date.strftime('%Y-%m-%d')}")
+        print(f"Filter Start Date: {start_date.strftime('%Y-%m-%d')}")
 
         # Group by item name
         grouped = df.groupby('제품명')
 
         for name, group in grouped:
-            # Filter for last 6 months relative to global latest date
-            # (Or should it be relative to the item's latest? 
-            #  User said "based on the most recent data" (latest data point).
-            #  I'll use global latest to keep the X-axis comparable if needed, 
-            #  but usually, we just want the history. 
-            #  Let's allow items to have their own history if they stopped updating, 
-            #  but user said "Last 6 months period".)
-            #  
-            #  Actually, "From the latest data point, show last 6 months" 
-            #  implies the window [latest - 6mo, latest].
-            
             # Filter data within the range
             mask = (group['날짜'] >= start_date) & (group['날짜'] <= global_latest_date)
-            filtered_data = group.loc[mask]
+            filtered_data = group.loc[mask].copy()
 
             if filtered_data.empty:
-                print(f"⚠️ No data in range for: {name}")
+                print(f"No data in range for: {name}")
                 continue
+
+            # Forward-fill missing dates
+            # Create a complete date range
+            date_range = pd.date_range(start=filtered_data['날짜'].min(), 
+                                      end=filtered_data['날짜'].max(), 
+                                      freq='D')
+            
+            # Reindex to include all dates, forward-fill missing values
+            filtered_data = filtered_data.set_index('날짜')
+            filtered_data = filtered_data.reindex(date_range, method='ffill')
+            filtered_data.index.name = '날짜'
+            filtered_data = filtered_data.reset_index()
 
             # Plotting
             plt.figure(figsize=(10, 6))
@@ -91,8 +109,11 @@ def draw_charts():
             plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
             plt.gcf().autofmt_xdate() # Rotate dates
 
-            # Y-axis tight margins: "위아래 여백이 크지 않았으면 좋겠어"
-            # margins(y=0) removes standard padding.
+            # Y-axis: Fix tick density for high-value items
+            # MaxNLocator limits the number of ticks to prevent overcrowding
+            plt.gca().yaxis.set_major_locator(MaxNLocator(nbins=8, prune='both'))
+
+            # Y-axis tight margins
             plt.margins(y=0.02) 
 
             # Legend at top center
@@ -101,17 +122,25 @@ def draw_charts():
             # Grid
             plt.grid(True, linestyle='--', alpha=0.5)
 
-            # Save
+            # Save with category metadata in filename for later grouping
+            # Get category from data type if available
+            category = 'Other'
+            if '데이터 타입' in group.columns:
+                data_type = group['데이터 타입'].iloc[0]
+                category = CATEGORY_MAP.get(data_type, 'Other')
+            
             # Clean filename
             safe_name = "".join([c if c.isalnum() else "_" for c in name])
             save_path = os.path.join(CHARTS_DIR, f"{safe_name}.png")
-            plt.savefig(save_path, bbox_inches='tight')
+            plt.savefig(save_path, bbox_inches='tight', metadata={'Category': category})
             plt.close()
             
-            print(f"✓ Saved chart: {save_path}")
+            print(f"Saved chart: {save_path} (Category: {category})")
 
     except Exception as e:
-        print(f"❌ Error drawing charts: {e}")
+        print(f"Error drawing charts: {e}")
+        import traceback
+        traceback.print_exc()
 
 if __name__ == "__main__":
     setup_charts_dir()
