@@ -47,7 +47,6 @@ YFINANCE_TICKERS = {
     'Binance Coin': {'ticker': 'BNB-USD', 'type': 'CRYPTO'},
     'Ripple': {'ticker': 'XRP-USD', 'type': 'CRYPTO'},
     'Solana': {'ticker': 'SOL-USD', 'type': 'CRYPTO'},
-    'Dogecoin': {'ticker': 'DOGE-USD', 'type': 'CRYPTO'},
 
     # --- 원자재 ---
     'WTI Crude Oil': {'ticker': 'CL=F', 'type': 'COMMODITY'},

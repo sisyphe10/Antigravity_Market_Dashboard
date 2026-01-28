@@ -24,6 +24,14 @@ CATEGORY_MAP = {
 
 def get_item_category(item_name):
     """Get category for an item by looking up in dataset.csv"""
+    # Special handling for DDR items (they should be in Memory)
+    if 'DDR4' in item_name or 'DDR5' in item_name:
+        return 'Memory'
+    
+    # Special handling for S&P 500 related items (should be in US Indices)
+    if 'S&P 500' in item_name or 'S_P_500' in item_name:
+        return 'US Indices'
+    
     try:
         with open(CSV_FILE, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f)
