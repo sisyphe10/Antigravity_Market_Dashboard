@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Data Dashboard</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text-color: #e0e0e0;
+            --accent-color: #4a90e2;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            color: var(--text-color);
+        }
+
+        .last-updated {
+            margin-top: 10px;
+            color: #888;
+            font-style: italic;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
+            gap: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease;
+            text-align: center;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .chart-card h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            color: #ccc;
+        }
+
+        .chart-card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>📊 Market Data Dashboard</h1>
+        <div class="last-updated">Last Updated: 2026-01-28 15:36:49 KST</div>
+    </header>
+
+    <div class="dashboard-grid">
+        
+            <div class="chart-card">
+                <h3>Binance Coin</h3>
+                <a href="charts/Binance_Coin.png" target="_blank">
+                    <img src="charts/Binance_Coin.png" alt="Binance Coin" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>Bitcoin</h3>
+                <a href="charts/Bitcoin.png" target="_blank">
+                    <img src="charts/Bitcoin.png" alt="Bitcoin" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>Brent Crude Oil</h3>
+                <a href="charts/Brent_Crude_Oil.png" target="_blank">
+                    <img src="charts/Brent_Crude_Oil.png" alt="Brent Crude Oil" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>CNY USD</h3>
+                <a href="charts/CNY_USD.png" target="_blank">
+                    <img src="charts/CNY_USD.png" alt="CNY USD" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>Copper</h3>
+                <a href="charts/Copper.png" target="_blank">
+                    <img src="charts/Copper.png" alt="Copper" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>DDR4 16Gb  2Gx8 3200</h3>
+                <a href="charts/DDR4_16Gb__2Gx8_3200.png" target="_blank">
+                    <img src="charts/DDR4_16Gb__2Gx8_3200.png" alt="DDR4 16Gb  2Gx8 3200" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>DDR4 8Gb  1Gx8  3200</h3>
+                <a href="charts/DDR4_8Gb__1Gx8__3200.png" target="_blank">
+                    <img src="charts/DDR4_8Gb__1Gx8__3200.png" alt="DDR4 8Gb  1Gx8  3200" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>DDR5 16G  2Gx8  4800 5600</h3>
+                <a href="charts/DDR5_16G__2Gx8__4800_5600.png" target="_blank">
+                    <img src="charts/DDR5_16G__2Gx8__4800_5600.png" alt="DDR5 16G  2Gx8  4800 5600" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>Dogecoin</h3>
+                <a href="charts/Dogecoin.png" target="_blank">
+                    <img src="charts/Dogecoin.png" alt="Dogecoin" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>Dollar Index  DXY </h3>
+                <a href="charts/Dollar_Index__DXY_.png" target="_blank">
+                    <img src="charts/Dollar_Index__DXY_.png" alt="Dollar Index  DXY " loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>EUR USD</h3>
+                <a href="charts/EUR_USD.png" target="_blank">
+                    <img src="charts/EUR_USD.png" alt="EUR USD" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>Ethereum</h3>
+                <a href="charts/Ethereum.png" target="_blank">
+                    <img src="charts/Ethereum.png" alt="Ethereum" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>Gold</h3>
+                <a href="charts/Gold.png" target="_blank">
+                    <img src="charts/Gold.png" alt="Gold" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>JPY USD</h3>
+                <a href="charts/JPY_USD.png" target="_blank">
+                    <img src="charts/JPY_USD.png" alt="JPY USD" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>KRW USD</h3>
+                <a href="charts/KRW_USD.png" target="_blank">
+                    <img src="charts/KRW_USD.png" alt="KRW USD" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>MLC 32Gb 4GBx8</h3>
+                <a href="charts/MLC_32Gb_4GBx8.png" target="_blank">
+                    <img src="charts/MLC_32Gb_4GBx8.png" alt="MLC 32Gb 4GBx8" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>MLC 64Gb 8GBx8</h3>
+                <a href="charts/MLC_64Gb_8GBx8.png" target="_blank">
+                    <img src="charts/MLC_64Gb_8GBx8.png" alt="MLC 64Gb 8GBx8" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>NASDAQ</h3>
+                <a href="charts/NASDAQ.png" target="_blank">
+                    <img src="charts/NASDAQ.png" alt="NASDAQ" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>NASDAQ PBR</h3>
+                <a href="charts/NASDAQ_PBR.png" target="_blank">
+                    <img src="charts/NASDAQ_PBR.png" alt="NASDAQ PBR" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>NASDAQ PER</h3>
+                <a href="charts/NASDAQ_PER.png" target="_blank">
+                    <img src="charts/NASDAQ_PER.png" alt="NASDAQ PER" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>Natural Gas</h3>
+                <a href="charts/Natural_Gas.png" target="_blank">
+                    <img src="charts/Natural_Gas.png" alt="Natural Gas" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>RUSSELL 2000</h3>
+                <a href="charts/RUSSELL_2000.png" target="_blank">
+                    <img src="charts/RUSSELL_2000.png" alt="RUSSELL 2000" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>RUSSELL 2000 PBR</h3>
+                <a href="charts/RUSSELL_2000_PBR.png" target="_blank">
+                    <img src="charts/RUSSELL_2000_PBR.png" alt="RUSSELL 2000 PBR" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>RUSSELL 2000 PER</h3>
+                <a href="charts/RUSSELL_2000_PER.png" target="_blank">
+                    <img src="charts/RUSSELL_2000_PER.png" alt="RUSSELL 2000 PER" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>Ripple</h3>
+                <a href="charts/Ripple.png" target="_blank">
+                    <img src="charts/Ripple.png" alt="Ripple" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>SCFI Comprehensive Index</h3>
+                <a href="charts/SCFI_Comprehensive_Index.png" target="_blank">
+                    <img src="charts/SCFI_Comprehensive_Index.png" alt="SCFI Comprehensive Index" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>SLC 1Gb 128MBx8</h3>
+                <a href="charts/SLC_1Gb_128MBx8.png" target="_blank">
+                    <img src="charts/SLC_1Gb_128MBx8.png" alt="SLC 1Gb 128MBx8" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>SLC 2Gb 256MBx8</h3>
+                <a href="charts/SLC_2Gb_256MBx8.png" target="_blank">
+                    <img src="charts/SLC_2Gb_256MBx8.png" alt="SLC 2Gb 256MBx8" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>S P 500</h3>
+                <a href="charts/S_P_500.png" target="_blank">
+                    <img src="charts/S_P_500.png" alt="S P 500" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>S P 500 PBR</h3>
+                <a href="charts/S_P_500_PBR.png" target="_blank">
+                    <img src="charts/S_P_500_PBR.png" alt="S P 500 PBR" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>S P 500 PER</h3>
+                <a href="charts/S_P_500_PER.png" target="_blank">
+                    <img src="charts/S_P_500_PER.png" alt="S P 500 PER" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>Silver</h3>
+                <a href="charts/Silver.png" target="_blank">
+                    <img src="charts/Silver.png" alt="Silver" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>Solana</h3>
+                <a href="charts/Solana.png" target="_blank">
+                    <img src="charts/Solana.png" alt="Solana" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>TWD USD</h3>
+                <a href="charts/TWD_USD.png" target="_blank">
+                    <img src="charts/TWD_USD.png" alt="TWD USD" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>US 10 Year Treasury Yield</h3>
+                <a href="charts/US_10_Year_Treasury_Yield.png" target="_blank">
+                    <img src="charts/US_10_Year_Treasury_Yield.png" alt="US 10 Year Treasury Yield" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>US 2 Year Treasury Yield</h3>
+                <a href="charts/US_2_Year_Treasury_Yield.png" target="_blank">
+                    <img src="charts/US_2_Year_Treasury_Yield.png" alt="US 2 Year Treasury Yield" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>US 30 Year Treasury Yield</h3>
+                <a href="charts/US_30_Year_Treasury_Yield.png" target="_blank">
+                    <img src="charts/US_30_Year_Treasury_Yield.png" alt="US 30 Year Treasury Yield" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>Uranium ETF  URA </h3>
+                <a href="charts/Uranium_ETF__URA_.png" target="_blank">
+                    <img src="charts/Uranium_ETF__URA_.png" alt="Uranium ETF  URA " loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>VIX Index</h3>
+                <a href="charts/VIX_Index.png" target="_blank">
+                    <img src="charts/VIX_Index.png" alt="VIX Index" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>WTI Crude Oil</h3>
+                <a href="charts/WTI_Crude_Oil.png" target="_blank">
+                    <img src="charts/WTI_Crude_Oil.png" alt="WTI Crude Oil" loading="lazy">
+                </a>
+            </div>
+            
+            <div class="chart-card">
+                <h3>Wheat Futures</h3>
+                <a href="charts/Wheat_Futures.png" target="_blank">
+                    <img src="charts/Wheat_Futures.png" alt="Wheat Futures" loading="lazy">
+                </a>
+            </div>
+            
+    </div>
+
+    <footer>
+        <p>Auto-generated by Antigravity Agent</p>
+    </footer>
+</body>
+</html>
