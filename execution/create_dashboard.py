@@ -70,6 +70,9 @@ def create_dashboard():
             # Extract item name from filename (remove .png and replace _ with space)
             item_name = os.path.splitext(filename)[0].replace('_', ' ')
             
+            # Normalize S P 500 to S&P 500 (fix chart naming)
+            item_name = item_name.replace('S P 500', 'S&P 500')
+            
             # Get category
             category = get_item_category(item_name)
             
@@ -120,9 +123,9 @@ def create_dashboard():
             # US Indices order
             elif category == 'US Indices':
                 custom_order = [
-                    'S&P 500', 'S P 500', 'S_P_500',
-                    'S&P 500 PER', 'S P 500 PER',
-                    'S&P 500 PBR', 'S P 500 PBR',
+                    'S&P 500',
+                    'S&P 500 PER',
+                    'S&P 500 PBR',
                     'NASDAQ',
                     'NASDAQ PER',
                     'NASDAQ PBR',
