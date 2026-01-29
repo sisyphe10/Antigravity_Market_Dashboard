@@ -33,16 +33,20 @@ def get_item_category(item_name):
     if 'S&P 500' in item_name or 'S_P_500' in item_name or 'S P 500' in item_name:
         return 'US Indices'
     
+    # Special handling for Uranium ETF (should be in Commodities)
+    if 'Uranium' in item_name or 'URA' in item_name:
+        return 'Commodities'
+    
     try:
         with open(CSV_FILE, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f)
             for row in reader:
                 if row.get('제품명', '').strip() == item_name:
                     data_type = row.get('데이터 타입', '').strip()
-                    return CATEGORY_MAP.get(data_type, 'Other')
+                    return CATEGORY_MAP.get(data_type, 'Foreign Exchange')
     except:
         pass
-    return 'Other'
+    return 'Foreign Exchange'
 
 def create_dashboard():
     # Check if charts directory exists
@@ -83,13 +87,23 @@ def create_dashboard():
         
         # Define category order for better organization
         category_order = ['Memory', 'Cryptocurrency', 'US Indices', 'Market Indices', 
-                         'Commodities', 'Foreign Exchange', 'Interest Rates', 'Shipping', 'Other']
+                         'Commodities', 'Exchange Rate', 'Interest Rates', 'Shipping', 'Foreign Exchange']
         
         for category in category_order:
             if category not in charts_by_category:
                 continue
                 
             charts = charts_by_category[category]
+            
+            # Custom ordering for Cryptocurrency
+            if category == 'Cryptocurrency':
+                crypto_order = ['Bitcoin', 'Ethereum', 'Binance Coin', 'Ripple', 'Solana']
+                def crypto_sort_key(chart):
+                    try:
+                        return crypto_order.index(chart['title'])
+                    except ValueError:
+                        return 999  # Put unknown items at the end
+                charts = sorted(charts, key=crypto_sort_key)
             
             # Add category header
             charts_html += f"""
