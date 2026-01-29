@@ -52,11 +52,7 @@ def merge_ddr5_data():
                     else:
                         date_str = date_val.strftime('%Y-%m-%d')
                         
-                    # Normalize price (Handle 36.xx vs 3.xx issue)
-                    # Assuming price should be around $3-4
-                    if price_val > 10:
-                        price_val = price_val / 10.0
-                        
+                    # Use raw price as requested by user
                     new_rows.append([date_str, TARGET_ITEM_NAME, price_val, CATEGORY])
                     
                 print(f"Extracted {len(new_rows)} rows from Excel")
@@ -69,7 +65,7 @@ def merge_ddr5_data():
         
     # 2. Add Today's Price (Manual input from user)
     today_str = datetime.now().strftime('%Y-%m-%d')
-    today_price = 3.6533
+    today_price = 36.533
     new_rows.append([today_str, TARGET_ITEM_NAME, today_price, CATEGORY])
     print(f"Added today's price: {today_price}")
     
