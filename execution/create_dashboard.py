@@ -19,7 +19,7 @@ CATEGORY_MAP = {
     'INDEX_US': 'US Indices',
     'INTEREST_RATE': 'Interest Rates',
     'INDEX': 'US Indices',
-    'OCEAN_FREIGHT': 'Shipping'
+    'OCEAN_FREIGHT': 'Commodities'  # SCFI moved to Commodities
 }
 
 def get_item_category(item_name):
@@ -90,7 +90,7 @@ def create_dashboard():
         
         # Define category order for better organization
         category_order = ['Memory', 'Cryptocurrency', 'US Indices', 'Market Indices', 
-                         'Commodities', 'Exchange Rate', 'Interest Rates', 'Shipping', 'Foreign Exchange']
+                         'Commodities', 'Exchange Rate', 'Interest Rates', 'Foreign Exchange']
         
         for category in category_order:
             if category not in charts_by_category:
@@ -145,7 +145,8 @@ def create_dashboard():
                     'Brent Crude Oil',
                     'Natural Gas',
                     'Wheat Futures',
-                    'Uranium ETF (URA)'
+                    'Uranium ETF (URA)',
+                    'SCFI Comprehensive Index'  # Shipping moved here
                 ]
             
             # Exchange Rate order
@@ -153,8 +154,8 @@ def create_dashboard():
                 custom_order = [
                     'Dollar Index (DXY)',
                     'KRW/USD',
-                    'JPY/USD',
                     'CNY/USD',
+                    'JPY/USD',
                     'TWD/USD',
                     'EUR/USD'
                 ]
@@ -167,10 +168,6 @@ def create_dashboard():
                     'US 10 Year Treasury Yield',
                     'US 30 Year Treasury Yield'
                 ]
-            
-            # Shipping order
-            elif category == 'Shipping':
-                custom_order = ['SCFI Comprehensive Index']
             
             else:
                 custom_order = None

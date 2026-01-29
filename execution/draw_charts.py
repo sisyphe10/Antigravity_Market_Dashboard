@@ -21,7 +21,7 @@ CATEGORY_MAP = {
     'INDEX_US': 'US Indices',
     'INTEREST_RATE': 'Interest Rates',
     'INDEX': 'US Indices',
-    'OCEAN_FREIGHT': 'Shipping'
+    'OCEAN_FREIGHT': 'Commodities'  # SCFI moved to Commodities
 }
 
 def get_category_for_item(item_name, data_type):
