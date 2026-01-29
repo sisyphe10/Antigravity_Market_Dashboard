@@ -15,10 +15,10 @@ CATEGORY_MAP = {
     'NAND': 'Memory',
     'CRYPTO': 'Cryptocurrency',
     'COMMODITY': 'Commodities',
-    'FX': 'Foreign Exchange',
+    'FX': 'Exchange Rate',
     'INDEX_US': 'US Indices',
     'INTEREST_RATE': 'Interest Rates',
-    'INDEX': 'Market Indices',
+    'INDEX': 'US Indices',
     'OCEAN_FREIGHT': 'Shipping'
 }
 

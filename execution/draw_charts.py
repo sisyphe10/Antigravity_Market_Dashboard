@@ -17,10 +17,10 @@ CATEGORY_MAP = {
     'NAND': 'Memory',
     'CRYPTO': 'Cryptocurrency',
     'COMMODITY': 'Commodities',
-    'FX': 'Foreign Exchange',
+    'FX': 'Exchange Rate',
     'INDEX_US': 'US Indices',
     'INTEREST_RATE': 'Interest Rates',
-    'INDEX': 'Market Indices',
+    'INDEX': 'US Indices',
     'OCEAN_FREIGHT': 'Shipping'
 }
 
@@ -127,10 +127,11 @@ def draw_charts():
             # Y-axis label at top left
             ax.set_ylabel("Price", fontsize=10, loc='top')
             
-            # X-axis date formatting - YY/MM format
+            # X-axis date formatting - YY/MM format (no rotation)
             ax.xaxis.set_major_formatter(mdates.DateFormatter('%y/%m'))
             ax.xaxis.set_major_locator(mdates.MonthLocator())
-            fig.autofmt_xdate()
+            # Don't rotate labels - keep them horizontal
+            plt.setp(ax.xaxis.get_majorticklabels(), rotation=0, ha='center')
 
             # Y-axis: Smart formatting with ~8 ticks
             ax.yaxis.set_major_locator(MaxNLocator(nbins=8, prune='both'))
