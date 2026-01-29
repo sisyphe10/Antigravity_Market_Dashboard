@@ -68,3 +68,4 @@ jobs:
         with:
           commit_message: "Auto-update: Market data and dashboard [skip ci]"
           file_pattern: 'dataset.csv charts/*.png index.html'
+          pull: '--rebase --autostash'
