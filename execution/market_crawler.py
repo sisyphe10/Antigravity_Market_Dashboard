@@ -158,6 +158,8 @@ def crawl_dram_nand(data_type):
         driver.get(f'https://www.dramexchange.com/#{data_type.lower()}')
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'table')))
 
+        if not driver: return
+
         current_date = datetime.now().strftime('%Y-%m-%d')
         collected_data = []
         target_items = TARGET_DRAM_ITEMS if data_type == 'DRAM' else TARGET_NAND_ITEMS
@@ -165,16 +167,38 @@ def crawl_dram_nand(data_type):
 
         tables = driver.find_elements(By.TAG_NAME, 'table')
         for table in tables:
+            # 1. 헤더에서 'Average' 컬럼 인덱스 찾기
+            price_col_idx = 1  # 기본값: 2번째 컬럼 (인덱스 1)
+            try:
+                header_rows = table.find_elements(By.TAG_NAME, 'tr')
+                if header_rows:
+                    headers = header_rows[0].find_elements(By.TAG_NAME, 'th')
+                    if not headers:
+                        headers = header_rows[0].find_elements(By.TAG_NAME, 'td')
+                    
+                    for i, th in enumerate(headers):
+                        header_text = th.text.strip().lower()
+                        if 'average' in header_text or 'avg' in header_text:
+                            price_col_idx = i
+                            print(f"  Target column found: '{th.text}' (Index {i})")
+                            break
+            except Exception as e:
+                print(f"  Header parsing warning: {e}")
+
+            # 2. 데이터 행 파싱
             rows = table.find_elements(By.TAG_NAME, 'tr')
             for row in rows:
                 cells = row.find_elements(By.TAG_NAME, 'td')
                 if not cells: cells = row.find_elements(By.TAG_NAME, 'th')
-                if len(cells) < 2: continue
+                
+                # 최소한 target 인덱스보다는 길어야 함
+                if len(cells) <= price_col_idx: continue
 
                 item_name = cells[0].text.strip()
                 if item_name in target_items and item_name not in found_items:
                     try:
-                        price = cells[1].text.strip()
+                        # 찾은 인덱스의 가격 사용
+                        price = cells[price_col_idx].text.strip()
                         if price and price.replace('.', '').replace(',', '').isdigit():
                             val = float(price.replace(',', ''))
                             collected_data.append((current_date, item_name, val, data_type))
