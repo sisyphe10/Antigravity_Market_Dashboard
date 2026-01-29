@@ -27,7 +27,8 @@ YFINANCE_TICKERS = {
 
     # --- 지수 및 금리 ---
     'VIX Index': {'ticker': '^VIX', 'type': 'INDEX_US'},
-    'US 2 Year Treasury Yield': {'ticker': '^FVX', 'type': 'INTEREST_RATE'},
+    'US 13 Week Treasury Yield': {'ticker': '^IRX', 'type': 'INTEREST_RATE'},
+    'US 5 Year Treasury Yield': {'ticker': '^FVX', 'type': 'INTEREST_RATE'},
     'US 10 Year Treasury Yield': {'ticker': '^TNX', 'type': 'INTEREST_RATE'},
     'US 30 Year Treasury Yield': {'ticker': '^TYX', 'type': 'INTEREST_RATE'},
 
