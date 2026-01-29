@@ -4,24 +4,12 @@ import glob
 from datetime import datetime
 import csv
 
+# Import shared configuration
+from config import CATEGORY_MAP, CSV_FILE
+
 # Version 3.0 - Added category grouping
 CHARTS_DIR = 'charts'
 OUTPUT_FILE = 'index.html'
-CSV_FILE = 'dataset.csv'
-
-# Category mapping (must match draw_charts.py)
-CATEGORY_MAP = {
-    'DRAM': 'Memory',
-    'NAND': 'Memory',
-    'CRYPTO': 'Cryptocurrency',
-    'COMMODITY': 'Commodities',
-    'FX': 'Exchange Rate',
-    'INDEX_US': 'US Indices',
-    'INTEREST_RATE': 'Interest Rates',
-    'INDEX': 'US Indices',
-    'OCEAN_FREIGHT': 'Commodities'  # SCFI moved to Commodities
-}
-
 def get_item_category(item_name):
     """Get category for an item by looking up in dataset.csv"""
     # Special handling for DDR items (they should be in Memory)

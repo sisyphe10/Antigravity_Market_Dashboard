@@ -1,6 +1,9 @@
 
 import pandas as pd
 import matplotlib.pyplot as plt
+
+# Import shared configuration
+from config import CATEGORY_MAP
 import matplotlib.dates as mdates
 from matplotlib.ticker import MaxNLocator, FuncFormatter
 import os
@@ -10,19 +13,6 @@ from datetime import datetime, timedelta
 CSV_FILE = 'dataset.csv'
 CHARTS_DIR = 'charts'
 LINE_COLOR = '#404040'  # RGB(64, 64, 64)
-
-# Category mapping for grouping
-CATEGORY_MAP = {
-    'DRAM': 'Memory',
-    'NAND': 'Memory',
-    'CRYPTO': 'Cryptocurrency',
-    'COMMODITY': 'Commodities',
-    'FX': 'Exchange Rate',
-    'INDEX_US': 'US Indices',
-    'INTEREST_RATE': 'Interest Rates',
-    'INDEX': 'US Indices',
-    'OCEAN_FREIGHT': 'Commodities'  # SCFI moved to Commodities
-}
 
 def get_category_for_item(item_name, data_type):
     """Determine category based on item name and data type"""

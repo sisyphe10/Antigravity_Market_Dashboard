@@ -4,42 +4,8 @@ import csv
 import os
 from datetime import datetime, timedelta
 
-CSV_FILE = 'dataset.csv'
 
 # yfinance 티커 목록 (market_crawler.py와 동일)
-YFINANCE_TICKERS = {
-    # --- 암호화폐 ---
-    'Bitcoin': {'ticker': 'BTC-USD', 'type': 'CRYPTO'},
-    'Ethereum': {'ticker': 'ETH-USD', 'type': 'CRYPTO'},
-    'Binance Coin': {'ticker': 'BNB-USD', 'type': 'CRYPTO'},
-    'Ripple': {'ticker': 'XRP-USD', 'type': 'CRYPTO'},
-    'Solana': {'ticker': 'SOL-USD', 'type': 'CRYPTO'},
-
-    # --- 원자재 ---
-    'WTI Crude Oil': {'ticker': 'CL=F', 'type': 'COMMODITY'},
-    'Brent Crude Oil': {'ticker': 'BZ=F', 'type': 'COMMODITY'},
-    'Natural Gas': {'ticker': 'NG=F', 'type': 'COMMODITY'},
-    'Gold': {'ticker': 'GC=F', 'type': 'COMMODITY'},
-    'Silver': {'ticker': 'SI=F', 'type': 'COMMODITY'},
-    'Copper': {'ticker': 'HG=F', 'type': 'COMMODITY'},
-    'Uranium ETF (URA)': {'ticker': 'URA', 'type': 'COMMODITY'},
-    'Wheat Futures': {'ticker': 'ZW=F', 'type': 'COMMODITY'},
-
-    # --- 지수 및 금리 ---
-    'VIX Index': {'ticker': '^VIX', 'type': 'INDEX_US'},
-    'US 13 Week Treasury Yield': {'ticker': '^IRX', 'type': 'INTEREST_RATE'},
-    'US 5 Year Treasury Yield': {'ticker': '^FVX', 'type': 'INTEREST_RATE'},
-    'US 10 Year Treasury Yield': {'ticker': '^TNX', 'type': 'INTEREST_RATE'},
-    'US 30 Year Treasury Yield': {'ticker': '^TYX', 'type': 'INTEREST_RATE'},
-
-    # --- 환율 (FX) ---
-    'Dollar Index (DXY)': {'ticker': 'DX-Y.NYB', 'type': 'FX'},
-    'KRW/USD': {'ticker': 'KRW=X', 'type': 'FX'},
-    'JPY/USD': {'ticker': 'JPY=X', 'type': 'FX'},
-    'CNY/USD': {'ticker': 'CNY=X', 'type': 'FX'},
-    'TWD/USD': {'ticker': 'TWD=X', 'type': 'FX'},
-    'EUR/USD': {'ticker': 'EUR=X', 'type': 'FX'},
-}
 
 # US Indices (market_crawler.py의 crawl_us_indices와 동일)
 US_INDICES = {

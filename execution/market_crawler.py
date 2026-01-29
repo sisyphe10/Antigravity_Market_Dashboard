@@ -16,64 +16,11 @@ import warnings
 
 import pandas as pd
 
+# Import shared configuration
+from config import CATEGORY_MAP, YFINANCE_TICKERS, TARGET_DRAM_ITEMS, TARGET_NAND_ITEMS, CSV_FILE
+
 # 경고 메시지 무시
 warnings.simplefilter(action='ignore', category=FutureWarning)
-
-# === 상수 정의 ===
-CSV_FILE = 'dataset.csv'
-
-# DRAM 제품명
-TARGET_DRAM_ITEMS = {
-    'DDR5 16G (2Gx8) 4800/5600': 'DDR5 16G (2Gx8) 4800/5600',
-    'DDR4 16Gb (1Gx16)3200': 'DDR4 16Gb (1Gx16)3200',
-    'DDR4 16Gb (2Gx8)3200': 'DDR4 16Gb (2Gx8)3200',
-    'DDR4 8Gb (1Gx8) 3200': 'DDR4 8Gb (1Gx8) 3200',
-    'DDR4 8Gb (512Mx16) 3200': 'DDR4 8Gb (512Mx16) 3200'
-}
-
-# NAND 제품명
-TARGET_NAND_ITEMS = {
-    'SLC 2Gb 256MBx8': 'SLC 2Gb 256MBx8',
-    'SLC 1Gb 128MBx8': 'SLC 1Gb 128MBx8',
-    'MLC 64Gb 8GBx8': 'MLC 64Gb 8GBx8',
-    'MLC 32Gb 4GBx8': 'MLC 32Gb 4GBx8'
-}
-
-# yfinance 티커 목록
-YFINANCE_TICKERS = {
-    # --- 암호화폐 ---
-    'Bitcoin': {'ticker': 'BTC-USD', 'type': 'CRYPTO'},
-    'Ethereum': {'ticker': 'ETH-USD', 'type': 'CRYPTO'},
-    'Binance Coin': {'ticker': 'BNB-USD', 'type': 'CRYPTO'},
-    'Ripple': {'ticker': 'XRP-USD', 'type': 'CRYPTO'},
-    'Solana': {'ticker': 'SOL-USD', 'type': 'CRYPTO'},
-
-    # --- 원자재 ---
-    'WTI Crude Oil': {'ticker': 'CL=F', 'type': 'COMMODITY'},
-    'Brent Crude Oil': {'ticker': 'BZ=F', 'type': 'COMMODITY'},
-    'Natural Gas': {'ticker': 'NG=F', 'type': 'COMMODITY'},
-    'Gold': {'ticker': 'GC=F', 'type': 'COMMODITY'},
-    'Silver': {'ticker': 'SI=F', 'type': 'COMMODITY'},
-    'Copper': {'ticker': 'HG=F', 'type': 'COMMODITY'},
-    'Uranium ETF (URA)': {'ticker': 'URA', 'type': 'COMMODITY'},
-    'Wheat Futures': {'ticker': 'ZW=F', 'type': 'COMMODITY'},
-
-    # --- 지수 및 금리 ---
-    'VIX Index': {'ticker': '^VIX', 'type': 'INDEX_US'},
-    'US 13 Week Treasury Yield': {'ticker': '^IRX', 'type': 'INTEREST_RATE'},
-    'US 5 Year Treasury Yield': {'ticker': '^FVX', 'type': 'INTEREST_RATE'},
-    'US 10 Year Treasury Yield': {'ticker': '^TNX', 'type': 'INTEREST_RATE'},
-    'US 30 Year Treasury Yield': {'ticker': '^TYX', 'type': 'INTEREST_RATE'},
-
-    # --- 환율 (FX) ---
-    'Dollar Index (DXY)': {'ticker': 'DX-Y.NYB', 'type': 'FX'},
-    'KRW/USD': {'ticker': 'KRW=X', 'type': 'FX'},
-    'JPY/USD': {'ticker': 'JPY=X', 'type': 'FX'},
-    'CNY/USD': {'ticker': 'CNY=X', 'type': 'FX'},
-    'TWD/USD': {'ticker': 'TWD=X', 'type': 'FX'},
-    'EUR/USD': {'ticker': 'EUR=X', 'type': 'FX'},
-}
-
 
 # === 유틸리티 함수 ===
 def setup_csv():
@@ -85,7 +32,6 @@ def setup_csv():
         print(f"✅ CSV 파일 생성 완료: {CSV_FILE}")
     else:
         print(f"✅ 기존 CSV 파일 사용: {CSV_FILE}")
-
 
 def setup_driver(headless=True):
     """Selenium 웹드라이버 설정"""
@@ -102,7 +48,6 @@ def setup_driver(headless=True):
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=chrome_options)
     return driver
-
 
 def save_to_csv(data):
     """중복 방지 기능이 강화된 CSV 저장 (배치 내 중복까지 제거)"""
@@ -140,7 +85,6 @@ def save_to_csv(data):
         print(f"\n❌ 저장 중 오류: {str(e)}")
         return False
 
-
 def get_last_scfi_date():
     try:
         if not os.path.exists(CSV_FILE): return None
@@ -154,10 +98,6 @@ def get_last_scfi_date():
         return last_date
     except:
         return None
-
-
-
-
 
 # ==========================================
 # 2. [US] 미국 지수/PER/PBR (yfinance)
@@ -206,7 +146,6 @@ def crawl_us_indices():
     if collected_data:
         save_to_csv(collected_data)
 
-
 # ==========================================
 # 3. [DRAM/NAND] 반도체 가격
 # ==========================================
@@ -254,7 +193,6 @@ def crawl_dram_nand(data_type):
     finally:
         if driver: driver.quit()
 
-
 # ==========================================
 # 4. [SCFI] 해상운임지수
 # ==========================================
@@ -289,7 +227,6 @@ def crawl_scfi_index():
     finally:
         if driver: driver.quit()
 
-
 # ==========================================
 # 5. [yfinance] 기타 자산
 # ==========================================
@@ -311,7 +248,6 @@ def crawl_yfinance_data():
 
     if collected_data: save_to_csv(collected_data)
 
-
 # ==========================================
 # Main Execution
 # ==========================================
@@ -328,7 +264,6 @@ def main():
     crawl_us_indices()
 
     print(f"\n📁 결과 파일: {CSV_FILE}")
-
 
 if __name__ == "__main__":
     main()
