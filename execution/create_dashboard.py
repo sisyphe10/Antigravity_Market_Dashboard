@@ -61,6 +61,14 @@ def create_dashboard():
             # Normalize S P 500 to S&P 500 (fix chart naming)
             item_name = item_name.replace('S P 500', 'S&P 500')
             
+            # Fix Dollar Index naming: "Dollar Index  DXY " -> "Dollar Index (DXY)"
+            if 'Dollar Index' in item_name:
+                item_name = 'Dollar Index (DXY)'
+                
+            # Fix Uranium ETF naming: "Uranium ETF  URA " -> "Uranium ETF (URA)"
+            if 'Uranium ETF' in item_name:
+                item_name = 'Uranium ETF (URA)'
+            
             # Fix FX naming: convert "XXX USD" to "XXX/USD" to match dataset format
             item_name = item_name.replace(' USD', '/USD')
             
