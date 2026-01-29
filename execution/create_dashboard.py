@@ -95,15 +95,86 @@ def create_dashboard():
                 
             charts = charts_by_category[category]
             
-            # Custom ordering for Cryptocurrency
+            # ========================================
+            # Custom ordering for each category
+            # ========================================
+            
+            # Cryptocurrency order
             if category == 'Cryptocurrency':
-                crypto_order = ['Bitcoin', 'Ethereum', 'Binance Coin', 'Ripple', 'Solana']
-                def crypto_sort_key(chart):
+                custom_order = ['Bitcoin', 'Ethereum', 'Binance Coin', 'Ripple', 'Solana']
+            
+            # Memory order
+            elif category == 'Memory':
+                custom_order = [
+                    'DDR5 16G (2Gx8) 4800/5600',
+                    'DDR4 16Gb (2Gx8)3200',
+                    'DDR4 16Gb (1Gx16)3200',
+                    'DDR4 8Gb (1Gx8) 3200',
+                    'DDR4 8Gb (512Mx16) 3200',
+                    'SLC 2Gb 256MBx8',
+                    'SLC 1Gb 128MBx8',
+                    'MLC 64Gb 8GBx8',
+                    'MLC 32Gb 4GBx8'
+                ]
+            
+            # US Indices order
+            elif category == 'US Indices':
+                custom_order = [
+                    'S&P 500', 'S P 500', 'S_P_500',
+                    'S&P 500 PER', 'S P 500 PER',
+                    'S&P 500 PBR', 'S P 500 PBR',
+                    'NASDAQ',
+                    'NASDAQ PER',
+                    'NASDAQ PBR',
+                    'RUSSELL 2000',
+                    'RUSSELL 2000 PER',
+                    'RUSSELL 2000 PBR',
+                    'VIX Index'
+                ]
+            
+            # Commodities order
+            elif category == 'Commodities':
+                custom_order = [
+                    'Gold',
+                    'Silver',
+                    'Copper',
+                    'WTI Crude Oil',
+                    'Brent Crude Oil',
+                    'Natural Gas',
+                    'Wheat Futures',
+                    'Uranium ETF (URA)'
+                ]
+            
+            # Exchange Rate order
+            elif category == 'Exchange Rate':
+                custom_order = [
+                    'Dollar Index (DXY)',
+                    'KRW/USD',
+                    'JPY/USD',
+                    'CNY/USD',
+                    'TWD/USD',
+                    'EUR/USD'
+                ]
+            
+            # Interest Rates order
+            elif category == 'Interest Rates':
+                custom_order = ['US 10 Year Treasury Yield']
+            
+            # Shipping order
+            elif category == 'Shipping':
+                custom_order = ['SCFI Comprehensive Index']
+            
+            else:
+                custom_order = None
+            
+            # Apply custom ordering if defined
+            if custom_order:
+                def sort_key(chart):
                     try:
-                        return crypto_order.index(chart['title'])
+                        return custom_order.index(chart['title'])
                     except ValueError:
                         return 999  # Put unknown items at the end
-                charts = sorted(charts, key=crypto_sort_key)
+                charts = sorted(charts, key=sort_key)
             
             # Add category header
             charts_html += f"""
