@@ -161,7 +161,11 @@ def create_dashboard():
             
             # Interest Rates order
             elif category == 'Interest Rates':
-                custom_order = ['US 10 Year Treasury Yield']
+                custom_order = [
+                    'US 2 Year Treasury Yield',
+                    'US 10 Year Treasury Yield',
+                    'US 30 Year Treasury Yield'
+                ]
             
             # Shipping order
             elif category == 'Shipping':
