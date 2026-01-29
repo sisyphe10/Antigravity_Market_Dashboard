@@ -4,8 +4,8 @@ import csv
 import os
 from datetime import datetime, timedelta
 
-
-# yfinance 티커 목록 (market_crawler.py와 동일)
+# Import shared configuration
+from config import YFINANCE_TICKERS, CSV_FILE
 
 # US Indices (market_crawler.py의 crawl_us_indices와 동일)
 US_INDICES = {
