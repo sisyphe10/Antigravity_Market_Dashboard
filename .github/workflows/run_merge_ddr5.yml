@@ -1,0 +1,40 @@
+name: Merge DDR5 Data
+
+on:
+  push:
+    paths:
+      - 'execution/merge_ddr5_data.py'
+
+jobs:
+  merge-data:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas openpyxl yfinance schedule selenium webdriver_manager aspose-cells-python
+
+    - name: Run Merge Script
+      run: python execution/merge_ddr5_data.py
+
+    - name: Run Dashboard Generator
+      run: python execution/create_dashboard.py
+
+    - name: Commit and Push Changes
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add dataset.csv index.html execution/merge_ddr5_data.py
+        git commit -m "Auto-update: Merged DDR5 data and updated dashboard" || echo "No changes to commit"
+        git push
