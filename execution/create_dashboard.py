@@ -43,10 +43,10 @@ def get_item_category(item_name):
             for row in reader:
                 if row.get('제품명', '').strip() == item_name:
                     data_type = row.get('데이터 타입', '').strip()
-                    return CATEGORY_MAP.get(data_type, 'Foreign Exchange')
+                    return CATEGORY_MAP.get(data_type, 'Other')
     except:
         pass
-    return 'Foreign Exchange'
+    return 'Other'
 
 def create_dashboard():
     # Check if charts directory exists
@@ -73,6 +73,9 @@ def create_dashboard():
             # Normalize S P 500 to S&P 500 (fix chart naming)
             item_name = item_name.replace('S P 500', 'S&P 500')
             
+            # Fix FX naming: convert "XXX USD" to "XXX/USD" to match dataset format
+            item_name = item_name.replace(' USD', '/USD')
+            
             # Get category
             category = get_item_category(item_name)
             
@@ -90,7 +93,7 @@ def create_dashboard():
         
         # Define category order for better organization
         category_order = ['Memory', 'Cryptocurrency', 'US Indices', 'Market Indices', 
-                         'Commodities', 'Exchange Rate', 'Interest Rates', 'Foreign Exchange']
+                         'Commodities', 'Exchange Rate', 'Interest Rates']
         
         for category in category_order:
             if category not in charts_by_category:
