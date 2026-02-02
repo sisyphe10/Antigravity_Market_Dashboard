@@ -136,8 +136,23 @@ def draw_charts():
             # Plot line
             ax.plot(filtered_data['날짜'], filtered_data['가격'], color=LINE_COLOR, label=label_text)
             
-            # Title without "(Last 6 Months)" - just the item name
-            ax.set_title(f"{name}", fontsize=14)
+            # Title removed as requested (redundant with web page title)
+            # ax.set_title(f"{name}", fontsize=14)
+            
+            # Additional WoW Text on Chart (Top Left)
+            if wow_label:
+                # Remove parentheses for cleaner look in text box
+                wow_text = f"WoW: {wow_label.strip('()')}"
+                # Color code: Red for positive (KR/CN style) or Green? 
+                # Let's stick to neutral or Green for up, Red for down (US style) 
+                # User didn't specify color preferences, used simple text for now.
+                # US Market: Green = Up, Red = Down
+                text_color = 'green' if '+' in wow_label else 'red' if '-' in wow_label else 'black'
+                
+                # Add text annotation
+                ax.text(0.02, 0.95, wow_text, transform=ax.transAxes, 
+                        fontsize=12, fontweight='bold', color=text_color, 
+                        verticalalignment='top')
             
             # Axis labels positioned as requested
             # X-axis label at bottom right
@@ -157,9 +172,10 @@ def draw_charts():
 
             # Y-axis tight margins
             ax.margins(y=0.02)
-
-            # Legend at top center (without redundant title info)
-            ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.1), ncol=1)
+            
+            # Legend removed (redundant item name)
+            # ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.1), ncol=1)
+            # If user really wants legend, we can keep it but with empty label? No, remove it.
 
             # Grid
             ax.grid(True, linestyle='--', alpha=0.5)
