@@ -136,23 +136,28 @@ def draw_charts():
             # Plot line
             ax.plot(filtered_data['날짜'], filtered_data['가격'], color=LINE_COLOR, label=label_text)
             
-            # Title removed as requested (redundant with web page title)
-            # ax.set_title(f"{name}", fontsize=14)
+            # Title with WoW return as requested
+            # Color code: Green for up, Red for down (US style)
+            title_text = name
+            title_color = 'black'
             
-            # Additional WoW Text on Chart (Top Left)
             if wow_label:
-                # Remove parentheses for cleaner look in text box
-                wow_text = f"WoW: {wow_label.strip('()')}"
-                # Color code: Red for positive (KR/CN style) or Green? 
-                # Let's stick to neutral or Green for up, Red for down (US style) 
-                # User didn't specify color preferences, used simple text for now.
-                # US Market: Green = Up, Red = Down
-                text_color = 'green' if '+' in wow_label else 'red' if '-' in wow_label else 'black'
+                # wow_label format from above is " (+0.5%)"
+                # Remove extra spaces/parentheses to re-format cleanly
+                val_str = wow_label.strip().strip("()") # e.g. "+0.5%"
                 
-                # Add text annotation
-                ax.text(0.02, 0.95, wow_text, transform=ax.transAxes, 
-                        fontsize=12, fontweight='bold', color=text_color, 
-                        verticalalignment='top')
+                title_text = f"{name} ({val_str})"
+                
+                if '+' in val_str:
+                    title_color = 'green'
+                elif '-' in val_str:
+                    title_color = 'red'
+            
+            ax.set_title(title_text, fontsize=14, color=title_color)
+            
+            # Remove previous ax.text implementation
+            # ...
+
             
             # Axis labels positioned as requested
             # X-axis label at bottom right
