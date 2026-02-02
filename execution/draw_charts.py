@@ -136,34 +136,50 @@ def draw_charts():
             # Plot line
             ax.plot(filtered_data['날짜'], filtered_data['가격'], color=LINE_COLOR, label=label_text)
             
-            # Title: Item Name (Black)
-            ax.set_title(name, fontsize=14, color='black', pad=10)
+            # Two-line Title Implementation
+            # Line 1: Item Name (Black) - Centered
+            # Line 2: Current Price + WoW (Color) - Centered
             
-            # WoW Return: Colored text at top-right
+            # 1. Format Price
+            # Use sensible formatting: no decimals for large numbers, 2 decimals for others
+            if abs(latest_price) >= 1000:
+                price_str = f"{latest_price:,.0f}"
+            elif abs(latest_price) >= 1:
+                price_str = f"{latest_price:,.2f}"
+            else:
+                price_str = f"{latest_price:,.4f}" # Need more precision for small values
+            
+            # 2. Prepare Line 2 Text and Color
+            line2_text = price_str
+            line2_color = 'black'
+            
             if wow_label:
-                # Remove extra spaces/parentheses
-                val_str = wow_label.strip().strip("()") # e.g. "+0.5%"
+                # wow_label is " (+0.5%)"
+                val_str = wow_label.strip() # "(+0.5%)"
+                line2_text = f"{price_str} {val_str}"
                 
-                # Re-add parentheses
-                wow_text = f"({val_str})"
-                
-                # Color code
-                # Darker green for positive: '#008000' (Green) or '#006400' (DarkGreen)
                 if '+' in val_str:
-                    text_color = '#008000' # Darker Green
+                    line2_color = '#008000' # Darker Green
                 elif '-' in val_str:
-                    text_color = 'red'
-                else:
-                    text_color = 'black'
-                
-                # Position: Top Right (aligned with title height approx)
-                # y=1.02 is slightly above the plot area, similar to title
-                ax.text(1.0, 1.02, wow_text, transform=ax.transAxes, 
-                        fontsize=12, fontweight='bold', color=text_color, 
-                        ha='right', va='bottom')
+                    line2_color = 'red'
             
-            # Remove previous ax.text implementation
-            # ...
+            # 3. Draw Texts
+            # Turn off standard title to manage spacing manually
+            ax.set_title("")
+            
+            # Draw Line 1 (Name)
+            # y=1.08 accounts for the space needed for Line 2
+            ax.text(0.5, 1.10, name, transform=ax.transAxes, 
+                    fontsize=14, color='black', ha='center', va='bottom', fontweight='bold')
+            
+            # Draw Line 2 (Price + WoW)
+            # y=1.08 (same baseline as bottom of Line 1? No, place it below)
+            # Let's put Line 1 at 1.12 and Line 2 at 1.06
+            ax.text(0.5, 1.04, line2_text, transform=ax.transAxes, 
+                    fontsize=12, color=line2_color, ha='center', va='bottom', fontweight='bold')
+            
+            # Remove previous implementations
+
 
             
             # Axis labels positioned as requested
