@@ -30,6 +30,9 @@ jobs:
     - name: Run Backfill Script
       run: python execution/backfill_yfinance_history.py
 
+    - name: Draw Charts
+      run: python execution/draw_charts.py
+
     - name: Run Dashboard Generator
       run: python execution/create_dashboard.py
 
