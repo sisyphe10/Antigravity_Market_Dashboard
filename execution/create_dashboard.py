@@ -187,7 +187,8 @@ def create_dashboard():
             for chart in charts:
                 charts_html += f"""
                 <div class="chart-card">
-                    <h3>{chart['title']}</h3>
+                    <!-- Title removed as requested (it's inside the chart now) -->
+                    <!-- <h3>{chart['title']}</h3> -->
                     <a href="{chart['path']}" target="_blank">
                         <img src="{chart['path']}" alt="{chart['title']}" loading="lazy">
                     </a>

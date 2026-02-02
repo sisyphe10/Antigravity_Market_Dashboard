@@ -136,24 +136,31 @@ def draw_charts():
             # Plot line
             ax.plot(filtered_data['날짜'], filtered_data['가격'], color=LINE_COLOR, label=label_text)
             
-            # Title with WoW return as requested
-            # Color code: Green for up, Red for down (US style)
-            title_text = name
-            title_color = 'black'
+            # Title: Item Name (Black)
+            ax.set_title(name, fontsize=14, color='black', pad=10)
             
+            # WoW Return: Colored text at top-right
             if wow_label:
-                # wow_label format from above is " (+0.5%)"
-                # Remove extra spaces/parentheses to re-format cleanly
+                # Remove extra spaces/parentheses
                 val_str = wow_label.strip().strip("()") # e.g. "+0.5%"
                 
-                title_text = f"{name} ({val_str})"
+                # Re-add parentheses
+                wow_text = f"({val_str})"
                 
+                # Color code
+                # Darker green for positive: '#008000' (Green) or '#006400' (DarkGreen)
                 if '+' in val_str:
-                    title_color = 'green'
+                    text_color = '#008000' # Darker Green
                 elif '-' in val_str:
-                    title_color = 'red'
-            
-            ax.set_title(title_text, fontsize=14, color=title_color)
+                    text_color = 'red'
+                else:
+                    text_color = 'black'
+                
+                # Position: Top Right (aligned with title height approx)
+                # y=1.02 is slightly above the plot area, similar to title
+                ax.text(1.0, 1.02, wow_text, transform=ax.transAxes, 
+                        fontsize=12, fontweight='bold', color=text_color, 
+                        ha='right', va='bottom')
             
             # Remove previous ax.text implementation
             # ...
