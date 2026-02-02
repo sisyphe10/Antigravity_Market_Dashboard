@@ -65,10 +65,6 @@ def create_dashboard():
             if 'Dollar Index' in item_name:
                 item_name = 'Dollar Index (DXY)'
                 
-            # Fix Uranium ETF naming: "Uranium ETF  URA " -> "Uranium ETF (URA)"
-            if 'Uranium ETF' in item_name:
-                item_name = 'Uranium ETF (URA)'
-            
             # Fix FX naming: convert "XXX USD" to "XXX/USD" to match dataset format
             item_name = item_name.replace(' USD', '/USD')
             
@@ -144,7 +140,7 @@ def create_dashboard():
                     'Brent Crude Oil',
                     'Natural Gas',
                     'Wheat Futures',
-                    'Uranium ETF (URA)',
+                    'Sprott Physical Uranium Trust',
                     'SCFI Comprehensive Index'  # Shipping moved here
                 ]
             

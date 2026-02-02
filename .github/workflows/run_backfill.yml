@@ -1,0 +1,40 @@
+name: Run Backfill
+
+on:
+  push:
+    paths:
+      - '.github/workflows/run_backfill.yml'
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas yfinance schedule selenium webdriver_manager
+
+    - name: Run Backfill Script
+      run: python execution/backfill_yfinance_history.py
+
+    - name: Run Dashboard Generator
+      run: python execution/create_dashboard.py
+
+    - name: Commit and Push Changes
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add dataset.csv index.html
+        git commit -m "Auto-update: Backfilled yfinance history" || echo "No changes to commit"
+        git push

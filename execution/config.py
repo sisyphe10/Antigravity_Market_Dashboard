@@ -49,7 +49,7 @@ YFINANCE_TICKERS = {
     'Gold': {'ticker': 'GC=F', 'type': 'COMMODITY'},
     'Silver': {'ticker': 'SI=F', 'type': 'COMMODITY'},
     'Copper': {'ticker': 'HG=F', 'type': 'COMMODITY'},
-    'Uranium ETF (URA)': {'ticker': 'URA', 'type': 'COMMODITY'},
+    'Sprott Physical Uranium Trust': {'ticker': 'SRUUF', 'type': 'COMMODITY'},
     'Wheat Futures': {'ticker': 'ZW=F', 'type': 'COMMODITY'},
 
     # --- Indices and Interest Rates ---
