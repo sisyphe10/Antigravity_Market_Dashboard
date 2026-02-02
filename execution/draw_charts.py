@@ -164,11 +164,11 @@ def draw_charts():
 
 
             
-            # Axis labels positioned as requested
-            # X-axis label at bottom right
-            ax.set_xlabel("Date", fontsize=10, loc='right')
-            # Y-axis label at top left
-            ax.set_ylabel("Price", fontsize=10, loc='top')
+            # Axis labels removed as requested
+            # ax.set_xlabel("Date", fontsize=10, loc='right')
+            # ax.set_ylabel("Price", fontsize=10, loc='top')
+            ax.set_xlabel("")
+            ax.set_ylabel("")
             
             # X-axis date formatting - YY/MM format (no rotation)
             ax.xaxis.set_major_formatter(mdates.DateFormatter('%y/%m'))
