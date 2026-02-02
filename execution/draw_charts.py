@@ -102,11 +102,39 @@ def draw_charts():
             filtered_data.index.name = '날짜'
             filtered_data = filtered_data.reset_index()
 
+            # WoW Calculation
+            # Ensure group is sorted
+            group = group.sort_values('날짜')
+            if not group.empty:
+                latest_row = group.iloc[-1]
+                latest_price = latest_row['가격']
+                latest_date = latest_row['날짜']
+                
+                # Target date: 7 days ago
+                target_date = latest_date - timedelta(days=7)
+                
+                # Find data closest to 7 days ago (on or before)
+                past_data = group[group['날짜'] <= target_date]
+                
+                wow_label = ""
+                if not past_data.empty:
+                    past_row = past_data.iloc[-1]
+                    past_price = past_row['가격']
+                    
+                    if past_price != 0:
+                        change = ((latest_price - past_price) / past_price) * 100
+                        sign = "+" if change > 0 else ""
+                        wow_label = f" ({sign}{change:.1f}%)"
+            else:
+                wow_label = ""
+
+            label_text = f"{name}{wow_label}"
+
             # Plotting
             fig, ax = plt.subplots(figsize=(10, 6))
             
             # Plot line
-            ax.plot(filtered_data['날짜'], filtered_data['가격'], color=LINE_COLOR, label=name)
+            ax.plot(filtered_data['날짜'], filtered_data['가격'], color=LINE_COLOR, label=label_text)
             
             # Title without "(Last 6 Months)" - just the item name
             ax.set_title(f"{name}", fontsize=14)
