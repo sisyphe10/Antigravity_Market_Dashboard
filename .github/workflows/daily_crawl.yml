@@ -11,6 +11,7 @@ on:
     paths:
       - 'execution/**'
       - 'dataset.csv'
+      - 'requirements.txt'
       - '.github/workflows/daily_crawl.yml'
 
 jobs:
