@@ -97,14 +97,14 @@ def get_naver_weather(location="여의도"):
         elapsed = time.time() - start_time
         logging.info(f"Scraping finished in {elapsed:.2f}s")
 
-        # --- 출력 포맷 구성 ---
+        # --- 출력 포맷 구성 (Markdown 적용) ---
         result_msg = (
-            f"a. 날짜 / {date_str}\n"
-            f"b. 날씨 / {weather_status} {weather_emoji}\n"
-            f"c. 최저기온 및 최고기온 / {min_temp}도, {max_temp}도\n"
-            f"d. 현재기온 / {current_temp}도\n"
-            f"e. 미세먼지, 초미세먼지 / {dust}, {ultra_dust}\n"
-            f"f. 일출, 일몰 / {sun_info}"
+            f"*a. 날짜* / {date_str}\n"
+            f"*b. 날씨* / {weather_status} {weather_emoji}\n"
+            f"*c. 최저기온, 최고기온* / {min_temp}도, {max_temp}도\n"
+            f"*d. 현재기온* / {current_temp}도\n"
+            f"*e. 미세먼지, 초미세먼지* / {dust}, {ultra_dust}\n"
+            f"*f. 일출, 일몰* / {sun_info}"
         )
         return result_msg
         
