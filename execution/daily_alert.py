@@ -81,11 +81,52 @@ def get_naver_weather(location="여의도"):
         
         dust = chart_data.get("미세먼지", "정보없음")
         ultra_dust = chart_data.get("초미세먼지", "정보없음")
-        sunrise = chart_data.get("일출", "")
-        sunset = chart_data.get("일몰", "")
         
-        sun_info = f"{sunrise}, {sunset}".strip(", ")
-        if not sun_info: sun_info = "정보없음"
+        # 일출/일몰 계산 (AccuWeather Scraping)
+        try:
+            accu_url = "https://www.accuweather.com/ko/kr/yeoui-dong/225999/weather-forecast/225999"
+            accu_headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+                "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7"
+            }
+            res = requests.get(accu_url, headers=accu_headers, timeout=5)
+            if res.status_code == 200:
+                accu_soup = BeautifulSoup(res.text, "html.parser")
+                block = accu_soup.select_one(".sunrise-sunset")
+                if block:
+                    import re
+                    text = block.get_text()
+                    
+                    sunrise_match = re.search(r"일출\s*(AM|PM)\s*(\d{1,2}:\d{2})", text)
+                    sunset_match = re.search(r"일몰\s*(AM|PM)\s*(\d{1,2}:\d{2})", text)
+                    
+                    def convert_to_24h(ampm, time_str):
+                        hour, minute = map(int, time_str.split(':'))
+                        if ampm == "PM" and hour != 12:
+                            hour += 12
+                        if ampm == "AM" and hour == 12:
+                            hour = 0
+                        return f"{hour:02d}:{minute:02d}"
+
+                    if sunrise_match:
+                        sr = convert_to_24h(sunrise_match.group(1), sunrise_match.group(2))
+                    else:
+                        sr = "?"
+                        
+                    if sunset_match:
+                        ss = convert_to_24h(sunset_match.group(1), sunset_match.group(2))
+                    else:
+                        ss = "?"
+                    
+                    sun_info = f"{sr}, {ss}"
+                else:
+                    sun_info = "정보없음 (Parsing Fail)"
+            else:
+                 sun_info = "정보없음 (Connection Fail)"
+
+        except Exception as e:
+            logging.error(f"AccuWeather scraping failed: {e}")
+            sun_info = "정보없음 (Error)"
 
         result_msg = (
             f"a. 날짜 / {date_str}\n"

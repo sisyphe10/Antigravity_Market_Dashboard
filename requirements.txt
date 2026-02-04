@@ -13,3 +13,4 @@ seaborn
 openpyxl
 requests
 beautifulsoup4
+astral
