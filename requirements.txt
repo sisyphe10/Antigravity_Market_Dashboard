@@ -11,3 +11,5 @@ pandas
 matplotlib
 seaborn
 openpyxl
+requests
+beautifulsoup4
