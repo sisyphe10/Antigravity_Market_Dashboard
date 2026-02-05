@@ -41,11 +41,11 @@ def get_credentials_from_env():
     return credentials
 
 def get_today_events():
-    """오늘의 캘린더 일정 조회 (캘린더별로 구분)"""
+    """오늘의 캘린더 일정 조회 (모든 공유된 캘린더)"""
     credentials = get_credentials_from_env()
     service = build('calendar', 'v3', credentials=credentials)
     
-    # 디버깅: 사용 가능한 캘린더 목록 확인
+    # 사용 가능한 캘린더 목록 확인
     calendar_dict = {}
     try:
         calendar_list = service.calendarList().list().execute()
@@ -57,6 +57,8 @@ def get_today_events():
             logging.info(f"  - {cal_name} (ID: {cal_id})")
     except Exception as e:
         logging.warning(f"캘린더 목록 조회 실패: {e}")
+        # 캘린더 목록을 못 가져오면 기본 캘린더만 시도
+        calendar_dict = {'kts77775@gmail.com': '기본 캘린더'}
     
     # 오늘 00:00 ~ 23:59 (KST)
     from datetime import timezone, timedelta
@@ -72,40 +74,16 @@ def get_today_events():
     
     # 캘린더별로 일정 수집
     events_by_calendar = {
-        'main': [],  # 메인 캘린더
+        'main': [],  # 메인 캘린더 (투자 활동 제외)
         'investment': []  # 투자 활동 캘린더
     }
     
-    # 메인 캘린더 조회
-    try:
-        logging.info(f"메인 캘린더 조회 중...")
-        events_result = service.events().list(
-            calendarId='kts77775@gmail.com',
-            timeMin=start_of_day.isoformat(),
-            timeMax=end_of_day.isoformat(),
-            singleEvents=True,
-            orderBy='startTime'
-        ).execute()
-        
-        events = events_result.get('items', [])
-        logging.info(f"  → {len(events)}개 일정 발견")
-        events_by_calendar['main'] = events
-    except Exception as e:
-        logging.warning(f"메인 캘린더 조회 실패: {e}")
-    
-    # 투자 활동 캘린더 조회
-    # 투자 활동 캘린더의 ID를 찾기
-    investment_cal_id = None
+    # 모든 캘린더 조회
     for cal_id, cal_name in calendar_dict.items():
-        if '투자 활동' in cal_name or '투자활동' in cal_name:
-            investment_cal_id = cal_id
-            break
-    
-    if investment_cal_id:
         try:
-            logging.info(f"투자 활동 캘린더 조회 중...")
+            logging.info(f"캘린더 '{cal_name}' 조회 중...")
             events_result = service.events().list(
-                calendarId=investment_cal_id,
+                calendarId=cal_id,
                 timeMin=start_of_day.isoformat(),
                 timeMax=end_of_day.isoformat(),
                 singleEvents=True,
@@ -114,12 +92,29 @@ def get_today_events():
             
             events = events_result.get('items', [])
             logging.info(f"  → {len(events)}개 일정 발견")
-            events_by_calendar['investment'] = events
+            
+            # 투자 활동 캘린더는 별도로 분류
+            if '투자 활동' in cal_name or '투자활동' in cal_name:
+                events_by_calendar['investment'].extend(events)
+            else:
+                events_by_calendar['main'].extend(events)
+                
         except Exception as e:
-            logging.warning(f"투자 활동 캘린더 조회 실패: {e}")
+            logging.warning(f"캘린더 '{cal_name}' 조회 실패: {e}")
+    
+    # 시간순 정렬
+    def get_event_time(event):
+        start = event['start'].get('dateTime', event['start'].get('date'))
+        if 'T' in start:
+            return datetime.fromisoformat(start.replace('Z', '+00:00'))
+        else:
+            return datetime.fromisoformat(start + 'T00:00:00+00:00')
+    
+    events_by_calendar['main'].sort(key=get_event_time)
+    events_by_calendar['investment'].sort(key=get_event_time)
     
     total_events = len(events_by_calendar['main']) + len(events_by_calendar['investment'])
-    logging.info(f"총 {total_events}개 일정 발견")
+    logging.info(f"총 {total_events}개 일정 발견 (메인: {len(events_by_calendar['main'])}, 투자: {len(events_by_calendar['investment'])})")
     
     return events_by_calendar
 
