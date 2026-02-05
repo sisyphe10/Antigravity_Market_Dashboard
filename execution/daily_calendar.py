@@ -41,16 +41,20 @@ def get_credentials_from_env():
     return credentials
 
 def get_today_events():
-    """오늘의 캘린더 일정 조회"""
+    """오늘의 캘린더 일정 조회 (캘린더별로 구분)"""
     credentials = get_credentials_from_env()
     service = build('calendar', 'v3', credentials=credentials)
     
     # 디버깅: 사용 가능한 캘린더 목록 확인
+    calendar_dict = {}
     try:
         calendar_list = service.calendarList().list().execute()
         logging.info("사용 가능한 캘린더:")
         for calendar in calendar_list.get('items', []):
-            logging.info(f"  - {calendar.get('summary')} (ID: {calendar.get('id')})")
+            cal_id = calendar.get('id')
+            cal_name = calendar.get('summary')
+            calendar_dict[cal_id] = cal_name
+            logging.info(f"  - {cal_name} (ID: {cal_id})")
     except Exception as e:
         logging.warning(f"캘린더 목록 조회 실패: {e}")
     
@@ -66,18 +70,42 @@ def get_today_events():
     logging.info(f"📅 오늘({now.strftime('%Y-%m-%d')}) 일정 조회 중...")
     logging.info(f"시간 범위: {start_of_day.isoformat()} ~ {end_of_day.isoformat()}")
     
-    # 여러 캘린더 ID 시도
-    calendar_ids_to_try = [
-        'kts77775@gmail.com',  # 사용자의 Gmail 주소
-        'primary',
-    ]
+    # 캘린더별로 일정 수집
+    events_by_calendar = {
+        'main': [],  # 메인 캘린더
+        'investment': []  # 투자 활동 캘린더
+    }
     
-    all_events = []
-    for cal_id in calendar_ids_to_try:
+    # 메인 캘린더 조회
+    try:
+        logging.info(f"메인 캘린더 조회 중...")
+        events_result = service.events().list(
+            calendarId='kts77775@gmail.com',
+            timeMin=start_of_day.isoformat(),
+            timeMax=end_of_day.isoformat(),
+            singleEvents=True,
+            orderBy='startTime'
+        ).execute()
+        
+        events = events_result.get('items', [])
+        logging.info(f"  → {len(events)}개 일정 발견")
+        events_by_calendar['main'] = events
+    except Exception as e:
+        logging.warning(f"메인 캘린더 조회 실패: {e}")
+    
+    # 투자 활동 캘린더 조회
+    # 투자 활동 캘린더의 ID를 찾기
+    investment_cal_id = None
+    for cal_id, cal_name in calendar_dict.items():
+        if '투자 활동' in cal_name or '투자활동' in cal_name:
+            investment_cal_id = cal_id
+            break
+    
+    if investment_cal_id:
         try:
-            logging.info(f"캘린더 '{cal_id}' 조회 중...")
+            logging.info(f"투자 활동 캘린더 조회 중...")
             events_result = service.events().list(
-                calendarId=cal_id,
+                calendarId=investment_cal_id,
                 timeMin=start_of_day.isoformat(),
                 timeMax=end_of_day.isoformat(),
                 singleEvents=True,
@@ -86,38 +114,62 @@ def get_today_events():
             
             events = events_result.get('items', [])
             logging.info(f"  → {len(events)}개 일정 발견")
-            all_events.extend(events)
+            events_by_calendar['investment'] = events
         except Exception as e:
-            logging.warning(f"캘린더 '{cal_id}' 조회 실패: {e}")
+            logging.warning(f"투자 활동 캘린더 조회 실패: {e}")
     
-    logging.info(f"총 {len(all_events)}개 일정 발견")
-    return all_events
+    total_events = len(events_by_calendar['main']) + len(events_by_calendar['investment'])
+    logging.info(f"총 {total_events}개 일정 발견")
+    
+    return events_by_calendar
 
-def format_calendar_message(events):
-    """캘린더 일정을 텔레그램 메시지 형식으로 변환"""
+def format_calendar_message(events_by_calendar):
+    """캘린더 일정을 텔레그램 메시지 형식으로 변환 (캘린더별 구분)"""
     now = datetime.now()
     date_str = now.strftime('%Y-%m-%d')
     day_kor = ["월", "화", "수", "목", "금", "토", "일"][now.weekday()]
     
     msg = f"📅 오늘의 일정 ({date_str} {day_kor}요일)\n\n"
     
-    if not events:
+    main_events = events_by_calendar.get('main', [])
+    investment_events = events_by_calendar.get('investment', [])
+    
+    # 메인 캘린더 일정
+    if main_events:
+        for event in main_events:
+            start = event['start'].get('dateTime', event['start'].get('date'))
+            summary = event.get('summary', '(제목 없음)')
+            
+            # 시간 파싱
+            if 'T' in start:  # 시간이 있는 일정
+                dt = datetime.fromisoformat(start.replace('Z', '+00:00'))
+                time_str = dt.strftime('%H:%M')
+                msg += f"• {time_str} - {summary}\n"
+            else:  # 종일 일정
+                msg += f"• 종일 - {summary}\n"
+    
+    # 투자 활동 캘린더 일정 (별도 섹션)
+    if investment_events:
+        msg += f"\n💼 투자 활동\n"
+        for event in investment_events:
+            start = event['start'].get('dateTime', event['start'].get('date'))
+            summary = event.get('summary', '(제목 없음)')
+            
+            # 시간 파싱
+            if 'T' in start:  # 시간이 있는 일정
+                dt = datetime.fromisoformat(start.replace('Z', '+00:00'))
+                time_str = dt.strftime('%H:%M')
+                msg += f"• {time_str} - {summary}\n"
+            else:  # 종일 일정
+                msg += f"• 종일 - {summary}\n"
+    
+    # 총 일정 개수
+    total_count = len(main_events) + len(investment_events)
+    
+    if total_count == 0:
         msg += "오늘은 일정이 없습니다. 😊"
-        return msg
-    
-    for event in events:
-        start = event['start'].get('dateTime', event['start'].get('date'))
-        summary = event.get('summary', '(제목 없음)')
-        
-        # 시간 파싱
-        if 'T' in start:  # 시간이 있는 일정
-            dt = datetime.fromisoformat(start.replace('Z', '+00:00'))
-            time_str = dt.strftime('%H:%M')
-            msg += f"• {time_str} - {summary}\n"
-        else:  # 종일 일정
-            msg += f"• 종일 - {summary}\n"
-    
-    msg += f"\n총 {len(events)}개의 일정이 있습니다."
+    else:
+        msg += f"\n총 {total_count}개의 일정이 있습니다."
     
     return msg
 
