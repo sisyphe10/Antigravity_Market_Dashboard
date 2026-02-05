@@ -212,6 +212,28 @@ async def weather(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text=f"❌ 오류가 발생했습니다: {str(e)}"
         )
 
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """도움말 표시"""
+    help_text = """📋 **사용 가능한 명령어**
+
+🌤️ **날씨 정보**
+/weather - 여의도 날씨 조회
+• 매일 오전 6시 자동 전송
+• 날짜, 날씨, 기온, 미세먼지, 일출/일몰 정보 제공
+
+📊 **포트폴리오 리포트**
+• 매일 오후 4시 자동 전송
+• 기준가 (삼성 트루밸류, NH Value ESG, DB 개방형 랩)
+• 수익률 (1D, 1W, 1M, 3M, 6M, 1Y, YTD)
+• 종목별 기여도 상위/하위 5개
+
+⚙️ **기타**
+/start - 봇 시작 및 자동 알림 구독
+/stop - 자동 알림 구독 해제
+/help - 이 도움말 표시
+"""
+    await update.message.reply_text(help_text)
+
 async def daily_weather_job(context: ContextTypes.DEFAULT_TYPE):
     if not SUBSCRIBERS:
         return
@@ -243,6 +265,7 @@ if __name__ == '__main__':
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CommandHandler('weather', weather))
     application.add_handler(CommandHandler('stop', stop))
+    application.add_handler(CommandHandler('help', help_command))
     
     job_queue = application.job_queue
     try:
