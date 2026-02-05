@@ -222,6 +222,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 • 날짜, 날씨, 기온, 미세먼지, 일출/일몰 정보 제공
 
 📊 **포트폴리오 리포트**
+/portfolio - 포트폴리오 리포트 조회
 • 매일 오후 4시 자동 전송
 • 기준가 (삼성 트루밸류, NH Value ESG, DB 개방형 랩)
 • 수익률 (1D, 1W, 1M, 3M, 6M, 1Y, YTD)
@@ -233,6 +234,69 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 /help - 이 도움말 표시
 """
     await update.message.reply_text(help_text)
+
+async def portfolio_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """포트폴리오 리포트 조회"""
+    chat_id = update.effective_chat.id
+    
+    # 처리 중 메시지
+    status_msg = await update.message.reply_text("📊 포트폴리오 리포트를 생성하는 중...")
+    
+    try:
+        import subprocess
+        import sys
+        
+        # daily_portfolio_report.py 실행
+        result = subprocess.run(
+            [sys.executable, "execution/daily_portfolio_report.py"],
+            capture_output=True,
+            text=True,
+            timeout=60
+        )
+        
+        if result.returncode == 0:
+            # 성공 - 출력에서 메시지 추출
+            output_lines = result.stdout.strip().split('\n')
+            
+            # "전송된 메시지:" 이후의 내용 찾기
+            message_start = -1
+            for i, line in enumerate(output_lines):
+                if "전송된 메시지:" in line:
+                    message_start = i + 1
+                    break
+            
+            if message_start > 0:
+                report_message = '\n'.join(output_lines[message_start:])
+                await context.bot.edit_message_text(
+                    chat_id=chat_id,
+                    message_id=status_msg.message_id,
+                    text=report_message
+                )
+            else:
+                await context.bot.edit_message_text(
+                    chat_id=chat_id,
+                    message_id=status_msg.message_id,
+                    text="✅ 리포트가 생성되었습니다."
+                )
+        else:
+            await context.bot.edit_message_text(
+                chat_id=chat_id,
+                message_id=status_msg.message_id,
+                text=f"❌ 리포트 생성 실패:\n{result.stderr}"
+            )
+            
+    except subprocess.TimeoutExpired:
+        await context.bot.edit_message_text(
+            chat_id=chat_id,
+            message_id=status_msg.message_id,
+            text="⚠️ 리포트 생성 시간이 초과되었습니다."
+        )
+    except Exception as e:
+        await context.bot.edit_message_text(
+            chat_id=chat_id,
+            message_id=status_msg.message_id,
+            text=f"❌ 오류가 발생했습니다: {str(e)}"
+        )
 
 async def daily_weather_job(context: ContextTypes.DEFAULT_TYPE):
     if not SUBSCRIBERS:
@@ -264,6 +328,7 @@ if __name__ == '__main__':
 
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CommandHandler('weather', weather))
+    application.add_handler(CommandHandler('portfolio', portfolio_command))
     application.add_handler(CommandHandler('stop', stop))
     application.add_handler(CommandHandler('help', help_command))
     
