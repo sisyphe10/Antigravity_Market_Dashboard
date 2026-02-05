@@ -140,7 +140,11 @@ def format_message(date, nav_data, returns_data, top_5, bottom_5):
     for product in ['트루밸류', 'KOSPI', 'KOSDAQ']:
         if product in returns_data:
             returns = returns_data[product]
-            returns_str = " ".join([returns.get(period, 'N/A') for period in ['1D', '1W', '1M', '3M', '6M', '1Y', 'YTD']])
+            # NaN과 numpy 타입을 문자열로 변환
+            returns_str = " ".join([
+                str(returns.get(period, 'N/A')) if not pd.isna(returns.get(period, 'N/A')) else 'N/A'
+                for period in ['1D', '1W', '1M', '3M', '6M', '1Y', 'YTD']
+            ])
             
             if product == '트루밸류':
                 msg += f"삼성 트루밸류 {returns_str} "
