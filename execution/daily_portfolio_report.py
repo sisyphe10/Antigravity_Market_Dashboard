@@ -77,6 +77,9 @@ def calculate_contributions():
     latest_date = df_portfolio['날짜'].max()
     df_latest = df_portfolio[df_portfolio['날짜'] == latest_date]
     
+    # 비중이 0인 종목 제외
+    df_latest = df_latest[df_latest['비중'] > 0]
+    
     contributions = []
     
     for _, row in df_latest.iterrows():
@@ -119,7 +122,8 @@ def calculate_contributions():
     contributions_sorted = sorted(contributions, key=lambda x: x['contribution'], reverse=True)
     
     top_5 = contributions_sorted[:5]
-    bottom_5 = contributions_sorted[-5:]
+    # 하위 5개는 오름차순 (가장 낮은 것부터)
+    bottom_5 = sorted(contributions_sorted[-5:], key=lambda x: x['contribution'])
     
     return top_5, bottom_5
 
@@ -136,7 +140,7 @@ def format_message(date, nav_data, returns_data, top_5, bottom_5):
     msg += f"b. 기준가 / {nav_str}\n"
     
     # c. 수익률
-    msg += "c. 수익률 / "
+    msg += "c. 수익률 (1D 1W 1M 3M 6M 1Y YTD)\n"
     for product in ['트루밸류', 'KOSPI', 'KOSDAQ']:
         if product in returns_data:
             returns = returns_data[product]
@@ -147,11 +151,9 @@ def format_message(date, nav_data, returns_data, top_5, bottom_5):
             ])
             
             if product == '트루밸류':
-                msg += f"삼성 트루밸류 {returns_str} "
+                msg += f"삼성 트루밸류 {returns_str}\n"
             else:
-                msg += f"{product} {returns_str} "
-    
-    msg += "\n"
+                msg += f"{product} {returns_str}\n"
     
     # d. 종목별 기여도 상위
     if top_5:
