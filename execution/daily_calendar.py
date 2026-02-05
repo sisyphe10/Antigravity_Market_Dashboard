@@ -68,8 +68,8 @@ def get_today_events():
     
     # 여러 캘린더 ID 시도
     calendar_ids_to_try = [
+        'kts77775@gmail.com',  # 사용자의 Gmail 주소
         'primary',
-        # 사용자의 Gmail 주소를 여기에 추가하세요
     ]
     
     all_events = []
