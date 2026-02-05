@@ -104,10 +104,14 @@ def calculate_contributions():
                 # 전일 대비 변동률
                 latest_price = df_stock['Close'].iloc[-1]
                 prev_price = df_stock['Close'].iloc[-2]
+                latest_date_actual = df_stock.index[-1]
+                prev_date_actual = df_stock.index[-2]
                 change_pct = ((latest_price - prev_price) / prev_price) * 100
                 
                 # 기여도 = 비중 × 변동률
                 contribution = (weight / 100) * change_pct
+                
+                logging.info(f"{stock_name}: {prev_date_actual.strftime('%Y-%m-%d')} {prev_price:,.0f} → {latest_date_actual.strftime('%Y-%m-%d')} {latest_price:,.0f} ({change_pct:+.2f}%) = 기여도 {contribution:+.2f}")
                 
                 contributions.append({
                     'stock': stock_name,
