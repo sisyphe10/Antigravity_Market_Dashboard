@@ -41,24 +41,21 @@ def get_credentials_from_env():
     return credentials
 
 def get_today_events():
-    """오늘의 캘린더 일정 조회 (모든 공유된 캘린더)"""
+    """오늘의 캘린더 일정 조회 (직접 지정된 캘린더)"""
     credentials = get_credentials_from_env()
     service = build('calendar', 'v3', credentials=credentials)
     
-    # 사용 가능한 캘린더 목록 확인
-    calendar_dict = {}
-    try:
-        calendar_list = service.calendarList().list().execute()
-        logging.info("사용 가능한 캘린더:")
-        for calendar in calendar_list.get('items', []):
-            cal_id = calendar.get('id')
-            cal_name = calendar.get('summary')
-            calendar_dict[cal_id] = cal_name
-            logging.info(f"  - {cal_name} (ID: {cal_id})")
-    except Exception as e:
-        logging.warning(f"캘린더 목록 조회 실패: {e}")
-        # 캘린더 목록을 못 가져오면 기본 캘린더만 시도
-        calendar_dict = {'kts77775@gmail.com': '기본 캘린더'}
+    # 조회할 캘린더 목록 (직접 지정)
+    # 캘린더를 추가하려면 여기에 캘린더 ID를 추가하세요
+    calendars_to_check = {
+        'kts77775@gmail.com': '메인 캘린더',
+        # 다른 캘린더 ID를 여기에 추가
+        # 예: 'abcd1234@group.calendar.google.com': '투자 활동',
+    }
+    
+    logging.info("조회할 캘린더:")
+    for cal_id, cal_name in calendars_to_check.items():
+        logging.info(f"  - {cal_name} (ID: {cal_id})")
     
     # 오늘 00:00 ~ 23:59 (KST)
     from datetime import timezone, timedelta
@@ -79,7 +76,7 @@ def get_today_events():
     }
     
     # 모든 캘린더 조회
-    for cal_id, cal_name in calendar_dict.items():
+    for cal_id, cal_name in calendars_to_check.items():
         try:
             logging.info(f"캘린더 '{cal_name}' 조회 중...")
             events_result = service.events().list(
@@ -94,7 +91,7 @@ def get_today_events():
             logging.info(f"  → {len(events)}개 일정 발견")
             
             # 투자 활동 캘린더는 별도로 분류
-            if '투자 활동' in cal_name or '투자활동' in cal_name:
+            if '투자 활동' in cal_name or '투자활동' in cal_name or 'investment' in cal_name.lower():
                 events_by_calendar['investment'].extend(events)
             else:
                 events_by_calendar['main'].extend(events)
