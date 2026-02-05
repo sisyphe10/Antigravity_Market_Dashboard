@@ -51,8 +51,7 @@ def get_today_events():
         'kts77775@gmail.com': '메인 캘린더',
         'a49c912f9e11c6e050c873312ae00a314e45dc075540c86cf428c9921fcbc20c@group.calendar.google.com': '옥쥬와 빵빵이',
         'h7u3p3bs2tva7ki3e2up0tg30o@group.calendar.google.com': '운용 본부',
-        # 다른 캘린더 ID를 여기에 추가
-        # 예: 'abcd1234@group.calendar.google.com': '투자 활동',
+        's7m7ahc836cajffbt98vae3m1k@group.calendar.google.com': '투자 활동',
     }
     
     logging.info("조회할 캘린더:")
