@@ -136,8 +136,9 @@ def format_message(date, nav_data, returns_data, top_5, bottom_5):
     msg = f"a. 날짜 / {date_str}\n"
     
     # b. 기준가
-    nav_str = " ".join([f"{name} {value:,.2f}" for name, value in nav_data.items()])
-    msg += f"b. 기준가 / {nav_str}\n"
+    msg += "b. 기준가 / \n"
+    for name, value in nav_data.items():
+        msg += f"{name} {value:,.2f}\n"
     
     # c. 수익률
     msg += "c. 수익률 (1D 1W 1M 3M 6M 1Y YTD)\n"
@@ -151,23 +152,23 @@ def format_message(date, nav_data, returns_data, top_5, bottom_5):
             ])
             
             if product == '트루밸류':
-                msg += f"삼성 트루밸류 {returns_str}\n"
+                msg += f"삼성 트루밸류\n{returns_str}\n"
             else:
-                msg += f"{product} {returns_str}\n"
+                msg += f"{product}\n{returns_str}\n"
     
     # d. 종목별 기여도 상위
     if top_5:
         top_str = " ".join([f"{item['stock']} {item['contribution']:+.1f}" for item in top_5])
-        msg += f"d. 종목별 기여도 상위 / {top_str}\n"
+        msg += f"d. 종목별 기여도 상위 / \n{top_str}\n"
     else:
-        msg += "d. 종목별 기여도 상위 / 데이터 없음\n"
+        msg += "d. 종목별 기여도 상위 / \n데이터 없음\n"
     
     # e. 종목별 기여도 하위
     if bottom_5:
         bottom_str = " ".join([f"{item['stock']} {item['contribution']:+.1f}" for item in bottom_5])
-        msg += f"e. 종목별 기여도 하위 / {bottom_str}"
+        msg += f"e. 종목별 기여도 하위 / \n{bottom_str}"
     else:
-        msg += "e. 종목별 기여도 하위 / 데이터 없음"
+        msg += "e. 종목별 기여도 하위 / \n데이터 없음"
     
     return msg
 
