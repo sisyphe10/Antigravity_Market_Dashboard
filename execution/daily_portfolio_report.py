@@ -20,13 +20,38 @@ def get_day_of_week_kor():
     days = ["월", "화", "수", "목", "금", "토", "일"]
     return days[datetime.now().weekday()]
 
+def get_report_date():
+    """리포트 기준 날짜 결정 (16시 기준)"""
+    from datetime import timezone, timedelta as td
+    
+    # KST 시간대 (UTC+9)
+    kst = timezone(td(hours=9))
+    now_kst = datetime.now(kst)
+    
+    # 16시 이전이면 전일, 16시 이후면 당일
+    if now_kst.hour < 16:
+        report_date = now_kst.date() - td(days=1)
+    else:
+        report_date = now_kst.date()
+    
+    return report_date
+
 def get_latest_nav():
     """최신 기준가 가져오기"""
     df = pd.read_excel(file_name, sheet_name='기준가')
     df['Date'] = pd.to_datetime(df['Date'])
     df = df.set_index('Date')
     
-    latest_date = df.index[-1]
+    # 리포트 날짜 기준으로 데이터 가져오기
+    report_date = get_report_date()
+    
+    # 리포트 날짜 이하의 가장 최근 데이터
+    available_dates = df.index[df.index.date <= report_date]
+    if len(available_dates) == 0:
+        latest_date = df.index[-1]
+    else:
+        latest_date = available_dates[-1]
+    
     latest_row = df.loc[latest_date]
     
     # 필요한 상품만 추출
@@ -82,6 +107,9 @@ def calculate_contributions():
     
     contributions = []
     
+    # 리포트 날짜 기준
+    report_date = get_report_date()
+    
     for _, row in df_latest.iterrows():
         # 종목코드 컬럼 사용
         code = row.get('종목코드')
@@ -94,14 +122,17 @@ def calculate_contributions():
         weight = row['비중']  # 퍼센트 단위
         
         try:
-            # 최근 7일 데이터 가져오기
-            end_date = datetime.now()
-            start_date = end_date - timedelta(days=7)
+            # 리포트 날짜 기준으로 데이터 가져오기 (최근 10일)
+            end_date = report_date
+            start_date = end_date - timedelta(days=10)
             
             df_stock = fdr.DataReader(code, start=start_date, end=end_date)
             
+            # 리포트 날짜 이하의 데이터만 필터링
+            df_stock = df_stock[df_stock.index.date <= report_date]
+            
             if len(df_stock) >= 2:
-                # 전일 대비 변동률
+                # 리포트 날짜(D)와 전 거래일(D-1) 비교
                 latest_price = df_stock['Close'].iloc[-1]
                 prev_price = df_stock['Close'].iloc[-2]
                 latest_date_actual = df_stock.index[-1]
@@ -133,8 +164,10 @@ def calculate_contributions():
 
 def format_message(date, nav_data, returns_data, top_5, bottom_5):
     """텔레그램 메시지 포맷"""
-    day_kor = get_day_of_week_kor()
-    date_str = date.strftime(f'%Y-%m-%d ({day_kor})')
+    # 리포트 날짜 기준
+    report_date = get_report_date()
+    day_of_week = ["월", "화", "수", "목", "금", "토", "일"][report_date.weekday()]
+    date_str = f"{report_date.strftime('%Y-%m-%d')} ({day_of_week})"
     
     # a. 날짜
     msg = f"a. 날짜 / {date_str}\n"
