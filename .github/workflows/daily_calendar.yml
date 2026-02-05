@@ -1,0 +1,33 @@
+name: Daily Calendar Alert
+
+on:
+  schedule:
+    # UTC 21:05 = KST 06:05 (날씨 알림 5분 후)
+    - cron: '5 21 * * *'
+  workflow_dispatch:  # 수동 실행 가능
+
+jobs:
+  send-calendar:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client python-telegram-bot
+        
+    - name: Run Calendar Alert
+      env:
+        GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      run: |
+        python execution/daily_calendar.py
