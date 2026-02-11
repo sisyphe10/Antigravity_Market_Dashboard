@@ -23,6 +23,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
+      - name: Calculate NAV
+        run: |
+          python calculate_wrap_nav.py
+
+      - name: Calculate returns
+        run: |
+          python calculate_returns.py
+      
       - name: Run daily portfolio report
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
