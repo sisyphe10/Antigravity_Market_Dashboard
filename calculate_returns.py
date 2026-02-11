@@ -40,6 +40,7 @@ def calculate_return(current_value, past_value):
     return f"{return_pct:.1f}%"
 
 # 각 컬럼(상품/지수)에 대해 수익률 계산
+# 컬럼별로 최신 유효 데이터를 기준으로 계산 (시작일이 다른 포트폴리오 대응)
 print("   - 계산 중...")
 
 # 결과를 저장할 딕셔너리 (날짜를 키로 사용)
@@ -47,76 +48,53 @@ current_date_str = latest_date.strftime('%Y-%m-%d')
 returns_data = {'날짜': current_date_str}
 
 for col in df.columns:
-    current_value = df.loc[latest_date, col]
-    
-    if pd.isna(current_value):
-        # 데이터가 없으면 모든 기간에 대해 NaN
+    # 해당 컬럼의 유효 데이터만 추출
+    col_series = df[col].dropna()
+
+    if len(col_series) == 0:
         for period in ['1D', '1W', '1M', '3M', '6M', '1Y', 'YTD']:
             returns_data[f"{col}_{period}"] = np.nan
         continue
-    
+
+    current_value = col_series.iloc[-1]
+    col_latest = col_series.index[-1]
+    print(f"   - {col}: 기준일 {col_latest.strftime('%Y-%m-%d')}, 값 {current_value:,.2f}")
+
     # 1D (전일 대비)
-    past_dates_1d = df.index[df.index < latest_date]
-    if len(past_dates_1d) > 0:
-        past_value = df.loc[past_dates_1d[-1], col]
-        returns_data[f"{col}_1D"] = calculate_return(current_value, past_value)
+    if len(col_series) >= 2:
+        returns_data[f"{col}_1D"] = calculate_return(current_value, col_series.iloc[-2])
     else:
         returns_data[f"{col}_1D"] = np.nan
-    
+
     # 1W (7일 전)
-    target_date_1w = latest_date - timedelta(days=7)
-    past_dates_1w = df.index[df.index <= target_date_1w]
-    if len(past_dates_1w) > 0:
-        past_value = df.loc[past_dates_1w[-1], col]
-        returns_data[f"{col}_1W"] = calculate_return(current_value, past_value)
-    else:
-        returns_data[f"{col}_1W"] = np.nan
-    
+    target_1w = col_latest - timedelta(days=7)
+    past_1w = col_series[col_series.index <= target_1w]
+    returns_data[f"{col}_1W"] = calculate_return(current_value, past_1w.iloc[-1]) if len(past_1w) > 0 else np.nan
+
     # 1M (1개월 전)
-    target_date_1m = latest_date - pd.DateOffset(months=1)
-    past_dates_1m = df.index[df.index <= target_date_1m]
-    if len(past_dates_1m) > 0:
-        past_value = df.loc[past_dates_1m[-1], col]
-        returns_data[f"{col}_1M"] = calculate_return(current_value, past_value)
-    else:
-        returns_data[f"{col}_1M"] = np.nan
-    
+    target_1m = col_latest - pd.DateOffset(months=1)
+    past_1m = col_series[col_series.index <= target_1m]
+    returns_data[f"{col}_1M"] = calculate_return(current_value, past_1m.iloc[-1]) if len(past_1m) > 0 else np.nan
+
     # 3M (3개월 전)
-    target_date_3m = latest_date - pd.DateOffset(months=3)
-    past_dates_3m = df.index[df.index <= target_date_3m]
-    if len(past_dates_3m) > 0:
-        past_value = df.loc[past_dates_3m[-1], col]
-        returns_data[f"{col}_3M"] = calculate_return(current_value, past_value)
-    else:
-        returns_data[f"{col}_3M"] = np.nan
-    
+    target_3m = col_latest - pd.DateOffset(months=3)
+    past_3m = col_series[col_series.index <= target_3m]
+    returns_data[f"{col}_3M"] = calculate_return(current_value, past_3m.iloc[-1]) if len(past_3m) > 0 else np.nan
+
     # 6M (6개월 전)
-    target_date_6m = latest_date - pd.DateOffset(months=6)
-    past_dates_6m = df.index[df.index <= target_date_6m]
-    if len(past_dates_6m) > 0:
-        past_value = df.loc[past_dates_6m[-1], col]
-        returns_data[f"{col}_6M"] = calculate_return(current_value, past_value)
-    else:
-        returns_data[f"{col}_6M"] = np.nan
-    
+    target_6m = col_latest - pd.DateOffset(months=6)
+    past_6m = col_series[col_series.index <= target_6m]
+    returns_data[f"{col}_6M"] = calculate_return(current_value, past_6m.iloc[-1]) if len(past_6m) > 0 else np.nan
+
     # 1Y (1년 전)
-    target_date_1y = latest_date - pd.DateOffset(years=1)
-    past_dates_1y = df.index[df.index <= target_date_1y]
-    if len(past_dates_1y) > 0:
-        past_value = df.loc[past_dates_1y[-1], col]
-        returns_data[f"{col}_1Y"] = calculate_return(current_value, past_value)
-    else:
-        returns_data[f"{col}_1Y"] = np.nan
-    
+    target_1y = col_latest - pd.DateOffset(years=1)
+    past_1y = col_series[col_series.index <= target_1y]
+    returns_data[f"{col}_1Y"] = calculate_return(current_value, past_1y.iloc[-1]) if len(past_1y) > 0 else np.nan
+
     # YTD (연초 첫 거래일)
-    year_start = datetime(latest_date.year, 1, 1)
-    ytd_dates = df.index[df.index >= year_start]
-    if len(ytd_dates) > 0:
-        ytd_start_date = ytd_dates[0]
-        past_value = df.loc[ytd_start_date, col]
-        returns_data[f"{col}_YTD"] = calculate_return(current_value, past_value)
-    else:
-        returns_data[f"{col}_YTD"] = np.nan
+    year_start = datetime(col_latest.year, 1, 1)
+    ytd_dates = col_series[col_series.index >= year_start]
+    returns_data[f"{col}_YTD"] = calculate_return(current_value, ytd_dates.iloc[0]) if len(ytd_dates) > 0 else np.nan
 
 print("   - 완료")
 
