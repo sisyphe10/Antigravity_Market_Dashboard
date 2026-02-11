@@ -27,8 +27,14 @@ df = df.loc[:, ~df.columns.str.contains('Unnamed', na=False)]
 print(f"   - 데이터 기간: {df.index[0].strftime('%Y-%m-%d')} ~ {df.index[-1].strftime('%Y-%m-%d')}")
 print(f"   - 대상 항목: {', '.join(df.columns.tolist())}")
 
-# 최신 날짜
-latest_date = df.index[-1]
+# 최신 날짜: 각 컬럼의 최신 유효 날짜 중 가장 많이 등장하는 날짜를 기준일로 사용
+from collections import Counter
+col_latest_dates = []
+for col in df.columns:
+    col_data = df[col].dropna()
+    if len(col_data) > 0:
+        col_latest_dates.append(col_data.index[-1])
+latest_date = Counter(col_latest_dates).most_common(1)[0][0]
 print(f"\n2. 수익률 계산 중... (기준일: {latest_date.strftime('%Y-%m-%d')})")
 
 # 수익률 계산 함수
