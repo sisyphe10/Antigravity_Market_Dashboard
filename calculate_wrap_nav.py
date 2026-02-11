@@ -84,9 +84,15 @@ if not is_update:
     current_base_prices = initial_base_prices
     print(f"   - 계산 시작일: {start_date.strftime('%Y-%m-%d')}")
 
-# 계산 종료일 (어제)
-today = pd.Timestamp.now().normalize()
-end_date = today - pd.Timedelta(days=1)
+# 계산 종료일: KST 16시 이후면 당일, 이전이면 전일
+from datetime import timezone, timedelta as td
+kst = timezone(td(hours=9))
+now_kst = pd.Timestamp.now(tz=kst)
+today_kst = now_kst.normalize().tz_localize(None)
+if now_kst.hour >= 16:
+    end_date = today_kst
+else:
+    end_date = today_kst - pd.Timedelta(days=1)
 
 print(f"   - 계산 종료일(목표): {end_date.strftime('%Y-%m-%d')}")
 
