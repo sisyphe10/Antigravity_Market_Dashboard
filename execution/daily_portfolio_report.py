@@ -58,7 +58,7 @@ def get_latest_nav():
     nav_data = {
         '삼성 트루밸류': latest_row.get('트루밸류', 0),
         'NH Value ESG': latest_row.get('Value ESG', 0),
-        'DB 개방형 랩': latest_row.get('자문형 랩', 0),
+        'DB 개방형 랩': latest_row.get('개방형 랩', 0),
         'DB 목표전환형 WRAP': latest_row.get('목표전환형', 0),
     }
     

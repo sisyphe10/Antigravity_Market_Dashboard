@@ -14,7 +14,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 portfolio_config = {
     '트루밸류': {'base_price': 2021.31, 'start_date': '2025-12-30'},
     'Value ESG': {'base_price': 1980.49, 'start_date': '2025-12-30'},
-    '자문형 랩': {'base_price': 1518.52, 'start_date': '2025-12-30'},
+    '개방형 랩': {'base_price': 1518.52, 'start_date': '2025-12-30'},
     '목표전환형': {'base_price': 1000.00, 'start_date': '2026-02-11'},
 }
 initial_base_prices = {k: v['base_price'] for k, v in portfolio_config.items()}
