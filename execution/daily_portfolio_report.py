@@ -58,7 +58,8 @@ def get_latest_nav():
     nav_data = {
         '삼성 트루밸류': latest_row.get('트루밸류', 0),
         'NH Value ESG': latest_row.get('Value ESG', 0),
-        'DB 개방형 랩': latest_row.get('자문형 랩', 0)
+        'DB 개방형 랩': latest_row.get('자문형 랩', 0),
+        'DB 목표전환형 WRAP': latest_row.get('목표전환형', 0),
     }
     
     return latest_date, nav_data
@@ -75,7 +76,7 @@ def get_latest_returns():
     # 트루밸류, KOSPI, KOSDAQ 수익률 추출
     returns_data = {}
     
-    for product in ['트루밸류', 'KOSPI', 'KOSDAQ']:
+    for product in ['트루밸류', '목표전환형', 'KOSPI', 'KOSDAQ']:
         returns_data[product] = {
             '1D': latest_row.get(f'{product}_1D', 'N/A'),
             '1W': latest_row.get(f'{product}_1W', 'N/A'),
@@ -179,7 +180,14 @@ def format_message(date, nav_data, returns_data, top_5, bottom_5):
     
     # c. 수익률
     msg += "c. 수익률 (1D 1W 1M 3M 6M 1Y YTD)\n"
-    for product in ['트루밸류', 'KOSPI', 'KOSDAQ']:
+    # 표시명 매핑
+    display_names = {
+        '트루밸류': '삼성 트루밸류',
+        '목표전환형': 'DB 목표전환형 WRAP',
+        'KOSPI': 'KOSPI',
+        'KOSDAQ': 'KOSDAQ',
+    }
+    for product in ['트루밸류', '목표전환형', 'KOSPI', 'KOSDAQ']:
         if product in returns_data:
             returns = returns_data[product]
             # NaN과 numpy 타입을 문자열로 변환
@@ -187,11 +195,8 @@ def format_message(date, nav_data, returns_data, top_5, bottom_5):
                 str(returns.get(period, 'N/A')) if not pd.isna(returns.get(period, 'N/A')) else 'N/A'
                 for period in ['1D', '1W', '1M', '3M', '6M', '1Y', 'YTD']
             ])
-            
-            if product == '트루밸류':
-                msg += f"삼성 트루밸류\n{returns_str}\n"
-            else:
-                msg += f"{product}\n{returns_str}\n"
+
+            msg += f"{display_names.get(product, product)}\n{returns_str}\n"
     
     # d. 종목별 기여도 상위
     if top_5:

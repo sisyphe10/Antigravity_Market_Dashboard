@@ -10,12 +10,15 @@ sys.stdout.reconfigure(encoding='utf-8')
 # ---------------------------------------------------------
 # 1. 설정
 # ---------------------------------------------------------
-initial_base_prices = {
-    '트루밸류': 2021.31,
-    'Value ESG': 1980.49,
-    '자문형 랩': 1518.52
+# 포트폴리오별 초기 기준가 및 시작일
+portfolio_config = {
+    '트루밸류': {'base_price': 2021.31, 'start_date': '2025-12-30'},
+    'Value ESG': {'base_price': 1980.49, 'start_date': '2025-12-30'},
+    '자문형 랩': {'base_price': 1518.52, 'start_date': '2025-12-30'},
+    '목표전환형': {'base_price': 1000.00, 'start_date': '2026-02-11'},
 }
-initial_start_date_str = '2025-12-30'  # 이 날짜 종가가 기준
+initial_base_prices = {k: v['base_price'] for k, v in portfolio_config.items()}
+initial_start_date_str = min(cfg['start_date'] for cfg in portfolio_config.values())
 
 # 시장 지수
 indices = {
@@ -87,9 +90,21 @@ end_date = today - pd.Timedelta(days=1)
 
 print(f"   - 계산 종료일(목표): {end_date.strftime('%Y-%m-%d')}")
 
-if start_date >= end_date:
+# 신규 포트폴리오 확인 (기존 데이터에 없는 포트폴리오)
+new_portfolios = []
+if is_update:
+    new_portfolios = [pf for pf in initial_base_prices.keys() if pf not in df_old.columns]
+
+if start_date >= end_date and not new_portfolios:
     print("\n✅ 이미 최신 데이터까지 업데이트되어 있습니다. (종료)")
     exit()
+
+# 신규 포트폴리오가 있으면 데이터 수집 시작일을 조정
+if new_portfolios:
+    earliest_new_start = min(pd.Timestamp(portfolio_config[pf]['start_date']) for pf in new_portfolios)
+    if earliest_new_start < start_date:
+        start_date = earliest_new_start
+    print(f"   - 신규 포트폴리오 감지: {', '.join(new_portfolios)}")
 
 # ---------------------------------------------------------
 # 3. 비중 데이터 전처리
@@ -143,7 +158,7 @@ if not df_indices.empty:
 # ★ [핵심 수정] 시작일(start_date) 당일은 제외하고, 그 다음 날부터 수익률 계산
 calc_dates = df_change.index[df_change.index > start_date]
 
-if len(calc_dates) == 0:
+if len(calc_dates) == 0 and not new_portfolios:
     print("\n✅ 업데이트할 거래일이 없습니다. (종료)")
     exit()
 
@@ -158,21 +173,34 @@ for pf_name, start_price in current_base_prices.items():
     sub_df = df_weights[df_weights['상품명'] == pf_name]
     if sub_df.empty: continue
 
+    # 포트폴리오별 시작일 및 계산 대상 날짜 결정
+    pf_config_start = pd.Timestamp(portfolio_config[pf_name]['start_date'])
+    is_new_portfolio = is_update and pf_name not in df_old.columns
+
+    if is_new_portfolio:
+        # 신규 포트폴리오: 설정된 시작일 기준
+        pf_start_date = pf_config_start
+        pf_calc_dates = df_change.index[(df_change.index > pf_config_start) & (df_change.index <= end_date)]
+    else:
+        # 기존 포트폴리오: 기존 데이터 이후부터
+        pf_start_date = start_date
+        pf_calc_dates = calc_dates
+
     w_table = sub_df.pivot(index='날짜', columns='코드', values='비중')
-    full_idx = calc_dates.union(w_table.index).sort_values()
+    full_idx = pf_calc_dates.union(w_table.index).sort_values()
     w_table = w_table.reindex(full_idx).ffill().fillna(0)
 
     idx_list = []
     date_list = []
 
-    # 업데이트 모드가 아니면(처음 생성 시) 시작일(T=0) 데이터 추가
-    if not is_update:
+    # 처음 생성 시 또는 신규 포트폴리오: 시작일(T=0) 초기값 기록
+    if not is_update or is_new_portfolio:
         idx_list.append(start_price)
-        date_list.append(start_date)
+        date_list.append(pf_start_date)
 
     current_index = start_price
 
-    for d in calc_dates:
+    for d in pf_calc_dates:
         # 전일(d-1)까지 유효했던 비중 찾기
         past_dates = w_table.index[w_table.index < d]
 
