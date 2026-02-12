@@ -19,28 +19,6 @@ PORTFOLIO_DISPLAY_NAMES = {
     '목표전환형': 'DB 목표전환형'
 }
 
-# 주요 종목 섹터 매핑 (수동)
-SECTOR_MAPPING = {
-    '005930': '반도체',
-    '000660': '반도체',
-    '352820': '엔터테인먼트',
-    '277810': '로봇/자동화',
-    '001040': '식품/유통',
-    '000150': '중공업',
-    '034020': '에너지',
-    '006800': '증권',
-    '010060': '화학',
-    '241560': '건설기계',
-    '101490': '전기전자',
-    '036810': '반도체장비',
-    '006400': '2차전지',
-    '034230': '호텔/레저',
-    '017800': '기계',
-    '003230': '식품',
-    '033780': '담배/식음료',
-    '196170': '의료기기',
-}
-
 # 기존 종목 누적 수익률 매핑 (사용자 제공 값)
 EXISTING_STOCK_CUMULATIVE_RETURNS = {
     '005930': 200.0,  # 삼성전자
@@ -262,6 +240,11 @@ def create_portfolio_tables():
         print("2. KRX 종목 리스트 로드 중...")
         krx = fdr.StockListing('KRX')
 
+        # Code 시트에서 FICS 섹터 매핑 로드
+        code_df = pd.read_excel(WRAP_NAV_FILE, sheet_name='Code')
+        code_df['종목코드'] = code_df['종목코드'].apply(lambda x: str(x).zfill(6))
+        sector_map = dict(zip(code_df['종목코드'], code_df['섹터']))
+
         # 포트폴리오별 데이터 생성
         portfolio_data = {}
 
@@ -319,13 +302,15 @@ def create_portfolio_tables():
                 # 종목 정보 가져오기
                 stock_data = krx[krx['Code'] == code]
 
+                # 섹터는 Code 시트의 FICS 분류 사용
+                sector = sector_map.get(code, '기타')
+                if pd.isna(sector):
+                    sector = '기타'
+
                 if not stock_data.empty:
-                    # 섹터는 수동 매핑 사용
-                    sector = SECTOR_MAPPING.get(code, '기타')
                     market_cap = stock_data.iloc[0].get('Marcap', 0)
                     market_cap_billions = market_cap / 100000000 if market_cap else 0
                 else:
-                    sector = '기타'
                     market_cap_billions = 0
 
                 # 오늘 수익률 계산
