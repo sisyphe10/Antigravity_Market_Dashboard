@@ -1,0 +1,311 @@
+{
+  "NH Value ESG": [
+    {
+      "code": "005930",
+      "name": "삼성전자",
+      "sector": "반도체",
+      "market_cap": 10507357.31155,
+      "weight": 30
+    },
+    {
+      "code": "000660",
+      "name": "SK하이닉스",
+      "sector": "반도체",
+      "market_cap": 6457380.97755,
+      "weight": 15
+    },
+    {
+      "code": "352820",
+      "name": "하이브",
+      "sector": "엔터테인먼트",
+      "market_cap": 162689.2533,
+      "weight": 10
+    },
+    {
+      "code": "277810",
+      "name": "레인보우로보틱스",
+      "sector": "로봇/자동화",
+      "market_cap": 131143.04008,
+      "weight": 10
+    },
+    {
+      "code": "001040",
+      "name": "CJ",
+      "sector": "식품/유통",
+      "market_cap": 66231.78546,
+      "weight": 8
+    },
+    {
+      "code": "000150",
+      "name": "두산",
+      "sector": "중공업",
+      "market_cap": 158213.76795,
+      "weight": 5
+    },
+    {
+      "code": "034020",
+      "name": "두산에너빌리티",
+      "sector": "에너지",
+      "market_cap": 598924.67151,
+      "weight": 5
+    },
+    {
+      "code": "006800",
+      "name": "미래에셋증권",
+      "sector": "증권",
+      "market_cap": 297720.01035,
+      "weight": 5
+    },
+    {
+      "code": "010060",
+      "name": "OCI홀딩스",
+      "sector": "화학",
+      "market_cap": 28808.167976,
+      "weight": 3
+    },
+    {
+      "code": "241560",
+      "name": "두산밥캣",
+      "sector": "건설기계",
+      "market_cap": 63648.42716,
+      "weight": 3
+    },
+    {
+      "code": "101490",
+      "name": "에스앤에스텍",
+      "sector": "전기전자",
+      "market_cap": 19500.079406,
+      "weight": 2
+    },
+    {
+      "code": "036810",
+      "name": "에프에스티",
+      "sector": "반도체장비",
+      "market_cap": 9682.749468,
+      "weight": 2
+    },
+    {
+      "code": "006400",
+      "name": "삼성SDI",
+      "sector": "2차전지",
+      "market_cap": 306627.94165,
+      "weight": 2
+    }
+  ],
+  "삼성 트루밸류": [
+    {
+      "code": "005930",
+      "name": "삼성전자",
+      "sector": "반도체",
+      "market_cap": 10507357.31155,
+      "weight": 30
+    },
+    {
+      "code": "000660",
+      "name": "SK하이닉스",
+      "sector": "반도체",
+      "market_cap": 6457380.97755,
+      "weight": 15
+    },
+    {
+      "code": "352820",
+      "name": "하이브",
+      "sector": "엔터테인먼트",
+      "market_cap": 162689.2533,
+      "weight": 10
+    },
+    {
+      "code": "277810",
+      "name": "레인보우로보틱스",
+      "sector": "로봇/자동화",
+      "market_cap": 131143.04008,
+      "weight": 10
+    },
+    {
+      "code": "001040",
+      "name": "CJ",
+      "sector": "식품/유통",
+      "market_cap": 66231.78546,
+      "weight": 8
+    },
+    {
+      "code": "000150",
+      "name": "두산",
+      "sector": "중공업",
+      "market_cap": 158213.76795,
+      "weight": 5
+    },
+    {
+      "code": "034020",
+      "name": "두산에너빌리티",
+      "sector": "에너지",
+      "market_cap": 598924.67151,
+      "weight": 5
+    },
+    {
+      "code": "006800",
+      "name": "미래에셋증권",
+      "sector": "증권",
+      "market_cap": 297720.01035,
+      "weight": 5
+    },
+    {
+      "code": "010060",
+      "name": "OCI홀딩스",
+      "sector": "화학",
+      "market_cap": 28808.167976,
+      "weight": 3
+    },
+    {
+      "code": "241560",
+      "name": "두산밥캣",
+      "sector": "건설기계",
+      "market_cap": 63648.42716,
+      "weight": 3
+    },
+    {
+      "code": "101490",
+      "name": "에스앤에스텍",
+      "sector": "전기전자",
+      "market_cap": 19500.079406,
+      "weight": 2
+    },
+    {
+      "code": "036810",
+      "name": "에프에스티",
+      "sector": "반도체장비",
+      "market_cap": 9682.749468,
+      "weight": 2
+    },
+    {
+      "code": "006400",
+      "name": "삼성SDI",
+      "sector": "2차전지",
+      "market_cap": 306627.94165,
+      "weight": 2
+    }
+  ],
+  "DB 개방형": [
+    {
+      "code": "005930",
+      "name": "삼성전자",
+      "sector": "반도체",
+      "market_cap": 10507357.31155,
+      "weight": 30
+    },
+    {
+      "code": "000660",
+      "name": "SK하이닉스",
+      "sector": "반도체",
+      "market_cap": 6457380.97755,
+      "weight": 15
+    },
+    {
+      "code": "352820",
+      "name": "하이브",
+      "sector": "엔터테인먼트",
+      "market_cap": 162689.2533,
+      "weight": 10
+    },
+    {
+      "code": "277810",
+      "name": "레인보우로보틱스",
+      "sector": "로봇/자동화",
+      "market_cap": 131143.04008,
+      "weight": 10
+    },
+    {
+      "code": "001040",
+      "name": "CJ",
+      "sector": "식품/유통",
+      "market_cap": 66231.78546,
+      "weight": 8
+    },
+    {
+      "code": "000150",
+      "name": "두산",
+      "sector": "중공업",
+      "market_cap": 158213.76795,
+      "weight": 5
+    },
+    {
+      "code": "034020",
+      "name": "두산에너빌리티",
+      "sector": "에너지",
+      "market_cap": 598924.67151,
+      "weight": 5
+    },
+    {
+      "code": "006800",
+      "name": "미래에셋증권",
+      "sector": "증권",
+      "market_cap": 297720.01035,
+      "weight": 5
+    },
+    {
+      "code": "010060",
+      "name": "OCI홀딩스",
+      "sector": "화학",
+      "market_cap": 28808.167976,
+      "weight": 3
+    },
+    {
+      "code": "241560",
+      "name": "두산밥캣",
+      "sector": "건설기계",
+      "market_cap": 63648.42716,
+      "weight": 3
+    },
+    {
+      "code": "101490",
+      "name": "에스앤에스텍",
+      "sector": "전기전자",
+      "market_cap": 19500.079406,
+      "weight": 2
+    },
+    {
+      "code": "036810",
+      "name": "에프에스티",
+      "sector": "반도체장비",
+      "market_cap": 9682.749468,
+      "weight": 2
+    },
+    {
+      "code": "006400",
+      "name": "삼성SDI",
+      "sector": "2차전지",
+      "market_cap": 306627.94165,
+      "weight": 2
+    }
+  ],
+  "DB 목표전환형": [
+    {
+      "code": "241560",
+      "name": "두산밥캣",
+      "sector": "건설기계",
+      "market_cap": 63648.42716,
+      "weight": 5
+    },
+    {
+      "code": "034230",
+      "name": "파라다이스",
+      "sector": "호텔/레저",
+      "market_cap": 19174.1534925,
+      "weight": 5
+    },
+    {
+      "code": "277810",
+      "name": "레인보우로보틱스",
+      "sector": "로봇/자동화",
+      "market_cap": 131143.04008,
+      "weight": 5
+    },
+    {
+      "code": "017800",
+      "name": "현대엘리베이터",
+      "sector": "기계",
+      "market_cap": 38427.814455,
+      "weight": 5
+    }
+  ]
+}

@@ -98,12 +98,75 @@
             color: #666;
             font-size: 0.9rem;
         }
+
+        /* Portfolio Tables Styling */
+        .portfolio-section {
+            margin-bottom: 40px;
+        }
+
+        .portfolio-title {
+            font-size: 1.4rem;
+            color: #e0e0e0;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #444;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .portfolio-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        .portfolio-table thead {
+            background-color: #3a3a3a;
+        }
+
+        .portfolio-table th {
+            padding: 12px 10px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        .portfolio-table td {
+            padding: 10px;
+            border-bottom: 1px solid #444;
+            color: #ccc;
+        }
+
+        .portfolio-table tbody tr:hover {
+            background-color: #3a3a3a;
+        }
+
+        .portfolio-table .number {
+            text-align: right;
+        }
+
+        .portfolio-table th:first-child,
+        .portfolio-table td:first-child {
+            width: 50px;
+            text-align: center;
+        }
+
+        .portfolio-section-wrapper {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>📊 Market Data Dashboard</h1>
-        <div class="last-updated">Last Updated: 2026-02-12 13:00:32 KST</div>
+        <div class="last-updated">Last Updated: 2026-02-12 13:29:50 KST</div>
     </header>
 
     
@@ -516,6 +579,485 @@
                 </div>
             </div>
             
+
+    <!-- Portfolio Holdings Section -->
+    <div class="category-section">
+        <h2 class="category-title">Portfolio</h2>
+        <div class="portfolio-section-wrapper">
+            
+            <div class="portfolio-section">
+                <h3 class="portfolio-title">NH Value ESG</h3>
+                <div class="table-container">
+                    <table class="portfolio-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>종목코드</th>
+                                <th>종목명</th>
+                                <th>섹터</th>
+                                <th>시가총액</th>
+                                <th>Weight</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            
+                            <tr>
+                                <td>1</td>
+                                <td>005930</td>
+                                <td>삼성전자</td>
+                                <td>반도체</td>
+                                <td class="number">10,507,357억</td>
+                                <td class="number">30%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>2</td>
+                                <td>000660</td>
+                                <td>SK하이닉스</td>
+                                <td>반도체</td>
+                                <td class="number">6,457,381억</td>
+                                <td class="number">15%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>3</td>
+                                <td>352820</td>
+                                <td>하이브</td>
+                                <td>엔터테인먼트</td>
+                                <td class="number">162,689억</td>
+                                <td class="number">10%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>4</td>
+                                <td>277810</td>
+                                <td>레인보우로보틱스</td>
+                                <td>로봇/자동화</td>
+                                <td class="number">131,143억</td>
+                                <td class="number">10%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>5</td>
+                                <td>001040</td>
+                                <td>CJ</td>
+                                <td>식품/유통</td>
+                                <td class="number">66,232억</td>
+                                <td class="number">8%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>6</td>
+                                <td>000150</td>
+                                <td>두산</td>
+                                <td>중공업</td>
+                                <td class="number">158,214억</td>
+                                <td class="number">5%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>7</td>
+                                <td>034020</td>
+                                <td>두산에너빌리티</td>
+                                <td>에너지</td>
+                                <td class="number">598,925억</td>
+                                <td class="number">5%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>8</td>
+                                <td>006800</td>
+                                <td>미래에셋증권</td>
+                                <td>증권</td>
+                                <td class="number">297,720억</td>
+                                <td class="number">5%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>9</td>
+                                <td>010060</td>
+                                <td>OCI홀딩스</td>
+                                <td>화학</td>
+                                <td class="number">28,808억</td>
+                                <td class="number">3%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>10</td>
+                                <td>241560</td>
+                                <td>두산밥캣</td>
+                                <td>건설기계</td>
+                                <td class="number">63,648억</td>
+                                <td class="number">3%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>11</td>
+                                <td>101490</td>
+                                <td>에스앤에스텍</td>
+                                <td>전기전자</td>
+                                <td class="number">19,500억</td>
+                                <td class="number">2%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>12</td>
+                                <td>036810</td>
+                                <td>에프에스티</td>
+                                <td>반도체장비</td>
+                                <td class="number">9,683억</td>
+                                <td class="number">2%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>13</td>
+                                <td>006400</td>
+                                <td>삼성SDI</td>
+                                <td>2차전지</td>
+                                <td class="number">306,628억</td>
+                                <td class="number">2%</td>
+                            </tr>
+                
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="portfolio-section">
+                <h3 class="portfolio-title">삼성 트루밸류</h3>
+                <div class="table-container">
+                    <table class="portfolio-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>종목코드</th>
+                                <th>종목명</th>
+                                <th>섹터</th>
+                                <th>시가총액</th>
+                                <th>Weight</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            
+                            <tr>
+                                <td>1</td>
+                                <td>005930</td>
+                                <td>삼성전자</td>
+                                <td>반도체</td>
+                                <td class="number">10,507,357억</td>
+                                <td class="number">30%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>2</td>
+                                <td>000660</td>
+                                <td>SK하이닉스</td>
+                                <td>반도체</td>
+                                <td class="number">6,457,381억</td>
+                                <td class="number">15%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>3</td>
+                                <td>352820</td>
+                                <td>하이브</td>
+                                <td>엔터테인먼트</td>
+                                <td class="number">162,689억</td>
+                                <td class="number">10%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>4</td>
+                                <td>277810</td>
+                                <td>레인보우로보틱스</td>
+                                <td>로봇/자동화</td>
+                                <td class="number">131,143억</td>
+                                <td class="number">10%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>5</td>
+                                <td>001040</td>
+                                <td>CJ</td>
+                                <td>식품/유통</td>
+                                <td class="number">66,232억</td>
+                                <td class="number">8%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>6</td>
+                                <td>000150</td>
+                                <td>두산</td>
+                                <td>중공업</td>
+                                <td class="number">158,214억</td>
+                                <td class="number">5%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>7</td>
+                                <td>034020</td>
+                                <td>두산에너빌리티</td>
+                                <td>에너지</td>
+                                <td class="number">598,925억</td>
+                                <td class="number">5%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>8</td>
+                                <td>006800</td>
+                                <td>미래에셋증권</td>
+                                <td>증권</td>
+                                <td class="number">297,720억</td>
+                                <td class="number">5%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>9</td>
+                                <td>010060</td>
+                                <td>OCI홀딩스</td>
+                                <td>화학</td>
+                                <td class="number">28,808억</td>
+                                <td class="number">3%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>10</td>
+                                <td>241560</td>
+                                <td>두산밥캣</td>
+                                <td>건설기계</td>
+                                <td class="number">63,648억</td>
+                                <td class="number">3%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>11</td>
+                                <td>101490</td>
+                                <td>에스앤에스텍</td>
+                                <td>전기전자</td>
+                                <td class="number">19,500억</td>
+                                <td class="number">2%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>12</td>
+                                <td>036810</td>
+                                <td>에프에스티</td>
+                                <td>반도체장비</td>
+                                <td class="number">9,683억</td>
+                                <td class="number">2%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>13</td>
+                                <td>006400</td>
+                                <td>삼성SDI</td>
+                                <td>2차전지</td>
+                                <td class="number">306,628억</td>
+                                <td class="number">2%</td>
+                            </tr>
+                
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="portfolio-section">
+                <h3 class="portfolio-title">DB 개방형</h3>
+                <div class="table-container">
+                    <table class="portfolio-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>종목코드</th>
+                                <th>종목명</th>
+                                <th>섹터</th>
+                                <th>시가총액</th>
+                                <th>Weight</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            
+                            <tr>
+                                <td>1</td>
+                                <td>005930</td>
+                                <td>삼성전자</td>
+                                <td>반도체</td>
+                                <td class="number">10,507,357억</td>
+                                <td class="number">30%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>2</td>
+                                <td>000660</td>
+                                <td>SK하이닉스</td>
+                                <td>반도체</td>
+                                <td class="number">6,457,381억</td>
+                                <td class="number">15%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>3</td>
+                                <td>352820</td>
+                                <td>하이브</td>
+                                <td>엔터테인먼트</td>
+                                <td class="number">162,689억</td>
+                                <td class="number">10%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>4</td>
+                                <td>277810</td>
+                                <td>레인보우로보틱스</td>
+                                <td>로봇/자동화</td>
+                                <td class="number">131,143억</td>
+                                <td class="number">10%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>5</td>
+                                <td>001040</td>
+                                <td>CJ</td>
+                                <td>식품/유통</td>
+                                <td class="number">66,232억</td>
+                                <td class="number">8%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>6</td>
+                                <td>000150</td>
+                                <td>두산</td>
+                                <td>중공업</td>
+                                <td class="number">158,214억</td>
+                                <td class="number">5%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>7</td>
+                                <td>034020</td>
+                                <td>두산에너빌리티</td>
+                                <td>에너지</td>
+                                <td class="number">598,925억</td>
+                                <td class="number">5%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>8</td>
+                                <td>006800</td>
+                                <td>미래에셋증권</td>
+                                <td>증권</td>
+                                <td class="number">297,720억</td>
+                                <td class="number">5%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>9</td>
+                                <td>010060</td>
+                                <td>OCI홀딩스</td>
+                                <td>화학</td>
+                                <td class="number">28,808억</td>
+                                <td class="number">3%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>10</td>
+                                <td>241560</td>
+                                <td>두산밥캣</td>
+                                <td>건설기계</td>
+                                <td class="number">63,648억</td>
+                                <td class="number">3%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>11</td>
+                                <td>101490</td>
+                                <td>에스앤에스텍</td>
+                                <td>전기전자</td>
+                                <td class="number">19,500억</td>
+                                <td class="number">2%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>12</td>
+                                <td>036810</td>
+                                <td>에프에스티</td>
+                                <td>반도체장비</td>
+                                <td class="number">9,683억</td>
+                                <td class="number">2%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>13</td>
+                                <td>006400</td>
+                                <td>삼성SDI</td>
+                                <td>2차전지</td>
+                                <td class="number">306,628억</td>
+                                <td class="number">2%</td>
+                            </tr>
+                
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="portfolio-section">
+                <h3 class="portfolio-title">DB 목표전환형</h3>
+                <div class="table-container">
+                    <table class="portfolio-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>종목코드</th>
+                                <th>종목명</th>
+                                <th>섹터</th>
+                                <th>시가총액</th>
+                                <th>Weight</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            
+                            <tr>
+                                <td>1</td>
+                                <td>241560</td>
+                                <td>두산밥캣</td>
+                                <td>건설기계</td>
+                                <td class="number">63,648억</td>
+                                <td class="number">5%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>2</td>
+                                <td>034230</td>
+                                <td>파라다이스</td>
+                                <td>호텔/레저</td>
+                                <td class="number">19,174억</td>
+                                <td class="number">5%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>3</td>
+                                <td>277810</td>
+                                <td>레인보우로보틱스</td>
+                                <td>로봇/자동화</td>
+                                <td class="number">131,143억</td>
+                                <td class="number">5%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>4</td>
+                                <td>017800</td>
+                                <td>현대엘리베이터</td>
+                                <td>기계</td>
+                                <td class="number">38,428억</td>
+                                <td class="number">5%</td>
+                            </tr>
+                
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        </div>
+    </div>
 
     <footer>
         <p>Auto-generated by Antigravity Agent</p>

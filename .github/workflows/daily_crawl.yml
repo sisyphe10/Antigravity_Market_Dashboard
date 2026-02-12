@@ -75,7 +75,13 @@ jobs:
           python execution/draw_wrap_charts.py
         env:
            TZ: 'Asia/Seoul'
-      
+
+      - name: Create Portfolio Tables
+        run: |
+          python execution/create_portfolio_tables.py
+        env:
+           TZ: 'Asia/Seoul'
+
       - name: Generate Dashboard
         run: |
           python execution/create_dashboard.py
@@ -91,5 +97,5 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Auto-update: Market data and dashboard [skip ci]"
-          file_pattern: 'dataset.csv charts/*.png index.html'
+          file_pattern: 'dataset.csv charts/*.png index.html portfolio_data.json'
           skip_fetch: true
