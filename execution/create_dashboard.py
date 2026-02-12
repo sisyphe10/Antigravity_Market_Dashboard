@@ -41,6 +41,7 @@ def create_portfolio_tables_html():
                                 <th>시가총액</th>
                                 <th>Weight</th>
                                 <th>오늘 수익률</th>
+                                <th>누적 수익률</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -61,15 +62,25 @@ def create_portfolio_tables_html():
                 total_weight += weight
 
                 if today_return is not None:
-                    return_str = f"{today_return:+.2f}%"
+                    today_return_str = f"{today_return:+.2f}%"
                     # 색상 적용 (양수: 빨강, 음수: 파랑)
-                    color_class = "positive" if today_return > 0 else "negative" if today_return < 0 else ""
+                    today_color_class = "positive" if today_return > 0 else "negative" if today_return < 0 else ""
                     # 가중 수익률 합산
                     weighted_return_sum += today_return * weight / 100
                     valid_returns_count += 1
                 else:
-                    return_str = "N/A"
-                    color_class = ""
+                    today_return_str = "N/A"
+                    today_color_class = ""
+
+                # 누적 수익률 포맷
+                cumulative_return = stock.get('cumulative_return')
+                if cumulative_return is not None:
+                    cumulative_return_str = f"{cumulative_return:+.2f}%"
+                    # 색상 적용 (양수: 빨강, 음수: 파랑)
+                    cumulative_color_class = "positive" if cumulative_return > 0 else "negative" if cumulative_return < 0 else ""
+                else:
+                    cumulative_return_str = "N/A"
+                    cumulative_color_class = ""
 
                 html += f"""
                             <tr>
@@ -79,7 +90,8 @@ def create_portfolio_tables_html():
                                 <td>{stock['sector']}</td>
                                 <td>{market_cap_str}</td>
                                 <td>{stock['weight']}%</td>
-                                <td class="{color_class}">{return_str}</td>
+                                <td class="{today_color_class}">{today_return_str}</td>
+                                <td class="{cumulative_color_class}">{cumulative_return_str}</td>
                             </tr>
                 """
 
@@ -92,6 +104,7 @@ def create_portfolio_tables_html():
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
                                 <td style="font-weight: 600;">{total_weight:.0f}%</td>
                                 <td class="{portfolio_color}" style="font-weight: 600;">{portfolio_return_str}</td>
+                                <td style="font-weight: 600;">-</td>
                             </tr>
                         </tbody>
                     </table>
