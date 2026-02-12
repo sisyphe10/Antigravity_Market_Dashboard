@@ -4,63 +4,63 @@
       "code": "005930",
       "name": "삼성전자",
       "sector": "반도체",
-      "market_cap": 10477759.12194,
+      "market_cap": 10495518.035706,
       "weight": 30
     },
     {
       "code": "000660",
       "name": "SK하이닉스",
       "sector": "반도체",
-      "market_cap": 6446460.942075,
+      "market_cap": 6450100.9539,
       "weight": 15
     },
     {
       "code": "352820",
       "name": "하이브",
       "sector": "엔터테인먼트",
-      "market_cap": 162043.661025,
+      "market_cap": 161398.06875,
       "weight": 10
     },
     {
       "code": "277810",
       "name": "레인보우로보틱스",
       "sector": "로봇/자동화",
-      "market_cap": 131337.03866,
+      "market_cap": 131143.04008,
       "weight": 10
     },
     {
       "code": "001040",
       "name": "CJ",
       "sector": "식품/유통",
-      "market_cap": 66669.44043,
+      "market_cap": 66523.55544,
       "weight": 8
     },
     {
       "code": "000150",
       "name": "두산",
       "sector": "중공업",
-      "market_cap": 159185.39805,
+      "market_cap": 159671.2131,
       "weight": 5
     },
     {
       "code": "034020",
       "name": "두산에너빌리티",
       "sector": "에너지",
-      "market_cap": 598924.67151,
+      "market_cap": 599565.232656,
       "weight": 5
     },
     {
       "code": "006800",
       "name": "미래에셋증권",
       "sector": "증권",
-      "market_cap": 298287.096084,
+      "market_cap": 299988.353286,
       "weight": 5
     },
     {
       "code": "010060",
       "name": "OCI홀딩스",
       "sector": "화학",
-      "market_cap": 28901.519136,
+      "market_cap": 28957.529832,
       "weight": 3
     },
     {
@@ -74,21 +74,21 @@
       "code": "101490",
       "name": "에스앤에스텍",
       "sector": "전기전자",
-      "market_cap": 19457.409648,
+      "market_cap": 19436.074769,
       "weight": 2
     },
     {
       "code": "036810",
       "name": "에프에스티",
       "sector": "반도체장비",
-      "market_cap": 9627.858598,
+      "market_cap": 9616.880424,
       "weight": 2
     },
     {
       "code": "006400",
       "name": "삼성SDI",
       "sector": "2차전지",
-      "market_cap": 306225.014,
+      "market_cap": 307030.8693,
       "weight": 2
     }
   ],
@@ -111,14 +111,14 @@
       "code": "277810",
       "name": "레인보우로보틱스",
       "sector": "로봇/자동화",
-      "market_cap": 131337.03866,
+      "market_cap": 131143.04008,
       "weight": 5
     },
     {
       "code": "017800",
       "name": "현대엘리베이터",
       "sector": "기계",
-      "market_cap": 38388.72207,
+      "market_cap": 38349.629685,
       "weight": 5
     }
   ]
