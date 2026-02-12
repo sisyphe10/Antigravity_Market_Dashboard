@@ -94,29 +94,55 @@ def calculate_contributions():
     # 포트폴리오 구성 읽기
     df_portfolio = pd.read_excel(file_name, sheet_name='NEW')
     df_portfolio = df_portfolio[df_portfolio['상품명'] == '트루밸류']
-    
+
     if len(df_portfolio) == 0:
         return [], []
-    
+
     # 최신 날짜의 포트폴리오 구성
     df_portfolio['날짜'] = pd.to_datetime(df_portfolio['날짜'])
     latest_date = df_portfolio['날짜'].max()
     df_latest = df_portfolio[df_portfolio['날짜'] == latest_date]
-    
+
     # 비중이 0인 종목 제외
     df_latest = df_latest[df_latest['비중'] > 0]
-    
+
     contributions = []
-    
+
     # 리포트 날짜 기준
     report_date = get_report_date()
-    
+
+    # 한국 주식 전체 리스트 (종목코드 검색용)
+    krx_stocks = None
+
     for _, row in df_latest.iterrows():
         # 종목코드 컬럼 사용
         code = row.get('종목코드')
+        stock_name = row['종목']
+        weight = row['비중']  # 퍼센트 단위
 
+        # 종목코드가 없으면 검색
         if pd.isna(code):
-            continue
+            logging.warning(f"⚠️ {stock_name}: 종목코드가 없습니다. 검색 중...")
+
+            # KRX 종목 리스트 로드 (캐싱)
+            if krx_stocks is None:
+                try:
+                    krx_stocks = fdr.StockListing('KRX')
+                    logging.info(f"KRX 종목 리스트 로드 완료 ({len(krx_stocks)}개)")
+                except Exception as e:
+                    logging.error(f"KRX 종목 리스트 로드 실패: {e}")
+                    krx_stocks = pd.DataFrame()  # 빈 DataFrame
+
+            # 종목명으로 검색
+            matched = krx_stocks[krx_stocks['Name'] == stock_name]
+
+            if len(matched) > 0:
+                code = matched.iloc[0]['Code']
+                logging.info(f"✅ {stock_name}: 종목코드 찾음 -> {code}")
+                print(f"📌 새 종목코드 추가됨: {stock_name} ({code})")
+            else:
+                logging.warning(f"❌ {stock_name}: 종목코드를 찾을 수 없습니다. 스킵합니다.")
+                continue
 
         code = str(int(float(code))).strip().zfill(6)
         stock_name = row['종목']
