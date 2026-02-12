@@ -90,12 +90,33 @@ def create_portfolio_tables():
         # 포트폴리오별 데이터 생성
         portfolio_data = {}
 
+        # 동일한 포트폴리오 그룹 정의
+        same_portfolios = ['트루밸류', 'Value ESG', '개방형 랩']
+        combined_name = '삼성 트루밸류 / NH Value ESG / DB 개방형'
+
+        processed = set()
+
         for portfolio_name in df_latest['상품명'].unique():
-            display_name = PORTFOLIO_DISPLAY_NAMES.get(portfolio_name, portfolio_name)
+            # 이미 처리된 포트폴리오는 스킵
+            if portfolio_name in processed:
+                continue
+
+            # 동일한 포트폴리오 3개는 하나로 합치기
+            if portfolio_name in same_portfolios:
+                display_name = combined_name
+                # 첫 번째 포트폴리오 데이터만 사용 (어차피 동일)
+                use_portfolio = '트루밸류'
+                # 나머지는 처리됨으로 표시
+                processed.update(same_portfolios)
+            else:
+                display_name = PORTFOLIO_DISPLAY_NAMES.get(portfolio_name, portfolio_name)
+                use_portfolio = portfolio_name
+                processed.add(portfolio_name)
+
             print(f"\n3. {display_name} 포트폴리오 처리 중...")
 
             # 해당 포트폴리오의 종목들
-            portfolio_stocks = df_latest[df_latest['상품명'] == portfolio_name].copy()
+            portfolio_stocks = df_latest[df_latest['상품명'] == use_portfolio].copy()
 
             # 비중이 0인 종목 제외
             portfolio_stocks = portfolio_stocks[portfolio_stocks['비중'] > 0]
