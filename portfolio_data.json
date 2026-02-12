@@ -4,16 +4,16 @@
       "code": "005930",
       "name": "삼성전자",
       "sector": "반도체",
-      "market_cap": 10477759.12194,
+      "market_cap": 10525116.225316,
       "weight": 30,
-      "today_return": 6.0786650774731825,
+      "today_return": 6.197854588796186,
       "cumulative_return": 200.0
     },
     {
       "code": "000660",
       "name": "SK하이닉스",
       "sector": "반도체",
-      "market_cap": 6428260.88295,
+      "market_cap": 6442820.93025,
       "weight": 15,
       "today_return": 3.0232558139534884,
       "cumulative_return": 203.0
@@ -22,7 +22,7 @@
       "code": "352820",
       "name": "하이브",
       "sector": "엔터테인먼트",
-      "market_cap": 162043.661025,
+      "market_cap": 162474.055875,
       "weight": 10,
       "today_return": -1.3054830287206265,
       "cumulative_return": 70.0
@@ -31,36 +31,36 @@
       "code": "277810",
       "name": "레인보우로보틱스",
       "sector": "로봇/자동화",
-      "market_cap": 131531.03724,
+      "market_cap": 132695.02872,
       "weight": 10,
-      "today_return": 1.4903129657228018,
-      "cumulative_return": 5.30265887233643
+      "today_return": 1.1922503725782414,
+      "cumulative_return": 4.993399962285516
     },
     {
       "code": "001040",
       "name": "CJ",
       "sector": "식품/유통",
-      "market_cap": 66085.90047,
+      "market_cap": 66523.55544,
       "weight": 8,
-      "today_return": 2.0179372197309418,
+      "today_return": 1.5695067264573992,
       "cumulative_return": 88.0
     },
     {
       "code": "000150",
       "name": "두산",
       "sector": "중공업",
-      "market_cap": 158699.583,
+      "market_cap": 158537.64465,
       "weight": 5,
-      "today_return": 6.971677559912854,
+      "today_return": 6.862745098039216,
       "cumulative_return": 1.0
     },
     {
       "code": "034020",
       "name": "두산에너빌리티",
       "sector": "에너지",
-      "market_cap": 597002.988072,
+      "market_cap": 596362.426926,
       "weight": 5,
-      "today_return": -2.1989528795811517,
+      "today_return": -2.3036649214659684,
       "cumulative_return": 42.0
     },
     {
@@ -69,23 +69,23 @@
       "sector": "증권",
       "market_cap": 302823.781956,
       "weight": 5,
-      "today_return": 3.898635477582846,
+      "today_return": 3.508771929824561,
       "cumulative_return": 150.0
     },
     {
       "code": "010060",
       "name": "OCI홀딩스",
       "sector": "화학",
-      "market_cap": 28994.870296,
+      "market_cap": 28882.848904,
       "weight": 3,
-      "today_return": 3.295225285810356,
+      "today_return": 3.63147276395427,
       "cumulative_return": 55.0
     },
     {
       "code": "241560",
       "name": "두산밥캣",
       "sector": "건설기계",
-      "market_cap": 63744.283225,
+      "market_cap": 63935.995355,
       "weight": 3,
       "today_return": 2.773497688751926,
       "cumulative_return": 2.7734976887519247
@@ -94,7 +94,7 @@
       "code": "101490",
       "name": "에스앤에스텍",
       "sector": "전기전자",
-      "market_cap": 19052.046947,
+      "market_cap": 19030.712068,
       "weight": 2,
       "today_return": 0.5656108597285068,
       "cumulative_return": 26.543753812783844
@@ -105,14 +105,14 @@
       "sector": "반도체장비",
       "market_cap": 9507.098684,
       "weight": 2,
-      "today_return": 2.2565320665083135,
-      "cumulative_return": 23.276743710370205
+      "today_return": 2.6128266033254155,
+      "cumulative_return": 23.706279402740837
     },
     {
       "code": "006400",
       "name": "삼성SDI",
       "sector": "2차전지",
-      "market_cap": 306627.94165,
+      "market_cap": 308239.65225,
       "weight": 2,
       "today_return": 1.4588859416445623,
       "cumulative_return": 1.0034327964087764
@@ -123,19 +123,19 @@
       "code": "007660",
       "name": "이수페타시스",
       "sector": "기타",
-      "market_cap": 79281.95652,
+      "market_cap": 79355.365739,
       "weight": 6,
-      "today_return": 0.6517690875232774,
+      "today_return": 0.5586592178770949,
       "cumulative_return": 0.0
     },
     {
       "code": "277810",
       "name": "레인보우로보틱스",
       "sector": "로봇/자동화",
-      "market_cap": 131531.03724,
+      "market_cap": 132695.02872,
       "weight": 6,
-      "today_return": 1.4903129657228018,
-      "cumulative_return": 0.6719526945303089
+      "today_return": 1.1922503725782414,
+      "cumulative_return": 0.5384304751648861
     },
     {
       "code": "017800",
@@ -143,14 +143,14 @@
       "sector": "기계",
       "market_cap": 38271.444915,
       "weight": 6,
-      "today_return": -5.0682261208577,
-      "cumulative_return": -2.3692363768908375
+      "today_return": -4.580896686159844,
+      "cumulative_return": -2.135587059251176
     },
     {
       "code": "241560",
       "name": "두산밥캣",
       "sector": "건설기계",
-      "market_cap": 63744.283225,
+      "market_cap": 63935.995355,
       "weight": 5,
       "today_return": 2.773497688751926,
       "cumulative_return": 1.3677811550151908
@@ -159,28 +159,28 @@
       "code": "000660",
       "name": "SK하이닉스",
       "sector": "반도체",
-      "market_cap": 6428260.88295,
+      "market_cap": 6442820.93025,
       "weight": 5,
       "today_return": 3.0232558139534884,
-      "cumulative_return": 203.0
+      "cumulative_return": 0.0
     },
     {
       "code": "034230",
       "name": "파라다이스",
       "sector": "호텔/레저",
-      "market_cap": 19081.7479335,
+      "market_cap": 19035.545154,
       "weight": 5,
-      "today_return": -3.7383177570093453,
-      "cumulative_return": -1.904761904761909
+      "today_return": -3.9719626168224296,
+      "cumulative_return": -2.026221692491059
     },
     {
       "code": "005930",
       "name": "삼성전자",
       "sector": "반도체",
-      "market_cap": 10477759.12194,
+      "market_cap": 10525116.225316,
       "weight": 5,
-      "today_return": 6.0786650774731825,
-      "cumulative_return": 200.0
+      "today_return": 6.197854588796186,
+      "cumulative_return": 0.0
     },
     {
       "code": "003570",
@@ -188,7 +188,7 @@
       "sector": "기타",
       "market_cap": 16243.9424845,
       "weight": 2,
-      "today_return": -1.2133468149646107,
+      "today_return": -1.4155712841253791,
       "cumulative_return": 0.0
     },
     {
@@ -197,7 +197,7 @@
       "sector": "기타",
       "market_cap": 10802.072952,
       "weight": 2,
-      "today_return": 0.10905125408942204,
+      "today_return": 0.21810250817884408,
       "cumulative_return": 0.0
     }
   ]

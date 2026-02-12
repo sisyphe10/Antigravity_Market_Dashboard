@@ -62,7 +62,7 @@ def create_portfolio_tables_html():
                 total_weight += weight
 
                 if today_return is not None:
-                    today_return_str = f"{today_return:+.2f}%"
+                    today_return_str = f"{today_return:+.0f}%"
                     # 색상 적용 (양수: 빨강, 음수: 파랑)
                     today_color_class = "positive" if today_return > 0 else "negative" if today_return < 0 else ""
                     # 가중 수익률 합산
@@ -75,7 +75,7 @@ def create_portfolio_tables_html():
                 # 누적 수익률 포맷
                 cumulative_return = stock.get('cumulative_return')
                 if cumulative_return is not None:
-                    cumulative_return_str = f"{cumulative_return:+.2f}%"
+                    cumulative_return_str = f"{cumulative_return:+.0f}%"
                     # 색상 적용 (양수: 빨강, 음수: 파랑)
                     cumulative_color_class = "positive" if cumulative_return > 0 else "negative" if cumulative_return < 0 else ""
                 else:
@@ -96,7 +96,7 @@ def create_portfolio_tables_html():
                 """
 
             # 합계 행 추가
-            portfolio_return_str = f"{weighted_return_sum:+.2f}%" if valid_returns_count > 0 else "N/A"
+            portfolio_return_str = f"{weighted_return_sum:+.0f}%" if valid_returns_count > 0 else "N/A"
             portfolio_color = "positive" if weighted_return_sum > 0 else "negative" if weighted_return_sum < 0 else ""
 
             html += f"""

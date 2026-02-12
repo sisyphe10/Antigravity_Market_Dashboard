@@ -123,8 +123,8 @@ def calculate_cumulative_return(code, stock_name, portfolio_name='트루밸류')
     try:
         from datetime import timedelta
 
-        # 기존 종목인 경우 사용자 제공 값 반환
-        if code in EXISTING_STOCK_CUMULATIVE_RETURNS:
+        # 기존 종목인 경우 사용자 제공 값 반환 (목표전환형은 신규 펀드이므로 직접 계산)
+        if code in EXISTING_STOCK_CUMULATIVE_RETURNS and portfolio_name != '목표전환형':
             return {
                 'cumulative_return': EXISTING_STOCK_CUMULATIVE_RETURNS[code],
                 'status': 'existing',
