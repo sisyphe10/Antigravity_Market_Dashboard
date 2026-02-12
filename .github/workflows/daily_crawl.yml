@@ -34,6 +34,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Install Korean fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-nanum fonts-nanum-coding
+          fc-cache -fv
+
       - name: Backfill Historical Data (yfinance)
         run: |
           python execution/backfill_yfinance_history.py

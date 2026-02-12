@@ -90,8 +90,8 @@ def create_dashboard():
         charts_html = ""
         
         # Define category order for better organization
-        category_order = ['Memory', 'Cryptocurrency', 'US Indices', 'Market Indices',
-                         'Commodities', 'Exchange Rate', 'Interest Rates', 'Wrap']
+        category_order = ['Wrap', 'Memory', 'Cryptocurrency', 'US Indices', 'Market Indices',
+                         'Commodities', 'Exchange Rate', 'Interest Rates']
         
         for category in category_order:
             if category not in charts_by_category:

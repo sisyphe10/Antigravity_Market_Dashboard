@@ -5,9 +5,30 @@ from matplotlib.ticker import MaxNLocator, FuncFormatter
 import os
 from datetime import datetime, timedelta
 import matplotlib.font_manager as fm
+import platform
 
-# 한글 폰트 설정
-plt.rcParams['font.family'] = 'Malgun Gothic'  # Windows 기본 한글 폰트
+# 한글 폰트 설정 (OS별로 다르게)
+system = platform.system()
+if system == 'Windows':
+    plt.rcParams['font.family'] = 'Malgun Gothic'
+elif system == 'Darwin':  # macOS
+    plt.rcParams['font.family'] = 'AppleGothic'
+else:  # Linux
+    # Ubuntu/Linux에서 사용 가능한 한글 폰트 찾기
+    available_fonts = [f.name for f in fm.fontManager.ttflist]
+    korean_fonts = ['NanumGothic', 'NanumBarunGothic', 'Noto Sans CJK KR', 'Noto Sans KR', 'DejaVu Sans']
+
+    font_found = False
+    for font in korean_fonts:
+        if any(font in f for f in available_fonts):
+            plt.rcParams['font.family'] = font
+            font_found = True
+            break
+
+    if not font_found:
+        # 폰트를 찾지 못한 경우 기본 sans-serif 사용
+        plt.rcParams['font.family'] = 'sans-serif'
+
 plt.rcParams['axes.unicode_minus'] = False  # 마이너스 기호 깨짐 방지
 
 # Constants
