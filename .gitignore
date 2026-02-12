@@ -1,0 +1,48 @@
+# 환경 변수 및 비밀 정보
+.env
+*.json
+!package.json
+!tsconfig.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# 가상 환경
+venv/
+.venv/
+bot_env/
+calendar_env/
+myenv/
+test_env/
+
+# 데이터 파일
+*.xlsx
+*.csv
+*.db
+
+# 로그
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 차트
+charts/
+*.png
+
+# 기타
+*.bat

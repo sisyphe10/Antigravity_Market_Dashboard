@@ -114,11 +114,11 @@ def calculate_contributions():
     for _, row in df_latest.iterrows():
         # 종목코드 컬럼 사용
         code = row.get('종목코드')
-        
+
         if pd.isna(code):
             continue
-            
-        code = str(code).strip().zfill(6)
+
+        code = str(int(float(code))).strip().zfill(6)
         stock_name = row['종목']
         weight = row['비중']  # 퍼센트 단위
         

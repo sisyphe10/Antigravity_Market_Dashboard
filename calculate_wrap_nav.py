@@ -252,15 +252,11 @@ if new_pf_results:
     # 소수점 둘째 자리 반올림
     df_final = df_final.round(2)
 
-    # ★ [수정 포인트]
-    # 문자열로 변환하는 strftime 코드를 제거했습니다.
-    # 대신 DatetimeIndex인지 확실히 하여, 엑셀이 '날짜' 포맷으로 인식하게 합니다.
+    # DatetimeIndex를 'YYYY-MM-DD' 문자열 형식으로 변환
     if not isinstance(df_final.index, pd.DatetimeIndex):
         df_final.index = pd.to_datetime(df_final.index)
 
-    # (선택) 시/분/초가 있다면 제거(00:00:00)하여 깔끔하게 만듦
-    # 실제 엑셀 저장 시에는 데이터 타입이 Date가 됩니다.
-    df_final.index = df_final.index.normalize()
+    df_final.index = df_final.index.strftime('%Y-%m-%d')
 
     # 엑셀 저장
     with pd.ExcelWriter(file_name, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:

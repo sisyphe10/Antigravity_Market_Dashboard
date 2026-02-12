@@ -308,15 +308,98 @@ async def daily_weather_job(context: ContextTypes.DEFAULT_TYPE):
             loop.run_in_executor(None, get_naver_weather, "여의도"),
             timeout=15.0
         )
-        
+
         for chat_id in SUBSCRIBERS:
             try:
                 await context.bot.send_message(chat_id=chat_id, text=weather_info)
             except Exception as e:
                 logging.error(f"Failed to send to {chat_id}: {e}")
-                
+
     except Exception as e:
         logging.error(f"Daily job failed: {e}")
+
+async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
+    """매일 오후 4시 포트폴리오 업데이트 및 리포트 전송"""
+    if not SUBSCRIBERS:
+        logging.info("No subscribers for portfolio report")
+        return
+
+    try:
+        import subprocess
+        import sys
+        import os
+
+        # 작업 디렉토리를 Antigravity 루트로 변경
+        original_dir = os.getcwd()
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        parent_dir = os.path.dirname(script_dir)  # Antigravity 루트
+        os.chdir(parent_dir)
+
+        logging.info("Starting portfolio update process...")
+
+        # 1. 기준가 업데이트
+        logging.info("Step 1: Updating NAV prices...")
+        result_nav = subprocess.run(
+            [sys.executable, "calculate_wrap_nav.py"],
+            capture_output=True,
+            text=True,
+            timeout=120
+        )
+
+        if result_nav.returncode != 0:
+            logging.error(f"NAV update failed: {result_nav.stderr}")
+            os.chdir(original_dir)
+            return
+
+        logging.info("NAV prices updated successfully")
+
+        # 2. 수익률 계산
+        logging.info("Step 2: Calculating returns...")
+        result_returns = subprocess.run(
+            [sys.executable, "calculate_returns.py"],
+            capture_output=True,
+            text=True,
+            timeout=120
+        )
+
+        if result_returns.returncode != 0:
+            logging.error(f"Returns calculation failed: {result_returns.stderr}")
+            os.chdir(original_dir)
+            return
+
+        logging.info("Returns calculated successfully")
+
+        # 3. 포트폴리오 리포트 생성 및 전송
+        logging.info("Step 3: Generating portfolio report...")
+        result_report = subprocess.run(
+            [sys.executable, "execution/daily_portfolio_report.py"],
+            capture_output=True,
+            text=True,
+            timeout=120
+        )
+
+        os.chdir(original_dir)  # 원래 디렉토리로 복귀
+
+        if result_report.returncode == 0:
+            logging.info("Portfolio report sent successfully via Telegram")
+        else:
+            logging.error(f"Report generation failed: {result_report.stderr}")
+            # 실패해도 구독자들에게 알림
+            for chat_id in SUBSCRIBERS:
+                try:
+                    await context.bot.send_message(
+                        chat_id=chat_id,
+                        text="⚠️ 포트폴리오 리포트 생성에 실패했습니다."
+                    )
+                except Exception as e:
+                    logging.error(f"Failed to send error notification to {chat_id}: {e}")
+
+    except subprocess.TimeoutExpired:
+        logging.error("Portfolio update process timed out")
+        os.chdir(original_dir)
+    except Exception as e:
+        logging.error(f"Daily portfolio job failed: {e}")
+        os.chdir(original_dir)
 
 if __name__ == '__main__':
     if not TOKEN:
@@ -336,12 +419,19 @@ if __name__ == '__main__':
     try:
         import pytz
         kst = pytz.timezone('Asia/Seoul')
-        # 매일 아침 6시 설정
-        job_time = datetime.time(hour=6, minute=0, second=0, tzinfo=kst)
+        # 매일 아침 6시 - 날씨 알림
+        weather_time = datetime.time(hour=6, minute=0, second=0, tzinfo=kst)
+        # 매일 오후 4시 - 포트폴리오 업데이트 및 리포트
+        portfolio_time = datetime.time(hour=16, minute=0, second=0, tzinfo=kst)
     except:
-        job_time = datetime.time(hour=6, minute=0, second=0)
-    
-    job_queue.run_daily(daily_weather_job, time=job_time)
+        weather_time = datetime.time(hour=6, minute=0, second=0)
+        portfolio_time = datetime.time(hour=16, minute=0, second=0)
+
+    job_queue.run_daily(daily_weather_job, time=weather_time)
+    job_queue.run_daily(daily_portfolio_job, time=portfolio_time)
 
     print(f"Bot started at {datetime.datetime.now()}")
+    print(f"✅ Daily jobs scheduled:")
+    print(f"  - Weather report: 06:00 KST")
+    print(f"  - Portfolio update & report: 16:00 KST")
     application.run_polling()

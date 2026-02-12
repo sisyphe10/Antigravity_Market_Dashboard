@@ -8,6 +8,16 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 file_name = 'Wrap_NAV.xlsx'
 
+# 포트폴리오별 YTD 기준일 설정
+ytd_base_dates = {
+    '트루밸류': '2025-12-30',
+    'Value ESG': '2025-12-30',
+    '개방형 랩': '2025-12-30',
+    '목표전환형': '2026-02-11',  # 목표전환형은 시작일 기준
+    'KOSPI': '2025-12-30',
+    'KOSDAQ': '2025-12-30',
+}
+
 print("1. 기준가 데이터 읽기 중...")
 
 # 기준가 시트 읽기
@@ -97,10 +107,16 @@ for col in df.columns:
     past_1y = col_series[col_series.index <= target_1y]
     returns_data[f"{col}_1Y"] = calculate_return(current_value, past_1y.iloc[-1]) if len(past_1y) > 0 else np.nan
 
-    # YTD (연초 첫 거래일)
-    year_start = datetime(col_latest.year, 1, 1)
-    ytd_dates = col_series[col_series.index >= year_start]
-    returns_data[f"{col}_YTD"] = calculate_return(current_value, ytd_dates.iloc[0]) if len(ytd_dates) > 0 else np.nan
+    # YTD (포트폴리오별 기준일 사용)
+    if col in ytd_base_dates:
+        ytd_base_date = pd.Timestamp(ytd_base_dates[col])
+        ytd_dates = col_series[col_series.index <= ytd_base_date]
+        returns_data[f"{col}_YTD"] = calculate_return(current_value, ytd_dates.iloc[-1]) if len(ytd_dates) > 0 else np.nan
+    else:
+        # 기본값: 2025-12-30
+        ytd_base_date = pd.Timestamp('2025-12-30')
+        ytd_dates = col_series[col_series.index <= ytd_base_date]
+        returns_data[f"{col}_YTD"] = calculate_return(current_value, ytd_dates.iloc[-1]) if len(ytd_dates) > 0 else np.nan
 
 print("   - 완료")
 
