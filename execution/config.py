@@ -13,7 +13,8 @@ CATEGORY_MAP = {
     'INDEX_US': 'US Indices',
     'INTEREST_RATE': 'Interest Rates',
     'INDEX': 'US Indices',
-    'OCEAN_FREIGHT': 'Commodities'
+    'OCEAN_FREIGHT': 'Commodities',
+    'WRAP': 'Wrap'
 }
 
 # Target DRAM items to scrape from DRAMeXchange

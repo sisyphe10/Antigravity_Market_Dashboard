@@ -15,16 +15,22 @@ def get_item_category(item_name):
     # Special handling for DDR items (they should be in Memory)
     if 'DDR4' in item_name or 'DDR5' in item_name:
         return 'Memory'
-    
+
     # Special handling for S&P 500 related items (should be in US Indices)
     # Handle all variations: "S&P 500", "S_P_500", "S P 500"
     if 'S&P 500' in item_name or 'S_P_500' in item_name or 'S P 500' in item_name:
         return 'US Indices'
-    
+
     # Special handling for Uranium ETF (should be in Commodities)
     if 'Uranium' in item_name or 'URA' in item_name:
         return 'Commodities'
-    
+
+    # Special handling for Wrap portfolios
+    wrap_keywords = ['트루밸류', '삼성 트루밸류', 'Value ESG', 'NH Value ESG',
+                     '개방형', 'DB 개방형', '목표전환형', 'DB 목표전환형']
+    if any(keyword in item_name for keyword in wrap_keywords):
+        return 'Wrap'
+
     try:
         with open(CSV_FILE, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f)
@@ -84,8 +90,8 @@ def create_dashboard():
         charts_html = ""
         
         # Define category order for better organization
-        category_order = ['Memory', 'Cryptocurrency', 'US Indices', 'Market Indices', 
-                         'Commodities', 'Exchange Rate', 'Interest Rates']
+        category_order = ['Memory', 'Cryptocurrency', 'US Indices', 'Market Indices',
+                         'Commodities', 'Exchange Rate', 'Interest Rates', 'Wrap']
         
         for category in category_order:
             if category not in charts_by_category:
@@ -163,7 +169,16 @@ def create_dashboard():
                     'US 10 Year Treasury Yield',
                     'US 30 Year Treasury Yield'
                 ]
-            
+
+            # Wrap order
+            elif category == 'Wrap':
+                custom_order = [
+                    '삼성 트루밸류',
+                    'NH Value ESG',
+                    'DB 개방형',
+                    'DB 목표전환형'
+                ]
+
             else:
                 custom_order = None
             
