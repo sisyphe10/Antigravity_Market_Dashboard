@@ -40,11 +40,16 @@ def create_portfolio_tables_html():
                                 <th>섹터</th>
                                 <th>시가총액</th>
                                 <th>Weight</th>
-                                <th>오늘수익률</th>
+                                <th>오늘 수익률</th>
                             </tr>
                         </thead>
                         <tbody>
             """
+
+            # 합계 계산용 변수
+            total_weight = 0
+            weighted_return_sum = 0
+            valid_returns_count = 0
 
             # 각 종목 행 추가
             for idx, stock in enumerate(stocks, 1):
@@ -52,10 +57,16 @@ def create_portfolio_tables_html():
 
                 # 오늘 수익률 포맷
                 today_return = stock.get('today_return')
+                weight = stock['weight']
+                total_weight += weight
+
                 if today_return is not None:
                     return_str = f"{today_return:+.2f}%"
                     # 색상 적용 (양수: 빨강, 음수: 파랑)
                     color_class = "positive" if today_return > 0 else "negative" if today_return < 0 else ""
+                    # 가중 수익률 합산
+                    weighted_return_sum += today_return * weight / 100
+                    valid_returns_count += 1
                 else:
                     return_str = "N/A"
                     color_class = ""
@@ -66,13 +77,22 @@ def create_portfolio_tables_html():
                                 <td>{stock['code']}</td>
                                 <td>{stock['name']}</td>
                                 <td>{stock['sector']}</td>
-                                <td class="number">{market_cap_str}</td>
-                                <td class="number">{stock['weight']}%</td>
-                                <td class="number {color_class}">{return_str}</td>
+                                <td>{market_cap_str}</td>
+                                <td>{stock['weight']}%</td>
+                                <td class="{color_class}">{return_str}</td>
                             </tr>
                 """
 
-            html += """
+            # 합계 행 추가
+            portfolio_return_str = f"{weighted_return_sum:+.2f}%" if valid_returns_count > 0 else "N/A"
+            portfolio_color = "positive" if weighted_return_sum > 0 else "negative" if weighted_return_sum < 0 else ""
+
+            html += f"""
+                            <tr class="total-row">
+                                <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
+                                <td style="font-weight: 600;">{total_weight:.0f}%</td>
+                                <td class="{portfolio_color}" style="font-weight: 600;">{portfolio_return_str}</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -451,6 +471,11 @@ def create_dashboard():
             padding: 10px;
             border-bottom: 1px solid #444;
             color: #ccc;
+            text-align: center;
+        }}
+
+        .portfolio-table th {{
+            text-align: center;
         }}
 
         .portfolio-table tbody tr:hover {{
@@ -480,6 +505,16 @@ def create_dashboard():
         .portfolio-table .negative {{
             color: #5599ff;
             font-weight: 600;
+        }}
+
+        .portfolio-table .total-row {{
+            background-color: #3a3a3a;
+            border-top: 2px solid var(--accent-color);
+        }}
+
+        .portfolio-table .total-row td {{
+            font-weight: 600;
+            padding: 12px 10px;
         }}
     </style>
 </head>
