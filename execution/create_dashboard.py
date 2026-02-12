@@ -40,6 +40,7 @@ def create_portfolio_tables_html():
                                 <th>섹터</th>
                                 <th>시가총액</th>
                                 <th>Weight</th>
+                                <th>오늘수익률</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -49,6 +50,16 @@ def create_portfolio_tables_html():
             for idx, stock in enumerate(stocks, 1):
                 market_cap_str = f"{stock['market_cap']:,.0f}억" if stock['market_cap'] > 0 else "N/A"
 
+                # 오늘 수익률 포맷
+                today_return = stock.get('today_return')
+                if today_return is not None:
+                    return_str = f"{today_return:+.2f}%"
+                    # 색상 적용 (양수: 빨강, 음수: 파랑)
+                    color_class = "positive" if today_return > 0 else "negative" if today_return < 0 else ""
+                else:
+                    return_str = "N/A"
+                    color_class = ""
+
                 html += f"""
                             <tr>
                                 <td>{idx}</td>
@@ -57,6 +68,7 @@ def create_portfolio_tables_html():
                                 <td>{stock['sector']}</td>
                                 <td class="number">{market_cap_str}</td>
                                 <td class="number">{stock['weight']}%</td>
+                                <td class="number {color_class}">{return_str}</td>
                             </tr>
                 """
 
@@ -458,6 +470,16 @@ def create_dashboard():
         .portfolio-section-wrapper {{
             max-width: 1600px;
             margin: 0 auto;
+        }}
+
+        .portfolio-table .positive {{
+            color: #ff5555;
+            font-weight: 600;
+        }}
+
+        .portfolio-table .negative {{
+            color: #5599ff;
+            font-weight: 600;
         }}
     </style>
 </head>

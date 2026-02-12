@@ -161,12 +161,22 @@
             max-width: 1600px;
             margin: 0 auto;
         }
+
+        .portfolio-table .positive {
+            color: #ff5555;
+            font-weight: 600;
+        }
+
+        .portfolio-table .negative {
+            color: #5599ff;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>📊 Market Data Dashboard</h1>
-        <div class="last-updated">Last Updated: 2026-02-12 13:40:48 KST</div>
+        <div class="last-updated">Last Updated: 2026-02-12 14:06:16 KST</div>
     </header>
 
     
@@ -225,6 +235,7 @@
                                 <th>섹터</th>
                                 <th>시가총액</th>
                                 <th>Weight</th>
+                                <th>오늘수익률</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -234,8 +245,9 @@
                                 <td>005930</td>
                                 <td>삼성전자</td>
                                 <td>반도체</td>
-                                <td class="number">10,495,518억</td>
+                                <td class="number">10,513,277억</td>
                                 <td class="number">30%</td>
+                                <td class="number positive">+5.72%</td>
                             </tr>
                 
                             <tr>
@@ -245,6 +257,7 @@
                                 <td>반도체</td>
                                 <td class="number">6,450,101억</td>
                                 <td class="number">15%</td>
+                                <td class="number positive">+2.67%</td>
                             </tr>
                 
                             <tr>
@@ -252,8 +265,9 @@
                                 <td>352820</td>
                                 <td>하이브</td>
                                 <td>엔터테인먼트</td>
-                                <td class="number">161,398억</td>
+                                <td class="number">162,259억</td>
                                 <td class="number">10%</td>
+                                <td class="number negative">-1.57%</td>
                             </tr>
                 
                             <tr>
@@ -261,8 +275,9 @@
                                 <td>277810</td>
                                 <td>레인보우로보틱스</td>
                                 <td>로봇/자동화</td>
-                                <td class="number">131,143억</td>
+                                <td class="number">131,531억</td>
                                 <td class="number">10%</td>
+                                <td class="number positive">+0.60%</td>
                             </tr>
                 
                             <tr>
@@ -270,8 +285,9 @@
                                 <td>001040</td>
                                 <td>CJ</td>
                                 <td>식품/유통</td>
-                                <td class="number">66,524억</td>
+                                <td class="number">66,451억</td>
                                 <td class="number">8%</td>
+                                <td class="number positive">+2.02%</td>
                             </tr>
                 
                             <tr>
@@ -279,8 +295,9 @@
                                 <td>000150</td>
                                 <td>두산</td>
                                 <td>중공업</td>
-                                <td class="number">159,671억</td>
+                                <td class="number">159,833억</td>
                                 <td class="number">5%</td>
+                                <td class="number positive">+6.86%</td>
                             </tr>
                 
                             <tr>
@@ -288,8 +305,9 @@
                                 <td>034020</td>
                                 <td>두산에너빌리티</td>
                                 <td>에너지</td>
-                                <td class="number">599,565억</td>
+                                <td class="number">597,003억</td>
                                 <td class="number">5%</td>
+                                <td class="number negative">-2.51%</td>
                             </tr>
                 
                             <tr>
@@ -297,8 +315,9 @@
                                 <td>006800</td>
                                 <td>미래에셋증권</td>
                                 <td>증권</td>
-                                <td class="number">299,988억</td>
+                                <td class="number">302,257억</td>
                                 <td class="number">5%</td>
+                                <td class="number positive">+3.90%</td>
                             </tr>
                 
                             <tr>
@@ -308,6 +327,7 @@
                                 <td>화학</td>
                                 <td class="number">28,958억</td>
                                 <td class="number">3%</td>
+                                <td class="number positive">+4.37%</td>
                             </tr>
                 
                             <tr>
@@ -317,6 +337,7 @@
                                 <td>건설기계</td>
                                 <td class="number">63,840억</td>
                                 <td class="number">3%</td>
+                                <td class="number positive">+2.47%</td>
                             </tr>
                 
                             <tr>
@@ -324,8 +345,9 @@
                                 <td>101490</td>
                                 <td>에스앤에스텍</td>
                                 <td>전기전자</td>
-                                <td class="number">19,436억</td>
+                                <td class="number">19,308억</td>
                                 <td class="number">2%</td>
+                                <td class="number positive">+1.58%</td>
                             </tr>
                 
                             <tr>
@@ -333,8 +355,9 @@
                                 <td>036810</td>
                                 <td>에프에스티</td>
                                 <td>반도체장비</td>
-                                <td class="number">9,617억</td>
+                                <td class="number">9,639억</td>
                                 <td class="number">2%</td>
+                                <td class="number positive">+2.97%</td>
                             </tr>
                 
                             <tr>
@@ -342,8 +365,9 @@
                                 <td>006400</td>
                                 <td>삼성SDI</td>
                                 <td>2차전지</td>
-                                <td class="number">307,031억</td>
+                                <td class="number">306,225억</td>
                                 <td class="number">2%</td>
+                                <td class="number positive">+1.06%</td>
                             </tr>
                 
                         </tbody>
@@ -363,44 +387,99 @@
                                 <th>섹터</th>
                                 <th>시가총액</th>
                                 <th>Weight</th>
+                                <th>오늘수익률</th>
                             </tr>
                         </thead>
                         <tbody>
             
                             <tr>
                                 <td>1</td>
+                                <td>007660</td>
+                                <td>이수페타시스</td>
+                                <td>기타</td>
+                                <td class="number">79,612억</td>
+                                <td class="number">6%</td>
+                                <td class="number positive">+0.65%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>2</td>
+                                <td>277810</td>
+                                <td>레인보우로보틱스</td>
+                                <td>로봇/자동화</td>
+                                <td class="number">131,531억</td>
+                                <td class="number">6%</td>
+                                <td class="number positive">+0.60%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>3</td>
+                                <td>017800</td>
+                                <td>현대엘리베이터</td>
+                                <td>기계</td>
+                                <td class="number">38,193억</td>
+                                <td class="number">6%</td>
+                                <td class="number negative">-4.58%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>4</td>
                                 <td>241560</td>
                                 <td>두산밥캣</td>
                                 <td>건설기계</td>
                                 <td class="number">63,840억</td>
                                 <td class="number">5%</td>
+                                <td class="number positive">+2.47%</td>
                             </tr>
                 
                             <tr>
-                                <td>2</td>
+                                <td>5</td>
+                                <td>000660</td>
+                                <td>SK하이닉스</td>
+                                <td>반도체</td>
+                                <td class="number">6,450,101억</td>
+                                <td class="number">5%</td>
+                                <td class="number positive">+2.67%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>6</td>
                                 <td>034230</td>
                                 <td>파라다이스</td>
                                 <td>호텔/레저</td>
-                                <td class="number">19,174억</td>
+                                <td class="number">19,128억</td>
                                 <td class="number">5%</td>
+                                <td class="number negative">-3.50%</td>
                             </tr>
                 
                             <tr>
-                                <td>3</td>
-                                <td>277810</td>
-                                <td>레인보우로보틱스</td>
-                                <td>로봇/자동화</td>
-                                <td class="number">131,143억</td>
+                                <td>7</td>
+                                <td>005930</td>
+                                <td>삼성전자</td>
+                                <td>반도체</td>
+                                <td class="number">10,513,277억</td>
                                 <td class="number">5%</td>
+                                <td class="number positive">+5.72%</td>
                             </tr>
                 
                             <tr>
-                                <td>4</td>
-                                <td>017800</td>
-                                <td>현대엘리베이터</td>
-                                <td>기계</td>
-                                <td class="number">38,350억</td>
-                                <td class="number">5%</td>
+                                <td>8</td>
+                                <td>003570</td>
+                                <td>SNT다이내믹스</td>
+                                <td>기타</td>
+                                <td class="number">16,377억</td>
+                                <td class="number">2%</td>
+                                <td class="number negative">-1.21%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>9</td>
+                                <td>009240</td>
+                                <td>한샘</td>
+                                <td>기타</td>
+                                <td class="number">10,814억</td>
+                                <td class="number">2%</td>
+                                <td class="number positive">+0.11%</td>
                             </tr>
                 
                         </tbody>

@@ -69,6 +69,33 @@ def get_stock_info(stock_code):
         print(f"  Warning: Could not fetch info for {stock_code}: {e}")
         return {'sector': 'N/A', 'market_cap': 0}
 
+def get_today_return(code):
+    """종목의 오늘 수익률 계산"""
+    try:
+        from datetime import timedelta
+
+        # 최근 5일 데이터 가져오기
+        end_date = pd.Timestamp.now()
+        start_date = end_date - timedelta(days=5)
+
+        df = fdr.DataReader(code, start=start_date)
+
+        if len(df) < 2:
+            return None
+
+        # 최신 종가와 전일 종가
+        latest_price = df.iloc[-1]['Close']
+        prev_price = df.iloc[-2]['Close']
+
+        # 수익률 계산
+        return_pct = ((latest_price - prev_price) / prev_price) * 100
+
+        return return_pct
+
+    except Exception as e:
+        print(f"  Warning: Could not fetch today's return for {code}: {e}")
+        return None
+
 def create_portfolio_tables():
     """포트폴리오 테이블 데이터 생성"""
     print("1. Wrap NAV 파일 읽기...")
@@ -77,11 +104,7 @@ def create_portfolio_tables():
         # NEW 시트에서 포트폴리오 데이터 읽기
         df = pd.read_excel(WRAP_NAV_FILE, sheet_name='NEW')
 
-        # 최신 날짜 데이터만 가져오기
-        latest_date = df['날짜'].max()
-        df_latest = df[df['날짜'] == latest_date].copy()
-
-        print(f"   최신 날짜: {latest_date.strftime('%Y-%m-%d')}")
+        print(f"   전체 날짜 범위: {df['날짜'].min()} ~ {df['날짜'].max()}")
 
         # KRX 종목 리스트 미리 로드
         print("2. KRX 종목 리스트 로드 중...")
@@ -96,7 +119,10 @@ def create_portfolio_tables():
 
         processed = set()
 
-        for portfolio_name in df_latest['상품명'].unique():
+        # 모든 포트폴리오 이름 가져오기
+        all_portfolios = df['상품명'].unique()
+
+        for portfolio_name in all_portfolios:
             # 이미 처리된 포트폴리오는 스킵
             if portfolio_name in processed:
                 continue
@@ -115,8 +141,15 @@ def create_portfolio_tables():
 
             print(f"\n3. {display_name} 포트폴리오 처리 중...")
 
-            # 해당 포트폴리오의 종목들
-            portfolio_stocks = df_latest[df_latest['상품명'] == use_portfolio].copy()
+            # 해당 포트폴리오의 최신 날짜 데이터
+            portfolio_df = df[df['상품명'] == use_portfolio].copy()
+            if portfolio_df.empty:
+                continue
+
+            latest_portfolio_date = portfolio_df['날짜'].max()
+            portfolio_stocks = portfolio_df[portfolio_df['날짜'] == latest_portfolio_date].copy()
+
+            print(f"   최신 날짜: {latest_portfolio_date}")
 
             # 비중이 0인 종목 제외
             portfolio_stocks = portfolio_stocks[portfolio_stocks['비중'] > 0]
@@ -143,15 +176,20 @@ def create_portfolio_tables():
                     sector = '기타'
                     market_cap_billions = 0
 
+                # 오늘 수익률 계산
+                today_return = get_today_return(code)
+
                 stocks_info.append({
                     'code': code,
                     'name': stock_name,
                     'sector': sector if sector else 'N/A',
                     'market_cap': market_cap_billions,
-                    'weight': weight
+                    'weight': weight,
+                    'today_return': today_return
                 })
 
-                print(f"   - {stock_name} ({code}): {sector}, {market_cap_billions:,.0f}억원, {weight}%")
+                return_str = f"{today_return:+.2f}%" if today_return is not None else "N/A"
+                print(f"   - {stock_name} ({code}): {sector}, {market_cap_billions:,.0f}억원, {weight}%, 오늘: {return_str}")
 
             portfolio_data[display_name] = stocks_info
 
