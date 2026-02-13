@@ -162,7 +162,7 @@ def get_naver_weather(location="여의도"):
         result_msg = (
             f"a. 날짜 / {date_str}\n"
             f"b. 날씨 / {weather_status} {weather_emoji}\n"
-            f"c. 최저기온, 최고기온 / {min_temp}도, {max_temp}도\n"
+            f"<b>c. 최저기온, 최고기온 / {min_temp}도, {max_temp}도</b>\n"
             f"d. 현재기온 / {current_temp}도\n"
             f"e. 미세먼지, 초미세먼지 / {dust}, {ultra_dust}\n"
             f"f. 일출, 일몰 / {sun_info}"
@@ -203,8 +203,8 @@ async def weather(update: Update, context: ContextTypes.DEFAULT_TYPE):
             loop.run_in_executor(None, get_naver_weather, "여의도"),
             timeout=15.0
         )
-        await context.bot.edit_message_text(chat_id=chat_id, message_id=status_msg.message_id, text=weather_info)
-        
+        await context.bot.edit_message_text(chat_id=chat_id, message_id=status_msg.message_id, text=weather_info, parse_mode='HTML')
+
     except asyncio.TimeoutError:
         await context.bot.edit_message_text(
             chat_id=chat_id, 
@@ -508,7 +508,7 @@ async def daily_weather_job(context: ContextTypes.DEFAULT_TYPE):
 
         for chat_id in SUBSCRIBERS:
             try:
-                await context.bot.send_message(chat_id=chat_id, text=weather_info)
+                await context.bot.send_message(chat_id=chat_id, text=weather_info, parse_mode='HTML')
             except Exception as e:
                 logging.error(f"Failed to send to {chat_id}: {e}")
 

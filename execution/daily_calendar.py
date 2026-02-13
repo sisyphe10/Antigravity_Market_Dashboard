@@ -91,6 +91,10 @@ def get_today_events():
             events = events_result.get('items', [])
             logging.info(f"  → {len(events)}개 일정 발견")
             
+            # 각 이벤트에 캘린더 이름 태깅
+            for event in events:
+                event['_calendar_name'] = cal_name
+
             # 투자 활동 캘린더는 별도로 분류
             if '투자 활동' in cal_name or '투자활동' in cal_name or 'investment' in cal_name.lower():
                 events_by_calendar['investment'].extend(events)
@@ -132,29 +136,33 @@ def format_calendar_message(events_by_calendar):
         for event in main_events:
             start = event['start'].get('dateTime', event['start'].get('date'))
             summary = event.get('summary', '(제목 없음)')
-            
+            cal_name = event.get('_calendar_name', '')
+            is_bold = '운용 본부' not in cal_name
+
             # 시간 파싱
             if 'T' in start:  # 시간이 있는 일정
                 dt = datetime.fromisoformat(start.replace('Z', '+00:00'))
                 time_str = dt.strftime('%H:%M')
-                msg += f"• {time_str} - {summary}\n"
+                line = f"• {time_str} - {summary}"
             else:  # 종일 일정
-                msg += f"• 종일 - {summary}\n"
-    
-    # 투자 활동 캘린더 일정 (별도 섹션)
+                line = f"• 종일 - {summary}"
+
+            msg += f"<b>{line}</b>\n" if is_bold else f"{line}\n"
+
+    # 투자 활동 캘린더 일정 (별도 섹션, 항상 볼드)
     if investment_events:
         msg += f"\n💼 투자 활동\n"
         for event in investment_events:
             start = event['start'].get('dateTime', event['start'].get('date'))
             summary = event.get('summary', '(제목 없음)')
-            
+
             # 시간 파싱
             if 'T' in start:  # 시간이 있는 일정
                 dt = datetime.fromisoformat(start.replace('Z', '+00:00'))
                 time_str = dt.strftime('%H:%M')
-                msg += f"• {time_str} - {summary}\n"
+                msg += f"<b>• {time_str} - {summary}</b>\n"
             else:  # 종일 일정
-                msg += f"• 종일 - {summary}\n"
+                msg += f"<b>• 종일 - {summary}</b>\n"
     
     # 총 일정 개수
     total_count = len(main_events) + len(investment_events)
@@ -176,7 +184,7 @@ async def send_calendar_to_telegram(message):
         sys.exit(1)
     
     bot = Bot(token=token)
-    await bot.send_message(chat_id=chat_id, text=message)
+    await bot.send_message(chat_id=chat_id, text=message, parse_mode='HTML')
     logging.info("✅ 텔레그램 전송 완료!")
 
 async def main():
