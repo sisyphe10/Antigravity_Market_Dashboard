@@ -429,30 +429,35 @@ def format_update_summary(portfolio_data):
         lines.append(f"[{portfolio_name}]")
         lines.append(f"오늘: {weighted_return:+.1f}%")
 
-        # 상승 종목 (today_return > 0, 상위 3개)
+        # 상승 종목 (today_return > 0, 상위 5개)
         gainers = sorted(
             [s for s in stocks if s['today_return'] and s['today_return'] > 0],
             key=lambda x: x['today_return'],
             reverse=True
-        )[:3]
+        )[:5]
 
-        # 하락 종목 (today_return < 0, 하위 3개)
+        # 하락 종목 (today_return < 0, 하위 5개)
         losers = sorted(
             [s for s in stocks if s['today_return'] and s['today_return'] < 0],
             key=lambda x: x['today_return']
-        )[:3]
+        )[:5]
 
         if gainers:
-            gainer_str = ", ".join(f"{s['name']} {s['today_return']:+.1f}%" for s in gainers)
-            lines.append(f"▲ {gainer_str}")
+            lines.append("▲")
+            for s in gainers:
+                contrib = s.get('contribution')
+                contrib_str = f" {contrib:+.2f}" if contrib is not None else ""
+                lines.append(f"  {s['name']} {s['today_return']:+.1f}%{contrib_str}")
 
         if losers:
-            loser_str = ", ".join(f"{s['name']} {s['today_return']:+.1f}%" for s in losers)
-            lines.append(f"▼ {loser_str}")
+            lines.append("▼")
+            for s in losers:
+                contrib = s.get('contribution')
+                contrib_str = f" {contrib:+.2f}" if contrib is not None else ""
+                lines.append(f"  {s['name']} {s['today_return']:+.1f}%{contrib_str}")
 
         lines.append("")
 
-    lines.append("✅ Dashboard 반영 완료")
     return "\n".join(lines)
 
 
