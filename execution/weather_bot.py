@@ -309,25 +309,65 @@ async def portfolio_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text=f"❌ 오류가 발생했습니다: {str(e)}"
         )
 
+def fetch_price(code):
+    """종목 실시간 가격 조회 (스레드에서 호출)"""
+    import FinanceDataReader as fdr
+    from datetime import timedelta
+    import pandas as pd
+    try:
+        df = fdr.DataReader(code, start=pd.Timestamp.now() - timedelta(days=5))
+        if len(df) < 2:
+            return code, None
+        latest = df.iloc[-1]['Close']
+        prev = df.iloc[-2]['Close']
+        return code, ((latest - prev) / prev) * 100
+    except Exception:
+        return code, None
+
+
 def run_portfolio_update():
     """포트폴리오 테이블 업데이트 실행 (동기 - run_in_executor에서 호출)"""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
     dashboard_dir = DASHBOARD_DIR
 
-    # 1. create_portfolio_tables.py 실행
-    logging.info("Update Step 1: Running create_portfolio_tables.py...")
-    result = subprocess.run(
-        [sys.executable, "execution/create_portfolio_tables.py"],
-        capture_output=True,
-        text=True,
-        encoding='utf-8',
-        timeout=240,
-        cwd=dashboard_dir
-    )
-    if result.returncode != 0:
-        raise RuntimeError(f"create_portfolio_tables.py 실패:\n{result.stderr}")
+    # 1. 기존 portfolio_data.json 읽기 (종목 코드/비중 이미 확정됨)
+    logging.info("Update Step 1: Reading portfolio_data.json...")
+    portfolio_file = os.path.join(dashboard_dir, 'portfolio_data.json')
+    with open(portfolio_file, 'r', encoding='utf-8') as f:
+        portfolio_data = json.load(f)
 
-    # 2. create_dashboard.py 실행
-    logging.info("Update Step 2: Running create_dashboard.py...")
+    # 전체 종목 코드 수집 (중복 제거)
+    all_codes = set()
+    for stocks in portfolio_data.values():
+        for s in stocks:
+            all_codes.add(s['code'])
+
+    # 2. 실시간 주가 병렬 조회
+    logging.info(f"Update Step 2: Fetching {len(all_codes)} stock prices...")
+    price_map = {}
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = {executor.submit(fetch_price, code): code for code in all_codes}
+        for future in as_completed(futures):
+            code, today_return = future.result()
+            price_map[code] = today_return
+
+    # 3. today_return, contribution 업데이트
+    logging.info("Update Step 3: Updating returns...")
+    for portfolio_name, stocks in portfolio_data.items():
+        for s in stocks:
+            today_return = price_map.get(s['code'])
+            s['today_return'] = today_return
+            if today_return is not None:
+                s['contribution'] = (s['weight'] / 100) * (today_return / 100) * 1000
+            else:
+                s['contribution'] = None
+
+    # 4. portfolio_data.json 저장
+    with open(portfolio_file, 'w', encoding='utf-8') as f:
+        json.dump(portfolio_data, f, ensure_ascii=False, indent=2)
+
+    # 5. create_dashboard.py 실행
+    logging.info("Update Step 4: Running create_dashboard.py...")
     result = subprocess.run(
         [sys.executable, "execution/create_dashboard.py"],
         capture_output=True,
@@ -339,8 +379,8 @@ def run_portfolio_update():
     if result.returncode != 0:
         raise RuntimeError(f"create_dashboard.py 실패:\n{result.stderr}")
 
-    # 3. Git commit & push
-    logging.info("Update Step 3: Git commit & push...")
+    # 6. Git commit & push
+    logging.info("Update Step 5: Git commit & push...")
     subprocess.run(
         ["git", "add", "portfolio_data.json", "index.html"],
         cwd=dashboard_dir,
@@ -369,11 +409,6 @@ def run_portfolio_update():
             logging.warning(f"Git push failed: {push_result.stderr}")
     else:
         logging.info(f"No changes to commit: {commit_result.stdout}")
-
-    # 4. portfolio_data.json 읽기
-    portfolio_file = os.path.join(dashboard_dir, 'portfolio_data.json')
-    with open(portfolio_file, 'r', encoding='utf-8') as f:
-        portfolio_data = json.load(f)
 
     return portfolio_data
 
