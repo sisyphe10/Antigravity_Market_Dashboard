@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Architecture - Antigravity Market Dashboard</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text-color: #e0e0e0;
+            --accent-color: #4a90e2;
+            --green: #4caf50;
+            --orange: #ff9800;
+            --red: #f44336;
+            --purple: #ab47bc;
+            --cyan: #00bcd4;
+            --border: #444;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        h1 { font-size: 2.2rem; }
+        .subtitle { color: #888; margin-top: 8px; font-size: 0.95rem; }
+
+        h2 {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+            margin: 40px 0 20px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        nav a {
+            color: var(--accent-color);
+            text-decoration: none;
+            padding: 8px 16px;
+            border: 1px solid var(--accent-color);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        nav a:hover {
+            background: var(--accent-color);
+            color: #fff;
+        }
+
+        /* Flow Section */
+        .flow-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .flow-group {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .flow-group.trigger-manual { border-left-color: var(--green); }
+        .flow-group.trigger-schedule { border-left-color: var(--orange); }
+        .flow-group.trigger-github { border-left-color: var(--purple); }
+
+        .flow-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .flow-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #fff;
+        }
+        .badge-manual { background: var(--green); }
+        .badge-schedule { background: var(--orange); }
+        .badge-github { background: var(--purple); }
+
+        .flow-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .flow-desc {
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+        }
+
+        /* Steps */
+        .steps {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0;
+            align-items: center;
+        }
+
+        .step {
+            background: #383838;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            min-width: 160px;
+            text-align: center;
+            position: relative;
+        }
+
+        .step-number {
+            font-size: 0.7rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .step-file {
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: var(--cyan);
+            margin: 4px 0;
+            word-break: break-all;
+        }
+
+        .step-desc {
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+
+        .arrow {
+            font-size: 1.4rem;
+            color: #666;
+            padding: 0 8px;
+            flex-shrink: 0;
+        }
+
+        .step-output {
+            background: #2a3a2a;
+            border: 1px solid var(--green);
+            border-radius: 8px;
+            padding: 12px 16px;
+            min-width: 140px;
+            text-align: center;
+        }
+
+        .step-output .step-file { color: var(--green); }
+
+        /* File Table */
+        .file-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        .file-table th {
+            background: #383838;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 0.85rem;
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--border);
+        }
+
+        .file-table td {
+            padding: 10px 16px;
+            border-bottom: 1px solid #333;
+            font-size: 0.85rem;
+        }
+
+        .file-table tr:hover { background: #333; }
+
+        .file-name {
+            font-family: 'Consolas', 'Courier New', monospace;
+            color: var(--cyan);
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: #fff;
+            margin: 1px 2px;
+        }
+        .tag-vm { background: #2e7d32; }
+        .tag-github { background: #7b1fa2; }
+        .tag-command { background: #1565c0; }
+        .tag-schedule { background: #e65100; }
+
+        /* Data Files */
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .data-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .data-card-title {
+            font-family: 'Consolas', 'Courier New', monospace;
+            color: var(--cyan);
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+        }
+
+        .data-card-desc {
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+
+        /* Command Reference */
+        .cmd-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .cmd-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .cmd-name {
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 1.1rem;
+            color: var(--green);
+            margin-bottom: 6px;
+        }
+
+        .cmd-desc { font-size: 0.85rem; color: #aaa; }
+
+        .cmd-flow {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #444;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .cmd-flow code {
+            color: var(--cyan);
+            background: #383838;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 0.8rem;
+        }
+
+        /* Infra Section */
+        .infra-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .infra-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .infra-icon { font-size: 2rem; margin-bottom: 8px; }
+        .infra-title { font-weight: bold; margin-bottom: 6px; }
+        .infra-desc { font-size: 0.85rem; color: #aaa; }
+
+        /* Troubleshooting */
+        .debug-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        .debug-table th {
+            background: #383838;
+            padding: 10px 14px;
+            text-align: left;
+            font-size: 0.85rem;
+            color: var(--orange);
+            border-bottom: 2px solid var(--border);
+        }
+
+        .debug-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #333;
+            font-size: 0.85rem;
+            vertical-align: top;
+        }
+
+        .debug-table code {
+            color: var(--cyan);
+            background: #383838;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 0.8rem;
+        }
+
+        /* Version Log */
+        .version-log {
+            margin-top: 12px;
+        }
+
+        .version-entry {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 3px solid var(--accent-color);
+        }
+
+        .version-date {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .version-title {
+            font-weight: bold;
+            margin: 4px 0;
+        }
+
+        .version-desc {
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 20px;
+            color: #555;
+            font-size: 0.85rem;
+            border-top: 1px solid #333;
+        }
+
+        footer a { color: var(--accent-color); text-decoration: none; }
+
+        @media (max-width: 768px) {
+            .steps { flex-direction: column; }
+            .arrow { transform: rotate(90deg); padding: 4px 0; }
+            h1 { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Antigravity Market Dashboard</h1>
+    <div class="subtitle">System Architecture & Documentation</div>
+    <div class="subtitle">Last updated: 2026-02-13</div>
+</header>
+
+<nav>
+    <a href="#overview">Overview</a>
+    <a href="#commands">Commands</a>
+    <a href="#flows">Flows</a>
+    <a href="#files">Files</a>
+    <a href="#data">Data</a>
+    <a href="#infra">Infra</a>
+    <a href="#debug">Troubleshooting</a>
+    <a href="#changelog">Changelog</a>
+    <a href="index.html">Dashboard</a>
+</nav>
+
+<!-- ===== Overview ===== -->
+<h2 id="overview">System Overview</h2>
+<div class="infra-grid">
+    <div class="infra-card">
+        <div class="infra-icon">🤖</div>
+        <div class="infra-title">Telegram Bot</div>
+        <div class="infra-desc">weather_bot.py<br>명령어 수신 + 정기 작업<br>Oracle Cloud VM 24시간 실행</div>
+    </div>
+    <div class="infra-card">
+        <div class="infra-icon">⚙️</div>
+        <div class="infra-title">GitHub Actions</div>
+        <div class="infra-desc">daily_crawl.yml<br>매일 23:00 KST 자동 실행<br>크롤링 + 차트 + 대시보드</div>
+    </div>
+    <div class="infra-card">
+        <div class="infra-icon">🌐</div>
+        <div class="infra-title">GitHub Pages</div>
+        <div class="infra-desc">index.html<br>포트폴리오 대시보드<br>git push 시 자동 배포</div>
+    </div>
+    <div class="infra-card">
+        <div class="infra-icon">📊</div>
+        <div class="infra-title">Data Sources</div>
+        <div class="infra-desc">FinanceDataReader (실시간 주가)<br>네이버 날씨 / AccuWeather<br>yfinance (해외 지수)</div>
+    </div>
+</div>
+
+<!-- ===== Commands ===== -->
+<h2 id="commands">Telegram Commands</h2>
+<div class="cmd-grid">
+    <div class="cmd-card">
+        <div class="cmd-name">/update</div>
+        <div class="cmd-desc">실시간 주가 기반 포트폴리오 테이블 즉시 업데이트. Dashboard 자동 반영.</div>
+        <div class="cmd-flow">
+            <code>create_portfolio_tables.py</code> &rarr;
+            <code>create_dashboard.py</code> &rarr;
+            git push &rarr; 텔레그램 요약
+        </div>
+    </div>
+    <div class="cmd-card">
+        <div class="cmd-name">/weather</div>
+        <div class="cmd-desc">여의도 현재 날씨 조회. 날짜, 기온, 미세먼지, 일출/일몰.</div>
+        <div class="cmd-flow">
+            네이버 날씨 스크래핑 + AccuWeather (일출/일몰)
+        </div>
+    </div>
+    <div class="cmd-card">
+        <div class="cmd-name">/portfolio</div>
+        <div class="cmd-desc">포트폴리오 리포트 조회. 기준가, 수익률(1D~YTD), 기여도 Top5.</div>
+        <div class="cmd-flow">
+            <code>daily_portfolio_report.py</code> &rarr; 텔레그램 전송
+        </div>
+    </div>
+    <div class="cmd-card">
+        <div class="cmd-name">/help</div>
+        <div class="cmd-desc">사용 가능한 명령어 목록 표시.</div>
+        <div class="cmd-flow">-</div>
+    </div>
+</div>
+
+<!-- ===== Flows ===== -->
+<h2 id="flows">Execution Flows</h2>
+<div class="flow-container">
+
+    <!-- /update Flow -->
+    <div class="flow-group trigger-manual">
+        <div class="flow-header">
+            <span class="flow-badge badge-manual">수동</span>
+            <span class="flow-title">/update 명령어</span>
+        </div>
+        <div class="flow-desc">사용자가 텔레그램에서 /update 입력 시 실행. 실시간 주가로 포트폴리오 테이블 갱신.</div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">Step 1</div>
+                <div class="step-file">create_portfolio_tables.py</div>
+                <div class="step-desc">FinanceDataReader로 실시간 주가 조회<br>오늘 수익률 + 기여도 계산</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step-output">
+                <div class="step-number">Output</div>
+                <div class="step-file">portfolio_data.json</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 2</div>
+                <div class="step-file">create_dashboard.py</div>
+                <div class="step-desc">JSON 읽어서 HTML 테이블 생성</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step-output">
+                <div class="step-number">Output</div>
+                <div class="step-file">index.html</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 3</div>
+                <div class="step-file">git push</div>
+                <div class="step-desc">GitHub Pages 자동 배포</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 4</div>
+                <div class="step-file">텔레그램 요약</div>
+                <div class="step-desc">상승/하락 종목 Top3</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Portfolio (16:00) -->
+    <div class="flow-group trigger-schedule">
+        <div class="flow-header">
+            <span class="flow-badge badge-schedule">매일 16:00</span>
+            <span class="flow-title">포트폴리오 리포트 자동 전송</span>
+        </div>
+        <div class="flow-desc">장 마감 후 자동 실행. 기준가 업데이트 + 수익률 계산 + 텔레그램 리포트.</div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">Step 1</div>
+                <div class="step-file">calculate_wrap_nav.py</div>
+                <div class="step-desc">오늘자 기준가(NAV) 계산<br>Wrap_NAV.xlsx에 추가</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 2</div>
+                <div class="step-file">calculate_returns.py</div>
+                <div class="step-desc">1D, 1W, 1M, 3M, 6M,<br>1Y, YTD 수익률 계산</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 3</div>
+                <div class="step-file">daily_portfolio_report.py</div>
+                <div class="step-desc">텔레그램으로 리포트 전송<br>기준가 + 수익률 + 기여도 Top5</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Weather (06:00) -->
+    <div class="flow-group trigger-schedule">
+        <div class="flow-header">
+            <span class="flow-badge badge-schedule">매일 06:00</span>
+            <span class="flow-title">날씨 자동 전송</span>
+        </div>
+        <div class="flow-desc">매일 아침 6시 여의도 날씨 자동 전송.</div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">Step 1</div>
+                <div class="step-file">네이버 날씨 스크래핑</div>
+                <div class="step-desc">기온, 미세먼지 등</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 2</div>
+                <div class="step-file">AccuWeather 스크래핑</div>
+                <div class="step-desc">일출/일몰 시각</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 3</div>
+                <div class="step-file">텔레그램 전송</div>
+                <div class="step-desc">구독자에게 날씨 메시지</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GitHub Actions (23:00) -->
+    <div class="flow-group trigger-github">
+        <div class="flow-header">
+            <span class="flow-badge badge-github">매일 23:00</span>
+            <span class="flow-title">GitHub Actions - Daily Market Crawl</span>
+        </div>
+        <div class="flow-desc">GitHub 서버에서 실행. 시장 데이터 크롤링 + 차트 생성 + 대시보드 갱신. VM과 별도.</div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">Step 1</div>
+                <div class="step-file">backfill_yfinance_history.py</div>
+                <div class="step-desc">yfinance 과거 데이터 보충</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 2</div>
+                <div class="step-file">import_memory_data.py</div>
+                <div class="step-desc">엑셀 과거 데이터 가져오기</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 3</div>
+                <div class="step-file">market_crawler.py</div>
+                <div class="step-desc">시장 데이터 크롤링<br>&rarr; dataset.csv</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 4</div>
+                <div class="step-file">calculate_wrap_nav.py</div>
+                <div class="step-desc">기준가 계산</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 5</div>
+                <div class="step-file">calculate_returns.py</div>
+                <div class="step-desc">수익률 계산</div>
+            </div>
+        </div>
+        <div class="steps" style="margin-top: 12px;">
+            <div class="step">
+                <div class="step-number">Step 6</div>
+                <div class="step-file">draw_charts.py</div>
+                <div class="step-desc">시장 차트 이미지 생성</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 7</div>
+                <div class="step-file">draw_wrap_charts.py</div>
+                <div class="step-desc">Wrap 차트 이미지 생성</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 8</div>
+                <div class="step-file">create_portfolio_tables.py</div>
+                <div class="step-desc">포트폴리오 테이블 생성</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 9</div>
+                <div class="step-file">create_dashboard.py</div>
+                <div class="step-desc">index.html 생성</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 10</div>
+                <div class="step-file">git push</div>
+                <div class="step-desc">자동 커밋 &amp; 배포</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ===== Files ===== -->
+<h2 id="files">Python Files</h2>
+<table class="file-table">
+    <thead>
+        <tr>
+            <th>File</th>
+            <th>Role</th>
+            <th>Triggered By</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><span class="file-name">execution/weather_bot.py</span></td>
+            <td>메인 봇 - 모든 명령어 처리 + 스케줄러 관리</td>
+            <td><span class="tag tag-vm">VM systemd</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">execution/create_portfolio_tables.py</span></td>
+            <td>실시간 주가 &rarr; 오늘수익률/기여도 계산 &rarr; portfolio_data.json</td>
+            <td><span class="tag tag-command">/update</span> <span class="tag tag-github">Actions</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">execution/create_dashboard.py</span></td>
+            <td>portfolio_data.json &rarr; index.html 생성</td>
+            <td><span class="tag tag-command">/update</span> <span class="tag tag-github">Actions</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">execution/daily_portfolio_report.py</span></td>
+            <td>기준가 + 수익률 리포트 &rarr; 텔레그램 전송</td>
+            <td><span class="tag tag-command">/portfolio</span> <span class="tag tag-schedule">16:00</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">calculate_wrap_nav.py</span></td>
+            <td>Wrap_NAV.xlsx에 오늘자 기준가(NAV) 추가</td>
+            <td><span class="tag tag-schedule">16:00</span> <span class="tag tag-github">Actions</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">calculate_returns.py</span></td>
+            <td>1D, 1W, 1M, 3M, 6M, 1Y, YTD 수익률 계산</td>
+            <td><span class="tag tag-schedule">16:00</span> <span class="tag tag-github">Actions</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">execution/market_crawler.py</span></td>
+            <td>시장 데이터 크롤링 &rarr; dataset.csv</td>
+            <td><span class="tag tag-github">Actions</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">execution/draw_charts.py</span></td>
+            <td>시장 차트 이미지(PNG) 생성</td>
+            <td><span class="tag tag-github">Actions</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">execution/draw_wrap_charts.py</span></td>
+            <td>Wrap 차트 이미지(PNG) 생성</td>
+            <td><span class="tag tag-github">Actions</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">execution/backfill_yfinance_history.py</span></td>
+            <td>yfinance로 해외 지수 과거 데이터 보충</td>
+            <td><span class="tag tag-github">Actions</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">execution/import_memory_data.py</span></td>
+            <td>엑셀 과거 데이터 가져오기</td>
+            <td><span class="tag tag-github">Actions</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">execution/config.py</span></td>
+            <td>설정값 (파일 경로, 포트폴리오 정의 등)</td>
+            <td><span class="tag tag-vm">import</span></td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- ===== Data ===== -->
+<h2 id="data">Data Files</h2>
+<div class="data-grid">
+    <div class="data-card">
+        <div class="data-card-title">Wrap_NAV.xlsx</div>
+        <div class="data-card-desc">
+            <strong>마스터 데이터.</strong> 포트폴리오별 종목/비중/기준가 저장.<br>
+            시트: NEW(종목구성), 기준가(일별NAV), 수익률(기간별), Code(섹터매핑)
+        </div>
+    </div>
+    <div class="data-card">
+        <div class="data-card-title">portfolio_data.json</div>
+        <div class="data-card-desc">
+            실시간 종목별 오늘수익률, 기여도, 누적수익률.<br>
+            /update 실행 시 갱신. Dashboard 테이블 데이터 소스.
+        </div>
+    </div>
+    <div class="data-card">
+        <div class="data-card-title">index.html</div>
+        <div class="data-card-desc">
+            GitHub Pages 대시보드. 시장 차트 + 포트폴리오 테이블.<br>
+            git push 시 자동 배포.
+        </div>
+    </div>
+    <div class="data-card">
+        <div class="data-card-title">dataset.csv</div>
+        <div class="data-card-desc">
+            시장 데이터 (환율, 금리, 원자재, 국내외 지수).<br>
+            매일 23:00 크롤링으로 갱신.
+        </div>
+    </div>
+    <div class="data-card">
+        <div class="data-card-title">.env</div>
+        <div class="data-card-desc">
+            환경변수 파일. TELEGRAM_BOT_TOKEN 저장.<br>
+            Git에 포함되지 않음 (보안).
+        </div>
+    </div>
+    <div class="data-card">
+        <div class="data-card-title">charts/*.png</div>
+        <div class="data-card-desc">
+            시장 차트 이미지 파일들.<br>
+            draw_charts.py / draw_wrap_charts.py에서 생성.
+        </div>
+    </div>
+</div>
+
+<!-- ===== Infra ===== -->
+<h2 id="infra">Infrastructure</h2>
+<div class="infra-grid">
+    <div class="infra-card">
+        <div class="infra-icon">☁️</div>
+        <div class="infra-title">Oracle Cloud VM</div>
+        <div class="infra-desc">
+            VM.Standard.E2.1.Micro (Free Tier)<br>
+            Ubuntu 22.04, 1 OCPU, 1GB RAM<br>
+            IP: 152.67.199.118<br>
+            weather_bot.py 24시간 실행
+        </div>
+    </div>
+    <div class="infra-card">
+        <div class="infra-icon">🔄</div>
+        <div class="infra-title">systemd Service</div>
+        <div class="infra-desc">
+            weather_bot.service<br>
+            자동 재시작 (RestartSec=10)<br>
+            부팅 시 자동 시작 (enabled)<br>
+            PYTHONIOENCODING=utf-8
+        </div>
+    </div>
+    <div class="infra-card">
+        <div class="infra-icon">🔑</div>
+        <div class="infra-title">인증</div>
+        <div class="infra-desc">
+            SSH: ssh-key-2026-02-13.key<br>
+            GitHub: PAT (No expiration)<br>
+            Telegram: Bot Token (.env)
+        </div>
+    </div>
+    <div class="infra-card">
+        <div class="infra-icon">📂</div>
+        <div class="infra-title">GitHub Repository</div>
+        <div class="infra-desc">
+            sisyphe10/Antigravity_Market_Dashboard<br>
+            GitHub Pages 활성화<br>
+            GitHub Actions 워크플로우
+        </div>
+    </div>
+</div>
+
+<!-- ===== Troubleshooting ===== -->
+<h2 id="debug">Troubleshooting</h2>
+<table class="debug-table">
+    <thead>
+        <tr>
+            <th>증상</th>
+            <th>원인</th>
+            <th>확인 방법</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>/update 보냈는데 수익률이 안 바뀜</td>
+            <td>create_portfolio_tables.py 에러로 실패</td>
+            <td><code>sudo journalctl -u weather_bot -n 50</code></td>
+        </tr>
+        <tr>
+            <td>텔레그램 봇이 응답 없음</td>
+            <td>봇 서비스 중단됨</td>
+            <td><code>sudo systemctl status weather_bot</code><br><code>sudo systemctl restart weather_bot</code></td>
+        </tr>
+        <tr>
+            <td>Dashboard가 업데이트 안 됨</td>
+            <td>git push 실패 (인증 만료 등)</td>
+            <td><code>cd ~/Antigravity_Market_Dashboard && git push</code></td>
+        </tr>
+        <tr>
+            <td>날짜 타입 에러 (str vs datetime)</td>
+            <td>Wrap_NAV.xlsx 날짜 컬럼 타입 불일치</td>
+            <td>pd.to_datetime() 적용 확인</td>
+        </tr>
+        <tr>
+            <td>GitHub Actions 실패</td>
+            <td>크롤링 대상 사이트 변경 등</td>
+            <td>GitHub &rarr; Actions 탭 &rarr; 실패 로그 확인</td>
+        </tr>
+        <tr>
+            <td>VM SSH 접속 안 됨</td>
+            <td>키 파일 권한 또는 보안 그룹</td>
+            <td><code>ssh -i key.key ubuntu@152.67.199.118</code></td>
+        </tr>
+        <tr>
+            <td>16:00 리포트 안 옴</td>
+            <td>/start로 구독 안 됨 또는 봇 재시작으로 구독 초기화</td>
+            <td>텔레그램에서 /start 다시 입력</td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- ===== Changelog ===== -->
+<h2 id="changelog">Changelog</h2>
+<div class="version-log">
+    <div class="version-entry">
+        <div class="version-date">2026-02-13</div>
+        <div class="version-title">Oracle Cloud VM 배포</div>
+        <div class="version-desc">텔레그램 봇을 Oracle Cloud Free Tier VM으로 이전. 24시간 무중단 운영. systemd 서비스 등록.</div>
+    </div>
+    <div class="version-entry">
+        <div class="version-date">2026-02-13</div>
+        <div class="version-title">기여도(Contribution) 컬럼 추가</div>
+        <div class="version-desc">포트폴리오 테이블에 기여도 컬럼 추가. 공식: (Weight/100) x (Return/100) x 1000. NAV 1000 기준 변동 포인트.</div>
+    </div>
+    <div class="version-entry">
+        <div class="version-date">2026-02-13</div>
+        <div class="version-title">/update 명령어 추가</div>
+        <div class="version-desc">실시간 주가 기반 포트폴리오 테이블 즉시 업데이트 기능. FinanceDataReader로 실시간 조회 → 수익률 재계산 → Dashboard 반영.</div>
+    </div>
+    <div class="version-entry">
+        <div class="version-date">2026-02-13</div>
+        <div class="version-title">GitHub Actions에 calculate_returns.py 추가</div>
+        <div class="version-desc">daily_crawl 워크플로우에 수익률 계산 스텝 추가. Wrap_NAV.xlsx도 자동 커밋 대상에 포함.</div>
+    </div>
+</div>
+
+<footer>
+    <a href="index.html">&larr; Dashboard</a> &nbsp;|&nbsp;
+    <a href="https://github.com/sisyphe10/Antigravity_Market_Dashboard">GitHub Repository</a>
+</footer>
+
+</body>
+</html>
