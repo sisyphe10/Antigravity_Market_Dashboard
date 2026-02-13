@@ -428,11 +428,12 @@
 <div class="cmd-grid">
     <div class="cmd-card">
         <div class="cmd-name">/update</div>
-        <div class="cmd-desc">실시간 주가 기반 포트폴리오 테이블 즉시 업데이트. Dashboard 자동 반영.</div>
+        <div class="cmd-desc">실시간 주가 기반 포트폴리오 테이블 즉시 업데이트. 전거래일 포트폴리오 기준. Dashboard 자동 반영.</div>
         <div class="cmd-flow">
-            <code>create_portfolio_tables.py</code> &rarr;
+            <code>portfolio_data.json</code> 읽기 &rarr;
+            실시간 주가 병렬 조회 (10 threads) &rarr;
             <code>create_dashboard.py</code> &rarr;
-            git push &rarr; 텔레그램 요약
+            git push &rarr; 텔레그램 요약 (상위/하위 5종목 + 기여도)
         </div>
     </div>
     <div class="cmd-card">
@@ -466,40 +467,36 @@
             <span class="flow-badge badge-manual">수동</span>
             <span class="flow-title">/update 명령어</span>
         </div>
-        <div class="flow-desc">사용자가 텔레그램에서 /update 입력 시 실행. 실시간 주가로 포트폴리오 테이블 갱신.</div>
+        <div class="flow-desc">사용자가 텔레그램에서 /update 입력 시 실행. 기존 portfolio_data.json에서 종목 코드/비중을 읽고, 실시간 주가만 병렬 조회하여 빠르게 갱신. 전거래일 포트폴리오 기준 (당일 매매 미반영).</div>
         <div class="steps">
             <div class="step">
                 <div class="step-number">Step 1</div>
-                <div class="step-file">create_portfolio_tables.py</div>
-                <div class="step-desc">FinanceDataReader로 실시간 주가 조회<br>오늘 수익률 + 기여도 계산</div>
-            </div>
-            <div class="arrow">&rarr;</div>
-            <div class="step-output">
-                <div class="step-number">Output</div>
-                <div class="step-file">portfolio_data.json</div>
+                <div class="step-file">portfolio_data.json 읽기</div>
+                <div class="step-desc">기존 종목 코드/비중 사용<br>(Wrap_NAV.xlsx 파싱 불필요)</div>
             </div>
             <div class="arrow">&rarr;</div>
             <div class="step">
                 <div class="step-number">Step 2</div>
-                <div class="step-file">create_dashboard.py</div>
-                <div class="step-desc">JSON 읽어서 HTML 테이블 생성</div>
-            </div>
-            <div class="arrow">&rarr;</div>
-            <div class="step-output">
-                <div class="step-number">Output</div>
-                <div class="step-file">index.html</div>
+                <div class="step-file">FinanceDataReader 병렬 조회</div>
+                <div class="step-desc">ThreadPoolExecutor (10 workers)<br>오늘 수익률 + 기여도 계산</div>
             </div>
             <div class="arrow">&rarr;</div>
             <div class="step">
                 <div class="step-number">Step 3</div>
+                <div class="step-file">create_dashboard.py</div>
+                <div class="step-desc">JSON 읽어서 HTML 테이블 생성</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 4</div>
                 <div class="step-file">git push</div>
                 <div class="step-desc">GitHub Pages 자동 배포</div>
             </div>
             <div class="arrow">&rarr;</div>
             <div class="step">
-                <div class="step-number">Step 4</div>
+                <div class="step-number">Step 5</div>
                 <div class="step-file">텔레그램 요약</div>
-                <div class="step-desc">상승/하락 종목 Top3</div>
+                <div class="step-desc">상승/하락 Top5 + 기여도</div>
             </div>
         </div>
     </div>
@@ -849,6 +846,16 @@
 <!-- ===== Changelog ===== -->
 <h2 id="changelog">Changelog</h2>
 <div class="version-log">
+    <div class="version-entry">
+        <div class="version-date">2026-02-13</div>
+        <div class="version-title">/update 속도 최적화 (55초 → 5초)</div>
+        <div class="version-desc">create_portfolio_tables.py 전체 실행 대신, 기존 portfolio_data.json에서 종목 코드만 읽고 실시간 주가를 ThreadPoolExecutor로 병렬 조회. Wrap_NAV.xlsx 파싱, KRX API, 누적수익률 계산 생략.</div>
+    </div>
+    <div class="version-entry">
+        <div class="version-date">2026-02-13</div>
+        <div class="version-title">전거래일 기준 포트폴리오 적용</div>
+        <div class="version-desc">오늘 추가/변경한 종목(당일 매매)은 /update에 반영하지 않고, 전거래일 포트폴리오 구성 기준으로 수익률 계산.</div>
+    </div>
     <div class="version-entry">
         <div class="version-date">2026-02-13</div>
         <div class="version-title">Oracle Cloud VM 배포</div>
