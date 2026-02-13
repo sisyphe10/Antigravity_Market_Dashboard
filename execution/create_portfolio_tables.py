@@ -233,6 +233,7 @@ def create_portfolio_tables():
     try:
         # NEW 시트에서 포트폴리오 데이터 읽기
         df = pd.read_excel(WRAP_NAV_FILE, sheet_name='NEW')
+        df['날짜'] = pd.to_datetime(df['날짜'])
 
         print(f"   전체 날짜 범위: {df['날짜'].min()} ~ {df['날짜'].max()}")
 
