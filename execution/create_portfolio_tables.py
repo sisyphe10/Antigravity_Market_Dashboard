@@ -3,6 +3,8 @@ import FinanceDataReader as fdr
 import sys
 import json
 from pathlib import Path
+from datetime import timedelta
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Windows console encoding fix
 sys.stdout.reconfigure(encoding='utf-8')
@@ -31,76 +33,33 @@ EXISTING_STOCK_CUMULATIVE_RETURNS = {
     '010060': 55.0,   # OCI홀딩스
 }
 
-def get_stock_info(stock_code):
-    """종목 코드로 섹터와 시가총액 정보 가져오기"""
+
+def fetch_price_data(code):
+    """종목의 최근 가격 데이터를 가져오기 (스레드에서 호출)"""
     try:
-        # 종목 코드를 6자리로 포맷
-        code = str(stock_code).zfill(6)
-
-        # FinanceDataReader로 종목 정보 가져오기
-        # KRX 상장 종목 리스트
-        krx = fdr.StockListing('KRX')
-        stock_info = krx[krx['Code'] == code]
-
-        if not stock_info.empty:
-            sector = stock_info.iloc[0].get('Sector', 'N/A')
-            market_cap = stock_info.iloc[0].get('Marcap', 0)
-
-            # 시가총액을 억 원 단위로 변환
-            market_cap_billions = market_cap / 100000000 if market_cap else 0
-
-            return {
-                'sector': sector if sector else 'N/A',
-                'market_cap': market_cap_billions
-            }
-        else:
-            return {'sector': 'N/A', 'market_cap': 0}
-    except Exception as e:
-        print(f"  Warning: Could not fetch info for {stock_code}: {e}")
-        return {'sector': 'N/A', 'market_cap': 0}
-
-def get_today_return(code):
-    """종목의 오늘 수익률 계산"""
-    try:
-        from datetime import timedelta
-
-        # 최근 5일 데이터 가져오기
         end_date = pd.Timestamp.now()
-        start_date = end_date - timedelta(days=5)
-
+        start_date = end_date - timedelta(days=90)  # 누적수익률 계산에도 사용하므로 넉넉히
         df = fdr.DataReader(code, start=start_date)
-
-        if len(df) < 2:
-            return None
-
-        # 최신 종가와 전일 종가
-        latest_price = df.iloc[-1]['Close']
-        prev_price = df.iloc[-2]['Close']
-
-        # 수익률 계산
-        return_pct = ((latest_price - prev_price) / prev_price) * 100
-
-        return return_pct
-
+        return code, df
     except Exception as e:
-        print(f"  Warning: Could not fetch today's return for {code}: {e}")
+        print(f"  Warning: Could not fetch price for {code}: {e}")
+        return code, pd.DataFrame()
+
+
+def get_today_return_from_cache(price_df):
+    """캐시된 가격 데이터에서 오늘 수익률 계산"""
+    if price_df is None or len(price_df) < 2:
         return None
+    latest_price = price_df.iloc[-1]['Close']
+    prev_price = price_df.iloc[-2]['Close']
+    return ((latest_price - prev_price) / prev_price) * 100
 
-def calculate_cumulative_return(code, stock_name, portfolio_name='트루밸류'):
+
+def calculate_cumulative_return(code, stock_name, portfolio_name, nav_df, price_df):
     """
-    종목의 누적 수익률 계산
-
-    Returns:
-        dict: {
-            'cumulative_return': float or None,
-            'status': str ('2026_new', 'existing', 'resold'),
-            'avg_price': float or None,
-            'current_price': float or None
-        }
+    종목의 누적 수익률 계산 (캐시된 데이터 사용)
     """
     try:
-        from datetime import timedelta
-
         # 기존 종목인 경우 사용자 제공 값 반환 (목표전환형은 신규 펀드이므로 직접 계산)
         if code in EXISTING_STOCK_CUMULATIVE_RETURNS and portfolio_name != '목표전환형':
             return {
@@ -110,12 +69,8 @@ def calculate_cumulative_return(code, stock_name, portfolio_name='트루밸류')
                 'current_price': None
             }
 
-        # NEW 시트에서 해당 종목의 거래 이력 가져오기
-        df = pd.read_excel(WRAP_NAV_FILE, sheet_name='NEW')
-        df['날짜'] = pd.to_datetime(df['날짜'])
-
         # 해당 포트폴리오의 해당 종목 이력
-        stock_history = df[(df['상품명'] == portfolio_name) & (df['코드'] == int(code))].copy()
+        stock_history = nav_df[(nav_df['상품명'] == portfolio_name) & (nav_df['코드'] == int(code))].copy()
         stock_history = stock_history.sort_values('날짜')
 
         if stock_history.empty:
@@ -131,7 +86,6 @@ def calculate_cumulative_return(code, stock_name, portfolio_name='트루밸류')
         # 마지막 전량 매도 이후의 데이터만 사용
         if zero_weight_dates:
             last_zero_date = max(zero_weight_dates)
-            # 마지막 전량 매도 이후 데이터
             stock_history = stock_history[stock_history['날짜'] > last_zero_date]
             status = 'resold'
         else:
@@ -153,7 +107,11 @@ def calculate_cumulative_return(code, stock_name, portfolio_name='트루밸류')
         if purchases.empty:
             return {'cumulative_return': None, 'status': 'no_purchases', 'avg_price': None, 'current_price': None}
 
-        # 각 매수 시점의 종가 가져오기
+        # 캐시된 가격 데이터가 없으면 계산 불가
+        if price_df is None or price_df.empty:
+            return {'cumulative_return': None, 'status': 'no_price_data', 'avg_price': None, 'current_price': None}
+
+        # 각 매수 시점의 종가 가져오기 (캐시된 데이터에서)
         weighted_sum = 0
         total_weight = 0
 
@@ -161,64 +119,36 @@ def calculate_cumulative_return(code, stock_name, portfolio_name='트루밸류')
             purchase_date = row['날짜']
             weight = row['비중']
 
-            # 해당 날짜의 종가 가져오기
             try:
-                # 해당 날짜 전후 5일 데이터 가져오기
-                start_date = purchase_date - timedelta(days=5)
-                end_date = purchase_date + timedelta(days=2)
-
-                price_data = fdr.DataReader(code, start=start_date, end=end_date)
-
-                if price_data.empty:
-                    continue
-
-                # 해당 날짜 또는 가장 가까운 날짜의 종가
-                if purchase_date in price_data.index:
-                    close_price = price_data.loc[purchase_date, 'Close']
+                if purchase_date in price_df.index:
+                    close_price = price_df.loc[purchase_date, 'Close']
                 else:
-                    # 가장 가까운 이전 날짜의 종가
-                    available_dates = price_data[price_data.index <= purchase_date]
+                    available_dates = price_df[price_df.index <= purchase_date]
                     if not available_dates.empty:
                         close_price = available_dates.iloc[-1]['Close']
                     else:
-                        # 이후 날짜 중 가장 가까운 날짜
-                        close_price = price_data.iloc[0]['Close']
+                        close_price = price_df.iloc[0]['Close']
 
                 weighted_sum += close_price * weight
                 total_weight += weight
-
             except Exception as e:
-                print(f"    Warning: Could not fetch price for {stock_name} on {purchase_date}: {e}")
+                print(f"    Warning: Could not get price for {stock_name} on {purchase_date}: {e}")
                 continue
 
         if total_weight == 0:
             return {'cumulative_return': None, 'status': 'no_valid_prices', 'avg_price': None, 'current_price': None}
 
-        # 가중 평단가 계산
         avg_price = weighted_sum / total_weight
+        current_price = price_df.iloc[-1]['Close']
+        cumulative_return = (current_price / avg_price - 1) * 100
 
-        # 현재가 가져오기
-        try:
-            current_data = fdr.DataReader(code, start=pd.Timestamp.now() - timedelta(days=5))
-            if current_data.empty:
-                return {'cumulative_return': None, 'status': 'no_current_price', 'avg_price': avg_price, 'current_price': None}
-
-            current_price = current_data.iloc[-1]['Close']
-
-            # 누적 수익률 계산
-            cumulative_return = (current_price / avg_price - 1) * 100
-
-            return {
-                'cumulative_return': cumulative_return,
-                'status': status,
-                'avg_price': avg_price,
-                'current_price': current_price,
-                'first_date': first_date
-            }
-
-        except Exception as e:
-            print(f"    Warning: Could not fetch current price for {stock_name}: {e}")
-            return {'cumulative_return': None, 'status': 'no_current_price', 'avg_price': avg_price, 'current_price': None}
+        return {
+            'cumulative_return': cumulative_return,
+            'status': status,
+            'avg_price': avg_price,
+            'current_price': current_price,
+            'first_date': first_date
+        }
 
     except Exception as e:
         print(f"    Error calculating cumulative return for {stock_name}: {e}")
@@ -226,16 +156,17 @@ def calculate_cumulative_return(code, stock_name, portfolio_name='트루밸류')
         traceback.print_exc()
         return {'cumulative_return': None, 'status': 'error', 'avg_price': None, 'current_price': None}
 
+
 def create_portfolio_tables():
     """포트폴리오 테이블 데이터 생성"""
     print("1. Wrap NAV 파일 읽기...")
 
     try:
-        # NEW 시트에서 포트폴리오 데이터 읽기
-        df = pd.read_excel(WRAP_NAV_FILE, sheet_name='NEW')
-        df['날짜'] = pd.to_datetime(df['날짜'])
+        # NEW 시트에서 포트폴리오 데이터 읽기 (1회만)
+        nav_df = pd.read_excel(WRAP_NAV_FILE, sheet_name='NEW')
+        nav_df['날짜'] = pd.to_datetime(nav_df['날짜'])
 
-        print(f"   전체 날짜 범위: {df['날짜'].min()} ~ {df['날짜'].max()}")
+        print(f"   전체 날짜 범위: {nav_df['날짜'].min()} ~ {nav_df['날짜'].max()}")
 
         # KRX 종목 리스트 미리 로드
         print("2. KRX 종목 리스트 로드 중...")
@@ -246,73 +177,89 @@ def create_portfolio_tables():
         code_df['종목코드'] = code_df['종목코드'].apply(lambda x: str(x).zfill(6))
         sector_map = dict(zip(code_df['종목코드'], code_df['섹터']))
 
-        # 포트폴리오별 데이터 생성
-        portfolio_data = {}
-
-        # 동일한 포트폴리오 그룹 정의
+        # === 전체 종목 코드 수집 (중복 제거) ===
         same_portfolios = ['트루밸류', 'Value ESG', '개방형 랩']
         combined_name = '삼성 트루밸류 / NH Value ESG / DB 개방형'
+        today = pd.Timestamp.now().normalize()
+
+        # 포트폴리오별 종목 구성을 미리 계산
+        portfolio_configs = []
+        all_codes = set()
 
         processed = set()
-
-        # 모든 포트폴리오 이름 가져오기
-        all_portfolios = df['상품명'].unique()
-
-        for portfolio_name in all_portfolios:
-            # 이미 처리된 포트폴리오는 스킵
+        for portfolio_name in nav_df['상품명'].unique():
             if portfolio_name in processed:
                 continue
 
-            # 동일한 포트폴리오 3개는 하나로 합치기
             if portfolio_name in same_portfolios:
                 display_name = combined_name
-                # 첫 번째 포트폴리오 데이터만 사용 (어차피 동일)
                 use_portfolio = '트루밸류'
-                # 나머지는 처리됨으로 표시
                 processed.update(same_portfolios)
             else:
                 display_name = PORTFOLIO_DISPLAY_NAMES.get(portfolio_name, portfolio_name)
                 use_portfolio = portfolio_name
                 processed.add(portfolio_name)
 
-            print(f"\n3. {display_name} 포트폴리오 처리 중...")
-
-            # 해당 포트폴리오의 전거래일 데이터 사용
-            # (오늘 추가/변경한 종목은 아직 반영하지 않음)
-            portfolio_df = df[df['상품명'] == use_portfolio].copy()
+            portfolio_df = nav_df[nav_df['상품명'] == use_portfolio].copy()
             if portfolio_df.empty:
                 continue
 
-            today = pd.Timestamp.now().normalize()
             available_dates = sorted(portfolio_df['날짜'].unique())
-            # 오늘 이전 날짜들 중 가장 최신 = 전거래일
             prev_dates = [d for d in available_dates if d < today]
             if prev_dates:
                 latest_portfolio_date = prev_dates[-1]
             else:
-                # 오늘 이전 데이터가 없으면 최신 날짜 사용 (fallback)
                 latest_portfolio_date = available_dates[-1]
+
             portfolio_stocks = portfolio_df[portfolio_df['날짜'] == latest_portfolio_date].copy()
-
-            print(f"   기준 날짜: {latest_portfolio_date} (전거래일)")
-
-            # 비중이 0인 종목 제외
             portfolio_stocks = portfolio_stocks[portfolio_stocks['비중'] > 0]
-
-            # 비중 순으로 정렬
             portfolio_stocks = portfolio_stocks.sort_values('비중', ascending=False)
 
-            # 각 종목에 대해 정보 수집
+            codes_in_portfolio = [str(row['코드']).zfill(6) for _, row in portfolio_stocks.iterrows()]
+            all_codes.update(codes_in_portfolio)
+
+            portfolio_configs.append({
+                'display_name': display_name,
+                'use_portfolio': use_portfolio,
+                'latest_date': latest_portfolio_date,
+                'stocks': portfolio_stocks,
+            })
+
+        # === 모든 종목 가격을 병렬로 조회 ===
+        print(f"\n3. {len(all_codes)}개 종목 가격 병렬 조회 중...")
+        price_cache = {}
+
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = {executor.submit(fetch_price_data, code): code for code in all_codes}
+            for future in as_completed(futures):
+                code, price_df = future.result()
+                price_cache[code] = price_df
+                if not price_df.empty:
+                    print(f"   ✓ {code} ({len(price_df)}일)")
+                else:
+                    print(f"   ✗ {code} (데이터 없음)")
+
+        print(f"   가격 조회 완료!")
+
+        # === 포트폴리오별 데이터 생성 ===
+        portfolio_data = {}
+
+        for config in portfolio_configs:
+            display_name = config['display_name']
+            use_portfolio = config['use_portfolio']
+            latest_portfolio_date = config['latest_date']
+            portfolio_stocks = config['stocks']
+
+            print(f"\n4. {display_name} 포트폴리오 처리 중...")
+            print(f"   기준 날짜: {latest_portfolio_date} (전거래일)")
+
             stocks_info = []
             for idx, row in portfolio_stocks.iterrows():
                 code = str(row['코드']).zfill(6)
                 stock_name = row['종목']
                 weight = row['비중']
 
-                # 종목 정보 가져오기
                 stock_data = krx[krx['Code'] == code]
-
-                # 섹터는 Code 시트의 FICS 분류 사용
                 sector = sector_map.get(code, '기타')
                 if pd.isna(sector):
                     sector = '기타'
@@ -323,14 +270,15 @@ def create_portfolio_tables():
                 else:
                     market_cap_billions = 0
 
-                # 오늘 수익률 계산
-                today_return = get_today_return(code)
+                # 캐시된 가격 데이터에서 오늘 수익률 계산
+                price_df = price_cache.get(code)
+                today_return = get_today_return_from_cache(price_df)
 
-                # 누적 수익률 계산
-                cumulative_result = calculate_cumulative_return(code, stock_name, use_portfolio)
+                # 누적 수익률 계산 (캐시된 데이터 사용)
+                cumulative_result = calculate_cumulative_return(code, stock_name, use_portfolio, nav_df, price_df)
                 cumulative_return = cumulative_result.get('cumulative_return')
 
-                # 기여도 계산: (Weight/100) * (Return/100) * 1000 = 기준가 1000 기준 NAV 변동 포인트
+                # 기여도 계산
                 contribution = (weight / 100) * (today_return / 100) * 1000 if today_return is not None else None
 
                 stocks_info.append({
@@ -352,7 +300,7 @@ def create_portfolio_tables():
             portfolio_data[display_name] = stocks_info
 
         # JSON 파일로 저장
-        print(f"\n4. 결과 저장 중... ({OUTPUT_FILE})")
+        print(f"\n5. 결과 저장 중... ({OUTPUT_FILE})")
         with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
             json.dump(portfolio_data, f, ensure_ascii=False, indent=2)
 
