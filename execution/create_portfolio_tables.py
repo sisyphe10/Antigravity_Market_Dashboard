@@ -320,6 +320,9 @@ def create_portfolio_tables():
                 cumulative_result = calculate_cumulative_return(code, stock_name, use_portfolio)
                 cumulative_return = cumulative_result.get('cumulative_return')
 
+                # 기여도 계산: (Weight/100) * (Return/100) * 1000 = 기준가 1000 기준 NAV 변동 포인트
+                contribution = (weight / 100) * (today_return / 100) * 1000 if today_return is not None else None
+
                 stocks_info.append({
                     'code': code,
                     'name': stock_name,
@@ -327,12 +330,14 @@ def create_portfolio_tables():
                     'market_cap': market_cap_billions,
                     'weight': weight,
                     'today_return': today_return,
+                    'contribution': contribution,
                     'cumulative_return': cumulative_return
                 })
 
                 return_str = f"{today_return:+.2f}%" if today_return is not None else "N/A"
+                contribution_str = f"{contribution:+.2f}" if contribution is not None else "N/A"
                 cumulative_str = f"{cumulative_return:+.2f}%" if cumulative_return is not None else "N/A"
-                print(f"   - {stock_name} ({code}): {sector}, {market_cap_billions:,.0f}억원, {weight}%, 오늘: {return_str}, 누적: {cumulative_str}")
+                print(f"   - {stock_name} ({code}): {sector}, {market_cap_billions:,.0f}억원, {weight}%, 오늘: {return_str}, 기여도: {contribution_str}, 누적: {cumulative_str}")
 
             portfolio_data[display_name] = stocks_info
 

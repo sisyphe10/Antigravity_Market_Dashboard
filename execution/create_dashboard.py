@@ -41,6 +41,7 @@ def create_portfolio_tables_html():
                                 <th>시가총액</th>
                                 <th>Weight</th>
                                 <th>오늘 수익률</th>
+                                <th>기여도</th>
                                 <th>누적 수익률</th>
                             </tr>
                         </thead>
@@ -50,6 +51,7 @@ def create_portfolio_tables_html():
             # 합계 계산용 변수
             total_weight = 0
             weighted_return_sum = 0
+            total_contribution = 0
             valid_returns_count = 0
 
             # 각 종목 행 추가
@@ -63,20 +65,27 @@ def create_portfolio_tables_html():
 
                 if today_return is not None:
                     today_return_str = f"{today_return:+.0f}%"
-                    # 색상 적용 (양수: 빨강, 음수: 파랑)
                     today_color_class = "positive" if today_return > 0 else "negative" if today_return < 0 else ""
-                    # 가중 수익률 합산
                     weighted_return_sum += today_return * weight / 100
                     valid_returns_count += 1
                 else:
                     today_return_str = "N/A"
                     today_color_class = ""
 
+                # 기여도 포맷
+                contribution = stock.get('contribution')
+                if contribution is not None:
+                    contribution_str = f"{contribution:+.1f}"
+                    contribution_color_class = "positive" if contribution > 0 else "negative" if contribution < 0 else ""
+                    total_contribution += contribution
+                else:
+                    contribution_str = "N/A"
+                    contribution_color_class = ""
+
                 # 누적 수익률 포맷
                 cumulative_return = stock.get('cumulative_return')
                 if cumulative_return is not None:
                     cumulative_return_str = f"{cumulative_return:+.0f}%"
-                    # 색상 적용 (양수: 빨강, 음수: 파랑)
                     cumulative_color_class = "positive" if cumulative_return > 0 else "negative" if cumulative_return < 0 else ""
                 else:
                     cumulative_return_str = "N/A"
@@ -91,6 +100,7 @@ def create_portfolio_tables_html():
                                 <td>{market_cap_str}</td>
                                 <td>{stock['weight']}%</td>
                                 <td class="{today_color_class}">{today_return_str}</td>
+                                <td class="{contribution_color_class}">{contribution_str}</td>
                                 <td class="{cumulative_color_class}">{cumulative_return_str}</td>
                             </tr>
                 """
@@ -98,12 +108,15 @@ def create_portfolio_tables_html():
             # 합계 행 추가
             portfolio_return_str = f"{weighted_return_sum:+.0f}%" if valid_returns_count > 0 else "N/A"
             portfolio_color = "positive" if weighted_return_sum > 0 else "negative" if weighted_return_sum < 0 else ""
+            total_contribution_str = f"{total_contribution:+.1f}" if valid_returns_count > 0 else "N/A"
+            contribution_total_color = "positive" if total_contribution > 0 else "negative" if total_contribution < 0 else ""
 
             html += f"""
                             <tr class="total-row">
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
                                 <td style="font-weight: 600;">{total_weight:.0f}%</td>
                                 <td class="{portfolio_color}" style="font-weight: 600;">{portfolio_return_str}</td>
+                                <td class="{contribution_total_color}" style="font-weight: 600;">{total_contribution_str}</td>
                                 <td style="font-weight: 600;">-</td>
                             </tr>
                         </tbody>
