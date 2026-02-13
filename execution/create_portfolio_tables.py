@@ -277,15 +277,24 @@ def create_portfolio_tables():
 
             print(f"\n3. {display_name} 포트폴리오 처리 중...")
 
-            # 해당 포트폴리오의 최신 날짜 데이터
+            # 해당 포트폴리오의 전거래일 데이터 사용
+            # (오늘 추가/변경한 종목은 아직 반영하지 않음)
             portfolio_df = df[df['상품명'] == use_portfolio].copy()
             if portfolio_df.empty:
                 continue
 
-            latest_portfolio_date = portfolio_df['날짜'].max()
+            today = pd.Timestamp.now().normalize()
+            available_dates = sorted(portfolio_df['날짜'].unique())
+            # 오늘 이전 날짜들 중 가장 최신 = 전거래일
+            prev_dates = [d for d in available_dates if d < today]
+            if prev_dates:
+                latest_portfolio_date = prev_dates[-1]
+            else:
+                # 오늘 이전 데이터가 없으면 최신 날짜 사용 (fallback)
+                latest_portfolio_date = available_dates[-1]
             portfolio_stocks = portfolio_df[portfolio_df['날짜'] == latest_portfolio_date].copy()
 
-            print(f"   최신 날짜: {latest_portfolio_date}")
+            print(f"   기준 날짜: {latest_portfolio_date} (전거래일)")
 
             # 비중이 0인 종목 제외
             portfolio_stocks = portfolio_stocks[portfolio_stocks['비중'] > 0]
