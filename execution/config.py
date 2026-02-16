@@ -7,15 +7,15 @@ Centralized definitions for categories, tickers, and target items
 CATEGORY_MAP = {
     'DRAM': 'Memory',
     'NAND': 'Memory',
-    'CRYPTO': 'Cryptocurrency',
-    'COMMODITY': 'Commodities',
-    'FX': 'Exchange Rate',
-    'INDEX_US': 'US Indices',
-    'INTEREST_RATE': 'Interest Rates',
-    'INDEX': 'US Indices',
-    'OCEAN_FREIGHT': 'Commodities',
+    'CRYPTO': 'CRYPTOCURRENCY',
+    'COMMODITY': 'COMMODITIES',
+    'FX': 'EXCHANGE RATE',
+    'INDEX_US': 'INDEX_US',
+    'INTEREST_RATE': 'INTEREST RATES',
+    'INDEX': 'INDEX_US',
+    'OCEAN_FREIGHT': 'COMMODITIES',
     'WRAP': 'Wrap',
-    'INDEX_KR': 'Market Indices'
+    'INDEX_KR': 'INDEX_KOREA'
 }
 
 # Target DRAM items to scrape from DRAMeXchange

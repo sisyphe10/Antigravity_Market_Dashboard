@@ -135,16 +135,16 @@ def get_item_category(item_name):
     """Get category for an item by looking up in dataset.csv"""
     # Special handling for DDR items (they should be in Memory)
     if 'DDR4' in item_name or 'DDR5' in item_name:
-        return 'Memory'
+        return 'MEMORY'
 
     # Special handling for S&P 500 related items (should be in US Indices)
     # Handle all variations: "S&P 500", "S_P_500", "S P 500"
     if 'S&P 500' in item_name or 'S_P_500' in item_name or 'S P 500' in item_name:
-        return 'US Indices'
+        return 'INDEX_US'
 
     # Special handling for Uranium ETF (should be in Commodities)
     if 'Uranium' in item_name or 'URA' in item_name:
-        return 'Commodities'
+        return 'COMMODITIES'
 
     # Special handling for Wrap portfolios
     wrap_keywords = ['트루밸류', '삼성 트루밸류', 'Value ESG', 'NH Value ESG',
@@ -217,8 +217,8 @@ def create_dashboard():
         charts_html = ""
         
         # Define category order for better organization
-        category_order = ['Wrap', 'Portfolio', 'Memory', 'Cryptocurrency', 'US Indices', 'Market Indices',
-                         'Commodities', 'Exchange Rate', 'Interest Rates']
+        category_order = ['Wrap', 'Portfolio', 'INDEX_KOREA', 'INDEX_US', 'EXCHANGE RATE', 'INTEREST RATES',
+                         'CRYPTOCURRENCY', 'MEMORY', 'COMMODITIES']
         
         for category in category_order:
             # Portfolio는 차트가 아니라 테이블이므로 특별 처리
@@ -246,11 +246,11 @@ def create_dashboard():
             # ========================================
             
             # Cryptocurrency order
-            if category == 'Cryptocurrency':
+            if category == 'CRYPTOCURRENCY':
                 custom_order = ['Bitcoin', 'Ethereum', 'Binance Coin', 'Ripple', 'Solana']
-            
+
             # Memory order
-            elif category == 'Memory':
+            elif category == 'MEMORY':
                 custom_order = [
                     'DDR5 16G (2Gx8) 4800/5600',
                     'DDR4 16Gb (2Gx8)3200',
@@ -264,7 +264,7 @@ def create_dashboard():
                 ]
             
             # US Indices order
-            elif category == 'US Indices':
+            elif category == 'INDEX_US':
                 custom_order = [
                     'S&P 500',
                     'S&P 500 PER',
@@ -279,7 +279,7 @@ def create_dashboard():
                 ]
             
             # Commodities order
-            elif category == 'Commodities':
+            elif category == 'COMMODITIES':
                 custom_order = [
                     'Gold',
                     'Silver',
@@ -293,7 +293,7 @@ def create_dashboard():
                 ]
             
             # Exchange Rate order
-            elif category == 'Exchange Rate':
+            elif category == 'EXCHANGE RATE':
                 custom_order = [
                     'Dollar Index (DXY)',
                     'KRW/USD',
@@ -304,7 +304,7 @@ def create_dashboard():
                 ]
             
             # Interest Rates order
-            elif category == 'Interest Rates':
+            elif category == 'INTEREST RATES':
                 custom_order = [
                     'US 13 Week Treasury Yield',
                     'US 5 Year Treasury Yield',
@@ -321,8 +321,8 @@ def create_dashboard():
                     'DB 목표전환형'
                 ]
 
-            # Market Indices order
-            elif category == 'Market Indices':
+            # Korea Indices order
+            elif category == 'INDEX_KOREA':
                 custom_order = [
                     'KOSPI',
                     'KOSPI(USD)',
