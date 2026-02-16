@@ -313,14 +313,14 @@ def crawl_kr_indices():
                 fx_rate = float(krw.loc[date, 'Close'])
 
                 kospi_usd = float(kospi.loc[date, 'Close']) / fx_rate
-                collected_data.append((d, 'KOSPI(USD)', round(kospi_usd, 4), 'INDEX_KR'))
+                collected_data.append((d, 'KOSPI/USD', round(kospi_usd, 4), 'INDEX_KR'))
 
                 if date in kosdaq.index:
                     kosdaq_usd = float(kosdaq.loc[date, 'Close']) / fx_rate
-                    collected_data.append((d, 'KOSDAQ(USD)', round(kosdaq_usd, 4), 'INDEX_KR'))
+                    collected_data.append((d, 'KOSDAQ/USD', round(kosdaq_usd, 4), 'INDEX_KR'))
 
         print(f"✓ KOSPI: {len(kospi)}일, KOSDAQ: {len(kosdaq)}일 수집")
-        print(f"✓ KOSPI(USD), KOSDAQ(USD) 환산 완료")
+        print(f"✓ KOSPI/USD, KOSDAQ/USD 환산 완료")
 
     except Exception as e:
         print(f"❌ 한국 지수 오류: {e}")

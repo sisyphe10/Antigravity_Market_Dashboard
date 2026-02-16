@@ -193,13 +193,7 @@ def create_dashboard():
                 item_name = 'Dollar Index (DXY)'
                 
             # Fix FX naming: convert "XXX USD" to "XXX/USD" to match dataset format
-            item_name = item_name.replace(' USD', '/USD')
-
-            # Fix Korean index USD naming: "KOSPI USD " -> "KOSPI(USD)"
-            if item_name.strip() == 'KOSPI/USD':
-                item_name = 'KOSPI(USD)'
-            elif item_name.strip() == 'KOSDAQ/USD':
-                item_name = 'KOSDAQ(USD)'
+            item_name = item_name.replace(' USD', '/USD').strip()
             
             # Get category
             category = get_item_category(item_name)
@@ -325,9 +319,9 @@ def create_dashboard():
             elif category == 'INDEX_KOREA':
                 custom_order = [
                     'KOSPI',
-                    'KOSPI(USD)',
+                    'KOSPI/USD',
                     'KOSDAQ',
-                    'KOSDAQ(USD)'
+                    'KOSDAQ/USD'
                 ]
 
             else:
