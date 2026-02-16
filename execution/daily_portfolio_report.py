@@ -4,14 +4,28 @@ import asyncio
 import logging
 import pandas as pd
 import FinanceDataReader as fdr
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from telegram import Bot
+import holidays
 
 # Windows console encoding fix
 sys.stdout.reconfigure(encoding='utf-8')
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
+
+def is_korean_trading_day():
+    """한국 거래일 여부 확인 (주말 + 공휴일 제외)"""
+    kst = timezone(timedelta(hours=9))
+    today = datetime.now(kst).date()
+    kr_holidays = holidays.KR(years=today.year)
+    if today.weekday() >= 5:
+        logging.info(f"{today} 주말 - 리포트 스킵")
+        return False
+    if today in kr_holidays:
+        logging.info(f"{today} 공휴일({kr_holidays.get(today)}) - 리포트 스킵")
+        return False
+    return True
 
 file_name = 'Wrap_NAV.xlsx'
 
@@ -241,7 +255,11 @@ def format_message(date, nav_data, returns_data, top_5, bottom_5):
     return msg
 
 async def send_report():
-    """리포트 생성 및 전송"""
+    """리포트 생성 및 전송 (거래일만)"""
+    if not is_korean_trading_day():
+        print("거래일이 아니므로 리포트를 생략합니다.")
+        return
+
     token = os.getenv("TELEGRAM_BOT_TOKEN")
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
     
