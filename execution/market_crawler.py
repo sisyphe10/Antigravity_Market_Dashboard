@@ -273,6 +273,62 @@ def crawl_yfinance_data():
     if collected_data: save_to_csv(collected_data)
 
 # ==========================================
+# 6. [KR] 한국 지수 + USD 환산
+# ==========================================
+def crawl_kr_indices():
+    """한국 지수(KOSPI/KOSDAQ) + USD 환산 데이터 수집"""
+    print(f"\n{'=' * 60}")
+    print(f"🇰🇷 한국 지수 크롤링 시작")
+    print(f"{'=' * 60}")
+
+    collected_data = []
+
+    try:
+        kospi = yf.Ticker('^KS11').history(period='6mo')
+        kosdaq = yf.Ticker('^KQ11').history(period='6mo')
+        krw = yf.Ticker('KRW=X').history(period='6mo')
+
+        if kospi.empty or kosdaq.empty or krw.empty:
+            print("⚠️ 한국 지수 데이터 없음")
+            return
+
+        # 타임존 제거
+        kospi.index = kospi.index.tz_localize(None)
+        kosdaq.index = kosdaq.index.tz_localize(None)
+        krw.index = krw.index.tz_localize(None)
+
+        # KOSPI, KOSDAQ 원본 데이터
+        for date, row in kospi.iterrows():
+            d = date.strftime('%Y-%m-%d')
+            collected_data.append((d, 'KOSPI', float(row['Close']), 'INDEX_KR'))
+
+        for date, row in kosdaq.iterrows():
+            d = date.strftime('%Y-%m-%d')
+            collected_data.append((d, 'KOSDAQ', float(row['Close']), 'INDEX_KR'))
+
+        # USD 환산 (KOSPI/USDKRW, KOSDAQ/USDKRW)
+        for date in kospi.index:
+            if date in krw.index:
+                d = date.strftime('%Y-%m-%d')
+                fx_rate = float(krw.loc[date, 'Close'])
+
+                kospi_usd = float(kospi.loc[date, 'Close']) / fx_rate
+                collected_data.append((d, 'KOSPI(USD)', round(kospi_usd, 4), 'INDEX_KR'))
+
+                if date in kosdaq.index:
+                    kosdaq_usd = float(kosdaq.loc[date, 'Close']) / fx_rate
+                    collected_data.append((d, 'KOSDAQ(USD)', round(kosdaq_usd, 4), 'INDEX_KR'))
+
+        print(f"✓ KOSPI: {len(kospi)}일, KOSDAQ: {len(kosdaq)}일 수집")
+        print(f"✓ KOSPI(USD), KOSDAQ(USD) 환산 완료")
+
+    except Exception as e:
+        print(f"❌ 한국 지수 오류: {e}")
+
+    if collected_data:
+        save_to_csv(collected_data)
+
+# ==========================================
 # Main Execution
 # ==========================================
 def main():
@@ -286,6 +342,7 @@ def main():
     crawl_yfinance_data()
 
     crawl_us_indices()
+    crawl_kr_indices()
 
     print(f"\n📁 결과 파일: {CSV_FILE}")
 

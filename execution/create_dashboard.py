@@ -194,6 +194,12 @@ def create_dashboard():
                 
             # Fix FX naming: convert "XXX USD" to "XXX/USD" to match dataset format
             item_name = item_name.replace(' USD', '/USD')
+
+            # Fix Korean index USD naming: "KOSPI USD " -> "KOSPI(USD)"
+            if item_name.strip() == 'KOSPI/USD':
+                item_name = 'KOSPI(USD)'
+            elif item_name.strip() == 'KOSDAQ/USD':
+                item_name = 'KOSDAQ(USD)'
             
             # Get category
             category = get_item_category(item_name)
@@ -313,6 +319,15 @@ def create_dashboard():
                     'NH Value ESG',
                     'DB 개방형',
                     'DB 목표전환형'
+                ]
+
+            # Market Indices order
+            elif category == 'Market Indices':
+                custom_order = [
+                    'KOSPI',
+                    'KOSPI(USD)',
+                    'KOSDAQ',
+                    'KOSDAQ(USD)'
                 ]
 
             else:
