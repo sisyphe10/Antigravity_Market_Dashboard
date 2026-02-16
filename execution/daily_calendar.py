@@ -7,7 +7,7 @@ import sys
 import json
 import logging
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from telegram import Bot
@@ -59,7 +59,6 @@ def get_today_events():
         logging.info(f"  - {cal_name} (ID: {cal_id})")
     
     # 오늘 00:00 ~ 23:59 (KST)
-    from datetime import timezone, timedelta
     kst = timezone(timedelta(hours=9))
     now = datetime.now(kst)
     
@@ -122,7 +121,8 @@ def get_today_events():
 
 def format_calendar_message(events_by_calendar):
     """캘린더 일정을 텔레그램 메시지 형식으로 변환 (캘린더별 구분)"""
-    now = datetime.now()
+    kst = timezone(timedelta(hours=9))
+    now = datetime.now(kst)
     date_str = now.strftime('%Y-%m-%d')
     day_kor = ["월", "화", "수", "목", "금", "토", "일"][now.weekday()]
     
@@ -141,7 +141,7 @@ def format_calendar_message(events_by_calendar):
 
             # 시간 파싱
             if 'T' in start:  # 시간이 있는 일정
-                dt = datetime.fromisoformat(start.replace('Z', '+00:00'))
+                dt = datetime.fromisoformat(start.replace('Z', '+00:00')).astimezone(kst)
                 time_str = dt.strftime('%H:%M')
                 line = f"• {time_str} - {summary}"
             else:  # 종일 일정
@@ -158,7 +158,7 @@ def format_calendar_message(events_by_calendar):
 
             # 시간 파싱
             if 'T' in start:  # 시간이 있는 일정
-                dt = datetime.fromisoformat(start.replace('Z', '+00:00'))
+                dt = datetime.fromisoformat(start.replace('Z', '+00:00')).astimezone(kst)
                 time_str = dt.strftime('%H:%M')
                 msg += f"<b>• {time_str} - {summary}</b>\n"
             else:  # 종일 일정
