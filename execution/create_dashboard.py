@@ -371,11 +371,11 @@ def create_dashboard():
     <title>Market Data Dashboard</title>
     <style>
         :root {{
-            --bg-color: #1a1a1a;
-            --card-bg: #2d2d2d;
-            --text-color: #e0e0e0;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
             --accent-color: #4a90e2;
-            --category-bg: #252525;
+            --category-bg: #eeeeee;
         }}
 
         body {{
@@ -390,7 +390,7 @@ def create_dashboard():
             text-align: center;
             margin-bottom: 40px;
             padding: 20px 0;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid #dee2e6;
         }}
 
         h1 {{
@@ -401,7 +401,7 @@ def create_dashboard():
 
         .last-updated {{
             margin-top: 10px;
-            color: #888;
+            color: #6c757d;
             font-style: italic;
         }}
 
@@ -411,10 +411,11 @@ def create_dashboard():
 
         .category-title {{
             font-size: 1.8rem;
-            color: var(--accent-color);
+            color: #000000;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 2px solid var(--accent-color);
+            border-bottom: 2px solid #000000;
+            text-transform: uppercase;
         }}
 
         .dashboard-grid {{
@@ -435,7 +436,7 @@ def create_dashboard():
             background-color: var(--card-bg);
             border-radius: 12px;
             padding: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s ease;
             text-align: center;
         }}
@@ -448,7 +449,7 @@ def create_dashboard():
             margin-top: 0;
             margin-bottom: 15px;
             font-size: 1.2rem;
-            color: #ccc;
+            color: #555555;
         }}
 
         .chart-card img {{
@@ -460,7 +461,7 @@ def create_dashboard():
         footer {{
             text-align: center;
             margin-top: 50px;
-            color: #666;
+            color: #6c757d;
             font-size: 0.9rem;
         }}
 
@@ -471,10 +472,10 @@ def create_dashboard():
 
         .portfolio-title {{
             font-size: 1.4rem;
-            color: #e0e0e0;
+            color: #333333;
             margin-bottom: 15px;
             padding-bottom: 8px;
-            border-bottom: 1px solid #444;
+            border-bottom: 1px solid #dee2e6;
         }}
 
         .table-container {{
@@ -491,7 +492,7 @@ def create_dashboard():
         }}
 
         .portfolio-table thead {{
-            background-color: #3a3a3a;
+            background-color: #e9ecef;
         }}
 
         .portfolio-table th {{
@@ -504,8 +505,8 @@ def create_dashboard():
 
         .portfolio-table td {{
             padding: 10px;
-            border-bottom: 1px solid #444;
-            color: #ccc;
+            border-bottom: 1px solid #dee2e6;
+            color: #333333;
             text-align: center;
         }}
 
@@ -514,7 +515,7 @@ def create_dashboard():
         }}
 
         .portfolio-table tbody tr:hover {{
-            background-color: #3a3a3a;
+            background-color: #f5f5f5;
         }}
 
         .portfolio-table .number {{
@@ -533,17 +534,17 @@ def create_dashboard():
         }}
 
         .portfolio-table .positive {{
-            color: #ff5555;
+            color: #cc0000;
             font-weight: 600;
         }}
 
         .portfolio-table .negative {{
-            color: #5599ff;
+            color: #0055cc;
             font-weight: 600;
         }}
 
         .portfolio-table .total-row {{
-            background-color: #3a3a3a;
+            background-color: #e9ecef;
             border-top: 2px solid var(--accent-color);
         }}
 
