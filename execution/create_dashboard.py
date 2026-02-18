@@ -414,8 +414,10 @@ def create_dashboard():
             font-size: 1.8rem;
             color: #000000;
             margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #000000;
+            padding: 10px 16px;
+            background-color: #fdf6e3;
+            border-left: 4px solid #000000;
+            border-radius: 4px;
             text-transform: uppercase;
         }}
 
@@ -546,7 +548,7 @@ def create_dashboard():
 
         .portfolio-table .total-row {{
             background-color: #e9ecef;
-            border-top: 2px solid var(--accent-color);
+            border-top: 2px solid #000000;
         }}
 
         .portfolio-table .total-row td {{
