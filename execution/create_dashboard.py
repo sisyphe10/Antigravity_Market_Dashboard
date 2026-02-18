@@ -415,7 +415,7 @@ def create_dashboard():
             color: #000000;
             margin-bottom: 20px;
             padding: 10px 16px;
-            background-color: #fdf6e3;
+            background-color: #e0e0e0;
             border-left: 4px solid #000000;
             border-radius: 4px;
             text-transform: uppercase;
