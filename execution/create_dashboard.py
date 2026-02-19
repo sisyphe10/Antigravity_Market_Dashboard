@@ -406,6 +406,23 @@ def create_dashboard():
             font-style: italic;
         }}
 
+        .nav-button {{
+            display: inline-block;
+            margin-top: 14px;
+            padding: 8px 20px;
+            background-color: #4a90e2;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }}
+
+        .nav-button:hover {{
+            background-color: #357abd;
+        }}
+
         .category-section {{
             margin-bottom: 50px;
         }}
@@ -561,6 +578,7 @@ def create_dashboard():
     <header>
         <h1>📊 Market Data Dashboard</h1>
         <div class="last-updated">Last Updated: {now}</div>
+        <a href="architecture.html" target="_blank" class="nav-button">🗂️ Workflow Architecture</a>
     </header>
 
     {charts_html}
