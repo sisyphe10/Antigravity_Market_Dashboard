@@ -192,7 +192,7 @@ def format_message(date, nav_data, returns_data, top_5, bottom_5):
     day_of_week = ["월", "화", "수", "목", "금", "토", "일"][report_date.weekday()]
     date_str = f"{report_date.strftime('%Y-%m-%d')} ({day_of_week})"
 
-    msg = f"<b>📊 포트폴리오 리포트</b>\n{date_str}\n\n"
+    msg = f"<b>📊 포트폴리오 리포트</b>\n{date_str}\n"
 
     # 기준가
     msg += f"{LINE}\n<b>💰 기준가</b>\n{LINE}\n"
@@ -200,7 +200,7 @@ def format_message(date, nav_data, returns_data, top_5, bottom_5):
         msg += f"{name}  {value:,.2f}\n"
 
     # 수익률
-    msg += f"\n{LINE}\n<b>📈 수익률</b>\n{LINE}\n"
+    msg += f"{LINE}\n<b>📈 수익률</b>\n{LINE}\n"
     display_names = {
         '트루밸류': '삼성 트루밸류',
         '목표전환형': 'DB 목표전환형 WRAP',
@@ -223,7 +223,6 @@ def format_message(date, nav_data, returns_data, top_5, bottom_5):
                 # 3개씩 끊어서 줄바꿈
                 for i in range(0, len(valid_periods), 3):
                     msg += " | ".join(valid_periods[i:i+3]) + "\n"
-                msg += "\n"
 
     # 기여도 상위
     msg += f"{LINE}\n<b>🔺 기여도 상위</b>\n{LINE}\n"
@@ -234,7 +233,7 @@ def format_message(date, nav_data, returns_data, top_5, bottom_5):
         msg += "데이터 없음\n"
 
     # 기여도 하위
-    msg += f"\n{LINE}\n<b>🔻 기여도 하위</b>\n{LINE}\n"
+    msg += f"{LINE}\n<b>🔻 기여도 하위</b>\n{LINE}\n"
     if bottom_5:
         for item in bottom_5:
             msg += f"{item['stock']}  {item['contribution']:+.1f}\n"
@@ -243,37 +242,37 @@ def format_message(date, nav_data, returns_data, top_5, bottom_5):
 
     return msg
 
-async def send_report():
+async def send_report(no_send=False):
     """리포트 생성 및 전송 (거래일만)"""
     if not is_korean_trading_day():
         print("거래일이 아니므로 리포트를 생략합니다.")
         return
 
-    token = os.getenv("TELEGRAM_BOT_TOKEN")
-    chat_id = os.getenv("TELEGRAM_CHAT_ID")
-    
-    if not token or not chat_id:
-        logging.error("TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is missing.")
-        sys.exit(1)
-    
     logging.info("1. 기준가 데이터 읽기...")
     date, nav_data = get_latest_nav()
-    
+
     logging.info("2. 수익률 데이터 읽기...")
     returns_data = get_latest_returns()
-    
+
     logging.info("3. 종목별 기여도 계산...")
     top_5, bottom_5 = calculate_contributions()
-    
+
     logging.info("4. 메시지 포맷팅...")
     message = format_message(date, nav_data, returns_data, top_5, bottom_5)
-    
-    logging.info("5. 텔레그램 전송...")
-    bot = Bot(token=token)
-    await bot.send_message(chat_id=chat_id, text=message, parse_mode='HTML')
-    
+
+    if not no_send:
+        token = os.getenv("TELEGRAM_BOT_TOKEN")
+        chat_id = os.getenv("TELEGRAM_CHAT_ID")
+        if not token or not chat_id:
+            logging.error("TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is missing.")
+            sys.exit(1)
+        logging.info("5. 텔레그램 전송...")
+        bot = Bot(token=token)
+        await bot.send_message(chat_id=chat_id, text=message, parse_mode='HTML')
+
     logging.info("완료!")
     print(f"\n전송된 메시지:\n{message}")
 
 if __name__ == "__main__":
-    asyncio.run(send_report())
+    no_send = '--no-send' in sys.argv
+    asyncio.run(send_report(no_send=no_send))

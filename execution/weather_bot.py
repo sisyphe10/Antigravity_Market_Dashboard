@@ -96,7 +96,7 @@ async def portfolio_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         # daily_portfolio_report.py 실행
         result = subprocess.run(
-            [sys.executable, "execution/daily_portfolio_report.py"],
+            [sys.executable, "execution/daily_portfolio_report.py", "--no-send"],
             capture_output=True,
             text=True,
             timeout=60
