@@ -383,7 +383,7 @@
 <header>
     <h1>Antigravity Market Dashboard</h1>
     <div class="subtitle">System Architecture & Documentation</div>
-    <div class="subtitle">Last updated: 2026-02-13</div>
+    <div class="subtitle">Last updated: 2026-02-19</div>
 </header>
 
 <nav>
@@ -433,7 +433,7 @@
             <code>portfolio_data.json</code> 읽기 &rarr;
             실시간 주가 병렬 조회 (10 threads) &rarr;
             <code>create_dashboard.py</code> &rarr;
-            git push &rarr; 텔레그램 요약 (상위/하위 5종목 + 기여도)
+            git pull --rebase &rarr; git push &rarr; 텔레그램 요약 (상위/하위 5종목 + 기여도)
         </div>
     </div>
     <div class="cmd-card">
@@ -489,12 +489,18 @@
             <div class="arrow">&rarr;</div>
             <div class="step">
                 <div class="step-number">Step 4</div>
+                <div class="step-file">git pull --rebase</div>
+                <div class="step-desc">원격 변경사항 통합<br>(push 충돌 방지)</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 5</div>
                 <div class="step-file">git push</div>
                 <div class="step-desc">GitHub Pages 자동 배포</div>
             </div>
             <div class="arrow">&rarr;</div>
             <div class="step">
-                <div class="step-number">Step 5</div>
+                <div class="step-number">Step 6</div>
                 <div class="step-file">텔레그램 요약</div>
                 <div class="step-desc">상승/하락 Top5 + 기여도</div>
             </div>
@@ -778,9 +784,10 @@
         <div class="infra-icon">🔑</div>
         <div class="infra-title">인증</div>
         <div class="infra-desc">
-            SSH: ssh-key-2026-02-13.key<br>
+            SSH(원본): ssh-key-2026-02-13.key<br>
+            SSH(추가): ~/.ssh/oracle_cloud<br>
             GitHub: PAT (No expiration)<br>
-            Telegram: Bot Token (.env)
+            Telegram: Bot Token (.env / GitHub Secrets)
         </div>
     </div>
     <div class="infra-card">
@@ -840,12 +847,47 @@
             <td>/start로 구독 안 됨 또는 봇 재시작으로 구독 초기화</td>
             <td>텔레그램에서 /start 다시 입력</td>
         </tr>
+        <tr>
+            <td>/update 수익률이 모두 0%로 표시됨</td>
+            <td>설날 등 장기 휴장으로 FinanceDataReader 조회 기간(days=5) 내 거래일이 1일뿐 → 전일 데이터 없어 계산 불가</td>
+            <td><code>fetch_price()</code>의 <code>timedelta(days=30)</code>으로 수정 적용 확인</td>
+        </tr>
+        <tr>
+            <td>Dashboard "Last Updated" 시각이 /update 후에도 안 바뀜</td>
+            <td>VM에서 git push 충돌 (로컬 PC도 동시에 push). remote rejected → push 실패</td>
+            <td><code>run_portfolio_update()</code>에 push 전 <code>git pull --rebase origin main</code> 자동 실행 추가</td>
+        </tr>
+        <tr>
+            <td>Claude Code 재설치 후 MCP 서버/SSH 연결 끊김</td>
+            <td>~/.claude.json 초기화됨 (MCP 설정 삭제)</td>
+            <td><code>claude mcp add github -e GITHUB_PERSONAL_ACCESS_TOKEN=... -- npx -y @modelcontextprotocol/server-github</code><br>SSH: <code>ssh -i ~/.ssh/oracle_cloud ubuntu@152.67.199.118</code></td>
+        </tr>
     </tbody>
 </table>
 
 <!-- ===== Changelog ===== -->
 <h2 id="changelog">Changelog</h2>
 <div class="version-log">
+    <div class="version-entry">
+        <div class="version-date">2026-02-19</div>
+        <div class="version-title">Claude Code 재설치 후 환경 복구</div>
+        <div class="version-desc">Claude Code 완전 재설치로 초기화된 설정 복구. GitHub MCP 서버 재연결 (npx @modelcontextprotocol/server-github). Oracle Cloud VM SSH 접속 복구: 원본 키(ssh-key-2026-02-13.key) 발견, 새 키(~/.ssh/oracle_cloud) 생성 및 authorized_keys 등록. GitHub Secrets (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID) 복구.</div>
+    </div>
+    <div class="version-entry">
+        <div class="version-date">2026-02-19</div>
+        <div class="version-title">fetch_price 조회 기간 5일 → 30일 (설날 장기 휴장 대응)</div>
+        <div class="version-desc">설날 연휴(5일 이상 휴장) 시 FinanceDataReader가 데이터를 1행만 반환하여 today_return이 None → 0%로 표시되는 버그 수정. weather_bot.py의 fetch_price() 함수 내 timedelta(days=5) → timedelta(days=30) 변경. 장기 휴장 후에도 충분한 전일 데이터를 확보.</div>
+    </div>
+    <div class="version-entry">
+        <div class="version-date">2026-02-19</div>
+        <div class="version-title">/update 후 git pull --rebase 추가 (push 충돌 방지)</div>
+        <div class="version-desc">VM과 로컬 PC가 동시에 push할 때 발생하는 충돌로 "Dashboard Last Updated" 시각이 갱신되지 않는 문제 해결. weather_bot.py의 run_portfolio_update() 함수에서 git push 전 git pull --rebase origin main 자동 실행하도록 추가.</div>
+    </div>
+    <div class="version-entry">
+        <div class="version-date">2026-02-19</div>
+        <div class="version-title">메인 대시보드에 Workflow Architecture 버튼 추가</div>
+        <div class="version-desc">create_dashboard.py에 Workflow Architecture 버튼 추가. 대시보드 헤더 영역에 "🗂️ Workflow Architecture" 버튼 표시, 클릭 시 architecture.html 새 탭으로 열림.</div>
+    </div>
     <div class="version-entry">
         <div class="version-date">2026-02-13</div>
         <div class="version-title">/update 속도 최적화 (55초 → 5초)</div>
