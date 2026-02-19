@@ -476,6 +476,38 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
         logging.error(f"Daily portfolio job failed: {e}")
         os.chdir(original_dir)
 
+async def daily_weather_job(context: ContextTypes.DEFAULT_TYPE):
+    """매일 05:00 날씨 알림 (daily_alert.py 실행)"""
+    logging.info("Daily weather job started")
+    try:
+        result = subprocess.run(
+            [sys.executable, "execution/daily_alert.py"],
+            capture_output=True, text=True, encoding='utf-8',
+            timeout=60, cwd=DASHBOARD_DIR
+        )
+        if result.returncode == 0:
+            logging.info("Daily weather job completed successfully")
+        else:
+            logging.error(f"Daily weather job failed: {result.stderr}")
+    except Exception as e:
+        logging.error(f"Daily weather job error: {e}")
+
+async def daily_calendar_job(context: ContextTypes.DEFAULT_TYPE):
+    """매일 05:10 Google Calendar 일정 알림 (daily_calendar.py 실행)"""
+    logging.info("Daily calendar job started")
+    try:
+        result = subprocess.run(
+            [sys.executable, "execution/daily_calendar.py"],
+            capture_output=True, text=True, encoding='utf-8',
+            timeout=60, cwd=DASHBOARD_DIR
+        )
+        if result.returncode == 0:
+            logging.info("Daily calendar job completed successfully")
+        else:
+            logging.error(f"Daily calendar job failed: {result.stderr}")
+    except Exception as e:
+        logging.error(f"Daily calendar job error: {e}")
+
 if __name__ == '__main__':
     if not TOKEN:
         print("Error: TOKEN environment variable is missing.")
@@ -494,12 +526,16 @@ if __name__ == '__main__':
     try:
         import pytz
         kst = pytz.timezone('Asia/Seoul')
-        # 매일 오후 4시 - 포트폴리오 업데이트 및 리포트
+        weather_time = datetime.time(hour=5, minute=0, second=0, tzinfo=kst)
+        calendar_time = datetime.time(hour=5, minute=10, second=0, tzinfo=kst)
         portfolio_time = datetime.time(hour=16, minute=0, second=0, tzinfo=kst)
     except:
+        weather_time = datetime.time(hour=5, minute=0, second=0)
+        calendar_time = datetime.time(hour=5, minute=10, second=0)
         portfolio_time = datetime.time(hour=16, minute=0, second=0)
 
-    # 날씨 알림은 GitHub Actions에서 전송 (daily_weather.yml, KST 05:00)
+    job_queue.run_daily(daily_weather_job, time=weather_time)
+    job_queue.run_daily(daily_calendar_job, time=calendar_time)
     job_queue.run_daily(daily_portfolio_job, time=portfolio_time)
 
     # 거래시간 30분마다 자동 포트폴리오 업데이트
@@ -529,7 +565,8 @@ if __name__ == '__main__':
 
     print(f"Bot started at {datetime.datetime.now()}")
     print(f"✅ Daily jobs scheduled:")
-    print(f"  - Weather report: 06:00 KST")
-    print(f"  - Portfolio update & report: 16:00 KST")
+    print(f"  - Weather: 05:00 KST")
+    print(f"  - Calendar: 05:10 KST")
+    print(f"  - Portfolio report: 16:00 KST")
     print(f"  - Auto portfolio update: 09:30~15:30 KST (30분 간격, 거래일만)")
     application.run_polling()
