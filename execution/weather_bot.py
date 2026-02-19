@@ -504,7 +504,7 @@ async def update_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def auto_portfolio_update_job(context: ContextTypes.DEFAULT_TYPE):
-    """거래일 30분마다 자동 포트폴리오 업데이트 (텔레그램 알림 없음)"""
+    """거래일 30분마다 자동 포트폴리오 업데이트 + 텔레그램 알림"""
     import datetime as dt_module
     now_kst = dt_module.datetime.now(pytz.timezone('Asia/Seoul'))
 
@@ -527,11 +527,20 @@ async def auto_portfolio_update_job(context: ContextTypes.DEFAULT_TYPE):
     logging.info(f"Auto portfolio update started at {now_kst.strftime('%H:%M')} KST")
     try:
         loop = asyncio.get_running_loop()
-        await asyncio.wait_for(
+        portfolio_data = await asyncio.wait_for(
             loop.run_in_executor(None, run_portfolio_update),
             timeout=300.0
         )
         logging.info("Auto portfolio update completed successfully")
+
+        # 구독자에게 텔레그램 알림 전송
+        if SUBSCRIBERS and portfolio_data:
+            summary = format_update_summary(portfolio_data)
+            for chat_id in SUBSCRIBERS:
+                try:
+                    await context.bot.send_message(chat_id=chat_id, text=summary)
+                except Exception as e:
+                    logging.error(f"Auto update 알림 전송 실패 (chat_id={chat_id}): {e}")
     except Exception as e:
         logging.error(f"Auto portfolio update failed: {e}")
 
