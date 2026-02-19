@@ -241,7 +241,7 @@ def create_dashboard():
             
             # Cryptocurrency order
             if category == 'CRYPTOCURRENCY':
-                custom_order = ['Bitcoin', 'Ethereum', 'Binance Coin', 'Ripple', 'Solana']
+                custom_order = ['BTC', 'ETH', 'BNB', 'XRP', 'SOL']
 
             # Memory order
             elif category == 'MEMORY':

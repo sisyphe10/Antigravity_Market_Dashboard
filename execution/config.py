@@ -38,11 +38,11 @@ TARGET_NAND_ITEMS = {
 # yfinance ticker definitions
 YFINANCE_TICKERS = {
     # --- Cryptocurrencies ---
-    'Bitcoin': {'ticker': 'BTC-USD', 'type': 'CRYPTO'},
-    'Ethereum': {'ticker': 'ETH-USD', 'type': 'CRYPTO'},
-    'Binance Coin': {'ticker': 'BNB-USD', 'type': 'CRYPTO'},
-    'Ripple': {'ticker': 'XRP-USD', 'type': 'CRYPTO'},
-    'Solana': {'ticker': 'SOL-USD', 'type': 'CRYPTO'},
+    'BTC': {'ticker': 'BTC-USD', 'type': 'CRYPTO'},
+    'ETH': {'ticker': 'ETH-USD', 'type': 'CRYPTO'},
+    'BNB': {'ticker': 'BNB-USD', 'type': 'CRYPTO'},
+    'XRP': {'ticker': 'XRP-USD', 'type': 'CRYPTO'},
+    'SOL': {'ticker': 'SOL-USD', 'type': 'CRYPTO'},
 
     # --- Commodities ---
     'WTI Crude Oil': {'ticker': 'CL=F', 'type': 'COMMODITY'},
