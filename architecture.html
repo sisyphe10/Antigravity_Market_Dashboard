@@ -383,7 +383,7 @@
 <header>
     <h1>Antigravity Market Dashboard</h1>
     <div class="subtitle">System Architecture & Documentation</div>
-    <div class="subtitle">Last updated: 2026-02-19</div>
+    <div class="subtitle">Last updated: 2026-02-19 (2차)</div>
 </header>
 
 <nav>
@@ -503,6 +503,33 @@
                 <div class="step-number">Step 6</div>
                 <div class="step-file">텔레그램 요약</div>
                 <div class="step-desc">상승/하락 Top5 + 기여도</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auto Portfolio Update (09:30~15:30) -->
+    <div class="flow-group trigger-schedule">
+        <div class="flow-header">
+            <span class="flow-badge badge-schedule">09:30~15:30 (30분)</span>
+            <span class="flow-title">장중 자동 포트폴리오 업데이트</span>
+        </div>
+        <div class="flow-desc">거래일 장중 30분마다 자동 실행. 텔레그램 알림 없이 Dashboard만 조용히 갱신. 주말·공휴일 자동 스킵 (삼성전자 당일 데이터 유무로 판단).</div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">Step 1</div>
+                <div class="step-file">장중 여부 확인</div>
+                <div class="step-desc">주말 스킵<br>삼성전자 당일 데이터 없으면 공휴일로 판단 스킵</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 2</div>
+                <div class="step-file">run_portfolio_update()</div>
+                <div class="step-desc">/update와 동일 로직<br>실시간 주가 조회 + Dashboard 갱신</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step-output">
+                <div class="step-file">index.html 갱신</div>
+                <div class="step-desc">텔레그램 알림 없음</div>
             </div>
         </div>
     </div>
@@ -707,6 +734,11 @@
             <td>설정값 (파일 경로, 포트폴리오 정의 등)</td>
             <td><span class="tag tag-vm">import</span></td>
         </tr>
+        <tr>
+            <td><span class="file-name">watch_wrap_nav.py</span></td>
+            <td>Wrap_NAV.xlsx 파일 감시 → 변경 시 자동 git commit &amp; push. PID 파일로 중복 실행 방지. Windows 시작 프로그램 등록.</td>
+            <td><span class="tag tag-vm">로컬 PC</span></td>
+        </tr>
     </tbody>
 </table>
 
@@ -717,7 +749,8 @@
         <div class="data-card-title">Wrap_NAV.xlsx</div>
         <div class="data-card-desc">
             <strong>마스터 데이터.</strong> 포트폴리오별 종목/비중/기준가 저장.<br>
-            시트: NEW(종목구성), 기준가(일별NAV), 수익률(기간별), Code(섹터매핑)
+            시트: NEW(날짜·증권사·상품명·업종·코드·종목·비중), 기준가(일별NAV), 수익률(기간별), Code(섹터매핑)<br>
+            로컬 수정 → 저장 시 watch_wrap_nav.py가 자동 git push → VM이 16:00에 pull하여 계산에 반영
         </div>
     </div>
     <div class="data-card">
@@ -791,6 +824,17 @@
         </div>
     </div>
     <div class="infra-card">
+        <div class="infra-icon">👁️</div>
+        <div class="infra-title">로컬 파일 감시</div>
+        <div class="infra-desc">
+            watch_wrap_nav.py (로컬 PC)<br>
+            Wrap_NAV.xlsx 변경 감지 → 자동 git push<br>
+            디바운스 8초 / 재시도 3회<br>
+            PID 파일로 중복 실행 방지<br>
+            Windows 시작 프로그램 자동 등록
+        </div>
+    </div>
+    <div class="infra-card">
         <div class="infra-icon">📂</div>
         <div class="infra-title">GitHub Repository</div>
         <div class="infra-desc">
@@ -858,6 +902,16 @@
             <td><code>run_portfolio_update()</code>에 push 전 <code>git pull --rebase origin main</code> 자동 실행 추가</td>
         </tr>
         <tr>
+            <td>Wrap_NAV.xlsx 저장해도 자동 push 안 됨</td>
+            <td>watch_wrap_nav.py 프로세스가 꺼져 있음 (PC 재부팅 후 vbs 미실행 등)</td>
+            <td>작업 관리자에서 python.exe 확인<br><code>watch_wrap_nav.pid</code> 파일 존재 여부 확인<br>없으면 <code>start_watch_wrap_nav.vbs</code> 더블클릭으로 수동 시작</td>
+        </tr>
+        <tr>
+            <td>Wrap_NAV 수정 시 커밋이 여러 개 생성됨</td>
+            <td>watch_wrap_nav.py 중복 실행 (이전 프로세스 미종료 상태에서 재실행)</td>
+            <td>작업 관리자에서 python.exe 전부 종료 후 vbs 재실행. PID 파일 삭제 필요 시 <code>watch_wrap_nav.pid</code> 삭제</td>
+        </tr>
+        <tr>
             <td>Claude Code 재설치 후 MCP 서버/SSH 연결 끊김</td>
             <td>~/.claude.json 초기화됨 (MCP 설정 삭제)</td>
             <td><code>claude mcp add github -e GITHUB_PERSONAL_ACCESS_TOKEN=... -- npx -y @modelcontextprotocol/server-github</code><br>SSH: <code>ssh -i ~/.ssh/oracle_cloud ubuntu@152.67.199.118</code></td>
@@ -887,6 +941,26 @@
         <div class="version-date">2026-02-19</div>
         <div class="version-title">메인 대시보드에 Workflow Architecture 버튼 추가</div>
         <div class="version-desc">create_dashboard.py에 Workflow Architecture 버튼 추가. 대시보드 헤더 영역에 "🗂️ Workflow Architecture" 버튼 표시, 클릭 시 architecture.html 새 탭으로 열림.</div>
+    </div>
+    <div class="version-entry">
+        <div class="version-date">2026-02-19</div>
+        <div class="version-title">장중 자동 포트폴리오 업데이트 추가 (09:30~15:30, 30분 간격)</div>
+        <div class="version-desc">weather_bot.py에 auto_portfolio_update_job 추가. 거래일 09:30~15:30 KST 30분마다 자동으로 Dashboard 갱신 (하루 13회). 주말 자동 스킵. 삼성전자 당일 데이터 유무로 공휴일 자동 판단. 텔레그램 알림 없이 조용히 index.html만 갱신.</div>
+    </div>
+    <div class="version-entry">
+        <div class="version-date">2026-02-19</div>
+        <div class="version-title">Wrap_NAV.xlsx 파일 감시 자동 push (watch_wrap_nav.py)</div>
+        <div class="version-desc">로컬 PC에서 Wrap_NAV.xlsx 저장 시 자동으로 git commit &amp; push. watchdog 라이브러리 기반, 디바운스 8초, 실패 시 최대 3회 재시도. PID 파일로 중복 실행 방지. Windows 시작 프로그램(start_watch_wrap_nav.vbs)에 등록하여 PC 부팅 시 자동 실행.</div>
+    </div>
+    <div class="version-entry">
+        <div class="version-date">2026-02-19</div>
+        <div class="version-title">Wrap_NAV.xlsx NEW 시트 개선</div>
+        <div class="version-desc">상품명 칼럼 다음에 '업종' 칼럼 추가 (Code 시트 섹터 자동 매핑). 종목코드 중복 칼럼 삭제 (코드 칼럼과 동일한 값). NEW/기준가/수익률 시트 열 너비 자동 맞춤 + 가운데 정렬 적용. daily_portfolio_report.py가 종목코드 대신 코드 칼럼 사용으로 변경.</div>
+    </div>
+    <div class="version-entry">
+        <div class="version-date">2026-02-19</div>
+        <div class="version-title">암호화폐 차트 이름 티커로 변경</div>
+        <div class="version-desc">Dashboard 및 차트 파일명을 전체명에서 티커로 변경. Bitcoin→BTC, Ethereum→ETH, Binance Coin→BNB, Ripple→XRP, Solana→SOL. config.py, create_dashboard.py, dataset.csv, charts/*.png 모두 반영.</div>
     </div>
     <div class="version-entry">
         <div class="version-date">2026-02-13</div>
