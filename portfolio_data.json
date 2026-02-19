@@ -137,9 +137,9 @@
       "name": "SK하이닉스",
       "sector": "반도체",
       "market_cap": 6508341.1431,
-      "weight": 10,
+      "weight": 15,
       "today_return": 1.5909090909090908,
-      "contribution": 1.5909090909090908,
+      "contribution": 2.3863636363636362,
       "cumulative_return": 0.6378986866791614
     },
     {
@@ -147,19 +147,29 @@
       "name": "삼성전자",
       "sector": "반도체",
       "market_cap": 11247312.0518,
-      "weight": 10,
+      "weight": 15,
       "today_return": 4.856512141280353,
-      "contribution": 4.856512141280353,
+      "contribution": 7.28476821192053,
       "cumulative_return": 2.6102610261026227
+    },
+    {
+      "code": "277810",
+      "name": "레인보우로보틱스",
+      "sector": "기계",
+      "market_cap": 139290.98044,
+      "weight": 10,
+      "today_return": 7.164179104477612,
+      "contribution": 7.164179104477613,
+      "cumulative_return": 4.197796291319533
     },
     {
       "code": "007660",
       "name": "이수페타시스",
       "sector": "IT하드웨어",
       "market_cap": 74657.175723,
-      "weight": 6,
+      "weight": 7,
       "today_return": 0.09842519685039369,
-      "contribution": 0.05905511811023621,
+      "contribution": 0.0688976377952756,
       "cumulative_return": -1.9485462018572042
     },
     {
@@ -173,14 +183,14 @@
       "cumulative_return": 4.686577237830081
     },
     {
-      "code": "277810",
-      "name": "레인보우로보틱스",
-      "sector": "기계",
-      "market_cap": 139290.98044,
-      "weight": 6,
-      "today_return": 7.164179104477612,
-      "contribution": 4.298507462686567,
-      "cumulative_return": 4.197796291319533
+      "code": "034230",
+      "name": "파라다이스",
+      "sector": "호텔,레저서비스",
+      "market_cap": 18619.7201385,
+      "weight": 5,
+      "today_return": -1.707317073170732,
+      "contribution": -0.853658536585366,
+      "cumulative_return": -2.657004830917875
     },
     {
       "code": "241560",
@@ -193,24 +203,14 @@
       "cumulative_return": -1.4181678804139564
     },
     {
-      "code": "034230",
-      "name": "파라다이스",
-      "sector": "호텔,레저서비스",
-      "market_cap": 18619.7201385,
-      "weight": 5,
-      "today_return": -1.707317073170732,
-      "contribution": -0.853658536585366,
-      "cumulative_return": -2.657004830917875
-    },
-    {
-      "code": "003570",
-      "name": "SNT다이내믹스",
-      "sector": "자동차",
-      "market_cap": 18721.268411,
-      "weight": 2,
-      "today_return": 2.3636363636363638,
-      "contribution": 0.4727272727272727,
-      "cumulative_return": 5.23364485981308
+      "code": "439260",
+      "name": "대한조선",
+      "sector": "기타",
+      "market_cap": 29588.207616,
+      "weight": 3,
+      "today_return": 1.7218543046357615,
+      "contribution": 0.5165562913907285,
+      "cumulative_return": 0.0
     },
     {
       "code": "009240",
@@ -221,6 +221,16 @@
       "today_return": -3.189300411522634,
       "contribution": -0.6378600823045267,
       "cumulative_return": -0.5635787249031243
+    },
+    {
+      "code": "003570",
+      "name": "SNT다이내믹스",
+      "sector": "자동차",
+      "market_cap": 18721.268411,
+      "weight": 2,
+      "today_return": 2.3636363636363638,
+      "contribution": 0.4727272727272727,
+      "cumulative_return": 5.23364485981308
     },
     {
       "code": "001720",
@@ -241,6 +251,26 @@
       "today_return": 2.80561122244489,
       "contribution": 0.561122244488978,
       "cumulative_return": 1.383399209486158
+    },
+    {
+      "code": "399720",
+      "name": "가온칩스",
+      "sector": "반도체",
+      "market_cap": 8073.89232,
+      "weight": 2,
+      "today_return": 5.93607305936073,
+      "contribution": 1.187214611872146,
+      "cumulative_return": 0.0
+    },
+    {
+      "code": "039130",
+      "name": "하나투어",
+      "sector": "호텔,레저서비스",
+      "market_cap": 7806.925728,
+      "weight": 2,
+      "today_return": -0.591715976331361,
+      "contribution": -0.11834319526627218,
+      "cumulative_return": 0.0
     }
   ]
 }
