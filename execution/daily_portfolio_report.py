@@ -76,7 +76,7 @@ def get_latest_nav():
         '삼성 트루밸류': latest_row.get('트루밸류', 0),
         'NH Value ESG': latest_row.get('Value ESG', 0),
         'DB 개방형 랩': latest_row.get('개방형 랩', 0),
-        'DB 목표전환형 WRAP': latest_row.get('목표전환형', 0),
+        'DB 목표전환형 랩': latest_row.get('목표전환형', 0),
     }
     
     return latest_date, nav_data
@@ -203,7 +203,7 @@ def format_message(date, nav_data, returns_data, top_5, bottom_5):
     msg += f"{LINE}\n<b>📈 수익률</b>\n{LINE}\n"
     display_names = {
         '트루밸류': '삼성 트루밸류',
-        '목표전환형': 'DB 목표전환형 WRAP',
+        '목표전환형': 'DB 목표전환형 랩',
         'KOSPI': 'KOSPI',
         'KOSDAQ': 'KOSDAQ',
     }
