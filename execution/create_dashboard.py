@@ -56,7 +56,16 @@ def create_portfolio_tables_html():
 
             # 각 종목 행 추가
             for idx, stock in enumerate(stocks, 1):
-                market_cap_str = f"{stock['market_cap']:,.0f}억" if stock['market_cap'] > 0 else "N/A"
+                mc = stock['market_cap']
+                if mc > 0:
+                    jo = int(mc // 10000)
+                    eok = int(mc % 10000)
+                    if jo > 0:
+                        market_cap_str = f"{jo:,}조{eok:,}억" if eok > 0 else f"{jo:,}조"
+                    else:
+                        market_cap_str = f"{eok:,}억"
+                else:
+                    market_cap_str = "N/A"
 
                 # 오늘 수익률 포맷
                 today_return = stock.get('today_return')
