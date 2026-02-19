@@ -503,6 +503,39 @@ async def update_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
 
+async def auto_portfolio_update_job(context: ContextTypes.DEFAULT_TYPE):
+    """거래일 30분마다 자동 포트폴리오 업데이트 (텔레그램 알림 없음)"""
+    import datetime as dt_module
+    now_kst = dt_module.datetime.now(pytz.timezone('Asia/Seoul'))
+
+    # 주말 스킵
+    if now_kst.weekday() >= 5:
+        return
+
+    # 실제 거래 여부 확인: 삼성전자 오늘 데이터가 있으면 장중
+    try:
+        import FinanceDataReader as fdr
+        import pandas as pd
+        today_str = now_kst.strftime('%Y-%m-%d')
+        df = fdr.DataReader('005930', start=today_str)
+        if df.empty:
+            logging.info(f"Auto update skipped: no market data today ({today_str}, 공휴일 또는 휴장)")
+            return
+    except Exception as e:
+        logging.warning(f"Auto update: market check 실패 ({e}), 업데이트 진행")
+
+    logging.info(f"Auto portfolio update started at {now_kst.strftime('%H:%M')} KST")
+    try:
+        loop = asyncio.get_running_loop()
+        await asyncio.wait_for(
+            loop.run_in_executor(None, run_portfolio_update),
+            timeout=300.0
+        )
+        logging.info("Auto portfolio update completed successfully")
+    except Exception as e:
+        logging.error(f"Auto portfolio update failed: {e}")
+
+
 async def daily_weather_job(context: ContextTypes.DEFAULT_TYPE):
     if not SUBSCRIBERS:
         return
@@ -646,8 +679,34 @@ if __name__ == '__main__':
     job_queue.run_daily(daily_weather_job, time=weather_time)
     job_queue.run_daily(daily_portfolio_job, time=portfolio_time)
 
+    # 거래시간 30분마다 자동 포트폴리오 업데이트
+    # 09:30, 10:00, 10:30, ..., 15:00, 15:30 KST
+    try:
+        kst = pytz.timezone('Asia/Seoul')
+        trading_times = [
+            datetime.time(hour=h, minute=m, second=0, tzinfo=kst)
+            for h, m in [
+                (9,30),(10,0),(10,30),(11,0),(11,30),
+                (12,0),(12,30),(13,0),(13,30),(14,0),
+                (14,30),(15,0),(15,30)
+            ]
+        ]
+    except:
+        trading_times = [
+            datetime.time(hour=h, minute=m, second=0)
+            for h, m in [
+                (9,30),(10,0),(10,30),(11,0),(11,30),
+                (12,0),(12,30),(13,0),(13,30),(14,0),
+                (14,30),(15,0),(15,30)
+            ]
+        ]
+
+    for t in trading_times:
+        job_queue.run_daily(auto_portfolio_update_job, time=t)
+
     print(f"Bot started at {datetime.datetime.now()}")
     print(f"✅ Daily jobs scheduled:")
     print(f"  - Weather report: 06:00 KST")
     print(f"  - Portfolio update & report: 16:00 KST")
+    print(f"  - Auto portfolio update: 09:30~15:30 KST (30분 간격, 거래일만)")
     application.run_polling()
