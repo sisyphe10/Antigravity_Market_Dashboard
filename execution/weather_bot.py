@@ -542,6 +542,16 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
 
         logging.info("Starting portfolio update process...")
 
+        # 0. 최신 Wrap_NAV.xlsx 받기 (로컬 PC에서 push한 내용 반영)
+        logging.info("Step 0: Pulling latest data from GitHub...")
+        subprocess.run(
+            ["git", "pull", "origin", "main"],
+            cwd=parent_dir,
+            capture_output=True,
+            text=True,
+            timeout=60
+        )
+
         # 1. 기준가 업데이트
         logging.info("Step 1: Updating NAV prices...")
         result_nav = subprocess.run(
