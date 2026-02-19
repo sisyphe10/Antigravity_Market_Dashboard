@@ -184,54 +184,63 @@ def calculate_contributions():
     return top_5, bottom_5
 
 def format_message(date, nav_data, returns_data, top_5, bottom_5):
-    """텔레그램 메시지 포맷"""
+    """텔레그램 메시지 포맷 (HTML)"""
+    LINE = "━━━━━━━━━━━━━━━"
+
     # 리포트 날짜 기준
     report_date = get_report_date()
     day_of_week = ["월", "화", "수", "목", "금", "토", "일"][report_date.weekday()]
     date_str = f"{report_date.strftime('%Y-%m-%d')} ({day_of_week})"
-    
-    # a. 날짜
-    msg = f"a. 날짜 / {date_str}\n"
-    
-    # b. 기준가
-    msg += "b. 기준가 / \n"
+
+    msg = f"<b>📊 포트폴리오 리포트</b>\n{date_str}\n\n"
+
+    # 기준가
+    msg += f"{LINE}\n<b>💰 기준가</b>\n{LINE}\n"
     for name, value in nav_data.items():
-        msg += f"{name} {value:,.2f}\n"
-    
-    # c. 수익률
-    msg += "c. 수익률 (1D 1W 1M 3M 6M 1Y YTD)\n"
-    # 표시명 매핑
+        msg += f"{name}  {value:,.2f}\n"
+
+    # 수익률
+    msg += f"\n{LINE}\n<b>📈 수익률</b>\n{LINE}\n"
     display_names = {
         '트루밸류': '삼성 트루밸류',
         '목표전환형': 'DB 목표전환형 WRAP',
         'KOSPI': 'KOSPI',
         'KOSDAQ': 'KOSDAQ',
     }
+    periods = ['1D', '1W', '1M', '3M', '6M', '1Y', 'YTD']
     for product in ['트루밸류', '목표전환형', 'KOSPI', 'KOSDAQ']:
         if product in returns_data:
             returns = returns_data[product]
-            # NaN과 numpy 타입을 문자열로 변환
-            returns_str = " ".join([
-                str(returns.get(period, 'N/A')) if not pd.isna(returns.get(period, 'N/A')) else 'N/A'
-                for period in ['1D', '1W', '1M', '3M', '6M', '1Y', 'YTD']
-            ])
+            # N/A가 아닌 항목만 표시
+            valid_periods = []
+            for p in periods:
+                val = returns.get(p, 'N/A')
+                if not pd.isna(val) and val != 'N/A':
+                    valid_periods.append(f"{p} {val}")
+            if valid_periods:
+                name = display_names.get(product, product)
+                msg += f"<b>{name}</b>\n"
+                # 3개씩 끊어서 줄바꿈
+                for i in range(0, len(valid_periods), 3):
+                    msg += " | ".join(valid_periods[i:i+3]) + "\n"
+                msg += "\n"
 
-            msg += f"{display_names.get(product, product)}\n{returns_str}\n"
-    
-    # d. 종목별 기여도 상위
+    # 기여도 상위
+    msg += f"{LINE}\n<b>🔺 기여도 상위</b>\n{LINE}\n"
     if top_5:
-        top_str = " ".join([f"{item['stock']} {item['contribution']:+.1f}" for item in top_5])
-        msg += f"d. 종목별 기여도 상위 / \n{top_str}\n"
+        for item in top_5:
+            msg += f"{item['stock']}  {item['contribution']:+.1f}\n"
     else:
-        msg += "d. 종목별 기여도 상위 / \n데이터 없음\n"
-    
-    # e. 종목별 기여도 하위
+        msg += "데이터 없음\n"
+
+    # 기여도 하위
+    msg += f"\n{LINE}\n<b>🔻 기여도 하위</b>\n{LINE}\n"
     if bottom_5:
-        bottom_str = " ".join([f"{item['stock']} {item['contribution']:+.1f}" for item in bottom_5])
-        msg += f"e. 종목별 기여도 하위 / \n{bottom_str}"
+        for item in bottom_5:
+            msg += f"{item['stock']}  {item['contribution']:+.1f}\n"
     else:
-        msg += "e. 종목별 기여도 하위 / \n데이터 없음"
-    
+        msg += "데이터 없음\n"
+
     return msg
 
 async def send_report():
@@ -261,7 +270,7 @@ async def send_report():
     
     logging.info("5. 텔레그램 전송...")
     bot = Bot(token=token)
-    await bot.send_message(chat_id=chat_id, text=message)
+    await bot.send_message(chat_id=chat_id, text=message, parse_mode='HTML')
     
     logging.info("완료!")
     print(f"\n전송된 메시지:\n{message}")

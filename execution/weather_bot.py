@@ -118,7 +118,8 @@ async def portfolio_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await context.bot.edit_message_text(
                     chat_id=chat_id,
                     message_id=status_msg.message_id,
-                    text=report_message
+                    text=report_message,
+                    parse_mode='HTML'
                 )
             else:
                 await context.bot.edit_message_text(
