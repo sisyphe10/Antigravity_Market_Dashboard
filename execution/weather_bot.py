@@ -398,6 +398,14 @@ def run_portfolio_update():
     )
 
     if commit_result.returncode == 0:
+        # pull --rebase로 원격 변경사항 통합 후 push
+        subprocess.run(
+            ["git", "pull", "--rebase", "origin", "main"],
+            cwd=dashboard_dir,
+            capture_output=True,
+            text=True,
+            timeout=60
+        )
         push_result = subprocess.run(
             ["git", "push"],
             cwd=dashboard_dir,
