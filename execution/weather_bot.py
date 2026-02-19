@@ -315,7 +315,7 @@ def fetch_price(code):
     from datetime import timedelta
     import pandas as pd
     try:
-        df = fdr.DataReader(code, start=pd.Timestamp.now() - timedelta(days=5))
+        df = fdr.DataReader(code, start=pd.Timestamp.now() - timedelta(days=30))
         if len(df) < 2:
             return code, None
         latest = df.iloc[-1]['Close']
