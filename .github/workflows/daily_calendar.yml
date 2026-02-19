@@ -2,8 +2,8 @@ name: Daily Calendar Alert
 
 on:
   schedule:
-    # UTC 21:05 = KST 06:05 (날씨 알림 5분 후)
-    - cron: '5 21 * * *'
+    # UTC 20:10 = KST 05:10 (날씨 알림 10분 후)
+    - cron: '10 20 * * *'
   workflow_dispatch:  # 수동 실행 가능
 
 jobs:

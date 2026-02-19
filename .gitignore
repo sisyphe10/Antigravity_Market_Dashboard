@@ -26,6 +26,8 @@ test_env/
 *.xlsx
 *.csv
 *.db
+!dataset.csv
+!Wrap_NAV.xlsx
 
 # 로그
 *.log
@@ -40,9 +42,13 @@ Thumbs.db
 *.swp
 *.swo
 
-# 차트
-charts/
-*.png
+# 차트 (charts/ 폴더는 워크플로우에서 커밋)
+!charts/
+charts/*
+!charts/*.png
+
+# JSON (portfolio_data.json은 워크플로우에서 커밋)
+!portfolio_data.json
 
 # 기타
 *.bat

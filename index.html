@@ -6,11 +6,11 @@
     <title>Market Data Dashboard</title>
     <style>
         :root {
-            --bg-color: #1a1a1a;
-            --card-bg: #2d2d2d;
-            --text-color: #e0e0e0;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
             --accent-color: #4a90e2;
-            --category-bg: #252525;
+            --category-bg: #eeeeee;
         }
 
         body {
@@ -24,19 +24,20 @@
         header {
             text-align: center;
             margin-bottom: 40px;
-            padding: 20px 0;
-            border-bottom: 1px solid #333;
+            padding: 20px;
+            background-color: #000000;
+            border-radius: 12px;
         }
 
         h1 {
             margin: 0;
             font-size: 2.5rem;
-            color: var(--text-color);
+            color: #ffffff;
         }
 
         .last-updated {
             margin-top: 10px;
-            color: #888;
+            color: #6c757d;
             font-style: italic;
         }
 
@@ -46,10 +47,13 @@
 
         .category-title {
             font-size: 1.8rem;
-            color: var(--accent-color);
+            color: #000000;
             margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--accent-color);
+            padding: 10px 16px;
+            background-color: #e0e0e0;
+            border-left: 4px solid #000000;
+            border-radius: 4px;
+            text-transform: uppercase;
         }
 
         .dashboard-grid {
@@ -70,7 +74,7 @@
             background-color: var(--card-bg);
             border-radius: 12px;
             padding: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s ease;
             text-align: center;
         }
@@ -83,7 +87,7 @@
             margin-top: 0;
             margin-bottom: 15px;
             font-size: 1.2rem;
-            color: #ccc;
+            color: #555555;
         }
 
         .chart-card img {
@@ -95,7 +99,7 @@
         footer {
             text-align: center;
             margin-top: 50px;
-            color: #666;
+            color: #6c757d;
             font-size: 0.9rem;
         }
 
@@ -106,10 +110,10 @@
 
         .portfolio-title {
             font-size: 1.4rem;
-            color: #e0e0e0;
+            color: #333333;
             margin-bottom: 15px;
             padding-bottom: 8px;
-            border-bottom: 1px solid #444;
+            border-bottom: 1px solid #dee2e6;
         }
 
         .table-container {
@@ -126,21 +130,21 @@
         }
 
         .portfolio-table thead {
-            background-color: #3a3a3a;
+            background-color: #e9ecef;
         }
 
         .portfolio-table th {
             padding: 12px 10px;
             text-align: left;
             font-weight: 600;
-            color: var(--accent-color);
-            border-bottom: 2px solid var(--accent-color);
+            color: #000000;
+            border-bottom: 2px solid #000000;
         }
 
         .portfolio-table td {
             padding: 10px;
-            border-bottom: 1px solid #444;
-            color: #ccc;
+            border-bottom: 1px solid #dee2e6;
+            color: #333333;
             text-align: center;
         }
 
@@ -149,7 +153,7 @@
         }
 
         .portfolio-table tbody tr:hover {
-            background-color: #3a3a3a;
+            background-color: #f5f5f5;
         }
 
         .portfolio-table .number {
@@ -168,18 +172,18 @@
         }
 
         .portfolio-table .positive {
-            color: #ff5555;
+            color: #cc0000;
             font-weight: 600;
         }
 
         .portfolio-table .negative {
-            color: #5599ff;
+            color: #0055cc;
             font-weight: 600;
         }
 
         .portfolio-table .total-row {
-            background-color: #3a3a3a;
-            border-top: 2px solid var(--accent-color);
+            background-color: #e9ecef;
+            border-top: 2px solid #000000;
         }
 
         .portfolio-table .total-row td {
@@ -191,7 +195,7 @@
 <body>
     <header>
         <h1>📊 Market Data Dashboard</h1>
-        <div class="last-updated">Last Updated: 2026-02-13 06:15:17 KST</div>
+        <div class="last-updated">Last Updated: 2026-02-18 23:53:18 KST</div>
     </header>
 
     
@@ -262,10 +266,10 @@
                                 <td>005930</td>
                                 <td>삼성전자</td>
                                 <td>반도체</td>
-                                <td>10,750,062억</td>
+                                <td>10,726,384억</td>
                                 <td>30%</td>
-                                <td class="positive">+2%</td>
-                                <td class="positive">+5.0</td>
+                                <td class="positive">+1%</td>
+                                <td class="positive">+4.4</td>
                                 <td class="positive">+200%</td>
                             </tr>
                 
@@ -274,10 +278,10 @@
                                 <td>000660</td>
                                 <td>SK하이닉스</td>
                                 <td>반도체</td>
-                                <td>6,450,101억</td>
+                                <td>6,406,421억</td>
                                 <td>15%</td>
-                                <td class="negative">-0%</td>
-                                <td class="negative">-0.7</td>
+                                <td class="negative">-1%</td>
+                                <td class="negative">-1.4</td>
                                 <td class="positive">+203%</td>
                             </tr>
                 
@@ -286,7 +290,7 @@
                                 <td>352820</td>
                                 <td>하이브</td>
                                 <td>미디어,교육</td>
-                                <td>166,993억</td>
+                                <td>167,854억</td>
                                 <td>10%</td>
                                 <td class="positive">+2%</td>
                                 <td class="positive">+2.5</td>
@@ -298,10 +302,10 @@
                                 <td>277810</td>
                                 <td>레인보우로보틱스</td>
                                 <td>기계</td>
-                                <td>129,591억</td>
+                                <td>129,979억</td>
                                 <td>10%</td>
                                 <td class="negative">-1%</td>
-                                <td class="negative">-0.9</td>
+                                <td class="negative">-0.7</td>
                                 <td class="positive">+3%</td>
                             </tr>
                 
@@ -310,10 +314,10 @@
                                 <td>001040</td>
                                 <td>CJ</td>
                                 <td>상사,자본재</td>
-                                <td>66,378억</td>
+                                <td>66,524억</td>
                                 <td>8%</td>
                                 <td class="negative">-2%</td>
-                                <td class="negative">-1.2</td>
+                                <td class="negative">-1.4</td>
                                 <td class="positive">+88%</td>
                             </tr>
                 
@@ -322,10 +326,10 @@
                                 <td>000150</td>
                                 <td>두산</td>
                                 <td>상사,자본재</td>
-                                <td>153,032억</td>
+                                <td>152,546억</td>
                                 <td>5%</td>
                                 <td class="negative">-3%</td>
-                                <td class="negative">-1.5</td>
+                                <td class="negative">-1.6</td>
                                 <td class="positive">+1%</td>
                             </tr>
                 
@@ -334,7 +338,7 @@
                                 <td>034020</td>
                                 <td>두산에너빌리티</td>
                                 <td>기계</td>
-                                <td>621,344억</td>
+                                <td>619,423억</td>
                                 <td>5%</td>
                                 <td class="positive">+1%</td>
                                 <td class="positive">+0.6</td>
@@ -343,26 +347,26 @@
                 
                             <tr>
                                 <td>8</td>
-                                <td>006800</td>
-                                <td>미래에셋증권</td>
-                                <td>증권</td>
-                                <td>348,191억</td>
-                                <td>5%</td>
-                                <td class="positive">+16%</td>
-                                <td class="positive">+7.8</td>
-                                <td class="positive">+150%</td>
+                                <td>010060</td>
+                                <td>OCI홀딩스</td>
+                                <td>화학</td>
+                                <td>28,117억</td>
+                                <td>3%</td>
+                                <td class="negative">-3%</td>
+                                <td class="negative">-1.0</td>
+                                <td class="positive">+55%</td>
                             </tr>
                 
                             <tr>
                                 <td>9</td>
-                                <td>010060</td>
-                                <td>OCI홀딩스</td>
-                                <td>화학</td>
-                                <td>27,781억</td>
+                                <td>006800</td>
+                                <td>미래에셋증권</td>
+                                <td>증권</td>
+                                <td>349,325억</td>
                                 <td>3%</td>
-                                <td class="negative">-4%</td>
-                                <td class="negative">-1.2</td>
-                                <td class="positive">+55%</td>
+                                <td class="positive">+15%</td>
+                                <td class="positive">+4.6</td>
+                                <td class="positive">+150%</td>
                             </tr>
                 
                             <tr>
@@ -370,10 +374,10 @@
                                 <td>241560</td>
                                 <td>두산밥캣</td>
                                 <td>기계</td>
-                                <td>61,827억</td>
+                                <td>62,019억</td>
                                 <td>3%</td>
-                                <td class="negative">-4%</td>
-                                <td class="negative">-1.1</td>
+                                <td class="negative">-3%</td>
+                                <td class="negative">-1.0</td>
                                 <td class="negative">-0%</td>
                             </tr>
                 
@@ -382,10 +386,10 @@
                                 <td>101490</td>
                                 <td>에스앤에스텍</td>
                                 <td>반도체</td>
-                                <td>19,009억</td>
+                                <td>19,073억</td>
                                 <td>2%</td>
-                                <td class="negative">-0%</td>
-                                <td class="negative">-0.0</td>
+                                <td class="">+0%</td>
+                                <td class="">+0.0</td>
                                 <td class="positive">+24%</td>
                             </tr>
                 
@@ -394,7 +398,7 @@
                                 <td>036810</td>
                                 <td>에프에스티</td>
                                 <td>반도체</td>
-                                <td>9,430억</td>
+                                <td>9,397억</td>
                                 <td>2%</td>
                                 <td class="negative">-1%</td>
                                 <td class="negative">-0.2</td>
@@ -406,18 +410,18 @@
                                 <td>006400</td>
                                 <td>삼성SDI</td>
                                 <td>IT가전</td>
-                                <td>302,599억</td>
+                                <td>301,793억</td>
                                 <td>2%</td>
                                 <td class="negative">-3%</td>
-                                <td class="negative">-0.5</td>
+                                <td class="negative">-0.6</td>
                                 <td class="negative">-1%</td>
                             </tr>
                 
                             <tr class="total-row">
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
-                                <td style="font-weight: 600;">100%</td>
-                                <td class="positive" style="font-weight: 600;">+1%</td>
-                                <td class="positive" style="font-weight: 600;">+8.6</td>
+                                <td style="font-weight: 600;">98%</td>
+                                <td class="positive" style="font-weight: 600;">+0%</td>
+                                <td class="positive" style="font-weight: 600;">+4.2</td>
                                 <td style="font-weight: 600;">-</td>
                             </tr>
                         </tbody>
@@ -446,6 +450,30 @@
             
                             <tr>
                                 <td>1</td>
+                                <td>000660</td>
+                                <td>SK하이닉스</td>
+                                <td>반도체</td>
+                                <td>6,406,421억</td>
+                                <td>10%</td>
+                                <td class="negative">-1%</td>
+                                <td class="negative">-0.9</td>
+                                <td class="negative">-0%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>2</td>
+                                <td>005930</td>
+                                <td>삼성전자</td>
+                                <td>반도체</td>
+                                <td>10,726,384억</td>
+                                <td>10%</td>
+                                <td class="positive">+1%</td>
+                                <td class="positive">+1.5</td>
+                                <td class="positive">+0%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>3</td>
                                 <td>007660</td>
                                 <td>이수페타시스</td>
                                 <td>IT하드웨어</td>
@@ -457,19 +485,7 @@
                             </tr>
                 
                             <tr>
-                                <td>2</td>
-                                <td>277810</td>
-                                <td>레인보우로보틱스</td>
-                                <td>기계</td>
-                                <td>129,591억</td>
-                                <td>6%</td>
-                                <td class="negative">-1%</td>
-                                <td class="negative">-0.5</td>
-                                <td class="negative">-0%</td>
-                            </tr>
-                
-                            <tr>
-                                <td>3</td>
+                                <td>4</td>
                                 <td>017800</td>
                                 <td>현대엘리베이터</td>
                                 <td>기계</td>
@@ -481,51 +497,39 @@
                             </tr>
                 
                             <tr>
-                                <td>4</td>
-                                <td>241560</td>
-                                <td>두산밥캣</td>
-                                <td>기계</td>
-                                <td>61,827억</td>
-                                <td>5%</td>
-                                <td class="negative">-4%</td>
-                                <td class="negative">-1.8</td>
-                                <td class="negative">-1%</td>
-                            </tr>
-                
-                            <tr>
                                 <td>5</td>
-                                <td>000660</td>
-                                <td>SK하이닉스</td>
-                                <td>반도체</td>
-                                <td>6,450,101억</td>
-                                <td>5%</td>
-                                <td class="negative">-0%</td>
-                                <td class="negative">-0.2</td>
+                                <td>277810</td>
+                                <td>레인보우로보틱스</td>
+                                <td>기계</td>
+                                <td>129,979억</td>
+                                <td>6%</td>
+                                <td class="negative">-1%</td>
+                                <td class="negative">-0.4</td>
                                 <td class="negative">-0%</td>
                             </tr>
                 
                             <tr>
                                 <td>6</td>
-                                <td>034230</td>
-                                <td>파라다이스</td>
-                                <td>호텔,레저서비스</td>
-                                <td>18,897억</td>
+                                <td>241560</td>
+                                <td>두산밥캣</td>
+                                <td>기계</td>
+                                <td>62,019억</td>
                                 <td>5%</td>
+                                <td class="negative">-3%</td>
+                                <td class="negative">-1.7</td>
                                 <td class="negative">-1%</td>
-                                <td class="negative">-0.5</td>
-                                <td class="negative">-2%</td>
                             </tr>
                 
                             <tr>
                                 <td>7</td>
-                                <td>005930</td>
-                                <td>삼성전자</td>
-                                <td>반도체</td>
-                                <td>10,750,062억</td>
+                                <td>034230</td>
+                                <td>파라다이스</td>
+                                <td>호텔,레저서비스</td>
+                                <td>18,943억</td>
                                 <td>5%</td>
-                                <td class="positive">+2%</td>
-                                <td class="positive">+0.8</td>
-                                <td class="positive">+1%</td>
+                                <td class="negative">-1%</td>
+                                <td class="negative">-0.6</td>
+                                <td class="negative">-2%</td>
                             </tr>
                 
                             <tr>
@@ -533,11 +537,11 @@
                                 <td>003570</td>
                                 <td>SNT다이내믹스</td>
                                 <td>자동차</td>
-                                <td>18,189억</td>
+                                <td>18,289억</td>
                                 <td>2%</td>
-                                <td class="positive">+11%</td>
-                                <td class="positive">+2.1</td>
-                                <td class="positive">+5%</td>
+                                <td class="positive">+12%</td>
+                                <td class="positive">+2.4</td>
+                                <td class="positive">+6%</td>
                             </tr>
                 
                             <tr>
@@ -545,18 +549,42 @@
                                 <td>009240</td>
                                 <td>한샘</td>
                                 <td>건설,건축관련</td>
-                                <td>11,367억</td>
+                                <td>11,437억</td>
                                 <td>2%</td>
-                                <td class="positive">+4%</td>
-                                <td class="positive">+0.8</td>
+                                <td class="positive">+5%</td>
+                                <td class="positive">+1.0</td>
                                 <td class="positive">+2%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>10</td>
+                                <td>001720</td>
+                                <td>신영증권</td>
+                                <td>증권</td>
+                                <td>37,401억</td>
+                                <td>2%</td>
+                                <td class="positive">+17%</td>
+                                <td class="positive">+3.4</td>
+                                <td class="">+0%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>11</td>
+                                <td>005380</td>
+                                <td>현대차</td>
+                                <td>자동차</td>
+                                <td>1,021,741억</td>
+                                <td>2%</td>
+                                <td class="negative">-1%</td>
+                                <td class="negative">-0.3</td>
+                                <td class="">+0%</td>
                             </tr>
                 
                             <tr class="total-row">
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
-                                <td style="font-weight: 600;">42%</td>
+                                <td style="font-weight: 600;">56%</td>
                                 <td class="positive" style="font-weight: 600;">+0%</td>
-                                <td class="positive" style="font-weight: 600;">+0.1</td>
+                                <td class="positive" style="font-weight: 600;">+3.6</td>
                                 <td style="font-weight: 600;">-</td>
                             </tr>
                         </tbody>
@@ -568,62 +596,54 @@
             </div>
             
             <div class="category-section">
-                <h2 class="category-title">Memory</h2>
+                <h2 class="category-title">INDEX_KOREA</h2>
                 <div class="dashboard-grid">
             
                 <div class="chart-card">
                     <!-- Title removed as requested (it's inside the chart now) -->
-                    <!-- <h3>SLC 2Gb 256MBx8</h3> -->
-                    <a href="charts/SLC_2Gb_256MBx8.png" target="_blank">
-                        <img src="charts/SLC_2Gb_256MBx8.png" alt="SLC 2Gb 256MBx8" loading="lazy">
+                    <!-- <h3>KOSPI</h3> -->
+                    <a href="charts/KOSPI.png" target="_blank">
+                        <img src="charts/KOSPI.png" alt="KOSPI" loading="lazy">
                     </a>
                 </div>
                 
                 <div class="chart-card">
                     <!-- Title removed as requested (it's inside the chart now) -->
-                    <!-- <h3>SLC 1Gb 128MBx8</h3> -->
-                    <a href="charts/SLC_1Gb_128MBx8.png" target="_blank">
-                        <img src="charts/SLC_1Gb_128MBx8.png" alt="SLC 1Gb 128MBx8" loading="lazy">
+                    <!-- <h3>KOSPI/USD</h3> -->
+                    <a href="charts/KOSPI_USD.png" target="_blank">
+                        <img src="charts/KOSPI_USD.png" alt="KOSPI/USD" loading="lazy">
                     </a>
                 </div>
                 
                 <div class="chart-card">
                     <!-- Title removed as requested (it's inside the chart now) -->
-                    <!-- <h3>MLC 64Gb 8GBx8</h3> -->
-                    <a href="charts/MLC_64Gb_8GBx8.png" target="_blank">
-                        <img src="charts/MLC_64Gb_8GBx8.png" alt="MLC 64Gb 8GBx8" loading="lazy">
+                    <!-- <h3>KOSPI/USD</h3> -->
+                    <a href="charts/KOSPI_USD_.png" target="_blank">
+                        <img src="charts/KOSPI_USD_.png" alt="KOSPI/USD" loading="lazy">
                     </a>
                 </div>
                 
                 <div class="chart-card">
                     <!-- Title removed as requested (it's inside the chart now) -->
-                    <!-- <h3>MLC 32Gb 4GBx8</h3> -->
-                    <a href="charts/MLC_32Gb_4GBx8.png" target="_blank">
-                        <img src="charts/MLC_32Gb_4GBx8.png" alt="MLC 32Gb 4GBx8" loading="lazy">
+                    <!-- <h3>KOSDAQ</h3> -->
+                    <a href="charts/KOSDAQ.png" target="_blank">
+                        <img src="charts/KOSDAQ.png" alt="KOSDAQ" loading="lazy">
                     </a>
                 </div>
                 
                 <div class="chart-card">
                     <!-- Title removed as requested (it's inside the chart now) -->
-                    <!-- <h3>DDR4 16Gb  2Gx8 3200</h3> -->
-                    <a href="charts/DDR4_16Gb__2Gx8_3200.png" target="_blank">
-                        <img src="charts/DDR4_16Gb__2Gx8_3200.png" alt="DDR4 16Gb  2Gx8 3200" loading="lazy">
+                    <!-- <h3>KOSDAQ/USD</h3> -->
+                    <a href="charts/KOSDAQ_USD.png" target="_blank">
+                        <img src="charts/KOSDAQ_USD.png" alt="KOSDAQ/USD" loading="lazy">
                     </a>
                 </div>
                 
                 <div class="chart-card">
                     <!-- Title removed as requested (it's inside the chart now) -->
-                    <!-- <h3>DDR4 8Gb  1Gx8  3200</h3> -->
-                    <a href="charts/DDR4_8Gb__1Gx8__3200.png" target="_blank">
-                        <img src="charts/DDR4_8Gb__1Gx8__3200.png" alt="DDR4 8Gb  1Gx8  3200" loading="lazy">
-                    </a>
-                </div>
-                
-                <div class="chart-card">
-                    <!-- Title removed as requested (it's inside the chart now) -->
-                    <!-- <h3>DDR5 16G  2Gx8  4800 5600</h3> -->
-                    <a href="charts/DDR5_16G__2Gx8__4800_5600.png" target="_blank">
-                        <img src="charts/DDR5_16G__2Gx8__4800_5600.png" alt="DDR5 16G  2Gx8  4800 5600" loading="lazy">
+                    <!-- <h3>KOSDAQ/USD</h3> -->
+                    <a href="charts/KOSDAQ_USD_.png" target="_blank">
+                        <img src="charts/KOSDAQ_USD_.png" alt="KOSDAQ/USD" loading="lazy">
                     </a>
                 </div>
                 
@@ -631,54 +651,7 @@
             </div>
             
             <div class="category-section">
-                <h2 class="category-title">Cryptocurrency</h2>
-                <div class="dashboard-grid">
-            
-                <div class="chart-card">
-                    <!-- Title removed as requested (it's inside the chart now) -->
-                    <!-- <h3>Bitcoin</h3> -->
-                    <a href="charts/Bitcoin.png" target="_blank">
-                        <img src="charts/Bitcoin.png" alt="Bitcoin" loading="lazy">
-                    </a>
-                </div>
-                
-                <div class="chart-card">
-                    <!-- Title removed as requested (it's inside the chart now) -->
-                    <!-- <h3>Ethereum</h3> -->
-                    <a href="charts/Ethereum.png" target="_blank">
-                        <img src="charts/Ethereum.png" alt="Ethereum" loading="lazy">
-                    </a>
-                </div>
-                
-                <div class="chart-card">
-                    <!-- Title removed as requested (it's inside the chart now) -->
-                    <!-- <h3>Binance Coin</h3> -->
-                    <a href="charts/Binance_Coin.png" target="_blank">
-                        <img src="charts/Binance_Coin.png" alt="Binance Coin" loading="lazy">
-                    </a>
-                </div>
-                
-                <div class="chart-card">
-                    <!-- Title removed as requested (it's inside the chart now) -->
-                    <!-- <h3>Ripple</h3> -->
-                    <a href="charts/Ripple.png" target="_blank">
-                        <img src="charts/Ripple.png" alt="Ripple" loading="lazy">
-                    </a>
-                </div>
-                
-                <div class="chart-card">
-                    <!-- Title removed as requested (it's inside the chart now) -->
-                    <!-- <h3>Solana</h3> -->
-                    <a href="charts/Solana.png" target="_blank">
-                        <img src="charts/Solana.png" alt="Solana" loading="lazy">
-                    </a>
-                </div>
-                
-                </div>
-            </div>
-            
-            <div class="category-section">
-                <h2 class="category-title">US Indices</h2>
+                <h2 class="category-title">INDEX_US</h2>
                 <div class="dashboard-grid">
             
                 <div class="chart-card">
@@ -765,7 +738,179 @@
             </div>
             
             <div class="category-section">
-                <h2 class="category-title">Commodities</h2>
+                <h2 class="category-title">EXCHANGE RATE</h2>
+                <div class="dashboard-grid">
+            
+                <div class="chart-card">
+                    <!-- Title removed as requested (it's inside the chart now) -->
+                    <!-- <h3>Dollar Index (DXY)</h3> -->
+                    <a href="charts/Dollar_Index__DXY_.png" target="_blank">
+                        <img src="charts/Dollar_Index__DXY_.png" alt="Dollar Index (DXY)" loading="lazy">
+                    </a>
+                </div>
+                
+                <div class="chart-card">
+                    <!-- Title removed as requested (it's inside the chart now) -->
+                    <!-- <h3>KRW/USD</h3> -->
+                    <a href="charts/KRW_USD.png" target="_blank">
+                        <img src="charts/KRW_USD.png" alt="KRW/USD" loading="lazy">
+                    </a>
+                </div>
+                
+                <div class="chart-card">
+                    <!-- Title removed as requested (it's inside the chart now) -->
+                    <!-- <h3>CNY/USD</h3> -->
+                    <a href="charts/CNY_USD.png" target="_blank">
+                        <img src="charts/CNY_USD.png" alt="CNY/USD" loading="lazy">
+                    </a>
+                </div>
+                
+                <div class="chart-card">
+                    <!-- Title removed as requested (it's inside the chart now) -->
+                    <!-- <h3>JPY/USD</h3> -->
+                    <a href="charts/JPY_USD.png" target="_blank">
+                        <img src="charts/JPY_USD.png" alt="JPY/USD" loading="lazy">
+                    </a>
+                </div>
+                
+                <div class="chart-card">
+                    <!-- Title removed as requested (it's inside the chart now) -->
+                    <!-- <h3>TWD/USD</h3> -->
+                    <a href="charts/TWD_USD.png" target="_blank">
+                        <img src="charts/TWD_USD.png" alt="TWD/USD" loading="lazy">
+                    </a>
+                </div>
+                
+                <div class="chart-card">
+                    <!-- Title removed as requested (it's inside the chart now) -->
+                    <!-- <h3>EUR/USD</h3> -->
+                    <a href="charts/EUR_USD.png" target="_blank">
+                        <img src="charts/EUR_USD.png" alt="EUR/USD" loading="lazy">
+                    </a>
+                </div>
+                
+                </div>
+            </div>
+            
+            <div class="category-section">
+                <h2 class="category-title">INTEREST RATES</h2>
+                <div class="dashboard-grid">
+            
+                <div class="chart-card">
+                    <!-- Title removed as requested (it's inside the chart now) -->
+                    <!-- <h3>US 13 Week Treasury Yield</h3> -->
+                    <a href="charts/US_13_Week_Treasury_Yield.png" target="_blank">
+                        <img src="charts/US_13_Week_Treasury_Yield.png" alt="US 13 Week Treasury Yield" loading="lazy">
+                    </a>
+                </div>
+                
+                <div class="chart-card">
+                    <!-- Title removed as requested (it's inside the chart now) -->
+                    <!-- <h3>US 5 Year Treasury Yield</h3> -->
+                    <a href="charts/US_5_Year_Treasury_Yield.png" target="_blank">
+                        <img src="charts/US_5_Year_Treasury_Yield.png" alt="US 5 Year Treasury Yield" loading="lazy">
+                    </a>
+                </div>
+                
+                <div class="chart-card">
+                    <!-- Title removed as requested (it's inside the chart now) -->
+                    <!-- <h3>US 10 Year Treasury Yield</h3> -->
+                    <a href="charts/US_10_Year_Treasury_Yield.png" target="_blank">
+                        <img src="charts/US_10_Year_Treasury_Yield.png" alt="US 10 Year Treasury Yield" loading="lazy">
+                    </a>
+                </div>
+                
+                <div class="chart-card">
+                    <!-- Title removed as requested (it's inside the chart now) -->
+                    <!-- <h3>US 30 Year Treasury Yield</h3> -->
+                    <a href="charts/US_30_Year_Treasury_Yield.png" target="_blank">
+                        <img src="charts/US_30_Year_Treasury_Yield.png" alt="US 30 Year Treasury Yield" loading="lazy">
+                    </a>
+                </div>
+                
+                </div>
+            </div>
+            
+            <div class="category-section">
+                <h2 class="category-title">CRYPTOCURRENCY</h2>
+                <div class="dashboard-grid">
+            
+                <div class="chart-card">
+                    <!-- Title removed as requested (it's inside the chart now) -->
+                    <!-- <h3>Bitcoin</h3> -->
+                    <a href="charts/Bitcoin.png" target="_blank">
+                        <img src="charts/Bitcoin.png" alt="Bitcoin" loading="lazy">
+                    </a>
+                </div>
+                
+                <div class="chart-card">
+                    <!-- Title removed as requested (it's inside the chart now) -->
+                    <!-- <h3>Ethereum</h3> -->
+                    <a href="charts/Ethereum.png" target="_blank">
+                        <img src="charts/Ethereum.png" alt="Ethereum" loading="lazy">
+                    </a>
+                </div>
+                
+                <div class="chart-card">
+                    <!-- Title removed as requested (it's inside the chart now) -->
+                    <!-- <h3>Binance Coin</h3> -->
+                    <a href="charts/Binance_Coin.png" target="_blank">
+                        <img src="charts/Binance_Coin.png" alt="Binance Coin" loading="lazy">
+                    </a>
+                </div>
+                
+                <div class="chart-card">
+                    <!-- Title removed as requested (it's inside the chart now) -->
+                    <!-- <h3>Ripple</h3> -->
+                    <a href="charts/Ripple.png" target="_blank">
+                        <img src="charts/Ripple.png" alt="Ripple" loading="lazy">
+                    </a>
+                </div>
+                
+                <div class="chart-card">
+                    <!-- Title removed as requested (it's inside the chart now) -->
+                    <!-- <h3>Solana</h3> -->
+                    <a href="charts/Solana.png" target="_blank">
+                        <img src="charts/Solana.png" alt="Solana" loading="lazy">
+                    </a>
+                </div>
+                
+                </div>
+            </div>
+            
+            <div class="category-section">
+                <h2 class="category-title">MEMORY</h2>
+                <div class="dashboard-grid">
+            
+                <div class="chart-card">
+                    <!-- Title removed as requested (it's inside the chart now) -->
+                    <!-- <h3>DDR4 16Gb  2Gx8 3200</h3> -->
+                    <a href="charts/DDR4_16Gb__2Gx8_3200.png" target="_blank">
+                        <img src="charts/DDR4_16Gb__2Gx8_3200.png" alt="DDR4 16Gb  2Gx8 3200" loading="lazy">
+                    </a>
+                </div>
+                
+                <div class="chart-card">
+                    <!-- Title removed as requested (it's inside the chart now) -->
+                    <!-- <h3>DDR4 8Gb  1Gx8  3200</h3> -->
+                    <a href="charts/DDR4_8Gb__1Gx8__3200.png" target="_blank">
+                        <img src="charts/DDR4_8Gb__1Gx8__3200.png" alt="DDR4 8Gb  1Gx8  3200" loading="lazy">
+                    </a>
+                </div>
+                
+                <div class="chart-card">
+                    <!-- Title removed as requested (it's inside the chart now) -->
+                    <!-- <h3>DDR5 16G  2Gx8  4800 5600</h3> -->
+                    <a href="charts/DDR5_16G__2Gx8__4800_5600.png" target="_blank">
+                        <img src="charts/DDR5_16G__2Gx8__4800_5600.png" alt="DDR5 16G  2Gx8  4800 5600" loading="lazy">
+                    </a>
+                </div>
+                
+                </div>
+            </div>
+            
+            <div class="category-section">
+                <h2 class="category-title">COMMODITIES</h2>
                 <div class="dashboard-grid">
             
                 <div class="chart-card">
@@ -837,100 +982,6 @@
                     <!-- <h3>SCFI Comprehensive Index</h3> -->
                     <a href="charts/SCFI_Comprehensive_Index.png" target="_blank">
                         <img src="charts/SCFI_Comprehensive_Index.png" alt="SCFI Comprehensive Index" loading="lazy">
-                    </a>
-                </div>
-                
-                </div>
-            </div>
-            
-            <div class="category-section">
-                <h2 class="category-title">Exchange Rate</h2>
-                <div class="dashboard-grid">
-            
-                <div class="chart-card">
-                    <!-- Title removed as requested (it's inside the chart now) -->
-                    <!-- <h3>Dollar Index (DXY)</h3> -->
-                    <a href="charts/Dollar_Index__DXY_.png" target="_blank">
-                        <img src="charts/Dollar_Index__DXY_.png" alt="Dollar Index (DXY)" loading="lazy">
-                    </a>
-                </div>
-                
-                <div class="chart-card">
-                    <!-- Title removed as requested (it's inside the chart now) -->
-                    <!-- <h3>KRW/USD</h3> -->
-                    <a href="charts/KRW_USD.png" target="_blank">
-                        <img src="charts/KRW_USD.png" alt="KRW/USD" loading="lazy">
-                    </a>
-                </div>
-                
-                <div class="chart-card">
-                    <!-- Title removed as requested (it's inside the chart now) -->
-                    <!-- <h3>CNY/USD</h3> -->
-                    <a href="charts/CNY_USD.png" target="_blank">
-                        <img src="charts/CNY_USD.png" alt="CNY/USD" loading="lazy">
-                    </a>
-                </div>
-                
-                <div class="chart-card">
-                    <!-- Title removed as requested (it's inside the chart now) -->
-                    <!-- <h3>JPY/USD</h3> -->
-                    <a href="charts/JPY_USD.png" target="_blank">
-                        <img src="charts/JPY_USD.png" alt="JPY/USD" loading="lazy">
-                    </a>
-                </div>
-                
-                <div class="chart-card">
-                    <!-- Title removed as requested (it's inside the chart now) -->
-                    <!-- <h3>TWD/USD</h3> -->
-                    <a href="charts/TWD_USD.png" target="_blank">
-                        <img src="charts/TWD_USD.png" alt="TWD/USD" loading="lazy">
-                    </a>
-                </div>
-                
-                <div class="chart-card">
-                    <!-- Title removed as requested (it's inside the chart now) -->
-                    <!-- <h3>EUR/USD</h3> -->
-                    <a href="charts/EUR_USD.png" target="_blank">
-                        <img src="charts/EUR_USD.png" alt="EUR/USD" loading="lazy">
-                    </a>
-                </div>
-                
-                </div>
-            </div>
-            
-            <div class="category-section">
-                <h2 class="category-title">Interest Rates</h2>
-                <div class="dashboard-grid">
-            
-                <div class="chart-card">
-                    <!-- Title removed as requested (it's inside the chart now) -->
-                    <!-- <h3>US 13 Week Treasury Yield</h3> -->
-                    <a href="charts/US_13_Week_Treasury_Yield.png" target="_blank">
-                        <img src="charts/US_13_Week_Treasury_Yield.png" alt="US 13 Week Treasury Yield" loading="lazy">
-                    </a>
-                </div>
-                
-                <div class="chart-card">
-                    <!-- Title removed as requested (it's inside the chart now) -->
-                    <!-- <h3>US 5 Year Treasury Yield</h3> -->
-                    <a href="charts/US_5_Year_Treasury_Yield.png" target="_blank">
-                        <img src="charts/US_5_Year_Treasury_Yield.png" alt="US 5 Year Treasury Yield" loading="lazy">
-                    </a>
-                </div>
-                
-                <div class="chart-card">
-                    <!-- Title removed as requested (it's inside the chart now) -->
-                    <!-- <h3>US 10 Year Treasury Yield</h3> -->
-                    <a href="charts/US_10_Year_Treasury_Yield.png" target="_blank">
-                        <img src="charts/US_10_Year_Treasury_Yield.png" alt="US 10 Year Treasury Yield" loading="lazy">
-                    </a>
-                </div>
-                
-                <div class="chart-card">
-                    <!-- Title removed as requested (it's inside the chart now) -->
-                    <!-- <h3>US 30 Year Treasury Yield</h3> -->
-                    <a href="charts/US_30_Year_Treasury_Yield.png" target="_blank">
-                        <img src="charts/US_30_Year_Treasury_Yield.png" alt="US 30 Year Treasury Yield" loading="lazy">
                     </a>
                 </div>
                 

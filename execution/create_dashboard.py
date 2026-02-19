@@ -135,16 +135,16 @@ def get_item_category(item_name):
     """Get category for an item by looking up in dataset.csv"""
     # Special handling for DDR items (they should be in Memory)
     if 'DDR4' in item_name or 'DDR5' in item_name:
-        return 'Memory'
+        return 'MEMORY'
 
     # Special handling for S&P 500 related items (should be in US Indices)
     # Handle all variations: "S&P 500", "S_P_500", "S P 500"
     if 'S&P 500' in item_name or 'S_P_500' in item_name or 'S P 500' in item_name:
-        return 'US Indices'
+        return 'INDEX_US'
 
     # Special handling for Uranium ETF (should be in Commodities)
     if 'Uranium' in item_name or 'URA' in item_name:
-        return 'Commodities'
+        return 'COMMODITIES'
 
     # Special handling for Wrap portfolios
     wrap_keywords = ['트루밸류', '삼성 트루밸류', 'Value ESG', 'NH Value ESG',
@@ -193,7 +193,7 @@ def create_dashboard():
                 item_name = 'Dollar Index (DXY)'
                 
             # Fix FX naming: convert "XXX USD" to "XXX/USD" to match dataset format
-            item_name = item_name.replace(' USD', '/USD')
+            item_name = item_name.replace(' USD', '/USD').strip()
             
             # Get category
             category = get_item_category(item_name)
@@ -211,8 +211,8 @@ def create_dashboard():
         charts_html = ""
         
         # Define category order for better organization
-        category_order = ['Wrap', 'Portfolio', 'Memory', 'Cryptocurrency', 'US Indices', 'Market Indices',
-                         'Commodities', 'Exchange Rate', 'Interest Rates']
+        category_order = ['Wrap', 'Portfolio', 'INDEX_KOREA', 'INDEX_US', 'EXCHANGE RATE', 'INTEREST RATES',
+                         'CRYPTOCURRENCY', 'MEMORY', 'COMMODITIES']
         
         for category in category_order:
             # Portfolio는 차트가 아니라 테이블이므로 특별 처리
@@ -240,11 +240,11 @@ def create_dashboard():
             # ========================================
             
             # Cryptocurrency order
-            if category == 'Cryptocurrency':
+            if category == 'CRYPTOCURRENCY':
                 custom_order = ['Bitcoin', 'Ethereum', 'Binance Coin', 'Ripple', 'Solana']
-            
+
             # Memory order
-            elif category == 'Memory':
+            elif category == 'MEMORY':
                 custom_order = [
                     'DDR5 16G (2Gx8) 4800/5600',
                     'DDR4 16Gb (2Gx8)3200',
@@ -258,7 +258,7 @@ def create_dashboard():
                 ]
             
             # US Indices order
-            elif category == 'US Indices':
+            elif category == 'INDEX_US':
                 custom_order = [
                     'S&P 500',
                     'S&P 500 PER',
@@ -273,7 +273,7 @@ def create_dashboard():
                 ]
             
             # Commodities order
-            elif category == 'Commodities':
+            elif category == 'COMMODITIES':
                 custom_order = [
                     'Gold',
                     'Silver',
@@ -287,7 +287,7 @@ def create_dashboard():
                 ]
             
             # Exchange Rate order
-            elif category == 'Exchange Rate':
+            elif category == 'EXCHANGE RATE':
                 custom_order = [
                     'Dollar Index (DXY)',
                     'KRW/USD',
@@ -298,7 +298,7 @@ def create_dashboard():
                 ]
             
             # Interest Rates order
-            elif category == 'Interest Rates':
+            elif category == 'INTEREST RATES':
                 custom_order = [
                     'US 13 Week Treasury Yield',
                     'US 5 Year Treasury Yield',
@@ -313,6 +313,15 @@ def create_dashboard():
                     'NH Value ESG',
                     'DB 개방형',
                     'DB 목표전환형'
+                ]
+
+            # Korea Indices order
+            elif category == 'INDEX_KOREA':
+                custom_order = [
+                    'KOSPI',
+                    'KOSPI/USD',
+                    'KOSDAQ',
+                    'KOSDAQ/USD'
                 ]
 
             else:
@@ -362,11 +371,11 @@ def create_dashboard():
     <title>Market Data Dashboard</title>
     <style>
         :root {{
-            --bg-color: #1a1a1a;
-            --card-bg: #2d2d2d;
-            --text-color: #e0e0e0;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
             --accent-color: #4a90e2;
-            --category-bg: #252525;
+            --category-bg: #eeeeee;
         }}
 
         body {{
@@ -380,19 +389,20 @@ def create_dashboard():
         header {{
             text-align: center;
             margin-bottom: 40px;
-            padding: 20px 0;
-            border-bottom: 1px solid #333;
+            padding: 20px;
+            background-color: #000000;
+            border-radius: 12px;
         }}
 
         h1 {{
             margin: 0;
             font-size: 2.5rem;
-            color: var(--text-color);
+            color: #ffffff;
         }}
 
         .last-updated {{
             margin-top: 10px;
-            color: #888;
+            color: #6c757d;
             font-style: italic;
         }}
 
@@ -402,10 +412,13 @@ def create_dashboard():
 
         .category-title {{
             font-size: 1.8rem;
-            color: var(--accent-color);
+            color: #000000;
             margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--accent-color);
+            padding: 10px 16px;
+            background-color: #e0e0e0;
+            border-left: 4px solid #000000;
+            border-radius: 4px;
+            text-transform: uppercase;
         }}
 
         .dashboard-grid {{
@@ -426,7 +439,7 @@ def create_dashboard():
             background-color: var(--card-bg);
             border-radius: 12px;
             padding: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s ease;
             text-align: center;
         }}
@@ -439,7 +452,7 @@ def create_dashboard():
             margin-top: 0;
             margin-bottom: 15px;
             font-size: 1.2rem;
-            color: #ccc;
+            color: #555555;
         }}
 
         .chart-card img {{
@@ -451,7 +464,7 @@ def create_dashboard():
         footer {{
             text-align: center;
             margin-top: 50px;
-            color: #666;
+            color: #6c757d;
             font-size: 0.9rem;
         }}
 
@@ -462,10 +475,10 @@ def create_dashboard():
 
         .portfolio-title {{
             font-size: 1.4rem;
-            color: #e0e0e0;
+            color: #333333;
             margin-bottom: 15px;
             padding-bottom: 8px;
-            border-bottom: 1px solid #444;
+            border-bottom: 1px solid #dee2e6;
         }}
 
         .table-container {{
@@ -482,21 +495,21 @@ def create_dashboard():
         }}
 
         .portfolio-table thead {{
-            background-color: #3a3a3a;
+            background-color: #e9ecef;
         }}
 
         .portfolio-table th {{
             padding: 12px 10px;
             text-align: left;
             font-weight: 600;
-            color: var(--accent-color);
-            border-bottom: 2px solid var(--accent-color);
+            color: #000000;
+            border-bottom: 2px solid #000000;
         }}
 
         .portfolio-table td {{
             padding: 10px;
-            border-bottom: 1px solid #444;
-            color: #ccc;
+            border-bottom: 1px solid #dee2e6;
+            color: #333333;
             text-align: center;
         }}
 
@@ -505,7 +518,7 @@ def create_dashboard():
         }}
 
         .portfolio-table tbody tr:hover {{
-            background-color: #3a3a3a;
+            background-color: #f5f5f5;
         }}
 
         .portfolio-table .number {{
@@ -524,18 +537,18 @@ def create_dashboard():
         }}
 
         .portfolio-table .positive {{
-            color: #ff5555;
+            color: #cc0000;
             font-weight: 600;
         }}
 
         .portfolio-table .negative {{
-            color: #5599ff;
+            color: #0055cc;
             font-weight: 600;
         }}
 
         .portfolio-table .total-row {{
-            background-color: #3a3a3a;
-            border-top: 2px solid var(--accent-color);
+            background-color: #e9ecef;
+            border-top: 2px solid #000000;
         }}
 
         .portfolio-table .total-row td {{
