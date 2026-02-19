@@ -677,15 +677,12 @@ if __name__ == '__main__':
     try:
         import pytz
         kst = pytz.timezone('Asia/Seoul')
-        # 매일 아침 5시 - 날씨 알림
-        weather_time = datetime.time(hour=5, minute=0, second=0, tzinfo=kst)
         # 매일 오후 4시 - 포트폴리오 업데이트 및 리포트
         portfolio_time = datetime.time(hour=16, minute=0, second=0, tzinfo=kst)
     except:
-        weather_time = datetime.time(hour=5, minute=0, second=0)
         portfolio_time = datetime.time(hour=16, minute=0, second=0)
 
-    job_queue.run_daily(daily_weather_job, time=weather_time)
+    # 날씨 알림은 GitHub Actions에서 전송 (daily_weather.yml, KST 05:00)
     job_queue.run_daily(daily_portfolio_job, time=portfolio_time)
 
     # 거래시간 30분마다 자동 포트폴리오 업데이트
