@@ -22,11 +22,24 @@ TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 # Market Dashboard 저장소 경로
 DASHBOARD_DIR = os.path.join(os.path.expanduser('~'), 'Antigravity_Market_Dashboard')
 
-SUBSCRIBERS = set()
+SUBSCRIBERS_FILE = os.path.join(DASHBOARD_DIR, 'subscribers.json')
+
+def load_subscribers():
+    if os.path.exists(SUBSCRIBERS_FILE):
+        with open(SUBSCRIBERS_FILE, 'r') as f:
+            return set(json.load(f))
+    return set()
+
+def save_subscribers():
+    with open(SUBSCRIBERS_FILE, 'w') as f:
+        json.dump(list(SUBSCRIBERS), f)
+
+SUBSCRIBERS = load_subscribers()
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
     SUBSCRIBERS.add(user_id)
+    save_subscribers()
     await context.bot.send_message(
         chat_id=user_id,
         text="반갑습니다! 포트폴리오 리포트와 장중 업데이트를 알려드릴게요.\n/help 로 명령어를 확인하세요."
@@ -37,6 +50,7 @@ async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
     if user_id in SUBSCRIBERS:
         SUBSCRIBERS.remove(user_id)
+        save_subscribers()
         await context.bot.send_message(chat_id=user_id, text="구독 취소되었습니다.")
     else:
         await context.bot.send_message(chat_id=user_id, text="구독 중이 아닙니다.")
