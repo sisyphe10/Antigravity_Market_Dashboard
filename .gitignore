@@ -52,3 +52,7 @@ charts/*
 
 # 기타
 *.bat
+
+# SSH 키
+*.key
+*.pem
