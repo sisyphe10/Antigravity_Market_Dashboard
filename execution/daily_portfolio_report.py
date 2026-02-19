@@ -7,6 +7,9 @@ import FinanceDataReader as fdr
 from datetime import datetime, timedelta, timezone
 from telegram import Bot
 import holidays
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Windows console encoding fix
 sys.stdout.reconfigure(encoding='utf-8')
