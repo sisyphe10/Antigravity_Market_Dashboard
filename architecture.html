@@ -383,7 +383,7 @@
 <header>
     <h1>Antigravity Market Dashboard</h1>
     <div class="subtitle">System Architecture & Documentation</div>
-    <div class="subtitle">Last updated: 2026-02-19 (2차)</div>
+    <div class="subtitle">Last updated: 2026-02-19 (3차)</div>
 </header>
 
 <nav>
@@ -562,13 +562,13 @@
         </div>
     </div>
 
-    <!-- Daily Weather (06:00) -->
+    <!-- Daily Weather (05:00) -->
     <div class="flow-group trigger-schedule">
         <div class="flow-header">
-            <span class="flow-badge badge-schedule">매일 06:00</span>
+            <span class="flow-badge badge-schedule">매일 05:00</span>
             <span class="flow-title">날씨 자동 전송</span>
         </div>
-        <div class="flow-desc">매일 아침 6시 여의도 날씨 자동 전송.</div>
+        <div class="flow-desc">매일 아침 5시 여의도 날씨 자동 전송. (VM + GitHub Actions 병행)</div>
         <div class="steps">
             <div class="step">
                 <div class="step-number">Step 1</div>
@@ -586,6 +586,34 @@
                 <div class="step-number">Step 3</div>
                 <div class="step-file">텔레그램 전송</div>
                 <div class="step-desc">구독자에게 날씨 메시지</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Calendar (05:10) -->
+    <div class="flow-group trigger-github">
+        <div class="flow-header">
+            <span class="flow-badge badge-github">매일 05:10</span>
+            <span class="flow-title">Google Calendar 일정 알림</span>
+        </div>
+        <div class="flow-desc">GitHub Actions에서 실행. 오늘의 Google Calendar 일정을 텔레그램으로 전송. 4개 캘린더 조회 (메인, 옥쥬와 빵빵이, 운용 본부, 투자 활동).</div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">Step 1</div>
+                <div class="step-file">daily_calendar.py</div>
+                <div class="step-desc">Google Calendar API로 오늘 일정 조회<br>(서비스 계정 인증)</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 2</div>
+                <div class="step-file">일정 포맷팅</div>
+                <div class="step-desc">메인 / 투자 활동 캘린더 구분<br>시간순 정렬</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 3</div>
+                <div class="step-file">텔레그램 전송</div>
+                <div class="step-desc">HTML 파싱으로 일정 메시지 전송</div>
             </div>
         </div>
     </div>
@@ -738,6 +766,21 @@
             <td><span class="file-name">watch_wrap_nav.py</span></td>
             <td>Wrap_NAV.xlsx 파일 감시 → 변경 시 자동 git commit &amp; push. PID 파일로 중복 실행 방지. Windows 시작 프로그램 등록.</td>
             <td><span class="tag tag-vm">로컬 PC</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">execution/daily_calendar.py</span></td>
+            <td>Google Calendar API로 오늘 일정 조회 → 텔레그램 전송. 서비스 계정 인증. 4개 캘린더 (메인, 옥쥬와 빵빵이, 운용 본부, 투자 활동) 조회.</td>
+            <td><span class="tag tag-github">GitHub Actions</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">.github/workflows/daily_calendar.yml</span></td>
+            <td>매일 KST 05:10 Google Calendar 일정 알림 워크플로우</td>
+            <td><span class="tag tag-github">GitHub Actions</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">.github/workflows/daily_weather.yml</span></td>
+            <td>매일 KST 05:00 날씨 알림 워크플로우 (daily_alert.py 실행)</td>
+            <td><span class="tag tag-github">GitHub Actions</span></td>
         </tr>
     </tbody>
 </table>
@@ -922,6 +965,11 @@
 <!-- ===== Changelog ===== -->
 <h2 id="changelog">Changelog</h2>
 <div class="version-log">
+    <div class="version-entry">
+        <div class="version-date">2026-02-19</div>
+        <div class="version-title">날씨 알림 시간 변경 + 캘린더 일정 알림 문서화</div>
+        <div class="version-desc">날씨 알림 시간 06:00 → 05:00 변경. Google Calendar 일정 알림 (05:10, GitHub Actions) architecture에 추가. 자동 포트폴리오 업데이트 시 텔레그램 알림 전송 추가.</div>
+    </div>
     <div class="version-entry">
         <div class="version-date">2026-02-19</div>
         <div class="version-title">Claude Code 재설치 후 환경 복구</div>
