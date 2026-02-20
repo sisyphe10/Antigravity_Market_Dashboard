@@ -534,13 +534,13 @@ def create_dashboard():
         .update-time {{
             font-size: 0.75rem;
             font-weight: normal;
-            color: #888888;
+            color: #4a90e2;
         }}
 
         .category-date {{
             font-size: 1rem;
             font-weight: normal;
-            color: #555555;
+            color: #4a90e2;
             text-transform: none;
         }}
 
