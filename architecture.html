@@ -383,7 +383,7 @@
 <header>
     <h1>Antigravity Market Dashboard</h1>
     <div class="subtitle">System Architecture & Documentation</div>
-    <div class="subtitle">Last updated: 2026-02-19 (3차)</div>
+    <div class="subtitle">Last updated: 2026-02-20 (4차)</div>
 </header>
 
 <nav>
@@ -563,12 +563,12 @@
     </div>
 
     <!-- Daily Weather (05:00) -->
-    <div class="flow-group trigger-github">
+    <div class="flow-group trigger-schedule">
         <div class="flow-header">
-            <span class="flow-badge badge-github">매일 05:00</span>
+            <span class="flow-badge badge-schedule">매일 05:00</span>
             <span class="flow-title">날씨 자동 전송</span>
         </div>
-        <div class="flow-desc">매일 아침 5시 여의도 날씨 자동 전송. (GitHub Actions)</div>
+        <div class="flow-desc">매일 아침 5시 여의도 날씨 자동 전송. (VM 봇 스케줄러) ※ 2026-02-20 GitHub Actions에서 VM으로 이전.</div>
         <div class="steps">
             <div class="step">
                 <div class="step-number">Step 1</div>
@@ -591,12 +591,12 @@
     </div>
 
     <!-- Daily Calendar (05:10) -->
-    <div class="flow-group trigger-github">
+    <div class="flow-group trigger-schedule">
         <div class="flow-header">
-            <span class="flow-badge badge-github">매일 05:10</span>
+            <span class="flow-badge badge-schedule">매일 05:10</span>
             <span class="flow-title">Google Calendar 일정 알림</span>
         </div>
-        <div class="flow-desc">GitHub Actions에서 실행. 오늘의 Google Calendar 일정을 텔레그램으로 전송. 4개 캘린더 조회 (메인, 옥쥬와 빵빵이, 운용 본부, 투자 활동).</div>
+        <div class="flow-desc">VM 봇 스케줄러에서 실행. 오늘의 Google Calendar 일정을 텔레그램으로 전송. 4개 캘린더 조회 (메인, 옥쥬와 빵빵이, 운용 본부, 투자 활동). GOOGLE_SERVICE_ACCOUNT_KEY 사용. ※ 2026-02-20 GitHub Actions에서 VM으로 이전.</div>
         <div class="steps">
             <div class="step">
                 <div class="step-number">Step 1</div>
@@ -820,8 +820,11 @@
     <div class="data-card">
         <div class="data-card-title">.env</div>
         <div class="data-card-desc">
-            환경변수 파일. TELEGRAM_BOT_TOKEN 저장.<br>
-            Git에 포함되지 않음 (보안).
+            환경변수 파일. VM에 위치.<br>
+            • TELEGRAM_BOT_TOKEN<br>
+            • TELEGRAM_CHAT_ID<br>
+            • GOOGLE_SERVICE_ACCOUNT_KEY (JSON 문자열)<br>
+            Git에 포함되지 않음 (보안). 분실 시 각 서비스 콘솔에서 재발급.
         </div>
     </div>
     <div class="data-card">
@@ -842,9 +845,11 @@
         <div class="infra-desc">
             VM.Standard.E2.1.Micro (Free Tier)<br>
             Ubuntu 22.04, 1 OCPU, 1GB RAM<br>
-            IP: 152.67.199.118<br>
+            <strong>IP: 144.24.70.224</strong> (dashboard-vm)<br>
+            ※ 2026-02-20 VM 재생성 (구: 158.180.87.197)<br>
             <strong>담당:</strong><br>
             • 텔레그램 봇 24시간 구동 (/update, /portfolio 등)<br>
+            • 날씨 알림 (05:00), 캘린더 알림 (05:10)<br>
             • 장중 자동 포트폴리오 업데이트 (09:30~15:30, 30분)<br>
             • 일일 포트폴리오 리포트 (16:00)
         </div>
@@ -863,10 +868,10 @@
         <div class="infra-icon">🔑</div>
         <div class="infra-title">인증</div>
         <div class="infra-desc">
-            SSH(원본): ssh-key-2026-02-13.key<br>
-            SSH(추가): ~/.ssh/oracle_cloud<br>
+            SSH: ssh-key-2026-02-20.key (로컬 저장 위치: C:\Users\user\Antigravity_Market_Dashboard\)<br>
             GitHub: PAT (No expiration)<br>
-            Telegram: Bot Token (.env / GitHub Secrets)
+            Telegram: Bot Token (.env / GitHub Secrets)<br>
+            Google: Service Account Key (b6e5cda22ed7, .env에 JSON 문자열로 저장)
         </div>
     </div>
     <div class="infra-card">
@@ -887,9 +892,8 @@
             sisyphe10/Antigravity_Market_Dashboard<br>
             GitHub Pages 활성화<br>
             <strong>GitHub Actions 담당:</strong><br>
-            • 날씨 알림 (05:00, daily_weather.yml)<br>
-            • Google Calendar 일정 알림 (05:10, daily_calendar.yml)<br>
-            • Daily Market Crawl (23:00, daily_update.yml)
+            • Daily Market Crawl (23:00, daily_crawl.yml)<br>
+            <span style="color:#888">• 날씨/캘린더/포트폴리오 리포트: 2026-02-20 VM으로 이전, 워크플로우 비활성화</span>
         </div>
     </div>
 </div>
@@ -932,8 +936,18 @@
         </tr>
         <tr>
             <td>VM SSH 접속 안 됨</td>
-            <td>키 파일 권한 또는 보안 그룹</td>
-            <td><code>ssh -i key.key ubuntu@152.67.199.118</code></td>
+            <td>키 파일 권한 또는 보안 그룹. OCI는 cloud-init이 부팅 시 authorized_keys를 메타데이터 키로 덮어씀 → Boot volume repair로 수동 수정해도 재부팅하면 원래대로 돌아옴</td>
+            <td><code>ssh -i "C:\Users\user\Antigravity_Market_Dashboard\ssh-key-2026-02-20.key" ubuntu@144.24.70.224</code><br>⚠️ SSH 복구가 안 되면 VM 재생성이 가장 빠름. 코드는 GitHub에 있으니 .env만 재작성하면 됨</td>
+        </tr>
+        <tr>
+            <td>pip3로 설치했는데 모듈을 못 찾음</td>
+            <td>pip3와 python3의 경로 불일치. VM에서는 pip3 대신 python3 -m pip 사용해야 함</td>
+            <td><code>python3 -m pip install -r requirements.txt</code></td>
+        </tr>
+        <tr>
+            <td>GCP 서비스 계정 키 분실 / 노출</td>
+            <td>키가 채팅 등에 노출됨</td>
+            <td>GCP 콘솔 → IAM → 서비스 계정 → 키 탭 → 해당 키 즉시 삭제 → 새 JSON 키 발급 → VM .env의 GOOGLE_SERVICE_ACCOUNT_KEY 교체 → <code>sudo systemctl restart weather-bot</code></td>
         </tr>
         <tr>
             <td>16:00 리포트 안 옴</td>
@@ -971,6 +985,16 @@
 <!-- ===== Changelog ===== -->
 <h2 id="changelog">Changelog</h2>
 <div class="version-log">
+    <div class="version-entry" style="border-left-color: var(--red);">
+        <div class="version-date">2026-02-20</div>
+        <div class="version-title">VM 재생성 + 전체 서비스 VM으로 이전 완료</div>
+        <div class="version-desc">
+            <strong>[VM 재생성]</strong> 기존 VM(158.180.87.197) SSH 접속 불가 문제 발생. 원인: OCI cloud-init이 부팅 시마다 authorized_keys를 메타데이터 키로 덮어씀 → Boot volume repair 9회 시도 포함 모든 복구 방법 실패. 구 VM 2개 삭제 후 새 VM(dashboard-vm, 144.24.70.224) 생성. SSH 키: ssh-key-2026-02-20.key.<br><br>
+            <strong>[서비스 이전]</strong> GitHub Actions에서 실행되던 날씨(05:00), 캘린더(05:10) 알림을 VM 봇 스케줄러로 이전. daily_portfolio_report.yml 비활성화 (VM 봇의 daily_portfolio_job이 동일 기능 수행). GitHub Actions에는 Daily Market Crawl(23:00)만 남음.<br><br>
+            <strong>[GOOGLE_SERVICE_ACCOUNT_KEY]</strong> GCP 서비스 계정 JSON 키를 VM .env에 추가. 주의: 작업 중 키가 채팅에 노출되어 즉시 폐기 후 새 키(b6e5cda22ed7) 재발급.<br><br>
+            <strong>[교훈]</strong> ① OCI VM SSH 복구 불가 시 VM 재생성이 가장 빠름 (코드는 GitHub에 있으므로 .env만 재작성하면 됨) ② pip3 대신 python3 -m pip 사용 ③ 민감 정보(private key, service account key)를 채팅에 절대 붙여넣지 말 것.
+        </div>
+    </div>
     <div class="version-entry">
         <div class="version-date">2026-02-19</div>
         <div class="version-title">날씨 알림 시간 변경 + 캘린더 일정 알림 문서화</div>
