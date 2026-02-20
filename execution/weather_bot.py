@@ -447,6 +447,21 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
 
         logging.info("Returns calculated successfully")
 
+        # 2-5. Wrap_NAV.xlsx 변경사항 GitHub에 push
+        logging.info("Step 2-5: Pushing updated Wrap_NAV.xlsx to GitHub...")
+        now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        subprocess.run(["git", "add", "Wrap_NAV.xlsx"], cwd=parent_dir, capture_output=True, timeout=30)
+        commit_result = subprocess.run(
+            ["git", "commit", "-m", f"Update Wrap_NAV ({now_str})"],
+            cwd=parent_dir, capture_output=True, text=True, timeout=30
+        )
+        if commit_result.returncode == 0:
+            subprocess.run(["git", "pull", "--rebase", "origin", "main"], cwd=parent_dir, capture_output=True, timeout=60)
+            subprocess.run(["git", "push"], cwd=parent_dir, capture_output=True, timeout=60)
+            logging.info("Wrap_NAV.xlsx pushed to GitHub")
+        else:
+            logging.info("No changes to Wrap_NAV.xlsx to commit")
+
         # 3. 포트폴리오 리포트 생성 및 전송
         logging.info("Step 3: Generating portfolio report...")
         result_report = subprocess.run(
