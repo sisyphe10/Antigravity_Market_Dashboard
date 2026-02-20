@@ -383,7 +383,7 @@
 <header>
     <h1>Antigravity Market Dashboard</h1>
     <div class="subtitle">System Architecture & Documentation</div>
-    <div class="subtitle">Last updated: 2026-02-20 (4차)</div>
+    <div class="subtitle">Last updated: 2026-02-20 (5차)</div>
 </header>
 
 <nav>
@@ -977,7 +977,30 @@
         <tr>
             <td>Claude Code 재설치 후 MCP 서버/SSH 연결 끊김</td>
             <td>~/.claude.json 초기화됨 (MCP 설정 삭제)</td>
-            <td><code>claude mcp add github -e GITHUB_PERSONAL_ACCESS_TOKEN=... -- npx -y @modelcontextprotocol/server-github</code><br>SSH: <code>ssh -i ~/.ssh/oracle_cloud ubuntu@152.67.199.118</code></td>
+            <td><code>claude mcp add github -e GITHUB_PERSONAL_ACCESS_TOKEN=... -- npx -y @modelcontextprotocol/server-github</code><br>SSH: <code>ssh -i "C:\Users\user\Antigravity_Market_Dashboard\ssh-key-2026-02-20.key" ubuntu@144.24.70.224</code></td>
+        </tr>
+        <tr>
+            <td>VM에서 git push 실패 (dashboard 업데이트 안 됨)</td>
+            <td>새 VM에 git 인증 미설정. push 시 authentication 오류 발생</td>
+            <td><code>git -C ~/Antigravity_Market_Dashboard config user.email "kts77775@gmail.com"</code><br>
+                <code>git -C ~/Antigravity_Market_Dashboard config user.name "sisyphe10"</code><br>
+                <code>git -C ~/Antigravity_Market_Dashboard remote set-url origin https://sisyphe10:TOKEN@github.com/sisyphe10/Antigravity_Market_Dashboard.git</code><br>
+                TOKEN은 gh auth token으로 확인</td>
+        </tr>
+        <tr>
+            <td>봇 재시작 후 16:00/30분 알림 안 옴</td>
+            <td>SUBSCRIBERS가 메모리에 있다가 재시작 시 초기화됨. subscribers.json은 VM 로컬 파일이라 새 VM에는 없음</td>
+            <td>텔레그램에서 <code>/start</code> 한 번 입력하면 subscribers.json 생성 및 이후 재시작에도 유지</td>
+        </tr>
+        <tr>
+            <td>Claude Code Stop hook 오류 (PowerShell $변수 사라짐)</td>
+            <td>bash가 PowerShell의 $변수를 쉘 변수로 해석해 빈 문자열로 치환</td>
+            <td><code>~/.claude/notify.ps1</code> 파일로 분리 후 settings.json에서 <code>powershell -ExecutionPolicy Bypass -File "C:\Users\user\.claude\notify.ps1"</code>로 호출</td>
+        </tr>
+        <tr>
+            <td>watch_wrap_nav.py PC 재부팅 후 꺼짐</td>
+            <td>PID 파일은 있지만 프로세스가 없는 상태</td>
+            <td><code>cscript //nologo "C:\Users\user\Antigravity_Market_Dashboard\start_watch_wrap_nav.vbs"</code></td>
         </tr>
     </tbody>
 </table>
@@ -985,6 +1008,18 @@
 <!-- ===== Changelog ===== -->
 <h2 id="changelog">Changelog</h2>
 <div class="version-log">
+    <div class="version-entry">
+        <div class="version-date">2026-02-20</div>
+        <div class="version-title">Dashboard WRAP/Portfolio 업데이트 날짜 표시 추가</div>
+        <div class="version-desc">
+            <strong>[WRAP 헤더]</strong> WRAP 카테고리 제목 옆에 마지막 기준가 업데이트 날짜 표시. git 커밋 날짜 기준 (git pull 시 mtime이 변경되므로 os.path.getmtime 대신 git log 사용).<br><br>
+            <strong>[Portfolio 헤더]</strong> 포트폴리오 테이블 제목 옆에 마지막 업데이트 일시 표시 (KST 기준). portfolio_data.json 파일 수정 시각 사용.<br><br>
+            <strong>[스타일]</strong> 날짜 텍스트: 오늘 수익률 파란색(#0055cc)과 동일, bold 처리, 메인 텍스트보다 작은 크기.<br><br>
+            <strong>[Claude Code 알림 훅]</strong> Stop hook PowerShell 명령 오류 수정. bash의 $ 변수 해석 문제로 ~/.claude/notify.ps1 파일로 분리. settings.json에서 -File 옵션으로 호출.<br><br>
+            <strong>[VM git 인증]</strong> 새 VM에 git user 및 remote URL(PAT 포함) 설정. /update 후 dashboard push 정상화.<br><br>
+            <strong>[구독자 초기화]</strong> 새 VM에 subscribers.json 없어서 /start로 재구독 필요. 이후 재시작에도 유지됨.
+        </div>
+    </div>
     <div class="version-entry" style="border-left-color: var(--red);">
         <div class="version-date">2026-02-20</div>
         <div class="version-title">VM 재생성 + 전체 서비스 VM으로 이전 완료</div>
