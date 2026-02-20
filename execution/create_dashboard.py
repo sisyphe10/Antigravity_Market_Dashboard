@@ -1,10 +1,13 @@
 
 import os
 import glob
-from datetime import datetime
+import subprocess
+from datetime import datetime, timezone, timedelta
 import csv
 import json
 from pathlib import Path
+
+KST = timezone(timedelta(hours=9))
 
 # Import shared configuration
 from config import CATEGORY_MAP, CSV_FILE
@@ -23,9 +26,9 @@ def create_portfolio_tables_html():
         with open(portfolio_file, 'r', encoding='utf-8') as f:
             portfolio_data = json.load(f)
 
-        # 포트폴리오 최근 업데이트 시각 (파일 수정 시각 기준)
+        # 포트폴리오 최근 업데이트 시각 (KST 기준)
         portfolio_mtime = os.path.getmtime(portfolio_file)
-        portfolio_updated = datetime.fromtimestamp(portfolio_mtime).strftime('%Y-%m-%d %H:%M')
+        portfolio_updated = datetime.fromtimestamp(portfolio_mtime, tz=timezone.utc).astimezone(KST).strftime('%Y-%m-%d %H:%M')
 
         html = ""
 
@@ -351,10 +354,17 @@ def create_dashboard():
                         return 999  # Put unknown items at the end
                 charts = sorted(charts, key=sort_key)
 
-            # Wrap 카테고리는 차트 파일 최신 수정 시각으로 날짜 표시
+            # Wrap 카테고리는 git 커밋 날짜로 날짜 표시 (git pull 시 mtime이 바뀌므로)
             if category == 'Wrap' and charts:
-                wrap_mtime = max(os.path.getmtime(os.path.join(CHARTS_DIR, c['filename'])) for c in charts)
-                wrap_date = datetime.fromtimestamp(wrap_mtime).strftime('%Y-%m-%d')
+                try:
+                    sample_file = os.path.join(CHARTS_DIR, charts[0]['filename'])
+                    git_log = subprocess.run(
+                        ['git', 'log', '-1', '--format=%ci', sample_file],
+                        capture_output=True, text=True
+                    )
+                    wrap_date = git_log.stdout.strip()[:10] if git_log.stdout.strip() else datetime.now().strftime('%Y-%m-%d')
+                except Exception:
+                    wrap_date = datetime.now().strftime('%Y-%m-%d')
                 category_label = f'WRAP <span class="category-date">({wrap_date})</span>'
             else:
                 category_label = category
