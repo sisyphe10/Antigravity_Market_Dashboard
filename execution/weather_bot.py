@@ -189,14 +189,17 @@ def run_portfolio_update():
             code, today_return = future.result()
             price_map[code] = today_return
 
-    # 3. today_return, contribution 업데이트
+    # 3. today_return, contribution, cumulative_return 업데이트
     logging.info("Update Step 3: Updating returns...")
     for portfolio_name, stocks in portfolio_data.items():
         for s in stocks:
             today_return = price_map.get(s['code'])
+            prev_cumulative = s.get('cumulative_return')
             s['today_return'] = today_return
             if today_return is not None:
                 s['contribution'] = (s['weight'] / 100) * (today_return / 100) * 1000
+                if prev_cumulative is not None:
+                    s['cumulative_return'] = ((1 + prev_cumulative / 100) * (1 + today_return / 100) - 1) * 100
             else:
                 s['contribution'] = None
 
