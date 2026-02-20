@@ -23,13 +23,19 @@ def create_portfolio_tables_html():
         with open(portfolio_file, 'r', encoding='utf-8') as f:
             portfolio_data = json.load(f)
 
+        # 포트폴리오 최근 업데이트 시각 (파일 수정 시각 기준)
+        portfolio_mtime = os.path.getmtime(portfolio_file)
+        portfolio_updated = datetime.fromtimestamp(portfolio_mtime).strftime('%Y-%m-%d %H:%M')
+
         html = ""
 
         for portfolio_name, stocks in portfolio_data.items():
+            if portfolio_name.startswith('_'):
+                continue
             # 포트폴리오별 테이블 생성
             html += f"""
             <div class="portfolio-section">
-                <h3 class="portfolio-title">{portfolio_name}</h3>
+                <h3 class="portfolio-title">{portfolio_name} <span class="update-time">({portfolio_updated})</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table">
                         <thead>
@@ -344,11 +350,19 @@ def create_dashboard():
                     except ValueError:
                         return 999  # Put unknown items at the end
                 charts = sorted(charts, key=sort_key)
-            
+
+            # Wrap 카테고리는 차트 파일 최신 수정 시각으로 날짜 표시
+            if category == 'Wrap' and charts:
+                wrap_mtime = max(os.path.getmtime(os.path.join(CHARTS_DIR, c['filename'])) for c in charts)
+                wrap_date = datetime.fromtimestamp(wrap_mtime).strftime('%Y-%m-%d')
+                category_label = f'WRAP <span class="category-date">({wrap_date})</span>'
+            else:
+                category_label = category
+
             # Add category header
             charts_html += f"""
             <div class="category-section">
-                <h2 class="category-title">{category}</h2>
+                <h2 class="category-title">{category_label}</h2>
                 <div class="dashboard-grid">
             """
             
@@ -505,6 +519,19 @@ def create_dashboard():
             margin-bottom: 15px;
             padding-bottom: 8px;
             border-bottom: 1px solid #dee2e6;
+        }}
+
+        .update-time {{
+            font-size: 0.75rem;
+            font-weight: normal;
+            color: #888888;
+        }}
+
+        .category-date {{
+            font-size: 1rem;
+            font-weight: normal;
+            color: #555555;
+            text-transform: none;
         }}
 
         .table-container {{
