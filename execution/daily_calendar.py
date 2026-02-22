@@ -8,9 +8,12 @@ import json
 import logging
 import asyncio
 from datetime import datetime, timezone, timedelta
+from dotenv import load_dotenv
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from telegram import Bot
+
+load_dotenv()
 
 # 로깅 설정
 logging.basicConfig(
