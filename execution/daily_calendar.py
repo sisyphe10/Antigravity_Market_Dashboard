@@ -150,7 +150,7 @@ def format_calendar_message(events_by_calendar):
             else:  # 종일 일정
                 line = f"• 종일 - {summary}"
 
-            msg += f"<b>{line}</b>\n" if is_bold else f"{line}\n"
+            msg += f"<b><u>{line}</u></b>\n" if is_bold else f"{line}\n"
 
     # 투자 활동 캘린더 일정 (별도 섹션, 항상 볼드)
     if investment_events:
