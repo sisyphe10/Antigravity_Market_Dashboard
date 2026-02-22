@@ -74,6 +74,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 🌤️ **날씨 / 일정**
 /weather - 현재 날씨 즉시 조회 (여의도 기준)
+/calendar - 오늘 Google Calendar 일정 즉시 조회
 • 매일 05:00 날씨 자동 전송
 • 매일 05:10 Google Calendar 일정 자동 전송
 
@@ -106,6 +107,33 @@ async def weather_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             chat_id=chat_id,
             message_id=status_msg.message_id,
             text=f"❌ 날씨 조회 실패: {str(e)}"
+        )
+
+
+async def calendar_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """오늘 캘린더 일정 조회"""
+    chat_id = update.effective_chat.id
+    status_msg = await update.message.reply_text("📅 일정을 가져오는 중...")
+
+    try:
+        import sys
+        sys.path.insert(0, os.path.join(DASHBOARD_DIR, 'execution'))
+        from daily_calendar import get_today_events, format_calendar_message
+
+        loop = asyncio.get_running_loop()
+        events = await loop.run_in_executor(None, get_today_events)
+        message = format_calendar_message(events)
+        await context.bot.edit_message_text(
+            chat_id=chat_id,
+            message_id=status_msg.message_id,
+            text=message,
+            parse_mode='HTML'
+        )
+    except Exception as e:
+        await context.bot.edit_message_text(
+            chat_id=chat_id,
+            message_id=status_msg.message_id,
+            text=f"❌ 일정 조회 실패: {str(e)}"
         )
 
 
@@ -562,6 +590,7 @@ if __name__ == '__main__':
 
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CommandHandler('weather', weather_command))
+    application.add_handler(CommandHandler('calendar', calendar_command))
     application.add_handler(CommandHandler('portfolio', portfolio_command))
     application.add_handler(CommandHandler('update', update_command))
     application.add_handler(CommandHandler('stop', stop))
