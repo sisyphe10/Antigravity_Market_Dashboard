@@ -1009,6 +1009,17 @@
 <h2 id="changelog">Changelog</h2>
 <div class="version-log">
     <div class="version-entry">
+        <div class="version-date">2026-02-23</div>
+        <div class="version-title">캘린더 알림 복구 + /weather 커맨드 추가 + 일정 표시 개선</div>
+        <div class="version-desc">
+            <strong>[캘린더 알림 복구]</strong> 아침 05:10 캘린더 알림 미발송 원인 파악: VM .env에 GOOGLE_SERVICE_ACCOUNT_KEY가 누락되어 있었음. VM 재생성 당시 설정하지 못한 것. b6e5cda22ed7 키를 .env에 추가 후 서비스 재시작하여 정상화.<br><br>
+            <strong>[load_dotenv 추가]</strong> daily_calendar.py에 load_dotenv() 추가. 이전에는 systemd EnvironmentFile로만 env를 주입받아 직접 실행 시 환경변수를 못 읽는 문제가 있었음. 이제 직접 실행해도 .env 자동 로드.<br><br>
+            <strong>[일정 텍스트 스타일]</strong> 개인 일정(운용 본부 제외)에 볼드+밑줄 동시 적용. <code>&lt;b&gt;&lt;u&gt;text&lt;/u&gt;&lt;/b&gt;</code><br><br>
+            <strong>[/weather 커맨드]</strong> 텔레그램 봇에 /weather 커맨드 추가. 아침 자동 알림 외에도 언제든지 여의도 날씨 즉시 조회 가능. daily_alert.py의 get_naver_weather() 재사용.<br><br>
+            <strong>[파일 정리]</strong> revoke된 GCP 서비스 계정 키(4591258d4331.json) 및 구 VM SSH 키(ssh-key-2026-02-13.key) 삭제.
+        </div>
+    </div>
+    <div class="version-entry">
         <div class="version-date">2026-02-20</div>
         <div class="version-title">Dashboard WRAP/Portfolio 업데이트 날짜 표시 추가</div>
         <div class="version-desc">
