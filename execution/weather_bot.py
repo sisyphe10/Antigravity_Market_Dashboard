@@ -73,8 +73,9 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 • 거래일 09:30~15:30 30분마다 자동 실행
 
 🌤️ **날씨 / 일정**
-• 매일 05:00 날씨 자동 전송 (GitHub Actions)
-• 매일 05:10 Google Calendar 일정 자동 전송 (GitHub Actions)
+/weather - 현재 날씨 즉시 조회 (여의도 기준)
+• 매일 05:00 날씨 자동 전송
+• 매일 05:10 Google Calendar 일정 자동 전송
 
 ⚙️ **기타**
 /start - 봇 시작 및 자동 알림 구독
@@ -82,6 +83,31 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 /help - 이 도움말 표시
 """
     await update.message.reply_text(help_text)
+
+async def weather_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """현재 날씨 조회"""
+    chat_id = update.effective_chat.id
+    status_msg = await update.message.reply_text("🌤️ 날씨 정보를 가져오는 중...")
+
+    try:
+        import sys
+        sys.path.insert(0, os.path.join(DASHBOARD_DIR, 'execution'))
+        from daily_alert import get_naver_weather
+
+        loop = asyncio.get_running_loop()
+        message = await loop.run_in_executor(None, lambda: get_naver_weather("여의도"))
+        await context.bot.edit_message_text(
+            chat_id=chat_id,
+            message_id=status_msg.message_id,
+            text=message
+        )
+    except Exception as e:
+        await context.bot.edit_message_text(
+            chat_id=chat_id,
+            message_id=status_msg.message_id,
+            text=f"❌ 날씨 조회 실패: {str(e)}"
+        )
+
 
 async def portfolio_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """포트폴리오 리포트 조회"""
@@ -535,6 +561,7 @@ if __name__ == '__main__':
     application = ApplicationBuilder().token(TOKEN).build()
 
     application.add_handler(CommandHandler('start', start))
+    application.add_handler(CommandHandler('weather', weather_command))
     application.add_handler(CommandHandler('portfolio', portfolio_command))
     application.add_handler(CommandHandler('update', update_command))
     application.add_handler(CommandHandler('stop', stop))
