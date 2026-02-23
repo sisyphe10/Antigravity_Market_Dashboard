@@ -60,37 +60,41 @@ def check_single_instance():
 def git_push():
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            # 변경사항 확인
+            # 아직 commit 안 된 변경사항이 있으면 commit
             diff = subprocess.run(
                 ["git", "diff", "--quiet", WATCH_FILE],
                 cwd=REPO_DIR,
             )
-            if diff.returncode == 0:
-                logging.info("변경사항 없음 - push 생략")
+            if diff.returncode != 0:
+                commit_msg = f"update: Wrap_NAV.xlsx ({datetime.now().strftime('%Y-%m-%d %H:%M')})"
+                add = subprocess.run(
+                    ["git", "add", WATCH_FILE],
+                    cwd=REPO_DIR, capture_output=True, text=True,
+                )
+                if add.returncode != 0:
+                    raise RuntimeError(f"git add 실패 (exit {add.returncode}): {add.stderr.strip()}")
+                commit = subprocess.run(
+                    ["git", "commit", "-m", commit_msg],
+                    cwd=REPO_DIR, capture_output=True, text=True,
+                )
+                if commit.returncode != 0:
+                    raise RuntimeError(f"git commit 실패: {commit.stderr.strip()}")
+                logging.info(f"commit: {commit_msg}")
+
+            # push 안 된 commit이 없으면 생략
+            ahead = subprocess.run(
+                ["git", "log", "origin/main..HEAD", "--oneline"],
+                cwd=REPO_DIR, capture_output=True, text=True,
+            )
+            if not ahead.stdout.strip():
+                logging.info("push할 커밋 없음 - 생략")
                 return True
 
-            commit_msg = f"update: Wrap_NAV.xlsx ({datetime.now().strftime('%Y-%m-%d %H:%M')})"
-
-            add = subprocess.run(
-                ["git", "add", WATCH_FILE],
-                cwd=REPO_DIR, capture_output=True, text=True,
-            )
-            if add.returncode != 0:
-                raise RuntimeError(f"git add 실패 (exit {add.returncode}): {add.stderr.strip()}")
-
-            commit = subprocess.run(
-                ["git", "commit", "-m", commit_msg],
-                cwd=REPO_DIR, capture_output=True, text=True,
-            )
-            if commit.returncode != 0:
-                raise RuntimeError(f"git commit 실패: {commit.stderr.strip()}")
-            logging.info(f"commit: {commit_msg}")
-
+            # pull --rebase 후 push
             subprocess.run(
                 ["git", "pull", "--rebase", "origin", "main"],
                 cwd=REPO_DIR, capture_output=True, text=True, timeout=60,
             )
-
             push = subprocess.run(
                 ["git", "push", "origin", "main"],
                 cwd=REPO_DIR, capture_output=True, text=True, timeout=60,
