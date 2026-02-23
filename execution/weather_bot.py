@@ -337,7 +337,7 @@ def format_update_summary(portfolio_data):
     kosdaq = index.get('KOSDAQ')
     kospi_str = f"{kospi:+.2f}%" if kospi is not None else "N/A"
     kosdaq_str = f"{kosdaq:+.2f}%" if kosdaq is not None else "N/A"
-    lines.append(f"KOSPI {kospi_str}  |  KOSDAQ {kosdaq_str}")
+    lines.append(f"<b><u>KOSPI {kospi_str}  |  KOSDAQ {kosdaq_str}</u></b>")
     lines.append("")
 
     for portfolio_name, stocks in portfolio_data.items():
