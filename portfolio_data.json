@@ -8,7 +8,7 @@
       "weight": 30,
       "today_return": 2.41977906365071,
       "contribution": 7.25933719095213,
-      "cumulative_return": 216.4722683955204
+      "cumulative_return": 224.1301980884157
     },
     {
       "code": "000660",
@@ -18,7 +18,7 @@
       "weight": 15,
       "today_return": 1.5806111696522658,
       "contribution": 2.3709167544783982,
-      "cumulative_return": 214.6001836551369
+      "cumulative_return": 219.57278929773656
     },
     {
       "code": "352820",
@@ -28,7 +28,7 @@
       "weight": 10,
       "today_return": -0.12547051442910914,
       "contribution": -0.12547051442910914,
-      "cumulative_return": 70.63882910978907
+      "cumulative_return": 70.42472769308921
     },
     {
       "code": "277810",
@@ -38,7 +38,7 @@
       "weight": 10,
       "today_return": 1.544943820224719,
       "contribution": 1.5449438202247192,
-      "cumulative_return": 10.85674125233329
+      "cumulative_return": 12.569415625613711
     },
     {
       "code": "001040",
@@ -48,7 +48,7 @@
       "weight": 8,
       "today_return": -1.1086474501108647,
       "contribution": -0.8869179600886918,
-      "cumulative_return": 84.67905270868876
+      "cumulative_return": 82.63161309994499
     },
     {
       "code": "000150",
@@ -58,7 +58,7 @@
       "weight": 5,
       "today_return": 8.118433619866284,
       "contribution": 4.059216809933142,
-      "cumulative_return": 17.126237788596875
+      "cumulative_return": 26.635053654910855
     },
     {
       "code": "034020",
@@ -68,7 +68,7 @@
       "weight": 5,
       "today_return": 0.1932367149758454,
       "contribution": 0.0966183574879227,
-      "cumulative_return": 43.37410161263973
+      "cumulative_return": 43.65115301672211
     },
     {
       "code": "010060",
@@ -78,7 +78,7 @@
       "weight": 3,
       "today_return": -1.574803149606299,
       "contribution": -0.4724409448818897,
-      "cumulative_return": 51.45790708248084
+      "cumulative_return": 49.07274319141814
     },
     {
       "code": "006800",
@@ -88,7 +88,7 @@
       "weight": 3,
       "today_return": -4.231311706629055,
       "contribution": -1.2693935119887163,
-      "cumulative_return": 133.34331315486364
+      "cumulative_return": 123.46983022870579
     },
     {
       "code": "241560",
@@ -98,7 +98,7 @@
       "weight": 3,
       "today_return": 0.3053435114503817,
       "contribution": 0.0916030534351145,
-      "cumulative_return": 0.46226262390820505
+      "cumulative_return": 0.7690176242865387
     },
     {
       "code": "101490",
@@ -108,7 +108,7 @@
       "weight": 2,
       "today_return": -2.845100105374078,
       "contribution": -0.5690200210748155,
-      "cumulative_return": 19.31089457000743
+      "cumulative_return": 15.916380182873402
     },
     {
       "code": "036810",
@@ -118,7 +118,7 @@
       "weight": 2,
       "today_return": -1.8285714285714287,
       "contribution": -0.3657142857142857,
-      "cumulative_return": 16.117576370937915
+      "cumulative_return": 13.994283545869335
     },
     {
       "code": "006400",
@@ -128,7 +128,7 @@
       "weight": 2,
       "today_return": -2.1144278606965177,
       "contribution": -0.4228855721393035,
-      "cumulative_return": 0.579143898692136
+      "cumulative_return": -1.547529541951853
     }
   ],
   "DB 목표전환형": [
@@ -140,7 +140,7 @@
       "weight": 15,
       "today_return": 1.5806111696522658,
       "contribution": 2.3709167544783982,
-      "cumulative_return": 10.222533555143777
+      "cumulative_return": 11.964723231990092
     },
     {
       "code": "005930",
@@ -150,7 +150,7 @@
       "weight": 15,
       "today_return": 2.41977906365071,
       "contribution": 3.629668595476065,
-      "cumulative_return": 9.526600245183037
+      "cumulative_return": 12.176901987044397
     },
     {
       "code": "277810",
@@ -160,7 +160,7 @@
       "weight": 10,
       "today_return": 1.544943820224719,
       "contribution": 1.5449438202247192,
-      "cumulative_return": 3.922671980168091
+      "cumulative_return": 5.5282188787381115
     },
     {
       "code": "007660",
@@ -170,7 +170,7 @@
       "weight": 7,
       "today_return": 0.8955223880597015,
       "contribution": 0.6268656716417911,
-      "cumulative_return": 0.8366469910119578
+      "cumulative_return": 1.7396617401852055
     },
     {
       "code": "017800",
@@ -180,7 +180,7 @@
       "weight": 6,
       "today_return": 1.4519056261343013,
       "contribution": 0.8711433756805808,
-      "cumulative_return": 10.637983634573246
+      "cumulative_return": 12.244342743605173
     },
     {
       "code": "034230",
@@ -190,7 +190,7 @@
       "weight": 5,
       "today_return": 1.9607843137254901,
       "contribution": 0.9803921568627451,
-      "cumulative_return": 2.1630298570845197
+      "cumulative_return": 4.166226520948912
     },
     {
       "code": "241560",
@@ -200,7 +200,7 @@
       "weight": 5,
       "today_return": 0.3053435114503817,
       "contribution": 0.15267175572519084,
-      "cumulative_return": -0.18468846934602823
+      "cumulative_return": 0.12009110784680921
     },
     {
       "code": "439260",
@@ -210,7 +210,7 @@
       "weight": 3,
       "today_return": 11.533742331288344,
       "contribution": 3.4601226993865035,
-      "cumulative_return": 32.371273389313984
+      "cumulative_return": 47.6386349826827
     },
     {
       "code": "009240",
@@ -220,7 +220,7 @@
       "weight": 2,
       "today_return": 3.4957627118644066,
       "contribution": 0.6991525423728813,
-      "cumulative_return": 8.80794739223083
+      "cumulative_return": 12.611615044713464
     },
     {
       "code": "003570",
@@ -230,7 +230,7 @@
       "weight": 2,
       "today_return": 0.5208333333333333,
       "contribution": 0.10416666666666664,
-      "cumulative_return": 9.414807668172664
+      "cumulative_return": 9.984676458111053
     },
     {
       "code": "001720",
@@ -240,7 +240,7 @@
       "weight": 2,
       "today_return": -0.205761316872428,
       "contribution": -0.0411522633744856,
-      "cumulative_return": 3.0542088816295943
+      "cumulative_return": 2.8421631843422945
     },
     {
       "code": "005380",
@@ -250,7 +250,7 @@
       "weight": 2,
       "today_return": 3.43811394891945,
       "contribution": 0.68762278978389,
-      "cumulative_return": 10.483649931420679
+      "cumulative_return": 14.282203710988185
     },
     {
       "code": "399720",
@@ -260,7 +260,7 @@
       "weight": 2,
       "today_return": 4.296296296296296,
       "contribution": 0.8592592592592593,
-      "cumulative_return": 8.70030425416546
+      "cumulative_return": 13.370391399899972
     },
     {
       "code": "039130",
@@ -270,7 +270,7 @@
       "weight": 2,
       "today_return": 1.314459049544995,
       "contribution": 0.26289180990899896,
-      "cumulative_return": 0.09645441430696788
+      "cumulative_return": 1.4121813176295017
     }
   ]
 }
