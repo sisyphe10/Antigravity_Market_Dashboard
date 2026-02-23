@@ -205,7 +205,7 @@ def create_portfolio_tables():
                 continue
 
             available_dates = sorted(portfolio_df['날짜'].unique())
-            prev_dates = [d for d in available_dates if d < today]
+            prev_dates = [d for d in available_dates if d <= today]
             if prev_dates:
                 latest_portfolio_date = prev_dates[-1]
             else:
