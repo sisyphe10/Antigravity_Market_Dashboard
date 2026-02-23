@@ -429,7 +429,7 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                     <h4 class="sect-panel-title">BM 비중 상위 5개</h4>
                     <table class="sector-table">
                         <thead>
-                            <tr><th>업종</th><th>BM 비중</th><th>vs BM 1M</th></tr>
+                            <tr><th>업종</th><th>비중</th><th>vs BM 1M</th></tr>
                         </thead>
                         <tbody>
 {bench_rows}
@@ -440,7 +440,7 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                     <h4 class="sect-panel-title">1M 초과 수익률 상위 5개</h4>
                     <table class="sector-table">
                         <thead>
-                            <tr><th>업종</th><th>BM 비중</th><th>vs BM 1M</th></tr>
+                            <tr><th>업종</th><th>비중</th><th>vs BM 1M</th></tr>
                         </thead>
                         <tbody>
 {ret_rows}
@@ -969,7 +969,7 @@ def create_dashboard():
         }}
 
         .sect-vs {{
-            color: #999;
+            color: #111;
             font-weight: 400;
             font-size: 0.95rem;
             margin: 0 4px;
