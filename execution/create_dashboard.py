@@ -220,7 +220,7 @@ def read_portfolio_sectors(stock_sector_map):
                 continue
 
             available_dates = sorted(df_p['날짜'].unique())
-            prev_dates = [d for d in available_dates if d < today]
+            prev_dates = [d for d in available_dates if d <= today]
             latest_date = prev_dates[-1] if prev_dates else available_dates[-1]
 
             df_latest = df_p[df_p['날짜'] == latest_date].copy()
@@ -1131,7 +1131,7 @@ def create_dashboard():
         }}
 
         .sect-detail-mine {{ color: #2d7a3a; font-weight: 500; }}
-        .sect-detail-bm   {{ color: #b07a10; font-weight: 500; }}
+        .sect-detail-bm   {{ color: #444; font-weight: 500; }}
         .sect-detail-sep  {{ color: #ccc; }}
 
         @media (max-width: 800px) {{
