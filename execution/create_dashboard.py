@@ -342,9 +342,16 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
     top5_bench = sorted(not_held, key=lambda s: not_held[s], reverse=True)[:5]
     bench_rows = ""
     for s in top5_bench:
+        bm_s = bm_top_stocks.get(s, [])
+        stocks_str = ', '.join(bm_s) if bm_s else ''
         bench_rows += f"""                    <tr>
                         <td class="sect-name">{s}</td>
                         <td class="sect-right-val">{not_held[s]:.1f}%</td>
+                    </tr>
+"""
+        if stocks_str:
+            bench_rows += f"""                    <tr>
+                        <td colspan="2" class="sect-right-stocks">{stocks_str}</td>
                     </tr>
 """
 
@@ -365,9 +372,16 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
         for s in top5_1m:
             ex = not_held_excess[s]
             r_cls = 'sect-over' if ex > 0 else 'sect-under'
+            bm_s = bm_top_stocks.get(s, [])
+            stocks_str = ', '.join(bm_s) if bm_s else ''
             ret_rows += f"""                    <tr>
                         <td class="sect-name">{s}</td>
                         <td class="sect-right-val {r_cls}">{ex:+.1f}%</td>
+                    </tr>
+"""
+            if stocks_str:
+                ret_rows += f"""                    <tr>
+                        <td colspan="2" class="sect-right-stocks">{stocks_str}</td>
                     </tr>
 """
     else:
@@ -943,8 +957,8 @@ def create_dashboard():
 
         .sect-bm-1m {{
             font-size: 0.78rem;
-            font-weight: 400;
-            color: #666;
+            font-weight: 600;
+            color: #333;
             margin-left: 10px;
         }}
 
@@ -1112,6 +1126,13 @@ def create_dashboard():
             font-size: 0.82rem;
             text-align: center;
             padding: 8px !important;
+        }}
+
+        .sect-right-stocks {{
+            font-size: 0.72rem;
+            color: #444;
+            padding: 0 8px 5px 12px !important;
+            border-bottom: 1px solid #eee;
         }}
 
         .sect-detail-row td {{
