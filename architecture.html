@@ -1010,6 +1010,16 @@
 <div class="version-log">
     <div class="version-entry">
         <div class="version-date">2026-02-23</div>
+        <div class="version-title">/update 메시지 개선 + /calendar 추가 + 포트폴리오 리포트 스타일</div>
+        <div class="version-desc">
+            <strong>[/calendar 커맨드]</strong> 텔레그램 봇에 /calendar 커맨드 추가. 언제든지 오늘 Google Calendar 일정 즉시 조회 가능.<br><br>
+            <strong>[/update 메시지 개선]</strong> ① 시간 UTC→KST 수정 (datetime.now(tz=KST)) ② 포트폴리오명 볼드+밑줄 ③ 오늘 수익률 볼드+밑줄 ④ KOSPI/KOSDAQ 실시간 수익률 추가 (볼드+밑줄). KS11/KQ11을 기존 종목 조회와 동일한 ThreadPoolExecutor로 병렬 조회, _index 키로 임시 저장(JSON 저장 시 제외).<br><br>
+            <strong>[포트폴리오 리포트 스타일]</strong> 기준가 항목 전체 볼드, 수익률 YTD 볼드+밑줄.<br><br>
+            <strong>[watch_wrap_nav.py 재시도 로직 수정]</strong> push 실패 후 재시도 시 이미 commit된 파일은 git diff에 안 잡혀 "변경사항 없음"으로 넘어가는 버그 수정. 이제 재시도 시 미push 커밋 여부(git log origin/main..HEAD)를 확인 후 pull --rebase → push 진행.
+        </div>
+    </div>
+    <div class="version-entry">
+        <div class="version-date">2026-02-23</div>
         <div class="version-title">캘린더 알림 복구 + /weather 커맨드 추가 + 일정 표시 개선</div>
         <div class="version-desc">
             <strong>[캘린더 알림 복구]</strong> 아침 05:10 캘린더 알림 미발송 원인 파악: VM .env에 GOOGLE_SERVICE_ACCOUNT_KEY가 누락되어 있었음. VM 재생성 당시 설정하지 못한 것. b6e5cda22ed7 키를 .env에 추가 후 서비스 재시작하여 정상화.<br><br>
