@@ -228,11 +228,12 @@ def run_portfolio_update():
     with open(portfolio_file, 'r', encoding='utf-8') as f:
         portfolio_data = json.load(f)
 
-    # 전체 종목 코드 수집 (중복 제거)
+    # 전체 종목 코드 수집 (중복 제거) + 지수 추가
     all_codes = set()
     for stocks in portfolio_data.values():
         for s in stocks:
             all_codes.add(s['code'])
+    all_codes.update(['KS11', 'KQ11'])
 
     # 2. 실시간 주가 병렬 조회
     logging.info(f"Update Step 2: Fetching {len(all_codes)} stock prices...")
@@ -243,9 +244,17 @@ def run_portfolio_update():
             code, today_return = future.result()
             price_map[code] = today_return
 
+    # 지수 수익률 저장
+    portfolio_data['_index'] = {
+        'KOSPI': price_map.get('KS11'),
+        'KOSDAQ': price_map.get('KQ11'),
+    }
+
     # 3. today_return, contribution, cumulative_return 업데이트
     logging.info("Update Step 3: Updating returns...")
     for portfolio_name, stocks in portfolio_data.items():
+        if portfolio_name.startswith('_'):
+            continue
         for s in stocks:
             today_return = price_map.get(s['code'])
             prev_cumulative = s.get('cumulative_return')
@@ -321,9 +330,19 @@ def format_update_summary(portfolio_data):
     from datetime import timezone, timedelta
     KST = timezone(timedelta(hours=9))
     now_str = datetime.datetime.now(tz=KST).strftime("%Y-%m-%d %H:%M")
-    lines = [f"📊 포트폴리오 업데이트 완료", f"⏰ {now_str} 기준 (KST)", ""]
+    lines = [f"📊 포트폴리오 업데이트 완료", f"⏰ {now_str} 기준 (KST)"]
+
+    index = portfolio_data.get('_index', {})
+    kospi = index.get('KOSPI')
+    kosdaq = index.get('KOSDAQ')
+    kospi_str = f"{kospi:+.2f}%" if kospi is not None else "N/A"
+    kosdaq_str = f"{kosdaq:+.2f}%" if kosdaq is not None else "N/A"
+    lines.append(f"KOSPI {kospi_str}  |  KOSDAQ {kosdaq_str}")
+    lines.append("")
 
     for portfolio_name, stocks in portfolio_data.items():
+        if portfolio_name.startswith('_'):
+            continue
         # 포트폴리오 가중 평균 수익률
         total_weight = sum(s['weight'] for s in stocks)
         weighted_return = sum(
