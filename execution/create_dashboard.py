@@ -529,7 +529,7 @@ def create_dashboard():
         charts_html = ""
         
         # Define category order for better organization
-        category_order = ['Wrap', 'SECTOR', 'Portfolio', 'INDEX_KOREA', 'INDEX_US', 'EXCHANGE RATE',
+        category_order = ['Wrap', 'Portfolio', 'SECTOR', 'INDEX_KOREA', 'INDEX_US', 'EXCHANGE RATE',
                          'INTEREST RATES', 'CRYPTOCURRENCY', 'MEMORY', 'COMMODITIES']
         
         for category in category_order:
