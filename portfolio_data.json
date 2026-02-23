@@ -51,16 +51,6 @@
       "cumulative_return": 88.0
     },
     {
-      "code": "000150",
-      "name": "두산",
-      "sector": "상사,자본재",
-      "market_cap": 181694.8287,
-      "weight": 5,
-      "today_return": 7.163323782234957,
-      "contribution": 3.5816618911174785,
-      "cumulative_return": 1.0
-    },
-    {
       "code": "034020",
       "name": "두산에너빌리티",
       "sector": "기계",
@@ -71,14 +61,14 @@
       "cumulative_return": 42.0
     },
     {
-      "code": "010060",
-      "name": "OCI홀딩스",
-      "sector": "화학",
-      "market_cap": 27333.219648,
-      "weight": 3,
-      "today_return": -3.937007874015748,
-      "contribution": -1.1811023622047243,
-      "cumulative_return": 55.0
+      "code": "000150",
+      "name": "두산",
+      "sector": "상사,자본재",
+      "market_cap": 181694.8287,
+      "weight": 5,
+      "today_return": 7.163323782234957,
+      "contribution": 3.5816618911174785,
+      "cumulative_return": 1.0
     },
     {
       "code": "006800",
@@ -89,6 +79,16 @@
       "today_return": -3.6671368124118473,
       "contribution": -1.1001410437235544,
       "cumulative_return": 150.0
+    },
+    {
+      "code": "010060",
+      "name": "OCI홀딩스",
+      "sector": "화학",
+      "market_cap": 27333.219648,
+      "weight": 3,
+      "today_return": -3.937007874015748,
+      "contribution": -1.1811023622047243,
+      "cumulative_return": 55.0
     },
     {
       "code": "241560",
@@ -183,16 +183,6 @@
       "cumulative_return": 6.527887398053145
     },
     {
-      "code": "034230",
-      "name": "파라다이스",
-      "sector": "호텔,레저서비스",
-      "market_cap": 18943.139595,
-      "weight": 5,
-      "today_return": 0.49019607843137253,
-      "contribution": 0.24509803921568626,
-      "cumulative_return": -0.7744433688286589
-    },
-    {
       "code": "241560",
       "name": "두산밥캣",
       "sector": "기계",
@@ -201,6 +191,16 @@
       "today_return": -0.15267175572519084,
       "contribution": -0.07633587786259542,
       "cumulative_return": 0.21452650934723483
+    },
+    {
+      "code": "034230",
+      "name": "파라다이스",
+      "sector": "호텔,레저서비스",
+      "market_cap": 18943.139595,
+      "weight": 5,
+      "today_return": 0.49019607843137253,
+      "contribution": 0.24509803921568626,
+      "cumulative_return": -0.7744433688286589
     },
     {
       "code": "439260",
@@ -213,16 +213,6 @@
       "cumulative_return": 5.9392872855257295
     },
     {
-      "code": "009240",
-      "name": "한샘",
-      "sector": "건설,건축관련",
-      "market_cap": 11566.925612,
-      "weight": 2,
-      "today_return": 4.13135593220339,
-      "contribution": 0.826271186440678,
-      "cumulative_return": 2.550133302422619
-    },
-    {
       "code": "003570",
       "name": "SNT다이내믹스",
       "sector": "자동차",
@@ -231,6 +221,16 @@
       "today_return": 1.9097222222222223,
       "contribution": 0.3819444444444445,
       "cumulative_return": 6.2764031382015695
+    },
+    {
+      "code": "009240",
+      "name": "한샘",
+      "sector": "건설,건축관련",
+      "market_cap": 11566.925612,
+      "weight": 2,
+      "today_return": 4.13135593220339,
+      "contribution": 0.826271186440678,
+      "cumulative_return": 2.550133302422619
     },
     {
       "code": "001720",
