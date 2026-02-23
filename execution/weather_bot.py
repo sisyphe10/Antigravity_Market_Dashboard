@@ -353,7 +353,7 @@ def format_update_summary(portfolio_data):
             for s in stocks
         ) / total_weight if total_weight > 0 else 0
 
-        lines.append(f"<b>[{portfolio_name}]</b>")
+        lines.append(f"<b><u>[{portfolio_name}]</u></b>")
         lines.append(f"<b><u>오늘: {weighted_return:+.1f}%</u></b>")
 
         # 상승 종목 (today_return > 0, 상위 5개)
