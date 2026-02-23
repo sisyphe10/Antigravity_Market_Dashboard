@@ -847,13 +847,13 @@ def create_dashboard():
         .update-time {{
             font-size: 0.75rem;
             font-weight: bold;
-            color: #2d7a3a;
+            color: #555;
         }}
 
         .category-date {{
             font-size: 1rem;
             font-weight: bold;
-            color: #2d7a3a;
+            color: #555;
             text-transform: none;
         }}
 
@@ -952,13 +952,13 @@ def create_dashboard():
         .sect-portfolio-date {{
             font-size: 0.75rem;
             font-weight: 700;
-            color: #2d7a3a;
+            color: #555;
         }}
 
         .sect-kodex-date {{
             font-size: 0.75rem;
             font-weight: 700;
-            color: #111;
+            color: #555;
         }}
 
         .sect-bm-1m {{
