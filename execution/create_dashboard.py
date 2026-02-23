@@ -350,7 +350,7 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                                 <span class="sect-pct">{k_w:.1f}%</span>
                             </div>
                         </td>
-                        <td class="sect-diff {diff_class}">{diff:+.1f}%</td>
+                        <td class="sect-diff">{diff:+.1f}%</td>
                         <td class="sect-diff {ex_cls}">{ex_str}</td>
                     </tr>
                     <tr class="sect-detail-row">
@@ -422,7 +422,6 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
             <div class="sector-legend">
                 <span class="legend-item"><span class="legend-dot portfolio-dot"></span> 포트폴리오</span>
                 <span class="legend-item"><span class="legend-dot kodex-dot"></span> 벤치마크</span>
-                <span class="sect-diff-note">&nbsp;|&nbsp; <span class="sect-over">과중</span> &nbsp;/&nbsp; <span class="sect-under">과소</span></span>
             </div>
             <div class="sector-three-panel">
                 <div class="sector-left-panel">
@@ -445,7 +444,7 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                     </div>
                 </div>
                 <div class="sect-right-block">
-                    <h4 class="sect-panel-title">(미보유) BM 비중 상위 5개</h4>
+                    <h4 class="sect-panel-title">미보유 BM 비중 상위 5개</h4>
                     <table class="sector-table">
                         <thead>
                             <tr><th>업종</th><th>BM 비중</th><th>초과 수익률</th></tr>
@@ -456,7 +455,7 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                     </table>
                 </div>
                 <div class="sect-right-block">
-                    <h4 class="sect-panel-title">(미보유) 1M 초과 수익률 상위 5개</h4>
+                    <h4 class="sect-panel-title">미보유 1M 초과 수익률 상위 5개</h4>
                     <table class="sector-table">
                         <thead>
                             <tr><th>업종</th><th>BM 비중</th><th>초과 수익률</th></tr>
