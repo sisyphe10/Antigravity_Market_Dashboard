@@ -416,7 +416,7 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                                     <th>포트폴리오</th>
                                     <th>벤치마크</th>
                                     <th>차이</th>
-                                    <th>초과 수익률</th>
+                                    <th>vs BM 1M</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -429,7 +429,7 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                     <h4 class="sect-panel-title">BM 비중 상위 5개</h4>
                     <table class="sector-table">
                         <thead>
-                            <tr><th>업종</th><th>BM 비중</th><th>초과 수익률</th></tr>
+                            <tr><th>업종</th><th>BM 비중</th><th>vs BM 1M</th></tr>
                         </thead>
                         <tbody>
 {bench_rows}
@@ -440,7 +440,7 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                     <h4 class="sect-panel-title">1M 초과 수익률 상위 5개</h4>
                     <table class="sector-table">
                         <thead>
-                            <tr><th>업종</th><th>BM 비중</th><th>초과 수익률</th></tr>
+                            <tr><th>업종</th><th>BM 비중</th><th>vs BM 1M</th></tr>
                         </thead>
                         <tbody>
 {ret_rows}
