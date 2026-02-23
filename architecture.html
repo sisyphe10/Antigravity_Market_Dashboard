@@ -534,13 +534,13 @@
         </div>
     </div>
 
-    <!-- Daily Portfolio (15:40) -->
+    <!-- Daily Portfolio (16:00) -->
     <div class="flow-group trigger-schedule">
         <div class="flow-header">
-            <span class="flow-badge badge-schedule">매일 15:40</span>
+            <span class="flow-badge badge-schedule">매일 16:00</span>
             <span class="flow-title">포트폴리오 리포트 자동 전송</span>
         </div>
-        <div class="flow-desc">장 마감 직후 자동 실행. 기준가 업데이트 + 수익률 계산 + Dashboard 재생성 + 텔레그램 리포트.</div>
+        <div class="flow-desc">장 마감 후 자동 실행. 기준가 업데이트 + 수익률 계산 + 텔레그램 리포트.</div>
         <div class="steps">
             <div class="step">
                 <div class="step-number">Step 1</div>
@@ -556,12 +556,6 @@
             <div class="arrow">&rarr;</div>
             <div class="step">
                 <div class="step-number">Step 3</div>
-                <div class="step-file">create_dashboard.py</div>
-                <div class="step-desc">index.html 재생성<br>git push → Dashboard 갱신</div>
-            </div>
-            <div class="arrow">&rarr;</div>
-            <div class="step">
-                <div class="step-number">Step 4</div>
                 <div class="step-file">daily_portfolio_report.py</div>
                 <div class="step-desc">텔레그램으로 리포트 전송<br>기준가 + 수익률 + 기여도 Top5</div>
             </div>
@@ -726,17 +720,17 @@
         <tr>
             <td><span class="file-name">execution/daily_portfolio_report.py</span></td>
             <td>기준가 + 수익률 리포트 &rarr; 텔레그램 전송</td>
-            <td><span class="tag tag-command">/portfolio</span> <span class="tag tag-schedule">15:40</span></td>
+            <td><span class="tag tag-command">/portfolio</span> <span class="tag tag-schedule">16:00</span></td>
         </tr>
         <tr>
             <td><span class="file-name">calculate_wrap_nav.py</span></td>
             <td>Wrap_NAV.xlsx에 오늘자 기준가(NAV) 추가</td>
-            <td><span class="tag tag-schedule">15:40</span> <span class="tag tag-github">Actions</span></td>
+            <td><span class="tag tag-schedule">16:00</span> <span class="tag tag-github">Actions</span></td>
         </tr>
         <tr>
             <td><span class="file-name">calculate_returns.py</span></td>
             <td>1D, 1W, 1M, 3M, 6M, 1Y, YTD 수익률 계산</td>
-            <td><span class="tag tag-schedule">15:40</span> <span class="tag tag-github">Actions</span></td>
+            <td><span class="tag tag-schedule">16:00</span> <span class="tag tag-github">Actions</span></td>
         </tr>
         <tr>
             <td><span class="file-name">execution/market_crawler.py</span></td>
@@ -804,7 +798,7 @@
         <div class="data-card-desc">
             <strong>마스터 데이터.</strong> 포트폴리오별 종목/비중/기준가 저장.<br>
             시트: NEW(날짜·증권사·상품명·업종·코드·종목·비중), 기준가(일별NAV), 수익률(기간별), Code(섹터매핑)<br>
-            로컬 수정 → 저장 시 watch_wrap_nav.py가 자동 git push → VM이 15:40에 pull하여 계산에 반영
+            로컬 수정 → 저장 시 watch_wrap_nav.py가 자동 git push → VM이 16:00에 pull하여 계산에 반영
         </div>
     </div>
     <div class="data-card">
@@ -873,7 +867,7 @@
             • 텔레그램 봇 24시간 구동 (/update, /portfolio 등)<br>
             • 날씨 알림 (05:00), 캘린더 알림 (05:10)<br>
             • 장중 자동 포트폴리오 업데이트 (09:30~15:35, 30분)<br>
-            • 일일 포트폴리오 리포트 (15:40)
+            • 일일 포트폴리오 리포트 (16:00)
         </div>
     </div>
     <div class="infra-card">
@@ -972,7 +966,7 @@
             <td>GCP 콘솔 → IAM → 서비스 계정 → 키 탭 → 해당 키 즉시 삭제 → 새 JSON 키 발급 → VM .env의 GOOGLE_SERVICE_ACCOUNT_KEY 교체 → <code>sudo systemctl restart weather-bot</code></td>
         </tr>
         <tr>
-            <td>15:40 리포트 안 옴</td>
+            <td>16:00 리포트 안 옴</td>
             <td>/start로 구독 안 됨 또는 봇 재시작으로 구독 초기화</td>
             <td>텔레그램에서 /start 다시 입력</td>
         </tr>
@@ -1010,7 +1004,7 @@
                 TOKEN은 gh auth token으로 확인</td>
         </tr>
         <tr>
-            <td>봇 재시작 후 15:40/30분 알림 안 옴</td>
+            <td>봇 재시작 후 16:00/30분 알림 안 옴</td>
             <td>SUBSCRIBERS가 메모리에 있다가 재시작 시 초기화됨. subscribers.json은 VM 로컬 파일이라 새 VM에는 없음</td>
             <td>텔레그램에서 <code>/start</code> 한 번 입력하면 subscribers.json 생성 및 이후 재시작에도 유지</td>
         </tr>
@@ -1030,16 +1024,6 @@
 <!-- ===== Changelog ===== -->
 <h2 id="changelog">Changelog</h2>
 <div class="version-log">
-    <div class="version-entry">
-        <div class="version-date">2026-02-23</div>
-        <div class="version-title">포트폴리오 리포트 시각 변경 + dashboard 갱신 기능 추가 + 카테고리 순서 변경</div>
-        <div class="version-desc">
-            <strong>[리포트 시각]</strong> 포트폴리오 리포트 자동 전송 시각 16:00 → 15:40으로 변경.<br><br>
-            <strong>[Dashboard 갱신]</strong> 15:40 자동 작업 및 /portfolio 명령어 실행 시 create_dashboard.py 실행 + git push 추가. Wrap_NAV.xlsx 수정사항이 장 마감 후 dashboard에 자동 반영됨.<br><br>
-            <strong>[카테고리 순서]</strong> WRAP → SECTOR WEIGHT → PORTFOLIO → … 에서 WRAP → PORTFOLIO → SECTOR WEIGHT → … 순으로 변경.<br><br>
-            <strong>[날짜 색상]</strong> 카테고리·헤더 날짜 텍스트 색상 dark green → 진한 회색(#555)으로 변경.
-        </div>
-    </div>
     <div class="version-entry">
         <div class="version-date">2026-02-23</div>
         <div class="version-title">SECTOR WEIGHT UI 개선 + 포트폴리오 대표색 변경 + 봇 수정 + 파일 정리</div>
