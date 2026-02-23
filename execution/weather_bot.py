@@ -318,8 +318,10 @@ def run_portfolio_update():
 
 def format_update_summary(portfolio_data):
     """포트폴리오 업데이트 요약 메시지 생성"""
-    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-    lines = [f"📊 포트폴리오 업데이트 완료", f"⏰ {now_str} 기준", ""]
+    from datetime import timezone, timedelta
+    KST = timezone(timedelta(hours=9))
+    now_str = datetime.datetime.now(tz=KST).strftime("%Y-%m-%d %H:%M")
+    lines = [f"📊 포트폴리오 업데이트 완료", f"⏰ {now_str} 기준 (KST)", ""]
 
     for portfolio_name, stocks in portfolio_data.items():
         # 포트폴리오 가중 평균 수익률
@@ -329,8 +331,8 @@ def format_update_summary(portfolio_data):
             for s in stocks
         ) / total_weight if total_weight > 0 else 0
 
-        lines.append(f"[{portfolio_name}]")
-        lines.append(f"오늘: {weighted_return:+.1f}%")
+        lines.append(f"<b>[{portfolio_name}]</b>")
+        lines.append(f"<b><u>오늘: {weighted_return:+.1f}%</u></b>")
 
         # 상승 종목 (today_return > 0, 상위 5개)
         gainers = sorted(
@@ -380,7 +382,8 @@ async def update_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.edit_message_text(
             chat_id=chat_id,
             message_id=status_msg.message_id,
-            text=summary
+            text=summary,
+            parse_mode='HTML'
         )
 
     except asyncio.TimeoutError:
@@ -433,7 +436,7 @@ async def auto_portfolio_update_job(context: ContextTypes.DEFAULT_TYPE):
             summary = format_update_summary(portfolio_data)
             for chat_id in SUBSCRIBERS:
                 try:
-                    await context.bot.send_message(chat_id=chat_id, text=summary)
+                    await context.bot.send_message(chat_id=chat_id, text=summary, parse_mode='HTML')
                 except Exception as e:
                     logging.error(f"Auto update 알림 전송 실패 (chat_id={chat_id}): {e}")
     except Exception as e:
