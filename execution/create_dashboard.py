@@ -402,7 +402,7 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                 <span class="legend-item"><span class="legend-dot portfolio-dot"></span> 포트폴리오</span>
                 <span class="legend-item"><span class="legend-dot kodex-dot"></span> 벤치마크</span>
             </div>
-            <div class="sector-three-panel">
+            <div class="sector-split-panel">
                 <div class="sector-left-panel">
                     <h4 class="sect-panel-title">보유 업종</h4>
                     <div class="sector-table-wrap">
@@ -422,27 +422,32 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                         </table>
                     </div>
                 </div>
-                <div class="sect-right-block">
-                    <h4 class="sect-panel-title">미보유 BM 비중 상위 5개</h4>
-                    <table class="sector-table">
-                        <thead>
-                            <tr><th>업종</th><th>BM 비중</th><th>초과 수익률</th></tr>
-                        </thead>
-                        <tbody>
+                <div class="sect-right-wrapper">
+                    <h4 class="sect-right-header">미보유</h4>
+                    <div class="sect-right-inner">
+                        <div class="sect-right-block">
+                            <h5 class="sect-panel-title">BM 비중 상위 5개</h5>
+                            <table class="sector-table">
+                                <thead>
+                                    <tr><th>업종</th><th>BM 비중</th><th>초과 수익률</th></tr>
+                                </thead>
+                                <tbody>
 {bench_rows}
-                        </tbody>
-                    </table>
-                </div>
-                <div class="sect-right-block">
-                    <h4 class="sect-panel-title">미보유 1M 초과 수익률 상위 5개</h4>
-                    <table class="sector-table">
-                        <thead>
-                            <tr><th>업종</th><th>BM 비중</th><th>초과 수익률</th></tr>
-                        </thead>
-                        <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="sect-right-block">
+                            <h5 class="sect-panel-title">1M 초과 수익률 상위 5개</h5>
+                            <table class="sector-table">
+                                <thead>
+                                    <tr><th>업종</th><th>BM 비중</th><th>초과 수익률</th></tr>
+                                </thead>
+                                <tbody>
 {ret_rows}
-                        </tbody>
-                    </table>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -940,7 +945,7 @@ def create_dashboard():
 
         .sector-card-title {{
             font-size: 1.2rem;
-            color: #333;
+            color: #111;
             margin: 0 0 10px 0;
             padding-bottom: 8px;
             border-bottom: 1px solid #ddd;
@@ -955,13 +960,13 @@ def create_dashboard():
         .sect-kodex-date {{
             font-size: 0.75rem;
             font-weight: 700;
-            color: #333;
+            color: #111;
         }}
 
         .sect-bm-1m {{
             font-size: 0.78rem;
             font-weight: 600;
-            color: #333;
+            color: #111;
             margin-left: 10px;
         }}
 
@@ -984,7 +989,7 @@ def create_dashboard():
             gap: 16px;
             margin-bottom: 10px;
             font-size: 0.82rem;
-            color: #555;
+            color: #333;
         }}
 
         .legend-item {{
@@ -1023,8 +1028,8 @@ def create_dashboard():
             padding: 8px 12px;
             text-align: left;
             font-weight: 600;
-            color: #333;
-            border-bottom: 2px solid #333;
+            color: #111;
+            border-bottom: 2px solid #111;
             background: #f0f0f0;
             white-space: nowrap;
         }}
@@ -1065,17 +1070,40 @@ def create_dashboard():
         .sect-under {{ color: #0055cc; }}
         .sect-neutral {{ color: #777; }}
 
-        .sector-three-panel {{
+        .sector-split-panel {{
             display: grid;
-            grid-template-columns: 3fr 1fr 1fr;
+            grid-template-columns: 3fr 2fr;
             gap: 24px;
             align-items: start;
         }}
 
+        .sect-right-wrapper {{
+            display: flex;
+            flex-direction: column;
+        }}
+
+        .sect-right-header {{
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #111;
+            text-align: center;
+            margin: 0 0 10px 0;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #111;
+        }}
+
+        .sect-right-inner {{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            align-items: start;
+        }}
+
         .sect-panel-title {{
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             font-weight: 600;
-            color: #444;
+            color: #111;
+            text-align: center;
             margin: 0 0 8px 0;
             padding-bottom: 4px;
             border-bottom: 1px solid #ddd;
@@ -1120,7 +1148,10 @@ def create_dashboard():
         .sect-detail-sep  {{ color: #ccc; }}
 
         @media (max-width: 800px) {{
-            .sector-three-panel {{
+            .sector-split-panel {{
+                grid-template-columns: 1fr;
+            }}
+            .sect-right-inner {{
                 grid-template-columns: 1fr;
             }}
         }}
