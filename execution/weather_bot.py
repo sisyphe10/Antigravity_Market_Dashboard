@@ -240,6 +240,13 @@ def run_portfolio_update():
     from concurrent.futures import ThreadPoolExecutor, as_completed
     dashboard_dir = DASHBOARD_DIR
 
+    # 0. Wrap_NAV.xlsx에서 최신 포트폴리오 구성 반영 → portfolio_data.json 재생성
+    logging.info("Update Step 0: Regenerating portfolio_data.json from Wrap_NAV.xlsx...")
+    subprocess.run(
+        [sys.executable, "execution/create_portfolio_tables.py"],
+        capture_output=True, text=True, timeout=180
+    )
+
     # 1. 기존 portfolio_data.json 읽기 (종목 코드/비중 이미 확정됨)
     logging.info("Update Step 1: Reading portfolio_data.json...")
     portfolio_file = os.path.join(dashboard_dir, 'portfolio_data.json')
@@ -527,6 +534,13 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
             return
 
         logging.info("NAV prices updated successfully")
+
+        # 1-5. portfolio_data.json 재생성 (Wrap_NAV.xlsx 최신 구성 반영)
+        logging.info("Step 1-5: Regenerating portfolio_data.json from Wrap_NAV.xlsx...")
+        subprocess.run(
+            [sys.executable, "execution/create_portfolio_tables.py"],
+            capture_output=True, text=True, timeout=180
+        )
 
         # 2. 수익률 계산
         logging.info("Step 2: Calculating returns...")
