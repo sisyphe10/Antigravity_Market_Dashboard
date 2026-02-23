@@ -333,39 +333,11 @@
             white-space: nowrap;
         }
 
-        .sect-bar-cell {
-            width: 260px;
-        }
-
-        .sect-bar-inner {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .sect-bar-wrap {
-            flex: 1;
-            height: 14px;
-            background: #ececec;
-            border-radius: 3px;
-            overflow: hidden;
-            min-width: 80px;
-        }
-
-        .sect-bar-fill {
-            height: 100%;
-            border-radius: 3px;
-        }
-
-        .sect-portfolio { background: #4a90e2; }
-        .sect-kodex { background: #e8a838; }
-
-        .sect-pct {
-            min-width: 40px;
-            font-size: 0.80rem;
-            color: #555;
-            text-align: right;
-            flex-shrink: 0;
+        .sect-num {
+            text-align: center;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            width: 64px;
         }
 
         .sector-table thead th {
@@ -449,7 +421,7 @@
 <body>
     <header>
         <h1>📊 Market Data Dashboard</h1>
-        <div class="last-updated">Last Updated: 2026-02-23 16:14:15 KST</div>
+        <div class="last-updated">Last Updated: 2026-02-23 16:15:47 KST</div>
         <a href="architecture.html" target="_blank" class="nav-button">🗂️ Workflow Architecture</a>
     </header>
 
@@ -526,22 +498,8 @@
                             <tbody>
                     <tr>
                         <td class="sect-name">전기·전자</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:100.0%"></div>
-                                </div>
-                                <span class="sect-pct">51.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:92.2%"></div>
-                                </div>
-                                <span class="sect-pct">47.0%</span>
-                            </div>
-                        </td>
+                        <td class="sect-num">51.0%</td>
+                        <td class="sect-num">47.0%</td>
                         <td class="sect-diff">+4.0%</td>
                         <td class="sect-diff sect-over">+4.5%</td>
                     </tr>
@@ -554,22 +512,8 @@
                     </tr>
                     <tr>
                         <td class="sect-name">기계·장비</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:35.3%"></div>
-                                </div>
-                                <span class="sect-pct">18.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:7.4%"></div>
-                                </div>
-                                <span class="sect-pct">3.8%</span>
-                            </div>
-                        </td>
+                        <td class="sect-num">18.0%</td>
+                        <td class="sect-num">3.8%</td>
                         <td class="sect-diff">+14.2%</td>
                         <td class="sect-diff sect-under">-2.4%</td>
                     </tr>
@@ -582,22 +526,8 @@
                     </tr>
                     <tr>
                         <td class="sect-name">기타금융</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:31.4%"></div>
-                                </div>
-                                <span class="sect-pct">16.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:21.2%"></div>
-                                </div>
-                                <span class="sect-pct">10.8%</span>
-                            </div>
-                        </td>
+                        <td class="sect-num">16.0%</td>
+                        <td class="sect-num">10.8%</td>
                         <td class="sect-diff">+5.2%</td>
                         <td class="sect-diff sect-over">+3.7%</td>
                     </tr>
@@ -610,22 +540,8 @@
                     </tr>
                     <tr>
                         <td class="sect-name">오락·문화</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:19.6%"></div>
-                                </div>
-                                <span class="sect-pct">10.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:1.4%"></div>
-                                </div>
-                                <span class="sect-pct">0.7%</span>
-                            </div>
-                        </td>
+                        <td class="sect-num">10.0%</td>
+                        <td class="sect-num">0.7%</td>
                         <td class="sect-diff">+9.3%</td>
                         <td class="sect-diff sect-under">-13.6%</td>
                     </tr>
@@ -638,22 +554,8 @@
                     </tr>
                     <tr>
                         <td class="sect-name">증권</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:5.9%"></div>
-                                </div>
-                                <span class="sect-pct">3.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:3.1%"></div>
-                                </div>
-                                <span class="sect-pct">1.6%</span>
-                            </div>
-                        </td>
+                        <td class="sect-num">3.0%</td>
+                        <td class="sect-num">1.6%</td>
                         <td class="sect-diff">+1.4%</td>
                         <td class="sect-diff sect-over">+46.7%</td>
                     </tr>
@@ -803,22 +705,8 @@
                             <tbody>
                     <tr>
                         <td class="sect-name">전기·전자</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:82.9%"></div>
-                                </div>
-                                <span class="sect-pct">39.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:100.0%"></div>
-                                </div>
-                                <span class="sect-pct">47.0%</span>
-                            </div>
-                        </td>
+                        <td class="sect-num">39.0%</td>
+                        <td class="sect-num">47.0%</td>
                         <td class="sect-diff">-8.0%</td>
                         <td class="sect-diff sect-over">+4.5%</td>
                     </tr>
@@ -831,22 +719,8 @@
                     </tr>
                     <tr>
                         <td class="sect-name">기계·장비</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:44.7%"></div>
-                                </div>
-                                <span class="sect-pct">21.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:8.0%"></div>
-                                </div>
-                                <span class="sect-pct">3.8%</span>
-                            </div>
-                        </td>
+                        <td class="sect-num">21.0%</td>
+                        <td class="sect-num">3.8%</td>
                         <td class="sect-diff">+17.2%</td>
                         <td class="sect-diff sect-under">-2.4%</td>
                     </tr>
@@ -859,22 +733,8 @@
                     </tr>
                     <tr>
                         <td class="sect-name">운송장비·부품</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:14.9%"></div>
-                                </div>
-                                <span class="sect-pct">7.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:20.7%"></div>
-                                </div>
-                                <span class="sect-pct">9.7%</span>
-                            </div>
-                        </td>
+                        <td class="sect-num">7.0%</td>
+                        <td class="sect-num">9.7%</td>
                         <td class="sect-diff">-2.7%</td>
                         <td class="sect-diff sect-under">-17.3%</td>
                     </tr>
@@ -887,22 +747,8 @@
                     </tr>
                     <tr>
                         <td class="sect-name">오락·문화</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:10.6%"></div>
-                                </div>
-                                <span class="sect-pct">5.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:1.5%"></div>
-                                </div>
-                                <span class="sect-pct">0.7%</span>
-                            </div>
-                        </td>
+                        <td class="sect-num">5.0%</td>
+                        <td class="sect-num">0.7%</td>
                         <td class="sect-diff">+4.3%</td>
                         <td class="sect-diff sect-under">-13.6%</td>
                     </tr>
@@ -915,22 +761,8 @@
                     </tr>
                     <tr>
                         <td class="sect-name">유통</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:4.3%"></div>
-                                </div>
-                                <span class="sect-pct">2.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:4.8%"></div>
-                                </div>
-                                <span class="sect-pct">2.3%</span>
-                            </div>
-                        </td>
+                        <td class="sect-num">2.0%</td>
+                        <td class="sect-num">2.3%</td>
                         <td class="sect-diff">-0.3%</td>
                         <td class="sect-diff sect-under">-4.1%</td>
                     </tr>
@@ -943,22 +775,8 @@
                     </tr>
                     <tr>
                         <td class="sect-name">일반서비스</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:4.3%"></div>
-                                </div>
-                                <span class="sect-pct">2.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:4.5%"></div>
-                                </div>
-                                <span class="sect-pct">2.1%</span>
-                            </div>
-                        </td>
+                        <td class="sect-num">2.0%</td>
+                        <td class="sect-num">2.1%</td>
                         <td class="sect-diff">-0.1%</td>
                         <td class="sect-diff sect-under">-6.6%</td>
                     </tr>
@@ -971,22 +789,8 @@
                     </tr>
                     <tr>
                         <td class="sect-name">증권</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:4.3%"></div>
-                                </div>
-                                <span class="sect-pct">2.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:3.4%"></div>
-                                </div>
-                                <span class="sect-pct">1.6%</span>
-                            </div>
-                        </td>
+                        <td class="sect-num">2.0%</td>
+                        <td class="sect-num">1.6%</td>
                         <td class="sect-diff">+0.4%</td>
                         <td class="sect-diff sect-over">+46.7%</td>
                     </tr>

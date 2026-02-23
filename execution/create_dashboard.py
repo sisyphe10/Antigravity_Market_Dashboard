@@ -290,10 +290,6 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
     held = {s: w for s, w in portfolio_sectors.items() if w > 0}
     not_held = {s: w for s, w in kodex_sectors.items() if s not in held}
 
-    # 스케일 기준: 양쪽 최대 비중
-    all_weights = list(portfolio_sectors.values()) + list(kodex_sectors.values())
-    max_weight = max(all_weights) if all_weights else 1
-
     # ── 왼쪽: 보유 업종 (bm_1m 계산 후에 실행) ──
     # bm_1m은 아래에서 계산되므로 left_rows 생성을 지연
     _left_rows_data = []
@@ -301,14 +297,11 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
         p_w = held[sector]
         k_w = kodex_sectors.get(sector, 0)
         diff = p_w - k_w
-        p_bar = (p_w / max_weight) * 100
-        k_bar = (k_w / max_weight) * 100
-        diff_class = 'sect-over' if diff > 3 else 'sect-under' if diff < -3 else 'sect-neutral'
         my_stocks = stocks_per_sector.get(sector, [])
         bm_stocks = bm_top_stocks.get(sector, [])
         detail_my = ', '.join(my_stocks) if my_stocks else '—'
         detail_bm = ', '.join(bm_stocks) if bm_stocks else '—'
-        _left_rows_data.append((sector, p_w, k_w, p_bar, k_bar, diff, diff_class, detail_my, detail_bm))
+        _left_rows_data.append((sector, p_w, k_w, diff, detail_my, detail_bm))
 
     # BM 전체 1M 수익률 = 섹터 수익률의 BM 비중 가중 평균
     bm_1m = sum(
@@ -328,28 +321,14 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
 
     # ── 왼쪽: 보유 업종 rows 완성 ──
     left_rows = ""
-    for (sector, p_w, k_w, p_bar, k_bar, diff, diff_class, detail_my, detail_bm) in _left_rows_data:
+    for (sector, p_w, k_w, diff, detail_my, detail_bm) in _left_rows_data:
         ex = held_excess.get(sector)
         ex_str = f"{ex:+.1f}%" if ex is not None else "—"
         ex_cls = ('sect-over' if ex > 0 else 'sect-under') if ex is not None else 'sect-neutral'
         left_rows += f"""                    <tr>
                         <td class="sect-name">{sector}</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:{p_bar:.1f}%"></div>
-                                </div>
-                                <span class="sect-pct">{p_w:.1f}%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:{k_bar:.1f}%"></div>
-                                </div>
-                                <span class="sect-pct">{k_w:.1f}%</span>
-                            </div>
-                        </td>
+                        <td class="sect-num">{p_w:.1f}%</td>
+                        <td class="sect-num">{k_w:.1f}%</td>
                         <td class="sect-diff">{diff:+.1f}%</td>
                         <td class="sect-diff {ex_cls}">{ex_str}</td>
                     </tr>
@@ -1062,39 +1041,11 @@ def create_dashboard():
             white-space: nowrap;
         }}
 
-        .sect-bar-cell {{
-            width: 260px;
-        }}
-
-        .sect-bar-inner {{
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }}
-
-        .sect-bar-wrap {{
-            flex: 1;
-            height: 14px;
-            background: #ececec;
-            border-radius: 3px;
-            overflow: hidden;
-            min-width: 80px;
-        }}
-
-        .sect-bar-fill {{
-            height: 100%;
-            border-radius: 3px;
-        }}
-
-        .sect-portfolio {{ background: #4a90e2; }}
-        .sect-kodex {{ background: #e8a838; }}
-
-        .sect-pct {{
-            min-width: 40px;
-            font-size: 0.80rem;
-            color: #555;
-            text-align: right;
-            flex-shrink: 0;
+        .sect-num {{
+            text-align: center;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            width: 64px;
         }}
 
         .sector-table thead th {{
