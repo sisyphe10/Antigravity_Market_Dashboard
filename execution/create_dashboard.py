@@ -720,7 +720,7 @@ def create_dashboard():
             --bg-color: #f8f9fa;
             --card-bg: #ffffff;
             --text-color: #333333;
-            --accent-color: #4a90e2;
+            --accent-color: #2d7a3a;
             --category-bg: #eeeeee;
         }}
 
@@ -756,7 +756,7 @@ def create_dashboard():
             display: inline-block;
             margin-top: 14px;
             padding: 8px 20px;
-            background-color: #4a90e2;
+            background-color: #2d7a3a;
             color: #ffffff;
             text-decoration: none;
             border-radius: 8px;
@@ -1003,13 +1003,8 @@ def create_dashboard():
             flex-shrink: 0;
         }}
 
-        .portfolio-dot {{ background: #4a90e2; }}
+        .portfolio-dot {{ background: #2d7a3a; }}
         .kodex-dot {{ background: #e8a838; }}
-
-        .sect-diff-note {{
-            font-size: 0.78rem;
-            color: #888;
-        }}
 
         .sector-table-wrap {{
             overflow-x: auto;
@@ -1135,7 +1130,7 @@ def create_dashboard():
             line-height: 1.4;
         }}
 
-        .sect-detail-mine {{ color: #4a90e2; font-weight: 500; }}
+        .sect-detail-mine {{ color: #2d7a3a; font-weight: 500; }}
         .sect-detail-bm   {{ color: #b07a10; font-weight: 500; }}
         .sect-detail-sep  {{ color: #ccc; }}
 
