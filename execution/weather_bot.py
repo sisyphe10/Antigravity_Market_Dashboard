@@ -230,7 +230,9 @@ def run_portfolio_update():
 
     # 전체 종목 코드 수집 (중복 제거) + 지수 추가
     all_codes = set()
-    for stocks in portfolio_data.values():
+    for key, stocks in portfolio_data.items():
+        if key.startswith('_'):
+            continue
         for s in stocks:
             all_codes.add(s['code'])
     all_codes.update(['KS11', 'KQ11'])
@@ -266,9 +268,10 @@ def run_portfolio_update():
             else:
                 s['contribution'] = None
 
-    # 4. portfolio_data.json 저장
+    # 4. portfolio_data.json 저장 (_로 시작하는 임시 키 제외)
+    save_data = {k: v for k, v in portfolio_data.items() if not k.startswith('_')}
     with open(portfolio_file, 'w', encoding='utf-8') as f:
-        json.dump(portfolio_data, f, ensure_ascii=False, indent=2)
+        json.dump(save_data, f, ensure_ascii=False, indent=2)
 
     # 5. create_dashboard.py 실행
     logging.info("Update Step 4: Running create_dashboard.py...")
