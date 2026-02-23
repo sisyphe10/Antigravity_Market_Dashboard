@@ -244,6 +244,13 @@
             color: #0055cc;
         }
 
+        .sect-bm-1m {
+            font-size: 0.78rem;
+            font-weight: 400;
+            color: #666;
+            margin-left: 10px;
+        }
+
         .sect-vs {
             color: #999;
             font-weight: 400;
@@ -429,13 +436,13 @@
 <body>
     <header>
         <h1>📊 Market Data Dashboard</h1>
-        <div class="last-updated">Last Updated: 2026-02-23 15:43:37 KST</div>
+        <div class="last-updated">Last Updated: 2026-02-23 15:45:50 KST</div>
         <a href="architecture.html" target="_blank" class="nav-button">🗂️ Workflow Architecture</a>
     </header>
 
     
             <div class="category-section">
-                <h2 class="category-title">WRAP <span class="category-date">(2026-02-23)</span></h2>
+                <h2 class="category-title">WRAP <span class="category-date">(2026-02-20)</span></h2>
                 <div class="dashboard-grid">
             
                 <div class="chart-card">
@@ -483,6 +490,7 @@
                 <span class="sect-portfolio-date">(2026-02-13)</span>
                 <span class="sect-vs">vs</span>
                 KOSPI 200 + KOSDAQ 150 <span class='sect-note'>(2026-02-23 기준)</span>
+                <span class="sect-bm-1m">BM 1M <span class="sect-over">+19.52%</span></span>
             </h3>
             <div class="sector-legend">
                 <span class="legend-item"><span class="legend-dot portfolio-dot"></span> 포트폴리오</span>
@@ -525,9 +533,9 @@
                     </tr>
                     <tr class="sect-detail-row">
                         <td colspan="4" class="sect-detail">
-                            <span class="sect-detail-mine">내: 삼성전자, SK하이닉스, 에스앤에스텍</span>
+                            <span class="sect-detail-mine">삼성전자, SK하이닉스, 에스앤에스텍</span>
                             <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
-                            <span class="sect-detail-bm">BM: 삼성전자, SK하이닉스, LG에너지솔루션</span>
+                            <span class="sect-detail-bm">삼성전자, SK하이닉스, LG에너지솔루션</span>
                         </td>
                     </tr>
                     <tr>
@@ -552,9 +560,9 @@
                     </tr>
                     <tr class="sect-detail-row">
                         <td colspan="4" class="sect-detail">
-                            <span class="sect-detail-mine">내: 레인보우로보틱스, 두산에너빌리티, 두산밥캣</span>
+                            <span class="sect-detail-mine">레인보우로보틱스, 두산에너빌리티, 두산밥캣</span>
                             <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
-                            <span class="sect-detail-bm">BM: 두산에너빌리티, 한미반도체, 레인보우로보틱스</span>
+                            <span class="sect-detail-bm">두산에너빌리티, 한미반도체, 레인보우로보틱스</span>
                         </td>
                     </tr>
                     <tr>
@@ -579,9 +587,9 @@
                     </tr>
                     <tr class="sect-detail-row">
                         <td colspan="4" class="sect-detail">
-                            <span class="sect-detail-mine">내: CJ, 두산, OCI홀딩스</span>
+                            <span class="sect-detail-mine">CJ, 두산, OCI홀딩스</span>
                             <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
-                            <span class="sect-detail-bm">BM: SK스퀘어, KB금융, 신한지주</span>
+                            <span class="sect-detail-bm">SK스퀘어, KB금융, 신한지주</span>
                         </td>
                     </tr>
                     <tr>
@@ -606,9 +614,9 @@
                     </tr>
                     <tr class="sect-detail-row">
                         <td colspan="4" class="sect-detail">
-                            <span class="sect-detail-mine">내: 하이브</span>
+                            <span class="sect-detail-mine">하이브</span>
                             <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
-                            <span class="sect-detail-bm">BM: 하이브, 강원랜드, 에스엠</span>
+                            <span class="sect-detail-bm">하이브, 강원랜드, 에스엠</span>
                         </td>
                     </tr>
                     <tr>
@@ -633,9 +641,9 @@
                     </tr>
                     <tr class="sect-detail-row">
                         <td colspan="4" class="sect-detail">
-                            <span class="sect-detail-mine">내: 미래에셋증권</span>
+                            <span class="sect-detail-mine">미래에셋증권</span>
                             <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
-                            <span class="sect-detail-bm">BM: 미래에셋증권, NH투자증권, 키움증권</span>
+                            <span class="sect-detail-bm">미래에셋증권, NH투자증권, 키움증권</span>
                         </td>
                     </tr>
 
@@ -645,7 +653,7 @@
                 </div>
                 <div class="sector-right-panel">
                     <div class="sect-right-block">
-                        <h4 class="sect-panel-title">미보유 업종 — BM 비중 상위 5</h4>
+                        <h4 class="sect-panel-title">BM 비중 상위 5개</h4>
                         <table class="sector-table">
                             <thead>
                                 <tr><th>업종</th><th>BM 비중</th></tr>
@@ -676,31 +684,31 @@
                         </table>
                     </div>
                     <div class="sect-right-block">
-                        <h4 class="sect-panel-title">미보유 업종 — 1M 수익률 상위 5</h4>
+                        <h4 class="sect-panel-title">1M 초과수익률 상위 5개 <span class="sect-note">(미보유)</span></h4>
                         <table class="sector-table">
                             <thead>
-                                <tr><th>업종</th><th>1M 수익률</th></tr>
+                                <tr><th>업종</th><th>초과수익률</th></tr>
                             </thead>
                             <tbody>
                     <tr>
                         <td class="sect-name">금융</td>
-                        <td class="sect-right-val sect-over">+51.19%</td>
+                        <td class="sect-right-val sect-over">+31.67%</td>
                     </tr>
                     <tr>
                         <td class="sect-name">비금속</td>
-                        <td class="sect-right-val sect-over">+44.83%</td>
+                        <td class="sect-right-val sect-over">+25.31%</td>
                     </tr>
                     <tr>
                         <td class="sect-name">보험</td>
-                        <td class="sect-right-val sect-over">+30.84%</td>
+                        <td class="sect-right-val sect-over">+11.32%</td>
                     </tr>
                     <tr>
                         <td class="sect-name">은행</td>
-                        <td class="sect-right-val sect-over">+26.08%</td>
+                        <td class="sect-right-val sect-over">+6.56%</td>
                     </tr>
                     <tr>
                         <td class="sect-name">통신</td>
-                        <td class="sect-right-val sect-over">+23.16%</td>
+                        <td class="sect-right-val sect-over">+3.64%</td>
                     </tr>
 
                             </tbody>
@@ -716,6 +724,7 @@
                 <span class="sect-portfolio-date">(2026-02-19)</span>
                 <span class="sect-vs">vs</span>
                 KOSPI 200 + KOSDAQ 150 <span class='sect-note'>(2026-02-23 기준)</span>
+                <span class="sect-bm-1m">BM 1M <span class="sect-over">+19.52%</span></span>
             </h3>
             <div class="sector-legend">
                 <span class="legend-item"><span class="legend-dot portfolio-dot"></span> 포트폴리오</span>
@@ -758,9 +767,9 @@
                     </tr>
                     <tr class="sect-detail-row">
                         <td colspan="4" class="sect-detail">
-                            <span class="sect-detail-mine">내: SK하이닉스, 삼성전자, 이수페타시스</span>
+                            <span class="sect-detail-mine">SK하이닉스, 삼성전자, 이수페타시스</span>
                             <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
-                            <span class="sect-detail-bm">BM: 삼성전자, SK하이닉스, LG에너지솔루션</span>
+                            <span class="sect-detail-bm">삼성전자, SK하이닉스, LG에너지솔루션</span>
                         </td>
                     </tr>
                     <tr>
@@ -785,9 +794,9 @@
                     </tr>
                     <tr class="sect-detail-row">
                         <td colspan="4" class="sect-detail">
-                            <span class="sect-detail-mine">내: 레인보우로보틱스, 현대엘리베이터, 두산밥캣</span>
+                            <span class="sect-detail-mine">레인보우로보틱스, 현대엘리베이터, 두산밥캣</span>
                             <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
-                            <span class="sect-detail-bm">BM: 두산에너빌리티, 한미반도체, 레인보우로보틱스</span>
+                            <span class="sect-detail-bm">두산에너빌리티, 한미반도체, 레인보우로보틱스</span>
                         </td>
                     </tr>
                     <tr>
@@ -812,9 +821,9 @@
                     </tr>
                     <tr class="sect-detail-row">
                         <td colspan="4" class="sect-detail">
-                            <span class="sect-detail-mine">내: 대한조선, SNT다이내믹스, 현대차</span>
+                            <span class="sect-detail-mine">대한조선, SNT다이내믹스, 현대차</span>
                             <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
-                            <span class="sect-detail-bm">BM: 현대차, 기아, HD현대중공업</span>
+                            <span class="sect-detail-bm">현대차, 기아, HD현대중공업</span>
                         </td>
                     </tr>
                     <tr>
@@ -839,9 +848,9 @@
                     </tr>
                     <tr class="sect-detail-row">
                         <td colspan="4" class="sect-detail">
-                            <span class="sect-detail-mine">내: 파라다이스</span>
+                            <span class="sect-detail-mine">파라다이스</span>
                             <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
-                            <span class="sect-detail-bm">BM: 하이브, 강원랜드, 에스엠</span>
+                            <span class="sect-detail-bm">하이브, 강원랜드, 에스엠</span>
                         </td>
                     </tr>
                     <tr>
@@ -866,9 +875,9 @@
                     </tr>
                     <tr class="sect-detail-row">
                         <td colspan="4" class="sect-detail">
-                            <span class="sect-detail-mine">내: 한샘</span>
+                            <span class="sect-detail-mine">한샘</span>
                             <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
-                            <span class="sect-detail-bm">BM: 삼성물산, 포스코인터내셔널, 영원무역</span>
+                            <span class="sect-detail-bm">삼성물산, 포스코인터내셔널, 영원무역</span>
                         </td>
                     </tr>
                     <tr>
@@ -893,9 +902,9 @@
                     </tr>
                     <tr class="sect-detail-row">
                         <td colspan="4" class="sect-detail">
-                            <span class="sect-detail-mine">내: 하나투어</span>
+                            <span class="sect-detail-mine">하나투어</span>
                             <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
-                            <span class="sect-detail-bm">BM: 알테오젠, SK바이오팜, HD현대마린솔루션</span>
+                            <span class="sect-detail-bm">알테오젠, SK바이오팜, HD현대마린솔루션</span>
                         </td>
                     </tr>
                     <tr>
@@ -920,9 +929,9 @@
                     </tr>
                     <tr class="sect-detail-row">
                         <td colspan="4" class="sect-detail">
-                            <span class="sect-detail-mine">내: 신영증권</span>
+                            <span class="sect-detail-mine">신영증권</span>
                             <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
-                            <span class="sect-detail-bm">BM: 미래에셋증권, NH투자증권, 키움증권</span>
+                            <span class="sect-detail-bm">미래에셋증권, NH투자증권, 키움증권</span>
                         </td>
                     </tr>
 
@@ -932,7 +941,7 @@
                 </div>
                 <div class="sector-right-panel">
                     <div class="sect-right-block">
-                        <h4 class="sect-panel-title">미보유 업종 — BM 비중 상위 5</h4>
+                        <h4 class="sect-panel-title">BM 비중 상위 5개</h4>
                         <table class="sector-table">
                             <thead>
                                 <tr><th>업종</th><th>BM 비중</th></tr>
@@ -963,31 +972,31 @@
                         </table>
                     </div>
                     <div class="sect-right-block">
-                        <h4 class="sect-panel-title">미보유 업종 — 1M 수익률 상위 5</h4>
+                        <h4 class="sect-panel-title">1M 초과수익률 상위 5개 <span class="sect-note">(미보유)</span></h4>
                         <table class="sector-table">
                             <thead>
-                                <tr><th>업종</th><th>1M 수익률</th></tr>
+                                <tr><th>업종</th><th>초과수익률</th></tr>
                             </thead>
                             <tbody>
                     <tr>
                         <td class="sect-name">금융</td>
-                        <td class="sect-right-val sect-over">+51.19%</td>
+                        <td class="sect-right-val sect-over">+31.67%</td>
                     </tr>
                     <tr>
                         <td class="sect-name">비금속</td>
-                        <td class="sect-right-val sect-over">+44.83%</td>
+                        <td class="sect-right-val sect-over">+25.31%</td>
                     </tr>
                     <tr>
                         <td class="sect-name">보험</td>
-                        <td class="sect-right-val sect-over">+30.84%</td>
+                        <td class="sect-right-val sect-over">+11.32%</td>
                     </tr>
                     <tr>
                         <td class="sect-name">은행</td>
-                        <td class="sect-right-val sect-over">+26.08%</td>
+                        <td class="sect-right-val sect-over">+6.56%</td>
                     </tr>
                     <tr>
                         <td class="sect-name">기타금융</td>
-                        <td class="sect-right-val sect-over">+23.23%</td>
+                        <td class="sect-right-val sect-over">+3.71%</td>
                     </tr>
 
                             </tbody>
@@ -1005,7 +1014,7 @@
                 <div class="portfolio-section-wrapper">
                     
             <div class="portfolio-section">
-                <h3 class="portfolio-title">삼성 트루밸류 / NH Value ESG / DB 개방형 <span class="update-time">(2026-02-23 15:42)</span></h3>
+                <h3 class="portfolio-title">삼성 트루밸류 / NH Value ESG / DB 개방형 <span class="update-time">(2026-02-23 15:44)</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table">
                         <thead>
@@ -1192,7 +1201,7 @@
             </div>
             
             <div class="portfolio-section">
-                <h3 class="portfolio-title">DB 목표전환형 <span class="update-time">(2026-02-23 15:42)</span></h3>
+                <h3 class="portfolio-title">DB 목표전환형 <span class="update-time">(2026-02-23 15:44)</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table">
                         <thead>

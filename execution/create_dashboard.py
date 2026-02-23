@@ -331,9 +331,9 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                     </tr>
                     <tr class="sect-detail-row">
                         <td colspan="4" class="sect-detail">
-                            <span class="sect-detail-mine">내: {detail_my}</span>
+                            <span class="sect-detail-mine">{detail_my}</span>
                             <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
-                            <span class="sect-detail-bm">BM: {detail_bm}</span>
+                            <span class="sect-detail-bm">{detail_bm}</span>
                         </td>
                     </tr>
 """
@@ -348,23 +348,33 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                     </tr>
 """
 
-    # ── 오른쪽 하단: 미보유 업종 1M 수익률 상위 5 ──
-    not_held_ret = {s: sector_1m_returns[s] for s in not_held if s in sector_1m_returns}
-    top5_1m = sorted(not_held_ret, key=lambda s: not_held_ret[s], reverse=True)[:5]
+    # ── 오른쪽 하단: 미보유 업종 1M 초과수익률 상위 5 ──
+    # BM 전체 1M 수익률 = 섹터 수익률의 BM 비중 가중 평균
+    bm_1m = sum(
+        sector_1m_returns.get(s, 0) * w / 100
+        for s, w in kodex_sectors.items()
+        if s in sector_1m_returns
+    )
+    not_held_excess = {
+        s: sector_1m_returns[s] - bm_1m
+        for s in not_held if s in sector_1m_returns
+    }
+    top5_1m = sorted(not_held_excess, key=lambda s: not_held_excess[s], reverse=True)[:5]
     ret_rows = ""
     if top5_1m:
         for s in top5_1m:
-            r = not_held_ret[s]
-            r_cls = 'sect-over' if r > 0 else 'sect-under'
+            ex = not_held_excess[s]
+            r_cls = 'sect-over' if ex > 0 else 'sect-under'
             ret_rows += f"""                    <tr>
                         <td class="sect-name">{s}</td>
-                        <td class="sect-right-val {r_cls}">{r:+.2f}%</td>
+                        <td class="sect-right-val {r_cls}">{ex:+.2f}%</td>
                     </tr>
 """
     else:
         ret_rows = '<tr><td colspan="2" class="sect-no-data">데이터 없음</td></tr>'
 
     kodex_note = f" <span class='sect-note'>({kodex_updated} 기준)</span>" if kodex_updated else ""
+    bm_1m_str = f"{bm_1m:+.2f}%" if sector_1m_returns else "—"
 
     card = f"""
         <div class="sector-card">
@@ -373,6 +383,7 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                 <span class="sect-portfolio-date">({portfolio_date})</span>
                 <span class="sect-vs">vs</span>
                 KOSPI 200 + KOSDAQ 150{kodex_note}
+                <span class="sect-bm-1m">BM 1M <span class="{'sect-over' if bm_1m > 0 else 'sect-under'}">{bm_1m_str}</span></span>
             </h3>
             <div class="sector-legend">
                 <span class="legend-item"><span class="legend-dot portfolio-dot"></span> 포트폴리오</span>
@@ -400,7 +411,7 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                 </div>
                 <div class="sector-right-panel">
                     <div class="sect-right-block">
-                        <h4 class="sect-panel-title">미보유 업종 — BM 비중 상위 5</h4>
+                        <h4 class="sect-panel-title">BM 비중 상위 5개</h4>
                         <table class="sector-table">
                             <thead>
                                 <tr><th>업종</th><th>BM 비중</th></tr>
@@ -411,10 +422,10 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                         </table>
                     </div>
                     <div class="sect-right-block">
-                        <h4 class="sect-panel-title">미보유 업종 — 1M 수익률 상위 5</h4>
+                        <h4 class="sect-panel-title">1M 초과수익률 상위 5개 <span class="sect-note">(미보유)</span></h4>
                         <table class="sector-table">
                             <thead>
-                                <tr><th>업종</th><th>1M 수익률</th></tr>
+                                <tr><th>업종</th><th>초과수익률</th></tr>
                             </thead>
                             <tbody>
 {ret_rows}
@@ -928,6 +939,13 @@ def create_dashboard():
             font-size: 0.75rem;
             font-weight: 700;
             color: #0055cc;
+        }}
+
+        .sect-bm-1m {{
+            font-size: 0.78rem;
+            font-weight: 400;
+            color: #666;
+            margin-left: 10px;
         }}
 
         .sect-vs {{
