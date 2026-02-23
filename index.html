@@ -241,7 +241,7 @@
         .sect-portfolio-date {
             font-size: 0.75rem;
             font-weight: 700;
-            color: #0055cc;
+            color: #333;
         }
 
         .sect-bm-1m {
@@ -379,17 +379,11 @@
         .sect-under { color: #0055cc; }
         .sect-neutral { color: #777; }
 
-        .sector-two-panel {
+        .sector-three-panel {
             display: grid;
-            grid-template-columns: 1fr 280px;
+            grid-template-columns: 3fr 1fr 1fr;
             gap: 24px;
             align-items: start;
-        }
-
-        .sector-right-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
         }
 
         .sect-panel-title {
@@ -440,7 +434,7 @@
         .sect-detail-sep  { color: #ccc; }
 
         @media (max-width: 800px) {
-            .sector-two-panel {
+            .sector-three-panel {
                 grid-template-columns: 1fr;
             }
         }
@@ -449,7 +443,7 @@
 <body>
     <header>
         <h1>📊 Market Data Dashboard</h1>
-        <div class="last-updated">Last Updated: 2026-02-23 15:57:34 KST</div>
+        <div class="last-updated">Last Updated: 2026-02-23 16:00:15 KST</div>
         <a href="architecture.html" target="_blank" class="nav-button">🗂️ Workflow Architecture</a>
     </header>
 
@@ -510,7 +504,7 @@
                 <span class="legend-item"><span class="legend-dot kodex-dot"></span> 벤치마크</span>
                 <span class="sect-diff-note">&nbsp;|&nbsp; <span class="sect-over">과중</span> &nbsp;/&nbsp; <span class="sect-under">과소</span></span>
             </div>
-            <div class="sector-two-panel">
+            <div class="sector-three-panel">
                 <div class="sector-left-panel">
                     <h4 class="sect-panel-title">보유 업종</h4>
                     <div class="sector-table-wrap">
@@ -664,14 +658,13 @@
                         </table>
                     </div>
                 </div>
-                <div class="sector-right-panel">
-                    <div class="sect-right-block">
-                        <h4 class="sect-panel-title">(미보유) BM 비중 상위 5개</h4>
-                        <table class="sector-table">
-                            <thead>
-                                <tr><th>업종</th><th>BM 비중</th></tr>
-                            </thead>
-                            <tbody>
+                <div class="sect-right-block">
+                    <h4 class="sect-panel-title">(미보유) BM 비중 상위 5개</h4>
+                    <table class="sector-table">
+                        <thead>
+                            <tr><th>업종</th><th>BM 비중</th></tr>
+                        </thead>
+                        <tbody>
                     <tr>
                         <td class="sect-name">운송장비·부품</td>
                         <td class="sect-right-val">9.7%</td>
@@ -708,16 +701,16 @@
                         <td colspan="2" class="sect-right-stocks">삼성물산, 포스코인터내셔널, 영원무역</td>
                     </tr>
 
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="sect-right-block">
-                        <h4 class="sect-panel-title">(미보유) 1M 초과 수익률 상위 5개</h4>
-                        <table class="sector-table">
-                            <thead>
-                                <tr><th>업종</th><th>초과 수익률</th></tr>
-                            </thead>
-                            <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="sect-right-block">
+                    <h4 class="sect-panel-title">(미보유) 1M 초과 수익률 상위 5개</h4>
+                    <table class="sector-table">
+                        <thead>
+                            <tr><th>업종</th><th>초과 수익률</th></tr>
+                        </thead>
+                        <tbody>
                     <tr>
                         <td class="sect-name">금융</td>
                         <td class="sect-right-val sect-over">+31.7%</td>
@@ -754,9 +747,8 @@
                         <td colspan="2" class="sect-right-stocks">SK텔레콤, KT, LG유플러스</td>
                     </tr>
 
-                            </tbody>
-                        </table>
-                    </div>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -774,7 +766,7 @@
                 <span class="legend-item"><span class="legend-dot kodex-dot"></span> 벤치마크</span>
                 <span class="sect-diff-note">&nbsp;|&nbsp; <span class="sect-over">과중</span> &nbsp;/&nbsp; <span class="sect-under">과소</span></span>
             </div>
-            <div class="sector-two-panel">
+            <div class="sector-three-panel">
                 <div class="sector-left-panel">
                     <h4 class="sect-panel-title">보유 업종</h4>
                     <div class="sector-table-wrap">
@@ -982,14 +974,13 @@
                         </table>
                     </div>
                 </div>
-                <div class="sector-right-panel">
-                    <div class="sect-right-block">
-                        <h4 class="sect-panel-title">(미보유) BM 비중 상위 5개</h4>
-                        <table class="sector-table">
-                            <thead>
-                                <tr><th>업종</th><th>BM 비중</th></tr>
-                            </thead>
-                            <tbody>
+                <div class="sect-right-block">
+                    <h4 class="sect-panel-title">(미보유) BM 비중 상위 5개</h4>
+                    <table class="sector-table">
+                        <thead>
+                            <tr><th>업종</th><th>BM 비중</th></tr>
+                        </thead>
+                        <tbody>
                     <tr>
                         <td class="sect-name">기타금융</td>
                         <td class="sect-right-val">10.8%</td>
@@ -1026,16 +1017,16 @@
                         <td colspan="2" class="sect-right-stocks">고려아연, POSCO홀딩스, LIG넥스원</td>
                     </tr>
 
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="sect-right-block">
-                        <h4 class="sect-panel-title">(미보유) 1M 초과 수익률 상위 5개</h4>
-                        <table class="sector-table">
-                            <thead>
-                                <tr><th>업종</th><th>초과 수익률</th></tr>
-                            </thead>
-                            <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="sect-right-block">
+                    <h4 class="sect-panel-title">(미보유) 1M 초과 수익률 상위 5개</h4>
+                    <table class="sector-table">
+                        <thead>
+                            <tr><th>업종</th><th>초과 수익률</th></tr>
+                        </thead>
+                        <tbody>
                     <tr>
                         <td class="sect-name">금융</td>
                         <td class="sect-right-val sect-over">+31.7%</td>
@@ -1072,9 +1063,8 @@
                         <td colspan="2" class="sect-right-stocks">SK스퀘어, KB금융, 신한지주</td>
                     </tr>
 
-                            </tbody>
-                        </table>
-                    </div>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

@@ -404,7 +404,7 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                 <span class="legend-item"><span class="legend-dot kodex-dot"></span> 벤치마크</span>
                 <span class="sect-diff-note">&nbsp;|&nbsp; <span class="sect-over">과중</span> &nbsp;/&nbsp; <span class="sect-under">과소</span></span>
             </div>
-            <div class="sector-two-panel">
+            <div class="sector-three-panel">
                 <div class="sector-left-panel">
                     <h4 class="sect-panel-title">보유 업종</h4>
                     <div class="sector-table-wrap">
@@ -423,29 +423,27 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                         </table>
                     </div>
                 </div>
-                <div class="sector-right-panel">
-                    <div class="sect-right-block">
-                        <h4 class="sect-panel-title">(미보유) BM 비중 상위 5개</h4>
-                        <table class="sector-table">
-                            <thead>
-                                <tr><th>업종</th><th>BM 비중</th></tr>
-                            </thead>
-                            <tbody>
+                <div class="sect-right-block">
+                    <h4 class="sect-panel-title">(미보유) BM 비중 상위 5개</h4>
+                    <table class="sector-table">
+                        <thead>
+                            <tr><th>업종</th><th>BM 비중</th></tr>
+                        </thead>
+                        <tbody>
 {bench_rows}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="sect-right-block">
-                        <h4 class="sect-panel-title">(미보유) 1M 초과 수익률 상위 5개</h4>
-                        <table class="sector-table">
-                            <thead>
-                                <tr><th>업종</th><th>초과 수익률</th></tr>
-                            </thead>
-                            <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="sect-right-block">
+                    <h4 class="sect-panel-title">(미보유) 1M 초과 수익률 상위 5개</h4>
+                    <table class="sector-table">
+                        <thead>
+                            <tr><th>업종</th><th>초과 수익률</th></tr>
+                        </thead>
+                        <tbody>
 {ret_rows}
-                            </tbody>
-                        </table>
-                    </div>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -952,7 +950,7 @@ def create_dashboard():
         .sect-portfolio-date {{
             font-size: 0.75rem;
             font-weight: 700;
-            color: #0055cc;
+            color: #333;
         }}
 
         .sect-bm-1m {{
@@ -1090,17 +1088,11 @@ def create_dashboard():
         .sect-under {{ color: #0055cc; }}
         .sect-neutral {{ color: #777; }}
 
-        .sector-two-panel {{
+        .sector-three-panel {{
             display: grid;
-            grid-template-columns: 1fr 280px;
+            grid-template-columns: 3fr 1fr 1fr;
             gap: 24px;
             align-items: start;
-        }}
-
-        .sector-right-panel {{
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
         }}
 
         .sect-panel-title {{
@@ -1151,7 +1143,7 @@ def create_dashboard():
         .sect-detail-sep  {{ color: #ccc; }}
 
         @media (max-width: 800px) {{
-            .sector-two-panel {{
+            .sector-three-panel {{
                 grid-template-columns: 1fr;
             }}
         }}
