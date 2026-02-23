@@ -1004,7 +1004,7 @@ def create_dashboard():
         }}
 
         .portfolio-dot {{ background: #2d7a3a; }}
-        .kodex-dot {{ background: #e8a838; }}
+        .kodex-dot {{ background: #444; }}
 
         .sector-table-wrap {{
             overflow-x: auto;
@@ -1115,6 +1115,7 @@ def create_dashboard():
         .sect-right-stocks {{
             font-size: 0.72rem;
             color: #444;
+            font-weight: 500;
             padding: 0 8px 5px 12px !important;
             border-bottom: 1px solid #eee;
         }}
