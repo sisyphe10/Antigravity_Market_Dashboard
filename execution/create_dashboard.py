@@ -80,9 +80,13 @@ def create_portfolio_tables_html():
                 # 오늘 수익률 포맷
                 today_return = stock.get('today_return')
                 weight = stock['weight']
+                is_today_new = stock.get('is_today_new', False)
                 total_weight += weight
 
-                if today_return is not None:
+                if is_today_new:
+                    today_return_str = "-"
+                    today_color_class = ""
+                elif today_return is not None:
                     today_return_str = f"{today_return:+.1f}%"
                     today_color_class = "positive" if today_return > 0 else "negative" if today_return < 0 else ""
                     weighted_return_sum += today_return * weight / 100
@@ -93,7 +97,10 @@ def create_portfolio_tables_html():
 
                 # 기여도 포맷
                 contribution = stock.get('contribution')
-                if contribution is not None:
+                if is_today_new:
+                    contribution_str = "-"
+                    contribution_color_class = ""
+                elif contribution is not None:
                     contribution_str = f"{contribution:+.1f}"
                     contribution_color_class = "positive" if contribution > 0 else "negative" if contribution < 0 else ""
                     total_contribution += contribution
@@ -103,7 +110,10 @@ def create_portfolio_tables_html():
 
                 # 누적 수익률 포맷
                 cumulative_return = stock.get('cumulative_return')
-                if cumulative_return is not None:
+                if is_today_new:
+                    cumulative_return_str = "-"
+                    cumulative_color_class = ""
+                elif cumulative_return is not None:
                     cumulative_return_str = f"{cumulative_return:+.1f}%"
                     cumulative_color_class = "positive" if cumulative_return > 0 else "negative" if cumulative_return < 0 else ""
                 else:
@@ -1131,7 +1141,7 @@ def create_dashboard():
             line-height: 1.4;
         }}
 
-        .sect-detail-mine {{ color: #2d7a3a; font-weight: 500; }}
+        .sect-detail-mine {{ color: #2d7a3a; font-weight: 700; }}
         .sect-detail-bm   {{ color: #444; font-weight: 500; }}
         .sect-detail-sep  {{ color: #ccc; }}
 

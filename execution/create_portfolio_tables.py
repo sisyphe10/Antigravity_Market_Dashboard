@@ -107,6 +107,11 @@ def calculate_cumulative_return(code, stock_name, portfolio_name, nav_df, price_
         if purchases.empty:
             return {'cumulative_return': None, 'status': 'no_purchases', 'avg_price': None, 'current_price': None}
 
+        # 오늘 처음 편입된 종목은 수익률 미표시
+        today_norm = pd.Timestamp.now().normalize()
+        if purchases['날짜'].min() >= today_norm:
+            return {'cumulative_return': None, 'status': 'today_new', 'avg_price': None, 'current_price': None}
+
         # 캐시된 가격 데이터가 없으면 계산 불가
         if price_df is None or price_df.empty:
             return {'cumulative_return': None, 'status': 'no_price_data', 'avg_price': None, 'current_price': None}
@@ -270,16 +275,21 @@ def create_portfolio_tables():
                 else:
                     market_cap_billions = 0
 
-                # 캐시된 가격 데이터에서 오늘 수익률 계산
                 price_df = price_cache.get(code)
-                today_return = get_today_return_from_cache(price_df)
 
-                # 누적 수익률 계산 (캐시된 데이터 사용)
+                # 누적 수익률 계산 (오늘 편입 여부도 함께 확인)
                 cumulative_result = calculate_cumulative_return(code, stock_name, use_portfolio, nav_df, price_df)
-                cumulative_return = cumulative_result.get('cumulative_return')
+                is_today_new = (cumulative_result.get('status') == 'today_new')
 
-                # 기여도 계산
-                contribution = (weight / 100) * (today_return / 100) * 1000 if today_return is not None else None
+                # 오늘 처음 편입된 종목은 수익률/기여도/누적 미표시
+                if is_today_new:
+                    today_return = None
+                    contribution = None
+                    cumulative_return = None
+                else:
+                    today_return = get_today_return_from_cache(price_df)
+                    cumulative_return = cumulative_result.get('cumulative_return')
+                    contribution = (weight / 100) * (today_return / 100) * 1000 if today_return is not None else None
 
                 stocks_info.append({
                     'code': code,
@@ -289,13 +299,15 @@ def create_portfolio_tables():
                     'weight': weight,
                     'today_return': today_return,
                     'contribution': contribution,
-                    'cumulative_return': cumulative_return
+                    'cumulative_return': cumulative_return,
+                    'is_today_new': is_today_new
                 })
 
-                return_str = f"{today_return:+.2f}%" if today_return is not None else "N/A"
-                contribution_str = f"{contribution:+.2f}" if contribution is not None else "N/A"
-                cumulative_str = f"{cumulative_return:+.2f}%" if cumulative_return is not None else "N/A"
-                print(f"   - {stock_name} ({code}): {sector}, {market_cap_billions:,.0f}억원, {weight}%, 오늘: {return_str}, 기여도: {contribution_str}, 누적: {cumulative_str}")
+                new_str = " [신규]" if is_today_new else ""
+                return_str = f"{today_return:+.2f}%" if today_return is not None else "-"
+                contribution_str = f"{contribution:+.2f}" if contribution is not None else "-"
+                cumulative_str = f"{cumulative_return:+.2f}%" if cumulative_return is not None else "-"
+                print(f"   - {stock_name} ({code}){new_str}: {sector}, {market_cap_billions:,.0f}억원, {weight}%, 오늘: {return_str}, 기여도: {contribution_str}, 누적: {cumulative_str}")
 
             portfolio_data[display_name] = stocks_info
 
