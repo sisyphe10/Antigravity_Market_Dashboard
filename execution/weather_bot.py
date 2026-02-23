@@ -666,11 +666,11 @@ if __name__ == '__main__':
         kst = pytz.timezone('Asia/Seoul')
         weather_time = datetime.time(hour=5, minute=0, second=0, tzinfo=kst)
         calendar_time = datetime.time(hour=5, minute=10, second=0, tzinfo=kst)
-        portfolio_time = datetime.time(hour=16, minute=0, second=0, tzinfo=kst)
+        portfolio_time = datetime.time(hour=15, minute=40, second=0, tzinfo=kst)
     except:
         weather_time = datetime.time(hour=5, minute=0, second=0)
         calendar_time = datetime.time(hour=5, minute=10, second=0)
-        portfolio_time = datetime.time(hour=16, minute=0, second=0)
+        portfolio_time = datetime.time(hour=15, minute=40, second=0)
 
     job_queue.run_daily(daily_weather_job, time=weather_time)
     job_queue.run_daily(daily_calendar_job, time=calendar_time)
@@ -705,6 +705,6 @@ if __name__ == '__main__':
     print(f"✅ Daily jobs scheduled:")
     print(f"  - Weather: 05:00 KST")
     print(f"  - Calendar: 05:10 KST")
-    print(f"  - Portfolio report: 16:00 KST")
+    print(f"  - Portfolio report: 15:40 KST")
     print(f"  - Auto portfolio update: 09:30~15:35 KST (30분 간격, 거래일만)")
     application.run_polling()
