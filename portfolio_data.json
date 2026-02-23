@@ -201,17 +201,6 @@
       "is_today_new": false
     },
     {
-      "code": "241560",
-      "name": "두산밥캣",
-      "sector": "기계",
-      "market_cap": 62689.86651,
-      "weight": 5,
-      "today_return": -0.15267175572519084,
-      "contribution": -0.07633587786259542,
-      "cumulative_return": 0.21452650934723483,
-      "is_today_new": false
-    },
-    {
       "code": "034230",
       "name": "파라다이스",
       "sector": "호텔,레저서비스",
@@ -223,14 +212,14 @@
       "is_today_new": false
     },
     {
-      "code": "005380",
-      "name": "현대차",
-      "sector": "자동차",
-      "market_cap": 1070883.11618,
+      "code": "241560",
+      "name": "두산밥캣",
+      "sector": "기계",
+      "market_cap": 62689.86651,
       "weight": 5,
-      "today_return": 2.75049115913556,
-      "contribution": 1.37524557956778,
-      "cumulative_return": 1.4658331536969271,
+      "today_return": -0.15267175572519084,
+      "contribution": -0.07633587786259542,
+      "cumulative_return": 0.21452650934723483,
       "is_today_new": false
     },
     {
@@ -238,10 +227,21 @@
       "name": "대한조선",
       "sector": "기타",
       "market_cap": 34789.259736,
-      "weight": 5,
+      "weight": 3,
       "today_return": 10.797546012269938,
-      "contribution": 5.39877300613497,
+      "contribution": 3.2392638036809815,
       "cumulative_return": 5.9392872855257295,
+      "is_today_new": false
+    },
+    {
+      "code": "009240",
+      "name": "한샘",
+      "sector": "건설,건축관련",
+      "market_cap": 11566.925612,
+      "weight": 2,
+      "today_return": 4.13135593220339,
+      "contribution": 0.826271186440678,
+      "cumulative_return": 2.550133302422619,
       "is_today_new": false
     },
     {
@@ -249,9 +249,9 @@
       "name": "SNT다이내믹스",
       "sector": "자동차",
       "market_cap": 19519.333139,
-      "weight": 3,
+      "weight": 2,
       "today_return": 1.9097222222222223,
-      "contribution": 0.5729166666666666,
+      "contribution": 0.3819444444444445,
       "cumulative_return": 6.2764031382015695,
       "is_today_new": false
     },
@@ -260,44 +260,22 @@
       "name": "신영증권",
       "sector": "증권",
       "market_cap": 41922.0,
-      "weight": 3,
+      "weight": 2,
       "today_return": 4.938271604938271,
-      "contribution": 1.4814814814814814,
+      "contribution": 0.9876543209876544,
       "cumulative_return": 4.938271604938271,
       "is_today_new": false
     },
     {
-      "code": "009240",
-      "name": "한샘",
-      "sector": "건설,건축관련",
-      "market_cap": 11566.925612,
-      "weight": 3,
-      "today_return": 4.13135593220339,
-      "contribution": 1.2394067796610169,
-      "cumulative_return": 2.550133302422619,
+      "code": "005380",
+      "name": "현대차",
+      "sector": "자동차",
+      "market_cap": 1070883.11618,
+      "weight": 2,
+      "today_return": 2.75049115913556,
+      "contribution": 0.550098231827112,
+      "cumulative_return": 1.4658331536969271,
       "is_today_new": false
-    },
-    {
-      "code": "006260",
-      "name": "LS",
-      "sector": "기계",
-      "market_cap": 85907.0,
-      "weight": 3,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
-      "is_today_new": true
-    },
-    {
-      "code": "033780",
-      "name": "KT&G",
-      "sector": "필수소비재",
-      "market_cap": 208228.778425,
-      "weight": 3,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
-      "is_today_new": true
     },
     {
       "code": "399720",
