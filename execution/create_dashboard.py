@@ -1083,13 +1083,13 @@ def create_dashboard():
         }}
 
         .sect-right-header {{
-            font-size: 0.88rem;
+            font-size: 0.85rem;
             font-weight: 700;
             color: #111;
             text-align: center;
-            margin: 0 0 10px 0;
-            padding-bottom: 6px;
-            border-bottom: 2px solid #111;
+            margin: 0 0 8px 0;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #ddd;
         }}
 
         .sect-right-inner {{
@@ -1097,6 +1097,12 @@ def create_dashboard():
             grid-template-columns: 1fr 1fr;
             gap: 16px;
             align-items: start;
+        }}
+
+        .sect-right-inner .sect-panel-title {{
+            font-size: 0.78rem;
+            margin: 0 0 6px 0;
+            padding-bottom: 3px;
         }}
 
         .sect-panel-title {{
