@@ -344,7 +344,7 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
     for s in top5_bench:
         bench_rows += f"""                    <tr>
                         <td class="sect-name">{s}</td>
-                        <td class="sect-right-val">{not_held[s]:.2f}%</td>
+                        <td class="sect-right-val">{not_held[s]:.1f}%</td>
                     </tr>
 """
 
@@ -367,14 +367,14 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
             r_cls = 'sect-over' if ex > 0 else 'sect-under'
             ret_rows += f"""                    <tr>
                         <td class="sect-name">{s}</td>
-                        <td class="sect-right-val {r_cls}">{ex:+.2f}%</td>
+                        <td class="sect-right-val {r_cls}">{ex:+.1f}%</td>
                     </tr>
 """
     else:
         ret_rows = '<tr><td colspan="2" class="sect-no-data">데이터 없음</td></tr>'
 
-    kodex_note = f" <span class='sect-note'>({kodex_updated} 기준)</span>" if kodex_updated else ""
-    bm_1m_str = f"{bm_1m:+.2f}%" if sector_1m_returns else "—"
+    kodex_note = f" <span class='sect-note'>({kodex_updated})</span>" if kodex_updated else ""
+    bm_1m_str = f"{bm_1m:+.1f}%" if sector_1m_returns else "—"
 
     card = f"""
         <div class="sector-card">
@@ -388,7 +388,7 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
             <div class="sector-legend">
                 <span class="legend-item"><span class="legend-dot portfolio-dot"></span> 포트폴리오</span>
                 <span class="legend-item"><span class="legend-dot kodex-dot"></span> 벤치마크</span>
-                <span class="sect-diff-note">&nbsp;|&nbsp; 차이: 빨강=과중, 파랑=과소</span>
+                <span class="sect-diff-note">&nbsp;|&nbsp; <span class="sect-over">과중</span> &nbsp;/&nbsp; <span class="sect-under">과소</span></span>
             </div>
             <div class="sector-two-panel">
                 <div class="sector-left-panel">
@@ -411,7 +411,7 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                 </div>
                 <div class="sector-right-panel">
                     <div class="sect-right-block">
-                        <h4 class="sect-panel-title">BM 비중 상위 5개</h4>
+                        <h4 class="sect-panel-title">(미보유) BM 비중 상위 5개</h4>
                         <table class="sector-table">
                             <thead>
                                 <tr><th>업종</th><th>BM 비중</th></tr>
@@ -422,10 +422,10 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                         </table>
                     </div>
                     <div class="sect-right-block">
-                        <h4 class="sect-panel-title">1M 초과수익률 상위 5개 <span class="sect-note">(미보유)</span></h4>
+                        <h4 class="sect-panel-title">(미보유) 1M 초과 수익률 상위 5개</h4>
                         <table class="sector-table">
                             <thead>
-                                <tr><th>업종</th><th>초과수익률</th></tr>
+                                <tr><th>업종</th><th>초과 수익률</th></tr>
                             </thead>
                             <tbody>
 {ret_rows}
@@ -525,7 +525,7 @@ def create_dashboard():
                 if sector_html:
                     charts_html += f"""
             <div class="category-section">
-                <h2 class="category-title">섹터 비중</h2>
+                <h2 class="category-title">SECTOR WEIGHT</h2>
                 <div class="portfolio-section-wrapper">
                     {sector_html}
                 </div>
@@ -1059,11 +1059,17 @@ def create_dashboard():
             flex-shrink: 0;
         }}
 
+        .sector-table thead th {{
+            text-align: center;
+        }}
+
         .sect-diff {{
-            text-align: right;
+            text-align: center;
             font-weight: 600;
             white-space: nowrap;
-            min-width: 52px;
+            width: 44px;
+            min-width: 44px;
+            max-width: 44px;
         }}
 
         .sect-over {{ color: #cc0000; }}
