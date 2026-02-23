@@ -333,7 +333,7 @@ def format_update_summary(portfolio_data):
     from datetime import timezone, timedelta
     KST = timezone(timedelta(hours=9))
     now_str = datetime.datetime.now(tz=KST).strftime("%Y-%m-%d %H:%M")
-    lines = [f"📊 포트폴리오 업데이트", f"⏰ {now_str} 기준 (KST)"]
+    lines = [f"📊 포트폴리오 업데이트", f"⏰ {now_str} (KST)"]
 
     index = portfolio_data.get('_index', {})
     kospi = index.get('KOSPI')
