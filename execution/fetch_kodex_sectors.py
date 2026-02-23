@@ -4,6 +4,7 @@ pykrx 사용:
  - KOSPI 200 (인덱스 코드 1028) + KOSDAQ 150 (2203) 실제 구성종목 조회
  - 각 구성종목의 시총 가중으로 섹터 비중 계산
  - KOSPI + KOSDAQ 전종목 코드→KRX 표준 업종명 매핑 저장
+ - 전종목 시총 가중 1개월 섹터 수익률 계산
 결과: kodex_sectors.json (프로젝트 루트)
 """
 
@@ -31,12 +32,12 @@ def get_recent_trading_date():
 
 
 def fetch_all():
-    """KOSPI 200 + KOSDAQ 150 구성종목 기반 섹터 비중 계산"""
+    """KOSPI 200 + KOSDAQ 150 구성종목 기반 섹터 비중 + 1M 수익률 계산"""
     try:
         from pykrx import stock
     except ImportError:
         print("pykrx 미설치. pip install pykrx --no-deps")
-        return None, None
+        return None, None, {}
 
     date_str = get_recent_trading_date()
     print(f"기준 날짜: {date_str}")
@@ -58,7 +59,7 @@ def fetch_all():
 
     if not all_index_tickers:
         print("구성종목 조회 실패")
-        return None, None
+        return None, None, {}
 
     # 2. KOSPI + KOSDAQ 전종목 섹터 분류 데이터
     print("KOSPI 섹터 분류 로드 중...")
@@ -86,7 +87,7 @@ def fetch_all():
 
     if cap_col is None or sector_col is None:
         print(f"필요 컬럼 없음: 시총={cap_col}, 섹터={sector_col}")
-        return None, None
+        return None, None, {}
 
     df_bench = df_all[df_all.index.astype(str).str.zfill(6).isin(all_index_tickers)].copy()
     df_bench[cap_col] = pd.to_numeric(df_bench[cap_col], errors='coerce').fillna(0)
@@ -112,19 +113,76 @@ def fetch_all():
     for s, w in benchmark_sectors.items():
         print(f"  {s}: {w:.2f}%")
 
-    return benchmark_sectors, stock_sector_map
+    # 6. 1개월 섹터 수익률 계산 (전종목 시총 가중 평균)
+    print("\n1M 섹터 수익률 계산 중...")
+    sector_1m_returns = {}
+    try:
+        date_dt = datetime.strptime(date_str, '%Y%m%d')
+        # 30일 전 가장 가까운 평일 찾기
+        date_1m_str = None
+        for i in range(37):
+            candidate = date_dt - timedelta(days=30 + i)
+            if candidate.weekday() < 5:
+                date_1m_str = candidate.strftime('%Y%m%d')
+                break
+        if date_1m_str is None:
+            raise ValueError("1M 기준일 산출 실패")
+        print(f"  기준: {date_1m_str} → {date_str}")
+
+        # 현재·1M 전 종가 조회
+        now_k = stock.get_market_ohlcv_by_ticker(date_str,    market='KOSPI')[['종가']]
+        now_q = stock.get_market_ohlcv_by_ticker(date_str,    market='KOSDAQ')[['종가']]
+        ago_k = stock.get_market_ohlcv_by_ticker(date_1m_str, market='KOSPI')[['종가']]
+        ago_q = stock.get_market_ohlcv_by_ticker(date_1m_str, market='KOSDAQ')[['종가']]
+
+        df_now = pd.concat([now_k, now_q])
+        df_ago = pd.concat([ago_k, ago_q])
+
+        df_now = df_now[df_now['종가'] > 0]
+        df_ago = df_ago[df_ago['종가'] > 0]
+
+        df_ret = df_now.join(df_ago.rename(columns={'종가': '종가_ago'}), how='inner')
+        df_ret['수익률'] = (df_ret['종가'] - df_ret['종가_ago']) / df_ret['종가_ago'] * 100
+
+        # 시총·섹터 정보 (df_all 재사용)
+        cap_sec = df_all[[cap_col, sector_col]].copy()
+        cap_sec.index = cap_sec.index.astype(str).str.zfill(6)
+        cap_sec[cap_col] = pd.to_numeric(cap_sec[cap_col], errors='coerce').fillna(0)
+
+        df_ret.index = df_ret.index.astype(str).str.zfill(6)
+        df_merged = df_ret.join(cap_sec, how='inner')
+        df_merged = df_merged[df_merged[cap_col] > 0]
+
+        def weighted_ret(g):
+            total = g[cap_col].sum()
+            return (g['수익률'] * g[cap_col]).sum() / total if total > 0 else 0.0
+
+        sector_1m_returns = (
+            df_merged.groupby(sector_col)
+            .apply(weighted_ret, include_groups=False)
+            .round(2)
+            .to_dict()
+        )
+        print(f"  → {len(sector_1m_returns)}개 섹터 완료")
+        for s, r in sorted(sector_1m_returns.items(), key=lambda x: -x[1])[:5]:
+            print(f"    {s}: {r:+.2f}%")
+    except Exception as e:
+        print(f"  1M 수익률 계산 실패: {e}")
+
+    return benchmark_sectors, stock_sector_map, sector_1m_returns
 
 
 if __name__ == '__main__':
     print("=== KOSPI 200 + KOSDAQ 150 벤치마크 섹터 비중 계산 ===")
-    sectors, stock_sector_map = fetch_all()
+    sectors, stock_sector_map, sector_1m_returns = fetch_all()
 
     if sectors:
         result = {
             'updated': datetime.now().strftime('%Y-%m-%d'),
-            'description': 'KOSPI 200 + KOSDAQ 150 실제 구성종목 기준 (시총 가중)',
+            'description': 'KOSPI 200 + KOSDAQ 150 기준',
             'sectors': sectors,
             'stock_sector_map': stock_sector_map or {},
+            'sector_1m_returns': sector_1m_returns or {},
         }
         with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
             json.dump(result, f, ensure_ascii=False, indent=2)

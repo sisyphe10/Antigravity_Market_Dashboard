@@ -365,12 +365,56 @@
         .sect-over { color: #cc0000; }
         .sect-under { color: #0055cc; }
         .sect-neutral { color: #777; }
+
+        .sector-two-panel {
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .sector-right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .sect-panel-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #444;
+            margin: 0 0 8px 0;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .sect-right-val {
+            text-align: right;
+            font-weight: 600;
+            white-space: nowrap;
+            min-width: 60px;
+            font-size: 0.85rem;
+            padding-right: 8px !important;
+        }
+
+        .sect-no-data {
+            color: #aaa;
+            font-size: 0.82rem;
+            text-align: center;
+            padding: 8px !important;
+        }
+
+        @media (max-width: 800px) {
+            .sector-two-panel {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>📊 Market Data Dashboard</h1>
-        <div class="last-updated">Last Updated: 2026-02-23 06:00:04 KST</div>
+        <div class="last-updated">Last Updated: 2026-02-23 15:18:01 KST</div>
         <a href="architecture.html" target="_blank" class="nav-button">🗂️ Workflow Architecture</a>
     </header>
 
@@ -423,25 +467,27 @@
                 삼성 트루밸류
                 <span class="sect-portfolio-date">(2026-02-13)</span>
                 <span class="sect-vs">vs</span>
-                시장 벤치마크 <span class='sect-note'>(2026-02-23 기준)</span>
-                <span class='sect-note'>— KOSPI 200 + KOSDAQ 150 실제 구성종목 기준 (시총 가중)</span>
+                KOSPI 200 + KOSDAQ 150 기준 <span class='sect-note'>(2026-02-23 기준)</span>
             </h3>
             <div class="sector-legend">
                 <span class="legend-item"><span class="legend-dot portfolio-dot"></span> 포트폴리오</span>
-                <span class="legend-item"><span class="legend-dot kodex-dot"></span> 시장 벤치마크</span>
-                <span class="sect-diff-note">&nbsp;|&nbsp; 차이: 빨강=포트폴리오 과중, 파랑=KODEX 과중</span>
+                <span class="legend-item"><span class="legend-dot kodex-dot"></span> 벤치마크</span>
+                <span class="sect-diff-note">&nbsp;|&nbsp; 차이: 빨강=과중, 파랑=과소</span>
             </div>
-            <div class="sector-table-wrap">
-                <table class="sector-table">
-                    <thead>
-                        <tr>
-                            <th>업종 (KRX 표준)</th>
-                            <th>포트폴리오</th>
-                            <th>시장 벤치마크</th>
-                            <th>차이</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+            <div class="sector-two-panel">
+                <div class="sector-left-panel">
+                    <h4 class="sect-panel-title">보유 업종</h4>
+                    <div class="sector-table-wrap">
+                        <table class="sector-table">
+                            <thead>
+                                <tr>
+                                    <th>업종</th>
+                                    <th>포트폴리오</th>
+                                    <th>벤치마크</th>
+                                    <th>차이</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                     <tr>
                         <td class="sect-name">전기·전자</td>
                         <td class="sect-bar-cell">
@@ -542,389 +588,55 @@
                         </td>
                         <td class="sect-diff sect-neutral">+1.4%</td>
                     </tr>
-                    <tr>
-                        <td class="sect-name">섬유·의류</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:0.1%"></div>
-                                </div>
-                                <span class="sect-pct">0.1%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-0.1%</td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">의료·정밀기기</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:0.4%"></div>
-                                </div>
-                                <span class="sect-pct">0.2%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-0.2%</td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">보험</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:3.9%"></div>
-                                </div>
-                                <span class="sect-pct">2.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-2.0%</td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">운송·창고</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:2.4%"></div>
-                                </div>
-                                <span class="sect-pct">1.2%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-1.2%</td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">금융</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:1.1%"></div>
-                                </div>
-                                <span class="sect-pct">0.6%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-0.6%</td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">IT 서비스</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:5.8%"></div>
-                                </div>
-                                <span class="sect-pct">3.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-3.0%</td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">비금속</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:0.2%"></div>
-                                </div>
-                                <span class="sect-pct">0.1%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-0.1%</td>
-                    </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="sector-right-panel">
+                    <div class="sect-right-block">
+                        <h4 class="sect-panel-title">미보유 업종 — 벤치 비중 상위 5</h4>
+                        <table class="sector-table">
+                            <thead>
+                                <tr><th>업종</th><th>벤치 비중</th></tr>
+                            </thead>
+                            <tbody>
                     <tr>
                         <td class="sect-name">운송장비·부품</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:19.1%"></div>
-                                </div>
-                                <span class="sect-pct">9.7%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-under">-9.7%</td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">금속</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:4.0%"></div>
-                                </div>
-                                <span class="sect-pct">2.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-2.0%</td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">건설</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:1.1%"></div>
-                                </div>
-                                <span class="sect-pct">0.6%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-0.6%</td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">유통</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:4.4%"></div>
-                                </div>
-                                <span class="sect-pct">2.3%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-2.3%</td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">통신</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:1.7%"></div>
-                                </div>
-                                <span class="sect-pct">0.9%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-0.9%</td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">은행</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:1.5%"></div>
-                                </div>
-                                <span class="sect-pct">0.7%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-0.7%</td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">음식료·담배</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:2.0%"></div>
-                                </div>
-                                <span class="sect-pct">1.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-1.0%</td>
+                        <td class="sect-right-val">9.74%</td>
                     </tr>
                     <tr>
                         <td class="sect-name">제약</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:9.9%"></div>
-                                </div>
-                                <span class="sect-pct">5.1%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-under">-5.1%</td>
+                        <td class="sect-right-val">5.06%</td>
                     </tr>
                     <tr>
                         <td class="sect-name">화학</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:7.2%"></div>
-                                </div>
-                                <span class="sect-pct">3.7%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-under">-3.7%</td>
+                        <td class="sect-right-val">3.69%</td>
                     </tr>
                     <tr>
-                        <td class="sect-name">일반서비스</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:4.1%"></div>
-                                </div>
-                                <span class="sect-pct">2.1%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-2.1%</td>
+                        <td class="sect-name">IT 서비스</td>
+                        <td class="sect-right-val">2.95%</td>
                     </tr>
                     <tr>
-                        <td class="sect-name">종이·목재</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-0.0%</td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">전기·가스</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:1.9%"></div>
-                                </div>
-                                <span class="sect-pct">0.9%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-0.9%</td>
+                        <td class="sect-name">유통</td>
+                        <td class="sect-right-val">2.26%</td>
                     </tr>
 
-                    </tbody>
-                </table>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="sect-right-block">
+                        <h4 class="sect-panel-title">미보유 업종 — 1M 수익률 상위 5</h4>
+                        <table class="sector-table">
+                            <thead>
+                                <tr><th>업종</th><th>1M 수익률</th></tr>
+                            </thead>
+                            <tbody>
+<tr><td colspan="2" class="sect-no-data">데이터 없음</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -933,25 +645,27 @@
                 DB 목표전환형
                 <span class="sect-portfolio-date">(2026-02-19)</span>
                 <span class="sect-vs">vs</span>
-                시장 벤치마크 <span class='sect-note'>(2026-02-23 기준)</span>
-                <span class='sect-note'>— KOSPI 200 + KOSDAQ 150 실제 구성종목 기준 (시총 가중)</span>
+                KOSPI 200 + KOSDAQ 150 기준 <span class='sect-note'>(2026-02-23 기준)</span>
             </h3>
             <div class="sector-legend">
                 <span class="legend-item"><span class="legend-dot portfolio-dot"></span> 포트폴리오</span>
-                <span class="legend-item"><span class="legend-dot kodex-dot"></span> 시장 벤치마크</span>
-                <span class="sect-diff-note">&nbsp;|&nbsp; 차이: 빨강=포트폴리오 과중, 파랑=KODEX 과중</span>
+                <span class="legend-item"><span class="legend-dot kodex-dot"></span> 벤치마크</span>
+                <span class="sect-diff-note">&nbsp;|&nbsp; 차이: 빨강=과중, 파랑=과소</span>
             </div>
-            <div class="sector-table-wrap">
-                <table class="sector-table">
-                    <thead>
-                        <tr>
-                            <th>업종 (KRX 표준)</th>
-                            <th>포트폴리오</th>
-                            <th>시장 벤치마크</th>
-                            <th>차이</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+            <div class="sector-two-panel">
+                <div class="sector-left-panel">
+                    <h4 class="sect-panel-title">보유 업종</h4>
+                    <div class="sector-table-wrap">
+                        <table class="sector-table">
+                            <thead>
+                                <tr>
+                                    <th>업종</th>
+                                    <th>포트폴리오</th>
+                                    <th>벤치마크</th>
+                                    <th>차이</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                     <tr>
                         <td class="sect-name">전기·전자</td>
                         <td class="sect-bar-cell">
@@ -1053,26 +767,6 @@
                         <td class="sect-diff sect-neutral">-0.3%</td>
                     </tr>
                     <tr>
-                        <td class="sect-name">증권</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:4.3%"></div>
-                                </div>
-                                <span class="sect-pct">2.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:3.3%"></div>
-                                </div>
-                                <span class="sect-pct">1.6%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">+0.4%</td>
-                    </tr>
-                    <tr>
                         <td class="sect-name">일반서비스</td>
                         <td class="sect-bar-cell">
                             <div class="sect-bar-inner">
@@ -1093,348 +787,74 @@
                         <td class="sect-diff sect-neutral">-0.1%</td>
                     </tr>
                     <tr>
-                        <td class="sect-name">섬유·의류</td>
+                        <td class="sect-name">증권</td>
                         <td class="sect-bar-cell">
                             <div class="sect-bar-inner">
                                 <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:0.1%"></div>
-                                </div>
-                                <span class="sect-pct">0.1%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-0.1%</td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">의료·정밀기기</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:0.4%"></div>
-                                </div>
-                                <span class="sect-pct">0.2%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-0.2%</td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">보험</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:4.3%"></div>
+                                    <div class="sect-bar-fill sect-portfolio" style="width:4.3%"></div>
                                 </div>
                                 <span class="sect-pct">2.0%</span>
                             </div>
                         </td>
-                        <td class="sect-diff sect-neutral">-2.0%</td>
+                        <td class="sect-bar-cell">
+                            <div class="sect-bar-inner">
+                                <div class="sect-bar-wrap">
+                                    <div class="sect-bar-fill sect-kodex" style="width:3.3%"></div>
+                                </div>
+                                <span class="sect-pct">1.6%</span>
+                            </div>
+                        </td>
+                        <td class="sect-diff sect-neutral">+0.4%</td>
                     </tr>
-                    <tr>
-                        <td class="sect-name">운송·창고</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:2.6%"></div>
-                                </div>
-                                <span class="sect-pct">1.2%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-1.2%</td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">금융</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:1.2%"></div>
-                                </div>
-                                <span class="sect-pct">0.6%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-0.6%</td>
-                    </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="sector-right-panel">
+                    <div class="sect-right-block">
+                        <h4 class="sect-panel-title">미보유 업종 — 벤치 비중 상위 5</h4>
+                        <table class="sector-table">
+                            <thead>
+                                <tr><th>업종</th><th>벤치 비중</th></tr>
+                            </thead>
+                            <tbody>
                     <tr>
                         <td class="sect-name">기타금융</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:23.0%"></div>
-                                </div>
-                                <span class="sect-pct">10.8%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-under">-10.8%</td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">IT 서비스</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:6.3%"></div>
-                                </div>
-                                <span class="sect-pct">3.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-3.0%</td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">비금속</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:0.2%"></div>
-                                </div>
-                                <span class="sect-pct">0.1%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-0.1%</td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">금속</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:4.3%"></div>
-                                </div>
-                                <span class="sect-pct">2.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-2.0%</td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">건설</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:1.2%"></div>
-                                </div>
-                                <span class="sect-pct">0.6%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-0.6%</td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">통신</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:1.9%"></div>
-                                </div>
-                                <span class="sect-pct">0.9%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-0.9%</td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">은행</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:1.6%"></div>
-                                </div>
-                                <span class="sect-pct">0.7%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-0.7%</td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">음식료·담배</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:2.1%"></div>
-                                </div>
-                                <span class="sect-pct">1.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-1.0%</td>
+                        <td class="sect-right-val">10.81%</td>
                     </tr>
                     <tr>
                         <td class="sect-name">제약</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:10.8%"></div>
-                                </div>
-                                <span class="sect-pct">5.1%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-under">-5.1%</td>
+                        <td class="sect-right-val">5.06%</td>
                     </tr>
                     <tr>
                         <td class="sect-name">화학</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:7.8%"></div>
-                                </div>
-                                <span class="sect-pct">3.7%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-under">-3.7%</td>
+                        <td class="sect-right-val">3.69%</td>
                     </tr>
                     <tr>
-                        <td class="sect-name">종이·목재</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-0.0%</td>
+                        <td class="sect-name">IT 서비스</td>
+                        <td class="sect-right-val">2.95%</td>
                     </tr>
                     <tr>
-                        <td class="sect-name">전기·가스</td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:0.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.0%</span>
-                            </div>
-                        </td>
-                        <td class="sect-bar-cell">
-                            <div class="sect-bar-inner">
-                                <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-kodex" style="width:2.0%"></div>
-                                </div>
-                                <span class="sect-pct">0.9%</span>
-                            </div>
-                        </td>
-                        <td class="sect-diff sect-neutral">-0.9%</td>
+                        <td class="sect-name">금속</td>
+                        <td class="sect-right-val">2.02%</td>
                     </tr>
 
-                    </tbody>
-                </table>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="sect-right-block">
+                        <h4 class="sect-panel-title">미보유 업종 — 1M 수익률 상위 5</h4>
+                        <table class="sector-table">
+                            <thead>
+                                <tr><th>업종</th><th>1M 수익률</th></tr>
+                            </thead>
+                            <tbody>
+<tr><td colspan="2" class="sect-no-data">데이터 없음</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1446,7 +866,7 @@
                 <div class="portfolio-section-wrapper">
                     
             <div class="portfolio-section">
-                <h3 class="portfolio-title">삼성 트루밸류 / NH Value ESG / DB 개방형 <span class="update-time">(2026-02-23 15:00)</span></h3>
+                <h3 class="portfolio-title">삼성 트루밸류 / NH Value ESG / DB 개방형 <span class="update-time">(2026-02-23 15:15)</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table">
                         <thead>
@@ -1633,7 +1053,7 @@
             </div>
             
             <div class="portfolio-section">
-                <h3 class="portfolio-title">DB 목표전환형 <span class="update-time">(2026-02-23 15:00)</span></h3>
+                <h3 class="portfolio-title">DB 목표전환형 <span class="update-time">(2026-02-23 15:15)</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table">
                         <thead>

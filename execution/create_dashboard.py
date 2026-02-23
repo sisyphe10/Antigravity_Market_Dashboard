@@ -269,35 +269,30 @@ def read_portfolio_sectors(stock_sector_map):
         return {}
 
 
-def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex_updated, kodex_desc=''):
-    """단일 포트폴리오 vs 시장 벤치마크 섹터 비중 비교 카드 HTML"""
+def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex_updated, sector_1m_returns=None):
+    """단일 포트폴리오 vs 시장 벤치마크 섹터 비중 비교 카드 HTML (두 패널)"""
     portfolio_sectors = portfolio_info['sectors']
     portfolio_date = portfolio_info['date']
+    sector_1m_returns = sector_1m_returns or {}
 
-    # 모든 섹터 수집 → 포트폴리오 비중 기준 내림차순
-    all_sectors = sorted(
-        set(list(portfolio_sectors.keys()) + list(kodex_sectors.keys())),
-        key=lambda s: portfolio_sectors.get(s, 0),
-        reverse=True,
-    )
+    # 보유/미보유 구분
+    held = {s: w for s, w in portfolio_sectors.items() if w > 0}
+    not_held = {s: w for s, w in kodex_sectors.items() if s not in held}
 
     # 스케일 기준: 양쪽 최대 비중
     all_weights = list(portfolio_sectors.values()) + list(kodex_sectors.values())
     max_weight = max(all_weights) if all_weights else 1
 
-    rows = ""
-    for sector in all_sectors:
-        p_w = portfolio_sectors.get(sector, 0)
+    # ── 왼쪽: 보유 업종 ──
+    left_rows = ""
+    for sector in sorted(held, key=lambda s: held[s], reverse=True):
+        p_w = held[sector]
         k_w = kodex_sectors.get(sector, 0)
         diff = p_w - k_w
-
         p_bar = (p_w / max_weight) * 100
         k_bar = (k_w / max_weight) * 100
-
         diff_class = 'sect-over' if diff > 3 else 'sect-under' if diff < -3 else 'sect-neutral'
-        diff_str = f"{diff:+.1f}%"
-
-        rows += f"""                    <tr>
+        left_rows += f"""                    <tr>
                         <td class="sect-name">{sector}</td>
                         <td class="sect-bar-cell">
                             <div class="sect-bar-inner">
@@ -315,11 +310,36 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                                 <span class="sect-pct">{k_w:.1f}%</span>
                             </div>
                         </td>
-                        <td class="sect-diff {diff_class}">{diff_str}</td>
+                        <td class="sect-diff {diff_class}">{diff:+.1f}%</td>
                     </tr>
 """
 
-    bench_label = kodex_desc if kodex_desc else 'KOSPI 200 + KOSDAQ 150'
+    # ── 오른쪽 상단: 미보유 업종 벤치 비중 상위 5 ──
+    top5_bench = sorted(not_held, key=lambda s: not_held[s], reverse=True)[:5]
+    bench_rows = ""
+    for s in top5_bench:
+        bench_rows += f"""                    <tr>
+                        <td class="sect-name">{s}</td>
+                        <td class="sect-right-val">{not_held[s]:.2f}%</td>
+                    </tr>
+"""
+
+    # ── 오른쪽 하단: 미보유 업종 1M 수익률 상위 5 ──
+    not_held_ret = {s: sector_1m_returns[s] for s in not_held if s in sector_1m_returns}
+    top5_1m = sorted(not_held_ret, key=lambda s: not_held_ret[s], reverse=True)[:5]
+    ret_rows = ""
+    if top5_1m:
+        for s in top5_1m:
+            r = not_held_ret[s]
+            r_cls = 'sect-over' if r > 0 else 'sect-under'
+            ret_rows += f"""                    <tr>
+                        <td class="sect-name">{s}</td>
+                        <td class="sect-right-val {r_cls}">{r:+.2f}%</td>
+                    </tr>
+"""
+    else:
+        ret_rows = '<tr><td colspan="2" class="sect-no-data">데이터 없음</td></tr>'
+
     kodex_note = f" <span class='sect-note'>({kodex_updated} 기준)</span>" if kodex_updated else ""
 
     card = f"""
@@ -328,28 +348,56 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                 {portfolio_name}
                 <span class="sect-portfolio-date">({portfolio_date})</span>
                 <span class="sect-vs">vs</span>
-                시장 벤치마크{kodex_note}
-                <span class='sect-note'>— {bench_label}</span>
+                KOSPI 200 + KOSDAQ 150 기준{kodex_note}
             </h3>
             <div class="sector-legend">
                 <span class="legend-item"><span class="legend-dot portfolio-dot"></span> 포트폴리오</span>
-                <span class="legend-item"><span class="legend-dot kodex-dot"></span> 시장 벤치마크</span>
-                <span class="sect-diff-note">&nbsp;|&nbsp; 차이: 빨강=포트폴리오 과중, 파랑=KODEX 과중</span>
+                <span class="legend-item"><span class="legend-dot kodex-dot"></span> 벤치마크</span>
+                <span class="sect-diff-note">&nbsp;|&nbsp; 차이: 빨강=과중, 파랑=과소</span>
             </div>
-            <div class="sector-table-wrap">
-                <table class="sector-table">
-                    <thead>
-                        <tr>
-                            <th>업종 (KRX 표준)</th>
-                            <th>포트폴리오</th>
-                            <th>시장 벤치마크</th>
-                            <th>차이</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-{rows}
-                    </tbody>
-                </table>
+            <div class="sector-two-panel">
+                <div class="sector-left-panel">
+                    <h4 class="sect-panel-title">보유 업종</h4>
+                    <div class="sector-table-wrap">
+                        <table class="sector-table">
+                            <thead>
+                                <tr>
+                                    <th>업종</th>
+                                    <th>포트폴리오</th>
+                                    <th>벤치마크</th>
+                                    <th>차이</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+{left_rows}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="sector-right-panel">
+                    <div class="sect-right-block">
+                        <h4 class="sect-panel-title">미보유 업종 — 벤치 비중 상위 5</h4>
+                        <table class="sector-table">
+                            <thead>
+                                <tr><th>업종</th><th>벤치 비중</th></tr>
+                            </thead>
+                            <tbody>
+{bench_rows}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="sect-right-block">
+                        <h4 class="sect-panel-title">미보유 업종 — 1M 수익률 상위 5</h4>
+                        <table class="sector-table">
+                            <thead>
+                                <tr><th>업종</th><th>1M 수익률</th></tr>
+                            </thead>
+                            <tbody>
+{ret_rows}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 """
@@ -362,8 +410,8 @@ def create_sector_section_html():
         kodex_data = load_kodex_data()
         kodex_sectors = kodex_data.get('sectors', {})
         kodex_updated = kodex_data.get('updated', '')
-        kodex_desc = kodex_data.get('description', 'KOSPI 200 + KOSDAQ 150')
         stock_sector_map = kodex_data.get('stock_sector_map', {})
+        sector_1m_returns = kodex_data.get('sector_1m_returns', {})
 
         portfolio_sectors = read_portfolio_sectors(stock_sector_map)
 
@@ -373,7 +421,7 @@ def create_sector_section_html():
         html = ""
         for portfolio_name, portfolio_info in portfolio_sectors.items():
             html += _sector_comparison_card(
-                portfolio_name, portfolio_info, kodex_sectors, kodex_updated, kodex_desc
+                portfolio_name, portfolio_info, kodex_sectors, kodex_updated, sector_1m_returns
             )
 
         return html
@@ -978,6 +1026,50 @@ def create_dashboard():
         .sect-over {{ color: #cc0000; }}
         .sect-under {{ color: #0055cc; }}
         .sect-neutral {{ color: #777; }}
+
+        .sector-two-panel {{
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            gap: 24px;
+            align-items: start;
+        }}
+
+        .sector-right-panel {{
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }}
+
+        .sect-panel-title {{
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #444;
+            margin: 0 0 8px 0;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #ddd;
+        }}
+
+        .sect-right-val {{
+            text-align: right;
+            font-weight: 600;
+            white-space: nowrap;
+            min-width: 60px;
+            font-size: 0.85rem;
+            padding-right: 8px !important;
+        }}
+
+        .sect-no-data {{
+            color: #aaa;
+            font-size: 0.82rem;
+            text-align: center;
+            padding: 8px !important;
+        }}
+
+        @media (max-width: 800px) {{
+            .sector-two-panel {{
+                grid-template-columns: 1fr;
+            }}
+        }}
     </style>
 </head>
 <body>
