@@ -5,6 +5,7 @@ pykrx 사용:
  - 각 구성종목의 시총 가중으로 섹터 비중 계산
  - KOSPI + KOSDAQ 전종목 코드→KRX 표준 업종명 매핑 저장
  - 전종목 시총 가중 1개월 섹터 수익률 계산
+ - 섹터별 시총 상위 3 종목명 저장
 결과: kodex_sectors.json (프로젝트 루트)
 """
 
@@ -32,12 +33,12 @@ def get_recent_trading_date():
 
 
 def fetch_all():
-    """KOSPI 200 + KOSDAQ 150 구성종목 기반 섹터 비중 + 1M 수익률 계산"""
+    """KOSPI 200 + KOSDAQ 150 구성종목 기반 섹터 비중 + 1M 수익률 + 상위 종목 계산"""
     try:
         from pykrx import stock
     except ImportError:
         print("pykrx 미설치. pip install pykrx --no-deps")
-        return None, None, {}
+        return None, None, {}, {}
 
     date_str = get_recent_trading_date()
     print(f"기준 날짜: {date_str}")
@@ -59,7 +60,7 @@ def fetch_all():
 
     if not all_index_tickers:
         print("구성종목 조회 실패")
-        return None, None, {}
+        return None, None, {}, {}
 
     # 2. KOSPI + KOSDAQ 전종목 섹터 분류 데이터
     print("KOSPI 섹터 분류 로드 중...")
@@ -87,7 +88,7 @@ def fetch_all():
 
     if cap_col is None or sector_col is None:
         print(f"필요 컬럼 없음: 시총={cap_col}, 섹터={sector_col}")
-        return None, None, {}
+        return None, None, {}, {}
 
     df_bench = df_all[df_all.index.astype(str).str.zfill(6).isin(all_index_tickers)].copy()
     df_bench[cap_col] = pd.to_numeric(df_bench[cap_col], errors='coerce').fillna(0)
@@ -113,7 +114,19 @@ def fetch_all():
     for s, w in benchmark_sectors.items():
         print(f"  {s}: {w:.2f}%")
 
-    # 6. 1개월 섹터 수익률 계산 (전종목 시총 가중 평균)
+    # 6. 벤치마크 섹터별 시총 상위 3 종목명
+    print("\n섹터별 상위 종목 추출 중...")
+    sector_top_stocks = {}
+    name_col = next((c for c in ['종목명', '회사명', 'Name'] if c in df_bench.columns), None)
+    if name_col:
+        for sector, grp in df_bench.groupby(sector_col):
+            top3 = grp.nlargest(3, cap_col)[name_col].tolist()
+            sector_top_stocks[str(sector)] = [str(n) for n in top3]
+        print(f"  → {len(sector_top_stocks)}개 섹터")
+    else:
+        print(f"  종목명 컬럼 없음 (available: {list(df_bench.columns[:5])})")
+
+    # 7. 1개월 섹터 수익률 계산 (전종목 시총 가중 평균)
     print("\n1M 섹터 수익률 계산 중...")
     sector_1m_returns = {}
     try:
@@ -169,12 +182,12 @@ def fetch_all():
     except Exception as e:
         print(f"  1M 수익률 계산 실패: {e}")
 
-    return benchmark_sectors, stock_sector_map, sector_1m_returns
+    return benchmark_sectors, stock_sector_map, sector_1m_returns, sector_top_stocks
 
 
 if __name__ == '__main__':
     print("=== KOSPI 200 + KOSDAQ 150 벤치마크 섹터 비중 계산 ===")
-    sectors, stock_sector_map, sector_1m_returns = fetch_all()
+    sectors, stock_sector_map, sector_1m_returns, sector_top_stocks = fetch_all()
 
     if sectors:
         result = {
@@ -183,6 +196,7 @@ if __name__ == '__main__':
             'sectors': sectors,
             'stock_sector_map': stock_sector_map or {},
             'sector_1m_returns': sector_1m_returns or {},
+            'sector_top_stocks': sector_top_stocks or {},
         }
         with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
             json.dump(result, f, ensure_ascii=False, indent=2)

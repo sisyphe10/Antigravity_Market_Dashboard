@@ -240,7 +240,7 @@
 
         .sect-portfolio-date {
             font-size: 0.75rem;
-            font-weight: 400;
+            font-weight: 700;
             color: #0055cc;
         }
 
@@ -404,6 +404,21 @@
             padding: 8px !important;
         }
 
+        .sect-detail-row td {
+            padding: 0 12px 6px 12px !important;
+            border-bottom: 1px solid #eee;
+        }
+
+        .sect-detail {
+            font-size: 0.75rem;
+            color: #888;
+            line-height: 1.4;
+        }
+
+        .sect-detail-mine { color: #4a90e2; font-weight: 500; }
+        .sect-detail-bm   { color: #b07a10; font-weight: 500; }
+        .sect-detail-sep  { color: #ccc; }
+
         @media (max-width: 800px) {
             .sector-two-panel {
                 grid-template-columns: 1fr;
@@ -414,7 +429,7 @@
 <body>
     <header>
         <h1>📊 Market Data Dashboard</h1>
-        <div class="last-updated">Last Updated: 2026-02-23 06:30:05 KST</div>
+        <div class="last-updated">Last Updated: 2026-02-23 15:39:29 KST</div>
         <a href="architecture.html" target="_blank" class="nav-button">🗂️ Workflow Architecture</a>
     </header>
 
@@ -467,7 +482,7 @@
                 삼성 트루밸류
                 <span class="sect-portfolio-date">(2026-02-13)</span>
                 <span class="sect-vs">vs</span>
-                KOSPI 200 + KOSDAQ 150 기준 <span class='sect-note'>(2026-02-23 기준)</span>
+                KOSPI 200 + KOSDAQ 150 <span class='sect-note'>(2026-02-23 기준)</span>
             </h3>
             <div class="sector-legend">
                 <span class="legend-item"><span class="legend-dot portfolio-dot"></span> 포트폴리오</span>
@@ -508,6 +523,13 @@
                         </td>
                         <td class="sect-diff sect-over">+4.0%</td>
                     </tr>
+                    <tr class="sect-detail-row">
+                        <td colspan="4" class="sect-detail">
+                            <span class="sect-detail-mine">내: 삼성전자, SK하이닉스, 에스앤에스텍</span>
+                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
+                            <span class="sect-detail-bm">BM: 삼성전자, SK하이닉스, LG에너지솔루션</span>
+                        </td>
+                    </tr>
                     <tr>
                         <td class="sect-name">기계·장비</td>
                         <td class="sect-bar-cell">
@@ -527,6 +549,13 @@
                             </div>
                         </td>
                         <td class="sect-diff sect-over">+14.2%</td>
+                    </tr>
+                    <tr class="sect-detail-row">
+                        <td colspan="4" class="sect-detail">
+                            <span class="sect-detail-mine">내: 레인보우로보틱스, 두산에너빌리티, 두산밥캣</span>
+                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
+                            <span class="sect-detail-bm">BM: 두산에너빌리티, 한미반도체, 레인보우로보틱스</span>
+                        </td>
                     </tr>
                     <tr>
                         <td class="sect-name">기타금융</td>
@@ -548,6 +577,13 @@
                         </td>
                         <td class="sect-diff sect-over">+5.2%</td>
                     </tr>
+                    <tr class="sect-detail-row">
+                        <td colspan="4" class="sect-detail">
+                            <span class="sect-detail-mine">내: CJ, 두산, OCI홀딩스</span>
+                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
+                            <span class="sect-detail-bm">BM: SK스퀘어, KB금융, 신한지주</span>
+                        </td>
+                    </tr>
                     <tr>
                         <td class="sect-name">오락·문화</td>
                         <td class="sect-bar-cell">
@@ -567,6 +603,13 @@
                             </div>
                         </td>
                         <td class="sect-diff sect-over">+9.3%</td>
+                    </tr>
+                    <tr class="sect-detail-row">
+                        <td colspan="4" class="sect-detail">
+                            <span class="sect-detail-mine">내: 하이브</span>
+                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
+                            <span class="sect-detail-bm">BM: 하이브, 강원랜드, 에스엠</span>
+                        </td>
                     </tr>
                     <tr>
                         <td class="sect-name">증권</td>
@@ -588,6 +631,13 @@
                         </td>
                         <td class="sect-diff sect-neutral">+1.4%</td>
                     </tr>
+                    <tr class="sect-detail-row">
+                        <td colspan="4" class="sect-detail">
+                            <span class="sect-detail-mine">내: 미래에셋증권</span>
+                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
+                            <span class="sect-detail-bm">BM: 미래에셋증권, NH투자증권, 키움증권</span>
+                        </td>
+                    </tr>
 
                             </tbody>
                         </table>
@@ -595,15 +645,15 @@
                 </div>
                 <div class="sector-right-panel">
                     <div class="sect-right-block">
-                        <h4 class="sect-panel-title">미보유 업종 — 벤치 비중 상위 5</h4>
+                        <h4 class="sect-panel-title">미보유 업종 — BM 비중 상위 5</h4>
                         <table class="sector-table">
                             <thead>
-                                <tr><th>업종</th><th>벤치 비중</th></tr>
+                                <tr><th>업종</th><th>BM 비중</th></tr>
                             </thead>
                             <tbody>
                     <tr>
                         <td class="sect-name">운송장비·부품</td>
-                        <td class="sect-right-val">9.72%</td>
+                        <td class="sect-right-val">9.73%</td>
                     </tr>
                     <tr>
                         <td class="sect-name">제약</td>
@@ -619,7 +669,7 @@
                     </tr>
                     <tr>
                         <td class="sect-name">유통</td>
-                        <td class="sect-right-val">2.26%</td>
+                        <td class="sect-right-val">2.27%</td>
                     </tr>
 
                             </tbody>
@@ -634,23 +684,23 @@
                             <tbody>
                     <tr>
                         <td class="sect-name">금융</td>
-                        <td class="sect-right-val sect-over">+51.90%</td>
+                        <td class="sect-right-val sect-over">+51.20%</td>
                     </tr>
                     <tr>
                         <td class="sect-name">비금속</td>
-                        <td class="sect-right-val sect-over">+44.25%</td>
+                        <td class="sect-right-val sect-over">+44.70%</td>
                     </tr>
                     <tr>
                         <td class="sect-name">보험</td>
-                        <td class="sect-right-val sect-over">+30.78%</td>
+                        <td class="sect-right-val sect-over">+30.82%</td>
                     </tr>
                     <tr>
                         <td class="sect-name">은행</td>
-                        <td class="sect-right-val sect-over">+26.31%</td>
+                        <td class="sect-right-val sect-over">+26.08%</td>
                     </tr>
                     <tr>
                         <td class="sect-name">통신</td>
-                        <td class="sect-right-val sect-over">+23.02%</td>
+                        <td class="sect-right-val sect-over">+23.16%</td>
                     </tr>
 
                             </tbody>
@@ -665,7 +715,7 @@
                 DB 목표전환형
                 <span class="sect-portfolio-date">(2026-02-19)</span>
                 <span class="sect-vs">vs</span>
-                KOSPI 200 + KOSDAQ 150 기준 <span class='sect-note'>(2026-02-23 기준)</span>
+                KOSPI 200 + KOSDAQ 150 <span class='sect-note'>(2026-02-23 기준)</span>
             </h3>
             <div class="sector-legend">
                 <span class="legend-item"><span class="legend-dot portfolio-dot"></span> 포트폴리오</span>
@@ -706,12 +756,19 @@
                         </td>
                         <td class="sect-diff sect-under">-8.0%</td>
                     </tr>
+                    <tr class="sect-detail-row">
+                        <td colspan="4" class="sect-detail">
+                            <span class="sect-detail-mine">내: SK하이닉스, 삼성전자, 이수페타시스</span>
+                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
+                            <span class="sect-detail-bm">BM: 삼성전자, SK하이닉스, LG에너지솔루션</span>
+                        </td>
+                    </tr>
                     <tr>
                         <td class="sect-name">기계·장비</td>
                         <td class="sect-bar-cell">
                             <div class="sect-bar-inner">
                                 <div class="sect-bar-wrap">
-                                    <div class="sect-bar-fill sect-portfolio" style="width:44.6%"></div>
+                                    <div class="sect-bar-fill sect-portfolio" style="width:44.7%"></div>
                                 </div>
                                 <span class="sect-pct">21.0%</span>
                             </div>
@@ -725,6 +782,13 @@
                             </div>
                         </td>
                         <td class="sect-diff sect-over">+17.2%</td>
+                    </tr>
+                    <tr class="sect-detail-row">
+                        <td colspan="4" class="sect-detail">
+                            <span class="sect-detail-mine">내: 레인보우로보틱스, 현대엘리베이터, 두산밥캣</span>
+                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
+                            <span class="sect-detail-bm">BM: 두산에너빌리티, 한미반도체, 레인보우로보틱스</span>
+                        </td>
                     </tr>
                     <tr>
                         <td class="sect-name">운송장비·부품</td>
@@ -746,6 +810,13 @@
                         </td>
                         <td class="sect-diff sect-neutral">-2.7%</td>
                     </tr>
+                    <tr class="sect-detail-row">
+                        <td colspan="4" class="sect-detail">
+                            <span class="sect-detail-mine">내: 대한조선, SNT다이내믹스, 현대차</span>
+                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
+                            <span class="sect-detail-bm">BM: 현대차, 기아, HD현대중공업</span>
+                        </td>
+                    </tr>
                     <tr>
                         <td class="sect-name">오락·문화</td>
                         <td class="sect-bar-cell">
@@ -765,6 +836,13 @@
                             </div>
                         </td>
                         <td class="sect-diff sect-over">+4.3%</td>
+                    </tr>
+                    <tr class="sect-detail-row">
+                        <td colspan="4" class="sect-detail">
+                            <span class="sect-detail-mine">내: 파라다이스</span>
+                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
+                            <span class="sect-detail-bm">BM: 하이브, 강원랜드, 에스엠</span>
+                        </td>
                     </tr>
                     <tr>
                         <td class="sect-name">유통</td>
@@ -786,6 +864,13 @@
                         </td>
                         <td class="sect-diff sect-neutral">-0.3%</td>
                     </tr>
+                    <tr class="sect-detail-row">
+                        <td colspan="4" class="sect-detail">
+                            <span class="sect-detail-mine">내: 한샘</span>
+                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
+                            <span class="sect-detail-bm">BM: 삼성물산, 포스코인터내셔널, 영원무역</span>
+                        </td>
+                    </tr>
                     <tr>
                         <td class="sect-name">일반서비스</td>
                         <td class="sect-bar-cell">
@@ -805,6 +890,13 @@
                             </div>
                         </td>
                         <td class="sect-diff sect-neutral">-0.1%</td>
+                    </tr>
+                    <tr class="sect-detail-row">
+                        <td colspan="4" class="sect-detail">
+                            <span class="sect-detail-mine">내: 하나투어</span>
+                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
+                            <span class="sect-detail-bm">BM: 알테오젠, SK바이오팜, HD현대마린솔루션</span>
+                        </td>
                     </tr>
                     <tr>
                         <td class="sect-name">증권</td>
@@ -826,6 +918,13 @@
                         </td>
                         <td class="sect-diff sect-neutral">+0.4%</td>
                     </tr>
+                    <tr class="sect-detail-row">
+                        <td colspan="4" class="sect-detail">
+                            <span class="sect-detail-mine">내: 신영증권</span>
+                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
+                            <span class="sect-detail-bm">BM: 미래에셋증권, NH투자증권, 키움증권</span>
+                        </td>
+                    </tr>
 
                             </tbody>
                         </table>
@@ -833,10 +932,10 @@
                 </div>
                 <div class="sector-right-panel">
                     <div class="sect-right-block">
-                        <h4 class="sect-panel-title">미보유 업종 — 벤치 비중 상위 5</h4>
+                        <h4 class="sect-panel-title">미보유 업종 — BM 비중 상위 5</h4>
                         <table class="sector-table">
                             <thead>
-                                <tr><th>업종</th><th>벤치 비중</th></tr>
+                                <tr><th>업종</th><th>BM 비중</th></tr>
                             </thead>
                             <tbody>
                     <tr>
@@ -872,23 +971,23 @@
                             <tbody>
                     <tr>
                         <td class="sect-name">금융</td>
-                        <td class="sect-right-val sect-over">+51.90%</td>
+                        <td class="sect-right-val sect-over">+51.20%</td>
                     </tr>
                     <tr>
                         <td class="sect-name">비금속</td>
-                        <td class="sect-right-val sect-over">+44.25%</td>
+                        <td class="sect-right-val sect-over">+44.70%</td>
                     </tr>
                     <tr>
                         <td class="sect-name">보험</td>
-                        <td class="sect-right-val sect-over">+30.78%</td>
+                        <td class="sect-right-val sect-over">+30.82%</td>
                     </tr>
                     <tr>
                         <td class="sect-name">은행</td>
-                        <td class="sect-right-val sect-over">+26.31%</td>
+                        <td class="sect-right-val sect-over">+26.08%</td>
                     </tr>
                     <tr>
-                        <td class="sect-name">통신</td>
-                        <td class="sect-right-val sect-over">+23.02%</td>
+                        <td class="sect-name">기타금융</td>
+                        <td class="sect-right-val sect-over">+23.22%</td>
                     </tr>
 
                             </tbody>
@@ -906,7 +1005,7 @@
                 <div class="portfolio-section-wrapper">
                     
             <div class="portfolio-section">
-                <h3 class="portfolio-title">삼성 트루밸류 / NH Value ESG / DB 개방형 <span class="update-time">(2026-02-23 15:30)</span></h3>
+                <h3 class="portfolio-title">삼성 트루밸류 / NH Value ESG / DB 개방형 <span class="update-time">(2026-02-23 15:15)</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table">
                         <thead>
@@ -931,9 +1030,9 @@
                                 <td>반도체</td>
                                 <td>1,134조2,026억</td>
                                 <td>30%</td>
-                                <td class="positive">+1.4%</td>
-                                <td class="positive">+4.3</td>
-                                <td class="positive">+208.9%</td>
+                                <td class="positive">+1.5%</td>
+                                <td class="positive">+4.6</td>
+                                <td class="positive">+204.6%</td>
                             </tr>
                 
                             <tr>
@@ -943,9 +1042,9 @@
                                 <td>반도체</td>
                                 <td>674조9,291억</td>
                                 <td>15%</td>
-                                <td class="positive">+0.1%</td>
-                                <td class="positive">+0.2</td>
-                                <td class="positive">+204.0%</td>
+                                <td class="positive">+0.2%</td>
+                                <td class="positive">+0.3</td>
+                                <td class="positive">+203.6%</td>
                             </tr>
                 
                             <tr>
@@ -955,9 +1054,9 @@
                                 <td>미디어,교육</td>
                                 <td>17조1,727억</td>
                                 <td>10%</td>
-                                <td class="positive">+0.5%</td>
-                                <td class="positive">+0.5</td>
-                                <td class="positive">+71.9%</td>
+                                <td class="positive">+0.6%</td>
+                                <td class="positive">+0.6</td>
+                                <td class="positive">+71.1%</td>
                             </tr>
                 
                             <tr>
@@ -967,9 +1066,9 @@
                                 <td>기계</td>
                                 <td>13조5,605억</td>
                                 <td>10%</td>
-                                <td class="negative">-2.1%</td>
-                                <td class="negative">-2.1</td>
-                                <td class="positive">+2.4%</td>
+                                <td class="negative">-2.0%</td>
+                                <td class="negative">-2.0</td>
+                                <td class="positive">+4.6%</td>
                             </tr>
                 
                             <tr>
@@ -979,9 +1078,9 @@
                                 <td>상사,자본재</td>
                                 <td>6조4,043억</td>
                                 <td>8%</td>
-                                <td class="negative">-1.6%</td>
-                                <td class="negative">-1.2</td>
-                                <td class="positive">+81.0%</td>
+                                <td class="negative">-2.2%</td>
+                                <td class="negative">-1.8</td>
+                                <td class="positive">+83.8%</td>
                             </tr>
                 
                             <tr>
@@ -991,9 +1090,9 @@
                                 <td>기계</td>
                                 <td>65조2,091억</td>
                                 <td>5%</td>
-                                <td class="negative">-1.3%</td>
-                                <td class="negative">-0.6</td>
-                                <td class="positive">+38.0%</td>
+                                <td class="negative">-1.5%</td>
+                                <td class="negative">-0.8</td>
+                                <td class="positive">+39.8%</td>
                             </tr>
                 
                             <tr>
@@ -1003,9 +1102,9 @@
                                 <td>상사,자본재</td>
                                 <td>17조9,427억</td>
                                 <td>5%</td>
+                                <td class="positive">+6.0%</td>
+                                <td class="positive">+3.0</td>
                                 <td class="positive">+7.1%</td>
-                                <td class="positive">+3.5</td>
-                                <td class="positive">+14.6%</td>
                             </tr>
                 
                             <tr>
@@ -1015,9 +1114,9 @@
                                 <td>증권</td>
                                 <td>38조1,081억</td>
                                 <td>3%</td>
-                                <td class="negative">-3.9%</td>
-                                <td class="negative">-1.2</td>
-                                <td class="positive">+131.2%</td>
+                                <td class="negative">-3.8%</td>
+                                <td class="negative">-1.1</td>
+                                <td class="positive">+140.5%</td>
                             </tr>
                 
                             <tr>
@@ -1027,9 +1126,9 @@
                                 <td>화학</td>
                                 <td>2조7,165억</td>
                                 <td>3%</td>
-                                <td class="negative">-4.1%</td>
-                                <td class="negative">-1.2</td>
-                                <td class="positive">+41.9%</td>
+                                <td class="negative">-4.6%</td>
+                                <td class="negative">-1.4</td>
+                                <td class="positive">+47.9%</td>
                             </tr>
                 
                             <tr>
@@ -1039,9 +1138,9 @@
                                 <td>기계</td>
                                 <td>6조2,114억</td>
                                 <td>3%</td>
-                                <td class="negative">-0.6%</td>
-                                <td class="negative">-0.2</td>
-                                <td class="negative">-1.7%</td>
+                                <td class="negative">-1.1%</td>
+                                <td class="negative">-0.3</td>
+                                <td class="negative">-1.1%</td>
                             </tr>
                 
                             <tr>
@@ -1053,7 +1152,7 @@
                                 <td>2%</td>
                                 <td class="negative">-6.3%</td>
                                 <td class="negative">-1.3</td>
-                                <td class="positive">+7.5%</td>
+                                <td class="positive">+14.8%</td>
                             </tr>
                 
                             <tr>
@@ -1063,9 +1162,9 @@
                                 <td>반도체</td>
                                 <td>9,013억</td>
                                 <td>2%</td>
-                                <td class="negative">-5.7%</td>
+                                <td class="negative">-5.4%</td>
                                 <td class="negative">-1.1</td>
-                                <td class="positive">+3.6%</td>
+                                <td class="positive">+9.9%</td>
                             </tr>
                 
                             <tr>
@@ -1075,16 +1174,16 @@
                                 <td>IT가전</td>
                                 <td>31조3,880억</td>
                                 <td>2%</td>
-                                <td class="negative">-2.7%</td>
-                                <td class="negative">-0.5</td>
-                                <td class="negative">-2.8%</td>
+                                <td class="negative">-2.9%</td>
+                                <td class="negative">-0.6</td>
+                                <td class="negative">-0.1%</td>
                             </tr>
                 
                             <tr class="total-row">
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
                                 <td style="font-weight: 600;">98%</td>
-                                <td class="negative" style="font-weight: 600;">-0.1%</td>
-                                <td class="negative" style="font-weight: 600;">-1.0</td>
+                                <td class="negative" style="font-weight: 600;">-0.2%</td>
+                                <td class="negative" style="font-weight: 600;">-1.7</td>
                                 <td style="font-weight: 600;">-</td>
                             </tr>
                         </tbody>
@@ -1093,7 +1192,7 @@
             </div>
             
             <div class="portfolio-section">
-                <h3 class="portfolio-title">DB 목표전환형 <span class="update-time">(2026-02-23 15:30)</span></h3>
+                <h3 class="portfolio-title">DB 목표전환형 <span class="update-time">(2026-02-23 15:15)</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table">
                         <thead>
@@ -1118,9 +1217,9 @@
                                 <td>반도체</td>
                                 <td>674조9,291억</td>
                                 <td>15%</td>
-                                <td class="positive">+0.1%</td>
-                                <td class="positive">+0.2</td>
-                                <td class="positive">+4.5%</td>
+                                <td class="positive">+0.2%</td>
+                                <td class="positive">+0.3</td>
+                                <td class="positive">+4.4%</td>
                             </tr>
                 
                             <tr>
@@ -1130,9 +1229,9 @@
                                 <td>반도체</td>
                                 <td>1,134조2,026억</td>
                                 <td>15%</td>
-                                <td class="positive">+1.4%</td>
-                                <td class="positive">+2.1</td>
-                                <td class="positive">+5.5%</td>
+                                <td class="positive">+1.5%</td>
+                                <td class="positive">+2.3</td>
+                                <td class="positive">+4.0%</td>
                             </tr>
                 
                             <tr>
@@ -1142,9 +1241,9 @@
                                 <td>기계</td>
                                 <td>13조5,605억</td>
                                 <td>10%</td>
-                                <td class="negative">-2.1%</td>
-                                <td class="negative">-2.1</td>
-                                <td class="negative">-3.4%</td>
+                                <td class="negative">-2.0%</td>
+                                <td class="negative">-2.0</td>
+                                <td class="negative">-1.4%</td>
                             </tr>
                 
                             <tr>
@@ -1154,9 +1253,9 @@
                                 <td>IT하드웨어</td>
                                 <td>7조8,033억</td>
                                 <td>7%</td>
-                                <td class="positive">+6.7%</td>
-                                <td class="positive">+4.7</td>
-                                <td class="positive">+14.6%</td>
+                                <td class="positive">+5.8%</td>
+                                <td class="positive">+4.0</td>
+                                <td class="positive">+7.5%</td>
                             </tr>
                 
                             <tr>
@@ -1166,9 +1265,9 @@
                                 <td>기계</td>
                                 <td>4조3,588억</td>
                                 <td>6%</td>
-                                <td class="positive">+1.5%</td>
-                                <td class="positive">+0.9</td>
-                                <td class="positive">+9.5%</td>
+                                <td class="positive">+1.4%</td>
+                                <td class="positive">+0.8</td>
+                                <td class="positive">+8.0%</td>
                             </tr>
                 
                             <tr>
@@ -1178,9 +1277,9 @@
                                 <td>기계</td>
                                 <td>6조2,114억</td>
                                 <td>5%</td>
-                                <td class="negative">-0.6%</td>
-                                <td class="negative">-0.3</td>
-                                <td class="negative">-2.2%</td>
+                                <td class="negative">-1.1%</td>
+                                <td class="negative">-0.5</td>
+                                <td class="negative">-1.6%</td>
                             </tr>
                 
                             <tr>
@@ -1190,9 +1289,9 @@
                                 <td>호텔,레저서비스</td>
                                 <td>1조8,989억</td>
                                 <td>5%</td>
-                                <td class="positive">+0.7%</td>
-                                <td class="positive">+0.4</td>
-                                <td class="positive">+1.1%</td>
+                                <td class="positive">+1.0%</td>
+                                <td class="positive">+0.5</td>
+                                <td class="positive">+0.4%</td>
                             </tr>
                 
                             <tr>
@@ -1202,9 +1301,9 @@
                                 <td>기타</td>
                                 <td>3조4,750억</td>
                                 <td>3%</td>
-                                <td class="positive">+10.8%</td>
+                                <td class="positive">+10.6%</td>
                                 <td class="positive">+3.2</td>
-                                <td class="positive">+29.8%</td>
+                                <td class="positive">+17.2%</td>
                             </tr>
                 
                             <tr>
@@ -1214,9 +1313,9 @@
                                 <td>자동차</td>
                                 <td>1조9,253억</td>
                                 <td>2%</td>
-                                <td class="positive">+1.7%</td>
-                                <td class="positive">+0.3</td>
-                                <td class="positive">+8.8%</td>
+                                <td class="positive">+1.2%</td>
+                                <td class="positive">+0.2</td>
+                                <td class="positive">+7.0%</td>
                             </tr>
                 
                             <tr>
@@ -1226,9 +1325,9 @@
                                 <td>건설,건축관련</td>
                                 <td>1조1,472억</td>
                                 <td>2%</td>
-                                <td class="positive">+4.0%</td>
+                                <td class="positive">+3.9%</td>
                                 <td class="positive">+0.8</td>
-                                <td class="positive">+10.9%</td>
+                                <td class="positive">+6.6%</td>
                             </tr>
                 
                             <tr>
@@ -1238,9 +1337,9 @@
                                 <td>증권</td>
                                 <td>4조1,017억</td>
                                 <td>2%</td>
-                                <td class="positive">+4.3%</td>
-                                <td class="positive">+0.9</td>
-                                <td class="positive">+11.0%</td>
+                                <td class="positive">+2.9%</td>
+                                <td class="positive">+0.6</td>
+                                <td class="positive">+6.4%</td>
                             </tr>
                 
                             <tr>
@@ -1250,9 +1349,9 @@
                                 <td>자동차</td>
                                 <td>106조5,764억</td>
                                 <td>2%</td>
-                                <td class="positive">+2.4%</td>
-                                <td class="positive">+0.5</td>
-                                <td class="positive">+6.5%</td>
+                                <td class="positive">+2.8%</td>
+                                <td class="positive">+0.6</td>
+                                <td class="positive">+4.0%</td>
                             </tr>
                 
                             <tr>
@@ -1262,9 +1361,9 @@
                                 <td>반도체</td>
                                 <td>7,853억</td>
                                 <td>2%</td>
-                                <td class="positive">+0.9%</td>
-                                <td class="positive">+0.2</td>
-                                <td class="positive">+0.0%</td>
+                                <td class="positive">+0.4%</td>
+                                <td class="positive">+0.1</td>
+                                <td class="negative">-0.9%</td>
                             </tr>
                 
                             <tr>
@@ -1274,16 +1373,16 @@
                                 <td>호텔,레저서비스</td>
                                 <td>7,729억</td>
                                 <td>2%</td>
-                                <td class="positive">+0.8%</td>
+                                <td class="positive">+1.1%</td>
                                 <td class="positive">+0.2</td>
-                                <td class="positive">+1.5%</td>
+                                <td class="positive">+0.7%</td>
                             </tr>
                 
                             <tr class="total-row">
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
                                 <td style="font-weight: 600;">78%</td>
-                                <td class="positive" style="font-weight: 600;">+1.2%</td>
-                                <td class="positive" style="font-weight: 600;">+11.8</td>
+                                <td class="positive" style="font-weight: 600;">+1.1%</td>
+                                <td class="positive" style="font-weight: 600;">+11.1</td>
                                 <td style="font-weight: 600;">-</td>
                             </tr>
                         </tbody>

@@ -257,9 +257,18 @@ def read_portfolio_sectors(stock_sector_map):
                 .to_dict()
             )
 
+            # 섹터별 보유 종목명 (비중 상위 3개)
+            name_col = next((c for c in ['종목명', '종목', '회사명'] if c in df_latest.columns), None)
+            stocks_per_sector = {}
+            if name_col:
+                for sector, grp in df_latest.groupby(sector_col):
+                    top3 = grp.nlargest(3, '비중')[name_col].tolist()
+                    stocks_per_sector[str(sector)] = [str(n) for n in top3]
+
             portfolio_sectors[display_name] = {
                 'sectors': sector_weights,
                 'date': latest_date.strftime('%Y-%m-%d'),
+                'stocks_per_sector': stocks_per_sector,
             }
 
         return portfolio_sectors
@@ -269,11 +278,13 @@ def read_portfolio_sectors(stock_sector_map):
         return {}
 
 
-def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex_updated, sector_1m_returns=None):
+def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex_updated, sector_1m_returns=None, bm_top_stocks=None):
     """단일 포트폴리오 vs 시장 벤치마크 섹터 비중 비교 카드 HTML (두 패널)"""
     portfolio_sectors = portfolio_info['sectors']
     portfolio_date = portfolio_info['date']
+    stocks_per_sector = portfolio_info.get('stocks_per_sector', {})
     sector_1m_returns = sector_1m_returns or {}
+    bm_top_stocks = bm_top_stocks or {}
 
     # 보유/미보유 구분
     held = {s: w for s, w in portfolio_sectors.items() if w > 0}
@@ -292,6 +303,12 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
         p_bar = (p_w / max_weight) * 100
         k_bar = (k_w / max_weight) * 100
         diff_class = 'sect-over' if diff > 3 else 'sect-under' if diff < -3 else 'sect-neutral'
+
+        my_stocks  = stocks_per_sector.get(sector, [])
+        bm_stocks  = bm_top_stocks.get(sector, [])
+        detail_my  = ', '.join(my_stocks)  if my_stocks  else '—'
+        detail_bm  = ', '.join(bm_stocks)  if bm_stocks  else '—'
+
         left_rows += f"""                    <tr>
                         <td class="sect-name">{sector}</td>
                         <td class="sect-bar-cell">
@@ -311,6 +328,13 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                             </div>
                         </td>
                         <td class="sect-diff {diff_class}">{diff:+.1f}%</td>
+                    </tr>
+                    <tr class="sect-detail-row">
+                        <td colspan="4" class="sect-detail">
+                            <span class="sect-detail-mine">내: {detail_my}</span>
+                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
+                            <span class="sect-detail-bm">BM: {detail_bm}</span>
+                        </td>
                     </tr>
 """
 
@@ -412,6 +436,7 @@ def create_sector_section_html():
         kodex_updated = kodex_data.get('updated', '')
         stock_sector_map = kodex_data.get('stock_sector_map', {})
         sector_1m_returns = kodex_data.get('sector_1m_returns', {})
+        bm_top_stocks = kodex_data.get('sector_top_stocks', {})
 
         portfolio_sectors = read_portfolio_sectors(stock_sector_map)
 
@@ -421,7 +446,7 @@ def create_sector_section_html():
         html = ""
         for portfolio_name, portfolio_info in portfolio_sectors.items():
             html += _sector_comparison_card(
-                portfolio_name, portfolio_info, kodex_sectors, kodex_updated, sector_1m_returns
+                portfolio_name, portfolio_info, kodex_sectors, kodex_updated, sector_1m_returns, bm_top_stocks
             )
 
         return html
@@ -901,7 +926,7 @@ def create_dashboard():
 
         .sect-portfolio-date {{
             font-size: 0.75rem;
-            font-weight: 400;
+            font-weight: 700;
             color: #0055cc;
         }}
 
@@ -1064,6 +1089,21 @@ def create_dashboard():
             text-align: center;
             padding: 8px !important;
         }}
+
+        .sect-detail-row td {{
+            padding: 0 12px 6px 12px !important;
+            border-bottom: 1px solid #eee;
+        }}
+
+        .sect-detail {{
+            font-size: 0.75rem;
+            color: #888;
+            line-height: 1.4;
+        }}
+
+        .sect-detail-mine {{ color: #4a90e2; font-weight: 500; }}
+        .sect-detail-bm   {{ color: #b07a10; font-weight: 500; }}
+        .sect-detail-sep  {{ color: #ccc; }}
 
         @media (max-width: 800px) {{
             .sector-two-panel {{
