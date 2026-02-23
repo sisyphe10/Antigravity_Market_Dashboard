@@ -294,8 +294,9 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
     all_weights = list(portfolio_sectors.values()) + list(kodex_sectors.values())
     max_weight = max(all_weights) if all_weights else 1
 
-    # ── 왼쪽: 보유 업종 ──
-    left_rows = ""
+    # ── 왼쪽: 보유 업종 (bm_1m 계산 후에 실행) ──
+    # bm_1m은 아래에서 계산되므로 left_rows 생성을 지연
+    _left_rows_data = []
     for sector in sorted(held, key=lambda s: held[s], reverse=True):
         p_w = held[sector]
         k_w = kodex_sectors.get(sector, 0)
@@ -303,12 +304,34 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
         p_bar = (p_w / max_weight) * 100
         k_bar = (k_w / max_weight) * 100
         diff_class = 'sect-over' if diff > 3 else 'sect-under' if diff < -3 else 'sect-neutral'
+        my_stocks = stocks_per_sector.get(sector, [])
+        bm_stocks = bm_top_stocks.get(sector, [])
+        detail_my = ', '.join(my_stocks) if my_stocks else '—'
+        detail_bm = ', '.join(bm_stocks) if bm_stocks else '—'
+        _left_rows_data.append((sector, p_w, k_w, p_bar, k_bar, diff, diff_class, detail_my, detail_bm))
 
-        my_stocks  = stocks_per_sector.get(sector, [])
-        bm_stocks  = bm_top_stocks.get(sector, [])
-        detail_my  = ', '.join(my_stocks)  if my_stocks  else '—'
-        detail_bm  = ', '.join(bm_stocks)  if bm_stocks  else '—'
+    # BM 전체 1M 수익률 = 섹터 수익률의 BM 비중 가중 평균
+    bm_1m = sum(
+        sector_1m_returns.get(s, 0) * w / 100
+        for s, w in kodex_sectors.items()
+        if s in sector_1m_returns
+    )
+    not_held_excess = {
+        s: sector_1m_returns[s] - bm_1m
+        for s in not_held if s in sector_1m_returns
+    }
+    # 보유 업종 초과 수익률 (held 섹터도 동일 공식)
+    held_excess = {
+        s: sector_1m_returns[s] - bm_1m
+        for s in held if s in sector_1m_returns
+    }
 
+    # ── 왼쪽: 보유 업종 rows 완성 ──
+    left_rows = ""
+    for (sector, p_w, k_w, p_bar, k_bar, diff, diff_class, detail_my, detail_bm) in _left_rows_data:
+        ex = held_excess.get(sector)
+        ex_str = f"{ex:+.1f}%" if ex is not None else "—"
+        ex_cls = ('sect-over' if ex > 0 else 'sect-under') if ex is not None else 'sect-neutral'
         left_rows += f"""                    <tr>
                         <td class="sect-name">{sector}</td>
                         <td class="sect-bar-cell">
@@ -328,9 +351,10 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                             </div>
                         </td>
                         <td class="sect-diff {diff_class}">{diff:+.1f}%</td>
+                        <td class="sect-diff {ex_cls}">{ex_str}</td>
                     </tr>
                     <tr class="sect-detail-row">
-                        <td colspan="4" class="sect-detail">
+                        <td colspan="5" class="sect-detail">
                             <span class="sect-detail-mine">{detail_my}</span>
                             <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
                             <span class="sect-detail-bm">{detail_bm}</span>
@@ -338,34 +362,28 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                     </tr>
 """
 
-    # ── 오른쪽 상단: 미보유 업종 BM 비중 상위 5 ──
+    # ── 오른쪽 상단: 미보유 업종 BM 비중 상위 5 (업종 | BM 비중 | 초과 수익률) ──
     top5_bench = sorted(not_held, key=lambda s: not_held[s], reverse=True)[:5]
     bench_rows = ""
     for s in top5_bench:
         bm_s = bm_top_stocks.get(s, [])
         stocks_str = ', '.join(bm_s) if bm_s else ''
+        ex = not_held_excess.get(s)
+        ex_str = f"{ex:+.1f}%" if ex is not None else "—"
+        ex_cls = ('sect-over' if ex > 0 else 'sect-under') if ex is not None else ''
         bench_rows += f"""                    <tr>
                         <td class="sect-name">{s}</td>
                         <td class="sect-right-val">{not_held[s]:.1f}%</td>
+                        <td class="sect-right-val {ex_cls}">{ex_str}</td>
                     </tr>
 """
         if stocks_str:
             bench_rows += f"""                    <tr>
-                        <td colspan="2" class="sect-right-stocks">{stocks_str}</td>
+                        <td colspan="3" class="sect-right-stocks">{stocks_str}</td>
                     </tr>
 """
 
-    # ── 오른쪽 하단: 미보유 업종 1M 초과수익률 상위 5 ──
-    # BM 전체 1M 수익률 = 섹터 수익률의 BM 비중 가중 평균
-    bm_1m = sum(
-        sector_1m_returns.get(s, 0) * w / 100
-        for s, w in kodex_sectors.items()
-        if s in sector_1m_returns
-    )
-    not_held_excess = {
-        s: sector_1m_returns[s] - bm_1m
-        for s in not_held if s in sector_1m_returns
-    }
+    # ── 오른쪽 하단: 미보유 업종 1M 초과 수익률 상위 5 (업종 | BM 비중 | 초과 수익률) ──
     top5_1m = sorted(not_held_excess, key=lambda s: not_held_excess[s], reverse=True)[:5]
     ret_rows = ""
     if top5_1m:
@@ -374,20 +392,22 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
             r_cls = 'sect-over' if ex > 0 else 'sect-under'
             bm_s = bm_top_stocks.get(s, [])
             stocks_str = ', '.join(bm_s) if bm_s else ''
+            bm_w = not_held.get(s, kodex_sectors.get(s, 0))
             ret_rows += f"""                    <tr>
                         <td class="sect-name">{s}</td>
+                        <td class="sect-right-val">{bm_w:.1f}%</td>
                         <td class="sect-right-val {r_cls}">{ex:+.1f}%</td>
                     </tr>
 """
             if stocks_str:
                 ret_rows += f"""                    <tr>
-                        <td colspan="2" class="sect-right-stocks">{stocks_str}</td>
+                        <td colspan="3" class="sect-right-stocks">{stocks_str}</td>
                     </tr>
 """
     else:
-        ret_rows = '<tr><td colspan="2" class="sect-no-data">데이터 없음</td></tr>'
+        ret_rows = '<tr><td colspan="3" class="sect-no-data">데이터 없음</td></tr>'
 
-    kodex_note = f" <span class='sect-note'>({kodex_updated})</span>" if kodex_updated else ""
+    kodex_note = f" <span class='sect-kodex-date'>({kodex_updated})</span>" if kodex_updated else ""
     bm_1m_str = f"{bm_1m:+.1f}%" if sector_1m_returns else "—"
 
     card = f"""
@@ -415,6 +435,7 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                                     <th>포트폴리오</th>
                                     <th>벤치마크</th>
                                     <th>차이</th>
+                                    <th>초과 수익률</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -427,7 +448,7 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                     <h4 class="sect-panel-title">(미보유) BM 비중 상위 5개</h4>
                     <table class="sector-table">
                         <thead>
-                            <tr><th>업종</th><th>BM 비중</th></tr>
+                            <tr><th>업종</th><th>BM 비중</th><th>초과 수익률</th></tr>
                         </thead>
                         <tbody>
 {bench_rows}
@@ -438,7 +459,7 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                     <h4 class="sect-panel-title">(미보유) 1M 초과 수익률 상위 5개</h4>
                     <table class="sector-table">
                         <thead>
-                            <tr><th>업종</th><th>초과 수익률</th></tr>
+                            <tr><th>업종</th><th>BM 비중</th><th>초과 수익률</th></tr>
                         </thead>
                         <tbody>
 {ret_rows}
@@ -948,6 +969,12 @@ def create_dashboard():
         }}
 
         .sect-portfolio-date {{
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #0055cc;
+        }}
+
+        .sect-kodex-date {{
             font-size: 0.75rem;
             font-weight: 700;
             color: #333;
