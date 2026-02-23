@@ -1,7 +1,8 @@
-"""KOSPI 200 + KOSDAQ 150 합산 벤치마크 섹터 비중 계산
+"""KOSPI 200 + KOSDAQ 150 정확한 구성종목 기반 섹터 비중 계산
 
 pykrx 사용:
- - KOSPI 시총 상위 200 + KOSDAQ 시총 상위 150 → 벤치마크 섹터 비중
+ - KOSPI 200 (인덱스 코드 1028) + KOSDAQ 150 (2203) 실제 구성종목 조회
+ - 각 구성종목의 시총 가중으로 섹터 비중 계산
  - KOSPI + KOSDAQ 전종목 코드→KRX 표준 업종명 매핑 저장
 결과: kodex_sectors.json (프로젝트 루트)
 """
@@ -15,9 +16,8 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 OUTPUT_FILE = 'kodex_sectors.json'
 
-# 벤치마크 구성: KOSPI 상위 N개 + KOSDAQ 상위 N개
-KOSPI_TOP_N = 200
-KOSDAQ_TOP_N = 150
+KOSPI200_TICKER  = '1028'   # KOSPI 200
+KOSDAQ150_TICKER = '2203'   # KOSDAQ 150
 
 
 def get_recent_trading_date():
@@ -25,35 +25,15 @@ def get_recent_trading_date():
     today = datetime.now()
     for i in range(7):
         dt = today - timedelta(days=i)
-        if dt.weekday() < 5:  # 0=Mon, 4=Fri
+        if dt.weekday() < 5:
             return dt.strftime('%Y%m%d')
     return today.strftime('%Y%m%d')
 
 
-def fetch_market_sectors(date_str, market):
-    """KOSPI 또는 KOSDAQ 전종목 섹터+시총 데이터 반환"""
-    from pykrx import stock
-    df = stock.get_market_sector_classifications(date_str, market)
-    if df is None or len(df) == 0:
-        print(f"  {market} 데이터 없음 ({date_str})")
-        return pd.DataFrame()
-    cap_col = next((c for c in ['시가총액', 'MktCap', 'Cap'] if c in df.columns), None)
-    sector_col = next((c for c in ['업종명', '업종', 'Sector'] if c in df.columns), None)
-    if cap_col is None or sector_col is None:
-        print(f"  {market} 필요 컬럼 없음: {df.columns.tolist()}")
-        return pd.DataFrame()
-    df = df[[sector_col, cap_col]].copy()
-    df.columns = ['업종명', '시가총액']
-    df['시가총액'] = pd.to_numeric(df['시가총액'], errors='coerce').fillna(0)
-    df = df[df['시가총액'] > 0]
-    print(f"  {market}: {len(df)}개 종목")
-    return df
-
-
 def fetch_all():
-    """KOSPI + KOSDAQ 데이터 수집 및 벤치마크/매핑 계산"""
+    """KOSPI 200 + KOSDAQ 150 구성종목 기반 섹터 비중 계산"""
     try:
-        from pykrx import stock as _  # import 확인용
+        from pykrx import stock
     except ImportError:
         print("pykrx 미설치. pip install pykrx --no-deps")
         return None, None
@@ -61,55 +41,74 @@ def fetch_all():
     date_str = get_recent_trading_date()
     print(f"기준 날짜: {date_str}")
 
-    from pykrx import stock
+    # 1. 인덱스 구성종목 조회 (ticker 먼저, date 두 번째)
+    print("KOSPI 200 구성종목 조회 중...")
+    kospi200_tickers = stock.get_index_portfolio_deposit_file(
+        KOSPI200_TICKER, date_str, alternative=True
+    )
+    print(f"  → {len(kospi200_tickers)}개")
 
-    # --- KOSPI ---
-    print("KOSPI 섹터 데이터 로드 중...")
-    df_kospi = fetch_market_sectors(date_str, 'KOSPI')
+    print("KOSDAQ 150 구성종목 조회 중...")
+    kosdaq150_tickers = stock.get_index_portfolio_deposit_file(
+        KOSDAQ150_TICKER, date_str, alternative=True
+    )
+    print(f"  → {len(kosdaq150_tickers)}개")
 
-    # --- KOSDAQ ---
-    print("KOSDAQ 섹터 데이터 로드 중...")
-    df_kosdaq = fetch_market_sectors(date_str, 'KOSDAQ')
+    all_index_tickers = set(kospi200_tickers) | set(kosdaq150_tickers)
 
-    if df_kospi.empty and df_kosdaq.empty:
+    if not all_index_tickers:
+        print("구성종목 조회 실패")
         return None, None
 
-    # --- stock_sector_map: 종목코드(str) → KRX 업종명 ---
-    # KOSPI 전종목 + KOSDAQ 전종목 재조회 (업종명만 필요)
+    # 2. KOSPI + KOSDAQ 전종목 섹터 분류 데이터
+    print("KOSPI 섹터 분류 로드 중...")
+    df_kospi_all = stock.get_market_sector_classifications(date_str, 'KOSPI')
+    print(f"  → {len(df_kospi_all)}개")
+
+    print("KOSDAQ 섹터 분류 로드 중...")
+    df_kosdaq_all = stock.get_market_sector_classifications(date_str, 'KOSDAQ')
+    print(f"  → {len(df_kosdaq_all)}개")
+
+    # 3. 전종목 stock_sector_map (코드 → KRX 표준 업종명)
     print("전종목 코드→업종명 매핑 생성 중...")
     stock_sector_map = {}
-    for market in ['KOSPI', 'KOSDAQ']:
-        try:
-            df_full = stock.get_market_sector_classifications(date_str, market)
-            sector_col = next((c for c in ['업종명', '업종', 'Sector'] if c in df_full.columns), None)
-            if sector_col and len(df_full) > 0:
-                for code, row in df_full.iterrows():
-                    stock_sector_map[str(code).zfill(6)] = str(row[sector_col])
-        except Exception as e:
-            print(f"  {market} 매핑 실패: {e}")
-    print(f"  총 {len(stock_sector_map)}개 종목 매핑 완료")
+    for df in [df_kospi_all, df_kosdaq_all]:
+        sector_col = next((c for c in ['업종명', '업종', 'Sector'] if c in df.columns), None)
+        if sector_col:
+            for code, row in df.iterrows():
+                stock_sector_map[str(code).zfill(6)] = str(row[sector_col])
+    print(f"  → 총 {len(stock_sector_map)}개 종목 매핑")
 
-    # --- 벤치마크: KOSPI top 200 + KOSDAQ top 150 (시총 가중) ---
-    frames = []
-    if not df_kospi.empty:
-        frames.append(df_kospi.sort_values('시가총액', ascending=False).head(KOSPI_TOP_N))
-    if not df_kosdaq.empty:
-        frames.append(df_kosdaq.sort_values('시가총액', ascending=False).head(KOSDAQ_TOP_N))
+    # 4. 구성종목의 시총·업종 추출
+    df_all = pd.concat([df_kospi_all, df_kosdaq_all])
+    cap_col    = next((c for c in ['시가총액', 'MktCap', 'Cap'] if c in df_all.columns), None)
+    sector_col = next((c for c in ['업종명', '업종', 'Sector'] if c in df_all.columns), None)
 
-    df_bench = pd.concat(frames)
-    total_cap = df_bench['시가총액'].sum()
-    df_bench = df_bench.copy()
-    df_bench['_w'] = df_bench['시가총액'] / total_cap * 100
+    if cap_col is None or sector_col is None:
+        print(f"필요 컬럼 없음: 시총={cap_col}, 섹터={sector_col}")
+        return None, None
+
+    df_bench = df_all[df_all.index.astype(str).str.zfill(6).isin(all_index_tickers)].copy()
+    df_bench[cap_col] = pd.to_numeric(df_bench[cap_col], errors='coerce').fillna(0)
+    df_bench = df_bench[df_bench[cap_col] > 0]
+
+    print(f"\n벤치마크 종목 수: {len(df_bench)} "
+          f"(KOSPI200 {len(kospi200_tickers)} + KOSDAQ150 {len(kosdaq150_tickers)}, "
+          f"섹터 데이터 매칭 후)")
+
+    # 5. 시총 가중 섹터 비중 계산
+    total_cap = df_bench[cap_col].sum()
+    df_bench['_w'] = df_bench[cap_col] / total_cap * 100
 
     benchmark_sectors = (
-        df_bench.groupby('업종명')['_w']
+        df_bench.groupby(sector_col)['_w']
         .sum()
         .round(2)
         .sort_values(ascending=False)
         .to_dict()
     )
 
-    print(f"\n벤치마크 섹터 비중 (KOSPI {KOSPI_TOP_N} + KOSDAQ {KOSDAQ_TOP_N}):")
+    print("\n섹터 비중:")
     for s, w in benchmark_sectors.items():
         print(f"  {s}: {w:.2f}%")
 
@@ -123,7 +122,7 @@ if __name__ == '__main__':
     if sectors:
         result = {
             'updated': datetime.now().strftime('%Y-%m-%d'),
-            'description': f'KOSPI 시총 상위 {KOSPI_TOP_N} + KOSDAQ 시총 상위 {KOSDAQ_TOP_N} 기준',
+            'description': 'KOSPI 200 + KOSDAQ 150 실제 구성종목 기준 (시총 가중)',
             'sectors': sectors,
             'stock_sector_map': stock_sector_map or {},
         }
