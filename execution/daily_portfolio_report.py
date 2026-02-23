@@ -197,7 +197,7 @@ def format_message(date, nav_data, returns_data, top_5, bottom_5):
     # 기준가
     msg += f"{LINE}\n<b>💰 기준가</b>\n{LINE}\n"
     for name, value in nav_data.items():
-        msg += f"{name}  {value:,.2f}\n"
+        msg += f"<b>{name}  {value:,.2f}</b>\n"
 
     # 수익률
     msg += f"{LINE}\n<b>📈 수익률</b>\n{LINE}\n"
@@ -216,7 +216,10 @@ def format_message(date, nav_data, returns_data, top_5, bottom_5):
             for p in periods:
                 val = returns.get(p, 'N/A')
                 if not pd.isna(val) and val != 'N/A':
-                    valid_periods.append(f"{p} {val}")
+                    if p == 'YTD':
+                        valid_periods.append(f"<b><u>{p} {val}</u></b>")
+                    else:
+                        valid_periods.append(f"{p} {val}")
             if valid_periods:
                 name = display_names.get(product, product)
                 msg += f"<b>{name}</b>\n"
