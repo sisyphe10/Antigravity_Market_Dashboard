@@ -6,6 +6,7 @@ from datetime import datetime, timezone, timedelta
 import csv
 import json
 from pathlib import Path
+import pandas as pd
 
 KST = timezone(timedelta(hours=9))
 
@@ -181,6 +182,207 @@ def get_item_category(item_name):
         pass
     return 'Other'
 
+def load_kodex_data():
+    """kodex_sectors.json 전체 데이터 로드"""
+    try:
+        if not os.path.exists('kodex_sectors.json'):
+            return {}
+        with open('kodex_sectors.json', 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Error reading kodex_sectors.json: {e}")
+        return {}
+
+
+def read_portfolio_sectors(stock_sector_map):
+    """Wrap_NAV.xlsx NEW 시트에서 포트폴리오별 섹터 비중 계산
+    종목코드 → KRX 표준 업종명 매핑 사용 (stock_sector_map)
+    """
+    try:
+        nav_file = 'Wrap_NAV.xlsx'
+        if not os.path.exists(nav_file):
+            return {}
+
+        nav_df = pd.read_excel(nav_file, sheet_name='NEW')
+        nav_df['날짜'] = pd.to_datetime(nav_df['날짜'])
+
+        portfolio_map = {
+            '트루밸류': '삼성 트루밸류',
+            '목표전환형': 'DB 목표전환형',
+        }
+
+        today = pd.Timestamp.now().normalize()
+        portfolio_sectors = {}
+
+        for portfolio_name, display_name in portfolio_map.items():
+            df_p = nav_df[nav_df['상품명'] == portfolio_name].copy()
+            if df_p.empty:
+                continue
+
+            available_dates = sorted(df_p['날짜'].unique())
+            prev_dates = [d for d in available_dates if d < today]
+            latest_date = prev_dates[-1] if prev_dates else available_dates[-1]
+
+            df_latest = df_p[df_p['날짜'] == latest_date].copy()
+            df_latest = df_latest[df_latest['비중'] > 0]
+
+            # 종목코드로 KRX 표준 업종명 조회
+            # stock_sector_map이 있으면 사용, 없으면 '업종' 컬럼 fallback
+            def lookup_sector(row):
+                try:
+                    code = str(int(float(row['코드']))).zfill(6)
+                    return stock_sector_map.get(code, None)
+                except Exception:
+                    return None
+
+            if stock_sector_map:
+                df_latest['_krx_sector'] = df_latest.apply(lookup_sector, axis=1)
+                # 매핑 안 된 종목은 '업종' 컬럼으로 fallback
+                if '업종' in df_latest.columns:
+                    mask = df_latest['_krx_sector'].isna()
+                    df_latest.loc[mask, '_krx_sector'] = df_latest.loc[mask, '업종'].fillna('기타')
+                df_latest['_krx_sector'] = df_latest['_krx_sector'].fillna('기타')
+                sector_col = '_krx_sector'
+            elif '업종' in df_latest.columns:
+                df_latest['업종'] = df_latest['업종'].fillna('기타').astype(str)
+                sector_col = '업종'
+            else:
+                continue
+
+            sector_weights = (
+                df_latest.groupby(sector_col)['비중']
+                .sum()
+                .sort_values(ascending=False)
+                .round(1)
+                .to_dict()
+            )
+
+            portfolio_sectors[display_name] = {
+                'sectors': sector_weights,
+                'date': latest_date.strftime('%Y-%m-%d'),
+            }
+
+        return portfolio_sectors
+
+    except Exception as e:
+        print(f"Error reading portfolio sectors: {e}")
+        return {}
+
+
+def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex_updated, kodex_desc=''):
+    """단일 포트폴리오 vs 시장 벤치마크 섹터 비중 비교 카드 HTML"""
+    portfolio_sectors = portfolio_info['sectors']
+    portfolio_date = portfolio_info['date']
+
+    # 모든 섹터 수집 → 포트폴리오 비중 기준 내림차순
+    all_sectors = sorted(
+        set(list(portfolio_sectors.keys()) + list(kodex_sectors.keys())),
+        key=lambda s: portfolio_sectors.get(s, 0),
+        reverse=True,
+    )
+
+    # 스케일 기준: 양쪽 최대 비중
+    all_weights = list(portfolio_sectors.values()) + list(kodex_sectors.values())
+    max_weight = max(all_weights) if all_weights else 1
+
+    rows = ""
+    for sector in all_sectors:
+        p_w = portfolio_sectors.get(sector, 0)
+        k_w = kodex_sectors.get(sector, 0)
+        diff = p_w - k_w
+
+        p_bar = (p_w / max_weight) * 100
+        k_bar = (k_w / max_weight) * 100
+
+        diff_class = 'sect-over' if diff > 3 else 'sect-under' if diff < -3 else 'sect-neutral'
+        diff_str = f"{diff:+.1f}%"
+
+        rows += f"""                    <tr>
+                        <td class="sect-name">{sector}</td>
+                        <td class="sect-bar-cell">
+                            <div class="sect-bar-inner">
+                                <div class="sect-bar-wrap">
+                                    <div class="sect-bar-fill sect-portfolio" style="width:{p_bar:.1f}%"></div>
+                                </div>
+                                <span class="sect-pct">{p_w:.1f}%</span>
+                            </div>
+                        </td>
+                        <td class="sect-bar-cell">
+                            <div class="sect-bar-inner">
+                                <div class="sect-bar-wrap">
+                                    <div class="sect-bar-fill sect-kodex" style="width:{k_bar:.1f}%"></div>
+                                </div>
+                                <span class="sect-pct">{k_w:.1f}%</span>
+                            </div>
+                        </td>
+                        <td class="sect-diff {diff_class}">{diff_str}</td>
+                    </tr>
+"""
+
+    bench_label = kodex_desc if kodex_desc else 'KOSPI 200 + KOSDAQ 150'
+    kodex_note = f" <span class='sect-note'>({kodex_updated} 기준)</span>" if kodex_updated else ""
+
+    card = f"""
+        <div class="sector-card">
+            <h3 class="sector-card-title">
+                {portfolio_name}
+                <span class="sect-portfolio-date">({portfolio_date})</span>
+                <span class="sect-vs">vs</span>
+                시장 벤치마크{kodex_note}
+                <span class='sect-note'>— {bench_label}</span>
+            </h3>
+            <div class="sector-legend">
+                <span class="legend-item"><span class="legend-dot portfolio-dot"></span> 포트폴리오</span>
+                <span class="legend-item"><span class="legend-dot kodex-dot"></span> 시장 벤치마크</span>
+                <span class="sect-diff-note">&nbsp;|&nbsp; 차이: 빨강=포트폴리오 과중, 파랑=KODEX 과중</span>
+            </div>
+            <div class="sector-table-wrap">
+                <table class="sector-table">
+                    <thead>
+                        <tr>
+                            <th>업종 (KRX 표준)</th>
+                            <th>포트폴리오</th>
+                            <th>시장 벤치마크</th>
+                            <th>차이</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+{rows}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+"""
+    return card
+
+
+def create_sector_section_html():
+    """섹터 비중 비교 섹션 전체 HTML"""
+    try:
+        kodex_data = load_kodex_data()
+        kodex_sectors = kodex_data.get('sectors', {})
+        kodex_updated = kodex_data.get('updated', '')
+        kodex_desc = kodex_data.get('description', 'KOSPI 200 + KOSDAQ 150')
+        stock_sector_map = kodex_data.get('stock_sector_map', {})
+
+        portfolio_sectors = read_portfolio_sectors(stock_sector_map)
+
+        if not portfolio_sectors:
+            return ""
+
+        html = ""
+        for portfolio_name, portfolio_info in portfolio_sectors.items():
+            html += _sector_comparison_card(
+                portfolio_name, portfolio_info, kodex_sectors, kodex_updated, kodex_desc
+            )
+
+        return html
+
+    except Exception as e:
+        print(f"Error creating sector section: {e}")
+        return ""
+
+
 def create_dashboard():
     # Check if charts directory exists
     if not os.path.exists(CHARTS_DIR):
@@ -229,11 +431,24 @@ def create_dashboard():
         charts_html = ""
         
         # Define category order for better organization
-        category_order = ['Wrap', 'Portfolio', 'INDEX_KOREA', 'INDEX_US', 'EXCHANGE RATE', 'INTEREST RATES',
-                         'CRYPTOCURRENCY', 'MEMORY', 'COMMODITIES']
+        category_order = ['Wrap', 'SECTOR', 'Portfolio', 'INDEX_KOREA', 'INDEX_US', 'EXCHANGE RATE',
+                         'INTEREST RATES', 'CRYPTOCURRENCY', 'MEMORY', 'COMMODITIES']
         
         for category in category_order:
             # Portfolio는 차트가 아니라 테이블이므로 특별 처리
+            if category == 'SECTOR':
+                sector_html = create_sector_section_html()
+                if sector_html:
+                    charts_html += f"""
+            <div class="category-section">
+                <h2 class="category-title">섹터 비중</h2>
+                <div class="portfolio-section-wrapper">
+                    {sector_html}
+                </div>
+            </div>
+            """
+                continue
+
             if category == 'Portfolio':
                 # Portfolio 테이블 HTML 생성
                 portfolio_html = create_portfolio_tables_html()
@@ -618,6 +833,151 @@ def create_dashboard():
             font-weight: 600;
             padding: 12px 10px;
         }}
+
+        /* Sector Weight Chart Styles */
+        .sector-card {{
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }}
+
+        .sector-card-title {{
+            font-size: 1.2rem;
+            color: #333;
+            margin: 0 0 10px 0;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #ddd;
+        }}
+
+        .sect-portfolio-date {{
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: #0055cc;
+        }}
+
+        .sect-vs {{
+            color: #999;
+            font-weight: 400;
+            font-size: 0.95rem;
+            margin: 0 4px;
+        }}
+
+        .sect-note {{
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: #666;
+        }}
+
+        .sector-legend {{
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 10px;
+            font-size: 0.82rem;
+            color: #555;
+        }}
+
+        .legend-item {{
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }}
+
+        .legend-dot {{
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            display: inline-block;
+            flex-shrink: 0;
+        }}
+
+        .portfolio-dot {{ background: #4a90e2; }}
+        .kodex-dot {{ background: #e8a838; }}
+
+        .sect-diff-note {{
+            font-size: 0.78rem;
+            color: #888;
+        }}
+
+        .sector-table-wrap {{
+            overflow-x: auto;
+        }}
+
+        .sector-table {{
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }}
+
+        .sector-table th {{
+            padding: 8px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #333;
+            background: #f0f0f0;
+            white-space: nowrap;
+        }}
+
+        .sector-table td {{
+            padding: 5px 12px;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }}
+
+        .sect-name {{
+            min-width: 90px;
+            font-weight: 500;
+            white-space: nowrap;
+        }}
+
+        .sect-bar-cell {{
+            width: 260px;
+        }}
+
+        .sect-bar-inner {{
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }}
+
+        .sect-bar-wrap {{
+            flex: 1;
+            height: 14px;
+            background: #ececec;
+            border-radius: 3px;
+            overflow: hidden;
+            min-width: 80px;
+        }}
+
+        .sect-bar-fill {{
+            height: 100%;
+            border-radius: 3px;
+        }}
+
+        .sect-portfolio {{ background: #4a90e2; }}
+        .sect-kodex {{ background: #e8a838; }}
+
+        .sect-pct {{
+            min-width: 40px;
+            font-size: 0.80rem;
+            color: #555;
+            text-align: right;
+            flex-shrink: 0;
+        }}
+
+        .sect-diff {{
+            text-align: right;
+            font-weight: 600;
+            white-space: nowrap;
+            min-width: 52px;
+        }}
+
+        .sect-over {{ color: #cc0000; }}
+        .sect-under {{ color: #0055cc; }}
+        .sect-neutral {{ color: #777; }}
     </style>
 </head>
 <body>

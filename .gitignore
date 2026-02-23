@@ -47,8 +47,9 @@ Thumbs.db
 charts/*
 !charts/*.png
 
-# JSON (portfolio_data.json은 워크플로우에서 커밋)
+# JSON (워크플로우에서 커밋하는 파일)
 !portfolio_data.json
+!kodex_sectors.json
 
 # 기타
 *.bat

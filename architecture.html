@@ -1010,6 +1010,15 @@
 <div class="version-log">
     <div class="version-entry">
         <div class="version-date">2026-02-23</div>
+        <div class="version-title">섹터 비중 차트 + KODEX 200 비교 대시보드 추가</div>
+        <div class="version-desc">
+            <strong>[섹터 비중 시각화]</strong> 대시보드에 "섹터 비중" 섹션 추가 (WRAP 섹션 바로 다음). 삼성 트루밸류, DB 목표전환형 각 포트폴리오의 업종별 비중을 CSS 수평 바 차트로 표시.<br><br>
+            <strong>[KODEX 200 비교]</strong> pykrx로 KOSPI 200 구성종목(인덱스 코드 1028)의 섹터 비중을 계산, 포트폴리오와 나란히 비교. 차이(+빨강/-파랑) 강조 표시. GitHub Actions에 "Fetch KODEX 200 Sector Data" 스텝 추가 → kodex_sectors.json 생성 후 커밋.<br><br>
+            <strong>[신규 파일]</strong> execution/fetch_kodex_sectors.py (pykrx 기반, 비거래일 자동 fallback), requirements.txt에 pykrx 추가.
+        </div>
+    </div>
+    <div class="version-entry">
+        <div class="version-date">2026-02-23</div>
         <div class="version-title">/update 메시지 개선 + /calendar 추가 + 포트폴리오 리포트 스타일</div>
         <div class="version-desc">
             <strong>[/calendar 커맨드]</strong> 텔레그램 봇에 /calendar 커맨드 추가. 언제든지 오늘 Google Calendar 일정 즉시 조회 가능.<br><br>

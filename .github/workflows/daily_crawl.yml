@@ -88,6 +88,12 @@ jobs:
         env:
            TZ: 'Asia/Seoul'
 
+      - name: Fetch KODEX 200 Sector Data
+        run: |
+          python execution/fetch_kodex_sectors.py || echo "섹터 데이터 수집 실패 (대시보드는 계속 진행)"
+        env:
+           TZ: 'Asia/Seoul'
+
       - name: Generate Dashboard
         run: |
           python execution/create_dashboard.py
@@ -103,5 +109,5 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Auto-update: Market data and dashboard [skip ci]"
-          file_pattern: 'dataset.csv charts/*.png index.html portfolio_data.json Wrap_NAV.xlsx'
+          file_pattern: 'dataset.csv charts/*.png index.html portfolio_data.json Wrap_NAV.xlsx kodex_sectors.json'
           skip_fetch: true
