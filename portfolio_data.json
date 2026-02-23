@@ -56,17 +56,6 @@
       "is_today_new": false
     },
     {
-      "code": "000150",
-      "name": "두산",
-      "sector": "상사,자본재",
-      "market_cap": 181694.8287,
-      "weight": 5,
-      "today_return": 7.163323782234957,
-      "contribution": 3.5816618911174785,
-      "cumulative_return": 1.0,
-      "is_today_new": false
-    },
-    {
       "code": "034020",
       "name": "두산에너빌리티",
       "sector": "기계",
@@ -78,14 +67,14 @@
       "is_today_new": false
     },
     {
-      "code": "010060",
-      "name": "OCI홀딩스",
-      "sector": "화학",
-      "market_cap": 27333.219648,
-      "weight": 3,
-      "today_return": -3.937007874015748,
-      "contribution": -1.1811023622047243,
-      "cumulative_return": 55.0,
+      "code": "000150",
+      "name": "두산",
+      "sector": "상사,자본재",
+      "market_cap": 181694.8287,
+      "weight": 5,
+      "today_return": 7.163323782234957,
+      "contribution": 3.5816618911174785,
+      "cumulative_return": 1.0,
       "is_today_new": false
     },
     {
@@ -97,6 +86,17 @@
       "today_return": -3.6671368124118473,
       "contribution": -1.1001410437235544,
       "cumulative_return": 150.0,
+      "is_today_new": false
+    },
+    {
+      "code": "010060",
+      "name": "OCI홀딩스",
+      "sector": "화학",
+      "market_cap": 27333.219648,
+      "weight": 3,
+      "today_return": -3.937007874015748,
+      "contribution": -1.1811023622047243,
+      "cumulative_return": 55.0,
       "is_today_new": false
     },
     {
@@ -201,17 +201,6 @@
       "is_today_new": false
     },
     {
-      "code": "034230",
-      "name": "파라다이스",
-      "sector": "호텔,레저서비스",
-      "market_cap": 18943.139595,
-      "weight": 5,
-      "today_return": 0.49019607843137253,
-      "contribution": 0.24509803921568626,
-      "cumulative_return": -0.7744433688286589,
-      "is_today_new": false
-    },
-    {
       "code": "241560",
       "name": "두산밥캣",
       "sector": "기계",
@@ -223,47 +212,14 @@
       "is_today_new": false
     },
     {
-      "code": "439260",
-      "name": "대한조선",
-      "sector": "기타",
-      "market_cap": 34789.259736,
-      "weight": 3,
-      "today_return": 10.797546012269938,
-      "contribution": 3.2392638036809815,
-      "cumulative_return": 5.9392872855257295,
-      "is_today_new": false
-    },
-    {
-      "code": "009240",
-      "name": "한샘",
-      "sector": "건설,건축관련",
-      "market_cap": 11566.925612,
-      "weight": 2,
-      "today_return": 4.13135593220339,
-      "contribution": 0.826271186440678,
-      "cumulative_return": 2.550133302422619,
-      "is_today_new": false
-    },
-    {
-      "code": "003570",
-      "name": "SNT다이내믹스",
-      "sector": "자동차",
-      "market_cap": 19519.333139,
-      "weight": 2,
-      "today_return": 1.9097222222222223,
-      "contribution": 0.3819444444444445,
-      "cumulative_return": 6.2764031382015695,
-      "is_today_new": false
-    },
-    {
-      "code": "001720",
-      "name": "신영증권",
-      "sector": "증권",
-      "market_cap": 41922.0,
-      "weight": 2,
-      "today_return": 4.938271604938271,
-      "contribution": 0.9876543209876544,
-      "cumulative_return": 4.938271604938271,
+      "code": "034230",
+      "name": "파라다이스",
+      "sector": "호텔,레저서비스",
+      "market_cap": 18943.139595,
+      "weight": 5,
+      "today_return": 0.49019607843137253,
+      "contribution": 0.24509803921568626,
+      "cumulative_return": -0.7744433688286589,
       "is_today_new": false
     },
     {
@@ -271,11 +227,77 @@
       "name": "현대차",
       "sector": "자동차",
       "market_cap": 1070883.11618,
-      "weight": 2,
+      "weight": 5,
       "today_return": 2.75049115913556,
-      "contribution": 0.550098231827112,
+      "contribution": 1.37524557956778,
       "cumulative_return": 1.4658331536969271,
       "is_today_new": false
+    },
+    {
+      "code": "439260",
+      "name": "대한조선",
+      "sector": "기타",
+      "market_cap": 34789.259736,
+      "weight": 5,
+      "today_return": 10.797546012269938,
+      "contribution": 5.39877300613497,
+      "cumulative_return": 5.9392872855257295,
+      "is_today_new": false
+    },
+    {
+      "code": "003570",
+      "name": "SNT다이내믹스",
+      "sector": "자동차",
+      "market_cap": 19519.333139,
+      "weight": 3,
+      "today_return": 1.9097222222222223,
+      "contribution": 0.5729166666666666,
+      "cumulative_return": 6.2764031382015695,
+      "is_today_new": false
+    },
+    {
+      "code": "009240",
+      "name": "한샘",
+      "sector": "건설,건축관련",
+      "market_cap": 11566.925612,
+      "weight": 3,
+      "today_return": 4.13135593220339,
+      "contribution": 1.2394067796610169,
+      "cumulative_return": 2.550133302422619,
+      "is_today_new": false
+    },
+    {
+      "code": "001720",
+      "name": "신영증권",
+      "sector": "증권",
+      "market_cap": 41922.0,
+      "weight": 3,
+      "today_return": 4.938271604938271,
+      "contribution": 1.4814814814814814,
+      "cumulative_return": 4.938271604938271,
+      "is_today_new": false
+    },
+    {
+      "code": "033780",
+      "name": "KT&G",
+      "sector": "필수소비재",
+      "market_cap": 208228.778425,
+      "weight": 3,
+      "today_return": null,
+      "contribution": null,
+      "cumulative_return": null,
+      "is_today_new": true
+    },
+    {
+      "code": "006260",
+      "name": "LS",
+      "sector": "기계",
+      "market_cap": 85907.0,
+      "weight": 3,
+      "today_return": null,
+      "contribution": null,
+      "cumulative_return": null,
+      "is_today_new": true
     },
     {
       "code": "399720",
