@@ -187,7 +187,25 @@ async def portfolio_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 message_id=status_msg.message_id,
                 text=f"❌ 리포트 생성 실패:\n{result.stderr}"
             )
-            
+
+        # 리포트 성공 시 dashboard 재생성 및 push
+        if result.returncode == 0:
+            import os
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            parent_dir = os.path.dirname(script_dir)
+            subprocess.run(["git", "pull", "--rebase", "origin", "main"], cwd=parent_dir, capture_output=True, timeout=60)
+            result_dash = subprocess.run(
+                [sys.executable, "execution/create_dashboard.py"],
+                cwd=parent_dir, capture_output=True, text=True, timeout=120
+            )
+            if result_dash.returncode == 0:
+                now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+                subprocess.run(["git", "add", "index.html"], cwd=parent_dir, capture_output=True, timeout=30)
+                subprocess.run(["git", "commit", "-m", f"포트폴리오 업데이트 ({now_str})"], cwd=parent_dir, capture_output=True, timeout=30)
+                subprocess.run(["git", "pull", "--rebase", "origin", "main"], cwd=parent_dir, capture_output=True, timeout=60)
+                subprocess.run(["git", "push"], cwd=parent_dir, capture_output=True, timeout=60)
+                logging.info("Dashboard updated via /portfolio command")
+
     except subprocess.TimeoutExpired:
         await context.bot.edit_message_text(
             chat_id=chat_id,
