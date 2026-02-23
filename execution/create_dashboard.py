@@ -314,7 +314,7 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                     </tr>
 """
 
-    # ── 오른쪽 상단: 미보유 업종 벤치 비중 상위 5 ──
+    # ── 오른쪽 상단: 미보유 업종 BM 비중 상위 5 ──
     top5_bench = sorted(not_held, key=lambda s: not_held[s], reverse=True)[:5]
     bench_rows = ""
     for s in top5_bench:
@@ -348,7 +348,7 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                 {portfolio_name}
                 <span class="sect-portfolio-date">({portfolio_date})</span>
                 <span class="sect-vs">vs</span>
-                KOSPI 200 + KOSDAQ 150 기준{kodex_note}
+                KOSPI 200 + KOSDAQ 150{kodex_note}
             </h3>
             <div class="sector-legend">
                 <span class="legend-item"><span class="legend-dot portfolio-dot"></span> 포트폴리오</span>
@@ -376,10 +376,10 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
                 </div>
                 <div class="sector-right-panel">
                     <div class="sect-right-block">
-                        <h4 class="sect-panel-title">미보유 업종 — 벤치 비중 상위 5</h4>
+                        <h4 class="sect-panel-title">미보유 업종 — BM 비중 상위 5</h4>
                         <table class="sector-table">
                             <thead>
-                                <tr><th>업종</th><th>벤치 비중</th></tr>
+                                <tr><th>업종</th><th>BM 비중</th></tr>
                             </thead>
                             <tbody>
 {bench_rows}
