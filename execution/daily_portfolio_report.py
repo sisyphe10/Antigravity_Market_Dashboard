@@ -226,6 +226,7 @@ def format_message(date, nav_data, returns_data, top_5, bottom_5):
                 # 3개씩 끊어서 줄바꿈
                 for i in range(0, len(valid_periods), 3):
                     msg += " | ".join(valid_periods[i:i+3]) + "\n"
+                msg += "\n"
 
     # 기여도 상위
     msg += f"{LINE}\n<b>🔺 기여도 상위</b>\n{LINE}\n"
