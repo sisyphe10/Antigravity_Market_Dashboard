@@ -541,8 +541,29 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
         else:
             logging.info("No changes to Wrap_NAV.xlsx to commit")
 
-        # 3. 포트폴리오 리포트 생성 및 전송
-        logging.info("Step 3: Generating portfolio report...")
+        # 3. Dashboard 재생성 및 push
+        logging.info("Step 3: Regenerating dashboard...")
+        result_dashboard = subprocess.run(
+            [sys.executable, "execution/create_dashboard.py"],
+            capture_output=True,
+            text=True,
+            timeout=120
+        )
+        if result_dashboard.returncode == 0:
+            subprocess.run(["git", "add", "index.html"], cwd=parent_dir, capture_output=True, timeout=30)
+            commit_dash = subprocess.run(
+                ["git", "commit", "-m", f"포트폴리오 업데이트 ({now_str})"],
+                cwd=parent_dir, capture_output=True, text=True, timeout=30
+            )
+            if commit_dash.returncode == 0:
+                subprocess.run(["git", "pull", "--rebase", "origin", "main"], cwd=parent_dir, capture_output=True, timeout=60)
+                subprocess.run(["git", "push"], cwd=parent_dir, capture_output=True, timeout=60)
+                logging.info("Dashboard updated and pushed")
+        else:
+            logging.error(f"Dashboard generation failed: {result_dashboard.stderr}")
+
+        # 4. 포트폴리오 리포트 생성 및 전송
+        logging.info("Step 4: Generating portfolio report...")
         result_report = subprocess.run(
             [sys.executable, "execution/daily_portfolio_report.py"],
             capture_output=True,
