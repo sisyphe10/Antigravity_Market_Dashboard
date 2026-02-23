@@ -274,7 +274,6 @@
             display: flex;
             align-items: center;
             gap: 16px;
-            margin-bottom: 10px;
             font-size: 0.82rem;
             color: #333;
         }
@@ -357,39 +356,28 @@
         .sect-under { color: #0055cc; }
         .sect-neutral { color: #777; }
 
-        .sector-split-panel {
+        .sector-header-bar {
             display: grid;
             grid-template-columns: 3fr 2fr;
-            gap: 24px;
-            align-items: start;
+            gap: 0 24px;
+            align-items: center;
+            margin-bottom: 10px;
         }
 
-        .sect-right-wrapper {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sect-right-header {
+        .sect-not-held-label {
             font-size: 0.85rem;
             font-weight: 700;
             color: #111;
             text-align: center;
-            margin: 0 0 8px 0;
             padding-bottom: 4px;
             border-bottom: 1px solid #ddd;
         }
 
-        .sect-right-inner {
+        .sector-three-panel {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            grid-template-columns: 3fr 1fr 1fr;
+            gap: 24px;
             align-items: start;
-        }
-
-        .sect-right-inner .sect-panel-title {
-            font-size: 0.78rem;
-            margin: 0 0 6px 0;
-            padding-bottom: 3px;
         }
 
         .sect-panel-title {
@@ -441,10 +429,8 @@
         .sect-detail-sep  { color: #ccc; }
 
         @media (max-width: 800px) {
-            .sector-split-panel {
-                grid-template-columns: 1fr;
-            }
-            .sect-right-inner {
+            .sector-header-bar,
+            .sector-three-panel {
                 grid-template-columns: 1fr;
             }
         }
@@ -453,7 +439,7 @@
 <body>
     <header>
         <h1>📊 Market Data Dashboard</h1>
-        <div class="last-updated">Last Updated: 2026-02-23 16:28:16 KST</div>
+        <div class="last-updated">Last Updated: 2026-02-23 16:29:54 KST</div>
         <a href="architecture.html" target="_blank" class="nav-button">🗂️ Workflow Architecture</a>
     </header>
 
@@ -509,11 +495,14 @@
                 KOSPI 200 + KOSDAQ 150 <span class='sect-kodex-date'>(2026-02-23)</span>
                 <span class="sect-bm-1m">BM 1M <span class="sect-over">+19.5%</span></span>
             </h3>
-            <div class="sector-legend">
-                <span class="legend-item"><span class="legend-dot portfolio-dot"></span> 포트폴리오</span>
-                <span class="legend-item"><span class="legend-dot kodex-dot"></span> 벤치마크</span>
+            <div class="sector-header-bar">
+                <div class="sector-legend">
+                    <span class="legend-item"><span class="legend-dot portfolio-dot"></span> 포트폴리오</span>
+                    <span class="legend-item"><span class="legend-dot kodex-dot"></span> 벤치마크</span>
+                </div>
+                <div class="sect-not-held-label">미보유</div>
             </div>
-            <div class="sector-split-panel">
+            <div class="sector-three-panel">
                 <div class="sector-left-panel">
                     <h4 class="sect-panel-title">보유 업종</h4>
                     <div class="sector-table-wrap">
@@ -603,16 +592,13 @@
                         </table>
                     </div>
                 </div>
-                <div class="sect-right-wrapper">
-                    <h4 class="sect-right-header">미보유</h4>
-                    <div class="sect-right-inner">
-                        <div class="sect-right-block">
-                            <h5 class="sect-panel-title">BM 비중 상위 5개</h5>
-                            <table class="sector-table">
-                                <thead>
-                                    <tr><th>업종</th><th>BM 비중</th><th>초과 수익률</th></tr>
-                                </thead>
-                                <tbody>
+                <div class="sect-right-block">
+                    <h4 class="sect-panel-title">BM 비중 상위 5개</h4>
+                    <table class="sector-table">
+                        <thead>
+                            <tr><th>업종</th><th>BM 비중</th><th>초과 수익률</th></tr>
+                        </thead>
+                        <tbody>
                     <tr>
                         <td class="sect-name">운송장비·부품</td>
                         <td class="sect-right-val">9.7%</td>
@@ -654,16 +640,16 @@
                         <td colspan="3" class="sect-right-stocks">삼성물산, 포스코인터내셔널, 영원무역</td>
                     </tr>
 
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="sect-right-block">
-                            <h5 class="sect-panel-title">1M 초과 수익률 상위 5개</h5>
-                            <table class="sector-table">
-                                <thead>
-                                    <tr><th>업종</th><th>BM 비중</th><th>초과 수익률</th></tr>
-                                </thead>
-                                <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="sect-right-block">
+                    <h4 class="sect-panel-title">1M 초과 수익률 상위 5개</h4>
+                    <table class="sector-table">
+                        <thead>
+                            <tr><th>업종</th><th>BM 비중</th><th>초과 수익률</th></tr>
+                        </thead>
+                        <tbody>
                     <tr>
                         <td class="sect-name">금융</td>
                         <td class="sect-right-val">0.6%</td>
@@ -705,10 +691,8 @@
                         <td colspan="3" class="sect-right-stocks">SK텔레콤, KT, LG유플러스</td>
                     </tr>
 
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -721,11 +705,14 @@
                 KOSPI 200 + KOSDAQ 150 <span class='sect-kodex-date'>(2026-02-23)</span>
                 <span class="sect-bm-1m">BM 1M <span class="sect-over">+19.5%</span></span>
             </h3>
-            <div class="sector-legend">
-                <span class="legend-item"><span class="legend-dot portfolio-dot"></span> 포트폴리오</span>
-                <span class="legend-item"><span class="legend-dot kodex-dot"></span> 벤치마크</span>
+            <div class="sector-header-bar">
+                <div class="sector-legend">
+                    <span class="legend-item"><span class="legend-dot portfolio-dot"></span> 포트폴리오</span>
+                    <span class="legend-item"><span class="legend-dot kodex-dot"></span> 벤치마크</span>
+                </div>
+                <div class="sect-not-held-label">미보유</div>
             </div>
-            <div class="sector-split-panel">
+            <div class="sector-three-panel">
                 <div class="sector-left-panel">
                     <h4 class="sect-panel-title">보유 업종</h4>
                     <div class="sector-table-wrap">
@@ -843,16 +830,13 @@
                         </table>
                     </div>
                 </div>
-                <div class="sect-right-wrapper">
-                    <h4 class="sect-right-header">미보유</h4>
-                    <div class="sect-right-inner">
-                        <div class="sect-right-block">
-                            <h5 class="sect-panel-title">BM 비중 상위 5개</h5>
-                            <table class="sector-table">
-                                <thead>
-                                    <tr><th>업종</th><th>BM 비중</th><th>초과 수익률</th></tr>
-                                </thead>
-                                <tbody>
+                <div class="sect-right-block">
+                    <h4 class="sect-panel-title">BM 비중 상위 5개</h4>
+                    <table class="sector-table">
+                        <thead>
+                            <tr><th>업종</th><th>BM 비중</th><th>초과 수익률</th></tr>
+                        </thead>
+                        <tbody>
                     <tr>
                         <td class="sect-name">기타금융</td>
                         <td class="sect-right-val">10.8%</td>
@@ -894,16 +878,16 @@
                         <td colspan="3" class="sect-right-stocks">고려아연, POSCO홀딩스, LIG넥스원</td>
                     </tr>
 
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="sect-right-block">
-                            <h5 class="sect-panel-title">1M 초과 수익률 상위 5개</h5>
-                            <table class="sector-table">
-                                <thead>
-                                    <tr><th>업종</th><th>BM 비중</th><th>초과 수익률</th></tr>
-                                </thead>
-                                <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="sect-right-block">
+                    <h4 class="sect-panel-title">1M 초과 수익률 상위 5개</h4>
+                    <table class="sector-table">
+                        <thead>
+                            <tr><th>업종</th><th>BM 비중</th><th>초과 수익률</th></tr>
+                        </thead>
+                        <tbody>
                     <tr>
                         <td class="sect-name">금융</td>
                         <td class="sect-right-val">0.6%</td>
@@ -945,10 +929,8 @@
                         <td colspan="3" class="sect-right-stocks">SK스퀘어, KB금융, 신한지주</td>
                     </tr>
 
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -961,7 +943,7 @@
                 <div class="portfolio-section-wrapper">
                     
             <div class="portfolio-section">
-                <h3 class="portfolio-title">삼성 트루밸류 / NH Value ESG / DB 개방형 <span class="update-time">(2026-02-23 16:28)</span></h3>
+                <h3 class="portfolio-title">삼성 트루밸류 / NH Value ESG / DB 개방형 <span class="update-time">(2026-02-23 16:06)</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table">
                         <thead>
@@ -1041,18 +1023,6 @@
                 
                             <tr>
                                 <td>6</td>
-                                <td>000150</td>
-                                <td>두산</td>
-                                <td>상사,자본재</td>
-                                <td>18조1,694억</td>
-                                <td>5%</td>
-                                <td class="positive">+7.2%</td>
-                                <td class="positive">+3.6</td>
-                                <td class="positive">+1.0%</td>
-                            </tr>
-                
-                            <tr>
-                                <td>7</td>
                                 <td>034020</td>
                                 <td>두산에너빌리티</td>
                                 <td>기계</td>
@@ -1064,19 +1034,19 @@
                             </tr>
                 
                             <tr>
-                                <td>8</td>
-                                <td>010060</td>
-                                <td>OCI홀딩스</td>
-                                <td>화학</td>
-                                <td>2조7,333억</td>
-                                <td>3%</td>
-                                <td class="negative">-3.9%</td>
-                                <td class="negative">-1.2</td>
-                                <td class="positive">+55.0%</td>
+                                <td>7</td>
+                                <td>000150</td>
+                                <td>두산</td>
+                                <td>상사,자본재</td>
+                                <td>18조1,694억</td>
+                                <td>5%</td>
+                                <td class="positive">+7.2%</td>
+                                <td class="positive">+3.6</td>
+                                <td class="positive">+1.0%</td>
                             </tr>
                 
                             <tr>
-                                <td>9</td>
+                                <td>8</td>
                                 <td>006800</td>
                                 <td>미래에셋증권</td>
                                 <td>증권</td>
@@ -1085,6 +1055,18 @@
                                 <td class="negative">-3.7%</td>
                                 <td class="negative">-1.1</td>
                                 <td class="positive">+150.0%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>9</td>
+                                <td>010060</td>
+                                <td>OCI홀딩스</td>
+                                <td>화학</td>
+                                <td>2조7,333억</td>
+                                <td>3%</td>
+                                <td class="negative">-3.9%</td>
+                                <td class="negative">-1.2</td>
+                                <td class="positive">+55.0%</td>
                             </tr>
                 
                             <tr>
@@ -1148,7 +1130,7 @@
             </div>
             
             <div class="portfolio-section">
-                <h3 class="portfolio-title">DB 목표전환형 <span class="update-time">(2026-02-23 16:28)</span></h3>
+                <h3 class="portfolio-title">DB 목표전환형 <span class="update-time">(2026-02-23 16:06)</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table">
                         <thead>
@@ -1228,18 +1210,6 @@
                 
                             <tr>
                                 <td>6</td>
-                                <td>034230</td>
-                                <td>파라다이스</td>
-                                <td>호텔,레저서비스</td>
-                                <td>1조8,943억</td>
-                                <td>5%</td>
-                                <td class="positive">+0.5%</td>
-                                <td class="positive">+0.2</td>
-                                <td class="negative">-0.8%</td>
-                            </tr>
-                
-                            <tr>
-                                <td>7</td>
                                 <td>241560</td>
                                 <td>두산밥캣</td>
                                 <td>기계</td>
@@ -1248,6 +1218,18 @@
                                 <td class="negative">-0.2%</td>
                                 <td class="negative">-0.1</td>
                                 <td class="positive">+0.2%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>7</td>
+                                <td>034230</td>
+                                <td>파라다이스</td>
+                                <td>호텔,레저서비스</td>
+                                <td>1조8,943억</td>
+                                <td>5%</td>
+                                <td class="positive">+0.5%</td>
+                                <td class="positive">+0.2</td>
+                                <td class="negative">-0.8%</td>
                             </tr>
                 
                             <tr>
@@ -1264,18 +1246,6 @@
                 
                             <tr>
                                 <td>9</td>
-                                <td>009240</td>
-                                <td>한샘</td>
-                                <td>건설,건축관련</td>
-                                <td>1조1,566억</td>
-                                <td>2%</td>
-                                <td class="positive">+4.1%</td>
-                                <td class="positive">+0.8</td>
-                                <td class="positive">+2.6%</td>
-                            </tr>
-                
-                            <tr>
-                                <td>10</td>
                                 <td>003570</td>
                                 <td>SNT다이내믹스</td>
                                 <td>자동차</td>
@@ -1284,6 +1254,18 @@
                                 <td class="positive">+1.9%</td>
                                 <td class="positive">+0.4</td>
                                 <td class="positive">+6.3%</td>
+                            </tr>
+                
+                            <tr>
+                                <td>10</td>
+                                <td>009240</td>
+                                <td>한샘</td>
+                                <td>건설,건축관련</td>
+                                <td>1조1,566억</td>
+                                <td>2%</td>
+                                <td class="positive">+4.1%</td>
+                                <td class="positive">+0.8</td>
+                                <td class="positive">+2.6%</td>
                             </tr>
                 
                             <tr>
