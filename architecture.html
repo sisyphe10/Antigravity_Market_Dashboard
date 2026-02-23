@@ -383,7 +383,7 @@
 <header>
     <h1>Antigravity Market Dashboard</h1>
     <div class="subtitle">System Architecture & Documentation</div>
-    <div class="subtitle">Last updated: 2026-02-20 (5차)</div>
+    <div class="subtitle">Last updated: 2026-02-23 (6차)</div>
 </header>
 
 <nav>
@@ -510,10 +510,10 @@
     <!-- Auto Portfolio Update (09:30~15:30) -->
     <div class="flow-group trigger-schedule">
         <div class="flow-header">
-            <span class="flow-badge badge-schedule">09:30~15:30 (30분)</span>
+            <span class="flow-badge badge-schedule">09:30~15:35 (30분)</span>
             <span class="flow-title">장중 자동 포트폴리오 업데이트</span>
         </div>
-        <div class="flow-desc">거래일 장중 30분마다 자동 실행. 텔레그램 알림 없이 Dashboard만 조용히 갱신. 주말·공휴일 자동 스킵 (삼성전자 당일 데이터 유무로 판단).</div>
+        <div class="flow-desc">거래일 09:30~15:35 KST 30분마다 자동 실행. 텔레그램 알림 없이 Dashboard만 조용히 갱신. 주말·공휴일 자동 스킵 (삼성전자 당일 데이터 유무로 판단).</div>
         <div class="steps">
             <div class="step">
                 <div class="step-number">Step 1</div>
@@ -758,6 +758,11 @@
             <td><span class="tag tag-github">Actions</span></td>
         </tr>
         <tr>
+            <td><span class="file-name">execution/fetch_kodex_sectors.py</span></td>
+            <td>pykrx로 KOSPI 200 + KOSDAQ 150 구성종목 섹터 비중 + 1M 수익률 + 상위 종목 계산 → kodex_sectors.json</td>
+            <td><span class="tag tag-github">Actions</span> <span class="tag tag-command">수동</span></td>
+        </tr>
+        <tr>
             <td><span class="file-name">execution/config.py</span></td>
             <td>설정값 (파일 경로, 포트폴리오 정의 등)</td>
             <td><span class="tag tag-vm">import</span></td>
@@ -828,6 +833,17 @@
         </div>
     </div>
     <div class="data-card">
+        <div class="data-card-title">kodex_sectors.json</div>
+        <div class="data-card-desc">
+            KOSPI 200 + KOSDAQ 150 섹터 데이터.<br>
+            • sectors: 시총 가중 섹터 비중 (%)<br>
+            • stock_sector_map: 전종목 코드→업종명 매핑<br>
+            • sector_1m_returns: 섹터별 1M 수익률<br>
+            • sector_top_stocks: 섹터별 시총 상위 3종목<br>
+            fetch_kodex_sectors.py에서 생성. Dashboard 섹터 비중 카드에서 사용.
+        </div>
+    </div>
+    <div class="data-card">
         <div class="data-card-title">charts/*.png</div>
         <div class="data-card-desc">
             시장 차트 이미지 파일들.<br>
@@ -850,7 +866,7 @@
             <strong>담당:</strong><br>
             • 텔레그램 봇 24시간 구동 (/update, /portfolio 등)<br>
             • 날씨 알림 (05:00), 캘린더 알림 (05:10)<br>
-            • 장중 자동 포트폴리오 업데이트 (09:30~15:30, 30분)<br>
+            • 장중 자동 포트폴리오 업데이트 (09:30~15:35, 30분)<br>
             • 일일 포트폴리오 리포트 (16:00)
         </div>
     </div>
@@ -1008,6 +1024,17 @@
 <!-- ===== Changelog ===== -->
 <h2 id="changelog">Changelog</h2>
 <div class="version-log">
+    <div class="version-entry">
+        <div class="version-date">2026-02-23</div>
+        <div class="version-title">SECTOR WEIGHT UI 개선 + 포트폴리오 대표색 변경 + 봇 수정 + 파일 정리</div>
+        <div class="version-desc">
+            <strong>[SECTOR WEIGHT 레이아웃]</strong> 카테고리명 "섹터 비중" → "SECTOR WEIGHT". 수평 바 차트 제거, 단순 숫자 셀로 변경. 3컬럼 그리드(3fr 1fr 1fr) 레이아웃 적용. "미보유" 레이블을 범례(●포트폴리오 ●벤치마크)와 같은 행으로 이동(sector-header-bar) → 좌우 패널 동일 높이 정렬.<br><br>
+            <strong>[SECTOR WEIGHT 데이터]</strong> 보유 업종 테이블에 "vs BM 1M" 컬럼 추가 (섹터별 초과수익률). 차이 컬럼 색상 제거(검정). 과중/과소 범례 제거. 미보유 패널에 BM 대표 종목 표시(시총 상위 3개). 컬럼명 "초과 수익률" → "vs BM 1M", "BM 비중" → "비중".<br><br>
+            <strong>[포트폴리오 대표색]</strong> #4a90e2(파란색) → #2d7a3a(dark green). create_dashboard.py의 --accent-color, .nav-button, .portfolio-dot, .sect-detail-mine 전체 반영.<br><br>
+            <strong>[텔레그램 봇]</strong> 장중 자동 업데이트 마지막 시각 15:30 → 15:35. /update 응답 메시지 "포트폴리오 업데이트 완료" → "포트폴리오 업데이트". 시각 표시 "기준 (KST)" → "(KST)". 포트폴리오 리포트 각 상품 수익률 블록 후 빈 줄 추가.<br><br>
+            <strong>[정리]</strong> 임시 작업 파일 6개 삭제(excel_output.txt, full_excel_dump.py, read_excel.py, read_excel2.py, small_files_dump.py, summarize_excel.py). 불필요한 CSS(sect-diff-note) 제거.
+        </div>
+    </div>
     <div class="version-entry">
         <div class="version-date">2026-02-23</div>
         <div class="version-title">섹터 비중 차트 + KODEX 200 비교 대시보드 추가</div>
