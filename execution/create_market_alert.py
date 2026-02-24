@@ -288,20 +288,19 @@ def render_table(stocks, category, price_cache):
         price_df  = price_cache.get(s['code']) if s['code'] else None
         판단일, current_price, target_price = analyze_release(s, price_df, category)
 
-        elapsed_str = f"{s['elapsed']}일"
-        cur_str = f'{current_price:,}원' if current_price is not None else '-'
-        tgt_str = f'{target_price:,}원' if target_price is not None else '-'
+        elapsed_str  = f"{s['elapsed']}일"
+        cur_str      = f'{current_price:,}원' if current_price is not None else '-'
+        판단일_passed = (판단일 != '-' and 판단일 <= today_str)
 
-        # 판단일 색상: 과거=초록, 미래=회색
-        if 판단일 == '-':
-            date_style = 'color:#6b7280'
-        elif 판단일 <= today_str:
-            date_style = 'color:#166534;font-weight:600'
-        else:
-            date_style = 'color:#374151'
+        # 판단일 도달 여부에 따라 행 전체 배경색 + 해제가능주가 볼드
+        row_style = ' style="background-color:#fee2e2"' if 판단일_passed else ''
+        tgt_style = 'font-weight:700' if 판단일_passed else ''
+        tgt_str   = (f'<span style="{tgt_style}">{target_price:,}원</span>'
+                     if target_price is not None else '-')
+        date_style = 'color:#374151' if not 판단일_passed else 'color:#374151'
 
         rows_html += f"""
-            <tr>
+            <tr{row_style}>
                 <td>{s['name']}</td>
                 <td>{s['market']}</td>
                 <td class="num">{fmt_marcap(s['marcap'])}</td>
@@ -452,12 +451,14 @@ def create_market_alert():
     now_kst  = datetime.now(tz=KST)
     today    = now_kst.strftime('%Y-%m-%d')
     start_90 = (now_kst - timedelta(days=90)).strftime('%Y-%m-%d')
+    # 투자주의는 5영업일 유효 → 최근 10일(≈5영업일+주말) 범위로 조회
+    start_10 = (now_kst - timedelta(days=10)).strftime('%Y-%m-%d')
 
     krx_data = load_krx_data()
     session  = get_session()
 
     print("  투자주의 조회 중...")
-    stocks_주의 = parse_stocks(fetch_category(session, '투자주의', today, today), '투자주의', krx_data)
+    stocks_주의 = parse_stocks(fetch_category(session, '투자주의', start_10, today), '투자주의', krx_data)
     print(f"    → {len(stocks_주의)}건")
 
     print("  투자경고 조회 중...")
@@ -468,10 +469,15 @@ def create_market_alert():
     stocks_위험 = parse_stocks(fetch_category(session, '투자위험', start_90, today), '투자위험', krx_data)
     print(f"    → {len(stocks_위험)}건")
 
-    # 경고/위험만 주가 필요 (주의는 가격 조건 없음)
-    all_stocks  = stocks_경고 + stocks_위험
-    codes_needed = [s['code'] for s in all_stocks if s['code']]
-    price_cache = fetch_all_prices(codes_needed, days_back=35)
+    # 경고/위험: T1·T2 계산에 35일 필요
+    codes_경고위험 = [s['code'] for s in stocks_경고 + stocks_위험 if s['code']]
+    price_cache   = fetch_all_prices(codes_경고위험, days_back=35)
+
+    # 투자주의: 현재가만 필요 → 3일치로 빠르게 조회 (경고/위험 중복 코드 제외)
+    codes_주의_only = [c for c in {s['code'] for s in stocks_주의 if s['code']}
+                      if c not in price_cache]
+    if codes_주의_only:
+        price_cache.update(fetch_all_prices(codes_주의_only, days_back=3))
 
     print("\n📝 HTML 생성 중...")
     html = generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache)
