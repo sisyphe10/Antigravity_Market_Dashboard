@@ -39,7 +39,7 @@ def create_portfolio_tables_html():
             # 포트폴리오별 테이블 생성
             html += f"""
             <div class="portfolio-section">
-                <h3 class="portfolio-title">{portfolio_name} <span class="update-time">({portfolio_updated})</span></h3>
+                <h3 class="portfolio-title">{portfolio_name}</h3>
                 <div class="table-container">
                     <table class="portfolio-table">
                         <thead>
@@ -399,16 +399,14 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
     else:
         ret_rows = '<tr><td colspan="3" class="sect-no-data">데이터 없음</td></tr>'
 
-    kodex_note = f" <span class='sect-kodex-date'>({kodex_updated})</span>" if kodex_updated else ""
     bm_1m_str = f"{bm_1m:+.1f}%" if sector_1m_returns else "—"
 
     card = f"""
         <div class="sector-card">
             <h3 class="sector-card-title">
                 {portfolio_name}
-                <span class="sect-portfolio-date">({portfolio_date})</span>
                 <span class="sect-vs">vs</span>
-                KOSPI 200 + KOSDAQ 150{kodex_note}
+                KOSPI 200 + KOSDAQ 150
                 <span class="sect-bm-1m">BM 1M <span class="{'sect-over' if bm_1m > 0 else 'sect-under'}">{bm_1m_str}</span></span>
             </h3>
             <div class="sector-header-bar">
@@ -539,7 +537,6 @@ def create_wrap_returns_table():
         <div class="category-section">
             <h2 class="category-title">RETURN</h2>
             <div style="max-width:800px;margin:0 auto;background:#fff;border-radius:10px;padding:16px 20px;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
-                <p style="font-size:0.75rem;font-weight:bold;color:#555;margin:0 0 10px 0">기준일: {ref_date}</p>
                 <table class="rt-table">
                     <thead>
                         <tr><th class="rt-nh"></th>{headers}</tr>
@@ -741,17 +738,8 @@ def create_dashboard():
                 charts = sorted(charts, key=sort_key)
 
             # Wrap 카테고리는 git 커밋 날짜로 날짜 표시 (git pull 시 mtime이 바뀌므로)
-            if category == 'Wrap' and charts:
-                try:
-                    sample_file = os.path.join(CHARTS_DIR, charts[0]['filename'])
-                    git_log = subprocess.run(
-                        ['git', 'log', '-1', '--format=%ci', sample_file],
-                        capture_output=True, text=True
-                    )
-                    wrap_date = git_log.stdout.strip()[:10] if git_log.stdout.strip() else datetime.now().strftime('%Y-%m-%d')
-                except Exception:
-                    wrap_date = datetime.now().strftime('%Y-%m-%d')
-                category_label = f'WRAP <span class="category-date">({wrap_date})</span>'
+            if category == 'Wrap':
+                category_label = 'WRAP'
             else:
                 category_label = category
 
