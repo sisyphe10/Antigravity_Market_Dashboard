@@ -45,8 +45,8 @@ def get_report_date():
     kst = timezone(td(hours=9))
     now_kst = datetime.now(kst)
     
-    # 16시 이전이면 전일, 16시 이후면 당일
-    if now_kst.hour < 16:
+    # 15시 이전이면 전일, 15시 이후면 당일
+    if now_kst.hour < 15:
         report_date = now_kst.date() - td(days=1)
     else:
         report_date = now_kst.date()

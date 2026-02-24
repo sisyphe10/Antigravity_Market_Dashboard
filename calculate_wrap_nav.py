@@ -89,7 +89,7 @@ from datetime import timezone, timedelta as td
 kst = timezone(td(hours=9))
 now_kst = pd.Timestamp.now(tz=kst)
 today_kst = now_kst.normalize().tz_localize(None)
-if now_kst.hour >= 16:
+if now_kst.hour >= 15:
     end_date = today_kst
 else:
     end_date = today_kst - pd.Timedelta(days=1)
