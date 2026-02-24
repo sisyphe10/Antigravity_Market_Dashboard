@@ -494,6 +494,65 @@ def create_sector_section_html():
         return ""
 
 
+def create_wrap_returns_table():
+    """WRAP 수익률 비교 테이블 HTML (삼성 트루밸류, DB 목표전환형, KOSPI, KOSDAQ)"""
+    try:
+        nav_file = 'Wrap_NAV.xlsx'
+        if not os.path.exists(nav_file):
+            return ""
+
+        df_returns = pd.read_excel(nav_file, sheet_name='수익률')
+        if df_returns.empty:
+            return ""
+
+        latest = df_returns.iloc[-1]
+        ref_date = str(latest.get('날짜', ''))[:10]
+
+        items = [
+            ('삼성 트루밸류', '트루밸류'),
+            ('DB 목표전환형', '목표전환형'),
+            ('KOSPI', 'KOSPI'),
+            ('KOSDAQ', 'KOSDAQ'),
+        ]
+        periods = ['1D', '1W', '1M', '3M', '6M', '1Y', 'YTD']
+
+        def cell_html(val):
+            s = str(val) if not (isinstance(val, float) and pd.isna(val)) else ''
+            if not s or s == 'nan':
+                return '<td class="rt-cell rt-na">-</td>'
+            try:
+                num = float(s.replace('%', '').strip())
+                cls = 'rt-pos' if num > 0 else 'rt-neg' if num < 0 else 'rt-zero'
+            except Exception:
+                cls = ''
+            return f'<td class="rt-cell {cls}">{s}</td>'
+
+        rows_html = ''
+        for display_name, key in items:
+            rows_html += f'<tr><td class="rt-name">{display_name}</td>'
+            for p in periods:
+                rows_html += cell_html(latest.get(f'{key}_{p}'))
+            rows_html += '</tr>\n'
+
+        headers = ''.join(f'<th class="rt-ph">{p}</th>' for p in periods)
+        return f"""
+        <div class="category-section">
+            <h2 class="category-title">수익률 비교</h2>
+            <div style="max-width:800px;background:#fff;border-radius:10px;padding:16px 20px;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
+                <p style="font-size:0.78rem;color:#9ca3af;margin:0 0 10px 0">기준일: {ref_date}</p>
+                <table class="rt-table">
+                    <thead>
+                        <tr><th class="rt-nh"></th>{headers}</tr>
+                    </thead>
+                    <tbody>{rows_html}</tbody>
+                </table>
+            </div>
+        </div>"""
+    except Exception as e:
+        print(f"Error creating wrap returns table: {e}")
+        return ""
+
+
 def create_dashboard():
     # Check if charts directory exists
     if not os.path.exists(CHARTS_DIR):
@@ -717,6 +776,7 @@ def create_dashboard():
             """
             if category == 'Wrap':
                 wrap_html += section
+                wrap_html += create_wrap_returns_table()
             else:
                 charts_html += section
 
@@ -1266,6 +1326,17 @@ def create_dashboard():
         .sect-detail-bm {{ color: #444; font-weight: 500; }}
         .sect-detail-sep {{ color: #ccc; }}
         @media (max-width: 800px) {{ .sector-header-bar, .sector-three-panel {{ grid-template-columns: 1fr; }} }}
+        /* Returns Table */
+        .rt-table {{ width:100%; border-collapse:collapse; font-size:0.9rem; }}
+        .rt-nh {{ width:130px; padding:7px 10px; text-align:left; font-weight:600; color:#111; border-bottom:2px solid #111; background:#f0f0f0; }}
+        .rt-ph {{ padding:7px 10px; text-align:center; font-weight:600; color:#111; border-bottom:2px solid #111; background:#f0f0f0; white-space:nowrap; min-width:54px; }}
+        .rt-name {{ padding:8px 10px; font-weight:600; border-bottom:1px solid #eee; white-space:nowrap; }}
+        .rt-cell {{ padding:8px 10px; text-align:center; border-bottom:1px solid #eee; font-variant-numeric:tabular-nums; white-space:nowrap; }}
+        .rt-pos {{ color:#cc0000; font-weight:600; }}
+        .rt-neg {{ color:#0055cc; font-weight:600; }}
+        .rt-zero {{ color:#555; }}
+        .rt-na {{ color:#bbb; }}
+        .rt-table tbody tr:hover td {{ background:#f9fafb; }}
     </style>
 </head>
 <body>

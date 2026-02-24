@@ -192,7 +192,7 @@ def fetch_category(session, category_name, start_date, end_date):
         'menuIndex': str(meta['menu_index']),
         'currentPageSize': '100', 'pageIndex': '1',
         'orderMode': '3' if meta['has_release'] else '4',
-        'orderStat': 'D', 'marketType': '',
+        'orderStat': 'A', 'marketType': '',
         'startDate': start_date, 'endDate': end_date,
         'searchCorpName': '', 'repIsuSrtCd': '', 'searchCodeType': '',
     }
@@ -302,7 +302,9 @@ def render_table(stocks, category, price_cache):
             판단일_임박   = False
 
         # 배경색: 판단일 도달=#fca5a5(진한), 5영업일 이내=#fee2e2(연한), 나머지=없음
-        if 판단일_passed:
+        if category == '투자주의':
+            row_bg = ''
+        elif 판단일_passed:
             row_bg = ' style="background-color:#fca5a5"'
         elif 판단일_임박:
             row_bg = ' style="background-color:#fee2e2"'
@@ -335,7 +337,7 @@ def render_table(stocks, category, price_cache):
                     <th>시장</th>
                     <th class="num">시가총액</th>
                     <th class="center">공시일</th>
-                    <th class="center">지정일 ▼</th>
+                    <th class="center">지정일 ▲</th>
                     <th class="center">경과일</th>
                     <th class="center">판단일</th>
                     <th class="num">현재가</th>
@@ -440,9 +442,9 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache):
         </div>
     </header>
 
-    {section('투자주의', stocks_주의)}
-    {section('투자경고', stocks_경고)}
     {section('투자위험', stocks_위험)}
+    {section('투자경고', stocks_경고)}
+    {section('투자주의', stocks_주의)}
 
     <div class="section" style="background:#f9fafb">
         {note_경고위험}

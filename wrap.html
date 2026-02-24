@@ -75,12 +75,23 @@
         .sect-detail-bm { color: #444; font-weight: 500; }
         .sect-detail-sep { color: #ccc; }
         @media (max-width: 800px) { .sector-header-bar, .sector-three-panel { grid-template-columns: 1fr; } }
+        /* Returns Table */
+        .rt-table { width:100%; border-collapse:collapse; font-size:0.9rem; }
+        .rt-nh { width:130px; padding:7px 10px; text-align:left; font-weight:600; color:#111; border-bottom:2px solid #111; background:#f0f0f0; }
+        .rt-ph { padding:7px 10px; text-align:center; font-weight:600; color:#111; border-bottom:2px solid #111; background:#f0f0f0; white-space:nowrap; min-width:54px; }
+        .rt-name { padding:8px 10px; font-weight:600; border-bottom:1px solid #eee; white-space:nowrap; }
+        .rt-cell { padding:8px 10px; text-align:center; border-bottom:1px solid #eee; font-variant-numeric:tabular-nums; white-space:nowrap; }
+        .rt-pos { color:#cc0000; font-weight:600; }
+        .rt-neg { color:#0055cc; font-weight:600; }
+        .rt-zero { color:#555; }
+        .rt-na { color:#bbb; }
+        .rt-table tbody tr:hover td { background:#f9fafb; }
     </style>
 </head>
 <body>
     <header>
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-02-24 14:23:31 KST</div>
+        <div class="last-updated">Updated: 2026-02-24 14:34:53 KST</div>
         <div class="nav-group">
             <a href="index.html" class="nav-button">← Dashboard</a>
         </div>
@@ -118,6 +129,22 @@
                 </div>
             </div>
             
+        <div class="category-section">
+            <h2 class="category-title">수익률 비교</h2>
+            <div style="max-width:800px;background:#fff;border-radius:10px;padding:16px 20px;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
+                <p style="font-size:0.78rem;color:#9ca3af;margin:0 0 10px 0">기준일: 2026-02-23</p>
+                <table class="rt-table">
+                    <thead>
+                        <tr><th class="rt-nh"></th><th class="rt-ph">1D</th><th class="rt-ph">1W</th><th class="rt-ph">1M</th><th class="rt-ph">3M</th><th class="rt-ph">6M</th><th class="rt-ph">1Y</th><th class="rt-ph">YTD</th></tr>
+                    </thead>
+                    <tbody><tr><td class="rt-name">삼성 트루밸류</td><td class="rt-cell rt-zero">-0.0%</td><td class="rt-cell rt-pos">5.1%</td><td class="rt-cell rt-pos">21.7%</td><td class="rt-cell rt-pos">65.5%</td><td class="rt-cell rt-pos">76.5%</td><td class="rt-cell rt-pos">122.4%</td><td class="rt-cell rt-pos">43.8%</td></tr>
+<tr><td class="rt-name">DB 목표전환형</td><td class="rt-cell rt-pos">1.2%</td><td class="rt-cell rt-pos">3.9%</td><td class="rt-cell rt-na">-</td><td class="rt-cell rt-na">-</td><td class="rt-cell rt-na">-</td><td class="rt-cell rt-na">-</td><td class="rt-cell rt-pos">3.7%</td></tr>
+<tr><td class="rt-name">KOSPI</td><td class="rt-cell rt-pos">0.6%</td><td class="rt-cell rt-pos">6.2%</td><td class="rt-cell rt-pos">17.2%</td><td class="rt-cell rt-pos">51.7%</td><td class="rt-cell rt-pos">84.5%</td><td class="rt-cell rt-pos">120.2%</td><td class="rt-cell rt-pos">38.7%</td></tr>
+<tr><td class="rt-name">KOSDAQ</td><td class="rt-cell rt-neg">-0.2%</td><td class="rt-cell rt-pos">4.2%</td><td class="rt-cell rt-pos">15.9%</td><td class="rt-cell rt-pos">33.3%</td><td class="rt-cell rt-pos">47.2%</td><td class="rt-cell rt-pos">48.7%</td><td class="rt-cell rt-pos">24.5%</td></tr>
+</tbody>
+                </table>
+            </div>
+        </div>
             <div class="category-section">
                 <h2 class="category-title">Portfolio</h2>
                 <div class="portfolio-section-wrapper">
