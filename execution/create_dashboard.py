@@ -539,7 +539,7 @@ def create_wrap_returns_table():
         <div class="category-section">
             <h2 class="category-title">RETURN</h2>
             <div style="max-width:800px;margin:0 auto;background:#fff;border-radius:10px;padding:16px 20px;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
-                <p style="font-size:0.78rem;color:#6c757d;margin:0 0 10px 0">기준일: {ref_date}</p>
+                <p style="font-size:0.75rem;font-weight:bold;color:#555;margin:0 0 10px 0">기준일: {ref_date}</p>
                 <table class="rt-table">
                     <thead>
                         <tr><th class="rt-nh"></th>{headers}</tr>
@@ -1292,36 +1292,36 @@ def create_dashboard():
         .portfolio-table .total-row td {{ font-weight: 600; padding: 12px 10px; }}
         /* Sector */
         .sector-card {{ background: var(--card-bg); border-radius: 8px; padding: 20px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); }}
-        .sector-card-title {{ font-size: 1.2rem; color: #111; margin: 0 0 10px 0; padding-bottom: 8px; border-bottom: 1px solid #ddd; }}
-        .sect-portfolio-date, .sect-kodex-date {{ font-size: 0.75rem; font-weight: 700; color: #555; }}
-        .sect-bm-1m {{ font-size: 0.78rem; font-weight: 600; color: #111; margin-left: 10px; }}
-        .sect-vs {{ color: #111; font-weight: 400; font-size: 0.95rem; margin: 0 4px; }}
-        .sect-note {{ font-size: 0.75rem; font-weight: 400; color: #666; }}
-        .sector-legend {{ display: flex; align-items: center; gap: 16px; font-size: 0.82rem; color: #333; }}
+        .sector-card-title {{ font-size: 1.35rem; color: #111; margin: 0 0 10px 0; padding-bottom: 8px; border-bottom: 1px solid #ddd; }}
+        .sect-portfolio-date, .sect-kodex-date {{ font-size: 0.85rem; font-weight: 700; color: #555; }}
+        .sect-bm-1m {{ font-size: 0.88rem; font-weight: 600; color: #111; margin-left: 10px; }}
+        .sect-vs {{ color: #111; font-weight: 400; font-size: 1.0rem; margin: 0 4px; }}
+        .sect-note {{ font-size: 0.85rem; font-weight: 400; color: #666; }}
+        .sector-legend {{ display: flex; align-items: center; gap: 16px; font-size: 0.92rem; color: #333; }}
         .legend-item {{ display: flex; align-items: center; gap: 5px; }}
         .legend-dot {{ width: 12px; height: 12px; border-radius: 2px; display: inline-block; flex-shrink: 0; }}
         .portfolio-dot {{ background: #2d7a3a; }}
         .kodex-dot {{ background: #444; }}
         .sector-table-wrap {{ overflow-x: auto; }}
-        .sector-table {{ width: 100%; border-collapse: collapse; font-size: 0.88rem; }}
+        .sector-table {{ width: 100%; border-collapse: collapse; font-size: 1.0rem; }}
         .sector-table th {{ padding: 8px 12px; text-align: left; font-weight: 600; color: #111; border-bottom: 2px solid #111; background: #f0f0f0; white-space: nowrap; }}
-        .sector-table td {{ padding: 5px 12px; border-bottom: 1px solid #eee; vertical-align: middle; }}
+        .sector-table td {{ padding: 6px 12px; border-bottom: 1px solid #eee; vertical-align: middle; }}
         .sect-name {{ min-width: 90px; font-weight: 500; white-space: nowrap; }}
-        .sect-num {{ text-align: center; font-size: 0.85rem; white-space: nowrap; width: 64px; }}
+        .sect-num {{ text-align: center; font-size: 0.95rem; white-space: nowrap; width: 64px; }}
         .sector-table thead th {{ text-align: center; }}
         .sect-diff {{ text-align: center; font-weight: 600; white-space: nowrap; width: 44px; min-width: 44px; max-width: 44px; }}
         .sect-over {{ color: #cc0000; }}
         .sect-under {{ color: #0055cc; }}
         .sect-neutral {{ color: #777; }}
         .sector-header-bar {{ display: grid; grid-template-columns: 3fr 2fr; gap: 0 24px; align-items: center; margin-bottom: 10px; }}
-        .sect-not-held-label {{ font-size: 0.85rem; font-weight: 700; color: #111; text-align: center; padding-bottom: 4px; border-bottom: 1px solid #ddd; }}
+        .sect-not-held-label {{ font-size: 0.95rem; font-weight: 700; color: #111; text-align: center; padding-bottom: 4px; border-bottom: 1px solid #ddd; }}
         .sector-three-panel {{ display: grid; grid-template-columns: 3fr 1fr 1fr; gap: 24px; align-items: start; }}
-        .sect-panel-title {{ font-size: 0.82rem; font-weight: 600; color: #111; text-align: center; margin: 0 0 8px 0; padding-bottom: 4px; border-bottom: 1px solid #ddd; }}
-        .sect-right-val {{ text-align: right; font-weight: 600; white-space: nowrap; min-width: 60px; font-size: 0.85rem; padding-right: 8px !important; }}
-        .sect-no-data {{ color: #aaa; font-size: 0.82rem; text-align: center; padding: 8px !important; }}
-        .sect-right-stocks {{ font-size: 0.72rem; color: #444; font-weight: 500; padding: 0 8px 5px 12px !important; border-bottom: 1px solid #eee; }}
+        .sect-panel-title {{ font-size: 0.93rem; font-weight: 600; color: #111; text-align: center; margin: 0 0 8px 0; padding-bottom: 4px; border-bottom: 1px solid #ddd; }}
+        .sect-right-val {{ text-align: right; font-weight: 600; white-space: nowrap; min-width: 60px; font-size: 0.95rem; padding-right: 8px !important; }}
+        .sect-no-data {{ color: #aaa; font-size: 0.93rem; text-align: center; padding: 8px !important; }}
+        .sect-right-stocks {{ font-size: 0.83rem; color: #444; font-weight: 500; padding: 0 8px 5px 12px !important; border-bottom: 1px solid #eee; }}
         .sect-detail-row td {{ padding: 0 12px 6px 12px !important; border-bottom: 1px solid #eee; }}
-        .sect-detail {{ font-size: 0.75rem; color: #888; line-height: 1.4; }}
+        .sect-detail {{ font-size: 0.85rem; color: #888; line-height: 1.4; }}
         .sect-detail-mine {{ color: #2d7a3a; font-weight: 700; }}
         .sect-detail-bm {{ color: #444; font-weight: 500; }}
         .sect-detail-sep {{ color: #ccc; }}
