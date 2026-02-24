@@ -573,6 +573,13 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
         else:
             logging.info("No changes to Wrap_NAV.xlsx to commit")
 
+        # 3. 투자유의종목 페이지 재생성
+        logging.info("Step 3-0: Regenerating market alert page...")
+        subprocess.run(
+            [sys.executable, "execution/create_market_alert.py"],
+            capture_output=True, text=True, timeout=60
+        )
+
         # 3. Dashboard 재생성 및 push
         logging.info("Step 3: Regenerating dashboard...")
         result_dashboard = subprocess.run(
@@ -582,7 +589,7 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
             timeout=120
         )
         if result_dashboard.returncode == 0:
-            subprocess.run(["git", "add", "index.html"], cwd=parent_dir, capture_output=True, timeout=30)
+            subprocess.run(["git", "add", "index.html", "market_alert.html"], cwd=parent_dir, capture_output=True, timeout=30)
             commit_dash = subprocess.run(
                 ["git", "commit", "-m", f"포트폴리오 업데이트 ({now_str})"],
                 cwd=parent_dir, capture_output=True, text=True, timeout=30
@@ -643,6 +650,12 @@ def _nightly_refresh_sync():
         cwd=dashboard_dir, capture_output=True, text=True, timeout=180
     )
 
+    # 투자유의종목 페이지 재생성
+    subprocess.run(
+        [sys.executable, "execution/create_market_alert.py"],
+        cwd=dashboard_dir, capture_output=True, text=True, timeout=60
+    )
+
     # 대시보드 재생성
     subprocess.run(
         [sys.executable, "execution/create_dashboard.py"],
@@ -651,7 +664,7 @@ def _nightly_refresh_sync():
 
     # Git push
     subprocess.run(
-        ["git", "add", "portfolio_data.json", "index.html"],
+        ["git", "add", "portfolio_data.json", "index.html", "market_alert.html"],
         cwd=dashboard_dir, capture_output=True, timeout=30
     )
     commit_result = subprocess.run(

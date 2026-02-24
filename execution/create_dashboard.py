@@ -1161,6 +1161,7 @@ def create_dashboard():
         <h1>📊 Market Data Dashboard</h1>
         <div class="last-updated">Last Updated: {now}</div>
         <a href="architecture.html" target="_blank" class="nav-button">🗂️ Workflow Architecture</a>
+        <a href="market_alert.html" target="_blank" class="nav-button" style="background-color:#c2410c;margin-left:8px">🚦 투자유의종목</a>
     </header>
 
     {charts_html}
