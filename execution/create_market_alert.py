@@ -212,7 +212,7 @@ def render_table(stocks):
                     <th>시장</th>
                     <th class="num">시가총액</th>
                     <th class="center">공시일</th>
-                    <th class="center">지정일</th>
+                    <th class="center">지정일 ▼</th>
                     <th class="center">경과일</th>
                     <th>유형</th>
                 </tr>
