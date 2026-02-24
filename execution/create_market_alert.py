@@ -311,7 +311,7 @@ def render_table(stocks, category, price_cache):
             imm_style = 'color:#d97706;font-weight:600' if n <= 2 else 'color:#374151'
 
         cur_str = f'{current_price:,}원' if current_price is not None else '-'
-        tgt_str = f'{target_price:,}원 이하' if target_price is not None else '-'
+        tgt_str = f'{target_price:,}원' if target_price is not None else '-'
 
         rows_html += f"""
             <tr>
