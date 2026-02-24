@@ -192,7 +192,9 @@ def fetch_category(session, category_name, start_date, end_date):
         'menuIndex': str(meta['menu_index']),
         'currentPageSize': '100', 'pageIndex': '1',
         'orderMode': '3' if meta['has_release'] else '4',
-        'orderStat': 'A', 'marketType': '',
+        # 투자경고/위험: 해제일 내림차순(D) → 미해제('-') 종목이 1페이지에 노출
+        # 투자주의: 지정일 오름차순(A)
+        'orderStat': 'D' if meta['has_release'] else 'A', 'marketType': '',
         'startDate': start_date, 'endDate': end_date,
         'searchCorpName': '', 'repIsuSrtCd': '', 'searchCodeType': '',
     }
