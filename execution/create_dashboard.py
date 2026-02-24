@@ -551,7 +551,7 @@ def create_dashboard():
                 sector_html = create_sector_section_html()
                 if sector_html:
                     charts_html += f"""
-            <div class="category-section">
+            <div class="category-section" id="section-sector">
                 <h2 class="category-title">SECTOR WEIGHT</h2>
                 <div class="portfolio-section-wrapper">
                     {sector_html}
@@ -565,7 +565,7 @@ def create_dashboard():
                 portfolio_html = create_portfolio_tables_html()
                 if portfolio_html:
                     charts_html += f"""
-            <div class="category-section">
+            <div class="category-section" id="section-portfolio">
                 <h2 class="category-title">Portfolio</h2>
                 <div class="portfolio-section-wrapper">
                     {portfolio_html}
@@ -696,8 +696,9 @@ def create_dashboard():
                 category_label = category
 
             # Add category header
+            wrap_id = ' id="section-wrap"' if category == 'Wrap' else ''
             charts_html += f"""
-            <div class="category-section">
+            <div class="category-section"{wrap_id}>
                 <h2 class="category-title">{category_label}</h2>
                 <div class="dashboard-grid">
             """
@@ -765,9 +766,15 @@ def create_dashboard():
             font-style: italic;
         }}
 
+        .nav-group {{
+            display: flex;
+            gap: 8px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }}
+
         .nav-button {{
             display: inline-block;
-            margin-top: 14px;
             padding: 8px 20px;
             background-color: #2d7a3a;
             color: #ffffff;
@@ -779,6 +786,14 @@ def create_dashboard():
         }}
 
         .nav-button:hover {{
+            background-color: #357abd;
+        }}
+
+        .nav-anchor {{
+            background-color: #1e40af;
+        }}
+
+        .nav-anchor:hover {{
             background-color: #357abd;
         }}
 
@@ -1160,8 +1175,15 @@ def create_dashboard():
     <header>
         <h1>📊 Market Data Dashboard</h1>
         <div class="last-updated">Last Updated: {now}</div>
-        <a href="architecture.html" target="_blank" class="nav-button">🗂️ Workflow Architecture</a>
-        <a href="market_alert.html" target="_blank" class="nav-button" style="background-color:#c2410c;margin-left:8px">🚦 투자유의종목</a>
+        <div class="nav-group">
+            <a href="#section-wrap" class="nav-button nav-anchor">📈 WRAP</a>
+            <a href="#section-portfolio" class="nav-button nav-anchor">💼 PORTFOLIO</a>
+            <a href="#section-sector" class="nav-button nav-anchor">🏭 SECTOR WEIGHT</a>
+        </div>
+        <div class="nav-group">
+            <a href="architecture.html" target="_blank" class="nav-button">🗂️ Workflow Architecture</a>
+            <a href="market_alert.html" target="_blank" class="nav-button" style="background-color:#c2410c">🚦 투자유의종목</a>
+        </div>
     </header>
 
     {charts_html}
