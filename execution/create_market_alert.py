@@ -134,17 +134,23 @@ def _get_prev_closes(price_df):
     return df['Close'] if not df.empty else pd.Series(dtype=float)
 
 
+def get_판단일(designation_date_str, category):
+    """지정일 + MIN_BDAYS 영업일 = 해제여부 최초판단일"""
+    try:
+        return (pd.Timestamp(designation_date_str) + pd.offsets.BDay(MIN_BDAYS[category])).strftime('%Y-%m-%d')
+    except Exception:
+        return '-'
+
+
 def analyze_release(stock, price_df, category):
     """
     Returns:
-        imminence     : str       (해제 임박 컬럼)
+        판단일        : str       (해제여부 최초판단일)
         current_price : int|None  (전 거래일 종가)
-        target_price  : int|None  (해제 가능 주가 기준)
+        target_price  : int|None  (해제 가능 주가 기준; 투자주의=None)
     """
     desig_date = stock['designation_date']
-    bd_elapsed = count_bdays(desig_date)
-    min_bd     = MIN_BDAYS[category]
-    remaining  = max(0, min_bd - bd_elapsed)
+    판단일      = get_판단일(desig_date, category)
 
     closes = _get_prev_closes(price_df)
 
@@ -157,27 +163,12 @@ def analyze_release(stock, price_df, category):
     thresholds    = [t for t in [T1, T2] if t is not None]
     target_price  = int(max(thresholds)) if thresholds else None
 
-    # ── 기간 미달 ──
-    if remaining > 0:
-        return f'D-{remaining}일', current_price, target_price
-
-    # ── 투자주의: 기간만 충족하면 해제 (주가 조건 없음) ──
+    # 투자주의: 주가 조건 없음
     if category == '투자주의':
-        return '해제 가능', current_price, None
+        return 판단일, current_price, None
 
-    # ── 투자경고/위험: 주가 조건 체크 ──
-    if current_price is None or T1 is None or T2 is None:
-        return '기간 경과', current_price, target_price
-
-    max_15d = closes.iloc[-15:].max() if len(closes) >= 1 else None
-    cond1 = current_price > T1
-    cond2 = current_price > T2
-    cond3 = (current_price >= max_15d) if max_15d is not None else False
-
-    if cond1 and cond2 and cond3:
-        return '조건 미충족', current_price, target_price
-
-    return '해제 가능', current_price, target_price
+    # 투자경고/위험: target_price만 조건 검증에 사용 (컬럼엔 항상 표시)
+    return 판단일, current_price, target_price
 
 
 # ──────────────────────────────────────────
@@ -287,31 +278,27 @@ def fmt_marcap(val):
     return f'{val:,}억'
 
 
-IMMINENCE_STYLE = {
-    '해제 가능':   'color:#166534;font-weight:600',
-    '조건 미충족': 'color:#991b1b;font-weight:600',
-    '기간 경과':   'color:#6b7280',
-}
-
-
 def render_table(stocks, category, price_cache):
     if not stocks:
         return '<p style="color:#9ca3af;padding:12px 0;font-size:0.85rem">현재 지정 종목 없음</p>'
 
+    today_str = datetime.now(tz=KST).strftime('%Y-%m-%d')
     rows_html = ''
     for s in stocks:
         price_df  = price_cache.get(s['code']) if s['code'] else None
-        imminence, current_price, target_price = analyze_release(s, price_df, category)
+        판단일, current_price, target_price = analyze_release(s, price_df, category)
 
         elapsed_str = f"{s['elapsed']}일"
-        imm_style   = IMMINENCE_STYLE.get(imminence, 'color:#374151')
-        # D-N일은 남은 일수에 따라 색상
-        if imminence.startswith('D-'):
-            n = int(imminence.replace('D-', '').replace('일', ''))
-            imm_style = 'color:#d97706;font-weight:600' if n <= 2 else 'color:#374151'
-
         cur_str = f'{current_price:,}원' if current_price is not None else '-'
         tgt_str = f'{target_price:,}원' if target_price is not None else '-'
+
+        # 판단일 색상: 과거=초록, 미래=회색
+        if 판단일 == '-':
+            date_style = 'color:#6b7280'
+        elif 판단일 <= today_str:
+            date_style = 'color:#166534;font-weight:600'
+        else:
+            date_style = 'color:#374151'
 
         rows_html += f"""
             <tr>
@@ -321,8 +308,7 @@ def render_table(stocks, category, price_cache):
                 <td class="center">{s['notice_date']}</td>
                 <td class="center">{s['designation_date']}</td>
                 <td class="center">{elapsed_str}</td>
-                <td>{s['warn_type']}</td>
-                <td class="center" style="{imm_style}">{imminence}</td>
+                <td class="center" style="{date_style}">{판단일}</td>
                 <td class="num">{cur_str}</td>
                 <td class="num">{tgt_str}</td>
             </tr>"""
@@ -338,8 +324,7 @@ def render_table(stocks, category, price_cache):
                     <th class="center">공시일</th>
                     <th class="center">지정일 ▼</th>
                     <th class="center">경과일</th>
-                    <th>유형</th>
-                    <th class="center">해제 임박</th>
+                    <th class="center">판단일</th>
                     <th class="num">현재가</th>
                     <th class="num">해제 가능 주가</th>
                 </tr>

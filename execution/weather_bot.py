@@ -200,7 +200,7 @@ async def portfolio_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             if result_dash.returncode == 0:
                 now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-                subprocess.run(["git", "add", "index.html"], cwd=parent_dir, capture_output=True, timeout=30)
+                subprocess.run(["git", "add", "index.html", "wrap.html"], cwd=parent_dir, capture_output=True, timeout=30)
                 subprocess.run(["git", "commit", "-m", f"포트폴리오 업데이트 ({now_str})"], cwd=parent_dir, capture_output=True, timeout=30)
                 subprocess.run(["git", "pull", "--rebase", "origin", "main"], cwd=parent_dir, capture_output=True, timeout=60)
                 subprocess.run(["git", "push"], cwd=parent_dir, capture_output=True, timeout=60)
@@ -314,7 +314,7 @@ def run_portfolio_update():
     # 6. Git commit & push
     logging.info("Update Step 5: Git commit & push...")
     subprocess.run(
-        ["git", "add", "portfolio_data.json", "index.html"],
+        ["git", "add", "portfolio_data.json", "index.html", "wrap.html"],
         cwd=dashboard_dir,
         capture_output=True,
         timeout=30
@@ -589,7 +589,7 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
             timeout=120
         )
         if result_dashboard.returncode == 0:
-            subprocess.run(["git", "add", "index.html", "market_alert.html"], cwd=parent_dir, capture_output=True, timeout=30)
+            subprocess.run(["git", "add", "index.html", "wrap.html", "market_alert.html"], cwd=parent_dir, capture_output=True, timeout=30)
             commit_dash = subprocess.run(
                 ["git", "commit", "-m", f"포트폴리오 업데이트 ({now_str})"],
                 cwd=parent_dir, capture_output=True, text=True, timeout=30
@@ -664,7 +664,7 @@ def _nightly_refresh_sync():
 
     # Git push
     subprocess.run(
-        ["git", "add", "portfolio_data.json", "index.html", "market_alert.html"],
+        ["git", "add", "portfolio_data.json", "index.html", "wrap.html", "market_alert.html"],
         cwd=dashboard_dir, capture_output=True, timeout=30
     )
     commit_result = subprocess.run(

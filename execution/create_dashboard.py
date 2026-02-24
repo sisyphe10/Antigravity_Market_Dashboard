@@ -540,18 +540,19 @@ def create_dashboard():
         
         # Build HTML with category sections
         charts_html = ""
-        
+        wrap_html   = ""   # WRAP page: Wrap charts + Portfolio + Sector
+
         # Define category order for better organization
         category_order = ['Wrap', 'Portfolio', 'SECTOR', 'INDEX_KOREA', 'INDEX_US', 'EXCHANGE RATE',
                          'INTEREST RATES', 'CRYPTOCURRENCY', 'MEMORY', 'COMMODITIES']
-        
+
         for category in category_order:
             # Portfolio는 차트가 아니라 테이블이므로 특별 처리
             if category == 'SECTOR':
                 sector_html = create_sector_section_html()
                 if sector_html:
-                    charts_html += f"""
-            <div class="category-section" id="section-sector">
+                    wrap_html += f"""
+            <div class="category-section">
                 <h2 class="category-title">SECTOR WEIGHT</h2>
                 <div class="portfolio-section-wrapper">
                     {sector_html}
@@ -564,8 +565,8 @@ def create_dashboard():
                 # Portfolio 테이블 HTML 생성
                 portfolio_html = create_portfolio_tables_html()
                 if portfolio_html:
-                    charts_html += f"""
-            <div class="category-section" id="section-portfolio">
+                    wrap_html += f"""
+            <div class="category-section">
                 <h2 class="category-title">Portfolio</h2>
                 <div class="portfolio-section-wrapper">
                     {portfolio_html}
@@ -696,29 +697,28 @@ def create_dashboard():
                 category_label = category
 
             # Add category header
-            wrap_id = ' id="section-wrap"' if category == 'Wrap' else ''
-            charts_html += f"""
-            <div class="category-section"{wrap_id}>
+            target = wrap_html if category == 'Wrap' else charts_html
+            section = f"""
+            <div class="category-section">
                 <h2 class="category-title">{category_label}</h2>
                 <div class="dashboard-grid">
             """
-            
-            # Add charts in this category
             for chart in charts:
-                charts_html += f"""
+                section += f"""
                 <div class="chart-card">
-                    <!-- Title removed as requested (it's inside the chart now) -->
-                    <!-- <h3>{chart['title']}</h3> -->
                     <a href="{chart['path']}" target="_blank">
                         <img src="{chart['path']}" alt="{chart['title']}" loading="lazy">
                     </a>
                 </div>
                 """
-            
-            charts_html += """
+            section += """
                 </div>
             </div>
             """
+            if category == 'Wrap':
+                wrap_html += section
+            else:
+                charts_html += section
 
     # Generate full HTML
     now = datetime.now(tz=KST).strftime("%Y-%m-%d %H:%M:%S KST")
@@ -786,14 +786,6 @@ def create_dashboard():
         }}
 
         .nav-button:hover {{
-            background-color: #357abd;
-        }}
-
-        .nav-anchor {{
-            background-color: #1e40af;
-        }}
-
-        .nav-anchor:hover {{
             background-color: #357abd;
         }}
 
@@ -1176,11 +1168,7 @@ def create_dashboard():
         <h1>📊 Market Data Dashboard</h1>
         <div class="last-updated">Last Updated: {now}</div>
         <div class="nav-group">
-            <a href="#section-wrap" class="nav-button nav-anchor">📈 WRAP</a>
-            <a href="#section-portfolio" class="nav-button nav-anchor">💼 PORTFOLIO</a>
-            <a href="#section-sector" class="nav-button nav-anchor">🏭 SECTOR WEIGHT</a>
-        </div>
-        <div class="nav-group">
+            <a href="wrap.html" target="_blank" class="nav-button" style="background-color:#1e40af">📈 WRAP</a>
             <a href="architecture.html" target="_blank" class="nav-button">🗂️ Workflow Architecture</a>
             <a href="market_alert.html" target="_blank" class="nav-button" style="background-color:#c2410c">🚦 투자유의종목</a>
         </div>
@@ -1195,11 +1183,109 @@ def create_dashboard():
 </html>
 """
 
-    # Write to file
+    # Write index.html
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
         f.write(html_content)
-
     print(f"Dashboard generated: {OUTPUT_FILE}")
+
+    # ── Generate wrap.html (WRAP + Portfolio + Sector) ──
+    wrap_page = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WRAP</title>
+    <style>
+        :root {{ --bg-color: #f8f9fa; --card-bg: #ffffff; --text-color: #333333; }}
+        body {{ font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; }}
+        header {{ text-align: center; margin-bottom: 40px; padding: 20px; background-color: #000000; border-radius: 12px; }}
+        h1 {{ margin: 0; font-size: 2.5rem; color: #ffffff; }}
+        .last-updated {{ margin-top: 10px; color: #6c757d; font-style: italic; }}
+        .nav-group {{ display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; justify-content: center; }}
+        .nav-button {{ display: inline-block; padding: 8px 20px; background-color: #2d7a3a; color: #ffffff; text-decoration: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; transition: background-color 0.2s; }}
+        .nav-button:hover {{ background-color: #357abd; }}
+        .category-section {{ margin-bottom: 50px; }}
+        .category-title {{ font-size: 1.8rem; color: #000000; margin-bottom: 20px; padding: 10px 16px; background-color: #e0e0e0; border-left: 4px solid #000000; border-radius: 4px; text-transform: uppercase; }}
+        .category-date {{ font-size: 1rem; font-weight: bold; color: #555; text-transform: none; }}
+        .dashboard-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(600px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }}
+        @media (max-width: 768px) {{ .dashboard-grid {{ grid-template-columns: 1fr; }} }}
+        .chart-card {{ background-color: var(--card-bg); border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s ease; text-align: center; }}
+        .chart-card:hover {{ transform: translateY(-5px); }}
+        .chart-card img {{ max-width: 100%; height: auto; border-radius: 8px; }}
+        footer {{ text-align: center; margin-top: 50px; color: #6c757d; font-size: 0.9rem; }}
+        /* Portfolio */
+        .portfolio-section {{ margin-bottom: 40px; }}
+        .portfolio-title {{ font-size: 1.4rem; color: #333; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px solid #dee2e6; }}
+        .update-time {{ font-size: 0.75rem; font-weight: bold; color: #555; }}
+        .table-container {{ overflow-x: auto; background-color: var(--card-bg); border-radius: 8px; padding: 15px; }}
+        .portfolio-table {{ width: 100%; border-collapse: collapse; font-size: 0.95rem; }}
+        .portfolio-table thead {{ background-color: #e9ecef; }}
+        .portfolio-table th {{ padding: 12px 10px; text-align: center; font-weight: 600; color: #000; border-bottom: 2px solid #000; }}
+        .portfolio-table td {{ padding: 10px; border-bottom: 1px solid #dee2e6; color: #333; text-align: center; }}
+        .portfolio-table tbody tr:hover {{ background-color: #f5f5f5; }}
+        .portfolio-table .number {{ text-align: right; }}
+        .portfolio-table th:first-child, .portfolio-table td:first-child {{ width: 50px; text-align: center; }}
+        .portfolio-section-wrapper {{ max-width: 1600px; margin: 0 auto; }}
+        .portfolio-table .positive {{ color: #cc0000; font-weight: 600; }}
+        .portfolio-table .negative {{ color: #0055cc; font-weight: 600; }}
+        .portfolio-table .total-row {{ background-color: #e9ecef; border-top: 2px solid #000; }}
+        .portfolio-table .total-row td {{ font-weight: 600; padding: 12px 10px; }}
+        /* Sector */
+        .sector-card {{ background: var(--card-bg); border-radius: 8px; padding: 20px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); }}
+        .sector-card-title {{ font-size: 1.2rem; color: #111; margin: 0 0 10px 0; padding-bottom: 8px; border-bottom: 1px solid #ddd; }}
+        .sect-portfolio-date, .sect-kodex-date {{ font-size: 0.75rem; font-weight: 700; color: #555; }}
+        .sect-bm-1m {{ font-size: 0.78rem; font-weight: 600; color: #111; margin-left: 10px; }}
+        .sect-vs {{ color: #111; font-weight: 400; font-size: 0.95rem; margin: 0 4px; }}
+        .sect-note {{ font-size: 0.75rem; font-weight: 400; color: #666; }}
+        .sector-legend {{ display: flex; align-items: center; gap: 16px; font-size: 0.82rem; color: #333; }}
+        .legend-item {{ display: flex; align-items: center; gap: 5px; }}
+        .legend-dot {{ width: 12px; height: 12px; border-radius: 2px; display: inline-block; flex-shrink: 0; }}
+        .portfolio-dot {{ background: #2d7a3a; }}
+        .kodex-dot {{ background: #444; }}
+        .sector-table-wrap {{ overflow-x: auto; }}
+        .sector-table {{ width: 100%; border-collapse: collapse; font-size: 0.88rem; }}
+        .sector-table th {{ padding: 8px 12px; text-align: left; font-weight: 600; color: #111; border-bottom: 2px solid #111; background: #f0f0f0; white-space: nowrap; }}
+        .sector-table td {{ padding: 5px 12px; border-bottom: 1px solid #eee; vertical-align: middle; }}
+        .sect-name {{ min-width: 90px; font-weight: 500; white-space: nowrap; }}
+        .sect-num {{ text-align: center; font-size: 0.85rem; white-space: nowrap; width: 64px; }}
+        .sector-table thead th {{ text-align: center; }}
+        .sect-diff {{ text-align: center; font-weight: 600; white-space: nowrap; width: 44px; min-width: 44px; max-width: 44px; }}
+        .sect-over {{ color: #cc0000; }}
+        .sect-under {{ color: #0055cc; }}
+        .sect-neutral {{ color: #777; }}
+        .sector-header-bar {{ display: grid; grid-template-columns: 3fr 2fr; gap: 0 24px; align-items: center; margin-bottom: 10px; }}
+        .sect-not-held-label {{ font-size: 0.85rem; font-weight: 700; color: #111; text-align: center; padding-bottom: 4px; border-bottom: 1px solid #ddd; }}
+        .sector-three-panel {{ display: grid; grid-template-columns: 3fr 1fr 1fr; gap: 24px; align-items: start; }}
+        .sect-panel-title {{ font-size: 0.82rem; font-weight: 600; color: #111; text-align: center; margin: 0 0 8px 0; padding-bottom: 4px; border-bottom: 1px solid #ddd; }}
+        .sect-right-val {{ text-align: right; font-weight: 600; white-space: nowrap; min-width: 60px; font-size: 0.85rem; padding-right: 8px !important; }}
+        .sect-no-data {{ color: #aaa; font-size: 0.82rem; text-align: center; padding: 8px !important; }}
+        .sect-right-stocks {{ font-size: 0.72rem; color: #444; font-weight: 500; padding: 0 8px 5px 12px !important; border-bottom: 1px solid #eee; }}
+        .sect-detail-row td {{ padding: 0 12px 6px 12px !important; border-bottom: 1px solid #eee; }}
+        .sect-detail {{ font-size: 0.75rem; color: #888; line-height: 1.4; }}
+        .sect-detail-mine {{ color: #2d7a3a; font-weight: 700; }}
+        .sect-detail-bm {{ color: #444; font-weight: 500; }}
+        .sect-detail-sep {{ color: #ccc; }}
+        @media (max-width: 800px) {{ .sector-header-bar, .sector-three-panel {{ grid-template-columns: 1fr; }} }}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>📈 WRAP</h1>
+        <div class="last-updated">Updated: {now}</div>
+        <div class="nav-group">
+            <a href="index.html" class="nav-button">← Dashboard</a>
+        </div>
+    </header>
+
+    {wrap_html}
+
+    <footer><p>Auto-generated by Antigravity Agent</p></footer>
+</body>
+</html>"""
+
+    with open('wrap.html', 'w', encoding='utf-8') as f:
+        f.write(wrap_page)
+    print("WRAP page generated: wrap.html")
 
 if __name__ == "__main__":
     create_dashboard()
