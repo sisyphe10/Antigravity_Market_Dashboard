@@ -66,6 +66,9 @@ def draw_charts():
         # Convert price to numeric, handling commas
         df['가격'] = pd.to_numeric(df['가격'].astype(str).str.replace(',', ''), errors='coerce')
         
+        # Normalize name variants: KOSPI(USD) -> KOSPI/USD, KOSDAQ(USD) -> KOSDAQ/USD
+        df['제품명'] = df['제품명'].str.replace(r'\(USD\)', '/USD', regex=True)
+
         # Sort by date
         df = df.sort_values(by='날짜')
 
@@ -144,6 +147,8 @@ def draw_charts():
             if abs(latest_price) >= 1000:
                 price_str = f"{latest_price:,.0f}"
             elif abs(latest_price) >= 1:
+                price_str = f"{latest_price:,.2f}"
+            elif name == 'KOSDAQ/USD':
                 price_str = f"{latest_price:,.2f}"
             else:
                 price_str = f"{latest_price:,.4f}"
