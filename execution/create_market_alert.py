@@ -194,7 +194,7 @@ def fetch_category(session, category_name, start_date, end_date):
         'orderMode': '3' if meta['has_release'] else '4',
         # 투자경고/위험: 해제일 내림차순(D) → 미해제('-') 종목이 1페이지에 노출
         # 투자주의: 지정일 오름차순(A)
-        'orderStat': 'D' if meta['has_release'] else 'A', 'marketType': '',
+        'orderStat': 'D', 'marketType': '',
         'startDate': start_date, 'endDate': end_date,
         'searchCorpName': '', 'repIsuSrtCd': '', 'searchCodeType': '',
     }
@@ -275,9 +275,14 @@ def parse_stocks(soup, category_name, krx_data):
 def fmt_marcap(val):
     if val is None:
         return '-'
-    if val >= 10000:
-        return f'{val / 10000:.1f}조'
-    return f'{val:,}억'
+    jo = val // 10000
+    eok = val % 10000
+    if jo > 0 and eok > 0:
+        return f'{jo:,}조 {eok:,}억원'
+    elif jo > 0:
+        return f'{jo:,}조원'
+    else:
+        return f'{eok:,}억원'
 
 
 def render_table(stocks, category, price_cache):
@@ -339,7 +344,7 @@ def render_table(stocks, category, price_cache):
                     <th>시장</th>
                     <th class="num">시가총액</th>
                     <th class="center">공시일</th>
-                    <th class="center">지정일 ▲</th>
+                    <th class="center">지정일 ▼</th>
                     <th class="center">경과일</th>
                     <th class="center">판단일</th>
                     <th class="num">현재가</th>
