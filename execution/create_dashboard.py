@@ -537,9 +537,9 @@ def create_wrap_returns_table():
         headers = ''.join(f'<th class="rt-ph">{p}</th>' for p in periods)
         return f"""
         <div class="category-section">
-            <h2 class="category-title">수익률 비교</h2>
+            <h2 class="category-title">RETURN</h2>
             <div style="max-width:800px;margin:0 auto;background:#fff;border-radius:10px;padding:16px 20px;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
-                <p style="font-size:0.78rem;color:#9ca3af;margin:0 0 10px 0">기준일: {ref_date}</p>
+                <p style="font-size:0.78rem;color:#6c757d;margin:0 0 10px 0">기준일: {ref_date}</p>
                 <table class="rt-table">
                     <thead>
                         <tr><th class="rt-nh"></th>{headers}</tr>

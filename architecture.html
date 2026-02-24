@@ -383,7 +383,7 @@
 <header>
     <h1>Antigravity Market Dashboard</h1>
     <div class="subtitle">System Architecture & Documentation</div>
-    <div class="subtitle">Last updated: 2026-02-24 (7차)</div>
+    <div class="subtitle">Last updated: 2026-02-24 (8차)</div>
 </header>
 
 <nav>
@@ -736,7 +736,7 @@
             <div class="step">
                 <div class="step-number">Step 9</div>
                 <div class="step-file">create_dashboard.py</div>
-                <div class="step-desc">index.html 생성</div>
+                <div class="step-desc">index.html + wrap.html 생성</div>
             </div>
             <div class="arrow">&rarr;</div>
             <div class="step">
@@ -772,8 +772,13 @@
         </tr>
         <tr>
             <td><span class="file-name">execution/create_dashboard.py</span></td>
-            <td>portfolio_data.json &rarr; index.html 생성</td>
+            <td>portfolio_data.json → index.html + wrap.html 생성. WRAP 차트 + 수익률 비교 테이블(RETURN) + Portfolio 테이블 + Sector Weight를 wrap.html에 분리.</td>
             <td><span class="tag tag-command">/update</span> <span class="tag tag-github">Actions</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">execution/create_market_alert.py</span></td>
+            <td>KIND(kind.krx.co.kr) 스크래핑 → 투자주의/경고/위험 종목 현황 → market_alert.html 생성. 판단일(지정일+영업일) 계산, 현재가 조회, 2단계 배경색(판단일 도달/임박).</td>
+            <td><span class="tag tag-schedule">15:40</span> <span class="tag tag-schedule">23:00</span></td>
         </tr>
         <tr>
             <td><span class="file-name">execution/daily_portfolio_report.py</span></td>
@@ -869,8 +874,22 @@
     <div class="data-card">
         <div class="data-card-title">index.html</div>
         <div class="data-card-desc">
-            GitHub Pages 대시보드. 시장 차트 + 포트폴리오 테이블.<br>
+            GitHub Pages 메인 대시보드. 시장 차트(지수/환율/금리/암호화폐/메모리/원자재) + 상단 네비게이션(WRAP / 투자유의종목 / Architecture).<br>
             git push 시 자동 배포.
+        </div>
+    </div>
+    <div class="data-card">
+        <div class="data-card-title">wrap.html</div>
+        <div class="data-card-desc">
+            WRAP 전용 페이지. WRAP 기준가 차트 + 수익률 비교 테이블(RETURN, 1D~YTD) + Portfolio 테이블 + Sector Weight 비교.<br>
+            create_dashboard.py에서 생성. GHA file_pattern + weather_bot.py git add에 포함.
+        </div>
+    </div>
+    <div class="data-card">
+        <div class="data-card-title">market_alert.html</div>
+        <div class="data-card-desc">
+            투자유의종목 현황 페이지. 투자위험 &rarr; 투자경고 &rarr; 투자주의 순서. 판단일, 현재가, 해제 가능 주가 표시. 2단계 배경색(판단일 도달/#fca5a5, 5영업일 이내/#fee2e2).<br>
+            KIND POST API 스크래핑. VM 15:40 / 23:00 자동 재생성.
         </div>
     </div>
     <div class="data-card">
@@ -1083,6 +1102,15 @@
 <!-- ===== Changelog ===== -->
 <h2 id="changelog">Changelog</h2>
 <div class="version-log">
+    <div class="version-entry">
+        <div class="version-date">2026-02-24</div>
+        <div class="version-title">투자유의종목 페이지 + WRAP 분리 + 수익률 비교 테이블(RETURN) + UI 개선</div>
+        <div class="version-desc">
+            <strong>[투자유의종목 페이지 (market_alert.html)]</strong> KIND POST API 스크래핑으로 투자주의/경고/위험 종목 현황 페이지 신설. 지정일 오름차순 정렬. 섹션 순서: 투자위험 &rarr; 투자경고 &rarr; 투자주의. 판단일(지정일+영업일) 컬럼. 2단계 배경색: 판단일 도달(#fca5a5) / 5영업일 이내(#fee2e2). 투자주의 행 배경색 없음. 현재가 조회(경고/위험 35일, 주의 3일 분리). VM 15:40 / 23:00 자동 재생성.<br><br>
+            <strong>[WRAP 페이지 분리 (wrap.html)]</strong> WRAP/PORTFOLIO/SECTOR를 별도 wrap.html로 분리. index.html 상단 네비게이션: WRAP / 투자유의종목 / Architecture. GHA daily_crawl.yml file_pattern에 wrap.html 추가(누락으로 Portfolio 시각 고정 버그 수정).<br><br>
+            <strong>[수익률 비교 테이블 (RETURN)]</strong> wrap.html 내 RETURN 섹션 추가. 삼성 트루밸류 / DB 목표전환형 / KOSPI / KOSDAQ × 1D~YTD. Wrap_NAV.xlsx 수익률 시트에서 읽음. 테이블 가운데 정렬.
+        </div>
+    </div>
     <div class="version-entry">
         <div class="version-date">2026-02-24</div>
         <div class="version-title">당일 주문 23:00 야간 반영 + 신규 편입 종목 수익률 미표시 + SECTOR WEIGHT 스타일 통일</div>
