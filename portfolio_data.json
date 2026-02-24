@@ -56,17 +56,6 @@
       "is_today_new": false
     },
     {
-      "code": "034020",
-      "name": "두산에너빌리티",
-      "sector": "기계",
-      "market_cap": 648888.440898,
-      "weight": 5,
-      "today_return": -0.6862745098039216,
-      "contribution": -0.3431372549019608,
-      "cumulative_return": 42.0,
-      "is_today_new": false
-    },
-    {
       "code": "000150",
       "name": "두산",
       "sector": "상사,자본재",
@@ -78,14 +67,14 @@
       "is_today_new": false
     },
     {
-      "code": "006800",
-      "name": "미래에셋증권",
-      "sector": "증권",
-      "market_cap": 380514.527514,
-      "weight": 3,
-      "today_return": -1.7569546120058566,
-      "contribution": -0.527086383601757,
-      "cumulative_return": 150.0,
+      "code": "034020",
+      "name": "두산에너빌리티",
+      "sector": "기계",
+      "market_cap": 648888.440898,
+      "weight": 5,
+      "today_return": -0.6862745098039216,
+      "contribution": -0.3431372549019608,
+      "cumulative_return": 42.0,
       "is_today_new": false
     },
     {
@@ -97,6 +86,17 @@
       "today_return": 3.0737704918032787,
       "contribution": 0.9221311475409836,
       "cumulative_return": 55.0,
+      "is_today_new": false
+    },
+    {
+      "code": "006800",
+      "name": "미래에셋증권",
+      "sector": "증권",
+      "market_cap": 380514.527514,
+      "weight": 3,
+      "today_return": -1.7569546120058566,
+      "contribution": -0.527086383601757,
+      "cumulative_return": 150.0,
       "is_today_new": false
     },
     {
@@ -256,17 +256,6 @@
       "is_today_new": false
     },
     {
-      "code": "009240",
-      "name": "한샘",
-      "sector": "건설,건축관련",
-      "market_cap": 11861.099712,
-      "weight": 3,
-      "today_return": 2.5432349949135302,
-      "contribution": 0.762970498474059,
-      "cumulative_return": 5.158224179900306,
-      "is_today_new": false
-    },
-    {
       "code": "001720",
       "name": "신영증권",
       "sector": "증권",
@@ -278,14 +267,14 @@
       "is_today_new": false
     },
     {
-      "code": "033780",
-      "name": "KT&G",
-      "sector": "필수소비재",
-      "market_cap": 204571.50243,
+      "code": "009240",
+      "name": "한샘",
+      "sector": "건설,건축관련",
+      "market_cap": 11861.099712,
       "weight": 3,
-      "today_return": -1.7563739376770537,
-      "contribution": -0.5269121813031161,
-      "cumulative_return": -1.7563739376770582,
+      "today_return": 2.5432349949135302,
+      "contribution": 0.762970498474059,
+      "cumulative_return": 5.158224179900306,
       "is_today_new": false
     },
     {
@@ -297,6 +286,17 @@
       "today_return": 4.243542435424354,
       "contribution": 1.2730627306273061,
       "cumulative_return": 4.243542435424352,
+      "is_today_new": false
+    },
+    {
+      "code": "033780",
+      "name": "KT&G",
+      "sector": "필수소비재",
+      "market_cap": 204571.50243,
+      "weight": 3,
+      "today_return": -1.7563739376770537,
+      "contribution": -0.5269121813031161,
+      "cumulative_return": -1.7563739376770582,
       "is_today_new": false
     },
     {
