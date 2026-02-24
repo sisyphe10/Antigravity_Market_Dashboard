@@ -8,742 +8,777 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Segoe UI', Roboto, 'Malgun Gothic', sans-serif;
+            font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
             background: #f8f9fa;
             color: #1f2937;
             padding: 24px;
-            min-height: 100vh;
         }
 
         header {
             background: #000;
-            border-radius: 12px;
-            padding: 20px 28px;
-            margin-bottom: 28px;
+            border-radius: 10px;
+            padding: 18px 24px;
+            margin-bottom: 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .header-left h1 {
-            color: #fff;
-            font-size: 1.8rem;
-            font-weight: 700;
-        }
-
-        .header-left .subtitle {
-            color: #9ca3af;
-            font-size: 0.85rem;
-            margin-top: 4px;
-        }
-
-        .header-right {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 8px;
-        }
-
-        .last-updated {
-            color: #6b7280;
-            font-size: 0.82rem;
-            font-style: italic;
-        }
-
-        .back-btn {
-            display: inline-block;
-            padding: 7px 18px;
-            background: #2d7a3a;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 8px;
-            font-size: 0.88rem;
-            font-weight: 600;
-        }
-
-        .back-btn:hover { background: #357abd; }
-
-        /* 요약 카드 */
-        .summary-bar {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 28px;
-            flex-wrap: wrap;
-        }
-
-        .summary-card {
-            flex: 1;
-            min-width: 160px;
-            border-radius: 10px;
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-        }
-
-        .summary-icon { font-size: 2rem; }
-
-        .summary-label {
-            font-size: 0.82rem;
-            color: #6b7280;
-            margin-bottom: 2px;
-        }
-
-        .summary-count {
-            font-size: 1.8rem;
-            font-weight: 700;
-            line-height: 1;
-        }
-
-        /* 섹션 */
-        .alert-section {
-            background: #fff;
-            border-radius: 10px;
-            margin-bottom: 24px;
-            overflow: hidden;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.07);
-        }
-
-        .section-header {
-            padding: 16px 20px;
-        }
-
-        .section-title {
-            font-size: 1.15rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
             gap: 10px;
         }
 
-        .count-badge {
-            font-size: 0.78rem;
-            padding: 2px 10px;
-            border-radius: 12px;
+        header h1 { color: #fff; font-size: 1.5rem; font-weight: 700; }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .last-updated { color: #9ca3af; font-size: 0.8rem; }
+
+        .back-btn {
+            padding: 6px 16px;
+            background: #2d7a3a;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
             font-weight: 600;
         }
+        .back-btn:hover { background: #357abd; }
 
-        .section-desc {
-            font-size: 0.78rem;
-            color: #6b7280;
-            margin-top: 4px;
+        .section {
+            background: #fff;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            padding: 20px 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
         }
 
-        .section-body {
-            padding: 0 20px 20px;
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-left: 12px;
+            margin-bottom: 14px;
         }
 
-        /* 테이블 */
-        .alert-table {
+        .section-title { font-size: 1rem; font-weight: 700; }
+        .section-count { font-size: 0.8rem; color: #6b7280; }
+
+        .data-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.88rem;
-            margin-top: 16px;
+            font-size: 0.86rem;
         }
 
-        .alert-table thead tr {
-            background: #f9fafb;
-            border-bottom: 2px solid #e5e7eb;
-        }
-
-        .alert-table th {
-            padding: 10px 12px;
+        .data-table th {
+            padding: 8px 10px;
             text-align: left;
-            font-size: 0.78rem;
+            font-size: 0.76rem;
             font-weight: 600;
             color: #6b7280;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
         }
 
-        .alert-table th.center,
-        .alert-table td.center { text-align: center; }
+        .data-table th.num, .data-table td.num { text-align: right; }
+        .data-table th.center, .data-table td.center { text-align: center; }
 
-        .alert-table tbody tr {
+        .data-table td {
+            padding: 8px 10px;
             border-bottom: 1px solid #f3f4f6;
-            transition: background 0.15s;
-        }
-
-        .alert-table tbody tr:hover { background: #fafafa; }
-
-        .alert-table td {
-            padding: 10px 12px;
-            vertical-align: middle;
-            line-height: 1.4;
-        }
-
-        .mkt-badge {
-            display: inline-block;
-            font-size: 0.7rem;
-            padding: 1px 7px;
-            border-radius: 10px;
-            font-weight: 600;
-            margin-top: 3px;
-        }
-
-        .type-badge {
-            display: inline-block;
-            font-size: 0.75rem;
-            padding: 2px 8px;
-            border-radius: 6px;
-        }
-
-        .desig-date {
-            font-weight: 600;
-        }
-
-        .elapsed {
-            display: inline-block;
-            padding: 2px 8px;
-            background: #f3f4f6;
-            border-radius: 10px;
-            font-size: 0.82rem;
             color: #374151;
         }
 
-        .elapsed-long {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .empty-msg {
-            text-align: center;
-            padding: 24px;
-            color: #9ca3af;
-            font-size: 0.9rem;
-        }
+        .data-table tbody tr:last-child td { border-bottom: none; }
+        .data-table tbody tr:hover td { background: #f9fafb; }
 
         footer {
             text-align: center;
-            padding: 20px;
+            padding: 16px;
             color: #9ca3af;
-            font-size: 0.78rem;
+            font-size: 0.75rem;
         }
-
-        footer a { color: #6b7280; }
+        footer a { color: #9ca3af; }
     </style>
 </head>
 <body>
     <header>
-        <div class="header-left">
-            <h1>🚦 투자유의종목 현황</h1>
-            <div class="subtitle">한국거래소(KRX) 시장경보제도 · 투자주의 / 투자경고 / 투자위험</div>
-        </div>
+        <h1>🚦 투자유의종목 현황</h1>
         <div class="header-right">
-            <div class="last-updated">Updated: 2026-02-24 10:08:54 KST</div>
+            <span class="last-updated">Updated: 2026-02-24 10:17:02 KST</span>
             <a href="index.html" class="back-btn">← Dashboard</a>
         </div>
     </header>
 
-    <div class="summary-bar">
-        <div class="summary-card" style="background:#fffbeb;border:1px solid #fde68a">
-            <div class="summary-icon">⚠️</div>
-            <div>
-                <div class="summary-label">투자주의</div>
-                <div class="summary-count" style="color:#b45309">35</div>
-            </div>
-        </div>
-        <div class="summary-card" style="background:#fff7ed;border:1px solid #fed7aa">
-            <div class="summary-icon">🚨</div>
-            <div>
-                <div class="summary-label">투자경고</div>
-                <div class="summary-count" style="color:#c2410c">29</div>
-            </div>
-        </div>
-        <div class="summary-card" style="background:#fff1f2;border:1px solid #fecdd3">
-            <div class="summary-icon">🛑</div>
-            <div>
-                <div class="summary-label">투자위험</div>
-                <div class="summary-count" style="color:#b91c1c">2</div>
-            </div>
-        </div>
-        <div class="summary-card" style="background:#f0fdf4;border:1px solid #bbf7d0">
-            <div class="summary-icon">📋</div>
-            <div>
-                <div class="summary-label">전체</div>
-                <div class="summary-count" style="color:#166534">66</div>
-            </div>
-        </div>
-    </div>
-
     
-    <section class="alert-section" style="border-left:4px solid #f59e0b">
-        <div class="section-header" style="background:#fffbeb;border-bottom:1px solid #f59e0b">
-            <div class="section-title" style="color:#b45309">
-                ⚠️ 투자주의
-                <span class="count-badge" style="background:#fef3c7;color:#92400e">35종목</span>
-            </div>
-            <div class="section-desc">금일 지정 종목 · 5영업일 후 자동 해제 · 거래 제약 없음</div>
+    <section class="section">
+        <div class="section-header" style="border-left:4px solid #f59e0b">
+            <span class="section-title" style="color:#b45309">⚠️ 투자주의</span>
+            <span class="section-count">35종목</span>
         </div>
-        <div class="section-body">
-            
-        <table class="alert-table">
+        
+        <table class="data-table">
             <thead>
                 <tr>
                     <th>종목명</th>
+                    <th>시장</th>
+                    <th class="num">시가총액</th>
+                    <th class="center">공시일</th>
+                    <th class="center">지정일</th>
+                    <th class="center">경과일</th>
                     <th>유형</th>
-                    <th>공시일</th>
-                    <th>지정일</th>
                 </tr>
             </thead>
             <tbody>
             <tr>
-                <td>DSC인베스트먼트<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
-                <td><span class="type-badge" style="background:#fef3c7;color:#92400e;font-weight:700;">투자경고 지정예고</span></td>
+                <td>DSC인베스트먼트</td>
+                <td>KOSDAQ</td>
+                <td class="num">4,884억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>투자경고 지정예고</td>
             </tr>
             <tr>
-                <td>HD한국조선해양<br><span class="mkt-badge" style="background:#dbeafe;color:#1e40af">KOSPI</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">매매관여과다종목</span></td>
+                <td>HD한국조선해양</td>
+                <td>KOSPI</td>
+                <td class="num">31.6조</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>매매관여과다종목</td>
             </tr>
             <tr>
-                <td>LG전자우<br><span class="mkt-badge" style="background:#dbeafe;color:#1e40af">KOSPI</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">매매관여과다종목</span></td>
+                <td>LG전자우</td>
+                <td>KOSPI</td>
+                <td class="num">1.0조</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>매매관여과다종목</td>
             </tr>
             <tr>
-                <td>SGC E&C<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">소수지점/계좌</span></td>
+                <td>SGC E&C</td>
+                <td>KOSDAQ</td>
+                <td class="num">1,009억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>소수지점/계좌</td>
             </tr>
             <tr>
-                <td>SG세계물산<br><span class="mkt-badge" style="background:#dbeafe;color:#1e40af">KOSPI</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">소수계좌 매수관여 과다</span></td>
+                <td>SG세계물산</td>
+                <td>KOSPI</td>
+                <td class="num">1,366억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>소수계좌 매수관여 과다</td>
             </tr>
             <tr>
-                <td>SG세계물산<br><span class="mkt-badge" style="background:#dbeafe;color:#1e40af">KOSPI</span></td>
-                <td><span class="type-badge" style="background:#fef3c7;color:#92400e;font-weight:700;">투자경고 지정예고</span></td>
+                <td>SG세계물산</td>
+                <td>KOSPI</td>
+                <td class="num">1,366억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>투자경고 지정예고</td>
             </tr>
             <tr>
-                <td>SK증권<br><span class="mkt-badge" style="background:#dbeafe;color:#1e40af">KOSPI</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">소수계좌 매수관여 과다</span></td>
+                <td>SK증권</td>
+                <td>KOSPI</td>
+                <td class="num">7,514억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>소수계좌 매수관여 과다</td>
             </tr>
             <tr>
-                <td>TBH글로벌<br><span class="mkt-badge" style="background:#dbeafe;color:#1e40af">KOSPI</span></td>
-                <td><span class="type-badge" style="background:#fef3c7;color:#92400e;font-weight:700;">투자경고 지정예고</span></td>
+                <td>TBH글로벌</td>
+                <td>KOSPI</td>
+                <td class="num">354억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>투자경고 지정예고</td>
             </tr>
             <tr>
-                <td>더코디<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">소수지점/계좌</span></td>
+                <td>더코디</td>
+                <td>KOSDAQ</td>
+                <td class="num">211억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>소수지점/계좌</td>
             </tr>
             <tr>
-                <td>덕우전자<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">매매관여과다종목</span></td>
+                <td>덕우전자</td>
+                <td>KOSDAQ</td>
+                <td class="num">1,021억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>매매관여과다종목</td>
             </tr>
             <tr>
-                <td>두산<br><span class="mkt-badge" style="background:#dbeafe;color:#1e40af">KOSPI</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">매매관여과다종목</span></td>
+                <td>두산</td>
+                <td>KOSPI</td>
+                <td class="num">17.2조</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>매매관여과다종목</td>
             </tr>
             <tr>
-                <td>두올<br><span class="mkt-badge" style="background:#dbeafe;color:#1e40af">KOSPI</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">소수지점/계좌</span></td>
+                <td>두올</td>
+                <td>KOSPI</td>
+                <td class="num">1,402억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>소수지점/계좌</td>
             </tr>
             <tr>
-                <td>두올<br><span class="mkt-badge" style="background:#dbeafe;color:#1e40af">KOSPI</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">매매관여과다종목</span></td>
+                <td>두올</td>
+                <td>KOSPI</td>
+                <td class="num">1,402억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>매매관여과다종목</td>
             </tr>
             <tr>
-                <td>디지틀조선<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">소수지점/계좌</span></td>
+                <td>디지틀조선</td>
+                <td>KOSDAQ</td>
+                <td class="num">857억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>소수지점/계좌</td>
             </tr>
             <tr>
-                <td>미래에셋생명<br><span class="mkt-badge" style="background:#dbeafe;color:#1e40af">KOSPI</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">상한가잔량</span></td>
+                <td>미래에셋생명</td>
+                <td>KOSPI</td>
+                <td class="num">3.1조</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>상한가잔량</td>
             </tr>
             <tr>
-                <td>미래에셋생명<br><span class="mkt-badge" style="background:#dbeafe;color:#1e40af">KOSPI</span></td>
-                <td><span class="type-badge" style="background:#fef3c7;color:#92400e;font-weight:700;">투자경고 지정예고</span></td>
+                <td>미래에셋생명</td>
+                <td>KOSPI</td>
+                <td class="num">3.1조</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>투자경고 지정예고</td>
             </tr>
             <tr>
-                <td>서산<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">소수지점/계좌</span></td>
+                <td>서산</td>
+                <td>KOSDAQ</td>
+                <td class="num">319억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>소수지점/계좌</td>
             </tr>
             <tr>
-                <td>서산<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">매매관여과다종목</span></td>
+                <td>서산</td>
+                <td>KOSDAQ</td>
+                <td class="num">319억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>매매관여과다종목</td>
             </tr>
             <tr>
-                <td>선익시스템<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">소수계좌 매수관여 과다</span></td>
+                <td>선익시스템</td>
+                <td>KOSDAQ</td>
+                <td class="num">1.2조</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>소수계좌 매수관여 과다</td>
             </tr>
             <tr>
-                <td>성광벤드<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">매매관여과다종목</span></td>
+                <td>성광벤드</td>
+                <td>KOSDAQ</td>
+                <td class="num">9,866억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>매매관여과다종목</td>
             </tr>
             <tr>
-                <td>스코넥<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">소수지점/계좌</span></td>
+                <td>스코넥</td>
+                <td>KOSDAQ</td>
+                <td class="num">183억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>소수지점/계좌</td>
             </tr>
             <tr>
-                <td>시지메드텍<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
-                <td><span class="type-badge" style="background:#fef3c7;color:#92400e;font-weight:700;">투자경고 지정예고</span></td>
+                <td>시지메드텍</td>
+                <td>KOSDAQ</td>
+                <td class="num">2,932억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>투자경고 지정예고</td>
             </tr>
             <tr>
-                <td>아모센스<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">투자경고 지정해제</span></td>
+                <td>아모센스</td>
+                <td>KOSDAQ</td>
+                <td class="num">1,519억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>투자경고 지정해제</td>
             </tr>
             <tr>
-                <td>아이씨디<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">매매관여과다종목</span></td>
+                <td>아이씨디</td>
+                <td>KOSDAQ</td>
+                <td class="num">883억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>매매관여과다종목</td>
             </tr>
             <tr>
-                <td>옵트론텍<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">매매관여과다종목</span></td>
+                <td>옵트론텍</td>
+                <td>KOSDAQ</td>
+                <td class="num">789억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>매매관여과다종목</td>
             </tr>
             <tr>
-                <td>와토스코리아<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">소수지점/계좌</span></td>
+                <td>와토스코리아</td>
+                <td>KOSDAQ</td>
+                <td class="num">807억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>소수지점/계좌</td>
             </tr>
             <tr>
-                <td>우원개발<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">종가급변</span></td>
+                <td>우원개발</td>
+                <td>KOSDAQ</td>
+                <td class="num">930억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>종가급변</td>
             </tr>
             <tr>
-                <td>유디엠텍<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">투자경고 지정해제</span></td>
+                <td>유디엠텍</td>
+                <td>KOSDAQ</td>
+                <td class="num">361억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>투자경고 지정해제</td>
             </tr>
             <tr>
-                <td>인콘<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">투자경고 지정해제</span></td>
+                <td>인콘</td>
+                <td>KOSDAQ</td>
+                <td class="num">369억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>투자경고 지정해제</td>
             </tr>
             <tr>
-                <td>큐라클<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">소수계좌 매수관여 과다</span></td>
+                <td>큐라클</td>
+                <td>KOSDAQ</td>
+                <td class="num">3,336억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>소수계좌 매수관여 과다</td>
             </tr>
             <tr>
-                <td>파라택시스이더리움<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">소수지점/계좌</span></td>
+                <td>파라택시스이더리움</td>
+                <td>KOSDAQ</td>
+                <td class="num">299억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>소수지점/계좌</td>
             </tr>
             <tr>
-                <td>한스바이오메드<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">투자경고 지정해제</span></td>
+                <td>한스바이오메드</td>
+                <td>KOSDAQ</td>
+                <td class="num">6,545억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>투자경고 지정해제</td>
             </tr>
             <tr>
-                <td>현대바이오<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
-                <td><span class="type-badge" style="background:#f3f4f6;color:#374151;">소수계좌 매수관여 과다</span></td>
+                <td>현대바이오</td>
+                <td>KOSDAQ</td>
+                <td class="num">1.9조</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>소수계좌 매수관여 과다</td>
             </tr>
             <tr>
-                <td>현대바이오<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
-                <td><span class="type-badge" style="background:#fef3c7;color:#92400e;font-weight:700;">투자경고 지정예고</span></td>
+                <td>현대바이오</td>
+                <td>KOSDAQ</td>
+                <td class="num">1.9조</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>투자경고 지정예고</td>
             </tr>
             <tr>
-                <td>흥국화재<br><span class="mkt-badge" style="background:#dbeafe;color:#1e40af">KOSPI</span></td>
-                <td><span class="type-badge" style="background:#fef3c7;color:#92400e;font-weight:700;">투자경고 지정예고</span></td>
+                <td>흥국화재</td>
+                <td>KOSPI</td>
+                <td class="num">3,790억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>투자경고 지정예고</td>
             </tr>
             </tbody>
         </table>
-        </div>
     </section>
     
-    <section class="alert-section" style="border-left:4px solid #f97316">
-        <div class="section-header" style="background:#fff7ed;border-bottom:1px solid #f97316">
-            <div class="section-title" style="color:#c2410c">
-                🚨 투자경고
-                <span class="count-badge" style="background:#ffedd5;color:#9a3412">29종목</span>
-            </div>
-            <div class="section-desc">신용융자 금지 · 위탁증거금 100% · 대용증권 불인정</div>
+    <section class="section">
+        <div class="section-header" style="border-left:4px solid #f97316">
+            <span class="section-title" style="color:#c2410c">🚨 투자경고</span>
+            <span class="section-count">29종목</span>
         </div>
-        <div class="section-body">
-            
-        <table class="alert-table">
+        
+        <table class="data-table">
             <thead>
                 <tr>
                     <th>종목명</th>
-                    <th>공시일</th>
-                    <th>지정일</th>
-                    <th>경과일</th>
+                    <th>시장</th>
+                    <th class="num">시가총액</th>
+                    <th class="center">공시일</th>
+                    <th class="center">지정일</th>
+                    <th class="center">경과일</th>
+                    <th>유형</th>
                 </tr>
             </thead>
             <tbody>
             <tr>
-                <td>광동제약<br><span class="mkt-badge" style="background:#dbeafe;color:#1e40af">KOSPI</span></td>
+                <td>광동제약</td>
+                <td>KOSPI</td>
+                <td class="num">4,979억</td>
                 <td class="center">2026-02-23</td>
-                <td class="center desig-date">2026-02-24</td>
-                <td class="center"><span class="elapsed">0일</span></td>
+                <td class="center">2026-02-24</td>
+                <td class="center">0일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>SGC에너지<br><span class="mkt-badge" style="background:#dbeafe;color:#1e40af">KOSPI</span></td>
+                <td>SGC에너지</td>
+                <td>KOSPI</td>
+                <td class="num">5,929억</td>
                 <td class="center">2026-02-20</td>
-                <td class="center desig-date">2026-02-23</td>
-                <td class="center"><span class="elapsed">1일</span></td>
+                <td class="center">2026-02-23</td>
+                <td class="center">1일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>다원넥스뷰<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
+                <td>다원넥스뷰</td>
+                <td>KOSDAQ</td>
+                <td class="num">1,392억</td>
                 <td class="center">2026-02-20</td>
-                <td class="center desig-date">2026-02-23</td>
-                <td class="center"><span class="elapsed">1일</span></td>
+                <td class="center">2026-02-23</td>
+                <td class="center">1일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>누리플렉스<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
+                <td>누리플렉스</td>
+                <td>KOSDAQ</td>
+                <td class="num">1,110억</td>
                 <td class="center">2026-02-19</td>
-                <td class="center desig-date">2026-02-20</td>
-                <td class="center"><span class="elapsed">4일</span></td>
+                <td class="center">2026-02-20</td>
+                <td class="center">4일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>본시스템즈<br><span class="mkt-badge" style="background:#f3e8ff;color:#6b21a8">KONEX</span></td>
+                <td>본시스템즈</td>
+                <td>KONEX</td>
+                <td class="num">4,040억</td>
                 <td class="center">2026-02-19</td>
-                <td class="center desig-date">2026-02-20</td>
-                <td class="center"><span class="elapsed">4일</span></td>
+                <td class="center">2026-02-20</td>
+                <td class="center">4일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>자화전자<br><span class="mkt-badge" style="background:#dbeafe;color:#1e40af">KOSPI</span></td>
+                <td>자화전자</td>
+                <td>KOSPI</td>
+                <td class="num">8,735억</td>
                 <td class="center">2026-02-19</td>
-                <td class="center desig-date">2026-02-20</td>
-                <td class="center"><span class="elapsed">4일</span></td>
+                <td class="center">2026-02-20</td>
+                <td class="center">4일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>서남<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
+                <td>서남</td>
+                <td>KOSDAQ</td>
+                <td class="num">1,247억</td>
                 <td class="center">2026-02-13</td>
-                <td class="center desig-date">2026-02-19</td>
-                <td class="center"><span class="elapsed">5일</span></td>
+                <td class="center">2026-02-19</td>
+                <td class="center">5일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>제이에스링크<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
+                <td>제이에스링크</td>
+                <td>KOSDAQ</td>
+                <td class="num">1.2조</td>
                 <td class="center">2026-02-13</td>
-                <td class="center desig-date">2026-02-19</td>
-                <td class="center"><span class="elapsed">5일</span></td>
+                <td class="center">2026-02-19</td>
+                <td class="center">5일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>현대ADM<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
+                <td>현대ADM</td>
+                <td>KOSDAQ</td>
+                <td class="num">8,691억</td>
                 <td class="center">2026-02-13</td>
-                <td class="center desig-date">2026-02-19</td>
-                <td class="center"><span class="elapsed">5일</span></td>
+                <td class="center">2026-02-19</td>
+                <td class="center">5일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>레이저쎌<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
+                <td>레이저쎌</td>
+                <td>KOSDAQ</td>
+                <td class="num">553억</td>
                 <td class="center">2026-02-12</td>
-                <td class="center desig-date">2026-02-13</td>
-                <td class="center"><span class="elapsed elapsed-long">11일</span></td>
+                <td class="center">2026-02-13</td>
+                <td class="center">11일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>스피어<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
+                <td>스피어</td>
+                <td>KOSDAQ</td>
+                <td class="num">2.1조</td>
                 <td class="center">2026-02-12</td>
-                <td class="center desig-date">2026-02-13</td>
-                <td class="center"><span class="elapsed elapsed-long">11일</span></td>
+                <td class="center">2026-02-13</td>
+                <td class="center">11일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>우리기술<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
+                <td>우리기술</td>
+                <td>KOSDAQ</td>
+                <td class="num">2.8조</td>
                 <td class="center">2026-02-12</td>
-                <td class="center desig-date">2026-02-13</td>
-                <td class="center"><span class="elapsed elapsed-long">11일</span></td>
+                <td class="center">2026-02-13</td>
+                <td class="center">11일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>유투바이오<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
+                <td>유투바이오</td>
+                <td>KOSDAQ</td>
+                <td class="num">3,560억</td>
                 <td class="center">2026-02-12</td>
-                <td class="center desig-date">2026-02-13</td>
-                <td class="center"><span class="elapsed elapsed-long">11일</span></td>
+                <td class="center">2026-02-13</td>
+                <td class="center">11일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>웰킵스하이텍<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
+                <td>웰킵스하이텍</td>
+                <td>KOSDAQ</td>
+                <td class="num">199억</td>
                 <td class="center">2026-02-10</td>
-                <td class="center desig-date">2026-02-11</td>
-                <td class="center"><span class="elapsed elapsed-long">13일</span></td>
+                <td class="center">2026-02-11</td>
+                <td class="center">13일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>유진로봇<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
+                <td>유진로봇</td>
+                <td>KOSDAQ</td>
+                <td class="num">1.3조</td>
                 <td class="center">2026-02-10</td>
-                <td class="center desig-date">2026-02-11</td>
-                <td class="center"><span class="elapsed elapsed-long">13일</span></td>
+                <td class="center">2026-02-11</td>
+                <td class="center">13일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>플루토스<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
+                <td>플루토스</td>
+                <td>KOSDAQ</td>
+                <td class="num">295억</td>
                 <td class="center">2026-02-10</td>
-                <td class="center desig-date">2026-02-11</td>
-                <td class="center"><span class="elapsed elapsed-long">13일</span></td>
+                <td class="center">2026-02-11</td>
+                <td class="center">13일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>LK삼양<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
+                <td>LK삼양</td>
+                <td>KOSDAQ</td>
+                <td class="num">1,606억</td>
                 <td class="center">2026-02-09</td>
-                <td class="center desig-date">2026-02-10</td>
-                <td class="center"><span class="elapsed elapsed-long">14일</span></td>
+                <td class="center">2026-02-10</td>
+                <td class="center">14일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>뉴로메카<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
+                <td>뉴로메카</td>
+                <td>KOSDAQ</td>
+                <td class="num">9,543억</td>
                 <td class="center">2026-02-06</td>
-                <td class="center desig-date">2026-02-09</td>
-                <td class="center"><span class="elapsed elapsed-long">15일</span></td>
+                <td class="center">2026-02-09</td>
+                <td class="center">15일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>셀루메드<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
+                <td>셀루메드</td>
+                <td>KOSDAQ</td>
+                <td class="num">1,157억</td>
                 <td class="center">2026-02-06</td>
-                <td class="center desig-date">2026-02-09</td>
-                <td class="center"><span class="elapsed elapsed-long">15일</span></td>
+                <td class="center">2026-02-09</td>
+                <td class="center">15일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>앤로보틱스<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
+                <td>앤로보틱스</td>
+                <td>KOSDAQ</td>
+                <td class="num">1,636억</td>
                 <td class="center">2026-02-06</td>
-                <td class="center desig-date">2026-02-09</td>
-                <td class="center"><span class="elapsed elapsed-long">15일</span></td>
+                <td class="center">2026-02-09</td>
+                <td class="center">15일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>파두<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
+                <td>파두</td>
+                <td>KOSDAQ</td>
+                <td class="num">2.7조</td>
                 <td class="center">2026-02-06</td>
-                <td class="center desig-date">2026-02-09</td>
-                <td class="center"><span class="elapsed elapsed-long">15일</span></td>
+                <td class="center">2026-02-09</td>
+                <td class="center">15일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>데이터스트림즈<br><span class="mkt-badge" style="background:#f3e8ff;color:#6b21a8">KONEX</span></td>
+                <td>데이터스트림즈</td>
+                <td>KONEX</td>
+                <td class="num">136억</td>
                 <td class="center">2026-02-05</td>
-                <td class="center desig-date">2026-02-06</td>
-                <td class="center"><span class="elapsed elapsed-long">18일</span></td>
+                <td class="center">2026-02-06</td>
+                <td class="center">18일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>동아엘텍<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
+                <td>동아엘텍</td>
+                <td>KOSDAQ</td>
+                <td class="num">1,619억</td>
                 <td class="center">2026-02-05</td>
-                <td class="center desig-date">2026-02-06</td>
-                <td class="center"><span class="elapsed elapsed-long">18일</span></td>
+                <td class="center">2026-02-06</td>
+                <td class="center">18일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>한화갤러리아우<br><span class="mkt-badge" style="background:#dbeafe;color:#1e40af">KOSPI</span></td>
+                <td>한화갤러리아우</td>
+                <td>KOSPI</td>
+                <td class="num">293억</td>
                 <td class="center">2026-02-05</td>
-                <td class="center desig-date">2026-02-06</td>
-                <td class="center"><span class="elapsed elapsed-long">18일</span></td>
+                <td class="center">2026-02-06</td>
+                <td class="center">18일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>현대무벡스<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
+                <td>현대무벡스</td>
+                <td>KOSDAQ</td>
+                <td class="num">3.1조</td>
                 <td class="center">2026-02-05</td>
-                <td class="center desig-date">2026-02-06</td>
-                <td class="center"><span class="elapsed elapsed-long">18일</span></td>
+                <td class="center">2026-02-06</td>
+                <td class="center">18일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>휴림로봇<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
+                <td>휴림로봇</td>
+                <td>KOSDAQ</td>
+                <td class="num">1.7조</td>
                 <td class="center">2026-02-05</td>
-                <td class="center desig-date">2026-02-06</td>
-                <td class="center"><span class="elapsed elapsed-long">18일</span></td>
+                <td class="center">2026-02-06</td>
+                <td class="center">18일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>삼미금속<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
+                <td>삼미금속</td>
+                <td>KOSDAQ</td>
+                <td class="num">3,970억</td>
                 <td class="center">2026-02-04</td>
-                <td class="center desig-date">2026-02-05</td>
-                <td class="center"><span class="elapsed elapsed-long">19일</span></td>
+                <td class="center">2026-02-05</td>
+                <td class="center">19일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>삼표시멘트<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
+                <td>삼표시멘트</td>
+                <td>KOSDAQ</td>
+                <td class="num">1.7조</td>
                 <td class="center">2026-02-02</td>
-                <td class="center desig-date">2026-02-03</td>
-                <td class="center"><span class="elapsed elapsed-long">21일</span></td>
+                <td class="center">2026-02-03</td>
+                <td class="center">21일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>네오티스<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
+                <td>네오티스</td>
+                <td>KOSDAQ</td>
+                <td class="num">2,442억</td>
                 <td class="center">2026-01-30</td>
-                <td class="center desig-date">2026-02-02</td>
-                <td class="center"><span class="elapsed elapsed-long">22일</span></td>
+                <td class="center">2026-02-02</td>
+                <td class="center">22일</td>
+                <td>-</td>
             </tr>
             </tbody>
         </table>
-        </div>
     </section>
     
-    <section class="alert-section" style="border-left:4px solid #ef4444">
-        <div class="section-header" style="background:#fff1f2;border-bottom:1px solid #ef4444">
-            <div class="section-title" style="color:#b91c1c">
-                🛑 투자위험
-                <span class="count-badge" style="background:#fee2e2;color:#991b1b">2종목</span>
-            </div>
-            <div class="section-desc">신용거래 전면 금지 · 지정일 1일 매매정지 · 위탁증거금 100%</div>
+    <section class="section">
+        <div class="section-header" style="border-left:4px solid #ef4444">
+            <span class="section-title" style="color:#b91c1c">🛑 투자위험</span>
+            <span class="section-count">2종목</span>
         </div>
-        <div class="section-body">
-            
-        <table class="alert-table">
+        
+        <table class="data-table">
             <thead>
                 <tr>
                     <th>종목명</th>
-                    <th>공시일</th>
-                    <th>지정일</th>
-                    <th>경과일</th>
+                    <th>시장</th>
+                    <th class="num">시가총액</th>
+                    <th class="center">공시일</th>
+                    <th class="center">지정일</th>
+                    <th class="center">경과일</th>
+                    <th>유형</th>
                 </tr>
             </thead>
             <tbody>
             <tr>
-                <td>썬테크<br><span class="mkt-badge" style="background:#f3e8ff;color:#6b21a8">KONEX</span></td>
+                <td>썬테크</td>
+                <td>KONEX</td>
+                <td class="num">34억</td>
                 <td class="center">2026-02-05</td>
-                <td class="center desig-date">2026-02-06</td>
-                <td class="center"><span class="elapsed elapsed-long">18일</span></td>
+                <td class="center">2026-02-06</td>
+                <td class="center">18일</td>
+                <td>-</td>
             </tr>
             <tr>
-                <td>비엘팜텍<br><span class="mkt-badge" style="background:#dcfce7;color:#166534">KOSDAQ</span></td>
+                <td>비엘팜텍</td>
+                <td>KOSDAQ</td>
+                <td class="num">1,244억</td>
                 <td class="center">2026-02-02</td>
-                <td class="center desig-date">2026-02-03</td>
-                <td class="center"><span class="elapsed elapsed-long">21일</span></td>
+                <td class="center">2026-02-03</td>
+                <td class="center">21일</td>
+                <td>-</td>
             </tr>
             </tbody>
         </table>
-        </div>
     </section>
 
     <footer>
-        데이터 출처: <a href="https://kind.krx.co.kr" target="_blank">한국거래소 KIND</a> &nbsp;|&nbsp;
-        투자주의는 금일 지정 종목, 투자경고/위험은 현재 지정 중인 종목 기준 &nbsp;|&nbsp;
+        출처: <a href="https://kind.krx.co.kr" target="_blank">한국거래소 KIND</a> &nbsp;|&nbsp;
+        투자주의: 금일 지정 기준 &nbsp;|&nbsp; 투자경고/위험: 현재 지정 중 기준 &nbsp;|&nbsp;
         본 자료는 참고용이며 투자 조언이 아닙니다
     </footer>
 </body>
