@@ -720,7 +720,7 @@ def create_dashboard():
             """
 
     # Generate full HTML
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S KST")
+    now = datetime.now(tz=KST).strftime("%Y-%m-%d %H:%M:%S KST")
     
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
