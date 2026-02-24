@@ -383,7 +383,7 @@
 <header>
     <h1>Antigravity Market Dashboard</h1>
     <div class="subtitle">System Architecture & Documentation</div>
-    <div class="subtitle">Last updated: 2026-02-23 (6차)</div>
+    <div class="subtitle">Last updated: 2026-02-24 (7차)</div>
 </header>
 
 <nav>
@@ -467,12 +467,18 @@
             <span class="flow-badge badge-manual">수동</span>
             <span class="flow-title">/update 명령어</span>
         </div>
-        <div class="flow-desc">사용자가 텔레그램에서 /update 입력 시 실행. 기존 portfolio_data.json에서 종목 코드/비중을 읽고, 실시간 주가만 병렬 조회하여 빠르게 갱신. 전거래일 포트폴리오 기준 (당일 매매 미반영).</div>
+        <div class="flow-desc">사용자가 텔레그램에서 /update 입력 시 실행. Wrap_NAV.xlsx에서 최신 포트폴리오 구성을 재생성한 뒤, 실시간 주가를 병렬 조회하여 갱신. 23:00 이전이면 전거래일 포트폴리오 기준 (당일 주문 미반영).</div>
         <div class="steps">
+            <div class="step">
+                <div class="step-number">Step 0</div>
+                <div class="step-file">create_portfolio_tables.py</div>
+                <div class="step-desc">Wrap_NAV.xlsx → portfolio_data.json 재생성<br>(최신 종목 구성 반영)</div>
+            </div>
+            <div class="arrow">&rarr;</div>
             <div class="step">
                 <div class="step-number">Step 1</div>
                 <div class="step-file">portfolio_data.json 읽기</div>
-                <div class="step-desc">기존 종목 코드/비중 사용<br>(Wrap_NAV.xlsx 파싱 불필요)</div>
+                <div class="step-desc">종목 코드/비중 로드</div>
             </div>
             <div class="arrow">&rarr;</div>
             <div class="step">
@@ -484,23 +490,17 @@
             <div class="step">
                 <div class="step-number">Step 3</div>
                 <div class="step-file">create_dashboard.py</div>
-                <div class="step-desc">JSON 읽어서 HTML 테이블 생성</div>
+                <div class="step-desc">JSON → HTML 테이블 생성</div>
             </div>
             <div class="arrow">&rarr;</div>
             <div class="step">
                 <div class="step-number">Step 4</div>
-                <div class="step-file">git pull --rebase</div>
-                <div class="step-desc">원격 변경사항 통합<br>(push 충돌 방지)</div>
-            </div>
-            <div class="arrow">&rarr;</div>
-            <div class="step">
-                <div class="step-number">Step 5</div>
-                <div class="step-file">git push</div>
+                <div class="step-file">git pull --rebase → push</div>
                 <div class="step-desc">GitHub Pages 자동 배포</div>
             </div>
             <div class="arrow">&rarr;</div>
             <div class="step">
-                <div class="step-number">Step 6</div>
+                <div class="step-number">Step 5</div>
                 <div class="step-file">텔레그램 요약</div>
                 <div class="step-desc">상승/하락 Top5 + 기여도</div>
             </div>
@@ -534,14 +534,20 @@
         </div>
     </div>
 
-    <!-- Daily Portfolio (16:00) -->
+    <!-- Daily Portfolio (15:40) -->
     <div class="flow-group trigger-schedule">
         <div class="flow-header">
-            <span class="flow-badge badge-schedule">매일 16:00</span>
+            <span class="flow-badge badge-schedule">매일 15:40</span>
             <span class="flow-title">포트폴리오 리포트 자동 전송</span>
         </div>
-        <div class="flow-desc">장 마감 후 자동 실행. 기준가 업데이트 + 수익률 계산 + 텔레그램 리포트.</div>
+        <div class="flow-desc">장 마감 직후 자동 실행. git pull → 기준가 업데이트 → portfolio_data.json 재생성 → 수익률 계산 → Dashboard 갱신 → 텔레그램 리포트.</div>
         <div class="steps">
+            <div class="step">
+                <div class="step-number">Step 0</div>
+                <div class="step-file">git pull origin main</div>
+                <div class="step-desc">최신 Wrap_NAV.xlsx 반영</div>
+            </div>
+            <div class="arrow">&rarr;</div>
             <div class="step">
                 <div class="step-number">Step 1</div>
                 <div class="step-file">calculate_wrap_nav.py</div>
@@ -549,15 +555,67 @@
             </div>
             <div class="arrow">&rarr;</div>
             <div class="step">
+                <div class="step-number">Step 1.5</div>
+                <div class="step-file">create_portfolio_tables.py</div>
+                <div class="step-desc">Wrap_NAV → portfolio_data.json<br>최신 종목 구성 반영</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
                 <div class="step-number">Step 2</div>
                 <div class="step-file">calculate_returns.py</div>
                 <div class="step-desc">1D, 1W, 1M, 3M, 6M,<br>1Y, YTD 수익률 계산</div>
             </div>
+        </div>
+        <div class="steps" style="margin-top: 12px;">
+            <div class="step">
+                <div class="step-number">Step 2.5</div>
+                <div class="step-file">git push (Wrap_NAV.xlsx)</div>
+                <div class="step-desc">기준가 계산 결과 GitHub 반영</div>
+            </div>
             <div class="arrow">&rarr;</div>
             <div class="step">
                 <div class="step-number">Step 3</div>
+                <div class="step-file">create_dashboard.py</div>
+                <div class="step-desc">index.html 재생성 + git push<br>Dashboard 즉시 반영</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 4</div>
                 <div class="step-file">daily_portfolio_report.py</div>
                 <div class="step-desc">텔레그램으로 리포트 전송<br>기준가 + 수익률 + 기여도 Top5</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nightly Portfolio Refresh (23:00 VM) -->
+    <div class="flow-group trigger-schedule">
+        <div class="flow-header">
+            <span class="flow-badge badge-schedule">매일 23:00 (VM)</span>
+            <span class="flow-title">당일 주문 포트폴리오 야간 반영</span>
+        </div>
+        <div class="flow-desc">당일 Wrap_NAV.xlsx에 입력한 주문(비중 변경·신규 편입)을 Dashboard에 반영. <strong>23:00 이전에는 create_portfolio_tables.py와 create_dashboard.py 모두 전거래일 기준 데이터를 사용</strong>하므로, 23:00 이후 이 잡이 실행돼야 당일 변경사항이 표시됨. 오늘 신규 편입 종목은 비중만 표시하고 수익률/기여도/누적은 '-' 표시.</div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">Step 1</div>
+                <div class="step-file">git pull origin main</div>
+                <div class="step-desc">최신 Wrap_NAV.xlsx 반영</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 2</div>
+                <div class="step-file">create_portfolio_tables.py</div>
+                <div class="step-desc">23:00 이후 → date_cutoff = 오늘<br>당일 변경된 비중·신규 종목 반영</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 3</div>
+                <div class="step-file">create_dashboard.py</div>
+                <div class="step-desc">index.html 재생성</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step-output">
+                <div class="step-file">git push</div>
+                <div class="step-desc">GitHub Pages 반영</div>
             </div>
         </div>
     </div>
@@ -720,17 +778,17 @@
         <tr>
             <td><span class="file-name">execution/daily_portfolio_report.py</span></td>
             <td>기준가 + 수익률 리포트 &rarr; 텔레그램 전송</td>
-            <td><span class="tag tag-command">/portfolio</span> <span class="tag tag-schedule">16:00</span></td>
+            <td><span class="tag tag-command">/portfolio</span> <span class="tag tag-schedule">15:40</span></td>
         </tr>
         <tr>
             <td><span class="file-name">calculate_wrap_nav.py</span></td>
             <td>Wrap_NAV.xlsx에 오늘자 기준가(NAV) 추가</td>
-            <td><span class="tag tag-schedule">16:00</span> <span class="tag tag-github">Actions</span></td>
+            <td><span class="tag tag-schedule">15:40</span> <span class="tag tag-github">Actions</span></td>
         </tr>
         <tr>
             <td><span class="file-name">calculate_returns.py</span></td>
             <td>1D, 1W, 1M, 3M, 6M, 1Y, YTD 수익률 계산</td>
-            <td><span class="tag tag-schedule">16:00</span> <span class="tag tag-github">Actions</span></td>
+            <td><span class="tag tag-schedule">15:40</span> <span class="tag tag-github">Actions</span></td>
         </tr>
         <tr>
             <td><span class="file-name">execution/market_crawler.py</span></td>
@@ -867,7 +925,8 @@
             • 텔레그램 봇 24시간 구동 (/update, /portfolio 등)<br>
             • 날씨 알림 (05:00), 캘린더 알림 (05:10)<br>
             • 장중 자동 포트폴리오 업데이트 (09:30~15:35, 30분)<br>
-            • 일일 포트폴리오 리포트 (16:00)
+            • 일일 포트폴리오 리포트 (15:40)<br>
+            • 야간 포트폴리오 갱신 (23:00, 당일 주문 반영)
         </div>
     </div>
     <div class="infra-card">
@@ -1024,6 +1083,17 @@
 <!-- ===== Changelog ===== -->
 <h2 id="changelog">Changelog</h2>
 <div class="version-log">
+    <div class="version-entry">
+        <div class="version-date">2026-02-24</div>
+        <div class="version-title">당일 주문 23:00 야간 반영 + 신규 편입 종목 수익률 미표시 + SECTOR WEIGHT 스타일 통일</div>
+        <div class="version-desc">
+            <strong>[당일 주문 반영 시점 조정]</strong> create_portfolio_tables.py, create_dashboard.py(read_portfolio_sectors)에 시간 기반 날짜 컷오프 도입. 23:00 이전: date_cutoff = 어제 (당일 주문 제외, 결제 익일 원칙). 23:00 이후: date_cutoff = 오늘 (당일 변경 포함). 이로써 장중에 Wrap_NAV.xlsx를 수정해도 비중/신규종목이 즉시 표시되지 않고, 23:00 야간 잡 실행 후 반영됨.<br><br>
+            <strong>[23:00 야간 포트폴리오 갱신 잡]</strong> weather_bot.py에 nightly_portfolio_refresh_job 추가. 매일 23:00 KST VM에서 자동 실행: git pull → create_portfolio_tables.py → create_dashboard.py → git push. 당일 입력한 비중 변경 및 신규 종목을 Dashboard에 반영.<br><br>
+            <strong>[신규 편입 종목 수익률 미표시]</strong> create_portfolio_tables.py: 오늘 날짜에 처음 편입된 종목(today_new 상태)은 오늘수익률·기여도·누적수익률을 None으로 저장. create_dashboard.py: is_today_new 플래그가 true인 종목은 세 컬럼 모두 '-' 표시. 콘솔 로그에 [신규] 태그 출력.<br><br>
+            <strong>[SECTOR WEIGHT 스타일]</strong> 오른쪽 테이블 종목(sect-right-stocks)에 font-weight: 500 추가 → 왼쪽 BM 종목(sect-detail-bm)과 동일한 진한 회색으로 통일. 벤치마크 범례 점(.kodex-dot) #e8a838(노란색) → #444(진한 회색). 포트폴리오 종목(.sect-detail-mine) font-weight: 500 → 700(볼드).<br><br>
+            <strong>[/update 플로우 변경]</strong> run_portfolio_update()에 Step 0 추가: create_portfolio_tables.py 실행으로 Wrap_NAV.xlsx 최신 종목 구성을 portfolio_data.json에 먼저 반영한 뒤 가격 조회 진행. /portfolio 명령 및 15:40 자동 잡에도 동일하게 적용.
+        </div>
+    </div>
     <div class="version-entry">
         <div class="version-date">2026-02-23</div>
         <div class="version-title">SECTOR WEIGHT UI 개선 + 포트폴리오 대표색 변경 + 봇 수정 + 파일 정리</div>
