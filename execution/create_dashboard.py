@@ -1214,7 +1214,7 @@ def create_dashboard():
 <body>
     <header>
         <h1>📊 Market Data Dashboard</h1>
-        <div class="last-updated">Last Updated: {now}</div>
+        <div class="last-updated">Updated: {now}</div>
         <div class="nav-group">
             <a href="wrap.html" target="_blank" class="nav-button" style="background-color:#1e40af">📈 WRAP</a>
             <a href="market_alert.html" target="_blank" class="nav-button" style="background-color:#c2410c">🚦 투자유의종목</a>
