@@ -109,5 +109,5 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Auto-update: Market data and dashboard [skip ci]"
-          file_pattern: 'dataset.csv charts/*.png index.html portfolio_data.json Wrap_NAV.xlsx kodex_sectors.json'
+          file_pattern: 'dataset.csv charts/*.png index.html wrap.html portfolio_data.json Wrap_NAV.xlsx kodex_sectors.json'
           skip_fetch: true

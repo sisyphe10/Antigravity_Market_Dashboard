@@ -282,32 +282,46 @@ def render_table(stocks, category, price_cache):
     if not stocks:
         return '<p style="color:#9ca3af;padding:12px 0;font-size:0.85rem">현재 지정 종목 없음</p>'
 
-    today_str = datetime.now(tz=KST).strftime('%Y-%m-%d')
-    rows_html = ''
+    today_str  = datetime.now(tz=KST).strftime('%Y-%m-%d')
+    today_ts   = pd.Timestamp.now().normalize()
+    rows_html  = ''
     for s in stocks:
         price_df  = price_cache.get(s['code']) if s['code'] else None
         판단일, current_price, target_price = analyze_release(s, price_df, category)
 
         elapsed_str  = f"{s['elapsed']}일"
         cur_str      = f'{current_price:,}원' if current_price is not None else '-'
-        판단일_passed = (판단일 != '-' and 판단일 <= today_str)
 
-        # 판단일 도달 여부에 따라 행 전체 배경색 + 해제가능주가 볼드
-        row_style = ' style="background-color:#fee2e2"' if 판단일_passed else ''
+        # 판단일 기준 구분
+        판단일_passed  = (판단일 != '-' and 판단일 <= today_str)
+        if not 판단일_passed and 판단일 != '-':
+            판단일_ts    = pd.Timestamp(판단일)
+            bdays_left   = len(pd.bdate_range(today_ts + pd.offsets.BDay(1), 판단일_ts))
+            판단일_임박   = bdays_left <= 5
+        else:
+            판단일_임박   = False
+
+        # 배경색: 판단일 도달=#fca5a5(진한), 5영업일 이내=#fee2e2(연한), 나머지=없음
+        if 판단일_passed:
+            row_bg = ' style="background-color:#fca5a5"'
+        elif 판단일_임박:
+            row_bg = ' style="background-color:#fee2e2"'
+        else:
+            row_bg = ''
+
         tgt_style = 'font-weight:700' if 판단일_passed else ''
         tgt_str   = (f'<span style="{tgt_style}">{target_price:,}원</span>'
                      if target_price is not None else '-')
-        date_style = 'color:#374151' if not 판단일_passed else 'color:#374151'
 
         rows_html += f"""
-            <tr{row_style}>
+            <tr{row_bg}>
                 <td>{s['name']}</td>
                 <td>{s['market']}</td>
                 <td class="num">{fmt_marcap(s['marcap'])}</td>
                 <td class="center">{s['notice_date']}</td>
                 <td class="center">{s['designation_date']}</td>
                 <td class="center">{elapsed_str}</td>
-                <td class="center" style="{date_style}">{판단일}</td>
+                <td class="center">{판단일}</td>
                 <td class="num">{cur_str}</td>
                 <td class="num">{tgt_str}</td>
             </tr>"""
