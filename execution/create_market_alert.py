@@ -482,6 +482,13 @@ def create_market_alert():
 
     print("  투자주의 조회 중...")
     stocks_주의 = parse_stocks(fetch_category(session, '투자주의', start_10, today), '투자주의', krx_data)
+    # 종목명 기준 중복 제거: 가장 최근 지정일 1건만 유지
+    seen = {}
+    for s in stocks_주의:
+        name = s['name']
+        if name not in seen or s['designation_date'] > seen[name]['designation_date']:
+            seen[name] = s
+    stocks_주의 = list(seen.values())
     print(f"    → {len(stocks_주의)}건")
 
     print("  투자경고 조회 중...")
