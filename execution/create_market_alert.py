@@ -125,52 +125,59 @@ def count_bdays(designation_date_str):
 # ──────────────────────────────────────────
 # 해제 조건 분석
 # ──────────────────────────────────────────
+def _get_prev_closes(price_df):
+    """전 거래일 기준 종가 시리즈 (오늘 데이터 제외)"""
+    if price_df is None or price_df.empty:
+        return pd.Series(dtype=float)
+    today_kst = datetime.now(tz=KST).date()
+    df = price_df[price_df.index.date < today_kst]
+    return df['Close'] if not df.empty else pd.Series(dtype=float)
+
+
 def analyze_release(stock, price_df, category):
     """
     Returns:
-        imminence  : str  (해제 임박 컬럼)
-        rel_price  : str  (해제 가능 주가 컬럼)
+        imminence     : str       (해제 임박 컬럼)
+        current_price : int|None  (전 거래일 종가)
+        target_price  : int|None  (해제 가능 주가 기준)
     """
     desig_date = stock['designation_date']
     bd_elapsed = count_bdays(desig_date)
     min_bd     = MIN_BDAYS[category]
     remaining  = max(0, min_bd - bd_elapsed)
 
+    closes = _get_prev_closes(price_df)
+
+    # 현재가·목표가 공통 계산 (데이터 있을 때)
+    current_price = int(closes.iloc[-1]) if len(closes) >= 1 else None
+    price_5d      = closes.iloc[-6]  if len(closes) >= 6  else None
+    price_15d     = closes.iloc[-16] if len(closes) >= 16 else None
+    T1 = price_5d  * 1.6 if price_5d  is not None else None
+    T2 = price_15d * 2.0 if price_15d is not None else None
+    thresholds    = [t for t in [T1, T2] if t is not None]
+    target_price  = int(max(thresholds)) if thresholds else None
+
     # ── 기간 미달 ──
     if remaining > 0:
-        return f'D-{remaining}일', '-'
+        return f'D-{remaining}일', current_price, target_price
 
     # ── 투자주의: 기간만 충족하면 해제 (주가 조건 없음) ──
     if category == '투자주의':
-        return '해제 가능', '-'
+        return '해제 가능', current_price, None
 
     # ── 투자경고/위험: 주가 조건 체크 ──
-    if price_df is None or price_df.empty or len(price_df) < 6:
-        return '기간 경과', '-'
+    if current_price is None or T1 is None or T2 is None:
+        return '기간 경과', current_price, target_price
 
-    closes = price_df['Close']
-    current    = closes.iloc[-1]
-    price_5d   = closes.iloc[-6]  if len(closes) >= 6  else None
-    price_15d  = closes.iloc[-16] if len(closes) >= 16 else None
-    max_15d    = closes.iloc[-15:].max()
+    max_15d = closes.iloc[-15:].max() if len(closes) >= 1 else None
+    cond1 = current_price > T1
+    cond2 = current_price > T2
+    cond3 = (current_price >= max_15d) if max_15d is not None else False
 
-    T1 = price_5d  * 1.6 if price_5d  is not None else None
-    T2 = price_15d * 2.0 if price_15d is not None else None
-
-    cond1 = (current > T1)        if T1 is not None else False
-    cond2 = (current > T2)        if T2 is not None else False
-    cond3 = (current >= max_15d)  # 15일 최고가
-
-    # 3가지 모두 충족 → 해제 불가
     if cond1 and cond2 and cond3:
-        # 가장 쉬운 목표: max(T1, T2) 이하로 내려가면 cond1 or cond2 깨짐
-        thresholds = [t for t in [T1, T2] if t is not None]
-        target = max(thresholds) if thresholds else None
-        rel_price = f'{int(target):,}원 이하' if target else '-'
-        return '조건 미충족', rel_price
+        return '조건 미충족', current_price, target_price
 
-    # 하나라도 불충족 → 해제 가능
-    return '해제 가능', '조건 충족'
+    return '해제 가능', current_price, target_price
 
 
 # ──────────────────────────────────────────
@@ -294,7 +301,7 @@ def render_table(stocks, category, price_cache):
     rows_html = ''
     for s in stocks:
         price_df  = price_cache.get(s['code']) if s['code'] else None
-        imminence, rel_price = analyze_release(s, price_df, category)
+        imminence, current_price, target_price = analyze_release(s, price_df, category)
 
         elapsed_str = f"{s['elapsed']}일"
         imm_style   = IMMINENCE_STYLE.get(imminence, 'color:#374151')
@@ -302,6 +309,9 @@ def render_table(stocks, category, price_cache):
         if imminence.startswith('D-'):
             n = int(imminence.replace('D-', '').replace('일', ''))
             imm_style = 'color:#d97706;font-weight:600' if n <= 2 else 'color:#374151'
+
+        cur_str = f'{current_price:,}원' if current_price is not None else '-'
+        tgt_str = f'{target_price:,}원 이하' if target_price is not None else '-'
 
         rows_html += f"""
             <tr>
@@ -313,7 +323,8 @@ def render_table(stocks, category, price_cache):
                 <td class="center">{elapsed_str}</td>
                 <td>{s['warn_type']}</td>
                 <td class="center" style="{imm_style}">{imminence}</td>
-                <td class="center">{rel_price}</td>
+                <td class="num">{cur_str}</td>
+                <td class="num">{tgt_str}</td>
             </tr>"""
 
     return f"""
@@ -329,7 +340,8 @@ def render_table(stocks, category, price_cache):
                     <th class="center">경과일</th>
                     <th>유형</th>
                     <th class="center">해제 임박</th>
-                    <th class="center">해제 가능 주가</th>
+                    <th class="num">현재가</th>
+                    <th class="num">해제 가능 주가</th>
                 </tr>
             </thead>
             <tbody>{rows_html}
