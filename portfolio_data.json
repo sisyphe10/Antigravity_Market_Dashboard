@@ -56,17 +56,6 @@
       "is_today_new": false
     },
     {
-      "code": "000150",
-      "name": "두산",
-      "sector": "상사,자본재",
-      "market_cap": 188658.17775,
-      "weight": 5,
-      "today_return": 5.812897366030881,
-      "contribution": 2.9064486830154403,
-      "cumulative_return": 1.0,
-      "is_today_new": false
-    },
-    {
       "code": "034020",
       "name": "두산에너빌리티",
       "sector": "기계",
@@ -78,14 +67,14 @@
       "is_today_new": false
     },
     {
-      "code": "010060",
-      "name": "OCI홀딩스",
-      "sector": "화학",
-      "market_cap": 27575.932664,
-      "weight": 3,
-      "today_return": -2.1206096752816435,
-      "contribution": -0.6361829025844931,
-      "cumulative_return": 55.0,
+      "code": "000150",
+      "name": "두산",
+      "sector": "상사,자본재",
+      "market_cap": 188658.17775,
+      "weight": 5,
+      "today_return": 5.812897366030881,
+      "contribution": 2.9064486830154403,
+      "cumulative_return": 1.0,
       "is_today_new": false
     },
     {
@@ -97,6 +86,17 @@
       "today_return": 8.64381520119225,
       "contribution": 2.593144560357675,
       "cumulative_return": 150.0,
+      "is_today_new": false
+    },
+    {
+      "code": "010060",
+      "name": "OCI홀딩스",
+      "sector": "화학",
+      "market_cap": 27575.932664,
+      "weight": 3,
+      "today_return": -2.1206096752816435,
+      "contribution": -0.6361829025844931,
+      "cumulative_return": 55.0,
       "is_today_new": false
     },
     {
@@ -256,17 +256,6 @@
       "is_today_new": false
     },
     {
-      "code": "001720",
-      "name": "신영증권",
-      "sector": "증권",
-      "market_cap": 38305.2,
-      "weight": 3,
-      "today_return": -1.8947368421052633,
-      "contribution": -0.5684210526315789,
-      "cumulative_return": -4.115226337448563,
-      "is_today_new": false
-    },
-    {
       "code": "009240",
       "name": "한샘",
       "sector": "건설,건축관련",
@@ -278,14 +267,14 @@
       "is_today_new": false
     },
     {
-      "code": "006260",
-      "name": "LS",
-      "sector": "기계",
-      "market_cap": 92405.5,
+      "code": "001720",
+      "name": "신영증권",
+      "sector": "증권",
+      "market_cap": 38305.2,
       "weight": 3,
-      "today_return": 3.185840707964602,
-      "contribution": 0.9557522123893806,
-      "cumulative_return": 7.564575645756455,
+      "today_return": -1.8947368421052633,
+      "contribution": -0.5684210526315789,
+      "cumulative_return": -4.115226337448563,
       "is_today_new": false
     },
     {
@@ -297,6 +286,17 @@
       "today_return": 3.633217993079585,
       "contribution": 1.0899653979238755,
       "cumulative_return": 1.8130311614730887,
+      "is_today_new": false
+    },
+    {
+      "code": "006260",
+      "name": "LS",
+      "sector": "기계",
+      "market_cap": 92405.5,
+      "weight": 3,
+      "today_return": 3.185840707964602,
+      "contribution": 0.9557522123893806,
+      "cumulative_return": 7.564575645756455,
       "is_today_new": false
     },
     {
