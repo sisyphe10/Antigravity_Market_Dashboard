@@ -1,0 +1,46 @@
+name: Recalculate Wrap NAV
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Wrap_NAV.xlsx'
+  workflow_dispatch:
+
+jobs:
+  recalc:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Calculate Wrap NAV
+        run: python calculate_wrap_nav.py
+        env:
+          TZ: 'Asia/Seoul'
+
+      - name: Calculate Returns
+        run: python calculate_returns.py
+        env:
+          TZ: 'Asia/Seoul'
+
+      - name: Commit and Push
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "auto: Wrap_NAV 기준가·수익률 재계산 [skip ci]"
+          file_pattern: 'Wrap_NAV.xlsx'
+          skip_fetch: true
