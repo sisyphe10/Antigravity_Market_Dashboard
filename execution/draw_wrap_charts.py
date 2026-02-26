@@ -41,7 +41,7 @@ PORTFOLIO_NAMES = {
     '트루밸류': '삼성 트루밸류',
     'Value ESG': 'NH Value ESG',
     '개방형 랩': 'DB 개방형',
-    '목표전환형': 'DB 목표전환형'
+    # '목표전환형': 'DB 목표전환형',  # 1차 완료 (6% 목표달성, 2026-02-25 청산)
 }
 
 def smart_format_yaxis(y, pos):
