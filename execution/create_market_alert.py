@@ -153,8 +153,9 @@ def analyze_release(stock, price_df, category):
     Returns:
         판단일        : str       (해제여부 최초판단일)
         current_price : int|None  (전 거래일 종가)
-        target_price  : int|None  (해제 가능 주가 기준; 투자주의=None)
+        target_price  : int|None  (해제 가능 주가; 투자주의=None)
         is_15d_high   : bool      (오늘 종가 = 최근 15거래일 최고가 → 해제 불가)
+        low_15d       : int|None  (최근 15거래일 최저가)
     """
     desig_date = stock['designation_date']
     판단일      = get_판단일(desig_date, category)
@@ -165,7 +166,7 @@ def analyze_release(stock, price_df, category):
 
     # 투자주의: 주가 조건 없음
     if category == '투자주의':
-        return 판단일, current_price, None, False
+        return 판단일, current_price, None, False, None
 
     # ── 기준 가격: 지정일 이전 종가로 고정 ──────────────────────────────
     desig_ts  = pd.Timestamp(desig_date)
@@ -179,16 +180,19 @@ def analyze_release(stock, price_df, category):
 
     T1 = price_pre1d  * 1.6 if price_pre1d  is not None else None
     T2 = price_pre15d * 2.0 if price_pre15d is not None else None
+    # 모든 조건 동시 충족(교집합) → 가장 엄격한(낮은) 값을 해제 가능 주가로 사용
     thresholds   = [t for t in [T1, T2] if t is not None]
-    target_price = int(max(thresholds)) if thresholds else None
+    target_price = int(min(thresholds)) if thresholds else None
 
     # ── 15거래일 최고가 조건: 오늘 종가 = 최근 15거래일 최고가이면 해제 불가 ──
+    recent_15 = closes.iloc[-15:] if len(closes) >= 15 else closes
     is_15d_high = False
-    if current_price is not None and len(closes) >= 1:
-        recent_15 = closes.iloc[-15:] if len(closes) >= 15 else closes
+    low_15d     = None
+    if current_price is not None and not recent_15.empty:
         is_15d_high = (current_price >= int(recent_15.max()))
+        low_15d     = int(recent_15.min())
 
-    return 판단일, current_price, target_price, is_15d_high
+    return 판단일, current_price, target_price, is_15d_high, low_15d
 
 
 # ──────────────────────────────────────────
@@ -314,7 +318,7 @@ def render_table(stocks, category, price_cache):
     rows_html  = ''
     for s in stocks:
         price_df  = price_cache.get(s['code']) if s['code'] else None
-        판단일, current_price, target_price, is_15d_high = analyze_release(s, price_df, category)
+        판단일, current_price, target_price, is_15d_high, low_15d = analyze_release(s, price_df, category)
 
         elapsed_str  = f"{s['elapsed']}일"
         cur_str      = f'{current_price:,}원' if current_price is not None else '-'
@@ -352,6 +356,8 @@ def render_table(stocks, category, price_cache):
         else:
             tgt_str = f'{target_price:,}원'
 
+        low_str = f'{low_15d:,}원' if low_15d is not None else '-'
+
         rows_html += f"""
             <tr{row_bg}>
                 <td>{s['name']}</td>
@@ -362,6 +368,7 @@ def render_table(stocks, category, price_cache):
                 <td class="center">{elapsed_str}</td>
                 <td class="center">{판단일}</td>
                 <td class="num">{cur_str}</td>
+                <td class="num">{low_str}</td>
                 <td class="num">{tgt_str}</td>
             </tr>"""
 
@@ -378,6 +385,7 @@ def render_table(stocks, category, price_cache):
                     <th class="center">경과일</th>
                     <th class="center">판단일</th>
                     <th class="num">현재가</th>
+                    <th class="num">15일 최저가</th>
                     <th class="num">해제 가능 주가</th>
                 </tr>
             </thead>
@@ -403,7 +411,7 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache):
     </section>"""
 
     note_경고위험 = (
-        '<p class="note">해제 가능 주가: 지정일 전일 종가×1.6 또는 지정일 전 15거래일 종가×2.0 중 높은 값 (급등 유형 기준). '
+        '<p class="note">해제 가능 주가: (지정일 전일 종가×1.6)과 (지정일 전 15거래일 종가×2.0) 중 낮은 값 — 모든 조건 동시 충족 필요 (급등 유형 기준). '
         '판단일 경과 + 현재가 ≤ 해제 가능 주가 + 당일이 15거래일 최고가가 아닐 때 해제 가능. '
         '<span style="color:#ef4444">15일 최고가</span> 표시 시 가격 조건 충족이나 최고가 조건으로 해제 불가.</p>'
     )
