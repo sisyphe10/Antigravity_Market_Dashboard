@@ -6,6 +6,10 @@ import sys
 import re
 import pandas as pd
 import FinanceDataReader as fdr
+import exchange_calendars as xcals
+
+# KRX 거래 캘린더 (한국 공휴일 포함)
+_xkrx = xcals.get_calendar('XKRX')
 
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -135,9 +139,11 @@ def _get_prev_closes(price_df):
 
 
 def get_판단일(designation_date_str, category):
-    """지정일 + MIN_BDAYS 영업일 = 해제여부 최초판단일"""
+    """지정일 포함 MIN_BDAYS 거래일째 = 해제여부 최초판단일 (KRX 실제 거래일 기준, 한국 공휴일 반영)"""
     try:
-        return (pd.Timestamp(designation_date_str) + pd.offsets.BDay(MIN_BDAYS[category])).strftime('%Y-%m-%d')
+        d = pd.Timestamp(designation_date_str)
+        sessions = _xkrx.sessions_window(d, count=MIN_BDAYS[category])
+        return sessions[-1].strftime('%Y-%m-%d')
     except Exception:
         return '-'
 
