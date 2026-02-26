@@ -76,7 +76,6 @@ def get_latest_nav():
         '삼성 트루밸류': latest_row.get('트루밸류', 0),
         'NH Value ESG': latest_row.get('Value ESG', 0),
         'DB 개방형 랩': latest_row.get('개방형 랩', 0),
-        'DB 목표전환형 랩': latest_row.get('목표전환형', 0),
     }
     
     return latest_date, nav_data
@@ -93,7 +92,7 @@ def get_latest_returns():
     # 트루밸류, KOSPI, KOSDAQ 수익률 추출
     returns_data = {}
     
-    for product in ['트루밸류', '목표전환형', 'KOSPI', 'KOSDAQ']:
+    for product in ['트루밸류', 'KOSPI', 'KOSDAQ']:
         returns_data[product] = {
             '1D': latest_row.get(f'{product}_1D', 'N/A'),
             '1W': latest_row.get(f'{product}_1W', 'N/A'),
@@ -203,12 +202,11 @@ def format_message(date, nav_data, returns_data, top_5, bottom_5):
     msg += f"{LINE}\n<b>📈 수익률</b>\n{LINE}\n"
     display_names = {
         '트루밸류': '삼성 트루밸류',
-        '목표전환형': 'DB 목표전환형 랩',
         'KOSPI': 'KOSPI',
         'KOSDAQ': 'KOSDAQ',
     }
     periods = ['1D', '1W', '1M', '3M', '6M', '1Y', 'YTD']
-    for product in ['트루밸류', '목표전환형', 'KOSPI', 'KOSDAQ']:
+    for product in ['트루밸류', 'KOSPI', 'KOSDAQ']:
         if product in returns_data:
             returns = returns_data[product]
             # N/A가 아닌 항목만 표시

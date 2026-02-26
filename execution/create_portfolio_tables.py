@@ -18,8 +18,11 @@ PORTFOLIO_DISPLAY_NAMES = {
     '트루밸류': '삼성 트루밸류',
     'Value ESG': 'NH Value ESG',
     '개방형 랩': 'DB 개방형',
-    '목표전환형': 'DB 목표전환형'
+    # '목표전환형': 'DB 목표전환형',  # 1차 완료 (6% 목표달성, 2026-02-25 청산)
 }
+
+# 표시 제외 포트폴리오 (역사 데이터는 보존하되 대시보드에서 숨김)
+EXCLUDED_PORTFOLIOS = {'목표전환형'}
 
 # 기존 종목 누적 수익률 매핑 (사용자 제공 값)
 EXISTING_STOCK_CUMULATIVE_RETURNS = {
@@ -194,6 +197,10 @@ def create_portfolio_tables():
         processed = set()
         for portfolio_name in nav_df['상품명'].unique():
             if portfolio_name in processed:
+                continue
+
+            if portfolio_name in EXCLUDED_PORTFOLIOS:
+                processed.add(portfolio_name)
                 continue
 
             if portfolio_name in same_portfolios:
