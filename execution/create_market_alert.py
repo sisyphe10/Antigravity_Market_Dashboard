@@ -342,21 +342,20 @@ def render_table(stocks, category, price_cache):
         else:
             row_bg = ''
 
-        # 해제 가능 주가 셀
-        # - 판단일 경과 + 가격조건 충족 + 15d 최고가 아님 → 굵게 (해제 가능)
-        # - 판단일 경과 + 15d 최고가 → 취소선 + 주석 (가격조건 충족이나 15d 최고가로 해제 불가)
+        # 해제 가능 주가 셀: 판단일 경과 + 가격조건 충족 + 15일 최고가 아님 → 굵게
         if target_price is None:
             tgt_str = '-'
-        elif 판단일_passed and is_15d_high:
-            tgt_str = (f'<span style="color:#6b7280;text-decoration:line-through">'
-                       f'{target_price:,}원</span>'
-                       f'<br><span style="font-size:0.7rem;color:#ef4444">15일 최고가</span>')
-        elif 판단일_passed and current_price is not None and current_price <= target_price:
+        elif 판단일_passed and not is_15d_high and current_price is not None and current_price <= target_price:
             tgt_str = f'<span style="font-weight:700">{target_price:,}원</span>'
         else:
             tgt_str = f'{target_price:,}원'
 
-        low_str = f'{low_15d:,}원' if low_15d is not None else '-'
+        if is_15d_high:
+            high_str = '<span style="color:#ef4444;font-weight:700">최고가</span>'
+        elif low_15d is not None:
+            high_str = '-'
+        else:
+            high_str = ''
 
         rows_html += f"""
             <tr{row_bg}>
@@ -368,7 +367,7 @@ def render_table(stocks, category, price_cache):
                 <td class="center">{elapsed_str}</td>
                 <td class="center">{판단일}</td>
                 <td class="num">{cur_str}</td>
-                <td class="num">{low_str}</td>
+                <td class="center">{high_str}</td>
                 <td class="num">{tgt_str}</td>
             </tr>"""
 
@@ -385,7 +384,7 @@ def render_table(stocks, category, price_cache):
                     <th class="center">경과일</th>
                     <th class="center">판단일</th>
                     <th class="num">현재가</th>
-                    <th class="num">15일 최저가</th>
+                    <th class="center">15일 최고가</th>
                     <th class="num">해제 가능 주가</th>
                 </tr>
             </thead>
