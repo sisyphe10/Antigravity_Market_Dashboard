@@ -529,12 +529,7 @@ def create_wrap_returns_table():
             return ""
 
         latest_date = date_list[-1]
-        dates_desc = list(reversed(date_list))
-
-        options_html = '\n'.join(
-            f'<option value="{d}"{" selected" if d == latest_date else ""}>{d}</option>'
-            for d in dates_desc
-        )
+        earliest_date = date_list[0]
 
         def cell_td(val, cell_id):
             s = val if val and val != 'nan' else ''
@@ -557,6 +552,8 @@ def create_wrap_returns_table():
 
         headers = ''.join(f'<th class="rt-ph">{p}</th>' for p in periods)
         data_json = json.dumps(all_data, ensure_ascii=False)
+        # sorted date list for floor-lookup in JS
+        dates_sorted_json = json.dumps(sorted(date_list))
         items_json = json.dumps([[d, k] for d, k in items], ensure_ascii=False)
         periods_json = json.dumps(periods)
 
@@ -566,9 +563,11 @@ def create_wrap_returns_table():
             <div style="max-width:800px;margin:0 auto;background:#fff;border-radius:10px;padding:16px 20px;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
                     <span style="font-size:13px;color:#555;font-weight:600;">기준일</span>
-                    <select id="return-date-select" onchange="updateReturnTable()" style="font-size:13px;padding:4px 10px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;cursor:pointer;color:#222;">
-                        {options_html}
-                    </select>
+                    <input type="date" id="return-date-input" value="{latest_date}"
+                           min="{earliest_date}"
+                           onchange="updateReturnTable()"
+                           style="font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;cursor:pointer;">
+                    <span id="return-actual-date-label" style="font-size:12px;color:#888;"></span>
                 </div>
                 <table class="rt-table">
                     <thead>
@@ -581,11 +580,32 @@ def create_wrap_returns_table():
         <script>
         (function() {{
             var returnData = {data_json};
+            var rtDatesSorted = {dates_sorted_json};
             var rtItems = {items_json};
             var rtPeriods = {periods_json};
-            window.updateReturnTable = function() {{
-                var date = document.getElementById('return-date-select').value;
-                var row = returnData[date] || {{}};
+
+            function floorDate(selected) {{
+                // 선택 날짜 이하의 가장 가까운 데이터 날짜 반환
+                var found = null;
+                for (var i = rtDatesSorted.length - 1; i >= 0; i--) {{
+                    if (rtDatesSorted[i] <= selected) {{
+                        found = rtDatesSorted[i];
+                        break;
+                    }}
+                }}
+                return found;
+            }}
+
+            function applyRow(dataDate) {{
+                var label = document.getElementById('return-actual-date-label');
+                var row = dataDate ? (returnData[dataDate] || {{}}) : {{}};
+                if (dataDate) {{
+                    label.textContent = '(데이터: ' + dataDate + ')';
+                    label.style.display = '';
+                }} else {{
+                    label.textContent = '데이터 없음';
+                    label.style.display = '';
+                }}
                 rtItems.forEach(function(item) {{
                     var key = item[1];
                     rtPeriods.forEach(function(p) {{
@@ -608,7 +628,21 @@ def create_wrap_returns_table():
                         }}
                     }});
                 }});
+            }}
+
+            window.updateReturnTable = function() {{
+                var selected = document.getElementById('return-date-input').value;
+                var dataDate = floorDate(selected);
+                // 선택 날짜 == 실제 데이터 날짜면 라벨 숨김
+                var label = document.getElementById('return-actual-date-label');
+                if (dataDate === selected) {{
+                    label.style.display = 'none';
+                }}
+                applyRow(dataDate);
             }};
+
+            // 초기 로드: 최신 날짜와 일치하므로 라벨 숨김
+            document.getElementById('return-actual-date-label').style.display = 'none';
         }})();
         </script>"""
     except Exception as e:
