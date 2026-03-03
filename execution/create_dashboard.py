@@ -492,7 +492,7 @@ def create_sector_section_html():
 
 
 def create_wrap_returns_table():
-    """WRAP 수익률 비교 테이블 HTML (삼성 트루밸류, DB 목표전환형, KOSPI, KOSDAQ)"""
+    """WRAP 수익률 비교 테이블 HTML (삼성 트루밸류, KOSPI, KOSDAQ) - 날짜 필터 포함"""
     try:
         nav_file = 'Wrap_NAV.xlsx'
         if not os.path.exists(nav_file):
@@ -502,9 +502,6 @@ def create_wrap_returns_table():
         if df_returns.empty:
             return ""
 
-        latest = df_returns.iloc[-1]
-        ref_date = str(latest.get('날짜', ''))[:10]
-
         items = [
             ('삼성 트루밸류', '트루밸류'),
             ('KOSPI', 'KOSPI'),
@@ -512,29 +509,67 @@ def create_wrap_returns_table():
         ]
         periods = ['1D', '1W', '1M', '3M', '6M', '1Y', 'YTD']
 
-        def cell_html(val):
-            s = str(val) if not (isinstance(val, float) and pd.isna(val)) else ''
-            if not s or s == 'nan':
-                return '<td class="rt-cell rt-na">-</td>'
+        # 모든 날짜-데이터 수집
+        all_data = {}
+        date_list = []
+        for _, row in df_returns.iterrows():
+            date_str = str(row.get('날짜', ''))[:10]
+            if not date_str or date_str == 'nan':
+                continue
+            row_data = {}
+            for _, key in items:
+                for p in periods:
+                    col = f'{key}_{p}'
+                    val = row.get(col)
+                    row_data[col] = None if (isinstance(val, float) and pd.isna(val)) else str(val)
+            all_data[date_str] = row_data
+            date_list.append(date_str)
+
+        if not date_list:
+            return ""
+
+        latest_date = date_list[-1]
+        dates_desc = list(reversed(date_list))
+
+        options_html = '\n'.join(
+            f'<option value="{d}"{" selected" if d == latest_date else ""}>{d}</option>'
+            for d in dates_desc
+        )
+
+        def cell_td(val, cell_id):
+            s = val if val and val != 'nan' else ''
+            if not s:
+                return f'<td id="{cell_id}" class="rt-cell rt-na">-</td>'
             try:
                 num = float(s.replace('%', '').strip())
                 cls = 'rt-pos' if num > 0 else 'rt-neg' if num < 0 else 'rt-zero'
             except Exception:
                 cls = ''
-            return f'<td class="rt-cell {cls}">{s}</td>'
+            return f'<td id="{cell_id}" class="rt-cell {cls}">{s}</td>'
 
+        latest_row = all_data.get(latest_date, {})
         rows_html = ''
         for display_name, key in items:
             rows_html += f'<tr><td class="rt-name">{display_name}</td>'
             for p in periods:
-                rows_html += cell_html(latest.get(f'{key}_{p}'))
+                rows_html += cell_td(latest_row.get(f'{key}_{p}'), f'rt-{key}-{p}')
             rows_html += '</tr>\n'
 
         headers = ''.join(f'<th class="rt-ph">{p}</th>' for p in periods)
+        data_json = json.dumps(all_data, ensure_ascii=False)
+        items_json = json.dumps([[d, k] for d, k in items], ensure_ascii=False)
+        periods_json = json.dumps(periods)
+
         return f"""
         <div class="category-section">
             <h2 class="category-title">RETURN</h2>
             <div style="max-width:800px;margin:0 auto;background:#fff;border-radius:10px;padding:16px 20px;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+                    <span style="font-size:13px;color:#555;font-weight:600;">기준일</span>
+                    <select id="return-date-select" onchange="updateReturnTable()" style="font-size:13px;padding:4px 10px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;cursor:pointer;color:#222;">
+                        {options_html}
+                    </select>
+                </div>
                 <table class="rt-table">
                     <thead>
                         <tr><th class="rt-nh"></th>{headers}</tr>
@@ -542,7 +577,40 @@ def create_wrap_returns_table():
                     <tbody>{rows_html}</tbody>
                 </table>
             </div>
-        </div>"""
+        </div>
+        <script>
+        (function() {{
+            var returnData = {data_json};
+            var rtItems = {items_json};
+            var rtPeriods = {periods_json};
+            window.updateReturnTable = function() {{
+                var date = document.getElementById('return-date-select').value;
+                var row = returnData[date] || {{}};
+                rtItems.forEach(function(item) {{
+                    var key = item[1];
+                    rtPeriods.forEach(function(p) {{
+                        var col = key + '_' + p;
+                        var cid = 'rt-' + key + '-' + p;
+                        var cell = document.getElementById(cid);
+                        if (!cell) return;
+                        var val = row[col];
+                        if (!val || val === 'nan') {{
+                            cell.className = 'rt-cell rt-na';
+                            cell.textContent = '-';
+                        }} else {{
+                            var num = parseFloat(val.replace('%', '').trim());
+                            var cls = 'rt-cell';
+                            if (!isNaN(num)) {{
+                                cls += num > 0 ? ' rt-pos' : num < 0 ? ' rt-neg' : ' rt-zero';
+                            }}
+                            cell.className = cls;
+                            cell.textContent = val;
+                        }}
+                    }});
+                }});
+            }};
+        }})();
+        </script>"""
     except Exception as e:
         print(f"Error creating wrap returns table: {e}")
         return ""
