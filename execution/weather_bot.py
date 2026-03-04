@@ -260,7 +260,7 @@ def run_portfolio_update():
             continue
         for s in stocks:
             all_codes.add(s['code'])
-    all_codes.update(['KS11', 'KQ11'])
+    all_codes.update(['^KS11', '^KQ11'])
 
     # 2. 실시간 주가 병렬 조회
     logging.info(f"Update Step 2: Fetching {len(all_codes)} stock prices...")
@@ -273,8 +273,8 @@ def run_portfolio_update():
 
     # 지수 수익률 저장
     portfolio_data['_index'] = {
-        'KOSPI': price_map.get('KS11'),
-        'KOSDAQ': price_map.get('KQ11'),
+        'KOSPI': price_map.get('^KS11'),
+        'KOSDAQ': price_map.get('^KQ11'),
     }
 
     # 3. today_return, contribution, cumulative_return 업데이트
