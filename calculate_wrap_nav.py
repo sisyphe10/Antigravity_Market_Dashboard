@@ -28,8 +28,8 @@ initial_start_date_str = min(cfg['start_date'] for cfg in portfolio_config.value
 
 # 시장 지수
 indices = {
-    'KOSPI': 'KS11',
-    'KOSDAQ': 'KQ11'
+    'KOSPI': '^KS11',
+    'KOSDAQ': '^KQ11'
 }
 
 file_name = 'Wrap_NAV.xlsx'
