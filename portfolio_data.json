@@ -6,9 +6,9 @@
       "sector": "반도체",
       "market_cap": 12934408.85957,
       "weight": 30,
-      "today_return": -8.559712967708867,
-      "contribution": -25.679138903126603,
-      "cumulative_return": -26.98505586740948,
+      "today_return": -9.431060994361866,
+      "contribution": -28.293182983085597,
+      "cumulative_return": -33.871139783553325,
       "is_today_new": false
     },
     {
@@ -17,9 +17,9 @@
       "sector": "반도체",
       "market_cap": 7640169.3528,
       "weight": 15,
-      "today_return": -6.602768903088392,
-      "contribution": -9.904153354632587,
-      "cumulative_return": -12.259680074421485,
+      "today_return": -7.0287539936102235,
+      "contribution": -10.543130990415335,
+      "cumulative_return": -18.426731315196974,
       "is_today_new": false
     },
     {
@@ -28,9 +28,9 @@
       "sector": "미디어,교육",
       "market_cap": 166993.2018,
       "weight": 8,
-      "today_return": -7.232267037552156,
-      "contribution": -5.7858136300417256,
-      "cumulative_return": -53.17823598701501,
+      "today_return": -7.7885952712100135,
+      "contribution": -6.230876216968011,
+      "cumulative_return": -56.824993684827476,
       "is_today_new": false
     },
     {
@@ -39,9 +39,9 @@
       "sector": "상사,자본재",
       "market_cap": 63751.74063,
       "weight": 8,
-      "today_return": -5.8937198067632846,
-      "contribution": -4.714975845410628,
-      "cumulative_return": -32.77268883153581,
+      "today_return": -6.763285024154589,
+      "contribution": -5.410628019323671,
+      "cumulative_return": -37.31946349993436,
       "is_today_new": false
     },
     {
@@ -50,9 +50,9 @@
       "sector": "기계",
       "market_cap": 167032.77738,
       "weight": 8,
-      "today_return": -11.666666666666666,
-      "contribution": -9.333333333333332,
-      "cumulative_return": -42.64535631528473,
+      "today_return": -12.261904761904761,
+      "contribution": -9.80952380952381,
+      "cumulative_return": -49.678128100434336,
       "is_today_new": false
     },
     {
@@ -61,9 +61,9 @@
       "sector": "기계",
       "market_cap": 680916.498198,
       "weight": 5,
-      "today_return": -13.725490196078432,
-      "contribution": -6.862745098039216,
-      "cumulative_return": -74.82852014914248,
+      "today_return": -14.551083591331269,
+      "contribution": -7.275541795665634,
+      "cumulative_return": -78.49124322341586,
       "is_today_new": false
     },
     {
@@ -72,9 +72,9 @@
       "sector": "상사,자본재",
       "market_cap": 205013.9511,
       "weight": 5,
-      "today_return": -13.88888888888889,
-      "contribution": -6.944444444444445,
-      "cumulative_return": -85.94895529811122,
+      "today_return": -14.149305555555555,
+      "contribution": -7.074652777777778,
+      "cumulative_return": -87.93708054672916,
       "is_today_new": false
     },
     {
@@ -83,9 +83,9 @@
       "sector": "증권",
       "market_cap": 411704.242884,
       "weight": 3,
-      "today_return": -12.012012012012011,
-      "contribution": -3.603603603603603,
-      "cumulative_return": -37.45815291877983,
+      "today_return": -12.312312312312311,
+      "contribution": -3.6936936936936933,
+      "cumulative_return": -45.158500457308435,
       "is_today_new": false
     },
     {
@@ -94,9 +94,9 @@
       "sector": "화학",
       "market_cap": 28322.741944,
       "weight": 3,
-      "today_return": -17.07152496626181,
-      "contribution": -5.1214574898785425,
-      "cumulative_return": -54.636926271742766,
+      "today_return": -16.39676113360324,
+      "contribution": -4.919028340080971,
+      "cumulative_return": -62.07500111382544,
       "is_today_new": false
     },
     {
@@ -105,9 +105,9 @@
       "sector": "IT가전",
       "market_cap": 375528.5698,
       "weight": 3,
-      "today_return": -9.191176470588236,
-      "contribution": -2.7573529411764706,
-      "cumulative_return": -78.95514564823404,
+      "today_return": -10.17156862745098,
+      "contribution": -3.051470588235294,
+      "cumulative_return": -81.09573745117102,
       "is_today_new": false
     },
     {
@@ -116,9 +116,9 @@
       "sector": "기계",
       "market_cap": 61731.30586,
       "weight": 3,
-      "today_return": -14.48382126348228,
-      "contribution": -4.345146379044684,
-      "cumulative_return": -58.01352554650834,
+      "today_return": -14.791987673343607,
+      "contribution": -4.437596302003081,
+      "cumulative_return": -64.22415967214039,
       "is_today_new": false
     },
     {
@@ -127,9 +127,9 @@
       "sector": "에너지",
       "market_cap": 22646.043411,
       "weight": 3,
-      "today_return": -13.021868787276341,
-      "contribution": -3.906560636182902,
-      "cumulative_return": -76.44755296370201,
+      "today_return": -13.12127236580517,
+      "contribution": -3.936381709741551,
+      "cumulative_return": -79.53793368814668,
       "is_today_new": false
     }
   ]
