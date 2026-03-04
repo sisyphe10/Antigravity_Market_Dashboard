@@ -69,6 +69,9 @@ def draw_charts():
         # Normalize name variants: KOSPI(USD) -> KOSPI/USD, KOSDAQ(USD) -> KOSDAQ/USD
         df['제품명'] = df['제품명'].str.replace(r'\(USD\)', '/USD', regex=True)
 
+        # 정규화 후 같은 이름이 된 중복 행 제거 (날짜+제품명 기준, 마지막 값 유지)
+        df = df.drop_duplicates(subset=['날짜', '제품명'], keep='last')
+
         # Sort by date
         df = df.sort_values(by='날짜')
 
