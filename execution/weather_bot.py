@@ -226,10 +226,14 @@ def fetch_price(code):
     import pandas as pd
     try:
         df = fdr.DataReader(code, start=pd.Timestamp.now() - timedelta(days=30))
+        # NaN Close 행 제거 후 2행 이상 확인
+        df = df.dropna(subset=['Close'])
         if len(df) < 2:
             return code, None
         latest = df.iloc[-1]['Close']
         prev = df.iloc[-2]['Close']
+        if prev == 0:
+            return code, None
         return code, ((latest - prev) / prev) * 100
     except Exception:
         return code, None
@@ -363,8 +367,9 @@ def format_update_summary(portfolio_data):
     index = portfolio_data.get('_index', {})
     kospi = index.get('KOSPI')
     kosdaq = index.get('KOSDAQ')
-    kospi_str = f"{kospi:+.2f}%" if kospi is not None else "N/A"
-    kosdaq_str = f"{kosdaq:+.2f}%" if kosdaq is not None else "N/A"
+    import math
+    kospi_str = f"{kospi:+.2f}%" if (kospi is not None and not math.isnan(kospi)) else "N/A"
+    kosdaq_str = f"{kosdaq:+.2f}%" if (kosdaq is not None and not math.isnan(kosdaq)) else "N/A"
     lines.append(f"<b><u>KOSPI {kospi_str}  |  KOSDAQ {kosdaq_str}</u></b>")
     lines.append("")
 
