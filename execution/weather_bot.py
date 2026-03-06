@@ -280,10 +280,13 @@ def run_portfolio_update():
 
     # 0. Wrap_NAV.xlsx에서 최신 포트폴리오 구성 반영 → portfolio_data.json 재생성
     logging.info("Update Step 0: Regenerating portfolio_data.json from Wrap_NAV.xlsx...")
-    subprocess.run(
+    step0_result = subprocess.run(
         [sys.executable, "execution/create_portfolio_tables.py"],
-        capture_output=True, text=True, timeout=180
+        capture_output=True, text=True, timeout=180,
+        cwd=dashboard_dir
     )
+    if step0_result.returncode != 0:
+        logging.error(f"Step 0 failed (rc={step0_result.returncode}): {step0_result.stderr[-500:]}")
 
     # 1. 기존 portfolio_data.json 읽기 (종목 코드/비중 이미 확정됨)
     logging.info("Update Step 1: Reading portfolio_data.json...")

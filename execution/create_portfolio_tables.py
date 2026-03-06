@@ -178,7 +178,11 @@ def create_portfolio_tables():
 
         # KRX 종목 리스트 미리 로드
         print("2. KRX 종목 리스트 로드 중...")
-        krx = fdr.StockListing('KRX')
+        try:
+            krx = fdr.StockListing('KRX')
+        except Exception as e:
+            print(f"  Warning: KRX listing unavailable ({e}), market cap will show 0")
+            krx = pd.DataFrame(columns=['Code', 'Marcap'])
 
         # Code 시트에서 FICS 섹터 매핑 로드
         code_df = pd.read_excel(WRAP_NAV_FILE, sheet_name='Code')
