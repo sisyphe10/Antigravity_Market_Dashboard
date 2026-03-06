@@ -219,10 +219,33 @@ async def portfolio_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text=f"❌ 오류가 발생했습니다: {str(e)}"
         )
 
+_NAVER_INDEX_CODES = {
+    '^KS11': 'KOSPI',
+    '^KQ11': 'KOSDAQ',
+}
+
+def _fetch_naver_index_return(naver_code):
+    """네이버 금융에서 지수 등락률 크롤링 (fdr fallback용)"""
+    import re, requests
+    url = f'https://finance.naver.com/sise/sise_index.naver?code={naver_code}'
+    r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=10)
+    r.encoding = 'euc-kr'
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(r.text, 'html.parser')
+    elem = soup.find(id='change_value_and_rate')
+    if not elem:
+        return None
+    text = elem.get_text()
+    m = re.search(r'([+-]?\d[\d.]+)%', text)
+    if not m:
+        return None
+    return float(m.group(1))
+
+
 def fetch_price(code):
     """종목 실시간 가격 조회 (스레드에서 호출)"""
     import FinanceDataReader as fdr
-    from datetime import timedelta, timezone, date as date_type
+    from datetime import timedelta, timezone
     import pandas as pd
     try:
         df = fdr.DataReader(code, start=pd.Timestamp.now() - timedelta(days=30))
@@ -230,13 +253,16 @@ def fetch_price(code):
         df = df.dropna(subset=['Close'])
         if len(df) < 2:
             return code, None
-        # 최신 데이터가 오늘(KST) 것이 아니면 당일 수익률 산출 불가
+        # 최신 데이터가 오늘(KST) 것이 아니면 네이버 fallback 시도
         kst = timezone(timedelta(hours=9))
         today_kst = pd.Timestamp.now(tz=kst).normalize().tz_localize(None).date()
         latest_date = df.index[-1]
         if hasattr(latest_date, 'date'):
             latest_date = latest_date.date()
         if latest_date < today_kst:
+            if code in _NAVER_INDEX_CODES:
+                ret = _fetch_naver_index_return(_NAVER_INDEX_CODES[code])
+                return code, ret
             return code, None
         latest = df.iloc[-1]['Close']
         prev = df.iloc[-2]['Close']
