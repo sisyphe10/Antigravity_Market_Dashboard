@@ -222,13 +222,21 @@ async def portfolio_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def fetch_price(code):
     """종목 실시간 가격 조회 (스레드에서 호출)"""
     import FinanceDataReader as fdr
-    from datetime import timedelta
+    from datetime import timedelta, timezone, date as date_type
     import pandas as pd
     try:
         df = fdr.DataReader(code, start=pd.Timestamp.now() - timedelta(days=30))
-        # NaN Close 행 제거 후 2행 이상 확인
+        # NaN Close 행 제거
         df = df.dropna(subset=['Close'])
         if len(df) < 2:
+            return code, None
+        # 최신 데이터가 오늘(KST) 것이 아니면 당일 수익률 산출 불가
+        kst = timezone(timedelta(hours=9))
+        today_kst = pd.Timestamp.now(tz=kst).normalize().tz_localize(None).date()
+        latest_date = df.index[-1]
+        if hasattr(latest_date, 'date'):
+            latest_date = latest_date.date()
+        if latest_date < today_kst:
             return code, None
         latest = df.iloc[-1]['Close']
         prev = df.iloc[-2]['Close']
