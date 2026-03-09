@@ -91,7 +91,7 @@
 <body>
     <header>
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-03-09 15:35:09 KST</div>
+        <div class="last-updated">Updated: 2026-03-09 15:40:50 KST</div>
         <div class="nav-group">
             <a href="index.html" class="nav-button">← Dashboard</a>
         </div>
@@ -128,7 +128,7 @@
             <div style="max-width:800px;margin:0 auto;background:#fff;border-radius:10px;padding:16px 20px;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
                     <span style="font-size:13px;color:#555;font-weight:600;">기준일</span>
-                    <input type="date" id="return-date-input" value="2026-03-06"
+                    <input type="date" id="return-date-input" value="2026-03-09"
                            min="2026-02-04"
                            onchange="updateReturnTable()"
                            style="font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;cursor:pointer;">
@@ -138,17 +138,17 @@
                     <thead>
                         <tr><th class="rt-nh"></th><th class="rt-ph">1D</th><th class="rt-ph">1W</th><th class="rt-ph">1M</th><th class="rt-ph">3M</th><th class="rt-ph">6M</th><th class="rt-ph">1Y</th><th class="rt-ph">YTD</th></tr>
                     </thead>
-                    <tbody><tr><td class="rt-name">삼성 트루밸류</td><td id="rt-트루밸류-1D" class="rt-cell rt-pos">0.8%</td><td id="rt-트루밸류-1W" class="rt-cell rt-neg">-10.1%</td><td id="rt-트루밸류-1M" class="rt-cell rt-pos">12.7%</td><td id="rt-트루밸류-3M" class="rt-cell rt-pos">56.1%</td><td id="rt-트루밸류-6M" class="rt-cell rt-pos">69.2%</td><td id="rt-트루밸류-1Y" class="rt-cell rt-pos">118.7%</td><td id="rt-트루밸류-YTD" class="rt-cell rt-pos">40.5%</td></tr>
-<tr><td class="rt-name">KOSPI</td><td id="rt-KOSPI-1D" class="rt-cell rt-neg">-0.2%</td><td id="rt-KOSPI-1W" class="rt-cell rt-neg">-10.8%</td><td id="rt-KOSPI-1M" class="rt-cell rt-pos">9.8%</td><td id="rt-KOSPI-3M" class="rt-cell rt-pos">36.3%</td><td id="rt-KOSPI-6M" class="rt-cell rt-pos">74.4%</td><td id="rt-KOSPI-1Y" class="rt-cell rt-pos">117.0%</td><td id="rt-KOSPI-YTD" class="rt-cell rt-pos">32.6%</td></tr>
-<tr><td class="rt-name">KOSDAQ</td><td id="rt-KOSDAQ-1D" class="rt-cell rt-pos">2.6%</td><td id="rt-KOSDAQ-1W" class="rt-cell rt-neg">-3.3%</td><td id="rt-KOSDAQ-1M" class="rt-cell rt-pos">6.6%</td><td id="rt-KOSDAQ-3M" class="rt-cell rt-pos">24.6%</td><td id="rt-KOSDAQ-6M" class="rt-cell rt-pos">42.1%</td><td id="rt-KOSDAQ-1Y" class="rt-cell rt-pos">56.8%</td><td id="rt-KOSDAQ-YTD" class="rt-cell rt-pos">24.5%</td></tr>
+                    <tbody><tr><td class="rt-name">삼성 트루밸류</td><td id="rt-트루밸류-1D" class="rt-cell rt-neg">-6.4%</td><td id="rt-트루밸류-1W" class="rt-cell rt-neg">-15.9%</td><td id="rt-트루밸류-1M" class="rt-cell rt-zero">-0.0%</td><td id="rt-트루밸류-3M" class="rt-cell rt-pos">46.9%</td><td id="rt-트루밸류-6M" class="rt-cell rt-pos">57.0%</td><td id="rt-트루밸류-1Y" class="rt-cell rt-pos">106.1%</td><td id="rt-트루밸류-YTD" class="rt-cell rt-pos">31.4%</td></tr>
+<tr><td class="rt-name">KOSPI</td><td id="rt-KOSPI-1D" class="rt-cell rt-neg">-6.3%</td><td id="rt-KOSPI-1W" class="rt-cell rt-neg">-16.4%</td><td id="rt-KOSPI-1M" class="rt-cell rt-neg">-1.2%</td><td id="rt-KOSPI-3M" class="rt-cell rt-pos">26.4%</td><td id="rt-KOSPI-6M" class="rt-cell rt-pos">60.6%</td><td id="rt-KOSPI-1Y" class="rt-cell rt-pos">104.3%</td><td id="rt-KOSPI-YTD" class="rt-cell rt-pos">24.3%</td></tr>
+<tr><td class="rt-name">KOSDAQ</td><td id="rt-KOSDAQ-1D" class="rt-cell rt-neg">-4.7%</td><td id="rt-KOSDAQ-1W" class="rt-cell rt-neg">-7.8%</td><td id="rt-KOSDAQ-1M" class="rt-cell rt-neg">-2.6%</td><td id="rt-KOSDAQ-3M" class="rt-cell rt-pos">17.9%</td><td id="rt-KOSDAQ-6M" class="rt-cell rt-pos">33.2%</td><td id="rt-KOSDAQ-1Y" class="rt-cell rt-pos">51.0%</td><td id="rt-KOSDAQ-YTD" class="rt-cell rt-pos">18.7%</td></tr>
 </tbody>
                 </table>
             </div>
         </div>
         <script>
         (function() {
-            var returnData = {"2026-02-04": {"트루밸류_1D": "1.5%", "트루밸류_1W": "5.7%", "트루밸류_1M": "28.5%", "트루밸류_3M": "38.6%", "트루밸류_6M": "64.7%", "트루밸류_1Y": "115.2%", "트루밸류_YTD": "28.5%", "KOSPI_1D": "1.6%", "KOSPI_1W": "3.9%", "KOSPI_1M": "24.6%", "KOSPI_3M": null, "KOSPI_6M": null, "KOSPI_1Y": null, "KOSPI_YTD": "24.6%", "KOSDAQ_1D": "0.4%", "KOSDAQ_1W": "1.4%", "KOSDAQ_1M": "21.6%", "KOSDAQ_3M": null, "KOSDAQ_6M": null, "KOSDAQ_1Y": null, "KOSDAQ_YTD": "21.6%"}, "2026-02-10": {"트루밸류_1D": "-0.6%", "트루밸류_1W": "-0.2%", "트루밸류_1M": "19.8%", "트루밸류_3M": "42.0%", "트루밸류_6M": "54.7%", "트루밸류_1Y": "108.5%", "트루밸류_YTD": "26.4%", "KOSPI_1D": "0.1%", "KOSPI_1W": "0.3%", "KOSPI_1M": "15.6%", "KOSPI_3M": null, "KOSPI_6M": null, "KOSPI_1Y": null, "KOSPI_YTD": "23.0%", "KOSDAQ_1D": "-1.1%", "KOSDAQ_1W": "-2.5%", "KOSDAQ_1M": "17.6%", "KOSDAQ_3M": null, "KOSDAQ_6M": null, "KOSDAQ_1Y": null, "KOSDAQ_YTD": "17.9%"}, "2026-02-11": {"트루밸류_1D": "-0.6%", "트루밸류_1W": "-0.2%", "트루밸류_1M": "19.8%", "트루밸류_3M": "42.0%", "트루밸류_6M": "54.7%", "트루밸류_1Y": "108.5%", "트루밸류_YTD": "26.4%", "KOSPI_1D": "0.1%", "KOSPI_1W": "0.3%", "KOSPI_1M": "15.6%", "KOSPI_3M": null, "KOSPI_6M": null, "KOSPI_1Y": null, "KOSPI_YTD": "23.0%", "KOSDAQ_1D": "-1.1%", "KOSDAQ_1W": "-2.5%", "KOSDAQ_1M": "17.6%", "KOSDAQ_3M": null, "KOSDAQ_6M": null, "KOSDAQ_1Y": null, "KOSDAQ_YTD": "17.9%"}, "2026-02-12": {"트루밸류_1D": "3.6%", "트루밸류_1W": "7.1%", "트루밸류_1M": "23.7%", "트루밸류_3M": "47.3%", "트루밸류_6M": "62.3%", "트루밸류_1Y": "116.8%", "트루밸류_YTD": "35.8%", "KOSPI_1D": "3.1%", "KOSPI_1W": "6.9%", "KOSPI_1M": "19.4%", "KOSPI_3M": null, "KOSPI_6M": null, "KOSPI_1Y": null, "KOSPI_YTD": "31.0%", "KOSDAQ_1D": "1.0%", "KOSDAQ_1W": "1.6%", "KOSDAQ_1M": "18.5%", "KOSDAQ_3M": null, "KOSDAQ_6M": null, "KOSDAQ_1Y": null, "KOSDAQ_YTD": "21.7%"}, "2026-02-13": {"트루밸류_1D": "0.7%", "트루밸류_1W": "9.7%", "트루밸류_1M": "24.9%", "트루밸류_3M": "46.5%", "트루밸류_6M": "62.4%", "트루밸류_1Y": "117.9%", "트루밸류_YTD": "36.8%", "KOSPI_1D": "-0.3%", "KOSPI_1W": "8.2%", "KOSPI_1M": "17.4%", "KOSPI_3M": null, "KOSPI_6M": null, "KOSPI_1Y": null, "KOSPI_YTD": "30.7%", "KOSDAQ_1D": "-1.8%", "KOSDAQ_1W": "2.3%", "KOSDAQ_1M": "16.6%", "KOSDAQ_3M": null, "KOSDAQ_6M": null, "KOSDAQ_1Y": null, "KOSDAQ_YTD": "19.5%"}, "2026-02-19": {"트루밸류_1D": "3.8%", "트루밸류_1W": "4.5%", "트루밸류_1M": "22.1%", "트루밸류_3M": "61.6%", "트루밸류_6M": "73.7%", "트루밸류_1Y": "116.4%", "트루밸류_YTD": "42.0%", "KOSPI_1D": "3.1%", "KOSPI_1W": "2.8%", "KOSPI_1M": "15.8%", "KOSPI_3M": "44.5%", "KOSPI_6M": "80.1%", "KOSPI_1Y": "112.5%", "KOSPI_YTD": "34.7%", "KOSDAQ_1D": "4.9%", "KOSDAQ_1W": "3.1%", "KOSDAQ_1M": "19.9%", "KOSDAQ_3M": "33.2%", "KOSDAQ_6M": "47.3%", "KOSDAQ_1Y": "49.1%", "KOSDAQ_YTD": "25.4%"}, "2026-02-20": {"트루밸류_1D": "1.4%", "트루밸류_1W": "5.2%", "트루밸류_1M": "25.2%", "트루밸류_3M": "59.4%", "트루밸류_6M": "77.6%", "트루밸류_1Y": "122.7%", "트루밸류_YTD": "43.9%", "KOSPI_1D": "2.3%", "KOSPI_1W": "5.5%", "KOSPI_1M": "18.9%", "KOSPI_3M": "45.0%", "KOSPI_6M": "85.6%", "KOSPI_1Y": "118.9%", "KOSPI_YTD": "37.8%", "KOSDAQ_1D": "-0.6%", "KOSDAQ_1W": "4.3%", "KOSDAQ_1M": "18.2%", "KOSDAQ_3M": "29.4%", "KOSDAQ_6M": "48.4%", "KOSDAQ_1Y": "50.2%", "KOSDAQ_YTD": "24.7%"}, "2026-02-23": {"트루밸류_1D": "-0.0%", "트루밸류_1W": "5.1%", "트루밸류_1M": "21.7%", "트루밸류_3M": "65.5%", "트루밸류_6M": "76.5%", "트루밸류_1Y": "122.4%", "트루밸류_YTD": "43.8%", "KOSPI_1D": "0.6%", "KOSPI_1W": "6.2%", "KOSPI_1M": "17.2%", "KOSPI_3M": "51.7%", "KOSPI_6M": "84.5%", "KOSPI_1Y": "120.2%", "KOSPI_YTD": "38.7%", "KOSDAQ_1D": "-0.2%", "KOSDAQ_1W": "4.2%", "KOSDAQ_1M": "15.9%", "KOSDAQ_3M": "33.3%", "KOSDAQ_6M": "47.2%", "KOSDAQ_1Y": "48.7%", "KOSDAQ_YTD": "24.5%"}, "2026-02-24": {"트루밸류_1D": "2.5%", "트루밸류_1W": "7.7%", "트루밸류_1M": "24.7%", "트루밸류_3M": "69.7%", "트루밸류_6M": "80.8%", "트루밸류_1Y": "129.8%", "트루밸류_YTD": "47.4%", "KOSPI_1D": "2.1%", "KOSPI_1W": "8.4%", "KOSPI_1M": "19.6%", "KOSPI_3M": "55.2%", "KOSPI_6M": "88.4%", "KOSPI_1Y": "125.7%", "KOSPI_YTD": "41.7%", "KOSDAQ_1D": "1.1%", "KOSDAQ_1W": "5.3%", "KOSDAQ_1M": "17.2%", "KOSDAQ_3M": "36.0%", "KOSDAQ_6M": "48.9%", "KOSDAQ_1Y": "50.6%", "KOSDAQ_YTD": "25.9%"}, "2026-02-25": {"트루밸류_1D": "1.9%", "트루밸류_1W": "9.8%", "트루밸류_1M": "27.1%", "트루밸류_3M": "73.8%", "트루밸류_6M": "82.3%", "트루밸류_1Y": "134.9%", "트루밸류_YTD": "50.2%", "KOSPI_1D": "1.9%", "KOSPI_1W": "10.5%", "KOSPI_1M": "21.9%", "KOSPI_3M": "57.7%", "KOSPI_6M": "89.5%", "KOSPI_1Y": "131.3%", "KOSPI_YTD": "44.4%", "KOSDAQ_1D": "0.0%", "KOSDAQ_1W": "5.3%", "KOSDAQ_1M": "17.2%", "KOSDAQ_3M": "36.1%", "KOSDAQ_6M": "46.0%", "KOSDAQ_1Y": "51.4%", "KOSDAQ_YTD": "25.9%"}, "2026-02-26": {"트루밸류_1D": "4.4%", "트루밸류_1W": "10.5%", "트루밸류_1M": "32.3%", "트루밸류_3M": "76.6%", "트루밸류_6M": "89.6%", "트루밸류_1Y": "144.0%", "트루밸류_YTD": "56.8%", "KOSPI_1D": "3.7%", "KOSPI_1W": "11.1%", "KOSPI_1M": "27.4%", "KOSPI_3M": "59.3%", "KOSPI_6M": "98.4%", "KOSPI_1Y": "138.8%", "KOSPI_YTD": "49.7%", "KOSDAQ_1D": "2.0%", "KOSDAQ_1W": "2.4%", "KOSDAQ_1M": "11.7%", "KOSDAQ_3M": "35.5%", "KOSDAQ_6M": "48.3%", "KOSDAQ_1Y": "54.1%", "KOSDAQ_YTD": "28.5%"}, "2026-02-27": {"트루밸류_1D": "-0.4%", "트루밸류_1W": "8.6%", "트루밸류_1M": "28.1%", "트루밸류_3M": "73.3%", "트루밸류_6M": "89.4%", "트루밸류_1Y": "143.0%", "트루밸류_YTD": "56.2%", "KOSPI_1D": "-0.7%", "KOSPI_1W": "7.9%", "KOSPI_1M": "23.2%", "KOSPI_3M": "57.2%", "KOSPI_6M": "96.6%", "KOSPI_1Y": "139.0%", "KOSPI_YTD": "48.7%", "KOSDAQ_1D": "0.2%", "KOSDAQ_1W": "3.3%", "KOSDAQ_1M": "10.1%", "KOSDAQ_3M": "35.4%", "KOSDAQ_6M": "48.7%", "KOSDAQ_1Y": "54.6%", "KOSDAQ_YTD": "28.8%"}, "2026-03-03": {"트루밸류_1D": "-7.7%", "트루밸류_1W": "-2.1%", "트루밸류_1M": "10.2%", "트루밸류_3M": "60.0%", "트루밸류_6M": "76.1%", "트루밸류_1Y": "130.0%", "트루밸류_YTD": "44.2%", "KOSPI_1D": "-0.7%", "KOSPI_1W": "7.9%", "KOSPI_1M": "23.2%", "KOSPI_3M": "57.2%", "KOSPI_6M": "96.6%", "KOSPI_1Y": "139.0%", "KOSPI_YTD": "48.7%", "KOSDAQ_1D": "0.2%", "KOSDAQ_1W": "3.3%", "KOSDAQ_1M": "10.1%", "KOSDAQ_3M": "35.4%", "KOSDAQ_6M": "48.7%", "KOSDAQ_1Y": "54.6%", "KOSDAQ_YTD": "28.8%"}, "2026-03-04": {"트루밸류_1D": "-11.8%", "트루밸류_1W": "-15.3%", "트루밸류_1M": "-4.3%", "트루밸류_3M": "41.5%", "트루밸류_6M": "54.1%", "트루밸류_1Y": "103.1%", "트루밸류_YTD": "27.2%", "KOSPI_1D": "-12.1%", "KOSPI_1W": "-16.3%", "KOSPI_1M": "-5.2%", "KOSPI_3M": "26.4%", "KOSPI_6M": "59.1%", "KOSPI_1Y": "101.4%", "KOSPI_YTD": "20.9%", "KOSDAQ_1D": "-14.0%", "KOSDAQ_1W": "-16.0%", "KOSDAQ_1M": "-14.9%", "KOSDAQ_3M": "5.2%", "KOSDAQ_6M": "21.5%", "KOSDAQ_1Y": "32.6%", "KOSDAQ_YTD": "5.7%"}, "2026-03-05": {"트루밸류_1D": "9.5%", "트루밸류_1W": "-11.2%", "트루밸류_1M": "9.8%", "트루밸류_3M": "54.8%", "트루밸류_6M": "67.8%", "트루밸류_1Y": "118.2%", "트루밸류_YTD": "39.3%", "KOSPI_1D": "10.0%", "KOSPI_1W": "-11.2%", "KOSPI_1M": "8.5%", "KOSPI_3M": "36.6%", "KOSPI_6M": "74.8%", "KOSPI_1Y": "119.0%", "KOSPI_YTD": "32.9%", "KOSDAQ_1D": "14.9%", "KOSDAQ_1W": "-5.5%", "KOSDAQ_1M": "1.4%", "KOSDAQ_3M": "21.5%", "KOSDAQ_6M": "38.5%", "KOSDAQ_1Y": "50.5%", "KOSDAQ_YTD": "21.4%"}, "2026-03-06": {"트루밸류_1D": "0.8%", "트루밸류_1W": "-10.1%", "트루밸류_1M": "12.7%", "트루밸류_3M": "56.1%", "트루밸류_6M": "69.2%", "트루밸류_1Y": "118.7%", "트루밸류_YTD": "40.5%", "KOSPI_1D": "-0.2%", "KOSPI_1W": "-10.8%", "KOSPI_1M": "9.8%", "KOSPI_3M": "36.3%", "KOSPI_6M": "74.4%", "KOSPI_1Y": "117.0%", "KOSPI_YTD": "32.6%", "KOSDAQ_1D": "2.6%", "KOSDAQ_1W": "-3.3%", "KOSDAQ_1M": "6.6%", "KOSDAQ_3M": "24.6%", "KOSDAQ_6M": "42.1%", "KOSDAQ_1Y": "56.8%", "KOSDAQ_YTD": "24.5%"}};
-            var rtDatesSorted = ["2026-02-04", "2026-02-10", "2026-02-11", "2026-02-12", "2026-02-13", "2026-02-19", "2026-02-20", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-02-27", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06"];
+            var returnData = {"2026-02-04": {"트루밸류_1D": "1.5%", "트루밸류_1W": "5.7%", "트루밸류_1M": "28.5%", "트루밸류_3M": "38.6%", "트루밸류_6M": "64.7%", "트루밸류_1Y": "115.2%", "트루밸류_YTD": "28.5%", "KOSPI_1D": "1.6%", "KOSPI_1W": "3.9%", "KOSPI_1M": "24.6%", "KOSPI_3M": null, "KOSPI_6M": null, "KOSPI_1Y": null, "KOSPI_YTD": "24.6%", "KOSDAQ_1D": "0.4%", "KOSDAQ_1W": "1.4%", "KOSDAQ_1M": "21.6%", "KOSDAQ_3M": null, "KOSDAQ_6M": null, "KOSDAQ_1Y": null, "KOSDAQ_YTD": "21.6%"}, "2026-02-10": {"트루밸류_1D": "-0.6%", "트루밸류_1W": "-0.2%", "트루밸류_1M": "19.8%", "트루밸류_3M": "42.0%", "트루밸류_6M": "54.7%", "트루밸류_1Y": "108.5%", "트루밸류_YTD": "26.4%", "KOSPI_1D": "0.1%", "KOSPI_1W": "0.3%", "KOSPI_1M": "15.6%", "KOSPI_3M": null, "KOSPI_6M": null, "KOSPI_1Y": null, "KOSPI_YTD": "23.0%", "KOSDAQ_1D": "-1.1%", "KOSDAQ_1W": "-2.5%", "KOSDAQ_1M": "17.6%", "KOSDAQ_3M": null, "KOSDAQ_6M": null, "KOSDAQ_1Y": null, "KOSDAQ_YTD": "17.9%"}, "2026-02-11": {"트루밸류_1D": "-0.6%", "트루밸류_1W": "-0.2%", "트루밸류_1M": "19.8%", "트루밸류_3M": "42.0%", "트루밸류_6M": "54.7%", "트루밸류_1Y": "108.5%", "트루밸류_YTD": "26.4%", "KOSPI_1D": "0.1%", "KOSPI_1W": "0.3%", "KOSPI_1M": "15.6%", "KOSPI_3M": null, "KOSPI_6M": null, "KOSPI_1Y": null, "KOSPI_YTD": "23.0%", "KOSDAQ_1D": "-1.1%", "KOSDAQ_1W": "-2.5%", "KOSDAQ_1M": "17.6%", "KOSDAQ_3M": null, "KOSDAQ_6M": null, "KOSDAQ_1Y": null, "KOSDAQ_YTD": "17.9%"}, "2026-02-12": {"트루밸류_1D": "3.6%", "트루밸류_1W": "7.1%", "트루밸류_1M": "23.7%", "트루밸류_3M": "47.3%", "트루밸류_6M": "62.3%", "트루밸류_1Y": "116.8%", "트루밸류_YTD": "35.8%", "KOSPI_1D": "3.1%", "KOSPI_1W": "6.9%", "KOSPI_1M": "19.4%", "KOSPI_3M": null, "KOSPI_6M": null, "KOSPI_1Y": null, "KOSPI_YTD": "31.0%", "KOSDAQ_1D": "1.0%", "KOSDAQ_1W": "1.6%", "KOSDAQ_1M": "18.5%", "KOSDAQ_3M": null, "KOSDAQ_6M": null, "KOSDAQ_1Y": null, "KOSDAQ_YTD": "21.7%"}, "2026-02-13": {"트루밸류_1D": "0.7%", "트루밸류_1W": "9.7%", "트루밸류_1M": "24.9%", "트루밸류_3M": "46.5%", "트루밸류_6M": "62.4%", "트루밸류_1Y": "117.9%", "트루밸류_YTD": "36.8%", "KOSPI_1D": "-0.3%", "KOSPI_1W": "8.2%", "KOSPI_1M": "17.4%", "KOSPI_3M": null, "KOSPI_6M": null, "KOSPI_1Y": null, "KOSPI_YTD": "30.7%", "KOSDAQ_1D": "-1.8%", "KOSDAQ_1W": "2.3%", "KOSDAQ_1M": "16.6%", "KOSDAQ_3M": null, "KOSDAQ_6M": null, "KOSDAQ_1Y": null, "KOSDAQ_YTD": "19.5%"}, "2026-02-19": {"트루밸류_1D": "3.8%", "트루밸류_1W": "4.5%", "트루밸류_1M": "22.1%", "트루밸류_3M": "61.6%", "트루밸류_6M": "73.7%", "트루밸류_1Y": "116.4%", "트루밸류_YTD": "42.0%", "KOSPI_1D": "3.1%", "KOSPI_1W": "2.8%", "KOSPI_1M": "15.8%", "KOSPI_3M": "44.5%", "KOSPI_6M": "80.1%", "KOSPI_1Y": "112.5%", "KOSPI_YTD": "34.7%", "KOSDAQ_1D": "4.9%", "KOSDAQ_1W": "3.1%", "KOSDAQ_1M": "19.9%", "KOSDAQ_3M": "33.2%", "KOSDAQ_6M": "47.3%", "KOSDAQ_1Y": "49.1%", "KOSDAQ_YTD": "25.4%"}, "2026-02-20": {"트루밸류_1D": "1.4%", "트루밸류_1W": "5.2%", "트루밸류_1M": "25.2%", "트루밸류_3M": "59.4%", "트루밸류_6M": "77.6%", "트루밸류_1Y": "122.7%", "트루밸류_YTD": "43.9%", "KOSPI_1D": "2.3%", "KOSPI_1W": "5.5%", "KOSPI_1M": "18.9%", "KOSPI_3M": "45.0%", "KOSPI_6M": "85.6%", "KOSPI_1Y": "118.9%", "KOSPI_YTD": "37.8%", "KOSDAQ_1D": "-0.6%", "KOSDAQ_1W": "4.3%", "KOSDAQ_1M": "18.2%", "KOSDAQ_3M": "29.4%", "KOSDAQ_6M": "48.4%", "KOSDAQ_1Y": "50.2%", "KOSDAQ_YTD": "24.7%"}, "2026-02-23": {"트루밸류_1D": "-0.0%", "트루밸류_1W": "5.1%", "트루밸류_1M": "21.7%", "트루밸류_3M": "65.5%", "트루밸류_6M": "76.5%", "트루밸류_1Y": "122.4%", "트루밸류_YTD": "43.8%", "KOSPI_1D": "0.6%", "KOSPI_1W": "6.2%", "KOSPI_1M": "17.2%", "KOSPI_3M": "51.7%", "KOSPI_6M": "84.5%", "KOSPI_1Y": "120.2%", "KOSPI_YTD": "38.7%", "KOSDAQ_1D": "-0.2%", "KOSDAQ_1W": "4.2%", "KOSDAQ_1M": "15.9%", "KOSDAQ_3M": "33.3%", "KOSDAQ_6M": "47.2%", "KOSDAQ_1Y": "48.7%", "KOSDAQ_YTD": "24.5%"}, "2026-02-24": {"트루밸류_1D": "2.5%", "트루밸류_1W": "7.7%", "트루밸류_1M": "24.7%", "트루밸류_3M": "69.7%", "트루밸류_6M": "80.8%", "트루밸류_1Y": "129.8%", "트루밸류_YTD": "47.4%", "KOSPI_1D": "2.1%", "KOSPI_1W": "8.4%", "KOSPI_1M": "19.6%", "KOSPI_3M": "55.2%", "KOSPI_6M": "88.4%", "KOSPI_1Y": "125.7%", "KOSPI_YTD": "41.7%", "KOSDAQ_1D": "1.1%", "KOSDAQ_1W": "5.3%", "KOSDAQ_1M": "17.2%", "KOSDAQ_3M": "36.0%", "KOSDAQ_6M": "48.9%", "KOSDAQ_1Y": "50.6%", "KOSDAQ_YTD": "25.9%"}, "2026-02-25": {"트루밸류_1D": "1.9%", "트루밸류_1W": "9.8%", "트루밸류_1M": "27.1%", "트루밸류_3M": "73.8%", "트루밸류_6M": "82.3%", "트루밸류_1Y": "134.9%", "트루밸류_YTD": "50.2%", "KOSPI_1D": "1.9%", "KOSPI_1W": "10.5%", "KOSPI_1M": "21.9%", "KOSPI_3M": "57.7%", "KOSPI_6M": "89.5%", "KOSPI_1Y": "131.3%", "KOSPI_YTD": "44.4%", "KOSDAQ_1D": "0.0%", "KOSDAQ_1W": "5.3%", "KOSDAQ_1M": "17.2%", "KOSDAQ_3M": "36.1%", "KOSDAQ_6M": "46.0%", "KOSDAQ_1Y": "51.4%", "KOSDAQ_YTD": "25.9%"}, "2026-02-26": {"트루밸류_1D": "4.4%", "트루밸류_1W": "10.5%", "트루밸류_1M": "32.3%", "트루밸류_3M": "76.6%", "트루밸류_6M": "89.6%", "트루밸류_1Y": "144.0%", "트루밸류_YTD": "56.8%", "KOSPI_1D": "3.7%", "KOSPI_1W": "11.1%", "KOSPI_1M": "27.4%", "KOSPI_3M": "59.3%", "KOSPI_6M": "98.4%", "KOSPI_1Y": "138.8%", "KOSPI_YTD": "49.7%", "KOSDAQ_1D": "2.0%", "KOSDAQ_1W": "2.4%", "KOSDAQ_1M": "11.7%", "KOSDAQ_3M": "35.5%", "KOSDAQ_6M": "48.3%", "KOSDAQ_1Y": "54.1%", "KOSDAQ_YTD": "28.5%"}, "2026-02-27": {"트루밸류_1D": "-0.4%", "트루밸류_1W": "8.6%", "트루밸류_1M": "28.1%", "트루밸류_3M": "73.3%", "트루밸류_6M": "89.4%", "트루밸류_1Y": "143.0%", "트루밸류_YTD": "56.2%", "KOSPI_1D": "-0.7%", "KOSPI_1W": "7.9%", "KOSPI_1M": "23.2%", "KOSPI_3M": "57.2%", "KOSPI_6M": "96.6%", "KOSPI_1Y": "139.0%", "KOSPI_YTD": "48.7%", "KOSDAQ_1D": "0.2%", "KOSDAQ_1W": "3.3%", "KOSDAQ_1M": "10.1%", "KOSDAQ_3M": "35.4%", "KOSDAQ_6M": "48.7%", "KOSDAQ_1Y": "54.6%", "KOSDAQ_YTD": "28.8%"}, "2026-03-03": {"트루밸류_1D": "-7.7%", "트루밸류_1W": "-2.1%", "트루밸류_1M": "10.2%", "트루밸류_3M": "60.0%", "트루밸류_6M": "76.1%", "트루밸류_1Y": "130.0%", "트루밸류_YTD": "44.2%", "KOSPI_1D": "-0.7%", "KOSPI_1W": "7.9%", "KOSPI_1M": "23.2%", "KOSPI_3M": "57.2%", "KOSPI_6M": "96.6%", "KOSPI_1Y": "139.0%", "KOSPI_YTD": "48.7%", "KOSDAQ_1D": "0.2%", "KOSDAQ_1W": "3.3%", "KOSDAQ_1M": "10.1%", "KOSDAQ_3M": "35.4%", "KOSDAQ_6M": "48.7%", "KOSDAQ_1Y": "54.6%", "KOSDAQ_YTD": "28.8%"}, "2026-03-04": {"트루밸류_1D": "-11.8%", "트루밸류_1W": "-15.3%", "트루밸류_1M": "-4.3%", "트루밸류_3M": "41.5%", "트루밸류_6M": "54.1%", "트루밸류_1Y": "103.1%", "트루밸류_YTD": "27.2%", "KOSPI_1D": "-12.1%", "KOSPI_1W": "-16.3%", "KOSPI_1M": "-5.2%", "KOSPI_3M": "26.4%", "KOSPI_6M": "59.1%", "KOSPI_1Y": "101.4%", "KOSPI_YTD": "20.9%", "KOSDAQ_1D": "-14.0%", "KOSDAQ_1W": "-16.0%", "KOSDAQ_1M": "-14.9%", "KOSDAQ_3M": "5.2%", "KOSDAQ_6M": "21.5%", "KOSDAQ_1Y": "32.6%", "KOSDAQ_YTD": "5.7%"}, "2026-03-05": {"트루밸류_1D": "9.5%", "트루밸류_1W": "-11.2%", "트루밸류_1M": "9.8%", "트루밸류_3M": "54.8%", "트루밸류_6M": "67.8%", "트루밸류_1Y": "118.2%", "트루밸류_YTD": "39.3%", "KOSPI_1D": "10.0%", "KOSPI_1W": "-11.2%", "KOSPI_1M": "8.5%", "KOSPI_3M": "36.6%", "KOSPI_6M": "74.8%", "KOSPI_1Y": "119.0%", "KOSPI_YTD": "32.9%", "KOSDAQ_1D": "14.9%", "KOSDAQ_1W": "-5.5%", "KOSDAQ_1M": "1.4%", "KOSDAQ_3M": "21.5%", "KOSDAQ_6M": "38.5%", "KOSDAQ_1Y": "50.5%", "KOSDAQ_YTD": "21.4%"}, "2026-03-06": {"트루밸류_1D": "0.8%", "트루밸류_1W": "-10.1%", "트루밸류_1M": "12.7%", "트루밸류_3M": "56.1%", "트루밸류_6M": "69.2%", "트루밸류_1Y": "118.7%", "트루밸류_YTD": "40.5%", "KOSPI_1D": "-0.2%", "KOSPI_1W": "-10.8%", "KOSPI_1M": "9.8%", "KOSPI_3M": "36.3%", "KOSPI_6M": "74.4%", "KOSPI_1Y": "117.0%", "KOSPI_YTD": "32.6%", "KOSDAQ_1D": "2.6%", "KOSDAQ_1W": "-3.3%", "KOSDAQ_1M": "6.6%", "KOSDAQ_3M": "24.6%", "KOSDAQ_6M": "42.1%", "KOSDAQ_1Y": "56.8%", "KOSDAQ_YTD": "24.5%"}, "2026-03-09": {"트루밸류_1D": "-6.4%", "트루밸류_1W": "-15.9%", "트루밸류_1M": "-0.0%", "트루밸류_3M": "46.9%", "트루밸류_6M": "57.0%", "트루밸류_1Y": "106.1%", "트루밸류_YTD": "31.4%", "KOSPI_1D": "-6.3%", "KOSPI_1W": "-16.4%", "KOSPI_1M": "-1.2%", "KOSPI_3M": "26.4%", "KOSPI_6M": "60.6%", "KOSPI_1Y": "104.3%", "KOSPI_YTD": "24.3%", "KOSDAQ_1D": "-4.7%", "KOSDAQ_1W": "-7.8%", "KOSDAQ_1M": "-2.6%", "KOSDAQ_3M": "17.9%", "KOSDAQ_6M": "33.2%", "KOSDAQ_1Y": "51.0%", "KOSDAQ_YTD": "18.7%"}};
+            var rtDatesSorted = ["2026-02-04", "2026-02-10", "2026-02-11", "2026-02-12", "2026-02-13", "2026-02-19", "2026-02-20", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-02-27", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09"];
             var rtItems = [["삼성 트루밸류", "트루밸류"], ["KOSPI", "KOSPI"], ["KOSDAQ", "KOSDAQ"]];
             var rtPeriods = ["1D", "1W", "1M", "3M", "6M", "1Y", "YTD"];
 
@@ -245,7 +245,7 @@
                                 <td>30%</td>
                                 <td class="negative">-7.8%</td>
                                 <td class="negative">-23.4</td>
-                                <td class="positive">+176.6%</td>
+                                <td class="positive">+200.0%</td>
                             </tr>
                 
                             <tr>
@@ -257,7 +257,7 @@
                                 <td>15%</td>
                                 <td class="negative">-9.5%</td>
                                 <td class="negative">-14.3</td>
-                                <td class="positive">+174.1%</td>
+                                <td class="positive">+203.0%</td>
                             </tr>
                 
                             <tr>
@@ -269,7 +269,7 @@
                                 <td>8%</td>
                                 <td class="negative">-2.0%</td>
                                 <td class="negative">-1.6</td>
-                                <td class="positive">+66.6%</td>
+                                <td class="positive">+70.0%</td>
                             </tr>
                 
                             <tr>
@@ -281,7 +281,7 @@
                                 <td>8%</td>
                                 <td class="negative">-6.6%</td>
                                 <td class="negative">-5.3</td>
-                                <td class="positive">+75.6%</td>
+                                <td class="positive">+88.0%</td>
                             </tr>
                 
                             <tr>
@@ -293,7 +293,7 @@
                                 <td>8%</td>
                                 <td class="negative">-11.2%</td>
                                 <td class="negative">-8.9</td>
-                                <td class="negative">-2.0%</td>
+                                <td class="positive">+10.3%</td>
                             </tr>
                 
                             <tr>
@@ -305,7 +305,7 @@
                                 <td>5%</td>
                                 <td class="negative">-1.8%</td>
                                 <td class="negative">-0.9</td>
-                                <td class="positive">+39.4%</td>
+                                <td class="positive">+42.0%</td>
                             </tr>
                 
                             <tr>
@@ -317,7 +317,7 @@
                                 <td>5%</td>
                                 <td class="negative">-6.7%</td>
                                 <td class="negative">-3.3</td>
-                                <td class="negative">-5.7%</td>
+                                <td class="positive">+1.0%</td>
                             </tr>
                 
                             <tr>
@@ -329,7 +329,7 @@
                                 <td>3%</td>
                                 <td class="negative">-4.3%</td>
                                 <td class="negative">-1.3</td>
-                                <td class="positive">+139.2%</td>
+                                <td class="positive">+150.0%</td>
                             </tr>
                 
                             <tr>
@@ -341,7 +341,7 @@
                                 <td>3%</td>
                                 <td class="negative">-3.3%</td>
                                 <td class="negative">-1.0</td>
-                                <td class="positive">+49.9%</td>
+                                <td class="positive">+55.0%</td>
                             </tr>
                 
                             <tr>
@@ -353,7 +353,7 @@
                                 <td>3%</td>
                                 <td class="negative">-5.2%</td>
                                 <td class="negative">-1.6</td>
-                                <td class="negative">-4.6%</td>
+                                <td class="positive">+0.7%</td>
                             </tr>
                 
                             <tr>
@@ -365,7 +365,7 @@
                                 <td>3%</td>
                                 <td class="negative">-4.5%</td>
                                 <td class="negative">-1.4</td>
-                                <td class="negative">-16.5%</td>
+                                <td class="negative">-12.5%</td>
                             </tr>
                 
                             <tr>
@@ -377,7 +377,7 @@
                                 <td>3%</td>
                                 <td class="negative">-4.7%</td>
                                 <td class="negative">-1.4</td>
-                                <td class="negative">-12.2%</td>
+                                <td class="negative">-7.9%</td>
                             </tr>
                 
                             <tr class="total-row">
