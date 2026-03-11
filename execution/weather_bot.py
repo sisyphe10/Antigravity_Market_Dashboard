@@ -621,7 +621,7 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
         logging.info("Step 3-0: Regenerating market alert page...")
         subprocess.run(
             [sys.executable, "execution/create_market_alert.py"],
-            capture_output=True, text=True, timeout=60
+            capture_output=True, text=True, timeout=180
         )
 
         # 3. Dashboard 재생성 및 push
@@ -697,7 +697,7 @@ def _nightly_refresh_sync():
     # 투자유의종목 페이지 재생성
     subprocess.run(
         [sys.executable, "execution/create_market_alert.py"],
-        cwd=dashboard_dir, capture_output=True, text=True, timeout=60
+        cwd=dashboard_dir, capture_output=True, text=True, timeout=180
     )
 
     # 대시보드 재생성
