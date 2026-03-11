@@ -248,21 +248,23 @@ def fetch_price(code):
     from datetime import timedelta, timezone
     import pandas as pd
     try:
+        # 지수는 항상 네이버에서 직접 등락률 조회 (FDR 데이터 누락 이슈 방지)
+        if code in _NAVER_INDEX_CODES:
+            ret = _fetch_naver_index_return(_NAVER_INDEX_CODES[code])
+            return code, ret
+
         df = fdr.DataReader(code, start=pd.Timestamp.now() - timedelta(days=30))
         # NaN Close 행 제거
         df = df.dropna(subset=['Close'])
         if len(df) < 2:
             return code, None
-        # 최신 데이터가 오늘(KST) 것이 아니면 네이버 fallback 시도
+        # 최신 데이터가 오늘(KST) 것이 아니면 데이터 없음
         kst = timezone(timedelta(hours=9))
         today_kst = pd.Timestamp.now(tz=kst).normalize().tz_localize(None).date()
         latest_date = df.index[-1]
         if hasattr(latest_date, 'date'):
             latest_date = latest_date.date()
         if latest_date < today_kst:
-            if code in _NAVER_INDEX_CODES:
-                ret = _fetch_naver_index_return(_NAVER_INDEX_CODES[code])
-                return code, ret
             return code, None
         latest = df.iloc[-1]['Close']
         prev = df.iloc[-2]['Close']
