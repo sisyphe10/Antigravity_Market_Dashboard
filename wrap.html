@@ -86,12 +86,46 @@
         .rt-zero { color:#555; }
         .rt-na { color:#bbb; }
         .rt-table tbody tr:hover td { background:#f9fafb; }
+        /* Password overlay */
+        .pw-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #f8f9fa; display: flex; align-items: center; justify-content: center;
+            z-index: 9999;
+        }
+        .pw-box {
+            background: #fff; padding: 40px; border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15); text-align: center; max-width: 360px; width: 90%;
+        }
+        .pw-box h2 { margin: 0 0 20px 0; font-size: 1.4rem; color: #333; }
+        .pw-box input {
+            width: 100%; padding: 12px; font-size: 1.1rem; border: 2px solid #ddd;
+            border-radius: 8px; text-align: center; outline: none; box-sizing: border-box;
+        }
+        .pw-box input:focus { border-color: #1e40af; }
+        .pw-box button {
+            margin-top: 14px; padding: 10px 40px; font-size: 1rem; font-weight: 600;
+            background: #1e40af; color: #fff; border: none; border-radius: 8px; cursor: pointer;
+        }
+        .pw-box button:hover { background: #1e3a8a; }
+        .pw-error { color: #dc2626; font-size: 0.9rem; margin-top: 10px; display: none; }
+        .pw-hidden { display: none !important; }
     </style>
 </head>
 <body>
+    <div id="pwOverlay" class="pw-overlay">
+        <div class="pw-box">
+            <h2>🔒 Password Required</h2>
+            <input type="password" id="pwInput" placeholder="비밀번호 입력" autofocus
+                   onkeydown="if(event.key==='Enter')checkPw()">
+            <button onclick="checkPw()">확인</button>
+            <div id="pwError" class="pw-error">비밀번호가 틀렸습니다.</div>
+        </div>
+    </div>
+
+    <div id="mainContent" class="pw-hidden">
     <header>
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-03-11 12:30:09 KST</div>
+        <div class="last-updated">Updated: 2026-03-11 11:02:43 KST</div>
         <div class="nav-group">
             <a href="index.html" class="nav-button">← Dashboard</a>
         </div>
@@ -238,153 +272,153 @@
             
                             <tr>
                                 <td>1</td>
-                                <td>005930</td>
+                                <td>5930.0</td>
                                 <td>삼성전자</td>
-                                <td>반도체</td>
+                                <td>기타</td>
                                 <td>N/A</td>
                                 <td>30%</td>
-                                <td class="positive">+2.6%</td>
-                                <td class="positive">+7.7</td>
-                                <td class="positive">+207.7%</td>
+                                <td class="">N/A</td>
+                                <td class="">N/A</td>
+                                <td class="">N/A</td>
                             </tr>
                 
                             <tr>
                                 <td>2</td>
-                                <td>000660</td>
+                                <td>0660.0</td>
                                 <td>SK하이닉스</td>
-                                <td>반도체</td>
+                                <td>기타</td>
                                 <td>N/A</td>
                                 <td>15%</td>
-                                <td class="positive">+4.3%</td>
-                                <td class="positive">+6.5</td>
-                                <td class="positive">+216.1%</td>
+                                <td class="">N/A</td>
+                                <td class="">N/A</td>
+                                <td class="">N/A</td>
                             </tr>
                 
                             <tr>
                                 <td>3</td>
-                                <td>352820</td>
+                                <td>352820.0</td>
                                 <td>하이브</td>
-                                <td>미디어,교육</td>
+                                <td>기타</td>
                                 <td>N/A</td>
                                 <td>8%</td>
-                                <td class="positive">+3.0%</td>
-                                <td class="positive">+2.4</td>
-                                <td class="positive">+75.1%</td>
+                                <td class="">N/A</td>
+                                <td class="">N/A</td>
+                                <td class="">N/A</td>
                             </tr>
                 
                             <tr>
                                 <td>4</td>
-                                <td>001040</td>
+                                <td>1040.0</td>
                                 <td>CJ</td>
-                                <td>상사,자본재</td>
+                                <td>기타</td>
                                 <td>N/A</td>
                                 <td>8%</td>
-                                <td class="positive">+5.4%</td>
-                                <td class="positive">+4.3</td>
-                                <td class="positive">+98.1%</td>
+                                <td class="">N/A</td>
+                                <td class="">N/A</td>
+                                <td class="">N/A</td>
                             </tr>
                 
                             <tr>
                                 <td>5</td>
-                                <td>277810</td>
+                                <td>277810.0</td>
                                 <td>레인보우로보틱스</td>
-                                <td>기계</td>
+                                <td>기타</td>
                                 <td>N/A</td>
                                 <td>8%</td>
-                                <td class="positive">+1.2%</td>
-                                <td class="positive">+0.9</td>
-                                <td class="positive">+14.9%</td>
+                                <td class="">N/A</td>
+                                <td class="">N/A</td>
+                                <td class="">N/A</td>
                             </tr>
                 
                             <tr>
                                 <td>6</td>
-                                <td>034020</td>
+                                <td>34020.0</td>
                                 <td>두산에너빌리티</td>
-                                <td>기계</td>
+                                <td>기타</td>
                                 <td>N/A</td>
                                 <td>5%</td>
-                                <td class="">+0.0%</td>
-                                <td class="">+0.0</td>
-                                <td class="positive">+42.0%</td>
+                                <td class="">N/A</td>
+                                <td class="">N/A</td>
+                                <td class="">N/A</td>
                             </tr>
                 
                             <tr>
                                 <td>7</td>
-                                <td>000150</td>
+                                <td>0150.0</td>
                                 <td>두산</td>
-                                <td>상사,자본재</td>
+                                <td>기타</td>
                                 <td>N/A</td>
                                 <td>5%</td>
-                                <td class="positive">+9.2%</td>
-                                <td class="positive">+4.6</td>
-                                <td class="positive">+10.3%</td>
+                                <td class="">N/A</td>
+                                <td class="">N/A</td>
+                                <td class="">N/A</td>
                             </tr>
                 
                             <tr>
                                 <td>8</td>
-                                <td>006800</td>
+                                <td>6800.0</td>
                                 <td>미래에셋증권</td>
-                                <td>증권</td>
+                                <td>기타</td>
                                 <td>N/A</td>
                                 <td>3%</td>
-                                <td class="positive">+14.1%</td>
-                                <td class="positive">+4.2</td>
-                                <td class="positive">+185.2%</td>
+                                <td class="">N/A</td>
+                                <td class="">N/A</td>
+                                <td class="">N/A</td>
                             </tr>
                 
                             <tr>
                                 <td>9</td>
-                                <td>010060</td>
+                                <td>10060.0</td>
                                 <td>OCI홀딩스</td>
-                                <td>화학</td>
+                                <td>기타</td>
                                 <td>N/A</td>
                                 <td>3%</td>
-                                <td class="positive">+5.9%</td>
-                                <td class="positive">+1.8</td>
-                                <td class="positive">+64.1%</td>
+                                <td class="">N/A</td>
+                                <td class="">N/A</td>
+                                <td class="">N/A</td>
                             </tr>
                 
                             <tr>
                                 <td>10</td>
-                                <td>006400</td>
+                                <td>6400.0</td>
                                 <td>삼성SDI</td>
-                                <td>IT가전</td>
+                                <td>기타</td>
                                 <td>N/A</td>
                                 <td>3%</td>
-                                <td class="positive">+1.9%</td>
-                                <td class="positive">+0.6</td>
-                                <td class="positive">+8.3%</td>
+                                <td class="">N/A</td>
+                                <td class="">N/A</td>
+                                <td class="">N/A</td>
                             </tr>
                 
                             <tr>
                                 <td>11</td>
-                                <td>241560</td>
+                                <td>241560.0</td>
                                 <td>두산밥캣</td>
-                                <td>기계</td>
+                                <td>기타</td>
                                 <td>N/A</td>
                                 <td>3%</td>
-                                <td class="positive">+5.4%</td>
-                                <td class="positive">+1.6</td>
-                                <td class="positive">+2.3%</td>
+                                <td class="">N/A</td>
+                                <td class="">N/A</td>
+                                <td class="">N/A</td>
                             </tr>
                 
                             <tr>
                                 <td>12</td>
-                                <td>112610</td>
+                                <td>112610.0</td>
                                 <td>씨에스윈드</td>
-                                <td>에너지</td>
+                                <td>기타</td>
                                 <td>N/A</td>
                                 <td>3%</td>
-                                <td class="positive">+4.1%</td>
-                                <td class="positive">+1.2</td>
-                                <td class="positive">+2.9%</td>
+                                <td class="">N/A</td>
+                                <td class="">N/A</td>
+                                <td class="">N/A</td>
                             </tr>
                 
                             <tr class="total-row">
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
                                 <td style="font-weight: 600;">94%</td>
-                                <td class="positive" style="font-weight: 600;">+3.6%</td>
-                                <td class="positive" style="font-weight: 600;">+35.7</td>
+                                <td class="" style="font-weight: 600;">N/A</td>
+                                <td class="" style="font-weight: 600;">N/A</td>
                                 <td style="font-weight: 600;">-</td>
                             </tr>
                         </tbody>
@@ -627,5 +661,29 @@
             
 
     <footer><p>Auto-generated by Antigravity Agent</p></footer>
+    </div>
+
+    <script>
+    async function sha256(msg) {
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+        return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+    async function checkPw() {
+        const hash = await sha256(document.getElementById('pwInput').value);
+        if (hash === '7d78e91672fb21bfd70f2c3a5df40ee3d3cf052ae66a133df53822cc8bad44ee') {
+            document.getElementById('pwOverlay').style.display = 'none';
+            document.getElementById('mainContent').classList.remove('pw-hidden');
+            sessionStorage.setItem('wrap_auth', '1');
+        } else {
+            document.getElementById('pwError').style.display = 'block';
+            document.getElementById('pwInput').value = '';
+            document.getElementById('pwInput').focus();
+        }
+    }
+    if (sessionStorage.getItem('wrap_auth') === '1') {
+        document.getElementById('pwOverlay').style.display = 'none';
+        document.getElementById('mainContent').classList.remove('pw-hidden');
+    }
+    </script>
 </body>
 </html>
