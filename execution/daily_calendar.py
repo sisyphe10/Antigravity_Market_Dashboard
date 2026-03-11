@@ -140,7 +140,7 @@ def format_calendar_message(events_by_calendar):
             start = event['start'].get('dateTime', event['start'].get('date'))
             summary = event.get('summary', '(제목 없음)')
             cal_name = event.get('_calendar_name', '')
-            is_bold = '운용 본부' not in cal_name or summary.startswith('TS |')
+            is_bold = '운용 본부' not in cal_name or 'TS' in summary
 
             # 시간 파싱
             if 'T' in start:  # 시간이 있는 일정
