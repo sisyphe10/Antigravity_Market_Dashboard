@@ -383,7 +383,7 @@
 <header>
     <h1>Antigravity Market Dashboard</h1>
     <div class="subtitle">System Architecture & Documentation</div>
-    <div class="subtitle">Last updated: 2026-02-24 (8차)</div>
+    <div class="subtitle">Last updated: 2026-03-11 (9차)</div>
 </header>
 
 <nav>
@@ -419,7 +419,7 @@
     <div class="infra-card">
         <div class="infra-icon">📊</div>
         <div class="infra-title">Data Sources</div>
-        <div class="infra-desc">FinanceDataReader (실시간 주가)<br>네이버 날씨 / AccuWeather<br>yfinance (해외 지수)</div>
+        <div class="infra-desc">FinanceDataReader (실시간 주가)<br>네이버 날씨 / AccuWeather<br>네이버 증권 (시가총액·지수 등락률 fallback)<br>yfinance (해외 지수)</div>
     </div>
 </div>
 
@@ -540,7 +540,7 @@
             <span class="flow-badge badge-schedule">매일 15:40</span>
             <span class="flow-title">포트폴리오 리포트 자동 전송</span>
         </div>
-        <div class="flow-desc">장 마감 직후 자동 실행. git pull → 기준가 업데이트 → portfolio_data.json 재생성 → 수익률 계산 → Dashboard 갱신 → 텔레그램 리포트.</div>
+        <div class="flow-desc">장 마감 직후 자동 실행. git pull → 기준가 업데이트 → portfolio_data.json 재생성 → 수익률 계산 → Wrap_NAV push → market_alert 재생성 → Dashboard 갱신 → 텔레그램 리포트.</div>
         <div class="steps">
             <div class="step">
                 <div class="step-number">Step 0</div>
@@ -654,7 +654,7 @@
             <span class="flow-badge badge-schedule">매일 05:10</span>
             <span class="flow-title">Google Calendar 일정 알림</span>
         </div>
-        <div class="flow-desc">VM 봇 스케줄러에서 실행. 오늘의 Google Calendar 일정을 텔레그램으로 전송. 4개 캘린더 조회 (메인, 옥쥬와 빵빵이, 운용 본부, 투자 활동). GOOGLE_SERVICE_ACCOUNT_KEY 사용. ※ 2026-02-20 GitHub Actions에서 VM으로 이전.</div>
+        <div class="flow-desc">VM 봇 스케줄러에서 실행. 오늘의 Google Calendar 일정을 텔레그램으로 전송. 4개 캘린더 조회 (메인, 옥쥬와 빵빵이, 운용 본부, 투자 활동). 소유 캘린더 + 'TS' 포함 일정 볼드+밑줄 처리. GOOGLE_SERVICE_ACCOUNT_KEY 사용. ※ 2026-02-20 GitHub Actions에서 VM으로 이전.</div>
         <div class="steps">
             <div class="step">
                 <div class="step-number">Step 1</div>
@@ -767,7 +767,7 @@
         </tr>
         <tr>
             <td><span class="file-name">execution/create_portfolio_tables.py</span></td>
-            <td>실시간 주가 &rarr; 오늘수익률/기여도 계산 &rarr; portfolio_data.json</td>
+            <td>실시간 주가 &rarr; 오늘수익률/기여도 계산 &rarr; portfolio_data.json. FDR KRX-DESC fallback + 네이버 시가총액 보충.</td>
             <td><span class="tag tag-command">/update</span> <span class="tag tag-github">Actions</span></td>
         </tr>
         <tr>
@@ -777,7 +777,7 @@
         </tr>
         <tr>
             <td><span class="file-name">execution/create_market_alert.py</span></td>
-            <td>KIND(kind.krx.co.kr) 스크래핑 → 투자주의/경고/위험 종목 현황 → market_alert.html 생성. 판단일(지정일+영업일) 계산, 현재가 조회, 2단계 배경색(판단일 도달/임박).</td>
+            <td>KIND(kind.krx.co.kr) 스크래핑 → 투자주의/경고/위험 종목 현황 → market_alert.html 생성. 투자주의: 지정유형·경고전환가 표시 (투자경고 지정예고 강조). 투자경고/위험: 판단일·해제가능주가·15일최고가. FDR KRX-DESC fallback + 네이버 시가총액 보충.</td>
             <td><span class="tag tag-schedule">15:40</span> <span class="tag tag-schedule">23:00</span></td>
         </tr>
         <tr>
@@ -837,8 +837,13 @@
         </tr>
         <tr>
             <td><span class="file-name">execution/daily_calendar.py</span></td>
-            <td>Google Calendar API로 오늘 일정 조회 → 텔레그램 전송. 서비스 계정 인증. 4개 캘린더 (메인, 옥쥬와 빵빵이, 운용 본부, 투자 활동) 조회.</td>
-            <td><span class="tag tag-github">GitHub Actions</span></td>
+            <td>Google Calendar API로 오늘 일정 조회 → 텔레그램 전송. 서비스 계정 인증. 4개 캘린더 조회. 소유 캘린더 + 'TS' 포함 일정 볼드+밑줄.</td>
+            <td><span class="tag tag-schedule">05:10</span> <span class="tag tag-command">/calendar</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">scripts/auto_pull.bat</span></td>
+            <td>로컬 PC에서 git pull --ff-only 실행. VM push 후 Wrap_NAV.xlsx(기준가·수익률) 자동 동기화.</td>
+            <td><span class="tag tag-schedule">16:00</span> <span class="tag tag-vm">로그인 시</span></td>
         </tr>
         <tr>
             <td><span class="file-name">.github/workflows/daily_calendar.yml</span></td>
@@ -881,15 +886,18 @@
     <div class="data-card">
         <div class="data-card-title">wrap.html</div>
         <div class="data-card-desc">
-            WRAP 전용 페이지. WRAP 기준가 차트 + 수익률 비교 테이블(RETURN, 1D~YTD) + Portfolio 테이블 + Sector Weight 비교.<br>
+            WRAP 전용 페이지. 비밀번호 보호 (SHA-256 클라이언트 검증, sessionStorage 세션 유지).<br>
+            WRAP 기준가 차트 + 수익률 비교 테이블(RETURN, 1D~YTD) + Portfolio 테이블 + Sector Weight 비교.<br>
             create_dashboard.py에서 생성. GHA file_pattern + weather_bot.py git add에 포함.
         </div>
     </div>
     <div class="data-card">
         <div class="data-card-title">market_alert.html</div>
         <div class="data-card-desc">
-            투자유의종목 현황 페이지. 투자위험 &rarr; 투자경고 &rarr; 투자주의 순서. 판단일, 현재가, 해제 가능 주가 표시. 2단계 배경색(판단일 도달/#fca5a5, 5영업일 이내/#fee2e2).<br>
-            KIND POST API 스크래핑. VM 15:40 / 23:00 자동 재생성.
+            투자유의종목 현황 페이지. 투자위험 &rarr; 투자경고 &rarr; 투자주의 순서.<br>
+            투자주의: 지정유형·경고전환가(min(5일전×1.6, 15일전×2.0)) 표시, 투자경고 지정예고 행 강조(#fef2f2).<br>
+            투자경고/위험: 판단일·현재가·15일최고가·해제가능주가, 2단계 배경색(판단일 도달/#fca5a5, 5영업일 이내/#fee2e2).<br>
+            KIND POST API 스크래핑. FDR KRX-DESC fallback + 네이버 시가총액 보충. VM 15:40 / 23:00 자동 재생성 (timeout 180초).
         </div>
     </div>
     <div class="data-card">
@@ -976,7 +984,10 @@
             Wrap_NAV.xlsx 변경 감지 → 자동 git push<br>
             디바운스 8초 / 재시도 3회<br>
             PID 파일로 중복 실행 방지<br>
-            Windows 시작 프로그램 자동 등록
+            Windows 시작 프로그램 자동 등록<br><br>
+            <strong>auto_pull.bat</strong> (로컬 PC)<br>
+            매일 16:00 Task Scheduler + 로그인 시 시작프로그램<br>
+            VM push 후 로컬 Wrap_NAV.xlsx 자동 동기화
         </div>
     </div>
     <div class="infra-card">
@@ -1087,6 +1098,26 @@
             <td>텔레그램에서 <code>/start</code> 한 번 입력하면 subscribers.json 생성 및 이후 재시작에도 유지</td>
         </tr>
         <tr>
+            <td>15:40 /portfolio 리포트 안 옴 (market_alert timeout)</td>
+            <td>create_market_alert.py 실행이 timeout 초과 → 이후 단계(dashboard 재생성 + 텔레그램 리포트) 미실행</td>
+            <td>weather_bot.py의 market_alert timeout을 60→180초로 증가. <code>journalctl -u weather-bot --since "HH:MM" | grep -E "timeout|error"</code></td>
+        </tr>
+        <tr>
+            <td>시가총액 N/A (FDR StockListing 실패)</td>
+            <td>FDR StockListing('KRX') JSONDecodeError → 빈 DataFrame → Marcap 0</td>
+            <td>KRX-DESC fallback + 네이버 증권 시가총액 스크래핑 보충 적용됨. create_portfolio_tables.py, create_market_alert.py 양쪽 모두.</td>
+        </tr>
+        <tr>
+            <td>KOSPI/KOSDAQ 수익률 비정상 (+8% 등)</td>
+            <td>FDR 지수 데이터 특정일 누락 → 이전 거래일 대비 비교하여 비정상 등락률</td>
+            <td>weather_bot.py: 지수는 항상 네이버 증권에서 등락률 직접 조회 (FDR 미사용)</td>
+        </tr>
+        <tr>
+            <td>개별종목 수익률 전부 0% 또는 None</td>
+            <td>Excel 종목코드가 float(5930.0)로 저장 → str(5930.0) = "5930.0" → FDR 조회 실패</td>
+            <td><code>str(int(row['코드'])).zfill(6)</code>으로 수정. create_portfolio_tables.py 2곳.</td>
+        </tr>
+        <tr>
             <td>Claude Code Stop hook 오류 (PowerShell $변수 사라짐)</td>
             <td>bash가 PowerShell의 $변수를 쉘 변수로 해석해 빈 문자열로 치환</td>
             <td><code>~/.claude/notify.ps1</code> 파일로 분리 후 settings.json에서 <code>powershell -ExecutionPolicy Bypass -File "C:\Users\user\.claude\notify.ps1"</code>로 호출</td>
@@ -1102,6 +1133,20 @@
 <!-- ===== Changelog ===== -->
 <h2 id="changelog">Changelog</h2>
 <div class="version-log">
+    <div class="version-entry">
+        <div class="version-date">2026-03-11</div>
+        <div class="version-title">투자주의 테이블 재설계 + FDR fallback + WRAP 비밀번호 + 다수 버그 수정</div>
+        <div class="version-desc">
+            <strong>[투자주의 테이블 재설계]</strong> 투자주의 카테고리에 별도 테이블 레이아웃 적용. 경과일/판단일/15일최고가/해제가능주가 제거, 지정유형·경고전환가 컬럼 추가. 투자경고 지정예고 행 빨간 배경(#fef2f2) + 볼드 강조. 경고전환가 = min(5거래일전 종가×1.6, 15거래일전 종가×2.0). 현재가 ≥ 경고전환가 시 ⚠ 마크 표시.<br><br>
+            <strong>[FDR KRX-DESC fallback + 네이버 시가총액]</strong> FDR StockListing('KRX') JSONDecodeError 장애 대응. KRX-DESC fallback으로 종목코드 확보, Marcap 없으면 네이버 증권 시가총액 스크래핑으로 보충. create_portfolio_tables.py, create_market_alert.py 양쪽 적용.<br><br>
+            <strong>[WRAP 비밀번호 보호]</strong> wrap.html에 SHA-256 클라이언트 비밀번호 검증 추가. sessionStorage로 탭 내 세션 유지. 비밀번호 오류 시 에러 메시지 표시.<br><br>
+            <strong>[KOSPI/KOSDAQ 수익률 수정]</strong> FDR 지수 데이터 특정일 누락으로 비정상 등락률(+8.55%) 표시 문제. 지수는 항상 네이버 증권에서 등락률 직접 조회하도록 변경.<br><br>
+            <strong>[개별종목 코드 float 수정]</strong> Excel 종목코드 float(5930.0) → str(int())로 변환. 개별종목 수익률 전부 0%/None 표시 버그 수정.<br><br>
+            <strong>[캘린더 TS 볼드]</strong> daily_calendar.py: 소유 캘린더 외에도 'TS' 포함 일정에 볼드+밑줄 적용.<br><br>
+            <strong>[market_alert timeout]</strong> weather_bot.py: create_market_alert.py 실행 timeout 60→180초. 네이버 시가총액 스크래핑 추가로 인한 실행 시간 증가 대응.<br><br>
+            <strong>[로컬 auto pull]</strong> scripts/auto_pull.bat 추가. Windows Task Scheduler(매일 16:00) + 시작프로그램(로그인 시) 등록. VM push 후 로컬 Wrap_NAV.xlsx 자동 동기화.
+        </div>
+    </div>
     <div class="version-entry">
         <div class="version-date">2026-02-24</div>
         <div class="version-title">투자유의종목 페이지 + WRAP 분리 + 수익률 비교 테이블(RETURN) + UI 개선</div>
