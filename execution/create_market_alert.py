@@ -346,6 +346,10 @@ def parse_stocks(soup, category_name, krx_data):
         market_raw = img.get('alt', '') if img else ''
         market     = MARKET_LABEL.get(market_raw, market_raw)
 
+        # 코넥스 종목 제외
+        if market == 'KONEX':
+            continue
+
         krx_info   = lookup_krx(name, krx_data)
         marcap     = krx_info['marcap']
         code       = krx_info['code']
