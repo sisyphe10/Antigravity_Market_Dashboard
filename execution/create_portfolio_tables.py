@@ -2,6 +2,9 @@ import pandas as pd
 import FinanceDataReader as fdr
 import sys
 import json
+import re
+import requests
+from bs4 import BeautifulSoup
 from pathlib import Path
 from datetime import timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -35,6 +38,44 @@ EXISTING_STOCK_CUMULATIVE_RETURNS = {
     '001040': 88.0,   # CJ
     '010060': 55.0,   # OCI홀딩스
 }
+
+
+def _load_naver_marcap():
+    """네이버 증권 시가총액 순위 페이지에서 code → marcap(억) 딕셔너리"""
+    marcap_map = {}
+    try:
+        for sosok in [0, 1]:  # 0=KOSPI, 1=KOSDAQ
+            for page in range(1, 40):
+                url = f'https://finance.naver.com/sise/sise_market_sum.naver?sosok={sosok}&page={page}'
+                r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=10)
+                r.encoding = 'euc-kr'
+                soup = BeautifulSoup(r.text, 'html.parser')
+                table = soup.find('table', class_='type_2')
+                if not table:
+                    break
+                found = 0
+                for row in table.find_all('tr'):
+                    cols = row.find_all('td')
+                    if len(cols) < 7:
+                        continue
+                    a_tag = cols[1].find('a')
+                    if not a_tag:
+                        continue
+                    href = a_tag.get('href', '')
+                    m = re.search(r'code=(\d+)', href)
+                    code = m.group(1) if m else ''
+                    marcap_text = cols[6].get_text(strip=True).replace(',', '')
+                    try:
+                        marcap_map[code] = int(marcap_text)
+                    except ValueError:
+                        pass
+                    found += 1
+                if found == 0:
+                    break
+        print(f"  네이버 시가총액: {len(marcap_map)}개 종목")
+    except Exception as e:
+        print(f"  Warning: 네이버 시가총액 로드 실패: {e}")
+    return marcap_map
 
 
 def fetch_price_data(code):
@@ -176,13 +217,28 @@ def create_portfolio_tables():
 
         print(f"   전체 날짜 범위: {nav_df['날짜'].min()} ~ {nav_df['날짜'].max()}")
 
-        # KRX 종목 리스트 미리 로드
+        # KRX 종목 리스트 미리 로드 (KRX → KRX-DESC fallback)
         print("2. KRX 종목 리스트 로드 중...")
-        try:
-            krx = fdr.StockListing('KRX')
-        except Exception as e:
-            print(f"  Warning: KRX listing unavailable ({e}), market cap will show 0")
-            krx = pd.DataFrame(columns=['Code', 'Marcap'])
+        krx = pd.DataFrame(columns=['Code', 'Marcap'])
+        for listing_type in ['KRX', 'KRX-DESC']:
+            try:
+                print(f"  {listing_type} 시도...")
+                krx = fdr.StockListing(listing_type)
+                has_marcap = 'Marcap' in krx.columns
+                print(f"  → {len(krx)}개 종목 (Marcap: {'O' if has_marcap else 'X'})")
+                break
+            except Exception as e:
+                print(f"  Warning: {listing_type} 로드 실패: {e}")
+
+        # Marcap 컬럼 없으면 네이버에서 보충
+        if 'Marcap' not in krx.columns or krx['Marcap'].sum() == 0:
+            print("  시가총액 데이터 없음 → 네이버에서 보충 중...")
+            naver_marcap = _load_naver_marcap()
+            if 'Code' in krx.columns:
+                krx['Marcap'] = krx['Code'].map(
+                    lambda c: naver_marcap.get(c, 0) * 100_000_000  # 억→원 변환
+                ).fillna(0)
+            print(f"  → 네이버 시가총액 {len(naver_marcap)}개 매핑 완료")
 
         # Code 시트에서 FICS 섹터 매핑 로드
         code_df = pd.read_excel(WRAP_NAV_FILE, sheet_name='Code')
