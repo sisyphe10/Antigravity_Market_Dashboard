@@ -254,6 +254,35 @@ def analyze_release(stock, price_df, category):
     return 판단일, current_price, target_price, is_15d_high, low_15d
 
 
+def analyze_escalation(stock, price_df):
+    """
+    투자주의 → 투자경고 전환 분석 (지정예고 종목만 해당)
+    경고전환가 = min(5거래일전 종가×1.6, 15거래일전 종가×2.0)
+    Returns:
+        current_price    : int|None
+        escalation_price : int|None  (경고전환가; 지정예고 아니면 None)
+    """
+    closes = _get_prev_closes(price_df)
+    current_price = int(closes.iloc[-1]) if len(closes) >= 1 else None
+
+    if stock.get('warn_type') != '투자경고 지정예고':
+        return current_price, None
+
+    if len(closes) < 2:
+        return current_price, None
+
+    # 5거래일 전 종가 (closes[-1]=어제, closes[-5]=5거래일 전)
+    price_5d = closes.iloc[-5] if len(closes) >= 5 else closes.iloc[0]
+    # 15거래일 전 종가
+    price_15d = closes.iloc[-15] if len(closes) >= 15 else closes.iloc[0]
+
+    T1 = price_5d * 1.6
+    T2 = price_15d * 2.0
+    escalation_price = int(min(T1, T2))
+
+    return current_price, escalation_price
+
+
 # ──────────────────────────────────────────
 # KIND 데이터 수집
 # ──────────────────────────────────────────
@@ -453,23 +482,98 @@ def render_table(stocks, category, price_cache):
         </div>"""
 
 
+def render_table_주의(stocks, price_cache):
+    """투자주의 전용 테이블 (지정유형 + 경고전환가 컬럼)"""
+    if not stocks:
+        return '<p style="color:#9ca3af;padding:12px 0;font-size:0.85rem">현재 지정 종목 없음</p>'
+
+    rows_html = ''
+    for s in stocks:
+        price_df = price_cache.get(s['code']) if s['code'] else None
+        current_price, escalation_price = analyze_escalation(s, price_df)
+
+        cur_str = f'{current_price:,}원' if current_price is not None else '-'
+
+        # 지정유형
+        warn_type = s.get('warn_type', '-')
+        is_예고 = (warn_type == '투자경고 지정예고')
+        if is_예고:
+            type_str = f'<span style="color:#dc2626;font-weight:700">{warn_type}</span>'
+        else:
+            type_str = warn_type
+
+        # 경고전환가 (지정예고만)
+        if escalation_price is not None:
+            if current_price is not None and current_price >= escalation_price:
+                esc_str = f'<span style="color:#dc2626;font-weight:700">{escalation_price:,}원 ⚠</span>'
+            else:
+                esc_str = f'{escalation_price:,}원'
+        else:
+            esc_str = '-'
+
+        row_bg = ' style="background-color:#fef2f2"' if is_예고 else ''
+
+        rows_html += f"""
+            <tr{row_bg}>
+                <td>{s['name']}</td>
+                <td>{s['market']}</td>
+                <td class="num">{fmt_marcap(s['marcap'])}</td>
+                <td class="center">{type_str}</td>
+                <td class="center">{s['notice_date']}</td>
+                <td class="center">{s['designation_date']}</td>
+                <td class="num">{cur_str}</td>
+                <td class="num">{esc_str}</td>
+            </tr>"""
+
+    return f"""
+        <div style="overflow-x:auto">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>종목명</th>
+                    <th>시장</th>
+                    <th class="num">시가총액</th>
+                    <th class="center">지정유형</th>
+                    <th class="center">공시일</th>
+                    <th class="center">지정일</th>
+                    <th class="num">현재가</th>
+                    <th class="num">경고전환가</th>
+                </tr>
+            </thead>
+            <tbody>{rows_html}
+            </tbody>
+        </table>
+        </div>"""
+
+
 def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache):
     now = datetime.now(tz=KST).strftime('%Y-%m-%d %H:%M:%S KST')
 
     def section(category_name, stocks):
         meta  = CATEGORY_META[category_name]
         count = len(stocks)
+        if category_name == '투자주의':
+            table_html = render_table_주의(stocks, price_cache)
+        else:
+            table_html = render_table(stocks, category_name, price_cache)
         return f"""
     <section class="section">
         <div class="section-header" style="border-left:4px solid {meta['border']}">
             <span class="section-title" style="color:{meta['color']}">{meta['icon']} {category_name}</span>
             <span class="section-count">{count}종목</span>
         </div>
-        {render_table(stocks, category_name, price_cache)}
+        {table_html}
     </section>"""
 
+    note_주의 = (
+        '<p class="note"><b>투자경고 지정예고</b>: 투자주의 지정과 동시에 투자경고 지정예고가 된 종목. '
+        '경고전환가 = min(5거래일전 종가×1.6, 15거래일전 종가×2.0) — '
+        '현재가가 경고전환가를 초과하면 투자경고로 전환될 수 있음. '
+        '<span style="color:#dc2626">⚠</span> 표시는 현재가 ≥ 경고전환가.</p>'
+    )
+
     note_경고위험 = (
-        '<p class="note">해제 가능 주가: (지정일 전일 종가×1.6)과 (지정일 전 15거래일 종가×2.0) 중 낮은 값 — 모든 조건 동시 충족 필요 (급등 유형 기준). '
+        '<p class="note"><b>해제 가능 주가</b>: (지정일 전일 종가×1.6)과 (지정일 전 15거래일 종가×2.0) 중 낮은 값 — 모든 조건 동시 충족 필요 (급등 유형 기준). '
         '판단일 경과 + 현재가 ≤ 해제 가능 주가 + 당일이 15거래일 최고가가 아닐 때 해제 가능. '
         '<span style="color:#ef4444">15일 최고가</span> 표시 시 가격 조건 충족이나 최고가 조건으로 해제 불가.</p>'
     )
@@ -551,6 +655,7 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache):
     {section('투자주의', stocks_주의)}
 
     <div class="section" style="background:#f9fafb">
+        {note_주의}
         {note_경고위험}
     </div>
 
@@ -601,7 +706,14 @@ def create_market_alert():
     codes_경고위험 = [s['code'] for s in stocks_경고 + stocks_위험 if s['code']]
     price_cache   = fetch_all_prices(codes_경고위험, days_back=120)
 
-    # 투자주의: 현재가만 필요 → 3일치로 빠르게 조회 (경고/위험 중복 코드 제외)
+    # 투자주의: 지정예고 종목은 경고전환가 계산에 15거래일 필요 → 35일치
+    codes_예고 = {s['code'] for s in stocks_주의
+                  if s['code'] and s.get('warn_type') == '투자경고 지정예고'}
+    codes_예고_only = [c for c in codes_예고 if c not in price_cache]
+    if codes_예고_only:
+        price_cache.update(fetch_all_prices(codes_예고_only, days_back=35))
+
+    # 나머지 투자주의: 현재가만 필요 → 3일치
     codes_주의_only = [c for c in {s['code'] for s in stocks_주의 if s['code']}
                       if c not in price_cache]
     if codes_주의_only:
