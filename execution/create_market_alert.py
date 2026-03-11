@@ -43,13 +43,52 @@ MARKET_LABEL = {'유가증권': 'KOSPI', '코스닥': 'KOSDAQ', '코넥스': 'KO
 # ──────────────────────────────────────────
 # KRX 데이터 로드
 # ──────────────────────────────────────────
+def _load_naver_marcap():
+    """네이버 증권 시가총액 순위 페이지에서 code → marcap(억) 딕셔너리"""
+    marcap_map = {}
+    try:
+        for sosok in [0, 1]:  # 0=KOSPI, 1=KOSDAQ
+            for page in range(1, 40):
+                url = f'https://finance.naver.com/sise/sise_market_sum.naver?sosok={sosok}&page={page}'
+                r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=10)
+                r.encoding = 'euc-kr'
+                soup = BeautifulSoup(r.text, 'html.parser')
+                table = soup.find('table', class_='type_2')
+                if not table:
+                    break
+                found = 0
+                for row in table.find_all('tr'):
+                    cols = row.find_all('td')
+                    if len(cols) < 7:
+                        continue
+                    a_tag = cols[1].find('a')
+                    if not a_tag:
+                        continue
+                    href = a_tag.get('href', '')
+                    m = re.search(r'code=(\d+)', href)
+                    code = m.group(1) if m else ''
+                    marcap_text = cols[6].get_text(strip=True).replace(',', '')
+                    try:
+                        marcap_map[code] = int(marcap_text)
+                    except ValueError:
+                        pass
+                    found += 1
+                if found == 0:
+                    break
+        print(f"  네이버 시가총액: {len(marcap_map)}개 종목")
+    except Exception as e:
+        print(f"  Warning: 네이버 시가총액 로드 실패: {e}")
+    return marcap_map
+
+
 def load_krx_data():
     """이름 → {marcap(억), code} 딕셔너리"""
+    result = {}
+    # 1) FDR에서 종목코드+이름 매핑
     for listing_type in ['KRX', 'KRX-DESC']:
         try:
             print(f"  KRX 종목 데이터 로드 중 ({listing_type})...")
             krx = fdr.StockListing(listing_type)
-            result = {}
             has_marcap = 'Marcap' in krx.columns
             for _, row in krx.iterrows():
                 name = str(row.get('Name', '')).strip()
@@ -61,10 +100,24 @@ def load_krx_data():
                         'code': code,
                     }
             print(f"  → {len(result)}개 종목 (marcap: {'O' if has_marcap else 'X'})")
-            return result
+            break
         except Exception as e:
             print(f"  Warning: {listing_type} 로드 실패: {e}")
-    return {}
+
+    if not result:
+        return {}
+
+    # 2) Marcap 없으면 네이버에서 보충
+    has_any_marcap = any(v['marcap'] for v in result.values())
+    if not has_any_marcap:
+        print("  시가총액 데이터 없음 → 네이버에서 보충 중...")
+        naver_marcap = _load_naver_marcap()
+        for name, info in result.items():
+            code = info['code']
+            if code in naver_marcap:
+                info['marcap'] = naver_marcap[code]
+
+    return result
 
 
 def normalize_name(name):
