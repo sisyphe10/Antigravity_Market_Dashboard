@@ -234,7 +234,7 @@ def create_portfolio_tables():
             portfolio_stocks = portfolio_stocks[portfolio_stocks['비중'] > 0]
             portfolio_stocks = portfolio_stocks.sort_values('비중', ascending=False)
 
-            codes_in_portfolio = [str(row['코드']).zfill(6) for _, row in portfolio_stocks.iterrows()]
+            codes_in_portfolio = [str(int(row['코드'])).zfill(6) for _, row in portfolio_stocks.iterrows()]
             all_codes.update(codes_in_portfolio)
 
             portfolio_configs.append({
@@ -274,7 +274,7 @@ def create_portfolio_tables():
 
             stocks_info = []
             for idx, row in portfolio_stocks.iterrows():
-                code = str(row['코드']).zfill(6)
+                code = str(int(row['코드'])).zfill(6)
                 stock_name = row['종목']
                 weight = row['비중']
 
