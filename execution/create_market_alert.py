@@ -45,24 +45,26 @@ MARKET_LABEL = {'유가증권': 'KOSPI', '코스닥': 'KOSDAQ', '코넥스': 'KO
 # ──────────────────────────────────────────
 def load_krx_data():
     """이름 → {marcap(억), code} 딕셔너리"""
-    try:
-        print("  KRX 종목 데이터 로드 중...")
-        krx = fdr.StockListing('KRX')
-        result = {}
-        for _, row in krx.iterrows():
-            name = str(row.get('Name', '')).strip()
-            cap  = row.get('Marcap', 0) or 0
-            code = str(row.get('Code', '')).strip()
-            if name:
-                result[name] = {
-                    'marcap': int(cap) // 100_000_000,
-                    'code': code,
-                }
-        print(f"  → {len(result)}개 종목")
-        return result
-    except Exception as e:
-        print(f"  Warning: KRX 로드 실패: {e}")
-        return {}
+    for listing_type in ['KRX', 'KRX-DESC']:
+        try:
+            print(f"  KRX 종목 데이터 로드 중 ({listing_type})...")
+            krx = fdr.StockListing(listing_type)
+            result = {}
+            has_marcap = 'Marcap' in krx.columns
+            for _, row in krx.iterrows():
+                name = str(row.get('Name', '')).strip()
+                code = str(row.get('Code', '')).strip()
+                if name:
+                    cap = (row.get('Marcap', 0) or 0) if has_marcap else 0
+                    result[name] = {
+                        'marcap': int(cap) // 100_000_000 if cap else None,
+                        'code': code,
+                    }
+            print(f"  → {len(result)}개 종목 (marcap: {'O' if has_marcap else 'X'})")
+            return result
+        except Exception as e:
+            print(f"  Warning: {listing_type} 로드 실패: {e}")
+    return {}
 
 
 def normalize_name(name):
@@ -166,6 +168,10 @@ def analyze_release(stock, price_df, category):
 
     # 투자주의: 주가 조건 없음
     if category == '투자주의':
+        return 판단일, current_price, None, False, None
+
+    # 가격 데이터 없으면 주가 분석 불가
+    if closes.empty:
         return 판단일, current_price, None, False, None
 
     # ── 기준 가격: 지정일 이전 종가로 고정 ──────────────────────────────
