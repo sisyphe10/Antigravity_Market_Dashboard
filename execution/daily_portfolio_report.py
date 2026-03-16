@@ -61,23 +61,27 @@ def get_latest_nav():
     
     # 리포트 날짜 기준으로 데이터 가져오기
     report_date = get_report_date()
-    
-    # 리포트 날짜 이하의 가장 최근 데이터
-    available_dates = df.index[df.index.date <= report_date]
-    if len(available_dates) == 0:
-        latest_date = df.index[-1]
-    else:
-        latest_date = available_dates[-1]
-    
-    latest_row = df.loc[latest_date]
-    
-    # 필요한 상품만 추출
-    nav_data = {
-        '삼성 트루밸류': latest_row.get('트루밸류', 0),
-        'NH Value ESG': latest_row.get('Value ESG', 0),
-        'DB 개방형 랩': latest_row.get('개방형 랩', 0),
+
+    # 리포트 날짜 이하로 필터
+    df_filtered = df[df.index.date <= report_date]
+    if df_filtered.empty:
+        df_filtered = df
+
+    # 각 포트폴리오별 NaN이 아닌 마지막 값 가져오기
+    nav_map = {
+        '삼성 트루밸류': '트루밸류',
+        'NH Value ESG': 'Value ESG',
+        'DB 개방형 랩': '개방형 랩',
+        'DB 목표전환형 2차': '목표전환형 2차',
     }
-    
+    nav_data = {}
+    for display_name, col_name in nav_map.items():
+        if col_name in df_filtered.columns:
+            valid = df_filtered[col_name].dropna()
+            if not valid.empty:
+                nav_data[display_name] = valid.iloc[-1]
+
+    latest_date = df_filtered.index[-1]
     return latest_date, nav_data
 
 def get_latest_returns():
