@@ -218,6 +218,7 @@ def read_portfolio_sectors(stock_sector_map):
 
         portfolio_map = {
             '트루밸류': '삼성 트루밸류',
+            '목표전환형 2차': 'DB 목표전환형 2차',
         }
 
         today = pd.Timestamp.now().normalize()

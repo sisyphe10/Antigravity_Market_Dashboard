@@ -125,7 +125,7 @@
     <div id="mainContent" class="pw-hidden">
     <header>
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-03-16 13:30:41 KST</div>
+        <div class="last-updated">Updated: 2026-03-16 13:52:58 KST</div>
         <div class="nav-group">
             <a href="index.html" class="nav-button">← Dashboard</a>
         </div>
@@ -162,7 +162,7 @@
             <div style="max-width:800px;margin:0 auto;background:#fff;border-radius:10px;padding:16px 20px;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
                     <span style="font-size:13px;color:#555;font-weight:600;">기준일</span>
-                    <input type="date" id="return-date-input" value="2026-03-13"
+                    <input type="date" id="return-date-input" value="2026-03-12"
                            min="2026-02-04"
                            onchange="updateReturnTable()"
                            style="font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;cursor:pointer;">
@@ -172,17 +172,17 @@
                     <thead>
                         <tr><th class="rt-nh"></th><th class="rt-ph">1D</th><th class="rt-ph">1W</th><th class="rt-ph">1M</th><th class="rt-ph">3M</th><th class="rt-ph">6M</th><th class="rt-ph">1Y</th><th class="rt-ph">YTD</th></tr>
                     </thead>
-                    <tbody><tr><td class="rt-name">삼성 트루밸류</td><td id="rt-트루밸류-1D" class="rt-cell rt-neg">-1.3%</td><td id="rt-트루밸류-1W" class="rt-cell rt-neg">-0.6%</td><td id="rt-트루밸류-1M" class="rt-cell rt-pos">2.1%</td><td id="rt-트루밸류-3M" class="rt-cell rt-pos">55.1%</td><td id="rt-트루밸류-6M" class="rt-cell rt-pos">64.0%</td><td id="rt-트루밸류-1Y" class="rt-cell rt-pos">121.5%</td><td id="rt-트루밸류-YTD" class="rt-cell rt-pos">39.7%</td></tr>
-<tr><td class="rt-name">KOSPI</td><td id="rt-KOSPI-1D" class="rt-cell rt-neg">-1.4%</td><td id="rt-KOSPI-1W" class="rt-cell rt-neg">-1.8%</td><td id="rt-KOSPI-1M" class="rt-cell rt-neg">-0.3%</td><td id="rt-KOSPI-3M" class="rt-cell rt-pos">31.7%</td><td id="rt-KOSPI-6M" class="rt-cell rt-pos">61.6%</td><td id="rt-KOSPI-1Y" class="rt-cell rt-pos">113.3%</td><td id="rt-KOSPI-YTD" class="rt-cell rt-pos">30.2%</td></tr>
-<tr><td class="rt-name">KOSDAQ</td><td id="rt-KOSDAQ-1D" class="rt-cell rt-pos">0.5%</td><td id="rt-KOSDAQ-1W" class="rt-cell rt-zero">-0.0%</td><td id="rt-KOSDAQ-1M" class="rt-cell rt-pos">4.2%</td><td id="rt-KOSDAQ-3M" class="rt-cell rt-pos">22.9%</td><td id="rt-KOSDAQ-6M" class="rt-cell rt-pos">36.0%</td><td id="rt-KOSDAQ-1Y" class="rt-cell rt-pos">59.4%</td><td id="rt-KOSDAQ-YTD" class="rt-cell rt-pos">24.5%</td></tr>
+                    <tbody><tr><td class="rt-name">삼성 트루밸류</td><td id="rt-트루밸류-1D" class="rt-cell rt-pos">0.3%</td><td id="rt-트루밸류-1W" class="rt-cell rt-pos">1.6%</td><td id="rt-트루밸류-1M" class="rt-cell rt-pos">4.2%</td><td id="rt-트루밸류-3M" class="rt-cell rt-pos">57.2%</td><td id="rt-트루밸류-6M" class="rt-cell rt-pos">66.2%</td><td id="rt-트루밸류-1Y" class="rt-cell rt-pos">126.1%</td><td id="rt-트루밸류-YTD" class="rt-cell rt-pos">41.5%</td></tr>
+<tr><td class="rt-name">KOSPI</td><td id="rt-KOSPI-1D" class="rt-cell rt-neg">-0.8%</td><td id="rt-KOSPI-1W" class="rt-cell rt-neg">-0.6%</td><td id="rt-KOSPI-1M" class="rt-cell rt-pos">0.8%</td><td id="rt-KOSPI-3M" class="rt-cell rt-pos">33.6%</td><td id="rt-KOSPI-6M" class="rt-cell rt-pos">64.0%</td><td id="rt-KOSPI-1Y" class="rt-cell rt-pos">116.2%</td><td id="rt-KOSPI-YTD" class="rt-cell rt-pos">32.1%</td></tr>
+<tr><td class="rt-name">KOSDAQ</td><td id="rt-KOSDAQ-1D" class="rt-cell rt-pos">0.9%</td><td id="rt-KOSDAQ-1W" class="rt-cell rt-pos">2.0%</td><td id="rt-KOSDAQ-1M" class="rt-cell rt-pos">1.8%</td><td id="rt-KOSDAQ-3M" class="rt-cell rt-pos">22.3%</td><td id="rt-KOSDAQ-6M" class="rt-cell rt-pos">35.4%</td><td id="rt-KOSDAQ-1Y" class="rt-cell rt-pos">57.2%</td><td id="rt-KOSDAQ-YTD" class="rt-cell rt-pos">23.9%</td></tr>
 </tbody>
                 </table>
             </div>
         </div>
         <script>
         (function() {
-            var returnData = {"2026-02-04": {"트루밸류_1D": "1.5%", "트루밸류_1W": "5.7%", "트루밸류_1M": "28.5%", "트루밸류_3M": "38.6%", "트루밸류_6M": "64.7%", "트루밸류_1Y": "115.2%", "트루밸류_YTD": "28.5%", "KOSPI_1D": "1.6%", "KOSPI_1W": "3.9%", "KOSPI_1M": "24.6%", "KOSPI_3M": null, "KOSPI_6M": null, "KOSPI_1Y": null, "KOSPI_YTD": "24.6%", "KOSDAQ_1D": "0.4%", "KOSDAQ_1W": "1.4%", "KOSDAQ_1M": "21.6%", "KOSDAQ_3M": null, "KOSDAQ_6M": null, "KOSDAQ_1Y": null, "KOSDAQ_YTD": "21.6%"}, "2026-02-10": {"트루밸류_1D": "-0.6%", "트루밸류_1W": "-0.2%", "트루밸류_1M": "19.8%", "트루밸류_3M": "42.0%", "트루밸류_6M": "54.7%", "트루밸류_1Y": "108.5%", "트루밸류_YTD": "26.4%", "KOSPI_1D": "0.1%", "KOSPI_1W": "0.3%", "KOSPI_1M": "15.6%", "KOSPI_3M": null, "KOSPI_6M": null, "KOSPI_1Y": null, "KOSPI_YTD": "23.0%", "KOSDAQ_1D": "-1.1%", "KOSDAQ_1W": "-2.5%", "KOSDAQ_1M": "17.6%", "KOSDAQ_3M": null, "KOSDAQ_6M": null, "KOSDAQ_1Y": null, "KOSDAQ_YTD": "17.9%"}, "2026-02-11": {"트루밸류_1D": "-0.6%", "트루밸류_1W": "-0.2%", "트루밸류_1M": "19.8%", "트루밸류_3M": "42.0%", "트루밸류_6M": "54.7%", "트루밸류_1Y": "108.5%", "트루밸류_YTD": "26.4%", "KOSPI_1D": "0.1%", "KOSPI_1W": "0.3%", "KOSPI_1M": "15.6%", "KOSPI_3M": null, "KOSPI_6M": null, "KOSPI_1Y": null, "KOSPI_YTD": "23.0%", "KOSDAQ_1D": "-1.1%", "KOSDAQ_1W": "-2.5%", "KOSDAQ_1M": "17.6%", "KOSDAQ_3M": null, "KOSDAQ_6M": null, "KOSDAQ_1Y": null, "KOSDAQ_YTD": "17.9%"}, "2026-02-12": {"트루밸류_1D": "3.6%", "트루밸류_1W": "7.1%", "트루밸류_1M": "23.7%", "트루밸류_3M": "47.3%", "트루밸류_6M": "62.3%", "트루밸류_1Y": "116.8%", "트루밸류_YTD": "35.8%", "KOSPI_1D": "3.1%", "KOSPI_1W": "6.9%", "KOSPI_1M": "19.4%", "KOSPI_3M": null, "KOSPI_6M": null, "KOSPI_1Y": null, "KOSPI_YTD": "31.0%", "KOSDAQ_1D": "1.0%", "KOSDAQ_1W": "1.6%", "KOSDAQ_1M": "18.5%", "KOSDAQ_3M": null, "KOSDAQ_6M": null, "KOSDAQ_1Y": null, "KOSDAQ_YTD": "21.7%"}, "2026-02-13": {"트루밸류_1D": "0.7%", "트루밸류_1W": "9.7%", "트루밸류_1M": "24.9%", "트루밸류_3M": "46.5%", "트루밸류_6M": "62.4%", "트루밸류_1Y": "117.9%", "트루밸류_YTD": "36.8%", "KOSPI_1D": "-0.3%", "KOSPI_1W": "8.2%", "KOSPI_1M": "17.4%", "KOSPI_3M": null, "KOSPI_6M": null, "KOSPI_1Y": null, "KOSPI_YTD": "30.7%", "KOSDAQ_1D": "-1.8%", "KOSDAQ_1W": "2.3%", "KOSDAQ_1M": "16.6%", "KOSDAQ_3M": null, "KOSDAQ_6M": null, "KOSDAQ_1Y": null, "KOSDAQ_YTD": "19.5%"}, "2026-02-19": {"트루밸류_1D": "3.8%", "트루밸류_1W": "4.5%", "트루밸류_1M": "22.1%", "트루밸류_3M": "61.6%", "트루밸류_6M": "73.7%", "트루밸류_1Y": "116.4%", "트루밸류_YTD": "42.0%", "KOSPI_1D": "3.1%", "KOSPI_1W": "2.8%", "KOSPI_1M": "15.8%", "KOSPI_3M": "44.5%", "KOSPI_6M": "80.1%", "KOSPI_1Y": "112.5%", "KOSPI_YTD": "34.7%", "KOSDAQ_1D": "4.9%", "KOSDAQ_1W": "3.1%", "KOSDAQ_1M": "19.9%", "KOSDAQ_3M": "33.2%", "KOSDAQ_6M": "47.3%", "KOSDAQ_1Y": "49.1%", "KOSDAQ_YTD": "25.4%"}, "2026-02-20": {"트루밸류_1D": "1.4%", "트루밸류_1W": "5.2%", "트루밸류_1M": "25.2%", "트루밸류_3M": "59.4%", "트루밸류_6M": "77.6%", "트루밸류_1Y": "122.7%", "트루밸류_YTD": "43.9%", "KOSPI_1D": "2.3%", "KOSPI_1W": "5.5%", "KOSPI_1M": "18.9%", "KOSPI_3M": "45.0%", "KOSPI_6M": "85.6%", "KOSPI_1Y": "118.9%", "KOSPI_YTD": "37.8%", "KOSDAQ_1D": "-0.6%", "KOSDAQ_1W": "4.3%", "KOSDAQ_1M": "18.2%", "KOSDAQ_3M": "29.4%", "KOSDAQ_6M": "48.4%", "KOSDAQ_1Y": "50.2%", "KOSDAQ_YTD": "24.7%"}, "2026-02-23": {"트루밸류_1D": "-0.0%", "트루밸류_1W": "5.1%", "트루밸류_1M": "21.7%", "트루밸류_3M": "65.5%", "트루밸류_6M": "76.5%", "트루밸류_1Y": "122.4%", "트루밸류_YTD": "43.8%", "KOSPI_1D": "0.6%", "KOSPI_1W": "6.2%", "KOSPI_1M": "17.2%", "KOSPI_3M": "51.7%", "KOSPI_6M": "84.5%", "KOSPI_1Y": "120.2%", "KOSPI_YTD": "38.7%", "KOSDAQ_1D": "-0.2%", "KOSDAQ_1W": "4.2%", "KOSDAQ_1M": "15.9%", "KOSDAQ_3M": "33.3%", "KOSDAQ_6M": "47.2%", "KOSDAQ_1Y": "48.7%", "KOSDAQ_YTD": "24.5%"}, "2026-02-24": {"트루밸류_1D": "2.5%", "트루밸류_1W": "7.7%", "트루밸류_1M": "24.7%", "트루밸류_3M": "69.7%", "트루밸류_6M": "80.8%", "트루밸류_1Y": "129.8%", "트루밸류_YTD": "47.4%", "KOSPI_1D": "2.1%", "KOSPI_1W": "8.4%", "KOSPI_1M": "19.6%", "KOSPI_3M": "55.2%", "KOSPI_6M": "88.4%", "KOSPI_1Y": "125.7%", "KOSPI_YTD": "41.7%", "KOSDAQ_1D": "1.1%", "KOSDAQ_1W": "5.3%", "KOSDAQ_1M": "17.2%", "KOSDAQ_3M": "36.0%", "KOSDAQ_6M": "48.9%", "KOSDAQ_1Y": "50.6%", "KOSDAQ_YTD": "25.9%"}, "2026-02-25": {"트루밸류_1D": "1.9%", "트루밸류_1W": "9.8%", "트루밸류_1M": "27.1%", "트루밸류_3M": "73.8%", "트루밸류_6M": "82.3%", "트루밸류_1Y": "134.9%", "트루밸류_YTD": "50.2%", "KOSPI_1D": "1.9%", "KOSPI_1W": "10.5%", "KOSPI_1M": "21.9%", "KOSPI_3M": "57.7%", "KOSPI_6M": "89.5%", "KOSPI_1Y": "131.3%", "KOSPI_YTD": "44.4%", "KOSDAQ_1D": "0.0%", "KOSDAQ_1W": "5.3%", "KOSDAQ_1M": "17.2%", "KOSDAQ_3M": "36.1%", "KOSDAQ_6M": "46.0%", "KOSDAQ_1Y": "51.4%", "KOSDAQ_YTD": "25.9%"}, "2026-02-26": {"트루밸류_1D": "4.4%", "트루밸류_1W": "10.5%", "트루밸류_1M": "32.3%", "트루밸류_3M": "76.6%", "트루밸류_6M": "89.6%", "트루밸류_1Y": "144.0%", "트루밸류_YTD": "56.8%", "KOSPI_1D": "3.7%", "KOSPI_1W": "11.1%", "KOSPI_1M": "27.4%", "KOSPI_3M": "59.3%", "KOSPI_6M": "98.4%", "KOSPI_1Y": "138.8%", "KOSPI_YTD": "49.7%", "KOSDAQ_1D": "2.0%", "KOSDAQ_1W": "2.4%", "KOSDAQ_1M": "11.7%", "KOSDAQ_3M": "35.5%", "KOSDAQ_6M": "48.3%", "KOSDAQ_1Y": "54.1%", "KOSDAQ_YTD": "28.5%"}, "2026-02-27": {"트루밸류_1D": "-0.4%", "트루밸류_1W": "8.6%", "트루밸류_1M": "28.1%", "트루밸류_3M": "73.3%", "트루밸류_6M": "89.4%", "트루밸류_1Y": "143.0%", "트루밸류_YTD": "56.2%", "KOSPI_1D": "-0.7%", "KOSPI_1W": "7.9%", "KOSPI_1M": "23.2%", "KOSPI_3M": "57.2%", "KOSPI_6M": "96.6%", "KOSPI_1Y": "139.0%", "KOSPI_YTD": "48.7%", "KOSDAQ_1D": "0.2%", "KOSDAQ_1W": "3.3%", "KOSDAQ_1M": "10.1%", "KOSDAQ_3M": "35.4%", "KOSDAQ_6M": "48.7%", "KOSDAQ_1Y": "54.6%", "KOSDAQ_YTD": "28.8%"}, "2026-03-03": {"트루밸류_1D": "-7.7%", "트루밸류_1W": "-2.1%", "트루밸류_1M": "10.2%", "트루밸류_3M": "60.0%", "트루밸류_6M": "76.1%", "트루밸류_1Y": "130.0%", "트루밸류_YTD": "44.2%", "KOSPI_1D": "-0.7%", "KOSPI_1W": "7.9%", "KOSPI_1M": "23.2%", "KOSPI_3M": "57.2%", "KOSPI_6M": "96.6%", "KOSPI_1Y": "139.0%", "KOSPI_YTD": "48.7%", "KOSDAQ_1D": "0.2%", "KOSDAQ_1W": "3.3%", "KOSDAQ_1M": "10.1%", "KOSDAQ_3M": "35.4%", "KOSDAQ_6M": "48.7%", "KOSDAQ_1Y": "54.6%", "KOSDAQ_YTD": "28.8%"}, "2026-03-04": {"트루밸류_1D": "-11.8%", "트루밸류_1W": "-15.3%", "트루밸류_1M": "-4.3%", "트루밸류_3M": "41.5%", "트루밸류_6M": "54.1%", "트루밸류_1Y": "103.1%", "트루밸류_YTD": "27.2%", "KOSPI_1D": "-12.1%", "KOSPI_1W": "-16.3%", "KOSPI_1M": "-5.2%", "KOSPI_3M": "26.4%", "KOSPI_6M": "59.1%", "KOSPI_1Y": "101.4%", "KOSPI_YTD": "20.9%", "KOSDAQ_1D": "-14.0%", "KOSDAQ_1W": "-16.0%", "KOSDAQ_1M": "-14.9%", "KOSDAQ_3M": "5.2%", "KOSDAQ_6M": "21.5%", "KOSDAQ_1Y": "32.6%", "KOSDAQ_YTD": "5.7%"}, "2026-03-05": {"트루밸류_1D": "9.5%", "트루밸류_1W": "-11.2%", "트루밸류_1M": "9.8%", "트루밸류_3M": "54.8%", "트루밸류_6M": "67.8%", "트루밸류_1Y": "118.2%", "트루밸류_YTD": "39.3%", "KOSPI_1D": "10.0%", "KOSPI_1W": "-11.2%", "KOSPI_1M": "8.5%", "KOSPI_3M": "36.6%", "KOSPI_6M": "74.8%", "KOSPI_1Y": "119.0%", "KOSPI_YTD": "32.9%", "KOSDAQ_1D": "14.9%", "KOSDAQ_1W": "-5.5%", "KOSDAQ_1M": "1.4%", "KOSDAQ_3M": "21.5%", "KOSDAQ_6M": "38.5%", "KOSDAQ_1Y": "50.5%", "KOSDAQ_YTD": "21.4%"}, "2026-03-06": {"트루밸류_1D": "0.8%", "트루밸류_1W": "-10.1%", "트루밸류_1M": "12.7%", "트루밸류_3M": "56.1%", "트루밸류_6M": "69.2%", "트루밸류_1Y": "118.7%", "트루밸류_YTD": "40.5%", "KOSPI_1D": "-0.2%", "KOSPI_1W": "-10.8%", "KOSPI_1M": "9.8%", "KOSPI_3M": "36.3%", "KOSPI_6M": "74.4%", "KOSPI_1Y": "117.0%", "KOSPI_YTD": "32.6%", "KOSDAQ_1D": "2.6%", "KOSDAQ_1W": "-3.3%", "KOSDAQ_1M": "6.6%", "KOSDAQ_3M": "24.6%", "KOSDAQ_6M": "42.1%", "KOSDAQ_1Y": "56.8%", "KOSDAQ_YTD": "24.5%"}, "2026-03-09": {"트루밸류_1D": "-6.4%", "트루밸류_1W": "-15.9%", "트루밸류_1M": "-0.0%", "트루밸류_3M": "46.9%", "트루밸류_6M": "57.0%", "트루밸류_1Y": "106.1%", "트루밸류_YTD": "31.4%", "KOSPI_1D": "-6.3%", "KOSPI_1W": "-16.4%", "KOSPI_1M": "-1.2%", "KOSPI_3M": "26.4%", "KOSPI_6M": "60.6%", "KOSPI_1Y": "104.3%", "KOSPI_YTD": "24.3%", "KOSDAQ_1D": "-4.7%", "KOSDAQ_1W": "-7.8%", "KOSDAQ_1M": "-2.6%", "KOSDAQ_3M": "17.9%", "KOSDAQ_6M": "33.2%", "KOSDAQ_1Y": "51.0%", "KOSDAQ_YTD": "18.7%"}, "2026-03-10": {"트루밸류_1D": "6.0%", "트루밸류_1W": "-3.4%", "트루밸류_1M": "6.6%", "트루밸류_3M": "54.8%", "트루밸류_6M": "66.0%", "트루밸류_1Y": "118.2%", "트루밸류_YTD": "39.3%", "KOSPI_1D": "5.8%", "KOSPI_1W": "-4.4%", "KOSPI_1M": "4.5%", "KOSPI_3M": "34.0%", "KOSPI_6M": "67.1%", "KOSPI_1Y": "115.5%", "KOSPI_YTD": "31.4%", "KOSDAQ_1D": "3.6%", "KOSDAQ_1W": "0.0%", "KOSDAQ_1M": "2.0%", "KOSDAQ_3M": "21.7%", "KOSDAQ_6M": "36.6%", "KOSDAQ_1Y": "56.8%", "KOSDAQ_YTD": "23.0%"}, "2026-03-11": {"트루밸류_1D": "1.4%", "트루밸류_1W": "11.0%", "트루밸류_1M": "7.7%", "트루밸류_3M": "58.8%", "트루밸류_6M": "67.7%", "트루밸류_1Y": "124.3%", "트루밸류_YTD": "41.2%", "KOSPI_1D": "1.3%", "KOSPI_1W": "10.1%", "KOSPI_1M": "4.8%", "KOSPI_3M": "36.5%", "KOSPI_6M": "67.8%", "KOSPI_1Y": "121.1%", "KOSPI_YTD": "33.1%", "KOSDAQ_1D": "-0.1%", "KOSDAQ_1W": "16.2%", "KOSDAQ_1M": "2.0%", "KOSDAQ_3M": "21.6%", "KOSDAQ_6M": "36.2%", "KOSDAQ_1Y": "57.6%", "KOSDAQ_YTD": "22.8%"}, "2026-03-12": {"트루밸류_1D": "0.3%", "트루밸류_1W": "1.6%", "트루밸류_1M": "4.2%", "트루밸류_3M": "57.2%", "트루밸류_6M": "66.2%", "트루밸류_1Y": "126.1%", "트루밸류_YTD": "41.5%", "KOSPI_1D": "-0.8%", "KOSPI_1W": "-0.6%", "KOSPI_1M": "0.8%", "KOSPI_3M": "33.6%", "KOSPI_6M": "64.0%", "KOSPI_1Y": "116.2%", "KOSPI_YTD": "32.1%", "KOSDAQ_1D": "0.9%", "KOSDAQ_1W": "2.0%", "KOSDAQ_1M": "1.8%", "KOSDAQ_3M": "22.3%", "KOSDAQ_6M": "35.4%", "KOSDAQ_1Y": "57.2%", "KOSDAQ_YTD": "23.9%"}, "2026-03-13": {"트루밸류_1D": "-1.3%", "트루밸류_1W": "-0.6%", "트루밸류_1M": "2.1%", "트루밸류_3M": "55.1%", "트루밸류_6M": "64.0%", "트루밸류_1Y": "121.5%", "트루밸류_YTD": "39.7%", "KOSPI_1D": "-1.4%", "KOSPI_1W": "-1.8%", "KOSPI_1M": "-0.3%", "KOSPI_3M": "31.7%", "KOSPI_6M": "61.6%", "KOSPI_1Y": "113.3%", "KOSPI_YTD": "30.2%", "KOSDAQ_1D": "0.5%", "KOSDAQ_1W": "-0.0%", "KOSDAQ_1M": "4.2%", "KOSDAQ_3M": "22.9%", "KOSDAQ_6M": "36.0%", "KOSDAQ_1Y": "59.4%", "KOSDAQ_YTD": "24.5%"}};
-            var rtDatesSorted = ["2026-02-04", "2026-02-10", "2026-02-11", "2026-02-12", "2026-02-13", "2026-02-19", "2026-02-20", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-02-27", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13"];
+            var returnData = {"2026-02-04": {"트루밸류_1D": "1.5%", "트루밸류_1W": "5.7%", "트루밸류_1M": "28.5%", "트루밸류_3M": "38.6%", "트루밸류_6M": "64.7%", "트루밸류_1Y": "115.2%", "트루밸류_YTD": "28.5%", "KOSPI_1D": "1.6%", "KOSPI_1W": "3.9%", "KOSPI_1M": "24.6%", "KOSPI_3M": null, "KOSPI_6M": null, "KOSPI_1Y": null, "KOSPI_YTD": "24.6%", "KOSDAQ_1D": "0.4%", "KOSDAQ_1W": "1.4%", "KOSDAQ_1M": "21.6%", "KOSDAQ_3M": null, "KOSDAQ_6M": null, "KOSDAQ_1Y": null, "KOSDAQ_YTD": "21.6%"}, "2026-02-10": {"트루밸류_1D": "-0.6%", "트루밸류_1W": "-0.2%", "트루밸류_1M": "19.8%", "트루밸류_3M": "42.0%", "트루밸류_6M": "54.7%", "트루밸류_1Y": "108.5%", "트루밸류_YTD": "26.4%", "KOSPI_1D": "0.1%", "KOSPI_1W": "0.3%", "KOSPI_1M": "15.6%", "KOSPI_3M": null, "KOSPI_6M": null, "KOSPI_1Y": null, "KOSPI_YTD": "23.0%", "KOSDAQ_1D": "-1.1%", "KOSDAQ_1W": "-2.5%", "KOSDAQ_1M": "17.6%", "KOSDAQ_3M": null, "KOSDAQ_6M": null, "KOSDAQ_1Y": null, "KOSDAQ_YTD": "17.9%"}, "2026-02-11": {"트루밸류_1D": "-0.6%", "트루밸류_1W": "-0.2%", "트루밸류_1M": "19.8%", "트루밸류_3M": "42.0%", "트루밸류_6M": "54.7%", "트루밸류_1Y": "108.5%", "트루밸류_YTD": "26.4%", "KOSPI_1D": "0.1%", "KOSPI_1W": "0.3%", "KOSPI_1M": "15.6%", "KOSPI_3M": null, "KOSPI_6M": null, "KOSPI_1Y": null, "KOSPI_YTD": "23.0%", "KOSDAQ_1D": "-1.1%", "KOSDAQ_1W": "-2.5%", "KOSDAQ_1M": "17.6%", "KOSDAQ_3M": null, "KOSDAQ_6M": null, "KOSDAQ_1Y": null, "KOSDAQ_YTD": "17.9%"}, "2026-02-12": {"트루밸류_1D": "3.6%", "트루밸류_1W": "7.1%", "트루밸류_1M": "23.7%", "트루밸류_3M": "47.3%", "트루밸류_6M": "62.3%", "트루밸류_1Y": "116.8%", "트루밸류_YTD": "35.8%", "KOSPI_1D": "3.1%", "KOSPI_1W": "6.9%", "KOSPI_1M": "19.4%", "KOSPI_3M": null, "KOSPI_6M": null, "KOSPI_1Y": null, "KOSPI_YTD": "31.0%", "KOSDAQ_1D": "1.0%", "KOSDAQ_1W": "1.6%", "KOSDAQ_1M": "18.5%", "KOSDAQ_3M": null, "KOSDAQ_6M": null, "KOSDAQ_1Y": null, "KOSDAQ_YTD": "21.7%"}, "2026-02-13": {"트루밸류_1D": "0.7%", "트루밸류_1W": "9.7%", "트루밸류_1M": "24.9%", "트루밸류_3M": "46.5%", "트루밸류_6M": "62.4%", "트루밸류_1Y": "117.9%", "트루밸류_YTD": "36.8%", "KOSPI_1D": "-0.3%", "KOSPI_1W": "8.2%", "KOSPI_1M": "17.4%", "KOSPI_3M": null, "KOSPI_6M": null, "KOSPI_1Y": null, "KOSPI_YTD": "30.7%", "KOSDAQ_1D": "-1.8%", "KOSDAQ_1W": "2.3%", "KOSDAQ_1M": "16.6%", "KOSDAQ_3M": null, "KOSDAQ_6M": null, "KOSDAQ_1Y": null, "KOSDAQ_YTD": "19.5%"}, "2026-02-19": {"트루밸류_1D": "3.8%", "트루밸류_1W": "4.5%", "트루밸류_1M": "22.1%", "트루밸류_3M": "61.6%", "트루밸류_6M": "73.7%", "트루밸류_1Y": "116.4%", "트루밸류_YTD": "42.0%", "KOSPI_1D": "3.1%", "KOSPI_1W": "2.8%", "KOSPI_1M": "15.8%", "KOSPI_3M": "44.5%", "KOSPI_6M": "80.1%", "KOSPI_1Y": "112.5%", "KOSPI_YTD": "34.7%", "KOSDAQ_1D": "4.9%", "KOSDAQ_1W": "3.1%", "KOSDAQ_1M": "19.9%", "KOSDAQ_3M": "33.2%", "KOSDAQ_6M": "47.3%", "KOSDAQ_1Y": "49.1%", "KOSDAQ_YTD": "25.4%"}, "2026-02-20": {"트루밸류_1D": "1.4%", "트루밸류_1W": "5.2%", "트루밸류_1M": "25.2%", "트루밸류_3M": "59.4%", "트루밸류_6M": "77.6%", "트루밸류_1Y": "122.7%", "트루밸류_YTD": "43.9%", "KOSPI_1D": "2.3%", "KOSPI_1W": "5.5%", "KOSPI_1M": "18.9%", "KOSPI_3M": "45.0%", "KOSPI_6M": "85.6%", "KOSPI_1Y": "118.9%", "KOSPI_YTD": "37.8%", "KOSDAQ_1D": "-0.6%", "KOSDAQ_1W": "4.3%", "KOSDAQ_1M": "18.2%", "KOSDAQ_3M": "29.4%", "KOSDAQ_6M": "48.4%", "KOSDAQ_1Y": "50.2%", "KOSDAQ_YTD": "24.7%"}, "2026-02-23": {"트루밸류_1D": "-0.0%", "트루밸류_1W": "5.1%", "트루밸류_1M": "21.7%", "트루밸류_3M": "65.5%", "트루밸류_6M": "76.5%", "트루밸류_1Y": "122.4%", "트루밸류_YTD": "43.8%", "KOSPI_1D": "0.6%", "KOSPI_1W": "6.2%", "KOSPI_1M": "17.2%", "KOSPI_3M": "51.7%", "KOSPI_6M": "84.5%", "KOSPI_1Y": "120.2%", "KOSPI_YTD": "38.7%", "KOSDAQ_1D": "-0.2%", "KOSDAQ_1W": "4.2%", "KOSDAQ_1M": "15.9%", "KOSDAQ_3M": "33.3%", "KOSDAQ_6M": "47.2%", "KOSDAQ_1Y": "48.7%", "KOSDAQ_YTD": "24.5%"}, "2026-02-24": {"트루밸류_1D": "2.5%", "트루밸류_1W": "7.7%", "트루밸류_1M": "24.7%", "트루밸류_3M": "69.7%", "트루밸류_6M": "80.8%", "트루밸류_1Y": "129.8%", "트루밸류_YTD": "47.4%", "KOSPI_1D": "2.1%", "KOSPI_1W": "8.4%", "KOSPI_1M": "19.6%", "KOSPI_3M": "55.2%", "KOSPI_6M": "88.4%", "KOSPI_1Y": "125.7%", "KOSPI_YTD": "41.7%", "KOSDAQ_1D": "1.1%", "KOSDAQ_1W": "5.3%", "KOSDAQ_1M": "17.2%", "KOSDAQ_3M": "36.0%", "KOSDAQ_6M": "48.9%", "KOSDAQ_1Y": "50.6%", "KOSDAQ_YTD": "25.9%"}, "2026-02-25": {"트루밸류_1D": "1.9%", "트루밸류_1W": "9.8%", "트루밸류_1M": "27.1%", "트루밸류_3M": "73.8%", "트루밸류_6M": "82.3%", "트루밸류_1Y": "134.9%", "트루밸류_YTD": "50.2%", "KOSPI_1D": "1.9%", "KOSPI_1W": "10.5%", "KOSPI_1M": "21.9%", "KOSPI_3M": "57.7%", "KOSPI_6M": "89.5%", "KOSPI_1Y": "131.3%", "KOSPI_YTD": "44.4%", "KOSDAQ_1D": "0.0%", "KOSDAQ_1W": "5.3%", "KOSDAQ_1M": "17.2%", "KOSDAQ_3M": "36.1%", "KOSDAQ_6M": "46.0%", "KOSDAQ_1Y": "51.4%", "KOSDAQ_YTD": "25.9%"}, "2026-02-26": {"트루밸류_1D": "4.4%", "트루밸류_1W": "10.5%", "트루밸류_1M": "32.3%", "트루밸류_3M": "76.6%", "트루밸류_6M": "89.6%", "트루밸류_1Y": "144.0%", "트루밸류_YTD": "56.8%", "KOSPI_1D": "3.7%", "KOSPI_1W": "11.1%", "KOSPI_1M": "27.4%", "KOSPI_3M": "59.3%", "KOSPI_6M": "98.4%", "KOSPI_1Y": "138.8%", "KOSPI_YTD": "49.7%", "KOSDAQ_1D": "2.0%", "KOSDAQ_1W": "2.4%", "KOSDAQ_1M": "11.7%", "KOSDAQ_3M": "35.5%", "KOSDAQ_6M": "48.3%", "KOSDAQ_1Y": "54.1%", "KOSDAQ_YTD": "28.5%"}, "2026-02-27": {"트루밸류_1D": "-0.4%", "트루밸류_1W": "8.6%", "트루밸류_1M": "28.1%", "트루밸류_3M": "73.3%", "트루밸류_6M": "89.4%", "트루밸류_1Y": "143.0%", "트루밸류_YTD": "56.2%", "KOSPI_1D": "-0.7%", "KOSPI_1W": "7.9%", "KOSPI_1M": "23.2%", "KOSPI_3M": "57.2%", "KOSPI_6M": "96.6%", "KOSPI_1Y": "139.0%", "KOSPI_YTD": "48.7%", "KOSDAQ_1D": "0.2%", "KOSDAQ_1W": "3.3%", "KOSDAQ_1M": "10.1%", "KOSDAQ_3M": "35.4%", "KOSDAQ_6M": "48.7%", "KOSDAQ_1Y": "54.6%", "KOSDAQ_YTD": "28.8%"}, "2026-03-03": {"트루밸류_1D": "-7.7%", "트루밸류_1W": "-2.1%", "트루밸류_1M": "10.2%", "트루밸류_3M": "60.0%", "트루밸류_6M": "76.1%", "트루밸류_1Y": "130.0%", "트루밸류_YTD": "44.2%", "KOSPI_1D": "-0.7%", "KOSPI_1W": "7.9%", "KOSPI_1M": "23.2%", "KOSPI_3M": "57.2%", "KOSPI_6M": "96.6%", "KOSPI_1Y": "139.0%", "KOSPI_YTD": "48.7%", "KOSDAQ_1D": "0.2%", "KOSDAQ_1W": "3.3%", "KOSDAQ_1M": "10.1%", "KOSDAQ_3M": "35.4%", "KOSDAQ_6M": "48.7%", "KOSDAQ_1Y": "54.6%", "KOSDAQ_YTD": "28.8%"}, "2026-03-04": {"트루밸류_1D": "-11.8%", "트루밸류_1W": "-15.3%", "트루밸류_1M": "-4.3%", "트루밸류_3M": "41.5%", "트루밸류_6M": "54.1%", "트루밸류_1Y": "103.1%", "트루밸류_YTD": "27.2%", "KOSPI_1D": "-12.1%", "KOSPI_1W": "-16.3%", "KOSPI_1M": "-5.2%", "KOSPI_3M": "26.4%", "KOSPI_6M": "59.1%", "KOSPI_1Y": "101.4%", "KOSPI_YTD": "20.9%", "KOSDAQ_1D": "-14.0%", "KOSDAQ_1W": "-16.0%", "KOSDAQ_1M": "-14.9%", "KOSDAQ_3M": "5.2%", "KOSDAQ_6M": "21.5%", "KOSDAQ_1Y": "32.6%", "KOSDAQ_YTD": "5.7%"}, "2026-03-05": {"트루밸류_1D": "9.5%", "트루밸류_1W": "-11.2%", "트루밸류_1M": "9.8%", "트루밸류_3M": "54.8%", "트루밸류_6M": "67.8%", "트루밸류_1Y": "118.2%", "트루밸류_YTD": "39.3%", "KOSPI_1D": "10.0%", "KOSPI_1W": "-11.2%", "KOSPI_1M": "8.5%", "KOSPI_3M": "36.6%", "KOSPI_6M": "74.8%", "KOSPI_1Y": "119.0%", "KOSPI_YTD": "32.9%", "KOSDAQ_1D": "14.9%", "KOSDAQ_1W": "-5.5%", "KOSDAQ_1M": "1.4%", "KOSDAQ_3M": "21.5%", "KOSDAQ_6M": "38.5%", "KOSDAQ_1Y": "50.5%", "KOSDAQ_YTD": "21.4%"}, "2026-03-06": {"트루밸류_1D": "0.8%", "트루밸류_1W": "-10.1%", "트루밸류_1M": "12.7%", "트루밸류_3M": "56.1%", "트루밸류_6M": "69.2%", "트루밸류_1Y": "118.7%", "트루밸류_YTD": "40.5%", "KOSPI_1D": "-0.2%", "KOSPI_1W": "-10.8%", "KOSPI_1M": "9.8%", "KOSPI_3M": "36.3%", "KOSPI_6M": "74.4%", "KOSPI_1Y": "117.0%", "KOSPI_YTD": "32.6%", "KOSDAQ_1D": "2.6%", "KOSDAQ_1W": "-3.3%", "KOSDAQ_1M": "6.6%", "KOSDAQ_3M": "24.6%", "KOSDAQ_6M": "42.1%", "KOSDAQ_1Y": "56.8%", "KOSDAQ_YTD": "24.5%"}, "2026-03-09": {"트루밸류_1D": "-6.4%", "트루밸류_1W": "-15.9%", "트루밸류_1M": "-0.0%", "트루밸류_3M": "46.9%", "트루밸류_6M": "57.0%", "트루밸류_1Y": "106.1%", "트루밸류_YTD": "31.4%", "KOSPI_1D": "-6.3%", "KOSPI_1W": "-16.4%", "KOSPI_1M": "-1.2%", "KOSPI_3M": "26.4%", "KOSPI_6M": "60.6%", "KOSPI_1Y": "104.3%", "KOSPI_YTD": "24.3%", "KOSDAQ_1D": "-4.7%", "KOSDAQ_1W": "-7.8%", "KOSDAQ_1M": "-2.6%", "KOSDAQ_3M": "17.9%", "KOSDAQ_6M": "33.2%", "KOSDAQ_1Y": "51.0%", "KOSDAQ_YTD": "18.7%"}, "2026-03-10": {"트루밸류_1D": "6.0%", "트루밸류_1W": "-3.4%", "트루밸류_1M": "6.6%", "트루밸류_3M": "54.8%", "트루밸류_6M": "66.0%", "트루밸류_1Y": "118.2%", "트루밸류_YTD": "39.3%", "KOSPI_1D": "5.8%", "KOSPI_1W": "-4.4%", "KOSPI_1M": "4.5%", "KOSPI_3M": "34.0%", "KOSPI_6M": "67.1%", "KOSPI_1Y": "115.5%", "KOSPI_YTD": "31.4%", "KOSDAQ_1D": "3.6%", "KOSDAQ_1W": "0.0%", "KOSDAQ_1M": "2.0%", "KOSDAQ_3M": "21.7%", "KOSDAQ_6M": "36.6%", "KOSDAQ_1Y": "56.8%", "KOSDAQ_YTD": "23.0%"}, "2026-03-11": {"트루밸류_1D": "1.4%", "트루밸류_1W": "11.0%", "트루밸류_1M": "7.7%", "트루밸류_3M": "58.8%", "트루밸류_6M": "67.7%", "트루밸류_1Y": "124.3%", "트루밸류_YTD": "41.2%", "KOSPI_1D": "1.3%", "KOSPI_1W": "10.1%", "KOSPI_1M": "4.8%", "KOSPI_3M": "36.5%", "KOSPI_6M": "67.8%", "KOSPI_1Y": "121.1%", "KOSPI_YTD": "33.1%", "KOSDAQ_1D": "-0.1%", "KOSDAQ_1W": "16.2%", "KOSDAQ_1M": "2.0%", "KOSDAQ_3M": "21.6%", "KOSDAQ_6M": "36.2%", "KOSDAQ_1Y": "57.6%", "KOSDAQ_YTD": "22.8%"}, "2026-03-12": {"트루밸류_1D": "0.3%", "트루밸류_1W": "1.6%", "트루밸류_1M": "4.2%", "트루밸류_3M": "57.2%", "트루밸류_6M": "66.2%", "트루밸류_1Y": "126.1%", "트루밸류_YTD": "41.5%", "KOSPI_1D": "-0.8%", "KOSPI_1W": "-0.6%", "KOSPI_1M": "0.8%", "KOSPI_3M": "33.6%", "KOSPI_6M": "64.0%", "KOSPI_1Y": "116.2%", "KOSPI_YTD": "32.1%", "KOSDAQ_1D": "0.9%", "KOSDAQ_1W": "2.0%", "KOSDAQ_1M": "1.8%", "KOSDAQ_3M": "22.3%", "KOSDAQ_6M": "35.4%", "KOSDAQ_1Y": "57.2%", "KOSDAQ_YTD": "23.9%"}};
+            var rtDatesSorted = ["2026-02-04", "2026-02-10", "2026-02-11", "2026-02-12", "2026-02-13", "2026-02-19", "2026-02-20", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-02-27", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12"];
             var rtItems = [["삼성 트루밸류", "트루밸류"], ["KOSPI", "KOSPI"], ["KOSDAQ", "KOSDAQ"]];
             var rtPeriods = ["1D", "1W", "1M", "3M", "6M", "1Y", "YTD"];
 
@@ -275,11 +275,11 @@
                                 <td>005930</td>
                                 <td>삼성전자</td>
                                 <td>반도체</td>
-                                <td>1,110조5,241억</td>
+                                <td>1,103조4,205억</td>
                                 <td>30%</td>
-                                <td class="positive">+2.2%</td>
-                                <td class="positive">+6.7</td>
-                                <td class="positive">+206.7%</td>
+                                <td class="positive">+1.6%</td>
+                                <td class="positive">+4.9</td>
+                                <td class="positive">+200.0%</td>
                             </tr>
                 
                             <tr>
@@ -287,11 +287,11 @@
                                 <td>000660</td>
                                 <td>SK하이닉스</td>
                                 <td>반도체</td>
-                                <td>682조7,689억</td>
+                                <td>677조7,799억</td>
                                 <td>15%</td>
-                                <td class="positive">+5.3%</td>
-                                <td class="positive">+7.9</td>
-                                <td class="positive">+219.0%</td>
+                                <td class="positive">+4.8%</td>
+                                <td class="positive">+7.3</td>
+                                <td class="positive">+203.0%</td>
                             </tr>
                 
                             <tr>
@@ -301,57 +301,57 @@
                                 <td>미디어,교육</td>
                                 <td>15조2,460억</td>
                                 <td>8%</td>
-                                <td class="negative">-1.9%</td>
-                                <td class="negative">-1.5</td>
-                                <td class="positive">+66.7%</td>
+                                <td class="negative">-2.4%</td>
+                                <td class="negative">-1.9</td>
+                                <td class="positive">+70.0%</td>
                             </tr>
                 
                             <tr>
                                 <td>4</td>
-                                <td>001040</td>
-                                <td>CJ</td>
-                                <td>상사,자본재</td>
-                                <td>5조6,545억</td>
+                                <td>277810</td>
+                                <td>레인보우로보틱스</td>
+                                <td>기계</td>
+                                <td>13조8,515억</td>
                                 <td>8%</td>
-                                <td class="positive">+9.9%</td>
-                                <td class="positive">+7.9</td>
-                                <td class="positive">+106.5%</td>
+                                <td class="negative">-4.8%</td>
+                                <td class="negative">-3.8</td>
+                                <td class="positive">+4.9%</td>
                             </tr>
                 
                             <tr>
                                 <td>5</td>
-                                <td>277810</td>
-                                <td>레인보우로보틱스</td>
-                                <td>기계</td>
-                                <td>13조9,097억</td>
+                                <td>001040</td>
+                                <td>CJ</td>
+                                <td>상사,자본재</td>
+                                <td>5조6,662억</td>
                                 <td>8%</td>
-                                <td class="negative">-4.5%</td>
-                                <td class="negative">-3.6</td>
-                                <td class="positive">+0.8%</td>
+                                <td class="positive">+10.0%</td>
+                                <td class="positive">+8.0</td>
+                                <td class="positive">+88.0%</td>
                             </tr>
                 
                             <tr>
                                 <td>6</td>
-                                <td>034020</td>
-                                <td>두산에너빌리티</td>
-                                <td>기계</td>
-                                <td>68조2,198억</td>
+                                <td>000150</td>
+                                <td>두산</td>
+                                <td>상사,자본재</td>
+                                <td>17조5,055억</td>
                                 <td>5%</td>
-                                <td class="">+0.0%</td>
-                                <td class="">+0.0</td>
-                                <td class="positive">+42.0%</td>
+                                <td class="negative">-1.4%</td>
+                                <td class="negative">-0.7</td>
+                                <td class="positive">+1.0%</td>
                             </tr>
                 
                             <tr>
                                 <td>7</td>
-                                <td>000150</td>
-                                <td>두산</td>
-                                <td>상사,자본재</td>
-                                <td>17조5,703억</td>
+                                <td>034020</td>
+                                <td>두산에너빌리티</td>
+                                <td>기계</td>
+                                <td>67조7,714억</td>
                                 <td>5%</td>
-                                <td class="negative">-1.3%</td>
-                                <td class="negative">-0.6</td>
-                                <td class="negative">-0.3%</td>
+                                <td class="negative">-0.7%</td>
+                                <td class="negative">-0.3</td>
+                                <td class="positive">+42.0%</td>
                             </tr>
                 
                             <tr>
@@ -359,11 +359,11 @@
                                 <td>006800</td>
                                 <td>미래에셋증권</td>
                                 <td>증권</td>
-                                <td>40조363억</td>
+                                <td>39조8,945억</td>
                                 <td>3%</td>
-                                <td class="positive">+2.0%</td>
-                                <td class="positive">+0.6</td>
-                                <td class="positive">+155.1%</td>
+                                <td class="positive">+2.3%</td>
+                                <td class="positive">+0.7</td>
+                                <td class="positive">+150.0%</td>
                             </tr>
                 
                             <tr>
@@ -371,11 +371,11 @@
                                 <td>010060</td>
                                 <td>OCI홀딩스</td>
                                 <td>화학</td>
-                                <td>2조9,574억</td>
+                                <td>2조9,443억</td>
                                 <td>3%</td>
                                 <td class="negative">-4.6%</td>
                                 <td class="negative">-1.4</td>
-                                <td class="positive">+47.9%</td>
+                                <td class="positive">+55.0%</td>
                             </tr>
                 
                             <tr>
@@ -383,11 +383,11 @@
                                 <td>006400</td>
                                 <td>삼성SDI</td>
                                 <td>IT가전</td>
-                                <td>31조2,672억</td>
+                                <td>31조1,463억</td>
                                 <td>3%</td>
-                                <td class="">+0.0%</td>
-                                <td class="">+0.0</td>
-                                <td class="negative">-0.1%</td>
+                                <td class="negative">-0.3%</td>
+                                <td class="negative">-0.1</td>
+                                <td class="">N/A</td>
                             </tr>
                 
                             <tr>
@@ -395,11 +395,11 @@
                                 <td>241560</td>
                                 <td>두산밥캣</td>
                                 <td>기계</td>
-                                <td>5조5,501억</td>
+                                <td>5조5,405억</td>
                                 <td>3%</td>
-                                <td class="negative">-4.1%</td>
-                                <td class="negative">-1.2</td>
-                                <td class="negative">-13.0%</td>
+                                <td class="negative">-4.3%</td>
+                                <td class="negative">-1.3</td>
+                                <td class="">N/A</td>
                             </tr>
                 
                             <tr>
@@ -407,11 +407,11 @@
                                 <td>112610</td>
                                 <td>씨에스윈드</td>
                                 <td>에너지</td>
-                                <td>2조3,152억</td>
+                                <td>2조3,321억</td>
                                 <td>3%</td>
-                                <td class="negative">-0.9%</td>
-                                <td class="negative">-0.3</td>
-                                <td class="positive">+3.1%</td>
+                                <td class="negative">-0.4%</td>
+                                <td class="negative">-0.1</td>
+                                <td class="positive">+2.5%</td>
                             </tr>
                 
                             <tr>
@@ -419,18 +419,133 @@
                                 <td>439260</td>
                                 <td>대한조선</td>
                                 <td>기타</td>
-                                <td>3조8,025억</td>
+                                <td>3조7,602억</td>
                                 <td>3%</td>
-                                <td class="negative">-2.8%</td>
-                                <td class="negative">-0.8</td>
-                                <td class="negative">-3.5%</td>
+                                <td class="negative">-3.8%</td>
+                                <td class="negative">-1.2</td>
+                                <td class="negative">-0.9%</td>
                             </tr>
                 
                             <tr class="total-row">
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
                                 <td style="font-weight: 600;">97%</td>
-                                <td class="positive" style="font-weight: 600;">+1.4%</td>
-                                <td class="positive" style="font-weight: 600;">+13.6</td>
+                                <td class="positive" style="font-weight: 600;">+1.0%</td>
+                                <td class="positive" style="font-weight: 600;">+10.1</td>
+                                <td style="font-weight: 600;">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="portfolio-section">
+                <h3 class="portfolio-title">DB 목표전환형 2차</h3>
+                <div class="table-container">
+                    <table class="portfolio-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>종목코드</th>
+                                <th>종목명</th>
+                                <th>섹터</th>
+                                <th>시가총액</th>
+                                <th>Weight</th>
+                                <th>오늘 수익률</th>
+                                <th>기여도</th>
+                                <th>누적 수익률</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            
+                            <tr>
+                                <td>1</td>
+                                <td>005930</td>
+                                <td>삼성전자</td>
+                                <td>반도체</td>
+                                <td>1,103조4,205억</td>
+                                <td>15%</td>
+                                <td class="">-</td>
+                                <td class="">-</td>
+                                <td class="">-</td>
+                            </tr>
+                
+                            <tr>
+                                <td>2</td>
+                                <td>000660</td>
+                                <td>SK하이닉스</td>
+                                <td>반도체</td>
+                                <td>677조7,799억</td>
+                                <td>15%</td>
+                                <td class="">-</td>
+                                <td class="">-</td>
+                                <td class="">-</td>
+                            </tr>
+                
+                            <tr>
+                                <td>3</td>
+                                <td>352820</td>
+                                <td>하이브</td>
+                                <td>미디어,교육</td>
+                                <td>15조2,460억</td>
+                                <td>5%</td>
+                                <td class="">-</td>
+                                <td class="">-</td>
+                                <td class="">-</td>
+                            </tr>
+                
+                            <tr>
+                                <td>4</td>
+                                <td>128940</td>
+                                <td>한미약품</td>
+                                <td>건강관리</td>
+                                <td>6조3,735억</td>
+                                <td>5%</td>
+                                <td class="">-</td>
+                                <td class="">-</td>
+                                <td class="">-</td>
+                            </tr>
+                
+                            <tr>
+                                <td>5</td>
+                                <td>010140</td>
+                                <td>삼성중공업</td>
+                                <td>조선</td>
+                                <td>25조3,440억</td>
+                                <td>5%</td>
+                                <td class="">-</td>
+                                <td class="">-</td>
+                                <td class="">-</td>
+                            </tr>
+                
+                            <tr>
+                                <td>6</td>
+                                <td>439260</td>
+                                <td>대한조선</td>
+                                <td>기타</td>
+                                <td>3조7,602억</td>
+                                <td>3%</td>
+                                <td class="">-</td>
+                                <td class="">-</td>
+                                <td class="">-</td>
+                            </tr>
+                
+                            <tr>
+                                <td>7</td>
+                                <td>007660</td>
+                                <td>이수페타시스</td>
+                                <td>IT하드웨어</td>
+                                <td>7조7,300억</td>
+                                <td>3%</td>
+                                <td class="">-</td>
+                                <td class="">-</td>
+                                <td class="">-</td>
+                            </tr>
+                
+                            <tr class="total-row">
+                                <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
+                                <td style="font-weight: 600;">51%</td>
+                                <td class="" style="font-weight: 600;">N/A</td>
+                                <td class="" style="font-weight: 600;">N/A</td>
                                 <td style="font-weight: 600;">-</td>
                             </tr>
                         </tbody>
@@ -489,20 +604,6 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="sect-name">기계·장비</td>
-                        <td class="sect-num">16.0%</td>
-                        <td class="sect-num">3.8%</td>
-                        <td class="sect-diff">+12.2%</td>
-                        <td class="sect-diff sect-under">-4.9%</td>
-                    </tr>
-                    <tr class="sect-detail-row">
-                        <td colspan="5" class="sect-detail">
-                            <span class="sect-detail-mine">레인보우로보틱스, 두산에너빌리티, 두산밥캣</span>
-                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
-                            <span class="sect-detail-bm">두산에너빌리티, 한미반도체, 레인보우로보틱스</span>
-                        </td>
-                    </tr>
-                    <tr>
                         <td class="sect-name">기타금융</td>
                         <td class="sect-num">16.0%</td>
                         <td class="sect-num">10.2%</td>
@@ -514,6 +615,20 @@
                             <span class="sect-detail-mine">CJ, 두산, OCI홀딩스</span>
                             <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
                             <span class="sect-detail-bm">SK스퀘어, KB금융, 신한지주</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="sect-name">기계·장비</td>
+                        <td class="sect-num">16.0%</td>
+                        <td class="sect-num">3.8%</td>
+                        <td class="sect-diff">+12.2%</td>
+                        <td class="sect-diff sect-under">-4.9%</td>
+                    </tr>
+                    <tr class="sect-detail-row">
+                        <td colspan="5" class="sect-detail">
+                            <span class="sect-detail-mine">레인보우로보틱스, 두산에너빌리티, 두산밥캣</span>
+                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
+                            <span class="sect-detail-bm">두산에너빌리티, 한미반도체, 레인보우로보틱스</span>
                         </td>
                     </tr>
                     <tr>
@@ -674,6 +789,201 @@
                     </tr>
                     <tr>
                         <td colspan="3" class="sect-right-stocks">기업은행, 카카오뱅크</td>
+                    </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="sector-card">
+            <h3 class="sector-card-title">
+                DB 목표전환형 2차
+                <span class="sect-vs">vs</span>
+                KOSPI 200 + KOSDAQ 150
+                <span class="sect-bm-1m">BM 1M <span class="sect-over">+25.8%</span></span>
+            </h3>
+            <div class="sector-header-bar">
+                <div class="sector-legend">
+                    <span class="legend-item"><span class="legend-dot portfolio-dot"></span> 포트폴리오</span>
+                    <span class="legend-item"><span class="legend-dot kodex-dot"></span> 벤치마크</span>
+                </div>
+                <div class="sect-not-held-label">미보유</div>
+            </div>
+            <div class="sector-three-panel">
+                <div class="sector-left-panel">
+                    <h4 class="sect-panel-title">보유 업종</h4>
+                    <div class="sector-table-wrap">
+                        <table class="sector-table">
+                            <thead>
+                                <tr>
+                                    <th>업종</th>
+                                    <th>포트폴리오</th>
+                                    <th>벤치마크</th>
+                                    <th>차이</th>
+                                    <th>vs BM 1M</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    <tr>
+                        <td class="sect-name">전기·전자</td>
+                        <td class="sect-num">33.0%</td>
+                        <td class="sect-num">49.1%</td>
+                        <td class="sect-diff">-16.1%</td>
+                        <td class="sect-diff sect-over">+8.1%</td>
+                    </tr>
+                    <tr class="sect-detail-row">
+                        <td colspan="5" class="sect-detail">
+                            <span class="sect-detail-mine">삼성전자, SK하이닉스, 이수페타시스</span>
+                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
+                            <span class="sect-detail-bm">삼성전자, SK하이닉스, LG에너지솔루션</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="sect-name">운송장비·부품</td>
+                        <td class="sect-num">8.0%</td>
+                        <td class="sect-num">9.7%</td>
+                        <td class="sect-diff">-1.7%</td>
+                        <td class="sect-diff sect-under">-12.3%</td>
+                    </tr>
+                    <tr class="sect-detail-row">
+                        <td colspan="5" class="sect-detail">
+                            <span class="sect-detail-mine">삼성중공업, 대한조선</span>
+                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
+                            <span class="sect-detail-bm">현대차, 기아, HD현대중공업</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="sect-name">오락·문화</td>
+                        <td class="sect-num">5.0%</td>
+                        <td class="sect-num">0.6%</td>
+                        <td class="sect-diff">+4.4%</td>
+                        <td class="sect-diff sect-under">-23.2%</td>
+                    </tr>
+                    <tr class="sect-detail-row">
+                        <td colspan="5" class="sect-detail">
+                            <span class="sect-detail-mine">하이브</span>
+                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
+                            <span class="sect-detail-bm">하이브, 강원랜드, 에스엠</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="sect-name">제약</td>
+                        <td class="sect-num">5.0%</td>
+                        <td class="sect-num">4.8%</td>
+                        <td class="sect-diff">+0.2%</td>
+                        <td class="sect-diff sect-under">-16.5%</td>
+                    </tr>
+                    <tr class="sect-detail-row">
+                        <td colspan="5" class="sect-detail">
+                            <span class="sect-detail-mine">한미약품</span>
+                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
+                            <span class="sect-detail-bm">삼성바이오로직스, 셀트리온, 삼천당제약</span>
+                        </td>
+                    </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="sect-right-block">
+                    <h4 class="sect-panel-title">BM 비중 상위 5개</h4>
+                    <table class="sector-table">
+                        <thead>
+                            <tr><th>업종</th><th>비중</th><th>vs BM 1M</th></tr>
+                        </thead>
+                        <tbody>
+                    <tr>
+                        <td class="sect-name">기타금융</td>
+                        <td class="sect-right-val">10.2%</td>
+                        <td class="sect-right-val sect-under">-1.6%</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" class="sect-right-stocks">SK스퀘어, KB금융, 신한지주</td>
+                    </tr>
+                    <tr>
+                        <td class="sect-name">기계·장비</td>
+                        <td class="sect-right-val">3.8%</td>
+                        <td class="sect-right-val sect-under">-4.9%</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" class="sect-right-stocks">두산에너빌리티, 한미반도체, 레인보우로보틱스</td>
+                    </tr>
+                    <tr>
+                        <td class="sect-name">화학</td>
+                        <td class="sect-right-val">3.6%</td>
+                        <td class="sect-right-val sect-under">-8.8%</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" class="sect-right-stocks">LG화학, SK이노베이션, S-Oil</td>
+                    </tr>
+                    <tr>
+                        <td class="sect-name">IT 서비스</td>
+                        <td class="sect-right-val">2.8%</td>
+                        <td class="sect-right-val sect-under">-24.1%</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" class="sect-right-stocks">NAVER, 카카오, 삼성에스디에스</td>
+                    </tr>
+                    <tr>
+                        <td class="sect-name">유통</td>
+                        <td class="sect-right-val">2.2%</td>
+                        <td class="sect-right-val sect-under">-6.4%</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" class="sect-right-stocks">삼성물산, 포스코인터내셔널, 영원무역</td>
+                    </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="sect-right-block">
+                    <h4 class="sect-panel-title">1M 초과 수익률 상위 5개</h4>
+                    <table class="sector-table">
+                        <thead>
+                            <tr><th>업종</th><th>비중</th><th>vs BM 1M</th></tr>
+                        </thead>
+                        <tbody>
+                    <tr>
+                        <td class="sect-name">증권</td>
+                        <td class="sect-right-val">1.5%</td>
+                        <td class="sect-right-val sect-over">+44.4%</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" class="sect-right-stocks">미래에셋증권, NH투자증권, 키움증권</td>
+                    </tr>
+                    <tr>
+                        <td class="sect-name">건설</td>
+                        <td class="sect-right-val">0.6%</td>
+                        <td class="sect-right-val sect-over">+13.9%</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" class="sect-right-stocks">현대건설, 대우건설, 한전KPS</td>
+                    </tr>
+                    <tr>
+                        <td class="sect-name">비금속</td>
+                        <td class="sect-right-val">0.1%</td>
+                        <td class="sect-right-val sect-over">+13.7%</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" class="sect-right-stocks">티씨케이, 한일시멘트, 원익QnC</td>
+                    </tr>
+                    <tr>
+                        <td class="sect-name">금융</td>
+                        <td class="sect-right-val">0.6%</td>
+                        <td class="sect-right-val sect-over">+3.5%</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" class="sect-right-stocks">에코프로, 하림지주, NHN KCP</td>
+                    </tr>
+                    <tr>
+                        <td class="sect-name">보험</td>
+                        <td class="sect-right-val">1.9%</td>
+                        <td class="sect-right-val sect-over">+1.8%</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" class="sect-right-stocks">삼성생명, 삼성화재, DB손해보험</td>
                     </tr>
 
                         </tbody>

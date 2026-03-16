@@ -22,6 +22,7 @@ PORTFOLIO_DISPLAY_NAMES = {
     'Value ESG': 'NH Value ESG',
     '개방형 랩': 'DB 개방형',
     # '목표전환형': 'DB 목표전환형',  # 1차 완료 (6% 목표달성, 2026-02-25 청산)
+    '목표전환형 2차': 'DB 목표전환형 2차',
 }
 
 # 표시 제외 포트폴리오 (역사 데이터는 보존하되 대시보드에서 숨김)
@@ -104,8 +105,8 @@ def calculate_cumulative_return(code, stock_name, portfolio_name, nav_df, price_
     종목의 누적 수익률 계산 (캐시된 데이터 사용)
     """
     try:
-        # 기존 종목인 경우 사용자 제공 값 반환 (목표전환형은 신규 펀드이므로 직접 계산)
-        if code in EXISTING_STOCK_CUMULATIVE_RETURNS and portfolio_name != '목표전환형':
+        # 기존 종목인 경우 사용자 제공 값 반환 (목표전환형 시리즈는 신규 펀드이므로 직접 계산)
+        if code in EXISTING_STOCK_CUMULATIVE_RETURNS and not portfolio_name.startswith('목표전환형'):
             return {
                 'cumulative_return': EXISTING_STOCK_CUMULATIVE_RETURNS[code],
                 'status': 'existing',
