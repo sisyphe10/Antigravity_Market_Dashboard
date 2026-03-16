@@ -34,17 +34,6 @@
       "is_today_new": false
     },
     {
-      "code": "277810",
-      "name": "레인보우로보틱스",
-      "sector": "기계",
-      "market_cap": 139679.0,
-      "weight": 8,
-      "today_return": -4.1278295605858855,
-      "contribution": -3.3022636484687085,
-      "cumulative_return": 6.01498802276772,
-      "is_today_new": false
-    },
-    {
       "code": "001040",
       "name": "CJ",
       "sector": "상사,자본재",
@@ -56,14 +45,14 @@
       "is_today_new": false
     },
     {
-      "code": "000150",
-      "name": "두산",
-      "sector": "상사,자본재",
-      "market_cap": 176189.0,
-      "weight": 5,
-      "today_return": -1.0009099181073704,
-      "contribution": -0.5004549590536852,
-      "cumulative_return": 1.0,
+      "code": "277810",
+      "name": "레인보우로보틱스",
+      "sector": "기계",
+      "market_cap": 139679.0,
+      "weight": 8,
+      "today_return": -4.1278295605858855,
+      "contribution": -3.3022636484687085,
+      "cumulative_return": 6.01498802276772,
       "is_today_new": false
     },
     {
@@ -75,6 +64,17 @@
       "today_return": -0.7511737089201878,
       "contribution": -0.3755868544600939,
       "cumulative_return": 42.0,
+      "is_today_new": false
+    },
+    {
+      "code": "000150",
+      "name": "두산",
+      "sector": "상사,자본재",
+      "market_cap": 176189.0,
+      "weight": 5,
+      "today_return": -1.0009099181073704,
+      "contribution": -0.5004549590536852,
+      "cumulative_return": 1.0,
       "is_today_new": false
     },
     {
