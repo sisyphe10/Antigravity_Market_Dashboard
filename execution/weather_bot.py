@@ -563,19 +563,22 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
             timeout=60
         )
 
-        # 1. 기준가 업데이트
+        # 1. 기준가 업데이트 (검증 실패 시 1회 재시도)
         logging.info("Step 1: Updating NAV prices...")
-        result_nav = subprocess.run(
-            [sys.executable, "calculate_wrap_nav.py"],
-            capture_output=True,
-            text=True,
-            timeout=120
-        )
-
-        if result_nav.returncode != 0:
-            logging.error(f"NAV update failed: {result_nav.stderr}")
-            os.chdir(original_dir)
-            return
+        for nav_attempt in range(1, 3):
+            result_nav = subprocess.run(
+                [sys.executable, "calculate_wrap_nav.py"],
+                capture_output=True,
+                text=True,
+                timeout=120
+            )
+            if result_nav.returncode == 0:
+                break
+            logging.warning(f"NAV update attempt {nav_attempt} failed: {result_nav.stdout}")
+            if nav_attempt == 2:
+                logging.error(f"NAV update failed after retry: {result_nav.stderr}")
+                os.chdir(original_dir)
+                return
 
         logging.info("NAV prices updated successfully")
 

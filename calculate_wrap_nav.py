@@ -298,5 +298,26 @@ if new_pf_results:
     print(f"\n[성공] 저장이 완료되었습니다. (날짜 형식 인식 가능)")
     print(df_final.tail())
 
+    # ---------------------------------------------------------
+    # 7. 검증: 마지막 행에 NaN인 포트폴리오가 있으면 경고
+    # ---------------------------------------------------------
+    last_row = df_final.iloc[-1]
+    last_date = df_final.index[-1]
+    problems = []
+    for pf in portfolio_config.keys():
+        if pf in df_final.columns:
+            val = last_row.get(pf)
+            if pd.isna(val):
+                # 시작일이 미래면 NaN 정상
+                pf_start = pd.Timestamp(portfolio_config[pf]['start_date'])
+                if pf_start <= pd.Timestamp(last_date):
+                    problems.append(pf)
+    if problems:
+        print(f"\n⚠️ [검증 실패] {last_date} 기준가 NaN: {', '.join(problems)}")
+        print("   재실행 필요!")
+        exit(1)
+    else:
+        print(f"\n✅ [검증 통과] {last_date} 모든 포트폴리오 기준가 정상")
+
 else:
     print("계산된 결과가 없습니다.")
