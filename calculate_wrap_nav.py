@@ -108,7 +108,33 @@ new_portfolios = []
 if is_update:
     new_portfolios = [pf for pf in initial_base_prices.keys() if pf not in df_old.columns]
 
-if start_date >= end_date and not new_portfolios:
+# 마지막 행에 NaN이 있는 포트폴리오도 미완료로 간주
+incomplete_portfolios = []
+if is_update and not new_portfolios:
+    last_row = df_old.iloc[-1]
+    for pf in initial_base_prices.keys():
+        if pf in df_old.columns and pd.isna(last_row.get(pf)):
+            incomplete_portfolios.append(pf)
+    if incomplete_portfolios:
+        # 마지막 행(NaN 포함)을 제거하고 그 전 날부터 재계산
+        print(f"   - 미완료 포트폴리오 감지: {', '.join(incomplete_portfolios)}")
+        df_old = df_old.iloc[:-1]
+        last_date = df_old.index[-1]
+        start_date = last_date
+        last_prices = {}
+        for key in initial_base_prices.keys():
+            val = None
+            if key in df_old.columns:
+                valid = df_old[key].dropna()
+                if not valid.empty:
+                    val = valid.iloc[-1]
+            if val is not None and not pd.isna(val):
+                last_prices[key] = val
+            else:
+                last_prices[key] = initial_base_prices[key]
+        current_base_prices = last_prices
+
+if start_date >= end_date and not new_portfolios and not incomplete_portfolios:
     print("\n✅ 이미 최신 데이터까지 업데이트되어 있습니다. (종료)")
     exit()
 
