@@ -148,6 +148,16 @@ async def portfolio_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         import subprocess
         import sys
         
+        # 기준가 + 수익률 먼저 갱신
+        subprocess.run(
+            [sys.executable, "calculate_wrap_nav.py"],
+            capture_output=True, text=True, timeout=120
+        )
+        subprocess.run(
+            [sys.executable, "calculate_returns.py"],
+            capture_output=True, text=True, timeout=120
+        )
+
         # daily_portfolio_report.py 실행
         result = subprocess.run(
             [sys.executable, "execution/daily_portfolio_report.py", "--no-send"],
