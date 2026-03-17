@@ -96,7 +96,7 @@ def get_latest_returns():
     # 트루밸류, KOSPI, KOSDAQ 수익률 추출
     returns_data = {}
     
-    for product in ['트루밸류', 'KOSPI', 'KOSDAQ']:
+    for product in ['트루밸류', '목표전환형 2차', 'KOSPI', 'KOSDAQ']:
         returns_data[product] = {
             '1D': latest_row.get(f'{product}_1D', 'N/A'),
             '1W': latest_row.get(f'{product}_1W', 'N/A'),
