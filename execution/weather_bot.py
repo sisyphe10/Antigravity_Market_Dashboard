@@ -796,6 +796,96 @@ async def daily_calendar_job(context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logging.error(f"Daily calendar job error: {e}")
 
+    # 하이라이트 일정 D-Day 알림
+    await check_dday_alerts(context)
+
+
+async def check_dday_alerts(context):
+    """하이라이트 일정 한 달 전/일주일 전/하루 전 알림"""
+    if not SUBSCRIBERS:
+        return
+
+    try:
+        from korean_lunar_calendar import KoreanLunarCalendar
+        from google.oauth2 import service_account
+        from googleapiclient.discovery import build
+
+        KST = datetime.timezone(datetime.timedelta(hours=9))
+        today = datetime.datetime.now(tz=KST).date()
+
+        # 1) 음력 기념일 (생일 + 설/추석)
+        LUNAR_EVENTS = [
+            {'name': '🎂 혜자 생일', 'month': 3, 'day': 4},
+            {'name': '🎂 동석 생일', 'month': 3, 'day': 12},
+            {'name': '🎂 연순 생일', 'month': 5, 'day': 3},
+            {'name': '🎂 맹호 생일', 'month': 8, 'day': 16},
+            {'name': '🧧 설날', 'month': 1, 'day': 1},
+            {'name': '🌕 추석', 'month': 8, 'day': 15},
+        ]
+
+        highlight_events = []
+        cal = KoreanLunarCalendar()
+        for year in [today.year, today.year + 1]:
+            for ev in LUNAR_EVENTS:
+                try:
+                    if cal.setLunarDate(year, ev['month'], ev['day'], False):
+                        d = datetime.date(cal.solarYear, cal.solarMonth, cal.solarDay)
+                        highlight_events.append({'name': ev['name'], 'date': d})
+                except:
+                    pass
+
+        # 2) Google Calendar "D-day |" 이벤트 (옥쥬와 빵빵이)
+        try:
+            service_account_json = os.getenv('GOOGLE_SERVICE_ACCOUNT_KEY')
+            if service_account_json:
+                sa_info = json.loads(service_account_json)
+                creds = service_account.Credentials.from_service_account_info(
+                    sa_info, scopes=['https://www.googleapis.com/auth/calendar.readonly']
+                )
+                service = build('calendar', 'v3', credentials=creds)
+                cal_id = 'a49c912f9e11c6e050c873312ae00a314e45dc075540c86cf428c9921fcbc20c@group.calendar.google.com'
+                time_min = datetime.datetime.combine(today, datetime.time.min).isoformat() + '+09:00'
+                time_max = datetime.datetime.combine(today + datetime.timedelta(days=400), datetime.time.min).isoformat() + '+09:00'
+                events_result = service.events().list(
+                    calendarId=cal_id, timeMin=time_min, timeMax=time_max,
+                    singleEvents=True, orderBy='startTime', maxResults=200
+                ).execute()
+                for item in events_result.get('items', []):
+                    summary = item.get('summary', '')
+                    if summary.startswith('D-day |') or summary.startswith('D-day|'):
+                        clean = summary.split('|', 1)[1].strip()
+                        start = item['start'].get('date') or item['start'].get('dateTime', '')[:10]
+                        d = datetime.date.fromisoformat(start)
+                        highlight_events.append({'name': f'📌 {clean}', 'date': d})
+        except Exception as e:
+            logging.warning(f"D-Day Google Calendar fetch failed: {e}")
+
+        # 3) 알림 대상 확인 (30일 전, 7일 전, 1일 전)
+        alerts = []
+        for ev in highlight_events:
+            diff = (ev['date'] - today).days
+            if diff == 30:
+                alerts.append(f"📅 <b>[한 달 전]</b> {ev['name']}\n    {ev['date'].strftime('%Y-%m-%d')} (D-30)")
+            elif diff == 7:
+                alerts.append(f"📅 <b>[일주일 전]</b> {ev['name']}\n    {ev['date'].strftime('%Y-%m-%d')} (D-7)")
+            elif diff == 1:
+                alerts.append(f"📅 <b>[내일]</b> {ev['name']}\n    {ev['date'].strftime('%Y-%m-%d')} (D-1)")
+
+        if alerts:
+            msg = "━━━━━━━━━━━━━━━\n<b>🔔 D-Day 알림</b>\n━━━━━━━━━━━━━━━\n\n"
+            msg += "\n\n".join(alerts)
+            for chat_id in SUBSCRIBERS:
+                try:
+                    await context.bot.send_message(chat_id=chat_id, text=msg, parse_mode='HTML')
+                except Exception as e:
+                    logging.error(f"D-Day alert send failed to {chat_id}: {e}")
+            logging.info(f"D-Day alerts sent: {len(alerts)} items")
+        else:
+            logging.info("No D-Day alerts for today")
+
+    except Exception as e:
+        logging.error(f"D-Day alert check failed: {e}")
+
 if __name__ == '__main__':
     if not TOKEN:
         print("Error: TOKEN environment variable is missing.")
