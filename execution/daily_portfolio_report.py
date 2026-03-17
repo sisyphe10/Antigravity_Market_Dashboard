@@ -206,11 +206,12 @@ def format_message(date, nav_data, returns_data, top_5, bottom_5):
     msg += f"{LINE}\n<b>📈 수익률</b>\n{LINE}\n"
     display_names = {
         '트루밸류': '삼성 트루밸류',
+        '목표전환형 2차': 'DB 목표전환형 2차',
         'KOSPI': 'KOSPI',
         'KOSDAQ': 'KOSDAQ',
     }
     periods = ['1D', '1W', '1M', '3M', '6M', '1Y', 'YTD']
-    for product in ['트루밸류', 'KOSPI', 'KOSDAQ']:
+    for product in ['트루밸류', '목표전환형 2차', 'KOSPI', 'KOSDAQ']:
         if product in returns_data:
             returns = returns_data[product]
             # N/A가 아닌 항목만 표시
