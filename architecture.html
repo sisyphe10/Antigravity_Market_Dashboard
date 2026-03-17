@@ -383,7 +383,7 @@
 <header>
     <h1>Antigravity Market Dashboard</h1>
     <div class="subtitle">System Architecture & Documentation</div>
-    <div class="subtitle">Last updated: 2026-03-11 (9차)</div>
+    <div class="subtitle">Last updated: 2026-03-16 (10차)</div>
 </header>
 
 <nav>
@@ -445,8 +445,10 @@
     </div>
     <div class="cmd-card">
         <div class="cmd-name">/portfolio</div>
-        <div class="cmd-desc">포트폴리오 리포트 조회. 기준가, 수익률(1D~YTD), 기여도 Top5.</div>
+        <div class="cmd-desc">포트폴리오 리포트 조회. 기준가, 수익률(1D~YTD), 기여도 Top5. NAV + 수익률을 먼저 계산한 뒤 리포트 생성.</div>
         <div class="cmd-flow">
+            <code>calculate_wrap_nav.py</code> &rarr;
+            <code>calculate_returns.py</code> &rarr;
             <code>daily_portfolio_report.py</code> &rarr; 텔레그램 전송
         </div>
     </div>
@@ -540,7 +542,7 @@
             <span class="flow-badge badge-schedule">매일 15:40</span>
             <span class="flow-title">포트폴리오 리포트 자동 전송</span>
         </div>
-        <div class="flow-desc">장 마감 직후 자동 실행. git pull → 기준가 업데이트 → portfolio_data.json 재생성 → 수익률 계산 → Wrap_NAV push → market_alert 재생성 → Dashboard 갱신 → 텔레그램 리포트.</div>
+        <div class="flow-desc">장 마감 직후 자동 실행. git pull → 기준가 업데이트(NaN 검증 + 실패 시 1회 재시도) → portfolio_data.json 재생성 → 수익률 계산 → Wrap_NAV push → market_alert 재생성 → Dashboard 갱신 → 텔레그램 리포트.</div>
         <div class="steps">
             <div class="step">
                 <div class="step-number">Step 0</div>
@@ -551,7 +553,7 @@
             <div class="step">
                 <div class="step-number">Step 1</div>
                 <div class="step-file">calculate_wrap_nav.py</div>
-                <div class="step-desc">오늘자 기준가(NAV) 계산<br>Wrap_NAV.xlsx에 추가</div>
+                <div class="step-desc">오늘자 기준가(NAV) 계산<br>NaN 검증 + 실패 시 재시도(2회)<br>Wrap_NAV.xlsx에 추가</div>
             </div>
             <div class="arrow">&rarr;</div>
             <div class="step">
@@ -782,18 +784,18 @@
         </tr>
         <tr>
             <td><span class="file-name">execution/daily_portfolio_report.py</span></td>
-            <td>기준가 + 수익률 리포트 &rarr; 텔레그램 전송</td>
+            <td>기준가 + 수익률 리포트 &rarr; 텔레그램 전송. 포트폴리오별 NaN 안전 읽기 (dropna per column).</td>
             <td><span class="tag tag-command">/portfolio</span> <span class="tag tag-schedule">15:40</span></td>
         </tr>
         <tr>
             <td><span class="file-name">calculate_wrap_nav.py</span></td>
-            <td>Wrap_NAV.xlsx에 오늘자 기준가(NAV) 추가</td>
-            <td><span class="tag tag-schedule">15:40</span> <span class="tag tag-github">Actions</span></td>
+            <td>Wrap_NAV.xlsx에 오늘자 기준가(NAV) 추가. 미완료(NaN) 포트폴리오 자동 감지 및 재계산. 저장 후 NaN 검증(실패 시 exit(1)). 신규 포트폴리오 자동 인식.</td>
+            <td><span class="tag tag-command">/portfolio</span> <span class="tag tag-schedule">15:40</span> <span class="tag tag-github">Actions</span></td>
         </tr>
         <tr>
             <td><span class="file-name">calculate_returns.py</span></td>
             <td>1D, 1W, 1M, 3M, 6M, 1Y, YTD 수익률 계산</td>
-            <td><span class="tag tag-schedule">15:40</span> <span class="tag tag-github">Actions</span></td>
+            <td><span class="tag tag-command">/portfolio</span> <span class="tag tag-schedule">15:40</span> <span class="tag tag-github">Actions</span></td>
         </tr>
         <tr>
             <td><span class="file-name">execution/market_crawler.py</span></td>
@@ -952,7 +954,7 @@
             • 텔레그램 봇 24시간 구동 (/update, /portfolio 등)<br>
             • 날씨 알림 (05:00), 캘린더 알림 (05:10)<br>
             • 장중 자동 포트폴리오 업데이트 (09:30~15:35, 30분)<br>
-            • 일일 포트폴리오 리포트 (15:40)<br>
+            • 일일 포트폴리오 리포트 (15:40, NAV 검증+재시도)<br>
             • 야간 포트폴리오 갱신 (23:00, 당일 주문 반영)
         </div>
     </div>
@@ -1098,6 +1100,16 @@
             <td>텔레그램에서 <code>/start</code> 한 번 입력하면 subscribers.json 생성 및 이후 재시작에도 유지</td>
         </tr>
         <tr>
+            <td>기준가 NaN (일부 포트폴리오만 계산됨)</td>
+            <td>calculate_wrap_nav.py가 마지막 행에 NaN인 포트폴리오를 감지 못하고 "이미 최신"으로 종료. 또는 신규 포트폴리오 시작일에 기존 포트폴리오 데이터 누락.</td>
+            <td>calculate_wrap_nav.py에 미완료 포트폴리오 감지 로직 + 저장 후 NaN 검증(exit(1)) 추가됨. weather_bot.py에서 실패 시 1회 자동 재시도.</td>
+        </tr>
+        <tr>
+            <td>/portfolio 수익률 갱신 안 됨 (1D가 어제 값)</td>
+            <td>/portfolio 명령이 daily_portfolio_report.py만 실행하고 NAV/수익률 계산을 건너뜀</td>
+            <td>/portfolio 명령에 calculate_wrap_nav.py → calculate_returns.py 실행 추가 완료</td>
+        </tr>
+        <tr>
             <td>15:40 /portfolio 리포트 안 옴 (market_alert timeout)</td>
             <td>create_market_alert.py 실행이 timeout 초과 → 이후 단계(dashboard 재생성 + 텔레그램 리포트) 미실행</td>
             <td>weather_bot.py의 market_alert timeout을 60→180초로 증가. <code>journalctl -u weather-bot --since "HH:MM" | grep -E "timeout|error"</code></td>
@@ -1133,6 +1145,17 @@
 <!-- ===== Changelog ===== -->
 <h2 id="changelog">Changelog</h2>
 <div class="version-log">
+    <div class="version-entry">
+        <div class="version-date">2026-03-16</div>
+        <div class="version-title">DB 목표전환형 2차 추가 + NAV 검증 강화 + /portfolio 플로우 개선</div>
+        <div class="version-desc">
+            <strong>[DB 목표전환형 2차 신규 추가]</strong> 7종목 포트폴리오 (기준가 1000, 시작일 2026-03-16). calculate_wrap_nav.py, create_portfolio_tables.py, create_dashboard.py, daily_portfolio_report.py 전체 반영. 누적수익률 비교 테이블에서 목표전환형 시리즈 제외 (startsWith 조건).<br><br>
+            <strong>[NAV 검증 로직 추가]</strong> calculate_wrap_nav.py: 저장 후 마지막 행에 NaN인 포트폴리오가 있으면 exit(1)으로 실패 처리. 미완료(NaN) 포트폴리오 자동 감지 → 해당 행 제거 후 재계산. 신규 포트폴리오 시작일에 기존 포트폴리오 기준가가 NaN이 되는 문제 방지.<br><br>
+            <strong>[NAV 실패 시 자동 재시도]</strong> weather_bot.py: 15:40 daily_portfolio_job에서 calculate_wrap_nav.py 실패(exit code != 0) 시 1회 자동 재시도.<br><br>
+            <strong>[/portfolio 플로우 개선]</strong> /portfolio 명령 실행 시 daily_portfolio_report.py만 실행하던 것을 calculate_wrap_nav.py → calculate_returns.py → daily_portfolio_report.py 순서로 변경. 최신 기준가와 수익률이 반영된 리포트 생성.<br><br>
+            <strong>[daily_portfolio_report.py NaN 안전 읽기]</strong> 기준가 조회 시 마지막 행 전체를 읽는 대신 포트폴리오별 dropna().iloc[-1]로 변경. 신규 포트폴리오 추가일에 다른 포트폴리오 기준가가 NaN으로 표시되는 문제 해결.
+        </div>
+    </div>
     <div class="version-entry">
         <div class="version-date">2026-03-11</div>
         <div class="version-title">투자주의 테이블 재설계 + FDR fallback + WRAP 비밀번호 + 다수 버그 수정</div>
