@@ -79,8 +79,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 • 매일 05:10 Google Calendar 일정 자동 전송
 
 💰 **가계부 (Sisyphe)**
-/가계부 지출 15000 식비 점심
-/가계부 수입 3000000 급여
+/ledger 지출 15000 식비 점심
+/ledger 수입 3000000 급여
 
 ⚙️ **기타**
 /start - 봇 시작 및 자동 알림 구독
@@ -973,13 +973,13 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "📝 <b>사용법</b>\n\n"
             "<code>/가계부 지출 15000 식비 점심</code>\n"
             "<code>/가계부 수입 3000000 급여</code>\n\n"
-            "형식: /가계부 [지출|수입] [금액] [카테고리] [메모]",
+            "형식: /ledger [지출|수입] [금액] [카테고리] [메모]",
             parse_mode='HTML'
         )
         return
 
     if len(args) < 3:
-        await update.message.reply_text("❌ 형식: /가계부 [지출|수입] [금액] [카테고리] [메모]", parse_mode='HTML')
+        await update.message.reply_text("❌ 형식: /ledger [지출|수입] [금액] [카테고리] [메모]", parse_mode='HTML')
         return
 
     tx_type_str = args[0]
@@ -1060,7 +1060,7 @@ if __name__ == '__main__':
     application.add_handler(CommandHandler('update', update_command))
     application.add_handler(CommandHandler('stop', stop))
     application.add_handler(CommandHandler('help', help_command))
-    application.add_handler(CommandHandler('가계부', ledger_command))
+    application.add_handler(CommandHandler('ledger', ledger_command))
     
     job_queue = application.job_queue
     try:
