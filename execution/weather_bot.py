@@ -948,14 +948,38 @@ async def _sisyphe_write_data(pat, data, sha):
 async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/가계부 지출 15000 식비 점심"""
     args = context.args
-    if not args or len(args) < 3:
+
+    # 인자 없이 /가계부만 입력 → 카테고리 목록 + 사용법 표시
+    if not args:
+        pat = _get_gh_pat()
+        cat_msg = ""
+        if pat:
+            try:
+                data, _ = await _sisyphe_read_data(pat)
+                cats = data.get('categories', {})
+                expense_cats = cats.get('expense', [])
+                income_cats = cats.get('income', [])
+                if expense_cats:
+                    cat_msg += f"🔴 <b>지출</b>: {', '.join(expense_cats)}\n"
+                if income_cats:
+                    cat_msg += f"🟠 <b>수입</b>: {', '.join(income_cats)}\n"
+                if cat_msg:
+                    cat_msg = f"━━━━━━━━━━━━━━━\n<b>📂 카테고리</b>\n━━━━━━━━━━━━━━━\n{cat_msg}\n"
+            except:
+                pass
+
         await update.message.reply_text(
+            f"{cat_msg}"
             "📝 <b>사용법</b>\n\n"
             "<code>/가계부 지출 15000 식비 점심</code>\n"
             "<code>/가계부 수입 3000000 급여</code>\n\n"
-            "형식: /가계부 [지출|수입] [금액] [카테고리] [메모(선택)]",
+            "형식: /가계부 [지출|수입] [금액] [카테고리] [메모]",
             parse_mode='HTML'
         )
+        return
+
+    if len(args) < 3:
+        await update.message.reply_text("❌ 형식: /가계부 [지출|수입] [금액] [카테고리] [메모]", parse_mode='HTML')
         return
 
     tx_type_str = args[0]
