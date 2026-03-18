@@ -961,12 +961,17 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 DEFAULT_INCOME = ['급여', '투자수익', '부수입', '기타']
                 expense_cats = cats.get('expense', []) or DEFAULT_EXPENSE
                 income_cats = cats.get('income', []) or DEFAULT_INCOME
-                if expense_cats:
-                    cat_msg += f"🔴 <b>지출</b>: {', '.join(expense_cats)}\n"
-                if income_cats:
-                    cat_msg += f"🟠 <b>수입</b>: {', '.join(income_cats)}\n"
-                if cat_msg:
-                    cat_msg = f"━━━━━━━━━━━━━━━\n<b>📂 카테고리</b>\n━━━━━━━━━━━━━━━\n{cat_msg}\n"
+                # 두 열을 나란히 표 형태로
+                max_len = max(len(expense_cats), len(income_cats))
+                cat_msg = "━━━━━━━━━━━━━━━\n<b>📂 카테고리</b>\n━━━━━━━━━━━━━━━\n"
+                cat_msg += "<pre>"
+                cat_msg += f"{'🔴 지출':<12}  {'🟠 수입'}\n"
+                cat_msg += f"{'─' * 12}  {'─' * 10}\n"
+                for i in range(max_len):
+                    left = expense_cats[i] if i < len(expense_cats) else ''
+                    right = income_cats[i] if i < len(income_cats) else ''
+                    cat_msg += f"{left:<12}  {right}\n"
+                cat_msg += "</pre>\n"
             except:
                 pass
 
