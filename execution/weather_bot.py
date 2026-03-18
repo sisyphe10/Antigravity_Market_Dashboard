@@ -78,6 +78,10 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 • 매일 05:00 날씨 자동 전송
 • 매일 05:10 Google Calendar 일정 자동 전송
 
+💰 **가계부 (Sisyphe)**
+/가계부 지출 15000 식비 점심
+/가계부 수입 3000000 급여
+
 ⚙️ **기타**
 /start - 봇 시작 및 자동 알림 구독
 /stop - 자동 알림 구독 해제
@@ -886,6 +890,137 @@ async def check_dday_alerts(context):
     except Exception as e:
         logging.error(f"D-Day alert check failed: {e}")
 
+# ============================================================
+# 가계부 (Sisyphe) - Telegram → GitHub data.json
+# ============================================================
+SISYPHE_REPO = 'sisyphe10/Sisyphe'
+SISYPHE_DATA_PATH = 'data.json'
+
+def _get_gh_pat():
+    """VM git remote URL에서 PAT 추출"""
+    try:
+        result = subprocess.run(
+            ['git', 'remote', 'get-url', 'origin'],
+            capture_output=True, text=True, cwd=DASHBOARD_DIR
+        )
+        url = result.stdout.strip()
+        # https://user:TOKEN@github.com/...
+        if '@github.com' in url and ':' in url.split('@')[0]:
+            return url.split(':')[2].split('@')[0]
+    except:
+        pass
+    return None
+
+async def _sisyphe_read_data(pat):
+    """GitHub에서 Sisyphe data.json 읽기"""
+    import urllib.request
+    req = urllib.request.Request(
+        f'https://api.github.com/repos/{SISYPHE_REPO}/contents/{SISYPHE_DATA_PATH}',
+        headers={'Authorization': f'token {pat}', 'Accept': 'application/vnd.github.v3+json'}
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            result = json.loads(resp.read().decode())
+            import base64
+            content = base64.b64decode(result['content']).decode('utf-8')
+            return json.loads(content), result['sha']
+    except Exception as e:
+        if '404' in str(e):
+            return {'transactions': [], 'budgets': {}, 'categories': {'expense': [], 'income': []}}, None
+        raise
+
+async def _sisyphe_write_data(pat, data, sha):
+    """GitHub에 Sisyphe data.json 쓰기"""
+    import urllib.request, base64
+    content = base64.b64encode(json.dumps(data, ensure_ascii=False, indent=2).encode('utf-8')).decode()
+    body = {'message': f'가계부 입력 ({datetime.datetime.now().strftime("%Y-%m-%d %H:%M")})', 'content': content}
+    if sha:
+        body['sha'] = sha
+    req = urllib.request.Request(
+        f'https://api.github.com/repos/{SISYPHE_REPO}/contents/{SISYPHE_DATA_PATH}',
+        data=json.dumps(body).encode('utf-8'),
+        headers={'Authorization': f'token {pat}', 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json'},
+        method='PUT'
+    )
+    with urllib.request.urlopen(req, timeout=15) as resp:
+        return json.loads(resp.read().decode())
+
+async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/가계부 지출 15000 식비 점심"""
+    args = context.args
+    if not args or len(args) < 3:
+        await update.message.reply_text(
+            "📝 <b>사용법</b>\n\n"
+            "<code>/가계부 지출 15000 식비 점심</code>\n"
+            "<code>/가계부 수입 3000000 급여</code>\n\n"
+            "형식: /가계부 [지출|수입] [금액] [카테고리] [메모(선택)]",
+            parse_mode='HTML'
+        )
+        return
+
+    tx_type_str = args[0]
+    if tx_type_str in ['지출', 'ㅈ']:
+        tx_type = 'expense'
+    elif tx_type_str in ['수입', 'ㅅ']:
+        tx_type = 'income'
+    else:
+        await update.message.reply_text("❌ 유형은 '지출' 또는 '수입'으로 입력하세요.")
+        return
+
+    try:
+        amount = int(args[1].replace(',', ''))
+        if amount <= 0:
+            raise ValueError
+    except:
+        await update.message.reply_text("❌ 금액을 올바르게 입력하세요. (숫자)")
+        return
+
+    category = args[2]
+    memo = ' '.join(args[3:]) if len(args) > 3 else ''
+
+    pat = _get_gh_pat()
+    if not pat:
+        await update.message.reply_text("❌ GitHub PAT를 찾을 수 없습니다.")
+        return
+
+    try:
+        data, sha = await _sisyphe_read_data(pat)
+
+        KST = datetime.timezone(datetime.timedelta(hours=9))
+        today_str = datetime.datetime.now(tz=KST).strftime('%Y-%m-%d')
+
+        tx = {
+            'id': f"{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}-{os.urandom(4).hex()}",
+            'date': today_str,
+            'type': tx_type,
+            'category': category,
+            'amount': amount,
+            'memo': memo
+        }
+        data['transactions'].append(tx)
+
+        await _sisyphe_write_data(pat, data, sha)
+
+        type_label = '지출' if tx_type == 'expense' else '수입'
+        type_emoji = '🔴' if tx_type == 'expense' else '🟠'
+        msg = (
+            f"{type_emoji} <b>{type_label}</b> 입력 완료\n"
+            f"━━━━━━━━━━━━━━━\n"
+            f"📅 {today_str}\n"
+            f"📂 {category}\n"
+            f"💰 {amount:,}원\n"
+        )
+        if memo:
+            msg += f"📝 {memo}\n"
+
+        await update.message.reply_text(msg, parse_mode='HTML')
+        logging.info(f"Sisyphe ledger: {type_label} {amount} {category} {memo}")
+
+    except Exception as e:
+        logging.error(f"Sisyphe ledger error: {e}")
+        await update.message.reply_text(f"❌ 저장 실패: {str(e)}")
+
+
 if __name__ == '__main__':
     if not TOKEN:
         print("Error: TOKEN environment variable is missing.")
@@ -901,6 +1036,7 @@ if __name__ == '__main__':
     application.add_handler(CommandHandler('update', update_command))
     application.add_handler(CommandHandler('stop', stop))
     application.add_handler(CommandHandler('help', help_command))
+    application.add_handler(CommandHandler('가계부', ledger_command))
     
     job_queue = application.job_queue
     try:
