@@ -957,8 +957,10 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             try:
                 data, _ = await _sisyphe_read_data(pat)
                 cats = data.get('categories', {})
-                expense_cats = cats.get('expense', [])
-                income_cats = cats.get('income', [])
+                DEFAULT_EXPENSE = ['식비', '카페/간식', '교통', '주거', '통신', '쇼핑', '의료', '교육', '여가/문화', '경조사', '저축/투자', '기타']
+                DEFAULT_INCOME = ['급여', '투자수익', '부수입', '기타']
+                expense_cats = cats.get('expense', []) or DEFAULT_EXPENSE
+                income_cats = cats.get('income', []) or DEFAULT_INCOME
                 if expense_cats:
                     cat_msg += f"🔴 <b>지출</b>: {', '.join(expense_cats)}\n"
                 if income_cats:
@@ -971,8 +973,8 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
             f"{cat_msg}"
             "📝 <b>사용법</b>\n\n"
-            "<code>/가계부 지출 15000 식비 점심</code>\n"
-            "<code>/가계부 수입 3000000 급여</code>\n\n"
+            "<code>/ledger 지출 15000 식비 점심</code>\n"
+            "<code>/ledger 수입 3000000 급여</code>\n\n"
             "형식: /ledger [지출|수입] [금액] [카테고리] [메모]",
             parse_mode='HTML'
         )
