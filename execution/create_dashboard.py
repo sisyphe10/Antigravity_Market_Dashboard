@@ -177,7 +177,7 @@ def get_item_category(item_name):
 
     # Special handling for Wrap portfolios
     wrap_keywords = ['트루밸류', '삼성 트루밸류', 'Value ESG', 'NH Value ESG',
-                     '개방형', 'DB 개방형']
+                     '개방형', 'DB 개방형', '목표전환형', 'DB 목표전환형']
     if any(keyword in item_name for keyword in wrap_keywords):
         return 'Wrap'
 
