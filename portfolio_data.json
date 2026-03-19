@@ -8,18 +8,18 @@
       "weight": 30,
       "today_return": -3.8369304556354913,
       "contribution": -11.510791366906473,
-      "cumulative_return": 188.4892086330935,
+      "cumulative_return": 200.0,
       "is_today_new": false
     },
     {
       "code": "000660",
       "name": "SK하이닉스",
       "sector": "반도체",
-      "market_cap": 7198294.0,
+      "market_cap": 7184040.0,
       "weight": 15,
       "today_return": -4.356060606060606,
       "contribution": -6.534090909090909,
-      "cumulative_return": 189.80113636363635,
+      "cumulative_return": 203.0,
       "is_today_new": false
     },
     {
@@ -30,40 +30,40 @@
       "weight": 8,
       "today_return": -1.4965986394557822,
       "contribution": -1.1972789115646258,
-      "cumulative_return": 67.45578231292517,
+      "cumulative_return": 70.0,
       "is_today_new": false
     },
     {
       "code": "001040",
       "name": "CJ",
       "sector": "상사,자본재",
-      "market_cap": 56282.0,
+      "market_cap": 56195.0,
       "weight": 8,
       "today_return": -3.55,
       "contribution": -2.84,
-      "cumulative_return": 81.326,
+      "cumulative_return": 88.0,
       "is_today_new": false
     },
     {
       "code": "034020",
       "name": "두산에너빌리티",
       "sector": "기계",
-      "market_cap": 678354.0,
+      "market_cap": 677073.0,
       "weight": 5,
       "today_return": -1.30475302889096,
       "contribution": -0.6523765144454801,
-      "cumulative_return": 40.14725069897482,
+      "cumulative_return": 42.0,
       "is_today_new": false
     },
     {
       "code": "000150",
       "name": "두산",
       "sector": "상사,자본재",
-      "market_cap": 184286.0,
+      "market_cap": 184124.0,
       "weight": 5,
       "today_return": -4.289318755256518,
       "contribution": -2.1446593776282596,
-      "cumulative_return": -3.3322119428090824,
+      "cumulative_return": 1.0,
       "is_today_new": false
     },
     {
@@ -74,18 +74,18 @@
       "weight": 5,
       "today_return": -3.2432432432432434,
       "contribution": -1.6216216216216217,
-      "cumulative_return": 1.5824761078615301,
+      "cumulative_return": 4.410734238584935,
       "is_today_new": false
     },
     {
       "code": "112610",
       "name": "씨에스윈드",
       "sector": "에너지",
-      "market_cap": 27285.0,
+      "market_cap": 27411.0,
       "weight": 5,
       "today_return": 9.475465313028765,
       "contribution": 4.737732656514383,
-      "cumulative_return": 30.618086610700026,
+      "cumulative_return": 16.053811659192817,
       "is_today_new": false
     },
     {
@@ -96,18 +96,18 @@
       "weight": 3,
       "today_return": -3.290414878397711,
       "contribution": -0.9871244635193135,
-      "cumulative_return": 141.77396280400575,
+      "cumulative_return": 150.0,
       "is_today_new": false
     },
     {
       "code": "010060",
       "name": "OCI홀딩스",
       "sector": "화학",
-      "market_cap": 36706.0,
+      "market_cap": 36724.0,
       "weight": 3,
       "today_return": 1.5495867768595042,
       "contribution": 0.46487603305785125,
-      "cumulative_return": 57.40185950413223,
+      "cumulative_return": 55.0,
       "is_today_new": false
     },
     {
@@ -118,18 +118,29 @@
       "weight": 3,
       "today_return": -0.20898641588296762,
       "contribution": -0.06269592476489029,
-      "cumulative_return": -3.05145679264317,
+      "cumulative_return": -1.9842627437564042,
       "is_today_new": false
     },
     {
       "code": "007660",
       "name": "이수페타시스",
       "sector": "IT하드웨어",
-      "market_cap": 93670.0,
+      "market_cap": 93597.0,
       "weight": 3,
       "today_return": 1.9984012789768184,
       "contribution": 0.5995203836930455,
-      "cumulative_return": 23.015085096384126,
+      "cumulative_return": 10.524036379385016,
+      "is_today_new": false
+    },
+    {
+      "code": "006360",
+      "name": "GS건설",
+      "sector": "건설,건축관련",
+      "market_cap": 22123.0,
+      "weight": 3,
+      "today_return": 0.9746588693957114,
+      "contribution": 0.2923976608187134,
+      "cumulative_return": 0.974658869395717,
       "is_today_new": false
     }
   ],
@@ -139,21 +150,21 @@
       "name": "삼성전자",
       "sector": "반도체",
       "market_cap": 11868874.0,
-      "weight": 15,
+      "weight": 20,
       "today_return": -3.8369304556354913,
-      "contribution": -5.755395683453236,
-      "cumulative_return": 2.176446442210289,
+      "contribution": -7.6738609112709835,
+      "cumulative_return": 0.24283979715735704,
       "is_today_new": false
     },
     {
       "code": "000660",
       "name": "SK하이닉스",
       "sector": "반도체",
-      "market_cap": 7198294.0,
+      "market_cap": 7184040.0,
       "weight": 15,
       "today_return": -4.356060606060606,
       "contribution": -6.534090909090909,
-      "cumulative_return": -0.8209663368801023,
+      "cumulative_return": -0.49261083743842304,
       "is_today_new": false
     },
     {
@@ -164,7 +175,7 @@
       "weight": 5,
       "today_return": -1.4965986394557822,
       "contribution": -0.7482993197278912,
-      "cumulative_return": 1.8806608357628818,
+      "cumulative_return": 0.9059233449477455,
       "is_today_new": false
     },
     {
@@ -175,18 +186,29 @@
       "weight": 5,
       "today_return": -2.6365348399246704,
       "contribution": -1.3182674199623354,
-      "cumulative_return": 0.6738229755178793,
+      "cumulative_return": 0.29097963142579175,
       "is_today_new": false
     },
     {
       "code": "010140",
       "name": "삼성중공업",
       "sector": "조선",
-      "market_cap": 251240.0,
+      "market_cap": 251460.0,
       "weight": 5,
       "today_return": -1.8900343642611683,
       "contribution": -0.9450171821305842,
-      "cumulative_return": -2.572538473031527,
+      "cumulative_return": -1.2964563526361328,
+      "is_today_new": false
+    },
+    {
+      "code": "006360",
+      "name": "GS건설",
+      "sector": "건설,건축관련",
+      "market_cap": 22123.0,
+      "weight": 5,
+      "today_return": 0.9746588693957114,
+      "contribution": 0.4873294346978557,
+      "cumulative_return": 0.974658869395717,
       "is_today_new": false
     },
     {
@@ -197,18 +219,29 @@
       "weight": 3,
       "today_return": -0.20898641588296762,
       "contribution": -0.06269592476489029,
-      "cumulative_return": -1.8533285552710943,
+      "cumulative_return": -0.9336099585062207,
       "is_today_new": false
     },
     {
       "code": "007660",
       "name": "이수페타시스",
       "sector": "IT하드웨어",
-      "market_cap": 93670.0,
+      "market_cap": 93597.0,
       "weight": 3,
       "today_return": 1.9984012789768184,
       "contribution": 0.5995203836930455,
-      "cumulative_return": 23.015085096384126,
+      "cumulative_return": 10.524036379385016,
+      "is_today_new": false
+    },
+    {
+      "code": "003030",
+      "name": "세아제강지주",
+      "sector": "철강",
+      "market_cap": 7182.0,
+      "weight": 3,
+      "today_return": 2.1201413427561837,
+      "contribution": 0.6360424028268551,
+      "cumulative_return": 2.1201413427561766,
       "is_today_new": false
     }
   ]
