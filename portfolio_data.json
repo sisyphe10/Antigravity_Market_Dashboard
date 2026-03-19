@@ -8,7 +8,7 @@
       "weight": 30,
       "today_return": -3.8369304556354913,
       "contribution": -11.510791366906473,
-      "cumulative_return": 188.4892086330935,
+      "cumulative_return": 200.0,
       "is_today_new": false
     },
     {
@@ -19,7 +19,7 @@
       "weight": 15,
       "today_return": -4.071969696969697,
       "contribution": -6.107954545454546,
-      "cumulative_return": 190.66193181818178,
+      "cumulative_return": 203.0,
       "is_today_new": false
     },
     {
@@ -30,7 +30,7 @@
       "weight": 8,
       "today_return": -3.537414965986395,
       "contribution": -2.829931972789116,
-      "cumulative_return": 63.98639455782311,
+      "cumulative_return": 70.0,
       "is_today_new": false
     },
     {
@@ -41,7 +41,7 @@
       "weight": 8,
       "today_return": -1.5,
       "contribution": -1.2,
-      "cumulative_return": 85.17999999999999,
+      "cumulative_return": 88.0,
       "is_today_new": false
     },
     {
@@ -52,7 +52,7 @@
       "weight": 5,
       "today_return": -0.9319664492078285,
       "contribution": -0.4659832246039142,
-      "cumulative_return": 40.676607642124864,
+      "cumulative_return": 42.0,
       "is_today_new": false
     },
     {
@@ -63,7 +63,7 @@
       "weight": 5,
       "today_return": -3.36417157275021,
       "contribution": -1.6820857863751053,
-      "cumulative_return": -2.3978132884777126,
+      "cumulative_return": 1.0,
       "is_today_new": false
     },
     {
@@ -74,7 +74,7 @@
       "weight": 5,
       "today_return": -2.9729729729729732,
       "contribution": -1.4864864864864866,
-      "cumulative_return": 1.5896107459086872,
+      "cumulative_return": 4.702384334223431,
       "is_today_new": false
     },
     {
@@ -85,7 +85,7 @@
       "weight": 5,
       "today_return": 9.813874788494077,
       "contribution": 4.906937394247039,
-      "cumulative_return": 27.837138543018213,
+      "cumulative_return": 16.412556053811667,
       "is_today_new": false
     },
     {
@@ -96,7 +96,7 @@
       "weight": 3,
       "today_return": -4.57796852646638,
       "contribution": -1.373390557939914,
-      "cumulative_return": 138.55507868383404,
+      "cumulative_return": 150.0,
       "is_today_new": false
     },
     {
@@ -107,7 +107,7 @@
       "weight": 3,
       "today_return": 2.37603305785124,
       "contribution": 0.7128099173553719,
-      "cumulative_return": 58.68285123966941,
+      "cumulative_return": 55.0,
       "is_today_new": false
     },
     {
@@ -118,7 +118,7 @@
       "weight": 3,
       "today_return": -0.8359456635318705,
       "contribution": -0.25078369905956116,
-      "cumulative_return": -3.4142789271553897,
+      "cumulative_return": -2.60006842285323,
       "is_today_new": false
     },
     {
@@ -129,7 +129,7 @@
       "weight": 3,
       "today_return": 3.5171862509992007,
       "contribution": 1.05515587529976,
-      "cumulative_return": 16.114990207920265,
+      "cumulative_return": 12.169770463404062,
       "is_today_new": false
     },
     {
@@ -140,7 +140,7 @@
       "weight": 3,
       "today_return": 1.1695906432748537,
       "contribution": 0.3508771929824561,
-      "cumulative_return": 2.3528607092780707,
+      "cumulative_return": 1.1695906432748648,
       "is_today_new": false
     }
   ],
@@ -153,7 +153,7 @@
       "weight": 20,
       "today_return": -3.8369304556354913,
       "contribution": -7.6738609112709835,
-      "cumulative_return": -3.6034082526136713,
+      "cumulative_return": 0.24283979715735704,
       "is_today_new": false
     },
     {
@@ -164,7 +164,7 @@
       "weight": 15,
       "today_return": -4.071969696969697,
       "contribution": -6.107954545454546,
-      "cumulative_return": -4.260990446335278,
+      "cumulative_return": -0.19704433497537144,
       "is_today_new": false
     },
     {
@@ -175,7 +175,7 @@
       "weight": 5,
       "today_return": -3.537414965986395,
       "contribution": -1.7687074829931975,
-      "cumulative_return": -4.680177297399791,
+      "cumulative_return": -1.184668989547033,
       "is_today_new": false
     },
     {
@@ -186,7 +186,7 @@
       "weight": 5,
       "today_return": -2.2598870056497176,
       "contribution": -1.1299435028248588,
-      "cumulative_return": -1.5962780910420915,
+      "cumulative_return": 0.678952473326877,
       "is_today_new": false
     },
     {
@@ -197,7 +197,7 @@
       "weight": 5,
       "today_return": -2.0618556701030926,
       "contribution": -1.0309278350515463,
-      "cumulative_return": -3.5008776697645017,
+      "cumulative_return": -1.4693171996542742,
       "is_today_new": false
     },
     {
@@ -208,7 +208,7 @@
       "weight": 5,
       "today_return": 1.1695906432748537,
       "contribution": 0.5847953216374269,
-      "cumulative_return": 2.3528607092780707,
+      "cumulative_return": 1.1695906432748648,
       "is_today_new": false
     },
     {
@@ -219,7 +219,7 @@
       "weight": 3,
       "today_return": -0.8359456635318705,
       "contribution": -0.25078369905956116,
-      "cumulative_return": -2.378954807771516,
+      "cumulative_return": -1.556016597510368,
       "is_today_new": false
     },
     {
@@ -230,7 +230,7 @@
       "weight": 3,
       "today_return": 3.5171862509992007,
       "contribution": 1.05515587529976,
-      "cumulative_return": 16.114990207920265,
+      "cumulative_return": 12.169770463404062,
       "is_today_new": false
     },
     {
@@ -241,7 +241,7 @@
       "weight": 3,
       "today_return": 4.122497055359246,
       "contribution": 1.236749116607774,
-      "cumulative_return": 8.414943930432962,
+      "cumulative_return": 4.122497055359253,
       "is_today_new": false
     }
   ]
