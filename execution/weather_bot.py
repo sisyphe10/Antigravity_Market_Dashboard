@@ -80,8 +80,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 💰 **가계부 (Sisyphe → Google Sheets)**
 /ledger - 카테고리 목록 조회
-/ledger 지출 15000 식비 점심
-/ledger 수입 3000000 급여
+/ledger 지출 식비 점심 15000
+/ledger 수입 급여 3000000
 
 ⚙️ **기타**
 /start - 봇 시작 및 자동 알림 구독
@@ -956,15 +956,15 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
             f"{cat_msg}"
             "📝 <b>사용법</b>\n\n"
-            "<code>/ledger 지출 15000 식비 점심</code>\n"
-            "<code>/ledger 수입 3000000 급여</code>\n\n"
-            "형식: /ledger [지출|수입] [금액] [카테고리] [메모]",
+            "<code>/ledger 지출 식비 점심 15000</code>\n"
+            "<code>/ledger 수입 급여 3000000</code>\n\n"
+            "형식: /ledger [지출|수입] [카테고리] [메모] [금액]",
             parse_mode='HTML'
         )
         return
 
     if len(args) < 3:
-        await update.message.reply_text("❌ 형식: /ledger [지출|수입] [금액] [카테고리] [메모]", parse_mode='HTML')
+        await update.message.reply_text("❌ 형식: /ledger [지출|수입] [카테고리] [메모] [금액]", parse_mode='HTML')
         return
 
     tx_type_str = args[0]
@@ -976,16 +976,17 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ 유형은 '지출' 또는 '수입'으로 입력하세요.")
         return
 
+    # 마지막 인자가 금액
     try:
-        amount = int(args[1].replace(',', ''))
+        amount = int(args[-1].replace(',', ''))
         if amount <= 0:
             raise ValueError
     except:
-        await update.message.reply_text("❌ 금액을 올바르게 입력하세요. (숫자)")
+        await update.message.reply_text("❌ 마지막에 금액(숫자)을 입력하세요.")
         return
 
-    category = args[2]
-    memo = ' '.join(args[3:]) if len(args) > 3 else ''
+    category = args[1]
+    memo = ' '.join(args[2:-1]) if len(args) > 3 else ''
 
     try:
         KST = datetime.timezone(datetime.timedelta(hours=9))
