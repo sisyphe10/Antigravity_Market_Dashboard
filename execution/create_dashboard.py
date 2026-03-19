@@ -567,7 +567,7 @@ def create_wrap_returns_table():
                     <input type="date" id="return-date-input" value="{latest_date}"
                            min="{earliest_date}"
                            onchange="updateReturnTable()"
-                           style="font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;cursor:pointer;">
+                           style="font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;cursor:pointer;width:150px;">
                     <span id="return-actual-date-label" style="font-size:12px;color:#888;"></span>
                 </div>
                 <table class="rt-table">
