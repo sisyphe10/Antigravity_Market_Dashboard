@@ -564,10 +564,9 @@ def create_wrap_returns_table():
             <div style="max-width:800px;margin:0 auto;background:#fff;border-radius:10px;padding:16px 20px;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
                     <span style="font-size:13px;color:#555;font-weight:600;">기준일</span>
-                    <input type="date" id="return-date-input" value="{latest_date}"
-                           min="{earliest_date}"
-                           onchange="updateReturnTable()"
-                           style="font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;cursor:pointer;width:150px;">
+                    <button onclick="shiftReturnDate(-1)" style="border:1px solid #d1d5db;background:#f9fafb;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:12px;color:#555;">&lt;</button>
+                    <span id="return-date-display" style="font-size:13px;padding:4px 12px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;">{latest_date}</span>
+                    <button onclick="shiftReturnDate(1)" style="border:1px solid #d1d5db;background:#f9fafb;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:12px;color:#555;">&gt;</button>
                     <span id="return-actual-date-label" style="font-size:12px;color:#888;"></span>
                 </div>
                 <table class="rt-table">
@@ -631,18 +630,23 @@ def create_wrap_returns_table():
                 }});
             }}
 
-            window.updateReturnTable = function() {{
-                var selected = document.getElementById('return-date-input').value;
-                var dataDate = floorDate(selected);
-                // 선택 날짜 == 실제 데이터 날짜면 라벨 숨김
-                var label = document.getElementById('return-actual-date-label');
-                if (dataDate === selected) {{
-                    label.style.display = 'none';
-                }}
-                applyRow(dataDate);
+            var currentRtIdx = rtDatesSorted.length - 1;
+
+            function showDate(idx) {{
+                if (idx < 0 || idx >= rtDatesSorted.length) return;
+                currentRtIdx = idx;
+                var d = rtDatesSorted[idx];
+                document.getElementById('return-date-display').textContent = d;
+                document.getElementById('return-actual-date-label').style.display = 'none';
+                applyRow(d);
+            }}
+
+            window.shiftReturnDate = function(dir) {{
+                var next = currentRtIdx + dir;
+                if (next >= 0 && next < rtDatesSorted.length) showDate(next);
             }};
 
-            // 초기 로드: 최신 날짜와 일치하므로 라벨 숨김
+            // 초기 로드
             document.getElementById('return-actual-date-label').style.display = 'none';
         }})();
         </script>"""
