@@ -78,7 +78,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 • 매일 05:00 날씨 자동 전송
 • 매일 05:10 Google Calendar 일정 자동 전송
 
-💰 **가계부 (Sisyphe)**
+💰 **가계부 (Sisyphe → Google Sheets)**
+/ledger - 카테고리 목록 조회
 /ledger 지출 15000 식비 점심
 /ledger 수입 3000000 급여
 
@@ -891,84 +892,66 @@ async def check_dday_alerts(context):
         logging.error(f"D-Day alert check failed: {e}")
 
 # ============================================================
-# 가계부 (Sisyphe) - Telegram → GitHub data.json
+# 가계부 (Sisyphe) - Telegram → Google Sheets
 # ============================================================
-SISYPHE_REPO = 'sisyphe10/Sisyphe'
-SISYPHE_DATA_PATH = 'data.json'
+SISYPHE_SHEET_ID = '1V41yiwO4VrVUhjhqHyu8JGsuGcqw6pZen0NHdxzXHGs'
 
-def _get_gh_pat():
-    """VM git remote URL에서 PAT 추출"""
-    try:
-        result = subprocess.run(
-            ['git', 'remote', 'get-url', 'origin'],
-            capture_output=True, text=True, cwd=DASHBOARD_DIR
-        )
-        url = result.stdout.strip()
-        # https://user:TOKEN@github.com/...
-        if '@github.com' in url and ':' in url.split('@')[0]:
-            return url.split(':')[2].split('@')[0]
-    except:
-        pass
-    return None
-
-async def _sisyphe_read_data(pat):
-    """GitHub에서 Sisyphe data.json 읽기"""
-    import urllib.request
-    req = urllib.request.Request(
-        f'https://api.github.com/repos/{SISYPHE_REPO}/contents/{SISYPHE_DATA_PATH}',
-        headers={'Authorization': f'token {pat}', 'Accept': 'application/vnd.github.v3+json'}
+def _get_sheets_service():
+    """Google Sheets API 서비스 (서비스 계정)"""
+    from google.oauth2 import service_account
+    from googleapiclient.discovery import build
+    sa_json = os.getenv('GOOGLE_SERVICE_ACCOUNT_KEY')
+    if not sa_json:
+        return None
+    sa_info = json.loads(sa_json)
+    creds = service_account.Credentials.from_service_account_info(
+        sa_info, scopes=['https://www.googleapis.com/auth/spreadsheets']
     )
-    try:
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            result = json.loads(resp.read().decode())
-            import base64
-            content = base64.b64decode(result['content']).decode('utf-8')
-            return json.loads(content), result['sha']
-    except Exception as e:
-        if '404' in str(e):
-            return {'transactions': [], 'budgets': {}, 'categories': {'expense': [], 'income': []}}, None
-        raise
+    return build('sheets', 'v4', credentials=creds)
 
-async def _sisyphe_write_data(pat, data, sha):
-    """GitHub에 Sisyphe data.json 쓰기"""
-    import urllib.request, base64
-    content = base64.b64encode(json.dumps(data, ensure_ascii=False, indent=2).encode('utf-8')).decode()
-    body = {'message': f'가계부 입력 ({datetime.datetime.now().strftime("%Y-%m-%d %H:%M")})', 'content': content}
-    if sha:
-        body['sha'] = sha
-    req = urllib.request.Request(
-        f'https://api.github.com/repos/{SISYPHE_REPO}/contents/{SISYPHE_DATA_PATH}',
-        data=json.dumps(body).encode('utf-8'),
-        headers={'Authorization': f'token {pat}', 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json'},
-        method='PUT'
-    )
-    with urllib.request.urlopen(req, timeout=15) as resp:
-        return json.loads(resp.read().decode())
+def _read_sheet(service, sheet_name):
+    """시트에서 전체 데이터 읽기"""
+    result = service.spreadsheets().values().get(
+        spreadsheetId=SISYPHE_SHEET_ID, range=sheet_name
+    ).execute()
+    return result.get('values', [])
+
+def _append_row(service, sheet_name, row):
+    """시트에 행 추가"""
+    service.spreadsheets().values().append(
+        spreadsheetId=SISYPHE_SHEET_ID,
+        range=sheet_name,
+        valueInputOption='USER_ENTERED',
+        insertDataOption='INSERT_ROWS',
+        body={'values': [row]}
+    ).execute()
 
 async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """/가계부 지출 15000 식비 점심"""
+    """/ledger 지출 15000 식비 점심"""
     args = context.args
 
-    # 인자 없이 /가계부만 입력 → 카테고리 목록 + 사용법 표시
+    service = _get_sheets_service()
+    if not service:
+        await update.message.reply_text("❌ Google 서비스 계정이 설정되지 않았습니다.")
+        return
+
+    # 인자 없이 /ledger만 입력 → 카테고리 목록 + 사용법 표시
     if not args:
-        pat = _get_gh_pat()
-        cat_msg = ""
-        if pat:
-            try:
-                data, _ = await _sisyphe_read_data(pat)
-                cats = data.get('categories', {})
-                DEFAULT_EXPENSE = ['식비', '카페/간식', '교통', '주거', '통신', '쇼핑', '의료', '교육', '여가/문화', '경조사', '저축/투자', '기타']
-                DEFAULT_INCOME = ['급여', '투자수익', '부수입', '기타']
-                expense_cats = cats.get('expense', []) or DEFAULT_EXPENSE
-                income_cats = cats.get('income', []) or DEFAULT_INCOME
-                cat_msg = "━━━━━━━━━━━━━━━\n<b>📂 카테고리</b>\n━━━━━━━━━━━━━━━\n"
-                if expense_cats:
-                    cat_msg += f"🔴 <b>지출</b>: {', '.join(expense_cats)}\n"
-                if income_cats:
-                    cat_msg += f"🟠 <b>수입</b>: {', '.join(income_cats)}\n"
-                cat_msg += "\n"
-            except:
-                pass
+        try:
+            rows = _read_sheet(service, '카테고리')
+            expense_cats, income_cats = [], []
+            for r in rows[1:]:  # skip header
+                if len(r) >= 2:
+                    if r[0] == '지출': expense_cats.append(r[1])
+                    elif r[0] == '수입': income_cats.append(r[1])
+            cat_msg = "━━━━━━━━━━━━━━━\n<b>📂 카테고리</b>\n━━━━━━━━━━━━━━━\n"
+            if expense_cats:
+                cat_msg += f"🔴 <b>지출</b>: {', '.join(expense_cats)}\n"
+            if income_cats:
+                cat_msg += f"🟠 <b>수입</b>: {', '.join(income_cats)}\n"
+            cat_msg += "\n"
+        except:
+            cat_msg = ""
 
         await update.message.reply_text(
             f"{cat_msg}"
@@ -986,9 +969,9 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     tx_type_str = args[0]
     if tx_type_str in ['지출', 'ㅈ']:
-        tx_type = 'expense'
+        tx_type = '지출'
     elif tx_type_str in ['수입', 'ㅅ']:
-        tx_type = 'income'
+        tx_type = '수입'
     else:
         await update.message.reply_text("❌ 유형은 '지출' 또는 '수입'으로 입력하세요.")
         return
@@ -1004,33 +987,15 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     category = args[2]
     memo = ' '.join(args[3:]) if len(args) > 3 else ''
 
-    pat = _get_gh_pat()
-    if not pat:
-        await update.message.reply_text("❌ GitHub PAT를 찾을 수 없습니다.")
-        return
-
     try:
-        data, sha = await _sisyphe_read_data(pat)
-
         KST = datetime.timezone(datetime.timedelta(hours=9))
         today_str = datetime.datetime.now(tz=KST).strftime('%Y-%m-%d')
 
-        tx = {
-            'id': f"{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}-{os.urandom(4).hex()}",
-            'date': today_str,
-            'type': tx_type,
-            'category': category,
-            'amount': amount,
-            'memo': memo
-        }
-        data['transactions'].append(tx)
+        _append_row(service, '거래내역', [today_str, tx_type, category, str(amount), memo])
 
-        await _sisyphe_write_data(pat, data, sha)
-
-        type_label = '지출' if tx_type == 'expense' else '수입'
-        type_emoji = '🔴' if tx_type == 'expense' else '🟠'
+        type_emoji = '🔴' if tx_type == '지출' else '🟠'
         msg = (
-            f"{type_emoji} <b>{type_label}</b> 입력 완료\n"
+            f"{type_emoji} <b>{tx_type}</b> 입력 완료\n"
             f"━━━━━━━━━━━━━━━\n"
             f"📅 {today_str}\n"
             f"📂 {category}\n"
@@ -1040,7 +1005,7 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             msg += f"📝 {memo}\n"
 
         await update.message.reply_text(msg, parse_mode='HTML')
-        logging.info(f"Sisyphe ledger: {type_label} {amount} {category} {memo}")
+        logging.info(f"Sisyphe ledger: {tx_type} {amount} {category} {memo}")
 
     except Exception as e:
         logging.error(f"Sisyphe ledger error: {e}")
