@@ -550,6 +550,7 @@ def create_wrap_returns_table():
 
         items = [
             ('삼성 트루밸류', '트루밸류'),
+            ('DB 목표전환형 2차', '목표전환형 2차'),
             ('KOSPI', 'KOSPI'),
             ('KOSDAQ', 'KOSDAQ'),
         ]
