@@ -492,6 +492,48 @@ def create_sector_section_html():
         return ""
 
 
+def create_aum_table():
+    """AUM 테이블 HTML 생성"""
+    try:
+        nav_file = 'Wrap_NAV.xlsx'
+        if not os.path.exists(nav_file):
+            return ""
+        df = pd.read_excel(nav_file, sheet_name='AUM')
+        if df.empty:
+            return ""
+        df['날짜'] = pd.to_datetime(df['날짜'])
+        latest = df.sort_values('날짜').groupby('상품명').last().reset_index()
+        latest = latest.sort_values('AUM', ascending=False)
+        rows_html = ''
+        total_aum = 0
+        for _, row in latest.iterrows():
+            aum = int(row['AUM'])
+            total_aum += aum
+            aum_억 = aum / 100_000_000
+            date_str = row['날짜'].strftime('%m/%d')
+            rows_html += f'<tr><td style="padding:8px 12px;font-weight:600;">{row["증권사"]}</td><td style="padding:8px 12px;font-weight:600;">{row["상품명"]}</td><td style="padding:8px 12px;text-align:right;">{aum_억:,.1f}억</td><td style="padding:8px 12px;text-align:center;color:#888;font-size:12px;">{date_str}</td></tr>\n'
+        total_억 = total_aum / 100_000_000
+        rows_html += f'<tr style="border-top:2px solid #d1d5db;font-weight:700;"><td style="padding:8px 12px;" colspan="2">합계</td><td style="padding:8px 12px;text-align:right;">{total_억:,.1f}억</td><td></td></tr>'
+        return f"""
+        <div class="category-section">
+            <h2 class="category-title">AUM</h2>
+            <div style="max-width:600px;margin:0 auto;background:#fff;border-radius:10px;padding:16px 20px;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
+                <table style="width:100%;border-collapse:collapse;">
+                    <thead><tr>
+                        <th style="text-align:left;padding:8px 12px;font-size:12px;color:#888;border-bottom:2px solid #e5e7eb;">증권사</th>
+                        <th style="text-align:left;padding:8px 12px;font-size:12px;color:#888;border-bottom:2px solid #e5e7eb;">상품명</th>
+                        <th style="text-align:right;padding:8px 12px;font-size:12px;color:#888;border-bottom:2px solid #e5e7eb;">AUM</th>
+                        <th style="text-align:center;padding:8px 12px;font-size:12px;color:#888;border-bottom:2px solid #e5e7eb;">기준일</th>
+                    </tr></thead>
+                    <tbody>{rows_html}</tbody>
+                </table>
+            </div>
+        </div>"""
+    except Exception as e:
+        print(f"Error creating AUM table: {e}")
+        return ""
+
+
 def create_wrap_returns_table():
     """WRAP 수익률 비교 테이블 HTML (삼성 트루밸류, KOSPI, KOSDAQ) - 날짜 필터 포함"""
     try:
@@ -869,6 +911,7 @@ def create_dashboard():
             if category == 'Wrap':
                 wrap_html += section
                 wrap_html += create_wrap_returns_table()
+                wrap_html += create_aum_table()
             else:
                 charts_html += section
 
