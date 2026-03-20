@@ -503,7 +503,10 @@ def create_aum_table():
             return ""
         df['날짜'] = pd.to_datetime(df['날짜'])
         latest = df.sort_values('날짜').groupby('상품명').last().reset_index()
-        latest = latest.sort_values('AUM', ascending=False)
+        # 증권사별 AUM 합계로 증권사 순서 결정, 같은 증권사 내에서는 AUM 내림차순
+        broker_total = latest.groupby('증권사')['AUM'].sum().sort_values(ascending=False)
+        latest['broker_rank'] = latest['증권사'].map({b: i for i, b in enumerate(broker_total.index)})
+        latest = latest.sort_values(['broker_rank', 'AUM'], ascending=[True, False]).drop(columns='broker_rank')
         rows_html = ''
         total_aum = 0
         for _, row in latest.iterrows():
