@@ -646,7 +646,7 @@ def _build_wrap_chart_section(category_label):
                             tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%'; } } }
                         },
                         scales: {
-                            x: { type: 'category', ticks: { maxTicksLimit: 8, font: { size: 11 }, color: '#888' }, grid: { display: false } },
+                            x: { type: 'category', ticks: { callback: function(val, idx) { var d = this.getLabelForValue(val); if (!d) return ''; var parts = d.split('-'); var m = parseInt(parts[1]); if (m === 1 || m === 7) return parts[0].slice(2) + '/' + parts[1]; return null; }, autoSkip: false, maxRotation: 0, font: { size: 11 }, color: '#888' }, grid: { display: false } },
                             y: { ticks: { callback: function(v) { return v + '%'; }, font: { size: 11 }, color: '#888' }, grid: { color: '#eee' } }
                         }
                     }
