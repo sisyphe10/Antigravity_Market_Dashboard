@@ -535,8 +535,13 @@ def _build_wrap_chart_section(category_label):
         nav_data_json = json.dumps(nav_export, ensure_ascii=False)
         colors_json = json.dumps(chart_colors, ensure_ascii=False)
 
+        benchmarks = {'KOSPI', 'KOSDAQ'}
         rows_html = ''
+        added_separator = False
         for display, _ in chart_series:
+            if display in benchmarks and not added_separator:
+                rows_html += '<tr><td colspan="2" style="padding:4px;border:none;"></td></tr>\n'
+                added_separator = True
             color = chart_colors.get(display, '#888')
             active = ' active' if display == '삼성 트루밸류' else ''
             rows_html += f'<tr class="wrap-chart-item{active}" data-series="{display}" onclick="toggleWrapSeries(this)"><td style="width:6px;padding:0;"><div style="width:4px;height:100%;background:{color};border-radius:2px;"></div></td><td>{display}</td></tr>\n'
