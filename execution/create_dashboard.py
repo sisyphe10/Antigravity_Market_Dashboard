@@ -509,12 +509,12 @@ def _build_wrap_chart_section(category_label):
             ('KOSDAQ', 'KOSDAQ'),
         ]
         chart_colors = {
-            '삼성 트루밸류': '#2d7a3a',
-            'NH Value ESG': '#4a90e2',
-            'DB 개방형': '#ff9800',
-            'DB 목표전환형 2차': '#ab47bc',
-            'KOSPI': '#f44336',
-            'KOSDAQ': '#00bcd4',
+            '삼성 트루밸류': '#1428A0',
+            'NH Value ESG': '#0072CE',
+            'DB 개방형': '#00854A',
+            'DB 목표전환형 2차': 'rgba(0,133,74,0.8)',
+            'KOSPI': '#000000',
+            'KOSDAQ': '#666666',
         }
 
         nav_export = {'dates': [d.strftime('%Y-%m-%d') for d in df_nav.index]}
