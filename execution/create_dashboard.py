@@ -492,6 +492,113 @@ def create_sector_section_html():
         return ""
 
 
+def _build_wrap_chart_section(category_label):
+    """동적 Chart.js 수익률 비교 차트 (멀티 셀렉트)"""
+    try:
+        df_nav = pd.read_excel('Wrap_NAV.xlsx', sheet_name='기준가')
+        if 'Date' in df_nav.columns:
+            df_nav['Date'] = pd.to_datetime(df_nav['Date'])
+            df_nav = df_nav.set_index('Date')
+
+        chart_series = [
+            ('삼성 트루밸류', '트루밸류'),
+            ('NH Value ESG', 'Value ESG'),
+            ('DB 개방형', '개방형 랩'),
+            ('DB 목표전환형 2차', '목표전환형 2차'),
+            ('KOSPI', 'KOSPI'),
+            ('KOSDAQ', 'KOSDAQ'),
+        ]
+        chart_colors = {
+            '삼성 트루밸류': '#2d7a3a',
+            'NH Value ESG': '#4a90e2',
+            'DB 개방형': '#ff9800',
+            'DB 목표전환형 2차': '#ab47bc',
+            'KOSPI': '#f44336',
+            'KOSDAQ': '#00bcd4',
+        }
+
+        nav_export = {'dates': [d.strftime('%Y-%m-%d') for d in df_nav.index]}
+        for display, col in chart_series:
+            if col in df_nav.columns:
+                vals = df_nav[col].tolist()
+                base = None
+                pcts = []
+                for v in vals:
+                    if pd.notna(v) and base is None:
+                        base = v
+                    if base is not None and pd.notna(v):
+                        pcts.append(round((v / base - 1) * 100, 2))
+                    else:
+                        pcts.append(None)
+                nav_export[display] = pcts
+
+        nav_data_json = json.dumps(nav_export, ensure_ascii=False)
+        colors_json = json.dumps(chart_colors, ensure_ascii=False)
+
+        list_html = ''
+        for display, _ in chart_series:
+            color = chart_colors.get(display, '#888')
+            active = ' active' if display == '삼성 트루밸류' else ''
+            list_html += f'<div class="wrap-chart-item{active}" data-series="{display}" onclick="toggleWrapSeries(this)" style="border-left:4px solid {color};">{display}</div>\n'
+
+        js_code = """
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+        (function() {
+            var navData = NAV_DATA_PLACEHOLDER;
+            var chartColors = COLORS_PLACEHOLDER;
+            var wrapChart = null;
+            function buildChart() {
+                var selected = [];
+                document.querySelectorAll('.wrap-chart-item.active').forEach(function(el) { selected.push(el.getAttribute('data-series')); });
+                var datasets = [];
+                selected.forEach(function(name) {
+                    if (!navData[name]) return;
+                    var data = [];
+                    for (var i = 0; i < navData.dates.length; i++) {
+                        if (navData[name][i] !== null) data.push({ x: navData.dates[i], y: navData[name][i] });
+                    }
+                    datasets.push({ label: name, data: data, borderColor: chartColors[name] || '#888', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 0, tension: 0.3 });
+                });
+                if (wrapChart) wrapChart.destroy();
+                wrapChart = new Chart(document.getElementById('wrapDynamicChart'), {
+                    type: 'line',
+                    data: { datasets: datasets },
+                    options: {
+                        responsive: true, maintainAspectRatio: true, aspectRatio: 1.8,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: { labels: { font: { size: 12 }, usePointStyle: true, pointStyle: 'line' } },
+                            tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%'; } } }
+                        },
+                        scales: {
+                            x: { type: 'category', ticks: { maxTicksLimit: 8, font: { size: 11 }, color: '#888' }, grid: { display: false } },
+                            y: { ticks: { callback: function(v) { return v + '%'; }, font: { size: 11 }, color: '#888' }, grid: { color: '#eee' } }
+                        }
+                    }
+                });
+            }
+            window.toggleWrapSeries = function(el) { el.classList.toggle('active'); buildChart(); };
+            buildChart();
+        })();
+        </script>
+        """.replace('NAV_DATA_PLACEHOLDER', nav_data_json).replace('COLORS_PLACEHOLDER', colors_json)
+
+        return f"""
+        <div class="category-section">
+            <h2 class="category-title">{category_label}</h2>
+            <div style="display:flex;gap:16px;align-items:flex-start;">
+                <div class="wrap-chart-list">{list_html}</div>
+                <div class="wrap-chart-view"><canvas id="wrapDynamicChart"></canvas></div>
+            </div>
+        </div>
+        {js_code}
+        """
+    except Exception as e:
+        print(f"Error building wrap chart section: {e}")
+        return ""
+
+
 def create_aum_table():
     """AUM 테이블 HTML 생성"""
     try:
@@ -895,28 +1002,29 @@ def create_dashboard():
 
             # Add category header
             target = wrap_html if category == 'Wrap' else charts_html
-            section = f"""
-            <div class="category-section">
-                <h2 class="category-title">{category_label}</h2>
-                <div class="dashboard-grid">
-            """
-            for chart in charts:
-                section += f"""
-                <div class="chart-card">
-                    <a href="{chart['path']}" target="_blank">
-                        <img src="{chart['path']}" alt="{chart['title']}" loading="lazy">
-                    </a>
-                </div>
-                """
-            section += """
-                </div>
-            </div>
-            """
+
             if category == 'Wrap':
-                wrap_html += section
+                wrap_html += _build_wrap_chart_section(category_label)
                 wrap_html += create_wrap_returns_table()
                 wrap_html += create_aum_table()
             else:
+                section = f"""
+            <div class="category-section">
+                <h2 class="category-title">{{category_label}}</h2>
+                <div class="dashboard-grid">
+                """
+                for chart in charts:
+                    section += f"""
+                <div class="chart-card">
+                    <a href="{{chart['path']}}" target="_blank">
+                        <img src="{{chart['path']}}" alt="{{chart['title']}}" loading="lazy">
+                    </a>
+                </div>
+                    """
+                section += """
+                </div>
+            </div>
+                """
                 charts_html += section
 
     # Generate full HTML
