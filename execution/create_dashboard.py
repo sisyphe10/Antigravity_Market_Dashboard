@@ -597,8 +597,9 @@ def _build_wrap_chart_section(category_label):
 
                     var lastPct = data[data.length - 1].y;
                     var sign = lastPct >= 0 ? '+' : '';
+                    returnLabels.push({ name: name, pct: sign + lastPct.toFixed(1) + '%', color: chartColors[name] || '#888' });
                     datasets.push({
-                        label: name + ' (' + sign + lastPct.toFixed(1) + '%)',
+                        label: name,
                         data: data,
                         borderColor: chartColors[name] || '#888',
                         backgroundColor: 'transparent',
@@ -608,6 +609,15 @@ def _build_wrap_chart_section(category_label):
                     });
                 });
 
+                // 차트 위 수익률 표시
+                var rlEl = document.getElementById('wrapReturnLabels');
+                rlEl.innerHTML = returnLabels.map(function(r) {
+                    return '<span style="display:inline-flex;align-items:center;gap:4px;margin-right:14px;font-size:13px;font-weight:700;">' +
+                        '<span style="width:10px;height:10px;border-radius:50%;background:' + r.color + ';display:inline-block;"></span>' +
+                        '<span style="color:#333;">' + r.name + '</span>' +
+                        '<span style="color:' + r.color + ';">' + r.pct + '</span></span>';
+                }).join('');
+
                 if (wrapChart) wrapChart.destroy();
                 wrapChart = new Chart(document.getElementById('wrapDynamicChart'), {
                     type: 'line',
@@ -616,8 +626,8 @@ def _build_wrap_chart_section(category_label):
                         responsive: true, maintainAspectRatio: false,
                         interaction: { mode: 'index', intersect: false },
                         plugins: {
-                            legend: { position: 'bottom', labels: { font: { size: 12 }, usePointStyle: true, pointStyle: 'line', padding: 16 } },
-                            tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label.split(' (')[0] + ': ' + ctx.parsed.y.toFixed(1) + '%'; } } }
+                            legend: { display: false },
+                            tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%'; } } }
                         },
                         scales: {
                             x: { type: 'category', ticks: { maxTicksLimit: 8, font: { size: 11 }, color: '#888' }, grid: { display: false } },
@@ -647,6 +657,7 @@ def _build_wrap_chart_section(category_label):
                         <input type="date" id="wrapEndDate" value="{last_date}" onchange="updateWrapChart()" style="font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;">
                     </div>
                     <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                        <div id="wrapReturnLabels" style="margin-bottom:10px;min-height:20px;"></div>
                         <canvas id="wrapDynamicChart" style="width:100%;height:500px;"></canvas>
                     </div>
                 </div>

@@ -128,7 +128,7 @@
     <div id="mainContent" class="pw-hidden">
     <header>
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-03-21 10:20:30 KST</div>
+        <div class="last-updated">Updated: 2026-03-21 10:21:21 KST</div>
         <div class="nav-group">
             <a href="index.html" class="nav-button">← Dashboard</a>
         </div>
@@ -154,6 +154,7 @@
                         <input type="date" id="wrapEndDate" value="2026-03-20" onchange="updateWrapChart()" style="font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;">
                     </div>
                     <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                        <div id="wrapReturnLabels" style="margin-bottom:10px;min-height:20px;"></div>
                         <canvas id="wrapDynamicChart" style="width:100%;height:500px;"></canvas>
                     </div>
                 </div>
@@ -197,8 +198,9 @@
 
                     var lastPct = data[data.length - 1].y;
                     var sign = lastPct >= 0 ? '+' : '';
+                    returnLabels.push({ name: name, pct: sign + lastPct.toFixed(1) + '%', color: chartColors[name] || '#888' });
                     datasets.push({
-                        label: name + ' (' + sign + lastPct.toFixed(1) + '%)',
+                        label: name,
                         data: data,
                         borderColor: chartColors[name] || '#888',
                         backgroundColor: 'transparent',
@@ -208,6 +210,15 @@
                     });
                 });
 
+                // 차트 위 수익률 표시
+                var rlEl = document.getElementById('wrapReturnLabels');
+                rlEl.innerHTML = returnLabels.map(function(r) {
+                    return '<span style="display:inline-flex;align-items:center;gap:4px;margin-right:14px;font-size:13px;font-weight:700;">' +
+                        '<span style="width:10px;height:10px;border-radius:50%;background:' + r.color + ';display:inline-block;"></span>' +
+                        '<span style="color:#333;">' + r.name + '</span>' +
+                        '<span style="color:' + r.color + ';">' + r.pct + '</span></span>';
+                }).join('');
+
                 if (wrapChart) wrapChart.destroy();
                 wrapChart = new Chart(document.getElementById('wrapDynamicChart'), {
                     type: 'line',
@@ -216,8 +227,8 @@
                         responsive: true, maintainAspectRatio: false,
                         interaction: { mode: 'index', intersect: false },
                         plugins: {
-                            legend: { position: 'bottom', labels: { font: { size: 12 }, usePointStyle: true, pointStyle: 'line', padding: 16 } },
-                            tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label.split(' (')[0] + ': ' + ctx.parsed.y.toFixed(1) + '%'; } } }
+                            legend: { display: false },
+                            tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%'; } } }
                         },
                         scales: {
                             x: { type: 'category', ticks: { maxTicksLimit: 8, font: { size: 11 }, color: '#888' }, grid: { display: false } },
@@ -994,20 +1005,6 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="sect-name">건설</td>
-                        <td class="sect-num">5.0%</td>
-                        <td class="sect-num">0.6%</td>
-                        <td class="sect-diff">+4.4%</td>
-                        <td class="sect-diff sect-over">+13.9%</td>
-                    </tr>
-                    <tr class="sect-detail-row">
-                        <td colspan="5" class="sect-detail">
-                            <span class="sect-detail-mine">GS건설</span>
-                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
-                            <span class="sect-detail-bm">현대건설, 대우건설, 한전KPS</span>
-                        </td>
-                    </tr>
-                    <tr>
                         <td class="sect-name">오락·문화</td>
                         <td class="sect-num">5.0%</td>
                         <td class="sect-num">0.6%</td>
@@ -1019,6 +1016,20 @@
                             <span class="sect-detail-mine">하이브</span>
                             <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
                             <span class="sect-detail-bm">하이브, 강원랜드, 에스엠</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="sect-name">건설</td>
+                        <td class="sect-num">5.0%</td>
+                        <td class="sect-num">0.6%</td>
+                        <td class="sect-diff">+4.4%</td>
+                        <td class="sect-diff sect-over">+13.9%</td>
+                    </tr>
+                    <tr class="sect-detail-row">
+                        <td colspan="5" class="sect-detail">
+                            <span class="sect-detail-mine">GS건설</span>
+                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
+                            <span class="sect-detail-bm">현대건설, 대우건설, 한전KPS</span>
                         </td>
                     </tr>
                     <tr>
