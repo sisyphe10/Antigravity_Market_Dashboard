@@ -609,21 +609,37 @@ def _build_wrap_chart_section(category_label):
                     });
                 });
 
-                // 차트 위 수익률 표시
-                var rlEl = document.getElementById('wrapReturnLabels');
-                rlEl.innerHTML = returnLabels.map(function(r) {
-                    return '<span style="display:inline-flex;align-items:center;gap:4px;margin-right:14px;font-size:13px;font-weight:700;">' +
-                        '<span style="width:10px;height:10px;border-radius:50%;background:' + r.color + ';display:inline-block;"></span>' +
-                        '<span style="color:#333;">' + r.name + '</span>' +
-                        '<span style="color:' + r.color + ';">' + r.pct + '</span></span>';
-                }).join('');
+                // 선 끝에 수익률 라벨을 그리는 커스텀 플러그인
+                var endLabelPlugin = {
+                    id: 'endLabels',
+                    afterDatasetsDraw: function(chart) {
+                        var ctx = chart.ctx;
+                        chart.data.datasets.forEach(function(ds, i) {
+                            var meta = chart.getDatasetMeta(i);
+                            if (meta.hidden) return;
+                            var last = meta.data[meta.data.length - 1];
+                            if (!last) return;
+                            var val = ds.data[ds.data.length - 1].y;
+                            var sign = val >= 0 ? '+' : '';
+                            var label = sign + val.toFixed(1) + '%';
+                            ctx.save();
+                            ctx.font = 'bold 12px sans-serif';
+                            ctx.fillStyle = ds.borderColor;
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(label, last.x + 6, last.y);
+                            ctx.restore();
+                        });
+                    }
+                };
 
                 if (wrapChart) wrapChart.destroy();
                 wrapChart = new Chart(document.getElementById('wrapDynamicChart'), {
                     type: 'line',
                     data: { datasets: datasets },
+                    plugins: [endLabelPlugin],
                     options: {
                         responsive: true, maintainAspectRatio: false,
+                        layout: { padding: { right: 60 } },
                         interaction: { mode: 'index', intersect: false },
                         plugins: {
                             legend: { display: false },
@@ -657,7 +673,6 @@ def _build_wrap_chart_section(category_label):
                         <input type="date" id="wrapEndDate" value="{last_date}" onchange="updateWrapChart()" style="font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;">
                     </div>
                     <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
-                        <div id="wrapReturnLabels" style="margin-bottom:10px;min-height:20px;"></div>
                         <canvas id="wrapDynamicChart" style="width:100%;height:500px;"></canvas>
                     </div>
                 </div>
