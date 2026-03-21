@@ -514,19 +514,19 @@ def create_aum_table():
             total_aum += aum
             aum_억 = aum / 100_000_000
             date_str = row['날짜'].strftime('%m/%d')
-            rows_html += f'<tr><td style="padding:8px 12px;font-weight:600;">{row["증권사"]}</td><td style="padding:8px 12px;font-weight:600;">{row["상품명"]}</td><td style="padding:8px 12px;text-align:right;">{aum_억:,.1f}억</td><td style="padding:8px 12px;text-align:center;color:#888;font-size:12px;">{date_str}</td></tr>\n'
+            rows_html += f'<tr><td style="text-align:left;font-weight:600;">{row["증권사"]}</td><td style="text-align:left;font-weight:600;">{row["상품명"]}</td><td style="text-align:right;">{aum_억:,.1f}억</td><td style="text-align:center;color:#888;font-size:12px;">{date_str}</td></tr>\n'
         total_억 = total_aum / 100_000_000
-        rows_html += f'<tr style="border-top:2px solid #d1d5db;font-weight:700;"><td style="padding:8px 12px;" colspan="2">합계</td><td style="padding:8px 12px;text-align:right;">{total_억:,.1f}억</td><td></td></tr>'
+        rows_html += f'<tr style="border-top:2px solid #000;font-weight:700;"><td colspan="2">합계</td><td style="text-align:right;">{total_억:,.1f}억</td><td></td></tr>'
         return f"""
         <div class="category-section">
             <h2 class="category-title">AUM</h2>
-            <div style="max-width:600px;margin:0 auto;background:#fff;border-radius:10px;padding:16px 20px;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
-                <table style="width:100%;border-collapse:collapse;">
+            <div class="portfolio-section-wrapper">
+                <table class="portfolio-table" style="max-width:600px;margin:0 auto;">
                     <thead><tr>
-                        <th style="text-align:left;padding:8px 12px;font-size:12px;color:#888;border-bottom:2px solid #e5e7eb;">증권사</th>
-                        <th style="text-align:left;padding:8px 12px;font-size:12px;color:#888;border-bottom:2px solid #e5e7eb;">상품명</th>
-                        <th style="text-align:right;padding:8px 12px;font-size:12px;color:#888;border-bottom:2px solid #e5e7eb;">AUM</th>
-                        <th style="text-align:center;padding:8px 12px;font-size:12px;color:#888;border-bottom:2px solid #e5e7eb;">기준일</th>
+                        <th style="text-align:left;">증권사</th>
+                        <th style="text-align:left;">상품명</th>
+                        <th style="text-align:right;">AUM</th>
+                        <th>기준일</th>
                     </tr></thead>
                     <tbody>{rows_html}</tbody>
                 </table>
