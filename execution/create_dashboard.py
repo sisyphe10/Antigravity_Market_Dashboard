@@ -540,7 +540,7 @@ def _build_wrap_chart_section(category_label):
         added_separator = False
         for display, _ in chart_series:
             if display in benchmarks and not added_separator:
-                rows_html += '<tr><td colspan="2" style="padding:4px;border:none;"></td></tr>\n'
+                rows_html += '<tr><td colspan="2" style="padding:0;border-bottom:2px solid #000;"></td></tr>\n'
                 added_separator = True
             color = chart_colors.get(display, '#888')
             active = ' active' if display == '삼성 트루밸류' else ''
