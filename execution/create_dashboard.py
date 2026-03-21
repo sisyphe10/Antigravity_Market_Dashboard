@@ -514,18 +514,18 @@ def create_aum_table():
             total_aum += aum
             aum_억 = aum / 100_000_000
             date_str = row['날짜'].strftime('%m/%d')
-            rows_html += f'<tr><td style="text-align:left;font-weight:600;">{row["증권사"]}</td><td style="text-align:left;font-weight:600;">{row["상품명"]}</td><td style="text-align:right;">{aum_억:,.1f}억</td><td style="text-align:center;color:#888;font-size:12px;">{date_str}</td></tr>\n'
+            rows_html += f'<tr><td>{row["증권사"]}</td><td>{row["상품명"]}</td><td>{aum_억:,.1f}억</td><td>{date_str}</td></tr>\n'
         total_억 = total_aum / 100_000_000
-        rows_html += f'<tr style="border-top:2px solid #000;font-weight:700;"><td colspan="2">합계</td><td style="text-align:right;">{total_억:,.1f}억</td><td></td></tr>'
+        rows_html += f'<tr style="border-top:2px solid #000;font-weight:700;"><td colspan="2">합계</td><td>{total_억:,.1f}억</td><td></td></tr>'
         return f"""
         <div class="category-section">
             <h2 class="category-title">AUM</h2>
             <div class="portfolio-section-wrapper">
-                <table class="portfolio-table" style="max-width:600px;margin:0 auto;">
+                <table class="portfolio-table" style="max-width:600px;margin:0 auto;white-space:nowrap;">
                     <thead><tr>
-                        <th style="text-align:left;">증권사</th>
-                        <th style="text-align:left;">상품명</th>
-                        <th style="text-align:right;">AUM</th>
+                        <th>증권사</th>
+                        <th>상품명</th>
+                        <th>AUM</th>
                         <th>기준일</th>
                     </tr></thead>
                     <tbody>{rows_html}</tbody>
