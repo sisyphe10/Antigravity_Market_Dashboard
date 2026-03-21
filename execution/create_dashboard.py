@@ -588,9 +588,9 @@ def _build_wrap_chart_section(category_label):
         return f"""
         <div class="category-section">
             <h2 class="category-title">{category_label}</h2>
-            <div style="max-width:1200px;margin:0 auto;">
-                <div style="margin-bottom:16px;">{list_html}</div>
-                <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+            <div style="display:flex;gap:16px;align-items:flex-start;max-width:1200px;margin:0 auto;">
+                <div style="min-width:180px;">{list_html}</div>
+                <div style="flex:1;background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                     <canvas id="wrapDynamicChart" style="width:100%;height:500px;"></canvas>
                 </div>
             </div>
@@ -1013,14 +1013,14 @@ def create_dashboard():
             else:
                 section = f"""
             <div class="category-section">
-                <h2 class="category-title">{{category_label}}</h2>
+                <h2 class="category-title">{category_label}</h2>
                 <div class="dashboard-grid">
                 """
                 for chart in charts:
                     section += f"""
                 <div class="chart-card">
-                    <a href="{{chart['path']}}" target="_blank">
-                        <img src="{{chart['path']}}" alt="{{chart['title']}}" loading="lazy">
+                    <a href="{chart['path']}" target="_blank">
+                        <img src="{chart['path']}" alt="{chart['title']}" loading="lazy">
                     </a>
                 </div>
                     """
