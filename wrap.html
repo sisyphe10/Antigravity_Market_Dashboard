@@ -128,7 +128,7 @@
     <div id="mainContent" class="pw-hidden">
     <header>
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-03-21 10:03:31 KST</div>
+        <div class="last-updated">Updated: 2026-03-21 10:08:17 KST</div>
         <div class="nav-group">
             <a href="index.html" class="nav-button">← Dashboard</a>
         </div>
@@ -137,15 +137,15 @@
     
         <div class="category-section">
             <h2 class="category-title">CHART</h2>
-            <div style="max-width:1200px;margin:0 auto;">
-                <div style="margin-bottom:16px;"><table class="portfolio-table" style="max-width:500px;margin:0 auto;"><tbody><tr class="wrap-chart-item active" data-series="삼성 트루밸류" onclick="toggleWrapSeries(this)"><td style="width:6px;padding:0;"><div style="width:4px;height:100%;background:#2d7a3a;border-radius:2px;"></div></td><td>삼성 트루밸류</td></tr>
+            <div style="display:flex;gap:16px;align-items:flex-start;max-width:1200px;margin:0 auto;">
+                <div style="min-width:180px;"><table class="portfolio-table" style="max-width:500px;margin:0 auto;"><tbody><tr class="wrap-chart-item active" data-series="삼성 트루밸류" onclick="toggleWrapSeries(this)"><td style="width:6px;padding:0;"><div style="width:4px;height:100%;background:#2d7a3a;border-radius:2px;"></div></td><td>삼성 트루밸류</td></tr>
 <tr class="wrap-chart-item" data-series="NH Value ESG" onclick="toggleWrapSeries(this)"><td style="width:6px;padding:0;"><div style="width:4px;height:100%;background:#4a90e2;border-radius:2px;"></div></td><td>NH Value ESG</td></tr>
 <tr class="wrap-chart-item" data-series="DB 개방형" onclick="toggleWrapSeries(this)"><td style="width:6px;padding:0;"><div style="width:4px;height:100%;background:#ff9800;border-radius:2px;"></div></td><td>DB 개방형</td></tr>
 <tr class="wrap-chart-item" data-series="DB 목표전환형 2차" onclick="toggleWrapSeries(this)"><td style="width:6px;padding:0;"><div style="width:4px;height:100%;background:#ab47bc;border-radius:2px;"></div></td><td>DB 목표전환형 2차</td></tr>
 <tr class="wrap-chart-item" data-series="KOSPI" onclick="toggleWrapSeries(this)"><td style="width:6px;padding:0;"><div style="width:4px;height:100%;background:#f44336;border-radius:2px;"></div></td><td>KOSPI</td></tr>
 <tr class="wrap-chart-item" data-series="KOSDAQ" onclick="toggleWrapSeries(this)"><td style="width:6px;padding:0;"><div style="width:4px;height:100%;background:#00bcd4;border-radius:2px;"></div></td><td>KOSDAQ</td></tr>
 </tbody></table></div>
-                <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                <div style="flex:1;background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                     <canvas id="wrapDynamicChart" style="width:100%;height:500px;"></canvas>
                 </div>
             </div>
@@ -953,20 +953,6 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="sect-name">건설</td>
-                        <td class="sect-num">5.0%</td>
-                        <td class="sect-num">0.6%</td>
-                        <td class="sect-diff">+4.4%</td>
-                        <td class="sect-diff sect-over">+13.9%</td>
-                    </tr>
-                    <tr class="sect-detail-row">
-                        <td colspan="5" class="sect-detail">
-                            <span class="sect-detail-mine">GS건설</span>
-                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
-                            <span class="sect-detail-bm">현대건설, 대우건설, 한전KPS</span>
-                        </td>
-                    </tr>
-                    <tr>
                         <td class="sect-name">오락·문화</td>
                         <td class="sect-num">5.0%</td>
                         <td class="sect-num">0.6%</td>
@@ -978,6 +964,20 @@
                             <span class="sect-detail-mine">하이브</span>
                             <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
                             <span class="sect-detail-bm">하이브, 강원랜드, 에스엠</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="sect-name">건설</td>
+                        <td class="sect-num">5.0%</td>
+                        <td class="sect-num">0.6%</td>
+                        <td class="sect-diff">+4.4%</td>
+                        <td class="sect-diff sect-over">+13.9%</td>
+                    </tr>
+                    <tr class="sect-detail-row">
+                        <td colspan="5" class="sect-detail">
+                            <span class="sect-detail-mine">GS건설</span>
+                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
+                            <span class="sect-detail-bm">현대건설, 대우건설, 한전KPS</span>
                         </td>
                     </tr>
                     <tr>
