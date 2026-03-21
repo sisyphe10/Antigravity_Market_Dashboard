@@ -889,7 +889,7 @@ def create_dashboard():
 
             # Wrap 카테고리는 git 커밋 날짜로 날짜 표시 (git pull 시 mtime이 바뀌므로)
             if category == 'Wrap':
-                category_label = 'WRAP'
+                category_label = 'CHART'
             else:
                 category_label = category
 
