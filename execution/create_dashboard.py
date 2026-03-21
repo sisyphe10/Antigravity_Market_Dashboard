@@ -646,7 +646,7 @@ def _build_wrap_chart_section(category_label):
                             tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%'; } } }
                         },
                         scales: {
-                            x: { type: 'category', ticks: { callback: function(val, idx) { var d = this.getLabelForValue(val); if (!d) return undefined; var parts = d.split('-'); var m = parseInt(parts[1]); var day = parseInt(parts[2]); if ((m === 1 || m === 7) && day <= 5) return parts[0].slice(2) + '/' + parts[1]; return undefined; }, autoSkip: true, maxRotation: 0, font: { size: 11 }, color: '#888' }, grid: { display: false } },
+                            x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val) { var d = this.getLabelForValue(val); if (!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 11 }, color: '#888' }, grid: { display: false } },
                             y: { ticks: { callback: function(v) { return v + '%'; }, font: { size: 11 }, color: '#888' }, grid: { color: '#eee' } }
                         }
                     }
