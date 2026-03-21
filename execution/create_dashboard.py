@@ -532,7 +532,15 @@ def _build_wrap_chart_section(category_label):
                         pcts.append(None)
                 nav_export[display] = pcts
 
+        # Raw NAV values (for period-based return calculation)
+        raw_export = {'dates': nav_export['dates']}
+        for display, col in chart_series:
+            if col in df_nav.columns:
+                vals = df_nav[col].tolist()
+                raw_export[display] = [round(v, 2) if pd.notna(v) else None for v in vals]
+
         nav_data_json = json.dumps(nav_export, ensure_ascii=False)
+        raw_data_json = json.dumps(raw_export, ensure_ascii=False)
         colors_json = json.dumps(chart_colors, ensure_ascii=False)
 
         benchmarks = {'KOSPI', 'KOSDAQ'}
@@ -547,25 +555,59 @@ def _build_wrap_chart_section(category_label):
             rows_html += f'<tr class="wrap-chart-item{active}" data-series="{display}" onclick="toggleWrapSeries(this)"><td style="width:6px;padding:0;"><div style="width:4px;height:100%;background:{color};border-radius:2px;"></div></td><td>{display}</td></tr>\n'
         list_html = f'<table class="portfolio-table" style="max-width:500px;margin:0 auto;"><tbody>{rows_html}</tbody></table>'
 
+        dates = nav_export['dates']
+        first_date = dates[0] if dates else ''
+        last_date = dates[-1] if dates else ''
+
         js_code = """
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
         (function() {
             var navData = NAV_DATA_PLACEHOLDER;
+            var rawData = RAW_DATA_PLACEHOLDER;
             var chartColors = COLORS_PLACEHOLDER;
             var wrapChart = null;
+
             function buildChart() {
                 var selected = [];
                 document.querySelectorAll('.wrap-chart-item.active').forEach(function(el) { selected.push(el.getAttribute('data-series')); });
+                var startDate = document.getElementById('wrapStartDate').value;
+                var endDate = document.getElementById('wrapEndDate').value;
+
                 var datasets = [];
+                var returnLabels = [];
+
                 selected.forEach(function(name) {
-                    if (!navData[name]) return;
-                    var data = [];
+                    if (!rawData[name]) return;
+                    var filteredDates = [];
+                    var filteredVals = [];
                     for (var i = 0; i < navData.dates.length; i++) {
-                        if (navData[name][i] !== null) data.push({ x: navData.dates[i], y: navData[name][i] });
+                        var d = navData.dates[i];
+                        if (d >= startDate && d <= endDate && rawData[name][i] !== null) {
+                            filteredDates.push(d);
+                            filteredVals.push(rawData[name][i]);
+                        }
                     }
-                    datasets.push({ label: name, data: data, borderColor: chartColors[name] || '#888', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 0, tension: 0.3 });
+                    if (filteredVals.length === 0) return;
+
+                    var base = filteredVals[0];
+                    var data = filteredDates.map(function(d, j) {
+                        return { x: d, y: Math.round((filteredVals[j] / base - 1) * 10000) / 100 };
+                    });
+
+                    var lastPct = data[data.length - 1].y;
+                    var sign = lastPct >= 0 ? '+' : '';
+                    datasets.push({
+                        label: name + ' (' + sign + lastPct.toFixed(1) + '%)',
+                        data: data,
+                        borderColor: chartColors[name] || '#888',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.3
+                    });
                 });
+
                 if (wrapChart) wrapChart.destroy();
                 wrapChart = new Chart(document.getElementById('wrapDynamicChart'), {
                     type: 'line',
@@ -574,8 +616,8 @@ def _build_wrap_chart_section(category_label):
                         responsive: true, maintainAspectRatio: false,
                         interaction: { mode: 'index', intersect: false },
                         plugins: {
-                            legend: { labels: { font: { size: 12 }, usePointStyle: true, pointStyle: 'line' } },
-                            tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%'; } } }
+                            legend: { position: 'bottom', labels: { font: { size: 12 }, usePointStyle: true, pointStyle: 'line', padding: 16 } },
+                            tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label.split(' (')[0] + ': ' + ctx.parsed.y.toFixed(1) + '%'; } } }
                         },
                         scales: {
                             x: { type: 'category', ticks: { maxTicksLimit: 8, font: { size: 11 }, color: '#888' }, grid: { display: false } },
@@ -584,19 +626,29 @@ def _build_wrap_chart_section(category_label):
                     }
                 });
             }
+
             window.toggleWrapSeries = function(el) { el.classList.toggle('active'); buildChart(); };
+            window.updateWrapChart = buildChart;
             buildChart();
         })();
         </script>
-        """.replace('NAV_DATA_PLACEHOLDER', nav_data_json).replace('COLORS_PLACEHOLDER', colors_json)
+        """.replace('NAV_DATA_PLACEHOLDER', nav_data_json).replace('COLORS_PLACEHOLDER', colors_json).replace('RAW_DATA_PLACEHOLDER', raw_data_json)
 
         return f"""
         <div class="category-section">
             <h2 class="category-title">{category_label}</h2>
             <div style="display:flex;gap:16px;align-items:flex-start;max-width:1200px;margin:0 auto;">
                 <div style="min-width:180px;">{list_html}</div>
-                <div style="flex:1;background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
-                    <canvas id="wrapDynamicChart" style="width:100%;height:500px;"></canvas>
+                <div style="flex:1;">
+                    <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;font-size:13px;">
+                        <span style="color:#555;font-weight:600;">기간</span>
+                        <input type="date" id="wrapStartDate" value="{first_date}" onchange="updateWrapChart()" style="font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;">
+                        <span style="color:#888;">~</span>
+                        <input type="date" id="wrapEndDate" value="{last_date}" onchange="updateWrapChart()" style="font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;">
+                    </div>
+                    <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                        <canvas id="wrapDynamicChart" style="width:100%;height:500px;"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
