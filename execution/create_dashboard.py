@@ -535,11 +535,12 @@ def _build_wrap_chart_section(category_label):
         nav_data_json = json.dumps(nav_export, ensure_ascii=False)
         colors_json = json.dumps(chart_colors, ensure_ascii=False)
 
-        list_html = ''
+        rows_html = ''
         for display, _ in chart_series:
             color = chart_colors.get(display, '#888')
             active = ' active' if display == '삼성 트루밸류' else ''
-            list_html += f'<div class="wrap-chart-item{active}" data-series="{display}" onclick="toggleWrapSeries(this)" style="border-left:4px solid {color};">{display}</div>\n'
+            rows_html += f'<tr class="wrap-chart-item{active}" data-series="{display}" onclick="toggleWrapSeries(this)"><td style="width:6px;padding:0;"><div style="width:4px;height:100%;background:{color};border-radius:2px;"></div></td><td>{display}</td></tr>\n'
+        list_html = f'<table class="portfolio-table" style="max-width:500px;margin:0 auto;"><tbody>{rows_html}</tbody></table>'
 
         js_code = """
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -565,7 +566,7 @@ def _build_wrap_chart_section(category_label):
                     type: 'line',
                     data: { datasets: datasets },
                     options: {
-                        responsive: true, maintainAspectRatio: true, aspectRatio: 1.8,
+                        responsive: true, maintainAspectRatio: false,
                         interaction: { mode: 'index', intersect: false },
                         plugins: {
                             legend: { labels: { font: { size: 12 }, usePointStyle: true, pointStyle: 'line' } },
@@ -587,9 +588,11 @@ def _build_wrap_chart_section(category_label):
         return f"""
         <div class="category-section">
             <h2 class="category-title">{category_label}</h2>
-            <div style="display:flex;gap:16px;align-items:flex-start;">
-                <div class="wrap-chart-list">{list_html}</div>
-                <div class="wrap-chart-view"><canvas id="wrapDynamicChart"></canvas></div>
+            <div style="max-width:1200px;margin:0 auto;">
+                <div style="margin-bottom:16px;">{list_html}</div>
+                <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                    <canvas id="wrapDynamicChart" style="width:100%;height:500px;"></canvas>
+                </div>
             </div>
         </div>
         {js_code}
@@ -1532,6 +1535,9 @@ def create_dashboard():
         .portfolio-table tbody tr:hover {{ background-color: #f5f5f5; }}
         .portfolio-table .number {{ text-align: right; }}
         .portfolio-table th:first-child, .portfolio-table td:first-child {{ width: 50px; text-align: center; }}
+        .wrap-chart-item {{ cursor: pointer; transition: all 0.15s; }}
+        .wrap-chart-item:hover td {{ background: #e9ecef; }}
+        .wrap-chart-item.active td {{ background: #222; color: #fff; }}
         .portfolio-section-wrapper {{ max-width: 1600px; margin: 0 auto; }}
         .portfolio-table .positive {{ color: #cc0000; font-weight: 600; }}
         .portfolio-table .negative {{ color: #0055cc; font-weight: 600; }}
