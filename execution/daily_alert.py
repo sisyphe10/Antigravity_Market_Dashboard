@@ -54,20 +54,36 @@ def get_naver_weather(location="여의도"):
         day_kor = days[now.weekday()]
         date_str = now.strftime(f"%Y-%m-%d ({day_kor})")
         
-        # b. 날씨
-        summary_elem = soup.select_one("span.weather.before_slash")
-        weather_status = summary_elem.text if summary_elem else "확인불가"
-        weather_emoji = get_weather_emoji(weather_status)
-        
-        # c. 최저/최고
-        min_elem = soup.select_one("span.lowest")
-        max_elem = soup.select_one("span.highest")
-        min_temp = min_elem.text.replace("최저기온", "").replace("°", "").strip() if min_elem else "?"
-        max_temp = max_elem.text.replace("최고기온", "").replace("°", "").strip() if max_elem else "?"
-        
-        # d. 현재 기온
-        temp_elem = soup.select_one("div.temperature_text > strong")
-        current_temp = temp_elem.text.replace("현재 온도", "").replace("°", "").strip() if temp_elem else "?"
+        # b. 시간별 날씨 (8시, 14시, 18시)
+        import re
+        weather_div = soup.select_one("div.graph_inner._hourly_weather")
+        hourly = {}
+        if weather_div:
+            for item in weather_div.select("li._li"):
+                text = item.get_text(separator='|')
+                hour_match = re.search(r'(\d{1,2})시', text)
+                if not hour_match:
+                    continue
+                hour = int(hour_match.group(1))
+                weather = '?'
+                for kw in ['구름많음', '구름조금', '흐림', '맑음', '소나기', '비', '눈']:
+                    if kw in text:
+                        weather = kw
+                        break
+                temp_span = item.select_one("span.num")
+                temp = temp_span.text.replace('°', '').strip() if temp_span else '?'
+                hourly[hour] = {'weather': weather, 'temp': temp}
+
+        target_hours = [8, 14, 18]
+        weather_flow = ' → '.join(
+            f"{hourly[h]['weather']}" if h in hourly else '?' for h in target_hours
+        )
+        weather_emojis = ' '.join(
+            get_weather_emoji(hourly[h]['weather']) if h in hourly else '🌤️' for h in target_hours
+        )
+        temp_flow = ' → '.join(
+            f"{hourly[h]['temp']}°" if h in hourly else '?' for h in target_hours
+        )
         
         # e, f. 차트 아이템
         chart_data = {}
@@ -101,11 +117,10 @@ def get_naver_weather(location="여의도"):
 
         result_msg = (
             f"a. 날짜 / {date_str}\n"
-            f"b. 날씨 / {weather_status} {weather_emoji}\n"
-            f"c. 최저기온, 최고기온 / {min_temp}도, {max_temp}도\n"
-            f"d. 현재기온 / {current_temp}도\n"
-            f"e. 미세먼지, 초미세먼지 / {dust}, {ultra_dust}\n"
-            f"f. 일출, 일몰 / {sun_info}"
+            f"b. 날씨 / {weather_flow} {weather_emojis}\n"
+            f"c. 기온 / {temp_flow}\n"
+            f"d. 미세먼지, 초미세먼지 / {dust}, {ultra_dust}\n"
+            f"e. 일출, 일몰 / {sun_info}"
         )
         return result_msg
         
