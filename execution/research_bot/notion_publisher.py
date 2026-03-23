@@ -6,14 +6,31 @@ from notion_client import Client
 def _find_existing_page(notion, database_id, date_str):
     """같은 날짜의 기존 페이지가 있는지 검색"""
     try:
-        results = notion.databases.query(
-            database_id=database_id,
-            filter={"property": "Date", "date": {"equals": date_str}}
-        )
-        if results['results']:
+        # notion-client v3 호환
+        if hasattr(notion.databases, 'query'):
+            results = notion.databases.query(
+                database_id=database_id,
+                filter={"property": "날짜", "date": {"equals": date_str}}
+            )
+        else:
+            import urllib.request, json
+            req = urllib.request.Request(
+                f"https://api.notion.com/v1/databases/{database_id}/query",
+                data=json.dumps({"filter": {"property": "날짜", "date": {"equals": date_str}}}).encode(),
+                headers={
+                    "Authorization": f"Bearer {notion.options.get('auth', '')}",
+                    "Notion-Version": "2022-06-28",
+                    "Content-Type": "application/json"
+                },
+                method="POST"
+            )
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                results = json.loads(resp.read().decode())
+        if results.get('results'):
             return results['results'][0]['id']
-    except:
-        pass
+    except Exception as e:
+        import logging
+        logging.warning(f"Find existing page failed: {e}")
     return None
 
 
@@ -64,21 +81,21 @@ def publish_to_notion(summary_markdown, date_str, topics, stocks, critical_image
             children=append_blocks[:100]
         )
         # 속성 업데이트 (토픽/종목 병합)
-        update_props = {"Name": {"title": [{"text": {"content": title}}]}}
+        update_props = {"이름": {"title": [{"text": {"content": title}}]}}
         if topics:
-            update_props["Topics"] = {"multi_select": [{"name": t} for t in topics]}
+            update_props["ResearCH Topic"] = {"multi_select": [{"name": t} for t in topics]}
         if stocks:
-            update_props["Ticker"] = {"multi_select": [{"name": s} for s in stocks]}
+            update_props["Ticker"] = {"rich_text": [{"text": {"content": ", ".join(stocks)}}]}
         notion.pages.update(page_id=existing_page_id, properties=update_props)
     else:
         # 새 페이지 생성
         properties = {
-            "Name": {"title": [{"text": {"content": title}}]},
-            "Date": {"date": {"start": date_str}},
-            "Topics": {"multi_select": [{"name": t} for t in topics]},
+            "이름": {"title": [{"text": {"content": title}}]},
+            "날짜": {"date": {"start": date_str}},
+            "ResearCH Topic": {"multi_select": [{"name": t} for t in topics]},
         }
         if stocks:
-            properties["Ticker"] = {"multi_select": [{"name": s} for s in stocks]}
+            properties["Ticker"] = {"rich_text": [{"text": {"content": ", ".join(stocks)}}]}
 
         notion.pages.create(
             parent={"database_id": database_id},
