@@ -3,31 +3,35 @@ import re
 from notion_client import Client
 
 
+def _find_existing_page(notion, database_id, date_str):
+    """같은 날짜의 기존 페이지가 있는지 검색"""
+    try:
+        results = notion.databases.query(
+            database_id=database_id,
+            filter={"property": "Date", "date": {"equals": date_str}}
+        )
+        if results['results']:
+            return results['results'][0]['id']
+    except:
+        pass
+    return None
+
+
 def publish_to_notion(summary_markdown, date_str, topics, stocks, critical_images=None):
-    """Notion 데이터베이스에 일별 리서치 요약 페이지 생성 (엄중 이미지 포함)"""
+    """Notion 데이터베이스에 일별 리서치 요약 페이지 생성/업데이트 (엄중 이미지 포함)"""
     notion = Client(auth=os.getenv("NOTION_API_KEY"))
     database_id = os.getenv("NOTION_DATABASE_ID")
 
     if not database_id:
         raise RuntimeError("NOTION_DATABASE_ID not set")
 
-    # 제목: YYYYMMDD_Research Notes_Topic1, Topic2
     date_compact = date_str.replace('-', '')
     topic_str = ', '.join(topics) if topics else 'General'
     title = f"{date_compact}_Research Notes_{topic_str}"
 
-    properties = {
-        "Name": {"title": [{"text": {"content": title}}]},
-        "Date": {"date": {"start": date_str}},
-        "Topics": {"multi_select": [{"name": t} for t in topics]},
-    }
-
-    if stocks:
-        properties["Ticker"] = {"multi_select": [{"name": s} for s in stocks]}
-
     blocks = markdown_to_blocks(summary_markdown)
 
-    # 엄중 이미지를 GitHub에 업로드하고 Notion에 이미지 블록 추가
+    # 엄중 이미지
     if critical_images:
         blocks.append({"object": "block", "type": "divider", "divider": {}})
         blocks.append({
@@ -42,12 +46,46 @@ def publish_to_notion(summary_markdown, date_str, topics, stocks, critical_image
                     "image": {"type": "external", "external": {"url": img_url}}
                 })
 
-    notion.pages.create(
-        parent={"database_id": database_id},
-        icon={"emoji": "📝"},
-        properties=properties,
-        children=blocks[:100]
-    )
+    existing_page_id = _find_existing_page(notion, database_id, date_str)
+
+    if existing_page_id:
+        # 기존 페이지에 추가: 구분선 + 새 요약 append
+        import datetime as dt
+        KST = dt.timezone(dt.timedelta(hours=9))
+        now_str = dt.datetime.now(tz=KST).strftime('%H:%M')
+        append_blocks = [
+            {"object": "block", "type": "divider", "divider": {}},
+            {"object": "block", "type": "heading_2",
+             "heading_2": {"rich_text": [{"text": {"content": f"추가 요약 ({now_str})"}}]}}
+        ] + blocks
+
+        notion.blocks.children.append(
+            block_id=existing_page_id,
+            children=append_blocks[:100]
+        )
+        # 속성 업데이트 (토픽/종목 병합)
+        update_props = {"Name": {"title": [{"text": {"content": title}}]}}
+        if topics:
+            update_props["Topics"] = {"multi_select": [{"name": t} for t in topics]}
+        if stocks:
+            update_props["Ticker"] = {"multi_select": [{"name": s} for s in stocks]}
+        notion.pages.update(page_id=existing_page_id, properties=update_props)
+    else:
+        # 새 페이지 생성
+        properties = {
+            "Name": {"title": [{"text": {"content": title}}]},
+            "Date": {"date": {"start": date_str}},
+            "Topics": {"multi_select": [{"name": t} for t in topics]},
+        }
+        if stocks:
+            properties["Ticker"] = {"multi_select": [{"name": s} for s in stocks]}
+
+        notion.pages.create(
+            parent={"database_id": database_id},
+            icon={"emoji": "📝"},
+            properties=properties,
+            children=blocks[:100]
+        )
 
 
 def upload_image_to_github(file_path, date_str, img_idx):
