@@ -759,22 +759,38 @@ def create_aum_table():
         # 증권사별 색상
         broker_colors = {'삼성': '#1428A0', 'NH': '#0072CE', 'DB': '#00854A'}
 
-        # 일자별 증권사별 AUM 합산 (stacked bar용)
-        daily = df.groupby([df['날짜'].dt.strftime('%Y-%m-%d'), '증권사'])['AUM'].sum().reset_index()
-        daily.columns = ['date', 'broker', 'aum']
+        # 일자별 증권사+상품명 기준 AUM (stacked bar용)
+        df['label'] = df['증권사'] + ' ' + df['상품명']
+        daily = df.groupby([df['날짜'].dt.strftime('%Y-%m-%d'), 'label', '증권사'])['AUM'].sum().reset_index()
+        daily.columns = ['date', 'label', 'broker', 'aum']
         dates_sorted = sorted(daily['date'].unique())
-        brokers_sorted = sorted(broker_colors.keys(), key=lambda b: broker_total.get(b, 0), reverse=True)
+
+        latest_day = daily[daily['date'] == dates_sorted[-1]].sort_values('aum', ascending=False)
+        all_labels = latest_day['label'].tolist()
+        all_labels += [l for l in daily['label'].unique() if l not in all_labels]
+
+        opacity_levels = [1.0, 0.6, 0.35]
+        broker_idx = {}
+        product_colors = {}
+        for label in all_labels:
+            broker = daily[daily['label'] == label]['broker'].iloc[0]
+            idx = broker_idx.get(broker, 0)
+            broker_idx[broker] = idx + 1
+            base = broker_colors.get(broker, '#888888')
+            r, g, b = int(base[1:3], 16), int(base[3:5], 16), int(base[5:7], 16)
+            op = opacity_levels[min(idx, len(opacity_levels) - 1)]
+            product_colors[label] = f'rgba({r},{g},{b},{op})'
 
         chart_datasets = []
-        for broker in brokers_sorted:
+        for label in all_labels:
             vals = []
             for d in dates_sorted:
-                v = daily[(daily['date'] == d) & (daily['broker'] == broker)]['aum'].sum()
+                v = daily[(daily['date'] == d) & (daily['label'] == label)]['aum'].sum()
                 vals.append(round(v / 100_000_000, 1))
             chart_datasets.append({
-                'label': broker,
+                'label': label,
                 'data': vals,
-                'backgroundColor': broker_colors.get(broker, '#888')
+                'backgroundColor': product_colors.get(label, '#888')
             })
 
         aum_chart_json = json.dumps({'dates': dates_sorted, 'datasets': chart_datasets}, ensure_ascii=False)
@@ -810,7 +826,7 @@ def create_aum_table():
         return f"""
         <div class="category-section">
             <h2 class="category-title">AUM</h2>
-            <div style="display:flex;gap:16px;align-items:flex-start;max-width:1200px;margin:0 auto;">
+            <div style="display:flex;gap:40px;align-items:flex-start;max-width:1200px;margin:0 auto;">
                 <div style="min-width:280px;">
                     <table class="portfolio-table" style="white-space:nowrap;">
                         <thead><tr>
