@@ -3,7 +3,7 @@ import re
 from notion_client import Client
 
 
-def publish_to_notion(summary_markdown, date_str, topics, msg_count):
+def publish_to_notion(summary_markdown, date_str, topics, stocks):
     """Notion 데이터베이스에 일별 리서치 요약 페이지 생성"""
     notion = Client(auth=os.getenv("NOTION_API_KEY"))
     database_id = os.getenv("NOTION_DATABASE_ID")
@@ -11,16 +11,25 @@ def publish_to_notion(summary_markdown, date_str, topics, msg_count):
     if not database_id:
         raise RuntimeError("NOTION_DATABASE_ID not set")
 
-    # Notion 페이지 생성
+    # 제목: YYYYMMDD_Research Notes_Topic1, Topic2
+    date_compact = date_str.replace('-', '')
+    topic_str = ', '.join(topics) if topics else 'General'
+    title = f"{date_compact}_Research Notes_{topic_str}"
+
+    properties = {
+        "Name": {"title": [{"text": {"content": title}}]},
+        "Date": {"date": {"start": date_str}},
+        "Topics": {"multi_select": [{"name": t} for t in topics]},
+    }
+
+    # Stocks 속성 (multi_select)
+    if stocks:
+        properties["Stocks"] = {"multi_select": [{"name": s} for s in stocks]}
+
     notion.pages.create(
         parent={"database_id": database_id},
         icon={"emoji": "📝"},
-        properties={
-            "Name": {"title": [{"text": {"content": f"{date_str} 리서치 노트"}}]},
-            "Date": {"date": {"start": date_str}},
-            "Topics": {"multi_select": [{"name": t} for t in topics]},
-            "Message Count": {"number": msg_count},
-        },
+        properties=properties,
         children=markdown_to_blocks(summary_markdown)
     )
 

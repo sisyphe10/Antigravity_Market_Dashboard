@@ -38,7 +38,11 @@ def summarize_daily_notes(messages, date_str):
 2. 각 토픽에 대해 핵심 요약을 작성해주세요
 3. 중요한 링크나 출처가 있으면 포함해주세요
 4. 후속 조치(action items)가 있으면 별도로 정리해주세요
-5. 마지막에 오늘의 토픽 키워드를 쉼표로 나열해주세요 (예: "토픽: 경제, AI, 부동산")
+5. 노트에서 언급된 주식/종목명이 있으면 모두 추출해주세요
+
+## 출력 마지막에 반드시 아래 형식으로 메타데이터를 작성해주세요
+토픽: 주요 토픽1, 토픽2 (쉼표 구분, 최대 3개)
+종목: 삼성전자, SK하이닉스 (쉼표 구분, 없으면 "없음")
 
 ## 수집된 노트 ({len(messages)}건)
 {notes_text}"""
@@ -56,4 +60,16 @@ def extract_topics(summary_text):
             raw = line.split(':', 1)[1].strip()
             topics = [t.strip() for t in raw.split(',') if t.strip()]
             break
-    return topics[:5]  # 최대 5개
+    return topics[:5]
+
+
+def extract_stocks(summary_text):
+    """요약 텍스트에서 종목명 추출"""
+    stocks = []
+    for line in summary_text.split('\n'):
+        if line.strip().startswith('종목:') or line.strip().startswith('종목 :'):
+            raw = line.split(':', 1)[1].strip()
+            if raw != '없음':
+                stocks = [s.strip() for s in raw.split(',') if s.strip()]
+            break
+    return stocks

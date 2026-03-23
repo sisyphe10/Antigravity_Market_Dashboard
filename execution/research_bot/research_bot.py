@@ -196,24 +196,27 @@ async def run_daily_summary(context, date_str):
 
     try:
         # 1. Claude API 요약
-        from summarizer import summarize_daily_notes, extract_topics
+        from summarizer import summarize_daily_notes, extract_topics, extract_stocks
         summary = summarize_daily_notes(messages, date_str)
         topics = extract_topics(summary)
+        stocks = extract_stocks(summary)
 
         # 2. Notion에 게시
         from notion_publisher import publish_to_notion
-        publish_to_notion(summary, date_str, topics, len(messages))
+        publish_to_notion(summary, date_str, topics, stocks)
 
         # 3. 처리 완료 표시
         mark_processed(date_str)
 
         # 4. 텔레그램 알림
         topic_str = ', '.join(topics) if topics else '없음'
+        stock_str = ', '.join(stocks) if stocks else '없음'
         await context.bot.send_message(
             chat_id=ALLOWED_CHAT_ID,
             text=f"✅ {date_str} 리서치 노트 정리 완료!\n"
                  f"📊 {len(messages)}건 → Notion 게시됨\n"
-                 f"🏷️ 토픽: {topic_str}",
+                 f"🏷️ 토픽: {topic_str}\n"
+                 f"📈 종목: {stock_str}",
             parse_mode='HTML'
         )
         logging.info(f"Daily summary done: {len(messages)} messages, topics: {topics}")
