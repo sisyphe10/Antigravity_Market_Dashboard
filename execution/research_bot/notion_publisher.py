@@ -92,7 +92,7 @@ def publish_to_notion(summary_markdown, date_str, topics, stocks, critical_image
         properties = {
             "이름": {"title": [{"text": {"content": title}}]},
             "날짜": {"date": {"start": date_str}},
-            "Research Topic": {"multi_select": [{"name": t} for t in topics]},
+            "Research Topic": {"rich_text": [{"text": {"content": ", ".join(topics)}}]},
         }
         if stocks:
             properties["Ticker"] = {"rich_text": [{"text": {"content": ", ".join(stocks)}}]}
