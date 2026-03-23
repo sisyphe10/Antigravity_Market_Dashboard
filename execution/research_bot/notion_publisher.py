@@ -76,7 +76,7 @@ def publish_to_notion(summary_markdown, date_str, topics, stocks, critical_image
         # 속성 업데이트 (토픽/종목 병합)
         update_props = {"이름": {"title": [{"text": {"content": title}}]}}
         if topics:
-            update_props["Research Topic"] = {"multi_select": [{"name": t} for t in topics]}
+            update_props["Research Topic"] = {"rich_text": [{"text": {"content": ", ".join(topics)}}]}
         if stocks:
             update_props["Ticker"] = {"rich_text": [{"text": {"content": ", ".join(stocks)}}]}
         notion.pages.update(page_id=existing_page_id, properties=update_props)
