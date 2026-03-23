@@ -3,8 +3,8 @@ import re
 from notion_client import Client
 
 
-def publish_to_notion(summary_markdown, date_str, topics, stocks):
-    """Notion 데이터베이스에 일별 리서치 요약 페이지 생성"""
+def publish_to_notion(summary_markdown, date_str, topics, stocks, critical_images=None):
+    """Notion 데이터베이스에 일별 리서치 요약 페이지 생성 (엄중 이미지 포함)"""
     notion = Client(auth=os.getenv("NOTION_API_KEY"))
     database_id = os.getenv("NOTION_DATABASE_ID")
 
@@ -22,16 +22,81 @@ def publish_to_notion(summary_markdown, date_str, topics, stocks):
         "Topics": {"multi_select": [{"name": t} for t in topics]},
     }
 
-    # Stocks 속성 (multi_select)
     if stocks:
         properties["Ticker"] = {"multi_select": [{"name": s} for s in stocks]}
+
+    blocks = markdown_to_blocks(summary_markdown)
+
+    # 엄중 이미지를 GitHub에 업로드하고 Notion에 이미지 블록 추가
+    if critical_images:
+        blocks.append({"object": "block", "type": "divider", "divider": {}})
+        blocks.append({
+            "object": "block", "type": "heading_2",
+            "heading_2": {"rich_text": [{"text": {"content": "첨부 이미지 (엄중)"}}]}
+        })
+        for img_path, img_idx in critical_images:
+            img_url = upload_image_to_github(img_path, date_str, img_idx)
+            if img_url:
+                blocks.append({
+                    "object": "block", "type": "image",
+                    "image": {"type": "external", "external": {"url": img_url}}
+                })
 
     notion.pages.create(
         parent={"database_id": database_id},
         icon={"emoji": "📝"},
         properties=properties,
-        children=markdown_to_blocks(summary_markdown)
+        children=blocks[:100]
     )
+
+
+def upload_image_to_github(file_path, date_str, img_idx):
+    """이미지를 GitHub repo에 업로드하고 raw URL 반환"""
+    import base64
+    import json
+    import urllib.request
+    import subprocess
+
+    try:
+        # VM git remote에서 PAT 추출
+        result = subprocess.run(
+            ['git', 'remote', 'get-url', 'origin'],
+            capture_output=True, text=True,
+            cwd=os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
+        )
+        url = result.stdout.strip()
+        pat = url.split(':')[2].split('@')[0] if '@github.com' in url else None
+        if not pat:
+            return None
+
+        with open(file_path, 'rb') as f:
+            content = base64.b64encode(f.read()).decode()
+
+        ext = os.path.splitext(file_path)[1] or '.jpg'
+        gh_path = f"research_images/{date_str.replace('-', '')}_img{img_idx}{ext}"
+
+        body = json.dumps({
+            "message": f"research image {date_str} #{img_idx}",
+            "content": content
+        }).encode('utf-8')
+
+        req = urllib.request.Request(
+            f"https://api.github.com/repos/sisyphe10/Antigravity_Market_Dashboard/contents/{gh_path}",
+            data=body,
+            headers={
+                'Authorization': f'token {pat}',
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            method='PUT'
+        )
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            result = json.loads(resp.read().decode())
+            return result['content']['download_url']
+    except Exception as e:
+        import logging
+        logging.error(f"Image upload to GitHub failed: {e}")
+        return None
 
 
 def markdown_to_blocks(md_text):

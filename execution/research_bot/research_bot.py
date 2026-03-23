@@ -196,14 +196,23 @@ async def run_daily_summary(context, date_str):
 
     try:
         # 1. Claude API 요약
-        from summarizer import summarize_daily_notes, extract_topics, extract_stocks
+        from summarizer import summarize_daily_notes, extract_topics, extract_stocks, extract_critical_image_indices
         summary = summarize_daily_notes(messages, date_str)
         topics = extract_topics(summary)
         stocks = extract_stocks(summary)
+        critical_indices = extract_critical_image_indices(summary)
+
+        # 엄중 이미지 파일 경로 수집
+        critical_images = []
+        for idx in critical_indices:
+            if 1 <= idx <= len(messages):
+                msg = messages[idx - 1]
+                if msg.get('media_path') and os.path.exists(msg['media_path']):
+                    critical_images.append((msg['media_path'], idx))
 
         # 2. Notion에 게시
         from notion_publisher import publish_to_notion
-        publish_to_notion(summary, date_str, topics, stocks)
+        publish_to_notion(summary, date_str, topics, stocks, critical_images)
 
         # 3. 처리 완료 표시
         mark_processed(date_str)
