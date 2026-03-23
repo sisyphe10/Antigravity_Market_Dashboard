@@ -553,7 +553,8 @@ def _build_wrap_chart_section(category_label):
             color = chart_colors.get(display, '#888')
             active = ' active' if display == '삼성 트루밸류' else ''
             rows_html += f'<tr class="wrap-chart-item{active}" data-series="{display}" onclick="toggleWrapSeries(this)"><td style="width:6px;padding:0;"><div style="width:4px;height:100%;background:{color};border-radius:2px;"></div></td><td>{display}</td></tr>\n'
-        list_html = f'<table class="portfolio-table" style="max-width:500px;margin:0 auto;"><tbody>{rows_html}</tbody></table>'
+        mode_html = '<div style="display:flex;gap:4px;margin-bottom:8px;"><button class="wrap-mode-btn active" data-mode="return" onclick="switchChartMode(this)">수익률</button><button class="wrap-mode-btn" data-mode="mdd" onclick="switchChartMode(this)">MDD</button></div>'
+        list_html = mode_html + f'<table class="portfolio-table" style="max-width:500px;margin:0 auto;"><tbody>{rows_html}</tbody></table>'
 
         dates = nav_export['dates']
         first_date = dates[0] if dates else ''
@@ -567,6 +568,17 @@ def _build_wrap_chart_section(category_label):
             var rawData = RAW_DATA_PLACEHOLDER;
             var chartColors = COLORS_PLACEHOLDER;
             var wrapChart = null;
+            var chartMode = 'return'; // 'return' or 'mdd'
+
+            function calcMDD(vals) {
+                var peak = vals[0];
+                var ddList = [];
+                for (var i = 0; i < vals.length; i++) {
+                    if (vals[i] > peak) peak = vals[i];
+                    ddList.push(Math.round((vals[i] / peak - 1) * 10000) / 100);
+                }
+                return ddList;
+            }
 
             function buildChart() {
                 var selected = [];
@@ -591,9 +603,15 @@ def _build_wrap_chart_section(category_label):
                     if (filteredVals.length === 0) return;
 
                     var base = filteredVals[0];
-                    var data = filteredDates.map(function(d, j) {
-                        return { x: d, y: Math.round((filteredVals[j] / base - 1) * 10000) / 100 };
-                    });
+                    var data;
+                    if (chartMode === 'mdd') {
+                        var mddVals = calcMDD(filteredVals);
+                        data = filteredDates.map(function(d, j) { return { x: d, y: mddVals[j] }; });
+                    } else {
+                        data = filteredDates.map(function(d, j) {
+                            return { x: d, y: Math.round((filteredVals[j] / base - 1) * 10000) / 100 };
+                        });
+                    }
 
                     var lastPct = data[data.length - 1].y;
                     var sign = lastPct >= 0 ? '+' : '';
@@ -655,6 +673,12 @@ def _build_wrap_chart_section(category_label):
 
             window.toggleWrapSeries = function(el) { el.classList.toggle('active'); buildChart(); };
             window.updateWrapChart = buildChart;
+            window.switchChartMode = function(el) {
+                document.querySelectorAll('.wrap-mode-btn').forEach(function(b) { b.classList.remove('active'); });
+                el.classList.add('active');
+                chartMode = el.getAttribute('data-mode');
+                buildChart();
+            };
             buildChart();
         })();
         </script>
@@ -1621,6 +1645,9 @@ def create_dashboard():
         .wrap-chart-item {{ cursor: pointer; transition: all 0.15s; }}
         .wrap-chart-item:hover td {{ background: #e9ecef; }}
         .wrap-chart-item.active td {{ background: #222; color: #fff; }}
+        .wrap-mode-btn {{ padding: 6px 16px; border: 1px solid #dee2e6; border-radius: 6px; background: #f5f5f5; color: #555; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }}
+        .wrap-mode-btn:hover {{ background: #e9ecef; }}
+        .wrap-mode-btn.active {{ background: #222; color: #fff; border-color: #222; }}
         .portfolio-section-wrapper {{ max-width: 1600px; margin: 0 auto; }}
         .portfolio-table .positive {{ color: #cc0000; font-weight: 600; }}
         .portfolio-table .negative {{ color: #0055cc; font-weight: 600; }}
