@@ -37,6 +37,10 @@
         .wrap-chart-item { cursor: pointer; transition: all 0.15s; }
         .wrap-chart-item:hover td { background: #e9ecef; }
         .wrap-chart-item.active td { background: #222; color: #fff; }
+        .wrap-tabs { display: flex; justify-content: center; gap: 0; background: #fff; border-bottom: 1px solid #eee; margin-bottom: 20px; position: sticky; top: 0; z-index: 100; }
+        .wrap-tab { padding: 14px 28px; border: none; background: none; font-size: 0.95rem; font-weight: 600; color: #999; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; }
+        .wrap-tab:hover { color: #333; }
+        .wrap-tab.active { color: #1e40af; border-bottom-color: #1e40af; }
         .wrap-mode-btn { padding: 6px 16px; border: 1px solid #dee2e6; border-radius: 6px; background: #f5f5f5; color: #555; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
         .wrap-mode-btn:hover { background: #e9ecef; }
         .wrap-mode-btn.active { background: #222; color: #fff; border-color: #222; }
@@ -131,12 +135,18 @@
     <div id="mainContent" class="pw-hidden">
     <header>
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-03-23 15:12:47 KST</div>
+        <div class="last-updated">Updated: 2026-03-23 15:14:43 KST</div>
         <div class="nav-group">
             <a href="index.html" class="nav-button">← Dashboard</a>
         </div>
     </header>
 
+    <div class="wrap-tabs">
+        <button class="wrap-tab active" onclick="switchWrapTab('wrap')">WRAP</button>
+        <button class="wrap-tab" onclick="switchWrapTab('universe')">Universe</button>
+    </div>
+
+    <div id="wrapTabContent" class="wrap-tab-content">
     
         <div class="category-section">
             <h2 class="category-title">CHART</h2>
@@ -1182,20 +1192,6 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="sect-name">건설</td>
-                        <td class="sect-num">5.0%</td>
-                        <td class="sect-num">0.6%</td>
-                        <td class="sect-diff">+4.4%</td>
-                        <td class="sect-diff sect-over">+13.9%</td>
-                    </tr>
-                    <tr class="sect-detail-row">
-                        <td colspan="5" class="sect-detail">
-                            <span class="sect-detail-mine">GS건설</span>
-                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
-                            <span class="sect-detail-bm">현대건설, 대우건설, 한전KPS</span>
-                        </td>
-                    </tr>
-                    <tr>
                         <td class="sect-name">오락·문화</td>
                         <td class="sect-num">5.0%</td>
                         <td class="sect-num">0.6%</td>
@@ -1207,6 +1203,20 @@
                             <span class="sect-detail-mine">하이브</span>
                             <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
                             <span class="sect-detail-bm">하이브, 강원랜드, 에스엠</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="sect-name">건설</td>
+                        <td class="sect-num">5.0%</td>
+                        <td class="sect-num">0.6%</td>
+                        <td class="sect-diff">+4.4%</td>
+                        <td class="sect-diff sect-over">+13.9%</td>
+                    </tr>
+                    <tr class="sect-detail-row">
+                        <td colspan="5" class="sect-detail">
+                            <span class="sect-detail-mine">GS건설</span>
+                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
+                            <span class="sect-detail-bm">현대건설, 대우건설, 한전KPS</span>
                         </td>
                     </tr>
                     <tr>
@@ -1350,6 +1360,48 @@
                 </div>
             </div>
             
+    </div>
+
+    <div id="universeTabContent" class="wrap-tab-content" style="display:none;">
+        <div class="category-section">
+            <h2 class="category-title">Universe</h2>
+            <div style="margin-bottom:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <select id="uniFilterCurrency" onchange="filterUniverse()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+                    <option value="">통화 전체</option>
+                </select>
+                <select id="uniFilterSector1" onchange="filterUniverse()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+                    <option value="">섹터1 전체</option>
+                </select>
+                <select id="uniFilterSector2" onchange="filterUniverse()" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+                    <option value="">섹터2 전체</option>
+                </select>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="portfolio-table" id="universeTable">
+                    <thead><tr>
+                        <th onclick="sortUniverse(0)">#</th>
+                        <th onclick="sortUniverse(1)">통화</th>
+                        <th onclick="sortUniverse(2)">섹터 1</th>
+                        <th onclick="sortUniverse(3)">섹터 2</th>
+                        <th onclick="sortUniverse(4)">티커</th>
+                        <th onclick="sortUniverse(5)">기업명</th>
+                        <th onclick="sortUniverse(6)">시가총액</th>
+                        <th onclick="sortUniverse(7)">가격</th>
+                        <th onclick="sortUniverse(8)">YTD</th>
+                        <th onclick="sortUniverse(9)">1D</th>
+                        <th onclick="sortUniverse(10)">1W</th>
+                        <th onclick="sortUniverse(11)">1M</th>
+                        <th onclick="sortUniverse(12)">3M</th>
+                        <th onclick="sortUniverse(13)">6M</th>
+                        <th onclick="sortUniverse(14)">1Y</th>
+                    </tr></thead>
+                    <tbody id="universeBody">
+                        <tr><td colspan="15" style="text-align:center;padding:40px;color:#888;">로딩 중...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
     <footer><p>Auto-generated by Antigravity Agent</p></footer>
     </div>
@@ -1374,6 +1426,107 @@
     if (sessionStorage.getItem('wrap_auth') === '1') {
         document.getElementById('pwOverlay').style.display = 'none';
         document.getElementById('mainContent').classList.remove('pw-hidden');
+    }
+
+    // Tab switching
+    function switchWrapTab(tab) {
+        document.querySelectorAll('.wrap-tab').forEach(function(b) { b.classList.remove('active'); });
+        event.target.classList.add('active');
+        document.getElementById('wrapTabContent').style.display = tab === 'wrap' ? '' : 'none';
+        document.getElementById('universeTabContent').style.display = tab === 'universe' ? '' : 'none';
+        if (tab === 'universe' && !window._uniLoaded) loadUniverse();
+    }
+
+    // Universe
+    var _uniData = [];
+    var _uniSortCol = -1;
+    var _uniSortAsc = true;
+
+    function loadUniverse() {
+        window._uniLoaded = true;
+        var url = 'https://sheets.googleapis.com/v4/spreadsheets/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/values/%EC%8B%9C%ED%8A%B81?key=AIzaSyCHPiRby5FVAIKDwneZHy1KGl3SfycjZEw';
+        fetch(url).then(function(r) { return r.json(); }).then(function(data) {
+            var rows = (data.values || []).slice(1);
+            _uniData = rows.map(function(r) { return r.slice(0, 15); });
+            populateFilters();
+            renderUniverse();
+        });
+    }
+
+    function populateFilters() {
+        var currencies = {}, s1 = {}, s2 = {};
+        _uniData.forEach(function(r) {
+            if (r[1]) currencies[r[1]] = 1;
+            if (r[2]) s1[r[2]] = 1;
+            if (r[3]) s2[r[3]] = 1;
+        });
+        var sel1 = document.getElementById('uniFilterCurrency');
+        var sel2 = document.getElementById('uniFilterSector1');
+        var sel3 = document.getElementById('uniFilterSector2');
+        sel1.innerHTML = '<option value="">통화 전체</option>' + Object.keys(currencies).sort().map(function(v) { return '<option>' + v + '</option>'; }).join('');
+        sel2.innerHTML = '<option value="">섹터1 전체</option>' + Object.keys(s1).sort().map(function(v) { return '<option>' + v + '</option>'; }).join('');
+        sel3.innerHTML = '<option value="">섹터2 전체</option>' + Object.keys(s2).sort().map(function(v) { return '<option>' + v + '</option>'; }).join('');
+    }
+
+    function filterUniverse() { renderUniverse(); }
+
+    function sortUniverse(col) {
+        if (_uniSortCol === col) { _uniSortAsc = !_uniSortAsc; }
+        else { _uniSortCol = col; _uniSortAsc = true; }
+        // Update header indicators
+        document.querySelectorAll('#universeTable thead th').forEach(function(th, i) {
+            th.style.cursor = 'pointer';
+            var base = ['#','통화','섹터 1','섹터 2','티커','기업명','시가총액','가격','YTD','1D','1W','1M','3M','6M','1Y'][i];
+            th.textContent = i === col ? base + (_uniSortAsc ? ' ▲' : ' ▼') : base;
+        });
+        renderUniverse();
+    }
+
+    function parseNum(s) {
+        if (!s) return -Infinity;
+        var n = parseFloat(s.replace(/,/g, '').replace(/%/g, ''));
+        return isNaN(n) ? -Infinity : n;
+    }
+
+    function renderUniverse() {
+        var fc = document.getElementById('uniFilterCurrency').value;
+        var fs1 = document.getElementById('uniFilterSector1').value;
+        var fs2 = document.getElementById('uniFilterSector2').value;
+        var filtered = _uniData.filter(function(r) {
+            if (fc && r[1] !== fc) return false;
+            if (fs1 && r[2] !== fs1) return false;
+            if (fs2 && r[3] !== fs2) return false;
+            return true;
+        });
+        if (_uniSortCol >= 0) {
+            var col = _uniSortCol;
+            var numCols = [0, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+            var isNum = numCols.indexOf(col) >= 0;
+            filtered.sort(function(a, b) {
+                var va = isNum ? parseNum(a[col]) : (a[col] || '');
+                var vb = isNum ? parseNum(b[col]) : (b[col] || '');
+                if (va < vb) return _uniSortAsc ? -1 : 1;
+                if (va > vb) return _uniSortAsc ? 1 : -1;
+                return 0;
+            });
+        }
+        var pctCols = [8, 9, 10, 11, 12, 13, 14];
+        var html = '';
+        filtered.forEach(function(r) {
+            html += '<tr>';
+            for (var i = 0; i < 15; i++) {
+                var v = r[i] || '';
+                var cls = '';
+                if (pctCols.indexOf(i) >= 0 && v) {
+                    var n = parseFloat(v.replace(/%/g, ''));
+                    if (!isNaN(n)) cls = n > 0 ? ' class="positive"' : n < 0 ? ' class="negative"' : '';
+                }
+                html += '<td' + cls + '>' + v + '</td>';
+            }
+            html += '</tr>';
+        });
+        if (!html) html = '<tr><td colspan="15" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
+        document.getElementById('universeBody').innerHTML = html;
     }
     </script>
 </body>
