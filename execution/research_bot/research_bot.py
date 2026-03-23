@@ -31,6 +31,13 @@ def fetch_article(url):
         from bs4 import BeautifulSoup
 
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+
+        # 네이버 블로그: 모바일 URL로 변환 (JS 렌더링 우회)
+        import re as _re
+        naver_match = _re.match(r'https?://blog\.naver\.com/([^/]+)/(\d+)', url)
+        if naver_match:
+            url = f'https://m.blog.naver.com/{naver_match.group(1)}/{naver_match.group(2)}'
+
         res = requests.get(url, headers=headers, timeout=10)
         res.raise_for_status()
 
@@ -42,6 +49,8 @@ def fetch_article(url):
 
         # 기사 본문 추출 (일반적인 기사 컨테이너)
         article = (
+            soup.select_one('div.se-main-container') or  # 네이버 블로그
+            soup.select_one('div.__viewer_container') or  # 네이버 블로그 v2
             soup.select_one('article') or
             soup.select_one('[class*="article_body"]') or
             soup.select_one('[class*="newsct_article"]') or

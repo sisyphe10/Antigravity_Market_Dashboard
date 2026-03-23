@@ -43,8 +43,7 @@ def publish_to_notion(summary_markdown, date_str, topics, stocks, critical_image
         raise RuntimeError("NOTION_DATABASE_ID not set")
 
     date_compact = date_str.replace('-', '')
-    topic_str = ', '.join(topics) if topics else 'General'
-    title = f"{date_compact}_Research Notes_{topic_str}"
+    title = f"{date_compact}_Research Notes"
 
     blocks = markdown_to_blocks(summary_markdown)
 
@@ -158,14 +157,59 @@ def markdown_to_blocks(md_text):
     """마크다운 텍스트를 Notion 블록 리스트로 변환"""
     blocks = []
     lines = md_text.split('\n')
+    i = 0
 
-    for line in lines:
-        stripped = line.strip()
+    while i < len(lines):
+        stripped = lines[i].strip()
+        i += 1
         if not stripped:
             continue
 
-        # 토픽 라인은 건너뛰기 (이미 속성으로 저장)
+        # 메타데이터 라인 건너뛰기
         if stripped.startswith('토픽:') or stripped.startswith('토픽 :'):
+            continue
+        if stripped.startswith('종목:') or stripped.startswith('종목 :'):
+            continue
+
+        # 마크다운 테이블 감지 (| 로 시작하는 행)
+        if stripped.startswith('|') and '|' in stripped[1:]:
+            table_rows = [stripped]
+            while i < len(lines) and lines[i].strip().startswith('|'):
+                row = lines[i].strip()
+                i += 1
+                # 구분선 (|---|---| ) 건너뛰기
+                if re.match(r'^\|[\s\-:]+\|', row):
+                    continue
+                table_rows.append(row)
+
+            # Notion 테이블 블록 생성
+            if len(table_rows) >= 1:
+                parsed_rows = []
+                for tr in table_rows:
+                    cells = [c.strip() for c in tr.strip('|').split('|')]
+                    parsed_rows.append(cells)
+
+                col_count = max(len(r) for r in parsed_rows)
+                table_children = []
+                for ri, row_cells in enumerate(parsed_rows):
+                    # 각 셀을 col_count에 맞춤
+                    while len(row_cells) < col_count:
+                        row_cells.append('')
+                    table_children.append({
+                        "object": "block",
+                        "type": "table_row",
+                        "table_row": {"cells": [[{"text": {"content": cell}}] for cell in row_cells[:col_count]]}
+                    })
+
+                blocks.append({
+                    "object": "block",
+                    "type": "table",
+                    "table": {
+                        "table_width": col_count,
+                        "has_column_header": True,
+                        "children": table_children
+                    }
+                })
             continue
 
         # Heading 2
