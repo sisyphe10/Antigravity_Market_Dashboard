@@ -3,29 +3,23 @@ import re
 from notion_client import Client
 
 
-def _find_existing_page(notion, database_id, date_str):
-    """같은 날짜의 기존 페이지가 있는지 검색"""
+def _find_existing_page(database_id, date_str):
+    """같은 날짜의 기존 페이지가 있는지 검색 (직접 HTTP 호출)"""
     try:
-        # notion-client v3 호환
-        if hasattr(notion.databases, 'query'):
-            results = notion.databases.query(
-                database_id=database_id,
-                filter={"property": "날짜", "date": {"equals": date_str}}
-            )
-        else:
-            import urllib.request, json
-            req = urllib.request.Request(
-                f"https://api.notion.com/v1/databases/{database_id}/query",
-                data=json.dumps({"filter": {"property": "날짜", "date": {"equals": date_str}}}).encode(),
-                headers={
-                    "Authorization": f"Bearer {notion.options.get('auth', '')}",
-                    "Notion-Version": "2022-06-28",
-                    "Content-Type": "application/json"
-                },
-                method="POST"
-            )
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                results = json.loads(resp.read().decode())
+        import urllib.request, json
+        api_key = os.getenv("NOTION_API_KEY")
+        req = urllib.request.Request(
+            f"https://api.notion.com/v1/databases/{database_id}/query",
+            data=json.dumps({"filter": {"property": "날짜", "date": {"equals": date_str}}}).encode(),
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Notion-Version": "2022-06-28",
+                "Content-Type": "application/json"
+            },
+            method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            results = json.loads(resp.read().decode())
         if results.get('results'):
             return results['results'][0]['id']
     except Exception as e:
@@ -62,7 +56,7 @@ def publish_to_notion(summary_markdown, date_str, topics, stocks, critical_image
                     "image": {"type": "external", "external": {"url": img_url}}
                 })
 
-    existing_page_id = _find_existing_page(notion, database_id, date_str)
+    existing_page_id = _find_existing_page(database_id, date_str)
 
     if existing_page_id:
         # 기존 페이지에 추가: 구분선 + 새 요약 append
