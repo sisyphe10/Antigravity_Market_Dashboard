@@ -851,7 +851,7 @@ def create_aum_table():
         return f"""
         <div class="category-section">
             <h2 class="category-title">AUM</h2>
-            <div style="display:flex;gap:60px;align-items:flex-start;max-width:1400px;margin:0 auto;">
+            <div style="display:flex;gap:100px;align-items:flex-start;max-width:1400px;margin:0 auto;">
                 <div style="min-width:500px;">
                     <table class="portfolio-table" style="white-space:nowrap;width:100%;">
                         <thead><tr>
