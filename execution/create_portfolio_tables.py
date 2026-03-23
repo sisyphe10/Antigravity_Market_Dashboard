@@ -83,7 +83,7 @@ def fetch_price_data(code):
     """종목의 최근 가격 데이터를 가져오기 (스레드에서 호출)"""
     try:
         end_date = pd.Timestamp.now()
-        start_date = end_date - timedelta(days=90)  # 누적수익률 계산에도 사용하므로 넉넉히
+        start_date = end_date - timedelta(days=365*5)  # 5년치 (역대 최고가 DD 계산용)
         df = fdr.DataReader(code, start=start_date)
         return code, df
     except Exception as e:
