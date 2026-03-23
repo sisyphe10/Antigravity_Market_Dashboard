@@ -278,12 +278,17 @@ def markdown_to_blocks(md_text):
 
 
 def parse_rich_text(text):
-    """볼드/링크를 Notion rich_text로 변환"""
+    """==하이라이트==, **볼드**, URL을 Notion rich_text로 변환"""
     rich = []
-    # **bold** 처리
-    parts = re.split(r'(\*\*[^*]+\*\*)', text)
+    # ==highlight== 와 **bold** 처리
+    parts = re.split(r'(==.+?==|\*\*[^*]+\*\*)', text)
     for part in parts:
-        if part.startswith('**') and part.endswith('**'):
+        if part.startswith('==') and part.endswith('=='):
+            rich.append({
+                "text": {"content": part[2:-2]},
+                "annotations": {"color": "red"}
+            })
+        elif part.startswith('**') and part.endswith('**'):
             rich.append({
                 "text": {"content": part[2:-2]},
                 "annotations": {"bold": True}
