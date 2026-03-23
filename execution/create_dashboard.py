@@ -756,21 +756,78 @@ def create_aum_table():
             rows_html += f'<tr><td>{row["증권사"]}</td><td>{row["상품명"]}</td><td>{aum_억:,.1f}억</td><td>{date_str}</td></tr>\n'
         total_억 = total_aum / 100_000_000
         rows_html += f'<tr style="border-top:2px solid #000;font-weight:700;"><td colspan="2">합계</td><td>{total_억:,.1f}억</td><td></td></tr>'
+        # 증권사별 색상
+        broker_colors = {'삼성': '#1428A0', 'NH': '#0072CE', 'DB': '#00854A'}
+
+        # 일자별 증권사별 AUM 합산 (stacked bar용)
+        daily = df.groupby([df['날짜'].dt.strftime('%Y-%m-%d'), '증권사'])['AUM'].sum().reset_index()
+        daily.columns = ['date', 'broker', 'aum']
+        dates_sorted = sorted(daily['date'].unique())
+        brokers_sorted = sorted(broker_colors.keys(), key=lambda b: broker_total.get(b, 0), reverse=True)
+
+        chart_datasets = []
+        for broker in brokers_sorted:
+            vals = []
+            for d in dates_sorted:
+                v = daily[(daily['date'] == d) & (daily['broker'] == broker)]['aum'].sum()
+                vals.append(round(v / 100_000_000, 1))
+            chart_datasets.append({
+                'label': broker,
+                'data': vals,
+                'backgroundColor': broker_colors.get(broker, '#888')
+            })
+
+        aum_chart_json = json.dumps({'dates': dates_sorted, 'datasets': chart_datasets}, ensure_ascii=False)
+
+        aum_js = """
+        <script>
+        (function() {
+            var aumData = AUM_DATA_PLACEHOLDER;
+            new Chart(document.getElementById('aumStackedChart'), {
+                type: 'bar',
+                data: {
+                    labels: aumData.dates.map(function(d) { return d.slice(5); }),
+                    datasets: aumData.datasets.map(function(ds) {
+                        return { label: ds.label, data: ds.data, backgroundColor: ds.backgroundColor };
+                    })
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { size: 11 } } },
+                        tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + ctx.raw.toFixed(1) + '억'; } } }
+                    },
+                    scales: {
+                        x: { stacked: true, ticks: { font: { size: 11 }, color: '#888' }, grid: { display: false } },
+                        y: { stacked: true, ticks: { callback: function(v) { return v + '억'; }, font: { size: 11 }, color: '#888' }, grid: { color: '#eee' } }
+                    }
+                }
+            });
+        })();
+        </script>
+        """.replace('AUM_DATA_PLACEHOLDER', aum_chart_json)
+
         return f"""
         <div class="category-section">
             <h2 class="category-title">AUM</h2>
-            <div class="portfolio-section-wrapper">
-                <table class="portfolio-table" style="max-width:600px;margin:0 auto;white-space:nowrap;">
-                    <thead><tr>
-                        <th>증권사</th>
-                        <th>상품명</th>
-                        <th>AUM</th>
-                        <th>기준일</th>
-                    </tr></thead>
-                    <tbody>{rows_html}</tbody>
-                </table>
+            <div style="display:flex;gap:16px;align-items:flex-start;max-width:1200px;margin:0 auto;">
+                <div style="min-width:280px;">
+                    <table class="portfolio-table" style="white-space:nowrap;">
+                        <thead><tr>
+                            <th>증권사</th>
+                            <th>상품명</th>
+                            <th>AUM</th>
+                            <th>기준일</th>
+                        </tr></thead>
+                        <tbody>{rows_html}</tbody>
+                    </table>
+                </div>
+                <div style="flex:1;background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                    <canvas id="aumStackedChart" style="width:100%;height:300px;"></canvas>
+                </div>
             </div>
-        </div>"""
+        </div>
+        {aum_js}"""
     except Exception as e:
         print(f"Error creating AUM table: {e}")
         return ""
