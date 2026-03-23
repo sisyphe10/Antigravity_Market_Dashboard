@@ -24,7 +24,7 @@ def publish_to_notion(summary_markdown, date_str, topics, stocks):
 
     # Stocks 속성 (multi_select)
     if stocks:
-        properties["Stocks"] = {"multi_select": [{"name": s} for s in stocks]}
+        properties["Ticker"] = {"multi_select": [{"name": s} for s in stocks]}
 
     notion.pages.create(
         parent={"database_id": database_id},
