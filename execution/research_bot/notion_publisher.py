@@ -60,26 +60,51 @@ def publish_to_notion(summary_markdown, date_str, topics, stocks, critical_image
 
     if existing_page_id:
         # 기존 페이지에 추가: 구분선 + 새 요약 append
-        import datetime as dt
-        KST = dt.timezone(dt.timedelta(hours=9))
-        now_str = dt.datetime.now(tz=KST).strftime('%H:%M')
         append_blocks = [
-            {"object": "block", "type": "divider", "divider": {}},
-            {"object": "block", "type": "heading_2",
-             "heading_2": {"rich_text": [{"text": {"content": f"추가 요약 ({now_str})"}}]}}
+            {"object": "block", "type": "divider", "divider": {}}
         ] + blocks
 
         notion.blocks.children.append(
             block_id=existing_page_id,
             children=append_blocks[:100]
         )
-        # 속성 업데이트 (토픽/종목 병합)
-        update_props = {"이름": {"title": [{"text": {"content": title}}]}}
-        if topics:
-            update_props["Research Topic"] = {"rich_text": [{"text": {"content": ", ".join(topics)}}]}
-        if stocks:
-            update_props["Ticker"] = {"rich_text": [{"text": {"content": ", ".join(stocks)}}]}
-        notion.pages.update(page_id=existing_page_id, properties=update_props)
+        # 속성 업데이트 (기존 값에 추가 병합)
+        import urllib.request as _ur
+        import json as _json
+        try:
+            req = _ur.Request(
+                f"https://api.notion.com/v1/pages/{existing_page_id}",
+                headers={"Authorization": f"Bearer {os.getenv('NOTION_API_KEY')}", "Notion-Version": "2022-06-28"}
+            )
+            with _ur.urlopen(req, timeout=15) as resp:
+                existing_props = _json.loads(resp.read().decode()).get("properties", {})
+
+            # Research Topic 병합
+            existing_topics = ""
+            rt = existing_props.get("Research Topic", {})
+            if rt.get("rich_text"):
+                existing_topics = rt["rich_text"][0].get("text", {}).get("content", "")
+            all_topics = set(t.strip() for t in existing_topics.split(",") if t.strip())
+            all_topics.update(topics)
+
+            # Ticker 병합
+            existing_tickers = ""
+            tk = existing_props.get("Ticker", {})
+            if tk.get("rich_text"):
+                existing_tickers = tk["rich_text"][0].get("text", {}).get("content", "")
+            all_tickers = set(t.strip() for t in existing_tickers.split(",") if t.strip())
+            all_tickers.update(stocks)
+        except:
+            all_topics = set(topics)
+            all_tickers = set(stocks)
+
+        update_props = {}
+        if all_topics:
+            update_props["Research Topic"] = {"rich_text": [{"text": {"content": ", ".join(sorted(all_topics))}}]}
+        if all_tickers:
+            update_props["Ticker"] = {"rich_text": [{"text": {"content": ", ".join(sorted(all_tickers))}}]}
+        if update_props:
+            notion.pages.update(page_id=existing_page_id, properties=update_props)
     else:
         # 새 페이지 생성
         properties = {
