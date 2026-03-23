@@ -765,9 +765,8 @@ def create_aum_table():
         daily.columns = ['date', 'label', 'broker', 'aum']
         dates_sorted = sorted(daily['date'].unique())
 
-        latest_day = daily[daily['date'] == dates_sorted[-1]].sort_values('aum', ascending=False)
-        all_labels = latest_day['label'].tolist()
-        all_labels += [l for l in daily['label'].unique() if l not in all_labels]
+        # 테이블과 같은 순서 (latest는 이미 증권사 그룹 + AUM 내림차순)
+        all_labels = (latest.apply(lambda r: r['증권사'] + ' ' + r['상품명'], axis=1)).tolist()
 
         opacity_levels = [1.0, 0.6, 0.35]
         broker_idx = {}
@@ -853,8 +852,8 @@ def create_aum_table():
         <div class="category-section">
             <h2 class="category-title">AUM</h2>
             <div style="display:flex;gap:40px;align-items:flex-start;max-width:1200px;margin:0 auto;">
-                <div style="min-width:280px;">
-                    <table class="portfolio-table" style="white-space:nowrap;">
+                <div style="min-width:380px;">
+                    <table class="portfolio-table" style="white-space:nowrap;width:100%;">
                         <thead><tr>
                             <th>증권사</th>
                             <th>상품명</th>
