@@ -374,12 +374,14 @@ def create_portfolio_tables():
 
                 # DD: price_df에서 직접 계산 (역대 최고가 대비)
                 dd = None
+                current_price = None
+                ath_price = None
                 if price_df is not None and not price_df.empty:
                     try:
-                        ath = price_df['Close'].max()
-                        cur = price_df.iloc[-1]['Close']
-                        if ath > 0:
-                            dd = (cur / ath - 1) * 100
+                        ath_price = float(price_df['Close'].max())
+                        current_price = float(price_df.iloc[-1]['Close'])
+                        if ath_price > 0:
+                            dd = (current_price / ath_price - 1) * 100
                     except:
                         pass
 
@@ -392,6 +394,8 @@ def create_portfolio_tables():
                     'today_return': today_return,
                     'contribution': contribution,
                     'cumulative_return': cumulative_return,
+                    'current_price': current_price,
+                    'ath_price': ath_price,
                     'dd': dd,
                     'is_today_new': is_today_new
                 })
