@@ -99,7 +99,7 @@ def publish_to_notion(summary_markdown, date_str, topics, stocks, critical_image
 
         notion.pages.create(
             parent={"database_id": database_id},
-            icon={"emoji": "📝"},
+            icon=None,
             properties=properties,
             children=blocks[:100]
         )
