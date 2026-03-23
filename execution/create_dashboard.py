@@ -53,6 +53,7 @@ def create_portfolio_tables_html():
                                 <th>오늘 수익률</th>
                                 <th>기여도</th>
                                 <th>누적 수익률</th>
+                                <th>DD</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -120,6 +121,15 @@ def create_portfolio_tables_html():
                     cumulative_return_str = "N/A"
                     cumulative_color_class = ""
 
+                # DD (역대 최고가 대비 하락률)
+                dd = stock.get('dd')
+                if dd is not None:
+                    dd_str = f"{dd:.1f}%"
+                    dd_color_class = "negative" if dd < -20 else ""
+                else:
+                    dd_str = "-"
+                    dd_color_class = ""
+
                 html += f"""
                             <tr>
                                 <td>{idx}</td>
@@ -131,6 +141,7 @@ def create_portfolio_tables_html():
                                 <td class="{today_color_class}">{today_return_str}</td>
                                 <td class="{contribution_color_class}">{contribution_str}</td>
                                 <td class="{cumulative_color_class}">{cumulative_return_str}</td>
+                                <td class="{dd_color_class}">{dd_str}</td>
                             </tr>
                 """
 
@@ -146,6 +157,7 @@ def create_portfolio_tables_html():
                                 <td style="font-weight: 600;">{total_weight:.0f}%</td>
                                 <td class="{portfolio_color}" style="font-weight: 600;">{portfolio_return_str}</td>
                                 <td class="{contribution_total_color}" style="font-weight: 600;">{total_contribution_str}</td>
+                                <td style="font-weight: 600;">-</td>
                                 <td style="font-weight: 600;">-</td>
                             </tr>
                         </tbody>

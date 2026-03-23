@@ -111,7 +111,9 @@ def calculate_cumulative_return(code, stock_name, portfolio_name, nav_df, price_
                 'cumulative_return': EXISTING_STOCK_CUMULATIVE_RETURNS[code],
                 'status': 'existing',
                 'avg_price': None,
-                'current_price': None
+                'current_price': None,
+                'dd': None,
+                'all_time_high': None
             }
 
         # 해당 포트폴리오의 해당 종목 이력
@@ -119,7 +121,7 @@ def calculate_cumulative_return(code, stock_name, portfolio_name, nav_df, price_
         stock_history = stock_history.sort_values('날짜')
 
         if stock_history.empty:
-            return {'cumulative_return': None, 'status': 'not_found', 'avg_price': None, 'current_price': None}
+            return {'cumulative_return': None, 'status': 'not_found', 'avg_price': None, 'current_price': None, 'dd': None, 'all_time_high': None}
 
         # 첫 등장일 확인
         first_date = stock_history['날짜'].min()
@@ -143,23 +145,25 @@ def calculate_cumulative_return(code, stock_name, portfolio_name, nav_df, price_
                 'status': 'existing',
                 'avg_price': None,
                 'current_price': None,
-                'first_date': first_date
+                'first_date': first_date,
+                'dd': None,
+                'all_time_high': None
             }
 
         # 비중이 0이 아닌 매수 데이터만 추출
         purchases = stock_history[stock_history['비중'] > 0].copy()
 
         if purchases.empty:
-            return {'cumulative_return': None, 'status': 'no_purchases', 'avg_price': None, 'current_price': None}
+            return {'cumulative_return': None, 'status': 'no_purchases', 'avg_price': None, 'current_price': None, 'dd': None, 'all_time_high': None}
 
         # 오늘 처음 편입된 종목은 수익률 미표시
         today_norm = pd.Timestamp.now().normalize()
         if purchases['날짜'].min() >= today_norm:
-            return {'cumulative_return': None, 'status': 'today_new', 'avg_price': None, 'current_price': None}
+            return {'cumulative_return': None, 'status': 'today_new', 'avg_price': None, 'current_price': None, 'dd': None, 'all_time_high': None}
 
         # 캐시된 가격 데이터가 없으면 계산 불가
         if price_df is None or price_df.empty:
-            return {'cumulative_return': None, 'status': 'no_price_data', 'avg_price': None, 'current_price': None}
+            return {'cumulative_return': None, 'status': 'no_price_data', 'avg_price': None, 'current_price': None, 'dd': None, 'all_time_high': None}
 
         # 각 매수 시점의 종가 가져오기 (캐시된 데이터에서)
         weighted_sum = 0
@@ -186,25 +190,31 @@ def calculate_cumulative_return(code, stock_name, portfolio_name, nav_df, price_
                 continue
 
         if total_weight == 0:
-            return {'cumulative_return': None, 'status': 'no_valid_prices', 'avg_price': None, 'current_price': None}
+            return {'cumulative_return': None, 'status': 'no_valid_prices', 'avg_price': None, 'current_price': None, 'dd': None, 'all_time_high': None}
 
         avg_price = weighted_sum / total_weight
         current_price = price_df.iloc[-1]['Close']
         cumulative_return = (current_price / avg_price - 1) * 100
+
+        # DD: 역대 최고가 대비 현재가 하락률
+        all_time_high = price_df['Close'].max()
+        dd = (current_price / all_time_high - 1) * 100 if all_time_high > 0 else None
 
         return {
             'cumulative_return': cumulative_return,
             'status': status,
             'avg_price': avg_price,
             'current_price': current_price,
-            'first_date': first_date
+            'first_date': first_date,
+            'dd': dd,
+            'all_time_high': all_time_high
         }
 
     except Exception as e:
         print(f"    Error calculating cumulative return for {stock_name}: {e}")
         import traceback
         traceback.print_exc()
-        return {'cumulative_return': None, 'status': 'error', 'avg_price': None, 'current_price': None}
+        return {'cumulative_return': None, 'status': 'error', 'avg_price': None, 'current_price': None, 'dd': None, 'all_time_high': None}
 
 
 def create_portfolio_tables():
@@ -362,6 +372,17 @@ def create_portfolio_tables():
                     cumulative_return = cumulative_result.get('cumulative_return')
                     contribution = (weight / 100) * (today_return / 100) * 1000 if today_return is not None else None
 
+                # DD: price_df에서 직접 계산 (역대 최고가 대비)
+                dd = None
+                if price_df is not None and not price_df.empty:
+                    try:
+                        ath = price_df['Close'].max()
+                        cur = price_df.iloc[-1]['Close']
+                        if ath > 0:
+                            dd = (cur / ath - 1) * 100
+                    except:
+                        pass
+
                 stocks_info.append({
                     'code': code,
                     'name': stock_name,
@@ -371,6 +392,7 @@ def create_portfolio_tables():
                     'today_return': today_return,
                     'contribution': contribution,
                     'cumulative_return': cumulative_return,
+                    'dd': dd,
                     'is_today_new': is_today_new
                 })
 
@@ -378,7 +400,8 @@ def create_portfolio_tables():
                 return_str = f"{today_return:+.2f}%" if today_return is not None else "-"
                 contribution_str = f"{contribution:+.2f}" if contribution is not None else "-"
                 cumulative_str = f"{cumulative_return:+.2f}%" if cumulative_return is not None else "-"
-                print(f"   - {stock_name} ({code}){new_str}: {sector}, {market_cap_billions:,.0f}억원, {weight}%, 오늘: {return_str}, 기여도: {contribution_str}, 누적: {cumulative_str}")
+                dd_str = f"{dd:.1f}%" if dd is not None else "-"
+                print(f"   - {stock_name} ({code}){new_str}: {sector}, {market_cap_billions:,.0f}억원, {weight}%, 오늘: {return_str}, 기여도: {contribution_str}, 누적: {cumulative_str}, DD: {dd_str}")
 
             portfolio_data[display_name] = stocks_info
 
