@@ -1934,11 +1934,12 @@ def create_dashboard():
     </style>
 </head>
 <body>
-<header>
+<header style="position:relative;">
     <h1>Universe</h1>
     <div class="nav-group">
         <a href="index.html" class="nav-button">← Dashboard</a>
     </div>
+    <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="position:absolute;top:24px;right:24px;color:#059669;font-size:0.8rem;text-decoration:none;border:1px solid #059669;padding:4px 14px;border-radius:16px;">Google Sheet 열기</a>
 </header>
 <div class="content">
     <div class="filters">
