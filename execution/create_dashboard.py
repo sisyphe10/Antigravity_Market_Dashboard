@@ -2017,11 +2017,11 @@ function render(){
         });
     }
     var h='';
-    f.forEach(function(r){
+    f.forEach(function(r,idx){
         h+='<tr>';
         for(var i=0;i<15;i++){
-            var v=r[i]||'';var cls='';
-            if(pctCols.indexOf(i)>=0&&v){var n=parseFloat(v.replace(/%/g,''));if(!isNaN(n))cls=n>0?' class="positive"':n<0?' class="negative"':'';}
+            var v=(i===0)?(idx+1):r[i]||'';var cls='';
+            if(pctCols.indexOf(i)>=0&&v){var n=parseFloat(String(v).replace(/%/g,''));if(!isNaN(n))cls=n>0?' class="positive"':n<0?' class="negative"':'';}
             h+='<td'+cls+'>'+v+'</td>';
         }
         h+='</tr>';
