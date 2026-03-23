@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universe - Antigravity</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background: #f8f9fa; color: #333; }
+        header { background: #fff; padding: 24px; text-align: center; border-bottom: 1px solid #eee; }
+        header h1 { font-size: 1.8rem; color: #059669; }
+        .nav-group { margin-top: 10px; }
+        .nav-button { display: inline-block; padding: 6px 16px; border-radius: 6px; text-decoration: none; color: #fff; font-size: 0.85rem; font-weight: 600; background: #333; }
+        .content { padding: 24px; max-width: 1600px; margin: 0 auto; }
+        .filters { margin-bottom: 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .filters select { padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; background: #fff; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        thead { background: #e9ecef; }
+        th { padding: 12px 10px; text-align: center; font-weight: 600; color: #000; border-bottom: 2px solid #000; cursor: pointer; white-space: nowrap; }
+        th:hover { background: #ddd; }
+        td { padding: 10px; border-bottom: 1px solid #dee2e6; text-align: center; }
+        tbody tr:hover { background: #f5f5f5; }
+        .positive { color: #cc0000; font-weight: 600; }
+        .negative { color: #0055cc; font-weight: 600; }
+        footer { text-align: center; padding: 24px; color: #999; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Universe</h1>
+    <div class="nav-group">
+        <a href="index.html" class="nav-button">← Dashboard</a>
+    </div>
+</header>
+<div class="content">
+    <div class="filters">
+        <select id="fCurrency" onchange="render()"><option value="">통화 전체</option></select>
+        <select id="fSector1" onchange="render()"><option value="">섹터1 전체</option></select>
+        <select id="fSector2" onchange="render()"><option value="">섹터2 전체</option></select>
+    </div>
+    <div style="overflow-x:auto;">
+        <table>
+            <thead><tr>
+                <th onclick="doSort(0)">#</th>
+                <th onclick="doSort(1)">통화</th>
+                <th onclick="doSort(2)">섹터 1</th>
+                <th onclick="doSort(3)">섹터 2</th>
+                <th onclick="doSort(4)">티커</th>
+                <th onclick="doSort(5)">기업명</th>
+                <th onclick="doSort(6)">시가총액</th>
+                <th onclick="doSort(7)">가격</th>
+                <th onclick="doSort(8)">YTD</th>
+                <th onclick="doSort(9)">1D</th>
+                <th onclick="doSort(10)">1W</th>
+                <th onclick="doSort(11)">1M</th>
+                <th onclick="doSort(12)">3M</th>
+                <th onclick="doSort(13)">6M</th>
+                <th onclick="doSort(14)">1Y</th>
+            </tr></thead>
+            <tbody id="tbody"><tr><td colspan="15" style="padding:40px;color:#888;">로딩 중...</td></tr></tbody>
+        </table>
+    </div>
+</div>
+<footer>Antigravity Universe</footer>
+<script>
+var D=[],sortCol=-1,sortAsc=true;
+var headers=['#','통화','섹터 1','섹터 2','티커','기업명','시가총액','가격','YTD','1D','1W','1M','3M','6M','1Y'];
+var numCols=[0,6,7,8,9,10,11,12,13,14];
+var pctCols=[8,9,10,11,12,13,14];
+
+fetch('https://sheets.googleapis.com/v4/spreadsheets/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/values/%EC%8B%9C%ED%8A%B81?key=AIzaSyCHPiRby5FVAIKDwneZHy1KGl3SfycjZEw')
+.then(function(r){return r.json()}).then(function(data){
+    D=(data.values||[]).slice(1).map(function(r){return r.slice(0,15)});
+    var c={},s1={},s2={};
+    D.forEach(function(r){if(r[1])c[r[1]]=1;if(r[2])s1[r[2]]=1;if(r[3])s2[r[3]]=1;});
+    document.getElementById('fCurrency').innerHTML='<option value="">통화 전체</option>'+Object.keys(c).sort().map(function(v){return '<option>'+v+'</option>';}).join('');
+    document.getElementById('fSector1').innerHTML='<option value="">섹터1 전체</option>'+Object.keys(s1).sort().map(function(v){return '<option>'+v+'</option>';}).join('');
+    document.getElementById('fSector2').innerHTML='<option value="">섹터2 전체</option>'+Object.keys(s2).sort().map(function(v){return '<option>'+v+'</option>';}).join('');
+    render();
+});
+
+function pn(s){if(!s)return -Infinity;var n=parseFloat(s.replace(/,/g,'').replace(/%/g,''));return isNaN(n)?-Infinity:n;}
+
+function doSort(col){
+    if(sortCol===col)sortAsc=!sortAsc;else{sortCol=col;sortAsc=true;}
+    document.querySelectorAll('thead th').forEach(function(th,i){th.textContent=i===col?headers[i]+(sortAsc?' ▲':' ▼'):headers[i];});
+    render();
+}
+
+function render(){
+    var fc=document.getElementById('fCurrency').value;
+    var fs1=document.getElementById('fSector1').value;
+    var fs2=document.getElementById('fSector2').value;
+    var f=D.filter(function(r){
+        if(fc&&r[1]!==fc)return false;
+        if(fs1&&r[2]!==fs1)return false;
+        if(fs2&&r[3]!==fs2)return false;
+        return true;
+    });
+    if(sortCol>=0){
+        var isN=numCols.indexOf(sortCol)>=0;
+        f.sort(function(a,b){
+            var va=isN?pn(a[sortCol]):(a[sortCol]||'');
+            var vb=isN?pn(b[sortCol]):(b[sortCol]||'');
+            if(va<vb)return sortAsc?-1:1;
+            if(va>vb)return sortAsc?1:-1;
+            return 0;
+        });
+    }
+    var h='';
+    f.forEach(function(r){
+        h+='<tr>';
+        for(var i=0;i<15;i++){
+            var v=r[i]||'';var cls='';
+            if(pctCols.indexOf(i)>=0&&v){var n=parseFloat(v.replace(/%/g,''));if(!isNaN(n))cls=n>0?' class="positive"':n<0?' class="negative"':'';}
+            h+='<td'+cls+'>'+v+'</td>';
+        }
+        h+='</tr>';
+    });
+    if(!h)h='<tr><td colspan="15" style="padding:40px;color:#888;">데이터 없음</td></tr>';
+    document.getElementById('tbody').innerHTML=h;
+}
+</script>
+</body>
+</html>
