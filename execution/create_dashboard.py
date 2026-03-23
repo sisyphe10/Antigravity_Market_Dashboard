@@ -1922,11 +1922,20 @@ def create_dashboard():
         .content { padding: 24px; max-width: 1600px; margin: 0 auto; }
         .filters { margin-bottom: 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .filters select { padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; background: #fff; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; table-layout: fixed; }
         thead { background: #e9ecef; }
-        th { padding: 12px 10px; text-align: center; font-weight: 600; color: #000; border-bottom: 2px solid #000; cursor: pointer; white-space: nowrap; }
+        th { padding: 12px 6px; text-align: center; font-weight: 600; color: #000; border-bottom: 2px solid #000; cursor: pointer; white-space: nowrap; overflow: hidden; }
         th:hover { background: #ddd; }
-        td { padding: 10px; border-bottom: 1px solid #dee2e6; text-align: center; }
+        td { padding: 10px 6px; border-bottom: 1px solid #dee2e6; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        /* 컬럼 너비: 앞쪽 좁게, 수익률 균등 넓게 */
+        th:nth-child(1) { width: 36px; }
+        th:nth-child(2) { width: 50px; }
+        th:nth-child(3), th:nth-child(4) { width: 70px; }
+        th:nth-child(5) { width: 100px; }
+        th:nth-child(6) { width: 110px; }
+        th:nth-child(7) { width: 90px; }
+        th:nth-child(8) { width: 80px; }
+        th:nth-child(n+9) { width: 75px; }
         tbody tr:hover { background: #f5f5f5; }
         .positive { color: #cc0000; font-weight: 600; }
         .negative { color: #0055cc; font-weight: 600; }
