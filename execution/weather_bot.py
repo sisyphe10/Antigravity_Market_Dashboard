@@ -431,11 +431,11 @@ def format_update_summary(portfolio_data):
         if portfolio_name.startswith('_'):
             continue
         # 포트폴리오 가중 평균 수익률
-        total_weight = sum(s['weight'] for s in stocks)
+        # 비중 합계가 100% 미만이면 나머지는 현금(수익률 0%)으로 처리
         weighted_return = sum(
             s['weight'] * (s['today_return'] or 0)
             for s in stocks
-        ) / total_weight if total_weight > 0 else 0
+        ) / 100
 
         lines.append(f"<b><u>[{portfolio_name}]</u></b>")
         lines.append(f"<b><u>오늘: {weighted_return:+.1f}%</u></b>")
