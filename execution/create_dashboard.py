@@ -1707,7 +1707,7 @@ def create_dashboard():
         <div class="nav-group">
             <a href="wrap.html" target="_blank" class="nav-button" style="background-color:#1e40af">📈 WRAP</a>
             <a href="market_alert.html" target="_blank" class="nav-button" style="background-color:#c2410c">🚦 투자유의종목</a>
-            <a href="universe.html" target="_blank" class="nav-button" style="background-color:#059669">🌐 Universe</a>
+            <a href="universe.html" target="_blank" class="nav-button" style="background-color:#6B21A8">🌐 Universe</a>
             <a href="architecture.html" target="_blank" class="nav-button">🗂️ Architecture</a>
         </div>
     </header>
@@ -1916,7 +1916,7 @@ def create_dashboard():
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Roboto, sans-serif; background: #f8f9fa; color: #333; }
         header { background: #fff; padding: 24px; text-align: center; border-bottom: 1px solid #eee; }
-        header h1 { font-size: 1.8rem; color: #059669; }
+        header h1 { font-size: 1.8rem; color: #6B21A8; }
         .nav-group { margin-top: 10px; }
         .nav-button { display: inline-block; padding: 6px 16px; border-radius: 6px; text-decoration: none; color: #fff; font-size: 0.85rem; font-weight: 600; background: #333; }
         .content { padding: 24px; max-width: 1600px; margin: 0 auto; }
@@ -1939,7 +1939,7 @@ def create_dashboard():
     <div class="nav-group">
         <a href="index.html" class="nav-button">← Dashboard</a>
     </div>
-    <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="position:absolute;top:24px;right:24px;color:#059669;font-size:0.8rem;text-decoration:none;border:1px solid #059669;padding:4px 14px;border-radius:16px;">Google Sheet 열기</a>
+    <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="position:absolute;top:24px;right:24px;color:#6B21A8;font-size:0.8rem;text-decoration:none;border:1px solid #6B21A8;padding:4px 14px;border-radius:16px;">Google Sheet 열기</a>
 </header>
 <div class="content">
     <div class="filters">
