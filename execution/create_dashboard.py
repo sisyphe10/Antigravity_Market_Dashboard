@@ -753,9 +753,9 @@ def create_aum_table():
             total_aum += aum
             aum_억 = aum / 100_000_000
             date_str = row['날짜'].strftime('%m/%d')
-            rows_html += f'<tr><td>{row["증권사"]}</td><td>{row["상품명"]}</td><td>{aum_억:,.1f}억</td><td>{date_str}</td></tr>\n'
+            rows_html += f'<tr><td>{row["증권사"]}</td><td>{row["상품명"]}</td><td>{aum_억:,.0f}억</td><td>{date_str}</td></tr>\n'
         total_억 = total_aum / 100_000_000
-        rows_html += f'<tr style="border-top:2px solid #000;font-weight:700;"><td colspan="2">합계</td><td>{total_억:,.1f}억</td><td></td></tr>'
+        rows_html += f'<tr style="border-top:2px solid #000;font-weight:700;"><td colspan="2">합계</td><td>{total_억:,.0f}억</td><td></td></tr>'
         # 증권사별 색상
         broker_colors = {'삼성': '#1428A0', 'NH': '#0072CE', 'DB': '#00854A'}
 
@@ -786,7 +786,7 @@ def create_aum_table():
             vals = []
             for d in dates_sorted:
                 v = daily[(daily['date'] == d) & (daily['label'] == label)]['aum'].sum()
-                vals.append(round(v / 100_000_000, 1))
+                vals.append(round(v / 100_000_000))
             chart_datasets.append({
                 'label': label,
                 'data': vals,
@@ -818,7 +818,7 @@ def create_aum_table():
                         ctx.fillStyle = '#000';
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'bottom';
-                        ctx.fillText(total.toFixed(0) + '억', bar.x, bar.y - 4);
+                        ctx.fillText(Math.round(total) + '억', bar.x, bar.y - 4);
                         ctx.restore();
                     }
                 }
@@ -836,12 +836,12 @@ def create_aum_table():
                     responsive: true, maintainAspectRatio: false,
                     layout: { padding: { top: 20 } },
                     plugins: {
-                        legend: { position: 'bottom', labels: { font: { size: 11 } } },
-                        tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + ctx.raw.toFixed(1) + '억'; } } }
+                        legend: { position: 'bottom', labels: { font: { size: 11 }, color: '#000' } },
+                        tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + Math.round(ctx.raw) + '억'; } } }
                     },
                     scales: {
-                        x: { stacked: true, ticks: { font: { size: 11 }, color: '#888' }, grid: { display: false } },
-                        y: { stacked: true, ticks: { callback: function(v) { return v + '억'; }, font: { size: 11 }, color: '#888' }, grid: { color: '#eee' } }
+                        x: { stacked: true, ticks: { font: { size: 11 }, color: '#000' }, grid: { display: false } },
+                        y: { stacked: true, ticks: { callback: function(v) { return v + '억'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' } }
                     }
                 }
             });
