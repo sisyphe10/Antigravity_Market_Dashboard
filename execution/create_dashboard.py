@@ -799,6 +799,30 @@ def create_aum_table():
         <script>
         (function() {
             var aumData = AUM_DATA_PLACEHOLDER;
+            var totalLabelPlugin = {
+                id: 'totalLabels',
+                afterDatasetsDraw: function(chart) {
+                    var ctx = chart.ctx;
+                    var datasets = chart.data.datasets;
+                    var meta0 = chart.getDatasetMeta(0);
+                    for (var i = 0; i < meta0.data.length; i++) {
+                        var total = 0;
+                        for (var d = 0; d < datasets.length; d++) {
+                            total += datasets[d].data[i] || 0;
+                        }
+                        var lastMeta = chart.getDatasetMeta(datasets.length - 1);
+                        var bar = lastMeta.data[i];
+                        if (!bar) continue;
+                        ctx.save();
+                        ctx.font = 'bold 11px sans-serif';
+                        ctx.fillStyle = '#000';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'bottom';
+                        ctx.fillText(total.toFixed(0) + '억', bar.x, bar.y - 4);
+                        ctx.restore();
+                    }
+                }
+            };
             new Chart(document.getElementById('aumStackedChart'), {
                 type: 'bar',
                 data: {
@@ -807,8 +831,10 @@ def create_aum_table():
                         return { label: ds.label, data: ds.data, backgroundColor: ds.backgroundColor };
                     })
                 },
+                plugins: [totalLabelPlugin],
                 options: {
                     responsive: true, maintainAspectRatio: false,
+                    layout: { padding: { top: 20 } },
                     plugins: {
                         legend: { position: 'bottom', labels: { font: { size: 11 } } },
                         tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + ctx.raw.toFixed(1) + '억'; } } }
