@@ -2031,7 +2031,8 @@ function render(){
         for(var i=0;i<15;i++){
             var v=(i===0)?(idx+1):r[i]||'';var cls='';
             if(pctCols.indexOf(i)>=0&&v){var n=parseFloat(String(v).replace(/%/g,''));if(!isNaN(n))cls=n>0?' class="positive"':n<0?' class="negative"':'';}
-            h+='<td'+cls+'>'+v+'</td>';
+            var bg=(i===8)?' style="background:#e6faf5;"':'';
+            h+='<td'+cls+bg+'>'+v+'</td>';
         }
         h+='</tr>';
     });
