@@ -264,13 +264,13 @@ if __name__ == '__main__':
     try:
         import pytz
         kst_tz = pytz.timezone('Asia/Seoul')
-        summary_time = datetime.time(hour=23, minute=30, second=0, tzinfo=kst_tz)
+        summary_time = datetime.time(hour=23, minute=0, second=0, tzinfo=kst_tz)
     except:
-        summary_time = datetime.time(hour=23, minute=30, second=0)
+        summary_time = datetime.time(hour=23, minute=0, second=0)
 
     job_queue.run_daily(daily_summary_job, time=summary_time)
 
-    print(f"  Daily summary: 23:30 KST")
+    print(f"  Daily summary: 23:00 KST")
     print(f"  Bot ready!")
 
     application.run_polling()
