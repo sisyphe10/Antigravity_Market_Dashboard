@@ -24,6 +24,57 @@ KST = datetime.timezone(datetime.timedelta(hours=9))
 from messages_db import add_message, get_messages_by_date, get_today_count, mark_processed
 
 
+def fetch_article(url):
+    """URL에서 기사 본문 텍스트 추출"""
+    try:
+        import requests
+        from bs4 import BeautifulSoup
+
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+        res = requests.get(url, headers=headers, timeout=10)
+        res.raise_for_status()
+
+        soup = BeautifulSoup(res.text, 'html.parser')
+
+        # 불필요한 태그 제거
+        for tag in soup.select('script, style, nav, header, footer, aside, .ad, .advertisement'):
+            tag.decompose()
+
+        # 기사 본문 추출 (일반적인 기사 컨테이너)
+        article = (
+            soup.select_one('article') or
+            soup.select_one('[class*="article_body"]') or
+            soup.select_one('[class*="newsct_article"]') or
+            soup.select_one('[id*="articleBody"]') or
+            soup.select_one('[class*="story-body"]') or
+            soup.select_one('[class*="content"]') or
+            soup.select_one('main')
+        )
+
+        if article:
+            text = article.get_text(separator='\n', strip=True)
+        else:
+            # fallback: p 태그들 합치기
+            paragraphs = soup.find_all('p')
+            text = '\n'.join(p.get_text(strip=True) for p in paragraphs if len(p.get_text(strip=True)) > 20)
+
+        # 제목 추출
+        title = ''
+        title_tag = soup.select_one('h1') or soup.select_one('title')
+        if title_tag:
+            title = title_tag.get_text(strip=True)
+
+        # 너무 긴 본문은 잘라냄 (토큰 절약)
+        if len(text) > 3000:
+            text = text[:3000] + '...(truncated)'
+
+        return f"[제목] {title}\n\n{text}" if title else text
+
+    except Exception as e:
+        logging.warning(f"Article fetch failed for {url}: {e}")
+        return None
+
+
 def now_kst():
     return datetime.datetime.now(tz=KST)
 
@@ -66,17 +117,26 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except:
             forward_source = 'unknown'
 
+    # URL이 있으면 기사 본문 스크래핑
+    article_content = None
+    if url:
+        article_content = fetch_article(url)
+
     add_message(
         timestamp=now_kst().isoformat(),
         message_type='text',
         text_content=text,
         url=url,
+        article_content=article_content,
         forward_source=forward_source,
         telegram_message_id=msg.message_id
     )
 
     count = get_today_count(today_str())
-    await msg.reply_text(f"📥 저장됨 (오늘 {count}건)")
+    reply = f"📥 저장됨 (오늘 {count}건)"
+    if article_content:
+        reply += f"\n📰 기사 본문 수집 완료"
+    await msg.reply_text(reply)
 
 
 async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):

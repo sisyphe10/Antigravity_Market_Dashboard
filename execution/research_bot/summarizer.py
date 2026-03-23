@@ -32,6 +32,8 @@ def summarize_daily_notes(messages, date_str):
             parts.append(msg['text_content'])
         if msg.get('url'):
             parts.append(f"링크: {msg['url']}")
+        if msg.get('article_content'):
+            parts.append(f"[기사 본문]\n{msg['article_content']}")
         notes_parts.append('\n'.join(parts))
 
         # 이미지가 있으면 Vision용 블록 추가

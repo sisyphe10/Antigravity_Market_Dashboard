@@ -20,19 +20,25 @@ def init_db():
             text_content TEXT,
             media_path TEXT,
             url TEXT,
+            article_content TEXT,
             forward_source TEXT,
             telegram_message_id INTEGER,
             processed INTEGER DEFAULT 0
         )
     """)
+    # article_content 컬럼이 없으면 추가 (기존 DB 호환)
+    try:
+        conn.execute("ALTER TABLE messages ADD COLUMN article_content TEXT")
+    except:
+        pass
     conn.commit()
     conn.close()
 
-def add_message(timestamp, message_type, text_content=None, media_path=None, url=None, forward_source=None, telegram_message_id=None):
+def add_message(timestamp, message_type, text_content=None, media_path=None, url=None, article_content=None, forward_source=None, telegram_message_id=None):
     conn = get_conn()
     conn.execute(
-        "INSERT INTO messages (timestamp, message_type, text_content, media_path, url, forward_source, telegram_message_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        (timestamp, message_type, text_content, media_path, url, forward_source, telegram_message_id)
+        "INSERT INTO messages (timestamp, message_type, text_content, media_path, url, article_content, forward_source, telegram_message_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        (timestamp, message_type, text_content, media_path, url, article_content, forward_source, telegram_message_id)
     )
     conn.commit()
     conn.close()
