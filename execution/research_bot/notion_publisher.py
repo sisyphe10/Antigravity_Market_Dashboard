@@ -170,18 +170,32 @@ def markdown_to_blocks(md_text):
 
         # Heading 2
         if stripped.startswith('## '):
-            blocks.append({
-                "object": "block",
-                "type": "heading_2",
-                "heading_2": {"rich_text": [{"text": {"content": stripped[3:]}}]}
-            })
+            h2_text = stripped[3:]
+            if '[엄중]' in h2_text:
+                h2_text = h2_text.replace('[엄중]', '').strip()
+                blocks.append({
+                    "object": "block", "type": "heading_2",
+                    "heading_2": {"rich_text": [{"text": {"content": h2_text}, "annotations": {"color": "red"}}]}
+                })
+            else:
+                blocks.append({
+                    "object": "block", "type": "heading_2",
+                    "heading_2": {"rich_text": [{"text": {"content": h2_text}}]}
+                })
         # Heading 3
         elif stripped.startswith('### '):
-            blocks.append({
-                "object": "block",
-                "type": "heading_3",
-                "heading_3": {"rich_text": [{"text": {"content": stripped[4:]}}]}
-            })
+            h3_text = stripped[4:]
+            if '[엄중]' in h3_text:
+                h3_text = h3_text.replace('[엄중]', '').strip()
+                blocks.append({
+                    "object": "block", "type": "heading_3",
+                    "heading_3": {"rich_text": [{"text": {"content": h3_text}, "annotations": {"color": "red"}}]}
+                })
+            else:
+                blocks.append({
+                    "object": "block", "type": "heading_3",
+                    "heading_3": {"rich_text": [{"text": {"content": h3_text}}]}
+                })
         # Bullet list
         elif stripped.startswith('- ') or stripped.startswith('* '):
             blocks.append({
