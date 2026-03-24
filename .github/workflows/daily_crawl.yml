@@ -76,6 +76,12 @@ jobs:
         env:
            TZ: 'Asia/Seoul'
 
+      - name: Fetch KRX Gold Trading Data
+        run: |
+          python execution/fetch_krx_gold.py || echo "KRX 금 데이터 수집 실패 (계속 진행)"
+        env:
+           TZ: 'Asia/Seoul'
+
       - name: Draw Wrap Charts
         run: |
           python execution/draw_wrap_charts.py
@@ -109,5 +115,5 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Auto-update: Market data and dashboard [skip ci]"
-          file_pattern: 'dataset.csv charts/*.png index.html wrap.html portfolio_data.json Wrap_NAV.xlsx kodex_sectors.json'
+          file_pattern: 'dataset.csv charts/*.png index.html wrap.html universe.html portfolio_data.json Wrap_NAV.xlsx kodex_sectors.json'
           skip_fetch: true
