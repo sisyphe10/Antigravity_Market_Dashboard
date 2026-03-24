@@ -197,6 +197,10 @@ def get_item_category(item_name):
     if 'Uranium' in item_name or 'URA' in item_name:
         return 'COMMODITIES'
 
+    # KRX GOLD Trading Volume
+    if 'KRX' in item_name and 'GOLD' in item_name:
+        return 'COMMODITIES'
+
     # Special handling for Wrap portfolios
     wrap_keywords = ['트루밸류', '삼성 트루밸류', 'Value ESG', 'NH Value ESG',
                      '개방형', 'DB 개방형', '목표전환형 2차', 'DB 목표전환형 2차']
@@ -1172,7 +1176,8 @@ def create_dashboard():
                     'Natural Gas',
                     'Wheat Futures',
                     'Sprott Physical Uranium Trust',
-                    'SCFI Comprehensive Index'  # Shipping moved here
+                    'SCFI Comprehensive Index',
+                    'KRX GOLD Trading Volume'
                 ]
             
             # Exchange Rate order
