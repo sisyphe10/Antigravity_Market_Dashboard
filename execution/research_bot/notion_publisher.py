@@ -39,22 +39,15 @@ def publish_to_notion(summary_markdown, date_str, topics, stocks, critical_image
     date_compact = date_str.replace('-', '')
     title = f"{date_compact}_Research Notes"
 
-    blocks = markdown_to_blocks(summary_markdown)
-
-    # 엄중 이미지
+    # 엄중 이미지를 GitHub에 업로드하고 URL 맵 생성
+    img_url_map = {}  # {idx: url}
     if critical_images:
-        blocks.append({"object": "block", "type": "divider", "divider": {}})
-        blocks.append({
-            "object": "block", "type": "heading_2",
-            "heading_2": {"rich_text": [{"text": {"content": "첨부 이미지 (엄중)"}}]}
-        })
         for img_path, img_idx in critical_images:
-            img_url = upload_image_to_github(img_path, date_str, img_idx)
-            if img_url:
-                blocks.append({
-                    "object": "block", "type": "image",
-                    "image": {"type": "external", "external": {"url": img_url}}
-                })
+            url = upload_image_to_github(img_path, date_str, img_idx)
+            if url:
+                img_url_map[img_idx] = url
+
+    blocks = markdown_to_blocks(summary_markdown, img_url_map)
 
     existing_page_id = _find_existing_page(database_id, date_str)
 
@@ -172,8 +165,10 @@ def upload_image_to_github(file_path, date_str, img_idx):
         return None
 
 
-def markdown_to_blocks(md_text):
+def markdown_to_blocks(md_text, img_url_map=None):
     """마크다운 텍스트를 Notion 블록 리스트로 변환"""
+    if img_url_map is None:
+        img_url_map = {}
     blocks = []
     lines = md_text.split('\n')
     i = 0
@@ -188,6 +183,19 @@ def markdown_to_blocks(md_text):
         if stripped.startswith('토픽:') or stripped.startswith('토픽 :'):
             continue
         if stripped.startswith('종목:') or stripped.startswith('종목 :'):
+            continue
+        if stripped.startswith('엄중이미지:') or stripped.startswith('엄중이미지 :'):
+            continue
+
+        # [IMG:N] 이미지 삽입 마커
+        img_match = re.match(r'^\[IMG:(\d+)\]$', stripped)
+        if img_match:
+            idx = int(img_match.group(1))
+            if idx in img_url_map:
+                blocks.append({
+                    "object": "block", "type": "image",
+                    "image": {"type": "external", "external": {"url": img_url_map[idx]}}
+                })
             continue
 
         # 마크다운 테이블 감지 (| 로 시작하는 행)
