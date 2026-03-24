@@ -36,8 +36,9 @@ def summarize_daily_notes(messages, date_str):
             parts.append(f"[기사 본문]\n{msg['article_content']}")
         notes_parts.append('\n'.join(parts))
 
-        # 이미지가 있으면 Vision용 블록 추가
-        if msg.get('media_path') and msg['message_type'] in ('photo', 'document'):
+        # 이미지가 있으면 Vision용 블록 추가 (이미지 파일만, PDF 등 제외)
+        img_exts = ('.jpg', '.jpeg', '.png', '.gif', '.webp')
+        if msg.get('media_path') and msg['message_type'] in ('photo', 'document') and msg['media_path'].lower().endswith(img_exts):
             img_data, media_type = _encode_image(msg['media_path'])
             if img_data:
                 notes_parts.append(f"[이미지 {i} 첨부 - 아래 참조]")
