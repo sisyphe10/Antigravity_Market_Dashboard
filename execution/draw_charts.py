@@ -150,7 +150,10 @@ def draw_charts():
             # Color: Black (no dynamic coloring)
             
             # 1. Format Price
-            if abs(latest_price) >= 1000:
+            if 'Trading Volume' in name:
+                # 거래대금은 억원 단위로 표시
+                price_str = f"{latest_price / 1e8:,.0f}억"
+            elif abs(latest_price) >= 1000:
                 price_str = f"{latest_price:,.0f}"
             elif abs(latest_price) >= 1:
                 price_str = f"{latest_price:,.2f}"
@@ -189,7 +192,10 @@ def draw_charts():
 
             # Y-axis: Smart formatting with ~8 ticks
             ax.yaxis.set_major_locator(MaxNLocator(nbins=8, prune='both'))
-            ax.yaxis.set_major_formatter(FuncFormatter(smart_format_yaxis))
+            if 'Trading Volume' in name:
+                ax.yaxis.set_major_formatter(FuncFormatter(lambda y, p: f'{y/1e8:.0f}억' if y >= 1e8 else f'{y/1e4:.0f}만' if y >= 1e4 else f'{y:,.0f}'))
+            else:
+                ax.yaxis.set_major_formatter(FuncFormatter(smart_format_yaxis))
 
             # Y-axis tight margins
             ax.margins(y=0.02)
