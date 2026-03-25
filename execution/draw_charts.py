@@ -157,10 +157,10 @@ def draw_charts():
             # 이동평균선 (20일, 120일) - 라인/바 모두 적용
             if len(filtered_data) >= 20:
                 ma20 = filtered_data['가격'].rolling(window=20).mean()
-                ax.plot(filtered_data['날짜'], ma20, color='#DC2626', linewidth=1.5, alpha=0.7)
+                ax.plot(filtered_data['날짜'], ma20, color='#DC2626', linewidth=2, alpha=0.7)
             if len(filtered_data) >= 120:
                 ma120 = filtered_data['가격'].rolling(window=120).mean()
-                ax.plot(filtered_data['날짜'], ma120, color='#1B5E20', linewidth=1.5, alpha=0.7)
+                ax.plot(filtered_data['날짜'], ma120, color='#1B5E20', linewidth=2, alpha=0.7)
             
             # Single-line Title Implementation
             # Format: Name | Price (WoW)
