@@ -1178,7 +1178,7 @@ def create_dashboard():
                     'Wheat Futures',
                     'Sprott Physical Uranium Trust',
                     'SCFI Comprehensive Index',
-                    'KRX ETS (KAU25)',
+                    'KRX ETS  KAU25',
                     'KRX ETS Trading Volume'
                 ]
             
