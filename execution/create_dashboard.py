@@ -197,8 +197,8 @@ def get_item_category(item_name):
     if 'Uranium' in item_name or 'URA' in item_name:
         return 'COMMODITIES'
 
-    # KRX GOLD Trading Volume
-    if 'KRX' in item_name and 'GOLD' in item_name:
+    # KRX GOLD / ETS
+    if 'KRX' in item_name and ('GOLD' in item_name or 'ETS' in item_name):
         return 'COMMODITIES'
 
     # Special handling for Wrap portfolios
@@ -1177,7 +1177,9 @@ def create_dashboard():
                     'Wheat Futures',
                     'Sprott Physical Uranium Trust',
                     'SCFI Comprehensive Index',
-                    'KRX GOLD Trading Volume'
+                    'KRX GOLD Trading Volume',
+                    'KRX ETS (KAU25)',
+                    'KRX ETS Trading Volume'
                 ]
             
             # Exchange Rate order

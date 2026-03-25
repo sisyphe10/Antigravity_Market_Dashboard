@@ -76,9 +76,9 @@ jobs:
         env:
            TZ: 'Asia/Seoul'
 
-      - name: Fetch KRX Gold Trading Data
+      - name: Fetch KRX Data (Gold + ETS)
         run: |
-          python execution/fetch_krx_gold.py || echo "KRX 금 데이터 수집 실패 (계속 진행)"
+          python execution/fetch_krx_data.py || echo "KRX 데이터 수집 실패 (계속 진행)"
         env:
            TZ: 'Asia/Seoul'
 
