@@ -721,9 +721,9 @@ def _build_wrap_chart_section(category_label):
                 <div style="flex:1;">
                     <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;font-size:13px;">
                         <span style="color:#555;font-weight:600;">기간</span>
-                        <input type="date" id="wrapStartDate" value="{first_date}" onchange="updateWrapChart()" style="font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;">
+                        <input type="text" id="wrapStartDate" value="{first_date}" onchange="updateWrapChart()" style="font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                         <span style="color:#888;">~</span>
-                        <input type="date" id="wrapEndDate" value="{last_date}" onchange="updateWrapChart()" style="font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;">
+                        <input type="text" id="wrapEndDate" value="{last_date}" onchange="updateWrapChart()" style="font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                     </div>
                     <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                         <canvas id="wrapDynamicChart" style="width:100%;height:500px;"></canvas>
@@ -913,7 +913,7 @@ def create_wrap_returns_table():
                 for p in periods:
                     col = f'{key}_{p}'
                     val = row.get(col)
-                    row_data[col] = None if (isinstance(val, float) and pd.isna(val)) else str(val)
+                    row_data[col] = None if (val is None or (isinstance(val, float) and pd.isna(val))) else str(val)
             all_data[date_str] = row_data
             date_list.append(date_str)
 
@@ -924,7 +924,7 @@ def create_wrap_returns_table():
         earliest_date = date_list[0]
 
         def cell_td(val, cell_id):
-            s = val if val and val != 'nan' else ''
+            s = val if val and val != 'nan' and val != 'None' else ''
             if not s:
                 return f'<td id="{cell_id}" class="rt-cell rt-na">-</td>'
             try:
