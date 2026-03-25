@@ -245,6 +245,7 @@ def read_portfolio_sectors(stock_sector_map):
         portfolio_map = {
             '트루밸류': '삼성 트루밸류',
             '목표전환형 2차': 'DB 목표전환형 2차',
+            '목표전환형 1호': 'NH 목표전환형 1호',
         }
 
         today = pd.Timestamp.now().normalize()
@@ -531,6 +532,7 @@ def _build_wrap_chart_section(category_label):
             ('NH Value ESG', 'Value ESG'),
             ('DB 개방형', '개방형 랩'),
             ('DB 목표전환형 2차', '목표전환형 2차'),
+            ('NH 목표전환형 1호', '목표전환형 1호'),
             ('KOSPI', 'KOSPI'),
             ('KOSDAQ', 'KOSDAQ'),
         ]
@@ -539,6 +541,7 @@ def _build_wrap_chart_section(category_label):
             'NH Value ESG': '#0072CE',
             'DB 개방형': '#00854A',
             'DB 목표전환형 2차': 'rgba(0,133,74,0.8)',
+            'NH 목표전환형 1호': 'rgba(0,114,206,0.6)',
             'KOSPI': '#000000',
             'KOSDAQ': '#666666',
         }
@@ -892,6 +895,7 @@ def create_wrap_returns_table():
         items = [
             ('삼성 트루밸류', '트루밸류'),
             ('DB 목표전환형 2차', '목표전환형 2차'),
+            ('NH 목표전환형 1호', '목표전환형 1호'),
             ('KOSPI', 'KOSPI'),
             ('KOSDAQ', 'KOSDAQ'),
         ]

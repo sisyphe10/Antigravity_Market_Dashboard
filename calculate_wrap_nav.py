@@ -23,6 +23,7 @@ portfolio_config = {
     '개방형 랩': {'base_price': 1518.52, 'start_date': '2025-12-30'},
     # '목표전환형': {'base_price': 1000.00, 'start_date': '2026-02-11'},  # 1차 완료 (6% 목표달성)
     '목표전환형 2차': {'base_price': 1000.00, 'start_date': '2026-03-16'},
+    '목표전환형 1호': {'base_price': 1000.00, 'start_date': '2026-03-25'},
 }
 initial_base_prices = {k: v['base_price'] for k, v in portfolio_config.items()}
 initial_start_date_str = min(cfg['start_date'] for cfg in portfolio_config.values())
