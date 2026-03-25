@@ -153,6 +153,13 @@ def draw_charts():
                 ax.bar(filtered_data['날짜'], filtered_data['가격'], color=LINE_COLOR, width=1.5, alpha=0.8)
             else:
                 ax.plot(filtered_data['날짜'], filtered_data['가격'], color=LINE_COLOR, label=label_text)
+                # 이동평균선 (20일, 120일)
+                if len(filtered_data) >= 20:
+                    ma20 = filtered_data['가격'].rolling(window=20).mean()
+                    ax.plot(filtered_data['날짜'], ma20, color='#DC2626', linewidth=0.8, alpha=0.7)
+                if len(filtered_data) >= 120:
+                    ma120 = filtered_data['가격'].rolling(window=120).mean()
+                    ax.plot(filtered_data['날짜'], ma120, color='#059669', linewidth=0.8, alpha=0.7)
             
             # Single-line Title Implementation
             # Format: Name | Price (WoW)
