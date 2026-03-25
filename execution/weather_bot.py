@@ -208,7 +208,7 @@ async def portfolio_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             import os
             script_dir = os.path.dirname(os.path.abspath(__file__))
             parent_dir = os.path.dirname(script_dir)
-            subprocess.run(["git", "pull", "--rebase", "origin", "main"], cwd=parent_dir, capture_output=True, timeout=60)
+            subprocess.run(["git", "pull", "origin", "main"], cwd=parent_dir, capture_output=True, timeout=60)
             result_dash = subprocess.run(
                 [sys.executable, "execution/create_dashboard.py"],
                 cwd=parent_dir, capture_output=True, text=True, timeout=120
@@ -217,7 +217,7 @@ async def portfolio_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
                 subprocess.run(["git", "add", "index.html", "wrap.html"], cwd=parent_dir, capture_output=True, timeout=30)
                 subprocess.run(["git", "commit", "-m", f"포트폴리오 업데이트 ({now_str})"], cwd=parent_dir, capture_output=True, timeout=30)
-                subprocess.run(["git", "pull", "--rebase", "origin", "main"], cwd=parent_dir, capture_output=True, timeout=60)
+                subprocess.run(["git", "pull", "origin", "main"], cwd=parent_dir, capture_output=True, timeout=60)
                 subprocess.run(["git", "push"], cwd=parent_dir, capture_output=True, timeout=60)
                 logging.info("Dashboard updated via /portfolio command")
 
@@ -388,9 +388,9 @@ def run_portfolio_update():
     )
 
     if commit_result.returncode == 0:
-        # pull --rebase로 원격 변경사항 통합 후 push
+        # pull로 원격 변경사항 통합 후 push
         subprocess.run(
-            ["git", "pull", "--rebase", "origin", "main"],
+            ["git", "pull", "origin", "main"],
             cwd=dashboard_dir,
             capture_output=True,
             text=True,
@@ -629,7 +629,7 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
             cwd=parent_dir, capture_output=True, text=True, timeout=30
         )
         if commit_result.returncode == 0:
-            subprocess.run(["git", "pull", "--rebase", "origin", "main"], cwd=parent_dir, capture_output=True, timeout=60)
+            subprocess.run(["git", "pull", "origin", "main"], cwd=parent_dir, capture_output=True, timeout=60)
             subprocess.run(["git", "push"], cwd=parent_dir, capture_output=True, timeout=60)
             logging.info("Wrap_NAV.xlsx pushed to GitHub")
         else:
@@ -668,7 +668,7 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
                 cwd=parent_dir, capture_output=True, text=True, timeout=30
             )
             if commit_dash.returncode == 0:
-                subprocess.run(["git", "pull", "--rebase", "origin", "main"], cwd=parent_dir, capture_output=True, timeout=60)
+                subprocess.run(["git", "pull", "origin", "main"], cwd=parent_dir, capture_output=True, timeout=60)
                 subprocess.run(["git", "push"], cwd=parent_dir, capture_output=True, timeout=60)
                 logging.info("Dashboard updated and pushed")
         else:
@@ -752,7 +752,7 @@ def _nightly_refresh_sync():
     )
     if commit_result.returncode == 0:
         subprocess.run(
-            ["git", "pull", "--rebase", "origin", "main"],
+            ["git", "pull", "origin", "main"],
             cwd=dashboard_dir, capture_output=True, timeout=60
         )
         subprocess.run(

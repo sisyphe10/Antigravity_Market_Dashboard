@@ -33,21 +33,20 @@ def push():
             btn.config(state='normal', text='Push Wrap_NAV')
             return
 
-        # 3. git pull --rebase (충돌 시 우리 파일 유지)
+        # 3. git pull (충돌 시 우리 Wrap_NAV 유지)
         pull = subprocess.run(
-            ['git', 'pull', '--rebase', 'origin', 'main'],
+            ['git', 'pull', 'origin', 'main'],
             capture_output=True, text=True, timeout=30
         )
 
         if pull.returncode != 0:
-            # 충돌 발생 시 - Wrap_NAV는 우리 걸로, 나머지는 remote 걸로
+            # 충돌 발생 시 - Wrap_NAV는 우리 걸로 (merge에서 --ours = 로컬)
             subprocess.run(['git', 'checkout', '--ours', 'Wrap_NAV.xlsx'], capture_output=True, timeout=10)
             # 생성 파일들은 remote 걸로
             for f in ['index.html', 'wrap.html', 'portfolio_data.json', 'market_alert.html']:
                 subprocess.run(['git', 'checkout', '--theirs', f], capture_output=True, timeout=10)
             subprocess.run(['git', 'add', '-A'], capture_output=True, timeout=10)
-            subprocess.run(['git', '-c', 'core.editor=true', 'rebase', '--continue'],
-                         capture_output=True, timeout=10, env={**os.environ, 'GIT_EDITOR': 'true'})
+            subprocess.run(['git', 'commit', '--no-edit'], capture_output=True, timeout=10)
 
         # 4. git push
         push_result = subprocess.run(
