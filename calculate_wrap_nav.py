@@ -174,16 +174,53 @@ for code in all_codes:
     except:
         pass
 
-# 4-2. 시장 지수
+# 4-2. 시장 지수 (네이버 금융 → FDR 폴백)
 print("   - KOSPI, KOSDAQ 지수 수집 중...")
 df_indices = pd.DataFrame()
-for name, code in indices.items():
+
+def _fetch_naver_index(code, pages=15):
+    """네이버 금융 일별 시세에서 지수 종가 수집"""
+    import requests
+    from bs4 import BeautifulSoup
+    rows = []
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    for page in range(1, pages + 1):
+        try:
+            url = f'https://finance.naver.com/sise/sise_index_day.naver?code={code}&page={page}'
+            r = requests.get(url, headers=headers, timeout=10)
+            soup = BeautifulSoup(r.text, 'html.parser')
+            for tr in soup.select('table.type_1 tr'):
+                tds = tr.select('td')
+                if len(tds) >= 2:
+                    try:
+                        date = pd.to_datetime(tds[0].text.strip())
+                        close = float(tds[1].text.strip().replace(',', ''))
+                        rows.append({'Date': date, 'Close': close})
+                    except:
+                        pass
+        except:
+            break
+    if not rows:
+        return pd.Series(dtype=float)
+    df = pd.DataFrame(rows).drop_duplicates('Date').set_index('Date').sort_index()
+    return df['Close']
+
+naver_codes = {'KOSPI': 'KOSPI', 'KOSDAQ': 'KOSDAQ'}
+for name in indices:
     try:
-        d = fdr.DataReader(code, start=start_date)
-        if not d.empty:
-            df_indices[name] = d['Close']
-    except:
-        pass
+        s = _fetch_naver_index(naver_codes[name])
+        if not s.empty:
+            df_indices[name] = s
+            print(f"     {name}: 네이버 금융 ({len(s)}일)")
+    except Exception as e:
+        print(f"     {name}: 네이버 실패 ({e}), FDR 시도...")
+        try:
+            d = fdr.DataReader(indices[name], start=start_date)
+            if not d.empty:
+                df_indices[name] = d['Close']
+                print(f"     {name}: FDR ({len(d)}일)")
+        except:
+            pass
 
 if df_change.empty and df_indices.empty:
     print("\n[알림] 해당 기간의 데이터가 없습니다.")
