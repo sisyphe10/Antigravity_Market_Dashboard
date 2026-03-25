@@ -1715,6 +1715,7 @@ def create_dashboard():
             <a href="wrap.html" target="_blank" class="nav-button" style="background-color:#1e40af">📈 WRAP</a>
             <a href="market_alert.html" target="_blank" class="nav-button" style="background-color:#c2410c">🚦 투자유의종목</a>
             <a href="universe.html" target="_blank" class="nav-button" style="background-color:#6B21A8">🌐 Universe</a>
+            <a href="seibro.html" target="_blank" class="nav-button" style="background-color:#0369a1">🏦 SEIBro</a>
             <a href="architecture.html" target="_blank" class="nav-button">🗂️ Architecture</a>
         </div>
     </header>
@@ -2053,6 +2054,140 @@ function render(){
     with open('universe.html', 'w', encoding='utf-8') as f:
         f.write(universe_page)
     print("Universe page generated: universe.html")
+
+    # SEIBro page
+    seibro_data = df_dataset[df_dataset['제품명'] == 'SEIBro US Settlement (Buy)'].copy() if 'df_dataset' in dir() else pd.DataFrame()
+    if seibro_data.empty:
+        try:
+            _df = pd.read_csv('dataset.csv', encoding='utf-8-sig')
+            seibro_data = _df[_df['제품명'] == 'SEIBro US Settlement (Buy)'].copy()
+        except:
+            seibro_data = pd.DataFrame()
+
+    seibro_dates = []
+    seibro_vals = []
+    if not seibro_data.empty:
+        seibro_data['날짜'] = pd.to_datetime(seibro_data['날짜'])
+        seibro_data = seibro_data.sort_values('날짜')
+        seibro_dates = [d.strftime('%Y-%m-%d') for d in seibro_data['날짜']]
+        seibro_vals = [round(float(v) / 1000000, 1) for v in seibro_data['가격']]  # 백만달러 단위
+
+    seibro_json = json.dumps({'dates': seibro_dates, 'values': seibro_vals}, ensure_ascii=False)
+
+    seibro_page = """<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEIBro - US Settlement</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', 'Malgun Gothic', sans-serif; background: #f8f9fa; color: #333; }
+        header { background: #fff; padding: 24px; text-align: center; border-bottom: 1px solid #eee; position: relative; }
+        header h1 { font-size: 1.8rem; color: #0369a1; }
+        .nav-group { margin-top: 10px; }
+        .nav-button { display: inline-block; padding: 6px 16px; border-radius: 6px; text-decoration: none; color: #fff; font-size: 0.85rem; font-weight: 600; background: #333; }
+        .subtitle { color: #888; font-size: 0.85rem; margin-top: 4px; }
+        .content { padding: 24px; max-width: 1200px; margin: 0 auto; }
+        .chart-section { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .chart-section h2 { font-size: 1.1rem; color: #333; margin-bottom: 16px; }
+        .stats-row { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+        .stat-card { background: #fff; border-radius: 10px; padding: 16px 20px; flex: 1; min-width: 180px; border-left: 4px solid #0369a1; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .stat-card .label { font-size: 0.8rem; color: #888; margin-bottom: 4px; }
+        .stat-card .value { font-size: 1.4rem; font-weight: 700; color: #333; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        thead { background: #e9ecef; }
+        th { padding: 10px 12px; text-align: center; font-weight: 600; color: #000; border-bottom: 2px solid #000; }
+        td { padding: 9px 12px; border-bottom: 1px solid #dee2e6; text-align: center; }
+        tbody tr:hover { background: #f5f5f5; }
+        footer { text-align: center; padding: 24px; color: #999; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+<header>
+    <h1>SEIBro US Settlement</h1>
+    <div class="subtitle">Overseas Securities Settlement - Buy (US)</div>
+    <div class="nav-group">
+        <a href="index.html" class="nav-button">Dashboard</a>
+    </div>
+</header>
+<div class="content">
+    <div class="stats-row" id="statsRow"></div>
+    <div class="chart-section">
+        <h2>Daily Buy Settlement Amount (US)</h2>
+        <canvas id="seibroChart" style="width:100%;height:400px;"></canvas>
+    </div>
+    <div class="chart-section">
+        <h2>Daily Data</h2>
+        <div style="overflow-x:auto;">
+            <table>
+                <thead><tr><th>#</th><th>Date</th><th>Buy Settlement (M$)</th><th>vs Prev</th></tr></thead>
+                <tbody id="seibroTable"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<footer>Data source: SEIBro (seibro.or.kr)</footer>
+<script>
+var sData = SEIBRO_DATA_PLACEHOLDER;
+
+// Stats
+if (sData.values.length > 0) {
+    var latest = sData.values[sData.values.length - 1];
+    var avg = sData.values.reduce(function(a,b){return a+b;},0) / sData.values.length;
+    var max = Math.max.apply(null, sData.values);
+    var min = Math.min.apply(null, sData.values);
+    document.getElementById('statsRow').innerHTML =
+        '<div class="stat-card"><div class="label">Latest (' + sData.dates[sData.dates.length-1].slice(5) + ')</div><div class="value">' + latest.toFixed(1) + 'M$</div></div>' +
+        '<div class="stat-card"><div class="label">YTD Average</div><div class="value">' + avg.toFixed(1) + 'M$</div></div>' +
+        '<div class="stat-card" style="border-left-color:#cc0000"><div class="label">YTD Max</div><div class="value">' + max.toFixed(1) + 'M$</div></div>' +
+        '<div class="stat-card" style="border-left-color:#0055cc"><div class="label">YTD Min</div><div class="value">' + min.toFixed(1) + 'M$</div></div>';
+}
+
+// Chart
+new Chart(document.getElementById('seibroChart'), {
+    type: 'bar',
+    data: {
+        labels: sData.dates.map(function(d) { return d.slice(5); }),
+        datasets: [{
+            label: 'Buy Settlement',
+            data: sData.values,
+            backgroundColor: 'rgba(3,105,161,0.4)',
+            borderColor: '#0369a1',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: function(ctx) { return ctx.raw.toFixed(1) + 'M$'; } } }
+        },
+        scales: {
+            x: { ticks: { maxTicksLimit: 12, font: { size: 11 }, color: '#000' }, grid: { display: false } },
+            y: { ticks: { callback: function(v) { return v + 'M$'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' } }
+        }
+    }
+});
+
+// Table (newest first)
+var html = '';
+for (var i = sData.dates.length - 1; i >= 0; i--) {
+    var prev = i > 0 ? sData.values[i-1] : null;
+    var chg = prev ? ((sData.values[i] - prev) / prev * 100) : 0;
+    var chgStr = prev ? ((chg >= 0 ? '+' : '') + chg.toFixed(1) + '%') : '-';
+    var chgColor = chg > 0 ? 'color:#cc0000' : chg < 0 ? 'color:#0055cc' : '';
+    html += '<tr><td>' + (sData.dates.length - i) + '</td><td>' + sData.dates[i] + '</td><td>' + sData.values[i].toFixed(1) + '</td><td style="' + chgColor + '">' + chgStr + '</td></tr>';
+}
+document.getElementById('seibroTable').innerHTML = html;
+</script>
+</body>
+</html>""".replace('SEIBRO_DATA_PLACEHOLDER', seibro_json)
+
+    with open('seibro.html', 'w', encoding='utf-8') as f:
+        f.write(seibro_page)
+    print("SEIBro page generated: seibro.html")
 
 if __name__ == "__main__":
     create_dashboard()

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEIBro - US Settlement</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', 'Malgun Gothic', sans-serif; background: #f8f9fa; color: #333; }
+        header { background: #fff; padding: 24px; text-align: center; border-bottom: 1px solid #eee; position: relative; }
+        header h1 { font-size: 1.8rem; color: #0369a1; }
+        .nav-group { margin-top: 10px; }
+        .nav-button { display: inline-block; padding: 6px 16px; border-radius: 6px; text-decoration: none; color: #fff; font-size: 0.85rem; font-weight: 600; background: #333; }
+        .subtitle { color: #888; font-size: 0.85rem; margin-top: 4px; }
+        .content { padding: 24px; max-width: 1200px; margin: 0 auto; }
+        .chart-section { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .chart-section h2 { font-size: 1.1rem; color: #333; margin-bottom: 16px; }
+        .stats-row { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+        .stat-card { background: #fff; border-radius: 10px; padding: 16px 20px; flex: 1; min-width: 180px; border-left: 4px solid #0369a1; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .stat-card .label { font-size: 0.8rem; color: #888; margin-bottom: 4px; }
+        .stat-card .value { font-size: 1.4rem; font-weight: 700; color: #333; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        thead { background: #e9ecef; }
+        th { padding: 10px 12px; text-align: center; font-weight: 600; color: #000; border-bottom: 2px solid #000; }
+        td { padding: 9px 12px; border-bottom: 1px solid #dee2e6; text-align: center; }
+        tbody tr:hover { background: #f5f5f5; }
+        footer { text-align: center; padding: 24px; color: #999; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+<header>
+    <h1>SEIBro US Settlement</h1>
+    <div class="subtitle">Overseas Securities Settlement - Buy (US)</div>
+    <div class="nav-group">
+        <a href="index.html" class="nav-button">Dashboard</a>
+    </div>
+</header>
+<div class="content">
+    <div class="stats-row" id="statsRow"></div>
+    <div class="chart-section">
+        <h2>Daily Buy Settlement Amount (US)</h2>
+        <canvas id="seibroChart" style="width:100%;height:400px;"></canvas>
+    </div>
+    <div class="chart-section">
+        <h2>Daily Data</h2>
+        <div style="overflow-x:auto;">
+            <table>
+                <thead><tr><th>#</th><th>Date</th><th>Buy Settlement (M$)</th><th>vs Prev</th></tr></thead>
+                <tbody id="seibroTable"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<footer>Data source: SEIBro (seibro.or.kr)</footer>
+<script>
+var sData = {"dates": ["2026-01-01", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-12", "2026-02-13", "2026-02-16", "2026-02-18", "2026-02-19", "2026-02-20", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-02-27", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24"], "values": [649.4, 600.7, 1118.2, 1080.6, 860.5, 748.5, 810.1, 607.5, 607.9, 724.4, 969.9, 795.8, 0.0, 726.5, 1238.2, 1041.6, 860.6, 759.8, 1246.3, 771.7, 877.2, 1711.1, 1617.7, 1064.0, 1625.1, 1547.5, 1084.3, 1051.7, 741.2, 741.6, 665.6, 1047.6, 622.3, 601.5, 406.7, 657.3, 547.7, 938.6, 553.5, 621.7, 839.8, 938.3, 1147.9, 985.1, 696.9, 880.2, 888.4, 666.0, 627.4, 529.8, 741.4, 724.9, 573.2, 481.4, 728.5, 951.4, 1003.7]};
+
+// Stats
+if (sData.values.length > 0) {
+    var latest = sData.values[sData.values.length - 1];
+    var avg = sData.values.reduce(function(a,b){return a+b;},0) / sData.values.length;
+    var max = Math.max.apply(null, sData.values);
+    var min = Math.min.apply(null, sData.values);
+    document.getElementById('statsRow').innerHTML =
+        '<div class="stat-card"><div class="label">Latest (' + sData.dates[sData.dates.length-1].slice(5) + ')</div><div class="value">' + latest.toFixed(1) + 'M$</div></div>' +
+        '<div class="stat-card"><div class="label">YTD Average</div><div class="value">' + avg.toFixed(1) + 'M$</div></div>' +
+        '<div class="stat-card" style="border-left-color:#cc0000"><div class="label">YTD Max</div><div class="value">' + max.toFixed(1) + 'M$</div></div>' +
+        '<div class="stat-card" style="border-left-color:#0055cc"><div class="label">YTD Min</div><div class="value">' + min.toFixed(1) + 'M$</div></div>';
+}
+
+// Chart
+new Chart(document.getElementById('seibroChart'), {
+    type: 'bar',
+    data: {
+        labels: sData.dates.map(function(d) { return d.slice(5); }),
+        datasets: [{
+            label: 'Buy Settlement',
+            data: sData.values,
+            backgroundColor: 'rgba(3,105,161,0.4)',
+            borderColor: '#0369a1',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: function(ctx) { return ctx.raw.toFixed(1) + 'M$'; } } }
+        },
+        scales: {
+            x: { ticks: { maxTicksLimit: 12, font: { size: 11 }, color: '#000' }, grid: { display: false } },
+            y: { ticks: { callback: function(v) { return v + 'M$'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' } }
+        }
+    }
+});
+
+// Table (newest first)
+var html = '';
+for (var i = sData.dates.length - 1; i >= 0; i--) {
+    var prev = i > 0 ? sData.values[i-1] : null;
+    var chg = prev ? ((sData.values[i] - prev) / prev * 100) : 0;
+    var chgStr = prev ? ((chg >= 0 ? '+' : '') + chg.toFixed(1) + '%') : '-';
+    var chgColor = chg > 0 ? 'color:#cc0000' : chg < 0 ? 'color:#0055cc' : '';
+    html += '<tr><td>' + (sData.dates.length - i) + '</td><td>' + sData.dates[i] + '</td><td>' + sData.values[i].toFixed(1) + '</td><td style="' + chgColor + '">' + chgStr + '</td></tr>';
+}
+document.getElementById('seibroTable').innerHTML = html;
+</script>
+</body>
+</html>
