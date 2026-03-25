@@ -90,6 +90,9 @@ def draw_charts():
         grouped = df.groupby('제품명')
 
         for name, group in grouped:
+            # KRX 데이터는 fetch_krx_data.py에서 별도 차트 생성하므로 스킵
+            if name.startswith('KRX '):
+                continue
             # Filter data within the range
             mask = (group['날짜'] >= start_date) & (group['날짜'] <= global_latest_date)
             filtered_data = group.loc[mask].copy()
