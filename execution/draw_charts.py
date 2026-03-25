@@ -69,6 +69,10 @@ def draw_charts():
             print(f"Missing columns. Required: {required_cols}")
             return
 
+        # SEIBro 데이터 제외 (별도 대시보드에서 처리)
+        if '데이터 타입' in df.columns:
+            df = df[df['데이터 타입'] != 'SEIBro']
+
         # Convert date column to datetime
         df['날짜'] = pd.to_datetime(df['날짜'])
         
