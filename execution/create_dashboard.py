@@ -721,9 +721,9 @@ def _build_wrap_chart_section(category_label):
                 <div style="flex:1;">
                     <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;font-size:13px;">
                         <span style="color:#555;font-weight:600;">기간</span>
-                        <input type="text" id="wrapStartDate" value="{first_date}" onchange="updateWrapChart()" style="font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
+                        <input type="text" id="wrapStartDate" value="{first_date}" onchange="updateWrapChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                         <span style="color:#888;">~</span>
-                        <input type="text" id="wrapEndDate" value="{last_date}" onchange="updateWrapChart()" style="font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
+                        <input type="text" id="wrapEndDate" value="{last_date}" onchange="updateWrapChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                     </div>
                     <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                         <canvas id="wrapDynamicChart" style="width:100%;height:500px;"></canvas>
