@@ -2130,9 +2130,9 @@ function render(){
     <div class="section">
         <div class="date-bar">
             <label>기간</label>
-            <input type="text" id="sStartDate" value="{last_date}" placeholder="YYYY-MM-DD" onchange="refresh()">
+            <input type="text" id="sStartDate" value="{last_date}" placeholder="YYYY-MM-DD" oninput="tryRefresh()" onchange="refresh()">
             <span>~</span>
-            <input type="text" id="sEndDate" value="{last_date}" placeholder="YYYY-MM-DD" onchange="refresh()">
+            <input type="text" id="sEndDate" value="{last_date}" placeholder="YYYY-MM-DD" oninput="tryRefresh()" onchange="refresh()">
             <span id="dateInfo" style="color:#555;font-size:12px;"></span>
         </div>
         <div class="stats-row" id="statsRow"></div>
@@ -2152,6 +2152,12 @@ function render(){
 <script>
 var raw = {seibro_json};
 var topChart = null;
+
+function tryRefresh() {{
+    var s = document.getElementById('sStartDate').value;
+    var e = document.getElementById('sEndDate').value;
+    if (/^\d{{4}}-\d{{2}}-\d{{2}}$/.test(s) && /^\d{{4}}-\d{{2}}-\d{{2}}$/.test(e)) refresh();
+}}
 
 function refresh() {{
     var s = document.getElementById('sStartDate').value;
