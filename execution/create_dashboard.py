@@ -2153,10 +2153,15 @@ function render(){
 var raw = {seibro_json};
 var topChart = null;
 
+function fmtDate(el) {{
+    var v = el.value;
+    if (/^\d{{8}}$/.test(v)) {{ el.value = v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8); return true; }}
+    return /^\d{{4}}-\d{{2}}-\d{{2}}$/.test(v);
+}}
 function tryRefresh() {{
-    var s = document.getElementById('sStartDate').value;
-    var e = document.getElementById('sEndDate').value;
-    if (/^\d{{4}}-\d{{2}}-\d{{2}}$/.test(s) && /^\d{{4}}-\d{{2}}-\d{{2}}$/.test(e)) refresh();
+    var a = document.getElementById('sStartDate');
+    var b = document.getElementById('sEndDate');
+    if (fmtDate(a) && fmtDate(b)) refresh();
 }}
 
 function refresh() {{
