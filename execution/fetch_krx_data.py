@@ -78,7 +78,7 @@ if __name__ == '__main__':
 
     print("KRX 데이터 수집 중...")
     all_new = []
-    all_new += collect_product(df, 'KRX GOLD Trading Volume', 'COMMODITY', fetch_gold_volume)
+    all_new += collect_product(df, 'KRX Gold Trading Volume', 'COMMODITY', fetch_gold_volume)
     all_new += collect_product(df, 'KRX ETS (KAU25)', 'COMMODITY', fetch_ets_kau25_price)
     all_new += collect_product(df, 'KRX ETS Trading Volume', 'COMMODITY', fetch_ets_volume)
 

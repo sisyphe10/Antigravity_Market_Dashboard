@@ -1169,6 +1169,7 @@ def create_dashboard():
             elif category == 'COMMODITIES':
                 custom_order = [
                     'Gold',
+                    'KRX Gold Trading Volume',
                     'Silver',
                     'Copper',
                     'WTI Crude Oil',
@@ -1177,7 +1178,6 @@ def create_dashboard():
                     'Wheat Futures',
                     'Sprott Physical Uranium Trust',
                     'SCFI Comprehensive Index',
-                    'KRX GOLD Trading Volume',
                     'KRX ETS (KAU25)',
                     'KRX ETS Trading Volume'
                 ]
