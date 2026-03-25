@@ -1,6 +1,15 @@
 
 import pandas as pd
+import matplotlib
 import matplotlib.pyplot as plt
+
+# 한글 폰트 설정
+import platform
+if platform.system() == 'Windows':
+    matplotlib.rc('font', family='Malgun Gothic')
+else:
+    matplotlib.rc('font', family='NanumGothic')
+matplotlib.rcParams['axes.unicode_minus'] = False
 
 # Import shared configuration
 from config import CATEGORY_MAP
