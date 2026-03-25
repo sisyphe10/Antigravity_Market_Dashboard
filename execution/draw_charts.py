@@ -160,7 +160,7 @@ def draw_charts():
                 ax.plot(filtered_data['날짜'], ma20, color='#DC2626', linewidth=1.5, alpha=0.7)
             if len(filtered_data) >= 120:
                 ma120 = filtered_data['가격'].rolling(window=120).mean()
-                ax.plot(filtered_data['날짜'], ma120, color='#059669', linewidth=1.5, alpha=0.7)
+                ax.plot(filtered_data['날짜'], ma120, color='#1B5E20', linewidth=1.5, alpha=0.7)
             
             # Single-line Title Implementation
             # Format: Name | Price (WoW)
