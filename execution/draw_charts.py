@@ -139,8 +139,11 @@ def draw_charts():
             # Plotting
             fig, ax = plt.subplots(figsize=(10, 6))
             
-            # Plot line
-            ax.plot(filtered_data['날짜'], filtered_data['가격'], color=LINE_COLOR, label=label_text)
+            # Plot: bar chart for Trading Volume, line chart for others
+            if 'Trading Volume' in name:
+                ax.bar(filtered_data['날짜'], filtered_data['가격'], color=LINE_COLOR, width=1.5, alpha=0.8)
+            else:
+                ax.plot(filtered_data['날짜'], filtered_data['가격'], color=LINE_COLOR, label=label_text)
             
             # Single-line Title Implementation
             # Format: Name | Price (WoW)
