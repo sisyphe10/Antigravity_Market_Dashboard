@@ -2059,135 +2059,181 @@ function render(){
         f.write(universe_page)
     print("Universe page generated: universe.html")
 
-    # SEIBro page
-    seibro_data = df_dataset[df_dataset['제품명'] == 'SEIBro US Settlement (Buy)'].copy() if 'df_dataset' in dir() else pd.DataFrame()
-    if seibro_data.empty:
-        try:
-            _df = pd.read_csv('dataset.csv', encoding='utf-8-sig')
-            seibro_data = _df[_df['제품명'] == 'SEIBro US Settlement (Buy)'].copy()
-        except:
-            seibro_data = pd.DataFrame()
+    # SEIBro page - TOP 50 종목별 데이터
+    try:
+        _df = pd.read_csv('dataset.csv', encoding='utf-8-sig')
+        seibro_data = _df[_df['데이터 타입'] == 'SEIBro'].copy()
+    except:
+        seibro_data = pd.DataFrame()
 
-    seibro_dates = []
-    seibro_vals = []
+    seibro_records = []
     if not seibro_data.empty:
         seibro_data['날짜'] = pd.to_datetime(seibro_data['날짜'])
-        seibro_data = seibro_data.sort_values('날짜')
-        seibro_dates = [d.strftime('%Y-%m-%d') for d in seibro_data['날짜']]
-        seibro_vals = [round(float(v) / 1000000, 1) for v in seibro_data['가격']]  # 백만달러 단위
+        for _, row in seibro_data.iterrows():
+            seibro_records.append({
+                'd': row['날짜'].strftime('%Y-%m-%d'),
+                'n': row['제품명'],
+                'v': int(row['가격']),
+            })
 
-    seibro_json = json.dumps({'dates': seibro_dates, 'values': seibro_vals}, ensure_ascii=False)
+    seibro_json = json.dumps(seibro_records, ensure_ascii=False)
+    seibro_dates_sorted = sorted(set(r['d'] for r in seibro_records))
+    last_date = seibro_dates_sorted[-1] if seibro_dates_sorted else ''
+    first_date = seibro_dates_sorted[0] if seibro_dates_sorted else ''
 
-    seibro_page = """<!DOCTYPE html>
+    seibro_page = f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SEIBro - US Settlement</title>
+    <title>SEIBro - US Settlement TOP 50</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', 'Malgun Gothic', sans-serif; background: #f8f9fa; color: #333; }
-        header { background: #fff; padding: 24px; text-align: center; border-bottom: 1px solid #eee; position: relative; }
-        header h1 { font-size: 1.8rem; color: #0369a1; }
-        .nav-group { margin-top: 10px; }
-        .nav-button { display: inline-block; padding: 6px 16px; border-radius: 6px; text-decoration: none; color: #fff; font-size: 0.85rem; font-weight: 600; background: #333; }
-        .subtitle { color: #888; font-size: 0.85rem; margin-top: 4px; }
-        .content { padding: 24px; max-width: 1200px; margin: 0 auto; }
-        .chart-section { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-        .chart-section h2 { font-size: 1.1rem; color: #333; margin-bottom: 16px; }
-        .stats-row { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
-        .stat-card { background: #fff; border-radius: 10px; padding: 16px 20px; flex: 1; min-width: 180px; border-left: 4px solid #0369a1; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-        .stat-card .label { font-size: 0.8rem; color: #888; margin-bottom: 4px; }
-        .stat-card .value { font-size: 1.4rem; font-weight: 700; color: #333; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        thead { background: #e9ecef; }
-        th { padding: 10px 12px; text-align: center; font-weight: 600; color: #000; border-bottom: 2px solid #000; }
-        td { padding: 9px 12px; border-bottom: 1px solid #dee2e6; text-align: center; }
-        tbody tr:hover { background: #f5f5f5; }
-        footer { text-align: center; padding: 24px; color: #999; font-size: 0.8rem; }
+        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+        body {{ font-family: 'Segoe UI', 'Malgun Gothic', sans-serif; background: #f8f9fa; color: #333; }}
+        header {{ background: #fff; padding: 24px; text-align: center; border-bottom: 1px solid #eee; }}
+        header h1 {{ font-size: 1.8rem; color: #0369a1; }}
+        .nav-group {{ margin-top: 10px; }}
+        .nav-button {{ display: inline-block; padding: 6px 16px; border-radius: 6px; text-decoration: none; color: #fff; font-size: 0.85rem; font-weight: 600; background: #333; }}
+        .subtitle {{ color: #888; font-size: 0.85rem; margin-top: 4px; }}
+        .content {{ padding: 24px; max-width: 1200px; margin: 0 auto; }}
+        .section {{ background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }}
+        .section h2 {{ font-size: 1.1rem; color: #333; margin-bottom: 16px; }}
+        .date-bar {{ display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 13px; flex-wrap: wrap; }}
+        .date-bar input {{ font-family: inherit; font-size: 13px; padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 6px; background: #f9fafb; color: #222; width: 110px; text-align: center; }}
+        .date-bar span {{ color: #888; }}
+        .date-bar label {{ color: #555; font-weight: 600; }}
+        .stats-row {{ display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }}
+        .stat-card {{ background: #fff; border-radius: 10px; padding: 16px 20px; flex: 1; min-width: 160px; border-left: 4px solid #0369a1; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }}
+        .stat-card .label {{ font-size: 0.8rem; color: #888; margin-bottom: 4px; }}
+        .stat-card .value {{ font-size: 1.3rem; font-weight: 700; color: #333; }}
+        table {{ width: 100%; border-collapse: collapse; font-size: 0.9rem; }}
+        thead {{ background: #e9ecef; }}
+        th {{ padding: 10px 12px; text-align: center; font-weight: 600; color: #000; border-bottom: 2px solid #000; }}
+        td {{ padding: 9px 12px; border-bottom: 1px solid #dee2e6; }}
+        td.name {{ text-align: left; max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
+        td.num {{ text-align: right; font-variant-numeric: tabular-nums; }}
+        td.rank {{ text-align: center; font-weight: 600; }}
+        tbody tr:hover {{ background: #f5f5f5; }}
+        footer {{ text-align: center; padding: 24px; color: #999; font-size: 0.8rem; }}
     </style>
 </head>
 <body>
 <header>
-    <h1>SEIBro US Settlement</h1>
-    <div class="subtitle">Overseas Securities Settlement - Buy (US)</div>
+    <h1>SEIBro US Settlement TOP 50</h1>
+    <div class="subtitle">Overseas Securities Buy Settlement - US Market</div>
     <div class="nav-group">
         <a href="index.html" class="nav-button">Dashboard</a>
     </div>
 </header>
 <div class="content">
-    <div class="stats-row" id="statsRow"></div>
-    <div class="chart-section">
-        <h2>Daily Buy Settlement Amount (US)</h2>
-        <div style="position:relative;height:400px;"><canvas id="seibroChart"></canvas></div>
+    <div class="section">
+        <div class="date-bar">
+            <label>기간</label>
+            <input type="text" id="sStartDate" value="{last_date}" placeholder="YYYY-MM-DD" onchange="refresh()">
+            <span>~</span>
+            <input type="text" id="sEndDate" value="{last_date}" placeholder="YYYY-MM-DD" onchange="refresh()">
+            <span id="dateInfo" style="color:#555;font-size:12px;"></span>
+        </div>
+        <div class="stats-row" id="statsRow"></div>
+        <div style="position:relative;height:400px;"><canvas id="topChart"></canvas></div>
     </div>
-    <div class="chart-section">
-        <h2>Daily Data</h2>
+    <div class="section">
+        <h2 id="tableTitle">TOP 50</h2>
         <div style="overflow-x:auto;">
             <table>
-                <thead><tr><th>#</th><th>Date</th><th>Buy Settlement (M$)</th><th>vs Prev</th></tr></thead>
-                <tbody id="seibroTable"></tbody>
+                <thead><tr><th style="width:40px">#</th><th style="text-align:left">Stock</th><th style="text-align:right">Buy Amount (USD)</th><th style="text-align:right">Share</th></tr></thead>
+                <tbody id="topTable"></tbody>
             </table>
         </div>
     </div>
 </div>
 <footer>Data source: SEIBro (seibro.or.kr)</footer>
 <script>
-var sData = SEIBRO_DATA_PLACEHOLDER;
+var raw = {seibro_json};
+var topChart = null;
 
-// Stats
-if (sData.values.length > 0) {
-    var latest = sData.values[sData.values.length - 1];
-    var avg = sData.values.reduce(function(a,b){return a+b;},0) / sData.values.length;
-    var max = Math.max.apply(null, sData.values);
-    var min = Math.min.apply(null, sData.values);
-    document.getElementById('statsRow').innerHTML =
-        '<div class="stat-card"><div class="label">Latest (' + sData.dates[sData.dates.length-1].slice(5) + ')</div><div class="value">' + latest.toFixed(1) + 'M$</div></div>' +
-        '<div class="stat-card"><div class="label">YTD Average</div><div class="value">' + avg.toFixed(1) + 'M$</div></div>' +
-        '<div class="stat-card" style="border-left-color:#cc0000"><div class="label">YTD Max</div><div class="value">' + max.toFixed(1) + 'M$</div></div>' +
-        '<div class="stat-card" style="border-left-color:#0055cc"><div class="label">YTD Min</div><div class="value">' + min.toFixed(1) + 'M$</div></div>';
-}
+function refresh() {{
+    var s = document.getElementById('sStartDate').value;
+    var e = document.getElementById('sEndDate').value;
+    var filtered = raw.filter(function(r) {{ return r.d >= s && r.d <= e; }});
 
-// Chart
-new Chart(document.getElementById('seibroChart'), {
-    type: 'bar',
-    data: {
-        labels: sData.dates.map(function(d) { return d.slice(5); }),
-        datasets: [{
-            label: 'Buy Settlement',
-            data: sData.values,
-            backgroundColor: 'rgba(3,105,161,0.4)',
-            borderColor: '#0369a1',
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false },
-            tooltip: { callbacks: { label: function(ctx) { return ctx.raw.toFixed(1) + 'M$'; } } }
-        },
-        scales: {
-            x: { ticks: { maxTicksLimit: 12, font: { size: 11 }, color: '#000' }, grid: { display: false } },
-            y: { ticks: { callback: function(v) { return v + 'M$'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' } }
-        }
-    }
-});
+    // Aggregate by stock name
+    var agg = {{}};
+    filtered.forEach(function(r) {{
+        if (!agg[r.n]) agg[r.n] = 0;
+        agg[r.n] += r.v;
+    }});
 
-// Table (newest first)
-var html = '';
-for (var i = sData.dates.length - 1; i >= 0; i--) {
-    var prev = i > 0 ? sData.values[i-1] : null;
-    var chg = prev ? ((sData.values[i] - prev) / prev * 100) : 0;
-    var chgStr = prev ? ((chg >= 0 ? '+' : '') + chg.toFixed(1) + '%') : '-';
-    var chgColor = chg > 0 ? 'color:#cc0000' : chg < 0 ? 'color:#0055cc' : '';
-    html += '<tr><td>' + (sData.dates.length - i) + '</td><td>' + sData.dates[i] + '</td><td>' + sData.values[i].toFixed(1) + '</td><td style="' + chgColor + '">' + chgStr + '</td></tr>';
-}
-document.getElementById('seibroTable').innerHTML = html;
+    // Sort and take top 50
+    var sorted = Object.keys(agg).map(function(k) {{ return {{name: k, val: agg[k]}}; }});
+    sorted.sort(function(a, b) {{ return b.val - a.val; }});
+    var top50 = sorted.slice(0, 50);
+
+    var total = top50.reduce(function(a, b) {{ return a + b.val; }}, 0);
+    var totalAll = sorted.reduce(function(a, b) {{ return a + b.val; }}, 0);
+
+    // Count unique dates
+    var dates = {{}};
+    filtered.forEach(function(r) {{ dates[r.d] = 1; }});
+    var nDays = Object.keys(dates).length;
+    var isSingle = (s === e);
+
+    document.getElementById('dateInfo').textContent = isSingle ? '' : nDays + '거래일 합산';
+
+    // Stats
+    var statsHtml = '<div class="stat-card"><div class="label">TOP 50 합산</div><div class="value">' + fmtM(total) + '</div></div>';
+    if (top50.length > 0) {{
+        statsHtml += '<div class="stat-card" style="border-left-color:#cc0000"><div class="label">1위</div><div class="value" style="font-size:1rem;">' + shortName(top50[0].name) + '</div></div>';
+        statsHtml += '<div class="stat-card"><div class="label">1위 금액</div><div class="value">' + fmtM(top50[0].val) + '</div></div>';
+    }}
+    document.getElementById('statsRow').innerHTML = statsHtml;
+    document.getElementById('tableTitle').textContent = isSingle ? s + ' TOP 50' : s + ' ~ ' + e + ' 합산 TOP 50';
+
+    // Chart (horizontal bar, top 20)
+    var chartData = top50.slice(0, 20);
+    if (topChart) topChart.destroy();
+    topChart = new Chart(document.getElementById('topChart'), {{
+        type: 'bar',
+        data: {{
+            labels: chartData.map(function(d) {{ return shortName(d.name); }}),
+            datasets: [{{
+                data: chartData.map(function(d) {{ return Math.round(d.val / 1000000); }}),
+                backgroundColor: 'rgba(3,105,161,0.5)',
+                borderColor: '#0369a1',
+                borderWidth: 1
+            }}]
+        }},
+        options: {{
+            indexAxis: 'y',
+            responsive: true, maintainAspectRatio: false,
+            plugins: {{
+                legend: {{ display: false }},
+                tooltip: {{ callbacks: {{ label: function(ctx) {{ return ctx.raw.toLocaleString() + 'M$'; }} }} }}
+            }},
+            scales: {{
+                x: {{ ticks: {{ callback: function(v) {{ return v.toLocaleString() + 'M$'; }}, font: {{ size: 11 }}, color: '#000' }}, grid: {{ color: '#eee' }} }},
+                y: {{ ticks: {{ font: {{ size: 11 }}, color: '#000' }}, grid: {{ display: false }} }}
+            }}
+        }}
+    }});
+
+    // Table
+    var html = '';
+    top50.forEach(function(d, i) {{
+        var pct = total > 0 ? (d.val / total * 100).toFixed(1) + '%' : '';
+        html += '<tr><td class="rank">' + (i + 1) + '</td><td class="name">' + d.name + '</td><td class="num">' + d.val.toLocaleString() + '</td><td class="num">' + pct + '</td></tr>';
+    }});
+    document.getElementById('topTable').innerHTML = html || '<tr><td colspan="4" style="padding:40px;color:#888;text-align:center;">데이터 없음</td></tr>';
+}}
+
+function fmtM(v) {{ return (v / 1000000).toFixed(0).replace(/\\B(?=(\\d{{3}})+(?!\\d))/g, ',') + 'M$'; }}
+function shortName(n) {{ return n.length > 25 ? n.substring(0, 25) + '...' : n; }}
+
+refresh();
 </script>
 </body>
-</html>""".replace('SEIBRO_DATA_PLACEHOLDER', seibro_json)
+</html>"""
 
     with open('seibro.html', 'w', encoding='utf-8') as f:
         f.write(seibro_page)

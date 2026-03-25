@@ -723,6 +723,12 @@ def _nightly_refresh_sync():
         cwd=dashboard_dir, capture_output=True, text=True, timeout=180
     )
 
+    # SEIBro TOP 50 수집 (D-1)
+    subprocess.run(
+        [sys.executable, "execution/fetch_seibro_data.py"],
+        cwd=dashboard_dir, capture_output=True, text=True, timeout=600
+    )
+
     # 투자유의종목 페이지 재생성
     subprocess.run(
         [sys.executable, "execution/create_market_alert.py"],
@@ -737,7 +743,7 @@ def _nightly_refresh_sync():
 
     # Git push
     subprocess.run(
-        ["git", "add", "portfolio_data.json", "index.html", "wrap.html", "market_alert.html"],
+        ["git", "add", "portfolio_data.json", "index.html", "wrap.html", "market_alert.html", "seibro.html", "dataset.csv"],
         cwd=dashboard_dir, capture_output=True, timeout=30
     )
     commit_result = subprocess.run(
@@ -1036,12 +1042,12 @@ if __name__ == '__main__':
         kst = pytz.timezone('Asia/Seoul')
         weather_time = datetime.time(hour=5, minute=0, second=0, tzinfo=kst)
         calendar_time = datetime.time(hour=5, minute=10, second=0, tzinfo=kst)
-        portfolio_time = datetime.time(hour=15, minute=40, second=0, tzinfo=kst)
+        portfolio_time = datetime.time(hour=16, minute=0, second=0, tzinfo=kst)
         nightly_time = datetime.time(hour=23, minute=0, second=0, tzinfo=kst)
     except:
         weather_time = datetime.time(hour=5, minute=0, second=0)
         calendar_time = datetime.time(hour=5, minute=10, second=0)
-        portfolio_time = datetime.time(hour=15, minute=40, second=0)
+        portfolio_time = datetime.time(hour=16, minute=0, second=0)
         nightly_time = datetime.time(hour=23, minute=0, second=0)
 
     job_queue.run_daily(daily_weather_job, time=weather_time)
@@ -1078,7 +1084,7 @@ if __name__ == '__main__':
     print(f"✅ Daily jobs scheduled:")
     print(f"  - Weather: 05:00 KST")
     print(f"  - Calendar: 05:10 KST")
-    print(f"  - Portfolio report: 15:40 KST")
+    print(f"  - Portfolio report: 16:00 KST")
     print(f"  - Auto portfolio update: 09:30~15:35 KST (30분 간격, 거래일만)")
     print(f"  - Nightly portfolio refresh: 23:00 KST (당일 주문 반영)")
     application.run_polling()
