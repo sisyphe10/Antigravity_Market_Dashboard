@@ -152,7 +152,7 @@ def draw_charts():
             if 'Trading Volume' in name:
                 ax.bar(filtered_data['날짜'], filtered_data['가격'], color=LINE_COLOR, width=1.5, alpha=0.3)
             else:
-                ax.plot(filtered_data['날짜'], filtered_data['가격'], color=LINE_COLOR, label=label_text)
+                ax.plot(filtered_data['날짜'], filtered_data['가격'], color=LINE_COLOR, linewidth=2, label=label_text)
 
             # 이동평균선 (20일, 120일) - 라인/바 모두 적용
             if len(filtered_data) >= 20:
