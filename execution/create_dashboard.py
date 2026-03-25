@@ -2120,7 +2120,7 @@ function render(){
     <div class="stats-row" id="statsRow"></div>
     <div class="chart-section">
         <h2>Daily Buy Settlement Amount (US)</h2>
-        <canvas id="seibroChart" style="width:100%;height:400px;"></canvas>
+        <div style="position:relative;height:400px;"><canvas id="seibroChart"></canvas></div>
     </div>
     <div class="chart-section">
         <h2>Daily Data</h2>
