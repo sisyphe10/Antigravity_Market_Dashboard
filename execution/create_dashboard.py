@@ -15,7 +15,7 @@ from config import CATEGORY_MAP, CSV_FILE
 
 # Version 3.0 - Added category grouping
 CHARTS_DIR = 'charts'
-OUTPUT_FILE = 'index.html'
+OUTPUT_FILE = 'market.html'
 def create_portfolio_tables_html():
     """포트폴리오 테이블 HTML 생성"""
     portfolio_file = 'portfolio_data.json'
@@ -1716,11 +1716,7 @@ def create_dashboard():
         <h1>📊 Market Data Dashboard</h1>
         <div class="last-updated">Updated: {now}</div>
         <div class="nav-group">
-            <a href="wrap.html" target="_blank" class="nav-button" style="background-color:#1e40af">📈 WRAP</a>
-            <a href="market_alert.html" target="_blank" class="nav-button" style="background-color:#c2410c">🚦 투자유의종목</a>
-            <a href="universe.html" target="_blank" class="nav-button" style="background-color:#6B21A8">🌐 Universe</a>
-            <a href="seibro.html" target="_blank" class="nav-button" style="background-color:#0369a1">🏦 SEIBro</a>
-            <a href="architecture.html" target="_blank" class="nav-button">🗂️ Architecture</a>
+            <a href="index.html" class="nav-button" style="background-color:#333">🏠 Home</a>
         </div>
     </header>
 
@@ -1737,6 +1733,70 @@ def create_dashboard():
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
         f.write(html_content)
     print(f"Dashboard generated: {OUTPUT_FILE}")
+
+    # ── Generate index.html (Landing page) ──
+    landing_page = f"""<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antigravity Dashboard</title>
+    <style>
+        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+        body {{ font-family: 'Segoe UI', 'Malgun Gothic', sans-serif; background: #f8f9fa; color: #333; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }}
+        h1 {{ font-size: 2.2rem; font-weight: 800; margin-bottom: 8px; color: #111; }}
+        .subtitle {{ color: #888; font-size: 0.9rem; margin-bottom: 48px; }}
+        .cards {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; max-width: 800px; width: 100%; }}
+        .card {{ background: #fff; border-radius: 14px; padding: 28px 24px; text-decoration: none; color: #333; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-left: 5px solid #ccc; transition: transform 0.15s, box-shadow 0.15s; display: block; }}
+        .card:hover {{ transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }}
+        .card .icon {{ font-size: 1.8rem; margin-bottom: 12px; }}
+        .card .title {{ font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; }}
+        .card .desc {{ font-size: 0.8rem; color: #888; line-height: 1.4; }}
+        footer {{ margin-top: 48px; color: #bbb; font-size: 0.75rem; }}
+    </style>
+</head>
+<body>
+    <h1>Antigravity</h1>
+    <div class="subtitle">Updated: {now}</div>
+    <div class="cards">
+        <a href="market.html" class="card" style="border-left-color:#2d7a3a">
+            <div class="icon">📊</div>
+            <div class="title">Market</div>
+            <div class="desc">Memory, Commodity, Crypto, FX, Index, Interest Rates</div>
+        </a>
+        <a href="wrap.html" class="card" style="border-left-color:#1e40af">
+            <div class="icon">📈</div>
+            <div class="title">WRAP</div>
+            <div class="desc">Chart, Return, AUM, Portfolio</div>
+        </a>
+        <a href="market_alert.html" class="card" style="border-left-color:#c2410c">
+            <div class="icon">🚦</div>
+            <div class="title">투자유의종목</div>
+            <div class="desc">투자주의 · 투자경고 · 투자위험 현황</div>
+        </a>
+        <a href="universe.html" class="card" style="border-left-color:#6B21A8">
+            <div class="icon">🌐</div>
+            <div class="title">Universe</div>
+            <div class="desc">투자 유니버스 종목 리스트</div>
+        </a>
+        <a href="seibro.html" class="card" style="border-left-color:#0369a1">
+            <div class="icon">🏦</div>
+            <div class="title">SEIBro</div>
+            <div class="desc">US 매수결제 TOP 50</div>
+        </a>
+        <a href="architecture.html" class="card" style="border-left-color:#666">
+            <div class="icon">🗂️</div>
+            <div class="title">Architecture</div>
+            <div class="desc">워크플로우 아키텍처</div>
+        </a>
+    </div>
+    <footer>Antigravity Agent</footer>
+</body>
+</html>"""
+
+    with open('index.html', 'w', encoding='utf-8') as f:
+        f.write(landing_page)
+    print("Landing page generated: index.html")
 
     # ── Generate wrap.html (WRAP + Portfolio + Sector) ──
     wrap_page = f"""<!DOCTYPE html>
