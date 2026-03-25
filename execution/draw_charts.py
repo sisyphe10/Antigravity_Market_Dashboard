@@ -150,7 +150,7 @@ def draw_charts():
             
             # Plot: bar chart for Trading Volume, line chart for others
             if 'Trading Volume' in name:
-                ax.bar(filtered_data['날짜'], filtered_data['가격'], color=LINE_COLOR, width=1.5, alpha=0.3)
+                ax.bar(filtered_data['날짜'], filtered_data['가격'], color=LINE_COLOR, width=1.5, alpha=0.3, edgecolor='none')
             else:
                 ax.plot(filtered_data['날짜'], filtered_data['가격'], color=LINE_COLOR, linewidth=2, label=label_text)
 
