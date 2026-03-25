@@ -1169,7 +1169,7 @@ def create_dashboard():
             elif category == 'COMMODITIES':
                 custom_order = [
                     'Gold',
-                    'KRX Gold Trading Volume',
+                    'KRX GOLD Trading Volume',
                     'Silver',
                     'Copper',
                     'WTI Crude Oil',
