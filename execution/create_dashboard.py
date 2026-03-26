@@ -871,7 +871,7 @@ def create_aum_table():
                     </table>
                 </div>
                 <div style="flex:1;background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
-                    <canvas id="aumStackedChart" style="width:100%;height:300px;"></canvas>
+                    <div style="position:relative;height:300px;"><canvas id="aumStackedChart"></canvas></div>
                 </div>
             </div>
         </div>
