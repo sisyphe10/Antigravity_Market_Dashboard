@@ -603,7 +603,7 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache):
         .header-right {{ display: flex; align-items: center; gap: 16px; }}
         .last-updated {{ color: #9ca3af; font-size: 0.8rem; }}
         .back-btn {{
-            padding: 6px 16px; background: #2d7a3a; color: #fff;
+            padding: 6px 16px; background: #333; color: #fff;
             text-decoration: none; border-radius: 6px;
             font-size: 0.85rem; font-weight: 600;
         }}
@@ -650,7 +650,7 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache):
         <h1>🚦 투자유의종목 현황</h1>
         <div class="header-right">
             <span class="last-updated">Updated: {now}</span>
-            <a href="index.html" class="back-btn">← Dashboard</a>
+            <a href="index.html" class="back-btn">🏠 Home</a>
         </div>
     </header>
 

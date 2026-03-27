@@ -1938,7 +1938,7 @@ def create_dashboard():
         <h1>📈 WRAP</h1>
         <div class="last-updated">Updated: {now}</div>
         <div class="nav-group">
-            <a href="index.html" class="nav-button">← Dashboard</a>
+            <a href="index.html" class="nav-button" style="background-color:#333">🏠 Home</a>
         </div>
     </header>
 
@@ -2018,7 +2018,7 @@ def create_dashboard():
 <header style="position:relative;">
     <h1>Universe</h1>
     <div class="nav-group">
-        <a href="index.html" class="nav-button">← Dashboard</a>
+        <a href="index.html" class="nav-button" style="background-color:#333">🏠 Home</a>
     </div>
     <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="position:absolute;top:24px;right:24px;color:#6B21A8;font-size:0.8rem;text-decoration:none;border:1px solid #6B21A8;padding:4px 14px;border-radius:16px;">Google Sheet 열기</a>
 </header>
@@ -2183,7 +2183,7 @@ function render(){
     <h1>SEIBro US Settlement TOP 50</h1>
     <div class="subtitle">Overseas Securities Buy Settlement - US Market</div>
     <div class="nav-group">
-        <a href="index.html" class="nav-button">Dashboard</a>
+        <a href="index.html" class="nav-button" style="background-color:#333">🏠 Home</a>
     </div>
 </header>
 <div class="content">

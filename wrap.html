@@ -135,9 +135,9 @@
     <div id="mainContent" class="pw-hidden">
     <header>
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-03-27 16:32:14 KST</div>
+        <div class="last-updated">Updated: 2026-03-27 16:42:27 KST</div>
         <div class="nav-group">
-            <a href="index.html" class="nav-button">← Dashboard</a>
+            <a href="index.html" class="nav-button" style="background-color:#333">🏠 Home</a>
         </div>
     </header>
 
@@ -398,12 +398,12 @@
                             <th>AUM</th>
                             <th>기준일</th>
                         </tr></thead>
-                        <tbody><tr><td>삼성</td><td>트루밸류</td><td>476억</td><td>03/25</td></tr>
-<tr><td>NH</td><td>목표전환형 1호</td><td>134억</td><td>03/25</td></tr>
-<tr><td>NH</td><td>다이내믹밸류</td><td>70억</td><td>03/25</td></tr>
-<tr><td>DB</td><td>개방형 랩</td><td>80억</td><td>03/25</td></tr>
-<tr><td>DB</td><td>목표전환형 2차</td><td>28억</td><td>03/25</td></tr>
-<tr style="border-top:2px solid #000;font-weight:700;"><td colspan="2">합계</td><td>788억</td><td></td></tr></tbody>
+                        <tbody><tr><td>삼성</td><td>트루밸류</td><td>459억</td><td>03/26</td></tr>
+<tr><td>NH</td><td>목표전환형 1호</td><td>136억</td><td>03/27</td></tr>
+<tr><td>NH</td><td>다이내믹밸류</td><td>67억</td><td>03/27</td></tr>
+<tr><td>DB</td><td>개방형 랩</td><td>78억</td><td>03/26</td></tr>
+<tr><td>DB</td><td>목표전환형 2차</td><td>27억</td><td>03/26</td></tr>
+<tr style="border-top:2px solid #000;font-weight:700;"><td colspan="2">합계</td><td>767억</td><td></td></tr></tbody>
                     </table>
                 </div>
                 <div style="flex:1;background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
@@ -414,7 +414,7 @@
         
         <script>
         (function() {
-            var aumData = {"dates": ["2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25"], "datasets": [{"label": "삼성 트루밸류", "data": [497, 462, 468, 476], "backgroundColor": "rgba(20,40,160,1.0)"}, {"label": "NH 목표전환형 1호", "data": [15, 50, 113, 134], "backgroundColor": "rgba(0,114,206,1.0)"}, {"label": "NH 다이내믹밸류", "data": [74, 69, 69, 70], "backgroundColor": "rgba(0,114,206,0.6)"}, {"label": "DB 개방형 랩", "data": [76, 75, 77, 80], "backgroundColor": "rgba(0,133,74,1.0)"}, {"label": "DB 목표전환형 2차", "data": [29, 28, 28, 28], "backgroundColor": "rgba(0,133,74,0.6)"}]};
+            var aumData = {"dates": ["2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27"], "datasets": [{"label": "삼성 트루밸류", "data": [497, 462, 468, 476, 459, 0], "backgroundColor": "rgba(20,40,160,1.0)"}, {"label": "NH 목표전환형 1호", "data": [15, 50, 113, 134, 136, 136], "backgroundColor": "rgba(0,114,206,1.0)"}, {"label": "NH 다이내믹밸류", "data": [74, 69, 69, 70, 67, 67], "backgroundColor": "rgba(0,114,206,0.6)"}, {"label": "DB 개방형 랩", "data": [76, 75, 77, 80, 78, 0], "backgroundColor": "rgba(0,133,74,1.0)"}, {"label": "DB 목표전환형 2차", "data": [29, 28, 28, 28, 27, 0], "backgroundColor": "rgba(0,133,74,0.6)"}]};
             var totalLabelPlugin = {
                 id: 'totalLabels',
                 afterDatasetsDraw: function(chart) {
@@ -1199,6 +1199,20 @@
                         </td>
                     </tr>
                     <tr>
+                        <td class="sect-name">제약</td>
+                        <td class="sect-num">5.0%</td>
+                        <td class="sect-num">4.8%</td>
+                        <td class="sect-diff">+0.2%</td>
+                        <td class="sect-diff sect-under">-16.5%</td>
+                    </tr>
+                    <tr class="sect-detail-row">
+                        <td colspan="5" class="sect-detail">
+                            <span class="sect-detail-mine">한미약품</span>
+                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
+                            <span class="sect-detail-bm">삼성바이오로직스, 셀트리온, 삼천당제약</span>
+                        </td>
+                    </tr>
+                    <tr>
                         <td class="sect-name">금속</td>
                         <td class="sect-num">5.0%</td>
                         <td class="sect-num">2.0%</td>
@@ -1210,20 +1224,6 @@
                             <span class="sect-detail-mine">씨에스윈드</span>
                             <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
                             <span class="sect-detail-bm">고려아연, POSCO홀딩스, LIG넥스원</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">기계·장비</td>
-                        <td class="sect-num">5.0%</td>
-                        <td class="sect-num">3.8%</td>
-                        <td class="sect-diff">+1.2%</td>
-                        <td class="sect-diff sect-under">-4.9%</td>
-                    </tr>
-                    <tr class="sect-detail-row">
-                        <td colspan="5" class="sect-detail">
-                            <span class="sect-detail-mine">두산에너빌리티</span>
-                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
-                            <span class="sect-detail-bm">두산에너빌리티, 한미반도체, 레인보우로보틱스</span>
                         </td>
                     </tr>
                     <tr>
@@ -1241,17 +1241,17 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="sect-name">제약</td>
+                        <td class="sect-name">기계·장비</td>
                         <td class="sect-num">5.0%</td>
-                        <td class="sect-num">4.8%</td>
-                        <td class="sect-diff">+0.2%</td>
-                        <td class="sect-diff sect-under">-16.5%</td>
+                        <td class="sect-num">3.8%</td>
+                        <td class="sect-diff">+1.2%</td>
+                        <td class="sect-diff sect-under">-4.9%</td>
                     </tr>
                     <tr class="sect-detail-row">
                         <td colspan="5" class="sect-detail">
-                            <span class="sect-detail-mine">한미약품</span>
+                            <span class="sect-detail-mine">두산에너빌리티</span>
                             <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
-                            <span class="sect-detail-bm">삼성바이오로직스, 셀트리온, 삼천당제약</span>
+                            <span class="sect-detail-bm">두산에너빌리티, 한미반도체, 레인보우로보틱스</span>
                         </td>
                     </tr>
                     <tr>
@@ -1520,17 +1520,17 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="sect-name">금속</td>
+                        <td class="sect-name">오락·문화</td>
                         <td class="sect-num">3.0%</td>
-                        <td class="sect-num">2.0%</td>
-                        <td class="sect-diff">+1.0%</td>
-                        <td class="sect-diff sect-under">-15.3%</td>
+                        <td class="sect-num">0.6%</td>
+                        <td class="sect-diff">+2.4%</td>
+                        <td class="sect-diff sect-under">-23.2%</td>
                     </tr>
                     <tr class="sect-detail-row">
                         <td colspan="5" class="sect-detail">
-                            <span class="sect-detail-mine">씨에스윈드</span>
+                            <span class="sect-detail-mine">하이브</span>
                             <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
-                            <span class="sect-detail-bm">고려아연, POSCO홀딩스, LIG넥스원</span>
+                            <span class="sect-detail-bm">하이브, 강원랜드, 에스엠</span>
                         </td>
                     </tr>
                     <tr>
@@ -1548,17 +1548,17 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="sect-name">오락·문화</td>
+                        <td class="sect-name">금속</td>
                         <td class="sect-num">3.0%</td>
-                        <td class="sect-num">0.6%</td>
-                        <td class="sect-diff">+2.4%</td>
-                        <td class="sect-diff sect-under">-23.2%</td>
+                        <td class="sect-num">2.0%</td>
+                        <td class="sect-diff">+1.0%</td>
+                        <td class="sect-diff sect-under">-15.3%</td>
                     </tr>
                     <tr class="sect-detail-row">
                         <td colspan="5" class="sect-detail">
-                            <span class="sect-detail-mine">하이브</span>
+                            <span class="sect-detail-mine">씨에스윈드</span>
                             <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
-                            <span class="sect-detail-bm">하이브, 강원랜드, 에스엠</span>
+                            <span class="sect-detail-bm">고려아연, POSCO홀딩스, LIG넥스원</span>
                         </td>
                     </tr>
                     <tr>
@@ -1729,20 +1729,6 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="sect-name">일반서비스</td>
-                        <td class="sect-num">5.0%</td>
-                        <td class="sect-num">2.0%</td>
-                        <td class="sect-diff">+3.0%</td>
-                        <td class="sect-diff sect-under">-14.4%</td>
-                    </tr>
-                    <tr class="sect-detail-row">
-                        <td colspan="5" class="sect-detail">
-                            <span class="sect-detail-mine">알지노믹스</span>
-                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
-                            <span class="sect-detail-bm">알테오젠, SK바이오팜, HD현대마린솔루션</span>
-                        </td>
-                    </tr>
-                    <tr>
                         <td class="sect-name">제약</td>
                         <td class="sect-num">5.0%</td>
                         <td class="sect-num">4.8%</td>
@@ -1754,6 +1740,20 @@
                             <span class="sect-detail-mine">한미약품</span>
                             <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
                             <span class="sect-detail-bm">삼성바이오로직스, 셀트리온, 삼천당제약</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="sect-name">일반서비스</td>
+                        <td class="sect-num">5.0%</td>
+                        <td class="sect-num">2.0%</td>
+                        <td class="sect-diff">+3.0%</td>
+                        <td class="sect-diff sect-under">-14.4%</td>
+                    </tr>
+                    <tr class="sect-detail-row">
+                        <td colspan="5" class="sect-detail">
+                            <span class="sect-detail-mine">알지노믹스</span>
+                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
+                            <span class="sect-detail-bm">알테오젠, SK바이오팜, HD현대마린솔루션</span>
                         </td>
                     </tr>
                     <tr>
