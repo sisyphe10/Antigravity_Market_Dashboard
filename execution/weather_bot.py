@@ -24,6 +24,29 @@ DASHBOARD_DIR = os.path.join(os.path.expanduser('~'), 'Antigravity_Market_Dashbo
 
 SUBSCRIBERS_FILE = os.path.join(DASHBOARD_DIR, 'subscribers.json')
 
+
+def git_sync(cwd):
+    """VM git 동기화: fetch + reset --hard (충돌 불가)"""
+    subprocess.run(["git", "fetch", "origin", "main"], cwd=cwd, capture_output=True, timeout=60)
+    subprocess.run(["git", "reset", "--hard", "origin/main"], cwd=cwd, capture_output=True, timeout=30)
+
+
+def git_push_safe(cwd):
+    """커밋 후 push: 실패 시 fetch+rebase+push 재시도, 그래도 실패 시 abort"""
+    result = subprocess.run(["git", "push"], cwd=cwd, capture_output=True, text=True, timeout=60)
+    if result.returncode == 0:
+        return True
+    # push 실패 → fetch + rebase 시도
+    subprocess.run(["git", "fetch", "origin", "main"], cwd=cwd, capture_output=True, timeout=60)
+    rebase = subprocess.run(["git", "rebase", "origin/main"], cwd=cwd, capture_output=True, text=True, timeout=60)
+    if rebase.returncode != 0:
+        subprocess.run(["git", "rebase", "--abort"], cwd=cwd, capture_output=True, timeout=10)
+        logging.warning("git push failed: rebase conflict, aborted")
+        return False
+    result2 = subprocess.run(["git", "push"], cwd=cwd, capture_output=True, text=True, timeout=60)
+    return result2.returncode == 0
+
+
 def load_subscribers():
     if os.path.exists(SUBSCRIBERS_FILE):
         with open(SUBSCRIBERS_FILE, 'r') as f:
@@ -208,7 +231,7 @@ async def portfolio_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             import os
             script_dir = os.path.dirname(os.path.abspath(__file__))
             parent_dir = os.path.dirname(script_dir)
-            subprocess.run(["git", "pull", "origin", "main"], cwd=parent_dir, capture_output=True, timeout=60)
+            git_sync(parent_dir)
             result_dash = subprocess.run(
                 [sys.executable, "execution/create_dashboard.py"],
                 cwd=parent_dir, capture_output=True, text=True, timeout=120
@@ -217,8 +240,7 @@ async def portfolio_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
                 subprocess.run(["git", "add", "index.html", "market.html", "wrap.html"], cwd=parent_dir, capture_output=True, timeout=30)
                 subprocess.run(["git", "commit", "-m", f"포트폴리오 업데이트 ({now_str})"], cwd=parent_dir, capture_output=True, timeout=30)
-                subprocess.run(["git", "pull", "origin", "main"], cwd=parent_dir, capture_output=True, timeout=60)
-                subprocess.run(["git", "push"], cwd=parent_dir, capture_output=True, timeout=60)
+                git_push_safe(parent_dir)
                 logging.info("Dashboard updated via /portfolio command")
 
     except subprocess.TimeoutExpired:
@@ -388,23 +410,8 @@ def run_portfolio_update():
     )
 
     if commit_result.returncode == 0:
-        # pull로 원격 변경사항 통합 후 push
-        subprocess.run(
-            ["git", "pull", "origin", "main"],
-            cwd=dashboard_dir,
-            capture_output=True,
-            text=True,
-            timeout=60
-        )
-        push_result = subprocess.run(
-            ["git", "push"],
-            cwd=dashboard_dir,
-            capture_output=True,
-            text=True,
-            timeout=60
-        )
-        if push_result.returncode != 0:
-            logging.warning(f"Git push failed: {push_result.stderr}")
+        if not git_push_safe(dashboard_dir):
+            logging.warning("Git push failed after commit")
     else:
         logging.info(f"No changes to commit: {commit_result.stdout}")
 
@@ -570,13 +577,7 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
 
         # 0. 최신 Wrap_NAV.xlsx 받기 (로컬 PC에서 push한 내용 반영)
         logging.info("Step 0: Pulling latest data from GitHub...")
-        subprocess.run(
-            ["git", "pull", "origin", "main"],
-            cwd=parent_dir,
-            capture_output=True,
-            text=True,
-            timeout=60
-        )
+        git_sync(parent_dir)
 
         # 1. 기준가 업데이트 (검증 실패 시 1회 재시도)
         logging.info("Step 1: Updating NAV prices...")
@@ -629,8 +630,7 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
             cwd=parent_dir, capture_output=True, text=True, timeout=30
         )
         if commit_result.returncode == 0:
-            subprocess.run(["git", "pull", "origin", "main"], cwd=parent_dir, capture_output=True, timeout=60)
-            subprocess.run(["git", "push"], cwd=parent_dir, capture_output=True, timeout=60)
+            git_push_safe(parent_dir)
             logging.info("Wrap_NAV.xlsx pushed to GitHub")
         else:
             logging.info("No changes to Wrap_NAV.xlsx to commit")
@@ -668,8 +668,7 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
                 cwd=parent_dir, capture_output=True, text=True, timeout=30
             )
             if commit_dash.returncode == 0:
-                subprocess.run(["git", "pull", "origin", "main"], cwd=parent_dir, capture_output=True, timeout=60)
-                subprocess.run(["git", "push"], cwd=parent_dir, capture_output=True, timeout=60)
+                git_push_safe(parent_dir)
                 logging.info("Dashboard updated and pushed")
         else:
             logging.error(f"Dashboard generation failed: {result_dashboard.stderr}")
@@ -712,10 +711,7 @@ def _nightly_refresh_sync():
     now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
 
     # 최신 Wrap_NAV.xlsx 받기
-    subprocess.run(
-        ["git", "pull", "origin", "main"],
-        cwd=dashboard_dir, capture_output=True, timeout=60
-    )
+    git_sync(dashboard_dir)
 
     # portfolio_data.json 재생성 (23:00 이후이므로 당일 데이터 포함)
     subprocess.run(
@@ -751,14 +747,7 @@ def _nightly_refresh_sync():
         cwd=dashboard_dir, capture_output=True, text=True, timeout=30
     )
     if commit_result.returncode == 0:
-        subprocess.run(
-            ["git", "pull", "origin", "main"],
-            cwd=dashboard_dir, capture_output=True, timeout=60
-        )
-        subprocess.run(
-            ["git", "push"],
-            cwd=dashboard_dir, capture_output=True, timeout=60
-        )
+        git_push_safe(dashboard_dir)
         logging.info("Nightly portfolio data pushed to GitHub")
     else:
         logging.info("Nightly refresh: no changes to commit")
