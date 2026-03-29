@@ -244,36 +244,29 @@ def markdown_to_blocks(md_text, img_url_map=None):
         # Heading 2
         if stripped.startswith('## '):
             h2_text = stripped[3:]
-            if '[중요]' in h2_text:
-                h2_text = h2_text.replace('[중요]', '').strip()
-                blocks.append({
-                    "object": "block", "type": "heading_2",
-                    "heading_2": {"rich_text": [{"text": {"content": h2_text}, "annotations": {"color": "red"}}]}
-                })
-            else:
-                blocks.append({
-                    "object": "block", "type": "heading_2",
-                    "heading_2": {"rich_text": [{"text": {"content": h2_text}}]}
-                })
+            is_red = '{RED}' in h2_text
+            h2_text = h2_text.replace('{RED}', '').strip()
+            annotations = {"color": "red"} if is_red else {}
+            blocks.append({
+                "object": "block", "type": "heading_2",
+                "heading_2": {"rich_text": [{"text": {"content": h2_text}, "annotations": annotations}] if annotations else [{"text": {"content": h2_text}}]}
+            })
         # Heading 3
         elif stripped.startswith('### '):
             h3_text = stripped[4:]
-            if '[중요]' in h3_text:
-                h3_text = h3_text.replace('[중요]', '').strip()
-                blocks.append({
-                    "object": "block", "type": "heading_3",
-                    "heading_3": {"rich_text": [{"text": {"content": h3_text}, "annotations": {"color": "red"}}]}
-                })
-            else:
-                blocks.append({
-                    "object": "block", "type": "heading_3",
-                    "heading_3": {"rich_text": [{"text": {"content": h3_text}}]}
-                })
+            is_red = '{RED}' in h3_text
+            h3_text = h3_text.replace('{RED}', '').strip()
+            annotations = {"color": "red"} if is_red else {}
+            blocks.append({
+                "object": "block", "type": "heading_3",
+                "heading_3": {"rich_text": [{"text": {"content": h3_text}, "annotations": annotations}] if annotations else [{"text": {"content": h3_text}}]}
+            })
         # Bullet list
         elif stripped.startswith('- ') or stripped.startswith('* '):
             bullet_text = stripped[2:]
-            if bullet_text.startswith('[!] '):
-                bullet_text = bullet_text[4:]
+            is_red = bullet_text.startswith('{RED}')
+            bullet_text = bullet_text.replace('{RED}', '').strip()
+            if is_red:
                 blocks.append({
                     "object": "block",
                     "type": "bulleted_list_item",
