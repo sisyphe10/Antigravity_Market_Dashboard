@@ -28,8 +28,8 @@ def _find_existing_page(database_id, date_str):
     return None
 
 
-def publish_to_notion(summary_markdown, date_str, topics, stocks, critical_images=None):
-    """Notion 데이터베이스에 일별 리서치 요약 페이지 생성/업데이트 (엄중 이미지 포함)"""
+def publish_to_notion(summary_markdown, date_str, topics, stocks, images=None):
+    """Notion 데이터베이스에 일별 리서치 요약 페이지 생성/업데이트 (이미지 포함)"""
     notion = Client(auth=os.getenv("NOTION_API_KEY"))
     database_id = os.getenv("NOTION_DATABASE_ID")
 
@@ -39,10 +39,10 @@ def publish_to_notion(summary_markdown, date_str, topics, stocks, critical_image
     date_compact = date_str.replace('-', '')
     title = f"{date_compact}_Research Notes"
 
-    # 엄중 이미지를 GitHub에 업로드하고 URL 맵 생성
+    # 이미지를 GitHub에 업로드하고 URL 맵 생성
     img_url_map = {}  # {idx: url}
-    if critical_images:
-        for img_path, img_idx in critical_images:
+    if images:
+        for img_path, img_idx in images:
             url = upload_image_to_github(img_path, date_str, img_idx)
             if url:
                 img_url_map[img_idx] = url
@@ -184,6 +184,8 @@ def markdown_to_blocks(md_text, img_url_map=None):
             continue
         if stripped.startswith('종목:') or stripped.startswith('종목 :'):
             continue
+        if stripped.startswith('이미지:') or stripped.startswith('이미지 :'):
+            continue
         if stripped.startswith('엄중이미지:') or stripped.startswith('엄중이미지 :'):
             continue
 
@@ -242,27 +244,13 @@ def markdown_to_blocks(md_text, img_url_map=None):
         # Heading 2
         if stripped.startswith('## '):
             h2_text = stripped[3:]
-            if '[엄중]' in h2_text:
-                h2_text = h2_text.replace('[엄중]', '').strip()
-                blocks.append({
-                    "object": "block", "type": "heading_2",
-                    "heading_2": {"rich_text": [{"text": {"content": h2_text}, "annotations": {"color": "red"}}]}
-                })
-            else:
-                blocks.append({
-                    "object": "block", "type": "heading_2",
-                    "heading_2": {"rich_text": [{"text": {"content": h2_text}}]}
-                })
+            blocks.append({
+                "object": "block", "type": "heading_2",
+                "heading_2": {"rich_text": [{"text": {"content": h2_text}}]}
+            })
         # Heading 3
         elif stripped.startswith('### '):
             h3_text = stripped[4:]
-            if '[엄중]' in h3_text:
-                h3_text = h3_text.replace('[엄중]', '').strip()
-                blocks.append({
-                    "object": "block", "type": "heading_3",
-                    "heading_3": {"rich_text": [{"text": {"content": h3_text}, "annotations": {"color": "red"}}]}
-                })
-            else:
                 blocks.append({
                     "object": "block", "type": "heading_3",
                     "heading_3": {"rich_text": [{"text": {"content": h3_text}}]}
