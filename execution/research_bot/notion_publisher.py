@@ -244,24 +244,47 @@ def markdown_to_blocks(md_text, img_url_map=None):
         # Heading 2
         if stripped.startswith('## '):
             h2_text = stripped[3:]
-            blocks.append({
-                "object": "block", "type": "heading_2",
-                "heading_2": {"rich_text": [{"text": {"content": h2_text}}]}
-            })
+            if '[중요]' in h2_text:
+                h2_text = h2_text.replace('[중요]', '').strip()
+                blocks.append({
+                    "object": "block", "type": "heading_2",
+                    "heading_2": {"rich_text": [{"text": {"content": h2_text}, "annotations": {"color": "red"}}]}
+                })
+            else:
+                blocks.append({
+                    "object": "block", "type": "heading_2",
+                    "heading_2": {"rich_text": [{"text": {"content": h2_text}}]}
+                })
         # Heading 3
         elif stripped.startswith('### '):
             h3_text = stripped[4:]
+            if '[중요]' in h3_text:
+                h3_text = h3_text.replace('[중요]', '').strip()
+                blocks.append({
+                    "object": "block", "type": "heading_3",
+                    "heading_3": {"rich_text": [{"text": {"content": h3_text}, "annotations": {"color": "red"}}]}
+                })
+            else:
                 blocks.append({
                     "object": "block", "type": "heading_3",
                     "heading_3": {"rich_text": [{"text": {"content": h3_text}}]}
                 })
         # Bullet list
         elif stripped.startswith('- ') or stripped.startswith('* '):
-            blocks.append({
-                "object": "block",
-                "type": "bulleted_list_item",
-                "bulleted_list_item": {"rich_text": parse_rich_text(stripped[2:])}
-            })
+            bullet_text = stripped[2:]
+            if bullet_text.startswith('[!] '):
+                bullet_text = bullet_text[4:]
+                blocks.append({
+                    "object": "block",
+                    "type": "bulleted_list_item",
+                    "bulleted_list_item": {"rich_text": [{"text": {"content": bullet_text}, "annotations": {"color": "red"}}]}
+                })
+            else:
+                blocks.append({
+                    "object": "block",
+                    "type": "bulleted_list_item",
+                    "bulleted_list_item": {"rich_text": parse_rich_text(bullet_text)}
+                })
         # Numbered list
         elif re.match(r'^\d+\.\s', stripped):
             content = re.sub(r'^\d+\.\s', '', stripped)
