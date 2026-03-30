@@ -790,7 +790,7 @@ async def daily_weather_job(context: ContextTypes.DEFAULT_TYPE):
                 for h in headlines:
                     title = h.get('title', '') if isinstance(h, dict) else h
                     summary = h.get('summary', '') if isinstance(h, dict) else ''
-                    msg += f"• <b>{title}</b>\n"
+                    msg += f"- <b>{title}</b>\n"
                     if summary:
                         msg += f"  {summary}\n"
                 for chat_id in SUBSCRIBERS:
