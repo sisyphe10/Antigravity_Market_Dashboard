@@ -961,12 +961,16 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 if len(r) >= 2:
                     if r[0] == '지출': expense_cats.append(r[1])
                     elif r[0] == '수입': income_cats.append(r[1])
-            cat_msg = "━━━━━━━━━━━━━━━\n<b>📂 카테고리</b>\n━━━━━━━━━━━━━━━\n"
-            if expense_cats:
-                cat_msg += f"🔴 <b>지출</b>: {', '.join(expense_cats)}\n"
-            if income_cats:
-                cat_msg += f"🟠 <b>수입</b>: {', '.join(income_cats)}\n"
-            cat_msg += "\n"
+            cat_msg = "<pre>"
+            cat_msg += "┌──────┬──────────────┐\n"
+            cat_msg += "│ 유형 │ 카테고리     │\n"
+            cat_msg += "├──────┼──────────────┤\n"
+            for c in expense_cats:
+                cat_msg += f"│ 지출 │ {c:<12} │\n"
+            for c in income_cats:
+                cat_msg += f"│ 수입 │ {c:<12} │\n"
+            cat_msg += "└──────┴──────────────┘\n"
+            cat_msg += "</pre>\n"
         except:
             cat_msg = ""
 
@@ -1073,15 +1077,25 @@ async def ledger2_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except:
             expense_cats, income_cats, accounts = [], [], []
 
-        msg = "━━━━━━━━━━━━━━━\n<b>🏠 선유듀오 가계부</b>\n━━━━━━━━━━━━━━━\n"
-        if expense_cats:
-            msg += f"🔴 <b>지출</b>: {', '.join(expense_cats)}\n"
-        if income_cats:
-            msg += f"🟢 <b>수입</b>: {', '.join(income_cats)}\n"
+        msg = "<pre>"
+        msg += "┌──────┬──────────────┐\n"
+        msg += "│ 유형 │ 카테고리     │\n"
+        msg += "├──────┼──────────────┤\n"
+        for c in expense_cats:
+            msg += f"│ 지출 │ {c:<12} │\n"
+        for c in income_cats:
+            msg += f"│ 수입 │ {c:<12} │\n"
+        msg += "└──────┴──────────────┘\n"
         if accounts:
-            msg += f"🏦 <b>통장</b>: {', '.join(accounts)}\n"
+            msg += "\n┌──────────────────────┐\n"
+            msg += "│ 통장                 │\n"
+            msg += "├──────────────────────┤\n"
+            for a in accounts:
+                msg += f"│ {a:<20} │\n"
+            msg += "└──────────────────────┘\n"
+        msg += "</pre>\n"
         msg += (
-            "\n📝 <b>사용법</b>\n\n"
+            "📝 <b>사용법</b>\n\n"
             "<code>/ledger2 지출 식비 점심 15000 생활비</code>\n"
             "<code>/ledger2 수입 급여 생활비충원 800000 생활비</code>\n\n"
             "형식: /ledger2 [유형] [카테고리] [메모] [금액] [통장]"
