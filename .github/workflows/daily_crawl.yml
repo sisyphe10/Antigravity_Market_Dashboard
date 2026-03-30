@@ -82,6 +82,12 @@ jobs:
         env:
            TZ: 'Asia/Seoul'
 
+      - name: Fetch Deposit Data (고객예탁금 + 신용잔고)
+        run: |
+          python execution/fetch_deposit_data.py || echo "예탁금 수집 실패 (계속 진행)"
+        env:
+           TZ: 'Asia/Seoul'
+
       - name: Draw Wrap Charts
         run: |
           python execution/draw_wrap_charts.py
