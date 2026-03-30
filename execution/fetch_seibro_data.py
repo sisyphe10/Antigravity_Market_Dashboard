@@ -29,6 +29,10 @@ def get_driver():
     opts.add_argument('--no-sandbox')
     opts.add_argument('--disable-gpu')
     opts.add_argument('--window-size=1920,1080')
+    # VM: snap chromium 경로
+    import shutil
+    if shutil.which('chromium'):
+        opts.binary_location = shutil.which('chromium')
     return webdriver.Chrome(options=opts)
 
 
