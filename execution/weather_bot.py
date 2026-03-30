@@ -1129,7 +1129,7 @@ async def ledger2_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         service.spreadsheets().values().append(
             spreadsheetId=SEONYUDUO_SHEET_ID,
-            range='가계부!A:F',
+            range='가계부!A1:F1',
             valueInputOption='USER_ENTERED',
             insertDataOption='INSERT_ROWS',
             body={'values': [[today_str, tx_type, category, amount, memo, account]]}
