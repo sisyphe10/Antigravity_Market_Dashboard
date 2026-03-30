@@ -1030,6 +1030,132 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"❌ 저장 실패: {str(e)}")
 
 
+# ============================================================
+# 가계부 (선유듀오) - Telegram → Google Sheets
+# ============================================================
+SEONYUDUO_SHEET_ID = '1w6q3UwUER7oINuk50LyMzgF2K0Fbt2wgSVJ34vImo0g'
+
+def _get_seonyuduo_service():
+    """선유듀오용 Google Sheets API 서비스"""
+    from google.oauth2 import service_account
+    from googleapiclient.discovery import build
+    sa_json = os.getenv('GOOGLE_SERVICE_ACCOUNT_KEY')
+    if not sa_json:
+        return None
+    sa_info = json.loads(sa_json)
+    creds = service_account.Credentials.from_service_account_info(
+        sa_info, scopes=['https://www.googleapis.com/auth/spreadsheets']
+    )
+    return build('sheets', 'v4', credentials=creds)
+
+async def ledger2_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/ledger2 지출 식비 점심 15000 생활비"""
+    args = context.args
+
+    service = _get_seonyuduo_service()
+    if not service:
+        await update.message.reply_text("❌ Google 서비스 계정이 설정되지 않았습니다.")
+        return
+
+    # 인자 없이 /ledger2만 입력 → 카테고리 + 통장 목록 표시
+    if not args:
+        try:
+            result = service.spreadsheets().values().get(
+                spreadsheetId=SEONYUDUO_SHEET_ID, range='가계부!I:K'
+            ).execute()
+            rows = result.get('values', [])
+            expense_cats, income_cats, accounts = [], [], []
+            for r in rows:
+                if len(r) >= 2:
+                    if r[0] == '지출' and r[1] not in expense_cats: expense_cats.append(r[1])
+                    elif r[0] == '수입' and r[1] not in income_cats: income_cats.append(r[1])
+                if len(r) >= 3 and r[2] and r[2] not in accounts: accounts.append(r[2])
+        except:
+            expense_cats, income_cats, accounts = [], [], []
+
+        msg = "━━━━━━━━━━━━━━━\n<b>🏠 선유듀오 가계부</b>\n━━━━━━━━━━━━━━━\n"
+        if expense_cats:
+            msg += f"🔴 <b>지출</b>: {', '.join(expense_cats)}\n"
+        if income_cats:
+            msg += f"🟢 <b>수입</b>: {', '.join(income_cats)}\n"
+        if accounts:
+            msg += f"🏦 <b>통장</b>: {', '.join(accounts)}\n"
+        msg += (
+            "\n📝 <b>사용법</b>\n\n"
+            "<code>/ledger2 지출 식비 점심 15000 생활비</code>\n"
+            "<code>/ledger2 수입 급여 생활비충원 800000 생활비</code>\n\n"
+            "형식: /ledger2 [유형] [카테고리] [메모] [금액] [통장]"
+        )
+        await update.message.reply_text(msg, parse_mode='HTML')
+        return
+
+    if len(args) < 4:
+        await update.message.reply_text("❌ 형식: /ledger2 [유형] [카테고리] [메모] [금액] [통장]", parse_mode='HTML')
+        return
+
+    tx_type_str = args[0]
+    if tx_type_str in ['지출', 'ㅈ']:
+        tx_type = '지출'
+    elif tx_type_str in ['수입', 'ㅅ']:
+        tx_type = '수입'
+    else:
+        await update.message.reply_text("❌ 유형은 '지출/ㅈ' 또는 '수입/ㅅ'으로 입력하세요.")
+        return
+
+    category = args[1]
+
+    # 마지막 인자 = 통장, 그 앞 = 금액
+    account = args[-1]
+    try:
+        amount = int(args[-2].replace(',', ''))
+        if amount <= 0:
+            raise ValueError
+        memo = ' '.join(args[2:-2]) if len(args) > 4 else ''
+    except:
+        # 통장 생략된 경우: 마지막이 금액
+        try:
+            amount = int(args[-1].replace(',', ''))
+            if amount <= 0:
+                raise ValueError
+            memo = ' '.join(args[2:-1]) if len(args) > 3 else ''
+            account = ''
+        except:
+            await update.message.reply_text("❌ 금액(숫자)을 확인하세요.")
+            return
+
+    try:
+        KST = datetime.timezone(datetime.timedelta(hours=9))
+        today_str = datetime.datetime.now(tz=KST).strftime('%Y-%m-%d')
+
+        service.spreadsheets().values().append(
+            spreadsheetId=SEONYUDUO_SHEET_ID,
+            range='가계부!A:F',
+            valueInputOption='USER_ENTERED',
+            insertDataOption='INSERT_ROWS',
+            body={'values': [[today_str, tx_type, category, amount, memo, account]]}
+        ).execute()
+
+        type_emoji = '🔴' if tx_type == '지출' else '🟢'
+        msg = (
+            f"{type_emoji} <b>{tx_type}</b> 입력 완료\n"
+            f"━━━━━━━━━━━━━━━\n"
+            f"📅 {today_str}\n"
+            f"📂 {category}\n"
+            f"💰 {amount:,}원\n"
+        )
+        if memo:
+            msg += f"📝 {memo}\n"
+        if account:
+            msg += f"🏦 {account}\n"
+
+        await update.message.reply_text(msg, parse_mode='HTML')
+        logging.info(f"SeonyuDuo ledger: {tx_type} {amount} {category} {memo} {account}")
+
+    except Exception as e:
+        logging.error(f"SeonyuDuo ledger error: {e}")
+        await update.message.reply_text(f"❌ 저장 실패: {str(e)}")
+
+
 if __name__ == '__main__':
     if not TOKEN:
         print("Error: TOKEN environment variable is missing.")
@@ -1046,6 +1172,7 @@ if __name__ == '__main__':
     application.add_handler(CommandHandler('stop', stop))
     application.add_handler(CommandHandler('help', help_command))
     application.add_handler(CommandHandler('ledger', ledger_command))
+    application.add_handler(CommandHandler('ledger2', ledger2_command))
     
     job_queue = application.job_queue
     try:
