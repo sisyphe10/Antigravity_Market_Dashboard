@@ -1072,7 +1072,7 @@ async def ledger2_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not args:
         try:
             result = service.spreadsheets().values().get(
-                spreadsheetId=SEONYUDUO_SHEET_ID, range='가계부!I:K'
+                spreadsheetId=SEONYUDUO_SHEET_ID, range='카테고리!A:C'
             ).execute()
             rows = result.get('values', [])
             expense_cats, income_cats, accounts = [], [], []
@@ -1119,7 +1119,7 @@ async def ledger2_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # 카테고리 유효성 검사
     try:
         result = service.spreadsheets().values().get(
-            spreadsheetId=SEONYUDUO_SHEET_ID, range='가계부!I:J'
+            spreadsheetId=SEONYUDUO_SHEET_ID, range='카테고리!A:B'
         ).execute()
         ref_rows = result.get('values', [])
         valid_cats = [r[1] for r in ref_rows if len(r) >= 2 and r[0] == tx_type]
