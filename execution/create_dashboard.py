@@ -2137,6 +2137,15 @@ function render(){
     last_date = seibro_dates_sorted[-1] if seibro_dates_sorted else ''
     first_date = seibro_dates_sorted[0] if seibro_dates_sorted else ''
 
+    # Ticker 매핑 로드
+    ticker_map = {}
+    try:
+        with open('seibro_tickers.json', 'r', encoding='utf-8') as f:
+            ticker_map = json.load(f)
+    except:
+        pass
+    ticker_json = json.dumps(ticker_map, ensure_ascii=False)
+
     seibro_page = f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -2199,7 +2208,7 @@ function render(){
         <h2 id="tableTitle">TOP 50</h2>
         <div style="overflow-x:auto;">
             <table>
-                <thead><tr><th style="width:40px">#</th><th style="text-align:left">Stock</th><th style="text-align:right">Buy Amount (USD)</th><th style="text-align:right">Share</th></tr></thead>
+                <thead><tr><th style="width:40px">#</th><th>Ticker</th><th style="text-align:left">Stock</th><th style="text-align:right">Buy Amount (USD)</th><th style="text-align:right">Share</th></tr></thead>
                 <tbody id="topTable"></tbody>
             </table>
         </div>
@@ -2208,6 +2217,7 @@ function render(){
 <footer>Data source: SEIBro (seibro.or.kr)</footer>
 <script>
 var raw = {seibro_json};
+var tickerMap = {ticker_json};
 var topChart = null;
 
 function fmtDate(el) {{
@@ -2264,7 +2274,7 @@ function refresh() {{
     topChart = new Chart(document.getElementById('topChart'), {{
         type: 'bar',
         data: {{
-            labels: chartData.map(function(d) {{ return shortName(d.name); }}),
+            labels: chartData.map(function(d) {{ return getTicker(d.name); }}),
             datasets: [{{
                 data: chartData.map(function(d) {{ return Math.round(d.val / 1000000); }}),
                 backgroundColor: 'rgba(3,105,161,0.5)',
@@ -2275,9 +2285,10 @@ function refresh() {{
         options: {{
             indexAxis: 'y',
             responsive: true, maintainAspectRatio: false,
+            layout: {{ padding: {{ top: 20 }} }},
             plugins: {{
                 legend: {{ display: false }},
-                tooltip: {{ callbacks: {{ label: function(ctx) {{ return ctx.raw.toLocaleString() + 'M$'; }} }} }}
+                tooltip: {{ callbacks: {{ label: function(ctx) {{ return getTicker(chartData[ctx.dataIndex].name) + ': ' + ctx.raw.toLocaleString() + 'M$'; }} }} }}
             }},
             scales: {{
                 x: {{ ticks: {{ callback: function(v) {{ return v.toLocaleString() + 'M$'; }}, font: {{ size: 11 }}, color: '#000' }}, grid: {{ color: '#eee' }} }},
@@ -2290,13 +2301,14 @@ function refresh() {{
     var html = '';
     top50.forEach(function(d, i) {{
         var pct = total > 0 ? (d.val / total * 100).toFixed(1) + '%' : '';
-        html += '<tr><td class="rank">' + (i + 1) + '</td><td class="name">' + d.name + '</td><td class="num">' + d.val.toLocaleString() + '</td><td class="num">' + pct + '</td></tr>';
+        var ticker = getTicker(d.name);
+        html += '<tr><td class="rank">' + (i + 1) + '</td><td style="text-align:center;font-weight:600;">' + ticker + '</td><td class="name">' + d.name + '</td><td class="num">' + d.val.toLocaleString() + '</td><td class="num">' + pct + '</td></tr>';
     }});
-    document.getElementById('topTable').innerHTML = html || '<tr><td colspan="4" style="padding:40px;color:#888;text-align:center;">데이터 없음</td></tr>';
+    document.getElementById('topTable').innerHTML = html || '<tr><td colspan="5" style="padding:40px;color:#888;text-align:center;">데이터 없음</td></tr>';
 }}
 
 function fmtM(v) {{ return (v / 1000000).toFixed(0).replace(/\\B(?=(\\d{{3}})+(?!\\d))/g, ',') + 'M$'; }}
-function shortName(n) {{ return n.length > 25 ? n.substring(0, 25) + '...' : n; }}
+function getTicker(n) {{ return tickerMap[n] || n.substring(0, 10); }}
 
 refresh();
 </script>
