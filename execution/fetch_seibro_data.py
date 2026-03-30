@@ -32,15 +32,17 @@ def get_driver():
     opts.add_argument('--disable-software-rasterizer')
     opts.add_argument('--remote-debugging-port=9222')
     opts.add_argument('--window-size=1920,1080')
-    import platform, os
-    if platform.system() == 'Linux':
-        snap_chromedriver = '/snap/chromium/current/usr/lib/chromium-browser/chromedriver'
-        snap_chromium = '/snap/bin/chromium'
-        if os.path.exists(snap_chromium):
-            opts.binary_location = snap_chromium
-        if os.path.exists(snap_chromedriver):
-            from selenium.webdriver.chrome.service import Service
-            return webdriver.Chrome(service=Service(snap_chromedriver), options=opts)
+    import platform, os, shutil
+    if platform.system() == 'Linux' and shutil.which('chromium'):
+        opts.binary_location = shutil.which('chromium')
+        # snap chromium: chromedriver는 'snap run chromium.chromedriver'로 실행
+        # wrapper script 생성
+        wrapper = '/tmp/chromedriver_wrapper.sh'
+        with open(wrapper, 'w') as f:
+            f.write('#!/bin/bash\nexec snap run chromium.chromedriver "$@"\n')
+        os.chmod(wrapper, 0o755)
+        from selenium.webdriver.chrome.service import Service
+        return webdriver.Chrome(service=Service(wrapper), options=opts)
     return webdriver.Chrome(options=opts)
 
 
