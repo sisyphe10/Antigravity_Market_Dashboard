@@ -2441,7 +2441,7 @@ refresh();
         <h2>신고가 종목</h2>
         <div style="overflow-x:auto;">
             <table>
-                <thead><tr><th>#</th><th>20일</th><th>시총</th><th>120일</th><th>시총</th><th>52주</th><th>시총</th></tr></thead>
+                <thead><tr><th style="width:30px">#</th><th style="border-left:2px solid #555">20일</th><th>시총</th><th style="border-left:2px solid #555">120일</th><th>시총</th><th style="border-left:2px solid #555">52주</th><th>시총</th></tr></thead>
                 <tbody id="newHighTable"></tbody>
             </table>
         </div>
@@ -2566,9 +2566,9 @@ function refresh() {{
     for (var i = 0; i < maxRows; i++) {{
         var r20 = nh20[i]; var r120 = nh120[i]; var r52 = nh52w[i];
         nhHtml += '<tr><td class="c">' + (i+1) + '</td>';
-        nhHtml += '<td class="c">' + (r20 ? r20.name : '') + '</td><td class="c">' + (r20 ? fmtVal(r20.mktcap) : '') + '</td>';
-        nhHtml += '<td class="c">' + (r120 ? r120.name : '') + '</td><td class="c">' + (r120 ? fmtVal(r120.mktcap) : '') + '</td>';
-        nhHtml += '<td class="c">' + (r52 ? r52.name : '') + '</td><td class="c">' + (r52 ? fmtVal(r52.mktcap) : '') + '</td>';
+        nhHtml += '<td class="c" style="border-left:2px solid #ddd">' + (r20 ? r20.name : '') + '</td><td class="c">' + (r20 ? fmtVal(r20.mktcap) : '') + '</td>';
+        nhHtml += '<td class="c" style="border-left:2px solid #ddd">' + (r120 ? r120.name : '') + '</td><td class="c">' + (r120 ? fmtVal(r120.mktcap) : '') + '</td>';
+        nhHtml += '<td class="c" style="border-left:2px solid #ddd">' + (r52 ? r52.name : '') + '</td><td class="c">' + (r52 ? fmtVal(r52.mktcap) : '') + '</td>';
         nhHtml += '</tr>';
     }}
     document.getElementById('newHighTable').innerHTML = nhHtml || '<tr><td colspan="7" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';

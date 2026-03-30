@@ -31,6 +31,13 @@ def get_daily_data(date_str):
         df[col] = pd.to_numeric(df[col], errors='coerce')
 
     df = df[(df['MKTCAP'] > 0) & df['ISU_NM'].notna() & (df['ISU_NM'] != '')]
+
+    # 필터: 스팩, 리츠, 우선주, 시총 1500억 미만 제외
+    df = df[~df['ISU_NM'].str.contains('스팩', na=False)]
+    df = df[~df['ISU_NM'].str.contains('리츠', na=False)]
+    df = df[df['ISU_CD'].str[-1] == '0']
+    df = df[df['MKTCAP'] >= 150_000_000_000]
+
     df['TURNOVER'] = df['ACC_TRDVAL'] / df['MKTCAP'] * 100
 
     return df
@@ -107,6 +114,10 @@ def extract_top(df, date_str):
             if date_str in hist_dates:
                 for label, n_days in [('newhigh_20d', 20), ('newhigh_120d', 120), ('newhigh_52w', 252)]:
                     for code, stock in history['stocks'].items():
+                        # 필터링된 df에 있는 종목만 (스팩/리츠/우선주/시총1500억 미만 제외)
+                        match = df[df['ISU_CD'] == code]
+                        if match.empty:
+                            continue
                         highs = stock['highs']
                         high_today = highs.get(date_str, 0)
                         close = stock['closes'].get(date_str, 0)
@@ -118,13 +129,8 @@ def extract_top(df, date_str):
                         if not recent:
                             continue
                         if high_today > max(recent):
-                            mktcap = 0
-                            trdval = 0
-                            # df에서 찾기
-                            match = df[df['ISU_CD'] == code]
-                            if not match.empty:
-                                mktcap = int(match.iloc[0]['MKTCAP']) if pd.notna(match.iloc[0]['MKTCAP']) else 0
-                                trdval = int(match.iloc[0]['ACC_TRDVAL']) if pd.notna(match.iloc[0]['ACC_TRDVAL']) else 0
+                            mktcap = int(match.iloc[0]['MKTCAP']) if pd.notna(match.iloc[0]['MKTCAP']) else 0
+                            trdval = int(match.iloc[0]['ACC_TRDVAL']) if pd.notna(match.iloc[0]['ACC_TRDVAL']) else 0
                             records.append({
                                 'd': date_str, 'type': label, 'rank': 0,
                                 'name': stock['name'], 'code': code,
