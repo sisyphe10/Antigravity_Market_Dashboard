@@ -2190,7 +2190,10 @@ function render(){
             <span id="dateInfo" style="color:#555;font-size:12px;"></span>
         </div>
         <div class="stats-row" id="statsRow"></div>
-        <div style="position:relative;height:400px;"><canvas id="topChart"></canvas></div>
+        <div style="position:relative;height:400px;">
+            <div style="position:absolute;top:0;right:0;font-size:12px;color:#888;">Data as of {last_date}</div>
+            <canvas id="topChart"></canvas>
+        </div>
     </div>
     <div class="section">
         <h2 id="tableTitle">TOP 50</h2>
