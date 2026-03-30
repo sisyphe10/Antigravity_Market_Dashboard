@@ -786,17 +786,22 @@ async def daily_weather_job(context: ContextTypes.DEFAULT_TYPE):
             headlines = data.get('headlines', [])
             date = data.get('date', '')
             if headlines:
-                msg = f"📋 <b>Research Notes ({date})</b>\n\n"
+                def esc_md2(s):
+                    for c in '_*[]()~`>#+-=|{}.!':
+                        s = s.replace(c, f'\\{c}')
+                    return s
+
+                msg = f"📋 *Research Notes \\({esc_md2(date)}\\)*\n\n"
                 for h in headlines:
                     title = h.get('title', '') if isinstance(h, dict) else h
                     summary = h.get('summary', '') if isinstance(h, dict) else ''
-                    msg += f"- <b>{title}</b>\n"
+                    msg += f"\\- *{esc_md2(title)}*\n"
                     if summary:
-                        msg += f"  {summary}\n"
+                        msg += f"  {esc_md2(summary)}\n"
                     msg += "\n"
                 for chat_id in SUBSCRIBERS:
                     try:
-                        await context.bot.send_message(chat_id=chat_id, text=msg, parse_mode='HTML')
+                        await context.bot.send_message(chat_id=chat_id, text=msg, parse_mode='MarkdownV2')
                     except Exception as e:
                         logging.error(f"Research headline 전송 실패: {e}")
                 logging.info(f"Research headlines sent: {len(headlines)}건")
