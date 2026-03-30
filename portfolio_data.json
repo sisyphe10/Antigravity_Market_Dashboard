@@ -85,20 +85,6 @@
       "is_today_new": false
     },
     {
-      "code": "112610",
-      "name": "씨에스윈드",
-      "sector": "에너지",
-      "market_cap": 26610.155293,
-      "weight": 5,
-      "today_return": 4.817275747508306,
-      "contribution": 2.4086378737541536,
-      "cumulative_return": 8.68499503146738,
-      "current_price": 63100.0,
-      "ath_price": 92300.0,
-      "dd": -31.635969664138674,
-      "is_today_new": false
-    },
-    {
       "code": "128940",
       "name": "한미약품",
       "sector": "건강관리",
@@ -113,17 +99,17 @@
       "is_today_new": false
     },
     {
-      "code": "010060",
-      "name": "OCI홀딩스",
-      "sector": "화학",
-      "market_cap": 35529.451496,
-      "weight": 4,
-      "today_return": 6.431767337807607,
-      "contribution": 2.5727069351230423,
-      "cumulative_return": 55.0,
-      "current_price": 190300.0,
-      "ath_price": 203000.0,
-      "dd": -6.256157635467985,
+      "code": "112610",
+      "name": "씨에스윈드",
+      "sector": "에너지",
+      "market_cap": 26610.155293,
+      "weight": 5,
+      "today_return": 4.817275747508306,
+      "contribution": 2.4086378737541536,
+      "cumulative_return": 8.68499503146738,
+      "current_price": 63100.0,
+      "ath_price": 92300.0,
+      "dd": -31.635969664138674,
       "is_today_new": false
     },
     {
@@ -138,6 +124,20 @@
       "current_price": 25850.0,
       "ath_price": 54700.0,
       "dd": -52.74223034734917,
+      "is_today_new": false
+    },
+    {
+      "code": "010060",
+      "name": "OCI홀딩스",
+      "sector": "화학",
+      "market_cap": 35529.451496,
+      "weight": 4,
+      "today_return": 6.431767337807607,
+      "contribution": 2.5727069351230423,
+      "cumulative_return": 55.0,
+      "current_price": 190300.0,
+      "ath_price": 203000.0,
+      "dd": -6.256157635467985,
       "is_today_new": false
     },
     {
@@ -255,20 +255,6 @@
       "is_today_new": false
     },
     {
-      "code": "006360",
-      "name": "GS건설",
-      "sector": "건설,건축관련",
-      "market_cap": 22122.815165,
-      "weight": 5,
-      "today_return": -1.8975332068311195,
-      "contribution": -0.9487666034155597,
-      "cumulative_return": -3.183520599250933,
-      "current_price": 25850.0,
-      "ath_price": 54700.0,
-      "dd": -52.74223034734917,
-      "is_today_new": false
-    },
-    {
       "code": "476830",
       "name": "알지노믹스",
       "sector": "기타",
@@ -280,6 +266,20 @@
       "current_price": 236000.0,
       "ath_price": 236000.0,
       "dd": 0.0,
+      "is_today_new": false
+    },
+    {
+      "code": "006360",
+      "name": "GS건설",
+      "sector": "건설,건축관련",
+      "market_cap": 22122.815165,
+      "weight": 5,
+      "today_return": -1.8975332068311195,
+      "contribution": -0.9487666034155597,
+      "cumulative_return": -3.183520599250933,
+      "current_price": 25850.0,
+      "ath_price": 54700.0,
+      "dd": -52.74223034734917,
       "is_today_new": false
     },
     {
@@ -311,20 +311,6 @@
       "is_today_new": false
     },
     {
-      "code": "003030",
-      "name": "세아제강지주",
-      "sector": "철강",
-      "market_cap": 8345.438855,
-      "weight": 3,
-      "today_return": 5.167014613778706,
-      "contribution": 1.5501043841336117,
-      "cumulative_return": 9.729533490651665,
-      "current_price": 201500.0,
-      "ath_price": 278000.0,
-      "dd": -27.517985611510788,
-      "is_today_new": false
-    },
-    {
       "code": "112610",
       "name": "씨에스윈드",
       "sector": "에너지",
@@ -336,6 +322,20 @@
       "current_price": 63100.0,
       "ath_price": 92300.0,
       "dd": -31.635969664138674,
+      "is_today_new": false
+    },
+    {
+      "code": "003030",
+      "name": "세아제강지주",
+      "sector": "철강",
+      "market_cap": 8345.438855,
+      "weight": 3,
+      "today_return": 5.167014613778706,
+      "contribution": 1.5501043841336117,
+      "cumulative_return": 9.729533490651665,
+      "current_price": 201500.0,
+      "ath_price": 278000.0,
+      "dd": -27.517985611510788,
       "is_today_new": false
     },
     {
@@ -439,20 +439,6 @@
       "is_today_new": false
     },
     {
-      "code": "007660",
-      "name": "이수페타시스",
-      "sector": "IT하드웨어",
-      "market_cap": 76712.633855,
-      "weight": 3,
-      "today_return": -5.429864253393665,
-      "contribution": -1.6289592760180995,
-      "cumulative_return": -11.177220569485758,
-      "current_price": 104500.0,
-      "ath_price": 148200.0,
-      "dd": -29.487179487179482,
-      "is_today_new": false
-    },
-    {
       "code": "006360",
       "name": "GS건설",
       "sector": "건설,건축관련",
@@ -467,17 +453,17 @@
       "is_today_new": false
     },
     {
-      "code": "003030",
-      "name": "세아제강지주",
-      "sector": "철강",
-      "market_cap": 8345.438855,
+      "code": "007660",
+      "name": "이수페타시스",
+      "sector": "IT하드웨어",
+      "market_cap": 76712.633855,
       "weight": 3,
-      "today_return": 5.167014613778706,
-      "contribution": 1.5501043841336117,
-      "cumulative_return": 6.388595564941912,
-      "current_price": 201500.0,
-      "ath_price": 278000.0,
-      "dd": -27.517985611510788,
+      "today_return": -5.429864253393665,
+      "contribution": -1.6289592760180995,
+      "cumulative_return": -11.177220569485758,
+      "current_price": 104500.0,
+      "ath_price": 148200.0,
+      "dd": -29.487179487179482,
       "is_today_new": false
     },
     {
@@ -492,6 +478,20 @@
       "current_price": 63100.0,
       "ath_price": 92300.0,
       "dd": -31.635969664138674,
+      "is_today_new": false
+    },
+    {
+      "code": "003030",
+      "name": "세아제강지주",
+      "sector": "철강",
+      "market_cap": 8345.438855,
+      "weight": 3,
+      "today_return": 5.167014613778706,
+      "contribution": 1.5501043841336117,
+      "cumulative_return": 6.388595564941912,
+      "current_price": 201500.0,
+      "ath_price": 278000.0,
+      "dd": -27.517985611510788,
       "is_today_new": false
     },
     {
