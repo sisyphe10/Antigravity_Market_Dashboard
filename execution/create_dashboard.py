@@ -2356,16 +2356,17 @@ refresh();
         .date-bar label {{ color: #555; font-weight: 600; }}
         .tables {{ display: flex; gap: 24px; flex-wrap: wrap; }}
         .tables > div {{ flex: 1; min-width: 500px; }}
-        table {{ width: 100%; border-collapse: collapse; font-size: 0.85rem; }}
-        thead {{ background: #1a1a2e; }}
-        th {{ padding: 10px 8px; text-align: center; font-weight: 600; color: #fff; font-size: 0.8rem; }}
-        td {{ padding: 8px; border-bottom: 1px solid #eee; }}
-        td.r {{ text-align: right; font-variant-numeric: tabular-nums; }}
-        td.c {{ text-align: center; }}
-        td.name {{ text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }}
-        tbody tr:hover {{ background: #f5f5f5; }}
-        .pos {{ color: #cc0000; }}
-        .neg {{ color: #0055cc; }}
+        table {{ width: 100%; border-collapse: collapse; font-size: 0.82rem; }}
+        thead {{ background: #2E7D32; }}
+        th {{ padding: 8px 6px; text-align: center; font-weight: 600; color: #fff; font-size: 0.78rem; border: 1px solid #1B5E20; }}
+        td {{ padding: 6px 6px; border: 1px solid #ddd; }}
+        td.c {{ text-align: center; font-variant-numeric: tabular-nums; }}
+        tbody tr:nth-child(even) {{ background: #E8F5E9; }}
+        tbody tr:nth-child(odd) {{ background: #fff; }}
+        tbody tr:hover {{ background: #C8E6C9; }}
+        .section h2 {{ background: #E67E22; color: #fff; padding: 8px 12px; border-radius: 4px; font-size: 0.95rem; }}
+        .pos {{ color: #cc0000; font-weight: 600; }}
+        .neg {{ color: #0055cc; font-weight: 600; }}
         footer {{ text-align: center; padding: 24px; color: #999; font-size: 0.8rem; }}
     </style>
 </head>
@@ -2441,7 +2442,7 @@ refresh();
         <h2>신고가 종목</h2>
         <div style="overflow-x:auto;">
             <table>
-                <thead><tr><th style="width:30px">#</th><th style="border-left:2px solid #555">20일</th><th>시총</th><th style="border-left:2px solid #555">120일</th><th>시총</th><th style="border-left:2px solid #555">52주</th><th>시총</th></tr></thead>
+                <thead><tr><th style="width:30px">#</th><th style="border-left:3px solid #2E7D32">20일</th><th>시총</th><th style="border-left:3px solid #2E7D32">120일</th><th>시총</th><th style="border-left:3px solid #2E7D32">52주</th><th>시총</th></tr></thead>
                 <tbody id="newHighTable"></tbody>
             </table>
         </div>
@@ -2566,9 +2567,9 @@ function refresh() {{
     for (var i = 0; i < maxRows; i++) {{
         var r20 = nh20[i]; var r120 = nh120[i]; var r52 = nh52w[i];
         nhHtml += '<tr><td class="c">' + (i+1) + '</td>';
-        nhHtml += '<td class="c" style="border-left:2px solid #ddd">' + (r20 ? r20.name : '') + '</td><td class="c">' + (r20 ? fmtVal(r20.mktcap) : '') + '</td>';
-        nhHtml += '<td class="c" style="border-left:2px solid #ddd">' + (r120 ? r120.name : '') + '</td><td class="c">' + (r120 ? fmtVal(r120.mktcap) : '') + '</td>';
-        nhHtml += '<td class="c" style="border-left:2px solid #ddd">' + (r52 ? r52.name : '') + '</td><td class="c">' + (r52 ? fmtVal(r52.mktcap) : '') + '</td>';
+        nhHtml += '<td class="c" style="border-left:3px solid #2E7D32">' + (r20 ? r20.name : '') + '</td><td class="c">' + (r20 ? fmtVal(r20.mktcap) : '') + '</td>';
+        nhHtml += '<td class="c" style="border-left:3px solid #2E7D32">' + (r120 ? r120.name : '') + '</td><td class="c">' + (r120 ? fmtVal(r120.mktcap) : '') + '</td>';
+        nhHtml += '<td class="c" style="border-left:3px solid #2E7D32">' + (r52 ? r52.name : '') + '</td><td class="c">' + (r52 ? fmtVal(r52.mktcap) : '') + '</td>';
         nhHtml += '</tr>';
     }}
     document.getElementById('newHighTable').innerHTML = nhHtml || '<tr><td colspan="7" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
