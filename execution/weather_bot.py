@@ -961,15 +961,18 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 if len(r) >= 2:
                     if r[0] == '지출': expense_cats.append(r[1])
                     elif r[0] == '수입': income_cats.append(r[1])
+            def pad(s, w):
+                """한글 폭 고려 패딩"""
+                slen = sum(2 if ord(c) > 127 else 1 for c in s)
+                return s + ' ' * max(0, w - slen)
+
             cat_msg = "<pre>"
-            cat_msg += "┌──────┬──────────────┐\n"
-            cat_msg += "│ 유형 │ 카테고리     │\n"
-            cat_msg += "├──────┼──────────────┤\n"
+            cat_msg += "유형  │ 카테고리\n"
+            cat_msg += "──────┼─────────\n"
             for c in expense_cats:
-                cat_msg += f"│ 지출 │ {c:<12} │\n"
+                cat_msg += f"지출  │ {c}\n"
             for c in income_cats:
-                cat_msg += f"│ 수입 │ {c:<12} │\n"
-            cat_msg += "└──────┴──────────────┘\n"
+                cat_msg += f"수입  │ {c}\n"
             cat_msg += "</pre>\n"
         except:
             cat_msg = ""
@@ -1077,22 +1080,23 @@ async def ledger2_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except:
             expense_cats, income_cats, accounts = [], [], []
 
+        # 유형+카테고리+통장을 하나의 표로 합치기
+        # 행 수를 맞추기 위해 가장 긴 리스트 기준
+        max_rows = max(len(expense_cats) + len(income_cats), len(accounts), 1)
+        all_cats = [('지출', c) for c in expense_cats] + [('수입', c) for c in income_cats]
+        while len(all_cats) < max_rows:
+            all_cats.append(('', ''))
+        while len(accounts) < max_rows:
+            accounts.append('')
+
         msg = "<pre>"
-        msg += "┌──────┬──────────────┐\n"
-        msg += "│ 유형 │ 카테고리     │\n"
-        msg += "├──────┼──────────────┤\n"
-        for c in expense_cats:
-            msg += f"│ 지출 │ {c:<12} │\n"
-        for c in income_cats:
-            msg += f"│ 수입 │ {c:<12} │\n"
-        msg += "└──────┴──────────────┘\n"
-        if accounts:
-            msg += "\n┌──────────────────────┐\n"
-            msg += "│ 통장                 │\n"
-            msg += "├──────────────────────┤\n"
-            for a in accounts:
-                msg += f"│ {a:<20} │\n"
-            msg += "└──────────────────────┘\n"
+        msg += "유형  │ 카테고리   │ 통장\n"
+        msg += "──────┼──────────┼──────\n"
+        for i in range(max_rows):
+            t, c = all_cats[i] if i < len(all_cats) else ('', '')
+            a = accounts[i] if i < len(accounts) else ''
+            t_str = t if t else '    '
+            msg += f"{t_str}  │ {c if c else '':<8} │ {a}\n"
         msg += "</pre>\n"
         msg += (
             "📝 <b>사용법</b>\n\n"
