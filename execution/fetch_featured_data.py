@@ -168,7 +168,7 @@ def get_trading_days(start, end):
 
 def main():
     today = datetime.now().date()
-    start = datetime(today.year, 1, 1).date()  # YTD (연초부터)
+    start = datetime(today.year - 1, 12, 25).date()  # 전년 마지막주부터 (YTD 기준가 확보)
 
     existing = get_existing_dates()
     trading_days = get_trading_days(start, today)
