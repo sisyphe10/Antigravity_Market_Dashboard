@@ -115,12 +115,40 @@ def get_naver_weather(location="여의도"):
             logging.error(f"Sunrise/sunset calculation failed: {e}")
             sun_info = "정보없음 (Error)"
 
+        # 특이사항 체크
+        alerts = []
+
+        # 1. 일교차 (10도 이상)
+        temps = [int(hourly[h]['temp']) for h in hourly if hourly[h]['temp'].lstrip('-').isdigit()]
+        if temps:
+            diff = max(temps) - min(temps)
+            if diff >= 10:
+                alerts.append(f"⚠️ 일교차 {diff}도 (최저 {min(temps)}° / 최고 {max(temps)}°)")
+
+        # 2. 비/눈
+        rain_hours = [h for h in hourly if any(w in hourly[h]['weather'] for w in ['비', '소나기', '장마'])]
+        snow_hours = [h for h in hourly if '눈' in hourly[h]['weather']]
+        if rain_hours:
+            alerts.append(f"🌧️ 비 예보 ({', '.join(f'{h}시' for h in sorted(rain_hours))})")
+        if snow_hours:
+            alerts.append(f"❄️ 눈 예보 ({', '.join(f'{h}시' for h in sorted(snow_hours))})")
+
+        # 3. 미세먼지/초미세먼지 (나쁨 이상)
+        bad_dust = ['나쁨', '매우나쁨', '매우 나쁨']
+        if any(d in dust for d in bad_dust):
+            alerts.append(f"😷 미세먼지 {dust}")
+        if any(d in ultra_dust for d in bad_dust):
+            alerts.append(f"😷 초미세먼지 {ultra_dust}")
+
+        alert_str = '\n'.join(alerts) if alerts else '없음'
+
         result_msg = (
             f"a. 날짜 / {date_str}\n"
             f"b. 날씨 / {weather_flow} {weather_emojis}\n"
             f"c. 기온 / {temp_flow}\n"
             f"d. 미세먼지, 초미세먼지 / {dust}, {ultra_dust}\n"
-            f"e. 일출, 일몰 / {sun_info}"
+            f"e. 일출, 일몰 / {sun_info}\n"
+            f"f. 특이사항 / {alert_str}"
         )
         return result_msg
         
