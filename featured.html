@@ -172,6 +172,25 @@ function refresh() {
     var nDays = Object.keys(dateSet).length;
     document.getElementById('dateLabel').textContent = isSingle ? '' : nDays + '거래일 합산';
 
+    // 종목별 기간 누적 수익률 계산 (시작일 종가 → 종료일 종가)
+    var allDates = [];
+    filtered.forEach(function(r) { if (allDates.indexOf(r.d) < 0) allDates.push(r.d); });
+    allDates.sort();
+
+    var priceMap = {};
+    filtered.forEach(function(r) {
+        if (!priceMap[r.name]) priceMap[r.name] = {firstDate: r.d, lastDate: r.d, firstPrice: r.price, lastPrice: r.price, market: r.market, mktcap: r.mktcap};
+        if (r.d <= priceMap[r.name].firstDate && r.price > 0) { priceMap[r.name].firstDate = r.d; priceMap[r.name].firstPrice = r.price; }
+        if (r.d >= priceMap[r.name].lastDate && r.price > 0) { priceMap[r.name].lastDate = r.d; priceMap[r.name].lastPrice = r.price; priceMap[r.name].mktcap = r.mktcap; }
+    });
+
+    function getCumChg(name) {
+        if (!name || !priceMap[name]) return 0;
+        var p = priceMap[name];
+        if (!p.firstPrice || p.firstPrice === 0) return 0;
+        return (p.lastPrice / p.firstPrice - 1) * 100;
+    }
+
     var h1 = '';
     absList.forEach(function(r, i) {
         var cumChg = isSingle ? (r.cnt > 0 ? r.chgSum / r.cnt : 0) : getCumChg(r.name);
@@ -191,27 +210,6 @@ function refresh() {
     });
     document.getElementById('turnTable').innerHTML = h2 || '<tr><td colspan="7" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
 
-    // 종목별 기간 누적 수익률 계산 (시작일 종가 → 종료일 종가)
-    var allDates = [];
-    filtered.forEach(function(r) { if (allDates.indexOf(r.d) < 0) allDates.push(r.d); });
-    allDates.sort();
-    var firstDate = allDates[0] || e;
-    var lastDate = allDates[allDates.length - 1] || e;
-
-    // 종목별 시작가/종료가 수집 (모든 type에서)
-    var priceMap = {};  // name → {firstPrice, lastPrice, ...}
-    filtered.forEach(function(r) {
-        if (!priceMap[r.name]) priceMap[r.name] = {firstDate: r.d, lastDate: r.d, firstPrice: r.price, lastPrice: r.price, market: r.market, mktcap: r.mktcap, trdval: 0};
-        if (r.d <= priceMap[r.name].firstDate && r.price > 0) { priceMap[r.name].firstDate = r.d; priceMap[r.name].firstPrice = r.price; }
-        if (r.d >= priceMap[r.name].lastDate && r.price > 0) { priceMap[r.name].lastDate = r.d; priceMap[r.name].lastPrice = r.price; priceMap[r.name].mktcap = r.mktcap; }
-    });
-
-    function getCumChg(name) {
-        var p = priceMap[name];
-        if (!p || !p.firstPrice || p.firstPrice === 0) return 0;
-        return (p.lastPrice / p.firstPrice - 1) * 100;
-    }
-
     // 시총/상승률 테이블: 기간 연동
     function aggByType(type) {
         var agg = {};
@@ -229,8 +227,7 @@ function refresh() {
         var items = aggByType(type).sort(function(a,b) { return b.mktcap - a.mktcap; }).slice(0, 30);
         var h = '';
         items.forEach(function(r, i) {
-            var cumChg = isSingle ? (priceMap[r.name] ? priceMap[r.name].lastPrice : 0) && getCumChg(r.name) : getCumChg(r.name);
-            // 단일 날짜면 당일 등락률 사용
+            var cumChg = getCumChg(r.name);
             if (isSingle) {
                 var dayItem = filtered.filter(function(x) { return x.name === r.name && x.type === type && x.d === e; })[0];
                 if (dayItem) cumChg = dayItem.chg;
