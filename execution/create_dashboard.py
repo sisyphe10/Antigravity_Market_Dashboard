@@ -2512,43 +2512,89 @@ function refresh() {{
 
     var h1 = '';
     absList.forEach(function(r, i) {{
-        var avgChg = r.cnt > 0 ? (r.chgSum / r.cnt) : 0;
-        var cls = avgChg > 0 ? 'pos' : (avgChg < 0 ? 'neg' : '');
-        var chgLabel = (avgChg > 0 ? '+' : '') + Math.round(avgChg) + '%';
+        var cumChg = isSingle ? (r.cnt > 0 ? r.chgSum / r.cnt : 0) : getCumChg(r.name);
+        var cls = cumChg > 0 ? 'pos' : (cumChg < 0 ? 'neg' : '');
+        var chgLabel = (cumChg > 0 ? '+' : '') + Math.round(cumChg) + '%';
         h1 += '<tr><td class="c">' + (i+1) + '</td><td class="c">' + r.name + '</td><td class="c">' + r.market + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c ' + cls + '">' + chgLabel + '</td></tr>';
     }});
     document.getElementById('absTable').innerHTML = h1 || '<tr><td colspan="6" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
 
     var h2 = '';
     turnList.forEach(function(r, i) {{
-        var avgChg = r.cnt > 0 ? (r.chgSum / r.cnt) : 0;
-        var cls = avgChg > 0 ? 'pos' : (avgChg < 0 ? 'neg' : '');
-        var chgLabel = (avgChg > 0 ? '+' : '') + Math.round(avgChg) + '%';
+        var cumChg = isSingle ? (r.cnt > 0 ? r.chgSum / r.cnt : 0) : getCumChg(r.name);
+        var cls = cumChg > 0 ? 'pos' : (cumChg < 0 ? 'neg' : '');
+        var chgLabel = (cumChg > 0 ? '+' : '') + Math.round(cumChg) + '%';
         var avgTurnover = r.cnt > 0 ? (r.turnover / r.cnt) : 0;
         h2 += '<tr><td class="c">' + (i+1) + '</td><td class="c">' + r.name + '</td><td class="c">' + r.market + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c">' + Math.round(avgTurnover) + '%</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c ' + cls + '">' + chgLabel + '</td></tr>';
     }});
     document.getElementById('turnTable').innerHTML = h2 || '<tr><td colspan="7" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
 
-    // 시총/상승률 테이블 (단일 날짜 기준 - 기간이면 마지막 날짜)
-    var targetDate = e;
-    var capChgData = raw.filter(function(r) {{ return r.d === targetDate; }});
+    // 종목별 기간 누적 수익률 계산 (시작일 종가 → 종료일 종가)
+    var allDates = [];
+    filtered.forEach(function(r) {{ if (allDates.indexOf(r.d) < 0) allDates.push(r.d); }});
+    allDates.sort();
+    var firstDate = allDates[0] || e;
+    var lastDate = allDates[allDates.length - 1] || e;
+
+    // 종목별 시작가/종료가 수집 (모든 type에서)
+    var priceMap = {{}};  // name → {{firstPrice, lastPrice, ...}}
+    filtered.forEach(function(r) {{
+        if (!priceMap[r.name]) priceMap[r.name] = {{firstDate: r.d, lastDate: r.d, firstPrice: r.price, lastPrice: r.price, market: r.market, mktcap: r.mktcap, trdval: 0}};
+        if (r.d <= priceMap[r.name].firstDate && r.price > 0) {{ priceMap[r.name].firstDate = r.d; priceMap[r.name].firstPrice = r.price; }}
+        if (r.d >= priceMap[r.name].lastDate && r.price > 0) {{ priceMap[r.name].lastDate = r.d; priceMap[r.name].lastPrice = r.price; priceMap[r.name].mktcap = r.mktcap; }}
+    }});
+
+    function getCumChg(name) {{
+        var p = priceMap[name];
+        if (!p || !p.firstPrice || p.firstPrice === 0) return 0;
+        return (p.lastPrice / p.firstPrice - 1) * 100;
+    }}
+
+    // 시총/상승률 테이블: 기간 연동
+    function aggByType(type) {{
+        var agg = {{}};
+        filtered.forEach(function(r) {{
+            if (r.type !== type) return;
+            if (!agg[r.name]) agg[r.name] = {{name: r.name, market: r.market, mktcap: r.mktcap, trdval: 0, price: r.price}};
+            agg[r.name].trdval += r.trdval;
+            agg[r.name].mktcap = r.mktcap;
+            agg[r.name].price = r.price;
+        }});
+        return Object.values(agg);
+    }}
 
     function renderCapTable(type, tableId) {{
-        var items = capChgData.filter(function(r) {{ return r.type === type; }}).sort(function(a,b) {{ return a.rank - b.rank; }});
+        var items = aggByType(type).sort(function(a,b) {{ return b.mktcap - a.mktcap; }}).slice(0, 30);
         var h = '';
         items.forEach(function(r, i) {{
-            var cls = r.chg > 0 ? 'pos' : (r.chg < 0 ? 'neg' : '');
-            h += '<tr><td class="c">' + (i+1) + '</td><td class="c">' + r.name + '</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c ' + cls + '">' + (r.chg > 0 ? '+' : '') + Math.round(r.chg) + '%</td></tr>';
+            var cumChg = isSingle ? (priceMap[r.name] ? priceMap[r.name].lastPrice : 0) && getCumChg(r.name) : getCumChg(r.name);
+            // 단일 날짜면 당일 등락률 사용
+            if (isSingle) {{
+                var dayItem = filtered.filter(function(x) {{ return x.name === r.name && x.type === type && x.d === e; }})[0];
+                if (dayItem) cumChg = dayItem.chg;
+            }}
+            var cls = cumChg > 0 ? 'pos' : (cumChg < 0 ? 'neg' : '');
+            h += '<tr><td class="c">' + (i+1) + '</td><td class="c">' + r.name + '</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c ' + cls + '">' + (cumChg > 0 ? '+' : '') + Math.round(cumChg) + '%</td></tr>';
         }});
         document.getElementById(tableId).innerHTML = h || '<tr><td colspan="5" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
     }}
 
     function renderChgTable(type, tableId) {{
-        var items = capChgData.filter(function(r) {{ return r.type === type; }}).sort(function(a,b) {{ return a.rank - b.rank; }});
+        var items = aggByType(type);
+        // 누적 등락률 기준 정렬
+        items.forEach(function(r) {{ r.cumChg = isSingle ? 0 : getCumChg(r.name); }});
+        if (isSingle) {{
+            items.forEach(function(r) {{
+                var dayItem = filtered.filter(function(x) {{ return x.name === r.name && x.type === type && x.d === e; }})[0];
+                if (dayItem) r.cumChg = dayItem.chg;
+            }});
+        }}
+        items.sort(function(a,b) {{ return b.cumChg - a.cumChg; }});
+        items = items.slice(0, 30);
         var h = '';
         items.forEach(function(r, i) {{
-            var cls = r.chg > 0 ? 'pos' : (r.chg < 0 ? 'neg' : '');
-            h += '<tr><td class="c">' + (i+1) + '</td><td class="c">' + r.name + '</td><td class="c ' + cls + '">' + (r.chg > 0 ? '+' : '') + Math.round(r.chg) + '%</td><td class="c">' + r.price.toLocaleString() + '</td><td class="c">' + fmtVal(r.trdval) + '</td></tr>';
+            var cls = r.cumChg > 0 ? 'pos' : (r.cumChg < 0 ? 'neg' : '');
+            h += '<tr><td class="c">' + (i+1) + '</td><td class="c">' + r.name + '</td><td class="c ' + cls + '">' + (r.cumChg > 0 ? '+' : '') + Math.round(r.cumChg) + '%</td><td class="c">' + r.price.toLocaleString() + '</td><td class="c">' + fmtVal(r.trdval) + '</td></tr>';
         }});
         document.getElementById(tableId).innerHTML = h || '<tr><td colspan="5" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
     }}
@@ -2558,10 +2604,11 @@ function refresh() {{
     renderChgTable('kospi_chg', 'kospiChgTable');
     renderChgTable('kosdaq_chg', 'kosdaqChgTable');
 
-    // 신고가 통합 테이블
-    var nh20 = capChgData.filter(function(r) {{ return r.type === 'newhigh_20d'; }}).sort(function(a,b) {{ return b.mktcap - a.mktcap; }});
-    var nh120 = capChgData.filter(function(r) {{ return r.type === 'newhigh_120d'; }}).sort(function(a,b) {{ return b.mktcap - a.mktcap; }});
-    var nh52w = capChgData.filter(function(r) {{ return r.type === 'newhigh_52w'; }}).sort(function(a,b) {{ return b.mktcap - a.mktcap; }});
+    // 신고가 통합 테이블 (종료일 기준, 기간 변경 무관)
+    var nhData = raw.filter(function(r) {{ return r.d === e; }});
+    var nh20 = nhData.filter(function(r) {{ return r.type === 'newhigh_20d'; }}).sort(function(a,b) {{ return b.mktcap - a.mktcap; }});
+    var nh120 = nhData.filter(function(r) {{ return r.type === 'newhigh_120d'; }}).sort(function(a,b) {{ return b.mktcap - a.mktcap; }});
+    var nh52w = nhData.filter(function(r) {{ return r.type === 'newhigh_52w'; }}).sort(function(a,b) {{ return b.mktcap - a.mktcap; }});
     var maxRows = Math.max(nh20.length, nh120.length, nh52w.length);
     var nhHtml = '';
     for (var i = 0; i < maxRows; i++) {{
