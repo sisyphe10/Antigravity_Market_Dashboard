@@ -283,6 +283,16 @@ async def run_daily_summary(context, date_str):
         from notion_publisher import publish_to_notion
         publish_to_notion(summary, date_str, topics, stocks, images)
 
+        # 2-1. 헤더 추출 → research_headlines.json 저장 (아침 알림용)
+        headlines = [line.strip()[3:].strip() for line in summary.split('\n') if line.strip().startswith('## ') and not line.strip().startswith('## 출처')]
+        headlines_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'research_headlines.json')
+        try:
+            import json as _json
+            _json.dump({'date': date_str, 'headlines': headlines}, open(headlines_file, 'w', encoding='utf-8'), ensure_ascii=False)
+            logging.info(f"Headlines saved: {len(headlines)}건")
+        except Exception as he:
+            logging.warning(f"Headlines 저장 실패: {he}")
+
         # 3. 처리 완료 표시
         mark_processed(date_str)
 

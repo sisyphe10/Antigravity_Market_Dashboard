@@ -761,7 +761,7 @@ async def nightly_portfolio_refresh_job(context: ContextTypes.DEFAULT_TYPE):
 
 
 async def daily_weather_job(context: ContextTypes.DEFAULT_TYPE):
-    """매일 05:00 날씨 알림 (daily_alert.py 실행)"""
+    """매일 05:00 날씨 알림 (daily_alert.py 실행) + 리서치 헤드라인"""
     logging.info("Daily weather job started")
     try:
         result = subprocess.run(
@@ -775,6 +775,27 @@ async def daily_weather_job(context: ContextTypes.DEFAULT_TYPE):
             logging.error(f"Daily weather job failed: {result.stderr}")
     except Exception as e:
         logging.error(f"Daily weather job error: {e}")
+
+    # 리서치 헤드라인 알림
+    try:
+        import json as _json
+        headlines_file = os.path.join(DASHBOARD_DIR, 'research_headlines.json')
+        if os.path.exists(headlines_file):
+            with open(headlines_file, 'r', encoding='utf-8') as f:
+                data = _json.load(f)
+            headlines = data.get('headlines', [])
+            date = data.get('date', '')
+            if headlines:
+                msg = f"📋 <b>Research Notes ({date})</b>\n"
+                msg += '\n'.join(f"• {h}" for h in headlines)
+                for chat_id in SUBSCRIBERS:
+                    try:
+                        await context.bot.send_message(chat_id=chat_id, text=msg, parse_mode='HTML')
+                    except Exception as e:
+                        logging.error(f"Research headline 전송 실패: {e}")
+                logging.info(f"Research headlines sent: {len(headlines)}건")
+    except Exception as e:
+        logging.error(f"Research headlines error: {e}")
 
 async def daily_calendar_job(context: ContextTypes.DEFAULT_TYPE):
     """매일 05:10 Google Calendar 일정 알림 (daily_calendar.py 실행)"""
