@@ -2262,7 +2262,7 @@ function refresh() {{
     // Stats
     var statsHtml = '<div class="stat-card"><div class="label">TOP 50 합산</div><div class="value">' + fmtM(total) + '</div></div>';
     if (top50.length > 0) {{
-        statsHtml += '<div class="stat-card" style="border-left-color:#cc0000"><div class="label">1위</div><div class="value" style="font-size:1rem;">' + shortName(top50[0].name) + '</div></div>';
+        statsHtml += '<div class="stat-card" style="border-left-color:#cc0000"><div class="label">1위</div><div class="value" style="font-size:1rem;">' + getTicker(top50[0].name) + '</div></div>';
         statsHtml += '<div class="stat-card"><div class="label">1위 금액</div><div class="value">' + fmtM(top50[0].val) + '</div></div>';
     }}
     document.getElementById('statsRow').innerHTML = statsHtml;
