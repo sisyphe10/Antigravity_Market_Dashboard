@@ -1005,6 +1005,17 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     category = args[1]
     memo = ' '.join(args[2:-1]) if len(args) > 3 else ''
 
+    # 카테고리 유효성 검사
+    try:
+        rows = _read_sheet(service, '카테고리')
+        valid_cats = [r[1] for r in rows[1:] if len(r) >= 2 and r[0] == tx_type]
+        if category not in valid_cats:
+            cat_list = ' · '.join(valid_cats) if valid_cats else '없음'
+            await update.message.reply_text(f"❌ '{category}'는 유효하지 않은 카테고리입니다.\n\n{tx_type}: {cat_list}", parse_mode='HTML')
+            return
+    except:
+        pass
+
     try:
         KST = datetime.timezone(datetime.timedelta(hours=9))
         today_str = datetime.datetime.now(tz=KST).strftime('%Y-%m-%d')
@@ -1104,6 +1115,20 @@ async def ledger2_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     category = args[1]
+
+    # 카테고리 유효성 검사
+    try:
+        result = service.spreadsheets().values().get(
+            spreadsheetId=SEONYUDUO_SHEET_ID, range='가계부!I:J'
+        ).execute()
+        ref_rows = result.get('values', [])
+        valid_cats = [r[1] for r in ref_rows if len(r) >= 2 and r[0] == tx_type]
+        if category not in valid_cats:
+            cat_list = ' · '.join(valid_cats) if valid_cats else '없음'
+            await update.message.reply_text(f"❌ '{category}'는 유효하지 않은 카테고리입니다.\n\n{tx_type}: {cat_list}", parse_mode='HTML')
+            return
+    except:
+        pass
 
     # 마지막 인자 = 통장, 그 앞 = 금액
     account = args[-1]
