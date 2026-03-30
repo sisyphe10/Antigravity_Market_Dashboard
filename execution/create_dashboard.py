@@ -2437,6 +2437,32 @@ refresh();
             </div>
         </div>
     </div>
+    <div class="section">
+        <h2>신고가 종목</h2>
+        <div class="tables" style="gap:16px;">
+            <div>
+                <h2 style="font-size:0.95rem;">20일 신고가</h2>
+                <table>
+                    <thead><tr><th>#</th><th>종목</th><th>시장</th><th>종가</th><th>등락률</th></tr></thead>
+                    <tbody id="nh20Table"></tbody>
+                </table>
+            </div>
+            <div>
+                <h2 style="font-size:0.95rem;">120일 신고가</h2>
+                <table>
+                    <thead><tr><th>#</th><th>종목</th><th>시장</th><th>종가</th><th>등락률</th></tr></thead>
+                    <tbody id="nh120Table"></tbody>
+                </table>
+            </div>
+            <div>
+                <h2 style="font-size:0.95rem;">52주 신고가</h2>
+                <table>
+                    <thead><tr><th>#</th><th>종목</th><th>시장</th><th>종가</th><th>등락률</th></tr></thead>
+                    <tbody id="nh52wTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 <footer>Data source: KRX OpenAPI</footer>
 <script>
@@ -2547,6 +2573,22 @@ function refresh() {{
     renderCapTable('kosdaq_cap', 'kosdaqCapTable');
     renderChgTable('kospi_chg', 'kospiChgTable');
     renderChgTable('kosdaq_chg', 'kosdaqChgTable');
+
+    // 신고가 테이블 (종료일 기준)
+    function renderNewHighTable(type, tableId) {{
+        var items = capChgData.filter(function(r) {{ return r.type === type; }});
+        items.sort(function(a,b) {{ return b.price - a.price; }});
+        var h = '';
+        items.forEach(function(r, i) {{
+            var cls = r.chg > 0 ? 'pos' : (r.chg < 0 ? 'neg' : '');
+            h += '<tr><td class="c">' + (i+1) + '</td><td class="c">' + r.name + '</td><td class="c">' + r.market + '</td><td class="c">' + r.price.toLocaleString() + '</td><td class="c ' + cls + '">' + (r.chg > 0 ? '+' : '') + Math.round(r.chg) + '%</td></tr>';
+        }});
+        document.getElementById(tableId).innerHTML = h || '<tr><td colspan="5" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
+    }}
+
+    renderNewHighTable('newhigh_20d', 'nh20Table');
+    renderNewHighTable('newhigh_120d', 'nh120Table');
+    renderNewHighTable('newhigh_52w', 'nh52wTable');
 }}
 refresh();
 </script>

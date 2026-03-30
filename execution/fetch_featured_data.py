@@ -97,6 +97,46 @@ def extract_top(df, date_str):
     add_top(kospi, 'kospi_chg', 'FLUC_RT')
     add_top(kosdaq, 'kosdaq_chg', 'FLUC_RT')
 
+    # 신고가 계산 (stock_price_history.json 기반)
+    history_file = 'stock_price_history.json'
+    if os.path.exists(history_file):
+        try:
+            with open(history_file, 'r', encoding='utf-8') as f:
+                history = json.load(f)
+            hist_dates = sorted(history['dates'])
+            if date_str in hist_dates:
+                for label, n_days in [('newhigh_20d', 20), ('newhigh_120d', 120), ('newhigh_52w', 252)]:
+                    for code, stock in history['stocks'].items():
+                        highs = stock['highs']
+                        high_today = highs.get(date_str, 0)
+                        close = stock['closes'].get(date_str, 0)
+                        if high_today == 0 or close == 0:
+                            continue
+                        past = [highs.get(d, 0) for d in hist_dates if d < date_str]
+                        past = [h for h in past if h > 0]
+                        recent = past[-n_days:] if len(past) >= n_days else past
+                        if not recent:
+                            continue
+                        if high_today > max(recent):
+                            mktcap = 0
+                            trdval = 0
+                            # df에서 찾기
+                            match = df[df['ISU_CD'] == code]
+                            if not match.empty:
+                                mktcap = int(match.iloc[0]['MKTCAP']) if pd.notna(match.iloc[0]['MKTCAP']) else 0
+                                trdval = int(match.iloc[0]['ACC_TRDVAL']) if pd.notna(match.iloc[0]['ACC_TRDVAL']) else 0
+                            records.append({
+                                'd': date_str, 'type': label, 'rank': 0,
+                                'name': stock['name'], 'code': code,
+                                'market': stock['market'],
+                                'trdval': trdval, 'mktcap': mktcap,
+                                'turnover': 0,
+                                'chg': round(float(df[df['ISU_CD']==code]['FLUC_RT'].iloc[0]), 2) if not df[df['ISU_CD']==code].empty else 0,
+                                'price': close,
+                            })
+        except Exception as e:
+            logging.warning(f'신고가 계산 실패: {e}')
+
     return records
 
 
