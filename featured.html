@@ -40,8 +40,10 @@
 <div class="content">
     <div class="section">
         <div class="date-bar">
-            <label>날짜</label>
-            <input type="text" id="fDate" value="2026-03-27" placeholder="YYYY-MM-DD" oninput="tryRefresh()" onchange="refresh()">
+            <label>기간</label>
+            <input type="text" id="fStartDate" value="2026-03-27" placeholder="YYYY-MM-DD" oninput="tryRefresh()" onchange="refresh()">
+            <span>~</span>
+            <input type="text" id="fEndDate" value="2026-03-27" placeholder="YYYY-MM-DD" oninput="tryRefresh()" onchange="refresh()">
             <span id="dateLabel" style="color:#888;font-size:12px;"></span>
         </div>
         <div class="tables">
@@ -71,7 +73,11 @@ function fmtDate(el) {
     if (/^\d{8}$/.test(v)) { el.value = v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8); return true; }
     return /^\d{4}-\d{2}-\d{2}$/.test(v);
 }
-function tryRefresh() { if (fmtDate(document.getElementById('fDate'))) refresh(); }
+function tryRefresh() {
+    var a = document.getElementById('fStartDate');
+    var b = document.getElementById('fEndDate');
+    if (fmtDate(a) && fmtDate(b)) refresh();
+}
 
 function fmtVal(v) {
     if (v >= 1e12) return (v/1e12).toFixed(1) + '조';
@@ -80,26 +86,58 @@ function fmtVal(v) {
 }
 
 function refresh() {
-    var d = document.getElementById('fDate').value;
-    var abs = raw.filter(function(r) { return r.d === d && r.type === 'absolute'; }).sort(function(a,b) { return a.rank - b.rank; });
-    var turn = raw.filter(function(r) { return r.d === d && r.type === 'turnover'; }).sort(function(a,b) { return a.rank - b.rank; });
+    var s = document.getElementById('fStartDate').value;
+    var e = document.getElementById('fEndDate').value;
+    var isSingle = (s === e);
+    var filtered = raw.filter(function(r) { return r.d >= s && r.d <= e; });
 
-    var dates = [];
-    raw.forEach(function(r) { if (dates.indexOf(r.d) < 0) dates.push(r.d); });
-    dates.sort();
-    document.getElementById('dateLabel').textContent = abs.length > 0 ? 'Data as of ' + d : (dates.length > 0 ? '해당 날짜 데이터 없음 (최신: ' + dates[dates.length-1] + ')' : '');
+    // 기간 내 거래대금 합산으로 순위 재계산
+    var absAgg = {};
+    var turnAgg = {};
+    filtered.forEach(function(r) {
+        var key = r.name;
+        if (r.type === 'absolute') {
+            if (!absAgg[key]) absAgg[key] = {name: r.name, market: r.market, trdval: 0, mktcap: r.mktcap, chgSum: 0, cnt: 0};
+            absAgg[key].trdval += r.trdval;
+            absAgg[key].mktcap = r.mktcap;
+            absAgg[key].chgSum += r.chg;
+            absAgg[key].cnt++;
+        }
+        if (r.type === 'turnover') {
+            if (!turnAgg[key]) turnAgg[key] = {name: r.name, market: r.market, trdval: 0, mktcap: r.mktcap, turnover: 0, chgSum: 0, cnt: 0};
+            turnAgg[key].trdval += r.trdval;
+            turnAgg[key].mktcap = r.mktcap;
+            turnAgg[key].turnover += r.turnover;
+            turnAgg[key].chgSum += r.chg;
+            turnAgg[key].cnt++;
+        }
+    });
+
+    var absList = Object.values(absAgg).sort(function(a,b) { return b.trdval - a.trdval; }).slice(0, 30);
+    var turnList = Object.values(turnAgg).sort(function(a,b) { return b.turnover - a.turnover; }).slice(0, 30);
+
+    // 날짜 수
+    var dateSet = {};
+    filtered.forEach(function(r) { dateSet[r.d] = 1; });
+    var nDays = Object.keys(dateSet).length;
+    document.getElementById('dateLabel').textContent = isSingle ? '' : nDays + '거래일 합산';
 
     var h1 = '';
-    abs.forEach(function(r) {
-        var cls = r.chg > 0 ? 'pos' : (r.chg < 0 ? 'neg' : '');
-        h1 += '<tr><td class="c">' + r.rank + '</td><td class="name">' + r.name + '</td><td class="c">' + r.market + '</td><td class="r">' + fmtVal(r.trdval) + '</td><td class="r">' + fmtVal(r.mktcap) + '</td><td class="r ' + cls + '">' + (r.chg > 0 ? '+' : '') + r.chg + '%</td></tr>';
+    absList.forEach(function(r, i) {
+        var avgChg = r.cnt > 0 ? (r.chgSum / r.cnt) : 0;
+        var cls = avgChg > 0 ? 'pos' : (avgChg < 0 ? 'neg' : '');
+        var chgLabel = isSingle ? ((avgChg > 0 ? '+' : '') + avgChg.toFixed(1) + '%') : ((avgChg > 0 ? '+' : '') + avgChg.toFixed(1) + '%');
+        h1 += '<tr><td class="c">' + (i+1) + '</td><td class="c">' + r.name + '</td><td class="c">' + r.market + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c ' + cls + '">' + chgLabel + '</td></tr>';
     });
     document.getElementById('absTable').innerHTML = h1 || '<tr><td colspan="6" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
 
     var h2 = '';
-    turn.forEach(function(r) {
-        var cls = r.chg > 0 ? 'pos' : (r.chg < 0 ? 'neg' : '');
-        h2 += '<tr><td class="c">' + r.rank + '</td><td class="name">' + r.name + '</td><td class="c">' + r.market + '</td><td class="r">' + r.turnover.toFixed(1) + '%</td><td class="r">' + fmtVal(r.trdval) + '</td><td class="r ' + cls + '">' + (r.chg > 0 ? '+' : '') + r.chg + '%</td></tr>';
+    turnList.forEach(function(r, i) {
+        var avgChg = r.cnt > 0 ? (r.chgSum / r.cnt) : 0;
+        var cls = avgChg > 0 ? 'pos' : (avgChg < 0 ? 'neg' : '');
+        var chgLabel = (avgChg > 0 ? '+' : '') + avgChg.toFixed(1) + '%';
+        var avgTurnover = r.cnt > 0 ? (r.turnover / r.cnt) : 0;
+        h2 += '<tr><td class="c">' + (i+1) + '</td><td class="c">' + r.name + '</td><td class="c">' + r.market + '</td><td class="c">' + avgTurnover.toFixed(1) + '%</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c ' + cls + '">' + chgLabel + '</td></tr>';
     });
     document.getElementById('turnTable').innerHTML = h2 || '<tr><td colspan="6" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
 }
