@@ -94,6 +94,17 @@ jobs:
         env:
            TZ: 'Asia/Seoul'
 
+      - name: Install Chrome (for SEIBro Selenium)
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      - name: Fetch SEIBro TOP 50
+        run: |
+          python execution/fetch_seibro_data.py || echo "SEIBro 수집 실패 (계속 진행)"
+        env:
+          TZ: 'Asia/Seoul'
+
       - name: Fetch KODEX 200 Sector Data
         run: |
           python execution/fetch_kodex_sectors.py || echo "섹터 데이터 수집 실패 (대시보드는 계속 진행)"

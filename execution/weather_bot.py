@@ -719,11 +719,7 @@ def _nightly_refresh_sync():
         cwd=dashboard_dir, capture_output=True, text=True, timeout=180
     )
 
-    # SEIBro TOP 50 수집 (D-1)
-    subprocess.run(
-        [sys.executable, "execution/fetch_seibro_data.py"],
-        cwd=dashboard_dir, capture_output=True, text=True, timeout=600
-    )
+    # SEIBro TOP 50 수집은 GHA에서 실행 (VM 메모리 부족으로 Selenium 불가)
 
     # 투자유의종목 페이지 재생성
     subprocess.run(
