@@ -74,7 +74,7 @@ def get_naver_weather(location="여의도"):
                 temp = temp_span.text.replace('°', '').strip() if temp_span else '?'
                 hourly[hour] = {'weather': weather, 'temp': temp}
 
-        target_hours = [8, 14, 18]
+        target_hours = [8, 14, 18, 22]
         weather_flow = ' → '.join(
             f"{hourly[h]['weather']}" if h in hourly else '?' for h in target_hours
         )
