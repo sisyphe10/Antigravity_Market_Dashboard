@@ -786,8 +786,13 @@ async def daily_weather_job(context: ContextTypes.DEFAULT_TYPE):
             headlines = data.get('headlines', [])
             date = data.get('date', '')
             if headlines:
-                msg = f"📋 <b>Research Notes ({date})</b>\n"
-                msg += '\n'.join(f"• {h}" for h in headlines)
+                msg = f"📋 <b>Research Notes ({date})</b>\n\n"
+                for h in headlines:
+                    title = h.get('title', '') if isinstance(h, dict) else h
+                    summary = h.get('summary', '') if isinstance(h, dict) else ''
+                    msg += f"• <b>{title}</b>\n"
+                    if summary:
+                        msg += f"  {summary}\n"
                 for chat_id in SUBSCRIBERS:
                     try:
                         await context.bot.send_message(chat_id=chat_id, text=msg, parse_mode='HTML')

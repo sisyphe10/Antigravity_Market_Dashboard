@@ -283,8 +283,23 @@ async def run_daily_summary(context, date_str):
         from notion_publisher import publish_to_notion
         publish_to_notion(summary, date_str, topics, stocks, images)
 
-        # 2-1. 헤더 추출 → research_headlines.json 저장 (아침 알림용)
-        headlines = [line.strip()[3:].strip() for line in summary.split('\n') if line.strip().startswith('## ') and not line.strip().startswith('## 출처')]
+        # 2-1. 헤더 + 첫 불릿 추출 → research_headlines.json 저장 (아침 알림용)
+        headlines = []
+        lines = summary.split('\n')
+        for idx, line in enumerate(lines):
+            stripped = line.strip()
+            if stripped.startswith('## ') and not stripped.startswith('## 출처'):
+                title = stripped[3:].strip().replace('{RED}', '')
+                # 다음 불릿 포인트 찾기
+                first_bullet = ''
+                for j in range(idx + 1, min(idx + 10, len(lines))):
+                    bl = lines[j].strip()
+                    if bl.startswith('- ') or bl.startswith('* '):
+                        first_bullet = bl[2:].replace('{RED}', '').replace('==', '').strip()
+                        break
+                    if bl.startswith('## '):
+                        break
+                headlines.append({'title': title, 'summary': first_bullet})
         headlines_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'research_headlines.json')
         try:
             import json as _json
