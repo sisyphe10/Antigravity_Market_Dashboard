@@ -961,11 +961,11 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 if len(r) >= 2:
                     if r[0] == '지출': expense_cats.append(r[1])
                     elif r[0] == '수입': income_cats.append(r[1])
-            cat_msg = "📂 <b>카테고리</b>\n"
+            cat_msg = "<b>카테고리</b>\n"
             if expense_cats:
-                cat_msg += f"🔴 지출: {' · '.join(expense_cats)}\n"
+                cat_msg += f"지출: {' · '.join(expense_cats)}\n"
             if income_cats:
-                cat_msg += f"🟠 수입: {' · '.join(income_cats)}\n"
+                cat_msg += f"수입: {' · '.join(income_cats)}\n"
             cat_msg += "\n"
         except:
             cat_msg = ""
@@ -1073,13 +1073,13 @@ async def ledger2_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except:
             expense_cats, income_cats, accounts = [], [], []
 
-        msg = "📂 <b>카테고리</b>\n"
+        msg = "<b>카테고리</b>\n"
         if expense_cats:
-            msg += f"🔴 지출: {' · '.join(expense_cats)}\n"
+            msg += f"지출: {' · '.join(expense_cats)}\n"
         if income_cats:
-            msg += f"🟢 수입: {' · '.join(income_cats)}\n"
+            msg += f"수입: {' · '.join(income_cats)}\n"
         if accounts:
-            msg += f"🏦 통장: {' · '.join(accounts)}\n"
+            msg += f"통장: {' · '.join(accounts)}\n"
         msg += "\n"
         msg += (
             "📝 <b>사용법</b>\n\n"
