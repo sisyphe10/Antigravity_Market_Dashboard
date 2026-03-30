@@ -80,8 +80,12 @@ function tryRefresh() {
 }
 
 function fmtVal(v) {
-    if (v >= 1e12) return (v/1e12).toFixed(1) + '조';
-    if (v >= 1e8) return (v/1e8).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',') + '억';
+    if (v >= 1e12) {
+        var jo = Math.floor(v / 1e12);
+        var eok = Math.round((v % 1e12) / 1e8);
+        return jo.toLocaleString() + '조 ' + eok.toLocaleString() + '억';
+    }
+    if (v >= 1e8) return Math.round(v / 1e8).toLocaleString() + '억';
     return Math.round(v).toLocaleString();
 }
 
@@ -126,7 +130,7 @@ function refresh() {
     absList.forEach(function(r, i) {
         var avgChg = r.cnt > 0 ? (r.chgSum / r.cnt) : 0;
         var cls = avgChg > 0 ? 'pos' : (avgChg < 0 ? 'neg' : '');
-        var chgLabel = isSingle ? ((avgChg > 0 ? '+' : '') + avgChg.toFixed(1) + '%') : ((avgChg > 0 ? '+' : '') + avgChg.toFixed(1) + '%');
+        var chgLabel = (avgChg > 0 ? '+' : '') + Math.round(avgChg) + '%';
         h1 += '<tr><td class="c">' + (i+1) + '</td><td class="c">' + r.name + '</td><td class="c">' + r.market + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c ' + cls + '">' + chgLabel + '</td></tr>';
     });
     document.getElementById('absTable').innerHTML = h1 || '<tr><td colspan="6" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
@@ -135,9 +139,9 @@ function refresh() {
     turnList.forEach(function(r, i) {
         var avgChg = r.cnt > 0 ? (r.chgSum / r.cnt) : 0;
         var cls = avgChg > 0 ? 'pos' : (avgChg < 0 ? 'neg' : '');
-        var chgLabel = (avgChg > 0 ? '+' : '') + avgChg.toFixed(1) + '%';
+        var chgLabel = (avgChg > 0 ? '+' : '') + Math.round(avgChg) + '%';
         var avgTurnover = r.cnt > 0 ? (r.turnover / r.cnt) : 0;
-        h2 += '<tr><td class="c">' + (i+1) + '</td><td class="c">' + r.name + '</td><td class="c">' + r.market + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c">' + avgTurnover.toFixed(1) + '%</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c ' + cls + '">' + chgLabel + '</td></tr>';
+        h2 += '<tr><td class="c">' + (i+1) + '</td><td class="c">' + r.name + '</td><td class="c">' + r.market + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c">' + Math.round(avgTurnover) + '%</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c ' + cls + '">' + chgLabel + '</td></tr>';
     });
     document.getElementById('turnTable').innerHTML = h2 || '<tr><td colspan="7" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
 }
