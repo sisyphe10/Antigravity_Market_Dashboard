@@ -1,0 +1,145 @@
+"""
+KRX OpenAPI로 Featured 데이터 수집 → featured_data.json 적재
+- 거래대금 절대금액 상위 30
+- 거래대금/시총 비율(회전율) 상위 30
+"""
+import sys
+import os
+import json
+import logging
+import pandas as pd
+from datetime import datetime, timedelta
+
+sys.stdout.reconfigure(encoding='utf-8')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
+
+API_KEY = 'E9E8B0A915D74BC59CFA41D5534CF19EF4B24C9E'
+FEATURED_JSON = 'featured_data.json'
+TOP_N = 30
+
+
+def get_daily_data(date_str):
+    """KRX API에서 코스피+코스닥 전 종목 데이터 수집"""
+    from pykrx_openapi import KRXOpenAPI
+    api = KRXOpenAPI(API_KEY)
+
+    kospi = pd.DataFrame(api.get_stock_daily_trade(date_str)['OutBlock_1'])
+    kosdaq = pd.DataFrame(api.get_kosdaq_stock_daily_trade(date_str)['OutBlock_1'])
+    df = pd.concat([kospi, kosdaq], ignore_index=True)
+
+    for col in ['ACC_TRDVAL', 'MKTCAP', 'FLUC_RT', 'TDD_CLSPRC', 'CMPPREVDD_PRC']:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+
+    df = df[(df['MKTCAP'] > 0) & df['ISU_NM'].notna() & (df['ISU_NM'] != '')]
+    df['TURNOVER'] = df['ACC_TRDVAL'] / df['MKTCAP'] * 100
+
+    return df
+
+
+def extract_top(df, date_str):
+    """거래대금 TOP 30 (절대 + 회전율) 추출"""
+    records = []
+
+    # 절대금액 상위
+    top_abs = df.nlargest(TOP_N, 'ACC_TRDVAL')
+    for rank, (_, r) in enumerate(top_abs.iterrows(), 1):
+        records.append({
+            'd': date_str,
+            'type': 'absolute',
+            'rank': rank,
+            'name': r['ISU_NM'],
+            'code': r['ISU_CD'],
+            'market': r['MKT_NM'] or '',
+            'trdval': int(r['ACC_TRDVAL']),
+            'mktcap': int(r['MKTCAP']),
+            'turnover': round(r['TURNOVER'], 2),
+            'chg': round(r['FLUC_RT'], 2) if pd.notna(r['FLUC_RT']) else 0,
+            'price': int(r['TDD_CLSPRC']) if pd.notna(r['TDD_CLSPRC']) else 0,
+        })
+
+    # 회전율 상위
+    top_turn = df.nlargest(TOP_N, 'TURNOVER')
+    for rank, (_, r) in enumerate(top_turn.iterrows(), 1):
+        records.append({
+            'd': date_str,
+            'type': 'turnover',
+            'rank': rank,
+            'name': r['ISU_NM'],
+            'code': r['ISU_CD'],
+            'market': r['MKT_NM'] or '',
+            'trdval': int(r['ACC_TRDVAL']),
+            'mktcap': int(r['MKTCAP']),
+            'turnover': round(r['TURNOVER'], 2),
+            'chg': round(r['FLUC_RT'], 2) if pd.notna(r['FLUC_RT']) else 0,
+            'price': int(r['TDD_CLSPRC']) if pd.notna(r['TDD_CLSPRC']) else 0,
+        })
+
+    return records
+
+
+def get_existing_dates():
+    """이미 수집된 날짜 목록"""
+    if not os.path.exists(FEATURED_JSON):
+        return set()
+    with open(FEATURED_JSON, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    return set(r['d'] for r in data)
+
+
+def get_trading_days(start, end):
+    """주말 제외 날짜 리스트"""
+    days = []
+    d = start
+    while d <= end:
+        if d.weekday() < 5:
+            days.append(d)
+        d += timedelta(days=1)
+    return days
+
+
+def main():
+    today = datetime.now().date()
+    start = today - timedelta(days=30)  # 최근 30일
+
+    existing = get_existing_dates()
+    trading_days = get_trading_days(start, today)
+    to_fetch = [d for d in trading_days if d.strftime('%Y-%m-%d') not in existing]
+
+    if not to_fetch:
+        logging.info("모든 날짜가 이미 수집됨.")
+        return
+
+    logging.info(f"수집 대상: {len(to_fetch)}일 ({to_fetch[0]} ~ {to_fetch[-1]})")
+
+    # 기존 데이터 로드
+    if os.path.exists(FEATURED_JSON):
+        with open(FEATURED_JSON, 'r', encoding='utf-8') as f:
+            all_records = json.load(f)
+    else:
+        all_records = []
+
+    for i, d in enumerate(to_fetch):
+        date_str = d.strftime('%Y%m%d')
+        date_display = d.strftime('%Y-%m-%d')
+        logging.info(f"[{i+1}/{len(to_fetch)}] {date_display} 수집 중...")
+
+        try:
+            df = get_daily_data(date_str)
+            if len(df) < 100:
+                logging.info(f"  → 데이터 부족 ({len(df)}건), 건너뜀")
+                continue
+            records = extract_top(df, date_display)
+            all_records.extend(records)
+            logging.info(f"  → {len(records)}건 수집")
+        except Exception as e:
+            logging.warning(f"  → 실패: {e}")
+
+    with open(FEATURED_JSON, 'w', encoding='utf-8') as f:
+        json.dump(all_records, f, ensure_ascii=False)
+
+    dates = sorted(set(r['d'] for r in all_records))
+    logging.info(f"완료! 총 {len(all_records)}건 ({dates[0]} ~ {dates[-1]})")
+
+
+if __name__ == '__main__':
+    main()

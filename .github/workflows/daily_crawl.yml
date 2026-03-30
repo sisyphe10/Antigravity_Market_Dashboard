@@ -88,6 +88,13 @@ jobs:
         env:
            TZ: 'Asia/Seoul'
 
+      - name: Fetch Featured Data (거래대금/회전율 TOP 30)
+        run: |
+          pip install pykrx-openapi -q
+          python execution/fetch_featured_data.py || echo "Featured 수집 실패 (계속 진행)"
+        env:
+           TZ: 'Asia/Seoul'
+
       - name: Draw Wrap Charts
         run: |
           python execution/draw_wrap_charts.py
@@ -132,5 +139,5 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Auto-update: Market data and dashboard [skip ci]"
-          file_pattern: 'dataset.csv charts/*.png index.html market.html wrap.html universe.html seibro.html portfolio_data.json Wrap_NAV.xlsx kodex_sectors.json'
+          file_pattern: 'dataset.csv charts/*.png index.html market.html wrap.html universe.html seibro.html featured.html featured_data.json portfolio_data.json Wrap_NAV.xlsx kodex_sectors.json'
           skip_fetch: true

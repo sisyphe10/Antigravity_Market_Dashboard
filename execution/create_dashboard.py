@@ -1782,6 +1782,11 @@ def create_dashboard():
             <div class="title">SEIBro</div>
             <div class="desc">US 매수결제 TOP 50</div>
         </a>
+        <a href="featured.html" class="card" style="border-left-color:#d97706">
+            <div class="icon">⭐</div>
+            <div class="title">Featured</div>
+            <div class="desc">거래대금 TOP 30, 회전율 TOP 30</div>
+        </a>
         <a href="architecture.html" class="card" style="border-left-color:#666">
             <div class="icon">🗂️</div>
             <div class="title">Architecture</div>
@@ -2318,6 +2323,132 @@ refresh();
     with open('seibro.html', 'w', encoding='utf-8') as f:
         f.write(seibro_page)
     print("SEIBro page generated: seibro.html")
+
+    # ── Featured page ──
+    featured_records = []
+    try:
+        with open('featured_data.json', 'r', encoding='utf-8') as f:
+            featured_records = json.load(f)
+    except:
+        pass
+
+    featured_json = json.dumps(featured_records, ensure_ascii=False)
+    featured_dates = sorted(set(r['d'] for r in featured_records))
+    featured_last = featured_dates[-1] if featured_dates else ''
+
+    featured_page = f"""<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Featured</title>
+    <style>
+        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+        body {{ font-family: 'Segoe UI', 'Malgun Gothic', sans-serif; background: #f8f9fa; color: #333; }}
+        header {{ background: #fff; padding: 24px; text-align: center; border-bottom: 1px solid #eee; position: relative; }}
+        header h1 {{ font-size: 1.8rem; color: #333; }}
+        .subtitle {{ color: #888; font-size: 0.85rem; margin-top: 4px; }}
+        .content {{ padding: 24px; max-width: 1400px; margin: 0 auto; }}
+        .section {{ background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }}
+        .section h2 {{ font-size: 1.1rem; color: #333; margin-bottom: 16px; }}
+        .date-bar {{ display: flex; align-items: center; gap: 8px; margin-bottom: 20px; font-size: 13px; flex-wrap: wrap; }}
+        .date-bar input {{ font-family: inherit; font-size: 13px; padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 6px; background: #f9fafb; color: #222; width: 110px; text-align: center; }}
+        .date-bar label {{ color: #555; font-weight: 600; }}
+        .tables {{ display: flex; gap: 24px; flex-wrap: wrap; }}
+        .tables > div {{ flex: 1; min-width: 500px; }}
+        table {{ width: 100%; border-collapse: collapse; font-size: 0.85rem; }}
+        thead {{ background: #1a1a2e; }}
+        th {{ padding: 10px 8px; text-align: center; font-weight: 600; color: #fff; font-size: 0.8rem; }}
+        td {{ padding: 8px; border-bottom: 1px solid #eee; }}
+        td.r {{ text-align: right; font-variant-numeric: tabular-nums; }}
+        td.c {{ text-align: center; }}
+        td.name {{ text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }}
+        tbody tr:hover {{ background: #f5f5f5; }}
+        .pos {{ color: #cc0000; }}
+        .neg {{ color: #0055cc; }}
+        footer {{ text-align: center; padding: 24px; color: #999; font-size: 0.8rem; }}
+    </style>
+</head>
+<body>
+<header style="position:relative;">
+    <h1>Featured</h1>
+    <div class="subtitle">Daily Market Highlights</div>
+    <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:0.85rem;font-weight:600;">🏠 Home</a>
+</header>
+<div class="content">
+    <div class="section">
+        <div class="date-bar">
+            <label>날짜</label>
+            <input type="text" id="fDate" value="{featured_last}" placeholder="YYYY-MM-DD" oninput="tryRefresh()" onchange="refresh()">
+            <span id="dateLabel" style="color:#888;font-size:12px;"></span>
+        </div>
+        <div class="tables">
+            <div>
+                <h2>거래대금 TOP 30</h2>
+                <table>
+                    <thead><tr><th>#</th><th>종목</th><th>시장</th><th>거래대금</th><th>시총</th><th>등락률</th></tr></thead>
+                    <tbody id="absTable"></tbody>
+                </table>
+            </div>
+            <div>
+                <h2>거래대금/시총 비율 TOP 30</h2>
+                <table>
+                    <thead><tr><th>#</th><th>종목</th><th>시장</th><th>회전율</th><th>거래대금</th><th>등락률</th></tr></thead>
+                    <tbody id="turnTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<footer>Data source: KRX OpenAPI</footer>
+<script>
+var raw = {featured_json};
+
+function fmtDate(el) {{
+    var v = el.value;
+    if (/^\d{{8}}$/.test(v)) {{ el.value = v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8); return true; }}
+    return /^\d{{4}}-\d{{2}}-\d{{2}}$/.test(v);
+}}
+function tryRefresh() {{ if (fmtDate(document.getElementById('fDate'))) refresh(); }}
+
+function fmtVal(v) {{
+    if (v >= 1e12) return (v/1e12).toFixed(1) + '조';
+    if (v >= 1e8) return (v/1e8).toFixed(0).replace(/\\B(?=(\\d{{3}})+(?!\\d))/g,',') + '억';
+    return Math.round(v).toLocaleString();
+}}
+
+function refresh() {{
+    var d = document.getElementById('fDate').value;
+    var abs = raw.filter(function(r) {{ return r.d === d && r.type === 'absolute'; }}).sort(function(a,b) {{ return a.rank - b.rank; }});
+    var turn = raw.filter(function(r) {{ return r.d === d && r.type === 'turnover'; }}).sort(function(a,b) {{ return a.rank - b.rank; }});
+
+    var dates = [];
+    raw.forEach(function(r) {{ if (dates.indexOf(r.d) < 0) dates.push(r.d); }});
+    dates.sort();
+    document.getElementById('dateLabel').textContent = abs.length > 0 ? 'Data as of ' + d : (dates.length > 0 ? '해당 날짜 데이터 없음 (최신: ' + dates[dates.length-1] + ')' : '');
+
+    var h1 = '';
+    abs.forEach(function(r) {{
+        var cls = r.chg > 0 ? 'pos' : (r.chg < 0 ? 'neg' : '');
+        h1 += '<tr><td class="c">' + r.rank + '</td><td class="name">' + r.name + '</td><td class="c">' + r.market + '</td><td class="r">' + fmtVal(r.trdval) + '</td><td class="r">' + fmtVal(r.mktcap) + '</td><td class="r ' + cls + '">' + (r.chg > 0 ? '+' : '') + r.chg + '%</td></tr>';
+    }});
+    document.getElementById('absTable').innerHTML = h1 || '<tr><td colspan="6" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
+
+    var h2 = '';
+    turn.forEach(function(r) {{
+        var cls = r.chg > 0 ? 'pos' : (r.chg < 0 ? 'neg' : '');
+        h2 += '<tr><td class="c">' + r.rank + '</td><td class="name">' + r.name + '</td><td class="c">' + r.market + '</td><td class="r">' + r.turnover.toFixed(1) + '%</td><td class="r">' + fmtVal(r.trdval) + '</td><td class="r ' + cls + '">' + (r.chg > 0 ? '+' : '') + r.chg + '%</td></tr>';
+    }});
+    document.getElementById('turnTable').innerHTML = h2 || '<tr><td colspan="6" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
+}}
+refresh();
+</script>
+</body>
+</html>"""
+
+    with open('featured.html', 'w', encoding='utf-8') as f:
+        f.write(featured_page)
+    print("Featured page generated: featured.html")
 
 if __name__ == "__main__":
     create_dashboard()
