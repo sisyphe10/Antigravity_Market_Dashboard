@@ -2401,6 +2401,42 @@ refresh();
             </div>
         </div>
     </div>
+    <div class="section">
+        <div class="tables">
+            <div>
+                <h2>코스피 시가총액 TOP 30</h2>
+                <table>
+                    <thead><tr><th>#</th><th>종목</th><th>시총</th><th>거래대금</th><th>등락률</th></tr></thead>
+                    <tbody id="kospiCapTable"></tbody>
+                </table>
+            </div>
+            <div>
+                <h2>코스닥 시가총액 TOP 30</h2>
+                <table>
+                    <thead><tr><th>#</th><th>종목</th><th>시총</th><th>거래대금</th><th>등락률</th></tr></thead>
+                    <tbody id="kosdaqCapTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="section">
+        <div class="tables">
+            <div>
+                <h2>코스피 상승률 TOP 30</h2>
+                <table>
+                    <thead><tr><th>#</th><th>종목</th><th>등락률</th><th>종가</th><th>거래대금</th></tr></thead>
+                    <tbody id="kospiChgTable"></tbody>
+                </table>
+            </div>
+            <div>
+                <h2>코스닥 상승률 TOP 30</h2>
+                <table>
+                    <thead><tr><th>#</th><th>종목</th><th>등락률</th><th>종가</th><th>거래대금</th></tr></thead>
+                    <tbody id="kosdaqChgTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 <footer>Data source: KRX OpenAPI</footer>
 <script>
@@ -2482,6 +2518,35 @@ function refresh() {{
         h2 += '<tr><td class="c">' + (i+1) + '</td><td class="c">' + r.name + '</td><td class="c">' + r.market + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c">' + Math.round(avgTurnover) + '%</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c ' + cls + '">' + chgLabel + '</td></tr>';
     }});
     document.getElementById('turnTable').innerHTML = h2 || '<tr><td colspan="7" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
+
+    // 시총/상승률 테이블 (단일 날짜 기준 - 기간이면 마지막 날짜)
+    var targetDate = e;
+    var capChgData = raw.filter(function(r) {{ return r.d === targetDate; }});
+
+    function renderCapTable(type, tableId) {{
+        var items = capChgData.filter(function(r) {{ return r.type === type; }}).sort(function(a,b) {{ return a.rank - b.rank; }});
+        var h = '';
+        items.forEach(function(r, i) {{
+            var cls = r.chg > 0 ? 'pos' : (r.chg < 0 ? 'neg' : '');
+            h += '<tr><td class="c">' + (i+1) + '</td><td class="c">' + r.name + '</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c ' + cls + '">' + (r.chg > 0 ? '+' : '') + Math.round(r.chg) + '%</td></tr>';
+        }});
+        document.getElementById(tableId).innerHTML = h || '<tr><td colspan="5" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
+    }}
+
+    function renderChgTable(type, tableId) {{
+        var items = capChgData.filter(function(r) {{ return r.type === type; }}).sort(function(a,b) {{ return a.rank - b.rank; }});
+        var h = '';
+        items.forEach(function(r, i) {{
+            var cls = r.chg > 0 ? 'pos' : (r.chg < 0 ? 'neg' : '');
+            h += '<tr><td class="c">' + (i+1) + '</td><td class="c">' + r.name + '</td><td class="c ' + cls + '">' + (r.chg > 0 ? '+' : '') + Math.round(r.chg) + '%</td><td class="c">' + r.price.toLocaleString() + '</td><td class="c">' + fmtVal(r.trdval) + '</td></tr>';
+        }});
+        document.getElementById(tableId).innerHTML = h || '<tr><td colspan="5" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
+    }}
+
+    renderCapTable('kospi_cap', 'kospiCapTable');
+    renderCapTable('kosdaq_cap', 'kosdaqCapTable');
+    renderChgTable('kospi_chg', 'kospiChgTable');
+    renderChgTable('kosdaq_chg', 'kosdaqChgTable');
 }}
 refresh();
 </script>

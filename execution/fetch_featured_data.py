@@ -74,6 +74,29 @@ def extract_top(df, date_str):
             'price': int(r['TDD_CLSPRC']) if pd.notna(r['TDD_CLSPRC']) else 0,
         })
 
+    # 코스피 시총 상위
+    def add_top(src_df, type_name, sort_col, ascending=False):
+        top = src_df.nlargest(TOP_N, sort_col) if not ascending else src_df.nsmallest(TOP_N, sort_col)
+        for rank, (_, r) in enumerate(top.iterrows(), 1):
+            records.append({
+                'd': date_str, 'type': type_name, 'rank': rank,
+                'name': r['ISU_NM'], 'code': r['ISU_CD'],
+                'market': r['MKT_NM'] or '',
+                'trdval': int(r['ACC_TRDVAL']),
+                'mktcap': int(r['MKTCAP']),
+                'turnover': round(r['TURNOVER'], 2),
+                'chg': round(r['FLUC_RT'], 2) if pd.notna(r['FLUC_RT']) else 0,
+                'price': int(r['TDD_CLSPRC']) if pd.notna(r['TDD_CLSPRC']) else 0,
+            })
+
+    kospi = df[df['MKT_NM'] == 'KOSPI']
+    kosdaq = df[df['MKT_NM'] == 'KOSDAQ']
+
+    add_top(kospi, 'kospi_cap', 'MKTCAP')
+    add_top(kosdaq, 'kosdaq_cap', 'MKTCAP')
+    add_top(kospi, 'kospi_chg', 'FLUC_RT')
+    add_top(kosdaq, 'kosdaq_chg', 'FLUC_RT')
+
     return records
 
 
