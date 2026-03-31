@@ -591,6 +591,7 @@ def _build_wrap_chart_section(category_label):
 
         js_code = """
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>Chart.defaults.font.family = "'Inter', 'Noto Sans KR', sans-serif";</script>
         <script>
         (function() {
             var navData = NAV_DATA_PLACEHOLDER;
@@ -2166,6 +2167,7 @@ function render(){
     <title>SEIBro - US Settlement TOP 50</title>
     <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>Chart.defaults.font.family = "'Inter', 'Noto Sans KR', sans-serif";</script>
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
         body {{ font-family: 'Inter', 'Noto Sans KR', sans-serif; background: #f8f9fa; color: #333; }}
