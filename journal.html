@@ -209,10 +209,10 @@ async function loadJournal() {
             }
             function mktColorRow(label, val, colorType) {
                 var bg = '';
-                if (colorType === 'up') bg = ' style="background:#FADBD8;border-radius:0;padding:0 4px;"';
-                else if (colorType === 'flat') bg = ' style="background:#f0f0f0;border-radius:0;padding:0 4px;"';
-                else if (colorType === 'down') bg = ' style="background:#D6EAF8;border-radius:0;padding:0 4px;"';
-                return '<div class="market-row"><span class="label">' + label + '</span><span class="value"' + bg + '>' + fmtNum(val) + '</span></div>';
+                if (colorType === 'up') bg = 'background:#FADBD8;';
+                else if (colorType === 'flat') bg = 'background:#f0f0f0;';
+                else if (colorType === 'down') bg = 'background:#D6EAF8;';
+                return '<div class="market-row" style="' + bg + '"><span class="label">' + label + '</span><span class="value">' + fmtNum(val) + '</span></div>';
             }
             function mktChgRow(label, val) {
                 return '<div class="market-row"><span class="label">' + label + '</span><span class="value ' + chgCls(val) + '">' + (val ? val : '-') + '</span></div>';
@@ -233,7 +233,7 @@ async function loadJournal() {
             html += '<div style="border-bottom:1px solid #ddd;margin:4px 0;"></div>';
             html += mktColorRow('상승', e.kUp, 'up') + mktColorRow('보합', e.kFlat, 'flat') + mktColorRow('하락', e.kDown, 'down');
             html += '<div style="border-bottom:1px solid #ddd;margin:4px 0;"></div>';
-            html += '<div class="market-row investor"><span class="label">개인</span><span class="value ' + chgCls(e.kPer) + '">' + fmtNum(e.kPer) + '</span></div>' + '<div class="market-row investor"><span class="label">외국인</span><span class="value ' + chgCls(e.kFor) + '">' + fmtNum(e.kFor) + '</span></div>' + '<div class="market-row investor"><span class="label">기관</span><span class="value ' + chgCls(e.kInst) + '">' + fmtNum(e.kInst) + '</span></div>';
+            html += (function(){ var cls=chgCls(e.kPer); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">개인</span><span class="value">'+fmtNum(e.kPer)+'</span></div>'; })() + (function(){ var cls=chgCls(e.kFor); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">외국인</span><span class="value">'+fmtNum(e.kFor)+'</span></div>'; })() + (function(){ var cls=chgCls(e.kInst); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">기관</span><span class="value">'+fmtNum(e.kInst)+'</span></div>'; })();
             html += '{divider}';
             html += '<div class="market-row ma120"><span class="label">120일선</span><span class="value">' + (function(v){ if(!v||v==='-') return '-'; var l=v.toLowerCase(); if(l==='up') return '<span style="background:#FADBD8;padding:0 6px;border-radius:0;">UP</span>'; if(l==='down') return '<span style="background:#D6EAF8;padding:0 6px;border-radius:0;">DOWN</span>'; return v; })(e.k_ma120) + '</span></div>';
             html += '</div>';
@@ -246,13 +246,13 @@ async function loadJournal() {
             html += '<div style="border-bottom:1px solid #ddd;margin:4px 0;"></div>';
             html += mktColorRow('상승', e.qUp, 'up') + mktColorRow('보합', e.qFlat, 'flat') + mktColorRow('하락', e.qDown, 'down');
             html += '<div style="border-bottom:1px solid #ddd;margin:4px 0;"></div>';
-            html += '<div class="market-row investor"><span class="label">개인</span><span class="value ' + chgCls(e.qPer) + '">' + fmtNum(e.qPer) + '</span></div>' + '<div class="market-row investor"><span class="label">외국인</span><span class="value ' + chgCls(e.qFor) + '">' + fmtNum(e.qFor) + '</span></div>' + '<div class="market-row investor"><span class="label">기관</span><span class="value ' + chgCls(e.qInst) + '">' + fmtNum(e.qInst) + '</span></div>';
+            html += (function(){ var cls=chgCls(e.qPer); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">개인</span><span class="value">'+fmtNum(e.qPer)+'</span></div>'; })() + (function(){ var cls=chgCls(e.qFor); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">외국인</span><span class="value">'+fmtNum(e.qFor)+'</span></div>'; })() + (function(){ var cls=chgCls(e.qInst); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">기관</span><span class="value">'+fmtNum(e.qInst)+'</span></div>'; })();
             html += '{divider}';
             html += '<div class="market-row ma120"><span class="label">120일선</span><span class="value">' + (function(v){ if(!v||v==='-') return '-'; var l=v.toLowerCase(); if(l==='up') return '<span style="background:#FADBD8;padding:0 6px;border-radius:0;">UP</span>'; if(l==='down') return '<span style="background:#D6EAF8;padding:0 6px;border-radius:0;">DOWN</span>'; return v; })(e.q_ma120) + '</span></div>';
             html += '</div></div>';
 
             // 장전계획 / 장후복기
-            html += '<div style="display:flex;flex-direction:column;gap:8px;">';
+            html += '<div style="display:flex;flex-direction:column;gap:0;">';
             html += '<div style="flex:1;background:#f7f7f7;border-radius:0;padding:12px;border:1px solid #333;"><div style="font-size:0.9rem;font-weight:700;color:#000;margin-bottom:6px;">장전 계획</div><div style="font-size:0.9rem;line-height:1.6;white-space:pre-wrap;">' + (e.plan || '<span style="color:#ccc;">-</span>') + '</div></div>';
             html += '<div style="flex:1;background:#f7f7f7;border-radius:0;padding:12px;border:1px solid #333;"><div style="font-size:0.9rem;font-weight:700;color:#000;margin-bottom:6px;">장후 복기</div><div style="font-size:0.9rem;line-height:1.6;white-space:pre-wrap;">' + (e.review || '<span style="color:#ccc;">-</span>') + '</div></div>';
             html += '</div>';
