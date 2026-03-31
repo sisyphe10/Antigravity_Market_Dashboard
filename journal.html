@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Journal</title>
+    <link href='https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap' rel='stylesheet'>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f8f9fa; color: #333; }
+        body { font-family: 'Nanum Gothic', sans-serif; background: #f8f9fa; color: #333; }
 
         /* Password */
         .pw-overlay { position: fixed; inset: 0; background: #f8f9fa; display: flex; align-items: center; justify-content: center; z-index: 9999; }
@@ -35,11 +36,11 @@
         .market-col.kospi h3 { background: #222; }
         .market-col.kosdaq h3 { background: #222; }
         .market-col.nasdaq h3 { background: #222; }
-        .market-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 0.8rem; border-bottom: 1px solid #f0f0f0; }
+        .market-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 0.8rem; border-bottom: 1px solid #f0f0f0; text-align: center; }
         .market-row .label { color: #000; font-weight: 600; }
         .market-row .value { font-weight: 600; color: #000; }
-        .market-row.investor { background: #EBF5FB; }
-        .market-row.ma120 { background: #FDEDEC; }
+        .market-row.investor { }
+        .market-row.ma120 { }
         .pos { color: #000; background: #FADBD8; border-radius: 4px; padding: 0 4px; }
         .neg { color: #000; background: #D6EAF8; border-radius: 4px; padding: 0 4px; }
 
@@ -211,23 +212,23 @@ async function loadJournal() {
 
             // Market data
             html += '<div class="market-grid">';
-            html += '<div class="market-col kospi"><h3>KOSPI</h3>';
+            html += '<div class="market-col kospi"><h3>코스피</h3>';
             html += mktRow('지수', e.kClose);
             html += mktChgRow('변동', e.kChg);
             html += mktRow('거래대금', e.kVol);
             html += mktChgRow('거래대금 변동', e.kVolChg);
             html += mktRow('상승', e.kUp) + mktRow('보합', e.kFlat) + mktRow('하락', e.kDown);
-            html += '<div class="market-row investor"><span class="label">개인</span><span class="value">' + fmtNum(e.kPer) + '</span></div>' + '<div class="market-row investor"><span class="label">외국인</span><span class="value">' + fmtNum(e.kFor) + '</span></div>' + '<div class="market-row investor"><span class="label">기관</span><span class="value">' + fmtNum(e.kInst) + '</span></div>';
+            html += '<div class="market-row investor"><span class="label">개인</span><span class="value ' + chgCls(e.kPer) + '">' + fmtNum(e.kPer) + '</span></div>' + '<div class="market-row investor"><span class="label">외국인</span><span class="value ' + chgCls(e.kFor) + '">' + fmtNum(e.kFor) + '</span></div>' + '<div class="market-row investor"><span class="label">기관</span><span class="value ' + chgCls(e.kInst) + '">' + fmtNum(e.kInst) + '</span></div>';
             html += '<div class="market-row ma120"><span class="label">120일선</span><span class="value">' + (e.k_ma120 || '-') + '</span></div>';
             html += '</div>';
 
-            html += '<div class="market-col kosdaq"><h3>KOSDAQ</h3>';
+            html += '<div class="market-col kosdaq"><h3>코스닥</h3>';
             html += mktRow('지수', e.qClose);
             html += mktChgRow('변동', e.qChg);
             html += mktRow('거래대금', e.qVol);
             html += mktChgRow('거래대금 변동', e.qVolChg);
             html += mktRow('상승', e.qUp) + mktRow('보합', e.qFlat) + mktRow('하락', e.qDown);
-            html += '<div class="market-row investor"><span class="label">개인</span><span class="value">' + fmtNum(e.qPer) + '</span></div>' + '<div class="market-row investor"><span class="label">외국인</span><span class="value">' + fmtNum(e.qFor) + '</span></div>' + '<div class="market-row investor"><span class="label">기관</span><span class="value">' + fmtNum(e.qInst) + '</span></div>';
+            html += '<div class="market-row investor"><span class="label">개인</span><span class="value ' + chgCls(e.qPer) + '">' + fmtNum(e.qPer) + '</span></div>' + '<div class="market-row investor"><span class="label">외국인</span><span class="value ' + chgCls(e.qFor) + '">' + fmtNum(e.qFor) + '</span></div>' + '<div class="market-row investor"><span class="label">기관</span><span class="value ' + chgCls(e.qInst) + '">' + fmtNum(e.qInst) + '</span></div>';
             html += '<div class="market-row ma120"><span class="label">120일선</span><span class="value">' + (e.q_ma120 || '-') + '</span></div>';
             html += '</div>';
 
