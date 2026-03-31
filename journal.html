@@ -30,7 +30,7 @@
         .tl-card { background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #c8e6c9; }
 
         /* Market data grid */
-        .market-grid { display: grid; grid-template-columns: 3fr 3fr 3fr 16fr; gap: 12px; margin-bottom: 14px; }
+        .market-grid { display: grid; grid-template-columns: 1fr 1fr 5fr; gap: 12px; margin-bottom: 14px; }
         .market-col h3 { font-size: 0.8rem; font-weight: 700; color: #fff; background: #333; padding: 6px 10px; border-radius: 6px; margin-bottom: 8px; text-align: center; }
         .market-col.kospi h3 { background: #222; }
         .market-col.kosdaq h3 { background: #222; }
@@ -231,14 +231,7 @@ async function loadJournal() {
             html += '<div class="market-row ma120"><span class="label">120일선</span><span class="value">' + (e.q_ma120 || '-') + '</span></div>';
             html += '</div>';
 
-            html += '<div class="market-col nasdaq"><h3>NASDAQ</h3>';
-            html += mktRow('지수', e.nqClose);
-            html += mktChgRow('변동', e.nqChg);
-            html += mktRow('거래량(B)', e.nqVol);
-            html += mktChgRow('거래량 변동', e.nqVolChg);
-            html += '</div>';
-
-            // 장전계획 / 장후복기 (4번째 열)
+            // 장전계획 / 장후복기 (3번째 열)
             html += '<div style="display:flex;flex-direction:column;gap:8px;">';
             html += '<div style="flex:1;background:#f0faf0;border-radius:8px;padding:12px;"><div style="font-size:0.75rem;font-weight:700;color:#2e7d32;margin-bottom:6px;">장전 계획</div><div style="font-size:0.8rem;line-height:1.6;white-space:pre-wrap;">' + (e.plan || '<span style="color:#ccc;">-</span>') + '</div></div>';
             html += '<div style="flex:1;background:#fff8f0;border-radius:8px;padding:12px;"><div style="font-size:0.75rem;font-weight:700;color:#e65100;margin-bottom:6px;">장후 복기</div><div style="font-size:0.8rem;line-height:1.6;white-space:pre-wrap;">' + (e.review || '<span style="color:#ccc;">-</span>') + '</div></div>';
