@@ -31,12 +31,12 @@
         .tl-card { background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #c8e6c9; }
 
         /* Market data grid */
-        .market-grid { display: grid; grid-template-columns: 1fr 1fr 5fr; gap: 12px; margin-bottom: 14px; }
+        .market-grid { display: grid; grid-template-columns: 2fr 5fr; gap: 0; margin-bottom: 14px; }
         .market-col h3 { font-size: 0.9rem; font-weight: 700; color: #fff; background: #333; padding: 6px 10px; border-radius: 6px; margin-bottom: 8px; text-align: center; }
         .market-col.kospi h3 { }
         .market-col.kosdaq h3 { }
         
-        .market-col { border: 1px solid #ccc; border-radius: 8px; padding: 8px; }
+        .market-col { padding: 8px; }
         .market-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 0.9rem; border-bottom: 1px solid #f0f0f0; text-align: center; }
         .market-row .label { color: #000; font-weight: 600; text-align: center; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.8rem; }
         .market-row .value { font-weight: 600; color: #000; text-align: center; flex: 1; }
@@ -224,7 +224,7 @@ async function loadJournal() {
 
             // Market data
             html += '<div class="market-grid">';
-            html += '<div class="market-col kospi"><h3>코스피</h3>';
+            html += '<div style="display:grid;grid-template-columns:1fr 1fr;border:1px solid #333;border-radius:8px;overflow:hidden;"><div class="market-col kospi"><h3>코스피</h3>';
             html += mktRow('지수', e.kClose);
             html += mktChgRow('변동', e.kChg);
             html += mktRow('거래대금', e.kVol);
@@ -234,7 +234,7 @@ async function loadJournal() {
             html += '<div class="market-row ma120"><span class="label">120일선</span><span class="value">' + (e.k_ma120 || '-') + '</span></div>';
             html += '</div>';
 
-            html += '<div class="market-col kosdaq"><h3>코스닥</h3>';
+            html += '<div class="market-col kosdaq" style="border-left:1px solid #ccc;"><h3>코스닥</h3>';
             html += mktRow('지수', e.qClose);
             html += mktChgRow('변동', e.qChg);
             html += mktRow('거래대금', e.qVol);
@@ -242,9 +242,9 @@ async function loadJournal() {
             html += mktColorRow('상승', e.qUp, 'up') + mktColorRow('보합', e.qFlat, 'flat') + mktColorRow('하락', e.qDown, 'down');
             html += '<div class="market-row investor"><span class="label">개인</span><span class="value ' + chgCls(e.qPer) + '">' + fmtNum(e.qPer) + '</span></div>' + '<div class="market-row investor"><span class="label">외국인</span><span class="value ' + chgCls(e.qFor) + '">' + fmtNum(e.qFor) + '</span></div>' + '<div class="market-row investor"><span class="label">기관</span><span class="value ' + chgCls(e.qInst) + '">' + fmtNum(e.qInst) + '</span></div>';
             html += '<div class="market-row ma120"><span class="label">120일선</span><span class="value">' + (e.q_ma120 || '-') + '</span></div>';
-            html += '</div>';
+            html += '</div></div>';
 
-            // 장전계획 / 장후복기 (3번째 열)
+            // 장전계획 / 장후복기
             html += '<div style="display:flex;flex-direction:column;gap:8px;">';
             html += '<div style="flex:1;background:#f7f7f7;border-radius:8px;padding:12px;border:1px solid #333;"><div style="font-size:0.9rem;font-weight:700;color:#000;margin-bottom:6px;">장전 계획</div><div style="font-size:0.9rem;line-height:1.6;white-space:pre-wrap;">' + (e.plan || '<span style="color:#ccc;">-</span>') + '</div></div>';
             html += '<div style="flex:1;background:#f7f7f7;border-radius:8px;padding:12px;border:1px solid #333;"><div style="font-size:0.9rem;font-weight:700;color:#000;margin-bottom:6px;">장후 복기</div><div style="font-size:0.9rem;line-height:1.6;white-space:pre-wrap;">' + (e.review || '<span style="color:#ccc;">-</span>') + '</div></div>';
