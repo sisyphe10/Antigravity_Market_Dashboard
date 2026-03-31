@@ -71,7 +71,10 @@
 <div id="mainContent" class="pw-hidden">
     <header style="position:relative;">
         <h1>Journal</h1>
-        <a href="index.html" style="position:absolute;top:16px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:0.85rem;font-weight:600;">Home</a>
+        <div style="position:absolute;top:16px;right:24px;display:flex;gap:8px;">
+            <a href="https://docs.google.com/spreadsheets/d/13HXDxF62ILXyRz7meRZ5CxJT5HfWAwIKc8IsCavuVXk/edit" target="_blank" style="padding:6px 16px;background:#fff;color:#333;text-decoration:none;border-radius:8px;font-size:0.85rem;font-weight:600;border:1px solid #ddd;">Sheet</a>
+            <a href="index.html" style="padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:0.85rem;font-weight:600;">Home</a>
+        </div>
     </header>
     <div class="content">
         <div class="timeline" id="timeline">
@@ -157,7 +160,11 @@ async function loadJournal() {
 
         var html = '';
         entries.forEach(function(e) {
-            var dow = e.dow || ['일','월','화','수','목','금','토'][new Date(e.date).getDay()];
+            var dowNames = ['일','월','화','수','목','금','토'];
+            var dow = e.dow;
+            if (!dow || dow.toString().indexOf('Date') >= 0) {
+                dow = dowNames[new Date(e.date).getDay()];
+            }
 
             function mktRow(label, val, cls) {
                 return '<div class="market-row"><span class="label">' + label + '</span><span class="value ' + (cls || '') + '">' + fmtNum(val) + '</span></div>';

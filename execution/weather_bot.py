@@ -673,6 +673,17 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
         else:
             logging.error(f"Dashboard generation failed: {result_dashboard.stderr}")
 
+        # 3-5. 투자일지 시장 데이터 수집
+        logging.info("Step 3-5: Fetching journal market data...")
+        result_journal = subprocess.run(
+            [sys.executable, "execution/fetch_journal_data.py"],
+            capture_output=True, text=True, timeout=120
+        )
+        if result_journal.returncode == 0:
+            logging.info("Journal data collected successfully")
+        else:
+            logging.warning(f"Journal data failed: {result_journal.stderr[:100]}")
+
         # 4. 포트폴리오 리포트 생성 및 전송
         logging.info("Step 4: Generating portfolio report...")
         result_report = subprocess.run(
