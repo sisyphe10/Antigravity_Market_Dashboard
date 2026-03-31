@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journal</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', 'Malgun Gothic', sans-serif; background: #f8f9fa; color: #333; }
+
+        /* Password */
+        .pw-overlay { position: fixed; inset: 0; background: #f8f9fa; display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        .pw-box { background: #fff; border-radius: 16px; padding: 40px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.1); max-width: 320px; width: 90%; }
+        .pw-box h2 { font-size: 1.2rem; margin-bottom: 20px; }
+        .pw-box input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 1rem; text-align: center; outline: none; }
+        .pw-box input:focus { border-color: #333; }
+        .pw-hidden { display: none; }
+
+        /* Layout */
+        header { background: #fff; padding: 20px 24px; border-bottom: 1px solid #eee; position: relative; text-align: center; }
+        header h1 { font-size: 1.6rem; font-weight: 800; color: #222; }
+        .content { max-width: 900px; margin: 0 auto; padding: 24px; }
+
+        /* Timeline */
+        .timeline { position: relative; padding-left: 32px; }
+        .timeline::before { content: ''; position: absolute; left: 10px; top: 0; bottom: 0; width: 2px; background: #ddd; }
+        .tl-entry { position: relative; margin-bottom: 32px; }
+        .tl-dot { position: absolute; left: -27px; top: 8px; width: 12px; height: 12px; border-radius: 50%; background: #333; border: 2px solid #fff; box-shadow: 0 0 0 2px #333; }
+        .tl-date { font-size: 0.85rem; font-weight: 800; color: #555; margin-bottom: 8px; }
+        .tl-card { background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+
+        /* Market data grid */
+        .market-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+        .market-col h3 { font-size: 0.8rem; font-weight: 700; color: #fff; background: #333; padding: 6px 10px; border-radius: 6px; margin-bottom: 8px; }
+        .market-col.kospi h3 { background: #1a237e; }
+        .market-col.kosdaq h3 { background: #b71c1c; }
+        .market-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 0.8rem; border-bottom: 1px solid #f0f0f0; }
+        .market-row .label { color: #888; font-weight: 600; }
+        .market-row .value { font-weight: 600; }
+        .pos { color: #cc0000; }
+        .neg { color: #0055cc; }
+
+        /* Manual fields */
+        .manual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px; }
+        .manual-field h4 { font-size: 0.75rem; font-weight: 700; color: #888; margin-bottom: 4px; }
+        .manual-field .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; }
+        .badge-up { background: #ffebee; color: #c62828; }
+        .badge-down { background: #e3f2fd; color: #1565c0; }
+        .badge-hold { background: #f5f5f5; color: #666; }
+
+        .note-section { margin-top: 10px; }
+        .note-section h4 { font-size: 0.78rem; font-weight: 700; color: #333; margin-bottom: 4px; padding: 4px 8px; background: #f5f5f5; border-radius: 4px; display: inline-block; }
+        .note-section p { font-size: 0.82rem; line-height: 1.6; color: #444; padding: 8px 0; white-space: pre-wrap; }
+        .note-section.plan h4 { background: #e8f5e9; color: #2e7d32; }
+        .note-section.review h4 { background: #fff3e0; color: #e65100; }
+
+        .empty-msg { text-align: center; color: #aaa; padding: 60px 0; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+<!-- Password -->
+<div class="pw-overlay" id="pwOverlay">
+    <div class="pw-box">
+        <h2>Journal</h2>
+        <input type="password" id="pwInput" placeholder="Password" autofocus
+               onkeyup="if(event.key==='Enter'){if(this.value==='0518'){document.getElementById('pwOverlay').style.display='none';document.getElementById('mainContent').classList.remove('pw-hidden');loadJournal();}else{this.style.borderColor='#cc0000';this.value='';}}">
+    </div>
+</div>
+
+<div id="mainContent" class="pw-hidden">
+    <header style="position:relative;">
+        <h1>Journal</h1>
+        <a href="index.html" style="position:absolute;top:16px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:0.85rem;font-weight:600;">Home</a>
+    </header>
+    <div class="content">
+        <div class="timeline" id="timeline">
+            <div class="empty-msg">로딩 중...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+const SHEET_ID = '13HXDxF62ILXyRz7meRZ5CxJT5HfWAwIKc8IsCavuVXk';
+
+function sheetUrl() {
+    return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+}
+
+function fmtNum(v) {
+    if (!v && v !== 0) return '-';
+    var n = parseFloat(v);
+    if (isNaN(n)) return v;
+    return n.toLocaleString();
+}
+
+function chgCls(v) {
+    if (!v) return '';
+    var s = String(v);
+    if (s.includes('-')) return 'neg';
+    if (parseFloat(v) > 0) return 'pos';
+    return '';
+}
+
+function badgeHtml(v) {
+    if (!v) return '<span class="badge badge-hold">-</span>';
+    var lower = String(v).toLowerCase();
+    if (lower === 'up' || lower === '상승') return '<span class="badge badge-up">UP</span>';
+    if (lower === 'down' || lower === '하락') return '<span class="badge badge-down">DOWN</span>';
+    return '<span class="badge badge-hold">' + v + '</span>';
+}
+
+async function loadJournal() {
+    try {
+        var res = await fetch(sheetUrl());
+        var text = await res.text();
+        var json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+        var rows = json.table.rows;
+
+        var entries = [];
+        rows.forEach(function(row) {
+            var c = row.c;
+            if (!c[0] || !c[0].v) return;
+            var dateVal = c[0].v;
+            // Date(2026,2,31) → 2026-03-31
+            var m = dateVal.match(/Date\((\d+),(\d+),(\d+)\)/);
+            var dateStr;
+            if (m) {
+                var y = parseInt(m[1]), mo = parseInt(m[2]) + 1, d = parseInt(m[3]);
+                dateStr = y + '-' + String(mo).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+            } else {
+                dateStr = String(dateVal);
+            }
+
+            function val(i) { return (c[i] && c[i].v != null) ? c[i].v : ''; }
+
+            entries.push({
+                date: dateStr,
+                dow: val(1),
+                kClose: val(2), kChg: val(3), kVol: val(4), kVolChg: val(5),
+                kUp: val(6), kFlat: val(7), kDown: val(8),
+                kPer: val(9), kFor: val(10), kInst: val(11),
+                qClose: val(12), qChg: val(13), qVol: val(14), qVolChg: val(15),
+                qUp: val(16), qFlat: val(17), qDown: val(18),
+                qPer: val(19), qFor: val(20), qInst: val(21),
+                ma120: val(22), strategy: val(23), judgment: val(24),
+                plan: val(25), review: val(26),
+            });
+        });
+
+        entries.sort(function(a, b) { return b.date.localeCompare(a.date); });
+
+        if (entries.length === 0) {
+            document.getElementById('timeline').innerHTML = '<div class="empty-msg">일지가 없습니다</div>';
+            return;
+        }
+
+        var html = '';
+        entries.forEach(function(e) {
+            var dow = e.dow || ['일','월','화','수','목','금','토'][new Date(e.date).getDay()];
+
+            function mktRow(label, val, cls) {
+                return '<div class="market-row"><span class="label">' + label + '</span><span class="value ' + (cls || '') + '">' + fmtNum(val) + '</span></div>';
+            }
+            function mktChgRow(label, val) {
+                return '<div class="market-row"><span class="label">' + label + '</span><span class="value ' + chgCls(val) + '">' + (val ? val : '-') + '</span></div>';
+            }
+
+            html += '<div class="tl-entry">';
+            html += '<div class="tl-dot"></div>';
+            html += '<div class="tl-date">' + e.date + ' (' + dow + ')</div>';
+            html += '<div class="tl-card">';
+
+            // Market data
+            html += '<div class="market-grid">';
+            html += '<div class="market-col kospi"><h3>KOSPI</h3>';
+            html += mktRow('지수', e.kClose);
+            html += mktChgRow('변동', e.kChg);
+            html += mktRow('거래대금', e.kVol);
+            html += mktChgRow('거래대금 변동', e.kVolChg);
+            html += mktRow('상승', e.kUp) + mktRow('보합', e.kFlat) + mktRow('하락', e.kDown);
+            html += mktRow('개인', e.kPer) + mktRow('외국인', e.kFor) + mktRow('기관', e.kInst);
+            html += '</div>';
+
+            html += '<div class="market-col kosdaq"><h3>KOSDAQ</h3>';
+            html += mktRow('지수', e.qClose);
+            html += mktChgRow('변동', e.qChg);
+            html += mktRow('거래대금', e.qVol);
+            html += mktChgRow('거래대금 변동', e.qVolChg);
+            html += mktRow('상승', e.qUp) + mktRow('보합', e.qFlat) + mktRow('하락', e.qDown);
+            html += mktRow('개인', e.qPer) + mktRow('외국인', e.qFor) + mktRow('기관', e.qInst);
+            html += '</div>';
+            html += '</div>';
+
+            // Manual fields
+            html += '<div class="manual-grid">';
+            html += '<div class="manual-field"><h4>120일선</h4> ' + badgeHtml(e.ma120) + '</div>';
+            html += '<div class="manual-field"><h4>전략</h4> ' + badgeHtml(e.strategy) + '</div>';
+            html += '</div>';
+            html += '<div class="manual-field" style="margin-bottom:10px;"><h4>판단</h4> ' + badgeHtml(e.judgment) + '</div>';
+
+            // Notes
+            if (e.plan) {
+                html += '<div class="note-section plan"><h4>장전 계획</h4><p>' + e.plan + '</p></div>';
+            }
+            if (e.review) {
+                html += '<div class="note-section review"><h4>장후 복기</h4><p>' + e.review + '</p></div>';
+            }
+
+            html += '</div></div>';
+        });
+
+        document.getElementById('timeline').innerHTML = html;
+    } catch(err) {
+        document.getElementById('timeline').innerHTML = '<div class="empty-msg">로딩 실패: ' + err.message + '</div>';
+    }
+}
+</script>
+</body>
+</html>

@@ -1787,6 +1787,11 @@ def create_dashboard():
             <div class="title">Featured</div>
             <div class="desc">거래대금 TOP 30, 회전율 TOP 30</div>
         </a>
+        <a href="journal.html" class="card" style="border-left-color:#333">
+            <div class="icon">📝</div>
+            <div class="title">Journal</div>
+            <div class="desc">투자일지</div>
+        </a>
         <a href="architecture.html" class="card" style="border-left-color:#666">
             <div class="icon">🗂️</div>
             <div class="title">Architecture</div>
