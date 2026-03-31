@@ -204,8 +204,9 @@ async function loadJournal() {
                 dow = dowNames[new Date(e.date).getDay()];
             }
 
-            function mktRow(label, val, cls) {
-                return '<div class="market-row"><span class="label">' + label + '</span><span class="value ' + (cls || '') + '">' + fmtNum(val) + '</span></div>';
+            function mktRow(label, val, bg) {
+                var style = bg ? ' style="background:' + bg + ';"' : '';
+                return '<div class="market-row"' + style + '><span class="label">' + label + '</span><span class="value">' + fmtNum(val) + '</span></div>';
             }
             function mktColorRow(label, val, colorType) {
                 var bg = '';
@@ -230,9 +231,9 @@ async function loadJournal() {
             // Market data
             html += '<div class="market-grid">';
             html += '<div style="display:grid;grid-template-columns:1fr 1fr;border:1px solid #333;border-radius:0;overflow:hidden;"><div class="market-col kospi"><h3>코스피</h3>';
-            html += mktRow('지수', e.kClose);
+            html += mktRow('지수', e.kClose, '#f0f0f0');
             html += mktChgRow('변동', e.kChg);
-            html += mktRow('거래대금', e.kVol);
+            html += mktRow('거래대금', e.kVol, '#f0f0f0');
             html += mktChgRow('변동', e.kVolChg);
             html += '<div style="border-bottom:1px solid #ddd;margin:4px 0;"></div>';
             html += mktColorRow('상승', e.kUp, 'up') + mktColorRow('보합', e.kFlat, 'flat') + mktColorRow('하락', e.kDown, 'down');
@@ -243,9 +244,9 @@ async function loadJournal() {
             html += '</div>';
 
             html += '<div class="market-col kosdaq" style="border-left:1px solid #ccc;"><h3>코스닥</h3>';
-            html += mktRow('지수', e.qClose);
+            html += mktRow('지수', e.qClose, '#f0f0f0');
             html += mktChgRow('변동', e.qChg);
-            html += mktRow('거래대금', e.qVol);
+            html += mktRow('거래대금', e.qVol, '#f0f0f0');
             html += mktChgRow('변동', e.qVolChg);
             html += '<div style="border-bottom:1px solid #ddd;margin:4px 0;"></div>';
             html += mktColorRow('상승', e.qUp, 'up') + mktColorRow('보합', e.qFlat, 'flat') + mktColorRow('하락', e.qDown, 'down');
