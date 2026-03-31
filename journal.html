@@ -99,7 +99,7 @@ function sheetUrl(sheetName) {
 function fmtNum(v) {
     if (!v && v !== 0) return '-';
     var s = String(v);
-    if (s.includes('%')) return s;
+    if (s.includes('%')) { var pn = parseFloat(s); return isNaN(pn) ? s : pn.toFixed(1) + '%'; }
     var n = parseFloat(s.replace(/,/g, ''));
     if (isNaN(n)) return v;
     if (s.includes('.')) return n.toLocaleString(undefined, {minimumFractionDigits:1, maximumFractionDigits:1});
