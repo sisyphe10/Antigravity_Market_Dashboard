@@ -11,9 +11,9 @@
 
         /* Password */
         .pw-overlay { position: fixed; inset: 0; background: #f8f9fa; display: flex; align-items: center; justify-content: center; z-index: 9999; }
-        .pw-box { background: #fff; border-radius: 16px; padding: 40px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.1); max-width: 320px; width: 90%; }
+        .pw-box { background: #fff; border-radius:0; padding: 40px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.1); max-width: 320px; width: 90%; }
         .pw-box h2 { font-size: 1.2rem; margin-bottom: 20px; }
-        .pw-box input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 1rem; text-align: center; outline: none; }
+        .pw-box input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius:0; font-size: 1rem; text-align: center; outline: none; }
         .pw-box input:focus { border-color: #333; }
         .pw-hidden { display: none; }
 
@@ -28,33 +28,33 @@
         .tl-entry { position: relative; margin-bottom: 32px; }
         .tl-dot { position: absolute; left: -27px; top: 8px; width: 12px; height: 12px; border-radius: 50%; background: #333; border: 2px solid #fff; box-shadow: 0 0 0 2px #333; }
         .tl-date { font-size: 0.85rem; font-weight: 800; color: #000; margin-bottom: 8px; }
-        .tl-card { background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #c8e6c9; }
+        .tl-card { background: #fff; border-radius:0; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #c8e6c9; }
 
         /* Market data grid */
         .market-grid { display: grid; grid-template-columns: 2fr 5fr; gap: 0; margin-bottom: 14px; }
-        .market-col h3 { font-size: 0.9rem; font-weight: 700; color: #fff; background: #333; padding: 6px 10px; border-radius: 6px; margin-bottom: 8px; text-align: center; }
+        .market-col h3 { font-size: 0.9rem; font-weight: 700; color: #fff; background: #333; padding: 6px 10px; border-radius:0; margin-bottom: 8px; text-align: center; }
         .market-col.kospi h3 { }
         .market-col.kosdaq h3 { }
         
         .market-col { padding: 8px; }
-        .market-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 0.9rem; border-bottom: 1px solid #f0f0f0; text-align: center; }
-        .market-row .label { color: #000; font-weight: 600; text-align: center; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.8rem; }
+        .market-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 0.9rem;  text-align: center; }
+        .market-row .label { color: #000; font-weight: 600; text-align: center; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.9rem; }
         .market-row .value { font-weight: 600; color: #000; text-align: center; flex: 1; }
         .market-row.investor { }
         .market-row.ma120 { }
-        .pos { color: #000; background: #FADBD8; border-radius: 4px; padding: 0 4px; }
-        .neg { color: #000; background: #D6EAF8; border-radius: 4px; padding: 0 4px; }
+        .pos { color: #000; background: #FADBD8; border-radius:0; padding: 0 4px; }
+        .neg { color: #000; background: #D6EAF8; border-radius:0; padding: 0 4px; }
 
         /* Manual fields */
         .manual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px; }
         .manual-field h4 { font-size: 0.75rem; font-weight: 700; color: #888; margin-bottom: 4px; }
-        .manual-field .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; }
+        .manual-field .badge { display: inline-block; padding: 2px 10px; border-radius:0; font-size: 0.75rem; font-weight: 700; }
         .badge-up { background: #ffebee; color: #c62828; }
         .badge-down { background: #e3f2fd; color: #1565c0; }
         .badge-hold { background: #f5f5f5; color: #666; }
 
         .note-section { margin-top: 10px; }
-        .note-section h4 { font-size: 0.78rem; font-weight: 700; color: #333; margin-bottom: 4px; padding: 4px 8px; background: #f5f5f5; border-radius: 4px; display: inline-block; }
+        .note-section h4 { font-size: 0.78rem; font-weight: 700; color: #333; margin-bottom: 4px; padding: 4px 8px; background: #f5f5f5; border-radius:0; display: inline-block; }
         .note-section p { font-size: 0.82rem; line-height: 1.6; color: #444; padding: 8px 0; white-space: pre-wrap; }
         .note-section.plan h4 { background: #e8f5e9; color: #2e7d32; }
         .note-section.review h4 { background: #fff3e0; color: #e65100; }
@@ -77,8 +77,8 @@
     <header style="position:relative;">
         <h1>Journal</h1>
         <div style="position:absolute;top:16px;right:24px;display:flex;gap:8px;">
-            <a href="https://docs.google.com/spreadsheets/d/13HXDxF62ILXyRz7meRZ5CxJT5HfWAwIKc8IsCavuVXk/edit" target="_blank" style="padding:6px 16px;background:#0F9D58;color:#fff;text-decoration:none;border-radius:8px;font-size:0.85rem;font-weight:600;">Sheet</a>
-            <a href="index.html" style="padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:0.85rem;font-weight:600;">Home</a>
+            <a href="https://docs.google.com/spreadsheets/d/13HXDxF62ILXyRz7meRZ5CxJT5HfWAwIKc8IsCavuVXk/edit" target="_blank" style="padding:6px 16px;background:#0F9D58;color:#fff;text-decoration:none;border-radius:0;font-size:0.85rem;font-weight:600;">Sheet</a>
+            <a href="index.html" style="padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:0;font-size:0.85rem;font-weight:600;">Home</a>
         </div>
     </header>
     <div class="content">
@@ -117,8 +117,8 @@ function chgCls(v) {
 function badgeHtml(v) {
     if (!v) return '<span class="badge badge-hold">-</span>';
     var lower = String(v).toLowerCase();
-    if (lower === 'up' || lower === '상승') return '<span style="background:#FADBD8;padding:2px 10px;border-radius:4px;">UP</span>';
-    if (lower === 'down' || lower === '하락') return '<span style="background:#D6EAF8;padding:2px 10px;border-radius:4px;">DOWN</span>';
+    if (lower === 'up' || lower === '상승') return '<span style="background:#FADBD8;padding:2px 10px;border-radius:0;">UP</span>';
+    if (lower === 'down' || lower === '하락') return '<span style="background:#D6EAF8;padding:2px 10px;border-radius:0;">DOWN</span>';
     return '<span class="badge badge-hold">' + v + '</span>';
 }
 
@@ -208,9 +208,9 @@ async function loadJournal() {
             }
             function mktColorRow(label, val, colorType) {
                 var bg = '';
-                if (colorType === 'up') bg = ' style="background:#FADBD8;border-radius:4px;padding:0 4px;"';
-                else if (colorType === 'flat') bg = ' style="background:#f0f0f0;border-radius:4px;padding:0 4px;"';
-                else if (colorType === 'down') bg = ' style="background:#D6EAF8;border-radius:4px;padding:0 4px;"';
+                if (colorType === 'up') bg = ' style="background:#FADBD8;border-radius:0;padding:0 4px;"';
+                else if (colorType === 'flat') bg = ' style="background:#f0f0f0;border-radius:0;padding:0 4px;"';
+                else if (colorType === 'down') bg = ' style="background:#D6EAF8;border-radius:0;padding:0 4px;"';
                 return '<div class="market-row"><span class="label">' + label + '</span><span class="value"' + bg + '>' + fmtNum(val) + '</span></div>';
             }
             function mktChgRow(label, val) {
@@ -224,30 +224,36 @@ async function loadJournal() {
 
             // Market data
             html += '<div class="market-grid">';
-            html += '<div style="display:grid;grid-template-columns:1fr 1fr;border:1px solid #333;border-radius:8px;overflow:hidden;"><div class="market-col kospi"><h3>코스피</h3>';
+            html += '<div style="display:grid;grid-template-columns:1fr 1fr;border:1px solid #333;border-radius:0;overflow:hidden;"><div class="market-col kospi"><h3>코스피</h3>';
             html += mktRow('지수', e.kClose);
             html += mktChgRow('변동', e.kChg);
             html += mktRow('거래대금', e.kVol);
-            html += mktChgRow('거래대금 변동', e.kVolChg);
+            html += mktChgRow('변동', e.kVolChg);
+            html += '<div style="border-bottom:1px solid #ddd;margin:4px 0;"></div>';
             html += mktColorRow('상승', e.kUp, 'up') + mktColorRow('보합', e.kFlat, 'flat') + mktColorRow('하락', e.kDown, 'down');
+            html += '<div style="border-bottom:1px solid #ddd;margin:4px 0;"></div>';
             html += '<div class="market-row investor"><span class="label">개인</span><span class="value ' + chgCls(e.kPer) + '">' + fmtNum(e.kPer) + '</span></div>' + '<div class="market-row investor"><span class="label">외국인</span><span class="value ' + chgCls(e.kFor) + '">' + fmtNum(e.kFor) + '</span></div>' + '<div class="market-row investor"><span class="label">기관</span><span class="value ' + chgCls(e.kInst) + '">' + fmtNum(e.kInst) + '</span></div>';
-            html += '<div class="market-row ma120"><span class="label">120일선</span><span class="value">' + (e.k_ma120 || '-') + '</span></div>';
+            html += '{divider}';
+            html += '<div class="market-row ma120"><span class="label">120일선</span><span class="value">' + (function(v){ if(!v||v==='-') return '-'; var l=v.toLowerCase(); if(l==='up') return '<span style="background:#FADBD8;padding:0 6px;border-radius:0;">UP</span>'; if(l==='down') return '<span style="background:#D6EAF8;padding:0 6px;border-radius:0;">DOWN</span>'; return v; })(e.k_ma120) + '</span></div>';
             html += '</div>';
 
             html += '<div class="market-col kosdaq" style="border-left:1px solid #ccc;"><h3>코스닥</h3>';
             html += mktRow('지수', e.qClose);
             html += mktChgRow('변동', e.qChg);
             html += mktRow('거래대금', e.qVol);
-            html += mktChgRow('거래대금 변동', e.qVolChg);
+            html += mktChgRow('변동', e.qVolChg);
+            html += '<div style="border-bottom:1px solid #ddd;margin:4px 0;"></div>';
             html += mktColorRow('상승', e.qUp, 'up') + mktColorRow('보합', e.qFlat, 'flat') + mktColorRow('하락', e.qDown, 'down');
+            html += '<div style="border-bottom:1px solid #ddd;margin:4px 0;"></div>';
             html += '<div class="market-row investor"><span class="label">개인</span><span class="value ' + chgCls(e.qPer) + '">' + fmtNum(e.qPer) + '</span></div>' + '<div class="market-row investor"><span class="label">외국인</span><span class="value ' + chgCls(e.qFor) + '">' + fmtNum(e.qFor) + '</span></div>' + '<div class="market-row investor"><span class="label">기관</span><span class="value ' + chgCls(e.qInst) + '">' + fmtNum(e.qInst) + '</span></div>';
-            html += '<div class="market-row ma120"><span class="label">120일선</span><span class="value">' + (e.q_ma120 || '-') + '</span></div>';
+            html += '{divider}';
+            html += '<div class="market-row ma120"><span class="label">120일선</span><span class="value">' + (function(v){ if(!v||v==='-') return '-'; var l=v.toLowerCase(); if(l==='up') return '<span style="background:#FADBD8;padding:0 6px;border-radius:0;">UP</span>'; if(l==='down') return '<span style="background:#D6EAF8;padding:0 6px;border-radius:0;">DOWN</span>'; return v; })(e.q_ma120) + '</span></div>';
             html += '</div></div>';
 
             // 장전계획 / 장후복기
             html += '<div style="display:flex;flex-direction:column;gap:8px;">';
-            html += '<div style="flex:1;background:#f7f7f7;border-radius:8px;padding:12px;border:1px solid #333;"><div style="font-size:0.9rem;font-weight:700;color:#000;margin-bottom:6px;">장전 계획</div><div style="font-size:0.9rem;line-height:1.6;white-space:pre-wrap;">' + (e.plan || '<span style="color:#ccc;">-</span>') + '</div></div>';
-            html += '<div style="flex:1;background:#f7f7f7;border-radius:8px;padding:12px;border:1px solid #333;"><div style="font-size:0.9rem;font-weight:700;color:#000;margin-bottom:6px;">장후 복기</div><div style="font-size:0.9rem;line-height:1.6;white-space:pre-wrap;">' + (e.review || '<span style="color:#ccc;">-</span>') + '</div></div>';
+            html += '<div style="flex:1;background:#f7f7f7;border-radius:0;padding:12px;border:1px solid #333;"><div style="font-size:0.9rem;font-weight:700;color:#000;margin-bottom:6px;">장전 계획</div><div style="font-size:0.9rem;line-height:1.6;white-space:pre-wrap;">' + (e.plan || '<span style="color:#ccc;">-</span>') + '</div></div>';
+            html += '<div style="flex:1;background:#f7f7f7;border-radius:0;padding:12px;border:1px solid #333;"><div style="font-size:0.9rem;font-weight:700;color:#000;margin-bottom:6px;">장후 복기</div><div style="font-size:0.9rem;line-height:1.6;white-space:pre-wrap;">' + (e.review || '<span style="color:#ccc;">-</span>') + '</div></div>';
             html += '</div>';
 
             html += '</div>';
