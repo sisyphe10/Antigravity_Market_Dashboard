@@ -72,6 +72,7 @@ jobs:
 
       - name: Draw Charts
         run: |
+          rm -f charts/*.png
           python execution/draw_charts.py
         env:
            TZ: 'Asia/Seoul'
