@@ -43,8 +43,8 @@
         .market-row .value { font-weight: 600; color: #000; text-align: center; flex: 1; }
         .market-row.investor { }
         .market-row.ma120 { }
-        .pos { color: #000; background: #FADBD8; border-radius:0; padding: 0 4px; }
-        .neg { color: #000; background: #D6EAF8; border-radius:0; padding: 0 4px; }
+        .pos { color: #000; }
+        .neg { color: #000; }
 
         /* Manual fields */
         .manual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px; }
@@ -215,7 +215,11 @@ async function loadJournal() {
                 return '<div class="market-row" style="' + bg + '"><span class="label">' + label + '</span><span class="value">' + fmtNum(val) + '</span></div>';
             }
             function mktChgRow(label, val) {
-                return '<div class="market-row"><span class="label">' + label + '</span><span class="value ' + chgCls(val) + '">' + (val ? val : '-') + '</span></div>';
+                var cls = chgCls(val);
+                var bg = '';
+                if (cls === 'pos') bg = 'background:#FADBD8;';
+                else if (cls === 'neg') bg = 'background:#D6EAF8;';
+                return '<div class="market-row" style="' + bg + '"><span class="label">' + label + '</span><span class="value">' + (val ? val : '-') + '</span></div>';
             }
 
             html += '<div class="tl-entry">';
@@ -234,8 +238,8 @@ async function loadJournal() {
             html += mktColorRow('상승', e.kUp, 'up') + mktColorRow('보합', e.kFlat, 'flat') + mktColorRow('하락', e.kDown, 'down');
             html += '<div style="border-bottom:1px solid #ddd;margin:4px 0;"></div>';
             html += (function(){ var cls=chgCls(e.kPer); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">개인</span><span class="value">'+fmtNum(e.kPer)+'</span></div>'; })() + (function(){ var cls=chgCls(e.kFor); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">외국인</span><span class="value">'+fmtNum(e.kFor)+'</span></div>'; })() + (function(){ var cls=chgCls(e.kInst); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">기관</span><span class="value">'+fmtNum(e.kInst)+'</span></div>'; })();
-            html += '{divider}';
-            html += '<div class="market-row ma120"><span class="label">120일선</span><span class="value">' + (function(v){ if(!v||v==='-') return '-'; var l=v.toLowerCase(); if(l==='up') return '<span style="background:#FADBD8;padding:0 6px;border-radius:0;">UP</span>'; if(l==='down') return '<span style="background:#D6EAF8;padding:0 6px;border-radius:0;">DOWN</span>'; return v; })(e.k_ma120) + '</span></div>';
+            html += '<div style="border-bottom:1px solid #ddd;margin:4px 0;"></div>';
+            html += (function(v){ var bg=''; if(v&&v.toLowerCase()==='up') bg='background:#FADBD8;'; else if(v&&v.toLowerCase()==='down') bg='background:#D6EAF8;'; return '<div class="market-row ma120" style="'+bg+'"><span class="label">120일선</span><span class="value">'+(v||'-')+'</span></div>'; })(e.k_ma120);
             html += '</div>';
 
             html += '<div class="market-col kosdaq" style="border-left:1px solid #ccc;"><h3>코스닥</h3>';
@@ -247,14 +251,14 @@ async function loadJournal() {
             html += mktColorRow('상승', e.qUp, 'up') + mktColorRow('보합', e.qFlat, 'flat') + mktColorRow('하락', e.qDown, 'down');
             html += '<div style="border-bottom:1px solid #ddd;margin:4px 0;"></div>';
             html += (function(){ var cls=chgCls(e.qPer); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">개인</span><span class="value">'+fmtNum(e.qPer)+'</span></div>'; })() + (function(){ var cls=chgCls(e.qFor); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">외국인</span><span class="value">'+fmtNum(e.qFor)+'</span></div>'; })() + (function(){ var cls=chgCls(e.qInst); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">기관</span><span class="value">'+fmtNum(e.qInst)+'</span></div>'; })();
-            html += '{divider}';
-            html += '<div class="market-row ma120"><span class="label">120일선</span><span class="value">' + (function(v){ if(!v||v==='-') return '-'; var l=v.toLowerCase(); if(l==='up') return '<span style="background:#FADBD8;padding:0 6px;border-radius:0;">UP</span>'; if(l==='down') return '<span style="background:#D6EAF8;padding:0 6px;border-radius:0;">DOWN</span>'; return v; })(e.q_ma120) + '</span></div>';
+            html += '<div style="border-bottom:1px solid #ddd;margin:4px 0;"></div>';
+            html += (function(v){ var bg=''; if(v&&v.toLowerCase()==='up') bg='background:#FADBD8;'; else if(v&&v.toLowerCase()==='down') bg='background:#D6EAF8;'; return '<div class="market-row ma120" style="'+bg+'"><span class="label">120일선</span><span class="value">'+(v||'-')+'</span></div>'; })(e.q_ma120);
             html += '</div></div>';
 
             // 장전계획 / 장후복기
-            html += '<div style="display:flex;flex-direction:column;gap:0;">';
-            html += '<div style="flex:1;background:#f7f7f7;border-radius:0;padding:12px;border:1px solid #333;"><div style="font-size:0.9rem;font-weight:700;color:#000;margin-bottom:6px;">장전 계획</div><div style="font-size:0.9rem;line-height:1.6;white-space:pre-wrap;">' + (e.plan || '<span style="color:#ccc;">-</span>') + '</div></div>';
-            html += '<div style="flex:1;background:#f7f7f7;border-radius:0;padding:12px;border:1px solid #333;"><div style="font-size:0.9rem;font-weight:700;color:#000;margin-bottom:6px;">장후 복기</div><div style="font-size:0.9rem;line-height:1.6;white-space:pre-wrap;">' + (e.review || '<span style="color:#ccc;">-</span>') + '</div></div>';
+            html += '<div style="display:flex;flex-direction:column;border:1px solid #333;">';
+            html += '<div style="flex:1;background:#f7f7f7;padding:12px;"><div style="font-size:0.9rem;font-weight:700;color:#000;margin-bottom:6px;">장전 계획</div><div style="font-size:0.9rem;line-height:1.6;white-space:pre-wrap;">' + (e.plan || '<span style="color:#ccc;">-</span>') + '</div></div>';
+            html += '<div style="flex:1;background:#f7f7f7;padding:12px;border-top:1px solid #333;"><div style="font-size:0.9rem;font-weight:700;color:#000;margin-bottom:6px;">장후 복기</div><div style="font-size:0.9rem;line-height:1.6;white-space:pre-wrap;">' + (e.review || '<span style="color:#ccc;">-</span>') + '</div></div>';
             html += '</div>';
 
             html += '</div>';
