@@ -33,10 +33,11 @@
         /* Market data grid */
         .market-grid { display: grid; grid-template-columns: 1fr 1fr 5fr; gap: 12px; margin-bottom: 14px; }
         .market-col h3 { font-size: 0.9rem; font-weight: 700; color: #fff; background: #333; padding: 6px 10px; border-radius: 6px; margin-bottom: 8px; text-align: center; }
-        .market-col.kospi h3 { background: #222; }
-        .market-col.kosdaq h3 { background: #222; }
-        .market-col.nasdaq h3 { background: #222; }
-        .market-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 0.9rem; border-bottom: 1px solid #f0f0f0; text-align: center; }
+        .market-col.kospi h3 { }
+        .market-col.kosdaq h3 { }
+        
+        .market-col { border: 1px solid #ccc; border-radius: 8px; padding: 8px; }
+        .market-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 0.95rem; border-bottom: 1px solid #f0f0f0; text-align: center; }
         .market-row .label { color: #000; font-weight: 600; text-align: center; flex: 1; }
         .market-row .value { font-weight: 600; color: #000; text-align: center; flex: 1; }
         .market-row.investor { }
@@ -235,8 +236,8 @@ async function loadJournal() {
 
             // 장전계획 / 장후복기 (3번째 열)
             html += '<div style="display:flex;flex-direction:column;gap:8px;">';
-            html += '<div style="flex:1;background:#f0faf0;border-radius:8px;padding:12px;"><div style="font-size:0.9rem;font-weight:700;color:#2e7d32;margin-bottom:6px;">장전 계획</div><div style="font-size:0.95rem;line-height:1.6;white-space:pre-wrap;">' + (e.plan || '<span style="color:#ccc;">-</span>') + '</div></div>';
-            html += '<div style="flex:1;background:#fff8f0;border-radius:8px;padding:12px;"><div style="font-size:0.9rem;font-weight:700;color:#e65100;margin-bottom:6px;">장후 복기</div><div style="font-size:0.95rem;line-height:1.6;white-space:pre-wrap;">' + (e.review || '<span style="color:#ccc;">-</span>') + '</div></div>';
+            html += '<div style="flex:1;background:#f0f0f0;border-radius:8px;padding:12px;border:1px solid #333;"><div style="font-size:0.9rem;font-weight:700;color:#000;margin-bottom:6px;">장전 계획</div><div style="font-size:0.95rem;line-height:1.6;white-space:pre-wrap;">' + (e.plan || '<span style="color:#ccc;">-</span>') + '</div></div>';
+            html += '<div style="flex:1;background:#f0f0f0;border-radius:8px;padding:12px;border:1px solid #333;"><div style="font-size:0.9rem;font-weight:700;color:#000;margin-bottom:6px;">장후 복기</div><div style="font-size:0.95rem;line-height:1.6;white-space:pre-wrap;">' + (e.review || '<span style="color:#ccc;">-</span>') + '</div></div>';
             html += '</div>';
 
             html += '</div>';
