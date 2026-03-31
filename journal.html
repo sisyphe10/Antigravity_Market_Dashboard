@@ -124,7 +124,9 @@ async function loadJournal() {
         rows.forEach(function(row) {
             var c = row.c;
             if (!c[0] || !c[0].v) return;
-            var dateVal = c[0].v;
+            var dateVal = String(c[0].v);
+            // 헤더 행 스킵
+            if (dateVal === '날짜') return;
             // Date(2026,2,31) → 2026-03-31
             var m = dateVal.match(/Date\((\d+),(\d+),(\d+)\)/);
             var dateStr;

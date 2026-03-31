@@ -34,10 +34,14 @@ def get_index_data():
                 date_text = cells[0].text.strip()
                 close = cells[1].text.strip().replace(',', '')
                 chg_rate = cells[3].text.strip()
-                volume = cells[5].text.strip().replace(',', '')  # 거래대금(백만)
+                volume_mil = cells[5].text.strip().replace(',', '')  # 거래대금(백만)
+                try:
+                    volume_eok = round(int(volume_mil) / 100)  # 백만 → 억원
+                except:
+                    volume_eok = volume_mil
                 result[f'{prefix}_close'] = close
                 result[f'{prefix}_chg'] = chg_rate
-                result[f'{prefix}_vol'] = volume
+                result[f'{prefix}_vol'] = volume_eok
                 raw = date_text.replace('.', '')
                 result['date'] = f'20{raw}' if len(raw) == 6 else raw  # 26.03.31 → 20260331, 2026.03.31 → 20260331
                 break
@@ -89,34 +93,28 @@ def get_investor_data(date_str):
     return result
 
 
-def get_rise_fall_count(date_str):
-    """KRX OpenAPI에서 상승/보합/하락 종목수 계산"""
-    from pykrx_openapi import KRXOpenAPI
-    api = KRXOpenAPI(KRX_API_KEY)
+def get_rise_fall_count():
+    """네이버 금융에서 상승/보합/하락 종목수 크롤링"""
+    import re
     result = {}
-
-    try:
-        kospi = api.get_stock_daily_trade(date_str)['OutBlock_1']
-        kosdaq = api.get_kosdaq_stock_daily_trade(date_str)['OutBlock_1']
-
-        for items, prefix in [(kospi, 'k'), (kosdaq, 'q')]:
-            import pandas as pd
-            df = pd.DataFrame(items)
-            df['CMPPREVDD_PRC'] = pd.to_numeric(df['CMPPREVDD_PRC'], errors='coerce')
-            df = df[df['ISU_NM'].notna() & (df['ISU_NM'] != '')]
-            # 우선주/스팩 제외
-            df = df[df['ISU_CD'].str[-1] == '0']
-            df = df[~df['ISU_NM'].str.contains('스팩', na=False)]
-
-            up = len(df[df['CMPPREVDD_PRC'] > 0])
-            flat = len(df[df['CMPPREVDD_PRC'] == 0])
-            down = len(df[df['CMPPREVDD_PRC'] < 0])
-            result[f'{prefix}_up'] = up
-            result[f'{prefix}_flat'] = flat
-            result[f'{prefix}_down'] = down
-    except Exception as e:
-        logging.warning(f'상승/하락 계산 실패: {e}')
-
+    for code, prefix in [('KOSPI', 'k'), ('KOSDAQ', 'q')]:
+        try:
+            r = requests.get(f'https://finance.naver.com/sise/sise_index.naver?code={code}', headers=HEADERS, timeout=10)
+            soup = BeautifulSoup(r.text, 'html.parser')
+            for table in soup.select('table'):
+                t = table.get_text()
+                if '상한종목수' in t and '하한종목수' in t:
+                    limit_up = int(re.search(r'상한종목수(\d+)', t).group(1))
+                    rise = int(re.search(r'상승종목수(\d+)', t).group(1))
+                    flat = int(re.search(r'보합종목수(\d+)', t).group(1))
+                    fall = int(re.search(r'하락종목수(\d+)', t).group(1))
+                    limit_down = int(re.search(r'하한종목수(\d+)', t).group(1))
+                    result[f'{prefix}_up'] = limit_up + rise
+                    result[f'{prefix}_flat'] = flat
+                    result[f'{prefix}_down'] = fall + limit_down
+                    break
+        except Exception as e:
+            logging.warning(f'{code} 상승/하락 크롤링 실패: {e}')
     return result
 
 
@@ -200,7 +198,7 @@ def main():
     logging.info(f'투자자: 개인 {inv.get("k_per")}, 외국인 {inv.get("k_for")}, 기관 {inv.get("k_inst")}')
 
     # 3. 상승/하락
-    rf = get_rise_fall_count(date_str)
+    rf = get_rise_fall_count()
     idx.update(rf)
     logging.info(f'상승/하락: {rf.get("k_up")}/{rf.get("k_flat")}/{rf.get("k_down")}')
 
