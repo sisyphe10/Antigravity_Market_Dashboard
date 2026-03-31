@@ -168,6 +168,7 @@ def write_to_sheet(data):
                 data.get('q_up', ''), data.get('q_flat', ''), data.get('q_down', ''),
                 data.get('q_per', ''), data.get('q_for', ''), data.get('q_inst', ''),
                 data.get('k_ma120', ''), data.get('q_ma120', ''),
+                data.get('nq_close', ''), data.get('nq_chg', ''),
             ]])
             return
 
@@ -181,6 +182,7 @@ def write_to_sheet(data):
         data.get('q_up', ''), data.get('q_flat', ''), data.get('q_down', ''),
         data.get('q_per', ''), data.get('q_for', ''), data.get('q_inst', ''),
         data.get('k_ma120', ''), data.get('q_ma120', ''),
+        data.get('nq_close', ''), data.get('nq_chg', ''),
     ]
     ws.append_row(row, value_input_option='USER_ENTERED')
     logging.info(f'{date_str} 새 행 추가 완료')
@@ -204,7 +206,24 @@ def main():
     idx.update(rf)
     logging.info(f'상승/하락: {rf.get("k_up")}/{rf.get("k_flat")}/{rf.get("k_down")}')
 
-    # 4. 120일선 계산 (Wrap_NAV.xlsx 기준가)
+    # 4. NASDAQ 전일 종가 (dataset.csv)
+    try:
+        import pandas as pd
+        ds = pd.read_csv('dataset.csv')
+        nq = ds[ds['제품명'] == 'NASDAQ'].sort_values('날짜')
+        if not nq.empty:
+            nq_latest = nq.iloc[-1]
+            idx['nq_close'] = float(nq_latest['가격'])
+            # 전일 대비 변동률
+            if len(nq) >= 2:
+                prev = float(nq.iloc[-2]['가격'])
+                chg = round((float(nq_latest['가격']) / prev - 1) * 100, 2)
+                idx['nq_chg'] = f'{chg:+.1f}%'
+            logging.info(f'NASDAQ: {idx.get("nq_close")} ({idx.get("nq_chg", "")})')
+    except Exception as e:
+        logging.warning(f'NASDAQ 수집 실패: {e}')
+
+    # 5. 120일선 계산 (Wrap_NAV.xlsx 기준가)
     try:
         import pandas as pd
         nav = pd.read_excel('Wrap_NAV.xlsx', sheet_name='기준가')
