@@ -1738,7 +1738,7 @@ def create_dashboard():
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Antigravity Dashboard</title>
+    <title>Age of Emergence</title>
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
         body {{ font-family: 'Segoe UI', 'Malgun Gothic', sans-serif; background: #f8f9fa; color: #333; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }}
@@ -1754,8 +1754,7 @@ def create_dashboard():
     </style>
 </head>
 <body>
-    <h1>Antigravity</h1>
-    <div class="subtitle">Updated: {now}</div>
+    <h1>Age of Emergence</h1>
     <div class="cards">
         <a href="market.html" class="card" style="border-left-color:#2d7a3a">
             <div class="icon">📊</div>
@@ -1798,7 +1797,7 @@ def create_dashboard():
             <div class="desc">워크플로우 아키텍처</div>
         </a>
     </div>
-    <footer>Antigravity Agent</footer>
+    <footer>Age of Emergence</footer>
 </body>
 </html>"""
 
