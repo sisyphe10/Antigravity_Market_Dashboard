@@ -168,7 +168,7 @@ def write_to_sheet(data):
                 data.get('q_up', ''), data.get('q_flat', ''), data.get('q_down', ''),
                 data.get('q_per', ''), data.get('q_for', ''), data.get('q_inst', ''),
                 data.get('k_ma120', ''), data.get('q_ma120', ''),
-                data.get('nq_close', ''), data.get('nq_chg', ''),
+                data.get('nq_close', ''), data.get('nq_chg', ''), data.get('nq_vol', ''), data.get('nq_vol_chg', ''),
             ]])
             return
 
@@ -182,7 +182,7 @@ def write_to_sheet(data):
         data.get('q_up', ''), data.get('q_flat', ''), data.get('q_down', ''),
         data.get('q_per', ''), data.get('q_for', ''), data.get('q_inst', ''),
         data.get('k_ma120', ''), data.get('q_ma120', ''),
-        data.get('nq_close', ''), data.get('nq_chg', ''),
+        data.get('nq_close', ''), data.get('nq_chg', ''), data.get('nq_vol', ''), data.get('nq_vol_chg', ''),
     ]
     ws.append_row(row, value_input_option='USER_ENTERED')
     logging.info(f'{date_str} 새 행 추가 완료')
@@ -214,12 +214,20 @@ def main():
         if not nq.empty:
             nq_latest = nq.iloc[-1]
             idx['nq_close'] = float(nq_latest['가격'])
-            # 전일 대비 변동률
             if len(nq) >= 2:
                 prev = float(nq.iloc[-2]['가격'])
                 chg = round((float(nq_latest['가격']) / prev - 1) * 100, 2)
                 idx['nq_chg'] = f'{chg:+.1f}%'
-            logging.info(f'NASDAQ: {idx.get("nq_close")} ({idx.get("nq_chg", "")})')
+            # NASDAQ 거래량 (FDR/yfinance)
+            import FinanceDataReader as fdr
+            nq_df = fdr.DataReader('^IXIC', '2026-01-01')
+            if not nq_df.empty and len(nq_df) >= 2:
+                vol = nq_df.iloc[-1]['Volume']
+                prev_vol = nq_df.iloc[-2]['Volume']
+                idx['nq_vol'] = round(vol / 1e9, 1)  # 십억주(B)
+                vol_chg = round((vol / prev_vol - 1) * 100, 1)
+                idx['nq_vol_chg'] = f'{vol_chg:+.1f}%'
+            logging.info(f'NASDAQ: {idx.get("nq_close")} ({idx.get("nq_chg", "")}) Vol: {idx.get("nq_vol", "")}B')
     except Exception as e:
         logging.warning(f'NASDAQ 수집 실패: {e}')
 

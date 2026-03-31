@@ -27,7 +27,7 @@
         .tl-entry { position: relative; margin-bottom: 32px; }
         .tl-dot { position: absolute; left: -27px; top: 8px; width: 12px; height: 12px; border-radius: 50%; background: #333; border: 2px solid #fff; box-shadow: 0 0 0 2px #333; }
         .tl-date { font-size: 0.85rem; font-weight: 800; color: #000; margin-bottom: 8px; }
-        .tl-card { background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .tl-card { background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #c8e6c9; }
 
         /* Market data grid */
         .market-grid { display: grid; grid-template-columns: 3fr 3fr 3fr 16fr; gap: 12px; margin-bottom: 14px; }
@@ -38,6 +38,8 @@
         .market-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 0.8rem; border-bottom: 1px solid #f0f0f0; }
         .market-row .label { color: #888; font-weight: 600; }
         .market-row .value { font-weight: 600; }
+        .market-row.investor { background: #EBF5FB; }
+        .market-row.ma120 { background: #FDEDEC; }
         .pos { color: #cc0000; }
         .neg { color: #0055cc; }
 
@@ -149,7 +151,7 @@ async function loadJournal() {
                 qClose: val(12), qChg: val(13), qVol: val(14), qVolChg: val(15),
                 qUp: val(16), qFlat: val(17), qDown: val(18),
                 qPer: val(19), qFor: val(20), qInst: val(21),
-                k_ma120: val(22), q_ma120: val(23), nqClose: val(24), nqChg: val(25),
+                k_ma120: val(22), q_ma120: val(23), nqClose: val(24), nqChg: val(25), nqVol: val(26), nqVolChg: val(27),
                 
             });
         });
@@ -215,8 +217,8 @@ async function loadJournal() {
             html += mktRow('거래대금', e.kVol);
             html += mktChgRow('거래대금 변동', e.kVolChg);
             html += mktRow('상승', e.kUp) + mktRow('보합', e.kFlat) + mktRow('하락', e.kDown);
-            html += mktRow('개인', e.kPer) + mktRow('외국인', e.kFor) + mktRow('기관', e.kInst);
-            html += '<div class="market-row"><span class="label">120일선</span><span class="value">' + (e.k_ma120 || '-') + '</span></div>';
+            html += '<div class="market-row investor"><span class="label">개인</span><span class="value">' + fmtNum(e.kPer) + '</span></div>' + '<div class="market-row investor"><span class="label">외국인</span><span class="value">' + fmtNum(e.kFor) + '</span></div>' + '<div class="market-row investor"><span class="label">기관</span><span class="value">' + fmtNum(e.kInst) + '</span></div>';
+            html += '<div class="market-row ma120"><span class="label">120일선</span><span class="value">' + (e.k_ma120 || '-') + '</span></div>';
             html += '</div>';
 
             html += '<div class="market-col kosdaq"><h3>KOSDAQ</h3>';
@@ -225,13 +227,15 @@ async function loadJournal() {
             html += mktRow('거래대금', e.qVol);
             html += mktChgRow('거래대금 변동', e.qVolChg);
             html += mktRow('상승', e.qUp) + mktRow('보합', e.qFlat) + mktRow('하락', e.qDown);
-            html += mktRow('개인', e.qPer) + mktRow('외국인', e.qFor) + mktRow('기관', e.qInst);
-            html += '<div class="market-row"><span class="label">120일선</span><span class="value">' + (e.q_ma120 || '-') + '</span></div>';
+            html += '<div class="market-row investor"><span class="label">개인</span><span class="value">' + fmtNum(e.qPer) + '</span></div>' + '<div class="market-row investor"><span class="label">외국인</span><span class="value">' + fmtNum(e.qFor) + '</span></div>' + '<div class="market-row investor"><span class="label">기관</span><span class="value">' + fmtNum(e.qInst) + '</span></div>';
+            html += '<div class="market-row ma120"><span class="label">120일선</span><span class="value">' + (e.q_ma120 || '-') + '</span></div>';
             html += '</div>';
 
             html += '<div class="market-col nasdaq"><h3>NASDAQ</h3>';
             html += mktRow('지수', e.nqClose);
             html += mktChgRow('변동', e.nqChg);
+            html += mktRow('거래량(B)', e.nqVol);
+            html += mktChgRow('거래량 변동', e.nqVolChg);
             html += '</div>';
 
             // 장전계획 / 장후복기 (4번째 열)
