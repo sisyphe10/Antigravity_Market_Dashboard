@@ -21,11 +21,10 @@ CATEGORY_MAP = {
 
 # Target DRAM items to scrape from DRAMeXchange
 TARGET_DRAM_ITEMS = {
-    'DDR5 16G (2Gx8) 4800/5600': 'DDR5 16G (2Gx8) 4800/5600',
+    'DDR5 16Gb (2Gx8) 4800/5600': 'DDR5 16G (2Gx8) 4800/5600',
     'DDR4 8Gb (512Mx16) 3200': 'DDR4 8Gb (512Mx16) 3200',
     'DDR4 8Gb (1Gx8) 3200': 'DDR4 8Gb (1Gx8) 3200',
-    'DDR4 16Gb (1Gx16)3200': 'DDR4 16Gb (1Gx16)3200',
-    'DDR4 16Gb (2Gx8)3200': 'DDR4 16Gb (2Gx8)3200'
+    'DDR4 16Gb (2Gx8) 3200': 'DDR4 16Gb (2Gx8)3200',
 }
 
 # Target NAND items to scrape from DRAMeXchange

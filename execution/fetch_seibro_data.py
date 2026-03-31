@@ -33,16 +33,16 @@ def get_driver():
     opts.add_argument('--remote-debugging-port=9222')
     opts.add_argument('--window-size=1920,1080')
     import platform, os, shutil
-    if platform.system() == 'Linux' and shutil.which('chromium'):
-        opts.binary_location = shutil.which('chromium')
-        # snap chromium: chromedriver는 'snap run chromium.chromedriver'로 실행
-        # wrapper script 생성
+    if platform.system() == 'Linux' and os.path.exists('/snap/bin/chromium'):
+        # VM: snap chromium
+        opts.binary_location = '/snap/bin/chromium'
         wrapper = '/tmp/chromedriver_wrapper.sh'
         with open(wrapper, 'w') as f:
             f.write('#!/bin/bash\nexec snap run chromium.chromedriver "$@"\n')
         os.chmod(wrapper, 0o755)
         from selenium.webdriver.chrome.service import Service
         return webdriver.Chrome(service=Service(wrapper), options=opts)
+    # GHA / Windows: 기본 Chrome 사용
     return webdriver.Chrome(options=opts)
 
 
