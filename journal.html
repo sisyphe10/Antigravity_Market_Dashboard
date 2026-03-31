@@ -185,7 +185,21 @@ async function loadJournal() {
             });
             entries.forEach(function(e) {
                 var j = jMap[e.date];
-                if (j) { e.plan = j.plan; e.review = j.review; }
+                if (j) { e.plan = j.plan; e.review = j.review; delete jMap[e.date]; }
+            });
+            // Journal 시트에만 있는 날짜도 카드 생성
+            Object.keys(jMap).forEach(function(jDate) {
+                var j = jMap[jDate];
+                if (j.plan || j.review) {
+                    entries.push({
+                        date: jDate, dow: '', kClose:'', kChg:'', kVol:'', kVolChg:'',
+                        kUp:'', kFlat:'', kDown:'', kPer:'', kFor:'', kInst:'',
+                        qClose:'', qChg:'', qVol:'', qVolChg:'',
+                        qUp:'', qFlat:'', qDown:'', qPer:'', qFor:'', qInst:'',
+                        k_ma120:'', q_ma120:'', nqClose:'', nqChg:'', nqVol:'', nqVolChg:'',
+                        plan: j.plan, review: j.review,
+                    });
+                }
             });
         } catch(je) { console.log('Journal load:', je); }
 
