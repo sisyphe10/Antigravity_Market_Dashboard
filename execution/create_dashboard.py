@@ -186,7 +186,7 @@ def get_item_category(item_name):
     """Get category for an item by looking up in dataset.csv"""
     # Special handling for DDR items (they should be in Memory)
     if 'DDR4' in item_name or 'DDR5' in item_name:
-        return 'MEMORY'
+        return 'Memory'
 
     # Special handling for S&P 500 related items (should be in US Indices)
     # Handle all variations: "S&P 500", "S_P_500", "S P 500"
@@ -1096,7 +1096,7 @@ def create_dashboard():
 
         # Define category order for better organization
         category_order = ['Wrap', 'Portfolio', 'SECTOR', 'INDEX_KOREA', 'INDEX_US', 'EXCHANGE RATE',
-                         'INTEREST RATES', 'CRYPTOCURRENCY', 'MEMORY', 'COMMODITIES']
+                         'INTEREST RATES', 'CRYPTOCURRENCY', 'Memory', 'COMMODITIES']
 
         for category in category_order:
             # Portfolio는 차트가 아니라 테이블이므로 특별 처리

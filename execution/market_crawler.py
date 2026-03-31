@@ -201,7 +201,8 @@ def crawl_dram_nand(data_type):
                         price = cells[price_col_idx].text.strip()
                         if price and price.replace('.', '').replace(',', '').isdigit():
                             val = float(price.replace(',', ''))
-                            collected_data.append((current_date, item_name, val, data_type))
+                            save_name = target_items[item_name]
+                            collected_data.append((current_date, save_name, val, data_type))
                             found_items.add(item_name)
                             print(f"✓ {item_name}: ${price}")
                     except:
