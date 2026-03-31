@@ -30,7 +30,7 @@
         .tl-card { background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
 
         /* Market data grid */
-        .market-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+        .market-grid { display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 12px; margin-bottom: 14px; }
         .market-col h3 { font-size: 0.8rem; font-weight: 700; color: #fff; background: #333; padding: 6px 10px; border-radius: 6px; margin-bottom: 8px; text-align: center; }
         .market-col.kospi h3 { background: #1a237e; }
         .market-col.kosdaq h3 { background: #b71c1c; }
@@ -215,6 +215,7 @@ async function loadJournal() {
             html += mktChgRow('거래대금 변동', e.kVolChg);
             html += mktRow('상승', e.kUp) + mktRow('보합', e.kFlat) + mktRow('하락', e.kDown);
             html += mktRow('개인', e.kPer) + mktRow('외국인', e.kFor) + mktRow('기관', e.kInst);
+            html += '<div class="market-row"><span class="label">120일선</span><span class="value">' + (e.k_ma120 || '-') + '</span></div>';
             html += '</div>';
 
             html += '<div class="market-col kosdaq"><h3>KOSDAQ</h3>';
@@ -224,14 +225,11 @@ async function loadJournal() {
             html += mktChgRow('거래대금 변동', e.qVolChg);
             html += mktRow('상승', e.qUp) + mktRow('보합', e.qFlat) + mktRow('하락', e.qDown);
             html += mktRow('개인', e.qPer) + mktRow('외국인', e.qFor) + mktRow('기관', e.qInst);
+            html += '<div class="market-row"><span class="label">120일선</span><span class="value">' + (e.q_ma120 || '-') + '</span></div>';
             html += '</div>';
             html += '</div>';
 
-            // 120일선
-            html += '<div class="manual-grid">';
-            html += '<div class="manual-field"><h4>KOSPI 120일선</h4> ' + badgeHtml(e.k_ma120) + '</div>';
-            html += '<div class="manual-field"><h4>KOSDAQ 120일선</h4> ' + badgeHtml(e.q_ma120) + '</div>';
-            html += '</div>';
+
 
             // Notes
             if (e.plan) {
