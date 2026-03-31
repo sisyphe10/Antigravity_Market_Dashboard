@@ -90,13 +90,22 @@ def summarize_daily_notes(messages, date_str):
 
     client = anthropic.Anthropic(api_key=api_key)
 
-    response = client.messages.create(
-        model="claude-sonnet-4-20250514",
-        max_tokens=4096,
-        messages=[{"role": "user", "content": all_content}]
-    )
-
-    return response.content[0].text
+    # 재시도 로직 (529 Overloaded 대응)
+    import time
+    for attempt in range(3):
+        try:
+            response = client.messages.create(
+                model="claude-sonnet-4-20250514",
+                max_tokens=4096,
+                messages=[{"role": "user", "content": all_content}]
+            )
+            return response.content[0].text
+        except Exception as e:
+            if '529' in str(e) or 'overloaded' in str(e).lower():
+                if attempt < 2:
+                    time.sleep(60)  # 1분 대기 후 재시도
+                    continue
+            raise
 
 
 def extract_topics(summary_text):

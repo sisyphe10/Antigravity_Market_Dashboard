@@ -787,7 +787,7 @@ async def daily_weather_job(context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logging.error(f"Daily weather job error: {e}")
 
-    # 리서치 헤드라인 알림
+    # 리서치 헤드라인 알림 (당일/전일 데이터만 전송, 오래된 데이터는 무시)
     try:
         import json as _json
         headlines_file = os.path.join(DASHBOARD_DIR, 'research_headlines.json')
@@ -796,6 +796,16 @@ async def daily_weather_job(context: ContextTypes.DEFAULT_TYPE):
                 data = _json.load(f)
             headlines = data.get('headlines', [])
             date = data.get('date', '')
+            # 날짜 신선도 체크: 어제 또는 오늘 데이터만 전송
+            today_kst = datetime.datetime.now(tz=KST).date()
+            yesterday_kst = today_kst - datetime.timedelta(days=1)
+            try:
+                headline_date = datetime.datetime.strptime(date, '%Y-%m-%d').date()
+            except (ValueError, TypeError):
+                headline_date = None
+            if headline_date and headline_date < yesterday_kst:
+                logging.info(f"Research headlines 스킵: 오래된 데이터 ({date})")
+                headlines = []
             if headlines:
                 def esc_md2(s):
                     for c in '_*[]()~`>#+-=|{}.!':
