@@ -136,7 +136,7 @@ def write_to_sheet(data):
 
     gc = gspread.authorize(creds)
     sh = gc.open_by_key(JOURNAL_SHEET_ID)
-    ws = sh.sheet1
+    ws = sh.worksheet('Data')
 
     # 날짜 변환
     raw_date = data.get('date', '')
@@ -167,6 +167,7 @@ def write_to_sheet(data):
                 data.get('q_close', ''), data.get('q_chg', ''), data.get('q_vol', ''), data.get('q_vol_chg', ''),
                 data.get('q_up', ''), data.get('q_flat', ''), data.get('q_down', ''),
                 data.get('q_per', ''), data.get('q_for', ''), data.get('q_inst', ''),
+                data.get('k_ma120', ''), data.get('q_ma120', ''),
             ]])
             return
 
@@ -179,6 +180,7 @@ def write_to_sheet(data):
         data.get('q_close', ''), data.get('q_chg', ''), data.get('q_vol', ''), data.get('q_vol_chg', ''),
         data.get('q_up', ''), data.get('q_flat', ''), data.get('q_down', ''),
         data.get('q_per', ''), data.get('q_for', ''), data.get('q_inst', ''),
+        data.get('k_ma120', ''), data.get('q_ma120', ''),
     ]
     ws.append_row(row, value_input_option='USER_ENTERED')
     logging.info(f'{date_str} 새 행 추가 완료')
@@ -202,7 +204,24 @@ def main():
     idx.update(rf)
     logging.info(f'상승/하락: {rf.get("k_up")}/{rf.get("k_flat")}/{rf.get("k_down")}')
 
-    # 4. 스프레드시트 저장
+    # 4. 120일선 계산 (Wrap_NAV.xlsx 기준가)
+    try:
+        import pandas as pd
+        nav = pd.read_excel('Wrap_NAV.xlsx', sheet_name='기준가')
+        nav['Date'] = pd.to_datetime(nav['Date'])
+        nav = nav.sort_values('Date')
+        for col, prefix in [('KOSPI', 'k'), ('KOSDAQ', 'q')]:
+            if col in nav.columns:
+                series = nav[col].dropna()
+                if len(series) >= 120:
+                    ma120 = series.rolling(120).mean().iloc[-1]
+                    current = series.iloc[-1]
+                    idx[f'{prefix}_ma120'] = 'UP' if current > ma120 else 'DOWN'
+                    logging.info(f'{col} 120MA: {ma120:.0f}, 현재: {current:.0f} → {idx[f"{prefix}_ma120"]}')
+    except Exception as e:
+        logging.warning(f'120일선 계산 실패: {e}')
+
+    # 5. 스프레드시트 저장
     write_to_sheet(idx)
     logging.info('완료!')
 

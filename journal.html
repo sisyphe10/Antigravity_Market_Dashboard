@@ -86,8 +86,8 @@
 <script>
 const SHEET_ID = '13HXDxF62ILXyRz7meRZ5CxJT5HfWAwIKc8IsCavuVXk';
 
-function sheetUrl() {
-    return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+function sheetUrl(sheetName) {
+    return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
 }
 
 function fmtNum(v) {
@@ -115,7 +115,7 @@ function badgeHtml(v) {
 
 async function loadJournal() {
     try {
-        var res = await fetch(sheetUrl());
+        var res = await fetch(sheetUrl('Data'));
         var text = await res.text();
         var json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
         var rows = json.table.rows;
@@ -148,10 +148,36 @@ async function loadJournal() {
                 qClose: val(12), qChg: val(13), qVol: val(14), qVolChg: val(15),
                 qUp: val(16), qFlat: val(17), qDown: val(18),
                 qPer: val(19), qFor: val(20), qInst: val(21),
-                ma120: val(22), strategy: val(23), judgment: val(24),
-                plan: val(25), review: val(26),
+                k_ma120: val(22), q_ma120: val(23),
+                
             });
         });
+
+        // Journal 시트에서 장전계획/장후복기 로드
+        try {
+            var jRes = await fetch(sheetUrl('Journal'));
+            var jText = await jRes.text();
+            var jJson = JSON.parse(jText.substring(jText.indexOf('{'), jText.lastIndexOf('}') + 1));
+            var jMap = {};
+            jJson.table.rows.forEach(function(row) {
+                var jc = row.c;
+                if (!jc[0] || !jc[0].v) return;
+                var jDateVal = String(jc[0].v);
+                if (jDateVal === '날짜') return;
+                var jm = jDateVal.match(/Date\((\d+),(\d+),(\d+)\)/);
+                var jDate;
+                if (jm) { jDate = parseInt(jm[1]) + '-' + String(parseInt(jm[2])+1).padStart(2,'0') + '-' + String(parseInt(jm[3])).padStart(2,'0'); }
+                else { jDate = jDateVal; }
+                jMap[jDate] = {
+                    plan: (jc[2] && jc[2].v) ? jc[2].v : '',
+                    review: (jc[3] && jc[3].v) ? jc[3].v : '',
+                };
+            });
+            entries.forEach(function(e) {
+                var j = jMap[e.date];
+                if (j) { e.plan = j.plan; e.review = j.review; }
+            });
+        } catch(je) { console.log('Journal load:', je); }
 
         entries.sort(function(a, b) { return b.date.localeCompare(a.date); });
 
@@ -201,12 +227,11 @@ async function loadJournal() {
             html += '</div>';
             html += '</div>';
 
-            // Manual fields
+            // 120일선
             html += '<div class="manual-grid">';
-            html += '<div class="manual-field"><h4>120일선</h4> ' + badgeHtml(e.ma120) + '</div>';
-            html += '<div class="manual-field"><h4>전략</h4> ' + badgeHtml(e.strategy) + '</div>';
+            html += '<div class="manual-field"><h4>KOSPI 120일선</h4> ' + badgeHtml(e.k_ma120) + '</div>';
+            html += '<div class="manual-field"><h4>KOSDAQ 120일선</h4> ' + badgeHtml(e.q_ma120) + '</div>';
             html += '</div>';
-            html += '<div class="manual-field" style="margin-bottom:10px;"><h4>판단</h4> ' + badgeHtml(e.judgment) + '</div>';
 
             // Notes
             if (e.plan) {
