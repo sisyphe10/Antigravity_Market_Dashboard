@@ -6,7 +6,7 @@
     <title>Journal</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', 'Malgun Gothic', sans-serif; background: #f8f9fa; color: #333; }
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f8f9fa; color: #333; }
 
         /* Password */
         .pw-overlay { position: fixed; inset: 0; background: #f8f9fa; display: flex; align-items: center; justify-content: center; z-index: 9999; }
@@ -227,17 +227,14 @@ async function loadJournal() {
             html += mktRow('개인', e.qPer) + mktRow('외국인', e.qFor) + mktRow('기관', e.qInst);
             html += '<div class="market-row"><span class="label">120일선</span><span class="value">' + (e.q_ma120 || '-') + '</span></div>';
             html += '</div>';
+
+            // 장전계획 / 장후복기 (3번째 열)
+            html += '<div style="display:flex;flex-direction:column;gap:8px;">';
+            html += '<div style="flex:1;background:#f0faf0;border-radius:8px;padding:12px;"><div style="font-size:0.75rem;font-weight:700;color:#2e7d32;margin-bottom:6px;">장전 계획</div><div style="font-size:0.8rem;line-height:1.6;white-space:pre-wrap;">' + (e.plan || '<span style="color:#ccc;">-</span>') + '</div></div>';
+            html += '<div style="flex:1;background:#fff8f0;border-radius:8px;padding:12px;"><div style="font-size:0.75rem;font-weight:700;color:#e65100;margin-bottom:6px;">장후 복기</div><div style="font-size:0.8rem;line-height:1.6;white-space:pre-wrap;">' + (e.review || '<span style="color:#ccc;">-</span>') + '</div></div>';
             html += '</div>';
 
-
-
-            // Notes
-            if (e.plan) {
-                html += '<div class="note-section plan"><h4>장전 계획</h4><p>' + e.plan + '</p></div>';
-            }
-            if (e.review) {
-                html += '<div class="note-section review"><h4>장후 복기</h4><p>' + e.review + '</p></div>';
-            }
+            html += '</div>';
 
             html += '</div></div>';
         });
