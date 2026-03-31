@@ -1228,13 +1228,15 @@ def _get_journal_service():
 
 async def journal_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/journal 장전 or /journal 장후 내용"""
-    args = context.args
     service = _get_journal_service()
     if not service:
         await update.message.reply_text("❌ Google 서비스 계정이 설정되지 않았습니다.")
         return
 
-    if not args or len(args) < 2:
+    # 원본 텍스트에서 줄바꿈 보존하여 파싱
+    raw_text = update.message.text or ''
+    parts = raw_text.split(None, 2)  # ['/journal', '장전', '나머지 전체']
+    if len(parts) < 3:
         await update.message.reply_text(
             "<b>투자일지 입력</b>\n\n"
             "<code>/journal 장전 오늘은 매수 중지 예정</code>\n"
@@ -1244,8 +1246,8 @@ async def journal_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    entry_type = args[0]
-    content = ' '.join(args[1:])
+    entry_type = parts[1]
+    content = parts[2]
 
     if entry_type not in ['장전', '장후']:
         await update.message.reply_text("❌ '장전' 또는 '장후'를 입력하세요.")
