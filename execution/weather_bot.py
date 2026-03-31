@@ -1199,6 +1199,103 @@ async def ledger2_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"❌ 저장 실패: {str(e)}")
 
 
+# ============================================================
+# 투자일지 - 장전계획/장후복기 입력
+# ============================================================
+JOURNAL_SHEET_ID = '13HXDxF62ILXyRz7meRZ5CxJT5HfWAwIKc8IsCavuVXk'
+
+def _get_journal_service():
+    from google.oauth2 import service_account
+    from googleapiclient.discovery import build
+    sa_json = os.getenv('GOOGLE_SERVICE_ACCOUNT_KEY')
+    if not sa_json:
+        return None
+    sa_info = json.loads(sa_json)
+    creds = service_account.Credentials.from_service_account_info(
+        sa_info, scopes=['https://www.googleapis.com/auth/spreadsheets']
+    )
+    return build('sheets', 'v4', credentials=creds)
+
+async def journal_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/journal 장전 or /journal 장후 내용"""
+    args = context.args
+    service = _get_journal_service()
+    if not service:
+        await update.message.reply_text("❌ Google 서비스 계정이 설정되지 않았습니다.")
+        return
+
+    if not args or len(args) < 2:
+        await update.message.reply_text(
+            "<b>투자일지 입력</b>\n\n"
+            "<code>/journal 장전 오늘은 매수 중지 예정</code>\n"
+            "<code>/journal 장후 예상대로 하락, 관망 유지</code>\n\n"
+            "형식: /journal [장전|장후] [내용]",
+            parse_mode='HTML'
+        )
+        return
+
+    entry_type = args[0]
+    content = ' '.join(args[1:])
+
+    if entry_type not in ['장전', '장후']:
+        await update.message.reply_text("❌ '장전' 또는 '장후'를 입력하세요.")
+        return
+
+    col = 'C' if entry_type == '장전' else 'D'  # C=장전계획, D=장후복기
+    KST_tz = datetime.timezone(datetime.timedelta(hours=9))
+    today = datetime.datetime.now(tz=KST_tz)
+    today_str = today.strftime('%Y-%m-%d')
+    dow_names = ['월', '화', '수', '목', '금', '토', '일']
+    dow = dow_names[today.weekday()]
+
+    try:
+        # Journal 시트에서 오늘 날짜 행 찾기
+        result = service.spreadsheets().values().get(
+            spreadsheetId=JOURNAL_SHEET_ID, range='Journal!A:D'
+        ).execute()
+        rows = result.get('values', [])
+
+        row_num = None
+        for i, row in enumerate(rows):
+            if row and today_str in str(row[0]):
+                row_num = i + 1
+                break
+
+        if row_num:
+            # 기존 행 업데이트
+            service.spreadsheets().values().update(
+                spreadsheetId=JOURNAL_SHEET_ID,
+                range=f'Journal!{col}{row_num}',
+                valueInputOption='USER_ENTERED',
+                body={'values': [[content]]}
+            ).execute()
+        else:
+            # 새 행 추가
+            new_row = [today_str, dow, '', '']
+            idx = 2 if entry_type == '장전' else 3
+            new_row[idx] = content
+            service.spreadsheets().values().append(
+                spreadsheetId=JOURNAL_SHEET_ID,
+                range='Journal!A1:D1',
+                valueInputOption='USER_ENTERED',
+                insertDataOption='INSERT_ROWS',
+                body={'values': [new_row]}
+            ).execute()
+
+        label = '장전 계획' if entry_type == '장전' else '장후 복기'
+        await update.message.reply_text(
+            f"✅ <b>{label}</b> 저장 완료\n"
+            f"📅 {today_str} ({dow})\n"
+            f"📝 {content}",
+            parse_mode='HTML'
+        )
+        logging.info(f"Journal {entry_type}: {content}")
+
+    except Exception as e:
+        logging.error(f"Journal error: {e}")
+        await update.message.reply_text(f"❌ 저장 실패: {str(e)}")
+
+
 if __name__ == '__main__':
     if not TOKEN:
         print("Error: TOKEN environment variable is missing.")
@@ -1216,6 +1313,7 @@ if __name__ == '__main__':
     application.add_handler(CommandHandler('help', help_command))
     application.add_handler(CommandHandler('ledger', ledger_command))
     application.add_handler(CommandHandler('ledger2', ledger2_command))
+    application.add_handler(CommandHandler('journal', journal_command))
     
     job_queue = application.job_queue
     try:
