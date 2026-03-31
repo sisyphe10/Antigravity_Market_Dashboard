@@ -588,10 +588,11 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache):
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>투자유의종목 현황</title>
+    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
         body {{
-            font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+            font-family: 'Inter', 'Noto Sans KR', sans-serif;
             background: #f8f9fa; color: #1f2937; padding: 24px;
         }}
         header {{

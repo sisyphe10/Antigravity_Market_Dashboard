@@ -1277,6 +1277,7 @@ def create_dashboard():
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Market Data Dashboard</title>
+    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
     <style>
         :root {{
             --bg-color: #f8f9fa;
@@ -1287,7 +1288,7 @@ def create_dashboard():
         }}
 
         body {{
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Inter', 'Noto Sans KR', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
@@ -1739,11 +1740,11 @@ def create_dashboard():
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Age of Emergence</title>
+    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-        body {{ font-family: 'Segoe UI', 'Malgun Gothic', sans-serif; background: #f8f9fa; color: #333; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }}
-        h1 {{ font-size: 2.2rem; font-weight: 800; margin-bottom: 8px; color: #111; }}
-        .subtitle {{ color: #888; font-size: 0.9rem; margin-bottom: 48px; }}
+        body {{ font-family: 'Inter', 'Noto Sans KR', sans-serif; background: #f8f9fa; color: #333; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }}
+        h1 {{ font-size: 2.2rem; font-weight: 800; margin-bottom: 48px; color: #111; }}
         .cards {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; max-width: 800px; width: 100%; }}
         .card {{ background: #fff; border-radius: 14px; padding: 28px 24px; text-decoration: none; color: #333; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-left: 5px solid #ccc; transition: transform 0.15s, box-shadow 0.15s; display: block; }}
         .card:hover {{ transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }}
@@ -1812,9 +1813,10 @@ def create_dashboard():
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WRAP</title>
+    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
     <style>
         :root {{ --bg-color: #f8f9fa; --card-bg: #ffffff; --text-color: #333333; }}
-        body {{ font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; }}
+        body {{ font-family: 'Inter', 'Noto Sans KR', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; }}
         header {{ text-align: center; margin-bottom: 40px; padding: 20px; background-color: #000000; border-radius: 12px; }}
         h1 {{ margin: 0; font-size: 2.5rem; color: #ffffff; }}
         .last-updated {{ margin-top: 10px; color: #6c757d; font-style: italic; }}
@@ -1988,10 +1990,11 @@ def create_dashboard():
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universe - Antigravity</title>
+    <title>Universe</title>
+    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background: #f8f9fa; color: #333; }
+        body { font-family: 'Inter', 'Noto Sans KR', sans-serif; background: #f8f9fa; color: #333; }
         header { background: #fff; padding: 24px; text-align: center; border-bottom: 1px solid #eee; }
         header h1 { font-size: 1.8rem; color: #6B21A8; }
         .nav-group { margin-top: 10px; }
@@ -2161,10 +2164,11 @@ function render(){
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SEIBro - US Settlement TOP 50</title>
+    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-        body {{ font-family: 'Segoe UI', 'Malgun Gothic', sans-serif; background: #f8f9fa; color: #333; }}
+        body {{ font-family: 'Inter', 'Noto Sans KR', sans-serif; background: #f8f9fa; color: #333; }}
         header {{ background: #fff; padding: 24px; text-align: center; border-bottom: 1px solid #eee; }}
         header h1 {{ font-size: 1.8rem; color: #0369a1; }}
         .nav-group {{ margin-top: 10px; }}
@@ -2346,9 +2350,10 @@ refresh();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Featured</title>
+    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-        body {{ font-family: 'Segoe UI', 'Malgun Gothic', sans-serif; background: #f8f9fa; color: #333; }}
+        body {{ font-family: 'Inter', 'Noto Sans KR', sans-serif; background: #f8f9fa; color: #333; }}
         header {{ background: #fff; padding: 24px; text-align: center; border-bottom: 1px solid #eee; position: relative; }}
         header h1 {{ font-size: 1.8rem; color: #333; }}
         .subtitle {{ color: #888; font-size: 0.85rem; margin-top: 4px; }}
