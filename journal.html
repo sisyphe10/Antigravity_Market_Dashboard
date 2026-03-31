@@ -32,13 +32,13 @@
 
         /* Market data grid */
         .market-grid { display: grid; grid-template-columns: 1fr 1fr 5fr; gap: 12px; margin-bottom: 14px; }
-        .market-col h3 { font-size: 0.8rem; font-weight: 700; color: #fff; background: #333; padding: 6px 10px; border-radius: 6px; margin-bottom: 8px; text-align: center; }
+        .market-col h3 { font-size: 0.9rem; font-weight: 700; color: #fff; background: #333; padding: 6px 10px; border-radius: 6px; margin-bottom: 8px; text-align: center; }
         .market-col.kospi h3 { background: #222; }
         .market-col.kosdaq h3 { background: #222; }
         .market-col.nasdaq h3 { background: #222; }
-        .market-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 0.8rem; border-bottom: 1px solid #f0f0f0; text-align: center; }
-        .market-row .label { color: #000; font-weight: 600; }
-        .market-row .value { font-weight: 600; color: #000; }
+        .market-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 0.9rem; border-bottom: 1px solid #f0f0f0; text-align: center; }
+        .market-row .label { color: #000; font-weight: 600; text-align: center; flex: 1; }
+        .market-row .value { font-weight: 600; color: #000; text-align: center; flex: 1; }
         .market-row.investor { }
         .market-row.ma120 { }
         .pos { color: #000; background: #FADBD8; border-radius: 4px; padding: 0 4px; }
@@ -102,10 +102,11 @@ function fmtNum(v) {
 }
 
 function chgCls(v) {
-    if (!v) return '';
-    var s = String(v);
-    if (s.includes('-')) return 'neg';
-    if (parseFloat(v) > 0) return 'pos';
+    if (!v && v !== 0) return '';
+    var n = parseFloat(String(v).replace(/,/g, ''));
+    if (isNaN(n)) return '';
+    if (n > 0) return 'pos';
+    if (n < 0) return 'neg';
     return '';
 }
 
