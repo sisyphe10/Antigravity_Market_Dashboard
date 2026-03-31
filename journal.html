@@ -29,10 +29,10 @@
         .tl-entry { position: relative; margin-bottom: 32px; }
         .tl-dot { position: absolute; left: -27px; top: 8px; width: 12px; height: 12px; border-radius: 50%; background: #333; border: 2px solid #fff; box-shadow: 0 0 0 2px #333; }
         .tl-date { font-size: 0.85rem; font-weight: 800; color: #000; margin-bottom: 8px; }
-        .tl-card { background: #fff; min-height: 500px; border-radius:0; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #c8e6c9; }
+        .tl-card { background: #fff; min-height: 500px; display: flex; flex-direction: column; border-radius:0; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #c8e6c9; }
 
         /* Market data grid */
-        .market-grid { display: grid; grid-template-columns: 2fr 5fr; gap: 0; margin-bottom: 14px; }
+        .market-grid { display: grid; grid-template-columns: 2fr 5fr; gap: 0; margin-bottom: 0; height: 100%; }
         .market-col h3 { font-size: 0.9rem; font-weight: 700; color: #fff; background: #333; padding: 6px 10px; border-radius:0; margin-bottom: 0; text-align: center; }
         .market-col.kospi h3 { }
         .market-col.kosdaq h3 { }
@@ -229,8 +229,8 @@ async function loadJournal() {
             html += '<div class="tl-card">';
 
             // Market data
-            html += '<div class="market-grid">';
-            html += '<div style="display:grid;grid-template-columns:1fr 1fr;border:1px solid #333;border-radius:0;overflow:hidden;"><div class="market-col kospi"><h3>코스피</h3>';
+            html += '<div class="market-grid" style="flex:1;">';
+            html += '<div style="display:grid;grid-template-columns:1fr 1fr;border:1px solid #333;overflow:hidden;align-content:stretch;"><div class="market-col kospi"><h3>코스피</h3>';
             html += mktRow('지수', e.kClose, '#f0f0f0');
             html += mktChgRow('변동', e.kChg);
             html += mktRow('거래대금', e.kVol, '#f0f0f0');
@@ -257,7 +257,7 @@ async function loadJournal() {
             html += '</div></div>';
 
             // 장전계획 / 장후복기
-            html += '<div style="display:flex;flex-direction:column;border:1px solid #333;">';
+            html += '<div style="display:flex;flex-direction:column;border:1px solid #333;height:100%;">';
             html += '<div style="flex:4;background:#f7f7f7;padding:12px;"><div style="font-size:0.9rem;font-weight:700;color:#000;margin-bottom:6px;">장전 계획</div><div style="font-size:0.9rem;line-height:1.6;white-space:pre-wrap;">' + (e.plan || '<span style="color:#ccc;">-</span>') + '</div></div>';
             html += '<div style="flex:7;background:#f7f7f7;padding:12px;border-top:1px solid #333;"><div style="font-size:0.9rem;font-weight:700;color:#000;margin-bottom:6px;">장후 복기</div><div style="font-size:0.9rem;line-height:1.6;white-space:pre-wrap;">' + (e.review || '<span style="color:#ccc;">-</span>') + '</div></div>';
             html += '</div>';
