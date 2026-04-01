@@ -653,17 +653,6 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
             capture_output=True, text=True, timeout=180
         )
 
-        # 3-featured. Featured 종목 데이터 수집
-        logging.info("Step 3-featured: Fetching featured data...")
-        result_featured = subprocess.run(
-            [sys.executable, "execution/fetch_featured_data.py"],
-            capture_output=True, text=True, timeout=120
-        )
-        if result_featured.returncode == 0:
-            logging.info("Featured data collected successfully")
-        else:
-            logging.warning(f"Featured data failed: {result_featured.stderr[:100]}")
-
         # 3. Dashboard 재생성 및 push
         logging.info("Step 3: Regenerating dashboard...")
         result_dashboard = subprocess.run(
@@ -673,7 +662,7 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
             timeout=120
         )
         if result_dashboard.returncode == 0:
-            subprocess.run(["git", "add", "index.html", "market.html", "wrap.html", "market_alert.html", "featured.html", "featured_data.json", "charts/"], cwd=parent_dir, capture_output=True, timeout=30)
+            subprocess.run(["git", "add", "index.html", "market.html", "wrap.html", "market_alert.html", "charts/"], cwd=parent_dir, capture_output=True, timeout=30)
             commit_dash = subprocess.run(
                 ["git", "commit", "-m", f"포트폴리오 업데이트 ({now_str})"],
                 cwd=parent_dir, capture_output=True, text=True, timeout=30
@@ -726,6 +715,78 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logging.error(f"Daily portfolio job failed: {e}")
         os.chdir(original_dir)
+
+async def daily_featured_job(context: ContextTypes.DEFAULT_TYPE):
+    """매일 18:00 Featured 종목 수집 + 대시보드 갱신. 실패 시 19:00에 재시도."""
+    logging.info("Daily featured job started")
+    try:
+        import subprocess, sys, os
+        parent_dir = DASHBOARD_DIR
+        os.chdir(parent_dir)
+        git_sync(parent_dir)
+
+        result = subprocess.run(
+            [sys.executable, "execution/fetch_featured_data.py"],
+            capture_output=True, text=True, timeout=180, cwd=parent_dir
+        )
+        # 당일 데이터 수집 여부 확인 (stdout에서 오늘 날짜 확인)
+        today_str = datetime.datetime.now(tz=KST).strftime('%Y-%m-%d')
+        if result.returncode != 0 or today_str not in result.stdout:
+            logging.warning(f"Featured data: 당일 데이터 미수집, 19:00 재시도 예약")
+            for chat_id in SUBSCRIBERS:
+                try:
+                    await context.bot.send_message(chat_id=chat_id, text=f"⏳ Featured 데이터 미수집 ({today_str}), 19:00에 재시도합니다.")
+                except: pass
+            # 1시간 후 재시도
+            context.job_queue.run_once(daily_featured_retry_job, when=3600)
+            return
+
+        logging.info("Featured data collected successfully")
+        # Dashboard 재생성 + push
+        subprocess.run([sys.executable, "execution/create_dashboard.py"],
+                       capture_output=True, text=True, timeout=120, cwd=parent_dir)
+        now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        subprocess.run(["git", "add", "featured.html", "featured_data.json"], cwd=parent_dir, capture_output=True, timeout=30)
+        commit_result = subprocess.run(["git", "commit", "-m", f"Featured 업데이트 ({now_str})"],
+                                       cwd=parent_dir, capture_output=True, text=True, timeout=30)
+        if commit_result.returncode == 0:
+            git_push_safe(parent_dir)
+            logging.info("Featured dashboard pushed")
+    except Exception as e:
+        logging.error(f"Daily featured job error: {e}")
+
+
+async def daily_featured_retry_job(context: ContextTypes.DEFAULT_TYPE):
+    """19:00 Featured 재시도"""
+    logging.info("Featured retry job started")
+    try:
+        import subprocess, sys, os
+        parent_dir = DASHBOARD_DIR
+        os.chdir(parent_dir)
+
+        result = subprocess.run(
+            [sys.executable, "execution/fetch_featured_data.py"],
+            capture_output=True, text=True, timeout=180, cwd=parent_dir
+        )
+        if result.returncode == 0:
+            logging.info("Featured retry: data collected")
+            subprocess.run([sys.executable, "execution/create_dashboard.py"],
+                           capture_output=True, text=True, timeout=120, cwd=parent_dir)
+            now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+            subprocess.run(["git", "add", "featured.html", "featured_data.json"], cwd=parent_dir, capture_output=True, timeout=30)
+            commit_result = subprocess.run(["git", "commit", "-m", f"Featured 업데이트 ({now_str})"],
+                                           cwd=parent_dir, capture_output=True, text=True, timeout=30)
+            if commit_result.returncode == 0:
+                git_push_safe(parent_dir)
+        else:
+            logging.warning(f"Featured retry also failed, will be collected at 23:00 GHA")
+            for chat_id in SUBSCRIBERS:
+                try:
+                    await context.bot.send_message(chat_id=chat_id, text="❌ Featured 데이터 19:00 재시도도 실패했습니다. 23:00 GHA에서 수집됩니다.")
+                except: pass
+    except Exception as e:
+        logging.error(f"Featured retry error: {e}")
+
 
 def _nightly_refresh_sync():
     """23:00 당일 포트폴리오 데이터 반영 (동기 함수)"""
@@ -1349,18 +1410,21 @@ if __name__ == '__main__':
         calendar_time = datetime.time(hour=5, minute=5, second=0, tzinfo=kst)
         headlines_time = datetime.time(hour=5, minute=10, second=0, tzinfo=kst)
         portfolio_time = datetime.time(hour=16, minute=0, second=0, tzinfo=kst)
+        featured_time = datetime.time(hour=18, minute=0, second=0, tzinfo=kst)
         nightly_time = datetime.time(hour=23, minute=0, second=0, tzinfo=kst)
     except:
         weather_time = datetime.time(hour=5, minute=0, second=0)
         calendar_time = datetime.time(hour=5, minute=5, second=0)
         headlines_time = datetime.time(hour=5, minute=10, second=0)
         portfolio_time = datetime.time(hour=16, minute=0, second=0)
+        featured_time = datetime.time(hour=18, minute=0, second=0)
         nightly_time = datetime.time(hour=23, minute=0, second=0)
 
     job_queue.run_daily(daily_weather_job, time=weather_time)
     job_queue.run_daily(daily_calendar_job, time=calendar_time)
     job_queue.run_daily(daily_headlines_job, time=headlines_time)
     job_queue.run_daily(daily_portfolio_job, time=portfolio_time)
+    job_queue.run_daily(daily_featured_job, time=featured_time)
     job_queue.run_daily(nightly_portfolio_refresh_job, time=nightly_time)
 
     # 거래시간 30분마다 자동 포트폴리오 업데이트
@@ -1394,6 +1458,7 @@ if __name__ == '__main__':
     print(f"  - Calendar: 05:05 KST")
     print(f"  - Headlines: 05:10 KST")
     print(f"  - Portfolio report: 16:00 KST")
+    print(f"  - Featured data: 18:00 KST (실패 시 19:00 재시도)")
     print(f"  - Auto portfolio update: 09:30~15:35 KST (30분 간격, 거래일만)")
     print(f"  - Nightly portfolio refresh: 23:00 KST (당일 주문 반영)")
     application.run_polling()
