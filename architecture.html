@@ -211,9 +211,11 @@
         <h2>Architecture</h2>
         <input type="password" id="pwInput" placeholder="Password" autofocus
                onkeyup="if(event.key==='Enter'){checkPw(this.value);}">
+        <div id="pwWarn" style="margin-top:12px;font-size:0.8rem;color:#f44336;display:none;"></div>
     </div>
 </div>
 <script>
+var _pwFail = 0;
 async function sha256(msg) {
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
     return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
@@ -226,8 +228,20 @@ async function checkPw(v) {
         document.getElementById('mainContent').innerHTML = tpl.content ? tpl.content.cloneNode(true).querySelector('div').outerHTML : tpl.innerHTML;
         document.getElementById('mainContent').style.display='block';
     } else {
+        _pwFail++;
         var inp = document.getElementById('pwInput');
+        var warn = document.getElementById('pwWarn');
         inp.style.borderColor='#f44336'; inp.value='';
+        if (_pwFail >= 3) {
+            warn.style.display='block';
+            warn.textContent = '\u26A0 ' + (5 - _pwFail) + '\uD68C \uCD94\uAC00 \uC2E4\uD328 \uC2DC \uD654\uBA74\uC774 \uC7A0\uAE41\uB2C8\uB2E4.';
+            if (_pwFail >= 5) {
+                warn.textContent = '\uD83D\uDD12 \uBCF4\uC548 \uC815\uCC45\uC5D0 \uC758\uD574 \uD654\uBA74\uC774 \uC7A0\uACBC\uC2B5\uB2C8\uB2E4. \uAD00\uB9AC\uC790\uC5D0\uAC8C \uBB38\uC758\uD558\uC138\uC694.';
+                inp.disabled = true;
+                inp.placeholder = 'Locked';
+                setTimeout(function(){ inp.disabled = false; inp.placeholder = 'Password'; warn.style.display = 'none'; _pwFail = 0; }, 30000);
+            }
+        }
     }
 }
 </script>
