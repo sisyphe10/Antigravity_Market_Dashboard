@@ -772,7 +772,7 @@ async def nightly_portfolio_refresh_job(context: ContextTypes.DEFAULT_TYPE):
 
 
 async def daily_weather_job(context: ContextTypes.DEFAULT_TYPE):
-    """매일 05:00 날씨 알림 (daily_alert.py 실행) + 리서치 헤드라인"""
+    """매일 05:00 날씨 알림 (daily_alert.py 실행)"""
     logging.info("Daily weather job started")
     try:
         result = subprocess.run(
@@ -787,7 +787,10 @@ async def daily_weather_job(context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logging.error(f"Daily weather job error: {e}")
 
-    # 리서치 헤드라인 알림 (당일/전일 데이터만 전송, 오래된 데이터는 무시)
+
+async def daily_headlines_job(context: ContextTypes.DEFAULT_TYPE):
+    """매일 05:10 리서치 헤드라인 알림 (당일/전일 데이터만 전송)"""
+    logging.info("Daily headlines job started")
     try:
         import json as _json
         headlines_file = os.path.join(DASHBOARD_DIR, 'research_headlines.json')
@@ -1332,17 +1335,20 @@ if __name__ == '__main__':
         import pytz
         kst = pytz.timezone('Asia/Seoul')
         weather_time = datetime.time(hour=5, minute=0, second=0, tzinfo=kst)
-        calendar_time = datetime.time(hour=5, minute=10, second=0, tzinfo=kst)
+        calendar_time = datetime.time(hour=5, minute=5, second=0, tzinfo=kst)
+        headlines_time = datetime.time(hour=5, minute=10, second=0, tzinfo=kst)
         portfolio_time = datetime.time(hour=16, minute=0, second=0, tzinfo=kst)
         nightly_time = datetime.time(hour=23, minute=0, second=0, tzinfo=kst)
     except:
         weather_time = datetime.time(hour=5, minute=0, second=0)
-        calendar_time = datetime.time(hour=5, minute=10, second=0)
+        calendar_time = datetime.time(hour=5, minute=5, second=0)
+        headlines_time = datetime.time(hour=5, minute=10, second=0)
         portfolio_time = datetime.time(hour=16, minute=0, second=0)
         nightly_time = datetime.time(hour=23, minute=0, second=0)
 
     job_queue.run_daily(daily_weather_job, time=weather_time)
     job_queue.run_daily(daily_calendar_job, time=calendar_time)
+    job_queue.run_daily(daily_headlines_job, time=headlines_time)
     job_queue.run_daily(daily_portfolio_job, time=portfolio_time)
     job_queue.run_daily(nightly_portfolio_refresh_job, time=nightly_time)
 
@@ -1374,7 +1380,8 @@ if __name__ == '__main__':
     print(f"Bot started at {datetime.datetime.now()}")
     print(f"✅ Daily jobs scheduled:")
     print(f"  - Weather: 05:00 KST")
-    print(f"  - Calendar: 05:10 KST")
+    print(f"  - Calendar: 05:05 KST")
+    print(f"  - Headlines: 05:10 KST")
     print(f"  - Portfolio report: 16:00 KST")
     print(f"  - Auto portfolio update: 09:30~15:35 KST (30분 간격, 거래일만)")
     print(f"  - Nightly portfolio refresh: 23:00 KST (당일 주문 반영)")
