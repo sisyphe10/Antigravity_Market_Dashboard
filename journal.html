@@ -131,9 +131,11 @@ function sheetUrl(sheetName) {
 async function fetchRichText(sheetName, range) {
     var url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}?ranges=${encodeURIComponent(sheetName+'!'+range)}&fields=sheets.data.rowData.values(effectiveValue,textFormatRuns,effectiveFormat.textFormat)&key=${GAPI_KEY}`;
     var res = await fetch(url);
+    if (!res.ok) { console.warn('Rich text API error:', res.status); return {}; }
     var json = await res.json();
+    console.log('Rich text API response:', JSON.stringify(json).substring(0, 500));
     var sheet = json.sheets && json.sheets[0];
-    if (!sheet || !sheet.data || !sheet.data[0]) return {};
+    if (!sheet || !sheet.data || !sheet.data[0]) { console.warn('Rich text: no sheet data'); return {}; }
     var rowData = sheet.data[0].rowData || [];
     // {rowIndex: {colOffset: htmlString}}
     var result = {};
@@ -175,6 +177,7 @@ async function fetchRichText(sheetName, range) {
             }
         });
     });
+    console.log('Rich text result:', JSON.stringify(result));
     return result;
 }
 
