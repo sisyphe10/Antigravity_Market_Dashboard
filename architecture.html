@@ -189,6 +189,14 @@
         }
         footer a { color: var(--accent-color); text-decoration: none; }
 
+        /* Password */
+        .pw-overlay { position: fixed; inset: 0; background: var(--bg-color); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        .pw-box { background: var(--card-bg); border-radius: 12px; padding: 40px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3); max-width: 320px; width: 90%; }
+        .pw-box h2 { font-size: 1.2rem; margin-bottom: 20px; color: var(--text-color); }
+        .pw-box input { width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 1rem; text-align: center; outline: none; background: #383838; color: var(--text-color); }
+        .pw-box input:focus { border-color: var(--accent-color); }
+        .pw-hidden { display: none; }
+
         @media (max-width: 768px) {
             .steps { flex-direction: column; }
             .arrow { transform: rotate(90deg); padding: 4px 0; }
@@ -198,6 +206,15 @@
 </head>
 <body>
 
+<div class="pw-overlay" id="pwOverlay">
+    <div class="pw-box">
+        <h2>Architecture</h2>
+        <input type="password" id="pwInput" placeholder="Password" autofocus
+               onkeyup="if(event.key==='Enter'){if(this.value==='0518'){document.getElementById('pwOverlay').style.display='none';document.getElementById('mainContent').classList.remove('pw-hidden');}else{this.style.borderColor='#f44336';this.value='';}}">
+    </div>
+</div>
+
+<div id="mainContent" class="pw-hidden">
 <header>
     <a href="index.html" class="home-btn">&#127968; Home</a>
     <h1>Age of Emergence</h1>
@@ -1212,6 +1229,7 @@
     Age of Emergence &mdash; Architecture Documentation<br>
     <a href="index.html">Back to Dashboard</a>
 </footer>
+</div>
 
 </body>
 </html>
