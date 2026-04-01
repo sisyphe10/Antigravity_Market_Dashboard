@@ -872,7 +872,8 @@ async def daily_headlines_job(context: ContextTypes.DEFAULT_TYPE):
             headlines = data.get('headlines', [])
             date = data.get('date', '')
             # 날짜 신선도 체크: 어제 또는 오늘 데이터만 전송
-            today_kst = datetime.datetime.now(tz=KST).date()
+            _KST = datetime.timezone(datetime.timedelta(hours=9))
+            today_kst = datetime.datetime.now(tz=_KST).date()
             yesterday_kst = today_kst - datetime.timedelta(days=1)
             try:
                 headline_date = datetime.datetime.strptime(date, '%Y-%m-%d').date()
