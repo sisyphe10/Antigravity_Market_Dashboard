@@ -72,7 +72,8 @@ def get_naver_weather(location="여의도"):
                         break
                 temp_span = item.select_one("span.num")
                 temp = temp_span.text.replace('°', '').strip() if temp_span else '?'
-                hourly[hour] = {'weather': weather, 'temp': temp}
+                if hour not in hourly:  # 첫 등장만 사용 (오늘 데이터, 내일/모레 덮어쓰기 방지)
+                    hourly[hour] = {'weather': weather, 'temp': temp}
 
         target_hours = [8, 14, 18, 22]
         weather_flow = ' → '.join(
