@@ -34,10 +34,17 @@
             margin-bottom: 40px;
             padding: 20px 0;
             border-bottom: 1px solid #333;
+            position: relative;
         }
 
         h1 { font-size: 2.2rem; }
         .subtitle { color: #888; margin-top: 8px; font-size: 0.95rem; }
+
+        .home-btn {
+            position: absolute; top: 20px; right: 24px;
+            padding: 6px 16px; background: #e0e0e0; color: #333;
+            text-decoration: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+        }
 
         h2 {
             font-size: 1.5rem;
@@ -47,7 +54,12 @@
             border-bottom: 2px solid var(--accent-color);
         }
 
-        /* Navigation */
+        h3 {
+            font-size: 1.15rem;
+            color: #ccc;
+            margin: 24px 0 12px 0;
+        }
+
         nav {
             display: flex;
             justify-content: center;
@@ -70,11 +82,7 @@
         }
 
         /* Flow Section */
-        .flow-container {
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-        }
+        .flow-container { display: flex; flex-direction: column; gap: 30px; }
 
         .flow-group {
             background: var(--card-bg);
@@ -82,294 +90,103 @@
             padding: 24px;
             border-left: 4px solid var(--accent-color);
         }
-
         .flow-group.trigger-manual { border-left-color: var(--green); }
         .flow-group.trigger-schedule { border-left-color: var(--orange); }
         .flow-group.trigger-github { border-left-color: var(--purple); }
 
-        .flow-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
+        .flow-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
 
         .flow-badge {
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            color: #fff;
+            padding: 4px 12px; border-radius: 12px;
+            font-size: 0.8rem; font-weight: bold; color: #fff;
         }
         .badge-manual { background: var(--green); }
         .badge-schedule { background: var(--orange); }
         .badge-github { background: var(--purple); }
 
-        .flow-title {
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-
-        .flow-desc {
-            color: #aaa;
-            font-size: 0.9rem;
-            margin-bottom: 16px;
-        }
+        .flow-title { font-size: 1.2rem; font-weight: bold; }
+        .flow-desc { color: #aaa; font-size: 0.9rem; margin-bottom: 16px; }
 
         /* Steps */
-        .steps {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0;
-            align-items: center;
-        }
+        .steps { display: flex; flex-wrap: wrap; gap: 0; align-items: center; }
 
         .step {
-            background: #383838;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px 16px;
-            min-width: 160px;
-            text-align: center;
-            position: relative;
+            background: #383838; border: 1px solid var(--border); border-radius: 8px;
+            padding: 12px 16px; min-width: 160px; text-align: center;
         }
+        .step-number { font-size: 0.7rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+        .step-file { font-family: 'Consolas', 'Courier New', monospace; font-size: 0.85rem; color: var(--cyan); margin: 4px 0; word-break: break-all; }
+        .step-desc { font-size: 0.8rem; color: #aaa; }
 
-        .step-number {
-            font-size: 0.7rem;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .step-file {
-            font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 0.85rem;
-            color: var(--cyan);
-            margin: 4px 0;
-            word-break: break-all;
-        }
-
-        .step-desc {
-            font-size: 0.8rem;
-            color: #aaa;
-        }
-
-        .arrow {
-            font-size: 1.4rem;
-            color: #666;
-            padding: 0 8px;
-            flex-shrink: 0;
-        }
+        .arrow { font-size: 1.4rem; color: #666; padding: 0 8px; flex-shrink: 0; }
 
         .step-output {
-            background: #2a3a2a;
-            border: 1px solid var(--green);
-            border-radius: 8px;
-            padding: 12px 16px;
-            min-width: 140px;
-            text-align: center;
+            background: #2a3a2a; border: 1px solid var(--green); border-radius: 8px;
+            padding: 12px 16px; min-width: 140px; text-align: center;
         }
-
         .step-output .step-file { color: var(--green); }
 
         /* File Table */
-        .file-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 12px;
-        }
-
-        .file-table th {
-            background: #383838;
-            padding: 12px 16px;
-            text-align: left;
-            font-size: 0.85rem;
-            color: var(--accent-color);
-            border-bottom: 2px solid var(--border);
-        }
-
-        .file-table td {
-            padding: 10px 16px;
-            border-bottom: 1px solid #333;
-            font-size: 0.85rem;
-        }
-
+        .file-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        .file-table th { background: #383838; padding: 12px 16px; text-align: left; font-size: 0.85rem; color: var(--accent-color); border-bottom: 2px solid var(--border); }
+        .file-table td { padding: 10px 16px; border-bottom: 1px solid #333; font-size: 0.85rem; }
         .file-table tr:hover { background: #333; }
-
-        .file-name {
-            font-family: 'Consolas', 'Courier New', monospace;
-            color: var(--cyan);
-        }
+        .file-name { font-family: 'Consolas', 'Courier New', monospace; color: var(--cyan); }
 
         .tag {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            color: #fff;
-            margin: 1px 2px;
+            display: inline-block; padding: 2px 8px; border-radius: 10px;
+            font-size: 0.7rem; font-weight: bold; color: #fff; margin: 1px 2px;
         }
         .tag-vm { background: #2e7d32; }
         .tag-github { background: #7b1fa2; }
         .tag-command { background: #1565c0; }
         .tag-schedule { background: #e65100; }
+        .tag-local { background: #555; }
 
-        /* Data Files */
-        .data-grid {
+        /* Data & Infra Cards */
+        .data-grid, .infra-grid, .cmd-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 16px;
-            margin-top: 12px;
+            gap: 16px; margin-top: 12px;
         }
 
-        .data-card {
-            background: var(--card-bg);
-            border-radius: 8px;
-            padding: 16px;
-            border: 1px solid var(--border);
+        .data-card, .infra-card, .cmd-card {
+            background: var(--card-bg); border-radius: 8px;
+            padding: 16px; border: 1px solid var(--border);
         }
+        .data-card-title { font-family: 'Consolas', 'Courier New', monospace; color: var(--cyan); font-size: 0.95rem; margin-bottom: 8px; }
+        .data-card-desc { font-size: 0.85rem; color: #aaa; }
 
-        .data-card-title {
-            font-family: 'Consolas', 'Courier New', monospace;
-            color: var(--cyan);
-            font-size: 0.95rem;
-            margin-bottom: 8px;
-        }
-
-        .data-card-desc {
-            font-size: 0.85rem;
-            color: #aaa;
-        }
-
-        /* Command Reference */
-        .cmd-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 16px;
-            margin-top: 12px;
-        }
-
-        .cmd-card {
-            background: var(--card-bg);
-            border-radius: 8px;
-            padding: 16px;
-            border: 1px solid var(--border);
-        }
-
-        .cmd-name {
-            font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 1.1rem;
-            color: var(--green);
-            margin-bottom: 6px;
-        }
-
-        .cmd-desc { font-size: 0.85rem; color: #aaa; }
-
-        .cmd-flow {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid #444;
-            font-size: 0.8rem;
-            color: #888;
-        }
-
-        .cmd-flow code {
-            color: var(--cyan);
-            background: #383838;
-            padding: 1px 5px;
-            border-radius: 3px;
-            font-size: 0.8rem;
-        }
-
-        /* Infra Section */
-        .infra-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 16px;
-            margin-top: 12px;
-        }
-
-        .infra-card {
-            background: var(--card-bg);
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            border: 1px solid var(--border);
-        }
-
+        .infra-card { text-align: center; padding: 20px; }
         .infra-icon { font-size: 2rem; margin-bottom: 8px; }
         .infra-title { font-weight: bold; margin-bottom: 6px; }
-        .infra-desc { font-size: 0.85rem; color: #aaa; }
+        .infra-desc { font-size: 0.85rem; color: #aaa; text-align: left; }
 
-        /* Troubleshooting */
-        .debug-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 12px;
-        }
+        .cmd-name { font-family: 'Consolas', 'Courier New', monospace; font-size: 1.1rem; color: var(--green); margin-bottom: 6px; }
+        .cmd-desc { font-size: 0.85rem; color: #aaa; }
+        .cmd-flow { margin-top: 10px; padding-top: 10px; border-top: 1px solid #444; font-size: 0.8rem; color: #888; }
+        .cmd-flow code { color: var(--cyan); background: #383838; padding: 1px 5px; border-radius: 3px; font-size: 0.8rem; }
 
-        .debug-table th {
-            background: #383838;
-            padding: 10px 14px;
-            text-align: left;
-            font-size: 0.85rem;
-            color: var(--orange);
-            border-bottom: 2px solid var(--border);
-        }
+        /* Debug Table */
+        .debug-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        .debug-table th { background: #383838; padding: 10px 14px; text-align: left; font-size: 0.85rem; color: var(--orange); border-bottom: 2px solid var(--border); }
+        .debug-table td { padding: 10px 14px; border-bottom: 1px solid #333; font-size: 0.85rem; vertical-align: top; }
+        .debug-table code { color: var(--cyan); background: #383838; padding: 1px 5px; border-radius: 3px; font-size: 0.8rem; }
 
-        .debug-table td {
-            padding: 10px 14px;
-            border-bottom: 1px solid #333;
-            font-size: 0.85rem;
-            vertical-align: top;
+        /* Migration Section */
+        .migration-card {
+            background: var(--card-bg); border-radius: 12px; padding: 24px;
+            border: 1px solid var(--border); margin-bottom: 16px;
         }
-
-        .debug-table code {
-            color: var(--cyan);
-            background: #383838;
-            padding: 1px 5px;
-            border-radius: 3px;
-            font-size: 0.8rem;
-        }
-
-        /* Version Log */
-        .version-log {
-            margin-top: 12px;
-        }
-
-        .version-entry {
-            background: var(--card-bg);
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 12px;
-            border-left: 3px solid var(--accent-color);
-        }
-
-        .version-date {
-            font-size: 0.8rem;
-            color: #888;
-        }
-
-        .version-title {
-            font-weight: bold;
-            margin: 4px 0;
-        }
-
-        .version-desc {
-            font-size: 0.85rem;
-            color: #aaa;
-        }
+        .migration-card h4 { color: var(--accent-color); margin-bottom: 12px; font-size: 1.05rem; }
+        .migration-card ul { padding-left: 20px; color: #aaa; font-size: 0.85rem; }
+        .migration-card li { margin-bottom: 6px; }
+        .migration-card code { color: var(--cyan); background: #383838; padding: 1px 5px; border-radius: 3px; font-size: 0.8rem; }
 
         footer {
-            text-align: center;
-            margin-top: 60px;
-            padding: 20px;
-            color: #555;
-            font-size: 0.85rem;
-            border-top: 1px solid #333;
+            text-align: center; margin-top: 60px; padding: 20px;
+            color: #555; font-size: 0.85rem; border-top: 1px solid #333;
         }
-
         footer a { color: var(--accent-color); text-decoration: none; }
 
         @media (max-width: 768px) {
@@ -382,9 +199,10 @@
 <body>
 
 <header>
-    <h1>Antigravity Market Dashboard</h1>
-    <div class="subtitle">System Architecture & Documentation</div>
-    <div class="subtitle">Last updated: 2026-03-16 (10차)</div>
+    <a href="index.html" class="home-btn">&#127968; Home</a>
+    <h1>Age of Emergence</h1>
+    <div class="subtitle">System Architecture &amp; Migration Guide</div>
+    <div class="subtitle">Last updated: 2026-04-01</div>
 </header>
 
 <nav>
@@ -393,9 +211,11 @@
     <a href="#flows">Flows</a>
     <a href="#files">Files</a>
     <a href="#data">Data</a>
+    <a href="#external">External APIs</a>
     <a href="#infra">Infra</a>
+    <a href="#env">Env &amp; Secrets</a>
     <a href="#debug">Troubleshooting</a>
-    <a href="#changelog">Changelog</a>
+    <a href="#migration">Migration Guide</a>
     <a href="index.html">Dashboard</a>
 </nav>
 
@@ -403,24 +223,73 @@
 <h2 id="overview">System Overview</h2>
 <div class="infra-grid">
     <div class="infra-card">
-        <div class="infra-icon">🤖</div>
-        <div class="infra-title">Telegram Bot</div>
-        <div class="infra-desc">weather_bot.py<br>명령어 수신 + 정기 작업<br>Oracle Cloud VM 24시간 실행</div>
+        <div class="infra-icon">&#129302;</div>
+        <div class="infra-title">Telegram Bot (VM)</div>
+        <div class="infra-desc">
+            weather_bot.py &mdash; 24시간 상주<br>
+            &bull; 명령어 수신 (/update, /portfolio, /journal 등)<br>
+            &bull; 스케줄 작업 (날씨, 캘린더, 포트폴리오, 리서치 헤드라인)<br>
+            &bull; 장중 30분 간격 자동 업데이트
+        </div>
     </div>
     <div class="infra-card">
-        <div class="infra-icon">⚙️</div>
+        <div class="infra-icon">&#128214;</div>
+        <div class="infra-title">Research Bot (VM)</div>
+        <div class="infra-desc">
+            research_bot.py &mdash; systemd 서비스<br>
+            &bull; 텔레그램 리서치 노트 수집<br>
+            &bull; Claude API 요약 (Sonnet 4)<br>
+            &bull; Notion 게시 + 이미지 GitHub 업로드<br>
+            &bull; 아침 헤드라인 JSON 저장
+        </div>
+    </div>
+    <div class="infra-card">
+        <div class="infra-icon">&#9881;</div>
         <div class="infra-title">GitHub Actions</div>
-        <div class="infra-desc">daily_crawl.yml<br>매일 23:00 KST 자동 실행<br>크롤링 + 차트 + 대시보드</div>
+        <div class="infra-desc">
+            daily_crawl.yml &mdash; 매일 23:00 KST<br>
+            &bull; 시장 데이터 크롤링 (DRAM, NAND, 지수, 환율, 원자재, 암호화폐)<br>
+            &bull; 차트 이미지 생성<br>
+            &bull; 포트폴리오 NAV/수익률 계산<br>
+            &bull; SEIBro TOP 50 (Selenium)<br>
+            &bull; Featured 종목 (KRX API)<br>
+            &bull; HTML 대시보드 전체 재생성 + git push
+        </div>
     </div>
     <div class="infra-card">
-        <div class="infra-icon">🌐</div>
+        <div class="infra-icon">&#127760;</div>
         <div class="infra-title">GitHub Pages</div>
-        <div class="infra-desc">index.html<br>포트폴리오 대시보드<br>git push 시 자동 배포</div>
+        <div class="infra-desc">
+            git push &rarr; 자동 배포<br>
+            &bull; index.html (랜딩), market.html, wrap.html<br>
+            &bull; market_alert.html, featured.html<br>
+            &bull; seibro.html, universe.html<br>
+            &bull; journal.html (Google Sheets 실시간)<br>
+            &bull; architecture.html (이 페이지)
+        </div>
     </div>
     <div class="infra-card">
-        <div class="infra-icon">📊</div>
+        <div class="infra-icon">&#128187;</div>
+        <div class="infra-title">Local PC (Windows)</div>
+        <div class="infra-desc">
+            &bull; Wrap_NAV.xlsx 수정 (Excel)<br>
+            &bull; watch_wrap_nav.py: 파일 변경 감지 &rarr; 자동 git push<br>
+            &bull; push_wrap_nav.py: GUI 수동 push<br>
+            &bull; auto_pull.bat: VM push 후 로컬 동기화
+        </div>
+    </div>
+    <div class="infra-card">
+        <div class="infra-icon">&#128202;</div>
         <div class="infra-title">Data Sources</div>
-        <div class="infra-desc">FinanceDataReader (실시간 주가)<br>네이버 날씨 / AccuWeather<br>네이버 증권 (시가총액·지수 등락률 fallback)<br>yfinance (해외 지수)</div>
+        <div class="infra-desc">
+            &bull; DRAMeXchange (Selenium): DRAM/NAND 가격<br>
+            &bull; Naver Finance (BS4): 지수, 투자자별, 시총<br>
+            &bull; yfinance: 해외 지수, 환율, 원자재, 암호화폐<br>
+            &bull; KRX OpenAPI: Featured 종목, 섹터<br>
+            &bull; KIND (POST): 투자주의/경고/위험<br>
+            &bull; SEIBro (Selenium): 해외결제 TOP 50<br>
+            &bull; Google Sheets (gviz): Journal 데이터
+        </div>
     </div>
 </div>
 
@@ -429,24 +298,17 @@
 <div class="cmd-grid">
     <div class="cmd-card">
         <div class="cmd-name">/update</div>
-        <div class="cmd-desc">실시간 주가 기반 포트폴리오 테이블 즉시 업데이트. 전거래일 포트폴리오 기준. Dashboard 자동 반영.</div>
+        <div class="cmd-desc">실시간 주가 기반 포트폴리오 즉시 업데이트. Dashboard 자동 반영.</div>
         <div class="cmd-flow">
-            <code>portfolio_data.json</code> 읽기 &rarr;
+            <code>create_portfolio_tables.py</code> &rarr;
             실시간 주가 병렬 조회 (10 threads) &rarr;
             <code>create_dashboard.py</code> &rarr;
-            git pull --rebase &rarr; git push &rarr; 텔레그램 요약 (상위/하위 5종목 + 기여도)
-        </div>
-    </div>
-    <div class="cmd-card">
-        <div class="cmd-name">/weather</div>
-        <div class="cmd-desc">여의도 현재 날씨 조회. 날짜, 기온, 미세먼지, 일출/일몰.</div>
-        <div class="cmd-flow">
-            네이버 날씨 스크래핑 + AccuWeather (일출/일몰)
+            git push &rarr; 텔레그램 요약 (상위/하위 5종목 + 기여도)
         </div>
     </div>
     <div class="cmd-card">
         <div class="cmd-name">/portfolio</div>
-        <div class="cmd-desc">포트폴리오 리포트 조회. 기준가, 수익률(1D~YTD), 기여도 Top5. NAV + 수익률을 먼저 계산한 뒤 리포트 생성.</div>
+        <div class="cmd-desc">기준가 + 수익률(1D~YTD) + 기여도 Top5 리포트.</div>
         <div class="cmd-flow">
             <code>calculate_wrap_nav.py</code> &rarr;
             <code>calculate_returns.py</code> &rarr;
@@ -454,8 +316,30 @@
         </div>
     </div>
     <div class="cmd-card">
-        <div class="cmd-name">/help</div>
-        <div class="cmd-desc">사용 가능한 명령어 목록 표시.</div>
+        <div class="cmd-name">/journal [장전|장후] [내용]</div>
+        <div class="cmd-desc">투자일지 기록. Google Sheets Journal 시트에 저장. 줄바꿈 보존.</div>
+        <div class="cmd-flow">
+            Google Sheets API &rarr; Journal 시트 C열(장전) 또는 D열(장후)
+        </div>
+    </div>
+    <div class="cmd-card">
+        <div class="cmd-name">/weather</div>
+        <div class="cmd-desc">여의도 현재 날씨 (기온, 미세먼지, 일출/일몰).</div>
+        <div class="cmd-flow">네이버 날씨 + AccuWeather 스크래핑</div>
+    </div>
+    <div class="cmd-card">
+        <div class="cmd-name">/calendar</div>
+        <div class="cmd-desc">오늘의 Google Calendar 일정 조회 (4개 캘린더).</div>
+        <div class="cmd-flow"><code>daily_calendar.py</code> &rarr; 서비스 계정 인증 &rarr; 텔레그램 전송</div>
+    </div>
+    <div class="cmd-card">
+        <div class="cmd-name">/ledger [카테고리] [금액] [메모]</div>
+        <div class="cmd-desc">가계부 기록. Google Sheets 가계부 시트에 저장.</div>
+        <div class="cmd-flow">Google Sheets API &rarr; 가계부 시트</div>
+    </div>
+    <div class="cmd-card">
+        <div class="cmd-name">/start &middot; /stop &middot; /help</div>
+        <div class="cmd-desc">봇 구독/해제/도움말. subscribers.json에 저장.</div>
         <div class="cmd-flow">-</div>
     </div>
 </div>
@@ -464,156 +348,63 @@
 <h2 id="flows">Execution Flows</h2>
 <div class="flow-container">
 
-    <!-- /update Flow -->
-    <div class="flow-group trigger-manual">
+    <!-- Morning (05:00~05:10) -->
+    <div class="flow-group trigger-schedule">
         <div class="flow-header">
-            <span class="flow-badge badge-manual">수동</span>
-            <span class="flow-title">/update 명령어</span>
+            <span class="flow-badge badge-schedule">매일 05:00 ~ 05:10</span>
+            <span class="flow-title">아침 알림 (날씨 + 캘린더 + 리서치 헤드라인)</span>
         </div>
-        <div class="flow-desc">사용자가 텔레그램에서 /update 입력 시 실행. Wrap_NAV.xlsx에서 최신 포트폴리오 구성을 재생성한 뒤, 실시간 주가를 병렬 조회하여 갱신. 23:00 이전이면 전거래일 포트폴리오 기준 (당일 주문 미반영).</div>
+        <div class="flow-desc">VM 스케줄러. 05:00 날씨 + 리서치 헤드라인 전송 (날짜 신선도 체크: 어제/오늘만), 05:10 Google Calendar 일정 전송.</div>
         <div class="steps">
             <div class="step">
-                <div class="step-number">Step 0</div>
-                <div class="step-file">create_portfolio_tables.py</div>
-                <div class="step-desc">Wrap_NAV.xlsx → portfolio_data.json 재생성<br>(최신 종목 구성 반영)</div>
+                <div class="step-number">05:00</div>
+                <div class="step-file">daily_alert.py</div>
+                <div class="step-desc">네이버 날씨 + AccuWeather</div>
             </div>
             <div class="arrow">&rarr;</div>
             <div class="step">
-                <div class="step-number">Step 1</div>
-                <div class="step-file">portfolio_data.json 읽기</div>
-                <div class="step-desc">종목 코드/비중 로드</div>
+                <div class="step-number">05:00</div>
+                <div class="step-file">research_headlines.json</div>
+                <div class="step-desc">날짜 체크 후 전송<br>(오래된 데이터 스킵)</div>
             </div>
             <div class="arrow">&rarr;</div>
             <div class="step">
-                <div class="step-number">Step 2</div>
-                <div class="step-file">FinanceDataReader 병렬 조회</div>
-                <div class="step-desc">ThreadPoolExecutor (10 workers)<br>오늘 수익률 + 기여도 계산</div>
+                <div class="step-number">05:10</div>
+                <div class="step-file">daily_calendar.py</div>
+                <div class="step-desc">Google Calendar 4개 조회</div>
             </div>
             <div class="arrow">&rarr;</div>
-            <div class="step">
-                <div class="step-number">Step 3</div>
-                <div class="step-file">create_dashboard.py</div>
-                <div class="step-desc">JSON → HTML 테이블 생성</div>
-            </div>
-            <div class="arrow">&rarr;</div>
-            <div class="step">
-                <div class="step-number">Step 4</div>
-                <div class="step-file">git pull --rebase → push</div>
-                <div class="step-desc">GitHub Pages 자동 배포</div>
-            </div>
-            <div class="arrow">&rarr;</div>
-            <div class="step">
-                <div class="step-number">Step 5</div>
-                <div class="step-file">텔레그램 요약</div>
-                <div class="step-desc">상승/하락 Top5 + 기여도</div>
+            <div class="step-output">
+                <div class="step-file">Telegram</div>
+                <div class="step-desc">구독자에게 전송</div>
             </div>
         </div>
     </div>
 
-    <!-- Auto Portfolio Update (09:30~15:30) -->
+    <!-- Intraday (09:30~15:35) -->
     <div class="flow-group trigger-schedule">
         <div class="flow-header">
             <span class="flow-badge badge-schedule">09:30~15:35 (30분)</span>
             <span class="flow-title">장중 자동 포트폴리오 업데이트</span>
         </div>
-        <div class="flow-desc">거래일 09:30~15:35 KST 30분마다 자동 실행. 텔레그램 알림 없이 Dashboard만 조용히 갱신. 주말·공휴일 자동 스킵 (삼성전자 당일 데이터 유무로 판단).</div>
+        <div class="flow-desc">거래일 09:30~15:35 KST 30분마다. 주말/공휴일 자동 스킵 (삼성전자 당일 데이터 유무로 판단). 텔레그램 알림 없이 Dashboard만 조용히 갱신.</div>
         <div class="steps">
             <div class="step">
                 <div class="step-number">Step 1</div>
-                <div class="step-file">장중 여부 확인</div>
-                <div class="step-desc">주말 스킵<br>삼성전자 당일 데이터 없으면 공휴일로 판단 스킵</div>
-            </div>
-            <div class="arrow">&rarr;</div>
-            <div class="step">
-                <div class="step-number">Step 2</div>
-                <div class="step-file">run_portfolio_update()</div>
-                <div class="step-desc">/update와 동일 로직<br>실시간 주가 조회 + Dashboard 갱신</div>
-            </div>
-            <div class="arrow">&rarr;</div>
-            <div class="step-output">
-                <div class="step-file">index.html 갱신</div>
-                <div class="step-desc">텔레그램 알림 없음</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Daily Portfolio (15:40) -->
-    <div class="flow-group trigger-schedule">
-        <div class="flow-header">
-            <span class="flow-badge badge-schedule">매일 15:40</span>
-            <span class="flow-title">포트폴리오 리포트 자동 전송</span>
-        </div>
-        <div class="flow-desc">장 마감 직후 자동 실행. git pull → 기준가 업데이트(NaN 검증 + 실패 시 1회 재시도) → portfolio_data.json 재생성 → 수익률 계산 → Wrap_NAV push → market_alert 재생성 → Dashboard 갱신 → 텔레그램 리포트.</div>
-        <div class="steps">
-            <div class="step">
-                <div class="step-number">Step 0</div>
-                <div class="step-file">git pull origin main</div>
-                <div class="step-desc">최신 Wrap_NAV.xlsx 반영</div>
-            </div>
-            <div class="arrow">&rarr;</div>
-            <div class="step">
-                <div class="step-number">Step 1</div>
-                <div class="step-file">calculate_wrap_nav.py</div>
-                <div class="step-desc">오늘자 기준가(NAV) 계산<br>NaN 검증 + 실패 시 재시도(2회)<br>Wrap_NAV.xlsx에 추가</div>
-            </div>
-            <div class="arrow">&rarr;</div>
-            <div class="step">
-                <div class="step-number">Step 1.5</div>
-                <div class="step-file">create_portfolio_tables.py</div>
-                <div class="step-desc">Wrap_NAV → portfolio_data.json<br>최신 종목 구성 반영</div>
-            </div>
-            <div class="arrow">&rarr;</div>
-            <div class="step">
-                <div class="step-number">Step 2</div>
-                <div class="step-file">calculate_returns.py</div>
-                <div class="step-desc">1D, 1W, 1M, 3M, 6M,<br>1Y, YTD 수익률 계산</div>
-            </div>
-        </div>
-        <div class="steps" style="margin-top: 12px;">
-            <div class="step">
-                <div class="step-number">Step 2.5</div>
-                <div class="step-file">git push (Wrap_NAV.xlsx)</div>
-                <div class="step-desc">기준가 계산 결과 GitHub 반영</div>
-            </div>
-            <div class="arrow">&rarr;</div>
-            <div class="step">
-                <div class="step-number">Step 3</div>
-                <div class="step-file">create_dashboard.py</div>
-                <div class="step-desc">index.html 재생성 + git push<br>Dashboard 즉시 반영</div>
-            </div>
-            <div class="arrow">&rarr;</div>
-            <div class="step">
-                <div class="step-number">Step 4</div>
-                <div class="step-file">daily_portfolio_report.py</div>
-                <div class="step-desc">텔레그램으로 리포트 전송<br>기준가 + 수익률 + 기여도 Top5</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Nightly Portfolio Refresh (23:00 VM) -->
-    <div class="flow-group trigger-schedule">
-        <div class="flow-header">
-            <span class="flow-badge badge-schedule">매일 23:00 (VM)</span>
-            <span class="flow-title">당일 주문 포트폴리오 야간 반영</span>
-        </div>
-        <div class="flow-desc">당일 Wrap_NAV.xlsx에 입력한 주문(비중 변경·신규 편입)을 Dashboard에 반영. <strong>23:00 이전에는 create_portfolio_tables.py와 create_dashboard.py 모두 전거래일 기준 데이터를 사용</strong>하므로, 23:00 이후 이 잡이 실행돼야 당일 변경사항이 표시됨. 오늘 신규 편입 종목은 비중만 표시하고 수익률/기여도/누적은 '-' 표시.</div>
-        <div class="steps">
-            <div class="step">
-                <div class="step-number">Step 1</div>
-                <div class="step-file">git pull origin main</div>
-                <div class="step-desc">최신 Wrap_NAV.xlsx 반영</div>
+                <div class="step-file">거래일 확인</div>
+                <div class="step-desc">주말/공휴일 스킵</div>
             </div>
             <div class="arrow">&rarr;</div>
             <div class="step">
                 <div class="step-number">Step 2</div>
                 <div class="step-file">create_portfolio_tables.py</div>
-                <div class="step-desc">23:00 이후 → date_cutoff = 오늘<br>당일 변경된 비중·신규 종목 반영</div>
+                <div class="step-desc">실시간 주가 조회 + JSON 갱신</div>
             </div>
             <div class="arrow">&rarr;</div>
             <div class="step">
                 <div class="step-number">Step 3</div>
                 <div class="step-file">create_dashboard.py</div>
-                <div class="step-desc">index.html 재생성</div>
+                <div class="step-desc">HTML 재생성</div>
             </div>
             <div class="arrow">&rarr;</div>
             <div class="step-output">
@@ -623,58 +414,89 @@
         </div>
     </div>
 
-    <!-- Daily Weather (05:00) -->
+    <!-- EOD Portfolio (16:00) -->
     <div class="flow-group trigger-schedule">
         <div class="flow-header">
-            <span class="flow-badge badge-schedule">매일 05:00</span>
-            <span class="flow-title">날씨 자동 전송</span>
+            <span class="flow-badge badge-schedule">매일 16:00</span>
+            <span class="flow-title">장 마감 리포트 + 투자일지 데이터 수집</span>
         </div>
-        <div class="flow-desc">매일 아침 5시 여의도 날씨 자동 전송. (VM 봇 스케줄러) ※ 2026-02-20 GitHub Actions에서 VM으로 이전.</div>
+        <div class="flow-desc">NAV 계산 &rarr; 수익률 &rarr; 포트폴리오 리포트 텔레그램 전송 + market_alert 재생성 + 투자일지 시장 데이터 수집 (KOSPI/KOSDAQ 지수, 거래대금, 투자자별, 상승/하락, 120일선).</div>
         <div class="steps">
             <div class="step">
                 <div class="step-number">Step 1</div>
-                <div class="step-file">네이버 날씨 스크래핑</div>
-                <div class="step-desc">기온, 미세먼지 등</div>
+                <div class="step-file">git pull</div>
+                <div class="step-desc">최신 Wrap_NAV.xlsx</div>
             </div>
             <div class="arrow">&rarr;</div>
             <div class="step">
                 <div class="step-number">Step 2</div>
-                <div class="step-file">AccuWeather 스크래핑</div>
-                <div class="step-desc">일출/일몰 시각</div>
+                <div class="step-file">calculate_wrap_nav.py</div>
+                <div class="step-desc">오늘자 NAV 계산<br>NaN 검증 + 재시도</div>
             </div>
             <div class="arrow">&rarr;</div>
             <div class="step">
                 <div class="step-number">Step 3</div>
-                <div class="step-file">텔레그램 전송</div>
-                <div class="step-desc">구독자에게 날씨 메시지</div>
+                <div class="step-file">calculate_returns.py</div>
+                <div class="step-desc">1D~YTD 수익률</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 4</div>
+                <div class="step-file">daily_portfolio_report.py</div>
+                <div class="step-desc">텔레그램 리포트</div>
+            </div>
+        </div>
+        <div class="steps" style="margin-top: 12px;">
+            <div class="step">
+                <div class="step-number">Step 5</div>
+                <div class="step-file">fetch_journal_data.py</div>
+                <div class="step-desc">네이버 금융 시장 데이터<br>&rarr; Google Sheets Data 시트</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 6</div>
+                <div class="step-file">create_market_alert.py</div>
+                <div class="step-desc">KIND 투자유의종목 재생성</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 7</div>
+                <div class="step-file">create_dashboard.py</div>
+                <div class="step-desc">HTML + git push</div>
             </div>
         </div>
     </div>
 
-    <!-- Daily Calendar (05:10) -->
+    <!-- Nightly (23:00) -->
     <div class="flow-group trigger-schedule">
         <div class="flow-header">
-            <span class="flow-badge badge-schedule">매일 05:10</span>
-            <span class="flow-title">Google Calendar 일정 알림</span>
+            <span class="flow-badge badge-schedule">매일 23:00 (VM)</span>
+            <span class="flow-title">야간 반영 (당일 주문 + SEIBro + market_alert)</span>
         </div>
-        <div class="flow-desc">VM 봇 스케줄러에서 실행. 오늘의 Google Calendar 일정을 텔레그램으로 전송. 4개 캘린더 조회 (메인, 옥쥬와 빵빵이, 운용 본부, 투자 활동). 소유 캘린더 + 'TS' 포함 일정 볼드+밑줄 처리. GOOGLE_SERVICE_ACCOUNT_KEY 사용. ※ 2026-02-20 GitHub Actions에서 VM으로 이전.</div>
+        <div class="flow-desc">23:00 이후 date_cutoff = 오늘. 당일 Wrap_NAV.xlsx에 입력한 주문(비중 변경/신규 편입)을 Dashboard에 반영. SEIBro TOP 50 재수집. market_alert 재생성.</div>
         <div class="steps">
             <div class="step">
                 <div class="step-number">Step 1</div>
-                <div class="step-file">daily_calendar.py</div>
-                <div class="step-desc">Google Calendar API로 오늘 일정 조회<br>(서비스 계정 인증)</div>
+                <div class="step-file">git pull</div>
+                <div class="step-desc">최신 Wrap_NAV.xlsx</div>
             </div>
             <div class="arrow">&rarr;</div>
             <div class="step">
                 <div class="step-number">Step 2</div>
-                <div class="step-file">일정 포맷팅</div>
-                <div class="step-desc">메인 / 투자 활동 캘린더 구분<br>시간순 정렬</div>
+                <div class="step-file">create_portfolio_tables.py</div>
+                <div class="step-desc">당일 주문 반영</div>
             </div>
             <div class="arrow">&rarr;</div>
             <div class="step">
                 <div class="step-number">Step 3</div>
-                <div class="step-file">텔레그램 전송</div>
-                <div class="step-desc">HTML 파싱으로 일정 메시지 전송</div>
+                <div class="step-file">create_market_alert.py</div>
+                <div class="step-desc">투자유의종목 갱신</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 4</div>
+                <div class="step-file">create_dashboard.py</div>
+                <div class="step-desc">HTML + git push</div>
             </div>
         </div>
     </div>
@@ -682,70 +504,117 @@
     <!-- GitHub Actions (23:00) -->
     <div class="flow-group trigger-github">
         <div class="flow-header">
-            <span class="flow-badge badge-github">매일 23:00</span>
-            <span class="flow-title">GitHub Actions - Daily Market Crawl</span>
+            <span class="flow-badge badge-github">매일 23:00 (GHA)</span>
+            <span class="flow-title">GitHub Actions &mdash; Daily Market Crawl</span>
         </div>
-        <div class="flow-desc">GitHub 서버에서 실행. 시장 데이터 크롤링 + 차트 생성 + 대시보드 갱신. VM과 별도.</div>
+        <div class="flow-desc">GitHub 서버에서 실행. VM과 별개. 시장 데이터 크롤링 + 차트 생성 + NAV 계산 + 대시보드 전체 재생성.</div>
         <div class="steps">
             <div class="step">
-                <div class="step-number">Step 1</div>
-                <div class="step-file">backfill_yfinance_history.py</div>
-                <div class="step-desc">yfinance 과거 데이터 보충</div>
+                <div class="step-number">Step 1-3</div>
+                <div class="step-file">backfill + import + market_crawler</div>
+                <div class="step-desc">yfinance 보충 + 엑셀 가져오기<br>+ DRAM/NAND/지수/환율/암호화폐<br>&rarr; dataset.csv</div>
             </div>
             <div class="arrow">&rarr;</div>
             <div class="step">
-                <div class="step-number">Step 2</div>
-                <div class="step-file">import_memory_data.py</div>
-                <div class="step-desc">엑셀 과거 데이터 가져오기</div>
+                <div class="step-number">Step 4-5</div>
+                <div class="step-file">calculate_wrap_nav + returns</div>
+                <div class="step-desc">NAV + 수익률 계산<br>&rarr; Wrap_NAV.xlsx</div>
             </div>
             <div class="arrow">&rarr;</div>
             <div class="step">
-                <div class="step-number">Step 3</div>
-                <div class="step-file">market_crawler.py</div>
-                <div class="step-desc">시장 데이터 크롤링<br>&rarr; dataset.csv</div>
-            </div>
-            <div class="arrow">&rarr;</div>
-            <div class="step">
-                <div class="step-number">Step 4</div>
-                <div class="step-file">calculate_wrap_nav.py</div>
-                <div class="step-desc">기준가 계산</div>
-            </div>
-            <div class="arrow">&rarr;</div>
-            <div class="step">
-                <div class="step-number">Step 5</div>
-                <div class="step-file">calculate_returns.py</div>
-                <div class="step-desc">수익률 계산</div>
+                <div class="step-number">Step 6-7</div>
+                <div class="step-file">draw_charts + draw_wrap_charts</div>
+                <div class="step-desc">시장 차트 + WRAP 차트<br>&rarr; charts/*.png</div>
             </div>
         </div>
         <div class="steps" style="margin-top: 12px;">
             <div class="step">
-                <div class="step-number">Step 6</div>
-                <div class="step-file">draw_charts.py</div>
-                <div class="step-desc">시장 차트 이미지 생성</div>
-            </div>
-            <div class="arrow">&rarr;</div>
-            <div class="step">
-                <div class="step-number">Step 7</div>
-                <div class="step-file">draw_wrap_charts.py</div>
-                <div class="step-desc">Wrap 차트 이미지 생성</div>
-            </div>
-            <div class="arrow">&rarr;</div>
-            <div class="step">
                 <div class="step-number">Step 8</div>
-                <div class="step-file">create_portfolio_tables.py</div>
-                <div class="step-desc">포트폴리오 테이블 생성</div>
+                <div class="step-file">update_price_history<br>fetch_featured_data</div>
+                <div class="step-desc">주가 히스토리 + Featured 종목</div>
             </div>
             <div class="arrow">&rarr;</div>
             <div class="step">
                 <div class="step-number">Step 9</div>
-                <div class="step-file">create_dashboard.py</div>
-                <div class="step-desc">index.html + wrap.html 생성</div>
+                <div class="step-file">fetch_seibro_data (Selenium)</div>
+                <div class="step-desc">SEIBro TOP 50<br>Chrome + headless</div>
             </div>
             <div class="arrow">&rarr;</div>
             <div class="step">
                 <div class="step-number">Step 10</div>
-                <div class="step-file">git push</div>
-                <div class="step-desc">자동 커밋 &amp; 배포</div>
+                <div class="step-file">create_portfolio_tables<br>create_dashboard</div>
+                <div class="step-desc">HTML 전체 재생성</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step-output">
+                <div class="step-file">git auto-commit + push</div>
+                <div class="step-desc">GitHub Pages 배포</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Research Bot -->
+    <div class="flow-group trigger-manual">
+        <div class="flow-header">
+            <span class="flow-badge badge-manual">수시</span>
+            <span class="flow-title">Research Bot &mdash; 리서치 노트 수집/요약</span>
+        </div>
+        <div class="flow-desc">사용자가 텔레그램 리서치봇에 기사/스크린샷 전송 &rarr; SQLite DB 저장 &rarr; 매일 자동 요약 (Claude Sonnet 4) &rarr; Notion 게시. 529 Overloaded 시 3회 재시도 (60초 간격).</div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">수집</div>
+                <div class="step-file">research_bot.py</div>
+                <div class="step-desc">기사 URL &rarr; 본문 추출<br>이미지 &rarr; media/ 저장<br>&rarr; research_notes.db</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">요약</div>
+                <div class="step-file">summarizer.py</div>
+                <div class="step-desc">Claude Sonnet 4 API<br>이미지 base64 Vision<br>토픽별 요약 + {RED} 태그</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">게시</div>
+                <div class="step-file">notion_publisher.py</div>
+                <div class="step-desc">Notion DB 페이지 생성<br>이미지 &rarr; GitHub 업로드</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step-output">
+                <div class="step-file">research_headlines.json</div>
+                <div class="step-desc">아침 05:00 텔레그램 전송용</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Local: Wrap_NAV.xlsx -->
+    <div class="flow-group trigger-manual">
+        <div class="flow-header">
+            <span class="flow-badge badge-manual">수동</span>
+            <span class="flow-title">Wrap_NAV.xlsx 수정 (로컬 PC)</span>
+        </div>
+        <div class="flow-desc">Excel에서 NEW 시트에 포트폴리오 변경 입력 &rarr; 저장 시 watch_wrap_nav.py가 감지 &rarr; 자동 git push &rarr; GitHub Actions recalc_wrap_nav.yml 트리거 &rarr; 기준가/수익률 재계산.</div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">Step 1</div>
+                <div class="step-file">Excel 저장</div>
+                <div class="step-desc">Wrap_NAV.xlsx 수정</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 2</div>
+                <div class="step-file">watch_wrap_nav.py</div>
+                <div class="step-desc">파일 변경 감지 (8초 디바운스)<br>자동 git commit + push</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step">
+                <div class="step-number">Step 3</div>
+                <div class="step-file">recalc_wrap_nav.yml</div>
+                <div class="step-desc">GHA 자동 트리거<br>NAV + 수익률 재계산</div>
+            </div>
+            <div class="arrow">&rarr;</div>
+            <div class="step-output">
+                <div class="step-file">Wrap_NAV.xlsx 갱신</div>
+                <div class="step-desc">기준가/수익률 시트 업데이트</div>
             </div>
         </div>
     </div>
@@ -754,109 +623,150 @@
 
 <!-- ===== Files ===== -->
 <h2 id="files">Python Files</h2>
+
+<h3>Core Scripts (루트)</h3>
 <table class="file-table">
-    <thead>
-        <tr>
-            <th>File</th>
-            <th>Role</th>
-            <th>Triggered By</th>
-        </tr>
-    </thead>
+    <thead><tr><th>File</th><th>Role</th><th>Triggered By</th></tr></thead>
     <tbody>
         <tr>
-            <td><span class="file-name">execution/weather_bot.py</span></td>
-            <td>메인 봇 - 모든 명령어 처리 + 스케줄러 관리</td>
-            <td><span class="tag tag-vm">VM systemd</span></td>
-        </tr>
-        <tr>
-            <td><span class="file-name">execution/create_portfolio_tables.py</span></td>
-            <td>실시간 주가 &rarr; 오늘수익률/기여도 계산 &rarr; portfolio_data.json. FDR KRX-DESC fallback + 네이버 시가총액 보충.</td>
-            <td><span class="tag tag-command">/update</span> <span class="tag tag-github">Actions</span></td>
-        </tr>
-        <tr>
-            <td><span class="file-name">execution/create_dashboard.py</span></td>
-            <td>portfolio_data.json → index.html + wrap.html 생성. WRAP 차트 + 수익률 비교 테이블(RETURN) + Portfolio 테이블 + Sector Weight를 wrap.html에 분리.</td>
-            <td><span class="tag tag-command">/update</span> <span class="tag tag-github">Actions</span></td>
-        </tr>
-        <tr>
-            <td><span class="file-name">execution/create_market_alert.py</span></td>
-            <td>KIND(kind.krx.co.kr) 스크래핑 → 투자주의/경고/위험 종목 현황 → market_alert.html 생성. 투자주의: 지정유형·경고전환가 표시 (투자경고 지정예고 강조). 투자경고/위험: 판단일·해제가능주가·15일최고가. FDR KRX-DESC fallback + 네이버 시가총액 보충.</td>
-            <td><span class="tag tag-schedule">15:40</span> <span class="tag tag-schedule">23:00</span></td>
-        </tr>
-        <tr>
-            <td><span class="file-name">execution/daily_portfolio_report.py</span></td>
-            <td>기준가 + 수익률 리포트 &rarr; 텔레그램 전송. 포트폴리오별 NaN 안전 읽기 (dropna per column).</td>
-            <td><span class="tag tag-command">/portfolio</span> <span class="tag tag-schedule">15:40</span></td>
-        </tr>
-        <tr>
             <td><span class="file-name">calculate_wrap_nav.py</span></td>
-            <td>Wrap_NAV.xlsx에 오늘자 기준가(NAV) 추가. 미완료(NaN) 포트폴리오 자동 감지 및 재계산. 저장 후 NaN 검증(실패 시 exit(1)). 신규 포트폴리오 자동 인식.</td>
-            <td><span class="tag tag-command">/portfolio</span> <span class="tag tag-schedule">15:40</span> <span class="tag tag-github">Actions</span></td>
+            <td>Wrap_NAV.xlsx NEW 시트 &rarr; 일별 NAV(기준가) 계산. 네이버 금융 + FDR. NaN 검증 + 재시도. 신규 포트폴리오 자동 인식.</td>
+            <td><span class="tag tag-command">/portfolio</span> <span class="tag tag-schedule">16:00</span> <span class="tag tag-github">GHA</span></td>
         </tr>
         <tr>
             <td><span class="file-name">calculate_returns.py</span></td>
-            <td>1D, 1W, 1M, 3M, 6M, 1Y, YTD 수익률 계산</td>
-            <td><span class="tag tag-command">/portfolio</span> <span class="tag tag-schedule">15:40</span> <span class="tag tag-github">Actions</span></td>
+            <td>1D, 1W, 1M, 3M, 6M, 1Y, YTD 수익률 계산 &rarr; Wrap_NAV.xlsx 수익률 시트</td>
+            <td><span class="tag tag-command">/portfolio</span> <span class="tag tag-schedule">16:00</span> <span class="tag tag-github">GHA</span></td>
         </tr>
         <tr>
-            <td><span class="file-name">execution/market_crawler.py</span></td>
-            <td>시장 데이터 크롤링 &rarr; dataset.csv</td>
-            <td><span class="tag tag-github">Actions</span></td>
-        </tr>
-        <tr>
-            <td><span class="file-name">execution/draw_charts.py</span></td>
-            <td>시장 차트 이미지(PNG) 생성</td>
-            <td><span class="tag tag-github">Actions</span></td>
-        </tr>
-        <tr>
-            <td><span class="file-name">execution/draw_wrap_charts.py</span></td>
-            <td>Wrap 차트 이미지(PNG) 생성</td>
-            <td><span class="tag tag-github">Actions</span></td>
-        </tr>
-        <tr>
-            <td><span class="file-name">execution/backfill_yfinance_history.py</span></td>
-            <td>yfinance로 해외 지수 과거 데이터 보충</td>
-            <td><span class="tag tag-github">Actions</span></td>
-        </tr>
-        <tr>
-            <td><span class="file-name">execution/import_memory_data.py</span></td>
-            <td>엑셀 과거 데이터 가져오기</td>
-            <td><span class="tag tag-github">Actions</span></td>
-        </tr>
-        <tr>
-            <td><span class="file-name">execution/fetch_kodex_sectors.py</span></td>
-            <td>pykrx로 KOSPI 200 + KOSDAQ 150 구성종목 섹터 비중 + 1M 수익률 + 상위 종목 계산 → kodex_sectors.json</td>
-            <td><span class="tag tag-github">Actions</span> <span class="tag tag-command">수동</span></td>
-        </tr>
-        <tr>
-            <td><span class="file-name">execution/config.py</span></td>
-            <td>설정값 (파일 경로, 포트폴리오 정의 등)</td>
-            <td><span class="tag tag-vm">import</span></td>
+            <td><span class="file-name">config.py</span></td>
+            <td>CATEGORY_MAP, TARGET_DRAM/NAND_ITEMS, YFINANCE_TICKERS 정의</td>
+            <td><span class="tag tag-local">import</span></td>
         </tr>
         <tr>
             <td><span class="file-name">watch_wrap_nav.py</span></td>
-            <td>Wrap_NAV.xlsx 파일 감시 → 변경 시 자동 git commit &amp; push. PID 파일로 중복 실행 방지. Windows 시작 프로그램 등록.</td>
-            <td><span class="tag tag-vm">로컬 PC</span></td>
+            <td>Wrap_NAV.xlsx 파일 감시 &rarr; 변경 시 자동 git push. PID 중복 방지. Windows 시작 프로그램.</td>
+            <td><span class="tag tag-local">로컬 PC</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">push_wrap_nav.py</span></td>
+            <td>Tkinter GUI &mdash; 수동 git push 도구. 충돌 시 로컬 Wrap_NAV.xlsx 유지.</td>
+            <td><span class="tag tag-local">수동</span></td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>Execution Scripts</h3>
+<table class="file-table">
+    <thead><tr><th>File</th><th>Role</th><th>Triggered By</th></tr></thead>
+    <tbody>
+        <tr>
+            <td><span class="file-name">execution/weather_bot.py</span></td>
+            <td>메인 봇 서버. 텔레그램 명령어 + 스케줄러 + git sync/push. 1,381줄.</td>
+            <td><span class="tag tag-vm">VM systemd</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">execution/market_crawler.py</span></td>
+            <td>DRAMeXchange(Selenium) + 네이버 지수 + yfinance + SCFI &rarr; dataset.csv</td>
+            <td><span class="tag tag-github">GHA 23:00</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">execution/create_dashboard.py</span></td>
+            <td>전체 HTML 생성 (index, market, wrap, universe, seibro, featured). 2,600줄.</td>
+            <td><span class="tag tag-command">/update</span> <span class="tag tag-schedule">장중 30분</span> <span class="tag tag-github">GHA</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">execution/create_portfolio_tables.py</span></td>
+            <td>Wrap_NAV.xlsx + stock_price_history &rarr; portfolio_data.json (실시간 수익률, 기여도, DD)</td>
+            <td><span class="tag tag-command">/update</span> <span class="tag tag-schedule">장중 30분</span> <span class="tag tag-github">GHA</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">execution/create_market_alert.py</span></td>
+            <td>KIND 스크래핑 (POST+Session) &rarr; 투자주의/경고/위험 &rarr; market_alert.html</td>
+            <td><span class="tag tag-schedule">16:00</span> <span class="tag tag-schedule">23:00</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">execution/draw_charts.py</span></td>
+            <td>dataset.csv &rarr; 카테고리별 차트 이미지 (matplotlib). SEIBro 제외.</td>
+            <td><span class="tag tag-github">GHA</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">execution/draw_wrap_charts.py</span></td>
+            <td>Wrap_NAV.xlsx 기준가 &rarr; 포트폴리오 NAV 차트 이미지</td>
+            <td><span class="tag tag-github">GHA</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">execution/fetch_featured_data.py</span></td>
+            <td>KRX OpenAPI &rarr; 거래대금/회전율/시가총액 TOP 30 &rarr; featured_data.json</td>
+            <td><span class="tag tag-github">GHA</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">execution/fetch_seibro_data.py</span></td>
+            <td>SEIBro WebSquare (Selenium) &rarr; 해외결제 TOP 50 &rarr; dataset.csv + seibro_tickers.json</td>
+            <td><span class="tag tag-github">GHA</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">execution/fetch_journal_data.py</span></td>
+            <td>네이버 금융 &rarr; KOSPI/KOSDAQ 지수, 거래대금, 투자자별, 상승/하락, 120일선 &rarr; Google Sheets Data 시트</td>
+            <td><span class="tag tag-schedule">16:00</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">execution/update_price_history.py</span></td>
+            <td>pykrx-openapi &rarr; 포트폴리오 전 종목 일별 종가 &rarr; stock_price_history.json</td>
+            <td><span class="tag tag-github">GHA</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">execution/fetch_kodex_sectors.py</span></td>
+            <td>pykrx &rarr; KOSPI 200 + KOSDAQ 150 섹터 비중/수익률/상위종목 &rarr; kodex_sectors.json</td>
+            <td><span class="tag tag-github">GHA</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">execution/daily_portfolio_report.py</span></td>
+            <td>기준가 + 수익률 + 기여도 포맷팅 &rarr; 텔레그램 전송</td>
+            <td><span class="tag tag-command">/portfolio</span> <span class="tag tag-schedule">16:00</span></td>
+        </tr>
+        <tr>
+            <td><span class="file-name">execution/daily_alert.py</span></td>
+            <td>네이버 날씨 + AccuWeather &rarr; 텔레그램 전송</td>
+            <td><span class="tag tag-schedule">05:00</span></td>
         </tr>
         <tr>
             <td><span class="file-name">execution/daily_calendar.py</span></td>
-            <td>Google Calendar API로 오늘 일정 조회 → 텔레그램 전송. 서비스 계정 인증. 4개 캘린더 조회. 소유 캘린더 + 'TS' 포함 일정 볼드+밑줄.</td>
-            <td><span class="tag tag-schedule">05:10</span> <span class="tag tag-command">/calendar</span></td>
+            <td>Google Calendar API &rarr; 오늘 일정 &rarr; 텔레그램 전송</td>
+            <td><span class="tag tag-schedule">05:10</span></td>
         </tr>
         <tr>
-            <td><span class="file-name">scripts/auto_pull.bat</span></td>
-            <td>로컬 PC에서 git pull --ff-only 실행. VM push 후 Wrap_NAV.xlsx(기준가·수익률) 자동 동기화.</td>
-            <td><span class="tag tag-schedule">16:00</span> <span class="tag tag-vm">로그인 시</span></td>
+            <td><span class="file-name">execution/backfill_yfinance_history.py</span></td>
+            <td>yfinance 180일 과거 데이터 보충 &rarr; dataset.csv</td>
+            <td><span class="tag tag-github">GHA</span></td>
         </tr>
         <tr>
-            <td><span class="file-name">.github/workflows/daily_calendar.yml</span></td>
-            <td>매일 KST 05:10 Google Calendar 일정 알림 워크플로우</td>
-            <td><span class="tag tag-github">GitHub Actions</span></td>
+            <td><span class="file-name">execution/import_memory_data.py</span></td>
+            <td>Universe.xlsx 과거 DRAM/NAND 데이터 &rarr; dataset.csv</td>
+            <td><span class="tag tag-github">GHA</span></td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>Research Bot (execution/research_bot/)</h3>
+<table class="file-table">
+    <thead><tr><th>File</th><th>Role</th></tr></thead>
+    <tbody>
+        <tr>
+            <td><span class="file-name">research_bot.py</span></td>
+            <td>텔레그램 봇 서버. 메시지 수집 + URL 기사 추출 + 이미지 저장 + 일일 요약 트리거</td>
         </tr>
         <tr>
-            <td><span class="file-name">.github/workflows/daily_weather.yml</span></td>
-            <td>매일 KST 05:00 날씨 알림 워크플로우 (daily_alert.py 실행)</td>
-            <td><span class="tag tag-github">GitHub Actions</span></td>
+            <td><span class="file-name">messages_db.py</span></td>
+            <td>SQLite 래퍼. research_notes.db 관리 (add_message, get_messages_by_date)</td>
+        </tr>
+        <tr>
+            <td><span class="file-name">summarizer.py</span></td>
+            <td>Claude Sonnet 4 API 호출. 토픽별 요약 + {RED} 태그 + 이미지 Vision. 529 재시도 3회(60초)</td>
+        </tr>
+        <tr>
+            <td><span class="file-name">notion_publisher.py</span></td>
+            <td>Notion API 페이지 생성. {RED} &rarr; 빨간 텍스트. 이미지 GitHub 업로드</td>
         </tr>
     </tbody>
 </table>
@@ -867,141 +777,223 @@
     <div class="data-card">
         <div class="data-card-title">Wrap_NAV.xlsx</div>
         <div class="data-card-desc">
-            <strong>마스터 데이터.</strong> 포트폴리오별 종목/비중/기준가 저장.<br>
-            시트: NEW(날짜·증권사·상품명·업종·코드·종목·비중), 기준가(일별NAV), 수익률(기간별), Code(섹터매핑)<br>
-            로컬 수정 → 저장 시 watch_wrap_nav.py가 자동 git push → VM이 16:00에 pull하여 계산에 반영
-        </div>
-    </div>
-    <div class="data-card">
-        <div class="data-card-title">portfolio_data.json</div>
-        <div class="data-card-desc">
-            실시간 종목별 오늘수익률, 기여도, 누적수익률.<br>
-            /update 실행 시 갱신. Dashboard 테이블 데이터 소스.
-        </div>
-    </div>
-    <div class="data-card">
-        <div class="data-card-title">index.html</div>
-        <div class="data-card-desc">
-            GitHub Pages 메인 대시보드. 시장 차트(지수/환율/금리/암호화폐/메모리/원자재) + 상단 네비게이션(WRAP / 투자유의종목 / Architecture).<br>
-            git push 시 자동 배포.
-        </div>
-    </div>
-    <div class="data-card">
-        <div class="data-card-title">wrap.html</div>
-        <div class="data-card-desc">
-            WRAP 전용 페이지. 비밀번호 보호 (SHA-256 클라이언트 검증, sessionStorage 세션 유지).<br>
-            WRAP 기준가 차트 + 수익률 비교 테이블(RETURN, 1D~YTD) + Portfolio 테이블 + Sector Weight 비교.<br>
-            create_dashboard.py에서 생성. GHA file_pattern + weather_bot.py git add에 포함.
-        </div>
-    </div>
-    <div class="data-card">
-        <div class="data-card-title">market_alert.html</div>
-        <div class="data-card-desc">
-            투자유의종목 현황 페이지. 투자위험 &rarr; 투자경고 &rarr; 투자주의 순서.<br>
-            투자주의: 지정유형·경고전환가(min(5일전×1.6, 15일전×2.0)) 표시, 투자경고 지정예고 행 강조(#fef2f2).<br>
-            투자경고/위험: 판단일·현재가·15일최고가·해제가능주가, 2단계 배경색(판단일 도달/#fca5a5, 5영업일 이내/#fee2e2).<br>
-            KIND POST API 스크래핑. FDR KRX-DESC fallback + 네이버 시가총액 보충. VM 15:40 / 23:00 자동 재생성 (timeout 180초).
+            마스터 데이터. 시트 구조:<br>
+            &bull; <strong>NEW</strong>: 포트폴리오 구성 (날짜, 상품명, 코드, 비중)<br>
+            &bull; <strong>기준가</strong>: 일별 NAV (트루밸류, Value ESG, 개방형, 목표전환형 2차/1호, KOSPI, KOSDAQ)<br>
+            &bull; <strong>수익률</strong>: 기간별 수익률 (1D~YTD)<br>
+            &bull; <strong>Code</strong>: 섹터 매핑<br>
+            로컬 Excel &rarr; watch_wrap_nav.py 자동 push &rarr; VM 16:00 pull
         </div>
     </div>
     <div class="data-card">
         <div class="data-card-title">dataset.csv</div>
         <div class="data-card-desc">
-            시장 데이터 (환율, 금리, 원자재, 국내외 지수).<br>
-            매일 23:00 크롤링으로 갱신.
+            시계열 시장 데이터. 컬럼: 날짜, 제품명, 가격, 데이터 타입.<br>
+            2023-01-03부터 축적. 14,000+ 행.<br>
+            카테고리: Memory, CRYPTOCURRENCY, COMMODITIES, EXCHANGE RATE, INTEREST_RATES, INDEX_US, INDEX_KOREA, SEIBro, OCEAN_FREIGHT
         </div>
     </div>
     <div class="data-card">
-        <div class="data-card-title">.env</div>
+        <div class="data-card-title">portfolio_data.json</div>
         <div class="data-card-desc">
-            환경변수 파일. VM에 위치.<br>
-            • TELEGRAM_BOT_TOKEN<br>
-            • TELEGRAM_CHAT_ID<br>
-            • GOOGLE_SERVICE_ACCOUNT_KEY (JSON 문자열)<br>
-            Git에 포함되지 않음 (보안). 분실 시 각 서비스 콘솔에서 재발급.
+            실시간 종목별 수익률, 기여도, 누적수익률, ATH, DD.<br>
+            장중 30분 + /update 시 갱신. Dashboard 테이블 소스.
+        </div>
+    </div>
+    <div class="data-card">
+        <div class="data-card-title">stock_price_history.json (27MB)</div>
+        <div class="data-card-desc">
+            포트폴리오 전 종목 일별 종가 히스토리.<br>
+            ATH, DD 계산용. pykrx-openapi에서 수집.
+        </div>
+    </div>
+    <div class="data-card">
+        <div class="data-card-title">featured_data.json (6MB)</div>
+        <div class="data-card-desc">
+            KRX 거래대금/회전율/시가총액 TOP 30 일별 데이터.<br>
+            SPAC, REIT, 우선주 필터링. 시총 1,500억 미만 제외.
+        </div>
+    </div>
+    <div class="data-card">
+        <div class="data-card-title">research_headlines.json</div>
+        <div class="data-card-desc">
+            리서치 요약 헤드라인. date + headlines[{title, summary}].<br>
+            05:00 텔레그램 전송 시 날짜 신선도 체크 (어제/오늘만).
+        </div>
+    </div>
+    <div class="data-card">
+        <div class="data-card-title">research_notes.db (SQLite)</div>
+        <div class="data-card-desc">
+            리서치봇 메시지 DB. VM에 위치.<br>
+            텍스트, URL, 기사 본문, 이미지 경로, 전달 출처.
         </div>
     </div>
     <div class="data-card">
         <div class="data-card-title">kodex_sectors.json</div>
         <div class="data-card-desc">
-            KOSPI 200 + KOSDAQ 150 섹터 데이터.<br>
-            • sectors: 시총 가중 섹터 비중 (%)<br>
-            • stock_sector_map: 전종목 코드→업종명 매핑<br>
-            • sector_1m_returns: 섹터별 1M 수익률<br>
-            • sector_top_stocks: 섹터별 시총 상위 3종목<br>
-            fetch_kodex_sectors.py에서 생성. Dashboard 섹터 비중 카드에서 사용.
+            KOSPI 200 + KOSDAQ 150 섹터 비중, 1M 수익률, 상위 3종목.
+        </div>
+    </div>
+    <div class="data-card">
+        <div class="data-card-title">seibro_tickers.json</div>
+        <div class="data-card-desc">
+            SEIBro 해외결제 TOP 50 티커 매핑 (ISIN &rarr; 종목명).
+        </div>
+    </div>
+    <div class="data-card">
+        <div class="data-card-title">subscribers.json</div>
+        <div class="data-card-desc">
+            텔레그램 봇 구독자 ID 목록. VM에 위치.
         </div>
     </div>
     <div class="data-card">
         <div class="data-card-title">charts/*.png</div>
         <div class="data-card-desc">
-            시장 차트 이미지 파일들.<br>
-            draw_charts.py / draw_wrap_charts.py에서 생성.
+            시장 + WRAP 차트 이미지. GHA에서 매일 재생성. 50+ 파일.
         </div>
     </div>
 </div>
+
+<!-- ===== External APIs ===== -->
+<h2 id="external">External APIs &amp; Services</h2>
+<table class="file-table">
+    <thead><tr><th>Service</th><th>Method</th><th>Purpose</th><th>Auth</th></tr></thead>
+    <tbody>
+        <tr><td>DRAMeXchange</td><td>Selenium</td><td>DRAM/NAND 현물가격</td><td>None</td></tr>
+        <tr><td>Naver Finance</td><td>BeautifulSoup</td><td>KOSPI/KOSDAQ 지수, 거래대금, 투자자별, 시총</td><td>None</td></tr>
+        <tr><td>yfinance</td><td>Python lib</td><td>해외지수, 환율, 원자재, 암호화폐 (21 tickers)</td><td>None</td></tr>
+        <tr><td>KRX OpenAPI</td><td>REST</td><td>Featured 종목, 섹터, 주가 히스토리</td><td>API Key</td></tr>
+        <tr><td>KIND (kind.krx.co.kr)</td><td>POST + Session</td><td>투자주의/경고/위험 종목 현황</td><td>JSESSIONID</td></tr>
+        <tr><td>SEIBro (seibro.or.kr)</td><td>Selenium</td><td>해외증권결제 TOP 50</td><td>None</td></tr>
+        <tr><td>Telegram Bot API</td><td>python-telegram-bot</td><td>명령어 수신, 메시지 전송, 구독 관리</td><td>Bot Token</td></tr>
+        <tr><td>Google Sheets API</td><td>gspread / REST</td><td>Journal 입력, 가계부, 투자일지 시장 데이터</td><td>Service Account</td></tr>
+        <tr><td>Google Calendar API</td><td>REST</td><td>일정 조회 (4개 캘린더)</td><td>Service Account</td></tr>
+        <tr><td>Anthropic Claude API</td><td>REST (SDK)</td><td>리서치 노트 요약 (Sonnet 4)</td><td>API Key</td></tr>
+        <tr><td>Notion API</td><td>REST</td><td>리서치 요약 게시</td><td>Integration Token</td></tr>
+        <tr><td>AccuWeather</td><td>Scraping</td><td>일출/일몰 시각</td><td>None</td></tr>
+        <tr><td>FinanceDataReader</td><td>Python lib</td><td>한국 주가 실시간 조회 (FDR)</td><td>None</td></tr>
+        <tr><td>GitHub Pages</td><td>git push</td><td>대시보드 정적 호스팅</td><td>PAT</td></tr>
+    </tbody>
+</table>
 
 <!-- ===== Infra ===== -->
 <h2 id="infra">Infrastructure</h2>
 <div class="infra-grid">
     <div class="infra-card">
-        <div class="infra-icon">☁️</div>
+        <div class="infra-icon">&#9729;&#65039;</div>
         <div class="infra-title">Oracle Cloud VM</div>
         <div class="infra-desc">
             VM.Standard.E2.1.Micro (Free Tier)<br>
             Ubuntu 22.04, 1 OCPU, 1GB RAM<br>
-            <strong>IP: 144.24.70.224</strong> (dashboard-vm)<br>
-            ※ 2026-02-20 VM 재생성 (구: 158.180.87.197)<br>
-            <strong>담당:</strong><br>
-            • 텔레그램 봇 24시간 구동 (/update, /portfolio 등)<br>
-            • 날씨 알림 (05:00), 캘린더 알림 (05:10)<br>
-            • 장중 자동 포트폴리오 업데이트 (09:30~15:35, 30분)<br>
-            • 일일 포트폴리오 리포트 (15:40, NAV 검증+재시도)<br>
-            • 야간 포트폴리오 갱신 (23:00, 당일 주문 반영)
+            <strong>IP: 144.24.70.224</strong><br><br>
+            <strong>Services:</strong><br>
+            &bull; weather-bot (systemd) &mdash; 텔레그램 봇 + 스케줄러<br>
+            &bull; research-bot (systemd) &mdash; 리서치 노트 수집<br><br>
+            <strong>Schedule (KST):</strong><br>
+            05:00 날씨+헤드라인 / 05:10 캘린더<br>
+            09:30~15:35 장중 업데이트 (30분)<br>
+            16:00 리포트+일지+market_alert<br>
+            23:00 야간 반영+SEIBro+alert
         </div>
     </div>
     <div class="infra-card">
-        <div class="infra-icon">🔄</div>
-        <div class="infra-title">systemd Service</div>
+        <div class="infra-icon">&#128736;&#65039;</div>
+        <div class="infra-title">systemd Services</div>
         <div class="infra-desc">
-            weather_bot.service<br>
-            자동 재시작 (RestartSec=10)<br>
-            부팅 시 자동 시작 (enabled)<br>
-            PYTHONIOENCODING=utf-8
+            <strong>weather-bot.service</strong><br>
+            ExecStart: python3 weather_bot.py<br>
+            EnvironmentFile: .env<br>
+            Restart: always (10s)<br>
+            PYTHONIOENCODING=utf-8<br><br>
+            <strong>research-bot.service</strong><br>
+            ExecStart: python3 research_bot.py<br>
+            WorkingDir: execution/research_bot/<br>
+            Restart: always (10s)
         </div>
     </div>
     <div class="infra-card">
-        <div class="infra-icon">🔑</div>
-        <div class="infra-title">인증</div>
-        <div class="infra-desc">
-            SSH: ssh-key-2026-02-20.key (로컬 저장 위치: C:\Users\user\Antigravity_Market_Dashboard\)<br>
-            GitHub: PAT (No expiration)<br>
-            Telegram: Bot Token (.env / GitHub Secrets)<br>
-            Google: Service Account Key (b6e5cda22ed7, .env에 JSON 문자열로 저장)
-        </div>
-    </div>
-    <div class="infra-card">
-        <div class="infra-icon">👁️</div>
-        <div class="infra-title">로컬 파일 감시</div>
-        <div class="infra-desc">
-            watch_wrap_nav.py (로컬 PC)<br>
-            Wrap_NAV.xlsx 변경 감지 → 자동 git push<br>
-            디바운스 8초 / 재시도 3회<br>
-            PID 파일로 중복 실행 방지<br>
-            Windows 시작 프로그램 자동 등록<br><br>
-            <strong>auto_pull.bat</strong> (로컬 PC)<br>
-            매일 16:00 Task Scheduler + 로그인 시 시작프로그램<br>
-            VM push 후 로컬 Wrap_NAV.xlsx 자동 동기화
-        </div>
-    </div>
-    <div class="infra-card">
-        <div class="infra-icon">📂</div>
+        <div class="infra-icon">&#128193;</div>
         <div class="infra-title">GitHub Repository</div>
         <div class="infra-desc">
             sisyphe10/Antigravity_Market_Dashboard<br>
-            GitHub Pages 활성화<br>
-            <strong>GitHub Actions 담당:</strong><br>
-            • Daily Market Crawl (23:00, daily_crawl.yml)<br>
-            <span style="color:#888">• 날씨/캘린더/포트폴리오 리포트: 2026-02-20 VM으로 이전, 워크플로우 비활성화</span>
+            GitHub Pages 활성화 (main branch)<br><br>
+            <strong>GitHub Actions:</strong><br>
+            &bull; daily_crawl.yml (23:00 KST)<br>
+            &bull; recalc_wrap_nav.yml (Wrap_NAV push 시)<br>
+            &bull; run_backfill.yml (수동)<br>
+            &bull; run_merge_ddr5.yml (수동)<br>
+            &bull; claude.yml (Issue/PR AI 리뷰)
+        </div>
+    </div>
+    <div class="infra-card">
+        <div class="infra-icon">&#128065;&#65039;</div>
+        <div class="infra-title">로컬 파일 감시</div>
+        <div class="infra-desc">
+            <strong>watch_wrap_nav.py</strong><br>
+            Wrap_NAV.xlsx 변경 &rarr; 자동 git push<br>
+            디바운스 8초 / 재시도 3회<br>
+            PID 파일 중복 방지<br>
+            start_watch_wrap_nav.vbs (시작 프로그램)<br><br>
+            <strong>auto_pull.bat</strong><br>
+            매일 16:00 Task Scheduler + 로그인 시<br>
+            VM push 후 로컬 Wrap_NAV.xlsx 동기화
+        </div>
+    </div>
+    <div class="infra-card">
+        <div class="infra-icon">&#128279;</div>
+        <div class="infra-title">Google Sheets</div>
+        <div class="infra-desc">
+            Sheet ID: 13HXDxF6...<br>
+            서비스 계정: calendar-bot-service@extreme-height-486504-c4<br><br>
+            <strong>시트:</strong><br>
+            &bull; Data: 시장 데이터 (지수, 거래대금, 투자자, 120일선)<br>
+            &bull; Journal: 장전계획/장후복기<br>
+            &bull; 가계부: 수입/지출 기록<br>
+            &bull; 캘린더: D-Day 관리
+        </div>
+    </div>
+</div>
+
+<!-- ===== Env ===== -->
+<h2 id="env">Environment Variables &amp; Secrets</h2>
+<div class="data-grid">
+    <div class="data-card">
+        <div class="data-card-title">.env (VM)</div>
+        <div class="data-card-desc">
+            &bull; TELEGRAM_BOT_TOKEN &mdash; Sisyphe-Bot<br>
+            &bull; RESEARCH_BOT_TOKEN &mdash; Research Bot<br>
+            &bull; ANTHROPIC_API_KEY &mdash; Claude API<br>
+            &bull; GOOGLE_SERVICE_ACCOUNT_KEY &mdash; JSON 문자열<br>
+            &bull; NOTION_API_KEY &mdash; Notion Integration<br>
+            Git에 포함되지 않음. 분실 시 각 콘솔에서 재발급.
+        </div>
+    </div>
+    <div class="data-card">
+        <div class="data-card-title">GitHub Secrets</div>
+        <div class="data-card-desc">
+            &bull; ANTHROPIC_API_KEY &mdash; claude.yml 워크플로우용
+        </div>
+    </div>
+    <div class="data-card">
+        <div class="data-card-title">SSH Key</div>
+        <div class="data-card-desc">
+            ssh-key-2026-02-20.key<br>
+            로컬: C:\Users\user\Antigravity_Market_Dashboard\<br>
+            VM User: ubuntu@144.24.70.224
+        </div>
+    </div>
+    <div class="data-card">
+        <div class="data-card-title">Google Service Account</div>
+        <div class="data-card-desc">
+            extreme-height-486504-c4-b6e5cda22ed7.json<br>
+            calendar-bot-service@extreme-height-486504-c4<br>
+            Scopes: Sheets, Calendar, Drive
+        </div>
+    </div>
+    <div class="data-card">
+        <div class="data-card-title">KRX OpenAPI Key</div>
+        <div class="data-card-desc">
+            E9E8B0A915D7... (fetch_featured_data.py, fetch_journal_data.py에 하드코딩)
         </div>
     </div>
 </div>
@@ -1009,331 +1001,216 @@
 <!-- ===== Troubleshooting ===== -->
 <h2 id="debug">Troubleshooting</h2>
 <table class="debug-table">
-    <thead>
-        <tr>
-            <th>증상</th>
-            <th>원인</th>
-            <th>확인 방법</th>
-        </tr>
-    </thead>
+    <thead><tr><th>증상</th><th>원인</th><th>확인/해결</th></tr></thead>
     <tbody>
         <tr>
-            <td>/update 보냈는데 수익률이 안 바뀜</td>
-            <td>create_portfolio_tables.py 에러로 실패</td>
-            <td><code>sudo journalctl -u weather_bot -n 50</code></td>
+            <td>텔레그램 봇 응답 없음</td>
+            <td>서비스 중단</td>
+            <td><code>sudo systemctl status weather-bot</code><br><code>sudo systemctl restart weather-bot</code></td>
         </tr>
         <tr>
-            <td>텔레그램 봇이 응답 없음</td>
-            <td>봇 서비스 중단됨</td>
-            <td><code>sudo systemctl status weather_bot</code><br><code>sudo systemctl restart weather_bot</code></td>
-        </tr>
-        <tr>
-            <td>Dashboard가 업데이트 안 됨</td>
-            <td>git push 실패 (인증 만료 등)</td>
-            <td><code>cd ~/Antigravity_Market_Dashboard && git push</code></td>
-        </tr>
-        <tr>
-            <td>날짜 타입 에러 (str vs datetime)</td>
-            <td>Wrap_NAV.xlsx 날짜 컬럼 타입 불일치</td>
-            <td>pd.to_datetime() 적용 확인</td>
-        </tr>
-        <tr>
-            <td>GitHub Actions 실패</td>
-            <td>크롤링 대상 사이트 변경 등</td>
-            <td>GitHub &rarr; Actions 탭 &rarr; 실패 로그 확인</td>
-        </tr>
-        <tr>
-            <td>VM SSH 접속 안 됨</td>
-            <td>키 파일 권한 또는 보안 그룹. OCI는 cloud-init이 부팅 시 authorized_keys를 메타데이터 키로 덮어씀 → Boot volume repair로 수동 수정해도 재부팅하면 원래대로 돌아옴</td>
-            <td><code>ssh -i "C:\Users\user\Antigravity_Market_Dashboard\ssh-key-2026-02-20.key" ubuntu@144.24.70.224</code><br>⚠️ SSH 복구가 안 되면 VM 재생성이 가장 빠름. 코드는 GitHub에 있으니 .env만 재작성하면 됨</td>
-        </tr>
-        <tr>
-            <td>pip3로 설치했는데 모듈을 못 찾음</td>
-            <td>pip3와 python3의 경로 불일치. VM에서는 pip3 대신 python3 -m pip 사용해야 함</td>
-            <td><code>python3 -m pip install -r requirements.txt</code></td>
-        </tr>
-        <tr>
-            <td>GCP 서비스 계정 키 분실 / 노출</td>
-            <td>키가 채팅 등에 노출됨</td>
-            <td>GCP 콘솔 → IAM → 서비스 계정 → 키 탭 → 해당 키 즉시 삭제 → 새 JSON 키 발급 → VM .env의 GOOGLE_SERVICE_ACCOUNT_KEY 교체 → <code>sudo systemctl restart weather-bot</code></td>
+            <td>Dashboard 업데이트 안 됨</td>
+            <td>git push 실패 (충돌/인증)</td>
+            <td>VM에서 <code>git push</code> 수동 시도. 충돌 시 <code>git fetch + reset --hard</code></td>
         </tr>
         <tr>
             <td>16:00 리포트 안 옴</td>
-            <td>/start로 구독 안 됨 또는 봇 재시작으로 구독 초기화</td>
-            <td>텔레그램에서 /start 다시 입력</td>
+            <td>구독 안 됨 (봇 재시작 후)</td>
+            <td>텔레그램에서 <code>/start</code> 재입력</td>
         </tr>
         <tr>
-            <td>/update 수익률이 모두 0%로 표시됨</td>
-            <td>설날 등 장기 휴장으로 FinanceDataReader 조회 기간(days=5) 내 거래일이 1일뿐 → 전일 데이터 없어 계산 불가</td>
-            <td><code>fetch_price()</code>의 <code>timedelta(days=30)</code>으로 수정 적용 확인</td>
+            <td>NAV 계산 실패 (NaN)</td>
+            <td>FDR/네이버 데이터 누락 (휴장일 등)</td>
+            <td><code>sudo journalctl -u weather-bot -n 100</code>에서 에러 확인.<br>calculate_wrap_nav.py 내장 재시도 2회 + NaN 검증</td>
         </tr>
         <tr>
-            <td>Dashboard "Last Updated" 시각이 /update 후에도 안 바뀜</td>
-            <td>VM에서 git push 충돌 (로컬 PC도 동시에 push). remote rejected → push 실패</td>
-            <td><code>run_portfolio_update()</code>에 push 전 <code>git pull --rebase origin main</code> 자동 실행 추가</td>
+            <td>리서치 요약 실패 (529)</td>
+            <td>Claude API 서버 과부하</td>
+            <td>자동 재시도 3회(60초 간격). 그래도 실패 시 수동: <code>python3 -c "..."</code> (환경변수 로드 필요)</td>
         </tr>
         <tr>
-            <td>Wrap_NAV.xlsx 저장해도 자동 push 안 됨</td>
-            <td>watch_wrap_nav.py 프로세스가 꺼져 있음 (PC 재부팅 후 vbs 미실행 등)</td>
-            <td>작업 관리자에서 python.exe 확인<br><code>watch_wrap_nav.pid</code> 파일 존재 여부 확인<br>없으면 <code>start_watch_wrap_nav.vbs</code> 더블클릭으로 수동 시작</td>
+            <td>오래된 리서치 헤드라인 재전송</td>
+            <td>요약 실패 후 이전 JSON 잔존</td>
+            <td>날짜 신선도 체크 로직 적용됨 (어제/오늘만 전송)</td>
         </tr>
         <tr>
-            <td>Wrap_NAV 수정 시 커밋이 여러 개 생성됨</td>
-            <td>watch_wrap_nav.py 중복 실행 (이전 프로세스 미종료 상태에서 재실행)</td>
-            <td>작업 관리자에서 python.exe 전부 종료 후 vbs 재실행. PID 파일 삭제 필요 시 <code>watch_wrap_nav.pid</code> 삭제</td>
+            <td>Wrap_NAV.xlsx 자동 push 안 됨</td>
+            <td>watch_wrap_nav.py 미실행</td>
+            <td>작업 관리자에서 python.exe 확인. <code>start_watch_wrap_nav.vbs</code> 더블클릭</td>
         </tr>
         <tr>
-            <td>Claude Code 재설치 후 MCP 서버/SSH 연결 끊김</td>
-            <td>~/.claude.json 초기화됨 (MCP 설정 삭제)</td>
-            <td><code>claude mcp add github -e GITHUB_PERSONAL_ACCESS_TOKEN=... -- npx -y @modelcontextprotocol/server-github</code><br>SSH: <code>ssh -i "C:\Users\user\Antigravity_Market_Dashboard\ssh-key-2026-02-20.key" ubuntu@144.24.70.224</code></td>
+            <td>Git push 충돌 (Wrap_NAV.xlsx)</td>
+            <td>VM/GHA/로컬 동시 수정</td>
+            <td>.gitattributes: <code>Wrap_NAV.xlsx -merge</code> 설정됨. 로컬 유지 원칙.</td>
         </tr>
         <tr>
-            <td>VM에서 git push 실패 (dashboard 업데이트 안 됨)</td>
-            <td>새 VM에 git 인증 미설정. push 시 authentication 오류 발생</td>
-            <td><code>git -C ~/Antigravity_Market_Dashboard config user.email "kts77775@gmail.com"</code><br>
-                <code>git -C ~/Antigravity_Market_Dashboard config user.name "sisyphe10"</code><br>
-                <code>git -C ~/Antigravity_Market_Dashboard remote set-url origin https://sisyphe10:TOKEN@github.com/sisyphe10/Antigravity_Market_Dashboard.git</code><br>
-                TOKEN은 gh auth token으로 확인</td>
+            <td>SEIBro 스크래핑 실패</td>
+            <td>WebSquare JS 렌더링 / Chrome 버전</td>
+            <td>GHA: browser-actions/setup-chrome 사용. VM (1GB RAM): 메모리 부족으로 GHA에서만 실행</td>
         </tr>
         <tr>
-            <td>봇 재시작 후 16:00/30분 알림 안 옴</td>
-            <td>SUBSCRIBERS가 메모리에 있다가 재시작 시 초기화됨. subscribers.json은 VM 로컬 파일이라 새 VM에는 없음</td>
-            <td>텔레그램에서 <code>/start</code> 한 번 입력하면 subscribers.json 생성 및 이후 재시작에도 유지</td>
+            <td>VM SSH 접속 안 됨</td>
+            <td>OCI cloud-init이 키 덮어씀</td>
+            <td>SSH 복구 어려움 &rarr; VM 재생성이 빠름. 코드 GitHub에 있으니 .env만 재작성</td>
         </tr>
         <tr>
-            <td>기준가 NaN (일부 포트폴리오만 계산됨)</td>
-            <td>calculate_wrap_nav.py가 마지막 행에 NaN인 포트폴리오를 감지 못하고 "이미 최신"으로 종료. 또는 신규 포트폴리오 시작일에 기존 포트폴리오 데이터 누락.</td>
-            <td>calculate_wrap_nav.py에 미완료 포트폴리오 감지 로직 + 저장 후 NaN 검증(exit(1)) 추가됨. weather_bot.py에서 실패 시 1회 자동 재시도.</td>
+            <td>Journal 대시보드 카드 안 뜸</td>
+            <td>Data 시트에 해당 날짜 없음 (16:00 전)</td>
+            <td>Journal 시트에만 데이터 있어도 카드 생성되도록 수정됨</td>
         </tr>
         <tr>
-            <td>/portfolio 수익률 갱신 안 됨 (1D가 어제 값)</td>
-            <td>/portfolio 명령이 daily_portfolio_report.py만 실행하고 NAV/수익률 계산을 건너뜀</td>
-            <td>/portfolio 명령에 calculate_wrap_nav.py → calculate_returns.py 실행 추가 완료</td>
-        </tr>
-        <tr>
-            <td>15:40 /portfolio 리포트 안 옴 (market_alert timeout)</td>
-            <td>create_market_alert.py 실행이 timeout 초과 → 이후 단계(dashboard 재생성 + 텔레그램 리포트) 미실행</td>
-            <td>weather_bot.py의 market_alert timeout을 60→180초로 증가. <code>journalctl -u weather-bot --since "HH:MM" | grep -E "timeout|error"</code></td>
-        </tr>
-        <tr>
-            <td>시가총액 N/A (FDR StockListing 실패)</td>
-            <td>FDR StockListing('KRX') JSONDecodeError → 빈 DataFrame → Marcap 0</td>
-            <td>KRX-DESC fallback + 네이버 증권 시가총액 스크래핑 보충 적용됨. create_portfolio_tables.py, create_market_alert.py 양쪽 모두.</td>
-        </tr>
-        <tr>
-            <td>KOSPI/KOSDAQ 수익률 비정상 (+8% 등)</td>
-            <td>FDR 지수 데이터 특정일 누락 → 이전 거래일 대비 비교하여 비정상 등락률</td>
-            <td>weather_bot.py: 지수는 항상 네이버 증권에서 등락률 직접 조회 (FDR 미사용)</td>
-        </tr>
-        <tr>
-            <td>개별종목 수익률 전부 0% 또는 None</td>
-            <td>Excel 종목코드가 float(5930.0)로 저장 → str(5930.0) = "5930.0" → FDR 조회 실패</td>
-            <td><code>str(int(row['코드'])).zfill(6)</code>으로 수정. create_portfolio_tables.py 2곳.</td>
-        </tr>
-        <tr>
-            <td>Claude Code Stop hook 오류 (PowerShell $변수 사라짐)</td>
-            <td>bash가 PowerShell의 $변수를 쉘 변수로 해석해 빈 문자열로 치환</td>
-            <td><code>~/.claude/notify.ps1</code> 파일로 분리 후 settings.json에서 <code>powershell -ExecutionPolicy Bypass -File "C:\Users\user\.claude\notify.ps1"</code>로 호출</td>
-        </tr>
-        <tr>
-            <td>watch_wrap_nav.py PC 재부팅 후 꺼짐</td>
-            <td>PID 파일은 있지만 프로세스가 없는 상태</td>
-            <td><code>cscript //nologo "C:\Users\user\Antigravity_Market_Dashboard\start_watch_wrap_nav.vbs"</code></td>
+            <td>pip3 모듈 못 찾음 (VM)</td>
+            <td>pip3와 python3 경로 불일치</td>
+            <td><code>python3 -m pip install -r requirements.txt</code></td>
         </tr>
     </tbody>
 </table>
 
-<!-- ===== Changelog ===== -->
-<h2 id="changelog">Changelog</h2>
-<div class="version-log">
-    <div class="version-entry">
-        <div class="version-date">2026-03-16</div>
-        <div class="version-title">DB 목표전환형 2차 추가 + NAV 검증 강화 + /portfolio 플로우 개선</div>
-        <div class="version-desc">
-            <strong>[DB 목표전환형 2차 신규 추가]</strong> 7종목 포트폴리오 (기준가 1000, 시작일 2026-03-16). calculate_wrap_nav.py, create_portfolio_tables.py, create_dashboard.py, daily_portfolio_report.py 전체 반영. 누적수익률 비교 테이블에서 목표전환형 시리즈 제외 (startsWith 조건).<br><br>
-            <strong>[NAV 검증 로직 추가]</strong> calculate_wrap_nav.py: 저장 후 마지막 행에 NaN인 포트폴리오가 있으면 exit(1)으로 실패 처리. 미완료(NaN) 포트폴리오 자동 감지 → 해당 행 제거 후 재계산. 신규 포트폴리오 시작일에 기존 포트폴리오 기준가가 NaN이 되는 문제 방지.<br><br>
-            <strong>[NAV 실패 시 자동 재시도]</strong> weather_bot.py: 15:40 daily_portfolio_job에서 calculate_wrap_nav.py 실패(exit code != 0) 시 1회 자동 재시도.<br><br>
-            <strong>[/portfolio 플로우 개선]</strong> /portfolio 명령 실행 시 daily_portfolio_report.py만 실행하던 것을 calculate_wrap_nav.py → calculate_returns.py → daily_portfolio_report.py 순서로 변경. 최신 기준가와 수익률이 반영된 리포트 생성.<br><br>
-            <strong>[daily_portfolio_report.py NaN 안전 읽기]</strong> 기준가 조회 시 마지막 행 전체를 읽는 대신 포트폴리오별 dropna().iloc[-1]로 변경. 신규 포트폴리오 추가일에 다른 포트폴리오 기준가가 NaN으로 표시되는 문제 해결.
-        </div>
-    </div>
-    <div class="version-entry">
-        <div class="version-date">2026-03-11</div>
-        <div class="version-title">투자주의 테이블 재설계 + FDR fallback + WRAP 비밀번호 + 다수 버그 수정</div>
-        <div class="version-desc">
-            <strong>[투자주의 테이블 재설계]</strong> 투자주의 카테고리에 별도 테이블 레이아웃 적용. 경과일/판단일/15일최고가/해제가능주가 제거, 지정유형·경고전환가 컬럼 추가. 투자경고 지정예고 행 빨간 배경(#fef2f2) + 볼드 강조. 경고전환가 = min(5거래일전 종가×1.6, 15거래일전 종가×2.0). 현재가 ≥ 경고전환가 시 ⚠ 마크 표시.<br><br>
-            <strong>[FDR KRX-DESC fallback + 네이버 시가총액]</strong> FDR StockListing('KRX') JSONDecodeError 장애 대응. KRX-DESC fallback으로 종목코드 확보, Marcap 없으면 네이버 증권 시가총액 스크래핑으로 보충. create_portfolio_tables.py, create_market_alert.py 양쪽 적용.<br><br>
-            <strong>[WRAP 비밀번호 보호]</strong> wrap.html에 SHA-256 클라이언트 비밀번호 검증 추가. sessionStorage로 탭 내 세션 유지. 비밀번호 오류 시 에러 메시지 표시.<br><br>
-            <strong>[KOSPI/KOSDAQ 수익률 수정]</strong> FDR 지수 데이터 특정일 누락으로 비정상 등락률(+8.55%) 표시 문제. 지수는 항상 네이버 증권에서 등락률 직접 조회하도록 변경.<br><br>
-            <strong>[개별종목 코드 float 수정]</strong> Excel 종목코드 float(5930.0) → str(int())로 변환. 개별종목 수익률 전부 0%/None 표시 버그 수정.<br><br>
-            <strong>[캘린더 TS 볼드]</strong> daily_calendar.py: 소유 캘린더 외에도 'TS' 포함 일정에 볼드+밑줄 적용.<br><br>
-            <strong>[market_alert timeout]</strong> weather_bot.py: create_market_alert.py 실행 timeout 60→180초. 네이버 시가총액 스크래핑 추가로 인한 실행 시간 증가 대응.<br><br>
-            <strong>[로컬 auto pull]</strong> scripts/auto_pull.bat 추가. Windows Task Scheduler(매일 16:00) + 시작프로그램(로그인 시) 등록. VM push 후 로컬 Wrap_NAV.xlsx 자동 동기화.
-        </div>
-    </div>
-    <div class="version-entry">
-        <div class="version-date">2026-02-24</div>
-        <div class="version-title">투자유의종목 페이지 + WRAP 분리 + 수익률 비교 테이블(RETURN) + UI 개선</div>
-        <div class="version-desc">
-            <strong>[투자유의종목 페이지 (market_alert.html)]</strong> KIND POST API 스크래핑으로 투자주의/경고/위험 종목 현황 페이지 신설. 지정일 오름차순 정렬. 섹션 순서: 투자위험 &rarr; 투자경고 &rarr; 투자주의. 판단일(지정일+영업일) 컬럼. 2단계 배경색: 판단일 도달(#fca5a5) / 5영업일 이내(#fee2e2). 투자주의 행 배경색 없음. 현재가 조회(경고/위험 35일, 주의 3일 분리). VM 15:40 / 23:00 자동 재생성.<br><br>
-            <strong>[WRAP 페이지 분리 (wrap.html)]</strong> WRAP/PORTFOLIO/SECTOR를 별도 wrap.html로 분리. index.html 상단 네비게이션: WRAP / 투자유의종목 / Architecture. GHA daily_crawl.yml file_pattern에 wrap.html 추가(누락으로 Portfolio 시각 고정 버그 수정).<br><br>
-            <strong>[수익률 비교 테이블 (RETURN)]</strong> wrap.html 내 RETURN 섹션 추가. 삼성 트루밸류 / DB 목표전환형 / KOSPI / KOSDAQ × 1D~YTD. Wrap_NAV.xlsx 수익률 시트에서 읽음. 테이블 가운데 정렬.
-        </div>
-    </div>
-    <div class="version-entry">
-        <div class="version-date">2026-02-24</div>
-        <div class="version-title">당일 주문 23:00 야간 반영 + 신규 편입 종목 수익률 미표시 + SECTOR WEIGHT 스타일 통일</div>
-        <div class="version-desc">
-            <strong>[당일 주문 반영 시점 조정]</strong> create_portfolio_tables.py, create_dashboard.py(read_portfolio_sectors)에 시간 기반 날짜 컷오프 도입. 23:00 이전: date_cutoff = 어제 (당일 주문 제외, 결제 익일 원칙). 23:00 이후: date_cutoff = 오늘 (당일 변경 포함). 이로써 장중에 Wrap_NAV.xlsx를 수정해도 비중/신규종목이 즉시 표시되지 않고, 23:00 야간 잡 실행 후 반영됨.<br><br>
-            <strong>[23:00 야간 포트폴리오 갱신 잡]</strong> weather_bot.py에 nightly_portfolio_refresh_job 추가. 매일 23:00 KST VM에서 자동 실행: git pull → create_portfolio_tables.py → create_dashboard.py → git push. 당일 입력한 비중 변경 및 신규 종목을 Dashboard에 반영.<br><br>
-            <strong>[신규 편입 종목 수익률 미표시]</strong> create_portfolio_tables.py: 오늘 날짜에 처음 편입된 종목(today_new 상태)은 오늘수익률·기여도·누적수익률을 None으로 저장. create_dashboard.py: is_today_new 플래그가 true인 종목은 세 컬럼 모두 '-' 표시. 콘솔 로그에 [신규] 태그 출력.<br><br>
-            <strong>[SECTOR WEIGHT 스타일]</strong> 오른쪽 테이블 종목(sect-right-stocks)에 font-weight: 500 추가 → 왼쪽 BM 종목(sect-detail-bm)과 동일한 진한 회색으로 통일. 벤치마크 범례 점(.kodex-dot) #e8a838(노란색) → #444(진한 회색). 포트폴리오 종목(.sect-detail-mine) font-weight: 500 → 700(볼드).<br><br>
-            <strong>[/update 플로우 변경]</strong> run_portfolio_update()에 Step 0 추가: create_portfolio_tables.py 실행으로 Wrap_NAV.xlsx 최신 종목 구성을 portfolio_data.json에 먼저 반영한 뒤 가격 조회 진행. /portfolio 명령 및 15:40 자동 잡에도 동일하게 적용.
-        </div>
-    </div>
-    <div class="version-entry">
-        <div class="version-date">2026-02-23</div>
-        <div class="version-title">SECTOR WEIGHT UI 개선 + 포트폴리오 대표색 변경 + 봇 수정 + 파일 정리</div>
-        <div class="version-desc">
-            <strong>[SECTOR WEIGHT 레이아웃]</strong> 카테고리명 "섹터 비중" → "SECTOR WEIGHT". 수평 바 차트 제거, 단순 숫자 셀로 변경. 3컬럼 그리드(3fr 1fr 1fr) 레이아웃 적용. "미보유" 레이블을 범례(●포트폴리오 ●벤치마크)와 같은 행으로 이동(sector-header-bar) → 좌우 패널 동일 높이 정렬.<br><br>
-            <strong>[SECTOR WEIGHT 데이터]</strong> 보유 업종 테이블에 "vs BM 1M" 컬럼 추가 (섹터별 초과수익률). 차이 컬럼 색상 제거(검정). 과중/과소 범례 제거. 미보유 패널에 BM 대표 종목 표시(시총 상위 3개). 컬럼명 "초과 수익률" → "vs BM 1M", "BM 비중" → "비중".<br><br>
-            <strong>[포트폴리오 대표색]</strong> #4a90e2(파란색) → #2d7a3a(dark green). create_dashboard.py의 --accent-color, .nav-button, .portfolio-dot, .sect-detail-mine 전체 반영.<br><br>
-            <strong>[텔레그램 봇]</strong> 장중 자동 업데이트 마지막 시각 15:30 → 15:35. /update 응답 메시지 "포트폴리오 업데이트 완료" → "포트폴리오 업데이트". 시각 표시 "기준 (KST)" → "(KST)". 포트폴리오 리포트 각 상품 수익률 블록 후 빈 줄 추가.<br><br>
-            <strong>[정리]</strong> 임시 작업 파일 6개 삭제(excel_output.txt, full_excel_dump.py, read_excel.py, read_excel2.py, small_files_dump.py, summarize_excel.py). 불필요한 CSS(sect-diff-note) 제거.
-        </div>
-    </div>
-    <div class="version-entry">
-        <div class="version-date">2026-02-23</div>
-        <div class="version-title">섹터 비중 차트 + KODEX 200 비교 대시보드 추가</div>
-        <div class="version-desc">
-            <strong>[섹터 비중 시각화]</strong> 대시보드에 "섹터 비중" 섹션 추가 (WRAP 섹션 바로 다음). 삼성 트루밸류, DB 목표전환형 각 포트폴리오의 업종별 비중을 CSS 수평 바 차트로 표시.<br><br>
-            <strong>[KODEX 200 비교]</strong> pykrx로 KOSPI 200 구성종목(인덱스 코드 1028)의 섹터 비중을 계산, 포트폴리오와 나란히 비교. 차이(+빨강/-파랑) 강조 표시. GitHub Actions에 "Fetch KODEX 200 Sector Data" 스텝 추가 → kodex_sectors.json 생성 후 커밋.<br><br>
-            <strong>[신규 파일]</strong> execution/fetch_kodex_sectors.py (pykrx 기반, 비거래일 자동 fallback), requirements.txt에 pykrx 추가.
-        </div>
-    </div>
-    <div class="version-entry">
-        <div class="version-date">2026-02-23</div>
-        <div class="version-title">/update 메시지 개선 + /calendar 추가 + 포트폴리오 리포트 스타일</div>
-        <div class="version-desc">
-            <strong>[/calendar 커맨드]</strong> 텔레그램 봇에 /calendar 커맨드 추가. 언제든지 오늘 Google Calendar 일정 즉시 조회 가능.<br><br>
-            <strong>[/update 메시지 개선]</strong> ① 시간 UTC→KST 수정 (datetime.now(tz=KST)) ② 포트폴리오명 볼드+밑줄 ③ 오늘 수익률 볼드+밑줄 ④ KOSPI/KOSDAQ 실시간 수익률 추가 (볼드+밑줄). KS11/KQ11을 기존 종목 조회와 동일한 ThreadPoolExecutor로 병렬 조회, _index 키로 임시 저장(JSON 저장 시 제외).<br><br>
-            <strong>[포트폴리오 리포트 스타일]</strong> 기준가 항목 전체 볼드, 수익률 YTD 볼드+밑줄.<br><br>
-            <strong>[watch_wrap_nav.py 재시도 로직 수정]</strong> push 실패 후 재시도 시 이미 commit된 파일은 git diff에 안 잡혀 "변경사항 없음"으로 넘어가는 버그 수정. 이제 재시도 시 미push 커밋 여부(git log origin/main..HEAD)를 확인 후 pull --rebase → push 진행.
-        </div>
-    </div>
-    <div class="version-entry">
-        <div class="version-date">2026-02-23</div>
-        <div class="version-title">캘린더 알림 복구 + /weather 커맨드 추가 + 일정 표시 개선</div>
-        <div class="version-desc">
-            <strong>[캘린더 알림 복구]</strong> 아침 05:10 캘린더 알림 미발송 원인 파악: VM .env에 GOOGLE_SERVICE_ACCOUNT_KEY가 누락되어 있었음. VM 재생성 당시 설정하지 못한 것. b6e5cda22ed7 키를 .env에 추가 후 서비스 재시작하여 정상화.<br><br>
-            <strong>[load_dotenv 추가]</strong> daily_calendar.py에 load_dotenv() 추가. 이전에는 systemd EnvironmentFile로만 env를 주입받아 직접 실행 시 환경변수를 못 읽는 문제가 있었음. 이제 직접 실행해도 .env 자동 로드.<br><br>
-            <strong>[일정 텍스트 스타일]</strong> 개인 일정(운용 본부 제외)에 볼드+밑줄 동시 적용. <code>&lt;b&gt;&lt;u&gt;text&lt;/u&gt;&lt;/b&gt;</code><br><br>
-            <strong>[/weather 커맨드]</strong> 텔레그램 봇에 /weather 커맨드 추가. 아침 자동 알림 외에도 언제든지 여의도 날씨 즉시 조회 가능. daily_alert.py의 get_naver_weather() 재사용.<br><br>
-            <strong>[파일 정리]</strong> revoke된 GCP 서비스 계정 키(4591258d4331.json) 및 구 VM SSH 키(ssh-key-2026-02-13.key) 삭제.
-        </div>
-    </div>
-    <div class="version-entry">
-        <div class="version-date">2026-02-20</div>
-        <div class="version-title">Dashboard WRAP/Portfolio 업데이트 날짜 표시 추가</div>
-        <div class="version-desc">
-            <strong>[WRAP 헤더]</strong> WRAP 카테고리 제목 옆에 마지막 기준가 업데이트 날짜 표시. git 커밋 날짜 기준 (git pull 시 mtime이 변경되므로 os.path.getmtime 대신 git log 사용).<br><br>
-            <strong>[Portfolio 헤더]</strong> 포트폴리오 테이블 제목 옆에 마지막 업데이트 일시 표시 (KST 기준). portfolio_data.json 파일 수정 시각 사용.<br><br>
-            <strong>[스타일]</strong> 날짜 텍스트: 오늘 수익률 파란색(#0055cc)과 동일, bold 처리, 메인 텍스트보다 작은 크기.<br><br>
-            <strong>[Claude Code 알림 훅]</strong> Stop hook PowerShell 명령 오류 수정. bash의 $ 변수 해석 문제로 ~/.claude/notify.ps1 파일로 분리. settings.json에서 -File 옵션으로 호출.<br><br>
-            <strong>[VM git 인증]</strong> 새 VM에 git user 및 remote URL(PAT 포함) 설정. /update 후 dashboard push 정상화.<br><br>
-            <strong>[구독자 초기화]</strong> 새 VM에 subscribers.json 없어서 /start로 재구독 필요. 이후 재시작에도 유지됨.
-        </div>
-    </div>
-    <div class="version-entry" style="border-left-color: var(--red);">
-        <div class="version-date">2026-02-20</div>
-        <div class="version-title">VM 재생성 + 전체 서비스 VM으로 이전 완료</div>
-        <div class="version-desc">
-            <strong>[VM 재생성]</strong> 기존 VM(158.180.87.197) SSH 접속 불가 문제 발생. 원인: OCI cloud-init이 부팅 시마다 authorized_keys를 메타데이터 키로 덮어씀 → Boot volume repair 9회 시도 포함 모든 복구 방법 실패. 구 VM 2개 삭제 후 새 VM(dashboard-vm, 144.24.70.224) 생성. SSH 키: ssh-key-2026-02-20.key.<br><br>
-            <strong>[서비스 이전]</strong> GitHub Actions에서 실행되던 날씨(05:00), 캘린더(05:10) 알림을 VM 봇 스케줄러로 이전. daily_portfolio_report.yml 비활성화 (VM 봇의 daily_portfolio_job이 동일 기능 수행). GitHub Actions에는 Daily Market Crawl(23:00)만 남음.<br><br>
-            <strong>[GOOGLE_SERVICE_ACCOUNT_KEY]</strong> GCP 서비스 계정 JSON 키를 VM .env에 추가. 주의: 작업 중 키가 채팅에 노출되어 즉시 폐기 후 새 키(b6e5cda22ed7) 재발급.<br><br>
-            <strong>[교훈]</strong> ① OCI VM SSH 복구 불가 시 VM 재생성이 가장 빠름 (코드는 GitHub에 있으므로 .env만 재작성하면 됨) ② pip3 대신 python3 -m pip 사용 ③ 민감 정보(private key, service account key)를 채팅에 절대 붙여넣지 말 것.
-        </div>
-    </div>
-    <div class="version-entry">
-        <div class="version-date">2026-02-19</div>
-        <div class="version-title">날씨 알림 시간 변경 + 캘린더 일정 알림 문서화</div>
-        <div class="version-desc">날씨 알림 시간 06:00 → 05:00 변경. Google Calendar 일정 알림 (05:10, GitHub Actions) architecture에 추가. 자동 포트폴리오 업데이트 시 텔레그램 알림 전송 추가.</div>
-    </div>
-    <div class="version-entry">
-        <div class="version-date">2026-02-19</div>
-        <div class="version-title">Claude Code 재설치 후 환경 복구</div>
-        <div class="version-desc">Claude Code 완전 재설치로 초기화된 설정 복구. GitHub MCP 서버 재연결 (npx @modelcontextprotocol/server-github). Oracle Cloud VM SSH 접속 복구: 원본 키(ssh-key-2026-02-13.key) 발견, 새 키(~/.ssh/oracle_cloud) 생성 및 authorized_keys 등록. GitHub Secrets (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID) 복구.</div>
-    </div>
-    <div class="version-entry">
-        <div class="version-date">2026-02-19</div>
-        <div class="version-title">fetch_price 조회 기간 5일 → 30일 (설날 장기 휴장 대응)</div>
-        <div class="version-desc">설날 연휴(5일 이상 휴장) 시 FinanceDataReader가 데이터를 1행만 반환하여 today_return이 None → 0%로 표시되는 버그 수정. weather_bot.py의 fetch_price() 함수 내 timedelta(days=5) → timedelta(days=30) 변경. 장기 휴장 후에도 충분한 전일 데이터를 확보.</div>
-    </div>
-    <div class="version-entry">
-        <div class="version-date">2026-02-19</div>
-        <div class="version-title">/update 후 git pull --rebase 추가 (push 충돌 방지)</div>
-        <div class="version-desc">VM과 로컬 PC가 동시에 push할 때 발생하는 충돌로 "Dashboard Last Updated" 시각이 갱신되지 않는 문제 해결. weather_bot.py의 run_portfolio_update() 함수에서 git push 전 git pull --rebase origin main 자동 실행하도록 추가.</div>
-    </div>
-    <div class="version-entry">
-        <div class="version-date">2026-02-19</div>
-        <div class="version-title">메인 대시보드에 Workflow Architecture 버튼 추가</div>
-        <div class="version-desc">create_dashboard.py에 Workflow Architecture 버튼 추가. 대시보드 헤더 영역에 "🗂️ Workflow Architecture" 버튼 표시, 클릭 시 architecture.html 새 탭으로 열림.</div>
-    </div>
-    <div class="version-entry">
-        <div class="version-date">2026-02-19</div>
-        <div class="version-title">장중 자동 포트폴리오 업데이트 추가 (09:30~15:30, 30분 간격)</div>
-        <div class="version-desc">weather_bot.py에 auto_portfolio_update_job 추가. 거래일 09:30~15:30 KST 30분마다 자동으로 Dashboard 갱신 (하루 13회). 주말 자동 스킵. 삼성전자 당일 데이터 유무로 공휴일 자동 판단. 텔레그램 알림 없이 조용히 index.html만 갱신.</div>
-    </div>
-    <div class="version-entry">
-        <div class="version-date">2026-02-19</div>
-        <div class="version-title">Wrap_NAV.xlsx 파일 감시 자동 push (watch_wrap_nav.py)</div>
-        <div class="version-desc">로컬 PC에서 Wrap_NAV.xlsx 저장 시 자동으로 git commit &amp; push. watchdog 라이브러리 기반, 디바운스 8초, 실패 시 최대 3회 재시도. PID 파일로 중복 실행 방지. Windows 시작 프로그램(start_watch_wrap_nav.vbs)에 등록하여 PC 부팅 시 자동 실행.</div>
-    </div>
-    <div class="version-entry">
-        <div class="version-date">2026-02-19</div>
-        <div class="version-title">Wrap_NAV.xlsx NEW 시트 개선</div>
-        <div class="version-desc">상품명 칼럼 다음에 '업종' 칼럼 추가 (Code 시트 섹터 자동 매핑). 종목코드 중복 칼럼 삭제 (코드 칼럼과 동일한 값). NEW/기준가/수익률 시트 열 너비 자동 맞춤 + 가운데 정렬 적용. daily_portfolio_report.py가 종목코드 대신 코드 칼럼 사용으로 변경.</div>
-    </div>
-    <div class="version-entry">
-        <div class="version-date">2026-02-19</div>
-        <div class="version-title">암호화폐 차트 이름 티커로 변경</div>
-        <div class="version-desc">Dashboard 및 차트 파일명을 전체명에서 티커로 변경. Bitcoin→BTC, Ethereum→ETH, Binance Coin→BNB, Ripple→XRP, Solana→SOL. config.py, create_dashboard.py, dataset.csv, charts/*.png 모두 반영.</div>
-    </div>
-    <div class="version-entry">
-        <div class="version-date">2026-02-13</div>
-        <div class="version-title">/update 속도 최적화 (55초 → 5초)</div>
-        <div class="version-desc">create_portfolio_tables.py 전체 실행 대신, 기존 portfolio_data.json에서 종목 코드만 읽고 실시간 주가를 ThreadPoolExecutor로 병렬 조회. Wrap_NAV.xlsx 파싱, KRX API, 누적수익률 계산 생략.</div>
-    </div>
-    <div class="version-entry">
-        <div class="version-date">2026-02-13</div>
-        <div class="version-title">전거래일 기준 포트폴리오 적용</div>
-        <div class="version-desc">오늘 추가/변경한 종목(당일 매매)은 /update에 반영하지 않고, 전거래일 포트폴리오 구성 기준으로 수익률 계산.</div>
-    </div>
-    <div class="version-entry">
-        <div class="version-date">2026-02-13</div>
-        <div class="version-title">Oracle Cloud VM 배포</div>
-        <div class="version-desc">텔레그램 봇을 Oracle Cloud Free Tier VM으로 이전. 24시간 무중단 운영. systemd 서비스 등록.</div>
-    </div>
-    <div class="version-entry">
-        <div class="version-date">2026-02-13</div>
-        <div class="version-title">기여도(Contribution) 컬럼 추가</div>
-        <div class="version-desc">포트폴리오 테이블에 기여도 컬럼 추가. 공식: (Weight/100) x (Return/100) x 1000. NAV 1000 기준 변동 포인트.</div>
-    </div>
-    <div class="version-entry">
-        <div class="version-date">2026-02-13</div>
-        <div class="version-title">/update 명령어 추가</div>
-        <div class="version-desc">실시간 주가 기반 포트폴리오 테이블 즉시 업데이트 기능. FinanceDataReader로 실시간 조회 → 수익률 재계산 → Dashboard 반영.</div>
-    </div>
-    <div class="version-entry">
-        <div class="version-date">2026-02-13</div>
-        <div class="version-title">GitHub Actions에 calculate_returns.py 추가</div>
-        <div class="version-desc">daily_crawl 워크플로우에 수익률 계산 스텝 추가. Wrap_NAV.xlsx도 자동 커밋 대상에 포함.</div>
-    </div>
+<!-- ===== Migration Guide ===== -->
+<h2 id="migration">Migration Guide (사설 서버 이전)</h2>
+
+<p style="color:#aaa; margin-bottom: 20px;">
+    현재 Oracle Cloud VM + GitHub Actions + GitHub Pages 구성에서<br>
+    Mac Mini / Mini PC 등 사설 서버로 이전할 경우의 가이드.
+</p>
+
+<div class="migration-card">
+    <h4>1. 현재 아키텍처 3계층</h4>
+    <ul>
+        <li><strong>VM (Oracle Cloud)</strong> &mdash; 텔레그램 봇 2개 (weather-bot, research-bot) 24시간 상주 + 스케줄 작업</li>
+        <li><strong>GitHub Actions</strong> &mdash; 매일 23:00 시장 데이터 크롤링 + 차트 생성 + HTML 재생성 (Selenium 포함)</li>
+        <li><strong>GitHub Pages</strong> &mdash; 정적 HTML 호스팅 (git push = 배포)</li>
+    </ul>
+</div>
+
+<div class="migration-card">
+    <h4>2. 사설 서버로 통합 시 구조</h4>
+    <ul>
+        <li>VM + GHA 역할을 사설 서버 1대로 통합 가능</li>
+        <li>GitHub Pages는 그대로 유지 (무료 + CDN) 또는 Nginx로 자체 호스팅</li>
+        <li>cron으로 GitHub Actions 대체 (daily_crawl 스케줄)</li>
+        <li>systemd로 봇 서비스 관리 (기존과 동일)</li>
+    </ul>
+</div>
+
+<div class="migration-card">
+    <h4>3. 서버 요구사항</h4>
+    <ul>
+        <li><strong>OS:</strong> Ubuntu 22.04+ (macOS도 가능하나 systemd 없음 &rarr; launchd 사용)</li>
+        <li><strong>RAM:</strong> 2GB+ 권장 (SEIBro Selenium: ~500MB, Chrome headless 필요)</li>
+        <li><strong>Storage:</strong> 5GB+ (dataset.csv + stock_price_history.json + charts + research DB)</li>
+        <li><strong>Python:</strong> 3.10+</li>
+        <li><strong>Chrome/Chromium:</strong> SEIBro + DRAMeXchange 스크래핑용 (headless)</li>
+        <li><strong>네트워크:</strong> 외부 인바운드 불필요 (봇은 아웃바운드 polling). 고정 IP 선택사항.</li>
+        <li><strong>Mac Mini 참고:</strong> M1/M2 기준 16GB 모델 권장. Homebrew로 Python/Chrome 설치. launchd로 서비스 관리.</li>
+        <li><strong>Mini PC 참고:</strong> Intel N100 이상. Ubuntu 설치. systemd 그대로 사용 가능.</li>
+    </ul>
+</div>
+
+<div class="migration-card">
+    <h4>4. 이전 절차</h4>
+    <ul>
+        <li><strong>Step 1:</strong> 서버에 git clone + Python 환경 구축
+            <br><code>git clone https://github.com/sisyphe10/Antigravity_Market_Dashboard.git</code>
+            <br><code>python3 -m pip install -r requirements.txt</code>
+            <br><code>sudo apt install chromium-browser</code> (또는 <code>brew install --cask chromium</code>)
+        </li>
+        <li><strong>Step 2:</strong> .env 파일 생성 (5개 키: TELEGRAM_BOT_TOKEN, RESEARCH_BOT_TOKEN, ANTHROPIC_API_KEY, GOOGLE_SERVICE_ACCOUNT_KEY, NOTION_API_KEY)</li>
+        <li><strong>Step 3:</strong> systemd 서비스 등록 (또는 Mac: launchd plist)
+            <br><code>sudo cp execution/research_bot/research-bot.service /etc/systemd/system/</code>
+            <br>weather-bot.service도 동일 패턴으로 생성
+            <br><code>sudo systemctl enable weather-bot research-bot</code>
+            <br><code>sudo systemctl start weather-bot research-bot</code>
+        </li>
+        <li><strong>Step 4:</strong> cron으로 GHA 대체
+            <br><code>crontab -e</code>
+            <br><code>0 23 * * * cd ~/Antigravity_Market_Dashboard && bash scripts/daily_crawl.sh</code>
+            <br>daily_crawl.sh: daily_crawl.yml의 Step 순서를 bash로 변환
+        </li>
+        <li><strong>Step 5:</strong> GitHub Pages 유지 시 &mdash; git push만 하면 됨 (현재와 동일)</li>
+        <li><strong>Step 5-alt:</strong> 자체 호스팅 시 &mdash; Nginx 설치 + root를 repo 디렉토리로 설정</li>
+        <li><strong>Step 6:</strong> 로컬 PC watch_wrap_nav.py &rarr; 서버에서 직접 Excel 수정하거나, 서버에 watch 스크립트 이전</li>
+    </ul>
+</div>
+
+<div class="migration-card">
+    <h4>5. GHA &rarr; cron 변환 (daily_crawl.sh 예시)</h4>
+    <ul>
+        <li><code>#!/bin/bash</code></li>
+        <li><code>cd /home/user/Antigravity_Market_Dashboard</code></li>
+        <li><code>source .env</code></li>
+        <li><code>python3 execution/backfill_yfinance_history.py</code></li>
+        <li><code>python3 execution/import_memory_data.py</code></li>
+        <li><code>python3 execution/market_crawler.py</code></li>
+        <li><code>python3 calculate_wrap_nav.py</code></li>
+        <li><code>python3 calculate_returns.py</code></li>
+        <li><code>rm -f charts/*.png && python3 execution/draw_charts.py</code></li>
+        <li><code>python3 execution/draw_wrap_charts.py</code></li>
+        <li><code>python3 execution/update_price_history.py</code> (continue-on-error)</li>
+        <li><code>python3 execution/fetch_featured_data.py</code> (continue-on-error)</li>
+        <li><code>python3 execution/fetch_seibro_data.py</code> (continue-on-error)</li>
+        <li><code>python3 execution/fetch_kodex_sectors.py</code> (continue-on-error)</li>
+        <li><code>python3 execution/create_portfolio_tables.py</code></li>
+        <li><code>python3 execution/create_dashboard.py</code></li>
+        <li><code>git add -A && git commit -m "Auto-update [skip ci]" && git push</code></li>
+    </ul>
+</div>
+
+<div class="migration-card">
+    <h4>6. Mac Mini launchd 예시 (weather-bot)</h4>
+    <ul>
+        <li>파일: <code>~/Library/LaunchAgents/com.aoe.weather-bot.plist</code></li>
+        <li>Label: com.aoe.weather-bot</li>
+        <li>ProgramArguments: ["/usr/local/bin/python3", "/Users/user/Antigravity_Market_Dashboard/execution/weather_bot.py"]</li>
+        <li>EnvironmentVariables: .env 내용을 plist에 직접 기입 또는 wrapper script</li>
+        <li>RunAtLoad: true, KeepAlive: true</li>
+        <li><code>launchctl load ~/Library/LaunchAgents/com.aoe.weather-bot.plist</code></li>
+    </ul>
+</div>
+
+<div class="migration-card">
+    <h4>7. 이전 시 주의사항</h4>
+    <ul>
+        <li><strong>Selenium Chrome 경로:</strong> fetch_seibro_data.py, market_crawler.py에서 Chrome 경로 감지 로직 확인. Mac은 <code>/Applications/Chromium.app/...</code></li>
+        <li><strong>한글 폰트:</strong> draw_charts.py에서 matplotlib 한글 폰트 필요. <code>sudo apt install fonts-nanum</code> 또는 Mac: <code>brew install font-nanum-gothic</code></li>
+        <li><strong>Git 인증:</strong> <code>git remote set-url origin https://USERNAME:TOKEN@github.com/...</code></li>
+        <li><strong>타임존:</strong> 서버 TZ=Asia/Seoul 설정. <code>sudo timedatectl set-timezone Asia/Seoul</code></li>
+        <li><strong>research_notes.db:</strong> VM에서 scp로 복사 필요 (Git에 포함 안 됨)</li>
+        <li><strong>subscribers.json:</strong> VM에서 복사 필요</li>
+        <li><strong>media/ 디렉토리:</strong> 리서치봇 이미지 파일. scp로 이전</li>
+        <li><strong>Wrap_NAV.xlsx 충돌:</strong> .gitattributes에 <code>Wrap_NAV.xlsx -merge</code> 설정 유지</li>
+        <li><strong>GHA 비활성화:</strong> 사설 서버로 완전 이전 시 daily_crawl.yml의 schedule 주석 처리 (중복 실행 방지)</li>
+    </ul>
+</div>
+
+<div class="migration-card">
+    <h4>8. 이전 불필요 항목 (Git에 이미 포함)</h4>
+    <ul>
+        <li>모든 Python 스크립트 &mdash; git clone으로 자동 확보</li>
+        <li>HTML 대시보드 파일 &mdash; 자동 생성됨</li>
+        <li>dataset.csv, Wrap_NAV.xlsx &mdash; Git에 포함</li>
+        <li>charts/*.png &mdash; 자동 생성됨</li>
+        <li>JSON 데이터 파일 &mdash; Git에 포함</li>
+    </ul>
+</div>
+
+<div class="migration-card">
+    <h4>9. 이전 필수 수동 작업</h4>
+    <ul>
+        <li>.env 파일 생성 (5개 키)</li>
+        <li>research_notes.db + media/ 복사 (scp)</li>
+        <li>subscribers.json 복사</li>
+        <li>systemd/launchd 서비스 등록</li>
+        <li>crontab 등록 (daily_crawl)</li>
+        <li>Chrome/Chromium 설치</li>
+        <li>한글 폰트 설치</li>
+        <li>Git 인증 설정 (PAT)</li>
+    </ul>
 </div>
 
 <footer>
-    <a href="index.html">&larr; Dashboard</a> &nbsp;|&nbsp;
-    <a href="https://github.com/sisyphe10/Antigravity_Market_Dashboard">GitHub Repository</a>
+    Age of Emergence &mdash; Architecture Documentation<br>
+    <a href="index.html">Back to Dashboard</a>
 </footer>
 
 </body>
