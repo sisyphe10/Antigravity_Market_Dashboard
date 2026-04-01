@@ -26,6 +26,7 @@ create_market_alert.py 변경 → market_alert.html 재생성
 ```
 
 ## UI 일관성
+- 글씨체: 영문 Inter + 한글 Noto Sans KR (`font-family: 'Inter', 'Noto Sans KR', sans-serif;`). Google Fonts 링크 필수. Chart.js 사용 시 `Chart.defaults.font.family` 동일하게 설정
 - Home 버튼: 모든 페이지에서 오른쪽 상단, 라이트 그레이(#e0e0e0), `🏠 Home`
 - create_dashboard.py 수정 시 모든 생성 파일 재생성 후 확인
 - UI 변경 시 전체 페이지에서 일관성 확인
