@@ -267,6 +267,7 @@ async function loadJournal() {
                 if (jm) { jDate = parseInt(jm[1]) + '-' + String(parseInt(jm[2])+1).padStart(2,'0') + '-' + String(parseInt(jm[3])).padStart(2,'0'); }
                 else { jDate = jDateVal; }
                 var rt = richText[rowIdx] || {};
+                console.log('Journal row', rowIdx, jDate, 'rt[2]:', !!rt[2], 'richText keys:', Object.keys(richText));
                 jMap[jDate] = {
                     plan: rt[2] || ((jc[2] && jc[2].v) ? jc[2].v : ''),
                     review: rt[3] || ((jc[3] && jc[3].v) ? jc[3].v : ''),
