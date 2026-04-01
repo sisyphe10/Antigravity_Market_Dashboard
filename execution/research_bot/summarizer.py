@@ -90,7 +90,7 @@ def summarize_daily_notes(messages, date_str):
 
     client = anthropic.Anthropic(api_key=api_key)
 
-    # 재시도 로직 (529 Overloaded 대응)
+    # 재시도 로직 (529 Overloaded / 429 Rate Limit 대응)
     import time
     for attempt in range(3):
         try:
@@ -101,9 +101,10 @@ def summarize_daily_notes(messages, date_str):
             )
             return response.content[0].text
         except Exception as e:
-            if '529' in str(e) or 'overloaded' in str(e).lower():
+            err_str = str(e).lower()
+            if '529' in str(e) or 'overloaded' in err_str or '429' in str(e) or 'rate_limit' in err_str:
                 if attempt < 2:
-                    time.sleep(60)  # 1분 대기 후 재시도
+                    time.sleep(90)  # 1분 30초 대기 후 재시도
                     continue
             raise
 
