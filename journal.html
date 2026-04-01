@@ -121,9 +121,61 @@ async function checkPw(v) {
 
 <script>
 const SHEET_ID = '13HXDxF62ILXyRz7meRZ5CxJT5HfWAwIKc8IsCavuVXk';
+const GAPI_KEY = 'AIzaSyCHPiRby5FVAIKDwneZHy1KGl3SfycjZEw';
 
 function sheetUrl(sheetName) {
     return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+}
+
+// Sheets API v4로 셀 서식(밑줄/볼드) 포함 텍스트 가져오기
+async function fetchRichText(sheetName, range) {
+    var url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}?ranges=${encodeURIComponent(sheetName+'!'+range)}&fields=sheets.data.rowData.values(effectiveValue,textFormatRuns,effectiveFormat.textFormat)&key=${GAPI_KEY}`;
+    var res = await fetch(url);
+    var json = await res.json();
+    var sheet = json.sheets && json.sheets[0];
+    if (!sheet || !sheet.data || !sheet.data[0]) return {};
+    var rowData = sheet.data[0].rowData || [];
+    // {rowIndex: {colOffset: htmlString}}
+    var result = {};
+    rowData.forEach(function(rd, ri) {
+        if (!rd.values) return;
+        rd.values.forEach(function(cell, ci) {
+            if (!cell) return;
+            var text = '';
+            if (cell.effectiveValue) {
+                text = cell.effectiveValue.stringValue || cell.effectiveValue.numberValue || '';
+            }
+            if (!text) return;
+            text = String(text);
+            // textFormatRuns가 있으면 부분 서식 적용
+            if (cell.textFormatRuns && cell.textFormatRuns.length > 0) {
+                var runs = cell.textFormatRuns;
+                var html = '';
+                for (var k = 0; k < runs.length; k++) {
+                    var start = runs[k].startIndex || 0;
+                    var end = (k + 1 < runs.length) ? runs[k + 1].startIndex : text.length;
+                    var seg = text.substring(start, end).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+                    var fmt = runs[k].format || {};
+                    if (fmt.underline) seg = '<u>' + seg + '</u>';
+                    if (fmt.bold) seg = '<b>' + seg + '</b>';
+                    html += seg;
+                }
+                if (!result[ri]) result[ri] = {};
+                result[ri][ci] = html;
+            } else if (cell.effectiveFormat && cell.effectiveFormat.textFormat) {
+                // 셀 전체 서식
+                var fmt = cell.effectiveFormat.textFormat;
+                var ht = text.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+                if (fmt.underline) ht = '<u>' + ht + '</u>';
+                if (fmt.bold) ht = '<b>' + ht + '</b>';
+                if (ht !== text.replace(/&/g,'&amp;').replace(/</g,'&lt;')) {
+                    if (!result[ri]) result[ri] = {};
+                    result[ri][ci] = ht;
+                }
+            }
+        });
+    });
+    return result;
 }
 
 function fmtNum(v) {
@@ -193,13 +245,16 @@ async function loadJournal() {
             });
         });
 
-        // Journal 시트에서 장전계획/장후복기 로드
+        // Journal 시트에서 장전계획/장후복기 로드 (서식 포함)
         try {
             var jRes = await fetch(sheetUrl('Journal'));
             var jText = await jRes.text();
             var jJson = JSON.parse(jText.substring(jText.indexOf('{'), jText.lastIndexOf('}') + 1));
+            // 서식 데이터 가져오기 (C, D 컬럼 = 장전계획, 장후복기)
+            var richText = {};
+            try { richText = await fetchRichText('Journal', 'A:D'); } catch(re) { console.log('Rich text fetch:', re); }
             var jMap = {};
-            jJson.table.rows.forEach(function(row) {
+            jJson.table.rows.forEach(function(row, rowIdx) {
                 var jc = row.c;
                 if (!jc[0] || !jc[0].v) return;
                 var jDateVal = String(jc[0].v);
@@ -208,14 +263,17 @@ async function loadJournal() {
                 var jDate;
                 if (jm) { jDate = parseInt(jm[1]) + '-' + String(parseInt(jm[2])+1).padStart(2,'0') + '-' + String(parseInt(jm[3])).padStart(2,'0'); }
                 else { jDate = jDateVal; }
+                var rt = richText[rowIdx] || {};
                 jMap[jDate] = {
-                    plan: (jc[2] && jc[2].v) ? jc[2].v : '',
-                    review: (jc[3] && jc[3].v) ? jc[3].v : '',
+                    plan: rt[2] || ((jc[2] && jc[2].v) ? jc[2].v : ''),
+                    review: rt[3] || ((jc[3] && jc[3].v) ? jc[3].v : ''),
+                    planRich: !!rt[2],
+                    reviewRich: !!rt[3],
                 };
             });
             entries.forEach(function(e) {
                 var j = jMap[e.date];
-                if (j) { e.plan = j.plan; e.review = j.review; delete jMap[e.date]; }
+                if (j) { e.plan = j.plan; e.review = j.review; e.planRich = j.planRich; e.reviewRich = j.reviewRich; delete jMap[e.date]; }
             });
             // Journal 시트에만 있는 날짜도 카드 생성
             Object.keys(jMap).forEach(function(jDate) {
@@ -227,7 +285,7 @@ async function loadJournal() {
                         qClose:'', qChg:'', qVol:'', qVolChg:'',
                         qUp:'', qFlat:'', qDown:'', qPer:'', qFor:'', qInst:'',
                         k_ma120:'', q_ma120:'', nqClose:'', nqChg:'', nqVol:'', nqVolChg:'',
-                        plan: j.plan, review: j.review,
+                        plan: j.plan, review: j.review, planRich: j.planRich, reviewRich: j.reviewRich,
                     });
                 }
             });
@@ -302,8 +360,10 @@ async function loadJournal() {
 
             // 장전계획 / 장후복기
             html += '<div style="display:flex;flex-direction:column;border:1px solid #333;height:100%;">';
-            html += '<div style="flex:5;background:#f7f7f7;padding:12px;"><div style="font-size:0.9rem;font-weight:700;color:#000;margin-bottom:6px;">장전 계획</div><div style="font-size:0.9rem;line-height:1.6;white-space:pre-wrap;">' + (e.plan || '<span style="color:#ccc;">-</span>') + '</div></div>';
-            html += '<div style="flex:7;background:#f7f7f7;padding:12px;border-top:1px solid #333;"><div style="font-size:0.9rem;font-weight:700;color:#000;margin-bottom:6px;">장후 복기</div><div style="font-size:0.9rem;line-height:1.6;white-space:pre-wrap;">' + (e.review || '<span style="color:#ccc;">-</span>') + '</div></div>';
+            var planHtml = e.plan ? (e.planRich ? e.plan.replace(/\n/g,'<br>') : String(e.plan).replace(/&/g,'&amp;').replace(/</g,'&lt;')) : '<span style="color:#ccc;">-</span>';
+            var reviewHtml = e.review ? (e.reviewRich ? e.review.replace(/\n/g,'<br>') : String(e.review).replace(/&/g,'&amp;').replace(/</g,'&lt;')) : '<span style="color:#ccc;">-</span>';
+            html += '<div style="flex:5;background:#f7f7f7;padding:12px;"><div style="font-size:0.9rem;font-weight:700;color:#000;margin-bottom:6px;">장전 계획</div><div style="font-size:0.9rem;line-height:1.6;white-space:pre-wrap;">' + planHtml + '</div></div>';
+            html += '<div style="flex:7;background:#f7f7f7;padding:12px;border-top:1px solid #333;"><div style="font-size:0.9rem;font-weight:700;color:#000;margin-bottom:6px;">장후 복기</div><div style="font-size:0.9rem;line-height:1.6;white-space:pre-wrap;">' + reviewHtml + '</div></div>';
             html += '</div>';
 
             html += '</div>';
