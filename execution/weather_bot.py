@@ -653,6 +653,17 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
             capture_output=True, text=True, timeout=180
         )
 
+        # 3-featured. Featured 종목 데이터 수집
+        logging.info("Step 3-featured: Fetching featured data...")
+        result_featured = subprocess.run(
+            [sys.executable, "execution/fetch_featured_data.py"],
+            capture_output=True, text=True, timeout=120
+        )
+        if result_featured.returncode == 0:
+            logging.info("Featured data collected successfully")
+        else:
+            logging.warning(f"Featured data failed: {result_featured.stderr[:100]}")
+
         # 3. Dashboard 재생성 및 push
         logging.info("Step 3: Regenerating dashboard...")
         result_dashboard = subprocess.run(
@@ -662,7 +673,7 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
             timeout=120
         )
         if result_dashboard.returncode == 0:
-            subprocess.run(["git", "add", "index.html", "market.html", "wrap.html", "market_alert.html", "charts/"], cwd=parent_dir, capture_output=True, timeout=30)
+            subprocess.run(["git", "add", "index.html", "market.html", "wrap.html", "market_alert.html", "featured.html", "featured_data.json", "charts/"], cwd=parent_dir, capture_output=True, timeout=30)
             commit_dash = subprocess.run(
                 ["git", "commit", "-m", f"포트폴리오 업데이트 ({now_str})"],
                 cwd=parent_dir, capture_output=True, text=True, timeout=30
