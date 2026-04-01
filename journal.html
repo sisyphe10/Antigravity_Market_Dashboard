@@ -162,7 +162,7 @@ async function fetchRichText(sheetName, range) {
                     html += seg;
                 }
                 if (!result[ri]) result[ri] = {};
-                result[ri][ci] = html;
+                result[ri][ci] = html.replace(/\s+$/, '');
             } else if (cell.effectiveFormat && cell.effectiveFormat.textFormat) {
                 // 셀 전체 서식
                 var fmt = cell.effectiveFormat.textFormat;
