@@ -157,8 +157,8 @@ async function fetchRichText(sheetName, range) {
                     var end = (k + 1 < runs.length) ? runs[k + 1].startIndex : text.length;
                     var seg = text.substring(start, end).replace(/&/g,'&amp;').replace(/</g,'&lt;');
                     var fmt = runs[k].format || {};
-                    if (fmt.underline) seg = '<span style="text-decoration:underline">' + seg + '</span>';
-                    if (fmt.bold) seg = '<span style="font-weight:bold">' + seg + '</span>';
+                    if (fmt.underline) seg = '<span style="text-decoration:underline;line-height:inherit;display:inline">' + seg + '</span>';
+                    if (fmt.bold) seg = '<span style="font-weight:bold;line-height:inherit;display:inline">' + seg + '</span>';
                     html += seg;
                 }
                 if (!result[ri]) result[ri] = {};
