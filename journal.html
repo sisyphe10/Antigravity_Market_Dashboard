@@ -131,9 +131,8 @@ function sheetUrl(sheetName) {
 async function fetchRichText(sheetName, range) {
     var url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}?ranges=${encodeURIComponent(sheetName+'!'+range)}&fields=sheets.data.rowData.values(effectiveValue,textFormatRuns,effectiveFormat.textFormat)&key=${GAPI_KEY}`;
     var res = await fetch(url);
-    if (!res.ok) { console.warn('Rich text API error:', res.status); return {}; }
+    if (!res.ok) return {};
     var json = await res.json();
-    console.log('Rich text API response:', JSON.stringify(json).substring(0, 500));
     var sheet = json.sheets && json.sheets[0];
     if (!sheet || !sheet.data || !sheet.data[0]) { console.warn('Rich text: no sheet data'); return {}; }
     var rowData = sheet.data[0].rowData || [];
@@ -177,7 +176,6 @@ async function fetchRichText(sheetName, range) {
             }
         });
     });
-    console.log('Rich text result:', JSON.stringify(result));
     return result;
 }
 
@@ -266,8 +264,7 @@ async function loadJournal() {
                 var jDate;
                 if (jm) { jDate = parseInt(jm[1]) + '-' + String(parseInt(jm[2])+1).padStart(2,'0') + '-' + String(parseInt(jm[3])).padStart(2,'0'); }
                 else { jDate = jDateVal; }
-                var rt = richText[rowIdx] || {};
-                console.log('Journal row', rowIdx, jDate, 'rt[2]:', !!rt[2], 'richText keys:', Object.keys(richText));
+                var rt = richText[rowIdx + 1] || {};  // Sheets API는 헤더 포함(+1), gviz는 데이터만
                 jMap[jDate] = {
                     plan: rt[2] || ((jc[2] && jc[2].v) ? jc[2].v : ''),
                     review: rt[3] || ((jc[3] && jc[3].v) ? jc[3].v : ''),
