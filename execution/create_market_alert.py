@@ -594,6 +594,7 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache):
         body {{
             font-family: 'Inter', 'Noto Sans KR', sans-serif;
             background: #f8f9fa; color: #1f2937; padding: 24px;
+            max-width: 1200px; margin: 0 auto;
         }}
         header {{
             background: #000; border-radius: 10px; padding: 18px 24px;
@@ -624,19 +625,21 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache):
             line-height: 1.5;
         }}
         .data-table {{
-            width: 100%; border-collapse: collapse; font-size: 0.86rem;
+            width: 100%; border-collapse: collapse; font-size: 0.82rem;
         }}
         .data-table th {{
             padding: 8px 10px; text-align: left;
-            font-size: 0.76rem; font-weight: 600; color: #6b7280;
+            font-size: 0.74rem; font-weight: 600; color: #6b7280;
             border-bottom: 1px solid #e5e7eb; background: #f9fafb;
-            white-space: nowrap;
+            white-space: nowrap; cursor: pointer; user-select: none;
         }}
+        .data-table th:hover {{ color: #111; }}
+        .data-table th .sort-arrow {{ font-size: 0.6rem; margin-left: 2px; color: #aaa; }}
         .data-table th.num, .data-table td.num {{ text-align: right; }}
         .data-table th.center, .data-table td.center {{ text-align: center; }}
         .data-table td {{
-            padding: 8px 10px; border-bottom: 1px solid #f3f4f6;
-            color: #374151; white-space: nowrap;
+            padding: 6px 10px; border-bottom: 1px solid #f3f4f6;
+            color: #374151; white-space: nowrap; font-size: 0.8rem;
         }}
         .data-table tbody tr:last-child td {{ border-bottom: none; }}
         .data-table tbody tr:hover td {{ background: #f9fafb; }}
@@ -669,6 +672,37 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache):
         투자주의: 금일 지정 기준 &nbsp;|&nbsp; 투자경고/위험: 현재 지정 중 기준 &nbsp;|&nbsp;
         본 자료는 참고용이며 투자 조언이 아닙니다
     </footer>
+    <script>
+    document.querySelectorAll('.data-table th').forEach(function(th) {{
+        th.innerHTML = th.innerHTML + '<span class="sort-arrow"></span>';
+        th.addEventListener('click', function() {{
+            var table = th.closest('table');
+            var tbody = table.querySelector('tbody');
+            var rows = Array.from(tbody.querySelectorAll('tr'));
+            var idx = Array.from(th.parentNode.children).indexOf(th);
+            var asc = th.dataset.sort !== 'asc';
+            // 같은 테이블의 다른 th 정렬 표시 제거
+            th.parentNode.querySelectorAll('th .sort-arrow').forEach(function(s) {{ s.textContent = ''; }});
+            th.querySelector('.sort-arrow').textContent = asc ? ' ▲' : ' ▼';
+            th.dataset.sort = asc ? 'asc' : 'desc';
+            rows.sort(function(a, b) {{
+                var ac = a.children[idx], bc = b.children[idx];
+                if (!ac || !bc) return 0;
+                var av = ac.textContent.trim(), bv = bc.textContent.trim();
+                // 숫자 파싱 (콤마, 억원, 조, 원 등 제거)
+                var an = parseFloat(av.replace(/[^0-9.\-]/g, '')), bn = parseFloat(bv.replace(/[^0-9.\-]/g, ''));
+                if (!isNaN(an) && !isNaN(bn)) {{
+                    // 조 단위 보정
+                    if (av.includes('조')) an *= 10000;
+                    if (bv.includes('조')) bn *= 10000;
+                    return asc ? an - bn : bn - an;
+                }}
+                return asc ? av.localeCompare(bv, 'ko') : bv.localeCompare(av, 'ko');
+            }});
+            rows.forEach(function(r) {{ tbody.appendChild(r); }});
+        }});
+    }});
+    </script>
 </body>
 </html>"""
 
