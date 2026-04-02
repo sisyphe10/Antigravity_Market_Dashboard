@@ -49,6 +49,12 @@ def publish_to_notion(summary_markdown, date_str, topics, stocks, images=None):
 
     blocks = markdown_to_blocks(summary_markdown, img_url_map)
 
+    def append_in_chunks(page_id, block_list):
+        """100블록씩 나눠서 Notion에 추가"""
+        for i in range(0, len(block_list), 100):
+            chunk = block_list[i:i+100]
+            notion.blocks.children.append(block_id=page_id, children=chunk)
+
     existing_page_id = _find_existing_page(database_id, date_str)
 
     if existing_page_id:
@@ -57,10 +63,7 @@ def publish_to_notion(summary_markdown, date_str, topics, stocks, images=None):
             {"object": "block", "type": "divider", "divider": {}}
         ] + blocks
 
-        notion.blocks.children.append(
-            block_id=existing_page_id,
-            children=append_blocks[:100]
-        )
+        append_in_chunks(existing_page_id, append_blocks)
         # 속성 업데이트 (기존 값에 추가 병합)
         import urllib.request as _ur
         import json as _json
@@ -108,12 +111,15 @@ def publish_to_notion(summary_markdown, date_str, topics, stocks, images=None):
         if stocks:
             properties["Ticker"] = {"rich_text": [{"text": {"content": ", ".join(stocks)}}]}
 
-        notion.pages.create(
+        page = notion.pages.create(
             parent={"database_id": database_id},
             icon=None,
             properties=properties,
             children=blocks[:100]
         )
+        # 100블록 초과분 추가
+        if len(blocks) > 100:
+            append_in_chunks(page["id"], blocks[100:])
 
 
 def upload_image_to_github(file_path, date_str, img_idx):
