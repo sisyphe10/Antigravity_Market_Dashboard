@@ -724,6 +724,17 @@ def create_market_alert():
     if codes_주의_only:
         price_cache.update(fetch_all_prices(codes_주의_only, days_back=3))
 
+    # 시가총액 1,000억원 이하 제외
+    MIN_MARCAP = 1000  # 억원
+    before = (len(stocks_주의), len(stocks_경고), len(stocks_위험))
+    stocks_주의 = [s for s in stocks_주의 if not s.get('marcap') or s['marcap'] >= MIN_MARCAP]
+    stocks_경고 = [s for s in stocks_경고 if not s.get('marcap') or s['marcap'] >= MIN_MARCAP]
+    stocks_위험 = [s for s in stocks_위험 if not s.get('marcap') or s['marcap'] >= MIN_MARCAP]
+    after = (len(stocks_주의), len(stocks_경고), len(stocks_위험))
+    filtered = sum(b - a for b, a in zip(before, after))
+    if filtered:
+        print(f"  시가총액 {MIN_MARCAP}억 미만 {filtered}건 제외")
+
     print("\n📝 HTML 생성 중...")
     html = generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache)
 
