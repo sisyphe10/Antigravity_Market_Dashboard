@@ -628,18 +628,17 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache):
             width: 100%; border-collapse: collapse; font-size: 0.82rem;
         }}
         .data-table th {{
-            padding: 8px 10px; text-align: left;
+            padding: 8px 10px; text-align: center;
             font-size: 0.74rem; font-weight: 600; color: #6b7280;
             border-bottom: 1px solid #e5e7eb; background: #f9fafb;
             white-space: nowrap; cursor: pointer; user-select: none;
         }}
         .data-table th:hover {{ color: #111; }}
         .data-table th .sort-arrow {{ font-size: 0.6rem; margin-left: 2px; color: #aaa; }}
-        .data-table th.num, .data-table td.num {{ text-align: right; }}
-        .data-table th.center, .data-table td.center {{ text-align: center; }}
         .data-table td {{
             padding: 6px 10px; border-bottom: 1px solid #f3f4f6;
             color: #374151; white-space: nowrap; font-size: 0.8rem;
+            text-align: center;
         }}
         .data-table tbody tr:last-child td {{ border-bottom: none; }}
         .data-table tbody tr:hover td {{ background: #f9fafb; }}
