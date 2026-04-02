@@ -42,7 +42,29 @@
         }
         .data-table {
             width: 100%; border-collapse: collapse; font-size: 0.82rem;
+            table-layout: fixed;
         }
+        .data-table.tbl-warn { /* 투자위험/경고 공통 */ }
+        .data-table.tbl-warn th:nth-child(1),
+        .data-table.tbl-warn td:nth-child(1) { width: 14%; } /* 종목명 */
+        .data-table.tbl-warn th:nth-child(2),
+        .data-table.tbl-warn td:nth-child(2) { width: 8%; }  /* 시장 */
+        .data-table.tbl-warn th:nth-child(3),
+        .data-table.tbl-warn td:nth-child(3) { width: 11%; } /* 시가총액 */
+        .data-table.tbl-warn th:nth-child(4),
+        .data-table.tbl-warn td:nth-child(4) { width: 11%; } /* 공시일 */
+        .data-table.tbl-warn th:nth-child(5),
+        .data-table.tbl-warn td:nth-child(5) { width: 11%; } /* 지정일 */
+        .data-table.tbl-warn th:nth-child(6),
+        .data-table.tbl-warn td:nth-child(6) { width: 7%; }  /* 경과일 */
+        .data-table.tbl-warn th:nth-child(7),
+        .data-table.tbl-warn td:nth-child(7) { width: 11%; } /* 판단일 */
+        .data-table.tbl-warn th:nth-child(8),
+        .data-table.tbl-warn td:nth-child(8) { width: 10%; } /* 현재가 */
+        .data-table.tbl-warn th:nth-child(9),
+        .data-table.tbl-warn td:nth-child(9) { width: 9%; }  /* 15일 최고가 */
+        .data-table.tbl-warn th:nth-child(10),
+        .data-table.tbl-warn td:nth-child(10) { width: 10%; } /* 해제가능주가 */
         .data-table th {
             padding: 8px 10px; text-align: center;
             font-size: 0.74rem; font-weight: 600; color: #6b7280;
@@ -68,7 +90,7 @@
     <header>
         <h1>🚦 투자유의종목 현황</h1>
         <div class="header-right">
-            <span class="last-updated">Updated: 2026-04-02 11:04:30 KST</span>
+            <span class="last-updated">Updated: 2026-04-02 11:06:57 KST</span>
             <a href="index.html" class="back-btn">🏠 Home</a>
         </div>
     </header>
@@ -81,26 +103,26 @@
         </div>
         
         <div style="overflow-x:auto">
-        <table class="data-table">
+        <table class="data-table tbl-warn">
             <thead>
                 <tr>
                     <th>종목명</th>
                     <th>시장</th>
-                    <th class="num">시가총액</th>
-                    <th class="center">공시일</th>
-                    <th class="center">지정일 ▼</th>
-                    <th class="center">경과일</th>
-                    <th class="center">판단일</th>
-                    <th class="num">현재가</th>
-                    <th class="center">15일 최고가</th>
-                    <th class="num">해제 가능 주가</th>
+                    <th>시가총액</th>
+                    <th>공시일</th>
+                    <th>지정일</th>
+                    <th>경과일</th>
+                    <th>판단일</th>
+                    <th>현재가</th>
+                    <th>15일 최고가</th>
+                    <th>해제 가능 주가</th>
                 </tr>
             </thead>
             <tbody>
             <tr>
                 <td>우리로</td>
                 <td>KOSDAQ</td>
-                <td class="num">3,261억원</td>
+                <td class="num">3,247억원</td>
                 <td class="center">2026-03-30</td>
                 <td class="center">2026-03-31</td>
                 <td class="center">2일</td>
@@ -121,26 +143,26 @@
         </div>
         
         <div style="overflow-x:auto">
-        <table class="data-table">
+        <table class="data-table tbl-warn">
             <thead>
                 <tr>
                     <th>종목명</th>
                     <th>시장</th>
-                    <th class="num">시가총액</th>
-                    <th class="center">공시일</th>
-                    <th class="center">지정일 ▼</th>
-                    <th class="center">경과일</th>
-                    <th class="center">판단일</th>
-                    <th class="num">현재가</th>
-                    <th class="center">15일 최고가</th>
-                    <th class="num">해제 가능 주가</th>
+                    <th>시가총액</th>
+                    <th>공시일</th>
+                    <th>지정일</th>
+                    <th>경과일</th>
+                    <th>판단일</th>
+                    <th>현재가</th>
+                    <th>15일 최고가</th>
+                    <th>해제 가능 주가</th>
                 </tr>
             </thead>
             <tbody>
             <tr>
                 <td>기가레인</td>
                 <td>KOSDAQ</td>
-                <td class="num">1,545억원</td>
+                <td class="num">1,577억원</td>
                 <td class="center">2026-03-27</td>
                 <td class="center">2026-03-30</td>
                 <td class="center">3일</td>
@@ -152,7 +174,7 @@
             <tr>
                 <td>대성하이텍</td>
                 <td>KOSDAQ</td>
-                <td class="num">2,016억원</td>
+                <td class="num">2,001억원</td>
                 <td class="center">2026-03-27</td>
                 <td class="center">2026-03-30</td>
                 <td class="center">3일</td>
@@ -164,7 +186,7 @@
             <tr>
                 <td>부광약품</td>
                 <td>KOSPI</td>
-                <td class="num">7,844억원</td>
+                <td class="num">7,814억원</td>
                 <td class="center">2026-03-27</td>
                 <td class="center">2026-03-30</td>
                 <td class="center">3일</td>
@@ -176,7 +198,7 @@
             <tr>
                 <td>우리넷</td>
                 <td>KOSDAQ</td>
-                <td class="num">1,177억원</td>
+                <td class="num">1,169억원</td>
                 <td class="center">2026-03-27</td>
                 <td class="center">2026-03-30</td>
                 <td class="center">3일</td>
@@ -188,7 +210,7 @@
             <tr style="background-color:#fee2e2">
                 <td>옵투스제약</td>
                 <td>KOSDAQ</td>
-                <td class="num">2,347억원</td>
+                <td class="num">2,349억원</td>
                 <td class="center">2026-03-26</td>
                 <td class="center">2026-03-27</td>
                 <td class="center">6일</td>
@@ -200,7 +222,7 @@
             <tr style="background-color:#fee2e2">
                 <td>페니트리움바이오</td>
                 <td>KOSDAQ</td>
-                <td class="num">5,918억원</td>
+                <td class="num">5,902억원</td>
                 <td class="center">2026-03-26</td>
                 <td class="center">2026-03-27</td>
                 <td class="center">6일</td>
@@ -212,7 +234,7 @@
             <tr style="background-color:#fee2e2">
                 <td>에이치브이엠</td>
                 <td>KOSDAQ</td>
-                <td class="num">1조 476억원</td>
+                <td class="num">1조 355억원</td>
                 <td class="center">2026-03-25</td>
                 <td class="center">2026-03-26</td>
                 <td class="center">7일</td>
@@ -248,7 +270,7 @@
             <tr style="background-color:#fee2e2">
                 <td>RF머트리얼즈</td>
                 <td>KOSDAQ</td>
-                <td class="num">5,811억원</td>
+                <td class="num">5,768억원</td>
                 <td class="center">2026-03-20</td>
                 <td class="center">2026-03-23</td>
                 <td class="center">10일</td>
@@ -260,7 +282,7 @@
             <tr style="background-color:#fee2e2">
                 <td>로킷헬스케어</td>
                 <td>KOSDAQ</td>
-                <td class="num">2조 2,034억원</td>
+                <td class="num">2조 1,924억원</td>
                 <td class="center">2026-03-20</td>
                 <td class="center">2026-03-23</td>
                 <td class="center">10일</td>
@@ -272,7 +294,7 @@
             <tr style="background-color:#fee2e2">
                 <td>오르비텍</td>
                 <td>KOSDAQ</td>
-                <td class="num">3,790억원</td>
+                <td class="num">3,750억원</td>
                 <td class="center">2026-03-20</td>
                 <td class="center">2026-03-23</td>
                 <td class="center">10일</td>
@@ -310,7 +332,7 @@
             <tr style="background-color:#fef2f2">
                 <td>메디아나</td>
                 <td>KOSDAQ</td>
-                <td class="num">3,668억원</td>
+                <td class="num">3,660억원</td>
                 <td class="center"><span style="color:#dc2626;font-weight:700">투자경고 지정예고</span></td>
                 <td class="center">2026-04-01</td>
                 <td class="center">2026-04-02</td>
@@ -320,7 +342,7 @@
             <tr>
                 <td>삼일씨엔에스</td>
                 <td>KOSPI</td>
-                <td class="num">1,255억원</td>
+                <td class="num">1,245억원</td>
                 <td class="center">소수계좌 매수관여 과다</td>
                 <td class="center">2026-04-01</td>
                 <td class="center">2026-04-02</td>
@@ -330,7 +352,7 @@
             <tr>
                 <td>케이엔더블유</td>
                 <td>KOSDAQ</td>
-                <td class="num">1,341억원</td>
+                <td class="num">1,339억원</td>
                 <td class="center">매매관여과다종목</td>
                 <td class="center">2026-04-01</td>
                 <td class="center">2026-04-02</td>
@@ -360,7 +382,7 @@
             <tr>
                 <td>티움바이오</td>
                 <td>KOSDAQ</td>
-                <td class="num">3,472억원</td>
+                <td class="num">3,460억원</td>
                 <td class="center">소수계좌 매수관여 과다</td>
                 <td class="center">2026-04-01</td>
                 <td class="center">2026-04-02</td>
@@ -370,7 +392,7 @@
             <tr>
                 <td>폴라리스AI</td>
                 <td>KOSDAQ</td>
-                <td class="num">1,098억원</td>
+                <td class="num">1,093억원</td>
                 <td class="center">투자경고 지정해제</td>
                 <td class="center">2026-04-01</td>
                 <td class="center">2026-04-02</td>
@@ -380,7 +402,7 @@
             <tr>
                 <td>LB세미콘</td>
                 <td>KOSDAQ</td>
-                <td class="num">2,318억원</td>
+                <td class="num">2,312억원</td>
                 <td class="center">소수지점/계좌</td>
                 <td class="center">2026-03-31</td>
                 <td class="center">2026-04-01</td>
@@ -390,7 +412,7 @@
             <tr>
                 <td>나무기술</td>
                 <td>KOSDAQ</td>
-                <td class="num">2,038억원</td>
+                <td class="num">2,031억원</td>
                 <td class="center">투자경고 지정해제</td>
                 <td class="center">2026-03-31</td>
                 <td class="center">2026-04-01</td>
@@ -400,7 +422,7 @@
             <tr>
                 <td>라이콤</td>
                 <td>KOSDAQ</td>
-                <td class="num">1,659억원</td>
+                <td class="num">1,650억원</td>
                 <td class="center">투자경고 지정해제</td>
                 <td class="center">2026-03-31</td>
                 <td class="center">2026-04-01</td>
@@ -410,7 +432,7 @@
             <tr>
                 <td>에스티큐브</td>
                 <td>KOSDAQ</td>
-                <td class="num">1조 1,285억원</td>
+                <td class="num">1조 1,183억원</td>
                 <td class="center">투자경고 지정해제</td>
                 <td class="center">2026-03-31</td>
                 <td class="center">2026-04-01</td>
@@ -420,7 +442,7 @@
             <tr>
                 <td>지니너스</td>
                 <td>KOSDAQ</td>
-                <td class="num">1,862억원</td>
+                <td class="num">1,856억원</td>
                 <td class="center">투자경고 지정해제</td>
                 <td class="center">2026-03-31</td>
                 <td class="center">2026-04-01</td>
@@ -430,7 +452,7 @@
             <tr style="background-color:#fef2f2">
                 <td>펄어비스</td>
                 <td>KOSDAQ</td>
-                <td class="num">4조 3,303억원</td>
+                <td class="num">4조 3,110억원</td>
                 <td class="center"><span style="color:#dc2626;font-weight:700">투자경고 지정예고</span></td>
                 <td class="center">2026-03-31</td>
                 <td class="center">2026-04-01</td>
@@ -450,7 +472,7 @@
             <tr>
                 <td>휴림로봇</td>
                 <td>KOSDAQ</td>
-                <td class="num">1조 3,116억원</td>
+                <td class="num">1조 3,009억원</td>
                 <td class="center">단일계좌거래량</td>
                 <td class="center">2026-03-31</td>
                 <td class="center">2026-04-01</td>
@@ -460,7 +482,7 @@
             <tr>
                 <td>DB손해보험</td>
                 <td>KOSPI</td>
-                <td class="num">11조 1,847억원</td>
+                <td class="num">11조 1,569억원</td>
                 <td class="center">소수지점/계좌</td>
                 <td class="center">2026-03-30</td>
                 <td class="center">2026-03-31</td>
@@ -470,7 +492,7 @@
             <tr>
                 <td>HC보광산업</td>
                 <td>KOSDAQ</td>
-                <td class="num">1,390억원</td>
+                <td class="num">1,388억원</td>
                 <td class="center">매매관여과다종목</td>
                 <td class="center">2026-03-30</td>
                 <td class="center">2026-03-31</td>
@@ -480,7 +502,7 @@
             <tr>
                 <td>SKAI</td>
                 <td>KOSDAQ</td>
-                <td class="num">1,614억원</td>
+                <td class="num">1,612억원</td>
                 <td class="center">투자경고 지정해제</td>
                 <td class="center">2026-03-30</td>
                 <td class="center">2026-03-31</td>
@@ -490,7 +512,7 @@
             <tr>
                 <td>비츠로셀</td>
                 <td>KOSDAQ</td>
-                <td class="num">1조 7,229억원</td>
+                <td class="num">1조 7,184억원</td>
                 <td class="center">소수계좌 매수관여 과다</td>
                 <td class="center">2026-03-30</td>
                 <td class="center">2026-03-31</td>
@@ -500,7 +522,7 @@
             <tr>
                 <td>센서뷰</td>
                 <td>KOSDAQ</td>
-                <td class="num">1,761억원</td>
+                <td class="num">1,751억원</td>
                 <td class="center">투자경고 지정해제</td>
                 <td class="center">2026-03-30</td>
                 <td class="center">2026-03-31</td>
@@ -510,7 +532,7 @@
             <tr style="background-color:#fef2f2">
                 <td>애경케미칼</td>
                 <td>KOSPI</td>
-                <td class="num">7,302억원</td>
+                <td class="num">7,346억원</td>
                 <td class="center"><span style="color:#dc2626;font-weight:700">투자경고 지정예고</span></td>
                 <td class="center">2026-03-30</td>
                 <td class="center">2026-03-31</td>
@@ -520,7 +542,7 @@
             <tr>
                 <td>에이치엠넥스</td>
                 <td>KOSDAQ</td>
-                <td class="num">2,614억원</td>
+                <td class="num">2,608억원</td>
                 <td class="center">투자경고 지정해제</td>
                 <td class="center">2026-03-30</td>
                 <td class="center">2026-03-31</td>
@@ -530,7 +552,7 @@
             <tr>
                 <td>에치에프알</td>
                 <td>KOSDAQ</td>
-                <td class="num">4,512억원</td>
+                <td class="num">4,518억원</td>
                 <td class="center">투자경고 지정해제</td>
                 <td class="center">2026-03-30</td>
                 <td class="center">2026-03-31</td>
@@ -540,7 +562,7 @@
             <tr>
                 <td>엠케이전자</td>
                 <td>KOSDAQ</td>
-                <td class="num">4,205억원</td>
+                <td class="num">4,194억원</td>
                 <td class="center">소수계좌 매수관여 과다</td>
                 <td class="center">2026-03-30</td>
                 <td class="center">2026-03-31</td>
@@ -550,7 +572,7 @@
             <tr>
                 <td>오이솔루션</td>
                 <td>KOSDAQ</td>
-                <td class="num">5,288억원</td>
+                <td class="num">5,227억원</td>
                 <td class="center">소수계좌 매수관여 과다</td>
                 <td class="center">2026-03-30</td>
                 <td class="center">2026-03-31</td>
@@ -560,7 +582,7 @@
             <tr>
                 <td>와이솔</td>
                 <td>KOSDAQ</td>
-                <td class="num">1,766억원</td>
+                <td class="num">1,764억원</td>
                 <td class="center">소수지점/계좌</td>
                 <td class="center">2026-03-30</td>
                 <td class="center">2026-03-31</td>
@@ -570,7 +592,7 @@
             <tr>
                 <td>유투바이오</td>
                 <td>KOSDAQ</td>
-                <td class="num">3,593억원</td>
+                <td class="num">3,569억원</td>
                 <td class="center">투자경고 지정해제</td>
                 <td class="center">2026-03-30</td>
                 <td class="center">2026-03-31</td>
@@ -580,7 +602,7 @@
             <tr>
                 <td>큐알티</td>
                 <td>KOSDAQ</td>
-                <td class="num">1,928억원</td>
+                <td class="num">1,927억원</td>
                 <td class="center">소수지점/계좌</td>
                 <td class="center">2026-03-30</td>
                 <td class="center">2026-03-31</td>
@@ -590,7 +612,7 @@
             <tr style="background-color:#fef2f2">
                 <td>파워넷</td>
                 <td>KOSDAQ</td>
-                <td class="num">1,352억원</td>
+                <td class="num">1,342억원</td>
                 <td class="center"><span style="color:#dc2626;font-weight:700">투자경고 지정예고</span></td>
                 <td class="center">2026-03-30</td>
                 <td class="center">2026-03-31</td>
@@ -600,7 +622,7 @@
             <tr style="background-color:#fef2f2">
                 <td>피노</td>
                 <td>KOSDAQ</td>
-                <td class="num">5,872억원</td>
+                <td class="num">5,804억원</td>
                 <td class="center"><span style="color:#dc2626;font-weight:700">투자경고 지정예고</span></td>
                 <td class="center">2026-03-30</td>
                 <td class="center">2026-03-31</td>
@@ -610,7 +632,7 @@
             <tr style="background-color:#fef2f2">
                 <td>누리플렉스</td>
                 <td>KOSDAQ</td>
-                <td class="num">1,206억원</td>
+                <td class="num">1,204억원</td>
                 <td class="center"><span style="color:#dc2626;font-weight:700">투자경고 지정예고</span></td>
                 <td class="center">2026-03-27</td>
                 <td class="center">2026-03-30</td>
@@ -620,7 +642,7 @@
             <tr>
                 <td>대한광통신</td>
                 <td>KOSDAQ</td>
-                <td class="num">1조 5,875억원</td>
+                <td class="num">1조 5,751억원</td>
                 <td class="center">투자경고 지정해제</td>
                 <td class="center">2026-03-27</td>
                 <td class="center">2026-03-30</td>
@@ -630,7 +652,7 @@
             <tr>
                 <td>비나텍</td>
                 <td>KOSDAQ</td>
-                <td class="num">8,281억원</td>
+                <td class="num">8,267억원</td>
                 <td class="center">투자경고 지정해제</td>
                 <td class="center">2026-03-27</td>
                 <td class="center">2026-03-30</td>
@@ -640,7 +662,7 @@
             <tr>
                 <td>성호전자</td>
                 <td>KOSDAQ</td>
-                <td class="num">3조 1,915억원</td>
+                <td class="num">3조 1,561억원</td>
                 <td class="center">투자경고 지정해제</td>
                 <td class="center">2026-03-27</td>
                 <td class="center">2026-03-30</td>
@@ -650,7 +672,7 @@
             <tr>
                 <td>아나패스</td>
                 <td>KOSDAQ</td>
-                <td class="num">2,032억원</td>
+                <td class="num">2,031억원</td>
                 <td class="center">소수지점/계좌</td>
                 <td class="center">2026-03-27</td>
                 <td class="center">2026-03-30</td>
