@@ -465,19 +465,19 @@ def render_table(stocks, category, price_cache):
 
     return f"""
         <div style="overflow-x:auto">
-        <table class="data-table">
+        <table class="data-table tbl-warn">
             <thead>
                 <tr>
                     <th>종목명</th>
                     <th>시장</th>
-                    <th class="num">시가총액</th>
-                    <th class="center">공시일</th>
-                    <th class="center">지정일 ▼</th>
-                    <th class="center">경과일</th>
-                    <th class="center">판단일</th>
-                    <th class="num">현재가</th>
-                    <th class="center">15일 최고가</th>
-                    <th class="num">해제 가능 주가</th>
+                    <th>시가총액</th>
+                    <th>공시일</th>
+                    <th>지정일</th>
+                    <th>경과일</th>
+                    <th>판단일</th>
+                    <th>현재가</th>
+                    <th>15일 최고가</th>
+                    <th>해제 가능 주가</th>
                 </tr>
             </thead>
             <tbody>{rows_html}
@@ -626,7 +626,29 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache):
         }}
         .data-table {{
             width: 100%; border-collapse: collapse; font-size: 0.82rem;
+            table-layout: fixed;
         }}
+        .data-table.tbl-warn {{ /* 투자위험/경고 공통 */ }}
+        .data-table.tbl-warn th:nth-child(1),
+        .data-table.tbl-warn td:nth-child(1) {{ width: 14%; }} /* 종목명 */
+        .data-table.tbl-warn th:nth-child(2),
+        .data-table.tbl-warn td:nth-child(2) {{ width: 8%; }}  /* 시장 */
+        .data-table.tbl-warn th:nth-child(3),
+        .data-table.tbl-warn td:nth-child(3) {{ width: 11%; }} /* 시가총액 */
+        .data-table.tbl-warn th:nth-child(4),
+        .data-table.tbl-warn td:nth-child(4) {{ width: 11%; }} /* 공시일 */
+        .data-table.tbl-warn th:nth-child(5),
+        .data-table.tbl-warn td:nth-child(5) {{ width: 11%; }} /* 지정일 */
+        .data-table.tbl-warn th:nth-child(6),
+        .data-table.tbl-warn td:nth-child(6) {{ width: 7%; }}  /* 경과일 */
+        .data-table.tbl-warn th:nth-child(7),
+        .data-table.tbl-warn td:nth-child(7) {{ width: 11%; }} /* 판단일 */
+        .data-table.tbl-warn th:nth-child(8),
+        .data-table.tbl-warn td:nth-child(8) {{ width: 10%; }} /* 현재가 */
+        .data-table.tbl-warn th:nth-child(9),
+        .data-table.tbl-warn td:nth-child(9) {{ width: 9%; }}  /* 15일 최고가 */
+        .data-table.tbl-warn th:nth-child(10),
+        .data-table.tbl-warn td:nth-child(10) {{ width: 10%; }} /* 해제가능주가 */
         .data-table th {{
             padding: 8px 10px; text-align: center;
             font-size: 0.74rem; font-weight: 600; color: #6b7280;
