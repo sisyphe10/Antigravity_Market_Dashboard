@@ -61,6 +61,30 @@
         .note-section.review h4 { background: #fff3e0; color: #e65100; }
 
         .empty-msg { text-align: center; color: #aaa; padding: 60px 0; font-size: 0.9rem; }
+
+        /* Tabs */
+        .tab-bar { display: flex; gap: 0; margin-bottom: 0; border-bottom: 2px solid #333; }
+        .tab-btn { padding: 10px 28px; font-size: 0.95rem; font-weight: 700; cursor: pointer; background: #f0f0f0; border: none; color: #888; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+        .tab-btn.active { background: #fff; color: #222; border-bottom: 2px solid #333; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* Ideas */
+        .ideas-search { width: 100%; max-width: 400px; padding: 10px 14px; border: 2px solid #ddd; font-size: 0.95rem; outline: none; margin-bottom: 20px; font-family: inherit; }
+        .ideas-search:focus { border-color: #333; }
+        .stock-group { margin-bottom: 24px; }
+        .stock-header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #333; color: #fff; cursor: pointer; user-select: none; }
+        .stock-header .stock-name { font-size: 1rem; font-weight: 700; }
+        .stock-header .stock-code { font-size: 0.8rem; color: #aaa; }
+        .stock-header .stock-count { margin-left: auto; font-size: 0.8rem; color: #ccc; }
+        .stock-header .arrow { transition: transform 0.2s; }
+        .stock-header.open .arrow { transform: rotate(90deg); }
+        .stock-body { display: none; border: 1px solid #e0e0e0; border-top: none; }
+        .stock-body.open { display: block; }
+        .idea-row { display: flex; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; font-size: 0.88rem; }
+        .idea-row:last-child { border-bottom: none; }
+        .idea-date { flex: 0 0 110px; font-weight: 600; color: #555; }
+        .idea-text { flex: 1; line-height: 1.6; white-space: pre-wrap; color: #333; }
     </style>
 </head>
 <body>
@@ -113,8 +137,18 @@ async function checkPw(v) {
         </div>
     </header>
     <div class="content">
-        <div class="timeline" id="timeline">
-            <div class="empty-msg">로딩 중...</div>
+        <div class="tab-bar">
+            <button class="tab-btn active" onclick="switchTab('journal')">Journal</button>
+            <button class="tab-btn" onclick="switchTab('ideas')">💡 Ideas</button>
+        </div>
+        <div id="panelJournal" class="tab-panel active" style="padding-top:24px;">
+            <div class="timeline" id="timeline">
+                <div class="empty-msg">로딩 중...</div>
+            </div>
+        </div>
+        <div id="panelIdeas" class="tab-panel" style="padding-top:24px;">
+            <input type="text" class="ideas-search" id="ideasSearch" placeholder="종목명 검색..." oninput="filterIdeas()">
+            <div id="ideasList"><div class="empty-msg">로딩 중...</div></div>
         </div>
     </div>
 </div>
@@ -377,6 +411,112 @@ async function loadJournal() {
         document.getElementById('timeline').innerHTML = '<div class="empty-msg">로딩 실패: ' + err.message + '</div>';
     }
 }
+// ============================================================
+// Tab switching
+// ============================================================
+var _ideasLoaded = false;
+function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(function(b, i) {
+        b.classList.toggle('active', (tab === 'journal' && i === 0) || (tab === 'ideas' && i === 1));
+    });
+    document.getElementById('panelJournal').classList.toggle('active', tab === 'journal');
+    document.getElementById('panelIdeas').classList.toggle('active', tab === 'ideas');
+    if (tab === 'ideas' && !_ideasLoaded) { _ideasLoaded = true; loadIdeas(); }
+}
+
+// ============================================================
+// Ideas tab
+// ============================================================
+var _ideasData = {}; // { 종목: [{ date, dow, code, idea }] }
+
+async function loadIdeas() {
+    try {
+        var res = await fetch(sheetUrl('Ideas'));
+        var text = await res.text();
+        var json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+        var rows = json.table.rows;
+
+        _ideasData = {};
+        rows.forEach(function(row) {
+            var c = row.c;
+            if (!c[0] || !c[0].v) return;
+            var dateVal = String(c[0].v);
+            if (dateVal === '날짜') return;
+            var m = dateVal.match(/Date\((\d+),(\d+),(\d+)\)/);
+            var dateStr;
+            if (m) {
+                var y = parseInt(m[1]), mo = parseInt(m[2]) + 1, d = parseInt(m[3]);
+                dateStr = y + '-' + String(mo).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+            } else { dateStr = dateVal; }
+
+            function val(i) { return (c[i] && c[i].v != null) ? String(c[i].v) : ''; }
+            var dow = val(1);
+            var code = val(2);
+            var stock = val(3);
+            var idea = val(4);
+            if (!stock) return;
+
+            if (!_ideasData[stock]) _ideasData[stock] = { code: code, items: [] };
+            _ideasData[stock].items.push({ date: dateStr, dow: dow, idea: idea });
+        });
+
+        // 종목별 날짜 내림차순 정렬
+        Object.keys(_ideasData).forEach(function(k) {
+            _ideasData[k].items.sort(function(a, b) { return b.date.localeCompare(a.date); });
+        });
+
+        renderIdeas();
+    } catch(err) {
+        document.getElementById('ideasList').innerHTML = '<div class="empty-msg">로딩 실패: ' + err.message + '</div>';
+    }
+}
+
+function renderIdeas(filter) {
+    var keys = Object.keys(_ideasData).sort();
+    if (filter) {
+        var f = filter.toLowerCase();
+        keys = keys.filter(function(k) { return k.toLowerCase().includes(f) || _ideasData[k].code.includes(f); });
+    }
+    if (keys.length === 0) {
+        document.getElementById('ideasList').innerHTML = '<div class="empty-msg">데이터가 없습니다</div>';
+        return;
+    }
+    var html = '';
+    keys.forEach(function(stock) {
+        var d = _ideasData[stock];
+        var codeStr = d.code ? ' (' + d.code + ')' : '';
+        html += '<div class="stock-group" data-stock="' + stock + '">';
+        html += '<div class="stock-header" onclick="toggleStock(this)">';
+        html += '<span class="arrow">▶</span>';
+        html += '<span class="stock-name">' + stock + '</span>';
+        html += '<span class="stock-code">' + d.code + '</span>';
+        html += '<span class="stock-count">' + d.items.length + '건</span>';
+        html += '</div>';
+        html += '<div class="stock-body">';
+        d.items.forEach(function(item) {
+            var dowNames = ['일','월','화','수','목','금','토'];
+            var dow = item.dow;
+            if (!dow) { dow = dowNames[new Date(item.date).getDay()]; }
+            html += '<div class="idea-row">';
+            html += '<div class="idea-date">' + item.date + ' (' + dow + ')</div>';
+            html += '<div class="idea-text">' + (item.idea || '-').replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</div>';
+            html += '</div>';
+        });
+        html += '</div></div>';
+    });
+    document.getElementById('ideasList').innerHTML = html;
+}
+
+function toggleStock(el) {
+    el.classList.toggle('open');
+    el.nextElementSibling.classList.toggle('open');
+}
+
+function filterIdeas() {
+    var q = document.getElementById('ideasSearch').value.trim();
+    renderIdeas(q);
+}
+
 // loadJournal() is called after password verification
 </script>
 </body>
