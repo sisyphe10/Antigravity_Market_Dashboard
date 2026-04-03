@@ -289,7 +289,8 @@ async def run_daily_summary(context, date_str):
         for idx, line in enumerate(lines):
             stripped = line.strip()
             if stripped.startswith('## ') and not stripped.startswith('## 출처'):
-                title = stripped[3:].strip().replace('{RED}', '')
+                is_important = '{RED}' in stripped
+                title = stripped[3:].strip().replace('{RED}', '').strip()
                 # 다음 불릿 포인트 찾기
                 first_bullet = ''
                 for j in range(idx + 1, min(idx + 10, len(lines))):
@@ -299,7 +300,7 @@ async def run_daily_summary(context, date_str):
                         break
                     if bl.startswith('## '):
                         break
-                headlines.append({'title': title, 'summary': first_bullet})
+                headlines.append({'title': title, 'summary': first_bullet, 'important': is_important})
         # __file__ = .../execution/research_bot/research_bot.py → 3단계 상위 = repo root
         headlines_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'research_headlines.json')
         try:

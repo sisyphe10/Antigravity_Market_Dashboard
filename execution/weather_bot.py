@@ -883,10 +883,18 @@ async def daily_headlines_job(context: ContextTypes.DEFAULT_TYPE):
                 logging.info(f"Research headlines 스킵: 오래된 데이터 ({date})")
                 headlines = []
             if headlines:
+                # 엄중(important) 먼저, 일반 나중에 정렬
+                important = [h for h in headlines if isinstance(h, dict) and h.get('important')]
+                normal = [h for h in headlines if not (isinstance(h, dict) and h.get('important'))]
+                sorted_headlines = important + normal
+
                 msg = f"📋 <b>Research Notes ({date})</b>\n\n"
-                for h in headlines:
+                for i, h in enumerate(sorted_headlines):
                     title = h.get('title', '') if isinstance(h, dict) else h
                     summary = h.get('summary', '') if isinstance(h, dict) else ''
+                    # 엄중 → 일반 전환 시 구분선
+                    if i == len(important) and important:
+                        msg += "————————————————\n\n"
                     msg += f"- <b><u>{title}</u></b>\n"
                     if summary:
                         msg += f"  {summary}\n"
