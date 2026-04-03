@@ -226,7 +226,7 @@ def format_message(date, nav_data, returns_data, top_5, bottom_5):
                         valid_periods.append(f"{p} {val}")
             if valid_periods:
                 name = display_names.get(product, product)
-                msg += f"<b>{name}</b>\n"
+                msg += f"▪ <b>{name}</b>\n"
                 # 3개씩 끊어서 줄바꿈
                 for i in range(0, len(valid_periods), 3):
                     msg += " | ".join(valid_periods[i:i+3]) + "\n"
