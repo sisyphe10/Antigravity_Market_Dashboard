@@ -883,22 +883,17 @@ async def daily_headlines_job(context: ContextTypes.DEFAULT_TYPE):
                 logging.info(f"Research headlines 스킵: 오래된 데이터 ({date})")
                 headlines = []
             if headlines:
-                def esc_md2(s):
-                    for c in '_*[]()~`>#+-=|{}.!':
-                        s = s.replace(c, f'\\{c}')
-                    return s
-
-                msg = f"📋 *Research Notes \\({esc_md2(date)}\\)*\n\n"
+                msg = f"📋 <b>Research Notes ({date})</b>\n\n"
                 for h in headlines:
                     title = h.get('title', '') if isinstance(h, dict) else h
                     summary = h.get('summary', '') if isinstance(h, dict) else ''
-                    msg += f"\\- __{esc_md2(title)}__\n"
+                    msg += f"- <b><u>{title}</u></b>\n"
                     if summary:
-                        msg += f"  {esc_md2(summary)}\n"
+                        msg += f"  {summary}\n"
                     msg += "\n"
                 for chat_id in SUBSCRIBERS:
                     try:
-                        await context.bot.send_message(chat_id=chat_id, text=msg, parse_mode='MarkdownV2')
+                        await context.bot.send_message(chat_id=chat_id, text=msg, parse_mode='HTML')
                     except Exception as e:
                         logging.error(f"Research headline 전송 실패: {e}")
                 logging.info(f"Research headlines sent: {len(headlines)}건")
