@@ -71,25 +71,25 @@
         .tab-panel.active { display: block; }
 
         /* Ideas */
-        .ideas-search { width: 100%; max-width: 400px; padding: 10px 14px; border: 2px solid #ddd; font-size: 0.95rem; outline: none; margin-bottom: 20px; font-family: inherit; }
+        .ideas-search { width: 100%; max-width: 400px; padding: 10px 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 0.95rem; outline: none; margin-bottom: 20px; font-family: inherit; }
         .ideas-search:focus { border-color: #333; }
         .stock-group { margin-bottom: 24px; }
-        .stock-header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #333; color: #fff; cursor: pointer; user-select: none; }
+        .stock-header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #333; color: #fff; cursor: pointer; user-select: none; border-radius: 8px 8px 0 0; }
         .stock-header .stock-name { font-size: 1rem; font-weight: 700; }
         .stock-header .stock-code { font-size: 0.8rem; color: #aaa; }
         .stock-header .stock-count { margin-left: auto; font-size: 0.8rem; color: #ccc; }
         .stock-header .arrow { transition: transform 0.2s; }
         .stock-header.open .arrow { transform: rotate(90deg); }
-        .stock-body { display: none; border: 1px solid #e0e0e0; border-top: none; }
+        .stock-body { display: none; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 8px 8px; overflow: hidden; }
         .stock-body.open { display: block; }
         .idea-row { display: flex; align-items: flex-start; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; font-size: 0.88rem; }
         .idea-row:last-child { border-bottom: none; }
         .idea-date { flex: 0 0 110px; font-weight: 600; color: #555; }
         .idea-action { flex: 0 0 52px; text-align: center; }
         .idea-action span { display: inline-block; padding: 3px 10px; font-size: 0.82rem; font-weight: 700; }
-        .action-buy { background: #FADBD8; color: #c0392b; }
-        .action-sell { background: #D6EAF8; color: #1565c0; }
-        .action-hold { background: #f0f0f0; color: #666; }
+        .action-buy { background: #FADBD8; color: #c0392b; border-radius: 4px; }
+        .action-sell { background: #D6EAF8; color: #1565c0; border-radius: 4px; }
+        .action-hold { background: #f0f0f0; color: #666; border-radius: 4px; }
         .idea-text { flex: 1; line-height: 1.6; white-space: pre-wrap; color: #333; padding-left: 10px; }
     </style>
 </head>
