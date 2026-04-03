@@ -81,10 +81,15 @@
         .stock-header.open .arrow { transform: rotate(90deg); }
         .stock-body { display: none; border: 1px solid #e0e0e0; border-top: none; }
         .stock-body.open { display: block; }
-        .idea-row { display: flex; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; font-size: 0.88rem; }
+        .idea-row { display: flex; align-items: flex-start; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; font-size: 0.88rem; }
         .idea-row:last-child { border-bottom: none; }
         .idea-date { flex: 0 0 110px; font-weight: 600; color: #555; }
-        .idea-text { flex: 1; line-height: 1.6; white-space: pre-wrap; color: #333; }
+        .idea-action { flex: 0 0 52px; text-align: center; }
+        .idea-action span { display: inline-block; padding: 2px 8px; font-size: 0.75rem; font-weight: 700; }
+        .action-buy { background: #FADBD8; color: #c0392b; }
+        .action-sell { background: #D6EAF8; color: #1565c0; }
+        .action-hold { background: #f0f0f0; color: #666; }
+        .idea-text { flex: 1; line-height: 1.6; white-space: pre-wrap; color: #333; padding-left: 10px; }
     </style>
 </head>
 <body>
@@ -453,11 +458,12 @@ async function loadIdeas() {
             var dow = val(1);
             var code = val(2);
             var stock = val(3);
-            var idea = val(4);
+            var action = val(4);
+            var idea = val(5);
             if (!stock) return;
 
             if (!_ideasData[stock]) _ideasData[stock] = { code: code, items: [] };
-            _ideasData[stock].items.push({ date: dateStr, dow: dow, idea: idea });
+            _ideasData[stock].items.push({ date: dateStr, dow: dow, action: action, idea: idea });
         });
 
         // 종목별 날짜 내림차순 정렬
@@ -497,8 +503,12 @@ function renderIdeas(filter) {
             var dowNames = ['일','월','화','수','목','금','토'];
             var dow = item.dow;
             if (!dow) { dow = dowNames[new Date(item.date).getDay()]; }
+            var actionCls = 'action-hold', actionLabel = item.action || '-';
+            if (item.action === '매수') { actionCls = 'action-buy'; }
+            else if (item.action === '매도') { actionCls = 'action-sell'; }
             html += '<div class="idea-row">';
             html += '<div class="idea-date">' + item.date + ' (' + dow + ')</div>';
+            html += '<div class="idea-action"><span class="' + actionCls + '">' + actionLabel + '</span></div>';
             html += '<div class="idea-text">' + (item.idea || '-').replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</div>';
             html += '</div>';
         });
