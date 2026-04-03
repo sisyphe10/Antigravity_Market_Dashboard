@@ -190,10 +190,10 @@ def format_message(date, nav_data, returns_data, top_5, bottom_5):
     """텔레그램 메시지 포맷 (HTML)"""
     LINE = "━━━━━━━━━━━━━━━"
 
-    # 리포트 날짜 기준
-    report_date = get_report_date()
-    day_of_week = ["월", "화", "수", "목", "금", "토", "일"][report_date.weekday()]
-    date_str = f"{report_date.strftime('%Y-%m-%d')} ({day_of_week})"
+    # 실제 데이터 날짜 기준
+    data_date = date.date() if hasattr(date, 'date') else date
+    day_of_week = ["월", "화", "수", "목", "금", "토", "일"][data_date.weekday()]
+    date_str = f"{data_date.strftime('%Y-%m-%d')} ({day_of_week})"
 
     msg = f"<b>📊 포트폴리오 리포트</b>\n{date_str}\n"
 
@@ -226,7 +226,7 @@ def format_message(date, nav_data, returns_data, top_5, bottom_5):
                         valid_periods.append(f"{p} {val}")
             if valid_periods:
                 name = display_names.get(product, product)
-                msg += f"▪ <b>{name}</b>\n"
+                msg += f"• <b>{name}</b>\n"
                 # 3개씩 끊어서 줄바꿈
                 for i in range(0, len(valid_periods), 3):
                     msg += " | ".join(valid_periods[i:i+3]) + "\n"
