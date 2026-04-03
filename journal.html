@@ -85,7 +85,7 @@
         .idea-row:last-child { border-bottom: none; }
         .idea-date { flex: 0 0 110px; font-weight: 600; color: #555; }
         .idea-action { flex: 0 0 52px; text-align: center; }
-        .idea-action span { display: inline-block; padding: 2px 8px; font-size: 0.75rem; font-weight: 700; }
+        .idea-action span { display: inline-block; padding: 3px 10px; font-size: 0.82rem; font-weight: 700; }
         .action-buy { background: #FADBD8; color: #c0392b; }
         .action-sell { background: #D6EAF8; color: #1565c0; }
         .action-hold { background: #f0f0f0; color: #666; }
@@ -500,14 +500,11 @@ function renderIdeas(filter) {
         html += '</div>';
         html += '<div class="stock-body">';
         d.items.forEach(function(item) {
-            var dowNames = ['일','월','화','수','목','금','토'];
-            var dow = item.dow;
-            if (!dow) { dow = dowNames[new Date(item.date).getDay()]; }
             var actionCls = 'action-hold', actionLabel = item.action || '-';
             if (item.action === '매수') { actionCls = 'action-buy'; }
             else if (item.action === '매도') { actionCls = 'action-sell'; }
             html += '<div class="idea-row">';
-            html += '<div class="idea-date">' + item.date + ' (' + dow + ')</div>';
+            html += '<div class="idea-date">' + item.date + '</div>';
             html += '<div class="idea-action"><span class="' + actionCls + '">' + actionLabel + '</span></div>';
             html += '<div class="idea-text">' + (item.idea || '-').replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</div>';
             html += '</div>';
