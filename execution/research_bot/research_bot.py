@@ -300,7 +300,8 @@ async def run_daily_summary(context, date_str):
                     if bl.startswith('## '):
                         break
                 headlines.append({'title': title, 'summary': first_bullet})
-        headlines_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'research_headlines.json')
+        # __file__ = .../execution/research_bot/research_bot.py → 3단계 상위 = repo root
+        headlines_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'research_headlines.json')
         try:
             import json as _json
             _json.dump({'date': date_str, 'headlines': headlines}, open(headlines_file, 'w', encoding='utf-8'), ensure_ascii=False)
