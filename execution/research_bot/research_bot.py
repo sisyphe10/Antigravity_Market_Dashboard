@@ -21,7 +21,7 @@ ALLOWED_CHAT_ID = int(os.getenv("TELEGRAM_CHAT_ID", "0"))
 KST = datetime.timezone(datetime.timedelta(hours=9))
 
 # DB 초기화
-from messages_db import add_message, get_messages_by_date, get_today_count, mark_processed
+from messages_db import add_message, get_messages_by_date, get_today_count, mark_processed, is_duplicate
 
 
 def fetch_article(url):
@@ -126,6 +126,11 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except:
             forward_source = 'unknown'
 
+    # 중복 체크 (초반 10글자)
+    if is_duplicate(today_str(), text):
+        await msg.reply_text("⚠️ 중복된 메시지입니다. 저장하지 않았습니다.")
+        return
+
     # URL이 있으면 기사 본문 스크래핑
     article_content = None
     if url:
@@ -140,12 +145,6 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         forward_source=forward_source,
         telegram_message_id=msg.message_id
     )
-
-    count = get_today_count(today_str())
-    reply = f"📥 저장됨 (오늘 {count}건)"
-    if article_content:
-        reply += f"\n📰 기사 본문 수집 완료"
-    await msg.reply_text(reply)
 
 
 async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -172,9 +171,6 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         telegram_message_id=msg.message_id
     )
 
-    count = get_today_count(today_str())
-    await msg.reply_text(f"📸 사진 저장됨 (오늘 {count}건)")
-
 
 async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_chat.id != ALLOWED_CHAT_ID:
@@ -198,9 +194,6 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE):
         media_path=file_path,
         telegram_message_id=msg.message_id
     )
-
-    count = get_today_count(today_str())
-    await msg.reply_text(f"📎 파일 저장됨 (오늘 {count}건)")
 
 
 # ============================================================
