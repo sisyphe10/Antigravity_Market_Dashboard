@@ -381,7 +381,7 @@ async function loadJournal() {
 
             // Market data
             html += '<div class="market-grid">';
-            html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;border:1px solid #333;overflow:hidden;flex:0 0 auto;"><div class="market-col kospi"><h3>코스피</h3><div class="mkt-body">';
+            html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;border:1px solid #333;overflow:hidden;flex:0 0 auto;align-self:flex-start;"><div class="market-col kospi"><h3>코스피</h3><div class="mkt-body">';
             html += mktRow('지수', e.kClose, '#f0f0f0');
             html += mktChgRow('변동', e.kChg);
             html += mktRow('거래대금', e.kVol, '#f0f0f0');
