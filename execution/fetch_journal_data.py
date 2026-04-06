@@ -204,7 +204,7 @@ def write_to_sheet(data):
                 data.get('q_up', ''), data.get('q_flat', ''), data.get('q_down', ''),
                 data.get('q_per', ''), data.get('q_for', ''), data.get('q_inst', ''),
                 data.get('k_ma120', ''), data.get('q_ma120', ''),
-                data.get('nq_close', ''), data.get('nq_chg', ''), data.get('nq_vol', ''), data.get('nq_vol_chg', ''),
+                '', '', '', '',
                 data.get('f_close', ''), data.get('f_chg', ''), data.get('f_vol', ''), data.get('f_vol_chg', ''),
                 '-', '-', '-',
                 data.get('f_per', ''), data.get('f_for', ''), data.get('f_inst', ''),
@@ -282,43 +282,7 @@ def main(target_date=None):
         idx.update(rf)
         logging.info(f'상승/하락: {rf.get("k_up")}/{rf.get("k_flat")}/{rf.get("k_down")}')
 
-    # 4. NASDAQ 전일 종가 (dataset.csv)
-    try:
-        import pandas as pd
-        ds = pd.read_csv('dataset.csv')
-        nq = ds[ds['제품명'] == 'NASDAQ'].sort_values('날짜')
-        if target_date:
-            # 특정 날짜의 NASDAQ: 한국 날짜 기준 전일 미국 종가
-            t_date = f'{target_date[:4]}-{target_date[4:6]}-{target_date[6:8]}'
-            nq_before = nq[nq['날짜'] <= t_date]
-            if len(nq_before) >= 2:
-                nq_latest = nq_before.iloc[-1]
-                prev = float(nq_before.iloc[-2]['가격'])
-                idx['nq_close'] = float(nq_latest['가격'])
-                chg = round((float(nq_latest['가격']) / prev - 1) * 100, 2)
-                idx['nq_chg'] = f'{chg:+.1f}%'
-        else:
-            if not nq.empty:
-                nq_latest = nq.iloc[-1]
-                idx['nq_close'] = float(nq_latest['가격'])
-                if len(nq) >= 2:
-                    prev = float(nq.iloc[-2]['가격'])
-                    chg = round((float(nq_latest['가격']) / prev - 1) * 100, 2)
-                    idx['nq_chg'] = f'{chg:+.1f}%'
-                # NASDAQ 거래량 (FDR/yfinance)
-                import FinanceDataReader as fdr
-                nq_df = fdr.DataReader('^IXIC', '2026-01-01')
-                if not nq_df.empty and len(nq_df) >= 2:
-                    vol = nq_df.iloc[-1]['Volume']
-                    prev_vol = nq_df.iloc[-2]['Volume']
-                    idx['nq_vol'] = round(vol / 1e9, 1)  # 십억주(B)
-                    vol_chg = round((vol / prev_vol - 1) * 100)
-                    idx['nq_vol_chg'] = f'{vol_chg:+d}%'
-        logging.info(f'NASDAQ: {idx.get("nq_close", "N/A")} ({idx.get("nq_chg", "")}) Vol: {idx.get("nq_vol", "")}')
-    except Exception as e:
-        logging.warning(f'NASDAQ 수집 실패: {e}')
-
-    # 5. 120일선 계산 (Wrap_NAV.xlsx 기준가)
+    # 4. 120일선 계산 (Wrap_NAV.xlsx 기준가)
     try:
         import pandas as pd
         nav = pd.read_excel('Wrap_NAV.xlsx', sheet_name='기준가')
