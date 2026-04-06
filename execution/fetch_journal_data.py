@@ -21,19 +21,26 @@ HEADERS = {'User-Agent': 'Mozilla/5.0'}
 KST = timezone(timedelta(hours=9))
 
 
-def get_index_data():
-    """네이버 금융에서 KOSPI/KOSDAQ 지수 + 거래대금"""
+def get_index_data(target_date=None):
+    """네이버 금융에서 KOSPI/KOSDAQ 지수 + 거래대금
+    target_date: 'YYYYMMDD' 형식. None이면 최신 데이터."""
+    # target_date를 네이버 형식(YY.MM.DD)으로 변환
+    target_short = None
+    if target_date:
+        target_short = f'{target_date[2:4]}.{target_date[4:6]}.{target_date[6:8]}'
+
     result = {}
     for code, prefix in [('KOSPI', 'k'), ('KOSDAQ', 'q')]:
         r = requests.get(f'https://finance.naver.com/sise/sise_index_day.naver?code={code}', headers=HEADERS, timeout=10)
         soup = BeautifulSoup(r.text, 'html.parser')
         table = soup.select('table')[0]
         rows = table.select('tr')
-        # 첫 번째 데이터 행 (오늘)
         for row in rows:
             cells = row.select('td')
             if len(cells) >= 6:
                 date_text = cells[0].text.strip()
+                if target_short and date_text != target_short:
+                    continue
                 close = cells[1].text.strip().replace(',', '')
                 chg_rate = cells[3].text.strip()
                 volume_mil = cells[5].text.strip().replace(',', '')  # 거래대금(백만)
@@ -45,7 +52,7 @@ def get_index_data():
                 result[f'{prefix}_chg'] = chg_rate
                 result[f'{prefix}_vol'] = volume_eok
                 raw = date_text.replace('.', '')
-                result['date'] = f'20{raw}' if len(raw) == 6 else raw  # 26.03.31 → 20260331, 2026.03.31 → 20260331
+                result['date'] = f'20{raw}' if len(raw) == 6 else raw
                 break
 
     # 거래대금 변동률 (전일 대비)
@@ -55,16 +62,28 @@ def get_index_data():
         table = soup.select('table')[0]
         rows = table.select('tr')
         vols = []
+        found_target = False
         for row in rows:
             cells = row.select('td')
             if len(cells) >= 6:
+                date_text = cells[0].text.strip()
                 vol = cells[5].text.strip().replace(',', '')
-                try:
-                    vols.append(int(vol))
-                except:
-                    pass
-                if len(vols) == 2:
-                    break
+                if target_short:
+                    if not found_target:
+                        if date_text == target_short:
+                            found_target = True
+                            try: vols.append(int(vol))
+                            except: pass
+                        continue
+                    else:
+                        try: vols.append(int(vol))
+                        except: pass
+                        break
+                else:
+                    try: vols.append(int(vol))
+                    except: pass
+                    if len(vols) == 2:
+                        break
         if len(vols) == 2 and vols[1] > 0:
             vol_chg = round((vols[0] / vols[1] - 1) * 100, 1)
             result[f'{prefix}_vol_chg'] = f'{vol_chg:+.1f}%'
@@ -190,12 +209,43 @@ def write_to_sheet(data):
     logging.info(f'{date_str} 새 행 추가 완료')
 
 
-def main():
+def delete_sheet_row(date_str):
+    """스프레드시트에서 특정 날짜 행 삭제"""
+    import gspread
+    from google.oauth2.service_account import Credentials
+
+    sa_json = os.getenv('GOOGLE_SERVICE_ACCOUNT_KEY')
+    if sa_json:
+        import json
+        sa_info = json.loads(sa_json)
+        creds = Credentials.from_service_account_info(sa_info, scopes=['https://www.googleapis.com/auth/spreadsheets'])
+    else:
+        key_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                'extreme-height-486504-c4-b6e5cda22ed7.json')
+        creds = Credentials.from_service_account_file(key_file, scopes=['https://www.googleapis.com/auth/spreadsheets'])
+
+    gc = gspread.authorize(creds)
+    sh = gc.open_by_key(JOURNAL_SHEET_ID)
+    ws = sh.worksheet('Data')
+    existing = ws.col_values(1)
+    for i, v in enumerate(existing):
+        if date_str in str(v):
+            ws.delete_rows(i + 1)
+            logging.info(f'{date_str} 행 삭제 완료 (행 {i+1})')
+            return True
+    logging.info(f'{date_str} 행을 찾을 수 없음')
+    return False
+
+
+def main(target_date=None):
     logging.info('투자일지 데이터 수집 시작')
 
     # 1. 지수/거래대금
-    idx = get_index_data()
+    idx = get_index_data(target_date)
     date_str = idx.get('date', '')
+    if not date_str:
+        logging.error(f'날짜 {target_date}에 해당하는 데이터를 찾을 수 없습니다')
+        return
     logging.info(f'날짜: {date_str}, KOSPI: {idx.get("k_close")}, KOSDAQ: {idx.get("q_close")}')
 
     # 2. 투자자별
@@ -203,33 +253,45 @@ def main():
     idx.update(inv)
     logging.info(f'투자자: 개인 {inv.get("k_per")}, 외국인 {inv.get("k_for")}, 기관 {inv.get("k_inst")}')
 
-    # 3. 상승/하락
-    rf = get_rise_fall_count()
-    idx.update(rf)
-    logging.info(f'상승/하락: {rf.get("k_up")}/{rf.get("k_flat")}/{rf.get("k_down")}')
+    # 3. 상승/하락 (과거 데이터는 불가 - 실시간만)
+    if not target_date:
+        rf = get_rise_fall_count()
+        idx.update(rf)
+        logging.info(f'상승/하락: {rf.get("k_up")}/{rf.get("k_flat")}/{rf.get("k_down")}')
 
     # 4. NASDAQ 전일 종가 (dataset.csv)
     try:
         import pandas as pd
         ds = pd.read_csv('dataset.csv')
         nq = ds[ds['제품명'] == 'NASDAQ'].sort_values('날짜')
-        if not nq.empty:
-            nq_latest = nq.iloc[-1]
-            idx['nq_close'] = float(nq_latest['가격'])
-            if len(nq) >= 2:
-                prev = float(nq.iloc[-2]['가격'])
+        if target_date:
+            # 특정 날짜의 NASDAQ: 한국 날짜 기준 전일 미국 종가
+            t_date = f'{target_date[:4]}-{target_date[4:6]}-{target_date[6:8]}'
+            nq_before = nq[nq['날짜'] <= t_date]
+            if len(nq_before) >= 2:
+                nq_latest = nq_before.iloc[-1]
+                prev = float(nq_before.iloc[-2]['가격'])
+                idx['nq_close'] = float(nq_latest['가격'])
                 chg = round((float(nq_latest['가격']) / prev - 1) * 100, 2)
                 idx['nq_chg'] = f'{chg:+.1f}%'
-            # NASDAQ 거래량 (FDR/yfinance)
-            import FinanceDataReader as fdr
-            nq_df = fdr.DataReader('^IXIC', '2026-01-01')
-            if not nq_df.empty and len(nq_df) >= 2:
-                vol = nq_df.iloc[-1]['Volume']
-                prev_vol = nq_df.iloc[-2]['Volume']
-                idx['nq_vol'] = round(vol / 1e9, 1)  # 십억주(B)
-                vol_chg = round((vol / prev_vol - 1) * 100, 1)
-                idx['nq_vol_chg'] = f'{vol_chg:+.1f}%'
-            logging.info(f'NASDAQ: {idx.get("nq_close")} ({idx.get("nq_chg", "")}) Vol: {idx.get("nq_vol", "")}B')
+        else:
+            if not nq.empty:
+                nq_latest = nq.iloc[-1]
+                idx['nq_close'] = float(nq_latest['가격'])
+                if len(nq) >= 2:
+                    prev = float(nq.iloc[-2]['가격'])
+                    chg = round((float(nq_latest['가격']) / prev - 1) * 100, 2)
+                    idx['nq_chg'] = f'{chg:+.1f}%'
+                # NASDAQ 거래량 (FDR/yfinance)
+                import FinanceDataReader as fdr
+                nq_df = fdr.DataReader('^IXIC', '2026-01-01')
+                if not nq_df.empty and len(nq_df) >= 2:
+                    vol = nq_df.iloc[-1]['Volume']
+                    prev_vol = nq_df.iloc[-2]['Volume']
+                    idx['nq_vol'] = round(vol / 1e9, 1)  # 십억주(B)
+                    vol_chg = round((vol / prev_vol - 1) * 100, 1)
+                    idx['nq_vol_chg'] = f'{vol_chg:+.1f}%'
+        logging.info(f'NASDAQ: {idx.get("nq_close", "N/A")} ({idx.get("nq_chg", "")}) Vol: {idx.get("nq_vol", "")}')
     except Exception as e:
         logging.warning(f'NASDAQ 수집 실패: {e}')
 
@@ -250,10 +312,22 @@ def main():
     except Exception as e:
         logging.warning(f'120일선 계산 실패: {e}')
 
-    # 5. 스프레드시트 저장
+    # 6. 스프레드시트 저장
     write_to_sheet(idx)
     logging.info('완료!')
 
 
 if __name__ == '__main__':
-    main()
+    target = None
+    for arg in sys.argv[1:]:
+        if arg.startswith('--date='):
+            target = arg.split('=')[1]
+        elif arg == '--delete':
+            # --delete=YYYY-MM-DD
+            pass
+    # --delete=날짜 처리
+    for arg in sys.argv[1:]:
+        if arg.startswith('--delete='):
+            delete_sheet_row(arg.split('=')[1])
+            sys.exit(0)
+    main(target_date=target)
