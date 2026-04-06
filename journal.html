@@ -89,7 +89,6 @@
         .idea-entry:last-child { border-bottom: none; }
         .idea-row { display: flex; align-items: center; padding: 6px 14px; font-size: 0.82rem; gap: 8px; }
         .idea-row.idea-header { background: #f8f8f8; font-weight: 700; color: #000; font-size: 0.75rem; padding: 4px 14px; }
-        .idea-text-row { padding: 4px 14px 10px; font-size: 0.88rem; line-height: 1.6; white-space: pre-wrap; color: #000; }
         .idea-date { flex: 0 0 90px; font-weight: 600; color: #000; }
         .idea-action { flex: 0 0 46px; text-align: center; }
         .idea-action span { display: inline-block; padding: 3px 10px; font-size: 0.82rem; font-weight: 700; }
@@ -565,18 +564,15 @@ function renderIdeas(filter) {
             var retStr = fmtReturn(item.returns);
             var retColor = retStr.startsWith('-') ? '#1565c0' : '#c0392b';
             var ideaText = (item.idea || '-').replace(/&/g,'&amp;').replace(/</g,'&lt;');
-            var firstLine = ideaText.split('\n')[0];
-            var restLines = ideaText.split('\n').slice(1).join('\n').trim();
             html += '<div class="idea-entry">';
-            html += '<div class="idea-row">';
+            html += '<div style="display:flex;align-items:flex-start;padding:6px 14px;font-size:0.82rem;gap:8px;">';
             html += '<div class="idea-date">' + item.date + '</div>';
             html += '<div class="idea-cell" style="flex:0 0 80px;">' + fmtMcap(item.xMcap) + '</div>';
             html += '<div class="idea-cell" style="flex:0 0 80px;">' + fmtMcap(item.mcap) + '</div>';
             html += '<div class="idea-cell" style="flex:0 0 50px;font-weight:600;color:' + (retStr ? retColor : '#000') + ';">' + (retStr || '-') + '</div>';
             html += '<div class="idea-action"><span class="' + actionCls + '">' + actionLabel + '</span></div>';
-            html += '<div style="flex:1;font-weight:600;color:#000;">' + firstLine + '</div>';
+            html += '<div style="flex:1;color:#000;white-space:pre-wrap;line-height:1.6;">' + ideaText + '</div>';
             html += '</div>';
-            if (restLines) html += '<div class="idea-text-row">' + restLines + '</div>';
             html += '</div>';
         });
         html += '</div></div>';
