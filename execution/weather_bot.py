@@ -1392,7 +1392,7 @@ async def journal_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ============================================================
 SISYPHE_SHEET_ID = '1V41yiwO4VrVUhjhqHyu8JGsuGcqw6pZen0NHdxzXHGs'
 SISYPHE_API_KEY = 'AIzaSyCHPiRby5FVAIKDwneZHy1KGl3SfycjZEw'
-BUDGET_MILESTONE_FILE = os.path.join(parent_dir, '.budget_milestone')
+BUDGET_MILESTONE_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.budget_milestone')
 
 
 def check_budget():
