@@ -192,7 +192,7 @@ def write_to_sheet(data):
                 data.get('q_per', ''), data.get('q_for', ''), data.get('q_inst', ''),
                 data.get('k_ma120', ''), data.get('q_ma120', ''),
                 data.get('nq_close', ''), data.get('nq_chg', ''), data.get('nq_vol', ''), data.get('nq_vol_chg', ''),
-            ]])
+            ]], value_input_option='RAW')
             return
 
     # 새 행 추가
@@ -207,7 +207,7 @@ def write_to_sheet(data):
         data.get('k_ma120', ''), data.get('q_ma120', ''),
         data.get('nq_close', ''), data.get('nq_chg', ''), data.get('nq_vol', ''), data.get('nq_vol_chg', ''),
     ]
-    ws.append_row(row, value_input_option='USER_ENTERED')
+    ws.append_row(row, value_input_option='RAW')
     logging.info(f'{date_str} 새 행 추가 완료')
 
 
