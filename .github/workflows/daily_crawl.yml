@@ -89,6 +89,13 @@ jobs:
         env:
            TZ: 'Asia/Seoul'
 
+      - name: Restore Stock Price History Cache
+        uses: actions/cache@v4
+        with:
+          path: stock_price_history.json
+          key: stock-price-history-${{ github.run_id }}
+          restore-keys: stock-price-history-
+
       - name: Update Stock Price History + Fetch Featured Data
         run: |
           pip install pykrx-openapi -q
@@ -141,5 +148,5 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Auto-update: Market data and dashboard [skip ci]"
-          file_pattern: 'dataset.csv charts/*.png index.html market.html wrap.html universe.html seibro.html featured.html featured_data.json stock_price_history.json portfolio_data.json Wrap_NAV.xlsx kodex_sectors.json'
+          file_pattern: 'dataset.csv charts/*.png index.html market.html wrap.html universe.html seibro.html featured.html featured_data.json portfolio_data.json Wrap_NAV.xlsx kodex_sectors.json seibro_tickers.json'
           skip_fetch: true
