@@ -89,7 +89,8 @@
         .stock-body.open { display: block; }
         .idea-entry { border-bottom: 1px solid #f0f0f0; }
         .idea-entry:last-child { border-bottom: none; }
-        .idea-row { display: flex; align-items: center; padding: 6px 14px; font-size: 0.82rem; gap: 8px; }
+        .idea-row { display: flex; align-items: flex-start; padding: 6px 14px; font-size: 0.82rem; gap: 8px; }
+        .idea-row.idea-header { align-items: center; }
         .idea-row.idea-header { background: #e0e0e0; font-weight: 700; color: #000; font-size: 0.75rem; padding: 4px 14px; text-align: center; }
         .idea-date { flex: 0 0 90px; font-weight: 600; color: #000; text-align: center; }
         .idea-action { flex: 0 0 46px; text-align: center; }
@@ -360,9 +361,10 @@ async function loadJournal() {
                 dow = dowNames[new Date(e.date).getDay()];
             }
 
-            function mktRow(label, val, bg) {
-                var style = bg ? ' style="background:' + bg + ';"' : '';
-                return '<div class="market-row"' + style + '><span class="label">' + label + '</span><span class="value">' + fmtNum(val) + '</span></div>';
+            function mktRow(label, val, bg, fs) {
+                var s = '';
+                if (bg || fs) { s = ' style="'; if (bg) s += 'background:' + bg + ';'; if (fs) s += 'font-size:' + fs + ';'; s += '"'; }
+                return '<div class="market-row"' + s + '><span class="label"' + (fs ? ' style="font-size:'+fs+'"' : '') + '>' + label + '</span><span class="value"' + (fs ? ' style="font-size:'+fs+'"' : '') + '>' + fmtNum(val) + '</span></div>';
             }
             function mktColorRow(label, val, colorType) {
                 var bg = '';
@@ -389,7 +391,7 @@ async function loadJournal() {
             html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;border:1px solid #333;overflow:hidden;flex:0 0 auto;align-self:flex-start;"><div class="market-col kospi"><h3>코스피</h3><div class="mkt-body">';
             html += mktRow('지수', e.kClose, '#f0f0f0');
             html += mktChgRow('변동', e.kChg);
-            html += mktRow('거래대금', e.kVol, '#f0f0f0');
+            html += mktRow('거래대금', e.kVol, '#f0f0f0', '0.89rem');
             html += mktChgRow('변동', e.kVolChg);
             html += '<div style="border-bottom:1px solid #999;margin:0;"></div>';
             html += mktColorRow('상승', e.kUp, 'up') + mktColorRow('보합', e.kFlat, 'flat') + mktColorRow('하락', e.kDown, 'down');
@@ -402,7 +404,7 @@ async function loadJournal() {
             html += '<div class="market-col kosdaq"><h3>코스닥</h3><div class="mkt-body">';
             html += mktRow('지수', e.qClose, '#f0f0f0');
             html += mktChgRow('변동', e.qChg);
-            html += mktRow('거래대금', e.qVol, '#f0f0f0');
+            html += mktRow('거래대금', e.qVol, '#f0f0f0', '0.89rem');
             html += mktChgRow('변동', e.qVolChg);
             html += '<div style="border-bottom:1px solid #999;margin:0;"></div>';
             html += mktColorRow('상승', e.qUp, 'up') + mktColorRow('보합', e.qFlat, 'flat') + mktColorRow('하락', e.qDown, 'down');
@@ -415,7 +417,7 @@ async function loadJournal() {
             html += '<div class="market-col futures"><h3>선물</h3><div class="mkt-body">';
             html += mktRow('지수', e.fClose, '#f0f0f0');
             html += mktChgRow('변동', e.fChg);
-            html += mktRow('거래대금', e.fVol, '#f0f0f0');
+            html += mktRow('거래대금', e.fVol, '#f0f0f0', '0.89rem');
             html += mktChgRow('변동', e.fVolChg);
             html += '<div style="border-bottom:1px solid #999;margin:0;"></div>';
             html += mktRow('상승', '-') + mktRow('보합', '-') + mktRow('하락', '-');
@@ -567,7 +569,7 @@ function renderIdeas(filter) {
             var retColor = retStr.startsWith('-') ? '#1565c0' : '#c0392b';
             var ideaText = (item.idea || '-').replace(/&/g,'&amp;').replace(/</g,'&lt;');
             html += '<div class="idea-entry">';
-            html += '<div style="display:flex;align-items:flex-start;padding:6px 14px;font-size:0.82rem;gap:8px;">';
+            html += '<div class="idea-row">';
             html += '<div class="idea-date">' + item.date + '</div>';
             html += '<div class="idea-cell" style="flex:0 0 80px;">' + fmtMcap(item.xMcap) + '</div>';
             html += '<div class="idea-cell" style="flex:0 0 80px;">' + fmtMcap(item.mcap) + '</div>';
