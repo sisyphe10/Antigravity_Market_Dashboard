@@ -32,7 +32,7 @@
         .tl-card { background: #fff; display: flex; flex-direction: column; border-radius:0; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #c8e6c9; }
 
         /* Market data grid */
-        .market-grid { display: flex; gap: 12px; margin-bottom: 0; }
+        .market-grid { display: flex; gap: 12px; margin-bottom: 0; align-items: center; }
         .market-grid > *:first-child { flex: 0 0 33%; }
         .market-grid > *:last-child { flex: 0 0 calc(67% - 12px); }
         .market-col h3 { font-size: 0.9rem; font-weight: 700; color: #fff; background: #333; padding: 6px 10px; border-radius:0; margin-bottom: 0; text-align: center; }
@@ -388,7 +388,7 @@ async function loadJournal() {
 
             // Market data
             html += '<div class="market-grid">';
-            html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;border:1px solid #333;overflow:hidden;flex:0 0 auto;align-self:flex-start;"><div class="market-col kospi"><h3>코스피</h3><div class="mkt-body">';
+            html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;border:1px solid #333;overflow:hidden;flex:0 0 auto;"><div class="market-col kospi"><h3>코스피</h3><div class="mkt-body">';
             html += mktRow('지수', e.kClose, '#f0f0f0');
             html += mktChgRow('변동', e.kChg);
             html += mktRow('거래대금', e.kVol, '#f0f0f0', '0.87rem');
