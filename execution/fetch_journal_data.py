@@ -88,6 +88,9 @@ def get_index_data(target_date=None):
                             except: pass
                         continue
                     else:
+                        # 같��� 날짜 중복 행 건너뛰기
+                        if date_text == target_short or date_text == target_long:
+                            continue
                         try: vols.append(int(vol))
                         except: pass
                         break
