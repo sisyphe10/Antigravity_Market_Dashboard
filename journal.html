@@ -521,6 +521,7 @@ function renderIdeas(filter) {
         html += '<span class="arrow">▶</span>';
         html += '<span class="stock-name">' + stock + '</span>';
         html += '<span class="stock-code">' + d.code + '</span>';
+        if (d.xMcap) html += '<span class="stock-code">' + d.xMcap + '</span>';
         if (d.mcap) html += '<span class="stock-code">' + d.mcap + '</span>';
         html += '<span class="stock-count">' + d.items.length + '건</span>';
         html += '</span>';
