@@ -74,11 +74,12 @@
         .ideas-search { width: 100%; max-width: 400px; padding: 10px 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 0.95rem; outline: none; margin-bottom: 20px; font-family: inherit; }
         .ideas-search:focus { border-color: #333; }
         .stock-group { margin-bottom: 24px; }
-        .stock-header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #333; color: #fff; cursor: pointer; user-select: none; border-radius: 8px 8px 0 0; }
+        .stock-header { display: flex; align-items: center; cursor: pointer; user-select: none; }
+        .stock-header-label { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; background: #333; color: #fff; border-radius: 8px 8px 0 0; }
         .stock-header .stock-name { font-size: 1rem; font-weight: 700; }
         .stock-header .stock-code { font-size: 0.8rem; color: #aaa; }
-        .stock-header .stock-count { margin-left: auto; font-size: 0.8rem; color: #ccc; }
-        .stock-header .arrow { transition: transform 0.2s; }
+        .stock-header .stock-count { font-size: 0.8rem; color: #ccc; }
+        .stock-header .arrow { transition: transform 0.2s; font-size: 0.75rem; }
         .stock-header.open .arrow { transform: rotate(90deg); }
         .stock-body { display: none; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 8px 8px; overflow: hidden; }
         .stock-body.open { display: block; }
@@ -494,10 +495,12 @@ function renderIdeas(filter) {
         var codeStr = d.code ? ' (' + d.code + ')' : '';
         html += '<div class="stock-group" data-stock="' + stock + '">';
         html += '<div class="stock-header" onclick="toggleStock(this)">';
+        html += '<span class="stock-header-label">';
         html += '<span class="arrow">▶</span>';
         html += '<span class="stock-name">' + stock + '</span>';
         html += '<span class="stock-code">' + d.code + '</span>';
         html += '<span class="stock-count">' + d.items.length + '건</span>';
+        html += '</span>';
         html += '</div>';
         html += '<div class="stock-body">';
         d.items.forEach(function(item) {
