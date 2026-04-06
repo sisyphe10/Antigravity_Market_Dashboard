@@ -9,7 +9,9 @@ import logging
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timezone, timedelta
+from dotenv import load_dotenv
 
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env'))
 sys.stdout.reconfigure(encoding='utf-8')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 
