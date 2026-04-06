@@ -85,14 +85,18 @@
         .stock-header.open .arrow { transform: rotate(90deg); }
         .stock-body { display: none; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 8px 8px; overflow: hidden; }
         .stock-body.open { display: block; }
-        .idea-row { display: flex; align-items: flex-start; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; font-size: 0.88rem; }
-        .idea-row:last-child { border-bottom: none; }
-        .idea-date { flex: 0 0 110px; font-weight: 600; color: #555; }
-        .idea-action { flex: 0 0 52px; text-align: center; }
+        .idea-entry { border-bottom: 1px solid #f0f0f0; }
+        .idea-entry:last-child { border-bottom: none; }
+        .idea-row { display: flex; align-items: center; padding: 6px 14px; font-size: 0.82rem; gap: 8px; }
+        .idea-row.idea-header { background: #f8f8f8; font-weight: 700; color: #888; font-size: 0.75rem; padding: 4px 14px; }
+        .idea-text-row { padding: 4px 14px 10px; font-size: 0.88rem; line-height: 1.6; white-space: pre-wrap; color: #333; }
+        .idea-date { flex: 0 0 90px; font-weight: 600; color: #555; }
+        .idea-action { flex: 0 0 46px; text-align: center; }
         .idea-action span { display: inline-block; padding: 3px 10px; font-size: 0.82rem; font-weight: 700; }
         .action-buy { background: #FADBD8; color: #c0392b; border-radius: 4px; }
         .action-sell { background: #D6EAF8; color: #1565c0; border-radius: 4px; }
         .action-hold { background: #f0f0f0; color: #666; border-radius: 4px; }
+        .idea-cell { flex: 0 0 auto; font-size: 0.82rem; color: #555; }
         .idea-text { flex: 1; line-height: 1.6; white-space: pre-wrap; color: #333; padding-left: 10px; }
     </style>
 </head>
@@ -455,6 +459,16 @@ function switchTab(tab) {
 // ============================================================
 var _ideasData = {};
 
+function fmtReturn(v) {
+    if (!v) return '';
+    var n = parseFloat(String(v).replace(/,/g, ''));
+    if (isNaN(n)) return v;
+    // 소수점이면 *100 (0.05 → 5%), 이미 %단위면 그대로
+    if (Math.abs(n) < 1 && String(v).indexOf('%') < 0) n = n * 100;
+    var s = (n >= 0 ? '+' : '') + Math.round(n) + '%';
+    return s;
+}
+
 function fmtMcap(v) {
     if (!v) return '';
     var n = parseInt(String(v).replace(/,/g, ''));
@@ -535,17 +549,29 @@ function renderIdeas(filter) {
         html += '</span>';
         html += '</div>';
         html += '<div class="stock-body">';
+        // 헤더 행
+        html += '<div class="idea-row idea-header">';
+        html += '<div class="idea-date">날짜</div>';
+        html += '<div class="idea-cell" style="flex:0 0 80px;">X-시총</div>';
+        html += '<div class="idea-cell" style="flex:0 0 80px;">시총</div>';
+        html += '<div class="idea-cell" style="flex:0 0 50px;">수익률</div>';
+        html += '<div class="idea-action">판단</div>';
+        html += '</div>';
         d.items.forEach(function(item) {
             var actionCls = 'action-hold', actionLabel = item.action || '-';
             if (item.action === '매수') { actionCls = 'action-buy'; }
             else if (item.action === '매도') { actionCls = 'action-sell'; }
+            var retStr = fmtReturn(item.returns);
+            var retColor = retStr.startsWith('-') ? '#1565c0' : '#c0392b';
+            html += '<div class="idea-entry">';
             html += '<div class="idea-row">';
             html += '<div class="idea-date">' + item.date + '</div>';
-            if (item.xMcap) html += '<div style="flex:0 0 auto;font-size:0.78rem;color:#888;padding-right:6px;">' + fmtMcap(item.xMcap) + '</div>';
-            if (item.mcap) html += '<div style="flex:0 0 auto;font-size:0.78rem;color:#888;padding-right:6px;">' + fmtMcap(item.mcap) + '</div>';
-            if (item.returns) html += '<div style="flex:0 0 auto;font-size:0.82rem;font-weight:600;padding-right:6px;color:' + (item.returns.startsWith('-') ? '#1565c0' : '#c0392b') + ';">' + item.returns + '</div>';
+            html += '<div class="idea-cell" style="flex:0 0 80px;">' + fmtMcap(item.xMcap) + '</div>';
+            html += '<div class="idea-cell" style="flex:0 0 80px;">' + fmtMcap(item.mcap) + '</div>';
+            html += '<div class="idea-cell" style="flex:0 0 50px;font-weight:600;color:' + (retStr ? retColor : '#555') + ';">' + (retStr || '-') + '</div>';
             html += '<div class="idea-action"><span class="' + actionCls + '">' + actionLabel + '</span></div>';
-            html += '<div class="idea-text">' + (item.idea || '-').replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</div>';
+            html += '</div>';
+            html += '<div class="idea-text-row">' + (item.idea || '-').replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</div>';
             html += '</div>';
         });
         html += '</div></div>';
