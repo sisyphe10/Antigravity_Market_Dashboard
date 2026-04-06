@@ -51,13 +51,13 @@ def get_index_data(target_date=None):
                 except:
                     volume_eok = volume_mil
                 try:
-                    close = f'{float(close):.1f}'
+                    close = f'{float(close):.0f}'
                 except:
                     pass
                 try:
                     chg_num = float(chg_rate.replace('%', '').replace('+', ''))
                     sign = '+' if chg_rate.startswith('+') else ''
-                    chg_rate = f'{sign}{chg_num:.1f}%'
+                    chg_rate = f'{sign}{chg_num:.0f}%'
                 except:
                     pass
                 result[f'{prefix}_close'] = close
