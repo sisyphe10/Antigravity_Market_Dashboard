@@ -37,8 +37,9 @@
         .market-col.kospi h3 { }
         .market-col.kosdaq h3 { }
         
-        .market-col { padding: 0; }
+        .market-col { padding: 0; display: flex; flex-direction: column; }
         .market-col + .market-col { border-left: 1px solid #ddd; }
+        .market-col .mkt-body { flex: 1; display: flex; flex-direction: column; justify-content: space-evenly; }
         .market-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 8px; font-size: 0.9rem; text-align: center; min-height: 28px; }
         .market-row .label { color: #000; font-weight: 600; text-align: center; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.9rem; }
         .market-row .value { font-weight: 600; color: #000; text-align: center; flex: 1; }
@@ -380,7 +381,7 @@ async function loadJournal() {
 
             // Market data
             html += '<div class="market-grid" style="flex:1;">';
-            html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;border:1px solid #333;overflow:hidden;height:100%;"><div class="market-col kospi"><h3>코스피</h3>';
+            html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;border:1px solid #333;overflow:hidden;height:100%;"><div class="market-col kospi"><h3>코스피</h3><div class="mkt-body">';
             html += mktRow('지수', e.kClose, '#f0f0f0');
             html += mktChgRow('변동', e.kChg);
             html += mktRow('거래대금', e.kVol, '#f0f0f0');
@@ -391,9 +392,9 @@ async function loadJournal() {
             html += (function(){ var cls=chgCls(e.kPer); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">개인</span><span class="value">'+fmtNum(e.kPer)+'</span></div>'; })() + (function(){ var cls=chgCls(e.kFor); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">외국인</span><span class="value">'+fmtNum(e.kFor)+'</span></div>'; })() + (function(){ var cls=chgCls(e.kInst); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">기관</span><span class="value">'+fmtNum(e.kInst)+'</span></div>'; })();
             html += '<div style="border-bottom:1px solid #999;margin:0;"></div>';
             html += (function(v){ var bg=''; if(v&&v.toLowerCase()==='up') bg='background:#FADBD8;'; else if(v&&v.toLowerCase()==='down') bg='background:#D6EAF8;'; return '<div class="market-row ma120" style="'+bg+'"><span class="label">120일선</span><span class="value">'+(v||'-')+'</span></div>'; })(e.k_ma120);
-            html += '</div>';
+            html += '</div></div>';
 
-            html += '<div class="market-col kosdaq" style=""><h3>코스닥</h3>';
+            html += '<div class="market-col kosdaq"><h3>코스닥</h3><div class="mkt-body">';
             html += mktRow('지수', e.qClose, '#f0f0f0');
             html += mktChgRow('변동', e.qChg);
             html += mktRow('거래대금', e.qVol, '#f0f0f0');
@@ -404,9 +405,9 @@ async function loadJournal() {
             html += (function(){ var cls=chgCls(e.qPer); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">개인</span><span class="value">'+fmtNum(e.qPer)+'</span></div>'; })() + (function(){ var cls=chgCls(e.qFor); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">외국인</span><span class="value">'+fmtNum(e.qFor)+'</span></div>'; })() + (function(){ var cls=chgCls(e.qInst); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">기관</span><span class="value">'+fmtNum(e.qInst)+'</span></div>'; })();
             html += '<div style="border-bottom:1px solid #999;margin:0;"></div>';
             html += (function(v){ var bg=''; if(v&&v.toLowerCase()==='up') bg='background:#FADBD8;'; else if(v&&v.toLowerCase()==='down') bg='background:#D6EAF8;'; return '<div class="market-row ma120" style="'+bg+'"><span class="label">120일선</span><span class="value">'+(v||'-')+'</span></div>'; })(e.q_ma120);
-            html += '</div>';
+            html += '</div></div>';
 
-            html += '<div class="market-col futures"><h3>선물</h3>';
+            html += '<div class="market-col futures"><h3>선물</h3><div class="mkt-body">';
             html += mktRow('지수', e.fClose, '#f0f0f0');
             html += mktChgRow('변동', e.fChg);
             html += mktRow('거래대금', e.fVol, '#f0f0f0');
@@ -417,7 +418,7 @@ async function loadJournal() {
             html += (function(){ var cls=chgCls(e.fPer); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">개인</span><span class="value">'+fmtNum(e.fPer)+'</span></div>'; })() + (function(){ var cls=chgCls(e.fFor); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">외국인</span><span class="value">'+fmtNum(e.fFor)+'</span></div>'; })() + (function(){ var cls=chgCls(e.fInst); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">기관</span><span class="value">'+fmtNum(e.fInst)+'</span></div>'; })();
             html += '<div style="border-bottom:1px solid #999;margin:0;"></div>';
             html += (function(v){ var bg=''; if(v&&v.toLowerCase()==='up') bg='background:#FADBD8;'; else if(v&&v.toLowerCase()==='down') bg='background:#D6EAF8;'; return '<div class="market-row ma120" style="'+bg+'"><span class="label">120일선</span><span class="value">'+(v||'-')+'</span></div>'; })(e.f_ma120);
-            html += '</div></div>';
+            html += '</div></div></div>';
 
             // 장전계획 / 장후복기
             html += '<div style="display:flex;flex-direction:column;border:1px solid #333;height:100%;">';
