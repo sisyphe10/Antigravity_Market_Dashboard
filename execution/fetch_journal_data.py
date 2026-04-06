@@ -100,8 +100,8 @@ def get_index_data(target_date=None):
                     if len(vols) == 2:
                         break
         if len(vols) == 2 and vols[1] > 0:
-            vol_chg = round((vols[0] / vols[1] - 1) * 100, 1)
-            result[f'{prefix}_vol_chg'] = f'{vol_chg:+.1f}%'
+            vol_chg = round((vols[0] / vols[1] - 1) * 100)
+            result[f'{prefix}_vol_chg'] = f'{vol_chg:+d}%'
         else:
             result[f'{prefix}_vol_chg'] = ''
 
@@ -304,8 +304,8 @@ def main(target_date=None):
                     vol = nq_df.iloc[-1]['Volume']
                     prev_vol = nq_df.iloc[-2]['Volume']
                     idx['nq_vol'] = round(vol / 1e9, 1)  # 십억주(B)
-                    vol_chg = round((vol / prev_vol - 1) * 100, 1)
-                    idx['nq_vol_chg'] = f'{vol_chg:+.1f}%'
+                    vol_chg = round((vol / prev_vol - 1) * 100)
+                    idx['nq_vol_chg'] = f'{vol_chg:+d}%'
         logging.info(f'NASDAQ: {idx.get("nq_close", "N/A")} ({idx.get("nq_chg", "")}) Vol: {idx.get("nq_vol", "")}')
     except Exception as e:
         logging.warning(f'NASDAQ 수집 실패: {e}')
