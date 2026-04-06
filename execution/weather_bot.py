@@ -1387,6 +1387,97 @@ async def journal_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"❌ 저장 실패: {str(e)}")
 
 
+# ============================================================
+# 예산 소진율 체크
+# ============================================================
+SISYPHE_SHEET_ID = '1V41yiwO4VrVUhjhqHyu8JGsuGcqw6pZen0NHdxzXHGs'
+SISYPHE_API_KEY = 'AIzaSyCHPiRby5FVAIKDwneZHy1KGl3SfycjZEw'
+BUDGET_MILESTONE_FILE = os.path.join(parent_dir, '.budget_milestone')
+
+
+def check_budget():
+    """Google Sheets에서 예산/거래 데이터 읽고 소진율 계산"""
+    import urllib.request
+    base = f'https://sheets.googleapis.com/v4/spreadsheets/{SISYPHE_SHEET_ID}/values'
+
+    # 예산 시트 읽기
+    with urllib.request.urlopen(f'{base}/%EC%98%88%EC%82%B0?key={SISYPHE_API_KEY}', timeout=15) as r:
+        budget_data = json.loads(r.read().decode())
+    budget_rows = (budget_data.get('values') or [])[1:]  # skip header
+
+    # 그룹별 예산 합산
+    budget_total = 0
+    budget_categories = []
+    for row in budget_rows:
+        cat = row[2] if len(row) > 2 else ''
+        amt = int((row[3] if len(row) > 3 else '0').replace(',', '') or '0')
+        if cat:
+            budget_categories.append(cat)
+            budget_total += amt
+
+    if budget_total <= 0:
+        return None, None
+
+    # 거래내역 시트 읽기
+    with urllib.request.urlopen(f'{base}/%EA%B1%B0%EB%9E%98%EB%82%B4%EC%97%AD?key={SISYPHE_API_KEY}', timeout=15) as r:
+        tx_data = json.loads(r.read().decode())
+    tx_rows = (tx_data.get('values') or [])[1:]
+
+    # 이번 달 지출 합산
+    now = datetime.datetime.now(KST)
+    month_prefix = now.strftime('%Y-%m')
+    total_spent = 0
+    for row in tx_rows:
+        date = row[0] if len(row) > 0 else ''
+        tx_type = row[1] if len(row) > 1 else ''
+        cat = row[2] if len(row) > 2 else ''
+        amt = int((row[3] if len(row) > 3 else '0').replace(',', '') or '0')
+        if date.startswith(month_prefix) and tx_type == '지출' and cat in budget_categories:
+            total_spent += amt
+
+    pct = round(total_spent / budget_total * 100)
+    return pct, budget_total
+
+
+async def budget_check_job(context: ContextTypes.DEFAULT_TYPE):
+    """예산 소진율 10% 단위 알림"""
+    try:
+        pct, budget_total = check_budget()
+        if pct is None:
+            return
+
+        milestone = (pct // 10) * 10  # 현재 도달한 10% 단위
+        if milestone < 10:
+            return
+
+        # 마지막 알림 마일스톤 확인
+        last_milestone = 0
+        now = datetime.datetime.now(KST)
+        month_key = now.strftime('%Y-%m')
+        if os.path.exists(BUDGET_MILESTONE_FILE):
+            try:
+                with open(BUDGET_MILESTONE_FILE, 'r') as f:
+                    data = json.load(f)
+                if data.get('month') == month_key:
+                    last_milestone = data.get('milestone', 0)
+            except:
+                pass
+
+        if milestone > last_milestone:
+            # 새 마일스톤 도달 → 알림
+            emoji = '🟢' if milestone <= 50 else '🟡' if milestone <= 70 else '🔴'
+            msg = f"{emoji} 생활비 예산 {milestone}% 소진\n현재 {pct}% 사용 중 (예산 {budget_total:,}원)"
+            await context.bot.send_message(chat_id=CHAT_ID, text=msg)
+
+            # 마일스톤 저장
+            with open(BUDGET_MILESTONE_FILE, 'w') as f:
+                json.dump({'month': month_key, 'milestone': milestone}, f)
+            logging.info(f"Budget milestone: {milestone}% (actual {pct}%)")
+
+    except Exception as e:
+        logging.warning(f"Budget check failed: {e}")
+
+
 if __name__ == '__main__':
     if not TOKEN:
         print("Error: TOKEN environment variable is missing.")
@@ -1455,6 +1546,9 @@ if __name__ == '__main__':
 
     for t in trading_times:
         job_queue.run_daily(auto_portfolio_update_job, time=t)
+
+    # 예산 소진율 체크 (3시간마다)
+    job_queue.run_repeating(budget_check_job, interval=10800, first=60)
 
     print(f"Bot started at {datetime.datetime.now()}")
     print(f"✅ Daily jobs scheduled:")
