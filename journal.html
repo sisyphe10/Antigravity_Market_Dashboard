@@ -555,8 +555,8 @@ function renderIdeas(filter) {
         // 헤더 행
         html += '<div class="idea-row idea-header">';
         html += '<div class="idea-date">날짜</div>';
-        html += '<div class="idea-cell" style="flex:0 0 80px;">X-시총</div>';
-        html += '<div class="idea-cell" style="flex:0 0 80px;">시총</div>';
+        html += '<div class="idea-cell" style="flex:0 0 82px;">X-시총</div>';
+        html += '<div class="idea-cell" style="flex:0 0 82px;">시총</div>';
         html += '<div class="idea-cell" style="flex:0 0 50px;">수익률</div>';
         html += '<div class="idea-action">판단</div>';
         html += '<div style="flex:1;border-left:2px solid #ccc;padding-left:10px;">아이디어</div>';
@@ -571,8 +571,8 @@ function renderIdeas(filter) {
             html += '<div class="idea-entry">';
             html += '<div class="idea-row">';
             html += '<div class="idea-date">' + item.date + '</div>';
-            html += '<div class="idea-cell" style="flex:0 0 80px;">' + fmtMcap(item.xMcap) + '</div>';
-            html += '<div class="idea-cell" style="flex:0 0 80px;">' + fmtMcap(item.mcap) + '</div>';
+            html += '<div class="idea-cell" style="flex:0 0 82px;">' + fmtMcap(item.xMcap) + '</div>';
+            html += '<div class="idea-cell" style="flex:0 0 82px;">' + fmtMcap(item.mcap) + '</div>';
             html += '<div class="idea-cell" style="flex:0 0 50px;font-weight:600;color:' + (retStr ? retColor : '#000') + ';">' + (retStr || '-') + '</div>';
             html += '<div class="idea-action"><span class="' + actionCls + '">' + actionLabel + '</span></div>';
             html += '<div style="flex:1;color:#000;white-space:pre-wrap;line-height:1.6;border-left:2px solid #ccc;padding-left:10px;">' + ideaText + '</div>';
