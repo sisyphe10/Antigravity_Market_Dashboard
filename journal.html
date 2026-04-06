@@ -283,7 +283,10 @@ async function loadJournal() {
                 qUp: val(16), qFlat: val(17), qDown: val(18),
                 qPer: val(19), qFor: val(20), qInst: val(21),
                 k_ma120: val(22), q_ma120: val(23), nqClose: val(24), nqChg: val(25), nqVol: val(26), nqVolChg: val(27),
-                
+                fClose: val(28), fChg: val(29), fVol: val(30), fVolChg: val(31),
+                fUp: val(32), fFlat: val(33), fDown: val(34),
+                fPer: val(35), fFor: val(36), fInst: val(37),
+                f_ma120: val(38),
             });
         });
 
@@ -327,6 +330,8 @@ async function loadJournal() {
                         qClose:'', qChg:'', qVol:'', qVolChg:'',
                         qUp:'', qFlat:'', qDown:'', qPer:'', qFor:'', qInst:'',
                         k_ma120:'', q_ma120:'', nqClose:'', nqChg:'', nqVol:'', nqVolChg:'',
+                        fClose:'', fChg:'', fVol:'', fVolChg:'',
+                        fUp:'', fFlat:'', fDown:'', fPer:'', fFor:'', fInst:'', f_ma120:'',
                         plan: j.plan, review: j.review, planRich: j.planRich, reviewRich: j.reviewRich,
                     });
                 }
@@ -374,7 +379,7 @@ async function loadJournal() {
 
             // Market data
             html += '<div class="market-grid" style="flex:1;">';
-            html += '<div style="display:grid;grid-template-columns:1fr 1fr;border:1px solid #333;overflow:hidden;height:100%;"><div class="market-col kospi"><h3>코스피</h3>';
+            html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;border:1px solid #333;overflow:hidden;height:100%;"><div class="market-col kospi"><h3>코스피</h3>';
             html += mktRow('지수', e.kClose, '#f0f0f0');
             html += mktChgRow('변동', e.kChg);
             html += mktRow('거래대금', e.kVol, '#f0f0f0');
@@ -398,6 +403,19 @@ async function loadJournal() {
             html += (function(){ var cls=chgCls(e.qPer); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">개인</span><span class="value">'+fmtNum(e.qPer)+'</span></div>'; })() + (function(){ var cls=chgCls(e.qFor); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">외국인</span><span class="value">'+fmtNum(e.qFor)+'</span></div>'; })() + (function(){ var cls=chgCls(e.qInst); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">기관</span><span class="value">'+fmtNum(e.qInst)+'</span></div>'; })();
             html += '<div style="border-bottom:1px solid #999;margin:0;"></div>';
             html += (function(v){ var bg=''; if(v&&v.toLowerCase()==='up') bg='background:#FADBD8;'; else if(v&&v.toLowerCase()==='down') bg='background:#D6EAF8;'; return '<div class="market-row ma120" style="'+bg+'"><span class="label">120일선</span><span class="value">'+(v||'-')+'</span></div>'; })(e.q_ma120);
+            html += '</div>';
+
+            html += '<div class="market-col futures" style="border-left:1px solid #333;"><h3>선물</h3>';
+            html += mktRow('지수', e.fClose, '#f0f0f0');
+            html += mktChgRow('변동', e.fChg);
+            html += mktRow('거래대금', e.fVol, '#f0f0f0');
+            html += mktChgRow('변동', e.fVolChg);
+            html += '<div style="border-bottom:1px solid #999;margin:0;"></div>';
+            html += mktRow('상승', '-') + mktRow('보합', '-') + mktRow('하락', '-');
+            html += '<div style="border-bottom:1px solid #999;margin:0;"></div>';
+            html += (function(){ var cls=chgCls(e.fPer); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">개인</span><span class="value">'+fmtNum(e.fPer)+'</span></div>'; })() + (function(){ var cls=chgCls(e.fFor); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">외국인</span><span class="value">'+fmtNum(e.fFor)+'</span></div>'; })() + (function(){ var cls=chgCls(e.fInst); var bg=''; if(cls==='pos') bg='background:#FADBD8;'; else if(cls==='neg') bg='background:#D6EAF8;'; return '<div class="market-row investor" style="'+bg+'"><span class="label">기관</span><span class="value">'+fmtNum(e.fInst)+'</span></div>'; })();
+            html += '<div style="border-bottom:1px solid #999;margin:0;"></div>';
+            html += (function(v){ var bg=''; if(v&&v.toLowerCase()==='up') bg='background:#FADBD8;'; else if(v&&v.toLowerCase()==='down') bg='background:#D6EAF8;'; return '<div class="market-row ma120" style="'+bg+'"><span class="label">120일선</span><span class="value">'+(v||'-')+'</span></div>'; })(e.f_ma120);
             html += '</div></div>';
 
             // 장전계획 / 장후복기

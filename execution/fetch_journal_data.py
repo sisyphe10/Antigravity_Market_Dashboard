@@ -32,7 +32,7 @@ def get_index_data(target_date=None):
         target_long = f'{target_date[:4]}.{target_date[4:6]}.{target_date[6:8]}'
 
     result = {}
-    for code, prefix in [('KOSPI', 'k'), ('KOSDAQ', 'q')]:
+    for code, prefix in [('KOSPI', 'k'), ('KOSDAQ', 'q'), ('FUT', 'f')]:
         r = requests.get(f'https://finance.naver.com/sise/sise_index_day.naver?code={code}', headers=HEADERS, timeout=10)
         soup = BeautifulSoup(r.text, 'html.parser')
         table = soup.select('table')[0]
@@ -68,7 +68,7 @@ def get_index_data(target_date=None):
                 break
 
     # 거래대금 변동률 (전일 대비)
-    for code, prefix in [('KOSPI', 'k'), ('KOSDAQ', 'q')]:
+    for code, prefix in [('KOSPI', 'k'), ('KOSDAQ', 'q'), ('FUT', 'f')]:
         r = requests.get(f'https://finance.naver.com/sise/sise_index_day.naver?code={code}', headers=HEADERS, timeout=10)
         soup = BeautifulSoup(r.text, 'html.parser')
         table = soup.select('table')[0]
@@ -111,7 +111,7 @@ def get_index_data(target_date=None):
 def get_investor_data(date_str):
     """네이버 금융에서 투자자별 순매수 (개인/외국인/기관)"""
     result = {}
-    for sosok, prefix in [('01', 'k'), ('02', 'q')]:
+    for sosok, prefix in [('01', 'k'), ('02', 'q'), ('03', 'f')]:
         r = requests.get(f'https://finance.naver.com/sise/investorDealTrendDay.naver?bizdate={date_str}&sosok={sosok}', headers=HEADERS, timeout=10)
         soup = BeautifulSoup(r.text, 'html.parser')
         tables = soup.select('table')
@@ -205,6 +205,10 @@ def write_to_sheet(data):
                 data.get('q_per', ''), data.get('q_for', ''), data.get('q_inst', ''),
                 data.get('k_ma120', ''), data.get('q_ma120', ''),
                 data.get('nq_close', ''), data.get('nq_chg', ''), data.get('nq_vol', ''), data.get('nq_vol_chg', ''),
+                data.get('f_close', ''), data.get('f_chg', ''), data.get('f_vol', ''), data.get('f_vol_chg', ''),
+                '-', '-', '-',
+                data.get('f_per', ''), data.get('f_for', ''), data.get('f_inst', ''),
+                data.get('f_ma120', ''),
             ]], value_input_option='RAW')
             return
 
@@ -219,6 +223,10 @@ def write_to_sheet(data):
         data.get('q_per', ''), data.get('q_for', ''), data.get('q_inst', ''),
         data.get('k_ma120', ''), data.get('q_ma120', ''),
         data.get('nq_close', ''), data.get('nq_chg', ''), data.get('nq_vol', ''), data.get('nq_vol_chg', ''),
+        data.get('f_close', ''), data.get('f_chg', ''), data.get('f_vol', ''), data.get('f_vol_chg', ''),
+        '-', '-', '-',
+        data.get('f_per', ''), data.get('f_for', ''), data.get('f_inst', ''),
+        data.get('f_ma120', ''),
     ]
     ws.append_row(row, value_input_option='RAW')
     logging.info(f'{date_str} 새 행 추가 완료')
@@ -326,6 +334,10 @@ def main(target_date=None):
                     logging.info(f'{col} 120MA: {ma120:.0f}, 현재: {current:.0f} → {idx[f"{prefix}_ma120"]}')
     except Exception as e:
         logging.warning(f'120일선 계산 실패: {e}')
+
+    # 선물 120일선 = KOSPI 120일선과 동일
+    if 'k_ma120' in idx:
+        idx['f_ma120'] = idx['k_ma120']
 
     # 6. 스프레드시트 저장
     write_to_sheet(idx)
