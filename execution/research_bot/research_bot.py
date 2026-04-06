@@ -126,9 +126,11 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except:
             forward_source = 'unknown'
 
-    # 중복 체크 (초반 10글자)
-    if is_duplicate(today_str(), text):
-        await msg.reply_text("⚠️ 중복된 메시지입니다. 저장하지 않았습니다.")
+    # 중복 체크
+    dup = is_duplicate(today_str(), text)
+    if dup:
+        preview = dup[:50] + ('...' if len(dup) > 50 else '')
+        await msg.reply_text(f"⚠️ 중복된 메시지입니다.\n기존: {preview}")
         return
 
     # URL이 있으면 기사 본문 스크래핑

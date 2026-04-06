@@ -63,9 +63,9 @@ def get_today_count(date_str):
     return count
 
 def is_duplicate(date_str, text_content):
-    """오늘 메시지 중 전체 텍스트가 동일한 메시지가 있는지 확인"""
+    """오늘 메시지 중 전체 텍스트가 동일한 메시지가 있는지 확인. 중복 시 기존 메시지 반환."""
     if not text_content or len(text_content.strip()) == 0:
-        return False
+        return None
     target = text_content.strip()
     conn = get_conn()
     rows = conn.execute(
@@ -76,8 +76,8 @@ def is_duplicate(date_str, text_content):
     for row in rows:
         existing = (row['text_content'] or '').strip()
         if existing == target:
-            return True
-    return False
+            return existing
+    return None
 
 
 def mark_processed(date_str):
