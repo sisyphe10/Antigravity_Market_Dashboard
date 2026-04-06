@@ -453,7 +453,17 @@ function switchTab(tab) {
 // ============================================================
 // Ideas tab
 // ============================================================
-var _ideasData = {}; // { 종목: [{ date, dow, code, idea }] }
+var _ideasData = {};
+
+function fmtMcap(v) {
+    if (!v) return '';
+    var n = parseInt(String(v).replace(/,/g, ''));
+    if (isNaN(n)) return v;
+    var jo = Math.floor(n / 10000);
+    var eok = n % 10000;
+    if (jo > 0) return jo.toLocaleString() + '조' + eok.toLocaleString() + '억';
+    return eok.toLocaleString() + '억';
+}
 
 async function loadIdeas() {
     try {
@@ -521,8 +531,8 @@ function renderIdeas(filter) {
         html += '<span class="arrow">▶</span>';
         html += '<span class="stock-name">' + stock + '</span>';
         html += '<span class="stock-code">' + d.code + '</span>';
-        if (d.xMcap) html += '<span class="stock-code">' + d.xMcap + '</span>';
-        if (d.mcap) html += '<span class="stock-code">' + d.mcap + '</span>';
+        if (d.xMcap) html += '<span class="stock-code">' + fmtMcap(d.xMcap) + '</span>';
+        if (d.mcap) html += '<span class="stock-code">' + fmtMcap(d.mcap) + '</span>';
         html += '<span class="stock-count">' + d.items.length + '건</span>';
         html += '</span>';
         html += '</div>';
