@@ -63,10 +63,10 @@ def get_today_count(date_str):
     return count
 
 def is_duplicate(date_str, text_content):
-    """오늘 메시지 중 초반 20글자가 동일한 메시지가 있는지 확인"""
+    """오늘 메시지 중 전체 텍스트가 동일한 메시지가 있는지 확인"""
     if not text_content or len(text_content.strip()) == 0:
         return False
-    prefix = text_content.strip()[:30]
+    target = text_content.strip()
     conn = get_conn()
     rows = conn.execute(
         "SELECT text_content FROM messages WHERE timestamp LIKE ? AND processed = 0",
@@ -75,7 +75,7 @@ def is_duplicate(date_str, text_content):
     conn.close()
     for row in rows:
         existing = (row['text_content'] or '').strip()
-        if existing[:30] == prefix:
+        if existing == target:
             return True
     return False
 
