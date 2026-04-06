@@ -50,6 +50,16 @@ def get_index_data(target_date=None):
                     volume_eok = round(int(volume_mil) / 100)  # 백만 → 억원
                 except:
                     volume_eok = volume_mil
+                try:
+                    close = f'{float(close):.1f}'
+                except:
+                    pass
+                try:
+                    chg_num = float(chg_rate.replace('%', '').replace('+', ''))
+                    sign = '+' if chg_rate.startswith('+') else ''
+                    chg_rate = f'{sign}{chg_num:.1f}%'
+                except:
+                    pass
                 result[f'{prefix}_close'] = close
                 result[f'{prefix}_chg'] = chg_rate
                 result[f'{prefix}_vol'] = volume_eok
