@@ -479,12 +479,15 @@ async function loadIdeas() {
             var dow = val(1);
             var code = val(2);
             var stock = val(3);
-            var action = val(4);
-            var idea = val(5);
+            var xMcap = val(4);
+            var mcap = val(5);
+            var returns = val(6);
+            var action = val(7);
+            var idea = val(8);
             if (!stock) return;
 
-            if (!_ideasData[stock]) _ideasData[stock] = { code: code, items: [] };
-            _ideasData[stock].items.push({ date: dateStr, dow: dow, action: action, idea: idea });
+            if (!_ideasData[stock]) _ideasData[stock] = { code: code, xMcap: xMcap, mcap: mcap, items: [] };
+            _ideasData[stock].items.push({ date: dateStr, dow: dow, returns: returns, action: action, idea: idea });
         });
 
         // 종목별 날짜 내림차순 정렬
@@ -518,6 +521,7 @@ function renderIdeas(filter) {
         html += '<span class="arrow">▶</span>';
         html += '<span class="stock-name">' + stock + '</span>';
         html += '<span class="stock-code">' + d.code + '</span>';
+        if (d.mcap) html += '<span class="stock-code">' + d.mcap + '</span>';
         html += '<span class="stock-count">' + d.items.length + '건</span>';
         html += '</span>';
         html += '</div>';
@@ -528,6 +532,7 @@ function renderIdeas(filter) {
             else if (item.action === '매도') { actionCls = 'action-sell'; }
             html += '<div class="idea-row">';
             html += '<div class="idea-date">' + item.date + '</div>';
+            if (item.returns) html += '<div style="flex:0 0 60px;font-size:0.82rem;font-weight:600;color:' + (item.returns.startsWith('-') ? '#1565c0' : '#c0392b') + ';">' + item.returns + '</div>';
             html += '<div class="idea-action"><span class="' + actionCls + '">' + actionLabel + '</span></div>';
             html += '<div class="idea-text">' + (item.idea || '-').replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</div>';
             html += '</div>';
