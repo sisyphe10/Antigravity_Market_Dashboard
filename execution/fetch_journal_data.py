@@ -24,10 +24,12 @@ KST = timezone(timedelta(hours=9))
 def get_index_data(target_date=None):
     """네이버 금융에서 KOSPI/KOSDAQ 지수 + 거래대금
     target_date: 'YYYYMMDD' 형식. None이면 최신 데이터."""
-    # target_date를 네이버 형식(YY.MM.DD)으로 변환
+    # target_date를 네이버 형식으로 변환 (YY.MM.DD 또는 YYYY.MM.DD 둘 다 매칭)
     target_short = None
+    target_long = None
     if target_date:
         target_short = f'{target_date[2:4]}.{target_date[4:6]}.{target_date[6:8]}'
+        target_long = f'{target_date[:4]}.{target_date[4:6]}.{target_date[6:8]}'
 
     result = {}
     for code, prefix in [('KOSPI', 'k'), ('KOSDAQ', 'q')]:
@@ -39,7 +41,7 @@ def get_index_data(target_date=None):
             cells = row.select('td')
             if len(cells) >= 6:
                 date_text = cells[0].text.strip()
-                if target_short and date_text != target_short:
+                if target_short and date_text != target_short and date_text != target_long:
                     continue
                 close = cells[1].text.strip().replace(',', '')
                 chg_rate = cells[3].text.strip()
@@ -70,7 +72,7 @@ def get_index_data(target_date=None):
                 vol = cells[5].text.strip().replace(',', '')
                 if target_short:
                     if not found_target:
-                        if date_text == target_short:
+                        if date_text == target_short or date_text == target_long:
                             found_target = True
                             try: vols.append(int(vol))
                             except: pass
