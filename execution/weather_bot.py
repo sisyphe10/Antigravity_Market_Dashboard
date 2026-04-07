@@ -1154,9 +1154,6 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(msg, parse_mode='HTML')
         logging.info(f"Sisyphe ledger: {tx_type} {amount} {category} {memo}")
 
-        # 지출 시 예산 마일스톤 체크 (10% 단위 알림)
-        if tx_type == '지출':
-            await _check_budget_after_ledger(context)
 
     except Exception as e:
         logging.error(f"Sisyphe ledger error: {e}")
@@ -1408,9 +1405,6 @@ async def journal_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ============================================================
 SISYPHE_SHEET_ID = '1V41yiwO4VrVUhjhqHyu8JGsuGcqw6pZen0NHdxzXHGs'
 SISYPHE_API_KEY = 'AIzaSyCHPiRby5FVAIKDwneZHy1KGl3SfycjZEw'
-BUDGET_MILESTONE_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.budget_milestone')
-
-
 def check_budget():
     """Google Sheets에서 예산/거래 데이터 읽고 소진율 계산"""
     import urllib.request
@@ -1455,41 +1449,6 @@ def check_budget():
     return pct, budget_total
 
 
-async def _check_budget_after_ledger(context):
-    """지출 입력 후 예산 소진율 10% 단위 마일스톤 체크"""
-    try:
-        pct, budget_total = check_budget()
-        if pct is None:
-            return
-
-        milestone = (pct // 10) * 10
-        if milestone < 10:
-            return
-
-        # 마지막 알림 마일스톤 확인
-        last_milestone = 0
-        now = datetime.datetime.now(KST)
-        month_key = now.strftime('%Y-%m')
-        if os.path.exists(BUDGET_MILESTONE_FILE):
-            try:
-                with open(BUDGET_MILESTONE_FILE, 'r') as f:
-                    data = json.load(f)
-                if data.get('month') == month_key:
-                    last_milestone = data.get('milestone', 0)
-            except:
-                pass
-
-        if milestone > last_milestone:
-            emoji = '🟢' if milestone <= 50 else '🟡' if milestone <= 70 else '🔴'
-            msg = f"{emoji} 생활비 예산 {milestone}% 소진\n현재 {pct}% 사용 중 (예산 {budget_total:,}원)"
-            await context.bot.send_message(chat_id=CHAT_ID, text=msg)
-
-            with open(BUDGET_MILESTONE_FILE, 'w') as f:
-                json.dump({'month': month_key, 'milestone': milestone}, f)
-            logging.info(f"Budget milestone: {milestone}% (actual {pct}%)")
-
-    except Exception as e:
-        logging.warning(f"Budget check failed: {e}")
 
 
 if __name__ == '__main__':
