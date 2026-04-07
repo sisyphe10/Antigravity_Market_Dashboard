@@ -1139,8 +1139,24 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if memo:
             msg += f"📝 {memo}\n"
 
+        # 지출 시 예산 소진율 표시
+        if tx_type == '지출':
+            try:
+                pct, budget_total = check_budget()
+                if pct is not None:
+                    bar_len = 10
+                    filled = min(bar_len, round(pct / 100 * bar_len))
+                    bar = '█' * filled + '░' * (bar_len - filled)
+                    msg += f"\n📊 예산 소진율 {pct}% [{bar}]"
+            except:
+                pass
+
         await update.message.reply_text(msg, parse_mode='HTML')
         logging.info(f"Sisyphe ledger: {tx_type} {amount} {category} {memo}")
+
+        # 지출 시 예산 마일스톤 체크 (10% 단위 알림)
+        if tx_type == '지출':
+            await _check_budget_after_ledger(context)
 
     except Exception as e:
         logging.error(f"Sisyphe ledger error: {e}")
@@ -1439,14 +1455,14 @@ def check_budget():
     return pct, budget_total
 
 
-async def budget_check_job(context: ContextTypes.DEFAULT_TYPE):
-    """예산 소진율 10% 단위 알림"""
+async def _check_budget_after_ledger(context):
+    """지출 입력 후 예산 소진율 10% 단위 마일스톤 체크"""
     try:
         pct, budget_total = check_budget()
         if pct is None:
             return
 
-        milestone = (pct // 10) * 10  # 현재 도달한 10% 단위
+        milestone = (pct // 10) * 10
         if milestone < 10:
             return
 
@@ -1464,12 +1480,10 @@ async def budget_check_job(context: ContextTypes.DEFAULT_TYPE):
                 pass
 
         if milestone > last_milestone:
-            # 새 마일스톤 도달 → 알림
             emoji = '🟢' if milestone <= 50 else '🟡' if milestone <= 70 else '🔴'
             msg = f"{emoji} 생활비 예산 {milestone}% 소진\n현재 {pct}% 사용 중 (예산 {budget_total:,}원)"
             await context.bot.send_message(chat_id=CHAT_ID, text=msg)
 
-            # 마일스톤 저장
             with open(BUDGET_MILESTONE_FILE, 'w') as f:
                 json.dump({'month': month_key, 'milestone': milestone}, f)
             logging.info(f"Budget milestone: {milestone}% (actual {pct}%)")
@@ -1546,9 +1560,6 @@ if __name__ == '__main__':
 
     for t in trading_times:
         job_queue.run_daily(auto_portfolio_update_job, time=t)
-
-    # 예산 소진율 체크 (3시간마다)
-    job_queue.run_repeating(budget_check_job, interval=10800, first=60)
 
     print(f"Bot started at {datetime.datetime.now()}")
     print(f"✅ Daily jobs scheduled:")
