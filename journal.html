@@ -539,7 +539,9 @@ async function loadIdeas() {
 }
 
 function renderIdeas(filter) {
-    var keys = Object.keys(_ideasData).sort();
+    var keys = Object.keys(_ideasData).sort(function(a, b) {
+        return _ideasData[b].items[0].date.localeCompare(_ideasData[a].items[0].date);
+    });
     if (filter) {
         var f = filter.toLowerCase();
         keys = keys.filter(function(k) { return k.toLowerCase().includes(f) || _ideasData[k].code.includes(f); });
