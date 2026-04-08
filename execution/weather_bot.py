@@ -1411,8 +1411,29 @@ async def journal_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ============================================================
 # WiseReport 리서치 리포트 알림
 # ============================================================
-_wisereport_sent = set()  # (기업명/산업명, 제목) 튜플로 중복 방지
-_wisereport_sent_date = None
+_WISEREPORT_SENT_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.wisereport_sent.json')
+
+
+def _load_wisereport_sent():
+    """파일에서 당일 전송 기록 로드"""
+    today_str = datetime.datetime.now(KST).strftime('%Y-%m-%d')
+    try:
+        with open(_WISEREPORT_SENT_FILE, 'r') as f:
+            data = json.load(f)
+        if data.get('date') == today_str:
+            return set(tuple(x) for x in data.get('sent', [])), today_str
+    except:
+        pass
+    return set(), today_str
+
+
+def _save_wisereport_sent(sent_set, date_str):
+    """전송 기록 파일에 저장"""
+    try:
+        with open(_WISEREPORT_SENT_FILE, 'w') as f:
+            json.dump({'date': date_str, 'sent': list(sent_set)}, f)
+    except:
+        pass
 
 
 def fetch_wisereport(fmt, date_str):
@@ -1559,18 +1580,14 @@ def format_wisereport_msg(company_data, industry_data, is_update=False):
 
 async def wisereport_job(context):
     """WiseReport 리서치 리포트 스크래핑 + 텔레그램 전송"""
-    global _wisereport_sent, _wisereport_sent_date
-
     now = datetime.datetime.now(KST)
     today_str = now.strftime('%Y-%m-%d')
 
-    # 날짜 바뀌면 초기화
-    if _wisereport_sent_date != today_str:
-        _wisereport_sent = set()
-        _wisereport_sent_date = today_str
+    sent_set, sent_date = _load_wisereport_sent()
+    if sent_date != today_str:
+        sent_set = set()
 
-    first_run = len(_wisereport_sent) == 0
-    is_update = not first_run
+    is_update = len(sent_set) > 0
 
     try:
         company = fetch_wisereport(1, today_str)
@@ -1584,31 +1601,23 @@ async def wisereport_job(context):
                 pass
         return
 
-    # 봇 재시작 후 첫 실행인데 08:00이 지났으면 → 기존 데이터만 등록하고 전송 생략
-    if first_run and now.hour >= 8:
-        for r in company:
-            _wisereport_sent.add((r['name'], r['title']))
-        for r in industry:
-            _wisereport_sent.add((r['name'], r['title']))
-        logging.info(f"WiseReport: silent catchup ({len(company)} company, {len(industry)} industry)")
-        return
-
     # 새 항목만 필터링
     new_company = []
     for r in company:
         key = (r['name'], r['title'])
-        if key not in _wisereport_sent:
-            _wisereport_sent.add(key)
+        if key not in sent_set:
+            sent_set.add(key)
             new_company.append(r)
 
     new_industry = []
     for r in industry:
         key = (r['name'], r['title'])
-        if key not in _wisereport_sent:
-            _wisereport_sent.add(key)
+        if key not in sent_set:
+            sent_set.add(key)
             new_industry.append(r)
 
     if not new_company and not new_industry:
+        _save_wisereport_sent(sent_set, today_str)
         logging.info("WiseReport: no new reports")
         return
 
@@ -1620,6 +1629,7 @@ async def wisereport_job(context):
             except Exception as e:
                 logging.error(f"WiseReport send failed: {e}")
 
+    _save_wisereport_sent(sent_set, today_str)
     logging.info(f"WiseReport sent: {len(new_company)} company, {len(new_industry)} industry")
 
 

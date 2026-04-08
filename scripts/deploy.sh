@@ -13,6 +13,7 @@ BACKUP_FILES=(
     ".env"
     "subscribers.json"
     ".budget_milestone"
+    ".wisereport_sent.json"
     "stock_price_history.json"
     "execution/research_bot/research_notes.db"
 )
