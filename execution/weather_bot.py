@@ -1478,50 +1478,73 @@ def format_wisereport_msg(company_data, industry_data, is_update=False):
 
     if company_data:
         lines.append('<b>━━ 기업 ━━</b>')
-        # 같은 종목끼리 그룹핑 (출현 순서 유지)
-        groups = OrderedDict()
+        # 같은 종목끼리 그룹핑 (한글 오름차순)
+        groups = {}
         for r in company_data:
             nm = r['name'].split('(')[0].strip()
             if nm not in groups:
                 groups[nm] = []
             groups[nm].append(r)
 
-        for nm, items in groups.items():
-            code = items[0]['name'].split('(')[-1].replace(')', '') if '(' in items[0]['name'] else ''
-            lines.append(f"<b>{nm}</b> ({code})" if code else f"<b>{nm}</b>")
+        for nm in sorted(groups.keys()):
+            items = groups[nm]
             for r in items:
                 op = r['opinion'] or '-'
                 tgt = r['target'] or '-'
                 analyst = r['analyst'].replace('[', '').replace(']', '')
-                lines.append(f"  {analyst} | {op} | {tgt}")
-                lines.append(f"  {r['title']}")
-                summ = r['summary'].replace('▶ ', '▶').replace('▶', '\n  ▶')
+                # 증권사 앞2글자 + 애널리스트명
+                parts = analyst.split()
+                firm = parts[0][:2] if parts else '-'
+                person = ' '.join(parts[1:]) if len(parts) > 1 else ''
+                analyst_short = f"{firm} {person}" if person else firm
+                close = r.get('close', '') or '-'
+                # upside/downside 계산
+                try:
+                    c_val = int(close.replace(',', ''))
+                    t_val = int(tgt.replace(',', ''))
+                    pct = round((t_val - c_val) / c_val * 100)
+                    pct_str = f" ({pct:+d}%)"
+                except:
+                    pct_str = ''
+                lines.append(f"<b><u>{nm}</u></b>")
+                lines.append(f"{analyst_short} | {op} | {close} → {tgt}{pct_str}")
+                lines.append(f"「{r['title']}」")
+                summ = r['summary'].replace('▶ ', '▶').replace('▶', '\n- ')
                 if summ.startswith('\n'):
                     summ = summ[1:]
-                lines.append(f"  {summ}")
-            lines.append('')
+                lines.append(summ)
+                lines.append('')
 
     if industry_data:
         lines.append('<b>━━ 산업 ━━</b>')
-        groups = OrderedDict()
+        groups = {}
         for r in industry_data:
             nm = r['name']
             if nm not in groups:
                 groups[nm] = []
             groups[nm].append(r)
 
-        for nm, items in groups.items():
-            lines.append(f"<b>{nm}</b>")
+        for nm in sorted(groups.keys()):
+            items = groups[nm]
             for r in items:
-                prev = r.get('prev_opinion', '') or '-'
-                curr = r.get('opinion', '') or '-'
+                prev = r.get('prev_opinion', '') or ''
+                curr = r.get('opinion', '') or ''
                 analyst = r['analyst'].replace('[', '').replace(']', '')
-                lines.append(f"  {analyst} | {prev} → {curr}")
-                lines.append(f"  {r['title']}")
-                summ = r['summary'].replace('▶ ', '▶').replace('▶', '\n  ▶')
+                if prev and curr and prev != curr:
+                    opinion_str = f"{prev} → {curr}"
+                else:
+                    opinion_str = curr or prev or '-'
+                parts = analyst.split()
+                firm = parts[0][:2] if parts else '-'
+                person = ' '.join(parts[1:]) if len(parts) > 1 else ''
+                analyst_short = f"{firm} {person}" if person else firm
+                lines.append(f"<b><u>{nm}</u></b>")
+                lines.append(f"{analyst_short} | {opinion_str}")
+                lines.append(f"「{r['title']}」")
+                summ = r['summary'].replace('▶ ', '▶').replace('▶', '\n- ')
                 if summ.startswith('\n'):
                     summ = summ[1:]
-                lines.append(f"  {summ}")
+                lines.append(summ)
             lines.append('')
 
     # 4096자 제한 분할
