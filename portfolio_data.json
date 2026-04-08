@@ -57,20 +57,6 @@
       "is_today_new": false
     },
     {
-      "code": "112610",
-      "name": "씨에스윈드",
-      "sector": "에너지",
-      "market_cap": 27327.069144,
-      "weight": 5,
-      "today_return": -1.0687022900763359,
-      "contribution": -0.5343511450381679,
-      "cumulative_return": 6.061246040126722,
-      "current_price": 64800.0,
-      "ath_price": 92300.0,
-      "dd": -29.794149512459366,
-      "is_today_new": false
-    },
-    {
       "code": "001040",
       "name": "CJ",
       "sector": "상사,자본재",
@@ -82,6 +68,20 @@
       "current_price": 195600.0,
       "ath_price": 305521.0,
       "dd": -35.978214263503986,
+      "is_today_new": false
+    },
+    {
+      "code": "112610",
+      "name": "씨에스윈드",
+      "sector": "에너지",
+      "market_cap": 27327.069144,
+      "weight": 5,
+      "today_return": -1.0687022900763359,
+      "contribution": -0.5343511450381679,
+      "cumulative_return": 6.061246040126722,
+      "current_price": 64800.0,
+      "ath_price": 92300.0,
+      "dd": -29.794149512459366,
       "is_today_new": false
     },
     {
@@ -227,17 +227,17 @@
       "is_today_new": false
     },
     {
-      "code": "352820",
-      "name": "하이브",
-      "sector": "미디어,교육",
-      "market_cap": 112191.73883,
-      "weight": 5,
-      "today_return": 1.7578125,
-      "contribution": 0.87890625,
-      "cumulative_return": null,
-      "current_price": 260500.0,
-      "ath_price": 414000.0,
-      "dd": -37.07729468599034,
+      "code": "476830",
+      "name": "알지노믹스",
+      "sector": "기타",
+      "market_cap": 26028.416856,
+      "weight": 7,
+      "today_return": 5.895691609977324,
+      "contribution": 4.126984126984127,
+      "cumulative_return": -5.56117290192113,
+      "current_price": 186800.0,
+      "ath_price": 236000.0,
+      "dd": -20.847457627118647,
       "is_today_new": false
     },
     {
@@ -255,17 +255,17 @@
       "is_today_new": false
     },
     {
-      "code": "476830",
-      "name": "알지노믹스",
-      "sector": "기타",
-      "market_cap": 26028.416856,
+      "code": "007660",
+      "name": "이수페타시스",
+      "sector": "IT하드웨어",
+      "market_cap": 88164.472019,
       "weight": 5,
-      "today_return": 5.895691609977324,
-      "contribution": 2.9478458049886624,
-      "cumulative_return": -5.56117290192113,
-      "current_price": 186800.0,
-      "ath_price": 236000.0,
-      "dd": -20.847457627118647,
+      "today_return": 13.30188679245283,
+      "contribution": 6.650943396226416,
+      "cumulative_return": 6.217795893255396,
+      "current_price": 120100.0,
+      "ath_price": 148200.0,
+      "dd": -18.960863697705797,
       "is_today_new": false
     },
     {
@@ -283,17 +283,17 @@
       "is_today_new": false
     },
     {
-      "code": "007660",
-      "name": "이수페타시스",
-      "sector": "IT하드웨어",
-      "market_cap": 88164.472019,
+      "code": "006360",
+      "name": "GS건설",
+      "sector": "건설,건축관련",
+      "market_cap": 32007.47726,
       "weight": 3,
-      "today_return": 13.30188679245283,
-      "contribution": 3.9905660377358494,
-      "cumulative_return": 6.217795893255396,
-      "current_price": 120100.0,
-      "ath_price": 148200.0,
-      "dd": -18.960863697705797,
+      "today_return": 29.86111111111111,
+      "contribution": 8.958333333333332,
+      "cumulative_return": 34.02015677491601,
+      "current_price": 37400.0,
+      "ath_price": 54700.0,
+      "dd": -31.62705667276051,
       "is_today_new": false
     },
     {
@@ -308,20 +308,6 @@
       "current_price": 235000.0,
       "ath_price": 278000.0,
       "dd": -15.467625899280579,
-      "is_today_new": false
-    },
-    {
-      "code": "006360",
-      "name": "GS건설",
-      "sector": "건설,건축관련",
-      "market_cap": 32007.47726,
-      "weight": 3,
-      "today_return": 29.86111111111111,
-      "contribution": 8.958333333333332,
-      "cumulative_return": 34.02015677491601,
-      "current_price": 37400.0,
-      "ath_price": 54700.0,
-      "dd": -31.62705667276051,
       "is_today_new": false
     },
     {
@@ -378,6 +364,20 @@
       "current_price": 40300.0,
       "ath_price": 71363.0,
       "dd": -43.52815884982414,
+      "is_today_new": false
+    },
+    {
+      "code": "440110",
+      "name": "파두",
+      "sector": "반도체",
+      "market_cap": 28542.97059,
+      "weight": 3,
+      "today_return": 21.27659574468085,
+      "contribution": 6.382978723404255,
+      "cumulative_return": 0.0,
+      "current_price": 57000.0,
+      "ath_price": 71000.0,
+      "dd": -19.718309859154925,
       "is_today_new": false
     }
   ]
