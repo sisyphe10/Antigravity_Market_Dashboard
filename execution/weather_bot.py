@@ -36,8 +36,6 @@ DASHBOARD_DIR = os.path.join(os.path.expanduser('~'), 'Antigravity_Market_Dashbo
 
 SUBSCRIBERS_FILE = os.path.join(DASHBOARD_DIR, 'subscribers.json')
 
-KST = datetime.timezone(datetime.timedelta(hours=9))
-
 
 def git_sync(cwd):
     """VM git 동기화: fetch + reset --hard (충돌 불가)"""
