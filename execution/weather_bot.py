@@ -1585,7 +1585,7 @@ async def wisereport_job(context):
         return
 
     # 봇 재시작 후 첫 실행인데 08:00이 지났으면 → 기존 데이터만 등록하고 전송 생략
-    if first_run and now.hour >= 9:
+    if first_run and now.hour >= 8:
         for r in company:
             _wisereport_sent.add((r['name'], r['title']))
         for r in industry:
@@ -1748,12 +1748,12 @@ if __name__ == '__main__':
         kst = pytz.timezone('Asia/Seoul')
         wisereport_times = [
             datetime.time(hour=h, minute=m, second=0, tzinfo=kst)
-            for h, m in [(8,0),(8,30),(9,0),(10,0),(11,0),(12,0)]
+            for h, m in [(7,0),(7,30),(8,0),(8,30),(9,0),(10,0),(11,0),(12,0)]
         ]
     except:
         wisereport_times = [
             datetime.time(hour=h, minute=m, second=0)
-            for h, m in [(8,0),(8,30),(9,0),(10,0),(11,0),(12,0)]
+            for h, m in [(7,0),(7,30),(8,0),(8,30),(9,0),(10,0),(11,0),(12,0)]
         ]
     for t in wisereport_times:
         job_queue.run_daily(wisereport_job, time=t)
