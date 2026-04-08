@@ -89,20 +89,7 @@ jobs:
         env:
            TZ: 'Asia/Seoul'
 
-      - name: Restore Stock Price History Cache
-        uses: actions/cache@v4
-        with:
-          path: stock_price_history.json
-          key: stock-price-history-${{ github.run_id }}
-          restore-keys: stock-price-history-
-
-      - name: Update Stock Price History + Fetch Featured Data
-        run: |
-          pip install pykrx-openapi -q
-          python execution/update_price_history.py || echo "가격 히스토리 업데이트 실패 (계속 진행)"
-          python execution/fetch_featured_data.py || echo "Featured 수집 실패 (계속 진행)"
-        env:
-           TZ: 'Asia/Seoul'
+      # Featured/stock_price_history는 VM 18:00 job에서 처리 (KRX OpenAPI가 GHA IP 차단)
 
       - name: Draw Wrap Charts
         run: |
