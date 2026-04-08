@@ -1467,7 +1467,8 @@ def fetch_wisereport(fmt, date_str):
 
 
 def format_wisereport_msg(company_data, industry_data, is_update=False):
-    """텔레그램 HTML 메시지 생성. 4096자 제한 고려해 분할 반환."""
+    """텔레그램 HTML 메시지 생성. 같은 종목/산업 그룹핑, 4096자 분할."""
+    from collections import OrderedDict
     now_str = datetime.datetime.now(KST).strftime('%Y-%m-%d %H:%M')
     header = f"📋 <b>리서치 리포트</b> ({now_str})"
     if is_update:
@@ -1476,32 +1477,51 @@ def format_wisereport_msg(company_data, industry_data, is_update=False):
     lines = [header, '']
 
     if company_data:
-        lines.append('<b>[기업]</b>')
+        lines.append('<b>━━ 기업 ━━</b>')
+        # 같은 종목끼리 그룹핑 (출현 순서 유지)
+        groups = OrderedDict()
         for r in company_data:
-            name = r['name'].split('(')[0].strip()
-            opinion = r['opinion'] or '-'
-            target = r['target'] or '-'
-            lines.append(f"▪ <b>{name}</b> | {r['analyst']} | {opinion} | {target}")
-            lines.append(f"  {r['title']}")
-            # 요약 첫 줄만 (너무 길면 잘라)
-            summ = r['summary'].replace('▶ ', '▶').replace('▶', '\n  ▶')
-            if summ.startswith('\n'):
-                summ = summ[1:]
-            lines.append(f"  {summ}")
+            nm = r['name'].split('(')[0].strip()
+            if nm not in groups:
+                groups[nm] = []
+            groups[nm].append(r)
+
+        for nm, items in groups.items():
+            code = items[0]['name'].split('(')[-1].replace(')', '') if '(' in items[0]['name'] else ''
+            lines.append(f"<b>{nm}</b> ({code})" if code else f"<b>{nm}</b>")
+            for r in items:
+                op = r['opinion'] or '-'
+                tgt = r['target'] or '-'
+                analyst = r['analyst'].replace('[', '').replace(']', '')
+                lines.append(f"  {analyst} | {op} | {tgt}")
+                lines.append(f"  {r['title']}")
+                summ = r['summary'].replace('▶ ', '▶').replace('▶', '\n  ▶')
+                if summ.startswith('\n'):
+                    summ = summ[1:]
+                lines.append(f"  {summ}")
             lines.append('')
 
     if industry_data:
-        lines.append('<b>[산업]</b>')
+        lines.append('<b>━━ 산업 ━━</b>')
+        groups = OrderedDict()
         for r in industry_data:
-            prev = r.get('prev_opinion', '') or '-'
-            curr = r.get('opinion', '') or '-'
-            lines.append(f"▪ <b>{r['name']}</b> | {r['analyst']}")
-            lines.append(f"  {prev} → {curr}")
-            lines.append(f"  {r['title']}")
-            summ = r['summary'].replace('▶ ', '▶').replace('▶', '\n  ▶')
-            if summ.startswith('\n'):
-                summ = summ[1:]
-            lines.append(f"  {summ}")
+            nm = r['name']
+            if nm not in groups:
+                groups[nm] = []
+            groups[nm].append(r)
+
+        for nm, items in groups.items():
+            lines.append(f"<b>{nm}</b>")
+            for r in items:
+                prev = r.get('prev_opinion', '') or '-'
+                curr = r.get('opinion', '') or '-'
+                analyst = r['analyst'].replace('[', '').replace(']', '')
+                lines.append(f"  {analyst} | {prev} → {curr}")
+                lines.append(f"  {r['title']}")
+                summ = r['summary'].replace('▶ ', '▶').replace('▶', '\n  ▶')
+                if summ.startswith('\n'):
+                    summ = summ[1:]
+                lines.append(f"  {summ}")
             lines.append('')
 
     # 4096자 제한 분할
