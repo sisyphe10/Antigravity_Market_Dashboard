@@ -1564,15 +1564,28 @@ def format_wisereport_msg(company_data, industry_data, is_update=False):
                 lines.append(summ)
             lines.append('')
 
-    # 4096자 제한 분할
+    # 종목/산업 블록 단위로 분할 (빈줄 기준)
+    blocks = []
+    block = ''
+    for line in lines:
+        if line == '' and block.strip():
+            blocks.append(block + '\n')
+            block = ''
+        else:
+            block += line + '\n'
+    if block.strip():
+        blocks.append(block)
+
+    # 4096자 제한, 블록 단위로 메시지 분할
     messages = []
     current = ''
-    for line in lines:
-        if len(current) + len(line) + 1 > 4000:
-            messages.append(current)
-            current = line + '\n'
+    for blk in blocks:
+        if len(current) + len(blk) > 4000:
+            if current.strip():
+                messages.append(current)
+            current = blk
         else:
-            current += line + '\n'
+            current += blk
     if current.strip():
         messages.append(current)
     return messages
