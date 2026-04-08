@@ -434,8 +434,6 @@ def run_portfolio_update():
 
 def format_update_summary(portfolio_data):
     """포트폴리오 업데이트 요약 메시지 생성"""
-    from datetime import timezone, timedelta
-    KST = timezone(timedelta(hours=9))
     now_str = datetime.datetime.now(tz=KST).strftime("%Y-%m-%d %H:%M")
     lines = [f"📊 포트폴리오 업데이트", f"⏰ {now_str} (KST)"]
 
@@ -886,8 +884,7 @@ async def daily_headlines_job(context: ContextTypes.DEFAULT_TYPE):
             headlines = data.get('headlines', [])
             date = data.get('date', '')
             # 날짜 신선도 체크: 어제 또는 오늘 데이터만 전송
-            _KST = datetime.timezone(datetime.timedelta(hours=9))
-            today_kst = datetime.datetime.now(tz=_KST).date()
+            today_kst = datetime.datetime.now(tz=KST).date()
             yesterday_kst = today_kst - datetime.timedelta(days=1)
             try:
                 headline_date = datetime.datetime.strptime(date, '%Y-%m-%d').date()
@@ -952,7 +949,6 @@ async def check_dday_alerts(context):
         from google.oauth2 import service_account
         from googleapiclient.discovery import build
 
-        KST = datetime.timezone(datetime.timedelta(hours=9))
         today = datetime.datetime.now(tz=KST).date()
 
         # 1) 음력 기념일 (생일 + 설/추석)
@@ -1137,7 +1133,6 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         pass
 
     try:
-        KST = datetime.timezone(datetime.timedelta(hours=9))
         today_str = datetime.datetime.now(tz=KST).strftime('%Y-%m-%d')
 
         _append_row(service, '거래내역', [today_str, tx_type, category, str(amount), memo])
@@ -1283,7 +1278,6 @@ async def ledger2_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
     try:
-        KST = datetime.timezone(datetime.timedelta(hours=9))
         today_str = datetime.datetime.now(tz=KST).strftime('%Y-%m-%d')
 
         service.spreadsheets().values().append(
