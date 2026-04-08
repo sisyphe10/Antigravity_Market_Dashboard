@@ -1537,6 +1537,11 @@ async def wisereport_job(context):
         industry = fetch_wisereport(2, today_str)
     except Exception as e:
         logging.warning(f"WiseReport fetch failed: {e}")
+        for chat_id in SUBSCRIBERS:
+            try:
+                await context.bot.send_message(chat_id=chat_id, text=f"⚠️ WiseReport 수집 실패: {e}")
+            except:
+                pass
         return
 
     # 새 항목만 필터링
