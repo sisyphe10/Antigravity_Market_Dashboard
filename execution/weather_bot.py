@@ -1413,6 +1413,163 @@ async def journal_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # ============================================================
+# WiseReport 리서치 리포트 알림
+# ============================================================
+_wisereport_sent = set()  # (기업명/산업명, 제목) 튜플로 중복 방지
+_wisereport_sent_date = None
+
+
+def fetch_wisereport(fmt, date_str):
+    """WiseReport 리포트 서머리 스크래핑. fmt=1(기업), fmt=2(산업)"""
+    import urllib.request
+    from bs4 import BeautifulSoup
+
+    url = f'https://comp.wisereport.co.kr/wiseReport/summary/ReportSummary.aspx?ee={date_str}&fmt={fmt}'
+    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+    html = urllib.request.urlopen(req, timeout=20).read().decode('utf-8', errors='replace')
+    soup = BeautifulSoup(html, 'html.parser')
+
+    tbl = soup.find('table', class_='Summary_list')
+    if not tbl:
+        return []
+
+    results = []
+    for row in tbl.find_all('tr', class_=['itm_t1', 'alt_t1']):
+        cells = row.find_all(['th', 'td'])
+        if fmt == 1 and len(cells) >= 7:
+            summary = cells[6].get_text(strip=True)
+            if not summary:
+                continue
+            name_div = cells[0].find('div')
+            title_full = cells[5].get('title', '') or cells[5].get_text(strip=True)
+            results.append({
+                'name': name_div.get('title', '') if name_div else cells[0].get_text(strip=True),
+                'analyst': cells[1].get_text(' ', strip=True),
+                'opinion': cells[2].get_text(strip=True),
+                'target': cells[3].get_text(strip=True).replace('\n', ''),
+                'close': cells[4].get_text(strip=True),
+                'title': title_full,
+                'summary': summary,
+            })
+        elif fmt == 2 and len(cells) >= 6:
+            summary = cells[5].get_text(strip=True)
+            if not summary:
+                continue
+            results.append({
+                'name': cells[0].get_text(strip=True),
+                'analyst': cells[1].get_text(' ', strip=True),
+                'opinion': cells[2].get_text(strip=True),
+                'prev_opinion': cells[3].get_text(strip=True),
+                'title': cells[4].get('title', '') or cells[4].get_text(strip=True),
+                'summary': summary,
+            })
+    return results
+
+
+def format_wisereport_msg(company_data, industry_data, is_update=False):
+    """텔레그램 HTML 메시지 생성. 4096자 제한 고려해 분할 반환."""
+    now_str = datetime.datetime.now(KST).strftime('%Y-%m-%d %H:%M')
+    header = f"📋 <b>리서치 리포트</b> ({now_str})"
+    if is_update:
+        header = f"📋 <b>리서치 리포트 추가</b> ({now_str})"
+
+    lines = [header, '']
+
+    if company_data:
+        lines.append('<b>[기업]</b>')
+        for r in company_data:
+            name = r['name'].split('(')[0].strip()
+            opinion = r['opinion'] or '-'
+            target = r['target'] or '-'
+            lines.append(f"▪ <b>{name}</b> | {r['analyst']} | {opinion} | {target}")
+            lines.append(f"  {r['title']}")
+            # 요약 첫 줄만 (너무 길면 잘라)
+            summ = r['summary'].replace('▶ ', '▶').replace('▶', '\n  ▶')
+            if summ.startswith('\n'):
+                summ = summ[1:]
+            lines.append(f"  {summ}")
+            lines.append('')
+
+    if industry_data:
+        lines.append('<b>[산업]</b>')
+        for r in industry_data:
+            prev = r.get('prev_opinion', '') or '-'
+            curr = r.get('opinion', '') or '-'
+            lines.append(f"▪ <b>{r['name']}</b> | {r['analyst']}")
+            lines.append(f"  {prev} → {curr}")
+            lines.append(f"  {r['title']}")
+            summ = r['summary'].replace('▶ ', '▶').replace('▶', '\n  ▶')
+            if summ.startswith('\n'):
+                summ = summ[1:]
+            lines.append(f"  {summ}")
+            lines.append('')
+
+    # 4096자 제한 분할
+    messages = []
+    current = ''
+    for line in lines:
+        if len(current) + len(line) + 1 > 4000:
+            messages.append(current)
+            current = line + '\n'
+        else:
+            current += line + '\n'
+    if current.strip():
+        messages.append(current)
+    return messages
+
+
+async def wisereport_job(context):
+    """WiseReport 리서치 리포트 스크래핑 + 텔레그램 전송"""
+    global _wisereport_sent, _wisereport_sent_date
+
+    now = datetime.datetime.now(KST)
+    today_str = now.strftime('%Y-%m-%d')
+
+    # 날짜 바뀌면 초기화
+    if _wisereport_sent_date != today_str:
+        _wisereport_sent = set()
+        _wisereport_sent_date = today_str
+
+    is_update = len(_wisereport_sent) > 0  # 첫 전송이 아니면 업데이트
+
+    try:
+        company = fetch_wisereport(1, today_str)
+        industry = fetch_wisereport(2, today_str)
+    except Exception as e:
+        logging.warning(f"WiseReport fetch failed: {e}")
+        return
+
+    # 새 항목만 필터링
+    new_company = []
+    for r in company:
+        key = (r['name'], r['title'])
+        if key not in _wisereport_sent:
+            _wisereport_sent.add(key)
+            new_company.append(r)
+
+    new_industry = []
+    for r in industry:
+        key = (r['name'], r['title'])
+        if key not in _wisereport_sent:
+            _wisereport_sent.add(key)
+            new_industry.append(r)
+
+    if not new_company and not new_industry:
+        logging.info("WiseReport: no new reports")
+        return
+
+    messages = format_wisereport_msg(new_company, new_industry, is_update)
+    for msg in messages:
+        for chat_id in SUBSCRIBERS:
+            try:
+                await context.bot.send_message(chat_id=chat_id, text=msg, parse_mode='HTML')
+            except Exception as e:
+                logging.error(f"WiseReport send failed: {e}")
+
+    logging.info(f"WiseReport sent: {len(new_company)} company, {len(new_industry)} industry")
+
+
+# ============================================================
 # 예산 소진율 체크
 # ============================================================
 SISYPHE_SHEET_ID = '1V41yiwO4VrVUhjhqHyu8JGsuGcqw6pZen0NHdxzXHGs'
@@ -1532,6 +1689,21 @@ if __name__ == '__main__':
     for t in trading_times:
         job_queue.run_daily(auto_portfolio_update_job, time=t)
 
+    # WiseReport 리서치 리포트 알림 (08:00, 08:30, 09:00, 10:00, 11:00, 12:00 KST)
+    try:
+        kst = pytz.timezone('Asia/Seoul')
+        wisereport_times = [
+            datetime.time(hour=h, minute=m, second=0, tzinfo=kst)
+            for h, m in [(8,0),(8,30),(9,0),(10,0),(11,0),(12,0)]
+        ]
+    except:
+        wisereport_times = [
+            datetime.time(hour=h, minute=m, second=0)
+            for h, m in [(8,0),(8,30),(9,0),(10,0),(11,0),(12,0)]
+        ]
+    for t in wisereport_times:
+        job_queue.run_daily(wisereport_job, time=t)
+
     print(f"Bot started at {datetime.datetime.now()}")
     print(f"✅ Daily jobs scheduled:")
     print(f"  - Weather: 05:00 KST")
@@ -1541,4 +1713,5 @@ if __name__ == '__main__':
     print(f"  - Featured data: 18:00 KST (실패 시 19:00 재시도)")
     print(f"  - Auto portfolio update: 09:30~15:35 KST (30분 간격, 거래일만)")
     print(f"  - Nightly portfolio refresh: 23:00 KST (당일 주문 반영)")
+    print(f"  - WiseReport: 08:00~12:00 KST (리서치 리포트)")
     application.run_polling()
