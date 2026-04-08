@@ -1573,7 +1573,8 @@ async def wisereport_job(context):
         _wisereport_sent = set()
         _wisereport_sent_date = today_str
 
-    is_update = len(_wisereport_sent) > 0  # 첫 전송이 아니면 업데이트
+    first_run = len(_wisereport_sent) == 0
+    is_update = not first_run
 
     try:
         company = fetch_wisereport(1, today_str)
@@ -1585,6 +1586,15 @@ async def wisereport_job(context):
                 await context.bot.send_message(chat_id=chat_id, text=f"⚠️ WiseReport 수집 실패: {e}")
             except:
                 pass
+        return
+
+    # 봇 재시작 후 첫 실행인데 08:00이 지났으면 → 기존 데이터만 등록하고 전송 생략
+    if first_run and now.hour >= 9:
+        for r in company:
+            _wisereport_sent.add((r['name'], r['title']))
+        for r in industry:
+            _wisereport_sent.add((r['name'], r['title']))
+        logging.info(f"WiseReport: silent catchup ({len(company)} company, {len(industry)} industry)")
         return
 
     # 새 항목만 필터링
