@@ -57,20 +57,6 @@
       "is_today_new": false
     },
     {
-      "code": "001040",
-      "name": "CJ",
-      "sector": "상사,자본재",
-      "market_cap": 57070.208088,
-      "weight": 5,
-      "today_return": 6.768558951965066,
-      "contribution": 3.384279475982533,
-      "cumulative_return": 88.0,
-      "current_price": 195600.0,
-      "ath_price": 305521.0,
-      "dd": -35.978214263503986,
-      "is_today_new": false
-    },
-    {
       "code": "112610",
       "name": "씨에스윈드",
       "sector": "에너지",
@@ -82,6 +68,20 @@
       "current_price": 64800.0,
       "ath_price": 92300.0,
       "dd": -29.794149512459366,
+      "is_today_new": false
+    },
+    {
+      "code": "001040",
+      "name": "CJ",
+      "sector": "상사,자본재",
+      "market_cap": 57070.208088,
+      "weight": 5,
+      "today_return": 6.768558951965066,
+      "contribution": 3.384279475982533,
+      "cumulative_return": 88.0,
+      "current_price": 195600.0,
+      "ath_price": 305521.0,
+      "dd": -35.978214263503986,
       "is_today_new": false
     },
     {
@@ -241,20 +241,6 @@
       "is_today_new": false
     },
     {
-      "code": "128940",
-      "name": "한미약품",
-      "sector": "건강관리",
-      "market_cap": 63222.240585,
-      "weight": 5,
-      "today_return": -2.6627218934911245,
-      "contribution": -1.3313609467455623,
-      "cumulative_return": -4.267701260911738,
-      "current_price": 493500.0,
-      "ath_price": 681979.0,
-      "dd": -27.637068003560227,
-      "is_today_new": false
-    },
-    {
       "code": "007660",
       "name": "이수페타시스",
       "sector": "IT하드웨어",
@@ -266,6 +252,20 @@
       "current_price": 120100.0,
       "ath_price": 148200.0,
       "dd": -18.960863697705797,
+      "is_today_new": false
+    },
+    {
+      "code": "128940",
+      "name": "한미약품",
+      "sector": "건강관리",
+      "market_cap": 63222.240585,
+      "weight": 5,
+      "today_return": -2.6627218934911245,
+      "contribution": -1.3313609467455623,
+      "cumulative_return": -4.267701260911738,
+      "current_price": 493500.0,
+      "ath_price": 681979.0,
+      "dd": -27.637068003560227,
       "is_today_new": false
     },
     {
