@@ -1921,12 +1921,12 @@ if __name__ == '__main__':
         kst = pytz.timezone('Asia/Seoul')
         wisereport_times = [
             datetime.time(hour=h, minute=m, second=0, tzinfo=kst)
-            for h, m in [(7,0),(7,30),(8,0),(8,30),(9,0),(10,0),(11,0),(12,0),(13,0),(14,0),(15,0),(16,0)]
+            for h, m in [(7,0),(8,0),(9,0),(10,0),(11,0),(12,0),(13,0),(14,0),(15,0),(17,0)]
         ]
     except:
         wisereport_times = [
             datetime.time(hour=h, minute=m, second=0)
-            for h, m in [(7,0),(7,30),(8,0),(8,30),(9,0),(10,0),(11,0),(12,0),(13,0),(14,0),(15,0),(16,0)]
+            for h, m in [(7,0),(8,0),(9,0),(10,0),(11,0),(12,0),(13,0),(14,0),(15,0),(17,0)]
         ]
     for t in wisereport_times:
         job_queue.run_daily(wisereport_job, time=t)
@@ -1943,5 +1943,5 @@ if __name__ == '__main__':
     print(f"  - Auto portfolio update: 09:30~15:35 KST (30분 간격, 거래일만)")
     print(f"  - Nightly portfolio refresh: 16:20 KST (당일 주문 반영)")
     print(f"  - ETF collection: 16:30 KST (구성종목 수집)")
-    print(f"  - WiseReport: 08:00~16:00 KST (리서치 리포트)")
+    print(f"  - WiseReport: 07~15,17 KST (리서치 리포트, 매시 정각)")
     application.run_polling()
