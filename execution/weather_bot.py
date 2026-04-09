@@ -996,6 +996,33 @@ async def nightly_portfolio_refresh_job(context: ContextTypes.DEFAULT_TYPE):
         logging.error(f"Nightly portfolio refresh failed: {e}")
 
 
+async def evening_backup_job(context: ContextTypes.DEFAULT_TYPE):
+    """20:00 백업 - 16:xx 스케줄에서 데이터 못 가져온 경우 재시도"""
+    logging.info("Evening backup job started (20:00 KST)")
+    try:
+        loop = asyncio.get_running_loop()
+
+        # 1. Portfolio report (16:00에 실패했을 수 있음)
+        logging.info("Backup: portfolio job...")
+        await daily_portfolio_job(context)
+
+        # 2. Featured (16:15에 실패했을 수 있음)
+        logging.info("Backup: featured job...")
+        await daily_featured_job(context)
+
+        # 3. Nightly refresh (16:20에 실패했을 수 있음)
+        logging.info("Backup: nightly refresh...")
+        await loop.run_in_executor(None, _nightly_refresh_sync)
+
+        # 4. ETF collection (16:30에 실패했을 수 있음)
+        logging.info("Backup: ETF collection...")
+        await daily_etf_collection_job(context)
+
+        logging.info("Evening backup job completed")
+    except Exception as e:
+        logging.error(f"Evening backup job error: {e}")
+
+
 async def daily_weather_job(context: ContextTypes.DEFAULT_TYPE):
     """매일 05:00 날씨 알림 (daily_alert.py 실행)"""
     logging.info("Daily weather job started")
@@ -1891,6 +1918,13 @@ if __name__ == '__main__':
     job_queue.run_daily(daily_etf_collection_job, time=etf_collection_time)
     job_queue.run_daily(nightly_portfolio_refresh_job, time=nightly_time)
 
+    # 20:00 백업 (16:xx에서 데이터 못 가져온 경우 재시도)
+    try:
+        backup_time = datetime.time(hour=20, minute=0, second=0, tzinfo=pytz.timezone('Asia/Seoul'))
+    except:
+        backup_time = datetime.time(hour=20, minute=0, second=0)
+    job_queue.run_daily(evening_backup_job, time=backup_time)
+
     # 거래시간 30분마다 자동 포트폴리오 업데이트
     # 09:30, 10:00, 10:30, ..., 15:00, 15:35 KST
     try:
@@ -1943,5 +1977,6 @@ if __name__ == '__main__':
     print(f"  - Auto portfolio update: 09:30~15:35 KST (30분 간격, 거래일만)")
     print(f"  - Nightly portfolio refresh: 16:20 KST (당일 주문 반영)")
     print(f"  - ETF collection: 16:30 KST (구성종목 수집)")
+    print(f"  - Evening backup: 20:00 KST (16:xx 실패 시 재시도)")
     print(f"  - WiseReport: 07~15,17 KST (리서치 리포트, 매시 정각)")
     application.run_polling()
