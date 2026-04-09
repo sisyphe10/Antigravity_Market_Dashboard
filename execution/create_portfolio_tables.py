@@ -289,9 +289,9 @@ def create_portfolio_tables():
 
             available_dates = sorted(portfolio_df['날짜'].unique())
             # 16:20 KST 이후에는 당일 주문 포함 (결제는 익일 반영)
-            from datetime import timezone, timedelta
-            _now_kst = pd.Timestamp.now(tz=timezone(timedelta(hours=9)))
-            _date_cutoff = _now_kst.normalize() if _now_kst.hour >= 16 else _now_kst.normalize() - pd.Timedelta(days=1)
+            from datetime import timezone, timedelta as _td
+            _now_kst = pd.Timestamp.now(tz=timezone(_td(hours=9)))
+            _date_cutoff = (_now_kst.normalize() if _now_kst.hour >= 16 else _now_kst.normalize() - pd.Timedelta(days=1)).tz_localize(None)
             prev_dates = [d for d in available_dates if d <= _date_cutoff]
             if prev_dates:
                 latest_portfolio_date = prev_dates[-1]
