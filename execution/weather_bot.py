@@ -1824,7 +1824,7 @@ if __name__ == '__main__':
         journal_time = datetime.time(hour=16, minute=10, second=0, tzinfo=kst)
         featured_time = datetime.time(hour=16, minute=15, second=0, tzinfo=kst)
         etf_collection_time = datetime.time(hour=16, minute=20, second=0, tzinfo=kst)
-        nightly_time = datetime.time(hour=23, minute=0, second=0, tzinfo=kst)
+        nightly_time = datetime.time(hour=17, minute=0, second=0, tzinfo=kst)
     except:
         weather_time = datetime.time(hour=5, minute=0, second=0)
         calendar_time = datetime.time(hour=5, minute=5, second=0)
@@ -1834,7 +1834,7 @@ if __name__ == '__main__':
         journal_time = datetime.time(hour=16, minute=10, second=0)
         featured_time = datetime.time(hour=16, minute=15, second=0)
         etf_collection_time = datetime.time(hour=16, minute=20, second=0)
-        nightly_time = datetime.time(hour=23, minute=0, second=0)
+        nightly_time = datetime.time(hour=17, minute=0, second=0)
 
     job_queue.run_daily(daily_weather_job, time=weather_time)
     job_queue.run_daily(daily_calendar_job, time=calendar_time)
@@ -1897,6 +1897,6 @@ if __name__ == '__main__':
     print(f"  - Featured data: 16:15 KST (실패 시 1시간 후 재시도)")
     print(f"  - Auto portfolio update: 09:30~15:35 KST (30분 간격, 거래일만)")
     print(f"  - ETF collection: 16:20 KST (구성종목 수집)")
-    print(f"  - Nightly portfolio refresh: 23:00 KST (당일 주문 반영)")
+    print(f"  - Nightly portfolio refresh: 17:00 KST (당일 주문 반영)")
     print(f"  - WiseReport: 08:00~12:00 KST (리서치 리포트)")
     application.run_polling()

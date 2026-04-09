@@ -256,9 +256,9 @@ def read_portfolio_sectors(stock_sector_map):
                 continue
 
             available_dates = sorted(df_p['날짜'].unique())
-            # 23:00 이전에는 당일 주문 제외 (결제는 익일 반영)
+            # 17:00 이전에는 당일 주문 제외 (결제는 익일 반영)
             _now = pd.Timestamp.now()
-            _date_cutoff = _now.normalize() if _now.hour >= 23 else _now.normalize() - pd.Timedelta(days=1)
+            _date_cutoff = _now.normalize() if _now.hour >= 17 else _now.normalize() - pd.Timedelta(days=1)
             prev_dates = [d for d in available_dates if d <= _date_cutoff]
             latest_date = prev_dates[-1] if prev_dates else available_dates[-1]
 
