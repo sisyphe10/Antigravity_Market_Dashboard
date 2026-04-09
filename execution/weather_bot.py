@@ -745,10 +745,52 @@ async def daily_market_alert_job(context: ContextTypes.DEFAULT_TYPE):
 
         os.chdir(original_dir)
     except subprocess.TimeoutExpired:
-        logging.error("Market alert job timed out")
+        logging.error("Market alert job timed out, scheduling retry in 20 min")
+        os.chdir(original_dir)
+        context.job_queue.run_once(daily_market_alert_retry_job, when=1200)
+    except Exception as e:
+        logging.error(f"Market alert job failed: {e}, scheduling retry in 20 min")
+        try:
+            os.chdir(original_dir)
+        except:
+            pass
+        context.job_queue.run_once(daily_market_alert_retry_job, when=1200)
+
+
+async def daily_market_alert_retry_job(context: ContextTypes.DEFAULT_TYPE):
+    """투자유의종목 대시보드 재시도"""
+    logging.info("Market alert retry job started")
+    try:
+        parent_dir = DASHBOARD_DIR
+        original_dir = os.getcwd()
+        os.chdir(parent_dir)
+        git_sync(parent_dir)
+
+        now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        result = subprocess.run(
+            [sys.executable, "execution/create_market_alert.py"],
+            capture_output=True, text=True, timeout=300
+        )
+        if result.returncode == 0:
+            subprocess.run(["git", "add", "market_alert.html"], cwd=parent_dir, capture_output=True, timeout=30)
+            commit = subprocess.run(
+                ["git", "commit", "-m", f"투자유의종목 업데이트 ({now_str})"],
+                cwd=parent_dir, capture_output=True, text=True, timeout=30
+            )
+            if commit.returncode == 0:
+                git_push_safe(parent_dir)
+                logging.info("Market alert retry succeeded")
+        else:
+            logging.error(f"Market alert retry also failed: {result.stderr[-300:]}")
+            for chat_id in SUBSCRIBERS:
+                try:
+                    await context.bot.send_message(chat_id=chat_id, text="❌ 투자유의종목 대시보드 재시도도 실패")
+                except:
+                    pass
+
         os.chdir(original_dir)
     except Exception as e:
-        logging.error(f"Market alert job failed: {e}")
+        logging.error(f"Market alert retry failed: {e}")
         try:
             os.chdir(original_dir)
         except:
@@ -1876,12 +1918,12 @@ if __name__ == '__main__':
         kst = pytz.timezone('Asia/Seoul')
         wisereport_times = [
             datetime.time(hour=h, minute=m, second=0, tzinfo=kst)
-            for h, m in [(7,0),(7,30),(8,0),(8,30),(9,0),(10,0),(11,0),(12,0)]
+            for h, m in [(7,0),(7,30),(8,0),(8,30),(9,0),(10,0),(11,0),(12,0),(13,0),(14,0),(15,0),(16,0)]
         ]
     except:
         wisereport_times = [
             datetime.time(hour=h, minute=m, second=0)
-            for h, m in [(7,0),(7,30),(8,0),(8,30),(9,0),(10,0),(11,0),(12,0)]
+            for h, m in [(7,0),(7,30),(8,0),(8,30),(9,0),(10,0),(11,0),(12,0),(13,0),(14,0),(15,0),(16,0)]
         ]
     for t in wisereport_times:
         job_queue.run_daily(wisereport_job, time=t)
@@ -1898,5 +1940,5 @@ if __name__ == '__main__':
     print(f"  - Auto portfolio update: 09:30~15:35 KST (30분 간격, 거래일만)")
     print(f"  - ETF collection: 16:20 KST (구성종목 수집)")
     print(f"  - Nightly portfolio refresh: 17:00 KST (당일 주문 반영)")
-    print(f"  - WiseReport: 08:00~12:00 KST (리서치 리포트)")
+    print(f"  - WiseReport: 08:00~16:00 KST (리서치 리포트)")
     application.run_polling()
