@@ -16,6 +16,7 @@ BACKUP_FILES=(
     ".wisereport_sent.json"
     "stock_price_history.json"
     "execution/research_bot/research_notes.db"
+    "etf_data.db"
 )
 BACKUP_DIRS=(
     "execution/research_bot/media"
