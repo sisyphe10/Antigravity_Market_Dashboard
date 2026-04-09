@@ -71,20 +71,6 @@
       "is_today_new": false
     },
     {
-      "code": "112610",
-      "name": "씨에스윈드",
-      "sector": "에너지",
-      "market_cap": 28550.039831,
-      "weight": 5,
-      "today_return": 4.4753086419753085,
-      "contribution": 2.2376543209876543,
-      "cumulative_return": 9.169092945128776,
-      "current_price": 67700.0,
-      "ath_price": 92300.0,
-      "dd": -26.6522210184182,
-      "is_today_new": false
-    },
-    {
       "code": "128940",
       "name": "한미약품",
       "sector": "건강관리",
@@ -99,17 +85,17 @@
       "is_today_new": false
     },
     {
-      "code": "010060",
-      "name": "OCI홀딩스",
-      "sector": "화학",
-      "market_cap": 37340.464,
-      "weight": 4,
-      "today_return": 1.4198782961460445,
-      "contribution": 0.5679513184584178,
-      "cumulative_return": 55.0,
-      "current_price": 200000.0,
-      "ath_price": 229500.0,
-      "dd": -12.85403050108932,
+      "code": "112610",
+      "name": "씨에스윈드",
+      "sector": "에너지",
+      "market_cap": 28550.039831,
+      "weight": 5,
+      "today_return": 4.4753086419753085,
+      "contribution": 2.2376543209876543,
+      "cumulative_return": 9.169092945128776,
+      "current_price": 67700.0,
+      "ath_price": 92300.0,
+      "dd": -26.6522210184182,
       "is_today_new": false
     },
     {
@@ -124,6 +110,20 @@
       "current_price": 35550.0,
       "ath_price": 54700.0,
       "dd": -35.0091407678245,
+      "is_today_new": false
+    },
+    {
+      "code": "010060",
+      "name": "OCI홀딩스",
+      "sector": "화학",
+      "market_cap": 37340.464,
+      "weight": 4,
+      "today_return": 1.4198782961460445,
+      "contribution": 0.5679513184584178,
+      "cumulative_return": 55.0,
+      "current_price": 200000.0,
+      "ath_price": 229500.0,
+      "dd": -12.85403050108932,
       "is_today_new": false
     },
     {
@@ -227,20 +227,6 @@
       "is_today_new": false
     },
     {
-      "code": "128940",
-      "name": "한미약품",
-      "sector": "건강관리",
-      "market_cap": 62389.52617,
-      "weight": 5,
-      "today_return": -1.3171225937183384,
-      "contribution": -0.6585612968591693,
-      "cumulative_return": -4.871200097668171,
-      "current_price": 487000.0,
-      "ath_price": 681979.0,
-      "dd": -28.590176530362378,
-      "is_today_new": false
-    },
-    {
       "code": "007660",
       "name": "이수페타시스",
       "sector": "IT하드웨어",
@@ -252,6 +238,20 @@
       "current_price": 117900.0,
       "ath_price": 148200.0,
       "dd": -20.445344129554655,
+      "is_today_new": false
+    },
+    {
+      "code": "128940",
+      "name": "한미약품",
+      "sector": "건강관리",
+      "market_cap": 62389.52617,
+      "weight": 5,
+      "today_return": -1.3171225937183384,
+      "contribution": -0.6585612968591693,
+      "cumulative_return": -4.871200097668171,
+      "current_price": 487000.0,
+      "ath_price": 681979.0,
+      "dd": -28.590176530362378,
       "is_today_new": false
     },
     {
