@@ -658,13 +658,6 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
         else:
             logging.warning(f"Wrap charts generation failed: {result_wcharts.stderr}")
 
-        # 3. 투자유의종목 페이지 재생성
-        logging.info("Step 3-0: Regenerating market alert page...")
-        subprocess.run(
-            [sys.executable, "execution/create_market_alert.py"],
-            capture_output=True, text=True, timeout=180
-        )
-
         # 3. Dashboard 재생성 및 push
         logging.info("Step 3: Regenerating dashboard...")
         result_dashboard = subprocess.run(
@@ -674,7 +667,7 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
             timeout=120
         )
         if result_dashboard.returncode == 0:
-            subprocess.run(["git", "add", "index.html", "market.html", "wrap.html", "market_alert.html", "charts/"], cwd=parent_dir, capture_output=True, timeout=30)
+            subprocess.run(["git", "add", "index.html", "market.html", "wrap.html", "charts/"], cwd=parent_dir, capture_output=True, timeout=30)
             commit_dash = subprocess.run(
                 ["git", "commit", "-m", f"포트폴리오 업데이트 ({now_str})"],
                 cwd=parent_dir, capture_output=True, text=True, timeout=30
@@ -684,17 +677,6 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
                 logging.info("Dashboard updated and pushed")
         else:
             logging.error(f"Dashboard generation failed: {result_dashboard.stderr}")
-
-        # 3-5. 투자일지 시장 데이터 수집
-        logging.info("Step 3-5: Fetching journal market data...")
-        result_journal = subprocess.run(
-            [sys.executable, "execution/fetch_journal_data.py"],
-            capture_output=True, text=True, timeout=120
-        )
-        if result_journal.returncode == 0:
-            logging.info("Journal data collected successfully")
-        else:
-            logging.warning(f"Journal data failed: {result_journal.stderr[:100]}")
 
         # 4. 포트폴리오 리포트 생성 및 전송
         logging.info("Step 4: Generating portfolio report...")
@@ -727,6 +709,70 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logging.error(f"Daily portfolio job failed: {e}")
         os.chdir(original_dir)
+
+async def daily_market_alert_job(context: ContextTypes.DEFAULT_TYPE):
+    """매일 16:05 투자유의종목 대시보드 독립 갱신"""
+    logging.info("Daily market alert job started")
+    try:
+        parent_dir = DASHBOARD_DIR
+        original_dir = os.getcwd()
+        os.chdir(parent_dir)
+        git_sync(parent_dir)
+
+        now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        result = subprocess.run(
+            [sys.executable, "execution/create_market_alert.py"],
+            capture_output=True, text=True, timeout=300
+        )
+        if result.returncode == 0:
+            subprocess.run(["git", "add", "market_alert.html"], cwd=parent_dir, capture_output=True, timeout=30)
+            commit = subprocess.run(
+                ["git", "commit", "-m", f"투자유의종목 업데이트 ({now_str})"],
+                cwd=parent_dir, capture_output=True, text=True, timeout=30
+            )
+            if commit.returncode == 0:
+                git_push_safe(parent_dir)
+                logging.info("Market alert page updated and pushed")
+            else:
+                logging.info("No changes to market_alert.html")
+        else:
+            logging.error(f"Market alert generation failed: {result.stderr[-500:]}")
+            for chat_id in SUBSCRIBERS:
+                try:
+                    await context.bot.send_message(chat_id=chat_id, text="⚠️ 투자유의종목 대시보드 생성 실패")
+                except:
+                    pass
+
+        os.chdir(original_dir)
+    except subprocess.TimeoutExpired:
+        logging.error("Market alert job timed out")
+        os.chdir(original_dir)
+    except Exception as e:
+        logging.error(f"Market alert job failed: {e}")
+        try:
+            os.chdir(original_dir)
+        except:
+            pass
+
+
+async def daily_journal_job(context: ContextTypes.DEFAULT_TYPE):
+    """매일 16:10 투자일지 시장 데이터 수집"""
+    logging.info("Daily journal data job started")
+    try:
+        result = subprocess.run(
+            [sys.executable, "execution/fetch_journal_data.py"],
+            capture_output=True, text=True, timeout=120,
+            cwd=DASHBOARD_DIR
+        )
+        if result.returncode == 0:
+            logging.info("Journal data collected successfully")
+        else:
+            logging.warning(f"Journal data failed: {result.stderr[:200]}")
+    except subprocess.TimeoutExpired:
+        logging.error("Journal data job timed out")
+    except Exception as e:
+        logging.error(f"Journal data job failed: {e}")
+
 
 async def daily_featured_job(context: ContextTypes.DEFAULT_TYPE):
     """매일 18:00 Featured 종목 수집 + 대시보드 갱신. 실패 시 19:00에 재시도."""
@@ -819,7 +865,7 @@ def _nightly_refresh_sync():
     # 투자유의종목 페이지 재생성
     subprocess.run(
         [sys.executable, "execution/create_market_alert.py"],
-        cwd=dashboard_dir, capture_output=True, text=True, timeout=180
+        cwd=dashboard_dir, capture_output=True, text=True, timeout=300
     )
 
     # 대시보드 재생성
@@ -842,6 +888,56 @@ def _nightly_refresh_sync():
         logging.info("Nightly portfolio data pushed to GitHub")
     else:
         logging.info("Nightly refresh: no changes to commit")
+
+
+async def daily_etf_collection_job(context: ContextTypes.DEFAULT_TYPE):
+    """매일 18:30 ETF 구성종목 수집 (독립 스크립트 호출)"""
+    logging.info("Daily ETF collection job started")
+    try:
+        result = subprocess.run(
+            [sys.executable, "execution/etf_collector/collect_etf_daily.py"],
+            capture_output=True, text=True, timeout=1200,
+            cwd=DASHBOARD_DIR
+        )
+        if result.returncode == 0:
+            # 마지막 로그 줄 추출
+            last_line = result.stdout.strip().split('\n')[-1] if result.stdout.strip() else ''
+            logging.info(f"ETF collection completed: {last_line}")
+        else:
+            logging.error(f"ETF collection failed: {result.stderr[-500:]}")
+            for chat_id in SUBSCRIBERS:
+                try:
+                    await context.bot.send_message(chat_id=chat_id, text=f"⚠️ ETF 구성종목 수집 실패")
+                except:
+                    pass
+            # 20:00 재시도
+            context.job_queue.run_once(daily_etf_retry_job, when=5400)
+    except subprocess.TimeoutExpired:
+        logging.error("ETF collection timed out (20 min)")
+    except Exception as e:
+        logging.error(f"ETF collection error: {e}")
+
+
+async def daily_etf_retry_job(context: ContextTypes.DEFAULT_TYPE):
+    """ETF 수집 재시도 (20:00)"""
+    logging.info("ETF collection retry started")
+    try:
+        result = subprocess.run(
+            [sys.executable, "execution/etf_collector/collect_etf_daily.py"],
+            capture_output=True, text=True, timeout=1200,
+            cwd=DASHBOARD_DIR
+        )
+        if result.returncode == 0:
+            logging.info("ETF collection retry completed")
+        else:
+            logging.error(f"ETF collection retry also failed: {result.stderr[-300:]}")
+            for chat_id in SUBSCRIBERS:
+                try:
+                    await context.bot.send_message(chat_id=chat_id, text=f"❌ ETF 구성종목 수집 재시도도 실패")
+                except:
+                    pass
+    except Exception as e:
+        logging.error(f"ETF collection retry error: {e}")
 
 
 async def nightly_portfolio_refresh_job(context: ContextTypes.DEFAULT_TYPE):
@@ -1724,21 +1820,30 @@ if __name__ == '__main__':
         calendar_time = datetime.time(hour=5, minute=5, second=0, tzinfo=kst)
         headlines_time = datetime.time(hour=5, minute=10, second=0, tzinfo=kst)
         portfolio_time = datetime.time(hour=16, minute=0, second=0, tzinfo=kst)
+        market_alert_time = datetime.time(hour=16, minute=5, second=0, tzinfo=kst)
+        journal_time = datetime.time(hour=16, minute=10, second=0, tzinfo=kst)
         featured_time = datetime.time(hour=18, minute=0, second=0, tzinfo=kst)
+        etf_collection_time = datetime.time(hour=18, minute=30, second=0, tzinfo=kst)
         nightly_time = datetime.time(hour=23, minute=0, second=0, tzinfo=kst)
     except:
         weather_time = datetime.time(hour=5, minute=0, second=0)
         calendar_time = datetime.time(hour=5, minute=5, second=0)
         headlines_time = datetime.time(hour=5, minute=10, second=0)
         portfolio_time = datetime.time(hour=16, minute=0, second=0)
+        market_alert_time = datetime.time(hour=16, minute=5, second=0)
+        journal_time = datetime.time(hour=16, minute=10, second=0)
         featured_time = datetime.time(hour=18, minute=0, second=0)
+        etf_collection_time = datetime.time(hour=18, minute=30, second=0)
         nightly_time = datetime.time(hour=23, minute=0, second=0)
 
     job_queue.run_daily(daily_weather_job, time=weather_time)
     job_queue.run_daily(daily_calendar_job, time=calendar_time)
     job_queue.run_daily(daily_headlines_job, time=headlines_time)
     job_queue.run_daily(daily_portfolio_job, time=portfolio_time)
+    job_queue.run_daily(daily_market_alert_job, time=market_alert_time)
+    job_queue.run_daily(daily_journal_job, time=journal_time)
     job_queue.run_daily(daily_featured_job, time=featured_time)
+    job_queue.run_daily(daily_etf_collection_job, time=etf_collection_time)
     job_queue.run_daily(nightly_portfolio_refresh_job, time=nightly_time)
 
     # 거래시간 30분마다 자동 포트폴리오 업데이트
@@ -1787,8 +1892,11 @@ if __name__ == '__main__':
     print(f"  - Calendar: 05:05 KST")
     print(f"  - Headlines: 05:10 KST")
     print(f"  - Portfolio report: 16:00 KST")
+    print(f"  - Market alert: 16:05 KST (투자유의종목)")
+    print(f"  - Journal data: 16:10 KST (투자일지)")
     print(f"  - Featured data: 18:00 KST (실패 시 19:00 재시도)")
     print(f"  - Auto portfolio update: 09:30~15:35 KST (30분 간격, 거래일만)")
+    print(f"  - ETF collection: 18:30 KST (구성종목 수집)")
     print(f"  - Nightly portfolio refresh: 23:00 KST (당일 주문 반영)")
     print(f"  - WiseReport: 08:00~12:00 KST (리서치 리포트)")
     application.run_polling()
