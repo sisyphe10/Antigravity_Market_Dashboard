@@ -71,20 +71,6 @@
       "is_today_new": false
     },
     {
-      "code": "128940",
-      "name": "한미약품",
-      "sector": "건강관리",
-      "market_cap": 62389.52617,
-      "weight": 5,
-      "today_return": -1.3171225937183384,
-      "contribution": -0.6585612968591693,
-      "cumulative_return": -5.350405853435469,
-      "current_price": 487000.0,
-      "ath_price": 681979.0,
-      "dd": -28.590176530362378,
-      "is_today_new": false
-    },
-    {
       "code": "112610",
       "name": "씨에스윈드",
       "sector": "에너지",
@@ -99,17 +85,17 @@
       "is_today_new": false
     },
     {
-      "code": "006360",
-      "name": "GS건설",
-      "sector": "건설,건축관련",
-      "market_cap": 30424.219695,
-      "weight": 4,
-      "today_return": -4.946524064171124,
-      "contribution": -1.9786096256684493,
-      "cumulative_return": 23.7201208901914,
-      "current_price": 35550.0,
-      "ath_price": 54700.0,
-      "dd": -35.0091407678245,
+      "code": "128940",
+      "name": "한미약품",
+      "sector": "건강관리",
+      "market_cap": 62389.52617,
+      "weight": 5,
+      "today_return": -1.3171225937183384,
+      "contribution": -0.6585612968591693,
+      "cumulative_return": -5.350405853435469,
+      "current_price": 487000.0,
+      "ath_price": 681979.0,
+      "dd": -28.590176530362378,
       "is_today_new": false
     },
     {
@@ -124,6 +110,20 @@
       "current_price": 200000.0,
       "ath_price": 229500.0,
       "dd": -12.85403050108932,
+      "is_today_new": false
+    },
+    {
+      "code": "006360",
+      "name": "GS건설",
+      "sector": "건설,건축관련",
+      "market_cap": 30424.219695,
+      "weight": 4,
+      "today_return": -4.946524064171124,
+      "contribution": -1.9786096256684493,
+      "cumulative_return": 23.7201208901914,
+      "current_price": 35550.0,
+      "ath_price": 54700.0,
+      "dd": -35.0091407678245,
       "is_today_new": false
     },
     {
@@ -227,20 +227,6 @@
       "is_today_new": false
     },
     {
-      "code": "007660",
-      "name": "이수페타시스",
-      "sector": "IT하드웨어",
-      "market_cap": 86549.469201,
-      "weight": 5,
-      "today_return": -1.8318068276436303,
-      "contribution": -0.9159034138218153,
-      "cumulative_return": 3.482649446725805,
-      "current_price": 117900.0,
-      "ath_price": 148200.0,
-      "dd": -20.445344129554655,
-      "is_today_new": false
-    },
-    {
       "code": "128940",
       "name": "한미약품",
       "sector": "건강관리",
@@ -252,6 +238,20 @@
       "current_price": 487000.0,
       "ath_price": 681979.0,
       "dd": -28.590176530362378,
+      "is_today_new": false
+    },
+    {
+      "code": "007660",
+      "name": "이수페타시스",
+      "sector": "IT하드웨어",
+      "market_cap": 86549.469201,
+      "weight": 5,
+      "today_return": -1.8318068276436303,
+      "contribution": -0.9159034138218153,
+      "cumulative_return": 3.482649446725805,
+      "current_price": 117900.0,
+      "ath_price": 148200.0,
+      "dd": -20.445344129554655,
       "is_today_new": false
     },
     {
