@@ -1921,12 +1921,12 @@ if __name__ == '__main__':
         kst = pytz.timezone('Asia/Seoul')
         wisereport_times = [
             datetime.time(hour=h, minute=m, second=0, tzinfo=kst)
-            for h, m in [(7,0),(8,0),(9,0),(10,0),(11,0),(12,0),(13,0),(14,0),(15,0),(17,0)]
+            for h, m in [(7,0),(8,0),(9,0),(10,0),(11,0),(12,0),(13,0),(14,0),(15,0),(16,0),(17,0)]
         ]
     except:
         wisereport_times = [
             datetime.time(hour=h, minute=m, second=0)
-            for h, m in [(7,0),(8,0),(9,0),(10,0),(11,0),(12,0),(13,0),(14,0),(15,0),(17,0)]
+            for h, m in [(7,0),(8,0),(9,0),(10,0),(11,0),(12,0),(13,0),(14,0),(15,0),(16,0),(17,0)]
         ]
     for t in wisereport_times:
         job_queue.run_daily(wisereport_job, time=t)
