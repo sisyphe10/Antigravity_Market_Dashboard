@@ -46,16 +46,19 @@ def git_sync(cwd):
 
 
 def git_push_safe(cwd):
-    """커밋 후 push: 실패 시 fetch+rebase+push 재시도, 그래도 실패 시 abort"""
+    """커밋 후 push: 실패 시 fetch+merge+push 재시도"""
     result = subprocess.run(["git", "push"], cwd=cwd, capture_output=True, text=True, timeout=60)
     if result.returncode == 0:
         return True
-    # push 실패 → fetch + rebase 시도
+    # push 실패 → fetch + merge 시도 (rebase는 바이너리 충돌 시 불가)
     subprocess.run(["git", "fetch", "origin", "main"], cwd=cwd, capture_output=True, timeout=60)
-    rebase = subprocess.run(["git", "rebase", "origin/main"], cwd=cwd, capture_output=True, text=True, timeout=60)
-    if rebase.returncode != 0:
-        subprocess.run(["git", "rebase", "--abort"], cwd=cwd, capture_output=True, timeout=10)
-        logging.warning("git push failed: rebase conflict, aborted")
+    merge = subprocess.run(
+        ["git", "merge", "origin/main", "--strategy-option=ours", "--no-edit"],
+        cwd=cwd, capture_output=True, text=True, timeout=60
+    )
+    if merge.returncode != 0:
+        subprocess.run(["git", "merge", "--abort"], cwd=cwd, capture_output=True, timeout=10)
+        logging.warning("git push failed: merge conflict, aborted")
         return False
     result2 = subprocess.run(["git", "push"], cwd=cwd, capture_output=True, text=True, timeout=60)
     return result2.returncode == 0
