@@ -935,6 +935,39 @@ def _nightly_refresh_sync():
         logging.info("Nightly refresh: no changes to commit")
 
 
+async def late_market_alert_job(context: ContextTypes.DEFAULT_TYPE):
+    """23:00 투자유의종목 재생�� (장 마감 후 공시 반영)"""
+    logging.info("Late market alert job started (23:00 KST)")
+    try:
+        dashboard_dir = DASHBOARD_DIR
+        git_sync(dashboard_dir)
+        result = subprocess.run(
+            [sys.executable, "execution/create_market_alert.py"],
+            cwd=dashboard_dir, capture_output=True, text=True, timeout=300
+        )
+        if result.returncode != 0:
+            logging.error(f"Late market alert failed: {result.stderr[-300:]}")
+            return
+        subprocess.run(
+            [sys.executable, "execution/create_dashboard.py"],
+            cwd=dashboard_dir, capture_output=True, text=True, timeout=120
+        )
+        now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        subprocess.run(["git", "add", "market_alert.html", "index.html", "market.html"],
+                       cwd=dashboard_dir, capture_output=True, timeout=30)
+        commit_result = subprocess.run(
+            ["git", "commit", "-m", f"���자유의종목 야간 업데이트 ({now_str})"],
+            cwd=dashboard_dir, capture_output=True, text=True, timeout=30
+        )
+        if commit_result.returncode == 0:
+            git_push_safe(dashboard_dir)
+            logging.info("Late market alert pushed")
+        else:
+            logging.info("Late market alert: no changes")
+    except Exception as e:
+        logging.error(f"Late market alert error: {e}")
+
+
 async def daily_etf_collection_job(context: ContextTypes.DEFAULT_TYPE):
     """매일 18:30 ETF 구성종목 수집 (독립 스크립트 호출)"""
     logging.info("Daily ETF collection job started")
@@ -1925,6 +1958,13 @@ if __name__ == '__main__':
         backup_time = datetime.time(hour=20, minute=0, second=0)
     job_queue.run_daily(evening_backup_job, time=backup_time)
 
+    # 23:00 투자유의종목 야간 업데이트
+    try:
+        late_alert_time = datetime.time(hour=23, minute=0, second=0, tzinfo=pytz.timezone('Asia/Seoul'))
+    except:
+        late_alert_time = datetime.time(hour=23, minute=0, second=0)
+    job_queue.run_daily(late_market_alert_job, time=late_alert_time)
+
     # 거래시간 30분마다 자동 포트폴리오 업데이트
     # 09:30, 10:00, 10:30, ..., 15:00, 15:35 KST
     try:
@@ -1978,5 +2018,6 @@ if __name__ == '__main__':
     print(f"  - Nightly portfolio refresh: 16:20 KST (당일 주문 반영)")
     print(f"  - ETF collection: 16:30 KST (구성종목 수집)")
     print(f"  - Evening backup: 20:00 KST (16:xx 실패 시 재시도)")
+    print(f"  - Late market alert: 23:00 KST (투자유의종목 야간 업데이트)")
     print(f"  - WiseReport: 07~15,17 KST (리서치 리포트, 매시 정각)")
     application.run_polling()
