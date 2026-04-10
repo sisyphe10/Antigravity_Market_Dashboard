@@ -606,16 +606,11 @@ def render_shortsell_section(stocks, krx_data=None):
         return ''
     rows_html = ''
     for s in stocks:
-        # 시가총액 조회
-        marcap_str = '-'
-        if krx_data and s['name'] in krx_data:
-            marcap = krx_data[s['name']].get('marcap')
-            if marcap:
-                marcap_str = f'{marcap:,}억'
+        marcap_val = krx_data.get(s['name'], {}).get('marcap') if krx_data else None
         rows_html += f"""<tr>
 <td style="font-weight:600">{s['name']}</td>
 <td>{s['market']}</td>
-<td style="text-align:right">{marcap_str}</td>
+<td class="num">{fmt_marcap(marcap_val)}</td>
 <td>{s['title']}</td>
 <td>{s['date']}</td>
 </tr>"""
