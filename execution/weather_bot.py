@@ -1287,7 +1287,21 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except:
             cat_msg = ""
 
+        budget_msg = ""
+        try:
+            pct, budget_total, total_spent = check_budget()
+            if pct is not None:
+                bar_len = 10
+                filled = min(bar_len, round(pct / 100 * bar_len))
+                bar = '█' * filled + '░' * (bar_len - filled)
+                remaining = max(0, budget_total - total_spent)
+                budget_msg = f"📊 예산 소진율 {pct}% [{bar}]\n💵 잔액 {remaining:,}원\n\n"
+        except:
+            pass
+
         await update.message.reply_text(
+            f"<b><u>시지프 가계부</u></b>\n\n"
+            f"{budget_msg}"
             f"{cat_msg}"
             "📝 <b>사용법</b>\n\n"
             "<code>/ledger 지출 식비 점심 15000</code>\n"
@@ -1340,7 +1354,7 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         type_emoji = '🔴' if tx_type == '지출' else '🟠'
         msg = (
-            f"<b>시지프 가계부</b>\n"
+            f"<b><u>시지프 가계부</u></b>\n"
             f"{type_emoji} <b>{tx_type}</b> 입력 완료\n"
             f"━━━━━━━━━━━━━━━\n"
             f"📅 {today_str}\n"
@@ -1416,7 +1430,32 @@ async def ledger2_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except:
             expense_cats, income_cats, accounts = [], [], []
 
-        msg = "<b>카테고리</b>\n"
+        budget_msg = ""
+        try:
+            import urllib.request as _ur
+            _base = f'https://sheets.googleapis.com/v4/spreadsheets/{SEONYUDUO_SHEET_ID}/values'
+            with _ur.urlopen(f'{_base}/%EA%B0%80%EA%B3%84%EB%B6%80?key={SISYPHE_API_KEY}', timeout=15) as _r:
+                _tx = json.loads(_r.read().decode())
+            _rows = (_tx.get('values') or [])[1:]
+            month_prefix = datetime.datetime.now(tz=KST).strftime('%Y-%m')
+            total_spent = sum(
+                int(str(r[3]).replace(',', '') or '0')
+                for r in _rows
+                if len(r) > 3 and str(r[0]).startswith(month_prefix) and r[1] == '지출'
+            )
+            budget = 800000
+            pct = round(total_spent / budget * 100)
+            remaining = max(0, budget - total_spent)
+            bar_len = 10
+            filled = min(bar_len, round(pct / 100 * bar_len))
+            bar = '█' * filled + '░' * (bar_len - filled)
+            budget_msg = f"📊 예산 소진율 {pct}% [{bar}]\n💵 잔액 {remaining:,}원\n\n"
+        except:
+            pass
+
+        msg = f"<b><u>선유듀오 가계부</u></b>\n\n"
+        msg += budget_msg
+        msg += "<b>카테고리</b>\n"
         if expense_cats:
             msg += f"지출: {' · '.join(expense_cats)}\n"
         if income_cats:
@@ -1494,7 +1533,7 @@ async def ledger2_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         type_emoji = '🔴' if tx_type == '지출' else '🟢'
         msg = (
-            f"<b>선유듀오 가계부</b>\n"
+            f"<b><u>선유듀오 가계부</u></b>\n"
             f"{type_emoji} <b>{tx_type}</b> 입력 완료\n"
             f"━━━━━━━━━━━━━━━\n"
             f"📅 {today_str}\n"
