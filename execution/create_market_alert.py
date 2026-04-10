@@ -600,18 +600,24 @@ def fetch_shortsell_overheated(session, date_str):
     return results
 
 
-def render_shortsell_section(stocks):
+def render_shortsell_section(stocks, krx_data=None):
     """공매도 과열종목 HTML 섹션"""
     if not stocks:
         return ''
     rows_html = ''
     for s in stocks:
+        # 시가총액 조회
+        marcap_str = '-'
+        if krx_data and s['name'] in krx_data:
+            marcap = krx_data[s['name']].get('marcap')
+            if marcap:
+                marcap_str = f'{marcap:,}억'
         rows_html += f"""<tr>
-<td>{s['date']}</td>
-<td>{s['time']}</td>
 <td style="font-weight:600">{s['name']}</td>
 <td>{s['market']}</td>
+<td style="text-align:right">{marcap_str}</td>
 <td>{s['title']}</td>
+<td>{s['date']}</td>
 </tr>"""
     return f"""
     <section class="section">
@@ -622,7 +628,7 @@ def render_shortsell_section(stocks):
         <div style="overflow-x:auto">
         <table class="data-table">
         <thead><tr>
-            <th>공시일</th><th>시간</th><th>종목명</th><th>시장</th><th>공시제목</th>
+            <th>종목</th><th>시장</th><th>시가총액</th><th>지정유형</th><th>공시일</th>
         </tr></thead>
         <tbody>{rows_html}</tbody>
         </table>
@@ -630,7 +636,7 @@ def render_shortsell_section(stocks):
     </section>"""
 
 
-def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stocks_공매도=None):
+def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stocks_공매도=None, krx_data=None):
     now = datetime.now(tz=KST).strftime('%Y-%m-%d %H:%M:%S KST')
 
     def section(category_name, stocks):
@@ -762,7 +768,7 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stoc
     {section('투자위험', stocks_위험)}
     {section('투자경고', stocks_경고)}
     {section('투자주의', stocks_주의)}
-    {render_shortsell_section(stocks_공매도 or [])}
+    {render_shortsell_section(stocks_공매도 or [], krx_data)}
 
     <div class="section" style="background:#f9fafb">
         {note_주의}
@@ -888,7 +894,7 @@ def create_market_alert():
     print(f"    → {len(stocks_공매도)}건")
 
     print("\n📝 HTML 생성 중...")
-    html = generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stocks_공매도)
+    html = generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stocks_공매도, krx_data)
 
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
         f.write(html)
