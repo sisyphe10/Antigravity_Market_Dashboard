@@ -669,8 +669,9 @@ def _build_wrap_chart_section(category_label):
                             var last = meta.data[meta.data.length - 1];
                             if (!last) return;
                             var val = ds.data[ds.data.length - 1].y;
-                            var sign = val >= 0 ? '+' : '';
-                            var label = sign + Math.round(val) + '%';
+                            var rounded = Math.sign(val) * Math.round(Math.abs(val));
+                            var sign = rounded >= 0 ? '+' : '';
+                            var label = sign + rounded + '%';
                             ctx.save();
                             ctx.font = 'bold 12px sans-serif';
                             ctx.fillStyle = ds.borderColor;

@@ -136,7 +136,7 @@
     <div id="mainContent" class="pw-hidden">
     <header style="position:relative;">
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-04-10 13:19:25 KST</div>
+        <div class="last-updated">Updated: 2026-04-10 13:22:14 KST</div>
         <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:0.85rem;font-weight:600;">🏠 Home</a>
     </header>
 
@@ -246,8 +246,9 @@
                             var last = meta.data[meta.data.length - 1];
                             if (!last) return;
                             var val = ds.data[ds.data.length - 1].y;
-                            var sign = val >= 0 ? '+' : '';
-                            var label = sign + Math.round(val) + '%';
+                            var rounded = Math.sign(val) * Math.round(Math.abs(val));
+                            var sign = rounded >= 0 ? '+' : '';
+                            var label = sign + rounded + '%';
                             ctx.save();
                             ctx.font = 'bold 12px sans-serif';
                             ctx.fillStyle = ds.borderColor;
