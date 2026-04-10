@@ -670,7 +670,7 @@ def _build_wrap_chart_section(category_label):
                             if (!last) return;
                             var val = ds.data[ds.data.length - 1].y;
                             var sign = val >= 0 ? '+' : '';
-                            var label = sign + val.toFixed(1) + '%';
+                            var label = sign + Math.round(val) + '%';
                             ctx.save();
                             ctx.font = 'bold 12px sans-serif';
                             ctx.fillStyle = ds.borderColor;
