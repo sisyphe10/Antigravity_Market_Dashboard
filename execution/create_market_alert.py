@@ -621,7 +621,7 @@ def render_shortsell_section(stocks, krx_data=None):
             <span class="section-count">{len(stocks)}종목</span>
         </div>
         <div style="overflow-x:auto">
-        <table class="data-table">
+        <table class="data-table tbl-shortsell">
         <thead><tr>
             <th>종목</th><th>시장</th><th>시가총액</th><th>지정유형</th><th>공시일</th>
         </tr></thead>
@@ -730,6 +730,16 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stoc
         .data-table.tbl-warn td:nth-child(9) {{ width: 9%; }}  /* 15일 최고가 */
         .data-table.tbl-warn th:nth-child(10),
         .data-table.tbl-warn td:nth-child(10) {{ width: 10%; }} /* 해제가능주가 */
+        .data-table.tbl-shortsell th:nth-child(1),
+        .data-table.tbl-shortsell td:nth-child(1) {{ width: 10%; }} /* 종목 */
+        .data-table.tbl-shortsell th:nth-child(2),
+        .data-table.tbl-shortsell td:nth-child(2) {{ width: 7%; }}  /* 시장 */
+        .data-table.tbl-shortsell th:nth-child(3),
+        .data-table.tbl-shortsell td:nth-child(3) {{ width: 12%; }} /* 시가총액 */
+        .data-table.tbl-shortsell th:nth-child(4),
+        .data-table.tbl-shortsell td:nth-child(4) {{ width: 60%; }} /* 지정유형 */
+        .data-table.tbl-shortsell th:nth-child(5),
+        .data-table.tbl-shortsell td:nth-child(5) {{ width: 11%; }} /* 공시일 */
         .data-table th {{
             padding: 8px 10px; text-align: center;
             font-size: 0.74rem; font-weight: 600; color: #6b7280;
