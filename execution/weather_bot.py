@@ -1340,6 +1340,7 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         type_emoji = '🔴' if tx_type == '지출' else '🟠'
         msg = (
+            f"<b>시지프 가계부</b>\n"
             f"{type_emoji} <b>{tx_type}</b> 입력 완료\n"
             f"━━━━━━━━━━━━━━━\n"
             f"📅 {today_str}\n"
@@ -1493,6 +1494,7 @@ async def ledger2_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         type_emoji = '🔴' if tx_type == '지출' else '🟢'
         msg = (
+            f"<b>선유듀오 가계부</b>\n"
             f"{type_emoji} <b>{tx_type}</b> 입력 완료\n"
             f"━━━━━━━━━━━━━━━\n"
             f"📅 {today_str}\n"
