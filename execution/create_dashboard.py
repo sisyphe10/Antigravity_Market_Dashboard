@@ -1789,6 +1789,11 @@ def create_dashboard():
             <div class="title">Featured</div>
             <div class="desc">거래대금 TOP 30, 회전율 TOP 30</div>
         </a>
+        <a href="etf.html" class="card" style="border-left-color:#6366f1">
+            <div class="icon">🏛️</div>
+            <div class="title">ETF</div>
+            <div class="desc">AUM · 구성종목 · 비중 검색</div>
+        </a>
         <a href="journal.html" class="card" style="border-left-color:#333;position:relative;">
             <div class="icon">📝</div>
             <div class="title">Journal</div>
@@ -2640,6 +2645,282 @@ refresh();
     with open('featured.html', 'w', encoding='utf-8') as f:
         f.write(featured_page)
     print("Featured page generated: featured.html")
+
+    # ── ETF page ──
+    generate_etf_html()
+
+
+def generate_etf_html():
+    """ETF 대시보드 페이지 생성"""
+    import sys
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'etf_collector'))
+    try:
+        from etf_db import get_all_etf_daily, get_available_dates, get_constituents_for_date
+    except ImportError:
+        print("ETF DB not available, skipping etf.html")
+        return
+
+    dates = get_available_dates()
+    if not dates:
+        print("No ETF data, skipping etf.html")
+        return
+
+    latest = dates[0]
+    daily = get_all_etf_daily()
+    constituents = get_constituents_for_date(latest)
+
+    # JSON 데이터 준비
+    import json
+    daily_json = json.dumps([
+        {'d': r['date'], 'code': r['etf_code'], 'name': r['etf_name'],
+         'close': r['close_price'], 'nav': r['nav'], 'vol': r['volume'],
+         'aum': r['aum'], 'mcap': r['market_cap']}
+        for r in daily
+    ], ensure_ascii=False)
+
+    const_json = json.dumps(constituents, ensure_ascii=False)
+    dates_json = json.dumps(dates)
+
+    page = f"""<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETF Dashboard</title>
+<link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
+<style>
+* {{ box-sizing: border-box; margin: 0; padding: 0; }}
+body {{ font-family: 'Inter', 'Noto Sans KR', sans-serif; background: #f8f9fa; color: #333; }}
+header {{ background: #fff; padding: 24px; text-align: center; border-bottom: 1px solid #eee; position: relative; }}
+header h1 {{ font-size: 1.6rem; color: #333; }}
+.home-btn {{ position: absolute; top: 20px; right: 24px; padding: 6px 16px; background: #e0e0e0; color: #333; text-decoration: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; }}
+.container {{ max-width: 1200px; margin: 0 auto; padding: 20px; }}
+.controls {{ display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }}
+.controls input {{ padding: 8px 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 0.9rem; font-family: inherit; outline: none; width: 300px; }}
+.controls input:focus {{ border-color: #6366f1; }}
+.controls select {{ padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.85rem; background: #fff; font-family: inherit; }}
+.controls label {{ font-size: 0.85rem; color: #666; }}
+.section {{ background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 20px; overflow: hidden; }}
+.section-header {{ padding: 14px 20px; font-size: 1rem; font-weight: 700; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }}
+.section-header .count {{ font-size: 0.8rem; color: #888; font-weight: 400; }}
+table {{ width: 100%; border-collapse: collapse; font-size: 0.82rem; }}
+thead {{ background: #4338ca; }}
+th {{ padding: 10px 8px; text-align: center; font-weight: 600; color: #fff; cursor: pointer; white-space: nowrap; }}
+th:hover {{ background: #3730a3; }}
+th .arr {{ font-size: 0.6rem; margin-left: 2px; }}
+td {{ padding: 8px 8px; border-bottom: 1px solid #f0f0f0; text-align: center; }}
+tbody tr:hover {{ background: #f5f3ff; }}
+tbody tr.etf-row {{ cursor: pointer; }}
+tbody tr.etf-row:hover {{ background: #ede9fe; }}
+.num {{ text-align: right; font-variant-numeric: tabular-nums; }}
+.pos {{ color: #cc0000; font-weight: 600; }}
+.neg {{ color: #0055cc; font-weight: 600; }}
+.etf-name {{ text-align: left; font-weight: 600; }}
+.constituents-row {{ background: #faf5ff; }}
+.constituents-row td {{ padding: 0; }}
+.const-table {{ width: 100%; font-size: 0.78rem; }}
+.const-table th {{ background: #e9e5f5; color: #333; padding: 6px 8px; font-size: 0.75rem; }}
+.const-table td {{ padding: 5px 8px; border-bottom: 1px solid #ede9fe; }}
+.const-table tbody tr:hover {{ background: #e9e5f5; }}
+.search-results {{ display: none; }}
+.search-results.active {{ display: block; }}
+.badge {{ display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }}
+.updated {{ text-align: center; font-size: 0.75rem; color: #aaa; margin-top: 10px; }}
+</style>
+</head>
+<body>
+<header>
+    <h1>🏛️ ETF Dashboard</h1>
+    <a href="index.html" class="home-btn">🏠 Home</a>
+</header>
+
+<div class="container">
+    <div class="controls">
+        <input type="text" id="searchInput" placeholder="종목명 검색 (예: ISC, 삼성전자)" oninput="onSearch()">
+        <select id="dateSelect" onchange="onDateChange()"></select>
+        <label><input type="checkbox" id="showAll" onchange="render()"> 전체 표시</label>
+    </div>
+
+    <div id="searchResults" class="section search-results">
+        <div class="section-header">🔍 종목 검색 결과 <span class="count" id="searchCount"></span></div>
+        <div style="overflow-x:auto"><table>
+            <thead><tr><th>ETF</th><th>비중(%)</th><th>AUM</th></tr></thead>
+            <tbody id="searchBody"></tbody>
+        </table></div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">AUM 상위 ETF <span class="count" id="mainCount"></span></div>
+        <div style="overflow-x:auto"><table>
+            <thead><tr>
+                <th onclick="doSort(0)">#<span class="arr"></span></th>
+                <th onclick="doSort(1)">ETF명<span class="arr"></span></th>
+                <th onclick="doSort(2)">AUM<span class="arr"></span></th>
+                <th onclick="doSort(3)">NAV<span class="arr"></span></th>
+                <th onclick="doSort(4)">종가<span class="arr"></span></th>
+                <th onclick="doSort(5)">거래량<span class="arr"></span></th>
+            </tr></thead>
+            <tbody id="mainBody"></tbody>
+        </table></div>
+    </div>
+
+    <p class="updated">Data: {latest} | Source: KRX OpenAPI + etfcheck.co.kr</p>
+</div>
+
+<script>
+var allDaily = {daily_json};
+var allConst = {const_json};
+var dates = {dates_json};
+
+var curDate = dates[0] || '';
+var sortCol = 2, sortAsc = false; // default: AUM desc
+var openETF = null;
+
+// Init date select
+(function() {{
+    var sel = document.getElementById('dateSelect');
+    dates.forEach(function(d) {{
+        var o = document.createElement('option');
+        o.value = d; o.textContent = d;
+        sel.appendChild(o);
+    }});
+}})();
+
+function fmtAum(v) {{
+    if (!v) return '-';
+    var jo = Math.floor(v / 1e12);
+    var eok = Math.round((v % 1e12) / 1e8);
+    if (jo > 0 && eok > 0) return jo.toLocaleString() + '조 ' + eok.toLocaleString() + '억';
+    if (jo > 0) return jo.toLocaleString() + '조';
+    return eok.toLocaleString() + '억';
+}}
+
+function fmtNum(v) {{
+    if (!v && v !== 0) return '-';
+    return Number(v).toLocaleString();
+}}
+
+function getDaily() {{
+    return allDaily.filter(function(r) {{ return r.d === curDate; }});
+}}
+
+function pn(s) {{
+    var n = parseFloat(String(s).replace(/,/g, ''));
+    return isNaN(n) ? -Infinity : n;
+}}
+
+function doSort(col) {{
+    if (sortCol === col) sortAsc = !sortAsc;
+    else {{ sortCol = col; sortAsc = (col <= 1); }}
+    render();
+}}
+
+function onDateChange() {{
+    curDate = document.getElementById('dateSelect').value;
+    render();
+}}
+
+function render() {{
+    var data = getDaily();
+    var showAll = document.getElementById('showAll').checked;
+    var limit = showAll ? data.length : 30;
+
+    // Sort
+    var cols = ['_idx', 'name', 'aum', 'nav', 'close', 'vol'];
+    var key = cols[sortCol] || 'aum';
+    data.sort(function(a, b) {{
+        var va = (key === 'name') ? a[key] : pn(a[key]);
+        var vb = (key === 'name') ? b[key] : pn(b[key]);
+        if (va < vb) return sortAsc ? -1 : 1;
+        if (va > vb) return sortAsc ? 1 : -1;
+        return 0;
+    }});
+
+    // Update sort arrows
+    document.querySelectorAll('th .arr').forEach(function(s, i) {{
+        s.textContent = (i === sortCol) ? (sortAsc ? ' ▲' : ' ▼') : '';
+    }});
+
+    var rows = data.slice(0, limit);
+    var h = '';
+    rows.forEach(function(r, i) {{
+        var isOpen = (openETF === r.code);
+        h += '<tr class="etf-row" onclick="toggleConst(\\''+r.code+'\\')">';
+        h += '<td>' + (i+1) + '</td>';
+        h += '<td class="etf-name">' + (isOpen ? '▼ ' : '▶ ') + r.name + '</td>';
+        h += '<td class="num">' + fmtAum(r.aum) + '</td>';
+        h += '<td class="num">' + fmtNum(r.nav) + '</td>';
+        h += '<td class="num">' + fmtNum(r.close) + '</td>';
+        h += '<td class="num">' + fmtNum(r.vol) + '</td>';
+        h += '</tr>';
+        if (isOpen) {{
+            var cList = allConst[r.code] || [];
+            h += '<tr class="constituents-row"><td colspan="6"><table class="const-table">';
+            h += '<thead><tr><th>#</th><th>종목명</th><th>종목코드</th><th>비중(%)</th></tr></thead><tbody>';
+            cList.forEach(function(c, ci) {{
+                h += '<tr><td>' + (ci+1) + '</td><td style="text-align:left">' + c.n + '</td><td>' + c.c + '</td><td class="num">' + (c.w ? c.w.toFixed(2) : '-') + '</td></tr>';
+            }});
+            if (!cList.length) h += '<tr><td colspan="4" style="color:#aaa;padding:12px">구성종목 데이터 없음</td></tr>';
+            h += '</tbody></table></td></tr>';
+        }}
+    }});
+    document.getElementById('mainBody').innerHTML = h;
+    document.getElementById('mainCount').textContent = (showAll ? data.length : Math.min(30, data.length)) + '종목';
+}}
+
+function toggleConst(code) {{
+    openETF = (openETF === code) ? null : code;
+    render();
+}}
+
+function onSearch() {{
+    var q = document.getElementById('searchInput').value.trim();
+    var panel = document.getElementById('searchResults');
+    if (!q) {{ panel.classList.remove('active'); return; }}
+    panel.classList.add('active');
+
+    var ql = q.toLowerCase();
+    var daily = getDaily();
+    var aumMap = {{}};
+    daily.forEach(function(r) {{ aumMap[r.code] = r; }});
+
+    // Search constituents
+    var matches = [];
+    Object.keys(allConst).forEach(function(etfCode) {{
+        var stocks = allConst[etfCode];
+        stocks.forEach(function(s) {{
+            if (s.n.toLowerCase().indexOf(ql) >= 0) {{
+                var etf = aumMap[etfCode];
+                if (etf) {{
+                    matches.push({{ etfName: etf.name, etfCode: etfCode, weight: s.w, aum: etf.aum }});
+                }}
+            }}
+        }});
+    }});
+
+    // Sort by weight desc
+    matches.sort(function(a, b) {{ return (b.weight || 0) - (a.weight || 0); }});
+
+    var h = '';
+    matches.forEach(function(m) {{
+        h += '<tr><td style="text-align:left">' + m.etfName + '</td>';
+        h += '<td class="num">' + (m.weight ? m.weight.toFixed(2) : '-') + '</td>';
+        h += '<td class="num">' + fmtAum(m.aum) + '</td></tr>';
+    }});
+    if (!h) h = '<tr><td colspan="3" style="padding:20px;color:#aaa;text-align:center">결과 없음</td></tr>';
+    document.getElementById('searchBody').innerHTML = h;
+    document.getElementById('searchCount').textContent = matches.length + '건';
+}}
+
+render();
+</script>
+</body>
+</html>"""
+
+    with open('etf.html', 'w', encoding='utf-8') as f:
+        f.write(page)
+    print("ETF page generated: etf.html")
+
 
 if __name__ == "__main__":
     create_dashboard()

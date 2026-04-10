@@ -155,3 +155,49 @@ def get_top_etfs_by_aum(date_str=None, limit=30):
     """, (date_str, limit)).fetchall()
     conn.close()
     return rows
+
+
+# ── 대시보드용 데이터 로드 ──
+
+def get_all_etf_daily():
+    """전체 ETF 일별 데이터 (dict list)"""
+    conn = get_conn()
+    rows = conn.execute("""
+        SELECT date, etf_code, etf_name, close_price, nav, volume, aum, market_cap
+        FROM etf_daily ORDER BY date DESC, aum DESC
+    """).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def get_available_dates():
+    """DB에 있는 날짜 목록"""
+    conn = get_conn()
+    rows = conn.execute("SELECT DISTINCT date FROM etf_daily ORDER BY date DESC").fetchall()
+    conn.close()
+    return [r[0] for r in rows]
+
+
+def get_constituents_for_date(date_str=None):
+    """특정 날짜의 전체 구성종목 (etf_code → [{stock_code, stock_name, weight}])"""
+    conn = get_conn()
+    if not date_str:
+        date_str = conn.execute("SELECT MAX(date) FROM etf_constituents").fetchone()[0]
+    rows = conn.execute("""
+        SELECT etf_code, stock_code, stock_name, weight
+        FROM etf_constituents
+        WHERE date = ?
+        ORDER BY etf_code, weight DESC
+    """, (date_str,)).fetchall()
+    conn.close()
+    result = {}
+    for r in rows:
+        code = r['etf_code']
+        if code not in result:
+            result[code] = []
+        result[code].append({
+            'c': r['stock_code'],
+            'n': r['stock_name'],
+            'w': r['weight'],
+        })
+    return result
