@@ -1352,12 +1352,12 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # 지출 시 예산 소진율 + 잔액 표시
         if tx_type == '지출':
             try:
-                pct, budget_total = check_budget()
+                pct, budget_total, total_spent = check_budget()
                 if pct is not None:
                     bar_len = 10
                     filled = min(bar_len, round(pct / 100 * bar_len))
                     bar = '█' * filled + '░' * (bar_len - filled)
-                    remaining = max(0, budget_total - int(budget_total * pct / 100))
+                    remaining = max(0, budget_total - total_spent)
                     msg += f"\n📊 예산 소진율 {pct}% [{bar}]"
                     msg += f"\n💵 잔액 {remaining:,}원"
             except:
@@ -1504,17 +1504,28 @@ async def ledger2_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if account:
             msg += f"🏦 {account}\n"
 
-        # 지출 시 예산 소진율 + 잔액 표시
+        # 지출 시 예산 소진율 + 잔액 표시 (월 80만원 기준)
         if tx_type == '지출':
             try:
-                pct, budget_total = check_budget()
-                if pct is not None:
-                    bar_len = 10
-                    filled = min(bar_len, round(pct / 100 * bar_len))
-                    bar = '█' * filled + '░' * (bar_len - filled)
-                    remaining = max(0, budget_total - int(budget_total * pct / 100))
-                    msg += f"\n📊 예산 소진율 {pct}% [{bar}]"
-                    msg += f"\n💵 잔액 {remaining:,}원"
+                import urllib.request as _ur
+                _base = f'https://sheets.googleapis.com/v4/spreadsheets/{SEONYUDUO_SHEET_ID}/values'
+                with _ur.urlopen(f'{_base}/%EA%B0%80%EA%B3%84%EB%B6%80?key={SISYPHE_API_KEY}', timeout=15) as _r:
+                    _tx = json.loads(_r.read().decode())
+                _rows = (_tx.get('values') or [])[1:]
+                month_prefix = datetime.datetime.now(tz=KST).strftime('%Y-%m')
+                total_spent = sum(
+                    int(str(r[3]).replace(',', '') or '0')
+                    for r in _rows
+                    if len(r) > 3 and str(r[0]).startswith(month_prefix) and r[1] == '지출'
+                )
+                budget = 800000
+                pct = round(total_spent / budget * 100)
+                remaining = max(0, budget - total_spent)
+                bar_len = 10
+                filled = min(bar_len, round(pct / 100 * bar_len))
+                bar = '█' * filled + '░' * (bar_len - filled)
+                msg += f"\n📊 예산 소진율 {pct}% [{bar}]"
+                msg += f"\n💵 잔액 {remaining:,}원"
             except:
                 pass
 
@@ -1889,7 +1900,7 @@ def check_budget():
             budget_total += amt
 
     if budget_total <= 0:
-        return None, None
+        return None, None, None
 
     # 거래내역 시트 읽기
     with urllib.request.urlopen(f'{base}/%EA%B1%B0%EB%9E%98%EB%82%B4%EC%97%AD?key={SISYPHE_API_KEY}', timeout=15) as r:
@@ -1909,7 +1920,7 @@ def check_budget():
             total_spent += amt
 
     pct = round(total_spent / budget_total * 100)
-    return pct, budget_total
+    return pct, budget_total, total_spent
 
 
 
