@@ -550,7 +550,87 @@ def render_table_주의(stocks, price_cache):
         </div>"""
 
 
-def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache):
+def fetch_shortsell_overheated(session, date_str):
+    """KIND 당일공시에서 공매도 과열종목 지정 공시 수집"""
+    data = {
+        'method': 'searchTodayDisclosureSub',
+        'forward': 'todaydisclosure_sub',
+        'currentPageSize': '100',
+        'pageIndex': '1',
+        'orderMode': '0',
+        'orderStat': 'D',
+        'marketType': '',
+        'searchCorpName': '',
+        'searchType': 'A',
+        'keyword': '',
+        'todayFlag': 'N',
+        'selDate': date_str,
+    }
+    try:
+        resp = session.post(
+            'https://kind.krx.co.kr/disclosure/todaydisclosure.do',
+            data=data,
+            headers={'Referer': 'https://kind.krx.co.kr/disclosure/todaydisclosure.do?method=searchTodayDisclosureMain'},
+            timeout=15
+        )
+        resp.encoding = 'utf-8'
+        soup = BeautifulSoup(resp.text, 'html.parser')
+    except Exception as e:
+        print(f"  공매도 과열종목 조회 실패: {e}")
+        return []
+
+    results = []
+    for row in soup.find_all('tr'):
+        cells = row.find_all('td')
+        if len(cells) < 4:
+            continue
+        title = cells[2].get_text(strip=True)
+        if '공매도 과열종목' not in title and '공매도 거래 금지' not in title:
+            continue
+        time_str = cells[0].get_text(strip=True)
+        name = cells[1].get_text(strip=True)
+        market = cells[3].get_text(strip=True)
+        results.append({
+            'time': time_str,
+            'name': name,
+            'title': title,
+            'market': '코스피' if '유가증권' in market else '코스닥' if '코스닥' in market else market,
+            'date': date_str,
+        })
+    return results
+
+
+def render_shortsell_section(stocks):
+    """공매도 과열종목 HTML 섹션"""
+    if not stocks:
+        return ''
+    rows_html = ''
+    for s in stocks:
+        rows_html += f"""<tr>
+<td>{s['date']}</td>
+<td>{s['time']}</td>
+<td style="font-weight:600">{s['name']}</td>
+<td>{s['market']}</td>
+<td>{s['title']}</td>
+</tr>"""
+    return f"""
+    <section class="section">
+        <div class="section-header" style="border-left:4px solid #6366f1">
+            <span class="section-title" style="color:#4338ca">🔻 공매도 과열종목</span>
+            <span class="section-count">{len(stocks)}종목</span>
+        </div>
+        <div style="overflow-x:auto">
+        <table class="data-table">
+        <thead><tr>
+            <th>공시일</th><th>시간</th><th>종목명</th><th>시장</th><th>공시제목</th>
+        </tr></thead>
+        <tbody>{rows_html}</tbody>
+        </table>
+        </div>
+    </section>"""
+
+
+def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stocks_공매도=None):
     now = datetime.now(tz=KST).strftime('%Y-%m-%d %H:%M:%S KST')
 
     def section(category_name, stocks):
@@ -682,6 +762,7 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache):
     {section('투자위험', stocks_위험)}
     {section('투자경고', stocks_경고)}
     {section('투자주의', stocks_주의)}
+    {render_shortsell_section(stocks_공매도 or [])}
 
     <div class="section" style="background:#f9fafb">
         {note_주의}
@@ -790,14 +871,30 @@ def create_market_alert():
     if filtered:
         print(f"  시가총액 {MIN_MARCAP}억 미만 {filtered}건 제외")
 
+    # 공매도 과열종목 (당일 + 전일 공시)
+    print("  공매도 과열종목 조회 중...")
+    stocks_공매도 = []
+    for d in [today, (now_kst - timedelta(days=1)).strftime('%Y-%m-%d')]:
+        stocks_공매도.extend(fetch_shortsell_overheated(session, d))
+    # 중복 제거 (같은 종목명+날짜)
+    seen_ss = set()
+    unique_공매도 = []
+    for s in stocks_공매도:
+        key = (s['name'], s['date'])
+        if key not in seen_ss:
+            seen_ss.add(key)
+            unique_공매도.append(s)
+    stocks_공매도 = unique_공매도
+    print(f"    → {len(stocks_공매도)}건")
+
     print("\n📝 HTML 생성 중...")
-    html = generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache)
+    html = generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stocks_공매도)
 
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
         f.write(html)
 
     print(f"✅ 완료: {OUTPUT_FILE}")
-    print(f"   투자주의 {len(stocks_주의)}건 / 투자경고 {len(stocks_경고)}건 / 투자위험 {len(stocks_위험)}건")
+    print(f"   투자주의 {len(stocks_주의)}건 / 투자경고 {len(stocks_경고)}건 / 투자위험 {len(stocks_위험)}건 / 공매도 과열 {len(stocks_공매도)}건")
 
 
 if __name__ == '__main__':
