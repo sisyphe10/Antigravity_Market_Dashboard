@@ -1349,7 +1349,7 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if memo:
             msg += f"📝 {memo}\n"
 
-        # 지출 시 예산 소진율 표시
+        # 지출 시 예산 소진율 + 잔액 표시
         if tx_type == '지출':
             try:
                 pct, budget_total = check_budget()
@@ -1357,7 +1357,9 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     bar_len = 10
                     filled = min(bar_len, round(pct / 100 * bar_len))
                     bar = '█' * filled + '░' * (bar_len - filled)
+                    remaining = max(0, budget_total - int(budget_total * pct / 100))
                     msg += f"\n📊 예산 소진율 {pct}% [{bar}]"
+                    msg += f"\n💵 잔액 {remaining:,}원"
             except:
                 pass
 
@@ -1501,6 +1503,20 @@ async def ledger2_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             msg += f"📝 {memo}\n"
         if account:
             msg += f"🏦 {account}\n"
+
+        # 지출 시 예산 소진율 + 잔액 표시
+        if tx_type == '지출':
+            try:
+                pct, budget_total = check_budget()
+                if pct is not None:
+                    bar_len = 10
+                    filled = min(bar_len, round(pct / 100 * bar_len))
+                    bar = '█' * filled + '░' * (bar_len - filled)
+                    remaining = max(0, budget_total - int(budget_total * pct / 100))
+                    msg += f"\n📊 예산 소진율 {pct}% [{bar}]"
+                    msg += f"\n💵 잔액 {remaining:,}원"
+            except:
+                pass
 
         await update.message.reply_text(msg, parse_mode='HTML')
         logging.info(f"SeonyuDuo ledger: {tx_type} {amount} {category} {memo} {account}")
