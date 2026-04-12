@@ -820,6 +820,43 @@ async def daily_journal_job(context: ContextTypes.DEFAULT_TYPE):
 
 
 
+async def morning_featured_job(context):
+    """06:00 KST - 전일 Featured 데이터 수집 (KRX OpenAPI 익일 제공)"""
+    logging.info("Morning featured job started (06:00 KST)")
+    try:
+        dashboard_dir = DASHBOARD_DIR
+        git_sync(dashboard_dir)
+        result = subprocess.run(
+            [sys.executable, "execution/fetch_featured_data.py"],
+            capture_output=True, text=True, timeout=180, cwd=dashboard_dir
+        )
+        if result.returncode != 0:
+            logging.error(f"Morning featured failed: {result.stderr[-300:]}")
+            return
+        # 완료 확인
+        if '완료' not in result.stdout:
+            logging.warning(f"Morning featured: no completion message")
+            return
+        logging.info("Morning featured data collected")
+        subprocess.run([sys.executable, "execution/create_dashboard.py"],
+                       capture_output=True, text=True, timeout=120, cwd=dashboard_dir)
+        now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        subprocess.run(["git", "add", "featured.html", "featured_data.json", "etf.html",
+                        "index.html", "market.html", "wrap.html"],
+                       cwd=dashboard_dir, capture_output=True, timeout=30)
+        commit_result = subprocess.run(
+            ["git", "commit", "-m", f"Featured 업데이트 ({now_str})"],
+            cwd=dashboard_dir, capture_output=True, text=True, timeout=30
+        )
+        if commit_result.returncode == 0:
+            git_push_safe(dashboard_dir)
+            logging.info("Morning featured pushed")
+        else:
+            logging.info("Morning featured: no changes to commit")
+    except Exception as e:
+        logging.error(f"Morning featured error: {e}")
+
+
 def _nightly_refresh_sync():
     """23:00 당일 포트폴리오 데이터 반영 (동기 함수)"""
     dashboard_dir = DASHBOARD_DIR
@@ -1932,6 +1969,13 @@ if __name__ == '__main__':
         nightly_time = datetime.time(hour=16, minute=20, second=0)
         etf_collection_time = datetime.time(hour=16, minute=30, second=0)
 
+    # 06:00 Featured (전일 데이터, KRX OpenAPI 익일 제공)
+    try:
+        featured_morning_time = datetime.time(hour=6, minute=0, second=0, tzinfo=pytz.timezone('Asia/Seoul'))
+    except:
+        featured_morning_time = datetime.time(hour=6, minute=0, second=0)
+    job_queue.run_daily(morning_featured_job, time=featured_morning_time)
+
     job_queue.run_daily(daily_weather_job, time=weather_time)
     job_queue.run_daily(daily_calendar_job, time=calendar_time)
     job_queue.run_daily(daily_headlines_job, time=headlines_time)
@@ -1997,6 +2041,7 @@ if __name__ == '__main__':
 
     print(f"Bot started at {datetime.datetime.now()}")
     print(f"✅ Daily jobs scheduled:")
+    print(f"  - Featured data: 06:00 KST (전일 데이터, 익일 수집)")
     print(f"  - Weather: 05:00 KST")
     print(f"  - Calendar: 05:05 KST")
     print(f"  - Headlines: 05:10 KST")
