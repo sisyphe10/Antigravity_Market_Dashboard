@@ -102,7 +102,7 @@ def summarize_daily_notes(messages, date_str):
             err_str = str(e).lower()
             if '529' in str(e) or 'overloaded' in err_str or '429' in str(e) or 'rate_limit' in err_str:
                 if attempt < 2:
-                    time.sleep(90)  # 1분 30초 대기 후 재시도
+                    time.sleep(300)  # 5분 대기 후 재시도
                     continue
             raise
 
