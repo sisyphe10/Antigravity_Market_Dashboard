@@ -173,7 +173,11 @@ def get_all_etf_daily():
 def get_available_dates():
     """DB에 있는 날짜 목록"""
     conn = get_conn()
-    rows = conn.execute("SELECT DISTINCT date FROM etf_daily ORDER BY date DESC").fetchall()
+    try:
+        rows = conn.execute("SELECT DISTINCT date FROM etf_daily ORDER BY date DESC").fetchall()
+    except Exception:
+        conn.close()
+        return []
     conn.close()
     return [r[0] for r in rows]
 
