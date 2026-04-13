@@ -826,6 +826,15 @@ async def morning_featured_job(context):
     try:
         dashboard_dir = DASHBOARD_DIR
         git_sync(dashboard_dir)
+        # 신고가 계산을 위해 stock_price_history.json 먼저 업데이트
+        price_result = subprocess.run(
+            [sys.executable, "execution/update_price_history.py"],
+            capture_output=True, text=True, timeout=300, cwd=dashboard_dir
+        )
+        if price_result.returncode == 0:
+            logging.info(f"Price history updated: {price_result.stdout[-200:]}")
+        else:
+            logging.warning(f"Price history update failed: {price_result.stderr[-300:]}")
         result = subprocess.run(
             [sys.executable, "execution/fetch_featured_data.py"],
             capture_output=True, text=True, timeout=180, cwd=dashboard_dir
