@@ -31,7 +31,9 @@ def main():
         return
 
     existing_dates = set(history['dates'])
-    today = datetime.now().date()
+    import datetime as _dt
+    KST = _dt.timezone(_dt.timedelta(hours=9))
+    today = datetime.now(tz=KST).date()
 
     # 최근 5거래일 중 누락된 날짜 수집
     dates_to_fetch = []

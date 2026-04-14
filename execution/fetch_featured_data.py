@@ -167,7 +167,9 @@ def get_trading_days(start, end):
 
 
 def main():
-    today = datetime.now().date()
+    import datetime as _dt
+    KST = _dt.timezone(_dt.timedelta(hours=9))
+    today = datetime.now(tz=KST).date()
     start = datetime(today.year - 1, 12, 25).date()  # 전년 마지막주부터 (YTD 기준가 확보)
 
     existing = get_existing_dates()

@@ -820,9 +820,9 @@ async def daily_journal_job(context: ContextTypes.DEFAULT_TYPE):
 
 
 
-async def morning_featured_job(context):
-    """06:00 KST - 전일 Featured 데이터 수집 (KRX OpenAPI 익일 제공)"""
-    logging.info("Morning featured job started (06:00 KST)")
+async def featured_update_job(context):
+    """16:10 / 18:30 KST - Featured 데이터 수집 (KRX 16:00 1차, 18:10 2차 배포)"""
+    logging.info("Featured update job started")
     try:
         dashboard_dir = DASHBOARD_DIR
         git_sync(dashboard_dir)
@@ -1978,12 +1978,15 @@ if __name__ == '__main__':
         nightly_time = datetime.time(hour=16, minute=20, second=0)
         etf_collection_time = datetime.time(hour=16, minute=30, second=0)
 
-    # 06:00 Featured (전일 데이터, KRX OpenAPI 익일 제공)
+    # Featured 수집: 16:10 1차 (정규장 종가), 18:30 2차 (시간외 포함 최종)
     try:
-        featured_morning_time = datetime.time(hour=6, minute=0, second=0, tzinfo=pytz.timezone('Asia/Seoul'))
+        featured_1st_time = datetime.time(hour=16, minute=10, second=0, tzinfo=pytz.timezone('Asia/Seoul'))
+        featured_2nd_time = datetime.time(hour=18, minute=30, second=0, tzinfo=pytz.timezone('Asia/Seoul'))
     except:
-        featured_morning_time = datetime.time(hour=6, minute=0, second=0)
-    job_queue.run_daily(morning_featured_job, time=featured_morning_time)
+        featured_1st_time = datetime.time(hour=16, minute=10, second=0)
+        featured_2nd_time = datetime.time(hour=18, minute=30, second=0)
+    job_queue.run_daily(featured_update_job, time=featured_1st_time)
+    job_queue.run_daily(featured_update_job, time=featured_2nd_time)
 
     job_queue.run_daily(daily_weather_job, time=weather_time)
     job_queue.run_daily(daily_calendar_job, time=calendar_time)

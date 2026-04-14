@@ -46,7 +46,10 @@ ssh ... "cd /home/ubuntu/Antigravity_Market_Dashboard && bash scripts/deploy.sh 
 - 05:05 KST: 캘린더 알림
 - 05:10 KST: 리서치 헤드라인
 - 09:30~15:35 KST: 30분 간격 포트폴리오 자동 업데이트 (거래일만)
-- 16:00 KST: 일간 포트폴리오 업데이트 + market_alert 재생성
-- 18:00 KST: Featured 데이터 수집
+- 16:00 KST: 일간 포트폴리오 업데이트
+- 16:05 KST: 투자유의종목 재생성
+- 16:10 KST: Featured 1차 수집 (정규장 종가, KRX 16:00 배포)
+- 16:30 KST: ETF 데이터 수집
+- 18:30 KST: Featured 2차 수집 (최종, KRX 18:10 배포)
+- 20:00 KST: 백업 (16:xx 실패 시 재시도)
 - 23:00 KST: 당일 주문 반영 + market_alert 재생성
-- 3시간마다: 예산 소진율 체크
