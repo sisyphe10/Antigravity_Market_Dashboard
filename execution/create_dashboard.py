@@ -2017,15 +2017,15 @@ def create_dashboard():
         th { padding: 12px 6px; text-align: center; font-weight: 600; color: #000; border-bottom: 2px solid #000; cursor: pointer; white-space: nowrap; overflow: hidden; }
         th:hover { background: #ddd; }
         td { padding: 10px 6px; border-bottom: 1px solid #dee2e6; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        /* 컬럼 너비: 앞쪽 좁게, 수익률 균등 넓게 */
+        /* 컬럼 너비 */
         th:nth-child(1) { width: 36px; }
         th:nth-child(2) { width: 50px; }
-        th:nth-child(3), th:nth-child(4) { width: 70px; }
-        th:nth-child(5) { width: 100px; }
-        th:nth-child(6) { width: 110px; }
-        th:nth-child(7) { width: 90px; }
-        th:nth-child(8) { width: 80px; }
-        th:nth-child(n+9) { width: 75px; }
+        th:nth-child(3) { width: 100px; }
+        th:nth-child(4) { width: 80px; }
+        th:nth-child(5) { width: 120px; }
+        th:nth-child(6) { width: 90px; }
+        th:nth-child(7) { width: 80px; }
+        th:nth-child(n+8) { width: 75px; }
         tbody tr:hover { background: #f5f5f5; }
         .positive { color: #cc0000; font-weight: 600; }
         .negative { color: #0055cc; font-weight: 600; }
@@ -2043,47 +2043,44 @@ def create_dashboard():
 <div class="content">
     <div class="filters">
         <select id="fCurrency" onchange="render()"><option value="">통화 전체</option></select>
-        <select id="fSector1" onchange="render()"><option value="">섹터1 전체</option></select>
-        <select id="fSector2" onchange="render()"><option value="">섹터2 전체</option></select>
+        <select id="fSector" onchange="render()"><option value="">섹터 전체</option></select>
     </div>
     <div style="overflow-x:auto;">
         <table>
             <thead><tr>
                 <th onclick="doSort(0)">#</th>
                 <th onclick="doSort(1)">통화</th>
-                <th onclick="doSort(2)">섹터 1</th>
-                <th onclick="doSort(3)">섹터 2</th>
-                <th onclick="doSort(4)">티커</th>
-                <th onclick="doSort(5)">기업명</th>
-                <th onclick="doSort(6)">시가총액</th>
-                <th onclick="doSort(7)">가격</th>
-                <th onclick="doSort(8)">YTD</th>
-                <th onclick="doSort(9)">1D</th>
-                <th onclick="doSort(10)">1W</th>
-                <th onclick="doSort(11)">1M</th>
-                <th onclick="doSort(12)">3M</th>
-                <th onclick="doSort(13)">6M</th>
-                <th onclick="doSort(14)">1Y</th>
+                <th onclick="doSort(2)">섹터</th>
+                <th onclick="doSort(3)">티커</th>
+                <th onclick="doSort(4)">기업명</th>
+                <th onclick="doSort(5)">시가총액</th>
+                <th onclick="doSort(6)">가격</th>
+                <th onclick="doSort(7)">YTD</th>
+                <th onclick="doSort(8)">1D</th>
+                <th onclick="doSort(9)">1W</th>
+                <th onclick="doSort(10)">1M</th>
+                <th onclick="doSort(11)">3M</th>
+                <th onclick="doSort(12)">6M</th>
+                <th onclick="doSort(13)">1Y</th>
             </tr></thead>
-            <tbody id="tbody"><tr><td colspan="15" style="padding:40px;color:#888;">로딩 중...</td></tr></tbody>
+            <tbody id="tbody"><tr><td colspan="14" style="padding:40px;color:#888;">로딩 중...</td></tr></tbody>
         </table>
     </div>
 </div>
 <footer>Antigravity Universe</footer>
 <script>
 var D=[],sortCol=-1,sortAsc=true;
-var headers=['#','통화','섹터 1','섹터 2','티커','기업명','시가총액','가격','YTD','1D','1W','1M','3M','6M','1Y'];
-var numCols=[0,6,7,8,9,10,11,12,13,14];
-var pctCols=[8,9,10,11,12,13,14];
+var headers=['#','통화','섹터','티커','기업명','시가총액','가격','YTD','1D','1W','1M','3M','6M','1Y'];
+var numCols=[0,5,6,7,8,9,10,11,12,13];
+var pctCols=[7,8,9,10,11,12,13];
 
 fetch('https://sheets.googleapis.com/v4/spreadsheets/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/values/%EC%8B%9C%ED%8A%B81?key=AIzaSyCHPiRby5FVAIKDwneZHy1KGl3SfycjZEw')
 .then(function(r){return r.json()}).then(function(data){
-    D=(data.values||[]).slice(1).map(function(r){return r.slice(0,15)});
-    var c={},s1={},s2={};
-    D.forEach(function(r){if(r[1])c[r[1]]=1;if(r[2])s1[r[2]]=1;if(r[3])s2[r[3]]=1;});
+    D=(data.values||[]).slice(1).map(function(r){return r.slice(0,14)});
+    var c={},sec={};
+    D.forEach(function(r){if(r[1])c[r[1]]=1;if(r[2])sec[r[2]]=1;});
     document.getElementById('fCurrency').innerHTML='<option value="">통화 전체</option>'+Object.keys(c).sort().map(function(v){return '<option>'+v+'</option>';}).join('');
-    document.getElementById('fSector1').innerHTML='<option value="">섹터1 전체</option>'+Object.keys(s1).sort().map(function(v){return '<option>'+v+'</option>';}).join('');
-    document.getElementById('fSector2').innerHTML='<option value="">섹터2 전체</option>'+Object.keys(s2).sort().map(function(v){return '<option>'+v+'</option>';}).join('');
+    document.getElementById('fSector').innerHTML='<option value="">섹터 전체</option>'+Object.keys(sec).sort().map(function(v){return '<option>'+v+'</option>';}).join('');
     render();
 });
 
@@ -2097,12 +2094,10 @@ function doSort(col){
 
 function render(){
     var fc=document.getElementById('fCurrency').value;
-    var fs1=document.getElementById('fSector1').value;
-    var fs2=document.getElementById('fSector2').value;
+    var fs=document.getElementById('fSector').value;
     var f=D.filter(function(r){
         if(fc&&r[1]!==fc)return false;
-        if(fs1&&r[2]!==fs1)return false;
-        if(fs2&&r[3]!==fs2)return false;
+        if(fs&&r[2]!==fs)return false;
         return true;
     });
     if(sortCol>=0){
@@ -2118,15 +2113,15 @@ function render(){
     var h='';
     f.forEach(function(r,idx){
         h+='<tr>';
-        for(var i=0;i<15;i++){
+        for(var i=0;i<14;i++){
             var v=(i===0)?(idx+1):r[i]||'';var cls='';
             if(pctCols.indexOf(i)>=0&&v){var n=parseFloat(String(v).replace(/%/g,''));if(!isNaN(n))cls=n>0?' class="positive"':n<0?' class="negative"':'';}
-            var bg=(i===8)?' style="background:#f3f0ff;"':'';
+            var bg=(i===7)?' style="background:#f3f0ff;"':'';
             h+='<td'+cls+bg+'>'+v+'</td>';
         }
         h+='</tr>';
     });
-    if(!h)h='<tr><td colspan="15" style="padding:40px;color:#888;">데이터 없음</td></tr>';
+    if(!h)h='<tr><td colspan="14" style="padding:40px;color:#888;">데이터 없음</td></tr>';
     document.getElementById('tbody').innerHTML=h;
 }
 </script>
