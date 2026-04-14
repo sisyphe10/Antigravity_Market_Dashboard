@@ -38,6 +38,9 @@ SUBSCRIBERS_FILE = os.path.join(DASHBOARD_DIR, 'subscribers.json')
 
 KST = datetime.timezone(datetime.timedelta(hours=9))
 
+# 당일 포트폴리오 리포트 전송 추적 (중복 방지)
+_portfolio_report_sent_date = None
+
 
 def git_sync(cwd):
     """VM git 동기화: fetch + reset --hard (충돌 불가)"""
@@ -681,30 +684,34 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
         else:
             logging.error(f"Dashboard generation failed: {result_dashboard.stderr}")
 
-        # 4. 포트폴리오 리포트 생성 및 전송
-        logging.info("Step 4: Generating portfolio report...")
-        result_report = subprocess.run(
-            [sys.executable, "execution/daily_portfolio_report.py"],
-            capture_output=True,
-            text=True,
-            timeout=120
-        )
+        # 4. 포트폴리오 리포트 생성 및 전송 (당일 미전송 시에만)
+        global _portfolio_report_sent_date
+        today_kst = datetime.datetime.now(tz=KST).strftime('%Y-%m-%d')
+        if _portfolio_report_sent_date == today_kst:
+            logging.info("Step 4: 리포트 이미 전송됨, 스킵")
+        else:
+            logging.info("Step 4: Generating portfolio report...")
+            result_report = subprocess.run(
+                [sys.executable, "execution/daily_portfolio_report.py"],
+                capture_output=True,
+                text=True,
+                timeout=120
+            )
+            if result_report.returncode == 0:
+                _portfolio_report_sent_date = today_kst
+                logging.info("Portfolio report sent successfully via Telegram")
+            else:
+                logging.error(f"Report generation failed: {result_report.stderr}")
+                for chat_id in SUBSCRIBERS:
+                    try:
+                        await context.bot.send_message(
+                            chat_id=chat_id,
+                            text="⚠️ 포트폴리오 리포트 생성에 실패했습니다."
+                        )
+                    except Exception as e:
+                        logging.error(f"Failed to send error notification to {chat_id}: {e}")
 
         os.chdir(original_dir)  # 원래 디렉토리로 복귀
-
-        if result_report.returncode == 0:
-            logging.info("Portfolio report sent successfully via Telegram")
-        else:
-            logging.error(f"Report generation failed: {result_report.stderr}")
-            # 실패해도 구독자들에게 알림
-            for chat_id in SUBSCRIBERS:
-                try:
-                    await context.bot.send_message(
-                        chat_id=chat_id,
-                        text="⚠️ 포트폴리오 리포트 생성에 실패했습니다."
-                    )
-                except Exception as e:
-                    logging.error(f"Failed to send error notification to {chat_id}: {e}")
 
     except subprocess.TimeoutExpired:
         logging.error("Portfolio update process timed out")
