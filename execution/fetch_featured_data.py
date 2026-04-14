@@ -176,8 +176,13 @@ def main():
     trading_days = get_trading_days(start, today)
     to_fetch = [d for d in trading_days if d.strftime('%Y-%m-%d') not in existing]
 
+    # 당일은 항상 재수집 (16:10 1차→18:30 2차 갱신을 위해)
+    today_str = today.strftime('%Y-%m-%d')
+    if today.weekday() < 5 and today_str not in [d.strftime('%Y-%m-%d') for d in to_fetch]:
+        to_fetch.append(today)
+
     if not to_fetch:
-        logging.info("모든 날짜가 이미 수집됨.")
+        logging.info("완료! 수집할 날짜 없음 (주말/공휴일)")
         return
 
     logging.info(f"수집 대상: {len(to_fetch)}일 ({to_fetch[0]} ~ {to_fetch[-1]})")
@@ -188,6 +193,13 @@ def main():
             all_records = json.load(f)
     else:
         all_records = []
+
+    # 재수집 대상 날짜의 기존 데이터 제거 (당일 재수집 시)
+    fetch_dates = set(d.strftime('%Y-%m-%d') for d in to_fetch)
+    removed = sum(1 for r in all_records if r['d'] in fetch_dates)
+    if removed:
+        all_records = [r for r in all_records if r['d'] not in fetch_dates]
+        logging.info(f"기존 {removed}건 제거 (재수집 대상)")
 
     for i, d in enumerate(to_fetch):
         date_str = d.strftime('%Y%m%d')
