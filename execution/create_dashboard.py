@@ -2036,7 +2036,7 @@ def create_dashboard():
 <header style="position:relative;">
     <h1>Universe</h1>
     <div style="position:absolute;top:20px;right:24px;display:flex;gap:8px;align-items:center;">
-        <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="color:#6B21A8;font-size:0.8rem;text-decoration:none;border:1px solid #6B21A8;padding:4px 14px;border-radius:16px;">Sheet</a>
+        <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="background:#6B21A8;color:#fff;font-size:0.85rem;font-weight:600;text-decoration:none;padding:6px 16px;border-radius:8px;">Sheet</a>
         <a href="index.html" style="padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:0.85rem;font-weight:600;">🏠 Home</a>
     </div>
 </header>
