@@ -822,34 +822,62 @@ async def daily_journal_job(context: ContextTypes.DEFAULT_TYPE):
 
 async def featured_update_job(context):
     """16:10 / 18:30 KST - Featured 데이터 수집 (KRX 16:00 1차, 18:10 2차 배포)"""
-    logging.info("Featured update job started")
+    now_kst = datetime.datetime.now(tz=KST)
+    tag = f"Featured [{now_kst.strftime('%H:%M')}]"
+    logging.info(f"{tag} 수집 시작")
+    errors = []
+
     try:
         dashboard_dir = DASHBOARD_DIR
         git_sync(dashboard_dir)
-        # 신고가 계산을 위해 stock_price_history.json 먼저 업데이트
+
+        # Step 1: stock_price_history.json 업데이트 (신고가 계산용)
         price_result = subprocess.run(
             [sys.executable, "execution/update_price_history.py"],
             capture_output=True, text=True, timeout=300, cwd=dashboard_dir
         )
-        if price_result.returncode == 0:
-            logging.info(f"Price history updated: {price_result.stdout[-200:]}")
+        if price_result.returncode != 0:
+            errors.append(f"price_history 실패: {price_result.stderr[-200:]}")
+            logging.error(f"{tag} {errors[-1]}")
         else:
-            logging.warning(f"Price history update failed: {price_result.stderr[-300:]}")
+            price_out = price_result.stdout.strip()
+            if '새로 수집할 날짜 없음' in price_out:
+                errors.append("price_history: 새로 수집할 날짜 없음 (데이터 미제공 또는 이미 수집)")
+                logging.warning(f"{tag} {errors[-1]}")
+            elif '없음' in price_out and '전체 수집' in price_out:
+                errors.append("price_history: stock_price_history.json 파일 없음")
+                logging.error(f"{tag} {errors[-1]}")
+            else:
+                logging.info(f"{tag} price_history OK: {price_out[-150:]}")
+
+        # Step 2: Featured 데이터 수집
         result = subprocess.run(
             [sys.executable, "execution/fetch_featured_data.py"],
-            capture_output=True, text=True, timeout=180, cwd=dashboard_dir
+            capture_output=True, text=True, timeout=300, cwd=dashboard_dir
         )
         if result.returncode != 0:
-            logging.error(f"Morning featured failed: {result.stderr[-300:]}")
-            return
-        # 완료 확인
-        if '완료' not in result.stdout:
-            logging.warning(f"Morning featured: no completion message")
-            return
-        logging.info("Morning featured data collected")
+            errors.append(f"fetch_featured 비정상 종료: {result.stderr[-200:]}")
+            logging.error(f"{tag} {errors[-1]}")
+        elif '완료' not in result.stdout:
+            # stdout 분석: 왜 완료 메시지가 없는지
+            out = result.stdout.strip()
+            if '모든 날짜가 이미 수집됨' in out:
+                logging.info(f"{tag} Featured: 이미 최신 (추가 수집 불필요)")
+            elif not out:
+                errors.append("fetch_featured: stdout 비어있음 (silent failure)")
+                logging.error(f"{tag} {errors[-1]}")
+            else:
+                # 수집 시도했지만 모두 실패한 경우
+                fail_count = out.count('실패')
+                errors.append(f"fetch_featured: 완료 메시지 없음 (실패 {fail_count}건)\nstdout: {out[-300:]}")
+                logging.error(f"{tag} {errors[-1]}")
+        else:
+            logging.info(f"{tag} Featured 수집 완료: {result.stdout.strip()[-150:]}")
+
+        # 에러가 있더라도 대시보드 재생성 시도 (기존 데이터로라도 갱신)
         subprocess.run([sys.executable, "execution/create_dashboard.py"],
                        capture_output=True, text=True, timeout=120, cwd=dashboard_dir)
-        now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        now_str = now_kst.strftime("%Y-%m-%d %H:%M")
         subprocess.run(["git", "add", "featured.html", "featured_data.json", "etf.html",
                         "index.html", "market.html", "wrap.html"],
                        cwd=dashboard_dir, capture_output=True, timeout=30)
@@ -859,11 +887,22 @@ async def featured_update_job(context):
         )
         if commit_result.returncode == 0:
             git_push_safe(dashboard_dir)
-            logging.info("Morning featured pushed")
+            logging.info(f"{tag} push 완료")
         else:
-            logging.info("Morning featured: no changes to commit")
+            logging.info(f"{tag} 변경 없음 (commit skip)")
+
     except Exception as e:
-        logging.error(f"Morning featured error: {e}")
+        errors.append(f"예외 발생: {e}")
+        logging.error(f"{tag} {errors[-1]}")
+
+    # 실패 시 텔레그램 알림
+    if errors:
+        error_msg = f"❌ {tag} 수집 실패\n\n" + "\n\n".join(f"• {e}" for e in errors)
+        for chat_id in SUBSCRIBERS:
+            try:
+                await context.bot.send_message(chat_id=chat_id, text=error_msg[:4000])
+            except:
+                pass
 
 
 def _nightly_refresh_sync():
