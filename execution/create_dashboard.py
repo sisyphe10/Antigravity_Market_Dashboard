@@ -2570,7 +2570,7 @@ function refresh() {{
         var cumChg = isSingle ? (r.cnt > 0 ? r.chgSum / r.cnt : 0) : getCumChg(r.name);
         var cls = cumChg > 0 ? 'pos' : (cumChg < 0 ? 'neg' : '');
         var chgLabel = (cumChg > 0 ? '+' : '') + Math.round(cumChg) + '%';
-        h1 += '<tr><td class="c">' + (i+1) + '</td><td class="c" style="color:#888;font-size:0.85em">' + sec(r.code) + '</td><td class="c">' + r.name + '</td><td class="c">' + r.market + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c ' + cls + '">' + chgLabel + '</td></tr>';
+        h1 += '<tr><td class="c">' + (i+1) + '</td><td class="c">' + sec(r.code) + '</td><td class="c">' + r.name + '</td><td class="c">' + r.market + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c ' + cls + '">' + chgLabel + '</td></tr>';
     }});
     document.getElementById('absTable').innerHTML = h1 || '<tr><td colspan="7" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
 
@@ -2580,7 +2580,7 @@ function refresh() {{
         var cls = cumChg > 0 ? 'pos' : (cumChg < 0 ? 'neg' : '');
         var chgLabel = (cumChg > 0 ? '+' : '') + Math.round(cumChg) + '%';
         var avgTurnover = r.cnt > 0 ? (r.turnover / r.cnt) : 0;
-        h2 += '<tr><td class="c">' + (i+1) + '</td><td class="c" style="color:#888;font-size:0.85em">' + sec(r.code) + '</td><td class="c">' + r.name + '</td><td class="c">' + r.market + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c">' + Math.round(avgTurnover) + '%</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c ' + cls + '">' + chgLabel + '</td></tr>';
+        h2 += '<tr><td class="c">' + (i+1) + '</td><td class="c">' + sec(r.code) + '</td><td class="c">' + r.name + '</td><td class="c">' + r.market + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c">' + Math.round(avgTurnover) + '%</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c ' + cls + '">' + chgLabel + '</td></tr>';
     }});
     document.getElementById('turnTable').innerHTML = h2 || '<tr><td colspan="8" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
 
@@ -2607,7 +2607,7 @@ function refresh() {{
                 if (dayItem) cumChg = dayItem.chg;
             }}
             var cls = cumChg > 0 ? 'pos' : (cumChg < 0 ? 'neg' : '');
-            h += '<tr><td class="c">' + (i+1) + '</td><td class="c" style="color:#888;font-size:0.85em">' + sec(r.code) + '</td><td class="c">' + r.name + '</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c ' + cls + '">' + (cumChg > 0 ? '+' : '') + Math.round(cumChg) + '%</td></tr>';
+            h += '<tr><td class="c">' + (i+1) + '</td><td class="c">' + sec(r.code) + '</td><td class="c">' + r.name + '</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c ' + cls + '">' + (cumChg > 0 ? '+' : '') + Math.round(cumChg) + '%</td></tr>';
         }});
         document.getElementById(tableId).innerHTML = h || '<tr><td colspan="6" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
     }}
@@ -2627,7 +2627,7 @@ function refresh() {{
         var h = '';
         items.forEach(function(r, i) {{
             var cls = r.cumChg > 0 ? 'pos' : (r.cumChg < 0 ? 'neg' : '');
-            h += '<tr><td class="c">' + (i+1) + '</td><td class="c" style="color:#888;font-size:0.85em">' + sec(r.code) + '</td><td class="c">' + r.name + '</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c ' + cls + '">' + (r.cumChg > 0 ? '+' : '') + Math.round(r.cumChg) + '%</td></tr>';
+            h += '<tr><td class="c">' + (i+1) + '</td><td class="c">' + sec(r.code) + '</td><td class="c">' + r.name + '</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c ' + cls + '">' + (r.cumChg > 0 ? '+' : '') + Math.round(r.cumChg) + '%</td></tr>';
         }});
         document.getElementById(tableId).innerHTML = h || '<tr><td colspan="6" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
     }}
@@ -2647,9 +2647,9 @@ function refresh() {{
     for (var i = 0; i < maxRows; i++) {{
         var r20 = nh20[i]; var r120 = nh120[i]; var r52 = nh52w[i];
         nhHtml += '<tr><td class="c">' + (i+1) + '</td>';
-        nhHtml += '<td class="c" style="border-left:2px solid #2E7D32;color:#888;font-size:0.85em">' + (r20 ? sec(r20.code) : '') + '</td><td class="c">' + (r20 ? r20.name : '') + '</td><td class="c">' + (r20 ? fmtVal(r20.mktcap) : '') + '</td>';
-        nhHtml += '<td class="c" style="border-left:2px solid #2E7D32;color:#888;font-size:0.85em">' + (r120 ? sec(r120.code) : '') + '</td><td class="c">' + (r120 ? r120.name : '') + '</td><td class="c">' + (r120 ? fmtVal(r120.mktcap) : '') + '</td>';
-        nhHtml += '<td class="c" style="border-left:2px solid #2E7D32;color:#888;font-size:0.85em">' + (r52 ? sec(r52.code) : '') + '</td><td class="c">' + (r52 ? r52.name : '') + '</td><td class="c">' + (r52 ? fmtVal(r52.mktcap) : '') + '</td>';
+        nhHtml += '<td class="c" style="border-left:2px solid #2E7D32">' + (r20 ? sec(r20.code) : '') + '</td><td class="c">' + (r20 ? r20.name : '') + '</td><td class="c">' + (r20 ? fmtVal(r20.mktcap) : '') + '</td>';
+        nhHtml += '<td class="c" style="border-left:2px solid #2E7D32">' + (r120 ? sec(r120.code) : '') + '</td><td class="c">' + (r120 ? r120.name : '') + '</td><td class="c">' + (r120 ? fmtVal(r120.mktcap) : '') + '</td>';
+        nhHtml += '<td class="c" style="border-left:2px solid #2E7D32">' + (r52 ? sec(r52.code) : '') + '</td><td class="c">' + (r52 ? r52.name : '') + '</td><td class="c">' + (r52 ? fmtVal(r52.mktcap) : '') + '</td>';
         nhHtml += '</tr>';
     }}
     document.getElementById('newHighTable').innerHTML = nhHtml || '<tr><td colspan="10" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
