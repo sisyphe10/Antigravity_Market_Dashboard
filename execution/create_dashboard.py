@@ -2036,7 +2036,7 @@ def create_dashboard():
 <header style="position:relative;">
     <h1>Universe</h1>
     <div style="position:absolute;top:20px;right:24px;display:flex;gap:8px;align-items:center;">
-        <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="color:#6B21A8;font-size:0.8rem;text-decoration:none;border:1px solid #6B21A8;padding:4px 14px;border-radius:16px;">Google Sheet 열기</a>
+        <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="color:#6B21A8;font-size:0.8rem;text-decoration:none;border:1px solid #6B21A8;padding:4px 14px;border-radius:16px;">Sheet</a>
         <a href="index.html" style="padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:0.85rem;font-weight:600;">🏠 Home</a>
     </div>
 </header>
@@ -2074,7 +2074,7 @@ var headers=['#','통화','섹터','티커','기업명','시가총액','가격',
 var numCols=[0,5,6,7,8,9,10,11,12,13];
 var pctCols=[7,8,9,10,11,12,13];
 
-fetch('https://sheets.googleapis.com/v4/spreadsheets/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/values/%EC%8B%9C%ED%8A%B81?key=AIzaSyCHPiRby5FVAIKDwneZHy1KGl3SfycjZEw')
+fetch('https://sheets.googleapis.com/v4/spreadsheets/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/values/universe?key=AIzaSyCHPiRby5FVAIKDwneZHy1KGl3SfycjZEw')
 .then(function(r){return r.json()}).then(function(data){
     D=(data.values||[]).slice(1).map(function(r){return r.slice(0,14)});
     var c={},sec={};
