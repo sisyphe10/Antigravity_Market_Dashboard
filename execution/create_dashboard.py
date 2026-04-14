@@ -2420,14 +2420,14 @@ refresh();
             <div>
                 <h2>거래대금 TOP 30</h2>
                 <table>
-                    <thead><tr><th>#</th><th>종목</th><th>시장</th><th>거래대금</th><th>시총</th><th>등락률</th></tr></thead>
+                    <thead><tr><th>#</th><th>업종</th><th>종목</th><th>시장</th><th>거래대금</th><th>시총</th><th>등락률</th></tr></thead>
                     <tbody id="absTable"></tbody>
                 </table>
             </div>
             <div>
                 <h2>거래대금/시총 비율 TOP 30</h2>
                 <table>
-                    <thead><tr><th>#</th><th>종목</th><th>시장</th><th>거래대금</th><th>회전율</th><th>시총</th><th>등락률</th></tr></thead>
+                    <thead><tr><th>#</th><th>업종</th><th>종목</th><th>시장</th><th>거래대금</th><th>회전율</th><th>시총</th><th>등락률</th></tr></thead>
                     <tbody id="turnTable"></tbody>
                 </table>
             </div>
@@ -2438,14 +2438,14 @@ refresh();
             <div>
                 <h2>코스피 시가총액 TOP 30</h2>
                 <table>
-                    <thead><tr><th>#</th><th>종목</th><th>시총</th><th>거래대금</th><th>등락률</th></tr></thead>
+                    <thead><tr><th>#</th><th>업종</th><th>종목</th><th>시총</th><th>거래대금</th><th>등락률</th></tr></thead>
                     <tbody id="kospiCapTable"></tbody>
                 </table>
             </div>
             <div>
                 <h2>코스닥 시가총액 TOP 30</h2>
                 <table>
-                    <thead><tr><th>#</th><th>종목</th><th>시총</th><th>거래대금</th><th>등락률</th></tr></thead>
+                    <thead><tr><th>#</th><th>업종</th><th>종목</th><th>시총</th><th>거래대금</th><th>등락률</th></tr></thead>
                     <tbody id="kosdaqCapTable"></tbody>
                 </table>
             </div>
@@ -2456,14 +2456,14 @@ refresh();
             <div>
                 <h2>코스피 상승률 TOP 30</h2>
                 <table>
-                    <thead><tr><th>#</th><th>종목</th><th>시총</th><th>거래대금</th><th>등락률</th></tr></thead>
+                    <thead><tr><th>#</th><th>업종</th><th>종목</th><th>시총</th><th>거래대금</th><th>등락률</th></tr></thead>
                     <tbody id="kospiChgTable"></tbody>
                 </table>
             </div>
             <div>
                 <h2>코스닥 상승률 TOP 30</h2>
                 <table>
-                    <thead><tr><th>#</th><th>종목</th><th>시총</th><th>거래대금</th><th>등락률</th></tr></thead>
+                    <thead><tr><th>#</th><th>업종</th><th>종목</th><th>시총</th><th>거래대금</th><th>등락률</th></tr></thead>
                     <tbody id="kosdaqChgTable"></tbody>
                 </table>
             </div>
@@ -2473,7 +2473,7 @@ refresh();
         <h2>신고가 종목</h2>
         <div style="overflow-x:auto;">
             <table>
-                <thead><tr><th style="width:30px">#</th><th style="border-left:2px solid #2E7D32">20일</th><th>시총</th><th style="border-left:2px solid #2E7D32">120일</th><th>시총</th><th style="border-left:2px solid #2E7D32">52주</th><th>시총</th></tr></thead>
+                <thead><tr><th style="width:30px">#</th><th style="border-left:2px solid #2E7D32">업종</th><th>20일</th><th>시총</th><th style="border-left:2px solid #2E7D32">업종</th><th>120일</th><th>시총</th><th style="border-left:2px solid #2E7D32">업종</th><th>52주</th><th>시총</th></tr></thead>
                 <tbody id="newHighTable"></tbody>
             </table>
         </div>
@@ -2484,9 +2484,8 @@ refresh();
 var raw = {featured_json};
 var wics = {wics_json};
 
-function sectorName(code, name) {{
-    var s = wics[code];
-    return s ? '<span style="color:#888;font-size:0.85em"># ' + s + '</span> ' + name : name;
+function sec(code) {{
+    return wics[code] || '';
 }}
 
 function fmtDate(el) {{
@@ -2571,9 +2570,9 @@ function refresh() {{
         var cumChg = isSingle ? (r.cnt > 0 ? r.chgSum / r.cnt : 0) : getCumChg(r.name);
         var cls = cumChg > 0 ? 'pos' : (cumChg < 0 ? 'neg' : '');
         var chgLabel = (cumChg > 0 ? '+' : '') + Math.round(cumChg) + '%';
-        h1 += '<tr><td class="c">' + (i+1) + '</td><td>' + sectorName(r.code, r.name) + '</td><td class="c">' + r.market + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c ' + cls + '">' + chgLabel + '</td></tr>';
+        h1 += '<tr><td class="c">' + (i+1) + '</td><td class="c" style="color:#888;font-size:0.85em">' + sec(r.code) + '</td><td class="c">' + r.name + '</td><td class="c">' + r.market + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c ' + cls + '">' + chgLabel + '</td></tr>';
     }});
-    document.getElementById('absTable').innerHTML = h1 || '<tr><td colspan="6" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
+    document.getElementById('absTable').innerHTML = h1 || '<tr><td colspan="7" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
 
     var h2 = '';
     turnList.forEach(function(r, i) {{
@@ -2581,9 +2580,9 @@ function refresh() {{
         var cls = cumChg > 0 ? 'pos' : (cumChg < 0 ? 'neg' : '');
         var chgLabel = (cumChg > 0 ? '+' : '') + Math.round(cumChg) + '%';
         var avgTurnover = r.cnt > 0 ? (r.turnover / r.cnt) : 0;
-        h2 += '<tr><td class="c">' + (i+1) + '</td><td>' + sectorName(r.code, r.name) + '</td><td class="c">' + r.market + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c">' + Math.round(avgTurnover) + '%</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c ' + cls + '">' + chgLabel + '</td></tr>';
+        h2 += '<tr><td class="c">' + (i+1) + '</td><td class="c" style="color:#888;font-size:0.85em">' + sec(r.code) + '</td><td class="c">' + r.name + '</td><td class="c">' + r.market + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c">' + Math.round(avgTurnover) + '%</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c ' + cls + '">' + chgLabel + '</td></tr>';
     }});
-    document.getElementById('turnTable').innerHTML = h2 || '<tr><td colspan="7" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
+    document.getElementById('turnTable').innerHTML = h2 || '<tr><td colspan="8" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
 
     // 시총/상승률 테이블: 기간 연동
     function aggByType(type) {{
@@ -2608,9 +2607,9 @@ function refresh() {{
                 if (dayItem) cumChg = dayItem.chg;
             }}
             var cls = cumChg > 0 ? 'pos' : (cumChg < 0 ? 'neg' : '');
-            h += '<tr><td class="c">' + (i+1) + '</td><td>' + sectorName(r.code, r.name) + '</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c ' + cls + '">' + (cumChg > 0 ? '+' : '') + Math.round(cumChg) + '%</td></tr>';
+            h += '<tr><td class="c">' + (i+1) + '</td><td class="c" style="color:#888;font-size:0.85em">' + sec(r.code) + '</td><td class="c">' + r.name + '</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c ' + cls + '">' + (cumChg > 0 ? '+' : '') + Math.round(cumChg) + '%</td></tr>';
         }});
-        document.getElementById(tableId).innerHTML = h || '<tr><td colspan="5" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
+        document.getElementById(tableId).innerHTML = h || '<tr><td colspan="6" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
     }}
 
     function renderChgTable(type, tableId) {{
@@ -2628,9 +2627,9 @@ function refresh() {{
         var h = '';
         items.forEach(function(r, i) {{
             var cls = r.cumChg > 0 ? 'pos' : (r.cumChg < 0 ? 'neg' : '');
-            h += '<tr><td class="c">' + (i+1) + '</td><td>' + sectorName(r.code, r.name) + '</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c ' + cls + '">' + (r.cumChg > 0 ? '+' : '') + Math.round(r.cumChg) + '%</td></tr>';
+            h += '<tr><td class="c">' + (i+1) + '</td><td class="c" style="color:#888;font-size:0.85em">' + sec(r.code) + '</td><td class="c">' + r.name + '</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c ' + cls + '">' + (r.cumChg > 0 ? '+' : '') + Math.round(r.cumChg) + '%</td></tr>';
         }});
-        document.getElementById(tableId).innerHTML = h || '<tr><td colspan="5" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
+        document.getElementById(tableId).innerHTML = h || '<tr><td colspan="6" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
     }}
 
     renderCapTable('kospi_cap', 'kospiCapTable');
@@ -2648,12 +2647,12 @@ function refresh() {{
     for (var i = 0; i < maxRows; i++) {{
         var r20 = nh20[i]; var r120 = nh120[i]; var r52 = nh52w[i];
         nhHtml += '<tr><td class="c">' + (i+1) + '</td>';
-        nhHtml += '<td style="border-left:2px solid #2E7D32">' + (r20 ? sectorName(r20.code, r20.name) : '') + '</td><td class="c">' + (r20 ? fmtVal(r20.mktcap) : '') + '</td>';
-        nhHtml += '<td style="border-left:2px solid #2E7D32">' + (r120 ? sectorName(r120.code, r120.name) : '') + '</td><td class="c">' + (r120 ? fmtVal(r120.mktcap) : '') + '</td>';
-        nhHtml += '<td style="border-left:2px solid #2E7D32">' + (r52 ? sectorName(r52.code, r52.name) : '') + '</td><td class="c">' + (r52 ? fmtVal(r52.mktcap) : '') + '</td>';
+        nhHtml += '<td class="c" style="border-left:2px solid #2E7D32;color:#888;font-size:0.85em">' + (r20 ? sec(r20.code) : '') + '</td><td class="c">' + (r20 ? r20.name : '') + '</td><td class="c">' + (r20 ? fmtVal(r20.mktcap) : '') + '</td>';
+        nhHtml += '<td class="c" style="border-left:2px solid #2E7D32;color:#888;font-size:0.85em">' + (r120 ? sec(r120.code) : '') + '</td><td class="c">' + (r120 ? r120.name : '') + '</td><td class="c">' + (r120 ? fmtVal(r120.mktcap) : '') + '</td>';
+        nhHtml += '<td class="c" style="border-left:2px solid #2E7D32;color:#888;font-size:0.85em">' + (r52 ? sec(r52.code) : '') + '</td><td class="c">' + (r52 ? r52.name : '') + '</td><td class="c">' + (r52 ? fmtVal(r52.mktcap) : '') + '</td>';
         nhHtml += '</tr>';
     }}
-    document.getElementById('newHighTable').innerHTML = nhHtml || '<tr><td colspan="7" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
+    document.getElementById('newHighTable').innerHTML = nhHtml || '<tr><td colspan="10" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
 }}
 refresh();
 </script>

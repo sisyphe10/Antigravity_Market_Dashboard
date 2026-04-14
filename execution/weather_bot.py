@@ -838,14 +838,14 @@ async def featured_update_job(context):
         dashboard_dir = DASHBOARD_DIR
         git_sync(dashboard_dir)
 
-        # Step 0: WICS 섹터 매핑 업데이트 (1차 수집 시에만)
-        if now_kst.hour < 17:
+        # Step 0: WICS 섹터 매핑 업데이트 (월요일 1차 수집 시에만)
+        if now_kst.hour < 17 and now_kst.weekday() == 0:
             wics_result = subprocess.run(
                 [sys.executable, "execution/fetch_wics_mapping.py"],
                 capture_output=True, text=True, timeout=120, cwd=dashboard_dir
             )
             if wics_result.returncode == 0:
-                logging.info(f"{tag} WICS 매핑 업데이트 완료")
+                logging.info(f"{tag} WICS 매핑 주간 업데이트 완료")
             else:
                 logging.warning(f"{tag} WICS 매핑 실패 (무시): {wics_result.stderr[-100:]}")
 
