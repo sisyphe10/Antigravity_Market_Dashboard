@@ -2623,9 +2623,9 @@ function refresh() {{
 
     // 신고가 통합 테이블 (종료일 기준, 기간 변경 무관)
     var nhData = raw.filter(function(r) {{ return r.d === e; }});
-    var nh20 = nhData.filter(function(r) {{ return r.type === 'newhigh_20d'; }}).sort(function(a,b) {{ return b.mktcap - a.mktcap; }});
-    var nh120 = nhData.filter(function(r) {{ return r.type === 'newhigh_120d'; }}).sort(function(a,b) {{ return b.mktcap - a.mktcap; }});
-    var nh52w = nhData.filter(function(r) {{ return r.type === 'newhigh_52w'; }}).sort(function(a,b) {{ return b.mktcap - a.mktcap; }});
+    var nh20 = nhData.filter(function(r) {{ return r.type === 'newhigh_20d'; }}).sort(function(a,b) {{ return b.mktcap - a.mktcap; }}).slice(0, 50);
+    var nh120 = nhData.filter(function(r) {{ return r.type === 'newhigh_120d'; }}).sort(function(a,b) {{ return b.mktcap - a.mktcap; }}).slice(0, 50);
+    var nh52w = nhData.filter(function(r) {{ return r.type === 'newhigh_52w'; }}).sort(function(a,b) {{ return b.mktcap - a.mktcap; }}).slice(0, 50);
     var maxRows = Math.max(nh20.length, nh120.length, nh52w.length);
     var nhHtml = '';
     for (var i = 0; i < maxRows; i++) {{
