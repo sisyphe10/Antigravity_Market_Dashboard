@@ -52,6 +52,7 @@ charts/*
 !kodex_sectors.json
 !featured_data.json
 !seibro_tickers.json
+!wics_mapping.json
 
 # 기타
 *.bat

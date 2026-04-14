@@ -838,6 +838,17 @@ async def featured_update_job(context):
         dashboard_dir = DASHBOARD_DIR
         git_sync(dashboard_dir)
 
+        # Step 0: WICS 섹터 매핑 업데이트 (1차 수집 시에만)
+        if now_kst.hour < 17:
+            wics_result = subprocess.run(
+                [sys.executable, "execution/fetch_wics_mapping.py"],
+                capture_output=True, text=True, timeout=120, cwd=dashboard_dir
+            )
+            if wics_result.returncode == 0:
+                logging.info(f"{tag} WICS 매핑 업데이트 완료")
+            else:
+                logging.warning(f"{tag} WICS 매핑 실패 (무시): {wics_result.stderr[-100:]}")
+
         # Step 1: stock_price_history.json 업데이트 (신고가 계산용)
         price_result = subprocess.run(
             [sys.executable, "execution/update_price_history.py"],

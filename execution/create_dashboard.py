@@ -2355,6 +2355,17 @@ refresh();
     featured_dates = sorted(set(r['d'] for r in featured_records))
     featured_last = featured_dates[-1] if featured_dates else ''
 
+    # WICS 섹터 매핑 로드
+    wics_map = {}
+    wics_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'wics_mapping.json')
+    if os.path.exists(wics_path):
+        try:
+            with open(wics_path, 'r', encoding='utf-8') as f:
+                wics_map = json.load(f).get('mapping', {})
+        except:
+            pass
+    wics_json = json.dumps(wics_map, ensure_ascii=False)
+
     featured_page = f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -2471,6 +2482,12 @@ refresh();
 <footer>Data source: KRX OpenAPI</footer>
 <script>
 var raw = {featured_json};
+var wics = {wics_json};
+
+function sectorName(code, name) {{
+    var s = wics[code];
+    return s ? '<span style="color:#888;font-size:0.85em"># ' + s + '</span> ' + name : name;
+}}
 
 function fmtDate(el) {{
     var v = el.value;
@@ -2505,14 +2522,14 @@ function refresh() {{
     filtered.forEach(function(r) {{
         var key = r.name;
         if (r.type === 'absolute') {{
-            if (!absAgg[key]) absAgg[key] = {{name: r.name, market: r.market, trdval: 0, mktcap: r.mktcap, chgSum: 0, cnt: 0}};
+            if (!absAgg[key]) absAgg[key] = {{name: r.name, code: r.code, market: r.market, trdval: 0, mktcap: r.mktcap, chgSum: 0, cnt: 0}};
             absAgg[key].trdval += r.trdval;
             absAgg[key].mktcap = r.mktcap;
             absAgg[key].chgSum += r.chg;
             absAgg[key].cnt++;
         }}
         if (r.type === 'turnover') {{
-            if (!turnAgg[key]) turnAgg[key] = {{name: r.name, market: r.market, trdval: 0, mktcap: r.mktcap, turnover: 0, chgSum: 0, cnt: 0}};
+            if (!turnAgg[key]) turnAgg[key] = {{name: r.name, code: r.code, market: r.market, trdval: 0, mktcap: r.mktcap, turnover: 0, chgSum: 0, cnt: 0}};
             turnAgg[key].trdval += r.trdval;
             turnAgg[key].mktcap = r.mktcap;
             turnAgg[key].turnover += r.turnover;
@@ -2554,7 +2571,7 @@ function refresh() {{
         var cumChg = isSingle ? (r.cnt > 0 ? r.chgSum / r.cnt : 0) : getCumChg(r.name);
         var cls = cumChg > 0 ? 'pos' : (cumChg < 0 ? 'neg' : '');
         var chgLabel = (cumChg > 0 ? '+' : '') + Math.round(cumChg) + '%';
-        h1 += '<tr><td class="c">' + (i+1) + '</td><td class="c">' + r.name + '</td><td class="c">' + r.market + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c ' + cls + '">' + chgLabel + '</td></tr>';
+        h1 += '<tr><td class="c">' + (i+1) + '</td><td>' + sectorName(r.code, r.name) + '</td><td class="c">' + r.market + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c ' + cls + '">' + chgLabel + '</td></tr>';
     }});
     document.getElementById('absTable').innerHTML = h1 || '<tr><td colspan="6" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
 
@@ -2564,7 +2581,7 @@ function refresh() {{
         var cls = cumChg > 0 ? 'pos' : (cumChg < 0 ? 'neg' : '');
         var chgLabel = (cumChg > 0 ? '+' : '') + Math.round(cumChg) + '%';
         var avgTurnover = r.cnt > 0 ? (r.turnover / r.cnt) : 0;
-        h2 += '<tr><td class="c">' + (i+1) + '</td><td class="c">' + r.name + '</td><td class="c">' + r.market + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c">' + Math.round(avgTurnover) + '%</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c ' + cls + '">' + chgLabel + '</td></tr>';
+        h2 += '<tr><td class="c">' + (i+1) + '</td><td>' + sectorName(r.code, r.name) + '</td><td class="c">' + r.market + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c">' + Math.round(avgTurnover) + '%</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c ' + cls + '">' + chgLabel + '</td></tr>';
     }});
     document.getElementById('turnTable').innerHTML = h2 || '<tr><td colspan="7" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
 
@@ -2573,7 +2590,7 @@ function refresh() {{
         var agg = {{}};
         filtered.forEach(function(r) {{
             if (r.type !== type) return;
-            if (!agg[r.name]) agg[r.name] = {{name: r.name, market: r.market, mktcap: r.mktcap, trdval: 0, price: r.price}};
+            if (!agg[r.name]) agg[r.name] = {{name: r.name, code: r.code, market: r.market, mktcap: r.mktcap, trdval: 0, price: r.price}};
             agg[r.name].trdval += r.trdval;
             agg[r.name].mktcap = r.mktcap;
             agg[r.name].price = r.price;
@@ -2591,7 +2608,7 @@ function refresh() {{
                 if (dayItem) cumChg = dayItem.chg;
             }}
             var cls = cumChg > 0 ? 'pos' : (cumChg < 0 ? 'neg' : '');
-            h += '<tr><td class="c">' + (i+1) + '</td><td class="c">' + r.name + '</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c ' + cls + '">' + (cumChg > 0 ? '+' : '') + Math.round(cumChg) + '%</td></tr>';
+            h += '<tr><td class="c">' + (i+1) + '</td><td>' + sectorName(r.code, r.name) + '</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c ' + cls + '">' + (cumChg > 0 ? '+' : '') + Math.round(cumChg) + '%</td></tr>';
         }});
         document.getElementById(tableId).innerHTML = h || '<tr><td colspan="5" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
     }}
@@ -2611,7 +2628,7 @@ function refresh() {{
         var h = '';
         items.forEach(function(r, i) {{
             var cls = r.cumChg > 0 ? 'pos' : (r.cumChg < 0 ? 'neg' : '');
-            h += '<tr><td class="c">' + (i+1) + '</td><td class="c">' + r.name + '</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c ' + cls + '">' + (r.cumChg > 0 ? '+' : '') + Math.round(r.cumChg) + '%</td></tr>';
+            h += '<tr><td class="c">' + (i+1) + '</td><td>' + sectorName(r.code, r.name) + '</td><td class="c">' + fmtVal(r.mktcap) + '</td><td class="c">' + fmtVal(r.trdval) + '</td><td class="c ' + cls + '">' + (r.cumChg > 0 ? '+' : '') + Math.round(r.cumChg) + '%</td></tr>';
         }});
         document.getElementById(tableId).innerHTML = h || '<tr><td colspan="5" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
     }}
@@ -2631,9 +2648,9 @@ function refresh() {{
     for (var i = 0; i < maxRows; i++) {{
         var r20 = nh20[i]; var r120 = nh120[i]; var r52 = nh52w[i];
         nhHtml += '<tr><td class="c">' + (i+1) + '</td>';
-        nhHtml += '<td class="c" style="border-left:2px solid #2E7D32">' + (r20 ? r20.name : '') + '</td><td class="c">' + (r20 ? fmtVal(r20.mktcap) : '') + '</td>';
-        nhHtml += '<td class="c" style="border-left:2px solid #2E7D32">' + (r120 ? r120.name : '') + '</td><td class="c">' + (r120 ? fmtVal(r120.mktcap) : '') + '</td>';
-        nhHtml += '<td class="c" style="border-left:2px solid #2E7D32">' + (r52 ? r52.name : '') + '</td><td class="c">' + (r52 ? fmtVal(r52.mktcap) : '') + '</td>';
+        nhHtml += '<td style="border-left:2px solid #2E7D32">' + (r20 ? sectorName(r20.code, r20.name) : '') + '</td><td class="c">' + (r20 ? fmtVal(r20.mktcap) : '') + '</td>';
+        nhHtml += '<td style="border-left:2px solid #2E7D32">' + (r120 ? sectorName(r120.code, r120.name) : '') + '</td><td class="c">' + (r120 ? fmtVal(r120.mktcap) : '') + '</td>';
+        nhHtml += '<td style="border-left:2px solid #2E7D32">' + (r52 ? sectorName(r52.code, r52.name) : '') + '</td><td class="c">' + (r52 ? fmtVal(r52.mktcap) : '') + '</td>';
         nhHtml += '</tr>';
     }}
     document.getElementById('newHighTable').innerHTML = nhHtml || '<tr><td colspan="7" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
