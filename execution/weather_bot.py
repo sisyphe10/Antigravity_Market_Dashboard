@@ -1167,7 +1167,17 @@ async def daily_market_alert_summary_job(context: ContextTypes.DEFAULT_TYPE):
             lines.append("")
             lines.append("<b><u>[투자주의]</u></b>")
             for s in sorted(stocks_주의, key=lambda x: (x.get('marcap') or 0), reverse=True):
-                lines.append(fmt_line(s, s['name'] not in prev_주의))
+                is_new = s['name'] not in prev_주의
+                is_예고 = s.get('warn_type') == '투자경고 지정예고'
+                name = esc(s['name'])
+                mcap = esc(fmt_marcap(s['marcap']))
+                if is_new:
+                    line = f"• <b>[NEW]</b> {name} / {mcap}"
+                else:
+                    line = f"• {name} / {mcap}"
+                if is_예고:
+                    line = f"<u>{line}</u>"
+                lines.append(line)
 
         _save_alert({
             '위험': [s['name'] for s in stocks_위험],
