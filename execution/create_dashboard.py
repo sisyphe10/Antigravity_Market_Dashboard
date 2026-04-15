@@ -2019,22 +2019,23 @@ def create_dashboard():
         .filters select { padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; background: #fff; }
         .sector-group { margin-bottom: 24px; }
         .sector-group h3 { font-size: 1rem; color: #6B21A8; margin-bottom: 8px; padding: 8px 0; border-bottom: 1px solid #6B21A8; }
-        #tab1 table { table-layout: fixed; width: 100%; }
-        #tab1 th, #tab1 td { text-align: center; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; table-layout: fixed; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
         thead { background: #e9ecef; }
         th { padding: 12px 6px; text-align: center; font-weight: 600; color: #000; border-bottom: 2px solid #000; cursor: pointer; white-space: nowrap; overflow: hidden; }
         th:hover { background: #ddd; }
         td { padding: 10px 6px; border-bottom: 1px solid #dee2e6; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        /* 컬럼 너비 */
-        th:nth-child(1) { width: 36px; }
-        th:nth-child(2) { width: 50px; }
-        th:nth-child(3) { width: 100px; }
-        th:nth-child(4) { width: 80px; }
-        th:nth-child(5) { width: 120px; }
-        th:nth-child(6) { width: 90px; }
-        th:nth-child(7) { width: 80px; }
-        th:nth-child(n+8) { width: 75px; }
+        /* 종목 리스트 테이블 */
+        #tab0 table { table-layout: fixed; }
+        #tab0 th:nth-child(1) { width: 36px; }
+        #tab0 th:nth-child(2) { width: 50px; }
+        #tab0 th:nth-child(3) { width: 100px; }
+        #tab0 th:nth-child(4) { width: 80px; }
+        #tab0 th:nth-child(5) { width: 120px; }
+        #tab0 th:nth-child(6) { width: 90px; }
+        #tab0 th:nth-child(7) { width: 80px; }
+        #tab0 th:nth-child(n+8) { width: 75px; }
+        /* 섹터 수익률 테이블 */
+        #tab1 table { table-layout: auto; }
         tbody tr:hover { background: #f5f5f5; }
         .positive { color: #cc0000; font-weight: 600; }
         .negative { color: #0055cc; font-weight: 600; }
@@ -2193,7 +2194,7 @@ function renderSector() {
     });
 
     function avg(arr) { return arr.length ? (arr.reduce(function(a,b){return a+b;},0)/arr.length) : null; }
-    function fv(v) { if(v===null) return '-'; var s=v>0?'+':''; return s+v.toFixed(1)+'%'; }
+    function fv(v) { if(v===null) return '-'; var s=v>0?'+':''; return s+Math.round(v)+'%'; }
     function cls(v) { if(v===null) return ''; return v>0?'positive':v<0?'negative':''; }
 
     var secs = Object.keys(agg).sort(function(a,b) {
