@@ -2084,9 +2084,7 @@ def create_dashboard():
         <div class="filters">
             <select id="fSectorCurrency" onchange="renderSector()"><option value="">전체</option></select>
         </div>
-        <div style="overflow-x:auto;">
-            <div id="sectorContent"><p style="padding:40px;color:#888;">로딩 중...</p></div>
-        </div>
+        <div id="sectorContent"><p style="padding:40px;color:#888;">로딩 중...</p></div>
     </div>
 </div>
 <footer>Antigravity Universe</footer>
@@ -2238,7 +2236,7 @@ function renderSector() {
     });
     for(var k in stocksBySec) stocksBySec[k].sort(function(a,b){return b.mcapVal-a.mcapVal;});
 
-    var html = '<table><thead><tr><th>섹터</th><th>종목수</th><th style="background:#f3f0ff">YTD</th><th>1D</th><th>1W</th><th>1M</th><th>3M</th><th>6M</th><th>1Y</th></tr></thead><tbody>';
+    var html = '<table style="width:100%;table-layout:fixed;border-collapse:collapse"><thead><tr><th>섹터</th><th>종목수</th><th style="background:#f3f0ff">YTD</th><th>1D</th><th>1W</th><th>1M</th><th>3M</th><th>6M</th><th>1Y</th></tr></thead><tbody>';
     secs.forEach(function(sec,idx) {
         var g = agg[sec];
         var vals = [wavg(g.ytd),wavg(g.d1),wavg(g.w1),wavg(g.m1),wavg(g.m3),wavg(g.m6),wavg(g.y1)];
