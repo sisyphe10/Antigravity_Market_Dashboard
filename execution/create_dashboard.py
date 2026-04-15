@@ -2023,7 +2023,7 @@ def create_dashboard():
         .csel-list { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #d1d5db; border-radius: 6px; margin-top: 2px; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
         .csel-list.open { display: block; }
         .csel-item { padding: 8px 12px; text-align: center; cursor: pointer; font-size: 14px; font-family: inherit; }
-        .csel-item:hover { background: #f3f0ff; }
+        .csel-item:hover { background: #e9e0f5; }
         .csel-item.selected { background: #6B21A8; color: #fff; }
         .sector-group { margin-bottom: 24px; }
         .sector-group h3 { font-size: 18px; color: #6B21A8; margin-bottom: 8px; padding: 8px 0; border-bottom: 1px solid #6B21A8; }
@@ -2065,8 +2065,14 @@ def create_dashboard():
     </div>
     <div id="tab0" class="tab-content active">
     <div class="filters">
-        <select id="fCurrency" onchange="render()"><option value="">통화 전체</option></select>
-        <select id="fSector" onchange="render()"><option value="">섹터 전체</option></select>
+        <div class="csel-wrap" id="cselCurWrap">
+            <div class="csel-display" id="cselCurDisplay" onclick="toggleCselId('cselCurList')">통화 전체</div>
+            <div class="csel-list" id="cselCurList"></div>
+        </div>
+        <div class="csel-wrap" id="cselSecWrap">
+            <div class="csel-display" id="cselSecDisplay" onclick="toggleCselId('cselSecList')">섹터 전체</div>
+            <div class="csel-list" id="cselSecList"></div>
+        </div>
     </div>
     <table>
         <thead><tr>
@@ -2110,8 +2116,14 @@ fetch('https://sheets.googleapis.com/v4/spreadsheets/1KR9RJN53G-yJtnowQbg5bcAiIB
     D=(data.values||[]).slice(1).map(function(r){return r.slice(0,14)});
     var c={},sec={};
     D.forEach(function(r){if(r[1])c[r[1]]=1;if(r[2])sec[r[2]]=1;});
-    document.getElementById('fCurrency').innerHTML='<option value="">통화 전체</option>'+Object.keys(c).sort().map(function(v){return '<option>'+v+'</option>';}).join('');
-    document.getElementById('fSector').innerHTML='<option value="">섹터 전체</option>'+Object.keys(sec).sort().map(function(v){return '<option>'+v+'</option>';}).join('');
+    var ch='<div class="csel-item selected" data-v="">통화 전체</div>';
+    Object.keys(c).sort().forEach(function(v){ch+='<div class="csel-item" data-v="'+v+'">'+v+'</div>';});
+    document.getElementById('cselCurList').innerHTML=ch;
+    document.getElementById('cselCurList').addEventListener('click',function(e){var item=e.target.closest('.csel-item');if(item)pickCselCur(item.getAttribute('data-v'),item.textContent);});
+    var sh='<div class="csel-item selected" data-v="">섹터 전체</div>';
+    Object.keys(sec).sort().forEach(function(v){sh+='<div class="csel-item" data-v="'+v+'">'+v+'</div>';});
+    document.getElementById('cselSecList').innerHTML=sh;
+    document.getElementById('cselSecList').addEventListener('click',function(e){var item=e.target.closest('.csel-item');if(item)pickCselSec(item.getAttribute('data-v'),item.textContent);});
     render();
 });
 
@@ -2124,8 +2136,8 @@ function doSort(col){
 }
 
 function render(){
-    var fc=document.getElementById('fCurrency').value;
-    var fs=document.getElementById('fSector').value;
+    var fc=_cselCurVal;
+    var fs=_cselSecVal;
     var f=D.filter(function(r){
         if(fc&&r[1]!==fc)return false;
         if(fs&&r[2]!==fs)return false;
@@ -2156,9 +2168,12 @@ function render(){
     document.getElementById('tbody').innerHTML=h;
 }
 
-var _cselVal = '';
-function toggleCsel() {
-    document.getElementById('cselList').classList.toggle('open');
+var _cselVal = '', _cselCurVal = '', _cselSecVal = '';
+function toggleCselId(listId) {
+    document.querySelectorAll('.csel-list').forEach(function(el) {
+        if (el.id !== listId) el.classList.remove('open');
+    });
+    document.getElementById(listId).classList.toggle('open');
 }
 function pickCsel(val, label) {
     _cselVal = val;
@@ -2169,9 +2184,28 @@ function pickCsel(val, label) {
     });
     renderSector();
 }
+function pickCselCur(val, label) {
+    _cselCurVal = val;
+    document.getElementById('cselCurDisplay').textContent = label;
+    document.getElementById('cselCurList').classList.remove('open');
+    document.querySelectorAll('#cselCurList .csel-item').forEach(function(el) {
+        el.classList.toggle('selected', el.getAttribute('data-v') === val);
+    });
+    render();
+}
+function pickCselSec(val, label) {
+    _cselSecVal = val;
+    document.getElementById('cselSecDisplay').textContent = label;
+    document.getElementById('cselSecList').classList.remove('open');
+    document.querySelectorAll('#cselSecList .csel-item').forEach(function(el) {
+        el.classList.toggle('selected', el.getAttribute('data-v') === val);
+    });
+    render();
+}
 document.addEventListener('click', function(e) {
-    var w = document.getElementById('cselWrap');
-    if (w && !w.contains(e.target)) document.getElementById('cselList').classList.remove('open');
+    document.querySelectorAll('.csel-wrap').forEach(function(w) {
+        if (!w.contains(e.target)) w.querySelector('.csel-list').classList.remove('open');
+    });
 });
 
 var _secSortCol = 3, _secSortAsc = false;
