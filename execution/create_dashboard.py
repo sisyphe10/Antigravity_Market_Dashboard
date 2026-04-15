@@ -2082,6 +2082,9 @@ def create_dashboard():
     </div>
     </div>
     <div id="tab1" class="tab-content">
+        <div class="filters">
+            <select id="fSectorCurrency" onchange="renderSector()"><option value="">전체</option></select>
+        </div>
         <div id="sectorContent"><p style="padding:40px;color:#888;">로딩 중...</p></div>
     </div>
 </div>
@@ -2149,15 +2152,34 @@ function switchTab(idx) {
     if(idx===1) renderSector();
 }
 
+var _sectorInit = false;
 function renderSector() {
     if(!D.length) return;
-    var groups = {};
-    D.forEach(function(r) {
-        var cur = r[1] || '기타';
+    var sel = document.getElementById('fSectorCurrency');
+    var fc2 = sel.value;
+
+    // 드롭다운 초기화 (1회)
+    if(!_sectorInit) {
+        var curs = {};
+        D.forEach(function(r){ if(r[1]) curs[r[1]]=1; });
+        var curOrder = ['KRW','USD','HKD','TWD','EUR','CAD'];
+        var keys = Object.keys(curs).sort(function(a,b){
+            var ia=curOrder.indexOf(a),ib=curOrder.indexOf(b);
+            if(ia<0)ia=99;if(ib<0)ib=99;return ia-ib;
+        });
+        sel.innerHTML = '<option value="">전체</option>' + keys.map(function(v){return '<option>'+v+'</option>';}).join('');
+        _sectorInit = true;
+    }
+
+    // 필터링
+    var filtered = fc2 ? D.filter(function(r){ return r[1]===fc2; }) : D;
+
+    // 섹터별 집계
+    var agg = {};
+    filtered.forEach(function(r) {
         var sec = r[2] || '기타';
-        if(!groups[cur]) groups[cur] = {};
-        if(!groups[cur][sec]) groups[cur][sec] = {cnt:0, ytd:[], d1:[], w1:[], m1:[], m3:[], m6:[], y1:[]};
-        var g = groups[cur][sec];
+        if(!agg[sec]) agg[sec] = {cnt:0, ytd:[], d1:[], w1:[], m1:[], m3:[], m6:[], y1:[]};
+        var g = agg[sec];
         g.cnt++;
         var vals = [r[7],r[8],r[9],r[10],r[11],r[12],r[13]];
         var arrs = [g.ytd,g.d1,g.w1,g.m1,g.m3,g.m6,g.y1];
@@ -2170,38 +2192,28 @@ function renderSector() {
     });
 
     function avg(arr) { return arr.length ? (arr.reduce(function(a,b){return a+b;},0)/arr.length) : null; }
-    function fc(v) { if(v===null) return '-'; var s=v>0?'+':''; return s+v.toFixed(1)+'%'; }
+    function fv(v) { if(v===null) return '-'; var s=v>0?'+':''; return s+v.toFixed(1)+'%'; }
     function cls(v) { if(v===null) return ''; return v>0?'positive':v<0?'negative':''; }
 
-    var curOrder = ['KRW','USD','HKD','TWD','EUR','CAD'];
-    var sorted = Object.keys(groups).sort(function(a,b) {
-        var ia=curOrder.indexOf(a), ib=curOrder.indexOf(b);
-        if(ia<0)ia=99; if(ib<0)ib=99;
-        return ia-ib;
+    var secs = Object.keys(agg).sort(function(a,b) {
+        var va=avg(agg[a].ytd)||0, vb=avg(agg[b].ytd)||0;
+        return vb-va;
     });
 
-    var html = '';
-    sorted.forEach(function(cur) {
-        html += '<div class="sector-group"><h3>' + cur + '</h3>';
-        html += '<table><thead><tr><th style="text-align:left">섹터</th><th>종목수</th><th style="background:#f3f0ff">YTD</th><th>1D</th><th>1W</th><th>1M</th><th>3M</th><th>6M</th><th>1Y</th></tr></thead><tbody>';
-        var secs = Object.keys(groups[cur]).sort(function(a,b) {
-            var va=avg(groups[cur][a].ytd)||0, vb=avg(groups[cur][b].ytd)||0;
-            return vb-va;
+    var html = '<table><thead><tr><th style="text-align:left">섹터</th><th>종목수</th><th style="background:#f3f0ff">YTD</th><th>1D</th><th>1W</th><th>1M</th><th>3M</th><th>6M</th><th>1Y</th></tr></thead><tbody>';
+    secs.forEach(function(sec) {
+        var g = agg[sec];
+        var vals = [avg(g.ytd),avg(g.d1),avg(g.w1),avg(g.m1),avg(g.m3),avg(g.m6),avg(g.y1)];
+        html += '<tr><td style="text-align:left;font-weight:600">' + sec + '</td><td>' + g.cnt + '</td>';
+        vals.forEach(function(v,i) {
+            var bg = i===0?' style="background:#f3f0ff"':'';
+            html += '<td class="'+cls(v)+'"'+bg+'>' + fv(v) + '</td>';
         });
-        secs.forEach(function(sec) {
-            var g = groups[cur][sec];
-            var vals = [avg(g.ytd),avg(g.d1),avg(g.w1),avg(g.m1),avg(g.m3),avg(g.m6),avg(g.y1)];
-            html += '<tr><td style="text-align:left;font-weight:600">' + sec + '</td><td>' + g.cnt + '</td>';
-            vals.forEach(function(v,i) {
-                var bg = i===0?' style="background:#f3f0ff"':'';
-                html += '<td class="'+cls(v)+'"'+bg+'>' + fc(v) + '</td>';
-            });
-            html += '</tr>';
-        });
-        html += '</tbody></table></div>';
+        html += '</tr>';
     });
+    html += '</tbody></table>';
 
-    document.getElementById('sectorContent').innerHTML = html || '<p style="padding:40px;color:#888;">데이터 없음</p>';
+    document.getElementById('sectorContent').innerHTML = html;
 }
 </script>
 </body>
