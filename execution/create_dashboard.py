@@ -2974,7 +2974,7 @@ tbody tr.etf-row:hover {{ background: #ede9fe; }}
 <body>
 <header>
     <h1>🏛️ ETF Dashboard</h1>
-    <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: {now}</div>
+    <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: {datetime.now(tz=KST).strftime("%Y-%m-%d %H:%M:%S KST")}</div>
     <a href="index.html" class="home-btn">Home</a>
 </header>
 
