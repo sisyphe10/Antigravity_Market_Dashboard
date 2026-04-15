@@ -2097,7 +2097,7 @@ def create_dashboard():
     <div id="tab1" class="tab-content">
         <div class="filters">
             <div class="csel-wrap" id="cselWrap">
-                <div class="csel-display" id="cselDisplay" onclick="toggleCsel()">전체</div>
+                <div class="csel-display" id="cselDisplay" onclick="toggleCselId('cselList')">전체</div>
                 <div class="csel-list" id="cselList"></div>
             </div>
         </div>
