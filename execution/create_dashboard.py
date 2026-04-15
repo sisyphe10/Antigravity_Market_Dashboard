@@ -2090,7 +2090,9 @@ def create_dashboard():
         <div class="filters">
             <select id="fSectorCurrency" onchange="renderSector()"><option value="">전체</option></select>
         </div>
-        <div id="sectorContent"><p style="padding:40px;color:#888;">로딩 중...</p></div>
+        <div style="overflow-x:auto;">
+            <div id="sectorContent"><p style="padding:40px;color:#888;">로딩 중...</p></div>
+        </div>
     </div>
 </div>
 <footer>Antigravity Universe</footer>
