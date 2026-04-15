@@ -2979,7 +2979,7 @@ tbody tr.etf-row:hover {{ background: #ede9fe; }}
 
 <div class="container">
     <div class="controls">
-        <input type="text" id="searchInput" placeholder="종목명 검색 (예: ISC, 삼성전자)" oninput="onSearch()">
+        <input type="text" id="searchInput" placeholder="종목명 검색" oninput="onSearch()">
         <select id="dateSelect" onchange="onDateChange()"></select>
         <label><input type="checkbox" id="showAll" onchange="render()"> 전체 표시</label>
     </div>
