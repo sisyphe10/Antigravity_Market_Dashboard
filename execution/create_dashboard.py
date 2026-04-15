@@ -2011,12 +2011,12 @@ def create_dashboard():
         .nav-button { display: inline-block; padding: 6px 16px; border-radius: 6px; text-decoration: none; color: #fff; font-size: 0.85rem; font-weight: 600; background: #333; }
         .content { padding: 24px; max-width: 1600px; margin: 0 auto; }
         .tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #6B21A8; }
-        .tab { padding: 10px 24px; cursor: pointer; font-weight: 600; font-size: 20px; color: #666; border: 1px solid transparent; border-bottom: none; border-radius: 8px 8px 0 0; background: #f0f0f0; }
+        .tab { padding: 10px 24px; cursor: pointer; font-weight: 600; font-size: 16px; color: #666; border: 1px solid transparent; border-bottom: none; border-radius: 8px 8px 0 0; background: #f0f0f0; }
         .tab.active { color: #6B21A8; background: #fff; border-color: #6B21A8 #6B21A8 transparent; margin-bottom: -2px; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .filters { margin-bottom: 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .filters select { padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 15px; background: #fff; }
+        .filters select { padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background: #fff; }
         .sector-group { margin-bottom: 24px; }
         .sector-group h3 { font-size: 18px; color: #6B21A8; margin-bottom: 8px; padding: 8px 0; border-bottom: 1px solid #6B21A8; }
         table { width: 100%; border-collapse: collapse; font-size: 16px; table-layout: fixed; }
@@ -2044,8 +2044,8 @@ def create_dashboard():
     <h1>Universe</h1>
     <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:12px;">Updated: __UNIVERSE_UPDATED__</div>
     <div style="position:absolute;top:20px;right:24px;display:flex;gap:8px;align-items:center;">
-        <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="background:#6B21A8;color:#fff;font-size:14px;font-weight:600;text-decoration:none;padding:6px 16px;border-radius:8px;">Sheet</a>
-        <a href="index.html" style="padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:14px;font-weight:600;">🏠 Home</a>
+        <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="background:#6B21A8;color:#fff;font-size:15px;font-weight:600;text-decoration:none;padding:6px 16px;border-radius:8px;">Sheet</a>
+        <a href="index.html" style="padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">🏠 Home</a>
     </div>
 </header>
 <div class="content">
