@@ -241,20 +241,6 @@
       "is_today_new": false
     },
     {
-      "code": "440110",
-      "name": "파두",
-      "sector": "반도체",
-      "market_cap": 30495.910683,
-      "weight": 5,
-      "today_return": 7.21830985915493,
-      "contribution": 3.609154929577465,
-      "cumulative_return": 8.310428455941787,
-      "current_price": 60900.0,
-      "ath_price": 71000.0,
-      "dd": -14.22535211267606,
-      "is_today_new": false
-    },
-    {
       "code": "007660",
       "name": "이수페타시스",
       "sector": "IT하드웨어",
@@ -266,6 +252,20 @@
       "current_price": 123200.0,
       "ath_price": 148200.0,
       "dd": -16.86909581646424,
+      "is_today_new": false
+    },
+    {
+      "code": "440110",
+      "name": "파두",
+      "sector": "반도체",
+      "market_cap": 30495.910683,
+      "weight": 5,
+      "today_return": 7.21830985915493,
+      "contribution": 3.609154929577465,
+      "cumulative_return": 8.310428455941787,
+      "current_price": 60900.0,
+      "ath_price": 71000.0,
+      "dd": -14.22535211267606,
       "is_today_new": false
     },
     {
