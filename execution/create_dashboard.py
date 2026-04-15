@@ -2180,7 +2180,7 @@ function renderSector() {
             var ia=curOrder.indexOf(a),ib=curOrder.indexOf(b);
             if(ia<0)ia=99;if(ib<0)ib=99;return ia-ib;
         });
-        sel.innerHTML = '<option value="">  전체  </option>' + keys.map(function(v){return '<option value="'+v+'">  '+v+'  </option>';}).join('');
+        sel.innerHTML = '<option value="">전체</option>' + keys.map(function(v){return '<option>'+v+'</option>';}).join('');
         _sectorInit = true;
     }
 
