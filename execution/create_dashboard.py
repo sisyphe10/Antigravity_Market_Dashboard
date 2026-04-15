@@ -2035,10 +2035,9 @@ def create_dashboard():
         #tab0 th:nth-child(7) { width: 80px; }
         #tab0 th:nth-child(n+8) { width: 75px; }
         /* 섹터 수익률 테이블 */
-        #tab1 table { table-layout: fixed; width: 100%; }
-        #tab1 th:nth-child(1) { width: 200px; }
-        #tab1 th:nth-child(2) { width: 60px; }
-        #tab1 th:nth-child(n+3) { width: 75px; }
+        #tab1 table { table-layout: fixed; width: 100%; max-width: 100%; }
+        #tab1 th:nth-child(1) { width: 22%; }
+        #tab1 th:nth-child(2) { width: 6%; }
         tbody tr:hover { background: #f5f5f5; }
         .positive { color: #cc0000; font-weight: 600; }
         .negative { color: #0055cc; font-weight: 600; }
@@ -2249,7 +2248,7 @@ function renderSector() {
         var g = agg[sec];
         var vals = [wavg(g.ytd),wavg(g.d1),wavg(g.w1),wavg(g.m1),wavg(g.m3),wavg(g.m6),wavg(g.y1)];
         html += '<tr style="cursor:pointer" onclick="toggleSec('+idx+')">';
-        html += '<td style="font-weight:600">' + sec + ' ▸</td><td>' + g.cnt + '</td>';
+        html += '<td style="font-weight:600">' + sec + '</td><td>' + g.cnt + '</td>';
         vals.forEach(function(v,i) {
             var bg = i===0?' style="background:#f3f0ff"':'';
             html += '<td class="'+cls(v)+'"'+bg+'>' + fv(v) + '</td>';
