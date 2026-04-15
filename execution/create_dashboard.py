@@ -3090,7 +3090,7 @@ function render() {{
         var isOpen = (openETF === r.code);
         h += '<tr class="etf-row" onclick="toggleConst(\\''+r.code+'\\')">';
         h += '<td>' + (i+1) + '</td>';
-        h += '<td class="etf-name">' + (isOpen ? '▼ ' : '▶ ') + r.name + '</td>';
+        h += '<td class="etf-name">' + r.name + '</td>';
         h += '<td class="num">' + fmtAum(r.aum) + '</td>';
         h += '<td class="num">' + fmtNum(r.nav) + '</td>';
         h += '<td class="num">' + fmtNum(r.close) + '</td>';
