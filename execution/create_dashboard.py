@@ -3022,14 +3022,14 @@ tbody tr.etf-row:hover {{ background: #ede9fe; }}
 
     <div id="etfTab1" class="etf-tab-content" style="display:none">
         <div class="section">
-            <div class="section-header">📈 순유입 상위 30 <span class="count">({latest} vs {prev_date})</span></div>
+            <div class="section-header">📈 순유입 상위 30 <span class="count">({latest})</span></div>
             <div style="overflow-x:auto"><table>
                 <thead><tr><th>#</th><th>종목</th><th>오늘 편입금액</th><th>전일 편입금액</th><th>변화</th></tr></thead>
                 <tbody id="inflowBody"></tbody>
             </table></div>
         </div>
         <div class="section">
-            <div class="section-header">📉 순유출 상위 30 <span class="count">({latest} vs {prev_date})</span></div>
+            <div class="section-header">📉 순유출 상위 30 <span class="count">({latest})</span></div>
             <div style="overflow-x:auto"><table>
                 <thead><tr><th>#</th><th>종목</th><th>오늘 편입금액</th><th>전일 편입금액</th><th>변화</th></tr></thead>
                 <tbody id="outflowBody"></tbody>
@@ -3242,8 +3242,8 @@ function renderAnalysis() {{
     if (_analysisRendered) return;
     _analysisRendered = true;
 
-    var latest = allDates[0];
-    var prev = allDates.length > 1 ? allDates[1] : null;
+    var latest = dates[0];
+    var prev = dates.length > 1 ? dates[1] : null;
     if (!prev) return;
 
     // AUM maps
