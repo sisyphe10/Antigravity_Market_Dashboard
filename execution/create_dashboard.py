@@ -2988,7 +2988,7 @@ tbody tr.etf-row:hover {{ background: #ede9fe; }}
     <div id="searchResults" class="section search-results">
         <div class="section-header">🔍 종목 검색 결과 <span class="count" id="searchCount"></span></div>
         <div style="overflow-x:auto"><table>
-            <thead><tr><th>ETF</th><th>비중(%)</th><th>AUM</th><th>편입금액</th></tr></thead>
+            <thead><tr><th onclick="sortSearch(0)" style="cursor:pointer">ETF<span class="sarr" id="sa0"></span></th><th onclick="sortSearch(1)" style="cursor:pointer">비중(%)<span class="sarr" id="sa1"></span></th><th onclick="sortSearch(2)" style="cursor:pointer">AUM<span class="sarr" id="sa2"></span></th><th onclick="sortSearch(3)" style="cursor:pointer">편입금액<span class="sarr" id="sa3"></span></th></tr></thead>
             <tbody id="searchBody"></tbody>
         </table></div>
     </div>
@@ -3117,6 +3117,36 @@ function toggleConst(code) {{
     render();
 }}
 
+var _srchSortCol = 3, _srchSortAsc = false, _srchMatches = [];
+function sortSearch(col) {{
+    if (_srchSortCol === col) _srchSortAsc = !_srchSortAsc;
+    else {{ _srchSortCol = col; _srchSortAsc = false; }}
+    renderSearchResults();
+}}
+function renderSearchResults() {{
+    var ms = _srchMatches.slice();
+    ms.sort(function(a,b) {{
+        var va, vb;
+        if (_srchSortCol === 0) {{ va=a.etfName; vb=b.etfName; return _srchSortAsc?va.localeCompare(vb):vb.localeCompare(va); }}
+        if (_srchSortCol === 1) {{ va=a.weight||0; vb=b.weight||0; }}
+        else if (_srchSortCol === 2) {{ va=a.aum||0; vb=b.aum||0; }}
+        else {{ va=(a.weight&&a.aum)?a.aum*a.weight/100:0; vb=(b.weight&&b.aum)?b.aum*b.weight/100:0; }}
+        return _srchSortAsc ? va-vb : vb-va;
+    }});
+    var h = '';
+    ms.forEach(function(m) {{
+        var invested = (m.weight && m.aum) ? m.aum * m.weight / 100 : 0;
+        h += '<tr><td>' + m.etfName + '</td>';
+        h += '<td>' + (m.weight ? m.weight.toFixed(2) : '-') + '</td>';
+        h += '<td>' + fmtAum(m.aum) + '</td>';
+        h += '<td>' + (invested > 0 ? fmtAum(invested) : '-') + '</td></tr>';
+    }});
+    if (!h) h = '<tr><td colspan="4" style="padding:20px;color:#aaa;text-align:center">결과 없음</td></tr>';
+    document.getElementById('searchBody').innerHTML = h;
+    document.getElementById('searchCount').textContent = ms.length + '건';
+    for (var i=0;i<4;i++) document.getElementById('sa'+i).textContent = (_srchSortCol===i?(_srchSortAsc?' ▲':' ▼'):'');
+}}
+
 function onSearch() {{
     var q = document.getElementById('searchInput').value.trim();
     var panel = document.getElementById('searchResults');
@@ -3142,20 +3172,8 @@ function onSearch() {{
         }});
     }});
 
-    // Sort by weight desc
-    matches.sort(function(a, b) {{ return (b.weight || 0) - (a.weight || 0); }});
-
-    var h = '';
-    matches.forEach(function(m) {{
-        var invested = (m.weight && m.aum) ? m.aum * m.weight / 100 : 0;
-        h += '<tr><td>' + m.etfName + '</td>';
-        h += '<td>' + (m.weight ? m.weight.toFixed(2) : '-') + '</td>';
-        h += '<td>' + fmtAum(m.aum) + '</td>';
-        h += '<td>' + (invested > 0 ? fmtAum(invested) : '-') + '</td></tr>';
-    }});
-    if (!h) h = '<tr><td colspan="4" style="padding:20px;color:#aaa;text-align:center">결과 없음</td></tr>';
-    document.getElementById('searchBody').innerHTML = h;
-    document.getElementById('searchCount').textContent = matches.length + '건';
+    _srchMatches = matches;
+    renderSearchResults();
 }}
 
 render();
