@@ -2207,12 +2207,16 @@ function renderSector() {
             var ia=curOrder.indexOf(a),ib=curOrder.indexOf(b);
             if(ia<0)ia=99;if(ib<0)ib=99;return ia-ib;
         });
-        var lh = '';
-        lh += '<div class="csel-item selected" data-v="" onclick="pickCsel(\x27\x27,\x27전체\x27)">전체</div>';
+        var lh = '<div class="csel-item selected" data-v="">전체</div>';
         keys.forEach(function(v) {
-            lh += '<div class="csel-item" data-v="'+v+'" onclick="pickCsel(\x27'+v+'\x27,\x27'+v+'\x27)">'+v+'</div>';
+            lh += '<div class="csel-item" data-v="'+v+'">'+v+'</div>';
         });
         document.getElementById('cselList').innerHTML = lh;
+        document.getElementById('cselList').addEventListener('click', function(e) {
+            var item = e.target.closest('.csel-item');
+            if (!item) return;
+            pickCsel(item.getAttribute('data-v'), item.textContent);
+        });
         _sectorInit = true;
     }
 
