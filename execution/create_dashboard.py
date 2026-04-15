@@ -2955,10 +2955,10 @@ td {{ padding: 8px 8px; border-bottom: 1px solid #f0f0f0; text-align: center; }}
 tbody tr:hover {{ background: #f5f3ff; }}
 tbody tr.etf-row {{ cursor: pointer; }}
 tbody tr.etf-row:hover {{ background: #ede9fe; }}
-.num {{ text-align: right; font-variant-numeric: tabular-nums; }}
+.num {{ text-align: center; font-variant-numeric: tabular-nums; }}
 .pos {{ color: #cc0000; font-weight: 600; }}
 .neg {{ color: #0055cc; font-weight: 600; }}
-.etf-name {{ text-align: left; font-weight: 600; }}
+.etf-name {{ text-align: center; font-weight: 600; }}
 .constituents-row {{ background: #faf5ff; }}
 .constituents-row td {{ padding: 0; }}
 .const-table {{ width: 100%; font-size: 0.78rem; }}
