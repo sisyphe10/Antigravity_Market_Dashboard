@@ -2142,6 +2142,13 @@ function render(){
     document.getElementById('tbody').innerHTML=h;
 }
 
+var _secSortCol = 2, _secSortAsc = false;
+function sortSector(col) {
+    if(_secSortCol === col) _secSortAsc = !_secSortAsc;
+    else { _secSortCol = col; _secSortAsc = false; }
+    renderSector();
+}
+
 function toggleSec(idx) {
     var rows = document.querySelectorAll('.sec-'+idx);
     var show = rows.length && rows[0].style.display === 'none';
@@ -2212,9 +2219,13 @@ function renderSector() {
     function fv(v) { if(v===null) return '-'; var s=v>0?'+':''; return s+Math.round(v)+'%'; }
     function cls(v) { if(v===null) return ''; return v>0?'positive':v<0?'negative':''; }
 
+    var colMap = [null,'cnt','ytd','d1','w1','m1','m3','m6','y1'];
     var secs = Object.keys(agg).sort(function(a,b) {
-        var va=wavg(agg[a].ytd)||0, vb=wavg(agg[b].ytd)||0;
-        return vb-va;
+        var va, vb;
+        if(_secSortCol === 0) { va=a; vb=b; return _secSortAsc?va.localeCompare(vb):vb.localeCompare(va); }
+        if(_secSortCol === 1) { va=agg[a].cnt; vb=agg[b].cnt; }
+        else { var k=colMap[_secSortCol]; va=wavg(agg[a][k])||0; vb=wavg(agg[b][k])||0; }
+        return _secSortAsc ? va-vb : vb-va;
     });
 
     // 종목별 데이터 (시총 파싱 + 정렬용)
@@ -2233,7 +2244,13 @@ function renderSector() {
     });
     for(var k in stocksBySec) stocksBySec[k].sort(function(a,b){return b.mcapVal-a.mcapVal;});
 
-    var html = '<table style="width:100%;table-layout:fixed;border-collapse:collapse"><thead><tr><th>섹터</th><th>종목수</th><th style="background:#f3f0ff">YTD</th><th>1D</th><th>1W</th><th>1M</th><th>3M</th><th>6M</th><th>1Y</th></tr></thead><tbody>';
+    var secHeaders = ['섹터','종목수','YTD','1D','1W','1M','3M','6M','1Y'];
+    var html = '<table style="width:100%;table-layout:fixed;border-collapse:collapse"><thead><tr>';
+    secHeaders.forEach(function(h,i) {
+        var bg = i===2?' style="background:#f3f0ff;cursor:pointer"':' style="cursor:pointer"';
+        html += '<th'+bg+' onclick="sortSector('+i+')">' + h + (_secSortCol===i ? (_secSortAsc?' ▲':' ▼') : '') + '</th>';
+    });
+    html += '</tr></thead><tbody>';
     secs.forEach(function(sec,idx) {
         var g = agg[sec];
         var vals = [wavg(g.ytd),wavg(g.d1),wavg(g.w1),wavg(g.m1),wavg(g.m3),wavg(g.m6),wavg(g.y1)];
@@ -2250,7 +2267,7 @@ function renderSector() {
             var tk = s.ticker.indexOf(':')>=0 ? s.ticker.split(':').pop() : s.ticker;
             function sc(v){if(!v)return'-';var n=parseFloat(String(v).replace(/%/g,'').replace(/,/g,''));if(isNaN(n))return v;return(n>0?'<span class="positive">+':'<span class="negative">')+Math.round(n)+'%</span>';}
             html += '<tr class="sec-detail sec-'+idx+'" style="display:none;background:#f0f0f0;font-size:0.85em">';
-            html += '<td style="padding-left:48px">'+s.name+'</td><td>'+tk+'</td>';
+            html += '<td style="padding-left:48px">- '+s.name+'</td><td>'+tk+'</td>';
             html += '<td style="background:#f3f0ff">'+sc(s.ytd)+'</td><td>'+sc(s.d1)+'</td><td>'+sc(s.w1)+'</td><td>'+sc(s.m1)+'</td><td>'+sc(s.m3)+'</td><td>'+sc(s.m6)+'</td><td>'+sc(s.y1)+'</td>';
             html += '</tr>';
         });
