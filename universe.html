@@ -13,8 +13,15 @@
         .nav-group { margin-top: 10px; }
         .nav-button { display: inline-block; padding: 6px 16px; border-radius: 6px; text-decoration: none; color: #fff; font-size: 0.85rem; font-weight: 600; background: #333; }
         .content { padding: 24px; max-width: 1600px; margin: 0 auto; }
+        .tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #6B21A8; }
+        .tab { padding: 10px 24px; cursor: pointer; font-weight: 600; font-size: 0.9rem; color: #666; border: 1px solid transparent; border-bottom: none; border-radius: 8px 8px 0 0; background: #f0f0f0; }
+        .tab.active { color: #6B21A8; background: #fff; border-color: #6B21A8 #6B21A8 transparent; margin-bottom: -2px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
         .filters { margin-bottom: 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .filters select { padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; background: #fff; }
+        .sector-group { margin-bottom: 24px; }
+        .sector-group h3 { font-size: 1rem; color: #6B21A8; margin-bottom: 8px; padding: 8px 0; border-bottom: 1px solid #6B21A8; }
         table { width: 100%; border-collapse: collapse; font-size: 0.9rem; table-layout: fixed; }
         thead { background: #e9ecef; }
         th { padding: 12px 6px; text-align: center; font-weight: 600; color: #000; border-bottom: 2px solid #000; cursor: pointer; white-space: nowrap; overflow: hidden; }
@@ -44,6 +51,11 @@
     </div>
 </header>
 <div class="content">
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab(0)">종목 리스트</div>
+        <div class="tab" onclick="switchTab(1)">섹터 수익률</div>
+    </div>
+    <div id="tab0" class="tab-content active">
     <div class="filters">
         <select id="fCurrency" onchange="render()"><option value="">통화 전체</option></select>
         <select id="fSector" onchange="render()"><option value="">섹터 전체</option></select>
@@ -68,6 +80,11 @@
             </tr></thead>
             <tbody id="tbody"><tr><td colspan="14" style="padding:40px;color:#888;">로딩 중...</td></tr></tbody>
         </table>
+    </div>
+    </div>
+    </div>
+    <div id="tab1" class="tab-content">
+        <div id="sectorContent"><p style="padding:40px;color:#888;">로딩 중...</p></div>
     </div>
 </div>
 <footer>Antigravity Universe</footer>
@@ -126,6 +143,67 @@ function render(){
     });
     if(!h)h='<tr><td colspan="14" style="padding:40px;color:#888;">데이터 없음</td></tr>';
     document.getElementById('tbody').innerHTML=h;
+}
+
+function switchTab(idx) {
+    document.querySelectorAll('.tab').forEach(function(t,i){ t.classList.toggle('active',i===idx); });
+    document.querySelectorAll('.tab-content').forEach(function(t,i){ t.classList.toggle('active',i===idx); });
+    if(idx===1) renderSector();
+}
+
+function renderSector() {
+    if(!D.length) return;
+    var groups = {};
+    D.forEach(function(r) {
+        var cur = r[1] || '기타';
+        var sec = r[2] || '기타';
+        if(!groups[cur]) groups[cur] = {};
+        if(!groups[cur][sec]) groups[cur][sec] = {cnt:0, ytd:[], d1:[], w1:[], m1:[], m3:[], m6:[], y1:[]};
+        var g = groups[cur][sec];
+        g.cnt++;
+        var vals = [r[7],r[8],r[9],r[10],r[11],r[12],r[13]];
+        var arrs = [g.ytd,g.d1,g.w1,g.m1,g.m3,g.m6,g.y1];
+        for(var i=0;i<7;i++) {
+            if(vals[i]) {
+                var n=parseFloat(String(vals[i]).replace(/%/g,'').replace(/,/g,''));
+                if(!isNaN(n)) arrs[i].push(n);
+            }
+        }
+    });
+
+    function avg(arr) { return arr.length ? (arr.reduce(function(a,b){return a+b;},0)/arr.length) : null; }
+    function fc(v) { if(v===null) return '-'; var s=v>0?'+':''; return s+v.toFixed(1)+'%'; }
+    function cls(v) { if(v===null) return ''; return v>0?'positive':v<0?'negative':''; }
+
+    var curOrder = ['KRW','USD','HKD','TWD','EUR','CAD'];
+    var sorted = Object.keys(groups).sort(function(a,b) {
+        var ia=curOrder.indexOf(a), ib=curOrder.indexOf(b);
+        if(ia<0)ia=99; if(ib<0)ib=99;
+        return ia-ib;
+    });
+
+    var html = '';
+    sorted.forEach(function(cur) {
+        html += '<div class="sector-group"><h3>' + cur + '</h3>';
+        html += '<table><thead><tr><th style="text-align:left">섹터</th><th>종목수</th><th style="background:#f3f0ff">YTD</th><th>1D</th><th>1W</th><th>1M</th><th>3M</th><th>6M</th><th>1Y</th></tr></thead><tbody>';
+        var secs = Object.keys(groups[cur]).sort(function(a,b) {
+            var va=avg(groups[cur][a].ytd)||0, vb=avg(groups[cur][b].ytd)||0;
+            return vb-va;
+        });
+        secs.forEach(function(sec) {
+            var g = groups[cur][sec];
+            var vals = [avg(g.ytd),avg(g.d1),avg(g.w1),avg(g.m1),avg(g.m3),avg(g.m6),avg(g.y1)];
+            html += '<tr><td style="text-align:left;font-weight:600">' + sec + '</td><td>' + g.cnt + '</td>';
+            vals.forEach(function(v,i) {
+                var bg = i===0?' style="background:#f3f0ff"':'';
+                html += '<td class="'+cls(v)+'"'+bg+'>' + fc(v) + '</td>';
+            });
+            html += '</tr>';
+        });
+        html += '</tbody></table></div>';
+    });
+
+    document.getElementById('sectorContent').innerHTML = html || '<p style="padding:40px;color:#888;">데이터 없음</p>';
 }
 </script>
 </body>
