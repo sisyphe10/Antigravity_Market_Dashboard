@@ -156,6 +156,12 @@ function render(){
     document.getElementById('tbody').innerHTML=h;
 }
 
+function toggleSec(idx) {
+    var rows = document.querySelectorAll('.sec-'+idx);
+    var show = rows.length && rows[0].style.display === 'none';
+    rows.forEach(function(r){ r.style.display = show ? '' : 'none'; });
+}
+
 function switchTab(idx) {
     document.querySelectorAll('.tab').forEach(function(t,i){ t.classList.toggle('active',i===idx); });
     document.querySelectorAll('.tab-content').forEach(function(t,i){ t.classList.toggle('active',i===idx); });
@@ -225,16 +231,43 @@ function renderSector() {
         return vb-va;
     });
 
+    // 종목별 데이터 (시총 파싱 + 정렬용)
+    var stocksBySec = {};
+    filtered.forEach(function(r) {
+        var sec = r[2] || '기타';
+        if(!stocksBySec[sec]) stocksBySec[sec] = [];
+        var mcapStr = r[5] || '0';
+        var mcapVal = 0;
+        var joM = mcapStr.match(/(\d[\d,]*)조/);
+        var eokM = mcapStr.match(/([\d,]+)억/);
+        if(joM) mcapVal += parseFloat(joM[1].replace(/,/g,'')) * 10000;
+        if(eokM) mcapVal += parseFloat(eokM[1].replace(/,/g,''));
+        stocksBySec[sec].push({name:r[4]||'',ticker:r[3]||'',mcap:mcapStr,mcapVal:mcapVal,
+            ytd:r[7]||'',d1:r[8]||'',w1:r[9]||'',m1:r[10]||'',m3:r[11]||'',m6:r[12]||'',y1:r[13]||''});
+    });
+    for(var k in stocksBySec) stocksBySec[k].sort(function(a,b){return b.mcapVal-a.mcapVal;});
+
     var html = '<table><thead><tr><th>섹터</th><th>종목수</th><th style="background:#f3f0ff">YTD</th><th>1D</th><th>1W</th><th>1M</th><th>3M</th><th>6M</th><th>1Y</th></tr></thead><tbody>';
-    secs.forEach(function(sec) {
+    secs.forEach(function(sec,idx) {
         var g = agg[sec];
         var vals = [wavg(g.ytd),wavg(g.d1),wavg(g.w1),wavg(g.m1),wavg(g.m3),wavg(g.m6),wavg(g.y1)];
-        html += '<tr><td style="font-weight:600">' + sec + '</td><td>' + g.cnt + '</td>';
+        html += '<tr style="cursor:pointer" onclick="toggleSec('+idx+')">';
+        html += '<td style="font-weight:600">' + sec + ' ▸</td><td>' + g.cnt + '</td>';
         vals.forEach(function(v,i) {
             var bg = i===0?' style="background:#f3f0ff"':'';
             html += '<td class="'+cls(v)+'"'+bg+'>' + fv(v) + '</td>';
         });
         html += '</tr>';
+        // 하위 종목 행 (숨김)
+        var stocks = stocksBySec[sec] || [];
+        stocks.forEach(function(s) {
+            var tk = s.ticker.indexOf(':')>=0 ? s.ticker.split(':').pop() : s.ticker;
+            function sc(v){if(!v)return'-';var n=parseFloat(String(v).replace(/%/g,'').replace(/,/g,''));if(isNaN(n))return v;return(n>0?'<span class="positive">+':'<span class="negative">')+Math.round(n)+'%</span>';}
+            html += '<tr class="sec-detail sec-'+idx+'" style="display:none;background:#f9f9f9;font-size:0.85em">';
+            html += '<td>'+s.name+'</td><td>'+tk+'</td>';
+            html += '<td style="background:#f3f0ff">'+sc(s.ytd)+'</td><td>'+sc(s.d1)+'</td><td>'+sc(s.w1)+'</td><td>'+sc(s.m1)+'</td><td>'+sc(s.m3)+'</td><td>'+sc(s.m6)+'</td><td>'+sc(s.y1)+'</td>';
+            html += '</tr>';
+        });
     });
     html += '</tbody></table>';
 
