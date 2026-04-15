@@ -103,7 +103,13 @@ reclone() {
 
     echo "📥 Fresh clone..."
     cd /home/ubuntu
-    git clone https://github.com/sisyphe10/Antigravity_Market_Dashboard.git
+    # .env에서 GH_PAT 읽기 (push 인증용)
+    GH_PAT=$(grep '^GH_PAT=' "$BACKUP_DIR/.env" 2>/dev/null | cut -d= -f2)
+    if [ -n "$GH_PAT" ]; then
+        git clone "https://sisyphe10:${GH_PAT}@github.com/sisyphe10/Antigravity_Market_Dashboard.git"
+    else
+        git clone https://github.com/sisyphe10/Antigravity_Market_Dashboard.git
+    fi
 
     restore
     validate || exit 1
