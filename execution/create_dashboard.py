@@ -2222,11 +2222,11 @@ function renderSector() {
         return vb-va;
     });
 
-    var html = '<table><thead><tr><th style="text-align:left">섹터</th><th>종목수</th><th style="background:#f3f0ff">YTD</th><th>1D</th><th>1W</th><th>1M</th><th>3M</th><th>6M</th><th>1Y</th></tr></thead><tbody>';
+    var html = '<table><thead><tr><th>섹터</th><th>종목수</th><th style="background:#f3f0ff">YTD</th><th>1D</th><th>1W</th><th>1M</th><th>3M</th><th>6M</th><th>1Y</th></tr></thead><tbody>';
     secs.forEach(function(sec) {
         var g = agg[sec];
         var vals = [wavg(g.ytd),wavg(g.d1),wavg(g.w1),wavg(g.m1),wavg(g.m3),wavg(g.m6),wavg(g.y1)];
-        html += '<tr><td style="text-align:left;font-weight:600">' + sec + '</td><td>' + g.cnt + '</td>';
+        html += '<tr><td style="font-weight:600">' + sec + '</td><td>' + g.cnt + '</td>';
         vals.forEach(function(v,i) {
             var bg = i===0?' style="background:#f3f0ff"':'';
             html += '<td class="'+cls(v)+'"'+bg+'>' + fv(v) + '</td>';
