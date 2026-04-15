@@ -2942,7 +2942,7 @@ header h1 {{ font-size: 33px; color: #333; }}
 .controls input {{ padding: 8px 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 0.9rem; font-family: inherit; outline: none; width: 300px; }}
 .controls input:focus {{ border-color: #6366f1; }}
 .controls select {{ padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.85rem; background: #fff; font-family: inherit; }}
-.controls label {{ font-size: 0.85rem; color: #666; }}
+.controls label {{ font-size: 0.85rem; color: #666; display: flex; align-items: center; gap: 4px; white-space: nowrap; }}
 .section {{ background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 20px; overflow: hidden; }}
 .section-header {{ padding: 14px 20px; font-size: 1rem; font-weight: 700; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }}
 .section-header .count {{ font-size: 0.8rem; color: #888; font-weight: 400; }}
