@@ -242,7 +242,7 @@ function renderSector() {
         var eokM = mcapStr.match(/([\d,]+)억/);
         if(joM) mcapVal += parseFloat(joM[1].replace(/,/g,'')) * 10000;
         if(eokM) mcapVal += parseFloat(eokM[1].replace(/,/g,''));
-        stocksBySec[sec].push({name:r[4]||'',ticker:r[3]||'',mcap:mcapStr,mcapVal:mcapVal,
+        stocksBySec[sec].push({name:r[4]||'',ticker:r[3]||'',cur:r[1]||'',mcap:mcapStr,mcapVal:mcapVal,
             ytd:r[7]||'',d1:r[8]||'',w1:r[9]||'',m1:r[10]||'',m3:r[11]||'',m6:r[12]||'',y1:r[13]||''});
     });
     for(var k in stocksBySec) stocksBySec[k].sort(function(a,b){return b.mcapVal-a.mcapVal;});
@@ -268,9 +268,10 @@ function renderSector() {
         var stocks = stocksBySec[sec] || [];
         stocks.forEach(function(s) {
             var tk = s.ticker.indexOf(':')>=0 ? s.ticker.split(':').pop() : s.ticker;
+            var label = s.cur==='KRW' ? s.name : tk;
             function sc(v){if(!v)return'-';var n=parseFloat(String(v).replace(/%/g,'').replace(/,/g,''));if(isNaN(n))return v;return(n>0?'<span class="positive">+':'<span class="negative">')+Math.round(n)+'%</span>';}
             html += '<tr class="sec-detail sec-'+idx+'" style="display:none;background:#f0f0f0;font-size:0.85em">';
-            html += '<td style="padding-left:48px">- '+s.name+'</td><td>'+tk+'</td>';
+            html += '<td style="padding-left:48px">- '+label+'</td><td>'+tk+'</td>';
             html += '<td style="background:#f3f0ff">'+sc(s.ytd)+'</td><td>'+sc(s.d1)+'</td><td>'+sc(s.w1)+'</td><td>'+sc(s.m1)+'</td><td>'+sc(s.m3)+'</td><td>'+sc(s.m6)+'</td><td>'+sc(s.y1)+'</td>';
             html += '</tr>';
         });
