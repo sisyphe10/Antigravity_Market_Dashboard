@@ -1084,6 +1084,22 @@ async def evening_backup_job(context: ContextTypes.DEFAULT_TYPE):
         logging.error(f"Evening backup job error: {e}")
 
 
+_ALERT_SENT_FILE = os.path.join(DASHBOARD_DIR, '.market_alert_sent.json')
+
+
+def _load_prev_alert():
+    try:
+        with open(_ALERT_SENT_FILE, 'r') as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _save_alert(data):
+    with open(_ALERT_SENT_FILE, 'w') as f:
+        json.dump(data, f, ensure_ascii=False)
+
+
 async def daily_market_alert_summary_job(context: ContextTypes.DEFAULT_TYPE):
     """매일 05:15 투자유의종목 텔레그램 요약 알림"""
     logging.info("Market alert summary job started")
@@ -1092,8 +1108,7 @@ async def daily_market_alert_summary_job(context: ContextTypes.DEFAULT_TYPE):
         sys.path.insert(0, os.path.join(DASHBOARD_DIR, 'execution'))
         from create_market_alert import (
             get_session, fetch_category, parse_stocks, load_krx_data,
-            fetch_all_prices, analyze_release, analyze_escalation,
-            fmt_marcap, count_bdays, get_판단일, KST as ALERT_KST
+            fmt_marcap
         )
         esc = html_mod.escape
 
@@ -1121,65 +1136,48 @@ async def daily_market_alert_summary_job(context: ContextTypes.DEFAULT_TYPE):
         stocks_경고 = [s for s in stocks_경고 if s.get('marcap') and s['marcap'] >= MIN_MARCAP]
         stocks_위험 = [s for s in stocks_위험 if s.get('marcap') and s['marcap'] >= MIN_MARCAP]
 
-        # 가격 데이터
-        codes_all = [s['code'] for s in stocks_경고 + stocks_위험 if s['code']]
-        price_cache = fetch_all_prices(codes_all, days_back=120)
-        codes_주의 = [s['code'] for s in stocks_주의 if s['code'] and s['code'] not in price_cache]
-        if codes_주의:
-            price_cache.update(fetch_all_prices(codes_주의, days_back=35))
+        # 이전 리스트와 비교
+        prev = _load_prev_alert()
+        prev_위험 = set(prev.get('위험', []))
+        prev_경고 = set(prev.get('경고', []))
+        prev_주의 = set(prev.get('주의', []))
 
-        lines = [f"<b><u>투자��의종목 현황</u></b> ({today})"]
+        def fmt_line(s, is_new):
+            name = esc(s['name'])
+            mcap = esc(fmt_marcap(s['marcap']))
+            if is_new:
+                return f"• <b>[NEW]</b> {name} / {mcap}"
+            return f"• {name} / {mcap}"
 
-        # 투자위험
+        lines = [f"<b><u>투자유의종목 현황</u></b> ({today})"]
+
         if stocks_위험:
             lines.append("")
-            lines.append("<b><u>[투자위���]</u></b> 종목명 / 시가총액 / 공시일 / 지정일 / 경과일 / 판단일 / 현재가 / 해제가능주가")
-            for s in stocks_위험:
-                pdf = price_cache.get(s['code'])
-                판단일, cur, tgt, is_15d, _ = analyze_release(s, pdf, '투자위험')
-                cur_str = f"{cur:,}" if cur else "-"
-                tgt_str = f"{tgt:,}" if tgt else "-"
-                lines.append(
-                    f"• {esc(s['name'])} / {esc(fmt_marcap(s['marcap']))} / "
-                    f"{s['notice_date']} / {s['designation_date']} / "
-                    f"{s['elapsed']}일 / {판단일} / {cur_str} / {tgt_str}"
-                )
+            lines.append("<b><u>[투자위험]</u></b>")
+            for s in sorted(stocks_위험, key=lambda x: x['name'] not in prev_위험, reverse=True):
+                lines.append(fmt_line(s, s['name'] not in prev_위험))
 
-        # 투자경고
         if stocks_경고:
             lines.append("")
-            lines.append("<b><u>[투자경고]</u></b> 종목명 / 시가총액 / 공시일 / 지정일 / 경과일 / 판단일 / 현재가 / 해제가능주가")
-            for s in stocks_경고:
-                pdf = price_cache.get(s['code'])
-                판단일, cur, tgt, is_15d, _ = analyze_release(s, pdf, '투자경고')
-                cur_str = f"{cur:,}" if cur else "-"
-                tgt_str = f"{tgt:,}" if tgt else "-"
-                lines.append(
-                    f"• {esc(s['name'])} / {esc(fmt_marcap(s['marcap']))} / "
-                    f"{s['notice_date']} / {s['designation_date']} / "
-                    f"{s['elapsed']}일 / {판단일} / {cur_str} / {tgt_str}"
-                )
+            lines.append("<b><u>[투자경고]</u></b>")
+            for s in sorted(stocks_경고, key=lambda x: x['name'] not in prev_경고, reverse=True):
+                lines.append(fmt_line(s, s['name'] not in prev_경고))
 
-        # 투자주의
         if stocks_주의:
             lines.append("")
-            lines.append("<b><u>[투자주의]</u></b> 종목명 / 시가총액 / 지정유형 / 공시일 / 지정일 / 현재가 / 경고전환가")
-            for s in stocks_주의:
-                pdf = price_cache.get(s['code'])
-                cur, esc_price = analyze_escalation(s, pdf)
-                cur_str = f"{cur:,}" if cur else "-"
-                esc_str = f"{esc_price:,}" if esc_price else "-"
-                warn_type = s.get('warn_type', '-')
-                lines.append(
-                    f"• {esc(s['name'])} / {esc(fmt_marcap(s['marcap']))} / "
-                    f"{esc(warn_type)} / {s['notice_date']} / {s['designation_date']} / "
-                    f"{cur_str} / {esc_str}"
-                )
+            lines.append("<b><u>[투자주의]</u></b>")
+            for s in sorted(stocks_주의, key=lambda x: x['name'] not in prev_주의, reverse=True):
+                lines.append(fmt_line(s, s['name'] not in prev_주의))
+
+        _save_alert({
+            '위험': [s['name'] for s in stocks_위험],
+            '경고': [s['name'] for s in stocks_경고],
+            '주의': [s['name'] for s in stocks_주의],
+        })
 
         msg = "\n".join(lines)
         for chat_id in SUBSCRIBERS:
             try:
-                # 4096자 제한 분할
                 for i in range(0, len(msg), 4000):
                     await context.bot.send_message(chat_id=chat_id, text=msg[i:i+4000], parse_mode='HTML')
             except Exception as e:
