@@ -47,7 +47,7 @@
 <header>
     <div style="max-width:1600px;margin:0 auto;padding:0 24px;position:relative;">
         <h1>Universe</h1>
-        <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: 2026-04-15 15:42:13 KST</div>
+        <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: 2026-04-15 15:45:17 KST</div>
         <div style="position:absolute;top:20px;right:24px;display:flex;gap:8px;">
             <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="background:#6B21A8;color:#fff;font-size:15px;font-weight:600;text-decoration:none;padding:6px 16px;border-radius:8px;">Sheet</a>
             <a href="index.html" style="padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
@@ -183,7 +183,7 @@ function renderSector() {
             var ia=curOrder.indexOf(a),ib=curOrder.indexOf(b);
             if(ia<0)ia=99;if(ib<0)ib=99;return ia-ib;
         });
-        sel.innerHTML = '<option value="">전체</option>' + keys.map(function(v){return '<option>'+v+'</option>';}).join('');
+        sel.innerHTML = '<option value="">  전체  </option>' + keys.map(function(v){return '<option value="'+v+'">  '+v+'  </option>';}).join('');
         _sectorInit = true;
     }
 
