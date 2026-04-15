@@ -54,7 +54,7 @@
 <header>
     <div style="max-width:1600px;margin:0 auto;padding:0 24px;position:relative;">
         <h1>Universe</h1>
-        <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: 2026-04-15 16:04:03 KST</div>
+        <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: 2026-04-15 16:09:02 KST</div>
         <div style="position:absolute;top:20px;right:24px;display:flex;gap:8px;">
             <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="background:#6B21A8;color:#fff;font-size:15px;font-weight:600;text-decoration:none;padding:6px 16px;border-radius:8px;">Sheet</a>
             <a href="index.html" style="padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
@@ -345,7 +345,7 @@ function renderSector() {
             var label = s.cur==='KRW' ? s.name : tk;
             function sc(v){if(!v)return'-';var n=parseFloat(String(v).replace(/%/g,'').replace(/,/g,''));if(isNaN(n))return v;return(n>0?'<span class="positive">+':'<span class="negative">')+Math.round(n)+'%</span>';}
             html += '<tr class="sec-detail sec-'+idx+'" style="display:none;background:#f0f0f0;font-size:14px">';
-            html += '<td></td><td colspan="2" style="padding-left:96px;text-align:left">- '+label+'</td>';
+            html += '<td></td><td colspan="2" style="padding-left:72px;text-align:left">- '+label+'</td>';
             html += '<td style="background:#f3f0ff">'+sc(s.ytd)+'</td><td>'+sc(s.d1)+'</td><td>'+sc(s.w1)+'</td><td>'+sc(s.m1)+'</td><td>'+sc(s.m3)+'</td><td>'+sc(s.m6)+'</td><td>'+sc(s.y1)+'</td>';
             html += '</tr>';
         });
