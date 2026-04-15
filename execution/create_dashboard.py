@@ -2938,8 +2938,8 @@ header {{ background: #fff; padding: 24px; text-align: center; border-bottom: 1p
 header h1 {{ font-size: 33px; color: #333; }}
 .home-btn {{ position: absolute; top: 20px; right: 24px; padding: 6px 16px; background: #e0e0e0; color: #333; text-decoration: none; border-radius: 8px; font-size: 15px; font-weight: 600; }}
 .container {{ max-width: 1200px; margin: 0 auto; padding: 20px; }}
-.controls {{ display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }}
-.controls input {{ padding: 8px 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 0.9rem; font-family: inherit; outline: none; width: 300px; }}
+.controls {{ display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }}
+.controls input {{ padding: 8px 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 0.9rem; font-family: inherit; outline: none; width: 200px; }}
 .controls input:focus {{ border-color: #6366f1; }}
 .controls select {{ padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.85rem; background: #fff; font-family: inherit; }}
 .controls label {{ font-size: 0.85rem; color: #666; display: flex; align-items: center; gap: 4px; white-space: nowrap; }}
