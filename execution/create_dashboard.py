@@ -2041,12 +2041,12 @@ def create_dashboard():
 </head>
 <body>
 <header>
-    <div style="max-width:1600px;margin:0 auto;position:relative;">
+    <div style="max-width:1600px;margin:0 auto;padding:0 24px;position:relative;">
         <h1>Universe</h1>
         <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: __UNIVERSE_UPDATED__</div>
         <div style="position:absolute;top:20px;right:0;display:flex;gap:8px;">
-            <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="background:#6B21A8;color:#fff;font-size:13px;font-weight:600;text-decoration:none;padding:4px 12px;border-radius:6px;">Sheet</a>
-            <a href="index.html" style="padding:4px 12px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:6px;font-size:13px;font-weight:600;">Home</a>
+            <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="background:#6B21A8;color:#fff;font-size:15px;font-weight:600;text-decoration:none;padding:6px 16px;border-radius:8px;">Sheet</a>
+            <a href="index.html" style="padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
         </div>
     </div>
 </header>
