@@ -2016,8 +2016,15 @@ def create_dashboard():
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .filters { margin-bottom: 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .filters select { padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background: #fff; text-align: center; text-align-last: center; -moz-text-align-last: center; }
-        .filters select option { text-align: center; }
+        .filters select { padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background: #fff; text-align: center; text-align-last: center; }
+        .csel-wrap { position: relative; display: inline-block; }
+        .csel-display { padding: 8px 28px 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background: #fff; text-align: center; cursor: pointer; min-width: 100px; user-select: none; font-family: inherit; position: relative; }
+        .csel-display::after { content: ''; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid #666; }
+        .csel-list { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #d1d5db; border-radius: 6px; margin-top: 2px; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+        .csel-list.open { display: block; }
+        .csel-item { padding: 8px 12px; text-align: center; cursor: pointer; font-size: 14px; font-family: inherit; }
+        .csel-item:hover { background: #f3f0ff; }
+        .csel-item.selected { background: #6B21A8; color: #fff; }
         .sector-group { margin-bottom: 24px; }
         .sector-group h3 { font-size: 18px; color: #6B21A8; margin-bottom: 8px; padding: 8px 0; border-bottom: 1px solid #6B21A8; }
         table { width: 100%; border-collapse: collapse; font-size: 16px; table-layout: fixed; }
@@ -2083,7 +2090,10 @@ def create_dashboard():
     </div>
     <div id="tab1" class="tab-content">
         <div class="filters">
-            <select id="fSectorCurrency" onchange="renderSector()"><option value="">전체</option></select>
+            <div class="csel-wrap" id="cselWrap">
+                <div class="csel-display" id="cselDisplay" onclick="toggleCsel()">전체</div>
+                <div class="csel-list" id="cselList"></div>
+            </div>
         </div>
         <div id="sectorContent"><p style="padding:40px;color:#888;">로딩 중...</p></div>
     </div>
@@ -2146,6 +2156,24 @@ function render(){
     document.getElementById('tbody').innerHTML=h;
 }
 
+var _cselVal = '';
+function toggleCsel() {
+    document.getElementById('cselList').classList.toggle('open');
+}
+function pickCsel(val, label) {
+    _cselVal = val;
+    document.getElementById('cselDisplay').textContent = label;
+    document.getElementById('cselList').classList.remove('open');
+    document.querySelectorAll('#cselList .csel-item').forEach(function(el) {
+        el.classList.toggle('selected', el.getAttribute('data-v') === val);
+    });
+    renderSector();
+}
+document.addEventListener('click', function(e) {
+    var w = document.getElementById('cselWrap');
+    if (w && !w.contains(e.target)) document.getElementById('cselList').classList.remove('open');
+});
+
 var _secSortCol = 3, _secSortAsc = false;
 function sortSector(col) {
     if(_secSortCol === col) _secSortAsc = !_secSortAsc;
@@ -2168,8 +2196,7 @@ function switchTab(idx) {
 var _sectorInit = false;
 function renderSector() {
     if(!D.length) return;
-    var sel = document.getElementById('fSectorCurrency');
-    var fc2 = sel.value;
+    var fc2 = _cselVal;
 
     // 드롭다운 초기화 (1회)
     if(!_sectorInit) {
@@ -2180,7 +2207,12 @@ function renderSector() {
             var ia=curOrder.indexOf(a),ib=curOrder.indexOf(b);
             if(ia<0)ia=99;if(ib<0)ib=99;return ia-ib;
         });
-        sel.innerHTML = '<option value="">전체</option>' + keys.map(function(v){return '<option>'+v+'</option>';}).join('');
+        var lh = '';
+        lh += '<div class="csel-item selected" data-v="" onclick="pickCsel(\x27\x27,\x27전체\x27)">전체</div>';
+        keys.forEach(function(v) {
+            lh += '<div class="csel-item" data-v="'+v+'" onclick="pickCsel(\x27'+v+'\x27,\x27'+v+'\x27)">'+v+'</div>';
+        });
+        document.getElementById('cselList').innerHTML = lh;
         _sectorInit = true;
     }
 
