@@ -1154,19 +1154,19 @@ async def daily_market_alert_summary_job(context: ContextTypes.DEFAULT_TYPE):
         if stocks_위험:
             lines.append("")
             lines.append("<b><u>[투자위험]</u></b>")
-            for s in sorted(stocks_위험, key=lambda x: x['name'] not in prev_위험, reverse=True):
+            for s in sorted(stocks_위험, key=lambda x: (x.get('marcap') or 0), reverse=True):
                 lines.append(fmt_line(s, s['name'] not in prev_위험))
 
         if stocks_경고:
             lines.append("")
             lines.append("<b><u>[투자경고]</u></b>")
-            for s in sorted(stocks_경고, key=lambda x: x['name'] not in prev_경고, reverse=True):
+            for s in sorted(stocks_경고, key=lambda x: (x.get('marcap') or 0), reverse=True):
                 lines.append(fmt_line(s, s['name'] not in prev_경고))
 
         if stocks_주의:
             lines.append("")
             lines.append("<b><u>[투자주의]</u></b>")
-            for s in sorted(stocks_주의, key=lambda x: x['name'] not in prev_주의, reverse=True):
+            for s in sorted(stocks_주의, key=lambda x: (x.get('marcap') or 0), reverse=True):
                 lines.append(fmt_line(s, s['name'] not in prev_주의))
 
         _save_alert({
