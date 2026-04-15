@@ -2019,7 +2019,8 @@ def create_dashboard():
         .filters select { padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; background: #fff; }
         .sector-group { margin-bottom: 24px; }
         .sector-group h3 { font-size: 1rem; color: #6B21A8; margin-bottom: 8px; padding: 8px 0; border-bottom: 1px solid #6B21A8; }
-        .sector-group table { table-layout: auto; width: auto; }
+        #tab1 table { table-layout: fixed; width: 100%; }
+        #tab1 th, #tab1 td { text-align: center; }
         table { width: 100%; border-collapse: collapse; font-size: 0.9rem; table-layout: fixed; }
         thead { background: #e9ecef; }
         th { padding: 12px 6px; text-align: center; font-weight: 600; color: #000; border-bottom: 2px solid #000; cursor: pointer; white-space: nowrap; overflow: hidden; }
