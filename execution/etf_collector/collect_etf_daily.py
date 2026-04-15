@@ -131,7 +131,12 @@ def main():
         date_str = sys.argv[1]
     else:
         now = datetime.now(KST)
-        date_str = now.strftime('%Y-%m-%d')
+        # KRX ETF API는 당일 데이터 미제공 → 전일(최근 거래일) 수집
+        from datetime import timedelta
+        d = now.date() - timedelta(days=1)
+        while d.weekday() >= 5:
+            d -= timedelta(days=1)
+        date_str = d.strftime('%Y-%m-%d')
         if now.weekday() >= 5:
             logging.info(f"Weekend ({now.strftime('%A')}), skipping.")
             return
