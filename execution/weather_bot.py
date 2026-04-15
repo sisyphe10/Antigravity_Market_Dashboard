@@ -1084,6 +1084,111 @@ async def evening_backup_job(context: ContextTypes.DEFAULT_TYPE):
         logging.error(f"Evening backup job error: {e}")
 
 
+async def daily_market_alert_summary_job(context: ContextTypes.DEFAULT_TYPE):
+    """매일 05:15 투자유의종목 텔레그램 요약 알림"""
+    logging.info("Market alert summary job started")
+    try:
+        sys.path.insert(0, os.path.join(DASHBOARD_DIR, 'execution'))
+        from create_market_alert import (
+            get_session, fetch_category, parse_stocks, load_krx_data,
+            fetch_all_prices, analyze_release, analyze_escalation,
+            fmt_marcap, count_bdays, get_판단일, KST as ALERT_KST
+        )
+
+        now_kst = datetime.datetime.now(tz=KST)
+        today = now_kst.strftime('%Y-%m-%d')
+        start_90 = (now_kst - datetime.timedelta(days=90)).strftime('%Y-%m-%d')
+        start_10 = (now_kst - datetime.timedelta(days=10)).strftime('%Y-%m-%d')
+
+        krx_data = load_krx_data()
+        session = get_session()
+
+        stocks_주의 = parse_stocks(fetch_category(session, '투자주의', start_10, today), '투자주의', krx_data)
+        seen = {}
+        for s in stocks_주의:
+            if s['name'] not in seen or s['designation_date'] > seen[s['name']]['designation_date']:
+                seen[s['name']] = s
+        stocks_주의 = list(seen.values())
+
+        stocks_경고 = parse_stocks(fetch_category(session, '투자경고', start_90, today), '투자경고', krx_data)
+        stocks_위험 = parse_stocks(fetch_category(session, '투자위험', start_90, today), '투자위험', krx_data)
+
+        # 시총 1000억 이상만
+        MIN_MARCAP = 1000
+        stocks_주의 = [s for s in stocks_주의 if s.get('marcap') and s['marcap'] >= MIN_MARCAP]
+        stocks_경고 = [s for s in stocks_경고 if s.get('marcap') and s['marcap'] >= MIN_MARCAP]
+        stocks_위험 = [s for s in stocks_위험 if s.get('marcap') and s['marcap'] >= MIN_MARCAP]
+
+        # 가격 데이터
+        codes_all = [s['code'] for s in stocks_경고 + stocks_위험 if s['code']]
+        price_cache = fetch_all_prices(codes_all, days_back=120)
+        codes_주의 = [s['code'] for s in stocks_주의 if s['code'] and s['code'] not in price_cache]
+        if codes_주의:
+            price_cache.update(fetch_all_prices(codes_주의, days_back=35))
+
+        lines = [f"🚨 <b>투자유의종목 현황</b> ({today})"]
+        lines.append("━━━━━━━━━━━━━━━")
+
+        # 투자위험
+        if stocks_위험:
+            lines.append("")
+            lines.append("<b>🛑 투자위험</b>")
+            for s in stocks_위험:
+                pdf = price_cache.get(s['code'])
+                판단일, cur, tgt, is_15d, _ = analyze_release(s, pdf, '투자위험')
+                cur_str = f"{cur:,}" if cur else "-"
+                tgt_str = f"{tgt:,}" if tgt else "-"
+                lines.append(
+                    f"• {s['name']} / {fmt_marcap(s['marcap'])} / "
+                    f"{s['notice_date']} / {s['designation_date']} / "
+                    f"{s['elapsed']}일 / {판단일} / {cur_str} / {tgt_str}"
+                )
+
+        # 투자경고
+        if stocks_경고:
+            lines.append("")
+            lines.append("<b>🚨 투자경고</b>")
+            for s in stocks_경고:
+                pdf = price_cache.get(s['code'])
+                판단일, cur, tgt, is_15d, _ = analyze_release(s, pdf, '투자경고')
+                cur_str = f"{cur:,}" if cur else "-"
+                tgt_str = f"{tgt:,}" if tgt else "-"
+                lines.append(
+                    f"• {s['name']} / {fmt_marcap(s['marcap'])} / "
+                    f"{s['notice_date']} / {s['designation_date']} / "
+                    f"{s['elapsed']}일 / {판단일} / {cur_str} / {tgt_str}"
+                )
+
+        # 투자주의
+        if stocks_주의:
+            lines.append("")
+            lines.append("<b>⚠️ 투자주의</b>")
+            for s in stocks_주의:
+                pdf = price_cache.get(s['code'])
+                cur, esc = analyze_escalation(s, pdf)
+                cur_str = f"{cur:,}" if cur else "-"
+                esc_str = f"{esc:,}" if esc else "-"
+                warn_type = s.get('warn_type', '-')
+                lines.append(
+                    f"• {s['name']} / {fmt_marcap(s['marcap'])} / "
+                    f"{warn_type} / {s['notice_date']} / {s['designation_date']} / "
+                    f"{cur_str} / {esc_str}"
+                )
+
+        msg = "\n".join(lines)
+        for chat_id in SUBSCRIBERS:
+            try:
+                # 4096자 제한 분할
+                for i in range(0, len(msg), 4000):
+                    await context.bot.send_message(chat_id=chat_id, text=msg[i:i+4000], parse_mode='HTML')
+            except Exception as e:
+                logging.error(f"Market alert summary send failed: {e}")
+
+        logging.info(f"Market alert summary sent: 위험{len(stocks_위험)} 경고{len(stocks_경고)} 주의{len(stocks_주의)}")
+    except Exception as e:
+        logging.error(f"Market alert summary job failed: {e}")
+
+
 async def daily_weather_job(context: ContextTypes.DEFAULT_TYPE):
     """매일 05:00 날씨 알림 (daily_alert.py 실행)"""
     logging.info("Daily weather job started")
@@ -2020,6 +2125,7 @@ if __name__ == '__main__':
         weather_time = datetime.time(hour=5, minute=0, second=0, tzinfo=kst)
         calendar_time = datetime.time(hour=5, minute=5, second=0, tzinfo=kst)
         headlines_time = datetime.time(hour=5, minute=10, second=0, tzinfo=kst)
+        alert_summary_time = datetime.time(hour=5, minute=15, second=0, tzinfo=kst)
         portfolio_time = datetime.time(hour=16, minute=0, second=0, tzinfo=kst)
         market_alert_time = datetime.time(hour=16, minute=5, second=0, tzinfo=kst)
         journal_time = datetime.time(hour=16, minute=10, second=0, tzinfo=kst)
@@ -2029,6 +2135,7 @@ if __name__ == '__main__':
         weather_time = datetime.time(hour=5, minute=0, second=0)
         calendar_time = datetime.time(hour=5, minute=5, second=0)
         headlines_time = datetime.time(hour=5, minute=10, second=0)
+        alert_summary_time = datetime.time(hour=5, minute=15, second=0)
         portfolio_time = datetime.time(hour=16, minute=0, second=0)
         market_alert_time = datetime.time(hour=16, minute=5, second=0)
         journal_time = datetime.time(hour=16, minute=10, second=0)
@@ -2048,6 +2155,7 @@ if __name__ == '__main__':
     job_queue.run_daily(daily_weather_job, time=weather_time)
     job_queue.run_daily(daily_calendar_job, time=calendar_time)
     job_queue.run_daily(daily_headlines_job, time=headlines_time)
+    job_queue.run_daily(daily_market_alert_summary_job, time=alert_summary_time)
     job_queue.run_daily(daily_portfolio_job, time=portfolio_time)
     job_queue.run_daily(daily_market_alert_job, time=market_alert_time)
     job_queue.run_daily(daily_journal_job, time=journal_time)
