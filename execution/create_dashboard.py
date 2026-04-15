@@ -2040,18 +2040,20 @@ def create_dashboard():
     </style>
 </head>
 <body>
-<header style="position:relative;">
+<header>
     <h1>Universe</h1>
     <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: __UNIVERSE_UPDATED__</div>
-    <div style="position:absolute;top:20px;right:24px;display:flex;gap:8px;align-items:center;">
-        <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="background:#6B21A8;color:#fff;font-size:15px;font-weight:600;text-decoration:none;padding:6px 16px;border-radius:8px;">Sheet</a>
-        <a href="index.html" style="padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">🏠 Home</a>
-    </div>
 </header>
 <div class="content">
-    <div class="tabs">
-        <div class="tab active" onclick="switchTab(0)">종목 리스트</div>
-        <div class="tab" onclick="switchTab(1)">섹터 수익률</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0;">
+        <div class="tabs" style="margin-bottom:0;">
+            <div class="tab active" onclick="switchTab(0)">종목 리스트</div>
+            <div class="tab" onclick="switchTab(1)">섹터 수익률</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+            <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="background:#6B21A8;color:#fff;font-size:15px;font-weight:600;text-decoration:none;padding:6px 16px;border-radius:8px;">Sheet</a>
+            <a href="index.html" style="padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">🏠 Home</a>
+        </div>
     </div>
     <div id="tab0" class="tab-content active">
     <div class="filters">
