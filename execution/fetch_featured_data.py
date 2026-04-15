@@ -11,7 +11,8 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 sys.stdout.reconfigure(encoding='utf-8')
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s',
+                    stream=sys.stdout)
 
 API_KEY = 'E9E8B0A915D74BC59CFA41D5534CF19EF4B24C9E'
 FEATURED_JSON = 'featured_data.json'
@@ -23,8 +24,12 @@ def get_daily_data(date_str):
     from pykrx_openapi import KRXOpenAPI
     api = KRXOpenAPI(API_KEY)
 
-    kospi = pd.DataFrame(api.get_stock_daily_trade(date_str)['OutBlock_1'])
-    kosdaq = pd.DataFrame(api.get_kosdaq_stock_daily_trade(date_str)['OutBlock_1'])
+    kospi_raw = api.get_stock_daily_trade(date_str).get('OutBlock_1', [])
+    kosdaq_raw = api.get_kosdaq_stock_daily_trade(date_str).get('OutBlock_1', [])
+    if not kospi_raw and not kosdaq_raw:
+        return pd.DataFrame()
+    kospi = pd.DataFrame(kospi_raw)
+    kosdaq = pd.DataFrame(kosdaq_raw)
     df = pd.concat([kospi, kosdaq], ignore_index=True)
 
     for col in ['ACC_TRDVAL', 'MKTCAP', 'FLUC_RT', 'TDD_CLSPRC', 'CMPPREVDD_PRC']:
