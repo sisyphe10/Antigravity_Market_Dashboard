@@ -2016,7 +2016,7 @@ def create_dashboard():
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .filters { margin-bottom: 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .filters select { padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background: #fff; text-align: center; }
+        .filters select { padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background: #fff; text-align: center; text-align-last: center; }
         .sector-group { margin-bottom: 24px; }
         .sector-group h3 { font-size: 18px; color: #6B21A8; margin-bottom: 8px; padding: 8px 0; border-bottom: 1px solid #6B21A8; }
         table { width: 100%; border-collapse: collapse; font-size: 16px; table-layout: fixed; }
