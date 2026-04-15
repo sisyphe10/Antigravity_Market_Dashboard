@@ -38,7 +38,8 @@
         #tab0 th:nth-child(7) { width: 80px; }
         #tab0 th:nth-child(n+8) { width: 75px; }
         /* 섹터 수익률 테이블 */
-        #tab1 table { table-layout: fixed; width: 100%; max-width: 100%; }
+        #tab1 table { table-layout: fixed; width: 100%; }
+        #tab1 th, #tab1 td { white-space: normal; word-break: break-word; }
         #tab1 th:nth-child(1) { width: 22%; }
         #tab1 th:nth-child(2) { width: 6%; }
         tbody tr:hover { background: #f5f5f5; }
@@ -262,7 +263,7 @@ function renderSector() {
         stocks.forEach(function(s) {
             var tk = s.ticker.indexOf(':')>=0 ? s.ticker.split(':').pop() : s.ticker;
             function sc(v){if(!v)return'-';var n=parseFloat(String(v).replace(/%/g,'').replace(/,/g,''));if(isNaN(n))return v;return(n>0?'<span class="positive">+':'<span class="negative">')+Math.round(n)+'%</span>';}
-            html += '<tr class="sec-detail sec-'+idx+'" style="display:none;background:#f3f0ff;font-size:0.85em">';
+            html += '<tr class="sec-detail sec-'+idx+'" style="display:none;background:#f0f0f0;font-size:0.85em">';
             html += '<td style="padding-left:24px">'+s.name+'</td><td>'+tk+'</td>';
             html += '<td style="background:#f3f0ff">'+sc(s.ytd)+'</td><td>'+sc(s.d1)+'</td><td>'+sc(s.w1)+'</td><td>'+sc(s.m1)+'</td><td>'+sc(s.m3)+'</td><td>'+sc(s.m6)+'</td><td>'+sc(s.y1)+'</td>';
             html += '</tr>';
