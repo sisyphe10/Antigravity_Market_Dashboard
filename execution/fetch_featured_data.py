@@ -16,6 +16,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s',
 
 API_KEY = 'E9E8B0A915D74BC59CFA41D5534CF19EF4B24C9E'
 FEATURED_JSON = 'featured_data.json'
+SKIP_DATES_FILE = 'featured_skip_dates.json'
 TOP_N = 30
 
 
@@ -160,6 +161,14 @@ def get_existing_dates():
     return set(r['d'] for r in data)
 
 
+def get_skip_dates():
+    """비거래일(공휴일 등) 스킵 목록"""
+    if not os.path.exists(SKIP_DATES_FILE):
+        return set()
+    with open(SKIP_DATES_FILE, 'r', encoding='utf-8') as f:
+        return set(json.load(f))
+
+
 def get_trading_days(start, end):
     """주말 제외 날짜 리스트"""
     days = []
@@ -178,8 +187,11 @@ def main():
     start = datetime(today.year - 1, 12, 25).date()  # 전년 마지막주부터 (YTD 기준가 확보)
 
     existing = get_existing_dates()
+    skip_dates = get_skip_dates()
     trading_days = get_trading_days(start, today)
-    to_fetch = [d for d in trading_days if d.strftime('%Y-%m-%d') not in existing]
+    to_fetch = [d for d in trading_days
+                if d.strftime('%Y-%m-%d') not in existing
+                and d.strftime('%Y-%m-%d') not in skip_dates]
 
     # 당일은 항상 재수집 (16:10 1차→18:30 2차 갱신을 위해)
     today_str = today.strftime('%Y-%m-%d')
@@ -206,6 +218,7 @@ def main():
         all_records = [r for r in all_records if r['d'] not in fetch_dates]
         logging.info(f"기존 {removed}건 제거 (재수집 대상)")
 
+    new_skip = []
     for i, d in enumerate(to_fetch):
         date_str = d.strftime('%Y%m%d')
         date_display = d.strftime('%Y-%m-%d')
@@ -215,12 +228,20 @@ def main():
             df = get_daily_data(date_str)
             if len(df) < 100:
                 logging.info(f"  → 데이터 부족 ({len(df)}건), 건너뜀")
+                if d < today:
+                    new_skip.append(date_display)
                 continue
             records = extract_top(df, date_display)
             all_records.extend(records)
             logging.info(f"  → {len(records)}건 수집")
         except Exception as e:
             logging.warning(f"  → 실패: {e}")
+
+    if new_skip:
+        skip_dates.update(new_skip)
+        with open(SKIP_DATES_FILE, 'w', encoding='utf-8') as f:
+            json.dump(sorted(skip_dates), f, ensure_ascii=False)
+        logging.info(f"비거래일 {len(new_skip)}건 스킵 등록: {', '.join(new_skip)}")
 
     with open(FEATURED_JSON, 'w', encoding='utf-8') as f:
         json.dump(all_records, f, ensure_ascii=False)
