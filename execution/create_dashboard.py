@@ -2042,7 +2042,7 @@ def create_dashboard():
 <body>
 <header style="position:relative;">
     <h1>Universe</h1>
-    <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:12px;">Updated: __UNIVERSE_UPDATED__</div>
+    <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:14px;">Updated: __UNIVERSE_UPDATED__</div>
     <div style="position:absolute;top:20px;right:24px;display:flex;gap:8px;align-items:center;">
         <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="background:#6B21A8;color:#fff;font-size:15px;font-weight:600;text-decoration:none;padding:6px 16px;border-radius:8px;">Sheet</a>
         <a href="index.html" style="padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">🏠 Home</a>
