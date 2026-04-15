@@ -2909,8 +2909,10 @@ def generate_etf_html():
         return
 
     latest = dates[0]
+    prev = dates[1] if len(dates) > 1 else None
     daily = get_all_etf_daily()
     constituents = get_constituents_for_date(latest)
+    prev_constituents = get_constituents_for_date(prev) if prev else {}
 
     # JSON 데이터 준비
     import json
@@ -2922,7 +2924,9 @@ def generate_etf_html():
     ], ensure_ascii=False)
 
     const_json = json.dumps(constituents, ensure_ascii=False)
+    prev_const_json = json.dumps(prev_constituents, ensure_ascii=False)
     dates_json = json.dumps(dates)
+    prev_date = prev or ''
 
     page = f"""<!DOCTYPE html>
 <html lang="ko">
@@ -2979,6 +2983,11 @@ tbody tr.etf-row:hover {{ background: #ede9fe; }}
 </header>
 
 <div class="container">
+    <div class="etf-tabs" style="display:flex;gap:0;margin-bottom:20px;border-bottom:2px solid #4338ca;">
+        <div class="etf-tab active" onclick="switchEtfTab(0)" style="padding:10px 24px;cursor:pointer;font-weight:600;font-size:16px;color:#666;border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;background:#f0f0f0;">AUM 상위</div>
+        <div class="etf-tab" onclick="switchEtfTab(1)" style="padding:10px 24px;cursor:pointer;font-weight:600;font-size:16px;color:#666;border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;background:#f0f0f0;">종목 분석</div>
+    </div>
+    <div id="etfTab0" class="etf-tab-content">
     <div class="controls">
         <input type="text" id="searchInput" placeholder="종목명 검색" oninput="onSearch()">
         <select id="dateSelect" onchange="onDateChange()"></select>
@@ -3009,11 +3018,51 @@ tbody tr.etf-row:hover {{ background: #ede9fe; }}
     </div>
 
     <p class="updated">Data: {latest} | Source: KRX OpenAPI + etfcheck.co.kr</p>
+    </div>
+
+    <div id="etfTab1" class="etf-tab-content" style="display:none">
+        <div class="section">
+            <div class="section-header">📈 순유입 상위 30 <span class="count">({latest} vs {prev_date})</span></div>
+            <div style="overflow-x:auto"><table>
+                <thead><tr><th>#</th><th>종목</th><th>오늘 편입금액</th><th>전일 편입금액</th><th>변화</th></tr></thead>
+                <tbody id="inflowBody"></tbody>
+            </table></div>
+        </div>
+        <div class="section">
+            <div class="section-header">📉 순유출 상위 30 <span class="count">({latest} vs {prev_date})</span></div>
+            <div style="overflow-x:auto"><table>
+                <thead><tr><th>#</th><th>종목</th><th>오늘 편입금액</th><th>전일 편입금액</th><th>변화</th></tr></thead>
+                <tbody id="outflowBody"></tbody>
+            </table></div>
+        </div>
+        <div class="section">
+            <div class="section-header">🆕 신규 편입 종목 <span class="count">(AUM 상위 ETF 기준)</span></div>
+            <div style="overflow-x:auto"><table>
+                <thead><tr><th>#</th><th>종목</th><th>ETF</th><th>비중(%)</th><th>ETF AUM</th></tr></thead>
+                <tbody id="newEntryBody"></tbody>
+            </table></div>
+        </div>
+        <div class="section">
+            <div class="section-header">❌ 편출 종목 <span class="count">(AUM 상위 ETF 기준)</span></div>
+            <div style="overflow-x:auto"><table>
+                <thead><tr><th>#</th><th>종목</th><th>ETF</th><th>비중(%)</th><th>ETF AUM</th></tr></thead>
+                <tbody id="exitBody"></tbody>
+            </table></div>
+        </div>
+        <div class="section">
+            <div class="section-header">💰 ETF AUM 증감 상위</div>
+            <div style="overflow-x:auto"><table>
+                <thead><tr><th>#</th><th>ETF</th><th>오늘 AUM</th><th>전일 AUM</th><th>변화</th></tr></thead>
+                <tbody id="aumChangeBody"></tbody>
+            </table></div>
+        </div>
+    </div>
 </div>
 
 <script>
 var allDaily = {daily_json};
 var allConst = {const_json};
+var prevConst = {prev_const_json};
 var dates = {dates_json};
 
 var curDate = dates[0] || '';
@@ -3174,6 +3223,144 @@ function onSearch() {{
 
     _srchMatches = matches;
     renderSearchResults();
+}}
+
+function switchEtfTab(idx) {{
+    document.querySelectorAll('.etf-tab').forEach(function(t,i) {{
+        t.style.color = i===idx ? '#4338ca' : '#666';
+        t.style.background = i===idx ? '#fff' : '#f0f0f0';
+        t.style.borderColor = i===idx ? '#4338ca #4338ca transparent' : 'transparent';
+        t.style.marginBottom = i===idx ? '-2px' : '0';
+    }});
+    document.getElementById('etfTab0').style.display = idx===0 ? '' : 'none';
+    document.getElementById('etfTab1').style.display = idx===1 ? '' : 'none';
+    if (idx===1) renderAnalysis();
+}}
+
+var _analysisRendered = false;
+function renderAnalysis() {{
+    if (_analysisRendered) return;
+    _analysisRendered = true;
+
+    var latest = allDates[0];
+    var prev = allDates.length > 1 ? allDates[1] : null;
+    if (!prev) return;
+
+    // AUM maps
+    var todayAum = {{}}, prevAum = {{}};
+    allDaily.forEach(function(r) {{
+        if (r.d === latest) todayAum[r.code] = r;
+        if (r.d === prev) prevAum[r.code] = r;
+    }});
+
+    // 1. 종목별 편입금액 계산
+    function calcStockAmounts(constData, aumMap) {{
+        var result = {{}};
+        Object.keys(constData).forEach(function(etfCode) {{
+            var etf = aumMap[etfCode];
+            if (!etf) return;
+            constData[etfCode].forEach(function(s) {{
+                var amt = (s.w || 0) * etf.aum / 100;
+                if (!result[s.c]) result[s.c] = {{name: s.n, code: s.c, total: 0}};
+                result[s.c].total += amt;
+            }});
+        }});
+        return result;
+    }}
+
+    var todayAmts = calcStockAmounts(allConst, todayAum);
+    var prevAmts = calcStockAmounts(prevConst, prevAum);
+
+    // 순유입/유출
+    var changes = [];
+    Object.keys(todayAmts).forEach(function(code) {{
+        var today = todayAmts[code].total;
+        var prev = prevAmts[code] ? prevAmts[code].total : 0;
+        changes.push({{name: todayAmts[code].name, code: code, today: today, prev: prev, diff: today - prev}});
+    }});
+    // 전일에만 있는 종목
+    Object.keys(prevAmts).forEach(function(code) {{
+        if (!todayAmts[code]) {{
+            changes.push({{name: prevAmts[code].name, code: code, today: 0, prev: prevAmts[code].total, diff: -prevAmts[code].total}});
+        }}
+    }});
+
+    changes.sort(function(a,b) {{ return b.diff - a.diff; }});
+    var inflow = changes.slice(0, 30);
+    var outflow = changes.slice(-30).reverse();
+    outflow.sort(function(a,b) {{ return a.diff - b.diff; }});
+
+    function fmtB(v) {{ if (Math.abs(v) >= 1e12) return (v/1e12).toFixed(1)+'조'; if (Math.abs(v) >= 1e8) return Math.round(v/1e8).toLocaleString()+'억'; return Math.round(v).toLocaleString(); }}
+    function diffCls(v) {{ return v > 0 ? 'pos' : v < 0 ? 'neg' : ''; }}
+
+    var h1 = '';
+    inflow.forEach(function(r,i) {{
+        h1 += '<tr><td>'+(i+1)+'</td><td>'+r.name+'</td><td>'+fmtB(r.today)+'</td><td>'+fmtB(r.prev)+'</td><td class="'+diffCls(r.diff)+'">'+((r.diff>0?'+':'')+fmtB(r.diff))+'</td></tr>';
+    }});
+    document.getElementById('inflowBody').innerHTML = h1;
+
+    var h2 = '';
+    outflow.forEach(function(r,i) {{
+        h2 += '<tr><td>'+(i+1)+'</td><td>'+r.name+'</td><td>'+fmtB(r.today)+'</td><td>'+fmtB(r.prev)+'</td><td class="'+diffCls(r.diff)+'">'+((r.diff>0?'+':'')+fmtB(r.diff))+'</td></tr>';
+    }});
+    document.getElementById('outflowBody').innerHTML = h2;
+
+    // 2. 신규 편입/편출 (AUM 상위 100 ETF 기준)
+    var topEtfs = allDaily.filter(function(r){{return r.d===latest;}}).sort(function(a,b){{return b.aum-a.aum;}}).slice(0,100);
+    var topCodes = {{}};
+    topEtfs.forEach(function(r){{topCodes[r.code]=r;}});
+
+    var newEntries = [], exits = [];
+    Object.keys(topCodes).forEach(function(etfCode) {{
+        var todayStocks = allConst[etfCode] || [];
+        var prevStocks = prevConst[etfCode] || [];
+        var prevSet = {{}};
+        prevStocks.forEach(function(s) {{ prevSet[s.c] = s; }});
+        var todaySet = {{}};
+        todayStocks.forEach(function(s) {{ todaySet[s.c] = s; }});
+
+        todayStocks.forEach(function(s) {{
+            if (!prevSet[s.c]) {{
+                newEntries.push({{stock: s.n, etf: topCodes[etfCode].name, weight: s.w, aum: topCodes[etfCode].aum}});
+            }}
+        }});
+        prevStocks.forEach(function(s) {{
+            if (!todaySet[s.c]) {{
+                exits.push({{stock: s.n, etf: topCodes[etfCode].name, weight: s.w, aum: topCodes[etfCode].aum}});
+            }}
+        }});
+    }});
+
+    newEntries.sort(function(a,b){{return b.aum-a.aum;}});
+    var h3 = '';
+    newEntries.slice(0,50).forEach(function(r,i) {{
+        h3 += '<tr><td>'+(i+1)+'</td><td>'+r.stock+'</td><td>'+r.etf+'</td><td>'+(r.weight?r.weight.toFixed(2):'-')+'</td><td>'+fmtAum(r.aum)+'</td></tr>';
+    }});
+    document.getElementById('newEntryBody').innerHTML = h3 || '<tr><td colspan="5" style="padding:20px;color:#aaa;text-align:center">없음</td></tr>';
+
+    exits.sort(function(a,b){{return b.aum-a.aum;}});
+    var h4 = '';
+    exits.slice(0,50).forEach(function(r,i) {{
+        h4 += '<tr><td>'+(i+1)+'</td><td>'+r.stock+'</td><td>'+r.etf+'</td><td>'+(r.weight?r.weight.toFixed(2):'-')+'</td><td>'+fmtAum(r.aum)+'</td></tr>';
+    }});
+    document.getElementById('exitBody').innerHTML = h4 || '<tr><td colspan="5" style="padding:20px;color:#aaa;text-align:center">없음</td></tr>';
+
+    // 3. ETF AUM 증감
+    var aumChanges = [];
+    Object.keys(todayAum).forEach(function(code) {{
+        var t = todayAum[code];
+        var p = prevAum[code];
+        if (t && p) {{
+            aumChanges.push({{name: t.name, today: t.aum, prev: p.aum, diff: t.aum - p.aum}});
+        }}
+    }});
+    aumChanges.sort(function(a,b){{return Math.abs(b.diff)-Math.abs(a.diff);}});
+
+    var h5 = '';
+    aumChanges.slice(0,30).forEach(function(r,i) {{
+        h5 += '<tr><td>'+(i+1)+'</td><td>'+r.name+'</td><td>'+fmtAum(r.today)+'</td><td>'+fmtAum(r.prev)+'</td><td class="'+diffCls(r.diff)+'">'+((r.diff>0?'+':'')+fmtB(r.diff))+'</td></tr>';
+    }});
+    document.getElementById('aumChangeBody').innerHTML = h5;
 }}
 
 render();
