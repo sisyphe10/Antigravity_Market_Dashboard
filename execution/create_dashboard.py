@@ -2988,7 +2988,7 @@ tbody tr.etf-row:hover {{ background: #ede9fe; }}
     <div id="searchResults" class="section search-results">
         <div class="section-header">🔍 종목 검색 결과 <span class="count" id="searchCount"></span></div>
         <div style="overflow-x:auto"><table>
-            <thead><tr><th>ETF</th><th>비중(%)</th><th>AUM</th></tr></thead>
+            <thead><tr><th>ETF</th><th>비중(%)</th><th>AUM</th><th>편입금액</th></tr></thead>
             <tbody id="searchBody"></tbody>
         </table></div>
     </div>
@@ -3147,11 +3147,13 @@ function onSearch() {{
 
     var h = '';
     matches.forEach(function(m) {{
-        h += '<tr><td style="text-align:left">' + m.etfName + '</td>';
-        h += '<td class="num">' + (m.weight ? m.weight.toFixed(2) : '-') + '</td>';
-        h += '<td class="num">' + fmtAum(m.aum) + '</td></tr>';
+        var invested = (m.weight && m.aum) ? m.aum * m.weight / 100 : 0;
+        h += '<tr><td>' + m.etfName + '</td>';
+        h += '<td>' + (m.weight ? m.weight.toFixed(2) : '-') + '</td>';
+        h += '<td>' + fmtAum(m.aum) + '</td>';
+        h += '<td>' + (invested > 0 ? fmtAum(invested) : '-') + '</td></tr>';
     }});
-    if (!h) h = '<tr><td colspan="3" style="padding:20px;color:#aaa;text-align:center">결과 없음</td></tr>';
+    if (!h) h = '<tr><td colspan="4" style="padding:20px;color:#aaa;text-align:center">결과 없음</td></tr>';
     document.getElementById('searchBody').innerHTML = h;
     document.getElementById('searchCount').textContent = matches.length + '건';
 }}
