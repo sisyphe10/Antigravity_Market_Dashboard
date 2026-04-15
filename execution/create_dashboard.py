@@ -2066,11 +2066,11 @@ def create_dashboard():
     <div id="tab0" class="tab-content active">
     <div class="filters">
         <div class="csel-wrap" id="cselCurWrap">
-            <div class="csel-display" id="cselCurDisplay" onclick="toggleCselId('cselCurList')">통화 전체</div>
+            <div class="csel-display" id="cselCurDisplay" onclick="toggleCselId('cselCurList')">통화</div>
             <div class="csel-list" id="cselCurList"></div>
         </div>
         <div class="csel-wrap" id="cselSecWrap">
-            <div class="csel-display" id="cselSecDisplay" onclick="toggleCselId('cselSecList')">섹터 전체</div>
+            <div class="csel-display" id="cselSecDisplay" onclick="toggleCselId('cselSecList')">섹터</div>
             <div class="csel-list" id="cselSecList"></div>
         </div>
     </div>
@@ -2097,7 +2097,7 @@ def create_dashboard():
     <div id="tab1" class="tab-content">
         <div class="filters">
             <div class="csel-wrap" id="cselWrap">
-                <div class="csel-display" id="cselDisplay" onclick="toggleCselId('cselList')">전체</div>
+                <div class="csel-display" id="cselDisplay" onclick="toggleCselId('cselList')">통화</div>
                 <div class="csel-list" id="cselList"></div>
             </div>
         </div>
@@ -2116,11 +2116,11 @@ fetch('https://sheets.googleapis.com/v4/spreadsheets/1KR9RJN53G-yJtnowQbg5bcAiIB
     D=(data.values||[]).slice(1).map(function(r){return r.slice(0,14)});
     var c={},sec={};
     D.forEach(function(r){if(r[1])c[r[1]]=1;if(r[2])sec[r[2]]=1;});
-    var ch='<div class="csel-item selected" data-v="">통화 전체</div>';
+    var ch='<div class="csel-item selected" data-v="">통화</div>';
     Object.keys(c).sort().forEach(function(v){ch+='<div class="csel-item" data-v="'+v+'">'+v+'</div>';});
     document.getElementById('cselCurList').innerHTML=ch;
     document.getElementById('cselCurList').addEventListener('click',function(e){var item=e.target.closest('.csel-item');if(item)pickCselCur(item.getAttribute('data-v'),item.textContent);});
-    var sh='<div class="csel-item selected" data-v="">섹터 전체</div>';
+    var sh='<div class="csel-item selected" data-v="">섹터</div>';
     Object.keys(sec).sort().forEach(function(v){sh+='<div class="csel-item" data-v="'+v+'">'+v+'</div>';});
     document.getElementById('cselSecList').innerHTML=sh;
     document.getElementById('cselSecList').addEventListener('click',function(e){var item=e.target.closest('.csel-item');if(item)pickCselSec(item.getAttribute('data-v'),item.textContent);});
@@ -2241,7 +2241,7 @@ function renderSector() {
             var ia=curOrder.indexOf(a),ib=curOrder.indexOf(b);
             if(ia<0)ia=99;if(ib<0)ib=99;return ia-ib;
         });
-        var lh = '<div class="csel-item selected" data-v="">전체</div>';
+        var lh = '<div class="csel-item selected" data-v="">통화</div>';
         keys.forEach(function(v) {
             lh += '<div class="csel-item" data-v="'+v+'">'+v+'</div>';
         });
