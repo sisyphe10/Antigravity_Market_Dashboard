@@ -2057,27 +2057,25 @@ def create_dashboard():
         <select id="fCurrency" onchange="render()"><option value="">통화 전체</option></select>
         <select id="fSector" onchange="render()"><option value="">섹터 전체</option></select>
     </div>
-    <div style="overflow-x:auto;">
-        <table>
-            <thead><tr>
-                <th onclick="doSort(0)">#</th>
-                <th onclick="doSort(1)">통화</th>
-                <th onclick="doSort(2)">섹터</th>
-                <th onclick="doSort(3)">티커</th>
-                <th onclick="doSort(4)">기업명</th>
-                <th onclick="doSort(5)">시가총액</th>
-                <th onclick="doSort(6)">가격</th>
-                <th onclick="doSort(7)">YTD</th>
-                <th onclick="doSort(8)">1D</th>
-                <th onclick="doSort(9)">1W</th>
-                <th onclick="doSort(10)">1M</th>
-                <th onclick="doSort(11)">3M</th>
-                <th onclick="doSort(12)">6M</th>
-                <th onclick="doSort(13)">1Y</th>
-            </tr></thead>
-            <tbody id="tbody"><tr><td colspan="14" style="padding:40px;color:#888;">로딩 중...</td></tr></tbody>
-        </table>
-    </div>
+    <table>
+        <thead><tr>
+            <th onclick="doSort(0)">#</th>
+            <th onclick="doSort(1)">통화</th>
+            <th onclick="doSort(2)">섹터</th>
+            <th onclick="doSort(3)">티커</th>
+            <th onclick="doSort(4)">기업명</th>
+            <th onclick="doSort(5)">시가총액</th>
+            <th onclick="doSort(6)">가격</th>
+            <th onclick="doSort(7)">YTD</th>
+            <th onclick="doSort(8)">1D</th>
+            <th onclick="doSort(9)">1W</th>
+            <th onclick="doSort(10)">1M</th>
+            <th onclick="doSort(11)">3M</th>
+            <th onclick="doSort(12)">6M</th>
+            <th onclick="doSort(13)">1Y</th>
+        </tr></thead>
+        <tbody id="tbody"><tr><td colspan="14" style="padding:40px;color:#888;">로딩 중...</td></tr></tbody>
+    </table>
     </div>
     </div>
     <div id="tab1" class="tab-content">
