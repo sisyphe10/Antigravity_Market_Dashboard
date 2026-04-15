@@ -1088,12 +1088,14 @@ async def daily_market_alert_summary_job(context: ContextTypes.DEFAULT_TYPE):
     """매일 05:15 투자유의종목 텔레그램 요약 알림"""
     logging.info("Market alert summary job started")
     try:
+        import html as html_mod
         sys.path.insert(0, os.path.join(DASHBOARD_DIR, 'execution'))
         from create_market_alert import (
             get_session, fetch_category, parse_stocks, load_krx_data,
             fetch_all_prices, analyze_release, analyze_escalation,
             fmt_marcap, count_bdays, get_판단일, KST as ALERT_KST
         )
+        esc = html_mod.escape
 
         now_kst = datetime.datetime.now(tz=KST)
         today = now_kst.strftime('%Y-%m-%d')
@@ -1126,20 +1128,19 @@ async def daily_market_alert_summary_job(context: ContextTypes.DEFAULT_TYPE):
         if codes_주의:
             price_cache.update(fetch_all_prices(codes_주의, days_back=35))
 
-        lines = [f"🚨 <b>투자유의종목 현황</b> ({today})"]
-        lines.append("━━━━━━━━━━━━━━━")
+        lines = [f"<b><u>투자��의종목 현황</u></b> ({today})"]
 
         # 투자위험
         if stocks_위험:
             lines.append("")
-            lines.append("<b>🛑 투자위험</b>")
+            lines.append("<b><u>[투자위���]</u></b> 종목명 / 시가총액 / 공시일 / 지정일 / 경과일 / 판단일 / 현재가 / 해제가능주가")
             for s in stocks_위험:
                 pdf = price_cache.get(s['code'])
                 판단일, cur, tgt, is_15d, _ = analyze_release(s, pdf, '투자위험')
                 cur_str = f"{cur:,}" if cur else "-"
                 tgt_str = f"{tgt:,}" if tgt else "-"
                 lines.append(
-                    f"• {s['name']} / {fmt_marcap(s['marcap'])} / "
+                    f"• {esc(s['name'])} / {esc(fmt_marcap(s['marcap']))} / "
                     f"{s['notice_date']} / {s['designation_date']} / "
                     f"{s['elapsed']}일 / {판단일} / {cur_str} / {tgt_str}"
                 )
@@ -1147,14 +1148,14 @@ async def daily_market_alert_summary_job(context: ContextTypes.DEFAULT_TYPE):
         # 투자경고
         if stocks_경고:
             lines.append("")
-            lines.append("<b>🚨 투자경고</b>")
+            lines.append("<b><u>[투자경고]</u></b> 종목명 / 시가총액 / 공시일 / 지정일 / 경과일 / 판단일 / 현재가 / 해제가능주가")
             for s in stocks_경고:
                 pdf = price_cache.get(s['code'])
                 판단일, cur, tgt, is_15d, _ = analyze_release(s, pdf, '투자경고')
                 cur_str = f"{cur:,}" if cur else "-"
                 tgt_str = f"{tgt:,}" if tgt else "-"
                 lines.append(
-                    f"• {s['name']} / {fmt_marcap(s['marcap'])} / "
+                    f"• {esc(s['name'])} / {esc(fmt_marcap(s['marcap']))} / "
                     f"{s['notice_date']} / {s['designation_date']} / "
                     f"{s['elapsed']}일 / {판단일} / {cur_str} / {tgt_str}"
                 )
@@ -1162,16 +1163,16 @@ async def daily_market_alert_summary_job(context: ContextTypes.DEFAULT_TYPE):
         # 투자주의
         if stocks_주의:
             lines.append("")
-            lines.append("<b>⚠️ 투자주의</b>")
+            lines.append("<b><u>[투자주의]</u></b> 종목명 / 시가총액 / 지정유형 / 공시일 / 지정일 / 현재가 / 경고전환가")
             for s in stocks_주의:
                 pdf = price_cache.get(s['code'])
-                cur, esc = analyze_escalation(s, pdf)
+                cur, esc_price = analyze_escalation(s, pdf)
                 cur_str = f"{cur:,}" if cur else "-"
-                esc_str = f"{esc:,}" if esc else "-"
+                esc_str = f"{esc_price:,}" if esc_price else "-"
                 warn_type = s.get('warn_type', '-')
                 lines.append(
-                    f"• {s['name']} / {fmt_marcap(s['marcap'])} / "
-                    f"{warn_type} / {s['notice_date']} / {s['designation_date']} / "
+                    f"• {esc(s['name'])} / {esc(fmt_marcap(s['marcap']))} / "
+                    f"{esc(warn_type)} / {s['notice_date']} / {s['designation_date']} / "
                     f"{cur_str} / {esc_str}"
                 )
 
