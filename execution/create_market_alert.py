@@ -674,6 +674,7 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stoc
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
         body {{
             font-family: 'Inter', 'Noto Sans KR', sans-serif;
+            font-size: 1.05rem;
             background: #f8f9fa; color: #1f2937; padding: 24px;
             max-width: 1200px; margin: 0 auto;
         }}
@@ -682,13 +683,13 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stoc
             margin-bottom: 24px; display: flex; align-items: center;
             justify-content: space-between; flex-wrap: wrap; gap: 10px;
         }}
-        header h1 {{ color: #fff; font-size: 1.5rem; font-weight: 700; }}
+        header h1 {{ color: #fff; font-size: 33px; font-weight: 700; }}
         .header-right {{ display: flex; align-items: center; gap: 16px; }}
-        .last-updated {{ color: #9ca3af; font-size: 0.8rem; }}
+        .last-updated {{ color: #6c757d; font-size: 15px; font-style: italic; }}
         .back-btn {{
             padding: 6px 16px; background: #e0e0e0; color: #333;
             text-decoration: none; border-radius: 8px;
-            font-size: 0.85rem; font-weight: 600;
+            font-size: 15px; font-weight: 600;
         }}
         .back-btn:hover {{ background: #ccc; }}
         .section {{
@@ -706,7 +707,7 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stoc
             line-height: 1.5;
         }}
         .data-table {{
-            width: 100%; border-collapse: collapse; font-size: 0.82rem;
+            width: 100%; border-collapse: collapse; font-size: 16px;
             table-layout: fixed;
         }}
         .data-table.tbl-warn {{ /* 투자위험/경고 공통 */ }}
@@ -756,9 +757,9 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stoc
         .data-table tbody tr:last-child td {{ border-bottom: none; }}
         .data-table tbody tr:hover td {{ background: #f9fafb; }}
         footer {{
-            text-align: center; padding: 16px; color: #9ca3af; font-size: 0.75rem;
+            text-align: center; padding: 16px; color: #999; font-size: 14px;
         }}
-        footer a {{ color: #9ca3af; }}
+        footer a {{ color: #999; }}
     </style>
 </head>
 <body>
@@ -766,7 +767,7 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stoc
         <h1>🚦 투자유의종목 현황</h1>
         <div class="header-right">
             <span class="last-updated">Updated: {now}</span>
-            <a href="index.html" class="back-btn">🏠 Home</a>
+            <a href="index.html" class="back-btn">Home</a>
         </div>
     </header>
 

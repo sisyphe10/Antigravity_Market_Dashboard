@@ -1292,6 +1292,7 @@ def create_dashboard():
 
         body {{
             font-family: 'Inter', 'Noto Sans KR', sans-serif;
+            font-size: 1.05rem;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
@@ -1308,13 +1309,14 @@ def create_dashboard():
 
         h1 {{
             margin: 0;
-            font-size: 2.5rem;
+            font-size: 33px;
             color: #ffffff;
         }}
 
         .last-updated {{
             margin-top: 10px;
             color: #6c757d;
+            font-size: 15px;
             font-style: italic;
         }}
 
@@ -1399,8 +1401,8 @@ def create_dashboard():
         footer {{
             text-align: center;
             margin-top: 50px;
-            color: #6c757d;
-            font-size: 0.9rem;
+            color: #999;
+            font-size: 14px;
         }}
 
         /* Portfolio Tables Styling */
@@ -1439,7 +1441,7 @@ def create_dashboard():
         .portfolio-table {{
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.95rem;
+            font-size: 16px;
         }}
 
         .portfolio-table thead {{
@@ -1719,7 +1721,7 @@ def create_dashboard():
     <header style="position:relative;">
         <h1>📊 Market Data Dashboard</h1>
         <div class="last-updated">Updated: {now}</div>
-        <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:0.85rem;font-weight:600;">🏠 Home</a>
+        <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
 
     {charts_html}
@@ -1754,7 +1756,7 @@ def create_dashboard():
         .card .icon {{ font-size: 1.8rem; margin-bottom: 12px; }}
         .card .title {{ font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; }}
         .card .desc {{ font-size: 0.8rem; color: #888; line-height: 1.4; }}
-        footer {{ margin-top: 48px; color: #bbb; font-size: 0.75rem; }}
+        footer {{ margin-top: 48px; color: #999; font-size: 14px; }}
     </style>
 </head>
 <body>
@@ -1826,10 +1828,10 @@ def create_dashboard():
     <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
     <style>
         :root {{ --bg-color: #f8f9fa; --card-bg: #ffffff; --text-color: #333333; }}
-        body {{ font-family: 'Inter', 'Noto Sans KR', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; }}
+        body {{ font-family: 'Inter', 'Noto Sans KR', sans-serif; font-size: 1.05rem; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; }}
         header {{ text-align: center; margin-bottom: 40px; padding: 20px; background-color: #000000; border-radius: 12px; }}
-        h1 {{ margin: 0; font-size: 2.5rem; color: #ffffff; }}
-        .last-updated {{ margin-top: 10px; color: #6c757d; font-style: italic; }}
+        h1 {{ margin: 0; font-size: 33px; color: #ffffff; }}
+        .last-updated {{ margin-top: 10px; color: #6c757d; font-size: 15px; font-style: italic; }}
         .nav-group {{ display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; justify-content: center; }}
         .nav-button {{ display: inline-block; padding: 8px 20px; background-color: #2d7a3a; color: #ffffff; text-decoration: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; transition: background-color 0.2s; }}
         .nav-button:hover {{ background-color: #357abd; }}
@@ -1841,13 +1843,13 @@ def create_dashboard():
         .chart-card {{ background-color: var(--card-bg); border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s ease; text-align: center; }}
         .chart-card:hover {{ transform: translateY(-5px); }}
         .chart-card img {{ max-width: 100%; height: auto; border-radius: 8px; }}
-        footer {{ text-align: center; margin-top: 50px; color: #6c757d; font-size: 0.9rem; }}
+        footer {{ text-align: center; margin-top: 50px; color: #999; font-size: 14px; }}
         /* Portfolio */
         .portfolio-section {{ margin-bottom: 40px; }}
         .portfolio-title {{ font-size: 1.4rem; color: #333; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px solid #dee2e6; }}
         .update-time {{ font-size: 0.75rem; font-weight: bold; color: #555; }}
         .table-container {{ overflow-x: auto; background-color: var(--card-bg); border-radius: 8px; padding: 15px; }}
-        .portfolio-table {{ width: 100%; border-collapse: collapse; font-size: 0.95rem; }}
+        .portfolio-table {{ width: 100%; border-collapse: collapse; font-size: 16px; }}
         .portfolio-table thead {{ background-color: #e9ecef; }}
         .portfolio-table th {{ padding: 12px 10px; text-align: center; font-weight: 600; color: #000; border-bottom: 2px solid #000; }}
         .portfolio-table td {{ padding: 10px; border-bottom: 1px solid #dee2e6; color: #333; text-align: center; }}
@@ -1956,7 +1958,7 @@ def create_dashboard():
     <header style="position:relative;">
         <h1>📈 WRAP</h1>
         <div class="last-updated">Updated: {now}</div>
-        <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:0.85rem;font-weight:600;">🏠 Home</a>
+        <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
 
     {wrap_html}
@@ -2401,9 +2403,9 @@ function renderSector() {
     <script>Chart.defaults.font.family = "'Inter', 'Noto Sans KR', sans-serif";</script>
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-        body {{ font-family: 'Inter', 'Noto Sans KR', sans-serif; background: #f8f9fa; color: #333; }}
+        body {{ font-family: 'Inter', 'Noto Sans KR', sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }}
         header {{ background: #fff; padding: 24px; text-align: center; border-bottom: 1px solid #eee; }}
-        header h1 {{ font-size: 1.8rem; color: #0369a1; }}
+        header h1 {{ font-size: 33px; color: #0369a1; }}
         .nav-group {{ margin-top: 10px; }}
         .nav-button {{ display: inline-block; padding: 6px 16px; border-radius: 6px; text-decoration: none; color: #fff; font-size: 0.85rem; font-weight: 600; background: #333; }}
         .subtitle {{ color: #888; font-size: 0.85rem; margin-top: 4px; }}
@@ -2418,7 +2420,7 @@ function renderSector() {
         .stat-card {{ background: #fff; border-radius: 10px; padding: 16px 20px; flex: 1; min-width: 160px; border-left: 4px solid #0369a1; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }}
         .stat-card .label {{ font-size: 0.8rem; color: #888; margin-bottom: 4px; }}
         .stat-card .value {{ font-size: 1.3rem; font-weight: 700; color: #333; }}
-        table {{ width: 100%; border-collapse: collapse; font-size: 0.9rem; }}
+        table {{ width: 100%; border-collapse: collapse; font-size: 16px; }}
         thead {{ background: #e9ecef; }}
         th {{ padding: 10px 12px; text-align: center; font-weight: 600; color: #000; border-bottom: 2px solid #000; }}
         td {{ padding: 9px 12px; border-bottom: 1px solid #dee2e6; }}
@@ -2426,14 +2428,16 @@ function renderSector() {
         td.num {{ text-align: right; font-variant-numeric: tabular-nums; }}
         td.rank {{ text-align: center; font-weight: 600; }}
         tbody tr:hover {{ background: #f5f5f5; }}
-        footer {{ text-align: center; padding: 24px; color: #999; font-size: 0.8rem; }}
+        .positive {{ color: #cc0000; font-weight: 600; }}
+        .negative {{ color: #0055cc; font-weight: 600; }}
+        footer {{ text-align: center; padding: 24px; color: #999; font-size: 14px; }}
     </style>
 </head>
 <body>
 <header style="position:relative;">
     <h1>SEIBro US Settlement TOP 50</h1>
     <div class="subtitle">Overseas Securities Buy Settlement - US Market</div>
-    <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:0.85rem;font-weight:600;">🏠 Home</a>
+    <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
 </header>
 <div class="content">
     <div class="section">
@@ -2597,9 +2601,9 @@ refresh();
     <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-        body {{ font-family: 'Inter', 'Noto Sans KR', sans-serif; background: #f8f9fa; color: #333; }}
+        body {{ font-family: 'Inter', 'Noto Sans KR', sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }}
         header {{ background: #fff; padding: 24px; text-align: center; border-bottom: 1px solid #eee; position: relative; }}
-        header h1 {{ font-size: 1.8rem; color: #333; }}
+        header h1 {{ font-size: 33px; color: #333; }}
         .subtitle {{ color: #888; font-size: 0.85rem; margin-top: 4px; }}
         .content {{ padding: 24px; max-width: 1400px; margin: 0 auto; }}
         .section {{ background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }}
@@ -2609,7 +2613,7 @@ refresh();
         .date-bar label {{ color: #555; font-weight: 600; }}
         .tables {{ display: flex; gap: 24px; flex-wrap: wrap; }}
         .tables > div {{ flex: 1; min-width: 500px; }}
-        table {{ width: 100%; border-collapse: collapse; font-size: 0.82rem; }}
+        table {{ width: 100%; border-collapse: collapse; font-size: 16px; }}
         thead {{ background: #2E7D32; }}
         th {{ padding: 8px 6px; text-align: center; font-weight: 600; color: #fff; font-size: 0.78rem; border: 1px solid #1B5E20; }}
         td {{ padding: 6px 6px; border: 1px solid #ddd; }}
@@ -2620,14 +2624,14 @@ refresh();
         .section h2 {{ background: #E67E22; color: #fff; padding: 8px 12px; border-radius: 4px; font-size: 0.95rem; }}
         .pos {{ color: #cc0000; font-weight: 600; }}
         .neg {{ color: #0055cc; font-weight: 600; }}
-        footer {{ text-align: center; padding: 24px; color: #999; font-size: 0.8rem; }}
+        footer {{ text-align: center; padding: 24px; color: #999; font-size: 14px; }}
     </style>
 </head>
 <body>
 <header style="position:relative;">
     <h1>Featured</h1>
     <div class="subtitle">Daily Market Highlights</div>
-    <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:0.85rem;font-weight:600;">🏠 Home</a>
+    <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
 </header>
 <div class="content">
     <div class="section">
@@ -2929,10 +2933,10 @@ def generate_etf_html():
 <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
 <style>
 * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-body {{ font-family: 'Inter', 'Noto Sans KR', sans-serif; background: #f8f9fa; color: #333; }}
+body {{ font-family: 'Inter', 'Noto Sans KR', sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }}
 header {{ background: #fff; padding: 24px; text-align: center; border-bottom: 1px solid #eee; position: relative; }}
-header h1 {{ font-size: 1.6rem; color: #333; }}
-.home-btn {{ position: absolute; top: 20px; right: 24px; padding: 6px 16px; background: #e0e0e0; color: #333; text-decoration: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; }}
+header h1 {{ font-size: 33px; color: #333; }}
+.home-btn {{ position: absolute; top: 20px; right: 24px; padding: 6px 16px; background: #e0e0e0; color: #333; text-decoration: none; border-radius: 8px; font-size: 15px; font-weight: 600; }}
 .container {{ max-width: 1200px; margin: 0 auto; padding: 20px; }}
 .controls {{ display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }}
 .controls input {{ padding: 8px 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 0.9rem; font-family: inherit; outline: none; width: 300px; }}
@@ -2942,7 +2946,7 @@ header h1 {{ font-size: 1.6rem; color: #333; }}
 .section {{ background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 20px; overflow: hidden; }}
 .section-header {{ padding: 14px 20px; font-size: 1rem; font-weight: 700; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }}
 .section-header .count {{ font-size: 0.8rem; color: #888; font-weight: 400; }}
-table {{ width: 100%; border-collapse: collapse; font-size: 0.82rem; }}
+table {{ width: 100%; border-collapse: collapse; font-size: 16px; }}
 thead {{ background: #4338ca; }}
 th {{ padding: 10px 8px; text-align: center; font-weight: 600; color: #fff; cursor: pointer; white-space: nowrap; }}
 th:hover {{ background: #3730a3; }}
@@ -2970,7 +2974,7 @@ tbody tr.etf-row:hover {{ background: #ede9fe; }}
 <body>
 <header>
     <h1>🏛️ ETF Dashboard</h1>
-    <a href="index.html" class="home-btn">🏠 Home</a>
+    <a href="index.html" class="home-btn">Home</a>
 </header>
 
 <div class="container">
