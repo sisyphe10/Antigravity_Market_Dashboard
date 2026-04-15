@@ -2019,23 +2019,20 @@ def create_dashboard():
         .filters select { padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; background: #fff; }
         .sector-group { margin-bottom: 24px; }
         .sector-group h3 { font-size: 1rem; color: #6B21A8; margin-bottom: 8px; padding: 8px 0; border-bottom: 1px solid #6B21A8; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; table-layout: fixed; }
         thead { background: #e9ecef; }
         th { padding: 12px 6px; text-align: center; font-weight: 600; color: #000; border-bottom: 2px solid #000; cursor: pointer; white-space: nowrap; overflow: hidden; }
         th:hover { background: #ddd; }
         td { padding: 10px 6px; border-bottom: 1px solid #dee2e6; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        /* 종목 리스트 테이블 */
-        #tab0 table { table-layout: fixed; }
-        #tab0 th:nth-child(1) { width: 36px; }
-        #tab0 th:nth-child(2) { width: 50px; }
-        #tab0 th:nth-child(3) { width: 100px; }
-        #tab0 th:nth-child(4) { width: 80px; }
-        #tab0 th:nth-child(5) { width: 120px; }
-        #tab0 th:nth-child(6) { width: 90px; }
-        #tab0 th:nth-child(7) { width: 80px; }
-        #tab0 th:nth-child(n+8) { width: 75px; }
-        /* 섹터 수익률 테이블 */
-        #tab1 table { width: 100%; }
+        /* 종목 리스트 컬럼 비율 */
+        #tab0 th:nth-child(1) { width: 3%; }
+        #tab0 th:nth-child(2) { width: 5%; }
+        #tab0 th:nth-child(3) { width: 9%; }
+        #tab0 th:nth-child(4) { width: 7%; }
+        #tab0 th:nth-child(5) { width: 12%; }
+        #tab0 th:nth-child(6) { width: 8%; }
+        #tab0 th:nth-child(7) { width: 7%; }
+        #tab0 th:nth-child(n+8) { width: 7%; }
         tbody tr:hover { background: #f5f5f5; }
         .positive { color: #cc0000; font-weight: 600; }
         .negative { color: #0055cc; font-weight: 600; }
