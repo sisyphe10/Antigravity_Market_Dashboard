@@ -152,20 +152,22 @@ def summarize_sector_news(sector, stocks_with_news):
 
 {news_text}
 
-위 뉴스를 바탕으로 이 섹터의 신고가 배경을 3~4줄로 종합 요약해주세요.
+위 뉴스를 바탕으로 이 섹터의 신고가 배경을 요약해주세요.
+
+구조:
+1) 섹터 전체 테마 1~2문장
+2) 빈 줄
+3) 개별 종목별로 각각 1문장씩, 종목마다 줄바꿈
 
 규칙:
-- 섹터 전체를 관통하는 테마/이슈가 있으면 먼저 언급
-- 특별히 강한 상승을 보인 종목이 있으면 별도로 언급 (종목명 + 이유)
-- 투자자가 빠르게 읽을 수 있는 간결한 문체
-- 존댓말 사용하지 않고 개조식/요약 문체로 작성
+- 한국어로만 작성 (영문 약어/종목명은 허용)
+- 투자자가 빠르게 읽을 수 있는 간결한 문체, 존댓말 금지
+- 특별히 강한 상승을 보인 종목은 등락률과 함께 언급
 
 출력 형식 (반드시 준수):
-- 마크다운 문법(#, **, -, ```) 절대 사용 금지
+- 마크다운 문법(#, **, -, ```, 목록기호) 절대 사용 금지
 - 강조할 종목명은 <b>태그</b>로 감싸기
-- 제목/헤더 넣지 말 것. 바로 본문부터 시작
-- 섹터 전체 요약 1문단, 개별 종목 언급 1문단 — 문단 사이에 빈 줄 넣기
-- 목록 기호(-, *) 사용하지 말고 문장으로 작성"""
+- 제목/헤더 넣지 말 것, 바로 본문부터 시작"""
 
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
@@ -176,7 +178,11 @@ def summarize_sector_news(sector, stocks_with_news):
                 max_tokens=512,
                 messages=[{"role": "user", "content": prompt}]
             )
-            return response.content[0].text.strip()
+            text = response.content[0].text.strip()
+            # 깨진 유니코드 문자 제거
+            text = text.encode('utf-8', errors='ignore').decode('utf-8')
+            text = re.sub(r'[\ufffd\udcff-\udfff]', '', text)
+            return text
         except Exception as e:
             err_str = str(e).lower()
             if '529' in str(e) or 'overloaded' in err_str or '429' in str(e):
