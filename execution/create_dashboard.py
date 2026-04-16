@@ -747,13 +747,14 @@ def create_aum_table():
             return ""
         df['날짜'] = pd.to_datetime(df['날짜'])
         latest = df.sort_values('날짜').groupby('상품명').last().reset_index()
-        # 증권사별 AUM 합계로 증권사 순서 결정, 같은 증권사 내에서는 AUM 내림차순
-        broker_total = latest.groupby('증권사')['AUM'].sum().sort_values(ascending=False)
-        latest['broker_rank'] = latest['증권사'].map({b: i for i, b in enumerate(broker_total.index)})
-        latest = latest.sort_values(['broker_rank', 'AUM'], ascending=[True, False]).drop(columns='broker_rank')
+        # 상단 테이블: 현재 활성 상품만 (목표전환형 제외)
+        active = latest[~latest['상품명'].str.contains('목표전환형', na=False)].copy()
+        broker_total = active.groupby('증권사')['AUM'].sum().sort_values(ascending=False)
+        active['broker_rank'] = active['증권사'].map({b: i for i, b in enumerate(broker_total.index)})
+        active = active.sort_values(['broker_rank', 'AUM'], ascending=[True, False]).drop(columns='broker_rank')
         rows_html = ''
         total_aum = 0
-        for _, row in latest.iterrows():
+        for _, row in active.iterrows():
             aum = int(row['AUM'])
             total_aum += aum
             aum_억 = aum / 100_000_000
@@ -764,14 +765,15 @@ def create_aum_table():
         # 증권사별 색상
         broker_colors = {'삼성': '#1428A0', 'NH': '#0072CE', 'DB': '#00854A'}
 
-        # 일자별 증권사+상품명 기준 AUM (stacked bar용)
-        df['label'] = df['증권사'] + ' ' + df['상품명']
-        daily = df.groupby([df['날짜'].dt.strftime('%Y-%m-%d'), 'label', '증권사'])['AUM'].sum().reset_index()
+        # 일자별 증권사+상품명 기준 AUM (stacked bar용) - 활성 상품만
+        active_df = df[~df['상품명'].str.contains('목표전환형', na=False)].copy()
+        active_df['label'] = active_df['증권사'] + ' ' + active_df['상품명']
+        daily = active_df.groupby([active_df['날짜'].dt.strftime('%Y-%m-%d'), 'label', '증권사'])['AUM'].sum().reset_index()
         daily.columns = ['date', 'label', 'broker', 'aum']
         dates_sorted = sorted(daily['date'].unique())
 
-        # 테이블과 같은 순서 (latest는 이미 증권사 그룹 + AUM 내림차순)
-        all_labels = (latest.apply(lambda r: r['증권사'] + ' ' + r['상품명'], axis=1)).tolist()
+        # 테이블과 같은 순서 (active는 이미 증권사 그룹 + AUM 내림차순)
+        all_labels = (active.apply(lambda r: r['증권사'] + ' ' + r['상품명'], axis=1)).tolist()
 
         opacity_levels = [1.0, 0.6, 0.35]
         broker_idx = {}
@@ -966,6 +968,29 @@ def create_cumulative_aum_chart():
                 'backgroundColor': f'rgba({r},{g},{b},{op})'
             })
 
+        # 누적 AUM 테이블 생성 (모든 상품 포함)
+        cum_rows_html = ''
+        cum_total = 0
+        # 일반형 상품
+        for label in reg_labels_sorted:
+            sub = regular_df[regular_df['label'] == label]
+            latest_row = sub.sort_values('날짜').iloc[-1]
+            aum = int(latest_row['AUM'])
+            cum_total += aum
+            date_str = latest_row['날짜'].strftime('%m/%d')
+            cum_rows_html += f'<tr><td>{latest_row["증권사"]}</td><td>{latest_row["상품명"]}</td><td>{aum/1e8:,.0f}억</td><td>{date_str}</td></tr>\n'
+        # 목표전환형 (회차별 개별 표시)
+        for broker in sorted(target_df['증권사'].unique()):
+            broker_target = target_df[target_df['증권사'] == broker]
+            for it in sorted(broker_target['상품명'].unique()):
+                it_data = broker_target[broker_target['상품명'] == it].sort_values('날짜')
+                latest_row = it_data.iloc[-1]
+                aum = int(latest_row['AUM'])
+                cum_total += aum
+                date_str = latest_row['날짜'].strftime('%m/%d')
+                cum_rows_html += f'<tr><td>{broker}</td><td>{it}</td><td>{aum/1e8:,.0f}억</td><td>{date_str}</td></tr>\n'
+        cum_rows_html += f'<tr style="border-top:2px solid #000;font-weight:700;"><td colspan="2">합계</td><td>{cum_total/1e8:,.0f}억</td><td></td></tr>'
+
         chart_json = json.dumps({'dates': all_dates, 'datasets': datasets}, ensure_ascii=False)
 
         chart_js = """
@@ -1023,8 +1048,21 @@ def create_cumulative_aum_chart():
         return f"""
         <div style="margin-top:40px;max-width:1800px;margin:40px auto 0 auto;">
             <h3 style="font-size:18px;font-weight:700;margin-bottom:12px;">누적 AUM</h3>
-            <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
-                <div style="position:relative;height:350px;"><canvas id="cumulativeAumChart"></canvas></div>
+            <div style="display:flex;gap:100px;align-items:flex-start;">
+                <div style="min-width:500px;">
+                    <table class="portfolio-table" style="white-space:nowrap;width:100%;">
+                        <thead><tr>
+                            <th>증권사</th>
+                            <th>상품명</th>
+                            <th>AUM</th>
+                            <th>기준일</th>
+                        </tr></thead>
+                        <tbody>{cum_rows_html}</tbody>
+                    </table>
+                </div>
+                <div style="flex:1;background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                    <div style="position:relative;height:350px;"><canvas id="cumulativeAumChart"></canvas></div>
+                </div>
             </div>
         </div>
         {chart_js}"""
