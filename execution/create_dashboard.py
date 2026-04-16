@@ -2999,7 +2999,7 @@ function renderNotable() {{
             var newsHtml = '';
             var nd = newsData.date || '';
             if (nd === e && newsData.summaries && newsData.summaries[s]) {{
-                newsHtml = newsData.summaries[s].replace(/\\n/g, '<br>');
+                newsHtml = newsData.summaries[s].replace(/\\n\\n/g, '\\n').replace(/\\n/g, '<br>');
             }}
             if (!newsHtml) newsHtml = '<span style="color:#bbb">-</span>';
 
