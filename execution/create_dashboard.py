@@ -2882,21 +2882,21 @@ refresh();
         <div class="section">
             <h2>20일 신고가 업종 분석 (<span id="notable20Count" style="font-size:inherit">0</span>개)</h2>
             <table>
-                <thead><tr><th style="width:10%">업종</th><th style="width:5%">종목수</th><th style="width:30%">주요 종목</th><th>뉴스</th></tr></thead>
+                <thead><tr><th style="width:10%">업종</th><th style="width:5%">종목수</th><th style="width:25%">주요 종목</th><th>요약</th></tr></thead>
                 <tbody id="notable20"></tbody>
             </table>
         </div>
         <div class="section">
             <h2>120일 신고가 업종 분석 (<span id="notable120Count" style="font-size:inherit">0</span>개)</h2>
             <table>
-                <thead><tr><th style="width:10%">업종</th><th style="width:5%">종목수</th><th style="width:30%">주요 종목</th><th>뉴스</th></tr></thead>
+                <thead><tr><th style="width:10%">업종</th><th style="width:5%">종목수</th><th style="width:25%">주요 종목</th><th>요약</th></tr></thead>
                 <tbody id="notable120"></tbody>
             </table>
         </div>
         <div class="section">
             <h2>52주 신고가 업종 분석 (<span id="notable52Count" style="font-size:inherit">0</span>개)</h2>
             <table>
-                <thead><tr><th style="width:10%">업종</th><th style="width:5%">종목수</th><th style="width:30%">주요 종목</th><th>뉴스</th></tr></thead>
+                <thead><tr><th style="width:10%">업종</th><th style="width:5%">종목수</th><th style="width:25%">주요 종목</th><th>요약</th></tr></thead>
                 <tbody id="notable52"></tbody>
             </table>
         </div>
@@ -2949,21 +2949,15 @@ function renderNotable() {{
         var html = '';
         sectorList.forEach(function(s) {{
             var items = sectors[s];
-            var names = items.map(function(r) {{
+            var names = items.slice(0, 10).map(function(r) {{
                 return r.name;
             }}).join(', ');
+            if (items.length > 10) names += ' 외 ' + (items.length - 10) + '개';
 
             var newsHtml = '';
             var nd = newsData.date || '';
-            if (nd === e && newsData.news) {{
-                items.forEach(function(r) {{
-                    var n = newsData.news[r.code];
-                    if (n && n.length > 0) {{
-                        n.forEach(function(article) {{
-                            newsHtml += '<div><b>' + r.name + '</b>: <a href="' + article.link + '" target="_blank">' + article.title + '</a></div>';
-                        }});
-                    }}
-                }});
+            if (nd === e && newsData.summaries && newsData.summaries[s]) {{
+                newsHtml = newsData.summaries[s].replace(/\\n/g, '<br>');
             }}
             if (!newsHtml) newsHtml = '<span style="color:#bbb">-</span>';
 

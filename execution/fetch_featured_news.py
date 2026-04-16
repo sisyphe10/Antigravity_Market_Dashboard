@@ -1,7 +1,8 @@
 """
-신고가 종목 뉴스 수집 → featured_news.json
+신고가 종목 뉴스 수집 + 섹터별 AI 요약 → featured_news.json
 - featured_data.json에서 당일 신고가 종목 추출
 - 섹터별 시총 상위 종목의 네이버 뉴스 검색
+- Claude API로 섹터별 종합 요약 생성
 - 당일분만 유지 (매일 덮어쓰기)
 """
 import sys
@@ -22,13 +23,13 @@ FEATURED_JSON = 'featured_data.json'
 WICS_JSON = 'wics_mapping.json'
 NEWS_JSON = 'featured_news.json'
 TOP_PER_SECTOR = 3   # 섹터당 뉴스 검색할 종목 수
-NEWS_PER_STOCK = 2    # 종목당 뉴스 헤드라인 수
+NEWS_PER_STOCK = 3    # 종목당 뉴스 헤드라인 수
 
-# .env에서 네이버 API 키 로드
 from dotenv import load_dotenv
 load_dotenv()
 NAVER_CLIENT_ID = os.environ.get('NAVER_CLIENT_ID', '')
 NAVER_CLIENT_SECRET = os.environ.get('NAVER_CLIENT_SECRET', '')
+ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
 
 
 def load_newhigh_stocks(target_date):
@@ -40,7 +41,7 @@ def load_newhigh_stocks(target_date):
     with open(FEATURED_JSON, 'r', encoding='utf-8') as f:
         data = json.load(f)
 
-    result = {}  # {type: [{'code','name','mktcap','chg','market'}, ...]}
+    result = {}
     for r in data:
         if r['d'] != target_date:
             continue
@@ -56,7 +57,6 @@ def load_newhigh_stocks(target_date):
             'market': r['market'],
         })
 
-    # 시총 내림차순 정렬
     for t in result:
         result[t].sort(key=lambda x: x['mktcap'], reverse=True)
 
@@ -72,38 +72,31 @@ def load_wics_mapping():
     return data.get('mapping', {})
 
 
-def get_stocks_to_search(newhigh_data, wics):
-    """섹터별 시총 상위 종목 선정 (뉴스 검색 대상)"""
-    # 모든 기간의 신고가 종목을 합쳐서 섹터별 그룹핑
-    all_stocks = {}  # code -> stock info (시총 최대값 기준)
+def group_by_sector(newhigh_data, wics):
+    """모든 기간의 신고가 종목을 섹터별로 그룹핑"""
+    all_stocks = {}
     for stocks in newhigh_data.values():
         for s in stocks:
             code = s['code']
             if code not in all_stocks or s['mktcap'] > all_stocks[code]['mktcap']:
                 all_stocks[code] = s
 
-    # 섹터별 그룹핑
-    sector_stocks = {}  # sector -> [stocks sorted by mktcap]
+    sector_stocks = {}
     for code, stock in all_stocks.items():
         sector = wics.get(code, '기타')
         if sector not in sector_stocks:
             sector_stocks[sector] = []
         sector_stocks[sector].append(stock)
 
-    # 각 섹터에서 시총 상위 N개 선정
-    to_search = []
     for sector in sector_stocks:
         sector_stocks[sector].sort(key=lambda x: x['mktcap'], reverse=True)
-        for stock in sector_stocks[sector][:TOP_PER_SECTOR]:
-            to_search.append(stock)
 
-    return to_search
+    return sector_stocks
 
 
-def search_naver_news(stock_name, date_str):
-    """네이버 검색 API로 종목 뉴스 검색"""
+def search_naver_news(stock_name):
+    """네이버 검색 API로 종목 뉴스 검색 (헤드라인 + description)"""
     if not NAVER_CLIENT_ID or not NAVER_CLIENT_SECRET:
-        logging.warning('네이버 API 키 미설정')
         return []
 
     headers = {
@@ -112,7 +105,7 @@ def search_naver_news(stock_name, date_str):
     }
     params = {
         'query': stock_name,
-        'display': 5,  # 여유 있게 가져와서 필터링
+        'display': 5,
         'sort': 'date',
     }
 
@@ -125,20 +118,69 @@ def search_naver_news(stock_name, date_str):
         logging.warning(f'뉴스 검색 실패 [{stock_name}]: {e}')
         return []
 
+    def clean(text):
+        text = re.sub(r'<.*?>', '', text)
+        return text.replace('&quot;', '"').replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>')
+
     results = []
     for item in items:
-        title = re.sub(r'<.*?>', '', item.get('title', ''))
-        title = title.replace('&quot;', '"').replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>')
-        link = item.get('link', '')
-        results.append({'title': title, 'link': link})
+        title = clean(item.get('title', ''))
+        desc = clean(item.get('description', ''))
+        results.append({'title': title, 'description': desc})
         if len(results) >= NEWS_PER_STOCK:
             break
 
     return results
 
 
+def summarize_sector_news(sector, stocks_with_news):
+    """Claude API로 섹터별 뉴스 종합 요약"""
+    if not ANTHROPIC_API_KEY:
+        logging.warning('ANTHROPIC_API_KEY 미설정, 요약 건너뜀')
+        return ''
+
+    import anthropic
+
+    # 프롬프트 구성
+    news_text = ''
+    for stock_name, chg, news_items in stocks_with_news:
+        news_text += f'\n[{stock_name} (등락률: {chg:+.1f}%)]\n'
+        for n in news_items:
+            news_text += f'- {n["title"]}: {n["description"]}\n'
+
+    prompt = f"""아래는 "{sector}" 섹터에서 신고가를 기록한 종목들의 최신 뉴스입니다.
+
+{news_text}
+
+위 뉴스를 바탕으로 이 섹터의 신고가 배경을 3~4줄로 종합 요약해주세요.
+- 섹터 전체를 관통하는 테마/이슈가 있으면 먼저 언급
+- 특별히 강한 상승을 보인 종목이 있으면 별도로 언급 (종목명 + 이유)
+- 투자자가 빠르게 읽을 수 있는 간결한 문체
+- 존댓말 사용하지 않고 개조식/요약 문체로 작성"""
+
+    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+
+    for attempt in range(2):
+        try:
+            response = client.messages.create(
+                model="claude-haiku-4-5-20251001",
+                max_tokens=512,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            return response.content[0].text.strip()
+        except Exception as e:
+            err_str = str(e).lower()
+            if '529' in str(e) or 'overloaded' in err_str or '429' in str(e):
+                if attempt < 1:
+                    logging.warning(f'  요약 재시도 대기 (30초): {e}')
+                    time.sleep(30)
+                    continue
+            logging.error(f'  요약 실패 [{sector}]: {e}')
+            return ''
+
+
 def fetch_news(target_date=None):
-    """메인: 신고가 종목 뉴스 수집"""
+    """메인: 신고가 종목 뉴스 수집 + 섹터별 요약"""
     if target_date is None:
         target_date = datetime.now(tz=KST).strftime('%Y-%m-%d')
 
@@ -149,37 +191,50 @@ def fetch_news(target_date=None):
         logging.info('신고가 종목 없음, 스킵')
         return
 
-    total_stocks = sum(len(v) for v in newhigh_data.values())
     logging.info(f'신고가 종목 수: 20일={len(newhigh_data.get("newhigh_20d", []))}, '
                  f'120일={len(newhigh_data.get("newhigh_120d", []))}, '
                  f'52주={len(newhigh_data.get("newhigh_52w", []))}')
 
     wics = load_wics_mapping()
-    to_search = get_stocks_to_search(newhigh_data, wics)
-    logging.info(f'뉴스 검색 대상: {len(to_search)}개 종목')
+    sector_stocks = group_by_sector(newhigh_data, wics)
+    logging.info(f'섹터 수: {len(sector_stocks)}개')
 
-    # 뉴스 검색
-    news = {}
-    for i, stock in enumerate(to_search):
-        code = stock['code']
-        name = stock['name']
-        results = search_naver_news(name, target_date)
-        if results:
-            news[code] = results
-            logging.info(f'  [{i+1}/{len(to_search)}] {name}: {len(results)}건')
-        else:
-            logging.info(f'  [{i+1}/{len(to_search)}] {name}: 뉴스 없음')
-        time.sleep(0.3)  # rate limiting
+    # 섹터별 뉴스 수집
+    sector_news = {}  # sector -> [(stock_name, chg, [news_items])]
+    searched = 0
+    for sector, stocks in sector_stocks.items():
+        sector_news[sector] = []
+        for stock in stocks[:TOP_PER_SECTOR]:
+            news_items = search_naver_news(stock['name'])
+            if news_items:
+                sector_news[sector].append((stock['name'], stock['chg'], news_items))
+                searched += 1
+                logging.info(f'  [{searched}] {stock["name"]}: {len(news_items)}건')
+            time.sleep(0.3)
+
+    logging.info(f'뉴스 수집 완료: {searched}개 종목')
+
+    # 섹터별 Claude 요약
+    summaries = {}
+    sectors_with_news = {s: items for s, items in sector_news.items() if items}
+    logging.info(f'요약 대상 섹터: {len(sectors_with_news)}개')
+
+    for i, (sector, stocks_with_news) in enumerate(sectors_with_news.items()):
+        summary = summarize_sector_news(sector, stocks_with_news)
+        if summary:
+            summaries[sector] = summary
+            logging.info(f'  요약 [{i+1}/{len(sectors_with_news)}] {sector}: {len(summary)}자')
+        time.sleep(0.5)
 
     # 저장
     output = {
         'date': target_date,
-        'news': news,
+        'summaries': summaries,
     }
     with open(NEWS_JSON, 'w', encoding='utf-8') as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    logging.info(f'저장 완료: {NEWS_JSON} ({len(news)}개 종목 뉴스)')
+    logging.info(f'저장 완료: {NEWS_JSON} ({len(summaries)}개 섹터 요약)')
 
 
 if __name__ == '__main__':

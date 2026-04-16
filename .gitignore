@@ -61,3 +61,8 @@ charts/*
 # SSH 키
 *.key
 *.pem
+
+# 메모/임시
+vm-bot.txt
+*.png
+!charts/*.png
