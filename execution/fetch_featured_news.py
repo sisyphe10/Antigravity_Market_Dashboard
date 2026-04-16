@@ -133,6 +133,38 @@ def search_naver_news(stock_name):
     return results
 
 
+def fix_stock_names(text, correct_names):
+    """<b>태그</b> 안의 종목명 오타를 실제 종목명으로 교정
+    전략: 이미 정확한 이름은 건드리지 않고, 텍스트에 없는 이름만 오타에서 찾아 교정"""
+    from difflib import SequenceMatcher
+
+    # 정확히 존재하지 않는 이름만 교정 대상
+    missing = [n for n in correct_names if n not in text]
+    if not missing:
+        return text
+
+    b_tags = re.findall(r'<b>([^<]+)</b>', text)
+    for tag_content in b_tags:
+        name_part = re.split(r'[(（]', tag_content)[0].strip()
+        if name_part in correct_names:
+            continue  # 이미 정확
+
+        # missing 중 가장 유사한 이름 찾기
+        best, best_ratio = None, 0
+        for m in missing:
+            ratio = SequenceMatcher(None, name_part, m).ratio()
+            if ratio > best_ratio:
+                best_ratio = ratio
+                best = m
+
+        if best and best_ratio >= 0.3:
+            suffix = tag_content[len(name_part):]
+            text = text.replace(f'<b>{tag_content}</b>', f'<b>{best}{suffix}</b>')
+            missing.remove(best)
+
+    return text
+
+
 def summarize_sector_news(sector, stocks_with_news):
     """Claude API로 섹터별 뉴스 종합 요약"""
     if not ANTHROPIC_API_KEY:
@@ -140,6 +172,8 @@ def summarize_sector_news(sector, stocks_with_news):
         return ''
 
     import anthropic
+
+    correct_names = [name for name, _, _ in stocks_with_news]
 
     # 프롬프트 구성
     news_text = ''
@@ -182,6 +216,8 @@ def summarize_sector_news(sector, stocks_with_news):
             # 깨진 유니코드 문자 제거
             text = text.encode('utf-8', errors='ignore').decode('utf-8')
             text = re.sub(r'[\ufffd\udcff-\udfff]', '', text)
+            # 종목명 오타 교정
+            text = fix_stock_names(text, correct_names)
             return text
         except Exception as e:
             err_str = str(e).lower()
