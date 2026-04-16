@@ -838,14 +838,14 @@ async def featured_update_job(context):
         dashboard_dir = DASHBOARD_DIR
         # git_sync 전 로컬 데이터 백업 (reset --hard로 소실 방지)
         import shutil
-        for fname in ['featured_data.json', 'stock_price_history.json']:
+        for fname in ['featured_data.json', 'stock_price_history.json', 'featured_news.json']:
             src = os.path.join(dashboard_dir, fname)
             bak = src + '.bak'
             if os.path.exists(src):
                 shutil.copy2(src, bak)
         git_sync(dashboard_dir)
         # git_sync 후 백업 복원
-        for fname in ['featured_data.json', 'stock_price_history.json']:
+        for fname in ['featured_data.json', 'stock_price_history.json', 'featured_news.json']:
             src = os.path.join(dashboard_dir, fname)
             bak = src + '.bak'
             if os.path.exists(bak):
@@ -906,12 +906,25 @@ async def featured_update_job(context):
         else:
             logging.info(f"{tag} Featured 수집 완료: {result.stdout.strip()[-150:]}")
 
+        # Step 3: 신고가 종목 뉴스 수집
+        try:
+            news_result = subprocess.run(
+                [sys.executable, "execution/fetch_featured_news.py"],
+                capture_output=True, text=True, timeout=120, cwd=dashboard_dir
+            )
+            if news_result.returncode == 0:
+                logging.info(f"{tag} 뉴스 수집 완료: {news_result.stdout.strip()[-100:]}")
+            else:
+                logging.warning(f"{tag} 뉴스 수집 실패 (무시): {news_result.stderr[-100:]}")
+        except Exception as ne:
+            logging.warning(f"{tag} 뉴스 수집 예외 (무시): {ne}")
+
         # 에러가 있더라도 대시보드 재생성 시도 (기존 데이터로라도 갱신)
         subprocess.run([sys.executable, "execution/create_dashboard.py"],
                        capture_output=True, text=True, timeout=120, cwd=dashboard_dir)
         now_str = now_kst.strftime("%Y-%m-%d %H:%M")
-        subprocess.run(["git", "add", "featured.html", "featured_data.json", "etf.html",
-                        "index.html", "market.html", "wrap.html"],
+        subprocess.run(["git", "add", "featured.html", "featured_data.json", "featured_news.json",
+                        "etf.html", "index.html", "market.html", "wrap.html"],
                        cwd=dashboard_dir, capture_output=True, timeout=30)
         commit_result = subprocess.run(
             ["git", "commit", "-m", f"Featured 업데이트 ({now_str})"],
