@@ -136,7 +136,7 @@
     <div id="mainContent" class="pw-hidden">
     <header style="position:relative;">
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-04-16 10:28:17 KST</div>
+        <div class="last-updated">Updated: 2026-04-16 10:31:00 KST</div>
         <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
 
@@ -447,6 +447,63 @@
                     })
                 },
                 plugins: [totalLabelPlugin],
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    layout: { padding: { top: 20 } },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { size: 11 }, color: '#000' } },
+                        tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + Math.round(ctx.raw) + '억'; } } }
+                    },
+                    scales: {
+                        x: { stacked: true, ticks: { font: { size: 11 }, color: '#000' }, grid: { display: false } },
+                        y: { stacked: true, ticks: { callback: function(v) { return v + '억'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' } }
+                    }
+                }
+            });
+        })();
+        </script>
+        
+        <div style="margin-top:40px;max-width:1800px;margin:40px auto 0 auto;">
+            <h3 style="font-size:18px;font-weight:700;margin-bottom:12px;">누적 AUM</h3>
+            <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                <div style="position:relative;height:350px;"><canvas id="cumulativeAumChart"></canvas></div>
+            </div>
+        </div>
+        
+        <script>
+        (function() {
+            var cData = {"dates": ["2026-02-24", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-03", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09"], "datasets": [{"label": "삼성 트루밸류", "data": [0, 497, 462, 468, 476, 459, 458, 446, 418, 457, 432, 451, 452, 450, 483, 480], "backgroundColor": "rgba(20,40,160,1.0)"}, {"label": "DB 개방형 랩", "data": [0, 76, 75, 77, 80, 78, 81, 80, 77, 84, 84, 83, 84, 83, 89, 89], "backgroundColor": "rgba(0,133,74,1.0)"}, {"label": "NH 다이내믹밸류", "data": [0, 74, 69, 69, 70, 67, 67, 65, 62, 68, 64, 68, 68, 68, 72, 71], "backgroundColor": "rgba(0,114,206,1.0)"}, {"label": "DB 목표전환형 (누적)", "data": [25, 54, 53, 53, 53, 52, 52, 52, 51, 52, 52, 52, 52, 52, 54, 53], "backgroundColor": "rgba(0,133,74,0.6)"}, {"label": "NH 목표전환형 (누적)", "data": [0, 15, 50, 113, 134, 136, 136, 134, 128, 138, 132, 136, 136, 136, 144, 142], "backgroundColor": "rgba(0,114,206,0.6)"}]};
+            var totalPlugin = {
+                id: 'cumulativeTotals',
+                afterDatasetsDraw: function(chart) {
+                    var ctx = chart.ctx;
+                    var ds = chart.data.datasets;
+                    var meta0 = chart.getDatasetMeta(0);
+                    for (var i = 0; i < meta0.data.length; i++) {
+                        var total = 0;
+                        for (var d = 0; d < ds.length; d++) total += ds[d].data[i] || 0;
+                        var lastMeta = chart.getDatasetMeta(ds.length - 1);
+                        var bar = lastMeta.data[i];
+                        if (!bar) continue;
+                        ctx.save();
+                        ctx.font = 'bold 11px sans-serif';
+                        ctx.fillStyle = '#000';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'bottom';
+                        ctx.fillText(Math.round(total) + '억', bar.x, bar.y - 4);
+                        ctx.restore();
+                    }
+                }
+            };
+            new Chart(document.getElementById('cumulativeAumChart'), {
+                type: 'bar',
+                data: {
+                    labels: cData.dates.map(function(d) { return d.slice(5); }),
+                    datasets: cData.datasets.map(function(ds) {
+                        return { label: ds.label, data: ds.data, backgroundColor: ds.backgroundColor };
+                    })
+                },
+                plugins: [totalPlugin],
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     layout: { padding: { top: 20 } },

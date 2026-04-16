@@ -879,6 +879,153 @@ def create_aum_table():
         return ""
 
 
+def create_cumulative_aum_chart():
+    """누적 AUM 차트 - 일반형은 현재 AUM, 목표전환형은 회차별 AUM 누적 합산"""
+    try:
+        nav_file = 'Wrap_NAV.xlsx'
+        if not os.path.exists(nav_file):
+            return ""
+        df = pd.read_excel(nav_file, sheet_name='AUM')
+        if df.empty:
+            return ""
+        df['날짜'] = pd.to_datetime(df['날짜'])
+
+        all_dates = sorted(df['날짜'].dt.strftime('%Y-%m-%d').unique())
+
+        is_target = df['상품명'].str.contains('목표전환형', na=False)
+        regular_df = df[~is_target].copy()
+        target_df = df[is_target].copy()
+
+        broker_colors = {'삼성': '#1428A0', 'NH': '#0072CE', 'DB': '#00854A'}
+        opacity_levels = [1.0, 0.6, 0.35]
+
+        def forward_fill_aum(product_df, dates):
+            """날짜별 AUM을 forward-fill하여 반환 (종료된 회차의 마지막 값 유지)"""
+            timeline = {}
+            for _, row in product_df.sort_values('날짜').iterrows():
+                timeline[row['날짜'].strftime('%Y-%m-%d')] = row['AUM']
+            result = []
+            last_known = 0
+            for d in dates:
+                if d in timeline:
+                    last_known = timeline[d]
+                result.append(last_known)
+            return result
+
+        datasets = []
+        broker_idx = {}
+
+        # 일반형: 개별 시리즈
+        regular_df['label'] = regular_df['증권사'] + ' ' + regular_df['상품명']
+        reg_latest = regular_df.sort_values('날짜').groupby('label').last().reset_index()
+        broker_total = reg_latest.groupby(reg_latest['label'].str.split(' ').str[0])['AUM'].sum().sort_values(ascending=False)
+        reg_latest['broker_rank'] = reg_latest['label'].str.split(' ').str[0].map({b: i for i, b in enumerate(broker_total.index)})
+        reg_labels_sorted = reg_latest.sort_values(['broker_rank', 'AUM'], ascending=[True, False])['label'].tolist()
+
+        for label in reg_labels_sorted:
+            sub = regular_df[regular_df['label'] == label]
+            broker = sub['증권사'].iloc[0]
+            idx = broker_idx.get(broker, 0)
+            broker_idx[broker] = idx + 1
+            base = broker_colors.get(broker, '#888888')
+            r, g, b = int(base[1:3], 16), int(base[3:5], 16), int(base[5:7], 16)
+            op = opacity_levels[min(idx, len(opacity_levels) - 1)]
+            vals = forward_fill_aum(sub, all_dates)
+            datasets.append({
+                'label': label,
+                'data': [round(v / 1e8) for v in vals],
+                'backgroundColor': f'rgba({r},{g},{b},{op})'
+            })
+
+        # 목표전환형: 증권사별 누적 합산 (모든 회차의 AUM forward-fill 후 합산)
+        for broker in sorted(target_df['증권사'].unique()):
+            broker_target = target_df[target_df['증권사'] == broker]
+            iterations = broker_target['상품명'].unique()
+            cumulative_vals = [0] * len(all_dates)
+            for it in iterations:
+                it_data = broker_target[broker_target['상품명'] == it]
+                it_vals = forward_fill_aum(it_data, all_dates)
+                for i in range(len(all_dates)):
+                    cumulative_vals[i] += it_vals[i]
+
+            idx = broker_idx.get(broker, 0)
+            broker_idx[broker] = idx + 1
+            base = broker_colors.get(broker, '#888888')
+            r, g, b = int(base[1:3], 16), int(base[3:5], 16), int(base[5:7], 16)
+            op = opacity_levels[min(idx, len(opacity_levels) - 1)]
+            datasets.append({
+                'label': f'{broker} 목표전환형 (누적)',
+                'data': [round(v / 1e8) for v in cumulative_vals],
+                'backgroundColor': f'rgba({r},{g},{b},{op})'
+            })
+
+        chart_json = json.dumps({'dates': all_dates, 'datasets': datasets}, ensure_ascii=False)
+
+        chart_js = """
+        <script>
+        (function() {
+            var cData = __CUMULATIVE_DATA__;
+            var totalPlugin = {
+                id: 'cumulativeTotals',
+                afterDatasetsDraw: function(chart) {
+                    var ctx = chart.ctx;
+                    var ds = chart.data.datasets;
+                    var meta0 = chart.getDatasetMeta(0);
+                    for (var i = 0; i < meta0.data.length; i++) {
+                        var total = 0;
+                        for (var d = 0; d < ds.length; d++) total += ds[d].data[i] || 0;
+                        var lastMeta = chart.getDatasetMeta(ds.length - 1);
+                        var bar = lastMeta.data[i];
+                        if (!bar) continue;
+                        ctx.save();
+                        ctx.font = 'bold 11px sans-serif';
+                        ctx.fillStyle = '#000';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'bottom';
+                        ctx.fillText(Math.round(total) + '억', bar.x, bar.y - 4);
+                        ctx.restore();
+                    }
+                }
+            };
+            new Chart(document.getElementById('cumulativeAumChart'), {
+                type: 'bar',
+                data: {
+                    labels: cData.dates.map(function(d) { return d.slice(5); }),
+                    datasets: cData.datasets.map(function(ds) {
+                        return { label: ds.label, data: ds.data, backgroundColor: ds.backgroundColor };
+                    })
+                },
+                plugins: [totalPlugin],
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    layout: { padding: { top: 20 } },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { size: 11 }, color: '#000' } },
+                        tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + Math.round(ctx.raw) + '억'; } } }
+                    },
+                    scales: {
+                        x: { stacked: true, ticks: { font: { size: 11 }, color: '#000' }, grid: { display: false } },
+                        y: { stacked: true, ticks: { callback: function(v) { return v + '억'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' } }
+                    }
+                }
+            });
+        })();
+        </script>
+        """.replace('__CUMULATIVE_DATA__', chart_json)
+
+        return f"""
+        <div style="margin-top:40px;max-width:1800px;margin:40px auto 0 auto;">
+            <h3 style="font-size:18px;font-weight:700;margin-bottom:12px;">누적 AUM</h3>
+            <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                <div style="position:relative;height:350px;"><canvas id="cumulativeAumChart"></canvas></div>
+            </div>
+        </div>
+        {chart_js}"""
+    except Exception as e:
+        print(f"Error creating cumulative AUM chart: {e}")
+        return ""
+
+
 def create_wrap_returns_table():
     """WRAP 수익률 비교 테이블 HTML (삼성 트루밸류, KOSPI, KOSDAQ) - 날짜 필터 포함"""
     try:
@@ -1244,6 +1391,7 @@ def create_dashboard():
                 wrap_html += _build_wrap_chart_section(category_label)
                 wrap_html += create_wrap_returns_table()
                 wrap_html += create_aum_table()
+                wrap_html += create_cumulative_aum_chart()
             else:
                 section = f"""
             <div class="category-section">
