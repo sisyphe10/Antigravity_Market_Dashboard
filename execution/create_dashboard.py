@@ -719,7 +719,7 @@ def _build_wrap_chart_section(category_label):
         return f"""
         <div class="category-section">
             <h2 class="category-title">{category_label}</h2>
-            <div style="display:flex;gap:16px;align-items:flex-start;max-width:1200px;margin:0 auto;">
+            <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;">
                 <div style="min-width:180px;">{list_html}</div>
                 <div style="flex:1;">
                     <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;font-size:13px;">
@@ -861,7 +861,7 @@ def create_aum_table():
         return f"""
         <div class="category-section">
             <h2 class="category-title">AUM</h2>
-            <div style="display:flex;gap:100px;align-items:flex-start;max-width:1400px;margin:0 auto;">
+            <div style="display:flex;gap:100px;align-items:flex-start;max-width:1800px;margin:0 auto;">
                 <div style="min-width:500px;">
                     <table class="portfolio-table" style="white-space:nowrap;width:100%;">
                         <thead><tr>
@@ -1362,7 +1362,7 @@ def create_dashboard():
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
             gap: 20px;
-            max-width: 1600px;
+            max-width: 1800px;
             margin: 0 auto;
         }}
 
@@ -1482,7 +1482,7 @@ def create_dashboard():
         }}
 
         .portfolio-section-wrapper {{
-            max-width: 1600px;
+            max-width: 1800px;
             margin: 0 auto;
         }}
 
@@ -1838,7 +1838,7 @@ def create_dashboard():
         .category-section {{ margin-bottom: 50px; }}
         .category-title {{ font-size: 1.8rem; color: #000000; margin-bottom: 20px; padding: 10px 16px; background-color: #e0e0e0; border-left: 4px solid #000000; border-radius: 4px; text-transform: uppercase; }}
         .category-date {{ font-size: 1rem; font-weight: bold; color: #555; text-transform: none; }}
-        .dashboard-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(600px, 1fr)); gap: 20px; max-width: 1600px; margin: 0 auto; }}
+        .dashboard-grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(600px, 1fr)); gap: 20px; max-width: 1800px; margin: 0 auto; }}
         @media (max-width: 768px) {{ .dashboard-grid {{ grid-template-columns: 1fr; }} }}
         .chart-card {{ background-color: var(--card-bg); border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s ease; text-align: center; }}
         .chart-card:hover {{ transform: translateY(-5px); }}
@@ -1866,7 +1866,7 @@ def create_dashboard():
         .wrap-mode-btn {{ padding: 6px 16px; border: 1px solid #dee2e6; border-radius: 6px; background: #f5f5f5; color: #555; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }}
         .wrap-mode-btn:hover {{ background: #e9ecef; }}
         .wrap-mode-btn.active {{ background: #222; color: #fff; border-color: #222; }}
-        .portfolio-section-wrapper {{ max-width: 1600px; margin: 0 auto; }}
+        .portfolio-section-wrapper {{ max-width: 1800px; margin: 0 auto; }}
         .portfolio-table .positive {{ color: #cc0000; font-weight: 600; }}
         .portfolio-table .negative {{ color: #0055cc; font-weight: 600; }}
         .portfolio-table .total-row {{ background-color: #e9ecef; border-top: 2px solid #000; }}
@@ -2011,7 +2011,7 @@ def create_dashboard():
         header h1 { font-size: 33px; color: #6B21A8; }
         .nav-group { margin-top: 10px; }
         .nav-button { display: inline-block; padding: 6px 16px; border-radius: 6px; text-decoration: none; color: #fff; font-size: 0.85rem; font-weight: 600; background: #333; }
-        .content { padding: 24px; max-width: 1600px; margin: 0 auto; }
+        .content { padding: 24px; max-width: 1800px; margin: 0 auto; }
         .tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #6B21A8; }
         .tab { padding: 10px 24px; cursor: pointer; font-weight: 600; font-size: 16px; color: #666; border: 1px solid transparent; border-bottom: none; border-radius: 8px 8px 0 0; background: #f0f0f0; }
         .tab.active { color: #6B21A8; background: #fff; border-color: #6B21A8 #6B21A8 transparent; margin-bottom: -2px; }
@@ -2051,7 +2051,7 @@ def create_dashboard():
 </head>
 <body>
 <header>
-    <div style="max-width:1600px;margin:0 auto;padding:0 24px;position:relative;">
+    <div style="max-width:1800px;margin:0 auto;padding:0 24px;position:relative;">
         <h1>Universe</h1>
         <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: __UNIVERSE_UPDATED__</div>
         <div style="position:absolute;top:20px;right:24px;display:flex;gap:8px;">
@@ -2409,7 +2409,7 @@ function renderSector() {
         .nav-group {{ margin-top: 10px; }}
         .nav-button {{ display: inline-block; padding: 6px 16px; border-radius: 6px; text-decoration: none; color: #fff; font-size: 0.85rem; font-weight: 600; background: #333; }}
         .subtitle {{ color: #888; font-size: 0.85rem; margin-top: 4px; }}
-        .content {{ padding: 24px; max-width: 1200px; margin: 0 auto; }}
+        .content {{ padding: 24px; max-width: 1800px; margin: 0 auto; }}
         .section {{ background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }}
         .section h2 {{ font-size: 1.1rem; color: #333; margin-bottom: 16px; }}
         .date-bar {{ display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 13px; flex-wrap: wrap; }}
@@ -2941,7 +2941,7 @@ body {{ font-family: 'Inter', 'Noto Sans KR', sans-serif; font-size: 1.05rem; ba
 header {{ background: #fff; padding: 24px; text-align: center; border-bottom: 1px solid #eee; position: relative; }}
 header h1 {{ font-size: 33px; color: #333; }}
 .home-btn {{ position: absolute; top: 20px; right: 24px; padding: 6px 16px; background: #e0e0e0; color: #333; text-decoration: none; border-radius: 8px; font-size: 15px; font-weight: 600; }}
-.container {{ max-width: 1200px; margin: 0 auto; padding: 20px; }}
+.container {{ max-width: 1800px; margin: 0 auto; padding: 20px; }}
 .controls {{ display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }}
 .controls input {{ padding: 8px 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 0.9rem; font-family: inherit; outline: none; width: 200px; }}
 .controls input:focus {{ border-color: #6366f1; }}
