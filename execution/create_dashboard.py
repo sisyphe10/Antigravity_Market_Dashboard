@@ -747,15 +747,15 @@ def create_aum_table():
             return ""
         df['날짜'] = pd.to_datetime(df['날짜'])
         latest = df.sort_values('날짜').groupby('상품명').last().reset_index()
-        # 상단 테이블: 최근 데이터가 있는 상품만 (최신일 기준 14일 이내)
+        # 상단 테이블: 최신 날짜 상품만 (가장 최근 거래일 기준)
         max_date = latest['날짜'].max()
-        active = latest[latest['날짜'] >= max_date - pd.Timedelta(days=14)].copy()
-        broker_total = active.groupby('증권사')['AUM'].sum().sort_values(ascending=False)
-        active['broker_rank'] = active['증권사'].map({b: i for i, b in enumerate(broker_total.index)})
-        active = active.sort_values(['broker_rank', 'AUM'], ascending=[True, False]).drop(columns='broker_rank')
+        table_latest = latest[latest['날짜'] == max_date].copy()
+        broker_total = table_latest.groupby('증권사')['AUM'].sum().sort_values(ascending=False)
+        table_latest['broker_rank'] = table_latest['증권사'].map({b: i for i, b in enumerate(broker_total.index)})
+        table_latest = table_latest.sort_values(['broker_rank', 'AUM'], ascending=[True, False]).drop(columns='broker_rank')
         rows_html = ''
         total_aum = 0
-        for _, row in active.iterrows():
+        for _, row in table_latest.iterrows():
             aum = int(row['AUM'])
             total_aum += aum
             aum_억 = aum / 100_000_000
@@ -766,16 +766,20 @@ def create_aum_table():
         # 증권사별 색상
         broker_colors = {'삼성': '#1428A0', 'NH': '#0072CE', 'DB': '#00854A'}
 
-        # 일자별 증권사+상품명 기준 AUM (stacked bar용) - 활성 상품만
-        active_names = set(active['상품명'])
-        active_df = df[df['상품명'].isin(active_names)].copy()
-        active_df['label'] = active_df['증권사'] + ' ' + active_df['상품명']
-        daily = active_df.groupby([active_df['날짜'].dt.strftime('%Y-%m-%d'), 'label', '증권사'])['AUM'].sum().reset_index()
+        # 일자별 증권사+상품명 기준 AUM (stacked bar용) - 14일 이내 활성 상품
+        chart_active = latest[latest['날짜'] >= max_date - pd.Timedelta(days=14)].copy()
+        chart_names = set(chart_active['상품명'])
+        chart_df = df[df['상품명'].isin(chart_names)].copy()
+        chart_df['label'] = chart_df['증권사'] + ' ' + chart_df['상품명']
+        daily = chart_df.groupby([chart_df['날짜'].dt.strftime('%Y-%m-%d'), 'label', '증권사'])['AUM'].sum().reset_index()
         daily.columns = ['date', 'label', 'broker', 'aum']
         dates_sorted = sorted(daily['date'].unique())
 
-        # 테이블과 같은 순서 (active는 이미 증권사 그룹 + AUM 내림차순)
-        all_labels = (active.apply(lambda r: r['증권사'] + ' ' + r['상품명'], axis=1)).tolist()
+        # 차트 범례 순서 (증권사 그룹 + AUM 내림차순)
+        chart_broker_total = chart_active.groupby('증권사')['AUM'].sum().sort_values(ascending=False)
+        chart_active['broker_rank'] = chart_active['증권사'].map({b: i for i, b in enumerate(chart_broker_total.index)})
+        chart_active = chart_active.sort_values(['broker_rank', 'AUM'], ascending=[True, False])
+        all_labels = (chart_active.apply(lambda r: r['증권사'] + ' ' + r['상품명'], axis=1)).tolist()
 
         opacity_levels = [1.0, 0.6, 0.35]
         broker_idx = {}
