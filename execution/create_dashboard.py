@@ -2832,10 +2832,8 @@ refresh();
         .tab.active {{ color: #E67E22; background: #fff; border-color: #E67E22 #E67E22 transparent; margin-bottom: -2px; }}
         .tab-content {{ display: none; }}
         .tab-content.active {{ display: block; }}
-        .notable-news {{ font-size: 13px; color: #555; line-height: 1.8; }}
-        .notable-news a {{ color: #1a73e8; text-decoration: none; }}
-        .notable-news a:hover {{ text-decoration: underline; }}
-        .notable-news b {{ color: #333; }}
+        .notable-news {{ font-size: 13px; color: #333; line-height: 1.8; }}
+        .notable-news b {{ font-weight: 700; }}
         footer {{ text-align: center; padding: 24px; color: #999; font-size: 14px; }}
     </style>
 </head>
