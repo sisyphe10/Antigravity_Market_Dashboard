@@ -2630,7 +2630,7 @@ refresh();
 <body>
 <header style="position:relative;">
     <h1>Featured</h1>
-    <div class="subtitle">Daily Market Highlights</div>
+    <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: __FEATURED_UPDATED__</div>
     <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
 </header>
 <div class="content">
@@ -2886,7 +2886,7 @@ refresh();
 </html>"""
 
     with open('featured.html', 'w', encoding='utf-8') as f:
-        f.write(featured_page)
+        f.write(featured_page.replace('__FEATURED_UPDATED__', now))
     print("Featured page generated: featured.html")
 
     # ── ETF page ──
