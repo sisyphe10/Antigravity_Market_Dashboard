@@ -1,14 +1,24 @@
 {
-  "date": "2026-04-14",
+  "date": "2026-04-15",
   "news": {
-    "000660": [
+    "005930": [
       {
-        "title": "코스피, 종전 기대감에 6170선까지 상승…기관 3300억대 매수",
-        "link": "https://n.news.naver.com/mnews/article/417/0001139245?sid=101"
+        "title": "씨피시스템, 세계 최대 스마트 제조 전시회 ‘하노버 메세 2026’ 참가",
+        "link": "https://www.sentv.co.kr/article/view/sentv202604160044"
       },
       {
-        "title": "\"같은 ETF 맞아?\"…삼성 +40% vs 하나 -9%",
-        "link": "https://theviewers.co.kr/View.aspx?No=4043205"
+        "title": "평택 부동산 시장 회복세 속 ‘고덕신도시 아테라’ 4월 분양 예정",
+        "link": "https://www.sentv.co.kr/article/view/sentv202604160049"
+      }
+    ],
+    "000660": [
+      {
+        "title": "[증시타임] 美 S&P 500, 3개월 만에 7,000선 돌파…사상 최고치 지속될까",
+        "link": "https://n.news.naver.com/mnews/article/374/0000504783?sid=101"
+      },
+      {
+        "title": "삼성 노조 '40조 성과급' 요구 파장…반도체 호황 속 커지는 보상 격차",
+        "link": "https://n.news.naver.com/mnews/article/277/0005750359?sid=101"
       }
     ],
     "000990": [
@@ -21,144 +31,114 @@
         "link": "https://www.newsquest.co.kr/news/articleView.html?idxno=264795"
       }
     ],
-    "064760": [
-      {
-        "title": "코스닥...알테오젠 · 삼천당제약 · HLB · 우리로 '껑충'",
-        "link": "http://www.choicenews.co.kr/news/articleView.html?idxno=163882"
-      },
-      {
-        "title": "[52주] 최고가 41개, 최저가 0 ... 코스피 6100 상회",
-        "link": "https://www.itooza.com/common/iview.php?no=2026041509340206945"
-      }
-    ],
     "402340": [
       {
-        "title": "코스피, 종전 기대감에 6170선까지 상승…기관 3300억대 매수",
-        "link": "https://n.news.naver.com/mnews/article/417/0001139245?sid=101"
+        "title": "[개장시황] 코스피, 사흘째 상승…6100선 유지",
+        "link": "http://www.hansbiz.co.kr/news/articleView.html?idxno=833325"
       },
       {
-        "title": "테슬라·마소·브로드컴 훈풍에 코스피도 사흘째 상승…6,130선",
-        "link": "https://www.slist.kr/news/articleView.html?idxno=732241"
+        "title": "노량진 라클라체자이드파인 1순위 26.91대 1",
+        "link": "https://www.newspim.com/news/view/20260416000337"
       }
     ],
     "267260": [
       {
+        "title": "미국 인프라 투자 수혜… 가온전선, 해외 매출 비중 확대에 '청신호'",
+        "link": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=445968"
+      },
+      {
         "title": "\"같은 ETF 맞아?\"…삼성 +40% vs 하나 -9%",
         "link": "https://theviewers.co.kr/View.aspx?No=4043205"
-      },
-      {
-        "title": "[V차트] HD현대, 조선·전력 자회사 호조에 실적 기대감↑",
-        "link": "https://www.itooza.com/common/iview.php?no=2026041415101104340"
       }
     ],
-    "298040": [
+    "000150": [
       {
-        "title": "'드파인' 세력 넓히는 SK에코플랜트, 강남 하이엔드 시장 '정조준'",
-        "link": "https://www.mediapen.com/news/view/1093689"
+        "title": "고금리·분양가 상승 속, 금융 혜택·안심보장제 단지 공급",
+        "link": "https://n.news.naver.com/mnews/article/016/0002630571?sid=101"
       },
       {
-        "title": "KB證 “전쟁 후 주가 회복한 종목은? 전력·증권·반도체”",
-        "link": "https://n.news.naver.com/mnews/article/366/0001157266?sid=101"
+        "title": "오토데스크, 해외 EPC 건설현장 디지털 전환·스마트 건설 가속화",
+        "link": "https://www.epnc.co.kr/news/articleView.html?idxno=400478"
       }
     ],
     "032830": [
       {
-        "title": "유동성 넘치는 삼성SDS…의뭉스런 자금 조달",
-        "link": "https://news.dealsitetv.com/articles/168735"
+        "title": "[비즈 인사이트] 삼성생명 홍원학 vs 삼성화재 이문화, ‘2조 클럽’ 쌍...",
+        "link": "https://www.seoultimes.news/news/article.html?no=2000095149"
       },
       {
-        "title": "\"KB 나와\" 삼성생명, 하나은행 잡고 5년 만에 챔프전 진출",
-        "link": "https://m.sports.naver.com/general/article/057/0001944921"
+        "title": "삼성생명, 원리금비보장 DC형 퇴직연금 수익률 25%",
+        "link": "https://www.g-enews.com/view.php?ud=202604161001536086a6e8311f64_1"
+      }
+    ],
+    "000810": [
+      {
+        "title": "[비즈 인사이트] 삼성생명 홍원학 vs 삼성화재 이문화, ‘2조 클럽’ 쌍...",
+        "link": "https://www.seoultimes.news/news/article.html?no=2000095149"
+      },
+      {
+        "title": "[더밸류 브리핑] 오늘의 소식…KB증권·KB자산운용",
+        "link": "http://www.thevaluenews.co.kr/news/view.php?idx=198120"
       }
     ],
     "055550": [
       {
-        "title": "'사상 최대' 뒤에 쌓인 숙제들... 진옥동 2기, KB와 격차 좁힐 수 있을까",
-        "link": "https://www.pressman.kr/news/articleView.html?idxno=101323"
+        "title": "[더밸류 브리핑] 오늘의 소식…KB증권·KB자산운용",
+        "link": "http://www.thevaluenews.co.kr/news/view.php?idx=198120"
       },
       {
-        "title": "KB자산운용, 'RISE 대형고배당10TR ETF' 순자산 5천억 돌파",
-        "link": "http://www.smarttimes.co.kr/news/articleView.html?idxno=44804"
+        "title": "KB운용, RISE 대형고배당10TR ETF 순자산 5000억 돌파",
+        "link": "http://www.whitepaper.co.kr/news/articleView.html?idxno=261099"
       }
     ],
     "086790": [
       {
-        "title": "KB운용, 'RISE 대형고배당10TR ETF' 순자산 5000억원 돌파",
-        "link": "https://www.joongangenews.com/news/articleView.html?idxno=512116"
+        "title": "[더밸류 브리핑] 오늘의 소식…KB증권·KB자산운용",
+        "link": "http://www.thevaluenews.co.kr/news/view.php?idx=198120"
       },
       {
-        "title": "KB자산운용, 'RISE 대형고배당10TR ETF' 순자산 5천억 돌파",
-        "link": "http://www.smarttimes.co.kr/news/articleView.html?idxno=44804"
+        "title": "KB운용, RISE 대형고배당10TR ETF 순자산 5000억 돌파",
+        "link": "http://www.whitepaper.co.kr/news/articleView.html?idxno=261099"
       }
     ],
     "316140": [
       {
-        "title": "KB자산운용, 'RISE 대형고배당10TR ETF' 순자산 5천억 돌파",
-        "link": "http://www.smarttimes.co.kr/news/articleView.html?idxno=44804"
+        "title": "[더밸류 브리핑] 오늘의 소식…KB증권·KB자산운용",
+        "link": "http://www.thevaluenews.co.kr/news/view.php?idx=198120"
       },
       {
-        "title": "KB운용, 'RISE 대형고배당10TR ETF' 순자산 5000억원 돌파",
-        "link": "https://www.joongangenews.com/news/articleView.html?idxno=512116"
+        "title": "KB운용, RISE 대형고배당10TR ETF 순자산 5000억 돌파",
+        "link": "http://www.whitepaper.co.kr/news/articleView.html?idxno=261099"
       }
     ],
     "009150": [
       {
-        "title": "삼성전기, 7거래일 연속 상승에 5% 급등…52주 최고가 경신",
-        "link": "http://www.econonews.co.kr/news/articleView.html?idxno=435803"
+        "title": "삼성전기 주가, 4월 16일 장중 637,000원 3.75% 상승",
+        "link": "https://www.topstarnews.net/news/articleView.html?idxno=16036213"
       },
       {
-        "title": "코스피, 종전 기대감 1%대 상승 출발···현대차 6%대 급등",
-        "link": "https://www.seoulfn.com/news/articleView.html?idxno=626664"
+        "title": "[서울데이터랩]개장 직후 인기 검색 종목 20選",
+        "link": "https://n.news.naver.com/mnews/article/081/0003635891?sid=101"
       }
     ],
-    "010170": [
+    "011070": [
       {
-        "title": "대한광통신 주가, 4월 16일 장중 18,130원 8.43% 하락",
-        "link": "https://www.joongangenews.com/news/articleView.html?idxno=512117"
+        "title": "로봇 시대의 숨은 강자… 에스비비테크, 초정밀 구동모듈 시장 정조준",
+        "link": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=445951"
       },
       {
-        "title": "전쟁 변동성 이겨내고 수익률 상위권 휩쓴 '광통신株'",
-        "link": "http://www.smedaily.co.kr/news/articleView.html?idxno=355772"
+        "title": "구미 '제32회 LG주부배구대회'…오는 18일 낙동강체육공원서 개최",
+        "link": "https://www.shinailbo.co.kr/news/articleView.html?idxno=5011769"
       }
     ],
-    "007810": [
+    "222800": [
       {
-        "title": "신성이엔지, 52주 신고가…클린룸 회복에 신사업 기대[특징주]",
-        "link": "https://n.news.naver.com/mnews/article/018/0006258275?sid=101"
+        "title": "[오늘의 IR] 롯데케미칼ㆍ이노테크ㆍ압타바이오 등",
+        "link": "https://www.etoday.co.kr/news/view/2576162"
       },
       {
-        "title": "[증권 뉴스브리핑] 외국인 지난달 주식 43.5조 순매도 역대 최대/금감원...",
-        "link": "https://www.asiatime.co.kr/article/20260416500077"
-      }
-    ],
-    "006800": [
-      {
-        "title": "DSRV, 써클과 USDC 기반 기관 결제 인프라 구축 본격화",
-        "link": "https://n.news.naver.com/mnews/article/018/0006258336?sid=105"
-      },
-      {
-        "title": "DSRV·써클, 기업용 '디지털 달러' 결제망 구축",
-        "link": "http://www.hansbiz.co.kr/news/articleView.html?idxno=833326"
-      }
-    ],
-    "071050": [
-      {
-        "title": "[증권주 담은 개미들]③ 미래에셋證, 글로벌이 만든 '30조 몸값'",
-        "link": "https://n.news.naver.com/mnews/article/293/0000082850?sid=101"
-      },
-      {
-        "title": "증권주, 종전·호실적 기대감에 상승…거래대금 폭증 속 '고공행진'",
-        "link": "http://www.economytalk.kr/news/articleView.html?idxno=420478"
-      }
-    ],
-    "039490": [
-      {
-        "title": "키움증권, 토스 중개형 ISA 계좌 개설 이벤트…고객 전원 1만5000원 지급",
-        "link": "https://www.joongangenews.com/news/articleView.html?idxno=512125"
-      },
-      {
-        "title": "키움증권, HL만도 주가 '기대 반영' 부담 경고…실적 회복 관건",
-        "link": "https://www.tokenpost.kr/news/market/350121"
+        "title": "청주시, 민선 8기 53조8천억 투자유치",
+        "link": "https://www.ccdn.co.kr/news/articleView.html?idxno=1073754"
       }
     ],
     "010130": [
@@ -167,48 +147,78 @@
         "link": "https://swtvnews.com/news/newsview.php?ncode=1065572877474226"
       },
       {
-        "title": "선취 수수료에 연이자만 325억… 메리츠, 고려아연의 '비싼' 백기사",
+        "title": "선취 수수료에 연이자만 325억…메리츠, 고려아연의 '비싼' 백기사",
         "link": "https://www.newsquest.co.kr/news/articleView.html?idxno=264806"
       }
     ],
-    "011780": [
+    "004020": [
       {
-        "title": "기업 흥망성쇠 시리즈① 대우건설 인수가 불러온 금호그룹의 자멸",
-        "link": "http://www.hansbiz.co.kr/news/articleView.html?idxno=833313"
+        "title": "'24시간 풀 가동' 철강업, 전기료 개편에 원가 부담 '설상가상'",
+        "link": "http://www.seoulwire.com/news/articleView.html?idxno=717151"
       },
       {
-        "title": "금호석유화학 휴그린, 신민아 출연 유튜브 조회수 2000만 넘어",
-        "link": "https://www.newspim.com/news/view/20260416000294"
+        "title": "\"석탄화력발전 조기 폐쇄, 폐기물 발생지 처리... 공약에 반영하라\"",
+        "link": "https://n.news.naver.com/mnews/article/047/0002512246?sid=162"
       }
     ],
-    "120110": [
+    "010060": [
       {
-        "title": "코오롱인더, 잘피 식재로 해양 탄소흡수 강화…\"NDC 기여 기대\"",
-        "link": "https://www.m-i.kr/news/articleView.html?idxno=1364781"
+        "title": "OCI홀딩스 주가, 4월 16일 장중 244,500원 4.04% 상승",
+        "link": "https://www.topstarnews.net/news/articleView.html?idxno=16036225"
       },
       {
-        "title": "코오롱인더, 한국수산자원공단·환경재단과 '바다숲 MOU' 체결",
-        "link": "https://n.news.naver.com/mnews/article/417/0001139144?sid=101"
+        "title": "[서울데이터랩]개장 직후 인기 검색 종목 20選",
+        "link": "https://n.news.naver.com/mnews/article/081/0003635891?sid=101"
       }
     ],
     "034730": [
       {
-        "title": "[이재명 AI 3강] GPU·데이터센터·NPU…'AI 고속도로' 인프라 윤곽",
-        "link": "https://dealsite.co.kr/articles/160266"
+        "title": "[증시타임] 美 S&P 500, 3개월 만에 7,000선 돌파…사상 최고치 지속될까",
+        "link": "https://n.news.naver.com/mnews/article/374/0000504783?sid=101"
       },
       {
-        "title": "코스피, 종전 기대감에 6170선까지 상승…기관 3300억대 매수",
-        "link": "https://n.news.naver.com/mnews/article/417/0001139245?sid=101"
+        "title": "순천시 도사동-SK텔레콤, 초등학생 안심휴대폰 지원사업 맞손",
+        "link": "https://www.jeonmae.co.kr/news/articleView.html?idxno=1248753"
+      }
+    ],
+    "006120": [
+      {
+        "title": "SK디스커버리, ‘백신 담합 무죄’ 후 형사보상금 877만원 받는다",
+        "link": "https://mdtoday.co.kr/news/view/1065575903076407"
+      },
+      {
+        "title": "국민연금, 1분기 삼성전자와 SK하이닉스 담아 49조 벌었다",
+        "link": "https://n.news.naver.com/mnews/article/037/0000038003?sid=101"
+      }
+    ],
+    "017670": [
+      {
+        "title": "순천시 도사동-SK텔레콤, 초등학생 안심휴대폰 지원사업 맞손",
+        "link": "https://www.jeonmae.co.kr/news/articleView.html?idxno=1248753"
+      },
+      {
+        "title": "누보·누보이엔지-광주광역시장애인종합복지관, 장애인 고용 확대 및 ES...",
+        "link": "http://www.nongup.net/news/articleView.html?idxno=32967"
+      }
+    ],
+    "030200": [
+      {
+        "title": "'무릎' 배재민 등 ECA 출전할 국가대표 20명 선정",
+        "link": "https://m.sports.naver.com/esports/article/347/0000193073"
+      },
+      {
+        "title": "KTis, 한성자동차·한성모터스 고객센터 AI 전환…상담 처리시간 28% 단축",
+        "link": "https://n.news.naver.com/mnews/article/029/0003021992?sid=105"
       }
     ],
     "066570": [
       {
-        "title": "슈퍼브에이아이, '슈퍼브 VA' 조달청 혁신제품 지정…수의계약 길 열리...",
-        "link": "https://www.public25.com/news/articleView.html?idxno=44296"
+        "title": "4월 초여름 날씨 예보…미리 준비하는 ‘얼리 썸머’ 급증",
+        "link": "https://n.news.naver.com/mnews/article/468/0001234483?sid=102"
       },
       {
-        "title": "[유통갤러리] 교원웰스 세라젬 유니시티코리아 신세계사이먼 GS샵",
-        "link": "https://theviewers.co.kr/View.aspx?No=4043783"
+        "title": "신세계 시흥프리미엄아울렛 '에스몰' 1주년...고객 10% 늘었다",
+        "link": "https://n.news.naver.com/mnews/article/008/0005345000?sid=101"
       }
     ],
     "043260": [
@@ -221,24 +231,34 @@
         "link": "https://www.news2day.co.kr/article/20260415500219"
       }
     ],
-    "001820": [
+    "082920": [
       {
-        "title": "비츠로테크 주가 기세등등...핵융합 발전 상용화 기대감에 매수세 몰려",
-        "link": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=445913"
+        "title": "KB證 “전쟁 후 주가 회복한 종목은? 전력·증권·반도체”",
+        "link": "https://n.news.naver.com/mnews/article/366/0001157266?sid=101"
       },
       {
-        "title": "[특징주] MLCC 산업 전망...IM증권 \"패닉바잉 전조\"",
-        "link": "http://www.newstnt.com/news/articleView.html?idxno=606838"
+        "title": "비츠로셀 주가, 4월 15일 50,400원 14.03% 상승 마감",
+        "link": "https://www.joongangenews.com/news/articleView.html?idxno=512021"
       }
     ],
     "033780": [
       {
-        "title": "[브리프]파리바게뜨 오뚜기 CJ제일제당 롯데웰푸드 동원홈푸드 KT&G 外",
-        "link": "http://www.biztribune.co.kr/news/articleView.html?idxno=352470"
+        "title": "기업은행, NIM 사수한 '본업 체력'…2Q 첫 분기배당 관전 포인트",
+        "link": "https://n.news.naver.com/mnews/article/293/0000082857?sid=101"
       },
       {
-        "title": "KT&G, 릴 하이브리드 전용스틱 '믹스 시가 컬렉션' 전국 편의점에 출시",
-        "link": "https://www.thepublic.kr/news/articleView.html?idxno=301280"
+        "title": "한국의결권자문, ‘이사회 실무 역량 강화 교육’ 개설",
+        "link": "https://n.news.naver.com/mnews/article/018/0006258345?sid=101"
+      }
+    ],
+    "271560": [
+      {
+        "title": "오리온, 참붕어빵 우유슈크림맛 출시",
+        "link": "http://www.beyondpost.co.kr/view.php?ud=20260416101435231018ef25b590_30"
+      },
+      {
+        "title": "오리온, ‘참붕어빵 우유슈크림맛’ 출시",
+        "link": "https://n.news.naver.com/mnews/article/022/0004121290?sid=101"
       }
     ],
     "084690": [
@@ -251,44 +271,134 @@
         "link": "https://www.thebell.co.kr/free/content/ArticleView.asp?key=202604101049395360102946"
       }
     ],
-    "353810": [
+    "278470": [
       {
-        "title": "식품 상장기업 브랜드평판 4월 빅데이터 분석... 1위 삼양식품, 2위 오리...",
-        "link": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=445846"
+        "title": "[특징주] 에이피알, K-뷰티테크로 서구권 공략… \"성수동 플래그십 외국...",
+        "link": "http://www.newstnt.com/news/articleView.html?idxno=606984"
       },
       {
-        "title": "[브랜드평판] 삼양식품, 식품 상장기업 4월 1위···오리온·농심 뒤쫓...",
-        "link": "https://www.enetnews.co.kr/news/articleView.html?idxno=48924"
+        "title": "KB證 “전쟁 후 주가 회복한 종목은? 전력·증권·반도체”",
+        "link": "https://n.news.naver.com/mnews/article/366/0001157266?sid=101"
       }
     ],
-    "030200": [
+    "021240": [
       {
-        "title": "슈퍼브에이아이, '슈퍼브 VA' 조달청 혁신제품 지정…수의계약 길 열리...",
-        "link": "https://www.public25.com/news/articleView.html?idxno=44296"
+        "title": "코웨이, '레드닷 디자인 어워드'서 8개 본상…20년 연속 수상",
+        "link": "http://www.metroseoul.co.kr/article/20260416500118"
       },
       {
-        "title": "ERA 13.03 아쿼 교체 현실화 되나. 울산에 일본인 투수 3명이 있는데...",
-        "link": "https://m.sports.naver.com/kbaseball/article/076/0004396136"
+        "title": "\"iF 이어 레드닷 수상\" 글로벌 디자인 인정받은 코웨이",
+        "link": "https://n.news.naver.com/mnews/article/014/0005508609?sid=101"
       }
     ],
-    "032640": [
+    "298020": [
       {
-        "title": "성신여대입구역 전력구 화재…4·5번 출구 폐쇄",
-        "link": "https://n.news.naver.com/mnews/article/011/0004611307?sid=102"
+        "title": "휠라 언더웨어, 초냉감 '쿨웨이브' 출시…여름 시장 공략",
+        "link": "http://www.dailysmart.co.kr/news/articleView.html?idxno=122714"
       },
       {
-        "title": "\"같은 ETF 맞아?\"…삼성 +40% vs 하나 -9%",
-        "link": "https://theviewers.co.kr/View.aspx?No=4043205"
+        "title": "휠라 언더웨어, 냉감 '쿨웨이브' 출시…여름 기능성 시장 공략",
+        "link": "https://www.insightkorea.co.kr/news/articleView.html?idxno=244760"
+      }
+    ],
+    "0126Z0": [
+      {
+        "title": "국민연금, 1분기 삼성전자와 SK하이닉스 담아 49조 벌었다",
+        "link": "https://n.news.naver.com/mnews/article/037/0000038003?sid=101"
+      },
+      {
+        "title": "[기업레이더 ①] 삼성바이오에피스, 바이오시밀러 넘어 신약으로 '빅파...",
+        "link": "https://www.apsk.co.kr/news/articleView.html?idxno=539152"
+      }
+    ],
+    "326030": [
+      {
+        "title": "비상장 제약바이오 89社, 부채비율 58.70%…43곳 부채비율 ↑",
+        "link": "https://www.medipana.com/news/articleView.html?idxno=409830"
+      },
+      {
+        "title": "SK바이오팜 '뇌전증 신약' 국내 론칭 초읽기...3분기 보험등재 가시화",
+        "link": "https://www.pharmnews.com/news/articleView.html?idxno=302868"
+      }
+    ],
+    "127120": [
+      {
+        "title": "[52주] 최고가 58개, 신저가 0 ... 코스피 1%대 상승",
+        "link": "https://www.itooza.com/common/iview.php?no=2026041609340205530"
+      },
+      {
+        "title": "[상대강도과열 종목] 광전자 루멘스 이노인스트루먼트 파수 줄상한가…...",
+        "link": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=445763"
+      }
+    ],
+    "071050": [
+      {
+        "title": "[증권주 담은 개미들]③ 미래에셋證, 글로벌이 만든 '30조 몸값'",
+        "link": "https://n.news.naver.com/mnews/article/293/0000082850?sid=101"
+      },
+      {
+        "title": "증권주, 종전·호실적 기대감에 상승…거래대금 폭증 속 '고공행진'",
+        "link": "http://www.economytalk.kr/news/articleView.html?idxno=420478"
+      }
+    ],
+    "005940": [
+      {
+        "title": "NC, 1분기 '깜짝 실적' 예고…'아이온2' 등 신작IP 부활 신호탄",
+        "link": "https://news.einfomax.co.kr/news/articleView.html?idxno=4409902"
+      },
+      {
+        "title": "증권가서 사라진 '매도' 리포트…안팎 압박에 '입틀막' 속앓이",
+        "link": "http://www.newsdream.kr/news/articleView.html?idxno=111349"
+      }
+    ],
+    "039490": [
+      {
+        "title": "美증시 사상 최고 … 삼전·하닉 '숨고르기', 현대차 '질주'",
+        "link": "https://biz.newdaily.co.kr/site/data/html/2026/04/16/2026041600078.html"
+      },
+      {
+        "title": "키움증권·토스, 중개형 ISA 계좌 개설 이벤트",
+        "link": "http://www.issuenbiz.com/news/articleView.html?idxno=75683"
+      }
+    ],
+    "018260": [
+      {
+        "title": "삼성에스디에스 주가, 4월 16일 장중 188,100원 5.32% 상승",
+        "link": "https://www.topstarnews.net/news/articleView.html?idxno=16036229"
+      },
+      {
+        "title": "[서울데이터랩]개장 직후 인기 검색 종목 20選",
+        "link": "https://n.news.naver.com/mnews/article/081/0003635891?sid=101"
+      }
+    ],
+    "022100": [
+      {
+        "title": "가비아, 국내 유일 IX 저력으로 AI·클라우드 대전환 가속",
+        "link": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=445961"
+      },
+      {
+        "title": "로봇 시대의 숨은 강자… 에스비비테크, 초정밀 구동모듈 시장 정조준",
+        "link": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=445951"
+      }
+    ],
+    "181710": [
+      {
+        "title": "혼자사는 어르신 AI가 살핀다...서귀포시, AI 기반 고독사 예방 시범사업...",
+        "link": "https://www.headlinejeju.co.kr/news/articleView.html?idxno=590806"
+      },
+      {
+        "title": "NHN KCP, 메르세데스 페이와 협력 강화...기술 인프라 점검 및 비전 공유",
+        "link": "https://hbnpress.com/news/view/1065574183917464"
       }
     ],
     "028300": [
       {
-        "title": "코스피, 종전 기대감에 6170선까지 상승…기관 3300억대 매수",
-        "link": "https://n.news.naver.com/mnews/article/417/0001139245?sid=101"
+        "title": "美증시 사상 최고 … 삼전·하닉 '숨고르기', 현대차 '질주'",
+        "link": "https://biz.newdaily.co.kr/site/data/html/2026/04/16/2026041600078.html"
       },
       {
-        "title": "각자도생 끝났다…제약바이오, 생존 위해 '재결합' 선택",
-        "link": "https://www.ebn.co.kr/news/articleView.html?idxno=1705606"
+        "title": "[서울데이터랩]개장 직후 인기 검색 종목 20選",
+        "link": "https://n.news.naver.com/mnews/article/081/0003635891?sid=101"
       }
     ],
     "214150": [
@@ -301,74 +411,114 @@
         "link": "https://www.etoday.co.kr/news/view/2574876"
       }
     ],
-    "067630": [
+    "137310": [
       {
-        "title": "HLB펩 최대주주 에이치엘비제넥스, HLB펩 주식등의 수 72만1900주 감소…...",
-        "link": "https://www.digitaltoday.co.kr/news/articleView.html?idxno=657354"
+        "title": "에스디바이오센서, 주식 1,000,000주 소각→주주가치 제고",
+        "link": "https://www.topstarnews.net/news/articleView.html?idxno=16035522"
       },
       {
-        "title": "[HIT알공] 로킷헬스케어, 원부자재 확보에 13억 선급금 지급",
-        "link": "https://www.hitnews.co.kr/news/articleView.html?idxno=75426"
+        "title": "루트락, 척추 임플란트 시장서도 성과… 정형외과용 의료기기 강자로 우...",
+        "link": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=445298"
       }
     ],
-    "021240": [
+    "052690": [
       {
-        "title": "코웨이, ‘레드닷 디자인 어워드’ 8관왕…20년 연속 수상",
-        "link": "https://n.news.naver.com/mnews/article/374/0000504773?sid=101"
+        "title": "한전, 6월 출범 예정 '한전기술지주' 초대 대표이사 공개 모집",
+        "link": "http://www.epj.co.kr/news/articleView.html?idxno=38383"
       },
       {
-        "title": "코웨이, ‘2026 레드닷 디자인 어워드’ 8관왕…20년 연속 수상",
-        "link": "http://www.datanews.co.kr/news/article.html?no=144346"
+        "title": "[52주] 최고가 58개, 신저가 0 ... 코스피 1%대 상승",
+        "link": "https://www.itooza.com/common/iview.php?no=2026041609340205530"
       }
     ],
-    "483650": [
+    "034220": [
       {
-        "title": "HB인베스트, PE 공백 VC로 메운다…신한캐피탈 출신 심사역 영입",
-        "link": "https://news.einfomax.co.kr/news/articleView.html?idxno=4409875"
+        "title": "\"상호주 의결권 제한, 대법원 정당성 인정… 향후 해석·집행 반영 필요...",
+        "link": "http://www.efnews.co.kr/news/articleView.html?idxno=129116"
       },
       {
-        "title": "[리스트] MVP 상위 20선...GST, 프로텍 등 - 16일",
-        "link": "https://www.itooza.com/common/iview.php?no=2026041607153302175"
+        "title": "경희법학연구소, '기업거버넌스의 주요 쟁점과 과제' 세미나 성료",
+        "link": "https://n.news.naver.com/mnews/article/008/0005344978?sid=102"
       }
     ],
-    "298020": [
+    "108320": [
       {
-        "title": "휠라 언더웨어, 냉감 '쿨웨이브' 출시…여름 기능성 시장 공략",
-        "link": "https://www.insightkorea.co.kr/news/articleView.html?idxno=244760"
+        "title": "2025년 연봉 순위, 1위 김승연 회장 248억원...신동빈·박정원·이재현·...",
+        "link": "https://www.greened.kr/news/articleView.html?idxno=339345"
       },
       {
-        "title": "휠라 언더웨어, 흡습성 1.5배 높은 고성능 초냉감 원사 사용 쿨웨이브 ...",
-        "link": "http://www.fashionn.com/board/read_new.php?table=1006&number=60661"
+        "title": "대기업 오너 평균보수 27억, 일반직원과 격차 27배 수준",
+        "link": "https://www.ksilbo.co.kr/news/articleView.html?idxno=1054189"
+      }
+    ],
+    "187870": [
+      {
+        "title": "AI 패권 ‘양강’ 전환… 중국, 가성비로 美 턱밑 추격",
+        "link": "https://www.g-enews.com/view.php?ud=202604161023393141fbbec65dfb_1"
+      },
+      {
+        "title": "'쇼챔'에 등장한 '신비 요괴'…코스모시, 'Silence' 퍼포 시선집중",
+        "link": "https://m.entertain.naver.com/article/030/0003418417"
       }
     ],
     "036570": [
       {
+        "title": "NC, 1분기 '깜짝 실적' 예고…'아이온2' 등 신작IP 부활 신호탄",
+        "link": "https://news.einfomax.co.kr/news/articleView.html?idxno=4409902"
+      },
+      {
         "title": "[특징주] NC, 실적 견조·신작 기대감에 '강세'",
         "link": "https://www.cstimes.com/news/articleView.html?idxno=702197"
-      },
-      {
-        "title": "엔씨서비스, 장애인 고용 공로로 국무총리 표창…중증장애인 비율 83%",
-        "link": "https://www.slist.kr/news/articleView.html?idxno=732240"
       }
     ],
-    "419530": [
+    "037560": [
       {
-        "title": "[산업계 이모저모] KCC·GS건설·신일전자·SAMG엔터",
-        "link": "http://www.bizwnews.com/news/articleView.html?idxno=133852"
+        "title": "안동, 세계유산을 케이블에 새기다",
+        "link": "https://n.news.naver.com/mnews/article/277/0005750353?sid=102"
       },
       {
-        "title": "[유아동브랜드 트렌드] 러베, 감도 깊은 취향 셀렉트샵 '29CM' 입점... 유...",
-        "link": "https://www.ibabynews.com/news/articleView.html?idxno=150505"
+        "title": "LG유플러스 자회사 미디어로그, 결손 부담 여전…체질 개선 고삐",
+        "link": "https://www.topdaily.kr/articles/109681"
       }
     ],
     "067000": [
       {
-        "title": "[게임뉴스] 조이시티 및 블리자드 외 주요 소식",
-        "link": "https://www.gamevu.co.kr/news/articleView.html?idxno=57252"
+        "title": "[체험기] 한국사 게임 장인 김태곤의 화려한 귀환, ‘임진왜란: 조선의...",
+        "link": "https://n.news.naver.com/mnews/article/009/0005666741?sid=105"
       },
       {
-        "title": "조이시티 '건쉽배틀 토탈워페어' 강습 작전 추가",
-        "link": "https://www.tgdaily.co.kr/news/articleView.html?idxno=403639"
+        "title": "[게임뉴스] 조이시티 및 블리자드 외 주요 소식",
+        "link": "https://www.gamevu.co.kr/news/articleView.html?idxno=57252"
+      }
+    ],
+    "004170": [
+      {
+        "title": "아워홈, 한화 편입 후 복지 체감 ‘톡톡’..육아동행지원금 수혜 100가정...",
+        "link": "https://kpenews.com/View.aspx?No=4043820"
+      },
+      {
+        "title": "이마트에서 장 보면 비트코인까지…빗썸·신세계포인트 '신비로운 더블...",
+        "link": "http://www.newsroad.co.kr/news/articleView.html?idxno=58014"
+      }
+    ],
+    "257720": [
+      {
+        "title": "'LG 파트너' 스킬드 AI, 지브라 로봇 사업부 인수…피지컬 AI 상용화 가속",
+        "link": "https://n.news.naver.com/mnews/article/092/0002418881?sid=105"
+      },
+      {
+        "title": "한화, \"8400억 베팅\"…한화솔루션 살리기 '승부수'",
+        "link": "https://www.megaeconomy.co.kr/news/newsview.php?ncode=1065571506158705"
+      }
+    ],
+    "036030": [
+      {
+        "title": "케이티알파, 임시주총 5월28일 개최…기타비상무이사 2명 선임 추진",
+        "link": "https://www.digitaltoday.co.kr/news/articleView.html?idxno=657225"
+      },
+      {
+        "title": "KT 박윤영호 계열사 인사 마무리 수순…전열 재정비",
+        "link": "http://www.newstomato.com/ReadNews.aspx?no=1297774&inflow=N"
       }
     ],
     "100790": [
@@ -383,182 +533,92 @@
     ],
     "027360": [
       {
+        "title": "아주IB투자 주가, 4월 16일 장중 11,130원 8.02% 하락",
+        "link": "https://www.topstarnews.net/news/articleView.html?idxno=16036195"
+      },
+      {
         "title": "[공시] 서울전자통신·우리넷 '투자위험', 애머릿지 '공매도 금지' 등.....",
         "link": "http://www.newstnt.com/news/articleView.html?idxno=606956"
-      },
-      {
-        "title": "아주IB투자, 투자경고종목 지정예고→투자주의 환기",
-        "link": "https://www.topstarnews.net/news/articleView.html?idxno=16035657"
       }
     ],
-    "204620": [
+    "021080": [
       {
-        "title": "MS 오피스 비켜라… 폴라리스오피스, 'K-AI 문서'로 시장 돌풍",
-        "link": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=445935"
+        "title": "루닛 유상증자에 에이티넘인베스트 참여 \"미래 성장 가치 인정\"",
+        "link": "https://www.medicaltimes.com/Main/News/NewsView.html?ID=1168232&ref=naverpc"
       },
       {
-        "title": "작년 12조 벌어들인 올다무…백화점과 격차 더 벌렸다 [언박싱]",
-        "link": "https://n.news.naver.com/mnews/article/016/0002629828?sid=101"
-      }
-    ],
-    "003570": [
-      {
-        "title": "SNT다이내믹스, 국내 첫 CMMC 핵심 전문가 인증 확보…美 시장 공략",
-        "link": "https://n.news.naver.com/mnews/article/018/0006257893?sid=100"
-      },
-      {
-        "title": "SNT다이내믹스 미 사이버보안 인증",
-        "link": "https://www.naeil.com/news/read/585329?ref=naver"
+        "title": "하나증권 \"스테이블코인 '써클' CEO 방한, 다날 우리기술투자 포함 가상...",
+        "link": "https://www.businesspost.co.kr/BP?command=article_view&num=435525"
       }
     ],
     "003620": [
       {
+        "title": "비규제지역 풍선효과 온기 퍼진 평택 고덕에 '고덕신도시 아테라' 4월 출...",
+        "link": "https://www.woodkorea.co.kr/news/articleView.html?idxno=89053"
+      },
+      {
         "title": "신차 효과' 등에 업은 중견 3사…현대차·기아 독주 체제 흔든다",
         "link": "https://www.cstimes.com/news/articleView.html?idxno=702157"
-      },
-      {
-        "title": "'파산 위기' KGM의 완벽한 부활…역대급 실적 비결은?",
-        "link": "https://www.newsway.co.kr/news/view?ud=2026041514405327735"
       }
     ],
-    "354320": [
+    "043370": [
       {
-        "title": "[골든크로스 종목] ETF·ETN까지 동반 상승... 엑스게이트· 케이씨에스...",
-        "link": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=445756"
+        "title": "대구 자동차 부품업계 로봇 신사업 확장…휴머노이드까지 넘본다",
+        "link": "https://www.yeongnam.com/web/view.php?key=20260415024548215"
       },
       {
-        "title": "전쟁 가고 실적 온다, 외인·기관 싹쓸이 종목은?",
-        "link": "http://www.opinionnews.co.kr/news/articleView.html?idxno=136802"
+        "title": "현대모비스, 글로벌 완성차 시장 정조준… 핵심 부품 수출 봇물",
+        "link": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=445610"
       }
     ],
-    "127120": [
+    "100250": [
       {
-        "title": "[52주] 최고가 58개, 신저가 0 ... 코스피 1%대 상승",
-        "link": "https://www.itooza.com/common/iview.php?no=2026041609340205530"
+        "title": "터보차저 넘어 로봇 부품으로... 한국피아이엠, 신성장 동력 확보 박차",
+        "link": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=445324"
       },
       {
-        "title": "[상대강도과열 종목] 광전자 루멘스 이노인스트루먼트 파수 줄상한가…...",
-        "link": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=445763"
+        "title": "바다 위 국방 통신의 핵심… 위월드 VSAT 서비스 시장 장악",
+        "link": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=444161"
       }
     ],
-    "096530": [
+    "403550": [
       {
-        "title": "가천대 길병원 이시훈 교수팀, 국제 학회 '우수 구연상'",
-        "link": "http://www.bokuennews.com/news/article.html?no=276818"
+        "title": "쏘카 “에지 케이스 22만건 축적…미래 모빌리티 1위 플랫폼 도약”",
+        "link": "https://n.news.naver.com/mnews/article/011/0004611222?sid=105"
       },
       {
-        "title": "판 커진 K-ADC 신약…삼성·셀트리온 등 대형사도 임상 '속속'",
-        "link": "https://daily.hankooki.com/news/articleView.html?idxno=1358572"
-      }
-    ],
-    "003850": [
-      {
-        "title": "보령 \"일자리 내실 사활\"·청양 \"기본소득 선순환 안착\"",
-        "link": "https://n.news.naver.com/mnews/article/277/0005750340?sid=102"
-      },
-      {
-        "title": "[보령소식] 공무원 창의학습 동아리 역량강화 워크숍 개최 외",
-        "link": "https://daily.hankooki.com/news/articleView.html?idxno=1358626"
-      }
-    ],
-    "108320": [
-      {
-        "title": "2025년 연봉 순위, 1위 김승연 회장 248억원...신동빈·박정원·이재현·...",
-        "link": "https://www.greened.kr/news/articleView.html?idxno=339345"
-      },
-      {
-        "title": "대기업 오너 평균보수 27억, 일반직원과 격차 27배 수준",
-        "link": "https://www.ksilbo.co.kr/news/articleView.html?idxno=1054189"
-      }
-    ],
-    "036170": [
-      {
-        "title": "[공시] 빛과전자'매매정지'·라이콤'투자위험'·우리넷'투자경고' 등......",
-        "link": "http://www.newstnt.com/news/articleView.html?idxno=606778"
-      },
-      {
-        "title": "에이치엠넥스, 주가 급등에 투자경고종목 지정예고→투자 주의 당부",
-        "link": "https://www.topstarnews.net/news/articleView.html?idxno=16034676"
-      }
-    ],
-    "078150": [
-      {
-        "title": "루멘스, MLD·MLP 신기술 탑재… 미니·마이크로 LED 시장 영토 확장 박...",
-        "link": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=445365"
-      },
-      {
-        "title": "[52주] 최고가 45개, 최저가 2개... 코스피 6천 근접",
-        "link": "https://www.itooza.com/common/iview.php?no=2026041409340105018"
-      }
-    ],
-    "093320": [
-      {
-        "title": "가비아, 국내 유일 IX 저력으로 AI·클라우드 대전환 가속",
-        "link": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=445961"
-      },
-      {
-        "title": "AI·디지털 전환 가속화…IT서비스株 케이씨에스 삼성에스디에스 아이티...",
-        "link": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=445564"
-      }
-    ],
-    "025770": [
-      {
-        "title": "\"데이터 신뢰가 IT 경쟁력\"...송경희 위원장 정책 발표, 개인정보보호법...",
-        "link": "https://n.news.naver.com/mnews/article/629/0000491867?sid=105"
-      },
-      {
-        "title": "씨이랩, AI 영상분석 플랫폼 'XAIVA' GS인증 1등급 획득",
-        "link": "https://www.industrynews.co.kr/news/articleView.html?idxno=80057"
-      }
-    ],
-    "035600": [
-      {
-        "title": "원화 스테이블코인, 결제 넘어 금융 인프라 될까",
-        "link": "https://www.tokenpost.kr/news/blockchain/349811"
-      },
-      {
-        "title": "\"스테이블코인, 결제 혁신 넘어 금융 인프라로 부상\"",
-        "link": "https://www.straightnews.co.kr/news/articleView.html?idxno=300264"
-      }
-    ],
-    "036030": [
-      {
-        "title": "케이티알파, 임시주총 5월28일 개최…기타비상무이사 2명 선임 추진",
-        "link": "https://www.digitaltoday.co.kr/news/articleView.html?idxno=657225"
-      },
-      {
-        "title": "KT 박윤영호 계열사 인사 마무리 수순…전열 재정비",
-        "link": "http://www.newstomato.com/ReadNews.aspx?no=1297774&inflow=N"
-      }
-    ],
-    "060150": [
-      {
-        "title": "[건설 먹거리 X파일] 아이에스동서, 건설 웃돈 '환경 매출'...수익성이 ...",
-        "link": "https://n.news.naver.com/mnews/article/293/0000082481?sid=101"
-      },
-      {
-        "title": "고양시 대기업 본사 이전 잇따라…지식산업센터 규제 완화 주효",
-        "link": "https://www.incheonilbo.com/news/articleView.html?idxno=1320549"
+        "title": "쏘카 “22만건 사고 데이터로 자율주행 승부”",
+        "link": "https://n.news.naver.com/mnews/article/020/0003712705?sid=101"
       }
     ],
     "203650": [
       {
-        "title": "[특징주] 엑스게이트·라온시큐어 등 보안주 연일 강세...업계 뒤흔든 '...",
-        "link": "https://www.joongangenews.com/news/articleView.html?idxno=512122"
+        "title": "AI 해커 공포·엔비디아 지원사격에 양자주 연이틀 ‘무더기 상한가’ ...",
+        "link": "https://n.news.naver.com/mnews/article/011/0004611323?sid=101"
       },
       {
-        "title": "[특징주] 엔비디아 ‘아이징’ 발표하자…양자컴퓨터주 줄줄이 ‘上’",
-        "link": "https://n.news.naver.com/mnews/article/366/0001157305?sid=101"
+        "title": "드림시큐리티 주가, 4월 16일 장중 상한가 3,545원 29.85% 상승",
+        "link": "https://www.topstarnews.net/news/articleView.html?idxno=16036220"
       }
     ],
     "067280": [
       {
-        "title": "[패트롤] 경주시-영남이공대-DGIST-대구보건대-계명대 동산병원-대구시...",
-        "link": "https://www.ekn.kr/web/view.php?key=20260415027207311"
+        "title": "평택 부동산 시장 회복세 속 ‘고덕신도시 아테라’ 4월 분양 예정",
+        "link": "https://www.sentv.co.kr/article/view/sentv202604160049"
       },
       {
-        "title": "中 '2026 휴머노이드 로봇 생태대회' 17일 상하이서 개막",
-        "link": "https://www.irobotnews.com/news/articleView.html?idxno=45877"
+        "title": "[패트롤] 경주시-영남이공대-DGIST-대구보건대-계명대 동산병원-대구시...",
+        "link": "https://www.ekn.kr/web/view.php?key=20260415027207311"
+      }
+    ],
+    "070960": [
+      {
+        "title": "\"어제는 나그네로, 오늘은 이웃으로\"…반값에 즐기는 국내 소도시 'N차 ...",
+        "link": "https://n.news.naver.com/mnews/article/076/0004396134?sid=101"
+      },
+      {
+        "title": "KGM, 스포츠 마케팅 강화…브랜드 접점 넓힌다",
+        "link": "http://www.srtimes.kr/news/articleView.html?idxno=201316"
       }
     ]
   }

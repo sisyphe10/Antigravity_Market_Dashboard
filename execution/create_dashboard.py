@@ -2794,10 +2794,9 @@ function renderNotable() {{
         var html = '';
         sectorList.forEach(function(s) {{
             var items = sectors[s];
-            var names = items.slice(0, 5).map(function(r) {{
+            var names = items.map(function(r) {{
                 return r.name;
             }}).join(', ');
-            if (items.length > 5) names += ' 외 ' + (items.length - 5) + '개';
 
             var newsHtml = '';
             var nd = newsData.date || '';
