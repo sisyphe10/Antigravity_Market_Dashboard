@@ -890,7 +890,9 @@ def create_cumulative_aum_chart():
             return ""
         df['날짜'] = pd.to_datetime(df['날짜'])
 
-        all_dates = sorted(df['날짜'].dt.strftime('%Y-%m-%d').unique())
+        # 차트 표시는 3/20부터 (이전 데이터는 forward-fill 기준값으로만 사용)
+        chart_start = '2026-03-20'
+        all_dates = sorted(d for d in df['날짜'].dt.strftime('%Y-%m-%d').unique() if d >= chart_start)
 
         is_target = df['상품명'].str.contains('목표전환형', na=False)
         regular_df = df[~is_target].copy()
@@ -899,18 +901,23 @@ def create_cumulative_aum_chart():
         broker_colors = {'삼성': '#1428A0', 'NH': '#0072CE', 'DB': '#00854A'}
         opacity_levels = [1.0, 0.6, 0.35]
 
-        def forward_fill_aum(product_df, dates):
-            """날짜별 AUM을 forward-fill하여 반환 (종료된 회차의 마지막 값 유지)"""
+        # 전체 날짜 (forward-fill 기준값 계산용, 차트 시작일 이전 포함)
+        all_dates_full = sorted(df['날짜'].dt.strftime('%Y-%m-%d').unique())
+
+        def forward_fill_aum(product_df, chart_dates):
+            """전체 데이터에서 forward-fill 후 chart_dates에 해당하는 값만 반환"""
             timeline = {}
             for _, row in product_df.sort_values('날짜').iterrows():
                 timeline[row['날짜'].strftime('%Y-%m-%d')] = row['AUM']
-            result = []
+            # 전체 날짜로 forward-fill
+            filled = {}
             last_known = 0
-            for d in dates:
+            for d in all_dates_full:
                 if d in timeline:
                     last_known = timeline[d]
-                result.append(last_known)
-            return result
+                filled[d] = last_known
+            # chart_dates에 해당하는 값만 추출
+            return [filled.get(d, 0) for d in chart_dates]
 
         datasets = []
         broker_idx = {}
