@@ -2621,7 +2621,7 @@ refresh();
         tbody tr:nth-child(even) {{ background: #E8F5E9; }}
         tbody tr:nth-child(odd) {{ background: #fff; }}
         tbody tr:hover {{ background: #C8E6C9; }}
-        .section h2 {{ background: #E67E22; color: #fff; padding: 8px 12px; border-radius: 4px; font-size: 0.95rem; }}
+        .section h2 {{ background: #E67E22; color: #fff; padding: 8px 12px; border-radius: 4px; font-size: 0.95rem; text-align: center; }}
         .pos {{ color: #cc0000; font-weight: 600; }}
         .neg {{ color: #0055cc; font-weight: 600; }}
         footer {{ text-align: center; padding: 24px; color: #999; font-size: 14px; }}
