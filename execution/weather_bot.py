@@ -1557,6 +1557,164 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # ============================================================
+# Fitness 기록 - Telegram → Google Sheets
+# ============================================================
+async def fitness_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/fitness 런닝 4.2 28 이지런"""
+    args = context.args
+
+    service = _get_sheets_service()
+    if not service:
+        await update.message.reply_text("❌ Google 서비스 계정이 설정되지 않았습니다.")
+        return
+
+    # 인자 없이 /fitness → 이번 주 요약 + 사용법
+    if not args:
+        try:
+            rows = _read_sheet(service, '운동기록')
+            now = datetime.datetime.now(tz=KST)
+            # 이번 주 월~일 범위
+            weekday = now.weekday()  # 0=월
+            mon = now - datetime.timedelta(days=weekday)
+            sun = mon + datetime.timedelta(days=6)
+            mon_str = mon.strftime('%Y-%m-%d')
+            sun_str = sun.strftime('%Y-%m-%d')
+
+            week_runs, week_weight, week_tennis = 0, 0, 0
+            week_km, week_min = 0.0, 0
+            for r in rows[1:]:
+                if len(r) < 2:
+                    continue
+                d = r[0]
+                if d < mon_str or d > sun_str:
+                    continue
+                t = r[1]
+                km = float(r[2] or 0) if len(r) > 2 and r[2] else 0
+                mins = int(r[3] or 0) if len(r) > 3 and r[3] else 0
+                if t == '런닝':
+                    week_runs += 1
+                    week_km += km
+                    week_min += mins
+                elif t == '웨이트':
+                    week_weight += 1
+                elif t == '테니스':
+                    week_tennis += 1
+
+            pace_str = ''
+            if week_km > 0 and week_min > 0:
+                pace_total = week_min / week_km
+                pace_str = f"  평균 {int(pace_total)}:{int((pace_total % 1) * 60):02d}/km"
+
+            msg = (
+                f"<b><u>Sisyphe Fitness</u></b>\n\n"
+                f"📅 이번 주 ({mon_str} ~ {sun_str})\n"
+                f"━━━━━━━━━━━━━━━\n"
+                f"🏃 런닝 {week_runs}회  {week_km:.1f}km  {week_min}분{pace_str}\n"
+                f"🏋️ 웨이트 {week_weight}회\n"
+                f"🎾 테니스 {week_tennis}회\n\n"
+                "📝 <b>사용법</b>\n\n"
+                "<code>/fitness 런닝 4.2 28 이지런</code>\n"
+                "  → 4.2km, 28분, 메모\n"
+                "<code>/fitness 웨이트 60 가슴 벤치80</code>\n"
+                "  → 60분, 메모\n"
+                "<code>/fitness 테니스 180</code>\n"
+                "  → 180분\n"
+            )
+        except Exception as e:
+            msg = (
+                f"<b><u>Sisyphe Fitness</u></b>\n\n"
+                "📝 <b>사용법</b>\n\n"
+                "<code>/fitness 런닝 4.2 28 이지런</code>\n"
+                "<code>/fitness 웨이트 60 가슴 벤치80</code>\n"
+                "<code>/fitness 테니스 180</code>\n"
+            )
+        await update.message.reply_text(msg, parse_mode='HTML')
+        return
+
+    workout_type = args[0]
+    today_str = datetime.datetime.now(tz=KST).strftime('%Y-%m-%d')
+
+    try:
+        if workout_type in ['런닝', 'ㄹ', '런']:
+            if len(args) < 3:
+                await update.message.reply_text("❌ 형식: /fitness 런닝 [거리km] [시간분] [메모]")
+                return
+            distance = float(args[1])
+            duration = int(args[2])
+            memo = ' '.join(args[3:]) if len(args) > 3 else ''
+            pace_total = duration / distance if distance > 0 else 0
+            pace_str = f"{int(pace_total)}:{int((pace_total % 1) * 60):02d}/km"
+
+            _append_row(service, '운동기록', [today_str, '런닝', str(distance), str(duration), memo])
+
+            msg = (
+                f"<b><u>Sisyphe Fitness</u></b>\n"
+                f"🏃 <b>런닝</b> 기록 완료\n"
+                f"━━━━━━━━━━━━━━━\n"
+                f"📅 {today_str}\n"
+                f"📏 {distance}km · {duration}분\n"
+                f"⏱️ 페이스 {pace_str}\n"
+            )
+            if memo:
+                msg += f"📝 {memo}\n"
+
+        elif workout_type in ['웨이트', 'ㅇ', '웨']:
+            if len(args) < 2:
+                await update.message.reply_text("❌ 형식: /fitness 웨이트 [시간분] [메모]")
+                return
+            duration = int(args[1])
+            memo = ' '.join(args[2:]) if len(args) > 2 else ''
+
+            _append_row(service, '운동기록', [today_str, '웨이트', '', str(duration), memo])
+
+            msg = (
+                f"<b><u>Sisyphe Fitness</u></b>\n"
+                f"🏋️ <b>웨이트</b> 기록 완료\n"
+                f"━━━━━━━━━━━━━━━\n"
+                f"📅 {today_str}\n"
+                f"⏱️ {duration}분\n"
+            )
+            if memo:
+                msg += f"📝 {memo}\n"
+
+        elif workout_type in ['테니스', 'ㅌ', '테']:
+            if len(args) < 2:
+                await update.message.reply_text("❌ 형식: /fitness 테니스 [시간분] [메모]")
+                return
+            duration = int(args[1])
+            memo = ' '.join(args[2:]) if len(args) > 2 else ''
+
+            _append_row(service, '운동기록', [today_str, '테니스', '', str(duration), memo])
+
+            msg = (
+                f"<b><u>Sisyphe Fitness</u></b>\n"
+                f"🎾 <b>테니스</b> 기록 완료\n"
+                f"━━━━━━━━━━━━━━━\n"
+                f"📅 {today_str}\n"
+                f"⏱️ {duration}분\n"
+            )
+            if memo:
+                msg += f"📝 {memo}\n"
+
+        else:
+            await update.message.reply_text(
+                "❌ 유형: 런닝(ㄹ) / 웨이트(ㅇ) / 테니스(ㅌ)\n\n"
+                "<code>/fitness 런닝 4.2 28 이지런</code>",
+                parse_mode='HTML'
+            )
+            return
+
+        await update.message.reply_text(msg, parse_mode='HTML')
+        logging.info(f"Sisyphe fitness: {workout_type} {args[1:]}")
+
+    except ValueError:
+        await update.message.reply_text("❌ 거리/시간은 숫자로 입력하세요.")
+    except Exception as e:
+        logging.error(f"Sisyphe fitness error: {e}")
+        await update.message.reply_text(f"❌ 저장 실패: {str(e)}")
+
+
+# ============================================================
 # 가계부 (선유듀오) - Telegram → Google Sheets
 # ============================================================
 SEONYUDUO_SHEET_ID = '1w6q3UwUER7oINuk50LyMzgF2K0Fbt2wgSVJ34vImo0g'
@@ -2153,6 +2311,7 @@ if __name__ == '__main__':
     application.add_handler(CommandHandler('help', help_command))
     application.add_handler(CommandHandler('ledger', ledger_command))
     application.add_handler(CommandHandler('ledger2', ledger2_command))
+    application.add_handler(CommandHandler('fitness', fitness_command))
     application.add_handler(CommandHandler('journal', journal_command))
     
     job_queue = application.job_queue
