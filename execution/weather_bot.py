@@ -836,7 +836,21 @@ async def featured_update_job(context):
 
     try:
         dashboard_dir = DASHBOARD_DIR
+        # git_sync 전 로컬 데이터 백업 (reset --hard로 소실 방지)
+        import shutil
+        for fname in ['featured_data.json', 'stock_price_history.json']:
+            src = os.path.join(dashboard_dir, fname)
+            bak = src + '.bak'
+            if os.path.exists(src):
+                shutil.copy2(src, bak)
         git_sync(dashboard_dir)
+        # git_sync 후 백업 복원
+        for fname in ['featured_data.json', 'stock_price_history.json']:
+            src = os.path.join(dashboard_dir, fname)
+            bak = src + '.bak'
+            if os.path.exists(bak):
+                shutil.copy2(bak, src)
+                os.remove(bak)
 
         # Step 0: WICS 섹터 매핑 업데이트 (매월 1일 1차 수집 시에만)
         if now_kst.hour < 17 and now_kst.day == 1:
@@ -2153,10 +2167,10 @@ if __name__ == '__main__':
 
     # Featured 수집: 16:10 1차 (정규장 종가), 18:30 2차 (시간외 포함 최종)
     try:
-        featured_1st_time = datetime.time(hour=16, minute=10, second=0, tzinfo=pytz.timezone('Asia/Seoul'))
+        featured_1st_time = datetime.time(hour=16, minute=20, second=0, tzinfo=pytz.timezone('Asia/Seoul'))
         featured_2nd_time = datetime.time(hour=18, minute=30, second=0, tzinfo=pytz.timezone('Asia/Seoul'))
     except:
-        featured_1st_time = datetime.time(hour=16, minute=10, second=0)
+        featured_1st_time = datetime.time(hour=16, minute=20, second=0)
         featured_2nd_time = datetime.time(hour=18, minute=30, second=0)
     job_queue.run_daily(featured_update_job, time=featured_1st_time)
     job_queue.run_daily(featured_update_job, time=featured_2nd_time)

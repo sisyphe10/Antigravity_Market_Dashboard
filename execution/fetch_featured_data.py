@@ -211,13 +211,9 @@ def main():
     else:
         all_records = []
 
-    # 재수집 대상 날짜의 기존 데이터 제거 (당일 재수집 시)
-    fetch_dates = set(d.strftime('%Y-%m-%d') for d in to_fetch)
-    removed = sum(1 for r in all_records if r['d'] in fetch_dates)
-    if removed:
-        all_records = [r for r in all_records if r['d'] not in fetch_dates]
-        logging.info(f"기존 {removed}건 제거 (재수집 대상)")
-
+    # 수집 성공한 날짜만 기존 데이터 교체 (실패 시 기존 보존)
+    succeeded_dates = set()
+    new_records = []
     new_skip = []
     for i, d in enumerate(to_fetch):
         date_str = d.strftime('%Y%m%d')
@@ -227,15 +223,24 @@ def main():
         try:
             df = get_daily_data(date_str)
             if len(df) < 100:
-                logging.info(f"  → 데이터 부족 ({len(df)}건), 건너뜀")
+                logging.info(f"  → 데이터 부족 ({len(df)}건), 건너뜀 (기존 보존)")
                 if d < today:
                     new_skip.append(date_display)
                 continue
             records = extract_top(df, date_display)
-            all_records.extend(records)
+            new_records.extend(records)
+            succeeded_dates.add(date_display)
             logging.info(f"  → {len(records)}건 수집")
         except Exception as e:
-            logging.warning(f"  → 실패: {e}")
+            logging.warning(f"  → 실패: {e} (기존 보존)")
+
+    # 성공한 날짜만 기존 데이터에서 제거하고 새 데이터로 교체
+    if succeeded_dates:
+        removed = sum(1 for r in all_records if r['d'] in succeeded_dates)
+        all_records = [r for r in all_records if r['d'] not in succeeded_dates]
+        all_records.extend(new_records)
+        if removed:
+            logging.info(f"기존 {removed}건 교체 (성공 {len(succeeded_dates)}일)")
 
     if new_skip:
         skip_dates.update(new_skip)
