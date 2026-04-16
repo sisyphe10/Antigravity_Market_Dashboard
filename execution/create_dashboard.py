@@ -2605,7 +2605,7 @@ refresh();
         header {{ background: #fff; padding: 24px; text-align: center; border-bottom: 1px solid #eee; position: relative; }}
         header h1 {{ font-size: 33px; color: #333; }}
         .subtitle {{ color: #888; font-size: 0.85rem; margin-top: 4px; }}
-        .content {{ padding: 24px; max-width: 1400px; margin: 0 auto; }}
+        .content {{ padding: 24px; max-width: 1800px; margin: 0 auto; }}
         .section {{ background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }}
         .section h2 {{ font-size: 1.1rem; color: #333; margin-bottom: 16px; }}
         .date-bar {{ display: flex; align-items: center; gap: 8px; margin-bottom: 20px; font-size: 13px; flex-wrap: wrap; }}
