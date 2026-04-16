@@ -747,8 +747,9 @@ def create_aum_table():
             return ""
         df['날짜'] = pd.to_datetime(df['날짜'])
         latest = df.sort_values('날짜').groupby('상품명').last().reset_index()
-        # 상단 테이블: 현재 활성 상품만 (목표전환형 제외)
-        active = latest[~latest['상품명'].str.contains('목표전환형', na=False)].copy()
+        # 상단 테이블: 최근 데이터가 있는 상품만 (최신일 기준 14일 이내)
+        max_date = latest['날짜'].max()
+        active = latest[latest['날짜'] >= max_date - pd.Timedelta(days=14)].copy()
         broker_total = active.groupby('증권사')['AUM'].sum().sort_values(ascending=False)
         active['broker_rank'] = active['증권사'].map({b: i for i, b in enumerate(broker_total.index)})
         active = active.sort_values(['broker_rank', 'AUM'], ascending=[True, False]).drop(columns='broker_rank')
@@ -766,7 +767,8 @@ def create_aum_table():
         broker_colors = {'삼성': '#1428A0', 'NH': '#0072CE', 'DB': '#00854A'}
 
         # 일자별 증권사+상품명 기준 AUM (stacked bar용) - 활성 상품만
-        active_df = df[~df['상품명'].str.contains('목표전환형', na=False)].copy()
+        active_names = set(active['상품명'])
+        active_df = df[df['상품명'].isin(active_names)].copy()
         active_df['label'] = active_df['증권사'] + ' ' + active_df['상품명']
         daily = active_df.groupby([active_df['날짜'].dt.strftime('%Y-%m-%d'), 'label', '증권사'])['AUM'].sum().reset_index()
         daily.columns = ['date', 'label', 'broker', 'aum']
