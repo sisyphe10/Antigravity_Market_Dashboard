@@ -2099,13 +2099,14 @@ def check_budget():
         budget_data = json.loads(r.read().decode())
     budget_rows = (budget_data.get('values') or [])[1:]  # skip header
 
-    # 그룹별 예산 합산
+    # 그룹별 예산 합산 (의료 제외)
+    BUDGET_EXCLUDE = {'의료'}
     budget_total = 0
     budget_categories = []
     for row in budget_rows:
         cat = row[2] if len(row) > 2 else ''
         amt = int((row[3] if len(row) > 3 else '0').replace(',', '') or '0')
-        if cat:
+        if cat and cat not in BUDGET_EXCLUDE:
             budget_categories.append(cat)
             budget_total += amt
 
