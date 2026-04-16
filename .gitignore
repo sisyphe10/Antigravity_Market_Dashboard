@@ -53,6 +53,7 @@ charts/*
 !featured_data.json
 !seibro_tickers.json
 !wics_mapping.json
+!featured_news.json
 
 # 기타
 *.bat

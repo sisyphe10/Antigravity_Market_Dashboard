@@ -2592,6 +2592,17 @@ refresh();
             pass
     wics_json = json.dumps(wics_map, ensure_ascii=False)
 
+    # 뉴스 데이터 로드
+    news_records = {}
+    news_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'featured_news.json')
+    if os.path.exists(news_path):
+        try:
+            with open(news_path, 'r', encoding='utf-8') as f:
+                news_records = json.load(f)
+        except:
+            pass
+    news_json = json.dumps(news_records, ensure_ascii=False)
+
     featured_page = f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -2624,6 +2635,15 @@ refresh();
         .section h2 {{ background: #E67E22; color: #fff; padding: 8px 12px; border-radius: 4px; font-size: 0.95rem; text-align: center; }}
         .pos {{ color: #cc0000; font-weight: 600; }}
         .neg {{ color: #0055cc; font-weight: 600; }}
+        .tabs {{ display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #E67E22; }}
+        .tab {{ padding: 10px 24px; cursor: pointer; font-weight: 600; font-size: 16px; color: #666; border: 1px solid transparent; border-bottom: none; border-radius: 8px 8px 0 0; background: #f0f0f0; }}
+        .tab.active {{ color: #E67E22; background: #fff; border-color: #E67E22 #E67E22 transparent; margin-bottom: -2px; }}
+        .tab-content {{ display: none; }}
+        .tab-content.active {{ display: block; }}
+        .notable-news {{ font-size: 13px; color: #555; line-height: 1.8; }}
+        .notable-news a {{ color: #1a73e8; text-decoration: none; }}
+        .notable-news a:hover {{ text-decoration: underline; }}
+        .notable-news b {{ color: #333; }}
         footer {{ text-align: center; padding: 24px; color: #999; font-size: 14px; }}
     </style>
 </head>
@@ -2634,14 +2654,19 @@ refresh();
     <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
 </header>
 <div class="content">
+    <div class="date-bar">
+        <label>기간</label>
+        <input type="text" id="fStartDate" value="{featured_last}" placeholder="YYYY-MM-DD" oninput="tryRefresh()" onchange="refresh()">
+        <span>~</span>
+        <input type="text" id="fEndDate" value="{featured_last}" placeholder="YYYY-MM-DD" oninput="tryRefresh()" onchange="refresh()">
+        <span id="dateLabel" style="color:#888;font-size:12px;"></span>
+    </div>
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab(0)">종목</div>
+        <div class="tab" onclick="switchTab(1)">특이사항</div>
+    </div>
+    <div id="tab0" class="tab-content active">
     <div class="section">
-        <div class="date-bar">
-            <label>기간</label>
-            <input type="text" id="fStartDate" value="{featured_last}" placeholder="YYYY-MM-DD" oninput="tryRefresh()" onchange="refresh()">
-            <span>~</span>
-            <input type="text" id="fEndDate" value="{featured_last}" placeholder="YYYY-MM-DD" oninput="tryRefresh()" onchange="refresh()">
-            <span id="dateLabel" style="color:#888;font-size:12px;"></span>
-        </div>
         <div class="tables">
             <div>
                 <h2>거래대금 TOP 30</h2>
@@ -2704,14 +2729,107 @@ refresh();
             </table>
         </div>
     </div>
+    </div>
+    <div id="tab1" class="tab-content">
+        <div class="section">
+            <h2>20일 신고가 업종 분석 (<span id="notable20Count" style="font-size:inherit">0</span>개)</h2>
+            <table>
+                <thead><tr><th style="width:10%">업종</th><th style="width:5%">종목수</th><th style="width:30%">주요 종목</th><th>뉴스</th></tr></thead>
+                <tbody id="notable20"></tbody>
+            </table>
+        </div>
+        <div class="section">
+            <h2>120일 신고가 업종 분석 (<span id="notable120Count" style="font-size:inherit">0</span>개)</h2>
+            <table>
+                <thead><tr><th style="width:10%">업종</th><th style="width:5%">종목수</th><th style="width:30%">주요 종목</th><th>뉴스</th></tr></thead>
+                <tbody id="notable120"></tbody>
+            </table>
+        </div>
+        <div class="section">
+            <h2>52주 신고가 업종 분석 (<span id="notable52Count" style="font-size:inherit">0</span>개)</h2>
+            <table>
+                <thead><tr><th style="width:10%">업종</th><th style="width:5%">종목수</th><th style="width:30%">주요 종목</th><th>뉴스</th></tr></thead>
+                <tbody id="notable52"></tbody>
+            </table>
+        </div>
+    </div>
 </div>
 <footer>Data source: KRX OpenAPI</footer>
 <script>
 var raw = {featured_json};
 var wics = {wics_json};
+var newsData = {news_json};
 
 function sec(code) {{
     return wics[code] || '';
+}}
+
+function switchTab(idx) {{
+    document.querySelectorAll('.tab').forEach(function(t, i) {{
+        t.classList.toggle('active', i === idx);
+    }});
+    document.querySelectorAll('.tab-content').forEach(function(c, i) {{
+        c.classList.toggle('active', i === idx);
+    }});
+    if (idx === 1) renderNotable();
+}}
+
+function renderNotable() {{
+    var e = document.getElementById('fEndDate').value;
+    var nhData = raw.filter(function(r) {{ return r.d === e; }});
+    var types = ['newhigh_20d', 'newhigh_120d', 'newhigh_52w'];
+    var tableIds = ['notable20', 'notable120', 'notable52'];
+    var countIds = ['notable20Count', 'notable120Count', 'notable52Count'];
+
+    types.forEach(function(type, idx) {{
+        var stocks = nhData.filter(function(r) {{ return r.type === type; }});
+        stocks.sort(function(a,b) {{ return b.mktcap - a.mktcap; }});
+
+        var sectors = {{}};
+        stocks.forEach(function(r) {{
+            var s = wics[r.code] || '기타';
+            if (!sectors[s]) sectors[s] = [];
+            sectors[s].push(r);
+        }});
+
+        var sectorList = Object.keys(sectors).sort(function(a,b) {{
+            return sectors[b].length - sectors[a].length;
+        }});
+
+        document.getElementById(countIds[idx]).textContent = stocks.length;
+
+        var html = '';
+        sectorList.forEach(function(s) {{
+            var items = sectors[s];
+            var names = items.slice(0, 5).map(function(r) {{
+                return r.name;
+            }}).join(', ');
+            if (items.length > 5) names += ' 외 ' + (items.length - 5) + '개';
+
+            var newsHtml = '';
+            var nd = newsData.date || '';
+            if (nd === e && newsData.news) {{
+                items.forEach(function(r) {{
+                    var n = newsData.news[r.code];
+                    if (n && n.length > 0) {{
+                        n.forEach(function(article) {{
+                            newsHtml += '<div><b>' + r.name + '</b>: <a href="' + article.link + '" target="_blank">' + article.title + '</a></div>';
+                        }});
+                    }}
+                }});
+            }}
+            if (!newsHtml) newsHtml = '<span style="color:#bbb">-</span>';
+
+            html += '<tr>';
+            html += '<td class="c" style="font-weight:600">' + s + '</td>';
+            html += '<td class="c" style="font-weight:700;font-size:1.1em">' + items.length + '</td>';
+            html += '<td style="text-align:left;padding-left:10px">' + names + '</td>';
+            html += '<td class="notable-news" style="text-align:left;padding-left:10px">' + newsHtml + '</td>';
+            html += '</tr>';
+        }});
+
+        document.getElementById(tableIds[idx]).innerHTML = html || '<tr><td colspan="4" style="text-align:center;padding:40px;color:#888;">데이터 없음</td></tr>';
+    }});
 }}
 
 function fmtDate(el) {{
