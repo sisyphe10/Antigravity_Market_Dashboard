@@ -1557,44 +1557,101 @@ async def ledger_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # ============================================================
-# Fitness 기록 - Telegram → Google Sheets
+# Fitness 기록 - Telegram → Sisyphe data.json (GitHub Contents API)
 # ============================================================
-async def fitness_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """/fitness 런닝 4.2 28 이지런"""
-    args = context.args
+SISYPHE_REPO = 'sisyphe10/Sisyphe'
+SISYPHE_DATA_PATH = 'data.json'
 
-    service = _get_sheets_service()
-    if not service:
-        await update.message.reply_text("❌ Google 서비스 계정이 설정되지 않았습니다.")
-        return
+
+def _gh_get_data_json():
+    import base64, requests
+    pat = os.environ.get('GH_PAT')
+    if not pat:
+        raise RuntimeError('GH_PAT 환경변수가 설정되지 않았습니다')
+    r = requests.get(
+        f'https://api.github.com/repos/{SISYPHE_REPO}/contents/{SISYPHE_DATA_PATH}',
+        headers={'Authorization': f'token {pat}', 'Accept': 'application/vnd.github.v3+json'},
+        timeout=10,
+    )
+    r.raise_for_status()
+    meta = r.json()
+    content = base64.b64decode(meta['content']).decode('utf-8')
+    return json.loads(content), meta['sha']
+
+
+def _gh_put_data_json(data, sha, message):
+    import base64, requests
+    pat = os.environ.get('GH_PAT')
+    content_str = json.dumps(data, ensure_ascii=False, indent=2)
+    r = requests.put(
+        f'https://api.github.com/repos/{SISYPHE_REPO}/contents/{SISYPHE_DATA_PATH}',
+        headers={'Authorization': f'token {pat}', 'Accept': 'application/vnd.github.v3+json'},
+        json={
+            'message': message,
+            'content': base64.b64encode(content_str.encode('utf-8')).decode('ascii'),
+            'sha': sha,
+        },
+        timeout=15,
+    )
+    r.raise_for_status()
+    return r.json()
+
+
+def _parse_duration(s):
+    """'31:26' → 31.4333..., '31' → 31.0"""
+    if ':' in s:
+        mm, ss = s.split(':')
+        return int(mm) + int(ss) / 60.0
+    return float(s)
+
+
+def _fmt_duration(min_dec):
+    total = round(min_dec * 60)
+    return f"{total // 60}:{total % 60:02d}"
+
+
+def _parse_fitness_tags(tokens):
+    """h158, c167, f4 등의 태그 추출. 반환: (hr, cadence, fatigue, memo)"""
+    hr, cadence, fatigue = None, None, None
+    memo_tokens = []
+    for t in tokens:
+        if len(t) >= 2 and t[0].lower() in ('h',) and t[1:].isdigit():
+            hr = int(t[1:])
+        elif len(t) >= 2 and t[0].lower() in ('c',) and t[1:].isdigit():
+            cadence = int(t[1:])
+        elif len(t) >= 2 and t[0].lower() in ('f',) and t[1:].isdigit():
+            fatigue = int(t[1:])
+        else:
+            memo_tokens.append(t)
+    return hr, cadence, fatigue, ' '.join(memo_tokens)
+
+
+async def fitness_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/fitness 런닝 5.01 31:26 h158 c167 f4 메모"""
+    args = context.args
+    today_str = datetime.datetime.now(tz=KST).strftime('%Y-%m-%d')
 
     # 인자 없이 /fitness → 이번 주 요약 + 사용법
     if not args:
         try:
-            rows = _read_sheet(service, '운동기록')
+            data, _ = _gh_get_data_json()
+            entries = data.get('fitness', [])
             now = datetime.datetime.now(tz=KST)
-            # 이번 주 월~일 범위
-            weekday = now.weekday()  # 0=월
-            mon = now - datetime.timedelta(days=weekday)
-            sun = mon + datetime.timedelta(days=6)
-            mon_str = mon.strftime('%Y-%m-%d')
-            sun_str = sun.strftime('%Y-%m-%d')
+            weekday = now.weekday()
+            mon = (now - datetime.timedelta(days=weekday)).strftime('%Y-%m-%d')
+            sun = (now - datetime.timedelta(days=weekday) + datetime.timedelta(days=6)).strftime('%Y-%m-%d')
 
             week_runs, week_weight, week_tennis = 0, 0, 0
-            week_km, week_min = 0.0, 0
-            for r in rows[1:]:
-                if len(r) < 2:
+            week_km, week_min = 0.0, 0.0
+            for e in entries:
+                d = e.get('date', '')
+                if d < mon or d > sun:
                     continue
-                d = r[0]
-                if d < mon_str or d > sun_str:
-                    continue
-                t = r[1]
-                km = float(r[2] or 0) if len(r) > 2 and r[2] else 0
-                mins = int(r[3] or 0) if len(r) > 3 and r[3] else 0
+                t = e.get('type', '')
                 if t == '런닝':
                     week_runs += 1
-                    week_km += km
-                    week_min += mins
+                    week_km += float(e.get('distance') or 0)
+                    week_min += float(e.get('duration') or 0)
                 elif t == '웨이트':
                     week_weight += 1
                 elif t == '테니스':
@@ -1602,113 +1659,134 @@ async def fitness_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             pace_str = ''
             if week_km > 0 and week_min > 0:
-                pace_total = week_min / week_km
-                pace_str = f"  평균 {int(pace_total)}:{int((pace_total % 1) * 60):02d}/km"
+                p = week_min / week_km
+                pace_str = f"  평균 {int(p)}:{int((p % 1) * 60):02d}/km"
 
             msg = (
                 f"<b><u>Sisyphe Fitness</u></b>\n\n"
-                f"📅 이번 주 ({mon_str} ~ {sun_str})\n"
+                f"📅 이번 주 ({mon} ~ {sun})\n"
                 f"━━━━━━━━━━━━━━━\n"
-                f"🏃 런닝 {week_runs}회  {week_km:.1f}km  {week_min}분{pace_str}\n"
+                f"🏃 런닝 {week_runs}회  {week_km:.1f}km  {_fmt_duration(week_min)}{pace_str}\n"
                 f"🏋️ 웨이트 {week_weight}회\n"
                 f"🎾 테니스 {week_tennis}회\n\n"
                 "📝 <b>사용법</b>\n\n"
-                "<code>/fitness 런닝 4.2 28 이지런</code>\n"
-                "  → 4.2km, 28분, 메모\n"
-                "<code>/fitness 웨이트 60 가슴 벤치80</code>\n"
-                "  → 60분, 메모\n"
-                "<code>/fitness 테니스 180</code>\n"
-                "  → 180분\n"
+                "<code>/fitness 런닝 5.01 31:26 h158 c167 f4 이지런</code>\n"
+                "  → km · 시간(mm:ss 또는 분) · 심박 · 케이던스 · 피로도 · 메모\n"
+                "<code>/fitness 웨이트 60 f2 가슴 벤치80</code>\n"
+                "<code>/fitness 테니스 180 f5</code>\n\n"
+                "<i>태그: h=심박, c=케이던스, f=피로도(0-10). 순서·생략 무관</i>\n"
             )
         except Exception as e:
+            logging.error(f"Sisyphe fitness summary error: {e}")
             msg = (
                 f"<b><u>Sisyphe Fitness</u></b>\n\n"
                 "📝 <b>사용법</b>\n\n"
-                "<code>/fitness 런닝 4.2 28 이지런</code>\n"
-                "<code>/fitness 웨이트 60 가슴 벤치80</code>\n"
-                "<code>/fitness 테니스 180</code>\n"
+                "<code>/fitness 런닝 5.01 31:26 h158 c167 f4 이지런</code>\n"
+                "<code>/fitness 웨이트 60 f2 가슴 벤치80</code>\n"
+                "<code>/fitness 테니스 180 f5</code>\n"
             )
         await update.message.reply_text(msg, parse_mode='HTML')
         return
 
     workout_type = args[0]
-    today_str = datetime.datetime.now(tz=KST).strftime('%Y-%m-%d')
 
     try:
+        entry = {'date': today_str}
+
         if workout_type in ['런닝', 'ㄹ', '런']:
             if len(args) < 3:
-                await update.message.reply_text("❌ 형식: /fitness 런닝 [거리km] [시간분] [메모]")
+                await update.message.reply_text("❌ 형식: /fitness 런닝 [거리km] [시간 mm:ss|분] [h심박 c케이던스 f피로도] [메모]")
                 return
             distance = float(args[1])
-            duration = int(args[2])
-            memo = ' '.join(args[3:]) if len(args) > 3 else ''
-            pace_total = duration / distance if distance > 0 else 0
-            pace_str = f"{int(pace_total)}:{int((pace_total % 1) * 60):02d}/km"
+            duration = _parse_duration(args[2])
+            hr, cadence, fatigue, memo = _parse_fitness_tags(args[3:])
 
-            _append_row(service, '운동기록', [today_str, '런닝', str(distance), str(duration), memo])
+            entry.update({'type': '런닝', 'distance': distance, 'duration': round(duration, 2)})
+            if hr is not None: entry['hr'] = hr
+            if cadence is not None: entry['cadence'] = cadence
+            if fatigue is not None: entry['fatigue'] = fatigue
+            if memo: entry['memo'] = memo
 
-            msg = (
-                f"<b><u>Sisyphe Fitness</u></b>\n"
-                f"🏃 <b>런닝</b> 기록 완료\n"
-                f"━━━━━━━━━━━━━━━\n"
-                f"📅 {today_str}\n"
-                f"📏 {distance}km · {duration}분\n"
-                f"⏱️ 페이스 {pace_str}\n"
-            )
-            if memo:
-                msg += f"📝 {memo}\n"
+            pace = duration / distance if distance > 0 else 0
+            msg_lines = [
+                "<b><u>Sisyphe Fitness</u></b>",
+                "🏃 <b>런닝</b> 기록 완료",
+                "━━━━━━━━━━━━━━━",
+                f"📅 {today_str}",
+                f"📏 {distance}km · {_fmt_duration(duration)}",
+                f"⏱️ 페이스 {int(pace)}:{int((pace % 1) * 60):02d}/km",
+            ]
+            if hr is not None: msg_lines.append(f"❤️ HR {hr}")
+            if cadence is not None: msg_lines.append(f"👟 케이던스 {cadence}")
+            if fatigue is not None: msg_lines.append(f"😤 피로도 {fatigue}")
+            if memo: msg_lines.append(f"📝 {memo}")
+            msg = '\n'.join(msg_lines)
 
         elif workout_type in ['웨이트', 'ㅇ', '웨']:
             if len(args) < 2:
-                await update.message.reply_text("❌ 형식: /fitness 웨이트 [시간분] [메모]")
+                await update.message.reply_text("❌ 형식: /fitness 웨이트 [시간분] [f피로도] [메모]")
                 return
-            duration = int(args[1])
-            memo = ' '.join(args[2:]) if len(args) > 2 else ''
+            duration = _parse_duration(args[1])
+            _, _, fatigue, memo = _parse_fitness_tags(args[2:])
 
-            _append_row(service, '운동기록', [today_str, '웨이트', '', str(duration), memo])
+            entry.update({'type': '웨이트', 'distance': 0, 'duration': round(duration, 2)})
+            if fatigue is not None: entry['fatigue'] = fatigue
+            if memo: entry['memo'] = memo
 
-            msg = (
-                f"<b><u>Sisyphe Fitness</u></b>\n"
-                f"🏋️ <b>웨이트</b> 기록 완료\n"
-                f"━━━━━━━━━━━━━━━\n"
-                f"📅 {today_str}\n"
-                f"⏱️ {duration}분\n"
-            )
-            if memo:
-                msg += f"📝 {memo}\n"
+            msg_lines = [
+                "<b><u>Sisyphe Fitness</u></b>",
+                "🏋️ <b>웨이트</b> 기록 완료",
+                "━━━━━━━━━━━━━━━",
+                f"📅 {today_str}",
+                f"⏱️ {_fmt_duration(duration)}",
+            ]
+            if fatigue is not None: msg_lines.append(f"😤 피로도 {fatigue}")
+            if memo: msg_lines.append(f"📝 {memo}")
+            msg = '\n'.join(msg_lines)
 
         elif workout_type in ['테니스', 'ㅌ', '테']:
             if len(args) < 2:
-                await update.message.reply_text("❌ 형식: /fitness 테니스 [시간분] [메모]")
+                await update.message.reply_text("❌ 형식: /fitness 테니스 [시간분] [f피로도] [메모]")
                 return
-            duration = int(args[1])
-            memo = ' '.join(args[2:]) if len(args) > 2 else ''
+            duration = _parse_duration(args[1])
+            _, _, fatigue, memo = _parse_fitness_tags(args[2:])
 
-            _append_row(service, '운동기록', [today_str, '테니스', '', str(duration), memo])
+            entry.update({'type': '테니스', 'distance': 0, 'duration': round(duration, 2)})
+            if fatigue is not None: entry['fatigue'] = fatigue
+            if memo: entry['memo'] = memo
 
-            msg = (
-                f"<b><u>Sisyphe Fitness</u></b>\n"
-                f"🎾 <b>테니스</b> 기록 완료\n"
-                f"━━━━━━━━━━━━━━━\n"
-                f"📅 {today_str}\n"
-                f"⏱️ {duration}분\n"
-            )
-            if memo:
-                msg += f"📝 {memo}\n"
+            msg_lines = [
+                "<b><u>Sisyphe Fitness</u></b>",
+                "🎾 <b>테니스</b> 기록 완료",
+                "━━━━━━━━━━━━━━━",
+                f"📅 {today_str}",
+                f"⏱️ {_fmt_duration(duration)}",
+            ]
+            if fatigue is not None: msg_lines.append(f"😤 피로도 {fatigue}")
+            if memo: msg_lines.append(f"📝 {memo}")
+            msg = '\n'.join(msg_lines)
 
         else:
             await update.message.reply_text(
                 "❌ 유형: 런닝(ㄹ) / 웨이트(ㅇ) / 테니스(ㅌ)\n\n"
-                "<code>/fitness 런닝 4.2 28 이지런</code>",
+                "<code>/fitness 런닝 5.01 31:26 h158 c167 f4</code>",
                 parse_mode='HTML'
             )
             return
 
-        await update.message.reply_text(msg, parse_mode='HTML')
-        logging.info(f"Sisyphe fitness: {workout_type} {args[1:]}")
+        # GitHub API로 data.json에 append
+        data, sha = _gh_get_data_json()
+        if 'fitness' not in data:
+            data['fitness'] = []
+        data['fitness'].append(entry)
+        data['fitness'].sort(key=lambda e: (e.get('date', ''), e.get('type', '')))
+        _gh_put_data_json(data, sha, f"fitness: {entry['date']} {entry['type']}")
 
-    except ValueError:
-        await update.message.reply_text("❌ 거리/시간은 숫자로 입력하세요.")
+        await update.message.reply_text(msg, parse_mode='HTML')
+        logging.info(f"Sisyphe fitness: {entry}")
+
+    except ValueError as e:
+        await update.message.reply_text(f"❌ 입력 형식 오류: {str(e)}")
     except Exception as e:
         logging.error(f"Sisyphe fitness error: {e}")
         await update.message.reply_text(f"❌ 저장 실패: {str(e)}")
