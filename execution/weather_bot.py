@@ -1471,12 +1471,12 @@ def _read_sheet(service, sheet_name):
     ).execute()
     return result.get('values', [])
 
-def _append_row(service, sheet_name, row):
-    """시트에 행 추가"""
+def _append_row(service, sheet_name, row, value_input_option='USER_ENTERED'):
+    """시트에 행 추가. RAW 모드로 호출하면 '31:26' 같은 문자열 자동 변환 방지"""
     service.spreadsheets().values().append(
         spreadsheetId=SISYPHE_SHEET_ID,
         range=sheet_name,
-        valueInputOption='USER_ENTERED',
+        valueInputOption=value_input_option,
         insertDataOption='INSERT_ROWS',
         body={'values': [row]}
     ).execute()
@@ -1841,14 +1841,14 @@ async def fitness_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 row = [
                     entry.get('date', ''),
                     entry.get('type', ''),
-                    entry.get('distance', '') or '',
-                    entry.get('duration', '') or '',
-                    entry.get('hr', '') if entry.get('hr') is not None else '',
-                    entry.get('cadence', '') if entry.get('cadence') is not None else '',
-                    entry.get('fatigue', '') if entry.get('fatigue') is not None else '',
+                    str(entry.get('distance', '')) if entry.get('distance') not in (None, 0, '') else '',
+                    str(entry.get('duration', '')) if entry.get('duration') not in (None, 0, '') else '',
+                    str(entry.get('hr', '')) if entry.get('hr') is not None else '',
+                    str(entry.get('cadence', '')) if entry.get('cadence') is not None else '',
+                    str(entry.get('fatigue', '')) if entry.get('fatigue') is not None else '',
                     entry.get('memo', ''),
                 ]
-                _append_row(service, '운동기록', row)
+                _append_row(service, '운동기록', row, value_input_option='RAW')
         except Exception as sheet_e:
             logging.warning(f"Sheets append 실패 (무시, data.json은 성공): {sheet_e}")
 
