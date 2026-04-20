@@ -950,6 +950,58 @@ async def featured_update_job(context):
                 pass
 
 
+async def morning_featured_recovery_job(context: ContextTypes.DEFAULT_TYPE):
+    """08:30 KST - 전일 Featured 데이터 누락 시 재수집 (KRX 지연 대응)"""
+    import holidays
+    now_kst = datetime.datetime.now(tz=KST)
+    today = now_kst.date()
+
+    # 직전 거래일 계산 (주말/공휴일 제외)
+    kr_holidays = holidays.KR(years=[today.year, today.year - 1])
+    prev_day = today - datetime.timedelta(days=1)
+    while prev_day.weekday() >= 5 or prev_day in kr_holidays:
+        prev_day -= datetime.timedelta(days=1)
+    prev_day_str = prev_day.strftime('%Y-%m-%d')
+
+    # featured_data.json에 직전 거래일 데이터 있는지 확인
+    dashboard_dir = DASHBOARD_DIR
+    featured_path = os.path.join(dashboard_dir, 'featured_data.json')
+    try:
+        with open(featured_path, 'r', encoding='utf-8') as f:
+            featured = json.load(f)
+        has_prev = any(r.get('d') == prev_day_str for r in featured)
+    except Exception as e:
+        logging.error(f"Featured [08:30] 파일 읽기 실패: {e}")
+        return
+
+    if has_prev:
+        logging.info(f"Featured [08:30] 직전 거래일({prev_day_str}) 데이터 정상 - 스킵")
+        return
+
+    # 누락됨 → featured_update_job 실행 (fetch_featured_data.py 내부에서 누락 날짜 자동 수집)
+    logging.warning(f"Featured [08:30] 직전 거래일({prev_day_str}) 누락 감지 → 재수집 시작")
+    await featured_update_job(context)
+
+    # 재수집 후 확인
+    try:
+        with open(featured_path, 'r', encoding='utf-8') as f:
+            featured_after = json.load(f)
+        recovered_count = sum(1 for r in featured_after if r.get('d') == prev_day_str)
+    except Exception:
+        recovered_count = 0
+
+    # 텔레그램 알림
+    if recovered_count > 0:
+        msg = f"✅ Featured 익일 복구 완료\n직전 거래일 {prev_day_str}: {recovered_count}건 수집"
+    else:
+        msg = f"⚠️ Featured 익일 복구 실패\n직전 거래일 {prev_day_str} 데이터 여전히 없음 (KRX 지속 지연)"
+    for chat_id in SUBSCRIBERS:
+        try:
+            await context.bot.send_message(chat_id=chat_id, text=msg)
+        except Exception:
+            pass
+
+
 def _nightly_refresh_sync():
     """23:00 당일 포트폴리오 데이터 반영 (동기 함수)"""
     dashboard_dir = DASHBOARD_DIR
@@ -2416,15 +2468,18 @@ if __name__ == '__main__':
         nightly_time = datetime.time(hour=16, minute=20, second=0)
         etf_collection_time = datetime.time(hour=16, minute=30, second=0)
 
-    # Featured 수집: 16:10 1차 (정규장 종가), 18:30 2차 (시간외 포함 최종)
+    # Featured 수집: 16:20 1차 (정규장 종가), 18:30 2차 (시간외 포함 최종), 08:30 3차 (익일 KRX 지연 복구)
     try:
         featured_1st_time = datetime.time(hour=16, minute=20, second=0, tzinfo=pytz.timezone('Asia/Seoul'))
         featured_2nd_time = datetime.time(hour=18, minute=30, second=0, tzinfo=pytz.timezone('Asia/Seoul'))
+        featured_3rd_time = datetime.time(hour=8, minute=30, second=0, tzinfo=pytz.timezone('Asia/Seoul'))
     except:
         featured_1st_time = datetime.time(hour=16, minute=20, second=0)
         featured_2nd_time = datetime.time(hour=18, minute=30, second=0)
+        featured_3rd_time = datetime.time(hour=8, minute=30, second=0)
     job_queue.run_daily(featured_update_job, time=featured_1st_time)
     job_queue.run_daily(featured_update_job, time=featured_2nd_time)
+    job_queue.run_daily(morning_featured_recovery_job, time=featured_3rd_time)
 
     job_queue.run_daily(daily_weather_job, time=weather_time)
     job_queue.run_daily(daily_calendar_job, time=calendar_time)
