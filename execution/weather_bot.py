@@ -1834,6 +1834,24 @@ async def fitness_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         data['fitness'].sort(key=lambda e: (e.get('date', ''), e.get('type', '')))
         _gh_put_data_json(data, sha, f"fitness: {entry['date']} {entry['type']}")
 
+        # Google Sheets '운동기록' 탭에도 append (백업/뷰)
+        try:
+            service = _get_sheets_service()
+            if service:
+                row = [
+                    entry.get('date', ''),
+                    entry.get('type', ''),
+                    entry.get('distance', '') or '',
+                    entry.get('duration', '') or '',
+                    entry.get('hr', '') if entry.get('hr') is not None else '',
+                    entry.get('cadence', '') if entry.get('cadence') is not None else '',
+                    entry.get('fatigue', '') if entry.get('fatigue') is not None else '',
+                    entry.get('memo', ''),
+                ]
+                _append_row(service, '운동기록', row)
+        except Exception as sheet_e:
+            logging.warning(f"Sheets append 실패 (무시, data.json은 성공): {sheet_e}")
+
         await update.message.reply_text(msg, parse_mode='HTML')
         logging.info(f"Sisyphe fitness: {entry}")
 
