@@ -1662,6 +1662,39 @@ def _fmt_duration(min_dec):
     return f"{total // 60}:{total % 60:02d}"
 
 
+def _parse_weight_memo(memo):
+    """웨이트 메모를 운동별로 분해.
+    '데드리프트 20kg x 20회 x 3세트, 벤치 60kg x 8회 x 4세트' →
+    [{'name':'데드리프트','weight':20.0,'reps':20,'sets':3}, ...]
+    쉼표 = 새 운동 행.
+    """
+    import re
+    if not memo:
+        return []
+    segments = [s.strip() for s in memo.split(',') if s.strip()]
+    result = []
+    for seg in segments:
+        tokens = seg.split()
+        name_tokens = []
+        for t in tokens:
+            if re.search(r'\d', t):
+                break
+            name_tokens.append(t)
+        name = ' '.join(name_tokens)
+        if not name:
+            continue
+        weight_m = re.search(r'(\d+(?:\.\d+)?)\s*kg', seg, re.IGNORECASE)
+        reps_m = re.search(r'(\d+)\s*회', seg)
+        sets_m = re.search(r'(\d+)\s*세트', seg)
+        result.append({
+            'name': name,
+            'weight': float(weight_m.group(1)) if weight_m else None,
+            'reps': int(reps_m.group(1)) if reps_m else None,
+            'sets': int(sets_m.group(1)) if sets_m else None,
+        })
+    return result
+
+
 def _detect_body_part(memo):
     """웨이트 메모에서 운동 부위 감지: 등/가슴/어깨/팔/하체, 하체+기타=전신"""
     if not memo:
@@ -1861,19 +1894,30 @@ async def fitness_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         # Google Sheets 라우팅:
         #   런닝/테니스 → '운동기록' (날짜, 유형, 거리, 시간, HR, 케이던스, 피로도, 메모)
-        #   웨이트 → '웨이트' (날짜, 운동부위, 피로도, 무게 및 세트)
+        #   웨이트 → '웨이트' (날짜, 운동부위, 종목, 무게, 반복, 세트, 피로도) - 운동별 다행
         try:
             service = _get_sheets_service()
             if service:
                 if entry['type'] == '웨이트':
-                    body_part = _detect_body_part(entry.get('memo', ''))
-                    row = [
-                        entry.get('date', ''),
-                        body_part,
-                        str(entry.get('fatigue', '')) if entry.get('fatigue') is not None else '',
-                        entry.get('memo', ''),
-                    ]
-                    _append_row(service, '웨이트', row, value_input_option='RAW')
+                    exercises = _parse_weight_memo(entry.get('memo', ''))
+                    fatigue_str = str(entry.get('fatigue', '')) if entry.get('fatigue') is not None else ''
+                    if not exercises:
+                        # 파싱 실패 시 원본 메모를 종목 칸에만 넣어 1행 생성
+                        row = [entry.get('date', ''), _detect_body_part(entry.get('memo', '')),
+                               entry.get('memo', ''), '', '', '', fatigue_str]
+                        _append_row(service, '웨이트', row, value_input_option='RAW')
+                    else:
+                        for ex in exercises:
+                            row = [
+                                entry.get('date', ''),
+                                _detect_body_part(ex['name']),
+                                ex['name'],
+                                str(ex['weight']) if ex['weight'] is not None else '',
+                                str(ex['reps']) if ex['reps'] is not None else '',
+                                str(ex['sets']) if ex['sets'] is not None else '',
+                                fatigue_str,
+                            ]
+                            _append_row(service, '웨이트', row, value_input_option='RAW')
                 else:
                     row = [
                         entry.get('date', ''),
