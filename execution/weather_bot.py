@@ -1907,7 +1907,7 @@ async def fitness_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                                entry.get('memo', ''), '', '', '', fatigue_str]
                         _append_row(service, '웨이트', row, value_input_option='RAW')
                     else:
-                        for ex in exercises:
+                        for i, ex in enumerate(exercises):
                             row = [
                                 entry.get('date', ''),
                                 _detect_body_part(ex['name']),
@@ -1915,7 +1915,7 @@ async def fitness_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                                 str(ex['weight']) if ex['weight'] is not None else '',
                                 str(ex['reps']) if ex['reps'] is not None else '',
                                 str(ex['sets']) if ex['sets'] is not None else '',
-                                fatigue_str,
+                                fatigue_str if i == 0 else '',  # 첫 행에만 피로도
                             ]
                             _append_row(service, '웨이트', row, value_input_option='RAW')
                 else:
