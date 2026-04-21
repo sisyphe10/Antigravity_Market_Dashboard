@@ -1662,6 +1662,31 @@ def _fmt_duration(min_dec):
     return f"{total // 60}:{total % 60:02d}"
 
 
+def _detect_body_part(memo):
+    """웨이트 메모에서 운동 부위 감지: 등/가슴/어깨/팔/하체, 하체+기타=전신"""
+    if not memo:
+        return ''
+    body_map = {
+        '등': ['데드리프트', '랫풀', '풀업', '친업', '롱풀', '시티드로우', '케이블로우', '바벨로우', '로우'],
+        '가슴': ['벤치프레스', '벤치 프레스', '체스트', '플라이', '딥스', '푸시업', '체스트프레스'],
+        '어깨': ['숄더', '레터럴', '리어 델트', '업라이트', '오버헤드'],
+        '팔': ['바이셉', '트라이셉', '해머컬', '킥백', '푸시다운'],
+        '하체': ['스쿼트', '런지', '레그', '카프', 'RDL', '힙쓰러스트', '불가리안'],
+    }
+    found = []
+    for part, keywords in body_map.items():
+        for kw in keywords:
+            if kw in memo:
+                if part not in found:
+                    found.append(part)
+                break
+    if not found:
+        return ''
+    if '하체' in found and len(found) > 1:
+        return '전신'
+    return '/'.join(found)
+
+
 def _parse_fitness_tags(tokens):
     """h158, c167, f4 등의 태그 추출. 반환: (hr, cadence, fatigue, memo)"""
     hr, cadence, fatigue = None, None, None
@@ -1834,21 +1859,33 @@ async def fitness_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         data['fitness'].sort(key=lambda e: (e.get('date', ''), e.get('type', '')))
         _gh_put_data_json(data, sha, f"fitness: {entry['date']} {entry['type']}")
 
-        # Google Sheets '운동기록' 탭에도 append (백업/뷰)
+        # Google Sheets 라우팅:
+        #   런닝/테니스 → '운동기록' (날짜, 유형, 거리, 시간, HR, 케이던스, 피로도, 메모)
+        #   웨이트 → '웨이트' (날짜, 운동부위, 피로도, 무게 및 세트)
         try:
             service = _get_sheets_service()
             if service:
-                row = [
-                    entry.get('date', ''),
-                    entry.get('type', ''),
-                    str(entry.get('distance', '')) if entry.get('distance') not in (None, 0, '') else '',
-                    str(entry.get('duration', '')) if entry.get('duration') not in (None, 0, '') else '',
-                    str(entry.get('hr', '')) if entry.get('hr') is not None else '',
-                    str(entry.get('cadence', '')) if entry.get('cadence') is not None else '',
-                    str(entry.get('fatigue', '')) if entry.get('fatigue') is not None else '',
-                    entry.get('memo', ''),
-                ]
-                _append_row(service, '운동기록', row, value_input_option='RAW')
+                if entry['type'] == '웨이트':
+                    body_part = _detect_body_part(entry.get('memo', ''))
+                    row = [
+                        entry.get('date', ''),
+                        body_part,
+                        str(entry.get('fatigue', '')) if entry.get('fatigue') is not None else '',
+                        entry.get('memo', ''),
+                    ]
+                    _append_row(service, '웨이트', row, value_input_option='RAW')
+                else:
+                    row = [
+                        entry.get('date', ''),
+                        entry.get('type', ''),
+                        str(entry.get('distance', '')) if entry.get('distance') not in (None, 0, '') else '',
+                        str(entry.get('duration', '')) if entry.get('duration') not in (None, 0, '') else '',
+                        str(entry.get('hr', '')) if entry.get('hr') is not None else '',
+                        str(entry.get('cadence', '')) if entry.get('cadence') is not None else '',
+                        str(entry.get('fatigue', '')) if entry.get('fatigue') is not None else '',
+                        entry.get('memo', ''),
+                    ]
+                    _append_row(service, '운동기록', row, value_input_option='RAW')
         except Exception as sheet_e:
             logging.warning(f"Sheets append 실패 (무시, data.json은 성공): {sheet_e}")
 
