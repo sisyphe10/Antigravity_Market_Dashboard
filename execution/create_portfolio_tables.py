@@ -15,6 +15,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 # Constants
 WRAP_NAV_FILE = 'Wrap_NAV.xlsx'
 OUTPUT_FILE = 'portfolio_data.json'
+EXISTING_STOCK_BASIS_FILE = 'existing_stock_basis.json'
 
 # 포트폴리오 표시 이름 매핑
 PORTFOLIO_DISPLAY_NAMES = {
@@ -28,17 +29,18 @@ PORTFOLIO_DISPLAY_NAMES = {
 # 표시 제외 포트폴리오 (역사 데이터는 보존하되 대시보드에서 숨김)
 EXCLUDED_PORTFOLIOS = {'목표전환형', '목표전환형 1호', '목표전환형 2차'}
 
-# 기존 종목 누적 수익률 매핑 (사용자 제공 값)
-EXISTING_STOCK_CUMULATIVE_RETURNS = {
-    '005930': 200.0,  # 삼성전자
-    '000660': 203.0,  # SK하이닉스
-    '352820': 70.0,   # 하이브
-    '000150': 1.0,    # 두산
-    '034020': 42.0,   # 두산에너빌리티
-    '006800': 150.0,  # 미래에셋증권
-    '001040': 88.0,   # CJ
-    '010060': 55.0,   # OCI홀딩스
-}
+# 편입일 이전부터 보유 중인 종목의 평균 매수가 (existing_stock_basis.json 로드)
+# 이후 누적 수익률은 (current_price / avg_price - 1) * 100 로 매일 계산
+def _load_existing_stock_basis():
+    try:
+        with open(EXISTING_STOCK_BASIS_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        return {code: info['avg_price'] for code, info in data.get('stocks', {}).items()}
+    except Exception as e:
+        print(f"  Warning: {EXISTING_STOCK_BASIS_FILE} 로드 실패: {e}")
+        return {}
+
+EXISTING_STOCK_AVG_PRICES = _load_existing_stock_basis()
 
 
 def _load_naver_marcap():
@@ -105,15 +107,24 @@ def calculate_cumulative_return(code, stock_name, portfolio_name, nav_df, price_
     종목의 누적 수익률 계산 (캐시된 데이터 사용)
     """
     try:
-        # 기존 종목인 경우 사용자 제공 값 반환 (목표전환형 시리즈는 신규 펀드이므로 직접 계산)
-        if code in EXISTING_STOCK_CUMULATIVE_RETURNS and not portfolio_name.startswith('목표전환형'):
+        # 편입일 이전부터 보유 중인 종목: existing_stock_basis.json 의 avg_price로 매일 재계산
+        # (목표전환형 시리즈는 신규 펀드이므로 직접 계산 경로로)
+        if code in EXISTING_STOCK_AVG_PRICES and not portfolio_name.startswith('목표전환형'):
+            avg_price = EXISTING_STOCK_AVG_PRICES[code]
+            if price_df is None or price_df.empty:
+                return {'cumulative_return': None, 'status': 'existing', 'avg_price': avg_price,
+                        'current_price': None, 'dd': None, 'all_time_high': None}
+            current_price = float(price_df.iloc[-1]['Close'])
+            cumulative_return = (current_price / avg_price - 1) * 100
+            all_time_high = float(price_df['Close'].max())
+            dd = (current_price / all_time_high - 1) * 100 if all_time_high > 0 else None
             return {
-                'cumulative_return': EXISTING_STOCK_CUMULATIVE_RETURNS[code],
+                'cumulative_return': cumulative_return,
                 'status': 'existing',
-                'avg_price': None,
-                'current_price': None,
-                'dd': None,
-                'all_time_high': None
+                'avg_price': avg_price,
+                'current_price': current_price,
+                'dd': dd,
+                'all_time_high': all_time_high,
             }
 
         # 해당 포트폴리오의 해당 종목 이력

@@ -54,6 +54,7 @@ charts/*
 !seibro_tickers.json
 !wics_mapping.json
 !featured_news.json
+!existing_stock_basis.json
 
 # 기타
 *.bat
