@@ -1221,42 +1221,35 @@ async def daily_market_alert_summary_job(context: ContextTypes.DEFAULT_TYPE):
         prev_경고 = set(prev.get('경고', []))
         prev_주의 = set(prev.get('주의', []))
 
-        def fmt_line(s, is_new):
+        def fmt_line(s):
             name = esc(s['name'])
             mcap = esc(fmt_marcap(s['marcap']))
-            if is_new:
-                return f"• <b>[NEW]</b> {name} / {mcap}"
-            return f"• {name} / {mcap}"
+            line = f"• {name} / {mcap}"
+            if s.get('warn_type') == '투자경고 지정예고':
+                line = f"<u>{line}</u>"
+            return line
+
+        def render_category(stocks, prev_set, header):
+            if not stocks:
+                return []
+            sorted_stocks = sorted(stocks, key=lambda x: (x.get('marcap') or 0), reverse=True)
+            new_stocks = [s for s in sorted_stocks if s['name'] not in prev_set]
+            existing_stocks = [s for s in sorted_stocks if s['name'] in prev_set]
+            out = ["", f"<b><u>[{header}]</u></b>"]
+            if new_stocks:
+                out.append("(신규)")
+                for s in new_stocks:
+                    out.append(fmt_line(s))
+                if existing_stocks:
+                    out.append("----")
+            for s in existing_stocks:
+                out.append(fmt_line(s))
+            return out
 
         lines = [f"<b><u>투자유의종목 현황</u></b> ({today})"]
-
-        if stocks_위험:
-            lines.append("")
-            lines.append("<b><u>[투자위험]</u></b>")
-            for s in sorted(stocks_위험, key=lambda x: (x.get('marcap') or 0), reverse=True):
-                lines.append(fmt_line(s, s['name'] not in prev_위험))
-
-        if stocks_경고:
-            lines.append("")
-            lines.append("<b><u>[투자경고]</u></b>")
-            for s in sorted(stocks_경고, key=lambda x: (x.get('marcap') or 0), reverse=True):
-                lines.append(fmt_line(s, s['name'] not in prev_경고))
-
-        if stocks_주의:
-            lines.append("")
-            lines.append("<b><u>[투자주의]</u></b>")
-            for s in sorted(stocks_주의, key=lambda x: (x.get('marcap') or 0), reverse=True):
-                is_new = s['name'] not in prev_주의
-                is_예고 = s.get('warn_type') == '투자경고 지정예고'
-                name = esc(s['name'])
-                mcap = esc(fmt_marcap(s['marcap']))
-                if is_new:
-                    line = f"• <b>[NEW]</b> {name} / {mcap}"
-                else:
-                    line = f"• {name} / {mcap}"
-                if is_예고:
-                    line = f"<u>{line}</u>"
-                lines.append(line)
+        lines.extend(render_category(stocks_위험, prev_위험, '투자위험'))
+        lines.extend(render_category(stocks_경고, prev_경고, '투자경고'))
+        lines.extend(render_category(stocks_주의, prev_주의, '투자주의'))
 
         _save_alert({
             '위험': [s['name'] for s in stocks_위험],
