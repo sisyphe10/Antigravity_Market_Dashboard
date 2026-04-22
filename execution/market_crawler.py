@@ -11,10 +11,12 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 import os
 import csv
+import re
 import yfinance as yf
 import warnings
 
 import pandas as pd
+import requests
 
 # Import shared configuration
 from config import CATEGORY_MAP, YFINANCE_TICKERS, TARGET_DRAM_ITEMS, TARGET_NAND_ITEMS, CSV_FILE
@@ -330,6 +332,62 @@ def crawl_kr_indices():
         save_to_csv(collected_data)
 
 # ==========================================
+# 7. [SMM] 중국 전지급 리튬 가격 (탄산리튬, 수산화리튬)
+# ==========================================
+# SMM 갱신: 중국시간 10:00~11:10 (한국시간 11:00~12:10)
+# 공개 페이지: https://hq.smm.cn/h5/Li2CO3-battery-price (임베디드 JSON)
+# product_id:
+#   201102250059 = 电池级碳酸锂 (Battery-Grade Lithium Carbonate)
+#   202106020003 = 电池级氢氧化锂(微粉) (Battery-Grade Lithium Hydroxide, Micro Powder)
+SMM_LITHIUM_URL = 'https://hq.smm.cn/h5/Li2CO3-battery-price'
+SMM_LITHIUM_PRODUCTS = {
+    '201102250059': '탄산리튬 전지급',
+    '202106020003': '수산화리튬 전지급 미분',
+}
+
+def crawl_smm_lithium():
+    """SMM에서 전지급 탄산리튬/수산화리튬 가격 수집 (CNY/톤)."""
+    print(f"\n🔋 SMM 리튬 가격 크롤링 시작")
+    try:
+        resp = requests.get(
+            SMM_LITHIUM_URL,
+            headers={'User-Agent': 'Mozilla/5.0'},
+            timeout=30,
+        )
+        resp.encoding = 'utf-8'
+        if resp.status_code != 200:
+            print(f"❌ SMM 응답 오류: HTTP {resp.status_code}")
+            return
+        html = resp.text
+    except Exception as e:
+        print(f"❌ SMM 요청 실패: {e}")
+        return
+
+    # 임베디드 JSON에서 product_id 기준으로 row 추출
+    collected_data = []
+    for pid, save_name in SMM_LITHIUM_PRODUCTS.items():
+        pattern = (
+            r'"product_id":"' + pid + r'"'
+            r'[^{]{0,500}'
+            r'"high":(-?\d+),"low":(-?\d+),"average":(-?\d+)'
+            r'[^{]{0,200}'
+            r'"renew_date":"(\d{4}-\d{2}-\d{2})"'
+        )
+        m = re.search(pattern, html)
+        if not m:
+            print(f"⚠️ {save_name} (id={pid}) 매칭 실패 — SMM 페이지 구조 변경 가능성")
+            continue
+        high, low, avg, renew_date = m.groups()
+        avg_val = float(avg)
+        collected_data.append((renew_date, save_name, avg_val, 'BATTERY_METAL'))
+        print(f"✓ {save_name} ({renew_date}): avg {avg_val:,.0f} CNY/톤 (L {low} ~ H {high})")
+
+    if collected_data:
+        save_to_csv(collected_data)
+    else:
+        print("⚠️ SMM 리튬 수집 결과 없음")
+
+# ==========================================
 # Main Execution
 # ==========================================
 def main():
@@ -344,6 +402,7 @@ def main():
 
     crawl_us_indices()
     crawl_kr_indices()
+    crawl_smm_lithium()
 
     print(f"\n📁 결과 파일: {CSV_FILE}")
 

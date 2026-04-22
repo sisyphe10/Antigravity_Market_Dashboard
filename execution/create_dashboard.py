@@ -1290,7 +1290,7 @@ def create_dashboard():
 
         # Define category order for better organization
         category_order = ['Wrap', 'Portfolio', 'SECTOR', 'INDEX_KOREA', 'INDEX_US', 'EXCHANGE RATE',
-                         'INTEREST RATES', 'CRYPTOCURRENCY', 'Memory', 'COMMODITIES']
+                         'INTEREST RATES', 'CRYPTOCURRENCY', 'Memory', 'COMMODITIES', 'BATTERY METAL']
 
         for category in category_order:
             # Portfolio는 차트가 아니라 테이블이므로 특별 처리
@@ -1415,6 +1415,13 @@ def create_dashboard():
                     'KOSPI/USD',
                     'KOSDAQ',
                     'KOSDAQ/USD'
+                ]
+
+            # Battery metal order (SMM China)
+            elif category == 'BATTERY METAL':
+                custom_order = [
+                    '탄산리튬 전지급',
+                    '수산화리튬 전지급 미분',
                 ]
 
             else:
