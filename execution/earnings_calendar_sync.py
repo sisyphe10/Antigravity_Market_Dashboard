@@ -31,7 +31,8 @@ SHEETS_API_KEY = 'AIzaSyCHPiRby5FVAIKDwneZHy1KGl3SfycjZEw'
 SHEETS_ID = '1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM'
 CAL_ID = 's7m7ahc836cajffbt98vae3m1k@group.calendar.google.com'
 FINNHUB_API = 'https://finnhub.io/api/v1'
-HOUR_LABEL = {'bmo': 'BMO (장전)', 'amc': 'AMC (장후)', 'dmh': 'DMH (장중)'}
+HOUR_LABEL = {'bmo': 'Before (장전)', 'amc': 'After (장후)', 'dmh': 'During (장중)'}
+HOUR_PREFIX = {'bmo': 'Before', 'amc': 'After', 'dmh': 'During'}
 
 
 def load_us_universe():
@@ -108,10 +109,11 @@ def build_event(earnings, company_name):
     q = earnings.get('quarter')
     y = earnings.get('year')
 
-    short = hour.upper() if hour in HOUR_LABEL else ''
     hour_disp = HOUR_LABEL.get(hour, '시간 미정')
-    suffix = f" ({short})" if short else ""
-    summary = f"[{ticker}] {y}Q{q} Earnings{suffix}"
+    prefix = HOUR_PREFIX.get(hour)
+    yy = str(y)[-2:] if y else ''
+    core = f"[{ticker}] {q}Q{yy} Earnings"
+    summary = f"{prefix} | {core}" if prefix else core
 
     eps_est = earnings.get('epsEstimate')
     rev_est = earnings.get('revenueEstimate')
