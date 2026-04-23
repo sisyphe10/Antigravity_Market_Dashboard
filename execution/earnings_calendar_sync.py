@@ -296,7 +296,7 @@ def build_ir_day_event(ev, company_name):
 
     end_date = (datetime.fromisoformat(ed) + timedelta(days=1)).strftime('%Y-%m-%d')
     return {
-        'id': make_event_id(ticker, ed, prefix='agirday'),
+        'id': make_event_id(ticker, ed, prefix='agird'),
         'summary': f"[{ticker}] Investor Day",
         'description': '\n'.join(lines),
         'start': {'date': ed},
