@@ -366,10 +366,10 @@ def run_investor_days(universe, service, api_key, today, days, dry_run):
 
     collected = {}  # (ticker, date) → event (EDGAR 우선)
 
-    # 1. EDGAR
+    # 1. EDGAR (filing date는 과거만 가능 → search_to는 today로 제한)
     log.info(f"[IR Day] EDGAR 8-K 검색 중...")
     try:
-        edgar_events = fetch_edgar_ir_days(news_from, event_to, universe_tickers, event_from, event_to)
+        edgar_events = fetch_edgar_ir_days(news_from, news_to, universe_tickers, event_from, event_to)
         for ev in edgar_events:
             key = (ev['ticker'], ev['date'])
             collected[key] = ev
