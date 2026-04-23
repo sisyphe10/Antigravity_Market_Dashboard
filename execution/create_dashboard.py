@@ -716,7 +716,7 @@ def _build_wrap_chart_section(category_label):
             <h2 class="category-title">{category_label}</h2>
             <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;">
                 <div style="min-width:180px;">{list_html}</div>
-                <div style="flex:1;">
+                <div style="width:1000px;">
                     <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;font-size:13px;">
                         <span style="color:#555;font-weight:600;">기간</span>
                         <input type="text" id="wrapStartDate" value="{first_date}" onchange="formatDateInput(this);updateWrapChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
