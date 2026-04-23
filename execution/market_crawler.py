@@ -388,6 +388,55 @@ def crawl_smm_lithium():
         print("⚠️ SMM 리튬 수집 결과 없음")
 
 # ==========================================
+# 7. [POLY_SILICON] PV Insights — PV Grade PolySilicon (9N/9N+) Average
+# ==========================================
+PV_INSIGHTS_URL = 'http://pvinsights.com/'
+
+def crawl_pv_polysilicon():
+    """PV Insights 메인페이지에서 PV Grade PolySilicon (9N/9N+) Average 가격 수집 (USD/kg)."""
+    print(f"\n☀️ PV Insights 폴리실리콘 크롤링 시작")
+    try:
+        resp = requests.get(
+            PV_INSIGHTS_URL,
+            headers={'User-Agent': 'Mozilla/5.0'},
+            timeout=30,
+        )
+        if resp.status_code != 200:
+            print(f"❌ PV Insights 응답 오류: HTTP {resp.status_code}")
+            return
+        html = resp.text
+    except Exception as e:
+        print(f"❌ PV Insights 요청 실패: {e}")
+        return
+
+    row_m = re.search(
+        r'PV Grade PolySilicon\s*\(9N/9N\+\)(.*?)</tr>',
+        html, re.DOTALL,
+    )
+    if not row_m:
+        print("⚠️ 폴리실리콘 행 매칭 실패 — PV Insights 페이지 구조 변경 가능성")
+        return
+    nums = re.findall(r'<b>([\d.]+)</b>', row_m.group(1))
+    if len(nums) < 3:
+        print(f"⚠️ 폴리실리콘 숫자 부족: {nums}")
+        return
+    high, low, avg = nums[0], nums[1], nums[2]
+    try:
+        avg_val = float(avg)
+    except ValueError:
+        print(f"⚠️ 폴리실리콘 Average 파싱 실패: {avg}")
+        return
+
+    date_m = re.search(r'Last Update:?</em>\s*(\d{4}-\d{2}-\d{2})', html, re.IGNORECASE)
+    if not date_m:
+        print("⚠️ 폴리실리콘 Last Update 날짜 매칭 실패")
+        return
+    renew_date = date_m.group(1)
+
+    save_to_csv([(renew_date, '폴리실리콘', avg_val, 'POLY_SILICON')])
+    print(f"✓ 폴리실리콘 ({renew_date}): {avg_val} USD/kg (H {high} / L {low})")
+
+# ==========================================
 # Main Execution
 # ==========================================
 def main():
@@ -403,6 +452,7 @@ def main():
     crawl_us_indices()
     crawl_kr_indices()
     crawl_smm_lithium()
+    crawl_pv_polysilicon()
 
     print(f"\n📁 결과 파일: {CSV_FILE}")
 
