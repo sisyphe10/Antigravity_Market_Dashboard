@@ -736,6 +736,127 @@ def _build_wrap_chart_section(category_label):
         return ""
 
 
+def _build_target_transform_chart_section():
+    """NH 목표전환형 1호 수익률 차트 + 일자별 투자 비중."""
+    try:
+        df_nav = pd.read_excel('Wrap_NAV.xlsx', sheet_name='기준가')
+        df_nav['Date'] = pd.to_datetime(df_nav['Date'])
+        cols = ['Date', '목표전환형 1호', 'KOSPI', 'KOSDAQ']
+        nav = df_nav[cols].dropna(subset=['목표전환형 1호']).copy().sort_values('Date')
+        if len(nav) < 2:
+            return ''
+
+        dates = [d.strftime('%Y-%m-%d') for d in nav['Date']]
+
+        def to_pct(series):
+            vals = series.tolist()
+            base = None
+            out = []
+            for v in vals:
+                if pd.notna(v) and base is None:
+                    base = v
+                if base is not None and pd.notna(v):
+                    out.append(round((v / base - 1) * 100, 2))
+                else:
+                    out.append(None)
+            return out
+
+        target_pct = to_pct(nav['목표전환형 1호'])
+        kospi_pct = to_pct(nav['KOSPI'])
+        kosdaq_pct = to_pct(nav['KOSDAQ'])
+
+        # NEW 시트에서 '목표전환형 1호' 일자별 비중 합계
+        df_new = pd.read_excel('Wrap_NAV.xlsx', sheet_name='NEW')
+        mask = df_new['상품명'].astype(str).str.contains('목표전환형 1호', na=False)
+        daily_w = {}
+        if mask.sum() > 0:
+            sub = df_new[mask].copy()
+            sub['날짜'] = pd.to_datetime(sub['날짜'])
+            grouped = sub.groupby(sub['날짜'].dt.strftime('%Y-%m-%d'))['비중'].sum()
+            daily_w = {d: round(float(v), 2) for d, v in grouped.items()}
+
+        # 라인차트 labels와 같은 순서로 weight series (없는 날짜는 None)
+        weight_series = [daily_w.get(d) for d in dates]
+
+        data_json = json.dumps({
+            'dates': dates,
+            'target': target_pct,
+            'kospi': kospi_pct,
+            'kosdaq': kosdaq_pct,
+            'weights': weight_series,
+        }, ensure_ascii=False)
+
+        html = """
+        <div class="category-section">
+            <h2 class="category-title">NH 목표전환형 1호</h2>
+            <div style="display:flex;justify-content:center;">
+                <div style="width:1000px;">
+                    <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                        <canvas id="targetTransformChart" style="width:100%;height:500px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+        (function() {
+            var D = __DATA_JSON__;
+            var stemPlugin = {
+                id: 'weightStems',
+                afterDatasetsDraw: function(chart) {
+                    var meta = chart.getDatasetMeta(3);
+                    if (!meta || !meta.data) return;
+                    var yScale = chart.scales.y1;
+                    if (!yScale) return;
+                    var baseY = yScale.getPixelForValue(0);
+                    chart.ctx.save();
+                    chart.ctx.strokeStyle = 'rgba(150,150,150,0.5)';
+                    chart.ctx.lineWidth = 1.5;
+                    meta.data.forEach(function(pt) {
+                        if (!pt || pt.skip) return;
+                        chart.ctx.beginPath();
+                        chart.ctx.moveTo(pt.x, pt.y);
+                        chart.ctx.lineTo(pt.x, baseY);
+                        chart.ctx.stroke();
+                    });
+                    chart.ctx.restore();
+                }
+            };
+            var ctx = document.getElementById('targetTransformChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: D.dates,
+                    datasets: [
+                        { label: '목표전환형 1호', data: D.target, borderColor: '#e11d48', backgroundColor: 'transparent', borderWidth: 3, pointRadius: 0, tension: 0.3, yAxisID: 'y' },
+                        { label: 'KOSPI', data: D.kospi, borderColor: '#000000', backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, tension: 0.3, yAxisID: 'y' },
+                        { label: 'KOSDAQ', data: D.kosdaq, borderColor: '#666666', backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, tension: 0.3, yAxisID: 'y' },
+                        { label: '투자 비중 (%)', data: D.weights, showLine: false, pointRadius: 6, pointHoverRadius: 8, pointBackgroundColor: '#dc2626', pointBorderColor: '#dc2626', yAxisID: 'y1', spanGaps: false }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        y: { position: 'left', title: { display: true, text: '수익률 (%)' } },
+                        y1: { position: 'right', title: { display: true, text: '투자 비중 (%)' }, min: 0, max: 100, grid: { drawOnChartArea: false } }
+                    },
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: { mode: 'index', intersect: false }
+                    }
+                },
+                plugins: [stemPlugin]
+            });
+        })();
+        </script>
+        """
+        return html.replace('__DATA_JSON__', data_json)
+    except Exception as e:
+        print(f"Error building target transform chart: {e}")
+        return ''
+
+
 def create_aum_table():
     """AUM 테이블 HTML 생성"""
     try:
@@ -1443,6 +1564,7 @@ def create_dashboard():
 
             if category == 'Wrap':
                 wrap_html += _build_wrap_chart_section(category_label)
+                wrap_html += _build_target_transform_chart_section()
                 wrap_html += create_wrap_returns_table()
                 wrap_html += create_aum_table()
                 wrap_html += create_cumulative_aum_chart()
