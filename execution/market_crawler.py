@@ -388,53 +388,60 @@ def crawl_smm_lithium():
         print("⚠️ SMM 리튬 수집 결과 없음")
 
 # ==========================================
-# 7. [POLY_SILICON] PV Insights — PV Grade PolySilicon (9N/9N+) Average
+# 7. [POLY_SILICON] Sunsirs — 폴리실리콘 현물 가격 (CNY/톤, daily)
 # ==========================================
-PV_INSIGHTS_URL = 'http://pvinsights.com/'
+SUNSIRS_URL = 'https://www.sunsirs.com/m-kr/page/futures-price-detail/futures-price-detail-463.html'
+SUNSIRS_COOKIE = 'HW_CHECK=5527e2f79f796b5f48f1d7f8fd881cd9'
 
-def crawl_pv_polysilicon():
-    """PV Insights 메인페이지에서 PV Grade PolySilicon (9N/9N+) Average 가격 수집 (USD/kg)."""
-    print(f"\n☀️ PV Insights 폴리실리콘 크롤링 시작")
+def crawl_sunsirs_polysilicon():
+    """Sunsirs 폴리실리콘 현물 가격 수집 (CNY/톤, daily 업데이트)."""
+    print(f"\n☀️ Sunsirs 폴리실리콘 크롤링 시작")
     try:
         resp = requests.get(
-            PV_INSIGHTS_URL,
-            headers={'User-Agent': 'Mozilla/5.0'},
+            SUNSIRS_URL,
+            headers={
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Cookie': SUNSIRS_COOKIE,
+            },
             timeout=30,
         )
         if resp.status_code != 200:
-            print(f"❌ PV Insights 응답 오류: HTTP {resp.status_code}")
+            print(f"❌ Sunsirs 응답 오류: HTTP {resp.status_code}")
             return
         html = resp.text
     except Exception as e:
-        print(f"❌ PV Insights 요청 실패: {e}")
+        print(f"❌ Sunsirs 요청 실패: {e}")
         return
 
-    row_m = re.search(
-        r'PV Grade PolySilicon\s*\(9N/9N\+\)(.*?)</tr>',
+    # 현물 가격 / 지배적인 계약 / 날짜 행 직후 데이터 행 추출
+    m = re.search(
+        r'현물 가격</p><p>지배적인 계약</p><p>날짜</p></li>'
+        r'\s*<li[^>]*>\s*<p>([\d.]+)</p>\s*<p>[\d.]+</p>\s*<p>(\d{2}-\d{2})</p>',
         html, re.DOTALL,
     )
-    if not row_m:
-        print("⚠️ 폴리실리콘 행 매칭 실패 — PV Insights 페이지 구조 변경 가능성")
+    if not m:
+        print("⚠️ Sunsirs 폴리실리콘 매칭 실패 — 페이지 구조 변경 가능성")
         return
-    nums = re.findall(r'<b>([\d.]+)</b>', row_m.group(1))
-    if len(nums) < 3:
-        print(f"⚠️ 폴리실리콘 숫자 부족: {nums}")
-        return
-    high, low, avg = nums[0], nums[1], nums[2]
     try:
-        avg_val = float(avg)
+        spot_val = float(m.group(1))
     except ValueError:
-        print(f"⚠️ 폴리실리콘 Average 파싱 실패: {avg}")
+        print(f"⚠️ Sunsirs 가격 파싱 실패: {m.group(1)}")
         return
 
-    date_m = re.search(r'Last Update:?</em>\s*(\d{4}-\d{2}-\d{2})', html, re.IGNORECASE)
-    if not date_m:
-        print("⚠️ 폴리실리콘 Last Update 날짜 매칭 실패")
+    # MM-DD → YYYY-MM-DD (현재 연도 기준, 미래 날짜면 작년으로 보정)
+    today = datetime.now()
+    mm_dd = m.group(2)
+    try:
+        guess = datetime.strptime(f"{today.year}-{mm_dd}", '%Y-%m-%d')
+        if guess > today + timedelta(days=7):
+            guess = datetime.strptime(f"{today.year - 1}-{mm_dd}", '%Y-%m-%d')
+        renew_date = guess.strftime('%Y-%m-%d')
+    except ValueError:
+        print(f"⚠️ Sunsirs 날짜 파싱 실패: {mm_dd}")
         return
-    renew_date = date_m.group(1)
 
-    save_to_csv([(renew_date, '폴리실리콘', avg_val, 'POLY_SILICON')])
-    print(f"✓ 폴리실리콘 ({renew_date}): {avg_val} USD/kg (H {high} / L {low})")
+    save_to_csv([(renew_date, 'Poly Silicon', spot_val, 'POLY_SILICON')])
+    print(f"✓ Poly Silicon ({renew_date}): {spot_val:,.0f} CNY/톤")
 
 # ==========================================
 # Main Execution
@@ -452,7 +459,7 @@ def main():
     crawl_us_indices()
     crawl_kr_indices()
     crawl_smm_lithium()
-    crawl_pv_polysilicon()
+    crawl_sunsirs_polysilicon()
 
     print(f"\n📁 결과 파일: {CSV_FILE}")
 

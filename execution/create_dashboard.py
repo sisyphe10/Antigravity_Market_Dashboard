@@ -1377,7 +1377,7 @@ def create_dashboard():
                     'Sprott Physical Uranium Trust',
                     '탄산리튬 전지급',
                     '수산화리튬 전지급 미분',
-                    '폴리실리콘',
+                    'Poly Silicon',
                     'SCFI Comprehensive Index',
                     'KRX ETS  KAU25',
                     'KRX ETS Trading Volume'
