@@ -56,7 +56,11 @@ def load_us_universe():
             continue
         if row[curr_idx].strip().upper() != 'USD':
             continue
-        ticker = row[ticker_idx].strip().upper()
+        raw_ticker = row[ticker_idx].strip().upper()
+        # "NYSE:AMGN", "NASDAQ:AMGN", "AMEX:X" 등 접두어 제거
+        if ':' in raw_ticker:
+            raw_ticker = raw_ticker.split(':', 1)[1].strip()
+        ticker = raw_ticker
         name = row[name_idx].strip() if len(row) > name_idx else ticker
         if ticker and ticker not in seen:
             result.append((ticker, name))
@@ -65,15 +69,19 @@ def load_us_universe():
     return result
 
 
-def fetch_earnings(ticker, from_date, to_date, api_key):
+def fetch_earnings(ticker, from_date, to_date, api_key, max_retries=3):
     params = {'from': from_date, 'to': to_date, 'symbol': ticker, 'token': api_key}
-    r = requests.get(f'{FINNHUB_API}/calendar/earnings', params=params, timeout=15)
-    if r.status_code == 429:
-        log.warning(f"Rate limit {ticker}, sleeping 2s")
-        time.sleep(2)
-        r = requests.get(f'{FINNHUB_API}/calendar/earnings', params=params, timeout=15)
-    r.raise_for_status()
-    return r.json().get('earningsCalendar', [])
+    url = f'{FINNHUB_API}/calendar/earnings'
+    for attempt in range(max_retries):
+        r = requests.get(url, params=params, timeout=15)
+        if r.status_code == 429:
+            wait = 5 * (attempt + 1)
+            log.warning(f"Rate limit {ticker}, sleeping {wait}s (attempt {attempt+1})")
+            time.sleep(wait)
+            continue
+        r.raise_for_status()
+        return r.json().get('earningsCalendar', [])
+    raise RuntimeError(f"Rate limit 재시도 초과: {ticker}")
 
 
 def format_number(val, prefix='$'):
@@ -210,7 +218,7 @@ def main():
                 log.error(f"  {ticker} {earnings.get('date','?')}: upsert 실패: {e}")
                 stats['error'] += 1
 
-        time.sleep(0.1)  # 60 req/min 여유
+        time.sleep(1.1)  # 60 req/min 제한, 여유있게 초당 1건 이하
 
     log.info(f"완료: {stats}")
 
