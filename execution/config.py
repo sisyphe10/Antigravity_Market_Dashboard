@@ -52,8 +52,8 @@ YFINANCE_TICKERS = {
     'Gold': {'ticker': 'GC=F', 'type': 'COMMODITY'},
     'Silver': {'ticker': 'SI=F', 'type': 'COMMODITY'},
     'Copper': {'ticker': 'HG=F', 'type': 'COMMODITY'},
-    'Sprott Physical Uranium Trust': {'ticker': 'SRUUF', 'type': 'COMMODITY'},
-    'Wheat Futures': {'ticker': 'ZW=F', 'type': 'COMMODITY'},
+    'Uranium': {'ticker': 'SRUUF', 'type': 'COMMODITY'},
+    'Wheat': {'ticker': 'ZW=F', 'type': 'COMMODITY'},
 
     # --- Indices and Interest Rates ---
     'VIX Index': {'ticker': '^VIX', 'type': 'INDEX_US'},
