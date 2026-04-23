@@ -647,7 +647,7 @@ def _build_wrap_chart_section(category_label):
                         data: data,
                         borderColor: chartColors[name] || '#888',
                         backgroundColor: 'transparent',
-                        borderWidth: (name === 'KOSPI' || name === 'KOSDAQ') ? 1.5 : 3.5,
+                        borderWidth: (name === 'KOSPI' || name === 'KOSDAQ') ? 1.5 : 3,
                         pointRadius: 0,
                         tension: 0.3
                     });
