@@ -341,8 +341,8 @@ def crawl_kr_indices():
 #   202106020003 = 电池级氢氧化锂(微粉) (Battery-Grade Lithium Hydroxide, Micro Powder)
 SMM_LITHIUM_URL = 'https://hq.smm.cn/h5/Li2CO3-battery-price'
 SMM_LITHIUM_PRODUCTS = {
-    '201102250059': '탄산리튬 전지급',
-    '202106020003': '수산화리튬 전지급 미분',
+    '201102250059': 'Lithium Carbonate',
+    '202106020003': 'Lithium Hydroxide',
 }
 
 def crawl_smm_lithium():
