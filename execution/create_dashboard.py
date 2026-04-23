@@ -1564,7 +1564,6 @@ def create_dashboard():
 
             if category == 'Wrap':
                 wrap_html += _build_wrap_chart_section(category_label)
-                wrap_html += _build_target_transform_chart_section()
                 wrap_html += create_wrap_returns_table()
                 wrap_html += create_aum_table()
                 wrap_html += create_cumulative_aum_chart()

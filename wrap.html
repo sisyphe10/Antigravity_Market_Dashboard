@@ -136,7 +136,7 @@
     <div id="mainContent" class="pw-hidden">
     <header style="position:relative;">
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-04-23 16:05:26 KST</div>
+        <div class="last-updated">Updated: 2026-04-23 16:10:31 KST</div>
         <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
 
@@ -290,70 +290,6 @@
         })();
         </script>
         
-        
-        <div class="category-section">
-            <h2 class="category-title">NH 목표전환형 1호</h2>
-            <div style="display:flex;justify-content:center;">
-                <div style="width:1000px;">
-                    <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
-                        <canvas id="targetTransformChart" style="width:100%;height:500px;"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <script>
-        (function() {
-            var D = {"dates": ["2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-03", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-13", "2026-04-14", "2026-04-15"], "target": [0.0, -1.65, -1.92, -3.31, -6.66, 0.44, -4.19, -1.04, -1.13, -0.85, 4.83, 2.99, 4.53, 4.97, 7.37, 10.16], "kospi": [0.0, -3.22, -3.6, -6.47, -10.45, -2.9, -7.23, -4.7, -3.4, -2.61, 4.08, 2.41, 3.84, 2.95, 5.77, 8.23], "kosdaq": [0.0, -1.98, -1.56, -4.53, -9.24, -3.74, -8.9, -8.26, -9.67, -10.59, -6.01, -7.21, -5.68, -5.15, -3.25, -0.86], "weights": [57.0, 60.0, null, null, 76.0, null, null, 79.0, null, null, 81.0, 92.0, null, null, 85.0, null]};
-            var stemPlugin = {
-                id: 'weightStems',
-                afterDatasetsDraw: function(chart) {
-                    var meta = chart.getDatasetMeta(3);
-                    if (!meta || !meta.data) return;
-                    var yScale = chart.scales.y1;
-                    if (!yScale) return;
-                    var baseY = yScale.getPixelForValue(0);
-                    chart.ctx.save();
-                    chart.ctx.strokeStyle = 'rgba(150,150,150,0.5)';
-                    chart.ctx.lineWidth = 1.5;
-                    meta.data.forEach(function(pt) {
-                        if (!pt || pt.skip) return;
-                        chart.ctx.beginPath();
-                        chart.ctx.moveTo(pt.x, pt.y);
-                        chart.ctx.lineTo(pt.x, baseY);
-                        chart.ctx.stroke();
-                    });
-                    chart.ctx.restore();
-                }
-            };
-            var ctx = document.getElementById('targetTransformChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: D.dates,
-                    datasets: [
-                        { label: '목표전환형 1호', data: D.target, borderColor: '#e11d48', backgroundColor: 'transparent', borderWidth: 3, pointRadius: 0, tension: 0.3, yAxisID: 'y' },
-                        { label: 'KOSPI', data: D.kospi, borderColor: '#000000', backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, tension: 0.3, yAxisID: 'y' },
-                        { label: 'KOSDAQ', data: D.kosdaq, borderColor: '#666666', backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, tension: 0.3, yAxisID: 'y' },
-                        { label: '투자 비중 (%)', data: D.weights, showLine: false, pointRadius: 6, pointHoverRadius: 8, pointBackgroundColor: '#dc2626', pointBorderColor: '#dc2626', yAxisID: 'y1', spanGaps: false }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    scales: {
-                        y: { position: 'left', title: { display: true, text: '수익률 (%)' } },
-                        y1: { position: 'right', title: { display: true, text: '투자 비중 (%)' }, min: 0, max: 100, grid: { drawOnChartArea: false } }
-                    },
-                    plugins: {
-                        legend: { position: 'top' },
-                        tooltip: { mode: 'index', intersect: false }
-                    }
-                },
-                plugins: [stemPlugin]
-            });
-        })();
-        </script>
         
         <div class="category-section">
             <h2 class="category-title">RETURN</h2>
