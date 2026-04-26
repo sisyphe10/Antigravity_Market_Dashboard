@@ -101,11 +101,14 @@ class _BodyTextExtractor(HTMLParser):
         text = html.unescape(text)
         text = text.replace('\xa0', ' ')
         text = re.sub(r'[ \t]+', ' ', text)
-        # 공백만 있는 줄도 빈 줄로 취급, 연속 빈 줄은 1개로 압축
-        lines = [ln.rstrip() for ln in text.split('\n')]
+        # 1) "※ 원문 :" 으로 시작하는 줄 제거
+        skip_re = re.compile(r'^\s*※\s*원문\s*[:：]')
+        filtered = [ln for ln in text.split('\n') if not skip_re.match(ln)]
+        # 2) 공백만 있는 줄도 빈 줄로 취급, 연속 빈 줄은 1개로 압축
         cleaned = []
         prev_blank = False
-        for ln in lines:
+        for ln in filtered:
+            ln = ln.rstrip()
             is_blank = not ln.strip()
             if is_blank and prev_blank:
                 continue

@@ -388,7 +388,7 @@ async def daily_kna_news_job(context: ContextTypes.DEFAULT_TYPE):
             return
         for p in posts:
             header = (
-                f"📰 <b>[KNA] {_html.escape(p['title'])}</b>\n"
+                f"📰 <b><u>[KNA] {_html.escape(p['title'])}</u></b>\n"
                 f"{p['date']} · #{p['display_no']}\n"
                 f"{p['url']}\n\n"
             )
