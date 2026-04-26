@@ -1163,113 +1163,6 @@ async def evening_backup_job(context: ContextTypes.DEFAULT_TYPE):
         logging.error(f"Evening backup job error: {e}")
 
 
-_ALERT_SENT_FILE = os.path.join(DASHBOARD_DIR, '.market_alert_sent.json')
-
-
-def _load_prev_alert():
-    try:
-        with open(_ALERT_SENT_FILE, 'r') as f:
-            return json.load(f)
-    except Exception:
-        return {}
-
-
-def _save_alert(data):
-    with open(_ALERT_SENT_FILE, 'w') as f:
-        json.dump(data, f, ensure_ascii=False)
-
-
-async def daily_market_alert_summary_job(context: ContextTypes.DEFAULT_TYPE):
-    """매일 05:15 투자유의종목 텔레그램 요약 알림"""
-    logging.info("Market alert summary job started")
-    try:
-        import html as html_mod
-        sys.path.insert(0, os.path.join(DASHBOARD_DIR, 'execution'))
-        from create_market_alert import (
-            get_session, fetch_category, parse_stocks, load_krx_data,
-            fmt_marcap
-        )
-        esc = html_mod.escape
-
-        now_kst = datetime.datetime.now(tz=KST)
-        today = now_kst.strftime('%Y-%m-%d')
-        start_90 = (now_kst - datetime.timedelta(days=90)).strftime('%Y-%m-%d')
-        start_10 = (now_kst - datetime.timedelta(days=10)).strftime('%Y-%m-%d')
-
-        krx_data = load_krx_data()
-        session = get_session()
-
-        stocks_주의 = parse_stocks(fetch_category(session, '투자주의', start_10, today), '투자주의', krx_data)
-        seen = {}
-        for s in stocks_주의:
-            if s['name'] not in seen or s['designation_date'] > seen[s['name']]['designation_date']:
-                seen[s['name']] = s
-        stocks_주의 = list(seen.values())
-
-        stocks_경고 = parse_stocks(fetch_category(session, '투자경고', start_90, today), '투자경고', krx_data)
-        stocks_위험 = parse_stocks(fetch_category(session, '투자위험', start_90, today), '투자위험', krx_data)
-
-        # 시총 1000억 이상만
-        MIN_MARCAP = 1000
-        stocks_주의 = [s for s in stocks_주의 if s.get('marcap') and s['marcap'] >= MIN_MARCAP]
-        stocks_경고 = [s for s in stocks_경고 if s.get('marcap') and s['marcap'] >= MIN_MARCAP]
-        stocks_위험 = [s for s in stocks_위험 if s.get('marcap') and s['marcap'] >= MIN_MARCAP]
-
-        # 이전 리스트와 비교
-        prev = _load_prev_alert()
-        prev_위험 = set(prev.get('위험', []))
-        prev_경고 = set(prev.get('경고', []))
-        prev_주의 = set(prev.get('주의', []))
-
-        def fmt_line(s):
-            name = esc(s['name'])
-            mcap = esc(fmt_marcap(s['marcap']))
-            line = f"• {name} / {mcap}"
-            if s.get('warn_type') == '투자경고 지정예고':
-                line = f"<u>{line}</u>"
-            return line
-
-        def render_category(stocks, prev_set, header):
-            if not stocks:
-                return []
-            sorted_stocks = sorted(stocks, key=lambda x: (x.get('marcap') or 0), reverse=True)
-            new_stocks = [s for s in sorted_stocks if s['name'] not in prev_set]
-            existing_stocks = [s for s in sorted_stocks if s['name'] in prev_set]
-            out = ["", f"<b><u>[{header}]</u></b>"]
-            if new_stocks:
-                out.append("(신규)")
-                for s in new_stocks:
-                    out.append(fmt_line(s))
-                if existing_stocks:
-                    out.append("----")
-            for s in existing_stocks:
-                out.append(fmt_line(s))
-            return out
-
-        lines = [f"<b><u>투자유의종목 현황</u></b> ({today})"]
-        lines.extend(render_category(stocks_위험, prev_위험, '투자위험'))
-        lines.extend(render_category(stocks_경고, prev_경고, '투자경고'))
-        lines.extend(render_category(stocks_주의, prev_주의, '투자주의'))
-
-        _save_alert({
-            '위험': [s['name'] for s in stocks_위험],
-            '경고': [s['name'] for s in stocks_경고],
-            '주의': [s['name'] for s in stocks_주의],
-        })
-
-        msg = "\n".join(lines)
-        for chat_id in SUBSCRIBERS:
-            try:
-                for i in range(0, len(msg), 4000):
-                    await context.bot.send_message(chat_id=chat_id, text=msg[i:i+4000], parse_mode='HTML')
-            except Exception as e:
-                logging.error(f"Market alert summary send failed: {e}")
-
-        logging.info(f"Market alert summary sent: 위험{len(stocks_위험)} 경고{len(stocks_경고)} 주의{len(stocks_주의)}")
-    except Exception as e:
-        logging.error(f"Market alert summary job failed: {e}")
-
-
 async def daily_weather_job(context: ContextTypes.DEFAULT_TYPE):
     """매일 05:00 날씨 알림 (daily_alert.py 실행)"""
     logging.info("Daily weather job started")
@@ -2257,7 +2150,6 @@ if __name__ == '__main__':
         kst = pytz.timezone('Asia/Seoul')
         weather_time = datetime.time(hour=5, minute=0, second=0, tzinfo=kst)
         calendar_time = datetime.time(hour=5, minute=5, second=0, tzinfo=kst)
-        alert_summary_time = datetime.time(hour=5, minute=15, second=0, tzinfo=kst)
         portfolio_time = datetime.time(hour=16, minute=0, second=0, tzinfo=kst)
         market_alert_time = datetime.time(hour=16, minute=5, second=0, tzinfo=kst)
         journal_time = datetime.time(hour=16, minute=10, second=0, tzinfo=kst)
@@ -2266,7 +2158,6 @@ if __name__ == '__main__':
     except:
         weather_time = datetime.time(hour=5, minute=0, second=0)
         calendar_time = datetime.time(hour=5, minute=5, second=0)
-        alert_summary_time = datetime.time(hour=5, minute=15, second=0)
         portfolio_time = datetime.time(hour=16, minute=0, second=0)
         market_alert_time = datetime.time(hour=16, minute=5, second=0)
         journal_time = datetime.time(hour=16, minute=10, second=0)
@@ -2288,7 +2179,6 @@ if __name__ == '__main__':
 
     job_queue.run_daily(daily_weather_job, time=weather_time)
     job_queue.run_daily(daily_calendar_job, time=calendar_time)
-    job_queue.run_daily(daily_market_alert_summary_job, time=alert_summary_time)
     job_queue.run_daily(daily_portfolio_job, time=portfolio_time)
     job_queue.run_daily(daily_market_alert_job, time=market_alert_time)
     job_queue.run_daily(daily_journal_job, time=journal_time)
