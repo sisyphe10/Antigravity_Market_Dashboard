@@ -101,8 +101,17 @@ class _BodyTextExtractor(HTMLParser):
         text = html.unescape(text)
         text = text.replace('\xa0', ' ')
         text = re.sub(r'[ \t]+', ' ', text)
-        text = re.sub(r'\n{3,}', '\n\n', text)
-        return text.strip()
+        # 공백만 있는 줄도 빈 줄로 취급, 연속 빈 줄은 1개로 압축
+        lines = [ln.rstrip() for ln in text.split('\n')]
+        cleaned = []
+        prev_blank = False
+        for ln in lines:
+            is_blank = not ln.strip()
+            if is_blank and prev_blank:
+                continue
+            cleaned.append('' if is_blank else ln)
+            prev_blank = is_blank
+        return '\n'.join(cleaned).strip()
 
 
 _TITLE_RE = re.compile(
