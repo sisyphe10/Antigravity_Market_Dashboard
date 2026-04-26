@@ -1,0 +1,16 @@
+[Unit]
+Description=Research Alerts Telegram Bot (RA_Sisyphe)
+After=network.target
+StartLimitBurst=10
+StartLimitIntervalSec=300
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/Antigravity_Market_Dashboard
+ExecStart=/usr/bin/python3 execution/research_alerts_bot.py
+Restart=always
+RestartSec=10
+EnvironmentFile=/home/ubuntu/Antigravity_Market_Dashboard/.env
+
+[Install]
+WantedBy=multi-user.target

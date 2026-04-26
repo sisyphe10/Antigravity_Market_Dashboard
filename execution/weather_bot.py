@@ -807,39 +807,6 @@ async def daily_market_alert_retry_job(context: ContextTypes.DEFAULT_TYPE):
             pass
 
 
-async def daily_kna_news_job(context: ContextTypes.DEFAULT_TYPE):
-    """매일 18:00 KNA 세계원전시장동향 신규 게시글 알림"""
-    import html as _html
-    logging.info("Daily KNA news job started")
-    try:
-        sys.path.insert(0, os.path.join(DASHBOARD_DIR, 'execution'))
-        from fetch_kna_news import fetch_new_posts
-        posts = fetch_new_posts(update_state=True)
-        if not posts:
-            logging.info("KNA: 신규 글 없음")
-            return
-        for p in posts:
-            header = (
-                f"📰 <b>[KNA] {_html.escape(p['title'])}</b>\n"
-                f"{p['date']} · #{p['display_no']}\n"
-                f"{p['url']}\n\n"
-            )
-            body = _html.escape(p.get('body', ''))
-            full = header + body
-            for chat_id in SUBSCRIBERS:
-                try:
-                    for i in range(0, len(full), 4000):
-                        await context.bot.send_message(
-                            chat_id=chat_id, text=full[i:i+4000], parse_mode='HTML',
-                            disable_web_page_preview=True,
-                        )
-                except Exception as e:
-                    logging.error(f"KNA news 전송 실패 (num={p.get('num')}): {e}")
-        logging.info(f"KNA news sent: {len(posts)}건")
-    except Exception as e:
-        logging.error(f"KNA news job failed: {e}")
-
-
 async def daily_journal_job(context: ContextTypes.DEFAULT_TYPE):
     """매일 16:10 투자일지 시장 데이터 수집"""
     logging.info("Daily journal data job started")
@@ -1319,53 +1286,6 @@ async def daily_weather_job(context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logging.error(f"Daily weather job error: {e}")
 
-
-async def daily_headlines_job(context: ContextTypes.DEFAULT_TYPE):
-    """매일 05:10 리서치 헤드라인 알림 (당일/전일 데이터만 전송)"""
-    logging.info("Daily headlines job started")
-    try:
-        import json as _json
-        headlines_file = os.path.join(DASHBOARD_DIR, 'research_headlines.json')
-        if os.path.exists(headlines_file):
-            with open(headlines_file, 'r', encoding='utf-8') as f:
-                data = _json.load(f)
-            headlines = data.get('headlines', [])
-            date = data.get('date', '')
-            # 날짜 신선도 체크: 어제 또는 오늘 데이터만 전송
-            today_kst = datetime.datetime.now(tz=KST).date()
-            yesterday_kst = today_kst - datetime.timedelta(days=1)
-            try:
-                headline_date = datetime.datetime.strptime(date, '%Y-%m-%d').date()
-            except (ValueError, TypeError):
-                headline_date = None
-            if headline_date and headline_date < yesterday_kst:
-                logging.info(f"Research headlines 스킵: 오래된 데이터 ({date})")
-                headlines = []
-            if headlines:
-                # 엄중(important) 먼저, 일반 나중에 정렬
-                important = [h for h in headlines if isinstance(h, dict) and h.get('important')]
-                normal = [h for h in headlines if not (isinstance(h, dict) and h.get('important'))]
-                sorted_headlines = important + normal
-
-                msg = f"📋 <b>Research Notes ({date})</b>\n\n"
-                for i, h in enumerate(sorted_headlines):
-                    title = h.get('title', '') if isinstance(h, dict) else h
-                    summary = h.get('summary', '') if isinstance(h, dict) else ''
-                    # 엄중 → 일반 전환 시 구분선
-                    if i == len(important) and important:
-                        msg += "————————————————\n\n"
-                    msg += f"- <b><u>{title}</u></b>\n"
-                    if summary:
-                        msg += f"  {summary}\n"
-                    msg += "\n"
-                for chat_id in SUBSCRIBERS:
-                    try:
-                        await context.bot.send_message(chat_id=chat_id, text=msg, parse_mode='HTML')
-                    except Exception as e:
-                        logging.error(f"Research headline 전송 실패: {e}")
-                logging.info(f"Research headlines sent: {len(headlines)}건")
-    except Exception as e:
-        logging.error(f"Research headlines error: {e}")
 
 async def daily_calendar_job(context: ContextTypes.DEFAULT_TYPE):
     """매일 05:10 Google Calendar 일정 알림 (daily_calendar.py 실행)"""
@@ -2260,244 +2180,6 @@ async def journal_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # ============================================================
-# WiseReport 리서치 리포트 알림
-# ============================================================
-_WISEREPORT_SENT_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.wisereport_sent.json')
-
-
-def _load_wisereport_sent():
-    """파일에서 당일 전송 기록 로드"""
-    today_str = datetime.datetime.now(KST).strftime('%Y-%m-%d')
-    try:
-        with open(_WISEREPORT_SENT_FILE, 'r') as f:
-            data = json.load(f)
-        if data.get('date') == today_str:
-            return set(tuple(x) for x in data.get('sent', [])), today_str
-    except:
-        pass
-    return set(), today_str
-
-
-def _save_wisereport_sent(sent_set, date_str):
-    """전송 기록 파일에 저장"""
-    try:
-        with open(_WISEREPORT_SENT_FILE, 'w') as f:
-            json.dump({'date': date_str, 'sent': list(sent_set)}, f)
-    except:
-        pass
-
-
-def fetch_wisereport(fmt, date_str):
-    """WiseReport 리포트 서머리 스크래핑. fmt=1(기업), fmt=2(산업)"""
-    import urllib.request
-    from bs4 import BeautifulSoup
-
-    url = f'https://comp.wisereport.co.kr/wiseReport/summary/ReportSummary.aspx?ee={date_str}&fmt={fmt}'
-    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-    html = urllib.request.urlopen(req, timeout=20).read().decode('utf-8', errors='replace')
-    soup = BeautifulSoup(html, 'html.parser')
-
-    tbl = soup.find('table', class_='Summary_list')
-    if not tbl:
-        return []
-
-    results = []
-    for row in tbl.find_all('tr', class_=['itm_t1', 'alt_t1']):
-        cells = row.find_all(['th', 'td'])
-        if fmt == 1 and len(cells) >= 7:
-            summary = cells[6].get_text(strip=True)
-            if not summary:
-                continue
-            name_div = cells[0].find('div')
-            title_full = cells[5].get('title', '') or cells[5].get_text(strip=True)
-            results.append({
-                'name': name_div.get('title', '') if name_div else cells[0].get_text(strip=True),
-                'analyst': cells[1].get_text(' ', strip=True),
-                'opinion': cells[2].get_text(strip=True),
-                'target': cells[3].get_text(strip=True).replace('\n', ''),
-                'close': cells[4].get_text(strip=True),
-                'title': title_full,
-                'summary': summary,
-            })
-        elif fmt == 2 and len(cells) >= 6:
-            summary = cells[5].get_text(strip=True)
-            if not summary:
-                continue
-            results.append({
-                'name': cells[0].get_text(strip=True),
-                'analyst': cells[1].get_text(' ', strip=True),
-                'opinion': cells[2].get_text(strip=True),
-                'prev_opinion': cells[3].get_text(strip=True),
-                'title': cells[4].get('title', '') or cells[4].get_text(strip=True),
-                'summary': summary,
-            })
-    return results
-
-
-def format_wisereport_msg(company_data, industry_data, is_update=False):
-    """텔레그램 HTML 메시지 생성. 같은 종목/산업 그룹핑, 4096자 분할."""
-    from collections import OrderedDict
-    now_str = datetime.datetime.now(KST).strftime('%Y-%m-%d %H:%M')
-    header = f"📋 <b>리서치 리포트</b> ({now_str})"
-    if is_update:
-        header = f"📋 <b>리서치 리포트 추가</b> ({now_str})"
-
-    lines = [header, '']
-
-    if company_data:
-        lines.append('<b>━━ 기업 ━━</b>')
-        # 같은 종목끼리 그룹핑 (한글 오름차순)
-        groups = {}
-        for r in company_data:
-            nm = r['name'].split('(')[0].strip()
-            if nm not in groups:
-                groups[nm] = []
-            groups[nm].append(r)
-
-        for nm in sorted(groups.keys()):
-            items = groups[nm]
-            for r in items:
-                op = r['opinion'] or '-'
-                tgt = r['target'] or '-'
-                analyst = r['analyst'].replace('[', '').replace(']', '')
-                # 증권사 앞2글자 + 애널리스트명
-                parts = analyst.split()
-                firm = parts[0][:2] if parts else '-'
-                person = ' '.join(parts[1:]) if len(parts) > 1 else ''
-                analyst_short = f"{firm} {person}" if person else firm
-                close = r.get('close', '') or '-'
-                # upside/downside 계산
-                try:
-                    c_val = int(close.replace(',', ''))
-                    t_val = int(tgt.replace(',', ''))
-                    pct = round((t_val - c_val) / c_val * 100)
-                    pct_str = f" ({pct:+d}%)"
-                except:
-                    pct_str = ''
-                lines.append(f"<b><u>{nm}</u></b>")
-                lines.append(f"{analyst_short} | {op} | {close} → {tgt}{pct_str}")
-                lines.append(f"「{r['title']}」")
-                summ = r['summary'].replace('▶ ', '▶').replace('▶', '\n- ')
-                if summ.startswith('\n'):
-                    summ = summ[1:]
-                lines.append(summ)
-                lines.append('')
-
-    if industry_data:
-        lines.append('<b>━━ 산업 ━━</b>')
-        groups = {}
-        for r in industry_data:
-            nm = r['name']
-            if nm not in groups:
-                groups[nm] = []
-            groups[nm].append(r)
-
-        for nm in sorted(groups.keys()):
-            items = groups[nm]
-            for r in items:
-                prev = r.get('prev_opinion', '') or ''
-                curr = r.get('opinion', '') or ''
-                analyst = r['analyst'].replace('[', '').replace(']', '')
-                if prev and curr and prev != curr:
-                    opinion_str = f"{prev} → {curr}"
-                else:
-                    opinion_str = curr or prev or '-'
-                parts = analyst.split()
-                firm = parts[0][:2] if parts else '-'
-                person = ' '.join(parts[1:]) if len(parts) > 1 else ''
-                analyst_short = f"{firm} {person}" if person else firm
-                lines.append(f"<b><u>{nm}</u></b>")
-                lines.append(f"{analyst_short} | {opinion_str}")
-                lines.append(f"「{r['title']}」")
-                summ = r['summary'].replace('▶ ', '▶').replace('▶', '\n- ')
-                if summ.startswith('\n'):
-                    summ = summ[1:]
-                lines.append(summ)
-            lines.append('')
-
-    # 종목/산업 블록 단위로 분할 (빈줄 기준)
-    blocks = []
-    block = ''
-    for line in lines:
-        if line == '' and block.strip():
-            blocks.append(block + '\n')
-            block = ''
-        else:
-            block += line + '\n'
-    if block.strip():
-        blocks.append(block)
-
-    # 4096자 제한, 블록 단위로 메시지 분할
-    messages = []
-    current = ''
-    for blk in blocks:
-        if len(current) + len(blk) > 4000:
-            if current.strip():
-                messages.append(current)
-            current = blk
-        else:
-            current += blk
-    if current.strip():
-        messages.append(current)
-    return messages
-
-
-async def wisereport_job(context):
-    """WiseReport 리서치 리포트 스크래핑 + 텔레그램 전송"""
-    now = datetime.datetime.now(KST)
-    today_str = now.strftime('%Y-%m-%d')
-
-    sent_set, sent_date = _load_wisereport_sent()
-    if sent_date != today_str:
-        sent_set = set()
-
-    is_update = len(sent_set) > 0
-
-    try:
-        company = fetch_wisereport(1, today_str)
-        industry = fetch_wisereport(2, today_str)
-    except Exception as e:
-        logging.warning(f"WiseReport fetch failed: {e}")
-        for chat_id in SUBSCRIBERS:
-            try:
-                await context.bot.send_message(chat_id=chat_id, text=f"⚠️ WiseReport 수집 실패: {e}")
-            except:
-                pass
-        return
-
-    # 새 항목만 필터링
-    new_company = []
-    for r in company:
-        key = (r['name'], r['title'])
-        if key not in sent_set:
-            sent_set.add(key)
-            new_company.append(r)
-
-    new_industry = []
-    for r in industry:
-        key = (r['name'], r['title'])
-        if key not in sent_set:
-            sent_set.add(key)
-            new_industry.append(r)
-
-    if not new_company and not new_industry:
-        _save_wisereport_sent(sent_set, today_str)
-        logging.info("WiseReport: no new reports")
-        return
-
-    messages = format_wisereport_msg(new_company, new_industry, is_update)
-    for msg in messages:
-        for chat_id in SUBSCRIBERS:
-            try:
-                await context.bot.send_message(chat_id=chat_id, text=msg, parse_mode='HTML')
-            except Exception as e:
-                logging.error(f"WiseReport send failed: {e}")
-
-    _save_wisereport_sent(sent_set, today_str)
-    logging.info(f"WiseReport sent: {len(new_company)} company, {len(new_industry)} industry")
-
-
-# ============================================================
 # 예산 소진율 체크
 # ============================================================
 SISYPHE_SHEET_ID = '1V41yiwO4VrVUhjhqHyu8JGsuGcqw6pZen0NHdxzXHGs'
@@ -2575,7 +2257,6 @@ if __name__ == '__main__':
         kst = pytz.timezone('Asia/Seoul')
         weather_time = datetime.time(hour=5, minute=0, second=0, tzinfo=kst)
         calendar_time = datetime.time(hour=5, minute=5, second=0, tzinfo=kst)
-        headlines_time = datetime.time(hour=5, minute=10, second=0, tzinfo=kst)
         alert_summary_time = datetime.time(hour=5, minute=15, second=0, tzinfo=kst)
         portfolio_time = datetime.time(hour=16, minute=0, second=0, tzinfo=kst)
         market_alert_time = datetime.time(hour=16, minute=5, second=0, tzinfo=kst)
@@ -2585,7 +2266,6 @@ if __name__ == '__main__':
     except:
         weather_time = datetime.time(hour=5, minute=0, second=0)
         calendar_time = datetime.time(hour=5, minute=5, second=0)
-        headlines_time = datetime.time(hour=5, minute=10, second=0)
         alert_summary_time = datetime.time(hour=5, minute=15, second=0)
         portfolio_time = datetime.time(hour=16, minute=0, second=0)
         market_alert_time = datetime.time(hour=16, minute=5, second=0)
@@ -2608,7 +2288,6 @@ if __name__ == '__main__':
 
     job_queue.run_daily(daily_weather_job, time=weather_time)
     job_queue.run_daily(daily_calendar_job, time=calendar_time)
-    job_queue.run_daily(daily_headlines_job, time=headlines_time)
     job_queue.run_daily(daily_market_alert_summary_job, time=alert_summary_time)
     job_queue.run_daily(daily_portfolio_job, time=portfolio_time)
     job_queue.run_daily(daily_market_alert_job, time=market_alert_time)
@@ -2629,13 +2308,6 @@ if __name__ == '__main__':
     except:
         late_alert_time = datetime.time(hour=23, minute=0, second=0)
     job_queue.run_daily(late_market_alert_job, time=late_alert_time)
-
-    # 18:00 KNA 세계원전시장동향 신규 글 알림
-    try:
-        kna_news_time = datetime.time(hour=18, minute=0, second=0, tzinfo=pytz.timezone('Asia/Seoul'))
-    except:
-        kna_news_time = datetime.time(hour=18, minute=0, second=0)
-    job_queue.run_daily(daily_kna_news_job, time=kna_news_time)
 
     # 거래시간 30분마다 자동 포트폴리오 업데이트
     # 09:30, 10:00, 10:30, ..., 15:00, 15:35 KST
@@ -2662,27 +2334,11 @@ if __name__ == '__main__':
     for t in trading_times:
         job_queue.run_daily(auto_portfolio_update_job, time=t)
 
-    # WiseReport 리서치 리포트 알림 (08:00, 08:30, 09:00, 10:00, 11:00, 12:00 KST)
-    try:
-        kst = pytz.timezone('Asia/Seoul')
-        wisereport_times = [
-            datetime.time(hour=h, minute=m, second=0, tzinfo=kst)
-            for h, m in [(7,0),(8,0),(9,0),(10,0),(11,0),(12,0),(13,0),(14,0),(15,0),(16,0),(17,0)]
-        ]
-    except:
-        wisereport_times = [
-            datetime.time(hour=h, minute=m, second=0)
-            for h, m in [(7,0),(8,0),(9,0),(10,0),(11,0),(12,0),(13,0),(14,0),(15,0),(16,0),(17,0)]
-        ]
-    for t in wisereport_times:
-        job_queue.run_daily(wisereport_job, time=t)
-
     print(f"Bot started at {datetime.datetime.now()}")
     print(f"✅ Daily jobs scheduled:")
     print(f"  - Featured data: 06:00 KST (전일 데이터, 익일 수집)")
     print(f"  - Weather: 05:00 KST")
     print(f"  - Calendar: 05:05 KST")
-    print(f"  - Headlines: 05:10 KST")
     print(f"  - Portfolio report: 16:00 KST")
     print(f"  - Market alert: 16:05 KST (투자유의종목)")
     print(f"  - Journal data: 16:10 KST (투자일지)")
@@ -2691,5 +2347,4 @@ if __name__ == '__main__':
     print(f"  - ETF collection: 16:30 KST (구성종목 수집)")
     print(f"  - Evening backup: 20:00 KST (16:xx 실패 시 재시도)")
     print(f"  - Late market alert: 23:00 KST (투자유의종목 야간 업데이트)")
-    print(f"  - WiseReport: 07~15,17 KST (리서치 리포트, 매시 정각)")
     application.run_polling()

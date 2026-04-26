@@ -1,7 +1,7 @@
 #!/bin/bash
-# deploy.sh - Safe deployment script for weather-bot
+# deploy.sh - Safe deployment for weather-bot + research-alerts-bot
 # Usage:
-#   ./scripts/deploy.sh          # pull + validate + restart
+#   ./scripts/deploy.sh          # pull + validate + restart both bots
 #   ./scripts/deploy.sh reclone  # backup + re-clone + restore + restart
 set -e
 
@@ -12,6 +12,8 @@ BACKUP_DIR="/tmp/dashboard_backup"
 BACKUP_FILES=(
     ".env"
     "subscribers.json"
+    "subscribers_research.json"
+    "kna_state.json"
     ".budget_milestone"
     ".wisereport_sent.json"
     "stock_price_history.json"
@@ -61,25 +63,39 @@ restore() {
 }
 
 validate() {
-    echo "🔍 Validating weather_bot.py..."
+    echo "🔍 Validating bot scripts..."
     cd "$REPO_DIR"
     python3 -c "compile(open('execution/weather_bot.py').read(), 'weather_bot.py', 'exec')" || {
-        echo "❌ Syntax error! Aborting."
+        echo "❌ Syntax error in weather_bot.py! Aborting."
         return 1
     }
-    echo "  ✓ Syntax OK"
+    echo "  ✓ weather_bot.py OK"
+    python3 -c "compile(open('execution/research_alerts_bot.py').read(), 'research_alerts_bot.py', 'exec')" || {
+        echo "❌ Syntax error in research_alerts_bot.py! Aborting."
+        return 1
+    }
+    echo "  ✓ research_alerts_bot.py OK"
 }
 
 healthcheck() {
     echo "🏥 Health check (5s)..."
     sleep 5
+    local rc=0
     if sudo systemctl is-active --quiet weather-bot; then
         echo "✅ weather-bot is running"
     else
         echo "❌ weather-bot crashed!"
         sudo journalctl -u weather-bot --no-pager -n 15 | grep -v 'getUpdates'
-        return 1
+        rc=1
     fi
+    if sudo systemctl is-active --quiet research-alerts-bot; then
+        echo "✅ research-alerts-bot is running"
+    else
+        echo "❌ research-alerts-bot crashed!"
+        sudo journalctl -u research-alerts-bot --no-pager -n 15 | grep -v 'getUpdates'
+        rc=1
+    fi
+    return $rc
 }
 
 deploy() {
@@ -92,6 +108,8 @@ deploy() {
 
     echo "🔄 Restarting weather-bot..."
     sudo systemctl restart weather-bot
+    echo "🔄 Restarting research-alerts-bot..."
+    sudo systemctl restart research-alerts-bot
     healthcheck
 }
 
@@ -116,6 +134,8 @@ reclone() {
 
     echo "🔄 Restarting weather-bot..."
     sudo systemctl restart weather-bot
+    echo "🔄 Restarting research-alerts-bot..."
+    sudo systemctl restart research-alerts-bot
     healthcheck
 }
 
