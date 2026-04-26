@@ -73,6 +73,24 @@ def fetch_ets_volume(date_str):
     return total if total > 0 else None
 
 
+def fetch_kospi_marketcap(date_str):
+    items = fetch_api('http://data-dbg.krx.co.kr/svc/apis/idx/kospi_dd_trd', date_str)
+    for item in items:
+        if item.get('IDX_NM') == '코스피':
+            mcap = int(item.get('MKTCAP', '0') or '0')
+            return mcap if mcap > 0 else None
+    return None
+
+
+def fetch_kosdaq_marketcap(date_str):
+    items = fetch_api('http://data-dbg.krx.co.kr/svc/apis/idx/kosdaq_dd_trd', date_str)
+    for item in items:
+        if item.get('IDX_NM') == '코스닥':
+            mcap = int(item.get('MKTCAP', '0') or '0')
+            return mcap if mcap > 0 else None
+    return None
+
+
 if __name__ == '__main__':
     df = pd.read_csv(DATASET_FILE, encoding='utf-8-sig')
 
@@ -81,6 +99,8 @@ if __name__ == '__main__':
     all_new += collect_product(df, 'KRX GOLD Trading Volume', 'COMMODITY', fetch_gold_volume)
     all_new += collect_product(df, 'KRX ETS (KAU25)', 'COMMODITY', fetch_ets_kau25_price)
     all_new += collect_product(df, 'KRX ETS Trading Volume', 'COMMODITY', fetch_ets_volume)
+    all_new += collect_product(df, 'KOSPI Market Cap', 'INDEX_KR', fetch_kospi_marketcap, lookback_days=365)
+    all_new += collect_product(df, 'KOSDAQ Market Cap', 'INDEX_KR', fetch_kosdaq_marketcap, lookback_days=365)
 
     if all_new:
         new_df = pd.DataFrame(all_new)

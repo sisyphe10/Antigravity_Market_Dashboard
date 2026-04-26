@@ -174,6 +174,8 @@ def draw_charts():
             if 'Trading Volume' in name:
                 # 거래대금은 억원 단위로 표시
                 price_str = f"{latest_price / 1e8:,.0f}억"
+            elif 'Market Cap' in name:
+                price_str = f"{latest_price / 1e12:,.0f}조"
             elif abs(latest_price) >= 1000:
                 price_str = f"{latest_price:,.0f}"
             elif abs(latest_price) >= 1:
@@ -215,6 +217,8 @@ def draw_charts():
             ax.yaxis.set_major_locator(MaxNLocator(nbins=8, prune='both'))
             if 'Trading Volume' in name:
                 ax.yaxis.set_major_formatter(FuncFormatter(lambda y, p: f'{y/1e8:.0f}억' if y >= 1e8 else f'{y/1e4:.0f}만' if y >= 1e4 else f'{y:,.0f}'))
+            elif 'Market Cap' in name:
+                ax.yaxis.set_major_formatter(FuncFormatter(lambda y, p: f'{y/1e12:,.0f}조'))
             else:
                 ax.yaxis.set_major_formatter(FuncFormatter(smart_format_yaxis))
 

@@ -1537,8 +1537,10 @@ def create_dashboard():
                 custom_order = [
                     'KOSPI',
                     'KOSPI/USD',
+                    'KOSPI Market Cap',
                     'KOSDAQ',
-                    'KOSDAQ/USD'
+                    'KOSDAQ/USD',
+                    'KOSDAQ Market Cap'
                 ]
 
             else:
