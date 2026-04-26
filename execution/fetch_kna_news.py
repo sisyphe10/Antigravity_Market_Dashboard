@@ -2,7 +2,7 @@
 한국원전수출산업협회(KNA) 세계원전시장동향 게시판 신규 글 수집.
 
 사용:
-  - import 하여 fetch_new_posts() 호출 (weather_bot.py에서 사용)
+  - import 하여 fetch_new_posts() 호출 (ra_sisyphe_bot.py에서 사용)
   - CLI로 직접 실행 시 dry-run (state 갱신 없이 신규 글 미리보기)
 
 state 파일: DASHBOARD_DIR/kna_state.json — last_seen_num(internal num) 저장.

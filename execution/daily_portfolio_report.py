@@ -267,10 +267,10 @@ async def send_report(no_send=False):
     message = format_message(date, nav_data, returns_data, top_5, bottom_5)
 
     if not no_send:
-        token = os.getenv("TELEGRAM_BOT_TOKEN")
+        token = os.getenv("TELEGRAM_SISYPHE_BOT_TOKEN")
         chat_id = os.getenv("TELEGRAM_CHAT_ID")
         if not token or not chat_id:
-            logging.error("TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is missing.")
+            logging.error("TELEGRAM_SISYPHE_BOT_TOKEN or TELEGRAM_CHAT_ID is missing.")
             sys.exit(1)
         logging.info("5. 텔레그램 전송...")
         bot = Bot(token=token)

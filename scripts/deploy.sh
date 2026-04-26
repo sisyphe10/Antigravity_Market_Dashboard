@@ -1,5 +1,5 @@
 #!/bin/bash
-# deploy.sh - Safe deployment for weather-bot + research-alerts-bot
+# deploy.sh - Safe deployment for sisyphe-bot + research-alerts-bot
 # Usage:
 #   ./scripts/deploy.sh          # pull + validate + restart both bots
 #   ./scripts/deploy.sh reclone  # backup + re-clone + restore + restart
@@ -65,11 +65,11 @@ restore() {
 validate() {
     echo "🔍 Validating bot scripts..."
     cd "$REPO_DIR"
-    python3 -c "compile(open('execution/weather_bot.py').read(), 'weather_bot.py', 'exec')" || {
-        echo "❌ Syntax error in weather_bot.py! Aborting."
+    python3 -c "compile(open('execution/sisyphe_bot.py').read(), 'sisyphe_bot.py', 'exec')" || {
+        echo "❌ Syntax error in sisyphe_bot.py! Aborting."
         return 1
     }
-    echo "  ✓ weather_bot.py OK"
+    echo "  ✓ sisyphe_bot.py OK"
     python3 -c "compile(open('execution/research_alerts_bot.py').read(), 'research_alerts_bot.py', 'exec')" || {
         echo "❌ Syntax error in research_alerts_bot.py! Aborting."
         return 1
@@ -81,11 +81,11 @@ healthcheck() {
     echo "🏥 Health check (5s)..."
     sleep 5
     local rc=0
-    if sudo systemctl is-active --quiet weather-bot; then
-        echo "✅ weather-bot is running"
+    if sudo systemctl is-active --quiet sisyphe-bot; then
+        echo "✅ sisyphe-bot is running"
     else
-        echo "❌ weather-bot crashed!"
-        sudo journalctl -u weather-bot --no-pager -n 15 | grep -v 'getUpdates'
+        echo "❌ sisyphe-bot crashed!"
+        sudo journalctl -u sisyphe-bot --no-pager -n 15 | grep -v 'getUpdates'
         rc=1
     fi
     if sudo systemctl is-active --quiet research-alerts-bot; then
@@ -106,8 +106,8 @@ deploy() {
 
     validate || exit 1
 
-    echo "🔄 Restarting weather-bot..."
-    sudo systemctl restart weather-bot
+    echo "🔄 Restarting sisyphe-bot..."
+    sudo systemctl restart sisyphe-bot
     echo "🔄 Restarting research-alerts-bot..."
     sudo systemctl restart research-alerts-bot
     healthcheck
@@ -132,8 +132,8 @@ reclone() {
     restore
     validate || exit 1
 
-    echo "🔄 Restarting weather-bot..."
-    sudo systemctl restart weather-bot
+    echo "🔄 Restarting sisyphe-bot..."
+    sudo systemctl restart sisyphe-bot
     echo "🔄 Restarting research-alerts-bot..."
     sudo systemctl restart research-alerts-bot
     healthcheck

@@ -158,11 +158,11 @@ def get_naver_weather(location="여의도"):
         return f"날씨 정보를 가져오는데 실패했습니다: {e}"
 
 async def send_daily_alert():
-    token = os.getenv("TELEGRAM_BOT_TOKEN")
+    token = os.getenv("TELEGRAM_SISYPHE_BOT_TOKEN")
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
-    
+
     if not token or not chat_id:
-        logging.error("TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is missing.")
+        logging.error("TELEGRAM_SISYPHE_BOT_TOKEN or TELEGRAM_CHAT_ID is missing.")
         sys.exit(1)
         
     logging.info("Fetching weather data...")

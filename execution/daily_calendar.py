@@ -179,11 +179,11 @@ def format_calendar_message(events_by_calendar):
 
 async def send_calendar_to_telegram(message):
     """텔레그램으로 캘린더 일정 전송"""
-    token = os.getenv('TELEGRAM_BOT_TOKEN')
+    token = os.getenv('TELEGRAM_SISYPHE_BOT_TOKEN')
     chat_id = os.getenv('TELEGRAM_CHAT_ID')
-    
+
     if not token or not chat_id:
-        logging.error("❌ TELEGRAM_BOT_TOKEN 또는 TELEGRAM_CHAT_ID가 설정되지 않았습니다.")
+        logging.error("❌ TELEGRAM_SISYPHE_BOT_TOKEN 또는 TELEGRAM_CHAT_ID가 설정되지 않았습니다.")
         sys.exit(1)
     
     bot = Bot(token=token)

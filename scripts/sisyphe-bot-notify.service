@@ -1,0 +1,6 @@
+[Unit]
+Description=Sisyphe Bot Failure Notification
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c 'curl -s -X POST "https://api.telegram.org/bot8539567193:AAEBOuIcsatbxC6y6clWm0wd9HMI1G823xQ/sendMessage" -d chat_id=869693700 -d parse_mode=HTML -d text="🚨 <b>Sisyphe-Bot 중단</b>%0A10회 연속 실패로 자동 재시작이 중단되었습니다.%0A수동 확인이 필요합니다.%0A%0A<code>sudo systemctl restart sisyphe-bot</code>"'

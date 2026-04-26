@@ -8,13 +8,13 @@ import json
 import fcntl
 
 # 중복 실행 방지 (파일 락)
-_lock_file = open('/tmp/weather_bot.lock', 'w')
+_lock_file = open('/tmp/sisyphe_bot.lock', 'w')
 try:
     fcntl.flock(_lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
     _lock_file.write(str(os.getpid()))
     _lock_file.flush()
 except IOError:
-    print("ERROR: weather_bot is already running. Exiting.")
+    print("ERROR: sisyphe_bot is already running. Exiting.")
     sys.exit(1)
 
 from telegram import Update
@@ -29,7 +29,7 @@ logging.basicConfig(
 
 # 환경 변수 로드
 load_dotenv()
-TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TOKEN = os.getenv("TELEGRAM_SISYPHE_BOT_TOKEN")
 
 # Market Dashboard 저장소 경로
 DASHBOARD_DIR = os.path.join(os.path.expanduser('~'), 'Antigravity_Market_Dashboard')

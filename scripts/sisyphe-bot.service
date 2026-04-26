@@ -1,0 +1,17 @@
+[Unit]
+Description=Sisyphe Telegram Bot
+After=network.target
+StartLimitBurst=10
+StartLimitIntervalSec=300
+OnFailure=sisyphe-bot-notify.service
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/Antigravity_Market_Dashboard
+ExecStart=/usr/bin/python3 execution/sisyphe_bot.py
+Restart=always
+RestartSec=10
+EnvironmentFile=/home/ubuntu/Antigravity_Market_Dashboard/.env
+
+[Install]
+WantedBy=multi-user.target
