@@ -388,11 +388,19 @@ async def daily_kna_news_job(context: ContextTypes.DEFAULT_TYPE):
             return
         for p in posts:
             header = (
-                f"📰 <b><u>[KNA] {_html.escape(p['title'])}</u></b>\n"
+                f"📰 <b>[KNA] {_html.escape(p['title'])}</b>\n"
                 f"{p['date']} · #{p['display_no']}\n"
                 f"{p['url']}\n\n"
             )
-            body = _html.escape(p.get('body', ''))
+            # 본문 escape + '□' 로 시작하는 소제목은 볼드+밑줄
+            body_lines = []
+            for ln in p.get('body', '').split('\n'):
+                escaped = _html.escape(ln)
+                if ln.lstrip().startswith('□'):
+                    body_lines.append(f'<b><u>{escaped}</u></b>')
+                else:
+                    body_lines.append(escaped)
+            body = '\n'.join(body_lines)
             full = header + body
             for chat_id in SUBSCRIBERS:
                 try:
