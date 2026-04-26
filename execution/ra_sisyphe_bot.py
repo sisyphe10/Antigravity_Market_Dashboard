@@ -1,13 +1,13 @@
 """
-RA_Sisyphe (Research Alerts) — 리서치/뉴스 알림 텔레그램 봇.
+RA_Sisyphe — 리서치/뉴스 알림 텔레그램 봇.
 
 Jobs:
   - 05:10 KST: Research Notes 헤드라인
   - 07:00~17:00 KST (매시): WiseReport 신규 리서치 리포트
   - 18:00 KST: KNA 세계원전시장동향 신규 게시글
 
-별도 SUBSCRIBERS (subscribers_research.json), 별도 락 파일.
-환경변수: TELEGRAM_RESEARCH_BOT_TOKEN
+별도 SUBSCRIBERS (subscribers_ra_sisyphe.json), 별도 락 파일.
+환경변수: TELEGRAM_RA_SISYPHE_BOT_TOKEN
 """
 import logging
 import datetime
@@ -18,13 +18,13 @@ import fcntl
 import html as _html
 
 # 중복 실행 방지 (파일 락)
-_lock_file = open('/tmp/research_alerts_bot.lock', 'w')
+_lock_file = open('/tmp/ra_sisyphe_bot.lock', 'w')
 try:
     fcntl.flock(_lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
     _lock_file.write(str(os.getpid()))
     _lock_file.flush()
 except IOError:
-    print("ERROR: research_alerts_bot is already running. Exiting.")
+    print("ERROR: ra_sisyphe_bot is already running. Exiting.")
     sys.exit(1)
 
 from telegram import Update
@@ -37,10 +37,10 @@ logging.basicConfig(
 )
 
 load_dotenv()
-TOKEN = os.getenv("TELEGRAM_RESEARCH_BOT_TOKEN")
+TOKEN = os.getenv("TELEGRAM_RA_SISYPHE_BOT_TOKEN")
 
 DASHBOARD_DIR = os.path.join(os.path.expanduser('~'), 'Antigravity_Market_Dashboard')
-SUBSCRIBERS_FILE = os.path.join(DASHBOARD_DIR, 'subscribers_research.json')
+SUBSCRIBERS_FILE = os.path.join(DASHBOARD_DIR, 'subscribers_ra_sisyphe.json')
 KST = datetime.timezone(datetime.timedelta(hours=9))
 
 
@@ -413,7 +413,7 @@ async def daily_kna_news_job(context: ContextTypes.DEFAULT_TYPE):
 # ============================================================
 if __name__ == "__main__":
     if not TOKEN:
-        print("Error: TELEGRAM_RESEARCH_BOT_TOKEN environment variable is missing.")
+        print("Error: TELEGRAM_RA_SISYPHE_BOT_TOKEN environment variable is missing.")
         sys.exit(1)
 
     application = ApplicationBuilder().token(TOKEN).build()

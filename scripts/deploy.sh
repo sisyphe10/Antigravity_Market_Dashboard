@@ -1,5 +1,5 @@
 #!/bin/bash
-# deploy.sh - Safe deployment for sisyphe-bot + research-notes-bot + research-alerts-bot
+# deploy.sh - Safe deployment for sisyphe-bot + research-notes-bot + ra-sisyphe-bot
 # Usage:
 #   ./scripts/deploy.sh          # pull + validate + restart all bots
 #   ./scripts/deploy.sh reclone  # backup + re-clone + restore + restart
@@ -12,7 +12,7 @@ BACKUP_DIR="/tmp/dashboard_backup"
 BACKUP_FILES=(
     ".env"
     "subscribers.json"
-    "subscribers_research.json"
+    "subscribers_ra_sisyphe.json"
     "kna_state.json"
     ".budget_milestone"
     ".wisereport_sent.json"
@@ -62,8 +62,8 @@ restore() {
     done
 }
 
-BOTS=(sisyphe-bot research-notes-bot research-alerts-bot)
-SCRIPTS=(execution/sisyphe_bot.py execution/research_bot/research_notes_bot.py execution/research_alerts_bot.py)
+BOTS=(sisyphe-bot research-notes-bot ra-sisyphe-bot)
+SCRIPTS=(execution/sisyphe_bot.py execution/research_bot/research_notes_bot.py execution/ra_sisyphe_bot.py)
 
 validate() {
     echo "🔍 Validating bot scripts..."
