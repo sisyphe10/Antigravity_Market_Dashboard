@@ -807,6 +807,39 @@ async def daily_market_alert_retry_job(context: ContextTypes.DEFAULT_TYPE):
             pass
 
 
+async def daily_kna_news_job(context: ContextTypes.DEFAULT_TYPE):
+    """매일 18:00 KNA 세계원전시장동향 신규 게시글 알림"""
+    import html as _html
+    logging.info("Daily KNA news job started")
+    try:
+        sys.path.insert(0, os.path.join(DASHBOARD_DIR, 'execution'))
+        from fetch_kna_news import fetch_new_posts
+        posts = fetch_new_posts(update_state=True)
+        if not posts:
+            logging.info("KNA: 신규 글 없음")
+            return
+        for p in posts:
+            header = (
+                f"📰 <b>[KNA] {_html.escape(p['title'])}</b>\n"
+                f"{p['date']} · #{p['display_no']}\n"
+                f"{p['url']}\n\n"
+            )
+            body = _html.escape(p.get('body', ''))
+            full = header + body
+            for chat_id in SUBSCRIBERS:
+                try:
+                    for i in range(0, len(full), 4000):
+                        await context.bot.send_message(
+                            chat_id=chat_id, text=full[i:i+4000], parse_mode='HTML',
+                            disable_web_page_preview=True,
+                        )
+                except Exception as e:
+                    logging.error(f"KNA news 전송 실패 (num={p.get('num')}): {e}")
+        logging.info(f"KNA news sent: {len(posts)}건")
+    except Exception as e:
+        logging.error(f"KNA news job failed: {e}")
+
+
 async def daily_journal_job(context: ContextTypes.DEFAULT_TYPE):
     """매일 16:10 투자일지 시장 데이터 수집"""
     logging.info("Daily journal data job started")
@@ -2596,6 +2629,13 @@ if __name__ == '__main__':
     except:
         late_alert_time = datetime.time(hour=23, minute=0, second=0)
     job_queue.run_daily(late_market_alert_job, time=late_alert_time)
+
+    # 18:00 KNA 세계원전시장동향 신규 글 알림
+    try:
+        kna_news_time = datetime.time(hour=18, minute=0, second=0, tzinfo=pytz.timezone('Asia/Seoul'))
+    except:
+        kna_news_time = datetime.time(hour=18, minute=0, second=0)
+    job_queue.run_daily(daily_kna_news_job, time=kna_news_time)
 
     # 거래시간 30분마다 자동 포트폴리오 업데이트
     # 09:30, 10:00, 10:30, ..., 15:00, 15:35 KST
