@@ -1,12 +1,15 @@
 [Unit]
 Description=Research Notes Telegram Bot
 After=network.target
+StartLimitBurst=10
+StartLimitIntervalSec=300
+OnFailure=sisyphe-bot-notify.service
 
 [Service]
 Type=simple
 User=ubuntu
 WorkingDirectory=/home/ubuntu/Antigravity_Market_Dashboard/execution/research_bot
-ExecStart=/usr/bin/python3 /home/ubuntu/Antigravity_Market_Dashboard/execution/research_bot/research_bot.py
+ExecStart=/usr/bin/python3 /home/ubuntu/Antigravity_Market_Dashboard/execution/research_bot/research_notes_bot.py
 EnvironmentFile=/home/ubuntu/Antigravity_Market_Dashboard/.env
 Restart=always
 RestartSec=10

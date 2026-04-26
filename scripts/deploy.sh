@@ -1,7 +1,7 @@
 #!/bin/bash
-# deploy.sh - Safe deployment for sisyphe-bot + research-alerts-bot
+# deploy.sh - Safe deployment for sisyphe-bot + research-notes-bot + research-alerts-bot
 # Usage:
-#   ./scripts/deploy.sh          # pull + validate + restart both bots
+#   ./scripts/deploy.sh          # pull + validate + restart all bots
 #   ./scripts/deploy.sh reclone  # backup + re-clone + restore + restart
 set -e
 
@@ -62,39 +62,34 @@ restore() {
     done
 }
 
+BOTS=(sisyphe-bot research-notes-bot research-alerts-bot)
+SCRIPTS=(execution/sisyphe_bot.py execution/research_bot/research_notes_bot.py execution/research_alerts_bot.py)
+
 validate() {
     echo "🔍 Validating bot scripts..."
     cd "$REPO_DIR"
-    python3 -c "compile(open('execution/sisyphe_bot.py').read(), 'sisyphe_bot.py', 'exec')" || {
-        echo "❌ Syntax error in sisyphe_bot.py! Aborting."
-        return 1
-    }
-    echo "  ✓ sisyphe_bot.py OK"
-    python3 -c "compile(open('execution/research_alerts_bot.py').read(), 'research_alerts_bot.py', 'exec')" || {
-        echo "❌ Syntax error in research_alerts_bot.py! Aborting."
-        return 1
-    }
-    echo "  ✓ research_alerts_bot.py OK"
+    for s in "${SCRIPTS[@]}"; do
+        python3 -c "compile(open('$s').read(), '$s', 'exec')" || {
+            echo "❌ Syntax error in $s! Aborting."
+            return 1
+        }
+        echo "  ✓ $s OK"
+    done
 }
 
 healthcheck() {
     echo "🏥 Health check (5s)..."
     sleep 5
     local rc=0
-    if sudo systemctl is-active --quiet sisyphe-bot; then
-        echo "✅ sisyphe-bot is running"
-    else
-        echo "❌ sisyphe-bot crashed!"
-        sudo journalctl -u sisyphe-bot --no-pager -n 15 | grep -v 'getUpdates'
-        rc=1
-    fi
-    if sudo systemctl is-active --quiet research-alerts-bot; then
-        echo "✅ research-alerts-bot is running"
-    else
-        echo "❌ research-alerts-bot crashed!"
-        sudo journalctl -u research-alerts-bot --no-pager -n 15 | grep -v 'getUpdates'
-        rc=1
-    fi
+    for b in "${BOTS[@]}"; do
+        if sudo systemctl is-active --quiet "$b"; then
+            echo "✅ $b is running"
+        else
+            echo "❌ $b crashed!"
+            sudo journalctl -u "$b" --no-pager -n 15 | grep -v 'getUpdates'
+            rc=1
+        fi
+    done
     return $rc
 }
 
@@ -106,10 +101,10 @@ deploy() {
 
     validate || exit 1
 
-    echo "🔄 Restarting sisyphe-bot..."
-    sudo systemctl restart sisyphe-bot
-    echo "🔄 Restarting research-alerts-bot..."
-    sudo systemctl restart research-alerts-bot
+    for b in "${BOTS[@]}"; do
+        echo "🔄 Restarting $b..."
+        sudo systemctl restart "$b"
+    done
     healthcheck
 }
 
@@ -132,10 +127,10 @@ reclone() {
     restore
     validate || exit 1
 
-    echo "🔄 Restarting sisyphe-bot..."
-    sudo systemctl restart sisyphe-bot
-    echo "🔄 Restarting research-alerts-bot..."
-    sudo systemctl restart research-alerts-bot
+    for b in "${BOTS[@]}"; do
+        echo "🔄 Restarting $b..."
+        sudo systemctl restart "$b"
+    done
     healthcheck
 }
 
