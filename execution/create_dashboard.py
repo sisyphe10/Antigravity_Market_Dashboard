@@ -757,7 +757,9 @@ def _build_indices_chart_section(category_label='Indices'):
                         <input type="text" id="idxEndDate" value="{last_date}" onchange="formatDateInput(this);updateIdxChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                     </div>
                     <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
-                        <canvas id="idxDynamicChart" style="width:100%;height:500px;"></canvas>
+                        <div style="position:relative;height:500px;">
+                            <canvas id="idxDynamicChart"></canvas>
+                        </div>
                         <div id="idxChartLegend" style="margin-top:12px;text-align:center;color:#222;"></div>
                     </div>
                 </div>
@@ -1009,7 +1011,9 @@ def _build_wrap_chart_section(category_label):
                         <input type="text" id="wrapEndDate" value="{last_date}" onchange="formatDateInput(this);updateWrapChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                     </div>
                     <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
-                        <canvas id="wrapDynamicChart" style="width:100%;height:500px;"></canvas>
+                        <div style="position:relative;height:500px;">
+                            <canvas id="wrapDynamicChart"></canvas>
+                        </div>
                         <div id="wrapChartLegend" style="margin-top:12px;text-align:center;color:#222;"></div>
                     </div>
                 </div>
@@ -1078,7 +1082,9 @@ def _build_target_transform_chart_section():
             <div style="display:flex;justify-content:center;">
                 <div style="width:1000px;">
                     <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
-                        <canvas id="targetTransformChart" style="width:100%;height:500px;"></canvas>
+                        <div style="position:relative;height:500px;">
+                            <canvas id="targetTransformChart"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
