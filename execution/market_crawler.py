@@ -467,24 +467,42 @@ def crawl_smm_lithium():
 # 7. [POLY_SILICON] Sunsirs — 폴리실리콘 현물 가격 (CNY/톤, daily)
 # ==========================================
 SUNSIRS_URL = 'https://www.sunsirs.com/m-kr/page/futures-price-detail/futures-price-detail-463.html'
-SUNSIRS_COOKIE = 'HW_CHECK=5527e2f79f796b5f48f1d7f8fd881cd9'
 
 def crawl_sunsirs_polysilicon():
-    """Sunsirs 폴리실리콘 현물 가격 수집 (CNY/톤, daily 업데이트)."""
+    """Sunsirs 폴리실리콘 현물 가격 수집 (CNY/톤, daily 업데이트).
+
+    1차 호출에서 anti-bot HTML이 발급하는 HW_CHECK cookie를 추출하고,
+    2차 호출에서 그 cookie를 동봉해 실제 데이터 페이지를 받는다.
+    사이트가 cookie 값을 회전시켜도 자동 적응."""
     print(f"\n☀️ Sunsirs 폴리실리콘 크롤링 시작")
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36',
+    }
     try:
-        resp = requests.get(
-            SUNSIRS_URL,
-            headers={
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                'Cookie': SUNSIRS_COOKIE,
-            },
-            timeout=30,
-        )
-        if resp.status_code != 200:
-            print(f"❌ Sunsirs 응답 오류: HTTP {resp.status_code}")
+        # 1차: anti-bot 페이지에서 cookie 추출
+        r1 = requests.get(SUNSIRS_URL, headers=headers, timeout=30)
+        if r1.status_code != 200:
+            print(f"❌ Sunsirs 1차 응답 오류: HTTP {r1.status_code}")
             return
-        html = resp.text
+        m_cookie = re.search(r'var\s+_0x2\s*=\s*"([a-f0-9]+)"', r1.text)
+        if not m_cookie:
+            # 1차 응답이 이미 데이터일 수도 있음 (cookie 불필요한 경우 대비)
+            html = r1.text
+            if '현물 가격' not in html:
+                print("⚠️ Sunsirs HW_CHECK cookie 추출 실패")
+                return
+        else:
+            # 2차: cookie 동봉해서 실제 데이터 fetch
+            r2 = requests.get(
+                SUNSIRS_URL,
+                headers=headers,
+                cookies={'HW_CHECK': m_cookie.group(1)},
+                timeout=30,
+            )
+            if r2.status_code != 200:
+                print(f"❌ Sunsirs 2차 응답 오류: HTTP {r2.status_code}")
+                return
+            html = r2.text
     except Exception as e:
         print(f"❌ Sunsirs 요청 실패: {e}")
         return

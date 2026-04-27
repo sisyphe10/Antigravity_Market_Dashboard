@@ -75,6 +75,8 @@ def collect_historical_yfinance():
                 key = (date_str, name)
                 
                 if key not in existing_keys:
+                    if pd.isna(row['Close']):
+                        continue
                     price = float(row['Close'])
                     new_data.append([date_str, name, price, info['type']])
             
@@ -104,6 +106,8 @@ def collect_historical_yfinance():
                     key = (date_str, name)
                     
                     if key not in existing_keys:
+                        if pd.isna(row['Close']):
+                            continue
                         price = float(row['Close'])
                         new_data.append([date_str, name, price, 'INDEX_US'])
                 
