@@ -605,7 +605,8 @@ def _build_indices_chart_section(category_label='Indices'):
         )
         list_html = mode_html + f'<table class="portfolio-table" style="max-width:500px;margin:0 auto;"><tbody>{rows_html}</tbody></table>'
 
-        first_date = dates[0] if dates else ''
+        ytd_start = '2025-12-30'
+        first_date = ytd_start if dates and dates[0] <= ytd_start else (dates[0] if dates else '')
         last_date = dates[-1] if dates else ''
 
         js_code = """
