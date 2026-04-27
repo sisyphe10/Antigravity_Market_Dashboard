@@ -71,3 +71,5 @@ vm-bot.txt
 # 일회성 로컬 전용 자료 (git 업로드 제외)
 target_transform_chart.html
 execution/generate_target_transform_chart.py
+db_target_transform_2nd_chart.html
+execution/generate_db_target_transform_2nd_chart.py

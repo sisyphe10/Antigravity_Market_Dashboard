@@ -626,54 +626,69 @@ def _build_indices_chart_section(category_label='Indices'):
                 var endDate = document.getElementById('idxEndDate').value;
                 var sourceSet = (idxMode === 'usd') ? idxData.usd : idxData.local;
 
-                // Pass 1: 시리즈별 필터링 데이터 수집
+                // Pass 1: 시리즈별 (date,value) 추출
                 var perSeries = [];
                 selected.forEach(function(name) {
                     var arr = sourceSet[name];
                     if (!arr) return;
-                    var filteredDates = [];
-                    var filteredVals = [];
+                    var lookup = {};
+                    var firstDate = '';
                     for (var i = 0; i < idxData.dates.length; i++) {
                         var d = idxData.dates[i];
                         if (d >= startDate && d <= endDate && arr[i] !== null && arr[i] !== undefined) {
-                            filteredDates.push(d);
-                            filteredVals.push(arr[i]);
+                            lookup[d] = arr[i];
+                            if (!firstDate) firstDate = d;
                         }
                     }
-                    if (filteredVals.length === 0) return;
-                    perSeries.push({ name: name, dates: filteredDates, vals: filteredVals });
+                    if (!firstDate) return;
+                    perSeries.push({ name: name, lookup: lookup, firstDate: firstDate });
                 });
 
-                // Pass 2: 공통 시작일 (시장 휴일 차이로 시리즈마다 거래일이 다른 경우 대비)
+                // Pass 2: 공통 시작일 = 가장 늦은 첫 데이터일자 (선택 시리즈 모두에 데이터가 있는 첫 날)
                 var commonStart = '';
                 perSeries.forEach(function(s) {
-                    if (s.dates[0] > commonStart) commonStart = s.dates[0];
+                    if (s.firstDate > commonStart) commonStart = s.firstDate;
                 });
 
-                // Pass 3: dataset 빌드 (공통 base 적용)
+                // Pass 3: 공통 날짜축 = commonStart 이후 모든 선택 시리즈의 거래일 합집합
+                // 시장별 휴일이 달라도 한 차트에서 같은 x축으로 정렬됨
+                var dateSet = {};
+                perSeries.forEach(function(s) {
+                    Object.keys(s.lookup).forEach(function(d) {
+                        if (d >= commonStart) dateSet[d] = true;
+                    });
+                });
+                var commonDates = Object.keys(dateSet).sort();
+
+                // Pass 4: 각 시리즈를 공통축에 정렬 + forward-fill (휴장일은 직전 종가 유지)
+                // base = 시리즈의 commonStart 시점 값. 거기 데이터가 없으면 ffill 후 첫 값.
                 var datasets = [];
                 perSeries.forEach(function(s) {
-                    var sliceIdx = 0;
-                    if (commonStart) {
-                        for (var i = 0; i < s.dates.length; i++) {
-                            if (s.dates[i] >= commonStart) { sliceIdx = i; break; }
-                        }
+                    var aligned = [];
+                    var lastVal = null;
+                    for (var i = 0; i < commonDates.length; i++) {
+                        var d = commonDates[i];
+                        if (s.lookup.hasOwnProperty(d)) lastVal = s.lookup[d];
+                        aligned.push(lastVal);
                     }
-                    var d_arr = s.dates.slice(sliceIdx);
-                    var v_arr = s.vals.slice(sliceIdx);
-                    if (v_arr.length === 0) return;
-                    var base = v_arr[0];
-                    var data = d_arr.map(function(d, j){
-                        return { x: d, y: Math.round((v_arr[j] / base - 1) * 10000) / 100 };
+                    var base = null;
+                    for (var j = 0; j < aligned.length; j++) {
+                        if (aligned[j] !== null) { base = aligned[j]; break; }
+                    }
+                    if (base === null) return;
+                    var pct = aligned.map(function(v) {
+                        if (v === null) return null;
+                        return Math.round((v / base - 1) * 10000) / 100;
                     });
                     datasets.push({
                         label: s.name,
-                        data: data,
+                        data: pct,
                         borderColor: idxColors[s.name] || '#888',
                         backgroundColor: 'transparent',
                         borderWidth: 2,
                         pointRadius: 0,
-                        tension: 0.3
+                        tension: 0.3,
+                        spanGaps: true
                     });
                 });
 
@@ -684,9 +699,15 @@ def _build_indices_chart_section(category_label='Indices'):
                         chart.data.datasets.forEach(function(ds, i) {
                             var meta = chart.getDatasetMeta(i);
                             if (meta.hidden) return;
-                            var last = meta.data[meta.data.length - 1];
+                            // 끝에 null이 있을 수 있음 — 마지막 non-null 값/포인트 찾기
+                            var lastIdx = -1;
+                            for (var k = ds.data.length - 1; k >= 0; k--) {
+                                if (ds.data[k] !== null && ds.data[k] !== undefined) { lastIdx = k; break; }
+                            }
+                            if (lastIdx < 0) return;
+                            var last = meta.data[lastIdx];
                             if (!last) return;
-                            var val = ds.data[ds.data.length - 1].y;
+                            var val = ds.data[lastIdx];
                             var rounded = Math.sign(val) * Math.round(Math.abs(val));
                             var sign = rounded >= 0 ? '+' : '';
                             ctx.save();
@@ -713,7 +734,7 @@ def _build_indices_chart_section(category_label='Indices'):
                 if (idxChart) idxChart.destroy();
                 idxChart = new Chart(document.getElementById('idxDynamicChart'), {
                     type: 'line',
-                    data: { datasets: datasets },
+                    data: { labels: commonDates, datasets: datasets },
                     plugins: [endLabelPlugin],
                     options: {
                         responsive: true, maintainAspectRatio: false,
@@ -721,7 +742,7 @@ def _build_indices_chart_section(category_label='Indices'):
                         interaction: { mode: 'index', intersect: false },
                         plugins: {
                             legend: { display: false },
-                            tooltip: { callbacks: { label: function(ctx){ return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%'; } } }
+                            tooltip: { callbacks: { label: function(ctx){ return ctx.dataset.label + ': ' + (ctx.parsed.y === null ? '-' : ctx.parsed.y.toFixed(1) + '%'); } } }
                         },
                         scales: {
                             x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 11 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
