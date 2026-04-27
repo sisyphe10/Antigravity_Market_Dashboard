@@ -136,7 +136,7 @@
     <div id="mainContent" class="pw-hidden">
     <header style="position:relative;">
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-04-26 20:02:22 KST</div>
+        <div class="last-updated">Updated: 2026-04-27 09:35:14 KST</div>
         <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
 
@@ -160,6 +160,7 @@
                     </div>
                     <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                         <canvas id="wrapDynamicChart" style="width:100%;height:500px;"></canvas>
+                        <div id="wrapChartLegend" style="margin-top:12px;text-align:center;color:#222;"></div>
                     </div>
                 </div>
             </div>
@@ -192,9 +193,8 @@
                 var startDate = document.getElementById('wrapStartDate').value;
                 var endDate = document.getElementById('wrapEndDate').value;
 
-                var datasets = [];
-                var returnLabels = [];
-
+                // Pass 1: 시리즈별 필터링 데이터 수집
+                var perSeries = [];
                 selected.forEach(function(name) {
                     if (!rawData[name]) return;
                     var filteredDates = [];
@@ -207,27 +207,49 @@
                         }
                     }
                     if (filteredVals.length === 0) return;
+                    perSeries.push({ name: name, dates: filteredDates, vals: filteredVals });
+                });
 
-                    var base = filteredVals[0];
+                // Pass 2: % return 모드일 때 공통 시작일 산출 (가장 늦은 첫 데이터 일자)
+                // 신규 시리즈(예: DB 개방형 inception 2024-05-16)와 장기 벤치마크(KOSPI 등)를 비교 가능하도록
+                // 모든 시리즈를 같은 0% 기준점에서 시작시킨다. MDD는 시리즈별 독립 유지.
+                var commonStart = '';
+                if (chartMode === 'return') {
+                    perSeries.forEach(function(s) {
+                        if (s.dates[0] > commonStart) commonStart = s.dates[0];
+                    });
+                }
+
+                // Pass 3: dataset 빌드 (공통 base 적용)
+                var datasets = [];
+                perSeries.forEach(function(s) {
+                    var sliceIdx = 0;
+                    if (chartMode === 'return' && commonStart) {
+                        for (var i = 0; i < s.dates.length; i++) {
+                            if (s.dates[i] >= commonStart) { sliceIdx = i; break; }
+                        }
+                    }
+                    var d_arr = s.dates.slice(sliceIdx);
+                    var v_arr = s.vals.slice(sliceIdx);
+                    if (v_arr.length === 0) return;
+
                     var data;
                     if (chartMode === 'mdd') {
-                        var mddVals = calcMDD(filteredVals);
-                        data = filteredDates.map(function(d, j) { return { x: d, y: mddVals[j] }; });
+                        var mddVals = calcMDD(v_arr);
+                        data = d_arr.map(function(d, j) { return { x: d, y: mddVals[j] }; });
                     } else {
-                        data = filteredDates.map(function(d, j) {
-                            return { x: d, y: Math.round((filteredVals[j] / base - 1) * 10000) / 100 };
+                        var base = v_arr[0];
+                        data = d_arr.map(function(d, j) {
+                            return { x: d, y: Math.round((v_arr[j] / base - 1) * 10000) / 100 };
                         });
                     }
 
-                    var lastPct = data[data.length - 1].y;
-                    var sign = lastPct >= 0 ? '+' : '';
-                    returnLabels.push({ name: name, pct: sign + lastPct.toFixed(1) + '%', color: chartColors[name] || '#888' });
                     datasets.push({
-                        label: name,
+                        label: s.name,
                         data: data,
-                        borderColor: chartColors[name] || '#888',
+                        borderColor: chartColors[s.name] || '#888',
                         backgroundColor: 'transparent',
-                        borderWidth: (name === 'KOSPI' || name === 'KOSDAQ') ? 1.5 : 3,
+                        borderWidth: (s.name === 'KOSPI' || s.name === 'KOSDAQ') ? 1.5 : 3,
                         pointRadius: 0,
                         tension: 0.3
                     });
@@ -256,6 +278,17 @@
                         });
                     }
                 };
+
+                // 하단 컬러닷 범례 (선택된 시리즈만)
+                var legendEl = document.getElementById('wrapChartLegend');
+                if (legendEl) {
+                    legendEl.innerHTML = datasets.map(function(ds) {
+                        var c = ds.borderColor;
+                        return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:13px;">' +
+                            '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
+                            ds.label + '</span>';
+                    }).join('');
+                }
 
                 if (wrapChart) wrapChart.destroy();
                 wrapChart = new Chart(document.getElementById('wrapDynamicChart'), {

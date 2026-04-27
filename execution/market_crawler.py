@@ -300,33 +300,109 @@ def crawl_kr_indices():
         kosdaq.index = kosdaq.index.tz_localize(None)
         krw.index = krw.index.tz_localize(None)
 
-        # KOSPI, KOSDAQ 원본 데이터
+        # KOSPI, KOSDAQ 원본 데이터 (NaN 행은 스킵 — yfinance가 종종 NaN 반환)
         for date, row in kospi.iterrows():
+            if pd.isna(row['Close']):
+                continue
             d = date.strftime('%Y-%m-%d')
             collected_data.append((d, 'KOSPI', float(row['Close']), 'INDEX_KR'))
 
         for date, row in kosdaq.iterrows():
+            if pd.isna(row['Close']):
+                continue
             d = date.strftime('%Y-%m-%d')
             collected_data.append((d, 'KOSDAQ', float(row['Close']), 'INDEX_KR'))
 
-        # USD 환산 (KOSPI/USDKRW, KOSDAQ/USDKRW)
+        # USD 환산 (KOSPI/KRW=X, KOSDAQ/KRW=X) — 양쪽 다 NaN 아닐 때만
         for date in kospi.index:
-            if date in krw.index:
-                d = date.strftime('%Y-%m-%d')
-                fx_rate = float(krw.loc[date, 'Close'])
+            if date not in krw.index:
+                continue
+            kospi_close = kospi.loc[date, 'Close']
+            fx_rate = krw.loc[date, 'Close']
+            if pd.isna(kospi_close) or pd.isna(fx_rate) or fx_rate == 0:
+                continue
+            d = date.strftime('%Y-%m-%d')
+            kospi_usd = float(kospi_close) / float(fx_rate)
+            collected_data.append((d, 'KOSPI/USD', round(kospi_usd, 4), 'INDEX_KR'))
 
-                kospi_usd = float(kospi.loc[date, 'Close']) / fx_rate
-                collected_data.append((d, 'KOSPI/USD', round(kospi_usd, 4), 'INDEX_KR'))
-
-                if date in kosdaq.index:
-                    kosdaq_usd = float(kosdaq.loc[date, 'Close']) / fx_rate
-                    collected_data.append((d, 'KOSDAQ/USD', round(kosdaq_usd, 4), 'INDEX_KR'))
+            if date in kosdaq.index:
+                kosdaq_close = kosdaq.loc[date, 'Close']
+                if pd.isna(kosdaq_close):
+                    continue
+                kosdaq_usd = float(kosdaq_close) / float(fx_rate)
+                collected_data.append((d, 'KOSDAQ/USD', round(kosdaq_usd, 4), 'INDEX_KR'))
 
         print(f"✓ KOSPI: {len(kospi)}일, KOSDAQ: {len(kosdaq)}일 수집")
         print(f"✓ KOSPI/USD, KOSDAQ/USD 환산 완료")
 
     except Exception as e:
         print(f"❌ 한국 지수 오류: {e}")
+
+    if collected_data:
+        save_to_csv(collected_data)
+
+# ==========================================
+# 6-1. [GLOBAL] NIKKEI / TSEC + 환율 6개월 히스토리
+# ==========================================
+def crawl_global_indices():
+    """글로벌 지수 6개월 히스토리 (NIKKEI, TSEC) + 통화 환율 (JPY=X, TWD=X).
+    Indices 동적 차트(create_dashboard._build_indices_chart_section)에서 사용."""
+    print(f"\n{'=' * 60}")
+    print(f"🌏 글로벌 지수(NIKKEI/TSEC) 크롤링 시작")
+    print(f"{'=' * 60}")
+
+    targets = [
+        # (지수명, 티커, FX 페어명, FX 티커, 카테고리)
+        ('NIKKEI', '^N225', 'JPY/USD', 'JPY=X', 'INDEX_GLOBAL'),
+        ('TSEC',   '^TWII', 'TWD/USD', 'TWD=X', 'INDEX_GLOBAL'),
+    ]
+
+    collected_data = []
+    fx_seen = set()
+
+    for name, idx_ticker, fx_name, fx_ticker, cat in targets:
+        try:
+            idx_df = yf.Ticker(idx_ticker).history(period='6mo')
+            fx_df = yf.Ticker(fx_ticker).history(period='6mo')
+            if idx_df.empty or fx_df.empty:
+                print(f"⚠️ {name} 또는 {fx_name} 데이터 없음")
+                continue
+
+            idx_df.index = idx_df.index.tz_localize(None)
+            fx_df.index = fx_df.index.tz_localize(None)
+
+            # 지수 raw
+            for date, row in idx_df.iterrows():
+                if pd.isna(row['Close']):
+                    continue
+                d = date.strftime('%Y-%m-%d')
+                collected_data.append((d, name, float(row['Close']), cat))
+
+            # 지수 USD 환산
+            for date in idx_df.index:
+                if date not in fx_df.index:
+                    continue
+                close = idx_df.loc[date, 'Close']
+                fx_rate = fx_df.loc[date, 'Close']
+                if pd.isna(close) or pd.isna(fx_rate) or fx_rate == 0:
+                    continue
+                d = date.strftime('%Y-%m-%d')
+                usd = float(close) / float(fx_rate)
+                collected_data.append((d, f'{name}/USD', round(usd, 4), cat))
+
+            # 환율 raw 6mo (USD 토글 시 클라이언트 동적 환산용) — 한 번만
+            if fx_name not in fx_seen:
+                for date, row in fx_df.iterrows():
+                    if pd.isna(row['Close']):
+                        continue
+                    d = date.strftime('%Y-%m-%d')
+                    collected_data.append((d, fx_name, round(float(row['Close']), 4), 'FX'))
+                fx_seen.add(fx_name)
+
+            print(f"✓ {name}: {len(idx_df)}일, {fx_name} 환율 수집 완료")
+
+        except Exception as e:
+            print(f"❌ {name} 오류: {e}")
 
     if collected_data:
         save_to_csv(collected_data)
@@ -458,6 +534,7 @@ def main():
 
     crawl_us_indices()
     crawl_kr_indices()
+    crawl_global_indices()
     crawl_smm_lithium()
     crawl_sunsirs_polysilicon()
 

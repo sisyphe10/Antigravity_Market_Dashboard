@@ -518,6 +518,259 @@ def create_sector_section_html():
         return ""
 
 
+def _build_indices_chart_section(category_label='Indices'):
+    """글로벌 지수 동적 비교 차트 (KOSPI/KOSDAQ/NIKKEI/TSEC/S&P500/NASDAQ/RUSSELL 2000).
+    좌 사이드바 시리즈 토글 + 우 Chart.js 라인. Local/USD 모드 토글로 통화 환산 보기.
+    WRAP CHART 패턴(_build_wrap_chart_section)과 동일한 UX."""
+    try:
+        df = pd.read_csv(CSV_FILE, encoding='utf-8-sig')
+        df['날짜'] = pd.to_datetime(df['날짜'])
+        df['가격'] = pd.to_numeric(df['가격'].astype(str).str.replace(',', ''), errors='coerce')
+
+        # 시리즈 정의: display name, local 컬럼, USD 컬럼, 색
+        series_config = [
+            {'display': 'KOSPI',         'local': 'KOSPI',         'usd': 'KOSPI/USD',    'color': '#000000'},
+            {'display': 'KOSDAQ',        'local': 'KOSDAQ',        'usd': 'KOSDAQ/USD',   'color': '#666666'},
+            {'display': 'NIKKEI',        'local': 'NIKKEI',        'usd': 'NIKKEI/USD',   'color': '#DC2626'},
+            {'display': 'TSEC',          'local': 'TSEC',          'usd': 'TSEC/USD',     'color': '#1976D2'},
+            {'display': 'S&P 500',       'local': 'S&P 500',       'usd': 'S&P 500',      'color': '#2E7D32'},
+            {'display': 'NASDAQ',        'local': 'NASDAQ',        'usd': 'NASDAQ',       'color': '#7B1FA2'},
+            {'display': 'RUSSELL 2000',  'local': 'RUSSELL 2000',  'usd': 'RUSSELL 2000', 'color': '#F57C00'},
+        ]
+
+        # 최근 6개월 범위
+        latest = df['날짜'].max()
+        start = latest - timedelta(days=180)
+        df = df[(df['날짜'] >= start) & (df['날짜'] <= latest)]
+
+        # 모든 시리즈를 wide table로 결합 (날짜 인덱스)
+        all_names = set()
+        for s in series_config:
+            all_names.add(s['local'])
+            all_names.add(s['usd'])
+        sub = df[df['제품명'].isin(all_names)].copy()
+        sub = sub.drop_duplicates(subset=['날짜', '제품명'], keep='last')
+        wide = sub.pivot(index='날짜', columns='제품명', values='가격').sort_index()
+
+        # 거래일 합집합으로 dates 정렬 (값이 모두 NaN인 row는 제외)
+        wide = wide.dropna(how='all')
+        dates = [d.strftime('%Y-%m-%d') for d in wide.index]
+
+        # JSON export: { dates, local: {시리즈: [...]}, usd: {시리즈: [...]}, colors: {...} }
+        local_data = {}
+        usd_data = {}
+        colors = {}
+        for s in series_config:
+            colors[s['display']] = s['color']
+            if s['local'] in wide.columns:
+                local_data[s['display']] = [
+                    None if pd.isna(v) else round(float(v), 4) for v in wide[s['local']].tolist()
+                ]
+            else:
+                local_data[s['display']] = [None] * len(dates)
+            if s['usd'] in wide.columns:
+                usd_data[s['display']] = [
+                    None if pd.isna(v) else round(float(v), 4) for v in wide[s['usd']].tolist()
+                ]
+            else:
+                usd_data[s['display']] = [None] * len(dates)
+
+        export = {
+            'dates': dates,
+            'local': local_data,
+            'usd': usd_data,
+        }
+        export_json = json.dumps(export, ensure_ascii=False)
+        colors_json = json.dumps(colors, ensure_ascii=False)
+
+        # 좌측 시리즈 리스트 행
+        rows_html = ''
+        defaults_active = {'KOSPI', 'KOSDAQ', 'S&P 500', 'NASDAQ'}
+        for s in series_config:
+            display = s['display']
+            color = s['color']
+            active = ' active' if display in defaults_active else ''
+            rows_html += (
+                f'<tr class="idx-chart-item{active}" data-series="{display}" '
+                f'onclick="toggleIdxSeries(this)">'
+                f'<td style="width:6px;padding:0;">'
+                f'<div style="width:4px;height:100%;background:{color};border-radius:2px;"></div></td>'
+                f'<td>{display}</td></tr>\n'
+            )
+        mode_html = (
+            '<div style="display:flex;gap:4px;margin-bottom:8px;">'
+            '<button class="idx-mode-btn active" data-mode="local" onclick="switchIdxMode(this)">Local</button>'
+            '<button class="idx-mode-btn" data-mode="usd" onclick="switchIdxMode(this)">USD</button>'
+            '</div>'
+        )
+        list_html = mode_html + f'<table class="portfolio-table" style="max-width:500px;margin:0 auto;"><tbody>{rows_html}</tbody></table>'
+
+        first_date = dates[0] if dates else ''
+        last_date = dates[-1] if dates else ''
+
+        js_code = """
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>Chart.defaults.font.family = "'Inter', 'Noto Sans KR', sans-serif";</script>
+        <script>function formatDateInput(el){var v=el.value.replace(/[^0-9]/g,'');if(v.length===8){el.value=v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8);}}</script>
+        <script>
+        (function() {
+            var idxData = IDX_DATA_PLACEHOLDER;
+            var idxColors = IDX_COLORS_PLACEHOLDER;
+            var idxChart = null;
+            var idxMode = 'local';
+
+            function buildIdxChart() {
+                var selected = [];
+                document.querySelectorAll('.idx-chart-item.active').forEach(function(el){ selected.push(el.getAttribute('data-series')); });
+                var startDate = document.getElementById('idxStartDate').value;
+                var endDate = document.getElementById('idxEndDate').value;
+                var sourceSet = (idxMode === 'usd') ? idxData.usd : idxData.local;
+
+                // Pass 1: 시리즈별 필터링 데이터 수집
+                var perSeries = [];
+                selected.forEach(function(name) {
+                    var arr = sourceSet[name];
+                    if (!arr) return;
+                    var filteredDates = [];
+                    var filteredVals = [];
+                    for (var i = 0; i < idxData.dates.length; i++) {
+                        var d = idxData.dates[i];
+                        if (d >= startDate && d <= endDate && arr[i] !== null && arr[i] !== undefined) {
+                            filteredDates.push(d);
+                            filteredVals.push(arr[i]);
+                        }
+                    }
+                    if (filteredVals.length === 0) return;
+                    perSeries.push({ name: name, dates: filteredDates, vals: filteredVals });
+                });
+
+                // Pass 2: 공통 시작일 (시장 휴일 차이로 시리즈마다 거래일이 다른 경우 대비)
+                var commonStart = '';
+                perSeries.forEach(function(s) {
+                    if (s.dates[0] > commonStart) commonStart = s.dates[0];
+                });
+
+                // Pass 3: dataset 빌드 (공통 base 적용)
+                var datasets = [];
+                perSeries.forEach(function(s) {
+                    var sliceIdx = 0;
+                    if (commonStart) {
+                        for (var i = 0; i < s.dates.length; i++) {
+                            if (s.dates[i] >= commonStart) { sliceIdx = i; break; }
+                        }
+                    }
+                    var d_arr = s.dates.slice(sliceIdx);
+                    var v_arr = s.vals.slice(sliceIdx);
+                    if (v_arr.length === 0) return;
+                    var base = v_arr[0];
+                    var data = d_arr.map(function(d, j){
+                        return { x: d, y: Math.round((v_arr[j] / base - 1) * 10000) / 100 };
+                    });
+                    datasets.push({
+                        label: s.name,
+                        data: data,
+                        borderColor: idxColors[s.name] || '#888',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.3
+                    });
+                });
+
+                var endLabelPlugin = {
+                    id: 'idxEndLabels',
+                    afterDatasetsDraw: function(chart) {
+                        var ctx = chart.ctx;
+                        chart.data.datasets.forEach(function(ds, i) {
+                            var meta = chart.getDatasetMeta(i);
+                            if (meta.hidden) return;
+                            var last = meta.data[meta.data.length - 1];
+                            if (!last) return;
+                            var val = ds.data[ds.data.length - 1].y;
+                            var rounded = Math.sign(val) * Math.round(Math.abs(val));
+                            var sign = rounded >= 0 ? '+' : '';
+                            ctx.save();
+                            ctx.font = 'bold 12px sans-serif';
+                            ctx.fillStyle = ds.borderColor;
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(sign + rounded + '%', last.x + 6, last.y);
+                            ctx.restore();
+                        });
+                    }
+                };
+
+                // 하단 컬러닷 범례 (선택된 시리즈만)
+                var legendEl = document.getElementById('idxChartLegend');
+                if (legendEl) {
+                    legendEl.innerHTML = datasets.map(function(ds) {
+                        var c = ds.borderColor;
+                        return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:13px;">' +
+                            '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
+                            ds.label + '</span>';
+                    }).join('');
+                }
+
+                if (idxChart) idxChart.destroy();
+                idxChart = new Chart(document.getElementById('idxDynamicChart'), {
+                    type: 'line',
+                    data: { datasets: datasets },
+                    plugins: [endLabelPlugin],
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        layout: { padding: { right: 60 } },
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { label: function(ctx){ return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%'; } } }
+                        },
+                        scales: {
+                            x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 11 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
+                            y: { ticks: { callback: function(v){ return v + '%'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' }, border: { color: '#000' } }
+                        }
+                    }
+                });
+            }
+
+            window.toggleIdxSeries = function(el) { el.classList.toggle('active'); buildIdxChart(); };
+            window.updateIdxChart = buildIdxChart;
+            window.switchIdxMode = function(el) {
+                document.querySelectorAll('.idx-mode-btn').forEach(function(b){ b.classList.remove('active'); });
+                el.classList.add('active');
+                idxMode = el.getAttribute('data-mode');
+                buildIdxChart();
+            };
+            buildIdxChart();
+        })();
+        </script>
+        """.replace('IDX_DATA_PLACEHOLDER', export_json).replace('IDX_COLORS_PLACEHOLDER', colors_json)
+
+        return f"""
+        <div class="category-section">
+            <h2 class="category-title">{category_label}</h2>
+            <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;">
+                <div style="min-width:180px;">{list_html}</div>
+                <div style="width:1000px;">
+                    <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;font-size:13px;">
+                        <span style="color:#555;font-weight:600;">기간</span>
+                        <input type="text" id="idxStartDate" value="{first_date}" onchange="formatDateInput(this);updateIdxChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
+                        <span style="color:#888;">~</span>
+                        <input type="text" id="idxEndDate" value="{last_date}" onchange="formatDateInput(this);updateIdxChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
+                    </div>
+                    <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                        <canvas id="idxDynamicChart" style="width:100%;height:500px;"></canvas>
+                        <div id="idxChartLegend" style="margin-top:12px;text-align:center;color:#222;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {js_code}
+        """
+    except Exception as e:
+        print(f"Error building indices chart section: {e}")
+        import traceback; traceback.print_exc()
+        return ""
+
+
 def _build_wrap_chart_section(category_label):
     """동적 Chart.js 수익률 비교 차트 (멀티 셀렉트)"""
     try:
@@ -612,9 +865,8 @@ def _build_wrap_chart_section(category_label):
                 var startDate = document.getElementById('wrapStartDate').value;
                 var endDate = document.getElementById('wrapEndDate').value;
 
-                var datasets = [];
-                var returnLabels = [];
-
+                // Pass 1: 시리즈별 필터링 데이터 수집
+                var perSeries = [];
                 selected.forEach(function(name) {
                     if (!rawData[name]) return;
                     var filteredDates = [];
@@ -627,27 +879,49 @@ def _build_wrap_chart_section(category_label):
                         }
                     }
                     if (filteredVals.length === 0) return;
+                    perSeries.push({ name: name, dates: filteredDates, vals: filteredVals });
+                });
 
-                    var base = filteredVals[0];
+                // Pass 2: % return 모드일 때 공통 시작일 산출 (가장 늦은 첫 데이터 일자)
+                // 신규 시리즈(예: DB 개방형 inception 2024-05-16)와 장기 벤치마크(KOSPI 등)를 비교 가능하도록
+                // 모든 시리즈를 같은 0% 기준점에서 시작시킨다. MDD는 시리즈별 독립 유지.
+                var commonStart = '';
+                if (chartMode === 'return') {
+                    perSeries.forEach(function(s) {
+                        if (s.dates[0] > commonStart) commonStart = s.dates[0];
+                    });
+                }
+
+                // Pass 3: dataset 빌드 (공통 base 적용)
+                var datasets = [];
+                perSeries.forEach(function(s) {
+                    var sliceIdx = 0;
+                    if (chartMode === 'return' && commonStart) {
+                        for (var i = 0; i < s.dates.length; i++) {
+                            if (s.dates[i] >= commonStart) { sliceIdx = i; break; }
+                        }
+                    }
+                    var d_arr = s.dates.slice(sliceIdx);
+                    var v_arr = s.vals.slice(sliceIdx);
+                    if (v_arr.length === 0) return;
+
                     var data;
                     if (chartMode === 'mdd') {
-                        var mddVals = calcMDD(filteredVals);
-                        data = filteredDates.map(function(d, j) { return { x: d, y: mddVals[j] }; });
+                        var mddVals = calcMDD(v_arr);
+                        data = d_arr.map(function(d, j) { return { x: d, y: mddVals[j] }; });
                     } else {
-                        data = filteredDates.map(function(d, j) {
-                            return { x: d, y: Math.round((filteredVals[j] / base - 1) * 10000) / 100 };
+                        var base = v_arr[0];
+                        data = d_arr.map(function(d, j) {
+                            return { x: d, y: Math.round((v_arr[j] / base - 1) * 10000) / 100 };
                         });
                     }
 
-                    var lastPct = data[data.length - 1].y;
-                    var sign = lastPct >= 0 ? '+' : '';
-                    returnLabels.push({ name: name, pct: sign + lastPct.toFixed(1) + '%', color: chartColors[name] || '#888' });
                     datasets.push({
-                        label: name,
+                        label: s.name,
                         data: data,
-                        borderColor: chartColors[name] || '#888',
+                        borderColor: chartColors[s.name] || '#888',
                         backgroundColor: 'transparent',
-                        borderWidth: (name === 'KOSPI' || name === 'KOSDAQ') ? 1.5 : 3,
+                        borderWidth: (s.name === 'KOSPI' || s.name === 'KOSDAQ') ? 1.5 : 3,
                         pointRadius: 0,
                         tension: 0.3
                     });
@@ -676,6 +950,17 @@ def _build_wrap_chart_section(category_label):
                         });
                     }
                 };
+
+                // 하단 컬러닷 범례 (선택된 시리즈만)
+                var legendEl = document.getElementById('wrapChartLegend');
+                if (legendEl) {
+                    legendEl.innerHTML = datasets.map(function(ds) {
+                        var c = ds.borderColor;
+                        return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:13px;">' +
+                            '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
+                            ds.label + '</span>';
+                    }).join('');
+                }
 
                 if (wrapChart) wrapChart.destroy();
                 wrapChart = new Chart(document.getElementById('wrapDynamicChart'), {
@@ -725,6 +1010,7 @@ def _build_wrap_chart_section(category_label):
                     </div>
                     <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                         <canvas id="wrapDynamicChart" style="width:100%;height:500px;"></canvas>
+                        <div id="wrapChartLegend" style="margin-top:12px;text-align:center;color:#222;"></div>
                     </div>
                 </div>
             </div>
@@ -1410,10 +1696,15 @@ def create_dashboard():
         wrap_html   = ""   # WRAP page: Wrap charts + Portfolio + Sector
 
         # Define category order for better organization
-        category_order = ['Wrap', 'Portfolio', 'SECTOR', 'INDEX_KOREA', 'INDEX_US', 'EXCHANGE RATE',
+        category_order = ['Indices', 'Wrap', 'Portfolio', 'SECTOR', 'INDEX_KOREA', 'INDEX_US', 'EXCHANGE RATE',
                          'INTEREST RATES', 'CRYPTOCURRENCY', 'Memory', 'COMMODITIES']
 
         for category in category_order:
+            # Indices는 동적 차트 (charts_by_category와 무관)
+            if category == 'Indices':
+                charts_html += _build_indices_chart_section('Indices')
+                continue
+
             # Portfolio는 차트가 아니라 테이블이므로 특별 처리
             if category == 'SECTOR':
                 sector_html = create_sector_section_html()
