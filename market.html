@@ -444,7 +444,7 @@
 <body>
     <header style="position:relative;">
         <h1>📊 Market Data Dashboard</h1>
-        <div class="last-updated">Updated: 2026-04-27 09:45:39 KST</div>
+        <div class="last-updated">Updated: 2026-04-27 09:52:53 KST</div>
         <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
 
@@ -591,12 +591,16 @@
                 // 하단 컬러닷 범례 (선택된 시리즈만)
                 var legendEl = document.getElementById('idxChartLegend');
                 if (legendEl) {
-                    legendEl.innerHTML = datasets.map(function(ds) {
+                    var legendHTML = datasets.map(function(ds) {
                         var c = ds.borderColor;
                         return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:13px;">' +
                             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
                             ds.label + '</span>';
                     }).join('');
+                    if (idxMode === 'usd' && datasets.length > 0) {
+                        legendHTML += '<span style="font-size:13px;color:#555;font-weight:600;margin-left:4px;">/ USD</span>';
+                    }
+                    legendEl.innerHTML = legendHTML;
                 }
 
                 if (idxChart) idxChart.destroy();

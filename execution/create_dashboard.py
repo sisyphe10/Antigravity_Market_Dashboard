@@ -723,12 +723,16 @@ def _build_indices_chart_section(category_label='Indices'):
                 // 하단 컬러닷 범례 (선택된 시리즈만)
                 var legendEl = document.getElementById('idxChartLegend');
                 if (legendEl) {
-                    legendEl.innerHTML = datasets.map(function(ds) {
+                    var legendHTML = datasets.map(function(ds) {
                         var c = ds.borderColor;
                         return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:13px;">' +
                             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
                             ds.label + '</span>';
                     }).join('');
+                    if (idxMode === 'usd' && datasets.length > 0) {
+                        legendHTML += '<span style="font-size:13px;color:#555;font-weight:600;margin-left:4px;">/ USD</span>';
+                    }
+                    legendEl.innerHTML = legendHTML;
                 }
 
                 if (idxChart) idxChart.destroy();
