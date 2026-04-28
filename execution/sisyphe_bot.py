@@ -199,11 +199,11 @@ async def portfolio_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # 기준가 + 수익률 먼저 갱신
         subprocess.run(
             [sys.executable, "calculate_wrap_nav.py"],
-            capture_output=True, text=True, timeout=120
+            capture_output=True, text=True, timeout=240
         )
         subprocess.run(
             [sys.executable, "calculate_returns.py"],
-            capture_output=True, text=True, timeout=120
+            capture_output=True, text=True, timeout=180
         )
 
         # daily_portfolio_report.py 실행
@@ -211,7 +211,7 @@ async def portfolio_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [sys.executable, "execution/daily_portfolio_report.py", "--no-send"],
             capture_output=True,
             text=True,
-            timeout=60
+            timeout=180
         )
         
         if result.returncode == 0:
@@ -254,7 +254,7 @@ async def portfolio_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             git_sync(parent_dir)
             result_dash = subprocess.run(
                 [sys.executable, "execution/create_dashboard.py"],
-                cwd=parent_dir, capture_output=True, text=True, timeout=120
+                cwd=parent_dir, capture_output=True, text=True, timeout=240
             )
             if result_dash.returncode == 0:
                 now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -341,7 +341,7 @@ def run_portfolio_update():
     logging.info("Update Step 0: Regenerating portfolio_data.json from Wrap_NAV.xlsx...")
     step0_result = subprocess.run(
         [sys.executable, "execution/create_portfolio_tables.py"],
-        capture_output=True, text=True, timeout=180,
+        capture_output=True, text=True, timeout=300,
         cwd=dashboard_dir
     )
     if step0_result.returncode != 0:
@@ -405,7 +405,7 @@ def run_portfolio_update():
         capture_output=True,
         text=True,
         encoding='utf-8',
-        timeout=60,
+        timeout=240,
         cwd=dashboard_dir
     )
     if result.returncode != 0:
@@ -506,7 +506,7 @@ async def update_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         loop = asyncio.get_running_loop()
         portfolio_data = await asyncio.wait_for(
             loop.run_in_executor(None, run_portfolio_update),
-            timeout=300.0
+            timeout=600.0
         )
 
         summary = format_update_summary(portfolio_data)
@@ -558,7 +558,7 @@ async def auto_portfolio_update_job(context: ContextTypes.DEFAULT_TYPE):
         loop = asyncio.get_running_loop()
         portfolio_data = await asyncio.wait_for(
             loop.run_in_executor(None, run_portfolio_update),
-            timeout=300.0
+            timeout=600.0
         )
         logging.info("Auto portfolio update completed successfully")
 
@@ -604,7 +604,7 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
                 [sys.executable, "calculate_wrap_nav.py"],
                 capture_output=True,
                 text=True,
-                timeout=120
+                timeout=240
             )
             if result_nav.returncode == 0:
                 break
@@ -620,7 +620,7 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
         logging.info("Step 1-5: Regenerating portfolio_data.json from Wrap_NAV.xlsx...")
         subprocess.run(
             [sys.executable, "execution/create_portfolio_tables.py"],
-            capture_output=True, text=True, timeout=180
+            capture_output=True, text=True, timeout=300
         )
 
         # 2. 수익률 계산
@@ -629,7 +629,7 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
             [sys.executable, "calculate_returns.py"],
             capture_output=True,
             text=True,
-            timeout=120
+            timeout=180
         )
 
         if result_returns.returncode != 0:
@@ -657,7 +657,7 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
         logging.info("Step 2-7: Drawing wrap charts...")
         result_wcharts = subprocess.run(
             [sys.executable, "execution/draw_wrap_charts.py"],
-            capture_output=True, text=True, timeout=120
+            capture_output=True, text=True, timeout=180
         )
         if result_wcharts.returncode == 0:
             logging.info("Wrap charts generated successfully")
@@ -670,7 +670,7 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
             [sys.executable, "execution/create_dashboard.py"],
             capture_output=True,
             text=True,
-            timeout=120
+            timeout=240
         )
         if result_dashboard.returncode == 0:
             subprocess.run(["git", "add", "index.html", "market.html", "wrap.html", "charts/"], cwd=parent_dir, capture_output=True, timeout=30)
