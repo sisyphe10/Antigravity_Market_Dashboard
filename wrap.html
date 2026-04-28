@@ -136,7 +136,7 @@
     <div id="mainContent" class="pw-hidden">
     <header style="position:relative;">
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-04-28 00:53:37 KST</div>
+        <div class="last-updated">Updated: 2026-04-28 10:42:42 KST</div>
         <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
 
@@ -157,6 +157,7 @@
                         <input type="text" id="wrapStartDate" value="2023-03-16" onchange="formatDateInput(this);updateWrapChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                         <span style="color:#888;">~</span>
                         <input type="text" id="wrapEndDate" value="2026-04-27" onchange="formatDateInput(this);updateWrapChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
+                        <button onclick="downloadWrapChart()" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#222;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
                     </div>
                     <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                         <div style="position:relative;height:500px;">
@@ -320,6 +321,33 @@
                 el.classList.add('active');
                 chartMode = el.getAttribute('data-mode');
                 buildChart();
+            };
+            window.downloadWrapChart = function() {
+                if (!wrapChart) return;
+                var srcImg = new Image();
+                srcImg.onload = function() {
+                    var canvas = document.createElement('canvas');
+                    canvas.width = srcImg.width;
+                    canvas.height = srcImg.height;
+                    var ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(srcImg, 0, 0);
+                    ctx.strokeStyle = '#000000';
+                    ctx.lineWidth = 0.5;
+                    ctx.strokeRect(0.25, 0.25, canvas.width - 0.5, canvas.height - 0.5);
+                    canvas.toBlob(function(blob) {
+                        var url = URL.createObjectURL(blob);
+                        var a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'wrap_chart_' + new Date().toISOString().slice(0,10) + '.png';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }, 'image/png');
+                };
+                srcImg.src = wrapChart.toBase64Image('image/png', 1);
             };
             buildChart();
         })();
@@ -1034,6 +1062,20 @@
                         </td>
                     </tr>
                     <tr>
+                        <td class="sect-name">섬유·의류</td>
+                        <td class="sect-num">3.0%</td>
+                        <td class="sect-num">0.1%</td>
+                        <td class="sect-diff">+3.0%</td>
+                        <td class="sect-diff sect-under">-12.9%</td>
+                    </tr>
+                    <tr class="sect-detail-row">
+                        <td colspan="5" class="sect-detail">
+                            <span class="sect-detail-mine">한섬</span>
+                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
+                            <span class="sect-detail-bm">F&F</span>
+                        </td>
+                    </tr>
+                    <tr>
                         <td class="sect-name">일반서비스</td>
                         <td class="sect-num">3.0%</td>
                         <td class="sect-num">2.0%</td>
@@ -1059,20 +1101,6 @@
                             <span class="sect-detail-mine">SGC에너지</span>
                             <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
                             <span class="sect-detail-bm">한국전력, 한국가스공사, 지역난방공사</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="sect-name">섬유·의류</td>
-                        <td class="sect-num">3.0%</td>
-                        <td class="sect-num">0.1%</td>
-                        <td class="sect-diff">+3.0%</td>
-                        <td class="sect-diff sect-under">-12.9%</td>
-                    </tr>
-                    <tr class="sect-detail-row">
-                        <td colspan="5" class="sect-detail">
-                            <span class="sect-detail-mine">한섬</span>
-                            <span class="sect-detail-sep"> &nbsp;|&nbsp; </span>
-                            <span class="sect-detail-bm">F&F</span>
                         </td>
                     </tr>
                     <tr>

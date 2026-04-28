@@ -72,4 +72,5 @@ vm-bot.txt
 target_transform_chart.html
 execution/generate_target_transform_chart.py
 db_target_transform_2nd_chart.html
+db_target_transform_2nd_chart_nostem.html
 execution/generate_db_target_transform_2nd_chart.py

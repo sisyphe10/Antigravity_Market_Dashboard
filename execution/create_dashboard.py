@@ -1019,6 +1019,33 @@ def _build_wrap_chart_section(category_label):
                 chartMode = el.getAttribute('data-mode');
                 buildChart();
             };
+            window.downloadWrapChart = function() {
+                if (!wrapChart) return;
+                var srcImg = new Image();
+                srcImg.onload = function() {
+                    var canvas = document.createElement('canvas');
+                    canvas.width = srcImg.width;
+                    canvas.height = srcImg.height;
+                    var ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(srcImg, 0, 0);
+                    ctx.strokeStyle = '#000000';
+                    ctx.lineWidth = 0.5;
+                    ctx.strokeRect(0.25, 0.25, canvas.width - 0.5, canvas.height - 0.5);
+                    canvas.toBlob(function(blob) {
+                        var url = URL.createObjectURL(blob);
+                        var a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'wrap_chart_' + new Date().toISOString().slice(0,10) + '.png';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }, 'image/png');
+                };
+                srcImg.src = wrapChart.toBase64Image('image/png', 1);
+            };
             buildChart();
         })();
         </script>
@@ -1035,6 +1062,7 @@ def _build_wrap_chart_section(category_label):
                         <input type="text" id="wrapStartDate" value="{first_date}" onchange="formatDateInput(this);updateWrapChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                         <span style="color:#888;">~</span>
                         <input type="text" id="wrapEndDate" value="{last_date}" onchange="formatDateInput(this);updateWrapChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
+                        <button onclick="downloadWrapChart()" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#222;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
                     </div>
                     <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                         <div style="position:relative;height:500px;">
