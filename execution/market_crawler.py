@@ -556,6 +556,13 @@ def main():
     crawl_smm_lithium()
     crawl_sunsirs_polysilicon()
 
+    # KPX 육지 SMP (한국 도매 전기 가격, 가중평균 원/kWh)
+    try:
+        from fetch_smp_kpx import crawl_kpx_smp
+        crawl_kpx_smp()
+    except Exception as e:
+        print(f"⚠️ KPX SMP 수집 실패 (계속 진행): {e}")
+
     print(f"\n📁 결과 파일: {CSV_FILE}")
 
 if __name__ == "__main__":

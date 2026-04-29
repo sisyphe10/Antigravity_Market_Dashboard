@@ -1855,7 +1855,8 @@ def create_dashboard():
                     'Poly Silicon',
                     'SCFI Comprehensive Index',
                     'KRX ETS  KAU25',
-                    'KRX ETS Trading Volume'
+                    'KRX ETS Trading Volume',
+                    'SMP 육지'
                 ]
             
             # Exchange Rate order
