@@ -128,6 +128,16 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 /ledger 지출 식비 점심 15000
 /ledger 수입 급여 3000000
 
+📓 **투자일지 (Journal)**
+/journal 장전 오늘은 매수 중지 예정
+/journal 장후 예상대로 하락, 관망 유지
+
+💡 **투자 아이디어 (Ideas)**
+/idea 삼성전자 BUY 반도체 사이클 하단
+/idea SK하이닉스 WATCH HBM 가격 정상화
+• 액션: BUY/SELL/WATCH/ADD/CUT/HOLD
+• 종목별 아이디어가 Journal 페이지 Ideas 탭에 누적
+
 ⚙️ **기타**
 /start - 봇 시작 및 자동 알림 구독
 /stop - 자동 알림 구독 해제
@@ -2074,6 +2084,88 @@ async def journal_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"❌ 저장 실패: {str(e)}")
 
 
+async def idea_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/idea 종목명 액션 아이디어 - 투자 아이디어를 Ideas 시트에 추가"""
+    service = _get_journal_service()
+    if not service:
+        await update.message.reply_text("❌ Google 서비스 계정이 설정되지 않았습니다.")
+        return
+
+    raw_text = update.message.text or ''
+    parts = raw_text.split(None, 3)  # ['/idea', '종목명', '액션', '아이디어 전체']
+    if len(parts) < 4:
+        await update.message.reply_text(
+            "<b>투자 아이디어 입력</b>\n\n"
+            "<code>/idea 삼성전자 BUY 반도체 사이클 하단</code>\n"
+            "<code>/idea SK하이닉스 WATCH HBM 가격 정상화</code>\n"
+            "<code>/idea 한섬 SELL 의류 비중 줄이기</code>\n\n"
+            "형식: /idea [종목명] [액션] [아이디어]\n"
+            "액션: BUY / SELL / WATCH / ADD / CUT / HOLD",
+            parse_mode='HTML'
+        )
+        return
+
+    stock_input = parts[1]
+    action = parts[2].upper()
+    idea_text = parts[3]
+
+    # 종목 lookup (Wrap_NAV.xlsx Code 시트)
+    try:
+        df_code = pd.read_excel('Wrap_NAV.xlsx', sheet_name='Code')
+        match = df_code[df_code['종목명'] == stock_input]
+        if match.empty:
+            match = df_code[df_code['종목명'].str.contains(stock_input, na=False, regex=False)]
+        if match.empty:
+            await update.message.reply_text(
+                f"❌ '{stock_input}' 종목을 찾을 수 없습니다.\n"
+                f"Wrap_NAV.xlsx Code 시트에 등록된 종목명을 정확히 입력해주세요."
+            )
+            return
+        if len(match) > 1:
+            names = ', '.join(match['종목명'].head(5).tolist())
+            await update.message.reply_text(
+                f"⚠️ 여러 종목 매칭됨: {names}\n정확한 종목명으로 다시 입력해주세요."
+            )
+            return
+        code = str(match.iloc[0]['종목코드']).zfill(6)
+        actual_name = match.iloc[0]['종목명']
+    except Exception as e:
+        await update.message.reply_text(f"❌ 종목 조회 실패: {e}")
+        return
+
+    # 날짜/요일
+    KST_tz = datetime.timezone(datetime.timedelta(hours=9))
+    today = datetime.datetime.now(tz=KST_tz)
+    today_str = today.strftime('%Y-%m-%d')
+    dow_names = ['월', '화', '수', '목', '금', '토', '일']
+    dow = dow_names[today.weekday()]
+
+    # Ideas 시트에 행 추가 (A 날짜, B 요일, C 코드, D 종목, E 시총X, F 시총, G 수익률, H 액션, I 아이디어)
+    try:
+        new_row = [today_str, dow, code, actual_name, '', '', '', action, idea_text]
+        service.spreadsheets().values().append(
+            spreadsheetId=JOURNAL_SHEET_ID,
+            range='Ideas!A1:I1',
+            valueInputOption='USER_ENTERED',
+            insertDataOption='INSERT_ROWS',
+            body={'values': [new_row]}
+        ).execute()
+
+        await update.message.reply_text(
+            f"✅ <b>Ideas 추가됨</b>\n"
+            f"📅 {today_str} ({dow})\n"
+            f"📌 <b>{actual_name}</b> ({code})\n"
+            f"🎯 액션: <b>{action}</b>\n"
+            f"💡 {idea_text}",
+            parse_mode='HTML'
+        )
+        logging.info(f"Idea added: {actual_name} ({code}) {action} - {idea_text[:50]}")
+
+    except Exception as e:
+        logging.error(f"Idea error: {e}")
+        await update.message.reply_text(f"❌ Ideas 시트 쓰기 실패: {str(e)}")
+
+
 # ============================================================
 # 예산 소진율 체크
 # ============================================================
@@ -2145,6 +2237,7 @@ if __name__ == '__main__':
     application.add_handler(CommandHandler('ledger2', ledger2_command))
     application.add_handler(CommandHandler('fitness', fitness_command))
     application.add_handler(CommandHandler('journal', journal_command))
+    application.add_handler(CommandHandler('idea', idea_command))
     
     job_queue = application.job_queue
     try:
