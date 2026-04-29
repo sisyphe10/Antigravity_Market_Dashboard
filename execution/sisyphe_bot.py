@@ -2141,7 +2141,7 @@ async def idea_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     dow_names = ['월', '화', '수', '목', '금', '토', '일']
     dow = dow_names[today.weekday()]
 
-    # 네이버 금융에서 시가총액 fetch (X-시가총액 = 입력 시점 시총)
+    # 네이버 금융에서 시가총액 fetch (X-시가총액 = 입력 시점 시총, 억원 단위 정수)
     market_cap_x = ''
     try:
         import requests
@@ -2151,48 +2151,32 @@ async def idea_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             timeout=10
         )
         r.encoding = 'euc-kr'
-        m = re.search(r'<em id="_market_sum">([\d,\s\n]+)</em>', r.text)
+        # <em id="_market_sum"> 안에 "1,234,567" 형태. 내부에 \n / 공백 / 콤마 섞임
+        m = re.search(r'<em id="_market_sum">([\s\S]*?)</em>', r.text)
         if m:
-            # "1,234,567" or "123,456" 형태 (단위: 억원)
-            digits_only = re.sub(r'[^\d,]', '', m.group(1))
-            market_cap_x = digits_only  # 시트에 그대로 (예: "123,456")
+            raw = re.sub(r'[^\d]', '', m.group(1))
+            if raw:
+                market_cap_x = int(raw)  # 억원 단위 정수 (시트가 천 단위 콤마 자동 포맷)
     except Exception as e:
         logging.warning(f'네이버 시총 fetch 실패: {e}')
 
-    # 윗행의 F, G 수식 fetch + 행 번호 시프트 (Sheets 복붙 효과)
-    f_formula = ''
-    g_formula = ''
+    # 새 행 번호 (수식에 행 번호 박기 위해 미리 계산)
     try:
         rows_result = service.spreadsheets().values().get(
             spreadsheetId=JOURNAL_SHEET_ID,
-            range='Ideas!A:I',
-            valueRenderOption='FORMULA'
+            range='Ideas!A:A'
         ).execute()
-        all_rows = rows_result.get('values', [])
-        if all_rows:
-            last_row_idx = len(all_rows)  # 1-indexed
-            last_row = all_rows[-1] if all_rows[-1] else []
-            f_raw = last_row[5] if len(last_row) > 5 else ''
-            g_raw = last_row[6] if len(last_row) > 6 else ''
+        new_row_num = len(rows_result.get('values', [])) + 1
+    except Exception:
+        new_row_num = 2  # fallback
 
-            def shift_row(formula, delta=1):
-                if not formula or not isinstance(formula, str) or not formula.startswith('='):
-                    return ''
-                return re.sub(
-                    r'([A-Z]+)(\$?)(\d+)',
-                    lambda m: f"{m.group(1)}{m.group(2)}{int(m.group(3)) + delta}",
-                    formula
-                )
+    # 시트 row 패턴 (A 날짜, B =A{N}, C 코드, D 종목, E 시총X, F GOOGLEFINANCE 시총, G 수익률, H 액션, I 아이디어)
+    b_formula = f'=A{new_row_num}'
+    f_formula = f'=GOOGLEFINANCE(C{new_row_num},"marketcap")/100000000'
+    g_formula = f'=F{new_row_num}/E{new_row_num}-1'
 
-            f_formula = shift_row(f_raw, 1)
-            g_formula = shift_row(g_raw, 1)
-    except Exception as e:
-        logging.warning(f'윗행 수식 fetch 실패: {e}')
-
-    # Ideas 시트에 행 추가 (A 날짜, B 요일, C 코드, D 종목, E 시총X, F 시총, G 수익률, H 액션, I 아이디어)
-    # 코드 앞에 ' 붙여 텍스트 강제 (005930 → 5930 변환 방지)
     try:
-        new_row = [today_str, dow, "'" + code, actual_name, market_cap_x, f_formula, g_formula, action, idea_text]
+        new_row = [today_str, b_formula, "'" + code, actual_name, market_cap_x, f_formula, g_formula, action, idea_text]
         service.spreadsheets().values().append(
             spreadsheetId=JOURNAL_SHEET_ID,
             range='Ideas!A1:I1',
