@@ -203,7 +203,7 @@ def get_item_category(item_name):
 
     # Special handling for Wrap portfolios
     wrap_keywords = ['트루밸류', '삼성 트루밸류', 'Value ESG', 'NH Value ESG',
-                     '개방형', 'DB 개방형']
+                     '개방형', 'DB 개방형', '목표전환형 2호', 'NH 목표전환형 2호']
     if any(keyword in item_name for keyword in wrap_keywords):
         return 'Wrap'
 
@@ -811,6 +811,7 @@ def _build_wrap_chart_section(category_label):
             ('삼성 트루밸류', '트루밸류'),
             ('NH Value ESG', 'Value ESG'),
             ('DB 개방형', '개방형 랩'),
+            ('NH 목표전환형 2호', '목표전환형 2호'),
             ('KOSPI', 'KOSPI'),
             ('KOSDAQ', 'KOSDAQ'),
         ]
@@ -818,6 +819,7 @@ def _build_wrap_chart_section(category_label):
             '삼성 트루밸류': '#1428A0',
             'NH Value ESG': '#0072CE',
             'DB 개방형': '#00854A',
+            'NH 목표전환형 2호': '#0072CE',
             'KOSPI': '#000000',
             'KOSDAQ': '#666666',
         }
@@ -1557,6 +1559,7 @@ def create_wrap_returns_table():
 
         items = [
             ('삼성 트루밸류', '트루밸류'),
+            ('NH 목표전환형 2호', '목표전환형 2호'),
             ('KOSPI', 'KOSPI'),
             ('KOSDAQ', 'KOSDAQ'),
         ]
