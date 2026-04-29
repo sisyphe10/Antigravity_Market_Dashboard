@@ -157,10 +157,34 @@ def main():
     if rows:
         append_csv(rows)
         print(f'\n=== ✅ {len(rows)}건 {CSV_FILE}에 저장 완료 ===')
+        auto_git_push(collected_at)
     if fail_log:
         print(f'\n=== ⚠️  {len(fail_log)}건 실패 ===')
         for h, l, e in fail_log:
             print(f'  {h} lead+{l}d: {e}')
+
+
+def auto_git_push(collected_at):
+    """hotel_adr.csv 자동 commit + push (사용자 노트북에서 매일 실행)"""
+    import subprocess
+    try:
+        subprocess.run(['git', 'add', CSV_FILE], capture_output=True, timeout=30)
+        commit = subprocess.run(
+            ['git', 'commit', '-m', f'Auto: hotel ADR daily collection {collected_at}'],
+            capture_output=True, text=True, timeout=30
+        )
+        if commit.returncode != 0:
+            print('git commit: 변경사항 없음 (skip)')
+            return
+        # pull merge + push (rebase 금지, memory 룰)
+        subprocess.run(['git', 'pull', 'origin', 'main', '--no-rebase', '--no-edit'], capture_output=True, timeout=60)
+        push = subprocess.run(['git', 'push', 'origin', 'main'], capture_output=True, text=True, timeout=60)
+        if push.returncode == 0:
+            print('✅ git push 완료')
+        else:
+            print(f'⚠️ git push 실패: {push.stderr[:200]}')
+    except Exception as e:
+        print(f'⚠️ auto_git_push 예외: {e}')
 
 
 if __name__ == '__main__':

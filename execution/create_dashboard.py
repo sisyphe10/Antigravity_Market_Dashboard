@@ -3673,6 +3673,153 @@ refresh();
     # ── ETF page ──
     generate_etf_html()
 
+    # ── Hotels ADR page ──
+    generate_hotels_html()
+
+
+def generate_hotels_html():
+    """Hotel ADR 페이지 생성 (Booking.com 10호텔 entry 객실 일별 가격)"""
+    import pandas as pd
+
+    csv_file = 'hotel_adr.csv'
+    if not os.path.exists(csv_file):
+        print("hotel_adr.csv not found, skipping hotels.html")
+        return
+    df = pd.read_csv(csv_file)
+    if len(df) == 0:
+        print("hotel_adr.csv empty, skipping hotels.html")
+        return
+
+    # 가장 최근 collected_at 행만 (당일 매트릭스)
+    latest = df['collected_at'].max()
+    df_latest = df[df['collected_at'] == latest]
+
+    # 호텔별 도시·등급 메타
+    meta = df_latest[['hotel', 'city', 'grade']].drop_duplicates().set_index('hotel').to_dict(orient='index')
+
+    # 매트릭스: 호텔 × lead_days
+    pivot = df_latest.pivot(index='hotel', columns='lead_days', values='price_krw')
+
+    # 행 HTML (호텔 카테고리 순으로 정렬: 서울 → 부산 → 제주 → 경주)
+    city_order = ['서울', '부산', '제주', '경주']
+    grade_order = {'Lux': 0, '5*': 1, '4*': 2}
+
+    def sort_key(hotel_name):
+        m = meta.get(hotel_name, {})
+        return (city_order.index(m.get('city', '서울')) if m.get('city') in city_order else 99,
+                grade_order.get(m.get('grade'), 99))
+
+    rows_html = ''
+    for hotel in sorted(pivot.index, key=sort_key):
+        m = meta.get(hotel, {})
+        rows_html += f'<tr><td class="hotel-name">{hotel}</td>'
+        rows_html += f'<td class="hotel-meta">{m.get("city", "")}</td>'
+        rows_html += f'<td class="hotel-meta">{m.get("grade", "")}</td>'
+        for lead in [7, 14, 30]:
+            v = pivot.loc[hotel].get(lead)
+            if v is None or pd.isna(v):
+                rows_html += '<td class="price-empty">-</td>'
+            else:
+                rows_html += f'<td class="price">₩{int(v):,}</td>'
+        rows_html += '</tr>\n'
+
+    # 데이터 누적 일수
+    unique_days = df['collected_at'].str[:10].nunique()
+
+    # 시계열 차트: lead+7 호텔별 라인 (데이터 ≥ 3일 누적 시)
+    chart_html = ''
+    if unique_days >= 3:
+        try:
+            import matplotlib
+            matplotlib.use('Agg')
+            import matplotlib.pyplot as plt
+            from matplotlib import font_manager
+            # 한글 폰트
+            for fn in ['Malgun Gothic', 'NanumGothic', 'Noto Sans KR', 'AppleGothic']:
+                if any(fn in f.name for f in font_manager.fontManager.ttflist):
+                    plt.rcParams['font.family'] = fn
+                    break
+            plt.rcParams['axes.unicode_minus'] = False
+
+            df_lead7 = df[df['lead_days'] == 7].copy()
+            df_lead7['date'] = df_lead7['collected_at'].str[:10]
+            pivot_ts = df_lead7.pivot(index='date', columns='hotel', values='price_krw') / 1000
+
+            fig, ax = plt.subplots(figsize=(13, 6))
+            for col in pivot_ts.columns:
+                ax.plot(pivot_ts.index, pivot_ts[col], marker='o', linewidth=2, label=col)
+            ax.set_title('Hotel ADR 시계열 (lead+7일 기준, 천원)', fontsize=14, fontweight='bold')
+            ax.set_ylabel('1박 가격 (천원)')
+            ax.legend(loc='upper left', bbox_to_anchor=(1.02, 1), fontsize=9)
+            ax.grid(True, alpha=0.3)
+            plt.tight_layout()
+            os.makedirs('charts', exist_ok=True)
+            chart_path = 'charts/hotel_adr_lead7.png'
+            fig.savefig(chart_path, dpi=100, bbox_inches='tight')
+            plt.close(fig)
+            chart_html = f'<img src="{chart_path}" alt="Hotel ADR Timeseries" style="max-width:100%;border:1px solid #ddd;border-radius:8px;">'
+        except Exception as e:
+            print(f'Hotel chart 생성 실패: {e}')
+
+    # HTML 생성
+    update_time = datetime.now(KST).strftime('%Y-%m-%d %H:%M:%S')
+    html = f"""<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>Hotel ADR - Antigravity Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  * {{ box-sizing: border-box; }}
+  body {{ font-family: 'Inter', 'Noto Sans KR', sans-serif; background: #f5f5f5; margin: 0; padding: 30px; color: #222; }}
+  .home-btn {{ position: fixed; top: 20px; right: 20px; background: #e0e0e0; color: #222; padding: 8px 18px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 600; }}
+  h1 {{ font-size: 1.8rem; margin-bottom: 8px; }}
+  .meta {{ color: #888; font-size: 13px; margin-bottom: 24px; }}
+  .container {{ max-width: 1200px; margin: 0 auto; }}
+  .card {{ background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 24px; }}
+  table {{ width: 100%; border-collapse: collapse; }}
+  th {{ background: #222; color: #fff; padding: 10px 14px; text-align: left; font-weight: 600; font-size: 13px; }}
+  td {{ padding: 10px 14px; border-bottom: 1px solid #eee; font-size: 14px; }}
+  td.hotel-name {{ font-weight: 600; }}
+  td.hotel-meta {{ color: #666; font-size: 13px; }}
+  td.price {{ text-align: right; font-feature-settings: 'tnum'; font-weight: 500; }}
+  td.price-empty {{ text-align: right; color: #ccc; }}
+  tr:hover {{ background: #fafafa; }}
+  .note {{ font-size: 13px; color: #666; margin-top: 16px; padding: 12px; background: #fff8e1; border-radius: 8px; border-left: 3px solid #ffc107; }}
+</style>
+</head>
+<body>
+<a href="index.html" class="home-btn">Home</a>
+<div class="container">
+  <h1>Hotel ADR — Booking.com</h1>
+  <p class="meta">Updated: {update_time} KST · 누적 {unique_days}일 · 매일 12:00 KST 자동 수집</p>
+
+  <div class="card">
+    <h2 style="margin-top:0;font-size:1.2rem;">당일 entry 객실 가격 (체크인 lead time별)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>호텔</th><th>도시</th><th>등급</th>
+          <th style="text-align:right;">+7일</th>
+          <th style="text-align:right;">+14일</th>
+          <th style="text-align:right;">+30일</th>
+        </tr>
+      </thead>
+      <tbody>{rows_html}</tbody>
+    </table>
+    <p class="note">※ 각 호텔에서 가장 저렴한 entry 객실 1박 가격 (2인, 환불가능 옵션 우선). Booking.com 기준이라 외국인 가격 포함될 수 있음.</p>
+  </div>
+
+  {f'<div class="card"><h2 style="margin-top:0;font-size:1.2rem;">시계열 (lead+7일)</h2>{chart_html}</div>' if chart_html else '<div class="card"><p class="note">시계열 차트는 데이터 3일 이상 누적 후 표시됩니다 (현재 {0}일).</p></div>'.format(unique_days)}
+</div>
+</body>
+</html>
+"""
+
+    with open('hotels.html', 'w', encoding='utf-8') as f:
+        f.write(html)
+    print("Hotels page generated: hotels.html")
+
 
 def generate_etf_html():
     """ETF 대시보드 페이지 생성"""

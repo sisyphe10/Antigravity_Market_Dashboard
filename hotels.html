@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>Hotel ADR - Antigravity Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: 'Inter', 'Noto Sans KR', sans-serif; background: #f5f5f5; margin: 0; padding: 30px; color: #222; }
+  .home-btn { position: fixed; top: 20px; right: 20px; background: #e0e0e0; color: #222; padding: 8px 18px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 600; }
+  h1 { font-size: 1.8rem; margin-bottom: 8px; }
+  .meta { color: #888; font-size: 13px; margin-bottom: 24px; }
+  .container { max-width: 1200px; margin: 0 auto; }
+  .card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 24px; }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: #222; color: #fff; padding: 10px 14px; text-align: left; font-weight: 600; font-size: 13px; }
+  td { padding: 10px 14px; border-bottom: 1px solid #eee; font-size: 14px; }
+  td.hotel-name { font-weight: 600; }
+  td.hotel-meta { color: #666; font-size: 13px; }
+  td.price { text-align: right; font-feature-settings: 'tnum'; font-weight: 500; }
+  td.price-empty { text-align: right; color: #ccc; }
+  tr:hover { background: #fafafa; }
+  .note { font-size: 13px; color: #666; margin-top: 16px; padding: 12px; background: #fff8e1; border-radius: 8px; border-left: 3px solid #ffc107; }
+</style>
+</head>
+<body>
+<a href="index.html" class="home-btn">Home</a>
+<div class="container">
+  <h1>Hotel ADR — Booking.com</h1>
+  <p class="meta">Updated: 2026-04-29 16:32:21 KST · 누적 1일 · 매일 12:00 KST 자동 수집</p>
+
+  <div class="card">
+    <h2 style="margin-top:0;font-size:1.2rem;">당일 entry 객실 가격 (체크인 lead time별)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>호텔</th><th>도시</th><th>등급</th>
+          <th style="text-align:right;">+7일</th>
+          <th style="text-align:right;">+14일</th>
+          <th style="text-align:right;">+30일</th>
+        </tr>
+      </thead>
+      <tbody><tr><td class="hotel-name">시그니엘 서울</td><td class="hotel-meta">서울</td><td class="hotel-meta">Lux</td><td class="price">₩570,000</td><td class="price">₩570,000</td><td class="price">₩902,500</td></tr>
+<tr><td class="hotel-name">포시즌스 호텔 서울</td><td class="hotel-meta">서울</td><td class="hotel-meta">Lux</td><td class="price">₩920,000</td><td class="price">₩1,720,000</td><td class="price">₩1,300,000</td></tr>
+<tr><td class="hotel-name">그랜드 하얏트 서울</td><td class="hotel-meta">서울</td><td class="hotel-meta">5*</td><td class="price-empty">-</td><td class="price">₩400,350</td><td class="price">₩428,400</td></tr>
+<tr><td class="hotel-name">롯데호텔 서울</td><td class="hotel-meta">서울</td><td class="hotel-meta">5*</td><td class="price">₩540,000</td><td class="price">₩620,000</td><td class="price">₩630,000</td></tr>
+<tr><td class="hotel-name">글래드 여의도</td><td class="hotel-meta">서울</td><td class="hotel-meta">4*</td><td class="price">₩176,000</td><td class="price">₩256,666</td><td class="price">₩350,000</td></tr>
+<tr><td class="hotel-name">시그니엘 부산</td><td class="hotel-meta">부산</td><td class="hotel-meta">Lux</td><td class="price">₩401,800</td><td class="price">₩362,600</td><td class="price">₩490,000</td></tr>
+<tr><td class="hotel-name">파라다이스 호텔 부산</td><td class="hotel-meta">부산</td><td class="hotel-meta">5*</td><td class="price">₩250,000</td><td class="price">₩250,000</td><td class="price-empty">-</td></tr>
+<tr><td class="hotel-name">그랜드 하얏트 제주</td><td class="hotel-meta">제주</td><td class="hotel-meta">5*</td><td class="price">₩351,000</td><td class="price">₩428,000</td><td class="price">₩468,000</td></tr>
+<tr><td class="hotel-name">롯데호텔 제주</td><td class="hotel-meta">제주</td><td class="hotel-meta">5*</td><td class="price">₩280,000</td><td class="price-empty">-</td><td class="price">₩334,800</td></tr>
+</tbody>
+    </table>
+    <p class="note">※ 각 호텔에서 가장 저렴한 entry 객실 1박 가격 (2인, 환불가능 옵션 우선). Booking.com 기준이라 외국인 가격 포함될 수 있음.</p>
+  </div>
+
+  <div class="card"><p class="note">시계열 차트는 데이터 3일 이상 누적 후 표시됩니다 (현재 1일).</p></div>
+</div>
+</body>
+</html>
