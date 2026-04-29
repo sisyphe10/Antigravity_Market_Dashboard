@@ -26,6 +26,8 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
+# 텔레그램 polling getUpdates 로그 제거 (10초마다 INFO → 디스크/journal 점거)
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 # 환경 변수 로드
 load_dotenv()
