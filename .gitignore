@@ -27,6 +27,7 @@ test_env/
 *.csv
 *.db
 !dataset.csv
+!hotel_adr.csv
 !Wrap_NAV.xlsx
 
 # 로그
