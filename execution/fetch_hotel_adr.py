@@ -51,8 +51,11 @@ def get_booking_driver():
     opts = Options()
     opts.add_argument('--headless=new')
     opts.add_argument('--no-sandbox')
+    opts.add_argument('--disable-gpu')
     opts.add_argument('--disable-dev-shm-usage')
+    opts.add_argument('--disable-software-rasterizer')
     opts.add_argument('--disable-blink-features=AutomationControlled')
+    opts.add_argument('--window-size=1920,1080')
     opts.add_argument(
         '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
         'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36'
@@ -62,6 +65,7 @@ def get_booking_driver():
     # VM (Ubuntu)에서 snap chromium 사용 시 wrapper 필요 (fetch_seibro_data.py 패턴)
     if os.path.exists('/snap/bin/chromium'):
         opts.binary_location = '/snap/bin/chromium'
+        opts.add_argument('--remote-debugging-port=9222')
         wrapper = '/tmp/chromedriver_wrapper.sh'
         with open(wrapper, 'w') as f:
             f.write('#!/bin/bash\nexec snap run chromium.chromedriver "$@"\n')
