@@ -61,11 +61,11 @@ def get_booking_driver():
 
     # VM (Ubuntu)에서 snap chromium 사용 시 wrapper 필요 (fetch_seibro_data.py 패턴)
     if os.path.exists('/snap/bin/chromium'):
+        opts.binary_location = '/snap/bin/chromium'
         wrapper = '/tmp/chromedriver_wrapper.sh'
-        if not os.path.exists(wrapper):
-            with open(wrapper, 'w') as f:
-                f.write('#!/bin/bash\nexec snap run chromium.chromedriver "$@"\n')
-            os.chmod(wrapper, 0o755)
+        with open(wrapper, 'w') as f:
+            f.write('#!/bin/bash\nexec snap run chromium.chromedriver "$@"\n')
+        os.chmod(wrapper, 0o755)
         from selenium.webdriver.chrome.service import Service
         return webdriver.Chrome(service=Service(wrapper), options=opts)
     return webdriver.Chrome(options=opts)
