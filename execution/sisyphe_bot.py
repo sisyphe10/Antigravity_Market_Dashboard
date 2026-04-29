@@ -2111,6 +2111,7 @@ async def idea_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # 종목 lookup (Wrap_NAV.xlsx Code 시트)
     try:
+        import pandas as pd
         df_code = pd.read_excel('Wrap_NAV.xlsx', sheet_name='Code')
         match = df_code[df_code['종목명'] == stock_input]
         if match.empty:
