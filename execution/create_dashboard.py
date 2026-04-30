@@ -1071,6 +1071,14 @@ def _build_combined_chart_section():
                     });
                 });
 
+                if (mode === 'raw2') {
+                    var padCount = 8;
+                    for (var p = 0; p < padCount; p++) commonDates.push('');
+                    datasets.forEach(function(ds) {
+                        for (var q = 0; q < padCount; q++) ds.data.push(null);
+                    });
+                }
+
                 var endLabelPlugin = {
                     id: 'cmbEndLabels',
                     afterDatasetsDraw: function(chart) {
@@ -3805,7 +3813,27 @@ def create_dashboard():
         document.getElementById('mainContent').classList.remove('pw-hidden');
     }}
 
-    function wrapSwitchTab(tab) {{
+    // Order/AUM 탭 추가 비밀번호 (sha256('2026'))
+    var ORDER_AUM_PW_HASH = '158a323a7ba44870f23d96f1516dd70aa48e9a72db4ebb026b0a89e212a208ab';
+
+    async function checkOrderAumPw() {{
+        if (sessionStorage.getItem('order_aum_auth') === '1') return true;
+        var pw = prompt('Order/AUM 탭 비밀번호 입력');
+        if (!pw) return false;
+        var hash = await sha256(pw);
+        if (hash === ORDER_AUM_PW_HASH) {{
+            sessionStorage.setItem('order_aum_auth', '1');
+            return true;
+        }}
+        alert('비밀번호가 틀렸습니다.');
+        return false;
+    }}
+
+    async function wrapSwitchTab(tab) {{
+        // Order/AUM 진입 시 추가 비밀번호 체크
+        if ((tab === 'order' || tab === 'aum') && !(await checkOrderAumPw())) {{
+            return;  // 인증 실패 시 탭 전환 취소
+        }}
         var tabs = ['dashboard', 'order', 'aum'];
         var btns = document.querySelectorAll('.wrap-tab-btn');
         tabs.forEach(function(t, i) {{

@@ -136,7 +136,7 @@
     <div id="mainContent" class="pw-hidden">
     <header style="position:relative;">
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-04-30 14:17:26 KST</div>
+        <div class="last-updated">Updated: 2026-04-30 14:19:06 KST</div>
         <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
 
@@ -2117,7 +2117,27 @@
         document.getElementById('mainContent').classList.remove('pw-hidden');
     }
 
-    function wrapSwitchTab(tab) {
+    // Order/AUM 탭 추가 비밀번호 (sha256('2026'))
+    var ORDER_AUM_PW_HASH = '158a323a7ba44870f23d96f1516dd70aa48e9a72db4ebb026b0a89e212a208ab';
+
+    async function checkOrderAumPw() {
+        if (sessionStorage.getItem('order_aum_auth') === '1') return true;
+        var pw = prompt('Order/AUM 탭 비밀번호 입력');
+        if (!pw) return false;
+        var hash = await sha256(pw);
+        if (hash === ORDER_AUM_PW_HASH) {
+            sessionStorage.setItem('order_aum_auth', '1');
+            return true;
+        }
+        alert('비밀번호가 틀렸습니다.');
+        return false;
+    }
+
+    async function wrapSwitchTab(tab) {
+        // Order/AUM 진입 시 추가 비밀번호 체크
+        if ((tab === 'order' || tab === 'aum') && !(await checkOrderAumPw())) {
+            return;  // 인증 실패 시 탭 전환 취소
+        }
         var tabs = ['dashboard', 'order', 'aum'];
         var btns = document.querySelectorAll('.wrap-tab-btn');
         tabs.forEach(function(t, i) {
