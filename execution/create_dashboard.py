@@ -816,7 +816,7 @@ def _build_combined_chart_section():
                 {'display': 'KOSDAQ Market Cap',  'csv': 'KOSDAQ Market Cap',  'color': '#7BAEDF'},
             ]},
             {'label': 'INDEX_US', 'series': [
-                {'display': 'S&P 500',            'csv': 'S&P 500',            'color': '#2E7D32', 'default': True},
+                {'display': 'S&P 500',            'csv': 'S&P 500',            'color': '#2E7D32'},
                 {'display': 'S&P 500 PER',        'csv': 'S&P 500 PER',        'color': '#4CAF50'},
                 {'display': 'S&P 500 PBR',        'csv': 'S&P 500 PBR',        'color': '#81C784'},
                 {'display': 'NASDAQ',             'csv': 'NASDAQ',             'color': '#7B1FA2'},
@@ -829,7 +829,7 @@ def _build_combined_chart_section():
             ]},
             {'label': 'EXCHANGE RATE', 'series': [
                 {'display': 'Dollar Index (DXY)', 'csv': 'Dollar Index (DXY)', 'color': '#1565C0'},
-                {'display': 'KRW/USD',            'csv': 'KRW/USD',            'color': '#0277BD', 'default': True},
+                {'display': 'KRW/USD',            'csv': 'KRW/USD',            'color': '#0277BD'},
                 {'display': 'CNY/USD',            'csv': 'CNY/USD',            'color': '#0288D1'},
                 {'display': 'JPY/USD',            'csv': 'JPY/USD',            'color': '#039BE5'},
                 {'display': 'TWD/USD',            'csv': 'TWD/USD',            'color': '#03A9F4'},
@@ -838,18 +838,18 @@ def _build_combined_chart_section():
             {'label': 'INTEREST RATES', 'series': [
                 {'display': 'US 13 Week Treasury Yield', 'csv': 'US 13 Week Treasury Yield', 'color': '#B71C1C'},
                 {'display': 'US 5 Year Treasury Yield',  'csv': 'US 5 Year Treasury Yield',  'color': '#C62828'},
-                {'display': 'US 10 Year Treasury Yield', 'csv': 'US 10 Year Treasury Yield', 'color': '#D32F2F', 'default': True},
+                {'display': 'US 10 Year Treasury Yield', 'csv': 'US 10 Year Treasury Yield', 'color': '#D32F2F'},
                 {'display': 'US 30 Year Treasury Yield', 'csv': 'US 30 Year Treasury Yield', 'color': '#E53935'},
             ]},
             {'label': 'CRYPTOCURRENCY', 'series': [
-                {'display': 'BTC', 'csv': 'BTC', 'color': '#F7931A', 'default': True},
+                {'display': 'BTC', 'csv': 'BTC', 'color': '#F7931A'},
                 {'display': 'ETH', 'csv': 'ETH', 'color': '#627EEA'},
                 {'display': 'BNB', 'csv': 'BNB', 'color': '#F0B90B'},
                 {'display': 'XRP', 'csv': 'XRP', 'color': '#23292F'},
                 {'display': 'SOL', 'csv': 'SOL', 'color': '#9945FF'},
             ]},
             {'label': 'COMMODITIES', 'series': [
-                {'display': 'Gold',                       'csv': 'Gold',                       'color': '#FFD700', 'default': True},
+                {'display': 'Gold',                       'csv': 'Gold',                       'color': '#FFD700'},
                 {'display': 'KRX GOLD Trading Volume',    'csv': 'KRX GOLD Trading Volume',    'color': '#DAA520'},
                 {'display': 'Silver',                     'csv': 'Silver',                     'color': '#C0C0C0'},
                 {'display': 'Copper',                     'csv': 'Copper',                     'color': '#B87333'},
@@ -867,7 +867,7 @@ def _build_combined_chart_section():
                 {'display': 'SMP',                        'csv': 'SMP',                        'color': '#E67E22'},
             ]},
             {'label': 'MEMORY', 'series': [
-                {'display': 'DDR5 16G (2Gx8) 4800/5600',  'csv': 'DDR5 16G (2Gx8) 4800/5600',  'color': '#E91E63', 'default': True},
+                {'display': 'DDR5 16G (2Gx8) 4800/5600',  'csv': 'DDR5 16G (2Gx8) 4800/5600',  'color': '#E91E63'},
                 {'display': 'DDR4 8Gb (1Gx8) 3200',       'csv': 'DDR4 8Gb (1Gx8) 3200',       'color': '#F48FB1'},
                 {'display': 'SLC 2Gb 256MBx8',            'csv': 'SLC 2Gb 256MBx8',            'color': '#00897B'},
                 {'display': 'SLC 1Gb 128MBx8',            'csv': 'SLC 1Gb 128MBx8',            'color': '#26A69A'},
@@ -916,12 +916,15 @@ def _build_combined_chart_section():
                 data_export[s['display']] = values
                 colors[s['display']] = s['color']
                 active = ' active' if s.get('default') else ''
+                first_top_border = 'border-top:1px solid #000;' if idx == 0 else ''
                 series_cell = (
                     f'<td class="cmb-chart-item{active}" data-series="{_html.escape(s["display"])}" '
-                    f'onclick="toggleCmbSeries(this)" style="cursor:pointer;">'
-                    f'<div style="display:flex;align-items:center;gap:8px;">'
-                    f'<div style="width:4px;height:18px;background:{s["color"]};border-radius:2px;flex-shrink:0;"></div>'
-                    f'<span>{_html.escape(s["display"])}</span></div></td>'
+                    f'onclick="toggleCmbSeries(this)" '
+                    f'style="cursor:pointer;text-align:center;position:relative;{first_top_border}">'
+                    f'<div class="cmb-color-bar" style="position:absolute;left:8px;top:50%;'
+                    f'transform:translateY(-50%);width:4px;height:18px;background:{s["color"]};'
+                    f'border-radius:2px;"></div>'
+                    f'{_html.escape(s["display"])}</td>'
                 )
                 if idx == 0:
                     group_cell = (
@@ -929,7 +932,7 @@ def _build_combined_chart_section():
                         f'style="background:#f0f0f0;font-weight:700;font-size:12px;color:#333;'
                         f'padding:8px 10px;text-align:center;vertical-align:middle;'
                         f'text-transform:uppercase;letter-spacing:0.5px;'
-                        f'border-top:1px solid #ddd;border-right:1px solid #ddd;'
+                        f'border-top:1px solid #000;border-right:1px solid #ddd;'
                         f'white-space:nowrap;">{_html.escape(g["label"])}</td>'
                     )
                     rows_html += f'<tr>{group_cell}{series_cell}</tr>\n'
@@ -941,6 +944,7 @@ def _build_combined_chart_section():
         colors_json = json.dumps(colors, ensure_ascii=False)
 
         list_html = (
+            '<style>.cmb-chart-item:not(.active) .cmb-color-bar{display:none;}</style>'
             f'<table class="portfolio-table" style="max-width:500px;margin:0 auto;">'
             f'<tbody>{rows_html}</tbody></table>'
         )
@@ -2441,6 +2445,199 @@ def create_order_section():
     """
 
 
+def create_aum_section():
+    """AUM 패널 — 상품별 AUM 입력 → Wrap_NAV.xlsx의 AUM 시트에 직접 행 추가.
+
+    GitHub Contents API + ExcelJS 클라이언트 사이드 처리.
+    PAT는 ORDER 탭과 동일한 'github_pat' localStorage 공유.
+    """
+    return """
+        <div id="aumContent"><div style="text-align:center;color:#888;padding:40px;">로딩 중...</div></div>
+        <script>
+        var AUM_PRODUCTS = [
+            { display: '삼성 트루밸류',      broker: '삼성', name: '트루밸류' },
+            { display: 'NH Value ESG',      broker: 'NH',   name: 'Value ESG' },
+            { display: 'DB 개방형',         broker: 'DB',   name: '개방형 랩' },
+            { display: 'NH 목표전환형 2호', broker: 'NH',   name: '목표전환형 2호' },
+            { display: 'DB 목표전환형 3차', broker: 'DB',   name: '목표전환형 3차' },
+        ];
+        var aumLatest = {};       // {broker|name: {date, aum}}
+        var aumInputs = {};       // {idx: 사용자 입력 (억원)}
+        var _aumLoaded = false;
+
+        async function loadAUM() {
+            if (_aumLoaded) return;
+            _aumLoaded = true;
+            try {
+                var url = 'https://raw.githubusercontent.com/sisyphe10/Antigravity_Market_Dashboard/main/Wrap_NAV.xlsx?cb=' + Date.now();
+                var resp = await fetch(url);
+                if (!resp.ok) throw new Error('Wrap_NAV.xlsx fetch 실패: ' + resp.status);
+                var buf = await resp.arrayBuffer();
+                var wb = new ExcelJS.Workbook();
+                await wb.xlsx.load(buf);
+                var ws = wb.getWorksheet('AUM');
+                if (!ws) throw new Error('AUM 시트가 없습니다');
+                aumLatest = {};
+                for (var r = 2; r <= ws.rowCount; r++) {
+                    var row = ws.getRow(r);
+                    var date = row.getCell(1).value;
+                    var broker = row.getCell(2).value;
+                    var product = row.getCell(3).value;
+                    var aum = row.getCell(4).value;
+                    if (broker && product && (typeof aum === 'number')) {
+                        var key = broker + '|' + product;
+                        var existing = aumLatest[key];
+                        if (!existing || (date && date > existing.date)) {
+                            aumLatest[key] = { date: date, aum: aum };
+                        }
+                    }
+                }
+                renderAUMPanel();
+            } catch(e) {
+                document.getElementById('aumContent').innerHTML = '<div style="color:#dc2626;padding:40px;text-align:center;">AUM 로드 실패: ' + e.message + '</div>';
+                console.error('loadAUM error:', e);
+                _aumLoaded = false;
+            }
+        }
+
+        function fmtAumDate(d) {
+            if (!d) return '';
+            try {
+                var dt = (d instanceof Date) ? d : new Date(d);
+                return (dt.getMonth() + 1) + '/' + dt.getDate();
+            } catch(_) { return ''; }
+        }
+
+        function renderAUMPanel() {
+            var html = '<div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);max-width:900px;margin:0 auto;">';
+            html += '<div style="display:flex;align-items:center;margin-bottom:20px;">';
+            html += '<h3 style="margin:0;font-size:18px;">AUM 입력 <span style="font-size:14px;color:#666;font-weight:400;">(오늘 날짜로 추가됨, 변경된 항목만 저장)</span></h3>';
+            html += '<button id="aumSaveBtn" style="margin-left:auto;font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;">저장</button>';
+            html += '</div>';
+            html += '<table style="width:100%;border-collapse:collapse;font-size:15px;">';
+            html += '<thead><tr style="border-bottom:2px solid #e5e7eb;color:#444;">';
+            html += '<th style="padding:10px;text-align:center;width:40px;">증권사</th>';
+            html += '<th style="padding:10px;text-align:center;">상품명</th>';
+            html += '<th style="padding:10px;text-align:center;width:160px;">현재 AUM</th>';
+            html += '<th style="padding:10px;text-align:center;width:200px;">신규 AUM</th>';
+            html += '</tr></thead><tbody>';
+            AUM_PRODUCTS.forEach(function(p, i) {
+                var key = p.broker + '|' + p.name;
+                var latest = aumLatest[key];
+                var currentText = latest
+                    ? Math.round(latest.aum / 1e8).toLocaleString() + '억 (' + fmtAumDate(latest.date) + ')'
+                    : '-';
+                var placeholderVal = latest ? Math.round(latest.aum / 1e8) : '';
+                html += '<tr style="border-bottom:1px solid #eee;">';
+                html += '<td style="padding:12px;text-align:center;">' + p.broker + '</td>';
+                html += '<td style="padding:12px;text-align:center;font-weight:600;">' + p.display + '</td>';
+                html += '<td style="padding:12px;text-align:center;">' + currentText + '</td>';
+                html += '<td style="padding:12px;text-align:center;">';
+                html += '<input type="text" inputmode="decimal" data-idx="' + i + '" value="' + (aumInputs[i] || '') + '" placeholder="' + placeholderVal + '" style="width:90px;text-align:center;padding:6px 8px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;color:#000;"> 억';
+                html += '</td></tr>';
+            });
+            html += '</tbody></table></div>';
+            document.getElementById('aumContent').innerHTML = html;
+            document.querySelectorAll('#aumContent input').forEach(function(el) {
+                el.addEventListener('input', function(e) {
+                    var idx = parseInt(e.target.dataset.idx);
+                    aumInputs[idx] = e.target.value.trim();
+                });
+            });
+            document.getElementById('aumSaveBtn').addEventListener('click', saveAUM);
+        }
+
+        async function saveAUM() {
+            var pat = getGithubPat();
+            if (!pat) { alert('PAT 입력이 취소되었습니다.'); return; }
+            var changes = [];
+            AUM_PRODUCTS.forEach(function(p, i) {
+                var v = aumInputs[i];
+                if (v && parseFloat(v) > 0) {
+                    var aumValue = Math.round(parseFloat(v) * 1e8);
+                    var key = p.broker + '|' + p.name;
+                    var latest = aumLatest[key];
+                    // 동일 값이면 스킵
+                    if (latest && Math.abs(latest.aum - aumValue) < 1) return;
+                    changes.push({ broker: p.broker, product: p.name, aum: aumValue });
+                }
+            });
+            if (changes.length === 0) {
+                alert('변경할 AUM이 없습니다 (입력값이 현재값과 동일).');
+                return;
+            }
+
+            var apiUrl = 'https://api.github.com/repos/' + ORDER_REPO + '/contents/Wrap_NAV.xlsx';
+            var headers = {
+                'Authorization': 'Bearer ' + pat,
+                'Accept': 'application/vnd.github+json',
+                'X-GitHub-Api-Version': '2022-11-28',
+            };
+            try {
+                var getResp = await fetch(apiUrl, { headers: headers });
+                if (!getResp.ok) {
+                    if (getResp.status === 401 || getResp.status === 403) {
+                        localStorage.removeItem('github_pat');
+                        throw new Error('인증 실패 (' + getResp.status + '). PAT를 다시 입력하세요.');
+                    }
+                    throw new Error('GET 실패: ' + getResp.status);
+                }
+                var meta = await getResp.json();
+                var sha = meta.sha;
+                // 파일 받기 (download_url 우선 — content는 1MB 이상이면 비어있음)
+                var fileResp = await fetch(meta.download_url);
+                var buf = await fileResp.arrayBuffer();
+
+                var wb = new ExcelJS.Workbook();
+                await wb.xlsx.load(buf);
+                var ws = wb.getWorksheet('AUM');
+                if (!ws) throw new Error('AUM 시트가 없습니다');
+
+                // 오늘 날짜로 새 행 추가
+                var today = new Date();
+                var todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                changes.forEach(function(ch) {
+                    var newRow = ws.addRow([todayDate, ch.broker, ch.product, ch.aum]);
+                    // 날짜 셀 서식: yyyy-mm-dd
+                    newRow.getCell(1).numFmt = 'yyyy-mm-dd';
+                    newRow.commit();
+                });
+
+                var out = await wb.xlsx.writeBuffer();
+                // ArrayBuffer → base64 (대용량 안전)
+                var u8 = new Uint8Array(out);
+                var binary = '';
+                var chunkSize = 0x8000;
+                for (var i = 0; i < u8.length; i += chunkSize) {
+                    binary += String.fromCharCode.apply(null, u8.subarray(i, i + chunkSize));
+                }
+                var b64 = btoa(binary);
+
+                var msg = 'AUM update: ' + changes.map(function(c) {
+                    return c.broker + ' ' + c.product + ' ' + Math.round(c.aum / 1e8) + '억';
+                }).join(', ');
+                var putResp = await fetch(apiUrl, {
+                    method: 'PUT',
+                    headers: Object.assign({}, headers, { 'Content-Type': 'application/json' }),
+                    body: JSON.stringify({ message: msg, content: b64, sha: sha }),
+                });
+                if (!putResp.ok) {
+                    var errTxt = await putResp.text();
+                    throw new Error('PUT 실패: ' + putResp.status + ' ' + errTxt.slice(0, 200));
+                }
+                alert('✅ AUM 저장 완료 (' + changes.length + '건)\\n다음 GHA 실행(23:00 KST)에서 반영됩니다.');
+                aumInputs = {};
+                _aumLoaded = false;
+                await loadAUM();
+            } catch(e) {
+                alert('❌ AUM 저장 실패: ' + e.message);
+                console.error('saveAUM error:', e);
+            }
+        }
+        </script>
+    """
+
+
 def create_dashboard():
     # Check if charts directory exists
     if not os.path.exists(CHARTS_DIR):
@@ -3237,8 +3434,9 @@ def create_dashboard():
         f.write(landing_page)
     print("Landing page generated: index.html")
 
-    # ── Generate wrap.html (WRAP + Portfolio + Sector + Order tab) ──
+    # ── Generate wrap.html (WRAP + Portfolio + Sector + Order/AUM tabs) ──
     order_html = create_order_section()
+    aum_html = create_aum_section()
     wrap_page = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3384,6 +3582,7 @@ def create_dashboard():
     <div style="display:flex;gap:0;margin:0 auto 0;border-bottom:3px solid #333;max-width:1800px;">
         <button class="wrap-tab-btn active" onclick="wrapSwitchTab('dashboard')" style="padding:12px 32px;font-size:1rem;font-weight:700;cursor:pointer;background:#333;color:#fff;border:none;border-bottom:3px solid #333;margin-bottom:-3px;font-family:inherit;">Dashboard</button>
         <button class="wrap-tab-btn" onclick="wrapSwitchTab('order')" style="padding:12px 32px;font-size:1rem;font-weight:700;cursor:pointer;background:#e8e8e8;color:#999;border:none;border-bottom:3px solid transparent;margin-bottom:-3px;font-family:inherit;">Order</button>
+        <button class="wrap-tab-btn" onclick="wrapSwitchTab('aum')" style="padding:12px 32px;font-size:1rem;font-weight:700;cursor:pointer;background:#e8e8e8;color:#999;border:none;border-bottom:3px solid transparent;margin-bottom:-3px;font-family:inherit;">AUM</button>
     </div>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -3392,6 +3591,10 @@ def create_dashboard():
 
     <div id="wrapPanelOrder" style="padding-top:24px;display:none;max-width:1800px;margin:0 auto;">
     {order_html}
+    </div>
+
+    <div id="wrapPanelAUM" style="padding-top:24px;display:none;max-width:1800px;margin:0 auto;">
+    {aum_html}
     </div>
 
     <footer><p>Auto-generated by Antigravity Agent</p></footer>
@@ -3420,18 +3623,20 @@ def create_dashboard():
     }}
 
     function wrapSwitchTab(tab) {{
+        var tabs = ['dashboard', 'order', 'aum'];
         var btns = document.querySelectorAll('.wrap-tab-btn');
-        btns[0].classList.toggle('active', tab === 'dashboard');
-        btns[1].classList.toggle('active', tab === 'order');
-        btns[0].style.background = tab === 'dashboard' ? '#333' : '#e8e8e8';
-        btns[0].style.color = tab === 'dashboard' ? '#fff' : '#999';
-        btns[0].style.borderBottomColor = tab === 'dashboard' ? '#333' : 'transparent';
-        btns[1].style.background = tab === 'order' ? '#333' : '#e8e8e8';
-        btns[1].style.color = tab === 'order' ? '#fff' : '#999';
-        btns[1].style.borderBottomColor = tab === 'order' ? '#333' : 'transparent';
+        tabs.forEach(function(t, i) {{
+            var active = (tab === t);
+            btns[i].classList.toggle('active', active);
+            btns[i].style.background = active ? '#333' : '#e8e8e8';
+            btns[i].style.color = active ? '#fff' : '#999';
+            btns[i].style.borderBottomColor = active ? '#333' : 'transparent';
+        }});
         document.getElementById('wrapPanelDashboard').style.display = tab === 'dashboard' ? 'block' : 'none';
         document.getElementById('wrapPanelOrder').style.display = tab === 'order' ? 'block' : 'none';
+        document.getElementById('wrapPanelAUM').style.display = tab === 'aum' ? 'block' : 'none';
         if (tab === 'order' && typeof loadOrder === 'function') loadOrder();
+        if (tab === 'aum' && typeof loadAUM === 'function') loadAUM();
     }}
     </script>
 </body>
