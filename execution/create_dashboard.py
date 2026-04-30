@@ -899,8 +899,7 @@ def _build_combined_chart_section():
         colors = {}
         rows_html = ''
         for g in groups:
-            group_has_data = False
-            group_rows = ''
+            visible = []
             for s in g['series']:
                 if s['csv'] not in wide.columns:
                     continue
@@ -910,25 +909,32 @@ def _build_combined_chart_section():
                 ]
                 if all(v is None for v in values):
                     continue
+                visible.append((s, values))
+            if not visible:
+                continue
+            for idx, (s, values) in enumerate(visible):
                 data_export[s['display']] = values
                 colors[s['display']] = s['color']
                 active = ' active' if s.get('default') else ''
-                group_rows += (
-                    f'<tr class="cmb-chart-item{active}" data-series="{_html.escape(s["display"])}" '
-                    f'onclick="toggleCmbSeries(this)">'
-                    f'<td style="width:6px;padding:0;">'
-                    f'<div style="width:4px;height:18px;background:{s["color"]};border-radius:2px;margin:auto;"></div></td>'
-                    f'<td>{_html.escape(s["display"])}</td></tr>\n'
+                series_cell = (
+                    f'<td class="cmb-chart-item{active}" data-series="{_html.escape(s["display"])}" '
+                    f'onclick="toggleCmbSeries(this)" style="cursor:pointer;">'
+                    f'<div style="display:flex;align-items:center;gap:8px;">'
+                    f'<div style="width:4px;height:18px;background:{s["color"]};border-radius:2px;flex-shrink:0;"></div>'
+                    f'<span>{_html.escape(s["display"])}</span></div></td>'
                 )
-                group_has_data = True
-            if group_has_data:
-                rows_html += (
-                    f'<tr class="cmb-group-header"><td colspan="2" '
-                    f'style="background:#f0f0f0;font-weight:700;font-size:12px;color:#333;'
-                    f'padding:8px 10px;text-transform:uppercase;letter-spacing:0.5px;'
-                    f'border-top:1px solid #ddd;">{_html.escape(g["label"])}</td></tr>\n'
-                )
-                rows_html += group_rows
+                if idx == 0:
+                    group_cell = (
+                        f'<td rowspan="{len(visible)}" class="cmb-group-cell" '
+                        f'style="background:#f0f0f0;font-weight:700;font-size:12px;color:#333;'
+                        f'padding:8px 10px;text-align:center;vertical-align:middle;'
+                        f'text-transform:uppercase;letter-spacing:0.5px;'
+                        f'border-top:1px solid #ddd;border-right:1px solid #ddd;'
+                        f'white-space:nowrap;">{_html.escape(g["label"])}</td>'
+                    )
+                    rows_html += f'<tr>{group_cell}{series_cell}</tr>\n'
+                else:
+                    rows_html += f'<tr>{series_cell}</tr>\n'
 
         export = {'dates': dates, 'data': data_export}
         export_json = json.dumps(export, ensure_ascii=False)
@@ -2154,23 +2160,22 @@ def create_order_section():
             stocks.forEach(function(s, i) {
                 var orderState_i = st[i];
                 var ot = calcOrderType(s.weight, parseFloat(orderState_i.newWeight) || 0);
-                var otColor = ot === '유지' ? '#888' : '#dc2626';
                 var sectorCell = s.isNew
-                    ? '<td style="text-align:center;color:#666;padding:8px;"><input type="text" data-idx="' + i + '" data-field="sector" value="' + (s.sector || '').replace(/"/g, '&quot;') + '" placeholder="업종" style="width:100px;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;"></td>'
-                    : '<td style="text-align:center;color:#666;padding:8px;">' + s.sector + '</td>';
+                    ? '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="sector" value="' + (s.sector || '').replace(/"/g, '&quot;') + '" placeholder="업종" style="width:100px;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;color:#000;"></td>'
+                    : '<td style="text-align:center;padding:8px;">' + s.sector + '</td>';
                 var codeCell = s.isNew
-                    ? '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="code" value="' + s.code + '" placeholder="000000" maxlength="6" style="width:70px;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:monospace;font-size:15px;"></td>'
-                    : '<td style="text-align:center;font-family:monospace;color:#666;padding:8px;">' + s.code + '</td>';
+                    ? '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="code" value="' + s.code + '" placeholder="000000" maxlength="6" style="width:70px;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:monospace;font-size:15px;color:#000;"></td>'
+                    : '<td style="text-align:center;font-family:monospace;padding:8px;">' + s.code + '</td>';
                 var nameCell = s.isNew
-                    ? '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="name" value="' + (s.name || '').replace(/"/g, '&quot;') + '" placeholder="종목명" style="width:120px;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;font-weight:600;"></td>'
+                    ? '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="name" value="' + (s.name || '').replace(/"/g, '&quot;') + '" placeholder="종목명" style="width:120px;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;font-weight:600;color:#000;"></td>'
                     : '<td style="text-align:center;font-weight:600;padding:8px;">' + s.name + '</td>';
                 rows += '<tr>'
-                    + '<td style="text-align:center;color:#666;padding:8px;">' + (i + 1) + '</td>'
+                    + '<td style="text-align:center;padding:8px;">' + (i + 1) + '</td>'
                     + sectorCell + codeCell + nameCell
-                    + '<td style="text-align:center;color:#666;padding:8px;">' + s.weight + '</td>'
-                    + '<td style="text-align:center;padding:8px;"><input type="text" inputmode="decimal" data-idx="' + i + '" data-field="newWeight" value="' + orderState_i.newWeight + '" style="width:65px;box-sizing:border-box;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;"></td>'
-                    + '<td style="text-align:center;color:' + otColor + ';padding:8px;">' + ot + '</td>'
-                    + '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="reason" value="' + (orderState_i.reason || '').replace(/"/g, '&quot;') + '" placeholder="추천사유 입력" style="width:100%;box-sizing:border-box;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;text-align:center;"></td>'
+                    + '<td style="text-align:center;padding:8px;">' + s.weight + '</td>'
+                    + '<td style="text-align:center;padding:8px;"><input type="text" inputmode="decimal" data-idx="' + i + '" data-field="newWeight" value="' + orderState_i.newWeight + '" style="width:65px;box-sizing:border-box;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;color:#000;"></td>'
+                    + '<td style="text-align:center;padding:8px;">' + ot + '</td>'
+                    + '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="reason" value="' + (orderState_i.reason || '').replace(/"/g, '&quot;') + '" style="width:100%;box-sizing:border-box;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;text-align:center;color:#000;"></td>'
                     + '</tr>';
             });
             // templates 배열 → N개 Download 버튼 + 예상 파일명 표시
