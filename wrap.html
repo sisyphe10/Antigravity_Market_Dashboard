@@ -136,7 +136,7 @@
     <div id="mainContent" class="pw-hidden">
     <header style="position:relative;">
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-04-30 13:42:38 KST</div>
+        <div class="last-updated">Updated: 2026-04-30 13:48:28 KST</div>
         <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
 
@@ -1722,13 +1722,64 @@
                 var wb = new ExcelJS.Workbook();
                 await wb.xlsx.load(buf);
                 var ws = wb.worksheets[0];
-                stocks.forEach(function(s, i) {
-                    var r = 7 + i;
-                    ws.getCell('F' + r).value = s.weight;
-                    ws.getCell('G' + r).value = parseFloat(st[i].newWeight) || 0;
-                    ws.getCell('H' + r).value = calcOrderType(s.weight, parseFloat(st[i].newWeight) || 0);
-                    ws.getCell('I' + r).value = st[i].reason || '';
+
+                // 종목 데이터 결합 + 비중(변경후) 내림차순 정렬
+                var combined = stocks.map(function(s, i) {
+                    var newW = parseFloat(st[i].newWeight) || 0;
+                    return {
+                        sector: s.sector || '',
+                        code: String(s.code || ''),
+                        name: s.name || '',
+                        oldWeight: parseFloat(s.weight) || 0,
+                        newWeight: newW,
+                        orderType: calcOrderType(parseFloat(s.weight) || 0, newW),
+                        reason: st[i].reason || '',
+                    };
                 });
+                combined.sort(function(a, b) { return b.newWeight - a.newWeight; });
+
+                // 자문지 양식의 Total 행 자동 감지 (E열에 'Total' 또는 'TOTAL' 텍스트)
+                var totalRow = -1;
+                for (var r = 7; r <= ws.rowCount + 5; r++) {
+                    var v = ws.getCell(r, 5).value;
+                    if (v && /total/i.test(String(v))) { totalRow = r; break; }
+                }
+
+                if (totalRow >= 7) {
+                    // Total 행이 있는 양식 (목표전환형) → 행 수 자동 조정
+                    var existingCount = totalRow - 7;
+                    var newCount = combined.length;
+                    if (newCount > existingCount) {
+                        // R7 행 서식을 복제하여 (newCount-existingCount)개 행 삽입
+                        ws.duplicateRow(7, newCount - existingCount, true);
+                        totalRow += (newCount - existingCount);
+                    } else if (newCount < existingCount) {
+                        ws.spliceRows(7, existingCount - newCount);
+                        totalRow -= (existingCount - newCount);
+                    }
+                }
+
+                // 종목 채우기
+                combined.forEach(function(s, i) {
+                    var r = 7 + i;
+                    ws.getCell('B' + r).value = i + 1;
+                    ws.getCell('C' + r).value = s.sector;
+                    ws.getCell('D' + r).value = s.code;  // 코드는 string으로 (앞 0 보존)
+                    ws.getCell('E' + r).value = s.name;
+                    ws.getCell('F' + r).value = s.oldWeight;
+                    ws.getCell('G' + r).value = s.newWeight;
+                    ws.getCell('H' + r).value = s.orderType;
+                    ws.getCell('I' + r).value = s.reason;
+                });
+
+                if (totalRow >= 7) {
+                    // Total 행 SUM 범위 갱신 (실제 종목 수에 맞춰)
+                    var lastDataRow = 6 + combined.length;
+                    ws.getCell('F' + totalRow).value = { formula: 'SUM(F7:F' + lastDataRow + ')' };
+                    ws.getCell('G' + totalRow).value = { formula: 'SUM(G7:G' + lastDataRow + ')' };
+                    ws.getCell('H' + totalRow).value = { formula: 'G' + totalRow + '-F' + totalRow };
+                }
+
                 var out = await wb.xlsx.writeBuffer();
                 var blob = new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
                 var url = URL.createObjectURL(blob);
