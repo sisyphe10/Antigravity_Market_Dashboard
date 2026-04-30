@@ -203,7 +203,8 @@ def get_item_category(item_name):
 
     # Special handling for Wrap portfolios
     wrap_keywords = ['트루밸류', '삼성 트루밸류', 'Value ESG', 'NH Value ESG',
-                     '개방형', 'DB 개방형', '목표전환형 2호', 'NH 목표전환형 2호']
+                     '개방형', 'DB 개방형', '목표전환형 2호', 'NH 목표전환형 2호',
+                     '목표전환형 3차', 'DB 목표전환형 3차']
     if any(keyword in item_name for keyword in wrap_keywords):
         return 'Wrap'
 
@@ -812,6 +813,7 @@ def _build_wrap_chart_section(category_label):
             ('NH Value ESG', 'Value ESG'),
             ('DB 개방형', '개방형 랩'),
             ('NH 목표전환형 2호', '목표전환형 2호'),
+            ('DB 목표전환형 3차', '목표전환형 3차'),
             ('KOSPI', 'KOSPI'),
             ('KOSDAQ', 'KOSDAQ'),
         ]
@@ -820,6 +822,7 @@ def _build_wrap_chart_section(category_label):
             'NH Value ESG': '#0072CE',
             'DB 개방형': '#00854A',
             'NH 목표전환형 2호': '#0072CE',
+            'DB 목표전환형 3차': '#00854A',
             'KOSPI': '#000000',
             'KOSDAQ': '#666666',
         }
@@ -1064,7 +1067,7 @@ def _build_wrap_chart_section(category_label):
                         <input type="text" id="wrapStartDate" value="{first_date}" onchange="formatDateInput(this);updateWrapChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                         <span style="color:#888;">~</span>
                         <input type="text" id="wrapEndDate" value="{last_date}" onchange="formatDateInput(this);updateWrapChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
-                        <button onclick="downloadWrapChart()" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#222;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
+                        <button onclick="downloadWrapChart()" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
                     </div>
                     <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                         <div style="position:relative;height:500px;">
@@ -1560,6 +1563,7 @@ def create_wrap_returns_table():
         items = [
             ('삼성 트루밸류', '트루밸류'),
             ('NH 목표전환형 2호', '목표전환형 2호'),
+            ('DB 목표전환형 3차', '목표전환형 3차'),
             ('KOSPI', 'KOSPI'),
             ('KOSDAQ', 'KOSDAQ'),
         ]
@@ -1708,6 +1712,237 @@ def create_wrap_returns_table():
     except Exception as e:
         print(f"Error creating wrap returns table: {e}")
         return ""
+
+
+def create_order_section():
+    """ORDER 탭 — 포트폴리오별 weight 변경 + 사유 입력 → 자문지 .xlsx 송출.
+
+    UX:
+      - 5개 포트폴리오 카드 탭 (트루밸류/NH Value ESG/DB 개방형/NH 목표전환형 2호/DB 목표전환형 3차)
+      - 각 카드 내부: 종목 테이블 (변경전 read-only, 변경후/추천사유 input)
+      - 변경후 입력 시 주문구분 자동 계산 (유지/추가매수/일부매도/신규매수/전량매도)
+      - 변경후 합계 ≠ 100% 시 빨간 경고 (현금 비중 자동)
+      - Download 버튼 → 자문지 폴더의 템플릿 .xlsx fetch → R7부터 G/H/I 셀 patch → 다운로드 (ExcelJS)
+    """
+    try:
+        with open('portfolio_data.json', encoding='utf-8') as f:
+            pdata = json.load(f)
+    except Exception as e:
+        print(f"Error loading portfolio_data.json: {e}")
+        return ""
+
+    # 일반형 3개는 portfolio_data.json에서 한 키로 묶여 있음 (동일 종목/비중)
+    common_key = '삼성 트루밸류 / NH Value ESG / DB 개방형'
+    common_stocks = pdata.get(common_key, [])
+
+    # 포트폴리오별 (표시명, 자문지 템플릿 파일명, 종목 리스트)
+    portfolios_meta = [
+        ('삼성 트루밸류',         '자문지/라이프자산운용_트루밸류_260427.xlsx',                                  common_stocks),
+        ('NH Value ESG',         '자문지/라이프자산운용_라이프 다이내믹밸류_일반형 _2026.4.27.xlsx',            common_stocks),
+        ('DB 개방형',            '자문지/라이프자산운용_DB 개방형 랩 _2026.4.27.xlsx',                          common_stocks),
+        ('NH 목표전환형 2호',    '자문지/라이프자산운용_라이프 다이내믹밸류_목표전환형 2호_2026.4.29.xlsx',     pdata.get('NH 목표전환형 2호', [])),
+        ('DB 목표전환형 3차',    '자문지/라이프자산운용_DB 목표전환형 랩 _3차_2026.4.30.xlsx',                  pdata.get('DB 목표전환형 3차', [])),
+    ]
+
+    portfolios_export = []
+    for display, template, stocks in portfolios_meta:
+        portfolios_export.append({
+            'display': display,
+            'template': template,
+            'stocks': [
+                {
+                    'code': s['code'],
+                    'name': s['name'],
+                    'sector': s.get('sector', ''),
+                    'weight': float(s.get('weight', 0)),
+                }
+                for s in stocks
+            ],
+        })
+    portfolios_json = json.dumps(portfolios_export, ensure_ascii=False)
+
+    section = """
+        <div class="category-section">
+            <h2 class="category-title">ORDER</h2>
+            <div style="max-width:1400px;margin:0 auto;">
+                <div id="orderTabs" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center;"></div>
+                <div id="orderPanels"></div>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+        <script>
+        (function(){
+            var ORDER_DATA = ORDER_DATA_PLACEHOLDER;
+            // 각 포트폴리오의 사용자 입력 state: {[displayName]: [{newWeight, reason}]}
+            var orderState = {};
+            ORDER_DATA.forEach(function(p){
+                orderState[p.display] = p.stocks.map(function(s){
+                    return { newWeight: s.weight, reason: '' };
+                });
+            });
+
+            function calcOrderType(oldW, newW){
+                if (oldW === newW) return '유지';
+                if (oldW === 0 && newW > 0) return '신규 매수';
+                if (newW === 0 && oldW > 0) return '전량 매도';
+                if (newW > oldW) return '추가 매수';
+                return '일부 매도';
+            }
+
+            function buildPanel(p, idx){
+                var rows = '';
+                p.stocks.forEach(function(s, i){
+                    var st = orderState[p.display][i];
+                    var ot = calcOrderType(s.weight, st.newWeight);
+                    rows += '<tr>' +
+                        '<td style="text-align:center;color:#666;">'+(i+1)+'</td>' +
+                        '<td style="color:#666;">'+(s.sector||'')+'</td>' +
+                        '<td style="text-align:center;font-family:Inter,monospace;color:#666;">'+s.code+'</td>' +
+                        '<td style="font-weight:600;">'+s.name+'</td>' +
+                        '<td style="text-align:right;color:#666;">'+s.weight+'</td>' +
+                        '<td style="text-align:right;"><input type="number" min="0" max="100" step="1" value="'+st.newWeight+'" data-pf="'+p.display+'" data-i="'+i+'" data-field="newWeight" style="width:60px;text-align:right;padding:3px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;"></td>' +
+                        '<td style="text-align:center;font-size:13px;color:'+(ot==='유지'?'#888':'#dc2626')+';">'+ot+'</td>' +
+                        '<td><input type="text" value="'+st.reason.replace(/"/g,'&quot;')+'" data-pf="'+p.display+'" data-i="'+i+'" data-field="reason" placeholder="추천사유 입력" style="width:100%;padding:3px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:13px;"></td>' +
+                        '</tr>';
+                });
+                var oldSum = p.stocks.reduce(function(a, s){return a + s.weight;}, 0);
+                var newSum = orderState[p.display].reduce(function(a, st){return a + (parseFloat(st.newWeight)||0);}, 0);
+                var newSumColor = (Math.abs(newSum - 100) < 0.01) ? '#16a34a' : (newSum > 100 ? '#dc2626' : '#222');
+
+                return '<div class="order-panel" data-pf="'+p.display+'" style="display:'+(idx===0?'block':'none')+';background:#fff;border-radius:12px;padding:24px;box-shadow:0 4px 6px rgba(0,0,0,0.08);">' +
+                    '<div style="display:flex;align-items:center;margin-bottom:16px;">' +
+                    '<h3 style="margin:0;font-size:18px;font-weight:600;">'+p.display+'</h3>' +
+                    '<div style="margin-left:auto;font-size:13px;color:#555;">변경전 합계 <b>'+oldSum+'%</b> → 변경후 합계 <b style="color:'+newSumColor+';">'+newSum.toFixed(0)+'%</b> (현금 '+(100-newSum).toFixed(0)+'%)</div>' +
+                    '<button onclick="downloadOrderExcel(\''+p.display.replace(/'/g, "\\'")+'\')" style="margin-left:14px;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>' +
+                    '</div>' +
+                    '<div style="overflow-x:auto;">' +
+                    '<table style="width:100%;border-collapse:collapse;font-size:13px;">' +
+                    '<thead><tr style="border-bottom:2px solid #e5e7eb;color:#444;">' +
+                    '<th style="padding:8px;text-align:center;width:40px;">순위</th>' +
+                    '<th style="padding:8px;text-align:left;">업종</th>' +
+                    '<th style="padding:8px;text-align:center;width:70px;">코드</th>' +
+                    '<th style="padding:8px;text-align:left;">종목명</th>' +
+                    '<th style="padding:8px;text-align:right;width:60px;">변경전</th>' +
+                    '<th style="padding:8px;text-align:right;width:80px;">변경후</th>' +
+                    '<th style="padding:8px;text-align:center;width:80px;">주문구분</th>' +
+                    '<th style="padding:8px;text-align:left;">추천사유</th>' +
+                    '</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+            }
+
+            function renderTabs(){
+                var tabsEl = document.getElementById('orderTabs');
+                tabsEl.innerHTML = ORDER_DATA.map(function(p, i){
+                    return '<button class="order-tab" data-pf="'+p.display+'" onclick="switchOrderTab(\''+p.display.replace(/'/g, "\\'")+'\')" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 16px;background:'+(i===0?'#222':'#f3f4f6')+';color:'+(i===0?'#fff':'#444')+';border:none;border-radius:8px;cursor:pointer;">'+p.display+'</button>';
+                }).join('');
+            }
+
+            function renderPanels(){
+                document.getElementById('orderPanels').innerHTML = ORDER_DATA.map(function(p, i){return buildPanel(p, i);}).join('');
+                // input 이벤트 바인딩
+                document.querySelectorAll('.order-panel input').forEach(function(el){
+                    el.addEventListener('input', function(e){
+                        var pf = e.target.getAttribute('data-pf');
+                        var i = parseInt(e.target.getAttribute('data-i'));
+                        var field = e.target.getAttribute('data-field');
+                        var v = (field === 'newWeight') ? (parseFloat(e.target.value) || 0) : e.target.value;
+                        orderState[pf][i][field] = v;
+                        if (field === 'newWeight') {
+                            // 주문구분 + 합계 갱신: 해당 패널 다시 렌더
+                            var idx = ORDER_DATA.findIndex(function(p){return p.display === pf;});
+                            var oldEl = document.querySelector('.order-panel[data-pf="'+pf+'"]');
+                            var newHtml = buildPanel(ORDER_DATA[idx], 0);
+                            // display 상태 유지
+                            var wasDisplayed = oldEl.style.display !== 'none';
+                            oldEl.outerHTML = newHtml;
+                            var newEl = document.querySelector('.order-panel[data-pf="'+pf+'"]');
+                            newEl.style.display = wasDisplayed ? 'block' : 'none';
+                            // 같은 패널의 input 이벤트 재바인딩
+                            bindPanelInputs(newEl);
+                            // 같은 행의 newWeight input에 포커스 복귀
+                            var refocus = newEl.querySelector('input[data-i="'+i+'"][data-field="newWeight"]');
+                            if (refocus) { refocus.focus(); refocus.setSelectionRange(refocus.value.length, refocus.value.length); }
+                        }
+                    });
+                });
+            }
+
+            function bindPanelInputs(panel){
+                panel.querySelectorAll('input').forEach(function(el){
+                    el.addEventListener('input', function(e){
+                        var pf = e.target.getAttribute('data-pf');
+                        var i = parseInt(e.target.getAttribute('data-i'));
+                        var field = e.target.getAttribute('data-field');
+                        var v = (field === 'newWeight') ? (parseFloat(e.target.value) || 0) : e.target.value;
+                        orderState[pf][i][field] = v;
+                        if (field === 'newWeight') {
+                            var idx = ORDER_DATA.findIndex(function(p){return p.display === pf;});
+                            var oldEl = document.querySelector('.order-panel[data-pf="'+pf+'"]');
+                            var wasDisplayed = oldEl.style.display !== 'none';
+                            oldEl.outerHTML = buildPanel(ORDER_DATA[idx], 0);
+                            var newEl = document.querySelector('.order-panel[data-pf="'+pf+'"]');
+                            newEl.style.display = wasDisplayed ? 'block' : 'none';
+                            bindPanelInputs(newEl);
+                            var refocus = newEl.querySelector('input[data-i="'+i+'"][data-field="newWeight"]');
+                            if (refocus) { refocus.focus(); refocus.setSelectionRange(refocus.value.length, refocus.value.length); }
+                        }
+                    });
+                });
+            }
+
+            window.switchOrderTab = function(pfName){
+                document.querySelectorAll('.order-tab').forEach(function(b){
+                    var active = b.getAttribute('data-pf') === pfName;
+                    b.style.background = active ? '#222' : '#f3f4f6';
+                    b.style.color = active ? '#fff' : '#444';
+                });
+                document.querySelectorAll('.order-panel').forEach(function(p){
+                    p.style.display = (p.getAttribute('data-pf') === pfName) ? 'block' : 'none';
+                });
+            };
+
+            window.downloadOrderExcel = async function(pfName){
+                var p = ORDER_DATA.find(function(x){return x.display === pfName;});
+                if (!p) return;
+                var st = orderState[pfName];
+                try {
+                    var resp = await fetch(p.template);
+                    if (!resp.ok) throw new Error('템플릿 fetch 실패: ' + resp.status);
+                    var buf = await resp.arrayBuffer();
+                    var wb = new ExcelJS.Workbook();
+                    await wb.xlsx.load(buf);
+                    var ws = wb.worksheets[0];
+                    // R7부터 종목수만큼 G/H/I 셀 patch (F=변경전, G=변경후, H=주문구분, I=추천사유)
+                    p.stocks.forEach(function(s, i){
+                        var r = 7 + i;
+                        ws.getCell('F' + r).value = s.weight;
+                        ws.getCell('G' + r).value = parseFloat(st[i].newWeight) || 0;
+                        ws.getCell('H' + r).value = calcOrderType(s.weight, parseFloat(st[i].newWeight) || 0);
+                        ws.getCell('I' + r).value = st[i].reason || '';
+                    });
+                    var out = await wb.xlsx.writeBuffer();
+                    var blob = new Blob([out], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+                    var url = URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    a.href = url;
+                    var today = new Date().toISOString().slice(0,10);
+                    a.download = pfName + '_자문지_' + today + '.xlsx';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                } catch(e) {
+                    alert('자문지 송출 실패: ' + e.message);
+                    console.error(e);
+                }
+            };
+
+            renderTabs();
+            renderPanels();
+        })();
+        </script>
+    """
+    section = section.replace('ORDER_DATA_PLACEHOLDER', portfolios_json)
+    return section
 
 
 def create_dashboard():
@@ -1924,6 +2159,7 @@ def create_dashboard():
                 wrap_html += create_wrap_returns_table()
                 wrap_html += create_aum_table()
                 wrap_html += create_cumulative_aum_chart()
+                wrap_html += create_order_section()
             else:
                 section = f"""
             <div class="category-section">

@@ -73,6 +73,7 @@ def get_latest_nav():
         'NH Value ESG': 'Value ESG',
         'DB 개방형 랩': '개방형 랩',
         'NH 목표전환형 2호': '목표전환형 2호',
+        'DB 목표전환형 3차': '목표전환형 3차',
         # 'DB 목표전환형 2차 / NH 목표전환형 1호': '목표전환형 2차',  # 완료 (2026-04-15 목표달성)
     }
     nav_data = {}
@@ -97,7 +98,7 @@ def get_latest_returns():
     # 트루밸류, KOSPI, KOSDAQ 수익률 추출
     returns_data = {}
     
-    for product in ['트루밸류', '목표전환형 2호', 'KOSPI', 'KOSDAQ']:
+    for product in ['트루밸류', '목표전환형 2호', '목표전환형 3차', 'KOSPI', 'KOSDAQ']:
         returns_data[product] = {
             '1D': latest_row.get(f'{product}_1D', 'N/A'),
             '1W': latest_row.get(f'{product}_1W', 'N/A'),
@@ -208,11 +209,12 @@ def format_message(date, nav_data, returns_data, top_5, bottom_5):
     display_names = {
         '트루밸류': '삼성 트루밸류',
         '목표전환형 2호': 'NH 목표전환형 2호',
+        '목표전환형 3차': 'DB 목표전환형 3차',
         'KOSPI': 'KOSPI',
         'KOSDAQ': 'KOSDAQ',
     }
     periods = ['1D', '1W', '1M', '3M', '6M', '1Y', 'YTD']
-    for product in ['트루밸류', '목표전환형 2호', 'KOSPI', 'KOSDAQ']:
+    for product in ['트루밸류', '목표전환형 2호', '목표전환형 3차', 'KOSPI', 'KOSDAQ']:
         if product in returns_data:
             returns = returns_data[product]
             # N/A가 아닌 항목만 표시
