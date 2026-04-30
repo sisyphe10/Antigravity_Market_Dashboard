@@ -2159,7 +2159,6 @@ def create_dashboard():
                 wrap_html += create_wrap_returns_table()
                 wrap_html += create_aum_table()
                 wrap_html += create_cumulative_aum_chart()
-                wrap_html += create_order_section()
             else:
                 section = f"""
             <div class="category-section">

@@ -155,6 +155,7 @@ async function checkPw(v) {
         <div class="tab-bar">
             <button class="tab-btn active" onclick="switchTab('journal')">Journal</button>
             <button class="tab-btn" onclick="switchTab('ideas')">Ideas</button>
+            <button class="tab-btn" onclick="switchTab('order')">Order</button>
         </div>
         <div id="panelJournal" class="tab-panel active" style="padding-top:24px;">
             <div class="timeline" id="timeline">
@@ -165,9 +166,14 @@ async function checkPw(v) {
             <input type="text" class="ideas-search" id="ideasSearch" placeholder="종목명 검색..." oninput="filterIdeas()">
             <div id="ideasList"><div class="empty-msg">로딩 중...</div></div>
         </div>
+        <div id="panelOrder" class="tab-panel" style="padding-top:24px;">
+            <div id="orderTabs" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;"></div>
+            <div id="orderContent"><div class="empty-msg">로딩 중...</div></div>
+        </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
 <script>
 const SHEET_ID = '13HXDxF62ILXyRz7meRZ5CxJT5HfWAwIKc8IsCavuVXk';
 const GAPI_KEY = 'AIzaSyCHPiRby5FVAIKDwneZHy1KGl3SfycjZEw';
@@ -448,13 +454,17 @@ async function loadJournal() {
 // Tab switching
 // ============================================================
 var _ideasLoaded = false;
+var _orderLoaded = false;
 function switchTab(tab) {
+    var tabs = ['journal', 'ideas', 'order'];
     document.querySelectorAll('.tab-btn').forEach(function(b, i) {
-        b.classList.toggle('active', (tab === 'journal' && i === 0) || (tab === 'ideas' && i === 1));
+        b.classList.toggle('active', tab === tabs[i]);
     });
     document.getElementById('panelJournal').classList.toggle('active', tab === 'journal');
     document.getElementById('panelIdeas').classList.toggle('active', tab === 'ideas');
+    document.getElementById('panelOrder').classList.toggle('active', tab === 'order');
     if (tab === 'ideas' && !_ideasLoaded) { _ideasLoaded = true; loadIdeas(); }
+    if (tab === 'order' && !_orderLoaded) { _orderLoaded = true; loadOrder(); }
 }
 
 // ============================================================
@@ -604,6 +614,176 @@ function toggleStock(el) {
 function filterIdeas() {
     var q = document.getElementById('ideasSearch').value.trim();
     renderIdeas(q);
+}
+
+// ============================================================
+// Order tab — 포트폴리오별 weight 변경 + 추천사유 입력 → 자문지 .xlsx 송출
+// ============================================================
+var ORDER_PORTFOLIOS = [
+    { display: '삼성 트루밸류',      jsonKey: '삼성 트루밸류 / NH Value ESG / DB 개방형', template: '자문지/라이프자산운용_트루밸류_260427.xlsx' },
+    { display: 'NH Value ESG',      jsonKey: '삼성 트루밸류 / NH Value ESG / DB 개방형', template: '자문지/라이프자산운용_라이프 다이내믹밸류_일반형 _2026.4.27.xlsx' },
+    { display: 'DB 개방형',         jsonKey: '삼성 트루밸류 / NH Value ESG / DB 개방형', template: '자문지/라이프자산운용_DB 개방형 랩 _2026.4.27.xlsx' },
+    { display: 'NH 목표전환형 2호', jsonKey: 'NH 목표전환형 2호',                          template: '자문지/라이프자산운용_라이프 다이내믹밸류_목표전환형 2호_2026.4.29.xlsx' },
+    { display: 'DB 목표전환형 3차', jsonKey: 'DB 목표전환형 3차',                          template: '자문지/라이프자산운용_DB 목표전환형 랩 _3차_2026.4.30.xlsx' },
+];
+var orderState = {};       // {display: [{newWeight, reason}, ...]}
+var orderStocks = {};      // {display: [{code, name, sector, weight}, ...]}
+var orderActiveTab = null;
+
+async function loadOrder() {
+    try {
+        var res = await fetch('portfolio_data.json');
+        if (!res.ok) throw new Error('portfolio_data.json fetch 실패: ' + res.status);
+        var pdata = await res.json();
+        ORDER_PORTFOLIOS.forEach(function(p) {
+            var stocks = pdata[p.jsonKey] || [];
+            orderStocks[p.display] = stocks.map(function(s) {
+                return { code: s.code, name: s.name, sector: s.sector || '', weight: parseFloat(s.weight) || 0 };
+            });
+            orderState[p.display] = orderStocks[p.display].map(function(s) {
+                return { newWeight: s.weight, reason: '' };
+            });
+        });
+        renderOrderTabs();
+        switchOrderTab(ORDER_PORTFOLIOS[0].display);
+    } catch(e) {
+        document.getElementById('orderContent').innerHTML = '<div class="empty-msg">데이터 로드 실패: ' + e.message + '</div>';
+        console.error('loadOrder error:', e);
+    }
+}
+
+function calcOrderType(oldW, newW) {
+    if (oldW === newW) return '유지';
+    if (oldW === 0 && newW > 0) return '신규 매수';
+    if (newW === 0 && oldW > 0) return '전량 매도';
+    if (newW > oldW) return '추가 매수';
+    return '일부 매도';
+}
+
+function renderOrderTabs() {
+    var html = '';
+    ORDER_PORTFOLIOS.forEach(function(p) {
+        html += '<button class="order-pf-btn" data-pf="' + p.display + '" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 16px;background:#f3f4f6;color:#444;border:none;border-radius:8px;cursor:pointer;">' + p.display + '</button>';
+    });
+    document.getElementById('orderTabs').innerHTML = html;
+    document.querySelectorAll('.order-pf-btn').forEach(function(b) {
+        b.addEventListener('click', function() { switchOrderTab(b.dataset.pf); });
+    });
+}
+
+function switchOrderTab(pfName) {
+    orderActiveTab = pfName;
+    document.querySelectorAll('.order-pf-btn').forEach(function(b) {
+        var active = b.dataset.pf === pfName;
+        b.style.background = active ? '#222' : '#f3f4f6';
+        b.style.color = active ? '#fff' : '#444';
+    });
+    renderOrderPanel(pfName);
+}
+
+function renderOrderPanel(pfName) {
+    var stocks = orderStocks[pfName] || [];
+    var st = orderState[pfName] || [];
+    var oldSum = stocks.reduce(function(a, s) { return a + s.weight; }, 0);
+    var newSum = st.reduce(function(a, x) { return a + (parseFloat(x.newWeight) || 0); }, 0);
+    var sumColor = (Math.abs(newSum - oldSum) < 0.01) ? '#16a34a' : (newSum > 100 ? '#dc2626' : '#222');
+
+    var rows = '';
+    stocks.forEach(function(s, i) {
+        var orderState_i = st[i];
+        var ot = calcOrderType(s.weight, parseFloat(orderState_i.newWeight) || 0);
+        var otColor = ot === '유지' ? '#888' : '#dc2626';
+        rows += '<tr>'
+            + '<td style="text-align:center;color:#666;padding:8px;">' + (i + 1) + '</td>'
+            + '<td style="color:#666;padding:8px;font-size:13px;">' + s.sector + '</td>'
+            + '<td style="text-align:center;font-family:monospace;color:#666;padding:8px;">' + s.code + '</td>'
+            + '<td style="font-weight:600;padding:8px;">' + s.name + '</td>'
+            + '<td style="text-align:right;color:#666;padding:8px;">' + s.weight + '</td>'
+            + '<td style="text-align:right;padding:8px;"><input type="number" min="0" max="100" step="1" data-idx="' + i + '" data-field="newWeight" value="' + orderState_i.newWeight + '" style="width:65px;text-align:right;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;"></td>'
+            + '<td style="text-align:center;font-size:13px;color:' + otColor + ';padding:8px;">' + ot + '</td>'
+            + '<td style="padding:8px;"><input type="text" data-idx="' + i + '" data-field="reason" value="' + (orderState_i.reason || '').replace(/"/g, '&quot;') + '" placeholder="추천사유 입력" style="width:100%;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:13px;"></td>'
+            + '</tr>';
+    });
+
+    var html = '<div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">'
+        + '<div style="display:flex;align-items:center;margin-bottom:16px;">'
+        + '<h3 style="margin:0;font-size:18px;">' + pfName + '</h3>'
+        + '<div style="margin-left:auto;font-size:13px;color:#555;">변경전 합계 <b>' + oldSum + '%</b> → 변경후 합계 <b style="color:' + sumColor + ';">' + newSum.toFixed(0) + '%</b> (현금 ' + (100 - newSum).toFixed(0) + '%)</div>'
+        + '<button id="orderDownloadBtn" style="margin-left:14px;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>'
+        + '</div>'
+        + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">'
+        + '<thead><tr style="border-bottom:2px solid #e5e7eb;color:#444;">'
+        + '<th style="padding:8px;width:40px;">순위</th>'
+        + '<th style="padding:8px;text-align:left;">업종</th>'
+        + '<th style="padding:8px;width:70px;">코드</th>'
+        + '<th style="padding:8px;text-align:left;">종목명</th>'
+        + '<th style="padding:8px;width:70px;text-align:right;">변경전</th>'
+        + '<th style="padding:8px;width:90px;text-align:right;">변경후</th>'
+        + '<th style="padding:8px;width:80px;">주문구분</th>'
+        + '<th style="padding:8px;text-align:left;">추천사유</th>'
+        + '</tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+
+    document.getElementById('orderContent').innerHTML = html;
+
+    // input 이벤트 바인딩
+    document.querySelectorAll('#orderContent input').forEach(function(el) {
+        el.addEventListener('input', function(e) {
+            var idx = parseInt(e.target.dataset.idx);
+            var field = e.target.dataset.field;
+            var v = (field === 'newWeight') ? (parseFloat(e.target.value) || 0) : e.target.value;
+            orderState[orderActiveTab][idx][field] = v;
+            if (field === 'newWeight') {
+                renderOrderPanel(orderActiveTab);
+                // 같은 행 newWeight input에 다시 포커스
+                var refocus = document.querySelector('#orderContent input[data-idx="' + idx + '"][data-field="newWeight"]');
+                if (refocus) { refocus.focus(); refocus.setSelectionRange(refocus.value.length, refocus.value.length); }
+            }
+        });
+    });
+    // 다운로드 버튼
+    document.getElementById('orderDownloadBtn').addEventListener('click', function() {
+        downloadOrderExcel(orderActiveTab);
+    });
+}
+
+async function downloadOrderExcel(pfName) {
+    var p = ORDER_PORTFOLIOS.find(function(x) { return x.display === pfName; });
+    if (!p) { alert('포트폴리오 매핑 누락: ' + pfName); return; }
+    if (typeof ExcelJS === 'undefined') {
+        alert('ExcelJS 라이브러리 로드 실패. 새로고침 해주세요.');
+        return;
+    }
+    var stocks = orderStocks[pfName];
+    var st = orderState[pfName];
+    try {
+        var resp = await fetch(p.template);
+        if (!resp.ok) throw new Error('템플릿 fetch 실패: HTTP ' + resp.status + ' (' + p.template + ')');
+        var buf = await resp.arrayBuffer();
+        var wb = new ExcelJS.Workbook();
+        await wb.xlsx.load(buf);
+        var ws = wb.worksheets[0];
+        stocks.forEach(function(s, i) {
+            var r = 7 + i;
+            ws.getCell('F' + r).value = s.weight;
+            ws.getCell('G' + r).value = parseFloat(st[i].newWeight) || 0;
+            ws.getCell('H' + r).value = calcOrderType(s.weight, parseFloat(st[i].newWeight) || 0);
+            ws.getCell('I' + r).value = st[i].reason || '';
+        });
+        var out = await wb.xlsx.writeBuffer();
+        var blob = new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        var today = new Date().toISOString().slice(0, 10);
+        a.download = pfName + '_자문지_' + today + '.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    } catch(e) {
+        alert('자문지 송출 실패: ' + e.message);
+        console.error('downloadOrderExcel error:', e);
+    }
 }
 
 // loadJournal() is called after password verification
