@@ -3,13 +3,20 @@ import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 
-# 한글 폰트 설정
-import platform
-if platform.system() == 'Windows':
-    matplotlib.rc('font', family='Malgun Gothic')
-else:
-    matplotlib.rc('font', family='NanumGothic')
+# 폰트: Noto Sans KR(한/영 모두 지원) 우선. Linux는 fonts-noto-cjk 패키지에서 제공.
+# Inter는 영문 전용이라 한글 글리프 폴백 필요 → 'Noto Sans CJK KR'를 다음 폴백으로.
+matplotlib.rcParams['font.family'] = 'sans-serif'
+matplotlib.rcParams['font.sans-serif'] = [
+    'Noto Sans KR',
+    'Noto Sans CJK KR',
+    'Inter',
+    'Malgun Gothic',
+    'NanumGothic',
+    'DejaVu Sans',
+]
 matplotlib.rcParams['axes.unicode_minus'] = False
+# HiDPI 모니터에서 PNG가 흐려보이지 않도록 저장 dpi 향상
+matplotlib.rcParams['savefig.dpi'] = 200
 
 # Import shared configuration
 from config import CATEGORY_MAP
