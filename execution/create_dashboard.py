@@ -2656,7 +2656,7 @@ def create_aum_section():
             var html = '<div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);max-width:900px;margin:0 auto;">';
             html += '<div style="display:flex;align-items:center;margin-bottom:20px;gap:10px;flex-wrap:wrap;">';
             html += '<h3 style="margin:0;font-size:18px;">AUM 입력</h3>';
-            html += '<label style="font-size:14px;color:#444;display:flex;align-items:center;gap:6px;">날짜 <input type="date" id="aumDateInput" value="' + aumSelectedDate + '" style="font-family:inherit;font-size:14px;padding:5px 8px;border:1px solid #d1d5db;border-radius:6px;"></label>';
+            html += '<label style="font-size:14px;color:#444;display:flex;align-items:center;gap:6px;">날짜 <input type="text" id="aumDateInput" value="' + aumSelectedDate + '" placeholder="YYYY-MM-DD" maxlength="10" onchange="formatDateInput(this)" style="font-family:inherit;font-size:14px;padding:5px 8px;border:1px solid #d1d5db;border-radius:6px;width:120px;text-align:center;"></label>';
             html += '<a href="https://raw.githubusercontent.com/sisyphe10/Antigravity_Market_Dashboard/main/Wrap_NAV.xlsx" download="Wrap_NAV.xlsx" target="_blank" style="margin-left:auto;font-family:inherit;font-size:14px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;text-decoration:none;border-radius:8px;">Wrap_NAV 다운로드</a>';
             html += '<button id="aumSaveBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;">저장</button>';
             html += '</div>';
