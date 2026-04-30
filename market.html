@@ -444,7 +444,7 @@
 <body>
     <header style="position:relative;">
         <h1>📊 Market Data Dashboard</h1>
-        <div class="last-updated">Updated: 2026-04-30 14:12:49 KST</div>
+        <div class="last-updated">Updated: 2026-04-30 14:17:26 KST</div>
         <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
 
@@ -718,6 +718,7 @@
             var cmbChart = null;
             var cmbClickOrder = [];
             var clickPalette = ['#000000','#0055cc','#cc0000','#006633','#6a0dad','#cc6600','#008080','#990066'];
+            var seriesScale = { 'KOSPI Market Cap': 1e12, 'KOSDAQ Market Cap': 1e12 };
 
             function colorForIndex(i) { return clickPalette[i % clickPalette.length]; }
 
@@ -803,7 +804,12 @@
                             return Math.round((v / base - 1) * 10000) / 100;
                         });
                     } else {
-                        data = aligned;
+                        var scale = seriesScale[s.name] || 1;
+                        data = aligned.map(function(v) {
+                            if (v === null) return null;
+                            var sv = v / scale;
+                            return scale > 1 ? Math.round(sv) : sv;
+                        });
                     }
                     var yAxisID = (mode === 'raw2' && idx === 1) ? 'y1' : 'y';
                     var clickIdx = cmbClickOrder.indexOf(s.name);

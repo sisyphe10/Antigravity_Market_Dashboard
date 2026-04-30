@@ -963,6 +963,7 @@ def _build_combined_chart_section():
             var cmbChart = null;
             var cmbClickOrder = [];
             var clickPalette = ['#000000','#0055cc','#cc0000','#006633','#6a0dad','#cc6600','#008080','#990066'];
+            var seriesScale = { 'KOSPI Market Cap': 1e12, 'KOSDAQ Market Cap': 1e12 };
 
             function colorForIndex(i) { return clickPalette[i % clickPalette.length]; }
 
@@ -1048,7 +1049,12 @@ def _build_combined_chart_section():
                             return Math.round((v / base - 1) * 10000) / 100;
                         });
                     } else {
-                        data = aligned;
+                        var scale = seriesScale[s.name] || 1;
+                        data = aligned.map(function(v) {
+                            if (v === null) return null;
+                            var sv = v / scale;
+                            return scale > 1 ? Math.round(sv) : sv;
+                        });
                     }
                     var yAxisID = (mode === 'raw2' && idx === 1) ? 'y1' : 'y';
                     var clickIdx = cmbClickOrder.indexOf(s.name);
@@ -2254,8 +2260,8 @@ def create_order_section():
                     ? '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="sector" value="' + (s.sector || '').replace(/"/g, '&quot;') + '" placeholder="업종" style="width:100px;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;color:#000;"></td>'
                     : '<td style="text-align:center;padding:8px;">' + s.sector + '</td>';
                 var codeCell = s.isNew
-                    ? '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="code" value="' + s.code + '" placeholder="000000" maxlength="6" style="width:70px;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:monospace;font-size:15px;color:#000;"></td>'
-                    : '<td style="text-align:center;font-family:monospace;padding:8px;">' + s.code + '</td>';
+                    ? '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="code" value="' + s.code + '" placeholder="000000" maxlength="6" style="width:70px;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;color:#000;"></td>'
+                    : '<td style="text-align:center;padding:8px;">' + s.code + '</td>';
                 var nameCell = s.isNew
                     ? '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="name" value="' + (s.name || '').replace(/"/g, '&quot;') + '" placeholder="종목명" style="width:120px;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;font-weight:600;color:#000;"></td>'
                     : '<td style="text-align:center;font-weight:600;padding:8px;">' + s.name + '</td>';
@@ -2578,16 +2584,32 @@ def create_aum_section():
     return """
         <div id="aumContent"><div style="text-align:center;color:#888;padding:40px;">로딩 중...</div></div>
         <script>
+        // name = AUM 시트 상품명 (NEW 시트와 다를 수 있음 — NH Value ESG는 AUM 시트에서 '다이내믹밸류'로 기록)
         var AUM_PRODUCTS = [
             { display: '삼성 트루밸류',      broker: '삼성', name: '트루밸류' },
-            { display: 'NH Value ESG',      broker: 'NH',   name: 'Value ESG' },
+            { display: 'NH Value ESG',      broker: 'NH',   name: '다이내믹밸류' },
             { display: 'DB 개방형',         broker: 'DB',   name: '개방형 랩' },
             { display: 'NH 목표전환형 2호', broker: 'NH',   name: '목표전환형 2호' },
             { display: 'DB 목표전환형 3차', broker: 'DB',   name: '목표전환형 3차' },
         ];
         var aumLatest = {};       // {broker|name: {date, aum}}
         var aumInputs = {};       // {idx: 사용자 입력 (억원)}
+        var aumSelectedDate = '';  // 사용자 지정 날짜 (YYYY-MM-DD), 빈 값이면 오늘
         var _aumLoaded = false;
+
+        function aumExtractValue(cell) {
+            // ExcelJS는 함수 셀을 {result, formula} 객체로 반환
+            if (typeof cell === 'number') return cell;
+            if (cell && typeof cell === 'object') {
+                if (typeof cell.result === 'number') return cell.result;
+                if (typeof cell.value === 'number') return cell.value;
+            }
+            if (typeof cell === 'string') {
+                var n = parseFloat(cell.replace(/,/g, ''));
+                if (!isNaN(n)) return n;
+            }
+            return null;
+        }
 
         async function loadAUM() {
             if (_aumLoaded) return;
@@ -2607,12 +2629,12 @@ def create_aum_section():
                     var date = row.getCell(1).value;
                     var broker = row.getCell(2).value;
                     var product = row.getCell(3).value;
-                    var aum = row.getCell(4).value;
-                    if (broker && product && (typeof aum === 'number')) {
+                    var aumVal = aumExtractValue(row.getCell(4).value);
+                    if (broker && product && aumVal !== null) {
                         var key = broker + '|' + product;
                         var existing = aumLatest[key];
                         if (!existing || (date && date > existing.date)) {
-                            aumLatest[key] = { date: date, aum: aum };
+                            aumLatest[key] = { date: date, aum: aumVal };
                         }
                     }
                 }
@@ -2633,9 +2655,12 @@ def create_aum_section():
         }
 
         function renderAUMPanel() {
+            var todayIso = new Date().toISOString().slice(0, 10);
+            if (!aumSelectedDate) aumSelectedDate = todayIso;
             var html = '<div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);max-width:900px;margin:0 auto;">';
             html += '<div style="display:flex;align-items:center;margin-bottom:20px;gap:10px;flex-wrap:wrap;">';
-            html += '<h3 style="margin:0;font-size:18px;">AUM 입력 <span style="font-size:14px;color:#666;font-weight:400;">(오늘 날짜로 추가됨, 변경된 항목만 저장)</span></h3>';
+            html += '<h3 style="margin:0;font-size:18px;">AUM 입력</h3>';
+            html += '<label style="font-size:14px;color:#444;display:flex;align-items:center;gap:6px;">날짜 <input type="date" id="aumDateInput" value="' + aumSelectedDate + '" style="font-family:inherit;font-size:14px;padding:5px 8px;border:1px solid #d1d5db;border-radius:6px;"></label>';
             html += '<a href="https://raw.githubusercontent.com/sisyphe10/Antigravity_Market_Dashboard/main/Wrap_NAV.xlsx" download="Wrap_NAV.xlsx" target="_blank" style="margin-left:auto;font-family:inherit;font-size:14px;font-weight:600;padding:6px 14px;background:#222;color:#fff;text-decoration:none;border-radius:8px;">Wrap_NAV 다운로드</a>';
             html += '<button id="aumSaveBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;">저장</button>';
             html += '</div>';
@@ -2663,12 +2688,18 @@ def create_aum_section():
             });
             html += '</tbody></table></div>';
             document.getElementById('aumContent').innerHTML = html;
-            document.querySelectorAll('#aumContent input').forEach(function(el) {
+            document.querySelectorAll('#aumContent input[data-idx]').forEach(function(el) {
                 el.addEventListener('input', function(e) {
                     var idx = parseInt(e.target.dataset.idx);
                     aumInputs[idx] = e.target.value.trim();
                 });
             });
+            var dateInput = document.getElementById('aumDateInput');
+            if (dateInput) {
+                dateInput.addEventListener('change', function(e) {
+                    aumSelectedDate = e.target.value || todayIso;
+                });
+            }
             document.getElementById('aumSaveBtn').addEventListener('click', saveAUM);
         }
 
@@ -2718,12 +2749,39 @@ def create_aum_section():
                 var ws = wb.getWorksheet('AUM');
                 if (!ws) throw new Error('AUM 시트가 없습니다');
 
-                // 오늘 날짜로 새 행 추가
-                var today = new Date();
-                var todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                // 사용자 지정 날짜 (또는 오늘)로 새 행 추가
+                var saveDateStr = aumSelectedDate || new Date().toISOString().slice(0, 10);
+                var parts = saveDateStr.split('-');
+                var saveDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+
+                // 같은 날짜 + 같은 (broker, product) 기존 행 삭제 (덮어쓰기)
+                var rowsToDelete = [];
+                for (var r = 2; r <= ws.rowCount; r++) {
+                    var row = ws.getRow(r);
+                    var date = row.getCell(1).value;
+                    var broker = row.getCell(2).value;
+                    var product = row.getCell(3).value;
+                    if (!broker || !product) continue;
+                    var dateStr = '';
+                    if (date instanceof Date) {
+                        dateStr = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+                    } else {
+                        dateStr = String(date).slice(0, 10);
+                    }
+                    if (dateStr !== saveDateStr) continue;
+                    for (var ci = 0; ci < changes.length; ci++) {
+                        if (broker === changes[ci].broker && product === changes[ci].product) {
+                            rowsToDelete.push(r);
+                            break;
+                        }
+                    }
+                }
+                for (var i = rowsToDelete.length - 1; i >= 0; i--) {
+                    ws.spliceRows(rowsToDelete[i], 1);
+                }
+
                 changes.forEach(function(ch) {
-                    var newRow = ws.addRow([todayDate, ch.broker, ch.product, ch.aum]);
-                    // 날짜 셀 서식: yyyy-mm-dd
+                    var newRow = ws.addRow([saveDate, ch.broker, ch.product, ch.aum]);
                     newRow.getCell(1).numFmt = 'yyyy-mm-dd';
                     newRow.commit();
                 });
