@@ -1551,7 +1551,7 @@ def create_aum_table():
             date_str = row['날짜'].strftime('%m/%d')
             rows_html += f'<tr><td>{row["증권사"]}</td><td>{row["상품명"]}</td><td>{aum_억:,.0f}억</td><td>{date_str}</td></tr>\n'
         total_억 = total_aum / 100_000_000
-        rows_html += f'<tr style="border-top:2px solid #000;font-weight:700;"><td>합계</td><td></td><td>{total_억:,.0f}억</td><td></td></tr>'
+        rows_html += f'<tr style="border-top:2px solid #000;font-weight:700;"><td colspan="2">합계</td><td>{total_억:,.0f}억</td><td></td></tr>'
         # 증권사별 색상
         broker_colors = {'삼성': '#1428A0', 'NH': '#0072CE', 'DB': '#00854A'}
 
@@ -3329,9 +3329,9 @@ def create_dashboard():
         @media (max-width: 800px) {{ .sector-header-bar, .sector-three-panel {{ grid-template-columns: 1fr; }} }}
         /* Returns Table */
         .rt-table {{ width:100%; border-collapse:collapse; font-size:0.9rem; }}
-        .rt-nh {{ width:130px; padding:7px 10px; text-align:left; font-weight:600; color:#111; border-bottom:2px solid #111; background:#f0f0f0; }}
+        .rt-nh {{ width:130px; padding:7px 10px; text-align:center; font-weight:600; color:#111; border-bottom:2px solid #111; background:#f0f0f0; }}
         .rt-ph {{ padding:7px 10px; text-align:center; font-weight:600; color:#111; border-bottom:2px solid #111; background:#f0f0f0; white-space:nowrap; min-width:54px; }}
-        .rt-name {{ padding:8px 10px; font-weight:600; border-bottom:1px solid #eee; white-space:nowrap; }}
+        .rt-name {{ padding:8px 10px; text-align:center; font-weight:600; border-bottom:1px solid #eee; white-space:nowrap; }}
         .rt-cell {{ padding:8px 10px; text-align:center; border-bottom:1px solid #eee; font-variant-numeric:tabular-nums; white-space:nowrap; }}
         .rt-pos {{ color:#cc0000; font-weight:600; }}
         .rt-neg {{ color:#0055cc; font-weight:600; }}
