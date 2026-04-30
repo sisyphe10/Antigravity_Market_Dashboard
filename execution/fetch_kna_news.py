@@ -14,16 +14,22 @@ import html
 import requests
 from html.parser import HTMLParser
 
-BOARD_URL = (
-    'https://e-kna.org/web/home.php?go=Emenu_01&go_pds=pds_text_list'
-    '&pds_num=68&start=0&num=9187&mode=&field=&s_que=&s_memo_2='
-)
 BOARD_BASE = 'https://e-kna.org/web/home.php?go=Emenu_01&go_pds=pds_text_list&pds_num=68&start=0'
 
 DASHBOARD_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATE_FILE = os.path.join(DASHBOARD_DIR, 'kna_state.json')
 
 UA = {'User-Agent': 'Mozilla/5.0 (compatible; KNANewsBot/1.0)'}
+
+PAGE_SIZE = 10
+MAX_PAGES = 10
+
+
+def _board_url(start=0):
+    return (
+        'https://e-kna.org/web/home.php?go=Emenu_01&go_pds=pds_text_list'
+        f'&pds_num=68&start={start}&num=&mode=&field=&s_que=&s_memo_2='
+    )
 
 
 def _build_post_url(num):
@@ -42,7 +48,7 @@ def parse_board_list(html_text):
     pattern = re.compile(
         r'<tr>\s*'
         r'<td[^>]*>\s*(?:<b><span[^>]*>)?\s*-?\s*(\d+)\s*-?\s*(?:</span></b>)?\s*</td>\s*'
-        r'<td>\s*<a href="[^"]*num=(\d+)[^"]*">([^<]+)</a>\s*</td>\s*'
+        r'<td>\s*<a href="[^"]*num=(\d+)[^"]*">([^<]+)</a>.*?</td>\s*'
         r'<td[^>]*>([^<]*)</td>\s*'
         r'<td[^>]*>(\d{4}-\d{2}-\d{2})</td>',
         re.DOTALL,
@@ -153,13 +159,26 @@ def _save_state(state):
 def fetch_new_posts(update_state=True):
     """신규 게시글(state 이후) 수집.
     최초 실행(state 파일 없음) 시에는 알림 없이 last_seen만 현재 최신으로 초기화.
+    페이지네이션: 최대 MAX_PAGES 페이지를 돌되, 페이지의 최소 num이 last_seen 이하면 조기 종료.
     """
     state_existed = os.path.exists(STATE_FILE)
     state = _load_state()
     last_seen = int(state.get('last_seen_num') or 0)
 
-    list_html = _fetch_html(BOARD_URL)
-    posts = parse_board_list(list_html)
+    posts = []
+    seen_nums = set()
+    for page in range(MAX_PAGES):
+        page_html = _fetch_html(_board_url(page * PAGE_SIZE))
+        page_posts = parse_board_list(page_html)
+        if not page_posts:
+            break
+        for p in page_posts:
+            if p['num'] not in seen_nums:
+                seen_nums.add(p['num'])
+                posts.append(p)
+        if min(p['num'] for p in page_posts) <= last_seen:
+            break
+
     if not posts:
         return []
 
