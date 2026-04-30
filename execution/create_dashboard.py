@@ -2155,15 +2155,22 @@ def create_order_section():
                 var orderState_i = st[i];
                 var ot = calcOrderType(s.weight, parseFloat(orderState_i.newWeight) || 0);
                 var otColor = ot === '유지' ? '#888' : '#dc2626';
+                var sectorCell = s.isNew
+                    ? '<td style="text-align:center;color:#666;padding:8px;"><input type="text" data-idx="' + i + '" data-field="sector" value="' + (s.sector || '').replace(/"/g, '&quot;') + '" placeholder="업종" style="width:100px;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;"></td>'
+                    : '<td style="text-align:center;color:#666;padding:8px;">' + s.sector + '</td>';
+                var codeCell = s.isNew
+                    ? '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="code" value="' + s.code + '" placeholder="000000" maxlength="6" style="width:70px;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:monospace;font-size:15px;"></td>'
+                    : '<td style="text-align:center;font-family:monospace;color:#666;padding:8px;">' + s.code + '</td>';
+                var nameCell = s.isNew
+                    ? '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="name" value="' + (s.name || '').replace(/"/g, '&quot;') + '" placeholder="종목명" style="width:120px;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;font-weight:600;"></td>'
+                    : '<td style="text-align:center;font-weight:600;padding:8px;">' + s.name + '</td>';
                 rows += '<tr>'
                     + '<td style="text-align:center;color:#666;padding:8px;">' + (i + 1) + '</td>'
-                    + '<td style="text-align:center;color:#666;padding:8px;">' + s.sector + '</td>'
-                    + '<td style="text-align:center;font-family:monospace;color:#666;padding:8px;">' + s.code + '</td>'
-                    + '<td style="text-align:center;font-weight:600;padding:8px;">' + s.name + '</td>'
+                    + sectorCell + codeCell + nameCell
                     + '<td style="text-align:center;color:#666;padding:8px;">' + s.weight + '</td>'
-                    + '<td style="text-align:center;padding:8px;"><input type="number" min="0" max="100" step="1" data-idx="' + i + '" data-field="newWeight" value="' + orderState_i.newWeight + '" style="width:65px;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;"></td>'
+                    + '<td style="text-align:center;padding:8px;"><input type="text" inputmode="decimal" data-idx="' + i + '" data-field="newWeight" value="' + orderState_i.newWeight + '" style="width:65px;box-sizing:border-box;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;"></td>'
                     + '<td style="text-align:center;color:' + otColor + ';padding:8px;">' + ot + '</td>'
-                    + '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="reason" value="' + (orderState_i.reason || '').replace(/"/g, '&quot;') + '" placeholder="추천사유 입력" style="width:100%;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;text-align:center;"></td>'
+                    + '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="reason" value="' + (orderState_i.reason || '').replace(/"/g, '&quot;') + '" placeholder="추천사유 입력" style="width:100%;box-sizing:border-box;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;text-align:center;"></td>'
                     + '</tr>';
             });
             // templates 배열 → N개 Download 버튼 + 예상 파일명 표시
@@ -2193,18 +2200,25 @@ def create_order_section():
                 + '<th style="padding:8px;text-align:center;width:90px;">변경후</th>'
                 + '<th style="padding:8px;text-align:center;width:80px;">주문구분</th>'
                 + '<th style="padding:8px;text-align:center;">추천사유</th>'
-                + '</tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+                + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
+                + '<div style="margin-top:12px;text-align:right;"><button id="orderAddStockBtn" style="font-family:inherit;font-size:14px;font-weight:600;padding:6px 14px;background:#f3f4f6;color:#222;border:1px solid #d1d5db;border-radius:8px;cursor:pointer;">+ 종목 추가</button></div>'
+                + '</div>';
             document.getElementById('orderContent').innerHTML = html;
             document.querySelectorAll('#orderContent input').forEach(function(el) {
                 el.addEventListener('input', function(e) {
                     var idx = parseInt(e.target.dataset.idx);
                     var field = e.target.dataset.field;
-                    var v = (field === 'newWeight') ? (parseFloat(e.target.value) || 0) : e.target.value;
-                    orderState[orderActiveTab][idx][field] = v;
+                    var raw = e.target.value;
                     if (field === 'newWeight') {
+                        orderState[orderActiveTab][idx][field] = parseFloat(raw) || 0;
                         renderOrderPanel(orderActiveTab);
                         var refocus = document.querySelector('#orderContent input[data-idx="' + idx + '"][data-field="newWeight"]');
                         if (refocus) { refocus.focus(); refocus.setSelectionRange(refocus.value.length, refocus.value.length); }
+                    } else if (field === 'reason') {
+                        orderState[orderActiveTab][idx][field] = raw;
+                    } else if (field === 'code' || field === 'name' || field === 'sector') {
+                        // 신규 종목 필드 (orderStocks에 직접 반영)
+                        orderStocks[orderActiveTab][idx][field] = raw;
                     }
                 });
             });
@@ -2216,6 +2230,14 @@ def create_order_section():
             });
             var saveBtn = document.getElementById('orderSaveBtn');
             if (saveBtn) saveBtn.addEventListener('click', function() { saveOrder(orderActiveTab); });
+            var addBtn = document.getElementById('orderAddStockBtn');
+            if (addBtn) addBtn.addEventListener('click', function() { addOrderStock(orderActiveTab); });
+        }
+
+        function addOrderStock(pfName) {
+            orderStocks[pfName].push({ code: '', name: '', sector: '', weight: 0, isNew: true });
+            orderState[pfName].push({ newWeight: 0, reason: '' });
+            renderOrderPanel(pfName);
         }
 
         // ─────────────────────────────────────────────────────────────
