@@ -1370,7 +1370,7 @@ def _build_wrap_chart_section(category_label):
         return f"""
         <div class="category-section">
             <h2 class="category-title">{category_label}</h2>
-            <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;">
+            <div style="display:flex;gap:16px;align-items:flex-start;justify-content:center;max-width:1800px;margin:0 auto;">
                 <div style="min-width:180px;">{list_html}</div>
                 <div style="width:1000px;">
                     <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;font-size:13px;">
