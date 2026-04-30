@@ -1072,7 +1072,7 @@ def _build_combined_chart_section():
                 });
 
                 if (mode === 'raw2') {
-                    var padCount = 8;
+                    var padCount = 3;
                     for (var p = 0; p < padCount; p++) commonDates.push('');
                     datasets.forEach(function(ds) {
                         for (var q = 0; q < padCount; q++) ds.data.push(null);
@@ -1127,6 +1127,7 @@ def _build_combined_chart_section():
                     x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 11 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
                     y: {
                         position: 'left',
+                        grace: '8%',
                         ticks: { callback: function(v){ return mode === 'pct' ? v + '%' : fmtNum(v); }, font: { size: 11 }, color: '#000' },
                         grid: { color: '#eee' },
                         border: { color: '#000' }
@@ -1135,6 +1136,7 @@ def _build_combined_chart_section():
                 if (mode === 'raw2' && datasets[1]) {
                     scalesConfig.y1 = {
                         position: 'right',
+                        grace: '8%',
                         ticks: { callback: function(v){ return fmtNum(v); }, font: { size: 11 }, color: '#000' },
                         grid: { drawOnChartArea: false },
                         border: { color: '#000' }
