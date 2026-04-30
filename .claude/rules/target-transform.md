@@ -43,8 +43,47 @@
 | 5 | `execution/create_dashboard.py` | `chart_colors` 딕셔너리 (~L817) | `'NH 목표전환형 N호': '#0072CE'` |
 | 6 | `execution/create_dashboard.py` | `create_wrap_returns_table()` items (~L1560) | `('NH 목표전환형 N호', '목표전환형 N호')` |
 | 7 | `execution/create_portfolio_tables.py` | `PORTFOLIO_DISPLAY_NAMES` (~L21) | `'목표전환형 N호': 'NH 목표전환형 N호'` |
+| 7-2 | `execution/create_portfolio_tables.py` | `PORTFOLIO_GROUPS`의 목표전환형 그룹 `sources` 리스트 | `'목표전환형 N호'` 추가 (아래 "포트폴리오 그룹 묶음" 참고) |
 | 8 | `execution/daily_portfolio_report.py` | `nav_map` (~L71) + `display_names` (~L208) + product list 2곳 (~L100, L214) | 각각 매핑 + 'KOSPI' 앞에 추가 |
 | 9 | `execution/draw_wrap_charts.py` | `PORTFOLIO_NAMES` (~L40) | `'목표전환형 N호': 'NH 목표전환형 N호'` |
+| 10 | `execution/create_dashboard.py` | `create_order_section()` 안의 `ORDER_PORTFOLIOS` 배열 | `{ display: 'NH/DB 목표전환형 N호', jsonKey: 'NH 목표전환형 2호 / DB 목표전환형 3차', template: '자문지/...xlsx' }` 추가 |
+| 11 | `자문지/` 폴더 | 자문지 .xlsx 템플릿 | 새 운용 개시 시 자문지 양식 1개 추가 (R6 헤더 + R7~ 종목, F=변경전, G=변경후, H=주문구분, I=추천사유) |
+
+## 포트폴리오 그룹 묶음 (중요)
+
+`PORTFOLIO_GROUPS` (create_portfolio_tables.py)는 **동일 종목/비중을 공유하는 포트폴리오를 한 묶음으로 표시**하기 위한 일반화된 정의:
+
+```python
+PORTFOLIO_GROUPS = [
+    {
+        'sources': ['트루밸류', 'Value ESG', '개방형 랩'],  # 일반형 3개 (영구 운용)
+        'combined': '삼성 트루밸류 / NH Value ESG / DB 개방형',
+        'use': '트루밸류',  # 종목 데이터 가져올 출처
+    },
+    {
+        'sources': ['목표전환형 2호', '목표전환형 3차'],  # 출시-청산 반복하는 단기 랩
+        'combined': 'NH 목표전환형 2호 / DB 목표전환형 3차',
+        'use': '목표전환형 2호',
+    },
+]
+```
+
+### 그룹 구조 원칙
+- **일반형 그룹**: 영구 운용되는 3개 (삼성 트루밸류 / NH Value ESG / DB 개방형). 셋이 항상 동일 종목/비중으로 운영됨.
+- **목표전환형 그룹**: 출시 → 목표달성 → 청산을 반복하는 단기 랩들. 매번 NH/DB 페어로 동시 출시되며 같은 종목/비중으로 묶음 운영.
+
+### 새 목표전환형 출시 시 작업
+- `PORTFOLIO_GROUPS`의 두 번째 그룹 `sources`에 새 상품명 추가만 하면 됨 (예: `['목표전환형 2호', '목표전환형 3차', '목표전환형 4호']`)
+- `combined`에는 새 페어가 시작될 때 갱신 (예: 4호+5차 페어 시작 시 `'NH 목표전환형 4호 / DB 목표전환형 5차'`)
+- 청산 완료된 회차는 sources에서 제거 (또는 `EXCLUDED_PORTFOLIOS`로 처리)
+
+### portfolio_data.json 키 → ORDER 탭 jsonKey 매칭
+| 그룹 | portfolio_data.json 키 |
+|---|---|
+| 일반형 | `삼성 트루밸류 / NH Value ESG / DB 개방형` |
+| 목표전환형 | `NH 목표전환형 2호 / DB 목표전환형 3차` (현재 페어) |
+
+ORDER 탭 (`create_order_section`)의 `ORDER_PORTFOLIOS` 배열에서 각 항목의 `jsonKey`는 위 표의 합쳐진 키를 가리켜야 함.
 
 ### Step 3. 실행 순서 (의존 체인)
 
