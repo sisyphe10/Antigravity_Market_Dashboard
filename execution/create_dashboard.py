@@ -896,7 +896,6 @@ def _build_combined_chart_section():
         dates = [d.strftime('%Y-%m-%d') for d in wide.index]
 
         data_export = {}
-        colors = {}
         rows_html = ''
         for g in groups:
             visible = []
@@ -912,17 +911,21 @@ def _build_combined_chart_section():
                 visible.append((s, values))
             if not visible:
                 continue
+            last_idx = len(visible) - 1
             for idx, (s, values) in enumerate(visible):
                 data_export[s['display']] = values
-                colors[s['display']] = s['color']
                 active = ' active' if s.get('default') else ''
-                first_top_border = 'border-top:1px solid #000;' if idx == 0 else ''
+                extra_border = ''
+                if idx == 0:
+                    extra_border += 'border-top:1px solid #000;'
+                if idx == last_idx:
+                    extra_border += 'border-bottom:1px solid #000;'
                 series_cell = (
                     f'<td class="cmb-chart-item{active}" data-series="{_html.escape(s["display"])}" '
                     f'onclick="toggleCmbSeries(this)" '
-                    f'style="cursor:pointer;text-align:center;position:relative;{first_top_border}">'
+                    f'style="cursor:pointer;text-align:center;position:relative;{extra_border}">'
                     f'<div class="cmb-color-bar" style="position:absolute;left:8px;top:50%;'
-                    f'transform:translateY(-50%);width:4px;height:18px;background:{s["color"]};'
+                    f'transform:translateY(-50%);width:4px;height:18px;'
                     f'border-radius:2px;"></div>'
                     f'{_html.escape(s["display"])}</td>'
                 )
@@ -932,7 +935,8 @@ def _build_combined_chart_section():
                         f'style="background:#f0f0f0;font-weight:700;font-size:12px;color:#333;'
                         f'padding:8px 10px;text-align:center;vertical-align:middle;'
                         f'text-transform:uppercase;letter-spacing:0.5px;'
-                        f'border-top:1px solid #000;border-right:1px solid #ddd;'
+                        f'border-top:1px solid #000;border-bottom:1px solid #000;'
+                        f'border-right:1px solid #ddd;'
                         f'white-space:nowrap;">{_html.escape(g["label"])}</td>'
                     )
                     rows_html += f'<tr>{group_cell}{series_cell}</tr>\n'
@@ -941,7 +945,6 @@ def _build_combined_chart_section():
 
         export = {'dates': dates, 'data': data_export}
         export_json = json.dumps(export, ensure_ascii=False)
-        colors_json = json.dumps(colors, ensure_ascii=False)
 
         list_html = (
             '<style>.cmb-chart-item:not(.active) .cmb-color-bar{display:none;}</style>'
@@ -957,12 +960,38 @@ def _build_combined_chart_section():
         <script>
         (function() {
             var cmbData = CMB_DATA_PLACEHOLDER;
-            var cmbColors = CMB_COLORS_PLACEHOLDER;
             var cmbChart = null;
+            var cmbClickOrder = [];
+            var clickPalette = ['#000000','#0055cc','#cc0000','#006633','#6a0dad','#cc6600','#008080','#990066'];
+
+            function colorForIndex(i) { return clickPalette[i % clickPalette.length]; }
+
+            function fmtNum(v) {
+                if (v === null || v === undefined) return '-';
+                return Number(v).toLocaleString(undefined, { maximumFractionDigits: 2 });
+            }
+
+            function applyMarkerColors() {
+                document.querySelectorAll('.cmb-chart-item').forEach(function(el) {
+                    var bar = el.querySelector('.cmb-color-bar');
+                    if (!bar) return;
+                    var idx = cmbClickOrder.indexOf(el.getAttribute('data-series'));
+                    bar.style.background = idx >= 0 ? colorForIndex(idx) : '';
+                });
+            }
 
             function buildCmbChart() {
-                var selected = [];
-                document.querySelectorAll('.cmb-chart-item.active').forEach(function(el){ selected.push(el.getAttribute('data-series')); });
+                var activeSet = {};
+                document.querySelectorAll('.cmb-chart-item.active').forEach(function(el){
+                    activeSet[el.getAttribute('data-series')] = true;
+                });
+                cmbClickOrder = cmbClickOrder.filter(function(n){ return activeSet[n]; });
+                Object.keys(activeSet).forEach(function(n){
+                    if (cmbClickOrder.indexOf(n) === -1) cmbClickOrder.push(n);
+                });
+                var selected = cmbClickOrder.slice();
+                applyMarkerColors();
+
                 var startDate = document.getElementById('cmbStartDate').value;
                 var endDate = document.getElementById('cmbEndDate').value;
 
@@ -996,8 +1025,10 @@ def _build_combined_chart_section():
                 });
                 var commonDates = Object.keys(dateSet).sort();
 
+                var mode = perSeries.length === 1 ? 'raw1' : (perSeries.length === 2 ? 'raw2' : 'pct');
+
                 var datasets = [];
-                perSeries.forEach(function(s) {
+                perSeries.forEach(function(s, idx) {
                     var aligned = [];
                     var lastVal = null;
                     for (var i = 0; i < commonDates.length; i++) {
@@ -1005,24 +1036,32 @@ def _build_combined_chart_section():
                         if (s.lookup.hasOwnProperty(d)) lastVal = s.lookup[d];
                         aligned.push(lastVal);
                     }
-                    var base = null;
-                    for (var j = 0; j < aligned.length; j++) {
-                        if (aligned[j] !== null) { base = aligned[j]; break; }
+                    var data;
+                    if (mode === 'pct') {
+                        var base = null;
+                        for (var j = 0; j < aligned.length; j++) {
+                            if (aligned[j] !== null) { base = aligned[j]; break; }
+                        }
+                        if (base === null) return;
+                        data = aligned.map(function(v) {
+                            if (v === null) return null;
+                            return Math.round((v / base - 1) * 10000) / 100;
+                        });
+                    } else {
+                        data = aligned;
                     }
-                    if (base === null) return;
-                    var pct = aligned.map(function(v) {
-                        if (v === null) return null;
-                        return Math.round((v / base - 1) * 10000) / 100;
-                    });
+                    var yAxisID = (mode === 'raw2' && idx === 1) ? 'y1' : 'y';
+                    var clickIdx = cmbClickOrder.indexOf(s.name);
                     datasets.push({
                         label: s.name,
-                        data: pct,
-                        borderColor: cmbColors[s.name] || '#888',
+                        data: data,
+                        borderColor: colorForIndex(clickIdx >= 0 ? clickIdx : 0),
                         backgroundColor: 'transparent',
                         borderWidth: 2,
                         pointRadius: 0,
                         tension: 0.3,
-                        spanGaps: true
+                        spanGaps: true,
+                        yAxisID: yAxisID
                     });
                 });
 
@@ -1041,13 +1080,19 @@ def _build_combined_chart_section():
                             var last = meta.data[lastIdx];
                             if (!last) return;
                             var val = ds.data[lastIdx];
-                            var rounded = Math.sign(val) * Math.round(Math.abs(val));
-                            var sign = rounded >= 0 ? '+' : '';
+                            var label;
+                            if (mode === 'pct') {
+                                var rounded = Math.sign(val) * Math.round(Math.abs(val));
+                                var sign = rounded >= 0 ? '+' : '';
+                                label = sign + rounded + '%';
+                            } else {
+                                label = fmtNum(val);
+                            }
                             ctx.save();
                             ctx.font = 'bold 12px sans-serif';
                             ctx.fillStyle = ds.borderColor;
                             ctx.textBaseline = 'middle';
-                            ctx.fillText(sign + rounded + '%', last.x + 6, last.y);
+                            ctx.fillText(label, last.x + 6, last.y);
                             ctx.restore();
                         });
                     }
@@ -1064,6 +1109,30 @@ def _build_combined_chart_section():
                     legendEl.innerHTML = legendHTML;
                 }
 
+                var scalesConfig = {
+                    x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 11 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
+                    y: {
+                        position: 'left',
+                        ticks: { callback: function(v){ return mode === 'pct' ? v + '%' : fmtNum(v); }, font: { size: 11 }, color: '#000' },
+                        grid: { color: '#eee' },
+                        border: { color: '#000' }
+                    }
+                };
+                if (mode === 'raw2' && datasets[1]) {
+                    scalesConfig.y1 = {
+                        position: 'right',
+                        ticks: { callback: function(v){ return fmtNum(v); }, font: { size: 11 }, color: '#000' },
+                        grid: { drawOnChartArea: false },
+                        border: { color: '#000' }
+                    };
+                }
+
+                var tooltipLabel = function(ctx) {
+                    if (ctx.parsed.y === null || ctx.parsed.y === undefined) return ctx.dataset.label + ': -';
+                    if (mode === 'pct') return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%';
+                    return ctx.dataset.label + ': ' + fmtNum(ctx.parsed.y);
+                };
+
                 if (cmbChart) cmbChart.destroy();
                 cmbChart = new Chart(document.getElementById('cmbDynamicChart'), {
                     type: 'line',
@@ -1075,22 +1144,24 @@ def _build_combined_chart_section():
                         interaction: { mode: 'index', intersect: false },
                         plugins: {
                             legend: { display: false },
-                            tooltip: { callbacks: { label: function(ctx){ return ctx.dataset.label + ': ' + (ctx.parsed.y === null ? '-' : ctx.parsed.y.toFixed(1) + '%'); } } }
+                            tooltip: { callbacks: { label: tooltipLabel } }
                         },
-                        scales: {
-                            x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 11 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
-                            y: { ticks: { callback: function(v){ return v + '%'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' }, border: { color: '#000' } }
-                        }
+                        scales: scalesConfig
                     }
                 });
             }
 
             window.toggleCmbSeries = function(el) { el.classList.toggle('active'); buildCmbChart(); };
             window.updateCmbChart = buildCmbChart;
+            window.clearCmbSelections = function() {
+                document.querySelectorAll('.cmb-chart-item.active').forEach(function(el){ el.classList.remove('active'); });
+                cmbClickOrder = [];
+                buildCmbChart();
+            };
             buildCmbChart();
         })();
         </script>
-        """.replace('CMB_DATA_PLACEHOLDER', export_json).replace('CMB_COLORS_PLACEHOLDER', colors_json)
+        """.replace('CMB_DATA_PLACEHOLDER', export_json)
 
         return f"""
         <div class="category-section">
@@ -1103,6 +1174,7 @@ def _build_combined_chart_section():
                         <input type="text" id="cmbStartDate" value="{first_date}" onchange="formatDateInput(this);updateCmbChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                         <span style="color:#888;">~</span>
                         <input type="text" id="cmbEndDate" value="{last_date}" onchange="formatDateInput(this);updateCmbChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
+                        <button onclick="clearCmbSelections()" style="font-family:inherit;font-size:13px;font-weight:600;padding:4px 14px;background:#f3f4f6;color:#444;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;margin-left:8px;">전체 해제</button>
                     </div>
                     <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                         <div style="position:relative;height:600px;">
@@ -2052,6 +2124,9 @@ def create_order_section():
         <script>
         // 일반형 3개는 종목/비중 동일 → 한 테이블 + 3개 Download 버튼
         // 목표전환형은 주문 시점이 다를 수 있어 별도 카드 유지
+        // newSheetTargets: 저장 시 Wrap_NAV.xlsx의 NEW 시트에 행을 추가할 (증권사, 상품명) 매핑
+        // 일반형 카드 → 3개 상품(삼성 트루밸류 / NH Value ESG / DB 개방형) 모두에 동일 종목/비중 행 추가
+        // 목표전환형 카드 → 1개 상품에만 추가
         var ORDER_PORTFOLIOS = [
             {
                 display: '삼성 트루밸류 / NH Value ESG / DB 개방형',
@@ -2061,6 +2136,11 @@ def create_order_section():
                     { label: 'NH Value ESG',  file: '자문지/라이프자산운용_라이프 다이내믹밸류_일반형 _2026.4.27.xlsx' },
                     { label: 'DB 개방형',     file: '자문지/라이프자산운용_DB 개방형 랩 _2026.4.27.xlsx' },
                 ],
+                newSheetTargets: [
+                    { broker: '삼성', product: '트루밸류' },
+                    { broker: 'NH',   product: 'Value ESG' },
+                    { broker: 'DB',   product: '개방형 랩' },
+                ],
             },
             {
                 display: 'NH 목표전환형 2호',
@@ -2068,12 +2148,18 @@ def create_order_section():
                 templates: [
                     { label: 'NH 목표전환형 2호', file: '자문지/라이프자산운용_라이프 다이내믹밸류_목표전환형 2호_2026.4.29.xlsx' },
                 ],
+                newSheetTargets: [
+                    { broker: 'NH', product: '목표전환형 2호' },
+                ],
             },
             {
                 display: 'DB 목표전환형 3차',
                 jsonKey: 'NH 목표전환형 2호 / DB 목표전환형 3차',
                 templates: [
                     { label: 'DB 목표전환형 3차', file: '자문지/라이프자산운용_DB 목표전환형 랩 _3차_2026.4.30.xlsx' },
+                ],
+                newSheetTargets: [
+                    { broker: 'DB', product: '목표전환형 3차' },
                 ],
             },
         ];
@@ -2277,32 +2363,31 @@ def create_order_section():
         async function saveOrder(pfName) {
             var pat = getGithubPat();
             if (!pat) { alert('PAT 입력이 취소되었습니다.'); return; }
+            var p = ORDER_PORTFOLIOS.find(function(x) { return x.display === pfName; });
+            if (!p) { alert('포트폴리오 매핑 누락: ' + pfName); return; }
+            var targets = p.newSheetTargets || [];
+            if (!targets.length) { alert('NEW 시트 매핑 누락'); return; }
+            if (typeof ExcelJS === 'undefined') { alert('ExcelJS 라이브러리 로드 실패.'); return; }
             var stocks = orderStocks[pfName];
             var st = orderState[pfName];
             if (!stocks || !st) { alert('데이터 누락: ' + pfName); return; }
 
-            var entry = {
-                timestamp: new Date().toISOString(),
-                portfolio: pfName,
-                summary: {
-                    oldSum: stocks.reduce(function(a, s) { return a + s.weight; }, 0),
-                    newSum: st.reduce(function(a, x) { return a + (parseFloat(x.newWeight) || 0); }, 0),
-                },
-                stocks: stocks.map(function(s, i) {
-                    var newW = parseFloat(st[i].newWeight) || 0;
-                    return {
-                        code: s.code,
-                        name: s.name,
-                        sector: s.sector,
-                        oldWeight: s.weight,
-                        newWeight: newW,
-                        orderType: calcOrderType(s.weight, newW),
-                        reason: st[i].reason || '',
-                    };
-                }),
-            };
+            // 변경후 비중 > 0인 종목만 NEW 시트에 추가 (비중 0 = 전량 매도, 자동 제외)
+            var validRows = [];
+            stocks.forEach(function(s, i) {
+                var newW = parseFloat(st[i].newWeight) || 0;
+                if (newW > 0 && s.code) {
+                    validRows.push({
+                        sector: s.sector || '',
+                        code: String(s.code),
+                        name: s.name || '',
+                        weight: newW,
+                    });
+                }
+            });
+            if (validRows.length === 0) { alert('저장할 종목이 없습니다 (모두 비중 0).'); return; }
 
-            var apiUrl = 'https://api.github.com/repos/' + ORDER_REPO + '/contents/' + ORDER_FILE_PATH;
+            var apiUrl = 'https://api.github.com/repos/' + ORDER_REPO + '/contents/Wrap_NAV.xlsx';
             var headers = {
                 'Authorization': 'Bearer ' + pat,
                 'Accept': 'application/vnd.github+json',
@@ -2310,43 +2395,82 @@ def create_order_section():
             };
 
             try {
-                var existing = [];
-                var sha = null;
                 var getResp = await fetch(apiUrl, { headers: headers });
-                if (getResp.ok) {
-                    var data = await getResp.json();
-                    sha = data.sha;
-                    try {
-                        existing = JSON.parse(base64ToUtf8(data.content));
-                        if (!Array.isArray(existing)) existing = [];
-                    } catch(_) { existing = []; }
-                } else if (getResp.status === 404) {
-                    // 파일 없음 → 신규 생성
-                } else if (getResp.status === 401 || getResp.status === 403) {
-                    localStorage.removeItem('github_pat');
-                    throw new Error('인증 실패 (' + getResp.status + '). PAT를 다시 입력하세요.');
-                } else {
+                if (!getResp.ok) {
+                    if (getResp.status === 401 || getResp.status === 403) {
+                        localStorage.removeItem('github_pat');
+                        throw new Error('인증 실패 (' + getResp.status + '). PAT를 다시 입력하세요.');
+                    }
                     throw new Error('GET 실패: ' + getResp.status);
                 }
+                var meta = await getResp.json();
+                var sha = meta.sha;
+                var fileResp = await fetch(meta.download_url);
+                var buf = await fileResp.arrayBuffer();
 
-                existing.push(entry);
-                var newContent = utf8ToBase64(JSON.stringify(existing, null, 2));
-                var body = {
-                    message: 'ORDER save: ' + pfName + ' (' + entry.timestamp.slice(0, 10) + ')',
-                    content: newContent,
-                };
-                if (sha) body.sha = sha;
+                var wb = new ExcelJS.Workbook();
+                await wb.xlsx.load(buf);
+                var ws = wb.getWorksheet('NEW');
+                if (!ws) throw new Error('NEW 시트가 없습니다');
 
+                // 오늘 날짜 + 매핑 상품의 기존 행 제거 (같은 날 재저장 시 덮어쓰기)
+                var today = new Date();
+                var todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                var todayStr = todayDate.getFullYear() + '-' + String(todayDate.getMonth() + 1).padStart(2, '0') + '-' + String(todayDate.getDate()).padStart(2, '0');
+                var rowsToDelete = [];
+                for (var r = 2; r <= ws.rowCount; r++) {
+                    var row = ws.getRow(r);
+                    var date = row.getCell(1).value;
+                    var broker = row.getCell(2).value;
+                    var product = row.getCell(3).value;
+                    if (!broker || !product) continue;
+                    var dateStr = '';
+                    if (date instanceof Date) {
+                        dateStr = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+                    } else {
+                        dateStr = String(date).slice(0, 10);
+                    }
+                    if (dateStr !== todayStr) continue;
+                    for (var ti = 0; ti < targets.length; ti++) {
+                        if (broker === targets[ti].broker && product === targets[ti].product) {
+                            rowsToDelete.push(r);
+                            break;
+                        }
+                    }
+                }
+                for (var i = rowsToDelete.length - 1; i >= 0; i--) {
+                    ws.spliceRows(rowsToDelete[i], 1);
+                }
+
+                // 새 행 추가: targets × validRows
+                targets.forEach(function(t) {
+                    validRows.forEach(function(s) {
+                        var newRow = ws.addRow([todayDate, t.broker, t.product, s.sector, s.code, s.name, s.weight]);
+                        newRow.getCell(1).numFmt = 'yyyy-mm-dd';
+                    });
+                });
+
+                var out = await wb.xlsx.writeBuffer();
+                var u8 = new Uint8Array(out);
+                var binary = '';
+                var chunkSize = 0x8000;
+                for (var i = 0; i < u8.length; i += chunkSize) {
+                    binary += String.fromCharCode.apply(null, u8.subarray(i, i + chunkSize));
+                }
+                var b64 = btoa(binary);
+
+                var totalRowsAdded = targets.length * validRows.length;
+                var msg = 'ORDER save: ' + pfName + ' (' + todayStr + ', ' + validRows.length + ' stocks × ' + targets.length + ' products)';
                 var putResp = await fetch(apiUrl, {
                     method: 'PUT',
                     headers: Object.assign({}, headers, { 'Content-Type': 'application/json' }),
-                    body: JSON.stringify(body),
+                    body: JSON.stringify({ message: msg, content: b64, sha: sha }),
                 });
                 if (!putResp.ok) {
                     var errTxt = await putResp.text();
                     throw new Error('PUT 실패: ' + putResp.status + ' ' + errTxt.slice(0, 200));
                 }
-                alert('✅ 저장 완료: ' + pfName + '\\n총 ' + existing.length + '건 누적');
+                alert('✅ ORDER 저장 완료: ' + pfName + '\\n' + validRows.length + '개 종목 × ' + targets.length + '개 상품 = ' + totalRowsAdded + '행 추가\\n다음 GHA 실행(23:00 KST)에서 반영됩니다.');
             } catch(e) {
                 alert('❌ 저장 실패: ' + e.message);
                 console.error('saveOrder error:', e);
@@ -2510,9 +2634,10 @@ def create_aum_section():
 
         function renderAUMPanel() {
             var html = '<div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);max-width:900px;margin:0 auto;">';
-            html += '<div style="display:flex;align-items:center;margin-bottom:20px;">';
+            html += '<div style="display:flex;align-items:center;margin-bottom:20px;gap:10px;flex-wrap:wrap;">';
             html += '<h3 style="margin:0;font-size:18px;">AUM 입력 <span style="font-size:14px;color:#666;font-weight:400;">(오늘 날짜로 추가됨, 변경된 항목만 저장)</span></h3>';
-            html += '<button id="aumSaveBtn" style="margin-left:auto;font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;">저장</button>';
+            html += '<a href="https://raw.githubusercontent.com/sisyphe10/Antigravity_Market_Dashboard/main/Wrap_NAV.xlsx" download="Wrap_NAV.xlsx" target="_blank" style="margin-left:auto;font-family:inherit;font-size:14px;font-weight:600;padding:6px 14px;background:#222;color:#fff;text-decoration:none;border-radius:8px;">Wrap_NAV 다운로드</a>';
+            html += '<button id="aumSaveBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;">저장</button>';
             html += '</div>';
             html += '<table style="width:100%;border-collapse:collapse;font-size:15px;">';
             html += '<thead><tr style="border-bottom:2px solid #e5e7eb;color:#444;">';
