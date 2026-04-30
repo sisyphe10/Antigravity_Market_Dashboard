@@ -2700,6 +2700,8 @@ def create_aum_section():
             document.getElementById('aumSaveBtn').addEventListener('click', saveAUM);
         }
 
+        // AUM 저장 → orders/aum_pending.json 누적 (GHA 16:00 KST에 Wrap_NAV.xlsx로 일괄 반영)
+        // Wrap_NAV.xlsx 동시 수정 충돌 방지 — Wrap_NAV.xlsx는 GHA만 수정
         async function saveAUM() {
             var pat = getGithubPat();
             if (!pat) { alert('PAT 입력이 취소되었습니다.'); return; }
@@ -2710,7 +2712,6 @@ def create_aum_section():
                     var aumValue = Math.round(parseFloat(v) * 1e8);
                     var key = p.broker + '|' + p.name;
                     var latest = aumLatest[key];
-                    // 동일 값이면 스킵
                     if (latest && Math.abs(latest.aum - aumValue) < 1) return;
                     changes.push({ broker: p.broker, product: p.name, aum: aumValue });
                 }
@@ -2720,95 +2721,60 @@ def create_aum_section():
                 return;
             }
 
-            var apiUrl = 'https://api.github.com/repos/' + ORDER_REPO + '/contents/Wrap_NAV.xlsx';
+            var saveDateStr = normalizeDateStr(aumSelectedDate) || todayLocalIso();
+            var apiUrl = 'https://api.github.com/repos/' + ORDER_REPO + '/contents/orders/aum_pending.json';
             var headers = {
                 'Authorization': 'Bearer ' + pat,
                 'Accept': 'application/vnd.github+json',
                 'X-GitHub-Api-Version': '2022-11-28',
             };
+
             try {
+                var existing = {};
+                var sha = null;
                 var getResp = await fetch(apiUrl, { headers: headers });
-                if (!getResp.ok) {
-                    if (getResp.status === 401 || getResp.status === 403) {
-                        localStorage.removeItem('github_pat');
-                        throw new Error('인증 실패 (' + getResp.status + '). PAT를 다시 입력하세요.');
-                    }
+                if (getResp.ok) {
+                    var data = await getResp.json();
+                    sha = data.sha;
+                    try {
+                        existing = JSON.parse(base64ToUtf8(data.content));
+                        if (typeof existing !== 'object' || Array.isArray(existing)) existing = {};
+                    } catch(_) { existing = {}; }
+                } else if (getResp.status === 401 || getResp.status === 403) {
+                    localStorage.removeItem('github_pat');
+                    throw new Error('인증 실패 (' + getResp.status + '). PAT를 다시 입력하세요.');
+                } else if (getResp.status !== 404) {
                     throw new Error('GET 실패: ' + getResp.status);
                 }
-                var meta = await getResp.json();
-                var sha = meta.sha;
-                // 파일 받기 (download_url 우선 — content는 1MB 이상이면 비어있음)
-                var fileResp = await fetch(meta.download_url);
-                var buf = await fileResp.arrayBuffer();
 
-                var wb = new ExcelJS.Workbook();
-                await wb.xlsx.load(buf);
-                var ws = wb.getWorksheet('AUM');
-                if (!ws) throw new Error('AUM 시트가 없습니다');
-
-                // 사용자 지정 날짜 (또는 오늘)로 새 행 추가
-                var saveDateStr = normalizeDateStr(aumSelectedDate) || todayLocalIso();
-                var parts = saveDateStr.split('-');
-                var saveDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-
-                // 같은 날짜 + 같은 (broker, product) 기존 행 삭제 (덮어쓰기)
-                var rowsToDelete = [];
-                for (var r = 2; r <= ws.rowCount; r++) {
-                    var row = ws.getRow(r);
-                    var date = row.getCell(1).value;
-                    var broker = row.getCell(2).value;
-                    var product = row.getCell(3).value;
-                    if (!broker || !product) continue;
-                    var dateStr = '';
-                    if (date instanceof Date) {
-                        dateStr = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
-                    } else {
-                        dateStr = String(date).slice(0, 10);
-                    }
-                    if (dateStr !== saveDateStr) continue;
-                    for (var ci = 0; ci < changes.length; ci++) {
-                        if (broker === changes[ci].broker && product === changes[ci].product) {
-                            rowsToDelete.push(r);
-                            break;
+                // 같은 날짜 + 같은 (broker, product) 덮어쓰기
+                if (!existing[saveDateStr] || !Array.isArray(existing[saveDateStr])) existing[saveDateStr] = [];
+                var dayList = existing[saveDateStr];
+                changes.forEach(function(ch) {
+                    for (var i = dayList.length - 1; i >= 0; i--) {
+                        if (dayList[i].broker === ch.broker && dayList[i].product === ch.product) {
+                            dayList.splice(i, 1);
                         }
                     }
-                }
-                for (var i = rowsToDelete.length - 1; i >= 0; i--) {
-                    ws.spliceRows(rowsToDelete[i], 1);
-                }
-
-                changes.forEach(function(ch) {
-                    var newRow = ws.addRow([saveDate, ch.broker, ch.product, ch.aum]);
-                    newRow.getCell(1).numFmt = 'yyyy-mm-dd';
-                    newRow.commit();
+                    dayList.push(ch);
                 });
 
-                var out = await wb.xlsx.writeBuffer();
-                // ArrayBuffer → base64 (대용량 안전)
-                var u8 = new Uint8Array(out);
-                var binary = '';
-                var chunkSize = 0x8000;
-                for (var i = 0; i < u8.length; i += chunkSize) {
-                    binary += String.fromCharCode.apply(null, u8.subarray(i, i + chunkSize));
-                }
-                var b64 = btoa(binary);
+                var newContent = utf8ToBase64(JSON.stringify(existing, null, 2));
+                var msg = 'AUM pending: ' + saveDateStr + ' (' + changes.length + ' products)';
+                var body = { message: msg, content: newContent };
+                if (sha) body.sha = sha;
 
-                var msg = 'AUM update: ' + changes.map(function(c) {
-                    return c.broker + ' ' + c.product + ' ' + Math.round(c.aum / 1e8) + '억';
-                }).join(', ');
                 var putResp = await fetch(apiUrl, {
                     method: 'PUT',
                     headers: Object.assign({}, headers, { 'Content-Type': 'application/json' }),
-                    body: JSON.stringify({ message: msg, content: b64, sha: sha }),
+                    body: JSON.stringify(body),
                 });
                 if (!putResp.ok) {
                     var errTxt = await putResp.text();
                     throw new Error('PUT 실패: ' + putResp.status + ' ' + errTxt.slice(0, 200));
                 }
-                alert('✅ AUM 저장 완료 (' + changes.length + '건)\\n다음 GHA 실행(23:00 KST)에서 반영됩니다.');
+                alert('✅ AUM 임시 저장 완료 (' + changes.length + '건, ' + saveDateStr + ')\\n\\n장마감 후 16:00 KST에 자동 확정 (Wrap_NAV.xlsx에 반영)\\n그 전까지 다시 저장하면 덮어쓰기됩니다.');
                 aumInputs = {};
-                _aumLoaded = false;
-                await loadAUM();
             } catch(e) {
                 alert('❌ AUM 저장 실패: ' + e.message);
                 console.error('saveAUM error:', e);

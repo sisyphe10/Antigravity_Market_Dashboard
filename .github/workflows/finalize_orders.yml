@@ -1,4 +1,4 @@
-name: Finalize Pending Orders
+name: Finalize Pending Orders + AUM
 
 on:
   schedule:
@@ -25,14 +25,19 @@ jobs:
           python -m pip install --upgrade pip
           pip install openpyxl
 
-      - name: Finalize pending orders → NEW sheet
+      - name: Finalize pending orders → Wrap_NAV NEW sheet
         run: python execution/finalize_pending_orders.py
         env:
           TZ: 'Asia/Seoul'
 
-      - name: Commit and push (Wrap_NAV.xlsx + pending_orders.json)
+      - name: Finalize pending AUM → Wrap_NAV AUM sheet
+        run: python execution/finalize_pending_aum.py
+        env:
+          TZ: 'Asia/Seoul'
+
+      - name: Commit and push (Wrap_NAV.xlsx + pending JSONs)
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Auto: finalize ORDER → Wrap_NAV NEW sheet [skip ci]"
-          file_pattern: 'Wrap_NAV.xlsx orders/pending_orders.json'
+          commit_message: "Auto: finalize pending ORDER + AUM → Wrap_NAV.xlsx [skip ci]"
+          file_pattern: 'Wrap_NAV.xlsx orders/pending_orders.json orders/aum_pending.json'
           skip_fetch: true
