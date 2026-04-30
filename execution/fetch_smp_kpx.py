@@ -9,7 +9,7 @@ Source: https://new.kpx.or.kr/smpInland.es?mid=a10606080100&device=pc
 - python fetch_smp_kpx.py            : 1년치 backfill 후 dataset.csv에 append
 - python fetch_smp_kpx.py --backfill : 동일 (명시용)
 
-저장: dataset.csv 에 (날짜, 제품명='SMP 육지', 가격, 데이터 타입='SMP_KPX') 형식
+저장: dataset.csv 에 (날짜, 제품명='SMP', 가격, 데이터 타입='SMP_KPX') 형식
 중복(날짜+제품명)은 save_to_csv가 자동 제거.
 """
 import csv
@@ -29,7 +29,7 @@ HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
                   '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
 }
-PRODUCT_NAME = 'SMP 육지'
+PRODUCT_NAME = 'SMP'
 DATA_TYPE = 'SMP_KPX'
 
 

@@ -1856,7 +1856,7 @@ def create_dashboard():
                     'SCFI Comprehensive Index',
                     'KRX ETS  KAU25',
                     'KRX ETS Trading Volume',
-                    'SMP 육지'
+                    'SMP'
                 ]
             
             # Exchange Rate order
