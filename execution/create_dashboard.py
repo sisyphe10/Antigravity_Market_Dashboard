@@ -2376,6 +2376,7 @@ def create_order_section():
             return decodeURIComponent(escape(atob(b64.replace(/\\n/g, ''))));
         }
 
+        // ORDER 저장 → orders/pending_orders.json 누적 (확정은 GHA 16:00 KST에 NEW 시트 반영)
         async function saveOrder(pfName) {
             var pat = getGithubPat();
             if (!pat) { alert('PAT 입력이 취소되었습니다.'); return; }
@@ -2383,12 +2384,10 @@ def create_order_section():
             if (!p) { alert('포트폴리오 매핑 누락: ' + pfName); return; }
             var targets = p.newSheetTargets || [];
             if (!targets.length) { alert('NEW 시트 매핑 누락'); return; }
-            if (typeof ExcelJS === 'undefined') { alert('ExcelJS 라이브러리 로드 실패.'); return; }
             var stocks = orderStocks[pfName];
             var st = orderState[pfName];
             if (!stocks || !st) { alert('데이터 누락: ' + pfName); return; }
 
-            // 변경후 비중 > 0인 종목만 NEW 시트에 추가 (비중 0 = 전량 매도, 자동 제외)
             var validRows = [];
             stocks.forEach(function(s, i) {
                 var newW = parseFloat(st[i].newWeight) || 0;
@@ -2403,7 +2402,11 @@ def create_order_section():
             });
             if (validRows.length === 0) { alert('저장할 종목이 없습니다 (모두 비중 0).'); return; }
 
-            var apiUrl = 'https://api.github.com/repos/' + ORDER_REPO + '/contents/Wrap_NAV.xlsx';
+            // 오늘 날짜 (KST 안전)
+            var d = new Date();
+            var todayStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+
+            var apiUrl = 'https://api.github.com/repos/' + ORDER_REPO + '/contents/orders/pending_orders.json';
             var headers = {
                 'Authorization': 'Bearer ' + pat,
                 'Accept': 'application/vnd.github+json',
@@ -2411,82 +2414,47 @@ def create_order_section():
             };
 
             try {
+                // 기존 pending 파일 가져오기 (없으면 새로 생성)
+                var existing = {};
+                var sha = null;
                 var getResp = await fetch(apiUrl, { headers: headers });
-                if (!getResp.ok) {
-                    if (getResp.status === 401 || getResp.status === 403) {
-                        localStorage.removeItem('github_pat');
-                        throw new Error('인증 실패 (' + getResp.status + '). PAT를 다시 입력하세요.');
-                    }
+                if (getResp.ok) {
+                    var data = await getResp.json();
+                    sha = data.sha;
+                    try {
+                        existing = JSON.parse(base64ToUtf8(data.content));
+                        if (typeof existing !== 'object' || Array.isArray(existing)) existing = {};
+                    } catch(_) { existing = {}; }
+                } else if (getResp.status === 401 || getResp.status === 403) {
+                    localStorage.removeItem('github_pat');
+                    throw new Error('인증 실패 (' + getResp.status + '). PAT를 다시 입력하세요.');
+                } else if (getResp.status !== 404) {
                     throw new Error('GET 실패: ' + getResp.status);
                 }
-                var meta = await getResp.json();
-                var sha = meta.sha;
-                var fileResp = await fetch(meta.download_url);
-                var buf = await fileResp.arrayBuffer();
 
-                var wb = new ExcelJS.Workbook();
-                await wb.xlsx.load(buf);
-                var ws = wb.getWorksheet('NEW');
-                if (!ws) throw new Error('NEW 시트가 없습니다');
+                // 같은 날짜 + 같은 카드(pfName) 덮어쓰기
+                if (!existing[todayStr]) existing[todayStr] = {};
+                existing[todayStr][pfName] = {
+                    targets: targets,
+                    stocks: validRows,
+                    savedAt: new Date().toISOString(),
+                };
 
-                // 오늘 날짜 + 매핑 상품의 기존 행 제거 (같은 날 재저장 시 덮어쓰기)
-                var today = new Date();
-                var todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-                var todayStr = todayDate.getFullYear() + '-' + String(todayDate.getMonth() + 1).padStart(2, '0') + '-' + String(todayDate.getDate()).padStart(2, '0');
-                var rowsToDelete = [];
-                for (var r = 2; r <= ws.rowCount; r++) {
-                    var row = ws.getRow(r);
-                    var date = row.getCell(1).value;
-                    var broker = row.getCell(2).value;
-                    var product = row.getCell(3).value;
-                    if (!broker || !product) continue;
-                    var dateStr = '';
-                    if (date instanceof Date) {
-                        dateStr = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
-                    } else {
-                        dateStr = String(date).slice(0, 10);
-                    }
-                    if (dateStr !== todayStr) continue;
-                    for (var ti = 0; ti < targets.length; ti++) {
-                        if (broker === targets[ti].broker && product === targets[ti].product) {
-                            rowsToDelete.push(r);
-                            break;
-                        }
-                    }
-                }
-                for (var i = rowsToDelete.length - 1; i >= 0; i--) {
-                    ws.spliceRows(rowsToDelete[i], 1);
-                }
+                var newContent = utf8ToBase64(JSON.stringify(existing, null, 2));
+                var msg = 'ORDER pending: ' + pfName + ' (' + todayStr + ', ' + validRows.length + ' stocks)';
+                var body = { message: msg, content: newContent };
+                if (sha) body.sha = sha;
 
-                // 새 행 추가: targets × validRows
-                targets.forEach(function(t) {
-                    validRows.forEach(function(s) {
-                        var newRow = ws.addRow([todayDate, t.broker, t.product, s.sector, s.code, s.name, s.weight]);
-                        newRow.getCell(1).numFmt = 'yyyy-mm-dd';
-                    });
-                });
-
-                var out = await wb.xlsx.writeBuffer();
-                var u8 = new Uint8Array(out);
-                var binary = '';
-                var chunkSize = 0x8000;
-                for (var i = 0; i < u8.length; i += chunkSize) {
-                    binary += String.fromCharCode.apply(null, u8.subarray(i, i + chunkSize));
-                }
-                var b64 = btoa(binary);
-
-                var totalRowsAdded = targets.length * validRows.length;
-                var msg = 'ORDER save: ' + pfName + ' (' + todayStr + ', ' + validRows.length + ' stocks × ' + targets.length + ' products)';
                 var putResp = await fetch(apiUrl, {
                     method: 'PUT',
                     headers: Object.assign({}, headers, { 'Content-Type': 'application/json' }),
-                    body: JSON.stringify({ message: msg, content: b64, sha: sha }),
+                    body: JSON.stringify(body),
                 });
                 if (!putResp.ok) {
                     var errTxt = await putResp.text();
                     throw new Error('PUT 실패: ' + putResp.status + ' ' + errTxt.slice(0, 200));
                 }
-                alert('✅ ORDER 저장 완료: ' + pfName + '\\n' + validRows.length + '개 종목 × ' + targets.length + '개 상품 = ' + totalRowsAdded + '행 추가\\n다음 GHA 실행(23:00 KST)에서 반영됩니다.');
+                alert('✅ ORDER 임시 저장 완료: ' + pfName + ' (' + validRows.length + '개 종목)\\n\\n장마감 후 16:00 KST에 자동 확정 (Wrap_NAV.xlsx NEW 시트에 반영)\\n그 전까지는 다시 저장하면 덮어쓰기됩니다.');
             } catch(e) {
                 alert('❌ 저장 실패: ' + e.message);
                 console.error('saveOrder error:', e);

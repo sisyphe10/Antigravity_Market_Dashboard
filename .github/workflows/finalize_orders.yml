@@ -1,0 +1,38 @@
+name: Finalize Pending Orders
+
+on:
+  schedule:
+    - cron: '0 7 * * *'   # 16:00 KST = 07:00 UTC
+  workflow_dispatch:
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install openpyxl
+
+      - name: Finalize pending orders → NEW sheet
+        run: python execution/finalize_pending_orders.py
+        env:
+          TZ: 'Asia/Seoul'
+
+      - name: Commit and push (Wrap_NAV.xlsx + pending_orders.json)
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Auto: finalize ORDER → Wrap_NAV NEW sheet [skip ci]"
+          file_pattern: 'Wrap_NAV.xlsx orders/pending_orders.json'
+          skip_fetch: true
