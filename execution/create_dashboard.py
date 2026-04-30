@@ -2621,6 +2621,18 @@ def create_aum_section():
             return null;
         }
 
+        // KST 안전: new Date().toISOString()은 UTC 변환되어 KST 0~9시에 어제 날짜 반환됨.
+        // 로컬 getFullYear/Month/Date를 직접 사용해서 사용자 시각의 오늘로 고정.
+        function todayLocalIso() {
+            var d = new Date();
+            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        }
+        function normalizeDateStr(s) {
+            if (typeof s !== 'string') return null;
+            var m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            return m ? s : null;
+        }
+
         async function loadAUM() {
             if (_aumLoaded) return;
             _aumLoaded = true;
@@ -2658,25 +2670,31 @@ def create_aum_section():
 
         function fmtAumDate(d) {
             if (!d) return '';
-            try {
-                var dt = (d instanceof Date) ? d : new Date(d);
-                return (dt.getMonth() + 1) + '/' + dt.getDate();
-            } catch(_) { return ''; }
+            // string 'YYYY-MM-DD' 또는 'YYYY-MM-DD...' 형태 — 정규식으로 직접 파싱 (Date 변환 우회)
+            if (typeof d === 'string') {
+                var m = d.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+                if (m) return parseInt(m[2]) + '/' + parseInt(m[3]);
+                return '';
+            }
+            if (d instanceof Date && !isNaN(d.getTime())) {
+                return (d.getMonth() + 1) + '/' + d.getDate();
+            }
+            return '';
         }
 
         function renderAUMPanel() {
-            var todayIso = new Date().toISOString().slice(0, 10);
-            if (!aumSelectedDate) aumSelectedDate = todayIso;
+            var todayIso = todayLocalIso();
+            if (!normalizeDateStr(aumSelectedDate)) aumSelectedDate = todayIso;
             var html = '<div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);max-width:900px;margin:0 auto;">';
             html += '<div style="display:flex;align-items:center;margin-bottom:20px;gap:10px;flex-wrap:wrap;">';
             html += '<h3 style="margin:0;font-size:18px;">AUM 입력</h3>';
             html += '<label style="font-size:14px;color:#444;display:flex;align-items:center;gap:6px;">날짜 <input type="date" id="aumDateInput" value="' + aumSelectedDate + '" style="font-family:inherit;font-size:14px;padding:5px 8px;border:1px solid #d1d5db;border-radius:6px;"></label>';
-            html += '<a href="https://raw.githubusercontent.com/sisyphe10/Antigravity_Market_Dashboard/main/Wrap_NAV.xlsx" download="Wrap_NAV.xlsx" target="_blank" style="margin-left:auto;font-family:inherit;font-size:14px;font-weight:600;padding:6px 14px;background:#222;color:#fff;text-decoration:none;border-radius:8px;">Wrap_NAV 다운로드</a>';
+            html += '<a href="https://raw.githubusercontent.com/sisyphe10/Antigravity_Market_Dashboard/main/Wrap_NAV.xlsx" download="Wrap_NAV.xlsx" target="_blank" style="margin-left:auto;font-family:inherit;font-size:14px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;text-decoration:none;border-radius:8px;">Wrap_NAV 다운로드</a>';
             html += '<button id="aumSaveBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;">저장</button>';
             html += '</div>';
             html += '<table style="width:100%;border-collapse:collapse;font-size:15px;">';
             html += '<thead><tr style="border-bottom:2px solid #e5e7eb;color:#444;">';
-            html += '<th style="padding:10px;text-align:center;width:40px;">증권사</th>';
+            html += '<th style="padding:10px;text-align:center;width:80px;white-space:nowrap;">증권사</th>';
             html += '<th style="padding:10px;text-align:center;">상품명</th>';
             html += '<th style="padding:10px;text-align:center;width:160px;">현재 AUM</th>';
             html += '<th style="padding:10px;text-align:center;width:200px;">신규 AUM</th>';
@@ -2707,7 +2725,8 @@ def create_aum_section():
             var dateInput = document.getElementById('aumDateInput');
             if (dateInput) {
                 dateInput.addEventListener('change', function(e) {
-                    aumSelectedDate = e.target.value || todayIso;
+                    var v = (e.target.value || '').trim();
+                    aumSelectedDate = normalizeDateStr(v) || todayLocalIso();
                 });
             }
             document.getElementById('aumSaveBtn').addEventListener('click', saveAUM);
@@ -2760,7 +2779,7 @@ def create_aum_section():
                 if (!ws) throw new Error('AUM 시트가 없습니다');
 
                 // 사용자 지정 날짜 (또는 오늘)로 새 행 추가
-                var saveDateStr = aumSelectedDate || new Date().toISOString().slice(0, 10);
+                var saveDateStr = normalizeDateStr(aumSelectedDate) || todayLocalIso();
                 var parts = saveDateStr.split('-');
                 var saveDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
 
