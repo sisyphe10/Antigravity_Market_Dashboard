@@ -1545,7 +1545,7 @@ def create_aum_table():
             date_str = row['날짜'].strftime('%m/%d')
             rows_html += f'<tr><td>{row["증권사"]}</td><td>{row["상품명"]}</td><td>{aum_억:,.0f}억</td><td>{date_str}</td></tr>\n'
         total_억 = total_aum / 100_000_000
-        rows_html += f'<tr style="border-top:2px solid #000;font-weight:700;"><td colspan="2">합계</td><td>{total_억:,.0f}억</td><td></td></tr>'
+        rows_html += f'<tr style="border-top:2px solid #000;font-weight:700;"><td>합계</td><td></td><td>{total_억:,.0f}억</td><td></td></tr>'
         # 증권사별 색상
         broker_colors = {'삼성': '#1428A0', 'NH': '#0072CE', 'DB': '#00854A'}
 
