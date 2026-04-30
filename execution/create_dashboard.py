@@ -5,6 +5,7 @@ import subprocess
 from datetime import datetime, timezone, timedelta
 import csv
 import json
+import html as _html
 from pathlib import Path
 import pandas as pd
 
@@ -796,6 +797,319 @@ def _build_indices_chart_section(category_label='Indices'):
         """
     except Exception as e:
         print(f"Error building indices chart section: {e}")
+        import traceback; traceback.print_exc()
+        return ""
+
+
+def _build_combined_chart_section():
+    """7개 카테고리(INDEX_KOREA/INDEX_US/EXCHANGE RATE/INTEREST RATES/CRYPTOCURRENCY/Memory/COMMODITIES)
+    를 단일 동적 Chart.js 차트로 통합. 좌 사이드바는 카테고리 그룹 헤더 + 토글 항목,
+    우는 % change 정규화 라인 차트 (Indices 패턴)."""
+    try:
+        groups = [
+            {'label': 'INDEX_KOREA', 'series': [
+                {'display': 'KOSPI',              'csv': 'KOSPI',              'color': '#000000', 'default': True},
+                {'display': 'KOSPI/USD',          'csv': 'KOSPI/USD',          'color': '#444444'},
+                {'display': 'KOSPI Market Cap',   'csv': 'KOSPI Market Cap',   'color': '#888888'},
+                {'display': 'KOSDAQ',             'csv': 'KOSDAQ',             'color': '#1976D2'},
+                {'display': 'KOSDAQ/USD',         'csv': 'KOSDAQ/USD',         'color': '#5294D8'},
+                {'display': 'KOSDAQ Market Cap',  'csv': 'KOSDAQ Market Cap',  'color': '#7BAEDF'},
+            ]},
+            {'label': 'INDEX_US', 'series': [
+                {'display': 'S&P 500',            'csv': 'S&P 500',            'color': '#2E7D32', 'default': True},
+                {'display': 'S&P 500 PER',        'csv': 'S&P 500 PER',        'color': '#4CAF50'},
+                {'display': 'S&P 500 PBR',        'csv': 'S&P 500 PBR',        'color': '#81C784'},
+                {'display': 'NASDAQ',             'csv': 'NASDAQ',             'color': '#7B1FA2'},
+                {'display': 'NASDAQ PER',         'csv': 'NASDAQ PER',         'color': '#9C27B0'},
+                {'display': 'NASDAQ PBR',         'csv': 'NASDAQ PBR',         'color': '#BA68C8'},
+                {'display': 'RUSSELL 2000',       'csv': 'RUSSELL 2000',       'color': '#F57C00'},
+                {'display': 'RUSSELL 2000 PER',   'csv': 'RUSSELL 2000 PER',   'color': '#FF9800'},
+                {'display': 'RUSSELL 2000 PBR',   'csv': 'RUSSELL 2000 PBR',   'color': '#FFB74D'},
+                {'display': 'VIX Index',          'csv': 'VIX Index',          'color': '#D32F2F'},
+            ]},
+            {'label': 'EXCHANGE RATE', 'series': [
+                {'display': 'Dollar Index (DXY)', 'csv': 'Dollar Index (DXY)', 'color': '#1565C0'},
+                {'display': 'KRW/USD',            'csv': 'KRW/USD',            'color': '#0277BD', 'default': True},
+                {'display': 'CNY/USD',            'csv': 'CNY/USD',            'color': '#0288D1'},
+                {'display': 'JPY/USD',            'csv': 'JPY/USD',            'color': '#039BE5'},
+                {'display': 'TWD/USD',            'csv': 'TWD/USD',            'color': '#03A9F4'},
+                {'display': 'EUR/USD',            'csv': 'EUR/USD',            'color': '#29B6F6'},
+            ]},
+            {'label': 'INTEREST RATES', 'series': [
+                {'display': 'US 13 Week Treasury Yield', 'csv': 'US 13 Week Treasury Yield', 'color': '#B71C1C'},
+                {'display': 'US 5 Year Treasury Yield',  'csv': 'US 5 Year Treasury Yield',  'color': '#C62828'},
+                {'display': 'US 10 Year Treasury Yield', 'csv': 'US 10 Year Treasury Yield', 'color': '#D32F2F', 'default': True},
+                {'display': 'US 30 Year Treasury Yield', 'csv': 'US 30 Year Treasury Yield', 'color': '#E53935'},
+            ]},
+            {'label': 'CRYPTOCURRENCY', 'series': [
+                {'display': 'BTC', 'csv': 'BTC', 'color': '#F7931A', 'default': True},
+                {'display': 'ETH', 'csv': 'ETH', 'color': '#627EEA'},
+                {'display': 'BNB', 'csv': 'BNB', 'color': '#F0B90B'},
+                {'display': 'XRP', 'csv': 'XRP', 'color': '#23292F'},
+                {'display': 'SOL', 'csv': 'SOL', 'color': '#9945FF'},
+            ]},
+            {'label': 'COMMODITIES', 'series': [
+                {'display': 'Gold',                       'csv': 'Gold',                       'color': '#FFD700', 'default': True},
+                {'display': 'KRX GOLD Trading Volume',    'csv': 'KRX GOLD Trading Volume',    'color': '#DAA520'},
+                {'display': 'Silver',                     'csv': 'Silver',                     'color': '#C0C0C0'},
+                {'display': 'Copper',                     'csv': 'Copper',                     'color': '#B87333'},
+                {'display': 'WTI Crude Oil',              'csv': 'WTI Crude Oil',              'color': '#2C3E50'},
+                {'display': 'Brent Crude Oil',            'csv': 'Brent Crude Oil',            'color': '#34495E'},
+                {'display': 'Natural Gas',                'csv': 'Natural Gas',                'color': '#16A085'},
+                {'display': 'Wheat',                      'csv': 'Wheat',                      'color': '#F39C12'},
+                {'display': 'Uranium',                    'csv': 'Uranium',                    'color': '#27AE60'},
+                {'display': 'Lithium Carbonate',          'csv': 'Lithium Carbonate',          'color': '#8E44AD'},
+                {'display': 'Lithium Hydroxide',          'csv': 'Lithium Hydroxide',          'color': '#9B59B6'},
+                {'display': 'Poly Silicon',               'csv': 'Poly Silicon',               'color': '#3498DB'},
+                {'display': 'SCFI Comprehensive Index',   'csv': 'SCFI Comprehensive Index',   'color': '#E74C3C'},
+                {'display': 'KRX ETS  KAU25',             'csv': 'KRX ETS  KAU25',             'color': '#1ABC9C'},
+                {'display': 'KRX ETS Trading Volume',     'csv': 'KRX ETS Trading Volume',     'color': '#117A65'},
+                {'display': 'SMP',                        'csv': 'SMP',                        'color': '#E67E22'},
+            ]},
+            {'label': 'MEMORY', 'series': [
+                {'display': 'DDR5 16G (2Gx8) 4800/5600',  'csv': 'DDR5 16G (2Gx8) 4800/5600',  'color': '#E91E63', 'default': True},
+                {'display': 'DDR4 16Gb (2Gx8)3200',       'csv': 'DDR4 16Gb (2Gx8)3200',       'color': '#EC407A'},
+                {'display': 'DDR4 16Gb (1Gx16)3200',      'csv': 'DDR4 16Gb (1Gx16)3200',      'color': '#F06292'},
+                {'display': 'DDR4 8Gb (1Gx8) 3200',       'csv': 'DDR4 8Gb (1Gx8) 3200',       'color': '#F48FB1'},
+                {'display': 'DDR4 8Gb (512Mx16) 3200',    'csv': 'DDR4 8Gb (512Mx16) 3200',    'color': '#F8BBD0'},
+                {'display': 'SLC 2Gb 256MBx8',            'csv': 'SLC 2Gb 256MBx8',            'color': '#00897B'},
+                {'display': 'SLC 1Gb 128MBx8',            'csv': 'SLC 1Gb 128MBx8',            'color': '#26A69A'},
+                {'display': 'MLC 64Gb 8GBx8',             'csv': 'MLC 64Gb 8GBx8',             'color': '#4DB6AC'},
+                {'display': 'MLC 32Gb 4GBx8',             'csv': 'MLC 32Gb 4GBx8',             'color': '#80CBC4'},
+            ]},
+        ]
+
+        df = pd.read_csv(CSV_FILE, encoding='utf-8-sig')
+        df['날짜'] = pd.to_datetime(df['날짜'])
+        df['가격'] = pd.to_numeric(df['가격'].astype(str).str.replace(',', ''), errors='coerce')
+
+        all_csv_names = set()
+        for g in groups:
+            for s in g['series']:
+                all_csv_names.add(s['csv'])
+
+        latest = df['날짜'].max()
+        start = latest - timedelta(days=180)
+        df = df[(df['날짜'] >= start) & (df['날짜'] <= latest)]
+
+        sub = df[df['제품명'].isin(all_csv_names)].copy()
+        sub = sub.drop_duplicates(subset=['날짜', '제품명'], keep='last')
+        wide = sub.pivot(index='날짜', columns='제품명', values='가격').sort_index()
+        wide = wide.dropna(how='all')
+        dates = [d.strftime('%Y-%m-%d') for d in wide.index]
+
+        data_export = {}
+        colors = {}
+        rows_html = ''
+        for g in groups:
+            group_has_data = False
+            group_rows = ''
+            for s in g['series']:
+                if s['csv'] not in wide.columns:
+                    continue
+                values = [
+                    None if pd.isna(v) else round(float(v), 4)
+                    for v in wide[s['csv']].tolist()
+                ]
+                if all(v is None for v in values):
+                    continue
+                data_export[s['display']] = values
+                colors[s['display']] = s['color']
+                active = ' active' if s.get('default') else ''
+                group_rows += (
+                    f'<tr class="cmb-chart-item{active}" data-series="{_html.escape(s["display"])}" '
+                    f'onclick="toggleCmbSeries(this)">'
+                    f'<td style="width:6px;padding:0;">'
+                    f'<div style="width:4px;height:18px;background:{s["color"]};border-radius:2px;margin:auto;"></div></td>'
+                    f'<td>{_html.escape(s["display"])}</td></tr>\n'
+                )
+                group_has_data = True
+            if group_has_data:
+                rows_html += (
+                    f'<tr class="cmb-group-header"><td colspan="2" '
+                    f'style="background:#f0f0f0;font-weight:700;font-size:12px;color:#333;'
+                    f'padding:8px 10px;text-transform:uppercase;letter-spacing:0.5px;'
+                    f'border-top:1px solid #ddd;">{_html.escape(g["label"])}</td></tr>\n'
+                )
+                rows_html += group_rows
+
+        export = {'dates': dates, 'data': data_export}
+        export_json = json.dumps(export, ensure_ascii=False)
+        colors_json = json.dumps(colors, ensure_ascii=False)
+
+        list_html = (
+            f'<table class="portfolio-table" style="max-width:500px;margin:0 auto;">'
+            f'<tbody>{rows_html}</tbody></table>'
+        )
+
+        ytd_start = '2025-12-30'
+        first_date = ytd_start if dates and dates[0] <= ytd_start else (dates[0] if dates else '')
+        last_date = dates[-1] if dates else ''
+
+        js_code = """
+        <script>
+        (function() {
+            var cmbData = CMB_DATA_PLACEHOLDER;
+            var cmbColors = CMB_COLORS_PLACEHOLDER;
+            var cmbChart = null;
+
+            function buildCmbChart() {
+                var selected = [];
+                document.querySelectorAll('.cmb-chart-item.active').forEach(function(el){ selected.push(el.getAttribute('data-series')); });
+                var startDate = document.getElementById('cmbStartDate').value;
+                var endDate = document.getElementById('cmbEndDate').value;
+
+                var perSeries = [];
+                selected.forEach(function(name) {
+                    var arr = cmbData.data[name];
+                    if (!arr) return;
+                    var lookup = {};
+                    var firstDate = '';
+                    for (var i = 0; i < cmbData.dates.length; i++) {
+                        var d = cmbData.dates[i];
+                        if (d >= startDate && d <= endDate && arr[i] !== null && arr[i] !== undefined) {
+                            lookup[d] = arr[i];
+                            if (!firstDate) firstDate = d;
+                        }
+                    }
+                    if (!firstDate) return;
+                    perSeries.push({ name: name, lookup: lookup, firstDate: firstDate });
+                });
+
+                var commonStart = '';
+                perSeries.forEach(function(s) {
+                    if (s.firstDate > commonStart) commonStart = s.firstDate;
+                });
+
+                var dateSet = {};
+                perSeries.forEach(function(s) {
+                    Object.keys(s.lookup).forEach(function(d) {
+                        if (d >= commonStart) dateSet[d] = true;
+                    });
+                });
+                var commonDates = Object.keys(dateSet).sort();
+
+                var datasets = [];
+                perSeries.forEach(function(s) {
+                    var aligned = [];
+                    var lastVal = null;
+                    for (var i = 0; i < commonDates.length; i++) {
+                        var d = commonDates[i];
+                        if (s.lookup.hasOwnProperty(d)) lastVal = s.lookup[d];
+                        aligned.push(lastVal);
+                    }
+                    var base = null;
+                    for (var j = 0; j < aligned.length; j++) {
+                        if (aligned[j] !== null) { base = aligned[j]; break; }
+                    }
+                    if (base === null) return;
+                    var pct = aligned.map(function(v) {
+                        if (v === null) return null;
+                        return Math.round((v / base - 1) * 10000) / 100;
+                    });
+                    datasets.push({
+                        label: s.name,
+                        data: pct,
+                        borderColor: cmbColors[s.name] || '#888',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.3,
+                        spanGaps: true
+                    });
+                });
+
+                var endLabelPlugin = {
+                    id: 'cmbEndLabels',
+                    afterDatasetsDraw: function(chart) {
+                        var ctx = chart.ctx;
+                        chart.data.datasets.forEach(function(ds, i) {
+                            var meta = chart.getDatasetMeta(i);
+                            if (meta.hidden) return;
+                            var lastIdx = -1;
+                            for (var k = ds.data.length - 1; k >= 0; k--) {
+                                if (ds.data[k] !== null && ds.data[k] !== undefined) { lastIdx = k; break; }
+                            }
+                            if (lastIdx < 0) return;
+                            var last = meta.data[lastIdx];
+                            if (!last) return;
+                            var val = ds.data[lastIdx];
+                            var rounded = Math.sign(val) * Math.round(Math.abs(val));
+                            var sign = rounded >= 0 ? '+' : '';
+                            ctx.save();
+                            ctx.font = 'bold 12px sans-serif';
+                            ctx.fillStyle = ds.borderColor;
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(sign + rounded + '%', last.x + 6, last.y);
+                            ctx.restore();
+                        });
+                    }
+                };
+
+                var legendEl = document.getElementById('cmbChartLegend');
+                if (legendEl) {
+                    var legendHTML = datasets.map(function(ds) {
+                        var c = ds.borderColor;
+                        return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:13px;">' +
+                            '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
+                            ds.label + '</span>';
+                    }).join('');
+                    legendEl.innerHTML = legendHTML;
+                }
+
+                if (cmbChart) cmbChart.destroy();
+                cmbChart = new Chart(document.getElementById('cmbDynamicChart'), {
+                    type: 'line',
+                    data: { labels: commonDates, datasets: datasets },
+                    plugins: [endLabelPlugin],
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        layout: { padding: { right: 60 } },
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { label: function(ctx){ return ctx.dataset.label + ': ' + (ctx.parsed.y === null ? '-' : ctx.parsed.y.toFixed(1) + '%'); } } }
+                        },
+                        scales: {
+                            x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 11 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
+                            y: { ticks: { callback: function(v){ return v + '%'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' }, border: { color: '#000' } }
+                        }
+                    }
+                });
+            }
+
+            window.toggleCmbSeries = function(el) { el.classList.toggle('active'); buildCmbChart(); };
+            window.updateCmbChart = buildCmbChart;
+            buildCmbChart();
+        })();
+        </script>
+        """.replace('CMB_DATA_PLACEHOLDER', export_json).replace('CMB_COLORS_PLACEHOLDER', colors_json)
+
+        return f"""
+        <div class="category-section">
+            <h2 class="category-title">MARKET</h2>
+            <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;">
+                <div style="min-width:240px;max-height:720px;overflow-y:auto;">{list_html}</div>
+                <div style="flex:1;min-width:0;">
+                    <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;font-size:13px;">
+                        <span style="color:#555;font-weight:600;">기간</span>
+                        <input type="text" id="cmbStartDate" value="{first_date}" onchange="formatDateInput(this);updateCmbChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
+                        <span style="color:#888;">~</span>
+                        <input type="text" id="cmbEndDate" value="{last_date}" onchange="formatDateInput(this);updateCmbChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
+                    </div>
+                    <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                        <div style="position:relative;height:600px;">
+                            <canvas id="cmbDynamicChart"></canvas>
+                        </div>
+                        <div id="cmbChartLegend" style="margin-top:12px;text-align:center;color:#222;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {js_code}
+        """
+    except Exception as e:
+        print(f"Error building combined chart section: {e}")
         import traceback; traceback.print_exc()
         return ""
 
@@ -1715,234 +2029,181 @@ def create_wrap_returns_table():
 
 
 def create_order_section():
-    """ORDER 탭 — 포트폴리오별 weight 변경 + 사유 입력 → 자문지 .xlsx 송출.
+    """ORDER 패널 — WRAP 페이지 'Order' 탭 안의 콘텐츠.
+
+    fetch portfolio_data.json + ExcelJS 클라이언트 사이드 처리 (journal.html 검증된 패턴).
 
     UX:
-      - 5개 포트폴리오 카드 탭 (트루밸류/NH Value ESG/DB 개방형/NH 목표전환형 2호/DB 목표전환형 3차)
-      - 각 카드 내부: 종목 테이블 (변경전 read-only, 변경후/추천사유 input)
-      - 변경후 입력 시 주문구분 자동 계산 (유지/추가매수/일부매도/신규매수/전량매도)
-      - 변경후 합계 ≠ 100% 시 빨간 경고 (현금 비중 자동)
-      - Download 버튼 → 자문지 폴더의 템플릿 .xlsx fetch → R7부터 G/H/I 셀 patch → 다운로드 (ExcelJS)
+      - 5개 포트폴리오 버튼 (트루밸류/NH Value ESG/DB 개방형/NH 목표전환형 2호/DB 목표전환형 3차)
+      - 각 버튼 클릭 시 종목 테이블: 변경전(read-only), 변경후(input), 주문구분(자동), 추천사유(input)
+      - Download(빨간) → 자문지/ 템플릿 fetch → R7부터 F/G/H/I 셀 patch → .xlsx 다운로드
     """
-    try:
-        with open('portfolio_data.json', encoding='utf-8') as f:
-            pdata = json.load(f)
-    except Exception as e:
-        print(f"Error loading portfolio_data.json: {e}")
-        return ""
-
-    # 일반형 3개는 portfolio_data.json에서 한 키로 묶여 있음 (동일 종목/비중)
-    common_key = '삼성 트루밸류 / NH Value ESG / DB 개방형'
-    common_stocks = pdata.get(common_key, [])
-
-    # 포트폴리오별 (표시명, 자문지 템플릿 파일명, 종목 리스트)
-    portfolios_meta = [
-        ('삼성 트루밸류',         '자문지/라이프자산운용_트루밸류_260427.xlsx',                                  common_stocks),
-        ('NH Value ESG',         '자문지/라이프자산운용_라이프 다이내믹밸류_일반형 _2026.4.27.xlsx',            common_stocks),
-        ('DB 개방형',            '자문지/라이프자산운용_DB 개방형 랩 _2026.4.27.xlsx',                          common_stocks),
-        ('NH 목표전환형 2호',    '자문지/라이프자산운용_라이프 다이내믹밸류_목표전환형 2호_2026.4.29.xlsx',     pdata.get('NH 목표전환형 2호', [])),
-        ('DB 목표전환형 3차',    '자문지/라이프자산운용_DB 목표전환형 랩 _3차_2026.4.30.xlsx',                  pdata.get('DB 목표전환형 3차', [])),
-    ]
-
-    portfolios_export = []
-    for display, template, stocks in portfolios_meta:
-        portfolios_export.append({
-            'display': display,
-            'template': template,
-            'stocks': [
-                {
-                    'code': s['code'],
-                    'name': s['name'],
-                    'sector': s.get('sector', ''),
-                    'weight': float(s.get('weight', 0)),
-                }
-                for s in stocks
-            ],
-        })
-    portfolios_json = json.dumps(portfolios_export, ensure_ascii=False)
-
-    section = """
-        <div class="category-section">
-            <h2 class="category-title">ORDER</h2>
-            <div style="max-width:1400px;margin:0 auto;">
-                <div id="orderTabs" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center;"></div>
-                <div id="orderPanels"></div>
-            </div>
-        </div>
+    return """
+        <div id="orderTabs" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;"></div>
+        <div id="orderContent"><div style="text-align:center;color:#888;padding:40px;">로딩 중...</div></div>
         <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
         <script>
-        (function(){
-            var ORDER_DATA = ORDER_DATA_PLACEHOLDER;
-            // 각 포트폴리오의 사용자 입력 state: {[displayName]: [{newWeight, reason}]}
-            var orderState = {};
-            ORDER_DATA.forEach(function(p){
-                orderState[p.display] = p.stocks.map(function(s){
-                    return { newWeight: s.weight, reason: '' };
+        var ORDER_PORTFOLIOS = [
+            { display: '삼성 트루밸류',      jsonKey: '삼성 트루밸류 / NH Value ESG / DB 개방형',          template: '자문지/라이프자산운용_트루밸류_260427.xlsx' },
+            { display: 'NH Value ESG',      jsonKey: '삼성 트루밸류 / NH Value ESG / DB 개방형',          template: '자문지/라이프자산운용_라이프 다이내믹밸류_일반형 _2026.4.27.xlsx' },
+            { display: 'DB 개방형',         jsonKey: '삼성 트루밸류 / NH Value ESG / DB 개방형',          template: '자문지/라이프자산운용_DB 개방형 랩 _2026.4.27.xlsx' },
+            { display: 'NH 목표전환형 2호', jsonKey: 'NH 목표전환형 2호 / DB 목표전환형 3차',             template: '자문지/라이프자산운용_라이프 다이내믹밸류_목표전환형 2호_2026.4.29.xlsx' },
+            { display: 'DB 목표전환형 3차', jsonKey: 'NH 목표전환형 2호 / DB 목표전환형 3차',             template: '자문지/라이프자산운용_DB 목표전환형 랩 _3차_2026.4.30.xlsx' },
+        ];
+        var orderState = {};
+        var orderStocks = {};
+        var orderActiveTab = null;
+        var _orderLoaded = false;
+
+        async function loadOrder() {
+            if (_orderLoaded) return;
+            _orderLoaded = true;
+            try {
+                var res = await fetch('portfolio_data.json');
+                if (!res.ok) throw new Error('portfolio_data.json fetch 실패: ' + res.status);
+                var pdata = await res.json();
+                ORDER_PORTFOLIOS.forEach(function(p) {
+                    var stocks = pdata[p.jsonKey] || [];
+                    orderStocks[p.display] = stocks.map(function(s) {
+                        return { code: s.code, name: s.name, sector: s.sector || '', weight: parseFloat(s.weight) || 0 };
+                    });
+                    orderState[p.display] = orderStocks[p.display].map(function(s) {
+                        return { newWeight: s.weight, reason: '' };
+                    });
+                });
+                renderOrderTabs();
+                switchOrderTab(ORDER_PORTFOLIOS[0].display);
+            } catch(e) {
+                document.getElementById('orderContent').innerHTML = '<div style="color:#dc2626;padding:40px;">데이터 로드 실패: ' + e.message + '</div>';
+                console.error('loadOrder error:', e);
+            }
+        }
+
+        function calcOrderType(oldW, newW) {
+            if (oldW === newW) return '유지';
+            if (oldW === 0 && newW > 0) return '신규 매수';
+            if (newW === 0 && oldW > 0) return '전량 매도';
+            if (newW > oldW) return '추가 매수';
+            return '일부 매도';
+        }
+
+        function renderOrderTabs() {
+            var html = '';
+            ORDER_PORTFOLIOS.forEach(function(p) {
+                html += '<button class="order-pf-btn" data-pf="' + p.display + '" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 16px;background:#f3f4f6;color:#444;border:none;border-radius:8px;cursor:pointer;">' + p.display + '</button>';
+            });
+            document.getElementById('orderTabs').innerHTML = html;
+            document.querySelectorAll('.order-pf-btn').forEach(function(b) {
+                b.addEventListener('click', function() { switchOrderTab(b.dataset.pf); });
+            });
+        }
+
+        function switchOrderTab(pfName) {
+            orderActiveTab = pfName;
+            document.querySelectorAll('.order-pf-btn').forEach(function(b) {
+                var active = b.dataset.pf === pfName;
+                b.style.background = active ? '#222' : '#f3f4f6';
+                b.style.color = active ? '#fff' : '#444';
+            });
+            renderOrderPanel(pfName);
+        }
+
+        function renderOrderPanel(pfName) {
+            var stocks = orderStocks[pfName] || [];
+            var st = orderState[pfName] || [];
+            var oldSum = stocks.reduce(function(a, s) { return a + s.weight; }, 0);
+            var newSum = st.reduce(function(a, x) { return a + (parseFloat(x.newWeight) || 0); }, 0);
+            var sumColor = (Math.abs(newSum - oldSum) < 0.01) ? '#16a34a' : (newSum > 100 ? '#dc2626' : '#222');
+            var rows = '';
+            stocks.forEach(function(s, i) {
+                var orderState_i = st[i];
+                var ot = calcOrderType(s.weight, parseFloat(orderState_i.newWeight) || 0);
+                var otColor = ot === '유지' ? '#888' : '#dc2626';
+                rows += '<tr>'
+                    + '<td style="text-align:center;color:#666;padding:8px;">' + (i + 1) + '</td>'
+                    + '<td style="color:#666;padding:8px;font-size:13px;">' + s.sector + '</td>'
+                    + '<td style="text-align:center;font-family:monospace;color:#666;padding:8px;">' + s.code + '</td>'
+                    + '<td style="font-weight:600;padding:8px;">' + s.name + '</td>'
+                    + '<td style="text-align:right;color:#666;padding:8px;">' + s.weight + '</td>'
+                    + '<td style="text-align:right;padding:8px;"><input type="number" min="0" max="100" step="1" data-idx="' + i + '" data-field="newWeight" value="' + orderState_i.newWeight + '" style="width:65px;text-align:right;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;"></td>'
+                    + '<td style="text-align:center;font-size:13px;color:' + otColor + ';padding:8px;">' + ot + '</td>'
+                    + '<td style="padding:8px;"><input type="text" data-idx="' + i + '" data-field="reason" value="' + (orderState_i.reason || '').replace(/"/g, '&quot;') + '" placeholder="추천사유 입력" style="width:100%;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:13px;"></td>'
+                    + '</tr>';
+            });
+            var html = '<div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">'
+                + '<div style="display:flex;align-items:center;margin-bottom:16px;">'
+                + '<h3 style="margin:0;font-size:18px;">' + pfName + '</h3>'
+                + '<div style="margin-left:auto;font-size:13px;color:#555;">변경전 합계 <b>' + oldSum + '%</b> → 변경후 합계 <b style="color:' + sumColor + ';">' + newSum.toFixed(0) + '%</b> (현금 ' + (100 - newSum).toFixed(0) + '%)</div>'
+                + '<button id="orderDownloadBtn" style="margin-left:14px;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>'
+                + '</div>'
+                + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">'
+                + '<thead><tr style="border-bottom:2px solid #e5e7eb;color:#444;">'
+                + '<th style="padding:8px;width:40px;">순위</th>'
+                + '<th style="padding:8px;text-align:left;">업종</th>'
+                + '<th style="padding:8px;width:70px;">코드</th>'
+                + '<th style="padding:8px;text-align:left;">종목명</th>'
+                + '<th style="padding:8px;width:70px;text-align:right;">변경전</th>'
+                + '<th style="padding:8px;width:90px;text-align:right;">변경후</th>'
+                + '<th style="padding:8px;width:80px;">주문구분</th>'
+                + '<th style="padding:8px;text-align:left;">추천사유</th>'
+                + '</tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+            document.getElementById('orderContent').innerHTML = html;
+            document.querySelectorAll('#orderContent input').forEach(function(el) {
+                el.addEventListener('input', function(e) {
+                    var idx = parseInt(e.target.dataset.idx);
+                    var field = e.target.dataset.field;
+                    var v = (field === 'newWeight') ? (parseFloat(e.target.value) || 0) : e.target.value;
+                    orderState[orderActiveTab][idx][field] = v;
+                    if (field === 'newWeight') {
+                        renderOrderPanel(orderActiveTab);
+                        var refocus = document.querySelector('#orderContent input[data-idx="' + idx + '"][data-field="newWeight"]');
+                        if (refocus) { refocus.focus(); refocus.setSelectionRange(refocus.value.length, refocus.value.length); }
+                    }
                 });
             });
+            document.getElementById('orderDownloadBtn').addEventListener('click', function() {
+                downloadOrderExcel(orderActiveTab);
+            });
+        }
 
-            function calcOrderType(oldW, newW){
-                if (oldW === newW) return '유지';
-                if (oldW === 0 && newW > 0) return '신규 매수';
-                if (newW === 0 && oldW > 0) return '전량 매도';
-                if (newW > oldW) return '추가 매수';
-                return '일부 매도';
-            }
-
-            function buildPanel(p, idx){
-                var rows = '';
-                p.stocks.forEach(function(s, i){
-                    var st = orderState[p.display][i];
-                    var ot = calcOrderType(s.weight, st.newWeight);
-                    rows += '<tr>' +
-                        '<td style="text-align:center;color:#666;">'+(i+1)+'</td>' +
-                        '<td style="color:#666;">'+(s.sector||'')+'</td>' +
-                        '<td style="text-align:center;font-family:Inter,monospace;color:#666;">'+s.code+'</td>' +
-                        '<td style="font-weight:600;">'+s.name+'</td>' +
-                        '<td style="text-align:right;color:#666;">'+s.weight+'</td>' +
-                        '<td style="text-align:right;"><input type="number" min="0" max="100" step="1" value="'+st.newWeight+'" data-pf="'+p.display+'" data-i="'+i+'" data-field="newWeight" style="width:60px;text-align:right;padding:3px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;"></td>' +
-                        '<td style="text-align:center;font-size:13px;color:'+(ot==='유지'?'#888':'#dc2626')+';">'+ot+'</td>' +
-                        '<td><input type="text" value="'+st.reason.replace(/"/g,'&quot;')+'" data-pf="'+p.display+'" data-i="'+i+'" data-field="reason" placeholder="추천사유 입력" style="width:100%;padding:3px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:13px;"></td>' +
-                        '</tr>';
+        async function downloadOrderExcel(pfName) {
+            var p = ORDER_PORTFOLIOS.find(function(x) { return x.display === pfName; });
+            if (!p) { alert('포트폴리오 매핑 누락: ' + pfName); return; }
+            if (typeof ExcelJS === 'undefined') { alert('ExcelJS 라이브러리 로드 실패. 새로고침 해주세요.'); return; }
+            var stocks = orderStocks[pfName];
+            var st = orderState[pfName];
+            try {
+                var resp = await fetch(p.template);
+                if (!resp.ok) throw new Error('템플릿 fetch 실패: HTTP ' + resp.status + ' (' + p.template + ')');
+                var buf = await resp.arrayBuffer();
+                var wb = new ExcelJS.Workbook();
+                await wb.xlsx.load(buf);
+                var ws = wb.worksheets[0];
+                stocks.forEach(function(s, i) {
+                    var r = 7 + i;
+                    ws.getCell('F' + r).value = s.weight;
+                    ws.getCell('G' + r).value = parseFloat(st[i].newWeight) || 0;
+                    ws.getCell('H' + r).value = calcOrderType(s.weight, parseFloat(st[i].newWeight) || 0);
+                    ws.getCell('I' + r).value = st[i].reason || '';
                 });
-                var oldSum = p.stocks.reduce(function(a, s){return a + s.weight;}, 0);
-                var newSum = orderState[p.display].reduce(function(a, st){return a + (parseFloat(st.newWeight)||0);}, 0);
-                var newSumColor = (Math.abs(newSum - 100) < 0.01) ? '#16a34a' : (newSum > 100 ? '#dc2626' : '#222');
-
-                return '<div class="order-panel" data-pf="'+p.display+'" style="display:'+(idx===0?'block':'none')+';background:#fff;border-radius:12px;padding:24px;box-shadow:0 4px 6px rgba(0,0,0,0.08);">' +
-                    '<div style="display:flex;align-items:center;margin-bottom:16px;">' +
-                    '<h3 style="margin:0;font-size:18px;font-weight:600;">'+p.display+'</h3>' +
-                    '<div style="margin-left:auto;font-size:13px;color:#555;">변경전 합계 <b>'+oldSum+'%</b> → 변경후 합계 <b style="color:'+newSumColor+';">'+newSum.toFixed(0)+'%</b> (현금 '+(100-newSum).toFixed(0)+'%)</div>' +
-                    '<button onclick="downloadOrderExcel(\''+p.display.replace(/'/g, "\\'")+'\')" style="margin-left:14px;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>' +
-                    '</div>' +
-                    '<div style="overflow-x:auto;">' +
-                    '<table style="width:100%;border-collapse:collapse;font-size:13px;">' +
-                    '<thead><tr style="border-bottom:2px solid #e5e7eb;color:#444;">' +
-                    '<th style="padding:8px;text-align:center;width:40px;">순위</th>' +
-                    '<th style="padding:8px;text-align:left;">업종</th>' +
-                    '<th style="padding:8px;text-align:center;width:70px;">코드</th>' +
-                    '<th style="padding:8px;text-align:left;">종목명</th>' +
-                    '<th style="padding:8px;text-align:right;width:60px;">변경전</th>' +
-                    '<th style="padding:8px;text-align:right;width:80px;">변경후</th>' +
-                    '<th style="padding:8px;text-align:center;width:80px;">주문구분</th>' +
-                    '<th style="padding:8px;text-align:left;">추천사유</th>' +
-                    '</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+                var out = await wb.xlsx.writeBuffer();
+                var blob = new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                var today = new Date().toISOString().slice(0, 10);
+                a.download = pfName + '_자문지_' + today + '.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch(e) {
+                alert('자문지 송출 실패: ' + e.message);
+                console.error('downloadOrderExcel error:', e);
             }
-
-            function renderTabs(){
-                var tabsEl = document.getElementById('orderTabs');
-                tabsEl.innerHTML = ORDER_DATA.map(function(p, i){
-                    return '<button class="order-tab" data-pf="'+p.display+'" onclick="switchOrderTab(\''+p.display.replace(/'/g, "\\'")+'\')" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 16px;background:'+(i===0?'#222':'#f3f4f6')+';color:'+(i===0?'#fff':'#444')+';border:none;border-radius:8px;cursor:pointer;">'+p.display+'</button>';
-                }).join('');
-            }
-
-            function renderPanels(){
-                document.getElementById('orderPanels').innerHTML = ORDER_DATA.map(function(p, i){return buildPanel(p, i);}).join('');
-                // input 이벤트 바인딩
-                document.querySelectorAll('.order-panel input').forEach(function(el){
-                    el.addEventListener('input', function(e){
-                        var pf = e.target.getAttribute('data-pf');
-                        var i = parseInt(e.target.getAttribute('data-i'));
-                        var field = e.target.getAttribute('data-field');
-                        var v = (field === 'newWeight') ? (parseFloat(e.target.value) || 0) : e.target.value;
-                        orderState[pf][i][field] = v;
-                        if (field === 'newWeight') {
-                            // 주문구분 + 합계 갱신: 해당 패널 다시 렌더
-                            var idx = ORDER_DATA.findIndex(function(p){return p.display === pf;});
-                            var oldEl = document.querySelector('.order-panel[data-pf="'+pf+'"]');
-                            var newHtml = buildPanel(ORDER_DATA[idx], 0);
-                            // display 상태 유지
-                            var wasDisplayed = oldEl.style.display !== 'none';
-                            oldEl.outerHTML = newHtml;
-                            var newEl = document.querySelector('.order-panel[data-pf="'+pf+'"]');
-                            newEl.style.display = wasDisplayed ? 'block' : 'none';
-                            // 같은 패널의 input 이벤트 재바인딩
-                            bindPanelInputs(newEl);
-                            // 같은 행의 newWeight input에 포커스 복귀
-                            var refocus = newEl.querySelector('input[data-i="'+i+'"][data-field="newWeight"]');
-                            if (refocus) { refocus.focus(); refocus.setSelectionRange(refocus.value.length, refocus.value.length); }
-                        }
-                    });
-                });
-            }
-
-            function bindPanelInputs(panel){
-                panel.querySelectorAll('input').forEach(function(el){
-                    el.addEventListener('input', function(e){
-                        var pf = e.target.getAttribute('data-pf');
-                        var i = parseInt(e.target.getAttribute('data-i'));
-                        var field = e.target.getAttribute('data-field');
-                        var v = (field === 'newWeight') ? (parseFloat(e.target.value) || 0) : e.target.value;
-                        orderState[pf][i][field] = v;
-                        if (field === 'newWeight') {
-                            var idx = ORDER_DATA.findIndex(function(p){return p.display === pf;});
-                            var oldEl = document.querySelector('.order-panel[data-pf="'+pf+'"]');
-                            var wasDisplayed = oldEl.style.display !== 'none';
-                            oldEl.outerHTML = buildPanel(ORDER_DATA[idx], 0);
-                            var newEl = document.querySelector('.order-panel[data-pf="'+pf+'"]');
-                            newEl.style.display = wasDisplayed ? 'block' : 'none';
-                            bindPanelInputs(newEl);
-                            var refocus = newEl.querySelector('input[data-i="'+i+'"][data-field="newWeight"]');
-                            if (refocus) { refocus.focus(); refocus.setSelectionRange(refocus.value.length, refocus.value.length); }
-                        }
-                    });
-                });
-            }
-
-            window.switchOrderTab = function(pfName){
-                document.querySelectorAll('.order-tab').forEach(function(b){
-                    var active = b.getAttribute('data-pf') === pfName;
-                    b.style.background = active ? '#222' : '#f3f4f6';
-                    b.style.color = active ? '#fff' : '#444';
-                });
-                document.querySelectorAll('.order-panel').forEach(function(p){
-                    p.style.display = (p.getAttribute('data-pf') === pfName) ? 'block' : 'none';
-                });
-            };
-
-            window.downloadOrderExcel = async function(pfName){
-                var p = ORDER_DATA.find(function(x){return x.display === pfName;});
-                if (!p) return;
-                var st = orderState[pfName];
-                try {
-                    var resp = await fetch(p.template);
-                    if (!resp.ok) throw new Error('템플릿 fetch 실패: ' + resp.status);
-                    var buf = await resp.arrayBuffer();
-                    var wb = new ExcelJS.Workbook();
-                    await wb.xlsx.load(buf);
-                    var ws = wb.worksheets[0];
-                    // R7부터 종목수만큼 G/H/I 셀 patch (F=변경전, G=변경후, H=주문구분, I=추천사유)
-                    p.stocks.forEach(function(s, i){
-                        var r = 7 + i;
-                        ws.getCell('F' + r).value = s.weight;
-                        ws.getCell('G' + r).value = parseFloat(st[i].newWeight) || 0;
-                        ws.getCell('H' + r).value = calcOrderType(s.weight, parseFloat(st[i].newWeight) || 0);
-                        ws.getCell('I' + r).value = st[i].reason || '';
-                    });
-                    var out = await wb.xlsx.writeBuffer();
-                    var blob = new Blob([out], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-                    var url = URL.createObjectURL(blob);
-                    var a = document.createElement('a');
-                    a.href = url;
-                    var today = new Date().toISOString().slice(0,10);
-                    a.download = pfName + '_자문지_' + today + '.xlsx';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                } catch(e) {
-                    alert('자문지 송출 실패: ' + e.message);
-                    console.error(e);
-                }
-            };
-
-            renderTabs();
-            renderPanels();
-        })();
+        }
         </script>
     """
-    section = section.replace('ORDER_DATA_PLACEHOLDER', portfolios_json)
-    return section
 
 
 def create_dashboard():
@@ -1997,10 +2258,25 @@ def create_dashboard():
         category_order = ['Indices', 'Wrap', 'Portfolio', 'SECTOR', 'INDEX_KOREA', 'INDEX_US', 'EXCHANGE RATE',
                          'INTEREST RATES', 'CRYPTOCURRENCY', 'Memory', 'COMMODITIES']
 
+        # 통합 동적 차트로 묶이는 7개 카테고리 — 개별 PNG 그리드 렌더 스킵
+        merged_into_combined = {
+            'INDEX_KOREA', 'INDEX_US', 'EXCHANGE RATE', 'INTEREST RATES',
+            'CRYPTOCURRENCY', 'Memory', 'COMMODITIES',
+        }
+        combined_rendered = False
+
         for category in category_order:
             # Indices는 동적 차트 (charts_by_category와 무관)
             if category == 'Indices':
                 charts_html += _build_indices_chart_section('Indices')
+                # Indices 직후에 통합 차트 1회 렌더
+                if not combined_rendered:
+                    charts_html += _build_combined_chart_section()
+                    combined_rendered = True
+                continue
+
+            # 통합 차트로 묶이는 카테고리는 건너뜀
+            if category in merged_into_combined:
                 continue
 
             # Portfolio는 차트가 아니라 테이블이므로 특별 처리
@@ -2726,7 +3002,8 @@ def create_dashboard():
         f.write(landing_page)
     print("Landing page generated: index.html")
 
-    # ── Generate wrap.html (WRAP + Portfolio + Sector) ──
+    # ── Generate wrap.html (WRAP + Portfolio + Sector + Order tab) ──
+    order_html = create_order_section()
     wrap_page = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2869,7 +3146,18 @@ def create_dashboard():
         <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
 
+    <div style="display:flex;gap:0;margin:0 auto 0;border-bottom:3px solid #333;max-width:1800px;">
+        <button class="wrap-tab-btn active" onclick="wrapSwitchTab('dashboard')" style="padding:12px 32px;font-size:1rem;font-weight:700;cursor:pointer;background:#333;color:#fff;border:none;border-bottom:3px solid #333;margin-bottom:-3px;font-family:inherit;">Dashboard</button>
+        <button class="wrap-tab-btn" onclick="wrapSwitchTab('order')" style="padding:12px 32px;font-size:1rem;font-weight:700;cursor:pointer;background:#e8e8e8;color:#999;border:none;border-bottom:3px solid transparent;margin-bottom:-3px;font-family:inherit;">Order</button>
+    </div>
+
+    <div id="wrapPanelDashboard" style="padding-top:24px;">
     {wrap_html}
+    </div>
+
+    <div id="wrapPanelOrder" style="padding-top:24px;display:none;max-width:1800px;margin:0 auto;">
+    {order_html}
+    </div>
 
     <footer><p>Auto-generated by Antigravity Agent</p></footer>
     </div>
@@ -2896,6 +3184,20 @@ def create_dashboard():
         document.getElementById('mainContent').classList.remove('pw-hidden');
     }}
 
+    function wrapSwitchTab(tab) {{
+        var btns = document.querySelectorAll('.wrap-tab-btn');
+        btns[0].classList.toggle('active', tab === 'dashboard');
+        btns[1].classList.toggle('active', tab === 'order');
+        btns[0].style.background = tab === 'dashboard' ? '#333' : '#e8e8e8';
+        btns[0].style.color = tab === 'dashboard' ? '#fff' : '#999';
+        btns[0].style.borderBottomColor = tab === 'dashboard' ? '#333' : 'transparent';
+        btns[1].style.background = tab === 'order' ? '#333' : '#e8e8e8';
+        btns[1].style.color = tab === 'order' ? '#fff' : '#999';
+        btns[1].style.borderBottomColor = tab === 'order' ? '#333' : 'transparent';
+        document.getElementById('wrapPanelDashboard').style.display = tab === 'dashboard' ? 'block' : 'none';
+        document.getElementById('wrapPanelOrder').style.display = tab === 'order' ? 'block' : 'none';
+        if (tab === 'order' && typeof loadOrder === 'function') loadOrder();
+    }}
     </script>
 </body>
 </html>"""

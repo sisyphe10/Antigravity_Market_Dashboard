@@ -269,9 +269,21 @@ def create_portfolio_tables():
         code_df['종목코드'] = code_df['종목코드'].apply(lambda x: str(x).zfill(6))
         sector_map = dict(zip(code_df['종목코드'], code_df['섹터']))
 
-        # === 전체 종목 코드 수집 (중복 제거) ===
-        same_portfolios = ['트루밸류', 'Value ESG', '개방형 랩']
-        combined_name = '삼성 트루밸류 / NH Value ESG / DB 개방형'
+        # === 포트폴리오 그룹 정의 (동일 종목/비중을 공유하여 합쳐서 표시) ===
+        # sources: Wrap_NAV.xlsx 상품명 / combined: 표시 결합명 / use: 데이터 가져올 포트폴리오
+        PORTFOLIO_GROUPS = [
+            {
+                'sources': ['트루밸류', 'Value ESG', '개방형 랩'],
+                'combined': '삼성 트루밸류 / NH Value ESG / DB 개방형',
+                'use': '트루밸류',
+            },
+            {
+                'sources': ['목표전환형 2호', '목표전환형 3차'],
+                'combined': 'NH 목표전환형 2호 / DB 목표전환형 3차',
+                'use': '목표전환형 2호',
+            },
+        ]
+
         today = pd.Timestamp.now().normalize()
 
         # 포트폴리오별 종목 구성을 미리 계산
@@ -287,10 +299,12 @@ def create_portfolio_tables():
                 processed.add(portfolio_name)
                 continue
 
-            if portfolio_name in same_portfolios:
-                display_name = combined_name
-                use_portfolio = '트루밸류'
-                processed.update(same_portfolios)
+            # 그룹 매칭
+            group = next((g for g in PORTFOLIO_GROUPS if portfolio_name in g['sources']), None)
+            if group:
+                display_name = group['combined']
+                use_portfolio = group['use']
+                processed.update(group['sources'])
             else:
                 display_name = PORTFOLIO_DISPLAY_NAMES.get(portfolio_name, portfolio_name)
                 use_portfolio = portfolio_name
