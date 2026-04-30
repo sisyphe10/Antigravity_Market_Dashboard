@@ -2171,9 +2171,9 @@ def create_order_section():
             var dlRowsHtml = (p && p.templates ? p.templates : []).map(function(t, ti) {
                 var btnLabel = (p.templates.length === 1) ? 'Download' : 'Download (' + t.label + ')';
                 var outName = buildOutFilename(t, new Date());
-                return '<div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">'
+                return '<div style="display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-bottom:6px;">'
+                    + '<span style="font-size:13px;color:#666;font-family:Inter,sans-serif;">' + outName + ' →</span>'
                     + '<button class="order-dl-btn" data-tidx="' + ti + '" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;min-width:230px;text-align:center;">' + btnLabel + '</button>'
-                    + '<span style="font-size:13px;color:#666;font-family:Inter,sans-serif;">→ ' + outName + '</span>'
                     + '</div>';
             }).join('');
             var html = '<div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">'

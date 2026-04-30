@@ -136,7 +136,7 @@
     <div id="mainContent" class="pw-hidden">
     <header style="position:relative;">
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-04-30 13:29:38 KST</div>
+        <div class="last-updated">Updated: 2026-04-30 13:32:39 KST</div>
         <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
 
@@ -1534,9 +1534,9 @@
             var dlRowsHtml = (p && p.templates ? p.templates : []).map(function(t, ti) {
                 var btnLabel = (p.templates.length === 1) ? 'Download' : 'Download (' + t.label + ')';
                 var outName = buildOutFilename(t, new Date());
-                return '<div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">'
+                return '<div style="display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-bottom:6px;">'
+                    + '<span style="font-size:13px;color:#666;font-family:Inter,sans-serif;">' + outName + ' →</span>'
                     + '<button class="order-dl-btn" data-tidx="' + ti + '" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;min-width:230px;text-align:center;">' + btnLabel + '</button>'
-                    + '<span style="font-size:13px;color:#666;font-family:Inter,sans-serif;">→ ' + outName + '</span>'
                     + '</div>';
             }).join('');
             var html = '<div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">'
