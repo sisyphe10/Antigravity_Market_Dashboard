@@ -170,6 +170,8 @@ def fetch_new_posts(update_state=True):
     for page in range(MAX_PAGES):
         page_html = _fetch_html(_board_url(page * PAGE_SIZE))
         page_posts = parse_board_list(page_html)
+        if page == 0 and not page_posts:
+            raise RuntimeError('KNA 게시판 파싱 0건 (HTML 구조 변경 가능성)')
         if not page_posts:
             break
         for p in page_posts:

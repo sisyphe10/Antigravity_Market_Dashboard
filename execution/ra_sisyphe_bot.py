@@ -380,23 +380,43 @@ async def wisereport_job(context: ContextTypes.DEFAULT_TYPE):
 # ============================================================
 # KNA 세계원전시장동향 (매일 18:00)
 # ============================================================
-async def daily_kna_news_job(context: ContextTypes.DEFAULT_TYPE):
-    """매일 18:00 KNA 세계원전시장동향 신규 게시글 알림"""
-    logging.info("Daily KNA news job started")
+MAX_KNA_RETRIES = 2  # 30분 간격으로 최대 2회 재시도
+
+
+async def _run_kna_job(context: ContextTypes.DEFAULT_TYPE, retry_count: int = 0):
+    """KNA 본 로직. retry_count=0=정기, 1+=재시도. 발송 성공 후 state 갱신."""
+    now_str = datetime.datetime.now(KST).strftime('%Y-%m-%d %H:%M')
+    retry_prefix = f"🔁 재시도 {retry_count}/{MAX_KNA_RETRIES} " if retry_count > 0 else ""
+
+    sys.path.insert(0, os.path.join(DASHBOARD_DIR, 'execution'))
+
     try:
-        sys.path.insert(0, os.path.join(DASHBOARD_DIR, 'execution'))
-        from fetch_kna_news import fetch_new_posts
-        posts = fetch_new_posts(update_state=True)
+        from fetch_kna_news import fetch_new_posts, _save_state
+
+        try:
+            posts = fetch_new_posts(update_state=False)
+        except Exception as fetch_err:
+            raise RuntimeError(
+                f"사이트 접속/파싱 실패 — {type(fetch_err).__name__}: {fetch_err}"
+            ) from fetch_err
+
         if not posts:
-            logging.info("KNA: 신규 글 없음")
+            msg = f"📰 <b>[KNA] {retry_prefix}신규 글 없음</b>\n{now_str}"
+            for chat_id in SUBSCRIBERS:
+                try:
+                    await context.bot.send_message(chat_id=chat_id, text=msg, parse_mode='HTML')
+                except Exception as e:
+                    logging.error(f"KNA empty notify 전송 실패: {e}")
+            logging.info("KNA: 신규 글 없음 (알림 발송)")
             return
+
+        send_errors = []
         for p in posts:
             header = (
                 f"📰 <b>[KNA] {_html.escape(p['title'])}</b>\n"
                 f"{p['date']} · #{p['display_no']}\n"
                 f"{p['url']}\n\n"
             )
-            # 본문 escape + '□' 로 시작하는 소제목은 볼드+밑줄
             body_lines = []
             for ln in p.get('body', '').split('\n'):
                 escaped = _html.escape(ln)
@@ -404,8 +424,7 @@ async def daily_kna_news_job(context: ContextTypes.DEFAULT_TYPE):
                     body_lines.append(f'<b><u>{escaped}</u></b>')
                 else:
                     body_lines.append(escaped)
-            body = '\n'.join(body_lines)
-            full = header + body
+            full = header + '\n'.join(body_lines)
             for chat_id in SUBSCRIBERS:
                 try:
                     for i in range(0, len(full), 4000):
@@ -414,10 +433,60 @@ async def daily_kna_news_job(context: ContextTypes.DEFAULT_TYPE):
                             disable_web_page_preview=True,
                         )
                 except Exception as e:
+                    send_errors.append(f"num={p.get('num')} chat={chat_id}: {e}")
                     logging.error(f"KNA news 전송 실패 (num={p.get('num')}): {e}")
-        logging.info(f"KNA news sent: {len(posts)}건")
+
+        if send_errors:
+            raise RuntimeError(
+                f"텔레그램 전송 실패 {len(send_errors)}건 — 첫 오류: {send_errors[0]}"
+            )
+
+        max_num = max(p['num'] for p in posts)
+        _save_state({'last_seen_num': max_num})
+        logging.info(f"KNA news sent: {len(posts)}건, state→{max_num}")
+
     except Exception as e:
-        logging.error(f"KNA news job failed: {e}")
+        logging.error(f"KNA news job failed (retry={retry_count}): {e}")
+        will_retry = retry_count < MAX_KNA_RETRIES
+        retry_note = (
+            f"\n\n30분 뒤 자동 재시도 (시도 {retry_count + 1}/{MAX_KNA_RETRIES})"
+            if will_retry else
+            "\n\n재시도 한도 초과. 수동 점검 필요."
+        )
+        err_msg = (
+            f"⚠️ <b>[KNA] {retry_prefix}수집/전송 오류</b>\n"
+            f"{now_str}\n\n"
+            f"{_html.escape(str(e))}"
+            f"{retry_note}"
+        )
+        for chat_id in SUBSCRIBERS:
+            try:
+                await context.bot.send_message(chat_id=chat_id, text=err_msg, parse_mode='HTML')
+            except Exception as send_err:
+                logging.error(f"KNA error notify 전송 실패: {send_err}")
+
+        if will_retry:
+            context.job_queue.run_once(
+                _kna_retry_job,
+                when=30 * 60,
+                data={'retry_count': retry_count + 1},
+                name='kna_retry',
+            )
+
+
+async def daily_kna_news_job(context: ContextTypes.DEFAULT_TYPE):
+    """매일 18:00 KNA 정기 잡"""
+    logging.info("Daily KNA news job started")
+    await _run_kna_job(context, retry_count=0)
+
+
+async def _kna_retry_job(context: ContextTypes.DEFAULT_TYPE):
+    """run_once 로 호출되는 KNA 재시도 잡"""
+    retry_count = 1
+    if context.job and context.job.data:
+        retry_count = context.job.data.get('retry_count', 1)
+    logging.info(f"KNA retry job started (retry={retry_count})")
+    await _run_kna_job(context, retry_count=retry_count)
 
 
 # ============================================================
