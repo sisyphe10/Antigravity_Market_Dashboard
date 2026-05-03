@@ -57,6 +57,7 @@ charts/*
 !wics_mapping.json
 !featured_news.json
 !existing_stock_basis.json
+!monthly_returns.json
 
 # 기타
 *.bat

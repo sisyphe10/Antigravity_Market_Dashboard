@@ -492,6 +492,100 @@ def _sector_comparison_card(portfolio_name, portfolio_info, kodex_sectors, kodex
     return card
 
 
+def create_monthly_returns_table():
+    """monthly_returns.json → 월별 수익률 테이블 HTML (한국식 색상: 양수 빨강, 음수 파랑)."""
+    json_path = 'monthly_returns.json'
+    if not os.path.exists(json_path):
+        return ''
+    try:
+        with open(json_path, encoding='utf-8') as f:
+            data = json.load(f)
+    except Exception as e:
+        print(f'monthly_returns.json 로드 실패: {e}')
+        return ''
+
+    indices = data.get('indices', [])
+    rows = data.get('rows', [])
+    if not indices or not rows:
+        return ''
+
+    # 헤더 (모든 컬럼 동일 너비)
+    n_cols = 2 + len(indices)
+    col_w = f'{100 / n_cols:.4f}%'
+    # 그룹 구분선 (오른쪽에 굵은 세로선): 월 / RUSSELL / ETH
+    DIVIDER_AFTER = {'월', 'RUSSELL', 'ETH'}
+
+    # border-collapse:separate 모드 — 셀마다 독립 테두리 (right + bottom만)
+    # 외곽은 table outline이 담당. 분할 셀은 right를 1.5px 진하게.
+    LIGHT = '1px solid #e5e7eb'
+    DARK = '1.5px solid #374151'
+
+    def cell_borders(name, is_header=False):
+        right = DARK if name in DIVIDER_AFTER else LIGHT
+        return f'border-right:{right};border-bottom:{LIGHT};'
+
+    def th_style_for(name):
+        return (f'padding:8px 6px;background:#f3f4f6;font-weight:700;text-align:center;'
+                f'width:{col_w};{cell_borders(name, True)}')
+
+    head_cells = f'<th style="{th_style_for("연도")}">연도</th>'
+    head_cells += f'<th style="{th_style_for("월")}">월</th>'
+    for name in indices:
+        head_cells += f'<th style="{th_style_for(name)}">{_html.escape(name)}</th>'
+
+    body_rows_html = ''
+    for r in rows:
+        y = r.get('year')
+        m = r.get('month')
+        returns = r.get('returns', {})
+        month_label = f'{m}월'
+        cells = f'<td style="padding:6px 12px;text-align:center;font-variant-numeric:tabular-nums;{cell_borders("연도")}">{y}</td>'
+        cells += f'<td style="padding:6px 12px;text-align:center;font-variant-numeric:tabular-nums;{cell_borders("월")}">{month_label}</td>'
+        for name in indices:
+            v = returns.get(name)
+            borders = cell_borders(name)
+            if v is None:
+                cells += f'<td style="padding:6px 12px;text-align:center;{borders}">&nbsp;</td>'
+            else:
+                pct = v * 100
+                abs_pct = abs(pct)
+                if pct > 0:
+                    sign = '+'
+                    if abs_pct <= 5:
+                        bg = '#ffe8e8'
+                    elif abs_pct <= 10:
+                        bg = '#ffb8b8'
+                    else:
+                        bg = '#ff7a7a'
+                elif pct < 0:
+                    sign = ''
+                    if abs_pct <= 5:
+                        bg = '#e8edff'
+                    elif abs_pct <= 10:
+                        bg = '#b8c5ff'
+                    else:
+                        bg = '#7a90ff'
+                else:
+                    sign = ''
+                    bg = 'transparent'
+                cells += f'<td style="padding:6px 12px;text-align:center;background:{bg};color:#000;font-variant-numeric:tabular-nums;{borders}">{sign}{pct:.1f}%</td>'
+        body_rows_html += f'<tr>{cells}</tr>\n'
+
+    html = f"""
+        <div class="category-section">
+            <h2 class="category-title">MONTHLY RETURNS</h2>
+            <div style="overflow-x:auto;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);padding:16px;">
+                <table style="width:900px;max-width:100%;border-collapse:separate;border-spacing:0;font-size:14px;font-family:inherit;table-layout:fixed;margin:0 auto;outline:1.5px solid #374151;outline-offset:-1px;">
+                    <thead><tr>{head_cells}</tr></thead>
+                    <tbody>
+{body_rows_html}                    </tbody>
+                </table>
+            </div>
+        </div>
+"""
+    return html
+
+
 def create_sector_section_html():
     """섹터 비중 비교 섹션 전체 HTML"""
     try:
@@ -775,7 +869,7 @@ def _build_indices_chart_section(category_label='Indices'):
         return f"""
         <div class="category-section">
             <h2 class="category-title">{category_label}</h2>
-            <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;">
+            <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;justify-content:center;">
                 <div style="min-width:180px;">{list_html}</div>
                 <div style="width:1000px;">
                     <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;font-size:13px;">
@@ -886,7 +980,8 @@ def _build_combined_chart_section():
                 all_csv_names.add(s['csv'])
 
         latest = df['날짜'].max()
-        start = latest - timedelta(days=180)
+        # MA120 표시를 위해 데이터 범위 확장 (12개월)
+        start = latest - timedelta(days=365)
         df = df[(df['날짜'] >= start) & (df['날짜'] <= latest)]
 
         sub = df[df['제품명'].isin(all_csv_names)].copy()
@@ -1065,10 +1160,73 @@ def _build_combined_chart_section():
                         backgroundColor: 'transparent',
                         borderWidth: 2,
                         pointRadius: 0,
-                        tension: 0.3,
+                        tension: 0.4,
+                        cubicInterpolationMode: 'monotone',
                         spanGaps: true,
                         yAxisID: yAxisID
                     });
+
+                    // 단일 선택일 때 MA20 / MA120 추가
+                    // 표시 윈도우만으로 MA 계산하면 120일이 안 채워지므로,
+                    // 전체 보유 데이터(12개월)로 MA를 먼저 계산한 뒤 가시 영역에 매핑한다.
+                    if (mode === 'raw1') {
+                        function computeMA(arr, win) {
+                            var out = [];
+                            for (var i = 0; i < arr.length; i++) {
+                                if (i < win - 1) { out.push(null); continue; }
+                                var sum = 0, cnt = 0;
+                                for (var k = i - win + 1; k <= i; k++) {
+                                    if (arr[k] !== null && arr[k] !== undefined) { sum += arr[k]; cnt++; }
+                                }
+                                out.push(cnt === win ? sum / cnt : null);
+                            }
+                            return out;
+                        }
+                        var fullArr = cmbData.data[s.name];
+                        var fullDates = cmbData.dates;
+                        var fullFilled = [];
+                        var lvf = null;
+                        for (var fi = 0; fi < fullArr.length; fi++) {
+                            if (fullArr[fi] !== null && fullArr[fi] !== undefined) lvf = fullArr[fi];
+                            fullFilled.push(lvf);
+                        }
+                        var fullMA20 = computeMA(fullFilled, 20);
+                        var fullMA120 = computeMA(fullFilled, 120);
+                        var dateIdxMap = {};
+                        for (var di = 0; di < fullDates.length; di++) dateIdxMap[fullDates[di]] = di;
+                        var ma20Visible = commonDates.map(function(d) {
+                            var ix = dateIdxMap[d];
+                            return (ix !== undefined) ? fullMA20[ix] : null;
+                        });
+                        var ma120Visible = commonDates.map(function(d) {
+                            var ix = dateIdxMap[d];
+                            return (ix !== undefined) ? fullMA120[ix] : null;
+                        });
+                        datasets.push({
+                            label: 'MA20',
+                            data: ma20Visible,
+                            borderColor: '#D32F2F',
+                            backgroundColor: 'transparent',
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            tension: 0.4,
+                            cubicInterpolationMode: 'monotone',
+                            spanGaps: true,
+                            yAxisID: yAxisID
+                        });
+                        datasets.push({
+                            label: 'MA120',
+                            data: ma120Visible,
+                            borderColor: '#1B5E20',
+                            backgroundColor: 'transparent',
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            tension: 0.4,
+                            cubicInterpolationMode: 'monotone',
+                            spanGaps: true,
+                            yAxisID: yAxisID
+                        });
+                    }
                 });
 
                 if (mode === 'raw2') {
@@ -1084,6 +1242,7 @@ def _build_combined_chart_section():
                     afterDatasetsDraw: function(chart) {
                         var ctx = chart.ctx;
                         chart.data.datasets.forEach(function(ds, i) {
+                            if (ds._skipEndLabel) return;
                             var meta = chart.getDatasetMeta(i);
                             if (meta.hidden) return;
                             var lastIdx = -1;
@@ -1123,9 +1282,11 @@ def _build_combined_chart_section():
                     legendEl.innerHTML = legendHTML;
                 }
 
+                var yType = (mode === 'pct') ? 'linear' : 'logarithmic';
                 var scalesConfig = {
                     x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 11 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
                     y: {
+                        type: yType,
                         position: 'left',
                         grace: '8%',
                         ticks: { callback: function(v){ return mode === 'pct' ? v + '%' : fmtNum(v); }, font: { size: 11 }, color: '#000' },
@@ -1135,6 +1296,7 @@ def _build_combined_chart_section():
                 };
                 if (mode === 'raw2' && datasets[1]) {
                     scalesConfig.y1 = {
+                        type: 'logarithmic',
                         position: 'right',
                         grace: '8%',
                         ticks: { callback: function(v){ return fmtNum(v); }, font: { size: 11 }, color: '#000' },
@@ -1182,9 +1344,9 @@ def _build_combined_chart_section():
         return f"""
         <div class="category-section">
             <h2 class="category-title">MARKET</h2>
-            <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;">
+            <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;justify-content:center;">
                 <div style="min-width:240px;max-height:720px;overflow-y:auto;">{list_html}</div>
-                <div style="flex:1;min-width:0;">
+                <div style="width:1000px;">
                     <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;font-size:13px;">
                         <span style="color:#555;font-weight:600;">기간</span>
                         <input type="text" id="cmbStartDate" value="{first_date}" onchange="formatDateInput(this);updateCmbChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
@@ -3035,7 +3197,9 @@ def create_dashboard():
 
     # Generate full HTML
     now = datetime.now(tz=KST).strftime("%Y-%m-%d %H:%M:%S KST")
-    
+
+    monthly_returns_html = create_monthly_returns_table()
+
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3485,6 +3649,8 @@ def create_dashboard():
         <div class="last-updated">Updated: {now}</div>
         <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
+
+    {monthly_returns_html}
 
     {charts_html}
 
