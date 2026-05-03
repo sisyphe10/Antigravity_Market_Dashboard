@@ -2456,11 +2456,19 @@ def create_order_section():
                     + '<button class="order-dl-btn" data-tidx="' + ti + '" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;min-width:130px;text-align:center;">' + btnLabel + '</button>'
                     + '</div>';
             }).join('');
+            // 합계 행: 변경전/변경후 SUM, 주문구분 자리에 현금 비율 표시
+            var cashPct = (100 - newSum);
+            var totalsRow = '<tr style="border-top:2px solid #374151;background:#f9fafb;font-weight:700;">'
+                + '<td colspan="4" style="padding:8px;text-align:right;color:#444;">합계</td>'
+                + '<td style="padding:8px;text-align:center;">' + oldSum.toFixed(0) + '%</td>'
+                + '<td style="padding:8px;text-align:center;color:' + sumColor + ';">' + newSum.toFixed(0) + '%</td>'
+                + '<td style="padding:8px;text-align:center;color:#555;">' + cashPct.toFixed(0) + '%</td>'
+                + '<td></td>'
+                + '</tr>';
             var html = '<div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">'
                 + '<div style="display:flex;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">'
                 + '<h3 style="margin:0;font-size:18px;">' + pfName + '</h3>'
-                + '<div style="margin-left:auto;font-size:15px;color:#555;">변경전 합계 <b>' + oldSum + '%</b> → 변경후 합계 <b style="color:' + sumColor + ';">' + newSum.toFixed(0) + '%</b> (현금 ' + (100 - newSum).toFixed(0) + '%)</div>'
-                + '<button id="orderSaveBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;">저장</button>'
+                + '<button id="orderSaveBtn" style="margin-left:auto;font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;">저장</button>'
                 + '</div>'
                 + '<div style="margin-bottom:16px;">' + dlRowsHtml + '</div>'
                 + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:15px;">'
@@ -2473,7 +2481,7 @@ def create_order_section():
                 + '<th style="padding:8px;text-align:center;width:90px;">변경후</th>'
                 + '<th style="padding:8px;text-align:center;width:80px;">주문구분</th>'
                 + '<th style="padding:8px;text-align:center;">추천사유</th>'
-                + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
+                + '</tr></thead><tbody>' + rows + totalsRow + '</tbody></table></div>'
                 + '<div style="margin-top:12px;text-align:right;"><button id="orderAddStockBtn" style="font-family:inherit;font-size:14px;font-weight:600;padding:6px 14px;background:#f3f4f6;color:#222;border:1px solid #d1d5db;border-radius:8px;cursor:pointer;">+ 종목 추가</button></div>'
                 + '</div>';
             document.getElementById('orderContent').innerHTML = html;
