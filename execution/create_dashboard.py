@@ -2803,14 +2803,19 @@ def create_order_section():
                         if (refocus) { refocus.focus(); refocus.setSelectionRange(refocus.value.length, refocus.value.length); }
                     } else if (field === 'reason') {
                         orderState[orderActiveTab][idx][field] = raw;
-                        // 같은 종목 코드면 다른 탭의 추천사유도 동기화
+                        // 같은 종목 코드 + 같은 주문구분일 때만 다른 탭의 추천사유 동기화
                         var curStock = orderStocks[orderActiveTab][idx];
                         var key = (curStock && curStock.code != null) ? String(curStock.code).trim() : '';
+                        var curType = calcOrderType(parseFloat(curStock.weight) || 0,
+                                                    parseFloat(orderState[orderActiveTab][idx].newWeight) || 0);
                         if (key) {
                             Object.keys(orderStocks).forEach(function(tab) {
                                 if (tab === orderActiveTab) return;
                                 orderStocks[tab].forEach(function(s, i) {
-                                    if (String(s.code || '').trim() === key) {
+                                    if (String(s.code || '').trim() !== key) return;
+                                    var otherType = calcOrderType(parseFloat(s.weight) || 0,
+                                                                  parseFloat(orderState[tab][i].newWeight) || 0);
+                                    if (otherType === curType) {
                                         orderState[tab][i].reason = raw;
                                     }
                                 });

@@ -136,7 +136,7 @@
     <div id="mainContent" class="pw-hidden">
     <header style="position:relative;">
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-05-04 10:07:33 KST</div>
+        <div class="last-updated">Updated: 2026-05-04 10:12:27 KST</div>
         <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
 
@@ -1863,14 +1863,19 @@
                         if (refocus) { refocus.focus(); refocus.setSelectionRange(refocus.value.length, refocus.value.length); }
                     } else if (field === 'reason') {
                         orderState[orderActiveTab][idx][field] = raw;
-                        // 같은 종목 코드면 다른 탭의 추천사유도 동기화
+                        // 같은 종목 코드 + 같은 주문구분일 때만 다른 탭의 추천사유 동기화
                         var curStock = orderStocks[orderActiveTab][idx];
                         var key = (curStock && curStock.code != null) ? String(curStock.code).trim() : '';
+                        var curType = calcOrderType(parseFloat(curStock.weight) || 0,
+                                                    parseFloat(orderState[orderActiveTab][idx].newWeight) || 0);
                         if (key) {
                             Object.keys(orderStocks).forEach(function(tab) {
                                 if (tab === orderActiveTab) return;
                                 orderStocks[tab].forEach(function(s, i) {
-                                    if (String(s.code || '').trim() === key) {
+                                    if (String(s.code || '').trim() !== key) return;
+                                    var otherType = calcOrderType(parseFloat(s.weight) || 0,
+                                                                  parseFloat(orderState[tab][i].newWeight) || 0);
+                                    if (otherType === curType) {
                                         orderState[tab][i].reason = raw;
                                     }
                                 });
