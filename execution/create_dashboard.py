@@ -3089,7 +3089,7 @@ def create_order_section():
                     b4.numFmt = 'yyyy-mm-dd';
                 }
 
-                // 종목 채우기 + 행 높이 통일
+                // 종목 채우기 + 행 높이 통일 + 주문구분 셀 색상 (매수=빨강, 매도=파랑)
                 var DATA_ROW_HEIGHT = 15;
                 combined.forEach(function(s, i) {
                     var r = 7 + i;
@@ -3099,7 +3099,16 @@ def create_order_section():
                     ws.getCell('E' + r).value = s.name;
                     ws.getCell('F' + r).value = s.oldWeight;
                     ws.getCell('G' + r).value = s.newWeight;
-                    ws.getCell('H' + r).value = s.orderType;
+                    var hCell = ws.getCell('H' + r);
+                    hCell.value = s.orderType;
+                    var ot = s.orderType;
+                    var color = null;
+                    if (ot === '신규 매수' || ot === '추가 매수') color = 'FFFF0000';      // 빨강
+                    else if (ot === '일부 매도' || ot === '전량 매도') color = 'FF0070C0'; // 파랑
+                    if (color) {
+                        var prevFont = hCell.font || {};
+                        hCell.font = Object.assign({}, prevFont, { color: { argb: color } });
+                    }
                     ws.getCell('I' + r).value = s.reason;
                     ws.getRow(r).height = DATA_ROW_HEIGHT;
                 });
