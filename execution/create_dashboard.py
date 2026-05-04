@@ -2607,7 +2607,7 @@ def create_order_section():
             lines.push('신규 매수: ' + fmt(changes.newBuy));
             lines.push('비중 확대: ' + fmt(changes.inc));
             lines.push('비중 축소: ' + fmt(changes.dec));
-            lines.push('편출: ' + fmt(changes.out));
+            lines.push('전량 편출: ' + fmt(changes.out));
             return lines;
         }
 
