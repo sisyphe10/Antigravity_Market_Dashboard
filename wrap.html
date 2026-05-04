@@ -136,7 +136,7 @@
     <div id="mainContent" class="pw-hidden">
     <header style="position:relative;">
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-05-04 10:15:22 KST</div>
+        <div class="last-updated">Updated: 2026-05-04 10:33:07 KST</div>
         <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
 
@@ -1828,19 +1828,26 @@
                     + '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="reason" value="' + (orderState_i.reason || '').replace(/"/g, '&quot;') + '" style="width:100%;box-sizing:border-box;padding:4px 6px;border:1px solid ' + reasonBorder + ';background:' + reasonBg + ';border-radius:4px;font-family:inherit;font-size:15px;text-align:center;color:#000;"></td>'
                     + '</tr>';
             });
-            // 합계 행: 변경전/변경후 SUM, 주문구분 자리에 현금 비율 표시
-            var cashPct = (100 - newSum);
+            // 합계 행: 변경전/변경후 SUM, 주문구분 자리에 변경전·후 비중 차이 (양수 빨강, 음수 파랑)
+            var weightDiff = newSum - oldSum;
+            var diffColor, diffSign;
+            if (weightDiff > 0) { diffColor = '#dc2626'; diffSign = '+'; }
+            else if (weightDiff < 0) { diffColor = '#1f4cb8'; diffSign = ''; }
+            else { diffColor = '#444'; diffSign = ''; }
             var totalsRow = '<tr style="border-top:2px solid #374151;background:#f9fafb;font-weight:700;">'
                 + '<td colspan="4" style="padding:8px;text-align:right;color:#444;">합계</td>'
                 + '<td style="padding:8px;text-align:center;">' + oldSum.toFixed(0) + '%</td>'
                 + '<td style="padding:8px;text-align:center;color:' + sumColor + ';">' + newSum.toFixed(0) + '%</td>'
-                + '<td style="padding:8px;text-align:center;color:#555;">' + cashPct.toFixed(0) + '%</td>'
+                + '<td style="padding:8px;text-align:center;color:' + diffColor + ';font-weight:700;">' + diffSign + weightDiff.toFixed(0) + '%</td>'
                 + '<td></td>'
                 + '</tr>';
             var html = '<div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">'
                 + '<div style="display:flex;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">'
                 + '<h3 style="margin:0;font-size:18px;">' + pfName + '</h3>'
-                + '<button id="orderSaveBtn" style="margin-left:auto;font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;">저장</button>'
+                + '<div style="margin-left:auto;display:flex;gap:8px;">'
+                + '<button id="orderSaveBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#f3f4f6;color:#222;border:1px solid #d1d5db;border-radius:8px;cursor:pointer;">임시저장</button>'
+                + '<button id="orderFinalizeBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;">최종 저장</button>'
+                + '</div>'
                 + '</div>'
                 + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:15px;">'
                 + '<thead><tr style="border-bottom:2px solid #e5e7eb;color:#444;">'
@@ -1894,6 +1901,8 @@
             });
             var saveBtn = document.getElementById('orderSaveBtn');
             if (saveBtn) saveBtn.addEventListener('click', function() { saveOrder(orderActiveTab); });
+            var finalizeBtn = document.getElementById('orderFinalizeBtn');
+            if (finalizeBtn) finalizeBtn.addEventListener('click', function() { finalizeOrder(orderActiveTab); });
             var addBtn = document.getElementById('orderAddStockBtn');
             if (addBtn) addBtn.addEventListener('click', function() { addOrderStock(orderActiveTab); });
             function bindCopy(btnSel, preSel, defaultBg) {
@@ -1953,7 +1962,7 @@
         }
 
         // ORDER 저장 → orders/pending_orders.json 누적 (확정은 GHA 16:00 KST에 NEW 시트 반영)
-        async function saveOrder(pfName) {
+        async function saveOrder(pfName, silent) {
             var pat = getGithubPat();
             if (!pat) { alert('PAT 입력이 취소되었습니다.'); return; }
             var p = ORDER_PORTFOLIOS.find(function(x) { return x.display === pfName; });
@@ -2033,10 +2042,49 @@
                     var errTxt = await putResp.text();
                     throw new Error('PUT 실패: ' + putResp.status + ' ' + errTxt.slice(0, 200));
                 }
-                alert('✅ ORDER 임시 저장 완료: ' + pfName + ' (' + validRows.length + '개 종목)\n\n장마감 후 16:00 KST에 자동 확정 (Wrap_NAV.xlsx NEW 시트에 반영)\n그 전까지는 다시 저장하면 덮어쓰기됩니다.');
+                if (!silent) {
+                    alert('✅ ORDER 임시 저장 완료: ' + pfName + ' (' + validRows.length + '개 종목)\n\n장마감 후 16:00 KST에 자동 확정 (Wrap_NAV.xlsx NEW 시트에 반영)\n그 전까지는 다시 저장하면 덮어쓰기됩니다.');
+                }
             } catch(e) {
-                alert('❌ 저장 실패: ' + e.message);
+                if (!silent) alert('❌ 저장 실패: ' + e.message);
                 console.error('saveOrder error:', e);
+                throw e;
+            }
+        }
+
+        // 최종 저장 = 임시저장 + finalize 워크플로 즉시 트리거 (16:00 KST 대기 없이)
+        async function finalizeOrder(pfName) {
+            if (!confirm('최종 저장하시겠습니까?\n\n임시저장 후 GitHub Actions(finalize_orders)를 즉시 실행해서 Wrap_NAV.xlsx NEW 시트에 반영합니다.')) return;
+            var pat = getGithubPat();
+            if (!pat) { alert('PAT 입력이 취소되었습니다.'); return; }
+            try {
+                await saveOrder(pfName, true);
+            } catch(e) {
+                alert('❌ 저장 실패로 최종 저장 중단: ' + e.message);
+                return;
+            }
+            try {
+                var dispatchUrl = 'https://api.github.com/repos/' + ORDER_REPO + '/actions/workflows/finalize_orders.yml/dispatches';
+                var resp = await fetch(dispatchUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'token ' + pat,
+                        'Accept': 'application/vnd.github+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ ref: 'main' })
+                });
+                if (resp.status === 204) {
+                    alert('✅ 최종 저장 워크플로 시작됨 (' + pfName + ')\n\n1~2분 후 Wrap_NAV.xlsx NEW 시트 반영 완료. Actions 탭에서 진행상황 확인 가능.');
+                } else if (resp.status === 401 || resp.status === 403) {
+                    alert('❌ PAT 권한 부족 (' + resp.status + ')\n\nfine-grained PAT 설정에서 Actions 권한을 "Read and write"로 추가하세요.\nhttps://github.com/settings/personal-access-tokens');
+                } else {
+                    var t = await resp.text();
+                    alert('❌ 워크플로 트리거 실패: HTTP ' + resp.status + '\n' + t.slice(0, 300));
+                }
+            } catch(e) {
+                alert('❌ 워크플로 호출 실패: ' + e.message);
+                console.error('finalizeOrder error:', e);
             }
         }
 
@@ -2092,7 +2140,14 @@
                     }
                 }
 
-                // 종목 채우기
+                // B4 TODAY() 셀 날짜 포맷 (ExcelJS load 후 'General'로 떨어지는 케이스 방어)
+                var b4 = ws.getCell('B4');
+                if (b4 && b4.value && (b4.formula === 'TODAY()' || /TODAY/i.test(String(b4.formula || b4.value)))) {
+                    b4.numFmt = 'yyyy-mm-dd';
+                }
+
+                // 종목 채우기 + 행 높이 통일
+                var DATA_ROW_HEIGHT = 15;
                 combined.forEach(function(s, i) {
                     var r = 7 + i;
                     ws.getCell('B' + r).value = i + 1;
@@ -2103,6 +2158,7 @@
                     ws.getCell('G' + r).value = s.newWeight;
                     ws.getCell('H' + r).value = s.orderType;
                     ws.getCell('I' + r).value = s.reason;
+                    ws.getRow(r).height = DATA_ROW_HEIGHT;
                 });
 
                 if (totalRow >= 7) {
