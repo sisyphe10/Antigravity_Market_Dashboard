@@ -2754,13 +2754,18 @@ def create_order_section():
                 var nameCell = s.isNew
                     ? '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="name" value="' + (s.name || '').replace(/"/g, '&quot;') + '" placeholder="종목명" style="width:120px;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;font-weight:600;color:#000;"></td>'
                     : '<td style="text-align:center;font-weight:600;padding:8px;">' + s.name + '</td>';
+                // 주문구분이 유지가 아닌데 추천사유가 비어있으면 입력란을 밝은 붉은색으로 강조
+                var reasonEmpty = !(orderState_i.reason || '').toString().trim();
+                var reasonNeeded = (ot !== '유지') && reasonEmpty;
+                var reasonBg = reasonNeeded ? '#fee2e2' : '#fff';
+                var reasonBorder = reasonNeeded ? '#fca5a5' : '#d1d5db';
                 rows += '<tr>'
                     + '<td style="text-align:center;padding:8px;">' + (i + 1) + '</td>'
                     + sectorCell + codeCell + nameCell
                     + '<td style="text-align:center;padding:8px;">' + s.weight + '</td>'
                     + '<td style="text-align:center;padding:8px;"><input type="text" inputmode="decimal" data-idx="' + i + '" data-field="newWeight" value="' + orderState_i.newWeight + '" style="width:65px;box-sizing:border-box;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;color:#000;"></td>'
                     + '<td style="text-align:center;padding:8px;">' + ot + '</td>'
-                    + '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="reason" value="' + (orderState_i.reason || '').replace(/"/g, '&quot;') + '" style="width:100%;box-sizing:border-box;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;text-align:center;color:#000;"></td>'
+                    + '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="reason" value="' + (orderState_i.reason || '').replace(/"/g, '&quot;') + '" style="width:100%;box-sizing:border-box;padding:4px 6px;border:1px solid ' + reasonBorder + ';background:' + reasonBg + ';border-radius:4px;font-family:inherit;font-size:15px;text-align:center;color:#000;"></td>'
                     + '</tr>';
             });
             // 합계 행: 변경전/변경후 SUM, 주문구분 자리에 현금 비율 표시
