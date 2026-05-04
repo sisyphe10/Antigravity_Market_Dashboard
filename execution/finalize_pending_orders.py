@@ -91,8 +91,17 @@ def main():
             added = 0
             for t in targets:
                 for s in stocks:
+                    # 편출(weight=0) 종목은 NEW 시트에 미반영. saveOrder가 추천사유 보존 위해 weight=0도 저장하지만,
+                    # 자문지 기준가/포트폴리오에는 들어가면 안 됨.
+                    w = s.get('weight', 0)
+                    try:
+                        w_num = float(w)
+                    except (TypeError, ValueError):
+                        w_num = 0
+                    if w_num <= 0:
+                        continue
                     ws.append([date_dt, t['broker'], t['product'], s.get('sector', ''),
-                               str(s.get('code', '')), s.get('name', ''), s.get('weight', 0)])
+                               str(s.get('code', '')), s.get('name', ''), w_num])
                     added += 1
             rows_added_total += added
             print(f'  ✓ {card_name}: {len(stocks)}종목 × {len(targets)}상품 = {added}행 추가')

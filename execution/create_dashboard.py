@@ -2384,17 +2384,20 @@ def create_order_section():
                                 var newStocks = [];
                                 var newStates = [];
                                 var consumed = {};
-                                // portfolio_data 기존 종목: 저장본에 있으면 newWeight 복원, 없으면 편출(0)
+                                // portfolio_data 기존 종목: 저장본 있으면 newWeight + reason 복원, 없으면 미저장 (원본 유지)
                                 orderStocks[p.display].forEach(function(s) {
                                     var key = String(s.code || '').trim();
                                     var saved = key && savedByCode[key];
                                     newStocks.push(s);
                                     if (saved) {
                                         consumed[key] = true;
-                                        newStates.push({ newWeight: parseFloat(saved.weight) || 0, reason: '' });
+                                        newStates.push({
+                                            newWeight: parseFloat(saved.weight) || 0,
+                                            reason: (saved.reason || '').toString()
+                                        });
                                     } else {
-                                        // saveOrder는 newWeight>0만 저장하므로 누락 = 편출
-                                        newStates.push({ newWeight: 0, reason: '' });
+                                        // 저장본에 없음 = 미저장 (원본 비중 유지)
+                                        newStates.push({ newWeight: s.weight, reason: '' });
                                     }
                                 });
                                 // 저장본에만 있는 신규 종목 (사용자가 추가한 것) append
@@ -2408,7 +2411,10 @@ def create_order_section():
                                         weight: 0,
                                         isNew: true
                                     });
-                                    newStates.push({ newWeight: parseFloat(s.weight) || 0, reason: '' });
+                                    newStates.push({
+                                        newWeight: parseFloat(s.weight) || 0,
+                                        reason: (s.reason || '').toString()
+                                    });
                                 });
                                 orderStocks[p.display] = newStocks;
                                 orderState[p.display] = newStates;
@@ -2459,6 +2465,8 @@ def create_order_section():
             ORDER_PORTFOLIOS.forEach(function(p) {
                 html += '<button class="order-pf-btn" data-pf="' + p.display + '" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 16px;background:#f3f4f6;color:#444;border:none;border-radius:8px;cursor:pointer;">' + p.display + '</button>';
             });
+            // Email 탭 (모든 이메일 텍스트 모음)
+            html += '<button class="order-pf-btn" data-pf="Email" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 16px;background:#f3f4f6;color:#444;border:none;border-radius:8px;cursor:pointer;">Email</button>';
             document.getElementById('orderTabs').innerHTML = html;
             document.querySelectorAll('.order-pf-btn').forEach(function(b) {
                 b.addEventListener('click', function() { switchOrderTab(b.dataset.pf); });
@@ -2472,7 +2480,104 @@ def create_order_section():
                 b.style.background = active ? '#222' : '#f3f4f6';
                 b.style.color = active ? '#fff' : '#444';
             });
-            renderOrderPanel(pfName);
+            if (pfName === 'Email') {
+                renderEmailPanel();
+            } else {
+                renderOrderPanel(pfName);
+            }
+        }
+
+        function buildEmailBox(title, text, bgColor, borderColor, titleColor, btnBg) {
+            return '<div style="margin-top:16px;padding:16px;background:' + bgColor + ';border:1px solid ' + borderColor + ';border-radius:8px;">'
+                + '<div style="display:flex;align-items:center;margin-bottom:12px;">'
+                + '<h4 style="margin:0;font-size:15px;color:' + titleColor + ';">' + title + '</h4>'
+                + '<button class="email-tab-copy-btn" data-bg="' + btnBg + '" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:5px 14px;background:' + btnBg + ';color:#fff;border:none;border-radius:6px;cursor:pointer;">복사</button>'
+                + '</div>'
+                + '<pre class="email-tab-text" style="white-space:pre-wrap;font-family:inherit;font-size:14px;color:#222;margin:0;line-height:1.6;">' + escapeHtml(text) + '</pre>'
+                + '</div>';
+        }
+
+        function renderEmailPanel() {
+            var GENERAL = '삼성 트루밸류 / NH Value ESG / DB 개방형';
+            var NH = 'NH 목표전환형 2호';
+            var DB = 'DB 목표전환형 3차';
+            var compliance = buildComplianceEmailText();
+            var samsung = buildOrderEmailText(GENERAL, orderStocks[GENERAL] || [], orderState[GENERAL] || []);
+            var nh = buildOrderEmailText(NH, orderStocks[NH] || [], orderState[NH] || []);
+            var db = buildOrderEmailText(DB, orderStocks[DB] || [], orderState[DB] || []);
+            // 네이트온 (NH 이메일 밑) — 일반형 + 목표전환형 한 박스
+            var nateonText = buildOrderNateonText(orderStocks[GENERAL] || [], orderState[GENERAL] || [], '일반형')
+                + '\\n\\n'
+                + buildOrderNateonText(orderStocks[NH] || [], orderState[NH] || [], '목표전환형');
+            // 다운로드 섹션 (증권사 순서: 삼성 → NH → DB, 색상도 증권사별)
+            var BROKER_ORDER = { '삼성': 0, 'NH': 1, 'DB': 2 };
+            var BROKER_COLOR = { '삼성': '#1428A0', 'NH': '#0072CE', 'DB': '#00854A' };
+            function brokerKey(label) {
+                if (label.indexOf('삼성') === 0) return '삼성';
+                if (label.indexOf('NH') === 0) return 'NH';
+                if (label.indexOf('DB') === 0) return 'DB';
+                return 'zz';
+            }
+            var dlItems = [];
+            ORDER_PORTFOLIOS.forEach(function(p) {
+                (p.templates || []).forEach(function(t, ti) {
+                    var btnLabel = t.label || ('Download' + (p.templates.length > 1 ? ' ' + (ti + 1) : ''));
+                    dlItems.push({ pf: p.display, ti: ti, t: t, label: btnLabel, broker: brokerKey(btnLabel) });
+                });
+            });
+            dlItems.sort(function(a, b) {
+                var oa = (BROKER_ORDER[a.broker] != null) ? BROKER_ORDER[a.broker] : 999;
+                var ob = (BROKER_ORDER[b.broker] != null) ? BROKER_ORDER[b.broker] : 999;
+                return oa - ob;
+            });
+            var dlRows = '';
+            var prevBroker = null;
+            dlItems.forEach(function(it) {
+                if (prevBroker && it.broker !== prevBroker) {
+                    dlRows += '<hr style="border:none;border-top:1px solid #9ca3af;width:160px;margin:10px 0 10px auto;">';
+                }
+                prevBroker = it.broker;
+                var outName = buildOutFilename(it.t, new Date());
+                var btnColor = BROKER_COLOR[it.broker] || '#dc2626';
+                dlRows += '<div style="display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-bottom:8px;">'
+                    + '<span style="font-size:13px;color:#666;font-family:Inter,sans-serif;">' + outName + ' →</span>'
+                    + '<button class="email-tab-dl-btn" data-pf="' + it.pf + '" data-tidx="' + it.ti + '" style="font-family:inherit;font-size:14px;font-weight:600;padding:6px 14px;background:' + btnColor + ';color:#fff;border:none;border-radius:8px;cursor:pointer;min-width:160px;text-align:center;">' + it.label + '</button>'
+                    + '</div>';
+            });
+            var dlSection = '<div style="margin-bottom:8px;padding:16px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;">'
+                + '<h4 style="margin:0 0 12px 0;font-size:15px;color:#444;">자문지 다운로드</h4>'
+                + dlRows
+                + '</div>';
+            var html = '<div style="max-width:720px;margin:0 auto;background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">'
+                + dlSection
+                + buildEmailBox('컴플라이언스 이메일', compliance, '#fffbeb', '#fef3c7', '#92400e', '#d97706')
+                + buildEmailBox('삼성 이메일', samsung, '#f9fafb', '#e5e7eb', '#444', '#374151')
+                + buildEmailBox('NH 이메일', nh, '#f9fafb', '#e5e7eb', '#444', '#374151')
+                + buildEmailBox('네이트온 (NH)', nateonText, '#eef2ff', '#c7d2fe', '#3730a3', '#4f46e5')
+                + buildEmailBox('DB 이메일', db, '#f9fafb', '#e5e7eb', '#444', '#374151')
+                + '</div>';
+            document.getElementById('orderContent').innerHTML = html;
+            document.querySelectorAll('#orderContent .email-tab-dl-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    downloadOrderExcel(btn.dataset.pf, parseInt(btn.dataset.tidx));
+                });
+            });
+            document.querySelectorAll('#orderContent .email-tab-copy-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var section = btn.parentElement.parentElement;
+                    var pre = section.querySelector('.email-tab-text');
+                    if (!pre) return;
+                    navigator.clipboard.writeText(pre.textContent).then(function() {
+                        var original = btn.textContent;
+                        btn.textContent = '복사됨';
+                        btn.style.background = '#16a34a';
+                        setTimeout(function() {
+                            btn.textContent = original;
+                            btn.style.background = btn.dataset.bg || '#374151';
+                        }, 1500);
+                    }).catch(function(err) { alert('복사 실패: ' + err.message); });
+                });
+            });
         }
 
         function buildOrderChanges(stocks, st) {
@@ -2658,16 +2763,6 @@ def create_order_section():
                     + '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="reason" value="' + (orderState_i.reason || '').replace(/"/g, '&quot;') + '" style="width:100%;box-sizing:border-box;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;text-align:center;color:#000;"></td>'
                     + '</tr>';
             });
-            // templates 배열 → N개 Download 버튼 + 예상 파일명 표시
-            var p = ORDER_PORTFOLIOS.find(function(x) { return x.display === pfName; });
-            var dlRowsHtml = (p && p.templates ? p.templates : []).map(function(t, ti) {
-                var btnLabel = (p.templates.length === 1) ? 'Download' : 'Download ' + (ti + 1);
-                var outName = buildOutFilename(t, new Date());
-                return '<div style="display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-bottom:6px;">'
-                    + '<span style="font-size:13px;color:#666;font-family:Inter,sans-serif;">' + outName + ' →</span>'
-                    + '<button class="order-dl-btn" data-tidx="' + ti + '" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;min-width:130px;text-align:center;">' + btnLabel + '</button>'
-                    + '</div>';
-            }).join('');
             // 합계 행: 변경전/변경후 SUM, 주문구분 자리에 현금 비율 표시
             var cashPct = (100 - newSum);
             var totalsRow = '<tr style="border-top:2px solid #374151;background:#f9fafb;font-weight:700;">'
@@ -2682,7 +2777,6 @@ def create_order_section():
                 + '<h3 style="margin:0;font-size:18px;">' + pfName + '</h3>'
                 + '<button id="orderSaveBtn" style="margin-left:auto;font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;">저장</button>'
                 + '</div>'
-                + '<div style="margin-bottom:16px;">' + dlRowsHtml + '</div>'
                 + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:15px;">'
                 + '<thead><tr style="border-bottom:2px solid #e5e7eb;color:#444;">'
                 + '<th style="padding:8px;text-align:center;width:40px;">순위</th>'
@@ -2695,9 +2789,6 @@ def create_order_section():
                 + '<th style="padding:8px;text-align:center;">추천사유</th>'
                 + '</tr></thead><tbody>' + rows + totalsRow + '</tbody></table></div>'
                 + '<div style="margin-top:12px;text-align:right;"><button id="orderAddStockBtn" style="font-family:inherit;font-size:14px;font-weight:600;padding:6px 14px;background:#f3f4f6;color:#222;border:1px solid #d1d5db;border-radius:8px;cursor:pointer;">+ 종목 추가</button></div>'
-                + buildComplianceEmailSection(pfName)
-                + buildOrderEmailSection(pfName, stocks, st)
-                + buildOrderNateonSection(pfName)
                 + '</div>';
             document.getElementById('orderContent').innerHTML = html;
             document.querySelectorAll('#orderContent input').forEach(function(el) {
@@ -2729,12 +2820,6 @@ def create_order_section():
                         // 신규 종목 필드 (orderStocks에 직접 반영)
                         orderStocks[orderActiveTab][idx][field] = raw;
                     }
-                });
-            });
-            document.querySelectorAll('#orderContent .order-dl-btn').forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    var ti = parseInt(btn.dataset.tidx);
-                    downloadOrderExcel(orderActiveTab, ti);
                 });
             });
             var saveBtn = document.getElementById('orderSaveBtn');
@@ -2809,19 +2894,22 @@ def create_order_section():
             var st = orderState[pfName];
             if (!stocks || !st) { alert('데이터 누락: ' + pfName); return; }
 
+            // 모든 종목 저장 (편출=weight 0 포함). 추천사유도 함께 보존.
+            // finalize_pending_orders.py에서 weight=0 행은 NEW 시트에 안 들어가도록 필터링됨.
             var validRows = [];
             stocks.forEach(function(s, i) {
                 var newW = parseFloat(st[i].newWeight) || 0;
-                if (newW > 0 && s.code) {
+                if (s.code) {
                     validRows.push({
                         sector: s.sector || '',
                         code: String(s.code),
                         name: s.name || '',
                         weight: newW,
+                        reason: (st[i].reason || '').toString()
                     });
                 }
             });
-            if (validRows.length === 0) { alert('저장할 종목이 없습니다 (모두 비중 0).'); return; }
+            if (validRows.length === 0) { alert('저장할 종목이 없습니다.'); return; }
 
             // 오늘 날짜 (KST 안전)
             var d = new Date();
