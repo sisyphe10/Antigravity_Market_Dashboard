@@ -2493,7 +2493,7 @@ def create_order_section():
                 + '<h4 style="margin:0;font-size:15px;color:' + titleColor + ';">' + title + '</h4>'
                 + '<button class="email-tab-copy-btn" data-bg="' + btnBg + '" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:5px 14px;background:' + btnBg + ';color:#fff;border:none;border-radius:6px;cursor:pointer;">복사</button>'
                 + '</div>'
-                + '<pre class="email-tab-text" style="white-space:pre-wrap;font-family:inherit;font-size:14px;color:#222;margin:0;line-height:1.6;">' + escapeHtml(text) + '</pre>'
+                + '<pre class="email-tab-text" style="white-space:pre-wrap;font-family:inherit;font-size:13px;color:#222;margin:0;line-height:1.6;">' + escapeHtml(text) + '</pre>'
                 + '</div>';
         }
 
@@ -2596,13 +2596,14 @@ def create_order_section():
         }
 
         function buildEmailSectionLines(changes, headerLabel) {
+            // headerLabel 있으면 `[label]` 만 (주요 내용 줄 생략 — 이미 라벨로 구분됨)
+            // headerLabel 없으면 `[주요 내용]`
             function fmt(arr) { return arr.length ? arr.join(', ') : '없음'; }
             var lines = [];
             if (headerLabel) {
                 lines.push('[' + headerLabel + ']');
-                lines.push('주요 내용');
             } else {
-                lines.push('주요 내용');
+                lines.push('[주요 내용]');
             }
             lines.push('신규 매수: ' + fmt(changes.newBuy));
             lines.push('비중 확대: ' + fmt(changes.inc));
@@ -2626,7 +2627,9 @@ def create_order_section():
             if (TARGET_TABS.indexOf(pfName) >= 0) {
                 var generalChanges = buildOrderChanges(orderStocks[GENERAL] || [], orderState[GENERAL] || []);
                 var targetChanges = buildOrderChanges(stocks, st);
-                lines = lines.concat(buildEmailSectionLines(generalChanges, '일반형'));
+                // DB는 일반형 자리에 '개방형'으로 표기, NH는 '일반형' 그대로
+                var generalLabel = (pfName === 'DB 목표전환형 3차') ? '개방형' : '일반형';
+                lines = lines.concat(buildEmailSectionLines(generalChanges, generalLabel));
                 lines.push('');
                 lines = lines.concat(buildEmailSectionLines(targetChanges, '목표전환형'));
             } else {
