@@ -2788,7 +2788,7 @@ def create_order_section():
                 + '<div style="display:flex;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">'
                 + '<h3 style="margin:0;font-size:18px;">' + pfName + '</h3>'
                 + '<div style="margin-left:auto;display:flex;gap:8px;">'
-                + '<button id="orderSaveBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#f3f4f6;color:#222;border:1px solid #d1d5db;border-radius:8px;cursor:pointer;">임시저장</button>'
+                + '<button id="orderSaveBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#f3f4f6;color:#222;border:1px solid #d1d5db;border-radius:8px;cursor:pointer;">저장</button>'
                 + '<button id="orderFinalizeBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;">최종 저장</button>'
                 + '</div>'
                 + '</div>'
@@ -2986,7 +2986,7 @@ def create_order_section():
                     throw new Error('PUT 실패: ' + putResp.status + ' ' + errTxt.slice(0, 200));
                 }
                 if (!silent) {
-                    alert('✅ ORDER 임시 저장 완료: ' + pfName + ' (' + validRows.length + '개 종목)\\n\\n장마감 후 16:00 KST에 자동 확정 (Wrap_NAV.xlsx NEW 시트에 반영)\\n그 전까지는 다시 저장하면 덮어쓰기됩니다.');
+                    alert('✅ 저장 완료: ' + pfName + ' (' + validRows.length + '개 종목)\\n\\n다시 저장하면 덮어쓰기. 최종 반영은 [최종 저장] 버튼 또는 16:00 KST 자동 처리.');
                 }
             } catch(e) {
                 if (!silent) alert('❌ 저장 실패: ' + e.message);
@@ -2995,15 +2995,25 @@ def create_order_section():
             }
         }
 
-        // 최종 저장 = 임시저장 + finalize 워크플로 즉시 트리거 (16:00 KST 대기 없이)
-        async function finalizeOrder(pfName) {
-            if (!confirm('최종 저장하시겠습니까?\\n\\n임시저장 후 GitHub Actions(finalize_orders)를 즉시 실행해서 Wrap_NAV.xlsx NEW 시트에 반영합니다.')) return;
+        // 최종 저장 = 3개 포트폴리오 모두 저장 + finalize 워크플로 1회 트리거
+        async function finalizeOrder(_pfNameIgnored) {
+            if (!confirm('최종 저장하시겠습니까?\\n\\n3개 포트폴리오(일반형/NH 목표전환형 2호/DB 목표전환형 3차) 모두 저장 후 GitHub Actions(finalize_orders) 즉시 실행. 1~2분 후 Wrap_NAV.xlsx NEW 시트 + 대시보드 반영.')) return;
             var pat = getGithubPat();
             if (!pat) { alert('PAT 입력이 취소되었습니다.'); return; }
-            try {
-                await saveOrder(pfName, true);
-            } catch(e) {
-                alert('❌ 저장 실패로 최종 저장 중단: ' + e.message);
+            var ALL_PFS = ORDER_PORTFOLIOS.map(function(p) { return p.display; });
+            var savedCount = 0;
+            var failed = [];
+            for (var i = 0; i < ALL_PFS.length; i++) {
+                var pfName = ALL_PFS[i];
+                try {
+                    await saveOrder(pfName, true);
+                    savedCount++;
+                } catch(e) {
+                    failed.push(pfName + ': ' + e.message);
+                }
+            }
+            if (failed.length) {
+                alert('❌ 일부 포트폴리오 저장 실패:\\n' + failed.join('\\n') + '\\n\\n워크플로 실행 중단. 수정 후 재시도하세요.');
                 return;
             }
             try {
@@ -3018,7 +3028,7 @@ def create_order_section():
                     body: JSON.stringify({ ref: 'main' })
                 });
                 if (resp.status === 204) {
-                    alert('✅ 최종 저장 워크플로 시작됨 (' + pfName + ')\\n\\n1~2분 후 Wrap_NAV.xlsx NEW 시트 반영 완료. Actions 탭에서 진행상황 확인 가능.');
+                    alert('✅ 최종 저장 완료 (' + savedCount + '개 포트폴리오)\\n\\nfinalize_orders 워크플로 실행 중. 1~2분 후 Wrap_NAV.xlsx + 대시보드 반영. Actions 탭에서 진행상황 확인 가능.');
                 } else if (resp.status === 401 || resp.status === 403) {
                     alert('❌ PAT 권한 부족 (' + resp.status + ')\\n\\nfine-grained PAT 설정에서 Actions 권한을 "Read and write"로 추가하세요.\\nhttps://github.com/settings/personal-access-tokens');
                 } else {
