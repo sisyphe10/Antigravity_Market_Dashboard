@@ -257,12 +257,11 @@ def read_portfolio_sectors(stock_sector_map):
                 continue
 
             available_dates = sorted(df_p['날짜'].unique())
-            # 16:20 KST 이후에는 당일 주문 포함 (결제는 익일 반영)
+            # NEW 시트 가장 최근 날짜 사용 (사용자가 최종 저장한 시점에 즉시 반영)
             from datetime import timezone, timedelta as _td
-            _now_kst = pd.Timestamp.now(tz=timezone(_td(hours=9)))
-            _date_cutoff = (_now_kst.normalize() if _now_kst.hour >= 16 else _now_kst.normalize() - pd.Timedelta(days=1)).tz_localize(None)
-            prev_dates = [d for d in available_dates if d <= _date_cutoff]
-            latest_date = prev_dates[-1] if prev_dates else available_dates[-1]
+            _today_kst = pd.Timestamp.now(tz=timezone(_td(hours=9))).normalize().tz_localize(None)
+            past_or_today = [d for d in available_dates if d <= _today_kst]
+            latest_date = past_or_today[-1] if past_or_today else available_dates[-1]
 
             df_latest = df_p[df_p['날짜'] == latest_date].copy()
             df_latest = df_latest[df_latest['비중'] > 0]
