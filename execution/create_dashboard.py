@@ -2362,6 +2362,63 @@ def create_order_section():
                         return { newWeight: s.weight, reason: '' };
                     });
                 });
+
+                // 오늘자 임시저장본(pending_orders.json) 화면 복원
+                try {
+                    var pendingRes = await fetch('orders/pending_orders.json?_=' + Date.now());
+                    if (pendingRes.ok) {
+                        var pending = await pendingRes.json();
+                        var dNow = new Date();
+                        var todayStr = dNow.getFullYear() + '-'
+                            + String(dNow.getMonth() + 1).padStart(2, '0') + '-'
+                            + String(dNow.getDate()).padStart(2, '0');
+                        var todayPending = pending && pending[todayStr];
+                        if (todayPending) {
+                            ORDER_PORTFOLIOS.forEach(function(p) {
+                                var entry = todayPending[p.display];
+                                if (!entry || !Array.isArray(entry.stocks)) return;
+                                var savedByCode = {};
+                                entry.stocks.forEach(function(s) {
+                                    if (s && s.code != null) savedByCode[String(s.code).trim()] = s;
+                                });
+                                var newStocks = [];
+                                var newStates = [];
+                                var consumed = {};
+                                // portfolio_data 기존 종목: 저장본에 있으면 newWeight 복원, 없으면 편출(0)
+                                orderStocks[p.display].forEach(function(s) {
+                                    var key = String(s.code || '').trim();
+                                    var saved = key && savedByCode[key];
+                                    newStocks.push(s);
+                                    if (saved) {
+                                        consumed[key] = true;
+                                        newStates.push({ newWeight: parseFloat(saved.weight) || 0, reason: '' });
+                                    } else {
+                                        // saveOrder는 newWeight>0만 저장하므로 누락 = 편출
+                                        newStates.push({ newWeight: 0, reason: '' });
+                                    }
+                                });
+                                // 저장본에만 있는 신규 종목 (사용자가 추가한 것) append
+                                entry.stocks.forEach(function(s) {
+                                    var key = String(s.code || '').trim();
+                                    if (!key || consumed[key]) return;
+                                    newStocks.push({
+                                        code: s.code,
+                                        name: s.name || '',
+                                        sector: s.sector || '',
+                                        weight: 0,
+                                        isNew: true
+                                    });
+                                    newStates.push({ newWeight: parseFloat(s.weight) || 0, reason: '' });
+                                });
+                                orderStocks[p.display] = newStocks;
+                                orderState[p.display] = newStates;
+                            });
+                        }
+                    }
+                } catch (e) {
+                    console.warn('pending_orders.json 복원 실패 (무시):', e);
+                }
+
                 renderOrderTabs();
                 switchOrderTab(ORDER_PORTFOLIOS[0].display);
             } catch(e) {
