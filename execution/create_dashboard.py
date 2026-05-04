@@ -2493,7 +2493,7 @@ def create_order_section():
                 + '<h4 style="margin:0;font-size:15px;color:' + titleColor + ';">' + title + '</h4>'
                 + '<button class="email-tab-copy-btn" data-bg="' + btnBg + '" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:5px 14px;background:' + btnBg + ';color:#fff;border:none;border-radius:6px;cursor:pointer;">복사</button>'
                 + '</div>'
-                + '<pre class="email-tab-text" style="white-space:pre-wrap;font-family:inherit;font-size:13px;color:#222;margin:0;line-height:1.6;">' + escapeHtml(text) + '</pre>'
+                + '<pre class="email-tab-text" style="white-space:pre-wrap;font-family:\'맑은 고딕\', \'Malgun Gothic\', \'Inter\', \'Noto Sans KR\', sans-serif;font-size:13px;color:#222;margin:0;line-height:1.6;"><span style="font-family:\'맑은 고딕\', \'Malgun Gothic\', sans-serif;font-size:13px;color:#222;">' + escapeHtml(text) + '</span></pre>'
                 + '</div>';
         }
 
