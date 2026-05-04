@@ -20,13 +20,13 @@
           "sector": "반도체",
           "code": "005930",
           "name": "삼성전자",
-          "weight": 20
+          "weight": 25
         },
         {
           "sector": "반도체",
           "code": "000660",
           "name": "SK하이닉스",
-          "weight": 20
+          "weight": 25
         },
         {
           "sector": "기계",
@@ -56,12 +56,6 @@
           "sector": "증권",
           "code": "006800",
           "name": "미래에셋증권",
-          "weight": 3
-        },
-        {
-          "sector": "기타",
-          "code": "439260",
-          "name": "대한조선",
           "weight": 3
         },
         {
@@ -119,7 +113,7 @@
           "weight": 2
         }
       ],
-      "savedAt": "2026-05-04T00:33:44.966Z"
+      "savedAt": "2026-05-04T00:34:25.438Z"
     },
     "NH 목표전환형 2호": {
       "targets": [
