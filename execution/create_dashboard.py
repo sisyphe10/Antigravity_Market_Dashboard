@@ -2655,6 +2655,19 @@ def create_order_section():
                         if (refocus) { refocus.focus(); refocus.setSelectionRange(refocus.value.length, refocus.value.length); }
                     } else if (field === 'reason') {
                         orderState[orderActiveTab][idx][field] = raw;
+                        // 같은 종목 코드면 다른 탭의 추천사유도 동기화
+                        var curStock = orderStocks[orderActiveTab][idx];
+                        var key = (curStock && curStock.code != null) ? String(curStock.code).trim() : '';
+                        if (key) {
+                            Object.keys(orderStocks).forEach(function(tab) {
+                                if (tab === orderActiveTab) return;
+                                orderStocks[tab].forEach(function(s, i) {
+                                    if (String(s.code || '').trim() === key) {
+                                        orderState[tab][i].reason = raw;
+                                    }
+                                });
+                            });
+                        }
                     } else if (field === 'code' || field === 'name' || field === 'sector') {
                         // 신규 종목 필드 (orderStocks에 직접 반영)
                         orderStocks[orderActiveTab][idx][field] = raw;
