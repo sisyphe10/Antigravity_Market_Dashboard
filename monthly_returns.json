@@ -306,19 +306,19 @@
       "month": 5,
       "is_mtd": true,
       "returns": {
-        "KOSPI": null,
-        "KOSDAQ": null,
+        "KOSPI": 0.051239,
+        "KOSDAQ": 0.017939,
         "NIKKEI": 0.003849,
-        "TAIEX": null,
-        "S&P500": -0.00197,
-        "NASDAQ": 0.004147,
-        "RUSSELL": -0.000522,
-        "BTC": 0.048804,
-        "ETH": 0.04085,
-        "GOLD": -0.016838,
-        "SILVER": -0.001346
+        "TAIEX": 0.047337,
+        "S&P500": 0.006371,
+        "NASDAQ": 0.016587,
+        "RUSSELL": 0.013659,
+        "BTC": 0.068751,
+        "ETH": 0.056194,
+        "GOLD": -0.006653,
+        "SILVER": 0.005249
       }
     }
   ],
-  "updated_at": "2026-05-05 01:04:42 KST"
+  "updated_at": "2026-05-06 00:55:48 KST"
 }
