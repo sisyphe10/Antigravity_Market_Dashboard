@@ -1,1 +1,85 @@
-{}
+{
+  "2026-05-06": {
+    "NH 목표전환형 2호": {
+      "targets": [
+        {
+          "broker": "NH",
+          "product": "목표전환형 2호"
+        }
+      ],
+      "stocks": [
+        {
+          "sector": "반도체",
+          "code": "005930",
+          "name": "삼성전자",
+          "weight": 30,
+          "reason": ""
+        },
+        {
+          "sector": "반도체",
+          "code": "000660",
+          "name": "SK하이닉스",
+          "weight": 20,
+          "reason": ""
+        },
+        {
+          "sector": "에너지",
+          "code": "083650",
+          "name": "비에이치아이",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "화장품,의류,완구",
+          "code": "020000",
+          "name": "한섬",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "에너지",
+          "code": "005090",
+          "name": "SGC에너지",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "호텔,레저서비스",
+          "code": "006730",
+          "name": "서부T&D",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "기계",
+          "code": "105840",
+          "name": "우진",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "상사,자본재",
+          "code": "079550",
+          "name": "LIG디펜스앤에어로스페이스",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "증권",
+          "code": "039490",
+          "name": "키움증권",
+          "weight": 3,
+          "reason": "Webull과의 협업으로 '외국인 통합계좌' 운영 예정, 신규 편입"
+        },
+        {
+          "sector": "비철,목재등",
+          "code": "124500",
+          "name": "아이티센글로벌",
+          "weight": 3,
+          "reason": "6월 정기변경에서 코스닥150 편입 유력, 미국 클래리티 법안 합의안 도출로 스테이블코인 관련주 관심"
+        }
+      ],
+      "savedAt": "2026-05-05T23:08:24.025Z"
+    }
+  }
+}
