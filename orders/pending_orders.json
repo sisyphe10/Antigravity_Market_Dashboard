@@ -1,1 +1,297 @@
-{}
+{
+  "2026-05-06": {
+    "NH 목표전환형 2호": {
+      "targets": [
+        {
+          "broker": "NH",
+          "product": "목표전환형 2호"
+        }
+      ],
+      "stocks": [
+        {
+          "sector": "반도체",
+          "code": "005930",
+          "name": "삼성전자",
+          "weight": 30,
+          "reason": ""
+        },
+        {
+          "sector": "반도체",
+          "code": "000660",
+          "name": "SK하이닉스",
+          "weight": 25,
+          "reason": "IBKR의 한국 시장에 대한 관심 증대, ADR을 상장하는 SK하이닉스의 외국인 관심 증가 기대"
+        },
+        {
+          "sector": "에너지",
+          "code": "083650",
+          "name": "비에이치아이",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "화장품,의류,완구",
+          "code": "020000",
+          "name": "한섬",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "에너지",
+          "code": "005090",
+          "name": "SGC에너지",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "호텔,레저서비스",
+          "code": "006730",
+          "name": "서부T&D",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "기계",
+          "code": "105840",
+          "name": "우진",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "상사,자본재",
+          "code": "079550",
+          "name": "LIG디펜스앤에어로스페이스",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "증권",
+          "code": "039490",
+          "name": "키움증권",
+          "weight": 5,
+          "reason": "Webull과의 협업으로 '외국인 통합계좌' 운영 예정, 신규 편입"
+        },
+        {
+          "sector": "비철,목재등",
+          "code": "124500",
+          "name": "아이티센글로벌",
+          "weight": 3,
+          "reason": "6월 정기변경에서 코스닥150 편입 유력, 미국 클래리티 법안 합의안 도출로 스테이블코인 관련주 관심"
+        }
+      ],
+      "savedAt": "2026-05-05T23:15:17.339Z"
+    },
+    "DB 목표전환형 3차": {
+      "targets": [
+        {
+          "broker": "DB",
+          "product": "목표전환형 3차"
+        }
+      ],
+      "stocks": [
+        {
+          "sector": "반도체",
+          "code": "005930",
+          "name": "삼성전자",
+          "weight": 30,
+          "reason": ""
+        },
+        {
+          "sector": "반도체",
+          "code": "000660",
+          "name": "SK하이닉스",
+          "weight": 25,
+          "reason": "IBKR의 한국 시장에 대한 관심 증대, ADR을 상장하는 SK하이닉스의 외국인 관심 증가 기대"
+        },
+        {
+          "sector": "에너지",
+          "code": "083650",
+          "name": "비에이치아이",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "화장품,의류,완구",
+          "code": "020000",
+          "name": "한섬",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "에너지",
+          "code": "005090",
+          "name": "SGC에너지",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "호텔,레저서비스",
+          "code": "006730",
+          "name": "서부T&D",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "기계",
+          "code": "105840",
+          "name": "우진",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "상사,자본재",
+          "code": "079550",
+          "name": "LIG디펜스앤에어로스페이스",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "증권",
+          "code": "039490",
+          "name": "키움증권",
+          "weight": 5,
+          "reason": "Webull과의 협업으로 '외국인 통합계좌' 운영 예정, 신규 편입"
+        },
+        {
+          "sector": "비철,목재등",
+          "code": "124500",
+          "name": "아이티센글로벌",
+          "weight": 3,
+          "reason": "6월 정기변경에서 코스닥150 편입 유력, 미국 클래리티 법안 합의안 도출로 스테이블코인 관련주 관심"
+        }
+      ],
+      "savedAt": "2026-05-05T23:16:58.198Z"
+    },
+    "삼성 트루밸류 / NH Value ESG / DB 개방형": {
+      "targets": [
+        {
+          "broker": "삼성",
+          "product": "트루밸류"
+        },
+        {
+          "broker": "NH",
+          "product": "Value ESG"
+        },
+        {
+          "broker": "DB",
+          "product": "개방형 랩"
+        }
+      ],
+      "stocks": [
+        {
+          "sector": "반도체",
+          "code": "005930",
+          "name": "삼성전자",
+          "weight": 30,
+          "reason": "파운드리 사업부에서 10년 만에 다시 애플 칩을 수주할 가능성, 비중 확대"
+        },
+        {
+          "sector": "반도체",
+          "code": "000660",
+          "name": "SK하이닉스",
+          "weight": 20,
+          "reason": ""
+        },
+        {
+          "sector": "기계",
+          "code": "034020",
+          "name": "두산에너빌리티",
+          "weight": 5,
+          "reason": ""
+        },
+        {
+          "sector": "상사,자본재",
+          "code": "000150",
+          "name": "두산",
+          "weight": 5,
+          "reason": ""
+        },
+        {
+          "sector": "상사,자본재",
+          "code": "001040",
+          "name": "CJ",
+          "weight": 5,
+          "reason": ""
+        },
+        {
+          "sector": "조선",
+          "code": "042660",
+          "name": "한화오션",
+          "weight": 5,
+          "reason": ""
+        },
+        {
+          "sector": "증권",
+          "code": "006800",
+          "name": "미래에셋증권",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "IT하드웨어",
+          "code": "007660",
+          "name": "이수페타시스",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "자동차",
+          "code": "005380",
+          "name": "현대차",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "에너지",
+          "code": "005090",
+          "name": "SGC에너지",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "화장품,의류,완구",
+          "code": "020000",
+          "name": "한섬",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "디스플레이",
+          "code": "171090",
+          "name": "선익시스템",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "에너지",
+          "code": "083650",
+          "name": "비에이치아이",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "기타",
+          "code": "267270",
+          "name": "HD건설기계",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "호텔,레저서비스",
+          "code": "006730",
+          "name": "서부T&D",
+          "weight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "기타",
+          "code": "082740",
+          "name": "한화엔진",
+          "weight": 2,
+          "reason": ""
+        }
+      ],
+      "savedAt": "2026-05-05T23:09:45.793Z"
+    }
+  }
+}
