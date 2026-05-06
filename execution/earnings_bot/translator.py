@@ -36,7 +36,10 @@ DRY_RUN = os.getenv('EARNINGS_BOT_DRY_RUN', '').lower() in ('1', 'true', 'yes')
 
 @api_retry
 def _call_sonnet(messages: list[dict]) -> dict:
-    """Sonnet 4.6 호출. system= 파라미터 필수. dict 반환 (text + usage)."""
+    """Sonnet 4.5 호출. system= 파라미터 필수. dict 반환 (text + usage).
+
+    모델 ID는 prompt_builder.ANALYSIS_MODEL 참조 (현재: claude-sonnet-4-5-20250929).
+    """
     client = get_anthropic_client()
     resp = client.messages.create(
         model=ANALYSIS_MODEL,
@@ -98,14 +101,20 @@ def process_filing(filing_id: int) -> dict:
                         accession_number=filing['accession_number']):
         return {'skip': True, 'reason': 'already analyzed'}
 
-    # primary_text 복원: edgartools v5는 accession_number로 직접 조회 가능 (find())
+    # primary_text 복원: edgartools v5의 accession 직접 조회 (get_by_accession_number 우선, find 폴백)
     from .attachment_parser import parse_filing
-    from edgar import set_identity, find
+    from edgar import set_identity
     set_identity(os.getenv('SEC_EDGAR_USER_AGENT', 'Kimtaesik (kts77775@gmail.com)'))
+    target_filing = None
     try:
-        target_filing = find(filing['accession_number'])
-    except Exception as e:
-        return {'error': f"filing {filing['accession_number']} find() 실패: {e}"}
+        from edgar import get_by_accession_number  # type: ignore
+        target_filing = get_by_accession_number(filing['accession_number'])
+    except (ImportError, Exception) as e:
+        try:
+            from edgar import find
+            target_filing = find(filing['accession_number'])
+        except Exception as e2:
+            return {'error': f"filing {filing['accession_number']} accession lookup 실패: {e2}"}
     if target_filing is None:
         return {'error': f"filing {filing['accession_number']} 조회 결과 없음"}
     parsed = parse_filing(target_filing)
@@ -180,7 +189,8 @@ def process_filing(filing_id: int) -> dict:
     analysis_text = sonnet_resp['text']
 
     # 분석 결과는 filing_analyses 전용 테이블에 저장 (Codex 권고)
-    db.insert_analysis(
+    # INSERT OR IGNORE 가 None 반환 시 = 동일 (filing_id, prompt_version) 중복 → analyzed stage 진행 X
+    analysis_row_id = db.insert_analysis(
         filing_id=filing_id,
         analysis_kr=analysis_text,
         yoy_md=yoy_md,
@@ -194,6 +204,18 @@ def process_filing(filing_id: int) -> dict:
         fiscal_year=fy,
         fiscal_quarter=fq,
     )
+    if analysis_row_id is None:
+        logger.warning(
+            f"[{filing['ticker']}] filing_analyses 중복 (filing_id={filing_id}, "
+            f"prompt_version={pv}) — analyzed stage 진행 안 함"
+        )
+        return {
+            'filing_id': filing_id,
+            'ticker': filing['ticker'],
+            'skip': True,
+            'reason': 'duplicate (filing_id, prompt_version)',
+            'tokens': sonnet_resp,
+        }
 
     # stage 'analyzed' 진행 — 동일 (ticker, accession, document_type)에 stage='analyzed' 새 행 추가
     db.upsert_filing(

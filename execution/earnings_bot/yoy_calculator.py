@@ -175,16 +175,28 @@ def from_press_release_text(text: str, fy: int, fq: int) -> YoySnapshot:
 
 def compute_yoy(ticker: str, fiscal_year: int, fiscal_quarter: int,
                 press_release_text: str = '') -> YoySnapshot:
-    """1순위 XBRL → 폴백 보도자료 텍스트."""
+    """XBRL + 정규식 병합 — Codex 권고: 부분 XBRL이 정규식 폴백을 억제하지 않도록.
+
+    - 완전한 XBRL metric (current+prior 모두 있음): 그대로 채택
+    - 부분 또는 unavailable: 정규식 결과로 보강 (덮어쓰기 아닌 추가)
+    """
     snap = from_xbrl_facts(ticker, fiscal_year, fiscal_quarter)
-    has_xbrl = any(m.source == 'xbrl' and m.current_value is not None for m in snap.metrics)
-    if has_xbrl:
+
+    # XBRL이 모든 핵심 metric에서 완전(current+prior)한 경우만 정규식 스킵
+    fully_complete = (
+        len(snap.metrics) > 0
+        and all(m.source == 'xbrl' and m.current_value is not None and m.prior_value is not None
+                for m in snap.metrics)
+    )
+    if fully_complete:
         return snap
+
     if press_release_text:
         text_snap = from_press_release_text(press_release_text, fiscal_year, fiscal_quarter)
-        # XBRL 실패한 metric을 텍스트로 보강
+        # 정규식 결과를 추가 (덮어쓰기 X). 사용자/모델이 source 컬럼으로 출처 구별 가능
         snap.metrics.extend(text_snap.metrics)
         snap.notes.extend(text_snap.notes)
+
     return snap
 
 

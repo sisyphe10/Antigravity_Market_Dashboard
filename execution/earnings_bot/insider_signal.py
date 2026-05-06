@@ -104,6 +104,27 @@ def _bucket_for_code(code: str) -> str:
     return 'other_raw'
 
 
+def _safe_float(v) -> float | None:
+    """edgartools TransactionActivity의 shares/price/value는 float일 수도, footnote ref('[F1]') 또는
+    '$1,234.56' / '1.2M' 같은 문자열일 수도 있음. 깔끔히 변환 안 되면 None."""
+    if v is None:
+        return None
+    if isinstance(v, (int, float)):
+        return float(v)
+    s = str(v).strip()
+    if not s or s.startswith('['):  # '[F1]' 같은 footnote 참조
+        return None
+    # 숫자/소수점/음수 외 문자 제거 (예: '$1,234' → '1234')
+    import re as _re
+    cleaned = _re.sub(r'[^\d.\-]', '', s)
+    if not cleaned or cleaned in ('.', '-', '-.'):
+        return None
+    try:
+        return float(cleaned)
+    except ValueError:
+        return None
+
+
 def _detect_10b5_1(footnotes_text: str) -> bool:
     if not footnotes_text:
         return False
@@ -177,9 +198,9 @@ def fetch_insider_window(ticker: str, event_date: date, days: int = 30) -> Insid
             if not code:
                 continue
             bucket = _bucket_for_code(code)
-            shares = getattr(t, 'shares', None)
-            price = getattr(t, 'price_per_share', None) or getattr(t, 'price', None)
-            value = getattr(t, 'value', None)
+            shares = _safe_float(getattr(t, 'shares', None))
+            price = _safe_float(getattr(t, 'price_per_share', None) or getattr(t, 'price', None))
+            value = _safe_float(getattr(t, 'value', None))
             footnotes_text = getattr(t, 'footnotes_text', '') or ''
 
             txn = InsiderTransaction(
@@ -188,9 +209,9 @@ def fetch_insider_window(ticker: str, event_date: date, days: int = 30) -> Insid
                 insider_role=owner_role,
                 transaction_code=code,
                 bucket=bucket,
-                shares=float(shares) if shares else None,
-                price=float(price) if price else None,
-                value_usd=float(value) if value else None,
+                shares=shares,
+                price=price,
+                value_usd=value,
                 is_10b5_1=_detect_10b5_1(footnotes_text),
                 raw_form_url=getattr(filing, 'filing_url', None) or getattr(filing, 'document_url', None),
             )

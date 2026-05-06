@@ -29,6 +29,17 @@ MONTHLY_REVENUE_KEYWORDS = ('monthend', 'monthly revenue', 'revenue 20', 'monthl
 IR_DAY_KEYWORDS = ('investor day', 'analyst day', 'capital markets day', 'investor presentation',
                    'investor briefing')
 
+# AGM (정기/임시 주주총회) 키워드 (6-K 분류용 — 외국 발행인이 분기실적 외 거버넌스 발표에 사용)
+# Codex 보완: shareholders' meeting / annual meeting of shareholders 변형도 포함
+AGM_KEYWORDS = (
+    'annual general meeting', 'agm', 'shareholders meeting',
+    "shareholders' meeting", 'shareholder meeting',
+    'annual meeting of shareholders', 'general meeting of shareholders',
+)
+
+# 8-K item 번호 정규식 (예: "Item 2.02", "2.02,9.01", "2.02 / 9.01")
+ITEM_RE = re.compile(r'(?:Item\s*)?(\d\.\d{2})', flags=re.IGNORECASE)
+
 
 @dataclass
 class ParsedFiling:
@@ -103,6 +114,53 @@ def _strip_html(html: str) -> str:
     return text.strip()
 
 
+def _normalize_items(raw) -> tuple[str, ...]:
+    """edgartools Filing/EightK item 표현을 ('2.02', '9.01')로 정규화.
+
+    edgartools v5는 items를 string("2.02,9.01"), list, tuple 등 여러 형태로 노출.
+    str/iterable 모두 받아 ITEM_RE로 추출하고 중복 제거.
+    """
+    if raw is None:
+        return ()
+    if isinstance(raw, str):
+        values = re.split(r'[,;]\s*', raw)
+    else:
+        try:
+            values = list(raw)
+        except TypeError:
+            values = [raw]
+
+    items: list[str] = []
+    for value in values:
+        for m in ITEM_RE.finditer(str(value)):
+            code = m.group(1)
+            if code not in items:
+                items.append(code)
+    return tuple(items)
+
+
+def _extract_items(filing, form: str) -> tuple[str, ...]:
+    """3단 폴백 — Filing.items → Filing.obj().items/item_numbers/item_codes → filing.text() 본문."""
+    items = _normalize_items(getattr(filing, 'items', None))
+    if items or form != '8-K':
+        return items
+
+    try:
+        obj = filing.obj()
+    except Exception:
+        obj = None
+    if obj is not None:
+        for attr in ('items', 'item_numbers', 'item_codes'):
+            items = _normalize_items(getattr(obj, attr, None))
+            if items:
+                return items
+
+    try:
+        return _normalize_items((filing.text() or '')[:5000])
+    except Exception:
+        return ()
+
+
 def _classify_8k(items: tuple[str, ...], primary_text: str) -> tuple[Severity, str]:
     if '2.02' in items:
         return 'HIGH', '8-K_EARNINGS'
@@ -116,20 +174,43 @@ def _classify_8k(items: tuple[str, ...], primary_text: str) -> tuple[Severity, s
 
 
 def _classify_6k(exhibits: dict[str, str], attachments_meta: list[dict]) -> tuple[Severity, str]:
-    """6-K는 items 없음 → 첨부 패턴으로 분류."""
+    """6-K는 items 없음 → 첨부 패턴 + 키워드로 분류.
+
+    실측 발견 (ASML 2026-04-15): 분기실적 보도자료에도 AGM 안내 문구 포함.
+    → EX-99.x 다수는 분기실적이 강한 시그널, AGM 키워드는 첨부 단일일 때만 의미 있음.
+
+    분류 순서:
+    1) EX-99.x ≥ 2 → 분기실적 (AGM 본문 언급 무시)
+    2) 월별 매출 키워드
+    3) AGM 키워드 + 단일 첨부 → AGM
+    4) EX-99.1 단일 + 본문 길이 → 분기실적 / OTHER
+    5) 첨부 EX-99.x 없음 → OTHER
+    """
+    meta_text = ' '.join(str(meta.get('document', '')) for meta in attachments_meta).lower()
+    body_text = ' '.join(text[:8000] for text in exhibits.values()).lower()
     ex99_count = sum(1 for k in exhibits if k.startswith('EX-99'))
+
+    # 1) 다중 EX-99.x = 분기실적 (가장 강한 시그널)
     if ex99_count >= 2:
-        # 분기 실적 패턴 (ASML/TSM 모두 EX-99.1 + EX-99.2 이상)
         return 'HIGH', '6-K_QUARTERLY'
+
+    # 2) 월별 매출
+    if any(meta.get('is_monthly_revenue') for meta in attachments_meta):
+        return 'NORMAL', '6-K_MONTHLY'
+
+    # 3) AGM — 첨부 파일명 또는 본문 키워드. ex99_count는 0 or 1.
+    agm_in_filename = any(k in meta_text for k in AGM_KEYWORDS)
+    agm_in_body = any(k in body_text for k in AGM_KEYWORDS)
+    if agm_in_filename or agm_in_body:
+        return 'INFO', '6-K_AGM'
+
+    # 4) EX-99.1 단일 + 긴 본문 → 분기실적 (TSM 단일 ex99 패턴)
     if ex99_count == 1:
-        # EX-99.1만 있음 — 분기 실적일 수도 있고 다른 발표일 수도. 본문 텍스트 길이로 추정
         first_text = next(iter(exhibits.values()), '')
         if len(first_text) > 3000:
             return 'HIGH', '6-K_QUARTERLY'
         return 'NORMAL', '6-K_OTHER'
-    # 첨부 EX-99.x 없음
-    if any(meta.get('is_monthly_revenue') for meta in attachments_meta):
-        return 'NORMAL', '6-K_MONTHLY'
+
     return 'INFO', '6-K_OTHER'
 
 
@@ -137,7 +218,7 @@ def parse_filing(filing) -> ParsedFiling:
     """edgartools Filing 객체를 받아 분류 + 첨부 텍스트 추출."""
     form = (getattr(filing, 'form', '') or '').upper()
     accession = getattr(filing, 'accession_no', None) or getattr(filing, 'accession_number', '')
-    items = tuple(getattr(filing, 'items', ()) or ())
+    items = _extract_items(filing, form)
 
     # NT 10-Q/K 우선 처리 (지연 제출 → 즉시 CRITICAL)
     if form in ('NT 10-Q', 'NT 10-K', 'NT-10-Q', 'NT-10-K'):
