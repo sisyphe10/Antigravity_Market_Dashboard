@@ -109,7 +109,30 @@ def init_db() -> None:
         conn.execute("CREATE INDEX IF NOT EXISTS idx_transcripts_filing ON transcripts(filing_id)")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_transcripts_confidence ON transcripts(match_confidence)")
 
-        # 5) earnings_calendar — Finnhub 발표 일정 사전 적재 (BMO/AMC lookup용)
+        # 5) filing_analyses — Sonnet 분석 결과 별도 테이블 (Codex 권고: metadata_json 분리)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS filing_analyses (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                filing_id INTEGER NOT NULL,
+                analysis_kr TEXT NOT NULL,            -- 한국어 1-page sheet
+                yoy_md TEXT,                           -- 기계 산출 YoY 표
+                insider_md TEXT,                       -- insider 부록
+                prompt_version TEXT NOT NULL,
+                analysis_model TEXT NOT NULL,
+                input_tokens INTEGER,
+                output_tokens INTEGER,
+                cache_read_tokens INTEGER,
+                cache_creation_tokens INTEGER,
+                fiscal_year INTEGER,
+                fiscal_quarter INTEGER,
+                created_at TEXT DEFAULT (datetime('now')),
+                FOREIGN KEY(filing_id) REFERENCES filings(id),
+                UNIQUE(filing_id, prompt_version)
+            )
+        """)
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_analyses_filing ON filing_analyses(filing_id)")
+
+        # 6) earnings_calendar — Finnhub 발표 일정 사전 적재 (BMO/AMC lookup용)
         conn.execute("""
             CREATE TABLE IF NOT EXISTS earnings_calendar (
                 ticker TEXT NOT NULL,
@@ -265,6 +288,44 @@ def get_filing_by_id(filing_id: int) -> dict | None:
     conn = get_conn()
     try:
         row = conn.execute("SELECT * FROM filings WHERE id=?", (filing_id,)).fetchone()
+        return dict(row) if row else None
+    finally:
+        conn.close()
+
+
+def insert_analysis(*, filing_id: int, analysis_kr: str, yoy_md: str | None,
+                    insider_md: str | None, prompt_version: str, analysis_model: str,
+                    input_tokens: int | None, output_tokens: int | None,
+                    cache_read_tokens: int | None, cache_creation_tokens: int | None,
+                    fiscal_year: int | None, fiscal_quarter: int | None) -> int | None:
+    """filing_analyses 테이블 INSERT OR IGNORE. (filing_id, prompt_version) 중복 시 None."""
+    conn = get_conn()
+    try:
+        cur = conn.execute(
+            """
+            INSERT OR IGNORE INTO filing_analyses
+              (filing_id, analysis_kr, yoy_md, insider_md, prompt_version, analysis_model,
+               input_tokens, output_tokens, cache_read_tokens, cache_creation_tokens,
+               fiscal_year, fiscal_quarter)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (filing_id, analysis_kr, yoy_md, insider_md, prompt_version, analysis_model,
+             input_tokens, output_tokens, cache_read_tokens, cache_creation_tokens,
+             fiscal_year, fiscal_quarter),
+        )
+        conn.commit()
+        return cur.lastrowid if cur.rowcount > 0 else None
+    finally:
+        conn.close()
+
+
+def get_latest_analysis(filing_id: int) -> dict | None:
+    conn = get_conn()
+    try:
+        row = conn.execute(
+            "SELECT * FROM filing_analyses WHERE filing_id=? ORDER BY created_at DESC LIMIT 1",
+            (filing_id,),
+        ).fetchone()
         return dict(row) if row else None
     finally:
         conn.close()
