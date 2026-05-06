@@ -32,10 +32,10 @@ create_market_alert.py 변경 → market_alert.html 재생성
 ```
 
 ## WRAP Order 탭 특이사항
-- 4개 서브탭: 일반형 / NH 목표전환형 2호 / DB 목표전환형 3차 / Email
+- 3개 서브탭: 일반형 / NH 목표전환형 2호 / Email (DB 3차 청산 2026-05-06)
 - 임시저장 (회색): orders/pending_orders.json에 누적 (GitHub Contents API)
 - 최종 저장 (초록): 임시저장 + finalize_orders.yml workflow_dispatch 즉시 트리거
-- Email 탭: 컴플라이언스/삼성/NH/네이트온/DB 이메일 + 자문지 5개 다운로드 통합
+- Email 탭: 컴플라이언스/삼성/NH/네이트온 이메일 + 자문지 4개 다운로드 통합
 - 추천사유는 종목코드 + 주문구분이 같을 때만 탭 간 동기화
 
 ## UI 일관성

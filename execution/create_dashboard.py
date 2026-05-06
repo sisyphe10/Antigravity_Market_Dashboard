@@ -204,8 +204,7 @@ def get_item_category(item_name):
 
     # Special handling for Wrap portfolios
     wrap_keywords = ['트루밸류', '삼성 트루밸류', 'Value ESG', 'NH Value ESG',
-                     '개방형', 'DB 개방형', '목표전환형 2호', 'NH 목표전환형 2호',
-                     '목표전환형 3차', 'DB 목표전환형 3차']
+                     '개방형', 'DB 개방형', '목표전환형 2호', 'NH 목표전환형 2호']
     if any(keyword in item_name for keyword in wrap_keywords):
         return 'Wrap'
 
@@ -1383,7 +1382,6 @@ def _build_wrap_chart_section(category_label):
             ('NH Value ESG', 'Value ESG'),
             ('DB 개방형', '개방형 랩'),
             ('NH 목표전환형 2호', '목표전환형 2호'),
-            ('DB 목표전환형 3차', '목표전환형 3차'),
             ('KOSPI', 'KOSPI'),
             ('KOSDAQ', 'KOSDAQ'),
         ]
@@ -1392,7 +1390,6 @@ def _build_wrap_chart_section(category_label):
             'NH Value ESG': '#0072CE',
             'DB 개방형': '#00854A',
             'NH 목표전환형 2호': '#0072CE',
-            'DB 목표전환형 3차': '#00854A',
             'KOSPI': '#000000',
             'KOSDAQ': '#666666',
         }
@@ -2133,7 +2130,6 @@ def create_wrap_returns_table():
         items = [
             ('삼성 트루밸류', '트루밸류'),
             ('NH 목표전환형 2호', '목표전환형 2호'),
-            ('DB 목표전환형 3차', '목표전환형 3차'),
             ('KOSPI', 'KOSPI'),
             ('KOSDAQ', 'KOSDAQ'),
         ]
@@ -2290,7 +2286,7 @@ def create_order_section():
     fetch portfolio_data.json + ExcelJS 클라이언트 사이드 처리 (journal.html 검증된 패턴).
 
     UX:
-      - 5개 포트폴리오 버튼 (트루밸류/NH Value ESG/DB 개방형/NH 목표전환형 2호/DB 목표전환형 3차)
+      - 4개 포트폴리오 버튼 (트루밸류/NH Value ESG/DB 개방형/NH 목표전환형 2호)
       - 각 버튼 클릭 시 종목 테이블: 변경전(read-only), 변경후(input), 주문구분(자동), 추천사유(input)
       - Download(빨간) → 자문지/ 템플릿 fetch → R7부터 F/G/H/I 셀 patch → .xlsx 다운로드
     """
@@ -2321,22 +2317,12 @@ def create_order_section():
             },
             {
                 display: 'NH 목표전환형 2호',
-                jsonKey: 'NH 목표전환형 2호 / DB 목표전환형 3차',
+                jsonKey: 'NH 목표전환형 2호',
                 templates: [
                     { label: 'NH 목표전환형 2호', file: '자문지/라이프자산운용_라이프 다이내믹밸류_목표전환형 2호_2026.4.29.xlsx' },
                 ],
                 newSheetTargets: [
                     { broker: 'NH', product: '목표전환형 2호' },
-                ],
-            },
-            {
-                display: 'DB 목표전환형 3차',
-                jsonKey: 'NH 목표전환형 2호 / DB 목표전환형 3차',
-                templates: [
-                    { label: 'DB 목표전환형 3차', file: '자문지/라이프자산운용_DB 목표전환형 랩 _3차_2026.4.30.xlsx' },
-                ],
-                newSheetTargets: [
-                    { broker: 'DB', product: '목표전환형 3차' },
                 ],
             },
         ];
@@ -2499,11 +2485,9 @@ def create_order_section():
         function renderEmailPanel() {
             var GENERAL = '삼성 트루밸류 / NH Value ESG / DB 개방형';
             var NH = 'NH 목표전환형 2호';
-            var DB = 'DB 목표전환형 3차';
             var compliance = buildComplianceEmailText();
             var samsung = buildOrderEmailText(GENERAL, orderStocks[GENERAL] || [], orderState[GENERAL] || []);
             var nh = buildOrderEmailText(NH, orderStocks[NH] || [], orderState[NH] || []);
-            var db = buildOrderEmailText(DB, orderStocks[DB] || [], orderState[DB] || []);
             // 네이트온 (NH 이메일 밑) — 일반형 + 목표전환형 한 박스
             var nateonText = buildOrderNateonText(orderStocks[GENERAL] || [], orderState[GENERAL] || [], '일반형')
                 + '\\n\\n'
@@ -2553,7 +2537,6 @@ def create_order_section():
                 + buildEmailBox('삼성 이메일', samsung, '#f9fafb', '#e5e7eb', '#444', '#374151')
                 + buildEmailBox('NH 이메일', nh, '#f9fafb', '#e5e7eb', '#444', '#374151')
                 + buildEmailBox('네이트온 (NH)', nateonText, '#eef2ff', '#c7d2fe', '#3730a3', '#4f46e5')
-                + buildEmailBox('DB 이메일', db, '#f9fafb', '#e5e7eb', '#444', '#374151')
                 + '</div>';
             document.getElementById('orderContent').innerHTML = html;
             document.querySelectorAll('#orderContent .email-tab-dl-btn').forEach(function(btn) {
@@ -2612,8 +2595,8 @@ def create_order_section():
         }
 
         function buildOrderEmailText(pfName, stocks, st) {
-            // 목표전환형 2호 / 3차 탭은 NH·DB 이메일에 일반형 + 목표전환형 둘 다 포함
-            var TARGET_TABS = ['NH 목표전환형 2호', 'DB 목표전환형 3차'];
+            // 목표전환형 2호 탭은 NH 이메일에 일반형 + 목표전환형 둘 다 포함
+            var TARGET_TABS = ['NH 목표전환형 2호'];
             var GENERAL = '삼성 트루밸류 / NH Value ESG / DB 개방형';
             var lines = [
                 '안녕하십니까.',
@@ -2626,9 +2609,7 @@ def create_order_section():
             if (TARGET_TABS.indexOf(pfName) >= 0) {
                 var generalChanges = buildOrderChanges(orderStocks[GENERAL] || [], orderState[GENERAL] || []);
                 var targetChanges = buildOrderChanges(stocks, st);
-                // DB는 일반형 자리에 '개방형'으로 표기, NH는 '일반형' 그대로
-                var generalLabel = (pfName === 'DB 목표전환형 3차') ? '개방형' : '일반형';
-                lines = lines.concat(buildEmailSectionLines(generalChanges, generalLabel));
+                lines = lines.concat(buildEmailSectionLines(generalChanges, '일반형'));
                 lines.push('');
                 lines = lines.concat(buildEmailSectionLines(targetChanges, '목표전환형'));
             } else {
@@ -2996,7 +2977,7 @@ def create_order_section():
 
         // 최종 저장 = 3개 포트폴리오 모두 저장 + finalize 워크플로 1회 트리거
         async function finalizeOrder(_pfNameIgnored) {
-            if (!confirm('최종 저장하시겠습니까?\\n\\n3개 포트폴리오(일반형/NH 목표전환형 2호/DB 목표전환형 3차) 모두 저장 후 GitHub Actions(finalize_orders) 즉시 실행. 1~2분 후 Wrap_NAV.xlsx NEW 시트 + 대시보드 반영.')) return;
+            if (!confirm('최종 저장하시겠습니까?\\n\\n2개 포트폴리오(일반형/NH 목표전환형 2호) 모두 저장 후 GitHub Actions(finalize_orders) 즉시 실행. 1~2분 후 Wrap_NAV.xlsx NEW 시트 + 대시보드 반영.')) return;
             var pat = getGithubPat();
             if (!pat) { alert('PAT 입력이 취소되었습니다.'); return; }
             var ALL_PFS = ORDER_PORTFOLIOS.map(function(p) { return p.display; });
@@ -3164,7 +3145,6 @@ def create_aum_section():
             { display: 'NH Value ESG',      broker: 'NH',   name: '다이내믹밸류' },
             { display: 'DB 개방형',         broker: 'DB',   name: '개방형 랩' },
             { display: 'NH 목표전환형 2호', broker: 'NH',   name: '목표전환형 2호' },
-            { display: 'DB 목표전환형 3차', broker: 'DB',   name: '목표전환형 3차' },
         ];
         var aumLatest = {};       // {broker|name: {date, aum}}
         var aumInputs = {};       // {idx: 사용자 입력 (억원)}
