@@ -24,3 +24,10 @@ google-api-python-client
 holidays
 pykrx
 exchange_calendars
+
+# earnings_bot
+edgartools==5.30.2
+anthropic
+notion-client
+finnhub-python
+tiktoken
