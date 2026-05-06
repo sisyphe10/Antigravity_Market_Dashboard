@@ -25,6 +25,7 @@ from .insider_signal import fetch_insider_window, format_appendix
 from .prompt_builder import (ANALYSIS_MODEL, SYSTEM_ANALYSIS, SYSTEM_TRANSLATION,
                              SYSTEM_TRANSLATION_TRANSCRIPT, TRANSLATION_MODEL,
                              AnalysisInput, build_analysis_messages,
+                             build_prepared_messages, build_qa_messages,
                              build_transcript_translation_messages,
                              build_translation_messages, get_anthropic_client,
                              prompt_version, skill_md_sha256,
@@ -267,6 +268,10 @@ def _call_haiku_long(messages: list[dict], system_prompt: str, max_tokens: int =
 def translate_transcript(transcript_id: int) -> dict:
     """transcripts 1건 한국어 풀 번역. translated_kr 미설정 행만 처리.
 
+    분할 호출 전략 (max_tokens 16K 도달 회피):
+    - prepared와 qa를 **별도 호출**해 합치기. 각 호출 max_tokens=16K (Haiku 한도).
+    - 결과 합쳐서 translated_kr에 저장.
+
     DRY_RUN=1 이면 Haiku 호출 없이 prompt 빌드 + 토큰 추정만.
     """
     db.init_db()
@@ -286,45 +291,83 @@ def translate_transcript(transcript_id: int) -> dict:
     if not prepared and not qa:
         return {'skip': True, 'reason': 'empty content', 'transcript_id': transcript_id}
 
-    messages = build_transcript_translation_messages(prepared, qa)
     pv = transcript_translation_prompt_version()
 
     if DRY_RUN:
         try:
             import tiktoken
             enc = tiktoken.get_encoding('cl100k_base')
-            input_estimate = len(enc.encode(SYSTEM_TRANSLATION_TRANSCRIPT)) + sum(
-                len(enc.encode(m['content'])) if isinstance(m.get('content'), str) else 0
-                for m in messages
-            )
+            sys_tokens = len(enc.encode(SYSTEM_TRANSLATION_TRANSCRIPT))
+            prep_tokens = len(enc.encode(prepared))
+            qa_tokens = len(enc.encode(qa))
         except Exception:
-            input_estimate = -1
+            sys_tokens = prep_tokens = qa_tokens = -1
         return {
             'transcript_id': transcript_id,
             'dry_run': True,
-            'input_tokens_estimate': input_estimate,
+            'system_tokens': sys_tokens,
+            'prepared_input_tokens': prep_tokens,
+            'qa_input_tokens': qa_tokens,
             'prompt_version': pv,
             'prepared_chars': len(prepared),
             'qa_chars': len(qa),
         }
 
-    haiku_resp = _call_haiku_long(messages, SYSTEM_TRANSLATION_TRANSCRIPT, max_tokens=16000)
+    # 1) Prepared Remarks 호출
+    prepared_resp = None
+    if prepared:
+        prepared_resp = _call_haiku_long(
+            build_prepared_messages(prepared),
+            SYSTEM_TRANSLATION_TRANSCRIPT,
+            max_tokens=16000,
+        )
+
+    # 2) Q&A 호출
+    qa_resp = None
+    if qa:
+        qa_resp = _call_haiku_long(
+            build_qa_messages(qa),
+            SYSTEM_TRANSLATION_TRANSCRIPT,
+            max_tokens=16000,
+        )
+
+    # 결과 합치기
+    parts = []
+    if prepared_resp and prepared_resp['text']:
+        parts.append(prepared_resp['text'])
+    if qa_resp and qa_resp['text']:
+        parts.append(qa_resp['text'])
+    translated_full = '\n\n'.join(parts)
+
+    total_input = (prepared_resp['input_tokens'] if prepared_resp else 0) + \
+                  (qa_resp['input_tokens'] if qa_resp else 0)
+    total_output = (prepared_resp['output_tokens'] if prepared_resp else 0) + \
+                   (qa_resp['output_tokens'] if qa_resp else 0)
 
     db.update_transcript_translation(
         transcript_id=transcript_id,
-        translated_kr=haiku_resp['text'],
+        translated_kr=translated_full,
         prompt_version_translation=pv,
         translation_model=TRANSLATION_MODEL,
-        translation_input_tokens=haiku_resp['input_tokens'],
-        translation_output_tokens=haiku_resp['output_tokens'],
+        translation_input_tokens=total_input,
+        translation_output_tokens=total_output,
     )
 
     return {
         'transcript_id': transcript_id,
         'translated': True,
-        'input_tokens': haiku_resp['input_tokens'],
-        'output_tokens': haiku_resp['output_tokens'],
-        'stop_reason': haiku_resp['stop_reason'],
+        'prepared': {
+            'input_tokens': prepared_resp['input_tokens'] if prepared_resp else 0,
+            'output_tokens': prepared_resp['output_tokens'] if prepared_resp else 0,
+            'stop_reason': prepared_resp['stop_reason'] if prepared_resp else None,
+        } if prepared_resp else None,
+        'qa': {
+            'input_tokens': qa_resp['input_tokens'] if qa_resp else 0,
+            'output_tokens': qa_resp['output_tokens'] if qa_resp else 0,
+            'stop_reason': qa_resp['stop_reason'] if qa_resp else None,
+        } if qa_resp else None,
+        'total_input_tokens': total_input,
+        'total_output_tokens': total_output,
         'prompt_version': pv,
     }
 
