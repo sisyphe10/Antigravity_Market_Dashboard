@@ -73,13 +73,21 @@ def run_pipeline() -> dict:
     # 3) transcript_watch — 매 호출 (5분 단위)
     summary.append(_safe('transcript_watch.run_once', transcript_watch.run_once))
 
-    # 4) translator — 매 호출. 비용 발생하므로 limit 작게.
+    # 4) translator (1-page 분석) — 매 호출. 비용 발생하므로 limit 작게.
     summary.append(_safe('translator.process_pending',
                          lambda: translator.process_pending(limit=5)))
 
-    # 5) notion_publisher — 매 호출
+    # 4b) translator (transcript 풀 번역, Haiku) — 매 호출. limit 3.
+    summary.append(_safe('translator.translate_pending_transcripts',
+                         lambda: translator.translate_pending_transcripts(limit=3)))
+
+    # 5) notion_publisher (분석 publish) — 매 호출
     summary.append(_safe('notion_publisher.publish_pending',
                          lambda: notion_publisher.publish_pending(limit=5)))
+
+    # 5b) notion_publisher (한국어 transcript append) — 매 호출
+    summary.append(_safe('notion_publisher.append_pending_translations',
+                         lambda: notion_publisher.append_pending_translations(limit=5)))
 
     # 6) digest — 하루 1회 (23:00 KST 시간대)
     if _is_within_hour(23, started):

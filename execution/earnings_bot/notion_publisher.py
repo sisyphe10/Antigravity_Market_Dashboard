@@ -229,15 +229,25 @@ def publish_analysis(filing_id: int) -> dict:
     except json.JSONDecodeError:
         pass
 
-    # 본문: analysis_kr + (있으면 transcript 일부 헤더)
+    # 본문: analysis_kr + (번역된 transcript가 있으면 풀 번역 append)
     body_md = analysis['analysis_kr']
     transcript_row = db.get_transcript_for_filing(filing_id)
     if transcript_row:
-        body_md += f"\n\n---\n\n### Transcript ({transcript_row['source']})\n\n"
-        body_md += f"[원문 URL]({transcript_row['source_url']})\n\n"
-        prepared = transcript_row.get('prepared_remarks') or ''
-        if prepared:
-            body_md += f"**Prepared Remarks (요지)**\n{prepared[:2000]}...\n"
+        translated_kr = transcript_row.get('translated_kr')
+        if translated_kr:
+            # 풀 번역 본문
+            body_md += (
+                f"\n\n---\n\n## 컨퍼런스콜 전문 (한국어 번역)\n\n"
+                f"_원문 출처: [{transcript_row['source']}]({transcript_row['source_url']})_\n\n"
+                f"{translated_kr}\n"
+            )
+        else:
+            # 번역 미완료 — 원문 URL만 표시
+            body_md += (
+                f"\n\n---\n\n## 컨퍼런스콜\n\n"
+                f"원문: [{transcript_row['source']}]({transcript_row['source_url']}) "
+                f"(한국어 번역 대기 중)\n"
+            )
 
     blocks = markdown_to_blocks(body_md)
     properties = _build_properties(filing, analysis, document_subtype)
@@ -301,6 +311,84 @@ def publish_analysis(filing_id: int) -> dict:
         'action': action,
         'block_count': len(blocks),
     }
+
+
+def append_translated_transcript(transcript_id: int) -> dict:
+    """번역 완료된 transcript를 기존 Notion 페이지에 append.
+
+    DRY_RUN=1 또는 NOTION_API_KEY 미설정 시 페이지 구조만 출력.
+    """
+    db.init_db()
+    conn = db.get_conn()
+    try:
+        row = conn.execute(
+            """
+            SELECT t.*, f.ticker, f.accession_number, f.severity
+            FROM transcripts t JOIN filings f ON t.filing_id = f.id
+            WHERE t.id = ?
+            """,
+            (transcript_id,),
+        ).fetchone()
+    finally:
+        conn.close()
+    if not row:
+        return {'error': f'transcript_id={transcript_id} 없음'}
+    row = dict(row)
+    if not row.get('translated_kr'):
+        return {'skip': True, 'reason': 'not yet translated'}
+    if row.get('notion_appended_at'):
+        return {'skip': True, 'reason': 'already appended'}
+
+    body_md = (
+        f"## 컨퍼런스콜 전문 (한국어 번역)\n\n"
+        f"_원문 출처: [{row['source']}]({row['source_url']}) | "
+        f"번역 모델: {row.get('translation_model') or 'haiku'} | "
+        f"prompt_version: {row.get('prompt_version_translation', '')}_\n\n"
+        f"{row['translated_kr']}\n"
+    )
+    blocks = [{'object': 'block', 'type': 'divider', 'divider': {}}] + markdown_to_blocks(body_md)
+
+    if DRY_RUN or not NOTION_API_KEY or not NOTION_DATABASE_ID:
+        reason = 'DRY_RUN' if DRY_RUN else 'NOTION 키/DB ID 미설정'
+        return {
+            'transcript_id': transcript_id,
+            'dry_run': True,
+            'reason': reason,
+            'ticker': row['ticker'],
+            'accession': row['accession_number'],
+            'block_count': len(blocks),
+            'translated_chars': len(row['translated_kr']),
+        }
+
+    from notion_client import Client
+    notion = Client(auth=NOTION_API_KEY)
+    page_id = _find_existing_page(notion, NOTION_DATABASE_ID, row['accession_number'])
+    if not page_id:
+        return {'error': f'기존 Notion 페이지 없음 (accession={row["accession_number"]}). publish_analysis 먼저 실행 필요.'}
+
+    _append_blocks(notion, page_id, blocks)
+    db.mark_transcript_appended(transcript_id, page_id)
+
+    return {
+        'transcript_id': transcript_id,
+        'ticker': row['ticker'],
+        'notion_page_id': page_id,
+        'block_count': len(blocks),
+    }
+
+
+def append_pending_translations(limit: int = 5) -> list[dict]:
+    """번역됐지만 Notion 미append된 transcripts 일괄 처리."""
+    db.init_db()
+    rows = db.get_pending_notion_append_transcripts(limit=limit)
+    results = []
+    for r in rows:
+        try:
+            results.append(append_translated_transcript(r['id']))
+        except Exception as e:
+            logger.error(f'transcript {r["id"]} append 실패: {e}')
+            results.append({'transcript_id': r['id'], 'error': str(e)})
+    return results
 
 
 def publish_pending(limit: int = 10) -> list[dict]:

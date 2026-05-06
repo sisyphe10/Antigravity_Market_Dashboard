@@ -109,6 +109,22 @@ def init_db() -> None:
         conn.execute("CREATE INDEX IF NOT EXISTS idx_transcripts_filing ON transcripts(filing_id)")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_transcripts_confidence ON transcripts(match_confidence)")
 
+        # Phase 6: 한국어 번역 + Notion append 추적 컬럼 (idempotent ALTER)
+        for ddl in (
+            "ALTER TABLE transcripts ADD COLUMN translated_kr TEXT",
+            "ALTER TABLE transcripts ADD COLUMN prompt_version_translation TEXT",
+            "ALTER TABLE transcripts ADD COLUMN translation_model TEXT",
+            "ALTER TABLE transcripts ADD COLUMN translation_input_tokens INTEGER",
+            "ALTER TABLE transcripts ADD COLUMN translation_output_tokens INTEGER",
+            "ALTER TABLE transcripts ADD COLUMN translated_at TEXT",
+            "ALTER TABLE transcripts ADD COLUMN notion_appended_at TEXT",
+            "ALTER TABLE transcripts ADD COLUMN notion_page_id TEXT",
+        ):
+            try:
+                conn.execute(ddl)
+            except Exception:
+                pass  # 이미 컬럼 있음
+
         # 5) filing_analyses — Sonnet 분석 결과 별도 테이블 (Codex 권고: metadata_json 분리)
         conn.execute("""
             CREATE TABLE IF NOT EXISTS filing_analyses (
@@ -405,6 +421,90 @@ def get_transcript_for_filing(filing_id: int, *, min_confidence: float = 0.7) ->
             (filing_id, min_confidence),
         ).fetchone()
         return dict(row) if row else None
+    finally:
+        conn.close()
+
+
+# ─── Phase 6: transcript 한국어 번역 헬퍼 ───
+def update_transcript_translation(transcript_id: int, *, translated_kr: str,
+                                   prompt_version_translation: str,
+                                   translation_model: str,
+                                   translation_input_tokens: int | None,
+                                   translation_output_tokens: int | None) -> None:
+    """transcript 한국어 번역 결과 in-place 업데이트."""
+    conn = get_conn()
+    try:
+        conn.execute(
+            """
+            UPDATE transcripts SET
+              translated_kr = ?,
+              prompt_version_translation = ?,
+              translation_model = ?,
+              translation_input_tokens = ?,
+              translation_output_tokens = ?,
+              translated_at = datetime('now')
+            WHERE id = ?
+            """,
+            (translated_kr, prompt_version_translation, translation_model,
+             translation_input_tokens, translation_output_tokens, transcript_id),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def get_pending_translation_transcripts(limit: int = 5) -> list[dict]:
+    """번역 안 된 transcripts (translated_kr IS NULL) 최신순."""
+    conn = get_conn()
+    try:
+        rows = conn.execute(
+            """
+            SELECT * FROM transcripts
+            WHERE translated_kr IS NULL
+              AND match_confidence >= 0.7
+              AND prepared_remarks IS NOT NULL
+            ORDER BY fetched_at DESC LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+def get_pending_notion_append_transcripts(limit: int = 5) -> list[dict]:
+    """번역 완료 + Notion append 미실행 transcripts."""
+    conn = get_conn()
+    try:
+        rows = conn.execute(
+            """
+            SELECT t.*, f.ticker, f.accession_number
+            FROM transcripts t
+            JOIN filings f ON t.filing_id = f.id
+            WHERE t.translated_kr IS NOT NULL
+              AND t.notion_appended_at IS NULL
+            ORDER BY t.translated_at DESC LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+def mark_transcript_appended(transcript_id: int, notion_page_id: str) -> None:
+    conn = get_conn()
+    try:
+        conn.execute(
+            """
+            UPDATE transcripts SET
+              notion_appended_at = datetime('now'),
+              notion_page_id = ?
+            WHERE id = ?
+            """,
+            (notion_page_id, transcript_id),
+        )
+        conn.commit()
     finally:
         conn.close()
 

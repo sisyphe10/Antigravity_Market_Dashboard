@@ -23,9 +23,12 @@ from datetime import date, datetime, timezone
 from . import db, ticker_registry
 from .insider_signal import fetch_insider_window, format_appendix
 from .prompt_builder import (ANALYSIS_MODEL, SYSTEM_ANALYSIS, SYSTEM_TRANSLATION,
-                             TRANSLATION_MODEL, AnalysisInput,
-                             build_analysis_messages, build_translation_messages,
-                             get_anthropic_client, prompt_version, skill_md_sha256)
+                             SYSTEM_TRANSLATION_TRANSCRIPT, TRANSLATION_MODEL,
+                             AnalysisInput, build_analysis_messages,
+                             build_transcript_translation_messages,
+                             build_translation_messages, get_anthropic_client,
+                             prompt_version, skill_md_sha256,
+                             transcript_translation_prompt_version)
 from .retry_helper import api_retry
 from .yoy_calculator import compute_yoy, format_table
 
@@ -240,6 +243,104 @@ def process_filing(filing_id: int) -> dict:
         'tokens': sonnet_resp,
         'prompt_version': pv,
     }
+
+
+# ─── Phase 6: transcript 풀 번역 (Haiku 4.5) ───
+@api_retry
+def _call_haiku_long(messages: list[dict], system_prompt: str, max_tokens: int = 16000) -> dict:
+    """Haiku 4.5 풀 번역용 — max_tokens 16K (Haiku 4.5 한도)."""
+    client = get_anthropic_client()
+    resp = client.messages.create(
+        model=TRANSLATION_MODEL,
+        max_tokens=max_tokens,
+        system=system_prompt,
+        messages=messages,
+    )
+    return {
+        'text': '\n'.join(b.text for b in resp.content if b.type == 'text'),
+        'input_tokens': resp.usage.input_tokens,
+        'output_tokens': resp.usage.output_tokens,
+        'stop_reason': resp.stop_reason,
+    }
+
+
+def translate_transcript(transcript_id: int) -> dict:
+    """transcripts 1건 한국어 풀 번역. translated_kr 미설정 행만 처리.
+
+    DRY_RUN=1 이면 Haiku 호출 없이 prompt 빌드 + 토큰 추정만.
+    """
+    db.init_db()
+    conn = db.get_conn()
+    try:
+        row = conn.execute('SELECT * FROM transcripts WHERE id=?', (transcript_id,)).fetchone()
+    finally:
+        conn.close()
+    if not row:
+        return {'error': f'transcript_id={transcript_id} 없음'}
+    row = dict(row)
+    if row.get('translated_kr'):
+        return {'skip': True, 'reason': 'already translated', 'transcript_id': transcript_id}
+
+    prepared = row.get('prepared_remarks') or ''
+    qa = row.get('qa') or ''
+    if not prepared and not qa:
+        return {'skip': True, 'reason': 'empty content', 'transcript_id': transcript_id}
+
+    messages = build_transcript_translation_messages(prepared, qa)
+    pv = transcript_translation_prompt_version()
+
+    if DRY_RUN:
+        try:
+            import tiktoken
+            enc = tiktoken.get_encoding('cl100k_base')
+            input_estimate = len(enc.encode(SYSTEM_TRANSLATION_TRANSCRIPT)) + sum(
+                len(enc.encode(m['content'])) if isinstance(m.get('content'), str) else 0
+                for m in messages
+            )
+        except Exception:
+            input_estimate = -1
+        return {
+            'transcript_id': transcript_id,
+            'dry_run': True,
+            'input_tokens_estimate': input_estimate,
+            'prompt_version': pv,
+            'prepared_chars': len(prepared),
+            'qa_chars': len(qa),
+        }
+
+    haiku_resp = _call_haiku_long(messages, SYSTEM_TRANSLATION_TRANSCRIPT, max_tokens=16000)
+
+    db.update_transcript_translation(
+        transcript_id=transcript_id,
+        translated_kr=haiku_resp['text'],
+        prompt_version_translation=pv,
+        translation_model=TRANSLATION_MODEL,
+        translation_input_tokens=haiku_resp['input_tokens'],
+        translation_output_tokens=haiku_resp['output_tokens'],
+    )
+
+    return {
+        'transcript_id': transcript_id,
+        'translated': True,
+        'input_tokens': haiku_resp['input_tokens'],
+        'output_tokens': haiku_resp['output_tokens'],
+        'stop_reason': haiku_resp['stop_reason'],
+        'prompt_version': pv,
+    }
+
+
+def translate_pending_transcripts(limit: int = 3) -> list[dict]:
+    """미번역 transcripts 일괄 처리. 비용 보호용 limit 작게."""
+    db.init_db()
+    rows = db.get_pending_translation_transcripts(limit=limit)
+    results = []
+    for r in rows:
+        try:
+            results.append(translate_transcript(r['id']))
+        except Exception as e:
+            logger.error(f'transcript {r["id"]} 번역 실패: {e}')
+            results.append({'transcript_id': r['id'], 'error': str(e)})
+    return results
 
 
 def process_pending(limit: int = 5) -> list[dict]:

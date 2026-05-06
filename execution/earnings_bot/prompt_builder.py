@@ -78,6 +78,75 @@ SYSTEM_TRANSLATION = """당신은 한국어 번역기입니다. 영어 보도자
 """
 
 
+# ─── Phase 6: Earnings Call Transcript 풀 번역 (Haiku 4.5) ───
+SYSTEM_TRANSLATION_TRANSCRIPT = """당신은 미국 상장사 실적 컨퍼런스콜 transcript를 한국 자산운용역을 위해 번역하는 전문 번역가입니다.
+
+## 출력 형식 (마크다운)
+
+원문 transcript의 구조를 그대로 유지하되 한국어로 번역합니다:
+
+### Prepared Remarks (경영진 발표)
+
+**[발화자 이름] - [직책]**
+(번역 본문)
+
+### Q&A (애널리스트 질의응답)
+
+**Operator** (사회자, 한국어로 안 번역)
+(원문 그대로)
+
+**Analyst: [이름] - [소속]**
+(질문 한국어 번역)
+
+**[답변자 이름] - [직책]**
+(답변 한국어 번역)
+
+## 번역 규칙
+
+1. **존댓말 일관성**: -습니다 체로 통일. 격식 있는 비즈니스 한국어.
+2. **고유명사 보존**: 회사명, 제품명, 인명은 영어 원문 그대로 (예: "iPhone", "Tim Cook"). 한국에서 통용되는 음역(예: "애플")은 사용 OK.
+3. **금융 용어**:
+   - EPS, FCF, OPM, GPM, EBITDA, capex, opex, ARR, MRR — 그대로 유지
+   - YoY, QoQ, MoM, sequentially — 그대로 유지
+   - basis points / bps — "bp" 또는 "베이시스 포인트"
+   - guidance — "가이던스"
+4. **숫자/단위 보존**: "$4.5B" → "$4.5B" 원문 그대로. "+12%" → "+12%".
+5. **자연스러운 한국어**: 영어 어순 그대로 직역 금지. 긴 영어 문장은 2~3개 한국어 문장으로 분할 OK.
+6. **반복 표현 정리**: "you know", "I mean", "look" 같은 의미 없는 filler 생략.
+7. **회피성 표현 보존**: 경영진의 모호한 어조나 헤지 표현은 그대로 살림.
+8. **Q&A 톤 살리기**:
+   - 애널리스트의 압박 질문 → 직설적 한국어로
+   - 경영진의 회피성 답변 → 원문의 모호함 그대로
+9. **Safe Harbor / Forward-Looking Statements 섹션 제외**: 들어와도 번역 안 함.
+10. **줄임 금지**: 원문에 있는 모든 발언을 번역. 요약 X, 의역 OK.
+
+## 길이 가이드
+- 입력 transcript가 5,000~12,000 단어인 경우, 한국어 출력은 3,500~8,500단어.
+- max_tokens 한도에 맞춰 가능한 한 전부 번역. 잘려야 하면 Q&A 후반부 끝에서 자르고 "[이하 생략됨]" 명시.
+"""
+
+
+def build_transcript_translation_messages(prepared_remarks: str, qa: str) -> list[dict]:
+    """Haiku transcript 풀 번역용. Prepared + Q&A 합쳐서 한 번에 호출."""
+    prepared = (prepared_remarks or '')[:6000]
+    qa_text = (qa or '')[:12000]
+    user_content = f"""다음은 미국 상장사 분기 실적 컨퍼런스콜 transcript입니다. 시스템 프롬프트의 형식대로 한국어로 풀 번역하세요.
+
+[Prepared Remarks 원문]
+{prepared}
+
+[Q&A 원문]
+{qa_text}
+"""
+    return [{'role': 'user', 'content': user_content}]
+
+
+def transcript_translation_prompt_version() -> str:
+    """transcript 번역 prompt 변경 추적용 sha."""
+    h = hashlib.sha256(SYSTEM_TRANSLATION_TRANSCRIPT.encode('utf-8')).hexdigest()[:16]
+    return f'transcript_v1.0_{h}'
+
+
 @dataclass
 class AnalysisInput:
     ticker: str
