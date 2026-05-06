@@ -86,6 +86,22 @@ def init_db() -> None:
             )
         """)
 
+        # 4) earnings_calendar — Finnhub 발표 일정 사전 적재 (BMO/AMC lookup용)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS earnings_calendar (
+                ticker TEXT NOT NULL,
+                event_date TEXT NOT NULL,    -- YYYY-MM-DD (Eastern Time 기준)
+                hour TEXT,                    -- 'amc' / 'bmo' / 'dmh' / NULL
+                year INTEGER,
+                quarter INTEGER,
+                eps_estimate REAL,
+                revenue_estimate REAL,
+                fetched_at TEXT DEFAULT (datetime('now')),
+                PRIMARY KEY (ticker, event_date)
+            )
+        """)
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_calendar_date ON earnings_calendar(event_date)")
+
         conn.commit()
     finally:
         conn.close()
@@ -165,6 +181,45 @@ def enqueue_transcript_job(filing_id: int, ticker: str, next_attempt_at: str,
             (filing_id, ticker, next_attempt_at, source),
         )
         conn.commit()
+    finally:
+        conn.close()
+
+
+def upsert_calendar_entry(ticker: str, event_date: str, hour: str | None,
+                          year: int | None, quarter: int | None,
+                          eps_estimate: float | None, revenue_estimate: float | None) -> None:
+    """Finnhub earnings calendar 항목 upsert. (ticker, event_date) 충돌 시 최신값 덮어쓰기."""
+    conn = get_conn()
+    try:
+        conn.execute(
+            """
+            INSERT INTO earnings_calendar
+              (ticker, event_date, hour, year, quarter, eps_estimate, revenue_estimate, fetched_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+            ON CONFLICT(ticker, event_date) DO UPDATE SET
+              hour=excluded.hour,
+              year=excluded.year,
+              quarter=excluded.quarter,
+              eps_estimate=excluded.eps_estimate,
+              revenue_estimate=excluded.revenue_estimate,
+              fetched_at=datetime('now')
+            """,
+            (ticker, event_date, hour, year, quarter, eps_estimate, revenue_estimate),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def lookup_calendar_hour(ticker: str, event_date: str) -> str | None:
+    """공시 도착 시 BMO/AMC 추론용. 없으면 None."""
+    conn = get_conn()
+    try:
+        row = conn.execute(
+            "SELECT hour FROM earnings_calendar WHERE ticker=? AND event_date=?",
+            (ticker, event_date),
+        ).fetchone()
+        return row['hour'] if row else None
     finally:
         conn.close()
 
