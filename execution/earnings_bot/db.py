@@ -86,7 +86,30 @@ def init_db() -> None:
             )
         """)
 
-        # 4) earnings_calendar — Finnhub 발표 일정 사전 적재 (BMO/AMC lookup용)
+        # 4) transcripts — Phase 2 v2 (Codex 권고: filings.metadata_json에서 분리)
+        # filing 1건당 다중 source 가능 (예: motley_fool 시도 후 fallback marketbeat success)
+        # normalized_url + content_hash로 dedup
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS transcripts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                filing_id INTEGER NOT NULL,
+                source TEXT NOT NULL,             -- 'motley_fool' / 'marketbeat' / 'manual_override'
+                source_url TEXT NOT NULL,
+                normalized_url TEXT NOT NULL,
+                content_hash TEXT NOT NULL,       -- raw 본문 sha256
+                prepared_remarks TEXT,
+                qa TEXT,
+                parser_version TEXT NOT NULL,
+                match_confidence REAL NOT NULL,   -- 0.0 ~ 1.0
+                fetched_at TEXT DEFAULT (datetime('now')),
+                UNIQUE(filing_id, normalized_url, content_hash),
+                FOREIGN KEY(filing_id) REFERENCES filings(id)
+            )
+        """)
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_transcripts_filing ON transcripts(filing_id)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_transcripts_confidence ON transcripts(match_confidence)")
+
+        # 5) earnings_calendar — Finnhub 발표 일정 사전 적재 (BMO/AMC lookup용)
         conn.execute("""
             CREATE TABLE IF NOT EXISTS earnings_calendar (
                 ticker TEXT NOT NULL,
@@ -170,10 +193,18 @@ def has_processed(ticker: str, document_type: str, stage: str,
 
 
 def enqueue_transcript_job(filing_id: int, ticker: str, next_attempt_at: str,
-                           source: str = "motley_fool") -> None:
+                           source: str = "motley_fool") -> int:
+    """transcript 잡 enqueue. filing_id 기반 idempotent (이미 있으면 새로 만들지 않음)."""
     conn = get_conn()
     try:
-        conn.execute(
+        # 기존 잡이 있으면 그대로 두고 ID 반환
+        existing = conn.execute(
+            "SELECT id FROM transcript_jobs WHERE filing_id=? LIMIT 1",
+            (filing_id,),
+        ).fetchone()
+        if existing:
+            return existing['id']
+        cur = conn.execute(
             """
             INSERT INTO transcript_jobs (filing_id, ticker, next_attempt_at, last_status, source)
             VALUES (?, ?, ?, 'pending', ?)
@@ -181,6 +212,60 @@ def enqueue_transcript_job(filing_id: int, ticker: str, next_attempt_at: str,
             (filing_id, ticker, next_attempt_at, source),
         )
         conn.commit()
+        return cur.lastrowid
+    finally:
+        conn.close()
+
+
+def get_due_transcript_jobs(now_iso: str, limit: int = 20) -> list[dict]:
+    """다음 시도 시각이 지난 미완료 잡들."""
+    conn = get_conn()
+    try:
+        rows = conn.execute(
+            """
+            SELECT j.*, f.cik, f.accession_number, f.document_type, f.filed_at, f.amc_or_bmo
+            FROM transcript_jobs j
+            JOIN filings f ON j.filing_id = f.id
+            WHERE j.next_attempt_at <= ?
+              AND j.last_status NOT IN ('success', 'gave_up', 'needs_review')
+            ORDER BY j.next_attempt_at ASC
+            LIMIT ?
+            """,
+            (now_iso, limit),
+        ).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+def update_transcript_job(job_id: int, *, last_status: str, next_attempt_at: str | None = None,
+                          attempt_count_delta: int = 1, last_error: str | None = None,
+                          source: str | None = None) -> None:
+    conn = get_conn()
+    try:
+        sets = ["last_status=?", "attempt_count = attempt_count + ?"]
+        params: list = [last_status, attempt_count_delta]
+        if next_attempt_at is not None:
+            sets.append("next_attempt_at=?")
+            params.append(next_attempt_at)
+        if last_error is not None:
+            sets.append("last_error=?")
+            params.append(last_error)
+        if source is not None:
+            sets.append("source=?")
+            params.append(source)
+        params.append(job_id)
+        conn.execute(f"UPDATE transcript_jobs SET {', '.join(sets)} WHERE id=?", params)
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def get_filing_by_id(filing_id: int) -> dict | None:
+    conn = get_conn()
+    try:
+        row = conn.execute("SELECT * FROM filings WHERE id=?", (filing_id,)).fetchone()
+        return dict(row) if row else None
     finally:
         conn.close()
 
@@ -220,6 +305,45 @@ def lookup_calendar_hour(ticker: str, event_date: str) -> str | None:
             (ticker, event_date),
         ).fetchone()
         return row['hour'] if row else None
+    finally:
+        conn.close()
+
+
+def insert_transcript(*, filing_id: int, source: str, source_url: str, normalized_url: str,
+                      content_hash: str, prepared_remarks: str | None, qa: str | None,
+                      parser_version: str, match_confidence: float) -> int | None:
+    """transcripts 테이블 INSERT OR IGNORE. 동일 filing+url+hash 중복 시 None."""
+    conn = get_conn()
+    try:
+        cur = conn.execute(
+            """
+            INSERT OR IGNORE INTO transcripts
+              (filing_id, source, source_url, normalized_url, content_hash,
+               prepared_remarks, qa, parser_version, match_confidence)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (filing_id, source, source_url, normalized_url, content_hash,
+             prepared_remarks, qa, parser_version, match_confidence),
+        )
+        conn.commit()
+        return cur.lastrowid if cur.rowcount > 0 else None
+    finally:
+        conn.close()
+
+
+def get_transcript_for_filing(filing_id: int, *, min_confidence: float = 0.7) -> dict | None:
+    """filing의 가장 높은 신뢰도 transcript 1건. 없으면 None."""
+    conn = get_conn()
+    try:
+        row = conn.execute(
+            """
+            SELECT * FROM transcripts
+            WHERE filing_id=? AND match_confidence >= ?
+            ORDER BY match_confidence DESC, fetched_at DESC LIMIT 1
+            """,
+            (filing_id, min_confidence),
+        ).fetchone()
+        return dict(row) if row else None
     finally:
         conn.close()
 
