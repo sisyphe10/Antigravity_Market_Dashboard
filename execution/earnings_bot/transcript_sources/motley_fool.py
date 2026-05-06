@@ -137,8 +137,14 @@ class MotleyFoolSource(TranscriptSource):
 
         soup = BeautifulSoup(html, 'html.parser')
 
-        # 본문 영역 추정 — fool.com transcript는 article 태그 또는 main 안
-        article = soup.find('article') or soup.find('main') or soup.body
+        # 본문 영역 — fool.com 실측: <div class="article-body transcript-content">
+        # (article 태그는 사이드바라 무시. 실측 검증: 2026-05 AAPL Q2 transcript)
+        article = (
+            soup.find('div', class_='transcript-content')
+            or soup.find('div', class_='article-body')
+            or soup.find('main')
+            or soup.body
+        )
         if not article:
             return None
 
@@ -193,35 +199,54 @@ class MotleyFoolSource(TranscriptSource):
     def _split_sections(self, text: str) -> tuple[str, str]:
         """Prepared Remarks / Q&A / Closing 분리.
 
-        - "Prepared Remarks" 헤더 ~ "Questions and Answers" 헤더 → prepared
-        - "Questions and Answers" 헤더 ~ "Forward-Looking Statements"/Closing → qa
-        - "Forward-Looking Statements" 또는 "This concludes today's conference" 이후 → 잘라냄
+        실제 fool.com 패턴: "PREPARED REMARKS" / "QUESTIONS AND ANSWERS" / "Operator" 헤더 다양.
+        Operator 첫 등장 위치를 Q&A 시작으로 추정 (가장 안정적인 신호).
         """
         # 끝 잘라내기 (Safe Harbor / Closing)
         for end_marker in [
             'Forward-Looking Statements',
             'This concludes today\'s conference',
-            'Duration:',  # fool.com이 종종 sentinel로 사용
+            'Duration:',
         ]:
             idx = text.find(end_marker)
             if idx > 0:
                 text = text[:idx]
                 break
 
-        # Prepared / Q&A 분리
         prepared, qa = '', ''
-        m_prep = re.search(r'\bPrepared Remarks\b', text, flags=re.IGNORECASE)
-        m_qa = re.search(r'\bQuestions and Answers\b|\bQ&A\b|\bAnalyst Q&A\b',
-                          text, flags=re.IGNORECASE)
+        # 1차: 명시적 Q&A 헤더
+        m_qa = re.search(
+            r'\b(Questions? and Answers?|Q&A Session|Q\s*&\s*A|Analyst Q&A|QUESTIONS AND ANSWERS)\b',
+            text, flags=re.IGNORECASE,
+        )
+        # 2차: Operator 첫 발화 (실측 fool.com 패턴: "\nOperator:\n" 형태)
+        # — Suhasini "Operator, may we..." 같은 IR 인용은 제외하기 위해 newline 직후 패턴만 매치
+        m_operator = None
+        if not m_qa:
+            m_operator = re.search(r'(?:^|\n)Operator\s*:\s*\n', text)
+            if not m_operator:
+                m_operator = re.search(
+                    r'\bOperator\b\s*[:\-]?\s*(?:Thank you|Thanks|Ladies and gentlemen|Welcome|At this time)',
+                    text, flags=re.IGNORECASE,
+                )
 
-        if m_prep and m_qa and m_prep.start() < m_qa.start():
-            prepared = text[m_prep.end():m_qa.start()].strip()
-            qa = text[m_qa.end():].strip()
-        elif m_qa:
-            prepared = text[:m_qa.start()].strip()
-            qa = text[m_qa.end():].strip()
+        # Prepared / Q&A 분할
+        m_prep = re.search(r'\bPREPARED REMARKS\b|\bPrepared Remarks\b', text)
+
+        split_idx = None
+        if m_qa:
+            split_idx = m_qa.start()
+        elif m_operator:
+            split_idx = m_operator.start()
+
+        if split_idx is not None:
+            prep_start = m_prep.end() if m_prep and m_prep.end() < split_idx else 0
+            prepared = text[prep_start:split_idx].strip()
+            qa = text[split_idx:].strip()
         else:
-            prepared = text.strip()
+            # Q&A 시작점을 못 찾음 — 전체를 prepared로
+            prep_start = m_prep.end() if m_prep else 0
+            prepared = text[prep_start:].strip()
             qa = ''
 
         return prepared[:50000], qa[:50000]

@@ -22,10 +22,16 @@ class ManualOverrideSource(TranscriptSource):
         html = _http_get(candidate.url)
         if not html:
             return None
-        # 본문 추출은 motley_fool 패턴 재사용 — 호스트별 정밀 파싱 필요 시 확장
+        # 본문 추출 — fool.com transcript-content 우선, 그 외 도메인은 article/main 폴백
         from bs4 import BeautifulSoup
         soup = BeautifulSoup(html, 'html.parser')
-        article = soup.find('article') or soup.find('main') or soup.body
+        article = (
+            soup.find('div', class_='transcript-content')
+            or soup.find('div', class_='article-body')
+            or soup.find('article')
+            or soup.find('main')
+            or soup.body
+        )
         if not article:
             return None
         text = article.get_text('\n', strip=True)
