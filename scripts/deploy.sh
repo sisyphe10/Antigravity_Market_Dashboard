@@ -19,6 +19,8 @@ BACKUP_FILES=(
     "stock_price_history.json"
     "execution/research_bot/research_notes.db"
     "etf_data.db"
+    "execution/earnings_bot/earnings.db"
+    "execution/earnings_bot/ticker_cik_cache.json"
 )
 BACKUP_DIRS=(
     "execution/research_bot/media"
@@ -64,11 +66,20 @@ restore() {
 
 BOTS=(sisyphe-bot research-notes-bot ra-sisyphe-bot)
 SCRIPTS=(execution/sisyphe_bot.py execution/research_bot/research_notes_bot.py execution/ra_sisyphe_bot.py)
+EARNINGS_BOT_TIMER=earnings-bot.timer
+EARNINGS_BOT_SCRIPTS=(
+    execution/earnings_bot/runner.py
+    execution/earnings_bot/edgar_monitor.py
+    execution/earnings_bot/scheduler.py
+    execution/earnings_bot/translator.py
+    execution/earnings_bot/notion_publisher.py
+    execution/earnings_bot/transcript_watch.py
+)
 
 validate() {
     echo "🔍 Validating bot scripts..."
     cd "$REPO_DIR"
-    for s in "${SCRIPTS[@]}"; do
+    for s in "${SCRIPTS[@]}" "${EARNINGS_BOT_SCRIPTS[@]}"; do
         python3 -c "compile(open('$s').read(), '$s', 'exec')" || {
             echo "❌ Syntax error in $s! Aborting."
             return 1
@@ -90,7 +101,26 @@ healthcheck() {
             rc=1
         fi
     done
+    # earnings-bot은 oneshot timer라 is-active 검사 X. timer 활성 여부 확인.
+    if sudo systemctl is-active --quiet "$EARNINGS_BOT_TIMER"; then
+        echo "✅ $EARNINGS_BOT_TIMER is active"
+    else
+        echo "⚠️  $EARNINGS_BOT_TIMER inactive (한 번도 enable 안 됐을 수 있음)"
+    fi
     return $rc
+}
+
+install_earnings_bot_units() {
+    # systemd unit 파일이 /etc/systemd/system/에 없으면 복사 + enable.
+    # 1회 실행. 이후 deploy()는 unit 변경 안 하고 timer 그대로 동작.
+    if [ ! -f /etc/systemd/system/earnings-bot.service ]; then
+        echo "🔧 earnings-bot systemd unit 설치..."
+        sudo cp "$REPO_DIR/scripts/earnings-bot.service" /etc/systemd/system/
+        sudo cp "$REPO_DIR/scripts/earnings-bot.timer" /etc/systemd/system/
+        sudo systemctl daemon-reload
+        sudo systemctl enable --now earnings-bot.timer
+        echo "  ✓ earnings-bot.timer enabled + started"
+    fi
 }
 
 deploy() {
@@ -101,10 +131,13 @@ deploy() {
 
     validate || exit 1
 
+    install_earnings_bot_units
+
     for b in "${BOTS[@]}"; do
         echo "🔄 Restarting $b..."
         sudo systemctl restart "$b"
     done
+    # earnings-bot은 timer라 restart 불필요 — 다음 OnUnitActiveSec(5분)에 자동 실행
     healthcheck
 }
 
@@ -126,6 +159,8 @@ reclone() {
 
     restore
     validate || exit 1
+
+    install_earnings_bot_units
 
     for b in "${BOTS[@]}"; do
         echo "🔄 Restarting $b..."

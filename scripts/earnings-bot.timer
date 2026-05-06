@@ -1,0 +1,15 @@
+[Unit]
+Description=Antigravity Earnings Bot timer (5분 간격 + 부팅 후 1회)
+
+[Timer]
+# 부팅 후 2분 뒤 첫 실행 (시스템 안정 후)
+OnBootSec=2min
+# 마지막 실행 후 5분마다
+OnUnitActiveSec=5min
+# Drift 보정: 시계 기준 매시 0/5/10/.../55분에 align (별도 OnCalendar 라인 사용 시)
+AccuracySec=30s
+Unit=earnings-bot.service
+Persistent=true
+
+[Install]
+WantedBy=timers.target

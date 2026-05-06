@@ -1,0 +1,18 @@
+[Unit]
+Description=Antigravity Earnings Bot (US 실적/IR Day 분석 파이프라인)
+After=network-online.target
+Wants=network-online.target
+OnFailure=sisyphe-bot-notify.service
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/Antigravity_Market_Dashboard
+ExecStart=/usr/bin/python3 -m execution.earnings_bot.runner
+EnvironmentFile=/home/ubuntu/Antigravity_Market_Dashboard/.env
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=10min
+
+[Install]
+WantedBy=multi-user.target
