@@ -1381,7 +1381,7 @@ def _build_wrap_chart_section(category_label):
             ('삼성 트루밸류', '트루밸류'),
             ('NH Value ESG', 'Value ESG'),
             ('DB 개방형', '개방형 랩'),
-            # ('NH 목표전환형 2호', '목표전환형 2호'),  # 2호 완료 (2026-05-06 목표달성, +7.26%)
+            # ('NH 목표전환형 2호', '목표전환형 2호'),  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
             ('KOSPI', 'KOSPI'),
             ('KOSDAQ', 'KOSDAQ'),
         ]
@@ -1389,7 +1389,7 @@ def _build_wrap_chart_section(category_label):
             '삼성 트루밸류': '#1428A0',
             'NH Value ESG': '#0072CE',
             'DB 개방형': '#00854A',
-            # 'NH 목표전환형 2호': '#0072CE',  # 2호 완료 (2026-05-06 목표달성, +7.26%)
+            # 'NH 목표전환형 2호': '#0072CE',  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
             'KOSPI': '#000000',
             'KOSDAQ': '#666666',
         }
@@ -2129,7 +2129,7 @@ def create_wrap_returns_table():
 
         items = [
             ('삼성 트루밸류', '트루밸류'),
-            # ('NH 목표전환형 2호', '목표전환형 2호'),  # 2호 완료 (2026-05-06 목표달성, +7.26%)
+            # ('NH 목표전환형 2호', '목표전환형 2호'),  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
             ('KOSPI', 'KOSPI'),
             ('KOSDAQ', 'KOSDAQ'),
         ]
@@ -2317,7 +2317,7 @@ def create_order_section():
                 ],
             },
             // {
-            //     display: 'NH 목표전환형 2호',  // 2호 완료 (2026-05-06 목표달성, +7.26%)
+            //     display: 'NH 목표전환형 2호',  // NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
             //     jsonKey: 'NH 목표전환형 2호',
             //     templates: [
             //         { label: 'NH 목표전환형 2호', file: '자문지/라이프자산운용_라이프 다이내믹밸류_목표전환형 2호_2026.4.29.xlsx' },
@@ -3125,7 +3125,7 @@ def create_aum_section():
             { display: '삼성 트루밸류',      broker: '삼성', name: '트루밸류' },
             { display: 'NH Value ESG',      broker: 'NH',   name: '다이내믹밸류' },
             { display: 'DB 개방형',         broker: 'DB',   name: '개방형 랩' },
-            // { display: 'NH 목표전환형 2호', broker: 'NH',   name: '목표전환형 2호' },  // 2호 완료 (2026-05-06 목표달성, +7.26%)
+            // { display: 'NH 목표전환형 2호', broker: 'NH',   name: '목표전환형 2호' },  // NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
         ];
         var aumLatest = {};       // {broker|name: {date, aum}}
         var aumInputs = {};       // {idx: 사용자 입력 (억원)}
