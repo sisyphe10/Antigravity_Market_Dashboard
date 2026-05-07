@@ -34,7 +34,7 @@ from .retry_helper import api_retry
 logger = logging.getLogger(__name__)
 
 DRY_RUN = os.getenv('EARNINGS_BOT_DRY_RUN', '').lower() in ('1', 'true', 'yes')
-NOTION_API_KEY = os.getenv('NOTION_API_KEY', '')
+NOTION_API_KEY = os.getenv('NOTION_EARNINGS_API_KEY', '') or os.getenv('NOTION_API_KEY', '')
 NOTION_DATABASE_ID = os.getenv('NOTION_EARNINGS_DATABASE_ID', '') or os.getenv('NOTION_DATABASE_ID', '')
 
 SEVERITY_ICONS = {
@@ -154,7 +154,7 @@ def markdown_to_blocks(md_text: str) -> list[dict]:
 def _find_existing_page(notion_client, database_id: str, accession_number: str) -> str | None:
     import urllib.request as _ur
     import json as _json
-    api_key = os.getenv('NOTION_API_KEY')
+    api_key = os.getenv('NOTION_EARNINGS_API_KEY') or os.getenv('NOTION_API_KEY')
     if not api_key:
         return None
     try:
