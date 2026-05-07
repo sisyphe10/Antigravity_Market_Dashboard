@@ -204,7 +204,7 @@ def get_item_category(item_name):
 
     # Special handling for Wrap portfolios
     wrap_keywords = ['트루밸류', '삼성 트루밸류', 'Value ESG', 'NH Value ESG',
-                     '개방형', 'DB 개방형', '목표전환형 2호', 'NH 목표전환형 2호']
+                     '개방형', 'DB 개방형']
     if any(keyword in item_name for keyword in wrap_keywords):
         return 'Wrap'
 
@@ -1381,7 +1381,7 @@ def _build_wrap_chart_section(category_label):
             ('삼성 트루밸류', '트루밸류'),
             ('NH Value ESG', 'Value ESG'),
             ('DB 개방형', '개방형 랩'),
-            ('NH 목표전환형 2호', '목표전환형 2호'),
+            # ('NH 목표전환형 2호', '목표전환형 2호'),  # 2호 완료 (2026-05-06 목표달성, +7.26%)
             ('KOSPI', 'KOSPI'),
             ('KOSDAQ', 'KOSDAQ'),
         ]
@@ -1389,7 +1389,7 @@ def _build_wrap_chart_section(category_label):
             '삼성 트루밸류': '#1428A0',
             'NH Value ESG': '#0072CE',
             'DB 개방형': '#00854A',
-            'NH 목표전환형 2호': '#0072CE',
+            # 'NH 목표전환형 2호': '#0072CE',  # 2호 완료 (2026-05-06 목표달성, +7.26%)
             'KOSPI': '#000000',
             'KOSDAQ': '#666666',
         }
@@ -2129,7 +2129,7 @@ def create_wrap_returns_table():
 
         items = [
             ('삼성 트루밸류', '트루밸류'),
-            ('NH 목표전환형 2호', '목표전환형 2호'),
+            # ('NH 목표전환형 2호', '목표전환형 2호'),  # 2호 완료 (2026-05-06 목표달성, +7.26%)
             ('KOSPI', 'KOSPI'),
             ('KOSDAQ', 'KOSDAQ'),
         ]
@@ -2286,9 +2286,10 @@ def create_order_section():
     fetch portfolio_data.json + ExcelJS 클라이언트 사이드 처리 (journal.html 검증된 패턴).
 
     UX:
-      - 4개 포트폴리오 버튼 (트루밸류/NH Value ESG/DB 개방형/NH 목표전환형 2호)
+      - 1개 포트폴리오 버튼 (트루밸류/NH Value ESG/DB 개방형 묶음)
       - 각 버튼 클릭 시 종목 테이블: 변경전(read-only), 변경후(input), 주문구분(자동), 추천사유(input)
       - Download(빨간) → 자문지/ 템플릿 fetch → R7부터 F/G/H/I 셀 patch → .xlsx 다운로드
+      - 목표전환형 2호 청산(2026-05-06, +7.26%)으로 NH/DB 페어 모두 비활성. 다음 페어 출시 시 ORDER_PORTFOLIOS 재추가.
     """
     return """
         <div id="orderTabs" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;"></div>
@@ -2315,16 +2316,16 @@ def create_order_section():
                     { broker: 'DB',   product: '개방형 랩' },
                 ],
             },
-            {
-                display: 'NH 목표전환형 2호',
-                jsonKey: 'NH 목표전환형 2호',
-                templates: [
-                    { label: 'NH 목표전환형 2호', file: '자문지/라이프자산운용_라이프 다이내믹밸류_목표전환형 2호_2026.4.29.xlsx' },
-                ],
-                newSheetTargets: [
-                    { broker: 'NH', product: '목표전환형 2호' },
-                ],
-            },
+            // {
+            //     display: 'NH 목표전환형 2호',  // 2호 완료 (2026-05-06 목표달성, +7.26%)
+            //     jsonKey: 'NH 목표전환형 2호',
+            //     templates: [
+            //         { label: 'NH 목표전환형 2호', file: '자문지/라이프자산운용_라이프 다이내믹밸류_목표전환형 2호_2026.4.29.xlsx' },
+            //     ],
+            //     newSheetTargets: [
+            //         { broker: 'NH', product: '목표전환형 2호' },
+            //     ],
+            // },
         ];
         var orderState = {};
         var orderStocks = {};
@@ -2484,14 +2485,10 @@ def create_order_section():
 
         function renderEmailPanel() {
             var GENERAL = '삼성 트루밸류 / NH Value ESG / DB 개방형';
-            var NH = 'NH 목표전환형 2호';
+            // 목표전환형 2호 청산(2026-05-06, +7.26%)으로 NH/DB 페어 모두 비활성. 다음 페어 출시 시 NH 변수/박스 복원.
             var compliance = buildComplianceEmailText();
             var samsung = buildOrderEmailText(GENERAL, orderStocks[GENERAL] || [], orderState[GENERAL] || []);
-            var nh = buildOrderEmailText(NH, orderStocks[NH] || [], orderState[NH] || []);
-            // 네이트온 (NH 이메일 밑) — 일반형 + 목표전환형 한 박스
-            var nateonText = buildOrderNateonText(orderStocks[GENERAL] || [], orderState[GENERAL] || [], '일반형')
-                + '\\n\\n'
-                + buildOrderNateonText(orderStocks[NH] || [], orderState[NH] || [], '목표전환형');
+            var nateonText = buildOrderNateonText(orderStocks[GENERAL] || [], orderState[GENERAL] || [], '일반형');
             // 다운로드 섹션 (증권사 순서: 삼성 → NH → DB, 색상도 증권사별)
             var BROKER_ORDER = { '삼성': 0, 'NH': 1, 'DB': 2 };
             var BROKER_COLOR = { '삼성': '#1428A0', 'NH': '#0072CE', 'DB': '#00854A' };
@@ -2535,8 +2532,7 @@ def create_order_section():
                 + dlSection
                 + buildEmailBox('컴플라이언스 이메일', compliance, '#fffbeb', '#fef3c7', '#92400e', '#d97706')
                 + buildEmailBox('삼성 이메일', samsung, '#f9fafb', '#e5e7eb', '#444', '#374151')
-                + buildEmailBox('NH 이메일', nh, '#f9fafb', '#e5e7eb', '#444', '#374151')
-                + buildEmailBox('네이트온 (NH)', nateonText, '#eef2ff', '#c7d2fe', '#3730a3', '#4f46e5')
+                + buildEmailBox('네이트온', nateonText, '#eef2ff', '#c7d2fe', '#3730a3', '#4f46e5')
                 + '</div>';
             document.getElementById('orderContent').innerHTML = html;
             document.querySelectorAll('#orderContent .email-tab-dl-btn').forEach(function(btn) {
@@ -2595,8 +2591,8 @@ def create_order_section():
         }
 
         function buildOrderEmailText(pfName, stocks, st) {
-            // 목표전환형 2호 탭은 NH 이메일에 일반형 + 목표전환형 둘 다 포함
-            var TARGET_TABS = ['NH 목표전환형 2호'];
+            // 목표전환형 페어 비활성 — 다음 페어 출시 시 TARGET_TABS에 복원
+            var TARGET_TABS = [];
             var GENERAL = '삼성 트루밸류 / NH Value ESG / DB 개방형';
             var lines = [
                 '안녕하십니까.',
@@ -2637,24 +2633,9 @@ def create_order_section():
         }
 
         function buildComplianceEmailText() {
-            // 일반형 + 목표전환형(NH 2호 기준 — DB 3차와 동일 종목/비중) 통합
+            // 일반형 단독 (목표전환형 페어 청산 후) — 다음 페어 출시 시 TARGET 통합 로직 복원
             var GENERAL = '삼성 트루밸류 / NH Value ESG / DB 개방형';
-            var TARGET = 'NH 목표전환형 2호';
-            var gen = buildOrderChanges(orderStocks[GENERAL] || [], orderState[GENERAL] || []);
-            var tgt = buildOrderChanges(orderStocks[TARGET] || [], orderState[TARGET] || []);
-            function dedupe(a, b) {
-                var seen = {}, out = [];
-                a.concat(b).forEach(function(name) {
-                    if (!seen[name]) { seen[name] = true; out.push(name); }
-                });
-                return out;
-            }
-            var combined = {
-                newBuy: dedupe(gen.newBuy, tgt.newBuy),
-                inc:    dedupe(gen.inc,    tgt.inc),
-                dec:    dedupe(gen.dec,    tgt.dec),
-                out:    dedupe(gen.out,    tgt.out)
-            };
+            var changes = buildOrderChanges(orderStocks[GENERAL] || [], orderState[GENERAL] || []);
             var lines = [
                 '안녕하십니까.',
                 '라이프자산운용 김태식입니다.',
@@ -2662,7 +2643,7 @@ def create_order_section():
                 '랩 자문지 보내드립니다.',
                 '주요 변경 내용은 다음과 같습니다.',
                 ''
-            ].concat(buildEmailSectionLines(combined, null)).concat(['', '감사합니다.']);
+            ].concat(buildEmailSectionLines(changes, null)).concat(['', '감사합니다.']);
             return lines.join('\\n');
         }
 
@@ -2977,7 +2958,7 @@ def create_order_section():
 
         // 최종 저장 = 3개 포트폴리오 모두 저장 + finalize 워크플로 1회 트리거
         async function finalizeOrder(_pfNameIgnored) {
-            if (!confirm('최종 저장하시겠습니까?\\n\\n2개 포트폴리오(일반형/NH 목표전환형 2호) 모두 저장 후 GitHub Actions(finalize_orders) 즉시 실행. 1~2분 후 Wrap_NAV.xlsx NEW 시트 + 대시보드 반영.')) return;
+            if (!confirm('최종 저장하시겠습니까?\\n\\n일반형 1개 저장 후 GitHub Actions(finalize_orders) 즉시 실행. 1~2분 후 Wrap_NAV.xlsx NEW 시트 + 대시보드 반영.')) return;
             var pat = getGithubPat();
             if (!pat) { alert('PAT 입력이 취소되었습니다.'); return; }
             var ALL_PFS = ORDER_PORTFOLIOS.map(function(p) { return p.display; });
@@ -3144,7 +3125,7 @@ def create_aum_section():
             { display: '삼성 트루밸류',      broker: '삼성', name: '트루밸류' },
             { display: 'NH Value ESG',      broker: 'NH',   name: '다이내믹밸류' },
             { display: 'DB 개방형',         broker: 'DB',   name: '개방형 랩' },
-            { display: 'NH 목표전환형 2호', broker: 'NH',   name: '목표전환형 2호' },
+            // { display: 'NH 목표전환형 2호', broker: 'NH',   name: '목표전환형 2호' },  // 2호 완료 (2026-05-06 목표달성, +7.26%)
         ];
         var aumLatest = {};       // {broker|name: {date, aum}}
         var aumInputs = {};       // {idx: 사용자 입력 (억원)}
