@@ -2133,7 +2133,7 @@ def create_wrap_returns_table():
             ('KOSPI', 'KOSPI'),
             ('KOSDAQ', 'KOSDAQ'),
         ]
-        periods = ['1D', '1W', '1M', '3M', '6M', '1Y', 'YTD']
+        periods = ['1D', '1W', '1M', '3M', '6M', '1Y', '3Y', 'YTD']
 
         # 모든 날짜-데이터 수집
         all_data = {}
@@ -2157,26 +2157,30 @@ def create_wrap_returns_table():
         latest_date = date_list[-1]
         earliest_date = date_list[0]
 
-        def cell_td(val, cell_id):
+        def cell_td(val, cell_id, divider=False):
             s = val if val and val != 'nan' and val != 'None' else ''
+            divider_cls = ' rt-divider-left' if divider else ''
             if not s:
-                return f'<td id="{cell_id}" class="rt-cell rt-na">-</td>'
+                return f'<td id="{cell_id}" class="rt-cell rt-na{divider_cls}">-</td>'
             try:
                 num = float(s.replace('%', '').strip())
                 cls = 'rt-pos' if num > 0 else 'rt-neg' if num < 0 else 'rt-zero'
             except Exception:
                 cls = ''
-            return f'<td id="{cell_id}" class="rt-cell {cls}">{s}</td>'
+            return f'<td id="{cell_id}" class="rt-cell {cls}{divider_cls}">{s}</td>'
 
         latest_row = all_data.get(latest_date, {})
         rows_html = ''
         for display_name, key in items:
             rows_html += f'<tr><td class="rt-name">{display_name}</td>'
             for p in periods:
-                rows_html += cell_td(latest_row.get(f'{key}_{p}'), f'rt-{key}-{p}')
+                rows_html += cell_td(latest_row.get(f'{key}_{p}'), f'rt-{key}-{p}', divider=(p == 'YTD'))
             rows_html += '</tr>\n'
 
-        headers = ''.join(f'<th class="rt-ph">{p}</th>' for p in periods)
+        headers = ''.join(
+            f'<th class="rt-ph rt-divider-left">{p}</th>' if p == 'YTD' else f'<th class="rt-ph">{p}</th>'
+            for p in periods
+        )
         data_json = json.dumps(all_data, ensure_ascii=False)
         # sorted date list for floor-lookup in JS
         dates_sorted_json = json.dumps(sorted(date_list))
@@ -2239,8 +2243,9 @@ def create_wrap_returns_table():
                         var cell = document.getElementById(cid);
                         if (!cell) return;
                         var val = row[col];
+                        var dividerCls = (p === 'YTD') ? ' rt-divider-left' : '';
                         if (!val || val === 'nan') {{
-                            cell.className = 'rt-cell rt-na';
+                            cell.className = 'rt-cell rt-na' + dividerCls;
                             cell.textContent = '-';
                         }} else {{
                             var num = parseFloat(val.replace('%', '').trim());
@@ -2248,7 +2253,7 @@ def create_wrap_returns_table():
                             if (!isNaN(num)) {{
                                 cls += num > 0 ? ' rt-pos' : num < 0 ? ' rt-neg' : ' rt-zero';
                             }}
-                            cell.className = cls;
+                            cell.className = cls + dividerCls;
                             cell.textContent = val;
                         }}
                     }});
@@ -4242,6 +4247,7 @@ def create_dashboard():
         .rt-neg {{ color:#0055cc; font-weight:600; }}
         .rt-zero {{ color:#555; }}
         .rt-na {{ color:#bbb; }}
+        .rt-divider-left {{ border-left:1px solid #c0c0c0; }}
         .rt-table tbody tr:hover td {{ background:#f9fafb; }}
         /* Password overlay */
         .pw-overlay {{

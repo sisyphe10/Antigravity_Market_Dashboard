@@ -72,7 +72,7 @@ for col in df.columns:
     col_series = df[col].dropna()
 
     if len(col_series) == 0:
-        for period in ['1D', '1W', '1M', '3M', '6M', '1Y', 'YTD']:
+        for period in ['1D', '1W', '1M', '3M', '6M', '1Y', '3Y', 'YTD']:
             returns_data[f"{col}_{period}"] = np.nan
         continue
 
@@ -110,6 +110,11 @@ for col in df.columns:
     target_1y = col_latest - pd.DateOffset(years=1)
     past_1y = col_series[col_series.index <= target_1y]
     returns_data[f"{col}_1Y"] = calculate_return(current_value, past_1y.iloc[-1]) if len(past_1y) > 0 else np.nan
+
+    # 3Y (3년 전)
+    target_3y = col_latest - pd.DateOffset(years=3)
+    past_3y = col_series[col_series.index <= target_3y]
+    returns_data[f"{col}_3Y"] = calculate_return(current_value, past_3y.iloc[-1]) if len(past_3y) > 0 else np.nan
 
     # YTD (포트폴리오별 기준일 사용)
     if col in ytd_base_dates:
