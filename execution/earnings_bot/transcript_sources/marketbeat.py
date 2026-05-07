@@ -27,6 +27,12 @@ class MarketBeatSource(TranscriptSource):
     HOST = 'https://www.marketbeat.com'
 
     def search(self, event: EarningsEvent) -> list[TranscriptCandidate]:
+        """1순위: Anthropic web_search → 2순위: marketbeat 자체 검색 → 3순위: DDG HTML."""
+        from .search_provider import anthropic_web_search
+        query = f'{event.ticker} Q{event.fiscal_quarter} {event.fiscal_year} earnings transcript'
+        candidates = anthropic_web_search(query, site='marketbeat.com')
+        if candidates:
+            return candidates
         candidates = self._search_marketbeat(event)
         if not candidates:
             candidates = self._search_ddg(event)

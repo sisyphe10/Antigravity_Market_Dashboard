@@ -58,7 +58,12 @@ class MotleyFoolSource(TranscriptSource):
     HOST = 'https://www.fool.com'
 
     def search(self, event: EarningsEvent) -> list[TranscriptCandidate]:
-        """fool.com/search → 실패 시 DDG HTML."""
+        """1순위: Anthropic web_search → 2순위: fool.com 자체 검색 → 3순위: DDG HTML."""
+        from .search_provider import anthropic_web_search
+        query = f'{event.ticker} Q{event.fiscal_quarter} {event.fiscal_year} earnings call transcript'
+        candidates = anthropic_web_search(query, site='fool.com')
+        if candidates:
+            return candidates
         candidates = self._search_fool(event)
         if not candidates:
             candidates = self._search_ddg(event)
