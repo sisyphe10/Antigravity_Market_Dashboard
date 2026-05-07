@@ -68,7 +68,7 @@ def run_pipeline() -> dict:
     # 1) scheduler.sync_calendar — Finnhub 14일 윈도우 캘린더 적재
     summary.append(_safe('scheduler.sync_calendar', scheduler.sync_calendar))
 
-    # 2) edgar_monitor — universe 22종목 8-K/6-K/NT-10 폴링
+    # 2) edgar_monitor — Universe USD 종목 (Sheets 라이브 fetch) 8-K/6-K/NT-10 폴링
     summary.append(_safe('edgar_monitor.poll_universe', edgar_monitor.poll_universe))
 
     # 3) transcript_watch — 큐에 있는 transcript 잡 처리 (search 시도)

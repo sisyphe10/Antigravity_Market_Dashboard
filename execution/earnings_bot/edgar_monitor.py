@@ -161,7 +161,7 @@ def poll_universe(tickers: list[str] | None = None) -> dict:
     """Universe 전체 1회 폴링. 반환: 통계 dict."""
     _init()
     if tickers is None:
-        tickers = ticker_registry.UNIVERSE_USD_DRAFT
+        tickers = list(ticker_registry.get_universe_usd())
     stats = {'tickers': len(tickers), 'new_filings': 0, 'errors': 0, 'entries': []}
 
     for ticker in tickers:

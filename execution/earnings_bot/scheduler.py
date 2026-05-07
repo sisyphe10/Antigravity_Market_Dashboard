@@ -40,7 +40,7 @@ def sync_calendar(tickers: list[str] | None = None, days: int = LOOKAHEAD_DAYS) 
     """Finnhub에서 N일 윈도우 캘린더 가져와 universe 종목만 DB 적재."""
     db.init_db()
     if tickers is None:
-        tickers = ticker_registry.UNIVERSE_USD_DRAFT
+        tickers = list(ticker_registry.get_universe_usd())
     universe = set(t.upper() for t in tickers)
 
     today = date.today()
