@@ -96,10 +96,11 @@ def markdown_to_blocks(md_text: str) -> list[dict]:
             for row_cells in parsed:
                 while len(row_cells) < col_count:
                     row_cells.append('')
+                # 셀 내 inline 마크다운(`**bold**`)을 Notion rich_text annotations로 변환
                 children.append({
                     'object': 'block', 'type': 'table_row',
                     'table_row': {
-                        'cells': [[{'text': {'content': c}}] for c in row_cells[:col_count]]
+                        'cells': [_rt(c) for c in row_cells[:col_count]]
                     }
                 })
             blocks.append({
@@ -148,17 +149,38 @@ def markdown_to_blocks(md_text: str) -> list[dict]:
 
 
 # ─── 페이지 dedup: 동일 accession_number 페이지 검색 ───
+# notion-client v2.7+에서 databases.query 제거 (multi-source DB 마이그레이션) →
+# research_bot 패턴 차용해 직접 HTTP urlopen 사용 (안정적, SDK 의존성 회피).
 def _find_existing_page(notion_client, database_id: str, accession_number: str) -> str | None:
+    import urllib.request as _ur
+    import json as _json
+    api_key = os.getenv('NOTION_API_KEY')
+    if not api_key:
+        return None
     try:
-        result = notion_client.databases.query(
-            database_id=database_id,
-            filter={'property': 'Accession', 'rich_text': {'equals': accession_number}},
-            page_size=1,
+        body = _json.dumps({
+            'filter': {'property': 'Accession', 'rich_text': {'equals': accession_number}},
+            'page_size': 1,
+        }).encode()
+        req = _ur.Request(
+            f'https://api.notion.com/v1/databases/{database_id}/query',
+            data=body,
+            headers={
+                'Authorization': f'Bearer {api_key}',
+                'Notion-Version': '2022-06-28',
+                'Content-Type': 'application/json',
+            },
+            method='POST',
         )
-        if result.get('results'):
-            return result['results'][0]['id']
+        with _ur.urlopen(req, timeout=15) as resp:
+            results = _json.loads(resp.read().decode())
+        # archived/in_trash 페이지는 dedup 검색에서 제외 (사용자가 정리한 것이라 새 페이지로 발행)
+        for page in results.get('results', []):
+            if page.get('archived') or page.get('in_trash'):
+                continue
+            return page['id']
     except Exception as e:
-        logger.warning(f"existing page search 실패: {e}")
+        logger.warning(f'existing page search 실패: {e}')
     return None
 
 
@@ -167,13 +189,15 @@ def _build_properties(filing: dict, analysis: dict, document_subtype: str) -> di
     fy = analysis.get('fiscal_year') or 0
     fq = analysis.get('fiscal_quarter') or 0
     severity = filing.get('severity') or 'NORMAL'
-    icon = SEVERITY_ICONS.get(severity, '⚪')
-    title = f"{icon} [{filing['ticker']}] FY{fy} Q{fq} 실적"
+    # 아이콘은 제목에서 제거 (Severity 컬럼 select 색상으로 이미 구별)
+    # 분기 표기: 2Q26 형식 (사용자 선호)
+    quarter_str = f'{fq}Q{fy % 100:02d}' if fy and fq else '?Q??'
+    title = f"[{filing['ticker']}] {quarter_str} 실적"
 
     props = {
         '이름': {'title': [{'text': {'content': title}}]},
         'Ticker': {'rich_text': [{'text': {'content': filing['ticker']}}]},
-        'Quarter': {'rich_text': [{'text': {'content': f'FY{fy} Q{fq}'}}]},
+        'Quarter': {'rich_text': [{'text': {'content': quarter_str}}]},
         'Type': {'select': {'name': document_subtype}},
         'Severity': {'select': {'name': severity}},
         'Accession': {'rich_text': [{'text': {'content': filing['accession_number']}}]},
@@ -230,23 +254,24 @@ def publish_analysis(filing_id: int) -> dict:
         pass
 
     # 본문: analysis_kr + (번역된 transcript가 있으면 풀 번역 append)
+    # 원문 출처 메타는 transcript 본문 뒤(맨 아래)에 (사용자 요청).
     body_md = analysis['analysis_kr']
     transcript_row = db.get_transcript_for_filing(filing_id)
     if transcript_row:
         translated_kr = transcript_row.get('translated_kr')
         if translated_kr:
-            # 풀 번역 본문
             body_md += (
                 f"\n\n---\n\n## 컨퍼런스콜 전문 (한국어 번역)\n\n"
-                f"_원문 출처: [{transcript_row['source']}]({transcript_row['source_url']})_\n\n"
-                f"{translated_kr}\n"
+                f"{translated_kr}\n\n"
+                f"---\n\n"
+                f"_원문 출처: [{transcript_row['source']}]({transcript_row['source_url']})_\n"
             )
         else:
-            # 번역 미완료 — 원문 URL만 표시
+            # 번역 미완료 — 원문 URL만 footer로
             body_md += (
                 f"\n\n---\n\n## 컨퍼런스콜\n\n"
-                f"원문: [{transcript_row['source']}]({transcript_row['source_url']}) "
-                f"(한국어 번역 대기 중)\n"
+                f"_원문 출처: [{transcript_row['source']}]({transcript_row['source_url']}) "
+                f"— 한국어 번역 대기 중_\n"
             )
 
     blocks = markdown_to_blocks(body_md)
@@ -339,12 +364,14 @@ def append_translated_transcript(transcript_id: int) -> dict:
     if row.get('notion_appended_at'):
         return {'skip': True, 'reason': 'already appended'}
 
+    # 원문 출처 메타는 페이지 맨 아래로 (사용자 요청). 본문 우선, 출처 footer.
     body_md = (
         f"## 컨퍼런스콜 전문 (한국어 번역)\n\n"
+        f"{row['translated_kr']}\n\n"
+        f"---\n\n"
         f"_원문 출처: [{row['source']}]({row['source_url']}) | "
         f"번역 모델: {row.get('translation_model') or 'haiku'} | "
-        f"prompt_version: {row.get('prompt_version_translation', '')}_\n\n"
-        f"{row['translated_kr']}\n"
+        f"prompt_version: {row.get('prompt_version_translation', '')}_\n"
     )
     blocks = [{'object': 'block', 'type': 'divider', 'divider': {}}] + markdown_to_blocks(body_md)
 

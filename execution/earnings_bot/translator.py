@@ -25,11 +25,49 @@ from .insider_signal import fetch_insider_window, format_appendix
 from .prompt_builder import (ANALYSIS_MODEL, SYSTEM_ANALYSIS, SYSTEM_TRANSLATION,
                              SYSTEM_TRANSLATION_TRANSCRIPT, TRANSLATION_MODEL,
                              AnalysisInput, build_analysis_messages,
-                             build_prepared_messages, build_qa_messages,
+                             build_prepared_messages, build_qa_chunk_messages,
+                             build_qa_messages,
                              build_transcript_translation_messages,
                              build_translation_messages, get_anthropic_client,
                              prompt_version, skill_md_sha256,
                              transcript_translation_prompt_version)
+
+
+# Q&A 자동 청크 분할: 한국어 출력이 ~1.5x 영문 chars로 늘어나므로
+# 영문 22K chars (~7K input tokens) 정도가 16K output 한도 안전 상한.
+QA_CHUNK_MAX_CHARS = 22000
+
+
+def _chunk_qa_text(qa_text: str, max_chars: int = QA_CHUNK_MAX_CHARS) -> list[str]:
+    """qa 본문을 자연 경계(`\nOperator:`)에서 분할.
+
+    - max_chars 이하면 단일 청크
+    - 그 이상이면 절반~max_chars 사이에서 가장 가까운 `\nOperator:` 위치에서 자름
+    - Operator 경계 못 찾으면 \\n\\n (빈 줄) 또는 어절 경계 폴백
+    """
+    if not qa_text or len(qa_text) <= max_chars:
+        return [qa_text or '']
+
+    chunks: list[str] = []
+    remaining = qa_text
+    while len(remaining) > max_chars:
+        # 절반 위치부터 max_chars 사이에서 가장 가까운 `\nOperator:` 찾기
+        search_start = len(remaining) // 2
+        idx = remaining.find('\nOperator:', search_start, max_chars + 2000)
+        if idx == -1:
+            # 폴백: \n\n 빈 줄
+            idx = remaining.find('\n\n', search_start, max_chars + 1000)
+        if idx == -1:
+            # 폴백: max_chars 직전 가장 가까운 \n
+            idx = remaining.rfind('\n', search_start, max_chars)
+        if idx == -1 or idx <= search_start:
+            # 마지막 폴백: 그냥 max_chars
+            idx = max_chars
+        chunks.append(remaining[:idx].strip())
+        remaining = remaining[idx:].strip()
+    if remaining:
+        chunks.append(remaining)
+    return chunks
 from .retry_helper import api_retry
 from .yoy_calculator import compute_yoy, format_table
 
@@ -322,27 +360,29 @@ def translate_transcript(transcript_id: int) -> dict:
             max_tokens=16000,
         )
 
-    # 2) Q&A 호출
-    qa_resp = None
-    if qa:
-        qa_resp = _call_haiku_long(
-            build_qa_messages(qa),
-            SYSTEM_TRANSLATION_TRANSCRIPT,
-            max_tokens=16000,
-        )
+    # 2) Q&A 호출 — 길이에 따라 자동 청크 분할 (각 청크 16K output 한도 안에서 풀 보존)
+    qa_resps: list[dict] = []
+    qa_chunks: list[str] = _chunk_qa_text(qa) if qa else []
+    for i, chunk in enumerate(qa_chunks):
+        if not chunk:
+            continue
+        msgs = build_qa_chunk_messages(chunk, i, len(qa_chunks))
+        resp = _call_haiku_long(msgs, SYSTEM_TRANSLATION_TRANSCRIPT, max_tokens=16000)
+        qa_resps.append(resp)
 
     # 결과 합치기
     parts = []
     if prepared_resp and prepared_resp['text']:
         parts.append(prepared_resp['text'])
-    if qa_resp and qa_resp['text']:
-        parts.append(qa_resp['text'])
+    for r in qa_resps:
+        if r.get('text'):
+            parts.append(r['text'])
     translated_full = '\n\n'.join(parts)
 
-    total_input = (prepared_resp['input_tokens'] if prepared_resp else 0) + \
-                  (qa_resp['input_tokens'] if qa_resp else 0)
-    total_output = (prepared_resp['output_tokens'] if prepared_resp else 0) + \
-                   (qa_resp['output_tokens'] if qa_resp else 0)
+    total_input = (prepared_resp['input_tokens'] if prepared_resp else 0) + sum(
+        r['input_tokens'] for r in qa_resps)
+    total_output = (prepared_resp['output_tokens'] if prepared_resp else 0) + sum(
+        r['output_tokens'] for r in qa_resps)
 
     db.update_transcript_translation(
         transcript_id=transcript_id,
@@ -361,11 +401,12 @@ def translate_transcript(transcript_id: int) -> dict:
             'output_tokens': prepared_resp['output_tokens'] if prepared_resp else 0,
             'stop_reason': prepared_resp['stop_reason'] if prepared_resp else None,
         } if prepared_resp else None,
-        'qa': {
-            'input_tokens': qa_resp['input_tokens'] if qa_resp else 0,
-            'output_tokens': qa_resp['output_tokens'] if qa_resp else 0,
-            'stop_reason': qa_resp['stop_reason'] if qa_resp else None,
-        } if qa_resp else None,
+        'qa_chunks': [{
+            'input_tokens': r['input_tokens'],
+            'output_tokens': r['output_tokens'],
+            'stop_reason': r['stop_reason'],
+        } for r in qa_resps],
+        'qa_chunk_count': len(qa_chunks),
         'total_input_tokens': total_input,
         'total_output_tokens': total_output,
         'prompt_version': pv,

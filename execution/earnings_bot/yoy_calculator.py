@@ -26,11 +26,13 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class YoyMetric:
-    label: str             # '매출' / '영업이익' / 'GAAP EPS' 등
+    label: str                       # '매출' / '영업이익' / 'GAAP EPS' 등
     current_value: float | None
-    prior_value: float | None
-    yoy_pct: float | None  # ((curr - prior) / |prior|) * 100
-    unit: str              # '$M' / '$B' / '$' / '%'
+    prior_qoq_value: float | None    # 직전 분기 (예: 2Q26 실적이면 1Q26)
+    prior_yoy_value: float | None    # 전년 동기 (예: 2Q26 실적이면 2Q25)
+    qoq_pct: float | None            # ((curr - prior_qoq) / |prior_qoq|) * 100
+    yoy_pct: float | None            # ((curr - prior_yoy) / |prior_yoy|) * 100
+    unit: str                        # '$M' / '$B' / '$' / '%'
     source: Literal['xbrl', 'press_release_regex', 'unavailable']
 
 
@@ -88,37 +90,43 @@ def from_xbrl_facts(ticker: str, fiscal_year: int, fiscal_quarter: int) -> YoySn
         ('매출총이익', 'get_gross_profit', '$M'),
     ]
 
+    # 직전 분기 산출 (1Q→4Q 직전년)
+    if fiscal_quarter > 1:
+        prev_qoq_fy, prev_qoq_fq = fiscal_year, fiscal_quarter - 1
+    else:
+        prev_qoq_fy, prev_qoq_fq = fiscal_year - 1, 4
+
     for label, method_name, unit in metric_specs:
         method = getattr(facts, method_name, None)
         if not callable(method):
             snapshot.metrics.append(YoyMetric(
-                label=label, current_value=None, prior_value=None, yoy_pct=None,
+                label=label, current_value=None,
+                prior_qoq_value=None, prior_yoy_value=None,
+                qoq_pct=None, yoy_pct=None,
                 unit=unit, source='unavailable',
             ))
             continue
+        curr_val = prior_yoy = prior_qoq = None
         try:
             curr_val = method(period=period_str, annual=False)
-            # edgartools v5의 get_revenue(period=...)는 가장 최근 분기 반환 — fiscal_year 매칭은 별도 검증 필요
-            # 폴백 안전: get_fact()로 직접 lookup도 시도
-            prior_val: float | None = None
-            try:
-                # 전년 동기 — period 문자열을 'YYYY-Qn'으로 시도 (edgartools 일부 버전 지원)
-                prior_period = f'{fiscal_year - 1}-Q{fiscal_quarter}'
-                prior_val = method(period=prior_period, annual=False)
-            except Exception:
-                pass
-        except (TypeError, ValueError) as e:
-            logger.debug(f'[{ticker}] {method_name} 호출 실패: {e}')
-            curr_val = prior_val = None
-        except Exception as e:
-            logger.debug(f'[{ticker}] {method_name} 예외: {e}')
-            curr_val = prior_val = None
+        except Exception:
+            pass
+        try:
+            prior_yoy = method(period=f'{fiscal_year - 1}-Q{fiscal_quarter}', annual=False)
+        except Exception:
+            pass
+        try:
+            prior_qoq = method(period=f'{prev_qoq_fy}-Q{prev_qoq_fq}', annual=False)
+        except Exception:
+            pass
 
         snapshot.metrics.append(YoyMetric(
             label=label,
             current_value=float(curr_val) if curr_val is not None else None,
-            prior_value=float(prior_val) if prior_val is not None else None,
-            yoy_pct=_yoy_pct(curr_val, prior_val),
+            prior_qoq_value=float(prior_qoq) if prior_qoq is not None else None,
+            prior_yoy_value=float(prior_yoy) if prior_yoy is not None else None,
+            qoq_pct=_yoy_pct(curr_val, prior_qoq),
+            yoy_pct=_yoy_pct(curr_val, prior_yoy),
             unit=unit,
             source='xbrl' if curr_val is not None else 'unavailable',
         ))
@@ -150,7 +158,9 @@ def from_press_release_text(text: str, fy: int, fq: int) -> YoySnapshot:
             yoy = float(rev_match.group(1))
             snap.metrics.append(YoyMetric(
                 label='매출 YoY (보도자료 텍스트)',
-                current_value=None, prior_value=None, yoy_pct=yoy,
+                current_value=None,
+                prior_qoq_value=None, prior_yoy_value=None,
+                qoq_pct=None, yoy_pct=yoy,
                 unit='%', source='press_release_regex',
             ))
         except ValueError:
@@ -162,7 +172,9 @@ def from_press_release_text(text: str, fy: int, fq: int) -> YoySnapshot:
             eps = float(eps_match.group(1))
             snap.metrics.append(YoyMetric(
                 label='희석 EPS (보도자료 텍스트)',
-                current_value=eps, prior_value=None, yoy_pct=None,
+                current_value=eps,
+                prior_qoq_value=None, prior_yoy_value=None,
+                qoq_pct=None, yoy_pct=None,
                 unit='$', source='press_release_regex',
             ))
         except ValueError:
@@ -185,7 +197,7 @@ def compute_yoy(ticker: str, fiscal_year: int, fiscal_quarter: int,
     # XBRL이 모든 핵심 metric에서 완전(current+prior)한 경우만 정규식 스킵
     fully_complete = (
         len(snap.metrics) > 0
-        and all(m.source == 'xbrl' and m.current_value is not None and m.prior_value is not None
+        and all(m.source == 'xbrl' and m.current_value is not None and m.prior_yoy_value is not None
                 for m in snap.metrics)
     )
     if fully_complete:
@@ -201,17 +213,34 @@ def compute_yoy(ticker: str, fiscal_year: int, fiscal_quarter: int,
 
 
 def format_table(snapshot: YoySnapshot) -> str:
-    """마크다운 테이블 (1-page sheet용)."""
+    """마크다운 테이블 (1-page sheet용). 6컬럼: 당분기 / 직전분기 / QoQ / 전년동기 / YoY / 출처.
+
+    매출/영업이익/순이익 3개 핵심 라벨은 **bold**로 강조.
+    """
+    fy, fq = snapshot.fiscal_year, snapshot.fiscal_quarter
+    # 직전 분기 라벨 (1Q→4Q 직전년)
+    if fq > 1:
+        prev_qoq_label = f'{fq-1}Q{fy % 100:02d}'
+    else:
+        prev_qoq_label = f'4Q{(fy - 1) % 100:02d}'
+    curr_label = f'{fq}Q{fy % 100:02d}'
+    yoy_label = f'{fq}Q{(fy - 1) % 100:02d}'
+
+    BOLD_LABELS = {'매출', '영업이익', '순이익'}
+
     lines = [
-        f"### YoY 비교 ({snapshot.fiscal_year} Q{snapshot.fiscal_quarter})",
-        "| 항목 | 당분기 | 전년동기 | YoY | 출처 |",
-        "|---|---|---|---|---|",
+        f"### 주요 숫자 ({curr_label})",
+        f"| 항목 | 당분기({curr_label}) | 직전분기({prev_qoq_label}) | QoQ | 전년동기({yoy_label}) | YoY | 출처 |",
+        "|---|---|---|---|---|---|---|",
     ]
     for m in snapshot.metrics:
+        label = f'**{m.label}**' if m.label in BOLD_LABELS else m.label
         curr = _format_value(m.current_value, m.unit)
-        prior = _format_value(m.prior_value, m.unit)
+        prior_qoq = _format_value(m.prior_qoq_value, m.unit)
+        prior_yoy = _format_value(m.prior_yoy_value, m.unit)
+        qoq = f'{m.qoq_pct:+.1f}%' if m.qoq_pct is not None else '—'
         yoy = f'{m.yoy_pct:+.1f}%' if m.yoy_pct is not None else '—'
-        lines.append(f"| {m.label} | {curr} | {prior} | {yoy} | {m.source} |")
+        lines.append(f"| {label} | {curr} | {prior_qoq} | {qoq} | {prior_yoy} | {yoy} | {m.source} |")
     for note in snapshot.notes:
         lines.append(f"\n_{note}_")
     return '\n'.join(lines)
