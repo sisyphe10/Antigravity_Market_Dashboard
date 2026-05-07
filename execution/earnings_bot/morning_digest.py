@@ -45,12 +45,12 @@ def _load_subscribers() -> list[int]:
 
 
 # ─── filing 상태 분류 (accession_number 기준 전수 join) ───
-def _classify_by_accession(accession_number: str, conn) -> tuple[str, str, str]:
-    """accession 단위로 (분류 이모지, 분기 레이블, Notion URL) 반환.
+def _classify_by_accession(accession_number: str, conn) -> tuple[str, str]:
+    """accession 단위로 (분류 이모지, 분기 레이블) 반환.
 
     🟢 완료: filing_analyses 있음 + transcript translated_kr + notion_appended_at
     🟡 분석만: filing_analyses 있음, transcript 미게시·미번역·미append
-    ⚪ 진행중: filing_analyses 없음 (큐 대기)
+    ⚪ 진행중: filing_analyses 없음 (큐 대기) — 분기 레이블 빈 문자열
     """
     a = conn.execute(
         """SELECT a.fiscal_quarter, a.fiscal_year FROM filing_analyses a
@@ -59,45 +59,23 @@ def _classify_by_accession(accession_number: str, conn) -> tuple[str, str, str]:
         (accession_number,),
     ).fetchone()
     if not a:
-        return ('⚪', '', '')
+        return ('⚪', '')
 
     q_label = ''
     if a['fiscal_year'] and a['fiscal_quarter']:
         q_label = f"{a['fiscal_quarter']}Q{a['fiscal_year'] % 100:02d}"
 
     t = conn.execute(
-        """SELECT t.translated_kr, t.notion_appended_at, t.notion_page_id
-           FROM transcripts t JOIN filings f ON t.filing_id = f.id
+        """SELECT t.translated_kr, t.notion_appended_at FROM transcripts t
+           JOIN filings f ON t.filing_id = f.id
            WHERE f.accession_number=? AND t.match_confidence >= 0.7
            ORDER BY t.match_confidence DESC, t.fetched_at DESC LIMIT 1""",
         (accession_number,),
     ).fetchone()
 
-    # Notion URL 우선순위: transcripts.notion_page_id (가장 정확) → filings.published.metadata_json (폴백)
-    notion_url = ''
-    if t and t['notion_page_id']:
-        pid = t['notion_page_id'].replace('-', '')
-        if pid:
-            notion_url = f'https://www.notion.so/{pid}'
-    if not notion_url:
-        n = conn.execute(
-            """SELECT metadata_json FROM filings
-               WHERE accession_number=? AND stage='published'
-               ORDER BY id DESC LIMIT 1""",
-            (accession_number,),
-        ).fetchone()
-        if n and n['metadata_json']:
-            try:
-                m = json.loads(n['metadata_json'])
-                pid = (m.get('notion_page_id') or '').replace('-', '')
-                if pid:
-                    notion_url = f'https://www.notion.so/{pid}'
-            except Exception:
-                pass
-
     if t and t['translated_kr'] and t['notion_appended_at']:
-        return ('🟢', q_label, notion_url)
-    return ('🟡', q_label, notion_url)
+        return ('🟢', q_label)
+    return ('🟡', q_label)
 
 
 # ─── 메시지 빌더 ───
@@ -124,9 +102,8 @@ def build_morning_digest(now: datetime | None = None) -> str:
 
         green, yellow, white = [], [], []
         for f in new_unique:
-            cat, q, url = _classify_by_accession(f['accession_number'], conn)
-            label = q or f['document_type']
-            entry = (f['ticker'], label, url)
+            cat, q = _classify_by_accession(f['accession_number'], conn)
+            entry = (f['ticker'], q)
             if cat == '🟢':
                 green.append(entry)
             elif cat == '🟡':
@@ -156,33 +133,29 @@ def build_morning_digest(now: datetime | None = None) -> str:
     finally:
         conn.close()
 
-    # ── 메시지 조립 ──
-    lines = [f"📊 어닝봇 일일 다이제스트 ({today_kst.isoformat()})", '']
+    # ── 메시지 조립 (제목은 Telegram HTML bold+underline) ──
+    lines = [f"<b><u>☀️ 어닝봇 일일 다이제스트 ({today_kst.isoformat()})</u></b>", '']
+
+    def _format_entry(ticker: str, label: str) -> str:
+        return f'  • [{ticker}] {label}'.rstrip()
 
     total_new = len(new_unique)
-    lines.append(f'━━ 어제 발표 신규 ({total_new}건) ━━')
-    if total_new == 0:
-        lines.append('  (없음)')
-    else:
-        if green:
-            lines.append(f'🟢 완료 ({len(green)}):')
-            for ticker, label, url in green:
-                tail = f' — {url}' if url else ''
-                lines.append(f'  • {ticker} {label}{tail}')
-        if yellow:
-            lines.append(f'🟡 분석만 발행, Q&A 번역 대기 ({len(yellow)}):')
-            for ticker, label, url in yellow:
-                tail = f' — {url}' if url else ''
-                lines.append(f'  • {ticker} {label}{tail}')
-        if white:
-            lines.append(f'⚪ 진행중 ({len(white)}):')
-            for ticker, label, _ in white:
-                lines.append(f'  • {ticker} {label}')
+    lines.append(f'━━ 신규 ({total_new}건) ━━')
+    sub_blocks: list[str] = []
+    if green:
+        blk = [f'🟢 완료 ({len(green)}):'] + [_format_entry(t, l) for t, l in green]
+        sub_blocks.append('\n'.join(blk))
+    if yellow:
+        blk = [f'🟡 번역 대기 ({len(yellow)}):'] + [_format_entry(t, l) for t, l in yellow]
+        sub_blocks.append('\n'.join(blk))
+    if white:
+        blk = [f'⚪ 진행중 ({len(white)}):'] + [_format_entry(t, l) for t, l in white]
+        sub_blocks.append('\n'.join(blk))
+    if sub_blocks:
+        lines.append('\n\n'.join(sub_blocks))
 
-    lines.extend(['', f'━━ 미해결 transcript 큐 ({len(backlog)}건) ━━'])
-    if not backlog:
-        lines.append('  (없음)')
-    else:
+    lines.extend(['', f'━━ 미해결 ({len(backlog)}건) ━━'])
+    if backlog:
         for r in backlog[:15]:
             try:
                 filed_dt = datetime.fromisoformat(
@@ -193,21 +166,19 @@ def build_morning_digest(now: datetime | None = None) -> str:
                 age_days = '?'
             stale = ' [stale]' if isinstance(age_days, int) and age_days >= STALE_DAYS else ''
             lines.append(
-                f"  • {r['ticker']} — {age_days}일 전, "
+                f"  • [{r['ticker']}] {age_days}일 전, "
                 f"{r['attempt_count']}회 재시도, {r['last_status']}{stale}"
             )
         if len(backlog) > 15:
             lines.append(f'  ... 외 {len(backlog) - 15}건')
 
-    lines.extend(['', f'━━ 다음 {LOOKAHEAD_DAYS}일 예정 ({len(upcoming)}건) ━━'])
-    if not upcoming:
-        lines.append('  (없음)')
-    else:
+    lines.extend(['', f'━━ 예정 ({len(upcoming)}건) ━━'])
+    if upcoming:
         # 한 줄에 여러 종목 묶기 (가독성)
         chunks = []
         for r in upcoming:
             hr = (r['hour'] or '').upper()
-            chunks.append(f"{r['ticker']} {r['event_date'][5:]}{(' ' + hr) if hr else ''}")
+            chunks.append(f"[{r['ticker']}] {r['event_date'][5:]}{(' ' + hr) if hr else ''}")
         line = '  '
         for c in chunks:
             if len(line) + len(c) + 3 > 80:
@@ -226,6 +197,7 @@ def _telegram_send(token: str, chat_id: int, text: str) -> bool:
     body = urllib.parse.urlencode({
         'chat_id': chat_id,
         'text': text,
+        'parse_mode': 'HTML',
         'disable_web_page_preview': 'true',
     }).encode()
     req = urllib.request.Request(url, data=body)
