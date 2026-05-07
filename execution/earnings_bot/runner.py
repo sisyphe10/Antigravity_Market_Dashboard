@@ -8,7 +8,8 @@
   5. translator.translate_pending_transcripts() — 번역 미완료 transcript Haiku 처리
   6. notion_publisher.publish_pending() — analyzed 결과 Notion 발행
   7. notion_publisher.append_pending_translations() — 번역 완료 transcript 페이지 append
-  8. transcript_digest.run() — 일일 다이제스트 (needs_review 큐 알림)
+  8. transcript_digest.run() — 운영 다이제스트 (콘솔/journal 디버그용)
+  9. morning_digest.run() — 사용자용 텔레그램 다이제스트 (RA_Sisyphe 채널)
 
 매 단계 결과는 JSON 줄로 출력 → systemd journal에 기록 → 디버깅 용이.
 한 단계 실패해도 다음 단계 진행 (운영 안정성).
@@ -55,6 +56,7 @@ def run_pipeline() -> dict:
     """orchestrator main entry."""
     from . import (
         edgar_monitor,
+        morning_digest,
         notion_publisher,
         scheduler,
         transcript_digest,
@@ -90,8 +92,11 @@ def run_pipeline() -> dict:
     summary.append(_safe('notion_publisher.append_pending_translations',
                          lambda: notion_publisher.append_pending_translations(limit=5)))
 
-    # 8) digest — needs_review 큐 알림 (1일 1회 통합 사이클이라 무조건 실행)
+    # 8) transcript_digest — 운영 디버그 (journal에만, 텔레그램 발송 X)
     summary.append(_safe('transcript_digest.run', transcript_digest.run))
+
+    # 9) morning_digest — 사용자용 텔레그램 다이제스트 (RA_Sisyphe_bot 채널)
+    summary.append(_safe('morning_digest.run', morning_digest.run))
 
     completed = _now_kst()
     return {
