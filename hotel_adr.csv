@@ -110,3 +110,32 @@ collected_at,hotel,city,grade,ota,search_date,lead_days,price_krw,url
 2026-05-06 13:48:29,힐튼 경주,경주,5*,booking,2026-05-13,7,231224,https://www.booking.com/hotel/kr/gyeongju-hilton.ko.html?checkin=2026-05-13&checkout=2026-05-14&group_adults=2&no_rooms=1
 2026-05-06 13:48:29,힐튼 경주,경주,5*,booking,2026-05-20,14,187850,https://www.booking.com/hotel/kr/gyeongju-hilton.ko.html?checkin=2026-05-20&checkout=2026-05-21&group_adults=2&no_rooms=1
 2026-05-06 13:48:29,힐튼 경주,경주,5*,booking,2026-06-05,30,253300,https://www.booking.com/hotel/kr/gyeongju-hilton.ko.html?checkin=2026-06-05&checkout=2026-06-06&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,시그니엘 서울,서울,Lux,booking,2026-05-14,7,580000,https://www.booking.com/hotel/kr/signiel-seoul.ko.html?checkin=2026-05-14&checkout=2026-05-15&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,시그니엘 서울,서울,Lux,booking,2026-05-21,14,720000,https://www.booking.com/hotel/kr/signiel-seoul.ko.html?checkin=2026-05-21&checkout=2026-05-22&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,시그니엘 서울,서울,Lux,booking,2026-06-06,30,1000000,https://www.booking.com/hotel/kr/signiel-seoul.ko.html?checkin=2026-06-06&checkout=2026-06-07&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,포시즌스 호텔 서울,서울,Lux,booking,2026-05-14,7,930000,https://www.booking.com/hotel/kr/four-seasons-seoul.ko.html?checkin=2026-05-14&checkout=2026-05-15&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,포시즌스 호텔 서울,서울,Lux,booking,2026-05-21,14,990000,https://www.booking.com/hotel/kr/four-seasons-seoul.ko.html?checkin=2026-05-21&checkout=2026-05-22&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,포시즌스 호텔 서울,서울,Lux,booking,2026-06-06,30,1150000,https://www.booking.com/hotel/kr/four-seasons-seoul.ko.html?checkin=2026-06-06&checkout=2026-06-07&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,그랜드 하얏트 서울,서울,5*,booking,2026-05-14,7,841500,https://www.booking.com/hotel/kr/grand-hyatt-seoul.ko.html?checkin=2026-05-14&checkout=2026-05-15&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,그랜드 하얏트 서울,서울,5*,booking,2026-05-21,14,558450,https://www.booking.com/hotel/kr/grand-hyatt-seoul.ko.html?checkin=2026-05-21&checkout=2026-05-22&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,그랜드 하얏트 서울,서울,5*,booking,2026-06-06,30,650000,https://www.booking.com/hotel/kr/grand-hyatt-seoul.ko.html?checkin=2026-06-06&checkout=2026-06-07&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,롯데호텔 서울,서울,5*,booking,2026-05-14,7,544000,https://www.booking.com/hotel/kr/lotte-seoul-seoul.ko.html?checkin=2026-05-14&checkout=2026-05-15&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,롯데호텔 서울,서울,5*,booking,2026-05-21,14,501500,https://www.booking.com/hotel/kr/lotte-seoul-seoul.ko.html?checkin=2026-05-21&checkout=2026-05-22&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,롯데호텔 서울,서울,5*,booking,2026-06-06,30,612000,https://www.booking.com/hotel/kr/lotte-seoul-seoul.ko.html?checkin=2026-06-06&checkout=2026-06-07&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,글래드 여의도,서울,4*,booking,2026-05-14,7,270545,https://www.booking.com/hotel/kr/glad-yeouido.ko.html?checkin=2026-05-14&checkout=2026-05-15&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,글래드 여의도,서울,4*,booking,2026-05-21,14,317333,https://www.booking.com/hotel/kr/glad-yeouido.ko.html?checkin=2026-05-21&checkout=2026-05-22&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,글래드 여의도,서울,4*,booking,2026-06-06,30,350000,https://www.booking.com/hotel/kr/glad-yeouido.ko.html?checkin=2026-06-06&checkout=2026-06-07&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,시그니엘 부산,부산,Lux,booking,2026-05-14,7,362600,https://www.booking.com/hotel/kr/signiel-busan.ko.html?checkin=2026-05-14&checkout=2026-05-15&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,시그니엘 부산,부산,Lux,booking,2026-05-21,14,362600,https://www.booking.com/hotel/kr/signiel-busan.ko.html?checkin=2026-05-21&checkout=2026-05-22&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,시그니엘 부산,부산,Lux,booking,2026-06-06,30,588000,https://www.booking.com/hotel/kr/signiel-busan.ko.html?checkin=2026-06-06&checkout=2026-06-07&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,파라다이스 호텔 부산,부산,5*,booking,2026-05-14,7,350000,https://www.booking.com/hotel/kr/paradise-busan.ko.html?checkin=2026-05-14&checkout=2026-05-15&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,파라다이스 호텔 부산,부산,5*,booking,2026-05-21,14,350000,https://www.booking.com/hotel/kr/paradise-busan.ko.html?checkin=2026-05-21&checkout=2026-05-22&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,그랜드 하얏트 제주,제주,5*,booking,2026-05-14,7,2108000,https://www.booking.com/hotel/kr/grand-hyatt-jeju.ko.html?checkin=2026-05-14&checkout=2026-05-15&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,그랜드 하얏트 제주,제주,5*,booking,2026-05-21,14,425000,https://www.booking.com/hotel/kr/grand-hyatt-jeju.ko.html?checkin=2026-05-21&checkout=2026-05-22&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,그랜드 하얏트 제주,제주,5*,booking,2026-06-06,30,448000,https://www.booking.com/hotel/kr/grand-hyatt-jeju.ko.html?checkin=2026-06-06&checkout=2026-06-07&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,롯데호텔 제주,제주,5*,booking,2026-05-14,7,260000,https://www.booking.com/hotel/kr/lotte-jeju.ko.html?checkin=2026-05-14&checkout=2026-05-15&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,롯데호텔 제주,제주,5*,booking,2026-05-21,14,360000,https://www.booking.com/hotel/kr/lotte-jeju.ko.html?checkin=2026-05-21&checkout=2026-05-22&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,롯데호텔 제주,제주,5*,booking,2026-06-06,30,409200,https://www.booking.com/hotel/kr/lotte-jeju.ko.html?checkin=2026-06-06&checkout=2026-06-07&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,힐튼 경주,경주,5*,booking,2026-05-14,7,238000,https://www.booking.com/hotel/kr/gyeongju-hilton.ko.html?checkin=2026-05-14&checkout=2026-05-15&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,힐튼 경주,경주,5*,booking,2026-05-21,14,224400,https://www.booking.com/hotel/kr/gyeongju-hilton.ko.html?checkin=2026-05-21&checkout=2026-05-22&group_adults=2&no_rooms=1
+2026-05-07 12:24:59,힐튼 경주,경주,5*,booking,2026-06-06,30,356150,https://www.booking.com/hotel/kr/gyeongju-hilton.ko.html?checkin=2026-06-06&checkout=2026-06-07&group_adults=2&no_rooms=1
