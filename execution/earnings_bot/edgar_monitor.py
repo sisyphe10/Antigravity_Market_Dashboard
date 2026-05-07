@@ -146,6 +146,13 @@ def process_ticker(ticker: str) -> list[dict]:
                     f"[{ticker}] NEW {form}/{parsed.document_subtype} "
                     f"sev={parsed.severity} accession={accession}"
                 )
+                # 분기 실적 (8-K_EARNINGS / 6-K_QUARTERLY)에 한해 transcript 큐 자동 enqueue
+                if parsed.document_subtype in ('8-K_EARNINGS', '6-K_QUARTERLY'):
+                    try:
+                        from . import transcript_watch
+                        transcript_watch.initial_enqueue(row_id)
+                    except Exception as e:
+                        logger.warning(f"[{ticker}] transcript enqueue 실패 filing_id={row_id}: {e}")
 
     return new_entries
 

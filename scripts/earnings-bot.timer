@@ -1,13 +1,10 @@
 [Unit]
-Description=Antigravity Earnings Bot timer (5분 간격 + 부팅 후 1회)
+Description=Antigravity Earnings Bot timer (매일 08:00 KST 1회)
 
 [Timer]
-# 부팅 후 2분 뒤 첫 실행 (시스템 안정 후)
-OnBootSec=2min
-# 마지막 실행 후 5분마다
-OnUnitActiveSec=5min
-# Drift 보정: 시계 기준 매시 0/5/10/.../55분에 align (별도 OnCalendar 라인 사용 시)
-AccuracySec=30s
+# 매일 한국 시간 08:00 (UTC 23:00 전날) — 한 번 호출에 캘린더 sync + 폴링 + 분석 + 발행 + 다이제스트 모두 진행
+OnCalendar=*-*-* 08:00:00 Asia/Seoul
+AccuracySec=1min
 Unit=earnings-bot.service
 Persistent=true
 
