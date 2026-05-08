@@ -127,17 +127,9 @@ def upload_image_to_github(file_path, date_str, img_idx):
     import base64
     import json
     import urllib.request
-    import subprocess
 
     try:
-        # VM git remote에서 PAT 추출
-        result = subprocess.run(
-            ['git', 'remote', 'get-url', 'origin'],
-            capture_output=True, text=True,
-            cwd=os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
-        )
-        url = result.stdout.strip()
-        pat = url.split(':')[2].split('@')[0] if '@github.com' in url else None
+        pat = os.getenv('GH_PAT')
         if not pat:
             return None
 
