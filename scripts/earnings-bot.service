@@ -2,7 +2,7 @@
 Description=Antigravity Earnings Bot (US 실적/IR Day 분석 파이프라인)
 After=network-online.target
 Wants=network-online.target
-OnFailure=sisyphe-bot-notify.service
+OnFailure=earnings-bot-notify.service
 
 [Service]
 Type=oneshot

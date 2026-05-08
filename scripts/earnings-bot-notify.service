@@ -1,0 +1,6 @@
+[Unit]
+Description=Earnings Bot Failure Notification
+
+[Service]
+Type=oneshot
+ExecStart=/home/ubuntu/Antigravity_Market_Dashboard/scripts/notify_sisyphe_failure.sh earnings-bot
