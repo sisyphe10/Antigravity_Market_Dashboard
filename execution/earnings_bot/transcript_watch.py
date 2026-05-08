@@ -19,6 +19,7 @@ from .matcher import DEFAULT_THRESHOLD, score_parsed
 from .transcript_sources import (EarningsEvent, TranscriptSource,
                                  make_event_from_filing)
 from .transcript_sources.marketbeat import MarketBeatSource
+from .transcript_sources.q4cdn import Q4CdnSource
 from .transcript_sources.motley_fool import MotleyFoolSource
 
 logger = logging.getLogger(__name__)
@@ -31,7 +32,7 @@ STALE_RETENTION_DAYS = 30
 
 # 사용 가능한 자동 소스 (순서대로 시도)
 def default_sources() -> list[TranscriptSource]:
-    return [MotleyFoolSource(), MarketBeatSource()]
+    return [Q4CdnSource(), MotleyFoolSource(), MarketBeatSource()]
 
 
 def _utcnow() -> datetime:
