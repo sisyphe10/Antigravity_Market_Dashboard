@@ -1,0 +1,27 @@
+#!/bin/bash
+# Secret pattern guard — staged diff에 시크릿이 들어가면 commit 차단.
+# 활성화: git config core.hooksPath .githooks
+
+set -euo pipefail
+
+# 검사 패턴
+PATTERN='(ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{50,}|ntn_[A-Za-z0-9]{30,}|sk-ant-[a-zA-Z0-9_-]{30,}|[0-9]{8,}:[A-Za-z0-9_-]{30,}|AKIA[A-Z0-9]{16})'
+
+# staged diff에서 + 라인만 검사 (삭제 라인은 제외)
+HITS=$(git diff --cached --diff-filter=ACMR -U0 | grep -E "^\+" | grep -vE "^\+\+\+" | grep -E "$PATTERN" || true)
+
+if [ -n "$HITS" ]; then
+  echo ""
+  echo "🚨 ERROR: 시크릿 패턴이 staged diff에 발견됐습니다."
+  echo "─────────────────────────────────────────────"
+  echo "$HITS" | sed -E "s/$PATTERN/[MASKED]/g" | head -20
+  echo "─────────────────────────────────────────────"
+  echo "감지 패턴: ghp_* / github_pat_* / ntn_* / sk-ant-* / telegram bot / AWS key"
+  echo ""
+  echo "처리 방법:"
+  echo "  1. 시크릿이면 .env로 옮기고 .gitignore 확인"
+  echo "  2. 오탐이면 우회: git commit --no-verify"
+  exit 1
+fi
+
+exit 0
