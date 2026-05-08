@@ -67,6 +67,7 @@ restore() {
 BOTS=(sisyphe-bot research-notes-bot ra-sisyphe-bot)
 SCRIPTS=(execution/sisyphe_bot.py execution/research_bot/research_notes_bot.py execution/ra_sisyphe_bot.py)
 EARNINGS_BOT_TIMER=earnings-bot.timer
+KODEX_TIMER=kodex-sectors.timer
 EARNINGS_BOT_SCRIPTS=(
     execution/earnings_bot/runner.py
     execution/earnings_bot/edgar_monitor.py
@@ -107,6 +108,11 @@ healthcheck() {
     else
         echo "⚠️  $EARNINGS_BOT_TIMER inactive (한 번도 enable 안 됐을 수 있음)"
     fi
+    if sudo systemctl is-active --quiet "$KODEX_TIMER"; then
+        echo "✅ $KODEX_TIMER is active"
+    else
+        echo "⚠️  $KODEX_TIMER inactive"
+    fi
     return $rc
 }
 
@@ -123,6 +129,19 @@ install_earnings_bot_units() {
     fi
 }
 
+install_kodex_units() {
+    # KRX가 GHA Azure IP 차단으로 VM에서 실행 (매일 23:30 KST)
+    if [ ! -f /etc/systemd/system/kodex-sectors.service ]; then
+        echo "🔧 kodex-sectors systemd unit 설치..."
+        sudo cp "$REPO_DIR/scripts/kodex-sectors.service" /etc/systemd/system/
+        sudo cp "$REPO_DIR/scripts/kodex-sectors.timer" /etc/systemd/system/
+        chmod +x "$REPO_DIR/scripts/run_kodex_sectors.sh"
+        sudo systemctl daemon-reload
+        sudo systemctl enable --now kodex-sectors.timer
+        echo "  ✓ kodex-sectors.timer enabled + started"
+    fi
+}
+
 deploy() {
     cd "$REPO_DIR"
     echo "📥 Pulling latest code..."
@@ -132,6 +151,7 @@ deploy() {
     validate || exit 1
 
     install_earnings_bot_units
+    install_kodex_units
 
     for b in "${BOTS[@]}"; do
         echo "🔄 Restarting $b..."
@@ -161,6 +181,7 @@ reclone() {
     validate || exit 1
 
     install_earnings_bot_units
+    install_kodex_units
 
     for b in "${BOTS[@]}"; do
         echo "🔄 Restarting $b..."

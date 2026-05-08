@@ -120,13 +120,8 @@ jobs:
         env:
           TZ: 'Asia/Seoul'
 
-      - name: Fetch KODEX 200 Sector Data
-        run: |
-          python execution/fetch_kodex_sectors.py || echo "섹터 데이터 수집 실패 (대시보드는 계속 진행)"
-        env:
-           TZ: 'Asia/Seoul'
-           KRX_ID: ${{ secrets.KRX_ID }}
-           KRX_PW: ${{ secrets.KRX_PW }}
+      # KODEX 200 섹터 데이터는 VM의 kodex-sectors.timer가 매일 23:30 KST에 생성·푸시.
+      # KRX가 GHA Azure IP를 차단해서 VM(OCI)에서만 인증 로그인이 가능.
 
       - name: Generate Dashboard
         run: |

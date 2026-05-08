@@ -1,0 +1,11 @@
+[Unit]
+Description=Antigravity KODEX Sectors timer (매일 23:30 KST 1회 — daily_crawl 23:00 직후)
+
+[Timer]
+OnCalendar=*-*-* 23:30:00 Asia/Seoul
+AccuracySec=1min
+Unit=kodex-sectors.service
+Persistent=true
+
+[Install]
+WantedBy=timers.target

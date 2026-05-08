@@ -1,0 +1,17 @@
+[Unit]
+Description=Antigravity KODEX Sectors Fetch (KOSPI 200 + KOSDAQ 150 섹터 비중)
+After=network-online.target
+Wants=network-online.target
+OnFailure=sisyphe-bot-notify.service
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/Antigravity_Market_Dashboard
+ExecStart=/bin/bash /home/ubuntu/Antigravity_Market_Dashboard/scripts/run_kodex_sectors.sh
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=10min
+
+[Install]
+WantedBy=multi-user.target
