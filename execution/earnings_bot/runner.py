@@ -76,9 +76,9 @@ def run_pipeline() -> dict:
     # 3) transcript_watch — 큐에 있는 transcript 잡 처리 (search 시도)
     summary.append(_safe('transcript_watch.run_once', transcript_watch.run_once))
 
-    # 4) translator (1-page 분석, Sonnet) — 비용 발생. limit 5.
+    # 4) translator (1-page 분석, Sonnet) — 비용 발생. limit 20.
     summary.append(_safe('translator.process_pending',
-                         lambda: translator.process_pending(limit=5)))
+                         lambda: translator.process_pending(limit=20)))
 
     # 5) translator (transcript 풀 번역, Haiku 분할) — 비용 발생. limit 3.
     summary.append(_safe('translator.translate_pending_transcripts',
