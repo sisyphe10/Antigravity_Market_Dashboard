@@ -30,4 +30,4 @@ edgartools==5.30.2
 anthropic
 notion-client
 finnhub-python
-tiktoken
+tiktokenpypdf
