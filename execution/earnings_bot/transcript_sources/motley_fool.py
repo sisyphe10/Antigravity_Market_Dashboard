@@ -34,21 +34,48 @@ REQ_DELAY_SEC = 2.0  # 동일 호스트 호출 간 최소 간격
 
 
 def _http_get(url: str, *, timeout: int = REQ_TIMEOUT) -> str | None:
-    """간단 GET. 비-200은 None 반환. 차단 식별 키워드 로깅."""
-    try:
-        req = Request(url, headers={'User-Agent': USER_AGENT, 'Accept': 'text/html'})
-        with urlopen(req, timeout=timeout) as resp:
-            if resp.status != 200:
-                logger.warning(f"GET {url} → {resp.status}")
+    """간단 GET. 4xx 영구실패는 즉시 None, 5xx/429는 짧은 backoff 후 1회 retry.
+
+    HTTPError.code로 분류:
+    - 4xx (404/403/410 등 ≠ 408/429): 영구 실패 — 즉시 None
+    - 408/429/5xx: 일시 장애 — 2초 backoff 후 1회 retry
+    """
+    import time
+    from urllib.error import HTTPError
+
+    for attempt in range(2):
+        try:
+            req = Request(url, headers={'User-Agent': USER_AGENT, 'Accept': 'text/html'})
+            with urlopen(req, timeout=timeout) as resp:
+                if resp.status != 200:
+                    logger.warning(f"GET {url} -> {resp.status}")
+                    return None
+                return resp.read().decode('utf-8', errors='ignore')
+        except HTTPError as e:
+            code = e.code
+            transient = code >= 500 or code in (408, 429)
+            if not transient:
+                logger.warning(f"GET {url} -> {code} (4xx 영구실패)")
                 return None
-            return resp.read().decode('utf-8', errors='ignore')
-    except Exception as e:
-        msg = str(e).lower()
-        if 'cloudflare' in msg or '403' in msg or 'blocked' in msg:
-            logger.error(f"BLOCKED {url}: {e}")
-        else:
+            if attempt == 0:
+                logger.info(f"GET {url} -> {code} (일시 장애), 2s 후 retry")
+                time.sleep(2.0)
+                continue
+            logger.warning(f"GET {url} -> {code} (retry 후에도 실패)")
+            return None
+        except Exception as e:
+            msg = str(e).lower()
+            if 'cloudflare' in msg or '403' in msg or 'blocked' in msg:
+                logger.error(f"BLOCKED {url}: {e}")
+                return None
+            # socket timeout / URLError 등 일시 네트워크 장애는 1회 retry
+            if attempt == 0 and ('timed out' in msg or 'timeout' in msg or 'urlerror' in msg or 'connection' in msg):
+                logger.info(f"GET {url} 일시 네트워크 장애({e}), 2s 후 retry")
+                time.sleep(2.0)
+                continue
             logger.warning(f"GET fail {url}: {e}")
-        return None
+            return None
+    return None
 
 
 class MotleyFoolSource(TranscriptSource):
