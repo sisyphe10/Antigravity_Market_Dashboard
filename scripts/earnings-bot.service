@@ -12,7 +12,7 @@ ExecStart=/usr/bin/python3 -m execution.earnings_bot.runner
 EnvironmentFile=/home/ubuntu/Antigravity_Market_Dashboard/.env
 StandardOutput=journal
 StandardError=journal
-TimeoutStartSec=10min
+TimeoutStartSec=30min
 
 [Install]
 WantedBy=multi-user.target

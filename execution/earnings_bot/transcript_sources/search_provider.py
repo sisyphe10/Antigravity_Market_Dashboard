@@ -62,7 +62,7 @@ def anthropic_web_search(query: str, *, site: str | None = None,
     )
 
     try:
-        client = anthropic.Anthropic()
+        client = anthropic.Anthropic(max_retries=1, timeout=30.0)
         resp = client.messages.create(
             model=SEARCH_MODEL,
             max_tokens=DEFAULT_MAX_TOKENS,
