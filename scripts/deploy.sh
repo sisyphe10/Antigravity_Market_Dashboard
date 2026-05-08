@@ -117,13 +117,26 @@ healthcheck() {
 }
 
 install_earnings_bot_units() {
-    # systemd unit 파일이 /etc/systemd/system/에 없으면 복사 + enable.
-    # 1회 실행. 이후 deploy()는 unit 변경 안 하고 timer 그대로 동작.
+    # systemd unit 파일을 /etc/systemd/system/과 동기화.
+    # repo의 unit과 다르면 cp + daemon-reload. 최초 설치 시 timer enable.
+    local need_reload=0
+    local need_enable=0
     if [ ! -f /etc/systemd/system/earnings-bot.service ]; then
-        echo "🔧 earnings-bot systemd unit 설치..."
-        sudo cp "$REPO_DIR/scripts/earnings-bot.service" /etc/systemd/system/
-        sudo cp "$REPO_DIR/scripts/earnings-bot.timer" /etc/systemd/system/
+        echo "🔧 earnings-bot systemd unit 최초 설치..."
+        need_enable=1
+    fi
+    for unit in earnings-bot.service earnings-bot.timer earnings-bot-notify.service; do
+        if [ ! -f "/etc/systemd/system/$unit" ] || ! cmp -s "$REPO_DIR/scripts/$unit" "/etc/systemd/system/$unit"; then
+            echo "  → sync $unit"
+            sudo cp "$REPO_DIR/scripts/$unit" /etc/systemd/system/
+            need_reload=1
+        fi
+    done
+    if [ "$need_reload" = 1 ]; then
         sudo systemctl daemon-reload
+        echo "  ✓ daemon-reload"
+    fi
+    if [ "$need_enable" = 1 ]; then
         sudo systemctl enable --now earnings-bot.timer
         echo "  ✓ earnings-bot.timer enabled + started"
     fi
