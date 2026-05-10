@@ -94,7 +94,7 @@ def summarize_daily_notes(messages, date_str):
         try:
             response = client.messages.create(
                 model="claude-sonnet-4-20250514",
-                max_tokens=4096,
+                max_tokens=16384,
                 messages=[{"role": "user", "content": all_content}]
             )
             return response.content[0].text
