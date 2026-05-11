@@ -62,13 +62,13 @@
       "sector": "비철,목재등",
       "market_cap": 12760.955751,
       "weight": 5,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": 18.020022246941046,
+      "contribution": 9.010011123470523,
+      "cumulative_return": 0.0,
       "current_price": 106100.0,
       "ath_price": 112100.0,
       "dd": -5.352363960749329,
-      "is_today_new": true
+      "is_today_new": false
     },
     {
       "code": "034020",
