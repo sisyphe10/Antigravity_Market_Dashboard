@@ -1869,7 +1869,7 @@ def create_aum_table():
                         ctx.fillStyle = '#000';
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'bottom';
-                        ctx.fillText(Math.round(total) + '억', bar.x, bar.y - 4);
+                        ctx.fillText(Math.round(total), bar.x, bar.y - 4);
                         ctx.restore();
                     }
                 }
@@ -2059,7 +2059,7 @@ def create_cumulative_aum_chart():
                         ctx.fillStyle = '#000';
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'bottom';
-                        ctx.fillText(Math.round(total) + '억', bar.x, bar.y - 4);
+                        ctx.fillText(Math.round(total), bar.x, bar.y - 4);
                         ctx.restore();
                     }
                 }
