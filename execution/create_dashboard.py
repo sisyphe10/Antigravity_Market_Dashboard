@@ -516,7 +516,7 @@ def create_monthly_returns_table():
     # border-collapse:separate 모드 — 셀마다 독립 테두리 (right + bottom만)
     # 외곽은 table outline이 담당. 분할 셀은 right를 1.5px 진하게.
     LIGHT = '1px solid #e5e7eb'           # 가로선 (행 사이)
-    LIGHT_VERT = '1px solid #d1d5db'      # 세로선 (열 사이) — 가로선보다 한 단계 진함
+    LIGHT_VERT = '1px solid #9ca3af'      # 세로선 (열 사이) — 가로선보다 진함 (gray-400)
     DARK = '1.5px solid #374151'
 
     def cell_borders(name, bottom_style=LIGHT, is_header=False):
