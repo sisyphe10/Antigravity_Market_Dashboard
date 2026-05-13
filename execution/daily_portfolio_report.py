@@ -1,13 +1,16 @@
 import os
 import sys
+import json
 import asyncio
 import logging
+from io import BytesIO
 import pandas as pd
 import FinanceDataReader as fdr
 from datetime import datetime, timedelta, timezone
 from telegram import Bot
 import holidays
 from dotenv import load_dotenv
+from PIL import Image, ImageDraw, ImageFont
 
 load_dotenv()
 
@@ -16,6 +19,41 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
+# httpx INFO 로그가 sendMessage/sendPhoto URL(토큰 path 포함)을 찍으므로 차단
+logging.getLogger("httpx").setLevel(logging.WARNING)
+
+# ── 종목 표 PNG 렌더링 설정 ───────────────────────────────
+FONT_REGULAR = '/home/ubuntu/fonts/pretendard/Pretendard-Regular.otf'
+FONT_BOLD = '/home/ubuntu/fonts/pretendard/Pretendard-Bold.otf'
+
+# 2배 해상도로 렌더링 (retina 디스플레이 대응)
+SCALE = 2
+
+# 컬럼 폭 (1x 기준 픽셀)
+COL_WIDTHS = {
+    '#':   40 * SCALE,
+    '종목': 160 * SCALE,
+    '비중': 75 * SCALE,
+    '당일': 95 * SCALE,
+    '기여': 70 * SCALE,
+    '누적': 105 * SCALE,
+}
+ROW_HEIGHT = 30 * SCALE
+PADDING = 16 * SCALE
+TITLE_HEIGHT = 38 * SCALE
+FONT_SIZE = 15 * SCALE
+TITLE_FONT_SIZE = 17 * SCALE
+
+# Light theme
+BG_COLOR = (255, 255, 255)
+HEADER_BG = (240, 240, 240)
+ALT_ROW_BG = (248, 248, 248)
+RISK_ROW_BG = (220, 220, 220)     # 누적 -10% 이하 위험 표시 (엷은 회색)
+TEXT_COLOR = (0, 0, 0)
+LINE_COLOR = (200, 200, 200)
+POSITIVE_COLOR = (220, 38, 38)    # 한국 컨벤션: 양수 빨강
+NEGATIVE_COLOR = (37, 99, 235)    # 음수 파랑
+RISK_THRESHOLD = -10.0
 
 def is_korean_trading_day():
     """한국 거래일 여부 확인 (주말 + 공휴일 제외)"""
@@ -111,85 +149,138 @@ def get_latest_returns():
 
     return returns_data
 
-def calculate_contributions():
-    """종목별 기여도 계산 (트루밸류 기준)"""
-    # 포트폴리오 구성 읽기
-    df_portfolio = pd.read_excel(file_name, sheet_name='NEW')
-    df_portfolio = df_portfolio[df_portfolio['상품명'] == '트루밸류']
+def get_portfolio_holdings():
+    """portfolio_data.json에서 일반형 / 목표전환형 그룹 추출
 
-    if len(df_portfolio) == 0:
-        return [], []
+    portfolio_data.json은 create_portfolio_tables.py가 15:35 자동 업데이트 사이클에서
+    당일 종가 기준으로 미리 갱신해 둠. 키는 'PORTFOLIO_GROUPS'의 combined 명을 사용:
+    - 일반형: '삼성 트루밸류 / NH Value ESG / DB 개방형'
+    - 목표전환형: 'NH 목표전환형 N호 / DB 목표전환형 M차' (운용 중일 때만 존재)
+    """
+    json_path = 'portfolio_data.json'
+    if not os.path.exists(json_path):
+        logging.warning(f"{json_path} not found — holdings 섹션 생략")
+        return None, None
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except Exception as e:
+        logging.warning(f"{json_path} 로드 실패: {e}")
+        return None, None
 
-    # 최신 날짜의 포트폴리오 구성
-    df_portfolio['날짜'] = pd.to_datetime(df_portfolio['날짜'])
-    latest_date = df_portfolio['날짜'].max()
-    df_latest = df_portfolio[df_portfolio['날짜'] == latest_date]
-
-    # 비중이 0인 종목 제외
-    df_latest = df_latest[df_latest['비중'] > 0]
-
-    contributions = []
-
-    # 리포트 날짜 기준
-    report_date = get_report_date()
-
-    for _, row in df_latest.iterrows():
-        # 코드 컬럼 사용 (종목코드와 동일한 값, 전체 행 채워져 있음)
-        code = row.get('코드')
-        stock_name = row['종목']
-        weight = row['비중']  # 퍼센트 단위
-
-        if pd.isna(code):
-            logging.warning(f"⚠️ {stock_name}: 코드가 없습니다. 스킵합니다.")
+    general = None
+    target = None
+    for key, stocks in data.items():
+        if not key or key.startswith('_'):
             continue
-
-        code = str(int(float(code))).strip().zfill(6)
-        stock_name = row['종목']
-        weight = row['비중']  # 퍼센트 단위
-        
-        try:
-            # 리포트 날짜 기준으로 데이터 가져오기 (최근 10일)
-            end_date = report_date
-            start_date = end_date - timedelta(days=10)
-            
-            df_stock = fdr.DataReader(code, start=start_date, end=end_date)
-            
-            # 리포트 날짜 이하의 데이터만 필터링
-            df_stock = df_stock[df_stock.index.date <= report_date]
-            
-            if len(df_stock) >= 2:
-                # 리포트 날짜(D)와 전 거래일(D-1) 비교
-                latest_price = df_stock['Close'].iloc[-1]
-                prev_price = df_stock['Close'].iloc[-2]
-                latest_date_actual = df_stock.index[-1]
-                prev_date_actual = df_stock.index[-2]
-                change_pct = ((latest_price - prev_price) / prev_price) * 100
-                
-                # 기여도 = 비중 × 변동률
-                contribution = (weight / 100) * change_pct
-                
-                logging.info(f"{stock_name}: {prev_date_actual.strftime('%Y-%m-%d')} {prev_price:,.0f} → {latest_date_actual.strftime('%Y-%m-%d')} {latest_price:,.0f} ({change_pct:+.2f}%) = 기여도 {contribution:+.2f}")
-                
-                contributions.append({
-                    'stock': stock_name,
-                    'contribution': contribution
-                })
-            
-        except Exception as e:
-            logging.warning(f"Failed to get data for {stock_name} ({code}): {e}")
+        if not isinstance(stocks, list) or not stocks:
             continue
-    
-    # 정렬
-    contributions_sorted = sorted(contributions, key=lambda x: x['contribution'], reverse=True)
-    
-    top_5 = contributions_sorted[:5]
-    # 하위 5개는 오름차순 (가장 낮은 것부터)
-    bottom_5 = sorted(contributions_sorted[-5:], key=lambda x: x['contribution'])
-    
-    return top_5, bottom_5
+        if '목표전환형' in key:
+            target = (key, stocks)
+        elif '트루밸류' in key:
+            general = (key, stocks)
 
-def format_message(date, nav_data, returns_data, top_5, bottom_5):
-    """텔레그램 메시지 포맷 (HTML)"""
+    return general, target
+
+def _color_for(text):
+    """양수(+) 빨강, 음수(-) 파랑, 그 외 검정"""
+    if not text or text == '-':
+        return TEXT_COLOR
+    if text.startswith('+'):
+        return POSITIVE_COLOR
+    if text.startswith('-'):
+        return NEGATIVE_COLOR
+    return TEXT_COLOR
+
+
+def render_holdings_png(title, stocks):
+    """랩 종목 구성을 PNG 표로 렌더링 (비중 내림차순, 가운데 정렬)
+
+    컬럼: # / 종목 / 비중 / 당일 / 기여 / 누적
+    위험 표시: 누적 ≤ -10% 행은 엷은 회색 배경
+    기여도 = 비중 × 당일 수익률 / 100
+    """
+    headers = list(COL_WIDTHS.keys())
+    width = sum(COL_WIDTHS.values()) + PADDING * 2
+    sorted_stocks = sorted(stocks, key=lambda s: s.get('weight') or 0, reverse=True)
+    height = TITLE_HEIGHT + ROW_HEIGHT * (len(sorted_stocks) + 1) + PADDING * 2
+
+    img = Image.new('RGB', (width, height), BG_COLOR)
+    draw = ImageDraw.Draw(img)
+
+    title_font = ImageFont.truetype(FONT_BOLD, TITLE_FONT_SIZE)
+    header_font = ImageFont.truetype(FONT_BOLD, FONT_SIZE)
+    body_font = ImageFont.truetype(FONT_REGULAR, FONT_SIZE)
+
+    # 제목
+    draw.text((PADDING, PADDING), f"📌 {title}", fill=TEXT_COLOR, font=title_font)
+
+    # 헤더 배경 + 텍스트 (가운데 정렬)
+    header_y = PADDING + TITLE_HEIGHT
+    draw.rectangle(
+        [PADDING, header_y, width - PADDING, header_y + ROW_HEIGHT],
+        fill=HEADER_BG,
+    )
+    x = PADDING
+    for h in headers:
+        col_w = COL_WIDTHS[h]
+        text_w = draw.textlength(h, font=header_font)
+        cx = x + (col_w - text_w) / 2
+        draw.text((cx, header_y + 6 * SCALE), h, fill=TEXT_COLOR, font=header_font)
+        x += col_w
+
+    line_y = header_y + ROW_HEIGHT
+    draw.line([(PADDING, line_y), (width - PADDING, line_y)], fill=LINE_COLOR, width=1)
+
+    # 데이터 행
+    for idx, s in enumerate(sorted_stocks, 1):
+        y = line_y + (idx - 1) * ROW_HEIGHT
+
+        name = s.get('name', '?')
+        weight = s.get('weight')
+        today_ret = s.get('today_return')
+        cum_ret = s.get('cumulative_return')
+        contrib = (weight / 100) * today_ret if (weight is not None and today_ret is not None) else None
+
+        is_risky = cum_ret is not None and cum_ret <= RISK_THRESHOLD
+        if is_risky:
+            row_bg = RISK_ROW_BG
+        elif idx % 2 == 0:
+            row_bg = ALT_ROW_BG
+        else:
+            row_bg = None
+        if row_bg:
+            draw.rectangle(
+                [PADDING, y, width - PADDING, y + ROW_HEIGHT],
+                fill=row_bg,
+            )
+
+        today_str = f"{today_ret:+.1f}%" if today_ret is not None else "-"
+        contrib_str = f"{contrib:+.1f}" if contrib is not None else "-"
+        cum_str = f"{cum_ret:+.1f}%" if cum_ret is not None else "-"
+
+        cells = [
+            (f"#{idx}", TEXT_COLOR),
+            (name, TEXT_COLOR),
+            (f"{weight:.1f}%" if weight is not None else "-", TEXT_COLOR),
+            (today_str, _color_for(today_str)),
+            (contrib_str, _color_for(contrib_str)),
+            (cum_str, _color_for(cum_str)),
+        ]
+
+        x = PADDING
+        for (cell_text, cell_color), h in zip(cells, headers):
+            col_w = COL_WIDTHS[h]
+            text_w = draw.textlength(cell_text, font=body_font)
+            cx = x + (col_w - text_w) / 2
+            draw.text((cx, y + 6 * SCALE), cell_text, fill=cell_color, font=body_font)
+            x += col_w
+
+    return img
+
+
+def format_message(date, nav_data, returns_data):
+    """텔레그램 텍스트 메시지 포맷 (HTML) — 헤더 + 기준가 + 수익률만 (종목 표는 별도 사진 전송)"""
     LINE = "━━━━━━━━━━━━━━━"
 
     # 실제 데이터 날짜 기준
@@ -234,22 +325,6 @@ def format_message(date, nav_data, returns_data, top_5, bottom_5):
                     msg += " | ".join(valid_periods[i:i+3]) + "\n"
                 msg += "\n"
 
-    # 기여도 상위
-    msg += f"{LINE}\n<b>🔺 기여도 상위</b>\n{LINE}\n"
-    if top_5:
-        for item in top_5:
-            msg += f"{item['stock']}  {item['contribution']:+.1f}\n"
-    else:
-        msg += "데이터 없음\n"
-
-    # 기여도 하위
-    msg += f"{LINE}\n<b>🔻 기여도 하위</b>\n{LINE}\n"
-    if bottom_5:
-        for item in bottom_5:
-            msg += f"{item['stock']}  {item['contribution']:+.1f}\n"
-    else:
-        msg += "데이터 없음\n"
-
     return msg
 
 async def send_report(no_send=False):
@@ -264,11 +339,11 @@ async def send_report(no_send=False):
     logging.info("2. 수익률 데이터 읽기...")
     returns_data = get_latest_returns()
 
-    logging.info("3. 종목별 기여도 계산...")
-    top_5, bottom_5 = calculate_contributions()
+    logging.info("3. 일반형/목표전환형 종목 구성 로드...")
+    general, target = get_portfolio_holdings()
 
     logging.info("4. 메시지 포맷팅...")
-    message = format_message(date, nav_data, returns_data, top_5, bottom_5)
+    message = format_message(date, nav_data, returns_data)
 
     if not no_send:
         token = os.getenv("TELEGRAM_SISYPHE_BOT_TOKEN")
@@ -279,6 +354,18 @@ async def send_report(no_send=False):
         logging.info("5. 텔레그램 전송...")
         bot = Bot(token=token)
         await bot.send_message(chat_id=chat_id, text=message, parse_mode='HTML')
+
+        # 종목 구성 PNG 표 전송 (일반형 + 운용 중인 목표전환형)
+        for section_title, holdings in [('일반형 랩', general), ('목표전환형 랩', target)]:
+            if not holdings:
+                continue
+            _, stocks = holdings
+            img = render_holdings_png(section_title, stocks)
+            buf = BytesIO()
+            img.save(buf, format='PNG')
+            buf.seek(0)
+            await bot.send_photo(chat_id=chat_id, photo=buf, caption=f"📌 {section_title}")
+            logging.info(f"{section_title} 사진 전송 완료 ({img.size[0]}x{img.size[1]}px)")
 
     logging.info("완료!")
     print(f"\n전송된 메시지:\n{message}")
