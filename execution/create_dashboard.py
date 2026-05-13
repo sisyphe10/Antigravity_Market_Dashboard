@@ -507,9 +507,14 @@ def create_monthly_returns_table():
     if not indices or not rows:
         return ''
 
-    # 헤더 (모든 컬럼 동일 너비)
-    n_cols = 2 + len(indices)
-    col_w = f'{100 / n_cols:.4f}%'
+    # 컬럼 너비 (table width 900px 기준):
+    #   연도 + 월 합산 130px → 각 65px (7.2222%)
+    #   인덱스 11개 = 나머지 770px → 각 70px (7.7778%)
+    YEAR_MONTH_COL_W = f'{65 / 900 * 100:.4f}%'
+    IDX_COL_W = f'{70 / 900 * 100:.4f}%'
+
+    def col_width_for(name):
+        return YEAR_MONTH_COL_W if name in ('연도', '월') else IDX_COL_W
     # 그룹 구분선 분리:
     #   DARK   = 월↔KOSPI (시점 vs 데이터 경계, 기존 유지)
     #   HEAVY  = RUSSELL↔BTC, ETH↔GOLD (자산군 경계, 더 진하게)
@@ -535,7 +540,7 @@ def create_monthly_returns_table():
 
     def th_style_for(name):
         return (f'padding:8px 6px;background:#f3f4f6;font-weight:700;text-align:center;'
-                f'width:{col_w};{cell_borders(name, True)}')
+                f'width:{col_width_for(name)};{cell_borders(name, True)}')
 
     head_cells = f'<th style="{th_style_for("연도")}">연도</th>'
     head_cells += f'<th style="{th_style_for("월")}">월</th>'
