@@ -508,10 +508,10 @@ def create_monthly_returns_table():
         return ''
 
     # 컬럼 너비 (table width 900px 기준):
-    #   연도 + 월 합산 130px → 각 65px (7.2222%)
-    #   인덱스 11개 = 나머지 770px → 각 70px (7.7778%)
-    YEAR_MONTH_COL_W = f'{65 / 900 * 100:.4f}%'
-    IDX_COL_W = f'{70 / 900 * 100:.4f}%'
+    #   연도 + 월 합산 120px → 각 60px (6.6667%)
+    #   인덱스 11개 = 나머지 780px → 각 70.91px (7.8788%)
+    YEAR_MONTH_COL_W = f'{60 / 900 * 100:.4f}%'
+    IDX_COL_W = f'{780 / 11 / 900 * 100:.4f}%'
 
     def col_width_for(name):
         return YEAR_MONTH_COL_W if name in ('연도', '월') else IDX_COL_W
