@@ -204,7 +204,8 @@ def get_item_category(item_name):
 
     # Special handling for Wrap portfolios
     wrap_keywords = ['트루밸류', '삼성 트루밸류', 'Value ESG', 'NH Value ESG',
-                     '개방형', 'DB 개방형']
+                     '개방형', 'DB 개방형',
+                     '목표전환형 3호', 'NH 목표전환형 3호']
     if any(keyword in item_name for keyword in wrap_keywords):
         return 'Wrap'
 
@@ -1435,6 +1436,7 @@ def _build_wrap_chart_section(category_label):
             ('삼성 트루밸류', '트루밸류'),
             ('NH Value ESG', 'Value ESG'),
             ('DB 개방형', '개방형 랩'),
+            ('NH 목표전환형 3호', '목표전환형 3호'),  # 운용 개시 2026-05-14
             # ('NH 목표전환형 2호', '목표전환형 2호'),  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
             ('KOSPI', 'KOSPI'),
             ('KOSDAQ', 'KOSDAQ'),
@@ -1443,6 +1445,7 @@ def _build_wrap_chart_section(category_label):
             '삼성 트루밸류': '#1428A0',
             'NH Value ESG': '#0072CE',
             'DB 개방형': '#00854A',
+            'NH 목표전환형 3호': '#0072CE',
             # 'NH 목표전환형 2호': '#0072CE',  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
             'KOSPI': '#000000',
             'KOSDAQ': '#666666',
@@ -2183,6 +2186,7 @@ def create_wrap_returns_table():
 
         items = [
             ('삼성 트루밸류', '트루밸류'),
+            ('NH 목표전환형 3호', '목표전환형 3호'),  # 운용 개시 2026-05-14
             # ('NH 목표전환형 2호', '목표전환형 2호'),  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
             ('KOSPI', 'KOSPI'),
             ('KOSDAQ', 'KOSDAQ'),
@@ -2375,16 +2379,16 @@ def create_order_section():
                     { broker: 'DB',   product: '개방형 랩' },
                 ],
             },
-            // {
-            //     display: 'NH 목표전환형 2호',  // NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
-            //     jsonKey: 'NH 목표전환형 2호',
-            //     templates: [
-            //         { label: 'NH 목표전환형 2호', file: '자문지/라이프자산운용_라이프 다이내믹밸류_목표전환형 2호_2026.4.29.xlsx' },
-            //     ],
-            //     newSheetTargets: [
-            //         { broker: 'NH', product: '목표전환형 2호' },
-            //     ],
-            // },
+            {
+                display: 'NH 목표전환형 3호',  // 운용 개시 2026-05-14, 240억원
+                jsonKey: 'NH 목표전환형 3호',
+                templates: [
+                    { label: 'NH 목표전환형 3호', file: '자문지/라이프자산운용_라이프 다이내믹밸류_목표전환형 3호_2026.5.14.xlsx' },
+                ],
+                newSheetTargets: [
+                    { broker: 'NH', product: '목표전환형 3호' },
+                ],
+            },
         ];
         var orderState = {};
         var orderStocks = {};
@@ -2650,8 +2654,8 @@ def create_order_section():
         }
 
         function buildOrderEmailText(pfName, stocks, st) {
-            // 목표전환형 페어 비활성 — 다음 페어 출시 시 TARGET_TABS에 복원
-            var TARGET_TABS = [];
+            // 일반형 + NH 3호 통합 이메일 (NH 3호 탭에서 활성화)
+            var TARGET_TABS = ['NH 목표전환형 3호'];
             var GENERAL = '삼성 트루밸류 / NH Value ESG / DB 개방형';
             var lines = [
                 '안녕하십니까.',
@@ -2743,8 +2747,8 @@ def create_order_section():
         }
 
         function buildOrderNateonSection(pfName) {
-            // NH 목표전환형 2호 탭에서만 노출 (일반형 + 목표전환형을 한 박스에 함께)
-            if (pfName !== 'NH 목표전환형 2호') return '';
+            // NH 목표전환형 3호 탭에서만 노출 (일반형 + 목표전환형을 한 박스에 함께)
+            if (pfName !== 'NH 목표전환형 3호') return '';
             var GENERAL = '삼성 트루밸류 / NH Value ESG / DB 개방형';
             var generalText = buildOrderNateonText(orderStocks[GENERAL] || [], orderState[GENERAL] || [], '일반형');
             var targetText = buildOrderNateonText(orderStocks[pfName] || [], orderState[pfName] || [], '목표전환형');
@@ -3184,7 +3188,7 @@ def create_aum_section():
             { display: '삼성 트루밸류',      broker: '삼성', name: '트루밸류' },
             { display: 'NH Value ESG',      broker: 'NH',   name: '다이내믹밸류' },
             { display: 'DB 개방형',         broker: 'DB',   name: '개방형 랩' },
-            // { display: 'NH 목표전환형 2호', broker: 'NH',   name: '목표전환형 2호' },  // NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
+            { display: 'NH 목표전환형 3호', broker: 'NH',   name: '목표전환형 3호' },  // 운용 개시 2026-05-14
         ];
         var aumLatest = {};       // {broker|name: {date, aum}}
         var aumInputs = {};       // {idx: 사용자 입력 (억원)}
