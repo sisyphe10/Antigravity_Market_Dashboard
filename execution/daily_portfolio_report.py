@@ -46,7 +46,8 @@ TITLE_FONT_SIZE = 17 * SCALE
 
 # Light theme
 BG_COLOR = (255, 255, 255)
-HEADER_BG = (240, 240, 240)
+HEADER_BG = (30, 58, 138)         # 네이비 블루 (#1E3A8A, blue-900)
+HEADER_TEXT_COLOR = (255, 255, 255)  # 헤더 위 글자 (흰색)
 ALT_ROW_BG = (248, 248, 248)
 RISK_ROW_BG = (220, 220, 220)     # 누적 -10% 이하 위험 표시 (엷은 회색)
 TEXT_COLOR = (0, 0, 0)
@@ -226,7 +227,7 @@ def render_holdings_png(title, stocks):
         col_w = COL_WIDTHS[h]
         text_w = draw.textlength(h, font=header_font)
         cx = x + (col_w - text_w) / 2
-        draw.text((cx, header_y + 6 * SCALE), h, fill=TEXT_COLOR, font=header_font)
+        draw.text((cx, header_y + 6 * SCALE), h, fill=HEADER_TEXT_COLOR, font=header_font)
         x += col_w
 
     line_y = header_y + ROW_HEIGHT
