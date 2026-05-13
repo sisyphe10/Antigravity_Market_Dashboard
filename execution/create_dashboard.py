@@ -4522,14 +4522,14 @@ def create_dashboard():
             <th onclick="doSort(4)">기업명</th>
             <th onclick="doSort(5)">시가총액</th>
             <th onclick="doSort(6)">가격</th>
-            <th onclick="doSort(7)">YTD</th>
-            <th onclick="doSort(8)">1D</th>
-            <th onclick="doSort(9)">1W</th>
-            <th onclick="doSort(10)">1M</th>
-            <th onclick="doSort(11)">3M</th>
-            <th onclick="doSort(12)">6M</th>
-            <th onclick="doSort(13)">1Y</th>
-            <th onclick="doSort(14)">RSI(1M)</th>
+            <th onclick="doSort(7)">RSI(1M)</th>
+            <th onclick="doSort(8)">YTD</th>
+            <th onclick="doSort(9)">1D</th>
+            <th onclick="doSort(10)">1W</th>
+            <th onclick="doSort(11)">1M</th>
+            <th onclick="doSort(12)">3M</th>
+            <th onclick="doSort(13)">6M</th>
+            <th onclick="doSort(14)">1Y</th>
         </tr></thead>
         <tbody id="tbody"><tr><td colspan="15" style="padding:40px;color:#888;">로딩 중...</td></tr></tbody>
     </table>
@@ -4546,8 +4546,8 @@ def create_dashboard():
 </div>
 <footer>Antigravity Universe</footer>
 <script>
-var D=[],sortCol=-1,sortAsc=true;
-var headers=['#','통화','섹터','티커','기업명','시가총액','가격','YTD','1D','1W','1M','3M','6M','1Y','RSI(1M)'];
+var D=[],sortCol=7,sortAsc=false;  // 기본 RSI(1M) 내림차순
+var headers=['#','통화','섹터','티커','기업명','시가총액','가격','RSI(1M)','YTD','1D','1W','1M','3M','6M','1Y'];
 var numCols=[0,5,6,7,8,9,10,11,12,13,14];
 var pctCols=[7,8,9,10,11,12,13,14];
 // 티커 prefix → 시장 지수 매핑 (우선순위: KOSPI > KOSDAQ > NASDAQ > S&P 500 > TSEC > NIKKEI > HSI > STOXX)
@@ -4569,7 +4569,17 @@ Promise.all([
 ]).then(function(results){
     var data=results[0], idxData=results[1];
     if(idxData&&idxData.returns_1m)INDEX_1M=idxData.returns_1m;
-    D=(data.values||[]).slice(1).map(function(r){var row=r.slice(0,14);row[14]=fmtRsi(rsiOf(row));return row;});
+    D=(data.values||[]).slice(1).map(function(r){
+        var row=r.slice(0,14);
+        var rsi=fmtRsi(rsiOf(row));  // rsiOf는 원본 row[10]=1M 사용
+        // RSI를 인덱스 7로 옮기고 기존 7~13 (YTD~1Y)을 한 칸씩 밀어 8~14로
+        var saved=[row[7],row[8],row[9],row[10],row[11],row[12],row[13]];
+        row[7]=rsi;
+        for(var i=0;i<7;i++)row[8+i]=saved[i];
+        return row;
+    });
+    // 초기 정렬 표시(RSI 내림차순)
+    document.querySelectorAll('thead th').forEach(function(th,i){th.textContent=i===sortCol?headers[i]+' ▼':headers[i];});
     var c={},sec={};
     D.forEach(function(r){if(r[1])c[r[1]]=1;if(r[2])sec[r[2]]=1;});
     var ch='<div class="csel-item selected" data-v="">통화</div>';
@@ -4617,8 +4627,8 @@ function render(){
         for(var i=0;i<15;i++){
             var v=(i===0)?(idx+1):r[i]||'';if(i===3&&v.indexOf(':')>=0)v=v.split(':').pop();var cls='';
             if(pctCols.indexOf(i)>=0&&v){var n=parseFloat(String(v).replace(/%/g,''));if(!isNaN(n))cls=n>0?' class="positive"':n<0?' class="negative"':'';}
-            var bg=(i===7)?' style="background:#f3f0ff;"':(i===14?' style="background:#fff8e1;"':'');
-            var ttl=(i===14&&rowMkt)?' title="시장: '+rowMkt+'"':'';
+            var bg=(i===7)?' style="background:#fff8e1;"':(i===8?' style="background:#f3f0ff;"':'');
+            var ttl=(i===7&&rowMkt)?' title="'+rowMkt+'"':'';
             h+='<td'+cls+bg+ttl+'>'+v+'</td>';
         }
         h+='</tr>';
@@ -4716,11 +4726,11 @@ function renderSector() {
     // 필터링
     var filtered = fc2 ? D.filter(function(r){ return r[1]===fc2; }) : D;
 
-    // 섹터별 집계 (시총 가중평균)
+    // 섹터별 집계 (시총 가중평균). row 인덱스: 7=RSI, 8=YTD, 9=1D, 10=1W, 11=1M, 12=3M, 13=6M, 14=1Y
     var agg = {};
     filtered.forEach(function(r) {
         var sec = r[2] || '기타';
-        if(!agg[sec]) agg[sec] = {cnt:0, ytd:[], d1:[], w1:[], m1:[], m3:[], m6:[], y1:[], rsi:[]};
+        if(!agg[sec]) agg[sec] = {cnt:0, rsi:[], ytd:[], d1:[], w1:[], m1:[], m3:[], m6:[], y1:[]};
         var g = agg[sec];
         var mcap = parseFloat(String(r[5]||'0').replace(/,/g,'').replace(/조/g,'*10000').replace(/억원/g,'').replace(/억/g,''));
         // 조/억 파싱
@@ -4734,7 +4744,7 @@ function renderSector() {
 
         g.cnt++;
         var vals = [r[7],r[8],r[9],r[10],r[11],r[12],r[13],r[14]];
-        var arrs = [g.ytd,g.d1,g.w1,g.m1,g.m3,g.m6,g.y1,g.rsi];
+        var arrs = [g.rsi,g.ytd,g.d1,g.w1,g.m1,g.m3,g.m6,g.y1];
         for(var i=0;i<8;i++) {
             if(vals[i]) {
                 var n=parseFloat(String(vals[i]).replace(/%/g,'').replace(/,/g,''));
@@ -4752,7 +4762,7 @@ function renderSector() {
     function fv(v) { if(v===null) return '-'; var s=v>0?'+':''; return s+Math.round(v)+'%'; }
     function cls(v) { if(v===null) return ''; return v>0?'positive':v<0?'negative':''; }
 
-    var colMap = [null,null,'cnt','ytd','d1','w1','m1','m3','m6','y1','rsi'];
+    var colMap = [null,null,'cnt','rsi','ytd','d1','w1','m1','m3','m6','y1'];
     var secs = Object.keys(agg).sort(function(a,b) {
         var va, vb;
         if(_secSortCol <= 1) { va=a; vb=b; return _secSortAsc?va.localeCompare(vb):vb.localeCompare(va); }
@@ -4774,25 +4784,26 @@ function renderSector() {
         if(eokM) mcapVal += parseFloat(eokM[1].replace(/,/g,''));
         var _p=(r[3]||'').indexOf(':')>=0?r[3].split(':')[0]:'';
         var _mkt=INDEX_BY_PREFIX[_p]||'';
+        // r 인덱스: 7=RSI, 8=YTD, 9=1D, 10=1W, 11=1M, 12=3M, 13=6M, 14=1Y
         stocksBySec[sec].push({name:r[4]||'',ticker:r[3]||'',cur:r[1]||'',mcap:mcapStr,mcapVal:mcapVal,mkt:_mkt,
-            ytd:r[7]||'',d1:r[8]||'',w1:r[9]||'',m1:r[10]||'',m3:r[11]||'',m6:r[12]||'',y1:r[13]||'',rsi:r[14]||''});
+            rsi:r[7]||'',ytd:r[8]||'',d1:r[9]||'',w1:r[10]||'',m1:r[11]||'',m3:r[12]||'',m6:r[13]||'',y1:r[14]||''});
     });
     for(var k in stocksBySec) stocksBySec[k].sort(function(a,b){return b.mcapVal-a.mcapVal;});
 
-    var secHeaders = ['#','섹터','종목수','YTD','1D','1W','1M','3M','6M','1Y','RSI(1M)'];
+    var secHeaders = ['#','섹터','종목수','RSI(1M)','YTD','1D','1W','1M','3M','6M','1Y'];
     var html = '<table style="width:100%;table-layout:fixed;border-collapse:collapse"><thead><tr>';
     secHeaders.forEach(function(h,i) {
-        var bg = i===3?' style="background:#f3f0ff;cursor:pointer"':(i===10?' style="background:#fff8e1;cursor:pointer"':' style="cursor:pointer"');
+        var bg = i===3?' style="background:#fff8e1;cursor:pointer"':(i===4?' style="background:#f3f0ff;cursor:pointer"':' style="cursor:pointer"');
         html += '<th'+bg+' onclick="sortSector('+i+')">' + h + (_secSortCol===i ? (_secSortAsc?' ▲':' ▼') : '') + '</th>';
     });
     html += '</tr></thead><tbody>';
     secs.forEach(function(sec,idx) {
         var g = agg[sec];
-        var vals = [wavg(g.ytd),wavg(g.d1),wavg(g.w1),wavg(g.m1),wavg(g.m3),wavg(g.m6),wavg(g.y1),wavg(g.rsi)];
+        var vals = [wavg(g.rsi),wavg(g.ytd),wavg(g.d1),wavg(g.w1),wavg(g.m1),wavg(g.m3),wavg(g.m6),wavg(g.y1)];
         html += '<tr style="cursor:pointer" onclick="toggleSec('+idx+')">';
         html += '<td>' + (idx+1) + '</td><td style="font-weight:600">' + sec + '</td><td>' + g.cnt + '</td>';
         vals.forEach(function(v,i) {
-            var bg = i===0?' style="background:#f3f0ff"':(i===7?' style="background:#fff8e1"':'');
+            var bg = i===0?' style="background:#fff8e1"':(i===1?' style="background:#f3f0ff"':'');
             html += '<td class="'+cls(v)+'"'+bg+'>' + fv(v) + '</td>';
         });
         html += '</tr>';
@@ -4805,8 +4816,8 @@ function renderSector() {
             html += '<tr class="sec-detail sec-'+idx+'" style="display:none;background:#f0f0f0;font-size:14px">';
             html += '<td></td><td style="padding-left:60px;text-align:left">- '+label+'</td>';
             html += '<td>'+(s.mcap||'')+'</td>';
-            var _ttl=s.mkt?' title="시장: '+s.mkt+'"':'';
-            html += '<td style="background:#f3f0ff">'+sc(s.ytd)+'</td><td>'+sc(s.d1)+'</td><td>'+sc(s.w1)+'</td><td>'+sc(s.m1)+'</td><td>'+sc(s.m3)+'</td><td>'+sc(s.m6)+'</td><td>'+sc(s.y1)+'</td><td style="background:#fff8e1"'+_ttl+'>'+sc(s.rsi)+'</td>';
+            var _ttl=s.mkt?' title="'+s.mkt+'"':'';
+            html += '<td style="background:#fff8e1"'+_ttl+'>'+sc(s.rsi)+'</td><td style="background:#f3f0ff">'+sc(s.ytd)+'</td><td>'+sc(s.d1)+'</td><td>'+sc(s.w1)+'</td><td>'+sc(s.m1)+'</td><td>'+sc(s.m3)+'</td><td>'+sc(s.m6)+'</td><td>'+sc(s.y1)+'</td>';
             html += '</tr>';
         });
     });
