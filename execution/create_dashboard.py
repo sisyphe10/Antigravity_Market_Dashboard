@@ -510,18 +510,28 @@ def create_monthly_returns_table():
     # 헤더 (모든 컬럼 동일 너비)
     n_cols = 2 + len(indices)
     col_w = f'{100 / n_cols:.4f}%'
-    # 그룹 구분선 (오른쪽에 굵은 세로선): 월 / RUSSELL / ETH
-    DIVIDER_AFTER = {'월', 'RUSSELL', 'ETH'}
+    # 그룹 구분선 분리:
+    #   DARK   = 월↔KOSPI (시점 vs 데이터 경계, 기존 유지)
+    #   HEAVY  = RUSSELL↔BTC, ETH↔GOLD (자산군 경계, 더 진하게)
+    #   NO_RIGHT = 연도 (연도↔월 사이 구분선 제거)
+    DARK_AFTER = {'월'}
+    HEAVY_AFTER = {'RUSSELL', 'ETH'}
+    NO_RIGHT = {'연도'}
 
     # border-collapse:separate 모드 — 셀마다 독립 테두리 (right + bottom만)
-    # 외곽은 table outline이 담당. 분할 셀은 right를 1.5px 진하게.
     LIGHT = '1px solid #e5e7eb'           # 가로선 (행 사이)
-    LIGHT_VERT = '1px solid #6b7280'      # 세로선 (열 사이) — 가로선보다 진함 (gray-500)
-    DARK = '1.5px solid #374151'
+    LIGHT_VERT = '1px solid #6b7280'      # 일반 세로선 (gray-500)
+    DARK = '1.5px solid #374151'          # 기존 그룹 구분 (gray-700)
+    DARK_HEAVY = '2px solid #1f2937'      # 강조 그룹 구분 + 외곽 (gray-800)
+
+    def right_border_for(name):
+        if name in NO_RIGHT: return 'none'
+        if name in HEAVY_AFTER: return DARK_HEAVY
+        if name in DARK_AFTER: return DARK
+        return LIGHT_VERT
 
     def cell_borders(name, bottom_style=LIGHT, is_header=False):
-        right = DARK if name in DIVIDER_AFTER else LIGHT_VERT
-        return f'border-right:{right};border-bottom:{bottom_style};'
+        return f'border-right:{right_border_for(name)};border-bottom:{bottom_style};'
 
     def th_style_for(name):
         return (f'padding:8px 6px;background:#f3f4f6;font-weight:700;text-align:center;'
@@ -594,8 +604,7 @@ def create_monthly_returns_table():
 
     if ytd_returns:
         def cell_borders_ytd(name):
-            right = DARK if name in DIVIDER_AFTER else LIGHT_VERT
-            return f'border-top:{DARK};border-right:{right};border-bottom:{LIGHT};'
+            return f'border-top:{DARK};border-right:{right_border_for(name)};border-bottom:{LIGHT};'
         cells = f'<td style="padding:6px 12px;text-align:center;font-weight:700;{cell_borders_ytd("연도")}">-</td>'
         cells += f'<td style="padding:6px 12px;text-align:center;font-weight:700;{cell_borders_ytd("월")}">YTD</td>'
         for name in indices:
@@ -613,7 +622,7 @@ def create_monthly_returns_table():
         <div class="category-section">
             <h2 class="category-title">MONTHLY RETURNS</h2>
             <div style="overflow-x:auto;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);padding:16px;">
-                <table style="width:900px;max-width:100%;border-collapse:separate;border-spacing:0;font-size:14px;font-family:inherit;table-layout:fixed;margin:0 auto;outline:1.5px solid #374151;outline-offset:-1px;">
+                <table style="width:900px;max-width:100%;border-collapse:separate;border-spacing:0;font-size:14px;font-family:inherit;table-layout:fixed;margin:0 auto;outline:2px solid #1f2937;outline-offset:-1px;">
                     <thead><tr>{head_cells}</tr></thead>
                     <tbody>
 {body_rows_html}                    </tbody>
