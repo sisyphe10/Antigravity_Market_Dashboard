@@ -515,11 +515,12 @@ def create_monthly_returns_table():
 
     # border-collapse:separate 모드 — 셀마다 독립 테두리 (right + bottom만)
     # 외곽은 table outline이 담당. 분할 셀은 right를 1.5px 진하게.
-    LIGHT = '1px solid #e5e7eb'
+    LIGHT = '1px solid #e5e7eb'           # 가로선 (행 사이)
+    LIGHT_VERT = '1px solid #d1d5db'      # 세로선 (열 사이) — 가로선보다 한 단계 진함
     DARK = '1.5px solid #374151'
 
     def cell_borders(name, bottom_style=LIGHT, is_header=False):
-        right = DARK if name in DIVIDER_AFTER else LIGHT
+        right = DARK if name in DIVIDER_AFTER else LIGHT_VERT
         return f'border-right:{right};border-bottom:{bottom_style};'
 
     def th_style_for(name):
@@ -593,7 +594,7 @@ def create_monthly_returns_table():
 
     if ytd_returns:
         def cell_borders_ytd(name):
-            right = DARK if name in DIVIDER_AFTER else LIGHT
+            right = DARK if name in DIVIDER_AFTER else LIGHT_VERT
             return f'border-top:{DARK};border-right:{right};border-bottom:{LIGHT};'
         cells = f'<td style="padding:6px 12px;text-align:center;font-weight:700;{cell_borders_ytd("연도")}">-</td>'
         cells += f'<td style="padding:6px 12px;text-align:center;font-weight:700;{cell_borders_ytd("월")}">YTD</td>'
