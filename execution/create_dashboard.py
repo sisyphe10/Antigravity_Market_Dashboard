@@ -4576,6 +4576,9 @@ Promise.all([
         var saved=[row[7],row[8],row[9],row[10],row[11],row[12],row[13]];
         row[7]=rsi;
         for(var i=0;i<7;i++)row[8+i]=saved[i];
+        // row[15]: 시가총액 정렬용 raw 숫자(억원). "43조9,769억" 등 표시값은 parseFloat 안 되니
+        //          시트 col 14 raw 값("439,769") 사용
+        row[15]=parseFloat(String(r[14]||'0').replace(/,/g,''))||0;
         return row;
     });
     // 초기 정렬 표시(RSI 내림차순)
@@ -4612,8 +4615,10 @@ function render(){
     if(sortCol>=0){
         var isN=numCols.indexOf(sortCol)>=0;
         f.sort(function(a,b){
-            var va=isN?pn(a[sortCol]):(a[sortCol]||'');
-            var vb=isN?pn(b[sortCol]):(b[sortCol]||'');
+            var va, vb;
+            if(sortCol===5){va=a[15]||0;vb=b[15]||0;}  // 시가총액은 raw 숫자(억원) 사용
+            else if(isN){va=pn(a[sortCol]);vb=pn(b[sortCol]);}
+            else{va=a[sortCol]||'';vb=b[sortCol]||'';}
             if(va<vb)return sortAsc?-1:1;
             if(va>vb)return sortAsc?1:-1;
             return 0;
