@@ -4468,7 +4468,7 @@ def create_dashboard():
         .sector-group h3 { font-size: 18px; color: #6B21A8; margin-bottom: 8px; padding: 8px 0; border-bottom: 1px solid #6B21A8; }
         table { width: 100%; border-collapse: collapse; font-size: 16px; table-layout: fixed; }
         thead { background: #e9ecef; }
-        th { padding: 12px 6px; text-align: center; font-weight: 600; color: #000; border-bottom: 2px solid #000; cursor: pointer; white-space: nowrap; overflow: hidden; }
+        th { padding: 12px 6px; text-align: center; font-weight: 600; color: #000; cursor: pointer; white-space: nowrap; overflow: hidden; position: sticky; top: 0; background: #e9ecef; z-index: 10; box-shadow: inset 0 -2px 0 #000; }
         th:hover { background: #ddd; }
         td { padding: 10px 6px; border-bottom: 1px solid #dee2e6; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         /* 종목 리스트 컬럼 비율 */
