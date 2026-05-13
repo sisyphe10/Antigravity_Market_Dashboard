@@ -54,7 +54,7 @@
 <header>
     <div style="max-width:1800px;margin:0 auto;padding:0 24px;position:relative;">
         <h1>Universe</h1>
-        <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: 2026-05-13 16:46:06 KST</div>
+        <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: 2026-05-13 16:50:59 KST</div>
         <div style="position:absolute;top:20px;right:24px;display:flex;gap:8px;">
             <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="background:#6B21A8;color:#fff;font-size:15px;font-weight:600;text-decoration:none;padding:6px 16px;border-radius:8px;">Sheet</a>
             <a href="index.html" style="padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
@@ -176,11 +176,14 @@ function render(){
     var h='';
     f.forEach(function(r,idx){
         h+='<tr>';
+        var rowMkt='';
+        if(r[3]){var rp=r[3].indexOf(':')>=0?r[3].split(':')[0]:'';rowMkt=INDEX_BY_PREFIX[rp]||'';}
         for(var i=0;i<15;i++){
             var v=(i===0)?(idx+1):r[i]||'';if(i===3&&v.indexOf(':')>=0)v=v.split(':').pop();var cls='';
             if(pctCols.indexOf(i)>=0&&v){var n=parseFloat(String(v).replace(/%/g,''));if(!isNaN(n))cls=n>0?' class="positive"':n<0?' class="negative"':'';}
             var bg=(i===7)?' style="background:#f3f0ff;"':(i===14?' style="background:#fff8e1;"':'');
-            h+='<td'+cls+bg+'>'+v+'</td>';
+            var ttl=(i===14&&rowMkt)?' title="시장: '+rowMkt+'"':'';
+            h+='<td'+cls+bg+ttl+'>'+v+'</td>';
         }
         h+='</tr>';
     });
@@ -333,7 +336,9 @@ function renderSector() {
         var eokM = mcapStr.match(/([\d,]+)억/);
         if(joM) mcapVal += parseFloat(joM[1].replace(/,/g,'')) * 10000;
         if(eokM) mcapVal += parseFloat(eokM[1].replace(/,/g,''));
-        stocksBySec[sec].push({name:r[4]||'',ticker:r[3]||'',cur:r[1]||'',mcap:mcapStr,mcapVal:mcapVal,
+        var _p=(r[3]||'').indexOf(':')>=0?r[3].split(':')[0]:'';
+        var _mkt=INDEX_BY_PREFIX[_p]||'';
+        stocksBySec[sec].push({name:r[4]||'',ticker:r[3]||'',cur:r[1]||'',mcap:mcapStr,mcapVal:mcapVal,mkt:_mkt,
             ytd:r[7]||'',d1:r[8]||'',w1:r[9]||'',m1:r[10]||'',m3:r[11]||'',m6:r[12]||'',y1:r[13]||'',rsi:r[14]||''});
     });
     for(var k in stocksBySec) stocksBySec[k].sort(function(a,b){return b.mcapVal-a.mcapVal;});
@@ -363,7 +368,8 @@ function renderSector() {
             function sc(v){if(!v)return'-';var n=parseFloat(String(v).replace(/%/g,'').replace(/,/g,''));if(isNaN(n))return v;return(n>0?'<span class="positive">+':'<span class="negative">')+Math.round(n)+'%</span>';}
             html += '<tr class="sec-detail sec-'+idx+'" style="display:none;background:#f0f0f0;font-size:14px">';
             html += '<td></td><td colspan="2" style="padding-left:60px;text-align:left">- '+label+'</td>';
-            html += '<td style="background:#f3f0ff">'+sc(s.ytd)+'</td><td>'+sc(s.d1)+'</td><td>'+sc(s.w1)+'</td><td>'+sc(s.m1)+'</td><td>'+sc(s.m3)+'</td><td>'+sc(s.m6)+'</td><td>'+sc(s.y1)+'</td><td style="background:#fff8e1">'+sc(s.rsi)+'</td>';
+            var _ttl=s.mkt?' title="시장: '+s.mkt+'"':'';
+            html += '<td style="background:#f3f0ff">'+sc(s.ytd)+'</td><td>'+sc(s.d1)+'</td><td>'+sc(s.w1)+'</td><td>'+sc(s.m1)+'</td><td>'+sc(s.m3)+'</td><td>'+sc(s.m6)+'</td><td>'+sc(s.y1)+'</td><td style="background:#fff8e1"'+_ttl+'>'+sc(s.rsi)+'</td>';
             html += '</tr>';
         });
     });
