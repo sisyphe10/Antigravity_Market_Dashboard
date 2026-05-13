@@ -52,6 +52,12 @@ jobs:
         env:
           TZ: 'Asia/Seoul'
 
+      - name: Fetch Index Returns (1M, for Universe RSI)
+        run: |
+          python execution/fetch_index_returns.py
+        env:
+          TZ: 'Asia/Seoul'
+
       - name: Import Memory Historical Data (Excel)
         run: |
           python execution/import_memory_data.py
@@ -138,5 +144,5 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Auto-update: Market data and dashboard [skip ci]"
-          file_pattern: 'dataset.csv charts/*.png index.html market.html wrap.html universe.html seibro.html featured.html featured_data.json portfolio_data.json Wrap_NAV.xlsx kodex_sectors.json seibro_tickers.json monthly_returns.json'
+          file_pattern: 'dataset.csv charts/*.png index.html market.html wrap.html universe.html seibro.html featured.html featured_data.json portfolio_data.json Wrap_NAV.xlsx kodex_sectors.json seibro_tickers.json monthly_returns.json index_returns.json'
           skip_fetch: true

@@ -43,7 +43,7 @@
         #tab0 th:nth-child(5) { width: 12%; }
         #tab0 th:nth-child(6) { width: 8%; }
         #tab0 th:nth-child(7) { width: 7%; }
-        #tab0 th:nth-child(n+8) { width: 7%; }
+        #tab0 th:nth-child(n+8) { width: 6%; }
         tbody tr:hover { background: #f5f5f5; }
         .positive { color: #cc0000; font-weight: 600; }
         .negative { color: #0055cc; font-weight: 600; }
@@ -54,7 +54,7 @@
 <header>
     <div style="max-width:1800px;margin:0 auto;padding:0 24px;position:relative;">
         <h1>Universe</h1>
-        <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: 2026-05-13 16:29:04 KST</div>
+        <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: 2026-05-13 16:41:53 KST</div>
         <div style="position:absolute;top:20px;right:24px;display:flex;gap:8px;">
             <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="background:#6B21A8;color:#fff;font-size:15px;font-weight:600;text-decoration:none;padding:6px 16px;border-radius:8px;">Sheet</a>
             <a href="index.html" style="padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
@@ -93,8 +93,9 @@
             <th onclick="doSort(11)">3M</th>
             <th onclick="doSort(12)">6M</th>
             <th onclick="doSort(13)">1Y</th>
+            <th onclick="doSort(14)">RSI(1M)</th>
         </tr></thead>
-        <tbody id="tbody"><tr><td colspan="14" style="padding:40px;color:#888;">로딩 중...</td></tr></tbody>
+        <tbody id="tbody"><tr><td colspan="15" style="padding:40px;color:#888;">로딩 중...</td></tr></tbody>
     </table>
     </div>
     <div id="tab1" class="tab-content">
@@ -110,13 +111,29 @@
 <footer>Antigravity Universe</footer>
 <script>
 var D=[],sortCol=-1,sortAsc=true;
-var headers=['#','통화','섹터','티커','기업명','시가총액','가격','YTD','1D','1W','1M','3M','6M','1Y'];
-var numCols=[0,5,6,7,8,9,10,11,12,13];
-var pctCols=[7,8,9,10,11,12,13];
+var headers=['#','통화','섹터','티커','기업명','시가총액','가격','YTD','1D','1W','1M','3M','6M','1Y','RSI(1M)'];
+var numCols=[0,5,6,7,8,9,10,11,12,13,14];
+var pctCols=[7,8,9,10,11,12,13,14];
+// 티커 prefix → 시장 지수 매핑 (우선순위: KOSPI > KOSDAQ > NASDAQ > S&P 500 > TSEC > NIKKEI > HSI > STOXX)
+var INDEX_BY_PREFIX={'KRX':'KOSPI','KOSDAQ':'KOSDAQ','NASDAQ':'NASDAQ','NYSE':'S&P 500','NYSEAMERICAN':'S&P 500','TPE':'TSEC','TSE':'NIKKEI','HKG':'HSI','AMS':'STOXX','ETR':'STOXX','EPA':'STOXX'};
+var INDEX_1M={};
+function rsiOf(r){
+    var tk=r[3]||'';var p=tk.indexOf(':')>=0?tk.split(':')[0]:'';
+    var key=INDEX_BY_PREFIX[p];if(!key)return null;
+    var idx=INDEX_1M[key];if(idx===undefined||idx===null)return null;
+    var s=r[10];if(!s)return null;
+    var sr=parseFloat(String(s).replace(/%/g,''));if(isNaN(sr))return null;
+    return sr-idx*100;
+}
+function fmtRsi(n){if(n===null||n===undefined)return'';var r=Math.round(n);return(r>0?'+':'')+r+'%';}
 
-fetch('https://sheets.googleapis.com/v4/spreadsheets/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/values/universe?key=AIzaSyCHPiRby5FVAIKDwneZHy1KGl3SfycjZEw')
-.then(function(r){return r.json()}).then(function(data){
-    D=(data.values||[]).slice(1).map(function(r){return r.slice(0,14)});
+Promise.all([
+    fetch('https://sheets.googleapis.com/v4/spreadsheets/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/values/universe?key=AIzaSyCHPiRby5FVAIKDwneZHy1KGl3SfycjZEw').then(function(r){return r.json()}),
+    fetch('index_returns.json').then(function(r){return r.ok?r.json():null}).catch(function(){return null})
+]).then(function(results){
+    var data=results[0], idxData=results[1];
+    if(idxData&&idxData.returns_1m)INDEX_1M=idxData.returns_1m;
+    D=(data.values||[]).slice(1).map(function(r){var row=r.slice(0,14);row[14]=fmtRsi(rsiOf(row));return row;});
     var c={},sec={};
     D.forEach(function(r){if(r[1])c[r[1]]=1;if(r[2])sec[r[2]]=1;});
     var ch='<div class="csel-item selected" data-v="">통화</div>';
@@ -159,15 +176,15 @@ function render(){
     var h='';
     f.forEach(function(r,idx){
         h+='<tr>';
-        for(var i=0;i<14;i++){
+        for(var i=0;i<15;i++){
             var v=(i===0)?(idx+1):r[i]||'';if(i===3&&v.indexOf(':')>=0)v=v.split(':').pop();var cls='';
             if(pctCols.indexOf(i)>=0&&v){var n=parseFloat(String(v).replace(/%/g,''));if(!isNaN(n))cls=n>0?' class="positive"':n<0?' class="negative"':'';}
-            var bg=(i===7)?' style="background:#f3f0ff;"':'';
+            var bg=(i===7)?' style="background:#f3f0ff;"':(i===14?' style="background:#fff8e1;"':'');
             h+='<td'+cls+bg+'>'+v+'</td>';
         }
         h+='</tr>';
     });
-    if(!h)h='<tr><td colspan="14" style="padding:40px;color:#888;">데이터 없음</td></tr>';
+    if(!h)h='<tr><td colspan="15" style="padding:40px;color:#888;">데이터 없음</td></tr>';
     document.getElementById('tbody').innerHTML=h;
 }
 
@@ -264,7 +281,7 @@ function renderSector() {
     var agg = {};
     filtered.forEach(function(r) {
         var sec = r[2] || '기타';
-        if(!agg[sec]) agg[sec] = {cnt:0, ytd:[], d1:[], w1:[], m1:[], m3:[], m6:[], y1:[]};
+        if(!agg[sec]) agg[sec] = {cnt:0, ytd:[], d1:[], w1:[], m1:[], m3:[], m6:[], y1:[], rsi:[]};
         var g = agg[sec];
         var mcap = parseFloat(String(r[5]||'0').replace(/,/g,'').replace(/조/g,'*10000').replace(/억원/g,'').replace(/억/g,''));
         // 조/억 파싱
@@ -277,9 +294,9 @@ function renderSector() {
         if(!mcapVal) mcapVal = parseFloat(mcapStr.replace(/,/g,'')) || 0;
 
         g.cnt++;
-        var vals = [r[7],r[8],r[9],r[10],r[11],r[12],r[13]];
-        var arrs = [g.ytd,g.d1,g.w1,g.m1,g.m3,g.m6,g.y1];
-        for(var i=0;i<7;i++) {
+        var vals = [r[7],r[8],r[9],r[10],r[11],r[12],r[13],r[14]];
+        var arrs = [g.ytd,g.d1,g.w1,g.m1,g.m3,g.m6,g.y1,g.rsi];
+        for(var i=0;i<8;i++) {
             if(vals[i]) {
                 var n=parseFloat(String(vals[i]).replace(/%/g,'').replace(/,/g,''));
                 if(!isNaN(n)) arrs[i].push({v:n, w:mcapVal});
@@ -296,7 +313,7 @@ function renderSector() {
     function fv(v) { if(v===null) return '-'; var s=v>0?'+':''; return s+Math.round(v)+'%'; }
     function cls(v) { if(v===null) return ''; return v>0?'positive':v<0?'negative':''; }
 
-    var colMap = [null,null,'cnt','ytd','d1','w1','m1','m3','m6','y1'];
+    var colMap = [null,null,'cnt','ytd','d1','w1','m1','m3','m6','y1','rsi'];
     var secs = Object.keys(agg).sort(function(a,b) {
         var va, vb;
         if(_secSortCol <= 1) { va=a; vb=b; return _secSortAsc?va.localeCompare(vb):vb.localeCompare(va); }
@@ -317,24 +334,24 @@ function renderSector() {
         if(joM) mcapVal += parseFloat(joM[1].replace(/,/g,'')) * 10000;
         if(eokM) mcapVal += parseFloat(eokM[1].replace(/,/g,''));
         stocksBySec[sec].push({name:r[4]||'',ticker:r[3]||'',cur:r[1]||'',mcap:mcapStr,mcapVal:mcapVal,
-            ytd:r[7]||'',d1:r[8]||'',w1:r[9]||'',m1:r[10]||'',m3:r[11]||'',m6:r[12]||'',y1:r[13]||''});
+            ytd:r[7]||'',d1:r[8]||'',w1:r[9]||'',m1:r[10]||'',m3:r[11]||'',m6:r[12]||'',y1:r[13]||'',rsi:r[14]||''});
     });
     for(var k in stocksBySec) stocksBySec[k].sort(function(a,b){return b.mcapVal-a.mcapVal;});
 
-    var secHeaders = ['#','섹터','종목수','YTD','1D','1W','1M','3M','6M','1Y'];
+    var secHeaders = ['#','섹터','종목수','YTD','1D','1W','1M','3M','6M','1Y','RSI(1M)'];
     var html = '<table style="width:100%;table-layout:fixed;border-collapse:collapse"><thead><tr>';
     secHeaders.forEach(function(h,i) {
-        var bg = i===3?' style="background:#f3f0ff;cursor:pointer"':' style="cursor:pointer"';
+        var bg = i===3?' style="background:#f3f0ff;cursor:pointer"':(i===10?' style="background:#fff8e1;cursor:pointer"':' style="cursor:pointer"');
         html += '<th'+bg+' onclick="sortSector('+i+')">' + h + (_secSortCol===i ? (_secSortAsc?' ▲':' ▼') : '') + '</th>';
     });
     html += '</tr></thead><tbody>';
     secs.forEach(function(sec,idx) {
         var g = agg[sec];
-        var vals = [wavg(g.ytd),wavg(g.d1),wavg(g.w1),wavg(g.m1),wavg(g.m3),wavg(g.m6),wavg(g.y1)];
+        var vals = [wavg(g.ytd),wavg(g.d1),wavg(g.w1),wavg(g.m1),wavg(g.m3),wavg(g.m6),wavg(g.y1),wavg(g.rsi)];
         html += '<tr style="cursor:pointer" onclick="toggleSec('+idx+')">';
         html += '<td>' + (idx+1) + '</td><td style="font-weight:600">' + sec + '</td><td>' + g.cnt + '</td>';
         vals.forEach(function(v,i) {
-            var bg = i===0?' style="background:#f3f0ff"':'';
+            var bg = i===0?' style="background:#f3f0ff"':(i===7?' style="background:#fff8e1"':'');
             html += '<td class="'+cls(v)+'"'+bg+'>' + fv(v) + '</td>';
         });
         html += '</tr>';
@@ -346,7 +363,7 @@ function renderSector() {
             function sc(v){if(!v)return'-';var n=parseFloat(String(v).replace(/%/g,'').replace(/,/g,''));if(isNaN(n))return v;return(n>0?'<span class="positive">+':'<span class="negative">')+Math.round(n)+'%</span>';}
             html += '<tr class="sec-detail sec-'+idx+'" style="display:none;background:#f0f0f0;font-size:14px">';
             html += '<td></td><td colspan="2" style="padding-left:60px;text-align:left">- '+label+'</td>';
-            html += '<td style="background:#f3f0ff">'+sc(s.ytd)+'</td><td>'+sc(s.d1)+'</td><td>'+sc(s.w1)+'</td><td>'+sc(s.m1)+'</td><td>'+sc(s.m3)+'</td><td>'+sc(s.m6)+'</td><td>'+sc(s.y1)+'</td>';
+            html += '<td style="background:#f3f0ff">'+sc(s.ytd)+'</td><td>'+sc(s.d1)+'</td><td>'+sc(s.w1)+'</td><td>'+sc(s.m1)+'</td><td>'+sc(s.m3)+'</td><td>'+sc(s.m6)+'</td><td>'+sc(s.y1)+'</td><td style="background:#fff8e1">'+sc(s.rsi)+'</td>';
             html += '</tr>';
         });
     });
