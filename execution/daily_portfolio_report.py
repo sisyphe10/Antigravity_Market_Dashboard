@@ -213,7 +213,7 @@ def render_holdings_png(title, stocks):
     body_font = ImageFont.truetype(FONT_REGULAR, FONT_SIZE)
 
     # 제목
-    draw.text((PADDING, PADDING), f"📌 {title}", fill=TEXT_COLOR, font=title_font)
+    draw.text((PADDING, PADDING), f"■ {title}", fill=TEXT_COLOR, font=title_font)
 
     # 헤더 배경 + 텍스트 (가운데 정렬)
     header_y = PADDING + TITLE_HEIGHT
@@ -364,7 +364,7 @@ async def send_report(no_send=False):
             buf = BytesIO()
             img.save(buf, format='PNG')
             buf.seek(0)
-            await bot.send_photo(chat_id=chat_id, photo=buf, caption=f"📌 {section_title}")
+            await bot.send_photo(chat_id=chat_id, photo=buf, caption=f"■ {section_title}")
             logging.info(f"{section_title} 사진 전송 완료 ({img.size[0]}x{img.size[1]}px)")
 
     logging.info("완료!")
