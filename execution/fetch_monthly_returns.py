@@ -117,9 +117,27 @@ def main():
         else:
             cur_m += 1
 
+    # 현재 연도 YTD: (현재 연도 가장 최근 월 종가 / 작년 12월 종가) - 1
+    current_year = today_kst.year
+    base_ym = f'{current_year - 1:04d}-12'
+    ytd_returns = {}
+    for name, _ in INDICES:
+        series = monthly_data.get(name, {})
+        base_close = series.get(base_ym)
+        current_yms = sorted([ym for ym in series.keys() if ym.startswith(f'{current_year:04d}-')])
+        latest_close = series.get(current_yms[-1]) if current_yms else None
+        if base_close is None or latest_close is None or base_close == 0:
+            ytd_returns[name] = None
+        else:
+            ytd_returns[name] = round((latest_close / base_close) - 1, 6)
+
     out = {
         'indices': [name for name, _ in INDICES],
         'rows': rows,
+        'ytd': {
+            'year': current_year,
+            'returns': ytd_returns,
+        },
         'updated_at': datetime.now(tz=KST).strftime('%Y-%m-%d %H:%M:%S KST'),
     }
     with open(OUTPUT_JSON, 'w', encoding='utf-8') as f:

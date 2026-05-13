@@ -531,6 +531,19 @@ def create_monthly_returns_table():
     for name in indices:
         head_cells += f'<th style="{th_style_for(name)}">{_html.escape(name)}</th>'
 
+    def color_bg(pct):
+        abs_pct = abs(pct)
+        if pct > 0:
+            sign = '+'
+            bg = '#ffe8e8' if abs_pct <= 5 else ('#ffb8b8' if abs_pct <= 10 else '#ff7a7a')
+        elif pct < 0:
+            sign = ''
+            bg = '#e8edff' if abs_pct <= 5 else ('#b8c5ff' if abs_pct <= 10 else '#7a90ff')
+        else:
+            sign = ''
+            bg = 'transparent'
+        return sign, bg
+
     body_rows_html = ''
     for r in rows:
         y = r.get('year')
@@ -546,27 +559,42 @@ def create_monthly_returns_table():
                 cells += f'<td style="padding:6px 12px;text-align:center;{borders}">&nbsp;</td>'
             else:
                 pct = v * 100
-                abs_pct = abs(pct)
-                if pct > 0:
-                    sign = '+'
-                    if abs_pct <= 5:
-                        bg = '#ffe8e8'
-                    elif abs_pct <= 10:
-                        bg = '#ffb8b8'
-                    else:
-                        bg = '#ff7a7a'
-                elif pct < 0:
-                    sign = ''
-                    if abs_pct <= 5:
-                        bg = '#e8edff'
-                    elif abs_pct <= 10:
-                        bg = '#b8c5ff'
-                    else:
-                        bg = '#7a90ff'
-                else:
-                    sign = ''
-                    bg = 'transparent'
+                sign, bg = color_bg(pct)
                 cells += f'<td style="padding:6px 12px;text-align:center;background:{bg};color:#000;font-variant-numeric:tabular-nums;{borders}">{sign}{pct:.1f}%</td>'
+        body_rows_html += f'<tr>{cells}</tr>\n'
+
+    # YTD 행 (현재 연도 누적 수익률 = 최근 종가 / 작년 12월 종가 - 1)
+    # fetch JSON에 ytd 필드가 있으면 사용, 없으면 rows에서 (1+r1)*(1+r2)*...-1 로 계산
+    ytd_returns = (data.get('ytd') or {}).get('returns', {})
+    if not ytd_returns and rows:
+        current_year = max((r.get('year') for r in rows if r.get('year') is not None), default=None)
+        if current_year is not None:
+            ytd_returns = {}
+            for name in indices:
+                cumul = 1.0
+                has_data = False
+                for r in rows:
+                    if r.get('year') == current_year:
+                        v = r.get('returns', {}).get(name)
+                        if v is not None:
+                            cumul *= (1 + v)
+                            has_data = True
+                ytd_returns[name] = round(cumul - 1, 6) if has_data else None
+    if ytd_returns:
+        def cell_borders_ytd(name):
+            right = DARK if name in DIVIDER_AFTER else LIGHT
+            return f'border-top:{DARK};border-right:{right};border-bottom:{LIGHT};'
+        cells = f'<td style="padding:6px 12px;text-align:center;font-weight:700;{cell_borders_ytd("연도")}">-</td>'
+        cells += f'<td style="padding:6px 12px;text-align:center;font-weight:700;{cell_borders_ytd("월")}">YTD</td>'
+        for name in indices:
+            v = ytd_returns.get(name)
+            borders = cell_borders_ytd(name)
+            if v is None:
+                cells += f'<td style="padding:6px 12px;text-align:center;{borders}">&nbsp;</td>'
+            else:
+                pct = v * 100
+                sign, bg = color_bg(pct)
+                cells += f'<td style="padding:6px 12px;text-align:center;font-weight:700;background:{bg};color:#000;font-variant-numeric:tabular-nums;{borders}">{sign}{pct:.1f}%</td>'
         body_rows_html += f'<tr>{cells}</tr>\n'
 
     html = f"""
