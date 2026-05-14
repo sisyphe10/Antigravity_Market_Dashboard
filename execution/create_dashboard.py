@@ -3179,13 +3179,17 @@ def create_order_section():
                     var hCell = ws.getCell('H' + r);
                     hCell.value = s.orderType;
                     var ot = s.orderType;
-                    // 주문구분 색상: 매수=빨강, 매도=파랑, 유지=검정.
-                    // 자문지 템플릿 H열 기본 폰트가 빨강일 수 있어 '유지'에도 검정을 명시 override.
-                    var color = 'FF000000';
-                    if (ot === '신규 매수' || ot === '추가 매수') color = 'FFFF0000';
-                    else if (ot === '일부 매도' || ot === '전량 매도') color = 'FF0070C0';
+                    // 글씨는 항상 검정. 배경: 매수=옅은 빨강, 매도=옅은 파랑, 유지=없음.
                     var prevFont = hCell.font || {};
-                    hCell.font = Object.assign({}, prevFont, { color: { argb: color } });
+                    hCell.font = Object.assign({}, prevFont, { color: { argb: 'FF000000' } });
+                    var bgColor = null;
+                    if (ot === '신규 매수' || ot === '추가 매수') bgColor = 'FFFFC7CE';
+                    else if (ot === '일부 매도' || ot === '전량 매도') bgColor = 'FFBDD7EE';
+                    if (bgColor) {
+                        hCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
+                    } else {
+                        hCell.fill = { type: 'pattern', pattern: 'none' };
+                    }
                     ws.getCell('I' + r).value = s.reason;
                     ws.getRow(r).height = DATA_ROW_HEIGHT;
                 });
