@@ -2561,6 +2561,8 @@ def create_order_section():
             var nateonText = buildOrderNateonText(orderStocks[GENERAL] || [], orderState[GENERAL] || [], '일반형')
                 + '\\n\\n'
                 + buildOrderNateonText(orderStocks[NH] || [], orderState[NH] || [], '목표전환형');
+            var nateonReasonLines = buildNateonReasonLines([GENERAL, NH]);
+            if (nateonReasonLines.length) nateonText += '\\n\\n' + nateonReasonLines.join('\\n');
             // 다운로드 섹션 (증권사 순서: 삼성 → NH → DB, 색상도 증권사별)
             var BROKER_ORDER = { '삼성': 0, 'NH': 1, 'DB': 2 };
             var BROKER_COLOR = { '삼성': '#1428A0', 'NH': '#0072CE', 'DB': '#00854A' };
@@ -2771,6 +2773,30 @@ def create_order_section():
             return lines.join('\\n');
         }
 
+        // 네이트온 박스 하단 사유 라인 빌드: 변동 있는 종목 + 사유 있는 것만, dedupe(code+name)
+        function buildNateonReasonLines(pfNames) {
+            var seen = {};
+            var lines = [];
+            pfNames.forEach(function(pfName) {
+                var stocks = orderStocks[pfName] || [];
+                var st = orderState[pfName] || [];
+                stocks.forEach(function(s, i) {
+                    var oldW = parseFloat(s.weight) || 0;
+                    var newW = parseFloat(st[i] && st[i].newWeight) || 0;
+                    if (oldW === newW) return;
+                    var name = (s.name || '').trim();
+                    if (!name) return;
+                    var reason = ((st[i] && st[i].reason) || '').trim();
+                    if (!reason) return;
+                    var key = (s.code || '') + '_' + name;
+                    if (seen[key]) return;
+                    seen[key] = true;
+                    lines.push(name + ' / ' + reason);
+                });
+            });
+            return lines;
+        }
+
         function buildOrderNateonSection(pfName) {
             // NH 목표전환형 3호 탭에서만 노출 (일반형 + 목표전환형을 한 박스에 함께)
             if (pfName !== 'NH 목표전환형 3호') return '';
@@ -2778,6 +2804,8 @@ def create_order_section():
             var generalText = buildOrderNateonText(orderStocks[GENERAL] || [], orderState[GENERAL] || [], '일반형');
             var targetText = buildOrderNateonText(orderStocks[pfName] || [], orderState[pfName] || [], '목표전환형');
             var combined = generalText + '\\n\\n' + targetText;
+            var reasonLines = buildNateonReasonLines([GENERAL, pfName]);
+            if (reasonLines.length) combined += '\\n\\n' + reasonLines.join('\\n');
             return '<div style="margin-top:16px;padding:16px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;">'
                 + '<div style="display:flex;align-items:center;margin-bottom:12px;">'
                 + '<h4 style="margin:0;font-size:15px;color:#3730a3;">네이트온 텍스트</h4>'
