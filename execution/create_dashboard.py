@@ -1070,7 +1070,7 @@ def _build_combined_chart_section():
                     extra_border += 'border-bottom:1px solid #000;'
                 series_cell = (
                     f'<td class="cmb-chart-item{active}" data-series="{_html.escape(s["display"])}" '
-                    f'onclick="toggleCmbSeries(this)" '
+                    f'onclick="toggleCmbSeries(this, event)" '
                     f'style="cursor:pointer;text-align:center;position:relative;{extra_border}">'
                     f'<div class="cmb-color-bar" style="position:absolute;left:8px;top:50%;'
                     f'transform:translateY(-50%);width:4px;height:18px;'
@@ -1409,7 +1409,22 @@ def _build_combined_chart_section():
                 });
             }
 
-            window.toggleCmbSeries = function(el) { el.classList.toggle('active'); buildCmbChart(); };
+            window.toggleCmbSeries = function(el, ev) {
+                var multi = ev && (ev.shiftKey || ev.ctrlKey || ev.metaKey);
+                if (multi) {
+                    // 다중 선택 모드: 기존 동작 (토글)
+                    el.classList.toggle('active');
+                } else {
+                    // 단일 선택 모드: 다른 항목 모두 해제 + 현재만 active
+                    var key = el.getAttribute('data-series');
+                    document.querySelectorAll('.cmb-chart-item.active').forEach(function(x) {
+                        if (x !== el) x.classList.remove('active');
+                    });
+                    el.classList.add('active');
+                    cmbClickOrder = [key];
+                }
+                buildCmbChart();
+            };
             window.updateCmbChart = buildCmbChart;
             window.clearCmbSelections = function() {
                 document.querySelectorAll('.cmb-chart-item.active').forEach(function(el){ el.classList.remove('active'); });
