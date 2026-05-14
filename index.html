@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Age of Emergence</title>
+    <script>
+    (function() {
+        if (window.location.search.indexOf('nav=1') >= 0) return;
+        var pages = ['market.html', 'market_alert.html', 'universe.html', 'seibro.html', 'featured.html', 'etf.html'];
+        var lastIdx = parseInt(localStorage.getItem('aoe_last_idx') || '-1', 10);
+        if (isNaN(lastIdx) || lastIdx < 0 || lastIdx >= pages.length) lastIdx = -1;
+        var nextIdx = (lastIdx + 1) % pages.length;
+        try { localStorage.setItem('aoe_last_idx', String(nextIdx)); } catch(e) {}
+        window.location.replace(pages[nextIdx]);
+    })();
+    </script>
     <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }

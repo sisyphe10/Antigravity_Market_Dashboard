@@ -4200,12 +4200,29 @@ def create_dashboard():
     print(f"Dashboard generated: {OUTPUT_FILE}")
 
     # ── Generate index.html (Landing page) ──
+    # 라운드 로빈 리다이렉트: 매 진입마다 다음 대시보드로 자동 이동 (?nav=1 쿼리스트링 시에만 카드 네비 표시)
+    rotate_pages = ['market.html', 'market_alert.html', 'universe.html', 'seibro.html', 'featured.html']
+    if os.path.exists('etf.html'):
+        rotate_pages.append('etf.html')
+    rotate_js_array = '[' + ', '.join("'{}'".format(p) for p in rotate_pages) + ']'
+
     landing_page = f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Age of Emergence</title>
+    <script>
+    (function() {{
+        if (window.location.search.indexOf('nav=1') >= 0) return;
+        var pages = {rotate_js_array};
+        var lastIdx = parseInt(localStorage.getItem('aoe_last_idx') || '-1', 10);
+        if (isNaN(lastIdx) || lastIdx < 0 || lastIdx >= pages.length) lastIdx = -1;
+        var nextIdx = (lastIdx + 1) % pages.length;
+        try {{ localStorage.setItem('aoe_last_idx', String(nextIdx)); }} catch(e) {{}}
+        window.location.replace(pages[nextIdx]);
+    }})();
+    </script>
     <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
