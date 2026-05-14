@@ -4251,7 +4251,7 @@ def create_dashboard():
     <header style="position:relative;">
         <h1>📊 Market Data Dashboard</h1>
         <div class="last-updated">Updated: {now}</div>
-        <a href="index.html?nav=1" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
+        <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
 
     {monthly_returns_html}
@@ -4271,29 +4271,12 @@ def create_dashboard():
     print(f"Dashboard generated: {OUTPUT_FILE}")
 
     # ── Generate index.html (Landing page) ──
-    # 라운드 로빈 리다이렉트: 매 진입마다 다음 대시보드로 자동 이동 (?nav=1 쿼리스트링 시에만 카드 네비 표시)
-    rotate_pages = ['market.html', 'market_alert.html', 'universe.html', 'seibro.html', 'featured.html']
-    if os.path.exists('etf.html'):
-        rotate_pages.append('etf.html')
-    rotate_js_array = '[' + ', '.join("'{}'".format(p) for p in rotate_pages) + ']'
-
     landing_page = f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Age of Emergence</title>
-    <script>
-    (function() {{
-        if (window.location.search.indexOf('nav=1') >= 0) return;
-        var pages = {rotate_js_array};
-        var lastIdx = parseInt(localStorage.getItem('aoe_last_idx') || '-1', 10);
-        if (isNaN(lastIdx) || lastIdx < 0 || lastIdx >= pages.length) lastIdx = -1;
-        var nextIdx = (lastIdx + 1) % pages.length;
-        try {{ localStorage.setItem('aoe_last_idx', String(nextIdx)); }} catch(e) {{}}
-        window.location.replace(pages[nextIdx]);
-    }})();
-    </script>
     <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
@@ -4510,7 +4493,7 @@ def create_dashboard():
     <header style="position:relative;">
         <h1>📈 WRAP</h1>
         <div class="last-updated">Updated: {now}</div>
-        <a href="index.html?nav=1" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
+        <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
 
     <div style="display:flex;gap:0;margin:0 auto 0;border-bottom:3px solid #333;max-width:1800px;">
@@ -4660,7 +4643,7 @@ def create_dashboard():
         <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: __UNIVERSE_UPDATED__</div>
         <div style="position:absolute;top:20px;right:24px;display:flex;gap:8px;">
             <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="background:#6B21A8;color:#fff;font-size:15px;font-weight:600;text-decoration:none;padding:6px 16px;border-radius:8px;">Sheet</a>
-            <a href="index.html?nav=1" style="padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
+            <a href="index.html" style="padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
         </div>
     </div>
 </header>
@@ -5081,7 +5064,7 @@ function renderSector() {
 <header style="position:relative;">
     <h1>SEIBro US Settlement TOP 50</h1>
     <div class="subtitle">Overseas Securities Buy Settlement - US Market</div>
-    <a href="index.html?nav=1" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
+    <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
 </header>
 <div class="content">
     <div class="section">
@@ -5293,7 +5276,7 @@ refresh();
 <header style="position:relative;">
     <h1>Featured</h1>
     <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: __FEATURED_UPDATED__</div>
-    <a href="index.html?nav=1" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
+    <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
 </header>
 <div class="content">
     <div class="date-bar">
@@ -5761,7 +5744,7 @@ def generate_hotels_html():
 </style>
 </head>
 <body>
-<a href="index.html?nav=1" class="home-btn">Home</a>
+<a href="index.html" class="home-btn">Home</a>
 <div class="container">
   <h1>Hotel ADR — Booking.com</h1>
   <p class="meta">Updated: {update_time} KST · 누적 {unique_days}일 · 매일 12:00 KST 자동 수집</p>
@@ -5879,7 +5862,7 @@ tbody tr.etf-row:hover {{ background: #ede9fe; }}
 <header>
     <h1>🏛️ ETF Dashboard</h1>
     <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: {datetime.now(tz=KST).strftime("%Y-%m-%d %H:%M:%S KST")}</div>
-    <a href="index.html?nav=1" class="home-btn">Home</a>
+    <a href="index.html" class="home-btn">Home</a>
 </header>
 
 <div class="container">
