@@ -1247,14 +1247,19 @@ def _build_combined_chart_section():
                         var fullMA120 = computeMA(fullFilled, 120);
                         var dateIdxMap = {};
                         for (var di = 0; di < fullDates.length; di++) dateIdxMap[fullDates[di]] = di;
-                        var ma20Visible = commonDates.map(function(d) {
-                            var ix = dateIdxMap[d];
-                            return (ix !== undefined) ? fullMA20[ix] : null;
-                        });
-                        var ma120Visible = commonDates.map(function(d) {
-                            var ix = dateIdxMap[d];
-                            return (ix !== undefined) ? fullMA120[ix] : null;
-                        });
+                        // MA도 본 라인과 같은 scale 적용 (KOSPI/KOSDAQ Market Cap은 1e12로 조 단위)
+                        function scaledMA(fullMA) {
+                            return commonDates.map(function(d) {
+                                var ix = dateIdxMap[d];
+                                if (ix === undefined) return null;
+                                var v = fullMA[ix];
+                                if (v === null || v === undefined) return null;
+                                var sv = v / scale;
+                                return scale > 1 ? Math.round(sv) : sv;
+                            });
+                        }
+                        var ma20Visible = scaledMA(fullMA20);
+                        var ma120Visible = scaledMA(fullMA120);
                         datasets.push({
                             label: 'MA20',
                             data: ma20Visible,
