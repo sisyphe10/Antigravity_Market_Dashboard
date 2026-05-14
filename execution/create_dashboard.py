@@ -2553,10 +2553,14 @@ def create_order_section():
 
         function renderEmailPanel() {
             var GENERAL = '삼성 트루밸류 / NH Value ESG / DB 개방형';
-            // 목표전환형 2호 청산(2026-05-06, +7.26%)으로 NH/DB 페어 모두 비활성. 다음 페어 출시 시 NH 변수/박스 복원.
+            var NH = 'NH 목표전환형 3호';
             var compliance = buildComplianceEmailText();
             var samsung = buildOrderEmailText(GENERAL, orderStocks[GENERAL] || [], orderState[GENERAL] || []);
-            var nateonText = buildOrderNateonText(orderStocks[GENERAL] || [], orderState[GENERAL] || [], '일반형');
+            var nh = buildOrderEmailText(NH, orderStocks[NH] || [], orderState[NH] || []);
+            // 네이트온 (NH 이메일 밑) — 일반형 + 목표전환형 한 박스
+            var nateonText = buildOrderNateonText(orderStocks[GENERAL] || [], orderState[GENERAL] || [], '일반형')
+                + '\\n\\n'
+                + buildOrderNateonText(orderStocks[NH] || [], orderState[NH] || [], '목표전환형');
             // 다운로드 섹션 (증권사 순서: 삼성 → NH → DB, 색상도 증권사별)
             var BROKER_ORDER = { '삼성': 0, 'NH': 1, 'DB': 2 };
             var BROKER_COLOR = { '삼성': '#1428A0', 'NH': '#0072CE', 'DB': '#00854A' };
@@ -2600,7 +2604,8 @@ def create_order_section():
                 + dlSection
                 + buildEmailBox('컴플라이언스 이메일', compliance, '#fffbeb', '#fef3c7', '#92400e', '#d97706')
                 + buildEmailBox('삼성 이메일', samsung, '#f9fafb', '#e5e7eb', '#444', '#374151')
-                + buildEmailBox('네이트온', nateonText, '#eef2ff', '#c7d2fe', '#3730a3', '#4f46e5')
+                + buildEmailBox('NH 이메일', nh, '#f9fafb', '#e5e7eb', '#444', '#374151')
+                + buildEmailBox('네이트온 (NH)', nateonText, '#eef2ff', '#c7d2fe', '#3730a3', '#4f46e5')
                 + '</div>';
             document.getElementById('orderContent').innerHTML = html;
             document.querySelectorAll('#orderContent .email-tab-dl-btn').forEach(function(btn) {
@@ -2701,9 +2706,24 @@ def create_order_section():
         }
 
         function buildComplianceEmailText() {
-            // 일반형 단독 (목표전환형 페어 청산 후) — 다음 페어 출시 시 TARGET 통합 로직 복원
+            // 일반형 + 목표전환형(NH 3호) 통합
             var GENERAL = '삼성 트루밸류 / NH Value ESG / DB 개방형';
-            var changes = buildOrderChanges(orderStocks[GENERAL] || [], orderState[GENERAL] || []);
+            var TARGET = 'NH 목표전환형 3호';
+            var gen = buildOrderChanges(orderStocks[GENERAL] || [], orderState[GENERAL] || []);
+            var tgt = buildOrderChanges(orderStocks[TARGET] || [], orderState[TARGET] || []);
+            function dedupe(a, b) {
+                var seen = {}, out = [];
+                a.concat(b).forEach(function(name) {
+                    if (!seen[name]) { seen[name] = true; out.push(name); }
+                });
+                return out;
+            }
+            var combined = {
+                newBuy: dedupe(gen.newBuy, tgt.newBuy),
+                inc:    dedupe(gen.inc,    tgt.inc),
+                dec:    dedupe(gen.dec,    tgt.dec),
+                out:    dedupe(gen.out,    tgt.out)
+            };
             var lines = [
                 '안녕하십니까.',
                 '라이프자산운용 김태식입니다.',
@@ -2711,7 +2731,7 @@ def create_order_section():
                 '랩 자문지 보내드립니다.',
                 '주요 변경 내용은 다음과 같습니다.',
                 ''
-            ].concat(buildEmailSectionLines(changes, null)).concat(['', '감사합니다.']);
+            ].concat(buildEmailSectionLines(combined, null)).concat(['', '감사합니다.']);
             return lines.join('\\n');
         }
 
@@ -3044,7 +3064,7 @@ def create_order_section():
 
         // 최종 저장 = 3개 포트폴리오 모두 저장 + finalize 워크플로 1회 트리거
         async function finalizeOrder(_pfNameIgnored) {
-            if (!confirm('최종 저장하시겠습니까?\\n\\n일반형 1개 저장 후 GitHub Actions(finalize_orders) 즉시 실행. 1~2분 후 Wrap_NAV.xlsx NEW 시트 + 대시보드 반영.')) return;
+            if (!confirm('최종 저장하시겠습니까?\\n\\n2개 포트폴리오(일반형/NH 목표전환형 3호) 모두 저장 후 GitHub Actions(finalize_orders) 즉시 실행. 1~2분 후 Wrap_NAV.xlsx NEW 시트 + 대시보드 반영.')) return;
             var pat = getGithubPat();
             if (!pat) { alert('PAT 입력이 취소되었습니다.'); return; }
             var ALL_PFS = ORDER_PORTFOLIOS.map(function(p) { return p.display; });
