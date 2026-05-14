@@ -137,7 +137,7 @@
     <div id="mainContent" class="pw-hidden">
     <header style="position:relative;">
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-05-14 09:02:29 KST</div>
+        <div class="last-updated">Updated: 2026-05-14 09:13:08 KST</div>
         <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
 
@@ -1734,6 +1734,11 @@
                 var reasonNeeded = (ot !== '유지') && reasonEmpty;
                 var reasonBg = reasonNeeded ? '#fee2e2' : '#fff';
                 var reasonBorder = reasonNeeded ? '#fca5a5' : '#d1d5db';
+                // 삭제 버튼: 사용자가 Order 탭에서 추가한 종목(isNew=true)만 표시.
+                // portfolio_data.json 출처 종목은 변경후=0(전량매도)으로 표현하므로 행 삭제 불필요.
+                var deleteCell = s.isNew
+                    ? '<td style="text-align:center;padding:8px;"><button class="order-del-btn" data-idx="' + i + '" title="종목 삭제" style="background:none;border:none;cursor:pointer;color:#dc2626;font-size:20px;line-height:1;padding:0 6px;font-weight:bold;">×</button></td>'
+                    : '<td style="padding:8px;"></td>';
                 rows += '<tr>'
                     + '<td style="text-align:center;padding:8px;">' + (i + 1) + '</td>'
                     + sectorCell + codeCell + nameCell
@@ -1741,6 +1746,7 @@
                     + '<td style="text-align:center;padding:8px;"><input type="text" inputmode="decimal" data-idx="' + i + '" data-field="newWeight" value="' + orderState_i.newWeight + '" style="width:65px;box-sizing:border-box;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;color:#000;"></td>'
                     + '<td style="text-align:center;padding:8px;">' + ot + '</td>'
                     + '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="reason" value="' + (orderState_i.reason || '').replace(/"/g, '&quot;') + '" style="width:100%;box-sizing:border-box;padding:4px 6px;border:1px solid ' + reasonBorder + ';background:' + reasonBg + ';border-radius:4px;font-family:inherit;font-size:15px;text-align:center;color:#000;"></td>'
+                    + deleteCell
                     + '</tr>';
             });
             // 합계 행: 변경전/변경후 SUM, 주문구분 자리에 변경전·후 비중 차이 (양수 빨강, 음수 파랑)
@@ -1754,6 +1760,7 @@
                 + '<td style="padding:8px;text-align:center;">' + oldSum.toFixed(0) + '%</td>'
                 + '<td style="padding:8px;text-align:center;color:' + sumColor + ';">' + newSum.toFixed(0) + '%</td>'
                 + '<td style="padding:8px;text-align:center;color:' + diffColor + ';font-weight:700;">' + diffSign + weightDiff.toFixed(0) + '%</td>'
+                + '<td></td>'
                 + '<td></td>'
                 + '</tr>';
             var html = '<div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">'
@@ -1774,6 +1781,7 @@
                 + '<th style="padding:8px;text-align:center;width:90px;">변경후</th>'
                 + '<th style="padding:8px;text-align:center;width:80px;">주문구분</th>'
                 + '<th style="padding:8px;text-align:center;">추천사유</th>'
+                + '<th style="padding:8px;text-align:center;width:40px;"></th>'
                 + '</tr></thead><tbody>' + rows + totalsRow + '</tbody></table></div>'
                 + '<div style="margin-top:12px;text-align:right;"><button id="orderAddStockBtn" style="font-family:inherit;font-size:14px;font-weight:600;padding:6px 14px;background:#f3f4f6;color:#222;border:1px solid #d1d5db;border-radius:8px;cursor:pointer;">+ 종목 추가</button></div>'
                 + '</div>';
@@ -1820,6 +1828,16 @@
             if (finalizeBtn) finalizeBtn.addEventListener('click', function() { finalizeOrder(orderActiveTab); });
             var addBtn = document.getElementById('orderAddStockBtn');
             if (addBtn) addBtn.addEventListener('click', function() { addOrderStock(orderActiveTab); });
+            // 종목 삭제 (사용자가 추가한 isNew 종목만 가능)
+            document.querySelectorAll('#orderContent .order-del-btn').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    var idx = parseInt(e.currentTarget.dataset.idx);
+                    if (isNaN(idx)) return;
+                    orderStocks[orderActiveTab].splice(idx, 1);
+                    orderState[orderActiveTab].splice(idx, 1);
+                    renderOrderPanel(orderActiveTab);
+                });
+            });
             function bindCopy(btnSel, preSel, defaultBg) {
                 document.querySelectorAll('#orderContent ' + btnSel).forEach(function(btn) {
                     btn.addEventListener('click', function() {
@@ -2084,13 +2102,13 @@
                     var hCell = ws.getCell('H' + r);
                     hCell.value = s.orderType;
                     var ot = s.orderType;
-                    var color = null;
-                    if (ot === '신규 매수' || ot === '추가 매수') color = 'FFFF0000';      // 빨강
-                    else if (ot === '일부 매도' || ot === '전량 매도') color = 'FF0070C0'; // 파랑
-                    if (color) {
-                        var prevFont = hCell.font || {};
-                        hCell.font = Object.assign({}, prevFont, { color: { argb: color } });
-                    }
+                    // 주문구분 색상: 매수=빨강, 매도=파랑, 유지=검정.
+                    // 자문지 템플릿 H열 기본 폰트가 빨강일 수 있어 '유지'에도 검정을 명시 override.
+                    var color = 'FF000000';
+                    if (ot === '신규 매수' || ot === '추가 매수') color = 'FFFF0000';
+                    else if (ot === '일부 매도' || ot === '전량 매도') color = 'FF0070C0';
+                    var prevFont = hCell.font || {};
+                    hCell.font = Object.assign({}, prevFont, { color: { argb: color } });
                     ws.getCell('I' + r).value = s.reason;
                     ws.getRow(r).height = DATA_ROW_HEIGHT;
                 });
