@@ -1299,6 +1299,7 @@ def _build_combined_chart_section():
                     id: 'cmbEndLabels',
                     afterDatasetsDraw: function(chart) {
                         var ctx = chart.ctx;
+                        var entries = [];
                         chart.data.datasets.forEach(function(ds, i) {
                             if (ds._skipEndLabel) return;
                             var meta = chart.getDatasetMeta(i);
@@ -1319,13 +1320,34 @@ def _build_combined_chart_section():
                             } else {
                                 label = fmtNum(val);
                             }
-                            ctx.save();
-                            ctx.font = 'bold 12px sans-serif';
-                            ctx.fillStyle = ds.borderColor;
-                            ctx.textBaseline = 'middle';
-                            ctx.fillText(label, last.x + 6, last.y);
-                            ctx.restore();
+                            entries.push({ x: last.x + 6, origY: last.y, y: last.y, label: label, color: ds.borderColor });
                         });
+                        if (entries.length === 0) return;
+                        // y 오름차순 정렬 후 minGap 강제 (위→아래 충돌 시 아래로 밀기)
+                        entries.sort(function(a, b) { return a.origY - b.origY; });
+                        var minGap = 14;
+                        for (var i = 1; i < entries.length; i++) {
+                            if (entries[i].y - entries[i-1].y < minGap) {
+                                entries[i].y = entries[i-1].y + minGap;
+                            }
+                        }
+                        // 차트 영역 밖으로 밀려나갔으면 위쪽으로 역보정
+                        var area = chart.chartArea;
+                        if (area) {
+                            var maxY = area.bottom - 4;
+                            for (var j = entries.length - 1; j > 0; j--) {
+                                if (entries[j].y > maxY) entries[j].y = maxY;
+                                if (entries[j-1].y > entries[j].y - minGap) entries[j-1].y = entries[j].y - minGap;
+                            }
+                        }
+                        ctx.save();
+                        ctx.font = 'bold 12px sans-serif';
+                        ctx.textBaseline = 'middle';
+                        entries.forEach(function(e) {
+                            ctx.fillStyle = e.color;
+                            ctx.fillText(e.label, e.x, e.y);
+                        });
+                        ctx.restore();
                     }
                 };
 
@@ -1394,6 +1416,35 @@ def _build_combined_chart_section():
                 cmbClickOrder = [];
                 buildCmbChart();
             };
+
+            // 화살표 위/아래 키로 시리즈 단일 선택 네비 (input 포커스 시 무시)
+            document.addEventListener('keydown', function(e) {
+                if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+                var ae = document.activeElement;
+                var tag = ae && ae.tagName;
+                if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (ae && ae.isContentEditable)) return;
+                var items = Array.prototype.slice.call(document.querySelectorAll('.cmb-chart-item'));
+                if (items.length === 0) return;
+                e.preventDefault();
+                var activeIdx = -1;
+                for (var i = 0; i < items.length; i++) {
+                    if (items[i].classList.contains('active')) { activeIdx = i; break; }
+                }
+                var nextIdx;
+                if (activeIdx < 0) {
+                    nextIdx = (e.key === 'ArrowDown') ? 0 : items.length - 1;
+                } else {
+                    nextIdx = activeIdx + (e.key === 'ArrowDown' ? 1 : -1);
+                    if (nextIdx < 0) nextIdx = items.length - 1;
+                    if (nextIdx >= items.length) nextIdx = 0;
+                }
+                items.forEach(function(el) { el.classList.remove('active'); });
+                items[nextIdx].classList.add('active');
+                cmbClickOrder = [items[nextIdx].getAttribute('data-series')];
+                items[nextIdx].scrollIntoView({ block: 'nearest' });
+                buildCmbChart();
+            });
+
             buildCmbChart();
         })();
         </script>
