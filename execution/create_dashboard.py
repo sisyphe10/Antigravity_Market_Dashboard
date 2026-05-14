@@ -4251,7 +4251,7 @@ def create_dashboard():
     <header style="position:relative;">
         <h1>📊 Market Data Dashboard</h1>
         <div class="last-updated">Updated: {now}</div>
-        <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
+        <a href="index.html?nav=1" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
 
     {monthly_returns_html}
@@ -4510,7 +4510,7 @@ def create_dashboard():
     <header style="position:relative;">
         <h1>📈 WRAP</h1>
         <div class="last-updated">Updated: {now}</div>
-        <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
+        <a href="index.html?nav=1" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
 
     <div style="display:flex;gap:0;margin:0 auto 0;border-bottom:3px solid #333;max-width:1800px;">
@@ -4660,7 +4660,7 @@ def create_dashboard():
         <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: __UNIVERSE_UPDATED__</div>
         <div style="position:absolute;top:20px;right:24px;display:flex;gap:8px;">
             <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="background:#6B21A8;color:#fff;font-size:15px;font-weight:600;text-decoration:none;padding:6px 16px;border-radius:8px;">Sheet</a>
-            <a href="index.html" style="padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
+            <a href="index.html?nav=1" style="padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
         </div>
     </div>
 </header>
@@ -5081,7 +5081,7 @@ function renderSector() {
 <header style="position:relative;">
     <h1>SEIBro US Settlement TOP 50</h1>
     <div class="subtitle">Overseas Securities Buy Settlement - US Market</div>
-    <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
+    <a href="index.html?nav=1" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
 </header>
 <div class="content">
     <div class="section">
@@ -5293,7 +5293,7 @@ refresh();
 <header style="position:relative;">
     <h1>Featured</h1>
     <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: __FEATURED_UPDATED__</div>
-    <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
+    <a href="index.html?nav=1" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
 </header>
 <div class="content">
     <div class="date-bar">
@@ -5761,7 +5761,7 @@ def generate_hotels_html():
 </style>
 </head>
 <body>
-<a href="index.html" class="home-btn">Home</a>
+<a href="index.html?nav=1" class="home-btn">Home</a>
 <div class="container">
   <h1>Hotel ADR — Booking.com</h1>
   <p class="meta">Updated: {update_time} KST · 누적 {unique_days}일 · 매일 12:00 KST 자동 수집</p>
@@ -5879,7 +5879,7 @@ tbody tr.etf-row:hover {{ background: #ede9fe; }}
 <header>
     <h1>🏛️ ETF Dashboard</h1>
     <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: {datetime.now(tz=KST).strftime("%Y-%m-%d %H:%M:%S KST")}</div>
-    <a href="index.html" class="home-btn">Home</a>
+    <a href="index.html?nav=1" class="home-btn">Home</a>
 </header>
 
 <div class="container">

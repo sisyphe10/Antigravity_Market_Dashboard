@@ -767,7 +767,7 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stoc
         <h1>🚦 투자유의종목 현황</h1>
         <div class="header-right">
             <span class="last-updated">Updated: {now}</span>
-            <a href="index.html" class="back-btn">Home</a>
+            <a href="index.html?nav=1" class="back-btn">Home</a>
         </div>
     </header>
 
