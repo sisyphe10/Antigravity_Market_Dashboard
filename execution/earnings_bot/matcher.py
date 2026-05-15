@@ -107,8 +107,11 @@ def score_candidate_breakdown(candidate: TranscriptCandidate, event: EarningsEve
         'date_delta': W_DATE_DELTA * raw['date_delta'],
         'keyword': W_KEYWORD * raw['keyword'],
     }
+    # FP 노이즈 정리 (DB/CLI 가독성). threshold 비교 결과는 round 전후 동일.
+    raw = {k: round(v, 6) for k, v in raw.items()}
+    weighted = {k: round(v, 6) for k, v in weighted.items()}
     return {
-        'total': sum(weighted.values()),
+        'total': round(sum(weighted.values()), 6),
         'scores': raw,
         'weighted': weighted,
     }
