@@ -931,6 +931,17 @@ async def featured_update_job(context):
         except Exception as ne:
             logging.warning(f"{tag} 뉴스 수집 예외 (무시): {ne}")
 
+        # 외국인/기관 수급 갱신 (네이버 frgn 스크래핑) — 대시보드 재생성 전에 실행해서 wrap PORTFOLIO 표에 즉시 반영
+        invtr_result = subprocess.run(
+            [sys.executable, "execution/fetch_investor_trading.py"],
+            capture_output=True, text=True, timeout=120, cwd=dashboard_dir
+        )
+        if invtr_result.returncode == 0:
+            logging.info(f"{tag} investor_trading: {invtr_result.stdout.strip()[-200:]}")
+        else:
+            errors.append(f"investor_trading 실패: {invtr_result.stderr[-200:]}")
+            logging.warning(f"{tag} {errors[-1]}")
+
         # 에러가 있더라도 대시보드 재생성 시도 (기존 데이터로라도 갱신)
         subprocess.run([sys.executable, "execution/create_dashboard.py"],
                        capture_output=True, text=True, timeout=120, cwd=dashboard_dir)
@@ -994,7 +1005,7 @@ async def featured_update_job(context):
         now_str = now_kst.strftime("%Y-%m-%d %H:%M")
         subprocess.run(["git", "add", "featured.html", "featured_data.json", "featured_news.json",
                         "etf.html", "index.html", "market.html", "wrap.html",
-                        "correlation_matrix.json"],
+                        "correlation_matrix.json", "investor_trading.json"],
                        cwd=dashboard_dir, capture_output=True, timeout=30)
         commit_result = subprocess.run(
             ["git", "commit", "-m", f"Featured 업데이트 ({now_str})"],

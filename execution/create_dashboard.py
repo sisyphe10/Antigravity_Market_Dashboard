@@ -24,6 +24,36 @@ def create_portfolio_tables_html():
     if not os.path.exists(portfolio_file):
         return ""
 
+    # 외국인/기관 수급 데이터 (선택 — 없으면 컬럼 값 '-' 로 채움)
+    investor_data = {}
+    investor_updated = None
+    investor_file = 'investor_trading.json'
+    if os.path.exists(investor_file):
+        try:
+            with open(investor_file, 'r', encoding='utf-8') as f:
+                _inv = json.load(f)
+            investor_data = _inv.get('stocks', {})
+            investor_updated = _inv.get('updated')
+        except Exception as e:
+            print(f"investor_trading.json 로드 실패 (무시): {e}")
+
+    def _fmt_eok(v):
+        if v is None:
+            return '-'
+        if abs(v) >= 10000:
+            return f"{v / 10000:+,.1f}조"
+        return f"{v:+,.0f}억"
+
+    def _color_class(v):
+        if v is None or v == 0:
+            return ''
+        return 'positive' if v > 0 else 'negative'
+
+    def _get_inv(code, window, who):
+        s = investor_data.get(code, {})
+        w = s.get(window, {})
+        return w.get(f'{who}_value_eok')
+
     try:
         with open(portfolio_file, 'r', encoding='utf-8') as f:
             portfolio_data = json.load(f)
@@ -57,6 +87,10 @@ def create_portfolio_tables_html():
                                 <th style="border-left:2px solid #000;">현재가</th>
                                 <th>ATH</th>
                                 <th>DD</th>
+                                <th style="border-left:2px solid #000;" title="외국인 5거래일 누적 순매수 (거래대금)">외인 5D</th>
+                                <th title="외국인 20거래일 누적 순매수 (거래대금)">외인 20D</th>
+                                <th title="기관 5거래일 누적 순매수 (거래대금)">기관 5D</th>
+                                <th title="기관 20거래일 누적 순매수 (거래대금)">기관 20D</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -137,6 +171,12 @@ def create_portfolio_tables_html():
                     dd_str = "-"
                     dd_color_class = ""
 
+                # 외국인/기관 수급 (5D / 20D)
+                frgn_5d = _get_inv(stock['code'], 'short', 'frgn')
+                frgn_20d = _get_inv(stock['code'], 'long', 'frgn')
+                inst_5d = _get_inv(stock['code'], 'short', 'inst')
+                inst_20d = _get_inv(stock['code'], 'long', 'inst')
+
                 html += f"""
                             <tr>
                                 <td>{idx}</td>
@@ -151,6 +191,10 @@ def create_portfolio_tables_html():
                                 <td style="border-left:2px solid #000;">{current_price_str}</td>
                                 <td>{ath_price_str}</td>
                                 <td class="{dd_color_class}">{dd_str}</td>
+                                <td style="border-left:2px solid #000;" class="{_color_class(frgn_5d)}">{_fmt_eok(frgn_5d)}</td>
+                                <td class="{_color_class(frgn_20d)}">{_fmt_eok(frgn_20d)}</td>
+                                <td class="{_color_class(inst_5d)}">{_fmt_eok(inst_5d)}</td>
+                                <td class="{_color_class(inst_20d)}">{_fmt_eok(inst_20d)}</td>
                             </tr>
                 """
 
@@ -159,6 +203,20 @@ def create_portfolio_tables_html():
             portfolio_color = "positive" if weighted_return_sum > 0 else "negative" if weighted_return_sum < 0 else ""
             total_contribution_str = f"{total_contribution:+.1f}" if valid_returns_count > 0 else "N/A"
             contribution_total_color = "positive" if total_contribution > 0 else "negative" if total_contribution < 0 else ""
+
+            # 포트폴리오 합계: 외인/기관 5D, 20D (각 종목 거래대금 단순 합산)
+            sum_frgn_5d = sum(
+                v for v in (_get_inv(s['code'], 'short', 'frgn') for s in stocks) if v is not None
+            )
+            sum_frgn_20d = sum(
+                v for v in (_get_inv(s['code'], 'long', 'frgn') for s in stocks) if v is not None
+            )
+            sum_inst_5d = sum(
+                v for v in (_get_inv(s['code'], 'short', 'inst') for s in stocks) if v is not None
+            )
+            sum_inst_20d = sum(
+                v for v in (_get_inv(s['code'], 'long', 'inst') for s in stocks) if v is not None
+            )
 
             html += f"""
                             <tr class="total-row">
@@ -170,6 +228,10 @@ def create_portfolio_tables_html():
                                 <td style="border-left:2px solid #000;">-</td>
                                 <td>-</td>
                                 <td>-</td>
+                                <td style="border-left:2px solid #000;font-weight:600;" class="{_color_class(sum_frgn_5d)}">{_fmt_eok(sum_frgn_5d)}</td>
+                                <td style="font-weight:600;" class="{_color_class(sum_frgn_20d)}">{_fmt_eok(sum_frgn_20d)}</td>
+                                <td style="font-weight:600;" class="{_color_class(sum_inst_5d)}">{_fmt_eok(sum_inst_5d)}</td>
+                                <td style="font-weight:600;" class="{_color_class(sum_inst_20d)}">{_fmt_eok(sum_inst_20d)}</td>
                             </tr>
                         </tbody>
                     </table>
