@@ -158,6 +158,18 @@ def resolve_cik(ticker: str, *, refresh: bool = False) -> str | None:
     return cik
 
 
+@lru_cache(maxsize=512)
+def get_company_name(ticker: str) -> str | None:
+    """ticker → SEC 공식 회사명 (예: 'Reddit, Inc.'). matcher 회사명 fuzzy 매칭용."""
+    try:
+        from edgar import Company
+        c = Company(ticker.upper())
+        name = getattr(c, 'name', None)
+        return str(name) if name else None
+    except Exception:
+        return None
+
+
 def warmup_universe_cache() -> dict[str, str | None]:
     """Universe 전체 CIK 사전 채우기. Phase 0 검증 + 운영 준비용."""
     result = {}

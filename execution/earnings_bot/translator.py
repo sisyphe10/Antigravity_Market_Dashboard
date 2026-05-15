@@ -174,11 +174,13 @@ def process_filing(filing_id: int) -> dict:
     if cal:
         fy, fq = cal['year'], cal['quarter']
     else:
-        # filing_date에서 추정
+        # filing_date에서 추정: 45일 lag 빼면 직전 분기 종료 = 발표 분기
+        from datetime import timedelta
         try:
             fd = date.fromisoformat(event_date_str)
-            fy = fd.year
-            fq = (fd.month - 1) // 3 + 1
+            anchor = fd - timedelta(days=45)
+            fy = anchor.year
+            fq = (anchor.month - 1) // 3 + 1
         except Exception:
             fy, fq = datetime.now(tz=timezone.utc).year, 1
 

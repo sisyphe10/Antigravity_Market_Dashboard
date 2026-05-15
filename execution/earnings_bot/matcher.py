@@ -29,11 +29,13 @@ DEFAULT_THRESHOLD = 0.7
 
 
 def _company_name_score(title: str, body_first_2k: str, company_names: list[str]) -> float:
-    """rapidfuzz token_sort_ratio max — 0~1."""
+    """token_set_ratio max — 0~1. 짧은 회사명이 긴 transcript 본문에 묻혀 점수가
+    sort 기반에서 1% 이하로 떨어지던 문제 회피 (RDDT 'Reddit' 1.0% → 100%).
+    set 기반이라 ticker 같은 단일 토큰 false positive는 ticker_mention 가중치로 분리 처리."""
     if not company_names:
         return 0.0
     text = f"{title} {body_first_2k}"
-    scores = [fuzz.token_sort_ratio(name.lower(), text.lower()) / 100.0 for name in company_names]
+    scores = [fuzz.token_set_ratio(name.lower(), text.lower()) / 100.0 for name in company_names]
     return max(scores) if scores else 0.0
 
 

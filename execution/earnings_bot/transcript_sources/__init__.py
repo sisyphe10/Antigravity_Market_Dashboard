@@ -114,10 +114,27 @@ def make_event_from_filing(filing_row: dict, ticker_meta: dict | None = None) ->
     # fiscal_year / quarter — earnings_calendar에서 lookup, 없으면 filed_at에서 추정
     from . import _calendar_lookup  # type: ignore  # 순환 회피용 stub (아래 정의)
     fy, fq = _calendar_lookup(ticker, filed_at[:10] if filed_at else '')
+    if not fy or not fq:
+        # 발표일에서 약 45일 lag를 빼면 직전 분기 종료점 = 발표 분기. RDDT 4-30 → 3-16 → Q1.
+        from datetime import timedelta
+        anchor = event_dt - timedelta(days=45)
+        fy = fy or anchor.year
+        fq = fq or ((anchor.month - 1) // 3 + 1)
 
     company_names = [ticker]
     if ticker_meta and ticker_meta.get('note'):
         company_names.append(ticker_meta['note'])
+    try:
+        from .. import ticker_registry as _tr
+        sec_name = _tr.get_company_name(ticker)
+        if sec_name:
+            company_names.append(sec_name)
+            # 'Reddit, Inc.' → 'Reddit' 같은 단축형도 fuzzy 매치 풀에 추가
+            core = sec_name.split(',')[0].strip()
+            if core and core not in company_names:
+                company_names.append(core)
+    except Exception:
+        pass
 
     expected_title_terms = []
     if fy and fq:
