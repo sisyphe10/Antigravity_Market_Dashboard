@@ -130,6 +130,80 @@
         }
       ],
       "savedAt": "2026-05-15T06:50:23.784Z"
+    },
+    "NH 목표전환형 3호": {
+      "targets": [
+        {
+          "broker": "NH",
+          "product": "목표전환형 3호"
+        }
+      ],
+      "stocks": [
+        {
+          "sector": "반도체",
+          "code": "005930",
+          "name": "삼성전자",
+          "weight": 30,
+          "reason": ""
+        },
+        {
+          "sector": "반도체",
+          "code": "000660",
+          "name": "SK하이닉스",
+          "weight": 10,
+          "reason": ""
+        },
+        {
+          "sector": "보험",
+          "code": "032830",
+          "name": "삼성생명",
+          "weight": 5,
+          "reason": ""
+        },
+        {
+          "sector": "상사,자본재",
+          "code": "028260",
+          "name": "삼성물산",
+          "weight": 5,
+          "reason": ""
+        },
+        {
+          "sector": "비철,목재등",
+          "code": "295310",
+          "name": "에이치브이엠",
+          "weight": 5,
+          "reason": ""
+        },
+        {
+          "sector": "조선",
+          "code": "267250",
+          "name": "HD현대",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "필수소비재",
+          "code": "003230",
+          "name": "삼양식품",
+          "weight": 5,
+          "reason": ""
+        },
+        {
+          "sector": "기타",
+          "code": "082740",
+          "name": "한화엔진",
+          "weight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "화장품,의류,완구",
+          "code": "020000",
+          "name": "한섬",
+          "weight": 3,
+          "reason": ""
+        }
+      ],
+      "savedAt": "2026-05-15T06:50:24.952Z"
     }
   }
 }
