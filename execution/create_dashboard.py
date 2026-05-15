@@ -3550,6 +3550,145 @@ def create_aum_section():
     """
 
 
+def create_risk_section():
+    """Risk 패널 — 보유 종목 간 30거래일 상관계수 + 집중도 위험.
+
+    correlation_matrix.json 을 fetch 해서 클라이언트에서 렌더.
+    원본 데이터는 VM cron 의 calc_portfolio_correlation.py 가 생성.
+    """
+    return """
+        <div id="riskContent">
+            <div style="text-align:center;color:#888;padding:40px;">로딩 중...</div>
+        </div>
+        <script>
+        var _riskLoaded = false;
+        async function loadRisk() {
+            if (_riskLoaded) return;
+            _riskLoaded = true;
+            try {
+                const r = await fetch('correlation_matrix.json?t=' + Date.now());
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                const d = await r.json();
+                renderRisk(d);
+            } catch(e) {
+                document.getElementById('riskContent').innerHTML =
+                    '<div style="text-align:center;color:#c00;padding:40px;">correlation_matrix.json 로드 실패: ' + e.message + '</div>';
+            }
+        }
+
+        function _corrColor(c) {
+            if (c >= 0) {
+                const g = Math.round(255 * (1 - c));
+                return 'rgb(255,' + g + ',' + g + ')';
+            } else {
+                const ac = Math.abs(c);
+                const r = Math.round(255 * (1 - ac));
+                return 'rgb(' + r + ',' + r + ',255)';
+            }
+        }
+
+        function _statCard(label, value, color) {
+            return '<div style="flex:1;min-width:140px;padding:12px;background:#f9fafb;border-radius:8px;border-left:3px solid ' + color + ';">' +
+                '<div style="font-size:11px;color:#6b7280;margin-bottom:4px;">' + label + '</div>' +
+                '<div style="font-size:22px;font-weight:700;color:' + color + ';">' + value + '</div></div>';
+        }
+
+        function _renderHeatmap(p) {
+            const codes = p.codes_order;
+            const matrix = p.matrix;
+            const nameMap = {};
+            p.stocks.forEach(function(s){ nameMap[s.code] = s.name; });
+            let h = '<details style="margin-top:12px;">';
+            h += '<summary style="cursor:pointer;font-weight:600;padding:8px 0;">상관계수 히트맵 (' + codes.length + '×' + codes.length + ')</summary>';
+            h += '<div style="overflow-x:auto;margin-top:8px;"><table style="border-collapse:collapse;font-size:11px;">';
+            h += '<thead><tr><th></th>';
+            codes.forEach(function(c){
+                h += '<th style="padding:4px;writing-mode:vertical-rl;transform:rotate(180deg);min-height:80px;white-space:nowrap;font-weight:500;">' + (nameMap[c] || c) + '</th>';
+            });
+            h += '</tr></thead><tbody>';
+            for (let i = 0; i < codes.length; i++) {
+                h += '<tr><td style="padding:4px 8px;font-weight:500;text-align:right;white-space:nowrap;">' + (nameMap[codes[i]] || codes[i]) + '</td>';
+                for (let j = 0; j < codes.length; j++) {
+                    const v = matrix[i][j];
+                    const bg = _corrColor(v);
+                    const tc = Math.abs(v) > 0.5 ? '#fff' : '#333';
+                    h += '<td style="padding:4px 6px;text-align:center;background:' + bg + ';color:' + tc + ';font-family:monospace;min-width:42px;">' + v.toFixed(2) + '</td>';
+                }
+                h += '</tr>';
+            }
+            h += '</tbody></table></div></details>';
+            return h;
+        }
+
+        function _renderPortfolioRisk(name, p) {
+            const s = p.summary;
+            let h = '<div style="margin-bottom:32px;padding:20px;background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);">';
+            h += '<h2 style="margin:0 0 12px;color:#1e40af;font-size:1.1rem;">' + name + '</h2>';
+            h += '<div style="font-size:12px;color:#6b7280;margin-bottom:14px;">기간 ' + p.date_range[0] + ' ~ ' + p.date_range[1] + '</div>';
+
+            h += '<div style="display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;">';
+            h += _statCard('유효 종목', p.stock_count, '#666');
+            h += _statCard('페어 주의 (0.70+)', s.pair_watch_count, s.pair_watch_count > 0 ? '#f59e0b' : '#666');
+            h += _statCard('페어 경고 (0.85+)', s.pair_alert_count, s.pair_alert_count > 0 ? '#dc2626' : '#666');
+            h += _statCard('집중 클러스터 (30%+)', s.concentration_clusters, s.concentration_clusters > 0 ? '#dc2626' : '#666');
+            h += '</div>';
+
+            const risky = p.clusters.filter(function(c){ return c.is_concentration_risk; });
+            if (risky.length) {
+                h += '<div style="margin-bottom:18px;padding:14px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;">';
+                h += '<div style="font-weight:700;color:#dc2626;margin-bottom:8px;">⚠️ 집중 위험 클러스터</div>';
+                risky.forEach(function(c){
+                    const members = c.members.map(function(m){ return m.name + '(' + m.weight + '%)'; }).join(' · ');
+                    h += '<div style="font-size:13px;color:#7f1d1d;margin-bottom:4px;">비중합 ' + c.weight_sum + '% · 평균상관 ' + c.avg_corr.toFixed(3) + ' → ' + members + '</div>';
+                });
+                h += '</div>';
+            }
+
+            const otherClusters = p.clusters.filter(function(c){ return !c.is_concentration_risk; });
+            if (otherClusters.length) {
+                h += '<details style="margin-bottom:14px;">';
+                h += '<summary style="cursor:pointer;font-weight:600;padding:6px 0;color:#666;">관찰 클러스터 ' + otherClusters.length + '개</summary>';
+                otherClusters.forEach(function(c){
+                    const members = c.members.map(function(m){ return m.name + '(' + m.weight + '%)'; }).join(' · ');
+                    h += '<div style="font-size:12px;color:#555;margin:4px 0 4px 12px;">비중합 ' + c.weight_sum + '% · 평균상관 ' + c.avg_corr.toFixed(3) + ' → ' + members + '</div>';
+                });
+                h += '</details>';
+            }
+
+            if (p.pairs.length) {
+                h += '<details open style="margin-bottom:14px;">';
+                h += '<summary style="cursor:pointer;font-weight:600;padding:6px 0;">페어 상관 ' + p.pairs.length + '개 (상위 10)</summary>';
+                h += '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:8px;">';
+                h += '<thead><tr style="background:#f3f4f6;"><th style="padding:6px 10px;text-align:left;">레벨</th><th style="padding:6px 10px;text-align:left;">종목 A</th><th style="padding:6px 10px;text-align:left;">종목 B</th><th style="padding:6px 10px;text-align:right;">상관</th></tr></thead><tbody>';
+                p.pairs.slice(0, 10).forEach(function(pr){
+                    const lc = pr.level === '경고' ? '#dc2626' : '#f59e0b';
+                    h += '<tr style="border-top:1px solid #e5e7eb;"><td style="padding:6px 10px;color:' + lc + ';font-weight:600;">' + pr.level + '</td><td style="padding:6px 10px;">' + pr.a_name + '(' + pr.a_weight + '%)</td><td style="padding:6px 10px;">' + pr.b_name + '(' + pr.b_weight + '%)</td><td style="padding:6px 10px;text-align:right;font-family:monospace;">' + pr.corr.toFixed(3) + '</td></tr>';
+                });
+                h += '</tbody></table></details>';
+            }
+
+            h += _renderHeatmap(p);
+            h += '</div>';
+            return h;
+        }
+
+        function renderRisk(d) {
+            const c = document.getElementById('riskContent');
+            const updated = new Date(d.updated).toLocaleString('ko-KR');
+            let html = '';
+            html += '<div style="margin-bottom:24px;padding:16px;background:#f8f9fa;border-radius:8px;font-size:13px;color:#555;">';
+            html += '<strong>' + d.window_days + '거래일 상관계수</strong> · Updated: ' + updated + '<br>';
+            html += '임계값 — 페어 ' + d.thresholds.pair_watch + '+ 주의, ' + d.thresholds.pair_alert + '+ 경고 · 클러스터 비중합 ' + d.thresholds.cluster_weight_pct + '%+ 집중위험';
+            html += '</div>';
+            for (const name in d.portfolios) {
+                html += _renderPortfolioRisk(name, d.portfolios[name]);
+            }
+            c.innerHTML = html;
+        }
+        </script>
+    """
+
+
 def create_dashboard():
     # Check if charts directory exists
     if not os.path.exists(CHARTS_DIR):
@@ -4350,9 +4489,10 @@ def create_dashboard():
         f.write(landing_page)
     print("Landing page generated: index.html")
 
-    # ── Generate wrap.html (WRAP + Portfolio + Sector + Order/AUM tabs) ──
+    # ── Generate wrap.html (WRAP + Portfolio + Sector + Order/AUM/Risk tabs) ──
     order_html = create_order_section()
     aum_html = create_aum_section()
+    risk_html = create_risk_section()
     wrap_page = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -4500,6 +4640,7 @@ def create_dashboard():
         <button class="wrap-tab-btn active" onclick="wrapSwitchTab('dashboard')" style="padding:12px 32px;font-size:1rem;font-weight:700;cursor:pointer;background:#333;color:#fff;border:none;border-bottom:3px solid #333;margin-bottom:-3px;font-family:inherit;">Dashboard</button>
         <button class="wrap-tab-btn" onclick="wrapSwitchTab('order')" style="padding:12px 32px;font-size:1rem;font-weight:700;cursor:pointer;background:#e8e8e8;color:#999;border:none;border-bottom:3px solid transparent;margin-bottom:-3px;font-family:inherit;">Order</button>
         <button class="wrap-tab-btn" onclick="wrapSwitchTab('aum')" style="padding:12px 32px;font-size:1rem;font-weight:700;cursor:pointer;background:#e8e8e8;color:#999;border:none;border-bottom:3px solid transparent;margin-bottom:-3px;font-family:inherit;">AUM</button>
+        <button class="wrap-tab-btn" onclick="wrapSwitchTab('risk')" style="padding:12px 32px;font-size:1rem;font-weight:700;cursor:pointer;background:#e8e8e8;color:#999;border:none;border-bottom:3px solid transparent;margin-bottom:-3px;font-family:inherit;">Risk</button>
     </div>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -4512,6 +4653,10 @@ def create_dashboard():
 
     <div id="wrapPanelAUM" style="padding-top:24px;display:none;max-width:1800px;margin:0 auto;">
     {aum_html}
+    </div>
+
+    <div id="wrapPanelRisk" style="padding-top:24px;display:none;max-width:1800px;margin:0 auto;">
+    {risk_html}
     </div>
 
     <footer><p>Auto-generated by Antigravity Agent</p></footer>
@@ -4556,11 +4701,11 @@ def create_dashboard():
     }}
 
     async function wrapSwitchTab(tab) {{
-        // Order/AUM 진입 시 추가 비밀번호 체크
+        // Order/AUM 진입 시 추가 비밀번호 체크 (Risk 는 Dashboard 와 동일 보안)
         if ((tab === 'order' || tab === 'aum') && !(await checkOrderAumPw())) {{
             return;  // 인증 실패 시 탭 전환 취소
         }}
-        var tabs = ['dashboard', 'order', 'aum'];
+        var tabs = ['dashboard', 'order', 'aum', 'risk'];
         var btns = document.querySelectorAll('.wrap-tab-btn');
         tabs.forEach(function(t, i) {{
             var active = (tab === t);
@@ -4572,8 +4717,10 @@ def create_dashboard():
         document.getElementById('wrapPanelDashboard').style.display = tab === 'dashboard' ? 'block' : 'none';
         document.getElementById('wrapPanelOrder').style.display = tab === 'order' ? 'block' : 'none';
         document.getElementById('wrapPanelAUM').style.display = tab === 'aum' ? 'block' : 'none';
+        document.getElementById('wrapPanelRisk').style.display = tab === 'risk' ? 'block' : 'none';
         if (tab === 'order' && typeof loadOrder === 'function') loadOrder();
         if (tab === 'aum' && typeof loadAUM === 'function') loadAUM();
+        if (tab === 'risk' && typeof loadRisk === 'function') loadRisk();
     }}
     </script>
 </body>

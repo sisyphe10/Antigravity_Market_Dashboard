@@ -59,6 +59,7 @@ charts/*
 !featured_news.json
 !existing_stock_basis.json
 !monthly_returns.json
+!correlation_matrix.json
 
 # 기타
 *.bat
