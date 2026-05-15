@@ -1,14 +1,14 @@
 {
-  "updated_at": "2026-05-15 14:32:31 KST",
+  "updated_at": "2026-05-15 14:40:05 KST",
   "lookback_trading_days": 21,
   "returns_1m": {
-    "KOSPI": 0.269101,
-    "KOSDAQ": 0.01682,
+    "KOSPI": 0.26877,
+    "KOSDAQ": 0.016169,
     "NASDAQ": 0.109061,
     "S&P 500": 0.068104,
-    "TSEC": 0.120097,
-    "NIKKEI": 0.080654,
-    "HSI": 0.003412,
+    "TSEC": 0.119819,
+    "NIKKEI": 0.079769,
+    "HSI": 0.003605,
     "STOXX": -0.00828
   }
 }
