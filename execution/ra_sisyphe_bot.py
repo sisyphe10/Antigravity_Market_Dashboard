@@ -438,14 +438,15 @@ async def _run_source_job(
             logging.info(f"{source_name}: 신규 글 없음 (알림 발송)")
             return
 
+        from sources.base import split_for_telegram
         send_errors = []
         for p in posts:
             full = adapter.format_message(p, label, icon)
             for chat_id in SUBSCRIBERS:
                 try:
-                    for i in range(0, len(full), 4000):
+                    for chunk in split_for_telegram(full, 4000):
                         await context.bot.send_message(
-                            chat_id=chat_id, text=full[i:i + 4000], parse_mode='HTML',
+                            chat_id=chat_id, text=chunk, parse_mode='HTML',
                             disable_web_page_preview=True,
                         )
                 except Exception as e:

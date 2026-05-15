@@ -49,17 +49,19 @@ def save_state(name: str, state: dict[str, Any]) -> None:
 
 
 def split_for_telegram(text: str, max_chars: int = 4000) -> list[str]:
-    """텔레그램 메시지 4000자 분할. 줄 경계 우선."""
+    """텔레그램 메시지 분할. 문단 경계(빈 줄) 1순위 → 줄 경계 2순위 → 강제 분할."""
     if len(text) <= max_chars:
         return [text]
 
     chunks: list[str] = []
     remaining = text
     while len(remaining) > max_chars:
-        idx = remaining.rfind('\n', 0, max_chars)
+        idx = remaining.rfind('\n\n', 0, max_chars)
+        if idx <= 0:
+            idx = remaining.rfind('\n', 0, max_chars)
         if idx <= 0:
             idx = max_chars
-        chunks.append(remaining[:idx])
+        chunks.append(remaining[:idx].rstrip())
         remaining = remaining[idx:].lstrip('\n')
     if remaining:
         chunks.append(remaining)

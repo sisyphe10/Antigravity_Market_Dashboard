@@ -144,6 +144,16 @@ _FOOTER_PATTERNS = [
     re.compile(r'^\s*Subscribe (now |today |to ).*$', re.IGNORECASE),
 ]
 
+# 텔레그램은 이미지 없이 텍스트만이라 figcaption placeholder는 노이즈. 본문 추출 단계에서 제거.
+_FIGCAPTION_PATTERN = re.compile(r'\[그림:[^\]]*\]')
+
+
+def _strip_figcaptions(text: str) -> str:
+    text = _FIGCAPTION_PATTERN.sub('', text)
+    text = re.sub(r'[ \t]+\n', '\n', text)
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    return text.strip()
+
 
 def _strip_footer(text: str) -> str:
     """본문 끝의 SemiAnalysis footer (Privacy/Terms/Subscribe CTA) 제거."""
@@ -236,7 +246,7 @@ def fetch_new_posts(update_state: bool = False) -> list[dict[str, Any]]:
         try:
             parser = _ContentExtractor()
             parser.feed(p['content_html'])
-            body_en = _strip_footer(parser.get_text())
+            body_en = _strip_figcaptions(_strip_footer(parser.get_text()))
             paywalled = _is_paywalled(body_en)
 
             # 번역
@@ -342,7 +352,7 @@ if __name__ == '__main__':
     for p in feed_posts[:args.limit]:
         parser_html = _ContentExtractor()
         parser_html.feed(p['content_html'])
-        body_en = _strip_footer(parser_html.get_text())
+        body_en = _strip_figcaptions(_strip_footer(parser_html.get_text()))
         paywalled = _is_paywalled(body_en)
 
         print('=' * 80)
