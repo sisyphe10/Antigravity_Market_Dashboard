@@ -10,12 +10,13 @@ Codex Phase 2 v2:
 """
 from __future__ import annotations
 
+import json
 import logging
 from datetime import datetime, timedelta, timezone
 from typing import Sequence
 
 from . import db, ticker_registry
-from .matcher import DEFAULT_THRESHOLD, score_parsed
+from .matcher import DEFAULT_THRESHOLD, score_parsed_breakdown
 from .transcript_sources import (EarningsEvent, TranscriptSource,
                                  make_event_from_filing)
 from .transcript_sources.marketbeat import MarketBeatSource
@@ -125,7 +126,8 @@ def _process_one(job: dict, sources: Sequence[TranscriptSource]) -> None:
                 last_failure_status = 'parse_failed'
                 last_error = f'{src.name} parse 결과 None'
                 continue
-            confidence = score_parsed(parsed, cand, event)
+            breakdown = score_parsed_breakdown(parsed, cand, event)
+            confidence = breakdown['total']
             parsed.match_confidence = confidence
 
             if confidence >= DEFAULT_THRESHOLD:
@@ -146,7 +148,10 @@ def _process_one(job: dict, sources: Sequence[TranscriptSource]) -> None:
                 return
             else:
                 last_failure_status = 'low_confidence'
-                last_error = f'{src.name} confidence={confidence:.3f} < {DEFAULT_THRESHOLD}'
+                last_error = (
+                    f'{src.name} confidence={confidence:.3f} < {DEFAULT_THRESHOLD} '
+                    f'| breakdown={json.dumps(breakdown, separators=(",", ":"))}'
+                )
 
     # 여기 도달 = 모든 소스 실패. 다음 attempt 스케줄
     new_attempt_count = job['attempt_count'] + 1

@@ -83,24 +83,60 @@ def _keyword_score(title: str, body_first_2k: str) -> float:
     return 0.0
 
 
+def score_candidate_breakdown(candidate: TranscriptCandidate, event: EarningsEvent,
+                              body_first_2k: str = '') -> dict:
+    """후보 점수 + 컴포넌트 breakdown. low_confidence 진단용.
+
+    반환 키:
+      - total: float (가중 합산, score_candidate와 동일)
+      - scores: dict[str, float] 5개 raw sub-score (0.0~1.0)
+      - weighted: dict[str, float] 5개 가중 적용 (sum == total)
+    """
+    text_body = body_first_2k or candidate.snippet
+    raw = {
+        'company_name': _company_name_score(candidate.title, text_body, event.company_names),
+        'ticker_mention': _ticker_mention_score(candidate.title, text_body, event.ticker),
+        'fiscal_term': _fiscal_term_score(candidate.title, text_body, event.expected_title_terms),
+        'date_delta': _date_delta_score(candidate.published_at, event.expected_call_datetime),
+        'keyword': _keyword_score(candidate.title, text_body),
+    }
+    weighted = {
+        'company_name': W_COMPANY_NAME * raw['company_name'],
+        'ticker_mention': W_TICKER_MENTION * raw['ticker_mention'],
+        'fiscal_term': W_FISCAL_TERM * raw['fiscal_term'],
+        'date_delta': W_DATE_DELTA * raw['date_delta'],
+        'keyword': W_KEYWORD * raw['keyword'],
+    }
+    return {
+        'total': sum(weighted.values()),
+        'scores': raw,
+        'weighted': weighted,
+    }
+
+
 def score_candidate(candidate: TranscriptCandidate, event: EarningsEvent,
                     body_first_2k: str = '') -> float:
-    """검색 단계의 후보 점수 — 본문 미확보 시 title + snippet 기반."""
-    text_body = body_first_2k or candidate.snippet
-    return (
-        W_COMPANY_NAME * _company_name_score(candidate.title, text_body, event.company_names)
-        + W_TICKER_MENTION * _ticker_mention_score(candidate.title, text_body, event.ticker)
-        + W_FISCAL_TERM * _fiscal_term_score(candidate.title, text_body, event.expected_title_terms)
-        + W_DATE_DELTA * _date_delta_score(candidate.published_at, event.expected_call_datetime)
-        + W_KEYWORD * _keyword_score(candidate.title, text_body)
-    )
+    """검색 단계의 후보 점수 — 본문 미확보 시 title + snippet 기반.
+
+    backward-compatible 얇은 wrapper. 진단이 필요하면 score_candidate_breakdown() 사용.
+    """
+    return score_candidate_breakdown(candidate, event, body_first_2k)['total']
+
+
+def score_parsed_breakdown(parsed: ParsedTranscript, candidate: TranscriptCandidate,
+                           event: EarningsEvent) -> dict:
+    """파싱 후 본문 기반 정밀 점수 + breakdown. transcript_watch가 last_error에 dump."""
+    body_first_2k = parsed.prepared_remarks[:2000] if parsed.prepared_remarks else ''
+    return score_candidate_breakdown(candidate, event, body_first_2k=body_first_2k)
 
 
 def score_parsed(parsed: ParsedTranscript, candidate: TranscriptCandidate,
                  event: EarningsEvent) -> float:
-    """파싱 후 본문 기반 정밀 점수. parse() 결과의 match_confidence로 저장."""
-    body_first_2k = parsed.prepared_remarks[:2000] if parsed.prepared_remarks else ''
-    return score_candidate(candidate, event, body_first_2k=body_first_2k)
+    """파싱 후 본문 기반 정밀 점수. parse() 결과의 match_confidence로 저장.
+
+    backward-compatible wrapper. 진단이 필요하면 score_parsed_breakdown() 사용.
+    """
+    return score_parsed_breakdown(parsed, candidate, event)['total']
 
 
 def is_acceptable(confidence: float, threshold: float = DEFAULT_THRESHOLD) -> bool:
@@ -109,8 +145,11 @@ def is_acceptable(confidence: float, threshold: float = DEFAULT_THRESHOLD) -> bo
 
 # ─── 자가 테스트 ───
 if __name__ == "__main__":
+    import json
     from datetime import datetime, timezone
-    event = EarningsEvent(
+
+    # ── case 1: pass — ASML 풀 회사명 매칭 ──
+    event_pass = EarningsEvent(
         ticker='ASML',
         fiscal_year=2026,
         fiscal_quarter=1,
@@ -119,12 +158,48 @@ if __name__ == "__main__":
         expected_title_terms=['Q1 2026', '1Q26', 'first quarter 2026'],
         filing_id=1,
     )
-    cand = TranscriptCandidate(
+    cand_pass = TranscriptCandidate(
         url='https://www.fool.com/earnings/call-transcripts/2026/04/16/asml-asml-q1-2026-earnings-call-transcript/',
         title='ASML Holding (ASML) Q1 2026 Earnings Call Transcript',
         snippet='ASML Holding NV (ASML) Q1 2026 earnings call dated April 15, 2026.',
         published_at=datetime(2026, 4, 16, 12, 0, tzinfo=timezone.utc),
     )
-    score = score_candidate(cand, event)
-    print(f"sample candidate score: {score:.3f}  (threshold={DEFAULT_THRESHOLD})")
-    print(f"acceptable: {is_acceptable(score)}")
+    bd_pass = score_candidate_breakdown(cand_pass, event_pass)
+    print(f'[PASS case] ASML total={bd_pass["total"]:.3f}')
+    print(f'  scores={bd_pass["scores"]}')
+    print(f'  weighted={bd_pass["weighted"]}')
+    assert bd_pass['total'] >= DEFAULT_THRESHOLD, f'expected pass, got {bd_pass["total"]}'
+    assert abs(bd_pass['total'] - sum(bd_pass['weighted'].values())) < 1e-9, \
+        'total mismatch with weighted sum'
+
+    # ── case 2: fail — RDDT-like 짧은 회사명 + ticker_registry 미등록 합성 케이스 ──
+    # 짧은 ticker(단일 토큰)만 company_names에 있으면 본문에 묻혀 회사명 점수가 떨어짐.
+    # 후보 제목이 정식 회사명만 적고 ticker 안 적는 marketbeat 패턴을 재현.
+    # production breakdown 로깅이 실제 진단 동선 — fixture는 의도 명시용.
+    event_fail = EarningsEvent(
+        ticker='RDDT',
+        fiscal_year=2026,
+        fiscal_quarter=1,
+        expected_call_datetime=datetime(2026, 5, 6, 0, 0, tzinfo=timezone.utc),
+        company_names=['RDDT'],  # ticker_registry 미등록 시 fallback
+        expected_title_terms=['Q1 2026', '1Q26', 'first quarter 2026', 'Q1 FY26'],
+        filing_id=999,
+    )
+    cand_fail = TranscriptCandidate(
+        url='https://www.marketbeat.com/earnings/transcripts/reddit-q1-2026/',
+        title='Reddit Q1 2026 Earnings Conference Call',
+        snippet='Reddit reported quarterly results.',
+        published_at=datetime(2026, 5, 7, 0, 0, tzinfo=timezone.utc),
+    )
+    bd_fail = score_candidate_breakdown(cand_fail, event_fail)
+    print(f'[FAIL case] RDDT-like total={bd_fail["total"]:.3f}')
+    print(f'  scores={bd_fail["scores"]}')
+    print(f'  weighted={bd_fail["weighted"]}')
+    print(f'  last_error_dump={json.dumps(bd_fail)}')
+    assert bd_fail['total'] < DEFAULT_THRESHOLD, f'expected fail, got {bd_fail["total"]}'
+    assert abs(bd_fail['total'] - sum(bd_fail['weighted'].values())) < 1e-9, \
+        'total mismatch with weighted sum'
+
+    # backward compat — score_candidate() / score_parsed() 시그니처 그대로 동작
+    assert score_candidate(cand_pass, event_pass) == bd_pass['total']
+    print('\nself-test OK (PASS + FAIL + backward-compat)')
