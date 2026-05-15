@@ -189,6 +189,32 @@ def build_qa_messages(qa: str) -> list[dict]:
     return [{'role': 'user', 'content': user_content}]
 
 
+def build_prepared_chunk_messages(prepared_chunk: str, chunk_index: int, total_chunks: int) -> list[dict]:
+    """Prepared Remarks를 N개 청크로 분할해 호출. max_tokens 16K 도달 회피용.
+
+    - 단일 청크: build_prepared_messages와 동일 (헤더 포함)
+    - 첫 번째: `## 경영진 발표` 헤더로 시작, 끝 안내 금지
+    - 마지막: 새 헤더 추가 금지, 본문 끝에서 깔끔 종료, 끝 안내 금지
+    - 중간: 새 헤더/끝 안내 모두 금지
+    """
+    if total_chunks == 1:
+        return build_prepared_messages(prepared_chunk)
+
+    if chunk_index == 0:
+        position = '**첫 번째 청크**입니다. 출력 시작은 `## 경영진 발표` 헤더로. 이후 청크가 이어지므로 끝에 어떤 안내 문구도 추가하지 마세요.'
+    elif chunk_index == total_chunks - 1:
+        position = '**마지막 청크**입니다. 이전 청크에서 이어지므로 새 헤더(`## 경영진 발표`)나 발화자 외 어떤 머리말도 추가하지 마세요. 본문만 깔끔히 번역하고, 마지막 발언 직후 종료. "[이하 Q&A 섹션 생략됨]" 같은 메타 안내 라인 금지.'
+    else:
+        position = '**중간 청크**입니다. 이전 청크에서 이어지므로 새 헤더 추가 금지. 다음 청크가 이어지므로 끝에 어떤 안내 문구도 추가 금지.'
+
+    user_content = f"""다음은 미국 상장사 분기 실적 컨퍼런스콜 **Prepared Remarks (경영진 발표)** 의 {position}
+
+[Prepared Remarks 청크 {chunk_index + 1}/{total_chunks}]
+{prepared_chunk}
+"""
+    return [{'role': 'user', 'content': user_content}]
+
+
 def build_qa_chunk_messages(qa_chunk: str, chunk_index: int, total_chunks: int) -> list[dict]:
     """Q&A를 N개 청크로 분할해 호출할 때 사용. 청크 인덱스에 따라 헤더 포함 여부 결정.
 

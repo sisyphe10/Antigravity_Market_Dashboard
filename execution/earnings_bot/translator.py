@@ -25,6 +25,7 @@ from .insider_signal import fetch_insider_window, format_appendix
 from .prompt_builder import (ANALYSIS_MODEL, SYSTEM_ANALYSIS, SYSTEM_TRANSLATION,
                              SYSTEM_TRANSLATION_TRANSCRIPT, TRANSLATION_MODEL,
                              AnalysisInput, build_analysis_messages,
+                             build_prepared_chunk_messages,
                              build_prepared_messages, build_qa_chunk_messages,
                              build_qa_messages,
                              build_transcript_translation_messages,
@@ -33,41 +34,48 @@ from .prompt_builder import (ANALYSIS_MODEL, SYSTEM_ANALYSIS, SYSTEM_TRANSLATION
                              transcript_translation_prompt_version)
 
 
-# Q&A 자동 청크 분할: 한국어 출력이 ~1.5x 영문 chars로 늘어나므로
+# 청크 분할: 한국어 출력이 ~1.5x 영문 chars로 늘어나므로
 # 영문 22K chars (~7K input tokens) 정도가 16K output 한도 안전 상한.
 QA_CHUNK_MAX_CHARS = 22000
+PREPARED_CHUNK_MAX_CHARS = 22000
 
 
-def _chunk_qa_text(qa_text: str, max_chars: int = QA_CHUNK_MAX_CHARS) -> list[str]:
-    """qa 본문을 자연 경계(`\nOperator:`)에서 분할.
+def _chunk_text(text: str, max_chars: int, boundaries: list[str]) -> list[str]:
+    """텍스트를 자연 경계에서 분할.
 
     - max_chars 이하면 단일 청크
-    - 그 이상이면 절반~max_chars 사이에서 가장 가까운 `\nOperator:` 위치에서 자름
-    - Operator 경계 못 찾으면 \\n\\n (빈 줄) 또는 어절 경계 폴백
+    - 그 이상이면 절반~max_chars 사이에서 boundaries 순서대로 매칭점 탐색
+    - 모두 실패 시 max_chars 직전 가장 가까운 \\n 폴백, 그것도 없으면 max_chars
     """
-    if not qa_text or len(qa_text) <= max_chars:
-        return [qa_text or '']
+    if not text or len(text) <= max_chars:
+        return [text or '']
 
     chunks: list[str] = []
-    remaining = qa_text
+    remaining = text
     while len(remaining) > max_chars:
-        # 절반 위치부터 max_chars 사이에서 가장 가까운 `\nOperator:` 찾기
         search_start = len(remaining) // 2
-        idx = remaining.find('\nOperator:', search_start, max_chars + 2000)
+        idx = -1
+        for marker in boundaries:
+            idx = remaining.find(marker, search_start, max_chars + 2000)
+            if idx != -1:
+                break
         if idx == -1:
-            # 폴백: \n\n 빈 줄
-            idx = remaining.find('\n\n', search_start, max_chars + 1000)
-        if idx == -1:
-            # 폴백: max_chars 직전 가장 가까운 \n
             idx = remaining.rfind('\n', search_start, max_chars)
         if idx == -1 or idx <= search_start:
-            # 마지막 폴백: 그냥 max_chars
             idx = max_chars
         chunks.append(remaining[:idx].strip())
         remaining = remaining[idx:].strip()
     if remaining:
         chunks.append(remaining)
     return chunks
+
+
+def _chunk_qa_text(qa_text: str, max_chars: int = QA_CHUNK_MAX_CHARS) -> list[str]:
+    return _chunk_text(qa_text, max_chars, ['\nOperator:', '\n\n'])
+
+
+def _chunk_prepared_text(prepared_text: str, max_chars: int = PREPARED_CHUNK_MAX_CHARS) -> list[str]:
+    return _chunk_text(prepared_text, max_chars, ['\n\n'])
 from .retry_helper import api_retry
 from .yoy_calculator import compute_yoy, format_table
 
@@ -353,16 +361,17 @@ def translate_transcript(transcript_id: int) -> dict:
             'qa_chars': len(qa),
         }
 
-    # 1) Prepared Remarks 호출
-    prepared_resp = None
-    if prepared:
-        prepared_resp = _call_haiku_long(
-            build_prepared_messages(prepared),
-            SYSTEM_TRANSLATION_TRANSCRIPT,
-            max_tokens=16000,
-        )
+    # 1) Prepared Remarks — 길이에 따라 자동 청크 분할 (qa와 동일 max 16K output 가드)
+    prepared_resps: list[dict] = []
+    prepared_chunks: list[str] = _chunk_prepared_text(prepared) if prepared else []
+    for i, chunk in enumerate(prepared_chunks):
+        if not chunk:
+            continue
+        msgs = build_prepared_chunk_messages(chunk, i, len(prepared_chunks))
+        resp = _call_haiku_long(msgs, SYSTEM_TRANSLATION_TRANSCRIPT, max_tokens=16000)
+        prepared_resps.append(resp)
 
-    # 2) Q&A 호출 — 길이에 따라 자동 청크 분할 (각 청크 16K output 한도 안에서 풀 보존)
+    # 2) Q&A 호출 — 길이에 따라 자동 청크 분할
     qa_resps: list[dict] = []
     qa_chunks: list[str] = _chunk_qa_text(qa) if qa else []
     for i, chunk in enumerate(qa_chunks):
@@ -374,16 +383,17 @@ def translate_transcript(transcript_id: int) -> dict:
 
     # 결과 합치기
     parts = []
-    if prepared_resp and prepared_resp['text']:
-        parts.append(prepared_resp['text'])
+    for r in prepared_resps:
+        if r.get('text'):
+            parts.append(r['text'])
     for r in qa_resps:
         if r.get('text'):
             parts.append(r['text'])
     translated_full = '\n\n'.join(parts)
 
-    total_input = (prepared_resp['input_tokens'] if prepared_resp else 0) + sum(
+    total_input = sum(r['input_tokens'] for r in prepared_resps) + sum(
         r['input_tokens'] for r in qa_resps)
-    total_output = (prepared_resp['output_tokens'] if prepared_resp else 0) + sum(
+    total_output = sum(r['output_tokens'] for r in prepared_resps) + sum(
         r['output_tokens'] for r in qa_resps)
 
     db.update_transcript_translation(
@@ -398,11 +408,12 @@ def translate_transcript(transcript_id: int) -> dict:
     return {
         'transcript_id': transcript_id,
         'translated': True,
-        'prepared': {
-            'input_tokens': prepared_resp['input_tokens'] if prepared_resp else 0,
-            'output_tokens': prepared_resp['output_tokens'] if prepared_resp else 0,
-            'stop_reason': prepared_resp['stop_reason'] if prepared_resp else None,
-        } if prepared_resp else None,
+        'prepared_chunks': [{
+            'input_tokens': r['input_tokens'],
+            'output_tokens': r['output_tokens'],
+            'stop_reason': r['stop_reason'],
+        } for r in prepared_resps],
+        'prepared_chunk_count': len(prepared_chunks),
         'qa_chunks': [{
             'input_tokens': r['input_tokens'],
             'output_tokens': r['output_tokens'],
