@@ -42,6 +42,7 @@ def fetch_article(url):
     try:
         import requests
         from bs4 import BeautifulSoup
+        import time as _time
 
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
 
@@ -51,7 +52,17 @@ def fetch_article(url):
         if naver_match:
             url = f'https://m.blog.naver.com/{naver_match.group(1)}/{naver_match.group(2)}'
 
-        res = requests.get(url, headers=headers, timeout=10)
+        # 최대 2회 시도 (DART 등 야간 응답 지연 흡수, transient 실패만 재시도)
+        res = None
+        for attempt in range(2):
+            try:
+                res = requests.get(url, headers=headers, timeout=25)
+                break
+            except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
+                if attempt == 0:
+                    _time.sleep(2)
+                    continue
+                raise
         res.raise_for_status()
 
         soup = BeautifulSoup(res.text, 'html.parser')

@@ -1,33 +1,41 @@
 """etfcheck.co.kr 내부 API 클라이언트"""
 import hashlib
 import time
-import urllib.request
-import urllib.parse
 import json
 import logging
+import requests
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 ETFCHECK_BASE = 'https://www.etfcheck.co.kr/user/etp/'
 ETFCHECK_KEY = '4lm@flEh68'
 
 
 def generate_checkclient():
-    """���간 기반 Checkclient 인증 해시 생성"""
+    """시간 기반 Checkclient 인증 해시 생성"""
     minutes = str(int(time.time() * 1000 / 60000))
     mapped = ''.join(ETFCHECK_KEY[int(ch)] for ch in minutes)
     return hashlib.sha256(mapped.encode()).hexdigest()
 
 
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=2, max=10),
+    retry=retry_if_exception_type((requests.exceptions.Timeout, requests.exceptions.ConnectionError)),
+    reraise=True,
+)
 def _request(endpoint, params=None):
-    """etfcheck API 호출"""
-    url = ETFCHECK_BASE + endpoint
-    if params:
-        url += '?' + urllib.parse.urlencode(params)
-    req = urllib.request.Request(url, headers={
-        'User-Agent': 'Mozilla/5.0',
-        'Checkclient': generate_checkclient(),
-    })
-    resp = urllib.request.urlopen(req, timeout=15)
-    data = json.loads(resp.read().decode())
+    """etfcheck API 호출 (timeout 30s, transient 실패 시 최대 3회 retry with exponential backoff)"""
+    resp = requests.get(
+        ETFCHECK_BASE + endpoint,
+        params=params,
+        headers={
+            'User-Agent': 'Mozilla/5.0',
+            'Checkclient': generate_checkclient(),
+        },
+        timeout=30,
+    )
+    resp.raise_for_status()
+    data = resp.json()
     if not data.get('success'):
         raise ValueError(f"API error: {data.get('message', 'unknown')}")
     return data.get('results', [])

@@ -1097,7 +1097,7 @@ async def daily_etf_collection_job(context: ContextTypes.DEFAULT_TYPE):
     try:
         result = subprocess.run(
             [sys.executable, "execution/etf_collector/collect_etf_daily.py"],
-            capture_output=True, text=True, timeout=1200,
+            capture_output=True, text=True, timeout=1800,
             cwd=DASHBOARD_DIR
         )
         if result.returncode == 0:
@@ -1125,7 +1125,7 @@ async def daily_etf_retry_job(context: ContextTypes.DEFAULT_TYPE):
     try:
         result = subprocess.run(
             [sys.executable, "execution/etf_collector/collect_etf_daily.py"],
-            capture_output=True, text=True, timeout=1200,
+            capture_output=True, text=True, timeout=1800,
             cwd=DASHBOARD_DIR
         )
         if result.returncode == 0:
