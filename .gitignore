@@ -61,6 +61,7 @@ charts/*
 !monthly_returns.json
 !correlation_matrix.json
 !investor_trading.json
+!sources.json
 
 # 기타
 *.bat

@@ -378,53 +378,69 @@ async def wisereport_job(context: ContextTypes.DEFAULT_TYPE):
 
 
 # ============================================================
-# KNA 세계원전시장동향 (매일 18:00)
+# Generic Source Pipeline (sources.json 기반)
 # ============================================================
-MAX_KNA_RETRIES = 2  # 30분 간격으로 최대 2회 재시도
+# sources.json 의 enabled=true 항목을 부팅 시 자동 등록.
+# 각 사이트의 어댑터는 execution/sources/<name>.py (fetch_new_posts/commit_state/format_message).
+sys.path.insert(0, os.path.join(DASHBOARD_DIR, 'execution'))
 
 
-async def _run_kna_job(context: ContextTypes.DEFAULT_TYPE, retry_count: int = 0):
-    """KNA 본 로직. retry_count=0=정기, 1+=재시도. 발송 성공 후 state 갱신."""
+def _load_source_config(source_name: str) -> dict:
+    """sources.json 에서 특정 source entry 가져오기 (없으면 빈 dict)."""
+    from sources import load_sources_config
+    for s in load_sources_config():
+        if s.get('name') == source_name:
+            return s
+    return {}
+
+
+async def _run_source_job(
+    context: ContextTypes.DEFAULT_TYPE,
+    source_name: str,
+    retry_count: int = 0,
+):
+    """소스 1건 본 로직. fetch → format → 발송 → commit_state.
+
+    retry_count=0=정기, 1+=재시도. retry 정책은 sources.json 의 retry.count / interval_min.
+    """
+    cfg = _load_source_config(source_name)
+    if not cfg:
+        logging.warning(f"source '{source_name}' not in sources.json — skipping")
+        return
+
+    label = cfg.get('label', source_name)
+    icon = cfg.get('icon', '📰')
+    retry_cfg = cfg.get('retry') or {}
+    max_retries = int(retry_cfg.get('count', 2))
+    retry_interval_min = int(retry_cfg.get('interval_min', 30))
+
     now_str = datetime.datetime.now(KST).strftime('%Y-%m-%d %H:%M')
-    retry_prefix = f"🔁 재시도 {retry_count}/{MAX_KNA_RETRIES} " if retry_count > 0 else ""
-
-    sys.path.insert(0, os.path.join(DASHBOARD_DIR, 'execution'))
+    retry_prefix = f"🔁 재시도 {retry_count}/{max_retries} " if retry_count > 0 else ""
 
     try:
-        from fetch_kna_news import fetch_new_posts, _save_state
+        from sources import load_adapter
+        adapter = load_adapter(source_name)
 
         try:
-            posts = fetch_new_posts(update_state=False)
+            posts = adapter.fetch_new_posts(update_state=False)
         except Exception as fetch_err:
             raise RuntimeError(
                 f"사이트 접속/파싱 실패 — {type(fetch_err).__name__}: {fetch_err}"
             ) from fetch_err
 
         if not posts:
-            msg = f"📰 <b>[KNA] {retry_prefix}신규 글 없음</b>\n{now_str}"
+            msg = f"{icon} <b>[{label}] {retry_prefix}신규 글 없음</b>\n{now_str}"
             for chat_id in SUBSCRIBERS:
                 try:
                     await context.bot.send_message(chat_id=chat_id, text=msg, parse_mode='HTML')
                 except Exception as e:
-                    logging.error(f"KNA empty notify 전송 실패: {e}")
-            logging.info("KNA: 신규 글 없음 (알림 발송)")
+                    logging.error(f"{source_name} empty notify 전송 실패: {e}")
+            logging.info(f"{source_name}: 신규 글 없음 (알림 발송)")
             return
 
         send_errors = []
         for p in posts:
-            header = (
-                f"📰 <b>[KNA] {_html.escape(p['title'])}</b>\n"
-                f"{p['date']} · #{p['display_no']}\n"
-                f"{p['url']}\n\n"
-            )
-            body_lines = []
-            for ln in p.get('body', '').split('\n'):
-                escaped = _html.escape(ln)
-                if ln.lstrip().startswith('□'):
-                    body_lines.append(f'<b><u>{escaped}</u></b>')
-                else:
-                    body_lines.append(escaped)
-            full = header + '\n'.join(body_lines)
+            full = adapter.format_message(p, label, icon)
             for chat_id in SUBSCRIBERS:
                 try:
                     for i in range(0, len(full), 4000):
@@ -433,28 +449,27 @@ async def _run_kna_job(context: ContextTypes.DEFAULT_TYPE, retry_count: int = 0)
                             disable_web_page_preview=True,
                         )
                 except Exception as e:
-                    send_errors.append(f"num={p.get('num')} chat={chat_id}: {e}")
-                    logging.error(f"KNA news 전송 실패 (num={p.get('num')}): {e}")
+                    send_errors.append(f"id={p.get('id')} chat={chat_id}: {e}")
+                    logging.error(f"{source_name} 전송 실패 (id={p.get('id')}): {e}")
 
         if send_errors:
             raise RuntimeError(
                 f"텔레그램 전송 실패 {len(send_errors)}건 — 첫 오류: {send_errors[0]}"
             )
 
-        max_num = max(p['num'] for p in posts)
-        _save_state({'last_seen_num': max_num})
-        logging.info(f"KNA news sent: {len(posts)}건, state→{max_num}")
+        adapter.commit_state(posts)
+        logging.info(f"{source_name} sent: {len(posts)}건, state committed")
 
     except Exception as e:
-        logging.error(f"KNA news job failed (retry={retry_count}): {e}")
-        will_retry = retry_count < MAX_KNA_RETRIES
+        logging.error(f"{source_name} job failed (retry={retry_count}): {e}")
+        will_retry = retry_count < max_retries
         retry_note = (
-            f"\n\n30분 뒤 자동 재시도 (시도 {retry_count + 1}/{MAX_KNA_RETRIES})"
+            f"\n\n{retry_interval_min}분 뒤 자동 재시도 (시도 {retry_count + 1}/{max_retries})"
             if will_retry else
             "\n\n재시도 한도 초과. 수동 점검 필요."
         )
         err_msg = (
-            f"⚠️ <b>[KNA] {retry_prefix}수집/전송 오류</b>\n"
+            f"⚠️ <b>[{label}] {retry_prefix}수집/전송 오류</b>\n"
             f"{now_str}\n\n"
             f"{_html.escape(str(e))}"
             f"{retry_note}"
@@ -463,30 +478,35 @@ async def _run_kna_job(context: ContextTypes.DEFAULT_TYPE, retry_count: int = 0)
             try:
                 await context.bot.send_message(chat_id=chat_id, text=err_msg, parse_mode='HTML')
             except Exception as send_err:
-                logging.error(f"KNA error notify 전송 실패: {send_err}")
+                logging.error(f"{source_name} error notify 전송 실패: {send_err}")
 
         if will_retry:
             context.job_queue.run_once(
-                _kna_retry_job,
-                when=30 * 60,
-                data={'retry_count': retry_count + 1},
-                name='kna_retry',
+                _source_retry_job,
+                when=retry_interval_min * 60,
+                data={'source_name': source_name, 'retry_count': retry_count + 1},
+                name=f'{source_name}_retry',
             )
 
 
-async def daily_kna_news_job(context: ContextTypes.DEFAULT_TYPE):
-    """매일 18:00 KNA 정기 잡"""
-    logging.info("Daily KNA news job started")
-    await _run_kna_job(context, retry_count=0)
+def _make_source_job(source_name: str):
+    """closure 로 source_name 바인딩한 정기 잡 생성."""
+    async def _job(context: ContextTypes.DEFAULT_TYPE):
+        logging.info(f"Source job started: {source_name}")
+        await _run_source_job(context, source_name, retry_count=0)
+    _job.__name__ = f'source_job_{source_name}'
+    return _job
 
 
-async def _kna_retry_job(context: ContextTypes.DEFAULT_TYPE):
-    """run_once 로 호출되는 KNA 재시도 잡"""
+async def _source_retry_job(context: ContextTypes.DEFAULT_TYPE):
+    """run_once 로 호출되는 재시도 잡 (모든 source 공용)."""
+    source_name = 'unknown'
     retry_count = 1
     if context.job and context.job.data:
+        source_name = context.job.data.get('source_name', 'unknown')
         retry_count = context.job.data.get('retry_count', 1)
-    logging.info(f"KNA retry job started (retry={retry_count})")
-    await _run_kna_job(context, retry_count=retry_count)
+    logging.info(f"Source retry job started: {source_name} (retry={retry_count})")
+    await _run_source_job(context, source_name, retry_count=retry_count)
 
 
 # ============================================================
@@ -631,16 +651,40 @@ if __name__ == "__main__":
             time=datetime.time(hour=h, minute=0, second=0, tzinfo=kst),
         )
 
-    job_queue.run_daily(
-        daily_kna_news_job,
-        time=datetime.time(hour=18, minute=0, second=0, tzinfo=kst),
-    )
+    # ── sources.json 기반 동적 등록 ───────────────────────────────
+    from sources import load_sources_config
+    source_schedule_log: list[str] = []
+    for src in load_sources_config():
+        src_name = src.get('name')
+        if not src_name:
+            continue
+        schedule = src.get('schedule') or []
+        if isinstance(schedule, str):
+            schedule = [schedule]
+        if not schedule:
+            logging.warning(f"source '{src_name}' has no schedule — skipping")
+            continue
+        job_fn = _make_source_job(src_name)
+        for hhmm in schedule:
+            try:
+                h_str, m_str = hhmm.split(':')
+                hh = int(h_str)
+                mm = int(m_str)
+            except Exception:
+                logging.error(f"source '{src_name}' bad schedule entry: {hhmm}")
+                continue
+            job_queue.run_daily(
+                job_fn,
+                time=datetime.time(hour=hh, minute=mm, second=0, tzinfo=kst),
+            )
+            source_schedule_log.append(f"  - {src.get('label', src_name)} ({src_name}): {hhmm} KST")
 
     print(f"Research Alerts Bot started at {datetime.datetime.now()}")
     print("✅ Daily jobs scheduled:")
     print("  - Research Notes headlines: 05:10 KST")
     print("  - Market alert summary: 05:15 KST (투자유의종목 현황)")
     print("  - WiseReport: 07:00~17:00 KST (hourly)")
-    print("  - KNA news: 18:00 KST")
+    for line in source_schedule_log:
+        print(line)
 
     application.run_polling()

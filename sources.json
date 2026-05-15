@@ -1,0 +1,23 @@
+{
+  "_comment": "RA_Sisyphe_bot 의 사이트 등록표. enabled=true 항목을 부팅 시 자동 등록. 신규 사이트 추가: (1) execution/sources/<name>.py 작성 → (2) 여기에 entry 추가 → (3) bash scripts/deploy.sh",
+  "sources": [
+    {
+      "name": "kna",
+      "label": "KNA 세계원전시장동향",
+      "icon": "📰",
+      "schedule": ["18:00"],
+      "enabled": true,
+      "retry": {"count": 2, "interval_min": 30},
+      "translate": {"enabled": false}
+    },
+    {
+      "name": "semianalysis",
+      "label": "SemiAnalysis",
+      "icon": "📊",
+      "schedule": ["09:00", "21:00"],
+      "enabled": true,
+      "retry": {"count": 2, "interval_min": 30},
+      "translate": {"enabled": true, "model": "claude-haiku-4-5-20251001", "target_lang": "ko"}
+    }
+  ]
+}

@@ -24,6 +24,7 @@ BACKUP_FILES=(
 )
 BACKUP_DIRS=(
     "execution/research_bot/media"
+    "sources_state"
 )
 
 backup() {
