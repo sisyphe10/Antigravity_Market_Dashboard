@@ -934,9 +934,67 @@ async def featured_update_job(context):
         # 에러가 있더라도 대시보드 재생성 시도 (기존 데이터로라도 갱신)
         subprocess.run([sys.executable, "execution/create_dashboard.py"],
                        capture_output=True, text=True, timeout=120, cwd=dashboard_dir)
+
+        # 포트폴리오 상관계수 + 집중도 위험 갱신 (stock_price_history 갱신 직후라 적절)
+        # 계산 전 기존 집중위험 클러스터 멤버셋을 백업해서, 신규 등장만 알림
+        corr_path = os.path.join(dashboard_dir, 'correlation_matrix.json')
+        prev_risk_sets = {}  # {portfolio_name: set of frozenset(codes)}
+        if os.path.exists(corr_path):
+            try:
+                with open(corr_path, 'r', encoding='utf-8') as cf:
+                    _prev = json.load(cf)
+                for _name, _p in _prev.get('portfolios', {}).items():
+                    prev_risk_sets[_name] = {
+                        frozenset(m['code'] for m in c['members'])
+                        for c in _p.get('clusters', []) if c.get('is_concentration_risk')
+                    }
+            except Exception as ce:
+                logging.warning(f"{tag} 직전 correlation 읽기 실패 (무시): {ce}")
+
+        corr_result = subprocess.run(
+            [sys.executable, "execution/calc_portfolio_correlation.py"],
+            capture_output=True, text=True, timeout=60, cwd=dashboard_dir
+        )
+        new_risk_alerts = []  # [(portfolio_name, cluster_dict), ...]
+        if corr_result.returncode == 0:
+            logging.info(f"{tag} correlation: {corr_result.stdout.strip()[-200:]}")
+            try:
+                with open(corr_path, 'r', encoding='utf-8') as cf:
+                    _new = json.load(cf)
+                for _name, _p in _new.get('portfolios', {}).items():
+                    _prev_set = prev_risk_sets.get(_name, set())
+                    for _c in _p.get('clusters', []):
+                        if not _c.get('is_concentration_risk'):
+                            continue
+                        _fs = frozenset(m['code'] for m in _c['members'])
+                        if _fs not in _prev_set:
+                            new_risk_alerts.append((_name, _c))
+            except Exception as ce:
+                logging.warning(f"{tag} correlation 비교 실패 (무시): {ce}")
+        else:
+            errors.append(f"correlation 실패: {corr_result.stderr[-200:]}")
+            logging.warning(f"{tag} {errors[-1]}")
+
+        # 신규 집중위험 클러스터 알림 (구독자 전체)
+        if new_risk_alerts:
+            risk_msg_lines = ['⚠️ 신규 집중 위험 클러스터']
+            for _name, _c in new_risk_alerts:
+                _members = ' · '.join(f"{m['name']}({m['weight']}%)" for m in _c['members'])
+                risk_msg_lines.append('')
+                risk_msg_lines.append(f"[{_name}]")
+                risk_msg_lines.append(f"비중합 {_c['weight_sum']}% · 평균상관 {_c['avg_corr']:.3f}")
+                risk_msg_lines.append(_members)
+            risk_msg = '\n'.join(risk_msg_lines)
+            for _cid in SUBSCRIBERS:
+                try:
+                    await context.bot.send_message(chat_id=_cid, text=risk_msg[:4000])
+                except Exception:
+                    pass
+
         now_str = now_kst.strftime("%Y-%m-%d %H:%M")
         subprocess.run(["git", "add", "featured.html", "featured_data.json", "featured_news.json",
-                        "etf.html", "index.html", "market.html", "wrap.html"],
+                        "etf.html", "index.html", "market.html", "wrap.html",
+                        "correlation_matrix.json"],
                        cwd=dashboard_dir, capture_output=True, timeout=30)
         commit_result = subprocess.run(
             ["git", "commit", "-m", f"Featured 업데이트 ({now_str})"],
