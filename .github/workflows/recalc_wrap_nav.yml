@@ -54,14 +54,5 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "auto: Wrap_NAV 재계산 + 대시보드 재생성 [skip ci]"
-          file_pattern: |
-            Wrap_NAV.xlsx
-            portfolio_data.json
-            wrap.html
-            market.html
-            index.html
-            universe.html
-            seibro.html
-            featured.html
-            hotels.html
+          file_pattern: "Wrap_NAV.xlsx portfolio_data.json wrap.html market.html index.html universe.html seibro.html featured.html hotels.html"
           skip_fetch: true
