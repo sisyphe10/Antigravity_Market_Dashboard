@@ -160,9 +160,14 @@ def resolve_cik(ticker: str, *, refresh: bool = False) -> str | None:
 
 @lru_cache(maxsize=512)
 def get_company_name(ticker: str) -> str | None:
-    """ticker → SEC 공식 회사명 (예: 'Reddit, Inc.'). matcher 회사명 fuzzy 매칭용."""
+    """ticker → SEC 공식 회사명 (예: 'Reddit, Inc.'). matcher 회사명 fuzzy 매칭용.
+
+    set_identity()를 1회 호출 — 없으면 SEC가 UA 요청을 거부해 None만 반환.
+    lru_cache 첫 호출 시에만 실행되며 edgartools 내부에서 idempotent하게 동작.
+    """
     try:
-        from edgar import Company
+        from edgar import Company, set_identity
+        set_identity(os.getenv('SEC_EDGAR_USER_AGENT', 'Kimtaesik (kts77775@gmail.com)'))
         c = Company(ticker.upper())
         name = getattr(c, 'name', None)
         return str(name) if name else None
@@ -184,10 +189,37 @@ if __name__ == "__main__":
         result = warmup_universe_cache()
         for t, cik in result.items():
             ftype = get_filing_type(t)
-            tag = '🌏 FPI' if is_foreign_issuer(t) else '🇺🇸 US'
-            print(f"{tag}  {t:6s}  {ftype}  CIK={cik or 'MISS'}")
+            tag = 'FPI' if is_foreign_issuer(t) else 'US'
+            print(f"[{tag}] {t:6s} {ftype} CIK={cik or 'MISS'}")
         miss = [t for t, c in result.items() if c is None]
         if miss:
-            print(f"\n⚠ CIK lookup 실패: {miss}")
+            print(f"\n[WARN] CIK lookup 실패: {miss}")
+    elif len(sys.argv) > 1 and sys.argv[1] == 'name-check':
+        # P2 set_identity 패치 검증: 9종 SEC 회사명이 None이 아닌지 확인.
+        # 네트워크/SEC 의존이라 SKIP_NAME_CHECK=1 환경변수 또는 오프라인 시 skip.
+        if os.getenv('SKIP_NAME_CHECK', '').lower() in ('1', 'true', 'yes'):
+            print('[SKIP] SKIP_NAME_CHECK=1 — name-check 건너뜀')
+            sys.exit(0)
+        expected = {
+            'CORZ': 'Core Scientific, Inc./tx',
+            'TPR': 'TAPESTRY, INC.',
+            'BMY': 'BRISTOL MYERS SQUIBB CO',
+        }
+        fails = []
+        for t, exp in expected.items():
+            try:
+                got = get_company_name(t)
+            except Exception as e:
+                fails.append((t, f'예외: {e}'))
+                continue
+            if got != exp:
+                fails.append((t, f'expected={exp!r} got={got!r}'))
+            else:
+                print(f'[OK] {t}: {got}')
+        if fails:
+            for t, reason in fails:
+                print(f'[FAIL] {t}: {reason}')
+            sys.exit(1)
+        print('\nname-check OK (3/3)')
     else:
-        print("Usage: python ticker_registry.py warmup")
+        print("Usage: python ticker_registry.py [warmup|name-check]")
