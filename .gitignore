@@ -87,3 +87,6 @@ execution/generate_target_transform_chart.py
 db_target_transform_2nd_chart.html
 db_target_transform_2nd_chart_nostem.html
 execution/generate_db_target_transform_2nd_chart.py
+
+# Research bot 일일 미디어 (텔레그램 첨부)
+execution/research_bot/media/
