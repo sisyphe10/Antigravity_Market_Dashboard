@@ -69,6 +69,7 @@ BOTS=(sisyphe-bot research-notes-bot ra-sisyphe-bot)
 SCRIPTS=(execution/sisyphe_bot.py execution/research_bot/research_notes_bot.py execution/ra_sisyphe_bot.py)
 EARNINGS_BOT_TIMER=earnings-bot.timer
 KODEX_TIMER=kodex-sectors.timer
+LANDING_HIGHLIGHTS_TIMER=landing-highlights.timer
 EARNINGS_BOT_SCRIPTS=(
     execution/earnings_bot/runner.py
     execution/earnings_bot/edgar_monitor.py
@@ -114,6 +115,11 @@ healthcheck() {
     else
         echo "⚠️  $KODEX_TIMER inactive"
     fi
+    if sudo systemctl is-active --quiet "$LANDING_HIGHLIGHTS_TIMER"; then
+        echo "✅ $LANDING_HIGHLIGHTS_TIMER is active"
+    else
+        echo "⚠️  $LANDING_HIGHLIGHTS_TIMER inactive"
+    fi
     return $rc
 }
 
@@ -156,6 +162,32 @@ install_kodex_units() {
     fi
 }
 
+install_landing_highlights_units() {
+    # 30분 간격으로 landing_highlights.json 재생성 + push (16:00~16:59 KST 가드)
+    local need_reload=0
+    local need_enable=0
+    if [ ! -f /etc/systemd/system/landing-highlights.service ]; then
+        echo "🔧 landing-highlights systemd unit 최초 설치..."
+        need_enable=1
+    fi
+    for unit in landing-highlights.service landing-highlights.timer; do
+        if [ ! -f "/etc/systemd/system/$unit" ] || ! cmp -s "$REPO_DIR/scripts/$unit" "/etc/systemd/system/$unit"; then
+            echo "  → sync $unit"
+            sudo cp "$REPO_DIR/scripts/$unit" /etc/systemd/system/
+            need_reload=1
+        fi
+    done
+    chmod +x "$REPO_DIR/scripts/run_landing_highlights.sh"
+    if [ "$need_reload" = 1 ]; then
+        sudo systemctl daemon-reload
+        echo "  ✓ daemon-reload"
+    fi
+    if [ "$need_enable" = 1 ]; then
+        sudo systemctl enable --now landing-highlights.timer
+        echo "  ✓ landing-highlights.timer enabled + started"
+    fi
+}
+
 deploy() {
     cd "$REPO_DIR"
     echo "📥 Pulling latest code..."
@@ -166,6 +198,7 @@ deploy() {
 
     install_earnings_bot_units
     install_kodex_units
+    install_landing_highlights_units
 
     for b in "${BOTS[@]}"; do
         echo "🔄 Restarting $b..."
@@ -196,6 +229,7 @@ reclone() {
 
     install_earnings_bot_units
     install_kodex_units
+    install_landing_highlights_units
 
     for b in "${BOTS[@]}"; do
         echo "🔄 Restarting $b..."

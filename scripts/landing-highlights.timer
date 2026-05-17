@@ -1,0 +1,12 @@
+[Unit]
+Description=Antigravity Landing Highlights timer (매 30분, 16시 가드 + 지터)
+
+[Timer]
+OnCalendar=*-*-* *:0/30:00 Asia/Seoul
+RandomizedDelaySec=120
+AccuracySec=30s
+Unit=landing-highlights.service
+Persistent=true
+
+[Install]
+WantedBy=timers.target

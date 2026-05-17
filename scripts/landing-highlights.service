@@ -1,0 +1,17 @@
+[Unit]
+Description=Antigravity Landing Highlights generator (30분 회전 위젯 데이터)
+After=network-online.target
+Wants=network-online.target
+OnFailure=sisyphe-bot-notify.service
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/Antigravity_Market_Dashboard
+ExecStart=/bin/bash /home/ubuntu/Antigravity_Market_Dashboard/scripts/run_landing_highlights.sh
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=5min
+
+[Install]
+WantedBy=multi-user.target

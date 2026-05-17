@@ -4281,7 +4281,22 @@ def create_dashboard():
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
         body {{ font-family: 'Inter', 'Noto Sans KR', sans-serif; background: #f8f9fa; color: #333; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }}
-        h1 {{ font-size: 2.2rem; font-weight: 800; margin-bottom: 48px; color: #111; }}
+        h1 {{ font-size: 2.2rem; font-weight: 800; margin-bottom: 22px; color: #111; }}
+        .lh-widget {{ display: flex; align-items: center; gap: 14px; background: #fff; border-radius: 14px; padding: 12px 18px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-left: 5px solid #999; max-width: 800px; width: 100%; margin: 0 auto 26px auto; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; min-height: 52px; }}
+        .lh-widget:hover {{ transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.10); }}
+        .lh-widget[hidden] {{ display: none; }}
+        .lh-tag {{ flex: 0 0 auto; padding: 4px 11px; background: #999; color: #fff; font-size: 0.72rem; font-weight: 700; border-radius: 999px; letter-spacing: 0.4px; }}
+        .lh-spark {{ flex: 0 0 auto; width: 80px; height: 24px; display: flex; align-items: center; justify-content: center; }}
+        .lh-spark svg {{ width: 80px; height: 24px; display: block; }}
+        .lh-text {{ flex: 1 1 auto; font-size: 0.92rem; color: #333; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
+        .lh-shuffle {{ flex: 0 0 auto; background: none; border: none; cursor: pointer; font-size: 1.05rem; opacity: 0.35; padding: 4px 6px; transition: opacity 0.15s, transform 0.2s; line-height: 1; color: inherit; }}
+        .lh-shuffle:hover {{ opacity: 0.95; transform: rotate(20deg); }}
+        @media (max-width: 600px) {{
+            .lh-widget {{ flex-wrap: wrap; padding: 10px 14px; gap: 10px; }}
+            .lh-text {{ white-space: normal; flex-basis: 100%; order: 4; font-size: 0.85rem; }}
+            .lh-spark {{ width: 60px; }}
+            .lh-spark svg {{ width: 60px; }}
+        }}
         .cards {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; max-width: 800px; width: 100%; }}
         .card {{ background: #fff; border-radius: 14px; padding: 28px 24px; text-decoration: none; color: #333; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-left: 5px solid #ccc; transition: transform 0.15s, box-shadow 0.15s; display: block; }}
         .card:hover {{ transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }}
@@ -4293,6 +4308,12 @@ def create_dashboard():
 </head>
 <body>
     <h1>Age of Emergence</h1>
+    <div id="landing-highlight" class="lh-widget" hidden>
+        <span class="lh-tag">—</span>
+        <span class="lh-spark"></span>
+        <span class="lh-text">—</span>
+        <button class="lh-shuffle" type="button" title="다른 하이라이트" aria-label="다른 하이라이트 보기">🎲</button>
+    </div>
     <div class="cards">
         <a href="market.html" class="card" style="border-left-color:#2d7a3a">
             <div class="icon">📊</div>
@@ -4343,6 +4364,86 @@ def create_dashboard():
         </a>
     </div>
     <footer>Age of Emergence</footer>
+    <script>
+    (function() {{
+        var widget = document.getElementById('landing-highlight');
+        if (!widget) return;
+        var tagEl = widget.querySelector('.lh-tag');
+        var sparkEl = widget.querySelector('.lh-spark');
+        var textEl = widget.querySelector('.lh-text');
+        var shuffleBtn = widget.querySelector('.lh-shuffle');
+        var current = null;
+        var slots = [];
+        var TREND = {{ up: '#2d7a3a', down: '#c2410c', flat: '#888' }};
+
+        function renderSpark(spark) {{
+            if (!spark || !spark.series || spark.series.length < 2) {{
+                sparkEl.innerHTML = '';
+                return;
+            }}
+            var vals = spark.series;
+            var w = 80, h = 24, pad = 2;
+            var mn = Math.min.apply(null, vals);
+            var mx = Math.max.apply(null, vals);
+            var range = (mx - mn) || 1;
+            var stepX = (w - pad * 2) / (vals.length - 1);
+            var pts = [];
+            for (var i = 0; i < vals.length; i++) {{
+                var x = pad + i * stepX;
+                var y = h - pad - ((vals[i] - mn) / range) * (h - pad * 2);
+                pts.push(x.toFixed(1) + ',' + y.toFixed(1));
+            }}
+            var color = TREND[spark.trend] || '#888';
+            sparkEl.innerHTML =
+                '<svg viewBox="0 0 ' + w + ' ' + h + '" xmlns="http://www.w3.org/2000/svg">' +
+                '<path d="M' + pts.join(' L') + '" fill="none" stroke="' + color +
+                '" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+                '</svg>';
+        }}
+
+        function render(slot) {{
+            current = slot;
+            var color = slot.color || '#999';
+            widget.style.borderLeftColor = color;
+            tagEl.textContent = slot.category || '';
+            tagEl.style.backgroundColor = color;
+            textEl.textContent = slot.text || '';
+            renderSpark(slot.spark);
+            widget.hidden = false;
+            try {{ sessionStorage.setItem('lh_prev_id', slot.id); }} catch (e) {{}}
+        }}
+
+        function pickSlot() {{
+            if (!slots.length) return null;
+            var prev = '';
+            try {{ prev = sessionStorage.getItem('lh_prev_id') || ''; }} catch (e) {{}}
+            var pool = slots.filter(function(s) {{ return s.id !== prev; }});
+            if (!pool.length) pool = slots;
+            return pool[Math.floor(Math.random() * pool.length)];
+        }}
+
+        widget.addEventListener('click', function(e) {{
+            if (e.target.closest('.lh-shuffle')) return;
+            if (current && current.href) window.location.href = current.href;
+        }});
+
+        shuffleBtn.addEventListener('click', function(e) {{
+            e.stopPropagation();
+            var next = pickSlot();
+            if (next) render(next);
+        }});
+
+        fetch('landing_highlights.json?t=' + Date.now())
+            .then(function(r) {{ if (!r.ok) throw new Error('http ' + r.status); return r.json(); }})
+            .then(function(data) {{
+                slots = (data && Array.isArray(data.slots)) ? data.slots : [];
+                if (data && data.updated_at) widget.title = 'Updated ' + data.updated_at;
+                var slot = pickSlot();
+                if (slot) render(slot);
+            }})
+            .catch(function() {{ /* hide silently */ }});
+    }})();
+    </script>
 </body>
 </html>"""
 
