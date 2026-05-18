@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-17T18:30:49+09:00",
+  "updated": "2026-05-18T16:21:40+09:00",
   "window_days": 30,
   "thresholds": {
     "pair_watch": 0.7,
@@ -482,7 +482,7 @@
         "concentration_clusters": 1
       }
     },
-    "NH 목표전환형 3호": {
+    "NH 목표전환형 3호 / DB 목표전환형 4차": {
       "window_days": 30,
       "date_range": [
         "2026-04-02",
