@@ -4418,7 +4418,10 @@ def create_dashboard():
             widget.style.borderLeftColor = color;
             tagEl.textContent = slot.category || '';
             tagEl.style.backgroundColor = color;
-            var html = escapeHtml(slot.text || '').replace(/\(([^)]+)\)/g, '(<b><u>$1</u></b>)');
+            var html = escapeHtml(slot.text || '').replace(/\(([^)]+)\)/g, function(m, inner) {{
+                if (/^[월화수목금토일]$/.test(inner)) return m;
+                return '(<b><u>' + inner + '</u></b>)';
+            }});
             textEl.innerHTML = html;
             renderSpark(slot.spark);
             widget.hidden = false;
