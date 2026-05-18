@@ -4296,20 +4296,20 @@ def create_dashboard():
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
         body {{ font-family: 'Inter', 'Noto Sans KR', sans-serif; background: #f8f9fa; color: #333; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }}
         h1 {{ font-size: 2.2rem; font-weight: 800; margin-bottom: 22px; color: #111; }}
-        .lh-widget {{ display: flex; align-items: center; gap: 14px; background: #fff; border-radius: 14px; padding: 12px 18px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-left: 5px solid #999; max-width: 800px; width: 100%; margin: 0 auto 26px auto; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; min-height: 100px; }}
+        .lh-widget {{ display: flex; align-items: center; gap: 14px; background: #fff; border-radius: 14px; padding: 12px 18px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-left: 5px solid #999; max-width: 800px; width: 100%; margin: 0 auto 26px auto; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; min-height: 120px; }}
         .lh-widget:hover {{ transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.10); }}
         .lh-widget[hidden] {{ display: none; }}
         .lh-tag {{ flex: 0 0 auto; padding: 4px 11px; background: #999; color: #fff; font-size: 0.72rem; font-weight: 700; border-radius: 999px; letter-spacing: 0.4px; }}
-        .lh-spark {{ flex: 0 0 auto; width: 180px; height: 60px; display: flex; align-items: center; justify-content: center; }}
-        .lh-spark svg {{ width: 180px; height: 60px; display: block; }}
+        .lh-spark {{ flex: 0 0 auto; width: 180px; height: 80px; display: flex; align-items: center; justify-content: center; }}
+        .lh-spark svg {{ width: 180px; height: 80px; display: block; }}
         .lh-text {{ flex: 1 1 auto; font-size: 0.92rem; color: #333; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
         .lh-shuffle {{ flex: 0 0 auto; background: none; border: none; cursor: pointer; font-size: 1.05rem; opacity: 0.35; padding: 4px 6px; transition: opacity 0.15s, transform 0.2s; line-height: 1; color: inherit; }}
         .lh-shuffle:hover {{ opacity: 0.95; transform: rotate(20deg); }}
         @media (max-width: 600px) {{
             .lh-widget {{ flex-wrap: wrap; padding: 10px 14px; gap: 10px; }}
             .lh-text {{ white-space: normal; flex-basis: 100%; order: 4; font-size: 0.85rem; }}
-            .lh-spark {{ width: 140px; height: 48px; }}
-            .lh-spark svg {{ width: 140px; height: 48px; }}
+            .lh-spark {{ width: 140px; height: 62px; }}
+            .lh-spark svg {{ width: 140px; height: 62px; }}
         }}
         .cards {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; max-width: 800px; width: 100%; }}
         .card {{ background: #fff; border-radius: 14px; padding: 28px 24px; text-decoration: none; color: #333; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-left: 5px solid #ccc; transition: transform 0.15s, box-shadow 0.15s; display: block; }}
@@ -4396,7 +4396,7 @@ def create_dashboard():
                 return;
             }}
             var vals = spark.series;
-            var w = 180, h = 60, pad = 4;
+            var w = 180, h = 80, pad = 5;
             var mn = Math.min.apply(null, vals);
             var mx = Math.max.apply(null, vals);
             var range = (mx - mn) || 1;
