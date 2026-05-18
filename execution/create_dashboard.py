@@ -4383,7 +4383,7 @@ def create_dashboard():
             100% {{ transform: rotate(720deg) scale(1)    translateY(0); }}
         }}
         .lh-divider {{ border: none; border-top: 1.5px solid #000; margin: 12px 0; }}
-        .lh-quote-row {{ display: flex; align-items: center; padding: 4px 0; cursor: pointer; min-height: 36px; }}
+        .lh-quote-row {{ display: flex; align-items: center; padding: 4px 0 4px 20px; cursor: pointer; min-height: 36px; }}
         .lh-quote-text {{ flex: 1 1 auto; font-size: 0.92rem; color: #333; line-height: 1.55; white-space: normal; }}
         .lh-author {{ color: #333; font-size: 1em; font-style: italic; margin-left: 8px; white-space: nowrap; }}
         @media (max-width: 600px) {{
