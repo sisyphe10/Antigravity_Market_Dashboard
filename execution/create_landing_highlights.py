@@ -110,6 +110,15 @@ def fmt_pct(x):
     return f'{x*100:+.1f}%'
 
 
+def fmt_price_dynamic(v, threshold=50):
+    """$threshold 미만이면 소수 1자리, 이상이면 정수(천단위)."""
+    if v is None:
+        return 'N/A'
+    if abs(v) < threshold:
+        return f"{v:.1f}"
+    return f"{v:,.0f}"
+
+
 def atomic_write_json(path, data):
     path = Path(path)
     tmp = path.with_suffix(path.suffix + '.tmp')
@@ -250,7 +259,7 @@ def b_memory_ddr5(ctx):
         phrase = pick('down_mild')
     else:
         phrase = pick('flat')
-    text = f"DDR5 7일 {fmt_pct(chg)} (현재 ${vals[-1]:.2f}) — {phrase}"
+    text = f"DDR5 7일 {fmt_pct(chg)} (${vals[-1]:,.0f}) — {phrase}"
     return slot('memory-ddr5', 'Memory', 'interpret', text, 'market.html', vals)
 
 
@@ -263,7 +272,7 @@ def b_crypto_btc(ctx):
     if not base:
         return None
     chg = (vals[-1] - base) / base
-    text = f"BTC 1M {fmt_pct(chg)} (현재 ${vals[-1]:,.0f})"
+    text = f"BTC 1M {fmt_pct(chg)} (${vals[-1]:,.0f})"
     return slot('crypto-btc', 'Crypto', 'fact', text, 'market.html', vals, trend_idx=22)
 
 
@@ -273,7 +282,7 @@ def b_commodity_gold(ctx):
         return None
     vals = srs['values']
     chg = (vals[-1] - vals[-22]) / vals[-22] if vals[-22] else 0
-    text = f"Gold 1M {fmt_pct(chg)} (현재 ${vals[-1]:,.0f}/oz)"
+    text = f"Gold 1M {fmt_pct(chg)} (${vals[-1]:,.0f}/oz)"
     return slot('commodity-gold', 'Commodity', 'fact', text, 'market.html', vals)
 
 
@@ -283,7 +292,7 @@ def b_fx_usdkrw(ctx):
         return None
     vals = srs['values']
     chg = vals[-1] - vals[-8]
-    text = f"USD/KRW 1주 {chg:+.1f}원 (현재 {vals[-1]:,.1f}원)"
+    text = f"USD/KRW 1주 {chg:+.1f}원 ({vals[-1]:,.0f}원)"
     return slot('fx-usdkrw', 'FX', 'fact', text, 'market.html', vals)
 
 
@@ -299,7 +308,7 @@ def b_dxy(ctx):
         phrase = '달러 약세 — 위험자산 우호'
     else:
         phrase = '달러 횡보'
-    text = f"DXY 7일 {fmt_pct(chg)} (현재 {vals[-1]:.2f}) — {phrase}"
+    text = f"DXY 7일 {fmt_pct(chg)} ({vals[-1]:,.0f}) — {phrase}"
     return slot('dxy', 'FX', 'interpret', text, 'market.html', vals)
 
 
@@ -325,7 +334,7 @@ def b_us10y(ctx):
         return None
     vals = srs['values']
     chg_bp = (vals[-1] - vals[-8]) * 100
-    text = f"US 10Y {vals[-1]:.2f}% (1주 {chg_bp:+.0f}bp)"
+    text = f"US 10Y {vals[-1]:.1f}% (1주 {chg_bp:+.0f}bp)"
     return slot('us-10y', 'Rate', 'fact', text, 'market.html', vals)
 
 
@@ -357,7 +366,7 @@ def b_smp(ctx):
         return None
     vals = srs['values']
     chg = (vals[-1] - vals[-8]) / vals[-8] if vals[-8] else 0
-    text = f"SMP 7일 {fmt_pct(chg)} (현재 {vals[-1]:.1f}원/kWh)"
+    text = f"SMP 7일 {fmt_pct(chg)} ({vals[-1]:,.0f}원/kWh)"
     return slot('smp', 'Commodity', 'fact', text, 'market.html', vals)
 
 
@@ -383,7 +392,7 @@ def b_index_kospi(ctx):
     if not base:
         return None
     chg = (vals[-1] - base) / base
-    text = f"KOSPI 1M {fmt_pct(chg)} (현재 {vals[-1]:,.1f})"
+    text = f"KOSPI 1M {fmt_pct(chg)} ({vals[-1]:,.0f})"
     return slot('index-kospi', 'Index', 'fact', text, 'market.html', vals, trend_idx=22)
 
 
@@ -396,7 +405,7 @@ def b_index_nasdaq(ctx):
     if not base:
         return None
     chg = (vals[-1] - base) / base
-    text = f"NASDAQ 1M {fmt_pct(chg)} (현재 {vals[-1]:,.0f})"
+    text = f"NASDAQ 1M {fmt_pct(chg)} ({vals[-1]:,.0f})"
     return slot('index-nasdaq', 'Index', 'fact', text, 'market.html', vals, trend_idx=22)
 
 
@@ -483,13 +492,13 @@ def _generic_1m(ctx, dtype, name, label, sid, category, href='market.html', unit
     if not base:
         return None
     chg = (vals[-1] - base) / base
-    if fmt == 'price2':
-        cur = f"{vals[-1]:,.2f}"
-    elif fmt == 'price0':
-        cur = f"{vals[-1]:,.0f}"
+    if fmt == 'price4':
+        cur = f"{vals[-1]:.4f}"
+    elif fmt == 'dynamic':
+        cur = fmt_price_dynamic(vals[-1])
     else:
-        cur = f"{vals[-1]:,.1f}"
-    text = f"{label} 1M {fmt_pct(chg)} (현재 {unit}{cur})"
+        cur = f"{vals[-1]:,.0f}"
+    text = f"{label} 1M {fmt_pct(chg)} ({unit}{cur})"
     return slot(sid, category, 'fact', text, href, vals, trend_idx=22)
 
 
@@ -502,13 +511,13 @@ def _generic_7d(ctx, dtype, name, label, sid, category, href='market.html', unit
     if not base:
         return None
     chg = (vals[-1] - base) / base
-    if fmt == 'price2':
-        cur = f"{vals[-1]:,.2f}"
-    elif fmt == 'price4':
+    if fmt == 'price4':
         cur = f"{vals[-1]:.4f}"
+    elif fmt == 'dynamic':
+        cur = fmt_price_dynamic(vals[-1])
     else:
-        cur = f"{vals[-1]:,.1f}"
-    text = f"{label} 7일 {fmt_pct(chg)} (현재 {unit}{cur})"
+        cur = f"{vals[-1]:,.0f}"
+    text = f"{label} 7일 {fmt_pct(chg)} ({unit}{cur})"
     return slot(sid, category, 'fact', text, href, vals)
 
 
@@ -546,7 +555,7 @@ def b_valuation_sp500_per(ctx):
         phrase = '저평가권'
     else:
         phrase = '중립권'
-    text = f"S&P500 PER {vals[-1]:.1f}배 (1M {diff:+.1f}p) — {phrase}"
+    text = f"S&P500 PER {vals[-1]:,.0f}배 (1M {diff:+.1f}p) — {phrase}"
     return slot('val-sp500-per', 'Index', 'interpret', text, 'market.html', vals, trend_idx=22)
 
 
@@ -556,24 +565,24 @@ def b_valuation_russell_per(ctx):
         return None
     vals = srs['values']
     diff = vals[-1] - vals[-22]
-    text = f"RUSSELL 2000 PER {vals[-1]:.1f}배 (1M {diff:+.1f}p) — 소형주 밸류"
+    text = f"RUSSELL 2000 PER {vals[-1]:,.0f}배 (1M {diff:+.1f}p) — 소형주 밸류"
     return slot('val-russell-per', 'Index', 'interpret', text, 'market.html', vals, trend_idx=22)
 
 
 def b_commodity_wti(ctx):
-    return _generic_1m(ctx, 'COMMODITY', 'WTI Crude Oil', 'WTI 유가', 'commodity-wti', 'Commodity', unit='$', fmt='price2')
+    return _generic_1m(ctx, 'COMMODITY', 'WTI Crude Oil', 'WTI 유가', 'commodity-wti', 'Commodity', unit='$', fmt='dynamic')
 
 
 def b_commodity_copper(ctx):
-    return _generic_1m(ctx, 'COMMODITY', 'Copper', '구리', 'commodity-copper', 'Commodity', unit='$', fmt='price2')
+    return _generic_1m(ctx, 'COMMODITY', 'Copper', '구리', 'commodity-copper', 'Commodity', unit='$', fmt='dynamic')
 
 
 def b_commodity_silver(ctx):
-    return _generic_1m(ctx, 'COMMODITY', 'Silver', '은', 'commodity-silver', 'Commodity', unit='$', fmt='price2')
+    return _generic_1m(ctx, 'COMMODITY', 'Silver', '은', 'commodity-silver', 'Commodity', unit='$', fmt='dynamic')
 
 
 def b_commodity_natgas(ctx):
-    return _generic_7d(ctx, 'COMMODITY', 'Natural Gas', '천연가스', 'commodity-natgas', 'Commodity', unit='$', fmt='price2')
+    return _generic_7d(ctx, 'COMMODITY', 'Natural Gas', '천연가스', 'commodity-natgas', 'Commodity', unit='$', fmt='dynamic')
 
 
 def b_commodity_uranium(ctx):
@@ -588,7 +597,7 @@ def b_commodity_uranium(ctx):
     if not base:
         return None
     chg = (vals[-1] - base) / base
-    text = f"우라늄 {label} {fmt_pct(chg)} (현재 ${vals[-1]:,.2f}) — 원전 테마"
+    text = f"우라늄 {label} {fmt_pct(chg)} (${fmt_price_dynamic(vals[-1])}) — 원전 테마"
     return slot('commodity-uranium', 'Commodity', 'interpret', text, 'market.html', vals, trend_idx=tidx)
 
 
@@ -598,7 +607,7 @@ def b_memory_ddr4(ctx):
         return None
     vals = srs['values']
     chg = (vals[-1] - vals[-8]) / vals[-8] if vals[-8] else 0
-    text = f"DDR4 7일 {fmt_pct(chg)} (현재 ${vals[-1]:.2f})"
+    text = f"DDR4 7일 {fmt_pct(chg)} (${vals[-1]:,.0f})"
     return slot('memory-ddr4', 'Memory', 'fact', text, 'market.html', vals)
 
 
@@ -611,7 +620,7 @@ def b_memory_nand(ctx):
     if not base:
         return None
     chg = (vals[-1] - base) / base
-    text = f"NAND MLC 64Gb 7일 {fmt_pct(chg)} (현재 ${vals[-1]:.2f})"
+    text = f"NAND MLC 64Gb 7일 {fmt_pct(chg)} (${vals[-1]:,.0f})"
     return slot('memory-nand', 'Memory', 'fact', text, 'market.html', vals)
 
 
@@ -628,7 +637,7 @@ def b_fx_jpyusd(ctx):
     if not base:
         return None
     chg = (vals[-1] - base) / base
-    text = f"USD/JPY 7일 {fmt_pct(chg)} (현재 {vals[-1]:.2f}엔)"
+    text = f"USD/JPY 7일 {fmt_pct(chg)} ({vals[-1]:,.0f}엔)"
     return slot('fx-jpyusd', 'FX', 'fact', text, 'market.html', vals)
 
 
@@ -641,7 +650,7 @@ def b_fx_cnyusd(ctx):
     if not base:
         return None
     chg = (vals[-1] - base) / base
-    text = f"USD/CNY 7일 {fmt_pct(chg)} (현재 {vals[-1]:.4f}위안)"
+    text = f"USD/CNY 7일 {fmt_pct(chg)} ({vals[-1]:.4f}위안)"
     return slot('fx-cnyusd', 'FX', 'fact', text, 'market.html', vals)
 
 
@@ -651,7 +660,7 @@ def b_rate_us13w(ctx):
         return None
     vals = srs['values']
     chg_bp = (vals[-1] - vals[-8]) * 100
-    text = f"US 13W {vals[-1]:.2f}% (1주 {chg_bp:+.0f}bp) — 단기금리"
+    text = f"US 13W {vals[-1]:.1f}% (1주 {chg_bp:+.0f}bp) — 단기금리"
     return slot('rate-us13w', 'Rate', 'fact', text, 'market.html', vals)
 
 
@@ -664,7 +673,7 @@ def b_crypto_eth(ctx):
     if not base:
         return None
     chg = (vals[-1] - base) / base
-    text = f"ETH 1M {fmt_pct(chg)} (현재 ${vals[-1]:,.0f})"
+    text = f"ETH 1M {fmt_pct(chg)} (${vals[-1]:,.0f})"
     return slot('crypto-eth', 'Crypto', 'fact', text, 'market.html', vals, trend_idx=22)
 
 
@@ -677,7 +686,7 @@ def b_crypto_sol(ctx):
     if not base:
         return None
     chg = (vals[-1] - base) / base
-    text = f"SOL 1M {fmt_pct(chg)} (현재 ${vals[-1]:.2f})"
+    text = f"SOL 1M {fmt_pct(chg)} (${vals[-1]:,.0f})"
     return slot('crypto-sol', 'Crypto', 'fact', text, 'market.html', vals, trend_idx=22)
 
 
@@ -739,7 +748,7 @@ def b_deposit_customer(ctx):
         return None
     chg = (vals[-1] - base) / base
     trillion = vals[-1] / 10000.0
-    text = f"고객예탁금 1M {fmt_pct(chg)} (현재 {trillion:,.1f}조원)"
+    text = f"고객예탁금 1M {fmt_pct(chg)} ({trillion:,.0f}조원)"
     return slot('deposit-customer', 'Liquidity', 'fact', text, 'market.html', vals, trend_idx=22)
 
 
