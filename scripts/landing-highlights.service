@@ -2,7 +2,7 @@
 Description=Antigravity Landing Highlights generator (30분 회전 위젯 데이터)
 After=network-online.target
 Wants=network-online.target
-OnFailure=sisyphe-bot-notify.service
+OnFailure=landing-highlights-notify.service
 
 [Service]
 Type=oneshot

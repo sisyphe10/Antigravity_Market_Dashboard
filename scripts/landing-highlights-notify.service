@@ -1,0 +1,6 @@
+[Unit]
+Description=Landing Highlights Failure Notification
+
+[Service]
+Type=oneshot
+ExecStart=/home/ubuntu/Antigravity_Market_Dashboard/scripts/notify_landing_highlights_failure.sh

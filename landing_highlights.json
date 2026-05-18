@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-05-18 09:05:45 KST",
+  "updated_at": "2026-05-18 09:30:33 KST",
   "slots": [
     {
       "id": "market-1m-leader",
@@ -118,7 +118,7 @@
       "category": "Memory",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "DDR5 7일 +1.0% (현재 $52.50) — 박스권 유지",
+      "text": "DDR5 7일 +1.0% (현재 $52.50) — 방향성 부재",
       "href": "market.html",
       "spark": {
         "series": [
@@ -724,7 +724,7 @@
       "category": "Commodity",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "리튬카보네이트 7일 +2.4% — 박스권 유지",
+      "text": "리튬카보네이트 7일 +2.4% — 관망세 지속",
       "href": "market.html",
       "spark": {
         "series": [
