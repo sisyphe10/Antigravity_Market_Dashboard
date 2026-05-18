@@ -4371,6 +4371,9 @@ def create_dashboard():
         .lh-spark {{ flex: 0 0 auto; width: 202px; height: 80px; padding: 0 10px; border-left: 1px solid #000; border-right: 1px solid #000; display: flex; align-items: center; justify-content: center; }}
         .lh-spark svg {{ width: 180px; height: 80px; display: block; }}
         .lh-text {{ flex: 1 1 auto; font-size: 0.92rem; color: #333; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
+        .lh-widget.is-quote .lh-spark {{ display: none; }}
+        .lh-widget.is-quote .lh-text {{ white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.55; padding: 4px 0; }}
+        .lh-author {{ color: #888; font-size: 0.85em; font-style: italic; margin-left: 8px; white-space: nowrap; }}
         .lh-shuffle {{ flex: 0 0 56px; width: 56px; background: none; border: none; cursor: pointer; font-size: 2.1rem; opacity: 0.9; padding: 8px 0; transition: opacity 0.15s, transform 0.2s; line-height: 1; color: inherit; text-align: center; display: inline-block; }}
         .lh-shuffle:hover {{ opacity: 1; transform: rotate(20deg); }}
         .lh-shuffle.rolling {{ animation: lh-roll 0.75s ease-out; transform-style: preserve-3d; }}
@@ -4404,6 +4407,11 @@ def create_dashboard():
         <span class="lh-spark"></span>
         <span class="lh-text">—</span>
         <button class="lh-shuffle" type="button" title="다른 하이라이트" aria-label="다른 하이라이트 보기">🎲</button>
+    </div>
+    <div id="landing-quote" class="lh-widget is-quote" hidden style="border-left-color:#475569;">
+        <span class="lh-tag" style="background-color:#475569;">명언</span>
+        <span class="lh-text">—</span>
+        <button class="lh-shuffle" type="button" title="다른 명언" aria-label="다른 명언 보기">🎲</button>
     </div>
     <div class="cards">
         <a href="market.html" class="card" style="border-left-color:#2d7a3a">
@@ -4535,6 +4543,62 @@ def create_dashboard():
                 if (data && data.updated_at) widget.title = 'Updated ' + data.updated_at;
                 var slot = pickSlot();
                 if (slot) render(slot);
+            }})
+            .catch(function() {{ /* hide silently */ }});
+    }})();
+
+    (function() {{
+        var widget = document.getElementById('landing-quote');
+        if (!widget) return;
+        var textEl = widget.querySelector('.lh-text');
+        var shuffleBtn = widget.querySelector('.lh-shuffle');
+        var quotes = [];
+        var prevIdx = -1;
+        try {{ prevIdx = parseInt(sessionStorage.getItem('lh_quote_prev') || '-1', 10); }} catch (e) {{}}
+
+        function escapeHtml(s) {{
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }}
+        function pickIdx() {{
+            if (!quotes.length) return -1;
+            if (quotes.length === 1) return 0;
+            var idx;
+            do {{ idx = Math.floor(Math.random() * quotes.length); }} while (idx === prevIdx);
+            return idx;
+        }}
+        function renderQ(idx) {{
+            if (idx < 0 || idx >= quotes.length) return;
+            var q = quotes[idx];
+            var html = escapeHtml(q.text || '');
+            if (q.author) {{
+                html += ' <span class="lh-author">— ' + escapeHtml(q.author) + '</span>';
+            }}
+            textEl.innerHTML = html;
+            widget.hidden = false;
+            prevIdx = idx;
+            try {{ sessionStorage.setItem('lh_quote_prev', String(idx)); }} catch (e) {{}}
+        }}
+
+        widget.addEventListener('click', function(e) {{
+            if (e.target.closest('.lh-shuffle')) return;
+            shuffleBtn.click();
+        }});
+
+        shuffleBtn.addEventListener('click', function(e) {{
+            e.stopPropagation();
+            shuffleBtn.classList.remove('rolling');
+            void shuffleBtn.offsetWidth;
+            shuffleBtn.classList.add('rolling');
+            var idx = pickIdx();
+            if (idx >= 0) renderQ(idx);
+        }});
+
+        fetch('landing_quotes.json?t=' + Date.now())
+            .then(function(r) {{ if (!r.ok) throw new Error('http ' + r.status); return r.json(); }})
+            .then(function(data) {{
+                quotes = Array.isArray(data) ? data : [];
+                var idx = pickIdx();
+                if (idx >= 0) renderQ(idx);
             }})
             .catch(function() {{ /* hide silently */ }});
     }})();

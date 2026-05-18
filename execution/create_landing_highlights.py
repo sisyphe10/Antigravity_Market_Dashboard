@@ -35,7 +35,40 @@ CATEGORY_COLORS = {
     'Universe':  '#6B21A8',
     'SEIBro':    '#0369a1',
     'Featured':  '#d97706',
+    '명언':      '#475569',
 }
+
+QUOTES_PATH = ROOT / 'landing_quotes.json'
+
+
+def build_quote_slots():
+    if not QUOTES_PATH.exists():
+        return []
+    try:
+        with open(QUOTES_PATH, encoding='utf-8') as f:
+            quotes = json.load(f)
+    except (OSError, json.JSONDecodeError) as e:
+        print(f"  ! quotes load error: {e}", file=sys.stderr)
+        return []
+    out = []
+    for i, q in enumerate(quotes):
+        text = (q.get('text') or '').strip()
+        if not text:
+            continue
+        s = {
+            'id': f'quote-{i:03d}',
+            'category': '명언',
+            'color': CATEGORY_COLORS['명언'],
+            'tone': 'wisdom',
+            'text': text,
+            'href': None,
+            'spark': None,
+        }
+        author = (q.get('author') or '').strip()
+        if author:
+            s['author'] = author
+        out.append(s)
+    return out
 
 SPARK_DAYS = 90
 
