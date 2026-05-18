@@ -259,7 +259,7 @@ def b_memory_ddr5(ctx):
         phrase = pick('down_mild')
     else:
         phrase = pick('flat')
-    text = f"DDR5 7일 {fmt_pct(chg)} (${vals[-1]:,.0f}) — {phrase}"
+    text = f"DDR5 1W {fmt_pct(chg)} (${vals[-1]:,.0f}) — {phrase}"
     return slot('memory-ddr5', 'Memory', 'interpret', text, 'market.html', vals)
 
 
@@ -292,7 +292,7 @@ def b_fx_usdkrw(ctx):
         return None
     vals = srs['values']
     chg = vals[-1] - vals[-8]
-    text = f"USD/KRW 1주 {chg:+.1f}원 ({vals[-1]:,.0f}원)"
+    text = f"USD/KRW 1W {chg:+.1f}원 ({vals[-1]:,.0f}원)"
     return slot('fx-usdkrw', 'FX', 'fact', text, 'market.html', vals)
 
 
@@ -308,7 +308,7 @@ def b_dxy(ctx):
         phrase = '달러 약세 — 위험자산 우호'
     else:
         phrase = '달러 횡보'
-    text = f"DXY 7일 {fmt_pct(chg)} ({vals[-1]:,.0f}) — {phrase}"
+    text = f"DXY 1W {fmt_pct(chg)} ({vals[-1]:,.0f}) — {phrase}"
     return slot('dxy', 'FX', 'interpret', text, 'market.html', vals)
 
 
@@ -334,7 +334,7 @@ def b_us10y(ctx):
         return None
     vals = srs['values']
     chg_bp = (vals[-1] - vals[-8]) * 100
-    text = f"US 10Y {vals[-1]:.1f}% (1주 {chg_bp:+.0f}bp)"
+    text = f"US 10Y 1W {chg_bp:+.0f}bp ({vals[-1]:.1f}%)"
     return slot('us-10y', 'Rate', 'fact', text, 'market.html', vals)
 
 
@@ -346,7 +346,7 @@ def b_battery_lithium(ctx):
     if len(vals) >= 22:
         base, label, tidx = vals[-22], '1M', 22
     else:
-        base, label, tidx = vals[-8], '7일', 8
+        base, label, tidx = vals[-8], '1W', 8
     if not base:
         return None
     chg = (vals[-1] - base) / base
@@ -366,7 +366,7 @@ def b_smp(ctx):
         return None
     vals = srs['values']
     chg = (vals[-1] - vals[-8]) / vals[-8] if vals[-8] else 0
-    text = f"SMP 7일 {fmt_pct(chg)} ({vals[-1]:,.0f}원/kWh)"
+    text = f"SMP 1W {fmt_pct(chg)} ({vals[-1]:,.0f}원/kWh)"
     return slot('smp', 'Commodity', 'fact', text, 'market.html', vals)
 
 
@@ -379,7 +379,7 @@ def b_scfi(ctx):
     if not base:
         return None
     chg = (vals[-1] - base) / base
-    text = f"SCFI {vals[-1]:,.0f} (4주 {fmt_pct(chg)})"
+    text = f"SCFI 1M {fmt_pct(chg)} ({vals[-1]:,.0f})"
     return slot('scfi', 'Commodity', 'fact', text, 'market.html', vals, trend_idx=4)
 
 
@@ -517,7 +517,7 @@ def _generic_7d(ctx, dtype, name, label, sid, category, href='market.html', unit
         cur = fmt_price_dynamic(vals[-1])
     else:
         cur = f"{vals[-1]:,.0f}"
-    text = f"{label} 7일 {fmt_pct(chg)} ({unit}{cur})"
+    text = f"{label} 1W {fmt_pct(chg)} ({unit}{cur})"
     return slot(sid, category, 'fact', text, href, vals)
 
 
@@ -555,7 +555,7 @@ def b_valuation_sp500_per(ctx):
         phrase = '저평가권'
     else:
         phrase = '중립권'
-    text = f"S&P500 PER {vals[-1]:,.0f}배 (1M {diff:+.1f}p) — {phrase}"
+    text = f"S&P500 PER 1M {diff:+.1f}p ({vals[-1]:,.0f}배) — {phrase}"
     return slot('val-sp500-per', 'Index', 'interpret', text, 'market.html', vals, trend_idx=22)
 
 
@@ -565,7 +565,7 @@ def b_valuation_russell_per(ctx):
         return None
     vals = srs['values']
     diff = vals[-1] - vals[-22]
-    text = f"RUSSELL 2000 PER {vals[-1]:,.0f}배 (1M {diff:+.1f}p) — 소형주 밸류"
+    text = f"RUSSELL 2000 PER 1M {diff:+.1f}p ({vals[-1]:,.0f}배) — 소형주 밸류"
     return slot('val-russell-per', 'Index', 'interpret', text, 'market.html', vals, trend_idx=22)
 
 
@@ -593,7 +593,7 @@ def b_commodity_uranium(ctx):
     if len(vals) >= 22:
         base, label, tidx = vals[-22], '1M', 22
     else:
-        base, label, tidx = vals[-8], '7일', 8
+        base, label, tidx = vals[-8], '1W', 8
     if not base:
         return None
     chg = (vals[-1] - base) / base
@@ -607,7 +607,7 @@ def b_memory_ddr4(ctx):
         return None
     vals = srs['values']
     chg = (vals[-1] - vals[-8]) / vals[-8] if vals[-8] else 0
-    text = f"DDR4 7일 {fmt_pct(chg)} (${vals[-1]:,.0f})"
+    text = f"DDR4 1W {fmt_pct(chg)} (${vals[-1]:,.0f})"
     return slot('memory-ddr4', 'Memory', 'fact', text, 'market.html', vals)
 
 
@@ -620,7 +620,7 @@ def b_memory_nand(ctx):
     if not base:
         return None
     chg = (vals[-1] - base) / base
-    text = f"NAND MLC 64Gb 7일 {fmt_pct(chg)} (${vals[-1]:,.0f})"
+    text = f"NAND MLC 64Gb 1W {fmt_pct(chg)} (${vals[-1]:,.0f})"
     return slot('memory-nand', 'Memory', 'fact', text, 'market.html', vals)
 
 
@@ -637,7 +637,7 @@ def b_fx_jpyusd(ctx):
     if not base:
         return None
     chg = (vals[-1] - base) / base
-    text = f"USD/JPY 7일 {fmt_pct(chg)} ({vals[-1]:,.0f}엔)"
+    text = f"USD/JPY 1W {fmt_pct(chg)} ({vals[-1]:,.0f}엔)"
     return slot('fx-jpyusd', 'FX', 'fact', text, 'market.html', vals)
 
 
@@ -650,7 +650,7 @@ def b_fx_cnyusd(ctx):
     if not base:
         return None
     chg = (vals[-1] - base) / base
-    text = f"USD/CNY 7일 {fmt_pct(chg)} ({vals[-1]:.4f}위안)"
+    text = f"USD/CNY 1W {fmt_pct(chg)} ({vals[-1]:.4f}위안)"
     return slot('fx-cnyusd', 'FX', 'fact', text, 'market.html', vals)
 
 
@@ -660,7 +660,7 @@ def b_rate_us13w(ctx):
         return None
     vals = srs['values']
     chg_bp = (vals[-1] - vals[-8]) * 100
-    text = f"US 13W {vals[-1]:.1f}% (1주 {chg_bp:+.0f}bp) — 단기금리"
+    text = f"US 13W 1W {chg_bp:+.0f}bp ({vals[-1]:.1f}%) — 단기금리"
     return slot('rate-us13w', 'Rate', 'fact', text, 'market.html', vals)
 
 

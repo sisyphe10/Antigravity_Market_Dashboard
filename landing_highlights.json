@@ -1,12 +1,12 @@
 {
-  "updated_at": "2026-05-18 12:31:34 KST",
+  "updated_at": "2026-05-18 13:04:47 KST",
   "slots": [
     {
       "id": "market-1m-leader",
       "category": "Market",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "1M 1위 KOSPI +23.6%, 꼴찌 KOSDAQ -4.1%",
+      "text": "1M 1위 KOSPI +23.7%, 꼴찌 KOSDAQ -4.0%",
       "href": "market.html",
       "spark": {
         "series": [
@@ -118,7 +118,7 @@
       "category": "Memory",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "DDR5 7일 +1.0% ($52) — 박스권 유지",
+      "text": "DDR5 1W +1.0% ($52) — 박스권 유지",
       "href": "market.html",
       "spark": {
         "series": [
@@ -175,7 +175,7 @@
       "category": "Memory",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "DDR4 7일 +1.5% ($53)",
+      "text": "DDR4 1W +1.5% ($53)",
       "href": "market.html",
       "spark": {
         "series": [
@@ -278,7 +278,7 @@
       "category": "Memory",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "NAND MLC 64Gb 7일 +7.1% ($30)",
+      "text": "NAND MLC 64Gb 1W +7.1% ($30)",
       "href": "market.html",
       "spark": {
         "series": [
@@ -1102,7 +1102,7 @@
       "category": "Commodity",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "천연가스 7일 +8.4% ($3.0)",
+      "text": "천연가스 1W +8.4% ($3.0)",
       "href": "market.html",
       "spark": {
         "series": [
@@ -1308,7 +1308,7 @@
       "category": "FX",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "USD/KRW 1주 +33.9원 (1,498원)",
+      "text": "USD/KRW 1W +33.9원 (1,498원)",
       "href": "market.html",
       "spark": {
         "series": [
@@ -1411,7 +1411,7 @@
       "category": "FX",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "USD/EUR 7일 +1.1% (0.8606)",
+      "text": "USD/EUR 1W +1.1% (0.8606)",
       "href": "market.html",
       "spark": {
         "series": [
@@ -1514,7 +1514,7 @@
       "category": "FX",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "USD/JPY 7일 +1.6% (159엔)",
+      "text": "USD/JPY 1W +1.6% (159엔)",
       "href": "market.html",
       "spark": {
         "series": [
@@ -1617,7 +1617,7 @@
       "category": "FX",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "USD/CNY 7일 +0.0% (6.8087위안)",
+      "text": "USD/CNY 1W +0.0% (6.8087위안)",
       "href": "market.html",
       "spark": {
         "series": [
@@ -1720,7 +1720,7 @@
       "category": "FX",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "DXY 7일 +1.4% (99) — 달러 강세 — 신흥국 자산 부담",
+      "text": "DXY 1W +1.4% (99) — 달러 강세 — 신흥국 자산 부담",
       "href": "market.html",
       "spark": {
         "series": [
@@ -1857,7 +1857,7 @@
       "category": "Rate",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "US 10Y 4.6% (1주 +23bp)",
+      "text": "US 10Y 1W +23bp (4.6%)",
       "href": "market.html",
       "spark": {
         "series": [
@@ -1960,7 +1960,7 @@
       "category": "Rate",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "US 13W 3.6% (1주 -1bp) — 단기금리",
+      "text": "US 13W 1W -1bp (3.6%) — 단기금리",
       "href": "market.html",
       "spark": {
         "series": [
@@ -2063,7 +2063,7 @@
       "category": "Commodity",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "리튬카보네이트 7일 +0.5% — 박스권 유지",
+      "text": "리튬카보네이트 1W +0.5% — 박스권 유지",
       "href": "market.html",
       "spark": {
         "series": [
@@ -2092,7 +2092,7 @@
       "category": "Commodity",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "SMP 7일 +0.8% (121원/kWh)",
+      "text": "SMP 1W +0.8% (121원/kWh)",
       "href": "market.html",
       "spark": {
         "series": [
@@ -2195,7 +2195,7 @@
       "category": "Commodity",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "SCFI 2,141 (4주 +14.2%)",
+      "text": "SCFI 1M +14.2% (2,141)",
       "href": "market.html",
       "spark": {
         "series": [
@@ -2944,7 +2944,7 @@
       "category": "Index",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "S&P500 PER 28배 (1M -0.4p) — 역사적 고밸류 영역",
+      "text": "S&P500 PER 1M -0.4p (28배) — 역사적 고밸류 영역",
       "href": "market.html",
       "spark": {
         "series": [
@@ -3047,7 +3047,7 @@
       "category": "Index",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "RUSSELL 2000 PER 19배 (1M -0.9p) — 소형주 밸류",
+      "text": "RUSSELL 2000 PER 1M -0.9p (19배) — 소형주 밸류",
       "href": "market.html",
       "spark": {
         "series": [
