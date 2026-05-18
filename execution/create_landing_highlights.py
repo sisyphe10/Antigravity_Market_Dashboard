@@ -78,7 +78,7 @@ def classify_trend(series):
     valid = [v for v in series if v is not None]
     if len(valid) < 2:
         return 'flat'
-    base = valid[0]
+    base = valid[-8] if len(valid) >= 8 else valid[0]
     if not base:
         return 'flat'
     chg = (valid[-1] - base) / abs(base)
