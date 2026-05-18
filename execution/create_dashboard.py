@@ -3013,7 +3013,7 @@ def create_order_section():
                 });
             });
             var saveBtn = document.getElementById('orderSaveBtn');
-            if (saveBtn) saveBtn.addEventListener('click', function() { saveOrder(orderActiveTab); });
+            if (saveBtn) saveBtn.addEventListener('click', function() { saveAllPendingOrders(false); });
             var finalizeBtn = document.getElementById('orderFinalizeBtn');
             if (finalizeBtn) finalizeBtn.addEventListener('click', function() { finalizeOrder(orderActiveTab); });
             var addBtn = document.getElementById('orderAddStockBtn');
@@ -3084,36 +3084,13 @@ def create_order_section():
             return decodeURIComponent(escape(atob(b64.replace(/\\n/g, ''))));
         }
 
-        // ORDER 저장 → orders/pending_orders.json 누적 (확정은 GHA 16:00 KST에 NEW 시트 반영)
-        async function saveOrder(pfName, silent) {
+        // ORDER 저장 → orders/pending_orders.json 갱신.
+        // 모든 포트폴리오를 1회 GET + 1회 PUT으로 영속화 — input 이벤트에서 메모리상 동기화된
+        // 추천사유(같은 종목코드+같은 주문구분)가 다른 탭에서도 git에 함께 박히도록 함.
+        async function saveAllPendingOrders(silent) {
             var pat = getGithubPat();
             if (!pat) { alert('PAT 입력이 취소되었습니다.'); return; }
-            var p = ORDER_PORTFOLIOS.find(function(x) { return x.display === pfName; });
-            if (!p) { alert('포트폴리오 매핑 누락: ' + pfName); return; }
-            var targets = p.newSheetTargets || [];
-            if (!targets.length) { alert('NEW 시트 매핑 누락'); return; }
-            var stocks = orderStocks[pfName];
-            var st = orderState[pfName];
-            if (!stocks || !st) { alert('데이터 누락: ' + pfName); return; }
 
-            // 모든 종목 저장 (편출=weight 0 포함). 추천사유도 함께 보존.
-            // finalize_pending_orders.py에서 weight=0 행은 NEW 시트에 안 들어가도록 필터링됨.
-            var validRows = [];
-            stocks.forEach(function(s, i) {
-                var newW = parseFloat(st[i].newWeight) || 0;
-                if (s.code) {
-                    validRows.push({
-                        sector: s.sector || '',
-                        code: String(s.code),
-                        name: s.name || '',
-                        weight: newW,
-                        reason: (st[i].reason || '').toString()
-                    });
-                }
-            });
-            if (validRows.length === 0) { alert('저장할 종목이 없습니다.'); return; }
-
-            // 오늘 날짜 (KST 안전)
             var d = new Date();
             var todayStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 
@@ -3125,7 +3102,7 @@ def create_order_section():
             };
 
             try {
-                // 기존 pending 파일 가져오기 (없으면 새로 생성)
+                // 기존 pending 1회 GET
                 var existing = {};
                 var sha = null;
                 var getResp = await fetch(apiUrl, { headers: headers });
@@ -3143,16 +3120,44 @@ def create_order_section():
                     throw new Error('GET 실패: ' + getResp.status);
                 }
 
-                // 같은 날짜 + 같은 카드(pfName) 덮어쓰기
+                // 모든 포트폴리오 갱신
                 if (!existing[todayStr]) existing[todayStr] = {};
-                existing[todayStr][pfName] = {
-                    targets: targets,
-                    stocks: validRows,
-                    savedAt: new Date().toISOString(),
-                };
+                var totalRows = 0;
+                var savedPfs = [];
+                ORDER_PORTFOLIOS.forEach(function(p) {
+                    var pfName = p.display;
+                    var targets = p.newSheetTargets || [];
+                    if (!targets.length) return;
+                    var stocks = orderStocks[pfName] || [];
+                    var st = orderState[pfName] || [];
+                    var validRows = [];
+                    stocks.forEach(function(s, i) {
+                        var newW = parseFloat(st[i].newWeight) || 0;
+                        if (s.code) {
+                            validRows.push({
+                                sector: s.sector || '',
+                                code: String(s.code),
+                                name: s.name || '',
+                                weight: newW,
+                                reason: (st[i].reason || '').toString()
+                            });
+                        }
+                    });
+                    if (validRows.length === 0) return;
+                    existing[todayStr][pfName] = {
+                        targets: targets,
+                        stocks: validRows,
+                        savedAt: new Date().toISOString(),
+                    };
+                    totalRows += validRows.length;
+                    savedPfs.push(pfName);
+                });
 
+                if (savedPfs.length === 0) { alert('저장할 종목이 없습니다.'); return; }
+
+                // 1회 PUT
                 var newContent = utf8ToBase64(JSON.stringify(existing, null, 2));
-                var msg = 'ORDER pending: ' + pfName + ' (' + todayStr + ', ' + validRows.length + ' stocks)';
+                var msg = 'ORDER pending: ' + savedPfs.length + ' pf (' + todayStr + ', ' + totalRows + ' stocks)';
                 var body = { message: msg, content: newContent };
                 if (sha) body.sha = sha;
 
@@ -3166,11 +3171,11 @@ def create_order_section():
                     throw new Error('PUT 실패: ' + putResp.status + ' ' + errTxt.slice(0, 200));
                 }
                 if (!silent) {
-                    alert('✅ 저장 완료: ' + pfName + ' (' + validRows.length + '개 종목)\\n\\n다시 저장하면 덮어쓰기. 최종 반영은 [최종 저장] 버튼 또는 16:00 KST 자동 처리.');
+                    alert('✅ 저장 완료 (' + savedPfs.length + '개 포트폴리오, ' + totalRows + '개 종목)\\n\\n탭 간 추천사유 동기화 보존됨. 최종 반영은 [최종 저장] 또는 16:00 KST 자동 처리.');
                 }
             } catch(e) {
                 if (!silent) alert('❌ 저장 실패: ' + e.message);
-                console.error('saveOrder error:', e);
+                console.error('saveAllPendingOrders error:', e);
                 throw e;
             }
         }
@@ -3180,20 +3185,11 @@ def create_order_section():
             if (!confirm('최종 저장하시겠습니까?\\n\\n2개 포트폴리오(일반형/NH 목표전환형 3호) 모두 저장 후 GitHub Actions(finalize_orders) 즉시 실행. 1~2분 후 Wrap_NAV.xlsx NEW 시트 + 대시보드 반영.')) return;
             var pat = getGithubPat();
             if (!pat) { alert('PAT 입력이 취소되었습니다.'); return; }
-            var ALL_PFS = ORDER_PORTFOLIOS.map(function(p) { return p.display; });
-            var savedCount = 0;
-            var failed = [];
-            for (var i = 0; i < ALL_PFS.length; i++) {
-                var pfName = ALL_PFS[i];
-                try {
-                    await saveOrder(pfName, true);
-                    savedCount++;
-                } catch(e) {
-                    failed.push(pfName + ': ' + e.message);
-                }
-            }
-            if (failed.length) {
-                alert('❌ 일부 포트폴리오 저장 실패:\\n' + failed.join('\\n') + '\\n\\n워크플로 실행 중단. 수정 후 재시도하세요.');
+            // 모든 포트폴리오 1회 커밋으로 저장 (탭 간 reason 동기화 보존)
+            try {
+                await saveAllPendingOrders(true);
+            } catch(e) {
+                alert('❌ 저장 실패: ' + e.message + '\\n\\n워크플로 실행 중단. 수정 후 재시도하세요.');
                 return;
             }
             try {
@@ -3208,7 +3204,7 @@ def create_order_section():
                     body: JSON.stringify({ ref: 'main' })
                 });
                 if (resp.status === 204) {
-                    alert('✅ 최종 저장 완료 (' + savedCount + '개 포트폴리오)\\n\\nfinalize_orders 워크플로 실행 중. 1~2분 후 Wrap_NAV.xlsx + 대시보드 반영. Actions 탭에서 진행상황 확인 가능.');
+                    alert('✅ 최종 저장 완료\\n\\nfinalize_orders 워크플로 실행 중. 1~2분 후 Wrap_NAV.xlsx + 대시보드 반영. Actions 탭에서 진행상황 확인 가능.');
                 } else if (resp.status === 401 || resp.status === 403) {
                     alert('❌ PAT 권한 부족 (' + resp.status + ')\\n\\nfine-grained PAT 설정에서 Actions 권한을 "Read and write"로 추가하세요.\\nhttps://github.com/settings/personal-access-tokens');
                 } else {
