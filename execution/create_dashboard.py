@@ -4388,7 +4388,7 @@ def create_dashboard():
         var shuffleBtn = widget.querySelector('.lh-shuffle');
         var current = null;
         var slots = [];
-        var TREND = {{ up: '#2d7a3a', down: '#c2410c', flat: '#888' }};
+        var TREND = {{ up: '#dc2626', down: '#1e40af', flat: '#555' }};
 
         function renderSpark(spark) {{
             if (!spark || !spark.series || spark.series.length < 2) {{
@@ -4407,7 +4407,7 @@ def create_dashboard():
                 var y = h - pad - ((vals[i] - mn) / range) * (h - pad * 2);
                 pts.push(x.toFixed(1) + ',' + y.toFixed(1));
             }}
-            var color = TREND[spark.trend] || '#888';
+            var color = TREND[spark.trend] || '#555';
             sparkEl.innerHTML =
                 '<svg viewBox="0 0 ' + w + ' ' + h + '" xmlns="http://www.w3.org/2000/svg">' +
                 '<path d="M' + pts.join(' L') + '" fill="none" stroke="' + color +
