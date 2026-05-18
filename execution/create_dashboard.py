@@ -4374,13 +4374,11 @@ def create_dashboard():
         .lh-text {{ flex: 1 1 auto; font-size: 0.92rem; color: #333; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
         .lh-shuffle {{ flex: 0 0 56px; width: 56px; background: none; border: none; cursor: pointer; font-size: 2.1rem; opacity: 0.9; padding: 8px 0; transition: opacity 0.15s, transform 0.2s; line-height: 1; color: inherit; text-align: center; display: inline-block; }}
         .lh-shuffle:hover {{ opacity: 1; transform: rotate(20deg); }}
-        .lh-shuffle.rolling {{ animation: lh-roll 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }}
+        .lh-shuffle.rolling {{ animation: lh-roll 0.55s ease-out; }}
         @keyframes lh-roll {{
-            0%   {{ transform: rotate(0deg)   scale(1)    translateY(0); }}
-            30%  {{ transform: rotate(220deg) scale(1.15) translateY(-10px); }}
-            60%  {{ transform: rotate(500deg) scale(1.1)  translateY(-14px); }}
-            85%  {{ transform: rotate(680deg) scale(1.02) translateY(-4px); }}
-            100% {{ transform: rotate(720deg) scale(1)    translateY(0); }}
+            0%   {{ transform: rotate(0deg)   translateY(0); }}
+            50%  {{ transform: rotate(360deg) translateY(-22px); }}
+            100% {{ transform: rotate(720deg) translateY(0); }}
         }}
         .lh-divider {{ border: none; border-top: 1.5px solid #000; margin: 12px 0; }}
         .lh-quote-row {{ display: flex; align-items: center; padding: 4px 0 4px 20px; cursor: pointer; min-height: 36px; }}
