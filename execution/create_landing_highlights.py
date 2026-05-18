@@ -29,6 +29,9 @@ CATEGORY_COLORS = {
     'FX':        '#2d7a3a',
     'Index':     '#2d7a3a',
     'Rate':      '#2d7a3a',
+    'Sector':    '#2d7a3a',
+    'Liquidity': '#2d7a3a',
+    'WRAP':      '#1e40af',
     'Alert':     '#c2410c',
     'Universe':  '#6B21A8',
     'SEIBro':    '#0369a1',
@@ -448,7 +451,10 @@ def _generic_1m(ctx, dtype, name, label, sid, category, href='market.html', unit
     if not srs or len(srs['values']) < 22:
         return None
     vals = srs['values']
-    chg = (vals[-1] - vals[-22]) / vals[-22] if vals[-22] else 0
+    base = vals[-22]
+    if not base:
+        return None
+    chg = (vals[-1] - base) / base
     if fmt == 'price2':
         cur = f"{vals[-1]:,.2f}"
     elif fmt == 'price0':
@@ -464,7 +470,10 @@ def _generic_7d(ctx, dtype, name, label, sid, category, href='market.html', unit
     if not srs or len(srs['values']) < 8:
         return None
     vals = srs['values']
-    chg = (vals[-1] - vals[-8]) / vals[-8] if vals[-8] else 0
+    base = vals[-8]
+    if not base:
+        return None
+    chg = (vals[-1] - base) / base
     if fmt == 'price2':
         cur = f"{vals[-1]:,.2f}"
     elif fmt == 'price4':
@@ -492,7 +501,7 @@ def b_index_russell(ctx):
 
 
 def b_index_tsec(ctx):
-    return _generic_1m(ctx, 'INDEX_GLOBAL', 'TSEC', '대만 TSEC', 'index-tsec', 'Index', fmt='comma')
+    return _generic_1m(ctx, 'INDEX_GLOBAL', 'TSEC', '대만 가권', 'index-tsec', 'Index', fmt='comma')
 
 
 def b_valuation_sp500_per(ctx):
@@ -519,7 +528,7 @@ def b_valuation_russell_per(ctx):
         return None
     vals = srs['values']
     diff = vals[-1] - vals[-22]
-    text = f"RUSSELL2000 PER {vals[-1]:.1f}배 (1M {diff:+.1f}p) — 소형주 밸류"
+    text = f"RUSSELL 2000 PER {vals[-1]:.1f}배 (1M {diff:+.1f}p) — 소형주 밸류"
     return slot('val-russell-per', 'Index', 'interpret', text, 'market.html', vals)
 
 
@@ -532,7 +541,7 @@ def b_commodity_copper(ctx):
 
 
 def b_commodity_silver(ctx):
-    return _generic_1m(ctx, 'COMMODITY', 'Silver', 'Silver', 'commodity-silver', 'Commodity', unit='$', fmt='price2')
+    return _generic_1m(ctx, 'COMMODITY', 'Silver', '은', 'commodity-silver', 'Commodity', unit='$', fmt='price2')
 
 
 def b_commodity_natgas(ctx):
@@ -568,13 +577,16 @@ def b_memory_nand(ctx):
     if not srs or len(srs['values']) < 8:
         return None
     vals = srs['values']
-    chg = (vals[-1] - vals[-8]) / vals[-8] if vals[-8] else 0
-    text = f"NAND MLC 64Gb 7일 {fmt_pct(chg)} (현재 ${vals[-1]:.3f})"
+    base = vals[-8]
+    if not base:
+        return None
+    chg = (vals[-1] - base) / base
+    text = f"NAND MLC 64Gb 7일 {fmt_pct(chg)} (현재 ${vals[-1]:.2f})"
     return slot('memory-nand', 'Memory', 'fact', text, 'market.html', vals)
 
 
 def b_fx_eurusd(ctx):
-    return _generic_7d(ctx, 'FX', 'EUR/USD', 'EUR/USD', 'fx-eurusd', 'FX', fmt='price4')
+    return _generic_7d(ctx, 'FX', 'EUR/USD', 'USD/EUR', 'fx-eurusd', 'FX', fmt='price4')
 
 
 def b_fx_jpyusd(ctx):
@@ -582,8 +594,11 @@ def b_fx_jpyusd(ctx):
     if not srs or len(srs['values']) < 8:
         return None
     vals = srs['values']
-    chg = (vals[-1] - vals[-8]) / vals[-8] if vals[-8] else 0
-    text = f"JPY/USD 7일 {fmt_pct(chg)} (현재 {vals[-1]:.4f})"
+    base = vals[-8]
+    if not base:
+        return None
+    chg = (vals[-1] - base) / base
+    text = f"USD/JPY 7일 {fmt_pct(chg)} (현재 {vals[-1]:.2f}엔)"
     return slot('fx-jpyusd', 'FX', 'fact', text, 'market.html', vals)
 
 
@@ -592,8 +607,11 @@ def b_fx_cnyusd(ctx):
     if not srs or len(srs['values']) < 8:
         return None
     vals = srs['values']
-    chg = (vals[-1] - vals[-8]) / vals[-8] if vals[-8] else 0
-    text = f"CNY/USD 7일 {fmt_pct(chg)} (현재 {vals[-1]:.4f})"
+    base = vals[-8]
+    if not base:
+        return None
+    chg = (vals[-1] - base) / base
+    text = f"USD/CNY 7일 {fmt_pct(chg)} (현재 {vals[-1]:.4f}위안)"
     return slot('fx-cnyusd', 'FX', 'fact', text, 'market.html', vals)
 
 
@@ -625,6 +643,104 @@ def b_crypto_sol(ctx):
     chg = (vals[-1] - vals[-22]) / vals[-22] if vals[-22] else 0
     text = f"SOL 1M {fmt_pct(chg)} (현재 ${vals[-1]:.2f})"
     return slot('crypto-sol', 'Crypto', 'fact', text, 'market.html', vals)
+
+
+def b_portfolio_top_contributor(ctx):
+    pd_data = safe_load_json(ROOT / 'portfolio_data.json')
+    if not pd_data:
+        return None
+    pname = next(iter(pd_data.keys()), None)
+    if not pname or not pd_data[pname]:
+        return None
+    rows = pd_data[pname]
+    valid = [r for r in rows if isinstance(r.get('contribution'), (int, float))]
+    if not valid:
+        return None
+    top = max(valid, key=lambda r: r['contribution'])
+    short_pname = pname.split(' / ')[0].replace('삼성 ', '')
+    text = f"{short_pname} 오늘 기여 1위 {top.get('name','')} {top['contribution']:+.2f}%p"
+    return slot('portfolio-top-contrib', 'WRAP', 'fact', text, 'wrap.html')
+
+
+def b_correlation_top_pair(ctx):
+    cm = safe_load_json(ROOT / 'correlation_matrix.json')
+    if not cm:
+        return None
+    pf = cm.get('portfolios', {})
+    pname = next(iter(pf.keys()), None)
+    if not pname:
+        return None
+    pairs = pf[pname].get('pairs', [])
+    if not pairs:
+        return None
+    top = max(pairs, key=lambda p: abs(p.get('corr', 0) or 0))
+    corr = top.get('corr')
+    if corr is None:
+        return None
+    lvl = top.get('level', '주의')
+    a, b = top.get('a_name', ''), top.get('b_name', '')
+    text = f"상관 {lvl} {a}–{b} {corr:.2f}"
+    return slot('correlation-top-pair', 'WRAP', 'interpret', text, 'wrap.html')
+
+
+def b_kodex_sector_leader(ctx):
+    ks = safe_load_json(ROOT / 'kodex_sectors.json')
+    if not ks:
+        return None
+    r = ks.get('sector_1m_returns')
+    if not isinstance(r, dict) or not r:
+        return None
+    items = sorted(
+        ((n, v) for n, v in r.items() if isinstance(v, (int, float))),
+        key=lambda x: x[1], reverse=True,
+    )
+    if len(items) < 2:
+        return None
+    top_n, top_v = items[0]
+    bot_n, bot_v = items[-1]
+    text = f"KODEX 1M 최강 {top_n} {top_v:+.1f}% · 최약 {bot_n} {bot_v:+.1f}%"
+    return slot('kodex-sector-leader', 'Sector', 'fact', text, 'market.html')
+
+
+def b_seibro_top_settlement(ctx):
+    candidates = []
+    for (dtype, name), pairs in ctx['ds'].items():
+        if dtype != 'SEIBro' or not pairs:
+            continue
+        d, v = pairs[-1]
+        if v is None:
+            continue
+        candidates.append((d, name, v))
+    if not candidates:
+        return None
+    latest = max(d for d, _, _ in candidates)
+    today = [c for c in candidates if c[0] == latest]
+    if not today:
+        return None
+    _, top_n, top_v = max(today, key=lambda x: x[2])
+    if top_v >= 1e8:
+        amt = f"{top_v/1e8:.1f}억$"
+    elif top_v >= 1e6:
+        amt = f"{top_v/1e6:.1f}백만$"
+    else:
+        amt = f"{top_v:,.0f}$"
+    short = top_n if len(top_n) <= 40 else top_n[:38] + '…'
+    text = f"SEIBro {latest} 결제 1위 {short} {amt}"
+    return slot('seibro-top-settlement', 'SEIBro', 'fact', text, 'seibro.html')
+
+
+def b_deposit_customer(ctx):
+    srs = get_series(ctx['ds'], 'DEPOSIT', '고객예탁금')
+    if not srs or len(srs['values']) < 22:
+        return None
+    vals = srs['values']
+    base = vals[-22]
+    if not base:
+        return None
+    chg = (vals[-1] - base) / base
+    trillion = vals[-1] / 10000.0
+    text = f"고객예탁금 1M {fmt_pct(chg)} (현재 {trillion:,.1f}조원)"
+    return slot('deposit-customer', 'Liquidity', 'fact', text, 'market.html', vals)
 
 
 BUILDERS = [
@@ -665,6 +781,11 @@ BUILDERS = [
     b_alert_counts,
     b_featured_volume_top,
     b_featured_chg_top,
+    b_portfolio_top_contributor,
+    b_correlation_top_pair,
+    b_kodex_sector_leader,
+    b_seibro_top_settlement,
+    b_deposit_customer,
 ]
 
 

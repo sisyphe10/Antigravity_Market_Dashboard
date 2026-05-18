@@ -1,12 +1,12 @@
 {
-  "updated_at": "2026-05-18 10:54:14 KST",
+  "updated_at": "2026-05-18 11:08:12 KST",
   "slots": [
     {
       "id": "market-1m-leader",
       "category": "Market",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "1M 1위 KOSPI +22.0%, 꼴찌 KOSDAQ -5.1%",
+      "text": "1M 1위 KOSPI +21.1%, 꼴찌 KOSDAQ -5.5%",
       "href": "market.html",
       "spark": {
         "series": [
@@ -118,7 +118,7 @@
       "category": "Memory",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "DDR5 7일 +1.0% (현재 $52.50) — 관망세 지속",
+      "text": "DDR5 7일 +1.0% (현재 $52.50) — 박스권 유지",
       "href": "market.html",
       "spark": {
         "series": [
@@ -278,7 +278,7 @@
       "category": "Memory",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "NAND MLC 64Gb 7일 +7.1% (현재 $30.000)",
+      "text": "NAND MLC 64Gb 7일 +7.1% (현재 $30.00)",
       "href": "market.html",
       "spark": {
         "series": [
@@ -999,7 +999,7 @@
       "category": "Commodity",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "Silver 1M -4.0% (현재 $76.55)",
+      "text": "은 1M -4.0% (현재 $76.55)",
       "href": "market.html",
       "spark": {
         "series": [
@@ -1411,7 +1411,7 @@
       "category": "FX",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "EUR/USD 7일 +1.1% (현재 0.8606)",
+      "text": "USD/EUR 7일 +1.1% (현재 0.8606)",
       "href": "market.html",
       "spark": {
         "series": [
@@ -1514,7 +1514,7 @@
       "category": "FX",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "JPY/USD 7일 +1.6% (현재 158.8780)",
+      "text": "USD/JPY 7일 +1.6% (현재 158.88엔)",
       "href": "market.html",
       "spark": {
         "series": [
@@ -1617,7 +1617,7 @@
       "category": "FX",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "CNY/USD 7일 +0.0% (현재 6.8087)",
+      "text": "USD/CNY 7일 +0.0% (현재 6.8087위안)",
       "href": "market.html",
       "spark": {
         "series": [
@@ -2840,7 +2840,7 @@
       "category": "Index",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "대만 TSEC 1M +8.2% (현재 40,174.5)",
+      "text": "대만 가권 1M +8.2% (현재 40,174.5)",
       "href": "market.html",
       "spark": {
         "series": [
@@ -3046,7 +3046,7 @@
       "category": "Index",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "RUSSELL2000 PER 19.1배 (1M -0.9p) — 소형주 밸류",
+      "text": "RUSSELL 2000 PER 19.1배 (1M -0.9p) — 소형주 밸류",
       "href": "market.html",
       "spark": {
         "series": [
@@ -3170,6 +3170,145 @@
       "text": "2026-05-15 KOSDAQ 상승률 1위: 에스에이엠티 +30.0%",
       "href": "featured.html",
       "spark": null
+    },
+    {
+      "id": "portfolio-top-contrib",
+      "category": "WRAP",
+      "color": "#1e40af",
+      "tone": "fact",
+      "text": "트루밸류 오늘 기여 1위 에이치브이엠 +9.70%p",
+      "href": "wrap.html",
+      "spark": null
+    },
+    {
+      "id": "correlation-top-pair",
+      "category": "WRAP",
+      "color": "#1e40af",
+      "tone": "interpret",
+      "text": "상관 경고 삼성전자–삼성생명 0.87",
+      "href": "wrap.html",
+      "spark": null
+    },
+    {
+      "id": "kodex-sector-leader",
+      "category": "Sector",
+      "color": "#2d7a3a",
+      "tone": "fact",
+      "text": "KODEX 1M 최강 전기·가스·수도 +51.5% · 최약 출판·매체복제 -10.2%",
+      "href": "market.html",
+      "spark": null
+    },
+    {
+      "id": "seibro-top-settlement",
+      "category": "SEIBro",
+      "color": "#0369a1",
+      "tone": "fact",
+      "text": "SEIBro 2026-05-15 결제 1위 DIREXION DAILY SEMICONDUCTORS BULL 3X … 1.1억$",
+      "href": "seibro.html",
+      "spark": null
+    },
+    {
+      "id": "deposit-customer",
+      "category": "Liquidity",
+      "color": "#2d7a3a",
+      "tone": "fact",
+      "text": "고객예탁금 1M +15.0% (현재 133.5조원)",
+      "href": "market.html",
+      "spark": {
+        "series": [
+          873986.0,
+          895211.0,
+          891304.0,
+          886339.0,
+          897650.0,
+          928537.0,
+          888720.0,
+          889880.0,
+          880489.0,
+          893099.0,
+          926030.0,
+          912182.0,
+          938623.0,
+          955260.0,
+          963317.0,
+          957276.0,
+          938095.0,
+          975405.0,
+          1002826.0,
+          1033623.0,
+          1037072.0,
+          1060325.0,
+          1112965.0,
+          1055845.0,
+          1008172.0,
+          1048667.0,
+          1090099.0,
+          985905.0,
+          952996.0,
+          981634.0,
+          1030184.0,
+          992736.0,
+          1065700.0,
+          1041291.0,
+          1082901.0,
+          1079032.0,
+          1094677.0,
+          1194832.0,
+          1187488.0,
+          1298188.0,
+          1320682.0,
+          1308873.0,
+          1299574.0,
+          1274218.0,
+          1255844.0,
+          1190280.0,
+          1201462.0,
+          1196960.0,
+          1178012.0,
+          1147783.0,
+          1122807.0,
+          1156443.0,
+          1206968.0,
+          1218992.0,
+          1197599.0,
+          1088498.0,
+          1115790.0,
+          1128372.0,
+          1110742.0,
+          1102889.0,
+          1116766.0,
+          1085740.0,
+          1090165.0,
+          1074674.0,
+          1089214.0,
+          1098332.0,
+          1128070.0,
+          1153642.0,
+          1161075.0,
+          1176725.0,
+          1171651.0,
+          1190743.0,
+          1205855.0,
+          1218173.0,
+          1212861.0,
+          1225381.0,
+          1260351.0,
+          1256869.0,
+          1259503.0,
+          1274134.0,
+          1297321.0,
+          1247591.0,
+          1248406.0,
+          1307434.0,
+          1369890.0,
+          1352991.0,
+          1340987.0,
+          1374174.0,
+          1371201.0,
+          1335088.0
+        ],
+        "trend": "up"
+      }
     }
   ]
 }
