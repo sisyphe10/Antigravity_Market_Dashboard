@@ -16,6 +16,7 @@ BACKUP_FILES=(
     "kna_state.json"
     ".budget_milestone"
     ".wisereport_sent.json"
+    ".portfolio_report_sent.json"
     "stock_price_history.json"
     "execution/research_bot/research_notes.db"
     "etf_data.db"

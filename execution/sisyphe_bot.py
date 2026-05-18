@@ -40,8 +40,27 @@ SUBSCRIBERS_FILE = os.path.join(DASHBOARD_DIR, 'subscribers.json')
 
 KST = datetime.timezone(datetime.timedelta(hours=9))
 
-# 당일 포트폴리오 리포트 전송 추적 (중복 방지)
-_portfolio_report_sent_date = None
+# 당일 포트폴리오 리포트 전송 추적 (중복 방지) — 봇 재시작에도 살아남도록 파일 영속화
+PORTFOLIO_REPORT_STATE_FILE = os.path.join(DASHBOARD_DIR, '.portfolio_report_sent.json')
+
+
+def _load_portfolio_report_sent_date():
+    try:
+        with open(PORTFOLIO_REPORT_STATE_FILE, 'r', encoding='utf-8') as f:
+            return (json.load(f) or {}).get('last_sent_date')
+    except FileNotFoundError:
+        return None
+    except Exception as e:
+        logging.warning(f"Failed to read portfolio report state: {e}")
+        return None
+
+
+def _save_portfolio_report_sent_date(date_str):
+    try:
+        with open(PORTFOLIO_REPORT_STATE_FILE, 'w', encoding='utf-8') as f:
+            json.dump({'last_sent_date': date_str}, f)
+    except Exception as e:
+        logging.error(f"Failed to write portfolio report state: {e}")
 
 
 def git_sync(cwd):
@@ -696,10 +715,9 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
         else:
             logging.error(f"Dashboard generation failed: {result_dashboard.stderr}")
 
-        # 4. 포트폴리오 리포트 생성 및 전송 (당일 미전송 시에만)
-        global _portfolio_report_sent_date
+        # 4. 포트폴리오 리포트 생성 및 전송 (당일 미전송 시에만, 봇 재시작에도 dedup 유지)
         today_kst = datetime.datetime.now(tz=KST).strftime('%Y-%m-%d')
-        if _portfolio_report_sent_date == today_kst:
+        if _load_portfolio_report_sent_date() == today_kst:
             logging.info("Step 4: 리포트 이미 전송됨, 스킵")
         else:
             logging.info("Step 4: Generating portfolio report...")
@@ -710,7 +728,7 @@ async def daily_portfolio_job(context: ContextTypes.DEFAULT_TYPE):
                 timeout=120
             )
             if result_report.returncode == 0:
-                _portfolio_report_sent_date = today_kst
+                _save_portfolio_report_sent_date(today_kst)
                 logging.info("Portfolio report sent successfully via Telegram")
             else:
                 logging.error(f"Report generation failed: {result_report.stderr}")
