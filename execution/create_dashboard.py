@@ -4374,7 +4374,7 @@ def create_dashboard():
         .lh-text {{ flex: 1 1 auto; font-size: 0.92rem; color: #333; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
         .lh-shuffle {{ flex: 0 0 56px; width: 56px; background: none; border: none; cursor: pointer; font-size: 2.1rem; opacity: 0.9; padding: 8px 0; transition: opacity 0.15s, transform 0.2s; line-height: 1; color: inherit; text-align: center; display: inline-block; }}
         .lh-shuffle:hover {{ opacity: 1; transform: rotate(20deg); }}
-        .lh-shuffle.rolling {{ animation: lh-roll 0.55s ease-out; }}
+        .lh-shuffle.rolling {{ animation: lh-roll 0.4s ease-out; }}
         @keyframes lh-roll {{
             0%   {{ transform: translateY(0)     rotate(0deg); }}
             50%  {{ transform: translateY(-16px) rotate(360deg); }}
