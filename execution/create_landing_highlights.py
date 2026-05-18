@@ -33,7 +33,6 @@ CATEGORY_COLORS = {
     'Universe':  '#6B21A8',
     'SEIBro':    '#0369a1',
     'Featured':  '#d97706',
-    'ETF':       '#6366f1',
 }
 
 SPARK_DAYS = 90
@@ -396,15 +395,6 @@ def b_alert_counts(ctx):
     return slot('alert-counts', 'Alert', 'fact', text, 'market_alert.html')
 
 
-def b_etf_sector_top(ctx):
-    d = ctx.get('kodex')
-    if not d or 'sectors' not in d or not d['sectors']:
-        return None
-    top = sorted(d['sectors'].items(), key=lambda x: x[1], reverse=True)[0]
-    text = f"KOSPI200+KOSDAQ150 섹터 1위: {top[0]} {top[1]:.1f}%"
-    return slot('etf-sector-top', 'ETF', 'fact', text, 'etf.html')
-
-
 def b_featured_volume_top(ctx):
     fd = ctx.get('featured_latest')
     if not fd:
@@ -469,7 +459,6 @@ BUILDERS = [
     b_index_kospi,
     b_index_nasdaq,
     b_alert_counts,
-    b_etf_sector_top,
     b_featured_volume_top,
     b_featured_chg_top,
 ]

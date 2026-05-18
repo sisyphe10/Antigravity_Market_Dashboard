@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-05-18 09:00:05 KST",
+  "updated_at": "2026-05-18 09:05:45 KST",
   "slots": [
     {
       "id": "market-1m-leader",
@@ -109,7 +109,7 @@
       "category": "Market",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "2026-05 11개 자산 중 7/11 상승 — 방향성 부재",
+      "text": "2026-05 11개 자산 중 7/11 상승 — 혼조 양상",
       "href": "market.html",
       "spark": null
     },
@@ -278,11 +278,10 @@
       "category": "Commodity",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "Gold 1M -5.8% (현재 $4,615/oz)",
+      "text": "Gold 1M -5.8% (현재 $4,541/oz)",
       "href": "market.html",
       "spark": {
         "series": [
-          4480.6001,
           4529.1001,
           4325.1001,
           4370.1001,
@@ -371,9 +370,10 @@
           4675.5,
           4711.5,
           4683.6001,
-          4615.1001
+          4615.1001,
+          4540.7002
         ],
-        "trend": "up"
+        "trend": "flat"
       }
     },
     {
@@ -381,11 +381,10 @@
       "category": "FX",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "USD/KRW 1주 +44.6원 (현재 1,492.7원)",
+      "text": "USD/KRW 1주 +33.9원 (현재 1,497.9원)",
       "href": "market.html",
       "spark": {
         "series": [
-          1434.71,
           1437.91,
           1477.78,
           1422.08,
@@ -474,7 +473,8 @@
           1491.38,
           1497.6801,
           1490.98,
-          1492.6801
+          1492.6801,
+          1497.92
         ],
         "trend": "up"
       }
@@ -484,11 +484,10 @@
       "category": "FX",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "DXY 7일 +1.1% (현재 99.05) — 달러 강세 — 신흥국 자산 부담",
+      "text": "DXY 7일 +1.1% (현재 99.32) — 달러 강세 — 신흥국 자산 부담",
       "href": "market.html",
       "spark": {
         "series": [
-          98.76,
           99.0,
           98.0,
           97.0,
@@ -577,7 +576,8 @@
           98.349,
           98.415,
           98.441,
-          99.049
+          99.049,
+          99.32
         ],
         "trend": "flat"
       }
@@ -724,7 +724,7 @@
       "category": "Commodity",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "리튬카보네이트 7일 +2.4% — 방향성 부재",
+      "text": "리튬카보네이트 7일 +2.4% — 박스권 유지",
       "href": "market.html",
       "spark": {
         "series": [
@@ -1091,15 +1091,6 @@
       "tone": "fact",
       "text": "오늘 투자주의 52 · 경고 41 · 위험 1",
       "href": "market_alert.html",
-      "spark": null
-    },
-    {
-      "id": "etf-sector-top",
-      "category": "ETF",
-      "color": "#6366f1",
-      "tone": "fact",
-      "text": "KOSPI200+KOSDAQ150 섹터 1위: 전기·전자 57.6%",
-      "href": "etf.html",
       "spark": null
     },
     {
