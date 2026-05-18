@@ -1,12 +1,12 @@
 {
-  "updated_at": "2026-05-18 13:25:45 KST",
+  "updated_at": "2026-05-18 13:30:23 KST",
   "slots": [
     {
       "id": "market-1m-leader",
       "category": "Market",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "1M 1위 KOSPI +24.0%, 꼴찌 KOSDAQ -3.9%",
+      "text": "1M 1위 KOSPI +24.0%, 꼴찌 KOSDAQ -3.6%",
       "href": "market.html",
       "spark": {
         "series": [
@@ -118,7 +118,7 @@
       "category": "Memory",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "DDR5 1W +1.0% ($52) — 관망세 지속",
+      "text": "DDR5 1W +1.0% ($52) — 박스권 유지",
       "href": "market.html",
       "spark": {
         "series": [
