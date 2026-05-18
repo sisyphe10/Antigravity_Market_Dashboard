@@ -1,16 +1,15 @@
 {
-  "updated_at": "2026-05-18 09:30:33 KST",
+  "updated_at": "2026-05-18 10:01:32 KST",
   "slots": [
     {
       "id": "market-1m-leader",
       "category": "Market",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "1M 1위 KOSPI +25.6%, 꼴찌 STOXX -2.6%",
+      "text": "1M 1위 KOSPI +18.3%, 꼴찌 KOSDAQ -5.9%",
       "href": "market.html",
       "spark": {
         "series": [
-          4309.6299,
           4457.52,
           4525.48,
           4551.0601,
@@ -99,7 +98,8 @@
           7643.1499,
           7682.3799,
           7950.0,
-          7897.6602
+          7897.6602,
+          7205.4302
         ],
         "trend": "up"
       }
@@ -109,7 +109,7 @@
       "category": "Market",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "2026-05 11개 자산 중 7/11 상승 — 혼조 양상",
+      "text": "2026-05 11개 자산 중 7/11 상승 — 엇갈린 흐름",
       "href": "market.html",
       "spark": null
     },
@@ -118,7 +118,7 @@
       "category": "Memory",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "DDR5 7일 +1.0% (현재 $52.50) — 방향성 부재",
+      "text": "DDR5 7일 +1.0% (현재 $52.50) — 관망세 지속",
       "href": "market.html",
       "spark": {
         "series": [
@@ -724,7 +724,7 @@
       "category": "Commodity",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "리튬카보네이트 7일 +2.4% — 관망세 지속",
+      "text": "리튬카보네이트 7일 +2.4% — 방향성 부재",
       "href": "market.html",
       "spark": {
         "series": [
@@ -883,11 +883,10 @@
       "category": "Index",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "KOSPI 1M +32.8% (현재 7,897.7)",
+      "text": "KOSPI 1M +16.8% (현재 7,205.4)",
       "href": "market.html",
       "spark": {
         "series": [
-          4309.6299,
           4457.52,
           4525.48,
           4551.0601,
@@ -976,7 +975,8 @@
           7643.1499,
           7682.3799,
           7950.0,
-          7897.6602
+          7897.6602,
+          7205.4302
         ],
         "trend": "up"
       }
