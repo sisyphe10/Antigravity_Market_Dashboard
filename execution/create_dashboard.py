@@ -4385,7 +4385,7 @@ def create_dashboard():
         .lh-divider {{ border: none; border-top: 1.5px solid #000; margin: 12px 0; }}
         .lh-quote-row {{ display: flex; align-items: center; padding: 4px 0; cursor: pointer; min-height: 36px; }}
         .lh-quote-text {{ flex: 1 1 auto; font-size: 0.92rem; color: #333; line-height: 1.55; white-space: normal; }}
-        .lh-author {{ color: #888; font-size: 0.85em; font-style: italic; margin-left: 8px; white-space: nowrap; }}
+        .lh-author {{ color: #333; font-size: 1em; font-style: italic; margin-left: 8px; white-space: nowrap; }}
         @media (max-width: 600px) {{
             .lh-card {{ padding: 12px 14px; }}
             .lh-chart-row {{ flex-wrap: wrap; gap: 10px; }}
