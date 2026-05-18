@@ -112,6 +112,7 @@ def get_latest_nav():
         'NH Value ESG': 'Value ESG',
         'DB 개방형 랩': '개방형 랩',
         'NH 목표전환형 3호': '목표전환형 3호',  # 운용 개시 2026-05-14
+        'DB 목표전환형 4차': '목표전환형 4차',  # 운용 개시 2026-05-18
         # 'NH 목표전환형 2호': '목표전환형 2호',  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
         # 'DB 목표전환형 3차': '목표전환형 3차',  # DB 3차 완료 (2026-05-06, +7.97%, 목표 7.5% 초과)
         # 'DB 목표전환형 2차 / NH 목표전환형 1호': '목표전환형 2차',  # 2차+1호 완료 (2026-04-15, DB 7.5% / NH 6.5% 달성)
@@ -138,7 +139,7 @@ def get_latest_returns():
     # 트루밸류, KOSPI, KOSDAQ 수익률 추출
     returns_data = {}
     
-    for product in ['트루밸류', '목표전환형 3호', 'KOSPI', 'KOSDAQ']:  # NH 3호 운용 개시 2026-05-14
+    for product in ['트루밸류', '목표전환형 3호', '목표전환형 4차', 'KOSPI', 'KOSDAQ']:  # NH 3호 + DB 4차 페어
         returns_data[product] = {
             '1D': latest_row.get(f'{product}_1D', 'N/A'),
             '1W': latest_row.get(f'{product}_1W', 'N/A'),
@@ -302,13 +303,14 @@ def format_message(date, nav_data, returns_data):
     display_names = {
         '트루밸류': '삼성 트루밸류',
         '목표전환형 3호': 'NH 목표전환형 3호',  # 운용 개시 2026-05-14
+        '목표전환형 4차': 'DB 목표전환형 4차',  # 운용 개시 2026-05-18
         # '목표전환형 2호': 'NH 목표전환형 2호',  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
         # '목표전환형 3차': 'DB 목표전환형 3차',  # DB 3차 완료 (2026-05-06, +7.97%, 목표 7.5% 초과)
         'KOSPI': 'KOSPI',
         'KOSDAQ': 'KOSDAQ',
     }
     periods = ['1D', '1W', '1M', '3M', '6M', '1Y', 'YTD']
-    for product in ['트루밸류', '목표전환형 3호', 'KOSPI', 'KOSDAQ']:
+    for product in ['트루밸류', '목표전환형 3호', '목표전환형 4차', 'KOSPI', 'KOSDAQ']:
         if product in returns_data:
             returns = returns_data[product]
             # N/A가 아닌 항목만 표시
