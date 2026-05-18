@@ -752,6 +752,184 @@ def b_deposit_customer(ctx):
     return slot('deposit-customer', 'Liquidity', 'fact', text, 'market.html', vals, trend_idx=22)
 
 
+# ── Rate (5) ────────────────────────────────────────────────
+def b_rate_10y_stress(ctx):
+    srs = get_series(ctx['ds'], 'INTEREST_RATE', 'US 10 Year Treasury Yield')
+    if not srs or len(srs['values']) < 8:
+        return None
+    vals = srs['values']
+    cur = vals[-1]
+    chg_bp = (cur - vals[-8]) * 100
+    if cur >= 5.0:
+        phrase = '5% 돌파, 고금리 환경'
+    elif cur >= 4.5:
+        phrase = '4.5% 상회 부담'
+    elif cur <= 3.5:
+        phrase = '완화적 영역'
+    else:
+        phrase = '중립권'
+    text = f"US 10Y 1W {chg_bp:+.0f}bp ({cur:.1f}%) — {phrase}"
+    return slot('rate-10y-stress', 'Rate', 'interpret', text, 'market.html', vals)
+
+
+def b_rate_5s10s_curve(ctx):
+    s5 = get_series(ctx['ds'], 'INTEREST_RATE', 'US 5 Year Treasury Yield')
+    s10 = get_series(ctx['ds'], 'INTEREST_RATE', 'US 10 Year Treasury Yield')
+    if not s5 or not s10 or len(s5['values']) < 8 or len(s10['values']) < 8:
+        return None
+    spread_bp = (s10['values'][-1] - s5['values'][-1]) * 100
+    if spread_bp >= 30:
+        phrase = '정상화 진행'
+    elif spread_bp >= 0:
+        phrase = '정상 영역'
+    else:
+        phrase = '역전 상태'
+    text = f"5Y-10Y 스프레드 {spread_bp:+.0f}bp — {phrase}"
+    spark = [b - a for a, b in zip(s5['values'], s10['values'])]
+    return slot('rate-5s10s-curve', 'Rate', 'interpret', text, 'market.html', spark)
+
+
+def b_rate_10s30s_curve(ctx):
+    s10 = get_series(ctx['ds'], 'INTEREST_RATE', 'US 10 Year Treasury Yield')
+    s30 = get_series(ctx['ds'], 'INTEREST_RATE', 'US 30 Year Treasury Yield')
+    if not s10 or not s30 or len(s10['values']) < 8 or len(s30['values']) < 8:
+        return None
+    spread_bp = (s30['values'][-1] - s10['values'][-1]) * 100
+    if spread_bp >= 50:
+        phrase = '장기 프리미엄 확대'
+    elif spread_bp >= 20:
+        phrase = '완만한 우상향'
+    else:
+        phrase = '플랫'
+    text = f"10Y-30Y 스프레드 {spread_bp:+.0f}bp — {phrase}"
+    spark = [b - a for a, b in zip(s10['values'], s30['values'])]
+    return slot('rate-10s30s-curve', 'Rate', 'interpret', text, 'market.html', spark)
+
+
+def b_rate_13w10y_inversion(ctx):
+    s13 = get_series(ctx['ds'], 'INTEREST_RATE', 'US 13 Week Treasury Yield')
+    s10 = get_series(ctx['ds'], 'INTEREST_RATE', 'US 10 Year Treasury Yield')
+    if not s13 or not s10 or len(s13['values']) < 8 or len(s10['values']) < 8:
+        return None
+    spread_bp = (s10['values'][-1] - s13['values'][-1]) * 100
+    if spread_bp < 0:
+        phrase = '역전 — 침체 시그널'
+    elif spread_bp < 50:
+        phrase = '역전 해소 구간'
+    else:
+        phrase = '정상화'
+    text = f"13W-10Y 스프레드 {spread_bp:+.0f}bp — {phrase}"
+    spark = [b - a for a, b in zip(s13['values'], s10['values'])]
+    return slot('rate-13w10y-inv', 'Rate', 'interpret', text, 'market.html', spark)
+
+
+def b_rate_30y_level(ctx):
+    srs = get_series(ctx['ds'], 'INTEREST_RATE', 'US 30 Year Treasury Yield')
+    if not srs or len(srs['values']) < 8:
+        return None
+    vals = srs['values']
+    cur = vals[-1]
+    chg_bp = (cur - vals[-8]) * 100
+    if cur >= 5.0:
+        phrase = '장기금리 경계'
+    elif cur >= 4.5:
+        phrase = '모기지 부담권'
+    else:
+        phrase = '중립'
+    text = f"US 30Y 1W {chg_bp:+.0f}bp ({cur:.1f}%) — {phrase}"
+    return slot('rate-30y-level', 'Rate', 'interpret', text, 'market.html', vals)
+
+
+# ── Sector (5) ──────────────────────────────────────────────
+def b_sector_top3_bottom3(ctx):
+    ks = ctx.get('kodex') or {}
+    r = ks.get('sector_1m_returns')
+    if not isinstance(r, dict) or len(r) < 6:
+        return None
+    items = sorted(
+        ((n, v) for n, v in r.items() if isinstance(v, (int, float))),
+        key=lambda x: x[1], reverse=True,
+    )
+    top3 = items[:3]
+    bot3 = items[-3:]
+    top_str = ', '.join(f"{n} {v:+.0f}%" for n, v in top3)
+    bot_str = ', '.join(f"{n} {v:+.0f}%" for n, v in reversed(bot3))
+    text = f"섹터 1M TOP3 {top_str} · BOT3 {bot_str}"
+    return slot('sector-top3-bot3', 'Sector', 'fact', text, 'market.html')
+
+
+def b_sector_dispersion(ctx):
+    ks = ctx.get('kodex') or {}
+    r = ks.get('sector_1m_returns')
+    if not isinstance(r, dict) or len(r) < 5:
+        return None
+    nums = [v for v in r.values() if isinstance(v, (int, float))]
+    if not nums:
+        return None
+    spread = max(nums) - min(nums)
+    if spread >= 50:
+        phrase = '극단 쏠림'
+    elif spread >= 30:
+        phrase = '쏠림 장세'
+    elif spread >= 15:
+        phrase = '보통 분산'
+    else:
+        phrase = '동조화'
+    text = f"섹터 분산 {spread:.0f}%p — {phrase}"
+    return slot('sector-dispersion', 'Sector', 'interpret', text, 'market.html')
+
+
+def b_sector_breadth(ctx):
+    ks = ctx.get('kodex') or {}
+    r = ks.get('sector_1m_returns')
+    if not isinstance(r, dict) or len(r) < 5:
+        return None
+    nums = [v for v in r.values() if isinstance(v, (int, float))]
+    if not nums:
+        return None
+    strong = sum(1 for v in nums if v >= 5)
+    weak = sum(1 for v in nums if v <= -5)
+    total = len(nums)
+    if strong >= total * 0.6:
+        phrase = '광범위 강세'
+    elif weak >= total * 0.6:
+        phrase = '광범위 약세'
+    elif strong > weak * 2:
+        phrase = '강세 우위'
+    elif weak > strong * 2:
+        phrase = '약세 우위'
+    else:
+        phrase = '선택적 강세'
+    text = f"섹터 폭 {strong}강/{weak}약 (29개) — {phrase}"
+    return slot('sector-breadth', 'Sector', 'interpret', text, 'market.html')
+
+
+def b_sector_semi_spotlight(ctx):
+    ks = ctx.get('kodex') or {}
+    r = ks.get('sector_1m_returns', {})
+    v = r.get('전기·전자')
+    if not isinstance(v, (int, float)):
+        return None
+    stocks = (ks.get('sector_top_stocks', {}) or {}).get('전기·전자', [])
+    leader = stocks[0] if stocks else ''
+    suffix = f" · {leader} 주도" if leader else ''
+    text = f"전기·전자(반도체) 1M {v:+.1f}%{suffix}"
+    return slot('sector-semi', 'Sector', 'fact', text, 'market.html')
+
+
+def b_sector_pharma_spotlight(ctx):
+    ks = ctx.get('kodex') or {}
+    r = ks.get('sector_1m_returns', {})
+    v = r.get('제약')
+    if not isinstance(v, (int, float)):
+        return None
+    stocks = (ks.get('sector_top_stocks', {}) or {}).get('제약', [])
+    leader = stocks[0] if stocks else ''
+    suffix = f" · {leader} 비중" if leader else ''
+    text = f"제약·바이오 1M {v:+.1f}%{suffix}"
+    return slot('sector-pharma', 'Sector', 'fact', text, 'market.html')
+
+
 BUILDERS = [
     b_market_1m_leader,
     b_market_breadth,
@@ -793,6 +971,16 @@ BUILDERS = [
     b_kodex_sector_leader,
     b_seibro_top_settlement,
     b_deposit_customer,
+    b_rate_10y_stress,
+    b_rate_5s10s_curve,
+    b_rate_10s30s_curve,
+    b_rate_13w10y_inversion,
+    b_rate_30y_level,
+    b_sector_top3_bottom3,
+    b_sector_dispersion,
+    b_sector_breadth,
+    b_sector_semi_spotlight,
+    b_sector_pharma_spotlight,
 ]
 
 
