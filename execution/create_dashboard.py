@@ -4371,8 +4371,15 @@ def create_dashboard():
         .lh-spark {{ flex: 0 0 auto; width: 202px; height: 80px; padding: 0 10px; border-left: 1px solid #000; border-right: 1px solid #000; display: flex; align-items: center; justify-content: center; }}
         .lh-spark svg {{ width: 180px; height: 80px; display: block; }}
         .lh-text {{ flex: 1 1 auto; font-size: 0.92rem; color: #333; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
-        .lh-shuffle {{ flex: 0 0 56px; width: 56px; background: none; border: none; cursor: pointer; font-size: 2.1rem; opacity: 0.9; padding: 8px 0; transition: opacity 0.15s, transform 0.2s; line-height: 1; color: inherit; text-align: center; }}
+        .lh-shuffle {{ flex: 0 0 56px; width: 56px; background: none; border: none; cursor: pointer; font-size: 2.1rem; opacity: 0.9; padding: 8px 0; transition: opacity 0.15s, transform 0.2s; line-height: 1; color: inherit; text-align: center; display: inline-block; }}
         .lh-shuffle:hover {{ opacity: 1; transform: rotate(20deg); }}
+        .lh-shuffle.rolling {{ animation: lh-roll 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }}
+        @keyframes lh-roll {{
+            0%   {{ transform: rotate(0deg) scale(1) translateY(0); }}
+            30%  {{ transform: rotate(220deg) scale(1.18) translateY(-6px); }}
+            60%  {{ transform: rotate(500deg) scale(1.1) translateY(2px); }}
+            100% {{ transform: rotate(720deg) scale(1) translateY(0); }}
+        }}
         @media (max-width: 600px) {{
             .lh-widget {{ flex-wrap: wrap; padding: 10px 14px; gap: 10px; }}
             .lh-text {{ white-space: normal; flex-basis: 100%; order: 4; font-size: 0.85rem; }}
@@ -4512,6 +4519,9 @@ def create_dashboard():
 
         shuffleBtn.addEventListener('click', function(e) {{
             e.stopPropagation();
+            shuffleBtn.classList.remove('rolling');
+            void shuffleBtn.offsetWidth;
+            shuffleBtn.classList.add('rolling');
             var next = pickSlot();
             if (next) render(next);
         }});
