@@ -122,13 +122,17 @@
                 '</svg>';
         }
 
+        function escapeHtml(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
         function render(slot) {
             current = slot;
             var color = slot.color || '#999';
             widget.style.borderLeftColor = color;
             tagEl.textContent = slot.category || '';
             tagEl.style.backgroundColor = color;
-            textEl.textContent = slot.text || '';
+            var html = escapeHtml(slot.text || '').replace(/\(([^)]+)\)/g, '(<b><u>$1</u></b>)');
+            textEl.innerHTML = html;
             renderSpark(slot.spark);
             widget.hidden = false;
             try { sessionStorage.setItem('lh_prev_id', slot.id); } catch (e) {}
