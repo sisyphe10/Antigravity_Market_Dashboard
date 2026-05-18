@@ -4286,16 +4286,16 @@ def create_dashboard():
         .lh-widget:hover {{ transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.10); }}
         .lh-widget[hidden] {{ display: none; }}
         .lh-tag {{ flex: 0 0 auto; padding: 4px 11px; background: #999; color: #fff; font-size: 0.72rem; font-weight: 700; border-radius: 999px; letter-spacing: 0.4px; }}
-        .lh-spark {{ flex: 0 0 auto; width: 80px; height: 24px; display: flex; align-items: center; justify-content: center; }}
-        .lh-spark svg {{ width: 80px; height: 24px; display: block; }}
+        .lh-spark {{ flex: 0 0 auto; width: 120px; height: 40px; display: flex; align-items: center; justify-content: center; }}
+        .lh-spark svg {{ width: 120px; height: 40px; display: block; }}
         .lh-text {{ flex: 1 1 auto; font-size: 0.92rem; color: #333; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
         .lh-shuffle {{ flex: 0 0 auto; background: none; border: none; cursor: pointer; font-size: 1.05rem; opacity: 0.35; padding: 4px 6px; transition: opacity 0.15s, transform 0.2s; line-height: 1; color: inherit; }}
         .lh-shuffle:hover {{ opacity: 0.95; transform: rotate(20deg); }}
         @media (max-width: 600px) {{
             .lh-widget {{ flex-wrap: wrap; padding: 10px 14px; gap: 10px; }}
             .lh-text {{ white-space: normal; flex-basis: 100%; order: 4; font-size: 0.85rem; }}
-            .lh-spark {{ width: 60px; }}
-            .lh-spark svg {{ width: 60px; }}
+            .lh-spark {{ width: 90px; height: 32px; }}
+            .lh-spark svg {{ width: 90px; height: 32px; }}
         }}
         .cards {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; max-width: 800px; width: 100%; }}
         .card {{ background: #fff; border-radius: 14px; padding: 28px 24px; text-decoration: none; color: #333; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-left: 5px solid #ccc; transition: transform 0.15s, box-shadow 0.15s; display: block; }}
@@ -4382,7 +4382,7 @@ def create_dashboard():
                 return;
             }}
             var vals = spark.series;
-            var w = 80, h = 24, pad = 2;
+            var w = 120, h = 40, pad = 3;
             var mn = Math.min.apply(null, vals);
             var mx = Math.max.apply(null, vals);
             var range = (mx - mn) || 1;
