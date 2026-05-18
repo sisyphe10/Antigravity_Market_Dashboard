@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-05-18 11:31:21 KST",
+  "updated_at": "2026-05-18 11:33:28 KST",
   "slots": [
     {
       "id": "market-1m-leader",
@@ -118,7 +118,7 @@
       "category": "Memory",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "DDR5 7일 +1.0% (현재 $52.50) — 박스권 유지",
+      "text": "DDR5 7일 +1.0% (현재 $52.50) — 관망세 지속",
       "href": "market.html",
       "spark": {
         "series": [
@@ -2063,7 +2063,7 @@
       "category": "Commodity",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "리튬카보네이트 7일 +0.5% — 관망세 지속",
+      "text": "리튬카보네이트 7일 +0.5% — 박스권 유지",
       "href": "market.html",
       "spark": {
         "series": [
@@ -3159,7 +3159,7 @@
       "category": "Featured",
       "color": "#d97706",
       "tone": "fact",
-      "text": "2026-05-15 거래대금 1위: SK하이닉스 14.1조원",
+      "text": "5.15(금) 거래대금 1위: SK하이닉스 14.1조원",
       "href": "featured.html",
       "spark": null
     },
@@ -3168,7 +3168,7 @@
       "category": "Featured",
       "color": "#d97706",
       "tone": "fact",
-      "text": "2026-05-15 KOSDAQ 상승률 1위: 에스에이엠티 +30.0%",
+      "text": "5.15(금) KOSDAQ 상승률 1위: 에스에이엠티 +30.0%",
       "href": "featured.html",
       "spark": null
     },
@@ -3186,7 +3186,7 @@
       "category": "SEIBro",
       "color": "#0369a1",
       "tone": "fact",
-      "text": "SEIBro 2026-05-15 결제 1위 DIREXION DAILY SEMICONDUCTORS BULL 3X … 1.1억$",
+      "text": "SEIBro 5.15(금) 결제 1위 SOXL 1.1억$",
       "href": "seibro.html",
       "spark": null
     },

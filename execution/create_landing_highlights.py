@@ -39,6 +39,17 @@ CATEGORY_COLORS = {
 
 SPARK_DAYS = 90
 
+WEEKDAY_KR = ['월', '화', '수', '목', '금', '토', '일']
+
+
+def fmt_short_date(date_str):
+    """'YYYY-MM-DD' → 'M.D(요일)'. 파싱 실패 시 원본 반환."""
+    try:
+        dt = datetime.strptime(date_str, '%Y-%m-%d')
+        return f"{dt.month}.{dt.day}({WEEKDAY_KR[dt.weekday()]})"
+    except (ValueError, TypeError):
+        return date_str
+
 INTERPRET_VARIANTS = {
     'up_strong':      ['반등 신호', '상승 모멘텀', '수요 회복', '추세 전환 가능성'],
     'up_mild':        ['저점 형성 가능성', '점진적 반등', '하방 압력 완화'],
@@ -435,7 +446,7 @@ def b_featured_volume_top(ctx):
         amt = f"{trdval/1e12:.1f}조"
     else:
         amt = f"{trdval/1e8:,.0f}억"
-    text = f"{latest_d} 거래대금 1위: {top.get('name','')} {amt}원"
+    text = f"{fmt_short_date(latest_d)} 거래대금 1위: {top.get('name','')} {amt}원"
     return slot('featured-volume-top', 'Featured', 'fact', text, 'featured.html')
 
 
@@ -459,7 +470,7 @@ def b_featured_chg_top(ctx):
     chg_rows.sort(key=lambda x: x[0], reverse=True)
     v, top = chg_rows[0]
     market = top.get('market', '')
-    text = f"{latest_d} {market} 상승률 1위: {top.get('name','')} {v:+.1f}%"
+    text = f"{fmt_short_date(latest_d)} {market} 상승률 1위: {top.get('name','')} {v:+.1f}%"
     return slot('featured-chg-top', 'Featured', 'fact', text, 'featured.html')
 
 
@@ -711,8 +722,10 @@ def b_seibro_top_settlement(ctx):
         amt = f"{top_v/1e6:.1f}백만$"
     else:
         amt = f"{top_v:,.0f}$"
-    short = top_n if len(top_n) <= 40 else top_n[:38] + '…'
-    text = f"SEIBro {latest} 결제 1위 {short} {amt}"
+    tickers = ctx.get('seibro_tickers') or {}
+    ticker = tickers.get(top_n)
+    display = ticker if ticker else (top_n if len(top_n) <= 30 else top_n[:28] + '…')
+    text = f"SEIBro {fmt_short_date(latest)} 결제 1위 {display} {amt}"
     return slot('seibro-top-settlement', 'SEIBro', 'fact', text, 'seibro.html')
 
 
@@ -786,6 +799,7 @@ def main():
         'correlation': safe_load_json(ROOT / 'correlation_matrix.json'),
         'kodex': safe_load_json(ROOT / 'kodex_sectors.json'),
         'featured_latest': featured_latest,
+        'seibro_tickers': safe_load_json(ROOT / 'seibro_tickers.json') or {},
     }
     print(f"  loaded: ds={len(ds)} series, featured_latest_rows={len(featured_latest[0]) if featured_latest else 0}")
 
