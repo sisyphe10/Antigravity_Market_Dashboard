@@ -74,11 +74,15 @@ def safe_float(v):
         return None
 
 
-def classify_trend(series):
+def classify_trend(series, base_idx=8):
+    """series 변화율 ±3% 기준으로 up/down/flat 분류.
+    base_idx: vals[-base_idx]를 기준값으로 사용. 기본 8 = vals[-8] = 7일 전.
+    빌더의 본문 분석 기간(1M=22, 7일=8)과 일치시켜야 텍스트와 색이 어긋나지 않음.
+    """
     valid = [v for v in series if v is not None]
     if len(valid) < 2:
         return 'flat'
-    base = valid[-8] if len(valid) >= 8 else valid[0]
+    base = valid[-base_idx] if len(valid) >= base_idx else valid[0]
     if not base:
         return 'flat'
     chg = (valid[-1] - base) / abs(base)
@@ -155,7 +159,7 @@ def load_featured_latest(path):
     return [r for r in rows if r.get('d') == latest], latest
 
 
-def slot(sid, category, tone, text, href, spark_values=None):
+def slot(sid, category, tone, text, href, spark_values=None, trend_idx=8):
     s = {
         'id': sid,
         'category': category,
@@ -167,7 +171,7 @@ def slot(sid, category, tone, text, href, spark_values=None):
     if spark_values and len(spark_values) >= 2:
         s['spark'] = {
             'series': [round(v, 4) for v in spark_values],
-            'trend': classify_trend(spark_values),
+            'trend': classify_trend(spark_values, base_idx=trend_idx),
         }
     else:
         s['spark'] = None
@@ -191,7 +195,7 @@ def b_market_1m_leader(ctx):
         if srs:
             spark = srs['values']
             break
-    return slot('market-1m-leader', 'Market', 'fact', text, 'market.html', spark)
+    return slot('market-1m-leader', 'Market', 'fact', text, 'market.html', spark, trend_idx=22)
 
 
 def b_market_breadth(ctx):
@@ -244,9 +248,12 @@ def b_crypto_btc(ctx):
     if not srs or len(srs['values']) < 22:
         return None
     vals = srs['values']
-    chg = (vals[-1] - vals[-22]) / vals[-22] if vals[-22] else 0
+    base = vals[-22]
+    if not base:
+        return None
+    chg = (vals[-1] - base) / base
     text = f"BTC 1M {fmt_pct(chg)} (현재 ${vals[-1]:,.0f})"
-    return slot('crypto-btc', 'Crypto', 'fact', text, 'market.html', vals)
+    return slot('crypto-btc', 'Crypto', 'fact', text, 'market.html', vals, trend_idx=22)
 
 
 def b_commodity_gold(ctx):
@@ -317,10 +324,12 @@ def b_battery_lithium(ctx):
         return None
     vals = srs['values']
     if len(vals) >= 22:
-        base, label = vals[-22], '1M'
+        base, label, tidx = vals[-22], '1M', 22
     else:
-        base, label = vals[-8], '7일'
-    chg = (vals[-1] - base) / base if base else 0
+        base, label, tidx = vals[-8], '7일', 8
+    if not base:
+        return None
+    chg = (vals[-1] - base) / base
     if chg >= 0.05:
         phrase = pick('up_strong')
     elif chg <= -0.05:
@@ -328,7 +337,7 @@ def b_battery_lithium(ctx):
     else:
         phrase = pick('flat')
     text = f"리튬카보네이트 {label} {fmt_pct(chg)} — {phrase}"
-    return slot('battery-lithium', 'Commodity', 'interpret', text, 'market.html', vals)
+    return slot('battery-lithium', 'Commodity', 'interpret', text, 'market.html', vals, trend_idx=tidx)
 
 
 def b_smp(ctx):
@@ -346,9 +355,12 @@ def b_scfi(ctx):
     if not srs or len(srs['values']) < 4:
         return None
     vals = srs['values']
-    chg = (vals[-1] - vals[-4]) / vals[-4] if vals[-4] else 0
+    base = vals[-4]
+    if not base:
+        return None
+    chg = (vals[-1] - base) / base
     text = f"SCFI {vals[-1]:,.0f} (4주 {fmt_pct(chg)})"
-    return slot('scfi', 'Commodity', 'fact', text, 'market.html', vals)
+    return slot('scfi', 'Commodity', 'fact', text, 'market.html', vals, trend_idx=4)
 
 
 def b_index_kospi(ctx):
@@ -356,9 +368,12 @@ def b_index_kospi(ctx):
     if not srs or len(srs['values']) < 22:
         return None
     vals = srs['values']
-    chg = (vals[-1] - vals[-22]) / vals[-22] if vals[-22] else 0
+    base = vals[-22]
+    if not base:
+        return None
+    chg = (vals[-1] - base) / base
     text = f"KOSPI 1M {fmt_pct(chg)} (현재 {vals[-1]:,.1f})"
-    return slot('index-kospi', 'Index', 'fact', text, 'market.html', vals)
+    return slot('index-kospi', 'Index', 'fact', text, 'market.html', vals, trend_idx=22)
 
 
 def b_index_nasdaq(ctx):
@@ -366,9 +381,12 @@ def b_index_nasdaq(ctx):
     if not srs or len(srs['values']) < 22:
         return None
     vals = srs['values']
-    chg = (vals[-1] - vals[-22]) / vals[-22] if vals[-22] else 0
+    base = vals[-22]
+    if not base:
+        return None
+    chg = (vals[-1] - base) / base
     text = f"NASDAQ 1M {fmt_pct(chg)} (현재 {vals[-1]:,.0f})"
-    return slot('index-nasdaq', 'Index', 'fact', text, 'market.html', vals)
+    return slot('index-nasdaq', 'Index', 'fact', text, 'market.html', vals, trend_idx=22)
 
 
 def b_alert_counts(ctx):
@@ -461,7 +479,7 @@ def _generic_1m(ctx, dtype, name, label, sid, category, href='market.html', unit
     else:
         cur = f"{vals[-1]:,.1f}"
     text = f"{label} 1M {fmt_pct(chg)} (현재 {unit}{cur})"
-    return slot(sid, category, 'fact', text, href, vals)
+    return slot(sid, category, 'fact', text, href, vals, trend_idx=22)
 
 
 def _generic_7d(ctx, dtype, name, label, sid, category, href='market.html', unit='', fmt='price2'):
@@ -518,7 +536,7 @@ def b_valuation_sp500_per(ctx):
     else:
         phrase = '중립권'
     text = f"S&P500 PER {vals[-1]:.1f}배 (1M {diff:+.1f}p) — {phrase}"
-    return slot('val-sp500-per', 'Index', 'interpret', text, 'market.html', vals)
+    return slot('val-sp500-per', 'Index', 'interpret', text, 'market.html', vals, trend_idx=22)
 
 
 def b_valuation_russell_per(ctx):
@@ -528,7 +546,7 @@ def b_valuation_russell_per(ctx):
     vals = srs['values']
     diff = vals[-1] - vals[-22]
     text = f"RUSSELL 2000 PER {vals[-1]:.1f}배 (1M {diff:+.1f}p) — 소형주 밸류"
-    return slot('val-russell-per', 'Index', 'interpret', text, 'market.html', vals)
+    return slot('val-russell-per', 'Index', 'interpret', text, 'market.html', vals, trend_idx=22)
 
 
 def b_commodity_wti(ctx):
@@ -553,12 +571,14 @@ def b_commodity_uranium(ctx):
         return None
     vals = srs['values']
     if len(vals) >= 22:
-        base, label = vals[-22], '1M'
+        base, label, tidx = vals[-22], '1M', 22
     else:
-        base, label = vals[-8], '7일'
-    chg = (vals[-1] - base) / base if base else 0
+        base, label, tidx = vals[-8], '7일', 8
+    if not base:
+        return None
+    chg = (vals[-1] - base) / base
     text = f"우라늄 {label} {fmt_pct(chg)} (현재 ${vals[-1]:,.2f}) — 원전 테마"
-    return slot('commodity-uranium', 'Commodity', 'interpret', text, 'market.html', vals)
+    return slot('commodity-uranium', 'Commodity', 'interpret', text, 'market.html', vals, trend_idx=tidx)
 
 
 def b_memory_ddr4(ctx):
@@ -629,9 +649,12 @@ def b_crypto_eth(ctx):
     if not srs or len(srs['values']) < 22:
         return None
     vals = srs['values']
-    chg = (vals[-1] - vals[-22]) / vals[-22] if vals[-22] else 0
+    base = vals[-22]
+    if not base:
+        return None
+    chg = (vals[-1] - base) / base
     text = f"ETH 1M {fmt_pct(chg)} (현재 ${vals[-1]:,.0f})"
-    return slot('crypto-eth', 'Crypto', 'fact', text, 'market.html', vals)
+    return slot('crypto-eth', 'Crypto', 'fact', text, 'market.html', vals, trend_idx=22)
 
 
 def b_crypto_sol(ctx):
@@ -639,9 +662,12 @@ def b_crypto_sol(ctx):
     if not srs or len(srs['values']) < 22:
         return None
     vals = srs['values']
-    chg = (vals[-1] - vals[-22]) / vals[-22] if vals[-22] else 0
+    base = vals[-22]
+    if not base:
+        return None
+    chg = (vals[-1] - base) / base
     text = f"SOL 1M {fmt_pct(chg)} (현재 ${vals[-1]:.2f})"
-    return slot('crypto-sol', 'Crypto', 'fact', text, 'market.html', vals)
+    return slot('crypto-sol', 'Crypto', 'fact', text, 'market.html', vals, trend_idx=22)
 
 
 def b_kodex_sector_leader(ctx):
@@ -701,7 +727,7 @@ def b_deposit_customer(ctx):
     chg = (vals[-1] - base) / base
     trillion = vals[-1] / 10000.0
     text = f"고객예탁금 1M {fmt_pct(chg)} (현재 {trillion:,.1f}조원)"
-    return slot('deposit-customer', 'Liquidity', 'fact', text, 'market.html', vals)
+    return slot('deposit-customer', 'Liquidity', 'fact', text, 'market.html', vals, trend_idx=22)
 
 
 BUILDERS = [
