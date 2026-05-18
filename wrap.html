@@ -1506,10 +1506,10 @@
 
         function calcOrderType(oldW, newW) {
             if (oldW === newW) return '유지';
-            if (oldW === 0 && newW > 0) return '신규 매수';
-            if (newW === 0 && oldW > 0) return '전량 매도';
-            if (newW > oldW) return '추가 매수';
-            return '일부 매도';
+            if (oldW === 0 && newW > 0) return '신규 편입';
+            if (newW === 0 && oldW > 0) return '전량 편출';
+            if (newW > oldW) return '비중 확대';
+            return '비중 축소';
         }
 
         // 다운로드 파일명: 자문지 폴더의 기존 파일명 패턴에 맞춰 오늘 날짜로 치환
@@ -1675,7 +1675,7 @@
             } else {
                 lines.push('[주요 내용]');
             }
-            lines.push('신규 매수: ' + fmt(changes.newBuy));
+            lines.push('신규 편입: ' + fmt(changes.newBuy));
             lines.push('비중 확대: ' + fmt(changes.inc));
             lines.push('비중 축소: ' + fmt(changes.dec));
             lines.push('전량 편출: ' + fmt(changes.out));
@@ -1783,7 +1783,7 @@
                 return arr.map(function(x) { return x.name + ' ' + x.weight + '%'; }).join(' ');
             }
             var lines = ['[' + headerLabel + ']'];
-            if (newBuy.length) lines.push('신규매수: ' + fmtList(newBuy));
+            if (newBuy.length) lines.push('신규편입: ' + fmtList(newBuy));
             if (inc.length) lines.push('비중확대: ' + fmtList(inc));
             if (dec.length) lines.push('비중축소: ' + fmtList(dec));
             if (out.length) lines.push('전량편출: ' + fmtList(out));
@@ -1857,7 +1857,7 @@
                 var reasonBg = reasonNeeded ? '#fee2e2' : '#fff';
                 var reasonBorder = reasonNeeded ? '#fca5a5' : '#d1d5db';
                 // 삭제 버튼: 사용자가 Order 탭에서 추가한 종목(isNew=true)만 표시.
-                // portfolio_data.json 출처 종목은 변경후=0(전량매도)으로 표현하므로 행 삭제 불필요.
+                // portfolio_data.json 출처 종목은 변경후=0(전량 편출)으로 표현하므로 행 삭제 불필요.
                 var deleteCell = s.isNew
                     ? '<td style="text-align:center;padding:8px;"><button class="order-del-btn" data-idx="' + i + '" title="종목 삭제" style="background:none;border:none;cursor:pointer;color:#dc2626;font-size:20px;line-height:1;padding:0 6px;font-weight:bold;">×</button></td>'
                     : '<td style="padding:8px;"></td>';
@@ -2211,7 +2211,23 @@
                     b4.numFmt = 'yyyy-mm-dd';
                 }
 
-                // 종목 채우기 + 행 높이 통일 + 주문구분 셀 색상 (매수=빨강, 매도=파랑)
+                // B2 헤더의 "목표전환형 N호"를 현재 회차(pfName 내 숫자)에 맞춰 동적 치환.
+                // NH 자문지 템플릿이 N호 시리즈 사이에서 재사용되며 헤더가 옛 호수로 박혀있어 발생.
+                var b2 = ws.getCell('B2');
+                if (b2 && typeof b2.value === 'string') {
+                    var hoMatch = pfName.match(/(\d+)\s*호/);
+                    if (hoMatch) {
+                        var newB2 = b2.value.replace(/목표전환형\s*\d+\s*호/, '목표전환형 ' + hoMatch[1] + '호');
+                        if (newB2 !== b2.value) b2.value = newB2;
+                    }
+                }
+
+                // 자문지 템플릿 H7:H27에 걸린 조건부 서식 제거.
+                // CF가 "매수/매도/편출/신규편입" 키워드로 진한 색을 덮어쓰는데,
+                // 새 분류명("신규 편입" 등 공백 포함)과 일치도가 깨져 색이 일관되지 않음.
+                ws.conditionalFormattings = [];
+
+                // 종목 채우기 + 행 높이 통일 + 주문구분 셀 색상 (편입/확대=빨강, 축소/편출=파랑)
                 var DATA_ROW_HEIGHT = 15;
                 combined.forEach(function(s, i) {
                     var r = 7 + i;
@@ -2223,18 +2239,18 @@
                     ws.getCell('G' + r).value = s.newWeight;
                     var hCell = ws.getCell('H' + r);
                     hCell.value = s.orderType;
+                    // duplicateRow(true)가 style 객체를 참조 복사하므로, H셀 style을 shallow clone하여 공유 해제.
+                    // 안 하면 마지막 분류 색상이 모든 복제 행에 덮어써짐.
+                    hCell.style = Object.assign({}, hCell.style);
                     var ot = s.orderType;
-                    // 글씨는 항상 검정. 배경: 매수=옅은 빨강, 매도=옅은 파랑, 유지=없음.
+                    // 글씨는 항상 검정. 배경: 편입/확대=옅은 빨강, 축소/편출=옅은 파랑, 유지=흰색.
                     var prevFont = hCell.font || {};
                     hCell.font = Object.assign({}, prevFont, { color: { argb: 'FF000000' } });
-                    var bgColor = null;
-                    if (ot === '신규 매수' || ot === '추가 매수') bgColor = 'FFFFC7CE';
-                    else if (ot === '일부 매도' || ot === '전량 매도') bgColor = 'FFBDD7EE';
-                    if (bgColor) {
-                        hCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
-                    } else {
-                        hCell.fill = { type: 'pattern', pattern: 'none' };
-                    }
+                    var bgColor;
+                    if (ot === '신규 편입' || ot === '비중 확대') bgColor = 'FFFFC7CE';
+                    else if (ot === '비중 축소' || ot === '전량 편출') bgColor = 'FFBDD7EE';
+                    else bgColor = 'FFFFFFFF';  // 유지: 흰색 명시 (pattern:'none'이 잔존 fill 못 지우는 케이스 방어)
+                    hCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
                     ws.getCell('I' + r).value = s.reason;
                     ws.getRow(r).height = DATA_ROW_HEIGHT;
                 });
