@@ -31,7 +31,6 @@ CATEGORY_COLORS = {
     'Rate':      '#2d7a3a',
     'Sector':    '#2d7a3a',
     'Liquidity': '#2d7a3a',
-    'WRAP':      '#1e40af',
     'Alert':     '#c2410c',
     'Universe':  '#6B21A8',
     'SEIBro':    '#0369a1',
@@ -645,44 +644,6 @@ def b_crypto_sol(ctx):
     return slot('crypto-sol', 'Crypto', 'fact', text, 'market.html', vals)
 
 
-def b_portfolio_top_contributor(ctx):
-    pd_data = safe_load_json(ROOT / 'portfolio_data.json')
-    if not pd_data:
-        return None
-    pname = next(iter(pd_data.keys()), None)
-    if not pname or not pd_data[pname]:
-        return None
-    rows = pd_data[pname]
-    valid = [r for r in rows if isinstance(r.get('contribution'), (int, float))]
-    if not valid:
-        return None
-    top = max(valid, key=lambda r: r['contribution'])
-    short_pname = pname.split(' / ')[0].replace('삼성 ', '')
-    text = f"{short_pname} 오늘 기여 1위 {top.get('name','')} {top['contribution']:+.2f}%p"
-    return slot('portfolio-top-contrib', 'WRAP', 'fact', text, 'wrap.html')
-
-
-def b_correlation_top_pair(ctx):
-    cm = safe_load_json(ROOT / 'correlation_matrix.json')
-    if not cm:
-        return None
-    pf = cm.get('portfolios', {})
-    pname = next(iter(pf.keys()), None)
-    if not pname:
-        return None
-    pairs = pf[pname].get('pairs', [])
-    if not pairs:
-        return None
-    top = max(pairs, key=lambda p: abs(p.get('corr', 0) or 0))
-    corr = top.get('corr')
-    if corr is None:
-        return None
-    lvl = top.get('level', '주의')
-    a, b = top.get('a_name', ''), top.get('b_name', '')
-    text = f"상관 {lvl} {a}–{b} {corr:.2f}"
-    return slot('correlation-top-pair', 'WRAP', 'interpret', text, 'wrap.html')
-
-
 def b_kodex_sector_leader(ctx):
     ks = safe_load_json(ROOT / 'kodex_sectors.json')
     if not ks:
@@ -781,8 +742,6 @@ BUILDERS = [
     b_alert_counts,
     b_featured_volume_top,
     b_featured_chg_top,
-    b_portfolio_top_contributor,
-    b_correlation_top_pair,
     b_kodex_sector_leader,
     b_seibro_top_settlement,
     b_deposit_customer,

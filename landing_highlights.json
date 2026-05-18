@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-05-18 11:08:39 KST",
+  "updated_at": "2026-05-18 11:14:26 KST",
   "slots": [
     {
       "id": "market-1m-leader",
@@ -109,7 +109,7 @@
       "category": "Market",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "2026-05 11개 자산 중 7/11 상승 — 방향성 부재",
+      "text": "2026-05 11개 자산 중 7/11 상승 — 엇갈린 흐름",
       "href": "market.html",
       "spark": null
     },
@@ -118,7 +118,7 @@
       "category": "Memory",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "DDR5 7일 +1.0% (현재 $52.50) — 박스권 유지",
+      "text": "DDR5 7일 +1.0% (현재 $52.50) — 관망세 지속",
       "href": "market.html",
       "spark": {
         "series": [
@@ -2063,7 +2063,7 @@
       "category": "Commodity",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "리튬카보네이트 7일 +2.4% — 방향성 부재",
+      "text": "리튬카보네이트 7일 +2.4% — 박스권 유지",
       "href": "market.html",
       "spark": {
         "series": [
@@ -3169,24 +3169,6 @@
       "tone": "fact",
       "text": "2026-05-15 KOSDAQ 상승률 1위: 에스에이엠티 +30.0%",
       "href": "featured.html",
-      "spark": null
-    },
-    {
-      "id": "portfolio-top-contrib",
-      "category": "WRAP",
-      "color": "#1e40af",
-      "tone": "fact",
-      "text": "트루밸류 오늘 기여 1위 삼성전자 +14.97%p",
-      "href": "wrap.html",
-      "spark": null
-    },
-    {
-      "id": "correlation-top-pair",
-      "category": "WRAP",
-      "color": "#1e40af",
-      "tone": "interpret",
-      "text": "상관 경고 삼성전자–삼성생명 0.87",
-      "href": "wrap.html",
       "spark": null
     },
     {
