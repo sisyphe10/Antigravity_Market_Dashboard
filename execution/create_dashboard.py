@@ -4367,11 +4367,11 @@ def create_dashboard():
         .lh-widget {{ display: flex; align-items: center; gap: 14px; background: #fff; border-radius: 14px; padding: 12px 18px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-left: 5px solid #999; max-width: 800px; width: 100%; margin: 0 auto 26px auto; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; min-height: 120px; }}
         .lh-widget:hover {{ transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.10); }}
         .lh-widget[hidden] {{ display: none; }}
-        .lh-tag {{ flex: 0 0 auto; padding: 4px 11px; background: #999; color: #fff; font-size: 0.72rem; font-weight: 700; border-radius: 999px; letter-spacing: 0.4px; }}
+        .lh-tag {{ flex: 0 0 90px; width: 90px; padding: 4px 0; background: #999; color: #fff; font-size: 0.72rem; font-weight: 700; border-radius: 999px; letter-spacing: 0.4px; text-align: center; white-space: nowrap; overflow: hidden; }}
         .lh-spark {{ flex: 0 0 auto; width: 202px; height: 80px; padding: 0 10px; border-left: 1px solid #000; border-right: 1px solid #000; display: flex; align-items: center; justify-content: center; }}
         .lh-spark svg {{ width: 180px; height: 80px; display: block; }}
         .lh-text {{ flex: 1 1 auto; font-size: 0.92rem; color: #333; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
-        .lh-shuffle {{ flex: 0 0 auto; background: none; border: none; cursor: pointer; font-size: 2.1rem; opacity: 0.9; padding: 8px 12px; transition: opacity 0.15s, transform 0.2s; line-height: 1; color: inherit; }}
+        .lh-shuffle {{ flex: 0 0 56px; width: 56px; background: none; border: none; cursor: pointer; font-size: 2.1rem; opacity: 0.9; padding: 8px 0; transition: opacity 0.15s, transform 0.2s; line-height: 1; color: inherit; text-align: center; }}
         .lh-shuffle:hover {{ opacity: 1; transform: rotate(20deg); }}
         @media (max-width: 600px) {{
             .lh-widget {{ flex-wrap: wrap; padding: 10px 14px; gap: 10px; }}
