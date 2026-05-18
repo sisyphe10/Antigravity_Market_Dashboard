@@ -1,12 +1,12 @@
 {
-  "updated_at": "2026-05-18 13:30:23 KST",
+  "updated_at": "2026-05-18 14:00:47 KST",
   "slots": [
     {
       "id": "market-1m-leader",
       "category": "Market",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "1M 1위 KOSPI +24.0%, 꼴찌 KOSDAQ -3.6%",
+      "text": "1M 1위 KOSPI +23.1%, 꼴찌 KOSDAQ -3.8%",
       "href": "market.html",
       "spark": {
         "series": [
@@ -109,7 +109,7 @@
       "category": "Market",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "2026-05 11개 자산 중 7/11 상승 — 엇갈린 흐름",
+      "text": "2026-05 11개 자산 중 7/11 상승 — 혼조 양상",
       "href": "market.html",
       "spark": null
     },
@@ -2063,7 +2063,7 @@
       "category": "Commodity",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "리튬카보네이트 1W +0.5% — 방향성 부재",
+      "text": "리튬카보네이트 1W +0.5% — 관망세 지속",
       "href": "market.html",
       "spark": {
         "series": [
