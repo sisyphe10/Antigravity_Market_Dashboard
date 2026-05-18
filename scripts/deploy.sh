@@ -170,7 +170,7 @@ install_landing_highlights_units() {
         echo "🔧 landing-highlights systemd unit 최초 설치..."
         need_enable=1
     fi
-    for unit in landing-highlights.service landing-highlights.timer; do
+    for unit in landing-highlights.service landing-highlights.timer landing-highlights-notify.service; do
         if [ ! -f "/etc/systemd/system/$unit" ] || ! cmp -s "$REPO_DIR/scripts/$unit" "/etc/systemd/system/$unit"; then
             echo "  → sync $unit"
             sudo cp "$REPO_DIR/scripts/$unit" /etc/systemd/system/
