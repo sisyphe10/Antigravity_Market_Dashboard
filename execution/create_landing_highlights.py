@@ -29,7 +29,6 @@ CATEGORY_COLORS = {
     'FX':        '#2d7a3a',
     'Index':     '#2d7a3a',
     'Rate':      '#2d7a3a',
-    'WRAP':      '#1e40af',
     'Alert':     '#c2410c',
     'Universe':  '#6B21A8',
     'SEIBro':    '#0369a1',
@@ -406,36 +405,6 @@ def b_etf_sector_top(ctx):
     return slot('etf-sector-top', 'ETF', 'fact', text, 'etf.html')
 
 
-def b_wrap_top_weight(ctx):
-    d = ctx.get('correlation')
-    if not d or 'portfolios' not in d:
-        return None
-    p = d['portfolios'].get('삼성 트루밸류 / NH Value ESG / DB 개방형')
-    if not p or 'stocks' not in p:
-        return None
-    stocks = sorted(p['stocks'], key=lambda x: x.get('weight', 0), reverse=True)
-    if not stocks:
-        return None
-    top = stocks[0]
-    text = f"WRAP 일반형 상위 비중: {top['name']} {top.get('weight',0):.1f}%"
-    return slot('wrap-top-weight', 'WRAP', 'fact', text, 'wrap.html')
-
-
-def b_wrap_stock_count(ctx):
-    d = ctx.get('correlation')
-    if not d or 'portfolios' not in d:
-        return None
-    counts = []
-    for name, p in d['portfolios'].items():
-        sc = p.get('stock_count') or len(p.get('stocks', []))
-        if sc:
-            counts.append((name, sc))
-    if not counts:
-        return None
-    text = ' · '.join(f'{n.split()[0]}/{n.split()[-1]} {c}종목' if ' / ' not in n else f'{n[:10]}.. {c}종목' for n, c in counts[:2])
-    return slot('wrap-stock-count', 'WRAP', 'fact', text, 'wrap.html')
-
-
 def b_featured_volume_top(ctx):
     fd = ctx.get('featured_latest')
     if not fd:
@@ -501,8 +470,6 @@ BUILDERS = [
     b_index_nasdaq,
     b_alert_counts,
     b_etf_sector_top,
-    b_wrap_top_weight,
-    b_wrap_stock_count,
     b_featured_volume_top,
     b_featured_chg_top,
 ]
