@@ -1026,7 +1026,6 @@ def main():
         'ds': ds,
         'index_returns': safe_load_json(ROOT / 'index_returns.json'),
         'monthly_returns': safe_load_json(ROOT / 'monthly_returns.json'),
-        'correlation': safe_load_json(ROOT / 'correlation_matrix.json'),
         'kodex': safe_load_json(ROOT / 'kodex_sectors.json'),
         'featured_latest': featured_latest,
         'seibro_tickers': safe_load_json(ROOT / 'seibro_tickers.json') or {},

@@ -59,7 +59,6 @@ charts/*
 !featured_news.json
 !existing_stock_basis.json
 !monthly_returns.json
-!correlation_matrix.json
 !investor_trading.json
 !sources.json
 !landing_highlights.json
