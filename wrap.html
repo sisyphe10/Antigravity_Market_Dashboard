@@ -1944,6 +1944,13 @@
                     }
                 });
             });
+            // 신규 종목 종목명 blur → 네이버 자동완성으로 코드+업종 자동
+            document.querySelectorAll('#orderContent input[data-field="name"]').forEach(function(el) {
+                el.addEventListener('blur', function(e) {
+                    var idx = parseInt(e.target.dataset.idx);
+                    if (!isNaN(idx)) autoFillStockFromName(idx);
+                });
+            });
             var saveBtn = document.getElementById('orderSaveBtn');
             if (saveBtn) saveBtn.addEventListener('click', function() { saveAllPendingOrders(false); });
             var finalizeBtn = document.getElementById('orderFinalizeBtn');
@@ -1989,6 +1996,54 @@
             orderStocks[pfName].push({ code: '', name: '', sector: '', weight: 0, isNew: true });
             orderState[pfName].push({ newWeight: 0, reason: '' });
             renderOrderPanel(pfName);
+        }
+
+        // 같은 종목코드가 다른 탭에 이미 있으면 그 sector를 가져옴 (KRX 분류 lookup).
+        function lookupSectorByCode(code) {
+            var c = String(code || '').trim();
+            if (!c) return '';
+            var pfs = Object.keys(orderStocks);
+            for (var p = 0; p < pfs.length; p++) {
+                var arr = orderStocks[pfs[p]] || [];
+                for (var i = 0; i < arr.length; i++) {
+                    var s = arr[i];
+                    if (String(s.code || '').trim() === c && s.sector && String(s.sector).trim()) {
+                        return String(s.sector).trim();
+                    }
+                }
+            }
+            return '';
+        }
+
+        // 신규 종목 행에서 종목명 입력 후 blur → 네이버 자동완성으로 코드 채움 + 보유 종목이면 sector도.
+        async function autoFillStockFromName(idx) {
+            var stocks = orderStocks[orderActiveTab];
+            if (!stocks || !stocks[idx] || !stocks[idx].isNew) return;
+            var s = stocks[idx];
+            var name = String(s.name || '').trim();
+            if (!name) return;
+            if (String(s.code || '').trim()) return;  // 코드 이미 있으면 skip
+            try {
+                var resp = await fetch('https://ac.stock.naver.com/ac?q=' + encodeURIComponent(name) + '&target=stock');
+                if (!resp.ok) return;
+                var data = await resp.json();
+                var items = (data.items || []).filter(function(x) {
+                    return x.nationCode === 'KOR' && x.category === 'stock';
+                });
+                if (!items.length) return;
+                // 정확 일치 우선, 없으면 첫 매칭
+                var exact = items.find(function(x) { return x.name === name; });
+                var item = exact || items[0];
+                s.code = item.code;
+                s.name = item.name;  // 정식 종목명으로 보정
+                if (!String(s.sector || '').trim()) {
+                    var sec = lookupSectorByCode(s.code);
+                    if (sec) s.sector = sec;
+                }
+                renderOrderPanel(orderActiveTab);
+            } catch (e) {
+                console.warn('autoFillStockFromName 실패 (네트워크/CORS):', e);
+            }
         }
 
         // ─────────────────────────────────────────────────────────────
