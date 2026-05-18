@@ -443,21 +443,225 @@ def b_featured_chg_top(ctx):
     return slot('featured-chg-top', 'Featured', 'fact', text, 'featured.html')
 
 
+def _generic_1m(ctx, dtype, name, label, sid, category, href='market.html', unit='', fmt='comma'):
+    srs = get_series(ctx['ds'], dtype, name)
+    if not srs or len(srs['values']) < 22:
+        return None
+    vals = srs['values']
+    chg = (vals[-1] - vals[-22]) / vals[-22] if vals[-22] else 0
+    if fmt == 'price2':
+        cur = f"{vals[-1]:,.2f}"
+    elif fmt == 'price0':
+        cur = f"{vals[-1]:,.0f}"
+    else:
+        cur = f"{vals[-1]:,.1f}"
+    text = f"{label} 1M {fmt_pct(chg)} (현재 {unit}{cur})"
+    return slot(sid, category, 'fact', text, href, vals)
+
+
+def _generic_7d(ctx, dtype, name, label, sid, category, href='market.html', unit='', fmt='price2'):
+    srs = get_series(ctx['ds'], dtype, name)
+    if not srs or len(srs['values']) < 8:
+        return None
+    vals = srs['values']
+    chg = (vals[-1] - vals[-8]) / vals[-8] if vals[-8] else 0
+    if fmt == 'price2':
+        cur = f"{vals[-1]:,.2f}"
+    elif fmt == 'price4':
+        cur = f"{vals[-1]:.4f}"
+    else:
+        cur = f"{vals[-1]:,.1f}"
+    text = f"{label} 7일 {fmt_pct(chg)} (현재 {unit}{cur})"
+    return slot(sid, category, 'fact', text, href, vals)
+
+
+def b_index_kosdaq(ctx):
+    return _generic_1m(ctx, 'INDEX_KR', 'KOSDAQ', 'KOSDAQ', 'index-kosdaq', 'Index', fmt='price1')
+
+
+def b_index_sp500(ctx):
+    return _generic_1m(ctx, 'INDEX_US', 'S&P 500', 'S&P 500', 'index-sp500', 'Index', fmt='comma')
+
+
+def b_index_nikkei(ctx):
+    return _generic_1m(ctx, 'INDEX_GLOBAL', 'NIKKEI', 'NIKKEI', 'index-nikkei', 'Index', fmt='comma')
+
+
+def b_index_russell(ctx):
+    return _generic_1m(ctx, 'INDEX_US', 'RUSSELL 2000', 'RUSSELL 2000', 'index-russell', 'Index', fmt='comma')
+
+
+def b_index_tsec(ctx):
+    return _generic_1m(ctx, 'INDEX_GLOBAL', 'TSEC', '대만 TSEC', 'index-tsec', 'Index', fmt='comma')
+
+
+def b_valuation_sp500_per(ctx):
+    srs = get_series(ctx['ds'], 'INDEX_US', 'S&P 500 PER')
+    if not srs or len(srs['values']) < 22:
+        return None
+    vals = srs['values']
+    diff = vals[-1] - vals[-22]
+    if vals[-1] >= 25:
+        phrase = '역사적 고밸류 영역'
+    elif vals[-1] >= 20:
+        phrase = '평균 이상'
+    elif vals[-1] <= 15:
+        phrase = '저평가권'
+    else:
+        phrase = '중립권'
+    text = f"S&P500 PER {vals[-1]:.1f}배 (1M {diff:+.1f}p) — {phrase}"
+    return slot('val-sp500-per', 'Index', 'interpret', text, 'market.html', vals)
+
+
+def b_valuation_russell_per(ctx):
+    srs = get_series(ctx['ds'], 'INDEX_US', 'RUSSELL 2000 PER')
+    if not srs or len(srs['values']) < 22:
+        return None
+    vals = srs['values']
+    diff = vals[-1] - vals[-22]
+    text = f"RUSSELL2000 PER {vals[-1]:.1f}배 (1M {diff:+.1f}p) — 소형주 밸류"
+    return slot('val-russell-per', 'Index', 'interpret', text, 'market.html', vals)
+
+
+def b_commodity_wti(ctx):
+    return _generic_1m(ctx, 'COMMODITY', 'WTI Crude Oil', 'WTI 유가', 'commodity-wti', 'Commodity', unit='$', fmt='price2')
+
+
+def b_commodity_copper(ctx):
+    return _generic_1m(ctx, 'COMMODITY', 'Copper', '구리', 'commodity-copper', 'Commodity', unit='$', fmt='price2')
+
+
+def b_commodity_silver(ctx):
+    return _generic_1m(ctx, 'COMMODITY', 'Silver', 'Silver', 'commodity-silver', 'Commodity', unit='$', fmt='price2')
+
+
+def b_commodity_natgas(ctx):
+    return _generic_7d(ctx, 'COMMODITY', 'Natural Gas', '천연가스', 'commodity-natgas', 'Commodity', unit='$', fmt='price2')
+
+
+def b_commodity_uranium(ctx):
+    srs = get_series(ctx['ds'], 'COMMODITY', 'Uranium')
+    if not srs or len(srs['values']) < 8:
+        return None
+    vals = srs['values']
+    if len(vals) >= 22:
+        base, label = vals[-22], '1M'
+    else:
+        base, label = vals[-8], '7일'
+    chg = (vals[-1] - base) / base if base else 0
+    text = f"우라늄 {label} {fmt_pct(chg)} (현재 ${vals[-1]:,.2f}) — 원전 테마"
+    return slot('commodity-uranium', 'Commodity', 'interpret', text, 'market.html', vals)
+
+
+def b_memory_ddr4(ctx):
+    srs = get_series(ctx['ds'], 'DRAM', 'DDR4 8Gb (1Gx8) 3200')
+    if not srs or len(srs['values']) < 8:
+        return None
+    vals = srs['values']
+    chg = (vals[-1] - vals[-8]) / vals[-8] if vals[-8] else 0
+    text = f"DDR4 7일 {fmt_pct(chg)} (현재 ${vals[-1]:.2f})"
+    return slot('memory-ddr4', 'Memory', 'fact', text, 'market.html', vals)
+
+
+def b_memory_nand(ctx):
+    srs = get_series(ctx['ds'], 'NAND', 'MLC 64Gb 8GBx8')
+    if not srs or len(srs['values']) < 8:
+        return None
+    vals = srs['values']
+    chg = (vals[-1] - vals[-8]) / vals[-8] if vals[-8] else 0
+    text = f"NAND MLC 64Gb 7일 {fmt_pct(chg)} (현재 ${vals[-1]:.3f})"
+    return slot('memory-nand', 'Memory', 'fact', text, 'market.html', vals)
+
+
+def b_fx_eurusd(ctx):
+    return _generic_7d(ctx, 'FX', 'EUR/USD', 'EUR/USD', 'fx-eurusd', 'FX', fmt='price4')
+
+
+def b_fx_jpyusd(ctx):
+    srs = get_series(ctx['ds'], 'FX', 'JPY/USD')
+    if not srs or len(srs['values']) < 8:
+        return None
+    vals = srs['values']
+    chg = (vals[-1] - vals[-8]) / vals[-8] if vals[-8] else 0
+    text = f"JPY/USD 7일 {fmt_pct(chg)} (현재 {vals[-1]:.4f})"
+    return slot('fx-jpyusd', 'FX', 'fact', text, 'market.html', vals)
+
+
+def b_fx_cnyusd(ctx):
+    srs = get_series(ctx['ds'], 'FX', 'CNY/USD')
+    if not srs or len(srs['values']) < 8:
+        return None
+    vals = srs['values']
+    chg = (vals[-1] - vals[-8]) / vals[-8] if vals[-8] else 0
+    text = f"CNY/USD 7일 {fmt_pct(chg)} (현재 {vals[-1]:.4f})"
+    return slot('fx-cnyusd', 'FX', 'fact', text, 'market.html', vals)
+
+
+def b_rate_us13w(ctx):
+    srs = get_series(ctx['ds'], 'INTEREST_RATE', 'US 13 Week Treasury Yield')
+    if not srs or len(srs['values']) < 8:
+        return None
+    vals = srs['values']
+    chg_bp = (vals[-1] - vals[-8]) * 100
+    text = f"US 13W {vals[-1]:.2f}% (1주 {chg_bp:+.0f}bp) — 단기금리"
+    return slot('rate-us13w', 'Rate', 'fact', text, 'market.html', vals)
+
+
+def b_crypto_eth(ctx):
+    srs = get_series(ctx['ds'], 'CRYPTO', 'ETH')
+    if not srs or len(srs['values']) < 22:
+        return None
+    vals = srs['values']
+    chg = (vals[-1] - vals[-22]) / vals[-22] if vals[-22] else 0
+    text = f"ETH 1M {fmt_pct(chg)} (현재 ${vals[-1]:,.0f})"
+    return slot('crypto-eth', 'Crypto', 'fact', text, 'market.html', vals)
+
+
+def b_crypto_sol(ctx):
+    srs = get_series(ctx['ds'], 'CRYPTO', 'SOL')
+    if not srs or len(srs['values']) < 22:
+        return None
+    vals = srs['values']
+    chg = (vals[-1] - vals[-22]) / vals[-22] if vals[-22] else 0
+    text = f"SOL 1M {fmt_pct(chg)} (현재 ${vals[-1]:.2f})"
+    return slot('crypto-sol', 'Crypto', 'fact', text, 'market.html', vals)
+
+
 BUILDERS = [
     b_market_1m_leader,
     b_market_breadth,
     b_memory_ddr5,
+    b_memory_ddr4,
+    b_memory_nand,
     b_crypto_btc,
+    b_crypto_eth,
+    b_crypto_sol,
     b_commodity_gold,
+    b_commodity_wti,
+    b_commodity_copper,
+    b_commodity_silver,
+    b_commodity_natgas,
+    b_commodity_uranium,
     b_fx_usdkrw,
+    b_fx_eurusd,
+    b_fx_jpyusd,
+    b_fx_cnyusd,
     b_dxy,
     b_vix,
     b_us10y,
+    b_rate_us13w,
     b_battery_lithium,
     b_smp,
     b_scfi,
     b_index_kospi,
+    b_index_kosdaq,
     b_index_nasdaq,
+    b_index_sp500,
+    b_index_nikkei,
+    b_index_russell,
+    b_index_tsec,
+    b_valuation_sp500_per,
+    b_valuation_russell_per,
     b_alert_counts,
     b_featured_volume_top,
     b_featured_chg_top,
