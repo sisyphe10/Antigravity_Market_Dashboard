@@ -3344,9 +3344,6 @@ def create_order_section():
                 });
                 _orderLoaded = true;
                 if (orderActiveTab && orderActiveTab !== 'Email') renderOrderPanel(orderActiveTab);
-                alert(hadToday
-                    ? '✅ 전체 취소 완료 — 오늘자 임시저장 삭제, 원본 비중으로 복원됨'
-                    : 'ℹ 오늘자 임시저장이 없습니다. 화면만 원본으로 새로고침했습니다.');
             } catch(e) {
                 alert('❌ 취소 실패: ' + e.message);
                 console.error('cancelAllPendingOrders error:', e);
