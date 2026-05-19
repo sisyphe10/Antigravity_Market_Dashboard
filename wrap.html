@@ -137,7 +137,7 @@
     <div id="mainContent" class="pw-hidden">
     <header style="position:relative;">
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-05-19 14:01:25 KST</div>
+        <div class="last-updated">Updated: 2026-05-19 14:04:34 KST</div>
         <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
 
@@ -1849,7 +1849,7 @@
                 if (ot === '신규 편입' || ot === '비중 확대') otBg = '#FF0000';
                 else if (ot === '비중 축소' || ot === '전량 편출') otBg = '#0070C0';
                 var otInner = otBg
-                    ? '<span style="display:inline-block;padding:4px 12px;background:' + otBg + ';color:#000;border-radius:8px;font-weight:600;">' + ot + '</span>'
+                    ? '<span style="display:inline-block;padding:4px 12px;background:' + otBg + ';color:#000;border-radius:8px;font-weight:600;white-space:nowrap;">' + ot + '</span>'
                     : ot;
                 rows += '<tr>'
                     + '<td style="text-align:center;padding:8px;">' + (i + 1) + '</td>'
@@ -1892,7 +1892,7 @@
                 + '<th style="padding:8px;text-align:center;">종목명</th>'
                 + '<th style="padding:8px;text-align:center;width:70px;">변경전</th>'
                 + '<th style="padding:8px;text-align:center;width:90px;">변경후</th>'
-                + '<th style="padding:8px;text-align:center;width:80px;">주문구분</th>'
+                + '<th style="padding:8px;text-align:center;width:100px;">주문구분</th>'
                 + '<th style="padding:8px;text-align:center;">추천사유</th>'
                 + '<th style="padding:8px;text-align:center;width:40px;"></th>'
                 + '</tr></thead><tbody>' + rows + totalsRow + '</tbody></table></div>'
