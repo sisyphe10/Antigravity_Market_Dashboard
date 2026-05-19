@@ -2900,7 +2900,45 @@ def create_order_section():
                 + '</div>';
         }
 
+        // 렌더링 직전 reason 자동 채움:
+        // - 이 탭의 어떤 종목의 reason이 비어있고 주문구분이 '유지'가 아닐 때
+        // - 다른 탭에서 같은 종목코드 + 같은 주문구분의 비어있지 않은 reason이 있으면 가져옴
+        // → 일반형에서 입력한 reason이 목표전환형 탭에서 비중 축소로 바꿀 때 자동 표시
+        function syncReasonFromOtherTabs(pfName) {
+            var stocks = orderStocks[pfName] || [];
+            var st = orderState[pfName] || [];
+            stocks.forEach(function(s, i) {
+                if (!s || !s.code) return;
+                if (!st[i]) return;
+                if ((st[i].reason || '').toString().trim()) return;
+                var curType = calcOrderType(parseFloat(s.weight) || 0,
+                                            parseFloat(st[i].newWeight) || 0);
+                if (curType === '유지') return;
+                var key = String(s.code).trim();
+                var found = '';
+                Object.keys(orderStocks).some(function(tab) {
+                    if (tab === pfName) return false;
+                    var arr = orderStocks[tab] || [];
+                    var stArr = orderState[tab] || [];
+                    for (var j = 0; j < arr.length; j++) {
+                        var os = arr[j];
+                        if (!os || String(os.code || '').trim() !== key) continue;
+                        var ostate = stArr[j];
+                        if (!ostate) continue;
+                        var otherType = calcOrderType(parseFloat(os.weight) || 0,
+                                                      parseFloat(ostate.newWeight) || 0);
+                        if (otherType !== curType) continue;
+                        var otherReason = (ostate.reason || '').toString().trim();
+                        if (otherReason) { found = otherReason; return true; }
+                    }
+                    return false;
+                });
+                if (found) st[i].reason = found;
+            });
+        }
+
         function renderOrderPanel(pfName) {
+            syncReasonFromOtherTabs(pfName);
             var stocks = orderStocks[pfName] || [];
             var st = orderState[pfName] || [];
             var oldSum = stocks.reduce(function(a, s) { return a + s.weight; }, 0);
