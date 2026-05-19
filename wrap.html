@@ -137,7 +137,7 @@
     <div id="mainContent" class="pw-hidden">
     <header style="position:relative;">
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-05-19 10:04:01 KST</div>
+        <div class="last-updated">Updated: 2026-05-19 13:50:48 KST</div>
         <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
 
@@ -1878,6 +1878,7 @@
                 + '<div style="display:flex;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">'
                 + '<h3 style="margin:0;font-size:18px;">' + pfName + '</h3>'
                 + '<div style="margin-left:auto;display:flex;gap:8px;">'
+                + '<button id="orderCancelAllBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">전체 취소</button>'
                 + '<button id="orderSaveBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#f3f4f6;color:#222;border:1px solid #d1d5db;border-radius:8px;cursor:pointer;">저장</button>'
                 + '<button id="orderFinalizeBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;">최종 저장</button>'
                 + '</div>'
@@ -1940,6 +1941,8 @@
                     if (!isNaN(idx)) autoFillStockFromName(idx);
                 });
             });
+            var cancelBtn = document.getElementById('orderCancelAllBtn');
+            if (cancelBtn) cancelBtn.addEventListener('click', function() { cancelAllPendingOrders(); });
             var saveBtn = document.getElementById('orderSaveBtn');
             if (saveBtn) saveBtn.addEventListener('click', function() { saveAllPendingOrders(false); });
             var finalizeBtn = document.getElementById('orderFinalizeBtn');
@@ -2153,6 +2156,57 @@
                 if (!silent) alert('❌ 저장 실패: ' + e.message);
                 console.error('saveAllPendingOrders error:', e);
                 throw e;
+            }
+        }
+
+        // 전체 취소: 오늘 임시저장(pending_orders.json[todayStr]) 전부 삭제 + 메모리 리셋 → portfolio_data.json 원본 다시 로드.
+        // 최종 저장(finalize) 후 NEW 시트에 박힌 건 되돌리지 않음 — pending 단계만 취소.
+        async function cancelAllPendingOrders() {
+            if (!confirm('오늘 임시 저장한 모든 변경사항을 취소하시겠습니까?\n원본 비중·빈 추천사유로 되돌립니다.')) return;
+            var pat = getGithubPat();
+            if (!pat) { alert('PAT 입력이 취소되었습니다.'); return; }
+            var d = new Date();
+            var todayStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+            var apiUrl = 'https://api.github.com/repos/sisyphe10/Antigravity_Market_Dashboard/contents/orders/pending_orders.json';
+            var headers = {
+                'Authorization': 'token ' + pat,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            };
+            try {
+                var existing = {};
+                var sha = null;
+                var getResp = await fetch(apiUrl, { headers: headers });
+                if (getResp.ok) {
+                    var raw = await getResp.json();
+                    sha = raw.sha;
+                    try { existing = JSON.parse(base64ToUtf8(raw.content)); } catch(_) { existing = {}; }
+                } else if (getResp.status !== 404) {
+                    throw new Error('GET 실패: ' + getResp.status);
+                }
+                var hadToday = !!existing[todayStr];
+                if (hadToday) {
+                    delete existing[todayStr];
+                    var newContent = utf8ToBase64(JSON.stringify(existing, null, 2));
+                    var body = { message: 'ORDER cancel: 전체 취소 (' + todayStr + ')', content: newContent };
+                    if (sha) body.sha = sha;
+                    var putResp = await fetch(apiUrl, { method: 'PUT', headers: headers, body: JSON.stringify(body) });
+                    if (!putResp.ok) {
+                        var errTxt = await putResp.text();
+                        throw new Error('PUT 실패: ' + putResp.status + ' ' + errTxt.slice(0, 200));
+                    }
+                }
+                _orderLoaded = false;
+                orderStocks = {};
+                orderState = {};
+                await loadOrder();
+                if (orderActiveTab && orderActiveTab !== 'Email') renderOrderPanel(orderActiveTab);
+                alert(hadToday
+                    ? '✅ 전체 취소 완료 — 오늘자 임시저장 삭제, 원본 비중으로 복원됨'
+                    : 'ℹ 오늘자 임시저장이 없습니다. 화면만 원본으로 새로고침했습니다.');
+            } catch(e) {
+                alert('❌ 취소 실패: ' + e.message);
+                console.error('cancelAllPendingOrders error:', e);
             }
         }
 
