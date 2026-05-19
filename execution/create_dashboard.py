@@ -2972,7 +2972,7 @@ def create_order_section():
                 if (ot === '신규 편입' || ot === '비중 확대') otBg = '#FF0000';
                 else if (ot === '비중 축소' || ot === '전량 편출') otBg = '#0070C0';
                 var otCellStyle = otBg
-                    ? 'text-align:center;padding:8px;background:' + otBg + ';color:#fff;font-weight:700;'
+                    ? 'text-align:center;padding:8px;background:' + otBg + ';color:#000;'
                     : 'text-align:center;padding:8px;';
                 rows += '<tr>'
                     + '<td style="text-align:center;padding:8px;">' + (i + 1) + '</td>'
