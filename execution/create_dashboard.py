@@ -3320,10 +3320,28 @@ def create_order_section():
                         throw new Error('PUT 실패: ' + putResp.status + ' ' + errTxt.slice(0, 200));
                     }
                 }
-                _orderLoaded = false;
+                // 메모리 직접 리셋 — pending fetch 우회.
+                // loadOrder()는 Pages의 orders/pending_orders.json을 다시 fetch하는데,
+                // PUT 직후엔 Pages CDN이 stale 응답을 줄 수 있어 비운 내용이 그대로 복원되는 케이스가 있음.
+                // → portfolio_data.json만 직접 fetch해서 orderStocks/orderState를 원본으로 초기화.
+                var pdRes = await fetch('portfolio_data.json?_=' + Date.now());
+                if (!pdRes.ok) throw new Error('portfolio_data.json fetch 실패: ' + pdRes.status);
+                var pdata = await pdRes.json();
                 orderStocks = {};
                 orderState = {};
-                await loadOrder();
+                ORDER_PORTFOLIOS.forEach(function(p) {
+                    var stocks = pdata[p.jsonKey] || [];
+                    var isTargetTransform = p.jsonKey && p.jsonKey.indexOf('목표전환형') >= 0;
+                    orderStocks[p.display] = stocks.map(function(s) {
+                        var origW = parseFloat(s.weight) || 0;
+                        var displayW = (isTargetTransform && s.is_today_new) ? 0 : origW;
+                        return { code: s.code, name: s.name, sector: s.sector || '', weight: displayW };
+                    });
+                    orderState[p.display] = stocks.map(function(s) {
+                        return { newWeight: parseFloat(s.weight) || 0, reason: '' };
+                    });
+                });
+                _orderLoaded = true;
                 if (orderActiveTab && orderActiveTab !== 'Email') renderOrderPanel(orderActiveTab);
                 alert(hadToday
                     ? '✅ 전체 취소 완료 — 오늘자 임시저장 삭제, 원본 비중으로 복원됨'
