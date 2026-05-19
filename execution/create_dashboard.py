@@ -2266,7 +2266,7 @@ def create_wrap_returns_table():
             ('KOSPI', 'KOSPI'),
             ('KOSDAQ', 'KOSDAQ'),
         ]
-        periods = ['1D', '1W', '1M', '3M', '6M', '1Y', '3Y', 'YTD']
+        periods = ['1D', '1W', '1M', '3M', '6M', '1Y', '3Y', 'YTD', 'DD']
 
         # 모든 날짜-데이터 수집
         all_data = {}
@@ -2307,11 +2307,11 @@ def create_wrap_returns_table():
         for display_name, key in items:
             rows_html += f'<tr><td class="rt-name">{display_name}</td>'
             for p in periods:
-                rows_html += cell_td(latest_row.get(f'{key}_{p}'), f'rt-{key}-{p}', divider=(p == 'YTD'))
+                rows_html += cell_td(latest_row.get(f'{key}_{p}'), f'rt-{key}-{p}', divider=(p in ('YTD', 'DD')))
             rows_html += '</tr>\n'
 
         headers = ''.join(
-            f'<th class="rt-ph rt-divider-left">{p}</th>' if p == 'YTD' else f'<th class="rt-ph">{p}</th>'
+            f'<th class="rt-ph rt-divider-left">{p}</th>' if p in ('YTD', 'DD') else f'<th class="rt-ph">{p}</th>'
             for p in periods
         )
         data_json = json.dumps(all_data, ensure_ascii=False)
@@ -2376,7 +2376,7 @@ def create_wrap_returns_table():
                         var cell = document.getElementById(cid);
                         if (!cell) return;
                         var val = row[col];
-                        var dividerCls = (p === 'YTD') ? ' rt-divider-left' : '';
+                        var dividerCls = (p === 'YTD' || p === 'DD') ? ' rt-divider-left' : '';
                         if (!val || val === 'nan') {{
                             cell.className = 'rt-cell rt-na' + dividerCls;
                             cell.textContent = '-';

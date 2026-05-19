@@ -74,7 +74,7 @@ for col in df.columns:
     col_series = df[col].dropna()
 
     if len(col_series) == 0:
-        for period in ['1D', '1W', '1M', '3M', '6M', '1Y', '3Y', 'YTD']:
+        for period in ['1D', '1W', '1M', '3M', '6M', '1Y', '3Y', 'YTD', 'DD']:
             returns_data[f"{col}_{period}"] = np.nan
         continue
 
@@ -128,6 +128,15 @@ for col in df.columns:
         ytd_base_date = pd.Timestamp('2025-12-30')
         ytd_dates = col_series[col_series.index <= ytd_base_date]
         returns_data[f"{col}_YTD"] = calculate_return(current_value, ytd_dates.iloc[-1]) if len(ytd_dates) > 0 else np.nan
+
+    # DD (현재 낙폭): 운용 개시일 이후 전고점 대비 현재 기준가 낙폭
+    # 각 컬럼의 첫 유효 데이터 = 운용 개시일 (목표전환형은 시작일 이전 NaN, 일반형/지수는 데이터 전체)
+    running_max = col_series.cummax().iloc[-1]
+    if running_max > 0:
+        dd_pct = (current_value - running_max) / running_max * 100
+        returns_data[f"{col}_DD"] = f"{dd_pct:.1f}%"
+    else:
+        returns_data[f"{col}_DD"] = np.nan
 
 print("   - 완료")
 
