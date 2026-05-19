@@ -2967,19 +2967,20 @@ def create_order_section():
                 var deleteCell = s.isNew
                     ? '<td style="text-align:center;padding:8px;"><button class="order-del-btn" data-idx="' + i + '" title="종목 삭제" style="background:none;border:none;cursor:pointer;color:#dc2626;font-size:20px;line-height:1;padding:0 6px;font-weight:bold;">×</button></td>'
                     : '<td style="padding:8px;"></td>';
-                // 주문구분 셀 배경: 자문지 엑셀 H열과 동일 색상 (편입/확대=#FF0000, 축소/편출=#0070C0)
+                // 주문구분 배지: 자문지 엑셀 H열과 동일 색상 (편입/확대=#FF0000, 축소/편출=#0070C0).
+                // 셀 자체 배경 대신 inline-block span을 써서 전체취소·저장·최종저장 버튼과 동일한 라운드(8px).
                 var otBg = '';
                 if (ot === '신규 편입' || ot === '비중 확대') otBg = '#FF0000';
                 else if (ot === '비중 축소' || ot === '전량 편출') otBg = '#0070C0';
-                var otCellStyle = otBg
-                    ? 'text-align:center;padding:8px;background:' + otBg + ';color:#000;'
-                    : 'text-align:center;padding:8px;';
+                var otInner = otBg
+                    ? '<span style="display:inline-block;padding:4px 12px;background:' + otBg + ';color:#000;border-radius:8px;font-weight:600;">' + ot + '</span>'
+                    : ot;
                 rows += '<tr>'
                     + '<td style="text-align:center;padding:8px;">' + (i + 1) + '</td>'
                     + sectorCell + codeCell + nameCell
                     + '<td style="text-align:center;padding:8px;">' + s.weight + '</td>'
                     + '<td style="text-align:center;padding:8px;"><input type="text" inputmode="decimal" data-idx="' + i + '" data-field="newWeight" value="' + orderState_i.newWeight + '" style="width:65px;box-sizing:border-box;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;color:#000;"></td>'
-                    + '<td style="' + otCellStyle + '">' + ot + '</td>'
+                    + '<td style="text-align:center;padding:8px;">' + otInner + '</td>'
                     + '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="reason" value="' + (orderState_i.reason || '').replace(/"/g, '&quot;') + '" style="width:100%;box-sizing:border-box;padding:4px 6px;border:1px solid ' + reasonBorder + ';background:' + reasonBg + ';border-radius:4px;font-family:inherit;font-size:15px;text-align:center;color:#000;"></td>'
                     + deleteCell
                     + '</tr>';
