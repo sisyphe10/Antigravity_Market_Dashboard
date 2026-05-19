@@ -85,15 +85,31 @@ def _extract_published_at(text: str) -> datetime | None:
         return None
 
 
+# 진짜 prepared remarks는 보통 5000자 이상. 이보다 짧은 위치의 Q&A 마커는
+# Operator 오프닝 boilerplate("we will conduct a question-and-answer session" 등)
+# 안에서 잡힌 false positive로 간주.
+_MIN_PREPARED_CHARS = 2000
+
+
 def _split_sections(text: str) -> tuple[str, str]:
-    earliest = -1
-    for pat in _QA_MARKERS:
-        m = pat.search(text)
-        if m and (earliest == -1 or m.start() < earliest):
-            earliest = m.start()
-    if earliest < 0:
+    """본문을 prepared remarks / Q&A 로 분할.
+
+    Q&A 마커가 _MIN_PREPARED_CHARS 미만 위치에서만 잡히면 false positive로 보고
+    본문 전체를 prepared로 반환 (Q&A는 빈 문자열). translator는 이 경우 prepared
+    청크 빌더로 본문 전부를 번역하므로 원문 손실 없이 한국어화됨.
+    """
+    all_offsets = sorted({m.start() for pat in _QA_MARKERS for m in pat.finditer(text)})
+    if not all_offsets:
         return text, ''
-    return text[:earliest], text[earliest:]
+    for pos in all_offsets:
+        if pos >= _MIN_PREPARED_CHARS:
+            return text[:pos], text[pos:]
+    logger.warning(
+        '_split_sections fallback: 모든 Q&A 마커가 %d자 미만에서 매치 '
+        '(matches=%s, total=%d) → 본문 전체를 prepared로 처리',
+        _MIN_PREPARED_CHARS, all_offsets[:5], len(text),
+    )
+    return text, ''
 
 
 def _trim_sidebar(text: str) -> str:
@@ -109,7 +125,7 @@ def _trim_sidebar(text: str) -> str:
 class InsiderMonkeySource(TranscriptSource):
     """Insider Monkey transcript source — div.single-content 풀 텍스트."""
     name = 'insider_monkey'
-    parser_version = '1.0'
+    parser_version = '1.1'  # 2026-05-19: _split_sections false positive 가드 (MIN_PREPARED_CHARS)
 
     def search(self, event: EarningsEvent) -> list[TranscriptCandidate]:
         candidates: list[TranscriptCandidate] = []
