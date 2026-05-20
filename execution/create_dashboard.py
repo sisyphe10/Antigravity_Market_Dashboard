@@ -4922,11 +4922,11 @@ def create_dashboard():
         .portfolio-table.aum-aligned .iter-row > td {{ background-color: #e1ebf6; }}
         .portfolio-table.aum-aligned .iter-row:hover > td {{ background-color: #cfdef0; }}
         /* 누적 AUM 목표전환형 행: 회차별 detail hover tooltip */
-        .iter-tooltip {{ display: none; position: absolute; left: 100%; top: 0; margin-left: 12px; background: #fff; border: 1px solid #ccc; box-shadow: 0 4px 10px rgba(0,0,0,0.18); z-index: 100; white-space: nowrap; font-size: 13px; font-weight: 400; }}
+        .iter-tooltip {{ display: none; position: absolute; left: 100%; top: 0; margin-left: 12px; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.18); z-index: 100; white-space: nowrap; font-size: 13px; font-weight: 400; }}
         .iter-row:hover .iter-tooltip {{ display: block; }}
         .iter-tooltip .iter-table {{ border-collapse: collapse; }}
-        .iter-tooltip .iter-table th {{ padding: 8px 12px; background: #e9ecef; border-bottom: 1px solid #ccc; font-weight: 600; text-align: center; color: #000; }}
-        .iter-tooltip .iter-table td {{ padding: 6px 12px; border-bottom: 1px solid #eee; text-align: center; color: #333; }}
+        .iter-tooltip .iter-table th {{ padding: 8px 12px; background: #e9ecef; border-bottom: 2px solid #000; font-weight: 600; text-align: center; color: #000; }}
+        .iter-tooltip .iter-table td {{ padding: 6px 12px; border-bottom: 1px solid #dee2e6; text-align: center; color: #333; }}
         .wrap-chart-item {{ cursor: pointer; transition: all 0.15s; }}
         .wrap-chart-item:hover td {{ background: #e9ecef; }}
         .wrap-chart-item.active td {{ background: #222; color: #fff; }}
