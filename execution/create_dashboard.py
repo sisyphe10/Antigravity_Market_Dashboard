@@ -4918,6 +4918,9 @@ def create_dashboard():
         .portfolio-table.aum-aligned th, .portfolio-table.aum-aligned td {{ width: auto; line-height: 24px; box-sizing: border-box; }}
         .portfolio-table.aum-aligned td {{ padding: 10px; }}
         .portfolio-table.aum-aligned th {{ padding: 12px 10px; }}
+        /* 누적 AUM 목표전환형 행: hover 가능 affordance (연한 cool grey-blue 배경) */
+        .portfolio-table.aum-aligned .iter-row td {{ background-color: #f5f8fc; }}
+        .portfolio-table.aum-aligned .iter-row:hover td {{ background-color: #eaf1f9; }}
         /* 누적 AUM 목표전환형 행: 회차별 detail hover tooltip */
         .iter-tooltip {{ display: none; position: absolute; left: 100%; top: 0; margin-left: 12px; background: #fff; border: 1px solid #ccc; box-shadow: 0 4px 10px rgba(0,0,0,0.18); z-index: 100; white-space: nowrap; font-size: 13px; font-weight: 400; }}
         .iter-row:hover .iter-tooltip {{ display: block; }}
