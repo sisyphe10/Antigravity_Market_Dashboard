@@ -1906,6 +1906,23 @@ def _build_target_transform_chart_section():
         return ''
 
 
+def pick_weekly_last(date_strs):
+    """각 ISO 주의 마지막 거래일 + 전체 최신일을 반환.
+
+    상단/누적 AUM 차트가 공유 — 모든 거래일 대신 주봉(주 마지막 거래일)만 표시.
+    입력: 'YYYY-MM-DD' 정렬된 문자열 리스트. 출력: 동일 형식 sparse 리스트.
+    """
+    if not date_strs:
+        return []
+    dts = pd.Series(pd.to_datetime(list(date_strs))).sort_values().reset_index(drop=True)
+    iso = dts.dt.isocalendar()
+    df_tmp = pd.DataFrame({'date': dts, 'year': iso['year'].values, 'week': iso['week'].values})
+    last_each = df_tmp.groupby(['year', 'week'])['date'].max().tolist()
+    selected = set(last_each)
+    selected.add(dts.iloc[-1])  # 전체 최신일 보장
+    return [d.strftime('%Y-%m-%d') for d in sorted(selected)]
+
+
 def create_aum_table():
     """AUM 테이블 HTML 생성"""
     try:
@@ -1936,14 +1953,34 @@ def create_aum_table():
         # 증권사별 색상
         broker_colors = {'삼성': '#1428A0', 'NH': '#0072CE', 'DB': '#00854A'}
 
-        # 일자별 증권사+상품명 기준 AUM (stacked bar용) - 14일 이내 활성 상품
-        chart_active = latest[latest['날짜'] >= max_date - pd.Timedelta(days=14)].copy()
+        # 일자별 증권사+상품명 기준 AUM (stacked bar용)
+        # 차트 구간은 누적 AUM 차트와 동일 (2026-03-20~), 봉은 주봉(주 마지막 거래일)만.
+        # 활성 상품만 차트에 표시 (청산 회차는 누적 AUM 차트에서 broker 단위로 누적).
+        chart_start = '2026-03-20'
+        chart_active = latest[latest['날짜'] == max_date].copy()
         chart_names = set(chart_active['상품명'])
         chart_df = df[df['상품명'].isin(chart_names)].copy()
+        chart_df = chart_df[chart_df['날짜'].dt.strftime('%Y-%m-%d') >= chart_start]
         chart_df['label'] = chart_df['증권사'] + ' ' + chart_df['상품명']
         daily = chart_df.groupby([chart_df['날짜'].dt.strftime('%Y-%m-%d'), 'label', '증권사'])['AUM'].sum().reset_index()
         daily.columns = ['date', 'label', 'broker', 'aum']
-        dates_sorted = sorted(daily['date'].unique())
+        all_daily_dates = sorted(daily['date'].unique())
+        dates_sorted = pick_weekly_last(all_daily_dates)  # 주봉화
+
+        # 일반형은 매일 데이터가 있으나 목표전환형은 가끔 빠질 수 있음.
+        # 주 마지막 거래일에 해당 상품 데이터가 없으면 forward-fill (직전 거래일 값).
+        def _ffill_aum(label):
+            timeline = {}
+            for _, r in daily[daily['label'] == label].sort_values('date').iterrows():
+                timeline[r['date']] = r['aum']
+            filled = []
+            last_known = 0
+            for d in all_daily_dates:
+                if d in timeline:
+                    last_known = timeline[d]
+                filled.append((d, last_known))
+            filled_map = dict(filled)
+            return [filled_map.get(d, 0) for d in dates_sorted]
 
         # 차트 범례 순서 (증권사 그룹 + AUM 내림차순)
         chart_broker_total = chart_active.groupby('증권사')['AUM'].sum().sort_values(ascending=False)
@@ -1965,10 +2002,8 @@ def create_aum_table():
 
         chart_datasets = []
         for label in all_labels:
-            vals = []
-            for d in dates_sorted:
-                v = daily[(daily['date'] == d) & (daily['label'] == label)]['aum'].sum()
-                vals.append(round(v / 100_000_000))
+            ffilled = _ffill_aum(label)
+            vals = [round(v / 100_000_000) for v in ffilled]
             chart_datasets.append({
                 'label': label,
                 'data': vals,
@@ -2019,7 +2054,10 @@ def create_aum_table():
                     layout: { padding: { top: 20 } },
                     plugins: {
                         legend: { position: 'bottom', labels: { font: { size: 11 }, color: '#000' } },
-                        tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + Math.round(ctx.raw) + '억'; } } }
+                        tooltip: { callbacks: {
+                            title: function(ctxs) { return ctxs.length ? aumData.dates[ctxs[0].dataIndex] : ''; },
+                            label: function(ctx) { return ctx.dataset.label + ': ' + Math.round(ctx.raw) + '억'; }
+                        } }
                     },
                     scales: {
                         x: { stacked: true, ticks: { font: { size: 11 }, color: '#000' }, grid: { display: false } },
@@ -2098,8 +2136,10 @@ def create_cumulative_aum_chart():
             print(f"Warning: 종료일 계산 실패: {e}")
 
         # 차트 표시는 3/20부터 (이전 데이터는 forward-fill 기준값으로만 사용)
+        # 봉은 주봉(각 ISO 주의 마지막 거래일 + 전체 최신일)만 표시
         chart_start = '2026-03-20'
-        all_dates = sorted(d for d in df['날짜'].dt.strftime('%Y-%m-%d').unique() if d >= chart_start)
+        all_dates_full_range = sorted(d for d in df['날짜'].dt.strftime('%Y-%m-%d').unique() if d >= chart_start)
+        all_dates = pick_weekly_last(all_dates_full_range)
 
         is_target = df['상품명'].str.contains('목표전환형', na=False)
         regular_df = df[~is_target].copy()
@@ -2262,23 +2302,7 @@ def create_cumulative_aum_chart():
                         } }
                     },
                     scales: {
-                        x: {
-                            stacked: true,
-                            ticks: {
-                                font: { size: 11 },
-                                color: '#000',
-                                autoSkip: false,
-                                callback: function(value, index, ticks) {
-                                    var dateStr = cData.dates[value] || cData.dates[index];
-                                    if (!dateStr) return '';
-                                    var isLatest = (index === cData.dates.length - 1);
-                                    var dt = new Date(dateStr + 'T00:00:00');
-                                    var isFriday = (dt.getDay() === 5);
-                                    return (isLatest || isFriday) ? dateStr.slice(5) : '';
-                                }
-                            },
-                            grid: { display: false }
-                        },
+                        x: { stacked: true, ticks: { font: { size: 11 }, color: '#000' }, grid: { display: false } },
                         y: { stacked: true, ticks: { callback: function(v) { return v + '억'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' } }
                     }
                 }
