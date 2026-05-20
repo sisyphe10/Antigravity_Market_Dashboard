@@ -1935,11 +1935,15 @@ def create_aum_table():
         df['날짜'] = pd.to_datetime(df['날짜'])
         latest = df.sort_values('날짜').groupby('상품명').last().reset_index()
         # 상단 테이블: 최신 날짜 상품만 (가장 최근 거래일 기준)
+        # 정렬: broker AUM 합 내림차순 → broker 안에서 일반형 → 목표전환형 → AUM 내림차순
         max_date = latest['날짜'].max()
         table_latest = latest[latest['날짜'] == max_date].copy()
         broker_total = table_latest.groupby('증권사')['AUM'].sum().sort_values(ascending=False)
         table_latest['broker_rank'] = table_latest['증권사'].map({b: i for i, b in enumerate(broker_total.index)})
-        table_latest = table_latest.sort_values(['broker_rank', 'AUM'], ascending=[True, False]).drop(columns='broker_rank')
+        table_latest['is_target'] = table_latest['상품명'].str.contains('목표전환형').astype(int)
+        table_latest = table_latest.sort_values(
+            ['broker_rank', 'is_target', 'AUM'], ascending=[True, True, False]
+        ).drop(columns=['broker_rank', 'is_target'])
         rows_html = ''
         total_aum = 0
         for _, row in table_latest.iterrows():
@@ -2109,9 +2113,11 @@ def create_cumulative_aum_chart():
             return ""
         df['날짜'] = pd.to_datetime(df['날짜'])
 
-        # 목표전환형 종료일 결정: 기준가 시트에서 각 회차의 마지막 유효 데이터 날짜.
-        # 전체 최신 거래일과 같으면 활성(=빈칸), 빠르면 청산일(=MM/DD).
+        # 목표전환형 종료일/운용 개시일 결정: 기준가 시트에서 각 회차의 첫/마지막 유효 데이터.
+        # 종료일 — 전체 최신 거래일과 같으면 활성(=빈칸), 빠르면 청산일(=MM/DD).
+        # 시작일 — 기준가 첫 유효 = 운용 개시일 (AUM 시트보다 정확).
         end_dates = {}
+        first_in_nav = {}
         try:
             df_nav = pd.read_excel(nav_file, sheet_name='기준가')
             if 'Date' in df_nav.columns:
@@ -2127,11 +2133,14 @@ def create_cumulative_aum_chart():
                 valid = df_nav[col].dropna()
                 if valid.empty:
                     continue
+                first_in_nav[col] = valid.index[0]
                 last_date = valid.index[-1]
                 end_dates[col] = '' if last_date >= nav_latest else last_date.strftime('%m/%d')
             # 별칭: 기준가 시트의 '목표전환형' (suffix 없음, DB 1차) → AUM 시트 '목표전환형 1차'
             if '목표전환형' in end_dates:
                 end_dates.setdefault('목표전환형 1차', end_dates['목표전환형'])
+            if '목표전환형' in first_in_nav:
+                first_in_nav.setdefault('목표전환형 1차', first_in_nav['목표전환형'])
         except Exception as e:
             print(f"Warning: 종료일 계산 실패: {e}")
 
@@ -2213,45 +2222,98 @@ def create_cumulative_aum_chart():
                 'backgroundColor': f'rgba({r},{g},{b},{op})'
             })
 
-        # 누적 AUM 테이블 행 순서 — 상단 AUM 테이블의 활성 행 순서를 그대로 따라가고,
-        # 청산 회차는 같은 broker 그룹 끝에 종료일 최신순으로 붙임.
+        # 누적 AUM 표: 5행 고정 (broker별 일반형 → 목표전환형 통합 행).
+        # 목표전환형 행은 활성 회차(없으면 가장 최근 청산) 데이터를 메인으로 표시하고,
+        # 회차별 [회차명, 마지막 AUM, 시작일, 종료일]은 hover tooltip으로 노출.
         latest_per_product = df.sort_values('날짜').groupby('상품명').last().reset_index()
+        first_per_product = df.sort_values('날짜').groupby('상품명').first()['날짜']
         max_date = latest_per_product['날짜'].max()
-        active_df_full = latest_per_product[latest_per_product['날짜'] == max_date].copy()
-        inactive_df_full = latest_per_product[latest_per_product['날짜'] < max_date].copy()
 
-        broker_total_active = active_df_full.groupby('증권사')['AUM'].sum().sort_values(ascending=False)
-        broker_order = broker_total_active.index.tolist()
-        broker_rank_map = {b: i for i, b in enumerate(broker_order)}
+        # broker 순서: 최신 날짜의 broker AUM 합 내림차순
+        active_all = latest_per_product[latest_per_product['날짜'] == max_date]
+        broker_order = active_all.groupby('증권사')['AUM'].sum().sort_values(ascending=False).index.tolist()
+        # 활성 일반형이 없지만 목표전환형 청산 이력만 있는 broker 포함 (안전망)
+        for b in df['증권사'].unique():
+            if b not in broker_order:
+                broker_order.append(b)
 
-        active_df_full['broker_rank'] = active_df_full['증권사'].map(broker_rank_map)
-        active_sorted = active_df_full.sort_values(['broker_rank', 'AUM'], ascending=[True, False])
+        target_df_all = df[df['상품명'].str.contains('목표전환형', na=False)]
 
-        inactive_df_full['broker_rank'] = inactive_df_full['증권사'].map(broker_rank_map).fillna(len(broker_order))
-        inactive_sorted = inactive_df_full.sort_values(['broker_rank', '날짜'], ascending=[True, False])
+        def _target_summary(broker):
+            broker_target = target_df_all[target_df_all['증권사'] == broker]
+            if broker_target.empty:
+                return None
+            # 활성 회차: 최신 거래일에 데이터가 있는 회차 (있으면 1개)
+            active_iter_rows = broker_target[broker_target['날짜'] == max_date]
+            if not active_iter_rows.empty:
+                iter_name = active_iter_rows.iloc[0]['상품명']
+            else:
+                # 활성 없음 → 가장 최근 청산 회차 (마지막 데이터 날짜 기준)
+                last_per_iter = broker_target.sort_values('날짜').groupby('상품명').last()
+                iter_name = last_per_iter.sort_values('날짜').index[-1]
+            iter_rows = broker_target[broker_target['상품명'] == iter_name].sort_values('날짜')
+            main_aum = int(iter_rows.iloc[-1]['AUM'])
+            main_date = iter_rows.iloc[-1]['날짜']
+            main_end = end_dates.get(iter_name, '')
 
-        def _row_html(row):
-            aum_val = int(row['AUM'])
-            date_str = row['날짜'].strftime('%m/%d')
-            end_str = end_dates.get(row['상품명'], '')
-            return (f'<tr><td>{row["증권사"]}</td><td>{row["상품명"]}</td>'
-                    f'<td>{aum_val/1e8:,.0f}억</td><td>{date_str}</td><td>{end_str}</td></tr>\n')
+            # 회차별 detail: 시작일 순으로 정렬
+            # 시작일은 기준가 시트의 첫 유효 데이터 (= 운용 개시일) 우선, 없으면 AUM 시트 첫 데이터.
+            iters = []
+            last_per_iter_all = broker_target.sort_values('날짜').groupby('상품명').last()
+            for it_name, it_row in last_per_iter_all.iterrows():
+                start_d = first_in_nav.get(it_name) or first_per_product.get(it_name)
+                iters.append({
+                    'name': it_name,
+                    'last_aum': int(it_row['AUM']),
+                    'start': start_d,
+                    'end': end_dates.get(it_name, ''),
+                })
+            iters.sort(key=lambda x: x['start'] if x['start'] is not None else pd.Timestamp('1970-01-01'))
+            return {'aum': main_aum, 'date': main_date, 'end': main_end, 'iters': iters}
+
+        def _tooltip_html(iters):
+            tt_rows = ''
+            for it in iters:
+                aum_s = f"{it['last_aum']/1e8:,.0f}억"
+                start_s = it['start'].strftime('%m/%d') if it['start'] is not None else '-'
+                end_s = it['end'] if it['end'] else '운용 중'
+                tt_rows += (f'<tr><td>{it["name"]}</td><td>{aum_s}</td>'
+                            f'<td>{start_s}</td><td>{end_s}</td></tr>')
+            return (
+                '<div class="iter-tooltip">'
+                '<table class="iter-table">'
+                '<thead><tr><th>회차</th><th>마지막 AUM</th><th>시작일</th><th>종료일</th></tr></thead>'
+                f'<tbody>{tt_rows}</tbody>'
+                '</table></div>'
+            )
 
         cum_rows_html = ''
         cum_total = 0
-        # broker 그룹 순회: 활성 → 청산
         for broker in broker_order:
-            for sub_df in (active_sorted[active_sorted['증권사'] == broker],
-                            inactive_sorted[inactive_sorted['증권사'] == broker]):
-                for _, row in sub_df.iterrows():
-                    cum_total += int(row['AUM'])
-                    cum_rows_html += _row_html(row)
-        # 활성에 없는 broker의 청산 회차 (안전망)
-        leftover_brokers = [b for b in inactive_sorted['증권사'].unique() if b not in broker_rank_map]
-        for broker in leftover_brokers:
-            for _, row in inactive_sorted[inactive_sorted['증권사'] == broker].iterrows():
-                cum_total += int(row['AUM'])
-                cum_rows_html += _row_html(row)
+            # 1) 그 broker의 활성 일반형 (AUM 내림차순)
+            broker_regular = active_all[
+                (active_all['증권사'] == broker) &
+                (~active_all['상품명'].str.contains('목표전환형', na=False))
+            ].sort_values('AUM', ascending=False)
+            for _, r in broker_regular.iterrows():
+                aum_val = int(r['AUM'])
+                cum_total += aum_val
+                date_str = r['날짜'].strftime('%m/%d')
+                cum_rows_html += (
+                    f'<tr><td>{broker}</td><td>{r["상품명"]}</td>'
+                    f'<td>{aum_val/1e8:,.0f}억</td><td>{date_str}</td><td></td></tr>\n'
+                )
+            # 2) 그 broker의 목표전환형 통합 행 (활성 또는 가장 최근 청산)
+            summary = _target_summary(broker)
+            if summary is not None:
+                cum_total += summary['aum']
+                date_str = summary['date'].strftime('%m/%d')
+                cum_rows_html += (
+                    f'<tr class="iter-row"><td>{broker}</td>'
+                    f'<td style="position:relative;">목표전환형{_tooltip_html(summary["iters"])}</td>'
+                    f'<td>{summary["aum"]/1e8:,.0f}억</td>'
+                    f'<td>{date_str}</td><td>{summary["end"]}</td></tr>\n'
+                )
         cum_rows_html += f'<tr style="border-top:2px solid #000;font-weight:700;"><td colspan="2">합계</td><td>{cum_total/1e8:,.0f}억</td><td></td><td></td></tr>'
 
         chart_json = json.dumps({'dates': all_dates, 'datasets': datasets}, ensure_ascii=False)
@@ -4857,6 +4919,12 @@ def create_dashboard():
         .portfolio-table.aum-aligned th, .portfolio-table.aum-aligned td {{ width: auto; line-height: 24px; box-sizing: border-box; }}
         .portfolio-table.aum-aligned td {{ padding: 10px; }}
         .portfolio-table.aum-aligned th {{ padding: 12px 10px; }}
+        /* 누적 AUM 목표전환형 행: 회차별 detail hover tooltip */
+        .iter-tooltip {{ display: none; position: absolute; left: 100%; top: 0; margin-left: 12px; background: #fff; border: 1px solid #ccc; box-shadow: 0 4px 10px rgba(0,0,0,0.18); z-index: 100; white-space: nowrap; font-size: 13px; font-weight: 400; }}
+        .iter-row:hover .iter-tooltip {{ display: block; }}
+        .iter-tooltip .iter-table {{ border-collapse: collapse; }}
+        .iter-tooltip .iter-table th {{ padding: 8px 12px; background: #e9ecef; border-bottom: 1px solid #ccc; font-weight: 600; text-align: center; color: #000; }}
+        .iter-tooltip .iter-table td {{ padding: 6px 12px; border-bottom: 1px solid #eee; text-align: center; color: #333; }}
         .wrap-chart-item {{ cursor: pointer; transition: all 0.15s; }}
         .wrap-chart-item:hover td {{ background: #e9ecef; }}
         .wrap-chart-item.active td {{ background: #222; color: #fff; }}
