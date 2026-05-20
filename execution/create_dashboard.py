@@ -3214,11 +3214,17 @@ def create_order_section():
                     }
                 });
             });
-            // 신규 종목 종목명 blur → 네이버 자동완성으로 코드+업종 자동
+            // 신규 종목 종목명/코드 blur → 네이버 자동완성으로 나머지 + 업종 자동
             document.querySelectorAll('#orderContent input[data-field="name"]').forEach(function(el) {
                 el.addEventListener('blur', function(e) {
                     var idx = parseInt(e.target.dataset.idx);
                     if (!isNaN(idx)) autoFillStockFromName(idx);
+                });
+            });
+            document.querySelectorAll('#orderContent input[data-field="code"]').forEach(function(el) {
+                el.addEventListener('blur', function(e) {
+                    var idx = parseInt(e.target.dataset.idx);
+                    if (!isNaN(idx)) autoFillStockFromCode(idx);
                 });
             });
             var cancelBtn = document.getElementById('orderCancelAllBtn');
@@ -3287,34 +3293,100 @@ def create_order_section():
             return '';
         }
 
-        // 신규 종목 행에서 종목명 입력 후 blur → 네이버 자동완성으로 코드 채움 + 보유 종목이면 sector도.
+        // 신규 종목 행에서 종목명 입력 후 blur → 네이버 자동완성으로 코드 채움 + sector lookup/fetch.
         async function autoFillStockFromName(idx) {
             var stocks = orderStocks[orderActiveTab];
             if (!stocks || !stocks[idx] || !stocks[idx].isNew) return;
             var s = stocks[idx];
             var name = String(s.name || '').trim();
             if (!name) return;
-            if (String(s.code || '').trim()) return;  // 코드 이미 있으면 skip
+            var codeAlreadySet = !!String(s.code || '').trim();
             try {
-                var resp = await fetch('https://ac.stock.naver.com/ac?q=' + encodeURIComponent(name) + '&target=stock');
-                if (!resp.ok) return;
-                var data = await resp.json();
-                var items = (data.items || []).filter(function(x) {
-                    return x.nationCode === 'KOR' && x.category === 'stock';
-                });
-                if (!items.length) return;
-                // 정확 일치 우선, 없으면 첫 매칭
-                var exact = items.find(function(x) { return x.name === name; });
-                var item = exact || items[0];
-                s.code = item.code;
-                s.name = item.name;  // 정식 종목명으로 보정
+                if (!codeAlreadySet) {
+                    var resp = await fetch('https://ac.stock.naver.com/ac?q=' + encodeURIComponent(name) + '&target=stock');
+                    if (!resp.ok) return;
+                    var data = await resp.json();
+                    var items = (data.items || []).filter(function(x) {
+                        return x.nationCode === 'KOR' && x.category === 'stock';
+                    });
+                    if (!items.length) return;
+                    var exact = items.find(function(x) { return x.name === name; });
+                    var item = exact || items[0];
+                    s.code = item.code;
+                    s.name = item.name;  // 정식 종목명으로 보정
+                }
                 if (!String(s.sector || '').trim()) {
                     var sec = lookupSectorByCode(s.code);
                     if (sec) s.sector = sec;
+                    else {
+                        var fetched = await fetchSectorFromNaver(s.code);
+                        if (fetched) s.sector = fetched;
+                    }
                 }
                 renderOrderPanel(orderActiveTab);
             } catch (e) {
                 console.warn('autoFillStockFromName 실패 (네트워크/CORS):', e);
+            }
+        }
+
+        // 신규 종목 행에서 코드 입력 후 blur → 네이버 자동완성으로 종목명 채움 + sector lookup/fetch.
+        async function autoFillStockFromCode(idx) {
+            var stocks = orderStocks[orderActiveTab];
+            if (!stocks || !stocks[idx] || !stocks[idx].isNew) return;
+            var s = stocks[idx];
+            var code = String(s.code || '').trim();
+            if (!code) return;
+            // "5930" → "005930" 0-padding (한국 종목은 6자리)
+            if (/^\d{1,6}$/.test(code) && code.length < 6) {
+                code = code.padStart(6, '0');
+                s.code = code;
+            }
+            var nameAlreadySet = !!String(s.name || '').trim();
+            try {
+                if (!nameAlreadySet) {
+                    var resp = await fetch('https://ac.stock.naver.com/ac?q=' + encodeURIComponent(code) + '&target=stock');
+                    if (resp.ok) {
+                        var data = await resp.json();
+                        var items = (data.items || []).filter(function(x) {
+                            return x.nationCode === 'KOR' && x.category === 'stock';
+                        });
+                        var exact = items.find(function(x) { return String(x.code) === code; });
+                        var item = exact || items[0];
+                        if (item) s.name = item.name;
+                    }
+                }
+                if (!String(s.sector || '').trim()) {
+                    var sec = lookupSectorByCode(s.code);
+                    if (sec) s.sector = sec;
+                    else {
+                        var fetched = await fetchSectorFromNaver(s.code);
+                        if (fetched) s.sector = fetched;
+                    }
+                }
+                renderOrderPanel(orderActiveTab);
+            } catch (e) {
+                console.warn('autoFillStockFromCode 실패 (네트워크/CORS):', e);
+            }
+        }
+
+        // 네이버 모바일 stock API에서 종목 sector(WICS) 가져옴. CORS 차단되면 빈 문자열.
+        // 자동완성 ac.stock.naver.com과 같은 호스트 패밀리라 보통 통과하지만, 폴리시 변경 대비해 try/catch.
+        async function fetchSectorFromNaver(code) {
+            var c = String(code || '').trim();
+            if (!c) return '';
+            try {
+                var resp = await fetch('https://api.stock.naver.com/stock/' + c + '/integration');
+                if (!resp.ok) return '';
+                var data = await resp.json();
+                // 응답 필드 후보 (변경 대비 다중 시도)
+                if (data.wicsSectorName) return String(data.wicsSectorName).trim();
+                if (data.industryCodeType && data.industryCodeType.name) return String(data.industryCodeType.name).trim();
+                if (data.sectorCodeType && data.sectorCodeType.name) return String(data.sectorCodeType.name).trim();
+                if (data.stockEndType && data.stockEndType.industryName) return String(data.stockEndType.industryName).trim();
+                return '';
+            } catch (e) {
+                console.warn('fetchSectorFromNaver 실패 (CORS 가능):', e);
+                return '';
             }
         }
 
