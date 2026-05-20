@@ -2068,6 +2068,32 @@ def create_cumulative_aum_chart():
             return ""
         df['날짜'] = pd.to_datetime(df['날짜'])
 
+        # 목표전환형 종료일 결정: 기준가 시트에서 각 회차의 마지막 유효 데이터 날짜.
+        # 전체 최신 거래일과 같으면 활성(=빈칸), 빠르면 청산일(=MM/DD).
+        end_dates = {}
+        try:
+            df_nav = pd.read_excel(nav_file, sheet_name='기준가')
+            if 'Date' in df_nav.columns:
+                df_nav['Date'] = pd.to_datetime(df_nav['Date'])
+                df_nav = df_nav.set_index('Date')
+            else:
+                df_nav.index = pd.to_datetime(df_nav.iloc[:, 0])
+                df_nav = df_nav.iloc[:, 1:]
+            nav_latest = df_nav.index.max()
+            for col in df_nav.columns:
+                if '목표전환형' not in col:
+                    continue
+                valid = df_nav[col].dropna()
+                if valid.empty:
+                    continue
+                last_date = valid.index[-1]
+                end_dates[col] = '' if last_date >= nav_latest else last_date.strftime('%m/%d')
+            # 별칭: 기준가 시트의 '목표전환형' (suffix 없음, DB 1차) → AUM 시트 '목표전환형 1차'
+            if '목표전환형' in end_dates:
+                end_dates.setdefault('목표전환형 1차', end_dates['목표전환형'])
+        except Exception as e:
+            print(f"Warning: 종료일 계산 실패: {e}")
+
         # 차트 표시는 3/20부터 (이전 데이터는 forward-fill 기준값으로만 사용)
         chart_start = '2026-03-20'
         all_dates = sorted(d for d in df['날짜'].dt.strftime('%Y-%m-%d').unique() if d >= chart_start)
@@ -2154,7 +2180,7 @@ def create_cumulative_aum_chart():
             aum = int(latest_row['AUM'])
             cum_total += aum
             date_str = latest_row['날짜'].strftime('%m/%d')
-            cum_rows_html += f'<tr><td>{latest_row["증권사"]}</td><td>{latest_row["상품명"]}</td><td>{aum/1e8:,.0f}억</td><td>{date_str}</td></tr>\n'
+            cum_rows_html += f'<tr><td>{latest_row["증권사"]}</td><td>{latest_row["상품명"]}</td><td>{aum/1e8:,.0f}억</td><td>{date_str}</td><td></td></tr>\n'
         # 목표전환형 (회차별 개별 표시)
         for broker in sorted(target_df['증권사'].unique()):
             broker_target = target_df[target_df['증권사'] == broker]
@@ -2164,8 +2190,9 @@ def create_cumulative_aum_chart():
                 aum = int(latest_row['AUM'])
                 cum_total += aum
                 date_str = latest_row['날짜'].strftime('%m/%d')
-                cum_rows_html += f'<tr><td>{broker}</td><td>{it}</td><td>{aum/1e8:,.0f}억</td><td>{date_str}</td></tr>\n'
-        cum_rows_html += f'<tr style="border-top:2px solid #000;font-weight:700;"><td colspan="2">합계</td><td>{cum_total/1e8:,.0f}억</td><td></td></tr>'
+                end_str = end_dates.get(it, '')
+                cum_rows_html += f'<tr><td>{broker}</td><td>{it}</td><td>{aum/1e8:,.0f}억</td><td>{date_str}</td><td>{end_str}</td></tr>\n'
+        cum_rows_html += f'<tr style="border-top:2px solid #000;font-weight:700;"><td colspan="2">합계</td><td>{cum_total/1e8:,.0f}억</td><td></td><td></td></tr>'
 
         chart_json = json.dumps({'dates': all_dates, 'datasets': datasets}, ensure_ascii=False)
 
@@ -2232,6 +2259,7 @@ def create_cumulative_aum_chart():
                             <th>상품명</th>
                             <th>AUM</th>
                             <th>기준일</th>
+                            <th>종료일</th>
                         </tr></thead>
                         <tbody>{cum_rows_html}</tbody>
                     </table>
