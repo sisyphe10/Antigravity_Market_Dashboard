@@ -33,6 +33,7 @@ FilingType = Literal['8-K', '6-K']
 FOREIGN_PRIVATE_ISSUERS: dict[str, dict] = {
     'ASML':  {'country': 'NL', 'exchange': 'NASDAQ', 'note': 'ASML Holding NV (ADR)'},
     'TSM':   {'country': 'TW', 'exchange': 'NYSE',   'note': 'Taiwan Semiconductor (ADR)'},
+    'CCJ':   {'country': 'CA', 'exchange': 'NYSE',   'note': 'Cameco Corporation (Canadian uranium)'},
     # 향후 ADR 추가 시 여기에 등록 (예: BABA, NIO, SHOP, NVO 등)
 }
 

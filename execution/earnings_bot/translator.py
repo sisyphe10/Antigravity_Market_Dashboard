@@ -93,7 +93,7 @@ def _call_sonnet(messages: list[dict]) -> dict:
     client = get_anthropic_client()
     resp = client.messages.create(
         model=ANALYSIS_MODEL,
-        max_tokens=2000,
+        max_tokens=4000,
         system=SYSTEM_ANALYSIS,
         messages=messages,
     )
