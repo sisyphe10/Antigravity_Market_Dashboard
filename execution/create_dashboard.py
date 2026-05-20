@@ -2073,7 +2073,7 @@ def create_aum_table():
         <div class="category-section">
             <h2 class="category-title">AUM</h2>
             <div style="display:flex;gap:100px;align-items:flex-start;max-width:1800px;margin:0 auto;">
-                <div>
+                <div style="width:440px;">
                     <table class="portfolio-table aum-aligned" style="white-space:nowrap;width:370px;table-layout:fixed;">
                         <colgroup>
                             <col style="width:60px"><col style="width:160px"><col style="width:80px"><col style="width:70px">
@@ -2315,7 +2315,7 @@ def create_cumulative_aum_chart():
         <div style="margin-top:40px;max-width:1800px;margin:40px auto 0 auto;">
             <h3 style="font-size:18px;font-weight:700;margin-bottom:12px;">누적 AUM</h3>
             <div style="display:flex;gap:100px;align-items:flex-start;">
-                <div>
+                <div style="width:440px;">
                     <table class="portfolio-table aum-aligned" style="white-space:nowrap;width:440px;table-layout:fixed;">
                         <colgroup>
                             <col style="width:60px"><col style="width:160px"><col style="width:80px"><col style="width:70px"><col style="width:70px">
@@ -4854,7 +4854,9 @@ def create_dashboard():
         .portfolio-table tbody tr:hover {{ background-color: #f5f5f5; }}
         .portfolio-table .number {{ text-align: right; }}
         .portfolio-table th:first-child, .portfolio-table td:first-child {{ width: 50px; text-align: center; }}
-        .portfolio-table.aum-aligned th, .portfolio-table.aum-aligned td {{ width: auto; }}
+        .portfolio-table.aum-aligned th, .portfolio-table.aum-aligned td {{ width: auto; line-height: 24px; box-sizing: border-box; }}
+        .portfolio-table.aum-aligned td {{ padding: 10px; }}
+        .portfolio-table.aum-aligned th {{ padding: 12px 10px; }}
         .wrap-chart-item {{ cursor: pointer; transition: all 0.15s; }}
         .wrap-chart-item:hover td {{ background: #e9ecef; }}
         .wrap-chart-item.active td {{ background: #222; color: #fff; }}
