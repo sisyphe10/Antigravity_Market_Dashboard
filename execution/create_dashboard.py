@@ -2035,8 +2035,11 @@ def create_aum_table():
         <div class="category-section">
             <h2 class="category-title">AUM</h2>
             <div style="display:flex;gap:100px;align-items:flex-start;max-width:1800px;margin:0 auto;">
-                <div style="min-width:500px;">
-                    <table class="portfolio-table" style="white-space:nowrap;width:100%;">
+                <div>
+                    <table class="portfolio-table aum-aligned" style="white-space:nowrap;width:370px;table-layout:fixed;">
+                        <colgroup>
+                            <col style="width:60px"><col style="width:160px"><col style="width:80px"><col style="width:70px">
+                        </colgroup>
                         <thead><tr>
                             <th>증권사</th>
                             <th>상품명</th>
@@ -2170,28 +2173,45 @@ def create_cumulative_aum_chart():
                 'backgroundColor': f'rgba({r},{g},{b},{op})'
             })
 
-        # 누적 AUM 테이블 생성 (모든 상품 포함)
+        # 누적 AUM 테이블 행 순서 — 상단 AUM 테이블의 활성 행 순서를 그대로 따라가고,
+        # 청산 회차는 같은 broker 그룹 끝에 종료일 최신순으로 붙임.
+        latest_per_product = df.sort_values('날짜').groupby('상품명').last().reset_index()
+        max_date = latest_per_product['날짜'].max()
+        active_df_full = latest_per_product[latest_per_product['날짜'] == max_date].copy()
+        inactive_df_full = latest_per_product[latest_per_product['날짜'] < max_date].copy()
+
+        broker_total_active = active_df_full.groupby('증권사')['AUM'].sum().sort_values(ascending=False)
+        broker_order = broker_total_active.index.tolist()
+        broker_rank_map = {b: i for i, b in enumerate(broker_order)}
+
+        active_df_full['broker_rank'] = active_df_full['증권사'].map(broker_rank_map)
+        active_sorted = active_df_full.sort_values(['broker_rank', 'AUM'], ascending=[True, False])
+
+        inactive_df_full['broker_rank'] = inactive_df_full['증권사'].map(broker_rank_map).fillna(len(broker_order))
+        inactive_sorted = inactive_df_full.sort_values(['broker_rank', '날짜'], ascending=[True, False])
+
+        def _row_html(row):
+            aum_val = int(row['AUM'])
+            date_str = row['날짜'].strftime('%m/%d')
+            end_str = end_dates.get(row['상품명'], '')
+            return (f'<tr><td>{row["증권사"]}</td><td>{row["상품명"]}</td>'
+                    f'<td>{aum_val/1e8:,.0f}억</td><td>{date_str}</td><td>{end_str}</td></tr>\n')
+
         cum_rows_html = ''
         cum_total = 0
-        # 일반형 상품
-        for label in reg_labels_sorted:
-            sub = regular_df[regular_df['label'] == label]
-            latest_row = sub.sort_values('날짜').iloc[-1]
-            aum = int(latest_row['AUM'])
-            cum_total += aum
-            date_str = latest_row['날짜'].strftime('%m/%d')
-            cum_rows_html += f'<tr><td>{latest_row["증권사"]}</td><td>{latest_row["상품명"]}</td><td>{aum/1e8:,.0f}억</td><td>{date_str}</td><td></td></tr>\n'
-        # 목표전환형 (회차별 개별 표시)
-        for broker in sorted(target_df['증권사'].unique()):
-            broker_target = target_df[target_df['증권사'] == broker]
-            for it in sorted(broker_target['상품명'].unique()):
-                it_data = broker_target[broker_target['상품명'] == it].sort_values('날짜')
-                latest_row = it_data.iloc[-1]
-                aum = int(latest_row['AUM'])
-                cum_total += aum
-                date_str = latest_row['날짜'].strftime('%m/%d')
-                end_str = end_dates.get(it, '')
-                cum_rows_html += f'<tr><td>{broker}</td><td>{it}</td><td>{aum/1e8:,.0f}억</td><td>{date_str}</td><td>{end_str}</td></tr>\n'
+        # broker 그룹 순회: 활성 → 청산
+        for broker in broker_order:
+            for sub_df in (active_sorted[active_sorted['증권사'] == broker],
+                            inactive_sorted[inactive_sorted['증권사'] == broker]):
+                for _, row in sub_df.iterrows():
+                    cum_total += int(row['AUM'])
+                    cum_rows_html += _row_html(row)
+        # 활성에 없는 broker의 청산 회차 (안전망)
+        leftover_brokers = [b for b in inactive_sorted['증권사'].unique() if b not in broker_rank_map]
+        for broker in leftover_brokers:
+            for _, row in inactive_sorted[inactive_sorted['증권사'] == broker].iterrows():
+                cum_total += int(row['AUM'])
+                cum_rows_html += _row_html(row)
         cum_rows_html += f'<tr style="border-top:2px solid #000;font-weight:700;"><td colspan="2">합계</td><td>{cum_total/1e8:,.0f}억</td><td></td><td></td></tr>'
 
         chart_json = json.dumps({'dates': all_dates, 'datasets': datasets}, ensure_ascii=False)
@@ -2236,10 +2256,29 @@ def create_cumulative_aum_chart():
                     layout: { padding: { top: 20 } },
                     plugins: {
                         legend: { position: 'bottom', labels: { font: { size: 11 }, color: '#000' } },
-                        tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + Math.round(ctx.raw) + '억'; } } }
+                        tooltip: { callbacks: {
+                            title: function(ctxs) { return ctxs.length ? cData.dates[ctxs[0].dataIndex] : ''; },
+                            label: function(ctx) { return ctx.dataset.label + ': ' + Math.round(ctx.raw) + '억'; }
+                        } }
                     },
                     scales: {
-                        x: { stacked: true, ticks: { font: { size: 11 }, color: '#000' }, grid: { display: false } },
+                        x: {
+                            stacked: true,
+                            ticks: {
+                                font: { size: 11 },
+                                color: '#000',
+                                autoSkip: false,
+                                callback: function(value, index, ticks) {
+                                    var dateStr = cData.dates[value] || cData.dates[index];
+                                    if (!dateStr) return '';
+                                    var isLatest = (index === cData.dates.length - 1);
+                                    var dt = new Date(dateStr + 'T00:00:00');
+                                    var isFriday = (dt.getDay() === 5);
+                                    return (isLatest || isFriday) ? dateStr.slice(5) : '';
+                                }
+                            },
+                            grid: { display: false }
+                        },
                         y: { stacked: true, ticks: { callback: function(v) { return v + '억'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' } }
                     }
                 }
@@ -2252,8 +2291,11 @@ def create_cumulative_aum_chart():
         <div style="margin-top:40px;max-width:1800px;margin:40px auto 0 auto;">
             <h3 style="font-size:18px;font-weight:700;margin-bottom:12px;">누적 AUM</h3>
             <div style="display:flex;gap:100px;align-items:flex-start;">
-                <div style="min-width:500px;">
-                    <table class="portfolio-table" style="white-space:nowrap;width:100%;">
+                <div>
+                    <table class="portfolio-table aum-aligned" style="white-space:nowrap;width:440px;table-layout:fixed;">
+                        <colgroup>
+                            <col style="width:60px"><col style="width:160px"><col style="width:80px"><col style="width:70px"><col style="width:70px">
+                        </colgroup>
                         <thead><tr>
                             <th>증권사</th>
                             <th>상품명</th>
@@ -4236,6 +4278,12 @@ def create_dashboard():
             text-align: center;
         }}
 
+        /* aum-aligned: colgroup width를 우선 적용 (상단 AUM/누적 AUM 컬럼 정렬 일치) */
+        .portfolio-table.aum-aligned th,
+        .portfolio-table.aum-aligned td {{
+            width: auto;
+        }}
+
         .portfolio-section-wrapper {{
             max-width: 1800px;
             margin: 0 auto;
@@ -4782,6 +4830,7 @@ def create_dashboard():
         .portfolio-table tbody tr:hover {{ background-color: #f5f5f5; }}
         .portfolio-table .number {{ text-align: right; }}
         .portfolio-table th:first-child, .portfolio-table td:first-child {{ width: 50px; text-align: center; }}
+        .portfolio-table.aum-aligned th, .portfolio-table.aum-aligned td {{ width: auto; }}
         .wrap-chart-item {{ cursor: pointer; transition: all 0.15s; }}
         .wrap-chart-item:hover td {{ background: #e9ecef; }}
         .wrap-chart-item.active td {{ background: #222; color: #fff; }}

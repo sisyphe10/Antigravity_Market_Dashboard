@@ -35,6 +35,7 @@
         .portfolio-table tbody tr:hover { background-color: #f5f5f5; }
         .portfolio-table .number { text-align: right; }
         .portfolio-table th:first-child, .portfolio-table td:first-child { width: 50px; text-align: center; }
+        .portfolio-table.aum-aligned th, .portfolio-table.aum-aligned td { width: auto; }
         .wrap-chart-item { cursor: pointer; transition: all 0.15s; }
         .wrap-chart-item:hover td { background: #e9ecef; }
         .wrap-chart-item.active td { background: #222; color: #fff; }
@@ -137,7 +138,7 @@
     <div id="mainContent" class="pw-hidden">
     <header style="position:relative;">
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-05-20 09:38:46 KST</div>
+        <div class="last-updated">Updated: 2026-05-20 09:53:45 KST</div>
         <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
 
@@ -464,8 +465,11 @@
         <div class="category-section">
             <h2 class="category-title">AUM</h2>
             <div style="display:flex;gap:100px;align-items:flex-start;max-width:1800px;margin:0 auto;">
-                <div style="min-width:500px;">
-                    <table class="portfolio-table" style="white-space:nowrap;width:100%;">
+                <div>
+                    <table class="portfolio-table aum-aligned" style="white-space:nowrap;width:370px;table-layout:fixed;">
+                        <colgroup>
+                            <col style="width:60px"><col style="width:160px"><col style="width:80px"><col style="width:70px">
+                        </colgroup>
                         <thead><tr>
                             <th>증권사</th>
                             <th>상품명</th>
@@ -541,8 +545,11 @@
         <div style="margin-top:40px;max-width:1800px;margin:40px auto 0 auto;">
             <h3 style="font-size:18px;font-weight:700;margin-bottom:12px;">누적 AUM</h3>
             <div style="display:flex;gap:100px;align-items:flex-start;">
-                <div style="min-width:500px;">
-                    <table class="portfolio-table" style="white-space:nowrap;width:100%;">
+                <div>
+                    <table class="portfolio-table aum-aligned" style="white-space:nowrap;width:440px;table-layout:fixed;">
+                        <colgroup>
+                            <col style="width:60px"><col style="width:160px"><col style="width:80px"><col style="width:70px"><col style="width:70px">
+                        </colgroup>
                         <thead><tr>
                             <th>증권사</th>
                             <th>상품명</th>
@@ -551,15 +558,15 @@
                             <th>종료일</th>
                         </tr></thead>
                         <tbody><tr><td>삼성</td><td>트루밸류</td><td>540억</td><td>05/19</td><td></td></tr>
-<tr><td>DB</td><td>개방형 랩</td><td>135억</td><td>05/19</td><td></td></tr>
-<tr><td>NH</td><td>다이내믹밸류</td><td>122억</td><td>05/19</td><td></td></tr>
-<tr><td>DB</td><td>목표전환형 1차</td><td>25억</td><td>02/24</td><td>02/25</td></tr>
-<tr><td>DB</td><td>목표전환형 2차</td><td>29억</td><td>04/14</td><td>04/15</td></tr>
-<tr><td>DB</td><td>목표전환형 3차</td><td>43억</td><td>05/06</td><td>05/06</td></tr>
-<tr><td>DB</td><td>목표전환형 4차</td><td>75억</td><td>05/19</td><td></td></tr>
-<tr><td>NH</td><td>목표전환형 1호</td><td>147억</td><td>04/14</td><td>04/15</td></tr>
-<tr><td>NH</td><td>목표전환형 2호</td><td>270억</td><td>05/06</td><td>05/06</td></tr>
 <tr><td>NH</td><td>목표전환형 3호</td><td>262억</td><td>05/19</td><td></td></tr>
+<tr><td>NH</td><td>다이내믹밸류</td><td>122억</td><td>05/19</td><td></td></tr>
+<tr><td>NH</td><td>목표전환형 2호</td><td>270억</td><td>05/06</td><td>05/06</td></tr>
+<tr><td>NH</td><td>목표전환형 1호</td><td>147억</td><td>04/14</td><td>04/15</td></tr>
+<tr><td>DB</td><td>개방형 랩</td><td>135억</td><td>05/19</td><td></td></tr>
+<tr><td>DB</td><td>목표전환형 4차</td><td>75억</td><td>05/19</td><td></td></tr>
+<tr><td>DB</td><td>목표전환형 3차</td><td>43억</td><td>05/06</td><td>05/06</td></tr>
+<tr><td>DB</td><td>목표전환형 2차</td><td>29억</td><td>04/14</td><td>04/15</td></tr>
+<tr><td>DB</td><td>목표전환형 1차</td><td>25억</td><td>02/24</td><td>02/25</td></tr>
 <tr style="border-top:2px solid #000;font-weight:700;"><td colspan="2">합계</td><td>1,648억</td><td></td><td></td></tr></tbody>
                     </table>
                 </div>
@@ -608,10 +615,29 @@
                     layout: { padding: { top: 20 } },
                     plugins: {
                         legend: { position: 'bottom', labels: { font: { size: 11 }, color: '#000' } },
-                        tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + Math.round(ctx.raw) + '억'; } } }
+                        tooltip: { callbacks: {
+                            title: function(ctxs) { return ctxs.length ? cData.dates[ctxs[0].dataIndex] : ''; },
+                            label: function(ctx) { return ctx.dataset.label + ': ' + Math.round(ctx.raw) + '억'; }
+                        } }
                     },
                     scales: {
-                        x: { stacked: true, ticks: { font: { size: 11 }, color: '#000' }, grid: { display: false } },
+                        x: {
+                            stacked: true,
+                            ticks: {
+                                font: { size: 11 },
+                                color: '#000',
+                                autoSkip: false,
+                                callback: function(value, index, ticks) {
+                                    var dateStr = cData.dates[value] || cData.dates[index];
+                                    if (!dateStr) return '';
+                                    var isLatest = (index === cData.dates.length - 1);
+                                    var dt = new Date(dateStr + 'T00:00:00');
+                                    var isFriday = (dt.getDay() === 5);
+                                    return (isLatest || isFriday) ? dateStr.slice(5) : '';
+                                }
+                            },
+                            grid: { display: false }
+                        },
                         y: { stacked: true, ticks: { callback: function(v) { return v + '억'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' } }
                     }
                 }
@@ -652,12 +678,12 @@
                                 <td>반도체</td>
                                 <td>1,610조6,497억</td>
                                 <td>30%</td>
-                                <td class="positive">+0.3%</td>
-                                <td class="positive">+0.8</td>
-                                <td class="positive">+364.0%</td>
-                                <td style="border-left:2px solid #000;">276,250</td>
+                                <td class="positive">+1.0%</td>
+                                <td class="positive">+3.0</td>
+                                <td class="positive">+372.1%</td>
+                                <td style="border-left:2px solid #000;">278,250</td>
                                 <td>296,000</td>
-                                <td class="">-6.7%</td>
+                                <td class="">-6.0%</td>
                             </tr>
                 
                             <tr>
@@ -668,11 +694,11 @@
                                 <td>1,243조6,656억</td>
                                 <td>22%</td>
                                 <td class="negative">-1.4%</td>
-                                <td class="negative">-3.2</td>
-                                <td class="positive">+486.9%</td>
-                                <td style="border-left:2px solid #000;">1,720,000</td>
+                                <td class="negative">-3.0</td>
+                                <td class="positive">+479.2%</td>
+                                <td style="border-left:2px solid #000;">1,721,000</td>
                                 <td>1,976,000</td>
-                                <td class="">-13.0%</td>
+                                <td class="">-12.9%</td>
                             </tr>
                 
                             <tr>
@@ -682,12 +708,12 @@
                                 <td>상사,자본재</td>
                                 <td>24조2,907억</td>
                                 <td>5%</td>
-                                <td class="positive">+0.5%</td>
-                                <td class="positive">+0.2</td>
-                                <td class="positive">+56.4%</td>
-                                <td style="border-left:2px solid #000;">1,507,000</td>
+                                <td class="negative">-2.9%</td>
+                                <td class="negative">-1.5</td>
+                                <td class="positive">+46.7%</td>
+                                <td style="border-left:2px solid #000;">1,456,000</td>
                                 <td>1,817,000</td>
-                                <td class="">-17.1%</td>
+                                <td class="">-19.9%</td>
                             </tr>
                 
                             <tr>
@@ -697,12 +723,12 @@
                                 <td>비철,목재등</td>
                                 <td>1조3,879억</td>
                                 <td>5%</td>
-                                <td class="negative">-13.3%</td>
-                                <td class="negative">-6.6</td>
-                                <td class="negative">-5.6%</td>
-                                <td style="border-left:2px solid #000;">100,100</td>
+                                <td class="negative">-14.4%</td>
+                                <td class="negative">-7.2</td>
+                                <td class="negative">-20.3%</td>
+                                <td style="border-left:2px solid #000;">98,800</td>
                                 <td>125,300</td>
-                                <td class="negative">-20.1%</td>
+                                <td class="negative">-21.1%</td>
                             </tr>
                 
                             <tr>
@@ -712,12 +738,12 @@
                                 <td>보험</td>
                                 <td>62조4,000억</td>
                                 <td>5%</td>
-                                <td class="negative">-2.4%</td>
-                                <td class="negative">-1.2</td>
-                                <td class="negative">-4.0%</td>
-                                <td style="border-left:2px solid #000;">304,500</td>
+                                <td class="negative">-2.7%</td>
+                                <td class="negative">-1.4</td>
+                                <td class="negative">-6.9%</td>
+                                <td style="border-left:2px solid #000;">303,500</td>
                                 <td>330,000</td>
-                                <td class="">-7.7%</td>
+                                <td class="">-8.0%</td>
                             </tr>
                 
                             <tr>
@@ -727,12 +753,12 @@
                                 <td>화장품,의류,완구</td>
                                 <td>5,712억</td>
                                 <td>4%</td>
-                                <td class="negative">-3.9%</td>
-                                <td class="negative">-1.6</td>
-                                <td class="negative">-2.8%</td>
-                                <td style="border-left:2px solid #000;">25,550</td>
+                                <td class="negative">-5.3%</td>
+                                <td class="negative">-2.1</td>
+                                <td class="negative">-9.2%</td>
+                                <td style="border-left:2px solid #000;">25,200</td>
                                 <td>51,000</td>
-                                <td class="negative">-49.9%</td>
+                                <td class="negative">-50.6%</td>
                             </tr>
                 
                             <tr>
@@ -742,12 +768,12 @@
                                 <td>기계</td>
                                 <td>67조8,994억</td>
                                 <td>3%</td>
-                                <td class="negative">-2.1%</td>
-                                <td class="negative">-0.6</td>
-                                <td class="positive">+54.3%</td>
-                                <td style="border-left:2px solid #000;">103,800</td>
+                                <td class="negative">-3.2%</td>
+                                <td class="negative">-1.0</td>
+                                <td class="positive">+47.7%</td>
+                                <td style="border-left:2px solid #000;">102,600</td>
                                 <td>136,400</td>
-                                <td class="negative">-23.9%</td>
+                                <td class="negative">-24.8%</td>
                             </tr>
                 
                             <tr>
@@ -757,12 +783,12 @@
                                 <td>조선</td>
                                 <td>34조2,876억</td>
                                 <td>3%</td>
-                                <td class="negative">-1.5%</td>
-                                <td class="negative">-0.5</td>
-                                <td class="negative">-14.8%</td>
-                                <td style="border-left:2px solid #000;">110,200</td>
+                                <td class="negative">-0.8%</td>
+                                <td class="negative">-0.2</td>
+                                <td class="negative">-14.9%</td>
+                                <td style="border-left:2px solid #000;">111,000</td>
                                 <td>153,696</td>
-                                <td class="negative">-28.3%</td>
+                                <td class="negative">-27.8%</td>
                             </tr>
                 
                             <tr>
@@ -772,12 +798,12 @@
                                 <td>IT하드웨어</td>
                                 <td>8조8,751억</td>
                                 <td>3%</td>
-                                <td class="positive">+5.2%</td>
-                                <td class="positive">+1.6</td>
-                                <td class="negative">-11.7%</td>
-                                <td style="border-left:2px solid #000;">127,200</td>
+                                <td class="positive">+5.1%</td>
+                                <td class="positive">+1.5</td>
+                                <td class="negative">-7.2%</td>
+                                <td style="border-left:2px solid #000;">127,100</td>
                                 <td>161,400</td>
-                                <td class="negative">-21.2%</td>
+                                <td class="negative">-21.3%</td>
                             </tr>
                 
                             <tr>
@@ -787,12 +813,12 @@
                                 <td>증권</td>
                                 <td>37조1,552억</td>
                                 <td>3%</td>
-                                <td class="negative">-4.8%</td>
-                                <td class="negative">-1.4</td>
-                                <td class="positive">+197.2%</td>
-                                <td style="border-left:2px solid #000;">63,200</td>
+                                <td class="negative">-6.3%</td>
+                                <td class="negative">-1.9</td>
+                                <td class="positive">+174.0%</td>
+                                <td style="border-left:2px solid #000;">62,200</td>
                                 <td>83,800</td>
-                                <td class="negative">-24.6%</td>
+                                <td class="negative">-25.8%</td>
                             </tr>
                 
                             <tr>
@@ -802,12 +828,12 @@
                                 <td>디스플레이</td>
                                 <td>7,930억</td>
                                 <td>3%</td>
-                                <td class="negative">-3.6%</td>
-                                <td class="negative">-1.1</td>
-                                <td class="negative">-22.4%</td>
-                                <td style="border-left:2px solid #000;">75,700</td>
+                                <td class="negative">-5.0%</td>
+                                <td class="negative">-1.5</td>
+                                <td class="negative">-27.3%</td>
+                                <td style="border-left:2px solid #000;">74,600</td>
                                 <td>131,000</td>
-                                <td class="negative">-42.2%</td>
+                                <td class="negative">-43.1%</td>
                             </tr>
                 
                             <tr>
@@ -817,12 +843,12 @@
                                 <td>기타</td>
                                 <td>7조7,430억</td>
                                 <td>3%</td>
-                                <td class="negative">-1.8%</td>
-                                <td class="negative">-0.5</td>
-                                <td class="negative">-12.7%</td>
-                                <td style="border-left:2px solid #000;">158,500</td>
+                                <td class="negative">-3.2%</td>
+                                <td class="negative">-1.0</td>
+                                <td class="negative">-16.7%</td>
+                                <td style="border-left:2px solid #000;">156,200</td>
                                 <td>198,100</td>
-                                <td class="">-20.0%</td>
+                                <td class="negative">-21.2%</td>
                             </tr>
                 
                             <tr>
@@ -832,12 +858,12 @@
                                 <td>기타</td>
                                 <td>5조5,325억</td>
                                 <td>2%</td>
-                                <td class="negative">-2.3%</td>
-                                <td class="negative">-0.5</td>
-                                <td class="negative">-18.7%</td>
-                                <td style="border-left:2px solid #000;">64,800</td>
+                                <td class="positive">+1.2%</td>
+                                <td class="positive">+0.2</td>
+                                <td class="negative">-14.8%</td>
+                                <td style="border-left:2px solid #000;">67,100</td>
                                 <td>89,500</td>
-                                <td class="negative">-27.6%</td>
+                                <td class="negative">-25.0%</td>
                             </tr>
                 
                             <tr>
@@ -847,19 +873,19 @@
                                 <td>필수소비재</td>
                                 <td>10조4,784억</td>
                                 <td>2%</td>
-                                <td class="positive">+2.0%</td>
-                                <td class="positive">+0.4</td>
-                                <td class="positive">+0.2%</td>
-                                <td style="border-left:2px solid #000;">1,419,000</td>
+                                <td class="positive">+1.2%</td>
+                                <td class="positive">+0.2</td>
+                                <td class="positive">+0.6%</td>
+                                <td style="border-left:2px solid #000;">1,408,000</td>
                                 <td>1,630,000</td>
-                                <td class="">-12.9%</td>
+                                <td class="">-13.6%</td>
                             </tr>
                 
                             <tr class="total-row">
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
                                 <td style="font-weight: 600;">93%</td>
-                                <td class="negative" style="font-weight: 600;">-1.4%</td>
-                                <td class="negative" style="font-weight: 600;">-14.1</td>
+                                <td class="negative" style="font-weight: 600;">-1.6%</td>
+                                <td class="negative" style="font-weight: 600;">-15.7</td>
                                 <td style="font-weight: 600;">-</td>
                                 <td style="border-left:2px solid #000;">-</td>
                                 <td>-</td>
@@ -899,12 +925,12 @@
                                 <td>반도체</td>
                                 <td>1,610조6,497억</td>
                                 <td>30%</td>
-                                <td class="positive">+0.3%</td>
-                                <td class="positive">+0.8</td>
-                                <td class="negative">-2.2%</td>
-                                <td style="border-left:2px solid #000;">276,250</td>
+                                <td class="positive">+1.0%</td>
+                                <td class="positive">+3.0</td>
+                                <td class="negative">-0.5%</td>
+                                <td style="border-left:2px solid #000;">278,250</td>
                                 <td>296,000</td>
-                                <td class="">-6.7%</td>
+                                <td class="">-6.0%</td>
                             </tr>
                 
                             <tr>
@@ -916,10 +942,10 @@
                                 <td>10%</td>
                                 <td class="negative">-1.4%</td>
                                 <td class="negative">-1.4</td>
-                                <td class="negative">-8.3%</td>
-                                <td style="border-left:2px solid #000;">1,720,000</td>
+                                <td class="negative">-9.5%</td>
+                                <td style="border-left:2px solid #000;">1,721,000</td>
                                 <td>1,976,000</td>
-                                <td class="">-13.0%</td>
+                                <td class="">-12.9%</td>
                             </tr>
                 
                             <tr>
@@ -929,12 +955,12 @@
                                 <td>보험</td>
                                 <td>62조4,000억</td>
                                 <td>7%</td>
-                                <td class="negative">-2.4%</td>
-                                <td class="negative">-1.7</td>
-                                <td class="negative">-4.0%</td>
-                                <td style="border-left:2px solid #000;">304,500</td>
+                                <td class="negative">-2.7%</td>
+                                <td class="negative">-1.9</td>
+                                <td class="negative">-7.0%</td>
+                                <td style="border-left:2px solid #000;">303,500</td>
                                 <td>330,000</td>
-                                <td class="">-7.7%</td>
+                                <td class="">-8.0%</td>
                             </tr>
                 
                             <tr>
@@ -944,12 +970,12 @@
                                 <td>상사,자본재</td>
                                 <td>61조7,047억</td>
                                 <td>7%</td>
-                                <td class="negative">-1.8%</td>
-                                <td class="negative">-1.3</td>
-                                <td class="negative">-9.2%</td>
-                                <td style="border-left:2px solid #000;">373,500</td>
+                                <td class="negative">-3.2%</td>
+                                <td class="negative">-2.2</td>
+                                <td class="negative">-13.2%</td>
+                                <td style="border-left:2px solid #000;">368,500</td>
                                 <td>452,000</td>
-                                <td class="">-17.4%</td>
+                                <td class="">-18.5%</td>
                             </tr>
                 
                             <tr>
@@ -959,12 +985,12 @@
                                 <td>비철,목재등</td>
                                 <td>1조3,879억</td>
                                 <td>5%</td>
-                                <td class="negative">-13.3%</td>
-                                <td class="negative">-6.6</td>
-                                <td class="negative">-5.6%</td>
-                                <td style="border-left:2px solid #000;">100,100</td>
+                                <td class="negative">-14.4%</td>
+                                <td class="negative">-7.2</td>
+                                <td class="negative">-20.3%</td>
+                                <td style="border-left:2px solid #000;">98,800</td>
                                 <td>125,300</td>
-                                <td class="negative">-20.1%</td>
+                                <td class="negative">-21.1%</td>
                             </tr>
                 
                             <tr>
@@ -974,12 +1000,12 @@
                                 <td>필수소비재</td>
                                 <td>10조4,784억</td>
                                 <td>5%</td>
-                                <td class="positive">+2.0%</td>
-                                <td class="positive">+1.0</td>
-                                <td class="positive">+0.4%</td>
-                                <td style="border-left:2px solid #000;">1,419,000</td>
+                                <td class="positive">+1.2%</td>
+                                <td class="positive">+0.6</td>
+                                <td class="positive">+0.9%</td>
+                                <td style="border-left:2px solid #000;">1,408,000</td>
                                 <td>1,630,000</td>
-                                <td class="">-12.9%</td>
+                                <td class="">-13.6%</td>
                             </tr>
                 
                             <tr>
@@ -989,12 +1015,12 @@
                                 <td>화장품,의류,완구</td>
                                 <td>5,712억</td>
                                 <td>4%</td>
-                                <td class="negative">-3.9%</td>
-                                <td class="negative">-1.6</td>
-                                <td class="negative">-5.9%</td>
-                                <td style="border-left:2px solid #000;">25,550</td>
+                                <td class="negative">-5.3%</td>
+                                <td class="negative">-2.1</td>
+                                <td class="negative">-12.1%</td>
+                                <td style="border-left:2px solid #000;">25,200</td>
                                 <td>51,000</td>
-                                <td class="negative">-49.9%</td>
+                                <td class="negative">-50.6%</td>
                             </tr>
                 
                             <tr>
@@ -1004,12 +1030,12 @@
                                 <td>조선</td>
                                 <td>20조9,331억</td>
                                 <td>3%</td>
-                                <td class="negative">-2.3%</td>
-                                <td class="negative">-0.7</td>
-                                <td class="negative">-5.0%</td>
-                                <td style="border-left:2px solid #000;">259,000</td>
+                                <td class="negative">-3.6%</td>
+                                <td class="negative">-1.1</td>
+                                <td class="negative">-9.6%</td>
+                                <td style="border-left:2px solid #000;">255,500</td>
                                 <td>310,500</td>
-                                <td class="">-16.6%</td>
+                                <td class="">-17.7%</td>
                             </tr>
                 
                             <tr>
@@ -1019,19 +1045,19 @@
                                 <td>기타</td>
                                 <td>5조5,325억</td>
                                 <td>3%</td>
-                                <td class="negative">-2.3%</td>
-                                <td class="negative">-0.7</td>
-                                <td class="negative">-10.6%</td>
-                                <td style="border-left:2px solid #000;">64,800</td>
+                                <td class="positive">+1.2%</td>
+                                <td class="positive">+0.4</td>
+                                <td class="negative">-6.3%</td>
+                                <td style="border-left:2px solid #000;">67,100</td>
                                 <td>89,500</td>
-                                <td class="negative">-27.6%</td>
+                                <td class="negative">-25.0%</td>
                             </tr>
                 
                             <tr class="total-row">
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
                                 <td style="font-weight: 600;">74%</td>
                                 <td class="negative" style="font-weight: 600;">-1.2%</td>
-                                <td class="negative" style="font-weight: 600;">-12.1</td>
+                                <td class="negative" style="font-weight: 600;">-11.9</td>
                                 <td style="font-weight: 600;">-</td>
                                 <td style="border-left:2px solid #000;">-</td>
                                 <td>-</td>
