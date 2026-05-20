@@ -2077,7 +2077,7 @@ def create_aum_table():
         <div class="category-section">
             <h2 class="category-title">AUM</h2>
             <div style="display:flex;gap:100px;align-items:flex-start;max-width:1800px;margin:0 auto;">
-                <div style="width:440px;">
+                <div style="width:370px;">
                     <table class="portfolio-table aum-aligned" style="white-space:nowrap;width:370px;table-layout:fixed;">
                         <colgroup>
                             <col style="width:60px"><col style="width:160px"><col style="width:80px"><col style="width:70px">
@@ -2282,7 +2282,7 @@ def create_cumulative_aum_chart():
             return (
                 '<div class="iter-tooltip">'
                 '<table class="iter-table">'
-                '<thead><tr><th>회차</th><th>마지막 AUM</th><th>시작일</th><th>종료일</th></tr></thead>'
+                '<thead><tr><th>회차</th><th>AUM</th><th>시작일</th><th>종료일</th></tr></thead>'
                 f'<tbody>{tt_rows}</tbody>'
                 '</table></div>'
             )
@@ -2301,7 +2301,7 @@ def create_cumulative_aum_chart():
                 date_str = r['날짜'].strftime('%m/%d')
                 cum_rows_html += (
                     f'<tr><td>{broker}</td><td>{r["상품명"]}</td>'
-                    f'<td>{aum_val/1e8:,.0f}억</td><td>{date_str}</td><td></td></tr>\n'
+                    f'<td>{aum_val/1e8:,.0f}억</td><td>{date_str}</td></tr>\n'
                 )
             # 2) 그 broker의 목표전환형 통합 행 (활성 또는 가장 최근 청산)
             summary = _target_summary(broker)
@@ -2312,9 +2312,9 @@ def create_cumulative_aum_chart():
                     f'<tr class="iter-row"><td>{broker}</td>'
                     f'<td style="position:relative;">목표전환형{_tooltip_html(summary["iters"])}</td>'
                     f'<td>{summary["aum"]/1e8:,.0f}억</td>'
-                    f'<td>{date_str}</td><td>{summary["end"]}</td></tr>\n'
+                    f'<td>{date_str}</td></tr>\n'
                 )
-        cum_rows_html += f'<tr style="border-top:2px solid #000;font-weight:700;"><td colspan="2">합계</td><td>{cum_total/1e8:,.0f}억</td><td></td><td></td></tr>'
+        cum_rows_html += f'<tr style="border-top:2px solid #000;font-weight:700;"><td colspan="2">합계</td><td>{cum_total/1e8:,.0f}억</td><td></td></tr>'
 
         chart_json = json.dumps({'dates': all_dates, 'datasets': datasets}, ensure_ascii=False)
 
@@ -2377,17 +2377,16 @@ def create_cumulative_aum_chart():
         <div style="margin-top:40px;max-width:1800px;margin:40px auto 0 auto;">
             <h3 style="font-size:18px;font-weight:700;margin-bottom:12px;">누적 AUM</h3>
             <div style="display:flex;gap:100px;align-items:flex-start;">
-                <div style="width:440px;">
-                    <table class="portfolio-table aum-aligned" style="white-space:nowrap;width:440px;table-layout:fixed;">
+                <div style="width:370px;">
+                    <table class="portfolio-table aum-aligned" style="white-space:nowrap;width:370px;table-layout:fixed;">
                         <colgroup>
-                            <col style="width:60px"><col style="width:160px"><col style="width:80px"><col style="width:70px"><col style="width:70px">
+                            <col style="width:60px"><col style="width:160px"><col style="width:80px"><col style="width:70px">
                         </colgroup>
                         <thead><tr>
                             <th>증권사</th>
                             <th>상품명</th>
                             <th>AUM</th>
                             <th>기준일</th>
-                            <th>종료일</th>
                         </tr></thead>
                         <tbody>{cum_rows_html}</tbody>
                     </table>
