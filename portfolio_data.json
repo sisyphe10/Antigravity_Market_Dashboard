@@ -202,13 +202,13 @@
       "sector": "소프트웨어",
       "market_cap": 172496.84678,
       "weight": 2,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": 12.724014336917563,
+      "contribution": 2.544802867383513,
+      "cumulative_return": 0.0,
       "current_price": 629000.0,
       "ath_price": 699000.0,
       "dd": -10.014306151645203,
-      "is_today_new": true
+      "is_today_new": false
     },
     {
       "code": "491000",
@@ -216,13 +216,13 @@
       "sector": "기타",
       "market_cap": 16952.977098,
       "weight": 2,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": 7.6190476190476195,
+      "contribution": 1.5238095238095242,
+      "cumulative_return": 0.0,
       "current_price": 67800.0,
       "ath_price": 91300.0,
       "dd": -25.739320920043806,
-      "is_today_new": true
+      "is_today_new": false
     }
   ],
   "NH 목표전환형 3호 / DB 목표전환형 4차": [
@@ -316,13 +316,13 @@
       "sector": "소프트웨어",
       "market_cap": 172496.84678,
       "weight": 5,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": 12.724014336917563,
+      "contribution": 6.362007168458782,
+      "cumulative_return": 0.0,
       "current_price": 629000.0,
       "ath_price": 699000.0,
       "dd": -10.014306151645203,
-      "is_today_new": true
+      "is_today_new": false
     },
     {
       "code": "020000",
