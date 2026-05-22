@@ -330,13 +330,13 @@
       "sector": "기계",
       "market_cap": 714866.238936,
       "weight": 5,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": 2.952029520295203,
+      "contribution": 1.4760147601476015,
+      "cumulative_return": 0.0,
       "current_price": 111600.0,
       "ath_price": 136400.0,
       "dd": -18.181818181818176,
-      "is_today_new": true
+      "is_today_new": false
     },
     {
       "code": "020000",
