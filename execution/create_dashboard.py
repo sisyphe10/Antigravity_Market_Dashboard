@@ -2269,7 +2269,10 @@ def create_cumulative_aum_chart():
                     'end': end_dates.get(it_name, ''),
                 })
             iters.sort(key=lambda x: x['start'] if x['start'] is not None else pd.Timestamp('1970-01-01'))
-            return {'aum': main_aum, 'date': main_date, 'end': main_end, 'iters': iters}
+            # 청산 회차 포함 broker 내 모든 회차 마지막 AUM 합 (차트 누적 합산과 동일 기준)
+            cumulative_aum = sum(it['last_aum'] for it in iters)
+            return {'aum': main_aum, 'date': main_date, 'end': main_end,
+                    'iters': iters, 'cumulative_aum': cumulative_aum}
 
         def _tooltip_html(iters):
             tt_rows = ''
@@ -2306,12 +2309,12 @@ def create_cumulative_aum_chart():
             # 2) 그 broker의 목표전환형 통합 행 (활성 또는 가장 최근 청산)
             summary = _target_summary(broker)
             if summary is not None:
-                cum_total += summary['aum']
+                cum_total += summary['cumulative_aum']
                 date_str = summary['date'].strftime('%m/%d')
                 cum_rows_html += (
                     f'<tr class="iter-row"><td>{broker}</td>'
                     f'<td style="position:relative;">목표전환형{_tooltip_html(summary["iters"])}</td>'
-                    f'<td>{summary["aum"]/1e8:,.0f}억</td>'
+                    f'<td>{summary["cumulative_aum"]/1e8:,.0f}억</td>'
                     f'<td>{date_str}</td></tr>\n'
                 )
         cum_rows_html += f'<tr style="border-top:2px solid #000;font-weight:700;"><td colspan="2">합계</td><td>{cum_total/1e8:,.0f}억</td><td></td></tr>'
