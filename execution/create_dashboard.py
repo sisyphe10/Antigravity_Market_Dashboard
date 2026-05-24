@@ -17,6 +17,128 @@ from config import CATEGORY_MAP, CSV_FILE
 # Version 3.0 - Added category grouping
 CHARTS_DIR = 'charts'
 OUTPUT_FILE = 'market.html'
+
+# ── Top navigation (shared across all pages) ──────────────────────────────
+# Main tabs: WRAP / Market (dropdown) / Architecture
+# Market dropdown children: Market / 투자유의종목 / Universe / SEIBro / Featured / ETF
+# Each entry: (key, href, label, children) — children is list of (sub_key, sub_href, sub_label) or None
+TOP_NAV_MAIN = [
+    ('wrap',         'wrap.html',          'WRAP',         None),
+    ('market',       'market.html',        'Market',       [
+        ('market',        'market.html',        'Market'),
+        ('market_alert',  'market_alert.html',  '투자유의종목'),
+        ('universe',      'universe.html',      'Universe'),
+        ('seibro',        'seibro.html',        'SEIBro'),
+        ('featured',      'featured.html',      'Featured'),
+        ('etf',           'etf.html',           'ETF'),
+    ]),
+    ('architecture', 'architecture.html',  'Architecture', None),
+]
+
+# Standard Pretendard font stack (use everywhere)
+PRETENDARD_LINK = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">'
+PRETENDARD_STACK = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"
+
+TOP_NAV_CSS = """
+.topnav { background: #fff; border-bottom: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.04); position: sticky; top: 0; z-index: 100; }
+.topnav-inner { max-width: 1400px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; height: 60px; gap: 28px; }
+.topnav-brand { font-size: 1.05rem; font-weight: 800; color: #111; white-space: nowrap; text-decoration: none; font-family: PRETENDARD_STACK_PLACEHOLDER; }
+.topnav-brand:hover { color: #2d7a3a; }
+.topnav-tabs { display: flex; gap: 10px; flex: 1; align-items: center; }
+.topnav-item { position: relative; }
+.topnav-tab { padding: 8px 20px; display: inline-flex; align-items: center; gap: 6px; color: #444; text-decoration: none; font-size: 0.94rem; font-weight: 600; border: 1.5px solid #d1d5db; border-radius: 999px; white-space: nowrap; background: #fff; transition: all 0.15s; font-family: PRETENDARD_STACK_PLACEHOLDER; cursor: pointer; }
+.topnav-tab:hover { color: #111; border-color: #2d7a3a; background: #f0f7f2; }
+.topnav-tab.active { color: #fff; border-color: #2d7a3a; background: #2d7a3a; }
+.topnav-tab .caret { font-size: 0.7rem; opacity: 0.7; }
+.topnav-dropdown { position: absolute; top: calc(100% + 8px); left: 0; min-width: 180px; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.10); padding: 6px; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity 0.15s, transform 0.15s, visibility 0.15s; z-index: 200; }
+.topnav-item:hover .topnav-dropdown,
+.topnav-item:focus-within .topnav-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
+.topnav-sub { display: block; padding: 9px 14px; color: #333; text-decoration: none; font-size: 0.9rem; font-weight: 500; border-radius: 8px; white-space: nowrap; font-family: PRETENDARD_STACK_PLACEHOLDER; }
+.topnav-sub:hover { background: #f3f4f6; color: #111; }
+.topnav-sub.active { background: #f0f7f2; color: #2d7a3a; font-weight: 700; }
+@media (max-width: 800px) {
+    .topnav-inner { padding: 0 12px; gap: 12px; height: 52px; }
+    .topnav-brand { font-size: 0.95rem; }
+    .topnav-tab { padding: 6px 14px; font-size: 0.85rem; }
+    .topnav-tabs { gap: 6px; }
+}
+
+/* Left sidebar — used only on Market-group pages */
+.sidebar { position: fixed; top: 60px; left: 0; bottom: 0; width: 150px; padding: 18px 10px; background: #fff; border-right: 1px solid #e5e7eb; overflow-y: auto; z-index: 50; box-sizing: border-box; }
+.sidebar-link { display: block; padding: 8px 10px; margin-bottom: 5px; color: #444; text-decoration: none; font-size: 0.88rem; font-weight: 600; border-radius: 999px; border: 1.5px solid transparent; transition: all 0.12s; font-family: PRETENDARD_STACK_PLACEHOLDER; text-align: center; }
+.sidebar-link:hover { background: #f0f7f2; color: #2d7a3a; border-color: #2d7a3a; }
+.sidebar-link.active { background: transparent; color: #2d7a3a; border-color: #2d7a3a; }
+/* Override per-page body styles so all sidebar pages align identically next to the sidebar */
+body.has-sidebar { padding-left: 174px !important; padding-right: 24px !important; padding-top: 24px !important; padding-bottom: 24px !important; max-width: none !important; margin: 0 !important; }
+@media (max-width: 900px) {
+    .sidebar { display: none; }
+    body.has-sidebar { padding-left: 24px !important; }
+}
+""".replace('PRETENDARD_STACK_PLACEHOLDER', PRETENDARD_STACK)
+
+
+def _resolve_main_key(active):
+    """Given an active page key, return the main tab key it belongs to."""
+    for main_key, _, _, children in TOP_NAV_MAIN:
+        if main_key == active:
+            return main_key
+        if children:
+            for ck, _, _ in children:
+                if ck == active:
+                    return main_key
+    return ''
+
+
+def is_market_group(active):
+    """True if the given page key belongs to the Market group (has sidebar)."""
+    return _resolve_main_key(active) == 'market'
+
+
+def body_class(active=''):
+    """Return body class attribute for pages that need a left sidebar."""
+    return ' class="has-sidebar"' if is_market_group(active) else ''
+
+
+def sidebar_html(active=''):
+    """Render the left sidebar for Market group pages. Returns '' for others."""
+    if not is_market_group(active):
+        return ''
+    children = None
+    for key, _, _, ch in TOP_NAV_MAIN:
+        if key == 'market':
+            children = ch
+            break
+    if not children:
+        return ''
+    links = ''.join(
+        f'<a href="{href}" class="sidebar-link{" active" if k == active else ""}">{label}</a>'
+        for k, href, label in children
+    )
+    return f'<aside class="sidebar">{links}</aside>'
+
+
+def top_nav_html(active=''):
+    """Render the shared top navigation. `active` matches a page key
+    (e.g. 'market', 'wrap', 'universe', 'architecture')."""
+    main_active = _resolve_main_key(active)
+    parts = []
+    for key, href, label, children in TOP_NAV_MAIN:
+        cls = 'topnav-tab active' if key == main_active else 'topnav-tab'
+        tab_html = f'<a href="{href}" class="{cls}">{label}</a>'
+        if children:
+            sub_links = ''.join(
+                f'<a href="{ch_href}" class="topnav-sub{" active" if ch_key == active else ""}">{ch_label}</a>'
+                for ch_key, ch_href, ch_label in children
+            )
+            tab_html += f'<div class="topnav-dropdown">{sub_links}</div>'
+        parts.append(f'<div class="topnav-item">{tab_html}</div>')
+    return (
+        '<nav class="topnav"><div class="topnav-inner">'
+        '<a href="index.html" class="topnav-brand">Age of Emergence</a>'
+        '<div class="topnav-tabs">' + ''.join(parts) + '</div>'
+        '</div></nav>'
+    )
+
 def create_portfolio_tables_html():
     """포트폴리오 테이블 HTML 생성"""
     portfolio_file = 'portfolio_data.json'
@@ -761,7 +883,7 @@ def _build_indices_chart_section(category_label='Indices'):
 
         js_code = """
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script>Chart.defaults.font.family = "'Inter', 'Noto Sans KR', sans-serif";</script>
+        <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif";</script>
         <script>function formatDateInput(el){var v=el.value.replace(/[^0-9]/g,'');if(v.length===8){el.value=v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8);}}</script>
         <script>
         (function() {
@@ -1570,7 +1692,7 @@ def _build_wrap_chart_section(category_label):
 
         js_code = """
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script>Chart.defaults.font.family = "'Inter', 'Noto Sans KR', sans-serif";</script>
+        <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif";</script>
         <script>function formatDateInput(el){var v=el.value.replace(/[^0-9]/g,'');if(v.length===8){el.value=v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8);}}</script>
         <script>
         (function() {
@@ -2837,7 +2959,7 @@ def create_order_section():
                 var outName = buildOutFilename(it.t, new Date());
                 var btnColor = BROKER_COLOR[it.broker] || '#dc2626';
                 dlRows += '<div style="display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-bottom:8px;">'
-                    + '<span style="font-size:13px;color:#666;font-family:Inter,sans-serif;">' + outName + ' →</span>'
+                    + '<span style="font-size:13px;color:#666;font-family:\\'Pretendard Variable\\', Pretendard, sans-serif;">' + outName + ' →</span>'
                     + '<button class="email-tab-dl-btn" data-pf="' + it.pf + '" data-tidx="' + it.ti + '" style="font-family:inherit;font-size:14px;font-weight:600;padding:6px 14px;background:' + btnColor + ';color:#fff;border:none;border-radius:8px;cursor:pointer;min-width:160px;text-align:center;">' + it.label + '</button>'
                     + '</div>';
             });
@@ -4237,7 +4359,7 @@ def create_dashboard():
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Market Data Dashboard</title>
-    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
     <style>
         :root {{
             --bg-color: #f8f9fa;
@@ -4248,7 +4370,7 @@ def create_dashboard():
         }}
 
         body {{
-            font-family: 'Inter', 'Noto Sans KR', sans-serif;
+            font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif;
             font-size: 1.05rem;
             background-color: var(--bg-color);
             color: var(--text-color);
@@ -4678,13 +4800,15 @@ def create_dashboard():
                 grid-template-columns: 1fr;
             }}
         }}
+        {TOP_NAV_CSS}
     </style>
 </head>
-<body>
-    <header style="position:relative;">
+<body class="has-sidebar">
+    {top_nav_html('market')}
+    {sidebar_html('market')}
+    <header>
         <h1>📊 Market Data Dashboard</h1>
         <div class="last-updated">Updated: {now}</div>
-        <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
 
     {monthly_returns_html}
@@ -4710,10 +4834,11 @@ def create_dashboard():
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Age of Emergence</title>
-    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-        body {{ font-family: 'Inter', 'Noto Sans KR', sans-serif; background: #f8f9fa; color: #333; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }}
+        body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; background: #f8f9fa; color: #333; min-height: 100vh; }}
+        .lh-main {{ max-width: 800px; margin: 0 auto; padding: 56px 20px 40px; display: flex; flex-direction: column; align-items: center; }}
         h1 {{ font-size: 2.2rem; font-weight: 800; margin-bottom: 22px; color: #111; }}
         .lh-card {{ background: #fff; border-radius: 14px; padding: 14px 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border: 1.5px solid #d1d5db; max-width: 800px; width: 100%; margin: 0 auto 26px auto; transition: transform 0.15s, box-shadow 0.15s; }}
         .lh-card:hover {{ transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.10); }}
@@ -4743,73 +4868,28 @@ def create_dashboard():
             .lh-spark {{ width: 162px; height: 62px; }}
             .lh-spark svg {{ width: 140px; height: 62px; }}
         }}
-        .cards {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; max-width: 800px; width: 100%; }}
-        .card {{ background: #fff; border-radius: 14px; padding: 28px 24px; text-decoration: none; color: #333; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-left: 5px solid #ccc; transition: transform 0.15s, box-shadow 0.15s; display: block; }}
-        .card:hover {{ transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }}
-        .card .icon {{ font-size: 1.8rem; margin-bottom: 12px; }}
-        .card .title {{ font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; }}
-        .card .desc {{ font-size: 0.8rem; color: #888; line-height: 1.4; }}
         footer {{ margin-top: 48px; color: #999; font-size: 14px; }}
+        {TOP_NAV_CSS}
     </style>
 </head>
 <body>
-    <h1>Age of Emergence</h1>
-    <div id="landing-card" class="lh-card" hidden>
-        <div class="lh-chart-row">
-            <span class="lh-tag">—</span>
-            <span class="lh-spark"></span>
-            <span class="lh-text">—</span>
-            <button class="lh-shuffle" type="button" title="다시 뽑기" aria-label="다시 뽑기">🎲</button>
+    {top_nav_html('')}
+    <main class="lh-main">
+        <h1>Age of Emergence</h1>
+        <div id="landing-card" class="lh-card" hidden>
+            <div class="lh-chart-row">
+                <span class="lh-tag">—</span>
+                <span class="lh-spark"></span>
+                <span class="lh-text">—</span>
+                <button class="lh-shuffle" type="button" title="다시 뽑기" aria-label="다시 뽑기">🎲</button>
+            </div>
+            <hr class="lh-divider">
+            <div class="lh-quote-row">
+                <span class="lh-quote-text">—</span>
+            </div>
         </div>
-        <hr class="lh-divider">
-        <div class="lh-quote-row">
-            <span class="lh-quote-text">—</span>
-        </div>
-    </div>
-    <div class="cards">
-        <a href="market.html" class="card" style="border-left-color:#2d7a3a">
-            <div class="icon">📊</div>
-            <div class="title">Market</div>
-            <div class="desc">Memory, Commodity, Crypto, FX, Index, Interest Rates</div>
-        </a>
-        <a href="wrap.html" class="card" style="border-left-color:#1e40af">
-            <div class="icon">📈</div>
-            <div class="title">WRAP</div>
-            <div class="desc">Chart, Return, AUM, Portfolio</div>
-        </a>
-        <a href="market_alert.html" class="card" style="border-left-color:#c2410c">
-            <div class="icon">🚦</div>
-            <div class="title">투자유의종목</div>
-            <div class="desc">투자주의 · 투자경고 · 투자위험 현황</div>
-        </a>
-        <a href="universe.html" class="card" style="border-left-color:#6B21A8">
-            <div class="icon">🌐</div>
-            <div class="title">Universe</div>
-            <div class="desc">투자 유니버스 종목 리스트</div>
-        </a>
-        <a href="seibro.html" class="card" style="border-left-color:#0369a1">
-            <div class="icon">🏦</div>
-            <div class="title">SEIBro</div>
-            <div class="desc">US 매수결제 TOP 50</div>
-        </a>
-        <a href="featured.html" class="card" style="border-left-color:#d97706">
-            <div class="icon">⭐</div>
-            <div class="title">Featured</div>
-            <div class="desc">거래대금 TOP 30, 회전율 TOP 30</div>
-        </a>
-        <a href="etf.html" class="card" style="border-left-color:#6366f1">
-            <div class="icon">🏛️</div>
-            <div class="title">ETF</div>
-            <div class="desc">AUM · 구성종목 · 비중 검색</div>
-        </a>
-        <a href="architecture.html" class="card" style="border-left-color:#666;position:relative;">
-            <div class="icon">🗂️</div>
-            <div class="title">Architecture</div>
-            <div class="desc">워크플로우 아키텍처</div>
-            <div style="position:absolute;bottom:10px;right:14px;font-size:0.85rem;opacity:0.5;">🔒</div>
-        </a>
-    </div>
-    <footer>Age of Emergence</footer>
+        <footer>Age of Emergence</footer>
+    </main>
     <script>
     (function() {{
         var card = document.getElementById('landing-card');
@@ -4959,10 +5039,10 @@ def create_dashboard():
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WRAP</title>
-    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
     <style>
         :root {{ --bg-color: #f8f9fa; --card-bg: #ffffff; --text-color: #333333; }}
-        body {{ font-family: 'Inter', 'Noto Sans KR', sans-serif; font-size: 1.05rem; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; }}
+        body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; font-size: 1.05rem; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; }}
         header {{ text-align: center; margin-bottom: 40px; padding: 20px; background-color: #000000; border-radius: 12px; }}
         h1 {{ margin: 0; font-size: 33px; color: #ffffff; }}
         .last-updated {{ margin-top: 10px; color: #6c757d; font-size: 15px; font-style: italic; }}
@@ -5088,6 +5168,7 @@ def create_dashboard():
         .pw-box button:hover {{ background: #1e3a8a; }}
         .pw-error {{ color: #dc2626; font-size: 0.9rem; margin-top: 10px; display: none; }}
         .pw-hidden {{ display: none !important; }}
+        {TOP_NAV_CSS}
     </style>
 </head>
 <body>
@@ -5102,10 +5183,10 @@ def create_dashboard():
     </div>
 
     <div id="mainContent" class="pw-hidden">
-    <header style="position:relative;">
+    {top_nav_html('wrap')}
+    <header>
         <h1>📈 WRAP</h1>
         <div class="last-updated">Updated: {now}</div>
-        <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
     </header>
 
     <div style="display:flex;gap:0;margin:0 auto 0;border-bottom:3px solid #333;max-width:1800px;">
@@ -5202,10 +5283,10 @@ def create_dashboard():
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Universe</title>
-    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', 'Noto Sans KR', sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }
+        body { font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }
         header { background: #fff; padding: 24px; text-align: center; border-bottom: 1px solid #eee; }
         header h1 { font-size: 33px; color: #6B21A8; }
         .nav-group { margin-top: 10px; }
@@ -5246,16 +5327,18 @@ def create_dashboard():
         .positive { color: #cc0000; font-weight: 600; }
         .negative { color: #0055cc; font-weight: 600; }
         footer { text-align: center; padding: 24px; color: #999; font-size: 14px; }
+        TOP_NAV_CSS_PLACEHOLDER
     </style>
 </head>
-<body>
+<body class="has-sidebar">
+TOPNAV_PLACEHOLDER
+SIDEBAR_PLACEHOLDER
 <header>
     <div style="max-width:1800px;margin:0 auto;padding:0 24px;position:relative;">
         <h1>Universe</h1>
         <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: __UNIVERSE_UPDATED__</div>
         <div style="position:absolute;top:20px;right:24px;display:flex;gap:8px;">
             <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="background:#6B21A8;color:#fff;font-size:15px;font-weight:600;text-decoration:none;padding:6px 16px;border-radius:8px;">Sheet</a>
-            <a href="index.html" style="padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
         </div>
     </div>
 </header>
@@ -5596,8 +5679,13 @@ function renderSector() {
 </body>
 </html>"""
 
+    universe_page = (universe_page
+                     .replace('TOP_NAV_CSS_PLACEHOLDER', TOP_NAV_CSS)
+                     .replace('TOPNAV_PLACEHOLDER', top_nav_html('universe'))
+                     .replace('SIDEBAR_PLACEHOLDER', sidebar_html('universe'))
+                     .replace('__UNIVERSE_UPDATED__', now))
     with open('universe.html', 'w', encoding='utf-8') as f:
-        f.write(universe_page.replace('__UNIVERSE_UPDATED__', now))
+        f.write(universe_page)
     print("Universe page generated: universe.html")
 
     # SEIBro page - TOP 50 종목별 데이터
@@ -5637,12 +5725,12 @@ function renderSector() {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SEIBro - US Settlement TOP 50</title>
-    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>Chart.defaults.font.family = "'Inter', 'Noto Sans KR', sans-serif";</script>
+    <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif";</script>
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-        body {{ font-family: 'Inter', 'Noto Sans KR', sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }}
+        body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }}
         header {{ background: #fff; padding: 24px; text-align: center; border-bottom: 1px solid #eee; }}
         header h1 {{ font-size: 33px; color: #0369a1; }}
         .nav-group {{ margin-top: 10px; }}
@@ -5670,13 +5758,15 @@ function renderSector() {
         .positive {{ color: #cc0000; font-weight: 600; }}
         .negative {{ color: #0055cc; font-weight: 600; }}
         footer {{ text-align: center; padding: 24px; color: #999; font-size: 14px; }}
+        {TOP_NAV_CSS}
     </style>
 </head>
-<body>
-<header style="position:relative;">
+<body class="has-sidebar">
+{top_nav_html('seibro')}
+{sidebar_html('seibro')}
+<header>
     <h1>SEIBro US Settlement TOP 50</h1>
     <div class="subtitle">Overseas Securities Buy Settlement - US Market</div>
-    <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
 </header>
 <div class="content">
     <div class="section">
@@ -5848,10 +5938,10 @@ refresh();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Featured</title>
-    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-        body {{ font-family: 'Inter', 'Noto Sans KR', sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }}
+        body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }}
         header {{ background: #fff; padding: 24px; text-align: center; border-bottom: 1px solid #eee; position: relative; }}
         header h1 {{ font-size: 33px; color: #333; }}
         .subtitle {{ color: #888; font-size: 0.85rem; margin-top: 4px; }}
@@ -5882,13 +5972,15 @@ refresh();
         .notable-news {{ font-size: 13px; color: #333; line-height: 1.8; }}
         .notable-news b {{ font-weight: 700; }}
         footer {{ text-align: center; padding: 24px; color: #999; font-size: 14px; }}
+        {TOP_NAV_CSS}
     </style>
 </head>
-<body>
-<header style="position:relative;">
+<body class="has-sidebar">
+{top_nav_html('featured')}
+{sidebar_html('featured')}
+<header>
     <h1>Featured</h1>
     <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: __FEATURED_UPDATED__</div>
-    <a href="index.html" style="position:absolute;top:20px;right:24px;padding:6px 16px;background:#e0e0e0;color:#333;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;">Home</a>
 </header>
 <div class="content">
     <div class="date-bar">
@@ -6335,10 +6427,10 @@ def generate_hotels_html():
 <head>
 <meta charset="utf-8">
 <title>Hotel ADR - Antigravity Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <style>
   * {{ box-sizing: border-box; }}
-  body {{ font-family: 'Inter', 'Noto Sans KR', sans-serif; background: #f5f5f5; margin: 0; padding: 30px; color: #222; }}
+  body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; background: #f5f5f5; margin: 0; padding: 30px; color: #222; }}
   .home-btn {{ position: fixed; top: 20px; right: 20px; background: #e0e0e0; color: #222; padding: 8px 18px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 600; }}
   h1 {{ font-size: 1.8rem; margin-bottom: 8px; }}
   .meta {{ color: #888; font-size: 13px; margin-bottom: 24px; }}
@@ -6353,10 +6445,11 @@ def generate_hotels_html():
   td.price-empty {{ text-align: right; color: #ccc; }}
   tr:hover {{ background: #fafafa; }}
   .note {{ font-size: 13px; color: #666; margin-top: 16px; padding: 12px; background: #fff8e1; border-radius: 8px; border-left: 3px solid #ffc107; }}
+  {TOP_NAV_CSS}
 </style>
 </head>
 <body>
-<a href="index.html" class="home-btn">Home</a>
+{top_nav_html('')}
 <div class="container">
   <h1>Hotel ADR — Booking.com</h1>
   <p class="meta">Updated: {update_time} KST · 누적 {unique_days}일 · 매일 12:00 KST 자동 수집</p>
@@ -6429,10 +6522,10 @@ def generate_etf_html():
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ETF Dashboard</title>
-<link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <style>
 * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-body {{ font-family: 'Inter', 'Noto Sans KR', sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }}
+body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }}
 header {{ background: #fff; padding: 24px; text-align: center; border-bottom: 1px solid #eee; position: relative; }}
 header h1 {{ font-size: 33px; color: #333; }}
 .home-btn {{ position: absolute; top: 20px; right: 24px; padding: 6px 16px; background: #e0e0e0; color: #333; text-decoration: none; border-radius: 8px; font-size: 15px; font-weight: 600; }}
@@ -6468,13 +6561,15 @@ tbody tr.etf-row:hover {{ background: #ede9fe; }}
 .search-results.active {{ display: block; }}
 .badge {{ display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }}
 .updated {{ text-align: center; font-size: 0.75rem; color: #aaa; margin-top: 10px; }}
+{TOP_NAV_CSS}
 </style>
 </head>
-<body>
+<body class="has-sidebar">
+{top_nav_html('etf')}
+{sidebar_html('etf')}
 <header>
     <h1>🏛️ ETF Dashboard</h1>
     <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: {datetime.now(tz=KST).strftime("%Y-%m-%d %H:%M:%S KST")}</div>
-    <a href="index.html" class="home-btn">Home</a>
 </header>
 
 <div class="container">

@@ -9,7 +9,7 @@ patterns:
 # 대시보드 규칙
 
 ## 페이지 구조
-- index.html = 랜딩 페이지 (카드 네비게이션)
+- index.html = 랜딩 페이지 (sparkline + 인용구 카드, 상단 탭바로 네비게이션)
 - market.html = 마켓 대시보드 (Monthly Returns 표 + Indices/MARKET 동적 차트)
 - wrap.html = WRAP (Dashboard / Order / AUM 3탭, Order는 추가로 Email 서브탭)
 - market_alert.html = 투자유의종목
@@ -39,7 +39,9 @@ create_market_alert.py 변경 → market_alert.html 재생성
 - 추천사유는 종목코드 + 주문구분이 같을 때만 탭 간 동기화
 
 ## UI 일관성
-- 글씨체: 영문 Inter + 한글 Noto Sans KR (`font-family: 'Inter', 'Noto Sans KR', sans-serif;`). Google Fonts 링크 필수. Chart.js 사용 시 `Chart.defaults.font.family` 동일하게 설정
-- Home 버튼: 모든 페이지에서 오른쪽 상단, 라이트 그레이(#e0e0e0), `Home` (이모지 없음, font-size 15px, font-weight 600, border-radius 8px)
+- 글씨체: **Pretendard** (2026-05-24 통일). `font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif;`. 로드: `<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">`. Chart.js 사용 시 `Chart.defaults.font.family` 동일하게 설정
+- 상단 탭바: 모든 페이지 공통. **WRAP / Market / Architecture 3개 메인 탭** (pill 모양, 라운드 직사각형 테두리). Market은 호버 시 6개 페이지(Market, 투자유의종목, Universe, SEIBro, Featured, ETF) 드롭다운. 좌측 "Age of Emergence" 브랜드 클릭 시 index.html로 이동
+- 우측 별도 Home 버튼은 사용 안 함 (탭바가 네비게이션 담당)
 - create_dashboard.py 수정 시 모든 생성 파일 재생성 후 확인
 - UI 변경 시 전체 페이지에서 일관성 확인
+- **architecture.html 동기화 주의**: 자동 생성되지 않고 수동 관리됨. `TOP_NAV_CSS`, `top_nav_html()` 결과(상단 탭바 HTML)를 정적으로 박아넣은 상태이므로, `create_dashboard.py`의 헬퍼 함수(TOP_NAV_MAIN 멤버/순서/라벨, TOP_NAV_CSS, 폰트 등)를 수정할 때마다 architecture.html도 수동으로 동기화해야 함 (안 하면 다른 페이지와 탭바 디자인 어긋남)

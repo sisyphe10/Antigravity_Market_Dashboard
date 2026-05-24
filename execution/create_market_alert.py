@@ -3,10 +3,15 @@ from bs4 import BeautifulSoup
 from datetime import datetime, timedelta, timezone
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import sys
+import os
 import re
 import pandas as pd
 import FinanceDataReader as fdr
 import exchange_calendars as xcals
+
+# Shared top navigation (defined in create_dashboard.py)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from create_dashboard import top_nav_html, sidebar_html, TOP_NAV_CSS
 
 # KRX 거래 캘린더 (한국 공휴일 포함)
 _xkrx = xcals.get_calendar('XKRX')
@@ -669,11 +674,11 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stoc
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>투자유의종목 현황</title>
-    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
         body {{
-            font-family: 'Inter', 'Noto Sans KR', sans-serif;
+            font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif;
             font-size: 1.05rem;
             background: #f8f9fa; color: #1f2937; padding: 24px;
             max-width: 1800px; margin: 0 auto;
@@ -760,14 +765,16 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stoc
             text-align: center; padding: 16px; color: #999; font-size: 14px;
         }}
         footer a {{ color: #999; }}
+        {TOP_NAV_CSS}
     </style>
 </head>
-<body>
+<body class="has-sidebar">
+    {top_nav_html('market_alert')}
+    {sidebar_html('market_alert')}
     <header>
         <h1>🚦 투자유의종목 현황</h1>
         <div class="header-right">
             <span class="last-updated">Updated: {now}</span>
-            <a href="index.html" class="back-btn">Home</a>
         </div>
     </header>
 
