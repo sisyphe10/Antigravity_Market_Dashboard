@@ -26,11 +26,11 @@ TOP_NAV_MAIN = [
     ('wrap',         'wrap.html',          'WRAP',         None),
     ('market',       'market.html',        'Market',       [
         ('market',        'market.html',        'Market'),
-        ('market_alert',  'market_alert.html',  '투자유의종목'),
         ('universe',      'universe.html',      'Universe'),
-        ('seibro',        'seibro.html',        'SEIBro'),
         ('featured',      'featured.html',      'Featured'),
+        ('market_alert',  'market_alert.html',  '투자유의종목'),
         ('etf',           'etf.html',           'ETF'),
+        ('seibro',        'seibro.html',        'SEIBro'),
     ]),
     ('architecture', 'architecture.html',  'Architecture', None),
 ]
