@@ -69,10 +69,10 @@ TOP_NAV_CSS = """
 .sidebar-link:hover { background: #f0f7f2; color: #2d7a3a; border-color: #2d7a3a; }
 .sidebar-link.active { background: transparent; color: #2d7a3a; border-color: #2d7a3a; }
 /* Override per-page body styles so all sidebar pages align identically next to the sidebar */
-body.has-sidebar { padding-left: 174px !important; padding-right: 24px !important; padding-top: 24px !important; padding-bottom: 24px !important; max-width: none !important; margin: 0 !important; }
+.has-sidebar { padding-left: 174px !important; padding-right: 24px !important; padding-top: 24px !important; padding-bottom: 24px !important; max-width: none !important; margin: 0 !important; }
 @media (max-width: 900px) {
     .sidebar { display: none; }
-    body.has-sidebar { padding-left: 24px !important; }
+    .has-sidebar { padding-left: 24px !important; }
 }
 """.replace('PRETENDARD_STACK_PLACEHOLDER', PRETENDARD_STACK)
 
@@ -113,6 +113,22 @@ def sidebar_html(active=''):
     links = ''.join(
         f'<a href="{href}" class="sidebar-link{" active" if k == active else ""}">{label}</a>'
         for k, href, label in children
+    )
+    return f'<aside class="sidebar">{links}</aside>'
+
+
+def wrap_sidebar_html():
+    """Render the WRAP-specific sidebar (Dashboard / Order / AUM, JS tab switcher)."""
+    items = [
+        ('dashboard', 'Dashboard'),
+        ('order',     'Order'),
+        ('aum',       'AUM'),
+    ]
+    links = ''.join(
+        f'<a href="#" onclick="wrapSwitchTab(\'{tab}\');return false;" '
+        f'data-wrap-tab="{tab}" '
+        f'class="sidebar-link{" active" if tab == "dashboard" else ""}">{label}</a>'
+        for tab, label in items
     )
     return f'<aside class="sidebar">{links}</aside>'
 
@@ -5182,18 +5198,13 @@ def create_dashboard():
         </div>
     </div>
 
-    <div id="mainContent" class="pw-hidden">
+    <div id="mainContent" class="pw-hidden has-sidebar">
     {top_nav_html('wrap')}
+    {wrap_sidebar_html()}
     <header>
         <h1>📈 WRAP</h1>
         <div class="last-updated">Updated: {now}</div>
     </header>
-
-    <div style="display:flex;gap:0;margin:0 auto 0;border-bottom:3px solid #333;max-width:1800px;">
-        <button class="wrap-tab-btn active" onclick="wrapSwitchTab('dashboard')" style="padding:12px 32px;font-size:1rem;font-weight:700;cursor:pointer;background:#333;color:#fff;border:none;border-bottom:3px solid #333;margin-bottom:-3px;font-family:inherit;">Dashboard</button>
-        <button class="wrap-tab-btn" onclick="wrapSwitchTab('order')" style="padding:12px 32px;font-size:1rem;font-weight:700;cursor:pointer;background:#e8e8e8;color:#999;border:none;border-bottom:3px solid transparent;margin-bottom:-3px;font-family:inherit;">Order</button>
-        <button class="wrap-tab-btn" onclick="wrapSwitchTab('aum')" style="padding:12px 32px;font-size:1rem;font-weight:700;cursor:pointer;background:#e8e8e8;color:#999;border:none;border-bottom:3px solid transparent;margin-bottom:-3px;font-family:inherit;">AUM</button>
-    </div>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
     {wrap_html}
@@ -5253,14 +5264,8 @@ def create_dashboard():
         if ((tab === 'order' || tab === 'aum') && !(await checkOrderAumPw())) {{
             return;  // 인증 실패 시 탭 전환 취소
         }}
-        var tabs = ['dashboard', 'order', 'aum'];
-        var btns = document.querySelectorAll('.wrap-tab-btn');
-        tabs.forEach(function(t, i) {{
-            var active = (tab === t);
-            btns[i].classList.toggle('active', active);
-            btns[i].style.background = active ? '#333' : '#e8e8e8';
-            btns[i].style.color = active ? '#fff' : '#999';
-            btns[i].style.borderBottomColor = active ? '#333' : 'transparent';
+        document.querySelectorAll('.sidebar-link[data-wrap-tab]').forEach(function(el) {{
+            el.classList.toggle('active', el.getAttribute('data-wrap-tab') === tab);
         }});
         document.getElementById('wrapPanelDashboard').style.display = tab === 'dashboard' ? 'block' : 'none';
         document.getElementById('wrapPanelOrder').style.display = tab === 'order' ? 'block' : 'none';

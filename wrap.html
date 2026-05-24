@@ -163,10 +163,10 @@
 .sidebar-link:hover { background: #f0f7f2; color: #2d7a3a; border-color: #2d7a3a; }
 .sidebar-link.active { background: transparent; color: #2d7a3a; border-color: #2d7a3a; }
 /* Override per-page body styles so all sidebar pages align identically next to the sidebar */
-body.has-sidebar { padding-left: 174px !important; padding-right: 24px !important; padding-top: 24px !important; padding-bottom: 24px !important; max-width: none !important; margin: 0 !important; }
+.has-sidebar { padding-left: 174px !important; padding-right: 24px !important; padding-top: 24px !important; padding-bottom: 24px !important; max-width: none !important; margin: 0 !important; }
 @media (max-width: 900px) {
     .sidebar { display: none; }
-    body.has-sidebar { padding-left: 24px !important; }
+    .has-sidebar { padding-left: 24px !important; }
 }
 
     </style>
@@ -182,18 +182,13 @@ body.has-sidebar { padding-left: 174px !important; padding-right: 24px !importan
         </div>
     </div>
 
-    <div id="mainContent" class="pw-hidden">
+    <div id="mainContent" class="pw-hidden has-sidebar">
     <nav class="topnav"><div class="topnav-inner"><a href="index.html" class="topnav-brand">Age of Emergence</a><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab active">WRAP</a></div><div class="topnav-item"><a href="market.html" class="topnav-tab">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub">Market</a><a href="universe.html" class="topnav-sub">Universe</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
+    <aside class="sidebar"><a href="#" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="sidebar-link active">Dashboard</a><a href="#" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="sidebar-link">Order</a><a href="#" onclick="wrapSwitchTab('aum');return false;" data-wrap-tab="aum" class="sidebar-link">AUM</a></aside>
     <header>
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-05-25 08:27:21 KST</div>
+        <div class="last-updated">Updated: 2026-05-25 08:59:01 KST</div>
     </header>
-
-    <div style="display:flex;gap:0;margin:0 auto 0;border-bottom:3px solid #333;max-width:1800px;">
-        <button class="wrap-tab-btn active" onclick="wrapSwitchTab('dashboard')" style="padding:12px 32px;font-size:1rem;font-weight:700;cursor:pointer;background:#333;color:#fff;border:none;border-bottom:3px solid #333;margin-bottom:-3px;font-family:inherit;">Dashboard</button>
-        <button class="wrap-tab-btn" onclick="wrapSwitchTab('order')" style="padding:12px 32px;font-size:1rem;font-weight:700;cursor:pointer;background:#e8e8e8;color:#999;border:none;border-bottom:3px solid transparent;margin-bottom:-3px;font-family:inherit;">Order</button>
-        <button class="wrap-tab-btn" onclick="wrapSwitchTab('aum')" style="padding:12px 32px;font-size:1rem;font-weight:700;cursor:pointer;background:#e8e8e8;color:#999;border:none;border-bottom:3px solid transparent;margin-bottom:-3px;font-family:inherit;">AUM</button>
-    </div>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
     
@@ -2879,14 +2874,8 @@ body.has-sidebar { padding-left: 174px !important; padding-right: 24px !importan
         if ((tab === 'order' || tab === 'aum') && !(await checkOrderAumPw())) {
             return;  // 인증 실패 시 탭 전환 취소
         }
-        var tabs = ['dashboard', 'order', 'aum'];
-        var btns = document.querySelectorAll('.wrap-tab-btn');
-        tabs.forEach(function(t, i) {
-            var active = (tab === t);
-            btns[i].classList.toggle('active', active);
-            btns[i].style.background = active ? '#333' : '#e8e8e8';
-            btns[i].style.color = active ? '#fff' : '#999';
-            btns[i].style.borderBottomColor = active ? '#333' : 'transparent';
+        document.querySelectorAll('.sidebar-link[data-wrap-tab]').forEach(function(el) {
+            el.classList.toggle('active', el.getAttribute('data-wrap-tab') === tab);
         });
         document.getElementById('wrapPanelDashboard').style.display = tab === 'dashboard' ? 'block' : 'none';
         document.getElementById('wrapPanelOrder').style.display = tab === 'order' ? 'block' : 'none';
