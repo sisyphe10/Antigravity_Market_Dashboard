@@ -2,7 +2,7 @@
 Description=Antigravity KODEX Sectors Fetch (KOSPI 200 + KOSDAQ 150 섹터 비중)
 After=network-online.target
 Wants=network-online.target
-OnFailure=sisyphe-bot-notify.service
+OnFailure=sisyphe-bot-notify@kodex-sectors.service
 
 [Service]
 Type=oneshot

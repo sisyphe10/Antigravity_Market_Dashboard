@@ -152,14 +152,46 @@ install_earnings_bot_units() {
 
 install_kodex_units() {
     # KRX가 GHA Azure IP 차단으로 VM에서 실행 (매일 23:30 KST)
+    local need_reload=0
+    local need_enable=0
     if [ ! -f /etc/systemd/system/kodex-sectors.service ]; then
-        echo "🔧 kodex-sectors systemd unit 설치..."
-        sudo cp "$REPO_DIR/scripts/kodex-sectors.service" /etc/systemd/system/
-        sudo cp "$REPO_DIR/scripts/kodex-sectors.timer" /etc/systemd/system/
-        chmod +x "$REPO_DIR/scripts/run_kodex_sectors.sh"
+        echo "🔧 kodex-sectors systemd unit 최초 설치..."
+        need_enable=1
+    fi
+    for unit in kodex-sectors.service kodex-sectors.timer; do
+        if [ ! -f "/etc/systemd/system/$unit" ] || ! cmp -s "$REPO_DIR/scripts/$unit" "/etc/systemd/system/$unit"; then
+            echo "  → sync $unit"
+            sudo cp "$REPO_DIR/scripts/$unit" /etc/systemd/system/
+            need_reload=1
+        fi
+    done
+    chmod +x "$REPO_DIR/scripts/run_kodex_sectors.sh"
+    if [ "$need_reload" = 1 ]; then
         sudo systemctl daemon-reload
+        echo "  ✓ daemon-reload"
+    fi
+    if [ "$need_enable" = 1 ]; then
         sudo systemctl enable --now kodex-sectors.timer
         echo "  ✓ kodex-sectors.timer enabled + started"
+    fi
+}
+
+install_bot_units() {
+    # 3개 봇 service 파일 + sisyphe-bot-notify@.service template 동기화.
+    # OnFailure 매핑 변경 등 .service 파일 수정 시 자동 반영. 기존 sisyphe-bot-notify.service는
+    # 더 이상 OnFailure target이 아님 (deprecated), unit 자체는 유지 — 외부 수동 호출 호환성 보존.
+    local need_reload=0
+    for unit in sisyphe-bot.service ra-sisyphe-bot.service research-notes-bot.service sisyphe-bot-notify@.service; do
+        if [ ! -f "/etc/systemd/system/$unit" ] || ! cmp -s "$REPO_DIR/scripts/$unit" "/etc/systemd/system/$unit"; then
+            echo "  → sync $unit"
+            sudo cp "$REPO_DIR/scripts/$unit" /etc/systemd/system/
+            need_reload=1
+        fi
+    done
+    chmod +x "$REPO_DIR/scripts/notify_sisyphe_failure.sh"
+    if [ "$need_reload" = 1 ]; then
+        sudo systemctl daemon-reload
+        echo "  ✓ daemon-reload"
     fi
 }
 
@@ -197,6 +229,7 @@ deploy() {
 
     validate || exit 1
 
+    install_bot_units
     install_earnings_bot_units
     install_kodex_units
     install_landing_highlights_units
@@ -228,6 +261,7 @@ reclone() {
     restore
     validate || exit 1
 
+    install_bot_units
     install_earnings_bot_units
     install_kodex_units
     install_landing_highlights_units

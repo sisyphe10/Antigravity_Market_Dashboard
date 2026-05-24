@@ -1,0 +1,6 @@
+[Unit]
+Description=Sisyphe-family failure notification (for %i)
+
+[Service]
+Type=oneshot
+ExecStart=/home/ubuntu/Antigravity_Market_Dashboard/scripts/notify_sisyphe_failure.sh %i

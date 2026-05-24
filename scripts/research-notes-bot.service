@@ -3,7 +3,7 @@ Description=Research Notes Telegram Bot
 After=network.target
 StartLimitBurst=10
 StartLimitIntervalSec=300
-OnFailure=sisyphe-bot-notify.service
+OnFailure=sisyphe-bot-notify@research-notes-bot.service
 
 [Service]
 Type=simple

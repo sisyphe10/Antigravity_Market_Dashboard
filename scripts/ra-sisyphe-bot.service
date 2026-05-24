@@ -3,7 +3,7 @@ Description=RA_Sisyphe (Research Alerts) Telegram Bot
 After=network.target
 StartLimitBurst=10
 StartLimitIntervalSec=300
-OnFailure=sisyphe-bot-notify.service
+OnFailure=sisyphe-bot-notify@ra-sisyphe-bot.service
 
 [Service]
 User=ubuntu
