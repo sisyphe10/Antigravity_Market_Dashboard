@@ -271,6 +271,23 @@ def create_portfolio_tables():
         code_df['종목코드'] = code_df['종목코드'].apply(lambda x: str(x).zfill(6))
         sector_map = dict(zip(code_df['종목코드'], code_df['섹터']))
 
+        # WRAP Order 탭 종목명/코드 양방향 자동완성용 마스터 (외부 API CORS 차단 우회)
+        master_rows = []
+        for _, r in code_df.iterrows():
+            name = r.get('종목명')
+            code = r.get('종목코드')
+            sector = r.get('섹터')
+            if not isinstance(code, str) or not code or pd.isna(name):
+                continue
+            master_rows.append({
+                'code': code,
+                'name': str(name),
+                'sector': '' if pd.isna(sector) else str(sector),
+            })
+        with open('stock_master.json', 'w', encoding='utf-8') as f:
+            json.dump(master_rows, f, ensure_ascii=False)
+        print(f"stock_master.json 생성: {len(master_rows)}종목")
+
         # === 포트폴리오 그룹 정의 (동일 종목/비중을 공유하여 합쳐서 표시) ===
         # sources: Wrap_NAV.xlsx 상품명 / combined: 표시 결합명 / use: 데이터 가져올 포트폴리오
         PORTFOLIO_GROUPS = [

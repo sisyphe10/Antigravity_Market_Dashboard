@@ -3439,43 +3439,59 @@ def create_order_section():
             return '';
         }
 
-        // 신규 종목 행에서 종목명 입력 후 blur → 네이버 자동완성으로 코드 채움 + sector lookup/fetch.
+        // KRX 전 종목 마스터(stock_master.json) 1회 로드 + name/code 인덱스 캐시.
+        // 같은 origin이라 CORS 영향 없음. Wrap_NAV.xlsx Code 시트가 소스라서 portfolio_data.json의 섹터 표기와 일치.
+        // 누락 종목(최근 신규IPO 등)은 수동 입력 fallback. (네이버 API는 GH Pages origin을 403으로 차단 → 외부 API 불가)
+        var wicsAllCache = null;
+        var wicsByCode = null;
+        var wicsByName = null;
+        async function loadWicsAll() {
+            if (wicsAllCache) return wicsAllCache;
+            var resp = await fetch('stock_master.json');
+            if (!resp.ok) throw new Error('stock_master.json fetch 실패: ' + resp.status);
+            wicsAllCache = await resp.json();
+            wicsByCode = {};
+            wicsByName = {};
+            wicsAllCache.forEach(function(x) {
+                if (x.code) wicsByCode[String(x.code)] = x;
+                if (x.name) wicsByName[String(x.name)] = x;
+            });
+            return wicsAllCache;
+        }
+
+        // 신규 종목 행에서 종목명 입력 후 blur → stock_master.json lookup으로 코드/업종 채움.
         async function autoFillStockFromName(idx) {
             var stocks = orderStocks[orderActiveTab];
             if (!stocks || !stocks[idx] || !stocks[idx].isNew) return;
             var s = stocks[idx];
             var name = String(s.name || '').trim();
             if (!name) return;
-            var codeAlreadySet = !!String(s.code || '').trim();
             try {
-                if (!codeAlreadySet) {
-                    var resp = await fetch('https://ac.stock.naver.com/ac?q=' + encodeURIComponent(name) + '&target=stock');
-                    if (!resp.ok) return;
-                    var data = await resp.json();
-                    var items = (data.items || []).filter(function(x) {
-                        return x.nationCode === 'KOR' && x.category === 'stock';
-                    });
-                    if (!items.length) return;
-                    var exact = items.find(function(x) { return x.name === name; });
-                    var item = exact || items[0];
-                    s.code = item.code;
-                    s.name = item.name;  // 정식 종목명으로 보정
+                await loadWicsAll();
+                var hit = wicsByName[name];
+                if (!hit) {
+                    // 부분 일치 fallback (대소문자 무시)
+                    var lower = name.toLowerCase();
+                    hit = wicsAllCache.find(function(x) { return x.name && x.name.toLowerCase() === lower; })
+                       || wicsAllCache.find(function(x) { return x.name && x.name.toLowerCase().indexOf(lower) >= 0; });
                 }
+                if (!hit) {
+                    console.warn('autoFillStockFromName: stock_master.json에 없음 →', name);
+                    return;
+                }
+                if (!String(s.code || '').trim()) s.code = hit.code;
+                s.name = hit.name;  // 정식 종목명으로 보정
                 if (!String(s.sector || '').trim()) {
-                    var sec = lookupSectorByCode(s.code);
+                    var sec = lookupSectorByCode(s.code) || hit.sector || '';
                     if (sec) s.sector = sec;
-                    else {
-                        var fetched = await fetchSectorFromNaver(s.code);
-                        if (fetched) s.sector = fetched;
-                    }
                 }
                 renderOrderPanel(orderActiveTab);
             } catch (e) {
-                console.warn('autoFillStockFromName 실패 (네트워크/CORS):', e);
+                console.warn('autoFillStockFromName 실패:', e);
             }
         }
 
-        // 신규 종목 행에서 코드 입력 후 blur → 네이버 자동완성으로 종목명 채움 + sector lookup/fetch.
+        // 신규 종목 행에서 코드 입력 후 blur → stock_master.json lookup으로 종목명/업종 채움.
         async function autoFillStockFromCode(idx) {
             var stocks = orderStocks[orderActiveTab];
             if (!stocks || !stocks[idx] || !stocks[idx].isNew) return;
@@ -3487,52 +3503,21 @@ def create_order_section():
                 code = code.padStart(6, '0');
                 s.code = code;
             }
-            var nameAlreadySet = !!String(s.name || '').trim();
             try {
-                if (!nameAlreadySet) {
-                    var resp = await fetch('https://ac.stock.naver.com/ac?q=' + encodeURIComponent(code) + '&target=stock');
-                    if (resp.ok) {
-                        var data = await resp.json();
-                        var items = (data.items || []).filter(function(x) {
-                            return x.nationCode === 'KOR' && x.category === 'stock';
-                        });
-                        var exact = items.find(function(x) { return String(x.code) === code; });
-                        var item = exact || items[0];
-                        if (item) s.name = item.name;
-                    }
+                await loadWicsAll();
+                var hit = wicsByCode[code];
+                if (!hit) {
+                    console.warn('autoFillStockFromCode: stock_master.json에 없음 →', code);
+                    return;
                 }
+                if (!String(s.name || '').trim()) s.name = hit.name;
                 if (!String(s.sector || '').trim()) {
-                    var sec = lookupSectorByCode(s.code);
+                    var sec = lookupSectorByCode(s.code) || hit.sector || '';
                     if (sec) s.sector = sec;
-                    else {
-                        var fetched = await fetchSectorFromNaver(s.code);
-                        if (fetched) s.sector = fetched;
-                    }
                 }
                 renderOrderPanel(orderActiveTab);
             } catch (e) {
-                console.warn('autoFillStockFromCode 실패 (네트워크/CORS):', e);
-            }
-        }
-
-        // 네이버 모바일 stock API에서 종목 sector(WICS) 가져옴. CORS 차단되면 빈 문자열.
-        // 자동완성 ac.stock.naver.com과 같은 호스트 패밀리라 보통 통과하지만, 폴리시 변경 대비해 try/catch.
-        async function fetchSectorFromNaver(code) {
-            var c = String(code || '').trim();
-            if (!c) return '';
-            try {
-                var resp = await fetch('https://api.stock.naver.com/stock/' + c + '/integration');
-                if (!resp.ok) return '';
-                var data = await resp.json();
-                // 응답 필드 후보 (변경 대비 다중 시도)
-                if (data.wicsSectorName) return String(data.wicsSectorName).trim();
-                if (data.industryCodeType && data.industryCodeType.name) return String(data.industryCodeType.name).trim();
-                if (data.sectorCodeType && data.sectorCodeType.name) return String(data.sectorCodeType.name).trim();
-                if (data.stockEndType && data.stockEndType.industryName) return String(data.stockEndType.industryName).trim();
-                return '';
-            } catch (e) {
-                console.warn('fetchSectorFromNaver 실패 (CORS 가능):', e);
-                return '';
+                console.warn('autoFillStockFromCode 실패:', e);
             }
         }
 

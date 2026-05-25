@@ -63,6 +63,7 @@ charts/*
 !sources.json
 !landing_highlights.json
 !landing_quotes.json
+!stock_master.json
 
 # 기타
 *.bat
