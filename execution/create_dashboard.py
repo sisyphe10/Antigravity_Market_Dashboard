@@ -25,7 +25,7 @@ OUTPUT_FILE = 'market.html'
 TOP_NAV_MAIN = [
     ('wrap',         'wrap.html',          'WRAP',         None),
     ('market',       'market.html',        'Market',       [
-        ('market',        'market.html',        'Market'),
+        ('market',        'market.html',        'Index'),
         ('universe',      'universe.html',      'Universe'),
         ('featured',      'featured.html',      'Featured'),
         ('market_alert',  'market_alert.html',  '투자유의종목'),
