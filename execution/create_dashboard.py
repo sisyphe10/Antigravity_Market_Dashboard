@@ -40,7 +40,7 @@ PRETENDARD_LINK = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orio
 PRETENDARD_STACK = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"
 
 TOP_NAV_CSS = """
-.topnav { background: #fff; border-bottom: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.04); position: sticky; top: 0; z-index: 100; margin-top: 12px; border-radius: 12px 12px 0 0; }
+.topnav { background: #fff; border-bottom: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.04); position: sticky; top: 0; z-index: 100; }
 .topnav-inner { max-width: 1400px; margin: 0 auto; padding: 0 28px; display: flex; align-items: center; height: 72px; gap: 32px; }
 .topnav-brand { font-size: 1.3rem; font-weight: 800; letter-spacing: 1.5px; color: #111; white-space: nowrap; text-decoration: none; font-family: PRETENDARD_STACK_PLACEHOLDER; }
 .topnav-brand:hover { color: #2d7a3a; }
@@ -64,8 +64,8 @@ TOP_NAV_CSS = """
 }
 
 /* Left sidebar — used only on Market-group pages. Sits ABOVE the topnav so its top corner doubles as the AoE brand badge. */
-.sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 200px; padding: 96px 10px 18px 10px; background: #fff; border-right: 1px solid #e5e7eb; overflow-y: auto; z-index: 150; box-sizing: border-box; }
-.sidebar-brand { position: absolute; top: 0; left: 0; right: 0; height: 84px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; letter-spacing: 2px; color: #1a1a1a; border-bottom: 1px solid #e5e7eb; background: #fff; text-decoration: none; font-family: PRETENDARD_STACK_PLACEHOLDER; }
+.sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 200px; padding: 84px 10px 18px 10px; background: #fff; border-right: 1px solid #e5e7eb; overflow-y: auto; z-index: 150; box-sizing: border-box; }
+.sidebar-brand { position: absolute; top: 0; left: 0; right: 0; height: 72px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; letter-spacing: 2px; color: #1a1a1a; border-bottom: 1px solid #e5e7eb; background: #fff; text-decoration: none; font-family: PRETENDARD_STACK_PLACEHOLDER; }
 .sidebar-brand:hover { color: #2d7a3a; }
 .sidebar-link { display: block; padding: 12px 11px; margin-bottom: 7px; color: #444; text-decoration: none; font-size: 0.94rem; font-weight: 600; border-radius: 999px; border: 1.5px solid transparent; transition: all 0.12s; font-family: PRETENDARD_STACK_PLACEHOLDER; text-align: center; }
 .sidebar-link:hover { background: #f0f7f2; color: #2d7a3a; border-color: #2d7a3a; }
