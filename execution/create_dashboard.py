@@ -42,7 +42,7 @@ PRETENDARD_STACK = "'Pretendard Variable', Pretendard, system-ui, -apple-system,
 TOP_NAV_CSS = """
 .topnav { background: #fff; border-bottom: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.04); position: sticky; top: 0; z-index: 100; margin-top: 12px; border-radius: 12px 12px 0 0; }
 .topnav-inner { max-width: 1400px; margin: 0 auto; padding: 0 28px; display: flex; align-items: center; height: 72px; gap: 32px; }
-.topnav-brand { font-size: 1.2rem; font-weight: 800; color: #111; white-space: nowrap; text-decoration: none; font-family: PRETENDARD_STACK_PLACEHOLDER; }
+.topnav-brand { font-size: 1.3rem; font-weight: 800; letter-spacing: 1.5px; color: #111; white-space: nowrap; text-decoration: none; font-family: PRETENDARD_STACK_PLACEHOLDER; }
 .topnav-brand:hover { color: #2d7a3a; }
 .topnav-tabs { display: flex; gap: 12px; flex: 1; align-items: center; }
 .topnav-item { position: relative; }
@@ -65,7 +65,7 @@ TOP_NAV_CSS = """
 
 /* Left sidebar — used only on Market-group pages */
 .sidebar { position: fixed; top: 84px; left: 0; bottom: 0; width: 200px; padding: 18px 10px; background: #fff; border-right: 1px solid #e5e7eb; overflow-y: auto; z-index: 50; box-sizing: border-box; }
-.sidebar-link { display: block; padding: 12px 10px; margin-bottom: 7px; color: #444; text-decoration: none; font-size: 0.92rem; font-weight: 600; border-radius: 999px; border: 1.5px solid transparent; transition: all 0.12s; font-family: PRETENDARD_STACK_PLACEHOLDER; text-align: center; }
+.sidebar-link { display: block; padding: 12px 11px; margin-bottom: 7px; color: #444; text-decoration: none; font-size: 0.94rem; font-weight: 600; border-radius: 999px; border: 1.5px solid transparent; transition: all 0.12s; font-family: PRETENDARD_STACK_PLACEHOLDER; text-align: center; }
 .sidebar-link:hover { background: #f0f7f2; color: #2d7a3a; border-color: #2d7a3a; }
 .sidebar-link.active { background: transparent; color: #2d7a3a; border-color: #2d7a3a; }
 /* Override per-page body styles so all sidebar pages align identically next to the sidebar */
