@@ -257,7 +257,8 @@ def enqueue_transcript_job(filing_id: int, ticker: str, next_attempt_at: str,
 
 
 def get_due_transcript_jobs(now_iso: str, limit: int = 20) -> list[dict]:
-    """다음 시도 시각이 지난 미완료 잡들."""
+    """다음 시도 시각이 지난 미완료 잡들. stale_pending은 cleanup_stale → gave_up
+    또는 수동 override 전까지 재선택하지 않는다 (next_attempt_at 미갱신으로 무한 재실행 방지)."""
     conn = get_conn()
     try:
         rows = conn.execute(
@@ -266,7 +267,7 @@ def get_due_transcript_jobs(now_iso: str, limit: int = 20) -> list[dict]:
             FROM transcript_jobs j
             JOIN filings f ON j.filing_id = f.id
             WHERE j.next_attempt_at <= ?
-              AND j.last_status NOT IN ('success', 'gave_up', 'needs_review')
+              AND j.last_status NOT IN ('success', 'gave_up', 'needs_review', 'stale_pending')
             ORDER BY j.next_attempt_at ASC
             LIMIT ?
             """,

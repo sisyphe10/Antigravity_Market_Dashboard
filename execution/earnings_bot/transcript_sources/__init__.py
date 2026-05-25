@@ -115,11 +115,25 @@ def make_event_from_filing(filing_row: dict, ticker_meta: dict | None = None) ->
     from . import _calendar_lookup  # type: ignore  # 순환 회피용 stub (아래 정의)
     fy, fq = _calendar_lookup(ticker, filed_at[:10] if filed_at else '')
     if not fy or not fq:
-        # 발표일에서 약 45일 lag를 빼면 직전 분기 종료점 = 발표 분기. RDDT 4-30 → 3-16 → Q1.
+        # 발표일에서 약 45일 lag를 빼면 직전 분기 종료점 (= 발표 대상 분기 종료일).
+        # 비-캘린더 FY 기업 (TPR=June, AAPL=Sep 등)은 FY end month 기준으로 환산.
+        # 예: TPR 5/7 filing → period_end ≒ 3/23 → FY end June → FQ3 FY26.
         from datetime import timedelta
-        anchor = event_dt - timedelta(days=45)
-        fy = fy or anchor.year
-        fq = fq or ((anchor.month - 1) // 3 + 1)
+        period_end = event_dt - timedelta(days=45)
+        p_month = period_end.month
+        p_year = period_end.year
+        try:
+            from .. import ticker_registry as _tr
+            fy_end_month = _tr.get_fiscal_year_end_month(ticker)
+        except Exception:
+            fy_end_month = 12
+        fy_start_month = (fy_end_month % 12) + 1  # FY 시작 월
+        month_in_fy = (p_month - fy_start_month) % 12 + 1  # 1..12 (FY 내 월 순서)
+        computed_fq = (month_in_fy - 1) // 3 + 1
+        # FY: period end month가 FY end month 초과 시 다음 FY (예: AAPL Dec → FY+1)
+        computed_fy = p_year + 1 if p_month > fy_end_month else p_year
+        fy = fy or computed_fy
+        fq = fq or computed_fq
 
     company_names = [ticker]
     if ticker_meta and ticker_meta.get('note'):

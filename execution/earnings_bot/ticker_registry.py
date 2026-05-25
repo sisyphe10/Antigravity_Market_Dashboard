@@ -176,6 +176,28 @@ def get_company_name(ticker: str) -> str | None:
         return None
 
 
+@lru_cache(maxsize=512)
+def get_fiscal_year_end_month(ticker: str) -> int:
+    """ticker → 회계연도 종료 월 (1-12). 조회 실패 시 12 (캘린더) 반환.
+
+    edgartools Company.fiscal_year_end는 'MMDD' 문자열 (예: TPR='0627', AAPL='0928').
+    transcript_sources가 비-캘린더 FY 기업(TPR=6월, AAPL=9월, NVDA=1월 등)의
+    fiscal_quarter를 정확히 산출하도록 lookup 제공.
+    """
+    try:
+        from edgar import Company, set_identity
+        set_identity(os.getenv('SEC_EDGAR_USER_AGENT', 'Kimtaesik (kts77775@gmail.com)'))
+        c = Company(ticker.upper())
+        fye = getattr(c, 'fiscal_year_end', None)
+        if fye and len(fye) >= 2:
+            m = int(fye[:2])
+            if 1 <= m <= 12:
+                return m
+    except Exception:
+        pass
+    return 12
+
+
 def warmup_universe_cache() -> dict[str, str | None]:
     """Universe 전체 CIK 사전 채우기. Phase 0 검증 + 운영 준비용."""
     result = {}
