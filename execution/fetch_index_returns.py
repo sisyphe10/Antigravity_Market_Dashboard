@@ -10,7 +10,8 @@ universe.html의 RSI(1M) 컬럼이 사용. 각 종목 1M 수익률에서 해당 
   NASDAQ        → NASDAQ      (^IXIC)
   NYSE, NYSEAMERICAN → S&P 500 (^GSPC)
   TPE           → TSEC        (^TWII)
-  TSE           → NIKKEI      (^N225)
+  TYO           → NIKKEI      (^N225)
+  TSE           → TSX         (^GSPTSE, S&P/TSX Composite — Toronto SE)
   HKG           → HSI         (^HSI)
   AMS, ETR, EPA → STOXX       (^STOXX50E)
 
@@ -38,6 +39,7 @@ INDICES = [
     ('S&P 500', '^GSPC'),
     ('TSEC',    '^TWII'),
     ('NIKKEI',  '^N225'),
+    ('TSX',     '^GSPTSE'),
     ('HSI',     '^HSI'),
     ('STOXX',   '^STOXX50E'),
 ]
