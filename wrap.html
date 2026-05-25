@@ -134,7 +134,7 @@
         .pw-error { color: #dc2626; font-size: 0.9rem; margin-top: 10px; display: none; }
         .pw-hidden { display: none !important; }
         
-.topnav { background: #fff; border-bottom: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.04); position: sticky; top: 0; z-index: 100; }
+.topnav { background: #fff; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 100; }
 .topnav-inner { max-width: 1400px; margin: 0 auto; padding: 0 28px; display: flex; align-items: center; height: 72px; gap: 32px; }
 .topnav-brand { font-size: 1.3rem; font-weight: 800; letter-spacing: 1.5px; color: #111; white-space: nowrap; text-decoration: none; font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; }
 .topnav-brand:hover { color: #2d7a3a; }
@@ -165,10 +165,14 @@
 .sidebar-link:hover { background: #f0f7f2; color: #2d7a3a; border-color: #2d7a3a; }
 .sidebar-link.active { background: transparent; color: #2d7a3a; border-color: #2d7a3a; }
 /* Override per-page body styles so all sidebar pages align identically next to the sidebar */
-.has-sidebar { padding-left: 224px !important; padding-right: 24px !important; padding-top: 24px !important; padding-bottom: 24px !important; max-width: none !important; margin: 0 !important; }
+.has-sidebar { padding-left: 224px !important; padding-right: 24px !important; padding-top: 0 !important; padding-bottom: 24px !important; max-width: none !important; margin: 0 !important; }
+.has-sidebar .topnav { margin-left: -224px; margin-right: -24px; }
+.has-sidebar .topnav-inner { padding-left: 228px; }
 @media (max-width: 900px) {
     .sidebar { display: none; }
     .has-sidebar { padding-left: 24px !important; }
+    .has-sidebar .topnav { margin-left: -24px; margin-right: -24px; }
+    .has-sidebar .topnav-inner { padding-left: 12px; }
 }
 
     </style>
@@ -185,11 +189,11 @@
     </div>
 
     <div id="mainContent" class="pw-hidden has-sidebar">
-    <nav class="topnav"><div class="topnav-inner"><a href="index.html" class="topnav-brand">AoE</a><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab active">WRAP</a></div><div class="topnav-item"><a href="market.html" class="topnav-tab">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub">Market</a><a href="universe.html" class="topnav-sub">Universe</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
+    <nav class="topnav"><div class="topnav-inner"><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab active">WRAP</a></div><div class="topnav-item"><a href="market.html" class="topnav-tab">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub">Market</a><a href="universe.html" class="topnav-sub">Universe</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
     <aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="#" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="sidebar-link active">Dashboard</a><a href="#" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="sidebar-link">Order</a><a href="#" onclick="wrapSwitchTab('aum');return false;" data-wrap-tab="aum" class="sidebar-link">AUM</a></aside>
     <header>
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-05-25 18:31:20 KST</div>
+        <div class="last-updated">Updated: 2026-05-25 18:45:13 KST</div>
     </header>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">

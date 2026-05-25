@@ -40,7 +40,7 @@ PRETENDARD_LINK = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orio
 PRETENDARD_STACK = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"
 
 TOP_NAV_CSS = """
-.topnav { background: #fff; border-bottom: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.04); position: sticky; top: 0; z-index: 100; }
+.topnav { background: #fff; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 100; }
 .topnav-inner { max-width: 1400px; margin: 0 auto; padding: 0 28px; display: flex; align-items: center; height: 72px; gap: 32px; }
 .topnav-brand { font-size: 1.3rem; font-weight: 800; letter-spacing: 1.5px; color: #111; white-space: nowrap; text-decoration: none; font-family: PRETENDARD_STACK_PLACEHOLDER; }
 .topnav-brand:hover { color: #2d7a3a; }
@@ -71,10 +71,14 @@ TOP_NAV_CSS = """
 .sidebar-link:hover { background: #f0f7f2; color: #2d7a3a; border-color: #2d7a3a; }
 .sidebar-link.active { background: transparent; color: #2d7a3a; border-color: #2d7a3a; }
 /* Override per-page body styles so all sidebar pages align identically next to the sidebar */
-.has-sidebar { padding-left: 224px !important; padding-right: 24px !important; padding-top: 24px !important; padding-bottom: 24px !important; max-width: none !important; margin: 0 !important; }
+.has-sidebar { padding-left: 224px !important; padding-right: 24px !important; padding-top: 0 !important; padding-bottom: 24px !important; max-width: none !important; margin: 0 !important; }
+.has-sidebar .topnav { margin-left: -224px; margin-right: -24px; }
+.has-sidebar .topnav-inner { padding-left: 228px; }
 @media (max-width: 900px) {
     .sidebar { display: none; }
     .has-sidebar { padding-left: 24px !important; }
+    .has-sidebar .topnav { margin-left: -24px; margin-right: -24px; }
+    .has-sidebar .topnav-inner { padding-left: 12px; }
 }
 """.replace('PRETENDARD_STACK_PLACEHOLDER', PRETENDARD_STACK)
 
@@ -152,7 +156,6 @@ def top_nav_html(active=''):
         parts.append(f'<div class="topnav-item">{tab_html}</div>')
     return (
         '<nav class="topnav"><div class="topnav-inner">'
-        '<a href="index.html" class="topnav-brand">AoE</a>'
         '<div class="topnav-tabs">' + ''.join(parts) + '</div>'
         '</div></nav>'
     )
