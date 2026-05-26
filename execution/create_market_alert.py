@@ -684,10 +684,9 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stoc
             max-width: 1800px; margin: 0 auto;
         }}
         header {{
-            background-color: #000000; border-radius: 12px; padding: 20px;
-            margin-bottom: 40px; text-align: center;
+            padding: 20px; margin-bottom: 40px; text-align: center;
         }}
-        header h1 {{ margin: 0; color: #ffffff; font-size: 33px; font-weight: 700; }}
+        header h1 {{ margin: 0; color: #333; font-size: 33px; font-weight: 700; }}
         .header-right {{ display: flex; align-items: center; gap: 16px; }}
         .last-updated {{ color: #6c757d; font-size: 15px; font-style: italic; }}
         .back-btn {{

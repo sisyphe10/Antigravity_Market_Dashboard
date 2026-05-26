@@ -4503,14 +4503,12 @@ def create_dashboard():
             text-align: center;
             margin-bottom: 40px;
             padding: 20px;
-            background-color: #000000;
-            border-radius: 12px;
         }}
 
         h1 {{
             margin: 0;
             font-size: 33px;
-            color: #ffffff;
+            color: #333;
         }}
 
         .last-updated {{
@@ -5404,8 +5402,8 @@ def create_dashboard():
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }
-        header { background-color: #000000; border-radius: 12px; padding: 20px; margin: 20px 20px 40px; text-align: center; }
-        header h1 { margin: 0; font-size: 33px; color: #ffffff; }
+        header { padding: 20px; margin: 20px 20px 40px; text-align: center; }
+        header h1 { margin: 0; font-size: 33px; color: #333; }
         .nav-group { margin-top: 10px; }
         .nav-button { display: inline-block; padding: 6px 16px; border-radius: 6px; text-decoration: none; color: #fff; font-size: 0.85rem; font-weight: 600; background: #333; }
         .content { padding: 24px; max-width: 1800px; margin: 0 auto; }
@@ -5452,10 +5450,10 @@ TOPNAV_PLACEHOLDER
 SIDEBAR_PLACEHOLDER
 <header>
     <div style="max-width:1800px;margin:0 auto;padding:0 24px;position:relative;">
-        <h1>Universe</h1>
+        <h1>🌐 Universe</h1>
         <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: __UNIVERSE_UPDATED__</div>
         <div style="position:absolute;top:20px;right:24px;display:flex;gap:8px;">
-            <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="background:#6B21A8;color:#fff;font-size:15px;font-weight:600;text-decoration:none;padding:6px 16px;border-radius:8px;">Sheet</a>
+            <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="background:#6B21A8;color:#fff;font-size:18px;font-weight:600;text-decoration:none;padding:10px 22px;border-radius:8px;">Sheet</a>
         </div>
     </div>
 </header>
@@ -5849,8 +5847,8 @@ function renderSector() {
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
         body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }}
-        header {{ background-color: #000000; border-radius: 12px; padding: 20px; margin: 20px 20px 40px; text-align: center; }}
-        header h1 {{ margin: 0; font-size: 33px; color: #ffffff; }}
+        header {{ padding: 20px; margin: 20px 20px 40px; text-align: center; }}
+        header h1 {{ margin: 0; font-size: 33px; color: #333; }}
         .nav-group {{ margin-top: 10px; }}
         .nav-button {{ display: inline-block; padding: 6px 16px; border-radius: 6px; text-decoration: none; color: #fff; font-size: 0.85rem; font-weight: 600; background: #333; }}
         .subtitle {{ color: #888; font-size: 0.85rem; margin-top: 4px; }}
@@ -6060,9 +6058,9 @@ refresh();
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
         body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }}
-        header {{ background-color: #000000; border-radius: 12px; padding: 20px; margin: 20px 20px 40px; text-align: center; position: relative; }}
-        header h1 {{ margin: 0; font-size: 33px; color: #ffffff; }}
-        .subtitle {{ color: #ccc; font-size: 0.85rem; margin-top: 4px; }}
+        header {{ padding: 20px; margin: 20px 20px 40px; text-align: center; position: relative; }}
+        header h1 {{ margin: 0; font-size: 33px; color: #333; }}
+        .subtitle {{ color: #888; font-size: 0.85rem; margin-top: 4px; }}
         .content {{ padding: 24px; max-width: 1800px; margin: 0 auto; }}
         .section {{ background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }}
         .section h2 {{ font-size: 1.1rem; color: #333; margin-bottom: 16px; }}
@@ -6644,8 +6642,8 @@ def generate_etf_html():
 <style>
 * {{ box-sizing: border-box; margin: 0; padding: 0; }}
 body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }}
-header {{ background-color: #000000; border-radius: 12px; padding: 20px; margin: 20px 20px 40px; text-align: center; position: relative; }}
-header h1 {{ margin: 0; font-size: 33px; color: #ffffff; }}
+header {{ padding: 20px; margin: 20px 20px 40px; text-align: center; position: relative; }}
+header h1 {{ margin: 0; font-size: 33px; color: #333; }}
 .home-btn {{ position: absolute; top: 20px; right: 24px; padding: 6px 16px; background: #e0e0e0; color: #333; text-decoration: none; border-radius: 8px; font-size: 15px; font-weight: 600; }}
 .container {{ max-width: 1800px; margin: 0 auto; padding: 20px; }}
 .controls {{ display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }}
