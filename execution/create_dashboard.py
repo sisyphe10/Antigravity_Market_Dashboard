@@ -1622,6 +1622,7 @@ def _build_combined_chart_section():
         </script>
         """.replace('CMB_DATA_PLACEHOLDER', export_json)
 
+        hotel_summary = _build_hotel_mini_summary()
         return f"""
         <div class="category-section">
             <h2 class="category-title">DATA</h2>
@@ -1643,6 +1644,7 @@ def _build_combined_chart_section():
                     </div>
                 </div>
             </div>
+            {hotel_summary}
         </div>
         {js_code}
         """
@@ -1650,6 +1652,49 @@ def _build_combined_chart_section():
         print(f"Error building combined chart section: {e}")
         import traceback; traceback.print_exc()
         return ""
+
+
+def _build_hotel_mini_summary():
+    """DATA 카테고리용 호텔 ADR 축소 요약 — 4개 도시별 lead+7 평균 ADR 카드 + Hotels 페이지 링크."""
+    try:
+        if not os.path.exists('hotel_adr.csv'):
+            return ''
+        df = pd.read_csv('hotel_adr.csv')
+        if df.empty:
+            return ''
+        # 최신 collected_at의 lead_days=7 만 사용
+        latest = df['collected_at'].max()
+        df_latest = df[(df['collected_at'] == latest) & (df['lead_days'] == 7)]
+        if df_latest.empty:
+            return ''
+        city_avg = df_latest.groupby('city').agg(avg=('price_krw', 'mean'), n=('hotel', 'nunique'))
+        cards = ''
+        for city in ['서울', '부산', '제주', '경주']:
+            if city in city_avg.index:
+                avg = int(city_avg.loc[city, 'avg'])
+                n = int(city_avg.loc[city, 'n'])
+                cards += (
+                    '<div style="flex:1;min-width:160px;background:#fff;padding:16px 20px;'
+                    'border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.06);text-align:center;">'
+                    f'<div style="font-size:13px;color:#888;font-weight:600;margin-bottom:6px;">{city}</div>'
+                    f'<div style="font-size:24px;color:#111;font-weight:700;">₩{avg:,}</div>'
+                    f'<div style="font-size:11px;color:#aaa;margin-top:4px;">{n} hotels · lead+7</div>'
+                    '</div>'
+                )
+        if not cards:
+            return ''
+        return f'''
+        <div style="max-width:1800px;margin:32px auto 0;padding:0 16px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;">
+                <h3 style="margin:0;font-size:18px;color:#333;font-weight:700;">HOTEL ADR · lead+7 평균</h3>
+                <a href="hotels.html" style="color:#2563eb;font-size:13px;text-decoration:none;font-weight:600;">Detail in Hotels →</a>
+            </div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;">{cards}</div>
+        </div>
+        '''
+    except Exception as e:
+        print(f"Hotel mini summary 생성 실패: {e}")
+        return ''
 
 
 def _build_wrap_chart_section(category_label):
@@ -6515,6 +6560,8 @@ def generate_hotels_html():
 
             df_lead7 = df[df['lead_days'] == 7].copy()
             df_lead7['date'] = df_lead7['collected_at'].str[:10]
+            # 하루에 여러 번 수집된 경우 마지막 값만 (시간대별 가격 차이는 무시, 일일 최신 스냅샷 기준).
+            df_lead7 = df_lead7.sort_values('collected_at').drop_duplicates(subset=['date', 'hotel'], keep='last')
             pivot_ts = df_lead7.pivot(index='date', columns='hotel', values='price_krw') / 1000
 
             fig, ax = plt.subplots(figsize=(13, 6))
