@@ -5500,7 +5500,6 @@ SIDEBAR_PLACEHOLDER
 <header>
     <h1>🌐 Universe</h1>
     <div class="last-updated">Updated: __UNIVERSE_UPDATED__</div>
-    <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="position:absolute;top:20px;right:24px;background:#2d7a3a;color:#fff;font-size:18px;font-weight:600;text-decoration:none;padding:10px 22px;border-radius:8px;">Sheet</a>
 </header>
 <div class="content">
     <div class="tabs">

@@ -55,6 +55,33 @@ PREFIX_MAP = {
     'EPA':         {'suffix': '.PA', 'currency': 'EUR'},   # 파리
 }
 
+# 통화 → KRW 환율 fetch (yfinance Forex 페어). 시가총액 KRW 환산용.
+def fetch_fx_to_krw() -> dict[str, float]:
+    """USD/JPY/EUR/HKD/TWD/CAD → KRW 환율 dict. 실패 시 fallback 환율 사용."""
+    pairs = {
+        'USD': 'KRW=X',       # USDKRW
+        'JPY': 'JPYKRW=X',
+        'EUR': 'EURKRW=X',
+        'HKD': 'HKDKRW=X',
+        'TWD': 'TWDKRW=X',
+        'CAD': 'CADKRW=X',
+    }
+    # 폴백 (yfinance fetch 실패 시) — 2026-05 대략치
+    fallback = {'USD': 1380, 'JPY': 9.0, 'EUR': 1500, 'HKD': 177, 'TWD': 43, 'CAD': 1010}
+    rates: dict[str, float] = {'KRW': 1.0}
+    for ccy, pair in pairs.items():
+        try:
+            hist = yf.Ticker(pair).history(period='5d', auto_adjust=False)
+            if not hist.empty:
+                rates[ccy] = float(hist['Close'].dropna().iloc[-1])
+            else:
+                rates[ccy] = fallback[ccy]
+                print(f"  Warning: {pair} 환율 fetch 실패 → fallback {fallback[ccy]}")
+        except Exception as e:
+            rates[ccy] = fallback[ccy]
+            print(f"  Warning: {pair} 예외 → fallback {fallback[ccy]} ({e})")
+    return rates
+
 
 def to_yf_ticker(raw: str) -> tuple[str | None, str | None]:
     """KRX:006800 → ('006800.KS', 'KRW'). 매핑 실패 시 (None, None)."""
@@ -86,8 +113,8 @@ def fmt_marcap_krw_eok(marcap_krw: float | None) -> str:
     return f'{eok:,}억'
 
 
-def fetch_one(idx: int, raw_ticker: str, sector: str, name: str) -> list[str] | None:
-    """단일 종목의 22개 컬럼 데이터 생성. 실패 시 None."""
+def fetch_one(idx: int, raw_ticker: str, sector: str, name: str, fx_to_krw: dict[str, float]) -> list[str] | None:
+    """단일 종목의 22개 컬럼 데이터 생성. 실패 시 None. fx_to_krw: 통화 → KRW 환율."""
     yf_tk, currency = to_yf_ticker(raw_ticker)
     if not yf_tk:
         return None
@@ -146,20 +173,13 @@ def fetch_one(idx: int, raw_ticker: str, sector: str, name: str) -> list[str] | 
                     continue
                 break
 
-        # 통화별 시가총액 표시 — KRW 종목은 억원, 다른 통화는 K/M/B 표기
-        if marcap_local and currency == 'KRW':
-            marcap_str = fmt_marcap_krw_eok(marcap_local)
-            marcap_raw_eok = marcap_local / 1e8
-        elif marcap_local:
-            # 비KRW: B/M 단위로 (예: $1.2B, $35M). 통화 기호 별도.
-            sym = {'USD': '$', 'JPY': '¥', 'TWD': 'NT$', 'CAD': 'C$', 'HKD': 'HK$', 'EUR': '€'}.get(currency, '')
-            if marcap_local >= 1e9:
-                marcap_str = f'{sym}{marcap_local/1e9:,.1f}B'
-            elif marcap_local >= 1e6:
-                marcap_str = f'{sym}{marcap_local/1e6:,.0f}M'
-            else:
-                marcap_str = f'{sym}{marcap_local:,.0f}'
-            marcap_raw_eok = marcap_local  # 정렬용 raw (원화 환산 X, 통화별 raw)
+        # 모든 종목 시가총액을 KRW로 환산해서 표시 + 정렬용 raw도 KRW 억원으로 통일.
+        # 섹터 가중평균(RSI 등)이 의미 있으려면 모든 종목 시총이 같은 단위여야 함.
+        if marcap_local:
+            fx = fx_to_krw.get(currency, 1.0)
+            marcap_krw = marcap_local * fx
+            marcap_str = fmt_marcap_krw_eok(marcap_krw)
+            marcap_raw_eok = marcap_krw / 1e8
         else:
             marcap_str = ''
             marcap_raw_eok = 0
@@ -221,6 +241,11 @@ def main() -> None:
     existing_by_ticker = _load_existing_by_ticker()
     print(f"기존 universe.json: {len(existing_by_ticker)}종목 (fallback 가능)")
 
+    # 환율 fetch (KRW 환산용)
+    print("환율 fetch 중 (USD/JPY/EUR/HKD/TWD/CAD → KRW)...")
+    fx_to_krw = fetch_fx_to_krw()
+    print(f"  환율: {', '.join(f'{k}={v:.2f}' for k, v in fx_to_krw.items() if k != 'KRW')}")
+
     HEADER = ['#', '통화', '섹터', '티커', '기업명', '시가총액 (억원)', '가격',
               'YTD', '1D', '1W', '1M', '3M', '6M', '1Y',
               '시가총액 raw', 'YTD(P)', '1D(P)', '1W(P)', '1M(P)', '3M(P)', '6M(P)', '1Y(P)']
@@ -230,7 +255,7 @@ def main() -> None:
     results: dict[int, list[str]] = {}
     with ThreadPoolExecutor(max_workers=5) as ex:
         futures = {
-            ex.submit(fetch_one, i + 1, r['티커'].strip(), r.get('섹터', '').strip(), r['기업명'].strip()): i
+            ex.submit(fetch_one, i + 1, r['티커'].strip(), r.get('섹터', '').strip(), r['기업명'].strip(), fx_to_krw): i
             for i, r in enumerate(rows)
         }
         done = 0
