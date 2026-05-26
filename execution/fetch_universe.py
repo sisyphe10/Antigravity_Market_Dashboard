@@ -113,14 +113,28 @@ def fmt_marcap_krw_eok(marcap_krw: float | None) -> str:
     return f'{eok:,}억'
 
 
+# 통화별 anomaly threshold — 각 시장의 일일 가격제한을 약간 초과하는 값이 의심점.
+# KRW/JPY: ±30%, TWD: ±10%, 가격제한 없는 시장(USD/EUR/HKD/CAD): 50% (실적 갭업/뉴스 변동 흡수).
+THRESHOLD_BY_CURRENCY = {
+    'KRW': 0.30,
+    'JPY': 0.30,
+    'TWD': 0.10,
+    'USD': 0.50,
+    'EUR': 0.50,
+    'HKD': 0.50,
+    'CAD': 0.50,
+}
+DEFAULT_ANOMALY_THRESHOLD = 0.50
+
+
 def detect_data_anomaly(closes: 'pd.Series', threshold: float = 0.30, window: int = 30):
     """
-    최근 window 영업일에서 인접 일간 절대변동률이 threshold(기본 30%)를 **초과**하면
+    최근 window 영업일에서 인접 일간 절대변동률이 threshold를 **초과**하면
     (prev_date, prev_close, curr_date, curr_close, pct) 반환. 없으면 None.
 
-    한국 시장은 일일 가격제한이 ±30.0%이므로 정확히 30%는 상한가/하한가 (정상).
-    30%를 *초과*하는 점프는 yfinance/Yahoo의 분할·병합·무증·유증 데이터 오류 의심.
-    코미코 2026-05-18 -51.7% 같은 사례 검출용.
+    각 시장의 일일 가격제한을 초과하는 점프는 yfinance/Yahoo의 분할·병합·무증·유증
+    데이터 오류 가능성 (코미코 2026-05-18 -51.7% 사례). threshold는 통화별로
+    THRESHOLD_BY_CURRENCY를 통해 fetch_one()에서 전달.
 
     EPS 마진: 161200/124000 = 1.30000000000000004 같은 부동소수점 노이즈를 흡수해
     정확한 상한가/하한가가 false positive로 잡히지 않게 함.
@@ -163,9 +177,10 @@ def fetch_one(idx: int, raw_ticker: str, sector: str, name: str, fx_to_krw: dict
         last = float(closes.iloc[-1])
         prev = float(closes.iloc[-2])
 
-        # Sanity check — 인접 영업일 ±30% 점프는 yfinance 분할 데이터 오류 가능성
-        # (코미코 5/18 절반 → 5/26 raw 환원 사례). 적발 시 수익률 모두 blank 처리.
-        anomaly = detect_data_anomaly(closes, threshold=0.30, window=30)
+        # Sanity check — 통화별 가격제한 초과 점프는 yfinance 데이터 오류 가능성
+        # (코미코 5/18 -51.7% 같은 사례). 적발 시 수익률 모두 blank 처리.
+        threshold = THRESHOLD_BY_CURRENCY.get(currency, DEFAULT_ANOMALY_THRESHOLD)
+        anomaly = detect_data_anomaly(closes, threshold=threshold, window=30)
 
         # 기간별 lookback (거래일 기준)
         def lookback_pct(days: int) -> float | None:
