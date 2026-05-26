@@ -4551,10 +4551,12 @@ def create_dashboard():
             position: relative;
         }}
 
-        h1 {{
+        header h1 {{
             margin: 0;
             font-size: 33px;
             color: #333;
+            font-weight: 700;
+            line-height: 1.2;
         }}
 
         .last-updated {{
@@ -5449,7 +5451,8 @@ def create_dashboard():
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }
         header { padding: 20px 24px; margin: 0 0 40px; text-align: center; position: relative; }
-        header h1 { margin: 0; font-size: 33px; color: #333; }
+        header h1 { margin: 0; font-size: 33px; color: #333; font-weight: 700; line-height: 1.2; }
+        .last-updated { margin-top: 10px; color: #6c757d; font-size: 15px; font-style: italic; }
         .nav-group { margin-top: 10px; }
         .nav-button { display: inline-block; padding: 6px 16px; border-radius: 6px; text-decoration: none; color: #fff; font-size: 0.85rem; font-weight: 600; background: #333; }
         .content { padding: 24px; max-width: 1800px; margin: 0 auto; }
@@ -5496,7 +5499,7 @@ TOPNAV_PLACEHOLDER
 SIDEBAR_PLACEHOLDER
 <header>
     <h1>🌐 Universe</h1>
-    <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: __UNIVERSE_UPDATED__</div>
+    <div class="last-updated">Updated: __UNIVERSE_UPDATED__</div>
     <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="position:absolute;top:20px;right:24px;background:#6B21A8;color:#fff;font-size:18px;font-weight:600;text-decoration:none;padding:10px 22px;border-radius:8px;">Sheet</a>
 </header>
 <div class="content">
@@ -5890,10 +5893,11 @@ function renderSector() {
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
         body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }}
         header {{ padding: 20px 24px; margin: 0 0 40px; text-align: center; position: relative; }}
-        header h1 {{ margin: 0; font-size: 33px; color: #333; }}
+        header h1 {{ margin: 0; font-size: 33px; color: #333; font-weight: 700; line-height: 1.2; }}
+        .last-updated {{ margin-top: 10px; color: #6c757d; font-size: 15px; font-style: italic; }}
         .nav-group {{ margin-top: 10px; }}
         .nav-button {{ display: inline-block; padding: 6px 16px; border-radius: 6px; text-decoration: none; color: #fff; font-size: 0.85rem; font-weight: 600; background: #333; }}
-        .subtitle {{ color: #888; font-size: 0.85rem; margin-top: 4px; }}
+        .subtitle {{ color: #6c757d; font-size: 15px; font-style: italic; margin-top: 10px; }}
         .content {{ padding: 24px; max-width: 1800px; margin: 0 auto; }}
         .section {{ background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }}
         .section h2 {{ font-size: 1.1rem; color: #333; margin-bottom: 16px; }}
@@ -6101,8 +6105,9 @@ refresh();
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
         body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }}
         header {{ padding: 20px 24px; margin: 0 0 40px; text-align: center; position: relative; }}
-        header h1 {{ margin: 0; font-size: 33px; color: #333; }}
-        .subtitle {{ color: #888; font-size: 0.85rem; margin-top: 4px; }}
+        header h1 {{ margin: 0; font-size: 33px; color: #333; font-weight: 700; line-height: 1.2; }}
+        .last-updated {{ margin-top: 10px; color: #6c757d; font-size: 15px; font-style: italic; }}
+        .subtitle {{ color: #6c757d; font-size: 15px; font-style: italic; margin-top: 10px; }}
         .content {{ padding: 24px; max-width: 1800px; margin: 0 auto; }}
         .section {{ background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }}
         .section h2 {{ font-size: 1.1rem; color: #333; margin-bottom: 16px; }}
@@ -6137,8 +6142,8 @@ refresh();
 {top_nav_html('featured')}
 {sidebar_html('featured')}
 <header>
-    <h1>Featured</h1>
-    <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: __FEATURED_UPDATED__</div>
+    <h1>🔥 Featured</h1>
+    <div class="last-updated">Updated: __FEATURED_UPDATED__</div>
 </header>
 <div class="content">
     <div class="date-bar">
@@ -6687,7 +6692,8 @@ def generate_etf_html():
 * {{ box-sizing: border-box; margin: 0; padding: 0; }}
 body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }}
 header {{ padding: 20px 24px; margin: 0 0 40px; text-align: center; position: relative; }}
-header h1 {{ margin: 0; font-size: 33px; color: #333; }}
+header h1 {{ margin: 0; font-size: 33px; color: #333; font-weight: 700; line-height: 1.2; }}
+        .last-updated {{ margin-top: 10px; color: #6c757d; font-size: 15px; font-style: italic; }}
 .home-btn {{ position: absolute; top: 20px; right: 24px; padding: 6px 16px; background: #e0e0e0; color: #333; text-decoration: none; border-radius: 8px; font-size: 15px; font-weight: 600; }}
 .container {{ max-width: 1800px; margin: 0 auto; padding: 20px; }}
 .controls {{ display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }}
@@ -6729,7 +6735,7 @@ tbody tr.etf-row:hover {{ background: #ede9fe; }}
 {sidebar_html('etf')}
 <header>
     <h1>🏛️ ETF Dashboard</h1>
-    <div style="margin-top:10px;color:#6c757d;font-style:italic;font-size:15px;">Updated: {datetime.now(tz=KST).strftime("%Y-%m-%d %H:%M:%S KST")}</div>
+    <div class="last-updated">Updated: {datetime.now(tz=KST).strftime("%Y-%m-%d %H:%M:%S KST")}</div>
 </header>
 
 <div class="container">
