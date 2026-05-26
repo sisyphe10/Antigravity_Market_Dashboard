@@ -293,7 +293,9 @@ for pf_name, start_price in current_base_prices.items():
     current_index = start_price
 
     for d in pf_calc_dates:
-        # 전일(d-1)까지 유효했던 비중 찾기
+        # 전일(d-1)까지 유효했던 비중 찾기.
+        # 엄격한 '<' 필수: '<='로 바꾸면 당일 NEW 시트에 추가된 새 비중으로 당일 NAV가
+        # 계산되어 룩어헤드 버그 발생 (자문 워크플로상 오늘 변경은 다음 거래일부터 적용).
         past_dates = w_table.index[w_table.index < d]
 
         if len(past_dates) == 0:
