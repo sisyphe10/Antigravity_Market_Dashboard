@@ -23,6 +23,7 @@ import csv
 import json
 import os
 import sys
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -128,14 +129,22 @@ def fetch_one(idx: int, raw_ticker: str, sector: str, name: str) -> list[str] | 
 
         # 시가총액 — yfinance fast_info.market_cap이 항상 None 반환하는 bug 우회.
         # info['marketCap']은 정상 동작 (단, 호출당 추가 API request 발생).
+        # rate limit (특히 TYO 종목) 회피용 1회 재시도 + sleep.
         marcap_local = None
-        try:
-            info = t.info or {}
-            mc = info.get('marketCap')
-            if mc:
-                marcap_local = float(mc)
-        except Exception:
-            pass
+        for attempt in range(2):
+            try:
+                info = t.info or {}
+                mc = info.get('marketCap')
+                if mc:
+                    marcap_local = float(mc)
+                    break
+                # info는 받았는데 marketCap만 누락 — 재시도 의미 없음
+                break
+            except Exception as e:
+                if 'Too Many Requests' in str(e) and attempt == 0:
+                    time.sleep(3)
+                    continue
+                break
 
         # 통화별 시가총액 표시 — KRW 종목은 억원, 다른 통화는 K/M/B 표기
         if marcap_local and currency == 'KRW':
@@ -187,6 +196,18 @@ def fetch_one(idx: int, raw_ticker: str, sector: str, name: str) -> list[str] | 
         return None
 
 
+def _load_existing_by_ticker() -> dict[str, list[str]]:
+    """기존 universe.json에서 티커 → row 매핑. 부분 실패 시 fallback용."""
+    if not OUTPUT_FILE.exists():
+        return {}
+    try:
+        with open(OUTPUT_FILE, encoding='utf-8') as f:
+            d = json.load(f)
+        return {r[3]: r for r in d.get('values', [])[1:] if len(r) > 3}
+    except Exception:
+        return {}
+
+
 def main() -> None:
     if not TICKERS_FILE.exists():
         raise RuntimeError(f"{TICKERS_FILE} 없음")
@@ -197,14 +218,17 @@ def main() -> None:
             rows.append(r)
     print(f"종목 수: {len(rows)}")
 
+    existing_by_ticker = _load_existing_by_ticker()
+    print(f"기존 universe.json: {len(existing_by_ticker)}종목 (fallback 가능)")
+
     HEADER = ['#', '통화', '섹터', '티커', '기업명', '시가총액 (억원)', '가격',
               'YTD', '1D', '1W', '1M', '3M', '6M', '1Y',
               '시가총액 raw', 'YTD(P)', '1D(P)', '1W(P)', '1M(P)', '3M(P)', '6M(P)', '1Y(P)']
     values: list[list[str]] = [HEADER]
 
-    # 병렬 fetch
+    # 병렬 fetch (worker 5로 줄여 rate limit 회피)
     results: dict[int, list[str]] = {}
-    with ThreadPoolExecutor(max_workers=10) as ex:
+    with ThreadPoolExecutor(max_workers=5) as ex:
         futures = {
             ex.submit(fetch_one, i + 1, r['티커'].strip(), r.get('섹터', '').strip(), r['기업명'].strip()): i
             for i, r in enumerate(rows)
@@ -219,9 +243,30 @@ def main() -> None:
             if done % 50 == 0:
                 print(f"  진행: {done}/{len(rows)}")
 
-    # 순서 보존
-    for i in sorted(results):
-        values.append(results[i])
+    # 부분 실패 보완 — 새 fetch 실패한 종목은 기존 universe.json 값 사용
+    fallback_count = 0
+    sequence_fixed: list[list[str]] = []
+    for i, r in enumerate(rows):
+        ticker = r['티커'].strip()
+        if i in results:
+            row = results[i].copy()
+            # 시가총액 빈값일 때도 기존 값 fallback
+            if (not row[5] or not row[14]) and ticker in existing_by_ticker:
+                old = existing_by_ticker[ticker]
+                if old[5] and old[14]:
+                    row[5] = old[5]
+                    row[14] = old[14]
+                    fallback_count += 1
+            sequence_fixed.append(row)
+        elif ticker in existing_by_ticker:
+            old = existing_by_ticker[ticker].copy()
+            old[0] = str(i + 1)  # 순번 갱신
+            sequence_fixed.append(old)
+            fallback_count += 1
+    values.extend(sequence_fixed)
+
+    if fallback_count:
+        print(f"  fallback 적용: {fallback_count}종목 (이전 universe.json 값 보존)")
 
     out = {
         'updated_at': datetime.now(KST).strftime('%Y-%m-%d %H:%M KST'),
