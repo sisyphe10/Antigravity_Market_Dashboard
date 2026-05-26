@@ -5570,7 +5570,9 @@ function rsiOf(r){
 function fmtRsi(n){if(n===null||n===undefined)return'';var r=Math.round(n);return(r>0?'+':'')+r+'%';}
 
 Promise.all([
-    fetch('https://sheets.googleapis.com/v4/spreadsheets/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/values/universe?key=AIzaSyCHPiRby5FVAIKDwneZHy1KGl3SfycjZEw').then(function(r){return r.json()}),
+    // GitHub Pages 정적 JSON (GHA cron이 매일 yfinance로 수집해서 갱신).
+    // 이전: Google Sheets API + GOOGLEFINANCE — REST API에서 "로드 중..." stale 캐시 반환 문제로 폐기 (2026-05-26).
+    fetch('universe.json?_=' + Date.now()).then(function(r){return r.json()}),
     fetch('index_returns.json').then(function(r){return r.ok?r.json():null}).catch(function(){return null})
 ]).then(function(results){
     var data=results[0], idxData=results[1];

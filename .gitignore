@@ -29,6 +29,7 @@ test_env/
 *.db
 !dataset.csv
 !hotel_adr.csv
+!universe_tickers.csv
 !Wrap_NAV.xlsx
 !자문지/*.xlsx
 
@@ -66,6 +67,7 @@ charts/*
 !stock_master.json
 !disclosures.json
 !corp_codes.json
+!universe.json
 
 # 기타
 *.bat

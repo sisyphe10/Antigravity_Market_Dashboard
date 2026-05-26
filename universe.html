@@ -98,7 +98,7 @@
 <aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="market.html" class="sidebar-link">Index</a><a href="universe.html" class="sidebar-link active">Universe</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
 <header>
     <h1>🌐 Universe</h1>
-    <div class="last-updated">Updated: 2026-05-26 13:39:00 KST</div>
+    <div class="last-updated">Updated: 2026-05-26 13:46:22 KST</div>
     <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="position:absolute;top:20px;right:24px;background:#2d7a3a;color:#fff;font-size:18px;font-weight:600;text-decoration:none;padding:10px 22px;border-radius:8px;">Sheet</a>
 </header>
 <div class="content">
@@ -169,7 +169,9 @@ function rsiOf(r){
 function fmtRsi(n){if(n===null||n===undefined)return'';var r=Math.round(n);return(r>0?'+':'')+r+'%';}
 
 Promise.all([
-    fetch('https://sheets.googleapis.com/v4/spreadsheets/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/values/universe?key=AIzaSyCHPiRby5FVAIKDwneZHy1KGl3SfycjZEw').then(function(r){return r.json()}),
+    // GitHub Pages 정적 JSON (GHA cron이 매일 yfinance로 수집해서 갱신).
+    // 이전: Google Sheets API + GOOGLEFINANCE — REST API에서 "로드 중..." stale 캐시 반환 문제로 폐기 (2026-05-26).
+    fetch('universe.json?_=' + Date.now()).then(function(r){return r.json()}),
     fetch('index_returns.json').then(function(r){return r.ok?r.json():null}).catch(function(){return null})
 ]).then(function(results){
     var data=results[0], idxData=results[1];
