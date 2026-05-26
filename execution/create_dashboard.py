@@ -1178,11 +1178,29 @@ def _build_combined_chart_section():
                 {'display': 'MLC 64Gb 8GBx8',             'csv': 'MLC 64Gb 8GBx8',             'color': '#4DB6AC'},
                 {'display': 'MLC 32Gb 4GBx8',             'csv': 'MLC 32Gb 4GBx8',             'color': '#80CBC4'},
             ]},
+            {'label': 'HOTELS', 'series': [
+                # hotel_adr.csv의 모든 호텔×lead 가격의 일별 평균 (별도 sub-section 대신 cmbChart에 편입)
+                {'display': 'Hotel ADR Avg', 'csv': 'Hotel ADR Avg', 'color': '#FF7043'},
+            ]},
         ]
 
         df = pd.read_csv(CSV_FILE, encoding='utf-8-sig')
         df['날짜'] = pd.to_datetime(df['날짜'])
         df['가격'] = pd.to_numeric(df['가격'].astype(str).str.replace(',', ''), errors='coerce')
+
+        # Hotel ADR 평균 시계열을 dataset에 inject (hotel_adr.csv → 일별 모든 호텔×lead 평균).
+        # dataset.csv를 영구히 안 건드리고 차트 빌드 시점에만 append.
+        try:
+            if os.path.exists('hotel_adr.csv'):
+                hdf = pd.read_csv('hotel_adr.csv')
+                hdf['date'] = pd.to_datetime(hdf['collected_at'].str[:10])
+                # 일별 모든 호텔×lead 가격의 단순 평균
+                daily_avg = hdf.groupby('date')['price_krw'].mean().round(0).reset_index()
+                daily_avg = daily_avg.rename(columns={'date': '날짜', 'price_krw': '가격'})
+                daily_avg['제품명'] = 'Hotel ADR Avg'
+                df = pd.concat([df, daily_avg[['날짜', '제품명', '가격']]], ignore_index=True)
+        except Exception as e:
+            print(f"  Warning: Hotel ADR Avg inject 실패: {e}")
 
         all_csv_names = set()
         for g in groups:
@@ -1622,7 +1640,6 @@ def _build_combined_chart_section():
         </script>
         """.replace('CMB_DATA_PLACEHOLDER', export_json)
 
-        hotel_summary = _build_hotel_mini_summary()
         return f"""
         <div class="category-section">
             <h2 class="category-title">DATA</h2>
@@ -1644,7 +1661,6 @@ def _build_combined_chart_section():
                     </div>
                 </div>
             </div>
-            {hotel_summary}
         </div>
         {js_code}
         """
