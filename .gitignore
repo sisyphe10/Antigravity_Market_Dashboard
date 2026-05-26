@@ -64,6 +64,8 @@ charts/*
 !landing_highlights.json
 !landing_quotes.json
 !stock_master.json
+!disclosures.json
+!corp_codes.json
 
 # 기타
 *.bat

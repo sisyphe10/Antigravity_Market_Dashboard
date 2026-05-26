@@ -124,11 +124,12 @@ def sidebar_html(active=''):
 
 
 def wrap_sidebar_html():
-    """Render the WRAP-specific sidebar (Dashboard / Order / AUM, JS tab switcher)."""
+    """Render the WRAP-specific sidebar (Dashboard / 공시 / Order / AUM, JS tab switcher)."""
     items = [
-        ('dashboard', 'Dashboard'),
-        ('order',     'Order'),
-        ('aum',       'AUM'),
+        ('dashboard',   'Dashboard'),
+        ('disclosures', '공시'),
+        ('order',       'Order'),
+        ('aum',         'AUM'),
     ]
     links = ''.join(
         f'<a href="#" onclick="wrapSwitchTab(\'{tab}\');return false;" '
@@ -3886,6 +3887,100 @@ def create_order_section():
     """
 
 
+def create_disclosures_section():
+    """공시 탭 — disclosures.json 누적 데이터를 날짜순 테이블 + 종목 필터로 렌더.
+
+    매일 fetch_disclosures.py(GHA cron)가 portfolio_data.json의 현재 보유 종목에 대해
+    DART API로 신규 공시만 수집해서 누적. 컬럼: 공시일/종목/제목/요약/URL.
+    """
+    return """
+        <div style="max-width:1800px;margin:0 auto;">
+            <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap;">
+                <h2 style="margin:0;font-size:24px;font-weight:700;color:#222;">공시 (DART)</h2>
+                <span id="disclLastUpdated" style="font-size:13px;color:#666;"></span>
+                <label style="margin-left:auto;font-size:14px;color:#444;display:flex;align-items:center;gap:8px;">
+                    종목 필터
+                    <select id="disclStockFilter" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-family:inherit;font-size:14px;background:#fff;min-width:160px;text-align:center;text-align-last:center;">
+                        <option value="">전체</option>
+                    </select>
+                </label>
+                <span id="disclCount" style="font-size:13px;color:#666;"></span>
+            </div>
+            <div id="disclContent" style="background:#fff;border-radius:8px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                <div style="text-align:center;color:#888;padding:40px;">로딩 중...</div>
+            </div>
+        </div>
+        <script>
+        var _disclData = null;
+        var _disclLoaded = false;
+
+        async function loadDisclosures() {
+            if (_disclLoaded) return;
+            _disclLoaded = true;
+            try {
+                var res = await fetch('disclosures.json?_=' + Date.now());
+                if (!res.ok) throw new Error('disclosures.json fetch 실패: ' + res.status);
+                _disclData = await res.json();
+                var items = _disclData.items || [];
+                document.getElementById('disclLastUpdated').textContent = _disclData.updated_at ? ('Updated: ' + _disclData.updated_at) : '';
+                // 종목 dropdown 채우기 (name+code 유일하게)
+                var seen = {};
+                var stocks = [];
+                items.forEach(function(it) {
+                    var key = it.code + '|' + it.name;
+                    if (!seen[key]) { seen[key] = true; stocks.push({ code: it.code, name: it.name }); }
+                });
+                stocks.sort(function(a, b) { return a.name.localeCompare(b.name, 'ko'); });
+                var sel = document.getElementById('disclStockFilter');
+                stocks.forEach(function(s) {
+                    var opt = document.createElement('option');
+                    opt.value = s.code;
+                    opt.textContent = s.name + ' (' + s.code + ')';
+                    sel.appendChild(opt);
+                });
+                sel.addEventListener('change', renderDisclosures);
+                renderDisclosures();
+            } catch (e) {
+                document.getElementById('disclContent').innerHTML = '<div style="text-align:center;color:#c00;padding:40px;">로드 실패: ' + e.message + '</div>';
+            }
+        }
+
+        function renderDisclosures() {
+            if (!_disclData) return;
+            var filter = document.getElementById('disclStockFilter').value;
+            var items = (_disclData.items || []).filter(function(it) { return !filter || it.code === filter; });
+            document.getElementById('disclCount').textContent = items.length + '건';
+            if (items.length === 0) {
+                document.getElementById('disclContent').innerHTML = '<div style="text-align:center;color:#888;padding:40px;">공시 데이터 없음.</div>';
+                return;
+            }
+            var html = '<table style="width:100%;border-collapse:collapse;font-size:14px;">';
+            html += '<thead><tr style="background:#f3f4f6;border-bottom:2px solid #d1d5db;">'
+                  + '<th style="padding:10px;text-align:center;width:110px;">공시일</th>'
+                  + '<th style="padding:10px;text-align:center;width:140px;">종목</th>'
+                  + '<th style="padding:10px;text-align:left;width:260px;">제목</th>'
+                  + '<th style="padding:10px;text-align:left;">요약</th>'
+                  + '<th style="padding:10px;text-align:center;width:60px;">DART</th>'
+                  + '</tr></thead><tbody>';
+            items.forEach(function(it) {
+                var summary = (it.summary || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                var title = (it.title || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                var name = (it.name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                html += '<tr style="border-bottom:1px solid #e5e7eb;">'
+                      + '<td style="padding:8px;text-align:center;color:#444;white-space:nowrap;">' + it.date + '</td>'
+                      + '<td style="padding:8px;text-align:center;font-weight:600;color:#1f2937;">' + name + '<div style="font-size:11px;color:#888;">' + it.code + '</div></td>'
+                      + '<td style="padding:8px;text-align:left;color:#222;font-weight:500;">' + title + '</td>'
+                      + '<td style="padding:8px;text-align:left;color:#555;line-height:1.5;">' + summary + '</td>'
+                      + '<td style="padding:8px;text-align:center;"><a href="' + it.url + '" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:none;font-weight:600;">↗</a></td>'
+                      + '</tr>';
+            });
+            html += '</tbody></table>';
+            document.getElementById('disclContent').innerHTML = html;
+        }
+        </script>
+    """
+
+
 def create_aum_section():
     """AUM 패널 — 상품별 AUM 입력 → Wrap_NAV.xlsx의 AUM 시트에 직접 행 추가.
 
@@ -5047,9 +5142,10 @@ def create_dashboard():
         f.write(landing_page)
     print("Landing page generated: index.html")
 
-    # ── Generate wrap.html (WRAP + Portfolio + Sector + Order/AUM tabs) ──
+    # ── Generate wrap.html (WRAP + Portfolio + Sector + 공시/Order/AUM tabs) ──
     order_html = create_order_section()
     aum_html = create_aum_section()
+    disclosures_html = create_disclosures_section()
     wrap_page = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5211,6 +5307,10 @@ def create_dashboard():
     {wrap_html}
     </div>
 
+    <div id="wrapPanelDisclosures" style="padding-top:24px;display:none;">
+    {disclosures_html}
+    </div>
+
     <div id="wrapPanelOrder" style="padding-top:24px;display:none;max-width:1800px;margin:0 auto;">
     {order_html}
     </div>
@@ -5269,8 +5369,10 @@ def create_dashboard():
             el.classList.toggle('active', el.getAttribute('data-wrap-tab') === tab);
         }});
         document.getElementById('wrapPanelDashboard').style.display = tab === 'dashboard' ? 'block' : 'none';
+        document.getElementById('wrapPanelDisclosures').style.display = tab === 'disclosures' ? 'block' : 'none';
         document.getElementById('wrapPanelOrder').style.display = tab === 'order' ? 'block' : 'none';
         document.getElementById('wrapPanelAUM').style.display = tab === 'aum' ? 'block' : 'none';
+        if (tab === 'disclosures' && typeof loadDisclosures === 'function') loadDisclosures();
         if (tab === 'order' && typeof loadOrder === 'function') loadOrder();
         if (tab === 'aum' && typeof loadAUM === 'function') loadAUM();
     }}
