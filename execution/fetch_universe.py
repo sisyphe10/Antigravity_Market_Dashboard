@@ -67,9 +67,10 @@ def to_yf_ticker(raw: str) -> tuple[str | None, str | None]:
 
 
 def fmt_pct(v: float | None) -> str:
+    """수익률 표시 — 일의 자리까지 (소수점 없음). 예: +15% / -3% / 0%."""
     if v is None or pd.isna(v):
         return ''
-    return f'{v:+.2f}%'
+    return f'{v:+.0f}%'
 
 
 def fmt_marcap_krw_eok(marcap_krw: float | None) -> str:
@@ -125,23 +126,34 @@ def fetch_one(idx: int, raw_ticker: str, sector: str, name: str) -> list[str] | 
         ret_6m = lookback_pct(126)
         ret_1y = lookback_pct(252)
 
-        # 시가총액 (yfinance fast_info)
+        # 시가총액 — yfinance fast_info.market_cap이 항상 None 반환하는 bug 우회.
+        # info['marketCap']은 정상 동작 (단, 호출당 추가 API request 발생).
         marcap_local = None
         try:
-            fi = t.fast_info
-            marcap_local = float(fi.get('market_cap') or 0)
+            info = t.info or {}
+            mc = info.get('marketCap')
+            if mc:
+                marcap_local = float(mc)
         except Exception:
             pass
 
-        # KRW 환산 (간단하게 정적 환율 사용. 정확도가 중요하면 별도 env vars로 갱신)
-        # 또는 KRW가 아닌 경우 그냥 시가총액만 표시 (단위 USD/JPY 등으로 헷갈리지만 일단)
-        if currency == 'KRW':
+        # 통화별 시가총액 표시 — KRW 종목은 억원, 다른 통화는 K/M/B 표기
+        if marcap_local and currency == 'KRW':
             marcap_str = fmt_marcap_krw_eok(marcap_local)
-            marcap_raw_eok = marcap_local / 1e8 if marcap_local else 0
+            marcap_raw_eok = marcap_local / 1e8
+        elif marcap_local:
+            # 비KRW: B/M 단위로 (예: $1.2B, $35M). 통화 기호 별도.
+            sym = {'USD': '$', 'JPY': '¥', 'TWD': 'NT$', 'CAD': 'C$', 'HKD': 'HK$', 'EUR': '€'}.get(currency, '')
+            if marcap_local >= 1e9:
+                marcap_str = f'{sym}{marcap_local/1e9:,.1f}B'
+            elif marcap_local >= 1e6:
+                marcap_str = f'{sym}{marcap_local/1e6:,.0f}M'
+            else:
+                marcap_str = f'{sym}{marcap_local:,.0f}'
+            marcap_raw_eok = marcap_local  # 정렬용 raw (원화 환산 X, 통화별 raw)
         else:
-            # USD/JPY 등은 그대로 단위로 표시 (대략. 정확한 KRW 환산은 후속 작업)
-            marcap_str = f'{marcap_local:,.0f} ({currency})' if marcap_local else ''
-            marcap_raw_eok = marcap_local or 0
+            marcap_str = ''
+            marcap_raw_eok = 0
 
         # 가격: 현지 통화 단위, 정수 또는 소수점 2자리
         if currency == 'KRW':
