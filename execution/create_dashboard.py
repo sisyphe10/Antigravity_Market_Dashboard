@@ -200,6 +200,7 @@ def create_portfolio_tables_html():
                                 <th style="border-left:2px solid #000;">현재가</th>
                                 <th>ATH</th>
                                 <th>DD</th>
+                                <th>RSI(1M)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -280,6 +281,15 @@ def create_portfolio_tables_html():
                     dd_str = "-"
                     dd_color_class = ""
 
+                # RSI(1M): 종목 1M - 시장 지수 1M (%p). Universe와 동일 정의.
+                rsi_1m = stock.get('rsi_1m')
+                if rsi_1m is not None:
+                    rsi_1m_str = f"{rsi_1m:+.1f}%"
+                    rsi_1m_color_class = "positive" if rsi_1m > 0 else "negative" if rsi_1m < 0 else ""
+                else:
+                    rsi_1m_str = "-"
+                    rsi_1m_color_class = ""
+
                 html += f"""
                             <tr>
                                 <td>{idx}</td>
@@ -294,6 +304,7 @@ def create_portfolio_tables_html():
                                 <td style="border-left:2px solid #000;">{current_price_str}</td>
                                 <td>{ath_price_str}</td>
                                 <td class="{dd_color_class}">{dd_str}</td>
+                                <td class="{rsi_1m_color_class}">{rsi_1m_str}</td>
                             </tr>
                 """
 
@@ -311,6 +322,7 @@ def create_portfolio_tables_html():
                                 <td class="{contribution_total_color}" style="font-weight: 600;">{total_contribution_str}</td>
                                 <td style="font-weight: 600;">-</td>
                                 <td style="border-left:2px solid #000;">-</td>
+                                <td>-</td>
                                 <td>-</td>
                                 <td>-</td>
                             </tr>

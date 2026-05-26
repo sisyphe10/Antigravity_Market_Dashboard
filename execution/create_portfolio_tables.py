@@ -247,6 +247,19 @@ def create_portfolio_tables():
         from datetime import timezone, timedelta as _td
         _today_kst = pd.Timestamp.now(tz=timezone(_td(hours=9))).normalize().tz_localize(None)
 
+        # 시장 지수 1M 수익률 (RSI(1M) = 종목 1M - 지수 1M, Universe와 동일 정의)
+        # KRX는 KOSPI/KOSDAQ만 매핑 (KONEX 등은 RSI 미표시)
+        try:
+            with open('index_returns.json', 'r', encoding='utf-8') as f:
+                _idx_returns = json.load(f).get('returns_1m', {})
+        except Exception as e:
+            print(f"  Warning: index_returns.json 로드 실패: {e}")
+            _idx_returns = {}
+        INDEX_RETURNS_1M = {
+            'KOSPI': _idx_returns.get('KOSPI'),
+            'KOSDAQ': _idx_returns.get('KOSDAQ'),
+        }
+
         # KRX 종목 리스트 미리 로드 (KRX → KRX-DESC fallback)
         print("2. KRX 종목 리스트 로드 중...")
         krx = pd.DataFrame(columns=['Code', 'Marcap'])
@@ -441,6 +454,25 @@ def create_portfolio_tables():
                     except:
                         pass
 
+                # RSI(1M) = 종목 1M 수익률 - 해당 시장 지수 1M 수익률 (%p, Universe와 동일 정의)
+                # 1M = 21 거래일 lookback (fetch_index_returns.py와 동일 기준)
+                rsi_1m = None
+                if price_df is not None and len(price_df) >= 22:
+                    try:
+                        last_c = float(price_df.iloc[-1]['Close'])
+                        prev_c = float(price_df.iloc[-22]['Close'])
+                        if prev_c > 0:
+                            stock_1m = (last_c / prev_c - 1)
+                            market = ''
+                            if not stock_data.empty:
+                                market = str(stock_data.iloc[0].get('Market', '') or '').upper()
+                            idx_key = 'KOSPI' if 'KOSPI' in market else ('KOSDAQ' if 'KOSDAQ' in market else None)
+                            idx_ret = INDEX_RETURNS_1M.get(idx_key) if idx_key else None
+                            if idx_ret is not None:
+                                rsi_1m = (stock_1m - idx_ret) * 100
+                    except Exception:
+                        pass
+
                 stocks_info.append({
                     'code': code,
                     'name': stock_name,
@@ -454,6 +486,7 @@ def create_portfolio_tables():
                     'current_price': current_price,
                     'ath_price': ath_price,
                     'dd': dd,
+                    'rsi_1m': rsi_1m,
                     'is_today_new': is_today_new
                 })
 
