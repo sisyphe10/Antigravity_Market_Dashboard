@@ -1191,10 +1191,10 @@ def _build_combined_chart_section():
         df['날짜'] = pd.to_datetime(df['날짜'])
         df['가격'] = pd.to_numeric(df['가격'].astype(str).str.replace(',', ''), errors='coerce')
 
-        # 단위 변환: KRX ETS Trading Volume은 원 단위(수십억 원) → 억원 단위로 환산.
+        # 단위 변환: KRX ETS/GOLD Trading Volume은 원 단위(수십~수백억 원) → 억원 단위로 환산.
         # Y축 라벨은 별도로 안 적음 (사용자 명시).
-        _ets_mask = df['제품명'] == 'KRX ETS Trading Volume'
-        df.loc[_ets_mask, '가격'] = df.loc[_ets_mask, '가격'] / 1e8
+        _volume_mask = df['제품명'].isin(['KRX ETS Trading Volume', 'KRX GOLD Trading Volume'])
+        df.loc[_volume_mask, '가격'] = df.loc[_volume_mask, '가격'] / 1e8
 
         # Hotel ADR 도시별 일별 평균을 dataset에 inject (hotel_adr.csv → 도시별 모든 호텔×lead 평균).
         # dataset.csv를 영구히 안 건드리고 차트 빌드 시점에만 append.
