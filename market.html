@@ -25,8 +25,9 @@
 
         header {
             text-align: center;
-            margin-bottom: 40px;
-            padding: 20px;
+            margin: 0 0 40px;
+            padding: 20px 24px;
+            position: relative;
         }
 
         h1 {
@@ -492,7 +493,7 @@
     <aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="market.html" class="sidebar-link active">Index</a><a href="universe.html" class="sidebar-link">Universe</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
     <header>
         <h1>📊 Index</h1>
-        <div class="last-updated">Updated: 2026-05-26 11:03:47 KST</div>
+        <div class="last-updated">Updated: 2026-05-26 12:07:40 KST</div>
     </header>
 
     
@@ -528,7 +529,7 @@
 
     
         <div class="category-section">
-            <h2 class="category-title">Indices</h2>
+            <h2 class="category-title">Indice</h2>
             <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;justify-content:center;">
                 <div style="min-width:180px;"><div style="display:flex;gap:4px;margin-bottom:8px;"><button class="idx-mode-btn active" data-mode="local" onclick="switchIdxMode(this)">Local</button><button class="idx-mode-btn" data-mode="usd" onclick="switchIdxMode(this)">USD</button></div><table class="portfolio-table" style="max-width:500px;margin:0 auto;"><tbody><tr class="idx-chart-item active" data-series="KOSPI" onclick="toggleIdxSeries(this)"><td style="width:6px;padding:0;"><div style="width:4px;height:100%;background:#000000;border-radius:2px;"></div></td><td>KOSPI</td></tr>
 <tr class="idx-chart-item active" data-series="KOSDAQ" onclick="toggleIdxSeries(this)"><td style="width:6px;padding:0;"><div style="width:4px;height:100%;background:#666666;border-radius:2px;"></div></td><td>KOSDAQ</td></tr>
@@ -716,7 +717,7 @@
         
         
         <div class="category-section">
-            <h2 class="category-title">MARKET</h2>
+            <h2 class="category-title">DATA</h2>
             <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;justify-content:center;">
                 <div style="min-width:240px;max-height:720px;overflow-y:auto;"><style>.cmb-chart-item:not(.active) .cmb-color-bar{display:none;}</style><table class="portfolio-table" style="max-width:500px;margin:0 auto;"><tbody><tr><td rowspan="6" class="cmb-group-cell" style="background:#f0f0f0;font-weight:700;font-size:12px;color:#333;padding:8px 10px;text-align:center;vertical-align:middle;text-transform:uppercase;letter-spacing:0.5px;border-top:1px solid #000;border-bottom:1px solid #000;border-right:1px solid #ddd;white-space:nowrap;">INDEX_KOREA</td><td class="cmb-chart-item active" data-series="KOSPI" onclick="toggleCmbSeries(this, event)" style="cursor:pointer;text-align:center;position:relative;border-top:1px solid #000;"><div class="cmb-color-bar" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);width:4px;height:18px;border-radius:2px;"></div>KOSPI</td></tr>
 <tr><td class="cmb-chart-item" data-series="KOSPI/USD" onclick="toggleCmbSeries(this, event)" style="cursor:pointer;text-align:center;position:relative;"><div class="cmb-color-bar" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);width:4px;height:18px;border-radius:2px;"></div>KOSPI/USD</td></tr>
