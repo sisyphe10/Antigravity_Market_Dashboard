@@ -113,6 +113,40 @@ def fmt_marcap_krw_eok(marcap_krw: float | None) -> str:
     return f'{eok:,}억'
 
 
+def detect_data_anomaly(closes: 'pd.Series', threshold: float = 0.30, window: int = 30):
+    """
+    최근 window 영업일에서 인접 일간 절대변동률이 threshold(기본 30%)를 **초과**하면
+    (prev_date, prev_close, curr_date, curr_close, pct) 반환. 없으면 None.
+
+    한국 시장은 일일 가격제한이 ±30.0%이므로 정확히 30%는 상한가/하한가 (정상).
+    30%를 *초과*하는 점프는 yfinance/Yahoo의 분할·병합·무증·유증 데이터 오류 의심.
+    코미코 2026-05-18 -51.7% 같은 사례 검출용.
+
+    EPS 마진: 161200/124000 = 1.30000000000000004 같은 부동소수점 노이즈를 흡수해
+    정확한 상한가/하한가가 false positive로 잡히지 않게 함.
+    """
+    EPS = 1e-6
+    recent = closes.tail(window + 1)
+    if len(recent) < 2:
+        return None
+    pct = recent.pct_change()
+    abs_pct = pct.abs()
+    if abs_pct.max() <= threshold + EPS:
+        return None
+    max_idx = abs_pct.idxmax()
+    loc = recent.index.get_loc(max_idx)
+    if loc == 0:
+        return None
+    prev_idx = recent.index[loc - 1]
+    return (
+        prev_idx.strftime('%Y-%m-%d'),
+        float(recent.loc[prev_idx]),
+        max_idx.strftime('%Y-%m-%d'),
+        float(recent.loc[max_idx]),
+        float(pct.loc[max_idx]) * 100,
+    )
+
+
 def fetch_one(idx: int, raw_ticker: str, sector: str, name: str, fx_to_krw: dict[str, float]) -> list[str] | None:
     """단일 종목의 22개 컬럼 데이터 생성. 실패 시 None. fx_to_krw: 통화 → KRW 환율."""
     yf_tk, currency = to_yf_ticker(raw_ticker)
@@ -128,6 +162,10 @@ def fetch_one(idx: int, raw_ticker: str, sector: str, name: str, fx_to_krw: dict
             return None
         last = float(closes.iloc[-1])
         prev = float(closes.iloc[-2])
+
+        # Sanity check — 인접 영업일 ±30% 점프는 yfinance 분할 데이터 오류 가능성
+        # (코미코 5/18 절반 → 5/26 raw 환원 사례). 적발 시 수익률 모두 blank 처리.
+        anomaly = detect_data_anomaly(closes, threshold=0.30, window=30)
 
         # 기간별 lookback (거래일 기준)
         def lookback_pct(days: int) -> float | None:
@@ -189,6 +227,19 @@ def fetch_one(idx: int, raw_ticker: str, sector: str, name: str, fx_to_krw: dict
             price_str = f'{last:,.0f}'
         else:
             price_str = f'{last:,.2f}'
+
+        # anomaly 적발 시 가격/시총만 표시, 수익률 컬럼은 모두 blank
+        if anomaly:
+            prev_d, prev_p, cur_d, cur_p, pct = anomaly
+            print(f"  Warning: {raw_ticker} ({name}) yfinance anomaly — "
+                  f"{prev_d} {prev_p:,.0f} → {cur_d} {cur_p:,.0f} ({pct:+.1f}%). Returns blanked.")
+            return [
+                str(idx), currency, sector, raw_ticker, name,
+                marcap_str, price_str,
+                '', '', '', '', '', '', '',  # YTD/1D/1W/1M/3M/6M/1Y
+                f'{int(marcap_raw_eok):,}' if marcap_raw_eok else '',
+                '', '', '', '', '', '', '',
+            ]
 
         # 22개 컬럼 (Sheets 헤더 그대로)
         return [
