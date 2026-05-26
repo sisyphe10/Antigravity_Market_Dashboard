@@ -243,6 +243,10 @@ def create_portfolio_tables():
 
         print(f"   전체 날짜 범위: {nav_df['날짜'].min()} ~ {nav_df['날짜'].max()}")
 
+        # 오늘 KST (D-1 기준 weight_prev 계산 + latest_portfolio_date 컷오프 공용)
+        from datetime import timezone, timedelta as _td
+        _today_kst = pd.Timestamp.now(tz=timezone(_td(hours=9))).normalize().tz_localize(None)
+
         # KRX 종목 리스트 미리 로드 (KRX → KRX-DESC fallback)
         print("2. KRX 종목 리스트 로드 중...")
         krx = pd.DataFrame(columns=['Code', 'Marcap'])
@@ -336,8 +340,6 @@ def create_portfolio_tables():
             available_dates = sorted(portfolio_df['날짜'].unique())
             # NEW 시트의 가장 최근 날짜 사용 (사용자가 최종 저장한 시점에 즉시 반영)
             # 미래 날짜는 제외 (실수 방지)
-            from datetime import timezone, timedelta as _td
-            _today_kst = pd.Timestamp.now(tz=timezone(_td(hours=9))).normalize().tz_localize(None)
             past_or_today = [d for d in available_dates if d <= _today_kst]
             latest_portfolio_date = past_or_today[-1] if past_or_today else available_dates[-1]
 
@@ -353,6 +355,7 @@ def create_portfolio_tables():
                 'use_portfolio': use_portfolio,
                 'latest_date': latest_portfolio_date,
                 'stocks': portfolio_stocks,
+                'portfolio_df': portfolio_df,
             })
 
         # === 모든 종목 가격을 병렬로 조회 ===
@@ -379,6 +382,7 @@ def create_portfolio_tables():
             use_portfolio = config['use_portfolio']
             latest_portfolio_date = config['latest_date']
             portfolio_stocks = config['stocks']
+            portfolio_df = config['portfolio_df']
 
             print(f"\n4. {display_name} 포트폴리오 처리 중...")
             print(f"   기준 날짜: {latest_portfolio_date} (전거래일)")
@@ -388,6 +392,14 @@ def create_portfolio_tables():
                 code = str(int(row['코드'])).zfill(6)
                 stock_name = row['종목']
                 weight = row['비중']
+
+                # 변경전 비중 (Order 탭 표시용): 오늘 KST 이전 가장 최근 NEW 시트 행의 비중.
+                # 오늘 finalize된 행이 있어도 "어제까지 비중"을 보존 → 모든 PC에서 변경 이력 일관 표시.
+                prev_rows = portfolio_df[(portfolio_df['코드'] == int(code)) & (portfolio_df['날짜'] < _today_kst)]
+                if not prev_rows.empty:
+                    weight_prev = float(prev_rows.sort_values('날짜').iloc[-1]['비중'])
+                else:
+                    weight_prev = 0.0
 
                 stock_data = krx[krx['Code'] == code]
                 sector = sector_map.get(code, '기타')
@@ -435,6 +447,7 @@ def create_portfolio_tables():
                     'sector': sector if sector else 'N/A',
                     'market_cap': market_cap_billions,
                     'weight': weight,
+                    'weight_prev': weight_prev,
                     'today_return': today_return,
                     'contribution': contribution,
                     'cumulative_return': cumulative_return,

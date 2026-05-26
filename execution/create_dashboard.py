@@ -2790,13 +2790,13 @@ def create_order_section():
                 var pdata = await res.json();
                 ORDER_PORTFOLIOS.forEach(function(p) {
                     var stocks = pdata[p.jsonKey] || [];
-                    // 목표전환형 첫 주문: NEW 시트 첫 행이 곧 운용 개시 비중이라 portfolio_data.json weight가 보유 중인 것처럼 표시됨.
-                    // is_today_new=true 종목은 어제까지 미보유이므로 "변경전"을 0으로 override (변경후 default는 원래 비중 유지).
-                    var isTargetTransform = p.jsonKey && p.jsonKey.indexOf('목표전환형') >= 0;
+                    // "변경전"은 D-1 기준(weight_prev) — 오늘 finalize된 행 직전 비중.
+                    // 모든 PC가 finalize 후에도 동일하게 "변경 이력" 화면을 보게 됨 (자정 지나면 자동 리셋).
+                    // weight_prev 누락 시(구버전 portfolio_data.json) 또는 신규 편입 시: weight 자체 fallback.
                     orderStocks[p.display] = stocks.map(function(s) {
                         var origW = parseFloat(s.weight) || 0;
-                        var displayW = (isTargetTransform && s.is_today_new) ? 0 : origW;
-                        return { code: s.code, name: s.name, sector: s.sector || '', weight: displayW };
+                        var prevW = (s.weight_prev != null) ? (parseFloat(s.weight_prev) || 0) : origW;
+                        return { code: s.code, name: s.name, sector: s.sector || '', weight: prevW };
                     });
                     orderState[p.display] = stocks.map(function(s) {
                         return { newWeight: parseFloat(s.weight) || 0, reason: '' };
@@ -3690,11 +3690,10 @@ def create_order_section():
                 orderState = {};
                 ORDER_PORTFOLIOS.forEach(function(p) {
                     var stocks = pdata[p.jsonKey] || [];
-                    var isTargetTransform = p.jsonKey && p.jsonKey.indexOf('목표전환형') >= 0;
                     orderStocks[p.display] = stocks.map(function(s) {
                         var origW = parseFloat(s.weight) || 0;
-                        var displayW = (isTargetTransform && s.is_today_new) ? 0 : origW;
-                        return { code: s.code, name: s.name, sector: s.sector || '', weight: displayW };
+                        var prevW = (s.weight_prev != null) ? (parseFloat(s.weight_prev) || 0) : origW;
+                        return { code: s.code, name: s.name, sector: s.sector || '', weight: prevW };
                     });
                     orderState[p.display] = stocks.map(function(s) {
                         return { newWeight: parseFloat(s.weight) || 0, reason: '' };
