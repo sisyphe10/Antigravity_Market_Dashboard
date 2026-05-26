@@ -1168,7 +1168,7 @@ def _build_combined_chart_section():
                 {'display': 'SCFI Comprehensive Index',   'csv': 'SCFI Comprehensive Index',   'color': '#E74C3C'},
                 {'display': 'KRX ETS (KAU25)',            'csv': 'KRX ETS (KAU25)',            'color': '#1ABC9C'},
                 {'display': 'KRX ETS Trading Volume',     'csv': 'KRX ETS Trading Volume',     'color': '#117A65'},
-                {'display': 'SMP',                        'csv': 'SMP',                        'color': '#E67E22'},
+                {'display': 'SMP',                        'csv': 'SMP',                        'color': '#2d7a3a'},
             ]},
             {'label': 'MEMORY', 'series': [
                 {'display': 'DDR5 16G (2Gx8) 4800/5600',  'csv': 'DDR5 16G (2Gx8) 4800/5600',  'color': '#E91E63'},
@@ -3051,7 +3051,7 @@ def create_order_section():
                 + buildEmailBox('컴플라이언스 이메일', compliance, '#fffbeb', '#fef3c7', '#92400e', '#d97706')
                 + buildEmailBox('삼성 이메일', samsung, '#f9fafb', '#e5e7eb', '#444', '#374151')
                 + buildEmailBox('NH 이메일', nh, '#f9fafb', '#e5e7eb', '#444', '#374151')
-                + buildEmailBox('네이트온 (NH)', nateonText, '#eef2ff', '#c7d2fe', '#3730a3', '#4f46e5')
+                + buildEmailBox('네이트온 (NH)', nateonText, '#eef2ff', '#c7d2fe', '#1f5a2a', '#4f46e5')
                 + '</div>';
             document.getElementById('orderContent').innerHTML = html;
             document.querySelectorAll('#orderContent .email-tab-dl-btn').forEach(function(btn) {
@@ -3252,7 +3252,7 @@ def create_order_section():
             if (reasonLines.length) combined += '\\n\\n' + reasonLines.join('\\n');
             return '<div style="margin-top:16px;padding:16px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;">'
                 + '<div style="display:flex;align-items:center;margin-bottom:12px;">'
-                + '<h4 style="margin:0;font-size:15px;color:#3730a3;">네이트온 텍스트</h4>'
+                + '<h4 style="margin:0;font-size:15px;color:#1f5a2a;">네이트온 텍스트</h4>'
                 + '<button class="nateon-copy-btn" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:5px 14px;background:#4f46e5;color:#fff;border:none;border-radius:6px;cursor:pointer;">복사</button>'
                 + '</div>'
                 + '<pre class="nateon-text" style="white-space:pre-wrap;font-family:inherit;font-size:14px;color:#222;margin:0;line-height:1.6;">' + escapeHtml(combined) + '</pre>'
@@ -5456,9 +5456,9 @@ def create_dashboard():
         .nav-group { margin-top: 10px; }
         .nav-button { display: inline-block; padding: 6px 16px; border-radius: 6px; text-decoration: none; color: #fff; font-size: 0.85rem; font-weight: 600; background: #333; }
         .content { padding: 24px; max-width: 1800px; margin: 0 auto; }
-        .tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #6B21A8; }
+        .tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #2d7a3a; }
         .tab { padding: 10px 24px; cursor: pointer; font-weight: 600; font-size: 16px; color: #666; border: 1px solid transparent; border-bottom: none; border-radius: 8px 8px 0 0; background: #f0f0f0; }
-        .tab.active { color: #6B21A8; background: #fff; border-color: #6B21A8 #6B21A8 transparent; margin-bottom: -2px; }
+        .tab.active { color: #2d7a3a; background: #fff; border-color: #2d7a3a #2d7a3a transparent; margin-bottom: -2px; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .filters { margin-bottom: 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
@@ -5469,10 +5469,10 @@ def create_dashboard():
         .csel-list { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #d1d5db; border-radius: 6px; margin-top: 2px; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
         .csel-list.open { display: block; }
         .csel-item { padding: 8px 12px; text-align: center; cursor: pointer; font-size: 14px; font-family: inherit; }
-        .csel-item:hover { background: #e9e0f5; }
-        .csel-item.selected { background: #6B21A8; color: #fff; }
+        .csel-item:hover { background: #f0f7f2; }
+        .csel-item.selected { background: #2d7a3a; color: #fff; }
         .sector-group { margin-bottom: 24px; }
-        .sector-group h3 { font-size: 18px; color: #6B21A8; margin-bottom: 8px; padding: 8px 0; border-bottom: 1px solid #6B21A8; }
+        .sector-group h3 { font-size: 18px; color: #2d7a3a; margin-bottom: 8px; padding: 8px 0; border-bottom: 1px solid #2d7a3a; }
         table { width: 100%; border-collapse: collapse; font-size: 16px; table-layout: fixed; }
         thead { background: #e9ecef; }
         th { padding: 12px 6px; text-align: center; font-weight: 600; color: #000; cursor: pointer; white-space: nowrap; overflow: hidden; position: sticky; top: 0; background: #e9ecef; z-index: 10; box-shadow: inset 0 -2px 0 #000; }
@@ -5500,7 +5500,7 @@ SIDEBAR_PLACEHOLDER
 <header>
     <h1>🌐 Universe</h1>
     <div class="last-updated">Updated: __UNIVERSE_UPDATED__</div>
-    <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="position:absolute;top:20px;right:24px;background:#6B21A8;color:#fff;font-size:18px;font-weight:600;text-decoration:none;padding:10px 22px;border-radius:8px;">Sheet</a>
+    <a href="https://docs.google.com/spreadsheets/d/1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM/edit" target="_blank" style="position:absolute;top:20px;right:24px;background:#2d7a3a;color:#fff;font-size:18px;font-weight:600;text-decoration:none;padding:10px 22px;border-radius:8px;">Sheet</a>
 </header>
 <div class="content">
     <div class="tabs">
@@ -5906,7 +5906,7 @@ function renderSector() {
         .date-bar span {{ color: #888; }}
         .date-bar label {{ color: #555; font-weight: 600; }}
         .stats-row {{ display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }}
-        .stat-card {{ background: #fff; border-radius: 10px; padding: 16px 20px; flex: 1; min-width: 160px; border-left: 4px solid #0369a1; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }}
+        .stat-card {{ background: #fff; border-radius: 10px; padding: 16px 20px; flex: 1; min-width: 160px; border-left: 4px solid #2d7a3a; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }}
         .stat-card .label {{ font-size: 0.8rem; color: #888; margin-bottom: 4px; }}
         .stat-card .value {{ font-size: 1.3rem; font-weight: 700; color: #333; }}
         table {{ width: 100%; border-collapse: collapse; font-size: 16px; }}
@@ -6019,7 +6019,7 @@ function refresh() {{
             datasets: [{{
                 data: chartData.map(function(d) {{ return Math.round(d.val / 1000000); }}),
                 backgroundColor: 'rgba(3,105,161,0.5)',
-                borderColor: '#0369a1',
+                borderColor: '#2d7a3a',
                 borderWidth: 1
             }}]
         }},
@@ -6124,12 +6124,12 @@ refresh();
         tbody tr:nth-child(even) {{ background: #E8F5E9; }}
         tbody tr:nth-child(odd) {{ background: #fff; }}
         tbody tr:hover {{ background: #C8E6C9; }}
-        .section h2 {{ background: #E67E22; color: #fff; padding: 8px 12px; border-radius: 4px; font-size: 0.95rem; text-align: center; }}
+        .section h2 {{ background: #2d7a3a; color: #fff; padding: 8px 12px; border-radius: 4px; font-size: 0.95rem; text-align: center; }}
         .pos {{ color: #cc0000; font-weight: 600; }}
         .neg {{ color: #0055cc; font-weight: 600; }}
-        .tabs {{ display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #E67E22; }}
+        .tabs {{ display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #2d7a3a; }}
         .tab {{ padding: 10px 24px; cursor: pointer; font-weight: 600; font-size: 16px; color: #666; border: 1px solid transparent; border-bottom: none; border-radius: 8px 8px 0 0; background: #f0f0f0; }}
-        .tab.active {{ color: #E67E22; background: #fff; border-color: #E67E22 #E67E22 transparent; margin-bottom: -2px; }}
+        .tab.active {{ color: #2d7a3a; background: #fff; border-color: #2d7a3a #2d7a3a transparent; margin-bottom: -2px; }}
         .tab-content {{ display: none; }}
         .tab-content.active {{ display: block; }}
         .notable-news {{ font-size: 13px; color: #333; line-height: 1.8; }}
@@ -6698,31 +6698,31 @@ header h1 {{ margin: 0; font-size: 33px; color: #333; font-weight: 700; line-hei
 .container {{ max-width: 1800px; margin: 0 auto; padding: 20px; }}
 .controls {{ display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }}
 .controls input {{ padding: 8px 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 0.9rem; font-family: inherit; outline: none; width: 200px; }}
-.controls input:focus {{ border-color: #6366f1; }}
+.controls input:focus {{ border-color: #2d7a3a; }}
 .controls select {{ padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.85rem; background: #fff; font-family: inherit; }}
 .controls label {{ font-size: 0.85rem; color: #666; display: flex; align-items: center; gap: 4px; white-space: nowrap; }}
 .section {{ background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 20px; overflow: hidden; }}
 .section-header {{ padding: 14px 20px; font-size: 1rem; font-weight: 700; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }}
 .section-header .count {{ font-size: 0.8rem; color: #888; font-weight: 400; }}
 table {{ width: 100%; border-collapse: collapse; font-size: 16px; }}
-thead {{ background: #4338ca; }}
+thead {{ background: #2d7a3a; }}
 th {{ padding: 10px 8px; text-align: center; font-weight: 600; color: #fff; cursor: pointer; white-space: nowrap; }}
-th:hover {{ background: #3730a3; }}
+th:hover {{ background: #1f5a2a; }}
 th .arr {{ font-size: 0.6rem; margin-left: 2px; }}
 td {{ padding: 8px 8px; border-bottom: 1px solid #f0f0f0; text-align: center; }}
-tbody tr:hover {{ background: #f5f3ff; }}
+tbody tr:hover {{ background: #f0f7f2; }}
 tbody tr.etf-row {{ cursor: pointer; }}
-tbody tr.etf-row:hover {{ background: #ede9fe; }}
+tbody tr.etf-row:hover {{ background: #f0f7f2; }}
 .num {{ text-align: center; font-variant-numeric: tabular-nums; }}
 .pos {{ color: #cc0000; font-weight: 600; }}
 .neg {{ color: #0055cc; font-weight: 600; }}
 .etf-name {{ text-align: center; font-weight: 600; }}
-.constituents-row {{ background: #faf5ff; }}
+.constituents-row {{ background: #f0f7f2; }}
 .constituents-row td {{ padding: 0; }}
 .const-table {{ width: 100%; font-size: 0.78rem; }}
-.const-table th {{ background: #e9e5f5; color: #333; padding: 6px 8px; font-size: 0.75rem; }}
-.const-table td {{ padding: 5px 8px; border-bottom: 1px solid #ede9fe; }}
-.const-table tbody tr:hover {{ background: #e9e5f5; }}
+.const-table th {{ background: #f0f7f2; color: #333; padding: 6px 8px; font-size: 0.75rem; }}
+.const-table td {{ padding: 5px 8px; border-bottom: 1px solid #f0f7f2; }}
+.const-table tbody tr:hover {{ background: #f0f7f2; }}
 .search-results {{ display: none; }}
 .search-results.active {{ display: block; }}
 .badge {{ display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }}
@@ -6739,7 +6739,7 @@ tbody tr.etf-row:hover {{ background: #ede9fe; }}
 </header>
 
 <div class="container">
-    <div class="etf-tabs" style="display:flex;gap:0;margin-bottom:20px;border-bottom:2px solid #4338ca;">
+    <div class="etf-tabs" style="display:flex;gap:0;margin-bottom:20px;border-bottom:2px solid #2d7a3a;">
         <div class="etf-tab active" onclick="switchEtfTab(0)" style="padding:10px 24px;cursor:pointer;font-weight:600;font-size:16px;color:#666;border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;background:#f0f0f0;">AUM 상위</div>
         <div class="etf-tab" onclick="switchEtfTab(1)" style="padding:10px 24px;cursor:pointer;font-weight:600;font-size:16px;color:#666;border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;background:#f0f0f0;">종목 분석</div>
     </div>
@@ -6983,9 +6983,9 @@ function onSearch() {{
 
 function switchEtfTab(idx) {{
     document.querySelectorAll('.etf-tab').forEach(function(t,i) {{
-        t.style.color = i===idx ? '#4338ca' : '#666';
+        t.style.color = i===idx ? '#2d7a3a' : '#666';
         t.style.background = i===idx ? '#fff' : '#f0f0f0';
-        t.style.borderColor = i===idx ? '#4338ca #4338ca transparent' : 'transparent';
+        t.style.borderColor = i===idx ? '#2d7a3a #2d7a3a transparent' : 'transparent';
         t.style.marginBottom = i===idx ? '-2px' : '0';
     }});
     document.getElementById('etfTab0').style.display = idx===0 ? '' : 'none';

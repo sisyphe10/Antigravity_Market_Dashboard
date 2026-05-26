@@ -24,7 +24,7 @@
         .date-bar span { color: #888; }
         .date-bar label { color: #555; font-weight: 600; }
         .stats-row { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
-        .stat-card { background: #fff; border-radius: 10px; padding: 16px 20px; flex: 1; min-width: 160px; border-left: 4px solid #0369a1; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .stat-card { background: #fff; border-radius: 10px; padding: 16px 20px; flex: 1; min-width: 160px; border-left: 4px solid #2d7a3a; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
         .stat-card .label { font-size: 0.8rem; color: #888; margin-bottom: 4px; }
         .stat-card .value { font-size: 1.3rem; font-weight: 700; color: #333; }
         table { width: 100%; border-collapse: collapse; font-size: 16px; }
@@ -178,7 +178,7 @@ function refresh() {
             datasets: [{
                 data: chartData.map(function(d) { return Math.round(d.val / 1000000); }),
                 backgroundColor: 'rgba(3,105,161,0.5)',
-                borderColor: '#0369a1',
+                borderColor: '#2d7a3a',
                 borderWidth: 1
             }]
         },

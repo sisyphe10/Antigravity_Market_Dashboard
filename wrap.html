@@ -193,7 +193,7 @@
     <aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="#" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="sidebar-link active">Dashboard</a><a href="#" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="sidebar-link">공시</a><a href="#" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="sidebar-link">Order</a><a href="#" onclick="wrapSwitchTab('aum');return false;" data-wrap-tab="aum" class="sidebar-link">AUM</a></aside>
     <header>
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-05-26 13:27:48 KST</div>
+        <div class="last-updated">Updated: 2026-05-26 13:39:00 KST</div>
     </header>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -1873,7 +1873,7 @@
                 + buildEmailBox('컴플라이언스 이메일', compliance, '#fffbeb', '#fef3c7', '#92400e', '#d97706')
                 + buildEmailBox('삼성 이메일', samsung, '#f9fafb', '#e5e7eb', '#444', '#374151')
                 + buildEmailBox('NH 이메일', nh, '#f9fafb', '#e5e7eb', '#444', '#374151')
-                + buildEmailBox('네이트온 (NH)', nateonText, '#eef2ff', '#c7d2fe', '#3730a3', '#4f46e5')
+                + buildEmailBox('네이트온 (NH)', nateonText, '#eef2ff', '#c7d2fe', '#1f5a2a', '#4f46e5')
                 + '</div>';
             document.getElementById('orderContent').innerHTML = html;
             document.querySelectorAll('#orderContent .email-tab-dl-btn').forEach(function(btn) {
@@ -2074,7 +2074,7 @@
             if (reasonLines.length) combined += '\n\n' + reasonLines.join('\n');
             return '<div style="margin-top:16px;padding:16px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;">'
                 + '<div style="display:flex;align-items:center;margin-bottom:12px;">'
-                + '<h4 style="margin:0;font-size:15px;color:#3730a3;">네이트온 텍스트</h4>'
+                + '<h4 style="margin:0;font-size:15px;color:#1f5a2a;">네이트온 텍스트</h4>'
                 + '<button class="nateon-copy-btn" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:5px 14px;background:#4f46e5;color:#fff;border:none;border-radius:6px;cursor:pointer;">복사</button>'
                 + '</div>'
                 + '<pre class="nateon-text" style="white-space:pre-wrap;font-family:inherit;font-size:14px;color:#222;margin:0;line-height:1.6;">' + escapeHtml(combined) + '</pre>'
