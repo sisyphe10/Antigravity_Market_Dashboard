@@ -1165,7 +1165,7 @@ def _build_combined_chart_section():
                 {'display': 'Lithium Carbonate',          'csv': 'Lithium Carbonate',          'color': '#8E44AD'},
                 {'display': 'Lithium Hydroxide',          'csv': 'Lithium Hydroxide',          'color': '#9B59B6'},
                 {'display': 'Poly Silicon',               'csv': 'Poly Silicon',               'color': '#3498DB'},
-                {'display': 'SCFI Comprehensive Index',   'csv': 'SCFI Comprehensive Index',   'color': '#E74C3C'},
+                {'display': 'SCFI',                       'csv': 'SCFI Comprehensive Index',   'color': '#E74C3C'},
                 {'display': 'KRX ETS (KAU25)',            'csv': 'KRX ETS (KAU25)',            'color': '#1ABC9C'},
                 {'display': 'KRX ETS Trading Volume',     'csv': 'KRX ETS Trading Volume',     'color': '#117A65'},
                 {'display': 'SMP',                        'csv': 'SMP',                        'color': '#2d7a3a'},
@@ -1190,6 +1190,11 @@ def _build_combined_chart_section():
         df = pd.read_csv(CSV_FILE, encoding='utf-8-sig')
         df['날짜'] = pd.to_datetime(df['날짜'])
         df['가격'] = pd.to_numeric(df['가격'].astype(str).str.replace(',', ''), errors='coerce')
+
+        # 단위 변환: KRX ETS Trading Volume은 원 단위(수십억 원) → 억원 단위로 환산.
+        # Y축 라벨은 별도로 안 적음 (사용자 명시).
+        _ets_mask = df['제품명'] == 'KRX ETS Trading Volume'
+        df.loc[_ets_mask, '가격'] = df.loc[_ets_mask, '가격'] / 1e8
 
         # Hotel ADR 도시별 일별 평균을 dataset에 inject (hotel_adr.csv → 도시별 모든 호텔×lead 평균).
         # dataset.csv를 영구히 안 건드리고 차트 빌드 시점에만 append.
