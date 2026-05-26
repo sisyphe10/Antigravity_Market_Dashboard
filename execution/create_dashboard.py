@@ -1180,10 +1180,10 @@ def _build_combined_chart_section():
             ]},
             {'label': 'HOTELS', 'series': [
                 # hotel_adr.csv의 도시별 일별 평균 ADR (모든 호텔×lead 평균)
-                {'display': 'Hotel ADR · 서울', 'csv': 'Hotel ADR · 서울', 'color': '#1976D2'},
-                {'display': 'Hotel ADR · 부산', 'csv': 'Hotel ADR · 부산', 'color': '#388E3C'},
-                {'display': 'Hotel ADR · 제주', 'csv': 'Hotel ADR · 제주', 'color': '#F57C00'},
-                {'display': 'Hotel ADR · 경주', 'csv': 'Hotel ADR · 경주', 'color': '#7B1FA2'},
+                {'display': 'Hotel 서울', 'csv': 'Hotel 서울', 'color': '#1976D2'},
+                {'display': 'Hotel 부산', 'csv': 'Hotel 부산', 'color': '#388E3C'},
+                {'display': 'Hotel 제주', 'csv': 'Hotel 제주', 'color': '#F57C00'},
+                {'display': 'Hotel 경주', 'csv': 'Hotel 경주', 'color': '#7B1FA2'},
             ]},
         ]
 
@@ -1193,15 +1193,21 @@ def _build_combined_chart_section():
 
         # Hotel ADR 도시별 일별 평균을 dataset에 inject (hotel_adr.csv → 도시별 모든 호텔×lead 평균).
         # dataset.csv를 영구히 안 건드리고 차트 빌드 시점에만 append.
+        hotels_by_city: dict[str, list[str]] = {}
         try:
             if os.path.exists('hotel_adr.csv'):
                 hdf = pd.read_csv('hotel_adr.csv')
                 hdf['date'] = pd.to_datetime(hdf['collected_at'].str[:10])
                 # 도시별 일별 평균 (모든 호텔 × 모든 lead_days)
                 city_avg = hdf.groupby(['date', 'city'])['price_krw'].mean().round(0).reset_index()
-                city_avg['제품명'] = 'Hotel ADR · ' + city_avg['city']
+                city_avg['제품명'] = 'Hotel ' + city_avg['city']
                 city_avg = city_avg.rename(columns={'date': '날짜', 'price_krw': '가격'})
                 df = pd.concat([df, city_avg[['날짜', '제품명', '가격']]], ignore_index=True)
+                # 사이드바 호버 tooltip용 — 도시별 수집 호텔 리스트 (최신 collected_at 기준)
+                latest_ct = hdf['collected_at'].max()
+                latest_df = hdf[hdf['collected_at'] == latest_ct]
+                for city, grp in latest_df.groupby('city'):
+                    hotels_by_city[city] = sorted(grp['hotel'].unique().tolist())
         except Exception as e:
             print(f"  Warning: Hotel ADR city inject 실패: {e}")
 
@@ -1246,8 +1252,15 @@ def _build_combined_chart_section():
                     extra_border += 'border-top:1px solid #000;'
                 if idx == last_idx:
                     extra_border += 'border-bottom:1px solid #000;'
+                # Hotel {city} 시리즈에는 수집 호텔 리스트를 native tooltip(title)으로 표시
+                tooltip_attr = ''
+                if s['display'].startswith('Hotel '):
+                    city = s['display'].replace('Hotel ', '', 1)
+                    hotels = hotels_by_city.get(city, [])
+                    if hotels:
+                        tooltip_attr = f' title="{_html.escape(", ".join(hotels))}"'
                 series_cell = (
-                    f'<td class="cmb-chart-item{active}" data-series="{_html.escape(s["display"])}" '
+                    f'<td class="cmb-chart-item{active}" data-series="{_html.escape(s["display"])}"{tooltip_attr} '
                     f'onclick="toggleCmbSeries(this, event)" '
                     f'style="cursor:pointer;text-align:center;position:relative;{extra_border}">'
                     f'<div class="cmb-color-bar" style="position:absolute;left:8px;top:50%;'
