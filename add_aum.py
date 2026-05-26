@@ -51,9 +51,9 @@ ACTIVE_TARGET_TRANSFORM = {
 def resolve_product(brokerage: str, kind: str) -> str:
     if (brokerage, kind) in FIXED_PRODUCTS:
         return FIXED_PRODUCTS[(brokerage, kind)]
-    if kind == '성과형':
+    if kind in ('성과형', '전환형'):
         if brokerage not in ACTIVE_TARGET_TRANSFORM:
-            raise ValueError(f"성과형 매핑 없음: {brokerage}")
+            raise ValueError(f"{kind} 매핑 없음: {brokerage}")
         return ACTIVE_TARGET_TRANSFORM[brokerage]
     raise ValueError(f"미지의 입력: 증권사={brokerage}, 유형={kind}")
 
