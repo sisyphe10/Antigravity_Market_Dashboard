@@ -13,7 +13,7 @@
       "current_price": 299000.0,
       "ath_price": 299500.0,
       "dd": -0.16694490818029983,
-      "rsi_1m": 11.666064367816093,
+      "rsi_1m": 14.629464367816091,
       "is_today_new": false
     },
     {
@@ -29,7 +29,7 @@
       "current_price": 2052000.0,
       "ath_price": 2052000.0,
       "dd": 0.0,
-      "rsi_1m": 41.97893736713,
+      "rsi_1m": 44.94233736713,
       "is_today_new": false
     },
     {
@@ -45,7 +45,7 @@
       "current_price": 1781000.0,
       "ath_price": 1817000.0,
       "dd": -1.9812878370941145,
-      "rsi_1m": -1.952626981919342,
+      "rsi_1m": 1.0107730180806573,
       "is_today_new": false
     },
     {
@@ -61,7 +61,7 @@
       "current_price": 133000.0,
       "ath_price": 133000.0,
       "dd": 0.0,
-      "rsi_1m": 48.24847777777779,
+      "rsi_1m": 49.295977777777786,
       "is_today_new": false
     },
     {
@@ -77,7 +77,7 @@
       "current_price": 348000.0,
       "ath_price": 364500.0,
       "dd": -4.526748971193417,
-      "rsi_1m": 14.800860606060601,
+      "rsi_1m": 17.7642606060606,
       "is_today_new": false
     },
     {
@@ -93,7 +93,7 @@
       "current_price": 112600.0,
       "ath_price": 136400.0,
       "dd": -17.448680351906155,
-      "rsi_1m": -28.652482139775664,
+      "rsi_1m": -25.689082139775664,
       "is_today_new": false
     },
     {
@@ -109,7 +109,7 @@
       "current_price": 134700.0,
       "ath_price": 151475.0,
       "dd": -11.074434725202176,
-      "rsi_1m": -26.027422222222224,
+      "rsi_1m": -23.064022222222224,
       "is_today_new": false
     },
     {
@@ -125,7 +125,7 @@
       "current_price": 139700.0,
       "ath_price": 161400.0,
       "dd": -13.444857496902108,
-      "rsi_1m": -39.25005749690211,
+      "rsi_1m": -36.28665749690211,
       "is_today_new": false
     },
     {
@@ -141,7 +141,7 @@
       "current_price": 66900.0,
       "ath_price": 83800.0,
       "dd": -20.167064439140812,
-      "rsi_1m": -28.98899160636758,
+      "rsi_1m": -26.02559160636758,
       "is_today_new": false
     },
     {
@@ -157,7 +157,7 @@
       "current_price": 164500.0,
       "ath_price": 198100.0,
       "dd": -16.96113074204947,
-      "rsi_1m": -34.56837249029396,
+      "rsi_1m": -31.60497249029396,
       "is_today_new": false
     },
     {
@@ -173,7 +173,7 @@
       "current_price": 95900.0,
       "ath_price": 131000.0,
       "dd": -26.793893129770996,
-      "rsi_1m": -15.406492982456147,
+      "rsi_1m": -14.358992982456146,
       "is_today_new": false
     },
     {
@@ -182,14 +182,14 @@
       "sector": "화장품,의류,완구",
       "market_cap": 4961.185614,
       "weight": 2,
-      "weight_prev": 4.0,
+      "weight_prev": 2.0,
       "today_return": -7.228915662650602,
       "contribution": -1.4457831325301205,
       "cumulative_return": -10.48337752396492,
       "current_price": 23100.0,
       "ath_price": 51000.0,
       "dd": -54.70588235294118,
-      "rsi_1m": -36.09646213592233,
+      "rsi_1m": -33.13306213592233,
       "is_today_new": false
     },
     {
@@ -205,7 +205,7 @@
       "current_price": 78400.0,
       "ath_price": 89500.0,
       "dd": -12.402234636871512,
-      "rsi_1m": -9.657051851851845,
+      "rsi_1m": -6.693651851851845,
       "is_today_new": false
     },
     {
@@ -221,7 +221,7 @@
       "current_price": 1296000.0,
       "ath_price": 1630000.0,
       "dd": -20.490797546012274,
-      "rsi_1m": -31.2066598540146,
+      "rsi_1m": -28.243259854014603,
       "is_today_new": false
     },
     {
@@ -237,7 +237,7 @@
       "current_price": 638000.0,
       "ath_price": 699000.0,
       "dd": -8.72675250357654,
-      "rsi_1m": 17.726858492688418,
+      "rsi_1m": 20.690258492688418,
       "is_today_new": false
     },
     {
@@ -253,7 +253,7 @@
       "current_price": 74200.0,
       "ath_price": 91300.0,
       "dd": -18.729463307776562,
-      "rsi_1m": 33.923937410071936,
+      "rsi_1m": 34.97143741007193,
       "is_today_new": false
     },
     {
@@ -262,15 +262,15 @@
       "sector": "IT하드웨어",
       "market_cap": 26428.84724,
       "weight": 2,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "weight_prev": 2.0,
+      "today_return": 9.433962264150944,
+      "contribution": 1.886792452830189,
+      "cumulative_return": 0.0,
       "current_price": 110200.0,
       "ath_price": 110200.0,
       "dd": 0.0,
-      "rsi_1m": -10.291573165618445,
-      "is_today_new": true
+      "rsi_1m": -7.328173165618446,
+      "is_today_new": false
     }
   ],
   "NH 목표전환형 3호 / DB 목표전환형 4차": [
@@ -287,7 +287,7 @@
       "current_price": 299000.0,
       "ath_price": 299500.0,
       "dd": -0.16694490818029983,
-      "rsi_1m": 11.666064367816093,
+      "rsi_1m": 14.629464367816091,
       "is_today_new": false
     },
     {
@@ -303,7 +303,7 @@
       "current_price": 2052000.0,
       "ath_price": 2052000.0,
       "dd": 0.0,
-      "rsi_1m": 41.97893736713,
+      "rsi_1m": 44.94233736713,
       "is_today_new": false
     },
     {
@@ -319,7 +319,7 @@
       "current_price": 348000.0,
       "ath_price": 364500.0,
       "dd": -4.526748971193417,
-      "rsi_1m": 14.800860606060601,
+      "rsi_1m": 17.7642606060606,
       "is_today_new": false
     },
     {
@@ -335,7 +335,7 @@
       "current_price": 411000.0,
       "ath_price": 452000.0,
       "dd": -9.07079646017699,
-      "rsi_1m": 10.739650498338865,
+      "rsi_1m": 13.703050498338865,
       "is_today_new": false
     },
     {
@@ -351,7 +351,7 @@
       "current_price": 133000.0,
       "ath_price": 133000.0,
       "dd": 0.0,
-      "rsi_1m": 48.24847777777779,
+      "rsi_1m": 49.295977777777786,
       "is_today_new": false
     },
     {
@@ -367,7 +367,7 @@
       "current_price": 1296000.0,
       "ath_price": 1630000.0,
       "dd": -20.490797546012274,
-      "rsi_1m": -31.2066598540146,
+      "rsi_1m": -28.243259854014603,
       "is_today_new": false
     },
     {
@@ -383,7 +383,7 @@
       "current_price": 638000.0,
       "ath_price": 699000.0,
       "dd": -8.72675250357654,
-      "rsi_1m": 17.726858492688418,
+      "rsi_1m": 20.690258492688418,
       "is_today_new": false
     },
     {
@@ -399,7 +399,7 @@
       "current_price": 112600.0,
       "ath_price": 136400.0,
       "dd": -17.448680351906155,
-      "rsi_1m": -28.652482139775664,
+      "rsi_1m": -25.689082139775664,
       "is_today_new": false
     },
     {
@@ -415,7 +415,7 @@
       "current_price": 289500.0,
       "ath_price": 310500.0,
       "dd": -6.763285024154586,
-      "rsi_1m": -16.35340415879017,
+      "rsi_1m": -13.39000415879017,
       "is_today_new": false
     },
     {
@@ -431,7 +431,7 @@
       "current_price": 78400.0,
       "ath_price": 89500.0,
       "dd": -12.402234636871512,
-      "rsi_1m": -9.657051851851845,
+      "rsi_1m": -6.693651851851845,
       "is_today_new": false
     },
     {
@@ -440,15 +440,15 @@
       "sector": "IT하드웨어",
       "market_cap": 26428.84724,
       "weight": 3,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "weight_prev": 3.0,
+      "today_return": 9.433962264150944,
+      "contribution": 2.8301886792452833,
+      "cumulative_return": 0.0,
       "current_price": 110200.0,
       "ath_price": 110200.0,
       "dd": 0.0,
-      "rsi_1m": -10.291573165618445,
-      "is_today_new": true
+      "rsi_1m": -7.328173165618446,
+      "is_today_new": false
     },
     {
       "code": "020000",
@@ -456,14 +456,14 @@
       "sector": "화장품,의류,완구",
       "market_cap": 4961.185614,
       "weight": 2,
-      "weight_prev": 4.0,
+      "weight_prev": 2.0,
       "today_return": -7.228915662650602,
       "contribution": -1.4457831325301205,
       "cumulative_return": -10.447761194029848,
       "current_price": 23100.0,
       "ath_price": 51000.0,
       "dd": -54.70588235294118,
-      "rsi_1m": -36.09646213592233,
+      "rsi_1m": -33.13306213592233,
       "is_today_new": false
     }
   ]
