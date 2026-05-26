@@ -685,8 +685,7 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stoc
         }}
         header {{
             background-color: #000000; border-radius: 12px; padding: 20px;
-            margin-bottom: 40px; display: flex; align-items: center;
-            justify-content: space-between; flex-wrap: wrap; gap: 10px;
+            margin-bottom: 40px; text-align: center;
         }}
         header h1 {{ margin: 0; color: #ffffff; font-size: 33px; font-weight: 700; }}
         .header-right {{ display: flex; align-items: center; gap: 16px; }}
@@ -773,9 +772,7 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stoc
     {sidebar_html('market_alert')}
     <header>
         <h1>🚦 투자유의종목 현황</h1>
-        <div class="header-right">
-            <span class="last-updated">Updated: {now}</span>
-        </div>
+        <div class="last-updated">Updated: {now}</div>
     </header>
 
     {section('투자위험', stocks_위험)}
