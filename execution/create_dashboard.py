@@ -3945,6 +3945,15 @@ def create_disclosures_section():
             }
         }
 
+        // 금액 하이라이트 (API 비용 없이 정규식만):
+        //   1) 콤마 2개 이상 포함된 큰 숫자 (백만 이상). 예: "515,761,033,577"
+        //   2) 한글 단위 표현. 예: "5,000억원", "1조 원", "300만"
+        // HTML escape 후 적용 — escape가 <>만 변환하므로 숫자 패턴은 그대로 매칭.
+        function highlightAmounts(text) {
+            return text.replace(/(\d{1,3}(?:,\d{3}){2,}(?:\s*원)?|\d+(?:,\d{3})*\s*(?:조|억|만)\s*원?)/g,
+                '<mark style="background:#fff7c2;padding:0 3px;border-radius:3px;font-weight:600;">$1</mark>');
+        }
+
         function renderDisclosures() {
             if (!_disclData) return;
             var filter = document.getElementById('disclStockFilter').value;
@@ -3963,7 +3972,7 @@ def create_disclosures_section():
                   + '<th style="padding:10px;text-align:center;width:60px;">DART</th>'
                   + '</tr></thead><tbody>';
             items.forEach(function(it) {
-                var summary = (it.summary || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                var summary = highlightAmounts((it.summary || '').replace(/</g, '&lt;').replace(/>/g, '&gt;'));
                 var title = (it.title || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 var name = (it.name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 html += '<tr style="border-bottom:1px solid #e5e7eb;">'
