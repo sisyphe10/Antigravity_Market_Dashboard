@@ -1179,8 +1179,11 @@ def _build_combined_chart_section():
                 {'display': 'MLC 32Gb 4GBx8',             'csv': 'MLC 32Gb 4GBx8',             'color': '#80CBC4'},
             ]},
             {'label': 'HOTELS', 'series': [
-                # hotel_adr.csv의 모든 호텔×lead 가격의 일별 평균 (별도 sub-section 대신 cmbChart에 편입)
-                {'display': 'Hotel ADR Avg', 'csv': 'Hotel ADR Avg', 'color': '#FF7043'},
+                # hotel_adr.csv의 도시별 일별 평균 ADR (모든 호텔×lead 평균)
+                {'display': 'Hotel ADR · 서울', 'csv': 'Hotel ADR · 서울', 'color': '#1976D2'},
+                {'display': 'Hotel ADR · 부산', 'csv': 'Hotel ADR · 부산', 'color': '#388E3C'},
+                {'display': 'Hotel ADR · 제주', 'csv': 'Hotel ADR · 제주', 'color': '#F57C00'},
+                {'display': 'Hotel ADR · 경주', 'csv': 'Hotel ADR · 경주', 'color': '#7B1FA2'},
             ]},
         ]
 
@@ -1188,19 +1191,19 @@ def _build_combined_chart_section():
         df['날짜'] = pd.to_datetime(df['날짜'])
         df['가격'] = pd.to_numeric(df['가격'].astype(str).str.replace(',', ''), errors='coerce')
 
-        # Hotel ADR 평균 시계열을 dataset에 inject (hotel_adr.csv → 일별 모든 호텔×lead 평균).
+        # Hotel ADR 도시별 일별 평균을 dataset에 inject (hotel_adr.csv → 도시별 모든 호텔×lead 평균).
         # dataset.csv를 영구히 안 건드리고 차트 빌드 시점에만 append.
         try:
             if os.path.exists('hotel_adr.csv'):
                 hdf = pd.read_csv('hotel_adr.csv')
                 hdf['date'] = pd.to_datetime(hdf['collected_at'].str[:10])
-                # 일별 모든 호텔×lead 가격의 단순 평균
-                daily_avg = hdf.groupby('date')['price_krw'].mean().round(0).reset_index()
-                daily_avg = daily_avg.rename(columns={'date': '날짜', 'price_krw': '가격'})
-                daily_avg['제품명'] = 'Hotel ADR Avg'
-                df = pd.concat([df, daily_avg[['날짜', '제품명', '가격']]], ignore_index=True)
+                # 도시별 일별 평균 (모든 호텔 × 모든 lead_days)
+                city_avg = hdf.groupby(['date', 'city'])['price_krw'].mean().round(0).reset_index()
+                city_avg['제품명'] = 'Hotel ADR · ' + city_avg['city']
+                city_avg = city_avg.rename(columns={'date': '날짜', 'price_krw': '가격'})
+                df = pd.concat([df, city_avg[['날짜', '제품명', '가격']]], ignore_index=True)
         except Exception as e:
-            print(f"  Warning: Hotel ADR Avg inject 실패: {e}")
+            print(f"  Warning: Hotel ADR city inject 실패: {e}")
 
         all_csv_names = set()
         for g in groups:
