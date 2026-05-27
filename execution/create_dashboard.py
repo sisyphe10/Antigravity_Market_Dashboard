@@ -1564,8 +1564,7 @@ def _build_combined_chart_section():
                             } else {
                                 pct = 0;
                             }
-                            var pctColor = pct > 0 ? '#cc0000' : (pct < 0 ? '#0055cc' : '#888');
-                            pctStr = ' <span style="color:' + pctColor + ';font-weight:700;margin-left:4px;">' + (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%</span>';
+                            pctStr = ' <span style="color:#333;margin-left:4px;">' + (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%</span>';
                         }
                         return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:13px;">' +
                             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
