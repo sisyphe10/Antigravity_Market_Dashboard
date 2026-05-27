@@ -4044,7 +4044,7 @@ def create_disclosures_section():
                       + '<td style="padding:8px;text-align:center;color:#444;white-space:nowrap;">' + it.date + '</td>'
                       + '<td style="padding:8px;text-align:center;font-weight:600;color:#1f2937;">' + name + '<div style="font-size:11px;color:#888;">' + it.code + '</div></td>'
                       + '<td style="padding:8px;text-align:left;color:#222;font-weight:500;">' + badge + title + '</td>'
-                      + '<td style="padding:8px;text-align:center;"><a href="' + it.url + '" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:none;font-weight:700;font-size:20px;line-height:1;">↗</a></td>'
+                      + '<td style="padding:8px;text-align:center;"><a href="' + it.url + '" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:none;font-weight:700;font-size:20px;line-height:1;">⧉</a></td>'
                       + '<td style="padding:8px;text-align:left;color:#555;line-height:1.5;">' + summary + '</td>'
                       + '</tr>';
             });
