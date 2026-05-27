@@ -193,7 +193,7 @@
     <aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="#" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="sidebar-link active">Dashboard</a><a href="#" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="sidebar-link">공시</a><a href="#" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="sidebar-link">Order</a><a href="#" onclick="wrapSwitchTab('aum');return false;" data-wrap-tab="aum" class="sidebar-link">AUM</a></aside>
     <header>
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-05-27 09:18:14 KST</div>
+        <div class="last-updated">Updated: 2026-05-27 09:30:57 KST</div>
     </header>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -1351,18 +1351,22 @@
             html += '<thead><tr style="background:#f3f4f6;border-bottom:2px solid #d1d5db;">'
                   + '<th style="padding:10px;text-align:center;width:110px;">공시일</th>'
                   + '<th style="padding:10px;text-align:center;width:140px;">종목</th>'
-                  + '<th style="padding:10px;text-align:left;width:260px;">제목</th>'
+                  + '<th style="padding:10px;text-align:left;width:280px;">제목</th>'
                   + '<th style="padding:10px;text-align:left;">요약</th>'
-                  + '<th style="padding:10px;text-align:center;width:60px;">DART</th>'
+                  + '<th style="padding:10px;text-align:center;width:60px;">링크</th>'
                   + '</tr></thead><tbody>';
             items.forEach(function(it) {
                 var summary = highlightAmounts((it.summary || '').replace(/</g, '&lt;').replace(/>/g, '&gt;'));
                 var title = (it.title || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 var name = (it.name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                // source 배지: KIND(거래소) 진녹 / DART(금감원, 기본) 회색
+                var src = it.source || 'DART';
+                var badgeBg = src === 'KIND' ? '#2d7a3a' : '#6c757d';
+                var badge = '<span style="display:inline-block;background:' + badgeBg + ';color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;margin-right:6px;vertical-align:middle;">' + src + '</span>';
                 html += '<tr style="border-bottom:1px solid #e5e7eb;">'
                       + '<td style="padding:8px;text-align:center;color:#444;white-space:nowrap;">' + it.date + '</td>'
                       + '<td style="padding:8px;text-align:center;font-weight:600;color:#1f2937;">' + name + '<div style="font-size:11px;color:#888;">' + it.code + '</div></td>'
-                      + '<td style="padding:8px;text-align:left;color:#222;font-weight:500;">' + title + '</td>'
+                      + '<td style="padding:8px;text-align:left;color:#222;font-weight:500;">' + badge + title + '</td>'
                       + '<td style="padding:8px;text-align:left;color:#555;line-height:1.5;">' + summary + '</td>'
                       + '<td style="padding:8px;text-align:center;"><a href="' + it.url + '" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:none;font-weight:600;">↗</a></td>'
                       + '</tr>';
