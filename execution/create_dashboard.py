@@ -1564,7 +1564,7 @@ def _build_combined_chart_section():
                             } else {
                                 pct = 0;
                             }
-                            pctStr = '<span style="margin-left:3px;">' + (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%</span>';
+                            pctStr = '<span style="margin-left:2px;">' + (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%</span>';
                         }
                         return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:13px;">' +
                             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
