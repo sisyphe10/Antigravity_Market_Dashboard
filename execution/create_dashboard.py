@@ -4029,8 +4029,8 @@ def create_disclosures_section():
                   + '<th style="padding:10px;text-align:center;width:110px;">공시일</th>'
                   + '<th style="padding:10px;text-align:center;width:140px;">종목</th>'
                   + '<th style="padding:10px;text-align:left;width:280px;">제목</th>'
-                  + '<th style="padding:10px;text-align:left;">요약</th>'
                   + '<th style="padding:10px;text-align:center;width:60px;">링크</th>'
+                  + '<th style="padding:10px;text-align:left;">요약</th>'
                   + '</tr></thead><tbody>';
             items.forEach(function(it) {
                 var summary = highlightAmounts((it.summary || '').replace(/</g, '&lt;').replace(/>/g, '&gt;'));
@@ -4044,8 +4044,8 @@ def create_disclosures_section():
                       + '<td style="padding:8px;text-align:center;color:#444;white-space:nowrap;">' + it.date + '</td>'
                       + '<td style="padding:8px;text-align:center;font-weight:600;color:#1f2937;">' + name + '<div style="font-size:11px;color:#888;">' + it.code + '</div></td>'
                       + '<td style="padding:8px;text-align:left;color:#222;font-weight:500;">' + badge + title + '</td>'
+                      + '<td style="padding:8px;text-align:center;"><a href="' + it.url + '" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:none;font-weight:700;font-size:20px;line-height:1;">↗</a></td>'
                       + '<td style="padding:8px;text-align:left;color:#555;line-height:1.5;">' + summary + '</td>'
-                      + '<td style="padding:8px;text-align:center;"><a href="' + it.url + '" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:none;font-weight:600;">↗</a></td>'
                       + '</tr>';
             });
             html += '</tbody></table>';

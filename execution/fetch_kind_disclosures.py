@@ -188,7 +188,7 @@ def main() -> None:
             if key in seen_keys:
                 continue
             seen_keys.add(key)
-            # 4. 항목 생성 (summary는 제목 + 제출인 + 시각 정도)
+            # 4. 항목 생성
             summary = f"{r['submitter']} · {r['time']}"
             new_items.append({
                 'rcept_no': r['acpt_no'],  # DART와 같은 필드명으로 통일 (UI 호환)
@@ -197,7 +197,9 @@ def main() -> None:
                 'date': r['date'],
                 'title': r['title'],
                 'summary': summary,
-                'url': f"https://kind.krx.co.kr/common/disclsviewer.do?method=search&acptNo={r['acpt_no']}",
+                # KIND viewer popup URL — JCommon.js openDisclsViewer2가 실제 호출하는 패턴.
+                # acptno 소문자 + method=search + viewerhost 필수 (없으면 blank.html redirect).
+                'url': f"https://kind.krx.co.kr/common/disclsviewer.do?method=search&acptno={r['acpt_no']}&docno=&viewerhost=kind.krx.co.kr&viewerport=",
                 'source': 'KIND',
             })
             print(f"  +{matched_name} | {r['title'][:50]}")
