@@ -360,9 +360,7 @@ def get_item_category(item_name):
 
     # Special handling for Wrap portfolios
     wrap_keywords = ['트루밸류', '삼성 트루밸류', 'Value ESG', 'NH Value ESG',
-                     '개방형', 'DB 개방형',
-                     '목표전환형 3호', 'NH 목표전환형 3호',
-                     '목표전환형 4차', 'DB 목표전환형 4차']
+                     '개방형', 'DB 개방형']
     if any(keyword in item_name for keyword in wrap_keywords):
         return 'Wrap'
 
@@ -1746,8 +1744,8 @@ def _build_wrap_chart_section(category_label):
             ('삼성 트루밸류', '트루밸류'),
             ('NH Value ESG', 'Value ESG'),
             ('DB 개방형', '개방형 랩'),
-            ('NH 목표전환형 3호', '목표전환형 3호'),  # 운용 개시 2026-05-14
-            ('DB 목표전환형 4차', '목표전환형 4차'),  # 운용 개시 2026-05-18
+            # ('NH 목표전환형 3호', '목표전환형 3호'),  # NH 3호 완료 (2026-05-27 청산, 목표달성)
+            # ('DB 목표전환형 4차', '목표전환형 4차'),  # DB 4차 완료 (2026-05-27 청산, 목표달성)
             # ('NH 목표전환형 2호', '목표전환형 2호'),  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
             ('KOSPI', 'KOSPI'),
             ('KOSDAQ', 'KOSDAQ'),
@@ -1756,8 +1754,8 @@ def _build_wrap_chart_section(category_label):
             '삼성 트루밸류': '#1428A0',
             'NH Value ESG': '#0072CE',
             'DB 개방형': '#00854A',
-            'NH 목표전환형 3호': '#0072CE',
-            'DB 목표전환형 4차': '#00854A',
+            # 'NH 목표전환형 3호': '#0072CE',  # NH 3호 완료 (2026-05-27 청산, 목표달성)
+            # 'DB 목표전환형 4차': '#00854A',  # DB 4차 완료 (2026-05-27 청산, 목표달성)
             # 'NH 목표전환형 2호': '#0072CE',  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
             'KOSPI': '#000000',
             'KOSDAQ': '#666666',
@@ -2656,8 +2654,8 @@ def create_wrap_returns_table():
 
         items = [
             ('삼성 트루밸류', '트루밸류'),
-            ('NH 목표전환형 3호', '목표전환형 3호'),  # 운용 개시 2026-05-14
-            ('DB 목표전환형 4차', '목표전환형 4차'),  # 운용 개시 2026-05-18
+            # ('NH 목표전환형 3호', '목표전환형 3호'),  # NH 3호 완료 (2026-05-27 청산, 목표달성)
+            # ('DB 목표전환형 4차', '목표전환형 4차'),  # DB 4차 완료 (2026-05-27 청산, 목표달성)
             # ('NH 목표전환형 2호', '목표전환형 2호'),  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
             ('KOSPI', 'KOSPI'),
             ('KOSDAQ', 'KOSDAQ'),
@@ -2823,7 +2821,7 @@ def create_order_section():
       - 1개 포트폴리오 버튼 (트루밸류/NH Value ESG/DB 개방형 묶음)
       - 각 버튼 클릭 시 종목 테이블: 변경전(read-only), 변경후(input), 주문구분(자동), 추천사유(input)
       - Download(빨간) → 자문지/ 템플릿 fetch → R7부터 F/G/H/I 셀 patch → .xlsx 다운로드
-      - 목표전환형 2호 청산(2026-05-06, +7.26%)으로 NH/DB 페어 모두 비활성. 다음 페어 출시 시 ORDER_PORTFOLIOS 재추가.
+      - NH 3호+DB 4차 페어 청산(2026-05-27, 목표달성)으로 NH/DB 페어 모두 비활성. 다음 페어 출시 시 ORDER_PORTFOLIOS 재추가.
     """
     return """
         <div id="orderTabs" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;"></div>
@@ -2850,26 +2848,7 @@ def create_order_section():
                     { broker: 'DB',   product: '개방형 랩' },
                 ],
             },
-            {
-                display: 'NH 목표전환형 3호',  // 운용 개시 2026-05-14, 240억원 (DB 4차와 페어)
-                jsonKey: 'NH 목표전환형 3호 / DB 목표전환형 4차',
-                templates: [
-                    { label: 'NH 목표전환형 3호', file: '자문지/라이프자산운용_라이프 다이내믹밸류_목표전환형 3호_2026.5.14.xlsx' },
-                ],
-                newSheetTargets: [
-                    { broker: 'NH', product: '목표전환형 3호' },
-                ],
-            },
-            {
-                display: 'DB 목표전환형 4차',  // 운용 개시 2026-05-18, AUM 추후 입력 (NH 3호와 페어)
-                jsonKey: 'NH 목표전환형 3호 / DB 목표전환형 4차',
-                templates: [
-                    { label: 'DB 목표전환형 4차', file: '자문지/라이프자산운용_DB 목표전환형 랩 _4차_2026.5.18.xlsx' },
-                ],
-                newSheetTargets: [
-                    { broker: 'DB', product: '목표전환형 4차' },
-                ],
-            },
+            // NH 3호 + DB 4차 페어 청산 (2026-05-27, 목표달성). 다음 페어 출시 시 재추가.
         ];
         var orderState = {};
         var orderStocks = {};
