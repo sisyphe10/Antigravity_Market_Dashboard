@@ -1,4 +1,4 @@
-name: Daily Disclosures (DART)
+name: Daily Disclosures (DART + KIND)
 
 on:
   schedule:
@@ -31,9 +31,14 @@ jobs:
           TZ: 'Asia/Seoul'
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
 
+      - name: Fetch KIND exchange disclosures (current holdings, accumulate)
+        run: python execution/fetch_kind_disclosures.py
+        env:
+          TZ: 'Asia/Seoul'
+
       - name: Commit and push (disclosures.json + corp_codes.json)
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Auto: DART disclosures update [skip ci]"
+          commit_message: "Auto: DART + KIND disclosures update [skip ci]"
           file_pattern: 'disclosures.json corp_codes.json'
           skip_fetch: true
