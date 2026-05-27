@@ -1169,12 +1169,12 @@ def _build_combined_chart_section():
                 {'display': 'SMP',                        'csv': 'SMP',                        'color': '#2d7a3a'},
             ]},
             {'label': 'MEMORY', 'series': [
-                {'display': 'DDR5 16G (2Gx8) 4800/5600',  'csv': 'DDR5 16G (2Gx8) 4800/5600',  'color': '#E91E63'},
-                {'display': 'DDR4 8Gb (1Gx8) 3200',       'csv': 'DDR4 8Gb (1Gx8) 3200',       'color': '#F48FB1'},
-                {'display': 'SLC 2Gb 256MBx8',            'csv': 'SLC 2Gb 256MBx8',            'color': '#00897B'},
-                {'display': 'SLC 1Gb 128MBx8',            'csv': 'SLC 1Gb 128MBx8',            'color': '#26A69A'},
-                {'display': 'MLC 64Gb 8GBx8',             'csv': 'MLC 64Gb 8GBx8',             'color': '#4DB6AC'},
-                {'display': 'MLC 32Gb 4GBx8',             'csv': 'MLC 32Gb 4GBx8',             'color': '#80CBC4'},
+                {'display': 'DDR5 16Gb', 'csv': 'DDR5 16G (2Gx8) 4800/5600', 'color': '#E91E63'},
+                {'display': 'DDR4 8Gb',  'csv': 'DDR4 8Gb (1Gx8) 3200',      'color': '#F48FB1'},
+                {'display': 'SLC 2Gb',   'csv': 'SLC 2Gb 256MBx8',           'color': '#00897B'},
+                {'display': 'SLC 1Gb',   'csv': 'SLC 1Gb 128MBx8',           'color': '#26A69A'},
+                {'display': 'MLC 64Gb',  'csv': 'MLC 64Gb 8GBx8',            'color': '#4DB6AC'},
+                {'display': 'MLC 32Gb',  'csv': 'MLC 32Gb 4GBx8',            'color': '#80CBC4'},
             ]},
             {'label': 'HOTELS', 'series': [
                 # hotel_adr.csv의 도시별 일별 평균 ADR (모든 호텔×lead 평균)
