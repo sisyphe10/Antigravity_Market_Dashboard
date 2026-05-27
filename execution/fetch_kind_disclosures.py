@@ -145,9 +145,16 @@ def main() -> None:
             seen_keys.add(f"dart:{it.get('rcept_no')}")
     print(f"기존 누적: {len(existing.get('items', []))}건 (KIND/DART 합)")
 
-    # 어제~오늘 KIND 공시 fetch (시점 차이로 누락 방지)
+    # 기본은 어제~오늘 (cron 일일 운영). --days N으로 N일치 백필 가능 (1회용 시드 갱신).
+    days_back = 1
+    if '--days' in sys.argv:
+        try:
+            days_back = max(1, int(sys.argv[sys.argv.index('--days') + 1]))
+        except (IndexError, ValueError):
+            pass
     today = datetime.now(KST).date()
-    dates = [today - timedelta(days=1), today]
+    dates = [today - timedelta(days=i) for i in range(days_back, -1, -1)]
+    print(f"조회 구간: {dates[0]} ~ {dates[-1]} ({len(dates)}일)")
     session = requests.Session()
     session.headers.update({'User-Agent': 'Mozilla/5.0'})
     # session init
