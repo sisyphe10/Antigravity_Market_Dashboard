@@ -128,28 +128,36 @@ THRESHOLD_BY_CURRENCY = {
 DEFAULT_ANOMALY_THRESHOLD = 0.50
 
 
-def fetch_naver_kr(code: str, pages: int = 10) -> dict[str, int]:
-    """네이버 모바일 API로 KRX/KOSDAQ 종가 시리즈를 {YYYY-MM-DD: close} 형식으로 반환.
+def fetch_naver_kr(code: str, days: int = 400) -> dict[str, int]:
+    """네이버 siseJson API로 KRX/KOSDAQ **수정주가** 종가 시리즈 fetch.
 
-    yfinance가 분할·병합 데이터 오류로 깨진 한국 종목의 fallback. 1Y(252영업일) 수익률
-    계산을 위해 기본 10페이지(=300영업일치) fetch.
+    requestType=1은 무상증자·액면분할 권리락 비율로 자동 조정된 가격을 반환.
+    예: 코미코 2026-05-12 1:1 무상증자 권리락 → 5/22 이전 가격이 절반으로 자동 조정.
+    1Y(252영업일) lookback 위해 days=400 (≈영업일 270개) 기본.
+
+    응답 형식: [['날짜','시가','고가','저가','종가','거래량','외국인소진율'], ["20260527",94200,98600,93000,93000,22548,19.44], ...]
+    JavaScript 배열 (trailing 공백/줄바꿈) — 정규식으로 row 추출.
     """
+    import re
+    end_d = datetime.now(KST).strftime('%Y%m%d')
+    start_d = (datetime.now(KST) - timedelta(days=days)).strftime('%Y%m%d')
+    url = (
+        f'https://api.finance.naver.com/siseJson.naver?'
+        f'symbol={code}&requestType=1&timeframe=day&startTime={start_d}&endTime={end_d}'
+    )
+    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+    try:
+        with urllib.request.urlopen(req, timeout=10) as r:
+            body = r.read().decode('utf-8', errors='replace')
+    except Exception:
+        return {}
+    # row 형식: ["20260527", 94200, 98600, 93000, 93000, 22548, 19.44]
+    # 날짜 다음 3개(시가/고가/저가) skip, 4번째가 수정주가 종가. 종가는 float 가능.
+    pattern = r'\["(\d{8})",\s*[\d.]+,\s*[\d.]+,\s*[\d.]+,\s*([\d.]+),'
     prices: dict[str, int] = {}
-    for page in range(1, pages + 1):
-        url = f'https://m.stock.naver.com/api/stock/{code}/price?pageSize=30&page={page}'
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        try:
-            with urllib.request.urlopen(req, timeout=10) as r:
-                data = json.loads(r.read().decode('utf-8'))
-            if not data:
-                break
-            for row in data:
-                d = row.get('localTradedAt')
-                c = row.get('closePrice')
-                if d and c:
-                    prices[d] = int(c.replace(',', ''))
-        except Exception:
-            break
+    for date_str, close_str in re.findall(pattern, body):
+        formatted = f'{date_str[:4]}-{date_str[4:6]}-{date_str[6:]}'
+        prices[formatted] = int(float(close_str))
     return prices
 
 
