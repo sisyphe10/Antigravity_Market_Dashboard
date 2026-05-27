@@ -1138,7 +1138,7 @@ def _build_combined_chart_section():
                 {'display': 'EUR/USD',            'csv': 'EUR/USD',            'color': '#29B6F6'},
             ]},
             {'label': 'INTEREST RATES', 'series': [
-                {'display': 'US3M',  'csv': 'US 13 Week Treasury Yield', 'color': '#B71C1C'},
+                {'display': 'US03M', 'csv': 'US 13 Week Treasury Yield', 'color': '#B71C1C'},
                 {'display': 'US05Y', 'csv': 'US 5 Year Treasury Yield',  'color': '#C62828'},
                 {'display': 'US10Y', 'csv': 'US 10 Year Treasury Yield', 'color': '#D32F2F'},
                 {'display': 'US30Y', 'csv': 'US 30 Year Treasury Yield', 'color': '#E53935'},
