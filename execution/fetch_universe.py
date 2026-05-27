@@ -24,6 +24,7 @@ import json
 import os
 import sys
 import time
+import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -125,6 +126,69 @@ THRESHOLD_BY_CURRENCY = {
     'CAD': 0.50,
 }
 DEFAULT_ANOMALY_THRESHOLD = 0.50
+
+
+def fetch_naver_kr(code: str, pages: int = 10) -> dict[str, int]:
+    """네이버 모바일 API로 KRX/KOSDAQ 종가 시리즈를 {YYYY-MM-DD: close} 형식으로 반환.
+
+    yfinance가 분할·병합 데이터 오류로 깨진 한국 종목의 fallback. 1Y(252영업일) 수익률
+    계산을 위해 기본 10페이지(=300영업일치) fetch.
+    """
+    prices: dict[str, int] = {}
+    for page in range(1, pages + 1):
+        url = f'https://m.stock.naver.com/api/stock/{code}/price?pageSize=30&page={page}'
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        try:
+            with urllib.request.urlopen(req, timeout=10) as r:
+                data = json.loads(r.read().decode('utf-8'))
+            if not data:
+                break
+            for row in data:
+                d = row.get('localTradedAt')
+                c = row.get('closePrice')
+                if d and c:
+                    prices[d] = int(c.replace(',', ''))
+        except Exception:
+            break
+    return prices
+
+
+def compute_returns_from_dict(prices: dict) -> dict | None:
+    """{YYYY-MM-DD: close} dict → {last, ytd, 1d, 1w, 1m, 3m, 6m, 1y} pct dict.
+
+    영업일 기반 lookback (yfinance fetch_one과 동일 로직). YTD는 연초 이후 첫 거래일 기준.
+    """
+    if not prices or len(prices) < 2:
+        return None
+    sorted_d = sorted(prices.keys())
+    last = float(prices[sorted_d[-1]])
+
+    def lookback(n: int) -> float | None:
+        if len(sorted_d) <= n:
+            return None
+        base = float(prices[sorted_d[-n - 1]])
+        if base <= 0:
+            return None
+        return (last / base - 1) * 100
+
+    year_start = f'{datetime.now(KST).year}-01-01'
+    ytd_dates = [d for d in sorted_d if d >= year_start]
+    ytd = None
+    if ytd_dates:
+        base = float(prices[ytd_dates[0]])
+        if base > 0:
+            ytd = (last / base - 1) * 100
+
+    return {
+        'last': last,
+        'ytd': ytd,
+        '1d': lookback(1),
+        '1w': lookback(5),
+        '1m': lookback(21),
+        '3m': lookback(63),
+        '6m': lookback(126),
+        '1y': lookback(252),
+    }
 
 
 def detect_data_anomaly(closes: 'pd.Series', threshold: float = 0.30, window: int = 30):
@@ -243,11 +307,37 @@ def fetch_one(idx: int, raw_ticker: str, sector: str, name: str, fx_to_krw: dict
         else:
             price_str = f'{last:,.2f}'
 
-        # anomaly 적발 시 가격/시총만 표시, 수익률 컬럼은 모두 blank
+        # anomaly 적발 시: 한국 종목은 네이버 fallback으로 재계산, 그 외는 blank
         if anomaly:
             prev_d, prev_p, cur_d, cur_p, pct = anomaly
-            print(f"  Warning: {raw_ticker} ({name}) yfinance anomaly — "
-                  f"{prev_d} {prev_p:,.0f} → {cur_d} {cur_p:,.0f} ({pct:+.1f}%). Returns blanked.")
+            if currency == 'KRW' and ':' in raw_ticker:
+                code = raw_ticker.split(':', 1)[1]
+                naver_prices = fetch_naver_kr(code)
+                rets = compute_returns_from_dict(naver_prices)
+                if rets:
+                    print(f"  Info: {raw_ticker} ({name}) yfinance anomaly "
+                          f"({prev_d} → {cur_d}, {pct:+.1f}%) → Naver fallback applied.")
+                    naver_last = rets['last']
+                    naver_price_str = f'{naver_last:,.0f}'
+                    return [
+                        str(idx), currency, sector, raw_ticker, name,
+                        marcap_str, naver_price_str,
+                        fmt_pct(rets['ytd']),
+                        fmt_pct(rets['1d']),
+                        fmt_pct(rets['1w']),
+                        fmt_pct(rets['1m']),
+                        fmt_pct(rets['3m']),
+                        fmt_pct(rets['6m']),
+                        fmt_pct(rets['1y']),
+                        f'{int(marcap_raw_eok):,}' if marcap_raw_eok else '',
+                        '', '', '', '', '', '', '',
+                    ]
+                else:
+                    print(f"  Warning: {raw_ticker} ({name}) yfinance anomaly "
+                          f"({prev_d} → {cur_d}, {pct:+.1f}%), Naver fallback also failed. Blanked.")
+            else:
+                print(f"  Warning: {raw_ticker} ({name}) yfinance anomaly — "
+                      f"{prev_d} {prev_p:,.0f} → {cur_d} {cur_p:,.0f} ({pct:+.1f}%). Returns blanked.")
             return [
                 str(idx), currency, sector, raw_ticker, name,
                 marcap_str, price_str,
