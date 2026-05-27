@@ -1549,9 +1549,27 @@ def _build_combined_chart_section():
                 if (legendEl) {
                     var legendHTML = datasets.map(function(ds) {
                         var c = ds.borderColor;
+                        // 설정 기간 변화율: pct 모드는 정규화된 값이라 last 자체가 변화율,
+                        // raw 모드는 (last/first - 1)*100. 첫/마지막 non-null 값으로 계산.
+                        var vals = ds.data.filter(function(v) { return v !== null && v !== undefined && !isNaN(v); });
+                        var pctStr = '';
+                        if (vals.length >= 2) {
+                            var first = vals[0];
+                            var last = vals[vals.length - 1];
+                            var pct;
+                            if (mode === 'pct') {
+                                pct = last - first;
+                            } else if (first !== 0) {
+                                pct = (last / first - 1) * 100;
+                            } else {
+                                pct = 0;
+                            }
+                            var pctColor = pct > 0 ? '#cc0000' : (pct < 0 ? '#0055cc' : '#888');
+                            pctStr = ' <span style="color:' + pctColor + ';font-weight:700;margin-left:4px;">' + (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%</span>';
+                        }
                         return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:13px;">' +
                             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
-                            ds.label + '</span>';
+                            ds.label + pctStr + '</span>';
                     }).join('');
                     legendEl.innerHTML = legendHTML;
                 }
