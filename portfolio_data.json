@@ -97,22 +97,6 @@
       "is_today_new": true
     },
     {
-      "code": "042660",
-      "name": "한화오션",
-      "sector": "조선",
-      "market_cap": 380565.435348,
-      "weight": 3,
-      "weight_prev": 3.0,
-      "today_return": -7.93180133432172,
-      "contribution": -2.379540400296516,
-      "cumulative_return": -3.2072417720760082,
-      "current_price": 124200.0,
-      "ath_price": 149900.0,
-      "dd": -17.144763175450294,
-      "rsi_1m": -35.00010133432172,
-      "is_today_new": false
-    },
-    {
       "code": "034020",
       "name": "두산에너빌리티",
       "sector": "기계",
@@ -126,6 +110,22 @@
       "ath_price": 136400.0,
       "dd": -22.360703812316718,
       "rsi_1m": -43.74807970102281,
+      "is_today_new": false
+    },
+    {
+      "code": "042660",
+      "name": "한화오션",
+      "sector": "조선",
+      "market_cap": 380565.435348,
+      "weight": 3,
+      "weight_prev": 3.0,
+      "today_return": -7.93180133432172,
+      "contribution": -2.379540400296516,
+      "cumulative_return": -3.2072417720760082,
+      "current_price": 124200.0,
+      "ath_price": 149900.0,
+      "dd": -17.144763175450294,
+      "rsi_1m": -35.00010133432172,
       "is_today_new": false
     },
     {
@@ -145,22 +145,6 @@
       "is_today_new": false
     },
     {
-      "code": "267270",
-      "name": "HD건설기계",
-      "sector": "기타",
-      "market_cap": 74374.784144,
-      "weight": 3,
-      "weight_prev": 3.0,
-      "today_return": -3.5425730267246736,
-      "contribution": -1.062771908017402,
-      "cumulative_return": -11.438855236590284,
-      "current_price": 155200.0,
-      "ath_price": 198100.0,
-      "dd": -21.655729429581015,
-      "rsi_1m": -47.35592198253724,
-      "is_today_new": false
-    },
-    {
       "code": "171090",
       "name": "선익시스템",
       "sector": "디스플레이",
@@ -174,6 +158,22 @@
       "ath_price": 131000.0,
       "dd": -35.57251908396947,
       "rsi_1m": -21.736878387953944,
+      "is_today_new": false
+    },
+    {
+      "code": "267270",
+      "name": "HD건설기계",
+      "sector": "기타",
+      "market_cap": 74374.784144,
+      "weight": 3,
+      "weight_prev": 3.0,
+      "today_return": -3.5425730267246736,
+      "contribution": -1.062771908017402,
+      "cumulative_return": -11.438855236590284,
+      "current_price": 155200.0,
+      "ath_price": 198100.0,
+      "dd": -21.655729429581015,
+      "rsi_1m": -47.35592198253724,
       "is_today_new": false
     },
     {
@@ -238,22 +238,6 @@
       "ath_price": 765000.0,
       "dd": -2.4836601307189565,
       "rsi_1m": 46.62203760186263,
-      "is_today_new": false
-    },
-    {
-      "code": "007810",
-      "name": "코리아써키트",
-      "sector": "IT하드웨어",
-      "market_cap": 26860.5344,
-      "weight": 2,
-      "weight_prev": 2.0,
-      "today_return": 1.6333938294010888,
-      "contribution": 0.32667876588021777,
-      "cumulative_return": 0.8100810081008047,
-      "current_price": 112000.0,
-      "ath_price": 112000.0,
-      "dd": 0.0,
-      "rsi_1m": -12.665848518896826,
       "is_today_new": false
     }
   ]
