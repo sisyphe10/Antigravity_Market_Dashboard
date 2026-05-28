@@ -822,6 +822,36 @@ def create_sector_section_html():
         return ""
 
 
+def _chart_download_helper_js():
+    """차트 canvas → PNG 다운로드 (흰 배경 합성). 페이지에 여러 번 inject되어도 1회만 등록."""
+    return """
+        <script>
+        if (typeof window.downloadChartImage !== 'function') {
+            window.downloadChartImage = function(canvasId, baseName) {
+                var src = document.getElementById(canvasId);
+                if (!src) { console.warn('canvas not found:', canvasId); return; }
+                var w = src.width, h = src.height;
+                var tmp = document.createElement('canvas');
+                tmp.width = w; tmp.height = h;
+                var ctx = tmp.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, w, h);
+                ctx.drawImage(src, 0, 0);
+                var d = new Date();
+                var pad = function(n){return n<10?'0'+n:''+n;};
+                var stamp = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+                var a = document.createElement('a');
+                a.href = tmp.toDataURL('image/png');
+                a.download = (baseName || 'chart') + '_' + stamp + '.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
+        }
+        </script>
+    """
+
+
 def _build_indices_chart_section(category_label='Indices'):
     """글로벌 지수 동적 비교 차트 (KOSPI/KOSDAQ/NIKKEI/TSEC/S&P500/NASDAQ/RUSSELL 2000).
     좌 사이드바 시리즈 토글 + 우 Chart.js 라인. Local/USD 모드 토글로 통화 환산 보기.
@@ -1076,7 +1106,12 @@ def _build_indices_chart_section(category_label='Indices'):
 
         return f"""
         <div class="category-section">
-            <h2 class="category-title">{category_label}</h2>
+            <h2 class="category-title" style="display:flex;align-items:center;gap:14px;">
+                <span>{category_label}</span>
+                <button onclick="downloadChartImage('idxDynamicChart','AoE_Indice')" title="현재 차트를 PNG로 다운로드" aria-label="Download chart" style="font-family:inherit;padding:2.5px;background:#fff;color:#1e3a8a;border:1.5px solid #1e3a8a;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;line-height:0;transition:all 0.15s;" onmouseover="this.style.background='#1e3a8a';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#1e3a8a'">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+                </button>
+            </h2>
             <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;justify-content:center;">
                 <div style="min-width:180px;">{list_html}</div>
                 <div style="width:1000px;">
@@ -1086,7 +1121,7 @@ def _build_indices_chart_section(category_label='Indices'):
                         <span style="color:#888;">~</span>
                         <input type="text" id="idxEndDate" value="{last_date}" onchange="formatDateInput(this);updateIdxChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                     </div>
-                    <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                    <div id="idxChartCard" style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                         <div style="position:relative;height:500px;">
                             <canvas id="idxDynamicChart"></canvas>
                         </div>
@@ -1096,6 +1131,7 @@ def _build_indices_chart_section(category_label='Indices'):
             </div>
         </div>
         {js_code}
+        {_chart_download_helper_js()}
         """
     except Exception as e:
         print(f"Error building indices chart section: {e}")
@@ -1678,7 +1714,12 @@ def _build_combined_chart_section():
 
         return f"""
         <div class="category-section">
-            <h2 class="category-title">DATA</h2>
+            <h2 class="category-title" style="display:flex;align-items:center;gap:14px;">
+                <span>DATA</span>
+                <button onclick="downloadChartImage('cmbDynamicChart','AoE_Data')" title="현재 차트를 PNG로 다운로드" aria-label="Download chart" style="font-family:inherit;padding:2.5px;background:#fff;color:#1e3a8a;border:1.5px solid #1e3a8a;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;line-height:0;transition:all 0.15s;" onmouseover="this.style.background='#1e3a8a';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#1e3a8a'">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+                </button>
+            </h2>
             <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;justify-content:center;">
                 <div style="min-width:240px;max-height:720px;overflow-y:auto;">{list_html}</div>
                 <div style="width:1000px;">
@@ -1689,7 +1730,7 @@ def _build_combined_chart_section():
                         <input type="text" id="cmbEndDate" value="{last_date}" onchange="formatDateInput(this);updateCmbChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                         <button onclick="clearCmbSelections()" style="font-family:inherit;font-size:13px;font-weight:600;padding:4px 14px;background:#f3f4f6;color:#444;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;margin-left:8px;">전체 해제</button>
                     </div>
-                    <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                    <div id="cmbChartCard" style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                         <div style="position:relative;height:600px;">
                             <canvas id="cmbDynamicChart"></canvas>
                         </div>
@@ -1699,6 +1740,7 @@ def _build_combined_chart_section():
             </div>
         </div>
         {js_code}
+        {_chart_download_helper_js()}
         """
     except Exception as e:
         print(f"Error building combined chart section: {e}")

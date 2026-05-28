@@ -495,7 +495,7 @@
     <aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="market.html" class="sidebar-link active">Index</a><a href="universe.html" class="sidebar-link">Universe</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
     <header>
         <h1>📊 Index</h1>
-        <div class="last-updated">Updated: 2026-05-28 02:25:49 KST</div>
+        <div class="last-updated">Updated: 2026-05-28 09:09:08 KST</div>
     </header>
 
     
@@ -531,7 +531,12 @@
 
     
         <div class="category-section">
-            <h2 class="category-title">Indice</h2>
+            <h2 class="category-title" style="display:flex;align-items:center;gap:14px;">
+                <span>Indice</span>
+                <button onclick="downloadChartImage('idxDynamicChart','AoE_Indice')" title="현재 차트를 PNG로 다운로드" aria-label="Download chart" style="font-family:inherit;padding:2.5px;background:#fff;color:#1e3a8a;border:1.5px solid #1e3a8a;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;line-height:0;transition:all 0.15s;" onmouseover="this.style.background='#1e3a8a';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#1e3a8a'">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+                </button>
+            </h2>
             <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;justify-content:center;">
                 <div style="min-width:180px;"><div style="display:flex;gap:4px;margin-bottom:8px;"><button class="idx-mode-btn active" data-mode="local" onclick="switchIdxMode(this)">Local</button><button class="idx-mode-btn" data-mode="usd" onclick="switchIdxMode(this)">USD</button></div><table class="portfolio-table" style="max-width:500px;margin:0 auto;"><tbody><tr class="idx-chart-item active" data-series="KOSPI" onclick="toggleIdxSeries(this)"><td style="width:6px;padding:0;"><div style="width:4px;height:100%;background:#000000;border-radius:2px;"></div></td><td>KOSPI</td></tr>
 <tr class="idx-chart-item active" data-series="KOSDAQ" onclick="toggleIdxSeries(this)"><td style="width:6px;padding:0;"><div style="width:4px;height:100%;background:#666666;border-radius:2px;"></div></td><td>KOSDAQ</td></tr>
@@ -548,7 +553,7 @@
                         <span style="color:#888;">~</span>
                         <input type="text" id="idxEndDate" value="2026-05-27" onchange="formatDateInput(this);updateIdxChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                     </div>
-                    <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                    <div id="idxChartCard" style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                         <div style="position:relative;height:500px;">
                             <canvas id="idxDynamicChart"></canvas>
                         </div>
@@ -718,8 +723,39 @@
         </script>
         
         
+        <script>
+        if (typeof window.downloadChartImage !== 'function') {
+            window.downloadChartImage = function(canvasId, baseName) {
+                var src = document.getElementById(canvasId);
+                if (!src) { console.warn('canvas not found:', canvasId); return; }
+                var w = src.width, h = src.height;
+                var tmp = document.createElement('canvas');
+                tmp.width = w; tmp.height = h;
+                var ctx = tmp.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, w, h);
+                ctx.drawImage(src, 0, 0);
+                var d = new Date();
+                var pad = function(n){return n<10?'0'+n:''+n;};
+                var stamp = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+                var a = document.createElement('a');
+                a.href = tmp.toDataURL('image/png');
+                a.download = (baseName || 'chart') + '_' + stamp + '.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
+        }
+        </script>
+    
+        
         <div class="category-section">
-            <h2 class="category-title">DATA</h2>
+            <h2 class="category-title" style="display:flex;align-items:center;gap:14px;">
+                <span>DATA</span>
+                <button onclick="downloadChartImage('cmbDynamicChart','AoE_Data')" title="현재 차트를 PNG로 다운로드" aria-label="Download chart" style="font-family:inherit;padding:2.5px;background:#fff;color:#1e3a8a;border:1.5px solid #1e3a8a;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;line-height:0;transition:all 0.15s;" onmouseover="this.style.background='#1e3a8a';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#1e3a8a'">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+                </button>
+            </h2>
             <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;justify-content:center;">
                 <div style="min-width:240px;max-height:720px;overflow-y:auto;"><style>.cmb-chart-item:not(.active) .cmb-color-bar{display:none;}</style><table class="portfolio-table" style="max-width:500px;margin:0 auto;"><tbody><tr><td rowspan="6" class="cmb-group-cell" style="background:#f0f0f0;font-weight:700;font-size:12px;color:#333;padding:8px 10px;text-align:center;vertical-align:middle;text-transform:uppercase;letter-spacing:0.5px;border-top:1px solid #000;border-bottom:1px solid #000;border-right:1px solid #ddd;white-space:nowrap;">INDEX_KOREA</td><td class="cmb-chart-item active" data-series="KOSPI" onclick="toggleCmbSeries(this, event)" style="cursor:pointer;text-align:center;position:relative;border-top:1px solid #000;"><div class="cmb-color-bar" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);width:4px;height:18px;border-radius:2px;"></div>KOSPI</td></tr>
 <tr><td class="cmb-chart-item" data-series="KOSPI/USD" onclick="toggleCmbSeries(this, event)" style="cursor:pointer;text-align:center;position:relative;"><div class="cmb-color-bar" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);width:4px;height:18px;border-radius:2px;"></div>KOSPI/USD</td></tr>
@@ -787,7 +823,7 @@
                         <input type="text" id="cmbEndDate" value="2026-05-28" onchange="formatDateInput(this);updateCmbChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                         <button onclick="clearCmbSelections()" style="font-family:inherit;font-size:13px;font-weight:600;padding:4px 14px;background:#f3f4f6;color:#444;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;margin-left:8px;">전체 해제</button>
                     </div>
-                    <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                    <div id="cmbChartCard" style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                         <div style="position:relative;height:600px;">
                             <canvas id="cmbDynamicChart"></canvas>
                         </div>
@@ -1173,6 +1209,32 @@
         })();
         </script>
         
+        
+        <script>
+        if (typeof window.downloadChartImage !== 'function') {
+            window.downloadChartImage = function(canvasId, baseName) {
+                var src = document.getElementById(canvasId);
+                if (!src) { console.warn('canvas not found:', canvasId); return; }
+                var w = src.width, h = src.height;
+                var tmp = document.createElement('canvas');
+                tmp.width = w; tmp.height = h;
+                var ctx = tmp.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, w, h);
+                ctx.drawImage(src, 0, 0);
+                var d = new Date();
+                var pad = function(n){return n<10?'0'+n:''+n;};
+                var stamp = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+                var a = document.createElement('a');
+                a.href = tmp.toDataURL('image/png');
+                a.download = (baseName || 'chart') + '_' + stamp + '.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
+        }
+        </script>
+    
         
 
     <footer>
