@@ -217,10 +217,10 @@
       "ticker": "ONTO",
       "exchange": "NYSE",
       "ir_url": "https://investors.ontoinnovation.com/news/default.aspx",
-      "rss_url": null,
-      "fetch_type": "html",
+      "rss_url": "https://investors.ontoinnovation.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "S&P/Q4 .aspx — HTML parseable. | codex: Fetched official IR news page. No RSS found.",
+      "notes": "S&P/Q4 .aspx — HTML parseable. | codex: Fetched official IR news page. No RSS found. | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "claude",
         "codex"
@@ -253,10 +253,10 @@
       "ticker": "GILD",
       "exchange": "NASDAQ",
       "ir_url": "https://investors.gilead.com/news/default.aspx",
-      "rss_url": null,
-      "fetch_type": "html",
+      "rss_url": "https://investors.gilead.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "S&P/Q4 .aspx — HTML parseable. | codex: Official IR News list found via search and verified as list page. No RSS found.",
+      "notes": "S&P/Q4 .aspx — HTML parseable. | codex: Official IR News list found via search and verified as list page. No RSS found. | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "claude",
         "codex"
@@ -325,10 +325,10 @@
       "ticker": "MU",
       "exchange": "NASDAQ",
       "ir_url": "https://micron.gcs-web.com/latest-news",
-      "rss_url": null,
-      "fetch_type": "html",
+      "rss_url": "https://micron.gcs-web.com/rss/news-releases.xml",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Fetched official IR latest news page; static HTML includes filters/list structure. No RSS found. | alternate (claude): https://investors.micron.com/latest-news",
+      "notes": "Fetched official IR latest news page; static HTML includes filters/list structure. No RSS found. | alternate (claude): https://investors.micron.com/latest-news | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -397,10 +397,10 @@
       "ticker": "ASPN",
       "exchange": "NYSE",
       "ir_url": "https://ir.aerogel.com/news/default.aspx",
-      "rss_url": null,
-      "fetch_type": "html",
+      "rss_url": "https://ir.aerogel.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "S&P/Q4 .aspx — HTML parseable. | codex: Official IR overview and release detail verified; list URL inferred from same Q4 IR news structure.",
+      "notes": "S&P/Q4 .aspx — HTML parseable. | codex: Official IR overview and release detail verified; list URL inferred from same Q4 IR news structure. | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "claude",
         "codex"
@@ -487,10 +487,10 @@
       "ticker": "TPR",
       "exchange": "NYSE",
       "ir_url": "https://tapestry.gcs-web.com/press-releases/",
-      "rss_url": null,
-      "fetch_type": "html",
+      "rss_url": "https://tapestry.gcs-web.com/rss/news-releases.xml",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Fetched official IR press releases list; static HTML includes dated releases. No RSS found. | alternate (claude): https://tapestry.gcs-web.com/press-releases",
+      "notes": "Fetched official IR press releases list; static HTML includes dated releases. No RSS found. | alternate (claude): https://tapestry.gcs-web.com/press-releases | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -505,10 +505,10 @@
       "ticker": "COST",
       "exchange": "NASDAQ",
       "ir_url": "https://investor.costco.com/news/default.aspx",
-      "rss_url": null,
-      "fetch_type": "html",
+      "rss_url": "https://investor.costco.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "S&P/Q4 .aspx — HTML parseable. Includes monthly sales reports. | codex: Fetched official IR news page. No RSS found.",
+      "notes": "S&P/Q4 .aspx — HTML parseable. Includes monthly sales reports. | codex: Fetched official IR news page. No RSS found. | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "claude",
         "codex"
@@ -577,10 +577,10 @@
       "ticker": "T",
       "exchange": "NYSE",
       "ir_url": "https://investors.att.com/news-and-events/news-releases",
-      "rss_url": null,
-      "fetch_type": "html",
+      "rss_url": "https://investors.att.com/rss",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "RSS 미확인, 이메일 alert만 보임 | codex: Best guess official AT&T investor news release listing; not verified by fetch in this pass.",
+      "notes": "RSS 미확인, 이메일 alert만 보임 | codex: Best guess official AT&T investor news release listing; not verified by fetch in this pass. | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "claude",
         "codex"
@@ -631,10 +631,10 @@
       "ticker": "KMI",
       "exchange": "NYSE",
       "ir_url": "https://ir.kindermorgan.com/news/default.aspx",
-      "rss_url": "https://ir.kindermorgan.com/resources/rss-feeds/default.aspx",
-      "fetch_type": "html",
+      "rss_url": "https://ir.kindermorgan.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "RSS feeds 페이지 별도 존재 | codex: Official IR news section inferred from fetched official release URL; listing page not fetched directly.",
+      "notes": "RSS feeds 페이지 별도 존재 | codex: Official IR news section inferred from fetched official release URL; listing page not fetched directly. | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "claude",
         "codex"
@@ -829,10 +829,10 @@
       "ticker": "AMGN",
       "exchange": "NASDAQ",
       "ir_url": "https://investors.amgen.com/news-and-events/press-releases/",
-      "rss_url": null,
-      "fetch_type": "html",
+      "rss_url": "https://investors.amgen.com/rss/news-releases.xml",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Fetched official investor press releases page; page lists dated news releases. No less feed found. | alternate (claude): https://investors.amgen.com/news-releases",
+      "notes": "Fetched official investor press releases page; page lists dated news releases. No less feed found. | alternate (claude): https://investors.amgen.com/news-releases | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -850,7 +850,7 @@
       "rss_url": null,
       "fetch_type": "html",
       "confidence": "high",
-      "notes": "Fetched official TSMC Press Center latest news page; page lists dated releases. No RSS feed found. | alternate (claude): https://pr.tsmc.com/english",
+      "notes": "Fetched official TSMC Press Center latest news page; page lists dated releases. No RSS feed found. | alternate (claude): https://pr.tsmc.com/english | 2026-05-29 Codex 발굴+검증(Phase3) html(YYYY/MM/DD)",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -1099,10 +1099,10 @@
       "ticker": "RTX",
       "exchange": "NYSE",
       "ir_url": "https://investors.rtx.com/news-releases",
-      "rss_url": null,
-      "fetch_type": "html",
+      "rss_url": "https://www.rtx.com/rss-feeds/news",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Official IR site confirmed; RSS feed not found. | alternate (claude): https://www.rtx.com/news/news-center",
+      "notes": "Official IR site confirmed; RSS feed not found. | alternate (claude): https://www.rtx.com/news/news-center | 2026-05-29 Codex 발굴+검증(Phase3) live RSS(구 feed 동결 대체)",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -1171,10 +1171,10 @@
       "ticker": "ANET",
       "exchange": "NYSE",
       "ir_url": "https://investors.arista.com/Communications/Press-Releases-and-Events/default.aspx",
-      "rss_url": null,
-      "fetch_type": "html",
+      "rss_url": "https://investors.arista.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": " | codex: Official IR press releases page confirmed; no verified RSS feed found.",
+      "notes": " | codex: Official IR press releases page confirmed; no verified RSS feed found. | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "claude",
         "codex"
@@ -1189,10 +1189,10 @@
       "ticker": "APH",
       "exchange": "NYSE",
       "ir_url": "https://investors.amphenol.com/news-and-events/news/default.aspx",
-      "rss_url": "https://investors.amphenol.com/rss/news-releases.xml",
-      "fetch_type": "html",
+      "rss_url": "https://investors.amphenol.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Official IR site confirmed; RSS URL follows Q4 feed pattern but was not independently fetched. | alternate (claude): https://investors.amphenol.com/press-releases",
+      "notes": "Official IR site confirmed; RSS URL follows Q4 feed pattern but was not independently fetched. | alternate (claude): https://investors.amphenol.com/press-releases | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -1225,10 +1225,10 @@
       "ticker": "VRTX",
       "exchange": "NASDAQ",
       "ir_url": "https://investors.vrtx.com/news-events/press-releases",
-      "rss_url": null,
-      "fetch_type": "html",
+      "rss_url": "https://investors.vrtx.com/rss/news-releases.xml",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Official IR listing confirmed; no verified RSS feed found. | alternate (claude): https://investors.vrtx.com/press-releases",
+      "notes": "Official IR listing confirmed; no verified RSS feed found. | alternate (claude): https://investors.vrtx.com/press-releases | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -1243,10 +1243,10 @@
       "ticker": "ATZ",
       "exchange": "TSX",
       "ir_url": "https://investors.aritzia.com/investor-news/default.aspx?LanguageId=1",
-      "rss_url": "https://investors.aritzia.com/rss/news-releases.xml",
-      "fetch_type": "html",
+      "rss_url": "https://investors.aritzia.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Official IR page shows Press Release RSS Feed link. | alternate (claude): https://investors.aritzia.com/investor-news/default.aspx",
+      "notes": "Official IR page shows Press Release RSS Feed link. | alternate (claude): https://investors.aritzia.com/investor-news/default.aspx | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -1297,10 +1297,10 @@
       "ticker": "MP",
       "exchange": "NYSE",
       "ir_url": "https://investors.mpmaterials.com/investor-news/default.aspx",
-      "rss_url": "https://investors.mpmaterials.com/rss/news-releases.xml",
-      "fetch_type": "html",
+      "rss_url": "https://investors.mpmaterials.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": " | codex: Official IR site confirmed; RSS URL follows Q4 feed pattern but was not independently fetched.",
+      "notes": " | codex: Official IR site confirmed; RSS URL follows Q4 feed pattern but was not independently fetched. | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "claude",
         "codex"
@@ -1351,10 +1351,10 @@
       "ticker": "NKE",
       "exchange": "NYSE",
       "ir_url": "https://about.nike.com/en/newsroom/releases",
-      "rss_url": null,
-      "fetch_type": "html",
+      "rss_url": "https://about.nike.com/feed",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Official Nike newsroom release listing confirmed; no verified RSS feed found. | alternate (claude): https://investors.nike.com/investors/news-events-and-reports/default.aspx",
+      "notes": "Official Nike newsroom release listing confirmed; no verified RSS feed found. | alternate (claude): https://investors.nike.com/investors/news-events-and-reports/default.aspx | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -1531,10 +1531,10 @@
       "ticker": "ZTS",
       "exchange": "NYSE",
       "ir_url": "https://news.zoetis.com/press-releases/default.aspx",
-      "rss_url": "https://news.zoetis.com/rss/news-releases.xml",
-      "fetch_type": "html",
+      "rss_url": "https://news.zoetis.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Official press release page confirmed; RSS URL follows Q4 feed pattern but was not independently fetched. | alternate (claude): https://news.zoetis.com/press-releases",
+      "notes": "Official press release page confirmed; RSS URL follows Q4 feed pattern but was not independently fetched. | alternate (claude): https://news.zoetis.com/press-releases | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -1567,10 +1567,10 @@
       "ticker": "ONON",
       "exchange": "NYSE",
       "ir_url": "https://investors.on-running.com/news/default.aspx",
-      "rss_url": "https://investors.on-running.com/rss/news-releases.xml",
-      "fetch_type": "html",
+      "rss_url": "https://investors.on-running.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Q4 platform IR | codex: Official Q4-hosted IR news page confirmed through press release pages; RSS URL follows Q4 feed pattern but was not independently fetched.",
+      "notes": "Q4 platform IR | codex: Official Q4-hosted IR news page confirmed through press release pages; RSS URL follows Q4 feed pattern but was not independently fetched. | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "claude",
         "codex"
@@ -1603,10 +1603,10 @@
       "ticker": "META",
       "exchange": "NASDAQ",
       "ir_url": "https://investor.atmeta.com/investor-news/default.aspx",
-      "rss_url": "https://investor.atmeta.com/rss/news-releases.xml",
-      "fetch_type": "html",
+      "rss_url": "https://investor.atmeta.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Official IR RSS page lists Press Release RSS Feed. | alternate (claude): https://investor.atmeta.com/financials/default.aspx",
+      "notes": "Official IR RSS page lists Press Release RSS Feed. | alternate (claude): https://investor.atmeta.com/financials/default.aspx | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -1621,10 +1621,10 @@
       "ticker": "NVDA",
       "exchange": "NASDAQ",
       "ir_url": "https://investor.nvidia.com/news/press-release-details/default.aspx",
-      "rss_url": "https://nvidianews.nvidia.com/rss",
-      "fetch_type": "html",
+      "rss_url": "https://investor.nvidia.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Official NVIDIA IR RSS page links to NVIDIA newsroom press release feed. | alternate (claude): https://investor.nvidia.com/financial-info/financial-reports/default.aspx",
+      "notes": "Official NVIDIA IR RSS page links to NVIDIA newsroom press release feed. | alternate (claude): https://investor.nvidia.com/financial-info/financial-reports/default.aspx | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -2053,10 +2053,10 @@
       "ticker": "DHR",
       "exchange": "NYSE",
       "ir_url": "https://investors.danaher.com/press-releases",
-      "rss_url": "https://investors.danaher.com/rss",
+      "rss_url": "https://investors.danaher.com/press-releases?pagetemplate=rss",
       "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Official IR press releases page and RSS page verified. | alternate (claude): https://investors.danaher.com/news-releases",
+      "notes": "Official IR press releases page and RSS page verified. | alternate (claude): https://investors.danaher.com/news-releases | 2026-05-29 Codex 발굴+검증(Phase3)",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -2143,10 +2143,10 @@
       "ticker": "ISRG",
       "exchange": "NASDAQ",
       "ir_url": "https://investor.intuitivesurgical.com/press-releases/",
-      "rss_url": "https://isrg.gcs-web.com/news-releases/rss",
+      "rss_url": "https://investor.intuitivesurgical.com/rss/news-releases.xml",
       "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Official investor press releases list verified; RSS URL follows GCS investor feed pattern. | alternate (claude): https://isrg.intuitive.com/news-releases",
+      "notes": "Official investor press releases list verified; RSS URL follows GCS investor feed pattern. | alternate (claude): https://isrg.intuitive.com/news-releases | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -2179,10 +2179,10 @@
       "ticker": "OKLO",
       "exchange": "NYSE",
       "ir_url": "https://oklo.com/newsroom/default.aspx",
-      "rss_url": "https://oklo.com/rss/news-releases.xml",
+      "rss_url": "https://oklo.com/rss/pressrelease.aspx",
       "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Official Oklo newsroom/IR news page; RSS pattern appears to be Q4-style. | alternate (claude): https://oklo.com/investors/news/default.aspx",
+      "notes": "Official Oklo newsroom/IR news page; RSS pattern appears to be Q4-style. | alternate (claude): https://oklo.com/investors/news/default.aspx | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -2269,10 +2269,10 @@
       "ticker": "SRFM",
       "exchange": "NYSE",
       "ir_url": "https://investors.surfair.com/news/default.aspx",
-      "rss_url": "https://investors.surfair.com/rss/news-releases.xml",
+      "rss_url": "https://investors.surfair.com/rss/pressrelease.aspx",
       "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Official IR news page; RSS pattern appears to be Q4-style. | alternate (claude): https://investors.surfair.com/news/",
+      "notes": "Official IR news page; RSS pattern appears to be Q4-style. | alternate (claude): https://investors.surfair.com/news/ | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -2287,10 +2287,10 @@
       "ticker": "TMO",
       "exchange": "NYSE",
       "ir_url": "https://ir.thermofisher.com/investors/news-events/news/default.aspx",
-      "rss_url": "https://ir.thermofisher.com/rss/news-releases.xml",
+      "rss_url": "https://ir.thermofisher.com/rss/pressrelease.aspx",
       "fetch_type": "rss",
       "confidence": "high",
-      "notes": " | alternate (claude): https://ir.thermofisher.com/investors/news-events/news/news-details/",
+      "notes": " | alternate (claude): https://ir.thermofisher.com/investors/news-events/news/news-details/ | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -2305,10 +2305,10 @@
       "ticker": "NFLX",
       "exchange": "NASDAQ",
       "ir_url": "https://ir.netflix.net/investor-news-and-events/financial-releases/default.aspx",
-      "rss_url": "https://ir.netflix.net/investor-news-and-events/financial-releases/rss",
+      "rss_url": "https://ir.netflix.net/rss/pressrelease.aspx",
       "fetch_type": "rss",
       "confidence": "high",
-      "notes": " | alternate (claude): https://ir.netflix.net/investor-news-and-events/financial-releases/press-release-details/default.aspx",
+      "notes": " | alternate (claude): https://ir.netflix.net/investor-news-and-events/financial-releases/press-release-details/default.aspx | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -2431,10 +2431,10 @@
       "ticker": "QCOM",
       "exchange": "NASDAQ",
       "ir_url": "https://investor.qualcomm.com/news-events/press-releases",
-      "rss_url": null,
-      "fetch_type": "html",
+      "rss_url": "https://investor.qualcomm.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "RSS news feed available per IR navigation | codex: Official IR press releases page; no working RSS endpoint found.",
+      "notes": "RSS news feed available per IR navigation | codex: Official IR press releases page; no working RSS endpoint found. | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "claude",
         "codex"
@@ -2593,10 +2593,10 @@
       "ticker": "RBLX",
       "exchange": "NYSE",
       "ir_url": "https://ir.roblox.com/news/default.aspx",
-      "rss_url": "https://ir.roblox.com/rss/news-releases.xml",
+      "rss_url": "https://ir.roblox.com/rss/pressrelease.aspx",
       "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Q4 IR site | codex: Official IR news page; RSS pattern appears to be Q4-style.",
+      "notes": "Q4 IR site | codex: Official IR news page; RSS pattern appears to be Q4-style. | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "claude",
         "codex"
@@ -2647,10 +2647,10 @@
       "ticker": "LEU",
       "exchange": "NYSE-AMEX",
       "ir_url": "https://investors.centrusenergy.com/news-releases",
-      "rss_url": null,
-      "fetch_type": "html",
+      "rss_url": "https://investors.centrusenergy.com/rss/news-releases.xml",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Corporate newsroom (centrusenergy.com/news/) also lists items | codex: Official investor news releases page; no working RSS endpoint found.",
+      "notes": "Corporate newsroom (centrusenergy.com/news/) also lists items | codex: Official investor news releases page; no working RSS endpoint found. | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "claude",
         "codex"
@@ -2665,10 +2665,10 @@
       "ticker": "CRM",
       "exchange": "NYSE",
       "ir_url": "https://investor.salesforce.com/news/default.aspx",
-      "rss_url": "https://investor.salesforce.com/rss/news-releases.xml",
+      "rss_url": "https://investor.salesforce.com/rss/pressrelease.aspx",
       "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Official Salesforce investor news page; RSS pattern appears to be Q4-style. | alternate (claude): https://investor.salesforce.com/press-releases/default.aspx",
+      "notes": "Official Salesforce investor news page; RSS pattern appears to be Q4-style. | alternate (claude): https://investor.salesforce.com/press-releases/default.aspx | 2026-05-29 RSS 발견(Phase3, curl_cffi 검증, live)",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"

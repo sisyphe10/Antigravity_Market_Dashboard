@@ -79,6 +79,7 @@ _MONTHS = ('January|February|March|April|May|June|July|August|September'
 _HTML_DATE_RE = re.compile(
     rf'\b(?:{_MONTHS})\.?\s+\d{{1,2}},?\s+\d{{4}}\b'   # May 13, 2026 / Apr 8 2026
     r'|\b\d{4}-\d{2}-\d{2}\b'                          # 2026-05-13
+    r'|\b\d{4}/\d{1,2}/\d{1,2}\b'                      # 2026/05/13 (아시아권 IR)
     r'|\b\d{1,2}/\d{1,2}/\d{4}\b'                      # 05/13/2026
     rf'|\b\d{{1,2}}\s+(?:{_MONTHS})\.?\s+\d{{4}}\b',   # 13 May 2026
     re.IGNORECASE,
@@ -86,7 +87,7 @@ _HTML_DATE_RE = re.compile(
 
 _DATE_FORMATS = (
     '%B %d, %Y', '%b %d, %Y', '%B %d %Y', '%b %d %Y',
-    '%Y-%m-%d', '%m/%d/%Y', '%d %B %Y', '%d %b %Y',
+    '%Y-%m-%d', '%Y/%m/%d', '%m/%d/%Y', '%d %B %Y', '%d %b %Y',
 )
 
 
