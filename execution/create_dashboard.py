@@ -4359,7 +4359,7 @@ FEE_TABLE = [
         'types': [
             {'type': '개방형',     'pre_broker': 0, 'pre_advisor': 0, 'post_broker': 0.9, 'post_advisor': 0.6, 'perf_ratio': (4, 6), 'perf_note': '7% 초과분의 20%'},
             {'type': '목표전환형', 'target': 5, 'pre_broker': 1, 'pre_advisor': 0, 'post_broker': 0, 'post_advisor': 0,
-             'perf_broker_pct': 0.5, 'perf_advisor_pct': 0.5, 'perf_total_tip': '성과 보수 = 발생 수익의 20%'},
+             'perf_broker_pct': 0.5, 'perf_advisor_pct': 0.5, 'perf_total_tip': '<ul class="tip-list"><li>성과 보수 = 발생 수익의 20%</li></ul>'},
         ],
     },
     {
