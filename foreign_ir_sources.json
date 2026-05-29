@@ -1948,7 +1948,7 @@
       "rss_url": null,
       "fetch_type": "html",
       "confidence": "high",
-      "notes": "Official Cadence newsroom list verified; no RSS feed found. | alternate (claude): https://www.cadence.com/en_US/home/company/newsroom/press-releases.html",
+      "notes": "Official Cadence newsroom list verified; no RSS feed found. | alternate (claude): https://www.cadence.com/en_US/home/company/newsroom/press-releases.html | 2026-05-29 Phase3-2 적용 (추출기 개선으로 동작)",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -2035,10 +2035,10 @@
       "ticker": "ABT",
       "exchange": "NYSE",
       "ir_url": "https://www.abbott.com/en-us/corpnewsroom.html",
-      "rss_url": null,
-      "fetch_type": "html",
+      "rss_url": "https://www.abbottinvestor.com/rss/news-releases.xml",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Official Abbott newsroom page verified; no RSS feed found. | alternate (claude): https://www.abbott.com/corpnewsroom/press-release.html",
+      "notes": "Official Abbott newsroom page verified; no RSS feed found. | alternate (claude): https://www.abbott.com/corpnewsroom/press-release.html | 2026-05-29 Phase3-2 적용 (corpnewsroom→IR rss)",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -2160,11 +2160,11 @@
       "domain": "nuscalepower.com",
       "ticker": "SMR",
       "exchange": "NYSE",
-      "ir_url": "https://www.nuscalepower.com/en/news",
+      "ir_url": "https://www.nuscalepower.com/press-releases",
       "rss_url": null,
       "fetch_type": "html",
       "confidence": "high",
-      "notes": "Official NuScale press releases page verified; no RSS feed found. | alternate (claude): https://www.nuscalepower.com/press-releases",
+      "notes": "Official NuScale press releases page verified; no RSS feed found. | alternate (claude): https://www.nuscalepower.com/press-releases | 2026-05-29 Phase3-2 적용",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -2377,10 +2377,10 @@
       "ticker": "MSFT",
       "exchange": "NASDAQ",
       "ir_url": "https://www.microsoft.com/en-us/Investor/earnings",
-      "rss_url": null,
-      "fetch_type": "html",
+      "rss_url": "https://news.microsoft.com/source/feed/",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Official investor earnings press release listing; no working RSS endpoint found. | alternate (claude): https://news.microsoft.com/source/ | claude RSS: https://news.microsoft.com/source/feed/",
+      "notes": "Official investor earnings press release listing; no working RSS endpoint found. | alternate (claude): https://news.microsoft.com/source/ | claude RSS: https://news.microsoft.com/source/feed/ | 2026-05-29 Phase3-2 적용 (Microsoft Source)",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
