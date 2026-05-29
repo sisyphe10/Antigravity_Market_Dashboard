@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-28T18:30:20+09:00",
+  "updated": "2026-05-29T08:31:12+09:00",
   "window_short": 5,
   "window_long": 20,
   "stocks": {
@@ -71,23 +71,6 @@
         "days_available": 20
       }
     },
-    "006800": {
-      "last_date": "2026.05.28",
-      "short": {
-        "inst_volume": -1952659,
-        "frgn_volume": -744950,
-        "inst_value_eok": -1272.8,
-        "frgn_value_eok": -497.5,
-        "days_available": 5
-      },
-      "long": {
-        "inst_volume": -3774202,
-        "frgn_volume": -3285761,
-        "inst_value_eok": -2430.0,
-        "frgn_value_eok": -2408.6,
-        "days_available": 20
-      }
-    },
     "007660": {
       "last_date": "2026.05.28",
       "short": {
@@ -102,23 +85,6 @@
         "frgn_volume": -2691885,
         "inst_value_eok": -41.2,
         "frgn_value_eok": -3529.7,
-        "days_available": 20
-      }
-    },
-    "007810": {
-      "last_date": "2026.05.28",
-      "short": {
-        "inst_volume": 137008,
-        "frgn_volume": 63999,
-        "inst_value_eok": 145.9,
-        "frgn_value_eok": 70.9,
-        "days_available": 5
-      },
-      "long": {
-        "inst_volume": 356591,
-        "frgn_volume": 83094,
-        "inst_value_eok": 394.5,
-        "frgn_value_eok": 83.4,
         "days_available": 20
       }
     },
@@ -275,20 +241,20 @@
         "days_available": 20
       }
     },
-    "491000": {
+    "402340": {
       "last_date": "2026.05.28",
       "short": {
-        "inst_volume": -45650,
-        "frgn_volume": 85067,
-        "inst_value_eok": -24.6,
-        "frgn_value_eok": 97.0,
+        "inst_volume": 203319,
+        "frgn_volume": -51799,
+        "inst_value_eok": 2448.5,
+        "frgn_value_eok": -564.6,
         "days_available": 5
       },
       "long": {
-        "inst_volume": -252847,
-        "frgn_volume": 334202,
-        "inst_value_eok": -152.7,
-        "frgn_value_eok": 264.4,
+        "inst_volume": 986357,
+        "frgn_volume": -1386808,
+        "inst_value_eok": 11073.6,
+        "frgn_value_eok": -14818.0,
         "days_available": 20
       }
     }
