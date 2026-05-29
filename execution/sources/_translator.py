@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import sys
 
 # earnings_bot 모듈 import 위해 execution/ 경로 추가
@@ -161,6 +162,96 @@ def translate_to_korean(text: str, title: str = '', dry_run: bool = False) -> di
     return {
         'text': '\n\n'.join(parts),
         'chunks': len(chunks),
+        'input_tokens': total_in,
+        'output_tokens': total_out,
+        'dry_run': False,
+    }
+
+
+# ── IR 보도자료 제목 배치 번역 (foreign_ir 어댑터용) ──────────────────────
+SYSTEM_TRANSLATION_IR_TITLE = """당신은 해외 상장사의 IR 보도자료 제목을 한국 자산운용역을 위해 번역하는 전문 번역가입니다.
+
+번호가 매겨진 영문 제목 목록을 받아, 각 제목을 한국어로 자연스럽게 번역합니다.
+
+## 번역 규칙
+1. 회사명/티커/제품명/사람 이름은 영문 유지 (NVIDIA, TSMC, GB200, Jensen Huang 등).
+2. 금융/실적 약어·표기는 원형 유지: EPS, FCF, EBITDA, FY26, Q1, YoY, capex, GW, MW, bps, IPO, M&A, ADR 등.
+3. 숫자·통화·단위는 절대 변형 금지 ($4.5B, 30%, 122일 등 그대로).
+4. 비즈니스 관용 표현 직역 금지: tailwind→순풍, headwind→부담, secular→구조적, pent-up demand→이연 수요, guidance→가이던스, ramp→양산 가속.
+5. 제목체(명사형 어미)로 간결하게. 예: "Q1 2026 Results" → "2026년 1분기 실적".
+6. 의역 허용하되 의미 보존.
+
+## 출력 형식 (엄격)
+- 입력과 정확히 같은 번호를 유지.
+- 한 줄에 하나: `<번호>. <한국어 번역>`
+- 번역문만 출력. 머리말/꼬리말/설명 절대 금지.
+"""
+
+_TITLE_LINE_RE = re.compile(r'^\s*(\d+)[.)\]]\s*(.+?)\s*$')
+TITLE_BATCH_SIZE = 30
+
+
+def translate_titles(titles: list[str], dry_run: bool = False) -> dict:
+    """IR 보도자료 제목 목록을 한국어로 배치 번역.
+
+    Args:
+        titles: 영문 제목 리스트.
+        dry_run: True 면 API 호출 없이 원문 반환.
+
+    Returns:
+        {
+            'titles_kr': list[str],  # titles 와 같은 길이/순서 (실패 항목은 원문 유지)
+            'input_tokens': int,
+            'output_tokens': int,
+            'dry_run': bool,
+        }
+    """
+    if not titles:
+        return {'titles_kr': [], 'input_tokens': 0, 'output_tokens': 0, 'dry_run': dry_run}
+    if dry_run:
+        return {'titles_kr': list(titles), 'input_tokens': 0, 'output_tokens': 0, 'dry_run': True}
+
+    result: list[str] = list(titles)  # 기본값 = 원문 (파싱 실패 시 폴백)
+    total_in = 0
+    total_out = 0
+
+    for batch_start in range(0, len(titles), TITLE_BATCH_SIZE):
+        batch = titles[batch_start:batch_start + TITLE_BATCH_SIZE]
+        numbered = '\n'.join(f'{i + 1}. {t}' for i, t in enumerate(batch))
+        user_msg = (
+            '다음 영문 보도자료 제목들을 시스템 프롬프트 규칙대로 한국어로 번역하세요. '
+            '입력과 같은 번호로만 출력하세요.\n\n' + numbered
+        )
+        try:
+            resp = _call_haiku(
+                [{'role': 'user', 'content': user_msg}],
+                SYSTEM_TRANSLATION_IR_TITLE,
+                max_tokens=4096,
+            )
+        except Exception as e:
+            logger.error(f'translate_titles 배치 실패 (start={batch_start}): {e}')
+            continue
+        total_in += resp.get('input_tokens', 0)
+        total_out += resp.get('output_tokens', 0)
+
+        # 번호별 파싱 → 해당 인덱스에 매핑
+        parsed: dict[int, str] = {}
+        for line in (resp.get('text') or '').splitlines():
+            m = _TITLE_LINE_RE.match(line)
+            if m:
+                n = int(m.group(1))
+                if 1 <= n <= len(batch):
+                    parsed[n - 1] = m.group(2).strip()
+        for local_idx, kr in parsed.items():
+            if kr:
+                result[batch_start + local_idx] = kr
+        logger.info(
+            f'translate_titles 배치 {batch_start}-{batch_start + len(batch)}: '
+            f'parsed={len(parsed)}/{len(batch)} in={resp.get("input_tokens")} out={resp.get("output_tokens")}'
+        )
+
+    return {
+        'titles_kr': result,
         'input_tokens': total_in,
         'output_tokens': total_out,
         'dry_run': False,

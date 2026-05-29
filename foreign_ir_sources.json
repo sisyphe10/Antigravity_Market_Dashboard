@@ -1,0 +1,2968 @@
+{
+  "version": 1,
+  "total": 164,
+  "enabled": 135,
+  "high_confidence": 153,
+  "batches": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "companies": [
+    {
+      "name_en": "Sandisk",
+      "currency": "USD",
+      "domain": "sandisk.com",
+      "ticker": "SNDK",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investor.sandisk.com/news-events/news-releases",
+      "rss_url": null,
+      "fetch_type": "spa",
+      "confidence": "high",
+      "notes": "Q4 IR site (q4inc-style) - JS rendered list. 2025 spinoff from WDC. | codex: Fetched official IR news releases list; static HTML includes multiple releases. No RSS text/link found on fetched page.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": false,
+      "batch": 1
+    },
+    {
+      "name_en": "WinWay Technology",
+      "currency": "TWD",
+      "domain": "winwayglobal.com",
+      "ticker": "6515.TW",
+      "exchange": "TWSE",
+      "ir_url": "https://www.winwayglobal.com/news",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Press list on corporate site /news. No dedicated IR press feed found; TWSE MOPS is the regulatory channel. | codex: Fetched official English News Center/Press Releases list; static HTML includes dated release list. No RSS found.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "FormFactor",
+      "currency": "USD",
+      "domain": "www.formfactor.com",
+      "ticker": "FORM",
+      "exchange": "NASDAQ",
+      "ir_url": "https://www.formfactor.com/company/news-events/press-releases/",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Fetched official press releases list; static HTML includes releases by year. No RSS found. | alternate (claude): https://investors.formfactor.com/press-releases/",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "Western Digital",
+      "currency": "USD",
+      "domain": "investor.wdc.com",
+      "ticker": "WDC",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investor.wdc.com/news-releases/news-release-details",
+      "rss_url": "https://investor.wdc.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official IR release detail pages verified via search; list URL follows same official Q4 IR structure, but full list fetch was not completed. | alternate (claude): https://investor.wdc.com/news-releases | 2026-05-29 URL 교정(Phase2.5, curl_cffi 검증)",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "Bloom Energy",
+      "currency": "USD",
+      "domain": "investor.bloomenergy.com",
+      "ticker": "BE",
+      "exchange": "NYSE",
+      "ir_url": "https://investor.bloomenergy.com/press-releases/",
+      "rss_url": "https://investor.bloomenergy.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Fetched official press releases page; HTML showed JS Loading for list but visible RSS page exposed Press Release RSS Feed. | alternate (claude): https://investor.bloomenergy.com/press-releases/default.aspx",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "Satellogic",
+      "currency": "USD",
+      "domain": "satellogic.gcs-web.com",
+      "ticker": "SATL",
+      "exchange": "NASDAQ",
+      "ir_url": "https://satellogic.gcs-web.com/news-releases/news-release-details",
+      "rss_url": "https://satellogic.gcs-web.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official GCS IR release URL pattern verified from official release detail; list URL inferred from same GCS structure. | alternate (claude): https://investors.satellogic.com/news-events/news-releases | 2026-05-29 URL 교정(Phase2.5, curl_cffi 검증)",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "Seagate Technology",
+      "currency": "USD",
+      "domain": "www.seagate.com",
+      "ticker": "STX",
+      "exchange": "NASDAQ",
+      "ir_url": "https://www.seagate.com/stories/articles/press-releases/",
+      "rss_url": "https://investors.seagate.com/rss/PressRelease.aspx?IssuerID=&CategoryWorkflowID=",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Fetched official Seagate Stories press releases list via search result; static HTML includes multiple releases. No RSS found. | alternate (claude): https://investors.seagate.com/news-events/press-releases | 2026-05-29 URL 교정(Phase2.5, curl_cffi 검증)",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "Enphase Energy",
+      "currency": "USD",
+      "domain": "enphase.com",
+      "ticker": "ENPH",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investor.enphase.com/news-releases/",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Also mirrored at newsroom.enphase.com/news-releases. | codex: Fetched official investor press releases list; static HTML includes recent and archived releases. No RSS found.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "USA Rare Earth",
+      "currency": "USD",
+      "domain": "usare.com",
+      "ticker": "USAR",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investors.usare.com/news-events/news-releases",
+      "rss_url": null,
+      "fetch_type": "spa",
+      "confidence": "high",
+      "notes": "Q4 IR widget — JS rendered. | codex: Fetched official IR homepage showing latest press releases and News Releases navigation; list URL inferred from official navigation.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": false,
+      "batch": 1
+    },
+    {
+      "name_en": "Nanya Technology",
+      "currency": "TWD",
+      "domain": "www.nanya.com",
+      "ticker": "2408",
+      "exchange": "TWSE",
+      "ir_url": "https://www.nanya.com/en/IR/15/Press%20Releases",
+      "rss_url": null,
+      "fetch_type": "spa",
+      "confidence": "high",
+      "notes": "Fetched official English IR press releases page; page shell/year filters render, but release rows appeared empty without dynamic loading. No RSS found. | alternate (claude): https://www.nanya.com/en/IR/16/Press%20Release",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": false,
+      "batch": 1
+    },
+    {
+      "name_en": "Applied Materials",
+      "currency": "USD",
+      "domain": "appliedmaterials.com",
+      "ticker": "AMAT",
+      "exchange": "NASDAQ",
+      "ir_url": "https://ir.appliedmaterials.com/news-releases",
+      "rss_url": "https://ir.appliedmaterials.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Q4 IR site — JS rendered. Newsroom alt: appliedmaterials.com/us/en/newsroom.html | codex: Fetched official IR News page; static HTML includes dated releases and visible RSS Feeds text.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "Onto Innovation",
+      "currency": "USD",
+      "domain": "ontoinnovation.com",
+      "ticker": "ONTO",
+      "exchange": "NYSE",
+      "ir_url": "https://investors.ontoinnovation.com/news/default.aspx",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "S&P/Q4 .aspx — HTML parseable. | codex: Fetched official IR news page. No RSS found.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "Pop Mart International Group",
+      "currency": "HKD",
+      "domain": "www.popmart.com",
+      "ticker": "09992",
+      "exchange": "HKEX",
+      "ir_url": "https://www.popmart.com/hk/investor-relations",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "medium",
+      "notes": "HK investor relations page found via search; appears official, but press-release/list content may be mixed with HK announcements. No RSS found. | alternate (claude): https://www.popmart.com/us/investor-relations",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": false,
+      "batch": 1
+    },
+    {
+      "name_en": "Gilead Sciences",
+      "currency": "USD",
+      "domain": "gilead.com",
+      "ticker": "GILD",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investors.gilead.com/news/default.aspx",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "S&P/Q4 .aspx — HTML parseable. | codex: Official IR News list found via search and verified as list page. No RSS found.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "Lam Research",
+      "currency": "USD",
+      "domain": "lamresearch.com",
+      "ticker": "LRCX",
+      "exchange": "NASDAQ",
+      "ir_url": "https://newsroom.lamresearch.com/press-releases",
+      "rss_url": "https://newsroom.lamresearch.com/rss",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Business Wire/PressDeck-style newsroom likely exposes RSS at /rss; verify before bot wiring. | codex: Official newsroom press releases list found via search; static search result showed multiple releases and filters. No RSS found.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "Texas Instruments",
+      "currency": "USD",
+      "domain": "investor.ti.com",
+      "ticker": "TXN",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investor.ti.com/news-releases",
+      "rss_url": "https://investor.ti.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official IR release details verified; list URL follows official TI IR structure. No RSS confirmed. | alternate (claude): https://investor.ti.com/investor-news | 2026-05-29 rss_url 교정(Phase2.5)",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "ON Semiconductor",
+      "currency": "USD",
+      "domain": "investor.onsemi.com",
+      "ticker": "ON",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investor.onsemi.com/news-releases",
+      "rss_url": "https://investor.onsemi.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official IR homepage and release details verified; news-releases list URL follows same official IR structure. No RSS found on fetched homepage. | alternate (claude): https://investor.onsemi.com/news | 2026-05-29 rss_url 교정(Phase2.5)",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "Micron Technology",
+      "currency": "USD",
+      "domain": "micron.gcs-web.com",
+      "ticker": "MU",
+      "exchange": "NASDAQ",
+      "ir_url": "https://micron.gcs-web.com/latest-news",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Fetched official IR latest news page; static HTML includes filters/list structure. No RSS found. | alternate (claude): https://investors.micron.com/latest-news",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "MediaTek",
+      "currency": "TWD",
+      "domain": "www.mediatek.com",
+      "ticker": "2454",
+      "exchange": "TWSE",
+      "ir_url": "https://www.mediatek.com/investor-relations",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official English investor relations page found; fetched/search text shows dated news items. No RSS found. | alternate (claude): https://corp.mediatek.com/news-events/press-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "Honeywell International",
+      "currency": "USD",
+      "domain": "www.honeywell.com",
+      "ticker": "HON",
+      "exchange": "NASDAQ",
+      "ir_url": "https://www.honeywell.com/us/en/news",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official Honeywell news list found via search; static result shows press releases and dated financial releases. No RSS found. | alternate (claude): https://investor.honeywell.com/news",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "Hasbro",
+      "currency": "USD",
+      "domain": "hasbro.com",
+      "ticker": "HAS",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investor.hasbro.com/press-releases",
+      "rss_url": "https://investor.hasbro.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "S&P/Q4 hosted. Mirror at newsroom.hasbro.com/news-releases. | codex: Fetched official IR press releases list; static HTML includes releases. RSS News Feeds page exposes General Releases RSS.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "Aspen Aerogels",
+      "currency": "USD",
+      "domain": "aerogel.com",
+      "ticker": "ASPN",
+      "exchange": "NYSE",
+      "ir_url": "https://ir.aerogel.com/news/default.aspx",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "S&P/Q4 .aspx — HTML parseable. | codex: Official IR overview and release detail verified; list URL inferred from same Q4 IR news structure.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "ASML Holding NV",
+      "currency": "USD",
+      "domain": "asml.com",
+      "ticker": "ASML",
+      "exchange": "NASDAQ",
+      "ir_url": "https://www.asml.com/en/news/press-releases",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Corporate-hosted, static HTML list. | codex: Fetched official ASML press releases & announcements list; static HTML includes latest press releases. No RSS found.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "BE Semiconductor Industries",
+      "currency": "EUR",
+      "domain": "www.besi.com",
+      "ticker": "BESI",
+      "exchange": "Euronext Amsterdam",
+      "ir_url": "https://www.besi.com/investor-relations/press-releases/2026/",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official Besi 2026 press releases list found via search; static result shows list page. No RSS found. | alternate (claude): https://www.besi.com/investor-relations/press-releases/",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "Motorola Solutions",
+      "currency": "USD",
+      "domain": "www.motorolasolutions.com",
+      "ticker": "MSI",
+      "exchange": "NYSE",
+      "ir_url": "https://www.motorolasolutions.com/newsroom.html",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official newsroom list found via search and individual press releases verified; direct press-releases list URL was not fetchable, so newsroom page used. No RSS found. | alternate (claude): https://www.motorolasolutions.com/newsroom/press-releases.html",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "Eaton plc",
+      "currency": "USD",
+      "domain": "eaton.com",
+      "ticker": "ETN",
+      "exchange": "NYSE",
+      "ir_url": "https://www.eaton.com/us/en-us/company/news-insights/news-releases.html",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Corporate-hosted news releases. IR landing: /company/investor-relations.html | codex: Fetched official Eaton news releases search/list page; static HTML includes multiple dated releases. No RSS found.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "Tapestry",
+      "currency": "USD",
+      "domain": "tapestry.gcs-web.com",
+      "ticker": "TPR",
+      "exchange": "NYSE",
+      "ir_url": "https://tapestry.gcs-web.com/press-releases/",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Fetched official IR press releases list; static HTML includes dated releases. No RSS found. | alternate (claude): https://tapestry.gcs-web.com/press-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "Costco Wholesale",
+      "currency": "USD",
+      "domain": "costco.com",
+      "ticker": "COST",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investor.costco.com/news/default.aspx",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "S&P/Q4 .aspx — HTML parseable. Includes monthly sales reports. | codex: Fetched official IR news page. No RSS found.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "Ericsson",
+      "currency": "USD",
+      "domain": "ericsson.com",
+      "ticker": "ERIC",
+      "exchange": "NASDAQ",
+      "ir_url": "https://www.ericsson.com/en/press-releases",
+      "rss_url": "https://www.ericsson.com/en/press-releases/rss",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Newsroom at /en/newsroom; press release archive at /en/press-releases. RSS path likely available — verify before wiring. | codex: Official Ericsson press releases list found via search and official investor page references latest press releases. No RSS found.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "Johnson & Johnson",
+      "currency": "USD",
+      "domain": "www.jnj.com",
+      "ticker": "JNJ",
+      "exchange": "NYSE",
+      "ir_url": "https://www.jnj.com/media-center/press-releases",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Fetched official J&J press releases list via search; static HTML includes multiple releases. No RSS found. | alternate (claude): https://www.investor.jnj.com/investor-news/default.aspx",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 1
+    },
+    {
+      "name_en": "INTEL",
+      "currency": "USD",
+      "domain": "intel.com",
+      "ticker": "INTC",
+      "exchange": "NASDAQ",
+      "ir_url": "https://www.intc.com/news-events/press-releases?category=all&page=1",
+      "rss_url": "https://www.intc.com/news-events/press-releases/rss",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Fetched IR press releases page; page lists dated press releases and exposes RSS News Feed. | alternate (claude): https://www.intc.com/news-events/press-releases | claude RSS: https://www.intc.com/news-events/press-releases/rss",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 2
+    },
+    {
+      "name_en": "AT&T",
+      "currency": "USD",
+      "domain": "att.com",
+      "ticker": "T",
+      "exchange": "NYSE",
+      "ir_url": "https://investors.att.com/news-and-events/news-releases",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "RSS 미확인, 이메일 alert만 보임 | codex: Best guess official AT&T investor news release listing; not verified by fetch in this pass.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 2
+    },
+    {
+      "name_en": "Fluor Corporation",
+      "currency": "USD",
+      "domain": "fluor.com",
+      "ticker": "FLR",
+      "exchange": "NYSE",
+      "ir_url": "https://newsroom.fluor.com/news-releases/all-news-releases/default.aspx",
+      "rss_url": "https://newsroom.fluor.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Newsroom 호스팅, RSS 미확인 | codex: Fetched official newsroom all news releases page and RSS feeds page; press release RSS link present.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 2
+    },
+    {
+      "name_en": "Altria Group",
+      "currency": "USD",
+      "domain": "altria.com",
+      "ticker": "MO",
+      "exchange": "NYSE",
+      "ir_url": "https://investor.altria.com/press-releases/",
+      "rss_url": "https://investor.altria.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Fetched IR press releases page and RSS newsfeeds page; press releases RSS link present. | alternate (claude): https://investor.altria.com/press-releases/default.aspx",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 2
+    },
+    {
+      "name_en": "Kinder Morgan",
+      "currency": "USD",
+      "domain": "kindermorgan.com",
+      "ticker": "KMI",
+      "exchange": "NYSE",
+      "ir_url": "https://ir.kindermorgan.com/news/default.aspx",
+      "rss_url": "https://ir.kindermorgan.com/resources/rss-feeds/default.aspx",
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "RSS feeds 페이지 별도 존재 | codex: Official IR news section inferred from fetched official release URL; listing page not fetched directly.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 2
+    },
+    {
+      "name_en": "Uranium Energy Corp",
+      "currency": "USD",
+      "domain": "uraniumenergy.com",
+      "ticker": "UEC",
+      "exchange": "NYSE American",
+      "ir_url": "https://www.uraniumenergy.com/news/releases/",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "RSS 없음, 이메일 sub만 | codex: Fetched official News Releases page; page includes current UEC news release content but no RSS feed found.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 2
+    },
+    {
+      "name_en": "SHARKNINJA",
+      "currency": "USD",
+      "domain": "sharkninja.com",
+      "ticker": "SN",
+      "exchange": "NYSE",
+      "ir_url": "https://ir.sharkninja.com/news/default.aspx",
+      "rss_url": null,
+      "fetch_type": "spa",
+      "confidence": "medium",
+      "notes": "Fetched official IR news page, but release list loads via JavaScript; no RSS feed found. | alternate (claude): https://ir.sharkninja.com/overview/default.aspx",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": false,
+      "batch": 2
+    },
+    {
+      "name_en": "KLA Corporation",
+      "currency": "USD",
+      "domain": "kla.com",
+      "ticker": "KLAC",
+      "exchange": "NASDAQ",
+      "ir_url": "https://ir.kla.com/news-events/press-releases?page=1",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Fetched IR press releases page; page lists dated releases. No RSS link observed in fetched page. | alternate (claude): https://ir.kla.com/news-events/press-releases | claude RSS: https://ir.kla.com/news-events/press-releases/rss",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 2
+    },
+    {
+      "name_en": "THE COCA-COLA COMPANY",
+      "currency": "USD",
+      "domain": "coca-colacompany.com",
+      "ticker": "KO",
+      "exchange": "NYSE",
+      "ir_url": "https://investors.coca-colacompany.com/news-events/press-releases?category=all",
+      "rss_url": "https://investors.coca-colacompany.com/rss-news-feed",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Fetched IR press releases page; page lists dated releases and exposes News RSS/RSS News Feed. | alternate (claude): https://investors.coca-colacompany.com/news-events/press-releases | claude RSS: https://investors.coca-colacompany.com/news-events/press-releases/rss",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 2
+    },
+    {
+      "name_en": "Cameco Corporation",
+      "currency": "USD",
+      "domain": "cameco.com",
+      "ticker": "CCJ",
+      "exchange": "NYSE",
+      "ir_url": "https://www.cameco.com/media/news",
+      "rss_url": "https://www.cameco.com/rss/news",
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Cameco 자체 RSS 페이지 | codex: Best guess official Cameco media news listing; not verified by fetch in this pass.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 2
+    },
+    {
+      "name_en": "Philip Morris International",
+      "currency": "USD",
+      "domain": "pmi.com",
+      "ticker": "PM",
+      "exchange": "NYSE",
+      "ir_url": "https://www.pmi.com/investor-relations/press-releases-and-events/press-releases-overview",
+      "rss_url": null,
+      "fetch_type": "spa",
+      "confidence": "medium",
+      "notes": "Fetched official IR press releases overview; content area returned an error/reload message, suggesting dynamic rendering; no RSS feed found. | alternate (claude): https://www.pmi.com/media-center/press-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": false,
+      "batch": 2
+    },
+    {
+      "name_en": "HALOZYME THERAPEUTICS",
+      "currency": "USD",
+      "domain": "halozyme.com",
+      "ticker": "HALO",
+      "exchange": "NASDAQ",
+      "ir_url": "https://ir.halozyme.com/news/default.aspx",
+      "rss_url": null,
+      "fetch_type": "spa",
+      "confidence": "medium",
+      "notes": "Fetched official IR news page, but release list shows Loading; likely JavaScript-rendered. No RSS feed found. | alternate (claude): https://www.halozyme.com/news/news-releases/default.aspx",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": false,
+      "batch": 2
+    },
+    {
+      "name_en": "Merck & Co.",
+      "currency": "USD",
+      "domain": "merck.com",
+      "ticker": "MRK",
+      "exchange": "NYSE",
+      "ir_url": "https://www.merck.com/media/news/",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "연도/카테고리 필터링 가능 | codex: Fetched official news releases page; filters and counts visible but release items not exposed in fetched HTML, likely dynamic.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 2
+    },
+    {
+      "name_en": "WALMART",
+      "currency": "USD",
+      "domain": "walmart.com",
+      "ticker": "WMT",
+      "exchange": "NYSE",
+      "ir_url": "https://corporate.walmart.com/newsroom/press-releases",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "medium",
+      "notes": "Best guess official Walmart corporate press releases listing; not verified by fetch in this pass. | alternate (claude): https://corporate.walmart.com/news",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": false,
+      "batch": 2
+    },
+    {
+      "name_en": "Ulta Beauty",
+      "currency": "USD",
+      "domain": "ulta.com",
+      "ticker": "ULTA",
+      "exchange": "NASDAQ",
+      "ir_url": "https://www.ulta.com/investor/news-events/press-releases",
+      "rss_url": "https://www.ulta.com/investor/news-events/press-releases/rss",
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "RSS 아이콘 확인됨 | codex: Fetched IR press releases page; page lists dated releases and exposes News RSS/RSS News Feed.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 2
+    },
+    {
+      "name_en": "AMGEN",
+      "currency": "USD",
+      "domain": "amgen.com",
+      "ticker": "AMGN",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investors.amgen.com/news-and-events/press-releases/",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Fetched official investor press releases page; page lists dated news releases. No less feed found. | alternate (claude): https://investors.amgen.com/news-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 2
+    },
+    {
+      "name_en": "TSMC / Taiwan Semiconductor",
+      "currency": "USD",
+      "domain": "tsmc.com",
+      "ticker": "TSM",
+      "exchange": "NYSE",
+      "ir_url": "https://pr.tsmc.com/english/latest-news",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Fetched official TSMC Press Center latest news page; page lists dated releases. No RSS feed found. | alternate (claude): https://pr.tsmc.com/english",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 2
+    },
+    {
+      "name_en": "LOWE'S COMPANIES",
+      "currency": "USD",
+      "domain": "lowes.com",
+      "ticker": "LOW",
+      "exchange": "NYSE",
+      "ir_url": "https://corporate.lowes.com/investors/news-events/financial-press-releases",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Fetched official financial press releases page; page lists dated releases and PDF downloads. No RSS feed found. | alternate (claude): https://corporate.lowes.com/newsroom",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 2
+    },
+    {
+      "name_en": "NexGen Energy Ltd.",
+      "currency": "USD",
+      "domain": "nexgenenergy.ca",
+      "ticker": "NXE",
+      "exchange": "NYSE",
+      "ir_url": "https://www.nexgenenergy.ca/news/default.aspx",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "medium",
+      "notes": "공식 뉴스 페이지, RSS 미확인 | codex: Best guess official NexGen news listing; not verified by fetch in this pass.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": false,
+      "batch": 2
+    },
+    {
+      "name_en": "BRISTOL-MYERS SQUIBB CO",
+      "currency": "USD",
+      "domain": "bms.com",
+      "ticker": "BMY",
+      "exchange": "NYSE",
+      "ir_url": "https://investors.bms.com/iframes/press-releases/",
+      "rss_url": "https://investors.bms.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Fetched official investor press releases iframe; page lists dated releases and notes Press Release RSS Feed. | alternate (claude): https://news.bms.com/news/default.aspx",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 2
+    },
+    {
+      "name_en": "THE PROCTER & GAMBLE COMPANY",
+      "currency": "USD",
+      "domain": "pg.com",
+      "ticker": "PG",
+      "exchange": "NYSE",
+      "ir_url": "https://www.pginvestor.com/news/default.aspx",
+      "rss_url": null,
+      "fetch_type": "spa",
+      "confidence": "high",
+      "notes": "Fetched official investor news page, but news items were not exposed in fetched output; likely JavaScript-rendered. No RSS feed found. | alternate (claude): https://us.pg.com/newsroom/",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": false,
+      "batch": 2
+    },
+    {
+      "name_en": "e.l.f. Beauty",
+      "currency": "USD",
+      "domain": "elfbeauty.com",
+      "ticker": "ELF",
+      "exchange": "NYSE",
+      "ir_url": "https://investor.elfbeauty.com/stock-and-financial/press-releases",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Sharelinx/sli IR 플랫폼, 연도별 정리 | codex: Fetched official investor press releases page; page lists many dated releases. No RSS feed found.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 2
+    },
+    {
+      "name_en": "Nokia Oyj",
+      "currency": "USD",
+      "domain": "nokia.com",
+      "ticker": "NOK",
+      "exchange": "NYSE",
+      "ir_url": "https://www.nokia.com/newsroom/stock-exchange-releases/",
+      "rss_url": "https://www.nokia.com/newsroom/stock-exchange-releases/rss.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Fetched official stock exchange releases page; page lists dated investor-relevant releases. RSS URL inferred from official newsroom RSS pattern. | alternate (claude): https://www.nokia.com/newsroom/",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 2
+    },
+    {
+      "name_en": "ENTERGY",
+      "currency": "USD",
+      "domain": "entergy.com",
+      "ticker": "ETR",
+      "exchange": "NYSE",
+      "ir_url": "https://www.entergy.com/news/releases",
+      "rss_url": "https://www.entergynewsroom.com/rss/",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official releases page found via search; official RSS feeds page found and states press release RSS is available, but direct feed URL not resolved in this pass. | alternate (claude): https://www.entergy.com/news/",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 2
+    },
+    {
+      "name_en": "THE HOME DEPOT",
+      "currency": "USD",
+      "domain": "homedepot.com",
+      "ticker": "HD",
+      "exchange": "NYSE",
+      "ir_url": "https://ir.homedepot.com/news-releases/default.aspx",
+      "rss_url": "https://ir.homedepot.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official IR site fetched at overview level and showed News Releases; listing URL and RSS follow standard official IR pattern but listing not fetched directly. | alternate (claude): https://ir.homedepot.com/news-releases/2026 | claude RSS: https://ir.homedepot.com/rss",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 2
+    },
+    {
+      "name_en": "Dominion Energy",
+      "currency": "USD",
+      "domain": "dominionenergy.com",
+      "ticker": "D",
+      "exchange": "NYSE",
+      "ir_url": "https://investors.dominionenergy.com/news-releases/default.aspx",
+      "rss_url": "https://investors.dominionenergy.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official RSS feeds page found via search with Press Release RSS Feed; listing URL follows official IR pattern but was not fetched directly. | alternate (claude): https://news.dominionenergy.com/press-releases/Corporate--Financial/",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 2
+    },
+    {
+      "name_en": "NXP Semiconductors NV",
+      "currency": "USD",
+      "domain": "nxp.com",
+      "ticker": "NXPI",
+      "exchange": "NASDAQ",
+      "ir_url": "https://media.nxp.com/media-center/press-releases/",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Fetched official newsroom press releases page; page lists dated releases. No RSS feed found. | alternate (claude): https://media.nxp.com/news-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 2
+    },
+    {
+      "name_en": "BWX TECHNOLOGIES",
+      "currency": "USD",
+      "domain": "bwxt.com",
+      "ticker": "BWXT",
+      "exchange": "NYSE",
+      "ir_url": "https://investors.bwxt.com/news-events/news-releases",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official investor news releases page found in search; direct fetch returned 403 in this pass. No RSS feed found. | alternate (claude): https://www.bwxt.com/news",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 2
+    },
+    {
+      "name_en": "Deckers Outdoor",
+      "currency": "USD",
+      "domain": "deckers.com",
+      "ticker": "DECK",
+      "exchange": "NYSE",
+      "ir_url": "https://ir.deckers.com/news-events/press-releases",
+      "rss_url": "https://ir.deckers.com/news-events/press-releases/rss",
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "RSS News Feed 링크 footer 확인 | codex: Fetched official IR overview showing latest news, View All Press Releases, and RSS News Feed link.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 2
+    },
+    {
+      "name_en": "Life Time Group Holdings",
+      "currency": "USD",
+      "domain": "lifetime.life",
+      "ticker": "LTH",
+      "exchange": "NYSE",
+      "ir_url": "https://ir.lifetime.life/news-events/press-releases",
+      "rss_url": "https://ir.lifetime.life/news-events/press-releases/rss",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Q4 Inc 스타일 URL 패턴 | codex: Fetched official IR press releases page; page lists dated releases and exposes News RSS/RSS News Feed.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 2
+    },
+    {
+      "name_en": "RTX",
+      "currency": "USD",
+      "domain": "rtx.com",
+      "ticker": "RTX",
+      "exchange": "NYSE",
+      "ir_url": "https://investors.rtx.com/news-releases",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official IR site confirmed; RSS feed not found. | alternate (claude): https://www.rtx.com/news/news-center",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 3
+    },
+    {
+      "name_en": "Pfizer",
+      "currency": "USD",
+      "domain": "pfizer.com",
+      "ticker": "PFE",
+      "exchange": "NYSE",
+      "ir_url": "https://www.pfizer.com/newsroom/press-releases",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": " | codex: Official global Pfizer press release listing confirmed; only localized Japan RSS found, not used.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 3
+    },
+    {
+      "name_en": "Core Scientific",
+      "currency": "USD",
+      "domain": "corescientific.com",
+      "ticker": "CORZ",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investors.corescientific.com/news-events/press-releases",
+      "rss_url": "https://investors.corescientific.com/news-events/press-releases/rss",
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "q4 platform IR, RSS 옵션 제공 | codex: ",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 3
+    },
+    {
+      "name_en": "Amer Sports",
+      "currency": "USD",
+      "domain": "amersports.com",
+      "ticker": "AS",
+      "exchange": "NYSE",
+      "ir_url": "https://investors.amersports.com/news-events/press-releases/default.aspx",
+      "rss_url": "https://investors.amersports.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official Q4-hosted IR site confirmed; RSS URL follows Q4 feed pattern but was not independently fetched. | alternate (claude): https://investors.amersports.com/news/financial-news/default.aspx | 2026-05-29 URL 교정(Phase2.5, curl_cffi 검증)",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 3
+    },
+    {
+      "name_en": "Arista Networks",
+      "currency": "USD",
+      "domain": "arista.com",
+      "ticker": "ANET",
+      "exchange": "NYSE",
+      "ir_url": "https://investors.arista.com/Communications/Press-Releases-and-Events/default.aspx",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": " | codex: Official IR press releases page confirmed; no verified RSS feed found.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 3
+    },
+    {
+      "name_en": "Amphenol",
+      "currency": "USD",
+      "domain": "amphenol.com",
+      "ticker": "APH",
+      "exchange": "NYSE",
+      "ir_url": "https://investors.amphenol.com/news-and-events/news/default.aspx",
+      "rss_url": "https://investors.amphenol.com/rss/news-releases.xml",
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official IR site confirmed; RSS URL follows Q4 feed pattern but was not independently fetched. | alternate (claude): https://investors.amphenol.com/press-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 3
+    },
+    {
+      "name_en": "Stryker",
+      "currency": "USD",
+      "domain": "stryker.com",
+      "ticker": "SYK",
+      "exchange": "NYSE",
+      "ir_url": "https://investors.stryker.com/press-releases/default.aspx",
+      "rss_url": "https://investors.stryker.com/rss/pressrelease.aspx",
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": " | alternate (claude): https://investors.stryker.com/press-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 3
+    },
+    {
+      "name_en": "Vertex Pharmaceuticals",
+      "currency": "USD",
+      "domain": "vrtx.com",
+      "ticker": "VRTX",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investors.vrtx.com/news-events/press-releases",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official IR listing confirmed; no verified RSS feed found. | alternate (claude): https://investors.vrtx.com/press-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 3
+    },
+    {
+      "name_en": "Aritzia",
+      "currency": "CAD",
+      "domain": "aritzia.com",
+      "ticker": "ATZ",
+      "exchange": "TSX",
+      "ir_url": "https://investors.aritzia.com/investor-news/default.aspx?LanguageId=1",
+      "rss_url": "https://investors.aritzia.com/rss/news-releases.xml",
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official IR page shows Press Release RSS Feed link. | alternate (claude): https://investors.aritzia.com/investor-news/default.aspx",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 3
+    },
+    {
+      "name_en": "Vistra Corp.",
+      "currency": "USD",
+      "domain": "vistracorp.com",
+      "ticker": "VST",
+      "exchange": "NYSE",
+      "ir_url": "https://investor.vistracorp.com/news",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official IR news releases page confirmed; no verified RSS feed found. | alternate (claude): https://investor.vistracorp.com/news-events/press-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 3
+    },
+    {
+      "name_en": "Fortinet",
+      "currency": "USD",
+      "domain": "fortinet.com",
+      "ticker": "FTNT",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investor.fortinet.com/press-releases",
+      "rss_url": "https://investor.fortinet.com/rss/news-releases.xml",
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": " | codex: Official IR RSS page lists All Releases feed.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 3
+    },
+    {
+      "name_en": "MP Materials Corp",
+      "currency": "USD",
+      "domain": "mpmaterials.com",
+      "ticker": "MP",
+      "exchange": "NYSE",
+      "ir_url": "https://investors.mpmaterials.com/investor-news/default.aspx",
+      "rss_url": "https://investors.mpmaterials.com/rss/news-releases.xml",
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": " | codex: Official IR site confirmed; RSS URL follows Q4 feed pattern but was not independently fetched.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 3
+    },
+    {
+      "name_en": "Nuveen Select Tax-Free Income Portfolio",
+      "currency": "USD",
+      "domain": "nuveen.com",
+      "ticker": "NXP",
+      "exchange": "NYSE",
+      "ir_url": "https://www.nuveen.com/en-us/closed-end-funds/nxp-nuveen-select-tax-free-income-portfolio",
+      "rss_url": null,
+      "fetch_type": "spa",
+      "confidence": "medium",
+      "notes": "Closed-end fund page is on Nuveen fund manager site; no dedicated official press-release RSS confirmed. | alternate (claude): https://www.nuveen.com/en-us/closed-end-funds/nxp",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": false,
+      "batch": 3
+    },
+    {
+      "name_en": "Autoliv",
+      "currency": "USD",
+      "domain": "autoliv.com",
+      "ticker": "ALV",
+      "exchange": "NYSE",
+      "ir_url": "https://www.autoliv.com/investors/press-releases",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": " | codex: Official IR press releases listing confirmed; no verified RSS feed found.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 3
+    },
+    {
+      "name_en": "NIKE",
+      "currency": "USD",
+      "domain": "nike.com",
+      "ticker": "NKE",
+      "exchange": "NYSE",
+      "ir_url": "https://about.nike.com/en/newsroom/releases",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official Nike newsroom release listing confirmed; no verified RSS feed found. | alternate (claude): https://investors.nike.com/investors/news-events-and-reports/default.aspx",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 3
+    },
+    {
+      "name_en": "Regeneron Pharmaceuticals",
+      "currency": "USD",
+      "domain": "regeneron.com",
+      "ticker": "REGN",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investor.regeneron.com/news/press-releases/",
+      "rss_url": "https://investor.regeneron.com/news/press-releases/rss",
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official IR listing confirmed; RSS URL inferred from site structure and not independently fetched. | alternate (claude): https://newsroom.regeneron.com/news/press-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 3
+    },
+    {
+      "name_en": "Ralph Lauren",
+      "currency": "USD",
+      "domain": "ralphlauren.com",
+      "ticker": "RL",
+      "exchange": "NYSE",
+      "ir_url": "https://investor.ralphlauren.com/news-releases",
+      "rss_url": "https://investor.ralphlauren.com/rss/news-releases.xml",
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": " | codex: Official RSS page lists All Press Releases feed.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 3
+    },
+    {
+      "name_en": "Rheinmetall AG",
+      "currency": "EUR",
+      "domain": "rheinmetall.com",
+      "ticker": "RHM",
+      "exchange": "XETRA",
+      "ir_url": "https://www.rheinmetall.com/en/investor-relations/publications/news",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official English IR news listing confirmed; no verified RSS feed found. | alternate (claude): https://ir.rheinmetall.com/investor-relations/news/news",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 3
+    },
+    {
+      "name_en": "The TJX Companies",
+      "currency": "USD",
+      "domain": "tjx.com",
+      "ticker": "TJX",
+      "exchange": "NYSE",
+      "ir_url": "https://investor.tjx.com/news-releases",
+      "rss_url": "https://investor.tjx.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official IR recent news listing confirmed; no verified RSS feed found. | alternate (claude): https://investor.tjx.com/news/default.aspx | 2026-05-29 URL 교정(Phase2.5, curl_cffi 검증)",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 3
+    },
+    {
+      "name_en": "AbbVie",
+      "currency": "USD",
+      "domain": "abbvie.com",
+      "ticker": "ABBV",
+      "exchange": "NYSE",
+      "ir_url": "https://investors.abbvie.com/financial-releases",
+      "rss_url": "https://investors.abbvie.com/rss/news-releases.xml",
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official IR RSS page lists Financial Releases feed. | alternate (claude): https://news.abbvie.com/press-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 3
+    },
+    {
+      "name_en": "Cisco Systems",
+      "currency": "USD",
+      "domain": "cisco.com",
+      "ticker": "CSCO",
+      "exchange": "NASDAQ",
+      "ir_url": "https://newsroom.cisco.com/pressreleases",
+      "rss_url": "https://newsroom.cisco.com/c/r/newsroom/en/us/rss-feeds/press-releases.xml",
+      "fetch_type": "spa",
+      "confidence": "high",
+      "notes": "Official newsroom and RSS feeds page confirmed; exact feed URL inferred from Cisco newsroom RSS structure. | alternate (claude): https://newsroom.cisco.com/c/r/newsroom/en/us/press-releases.html",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": false,
+      "batch": 3
+    },
+    {
+      "name_en": "Medtronic",
+      "currency": "USD",
+      "domain": "medtronic.com",
+      "ticker": "MDT",
+      "exchange": "NYSE",
+      "ir_url": "https://news.medtronic.com/press-releases",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": " | codex: Official Medtronic press releases listing confirmed; no verified RSS feed found.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 3
+    },
+    {
+      "name_en": "Metsera",
+      "currency": "USD",
+      "domain": "metsera.com",
+      "ticker": "MTSR",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investors.metsera.com/news/press-releases",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "2025년 1월 IPO 비만치료제 바이오텍 | codex: Official IR press releases listing confirmed; no verified RSS feed found. | 2026-05-29 Pfizer 인수·상폐 → disabled",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": false,
+      "batch": 3
+    },
+    {
+      "name_en": "Eutelsat Communications SA",
+      "currency": "EUR",
+      "domain": "eutelsat.com",
+      "ticker": "ETL",
+      "exchange": "Euronext Paris",
+      "ir_url": "https://eutelsat-com.mynewsdesk.com/pressreleases",
+      "rss_url": "https://eutelsat-com.mynewsdesk.com/pressreleases.rss",
+      "fetch_type": "html",
+      "confidence": "medium",
+      "notes": "Official Eutelsat newsroom is hosted on Mynewsdesk; RSS URL follows Mynewsdesk feed pattern but was not independently fetched. | alternate (claude): https://www.eutelsat.com/investors/financial-information",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": false,
+      "batch": 3
+    },
+    {
+      "name_en": "Zoetis",
+      "currency": "USD",
+      "domain": "zoetis.com",
+      "ticker": "ZTS",
+      "exchange": "NYSE",
+      "ir_url": "https://news.zoetis.com/press-releases/default.aspx",
+      "rss_url": "https://news.zoetis.com/rss/news-releases.xml",
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official press release page confirmed; RSS URL follows Q4 feed pattern but was not independently fetched. | alternate (claude): https://news.zoetis.com/press-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 3
+    },
+    {
+      "name_en": "Alibaba",
+      "currency": "USD",
+      "domain": "alibabagroup.com",
+      "ticker": "BABA",
+      "exchange": "NYSE",
+      "ir_url": "https://home.alibabagroup.com/en-US/ir-news-filings",
+      "rss_url": null,
+      "fetch_type": "spa",
+      "confidence": "high",
+      "notes": "Official Alibaba IR news and filings listing confirmed; no verified official RSS feed found. | alternate (claude): https://www.alibabagroup.com/en-US/ir-announcement",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": false,
+      "batch": 3
+    },
+    {
+      "name_en": "On Holding Ltd",
+      "currency": "USD",
+      "domain": "on-running.com",
+      "ticker": "ONON",
+      "exchange": "NYSE",
+      "ir_url": "https://investors.on-running.com/news/default.aspx",
+      "rss_url": "https://investors.on-running.com/rss/news-releases.xml",
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Q4 platform IR | codex: Official Q4-hosted IR news page confirmed through press release pages; RSS URL follows Q4 feed pattern but was not independently fetched.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 3
+    },
+    {
+      "name_en": "BYD Company Limited",
+      "currency": "HKD",
+      "domain": "byd.com",
+      "ticker": "1211",
+      "exchange": "HKEX",
+      "ir_url": "https://media.byd.com/section/company/press-releases/corporate",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "medium",
+      "notes": "Official BYD media press release listing confirmed; no verified RSS feed found. | alternate (claude): https://www1.hkexnews.hk/search/titlesearch.xhtml?lang=EN&market=SEHK&stockId=1211&category=0",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": false,
+      "batch": 3
+    },
+    {
+      "name_en": "Meta Platforms",
+      "currency": "USD",
+      "domain": "atmeta.com",
+      "ticker": "META",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investor.atmeta.com/investor-news/default.aspx",
+      "rss_url": "https://investor.atmeta.com/rss/news-releases.xml",
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official IR RSS page lists Press Release RSS Feed. | alternate (claude): https://investor.atmeta.com/financials/default.aspx",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 3
+    },
+    {
+      "name_en": "NVIDIA",
+      "currency": "USD",
+      "domain": "nvidia.com",
+      "ticker": "NVDA",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investor.nvidia.com/news/press-release-details/default.aspx",
+      "rss_url": "https://nvidianews.nvidia.com/rss",
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official NVIDIA IR RSS page links to NVIDIA newsroom press release feed. | alternate (claude): https://investor.nvidia.com/financial-info/financial-reports/default.aspx",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 3
+    },
+    {
+      "name_en": "Talen Energy Corp",
+      "currency": "USD",
+      "domain": "talenenergy.com",
+      "ticker": "TLN",
+      "exchange": "NASDAQ",
+      "ir_url": "https://ir.talenenergy.com/news-events/news-releases/",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official IR news releases list verified; no RSS feed found. | alternate (claude): https://ir.talenenergy.com/news-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "Electronic Arts Inc.",
+      "currency": "USD",
+      "domain": "ea.com",
+      "ticker": "EA",
+      "exchange": "NASDAQ",
+      "ir_url": "https://news.ea.com/press-releases/",
+      "rss_url": "https://news.ea.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official EA newsroom press release list verified; RSS link present on page. | alternate (claude): https://ir.ea.com/press-releases/default.aspx",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "Apple Inc.",
+      "currency": "USD",
+      "domain": "apple.com",
+      "ticker": "AAPL",
+      "exchange": "NASDAQ",
+      "ir_url": "https://www.apple.com/newsroom/",
+      "rss_url": "https://www.apple.com/newsroom/rss-feed.rss",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Apple Newsroom공식 RSS | codex: Official Apple Newsroom press release/news list verified; public newsroom RSS used.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "Eli Lilly and Company",
+      "currency": "USD",
+      "domain": "lilly.com",
+      "ticker": "LLY",
+      "exchange": "NYSE",
+      "ir_url": "https://investor.lilly.com/news-releases",
+      "rss_url": "https://investor.lilly.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": " | codex: Official investor news releases verified; RSS feeds page found.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "Alphabet (Google)",
+      "currency": "USD",
+      "domain": "abc.xyz",
+      "ticker": "GOOGL",
+      "exchange": "NASDAQ",
+      "ir_url": "https://abc.xyz/investor/news/",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Alphabet IR newsroom | codex: 추측: official Alphabet investor news detail pages verified, but list URL could not be fetched directly; no RSS found.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "Broadcom",
+      "currency": "USD",
+      "domain": "broadcom.com",
+      "ticker": "AVGO",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investors.broadcom.com/news-releases",
+      "rss_url": "https://investors.broadcom.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": " | codex: Official investor/news release pages and RSS feeds page verified. | 2026-05-29 URL 교정(Phase2.5, curl_cffi 검증)",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "ASP Isotopes",
+      "currency": "USD",
+      "domain": "aspisotopes.com",
+      "ticker": "ASPI",
+      "exchange": "NASDAQ",
+      "ir_url": "https://ir.aspisotopes.com/news-events/press-releases",
+      "rss_url": "https://ir.aspisotopes.com/news-events/press-releases/rss",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "q4inc IR platform | codex: Official IR press releases list verified; RSS URL follows site link pattern.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "Novo Nordisk A/S",
+      "currency": "USD",
+      "domain": "novonordisk.com",
+      "ticker": "NVO",
+      "exchange": "NYSE ADR",
+      "ir_url": "https://www.novonordisk.com/news-and-media/latest-news.html",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official global newsroom lists press releases and company announcements; no RSS feed found. | alternate (claude): https://www.novonordisk.com/news-and-media/news-and-ir-materials.html",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "Tesla",
+      "currency": "USD",
+      "domain": "tesla.com",
+      "ticker": "TSLA",
+      "exchange": "NASDAQ",
+      "ir_url": "https://ir.tesla.com/press",
+      "rss_url": null,
+      "fetch_type": "spa",
+      "confidence": "high",
+      "notes": "SPA, JS rendered | codex: Official Tesla IR press releases page verified.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": false,
+      "batch": 4
+    },
+    {
+      "name_en": "Lightbridge Corporation",
+      "currency": "USD",
+      "domain": "ltbridge.com",
+      "ticker": "LTBR",
+      "exchange": "NASDAQ",
+      "ir_url": "https://www.ltbridge.com/news-media/press-releases",
+      "rss_url": "https://www.ltbridge.com/news-media/press-releases/rss",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official press releases page verified; News RSS link present. | alternate (claude): https://www.ltbridge.com/investors/news-events/press-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "Intuitive Machines, Inc.",
+      "currency": "USD",
+      "domain": "intuitivemachines.com",
+      "ticker": "LUNR",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investors.intuitivemachines.com/news-releases",
+      "rss_url": "https://investors.intuitivemachines.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official investor news releases list verified; RSS URL follows site feed pattern. | alternate (claude): https://investors.intuitivemachines.com/news-events/latest-news | 2026-05-29 URL 교정(Phase2.5, curl_cffi 검증)",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "Adidas AG",
+      "currency": "EUR",
+      "domain": "adidas-group.com",
+      "ticker": "ADS",
+      "exchange": "XETRA",
+      "ir_url": "https://www.adidas-group.com/en/media/press-releases",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official adidas RSS page verified; feed covers press releases and investor events. | alternate (claude): https://www.adidas-group.com/en/media/news-archive/press-releases | 2026-05-29 URL 교정(Phase2.5, curl_cffi 검증)",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "MSCI Inc.",
+      "currency": "USD",
+      "domain": "msci.com",
+      "ticker": "MSCI",
+      "exchange": "NYSE",
+      "ir_url": "https://ir.msci.com/investor-news",
+      "rss_url": "https://ir.msci.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official IR press releases list verified; RSS link shown on page. | alternate (claude): https://ir.msci.com/news-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "JD.com, Inc.",
+      "currency": "HKD",
+      "domain": "jd.com",
+      "ticker": "9618",
+      "exchange": "HKEX",
+      "ir_url": "https://ir.jd.com/news-releases/",
+      "rss_url": "https://ir.jd.com/rss",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official investor news list and RSS page verified; HKEX ticker 9618 noted. | alternate (claude): https://ir.jd.com/news-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "Prada S.p.A.",
+      "currency": "HKD",
+      "domain": "pradagroup.com",
+      "ticker": "1913",
+      "exchange": "HKEX",
+      "ir_url": "https://www.pradagroup.com/en/news-media/press-releases-documents.html",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official Prada Group press releases/documents and investor highlights verified; no RSS found. | alternate (claude): https://www.pradagroup.com/en/investors/investor-relations/press-releases.html",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "NANO Nuclear Energy",
+      "currency": "USD",
+      "domain": "nanonuclearenergy.com",
+      "ticker": "NNE",
+      "exchange": "NASDAQ",
+      "ir_url": "https://ir.nanonuclearenergy.com/news-events/news-releases",
+      "rss_url": "https://ir.nanonuclearenergy.com/news-events/news-releases/rss",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "q4inc IR | codex: Official IR news releases list verified; RSS feeds page found.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "CrowdStrike Holdings, Inc.",
+      "currency": "USD",
+      "domain": "crowdstrike.com",
+      "ticker": "CRWD",
+      "exchange": "NASDAQ",
+      "ir_url": "https://ir.crowdstrike.com/press-releases",
+      "rss_url": "https://ir.crowdstrike.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official IR press releases list verified; RSS feeds resource exists. | alternate (claude): https://ir.crowdstrike.com/news-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "Cadence Design Systems, Inc.",
+      "currency": "USD",
+      "domain": "cadence.com",
+      "ticker": "CDNS",
+      "exchange": "NASDAQ",
+      "ir_url": "https://www.cadence.com/en_US/home/company/newsroom.html",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official Cadence newsroom list verified; no RSS feed found. | alternate (claude): https://www.cadence.com/en_US/home/company/newsroom/press-releases.html",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "Palo Alto Networks, Inc.",
+      "currency": "USD",
+      "domain": "paloaltonetworks.com",
+      "ticker": "PANW",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investors.paloaltonetworks.com/news-and-events/news-releases",
+      "rss_url": "https://investors.paloaltonetworks.com/news-and-events/news-releases/rss",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official IR press releases list and RSS feeds page verified. | alternate (claude): https://investors.paloaltonetworks.com/news-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "Xiaomi Corporation",
+      "currency": "HKD",
+      "domain": "mi.com",
+      "ticker": "1810",
+      "exchange": "HKEX",
+      "ir_url": "https://ir.mi.com/news-releases/",
+      "rss_url": "https://ir.mi.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official Xiaomi IR and RSS feeds page verified; HKEX ticker 1810. | alternate (claude): https://ir.mi.com/news-releases | 2026-05-29 URL 교정(Phase2.5, curl_cffi 검증)",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "Becton, Dickinson and Company",
+      "currency": "USD",
+      "domain": "bd.com",
+      "ticker": "BDX",
+      "exchange": "NYSE",
+      "ir_url": "https://investors.bd.com/news-events/press-releases",
+      "rss_url": "https://investors.bd.com/news-events/press-releases/rss",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official IR press releases list verified; News RSS link resolved. | alternate (claude): https://investors.bd.com/news-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "Advanced Micro Devices",
+      "currency": "USD",
+      "domain": "amd.com",
+      "ticker": "AMD",
+      "exchange": "NASDAQ",
+      "ir_url": "https://ir.amd.com/news-events/press-releases",
+      "rss_url": "https://ir.amd.com/news-events/press-releases/rss",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": " | codex: Official IR press releases list verified; News RSS link resolved.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "Abbott Laboratories",
+      "currency": "USD",
+      "domain": "abbott.com",
+      "ticker": "ABT",
+      "exchange": "NYSE",
+      "ir_url": "https://www.abbott.com/en-us/corpnewsroom.html",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official Abbott newsroom page verified; no RSS feed found. | alternate (claude): https://www.abbott.com/corpnewsroom/press-release.html",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "Danaher Corporation",
+      "currency": "USD",
+      "domain": "danaher.com",
+      "ticker": "DHR",
+      "exchange": "NYSE",
+      "ir_url": "https://investors.danaher.com/press-releases",
+      "rss_url": "https://investors.danaher.com/rss",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official IR press releases page and RSS page verified. | alternate (claude): https://investors.danaher.com/news-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "Unusual Machines, Inc.",
+      "currency": "USD",
+      "domain": "unusualmachines.com",
+      "ticker": "UMAC",
+      "exchange": "NYSE American",
+      "ir_url": "https://unusualmachines.suite.accessnewswire.com/browse/pr",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official Access Newswire media room press releases list verified; no RSS found. | alternate (claude): https://www.unusualmachines.com/news-events/press-releases/",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "Amazon.com, Inc.",
+      "currency": "USD",
+      "domain": "amazon.com",
+      "ticker": "AMZN",
+      "exchange": "NASDAQ",
+      "ir_url": "https://press.aboutamazon.com/press-releases/",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official Amazon Press Center press releases list verified; no RSS found. | alternate (claude): https://ir.aboutamazon.com/news-release/news-release-details/",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "Intuitive Machines, Inc.",
+      "currency": "USD",
+      "domain": "intuitivemachines.com",
+      "ticker": "LUNR",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investors.intuitivemachines.com/news-releases",
+      "rss_url": "https://investors.intuitivemachines.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official investor news releases list verified; RSS URL follows site feed pattern. | alternate (claude): https://newsroom.ibm.com/announcements | claude RSS: https://newsroom.ibm.com/announcements?pagetemplate=rss | 2026-05-29 URL 교정(Phase2.5, curl_cffi 검증)",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "Synopsys, Inc.",
+      "currency": "USD",
+      "domain": "synopsys.com",
+      "ticker": "SNPS",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investor.synopsys.com/news/default.aspx",
+      "rss_url": "https://investor.synopsys.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official investor news list verified; RSS URL follows Q4 IR feed pattern. | alternate (claude): https://news.synopsys.com/press-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "Intuitive Surgical, Inc.",
+      "currency": "USD",
+      "domain": "intuitivesurgical.com",
+      "ticker": "ISRG",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investor.intuitivesurgical.com/press-releases/",
+      "rss_url": "https://isrg.gcs-web.com/news-releases/rss",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official investor press releases list verified; RSS URL follows GCS investor feed pattern. | alternate (claude): https://isrg.intuitive.com/news-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "NuScale Power Corporation",
+      "currency": "USD",
+      "domain": "nuscalepower.com",
+      "ticker": "SMR",
+      "exchange": "NYSE",
+      "ir_url": "https://www.nuscalepower.com/en/news",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official NuScale press releases page verified; no RSS feed found. | alternate (claude): https://www.nuscalepower.com/press-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 4
+    },
+    {
+      "name_en": "OKLO",
+      "currency": "USD",
+      "domain": "oklo.com",
+      "ticker": "OKLO",
+      "exchange": "NYSE",
+      "ir_url": "https://oklo.com/newsroom/default.aspx",
+      "rss_url": "https://oklo.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official Oklo newsroom/IR news page; RSS pattern appears to be Q4-style. | alternate (claude): https://oklo.com/investors/news/default.aspx",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "Dutch Bros",
+      "currency": "USD",
+      "domain": "investors.dutchbros.com",
+      "ticker": "BROS",
+      "exchange": "NYSE",
+      "ir_url": "https://investors.dutchbros.com/news-events/news-releases/default.aspx",
+      "rss_url": "https://investors.dutchbros.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": " | alternate (claude): https://investors.dutchbros.com/news/default.aspx | 2026-05-29 URL 교정(Phase2.5, curl_cffi 검증)",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "Viking Therapeutics",
+      "currency": "USD",
+      "domain": "vikingtherapeutics.com",
+      "ticker": "VKTX",
+      "exchange": "NASDAQ",
+      "ir_url": "https://ir.vikingtherapeutics.com/press-releases",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": " | codex: ",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "Paychex",
+      "currency": "USD",
+      "domain": "paychex.com",
+      "ticker": "PAYX",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investor.paychex.com/news-events/press-releases",
+      "rss_url": "https://investor.paychex.com/news-events/press-releases/rss",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "RSS feed available per IR site | codex: ",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "Tencent Holdings Limited",
+      "currency": "HKD",
+      "domain": "tencent.com",
+      "ticker": "0700",
+      "exchange": "HKEX",
+      "ir_url": "https://www.tencent.com/en-us/investors/financial-news.html",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Confirmed listing visible | codex: Official Tencent investor financial news page; no working RSS endpoint found.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "Surf Air Mobility",
+      "currency": "USD",
+      "domain": "investors.surfair.com",
+      "ticker": "SRFM",
+      "exchange": "NYSE",
+      "ir_url": "https://investors.surfair.com/news/default.aspx",
+      "rss_url": "https://investors.surfair.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official IR news page; RSS pattern appears to be Q4-style. | alternate (claude): https://investors.surfair.com/news/",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "Thermo Fisher Scientific",
+      "currency": "USD",
+      "domain": "ir.thermofisher.com",
+      "ticker": "TMO",
+      "exchange": "NYSE",
+      "ir_url": "https://ir.thermofisher.com/investors/news-events/news/default.aspx",
+      "rss_url": "https://ir.thermofisher.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": " | alternate (claude): https://ir.thermofisher.com/investors/news-events/news/news-details/",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "Netflix",
+      "currency": "USD",
+      "domain": "ir.netflix.net",
+      "ticker": "NFLX",
+      "exchange": "NASDAQ",
+      "ir_url": "https://ir.netflix.net/investor-news-and-events/financial-releases/default.aspx",
+      "rss_url": "https://ir.netflix.net/investor-news-and-events/financial-releases/rss",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": " | alternate (claude): https://ir.netflix.net/investor-news-and-events/financial-releases/press-release-details/default.aspx",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "Accenture plc",
+      "currency": "USD",
+      "domain": "newsroom.accenture.com",
+      "ticker": "ACN",
+      "exchange": "NYSE",
+      "ir_url": "https://newsroom.accenture.com/news",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official newsroom news listing; no working RSS endpoint found. | alternate (claude): https://newsroom.accenture.com/news/",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "Lululemon Athletica",
+      "currency": "USD",
+      "domain": "investor.lululemon.com",
+      "ticker": "LULU",
+      "exchange": "NASDAQ",
+      "ir_url": "https://corporate.lululemon.com/media/press-releases",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official IR press releases page; no working RSS endpoint found. | alternate (claude): https://corporate.lululemon.com/media/press-releases | 2026-05-29 URL 교정(Phase2.5, curl_cffi 검증)",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "Automatic Data Processing / ADP",
+      "currency": "USD",
+      "domain": "investor.adp.com",
+      "ticker": "ADP",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investor.adp.com/news-releases",
+      "rss_url": "https://investors.adp.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official ADP investor news releases page; no working RSS endpoint found. | alternate (claude): https://mediacenter.adp.com/press-releases | 2026-05-29 URL 교정(Phase2.5, curl_cffi 검증)",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "Microsoft",
+      "currency": "USD",
+      "domain": "microsoft.com",
+      "ticker": "MSFT",
+      "exchange": "NASDAQ",
+      "ir_url": "https://www.microsoft.com/en-us/Investor/earnings",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official investor earnings press release listing; no working RSS endpoint found. | alternate (claude): https://news.microsoft.com/source/ | claude RSS: https://news.microsoft.com/source/feed/",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "Constellation Energy",
+      "currency": "USD",
+      "domain": "investors.constellationenergy.com",
+      "ticker": "CEG",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investors.constellationenergy.com/news-releases",
+      "rss_url": "https://investors.constellationenergy.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": " | alternate (claude): https://www.constellationenergy.com/newsroom.html",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "Sea Limited",
+      "currency": "USD",
+      "domain": "investors.sea.com",
+      "ticker": "SE",
+      "exchange": "NYSE",
+      "ir_url": "https://investors.sea.com/news-releases",
+      "rss_url": null,
+      "fetch_type": "spa",
+      "confidence": "high",
+      "notes": "Official Sea investor news releases page; no working RSS endpoint found. | alternate (claude): https://www.sea.com/investor/newsroom",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": false,
+      "batch": 5
+    },
+    {
+      "name_en": "Qualcomm",
+      "currency": "USD",
+      "domain": "qualcomm.com",
+      "ticker": "QCOM",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investor.qualcomm.com/news-events/press-releases",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "RSS news feed available per IR navigation | codex: Official IR press releases page; no working RSS endpoint found.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "First Solar",
+      "currency": "USD",
+      "domain": "investor.firstsolar.com",
+      "ticker": "FSLR",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investor.firstsolar.com/news-events/news-releases/default.aspx",
+      "rss_url": "https://investor.firstsolar.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official IR news releases page; RSS pattern appears to be Q4-style. | alternate (claude): https://investor.firstsolar.com/news/default.aspx | 2026-05-29 URL 교정(Phase2.5, curl_cffi 검증)",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "Fair Isaac / FICO",
+      "currency": "USD",
+      "domain": "investors.fico.com",
+      "ticker": "FICO",
+      "exchange": "NYSE",
+      "ir_url": "https://investors.fico.com/news-releases",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official investor news releases page; no working RSS endpoint found. | alternate (claude): https://investors.fico.com/press-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "MicroStrategy / Strategy",
+      "currency": "USD",
+      "domain": "strategy.com",
+      "ticker": "MSTR",
+      "exchange": "NASDAQ",
+      "ir_url": "https://www.strategy.com/investor-relations",
+      "rss_url": null,
+      "fetch_type": "spa",
+      "confidence": "high",
+      "notes": "Official Strategy investor relations page includes company news/press releases; no working RSS endpoint found. | alternate (claude): https://www.strategy.com/press",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": false,
+      "batch": 5
+    },
+    {
+      "name_en": "Boston Scientific",
+      "currency": "USD",
+      "domain": "news.bostonscientific.com",
+      "ticker": "BSX",
+      "exchange": "NYSE",
+      "ir_url": "https://news.bostonscientific.com/news-releases",
+      "rss_url": "https://news.bostonscientific.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": " | alternate (claude): https://news.bostonscientific.com/",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "Spotify Technology SA",
+      "currency": "USD",
+      "domain": "investors.spotify.com",
+      "ticker": "SPOT",
+      "exchange": "NYSE",
+      "ir_url": "https://investors.spotify.com/financials/press-release-details/default.aspx",
+      "rss_url": "https://investors.spotify.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official investor financial press release area; no working RSS endpoint found. | alternate (claude): https://investors.spotify.com/news/default.aspx | 2026-05-29 rss_url 교정(Phase2.5)",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "Oracle",
+      "currency": "USD",
+      "domain": "oracle.com",
+      "ticker": "ORCL",
+      "exchange": "NYSE",
+      "ir_url": "https://www.oracle.com/investor/news/",
+      "rss_url": "https://www.oracle.com/corporate/press/rss/rss-pr.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official Oracle investor relations news page; no working RSS endpoint found. | alternate (claude): https://www.oracle.com/news/ | 2026-05-29 URL 교정(Phase2.5, curl_cffi 검증)",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "Autodesk",
+      "currency": "USD",
+      "domain": "investors.autodesk.com",
+      "ticker": "ADSK",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investors.autodesk.com/news-releases",
+      "rss_url": "https://investors.autodesk.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": " | alternate (claude): https://investors.autodesk.com/news-events/press-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "Adobe",
+      "currency": "USD",
+      "domain": "adobe.com",
+      "ticker": "ADBE",
+      "exchange": "NASDAQ",
+      "ir_url": "https://news.adobe.com/news",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Newsroom is primary; dynamic content | codex: Official Adobe newsroom news listing; no working investor-specific RSS endpoint found.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "Roblox",
+      "currency": "USD",
+      "domain": "roblox.com",
+      "ticker": "RBLX",
+      "exchange": "NYSE",
+      "ir_url": "https://ir.roblox.com/news/default.aspx",
+      "rss_url": "https://ir.roblox.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Q4 IR site | codex: Official IR news page; RSS pattern appears to be Q4-style.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "Take-Two Interactive",
+      "currency": "USD",
+      "domain": "ir.take2games.com",
+      "ticker": "TTWO",
+      "exchange": "NASDAQ",
+      "ir_url": "https://ir.take2games.com/news-releases",
+      "rss_url": "https://ir.take2games.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": " | alternate (claude): https://www.take2games.com/ir",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "Coupang",
+      "currency": "USD",
+      "domain": "ir.aboutcoupang.com",
+      "ticker": "CPNG",
+      "exchange": "NYSE",
+      "ir_url": "https://ir.aboutcoupang.com/news-events/news/default.aspx",
+      "rss_url": "https://ir.aboutcoupang.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "medium",
+      "notes": "Official Coupang IR news page; RSS pattern appears to be Q4-style. | alternate (claude): https://ir.aboutcoupang.com/overview/default.aspx",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": false,
+      "batch": 5
+    },
+    {
+      "name_en": "Centrus Energy",
+      "currency": "USD",
+      "domain": "centrusenergy.com",
+      "ticker": "LEU",
+      "exchange": "NYSE-AMEX",
+      "ir_url": "https://investors.centrusenergy.com/news-releases",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Corporate newsroom (centrusenergy.com/news/) also lists items | codex: Official investor news releases page; no working RSS endpoint found.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "Salesforce",
+      "currency": "USD",
+      "domain": "investor.salesforce.com",
+      "ticker": "CRM",
+      "exchange": "NYSE",
+      "ir_url": "https://investor.salesforce.com/news/default.aspx",
+      "rss_url": "https://investor.salesforce.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official Salesforce investor news page; RSS pattern appears to be Q4-style. | alternate (claude): https://investor.salesforce.com/press-releases/default.aspx",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "Fidelity National Information Services / FIS",
+      "currency": "USD",
+      "domain": "investor.fisglobal.com",
+      "ticker": "FIS",
+      "exchange": "NYSE",
+      "ir_url": "https://www.investor.fisglobal.com/press-releases",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official FIS investor press releases page; no working RSS endpoint found. | alternate (claude): https://www.fisglobal.com/about-us/media-room/press-release",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "Shopify",
+      "currency": "USD",
+      "domain": "shopifyinvestors.com",
+      "ticker": "SHOP",
+      "exchange": "NYSE",
+      "ir_url": "https://shopifyinvestors.com/news-and-events/default.aspx",
+      "rss_url": "https://shopifyinvestors.com/rss/news-releases.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official Shopify investor news and events page; RSS pattern appears to be Q4-style. | alternate (claude): https://www.shopify.com/news/category/press-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 5
+    },
+    {
+      "name_en": "ServiceNow, Inc.",
+      "currency": "USD",
+      "domain": "servicenow.com",
+      "ticker": "NOW",
+      "exchange": "NYSE",
+      "ir_url": "https://newsroom.servicenow.com/press-releases/default.aspx",
+      "rss_url": null,
+      "fetch_type": "spa",
+      "confidence": "high",
+      "notes": "Official newsroom press-release listing verified; investor.servicenow.com/news/default.aspx redirects here. No verified direct RSS feed found. | alternate (claude): https://www.servicenow.com/company/investor-relations/press-releases.html",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": false,
+      "batch": 6
+    },
+    {
+      "name_en": "IonQ, Inc.",
+      "currency": "USD",
+      "domain": "ionq.com",
+      "ticker": "IONQ",
+      "exchange": "NYSE",
+      "ir_url": "https://investors.ionq.com/news/default.aspx",
+      "rss_url": null,
+      "fetch_type": "spa",
+      "confidence": "high",
+      "notes": "Official investor news page verified; listing content loads dynamically. No verified direct RSS feed found. | alternate (claude): https://investors.ionq.com/news-events/press-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": false,
+      "batch": 6
+    },
+    {
+      "name_en": "PayPal Holdings, Inc.",
+      "currency": "USD",
+      "domain": "paypal.com",
+      "ticker": "PYPL",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investor.pypl.com/news-and-events/news/default.aspx",
+      "rss_url": null,
+      "fetch_type": "spa",
+      "confidence": "high",
+      "notes": "Official PayPal IR news page verified; news list loads dynamically. No verified direct RSS feed found. | alternate (claude): https://investor.pypl.com/news-and-events/press-releases/default.aspx",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": false,
+      "batch": 6
+    },
+    {
+      "name_en": "Coinbase Global",
+      "currency": "USD",
+      "domain": "coinbase.com",
+      "ticker": "COIN",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investor.coinbase.com/news/default.aspx",
+      "rss_url": "https://s27.q4cdn.com/397450999/files/js/blog-rss.xml",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Q4 site RSS 확인됨 | codex: Official Coinbase IR news page verified; page separates Coinbase Blog and Investor News. No verified direct RSS feed found.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": true,
+      "batch": 6
+    },
+    {
+      "name_en": "SharpLink, Inc.",
+      "currency": "USD",
+      "domain": "sharplink.com",
+      "ticker": "SBET",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investors.sharplink.com/press-releases/",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official SharpLink investor press releases page verified; static HTML includes dated releases. No verified direct RSS feed found. | alternate (claude): https://www.sharplink.com/news",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 6
+    },
+    {
+      "name_en": "Rigetti Computing, Inc.",
+      "currency": "USD",
+      "domain": "rigetti.com",
+      "ticker": "RGTI",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investors.rigetti.com/news-events/news-releases",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official Rigetti news releases page verified. Site exposes an RSS Feeds page, but the Latest News Releases feed returned 403 during fetch, so rss_url set null. | alternate (claude): https://investors.rigetti.com/news-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 6
+    },
+    {
+      "name_en": "Robinhood Markets, Inc.",
+      "currency": "USD",
+      "domain": "robinhood.com",
+      "ticker": "HOOD",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investors.robinhood.com/press-releases",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "Official Robinhood investor press releases page verified; static HTML includes release list. No verified direct RSS feed found. | alternate (claude): https://investors.robinhood.com/news/news-details/",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 6
+    },
+    {
+      "name_en": "Evolus, Inc.",
+      "currency": "USD",
+      "domain": "evolus.com",
+      "ticker": "EOLS",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investors.evolus.com/press-releases-and-news/default.aspx",
+      "rss_url": null,
+      "fetch_type": "spa",
+      "confidence": "high",
+      "notes": "Official Evolus IR press releases and news page verified; listing loads dynamically. No verified direct RSS feed found. | alternate (claude): https://investors.evolus.com/press-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": false,
+      "batch": 6
+    },
+    {
+      "name_en": "BitMine Immersion Technologies, Inc.",
+      "currency": "USD",
+      "domain": "bitminetech.io",
+      "ticker": "BMNR",
+      "exchange": "NYSE",
+      "ir_url": "https://bitminetech.io/investor-relations/",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "low",
+      "notes": "추측: company releases cite this official investor-relations page, but direct fetch returned 403 and no dedicated official press-release listing was verified; recent releases appear distributed through PRNewswire. | alternate (claude): https://www.bitminetech.io/news/",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": false,
+      "batch": 6
+    },
+    {
+      "name_en": "AppLovin Corporation",
+      "currency": "USD",
+      "domain": "applovin.com",
+      "ticker": "APP",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investors.applovin.com/news/default.aspx",
+      "rss_url": null,
+      "fetch_type": "spa",
+      "confidence": "high",
+      "notes": "Official AppLovin IR news page verified; listing loads dynamically. No verified direct RSS feed found. | alternate (claude): https://www.applovin.com/newsroom/",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": false,
+      "batch": 6
+    },
+    {
+      "name_en": "Intuit Inc.",
+      "currency": "USD",
+      "domain": "intuit.com",
+      "ticker": "INTU",
+      "exchange": "NASDAQ",
+      "ir_url": "https://investors.intuit.com/news-events/press-releases",
+      "rss_url": "https://investors.intuit.com/news-events/press-releases/rss",
+      "fetch_type": "rss",
+      "confidence": "high",
+      "notes": "Official Intuit IR press releases page verified; page includes News RSS link and feed fetch returned XML content type. | alternate (claude): https://investors.intuit.com/news/default.aspx | claude RSS: https://investors.intuit.com/rss/news.aspx",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": true,
+      "batch": 6
+    },
+    {
+      "name_en": "Reddit, Inc.",
+      "currency": "USD",
+      "domain": "redditinc.com",
+      "ticker": "RDDT",
+      "exchange": "NYSE",
+      "ir_url": "https://investor.redditinc.com/news-events/news-releases/default.aspx",
+      "rss_url": null,
+      "fetch_type": "spa",
+      "confidence": "high",
+      "notes": "Official Reddit IR news releases page verified; listing loads dynamically. No verified direct RSS feed found. | alternate (claude): https://investor.redditinc.com/news-events/press-releases",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": false,
+      "batch": 6
+    },
+    {
+      "name_en": "Hims & Hers Health, Inc.",
+      "currency": "USD",
+      "domain": "forhims.com",
+      "ticker": "HIMS",
+      "exchange": "NYSE",
+      "ir_url": "https://investors.hims.com/news/default.aspx",
+      "rss_url": null,
+      "fetch_type": "spa",
+      "confidence": "high",
+      "notes": "Official Hims & Hers IR news page verified; listing loads dynamically. No verified direct RSS feed found. | alternate (claude): https://investors.hims.com/news-and-events/press-releases/default.aspx",
+      "sources": [
+        "codex (preferred)",
+        "claude (alternate)"
+      ],
+      "enabled": false,
+      "batch": 6
+    },
+    {
+      "name_en": "Unity Software",
+      "currency": "USD",
+      "domain": "unity.com",
+      "ticker": "U",
+      "exchange": "NYSE",
+      "ir_url": "https://investors.unity.com/news/default.aspx",
+      "rss_url": null,
+      "fetch_type": "spa",
+      "confidence": "high",
+      "notes": "Q4 IR 페이지, news loading via year selector | codex: Official Unity investor news page verified; listing loads dynamically. No verified direct RSS feed found.",
+      "sources": [
+        "claude",
+        "codex"
+      ],
+      "enabled": false,
+      "batch": 6
+    }
+  ]
+}

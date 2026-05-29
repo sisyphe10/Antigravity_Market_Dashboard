@@ -18,6 +18,15 @@
       "enabled": true,
       "retry": {"count": 2, "interval_min": 30},
       "translate": {"enabled": true, "model": "claude-haiku-4-5-20251001", "target_lang": "ko"}
+    },
+    {
+      "name": "foreign_ir",
+      "label": "해외 기업 뉴스룸",
+      "icon": "🌐",
+      "schedule": ["07:30", "20:00"],
+      "enabled": true,
+      "retry": {"count": 2, "interval_min": 30},
+      "translate": {"enabled": true, "model": "claude-haiku-4-5-20251001", "target_lang": "ko"}
     }
   ]
 }

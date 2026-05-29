@@ -32,3 +32,7 @@ notion-client
 finnhub-python
 tiktoken
 pypdf
+
+# foreign_ir source adapter (해외 기업 뉴스룸 폴링)
+feedparser
+curl_cffi

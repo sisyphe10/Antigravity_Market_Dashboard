@@ -68,6 +68,7 @@ charts/*
 !disclosures.json
 !corp_codes.json
 !universe.json
+!foreign_ir_sources.json
 
 # 기타
 *.bat
