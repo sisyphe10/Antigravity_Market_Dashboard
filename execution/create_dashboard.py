@@ -130,6 +130,7 @@ def wrap_sidebar_html():
         ('disclosures', '공시'),
         ('order',       'Order'),
         ('aum',         'AUM'),
+        ('fee',         '수수료'),
     ]
     links = ''.join(
         f'<a href="#" onclick="wrapSwitchTab(\'{tab}\');return false;" '
@@ -4344,6 +4345,158 @@ def create_aum_section():
     """
 
 
+# 수수료 탭 데이터 — 빈 골격. 값은 숫자(%) 또는 None(미입력=화면에 '—').
+# 각 항목: 선취/후취 수수료를 증권사 / 자문사 행으로 분리. 합계 행은 자동 계산.
+FEE_TABLE = [
+    {
+        'broker': '삼성',
+        'types': [
+            {'type': '개방형',     'pre_broker': None, 'pre_advisor': None, 'post_broker': None, 'post_advisor': None, 'perf_ratio': None},
+        ],
+    },
+    {
+        'broker': 'NH',
+        'types': [
+            {'type': '개방형',     'pre_broker': 0, 'pre_advisor': 0, 'post_broker': 0.9, 'post_advisor': 0.6, 'perf_ratio': (4, 6), 'perf_note': '7% 초과분의 20%'},
+            {'type': '목표전환형', 'target': 5, 'pre_broker': 1, 'pre_advisor': 0, 'post_broker': 0, 'post_advisor': 0, 'perf_ratio': (5, 5), 'perf_note': '발생 수익의 20%'},
+        ],
+    },
+    {
+        'broker': 'DB',
+        'types': [
+            {'type': '개방형',     'pre_broker': 1, 'pre_advisor': 0, 'post_broker': 0.24, 'post_advisor': 0.36, 'perf_ratio': (4, 6), 'perf_note': '7% 초과분의 20%'},
+            {'type': '목표전환형', 'target': 6, 'pre_broker': 0.75, 'pre_advisor': 0.75, 'post_broker': 0, 'post_advisor': 0, 'perf_ratio': None, 'perf_text': '-',
+             'pre_total_text': '1.5% (연율)',
+             'pre_total_tip': '<ul class="tip-list"><li>총 수수료 = 중도해지수수료 + 환매수수료<ul><li>중도해지수수료 = 소요일 / 365 × 1.5%</li><li>환매수수료 = (365 − 소요일) / 365 × 1.5% × 80%</li></ul></li></ul>'},
+        ],
+    },
+    {
+        'broker': '한투',
+        'types': [
+            {'type': '개방형',     'pre_broker': None, 'pre_advisor': None, 'post_broker': None, 'post_advisor': None, 'perf_ratio': None},
+            {'type': '목표전환형', 'pre_broker': None, 'pre_advisor': None, 'post_broker': None, 'post_advisor': None, 'perf_ratio': None},
+        ],
+    },
+]
+
+
+def _fmt_fee(v):
+    """수수료 값 표시: None → 공란, 숫자 → 소수점 둘째자리 '1.00%'."""
+    if v is None:
+        return ''
+    if isinstance(v, (int, float)):
+        return f'{v:.2f}%'
+    return str(v)
+
+
+def _sum_fee(a, b):
+    """증권사 + 자문사 합계. 둘 다 None이면 None, 숫자만 합산."""
+    if isinstance(a, (int, float)) or isinstance(b, (int, float)):
+        return (a or 0) + (b or 0)
+    return None
+
+
+def create_fee_section():
+    """수수료 패널 — 증권사 / 형태 / 선취·후취 수수료(증권사·자문사·합계 3행) 정적 테이블."""
+    rows = ''
+    for grp in FEE_TABLE:
+        broker = grp['broker']
+        types = grp['types']
+        broker_rowspan = len(types) * 3
+        first_broker_row = True
+        for t in types:
+            type_cell = f'<td class="fee-type" rowspan="3">{t["type"]}</td>'
+            # 성과보수는 증권사:자문사 분배 비율로 표기 (perf_ratio = (증권사, 자문사))
+            pr = t.get("perf_ratio")
+            perf_broker_cell = f'{pr[0]:g}' if pr else ''
+            perf_advisor_cell = f'{pr[1]:g}' if pr else ''
+            perf_note = t.get("perf_note")
+            # 합계 행 성과보수: 비율(증권사/자문사 행에서 확인 가능)은 생략하고 기준 문구만 표기
+            if perf_note:
+                perf_total_cell = perf_note
+            elif pr:
+                perf_total_cell = f'{pr[0]:g} : {pr[1]:g}'
+            else:
+                perf_total_cell = ''
+            # 성과보수가 비율이 아닌 고정 문구('-' 등)일 때: 세 행 모두 같은 값
+            perf_text = t.get("perf_text")
+            if perf_text:
+                perf_broker_cell = perf_advisor_cell = perf_total_cell = perf_text
+            # 후취/성과보수가 아예 없는 상품: '없음' 등을 3행 병합으로 표기 (post_label/perf_label)
+            post_label = t.get("post_label")
+            perf_label = t.get("perf_label")
+            # 증권사 행
+            rows += '<tr>'
+            if first_broker_row:
+                rows += f'<td class="fee-broker" rowspan="{broker_rowspan}">{broker}</td>'
+                first_broker_row = False
+            rows += type_cell
+            target_disp = '-' if t["type"] == '개방형' else _fmt_fee(t.get("target"))
+            rows += f'<td class="fee-target" rowspan="3">{target_disp}</td>'
+            rows += '<td class="fee-share">증권사</td>'
+            rows += f'<td class="fee-val">{_fmt_fee(t["pre_broker"])}</td>'
+            if post_label:
+                rows += f'<td class="fee-val fee-none" rowspan="3">{post_label}</td>'
+            else:
+                rows += f'<td class="fee-val">{_fmt_fee(t["post_broker"])}</td>'
+            if perf_label:
+                rows += f'<td class="fee-val fee-none" rowspan="3">{perf_label}</td>'
+            else:
+                rows += f'<td class="fee-val">{perf_broker_cell}</td>'
+            rows += '</tr>'
+            # 자문사 행
+            rows += '<tr class="fee-row-advisor">'
+            rows += '<td class="fee-share">자문사</td>'
+            rows += f'<td class="fee-val">{_fmt_fee(t["pre_advisor"])}</td>'
+            if not post_label:
+                rows += f'<td class="fee-val">{_fmt_fee(t["post_advisor"])}</td>'
+            if not perf_label:
+                rows += f'<td class="fee-val">{perf_advisor_cell}</td>'
+            rows += '</tr>'
+            # 선취 합계: override 문구가 있으면 그 문구(+호버 툴팁) 사용, 없으면 증권사+자문사 합
+            pre_total_cell = _fmt_fee(_sum_fee(t["pre_broker"], t["pre_advisor"]))
+            if t.get("pre_total_text"):
+                _txt = t["pre_total_text"]
+                _tip = t.get("pre_total_tip")
+                if _tip:
+                    pre_total_cell = f'<span class="fee-tip" tabindex="0">{_txt}<span class="fee-tip-box">{_tip}</span></span>'
+                else:
+                    pre_total_cell = _txt
+            # 합계 행 (선취/후취는 증권사+자문사 합, 성과보수는 비율)
+            rows += '<tr class="fee-row-total">'
+            rows += '<td class="fee-share">합계</td>'
+            rows += f'<td class="fee-val">{pre_total_cell}</td>'
+            if not post_label:
+                rows += f'<td class="fee-val">{_fmt_fee(_sum_fee(t["post_broker"], t["post_advisor"]))}</td>'
+            if not perf_label:
+                rows += f'<td class="fee-val">{perf_total_cell}</td>'
+            rows += '</tr>'
+
+    return f"""
+        <div class="fee-wrapper">
+            <h3 class="fee-title">WRAP 수수료 체계</h3>
+            <div class="table-container">
+                <table class="fee-table">
+                    <thead>
+                        <tr>
+                            <th>증권사</th>
+                            <th>형태</th>
+                            <th>목표</th>
+                            <th>구분</th>
+                            <th>선취 수수료</th>
+                            <th>후취 수수료</th>
+                            <th>성과 보수</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {rows}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    """
+
+
 def create_dashboard():
     # Check if charts directory exists
     if not os.path.exists(CHARTS_DIR):
@@ -5279,6 +5432,7 @@ def create_dashboard():
     # ── Generate wrap.html (WRAP + Portfolio + Sector + 공시/Order/AUM tabs) ──
     order_html = create_order_section()
     aum_html = create_aum_section()
+    fee_html = create_fee_section()
     disclosures_html = create_disclosures_section()
     wrap_page = f"""<!DOCTYPE html>
 <html lang="en">
@@ -5392,6 +5546,29 @@ def create_dashboard():
         .rt-na {{ color:#bbb; }}
         .rt-divider-left {{ border-left:1px solid #c0c0c0; }}
         .rt-table tbody tr:hover td {{ background:#f9fafb; }}
+        /* Fee table */
+        .fee-wrapper {{ max-width: 900px; margin: 0 auto; background: var(--card-bg); border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }}
+        .fee-title {{ margin: 0 0 18px 0; font-size: 1.3rem; color: #111; }}
+        .fee-table {{ width: 100%; border-collapse: collapse; font-size: 0.98rem; }}
+        .fee-table thead th {{ padding: 12px 10px; text-align: center; font-weight: 600; color: #000; background: #e9ecef; border-bottom: 2px solid #000; white-space: nowrap; }}
+        .fee-table td {{ padding: 11px 10px; text-align: center; border-bottom: 1px solid #dee2e6; color: #333; }}
+        .fee-broker {{ font-weight: 700; font-size: 1.05rem; color: #111; background: #f5f7fa; border-right: 1px solid #dee2e6; }}
+        .fee-type {{ font-weight: 600; color: #1e40af; border-right: 1px solid #dee2e6; }}
+        .fee-target {{ font-weight: 600; color: #111; border-right: 1px solid #dee2e6; font-variant-numeric: tabular-nums; }}
+        .fee-share {{ color: #555; font-size: 0.92rem; white-space: nowrap; }}
+        .fee-val {{ font-variant-numeric: tabular-nums; }}
+        .fee-none {{ color: #9ca3af; font-style: italic; vertical-align: middle; }}
+        .fee-row-total td {{ background: #f5f7fa; font-weight: 600; color: #111; border-bottom: 1px solid #c8ccd1; }}
+        .fee-row-total .fee-share {{ color: #111; }}
+        .fee-hurdle {{ font-size: 0.78rem; font-weight: 500; color: #6b7280; white-space: nowrap; }}
+        .fee-tip {{ position: relative; cursor: help; border-bottom: 1px dotted #888; }}
+        .fee-tip .fee-tip-box {{ display: none; position: absolute; left: 50%; transform: translateX(-50%); bottom: 135%; background: #222; color: #fff; padding: 10px 14px; border-radius: 6px; font-size: 0.82rem; font-weight: 400; line-height: 1.6; white-space: nowrap; z-index: 200; box-shadow: 0 4px 12px rgba(0,0,0,0.25); text-align: left; }}
+        .fee-tip .fee-tip-box::after {{ content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #222; }}
+        .fee-tip:hover .fee-tip-box, .fee-tip:focus .fee-tip-box {{ display: block; }}
+        .fee-tip-box .tip-list {{ margin: 0; padding-left: 1.3em; list-style-type: disc; }}
+        .fee-tip-box .tip-list ul {{ margin: 5px 0 0 0; padding-left: 1.4em; list-style-type: circle; }}
+        .fee-tip-box .tip-list li {{ margin: 3px 0; }}
+        .fee-note {{ margin: 16px 0 0 0; font-size: 0.85rem; color: #888; }}
         /* Password overlay */
         .pw-overlay {{
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -5453,6 +5630,10 @@ def create_dashboard():
     {aum_html}
     </div>
 
+    <div id="wrapPanelFee" style="padding-top:24px;display:none;max-width:1800px;margin:0 auto;">
+    {fee_html}
+    </div>
+
     <footer><p>Auto-generated by Antigravity Agent</p></footer>
     </div>
 
@@ -5506,6 +5687,7 @@ def create_dashboard():
         document.getElementById('wrapPanelDisclosures').style.display = tab === 'disclosures' ? 'block' : 'none';
         document.getElementById('wrapPanelOrder').style.display = tab === 'order' ? 'block' : 'none';
         document.getElementById('wrapPanelAUM').style.display = tab === 'aum' ? 'block' : 'none';
+        document.getElementById('wrapPanelFee').style.display = tab === 'fee' ? 'block' : 'none';
         if (tab === 'disclosures' && typeof loadDisclosures === 'function') loadDisclosures();
         if (tab === 'order' && typeof loadOrder === 'function') loadOrder();
         if (tab === 'aum' && typeof loadAUM === 'function') loadAUM();
