@@ -4358,7 +4358,8 @@ FEE_TABLE = [
         'broker': 'NH',
         'types': [
             {'type': '개방형',     'pre_broker': 0, 'pre_advisor': 0, 'post_broker': 0.9, 'post_advisor': 0.6, 'perf_ratio': (4, 6), 'perf_note': '7% 초과분의 20%'},
-            {'type': '목표전환형', 'target': 5, 'pre_broker': 1, 'pre_advisor': 0, 'post_broker': 0, 'post_advisor': 0, 'perf_ratio': (5, 5), 'perf_note': '발생 수익의 20%'},
+            {'type': '목표전환형', 'target': 5, 'pre_broker': 1, 'pre_advisor': 0, 'post_broker': 0, 'post_advisor': 0,
+             'perf_broker_pct': 0.5, 'perf_advisor_pct': 0.5, 'perf_total_tip': '성과 보수 = 발생 수익의 20%'},
         ],
     },
     {
@@ -4408,17 +4409,28 @@ def create_fee_section():
             type_cell = f'<td class="fee-type" rowspan="3">{t["type"]}</td>'
             # 성과보수는 증권사:자문사 분배 비율로 표기 (perf_ratio = (증권사, 자문사))
             pr = t.get("perf_ratio")
-            perf_broker_cell = f'{pr[0]:g}' if pr else ''
-            perf_advisor_cell = f'{pr[1]:g}' if pr else ''
+            perf_bpct = t.get("perf_broker_pct")
+            perf_apct = t.get("perf_advisor_pct")
             perf_note = t.get("perf_note")
-            # 합계 행 성과보수: 비율(증권사/자문사 행에서 확인 가능)은 생략하고 기준 문구만 표기
-            if perf_note:
-                perf_total_cell = perf_note
+            if perf_bpct is not None or perf_apct is not None:
+                # 성과보수를 실제 %로 표기 (증권사/자문사 %, 합계는 합 + 선택적 호버 툴팁)
+                perf_broker_cell = _fmt_fee(perf_bpct)
+                perf_advisor_cell = _fmt_fee(perf_apct)
+                perf_total_cell = _fmt_fee(_sum_fee(perf_bpct, perf_apct))
+                _ptip = t.get("perf_total_tip")
+                if _ptip:
+                    perf_total_cell = f'<span class="fee-tip" tabindex="0">{perf_total_cell}<span class="fee-tip-box">{_ptip}</span></span>'
             elif pr:
-                perf_total_cell = f'{pr[0]:g} : {pr[1]:g}'
+                # 성과보수를 증권사:자문사 분배 비율로 표기
+                perf_broker_cell = f'{pr[0]:g}'
+                perf_advisor_cell = f'{pr[1]:g}'
+                # 합계 행: 비율(증권사/자문사 행에서 확인 가능)은 생략하고 기준 문구만 표기
+                perf_total_cell = perf_note if perf_note else f'{pr[0]:g} : {pr[1]:g}'
             else:
-                perf_total_cell = ''
-            # 성과보수가 비율이 아닌 고정 문구('-' 등)일 때: 세 행 모두 같은 값
+                perf_broker_cell = ''
+                perf_advisor_cell = ''
+                perf_total_cell = perf_note or ''
+            # 성과보수가 고정 문구('-' 등)일 때: 세 행 모두 같은 값
             perf_text = t.get("perf_text")
             if perf_text:
                 perf_broker_cell = perf_advisor_cell = perf_total_cell = perf_text
