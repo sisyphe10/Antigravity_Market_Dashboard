@@ -4474,7 +4474,6 @@ def create_fee_section():
 
     return f"""
         <div class="fee-wrapper">
-            <h3 class="fee-title">WRAP 수수료 체계</h3>
             <div class="table-container">
                 <table class="fee-table">
                     <thead>
