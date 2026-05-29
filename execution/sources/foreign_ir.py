@@ -208,23 +208,32 @@ def _extract_html(base_url: str, html: str) -> list[dict]:
         node = el.parent
         title = None
         link = None
-        for _ in range(5):
+        for _ in range(7):
             if node is None:
                 break
-            a = node.find('a', href=True)
-            heading = node.find(['h1', 'h2', 'h3', 'h4', 'h5'])
+            # 카드 링크: 조상 노드 자신이 <a>(카드 전체를 감싼 래퍼)거나, 자손 <a>
+            cand_a = None
+            if node.name == 'a' and node.get('href') and _is_article_href(node['href'], base_url):
+                cand_a = node
+            else:
+                da = node.find('a', href=True)
+                if da and _is_article_href(da['href'], base_url):
+                    cand_a = da
+            # 제목: heading 우선 → 앵커 텍스트(날짜 제거) 폴백
+            heading = node.find(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
             cand_title = None
             if heading:
                 ht = _clean_text(heading.get_text(' ', strip=True))
                 if 15 <= len(ht) <= 220:
                     cand_title = ht
-            if not cand_title and a:
-                at = _clean_text(a.get_text(' ', strip=True))
+            if not cand_title and cand_a:
+                at = _clean_text(_HTML_DATE_RE.sub('', cand_a.get_text(' ', strip=True)))
+                at = at.strip(' -·|··')
                 if 15 <= len(at) <= 220:
                     cand_title = at
-            if cand_title and a and _is_article_href(a['href'], base_url):
+            if cand_title and cand_a:
                 title = cand_title
-                link = urljoin(base_url, a['href'])
+                link = urljoin(base_url, cand_a['href'])
                 break
             node = node.parent
 
