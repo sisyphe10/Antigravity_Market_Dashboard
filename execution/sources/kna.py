@@ -37,6 +37,25 @@ def fetch_new_posts(update_state: bool = False) -> list[dict]:
     return out
 
 
+def latest_item_date() -> str | None:
+    """게시판 최신 글 작성일(YYYY-MM-DD 또는 YYYY.MM.DD). staleness 감지용. 실패 시 None.
+
+    목록 첫 페이지(start=0)는 최신순이므로 날짜가 있는 첫 행을 반환.
+    """
+    try:
+        from fetch_kna_news import (  # noqa: E402
+            _fetch_list_html, _build_list_url, _parse_list_page,
+        )
+        posts = _parse_list_page(_fetch_list_html(_build_list_url(0)))
+    except Exception:
+        return None
+    for p in posts:
+        d = (p.get('date') or '').strip()
+        if d:
+            return d
+    return None
+
+
 def commit_state(posts: list[dict]) -> None:
     if not posts:
         return

@@ -17,6 +17,7 @@
 """
 from __future__ import annotations
 
+import datetime as _dt
 import json
 import os
 import re
@@ -55,6 +56,54 @@ def save_state(name: str, state: dict[str, Any]) -> None:
     ensure_state_dir()
     with open(p, 'w', encoding='utf-8') as f:
         json.dump(state, f, ensure_ascii=False, indent=2)
+
+
+# ── 피드 staleness 경보 ────────────────────────────────────────────────
+# 피드가 죽으면 fetch_new_posts 는 빈 리스트를 반환하므로 "신규 글 없음" 만 반복된다
+# (2026-06 SemiAnalysis 구 WordPress 피드 8개월 방치 사례). 신규 글 유무와 무관하게
+# 피드 자체의 최신 글 날짜를 보고, 임계일보다 오래되면 경보한다.
+_STALENESS_STATE = '_staleness'   # sources_state/_staleness.json: {source_name: 'YYYY-MM-DD'}
+
+
+def _parse_iso_loose(s: str) -> _dt.date | None:
+    """'YYYY-MM-DD' / 'YYYY.MM.DD' / 'YYYY/MM/DD' → date. 실패 시 None."""
+    s = (s or '').strip()[:10].replace('.', '-').replace('/', '-')
+    try:
+        return _dt.date.fromisoformat(s)
+    except ValueError:
+        return None
+
+
+def check_and_record_staleness(
+    source_name: str,
+    latest_date: str | None,
+    threshold_days: int,
+    today_iso: str,
+) -> str | None:
+    """피드 최신 글이 threshold_days 보다 오래됐으면 경보 문자열, 아니면 None.
+
+    같은 날 두 번째 호출부터는 None (하루 1회만 경보 — 09:00/21:00 중복 방지).
+    dedupe 상태는 sources_state/_staleness.json 에 {source_name: 'YYYY-MM-DD'}.
+    임계 미설정 / 날짜 파싱 실패 시 조용히 None (절대 예외 던지지 않음 — 호출부 안전).
+    """
+    if not threshold_days or threshold_days <= 0:
+        return None
+    latest = _parse_iso_loose(latest_date or '')
+    today = _parse_iso_loose(today_iso)
+    if latest is None or today is None:
+        return None
+    age = (today - latest).days
+    if age < threshold_days:
+        return None
+    st = load_state(_STALENESS_STATE)
+    if st.get(source_name) == today.isoformat():
+        return None
+    st[source_name] = today.isoformat()
+    save_state(_STALENESS_STATE, st)
+    return (
+        f"피드 최신 글이 {age}일 전({latest.isoformat()})입니다 "
+        f"(임계 {threshold_days}일). 피드 URL 변경/발행 중단 가능성 — 점검 필요."
+    )
 
 
 def _ends_with_orphan_header(chunk: str) -> bool:

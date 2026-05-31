@@ -313,6 +313,23 @@ def fetch_new_posts(update_state: bool = False) -> list[dict[str, Any]]:
     return enriched
 
 
+def latest_item_date() -> str | None:
+    """피드 최신 item 의 날짜(YYYY-MM-DD). staleness 감지용 (state 미변경).
+
+    피드는 최신순이므로 ISO 날짜로 변환되는 첫 item 을 반환. 실패 시 None.
+    """
+    try:
+        posts = _parse_feed(_fetch_feed())
+    except Exception as e:
+        logger.warning(f'SemiAnalysis latest_item_date 실패: {e}')
+        return None
+    for p in posts:
+        d = _format_date(p.get('date', ''))
+        if len(d) == 10 and d[4] == '-':
+            return d
+    return None
+
+
 def commit_state(posts: list[dict[str, Any]]) -> None:
     """발송 성공 후 state 갱신 — 신규 GUID 들을 last_seen 에 추가."""
     if not posts:

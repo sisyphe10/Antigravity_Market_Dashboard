@@ -394,6 +394,36 @@ def _load_source_config(source_name: str) -> dict:
     return {}
 
 
+async def _maybe_warn_staleness(context, adapter, cfg, source_name, label, icon):
+    """피드 최신 글이 staleness_days 보다 오래되면 1일 1회 경보 발송.
+
+    어댑터가 latest_item_date() 를 노출하고 sources.json 에 staleness_days 가
+    설정된 소스만 점검. 어떤 예외도 밖으로 던지지 않는다 (본 수집 작업 보호).
+    """
+    try:
+        threshold = int(cfg.get('staleness_days') or 0)
+        if threshold <= 0:
+            return
+        get_date = getattr(adapter, 'latest_item_date', None)
+        if not callable(get_date):
+            return
+        latest = get_date()
+        from sources.base import check_and_record_staleness
+        today_iso = datetime.datetime.now(KST).strftime('%Y-%m-%d')
+        warn = check_and_record_staleness(source_name, latest, threshold, today_iso)
+        if not warn:
+            return
+        msg = f"⚠️ <b>[{label}] {icon} 피드 staleness 경보</b>\n{_html.escape(warn)}"
+        for chat_id in SUBSCRIBERS:
+            try:
+                await context.bot.send_message(chat_id=chat_id, text=msg, parse_mode='HTML')
+            except Exception as e:
+                logging.error(f"{source_name} staleness notify 전송 실패: {e}")
+        logging.warning(f"{source_name} staleness 경보: {warn}")
+    except Exception as e:
+        logging.error(f"{source_name} staleness 점검 오류 (무시): {e}")
+
+
 async def _run_source_job(
     context: ContextTypes.DEFAULT_TYPE,
     source_name: str,
@@ -420,6 +450,10 @@ async def _run_source_job(
     try:
         from sources import load_adapter
         adapter = load_adapter(source_name)
+
+        # 피드 staleness 사전 점검 — 신규 글이 0건이어도 피드 자체가 죽었는지 감지.
+        # 완전 방어적: 절대 본 작업을 깨지 않음 (내부에서 모든 예외 흡수).
+        await _maybe_warn_staleness(context, adapter, cfg, source_name, label, icon)
 
         try:
             posts = adapter.fetch_new_posts(update_state=False)

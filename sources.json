@@ -8,7 +8,8 @@
       "schedule": ["18:00"],
       "enabled": true,
       "retry": {"count": 2, "interval_min": 30},
-      "translate": {"enabled": false}
+      "translate": {"enabled": false},
+      "staleness_days": 30
     },
     {
       "name": "semianalysis",
@@ -17,7 +18,8 @@
       "schedule": ["09:00", "21:00"],
       "enabled": true,
       "retry": {"count": 2, "interval_min": 30},
-      "translate": {"enabled": true, "model": "claude-haiku-4-5-20251001", "target_lang": "ko"}
+      "translate": {"enabled": true, "model": "claude-haiku-4-5-20251001", "target_lang": "ko"},
+      "staleness_days": 21
     },
     {
       "name": "foreign_ir",
