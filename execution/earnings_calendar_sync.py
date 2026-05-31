@@ -265,9 +265,18 @@ def build_earnings_event(earnings, company_name):
     lines.append("")
     lines.append(f"Finnhub: https://finnhub.io/dashboard/stock/{ticker}")
 
+    # 안정 ID: (ticker, 회계분기) 기반. Finnhub가 추정 발표일을 갱신해도 ID가 같아
+    # 새로 insert하지 않고 기존 이벤트를 update → 날짜 변경에 의한 유령 중복 방지.
+    # quarter/year가 비는 경우(드묾)에만 날짜 기반으로 폴백.
+    if q and yy:
+        stable_key = f"{ticker}_{q}Q{yy}"
+    else:
+        stable_key = f"{ticker}_{ed}"
+    eid = 'agearn' + hashlib.md5(stable_key.encode()).hexdigest()[:16]
+
     end_date = (datetime.fromisoformat(ed) + timedelta(days=1)).strftime('%Y-%m-%d')
     return {
-        'id': make_event_id(ticker, ed, prefix='agearn'),
+        'id': eid,
         'summary': summary,
         'description': '\n'.join(lines),
         'start': {'date': ed},
@@ -324,6 +333,60 @@ def upsert_event(service, event, dry_run=False):
         raise
 
 
+EARN_LABEL_RE = re.compile(r"\[([A-Z0-9\.\-]+)\]\s+(\d+Q\d+)\s+Earnings")
+
+
+def dedup_earnings_events(service, dry_run=False):
+    """같은 (ticker, 회계분기) 라벨의 중복 실적 이벤트 정리.
+    안정 ID(분기 기반)만 남기고 나머지 삭제 → ID 스킴 전환 시 옛 날짜해시
+    이벤트를 1회 자동 청소하고, 이후에도 혹시 생기는 중복을 매 실행마다 self-heal.
+    주의: Finnhub가 동일 분기를 다른 연도로 표기(2026↔2027 정정)하면 라벨이 달라져
+    같은 그룹으로 묶이지 않을 수 있음 — 그 경우는 드물며 다음 sync에서 수렴."""
+    if dry_run:
+        return 0
+    items = []
+    token = None
+    while True:
+        res = service.events().list(
+            calendarId=CAL_ID, timeMin='2026-01-01T00:00:00Z',
+            timeMax='2027-12-31T00:00:00Z', singleEvents=True, orderBy='startTime',
+            maxResults=2500, pageToken=token).execute()
+        items += res.get('items', [])
+        token = res.get('nextPageToken')
+        if not token:
+            break
+    groups = {}
+    for ev in items:
+        eid = ev.get('id', '')
+        if not eid.startswith('agearn'):
+            continue
+        m = EARN_LABEL_RE.search(ev.get('summary', ''))
+        if not m:
+            continue
+        tk, label = m.group(1), m.group(2)
+        d = ev.get('start', {}).get('date', '')
+        groups.setdefault((tk, label), []).append((eid, d))
+    removed = 0
+    for (tk, label), evs in groups.items():
+        if len(evs) < 2:
+            continue
+        canonical = 'agearn' + hashlib.md5(f"{tk}_{label}".encode()).hexdigest()[:16]
+        ids = [e[0] for e in evs]
+        keep = canonical if canonical in ids else sorted(evs, key=lambda x: x[1])[-1][0]
+        for eid, d in evs:
+            if eid == keep:
+                continue
+            try:
+                service.events().delete(calendarId=CAL_ID, eventId=eid).execute()
+                removed += 1
+                log.info(f"  [dedup] {tk} {label}: deleted {eid} ({d})")
+            except HttpError as e:
+                log.warning(f"  [dedup] {tk} {label} delete 실패 {eid}: {e}")
+    if removed:
+        log.info(f"[Dedup] 중복 실적 이벤트 {removed}건 정리")
+    return removed
+
+
 def run_earnings(universe, service, api_key, from_date, to_date, dry_run):
     log.info(f"[Earnings] 조회 범위: {from_date} ~ {to_date} ({len(universe)}개 종목)")
     stats = {'inserted': 0, 'updated': 0, 'unchanged': 0, 'dry-run': 0, 'no-earnings': 0, 'error': 0}
@@ -350,6 +413,7 @@ def run_earnings(universe, service, api_key, from_date, to_date, dry_run):
                 stats['error'] += 1
         time.sleep(1.1)
     log.info(f"[Earnings] 완료: {stats}")
+    dedup_earnings_events(service, dry_run=dry_run)
     return stats
 
 
