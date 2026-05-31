@@ -1,10 +1,12 @@
-"""SemiAnalysis (semianalysis.com) 어댑터.
+"""SemiAnalysis 어댑터.
 
-수집: WordPress 표준 RSS (/feed/), content:encoded 에 풀 HTML 본문 들어옴.
+수집: Substack RSS (newsletter.semianalysis.com/feed), content:encoded 에 풀 HTML 본문.
+  ※ 2026-05 기준 semianalysis.com/feed/ (구 WordPress 피드)는 2025-09 이후 갱신 중단됨.
+    실제 신규 글은 Substack 뉴스레터로만 발행되어 그쪽 피드로 전환.
 번역: _translator.translate_to_korean (Haiku 4.5).
 
 state: sources_state/semianalysis.json — last_seen_guids (최근 200개 GUID).
-paywall 감지: 본문 끝 '[…]' 패턴 (현재는 등장하지 않으나 안전망).
+paywall 감지: 본문 끝 '[…]' (구 피드) + Substack 유료글 truncation 문구.
 """
 from __future__ import annotations
 
@@ -24,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 LABEL = 'SemiAnalysis'
 ICON = '📊'
-FEED_URL = 'https://semianalysis.com/feed/'
+FEED_URL = 'https://newsletter.semianalysis.com/feed'
 STATE_NAME = 'semianalysis'
 MAX_REMEMBERED_GUIDS = 200
 
@@ -142,6 +144,11 @@ _FOOTER_PATTERNS = [
     re.compile(r'^\s*By signing up.*Privacy Policy.*$', re.IGNORECASE),
     re.compile(r'^\s*Privacy Policy\s+and\s+Terms.*$', re.IGNORECASE),
     re.compile(r'^\s*Subscribe (now |today |to ).*$', re.IGNORECASE),
+    # Substack 푸터/CTA
+    re.compile(r'^\s*Thanks for reading.*$', re.IGNORECASE),
+    re.compile(r'^\s*Leave a comment\s*$', re.IGNORECASE),
+    re.compile(r'^\s*Share\s*$', re.IGNORECASE),
+    re.compile(r'^\s*(Give a gift subscription|Get \d+% off).*$', re.IGNORECASE),
 ]
 
 # 텔레그램은 이미지 없이 텍스트만이라 figcaption placeholder는 노이즈. 본문 추출 단계에서 제거.
@@ -172,10 +179,25 @@ def _strip_footer(text: str) -> str:
     return '\n'.join(lines).rstrip()
 
 
+_SUBSTACK_PAYWALL_MARKERS = (
+    'subscribe to read',
+    'this post is for paid subscribers',
+    'this post is for paying subscribers',
+    'keep reading with a 7-day free trial',
+)
+
+
 def _is_paywalled(text: str) -> bool:
-    """본문 끝이 '[…]' 같은 잘림 마커로 끝나는지."""
-    tail = text[-200:].strip()
-    return tail.endswith('[…]') or tail.endswith('[...]')
+    """본문이 잘린 유료글인지.
+
+    - 구 WordPress 피드: 본문 끝 '[…]' / '[...]' 마커
+    - Substack 피드: 본문 끝부분에 'Subscribe to read' 등 유료 전환 문구
+    """
+    tail = text[-400:].strip()
+    if tail.endswith('[…]') or tail.endswith('[...]'):
+        return True
+    tail_low = tail.lower()
+    return any(m in tail_low for m in _SUBSTACK_PAYWALL_MARKERS)
 
 
 # ── RSS fetch ─────────────────────────────────────────────────────────
