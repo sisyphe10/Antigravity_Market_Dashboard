@@ -5578,7 +5578,7 @@ def create_dashboard():
         .fee-row-total td {{ background: #f5f7fa; font-weight: 600; color: #111; border-bottom: 1px solid #c8ccd1; }}
         .fee-row-total .fee-share {{ color: #111; }}
         .fee-hurdle {{ font-size: 0.78rem; font-weight: 500; color: #6b7280; white-space: nowrap; }}
-        .fee-tip {{ position: relative; cursor: help; border-bottom: 1px dotted #888; }}
+        .fee-tip {{ position: relative; cursor: help; border-bottom: 1px dotted #888; color: #0d3b8c; font-weight: 700; }}
         .fee-tip .fee-tip-box {{ display: none; position: absolute; left: 50%; transform: translateX(-50%); bottom: 135%; background: #222; color: #fff; padding: 10px 14px; border-radius: 6px; font-size: 0.82rem; font-weight: 400; line-height: 1.6; white-space: nowrap; z-index: 200; box-shadow: 0 4px 12px rgba(0,0,0,0.25); text-align: left; }}
         .fee-tip .fee-tip-box::after {{ content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #222; }}
         .fee-tip:hover .fee-tip-box, .fee-tip:focus .fee-tip-box {{ display: block; }}
