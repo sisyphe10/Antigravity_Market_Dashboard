@@ -660,29 +660,54 @@ _NEWHIGH_FILE = os.path.join(DASHBOARD_DIR, 'newhigh_20d.json')
 
 
 def render_newhigh_message(data, today):
-    """newhigh_20d.json data → HTML 메시지(섹터 그룹 > 종목). 잡/테스트 공용."""
+    """
+    newhigh_20d.json data → HTML 메시지 (섹터 > 테마 > 종목). 잡/테스트 공용.
+    레이아웃: 섹터 •(볼드+밑줄) / 테마 ◦(1단 들여쓰기, 볼드) / 종목 -(2단 들여쓰기).
+    들여쓰기는 점자공백 U+2800 — 텔레그램이 일반/nbsp 연속공백을 합치므로.
+    테마 미부여(theme 없음) 종목은 섹터 바로 아래(1단)에 나열.
+    """
     esc = _html.escape
+    NB = "⠀"          # 점자공백(빈 글자) — 들여쓰기 1칸
+    I1, I2 = NB * 2, NB * 4
     stocks = data.get('stocks', [])
     total = len(stocks)
 
     def fmt_cap(won):
         jo = (won or 0) / 1e12
-        return f"{jo:.1f}조" if jo >= 1 else f"{(won or 0)/1e8:,.0f}억"
+        if jo >= 10:
+            return f"{jo:,.0f}조"
+        if jo >= 1:
+            return f"{jo:,.1f}조"
+        return f"{(won or 0)/1e8:,.0f}억"
+
+    def stock_line(s, indent):
+        sign = '+' if s.get('chg', 0) >= 0 else ''
+        return f"{indent}- {esc(s['name'])} {fmt_cap(s.get('mktcap'))} | {sign}{s.get('chg', 0)}%"
 
     if total == 0:
         return f"<b><u>20일 신고가</u></b> ({today})\n\n오늘 신고가 종목 없음"
-    groups = {}
+
+    # 섹터 > 테마 그룹
+    sectors = {}
     for s in stocks:
-        groups.setdefault(s.get('sector') or '기타', []).append(s)
-    # 섹터 정렬: 종목수 desc → 총시총 desc
-    order = sorted(groups, key=lambda k: (-len(groups[k]), -sum(x.get('mktcap', 0) for x in groups[k])))
-    lines = [f"<b><u>20일 신고가</u></b> ({today}) — {total}종목", ""]
-    for sec in order:
-        rows = sorted(groups[sec], key=lambda x: -x.get('mktcap', 0))
-        lines.append(f"<b>[{esc(sec)}]</b> {len(rows)}")
-        for s in rows:
-            sign = '+' if s.get('chg', 0) >= 0 else ''
-            lines.append(f"• {esc(s['name'])} [{s.get('market', '')}] {sign}{s.get('chg', 0)}% / {fmt_cap(s.get('mktcap'))}")
+        sectors.setdefault(s.get('sector') or '기타', {}).setdefault(s.get('theme') or '', []).append(s)
+    sec_order = sorted(sectors, key=lambda k: -sum(len(v) for v in sectors[k].values()))
+
+    lines = [f"<b><u>20일 신고가</u></b> ({today})", ""]
+    for sec in sec_order:
+        themes = sectors[sec]
+        scnt = sum(len(v) for v in themes.values())
+        lines.append(f"• <b><u>{esc(sec)}_({scnt})</u></b>")
+        # 테마 정렬: 종목수 desc. 무테마('')는 마지막.
+        th_order = sorted([t for t in themes if t], key=lambda t: -len(themes[t]))
+        for th in th_order:
+            rows = sorted(themes[th], key=lambda x: -x.get('mktcap', 0))
+            lines.append(f"{I1}◦ <b>{esc(th)}_({len(rows)})</b>")
+            for s in rows:
+                lines.append(stock_line(s, I2))
+        if themes.get(''):     # 무테마 종목 → 섹터 바로 아래(1단)
+            for s in sorted(themes[''], key=lambda x: -x.get('mktcap', 0)):
+                lines.append(stock_line(s, I1))
         lines.append("")
     return "\n".join(lines).rstrip()
 
