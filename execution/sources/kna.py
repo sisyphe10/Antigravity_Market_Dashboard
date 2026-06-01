@@ -44,9 +44,9 @@ def latest_item_date() -> str | None:
     """
     try:
         from fetch_kna_news import (  # noqa: E402
-            _fetch_list_html, _build_list_url, _parse_list_page,
+            _board_url, _fetch_html, parse_board_list,
         )
-        posts = _parse_list_page(_fetch_list_html(_build_list_url(0)))
+        posts = parse_board_list(_fetch_html(_board_url(0)))
     except Exception:
         return None
     for p in posts:
