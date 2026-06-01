@@ -682,33 +682,32 @@ def render_newhigh_message(data, today):
 
     def stock_line(s, indent):
         sign = '+' if s.get('chg', 0) >= 0 else ''
-        return f"{indent}- {esc(s['name'])} {fmt_cap(s.get('mktcap'))} | {sign}{s.get('chg', 0)}%"
+        badge = ' | 🔥' if s.get('is_52w') else ''
+        return f"{indent}- {esc(s['name'])} | {fmt_cap(s.get('mktcap'))} | {sign}{s.get('chg', 0)}%{badge}"
 
     if total == 0:
-        return f"<b><u>20일 신고가</u></b> ({today})\n\n오늘 신고가 종목 없음"
+        return f"{today}\n<b><u>20일 신고가</u></b> (0종목)\n\n오늘 신고가 종목 없음"
 
-    # 섹터 > 테마 그룹
+    n52 = sum(1 for s in stocks if s.get('is_52w'))
+
+    # 섹터 > 종목 (테마 계층 일단 제외 — theme 데이터는 enrich가 계속 부여, 렌더만 생략)
     sectors = {}
     for s in stocks:
-        sectors.setdefault(s.get('sector') or '기타', {}).setdefault(s.get('theme') or '', []).append(s)
-    sec_order = sorted(sectors, key=lambda k: -sum(len(v) for v in sectors[k].values()))
+        sectors.setdefault(s.get('sector') or '기타', []).append(s)
+    sec_order = sorted(sectors, key=lambda k: -len(sectors[k]))
 
-    lines = [f"<b><u>20일 신고가</u></b> ({today})", ""]
+    head = f"<b><u>20일 신고가</u></b> ({total}종목)"
+    if n52:
+        head += f" / <b><u>52주 신고가</u></b>({n52}종목🔥)"
+    lines = [today, head, ""]
     for sec in sec_order:
-        themes = sectors[sec]
-        scnt = sum(len(v) for v in themes.values())
-        lines.append(f"• <b><u>{esc(sec)}_({scnt})</u></b>")
-        # 테마 정렬: 종목수 desc. 무테마('')는 마지막.
-        th_order = sorted([t for t in themes if t], key=lambda t: -len(themes[t]))
-        for th in th_order:
-            rows = sorted(themes[th], key=lambda x: -x.get('mktcap', 0))
-            lines.append(f"{I1}◦ <b>{esc(th)}_({len(rows)})</b>")
-            for s in rows:
-                lines.append(stock_line(s, I2))
-        if themes.get(''):     # 무테마 종목 → 섹터 바로 아래(1단)
-            for s in sorted(themes[''], key=lambda x: -x.get('mktcap', 0)):
-                lines.append(stock_line(s, I1))
+        rows = sorted(sectors[sec], key=lambda x: -x.get('mktcap', 0))
+        lines.append(f"• <b><u>{esc(sec)}_({len(rows)})</u></b>")
+        for s in rows:
+            lines.append(stock_line(s, I1))
         lines.append("")
+
+    # (테마 블록은 일단 제거 — enrich가 theme/theme_descriptions는 계속 생성하므로 복원 용이)
     return "\n".join(lines).rstrip()
 
 

@@ -37,9 +37,10 @@ MIN_MKTCAP = 200_000_000_000   # 2,000억 (원)
 # 20일 신고가 (텔레그램 알림용 산출물) — ra_sisyphe_bot이 16:00에 읽어 전송
 YF_HISTORY_FILE = 'stock_price_history.json'    # yfinance 과거(폴백/초기 seed)
 KIS_HISTORY_FILE = 'kis_price_history.json'      # 오늘부터 KIS 당일고가/종가 누적
-KIS_HIST_KEEP_DAYS = 40                          # 룩백 20 + 버퍼만 보관(파일 비대화 방지)
+KIS_HIST_KEEP_DAYS = 300                         # 52주(252) 룩백 + 버퍼 보관 (yfinance 폴백 의존도 점진 감소)
 NEWHIGH_OUTPUT = 'newhigh_20d.json'
 NEWHIGH_DAYS = 20
+NEWHIGH_52W_DAYS = 252                           # 52주 ≈ 252거래일
 WICS_FILE = 'wics_all.json'              # 전종목 WICS(GICS형) 섹터 (sub_sector=산업군 27종)
 UNIVERSE_CSV = 'universe_tickers.csv'    # 섹터 폴백(수동 큐레이션 529종목)
 
@@ -276,8 +277,11 @@ def accumulate_kis_history(master, prices, date_disp):
 
 def compute_newhigh_20d(master, prices, date_disp, now_iso):
     """
-    20일 신고가: 당일 고가(KIS) > 과거 20거래일 고가 최대값.
+    20일 신고가: 당일 고가(KIS) > 과거 20거래일 고가 최대값. 거래대금순 stocks 리스트.
+    각 종목에 is_52w 플래그(당일 고가 > 과거 252거래일 최대값=52주 신고가도 달성)를 부여.
+    52주는 20일의 부분집합(252⊃20)이라 별도 리스트 대신 플래그로 표시 → 봇이 🔥 뱃지로 강조.
     과거 고가는 KIS 히스토리 우선 + yfinance 폴백 머지 → 누적될수록 자연히 KIS 단일화.
+    ⚠️ yfinance 시드가 오래되면 그 갭 구간 고가 누락 → KIS 누적이 252일 채우기 전까지 52주 과다판정 여지.
     """
     def _load(path):
         try:
@@ -291,7 +295,7 @@ def compute_newhigh_20d(master, prices, date_disp, now_iso):
     kis_stocks = kis_hist.get('stocks', {})
     sector_map = load_sector_map()
 
-    out = []
+    out20 = []
     for code, m in master.items():
         p = prices.get(code)
         if not p or not p.get('price') or not p.get('high'):
@@ -311,24 +315,31 @@ def compute_newhigh_20d(master, prices, date_disp, now_iso):
                 past[d] = v
         if not past:
             continue
-        recent_dates = sorted(past)[-NEWHIGH_DAYS:]
-        prev_high = max(past[d] for d in recent_dates)
-        if p['high'] > prev_high:
-            out.append({
-                'code': code, 'name': m['name'], 'market': m['market'],
-                'sector': sector_map.get(code, '기타'),
-                'price': p['price'], 'chg': round(p['chg'], 2),
-                'high': p['high'], 'prev_high': prev_high,
-                'trdval': p['trdval'], 'mktcap': mktcap,
-                'lookback': len(recent_dates),
-            })
-    out.sort(key=lambda x: x['trdval'], reverse=True)   # 거래대금순
+        dates_sorted = sorted(past)
+        recent20 = dates_sorted[-NEWHIGH_DAYS:]
+        prev20 = max(past[d] for d in recent20)
+        if p['high'] <= prev20:
+            continue
+        # 20일 신고가 → 52주 신고가 여부도 판정(부분집합이라 20일 통과분만 검사)
+        recent52 = dates_sorted[-NEWHIGH_52W_DAYS:]
+        prev52 = max(past[d] for d in recent52)
+        is_52w = p['high'] > prev52
+        out20.append({
+            'code': code, 'name': m['name'], 'market': m['market'],
+            'sector': sector_map.get(code, '기타'),
+            'price': p['price'], 'chg': round(p['chg'], 2),
+            'high': p['high'], 'prev_high': prev20, 'trdval': p['trdval'], 'mktcap': mktcap,
+            'lookback': len(recent20), 'is_52w': is_52w, 'lookback_52w': len(recent52),
+        })
+    out20.sort(key=lambda x: x['trdval'], reverse=True)   # 거래대금순
+    n52 = sum(1 for s in out20 if s['is_52w'])
     with open(NEWHIGH_OUTPUT, 'w', encoding='utf-8') as f:
         json.dump({'date': date_disp, 'ranked_at': now_iso,
-                   'lookback_days': NEWHIGH_DAYS, 'count': len(out), 'stocks': out},
+                   'lookback_days': NEWHIGH_DAYS, 'lookback_52w_days': NEWHIGH_52W_DAYS,
+                   'count': len(out20), 'count_52w': n52, 'stocks': out20},
                   f, ensure_ascii=False)
-    logging.info('20일 신고가: %d종목 → %s', len(out), NEWHIGH_OUTPUT)
-    return out
+    logging.info('신고가: 20일 %d종목 (그중 52주 %d) → %s', len(out20), n52, NEWHIGH_OUTPUT)
+    return out20
 
 
 def main():
