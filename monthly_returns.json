@@ -315,8 +315,8 @@
         "RUSSELL": 0.042655,
         "BTC": -0.033412,
         "ETH": -0.10495,
-        "GOLD": -0.008841,
-        "SILVER": 0.032312
+        "GOLD": -0.008668,
+        "SILVER": 0.033536
       }
     },
     {
@@ -324,15 +324,15 @@
       "month": 6,
       "is_mtd": true,
       "returns": {
-        "KOSPI": null,
-        "KOSDAQ": null,
-        "NIKKEI": null,
+        "KOSPI": 0.011935,
+        "KOSDAQ": -0.001591,
+        "NIKKEI": 0.001886,
         "TAIEX": null,
         "S&P500": null,
         "NASDAQ": null,
         "RUSSELL": null,
-        "BTC": -0.001257,
-        "ETH": -0.005936,
+        "BTC": 0.000179,
+        "ETH": -0.004139,
         "GOLD": null,
         "SILVER": null
       }
@@ -341,18 +341,18 @@
   "ytd": {
     "year": 2026,
     "returns": {
-      "KOSPI": 1.011345,
-      "KOSDAQ": 0.161356,
-      "NIKKEI": 0.317644,
+      "KOSPI": 1.03535,
+      "KOSDAQ": 0.159508,
+      "NIKKEI": 0.320128,
       "TAIEX": 0.544454,
       "S&P500": 0.107306,
       "NASDAQ": 0.160512,
       "RUSSELL": 0.176247,
-      "BTC": -0.158232,
-      "ETH": -0.323409,
-      "GOLD": 0.057402,
-      "SILVER": 0.082357
+      "BTC": -0.157022,
+      "ETH": -0.322186,
+      "GOLD": 0.057587,
+      "SILVER": 0.08364
     }
   },
-  "updated_at": "2026-06-01 09:07:28 KST"
+  "updated_at": "2026-06-01 09:40:18 KST"
 }
