@@ -170,7 +170,7 @@
 .topnav-dropdown { position: absolute; top: calc(100% + 8px); left: 0; min-width: 180px; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.10); padding: 6px; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity 0.15s, transform 0.15s, visibility 0.15s; z-index: 200; }
 .topnav-item:hover .topnav-dropdown,
 .topnav-item:focus-within .topnav-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
-.topnav-sub { display: block; padding: 9px 14px; color: #333; text-decoration: none; font-size: 0.9rem; font-weight: 500; border-radius: 8px; white-space: nowrap; font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; }
+.topnav-sub { display: block; padding: 9px 14px; color: #333; text-decoration: none; font-size: 0.9rem; font-weight: 500; border-radius: 8px; white-space: nowrap; text-align: center; font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; }
 .topnav-sub:hover { background: #f3f4f6; color: #111; }
 .topnav-sub.active { background: #f0f7f2; color: #2d7a3a; font-weight: 700; }
 @media (max-width: 800px) {
@@ -212,11 +212,11 @@
     </div>
 
     <div id="mainContent" class="pw-hidden has-sidebar">
-    <nav class="topnav"><div class="topnav-inner"><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab active">WRAP</a></div><div class="topnav-item"><a href="market.html" class="topnav-tab">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub">Index</a><a href="universe.html" class="topnav-sub">Universe</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
+    <nav class="topnav"><div class="topnav-inner"><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab active">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#aum" class="topnav-sub">AUM</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub">Index</a><a href="universe.html" class="topnav-sub">Universe</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
     <aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="#" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="sidebar-link active">Dashboard</a><a href="#" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="sidebar-link">공시</a><a href="#" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="sidebar-link">Order</a><a href="#" onclick="wrapSwitchTab('aum');return false;" data-wrap-tab="aum" class="sidebar-link">AUM</a><a href="#" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="sidebar-link">수수료</a></aside>
     <header>
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-06-01 09:10:39 KST</div>
+        <div class="last-updated">Updated: 2026-06-01 09:28:38 KST</div>
     </header>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -2743,6 +2743,7 @@
             document.getElementById('pwOverlay').style.display = 'none';
             document.getElementById('mainContent').classList.remove('pw-hidden');
             sessionStorage.setItem('wrap_auth', '1');
+            if (typeof wrapTabFromHash === 'function') wrapTabFromHash();
         } else {
             document.getElementById('pwError').style.display = 'block';
             document.getElementById('pwInput').value = '';
@@ -2787,6 +2788,14 @@
         if (tab === 'order' && typeof loadOrder === 'function') loadOrder();
         if (tab === 'aum' && typeof loadAUM === 'function') loadAUM();
     }
+
+    // 상단 네비 WRAP 드롭다운 / 타 페이지에서 wrap.html#tab 진입 시 해당 탭으로 전환
+    function wrapTabFromHash() {
+        var h = (location.hash || '').replace('#', '');
+        if (['dashboard', 'disclosures', 'order', 'aum', 'fee'].indexOf(h) !== -1) wrapSwitchTab(h);
+    }
+    window.addEventListener('hashchange', wrapTabFromHash);
+    if (sessionStorage.getItem('wrap_auth') === '1') wrapTabFromHash();
     </script>
 </body>
 </html>
