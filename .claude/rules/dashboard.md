@@ -40,7 +40,7 @@ create_market_alert.py 변경 → market_alert.html 재생성
 
 ## UI 일관성
 - 글씨체: **Pretendard** (2026-05-24 통일). `font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif;`. 로드: `<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">`. Chart.js 사용 시 `Chart.defaults.font.family` 동일하게 설정
-- 상단 탭바: 모든 페이지 공통. **WRAP / Market / Architecture 3개 메인 탭** (pill 모양, 라운드 직사각형 테두리). Market은 호버 시 6개 페이지(Market, 투자유의종목, Universe, SEIBro, Featured, ETF) 드롭다운. 좌측 "Age of Emergence" 브랜드 클릭 시 index.html로 이동
+- 상단 탭바: 모든 페이지 공통. **WRAP / Market / Architecture 3개 메인 탭** (pill 모양, 라운드 직사각형 테두리). Market은 호버 시 6개 페이지(Market, 투자유의종목, Universe, SEIBro, Featured, ETF) 드롭다운. WRAP은 호버 시 5개 내부 탭(Dashboard, 공시, Order, AUM, 수수료) 드롭다운 — 링크는 `wrap.html#dashboard` 등 해시 방식이고, wrap.html의 `wrapTabFromHash()`가 hashchange/로드 시 해당 JS 탭으로 전환 (타 페이지에서 진입해도 동작). 드롭다운 항목은 `text-align: center` (`.topnav-sub`). 좌측 "Age of Emergence" 브랜드 클릭 시 index.html로 이동
 - 우측 별도 Home 버튼은 사용 안 함 (탭바가 네비게이션 담당)
 - create_dashboard.py 수정 시 모든 생성 파일 재생성 후 확인
 - UI 변경 시 전체 페이지에서 일관성 확인

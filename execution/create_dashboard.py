@@ -23,7 +23,13 @@ OUTPUT_FILE = 'market.html'
 # Market dropdown children: Market / 투자유의종목 / Universe / SEIBro / Featured / ETF
 # Each entry: (key, href, label, children) — children is list of (sub_key, sub_href, sub_label) or None
 TOP_NAV_MAIN = [
-    ('wrap',         'wrap.html',          'WRAP',         None),
+    ('wrap',         'wrap.html',          'WRAP',         [
+        ('wrap_dashboard',    'wrap.html#dashboard',    'Dashboard'),
+        ('wrap_disclosures',  'wrap.html#disclosures',  '공시'),
+        ('wrap_order',        'wrap.html#order',        'Order'),
+        ('wrap_aum',          'wrap.html#aum',          'AUM'),
+        ('wrap_fee',          'wrap.html#fee',          '수수료'),
+    ]),
     ('market',       'market.html',        'Market',       [
         ('market',        'market.html',        'Index'),
         ('universe',      'universe.html',      'Universe'),
@@ -53,7 +59,7 @@ TOP_NAV_CSS = """
 .topnav-dropdown { position: absolute; top: calc(100% + 8px); left: 0; min-width: 180px; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.10); padding: 6px; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity 0.15s, transform 0.15s, visibility 0.15s; z-index: 200; }
 .topnav-item:hover .topnav-dropdown,
 .topnav-item:focus-within .topnav-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
-.topnav-sub { display: block; padding: 9px 14px; color: #333; text-decoration: none; font-size: 0.9rem; font-weight: 500; border-radius: 8px; white-space: nowrap; font-family: PRETENDARD_STACK_PLACEHOLDER; }
+.topnav-sub { display: block; padding: 9px 14px; color: #333; text-decoration: none; font-size: 0.9rem; font-weight: 500; border-radius: 8px; white-space: nowrap; text-align: center; font-family: PRETENDARD_STACK_PLACEHOLDER; }
 .topnav-sub:hover { background: #f3f4f6; color: #111; }
 .topnav-sub.active { background: #f0f7f2; color: #2d7a3a; font-weight: 700; }
 @media (max-width: 800px) {
@@ -5659,6 +5665,7 @@ def create_dashboard():
             document.getElementById('pwOverlay').style.display = 'none';
             document.getElementById('mainContent').classList.remove('pw-hidden');
             sessionStorage.setItem('wrap_auth', '1');
+            if (typeof wrapTabFromHash === 'function') wrapTabFromHash();
         }} else {{
             document.getElementById('pwError').style.display = 'block';
             document.getElementById('pwInput').value = '';
@@ -5703,6 +5710,14 @@ def create_dashboard():
         if (tab === 'order' && typeof loadOrder === 'function') loadOrder();
         if (tab === 'aum' && typeof loadAUM === 'function') loadAUM();
     }}
+
+    // 상단 네비 WRAP 드롭다운 / 타 페이지에서 wrap.html#tab 진입 시 해당 탭으로 전환
+    function wrapTabFromHash() {{
+        var h = (location.hash || '').replace('#', '');
+        if (['dashboard', 'disclosures', 'order', 'aum', 'fee'].indexOf(h) !== -1) wrapSwitchTab(h);
+    }}
+    window.addEventListener('hashchange', wrapTabFromHash);
+    if (sessionStorage.getItem('wrap_auth') === '1') wrapTabFromHash();
     </script>
 </body>
 </html>"""
