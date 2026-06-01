@@ -1,0 +1,19 @@
+[Unit]
+Description=Antigravity Featured KIS collector (20일 신고가 newhigh_20d.json 생성 + 테마 enrich, 매일 15:50 KST)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/Antigravity_Market_Dashboard
+EnvironmentFile=/home/ubuntu/Antigravity_Market_Dashboard/.env
+ExecStart=/usr/bin/python3 execution/fetch_featured_data_kis.py
+# 수집 직후 테마 enrich (Naver 뉴스 + Haiku). 실패해도 수집 결과는 유지 → '-' 접두로 서비스 실패 처리 안 함.
+ExecStartPost=-/usr/bin/python3 execution/enrich_newhigh_themes.py
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=15min
+
+[Install]
+WantedBy=multi-user.target

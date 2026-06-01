@@ -1,0 +1,11 @@
+[Unit]
+Description=Antigravity Featured KIS collector timer (매일 15:50 KST, 16:00 신고가 봇 선행 수집)
+
+[Timer]
+OnCalendar=*-*-* 15:50:00 Asia/Seoul
+AccuracySec=30s
+Unit=featured-kis.service
+Persistent=true
+
+[Install]
+WantedBy=timers.target

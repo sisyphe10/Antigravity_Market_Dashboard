@@ -69,6 +69,7 @@ charts/*
 !corp_codes.json
 !universe.json
 !foreign_ir_sources.json
+!wics_all.json
 
 # 기타
 *.bat
