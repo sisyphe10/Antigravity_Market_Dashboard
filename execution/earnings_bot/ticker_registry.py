@@ -66,20 +66,33 @@ def get_universe_usd() -> tuple[str, ...]:
     매 사이클마다 새 프로세스로 fetch (= 자연스럽게 매일 1회 갱신).
 
     반환: tuple (lru_cache 호환 위해 immutable). 호출자가 list 필요하면 list(...)로 변환.
+
+    소스 우선순위: 자체 리스트 universe.json (GHA fetch_universe.py가 매일 07:00·
+    18:30 KST 생성) → 옛 Google Sheets 폴백 → DRAFT. Sheets는 미국 장 직후
+    통화 컬럼이 '로드 중...'으로 비는 시간대가 있어 신뢰도가 낮음.
     """
-    import requests  # 호출 시점에 import (테스트·CLI 시 의존성 미설치 환경 보호)
-    url = f'https://sheets.googleapis.com/v4/spreadsheets/{SHEETS_ID}/values/universe?key={SHEETS_API_KEY}'
+    values = None
+    local_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'universe.json')
     try:
-        r = requests.get(url, timeout=30)
-        r.raise_for_status()
-        values = r.json().get('values', [])
+        with open(local_path, encoding='utf-8') as f:
+            values = json.load(f).get('values') or None
+    except Exception as e:
+        logger.warning(f'universe.json 로드 실패 → Sheets 폴백: {e}')
+
+    try:
+        if values is None:
+            import requests  # 호출 시점에 import (테스트·CLI 시 의존성 미설치 환경 보호)
+            url = f'https://sheets.googleapis.com/v4/spreadsheets/{SHEETS_ID}/values/universe?key={SHEETS_API_KEY}'
+            r = requests.get(url, timeout=30)
+            r.raise_for_status()
+            values = r.json().get('values', [])
         if not values:
-            raise RuntimeError('Sheets universe empty')
+            raise RuntimeError('universe values empty')
         header = values[0]
         curr_idx = header.index('통화')
         ticker_idx = header.index('티커')
     except Exception as e:
-        logger.warning(f'Sheets universe fetch 실패, DRAFT 22종목 폴백: {e}')
+        logger.warning(f'Universe fetch 실패, DRAFT 22종목 폴백: {e}')
         return tuple(UNIVERSE_USD_DRAFT)
 
     tickers: list[str] = []
