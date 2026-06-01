@@ -322,9 +322,13 @@ def build_ir_day_event(ev, company_name):
     lines.append("")
     lines.append("※ 추정 일자는 자동 파싱 결과 — 회사 IR 페이지 재확인 권장")
 
+    # 안정 ID: (ticker, 연도) 기반 — 추정 일자가 재파싱으로 바뀌어도 같은 연도면 같은 ID로
+    # update (실적 fix와 동일 원리). IR Day는 회계분기가 없어 연도 단위로 묶음.
+    stable_key = f"{ticker}_IRDAY_{ed[:4]}"
+    eid = 'agird' + hashlib.md5(stable_key.encode()).hexdigest()[:16]
     end_date = (datetime.fromisoformat(ed) + timedelta(days=1)).strftime('%Y-%m-%d')
     return {
-        'id': make_event_id(ticker, ed, prefix='agird'),
+        'id': eid,
         'summary': f"[{ticker}] Investor Day",
         'description': '\n'.join(lines),
         'start': {'date': ed},
@@ -436,6 +440,58 @@ def run_earnings(universe, service, api_key, from_date, to_date, dry_run):
     return stats
 
 
+IR_LABEL_RE = re.compile(r"\[([A-Z0-9\.\-]+)\]\s+Investor Day")
+
+
+def dedup_ir_events(service, dry_run=False):
+    """같은 (ticker, 연도)의 중복 Investor Day 이벤트 정리.
+    연도 기반 안정 ID만 남기고 나머지 삭제 → 옛 날짜해시 이벤트 1회 청소 + 이후 self-heal.
+    한 종목이 한 해 복수 IR day를 여는 드문 경우는 병합될 수 있음(허용)."""
+    if dry_run or service is None:
+        return 0
+    items = []
+    token = None
+    while True:
+        res = service.events().list(
+            calendarId=CAL_ID, timeMin='2026-01-01T00:00:00Z',
+            timeMax='2027-12-31T00:00:00Z', singleEvents=True, orderBy='startTime',
+            maxResults=2500, pageToken=token).execute()
+        items += res.get('items', [])
+        token = res.get('nextPageToken')
+        if not token:
+            break
+    groups = {}
+    for ev in items:
+        eid = ev.get('id', '')
+        if not eid.startswith('agird'):
+            continue
+        m = IR_LABEL_RE.search(ev.get('summary', ''))
+        if not m:
+            continue
+        tk = m.group(1)
+        d = ev.get('start', {}).get('date', '')
+        groups.setdefault((tk, d[:4]), []).append((eid, d))
+    removed = 0
+    for (tk, yr), evs in groups.items():
+        if len(evs) < 2:
+            continue
+        canonical = 'agird' + hashlib.md5(f"{tk}_IRDAY_{yr}".encode()).hexdigest()[:16]
+        ids = [e[0] for e in evs]
+        keep = canonical if canonical in ids else sorted(evs, key=lambda x: x[1])[-1][0]
+        for eid, d in evs:
+            if eid == keep:
+                continue
+            try:
+                service.events().delete(calendarId=CAL_ID, eventId=eid).execute()
+                removed += 1
+                log.info(f"  [ir-dedup] {tk} {yr}: deleted {eid} ({d})")
+            except HttpError as e:
+                log.warning(f"  [ir-dedup] {tk} {yr} delete 실패 {eid}: {e}")
+    if removed:
+        log.info(f"[ir-dedup] IR Day 중복 {removed}건 정리")
+    return removed
+
+
 def run_investor_days(universe, service, api_key, today, days, dry_run):
     event_from = today.isoformat()
     event_to = (today + timedelta(days=days)).isoformat()
@@ -493,6 +549,7 @@ def run_investor_days(universe, service, api_key, today, days, dry_run):
             log.error(f"  IR {ev['ticker']} {ev.get('date','?')}: upsert 실패: {e}")
             stats['error'] += 1
     log.info(f"[IR Day] 완료: {stats}")
+    dedup_ir_events(service, dry_run=dry_run)
     return stats
 
 
@@ -503,6 +560,7 @@ def main():
     ap.add_argument('--ticker', help='특정 티커만 (테스트용)')
     ap.add_argument('--skip-earnings', action='store_true')
     ap.add_argument('--skip-ir-day', action='store_true')
+    ap.add_argument('--ir-dedup-only', action='store_true', help='IR Day 중복 정리만 실행')
     args = ap.parse_args()
 
     api_key = os.getenv('FINNHUB_API_KEY')
@@ -528,6 +586,11 @@ def main():
             sa_info, scopes=['https://www.googleapis.com/auth/calendar.events']
         )
         service = build('calendar', 'v3', credentials=creds)
+
+    if args.ir_dedup_only:
+        dedup_ir_events(service, dry_run=args.dry_run)
+        log.info('IR Day 중복 정리만 완료')
+        return
 
     if not args.skip_earnings:
         run_earnings(universe, service, api_key, from_date, to_date, args.dry_run)
