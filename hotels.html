@@ -28,11 +28,11 @@
 .topnav-brand:hover { color: #2d7a3a; }
 .topnav-tabs { display: flex; gap: 12px; flex: 1; align-items: center; }
 .topnav-item { position: relative; }
-.topnav-tab { padding: 10px 24px; display: inline-flex; align-items: center; gap: 6px; color: #444; text-decoration: none; font-size: 1rem; font-weight: 600; border: 1.5px solid #d1d5db; border-radius: 999px; white-space: nowrap; background: #fff; transition: all 0.15s; font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; cursor: pointer; }
+.topnav-tab { box-sizing: border-box; min-width: 180px; justify-content: center; padding: 10px 24px; display: inline-flex; align-items: center; gap: 6px; color: #444; text-decoration: none; font-size: 1rem; font-weight: 600; border: 1.5px solid #d1d5db; border-radius: 999px; white-space: nowrap; background: #fff; transition: all 0.15s; font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; cursor: pointer; }
 .topnav-tab:hover { color: #111; border-color: #2d7a3a; background: #f0f7f2; }
 .topnav-tab.active { color: #fff; border-color: #2d7a3a; background: #2d7a3a; }
 .topnav-tab .caret { font-size: 0.7rem; opacity: 0.7; }
-.topnav-dropdown { position: absolute; top: calc(100% + 8px); left: 0; min-width: 180px; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.10); padding: 6px; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity 0.15s, transform 0.15s, visibility 0.15s; z-index: 200; }
+.topnav-dropdown { box-sizing: border-box; position: absolute; top: calc(100% + 8px); left: 0; min-width: 180px; width: 100%; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.10); padding: 6px; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity 0.15s, transform 0.15s, visibility 0.15s; z-index: 200; }
 .topnav-item:hover .topnav-dropdown,
 .topnav-item:focus-within .topnav-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
 .topnav-sub { display: block; padding: 9px 14px; color: #333; text-decoration: none; font-size: 0.9rem; font-weight: 500; border-radius: 8px; white-space: nowrap; text-align: center; font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; }
@@ -69,7 +69,7 @@
 <nav class="topnav"><div class="topnav-inner"><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#aum" class="topnav-sub">AUM</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub">Index</a><a href="universe.html" class="topnav-sub">Universe</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
 <div class="container">
   <h1>Hotel ADR — Booking.com</h1>
-  <p class="meta">Updated: 2026-06-01 09:28:39 KST · 누적 19일 · 매일 12:00 KST 자동 수집</p>
+  <p class="meta">Updated: 2026-06-01 09:32:55 KST · 누적 19일 · 매일 12:00 KST 자동 수집</p>
 
   <div class="card">
     <h2 style="margin-top:0;font-size:1.2rem;">당일 entry 객실 가격 (체크인 lead time별)</h2>
