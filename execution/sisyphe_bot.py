@@ -912,9 +912,10 @@ async def featured_update_job(context):
             else:
                 logging.info(f"{tag} price_history OK: {price_out[-150:]}")
 
-        # Step 2: Featured 데이터 수집
+        # Step 2: Featured 데이터 수집 (KIS 전종목 배치 — 2026-06 KRX에서 컷오버)
+        # featured_data.json에 랭킹 6종 + 신고가 3종(20d/120d/52w) 누적. 장 마감 직후 같은날 값.
         result = subprocess.run(
-            [sys.executable, "execution/fetch_featured_data.py"],
+            [sys.executable, "execution/fetch_featured_data_kis.py"],
             capture_output=True, text=True, timeout=300, cwd=dashboard_dir
         )
         if result.returncode != 0:
@@ -1021,7 +1022,7 @@ async def morning_featured_recovery_job(context: ContextTypes.DEFAULT_TYPE):
         logging.info(f"Featured [08:30] 직전 거래일({prev_day_str}) 데이터 정상 - 스킵")
         return
 
-    # 누락됨 → featured_update_job 실행 (fetch_featured_data.py 내부에서 누락 날짜 자동 수집)
+    # 누락됨 → featured_update_job 실행 (KIS 수집은 당일만 가능 — 과거일 백필 불가, 같은날 재수집 시도)
     logging.warning(f"Featured [08:30] 직전 거래일({prev_day_str}) 누락 감지 → 재수집 시작")
     await featured_update_job(context)
 
