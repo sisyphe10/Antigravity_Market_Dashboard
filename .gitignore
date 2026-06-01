@@ -102,3 +102,7 @@ kis_universe_master.json
 kis_price_history.json
 newhigh_20d.json
 featured_data_kis.json
+
+# 신고가 테스트 전송 (B안)
+.newhigh_test_msg.txt
+.claude/settings.local.json
