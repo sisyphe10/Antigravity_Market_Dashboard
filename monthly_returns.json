@@ -324,35 +324,35 @@
       "month": 6,
       "is_mtd": true,
       "returns": {
-        "KOSPI": 0.041358,
-        "KOSDAQ": -0.021669,
-        "NIKKEI": 0.010273,
+        "KOSPI": 0.036836,
+        "KOSDAQ": -0.023046,
+        "NIKKEI": 0.009119,
         "TAIEX": 0.013524,
         "S&P500": null,
         "NASDAQ": null,
         "RUSSELL": null,
-        "BTC": -0.007583,
-        "ETH": -0.010947,
-        "GOLD": -0.004188,
-        "SILVER": 0.004682
+        "BTC": -0.008714,
+        "ETH": -0.011067,
+        "GOLD": -0.00603,
+        "SILVER": -0.000212
       }
     }
   ],
   "ytd": {
     "year": 2026,
     "returns": {
-      "KOSPI": 1.094531,
-      "KOSDAQ": 0.13619,
-      "NIKKEI": 0.33118,
+      "KOSPI": 1.085436,
+      "KOSDAQ": 0.134591,
+      "NIKKEI": 0.329659,
       "TAIEX": 0.565341,
       "S&P500": 0.107306,
       "NASDAQ": 0.160512,
       "RUSSELL": 0.176247,
-      "BTC": -0.16555,
-      "ETH": -0.331859,
-      "GOLD": 0.049889,
-      "SILVER": 0.083212
+      "BTC": -0.166501,
+      "ETH": -0.33194,
+      "GOLD": 0.047947,
+      "SILVER": 0.077936
     }
   },
-  "updated_at": "2026-06-01 15:42:16 KST"
+  "updated_at": "2026-06-01 16:03:05 KST"
 }
