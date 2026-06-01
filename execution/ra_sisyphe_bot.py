@@ -654,6 +654,71 @@ async def daily_market_alert_summary_job(context: ContextTypes.DEFAULT_TYPE):
 
 
 # ============================================================
+# 20일 신고가 (매일 16:00) — KIS featured 배치 산출물(newhigh_20d.json) 사용
+# ============================================================
+_NEWHIGH_FILE = os.path.join(DASHBOARD_DIR, 'newhigh_20d.json')
+
+
+def render_newhigh_message(data, today):
+    """newhigh_20d.json data → HTML 메시지(섹터 그룹 > 종목). 잡/테스트 공용."""
+    esc = _html.escape
+    stocks = data.get('stocks', [])
+    total = len(stocks)
+
+    def fmt_cap(won):
+        jo = (won or 0) / 1e12
+        return f"{jo:.1f}조" if jo >= 1 else f"{(won or 0)/1e8:,.0f}억"
+
+    if total == 0:
+        return f"<b><u>20일 신고가</u></b> ({today})\n\n오늘 신고가 종목 없음"
+    groups = {}
+    for s in stocks:
+        groups.setdefault(s.get('sector') or '기타', []).append(s)
+    # 섹터 정렬: 종목수 desc → 총시총 desc
+    order = sorted(groups, key=lambda k: (-len(groups[k]), -sum(x.get('mktcap', 0) for x in groups[k])))
+    lines = [f"<b><u>20일 신고가</u></b> ({today}) — {total}종목", ""]
+    for sec in order:
+        rows = sorted(groups[sec], key=lambda x: -x.get('mktcap', 0))
+        lines.append(f"<b>[{esc(sec)}]</b> {len(rows)}")
+        for s in rows:
+            sign = '+' if s.get('chg', 0) >= 0 else ''
+            lines.append(f"• {esc(s['name'])} [{s.get('market', '')}] {sign}{s.get('chg', 0)}% / {fmt_cap(s.get('mktcap'))}")
+        lines.append("")
+    return "\n".join(lines).rstrip()
+
+
+async def daily_newhigh_job(context: ContextTypes.DEFAULT_TYPE):
+    """매일 16:00 20일 신고가 리스트 알림 (fetch_featured_data_kis.py가 먼저 생성)."""
+    logging.info("Newhigh 20d job started")
+    try:
+        with open(_NEWHIGH_FILE, encoding='utf-8') as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        logging.warning("newhigh_20d.json 없음 → 신고가 알림 건너뜀")
+        return
+    except Exception as e:
+        logging.error(f"Newhigh load failed: {e}")
+        return
+
+    today = datetime.datetime.now(tz=KST).strftime('%Y-%m-%d')
+    if data.get('date') != today:
+        logging.warning(f"Newhigh 데이터 날짜 불일치(date={data.get('date')} != {today}) → 건너뜀")
+        return
+
+    msg = render_newhigh_message(data, today)
+    total = len(data.get('stocks', []))
+    sent = 0
+    for chat_id in SUBSCRIBERS:
+        try:
+            for i in range(0, len(msg), 4000):
+                await context.bot.send_message(chat_id=chat_id, text=msg[i:i+4000], parse_mode='HTML')
+            sent += 1
+        except Exception as e:
+            logging.error(f"Newhigh send failed ({chat_id}): {e}")
+    logging.info(f"Newhigh 20d sent: {total}종목 → {sent}명")
+
+
+# ============================================================
 # main
 # ============================================================
 if __name__ == "__main__":
@@ -678,6 +743,12 @@ if __name__ == "__main__":
     job_queue.run_daily(
         daily_market_alert_summary_job,
         time=datetime.time(hour=5, minute=15, second=0, tzinfo=kst),
+    )
+
+    # 20일 신고가 (장 마감 후 16:00 — fetch_featured_data_kis.py 산출물 사용)
+    job_queue.run_daily(
+        daily_newhigh_job,
+        time=datetime.time(hour=16, minute=0, second=0, tzinfo=kst),
     )
 
     for h in range(7, 18):
@@ -718,6 +789,7 @@ if __name__ == "__main__":
     print("✅ Daily jobs scheduled:")
     print("  - Research Notes headlines: 05:10 KST")
     print("  - Market alert summary: 05:15 KST (투자유의종목 현황)")
+    print("  - 20일 신고가: 16:00 KST (newhigh_20d.json)")
     print("  - WiseReport: 07:00~17:00 KST (hourly)")
     for line in source_schedule_log:
         print(line)

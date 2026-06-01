@@ -13,6 +13,12 @@ import exchange_calendars as xcals
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from create_dashboard import top_nav_html, sidebar_html, TOP_NAV_CSS
 
+# KIS 시가총액 보강 (선택적: 미설치/자격증명 부재 시 FDR marcap으로 폴백)
+try:
+    from kis_marcap import fetch_marcap as _kis_fetch_marcap
+except Exception:
+    _kis_fetch_marcap = None
+
 # KRX 거래 캘린더 (한국 공휴일 포함)
 _xkrx = xcals.get_calendar('XKRX')
 
@@ -48,44 +54,6 @@ MARKET_LABEL = {'유가증권': 'KOSPI', '코스닥': 'KOSDAQ', '코넥스': 'KO
 # ──────────────────────────────────────────
 # KRX 데이터 로드
 # ──────────────────────────────────────────
-def _load_naver_marcap():
-    """네이버 증권 시가총액 순위 페이지에서 code → marcap(억) 딕셔너리"""
-    marcap_map = {}
-    try:
-        for sosok in [0, 1]:  # 0=KOSPI, 1=KOSDAQ
-            for page in range(1, 40):
-                url = f'https://finance.naver.com/sise/sise_market_sum.naver?sosok={sosok}&page={page}'
-                r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=10)
-                r.encoding = 'euc-kr'
-                soup = BeautifulSoup(r.text, 'html.parser')
-                table = soup.find('table', class_='type_2')
-                if not table:
-                    break
-                found = 0
-                for row in table.find_all('tr'):
-                    cols = row.find_all('td')
-                    if len(cols) < 7:
-                        continue
-                    a_tag = cols[1].find('a')
-                    if not a_tag:
-                        continue
-                    href = a_tag.get('href', '')
-                    m = re.search(r'code=(\d+)', href)
-                    code = m.group(1) if m else ''
-                    marcap_text = cols[6].get_text(strip=True).replace(',', '')
-                    try:
-                        marcap_map[code] = int(marcap_text)
-                    except ValueError:
-                        pass
-                    found += 1
-                if found == 0:
-                    break
-        print(f"  네이버 시가총액: {len(marcap_map)}개 종목")
-    except Exception as e:
-        print(f"  Warning: 네이버 시가총액 로드 실패: {e}")
-    return marcap_map
-
-
 def load_krx_data():
     """이름 → {marcap(억), code} 딕셔너리"""
     result = {}
@@ -112,16 +80,8 @@ def load_krx_data():
     if not result:
         return {}
 
-    # 2) Marcap 없으면 네이버에서 보충
-    has_any_marcap = any(v['marcap'] for v in result.values())
-    if not has_any_marcap:
-        print("  시가총액 데이터 없음 → 네이버에서 보충 중...")
-        naver_marcap = _load_naver_marcap()
-        for name, info in result.items():
-            code = info['code']
-            if code in naver_marcap:
-                info['marcap'] = naver_marcap[code]
-
+    # 2) marcap 보충: 과거 네이버 40페이지 스크랩 → 제거됨.
+    #    지정 종목의 시가총액은 create_market_alert()에서 KIS(hts_avls)로 보강한다.
     return result
 
 
@@ -874,6 +834,27 @@ def create_market_alert():
                       if c not in price_cache]
     if codes_주의_only:
         price_cache.update(fetch_all_prices(codes_주의_only, days_back=3))
+
+    # ── KIS 시가총액 보강 (지정 종목 한정) ── FDR/네이버 marcap 대체 ──
+    # KIS hts_avls(억원)로 덮어쓰되, 실패한 종목은 기존 FDR marcap 유지(그레이스풀 폴백).
+    if _kis_fetch_marcap:
+        _all = stocks_주의 + stocks_경고 + stocks_위험
+        _codes = [s['code'] for s in _all if s.get('code')]
+        try:
+            _kis_mc = _kis_fetch_marcap(_codes)
+        except Exception as e:
+            _kis_mc = {}
+            print(f"  KIS 시가총액 보강 오류({e}) → FDR marcap 유지")
+        if _kis_mc:
+            _n = 0
+            for s in _all:
+                v = _kis_mc.get(s.get('code'))
+                if v:
+                    s['marcap'] = v
+                    _n += 1
+            print(f"  KIS 시가총액 보강: {_n}/{len(_codes)}종목 적용")
+        else:
+            print("  KIS 시가총액 보강 결과 없음 → FDR marcap 유지")
 
     # 시가총액 1,000억원 이하 제외
     MIN_MARCAP = 1000  # 억원

@@ -96,3 +96,9 @@ execution/generate_db_target_transform_2nd_chart.py
 
 # Research bot 일일 미디어 (텔레그램 첨부)
 execution/research_bot/media/
+
+# KIS featured 배치 생성 산출물 (VM에서 재생성)
+kis_universe_master.json
+kis_price_history.json
+newhigh_20d.json
+featured_data_kis.json
