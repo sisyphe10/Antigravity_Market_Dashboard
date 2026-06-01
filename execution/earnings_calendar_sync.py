@@ -51,11 +51,30 @@ MONTH_MAP = {'january': 1, 'february': 2, 'march': 3, 'april': 4, 'may': 5, 'jun
 EDGAR_UA = 'antigravity-bot kts77775@gmail.com'
 
 
-def load_us_universe():
+def _load_universe_values():
+    """Universe 행 데이터 로드. 자체 리스트 universe.json 우선(GHA fetch_universe.py가
+    매일 07:00·18:30 KST 생성, Sheets 응답과 동일한 {values:[header,...rows]} 형식).
+    없거나 비면 옛 Google Sheets로 폴백 — Sheets는 미국 장 직후 '로드 중...'으로
+    통화 컬럼이 비는 시간대가 있어 신뢰도가 낮음."""
+    local_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'universe.json')
+    try:
+        with open(local_path, encoding='utf-8') as f:
+            data = json.load(f)
+        values = data.get('values', [])
+        if values:
+            log.info(f"universe.json 로드 (updated_at={data.get('updated_at','?')})")
+            return values
+        log.warning("universe.json values 비어있음 → Sheets 폴백")
+    except Exception as e:
+        log.warning(f"universe.json 로드 실패 → Sheets 폴백: {e}")
     url = f'https://sheets.googleapis.com/v4/spreadsheets/{SHEETS_ID}/values/universe?key={SHEETS_API_KEY}'
     r = requests.get(url, timeout=30)
     r.raise_for_status()
-    values = r.json().get('values', [])
+    return r.json().get('values', [])
+
+
+def load_us_universe():
+    values = _load_universe_values()
     if not values:
         return []
     header = values[0]
