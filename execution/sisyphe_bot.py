@@ -554,18 +554,21 @@ def format_update_summary(portfolio_data):
     order_changes = portfolio_data.get('_order_changes') or {}
     if order_changes:
         lines.append("———————————————")
-        lines.append("<b>📝 주문 변경 내역</b> <i>(다음 거래일 반영)</i>")
+        lines.append("<b>주문 변경 내역</b> <i>(다음 거래일 반영)</i>")
         for pname, ch in order_changes.items():
             if not ch:
                 continue
-            lines.append(f"<b>[{pname}]</b> {ch.get('date','')} 최종 저장")
-            for a in ch.get('added', []):
-                lines.append(f"  🟢 신규  {a['name']} {a['weight']:g}%")
-            for cg in ch.get('changed', []):
-                lines.append(f"  🔵 변경  {cg['name']} {cg['from']:g}% → {cg['to']:g}%")
-            for r in ch.get('removed', []):
-                lines.append(f"  🔴 편출  {r['name']} (기존 {r['weight']:g}%)")
             lines.append("")
+            lines.append(f"<b>[{pname}]</b>  {ch.get('date','')} 최종 저장")
+            added = ch.get('added', [])
+            changed = ch.get('changed', [])
+            removed = ch.get('removed', [])
+            if added:
+                lines.append("<b>신규</b>  " + ", ".join(f"{a['name']} {a['weight']:g}%" for a in added))
+            if changed:
+                lines.append("<b>변경</b>  " + ", ".join(f"{cg['name']} {cg['from']:g}→{cg['to']:g}%" for cg in changed))
+            if removed:
+                lines.append("<b>편출</b>  " + ", ".join(f"{r['name']} {r['weight']:g}%" for r in removed))
 
     return "\n".join(lines)
 
