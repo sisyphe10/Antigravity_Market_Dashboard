@@ -393,14 +393,29 @@ def run_portfolio_update():
             all_codes.add(s['code'])
     all_codes.update(['^KS11', '^KQ11'])
 
-    # 2. 실시간 주가 병렬 조회
+    # 2. 실시간 주가 조회 — KIS multprice 배치(장중 실시간) 우선, 누락분만 FDR/네이버 폴백
     logging.info(f"Update Step 2: Fetching {len(all_codes)} stock prices...")
     price_map = {}
-    with ThreadPoolExecutor(max_workers=10) as executor:
-        futures = {executor.submit(fetch_price, code): code for code in all_codes}
-        for future in as_completed(futures):
-            code, today_return = future.result()
-            price_map[code] = today_return
+    stock_codes = [c for c in all_codes if c not in _NAVER_INDEX_CODES]
+
+    # 2a. KIS 배치 (종목). prdy_ctrt = 당일 등락률(장중 실시간) → FDR 일봉 지연 문제 회피.
+    try:
+        from kis_token import fetch_changes
+        kis_chg = fetch_changes(stock_codes)
+        price_map.update(kis_chg)
+        logging.info(f"Update Step 2: KIS multprice {len(kis_chg)}/{len(stock_codes)}종목")
+    except Exception as e:
+        logging.warning(f"Update Step 2: KIS multprice 실패 → FDR 폴백: {e}")
+
+    # 2b. KIS 누락 종목 + 지수 → FDR/네이버 폴백 (스레드)
+    fallback_codes = [c for c in all_codes if c not in price_map]
+    if fallback_codes:
+        logging.info(f"Update Step 2: FDR/네이버 폴백 {len(fallback_codes)}건")
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            futures = {executor.submit(fetch_price, code): code for code in fallback_codes}
+            for future in as_completed(futures):
+                code, today_return = future.result()
+                price_map[code] = today_return
 
     # 지수 수익률 저장
     portfolio_data['_index'] = {
@@ -418,7 +433,10 @@ def run_portfolio_update():
             prev_cumulative = s.get('cumulative_return')
             s['today_return'] = today_return
             if today_return is not None:
-                s['contribution'] = (s['weight'] / 100) * (today_return / 100) * 1000
+                # 기여도는 표·메시지(D-1 뷰) 기준 → weight_prev 사용 (평소엔 weight와 동일)
+                _wp = s.get('weight_prev')
+                _wp = s['weight'] if _wp is None else _wp
+                s['contribution'] = (_wp / 100) * (today_return / 100) * 1000
                 if prev_cumulative is not None:
                     s['cumulative_return'] = ((1 + prev_cumulative / 100) * (1 + today_return / 100) - 1) * 100
             else:
@@ -483,14 +501,21 @@ def format_update_summary(portfolio_data):
     lines.append(f"<b><u>KOSPI {kospi_str}  |  KOSDAQ {kosdaq_str}</u></b>")
     lines.append("")
 
+    def _disp_w(s):
+        # 표시 비중 = weight_prev(D-1). 당일 finalize된 주문은 다음 거래일부터 반영.
+        wp = s.get('weight_prev')
+        return (s.get('weight', 0) or 0) if wp is None else wp
+
     for portfolio_name, stocks in portfolio_data.items():
         if portfolio_name.startswith('_'):
             continue
+        # D-1 보유분만 표시 (당일 신규 편입은 다음 거래일부터)
+        held = [s for s in stocks if (_disp_w(s) or 0) > 0]
         # 포트폴리오 가중 평균 수익률
         # 비중 합계가 100% 미만이면 나머지는 현금(수익률 0%)으로 처리
         weighted_return = sum(
-            s['weight'] * (s['today_return'] or 0)
-            for s in stocks
+            _disp_w(s) * (s['today_return'] or 0)
+            for s in held
         ) / 100
 
         lines.append(f"<b><u>[{portfolio_name}]</u></b>")
@@ -498,14 +523,14 @@ def format_update_summary(portfolio_data):
 
         # 상승 종목 (today_return > 0, 상위 5개)
         gainers = sorted(
-            [s for s in stocks if s['today_return'] and s['today_return'] > 0],
+            [s for s in held if s['today_return'] and s['today_return'] > 0],
             key=lambda x: x['today_return'],
             reverse=True
         )[:5]
 
         # 하락 종목 (today_return < 0, 하위 5개)
         losers = sorted(
-            [s for s in stocks if s['today_return'] and s['today_return'] < 0],
+            [s for s in held if s['today_return'] and s['today_return'] < 0],
             key=lambda x: x['today_return']
         )[:5]
 
@@ -524,6 +549,23 @@ def format_update_summary(portfolio_data):
                 lines.append(f"  {s['name']} {s['today_return']:+.1f}%{contrib_str}")
 
         lines.append("")
+
+    # ── 주문 변경 내역 (당일 최종 저장분, 다음 거래일 반영 예정) ──
+    order_changes = portfolio_data.get('_order_changes') or {}
+    if order_changes:
+        lines.append("———————————————")
+        lines.append("<b>📝 주문 변경 내역</b> <i>(다음 거래일 반영)</i>")
+        for pname, ch in order_changes.items():
+            if not ch:
+                continue
+            lines.append(f"<b>[{pname}]</b> {ch.get('date','')} 최종 저장")
+            for a in ch.get('added', []):
+                lines.append(f"  🟢 신규  {a['name']} {a['weight']:g}%")
+            for cg in ch.get('changed', []):
+                lines.append(f"  🔵 변경  {cg['name']} {cg['from']:g}% → {cg['to']:g}%")
+            for r in ch.get('removed', []):
+                lines.append(f"  🔴 편출  {r['name']} (기존 {r['weight']:g}%)")
+            lines.append("")
 
     return "\n".join(lines)
 

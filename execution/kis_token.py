@@ -304,6 +304,41 @@ def kis_get(path, tr_id, params, tr_cont="", custtype="P", retry_on_expire=True)
     raise last_exc
 
 
+# ───────────────────────── 배치 당일 등락률 ─────────────────────────
+_MULTPRICE_PATH = "/uapi/domestic-stock/v1/quotations/intstock-multprice"
+_MULTPRICE_TRID = "FHKST11300006"
+
+
+def fetch_changes(codes):
+    """종목 코드 리스트 → {code: 당일 등락률(%)} (KIS intstock-multprice, 30종목/콜).
+
+    prdy_ctrt(전일대비율)는 **장중 실시간** 갱신되어 FDR 일봉(당일 봉 지연) 대비
+    /update 라이브 시세에 적합. 조회 실패 종목은 결과 dict에서 누락(호출측 폴백).
+    """
+    out = {}
+    codes = [str(c).zfill(6) for c in codes if c]
+    for i in range(0, len(codes), 30):
+        chunk = codes[i:i + 30]
+        params = {}
+        for j, c in enumerate(chunk, 1):
+            params[f"FID_COND_MRKT_DIV_CODE_{j}"] = "J"
+            params[f"FID_INPUT_ISCD_{j}"] = c
+        try:
+            j = kis_get(_MULTPRICE_PATH, tr_id=_MULTPRICE_TRID, params=params)
+            for row in (j.get("output") or []):
+                code = row.get("inter_shrn_iscd")
+                ctrt = row.get("prdy_ctrt")
+                if not code or ctrt in (None, ""):
+                    continue
+                try:
+                    out[code] = float(ctrt)
+                except (TypeError, ValueError):
+                    continue
+        except Exception:
+            continue   # 청크 실패 → 해당 종목은 호출측에서 FDR 폴백
+    return out
+
+
 if __name__ == "__main__":
     # 스모크 테스트: 토큰 확보(가능하면 캐시/공식캐시 재사용 → 신규 발급 없음)
     t = get_access_token()

@@ -220,8 +220,15 @@ def create_portfolio_tables_html():
             total_contribution = 0
             valid_returns_count = 0
 
+            # 표시 비중 = weight_prev(D-1). 당일 finalize된 주문은 다음 거래일부터 반영.
+            # (평소엔 weight_prev == weight. weight_prev 키 없으면 구버전 → weight로 fallback)
+            def _disp_w(s):
+                wp = s.get('weight_prev')
+                return (s.get('weight', 0) or 0) if wp is None else wp
+            disp_stocks = [s for s in stocks if (_disp_w(s) or 0) > 0]
+
             # 각 종목 행 추가
-            for idx, stock in enumerate(stocks, 1):
+            for idx, stock in enumerate(disp_stocks, 1):
                 mc = stock['market_cap']
                 if mc > 0:
                     jo = int(mc // 10000)
@@ -235,7 +242,7 @@ def create_portfolio_tables_html():
 
                 # 오늘 수익률 포맷
                 today_return = stock.get('today_return')
-                weight = stock['weight']
+                weight = _disp_w(stock)
                 is_today_new = stock.get('is_today_new', False)
                 total_weight += weight
 
@@ -305,7 +312,7 @@ def create_portfolio_tables_html():
                                 <td>{stock['name']}</td>
                                 <td>{stock['sector']}</td>
                                 <td>{market_cap_str}</td>
-                                <td>{stock['weight']}%</td>
+                                <td>{weight:g}%</td>
                                 <td class="{today_color_class}">{today_return_str}</td>
                                 <td class="{contribution_color_class}">{contribution_str}</td>
                                 <td class="{cumulative_color_class}">{cumulative_return_str}</td>
@@ -935,16 +942,21 @@ def _build_indices_chart_section(category_label='Indices'):
                 f'<tr class="idx-chart-item{active}" data-series="{display}" '
                 f'onclick="toggleIdxSeries(this)">'
                 f'<td style="width:6px;padding:0;">'
-                f'<div style="width:4px;height:100%;background:{color};border-radius:2px;"></div></td>'
+                f'<div class="idx-color-bar" style="width:4px;height:100%;background:{color};border-radius:2px;"></div></td>'
                 f'<td>{display}</td></tr>\n'
             )
         mode_html = (
+            '<style>'
+            '.idx-mode-btn{font-family:inherit;font-size:12px;font-weight:600;padding:4px 14px;'
+            'border:1px solid #d1d5db;border-radius:6px;background:#f3f4f6;color:#444;cursor:pointer;transition:all 0.15s;}'
+            '.idx-mode-btn.active{background:#1e3a8a;color:#fff;border-color:#1e3a8a;}'
+            '</style>'
             '<div style="display:flex;gap:4px;margin-bottom:8px;">'
             '<button class="idx-mode-btn active" data-mode="local" onclick="switchIdxMode(this)">Local</button>'
             '<button class="idx-mode-btn" data-mode="usd" onclick="switchIdxMode(this)">USD</button>'
             '</div>'
         )
-        list_html = mode_html + f'<table class="portfolio-table" style="max-width:500px;margin:0 auto;"><tbody>{rows_html}</tbody></table>'
+        list_html = mode_html + '<style>.idx-chart-item:not(.active) .idx-color-bar{visibility:hidden;}</style>' + f'<table class="portfolio-table" style="max-width:500px;margin:0 auto;"><tbody>{rows_html}</tbody></table>'
 
         ytd_start = '2025-12-30'
         first_date = ytd_start if dates and dates[0] <= ytd_start else (dates[0] if dates else '')
@@ -1113,12 +1125,7 @@ def _build_indices_chart_section(category_label='Indices'):
 
         return f"""
         <div class="category-section">
-            <h2 class="category-title" style="display:flex;align-items:center;gap:14px;">
-                <span>{category_label}</span>
-                <button onclick="downloadChartImage('idxDynamicChart','AoE_Indice')" title="현재 차트를 PNG로 다운로드" aria-label="Download chart" style="font-family:inherit;padding:2.5px;background:#fff;color:#1e3a8a;border:1.5px solid #1e3a8a;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;line-height:0;transition:all 0.15s;" onmouseover="this.style.background='#1e3a8a';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#1e3a8a'">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
-                </button>
-            </h2>
+            <h2 class="category-title">{category_label}</h2>
             <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;justify-content:center;">
                 <div style="min-width:180px;">{list_html}</div>
                 <div style="width:1000px;">
@@ -1127,6 +1134,7 @@ def _build_indices_chart_section(category_label='Indices'):
                         <input type="text" id="idxStartDate" value="{first_date}" onchange="formatDateInput(this);updateIdxChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                         <span style="color:#888;">~</span>
                         <input type="text" id="idxEndDate" value="{last_date}" onchange="formatDateInput(this);updateIdxChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
+                        <button onclick="downloadChartImage('idxDynamicChart','AoE_Indice')" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
                     </div>
                     <div id="idxChartCard" style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                         <div style="position:relative;height:500px;">
@@ -1721,12 +1729,7 @@ def _build_combined_chart_section():
 
         return f"""
         <div class="category-section">
-            <h2 class="category-title" style="display:flex;align-items:center;gap:14px;">
-                <span>DATA</span>
-                <button onclick="downloadChartImage('cmbDynamicChart','AoE_Data')" title="현재 차트를 PNG로 다운로드" aria-label="Download chart" style="font-family:inherit;padding:2.5px;background:#fff;color:#1e3a8a;border:1.5px solid #1e3a8a;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;line-height:0;transition:all 0.15s;" onmouseover="this.style.background='#1e3a8a';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#1e3a8a'">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
-                </button>
-            </h2>
+            <h2 class="category-title">DATA</h2>
             <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;justify-content:center;">
                 <div style="min-width:240px;max-height:720px;overflow-y:auto;">{list_html}</div>
                 <div style="width:1000px;">
@@ -1735,6 +1738,7 @@ def _build_combined_chart_section():
                         <input type="text" id="cmbStartDate" value="{first_date}" onchange="formatDateInput(this);updateCmbChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                         <span style="color:#888;">~</span>
                         <input type="text" id="cmbEndDate" value="{last_date}" onchange="formatDateInput(this);updateCmbChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
+                        <button onclick="downloadChartImage('cmbDynamicChart','AoE_Data')" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
                         <button onclick="clearCmbSelections()" style="font-family:inherit;font-size:13px;font-weight:600;padding:4px 14px;background:#f3f4f6;color:#444;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;margin-left:8px;">전체 해제</button>
                     </div>
                     <div id="cmbChartCard" style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">

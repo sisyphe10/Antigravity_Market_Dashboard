@@ -352,24 +352,66 @@ def create_portfolio_tables():
                 continue
 
             available_dates = sorted(portfolio_df['날짜'].unique())
-            # NEW 시트의 가장 최근 날짜 사용 (사용자가 최종 저장한 시점에 즉시 반영)
-            # 미래 날짜는 제외 (실수 방지)
-            past_or_today = [d for d in available_dates if d <= _today_kst]
-            latest_portfolio_date = past_or_today[-1] if past_or_today else available_dates[-1]
+            # today_date = 오늘 이하 가장 최근 (당일 최종 저장분 포함) → Order 탭 변경후 baseline
+            # disp_date  = 오늘 미만 가장 최근 (전일/D-1 공식 구성) → 대시보드 PORTFOLIO 표·/update 메시지
+            # 당일 finalize된 주문은 다음 거래일부터 표·메시지에 반영 (Order 탭은 즉시 반영).
+            dates_le_today = [d for d in available_dates if d <= _today_kst]
+            dates_lt_today = [d for d in available_dates if d < _today_kst]
+            today_date = dates_le_today[-1] if dates_le_today else available_dates[-1]
+            disp_date = dates_lt_today[-1] if dates_lt_today else today_date
 
-            portfolio_stocks = portfolio_df[portfolio_df['날짜'] == latest_portfolio_date].copy()
-            portfolio_stocks = portfolio_stocks[portfolio_stocks['비중'] > 0]
-            portfolio_stocks = portfolio_stocks.sort_values('비중', ascending=False)
+            def _composition(date):
+                rows = portfolio_df[(portfolio_df['날짜'] == date) & (portfolio_df['비중'] > 0)]
+                comp = {}
+                for _, r in rows.iterrows():
+                    c = str(int(r['코드'])).zfill(6)
+                    comp[c] = {'name': r['종목'], 'weight': float(r['비중'])}
+                return comp
 
-            codes_in_portfolio = [str(int(row['코드'])).zfill(6) for _, row in portfolio_stocks.iterrows()]
-            all_codes.update(codes_in_portfolio)
+            today_comp = _composition(today_date)
+            disp_comp = _composition(disp_date)
+
+            # 표시 종목 = 오늘 ∪ D-1 (편출된 종목도 D-1 뷰에 남기고, Order 탭 편출 표시용)
+            union_codes = list(disp_comp.keys()) + [c for c in today_comp if c not in disp_comp]
+            union_stocks = []
+            for c in union_codes:
+                info = today_comp.get(c) or disp_comp.get(c)
+                union_stocks.append({
+                    'code': c,
+                    'name': info['name'],
+                    'weight': today_comp.get(c, {}).get('weight', 0.0),      # 오늘(Order 탭 변경후)
+                    'weight_prev': disp_comp.get(c, {}).get('weight', 0.0),  # D-1(표·메시지 표시용)
+                })
+            # 표시(D-1) 기준 정렬: weight_prev desc → weight desc
+            union_stocks.sort(key=lambda s: (s['weight_prev'], s['weight']), reverse=True)
+            all_codes.update(s['code'] for s in union_stocks)
+
+            # 당일 finalize된 주문 변경 내역 (아직 표·메시지에 미반영분)
+            order_change = None
+            if today_date > disp_date:
+                added, removed, changed = [], [], []
+                for c, info in today_comp.items():
+                    if c not in disp_comp:
+                        added.append({'name': info['name'], 'weight': info['weight']})
+                    elif abs(disp_comp[c]['weight'] - info['weight']) > 1e-9:
+                        changed.append({'name': info['name'], 'from': disp_comp[c]['weight'], 'to': info['weight']})
+                for c, info in disp_comp.items():
+                    if c not in today_comp:
+                        removed.append({'name': info['name'], 'weight': info['weight']})
+                if added or removed or changed:
+                    order_change = {
+                        'date': pd.Timestamp(today_date).strftime('%Y-%m-%d'),
+                        'added': added, 'changed': changed, 'removed': removed,
+                    }
 
             portfolio_configs.append({
                 'display_name': display_name,
                 'use_portfolio': use_portfolio,
-                'latest_date': latest_portfolio_date,
-                'stocks': portfolio_stocks,
+                'today_date': today_date,
+                'disp_date': disp_date,
+                'union_stocks': union_stocks,
                 'portfolio_df': portfolio_df,
+                'order_change': order_change,
             })
 
         # === 모든 종목 가격을 병렬로 조회 ===
@@ -394,26 +436,20 @@ def create_portfolio_tables():
         for config in portfolio_configs:
             display_name = config['display_name']
             use_portfolio = config['use_portfolio']
-            latest_portfolio_date = config['latest_date']
-            portfolio_stocks = config['stocks']
+            today_date = config['today_date']
+            disp_date = config['disp_date']
+            union_stocks = config['union_stocks']
             portfolio_df = config['portfolio_df']
 
             print(f"\n4. {display_name} 포트폴리오 처리 중...")
-            print(f"   기준 날짜: {latest_portfolio_date} (전거래일)")
+            print(f"   표시 기준 날짜(D-1): {disp_date} / 오늘 구성 날짜: {today_date}")
 
             stocks_info = []
-            for idx, row in portfolio_stocks.iterrows():
-                code = str(int(row['코드'])).zfill(6)
-                stock_name = row['종목']
-                weight = row['비중']
-
-                # 변경전 비중 (Order 탭 표시용): 오늘 KST 이전 가장 최근 NEW 시트 행의 비중.
-                # 오늘 finalize된 행이 있어도 "어제까지 비중"을 보존 → 모든 PC에서 변경 이력 일관 표시.
-                prev_rows = portfolio_df[(portfolio_df['코드'] == int(code)) & (portfolio_df['날짜'] < _today_kst)]
-                if not prev_rows.empty:
-                    weight_prev = float(prev_rows.sort_values('날짜').iloc[-1]['비중'])
-                else:
-                    weight_prev = 0.0
+            for u in union_stocks:
+                code = u['code']
+                stock_name = u['name']
+                weight = u['weight']            # 오늘(Order 탭 변경후)
+                weight_prev = u['weight_prev']  # D-1(표·메시지 표시용)
 
                 stock_data = krx[krx['Code'] == code]
                 sector = sector_map.get(code, '기타')
@@ -440,7 +476,9 @@ def create_portfolio_tables():
                 else:
                     today_return = get_today_return_from_cache(price_df)
                     cumulative_return = cumulative_result.get('cumulative_return')
-                    contribution = (weight / 100) * (today_return / 100) * 1000 if today_return is not None else None
+                    # 기여도는 표·메시지(D-1 뷰) 기준이므로 weight_prev로 계산.
+                    # (평소엔 weight_prev == weight, finalize 당일만 D-1 비중 사용)
+                    contribution = (weight_prev / 100) * (today_return / 100) * 1000 if today_return is not None else None
 
                 # DD: price_df에서 직접 계산 (역대 최고가 대비)
                 dd = None
@@ -499,6 +537,11 @@ def create_portfolio_tables():
                 print(f"   - {stock_name} ({code}){new_str}: {sector}, {market_cap_billions:,.0f}억원, {weight}%, 오늘: {return_str}, 기여도: {contribution_str}, 누적: {cumulative_str}, DD: {dd_str}")
 
             portfolio_data[display_name] = stocks_info
+
+        # 당일 finalize된 주문 변경 내역 (다음 거래일 표·메시지 반영 예정) — /update 메시지에서 사용
+        order_changes = {c['display_name']: c['order_change'] for c in portfolio_configs if c.get('order_change')}
+        if order_changes:
+            portfolio_data['_order_changes'] = order_changes
 
         # JSON 파일로 저장
         print(f"\n5. 결과 저장 중... ({OUTPUT_FILE})")
