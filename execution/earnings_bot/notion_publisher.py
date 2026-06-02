@@ -49,6 +49,15 @@ SEVERITY_ICONS = {
     'INFO': '⚪',
 }
 
+# 제목 라벨 — 실적이 아닌 공시는 성격에 맞게 표기 (기본값 '실적').
+# 8-K_EARNINGS / 6-K_QUARTERLY 는 map에 없어 기본 '실적'.
+TITLE_LABEL_BY_SUBTYPE = {
+    '6-K_EVENT': '주요공시',     # M&A/자산인수/운영공시
+    '8-K_IR_DAY': 'IR Day',     # 투자자/애널리스트 데이
+    '6-K_MONTHLY': '월별 매출',
+    'NT_10': '실적 지연',        # NT 10-Q/10-K 지연 제출 통지
+}
+
 # Transcript 속성(select) 상태값
 TRANSCRIPT_NONE = '없음'
 TRANSCRIPT_RAW = '원문만'
@@ -210,8 +219,8 @@ def _build_properties(filing: dict, analysis: dict, document_subtype: str,
     # 아이콘은 제목에서 제거 (Severity 컬럼 select 색상으로 이미 구별)
     # 분기 표기: 2Q26 형식 (사용자 선호)
     quarter_str = f'{fq}Q{fy % 100:02d}' if fy and fq else '?Q??'
-    # 실적 발표가 아닌 주요사항(M&A/운영) 6-K는 '실적' 대신 '주요공시'로 표기
-    label = '주요공시' if document_subtype == '6-K_EVENT' else '실적'
+    # 실적 발표가 아닌 공시는 성격에 맞는 제목 라벨 (실적으로 오표기 방지).
+    label = TITLE_LABEL_BY_SUBTYPE.get(document_subtype, '실적')
     title = f"[{filing['ticker']}] {quarter_str} {label}"
 
     props = {
