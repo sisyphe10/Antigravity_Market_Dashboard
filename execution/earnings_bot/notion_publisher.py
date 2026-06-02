@@ -13,7 +13,8 @@ Notion DB 스키마 (사용자가 사전 생성):
   - Company (rich_text, 선택)
   - Quarter (rich_text): "FY2026 Q2"
   - Filed Date (date)
-  - Type (select): 8-K_EARNINGS / 6-K_QUARTERLY / 6-K_MONTHLY / 6-K_AGM / NT_10
+  - Type (select): 8-K_EARNINGS / 6-K_QUARTERLY / 6-K_MONTHLY / 6-K_EVENT / 6-K_AGM / NT_10
+      · 6-K_EVENT = 실적이 아닌 주요사항(M&A/자산인수/운영공시) — 제목 '주요공시', transcript 없음
   - Severity (select): CRITICAL / HIGH / NORMAL / INFO
   - Source URL (url)
   - Accession (rich_text)
@@ -209,7 +210,9 @@ def _build_properties(filing: dict, analysis: dict, document_subtype: str,
     # 아이콘은 제목에서 제거 (Severity 컬럼 select 색상으로 이미 구별)
     # 분기 표기: 2Q26 형식 (사용자 선호)
     quarter_str = f'{fq}Q{fy % 100:02d}' if fy and fq else '?Q??'
-    title = f"[{filing['ticker']}] {quarter_str} 실적"
+    # 실적 발표가 아닌 주요사항(M&A/운영) 6-K는 '실적' 대신 '주요공시'로 표기
+    label = '주요공시' if document_subtype == '6-K_EVENT' else '실적'
+    title = f"[{filing['ticker']}] {quarter_str} {label}"
 
     props = {
         '이름': {'title': [{'text': {'content': title}}]},

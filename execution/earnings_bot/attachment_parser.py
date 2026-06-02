@@ -37,6 +37,18 @@ AGM_KEYWORDS = (
     'annual meeting of shareholders', 'general meeting of shareholders',
 )
 
+# 분기 실적 재무 신호 (보도자료 본문). EX-99 첨부가 있어도 이 신호가 없으면 분기실적이
+# 아니라 M&A·운영공시 같은 주요사항(6-K_EVENT)으로 분류. 단순 본문 길이만으론 비-실적
+# 보도자료가 분기실적으로 오분류됨 (CCJ Cigar Lake 지분인수·McArthur 홍수 6-K 사례).
+EARNINGS_SIGNAL_KEYWORDS = (
+    'net earnings', 'net income', 'net loss', 'net sales',
+    'earnings per share', 'per share', 'diluted',
+    'gross profit', 'gross margin', 'operating income', 'operating margin',
+    'adjusted ebitda', 'adjusted net', 'results of operations',
+    'three months ended', 'six months ended', 'nine months ended', 'quarter ended',
+    'total revenue', 'revenue of', 'revenues of', 'net revenue',
+)
+
 # 8-K item 번호 정규식 (예: "Item 2.02", "2.02,9.01", "2.02 / 9.01")
 ITEM_RE = re.compile(r'(?:Item\s*)?(\d\.\d{2})', flags=re.IGNORECASE)
 
@@ -47,7 +59,7 @@ class ParsedFiling:
     form: str                     # '8-K' / '6-K' / 'NT 10-Q' / 'NT 10-K'
     items: tuple[str, ...]        # ('2.02', '7.01') for 8-K
     severity: Severity
-    document_subtype: str         # '8-K_EARNINGS' / '6-K_QUARTERLY' / '6-K_MONTHLY' / '8-K_IR_DAY' / 'NT_10' / 'OTHER'
+    document_subtype: str         # '8-K_EARNINGS' / '6-K_QUARTERLY' / '6-K_MONTHLY' / '6-K_EVENT' / '8-K_IR_DAY' / 'NT_10' / 'OTHER'
     exhibits: dict[str, str]      # {'EX-99.1': cleaned_text, ...}
     primary_text: str             # 주 본문 (EX-99.1 우선, 없으면 form 본문)
     attachment_count: int = 0
@@ -174,43 +186,51 @@ def _classify_8k(items: tuple[str, ...], primary_text: str) -> tuple[Severity, s
 
 
 def _classify_6k(exhibits: dict[str, str], attachments_meta: list[dict]) -> tuple[Severity, str]:
-    """6-K는 items 없음 → 첨부 패턴 + 키워드로 분류.
+    """6-K는 items 없음 → 첨부 패턴 + 본문 내용으로 분류.
 
-    실측 발견 (ASML 2026-04-15): 분기실적 보도자료에도 AGM 안내 문구 포함.
-    → EX-99.x 다수는 분기실적이 강한 시그널, AGM 키워드는 첨부 단일일 때만 의미 있음.
+    실측 발견:
+    - ASML 2026-04-15: 분기실적 보도자료에도 AGM 안내 문구 포함.
+    - CCJ 2026: Cigar Lake 지분인수·McArthur 홍수 6-K가 단일 EX-99.1 + 긴 본문이라
+      구(舊) 길이-기반 규칙에서 분기실적으로 오분류됨 → "실적" 제목 + transcript 시도.
+
+    핵심: 분기실적 판정은 **본문 재무 실적 신호(EARNINGS_SIGNAL_KEYWORDS)** 를 요구.
+    EX-99 첨부가 있어도 실적 신호가 없으면 M&A·운영공시 = 6-K_EVENT (컨퍼런스콜 없음).
 
     분류 순서:
-    1) EX-99.x ≥ 2 → 분기실적 (AGM 본문 언급 무시)
-    2) 월별 매출 키워드
-    3) AGM 키워드 + 단일 첨부 → AGM
-    4) EX-99.1 단일 + 본문 길이 → 분기실적 / OTHER
-    5) 첨부 EX-99.x 없음 → OTHER
+    1) 월별 매출 키워드 ('revenue'가 실적신호와 겹치므로 먼저 분기)
+    2) EX-99 + 실적 재무 신호 → 분기실적 (단일/다중 무관)
+    3) AGM 키워드 → AGM
+    4) EX-99 보도자료지만 실적 신호 없음 → 6-K_EVENT (긴 본문) / 6-K_OTHER (짧음)
+    5) EX-99 없음 → OTHER
     """
     meta_text = ' '.join(str(meta.get('document', '')) for meta in attachments_meta).lower()
     body_text = ' '.join(text[:8000] for text in exhibits.values()).lower()
     ex99_count = sum(1 for k in exhibits if k.startswith('EX-99'))
+    has_earnings = any(k in body_text for k in EARNINGS_SIGNAL_KEYWORDS)
 
-    # 1) 다중 EX-99.x = 분기실적 (가장 강한 시그널)
-    if ex99_count >= 2:
-        return 'HIGH', '6-K_QUARTERLY'
-
-    # 2) 월별 매출
+    # 1) 월별 매출 (가장 구체적 — 'revenue'가 실적신호와 겹치므로 먼저 처리)
     if any(meta.get('is_monthly_revenue') for meta in attachments_meta):
         return 'NORMAL', '6-K_MONTHLY'
 
-    # 3) AGM — 첨부 파일명 또는 본문 키워드. ex99_count는 0 or 1.
+    # 2) 분기 실적 = EX-99 첨부 + 본문 재무 실적 신호. ASML(다중)·TSM/Cameco(단일) 모두 해당.
+    if ex99_count >= 1 and has_earnings:
+        return 'HIGH', '6-K_QUARTERLY'
+
+    # 3) AGM — 첨부 파일명 또는 본문 키워드.
     agm_in_filename = any(k in meta_text for k in AGM_KEYWORDS)
     agm_in_body = any(k in body_text for k in AGM_KEYWORDS)
     if agm_in_filename or agm_in_body:
         return 'INFO', '6-K_AGM'
 
-    # 4) EX-99.1 단일 + 긴 본문 → 분기실적 (TSM 단일 ex99 패턴)
-    if ex99_count == 1:
-        first_text = next(iter(exhibits.values()), '')
-        if len(first_text) > 3000:
-            return 'HIGH', '6-K_QUARTERLY'
+    # 4) 실적 신호 없는 EX-99 보도자료 = 주요사항(M&A/자산인수/운영) 이벤트.
+    #    실적이 아니므로 컨퍼런스콜·transcript 없음 → NORMAL + 별도 타입.
+    if ex99_count >= 1:
+        longest = max((len(t) for t in exhibits.values()), default=0)
+        if longest > 1500:
+            return 'NORMAL', '6-K_EVENT'
         return 'NORMAL', '6-K_OTHER'
 
+    # 5) EX-99 첨부 없음
     return 'INFO', '6-K_OTHER'
 
 

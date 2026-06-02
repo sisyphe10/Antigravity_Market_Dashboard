@@ -33,6 +33,13 @@ ATTEMPT_SCHEDULE_HOURS = [0, 8, 24, 48, 72, 120, 168, 336]
 # 8회 시도 후 stale_pending → 30일 후 gave_up
 STALE_RETENTION_DAYS = 30
 
+# 컨퍼런스콜이 없는 공시 subtype — transcript 큐 enqueue 제외 (불필요한 parse_failed 방지).
+# 실적(8-K_EARNINGS/6-K_QUARTERLY)·IR Day(웹캐스트 transcript 가능)만 enqueue.
+NO_TRANSCRIPT_SUBTYPES = {
+    '6-K_EVENT', '6-K_MONTHLY', '6-K_AGM', '6-K_OTHER',
+    '8-K_OTHER', '8-K_REG_FD', 'NT_10', 'OTHER',
+}
+
 
 # 사용 가능한 자동 소스 (순서대로 시도)
 def default_sources() -> list[TranscriptSource]:
@@ -64,6 +71,13 @@ def initial_enqueue(filing_id: int) -> int | None:
             or filing.get('severity') == 'INFO'):
         # NT 시그널 / INFO 등급은 transcript 없음 → enqueue 스킵
         return None
+    # 컨퍼런스콜 없는 공시 subtype (주요사항/월별/AGM 등) → enqueue 스킵
+    try:
+        _meta = json.loads(filing['metadata_json']) if filing.get('metadata_json') else {}
+        if _meta.get('document_subtype') in NO_TRANSCRIPT_SUBTYPES:
+            return None
+    except (json.JSONDecodeError, TypeError):
+        pass
     if filing.get('amc_or_bmo'):
         # 정확한 발표 시각 lookup이 가능하면 활용
         from .transcript_sources import make_event_from_filing
