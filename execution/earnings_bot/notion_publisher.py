@@ -18,6 +18,10 @@ Notion DB 스키마 (사용자가 사전 생성):
   - Source URL (url)
   - Accession (rich_text)
   - Prompt Version (rich_text)
+  - Transcript (select): 없음 / 원문만 / 번역완료
+      · 없음    = transcript 미수집
+      · 원문만  = transcript 수집됐으나 한국어 번역 대기
+      · 번역완료 = 한국어 전문 번역까지 Notion에 append 완료
 
 마크다운 → Notion blocks 변환은 research_bot/notion_publisher.py 패턴 차용.
 """
@@ -43,6 +47,18 @@ SEVERITY_ICONS = {
     'NORMAL': '🟢',
     'INFO': '⚪',
 }
+
+# Transcript 속성(select) 상태값
+TRANSCRIPT_NONE = '없음'
+TRANSCRIPT_RAW = '원문만'
+TRANSCRIPT_TRANSLATED = '번역완료'
+
+
+def _transcript_state(transcript_row: dict | None) -> str:
+    """transcript_row 상태로 Notion Transcript select 값 결정."""
+    if not transcript_row:
+        return TRANSCRIPT_NONE
+    return TRANSCRIPT_TRANSLATED if transcript_row.get('translated_kr') else TRANSCRIPT_RAW
 
 
 # ─── 마크다운 → Notion blocks 변환 (research_bot 패턴 차용 + 단순화) ───
@@ -185,7 +201,8 @@ def _find_existing_page(notion_client, database_id: str, accession_number: str) 
 
 
 # ─── 페이지 생성/업데이트 ───
-def _build_properties(filing: dict, analysis: dict, document_subtype: str) -> dict:
+def _build_properties(filing: dict, analysis: dict, document_subtype: str,
+                      transcript_state: str = TRANSCRIPT_NONE) -> dict:
     fy = analysis.get('fiscal_year') or 0
     fq = analysis.get('fiscal_quarter') or 0
     severity = filing.get('severity') or 'NORMAL'
@@ -202,6 +219,7 @@ def _build_properties(filing: dict, analysis: dict, document_subtype: str) -> di
         'Severity': {'select': {'name': severity}},
         'Accession': {'rich_text': [{'text': {'content': filing['accession_number']}}]},
         'Prompt Version': {'rich_text': [{'text': {'content': analysis['prompt_version']}}]},
+        'Transcript': {'select': {'name': transcript_state}},
     }
     if filing.get('filed_at'):
         props['Filed Date'] = {'date': {'start': filing['filed_at'][:10]}}
@@ -223,6 +241,11 @@ def _create_notion_page(notion_client, database_id: str, properties: dict, block
 def _append_blocks(notion_client, page_id: str, blocks: list[dict]):
     for i in range(0, len(blocks), 100):
         notion_client.blocks.children.append(block_id=page_id, children=blocks[i:i+100])
+
+
+@api_retry
+def _update_page_props(notion_client, page_id: str, properties: dict):
+    notion_client.pages.update(page_id=page_id, properties=properties)
 
 
 def publish_analysis(filing_id: int) -> dict:
@@ -275,7 +298,8 @@ def publish_analysis(filing_id: int) -> dict:
             )
 
     blocks = markdown_to_blocks(body_md)
-    properties = _build_properties(filing, analysis, document_subtype)
+    transcript_state = _transcript_state(transcript_row)
+    properties = _build_properties(filing, analysis, document_subtype, transcript_state)
 
     if DRY_RUN or not NOTION_API_KEY or not NOTION_DATABASE_ID:
         reason = 'DRY_RUN' if DRY_RUN else 'NOTION 키/DB ID 미설정'
@@ -286,6 +310,7 @@ def publish_analysis(filing_id: int) -> dict:
             'title': properties['이름']['title'][0]['text']['content'],
             'severity': filing['severity'],
             'document_subtype': document_subtype,
+            'transcript_state': transcript_state,
             'block_count': len(blocks),
             'properties_keys': list(properties.keys()),
             'first_3_blocks': blocks[:3],
@@ -300,6 +325,9 @@ def publish_analysis(filing_id: int) -> dict:
         # 기존 페이지에 transcript append (구분선 포함)
         append_blocks = [{'object': 'block', 'type': 'divider', 'divider': {}}] + blocks
         _append_blocks(notion, existing, append_blocks)
+        # transcript 상태가 진전됐을 수 있으므로 select 갱신
+        _update_page_props(notion, existing,
+                           {'Transcript': {'select': {'name': transcript_state}}})
         page_id = existing
         action = 'appended'
     else:
@@ -394,6 +422,9 @@ def append_translated_transcript(transcript_id: int) -> dict:
         return {'error': f'기존 Notion 페이지 없음 (accession={row["accession_number"]}). publish_analysis 먼저 실행 필요.'}
 
     _append_blocks(notion, page_id, blocks)
+    # 전문 번역이 페이지에 들어갔으므로 Transcript 상태를 '번역완료'로 갱신
+    _update_page_props(notion, page_id,
+                       {'Transcript': {'select': {'name': TRANSCRIPT_TRANSLATED}}})
     db.mark_transcript_appended(transcript_id, page_id)
 
     return {
@@ -401,6 +432,7 @@ def append_translated_transcript(transcript_id: int) -> dict:
         'ticker': row['ticker'],
         'notion_page_id': page_id,
         'block_count': len(blocks),
+        'transcript_state': TRANSCRIPT_TRANSLATED,
     }
 
 
