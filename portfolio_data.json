@@ -13,7 +13,7 @@
       "current_price": 360500.0,
       "ath_price": 360500.0,
       "dd": 0.0,
-      "rsi_1m": 27.969074336283196,
+      "rsi_1m": 27.17847433628319,
       "is_today_new": false
     },
     {
@@ -22,14 +22,14 @@
       "sector": "반도체",
       "market_cap": 16819775.814,
       "weight": 25.0,
-      "weight_prev": 22.0,
+      "weight_prev": 25.0,
       "today_return": -0.12695725772323319,
-      "contribution": -0.27930596699111304,
+      "contribution": -0.31739314430808296,
       "cumulative_return": 705.2702618366967,
       "current_price": 2360000.0,
       "ath_price": 2363000.0,
       "dd": -0.12695725772323696,
-      "rsi_1m": 50.977068368136116,
+      "rsi_1m": 50.18646836813612,
       "is_today_new": false
     },
     {
@@ -45,7 +45,7 @@
       "current_price": 1918000.0,
       "ath_price": 2203000.0,
       "dd": -12.93690422151611,
-      "rsi_1m": -9.534021882951649,
+      "rsi_1m": -10.324621882951652,
       "is_today_new": false
     },
     {
@@ -61,7 +61,7 @@
       "current_price": 480000.0,
       "ath_price": 480000.0,
       "dd": 0.0,
-      "rsi_1m": 58.931990476190464,
+      "rsi_1m": 58.141390476190466,
       "is_today_new": false
     },
     {
@@ -77,23 +77,7 @@
       "current_price": 1346000.0,
       "ath_price": 1346000.0,
       "dd": 0.0,
-      "rsi_1m": 30.62447469879519,
-      "is_today_new": false
-    },
-    {
-      "code": "295310",
-      "name": "에이치브이엠",
-      "sector": "비철,목재등",
-      "market_cap": 12099.454746,
-      "weight": 2.0,
-      "weight_prev": 5.0,
-      "today_return": 1.3091641490433032,
-      "contribution": 0.6545820745216516,
-      "cumulative_return": -9.256475237317986,
-      "current_price": 100600.0,
-      "ath_price": 133000.0,
-      "dd": -24.360902255639093,
-      "rsi_1m": 28.068716499442587,
+      "rsi_1m": 29.83387469879519,
       "is_today_new": false
     },
     {
@@ -109,7 +93,7 @@
       "current_price": 100000.0,
       "ath_price": 136400.0,
       "dd": -26.68621700879765,
-      "rsi_1m": -54.14481919504644,
+      "rsi_1m": -54.93541919504643,
       "is_today_new": false
     },
     {
@@ -125,7 +109,7 @@
       "current_price": 116000.0,
       "ath_price": 149900.0,
       "dd": -22.615076717811878,
-      "rsi_1m": -43.864683749055175,
+      "rsi_1m": -44.65528374905518,
       "is_today_new": false
     },
     {
@@ -141,39 +125,23 @@
       "current_price": 136300.0,
       "ath_price": 161400.0,
       "dd": -15.551425030978939,
-      "rsi_1m": -38.188035616438356,
+      "rsi_1m": -38.97863561643835,
       "is_today_new": false
     },
     {
-      "code": "267270",
-      "name": "HD건설기계",
-      "sector": "기타",
-      "market_cap": 70828.563766,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": 1.9310344827586208,
-      "contribution": 0.5793103448275861,
-      "cumulative_return": -15.524291052978679,
-      "current_price": 147800.0,
-      "ath_price": 198100.0,
-      "dd": -25.391216557294292,
-      "rsi_1m": -56.136036734693874,
-      "is_today_new": false
-    },
-    {
-      "code": "171090",
-      "name": "선익시스템",
-      "sector": "디스플레이",
-      "market_cap": 7395.122232,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": -4.062909567496723,
-      "contribution": -1.2188728702490168,
-      "cumulative_return": -22.596388482186423,
-      "current_price": 73200.0,
-      "ath_price": 131000.0,
-      "dd": -44.12213740458015,
-      "rsi_1m": -14.633184629981027,
+      "code": "295310",
+      "name": "에이치브이엠",
+      "sector": "비철,목재등",
+      "market_cap": 12099.454746,
+      "weight": 2.0,
+      "weight_prev": 2.0,
+      "today_return": 1.3091641490433032,
+      "contribution": 0.2618328298086606,
+      "cumulative_return": -9.256475237317986,
+      "current_price": 100600.0,
+      "ath_price": 133000.0,
+      "dd": -24.360902255639093,
+      "rsi_1m": 25.77061649944259,
       "is_today_new": false
     },
     {
@@ -189,7 +157,7 @@
       "current_price": 23350.0,
       "ath_price": 51000.0,
       "dd": -54.215686274509814,
-      "rsi_1m": -46.01306446886447,
+      "rsi_1m": -46.803664468864476,
       "is_today_new": false
     },
     {
@@ -205,7 +173,7 @@
       "current_price": 1140000.0,
       "ath_price": 1630000.0,
       "dd": -30.061349693251536,
-      "rsi_1m": -44.7862091324201,
+      "rsi_1m": -45.576809132420095,
       "is_today_new": false
     },
     {
@@ -221,23 +189,7 @@
       "current_price": 898000.0,
       "ath_price": 938000.0,
       "dd": -4.264392324093813,
-      "rsi_1m": 57.90727679324894,
-      "is_today_new": false
-    },
-    {
-      "code": "082740",
-      "name": "한화엔진",
-      "sector": "기타",
-      "market_cap": 48733.130928,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -5.501618122977346,
-      "contribution": -1.100323624595469,
-      "cumulative_return": -24.249749425151823,
-      "current_price": 58400.0,
-      "ath_price": 89500.0,
-      "dd": -34.74860335195531,
-      "rsi_1m": -64.95355005701255,
+      "rsi_1m": 57.11667679324894,
       "is_today_new": false
     },
     {
@@ -246,14 +198,14 @@
       "sector": "건강관리",
       "market_cap": 64951.72437,
       "weight": 2.0,
-      "weight_prev": 0.0,
+      "weight_prev": 2.0,
       "today_return": -5.936920222634509,
-      "contribution": -0.0,
+      "contribution": -1.1873840445269017,
       "cumulative_return": 1.1283415139722752,
       "current_price": 507000.0,
       "ath_price": 681979.0,
       "dd": -25.657534909432698,
-      "rsi_1m": -26.57525590062111,
+      "rsi_1m": -27.36585590062111,
       "is_today_new": false
     },
     {
@@ -262,15 +214,15 @@
       "sector": "건강관리",
       "market_cap": 31668.90948,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "weight_prev": 2.0,
+      "today_return": -9.722222222222223,
+      "contribution": -1.9444444444444449,
+      "cumulative_return": 0.0,
       "current_price": 156000.0,
       "ath_price": 207000.0,
       "dd": -24.63768115942029,
-      "rsi_1m": 0.4241422535211259,
-      "is_today_new": true
+      "rsi_1m": -1.8739577464788741,
+      "is_today_new": false
     },
     {
       "code": "454910",
@@ -278,60 +230,15 @@
       "sector": "기계",
       "market_cap": 108054.90666,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "weight_prev": 2.0,
+      "today_return": 20.447976878612717,
+      "contribution": 4.089595375722543,
+      "cumulative_return": 0.0,
       "current_price": 166700.0,
       "ath_price": 166700.0,
       "dd": 0.0,
-      "rsi_1m": 31.56734598825832,
-      "is_today_new": true
+      "rsi_1m": 30.77674598825832,
+      "is_today_new": false
     }
-  ],
-  "_order_changes": {
-    "삼성 트루밸류 / NH Value ESG / DB 개방형": {
-      "date": "2026-06-02",
-      "added": [
-        {
-          "name": "한미약품",
-          "weight": 2.0
-        },
-        {
-          "name": "올릭스",
-          "weight": 2.0
-        },
-        {
-          "name": "두산로보틱스",
-          "weight": 2.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "SK하이닉스",
-          "from": 22.0,
-          "to": 25.0
-        },
-        {
-          "name": "에이치브이엠",
-          "from": 5.0,
-          "to": 2.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "HD건설기계",
-          "weight": 3.0
-        },
-        {
-          "name": "선익시스템",
-          "weight": 3.0
-        },
-        {
-          "name": "한화엔진",
-          "weight": 2.0
-        }
-      ]
-    }
-  }
+  ]
 }
