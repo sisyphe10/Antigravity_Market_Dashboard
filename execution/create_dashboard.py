@@ -941,8 +941,8 @@ def _build_indices_chart_section(category_label='Indices'):
             rows_html += (
                 f'<tr class="idx-chart-item{active}" data-series="{display}" '
                 f'onclick="toggleIdxSeries(this)">'
-                f'<td style="width:6px;padding:0;">'
-                f'<div class="idx-color-bar" style="width:4px;height:100%;background:{color};border-radius:2px;"></div></td>'
+                f'<td style="width:12px;padding:0;text-align:center;vertical-align:middle;">'
+                f'<div class="idx-color-bar" style="display:inline-block;width:4px;height:18px;background:{color};border-radius:2px;vertical-align:middle;"></div></td>'
                 f'<td>{display}</td></tr>\n'
             )
         mode_html = (
