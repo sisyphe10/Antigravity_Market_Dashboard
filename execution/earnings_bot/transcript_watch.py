@@ -21,6 +21,7 @@ from .transcript_sources import (EarningsEvent, TranscriptSource,
                                  make_event_from_filing)
 from .transcript_sources.marketbeat import MarketBeatSource
 from .transcript_sources.q4cdn import Q4CdnSource
+from .transcript_sources.cameco import CamecoSource
 from .transcript_sources.insider_monkey import InsiderMonkeySource
 from .transcript_sources.globe_and_mail import GlobeAndMailSource
 from .transcript_sources.motley_fool import MotleyFoolSource
@@ -35,7 +36,8 @@ STALE_RETENTION_DAYS = 30
 
 # 사용 가능한 자동 소스 (순서대로 시도)
 def default_sources() -> list[TranscriptSource]:
-    return [Q4CdnSource(), MotleyFoolSource(), InsiderMonkeySource(), GlobeAndMailSource(), MarketBeatSource()]
+    # CamecoSource는 CCJ/CCO만 처리하고 그 외엔 즉시 빈 리스트 → 맨 앞에 둬도 타 종목 영향 없음.
+    return [CamecoSource(), Q4CdnSource(), MotleyFoolSource(), InsiderMonkeySource(), GlobeAndMailSource(), MarketBeatSource()]
 
 
 def _utcnow() -> datetime:
