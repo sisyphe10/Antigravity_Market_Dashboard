@@ -841,16 +841,71 @@ def _chart_download_helper_js():
     return """
         <script>
         if (typeof window.downloadChartImage !== 'function') {
-            window.downloadChartImage = function(canvasId, baseName) {
+            window.downloadChartImage = function(canvasId, baseName, legendId) {
                 var src = document.getElementById(canvasId);
                 if (!src) { console.warn('canvas not found:', canvasId); return; }
                 var w = src.width, h = src.height;
+                var scale = src.clientWidth ? (w / src.clientWidth) : 1;
+
+                // 하단 범례 항목 수집 (컬러닷 + 라벨)
+                var legendItems = [];
+                var legendSuffix = '';
+                if (legendId) {
+                    var legendEl = document.getElementById(legendId);
+                    if (legendEl) {
+                        legendEl.querySelectorAll(':scope > span').forEach(function(span) {
+                            var dot = span.querySelector('span[style*="background"]');
+                            var text = (span.textContent || '').trim();
+                            if (dot) {
+                                legendItems.push({ color: dot.style.background || dot.style.backgroundColor || '#888', text: text });
+                            } else if (text) {
+                                legendSuffix = text;  // 예: "/ USD"
+                            }
+                        });
+                    }
+                }
+
+                var legendH = legendItems.length ? Math.round(44 * scale) : 0;
                 var tmp = document.createElement('canvas');
-                tmp.width = w; tmp.height = h;
+                tmp.width = w; tmp.height = h + legendH;
                 var ctx = tmp.getContext('2d');
                 ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, w, h);
+                ctx.fillRect(0, 0, tmp.width, tmp.height);
                 ctx.drawImage(src, 0, 0);
+
+                if (legendItems.length) {
+                    var fontPx = Math.round(13 * scale);
+                    ctx.font = '600 ' + fontPx + "px Pretendard, system-ui, sans-serif";
+                    ctx.textBaseline = 'middle';
+                    var dotR = Math.round(5 * scale);
+                    var gapDotText = Math.round(7 * scale);
+                    var gapItems = Math.round(18 * scale);
+                    var suffixGap = Math.round(6 * scale);
+                    var totalW = 0;
+                    legendItems.forEach(function(it, i) {
+                        totalW += dotR * 2 + gapDotText + ctx.measureText(it.text).width;
+                        if (i < legendItems.length - 1) totalW += gapItems;
+                    });
+                    if (legendSuffix) totalW += suffixGap + ctx.measureText(legendSuffix).width;
+                    var x = Math.max(Math.round((w - totalW) / 2), Math.round(10 * scale));
+                    var y = h + Math.round(legendH / 2);
+                    legendItems.forEach(function(it, i) {
+                        ctx.beginPath();
+                        ctx.fillStyle = it.color;
+                        ctx.arc(x + dotR, y, dotR, 0, Math.PI * 2);
+                        ctx.fill();
+                        x += dotR * 2 + gapDotText;
+                        ctx.fillStyle = '#222';
+                        ctx.fillText(it.text, x, y);
+                        x += ctx.measureText(it.text).width;
+                        if (i < legendItems.length - 1) x += gapItems;
+                    });
+                    if (legendSuffix) {
+                        x += suffixGap;
+                        ctx.fillStyle = '#555';
+                        ctx.fillText(legendSuffix, x, y);
+                    }
+                }
                 var d = new Date();
                 var pad = function(n){return n<10?'0'+n:''+n;};
                 var stamp = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
@@ -1134,7 +1189,7 @@ def _build_indices_chart_section(category_label='Indices'):
                         <input type="text" id="idxStartDate" value="{first_date}" onchange="formatDateInput(this);updateIdxChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                         <span style="color:#888;">~</span>
                         <input type="text" id="idxEndDate" value="{last_date}" onchange="formatDateInput(this);updateIdxChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
-                        <button onclick="downloadChartImage('idxDynamicChart','AoE_Indice')" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
+                        <button onclick="downloadChartImage('idxDynamicChart','AoE_Indice','idxChartLegend')" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
                     </div>
                     <div id="idxChartCard" style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                         <div style="position:relative;height:500px;">
@@ -1738,7 +1793,7 @@ def _build_combined_chart_section():
                         <input type="text" id="cmbStartDate" value="{first_date}" onchange="formatDateInput(this);updateCmbChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                         <span style="color:#888;">~</span>
                         <input type="text" id="cmbEndDate" value="{last_date}" onchange="formatDateInput(this);updateCmbChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
-                        <button onclick="downloadChartImage('cmbDynamicChart','AoE_Data')" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
+                        <button onclick="downloadChartImage('cmbDynamicChart','AoE_Data','cmbChartLegend')" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
                         <button onclick="clearCmbSelections()" style="font-family:inherit;font-size:13px;font-weight:600;padding:4px 14px;background:#f3f4f6;color:#444;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;margin-left:8px;">전체 해제</button>
                     </div>
                     <div id="cmbChartCard" style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
