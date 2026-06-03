@@ -875,20 +875,23 @@ def _chart_download_helper_js():
 
                 if (legendItems.length) {
                     var fontPx = Math.round(13 * scale);
-                    ctx.font = '600 ' + fontPx + "px Pretendard, system-ui, sans-serif";
+                    var fontItem = fontPx + "px Pretendard, system-ui, sans-serif";
+                    var fontSuffix = '600 ' + fontPx + "px Pretendard, system-ui, sans-serif";
                     ctx.textBaseline = 'middle';
                     var dotR = Math.round(5 * scale);
                     var gapDotText = Math.round(7 * scale);
                     var gapItems = Math.round(18 * scale);
                     var suffixGap = Math.round(6 * scale);
                     var totalW = 0;
+                    ctx.font = fontItem;
                     legendItems.forEach(function(it, i) {
                         totalW += dotR * 2 + gapDotText + ctx.measureText(it.text).width;
                         if (i < legendItems.length - 1) totalW += gapItems;
                     });
-                    if (legendSuffix) totalW += suffixGap + ctx.measureText(legendSuffix).width;
+                    if (legendSuffix) { ctx.font = fontSuffix; totalW += suffixGap + ctx.measureText(legendSuffix).width; }
                     var x = Math.max(Math.round((w - totalW) / 2), Math.round(10 * scale));
                     var y = h + Math.round(legendH / 2);
+                    ctx.font = fontItem;
                     legendItems.forEach(function(it, i) {
                         ctx.beginPath();
                         ctx.fillStyle = it.color;
@@ -902,6 +905,7 @@ def _chart_download_helper_js():
                     });
                     if (legendSuffix) {
                         x += suffixGap;
+                        ctx.font = fontSuffix;
                         ctx.fillStyle = '#555';
                         ctx.fillText(legendSuffix, x, y);
                     }
