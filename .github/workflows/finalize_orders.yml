@@ -5,6 +5,10 @@ on:
     - cron: '0 7 * * *'   # 16:00 KST = 07:00 UTC
   workflow_dispatch:
 
+concurrency:
+  group: wrap-nav-pipeline
+  cancel-in-progress: false
+
 jobs:
   finalize:
     runs-on: ubuntu-latest
@@ -14,6 +18,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history needed for merge / merge-base
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -55,9 +61,12 @@ jobs:
         env:
           TZ: 'Asia/Seoul'
 
-      - name: Commit and push (Wrap_NAV.xlsx + pending JSONs + Dashboard)
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Auto: finalize ORDER/AUM + Dashboard regenerate [skip ci]"
-          file_pattern: 'Wrap_NAV.xlsx orders/pending_orders.json orders/aum_pending.json portfolio_data.json index.html market.html wrap.html universe.html seibro.html featured.html hotels.html'
-          skip_fetch: true
+      - name: Commit and push (race-safe)
+        # --xlsx-conflict fail: a dropped commit would silently lose finalized
+        # NEW/AUM edits, so fail loudly for a manual re-run instead.
+        # portfolio_data.json kept as OURS (reflects freshly finalized orders).
+        run: |
+          bash scripts/safe_commit_push.sh \
+            -m "Auto: finalize ORDER/AUM + Dashboard regenerate [skip ci]" \
+            --xlsx-conflict fail \
+            -- Wrap_NAV.xlsx orders/pending_orders.json orders/aum_pending.json portfolio_data.json index.html market.html wrap.html universe.html seibro.html featured.html hotels.html
