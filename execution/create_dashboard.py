@@ -796,7 +796,10 @@ def create_monthly_returns_table():
     html = f"""
         <div class="category-section">
             <h2 class="category-title">MONTHLY RETURNS</h2>
-            <div style="overflow-x:auto;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);padding:16px;">
+            <div style="display:flex;justify-content:flex-end;width:900px;max-width:100%;margin:0 auto 8px;">
+                <button onclick="downloadElementImage('mrTableWrap','Monthly_Returns')" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
+            </div>
+            <div id="mrTableWrap" style="overflow-x:auto;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);padding:16px;">
                 <table style="width:900px;max-width:100%;border-collapse:separate;border-spacing:0;font-size:14px;font-family:inherit;table-layout:fixed;margin:0 auto;outline:2px solid #1f2937;outline-offset:-1px;">
                     <thead><tr>{head_cells}</tr></thead>
                     <tbody>
@@ -804,6 +807,7 @@ def create_monthly_returns_table():
                 </table>
             </div>
         </div>
+        {_element_download_helper_js()}
 """
     return html
 
@@ -919,6 +923,33 @@ def _chart_download_helper_js():
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
+            };
+        }
+        </script>
+    """
+
+
+def _element_download_helper_js():
+    """DOM 요소(테이블 등) → PNG 다운로드 (html2canvas). 페이지에 여러 번 inject되어도 1회만 등록."""
+    return """
+        <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+        <script>
+        if (typeof window.downloadElementImage !== 'function') {
+            window.downloadElementImage = function(elementId, baseName) {
+                var el = document.getElementById(elementId);
+                if (!el) { console.warn('element not found:', elementId); return; }
+                if (typeof html2canvas !== 'function') { alert('이미지 라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.'); return; }
+                html2canvas(el, { scale: 2, backgroundColor: '#ffffff', scrollX: 0, scrollY: -window.scrollY }).then(function(canvas) {
+                    var d = new Date();
+                    var pad = function(n){ return n<10 ? '0'+n : ''+n; };
+                    var stamp = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+                    var a = document.createElement('a');
+                    a.href = canvas.toDataURL('image/png');
+                    a.download = (baseName || 'table') + '_' + stamp + '.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                });
             };
         }
         </script>
@@ -5797,6 +5828,7 @@ def create_dashboard():
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Universe</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }
@@ -5866,6 +5898,7 @@ SIDEBAR_PLACEHOLDER
             <div class="csel-display" id="cselSecDisplay" onclick="toggleCselId('cselSecList')">섹터</div>
             <div class="csel-list" id="cselSecList"></div>
         </div>
+        <button onclick="downloadUniverseList()" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
     </div>
     <table>
         <thead><tr>
@@ -5894,6 +5927,7 @@ SIDEBAR_PLACEHOLDER
                 <div class="csel-display" id="cselDisplay" onclick="toggleCselId('cselList')">통화</div>
                 <div class="csel-list" id="cselList"></div>
             </div>
+            <button onclick="downloadUniverseSector()" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
         </div>
         <div id="sectorContent"><p style="padding:40px;color:#888;">로딩 중...</p></div>
     </div>
@@ -6186,6 +6220,44 @@ function renderSector() {
     html += '</tbody></table>';
 
     document.getElementById('sectorContent').innerHTML = html;
+}
+
+// ── 이미지 다운로드 (html2canvas, 상위 30개) ──────────────────
+function _univCapture(node, baseName) {
+    if (typeof html2canvas !== 'function') { alert('이미지 라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.'); return Promise.resolve(); }
+    return html2canvas(node, { scale: 2, backgroundColor: '#ffffff', scrollX: 0, scrollY: -window.scrollY }).then(function(canvas) {
+        var d = new Date();
+        var pad = function(n){ return n<10 ? '0'+n : ''+n; };
+        var stamp = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+        var a = document.createElement('a');
+        a.href = canvas.toDataURL('image/png');
+        a.download = baseName + '_' + stamp + '.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    });
+}
+function downloadUniverseList() {
+    var table = document.querySelector('#tab0 table');
+    if (!table) return;
+    var rows = document.querySelectorAll('#tbody tr');
+    var saved = [];
+    for (var i = 30; i < rows.length; i++) { saved.push([rows[i], rows[i].style.display]); rows[i].style.display = 'none'; }
+    _univCapture(table, 'Universe_Stocks').then(function() {
+        saved.forEach(function(p){ p[0].style.display = p[1]; });
+    });
+}
+function downloadUniverseSector() {
+    var table = document.querySelector('#sectorContent table');
+    if (!table) { alert('섹터 데이터가 아직 로딩되지 않았습니다.'); return; }
+    var headerRows = table.querySelectorAll('tbody tr:not(.sec-detail)');
+    var detailRows = table.querySelectorAll('tbody tr.sec-detail');
+    var saved = [];
+    headerRows.forEach(function(r, i){ if (i >= 30) { saved.push([r, r.style.display]); r.style.display = 'none'; } });
+    detailRows.forEach(function(r){ saved.push([r, r.style.display]); r.style.display = 'none'; });
+    _univCapture(table, 'Universe_Sectors').then(function() {
+        saved.forEach(function(p){ p[0].style.display = p[1]; });
+    });
 }
 </script>
 </body>
