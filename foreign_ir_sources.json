@@ -648,11 +648,11 @@
       "domain": "uraniumenergy.com",
       "ticker": "UEC",
       "exchange": "NYSE American",
-      "ir_url": "https://www.uraniumenergy.com/news/releases/",
+      "ir_url": "https://www.uraniumenergy.com/news/releases/2026/",
       "rss_url": null,
       "fetch_type": "html",
       "confidence": "high",
-      "notes": "RSS 없음, 이메일 sub만 | codex: Fetched official News Releases page; page includes current UEC news release content but no RSS feed found.",
+      "notes": "RSS 없음, 이메일 sub만 | codex: Fetched official News Releases page; page includes current UEC news release content but no RSS feed found. | 2026-06-08 fix: 연도별 정적 HTML(베이스 /releases/=SPA). ★매년 URL 롤오버 필요(2027=.../2027/), 미갱신 시 health 다이제스트가 잡음.",
       "sources": [
         "claude",
         "codex"
@@ -775,10 +775,10 @@
       "ticker": "MRK",
       "exchange": "NYSE",
       "ir_url": "https://www.merck.com/media/news/",
-      "rss_url": null,
-      "fetch_type": "html",
-      "confidence": "high",
-      "notes": "연도/카테고리 필터링 가능 | codex: Fetched official news releases page; filters and counts visible but release items not exposed in fetched HTML, likely dynamic.",
+      "rss_url": "https://news.google.com/rss/search?q=%22Merck%22+%28MRK%29+press+release+when:30d&hl=en-US&gl=US&ceid=US:en",
+      "fetch_type": "rss",
+      "confidence": "med",
+      "notes": "연도/카테고리 필터링 가능 | codex: Fetched official news releases page; filters and counts visible but release items not exposed in fetched HTML, likely dynamic. | 2026-06-08 fix: Google News RSS 복구(자사 newsroom=SPA, 공식 RSS 미발견). 일부 third-party 논평 섞일 수 있음.",
       "sources": [
         "claude",
         "codex"
@@ -955,10 +955,10 @@
       "ticker": "NOK",
       "exchange": "NYSE",
       "ir_url": "https://www.nokia.com/newsroom/stock-exchange-releases/",
-      "rss_url": "https://www.nokia.com/newsroom/stock-exchange-releases/rss.xml",
+      "rss_url": "https://news.google.com/rss/search?q=Nokia+%28NOK%29+when:30d&hl=en-US&gl=US&ceid=US:en",
       "fetch_type": "rss",
-      "confidence": "high",
-      "notes": "Fetched official stock exchange releases page; page lists dated investor-relevant releases. RSS URL inferred from official newsroom RSS pattern. | alternate (claude): https://www.nokia.com/newsroom/",
+      "confidence": "med",
+      "notes": "Fetched official stock exchange releases page; page lists dated investor-relevant releases. RSS URL inferred from official newsroom RSS pattern. | alternate (claude): https://www.nokia.com/newsroom/ | 2026-06-08 fix: Google News RSS 복구(구 rss.xml=404 HTML, newsroom=SPA). 주가 논평 비중 있음.",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -990,11 +990,11 @@
       "domain": "homedepot.com",
       "ticker": "HD",
       "exchange": "NYSE",
-      "ir_url": "https://ir.homedepot.com/news-releases/default.aspx",
-      "rss_url": "https://ir.homedepot.com/rss/pressrelease.aspx",
+      "ir_url": "https://ir.homedepot.com/news-releases/2026",
+      "rss_url": "https://news.google.com/rss/search?q=%22The+Home+Depot%22+source:prnewswire.com+when:90d&hl=en-US&gl=US&ceid=US:en",
       "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Official IR site fetched at overview level and showed News Releases; listing URL and RSS follow standard official IR pattern but listing not fetched directly. | alternate (claude): https://ir.homedepot.com/news-releases/2026 | claude RSS: https://ir.homedepot.com/rss",
+      "notes": "Official IR site fetched at overview level and showed News Releases; listing URL and RSS follow standard official IR pattern but listing not fetched directly. | alternate (claude): https://ir.homedepot.com/news-releases/2026 | claude RSS: https://ir.homedepot.com/rss | 2026-06-08 fix: Google News source:prnewswire.com 한정(ir.homedepot.com q4 전체가 VM IP 403 차단, 핑거프린트로도 안 풀림).",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -1117,10 +1117,10 @@
       "ticker": "PFE",
       "exchange": "NYSE",
       "ir_url": "https://www.pfizer.com/newsroom/press-releases",
-      "rss_url": null,
-      "fetch_type": "html",
+      "rss_url": "https://investors.pfizer.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": " | codex: Official global Pfizer press release listing confirmed; only localized Japan RSS found, not used.",
+      "notes": "codex: Official global Pfizer press release listing confirmed; only localized Japan RSS found, not used. | 2026-06-08 fix: 자사 q4 official RSS 정상 작동(가장 깨끗).",
       "sources": [
         "claude",
         "codex"
@@ -1765,10 +1765,10 @@
       "ticker": "NVO",
       "exchange": "NYSE ADR",
       "ir_url": "https://www.novonordisk.com/news-and-media/latest-news.html",
-      "rss_url": null,
-      "fetch_type": "html",
-      "confidence": "high",
-      "notes": "Official global newsroom lists press releases and company announcements; no RSS feed found. | alternate (claude): https://www.novonordisk.com/news-and-media/news-and-ir-materials.html",
+      "rss_url": "https://news.google.com/rss/search?q=%22Novo+Nordisk%22+when:30d&hl=en-US&gl=US&ceid=US:en",
+      "fetch_type": "rss",
+      "confidence": "med",
+      "notes": "Official global newsroom lists press releases and company announcements; no RSS feed found. | alternate (claude): https://www.novonordisk.com/news-and-media/news-and-ir-materials.html | 2026-06-08 fix: Google News RSS 복구(newsroom=SPA). source 한정 불가 → 논평 섞일 수 있음.",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -1891,10 +1891,10 @@
       "ticker": "1913",
       "exchange": "HKEX",
       "ir_url": "https://www.pradagroup.com/en/news-media/press-releases-documents.html",
-      "rss_url": null,
-      "fetch_type": "html",
-      "confidence": "high",
-      "notes": "Official Prada Group press releases/documents and investor highlights verified; no RSS found. | alternate (claude): https://www.pradagroup.com/en/investors/investor-relations/press-releases.html",
+      "rss_url": "https://news.google.com/rss/search?q=%22Prada%22+group+when:45d&hl=en-US&gl=US&ceid=US:en",
+      "fetch_type": "rss",
+      "confidence": "low",
+      "notes": "Official Prada Group press releases/documents and investor highlights verified; no RSS found. | alternate (claude): https://www.pradagroup.com/en/investors/investor-relations/press-releases.html | 2026-06-08 fix: Google News RSS 복구(SPA). 전용 배포처 일정치 않아 자사 발표 순도 낮음.",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -2070,11 +2070,11 @@
       "domain": "unusualmachines.com",
       "ticker": "UMAC",
       "exchange": "NYSE American",
-      "ir_url": "https://unusualmachines.suite.accessnewswire.com/browse/pr",
-      "rss_url": null,
-      "fetch_type": "html",
+      "ir_url": "https://www.unusualmachines.com/news-events/press-releases/",
+      "rss_url": "https://news.google.com/rss/search?q=%22Unusual+Machines%22+source:accessnewswire.com+when:90d&hl=en-US&gl=US&ceid=US:en",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Official Access Newswire media room press releases list verified; no RSS found. | alternate (claude): https://www.unusualmachines.com/news-events/press-releases/",
+      "notes": "Official Access Newswire media room press releases list verified; no RSS found. | alternate (claude): https://www.unusualmachines.com/news-events/press-releases/ | 2026-06-08 fix: Google News source:accessnewswire.com 한정(자사 IR=SPA).",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -2323,10 +2323,10 @@
       "ticker": "ACN",
       "exchange": "NYSE",
       "ir_url": "https://newsroom.accenture.com/news",
-      "rss_url": null,
-      "fetch_type": "html",
+      "rss_url": "https://news.google.com/rss/search?q=Accenture+source:businesswire.com+when:60d&hl=en-US&gl=US&ceid=US:en",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Official newsroom news listing; no working RSS endpoint found. | alternate (claude): https://newsroom.accenture.com/news/",
+      "notes": "Official newsroom news listing; no working RSS endpoint found. | alternate (claude): https://newsroom.accenture.com/news/ | 2026-06-08 fix: Google News source:businesswire.com 한정(공식 보도자료만). 구 rss.cfm 404 폐기.",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -2575,10 +2575,10 @@
       "ticker": "ADBE",
       "exchange": "NASDAQ",
       "ir_url": "https://news.adobe.com/news",
-      "rss_url": null,
-      "fetch_type": "html",
+      "rss_url": "https://news.google.com/rss/search?q=Adobe+source:businesswire.com+when:60d&hl=en-US&gl=US&ceid=US:en",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Newsroom is primary; dynamic content | codex: Official Adobe newsroom news listing; no working investor-specific RSS endpoint found.",
+      "notes": "Newsroom is primary; dynamic content | codex: Official Adobe newsroom news listing; no working investor-specific RSS endpoint found. | 2026-06-08 fix: Google News source:businesswire.com 한정(자사 AEM SPA, 투자IR 페이지 stale).",
       "sources": [
         "claude",
         "codex"
@@ -2700,11 +2700,11 @@
       "domain": "shopifyinvestors.com",
       "ticker": "SHOP",
       "exchange": "NYSE",
-      "ir_url": "https://shopifyinvestors.com/news-and-events/default.aspx",
-      "rss_url": "https://shopifyinvestors.com/rss/news-releases.xml",
+      "ir_url": "https://www.shopify.com/investors/press-releases",
+      "rss_url": "https://news.google.com/rss/search?q=Shopify+source:globenewswire.com+when:120d&hl=en-US&gl=US&ceid=US:en",
       "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Official Shopify investor news and events page; RSS pattern appears to be Q4-style. | alternate (claude): https://www.shopify.com/news/category/press-releases",
+      "notes": "Official Shopify investor news and events page; RSS pattern appears to be Q4-style. | alternate (claude): https://www.shopify.com/news/category/press-releases | 2026-06-08 fix: Google News source:globenewswire.com 한정(구 shopifyinvestors.com 폐지, IR이 shopify.com/investors로 이전·정적이나 제목 추출 불가). 본사 릴리스 상단 우선.",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -2790,11 +2790,11 @@
       "domain": "sharplink.com",
       "ticker": "SBET",
       "exchange": "NASDAQ",
-      "ir_url": "https://investors.sharplink.com/press-releases/",
-      "rss_url": null,
-      "fetch_type": "html",
+      "ir_url": "https://www.globenewswire.com/search/keyword/Sharplink",
+      "rss_url": "https://news.google.com/rss/search?q=Sharplink+source:globenewswire.com+when:60d&hl=en-US&gl=US&ceid=US:en",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Official SharpLink investor press releases page verified; static HTML includes dated releases. No verified direct RSS feed found. | alternate (claude): https://www.sharplink.com/news",
+      "notes": "Official SharpLink investor press releases page verified; static HTML includes dated releases. No verified direct RSS feed found. | alternate (claude): https://www.sharplink.com/news | 2026-06-08 fix: Google News source:globenewswire.com 한정(investors.sharplink.com DNS 폐지, 사명 변경).",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -2963,6 +2963,74 @@
       ],
       "enabled": false,
       "batch": 6
+    },
+    {
+      "name_en": "Samsung Electronics",
+      "currency": "KRW",
+      "domain": "samsung.com",
+      "ticker": "005930",
+      "exchange": "KRX",
+      "ir_url": "https://news.samsung.com/kr/",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "삼성전자 한글 뉴스룸. HTML 25건, 날짜 ISO 네이티브 매칭. KR→KR 패스스루.",
+      "sources": [
+        "kr-newsrooms"
+      ],
+      "enabled": true,
+      "batch": 7
+    },
+    {
+      "name_en": "SK hynix",
+      "currency": "KRW",
+      "domain": "skhynix.com",
+      "ticker": "000660",
+      "exchange": "KRX",
+      "ir_url": "https://news.skhynix.co.kr/",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "SK하이닉스 한글 뉴스룸. HTML 12건, 날짜 ISO. 영문 news.skhynix.com은 SPA(0건).",
+      "sources": [
+        "kr-newsrooms"
+      ],
+      "enabled": true,
+      "batch": 7
+    },
+    {
+      "name_en": "Doosan Enerbility",
+      "currency": "KRW",
+      "domain": "doosanenerbility.com",
+      "ticker": "034020",
+      "exchange": "KRX",
+      "ir_url": "https://www.doosanenerbility.com/kr/about/news_board_list",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "두산에너빌리티 회사 전용 뉴스. HTML 10건, 점 날짜 '2026. 06. 01'(regex 확장 반영됨).",
+      "sources": [
+        "kr-newsrooms"
+      ],
+      "enabled": true,
+      "batch": 7
+    },
+    {
+      "name_en": "Hyundai E&C",
+      "currency": "KRW",
+      "domain": "hdec.kr",
+      "ticker": "000720",
+      "exchange": "KRX",
+      "ir_url": "https://www.hdec.kr/kr/company/press_list.aspx",
+      "rss_url": null,
+      "fetch_type": "html",
+      "confidence": "high",
+      "notes": "현대건설 보도자료(한글). HTML 10건, 점 날짜 '2026.06.02'(regex 확장 반영됨).",
+      "sources": [
+        "kr-newsrooms"
+      ],
+      "enabled": true,
+      "batch": 7
     }
   ]
 }

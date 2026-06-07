@@ -463,13 +463,10 @@ async def _run_source_job(
             ) from fetch_err
 
         if not posts:
-            msg = f"{icon} <b>[{label}] {retry_prefix}신규 글 없음</b>\n{now_str}"
-            for chat_id in SUBSCRIBERS:
-                try:
-                    await context.bot.send_message(chat_id=chat_id, text=msg, parse_mode='HTML')
-                except Exception as e:
-                    logging.error(f"{source_name} empty notify 전송 실패: {e}")
-            logging.info(f"{source_name}: 신규 글 없음 (알림 발송)")
+            # 신규 글이 없으면 알림을 보내지 않는다 (조용히 종료).
+            # "신규 글 없음" 스팸 방지 — 피드가 죽어 0건만 반복되는 경우는
+            # 위의 _maybe_warn_staleness 가 별도로 경보하므로 침묵해도 안전.
+            logging.info(f"{source_name}: 신규 글 없음 (알림 미발송)")
             return
 
         from sources.base import split_for_telegram
@@ -542,6 +539,69 @@ async def _source_retry_job(context: ContextTypes.DEFAULT_TYPE):
         retry_count = context.job.data.get('retry_count', 1)
     logging.info(f"Source retry job started: {source_name} (retry={retry_count})")
     await _run_source_job(context, source_name, retry_count=retry_count)
+
+
+# ============================================================
+# 해외 IR 수집 사각지대 주간 점검 (월요일 09:10 KST)
+# ============================================================
+# foreign_ir 은 회사별 fetch 실패를 개별 텔레그램 오류로 보내지 않는다
+# (실패율 60% 미만이면 systemic 경보 안 뜸 → 12~14개사가 조용히 죽어도 모름).
+# 주 1회 foreign_ir_health 상태를 읽어 '오래 성공 못한' 회사를 1건으로 모아 알린다.
+FOREIGN_IR_DEAD_DAYS = 3   # 최근 성공이 N일 이상 전이면 '사각지대'로 본다
+
+
+async def foreign_ir_health_job(context: ContextTypes.DEFAULT_TYPE):
+    """월요일 1회 해외 IR 수집 사각지대 요약. 사각지대 없으면 조용히 종료."""
+    now = datetime.datetime.now(KST)
+    if now.weekday() != 0:   # 0=월요일만 실제 발송
+        return
+    try:
+        from sources.base import load_state, split_for_telegram
+        comps = (load_state('foreign_ir_health').get('companies') or {})
+        if not comps:
+            logging.info("foreign_ir health: 데이터 없음 — 점검 skip")
+            return
+        today = now.date()
+        dead = []
+        for tk, h in comps.items():
+            streak = int(h.get('fail_streak') or 0)
+            if streak <= 0:
+                continue   # 최근 실행 성공 → 정상
+            last_ok = h.get('last_ok')
+            age = None
+            if last_ok:
+                try:
+                    age = (today - datetime.date.fromisoformat(last_ok)).days
+                except Exception:
+                    age = None
+            if last_ok is None or (age is not None and age >= FOREIGN_IR_DEAD_DAYS):
+                dead.append((tk, h.get('name') or tk, last_ok, streak, h.get('last_error') or ''))
+        if not dead:
+            logging.info("foreign_ir health: 사각지대 없음 — 알림 미발송")
+            return
+        dead.sort(key=lambda x: (x[2] or '', -x[3]))   # 마지막 성공 오래된 순 → 연속실패 많은 순
+        lines = [
+            "🩺 <b>[해외 기업 뉴스룸] 수집 사각지대 점검</b>",
+            f"{now.strftime('%Y-%m-%d')} · {len(dead)}개사 {FOREIGN_IR_DEAD_DAYS}일+ 신규 미수집\n",
+        ]
+        for tk, name, last_ok, streak, err in dead:
+            since = f"마지막 성공 {last_ok}" if last_ok else "추적 후 성공 없음"
+            lines.append(f"• <b>{_html.escape(str(name))}</b> ({_html.escape(str(tk))}) — {since}, 연속실패 {streak}회")
+            if err:
+                lines.append(f"   ↳ {_html.escape(str(err)[:120])}")
+        msg = '\n'.join(lines)
+        for chat_id in SUBSCRIBERS:
+            try:
+                for chunk in split_for_telegram(msg, 4000):
+                    await context.bot.send_message(
+                        chat_id=chat_id, text=chunk, parse_mode='HTML',
+                        disable_web_page_preview=True,
+                    )
+            except Exception as e:
+                logging.error(f"foreign_ir health notify 전송 실패: {e}")
+        logging.info(f"foreign_ir health: 사각지대 {len(dead)}개사 알림 발송")
+    except Exception as e:
+        logging.error(f"foreign_ir health job failed (무시): {e}")
 
 
 # ============================================================
@@ -809,12 +869,19 @@ if __name__ == "__main__":
             )
             source_schedule_log.append(f"  - {src.get('label', src_name)} ({src_name}): {hhmm} KST")
 
+    # 해외 IR 수집 사각지대 주간 점검 (잡은 매일 등록되나 월요일에만 실제 발송)
+    job_queue.run_daily(
+        foreign_ir_health_job,
+        time=datetime.time(hour=9, minute=10, second=0, tzinfo=kst),
+    )
+
     print(f"Research Alerts Bot started at {datetime.datetime.now()}")
     print("✅ Daily jobs scheduled:")
     print("  - Research Notes headlines: 05:10 KST")
     print("  - Market alert summary: 05:15 KST (투자유의종목 현황)")
     print("  - 20일 신고가: 16:00 KST (newhigh_20d.json)")
     print("  - WiseReport: 07:00~17:00 KST (hourly)")
+    print("  - 해외 IR 사각지대 점검: 월요일 09:10 KST")
     for line in source_schedule_log:
         print(line)
 

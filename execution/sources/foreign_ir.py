@@ -54,6 +54,7 @@ logger = logging.getLogger(__name__)
 LABEL = '해외 기업 뉴스룸'
 ICON = '🌐'
 STATE_NAME = 'foreign_ir'
+HEALTH_NAME = 'foreign_ir_health'   # sources_state/foreign_ir_health.json — 회사별 수집 건강(사각지대 점검용)
 
 SOURCES_FILE = os.path.join(DASHBOARD_DIR, 'foreign_ir_sources.json')
 
@@ -80,6 +81,7 @@ _HTML_DATE_RE = re.compile(
     rf'\b(?:{_MONTHS})\.?\s+\d{{1,2}},?\s+\d{{4}}\b'   # May 13, 2026 / Apr 8 2026
     r'|\b\d{4}-\d{2}-\d{2}\b'                          # 2026-05-13
     r'|\b\d{4}/\d{1,2}/\d{1,2}\b'                      # 2026/05/13 (아시아권 IR)
+    r'|\b\d{4}\.\s?\d{1,2}\.\s?\d{1,2}\.?'             # 2026.06.02 / 2026. 06. 01 (한국식 점)
     r'|\b\d{1,2}/\d{1,2}/\d{4}\b'                      # 05/13/2026
     rf'|\b\d{{1,2}}\s+(?:{_MONTHS})\.?\s+\d{{4}}\b',   # 13 May 2026
     re.IGNORECASE,
@@ -96,6 +98,14 @@ def _parse_date_iso(s: str) -> str:
     if not s:
         return ''
     s = s.replace('Sept', 'Sep').strip().rstrip(',')
+    # 한국식 점 날짜: '2026.06.02' / '2026. 06. 01' (가변 공백, 끝점 옵션)
+    m = re.match(r'^(\d{4})\.\s?(\d{1,2})\.\s?(\d{1,2})\.?$', s)
+    if m:
+        y, mo, d = (int(g) for g in m.groups())
+        try:
+            return datetime(y, mo, d).strftime('%Y-%m-%d')
+        except ValueError:
+            return ''
     for fmt in _DATE_FORMATS:
         try:
             return datetime.strptime(s, fmt).strftime('%Y-%m-%d')
@@ -111,16 +121,39 @@ def _http_get(url: str, timeout: int = FETCH_TIMEOUT) -> str:
     SSL 인증서 오류 시 verify=False 로 1회 재시도 (일부 IR CDN 인증서 체인 불완전).
     """
     if _HAS_CURL_CFFI:
-        try:
-            r = _curl_requests.get(url, impersonate='chrome', timeout=timeout)
-        except Exception as e:
-            # curl_cffi 의 SSL 인증서 오류 → verify=False 재시도
-            if 'certificate' in str(e).lower() or 'ssl' in str(e).lower():
-                r = _curl_requests.get(url, impersonate='chrome', timeout=timeout, verify=False)
-            else:
-                raise
-        r.raise_for_status()
-        return r.text
+        # 봇 차단(403/406/429) 시 브라우저 핑거프린트를 바꿔가며 재시도.
+        # 1순위 'chrome'(최신 별칭)으로 빠르게 성공시키고, 차단 응답일 때만 대체
+        # 핑거프린트 + Referer/Accept-Language 보강 (HD/ERIC 같은 봇 차단 IR 회피).
+        _origin = f"{urlparse(url).scheme}://{urlparse(url).netloc}/"
+        _alt_headers = {'Referer': _origin, 'Accept-Language': 'en-US,en;q=0.9'}
+        attempts = (
+            {'impersonate': 'chrome'},
+            {'impersonate': 'safari180', 'headers': _alt_headers},
+            {'impersonate': 'chrome131', 'headers': _alt_headers},
+            {'impersonate': 'firefox144', 'headers': _alt_headers},
+        )
+        last_exc: Exception | None = None
+        for i, kw in enumerate(attempts):
+            try:
+                r = _curl_requests.get(url, timeout=timeout, **kw)
+            except Exception as e:
+                msg = str(e).lower()
+                if 'certificate' in msg or 'ssl' in msg:
+                    try:
+                        r = _curl_requests.get(url, timeout=timeout, verify=False, **kw)
+                    except Exception as e2:
+                        last_exc = e2
+                        continue
+                else:
+                    last_exc = e
+                    continue
+            # 봇 차단 코드면 다음 핑거프린트로 (마지막 시도면 그대로 raise_for_status)
+            if r.status_code in (403, 406, 429) and i < len(attempts) - 1:
+                last_exc = RuntimeError(f"HTTP {r.status_code} bot-block ({kw['impersonate']})")
+                continue
+            r.raise_for_status()
+            return r.text
+        raise last_exc if last_exc else RuntimeError('unknown fetch error')
 
     # ── requests 폴백 ──
     last_err: Exception | None = None
@@ -320,6 +353,38 @@ def _fetch_all(companies: list[dict]) -> list[dict]:
     return results
 
 
+def _update_health(results: list[dict]) -> None:
+    """회사별 수집 성공/실패 이력 기록 (사각지대 점검용 foreign_ir_health 상태).
+
+    success = 보도자료 1건 이상 추출. 정상 회사는 항상 과거 목록을 반환하므로
+    releases 가 0이면 사실상 fetch/parse 실패로 간주(진짜 '뉴스 없음'이 아님).
+    완전 방어적: 절대 본 작업을 깨지 않는다 (모든 예외 흡수).
+    """
+    try:
+        today = datetime.now().strftime('%Y-%m-%d')
+        state = load_state(HEALTH_NAME)
+        comps: dict = state.get('companies') or {}
+        for r in results:
+            tk = r.get('ticker')
+            if not tk:
+                continue
+            entry = comps.get(tk) or {}
+            entry['name'] = r.get('name') or entry.get('name') or tk
+            if r.get('releases'):
+                entry['last_ok'] = today
+                entry['fail_streak'] = 0
+                entry.pop('last_error', None)
+            else:
+                entry['fail_streak'] = int(entry.get('fail_streak', 0)) + 1
+                entry['last_fail'] = today
+                entry['last_error'] = (r.get('error') or 'no releases')[:200]
+                entry.setdefault('last_ok', None)
+            comps[tk] = entry
+        save_state(HEALTH_NAME, {'companies': comps, 'updated': today})
+    except Exception as e:
+        logger.warning(f'foreign_ir health 기록 실패 (무시): {e}')
+
+
 def fetch_new_posts(update_state: bool = False, translate: bool = True) -> list[dict]:
     """enabled 회사 순회 → 신규 보도자료 수집 → 제목 번역 → post 리스트.
 
@@ -333,6 +398,7 @@ def fetch_new_posts(update_state: bool = False, translate: bool = True) -> list[
     comp_state: dict = state.get('companies') or {}
 
     results = _fetch_all(companies)
+    _update_health(results)   # 회사별 건강 기록 (사각지대 주간 점검용)
 
     fail_count = sum(1 for r in results if r.get('error'))
     total = len(results) or 1
