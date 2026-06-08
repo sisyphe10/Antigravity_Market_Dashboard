@@ -2101,24 +2101,6 @@
       "batch": 4
     },
     {
-      "name_en": "Intuitive Machines, Inc.",
-      "currency": "USD",
-      "domain": "intuitivemachines.com",
-      "ticker": "LUNR",
-      "exchange": "NASDAQ",
-      "ir_url": "https://investors.intuitivemachines.com/news-releases",
-      "rss_url": "https://investors.intuitivemachines.com/rss/news-releases.xml",
-      "fetch_type": "rss",
-      "confidence": "high",
-      "notes": "Official investor news releases list verified; RSS URL follows site feed pattern. | alternate (claude): https://newsroom.ibm.com/announcements | claude RSS: https://newsroom.ibm.com/announcements?pagetemplate=rss | 2026-05-29 URL 교정(Phase2.5, curl_cffi 검증)",
-      "sources": [
-        "codex (preferred)",
-        "claude (alternate)"
-      ],
-      "enabled": true,
-      "batch": 4
-    },
-    {
       "name_en": "Synopsys, Inc.",
       "currency": "USD",
       "domain": "synopsys.com",
