@@ -18,7 +18,7 @@ except IOError:
     sys.exit(1)
 
 from telegram import Update
-from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
+from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, filters
 from dotenv import load_dotenv
 
 # 로깅 설정
@@ -2329,6 +2329,130 @@ def check_budget():
 
 
 
+# ============================================================
+# 미분류 거래 알림 + 답장 분류 (ledger_category 자동 추가)
+# ============================================================
+LEDGER_TX_SHEET = '거래내역'
+LEDGER_RULES_SHEET = 'ledger_category'
+UNCAT_LABEL = '미분류'
+UNCAT_NOTIFY_MARKER = '🏷️ 미분류 거래'
+UNCAT_NOTIFIED_FILE = os.path.join(DASHBOARD_DIR, '.ledger_uncat_notified.json')
+
+
+def _load_uncat_notified():
+    """알림 보낸 미분류 거래 키 집합. 파일 없으면 None(최초 실행 → baseline)."""
+    try:
+        with open(UNCAT_NOTIFIED_FILE, 'r', encoding='utf-8') as f:
+            return set(json.load(f) or [])
+    except FileNotFoundError:
+        return None
+    except Exception as e:
+        logging.warning(f"uncat notified 읽기 실패: {e}")
+        return set()
+
+
+def _save_uncat_notified(keys):
+    try:
+        with open(UNCAT_NOTIFIED_FILE, 'w', encoding='utf-8') as f:
+            json.dump(sorted(keys), f, ensure_ascii=False)
+    except Exception as e:
+        logging.error(f"uncat notified 저장 실패: {e}")
+
+
+def _uncat_key(date, mer, amt):
+    return f"{date}|{mer}|{str(amt).replace(',', '').replace(' ', '')}"
+
+
+async def check_uncategorized_job(context: ContextTypes.DEFAULT_TYPE):
+    """거래내역에서 카테고리='미분류'인 신규 행 발견 시 텔레그램 알림."""
+    import html
+    try:
+        service = _get_sheets_service()
+        if not service:
+            return
+        rows = await asyncio.to_thread(_read_sheet, service, LEDGER_TX_SHEET)
+        notified = _load_uncat_notified()
+        seed = notified is None  # 최초 실행: 기존 미분류는 조용히 baseline (스팸 방지)
+        if seed:
+            notified = set()
+        new_items = []
+        for row in rows[1:]:  # skip header
+            date = row[0] if len(row) > 0 else ''
+            cat  = row[2] if len(row) > 2 else ''
+            amt  = row[3] if len(row) > 3 else ''
+            mer  = row[4] if len(row) > 4 else ''
+            if cat == UNCAT_LABEL and mer:
+                key = _uncat_key(date, mer, amt)
+                if key not in notified:
+                    notified.add(key)
+                    new_items.append((mer, amt, date))
+        if seed:
+            _save_uncat_notified(notified)
+            logging.info(f"uncat baseline: 기존 미분류 {len(notified)}건 무음 처리")
+            return
+        for mer, amt, date in new_items:
+            try:
+                amt_disp = f"{int(str(amt).replace(',', '')):,}원"
+            except Exception:
+                amt_disp = f"{amt}원"
+            text = (
+                f"{UNCAT_NOTIFY_MARKER}\n"
+                f"가맹점: {html.escape(str(mer))}\n"
+                f"금액: {amt_disp}\n"
+                f"날짜: {html.escape(str(date))}\n\n"
+                f"이 메시지에 <b>답장</b>으로 카테고리를 보내주세요.\n"
+                f"예) <code>식비</code>\n"
+                f"키워드를 바꾸려면 <code>키워드=카테고리</code> (예: <code>아식스=운동</code>)"
+            )
+            for uid in SUBSCRIBERS:
+                try:
+                    await context.bot.send_message(chat_id=uid, text=text, parse_mode='HTML')
+                except Exception as e:
+                    logging.warning(f"uncat 알림 전송 실패 ({uid}): {e}")
+        if new_items:
+            _save_uncat_notified(notified)
+            logging.info(f"uncat 알림 {len(new_items)}건 전송")
+    except Exception as e:
+        logging.error(f"check_uncategorized_job 오류: {e}")
+
+
+async def handle_uncat_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """미분류 알림에 답장 → ledger_category 탭에 [키워드, 카테고리] 추가 (중복 스킵)."""
+    import re
+    msg = update.message
+    if not msg or not msg.reply_to_message:
+        return
+    orig = msg.reply_to_message.text or ''
+    if UNCAT_NOTIFY_MARKER not in orig:
+        return  # 우리 미분류 알림에 대한 답장이 아님
+    m = re.search(r'가맹점:\s*(.+)', orig)
+    default_kw = m.group(1).strip() if m else ''
+    reply = (msg.text or '').strip()
+    if '=' in reply:
+        kw, cat = [s.strip() for s in reply.split('=', 1)]
+    else:
+        kw, cat = default_kw, reply
+    if not kw or not cat:
+        await msg.reply_text("형식: 카테고리만 보내거나 '키워드=카테고리' (예: 아식스=운동)")
+        return
+    service = _get_sheets_service()
+    if not service:
+        await msg.reply_text("❌ Google 서비스 계정이 설정되지 않았습니다.")
+        return
+    try:
+        existing = await asyncio.to_thread(_read_sheet, service, LEDGER_RULES_SHEET)
+        for r in existing:
+            if r and r[0].strip() == kw:
+                await msg.reply_text(f"ℹ️ '{kw}' 규칙은 이미 있습니다 → {r[1] if len(r) > 1 else ''}")
+                return
+        await asyncio.to_thread(_append_row, service, LEDGER_RULES_SHEET, [kw, cat], 'RAW')
+        await msg.reply_text(f"✅ '{kw}' → '{cat}' 분류 규칙 추가됨.\n거래내역이 자동으로 재분류됩니다.")
+        logging.info(f"ledger_category 규칙 추가: {kw} -> {cat}")
+    except Exception as e:
+        logging.error(f"ledger_category 추가 실패: {e}")
+        await msg.reply_text(f"❌ 규칙 추가 실패: {e}")
+
+
 if __name__ == '__main__':
     if not TOKEN:
         print("Error: TOKEN environment variable is missing.")
@@ -2349,7 +2473,8 @@ if __name__ == '__main__':
     application.add_handler(CommandHandler('fitness', fitness_command))
     application.add_handler(CommandHandler('journal', journal_command))
     application.add_handler(CommandHandler('idea', idea_command))
-    
+    application.add_handler(MessageHandler(filters.REPLY & filters.TEXT & ~filters.COMMAND, handle_uncat_reply))
+
     job_queue = application.job_queue
     try:
         import pytz
@@ -2429,6 +2554,9 @@ if __name__ == '__main__':
 
     for t in trading_times:
         job_queue.run_daily(auto_portfolio_update_job, time=t)
+
+    # 미분류 거래 알림: 90초마다 거래내역 체크 (신규 미분류 → 텔레그램, 답장으로 분류)
+    job_queue.run_repeating(check_uncategorized_job, interval=90, first=20)
 
     print(f"Bot started at {datetime.datetime.now()}")
     print(f"✅ Daily jobs scheduled:")

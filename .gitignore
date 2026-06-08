@@ -107,3 +107,6 @@ featured_data_kis.json
 # 신고가 테스트 전송 (B안)
 .newhigh_test_msg.txt
 .claude/settings.local.json
+
+# 미분류 거래 알림 상태 (VM 로컬, deploy.sh가 백업)
+.ledger_uncat_notified.json
