@@ -799,7 +799,7 @@ def create_monthly_returns_table():
             <div style="display:flex;justify-content:flex-end;width:900px;max-width:100%;margin:0 auto 8px;">
                 <button onclick="downloadElementImage('mrTableWrap','Monthly_Returns')" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
             </div>
-            <div id="mrTableWrap" style="overflow-x:auto;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);padding:16px;">
+            <div id="mrTableWrap" style="overflow-x:auto;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);padding:16px;width:fit-content;max-width:100%;margin:0 auto;">
                 <table style="width:900px;max-width:100%;border-collapse:separate;border-spacing:0;font-size:14px;font-family:inherit;table-layout:fixed;margin:0 auto;outline:2px solid #1f2937;outline-offset:-1px;">
                     <thead><tr>{head_cells}</tr></thead>
                     <tbody>
