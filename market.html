@@ -495,13 +495,16 @@
     <aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="market.html" class="sidebar-link active">Index</a><a href="universe.html" class="sidebar-link">Universe</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
     <header>
         <h1>📊 Index</h1>
-        <div class="last-updated">Updated: 2026-06-08 08:54:22 KST</div>
+        <div class="last-updated">Updated: 2026-06-08 09:20:15 KST</div>
     </header>
 
     
         <div class="category-section">
             <h2 class="category-title">MONTHLY RETURNS</h2>
-            <div style="overflow-x:auto;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);padding:16px;">
+            <div style="display:flex;justify-content:flex-end;width:900px;max-width:100%;margin:0 auto 8px;">
+                <button onclick="downloadElementImage('mrTableWrap','Monthly_Returns')" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
+            </div>
+            <div id="mrTableWrap" style="overflow-x:auto;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);padding:16px;">
                 <table style="width:900px;max-width:100%;border-collapse:separate;border-spacing:0;font-size:14px;font-family:inherit;table-layout:fixed;margin:0 auto;outline:2px solid #1f2937;outline-offset:-1px;">
                     <thead><tr><th style="padding:8px 6px;background:#f3f4f6;font-weight:700;text-align:center;width:6.6667%;border-right:none;border-bottom:True;">연도</th><th style="padding:8px 6px;background:#f3f4f6;font-weight:700;text-align:center;width:6.6667%;border-right:1.5px solid #374151;border-bottom:True;">월</th><th style="padding:8px 6px;background:#f3f4f6;font-weight:700;text-align:center;width:7.8788%;border-right:1px solid #6b7280;border-bottom:True;">KOSPI</th><th style="padding:8px 6px;background:#f3f4f6;font-weight:700;text-align:center;width:7.8788%;border-right:1px solid #6b7280;border-bottom:True;">KOSDAQ</th><th style="padding:8px 6px;background:#f3f4f6;font-weight:700;text-align:center;width:7.8788%;border-right:1px solid #6b7280;border-bottom:True;">NIKKEI</th><th style="padding:8px 6px;background:#f3f4f6;font-weight:700;text-align:center;width:7.8788%;border-right:1px solid #6b7280;border-bottom:True;">TAIEX</th><th style="padding:8px 6px;background:#f3f4f6;font-weight:700;text-align:center;width:7.8788%;border-right:1px solid #6b7280;border-bottom:True;">S&amp;P500</th><th style="padding:8px 6px;background:#f3f4f6;font-weight:700;text-align:center;width:7.8788%;border-right:1px solid #6b7280;border-bottom:True;">NASDAQ</th><th style="padding:8px 6px;background:#f3f4f6;font-weight:700;text-align:center;width:7.8788%;border-right:2px solid #1f2937;border-bottom:True;">RUSSELL</th><th style="padding:8px 6px;background:#f3f4f6;font-weight:700;text-align:center;width:7.8788%;border-right:1px solid #6b7280;border-bottom:True;">BTC</th><th style="padding:8px 6px;background:#f3f4f6;font-weight:700;text-align:center;width:7.8788%;border-right:2px solid #1f2937;border-bottom:True;">ETH</th><th style="padding:8px 6px;background:#f3f4f6;font-weight:700;text-align:center;width:7.8788%;border-right:1px solid #6b7280;border-bottom:True;">GOLD</th><th style="padding:8px 6px;background:#f3f4f6;font-weight:700;text-align:center;width:7.8788%;border-right:1px solid #6b7280;border-bottom:True;">SILVER</th></tr></thead>
                     <tbody>
@@ -528,6 +531,29 @@
                 </table>
             </div>
         </div>
+        
+        <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+        <script>
+        if (typeof window.downloadElementImage !== 'function') {
+            window.downloadElementImage = function(elementId, baseName) {
+                var el = document.getElementById(elementId);
+                if (!el) { console.warn('element not found:', elementId); return; }
+                if (typeof html2canvas !== 'function') { alert('이미지 라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.'); return; }
+                html2canvas(el, { scale: 2, backgroundColor: '#ffffff', scrollX: 0, scrollY: -window.scrollY }).then(function(canvas) {
+                    var d = new Date();
+                    var pad = function(n){ return n<10 ? '0'+n : ''+n; };
+                    var stamp = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+                    var a = document.createElement('a');
+                    a.href = canvas.toDataURL('image/png');
+                    a.download = (baseName || 'table') + '_' + stamp + '.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                });
+            };
+        }
+        </script>
+    
 
 
     
