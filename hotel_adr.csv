@@ -689,3 +689,10 @@ collected_at,hotel,city,grade,ota,search_date,lead_days,price_krw,url
 2026-06-08 12:00:01,힐튼 경주,경주,5*,booking,2026-06-15,7,200080,https://www.booking.com/hotel/kr/gyeongju-hilton.ko.html?checkin=2026-06-15&checkout=2026-06-16&group_adults=2&no_rooms=1
 2026-06-08 12:00:01,힐튼 경주,경주,5*,booking,2026-06-22,14,237500,https://www.booking.com/hotel/kr/gyeongju-hilton.ko.html?checkin=2026-06-22&checkout=2026-06-23&group_adults=2&no_rooms=1
 2026-06-08 12:00:01,힐튼 경주,경주,5*,booking,2026-07-08,30,247000,https://www.booking.com/hotel/kr/gyeongju-hilton.ko.html?checkin=2026-07-08&checkout=2026-07-09&group_adults=2&no_rooms=1
+2026-06-09 12:00:02,시그니엘 서울,서울,Lux,booking,2026-06-16,7,620000,https://www.booking.com/hotel/kr/signiel-seoul.ko.html?checkin=2026-06-16&checkout=2026-06-17&group_adults=2&no_rooms=1
+2026-06-09 12:00:02,시그니엘 서울,서울,Lux,booking,2026-06-23,14,650000,https://www.booking.com/hotel/kr/signiel-seoul.ko.html?checkin=2026-06-23&checkout=2026-06-24&group_adults=2&no_rooms=1
+2026-06-09 12:00:02,시그니엘 서울,서울,Lux,booking,2026-07-09,30,850000,https://www.booking.com/hotel/kr/signiel-seoul.ko.html?checkin=2026-07-09&checkout=2026-07-10&group_adults=2&no_rooms=1
+2026-06-09 12:00:02,포시즌스 호텔 서울,서울,Lux,booking,2026-07-09,30,960000,https://www.booking.com/hotel/kr/four-seasons-seoul.ko.html?checkin=2026-07-09&checkout=2026-07-10&group_adults=2&no_rooms=1
+2026-06-09 12:00:02,그랜드 하얏트 서울,서울,5*,booking,2026-06-16,7,990000,https://www.booking.com/hotel/kr/grand-hyatt-seoul.ko.html?checkin=2026-06-16&checkout=2026-06-17&group_adults=2&no_rooms=1
+2026-06-09 12:00:02,그랜드 하얏트 서울,서울,5*,booking,2026-06-23,14,941000,https://www.booking.com/hotel/kr/grand-hyatt-seoul.ko.html?checkin=2026-06-23&checkout=2026-06-24&group_adults=2&no_rooms=1
+2026-06-09 12:00:02,그랜드 하얏트 서울,서울,5*,booking,2026-07-09,30,768000,https://www.booking.com/hotel/kr/grand-hyatt-seoul.ko.html?checkin=2026-07-09&checkout=2026-07-10&group_adults=2&no_rooms=1
