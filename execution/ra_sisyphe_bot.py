@@ -469,17 +469,33 @@ async def _run_source_job(
             logging.info(f"{source_name}: 신규 글 없음 (알림 미발송)")
             return
 
-        from sources.base import split_for_telegram
+        from sources.base import split_for_telegram, sanitize_telegram_html, html_to_plain
         send_errors = []
         for p in posts:
-            full = adapter.format_message(p, label, icon)
+            # 발송 직전 1회 안전화 — 본문 속 stray '<...>' 꺾쇠가 잘못된 태그로
+            # 파싱돼 메시지 전체 전송이 실패하는 사고 방지 (모든 소스 공통).
+            full = sanitize_telegram_html(adapter.format_message(p, label, icon))
             for chat_id in SUBSCRIBERS:
                 try:
                     for chunk in split_for_telegram(full, 4000):
-                        await context.bot.send_message(
-                            chat_id=chat_id, text=chunk, parse_mode='HTML',
-                            disable_web_page_preview=True,
-                        )
+                        try:
+                            await context.bot.send_message(
+                                chat_id=chat_id, text=chunk, parse_mode='HTML',
+                                disable_web_page_preview=True,
+                            )
+                        except Exception as parse_err:
+                            # HTML 파싱 실패 시 평문으로 폴백 — job 자체는 성공시켜
+                            # 재시도/restart/SIGKILL/OnFailure 연쇄를 차단.
+                            if 'parse' not in str(parse_err).lower():
+                                raise
+                            logging.warning(
+                                f"{source_name} HTML 파싱 실패 → 평문 폴백 "
+                                f"(id={p.get('id')}): {parse_err}"
+                            )
+                            await context.bot.send_message(
+                                chat_id=chat_id, text=html_to_plain(chunk),
+                                disable_web_page_preview=True,
+                            )
                 except Exception as e:
                     send_errors.append(f"id={p.get('id')} chat={chat_id}: {e}")
                     logging.error(f"{source_name} 전송 실패 (id={p.get('id')}): {e}")

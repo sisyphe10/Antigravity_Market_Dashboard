@@ -106,6 +106,54 @@ def check_and_record_staleness(
     )
 
 
+# ── 텔레그램 HTML 안전화 ────────────────────────────────────────────────
+# 번역/LLM 본문을 parse_mode='HTML' 로 보낼 때, 본문 속 stray '<...>' 꺾쇠가
+# 잘못된 태그로 파싱돼 메시지 전체 전송이 실패하는 사고 방지 (2026-06-09 SemiAnalysis
+# 번역 본문의 '<3-5kg>' → "Can't parse entities: unsupported start tag" 사례).
+# 텔레그램이 허용하는 태그만 살리고 나머지 '<', '>', 맨 '&' 는 escape 한다.
+# idempotent: 이미 escape 된 '&lt;'/'&amp;' 는 그대로 보존.
+_ALLOWED_TG_TAG = re.compile(
+    r'</?(?:b|strong|i|em|u|ins|s|strike|del|code|pre|blockquote|tg-spoiler)>'
+    r'|<a\s+href="[^"<>]*">|</a>'
+    r'|<code\s+class="[^"<>]*">'
+    r'|<span\s+class="tg-spoiler">|</span>'
+    r'|<blockquote\s+expandable>',
+    re.IGNORECASE,
+)
+_BARE_AMP = re.compile(r'&(?!(?:[a-zA-Z][a-zA-Z0-9]*|#\d+|#x[0-9a-fA-F]+);)')
+_SENTINEL = '\x00'
+_TAG_PLACEHOLDER = re.compile(r'\x00(\d+)\x00')
+_HTML_TAG_STRIP = re.compile(r'<[^>]+>')
+
+
+def sanitize_telegram_html(text: str) -> str:
+    """텔레그램 허용 태그만 보존하고 나머지 꺾쇠/맨 & 를 escape.
+
+    허용: b/strong, i/em, u/ins, s/strike/del, code, pre, blockquote,
+          tg-spoiler, a href, code class, span class=tg-spoiler.
+    그 외 '<', '>' → '&lt;'/'&gt;', 엔티티 아닌 맨 '&' → '&amp;'.
+    """
+    if not text or ('<' not in text and '&' not in text):
+        return text
+    saved: list[str] = []
+
+    def _save(m: 're.Match[str]') -> str:
+        saved.append(m.group(0))
+        return f'{_SENTINEL}{len(saved) - 1}{_SENTINEL}'
+
+    tmp = _ALLOWED_TG_TAG.sub(_save, text)
+    tmp = _BARE_AMP.sub('&amp;', tmp)
+    tmp = tmp.replace('<', '&lt;').replace('>', '&gt;')
+    tmp = _TAG_PLACEHOLDER.sub(lambda m: saved[int(m.group(1))], tmp)
+    return tmp
+
+
+def html_to_plain(text: str) -> str:
+    """HTML 태그 제거 + 엔티티 복원 → 평문. parse 실패 시 폴백 전송용."""
+    import html as _h
+    return _h.unescape(_HTML_TAG_STRIP.sub('', text or ''))
+
+
 def _ends_with_orphan_header(chunk: str) -> bool:
     """chunk 끝의 마지막 비공백 줄이 섹션 헤더면 True (헤더만 매달림)."""
     stripped = chunk.rstrip()
