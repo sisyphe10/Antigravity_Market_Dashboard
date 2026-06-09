@@ -1310,6 +1310,8 @@ def _build_combined_chart_section():
                 {'display': 'SMP',                        'csv': 'SMP',                        'color': '#2d7a3a'},
             ]},
             {'label': 'MEMORY', 'series': [
+                {'display': '삼성 DDR5 소매가', 'csv': '삼성 DDR5 소매가', 'color': '#AD1457'},
+                {'display': 'SK하이닉스 DDR5 소매가', 'csv': 'SK하이닉스 DDR5 소매가', 'color': '#6A1B9A'},
                 {'display': 'DDR5 16Gb', 'csv': 'DDR5 16G (2Gx8) 4800/5600', 'color': '#E91E63'},
                 {'display': 'DDR4 8Gb',  'csv': 'DDR4 8Gb (1Gx8) 3200',      'color': '#F48FB1'},
                 {'display': 'SLC 2Gb',   'csv': 'SLC 2Gb 256MBx8',           'color': '#00897B'},

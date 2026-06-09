@@ -88,6 +88,12 @@ jobs:
         env:
           TZ: 'Asia/Seoul'
 
+      - name: Fetch Danawa DRAM Retail Price (최저가)
+        run: |
+          python execution/fetch_danawa_price.py || echo "다나와 수집 실패 (계속 진행)"
+        env:
+           TZ: 'Asia/Seoul'
+
       - name: Draw Charts
         run: |
           rm -f charts/*.png

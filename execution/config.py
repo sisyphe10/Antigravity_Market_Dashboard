@@ -7,6 +7,7 @@ Centralized definitions for categories, tickers, and target items
 CATEGORY_MAP = {
     'DRAM': 'Memory',
     'NAND': 'Memory',
+    'DRAM_RETAIL': 'Memory',
     'CRYPTO': 'CRYPTOCURRENCY',
     'COMMODITY': 'COMMODITIES',
     'BATTERY_METAL': 'COMMODITIES',
