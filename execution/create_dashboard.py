@@ -1598,7 +1598,7 @@ def _build_combined_chart_section():
                         datasets.push({
                             label: 'MA20',
                             data: ma20Visible,
-                            borderColor: '#D32F2F',
+                            borderColor: 'rgba(211, 47, 47, 0.5)',
                             backgroundColor: 'transparent',
                             borderWidth: 1.5,
                             pointRadius: 0,
@@ -1610,7 +1610,7 @@ def _build_combined_chart_section():
                         datasets.push({
                             label: 'MA120',
                             data: ma120Visible,
-                            borderColor: '#1B5E20',
+                            borderColor: 'rgba(27, 94, 32, 0.5)',
                             backgroundColor: 'transparent',
                             borderWidth: 1.5,
                             pointRadius: 0,
