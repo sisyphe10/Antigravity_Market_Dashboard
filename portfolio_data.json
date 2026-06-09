@@ -13,7 +13,7 @@
       "current_price": 322000.0,
       "ath_price": 360500.0,
       "dd": -10.679611650485432,
-      "rsi_1m": 13.567868324125238,
+      "rsi_1m": 17.248268324125238,
       "is_today_new": false
     },
     {
@@ -29,7 +29,7 @@
       "current_price": 2215000.0,
       "ath_price": 2363000.0,
       "dd": -6.263224714346172,
-      "rsi_1m": 28.885275090689227,
+      "rsi_1m": 32.565675090689226,
       "is_today_new": false
     },
     {
@@ -45,7 +45,7 @@
       "current_price": 1566000.0,
       "ath_price": 2203000.0,
       "dd": -28.9151157512483,
-      "rsi_1m": -18.84647908640616,
+      "rsi_1m": -15.166079086406159,
       "is_today_new": false
     },
     {
@@ -61,7 +61,7 @@
       "current_price": 393000.0,
       "ath_price": 480000.0,
       "dd": -18.125000000000004,
-      "rsi_1m": 25.967500000000005,
+      "rsi_1m": 29.647900000000003,
       "is_today_new": false
     },
     {
@@ -77,7 +77,7 @@
       "current_price": 1269000.0,
       "ath_price": 1361000.0,
       "dd": -6.759735488611318,
-      "rsi_1m": 10.436107825295732,
+      "rsi_1m": 14.116507825295733,
       "is_today_new": false
     },
     {
@@ -93,7 +93,7 @@
       "current_price": 92300.0,
       "ath_price": 136400.0,
       "dd": -32.33137829912024,
-      "rsi_1m": -37.36387829912024,
+      "rsi_1m": -33.68347829912024,
       "is_today_new": false
     },
     {
@@ -109,7 +109,7 @@
       "current_price": 102200.0,
       "ath_price": 149900.0,
       "dd": -31.821214142761846,
-      "rsi_1m": -26.356595458044644,
+      "rsi_1m": -22.676195458044646,
       "is_today_new": false
     },
     {
@@ -125,7 +125,7 @@
       "current_price": 115800.0,
       "ath_price": 161400.0,
       "dd": -28.25278810408922,
-      "rsi_1m": -26.47076322930801,
+      "rsi_1m": -22.790363229308007,
       "is_today_new": false
     },
     {
@@ -141,7 +141,7 @@
       "current_price": 98400.0,
       "ath_price": 133000.0,
       "dd": -26.015037593984957,
-      "rsi_1m": 39.56065234657039,
+      "rsi_1m": 43.10065234657039,
       "is_today_new": false
     },
     {
@@ -157,7 +157,7 @@
       "current_price": 22350.0,
       "ath_price": 51000.0,
       "dd": -56.1764705882353,
-      "rsi_1m": -13.057191358024694,
+      "rsi_1m": -9.376791358024693,
       "is_today_new": false
     },
     {
@@ -173,7 +173,7 @@
       "current_price": 1110000.0,
       "ath_price": 1630000.0,
       "dd": -31.90184049079755,
-      "rsi_1m": -17.216044303797467,
+      "rsi_1m": -13.535644303797467,
       "is_today_new": false
     },
     {
@@ -189,7 +189,7 @@
       "current_price": 428500.0,
       "ath_price": 681979.0,
       "dd": -37.16815327158167,
-      "rsi_1m": -5.497076074332168,
+      "rsi_1m": -1.816676074332168,
       "is_today_new": false
     },
     {
@@ -205,39 +205,7 @@
       "current_price": 131700.0,
       "ath_price": 207000.0,
       "dd": -36.3768115942029,
-      "rsi_1m": -0.27094773269689953,
-      "is_today_new": false
-    },
-    {
-      "code": "307950",
-      "name": "현대오토에버",
-      "sector": "소프트웨어",
-      "market_cap": 188402.75634,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -8.643617021276597,
-      "contribution": -1.7287234042553197,
-      "cumulative_return": -7.83471961363027,
-      "current_price": 687000.0,
-      "ath_price": 938000.0,
-      "dd": -26.7590618336887,
-      "rsi_1m": 45.79077113062568,
-      "is_today_new": false
-    },
-    {
-      "code": "454910",
-      "name": "두산로보틱스",
-      "sector": "기계",
-      "market_cap": 75580.09668,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -8.333333333333332,
-      "contribution": -1.6666666666666663,
-      "cumulative_return": -30.05398920215957,
-      "current_price": 116600.0,
-      "ath_price": 166700.0,
-      "dd": -30.05398920215957,
-      "rsi_1m": 12.626430373360236,
+      "rsi_1m": 3.269052267303099,
       "is_today_new": false
     },
     {
@@ -246,37 +214,15 @@
       "sector": "반도체",
       "market_cap": 28745.777745,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "weight_prev": 2.0,
+      "today_return": 14.721485411140584,
+      "contribution": 2.944297082228117,
+      "cumulative_return": 0.0,
       "current_price": 43250.0,
       "ath_price": 54500.0,
       "dd": -20.642201834862384,
-      "rsi_1m": 23.033670082449934,
-      "is_today_new": true
+      "rsi_1m": 26.57367008244993,
+      "is_today_new": false
     }
-  ],
-  "_order_changes": {
-    "삼성 트루밸류 / NH Value ESG / DB 개방형": {
-      "date": "2026-06-09",
-      "added": [
-        {
-          "name": "하나마이크론",
-          "weight": 2.0
-        }
-      ],
-      "changed": [],
-      "removed": [
-        {
-          "name": "현대오토에버",
-          "weight": 2.0
-        },
-        {
-          "name": "두산로보틱스",
-          "weight": 2.0
-        }
-      ]
-    }
-  }
+  ]
 }
