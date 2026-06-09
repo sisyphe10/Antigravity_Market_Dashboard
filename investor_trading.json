@@ -1,277 +1,277 @@
 {
-  "updated": "2026-06-09T16:21:37+09:00",
+  "updated": "2026-06-09T18:31:35+09:00",
   "window_short": 5,
   "window_long": 20,
   "stocks": {
     "000150": {
-      "last_date": "2026.06.08",
+      "last_date": "2026.06.09",
       "short": {
-        "inst_volume": -111143,
-        "frgn_volume": 106284,
-        "inst_value_eok": -2007.6,
-        "frgn_value_eok": 2030.2,
+        "inst_volume": -133757,
+        "frgn_volume": 68556,
+        "inst_value_eok": -2351.5,
+        "frgn_value_eok": 1250.2,
         "days_available": 5
       },
       "long": {
-        "inst_volume": -217420,
-        "frgn_volume": 212048,
-        "inst_value_eok": -3796.2,
-        "frgn_value_eok": 3931.7,
+        "inst_volume": -232102,
+        "frgn_volume": 213783,
+        "inst_value_eok": -4010.0,
+        "frgn_value_eok": 3975.4,
         "days_available": 20
       }
     },
     "000660": {
-      "last_date": "2026.06.08",
+      "last_date": "2026.06.09",
       "short": {
-        "inst_volume": 566392,
-        "frgn_volume": -2223611,
-        "inst_value_eok": 14902.4,
-        "frgn_value_eok": -49848.3,
+        "inst_volume": 561118,
+        "frgn_volume": -2120717,
+        "inst_value_eok": 13512.8,
+        "frgn_value_eok": -46490.1,
         "days_available": 5
       },
       "long": {
-        "inst_volume": 2204899,
-        "frgn_volume": -12830693,
-        "inst_value_eok": 48893.0,
-        "frgn_value_eok": -250301.4,
+        "inst_volume": 2878239,
+        "frgn_volume": -12382529,
+        "inst_value_eok": 64767.0,
+        "frgn_value_eok": -246057.7,
         "days_available": 20
       }
     },
     "003230": {
-      "last_date": "2026.06.08",
+      "last_date": "2026.06.09",
       "short": {
-        "inst_volume": -45617,
-        "frgn_volume": 29127,
-        "inst_value_eok": -529.4,
-        "frgn_value_eok": 340.2,
+        "inst_volume": -3337,
+        "frgn_volume": 1613,
+        "inst_value_eok": -39.6,
+        "frgn_value_eok": 22.2,
         "days_available": 5
       },
       "long": {
-        "inst_volume": -46693,
-        "frgn_volume": 68399,
-        "inst_value_eok": -418.0,
-        "frgn_value_eok": 882.4,
+        "inst_volume": -59021,
+        "frgn_volume": 35840,
+        "inst_value_eok": -599.5,
+        "frgn_value_eok": 452.0,
         "days_available": 20
       }
     },
     "005930": {
-      "last_date": "2026.06.08",
+      "last_date": "2026.06.09",
       "short": {
-        "inst_volume": 4791018,
-        "frgn_volume": -29027671,
-        "inst_value_eok": 19552.8,
-        "frgn_value_eok": -101407.5,
+        "inst_volume": 2725345,
+        "frgn_volume": -30442979,
+        "inst_value_eok": 11866.5,
+        "frgn_value_eok": -105915.9,
         "days_available": 5
       },
       "long": {
-        "inst_volume": 23804816,
-        "frgn_volume": -92067070,
-        "inst_value_eok": 75691.5,
-        "frgn_value_eok": -276666.7,
+        "inst_volume": 24497194,
+        "frgn_volume": -84067306,
+        "inst_value_eok": 78495.9,
+        "frgn_value_eok": -256041.3,
         "days_available": 20
       }
     },
     "007660": {
-      "last_date": "2026.06.08",
+      "last_date": "2026.06.09",
       "short": {
-        "inst_volume": -135395,
-        "frgn_volume": 599053,
-        "inst_value_eok": -116.2,
-        "frgn_value_eok": 772.1,
+        "inst_volume": -250692,
+        "frgn_volume": 362452,
+        "inst_value_eok": -283.6,
+        "frgn_value_eok": 439.7,
         "days_available": 5
       },
       "long": {
-        "inst_volume": 237776,
-        "frgn_volume": -1949728,
-        "inst_value_eok": 380.5,
-        "frgn_value_eok": -2498.2,
+        "inst_volume": 223560,
+        "frgn_volume": -1670434,
+        "inst_value_eok": 353.2,
+        "frgn_value_eok": -2106.8,
         "days_available": 20
       }
     },
     "020000": {
-      "last_date": "2026.06.08",
+      "last_date": "2026.06.09",
       "short": {
-        "inst_volume": -8023,
-        "frgn_volume": 75554,
-        "inst_value_eok": -0.9,
-        "frgn_value_eok": 16.0,
+        "inst_volume": 53545,
+        "frgn_volume": -11331,
+        "inst_value_eok": 12.8,
+        "frgn_value_eok": -3.1,
         "days_available": 5
       },
       "long": {
-        "inst_volume": 214309,
-        "frgn_volume": 167229,
-        "inst_value_eok": 61.1,
-        "frgn_value_eok": 33.2,
+        "inst_volume": 196406,
+        "frgn_volume": 118317,
+        "inst_value_eok": 56.1,
+        "frgn_value_eok": 20.9,
         "days_available": 20
       }
     },
     "032830": {
-      "last_date": "2026.06.08",
+      "last_date": "2026.06.09",
       "short": {
-        "inst_volume": 175548,
-        "frgn_volume": -65339,
-        "inst_value_eok": 736.3,
-        "frgn_value_eok": -273.8,
+        "inst_volume": 145937,
+        "frgn_volume": -118346,
+        "inst_value_eok": 608.8,
+        "frgn_value_eok": -485.8,
         "days_available": 5
       },
       "long": {
-        "inst_volume": 692072,
-        "frgn_volume": -482775,
-        "inst_value_eok": 2436.8,
-        "frgn_value_eok": -1649.8,
+        "inst_volume": 706874,
+        "frgn_volume": -489787,
+        "inst_value_eok": 2515.4,
+        "frgn_value_eok": -1701.5,
         "days_available": 20
       }
     },
     "034020": {
-      "last_date": "2026.06.08",
+      "last_date": "2026.06.09",
       "short": {
-        "inst_volume": -1103015,
-        "frgn_volume": -2557635,
-        "inst_value_eok": -1049.5,
-        "frgn_value_eok": -2477.2,
+        "inst_volume": -1019172,
+        "frgn_volume": -2348466,
+        "inst_value_eok": -957.5,
+        "frgn_value_eok": -2276.9,
         "days_available": 5
       },
       "long": {
-        "inst_volume": -3875131,
-        "frgn_volume": -7682872,
-        "inst_value_eok": -4322.4,
-        "frgn_value_eok": -8623.7,
+        "inst_volume": -3474226,
+        "frgn_volume": -5563596,
+        "inst_value_eok": -3796.6,
+        "frgn_value_eok": -5936.6,
         "days_available": 20
       }
     },
     "042660": {
-      "last_date": "2026.06.08",
+      "last_date": "2026.06.09",
       "short": {
-        "inst_volume": -176125,
-        "frgn_volume": -1204524,
-        "inst_value_eok": -197.2,
-        "frgn_value_eok": -1380.0,
+        "inst_volume": -223247,
+        "frgn_volume": -1535686,
+        "inst_value_eok": -242.2,
+        "frgn_value_eok": -1724.3,
         "days_available": 5
       },
       "long": {
-        "inst_volume": 54563,
-        "frgn_volume": -1751064,
-        "inst_value_eok": 58.4,
-        "frgn_value_eok": -1796.7,
+        "inst_volume": 27468,
+        "frgn_volume": -1781206,
+        "inst_value_eok": 38.9,
+        "frgn_value_eok": -1761.8,
         "days_available": 20
       }
     },
     "067310": {
-      "last_date": "2026.06.08",
+      "last_date": "2026.06.09",
       "short": {
-        "inst_volume": 223002,
-        "frgn_volume": -246041,
-        "inst_value_eok": 96.8,
-        "frgn_value_eok": -105.7,
+        "inst_volume": 819123,
+        "frgn_volume": -520790,
+        "inst_value_eok": 349.9,
+        "frgn_value_eok": -222.7,
         "days_available": 5
       },
       "long": {
-        "inst_volume": -238556,
-        "frgn_volume": 1642447,
-        "inst_value_eok": -97.1,
-        "frgn_value_eok": 870.5,
+        "inst_volume": 165521,
+        "frgn_volume": 1339568,
+        "inst_value_eok": 77.8,
+        "frgn_value_eok": 739.9,
         "days_available": 20
       }
     },
     "128940": {
-      "last_date": "2026.06.08",
+      "last_date": "2026.06.09",
       "short": {
-        "inst_volume": -32502,
-        "frgn_volume": -102343,
-        "inst_value_eok": -116.5,
-        "frgn_value_eok": -550.7,
+        "inst_volume": -50882,
+        "frgn_volume": 9236,
+        "inst_value_eok": -211.4,
+        "frgn_value_eok": 5.4,
         "days_available": 5
       },
       "long": {
-        "inst_volume": 47400,
-        "frgn_volume": -147029,
-        "inst_value_eok": 291.9,
-        "frgn_value_eok": -782.9,
+        "inst_volume": 39656,
+        "frgn_volume": -110282,
+        "inst_value_eok": 258.4,
+        "frgn_value_eok": -625.8,
         "days_available": 20
       }
     },
     "226950": {
-      "last_date": "2026.06.08",
+      "last_date": "2026.06.09",
       "short": {
-        "inst_volume": -11263,
-        "frgn_volume": 17670,
-        "inst_value_eok": -2.5,
-        "frgn_value_eok": 26.9,
+        "inst_volume": 1692,
+        "frgn_volume": -133965,
+        "inst_value_eok": 17.5,
+        "frgn_value_eok": -237.8,
         "days_available": 5
       },
       "long": {
-        "inst_volume": 52485,
-        "frgn_volume": 145111,
-        "inst_value_eok": 150.8,
-        "frgn_value_eok": 222.3,
+        "inst_volume": 71210,
+        "frgn_volume": 164824,
+        "inst_value_eok": 180.1,
+        "frgn_value_eok": 253.1,
         "days_available": 20
       }
     },
     "295310": {
-      "last_date": "2026.06.08",
+      "last_date": "2026.06.09",
       "short": {
-        "inst_volume": -152259,
-        "frgn_volume": 53686,
-        "inst_value_eok": -149.2,
-        "frgn_value_eok": 49.5,
+        "inst_volume": -56739,
+        "frgn_volume": 14289,
+        "inst_value_eok": -54.3,
+        "frgn_value_eok": 10.3,
         "days_available": 5
       },
       "long": {
-        "inst_volume": -21105,
-        "frgn_volume": 402313,
-        "inst_value_eok": -5.4,
-        "frgn_value_eok": 436.0,
+        "inst_volume": -50208,
+        "frgn_volume": 365998,
+        "inst_value_eok": -32.1,
+        "frgn_value_eok": 403.7,
         "days_available": 20
       }
     },
     "307950": {
-      "last_date": "2026.06.08",
+      "last_date": "2026.06.09",
       "short": {
-        "inst_volume": -14019,
-        "frgn_volume": -19166,
-        "inst_value_eok": -103.7,
-        "frgn_value_eok": -184.0,
+        "inst_volume": -56998,
+        "frgn_volume": -40560,
+        "inst_value_eok": -408.9,
+        "frgn_value_eok": -286.2,
         "days_available": 5
       },
       "long": {
-        "inst_volume": 232162,
-        "frgn_volume": -10806,
-        "inst_value_eok": 1612.5,
-        "frgn_value_eok": -172.4,
+        "inst_volume": 141492,
+        "frgn_volume": -132579,
+        "inst_value_eok": 1038.6,
+        "frgn_value_eok": -930.6,
         "days_available": 20
       }
     },
     "402340": {
-      "last_date": "2026.06.08",
+      "last_date": "2026.06.09",
       "short": {
-        "inst_volume": -251512,
-        "frgn_volume": 609193,
-        "inst_value_eok": -3176.4,
-        "frgn_value_eok": 7909.2,
+        "inst_volume": -89104,
+        "frgn_volume": 376520,
+        "inst_value_eok": -1134.2,
+        "frgn_value_eok": 4991.8,
         "days_available": 5
       },
       "long": {
-        "inst_volume": 588035,
-        "frgn_volume": 67975,
-        "inst_value_eok": 6722.8,
-        "frgn_value_eok": 1758.2,
+        "inst_volume": 538957,
+        "frgn_volume": 228471,
+        "inst_value_eok": 6214.4,
+        "frgn_value_eok": 3585.6,
         "days_available": 20
       }
     },
     "454910": {
-      "last_date": "2026.06.08",
+      "last_date": "2026.06.09",
       "short": {
-        "inst_volume": -1550351,
-        "frgn_volume": 993972,
-        "inst_value_eok": -2149.3,
-        "frgn_value_eok": 1244.3,
+        "inst_volume": -1586777,
+        "frgn_volume": 114136,
+        "inst_value_eok": -2198.7,
+        "frgn_value_eok": 56.8,
         "days_available": 5
       },
       "long": {
-        "inst_volume": -4460098,
-        "frgn_volume": 3491308,
-        "inst_value_eok": -5046.0,
-        "frgn_value_eok": 3755.8,
+        "inst_volume": -4716092,
+        "frgn_volume": 3919749,
+        "inst_value_eok": -5305.3,
+        "frgn_value_eok": 4167.0,
         "days_available": 20
       }
     }
