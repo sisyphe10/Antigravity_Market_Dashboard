@@ -187,6 +187,22 @@ _SUBSTACK_PAYWALL_MARKERS = (
 )
 
 
+def _translate_enabled() -> bool:
+    """sources.json 의 semianalysis translate.enabled (기본 False).
+
+    번역이 꺼져 있으면 본문 추출·번역을 생략하고 링크만 발송한다.
+    설정 읽기 실패 시 안전하게 False (링크만).
+    """
+    try:
+        from . import load_sources_config
+        for s in load_sources_config():
+            if s.get('name') == STATE_NAME:
+                return bool((s.get('translate') or {}).get('enabled', False))
+    except Exception as e:
+        logger.warning(f'translate flag 읽기 실패, 번역 생략: {e}')
+    return False
+
+
 def _is_paywalled(text: str) -> bool:
     """본문이 잘린 유료글인지.
 
@@ -259,6 +275,25 @@ def fetch_new_posts(update_state: bool = False) -> list[dict[str, Any]]:
     # 신규 글만 (오래된 순)
     new_posts = [p for p in feed_posts if p['id'] and p['id'] not in seen_guids]
     new_posts.reverse()  # RSS는 최신순 → 오래된 순으로 발송
+
+    # 번역 비활성 → 링크만 발송 (본문 추출·번역·paywall 감지 생략)
+    if not _translate_enabled():
+        enriched: list[dict[str, Any]] = [{
+            'id': p['id'],
+            'title': p['title'],
+            'date': _format_date(p['date']),
+            'url': p['url'],
+            'author': p['author'],
+            'body_en': '',
+            'body_kr': '',
+            'paywalled': False,
+            'link_only': True,
+        } for p in new_posts]
+        if update_state and enriched:
+            new_seen = list(seen_guids) + [p['id'] for p in enriched]
+            save_state(STATE_NAME, {'last_seen_guids': new_seen[-MAX_REMEMBERED_GUIDS:]})
+        logger.info(f'SemiAnalysis 링크만 발송 모드 — 신규 {len(enriched)}건')
+        return enriched
 
     # 본문 텍스트화 + paywall 감지 + 번역
     from ._translator import translate_to_korean
@@ -356,7 +391,7 @@ def format_message(post: dict[str, Any], label: str, icon: str) -> str:
         f"{post['url']}\n\n"
     )
     body = post.get('body_kr', '') or ''
-    return header + body
+    return (header + body).rstrip()
 
 
 def _format_date(rfc822: str) -> str:
