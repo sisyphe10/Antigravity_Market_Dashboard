@@ -77,6 +77,10 @@ def collect_range(start: date, end: date, sleep_sec: float = 0.6) -> list[tuple[
         try:
             rows = parse_page(fetch_page(cur.isoformat()), cur)
             for d, v in rows:
+                # 수집 당일은 SMP 미확정 → 0.0으로 잡힘. provisional 0.0은 저장하지 않음
+                # (다음날 확정값으로 다시 fetch되어 채워짐)
+                if v == 0:
+                    continue
                 if d not in collected:
                     collected[d] = v
             page_count += 1
@@ -97,14 +101,23 @@ def append_to_dataset(rows: list[tuple[str, float]]) -> int:
     market_crawler.save_to_csv 와 동일 로직 (utf-8-sig, 헤더: 날짜,제품명,가격,데이터 타입)
     """
     csv_path = 'dataset.csv'
+    fetched = {d: v for d, v in rows}
     existing_keys = set()
+    all_rows = []
+    healed = 0
     if os.path.exists(csv_path):
         with open(csv_path, 'r', encoding='utf-8-sig') as f:
             r = csv.reader(f)
-            next(r, None)
+            header = next(r, None)
             for row in r:
                 if len(row) >= 2:
                     existing_keys.add((row[0], row[1]))
+                    # 이미 박혀버린 provisional 0.0 self-heal: 확정값 fetch되면 덮어쓰기
+                    if (len(row) >= 4 and row[1] == PRODUCT_NAME and row[2] == '0.0'
+                            and float(fetched.get(row[0], 0)) != 0):
+                        row[2] = str(fetched[row[0]])
+                        healed += 1
+                all_rows.append(row)
 
     new_rows = []
     for d, v in rows:
@@ -112,6 +125,17 @@ def append_to_dataset(rows: list[tuple[str, float]]) -> int:
         if key not in existing_keys:
             new_rows.append([d, PRODUCT_NAME, v, DATA_TYPE])
             existing_keys.add(key)
+
+    # 0.0 self-heal 발생 시 전체 재작성 (append만으로는 기존 행 수정 불가)
+    if healed:
+        with open(csv_path, 'w', newline='', encoding='utf-8-sig') as f:
+            w = csv.writer(f)
+            if header:
+                w.writerow(header)
+            w.writerows(all_rows)
+            w.writerows(new_rows)
+        print(f'  ↻ {healed}건 provisional 0.0 → 확정값으로 self-heal')
+        return len(new_rows) + healed
 
     if not new_rows:
         return 0
