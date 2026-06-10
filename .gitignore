@@ -111,3 +111,6 @@ featured_data_kis.json
 
 # 미분류 거래 알림 상태 (VM 로컬, deploy.sh가 백업)
 .ledger_uncat_notified.json
+
+# local API key files - never commit
+secrets/
