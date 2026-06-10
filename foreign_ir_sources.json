@@ -778,12 +778,12 @@
       "rss_url": "https://news.google.com/rss/search?q=%22Merck%22+%28MRK%29+press+release+when:30d&hl=en-US&gl=US&ceid=US:en",
       "fetch_type": "rss",
       "confidence": "med",
-      "notes": "연도/카테고리 필터링 가능 | codex: Fetched official news releases page; filters and counts visible but release items not exposed in fetched HTML, likely dynamic. | 2026-06-08 fix: Google News RSS 복구(자사 newsroom=SPA, 공식 RSS 미발견). 일부 third-party 논평 섞일 수 있음.",
+      "notes": "연도/카테고리 필터링 가능 | codex: Fetched official news releases page; filters and counts visible but release items not exposed in fetched HTML, likely dynamic. | 2026-06-08 fix: Google News RSS 복구(자사 newsroom=SPA, 공식 RSS 미발견). 일부 third-party 논평 섞일 수 있음. | 2026-06-11 disable: plain Google News라 제3자 기사 혼입 → 사용자 요청으로 수집 제외 (공식 뉴스룸 대안 확보 시 재활성화).",
       "sources": [
         "claude",
         "codex"
       ],
-      "enabled": true,
+      "enabled": false,
       "batch": 2
     },
     {
@@ -958,12 +958,12 @@
       "rss_url": "https://news.google.com/rss/search?q=Nokia+%28NOK%29+when:30d&hl=en-US&gl=US&ceid=US:en",
       "fetch_type": "rss",
       "confidence": "med",
-      "notes": "Fetched official stock exchange releases page; page lists dated investor-relevant releases. RSS URL inferred from official newsroom RSS pattern. | alternate (claude): https://www.nokia.com/newsroom/ | 2026-06-08 fix: Google News RSS 복구(구 rss.xml=404 HTML, newsroom=SPA). 주가 논평 비중 있음.",
+      "notes": "Fetched official stock exchange releases page; page lists dated investor-relevant releases. RSS URL inferred from official newsroom RSS pattern. | alternate (claude): https://www.nokia.com/newsroom/ | 2026-06-08 fix: Google News RSS 복구(구 rss.xml=404 HTML, newsroom=SPA). 주가 논평 비중 있음. | 2026-06-11 disable: plain Google News라 제3자 기사 혼입 → 사용자 요청으로 수집 제외 (공식 뉴스룸 대안 확보 시 재활성화).",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
       ],
-      "enabled": true,
+      "enabled": false,
       "batch": 2
     },
     {
@@ -1768,12 +1768,12 @@
       "rss_url": "https://news.google.com/rss/search?q=%22Novo+Nordisk%22+when:30d&hl=en-US&gl=US&ceid=US:en",
       "fetch_type": "rss",
       "confidence": "med",
-      "notes": "Official global newsroom lists press releases and company announcements; no RSS feed found. | alternate (claude): https://www.novonordisk.com/news-and-media/news-and-ir-materials.html | 2026-06-08 fix: Google News RSS 복구(newsroom=SPA). source 한정 불가 → 논평 섞일 수 있음.",
+      "notes": "Official global newsroom lists press releases and company announcements; no RSS feed found. | alternate (claude): https://www.novonordisk.com/news-and-media/news-and-ir-materials.html | 2026-06-08 fix: Google News RSS 복구(newsroom=SPA). source 한정 불가 → 논평 섞일 수 있음. | 2026-06-11 disable: plain Google News라 제3자 기사 혼입 → 사용자 요청으로 수집 제외 (공식 뉴스룸 대안 확보 시 재활성화).",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
       ],
-      "enabled": true,
+      "enabled": false,
       "batch": 4
     },
     {
@@ -1894,12 +1894,12 @@
       "rss_url": "https://news.google.com/rss/search?q=%22Prada%22+group+when:45d&hl=en-US&gl=US&ceid=US:en",
       "fetch_type": "rss",
       "confidence": "low",
-      "notes": "Official Prada Group press releases/documents and investor highlights verified; no RSS found. | alternate (claude): https://www.pradagroup.com/en/investors/investor-relations/press-releases.html | 2026-06-08 fix: Google News RSS 복구(SPA). 전용 배포처 일정치 않아 자사 발표 순도 낮음.",
+      "notes": "Official Prada Group press releases/documents and investor highlights verified; no RSS found. | alternate (claude): https://www.pradagroup.com/en/investors/investor-relations/press-releases.html | 2026-06-08 fix: Google News RSS 복구(SPA). 전용 배포처 일정치 않아 자사 발표 순도 낮음. | 2026-06-11 disable: plain Google News라 제3자 기사 혼입 → 사용자 요청으로 수집 제외 (공식 뉴스룸 대안 확보 시 재활성화).",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
       ],
-      "enabled": true,
+      "enabled": false,
       "batch": 4
     },
     {
