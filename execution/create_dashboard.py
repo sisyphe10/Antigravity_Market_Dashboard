@@ -1277,9 +1277,12 @@ def _build_combined_chart_section():
                 {'display': 'JPY/USD',            'csv': 'JPY/USD',            'color': '#039BE5'},
                 {'display': 'TWD/USD',            'csv': 'TWD/USD',            'color': '#03A9F4'},
                 {'display': 'EUR/USD',            'csv': 'EUR/USD',            'color': '#29B6F6'},
+                # 미국 달러인덱스 광의 (FRED 일별, fetch_fred_data.py)
+                {'display': '달러인덱스 (광의)',  'csv': '달러인덱스 (광의)',  'color': '#4FC3F7'},
             ]},
             {'label': 'INTEREST RATES', 'series': [
                 {'display': 'US03M', 'csv': 'US 13 Week Treasury Yield', 'color': '#B71C1C'},
+                {'display': 'US02Y', 'csv': 'US 2 Year Treasury Yield',  'color': '#D50000'},
                 {'display': 'US05Y', 'csv': 'US 5 Year Treasury Yield',  'color': '#C62828'},
                 {'display': 'US10Y', 'csv': 'US 10 Year Treasury Yield', 'color': '#D32F2F'},
                 {'display': 'US30Y', 'csv': 'US 30 Year Treasury Yield', 'color': '#E53935'},
@@ -1292,6 +1295,16 @@ def _build_combined_chart_section():
                 {'display': '회사채 3년 AA-',         'csv': '회사채 3년 AA-',         'color': '#E64A19'},
                 {'display': '장단기 스프레드 10Y-3Y', 'csv': '장단기 스프레드 10Y-3Y', 'color': '#F4511E'},
                 {'display': '신용 스프레드 AA-3Y',    'csv': '신용 스프레드 AA-3Y',    'color': '#FF7043'},
+                # 미국 금리·스프레드 (FRED 일별, fetch_fred_data.py)
+                {'display': '미 기준금리 상단',        'csv': '미 기준금리 상단',        'color': '#1A237E'},
+                {'display': '미 장단기 금리차 10Y-2Y', 'csv': '미 장단기 금리차 10Y-2Y', 'color': '#283593'},
+                {'display': '미 장단기 금리차 10Y-3M', 'csv': '미 장단기 금리차 10Y-3M', 'color': '#303F9F'},
+                {'display': '미 BBB 스프레드',         'csv': '미 BBB 스프레드',         'color': '#3949AB'},
+                {'display': '미 하이일드 스프레드',    'csv': '미 하이일드 스프레드',    'color': '#3F51B5'},
+                {'display': '미 실질금리 10Y',         'csv': '미 실질금리 10Y',         'color': '#5C6BC0'},
+                {'display': '미 기대인플레 BEI 10Y',   'csv': '미 기대인플레 BEI 10Y',   'color': '#7986CB'},
+                {'display': '미 기대인플레 5Y5Y',      'csv': '미 기대인플레 5Y5Y',      'color': '#9FA8DA'},
+                {'display': 'SOFR',                    'csv': 'SOFR',                    'color': '#304FFE'},
             ]},
             {'label': 'MACRO KOREA', 'series': [
                 # ECOS 월별 매크로 (5년 임베드 창, fetch_ecos_data.py)
@@ -1309,6 +1322,29 @@ def _build_combined_chart_section():
                 {'display': '경상수지',              'csv': '경상수지',              'color': '#4DB6AC'},
                 {'display': '외환보유액',            'csv': '외환보유액',            'color': '#4DD0E1'},
             ]},
+            {'label': 'MACRO US', 'series': [
+                # FRED 미국 매크로 (fetch_fred_data.py; 월·분기 FRED_MACRO는 5년 임베드 창,
+                # 일·주간 FRED_RATE는 기존 365일 창)
+                {'display': '미 역레포 잔고',               'csv': '미 역레포 잔고',               'color': '#0D47A1'},
+                {'display': '미 신규 실업수당청구',         'csv': '미 신규 실업수당청구',         'color': '#1A5BB8'},
+                {'display': '미 연속 실업수당청구',         'csv': '미 연속 실업수당청구',         'color': '#2A6BC9'},
+                {'display': '미 금융여건지수 NFCI',         'csv': '미 금융여건지수 NFCI',         'color': '#3A7BD5'},
+                {'display': '미 연준 총자산',               'csv': '미 연준 총자산',               'color': '#4A8BE0'},
+                {'display': '미 CPI 전년동월비',            'csv': '미 CPI 전년동월비',            'color': '#5B99E8'},
+                {'display': '미 근원 CPI 전년동월비',       'csv': '미 근원 CPI 전년동월비',       'color': '#6CA7EF'},
+                {'display': '미 근원 PCE 전년동월비',       'csv': '미 근원 PCE 전년동월비',       'color': '#7DB5F4'},
+                {'display': '미 PPI 전년동월비',            'csv': '미 PPI 전년동월비',            'color': '#8FC2F8'},
+                {'display': '미 시간당임금 전년동월비',     'csv': '미 시간당임금 전년동월비',     'color': '#A0CFFB'},
+                {'display': '미 비농업고용 증감',           'csv': '미 비농업고용 증감',           'color': '#263238'},
+                {'display': '미 실업률',                    'csv': '미 실업률',                    'color': '#37474F'},
+                {'display': '미 JOLTS 구인',                'csv': '미 JOLTS 구인',                'color': '#455A64'},
+                {'display': '미 소매판매 전년동월비',       'csv': '미 소매판매 전년동월비',       'color': '#546E7A'},
+                {'display': '미 산업생산 전년동월비',       'csv': '미 산업생산 전년동월비',       'color': '#607D8B'},
+                {'display': '미 근원자본재 수주 전년동월비','csv': '미 근원자본재 수주 전년동월비','color': '#78909C'},
+                {'display': '미시간 소비자심리',            'csv': '미시간 소비자심리',            'color': '#90A4AE'},
+                {'display': '미 Sahm Rule 침체지표',        'csv': '미 Sahm Rule 침체지표',        'color': '#A7B8C2'},
+                {'display': '미 GDPNow 성장률',             'csv': '미 GDPNow 성장률',             'color': '#BCC9D1'},
+            ]},
             {'label': 'CREDIT & HOUSING', 'series': [
                 # ECOS 신용·부동산 (5년 임베드 창, fetch_ecos_data.py)
                 {'display': '은행 대출금리 (신규취급)',       'csv': '은행 대출금리 (신규취급)',       'color': '#3E2723'},
@@ -1323,6 +1359,16 @@ def _build_combined_chart_section():
                 {'display': 'KB 아파트지수 (서울)',           'csv': 'KB 아파트지수 (서울)',           'color': '#9E9D24'},
                 {'display': '아파트 실거래지수 (전국)',       'csv': '아파트 실거래지수 (전국)',       'color': '#AFB42B'},
                 {'display': '아파트 실거래지수 (서울)',       'csv': '아파트 실거래지수 (서울)',       'color': '#C0CA33'},
+            ]},
+            {'label': 'CREDIT & HOUSING US', 'series': [
+                # FRED 미국 신용·부동산 (fetch_fred_data.py; 월·분기 FRED_SECTOR는 5년 임베드 창,
+                # 모기지(주간 FRED_RATE)는 기존 365일 창)
+                {'display': '미 모기지 30년 금리',                'csv': '미 모기지 30년 금리',                'color': '#5D2E0D'},
+                {'display': '미 주택착공',                        'csv': '미 주택착공',                        'color': '#7A3E11'},
+                {'display': '미 건축허가',                        'csv': '미 건축허가',                        'color': '#965016'},
+                {'display': '미 기존주택판매',                    'csv': '미 기존주택판매',                    'color': '#B3621B'},
+                {'display': '미 케이스-실러 주택가격 전년동월비', 'csv': '미 케이스-실러 주택가격 전년동월비', 'color': '#CF7420'},
+                {'display': '미 은행 대출태도 (C&I)',             'csv': '미 은행 대출태도 (C&I)',             'color': '#E98A2B'},
             ]},
             {'label': 'CRYPTOCURRENCY', 'series': [
                 {'display': 'BTC', 'csv': 'BTC', 'color': '#F7931A'},
@@ -1405,11 +1451,12 @@ def _build_combined_chart_section():
         latest = df['날짜'].max()
         # MA120 표시를 위해 데이터 범위 확장 (12개월)
         start = latest - timedelta(days=365)
-        # ECOS 월·분기 시리즈(ECOS_MACRO/ECOS_SECTOR)는 포인트가 적어 5년 창 적용.
+        # ECOS/FRED 월·분기 시리즈(ECOS_MACRO/ECOS_SECTOR/FRED_MACRO/FRED_SECTOR)는
+        # 포인트가 적어 5년 창 적용. FRED_RATE(일·주간)는 기존 365일 창 유지 (설계 핵심).
         # '데이터 타입'이 NaN인 빌드타임 inject 행(hotel 등)은 기존 365일 창 유지.
         long_start = latest - timedelta(days=365 * 5)
         if '데이터 타입' in df.columns:
-            long_mask = df['데이터 타입'].isin(['ECOS_MACRO', 'ECOS_SECTOR'])
+            long_mask = df['데이터 타입'].isin(['ECOS_MACRO', 'ECOS_SECTOR', 'FRED_MACRO', 'FRED_SECTOR'])
         else:
             long_mask = pd.Series(False, index=df.index)
         df = df[(df['날짜'] <= latest)

@@ -79,6 +79,9 @@ def draw_charts():
         # SEIBro 데이터 제외 (별도 대시보드에서 처리)
         if '데이터 타입' in df.columns:
             df = df[df['데이터 타입'] != 'SEIBro']
+            # ECOS/FRED 매크로 시계열 제외 — market.html 동적 통합 차트에서만 사용되고
+            # PNG는 어디서도 참조 안 됨 (매일 69종 PNG 커밋으로 repo 비대화 방지)
+            df = df[~df['데이터 타입'].astype(str).str.startswith(('ECOS_', 'FRED_'))]
 
         # Convert date column to datetime
         df['날짜'] = pd.to_datetime(df['날짜'])
