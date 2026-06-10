@@ -1,0 +1,62 @@
+name: Daily KOFIA Stats
+
+# 고객예탁금/신용잔고 (data.go.kr 금투협 종합통계) 수집 → kofia_stats.json →
+# index.html 랜딩 차트 재생성. 평일 17:30 KST.
+# secrets.DATA_GO_KR_API_KEY 미설정 시 graceful skip (실패 알림 없음).
+
+on:
+  schedule:
+    - cron: '30 8 * * 1-5'  # 17:30 KST weekdays (08:30 UTC)
+  workflow_dispatch:        # Allow manual trigger
+
+concurrency:
+  group: wrap-nav-pipeline
+  cancel-in-progress: false
+
+jobs:
+  fetch-kofia:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history needed for merge / merge-base
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Fetch KOFIA stats (고객예탁금 + 신용잔고)
+        env:
+          DATA_GO_KR_API_KEY: ${{ secrets.DATA_GO_KR_API_KEY }}
+          TZ: 'Asia/Seoul'
+        run: |
+          if [ -z "${DATA_GO_KR_API_KEY}" ]; then
+            echo "DATA_GO_KR_API_KEY secret not set - skipping KOFIA fetch (no failure)"
+            echo "KOFIA_SKIP=1" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          python execution/fetch_kofia_stats.py
+
+      - name: Generate Dashboard
+        if: env.KOFIA_SKIP != '1'
+        run: |
+          python execution/create_dashboard.py
+        env:
+          TZ: 'Asia/Seoul'
+
+      - name: Commit and Push (race-safe)
+        if: env.KOFIA_SKIP != '1'
+        run: |
+          bash scripts/safe_commit_push.sh \
+            -m "Auto-update: KOFIA deposit/credit stats [skip ci]" \
+            -- kofia_stats.json index.html

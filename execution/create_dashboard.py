@@ -4610,6 +4610,135 @@ def create_fee_section():
     """
 
 
+def _fmt_jo_eok(won):
+    """원 단위 금액 -> 'NN조 N,NNN억원' 표기 (사용자 금액 표기 규칙)."""
+    eok = int(round(won / 1e8))
+    jo, rem = divmod(eok, 10000)
+    if jo > 0:
+        return f"{jo}조 {rem:,}억원"
+    return f"{eok:,}억원"
+
+
+def _build_landing_kofia_section():
+    """index.html(랜딩) 고객예탁금/신용잔고 Chart.js 카드 2개.
+
+    데이터: 리포에 커밋된 kofia_stats.json (execution/fetch_kofia_stats.py가
+    data.go.kr 금투협 종합통계 API로 생성, 단위: 원).
+    파일이 없거나 비어 있으면 빈 문자열 반환 — API 키 없는 환경(VM 16:20 재생성 등)
+    에서도 graceful하게 동작.
+    """
+    try:
+        with open('kofia_stats.json', 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        dep = data.get('deposit') or {}
+        crd = data.get('credit') or {}
+        if not dep.get('dates') or not dep.get('values') \
+           or not crd.get('dates') or not crd.get('total'):
+            print("kofia_stats.json empty - landing kofia section skipped")
+            return ''
+    except Exception as e:
+        print(f"kofia_stats.json not available - landing kofia section skipped: {e}")
+        return ''
+
+    dep_latest = _fmt_jo_eok(dep['values'][-1])
+    dep_latest_date = dep['dates'][-1]
+    crd_latest = _fmt_jo_eok(crd['total'][-1])
+    crd_latest_date = crd['dates'][-1]
+
+    export_json = json.dumps({
+        'deposit': {'dates': dep['dates'], 'values': dep['values']},
+        'credit': {
+            'dates': crd['dates'],
+            'total': crd['total'],
+            'kospi': crd.get('kospi') or [],
+            'kosdaq': crd.get('kosdaq') or [],
+        },
+    }, ensure_ascii=False)
+
+    section = """
+        <style>
+        .lh-kofia-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
+        .lh-kofia-title { font-size: 1.0rem; font-weight: 700; color: #111; }
+        .lh-kofia-latest { font-size: 0.88rem; font-weight: 600; color: #333; }
+        .lh-kofia-latest small { color: #888; font-weight: 500; margin-left: 4px; }
+        .lh-kofia-legend { margin-top: 10px; text-align: center; color: #222; }
+        </style>
+        <div class="lh-card">
+            <div class="lh-kofia-head">
+                <span class="lh-kofia-title">고객예탁금</span>
+                <span class="lh-kofia-latest">DEP_LATEST_PLACEHOLDER<small>(DEP_DATE_PLACEHOLDER)</small></span>
+            </div>
+            <div style="position:relative;height:240px;"><canvas id="kofiaDepositChart"></canvas></div>
+        </div>
+        <div class="lh-card">
+            <div class="lh-kofia-head">
+                <span class="lh-kofia-title">신용잔고 (신용거래융자)</span>
+                <span class="lh-kofia-latest">CRD_LATEST_PLACEHOLDER<small>(CRD_DATE_PLACEHOLDER)</small></span>
+            </div>
+            <div style="position:relative;height:240px;"><canvas id="kofiaCreditChart"></canvas></div>
+            <div id="kofiaCreditLegend" class="lh-kofia-legend"></div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+        (function() {
+            Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif";
+            var KOFIA = KOFIA_DATA_PLACEHOLDER;
+            function fmtJoEok(v) {
+                var eok = Math.round(v / 1e8);
+                var jo = Math.floor(eok / 10000), rem = eok % 10000;
+                if (jo > 0) return jo + '조 ' + rem.toLocaleString('ko-KR') + '억원';
+                return eok.toLocaleString('ko-KR') + '억원';
+            }
+            function kofiaOpts() {
+                return {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + (ctx.parsed.y === null ? '-' : fmtJoEok(ctx.parsed.y)); } } }
+                    },
+                    scales: {
+                        x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val) { var d = this.getLabelForValue(val); if (!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 11 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
+                        y: { ticks: { callback: function(v) { return Math.round(v / 1e11) / 10 + '조원'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' }, border: { color: '#000' } }
+                    }
+                };
+            }
+            function lineDs(label, data, color) {
+                return { label: label, data: data, borderColor: color, backgroundColor: 'transparent', borderWidth: 2, pointRadius: 0, tension: 0.3, spanGaps: true };
+            }
+            new Chart(document.getElementById('kofiaDepositChart'), {
+                type: 'line',
+                data: { labels: KOFIA.deposit.dates, datasets: [lineDs('고객예탁금', KOFIA.deposit.values, '#1e3a8a')] },
+                options: kofiaOpts()
+            });
+            var crdSets = [lineDs('합계', KOFIA.credit.total, '#dc2626')];
+            if (KOFIA.credit.kospi && KOFIA.credit.kospi.length) crdSets.push(lineDs('코스피', KOFIA.credit.kospi, '#1976D2'));
+            if (KOFIA.credit.kosdaq && KOFIA.credit.kosdaq.length) crdSets.push(lineDs('코스닥', KOFIA.credit.kosdaq, '#F57C00'));
+            new Chart(document.getElementById('kofiaCreditChart'), {
+                type: 'line',
+                data: { labels: KOFIA.credit.dates, datasets: crdSets },
+                options: kofiaOpts()
+            });
+            var legendEl = document.getElementById('kofiaCreditLegend');
+            if (legendEl) {
+                legendEl.innerHTML = crdSets.map(function(ds) {
+                    return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:13px;">' +
+                        '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + ds.borderColor + ';"></span>' +
+                        ds.label + '</span>';
+                }).join('');
+            }
+        })();
+        </script>
+    """
+    section = (section
+               .replace('KOFIA_DATA_PLACEHOLDER', export_json)
+               .replace('DEP_LATEST_PLACEHOLDER', dep_latest)
+               .replace('DEP_DATE_PLACEHOLDER', dep_latest_date)
+               .replace('CRD_LATEST_PLACEHOLDER', crd_latest)
+               .replace('CRD_DATE_PLACEHOLDER', crd_latest_date))
+    return section
+
+
 def create_dashboard():
     # Check if charts directory exists
     if not os.path.exists(CHARTS_DIR):
@@ -5340,6 +5469,7 @@ def create_dashboard():
     print(f"Dashboard generated: {OUTPUT_FILE}")
 
     # ── Generate index.html (Landing page) ──
+    kofia_section = _build_landing_kofia_section()
     landing_page = f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -5400,6 +5530,7 @@ def create_dashboard():
                 <span class="lh-quote-text">—</span>
             </div>
         </div>
+        {kofia_section}
         <footer>Age of Emergence</footer>
     </main>
     <script>

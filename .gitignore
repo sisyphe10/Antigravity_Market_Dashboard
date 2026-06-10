@@ -70,6 +70,7 @@ charts/*
 !universe.json
 !foreign_ir_sources.json
 !wics_all.json
+!kofia_stats.json
 
 # 기타
 *.bat
