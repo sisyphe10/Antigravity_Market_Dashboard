@@ -1,0 +1,63 @@
+name: Daily ECOS BOK Series
+
+# 한국은행 ECOS 시계열 33종 (금리/매크로/신용·부동산) → dataset.csv →
+# market.html DATA 섹션 재생성. 평일 17:40 KST (시장금리 T+1 + 당일 오전 발표
+# 월간지표를 하루 1회로 완결 수집, kofia 17:30과 concurrency 그룹으로 직렬화).
+# secrets.ECOS_API_KEY 미설정 시 graceful skip (실패 알림 없음).
+
+on:
+  schedule:
+    - cron: '40 8 * * 1-5'  # 17:40 KST weekdays (08:40 UTC)
+  workflow_dispatch:        # Allow manual trigger
+
+concurrency:
+  group: wrap-nav-pipeline
+  cancel-in-progress: false
+
+jobs:
+  fetch-ecos:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history needed for merge / merge-base
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Fetch ECOS series (한국은행 금리/매크로/신용·부동산)
+        env:
+          ECOS_API_KEY: ${{ secrets.ECOS_API_KEY }}
+          TZ: 'Asia/Seoul'
+        run: |
+          if [ -z "${ECOS_API_KEY}" ]; then
+            echo "ECOS_API_KEY secret not set - skipping ECOS fetch (no failure)"
+            echo "ECOS_SKIP=1" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          python execution/fetch_ecos_data.py
+
+      - name: Generate Dashboard
+        if: env.ECOS_SKIP != '1'
+        run: |
+          python execution/create_dashboard.py
+        env:
+          TZ: 'Asia/Seoul'
+
+      - name: Commit and Push (race-safe)
+        if: env.ECOS_SKIP != '1'
+        run: |
+          bash scripts/safe_commit_push.sh \
+            -m "Auto-update: ECOS BOK series [skip ci]" \
+            -- dataset.csv market.html

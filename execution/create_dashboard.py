@@ -1283,6 +1283,46 @@ def _build_combined_chart_section():
                 {'display': 'US05Y', 'csv': 'US 5 Year Treasury Yield',  'color': '#C62828'},
                 {'display': 'US10Y', 'csv': 'US 10 Year Treasury Yield', 'color': '#D32F2F'},
                 {'display': 'US30Y', 'csv': 'US 30 Year Treasury Yield', 'color': '#E53935'},
+                # 한국 금리 (ECOS 일별, fetch_ecos_data.py)
+                {'display': '한국 기준금리',          'csv': '한국 기준금리',          'color': '#7F0000'},
+                {'display': '국고채 3년',             'csv': '국고채 3년',             'color': '#8E0000'},
+                {'display': '국고채 10년',            'csv': '국고채 10년',            'color': '#9A0007'},
+                {'display': 'CD 91일',                'csv': 'CD 91일',                'color': '#BF360C'},
+                {'display': 'CP 91일',                'csv': 'CP 91일',                'color': '#D84315'},
+                {'display': '회사채 3년 AA-',         'csv': '회사채 3년 AA-',         'color': '#E64A19'},
+                {'display': '장단기 스프레드 10Y-3Y', 'csv': '장단기 스프레드 10Y-3Y', 'color': '#F4511E'},
+                {'display': '신용 스프레드 AA-3Y',    'csv': '신용 스프레드 AA-3Y',    'color': '#FF7043'},
+            ]},
+            {'label': 'MACRO KOREA', 'series': [
+                # ECOS 월별 매크로 (5년 임베드 창, fetch_ecos_data.py)
+                {'display': 'CPI 전년동월비',        'csv': 'CPI 전년동월비',        'color': '#004D40'},
+                {'display': 'PPI 전년동월비',        'csv': 'PPI 전년동월비',        'color': '#00695C'},
+                {'display': '기대인플레이션 1년',    'csv': '기대인플레이션 1년',    'color': '#00796B'},
+                {'display': 'M2 전년동월비',         'csv': 'M2 전년동월비',         'color': '#00897B'},
+                {'display': 'BSI 업황실적 (전산업)', 'csv': 'BSI 업황실적 (전산업)', 'color': '#006064'},
+                {'display': 'BSI 업황전망 (전산업)', 'csv': 'BSI 업황전망 (전산업)', 'color': '#00838F'},
+                {'display': '소비자심리지수 CSI',    'csv': '소비자심리지수 CSI',    'color': '#0097A7'},
+                {'display': '경제심리지수 ESI',      'csv': '경제심리지수 ESI',      'color': '#00ACC1'},
+                {'display': '선행지수 순환변동치',   'csv': '선행지수 순환변동치',   'color': '#26A69A'},
+                {'display': '제조업 가동률',         'csv': '제조업 가동률',         'color': '#26C6DA'},
+                {'display': '수출금액 전년동월비',   'csv': '수출금액 전년동월비',   'color': '#00BFA5'},
+                {'display': '경상수지',              'csv': '경상수지',              'color': '#4DB6AC'},
+                {'display': '외환보유액',            'csv': '외환보유액',            'color': '#4DD0E1'},
+            ]},
+            {'label': 'CREDIT & HOUSING', 'series': [
+                # ECOS 신용·부동산 (5년 임베드 창, fetch_ecos_data.py)
+                {'display': '은행 대출금리 (신규취급)',       'csv': '은행 대출금리 (신규취급)',       'color': '#3E2723'},
+                {'display': '은행 저축성수신금리 (신규취급)', 'csv': '은행 저축성수신금리 (신규취급)', 'color': '#4E342E'},
+                {'display': '예대금리차 (신규)',              'csv': '예대금리차 (신규)',              'color': '#5D4037'},
+                {'display': '가계대출 잔액',                  'csv': '가계대출 잔액',                  'color': '#6D4C41'},
+                {'display': '가계신용',                       'csv': '가계신용',                       'color': '#795548'},
+                {'display': '은행 대출태도지수 (종합)',       'csv': '은행 대출태도지수 (종합)',       'color': '#8D6E63'},
+                {'display': '은행 신용위험지수 (종합)',       'csv': '은행 신용위험지수 (종합)',       'color': '#A1887F'},
+                {'display': '은행 대출수요지수 (종합)',       'csv': '은행 대출수요지수 (종합)',       'color': '#BCAAA4'},
+                {'display': 'KB 주택매매지수 (전국)',         'csv': 'KB 주택매매지수 (전국)',         'color': '#827717'},
+                {'display': 'KB 아파트지수 (서울)',           'csv': 'KB 아파트지수 (서울)',           'color': '#9E9D24'},
+                {'display': '아파트 실거래지수 (전국)',       'csv': '아파트 실거래지수 (전국)',       'color': '#AFB42B'},
+                {'display': '아파트 실거래지수 (서울)',       'csv': '아파트 실거래지수 (서울)',       'color': '#C0CA33'},
             ]},
             {'label': 'CRYPTOCURRENCY', 'series': [
                 {'display': 'BTC', 'csv': 'BTC', 'color': '#F7931A'},
@@ -1365,7 +1405,15 @@ def _build_combined_chart_section():
         latest = df['날짜'].max()
         # MA120 표시를 위해 데이터 범위 확장 (12개월)
         start = latest - timedelta(days=365)
-        df = df[(df['날짜'] >= start) & (df['날짜'] <= latest)]
+        # ECOS 월·분기 시리즈(ECOS_MACRO/ECOS_SECTOR)는 포인트가 적어 5년 창 적용.
+        # '데이터 타입'이 NaN인 빌드타임 inject 행(hotel 등)은 기존 365일 창 유지.
+        long_start = latest - timedelta(days=365 * 5)
+        if '데이터 타입' in df.columns:
+            long_mask = df['데이터 타입'].isin(['ECOS_MACRO', 'ECOS_SECTOR'])
+        else:
+            long_mask = pd.Series(False, index=df.index)
+        df = df[(df['날짜'] <= latest)
+                & ((df['날짜'] >= start) | (long_mask & (df['날짜'] >= long_start)))]
 
         sub = df[df['제품명'].isin(all_csv_names)].copy()
         sub = sub.drop_duplicates(subset=['날짜', '제품명'], keep='last')
@@ -1429,7 +1477,8 @@ def _build_combined_chart_section():
                     rows_html += f'<tr>{series_cell}</tr>\n'
 
         export = {'dates': dates, 'data': data_export}
-        export_json = json.dumps(export, ensure_ascii=False)
+        # compact separators: 시리즈 92개 × 날짜 414개 기준 공백만 ~38KB 절약
+        export_json = json.dumps(export, ensure_ascii=False, separators=(',', ':'))
 
         list_html = (
             '<style>.cmb-chart-item:not(.active) .cmb-color-bar{display:none;}</style>'
@@ -1528,7 +1577,9 @@ def _build_combined_chart_section():
                         for (var j = 0; j < aligned.length; j++) {
                             if (aligned[j] !== null) { base = aligned[j]; break; }
                         }
-                        if (base === null) return;
+                        // base가 0/음수인 시리즈(스프레드, 경상수지, 대출태도지수 등)는
+                        // % 정규화가 무의미(Infinity/부호반전) → 3개 이상 선택 시 제외
+                        if (base === null || base <= 0) return;
                         data = aligned.map(function(v) {
                             if (v === null) return null;
                             return Math.round((v / base - 1) * 10000) / 100;

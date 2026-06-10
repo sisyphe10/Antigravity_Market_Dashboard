@@ -20,7 +20,10 @@ CATEGORY_MAP = {
     'OCEAN_FREIGHT': 'COMMODITIES',
     'WRAP': 'Wrap',
     'INDEX_KR': 'INDEX_KOREA',
-    'DEPOSIT': 'INDEX_KOREA'
+    'DEPOSIT': 'INDEX_KOREA',
+    'ECOS_RATE': 'INTEREST RATES',
+    'ECOS_MACRO': 'MACRO KOREA',
+    'ECOS_SECTOR': 'CREDIT & HOUSING'
 }
 
 # Target DRAM items to scrape from DRAMeXchange
