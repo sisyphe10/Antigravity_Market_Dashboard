@@ -1485,14 +1485,33 @@ def _build_combined_chart_section():
             if not visible:
                 continue
             last_idx = len(visible) - 1
+            group_label = _html.escape(g['label'])
+            # 아코디언 초기 상태: default(기본 선택) 시리즈가 있는 그룹만 펼침
+            group_expanded = any(s.get('default') for s, _ in visible)
+            arrow_char = '▾' if group_expanded else '▸'
+            row_display = '' if group_expanded else 'display:none;'
+            default_count = sum(1 for s, _ in visible if s.get('default'))
+            badge_style = 'margin-left:6px;color:#0055cc;font-size:11px;'
+            if default_count:
+                badge_html = f'<span class="cmb-group-badge" style="{badge_style}">● {default_count}</span>'
+            else:
+                badge_html = f'<span class="cmb-group-badge" style="{badge_style}display:none;"></span>'
+            rows_html += (
+                f'<tr class="cmb-group-header" data-group="{group_label}" '
+                f'onclick="toggleCmbGroup(this)">'
+                f'<td style="background:#f0f0f0;font-weight:700;font-size:12px;color:#333;'
+                f'padding:8px 10px;text-align:left;cursor:pointer;user-select:none;'
+                f'text-transform:uppercase;letter-spacing:0.5px;'
+                f'border-top:1px solid #000;border-bottom:1px solid #000;'
+                f'white-space:nowrap;">'
+                f'<span class="cmb-group-arrow" style="display:inline-block;width:14px;">{arrow_char}</span>'
+                f'{group_label} <span style="font-weight:400;color:#888;">({len(visible)})</span>'
+                f'{badge_html}</td></tr>\n'
+            )
             for idx, (s, values) in enumerate(visible):
                 data_export[s['display']] = values
                 active = ' active' if s.get('default') else ''
-                extra_border = ''
-                if idx == 0:
-                    extra_border += 'border-top:1px solid #000;'
-                if idx == last_idx:
-                    extra_border += 'border-bottom:1px solid #000;'
+                extra_border = 'border-bottom:1px solid #000;' if idx == last_idx else ''
                 # Hotel {city} 시리즈에는 수집 호텔 리스트를 native tooltip(title)으로 표시
                 tooltip_attr = ''
                 if s['display'].startswith('Hotel '):
@@ -1509,26 +1528,20 @@ def _build_combined_chart_section():
                     f'border-radius:2px;"></div>'
                     f'{_html.escape(s["display"])}</td>'
                 )
-                if idx == 0:
-                    group_cell = (
-                        f'<td rowspan="{len(visible)}" class="cmb-group-cell" '
-                        f'style="background:#f0f0f0;font-weight:700;font-size:12px;color:#333;'
-                        f'padding:8px 10px;text-align:center;vertical-align:middle;'
-                        f'text-transform:uppercase;letter-spacing:0.5px;'
-                        f'border-top:1px solid #000;border-bottom:1px solid #000;'
-                        f'border-right:1px solid #ddd;'
-                        f'white-space:nowrap;">{_html.escape(g["label"])}</td>'
-                    )
-                    rows_html += f'<tr>{group_cell}{series_cell}</tr>\n'
-                else:
-                    rows_html += f'<tr>{series_cell}</tr>\n'
+                rows_html += (
+                    f'<tr class="cmb-series-row" data-group="{group_label}" '
+                    f'style="{row_display}">{series_cell}</tr>\n'
+                )
 
         export = {'dates': dates, 'data': data_export}
         # compact separators: 시리즈 92개 × 날짜 414개 기준 공백만 ~38KB 절약
         export_json = json.dumps(export, ensure_ascii=False, separators=(',', ':'))
 
         list_html = (
-            '<style>.cmb-chart-item:not(.active) .cmb-color-bar{display:none;}</style>'
+            '<style>'
+            '.cmb-chart-item:not(.active) .cmb-color-bar{display:none;}'
+            '.cmb-group-header td:hover{background:#e4e4e4 !important;}'
+            '</style>'
             f'<table class="portfolio-table" style="max-width:500px;margin:0 auto;">'
             f'<tbody>{rows_html}</tbody></table>'
         )
@@ -1546,11 +1559,78 @@ def _build_combined_chart_section():
             var clickPalette = ['#000000','#0055cc','#cc0000','#006633','#6a0dad','#cc6600','#008080','#990066'];
             var seriesScale = { 'KOSPI Market Cap': 1e12, 'KOSDAQ Market Cap': 1e12 };
 
+            var expandedGroups = new Set();
+
             function colorForIndex(i) { return clickPalette[i % clickPalette.length]; }
 
             function fmtNum(v) {
                 if (v === null || v === undefined) return '-';
                 return Number(v).toLocaleString(undefined, { maximumFractionDigits: 2 });
+            }
+
+            function cmbSearchQuery() {
+                var inp = document.getElementById('cmbSeriesSearch');
+                return inp ? inp.value.trim().toLowerCase() : '';
+            }
+
+            function groupOfItem(el) {
+                var row = el.closest('tr');
+                return row ? row.getAttribute('data-group') : null;
+            }
+
+            // 그룹 아코디언 + 검색 필터 상태를 DOM에 반영.
+            // 검색 중: 매칭 시리즈만 표시 + 그룹 자동 펼침 + 매칭 0개 그룹은 헤더째 숨김.
+            // 검색 비었으면: expandedGroups Set 기준으로 펼침 상태 복원.
+            function refreshCmbList() {
+                var q = cmbSearchQuery();
+                document.querySelectorAll('.cmb-group-header').forEach(function(header) {
+                    var label = header.getAttribute('data-group') || '';
+                    var groupMatch = q !== '' && label.toLowerCase().indexOf(q) !== -1;
+                    var anyMatch = false;
+                    document.querySelectorAll('.cmb-series-row').forEach(function(row) {
+                        if (row.getAttribute('data-group') !== label) return;
+                        if (q !== '') {
+                            var item = row.querySelector('.cmb-chart-item');
+                            var name = item ? (item.getAttribute('data-series') || '').toLowerCase() : '';
+                            var match = groupMatch || name.indexOf(q) !== -1;
+                            row.style.display = match ? '' : 'none';
+                            if (match) anyMatch = true;
+                        } else {
+                            row.style.display = expandedGroups.has(label) ? '' : 'none';
+                        }
+                    });
+                    var arrow = header.querySelector('.cmb-group-arrow');
+                    if (q !== '') {
+                        header.style.display = anyMatch ? '' : 'none';
+                        if (arrow) arrow.textContent = '▾';
+                    } else {
+                        header.style.display = '';
+                        if (arrow) arrow.textContent = expandedGroups.has(label) ? '▾' : '▸';
+                    }
+                });
+            }
+
+            // 그룹 헤더 배지(● N = 그룹 내 active 시리즈 수) 재계산 — 중앙화 함수.
+            // active 토글이 일어나는 모든 경로가 buildCmbChart()를 거치므로 거기서 호출.
+            function updateCmbGroupBadges() {
+                var counts = {};
+                document.querySelectorAll('.cmb-series-row .cmb-chart-item.active').forEach(function(el) {
+                    var g = groupOfItem(el);
+                    if (g) counts[g] = (counts[g] || 0) + 1;
+                });
+                document.querySelectorAll('.cmb-group-header').forEach(function(header) {
+                    var label = header.getAttribute('data-group') || '';
+                    var badge = header.querySelector('.cmb-group-badge');
+                    if (!badge) return;
+                    var n = counts[label] || 0;
+                    if (n > 0) {
+                        badge.textContent = '● ' + n;
+                        badge.style.display = '';
+                    } else {
+                        badge.textContent = '';
+                        badge.style.display = 'none';
+                    }
+                });
             }
 
             function applyMarkerColors() {
@@ -1573,6 +1653,7 @@ def _build_combined_chart_section():
                 });
                 var selected = cmbClickOrder.slice();
                 applyMarkerColors();
+                updateCmbGroupBadges();
 
                 var startDate = document.getElementById('cmbStartDate').value;
                 var endDate = document.getElementById('cmbEndDate').value;
@@ -1882,8 +1963,19 @@ def _build_combined_chart_section():
                     el.classList.add('active');
                     cmbClickOrder = [key];
                 }
+                // 선택된 시리즈의 그룹은 펼침 상태로 유지 (검색 해제 후에도 보이도록)
+                var grp = groupOfItem(el);
+                if (grp && el.classList.contains('active')) expandedGroups.add(grp);
                 buildCmbChart();
             };
+            window.toggleCmbGroup = function(el) {
+                if (cmbSearchQuery() !== '') return; // 검색 중에는 자동 펼침 상태 — 토글 무시
+                var label = el.getAttribute('data-group') || '';
+                if (expandedGroups.has(label)) expandedGroups.delete(label);
+                else expandedGroups.add(label);
+                refreshCmbList();
+            };
+            window.filterCmbSeries = function() { refreshCmbList(); };
             window.updateCmbChart = buildCmbChart;
             window.clearCmbSelections = function() {
                 document.querySelectorAll('.cmb-chart-item.active').forEach(function(el){ el.classList.remove('active'); });
@@ -1898,6 +1990,13 @@ def _build_combined_chart_section():
                 var tag = ae && ae.tagName;
                 if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (ae && ae.isContentEditable)) return;
                 var items = Array.prototype.slice.call(document.querySelectorAll('.cmb-chart-item'));
+                // 검색 중이면 필터 매칭(보이는) 항목 사이에서만 내비
+                if (cmbSearchQuery() !== '') {
+                    items = items.filter(function(el) {
+                        var row = el.closest('tr');
+                        return !row || row.style.display !== 'none';
+                    });
+                }
                 if (items.length === 0) return;
                 e.preventDefault();
                 var activeIdx = -1;
@@ -1912,13 +2011,25 @@ def _build_combined_chart_section():
                     if (nextIdx < 0) nextIdx = items.length - 1;
                     if (nextIdx >= items.length) nextIdx = 0;
                 }
-                items.forEach(function(el) { el.classList.remove('active'); });
+                document.querySelectorAll('.cmb-chart-item.active').forEach(function(el) { el.classList.remove('active'); });
                 items[nextIdx].classList.add('active');
                 cmbClickOrder = [items[nextIdx].getAttribute('data-series')];
+                // 접힌 그룹의 시리즈로 이동했으면 해당 그룹 펼침
+                var navGrp = groupOfItem(items[nextIdx]);
+                if (navGrp && !expandedGroups.has(navGrp)) {
+                    expandedGroups.add(navGrp);
+                    refreshCmbList();
+                }
                 items[nextIdx].scrollIntoView({ block: 'nearest' });
                 buildCmbChart();
             });
 
+            // 초기 상태: active(기본 선택) 시리즈가 있는 그룹만 펼침 (서버 렌더와 동기화)
+            document.querySelectorAll('.cmb-chart-item.active').forEach(function(el) {
+                var g = groupOfItem(el);
+                if (g) expandedGroups.add(g);
+            });
+            refreshCmbList();
             buildCmbChart();
         })();
         </script>
@@ -1928,7 +2039,10 @@ def _build_combined_chart_section():
         <div class="category-section">
             <h2 class="category-title">DATA</h2>
             <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;justify-content:center;">
-                <div style="min-width:240px;max-height:720px;overflow-y:auto;">{list_html}</div>
+                <div style="min-width:240px;">
+                    <input type="text" id="cmbSeriesSearch" placeholder="시리즈 검색..." oninput="filterCmbSeries()" autocomplete="off" style="font-family:inherit;font-size:13px;width:100%;box-sizing:border-box;padding:6px 10px;margin-bottom:8px;border:1px solid #d1d5db;border-radius:6px;background:#fff;color:#222;">
+                    <div style="max-height:720px;overflow-y:auto;">{list_html}</div>
+                </div>
                 <div style="width:1000px;">
                     <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;font-size:13px;">
                         <span style="color:#555;font-weight:600;">기간</span>
