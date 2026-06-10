@@ -1054,7 +1054,7 @@ def _build_indices_chart_section(category_label='Indices'):
 
         js_code = """
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif";</script>
+        <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = Math.max(2, window.devicePixelRatio || 1); Chart.defaults.elements.line.borderJoinStyle = 'round'; Chart.defaults.elements.line.borderCapStyle = 'round';</script>
         <script>function formatDateInput(el){var v=el.value.replace(/[^0-9]/g,'');if(v.length===8){el.value=v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8);}}</script>
         <script>
         (function() {
@@ -1975,7 +1975,7 @@ def _build_wrap_chart_section(category_label):
 
         js_code = """
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif";</script>
+        <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = Math.max(2, window.devicePixelRatio || 1); Chart.defaults.elements.line.borderJoinStyle = 'round'; Chart.defaults.elements.line.borderCapStyle = 'round';</script>
         <script>function formatDateInput(el){var v=el.value.replace(/[^0-9]/g,'');if(v.length===8){el.value=v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8);}}</script>
         <script>
         (function() {
@@ -4689,6 +4689,9 @@ def _build_landing_kofia_section():
         <script>
         (function() {
             Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif";
+            Chart.defaults.devicePixelRatio = Math.max(2, window.devicePixelRatio || 1);
+            Chart.defaults.elements.line.borderJoinStyle = 'round';
+            Chart.defaults.elements.line.borderCapStyle = 'round';
             var KOFIA = KOFIA_DATA_PLACEHOLDER;
             function fmtJoEok(v) {
                 var eok = Math.round(v / 1e8);
@@ -6451,7 +6454,7 @@ function downloadUniverseSector() {
     <title>SEIBro - US Settlement TOP 50</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif";</script>
+    <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = Math.max(2, window.devicePixelRatio || 1); Chart.defaults.elements.line.borderJoinStyle = 'round'; Chart.defaults.elements.line.borderCapStyle = 'round';</script>
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
         body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }}
