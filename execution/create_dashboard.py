@@ -1522,7 +1522,7 @@ def _build_combined_chart_section():
                 series_cell = (
                     f'<td class="cmb-chart-item{active}" data-series="{_html.escape(s["display"])}"{tooltip_attr} '
                     f'onclick="toggleCmbSeries(this, event)" '
-                    f'style="cursor:pointer;text-align:center;position:relative;{extra_border}">'
+                    f'style="cursor:pointer;text-align:left;padding-left:24px;position:relative;{extra_border}">'
                     f'<div class="cmb-color-bar" style="position:absolute;left:8px;top:50%;'
                     f'transform:translateY(-50%);width:4px;height:18px;'
                     f'border-radius:2px;"></div>'
