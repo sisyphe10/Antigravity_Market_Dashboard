@@ -13,7 +13,7 @@
       "current_price": 299000.0,
       "ath_price": 360500.0,
       "dd": -17.059639389736482,
-      "rsi_1m": 1.5921464098073546,
+      "rsi_1m": 1.6234464098073549,
       "is_today_new": false
     },
     {
@@ -29,7 +29,7 @@
       "current_price": 2101000.0,
       "ath_price": 2363000.0,
       "dd": -11.087600507829032,
-      "rsi_1m": 8.618919148936172,
+      "rsi_1m": 8.650219148936172,
       "is_today_new": false
     },
     {
@@ -45,7 +45,7 @@
       "current_price": 1621000.0,
       "ath_price": 2203000.0,
       "dd": -26.418520199727645,
-      "rsi_1m": -8.892213953488376,
+      "rsi_1m": -8.860913953488375,
       "is_today_new": false
     },
     {
@@ -61,7 +61,7 @@
       "current_price": 365000.0,
       "ath_price": 480000.0,
       "dd": -23.958333333333336,
-      "rsi_1m": 18.733382971619367,
+      "rsi_1m": 18.76468297161937,
       "is_today_new": false
     },
     {
@@ -77,7 +77,39 @@
       "current_price": 1228000.0,
       "ath_price": 1361000.0,
       "dd": -9.772226304188091,
-      "rsi_1m": 0.31768593091827113,
+      "rsi_1m": 0.34898593091827157,
+      "is_today_new": false
+    },
+    {
+      "code": "009150",
+      "name": "삼성전기",
+      "sector": "IT하드웨어",
+      "market_cap": 1348221.2128,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 0.0,
+      "contribution": 0.0,
+      "cumulative_return": 0.0,
+      "current_price": 1805000.0,
+      "ath_price": 2127000.0,
+      "dd": -15.138692994828396,
+      "rsi_1m": 97.45045555555555,
+      "is_today_new": false
+    },
+    {
+      "code": "007810",
+      "name": "코리아써키트",
+      "sector": "IT하드웨어",
+      "market_cap": 33383.80704,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 20.311149524632672,
+      "contribution": 6.093344857389801,
+      "cumulative_return": 9.090909090909083,
+      "current_price": 139200.0,
+      "ath_price": 139200.0,
+      "dd": 0.0,
+      "rsi_1m": 36.794397487437195,
       "is_today_new": false
     },
     {
@@ -86,14 +118,14 @@
       "sector": "기계",
       "market_cap": 567537.175356,
       "weight": 2.0,
-      "weight_prev": 3.0,
+      "weight_prev": 2.0,
       "today_return": -2.7442371020856204,
-      "contribution": -0.8232711306256861,
+      "contribution": -0.5488474204171242,
       "cumulative_return": 31.74031634329324,
       "current_price": 88600.0,
       "ath_price": 136400.0,
       "dd": -35.043988269794724,
-      "rsi_1m": -33.91765,
+      "rsi_1m": -33.88635000000001,
       "is_today_new": false
     },
     {
@@ -102,14 +134,14 @@
       "sector": "조선",
       "market_cap": 320201.99673,
       "weight": 2.0,
-      "weight_prev": 3.0,
+      "weight_prev": 2.0,
       "today_return": -5.172413793103448,
-      "contribution": -1.5517241379310345,
+      "contribution": -1.0344827586206897,
       "cumulative_return": -17.094137848588264,
       "current_price": 104500.0,
       "ath_price": 149900.0,
       "dd": -30.286857905270182,
-      "rsi_1m": -23.05977164750958,
+      "rsi_1m": -23.02847164750958,
       "is_today_new": false
     },
     {
@@ -118,14 +150,14 @@
       "sector": "IT하드웨어",
       "market_cap": 90440.157808,
       "weight": 2.0,
-      "weight_prev": 3.0,
+      "weight_prev": 2.0,
       "today_return": 9.026548672566372,
-      "contribution": 2.7079646017699117,
+      "contribution": 1.8053097345132745,
       "cumulative_return": -11.036608167528472,
       "current_price": 123200.0,
       "ath_price": 161400.0,
       "dd": -23.667905824039646,
-      "rsi_1m": -15.199212276945035,
+      "rsi_1m": -15.167912276945033,
       "is_today_new": false
     },
     {
@@ -141,7 +173,7 @@
       "current_price": 109900.0,
       "ath_price": 133000.0,
       "dd": -17.36842105263158,
-      "rsi_1m": 22.318526861451456,
+      "rsi_1m": 24.785926861451458,
       "is_today_new": false
     },
     {
@@ -157,7 +189,7 @@
       "current_price": 22200.0,
       "ath_price": 51000.0,
       "dd": -56.470588235294116,
-      "rsi_1m": -14.513645508982037,
+      "rsi_1m": -14.482345508982036,
       "is_today_new": false
     },
     {
@@ -173,7 +205,7 @@
       "current_price": 1176000.0,
       "ath_price": 1630000.0,
       "dd": -27.852760736196313,
-      "rsi_1m": -13.97794662623199,
+      "rsi_1m": -13.94664662623199,
       "is_today_new": false
     },
     {
@@ -189,114 +221,8 @@
       "current_price": 47950.0,
       "ath_price": 54500.0,
       "dd": -12.018348623853214,
-      "rsi_1m": 29.860986095017395,
-      "is_today_new": false
-    },
-    {
-      "code": "128940",
-      "name": "한미약품",
-      "sector": "건강관리",
-      "market_cap": 52653.17301,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -0.12150668286755771,
-      "contribution": -0.02430133657351154,
-      "cumulative_return": -17.568257932678666,
-      "current_price": 411000.0,
-      "ath_price": 681979.0,
-      "dd": -39.73421468989514,
-      "rsi_1m": -6.087993860684765,
-      "is_today_new": false
-    },
-    {
-      "code": "226950",
-      "name": "올릭스",
-      "sector": "건강관리",
-      "market_cap": 25233.624669,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": 0.8928571428571428,
-      "contribution": 0.17857142857142858,
-      "cumulative_return": -13.590545707334023,
-      "current_price": 124300.0,
-      "ath_price": 207000.0,
-      "dd": -39.95169082125604,
-      "rsi_1m": -8.316990610328636,
-      "is_today_new": false
-    },
-    {
-      "code": "009150",
-      "name": "삼성전기",
-      "sector": "IT하드웨어",
-      "market_cap": 1348221.2128,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
-      "current_price": 1805000.0,
-      "ath_price": 2127000.0,
-      "dd": -15.138692994828396,
-      "rsi_1m": 97.41915555555556,
-      "is_today_new": true
-    },
-    {
-      "code": "007810",
-      "name": "코리아써키트",
-      "sector": "IT하드웨어",
-      "market_cap": 33383.80704,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": 20.311149524632672,
-      "contribution": 0.0,
-      "cumulative_return": 9.090909090909083,
-      "current_price": 139200.0,
-      "ath_price": 139200.0,
-      "dd": 0.0,
-      "rsi_1m": 36.76309748743719,
+      "rsi_1m": 32.32838609501739,
       "is_today_new": false
     }
-  ],
-  "_order_changes": {
-    "삼성 트루밸류 / NH Value ESG / DB 개방형": {
-      "date": "2026-06-11",
-      "added": [
-        {
-          "name": "삼성전기",
-          "weight": 3.0
-        },
-        {
-          "name": "코리아써키트",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "두산에너빌리티",
-          "from": 3.0,
-          "to": 2.0
-        },
-        {
-          "name": "한화오션",
-          "from": 3.0,
-          "to": 2.0
-        },
-        {
-          "name": "이수페타시스",
-          "from": 3.0,
-          "to": 2.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "한미약품",
-          "weight": 2.0
-        },
-        {
-          "name": "올릭스",
-          "weight": 2.0
-        }
-      ]
-    }
-  }
+  ]
 }
