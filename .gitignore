@@ -114,3 +114,6 @@ featured_data_kis.json
 
 # local API key files - never commit
 secrets/
+
+# Wrap_NAV push hold marker (local_safe_push)
+Wrap_NAV_push.HOLD

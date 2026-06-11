@@ -101,16 +101,38 @@ for attempt in 1 2 3 4 5; do
   # ---- Wrap_NAV.xlsx guard ----------------------------------------------
   # With the concurrency group in place, no sibling GHA run can write the
   # binary while we run, so a non-empty base..origin xlsx diff means a manual
-  # (user) xlsx push landed. Never clobber it.
+  # (user) xlsx push landed. Never clobber it: try the 3-way sheet-level
+  # merge first (NEW/AUM row semantics, --prefer theirs = the user push is
+  # the protected side); only when that declares a domain conflict fall back
+  # to the original bail/fail.
+  # NOTE: ours is extracted from HEAD, not OUR_COMMIT — on retry iterations
+  # HEAD already contains the previous round's merge, and re-merging from the
+  # stale OUR_COMMIT would re-read absorbed remote rows as deletions.
+  MERGED_XLSX=""
   if xlsx_tracked && ! git diff --quiet "$base" "origin/${BRANCH}" -- "$XLSX"; then
-    if [[ "$XLSX_CONFLICT" == "fail" ]]; then
-      echo "::error::safe_push: origin advanced ${XLSX} under us — refusing to clobber (NEW/AUM edits at risk). Re-run this workflow."
-      git reset --hard "origin/${BRANCH}"
-      exit 1
-    else
-      echo "::warning::safe_push: origin advanced ${XLSX} under us — dropping our commit (will re-trigger on next xlsx push)."
-      git reset --hard "origin/${BRANCH}"
-      exit 0
+    if ! git diff --quiet "$base" "HEAD" -- "$XLSX"; then
+      MERGE_TMPD="$(mktemp -d)"
+      if git show "${base}:${XLSX}" > "$MERGE_TMPD/base.xlsx" 2>/dev/null \
+         && git show "HEAD:${XLSX}" > "$MERGE_TMPD/ours.xlsx" 2>/dev/null \
+         && git show "origin/${BRANCH}:${XLSX}" > "$MERGE_TMPD/theirs.xlsx" 2>/dev/null \
+         && python3 scripts/merge_wrap_nav.py "$MERGE_TMPD/base.xlsx" "$MERGE_TMPD/ours.xlsx" \
+              "$MERGE_TMPD/theirs.xlsx" -o "$MERGE_TMPD/merged.xlsx" --prefer theirs; then
+        MERGED_XLSX="$MERGE_TMPD/merged.xlsx"
+        echo "safe_push: ${XLSX} domain-merged sheet-level (local+origin rows both kept)."
+      else
+        rm -rf "$MERGE_TMPD"
+      fi
+    fi
+    if [[ -z "$MERGED_XLSX" ]]; then
+      if [[ "$XLSX_CONFLICT" == "fail" ]]; then
+        echo "::error::safe_push: origin advanced ${XLSX} under us — refusing to clobber (NEW/AUM edits at risk). Re-run this workflow."
+        git reset --hard "origin/${BRANCH}"
+        exit 1
+      else
+        echo "::warning::safe_push: origin advanced ${XLSX} under us — dropping our commit (will re-trigger on next xlsx push)."
+        git reset --hard "origin/${BRANCH}"
+        exit 0
+      fi
     fi
   fi
 
@@ -126,9 +148,9 @@ for attempt in 1 2 3 4 5; do
       # VM also changed portfolio_data.json -> its live prices win.
       git checkout "origin/${BRANCH}" -- "$f" 2>/dev/null || true
     else
-      # Our freshly regenerated version wins (also keeps OUR Wrap_NAV.xlsx,
-      # which the guard proved is the only side that changed the binary).
-      git checkout "$OUR_COMMIT" -- "$f" 2>/dev/null || true
+      # Our freshly regenerated version wins. HEAD (not OUR_COMMIT) so retry
+      # iterations keep what previous merge rounds already absorbed.
+      git checkout HEAD -- "$f" 2>/dev/null || true
     fi
     git add -- "$f" 2>/dev/null || true
   done
@@ -140,6 +162,13 @@ for attempt in 1 2 3 4 5; do
     git checkout "origin/${BRANCH}" -- "$f" 2>/dev/null || true
     git add -- "$f" 2>/dev/null || true
   done < <(git diff --name-only --diff-filter=U)
+
+  # Domain-merged xlsx supersedes the whole-file ours pick from the loop above.
+  if [[ -n "$MERGED_XLSX" ]]; then
+    cp "$MERGED_XLSX" "$XLSX"
+    git add -- "$XLSX"
+    rm -rf "$MERGE_TMPD"
+  fi
 
   git commit --no-edit -m "Merge origin/${BRANCH} before push [skip ci]" || true
 done

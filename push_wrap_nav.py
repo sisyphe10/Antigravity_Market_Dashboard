@@ -27,7 +27,7 @@ def push():
 
     try:
         now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-        ok = local_safe_push.safe_push(REPO_DIR, logging.getLogger())
+        ok = local_safe_push.sync_and_push(REPO_DIR, log=logging.getLogger())
         if ok:
             status.config(text=f'Push 완료 ({now})', fg='#00aa00')
             messagebox.showinfo('성공', f'Wrap_NAV.xlsx push 완료!\n{now}')
@@ -35,7 +35,7 @@ def push():
             status.config(text='보류 (양쪽 수정)', fg='red')
             messagebox.showerror(
                 '보류',
-                '원격과 로컬이 둘 다 Wrap_NAV.xlsx를 수정했습니다.\n'
+                '원격과 로컬이 둘 다 Wrap_NAV.xlsx를 수정했고 자동 병합도 실패했습니다.\n'
                 f'{local_safe_push.HOLD_FILE} 파일의 수동 해결 절차를 따라주세요.',
             )
         else:

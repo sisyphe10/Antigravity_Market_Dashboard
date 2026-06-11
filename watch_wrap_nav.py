@@ -62,7 +62,8 @@ _push_lock = threading.Lock()  # overlapping debounce timers must not interleave
 def git_push():
     with _push_lock:
         try:
-            return local_safe_push.safe_push(REPO_DIR, logging.getLogger())
+            # 전용 clone에서 push — 메인 작업트리의 git 상태는 건드리지 않음
+            return local_safe_push.sync_and_push(REPO_DIR, log=logging.getLogger())
         except Exception as e:
             logging.error(f"❌ push 실패 (예외): {e}")
             return False
@@ -98,7 +99,7 @@ if __name__ == "__main__":
     logging.info("=== Wrap_NAV 감시 시작 ===")
     logging.info(f"PID: {os.getpid()}")
     logging.info(f"감시 경로: {os.path.join(REPO_DIR, WATCH_FILE)}")
-    logging.info(f"디바운스: {DEBOUNCE_SECONDS}초, push 정책: local_safe_push (merge-only)")
+    logging.info(f"디바운스: {DEBOUNCE_SECONDS}초, push 정책: local_safe_push sync_and_push (전용 clone, merge-only)")
 
     handler = WrapNavHandler()
     observer = Observer()
