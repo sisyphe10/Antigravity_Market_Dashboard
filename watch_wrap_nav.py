@@ -4,23 +4,22 @@ Windows 시작 시 백그라운드로 실행됨 (중복 실행 방지)
 """
 
 import time
-import subprocess
 import logging
 import sys
 import os
 import threading
 import atexit
-from datetime import datetime
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 REPO_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(REPO_DIR, "scripts"))
+import local_safe_push  # noqa: E402  (merge-only push policy lives there)
+
 WATCH_FILE = "Wrap_NAV.xlsx"
 LOG_FILE = os.path.join(REPO_DIR, "watch_wrap_nav.log")
 PID_FILE = os.path.join(REPO_DIR, "watch_wrap_nav.pid")
 DEBOUNCE_SECONDS = 8
-MAX_RETRIES = 3
-RETRY_INTERVAL = 3
 
 logging.basicConfig(
     level=logging.INFO,
@@ -57,62 +56,16 @@ def check_single_instance():
 
 
 # ── git push ───────────────────────────────────────────
+_push_lock = threading.Lock()  # overlapping debounce timers must not interleave
+
+
 def git_push():
-    for attempt in range(1, MAX_RETRIES + 1):
+    with _push_lock:
         try:
-            # 아직 commit 안 된 변경사항이 있으면 commit
-            diff = subprocess.run(
-                ["git", "diff", "--quiet", WATCH_FILE],
-                cwd=REPO_DIR,
-            )
-            if diff.returncode != 0:
-                commit_msg = f"update: Wrap_NAV.xlsx ({datetime.now().strftime('%Y-%m-%d %H:%M')})"
-                add = subprocess.run(
-                    ["git", "add", WATCH_FILE],
-                    cwd=REPO_DIR, capture_output=True, text=True,
-                )
-                if add.returncode != 0:
-                    raise RuntimeError(f"git add 실패 (exit {add.returncode}): {add.stderr.strip()}")
-                commit = subprocess.run(
-                    ["git", "commit", "-m", commit_msg],
-                    cwd=REPO_DIR, capture_output=True, text=True,
-                )
-                if commit.returncode != 0:
-                    raise RuntimeError(f"git commit 실패: {commit.stderr.strip()}")
-                logging.info(f"commit: {commit_msg}")
-
-            # push 안 된 commit이 없으면 생략
-            ahead = subprocess.run(
-                ["git", "log", "origin/main..HEAD", "--oneline"],
-                cwd=REPO_DIR, capture_output=True, text=True,
-            )
-            if not ahead.stdout.strip():
-                logging.info("push할 커밋 없음 - 생략")
-                return True
-
-            # pull --rebase 후 push
-            subprocess.run(
-                ["git", "pull", "--rebase", "origin", "main"],
-                cwd=REPO_DIR, capture_output=True, text=True, timeout=60,
-            )
-            push = subprocess.run(
-                ["git", "push", "origin", "main"],
-                cwd=REPO_DIR, capture_output=True, text=True, timeout=60,
-            )
-            if push.returncode == 0:
-                logging.info("✅ GitHub push 성공")
-                return True
-            else:
-                raise RuntimeError(f"git push 실패: {push.stderr.strip()}")
-
+            return local_safe_push.safe_push(REPO_DIR, logging.getLogger())
         except Exception as e:
-            logging.warning(f"⚠️ 시도 {attempt}/{MAX_RETRIES} 실패: {e}")
-            if attempt < MAX_RETRIES:
-                logging.info(f"{RETRY_INTERVAL}초 후 재시도...")
-                time.sleep(RETRY_INTERVAL)
-            else:
-                logging.error("❌ 최대 재시도 횟수 초과. push 실패.")
-                return False
+            logging.error(f"❌ push 실패 (예외): {e}")
+            return False
 
 
 # ── 파일 감시 핸들러 ───────────────────────────────────
@@ -145,7 +98,7 @@ if __name__ == "__main__":
     logging.info("=== Wrap_NAV 감시 시작 ===")
     logging.info(f"PID: {os.getpid()}")
     logging.info(f"감시 경로: {os.path.join(REPO_DIR, WATCH_FILE)}")
-    logging.info(f"디바운스: {DEBOUNCE_SECONDS}초, 최대 재시도: {MAX_RETRIES}회")
+    logging.info(f"디바운스: {DEBOUNCE_SECONDS}초, push 정책: local_safe_push (merge-only)")
 
     handler = WrapNavHandler()
     observer = Observer()
