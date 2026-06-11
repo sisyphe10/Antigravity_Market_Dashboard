@@ -211,10 +211,14 @@ def compute_returns_from_dict(prices: dict) -> dict | None:
     }
 
 
-def detect_data_anomaly(closes: 'pd.Series', threshold: float = 0.30, window: int = 30):
+def detect_data_anomaly(closes: 'pd.Series', threshold: float = 0.30, window: int = 7):
     """
     최근 window 영업일에서 인접 일간 절대변동률이 threshold를 **초과**하면
     (prev_date, prev_close, curr_date, curr_close, pct) 반환. 없으면 None.
+
+    window=7 근거: Yahoo 데이터 오류(분할·무증 미반영)는 며칠 내 정정되어 시리즈에서
+    사라지지만, 실제 급등(UMAC 2026-05-28 +57% 펜타곤 드론 펀딩 사례)은 영구히 남는다.
+    창을 짧게 잡으면 오래된 실제 급등이 오탐으로 계속 blank되는 문제를 자연 해소.
 
     각 시장의 일일 가격제한을 초과하는 점프는 yfinance/Yahoo의 분할·병합·무증·유증
     데이터 오류 가능성 (코미코 2026-05-18 -51.7% 사례). threshold는 통화별로
@@ -264,7 +268,7 @@ def fetch_one(idx: int, raw_ticker: str, sector: str, name: str, fx_to_krw: dict
         # Sanity check — 통화별 가격제한 초과 점프는 yfinance 데이터 오류 가능성
         # (코미코 5/18 -51.7% 같은 사례). 적발 시 수익률 모두 blank 처리.
         threshold = THRESHOLD_BY_CURRENCY.get(currency, DEFAULT_ANOMALY_THRESHOLD)
-        anomaly = detect_data_anomaly(closes, threshold=threshold, window=30)
+        anomaly = detect_data_anomaly(closes, threshold=threshold, window=7)
 
         # 기간별 lookback (거래일 기준)
         def lookback_pct(days: int) -> float | None:
