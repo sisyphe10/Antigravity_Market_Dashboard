@@ -7,13 +7,13 @@
       "market_cap": 17275753.28664,
       "weight": 30.0,
       "weight_prev": 30.0,
-      "today_return": -2.975206611570248,
-      "contribution": -8.925619834710744,
-      "cumulative_return": 393.0011474244763,
-      "current_price": 293500.0,
+      "today_return": -1.16,
+      "contribution": -3.4799999999999995,
+      "cumulative_return": 395.58356638205856,
+      "current_price": 298500.0,
       "ath_price": 360500.0,
-      "dd": -18.585298196948685,
-      "rsi_1m": -5.3003984238178745,
+      "dd": -17.19833564493759,
+      "rsi_1m": -3.5490849387040377,
       "is_today_new": false
     },
     {
@@ -23,13 +23,13 @@
       "market_cap": 14496366.1041,
       "weight": 25.0,
       "weight_prev": 25.0,
-      "today_return": -0.537109375,
-      "contribution": -1.3427734375,
-      "cumulative_return": 595.0574251531149,
-      "current_price": 2037000.0,
+      "today_return": 2.1,
+      "contribution": 5.25,
+      "cumulative_return": 626.0275734774139,
+      "current_price": 2084000.0,
       "ath_price": 2363000.0,
-      "dd": -13.79602200592467,
-      "rsi_1m": 0.24856382978723085,
+      "dd": -11.807024968260682,
+      "rsi_1m": 2.748563829787244,
       "is_today_new": false
     },
     {
@@ -39,13 +39,13 @@
       "market_cap": 247117.9221,
       "weight": 5.0,
       "weight_prev": 5.0,
-      "today_return": -2.398989898989899,
-      "contribution": -1.1994949494949494,
-      "cumulative_return": 60.47893058003251,
-      "current_price": 1546000.0,
+      "today_return": 0.69,
+      "contribution": 0.34500000000000003,
+      "cumulative_return": 65.87151052007898,
+      "current_price": 1587000.0,
       "ath_price": 2203000.0,
-      "dd": -29.82296867907399,
-      "rsi_1m": -18.218779069767443,
+      "dd": -27.961870177031322,
+      "rsi_1m": -15.835058139534885,
       "is_today_new": false
     },
     {
@@ -55,13 +55,13 @@
       "market_cap": 704000.0,
       "weight": 5.0,
       "weight_prev": 5.0,
-      "today_return": -3.532608695652174,
-      "contribution": -1.766304347826087,
-      "cumulative_return": -3.4156439449948284,
-      "current_price": 355000.0,
+      "today_return": -3.67,
+      "contribution": -1.8349999999999997,
+      "cumulative_return": -6.72578980044346,
+      "current_price": 356000.0,
       "ath_price": 480000.0,
-      "dd": -26.041666666666664,
-      "rsi_1m": 10.428384808013348,
+      "dd": -25.83333333333333,
+      "rsi_1m": 10.762274624373948,
       "is_today_new": false
     },
     {
@@ -71,13 +71,13 @@
       "market_cap": 1471336.0039,
       "weight": 5.0,
       "weight_prev": 5.0,
-      "today_return": -3.634826711749789,
-      "contribution": -1.8174133558748946,
-      "cumulative_return": -8.580593424218119,
-      "current_price": 1140000.0,
+      "today_return": -1.52,
+      "contribution": -0.76,
+      "cumulative_return": -8.756549520766765,
+      "current_price": 1160000.0,
       "ath_price": 1361000.0,
-      "dd": -16.23806024981631,
-      "rsi_1m": -12.062061920808762,
+      "dd": -14.768552534900802,
+      "rsi_1m": -10.377141954507161,
       "is_today_new": false
     },
     {
@@ -87,13 +87,13 @@
       "market_cap": 552483.988425,
       "weight": 2.0,
       "weight_prev": 3.0,
-      "today_return": -5.488474204171241,
-      "contribution": -1.6465422612513723,
-      "cumulative_return": 28.02303879410326,
-      "current_price": 86100.0,
+      "today_return": -5.38,
+      "contribution": -1.6139999999999999,
+      "cumulative_return": 20.994707786298772,
+      "current_price": 86000.0,
       "ath_price": 136400.0,
-      "dd": -36.87683284457478,
-      "rsi_1m": -40.836875000000006,
+      "dd": -36.950146627565985,
+      "rsi_1m": -40.915,
       "is_today_new": false
     },
     {
@@ -103,13 +103,13 @@
       "market_cap": 315912.209214,
       "weight": 2.0,
       "weight_prev": 3.0,
-      "today_return": -6.624319419237749,
-      "contribution": -1.9872958257713247,
-      "cumulative_return": -18.33510904307365,
-      "current_price": 102900.0,
+      "today_return": -6.81,
+      "contribution": -2.0429999999999997,
+      "cumulative_return": -24.113414151517798,
+      "current_price": 102600.0,
       "ath_price": 149900.0,
-      "dd": -31.354236157438297,
-      "rsi_1m": -29.25192528735633,
+      "dd": -31.55436957971981,
+      "rsi_1m": -29.481810344827586,
       "is_today_new": false
     },
     {
@@ -119,13 +119,13 @@
       "market_cap": 79355.365739,
       "weight": 2.0,
       "weight_prev": 3.0,
-      "today_return": 3.7168141592920354,
-      "contribution": 1.1150442477876104,
-      "cumulative_return": -15.238082938358033,
-      "current_price": 117200.0,
+      "today_return": 4.6,
+      "contribution": 1.38,
+      "cumulative_return": -10.31237687034432,
+      "current_price": 118600.0,
       "ath_price": 161400.0,
-      "dd": -27.38537794299876,
-      "rsi_1m": -24.447967523197722,
+      "dd": -26.517967781908304,
+      "rsi_1m": -23.448681299072092,
       "is_today_new": false
     },
     {
@@ -135,13 +135,13 @@
       "market_cap": 11594.308524,
       "weight": 2.0,
       "weight_prev": 2.0,
-      "today_return": -9.171597633136095,
-      "contribution": -1.834319526627219,
-      "cumulative_return": -15.89375049630748,
-      "current_price": 92100.0,
+      "today_return": -8.97,
+      "contribution": -1.794,
+      "cumulative_return": -23.678377476869304,
+      "current_price": 91800.0,
       "ath_price": 133000.0,
-      "dd": -30.751879699248118,
-      "rsi_1m": 6.098901036757775,
+      "dd": -30.977443609022558,
+      "rsi_1m": 5.81614891611687,
       "is_today_new": false
     },
     {
@@ -151,13 +151,13 @@
       "market_cap": 4757.154171,
       "weight": 2.0,
       "weight_prev": 2.0,
-      "today_return": -3.0837004405286343,
-      "contribution": -0.6167400881057269,
-      "cumulative_return": -12.863785086964008,
-      "current_price": 22000.0,
+      "today_return": -2.86,
+      "contribution": -0.5720000000000001,
+      "cumulative_return": -15.170811881188119,
+      "current_price": 22050.0,
       "ath_price": 51000.0,
-      "dd": -56.86274509803921,
-      "rsi_1m": -20.278148702594812,
+      "dd": -56.76470588235294,
+      "rsi_1m": -20.078547904191613,
       "is_today_new": false
     },
     {
@@ -167,13 +167,13 @@
       "market_cap": 87608.96445,
       "weight": 2.0,
       "weight_prev": 2.0,
-      "today_return": 2.552816901408451,
-      "contribution": 0.5105633802816902,
-      "cumulative_return": -8.977263848738183,
-      "current_price": 1165000.0,
+      "today_return": 2.82,
+      "contribution": 0.5640000000000001,
+      "cumulative_return": -6.702602579132478,
+      "current_price": 1161000.0,
       "ath_price": 1630000.0,
-      "dd": -28.52760736196319,
-      "rsi_1m": -19.778011751326762,
+      "dd": -28.773006134969325,
+      "rsi_1m": -20.08127179681577,
       "is_today_new": false
     },
     {
@@ -183,13 +183,13 @@
       "market_cap": 28380.224502,
       "weight": 2.0,
       "weight_prev": 2.0,
-      "today_return": 7.792207792207792,
-      "contribution": 1.5584415584415585,
-      "cumulative_return": 2.699662542182235,
-      "current_price": 45650.0,
+      "today_return": 8.74,
+      "contribution": 1.7480000000000002,
+      "cumulative_return": 12.149540873460252,
+      "current_price": 46050.0,
       "ath_price": 54500.0,
-      "dd": -16.23853211009174,
-      "rsi_1m": 25.087742757821562,
+      "dd": -15.5045871559633,
+      "rsi_1m": 26.01474159907301,
       "is_today_new": false
     },
     {
@@ -199,13 +199,13 @@
       "market_cap": 49770.700035,
       "weight": 0.0,
       "weight_prev": 2.0,
-      "today_return": -2.0656136087484813,
-      "contribution": -0.4131227217496963,
-      "cumulative_return": -19.172768727176404,
-      "current_price": 403000.0,
+      "today_return": -1.09,
+      "contribution": -0.21800000000000003,
+      "cumulative_return": -19.95459669637283,
+      "current_price": 403500.0,
       "ath_price": 681979.0,
-      "dd": -40.907271338267016,
-      "rsi_1m": -12.94311393152302,
+      "dd": -40.83395529774377,
+      "rsi_1m": -12.825050177095632,
       "is_today_new": false
     },
     {
@@ -215,13 +215,13 @@
       "market_cap": 23223.866952,
       "weight": 0.0,
       "weight_prev": 2.0,
-      "today_return": -3.6525974025974026,
-      "contribution": -0.7305194805194806,
-      "cumulative_return": -17.48348974626347,
-      "current_price": 118700.0,
+      "today_return": -3.25,
+      "contribution": -0.6500000000000001,
+      "cumulative_return": -20.70333680917622,
+      "current_price": 117900.0,
       "ath_price": 207000.0,
-      "dd": -42.65700483091788,
-      "rsi_1m": -11.046375586854463,
+      "dd": -43.04347826086956,
+      "rsi_1m": -11.515859154929576,
       "is_today_new": false
     },
     {
@@ -231,13 +231,13 @@
       "market_cap": 1321331.48224,
       "weight": 3.0,
       "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "today_return": -2.49,
+      "contribution": -0.0,
       "cumulative_return": null,
-      "current_price": 1739000.0,
+      "current_price": 1758000.0,
       "ath_price": 2127000.0,
-      "dd": -18.24165491302304,
-      "rsi_1m": 85.11972222222222,
+      "dd": -17.34837799717912,
+      "rsi_1m": 87.23083333333334,
       "is_today_new": true
     },
     {
@@ -247,56 +247,14 @@
       "market_cap": 28899.0571,
       "weight": 3.0,
       "weight_prev": 0.0,
-      "today_return": 10.63094209161625,
+      "today_return": 13.22,
       "contribution": 0.0,
-      "cumulative_return": 5.890138980807413,
-      "current_price": 128000.0,
-      "ath_price": 128000.0,
+      "cumulative_return": 20.632111292962364,
+      "current_price": 130200.0,
+      "ath_price": 130200.0,
       "dd": 0.0,
-      "rsi_1m": 20.54071608040201,
+      "rsi_1m": 22.751771356783912,
       "is_today_new": false
     }
-  ],
-  "_order_changes": {
-    "삼성 트루밸류 / NH Value ESG / DB 개방형": {
-      "date": "2026-06-11",
-      "added": [
-        {
-          "name": "삼성전기",
-          "weight": 3.0
-        },
-        {
-          "name": "코리아써키트",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "두산에너빌리티",
-          "from": 3.0,
-          "to": 2.0
-        },
-        {
-          "name": "한화오션",
-          "from": 3.0,
-          "to": 2.0
-        },
-        {
-          "name": "이수페타시스",
-          "from": 3.0,
-          "to": 2.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "한미약품",
-          "weight": 2.0
-        },
-        {
-          "name": "올릭스",
-          "weight": 2.0
-        }
-      ]
-    }
-  }
+  ]
 }
