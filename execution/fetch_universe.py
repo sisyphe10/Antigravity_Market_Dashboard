@@ -3,7 +3,7 @@
 워크플로:
   1. universe_tickers.csv 읽기 (#, 통화, 섹터, 티커, 기업명) — 통화 컬럼은 무시하고 prefix로 결정
   2. 티커 prefix → yfinance ticker 변환 (KRX:006800 → 006800.KS 등)
-  3. yfinance로 가격/수익률(YTD/1D/1W/1M/3M/6M/1Y)/시가총액 fetch (병렬)
+  3. yfinance로 가격/수익률(YTD/1D/1W/1M/3M/6M/1Y)/DD(52주 고점 대비)/시가총액 fetch (병렬)
   4. universe.json 생성 — Sheets API 응답 형식과 동일한 구조 (header row + values rows)
      → universe.html JS 변경 최소화
 
@@ -11,7 +11,7 @@
   {
     "updated_at": "2026-05-26 14:00 KST",
     "values": [
-      ["#", "통화", "섹터", "티커", "기업명", "시가총액 (억원)", "가격", "YTD", "1D", "1W", "1M", "3M", "6M", "1Y", ...],
+      ["#", "통화", "섹터", "티커", "기업명", "시가총액 (억원)", "가격", "YTD", "1D", "1W", "1M", "3M", "6M", "1Y", ..., "DD"],
       ["1", "KRW", "증권", "KRX:006800", "미래에셋증권", "3조9,001억", "11500", "1.20%", "-0.50%", ...],
       ...
     ]
@@ -102,6 +102,13 @@ def fmt_pct(v: float | None) -> str:
     return f'{v:+.0f}%'
 
 
+def fmt_dd(v: float | None) -> str:
+    """DD(52주 고점 대비 낙폭) 표시 — 항상 0% 이하. 예: -12% / 0%."""
+    if v is None or pd.isna(v):
+        return ''
+    return f'{v:.0f}%'
+
+
 def fmt_marcap_krw_eok(marcap_krw: float | None) -> str:
     """원화 시가총액(원) → '12조3,456억' 또는 '999억' 형식. KRW가 아니면 환산은 호출자 책임."""
     if marcap_krw is None or marcap_krw <= 0:
@@ -162,9 +169,10 @@ def fetch_naver_kr(code: str, days: int = 400) -> dict[str, int]:
 
 
 def compute_returns_from_dict(prices: dict) -> dict | None:
-    """{YYYY-MM-DD: close} dict → {last, ytd, 1d, 1w, 1m, 3m, 6m, 1y} pct dict.
+    """{YYYY-MM-DD: close} dict → {last, ytd, 1d, 1w, 1m, 3m, 6m, 1y, dd} pct dict.
 
     영업일 기반 lookback (yfinance fetch_one과 동일 로직). YTD는 연초 이후 첫 거래일 기준.
+    dd는 최근 252거래일(당일 포함) 최고 종가 대비 낙폭.
     """
     if not prices or len(prices) < 2:
         return None
@@ -187,6 +195,9 @@ def compute_returns_from_dict(prices: dict) -> dict | None:
         if base > 0:
             ytd = (last / base - 1) * 100
 
+    high_1y = max(float(prices[d]) for d in sorted_d[-252:])
+    dd = (last / high_1y - 1) * 100 if high_1y > 0 else None
+
     return {
         'last': last,
         'ytd': ytd,
@@ -196,6 +207,7 @@ def compute_returns_from_dict(prices: dict) -> dict | None:
         '3m': lookback(63),
         '6m': lookback(126),
         '1y': lookback(252),
+        'dd': dd,
     }
 
 
@@ -234,7 +246,7 @@ def detect_data_anomaly(closes: 'pd.Series', threshold: float = 0.30, window: in
 
 
 def fetch_one(idx: int, raw_ticker: str, sector: str, name: str, fx_to_krw: dict[str, float]) -> list[str] | None:
-    """단일 종목의 22개 컬럼 데이터 생성. 실패 시 None. fx_to_krw: 통화 → KRW 환율."""
+    """단일 종목의 23개 컬럼 데이터 생성. 실패 시 None. fx_to_krw: 통화 → KRW 환율."""
     yf_tk, currency = to_yf_ticker(raw_ticker)
     if not yf_tk:
         return None
@@ -278,6 +290,10 @@ def fetch_one(idx: int, raw_ticker: str, sector: str, name: str, fx_to_krw: dict
         ret_3m = lookback_pct(63)
         ret_6m = lookback_pct(126)
         ret_1y = lookback_pct(252)
+
+        # DD: 52주(252거래일, 당일 포함) 최고 종가 대비 현재 낙폭. 항상 0% 이하.
+        high_1y = float(closes.tail(252).max())
+        dd = (last / high_1y - 1) * 100 if high_1y > 0 else None
 
         # 시가총액 — yfinance fast_info.market_cap이 항상 None 반환하는 bug 우회.
         # info['marketCap']은 정상 동작 (단, 호출당 추가 API request 발생).
@@ -339,6 +355,7 @@ def fetch_one(idx: int, raw_ticker: str, sector: str, name: str, fx_to_krw: dict
                         fmt_pct(rets['1y']),
                         f'{int(marcap_raw_eok):,}' if marcap_raw_eok else '',
                         '', '', '', '', '', '', '',
+                        fmt_dd(rets['dd']),
                     ]
                 else:
                     print(f"  Warning: {raw_ticker} ({name}) yfinance anomaly "
@@ -352,9 +369,10 @@ def fetch_one(idx: int, raw_ticker: str, sector: str, name: str, fx_to_krw: dict
                 '', '', '', '', '', '', '',  # YTD/1D/1W/1M/3M/6M/1Y
                 f'{int(marcap_raw_eok):,}' if marcap_raw_eok else '',
                 '', '', '', '', '', '', '',
+                '',  # DD — anomaly 데이터로는 신뢰 불가, blank
             ]
 
-        # 22개 컬럼 (Sheets 헤더 그대로)
+        # 23개 컬럼 (Sheets 헤더 + DD)
         return [
             str(idx),
             currency,
@@ -374,6 +392,8 @@ def fetch_one(idx: int, raw_ticker: str, sector: str, name: str, fx_to_krw: dict
             f'{int(marcap_raw_eok):,}' if marcap_raw_eok else '',
             # 컬럼 15~21: P(피크대비) 메트릭 — 옛 Sheets 컬럼명 'YTD(P) ... 1Y(P)'. 데이터 출처 미상이라 빈값.
             '', '', '', '', '', '', '',
+            # 컬럼 22: DD (52주 고점 대비 낙폭)
+            fmt_dd(dd),
         ]
     except Exception as e:
         print(f"  Warning: {raw_ticker} ({yf_tk}): {e}")
@@ -412,7 +432,8 @@ def main() -> None:
 
     HEADER = ['#', '통화', '섹터', '티커', '기업명', '시가총액 (억원)', '가격',
               'YTD', '1D', '1W', '1M', '3M', '6M', '1Y',
-              '시가총액 raw', 'YTD(P)', '1D(P)', '1W(P)', '1M(P)', '3M(P)', '6M(P)', '1Y(P)']
+              '시가총액 raw', 'YTD(P)', '1D(P)', '1W(P)', '1M(P)', '3M(P)', '6M(P)', '1Y(P)',
+              'DD']
     values: list[list[str]] = [HEADER]
 
     # 병렬 fetch (worker 5로 줄여 rate limit 회피)
@@ -450,6 +471,9 @@ def main() -> None:
         elif ticker in existing_by_ticker:
             old = existing_by_ticker[ticker].copy()
             old[0] = str(i + 1)  # 순번 갱신
+            # 구버전(DD 없는 22컬럼) row는 헤더 길이에 맞춰 패딩 — JSON 직사각형 유지
+            while len(old) < len(HEADER):
+                old.append('')
             sequence_fixed.append(old)
             fallback_count += 1
     values.extend(sequence_fixed)

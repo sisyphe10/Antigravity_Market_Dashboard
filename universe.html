@@ -46,6 +46,9 @@
         #tab0 th:nth-child(6) { width: 8%; }
         #tab0 th:nth-child(7) { width: 7%; }
         #tab0 th:nth-child(n+8) { width: 6%; }
+        /* DD 열 (1Y 오른쪽) 세로 구분선 — 종목 리스트 16번째, 섹터 수익률 12번째 컬럼 */
+        #tab0 th:nth-child(16), #tab0 td:nth-child(16) { border-left: 2px solid #868e96; }
+        #sectorContent th:nth-child(12), #sectorContent td:nth-child(12) { border-left: 2px solid #868e96; }
         tbody tr:hover { background: #f5f5f5; }
         .positive { color: #cc0000; font-weight: 600; }
         .negative { color: #0055cc; font-weight: 600; }
@@ -99,7 +102,7 @@
 <aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="market.html" class="sidebar-link">Index</a><a href="universe.html" class="sidebar-link active">Universe</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
 <header>
     <h1>🌐 Universe</h1>
-    <div class="last-updated">Updated: 2026-06-11 10:37:19 KST</div>
+    <div class="last-updated">Updated: 2026-06-11 12:52:10 KST</div>
 </header>
 <div class="content">
     <div class="tabs">
@@ -135,8 +138,9 @@
             <th onclick="doSort(12)">3M</th>
             <th onclick="doSort(13)">6M</th>
             <th onclick="doSort(14)">1Y</th>
+            <th onclick="doSort(15)">DD</th>
         </tr></thead>
-        <tbody id="tbody"><tr><td colspan="15" style="padding:40px;color:#888;">로딩 중...</td></tr></tbody>
+        <tbody id="tbody"><tr><td colspan="16" style="padding:40px;color:#888;">로딩 중...</td></tr></tbody>
     </table>
     </div>
     <div id="tab1" class="tab-content">
@@ -153,9 +157,9 @@
 <footer>Antigravity Universe</footer>
 <script>
 var D=[],sortCol=7,sortAsc=false;  // 기본 RSI(1M) 내림차순
-var headers=['#','통화','섹터','티커','기업명','시가총액','가격','RSI(1M)','YTD','1D','1W','1M','3M','6M','1Y'];
-var numCols=[0,5,6,7,8,9,10,11,12,13,14];
-var pctCols=[7,8,9,10,11,12,13,14];
+var headers=['#','통화','섹터','티커','기업명','시가총액','가격','RSI(1M)','YTD','1D','1W','1M','3M','6M','1Y','DD'];
+var numCols=[0,5,6,7,8,9,10,11,12,13,14,15];
+var pctCols=[7,8,9,10,11,12,13,14,15];
 // 티커 prefix → 시장 지수 매핑 (우선순위: KOSPI > KOSDAQ > NASDAQ > S&P 500 > TSEC > NIKKEI > TSX > HSI > STOXX)
 // TYO = Tokyo SE (Japan → NIKKEI). TSE = Toronto SE (Canada → TSX, S&P/TSX Composite).
 var INDEX_BY_PREFIX={'KRX':'KOSPI','KOSDAQ':'KOSDAQ','NASDAQ':'NASDAQ','NYSE':'S&P 500','NYSEAMERICAN':'S&P 500','TPE':'TSEC','TYO':'NIKKEI','TSE':'TSX','HKG':'HSI','AMS':'STOXX','ETR':'STOXX','EPA':'STOXX'};
@@ -185,9 +189,11 @@ Promise.all([
         var saved=[row[7],row[8],row[9],row[10],row[11],row[12],row[13]];
         row[7]=rsi;
         for(var i=0;i<7;i++)row[8+i]=saved[i];
-        // row[15]: 시가총액 정렬용 raw 숫자(억원). "43조9,769억" 등 표시값은 parseFloat 안 되니
+        // row[15]: DD (52주 고점 대비 낙폭) — 소스 col 22. 구버전 universe.json row는 undefined → ''
+        row[15]=r[22]||'';
+        // row[16]: 시가총액 정렬용 raw 숫자(억원). "43조9,769억" 등 표시값은 parseFloat 안 되니
         //          시트 col 14 raw 값("439,769") 사용
-        row[15]=parseFloat(String(r[14]||'0').replace(/,/g,''))||0;
+        row[16]=parseFloat(String(r[14]||'0').replace(/,/g,''))||0;
         return row;
     });
     // 초기 정렬 표시(RSI 내림차순)
@@ -225,7 +231,7 @@ function render(){
         var isN=numCols.indexOf(sortCol)>=0;
         f.sort(function(a,b){
             var va, vb;
-            if(sortCol===5){va=a[15]||0;vb=b[15]||0;}  // 시가총액은 raw 숫자(억원) 사용
+            if(sortCol===5){va=a[16]||0;vb=b[16]||0;}  // 시가총액은 raw 숫자(억원) 사용
             else if(isN){va=pn(a[sortCol]);vb=pn(b[sortCol]);}
             else{va=a[sortCol]||'';vb=b[sortCol]||'';}
             if(va<vb)return sortAsc?-1:1;
@@ -238,7 +244,7 @@ function render(){
         h+='<tr>';
         var rowMkt='';
         if(r[3]){var rp=r[3].indexOf(':')>=0?r[3].split(':')[0]:'';rowMkt=INDEX_BY_PREFIX[rp]||'';}
-        for(var i=0;i<15;i++){
+        for(var i=0;i<16;i++){
             var v=(i===0)?(idx+1):r[i]||'';if(i===3&&v.indexOf(':')>=0)v=v.split(':').pop();var cls='';
             if(pctCols.indexOf(i)>=0&&v){var n=parseFloat(String(v).replace(/%/g,''));if(!isNaN(n))cls=n>0?' class="positive"':n<0?' class="negative"':'';}
             var bg=(i===7)?' style="background:#fff8e1;"':(i===8?' style="background:#f3f0ff;"':'');
@@ -247,7 +253,7 @@ function render(){
         }
         h+='</tr>';
     });
-    if(!h)h='<tr><td colspan="15" style="padding:40px;color:#888;">데이터 없음</td></tr>';
+    if(!h)h='<tr><td colspan="16" style="padding:40px;color:#888;">데이터 없음</td></tr>';
     document.getElementById('tbody').innerHTML=h;
 }
 
@@ -340,11 +346,11 @@ function renderSector() {
     // 필터링
     var filtered = fc2 ? D.filter(function(r){ return r[1]===fc2; }) : D;
 
-    // 섹터별 집계 (시총 가중평균). row 인덱스: 7=RSI, 8=YTD, 9=1D, 10=1W, 11=1M, 12=3M, 13=6M, 14=1Y
+    // 섹터별 집계 (시총 가중평균). row 인덱스: 7=RSI, 8=YTD, 9=1D, 10=1W, 11=1M, 12=3M, 13=6M, 14=1Y, 15=DD
     var agg = {};
     filtered.forEach(function(r) {
         var sec = r[2] || '기타';
-        if(!agg[sec]) agg[sec] = {cnt:0, rsi:[], ytd:[], d1:[], w1:[], m1:[], m3:[], m6:[], y1:[]};
+        if(!agg[sec]) agg[sec] = {cnt:0, rsi:[], ytd:[], d1:[], w1:[], m1:[], m3:[], m6:[], y1:[], dd:[]};
         var g = agg[sec];
         var mcap = parseFloat(String(r[5]||'0').replace(/,/g,'').replace(/조/g,'*10000').replace(/억원/g,'').replace(/억/g,''));
         // 조/억 파싱
@@ -357,9 +363,9 @@ function renderSector() {
         if(!mcapVal) mcapVal = parseFloat(mcapStr.replace(/,/g,'')) || 0;
 
         g.cnt++;
-        var vals = [r[7],r[8],r[9],r[10],r[11],r[12],r[13],r[14]];
-        var arrs = [g.rsi,g.ytd,g.d1,g.w1,g.m1,g.m3,g.m6,g.y1];
-        for(var i=0;i<8;i++) {
+        var vals = [r[7],r[8],r[9],r[10],r[11],r[12],r[13],r[14],r[15]];
+        var arrs = [g.rsi,g.ytd,g.d1,g.w1,g.m1,g.m3,g.m6,g.y1,g.dd];
+        for(var i=0;i<9;i++) {
             if(vals[i]) {
                 var n=parseFloat(String(vals[i]).replace(/%/g,'').replace(/,/g,''));
                 if(!isNaN(n)) arrs[i].push({v:n, w:mcapVal});
@@ -376,7 +382,7 @@ function renderSector() {
     function fv(v) { if(v===null) return '-'; var s=v>0?'+':''; return s+Math.round(v)+'%'; }
     function cls(v) { if(v===null) return ''; return v>0?'positive':v<0?'negative':''; }
 
-    var colMap = [null,null,'cnt','rsi','ytd','d1','w1','m1','m3','m6','y1'];
+    var colMap = [null,null,'cnt','rsi','ytd','d1','w1','m1','m3','m6','y1','dd'];
     var secs = Object.keys(agg).sort(function(a,b) {
         var va, vb;
         if(_secSortCol <= 1) { va=a; vb=b; return _secSortAsc?va.localeCompare(vb):vb.localeCompare(va); }
@@ -398,13 +404,13 @@ function renderSector() {
         if(eokM) mcapVal += parseFloat(eokM[1].replace(/,/g,''));
         var _p=(r[3]||'').indexOf(':')>=0?r[3].split(':')[0]:'';
         var _mkt=INDEX_BY_PREFIX[_p]||'';
-        // r 인덱스: 7=RSI, 8=YTD, 9=1D, 10=1W, 11=1M, 12=3M, 13=6M, 14=1Y
+        // r 인덱스: 7=RSI, 8=YTD, 9=1D, 10=1W, 11=1M, 12=3M, 13=6M, 14=1Y, 15=DD
         stocksBySec[sec].push({name:r[4]||'',ticker:r[3]||'',cur:r[1]||'',mcap:mcapStr,mcapVal:mcapVal,mkt:_mkt,
-            rsi:r[7]||'',ytd:r[8]||'',d1:r[9]||'',w1:r[10]||'',m1:r[11]||'',m3:r[12]||'',m6:r[13]||'',y1:r[14]||''});
+            rsi:r[7]||'',ytd:r[8]||'',d1:r[9]||'',w1:r[10]||'',m1:r[11]||'',m3:r[12]||'',m6:r[13]||'',y1:r[14]||'',dd:r[15]||''});
     });
     for(var k in stocksBySec) stocksBySec[k].sort(function(a,b){return b.mcapVal-a.mcapVal;});
 
-    var secHeaders = ['#','섹터','종목수','RSI(1M)','YTD','1D','1W','1M','3M','6M','1Y'];
+    var secHeaders = ['#','섹터','종목수','RSI(1M)','YTD','1D','1W','1M','3M','6M','1Y','DD'];
     var html = '<table style="width:100%;table-layout:fixed;border-collapse:collapse"><thead><tr>';
     secHeaders.forEach(function(h,i) {
         var bg = i===3?' style="background:#fff8e1;cursor:pointer"':(i===4?' style="background:#f3f0ff;cursor:pointer"':' style="cursor:pointer"');
@@ -413,7 +419,7 @@ function renderSector() {
     html += '</tr></thead><tbody>';
     secs.forEach(function(sec,idx) {
         var g = agg[sec];
-        var vals = [wavg(g.rsi),wavg(g.ytd),wavg(g.d1),wavg(g.w1),wavg(g.m1),wavg(g.m3),wavg(g.m6),wavg(g.y1)];
+        var vals = [wavg(g.rsi),wavg(g.ytd),wavg(g.d1),wavg(g.w1),wavg(g.m1),wavg(g.m3),wavg(g.m6),wavg(g.y1),wavg(g.dd)];
         html += '<tr style="cursor:pointer" onclick="toggleSec('+idx+')">';
         html += '<td>' + (idx+1) + '</td><td style="font-weight:600">' + sec + '</td><td>' + g.cnt + '</td>';
         vals.forEach(function(v,i) {
@@ -431,7 +437,7 @@ function renderSector() {
             html += '<td></td><td style="padding-left:60px;text-align:left">- '+label+'</td>';
             html += '<td>'+(s.mcap||'')+'</td>';
             var _ttl=s.mkt?' title="'+s.mkt+'"':'';
-            html += '<td style="background:#fff8e1"'+_ttl+'>'+sc(s.rsi)+'</td><td style="background:#f3f0ff">'+sc(s.ytd)+'</td><td>'+sc(s.d1)+'</td><td>'+sc(s.w1)+'</td><td>'+sc(s.m1)+'</td><td>'+sc(s.m3)+'</td><td>'+sc(s.m6)+'</td><td>'+sc(s.y1)+'</td>';
+            html += '<td style="background:#fff8e1"'+_ttl+'>'+sc(s.rsi)+'</td><td style="background:#f3f0ff">'+sc(s.ytd)+'</td><td>'+sc(s.d1)+'</td><td>'+sc(s.w1)+'</td><td>'+sc(s.m1)+'</td><td>'+sc(s.m3)+'</td><td>'+sc(s.m6)+'</td><td>'+sc(s.y1)+'</td><td>'+sc(s.dd)+'</td>';
             html += '</tr>';
         });
     });
