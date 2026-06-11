@@ -168,6 +168,68 @@ def fetch_naver_kr(code: str, days: int = 400) -> dict[str, int]:
     return prices
 
 
+# 네이버 해외주식 API 커버리지 — 이상치 팩트체크용 독립 소스.
+# 일본(.T)·홍콩(.HK)은 야후와 동일 suffix 직매핑, 미국 3거래소는 suffix가 비일관
+# (KO=무suffix, NVDA.O, UMAC.K)이라 ac 검색으로 reutersCode 해석. 대만/유럽/캐나다 미커버.
+NAVER_WORLD_DIRECT_SUFFIX = {'TYO': '.T', 'HKG': '.HK'}
+US_PREFIXES = {'NASDAQ', 'NYSE', 'NYSEAMERICAN'}
+
+
+def _http_json(url: str):
+    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+    try:
+        with urllib.request.urlopen(req, timeout=10) as r:
+            return json.loads(r.read().decode('utf-8', errors='replace'))
+    except Exception:
+        return None
+
+
+def resolve_naver_world_code(prefix: str, code: str) -> str | None:
+    """티커 → 네이버 해외주식 reutersCode. 실패/미커버 시 None."""
+    if prefix in NAVER_WORLD_DIRECT_SUFFIX:
+        return code + NAVER_WORLD_DIRECT_SUFFIX[prefix]
+    if prefix in US_PREFIXES:
+        d = _http_json(f'https://ac.stock.naver.com/ac?q={code}&target=stock')
+        if not d:
+            return None
+        for item in d.get('items', []):
+            if (item.get('category') == 'stock' and item.get('nationCode') == 'USA'
+                    and item.get('code') == code):
+                return item.get('reutersCode') or None
+    return None
+
+
+def fetch_naver_world(reuters_code: str) -> dict[str, float]:
+    """네이버 해외주식 일봉 종가 dict {YYYY-MM-DD: close}. YTD 범위 반환."""
+    d = _http_json(f'https://api.stock.naver.com/chart/foreign/item/{reuters_code}?periodType=dayCandle')
+    prices: dict[str, float] = {}
+    if not d:
+        return prices
+    for p in d.get('priceInfos', []):
+        ld, cp = p.get('localDate'), p.get('closePrice')
+        if ld and cp:
+            prices[f'{ld[:4]}-{ld[4:6]}-{ld[6:]}'] = float(cp)
+    return prices
+
+
+def confirm_anomaly_real(prefix: str, code: str, prev_d: str, cur_d: str, yf_pct: float) -> bool:
+    """이상치 팩트체크 — 독립 소스(네이버 해외주식)에서 같은 날 같은 점프가 재현되면 실제 급등.
+
+    실제 급등(UMAC 2026-05-28 +57% 펜타곤 드론 펀딩)은 모든 소스에 동일하게 나타나고,
+    Yahoo 데이터 오류(분할·무증 미반영)는 Yahoo에만 나타난다는 점을 이용.
+    허용 오차: max(5%p, |점프|의 20%). 데이터 없음/미커버 시 False(보수적 blank 유지).
+    """
+    rc = resolve_naver_world_code(prefix, code)
+    if not rc:
+        return False
+    prices = fetch_naver_world(rc)
+    p0, p1 = prices.get(prev_d), prices.get(cur_d)
+    if not p0 or not p1:
+        return False
+    nv_pct = (p1 / p0 - 1) * 100
+    return abs(nv_pct - yf_pct) <= max(5.0, abs(yf_pct) * 0.2)
+
+
 def compute_returns_from_dict(prices: dict) -> dict | None:
     """{YYYY-MM-DD: close} dict → {last, ytd, 1d, 1w, 1m, 3m, 6m, 1y, dd} pct dict.
 
@@ -335,7 +397,15 @@ def fetch_one(idx: int, raw_ticker: str, sector: str, name: str, fx_to_krw: dict
         else:
             price_str = f'{last:,.2f}'
 
-        # anomaly 적발 시: 한국 종목은 네이버 fallback으로 재계산, 그 외는 blank
+        # anomaly 적발 시: 1차로 독립 소스(네이버 해외주식) 팩트체크 — 실제 급등이면 통과.
+        # 미확인이면 한국 종목은 네이버 fallback으로 재계산, 그 외는 blank.
+        if anomaly and currency != 'KRW' and ':' in raw_ticker:
+            prev_d, prev_p, cur_d, cur_p, pct = anomaly
+            prefix, code = raw_ticker.split(':', 1)
+            if confirm_anomaly_real(prefix, code, prev_d, cur_d, pct):
+                print(f"  Info: {raw_ticker} ({name}) jump {prev_d} → {cur_d} ({pct:+.1f}%) "
+                      f"confirmed real by Naver cross-check. Kept.")
+                anomaly = None
         if anomaly:
             prev_d, prev_p, cur_d, cur_p, pct = anomaly
             if currency == 'KRW' and ':' in raw_ticker:
