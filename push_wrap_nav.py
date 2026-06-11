@@ -2,64 +2,45 @@
 Wrap_NAV.xlsx 수동 Push 버튼
 더블클릭하면 현재 Wrap_NAV.xlsx를 GitHub에 push합니다.
 """
-import subprocess
 import os
 import sys
+import logging
 import datetime
 import tkinter as tk
 from tkinter import messagebox
 
 REPO_DIR = os.path.dirname(os.path.abspath(__file__))
 os.chdir(REPO_DIR)
+sys.path.insert(0, os.path.join(REPO_DIR, 'scripts'))
+import local_safe_push  # merge-only push policy (no rebase, no add -A)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    handlers=[logging.FileHandler(os.path.join(REPO_DIR, 'watch_wrap_nav.log'), encoding='utf-8')],
+)
+
 
 def push():
     btn.config(state='disabled', text='푸시 중...')
     root.update()
 
     try:
-        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-
-        # 1. git add
-        subprocess.run(['git', 'add', 'Wrap_NAV.xlsx'], capture_output=True, timeout=10)
-
-        # 2. git commit
-        commit = subprocess.run(
-            ['git', 'commit', '-m', f'update: Wrap_NAV.xlsx ({now})'],
-            capture_output=True, text=True, timeout=10
-        )
-
-        if 'nothing to commit' in commit.stdout:
-            messagebox.showinfo('알림', '변경사항이 없습니다.')
-            btn.config(state='normal', text='Push Wrap_NAV')
-            return
-
-        # 3. git pull (충돌 시 우리 Wrap_NAV 유지)
-        pull = subprocess.run(
-            ['git', 'pull', 'origin', 'main'],
-            capture_output=True, text=True, timeout=30
-        )
-
-        if pull.returncode != 0:
-            # 충돌 발생 시 - Wrap_NAV는 우리 걸로 (merge에서 --ours = 로컬)
-            subprocess.run(['git', 'checkout', '--ours', 'Wrap_NAV.xlsx'], capture_output=True, timeout=10)
-            # 생성 파일들은 remote 걸로
-            for f in ['index.html', 'wrap.html', 'portfolio_data.json', 'market_alert.html']:
-                subprocess.run(['git', 'checkout', '--theirs', f], capture_output=True, timeout=10)
-            subprocess.run(['git', 'add', '-A'], capture_output=True, timeout=10)
-            subprocess.run(['git', 'commit', '--no-edit'], capture_output=True, timeout=10)
-
-        # 4. git push
-        push_result = subprocess.run(
-            ['git', 'push', 'origin', 'main'],
-            capture_output=True, text=True, timeout=30
-        )
-
-        if push_result.returncode == 0:
+        now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+        ok = local_safe_push.safe_push(REPO_DIR, logging.getLogger())
+        if ok:
             status.config(text=f'Push 완료 ({now})', fg='#00aa00')
             messagebox.showinfo('성공', f'Wrap_NAV.xlsx push 완료!\n{now}')
+        elif os.path.exists(os.path.join(REPO_DIR, local_safe_push.HOLD_FILE)):
+            status.config(text='보류 (양쪽 수정)', fg='red')
+            messagebox.showerror(
+                '보류',
+                '원격과 로컬이 둘 다 Wrap_NAV.xlsx를 수정했습니다.\n'
+                f'{local_safe_push.HOLD_FILE} 파일의 수동 해결 절차를 따라주세요.',
+            )
         else:
             status.config(text='Push 실패', fg='red')
-            messagebox.showerror('실패', f'Push 실패:\n{push_result.stderr[:200]}')
+            messagebox.showerror('실패', 'Push 실패 - watch_wrap_nav.log 확인')
 
     except Exception as e:
         status.config(text='오류 발생', fg='red')
