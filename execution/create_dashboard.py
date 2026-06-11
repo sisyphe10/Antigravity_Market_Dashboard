@@ -845,11 +845,16 @@ def _chart_download_helper_js():
     return """
         <script>
         if (typeof window.downloadChartImage !== 'function') {
-            window.downloadChartImage = function(canvasId, baseName, legendId) {
+            window.downloadChartImage = function(canvasId, baseName, legendId, extraCanvasId) {
                 var src = document.getElementById(canvasId);
                 if (!src) { console.warn('canvas not found:', canvasId); return; }
                 var w = src.width, h = src.height;
                 var scale = src.clientWidth ? (w / src.clientWidth) : 1;
+
+                // 보조 캔버스(이격도 서브패널 등) — 보이는 경우에만 메인 아래에 세로 합성
+                var extra = extraCanvasId ? document.getElementById(extraCanvasId) : null;
+                if (extra && (extra.offsetParent === null || !extra.width)) extra = null;
+                var extraH = extra ? Math.round(extra.height * (w / extra.width)) : 0;
 
                 // 하단 범례 항목 수집 (컬러닷 + 라벨)
                 var legendItems = [];
@@ -871,11 +876,12 @@ def _chart_download_helper_js():
 
                 var legendH = legendItems.length ? Math.round(44 * scale) : 0;
                 var tmp = document.createElement('canvas');
-                tmp.width = w; tmp.height = h + legendH;
+                tmp.width = w; tmp.height = h + extraH + legendH;
                 var ctx = tmp.getContext('2d');
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(0, 0, tmp.width, tmp.height);
                 ctx.drawImage(src, 0, 0);
+                if (extra) ctx.drawImage(extra, 0, h, w, extraH);
 
                 if (legendItems.length) {
                     var fontPx = Math.round(13 * scale);
@@ -894,7 +900,7 @@ def _chart_download_helper_js():
                     });
                     if (legendSuffix) { ctx.font = fontSuffix; totalW += suffixGap + ctx.measureText(legendSuffix).width; }
                     var x = Math.max(Math.round((w - totalW) / 2), Math.round(10 * scale));
-                    var y = h + Math.round(legendH / 2);
+                    var y = h + extraH + Math.round(legendH / 2);
                     ctx.font = fontItem;
                     legendItems.forEach(function(it, i) {
                         ctx.beginPath();
@@ -1449,8 +1455,9 @@ def _build_combined_chart_section():
                 all_csv_names.add(s['csv'])
 
         latest = df['날짜'].max()
-        # MA120 표시를 위해 데이터 범위 확장 (12개월)
-        start = latest - timedelta(days=365)
+        # MA200 표시를 위해 데이터 범위 확장 (24개월: MA200은 약 280캘린더일 선행 데이터 필요.
+        # 연말 YTD 화면·12개월 수동 조회에서도 MA200이 채워지려면 730일 필요)
+        start = latest - timedelta(days=730)
         # ECOS/FRED 월·분기 시리즈(ECOS_MACRO/ECOS_SECTOR/FRED_MACRO/FRED_SECTOR)는
         # 포인트가 적어 5년 창 적용. FRED_RATE(일·주간)는 기존 365일 창 유지 (설계 핵심).
         # '데이터 타입'이 NaN인 빌드타임 inject 행(hotel 등)은 기존 365일 창 유지.
@@ -1560,6 +1567,119 @@ def _build_combined_chart_section():
             var seriesScale = { 'KOSPI Market Cap': 1e12, 'KOSDAQ Market Cap': 1e12 };
 
             var expandedGroups = new Set();
+
+            // MA/이격도 토글 상태 — 시리즈 전환·기간 변경에도 유지 (새로고침 시 초기화, 기본 전부 OFF)
+            var MA_DEFS = [
+                { win: 20,  color: '#d32f2f' },
+                { win: 60,  color: '#f57c00' },
+                { win: 120, color: '#1b5e20' },
+                { win: 200, color: '#1565c0' }
+            ];
+            var maActive = { 20: false, 60: false, 120: false, 200: false };
+            var dispActive = { 20: false, 60: false, 120: false, 200: false };
+            var cmbDispChart = null;
+
+            // 십자선(crosshair) — 세로선은 메인+이격도 패널 동기(같은 날짜 index),
+            // 가로선은 커서가 올라가 있는 차트에만. 두 차트가 같은 labels 배열을 공유해 x 정렬 보장.
+            var cmbHoverState = { idx: null, yPx: null, activeId: null };
+            // 반대편 차트에도 같은 날짜의 툴팁(데이터값) 표시.
+            // tooltip.setActiveElements가 내부에서 tooltip.update까지 수행하므로 이후 draw()만 하면 됨.
+            function cmbSyncTooltip(other, idx) {
+                if (!other || !other.tooltip) return;
+                var els = [];
+                if (idx !== null) {
+                    other.data.datasets.forEach(function(ds, di) {
+                        var v = ds.data[idx];
+                        if (v !== null && v !== undefined) els.push({ datasetIndex: di, index: idx });
+                    });
+                }
+                var area = other.chartArea;
+                var pos = { x: 0, y: 0 };
+                if (els.length && area) {
+                    pos.x = other.scales.x.getPixelForValue(idx);
+                    pos.y = (area.top + area.bottom) / 2;
+                }
+                other.tooltip.setActiveElements(els, pos);
+                if (other.setActiveElements) other.setActiveElements(els);
+            }
+            var cmbCrosshairPlugin = {
+                id: 'cmbCrosshair',
+                afterEvent: function(chart, args) {
+                    var e = args.event;
+                    var area = chart.chartArea;
+                    if (!area) return;
+                    var other = (chart.canvas.id === 'cmbDynamicChart') ? cmbDispChart : cmbChart;
+                    var inside = e.x !== null && e.y !== null &&
+                        e.x >= area.left && e.x <= area.right && e.y >= area.top && e.y <= area.bottom;
+                    if (e.type === 'mouseout' || !inside) {
+                        if (cmbHoverState.idx !== null) {
+                            cmbHoverState.idx = null;
+                            cmbHoverState.activeId = null;
+                            args.changed = true;
+                            if (other) {
+                                cmbSyncTooltip(other, null);
+                                other.draw();
+                            }
+                        }
+                        return;
+                    }
+                    if (e.type !== 'mousemove') return;
+                    var idx = Math.round(chart.scales.x.getValueForPixel(e.x));
+                    var maxIdx = chart.data.labels.length - 1;
+                    if (idx < 0) idx = 0;
+                    if (idx > maxIdx) idx = maxIdx;
+                    // 약한 마그넷: 현재 날짜(idx)의 데이터 점이 커서에서 12px 이내면 가로선을 그 점에 스냅
+                    var yPx = e.y;
+                    var snapRadius = 12;
+                    var bestDist = null;
+                    chart.data.datasets.forEach(function(ds, di) {
+                        var v = ds.data[idx];
+                        if (v === null || v === undefined) return;
+                        var meta = chart.getDatasetMeta(di);
+                        if (meta.hidden || !meta.data[idx]) return;
+                        var py = meta.data[idx].y;
+                        if (py === null || py === undefined || isNaN(py)) return;
+                        var dist = Math.abs(py - e.y);
+                        if (dist <= snapRadius && (bestDist === null || dist < bestDist)) {
+                            bestDist = dist;
+                            yPx = py;
+                        }
+                    });
+                    var moved = cmbHoverState.idx !== idx;
+                    cmbHoverState.idx = idx;
+                    cmbHoverState.yPx = yPx;
+                    cmbHoverState.activeId = chart.canvas.id;
+                    args.changed = true;
+                    if (other) {
+                        if (moved) cmbSyncTooltip(other, idx);
+                        other.draw();
+                    }
+                },
+                afterDraw: function(chart) {
+                    if (cmbHoverState.idx === null) return;
+                    var area = chart.chartArea;
+                    var xs = chart.scales.x;
+                    if (!area || !xs) return;
+                    var xPx = xs.getPixelForValue(cmbHoverState.idx);
+                    if (xPx < area.left || xPx > area.right) return;
+                    var ctx = chart.ctx;
+                    ctx.save();
+                    ctx.strokeStyle = '#888';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(xPx, area.top);
+                    ctx.lineTo(xPx, area.bottom);
+                    ctx.stroke();
+                    if (cmbHoverState.activeId === chart.canvas.id &&
+                        cmbHoverState.yPx >= area.top && cmbHoverState.yPx <= area.bottom) {
+                        ctx.beginPath();
+                        ctx.moveTo(area.left, cmbHoverState.yPx);
+                        ctx.lineTo(area.right, cmbHoverState.yPx);
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+                }
+            };
 
             function colorForIndex(i) { return clickPalette[i % clickPalette.length]; }
 
@@ -1690,7 +1810,12 @@ def _build_combined_chart_section():
 
                 var mode = perSeries.length === 1 ? 'raw1' : (perSeries.length === 2 ? 'raw2' : 'pct');
 
+                // 단일 선택(raw1)일 때만 MA/이격도 버튼 활성 (상태 값은 보존)
+                var maRow = document.getElementById('cmbMaRow');
+                if (maRow) maRow.classList.toggle('cmb-ma-disabled', mode !== 'raw1');
+
                 var datasets = [];
+                var dispDatasets = [];
                 perSeries.forEach(function(s, idx) {
                     var aligned = [];
                     var lastVal = null;
@@ -1737,9 +1862,9 @@ def _build_combined_chart_section():
                         yAxisID: yAxisID
                     });
 
-                    // 단일 선택일 때 MA20 / MA120 추가
-                    // 표시 윈도우만으로 MA 계산하면 120일이 안 채워지므로,
-                    // 전체 보유 데이터(12개월)로 MA를 먼저 계산한 뒤 가시 영역에 매핑한다.
+                    // 단일 선택일 때 토글된 MA / 이격도 추가
+                    // 표시 윈도우만으로 MA 계산하면 긴 윈도우가 안 채워지므로,
+                    // 전체 보유 데이터(24개월)로 MA를 먼저 계산한 뒤 가시 영역에 매핑한다.
                     if (mode === 'raw1') {
                         function computeMA(arr, win) {
                             var out = [];
@@ -1761,8 +1886,6 @@ def _build_combined_chart_section():
                             if (fullArr[fi] !== null && fullArr[fi] !== undefined) lvf = fullArr[fi];
                             fullFilled.push(lvf);
                         }
-                        var fullMA20 = computeMA(fullFilled, 20);
-                        var fullMA120 = computeMA(fullFilled, 120);
                         var dateIdxMap = {};
                         for (var di = 0; di < fullDates.length; di++) dateIdxMap[fullDates[di]] = di;
                         // MA도 본 라인과 같은 scale 적용 (KOSPI/KOSDAQ Market Cap은 1e12로 조 단위)
@@ -1776,35 +1899,51 @@ def _build_combined_chart_section():
                                 return scale > 1 ? Math.round(sv) : sv;
                             });
                         }
-                        var ma20Visible = scaledMA(fullMA20);
-                        var ma120Visible = scaledMA(fullMA120);
-                        datasets.push({
-                            label: 'MA20',
-                            data: ma20Visible,
-                            borderColor: '#d32f2f',
-                            backgroundColor: 'transparent',
-                            borderWidth: 1.8,
-                            borderJoinStyle: 'round',
-                            borderCapStyle: 'round',
-                            pointRadius: 0,
-                            tension: 0.4,
-                            cubicInterpolationMode: 'monotone',
-                            spanGaps: true,
-                            yAxisID: yAxisID
-                        });
-                        datasets.push({
-                            label: 'MA120',
-                            data: ma120Visible,
-                            borderColor: '#1b5e20',
-                            backgroundColor: 'transparent',
-                            borderWidth: 1.8,
-                            borderJoinStyle: 'round',
-                            borderCapStyle: 'round',
-                            pointRadius: 0,
-                            tension: 0.4,
-                            cubicInterpolationMode: 'monotone',
-                            spanGaps: true,
-                            yAxisID: yAxisID
+                        MA_DEFS.forEach(function(def) {
+                            if (!maActive[def.win] && !dispActive[def.win]) return;
+                            var fullMA = computeMA(fullFilled, def.win);
+                            if (maActive[def.win]) {
+                                var maVisible = scaledMA(fullMA);
+                                // 전 구간 null(데이터 부족)이면 범례 유령 항목 방지를 위해 생략
+                                if (maVisible.some(function(v){ return v !== null; })) datasets.push({
+                                    label: 'MA' + def.win,
+                                    data: maVisible,
+                                    borderColor: def.color,
+                                    backgroundColor: 'transparent',
+                                    borderWidth: 1.8,
+                                    borderJoinStyle: 'round',
+                                    borderCapStyle: 'round',
+                                    pointRadius: 0,
+                                    tension: 0.4,
+                                    cubicInterpolationMode: 'monotone',
+                                    spanGaps: true,
+                                    yAxisID: yAxisID
+                                });
+                            }
+                            if (dispActive[def.win]) {
+                                // 이격도 = 가격/MA×100 (비율이라 단위 scale 자동 소거)
+                                var dispVisible = commonDates.map(function(d) {
+                                    var ix = dateIdxMap[d];
+                                    if (ix === undefined) return null;
+                                    var ma = fullMA[ix], pv = fullFilled[ix];
+                                    if (ma === null || ma === undefined || ma === 0) return null;
+                                    if (pv === null || pv === undefined) return null;
+                                    return Math.round(pv / ma * 10000) / 100;
+                                });
+                                if (dispVisible.some(function(v){ return v !== null; })) dispDatasets.push({
+                                    label: '이격도' + def.win,
+                                    data: dispVisible,
+                                    borderColor: def.color,
+                                    backgroundColor: 'transparent',
+                                    borderWidth: 1.8,
+                                    borderJoinStyle: 'round',
+                                    borderCapStyle: 'round',
+                                    pointRadius: 0,
+                                    tension: 0.4,
+                                    cubicInterpolationMode: 'monotone',
+                                    spanGaps: true
+                                });
+                            }
                         });
                     }
                 });
@@ -1898,6 +2037,14 @@ def _build_combined_chart_section():
                             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
                             ds.label + pctStr + '</span>';
                     }).join('');
+                    // 이격도는 기간 변화율 대신 마지막 값 표시 (100 기준 과열/침체 지표)
+                    legendHTML += dispDatasets.map(function(ds) {
+                        var vals = ds.data.filter(function(v) { return v !== null && v !== undefined && !isNaN(v); });
+                        var lastStr = vals.length ? '<span>' + vals[vals.length - 1].toFixed(1) + '</span>' : '';
+                        return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:13px;">' +
+                            '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + ds.borderColor + ';"></span>' +
+                            ds.label + lastStr + '</span>';
+                    }).join('');
                     legendEl.innerHTML = legendHTML;
                 }
 
@@ -1934,7 +2081,7 @@ def _build_combined_chart_section():
                 cmbChart = new Chart(document.getElementById('cmbDynamicChart'), {
                     type: 'line',
                     data: { labels: commonDates, datasets: datasets },
-                    plugins: [endLabelPlugin],
+                    plugins: [endLabelPlugin, cmbCrosshairPlugin],
                     options: {
                         responsive: true, maintainAspectRatio: false,
                         devicePixelRatio: Math.max(2, window.devicePixelRatio || 1),
@@ -1942,11 +2089,74 @@ def _build_combined_chart_section():
                         interaction: { mode: 'index', intersect: false },
                         plugins: {
                             legend: { display: false },
-                            tooltip: { callbacks: { label: tooltipLabel } }
+                            // animation:false — 동기 툴팁이 draw()만으로 위치 갱신되도록 (애니메이션 속성이면 제자리에 멈춤)
+                            tooltip: { animation: false, callbacks: { label: tooltipLabel } }
                         },
                         scales: scalesConfig
                     }
                 });
+
+                // 이격도 서브패널 — 100 기준선 점선 + 메인 y축 폭에 맞춰 x축 정렬
+                var dispPanel = document.getElementById('cmbDispPanel');
+                if (cmbDispChart) { cmbDispChart.destroy(); cmbDispChart = null; }
+                if (dispPanel) {
+                    if (dispDatasets.length > 0) {
+                        dispPanel.style.display = '';
+                        var disp100Plugin = {
+                            id: 'cmbDisp100',
+                            beforeDatasetsDraw: function(chart) {
+                                var ys = chart.scales.y;
+                                var area = chart.chartArea;
+                                if (!ys || !area) return;
+                                var y100 = ys.getPixelForValue(100);
+                                if (y100 < area.top || y100 > area.bottom) return;
+                                var c = chart.ctx;
+                                c.save();
+                                c.strokeStyle = '#999';
+                                c.setLineDash([4, 4]);
+                                c.lineWidth = 1;
+                                c.beginPath();
+                                c.moveTo(area.left, y100);
+                                c.lineTo(area.right, y100);
+                                c.stroke();
+                                c.restore();
+                            }
+                        };
+                        var mainYWidth = (cmbChart.scales && cmbChart.scales.y) ? cmbChart.scales.y.width : 0;
+                        cmbDispChart = new Chart(document.getElementById('cmbDispChart'), {
+                            type: 'line',
+                            data: { labels: commonDates, datasets: dispDatasets },
+                            plugins: [endLabelPlugin, disp100Plugin, cmbCrosshairPlugin],
+                            options: {
+                                responsive: true, maintainAspectRatio: false,
+                                devicePixelRatio: Math.max(2, window.devicePixelRatio || 1),
+                                layout: { padding: { right: 60 } },
+                                interaction: { mode: 'index', intersect: false },
+                                plugins: {
+                                    legend: { display: false },
+                                    tooltip: { animation: false, callbacks: { label: function(ctx) {
+                                        if (ctx.parsed.y === null || ctx.parsed.y === undefined) return ctx.dataset.label + ': -';
+                                        return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1);
+                                    } } }
+                                },
+                                scales: {
+                                    x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 11 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
+                                    y: {
+                                        type: 'linear',
+                                        position: 'left',
+                                        grace: '8%',
+                                        afterFit: function(scale) { if (mainYWidth > 0) scale.width = mainYWidth; },
+                                        ticks: { callback: function(v){ return fmtNum(v); }, font: { size: 11 }, color: '#000' },
+                                        grid: { color: '#eee' },
+                                        border: { color: '#000' }
+                                    }
+                                }
+                            }
+                        });
+                    } else {
+                        dispPanel.style.display = 'none';
+                    }
+                }
             }
 
             window.toggleCmbSeries = function(el, ev) {
@@ -1976,6 +2186,16 @@ def _build_combined_chart_section():
                 refreshCmbList();
             };
             window.filterCmbSeries = function() { refreshCmbList(); };
+            window.toggleCmbMA = function(win, el) {
+                maActive[win] = !maActive[win];
+                el.classList.toggle('active', maActive[win]);
+                buildCmbChart();
+            };
+            window.toggleCmbDisp = function(win, el) {
+                dispActive[win] = !dispActive[win];
+                el.classList.toggle('active', dispActive[win]);
+                buildCmbChart();
+            };
             window.updateCmbChart = buildCmbChart;
             window.clearCmbSelections = function() {
                 document.querySelectorAll('.cmb-chart-item.active').forEach(function(el){ el.classList.remove('active'); });
@@ -2049,12 +2269,32 @@ def _build_combined_chart_section():
                         <input type="text" id="cmbStartDate" value="{first_date}" onchange="formatDateInput(this);updateCmbChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                         <span style="color:#888;">~</span>
                         <input type="text" id="cmbEndDate" value="{last_date}" onchange="formatDateInput(this);updateCmbChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
-                        <button onclick="downloadChartImage('cmbDynamicChart','AoE_Data','cmbChartLegend')" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
+                        <button onclick="downloadChartImage('cmbDynamicChart','AoE_Data','cmbChartLegend','cmbDispChart')" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
                         <button onclick="clearCmbSelections()" style="font-family:inherit;font-size:13px;font-weight:600;padding:4px 14px;background:#f3f4f6;color:#444;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;margin-left:8px;">전체 해제</button>
+                    </div>
+                    <style>
+                        .cmb-ma-btn {{ font-family:inherit;font-size:12px;font-weight:600;padding:4px 12px;border:1px solid #d1d5db;border-radius:20px;background:#f3f4f6;color:#888;cursor:pointer; }}
+                        .cmb-ma-btn.active {{ background:#222;color:#fff;border-color:#222; }}
+                        .cmb-ma-disabled .cmb-ma-btn {{ opacity:0.35;pointer-events:none; }}
+                    </style>
+                    <div id="cmbMaRow" style="display:flex;gap:6px;align-items:center;margin-bottom:12px;font-size:13px;">
+                        <span style="color:#555;font-weight:600;">이동평균</span>
+                        <button class="cmb-ma-btn" onclick="toggleCmbMA(20,this)">MA20</button>
+                        <button class="cmb-ma-btn" onclick="toggleCmbMA(60,this)">MA60</button>
+                        <button class="cmb-ma-btn" onclick="toggleCmbMA(120,this)">MA120</button>
+                        <button class="cmb-ma-btn" onclick="toggleCmbMA(200,this)">MA200</button>
+                        <span style="color:#555;font-weight:600;margin-left:18px;">이격도</span>
+                        <button class="cmb-ma-btn" onclick="toggleCmbDisp(20,this)">20</button>
+                        <button class="cmb-ma-btn" onclick="toggleCmbDisp(60,this)">60</button>
+                        <button class="cmb-ma-btn" onclick="toggleCmbDisp(120,this)">120</button>
+                        <button class="cmb-ma-btn" onclick="toggleCmbDisp(200,this)">200</button>
                     </div>
                     <div id="cmbChartCard" style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                         <div style="position:relative;height:600px;">
                             <canvas id="cmbDynamicChart"></canvas>
+                        </div>
+                        <div id="cmbDispPanel" style="display:none;position:relative;height:160px;margin-top:8px;">
+                            <canvas id="cmbDispChart"></canvas>
                         </div>
                         <div id="cmbChartLegend" style="margin-top:12px;text-align:center;color:#222;"></div>
                     </div>
