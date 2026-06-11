@@ -495,7 +495,7 @@
     <aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="market.html" class="sidebar-link active">Index</a><a href="universe.html" class="sidebar-link">Universe</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
     <header>
         <h1>📊 Index</h1>
-        <div class="last-updated">Updated: 2026-06-11 12:57:07 KST</div>
+        <div class="last-updated">Updated: 2026-06-11 13:21:55 KST</div>
     </header>
 
     
@@ -595,6 +595,100 @@
             var idxColors = {"KOSPI": "#000000", "KOSDAQ": "#666666", "NIKKEI": "#DC2626", "TSEC": "#1976D2", "S&P 500": "#2E7D32", "NASDAQ": "#7B1FA2", "RUSSELL 2000": "#F57C00"};
             var idxChart = null;
             var idxMode = 'local';
+
+            // 십자선(crosshair) — 세로선은 가장 가까운 날짜(index)에 스냅, 가로선은 커서 위치.
+            // cmbCrosshairPlugin(DATA 차트)과 동일 스타일의 단일 차트 버전.
+            var idxHoverState = { idx: null, yPx: null };
+            // 스냅된 날짜의 툴팁(데이터값) 표시.
+            // tooltip.setActiveElements가 내부에서 tooltip.update까지 수행하므로 이후 draw()만 하면 됨.
+            function idxSyncTooltip(chart, idx) {
+                if (!chart || !chart.tooltip) return;
+                var els = [];
+                if (idx !== null) {
+                    chart.data.datasets.forEach(function(ds, di) {
+                        var v = ds.data[idx];
+                        if (v !== null && v !== undefined) els.push({ datasetIndex: di, index: idx });
+                    });
+                }
+                var area = chart.chartArea;
+                var pos = { x: 0, y: 0 };
+                if (els.length && area) {
+                    pos.x = chart.scales.x.getPixelForValue(idx);
+                    pos.y = (area.top + area.bottom) / 2;
+                }
+                chart.tooltip.setActiveElements(els, pos);
+                if (chart.setActiveElements) chart.setActiveElements(els);
+            }
+            var idxCrosshairPlugin = {
+                id: 'idxCrosshair',
+                afterEvent: function(chart, args) {
+                    var e = args.event;
+                    var area = chart.chartArea;
+                    if (!area) return;
+                    var inside = e.x !== null && e.y !== null &&
+                        e.x >= area.left && e.x <= area.right && e.y >= area.top && e.y <= area.bottom;
+                    if (e.type === 'mouseout' || !inside) {
+                        if (idxHoverState.idx !== null) {
+                            idxHoverState.idx = null;
+                            idxSyncTooltip(chart, null);
+                            args.changed = true;
+                            chart.draw();
+                        }
+                        return;
+                    }
+                    if (e.type !== 'mousemove') return;
+                    var idx = Math.round(chart.scales.x.getValueForPixel(e.x));
+                    var maxIdx = chart.data.labels.length - 1;
+                    if (idx < 0) idx = 0;
+                    if (idx > maxIdx) idx = maxIdx;
+                    // 약한 마그넷: 현재 날짜(idx)의 데이터 점이 커서에서 12px 이내면 가로선을 그 점에 스냅
+                    var yPx = e.y;
+                    var snapRadius = 12;
+                    var bestDist = null;
+                    chart.data.datasets.forEach(function(ds, di) {
+                        var v = ds.data[idx];
+                        if (v === null || v === undefined) return;
+                        var meta = chart.getDatasetMeta(di);
+                        if (meta.hidden || !meta.data[idx]) return;
+                        var py = meta.data[idx].y;
+                        if (py === null || py === undefined || isNaN(py)) return;
+                        var dist = Math.abs(py - e.y);
+                        if (dist <= snapRadius && (bestDist === null || dist < bestDist)) {
+                            bestDist = dist;
+                            yPx = py;
+                        }
+                    });
+                    var moved = idxHoverState.idx !== idx;
+                    idxHoverState.idx = idx;
+                    idxHoverState.yPx = yPx;
+                    args.changed = true;
+                    if (moved) idxSyncTooltip(chart, idx);
+                    chart.draw();
+                },
+                afterDraw: function(chart) {
+                    if (idxHoverState.idx === null) return;
+                    var area = chart.chartArea;
+                    var xs = chart.scales.x;
+                    if (!area || !xs) return;
+                    var xPx = xs.getPixelForValue(idxHoverState.idx);
+                    if (xPx < area.left || xPx > area.right) return;
+                    var ctx = chart.ctx;
+                    ctx.save();
+                    ctx.strokeStyle = '#888';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(xPx, area.top);
+                    ctx.lineTo(xPx, area.bottom);
+                    ctx.stroke();
+                    if (idxHoverState.yPx >= area.top && idxHoverState.yPx <= area.bottom) {
+                        ctx.beginPath();
+                        ctx.moveTo(area.left, idxHoverState.yPx);
+                        ctx.lineTo(area.right, idxHoverState.yPx);
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+                }
+            };
 
             function buildIdxChart() {
                 var selected = [];
@@ -716,14 +810,15 @@
                 idxChart = new Chart(document.getElementById('idxDynamicChart'), {
                     type: 'line',
                     data: { labels: commonDates, datasets: datasets },
-                    plugins: [endLabelPlugin],
+                    plugins: [endLabelPlugin, idxCrosshairPlugin],
                     options: {
                         responsive: true, maintainAspectRatio: false,
                         layout: { padding: { right: 60 } },
                         interaction: { mode: 'index', intersect: false },
                         plugins: {
                             legend: { display: false },
-                            tooltip: { callbacks: { label: function(ctx){ return ctx.dataset.label + ': ' + (ctx.parsed.y === null ? '-' : ctx.parsed.y.toFixed(1) + '%'); } } }
+                            // animation:false — 스냅 툴팁이 draw()만으로 위치 갱신되도록 (애니메이션 속성이면 제자리에 멈춤)
+                            tooltip: { animation: false, callbacks: { label: function(ctx){ return ctx.dataset.label + ': ' + (ctx.parsed.y === null ? '-' : ctx.parsed.y.toFixed(1) + '%'); } } }
                         },
                         scales: {
                             x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 11 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
