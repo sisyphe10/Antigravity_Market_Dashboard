@@ -13,7 +13,7 @@
       "current_price": 322500.0,
       "ath_price": 360500.0,
       "dd": -10.540915395284323,
-      "rsi_1m": 12.486297849462375,
+      "rsi_1m": 16.336597849462375,
       "is_today_new": false
     },
     {
@@ -29,7 +29,7 @@
       "current_price": 2150000.0,
       "ath_price": 2363000.0,
       "dd": -9.013965298349557,
-      "rsi_1m": 14.061112534059944,
+      "rsi_1m": 17.911412534059945,
       "is_today_new": false
     },
     {
@@ -45,7 +45,7 @@
       "current_price": 1896000.0,
       "ath_price": 2203000.0,
       "dd": -13.93554244212437,
-      "rsi_1m": 10.021391646778039,
+      "rsi_1m": 13.87169164677804,
       "is_today_new": false
     },
     {
@@ -61,7 +61,7 @@
       "current_price": 385500.0,
       "ath_price": 480000.0,
       "dd": -19.687500000000004,
-      "rsi_1m": 25.60942420701168,
+      "rsi_1m": 29.459724207011682,
       "is_today_new": false
     },
     {
@@ -77,7 +77,23 @@
       "current_price": 1358000.0,
       "ath_price": 1361000.0,
       "dd": -0.22042615723733006,
-      "rsi_1m": 17.49880763765543,
+      "rsi_1m": 21.34910763765543,
+      "is_today_new": false
+    },
+    {
+      "code": "035420",
+      "name": "NAVER",
+      "sector": "소프트웨어",
+      "market_cap": 387478.22672,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": 10.267857142857142,
+      "contribution": 5.133928571428571,
+      "cumulative_return": 0.0,
+      "current_price": 247000.0,
+      "ath_price": 454000.0,
+      "dd": -45.59471365638766,
+      "rsi_1m": 21.823631372549013,
       "is_today_new": false
     },
     {
@@ -93,7 +109,7 @@
       "current_price": 1714000.0,
       "ath_price": 2127000.0,
       "dd": -19.417019275975555,
-      "rsi_1m": 75.8093050104384,
+      "rsi_1m": 79.65960501043841,
       "is_today_new": false
     },
     {
@@ -109,7 +125,7 @@
       "current_price": 134400.0,
       "ath_price": 139200.0,
       "dd": -3.4482758620689613,
-      "rsi_1m": 33.75844378818737,
+      "rsi_1m": 37.60874378818737,
       "is_today_new": false
     },
     {
@@ -125,7 +141,7 @@
       "current_price": 93100.0,
       "ath_price": 136400.0,
       "dd": -31.74486803519062,
-      "rsi_1m": -28.980896178343947,
+      "rsi_1m": -25.130596178343943,
       "is_today_new": false
     },
     {
@@ -141,7 +157,7 @@
       "current_price": 112700.0,
       "ath_price": 149900.0,
       "dd": -24.81654436290861,
-      "rsi_1m": -10.728050819672136,
+      "rsi_1m": -6.877750819672136,
       "is_today_new": false
     },
     {
@@ -157,7 +173,7 @@
       "current_price": 122400.0,
       "ath_price": 161400.0,
       "dd": -24.1635687732342,
-      "rsi_1m": -7.7779971962616825,
+      "rsi_1m": -3.9276971962616827,
       "is_today_new": false
     },
     {
@@ -173,7 +189,7 @@
       "current_price": 103400.0,
       "ath_price": 133000.0,
       "dd": -22.25563909774436,
-      "rsi_1m": 26.499715682281057,
+      "rsi_1m": 22.72291568228105,
       "is_today_new": false
     },
     {
@@ -189,7 +205,7 @@
       "current_price": 22600.0,
       "ath_price": 51000.0,
       "dd": -55.68627450980392,
-      "rsi_1m": -14.82385,
+      "rsi_1m": -10.97355,
       "is_today_new": false
     },
     {
@@ -205,7 +221,7 @@
       "current_price": 1145000.0,
       "ath_price": 1630000.0,
       "dd": -29.75460122699386,
-      "rsi_1m": -17.07955529676935,
+      "rsi_1m": -13.229255296769349,
       "is_today_new": false
     },
     {
@@ -221,24 +237,8 @@
       "current_price": 48950.0,
       "ath_price": 54500.0,
       "dd": -10.183486238532113,
-      "rsi_1m": 39.4411149758454,
+      "rsi_1m": 35.6643149758454,
       "is_today_new": false
-    },
-    {
-      "code": "035420",
-      "name": "NAVER",
-      "sector": "소프트웨어",
-      "market_cap": 387478.22672,
-      "weight": 5.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
-      "current_price": 247000.0,
-      "ath_price": 454000.0,
-      "dd": -45.59471365638766,
-      "rsi_1m": 17.973331372549012,
-      "is_today_new": true
     }
   ],
   "DB 목표전환형 5차": [
@@ -249,14 +249,14 @@
       "market_cap": 18854248.5108,
       "weight": 20.0,
       "weight_prev": 20.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": 7.859531772575251,
+      "contribution": 15.719063545150503,
+      "cumulative_return": 0.0,
       "current_price": 322500.0,
       "ath_price": 360500.0,
       "dd": -10.540915395284323,
-      "rsi_1m": 12.486297849462375,
-      "is_today_new": true
+      "rsi_1m": 16.336597849462375,
+      "is_today_new": false
     },
     {
       "code": "000660",
@@ -265,14 +265,14 @@
       "market_cap": 15323100.8475,
       "weight": 20.0,
       "weight_prev": 20.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": 2.3322227510709186,
+      "contribution": 4.664445502141837,
+      "cumulative_return": 0.0,
       "current_price": 2150000.0,
       "ath_price": 2363000.0,
       "dd": -9.013965298349557,
-      "rsi_1m": 14.061112534059944,
-      "is_today_new": true
+      "rsi_1m": 17.911412534059945,
+      "is_today_new": false
     },
     {
       "code": "035420",
@@ -281,27 +281,14 @@
       "market_cap": 387478.22672,
       "weight": 10.0,
       "weight_prev": 10.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": 10.267857142857142,
+      "contribution": 10.267857142857142,
+      "cumulative_return": 0.0,
       "current_price": 247000.0,
       "ath_price": 454000.0,
       "dd": -45.59471365638766,
-      "rsi_1m": 17.973331372549012,
-      "is_today_new": true
+      "rsi_1m": 21.823631372549013,
+      "is_today_new": false
     }
-  ],
-  "_order_changes": {
-    "삼성 트루밸류 / NH Value ESG / DB 개방형": {
-      "date": "2026-06-12",
-      "added": [
-        {
-          "name": "NAVER",
-          "weight": 5.0
-        }
-      ],
-      "changed": [],
-      "removed": []
-    }
-  }
+  ]
 }
