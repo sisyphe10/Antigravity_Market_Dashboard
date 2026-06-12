@@ -374,7 +374,8 @@ def get_item_category(item_name):
 
     # Special handling for Wrap portfolios
     wrap_keywords = ['트루밸류', '삼성 트루밸류', 'Value ESG', 'NH Value ESG',
-                     '개방형', 'DB 개방형']
+                     '개방형', 'DB 개방형',
+                     '목표전환형 5차', 'DB 목표전환형 5차']
     if any(keyword in item_name for keyword in wrap_keywords):
         return 'Wrap'
 
@@ -2460,6 +2461,7 @@ def _build_wrap_chart_section(category_label):
             ('삼성 트루밸류', '트루밸류'),
             ('NH Value ESG', 'Value ESG'),
             ('DB 개방형', '개방형 랩'),
+            ('DB 목표전환형 5차', '목표전환형 5차'),  # 운용 개시 2026-06-12 (NH 4호 2026-06-15 페어 예정)
             # ('NH 목표전환형 3호', '목표전환형 3호'),  # NH 3호 완료 (2026-05-27 청산, 목표달성)
             # ('DB 목표전환형 4차', '목표전환형 4차'),  # DB 4차 완료 (2026-05-27 청산, 목표달성)
             # ('NH 목표전환형 2호', '목표전환형 2호'),  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
@@ -2470,6 +2472,7 @@ def _build_wrap_chart_section(category_label):
             '삼성 트루밸류': '#1428A0',
             'NH Value ESG': '#0072CE',
             'DB 개방형': '#00854A',
+            'DB 목표전환형 5차': '#00854A',  # 운용 개시 2026-06-12
             # 'NH 목표전환형 3호': '#0072CE',  # NH 3호 완료 (2026-05-27 청산, 목표달성)
             # 'DB 목표전환형 4차': '#00854A',  # DB 4차 완료 (2026-05-27 청산, 목표달성)
             # 'NH 목표전환형 2호': '#0072CE',  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
@@ -3370,6 +3373,7 @@ def create_wrap_returns_table():
 
         items = [
             ('삼성 트루밸류', '트루밸류'),
+            ('DB 목표전환형 5차', '목표전환형 5차'),  # 운용 개시 2026-06-12 (NH 4호 2026-06-15 페어 예정)
             # ('NH 목표전환형 3호', '목표전환형 3호'),  # NH 3호 완료 (2026-05-27 청산, 목표달성)
             # ('DB 목표전환형 4차', '목표전환형 4차'),  # DB 4차 완료 (2026-05-27 청산, 목표달성)
             # ('NH 목표전환형 2호', '목표전환형 2호'),  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
@@ -3564,7 +3568,16 @@ def create_order_section():
                     { broker: 'DB',   product: '개방형 랩' },
                 ],
             },
-            // NH 3호 + DB 4차 페어 청산 (2026-05-27, 목표달성). 다음 페어 출시 시 재추가.
+            {
+                display: 'DB 목표전환형 5차',  // 운용 개시 2026-06-12 (NH 4호 2026-06-15 페어 예정, 등록 시 jsonKey 합친 키로 갱신)
+                jsonKey: 'DB 목표전환형 5차',
+                templates: [
+                    { label: 'DB 목표전환형 5차', file: '자문지/라이프자산운용_DB 목표전환형 랩 _5차_2026.6.12.xlsx' },
+                ],
+                newSheetTargets: [
+                    { broker: 'DB', product: '목표전환형 5차' },
+                ],
+            },
         ];
         var orderState = {};
         var orderStocks = {};
@@ -3734,10 +3747,12 @@ def create_order_section():
             var samsung = buildOrderEmailText(GENERAL, orderStocks[GENERAL] || [], orderState[GENERAL] || []);
             var nh = buildOrderEmailText(NH, orderStocks[NH] || [], orderState[NH] || []);
             // 네이트온 (NH 이메일 밑) — 일반형 + 목표전환형 한 박스
+            // 목표전환형 소스: DB 5차 단독 기간(2026-06-12~) — NH 4호(06-15) 등록 시 NH 소스로 교체
+            var TGT = 'DB 목표전환형 5차';
             var nateonText = buildOrderNateonText(orderStocks[GENERAL] || [], orderState[GENERAL] || [], '일반형')
                 + '\\n\\n'
-                + buildOrderNateonText(orderStocks[NH] || [], orderState[NH] || [], '목표전환형');
-            var nateonReasonLines = buildNateonReasonLines([GENERAL, NH]);
+                + buildOrderNateonText(orderStocks[TGT] || [], orderState[TGT] || [], '목표전환형');
+            var nateonReasonLines = buildNateonReasonLines([GENERAL, TGT]);
             if (nateonReasonLines.length) nateonText += '\\n\\n' + nateonReasonLines.join('\\n');
             // 다운로드 섹션 (증권사 순서: 삼성 → NH → DB, 색상도 증권사별)
             var BROKER_ORDER = { '삼성': 0, 'NH': 1, 'DB': 2 };
@@ -3884,9 +3899,9 @@ def create_order_section():
         }
 
         function buildComplianceEmailText() {
-            // 일반형 + 목표전환형(NH 3호) 통합
+            // 일반형 + 목표전환형(DB 5차) 통합 — NH 4호(2026-06-15) 등록 시 NH 소스로 교체
             var GENERAL = '삼성 트루밸류 / NH Value ESG / DB 개방형';
-            var TARGET = 'NH 목표전환형 3호';
+            var TARGET = 'DB 목표전환형 5차';
             var gen = buildOrderChanges(orderStocks[GENERAL] || [], orderState[GENERAL] || []);
             var tgt = buildOrderChanges(orderStocks[TARGET] || [], orderState[TARGET] || []);
             function dedupe(a, b) {
