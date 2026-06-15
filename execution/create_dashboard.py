@@ -193,7 +193,10 @@ def create_portfolio_tables_html():
             <div class="portfolio-section">
                 <h3 class="portfolio-title">{portfolio_name}</h3>
                 <div class="table-container">
-                    <table class="portfolio-table">
+                    <table class="portfolio-table holdings-table" style="table-layout:fixed;">
+                        <colgroup>
+                            <col style="width:3.5%"><col style="width:6.5%"><col style="width:11%"><col style="width:10%"><col style="width:9%"><col style="width:7%"><col style="width:8%"><col style="width:7%"><col style="width:8.5%"><col style="width:8.5%"><col style="width:8%"><col style="width:7%"><col style="width:6%">
+                        </colgroup>
                         <thead>
                             <tr>
                                 <th>#</th>
@@ -208,7 +211,7 @@ def create_portfolio_tables_html():
                                 <th style="border-left:2px solid #000;">현재가</th>
                                 <th>ATH</th>
                                 <th>DD</th>
-                                <th>RSI(1M)</th>
+                                <th>RSI</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -296,14 +299,14 @@ def create_portfolio_tables_html():
                     dd_str = "-"
                     dd_color_class = ""
 
-                # RSI(1M): 종목 1M - 시장 지수 1M (%p). Universe와 동일 정의.
-                rsi_1m = stock.get('rsi_1m')
-                if rsi_1m is not None:
-                    rsi_1m_str = f"{rsi_1m:+.1f}%"
-                    rsi_1m_color_class = "positive" if rsi_1m > 0 else "negative" if rsi_1m < 0 else ""
+                # RSI: 편입 이후 종목 수익률 − 동일 기간 시장 지수 수익률 (%p). 양수 = 시장 대비 초과.
+                rsi = stock.get('rsi')
+                if rsi is not None:
+                    rsi_str = f"{rsi:+.1f}%"
+                    rsi_color_class = "positive" if rsi > 0 else "negative" if rsi < 0 else ""
                 else:
-                    rsi_1m_str = "-"
-                    rsi_1m_color_class = ""
+                    rsi_str = "-"
+                    rsi_color_class = ""
 
                 html += f"""
                             <tr>
@@ -319,7 +322,7 @@ def create_portfolio_tables_html():
                                 <td style="border-left:2px solid #000;">{current_price_str}</td>
                                 <td>{ath_price_str}</td>
                                 <td class="{dd_color_class}">{dd_str}</td>
-                                <td class="{rsi_1m_color_class}">{rsi_1m_str}</td>
+                                <td class="{rsi_color_class}">{rsi_str}</td>
                             </tr>
                 """
 

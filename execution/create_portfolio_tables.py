@@ -107,6 +107,26 @@ def get_today_return_from_cache(price_df):
     return ((latest_price - prev_price) / prev_price) * 100
 
 
+def get_inclusion_date(code, portfolio_name, nav_df):
+    """포트폴리오 NAV 이력에서 종목 편입일(마지막 전량매도 이후 첫 비중>0 날짜) 반환.
+    RSI '편입 이후' 기준점으로 사용. 추적 개시 전부터 보유한 기존 종목은
+    NAV 첫 등장일(추적 개시일)을 자동 반환하므로 별도 하드코딩 불필요."""
+    try:
+        hist = nav_df[(nav_df['상품명'] == portfolio_name) & (nav_df['코드'] == int(code))]
+        if hist.empty:
+            return None
+        hist = hist.sort_values('날짜')
+        zero_dates = hist[hist['비중'] == 0]['날짜']
+        if not zero_dates.empty:
+            hist = hist[hist['날짜'] > zero_dates.max()]
+        purchases = hist[hist['비중'] > 0]
+        if purchases.empty:
+            return None
+        return purchases['날짜'].min()
+    except Exception:
+        return None
+
+
 def calculate_cumulative_return(code, stock_name, portfolio_name, nav_df, price_df):
     """
     종목의 누적 수익률 계산 (캐시된 데이터 사용)
@@ -248,18 +268,25 @@ def create_portfolio_tables():
         from datetime import timezone, timedelta as _td
         _today_kst = pd.Timestamp.now(tz=timezone(_td(hours=9))).normalize().tz_localize(None)
 
-        # 시장 지수 1M 수익률 (RSI(1M) = 종목 1M - 지수 1M, Universe와 동일 정의)
-        # KRX는 KOSPI/KOSDAQ만 매핑 (KONEX 등은 RSI 미표시)
+        # 시장 지수 가격 시계열 (RSI = 편입 이후 종목 수익률 − 동일 기간 지수 수익률, %p)
+        # KRX는 KOSPI/KOSDAQ만 매핑 (KONEX 등은 RSI 미표시).
+        # fdr KS11/KQ11은 data.krx LOGOUT 차단 → universe.html RSI(1M)과 동일하게 yfinance ^KS11/^KQ11 사용.
+        INDEX_PRICE_SERIES = {'KOSPI': None, 'KOSDAQ': None}
         try:
-            with open('index_returns.json', 'r', encoding='utf-8') as f:
-                _idx_returns = json.load(f).get('returns_1m', {})
+            import yfinance as yf
+            _idx_start = (pd.Timestamp.now() - pd.DateOffset(years=3)).strftime('%Y-%m-%d')
+            for mkt, ticker in [('KOSPI', '^KS11'), ('KOSDAQ', '^KQ11')]:
+                try:
+                    closes = yf.Ticker(ticker).history(start=_idx_start, auto_adjust=False)['Close'].dropna()
+                    if getattr(closes.index, 'tz', None) is not None:
+                        closes.index = closes.index.tz_localize(None)
+                    closes.index = closes.index.normalize()
+                    INDEX_PRICE_SERIES[mkt] = closes if not closes.empty else None
+                    print(f"  지수 {mkt} ({ticker}): {len(closes)}일 (RSI 편입 이후 기준)")
+                except Exception as e:
+                    print(f"  Warning: 지수 {mkt} 로드 실패 (RSI 미표시): {e}")
         except Exception as e:
-            print(f"  Warning: index_returns.json 로드 실패: {e}")
-            _idx_returns = {}
-        INDEX_RETURNS_1M = {
-            'KOSPI': _idx_returns.get('KOSPI'),
-            'KOSDAQ': _idx_returns.get('KOSDAQ'),
-        }
+            print(f"  Warning: yfinance import 실패 (RSI 미표시): {e}")
 
         # KRX 종목 리스트 미리 로드 (KRX → KRX-DESC fallback)
         print("2. KRX 종목 리스트 로드 중...")
@@ -494,22 +521,26 @@ def create_portfolio_tables():
                     except:
                         pass
 
-                # RSI(1M) = 종목 1M 수익률 - 해당 시장 지수 1M 수익률 (%p, Universe와 동일 정의)
-                # 1M = 21 거래일 lookback (fetch_index_returns.py와 동일 기준)
-                rsi_1m = None
-                if price_df is not None and len(price_df) >= 22:
+                # RSI = 편입 이후 종목 수익률 − 동일 기간 시장 지수 수익률 (%p). 양수 = 시장 대비 초과.
+                # 기준점 = 편입일(마지막 전량매도 이후 첫 비중>0 날짜) 당일 종가(on-or-before, 누적수익률과 동일).
+                # 종목·지수 모두 같은 편입일부터 현재까지 측정 → 동일 종목도 포트폴리오별 편입일 다르면 RSI 다름.
+                rsi = None
+                incl_date = None if is_today_new else get_inclusion_date(code, use_portfolio, nav_df)
+                if incl_date is not None and price_df is not None and not price_df.empty:
                     try:
-                        last_c = float(price_df.iloc[-1]['Close'])
-                        prev_c = float(price_df.iloc[-22]['Close'])
-                        if prev_c > 0:
-                            stock_1m = (last_c / prev_c - 1)
-                            market = ''
-                            if not stock_data.empty:
-                                market = str(stock_data.iloc[0].get('Market', '') or '').upper()
-                            idx_key = 'KOSPI' if 'KOSPI' in market else ('KOSDAQ' if 'KOSDAQ' in market else None)
-                            idx_ret = INDEX_RETURNS_1M.get(idx_key) if idx_key else None
-                            if idx_ret is not None:
-                                rsi_1m = (stock_1m - idx_ret) * 100
+                        market = str(stock_data.iloc[0].get('Market', '') or '').upper() if not stock_data.empty else ''
+                        idx_key = 'KOSPI' if 'KOSPI' in market else ('KOSDAQ' if 'KOSDAQ' in market else None)
+                        idx_series = INDEX_PRICE_SERIES.get(idx_key) if idx_key else None
+                        if idx_series is not None and not idx_series.empty:
+                            s_base_rows = price_df[price_df.index <= incl_date]
+                            i_base_rows = idx_series[idx_series.index <= incl_date]
+                            if not s_base_rows.empty and not i_base_rows.empty:
+                                s_base = float(s_base_rows.iloc[-1]['Close'])
+                                i_base = float(i_base_rows.iloc[-1])
+                                s_last = float(price_df.iloc[-1]['Close'])
+                                i_last = float(idx_series.iloc[-1])
+                                if s_base > 0 and i_base > 0:
+                                    rsi = ((s_last / s_base) - (i_last / i_base)) * 100
                     except Exception:
                         pass
 
@@ -526,7 +557,7 @@ def create_portfolio_tables():
                     'current_price': current_price,
                     'ath_price': ath_price,
                     'dd': dd,
-                    'rsi_1m': rsi_1m,
+                    'rsi': rsi,
                     'is_today_new': is_today_new
                 })
 
