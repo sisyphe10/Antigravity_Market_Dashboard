@@ -3682,12 +3682,14 @@ def create_order_section():
                 ],
             },
             {
-                display: 'DB 목표전환형 5차',  // 운용 개시 2026-06-12. NH 4호(06-15) 페어 → PORTFOLIO 제목/jsonKey는 합친 키, ORDER 라벨은 DB 5차 유지
+                display: 'NH 목표전환형 4호 / DB 목표전환형 5차',  // NH 4호(운용 개시 2026-06-15)+DB 5차(2026-06-12) 페어 (동일 종목/비중) → combined ORDER 탭
                 jsonKey: 'NH 목표전환형 4호 / DB 목표전환형 5차',
                 templates: [
+                    { label: 'NH 목표전환형 4호', file: '자문지/라이프자산운용_라이프 다이내믹밸류_목표전환형 4호_2026.6.15.xlsx' },
                     { label: 'DB 목표전환형 5차', file: '자문지/라이프자산운용_DB 목표전환형 랩 _5차_2026.6.12.xlsx' },
                 ],
                 newSheetTargets: [
+                    { broker: 'NH', product: '목표전환형 4호' },
                     { broker: 'DB', product: '목표전환형 5차' },
                 ],
             },
@@ -3860,8 +3862,8 @@ def create_order_section():
             var samsung = buildOrderEmailText(GENERAL, orderStocks[GENERAL] || [], orderState[GENERAL] || []);
             var nh = buildOrderEmailText(NH, orderStocks[NH] || [], orderState[NH] || []);
             // 네이트온 (NH 이메일 밑) — 일반형 + 목표전환형 한 박스
-            // 목표전환형 소스: DB 5차 단독 기간(2026-06-12~) — NH 4호(06-15) 등록 시 NH 소스로 교체
-            var TGT = 'DB 목표전환형 5차';
+            // 목표전환형 소스: NH 4호(06-15) / DB 5차(06-12) 페어 combined 키
+            var TGT = 'NH 목표전환형 4호 / DB 목표전환형 5차';
             var nateonText = buildOrderNateonText(orderStocks[GENERAL] || [], orderState[GENERAL] || [], '일반형')
                 + '\\n\\n'
                 + buildOrderNateonText(orderStocks[TGT] || [], orderState[TGT] || [], '목표전환형');
@@ -4012,9 +4014,9 @@ def create_order_section():
         }
 
         function buildComplianceEmailText() {
-            // 일반형 + 목표전환형(DB 5차) 통합 — NH 4호(2026-06-15) 등록 시 NH 소스로 교체
+            // 일반형 + 목표전환형(NH 4호 / DB 5차 페어) 통합
             var GENERAL = '삼성 트루밸류 / NH Value ESG / DB 개방형';
-            var TARGET = 'DB 목표전환형 5차';
+            var TARGET = 'NH 목표전환형 4호 / DB 목표전환형 5차';
             var gen = buildOrderChanges(orderStocks[GENERAL] || [], orderState[GENERAL] || []);
             var tgt = buildOrderChanges(orderStocks[TARGET] || [], orderState[TARGET] || []);
             function dedupe(a, b) {
