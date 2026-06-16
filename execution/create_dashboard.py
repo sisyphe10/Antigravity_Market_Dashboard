@@ -1362,6 +1362,9 @@ def _build_combined_chart_section():
                 {'display': 'KOSDAQ',             'csv': 'KOSDAQ',             'color': '#1976D2'},
                 {'display': 'KOSDAQ/USD',         'csv': 'KOSDAQ/USD',         'color': '#5294D8'},
                 {'display': 'KOSDAQ Market Cap',  'csv': 'KOSDAQ Market Cap',  'color': '#7BAEDF'},
+                # 증시 유동성 (금투협 KOFIA → dataset.csv DEPOSIT). DATA 일반 차트로 개별 시리즈 표시.
+                {'display': '고객예탁금',         'csv': '고객예탁금',         'color': '#2E7D32'},
+                {'display': '신용잔고',           'csv': '신용잔고',           'color': '#C2185B'},
             ]},
             {'label': 'INDEX_US', 'series': [
                 {'display': 'S&P 500',            'csv': 'S&P 500',            'color': '#2E7D32'},
@@ -6162,7 +6165,7 @@ def create_dashboard():
     print(f"Dashboard generated: {OUTPUT_FILE}")
 
     # ── Generate index.html (Landing page) ──
-    kofia_section = _build_landing_kofia_section()
+    # 고객예탁금/신용잔고는 Market DATA(INDEX_KOREA)로 이전 — 랜딩에서 제외.
     landing_page = f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -6223,7 +6226,6 @@ def create_dashboard():
                 <span class="lh-quote-text">—</span>
             </div>
         </div>
-        {kofia_section}
         <footer>Age of Emergence</footer>
     </main>
     <script>
