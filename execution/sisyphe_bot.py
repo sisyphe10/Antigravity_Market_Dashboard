@@ -2410,12 +2410,17 @@ def _delete_sheet_row(service, sheet_id, row_index):
     ).execute()
 
 
-def _append_row_to(service, spreadsheet_id, sheet_name, row, value_input_option='USER_ENTERED'):
-    """임의 스프레드시트/탭에 행 추가 (선유듀오 등 시지프 외 시트용)."""
-    service.spreadsheets().values().append(
-        spreadsheetId=spreadsheet_id, range=sheet_name,
-        valueInputOption=value_input_option, insertDataOption='INSERT_ROWS',
-        body={'values': [row]}
+def _read_range(service, spreadsheet_id, rng):
+    """임의 스프레드시트/범위 읽기."""
+    return service.spreadsheets().values().get(
+        spreadsheetId=spreadsheet_id, range=rng).execute().get('values', [])
+
+
+def _update_range(service, spreadsheet_id, rng, values, value_input_option='USER_ENTERED'):
+    """임의 스프레드시트/범위에 2D 값 기록."""
+    service.spreadsheets().values().update(
+        spreadsheetId=spreadsheet_id, range=rng,
+        valueInputOption=value_input_option, body={'values': values}
     ).execute()
 
 
@@ -2640,8 +2645,10 @@ async def _ledger_move_to_seonyuduo(service, msg, date, merchant, amount):
         amt_val,
         rowvals[4] if len(rowvals) > 4 else merchant,
     ]
-    # 1) 선유듀오 가계부에 먼저 추가 (실패 시 시지프 행은 보존 → 데이터 손실 방지)
-    await asyncio.to_thread(_append_row_to, service, SEONYUDUO_SHEET_ID, SEONYUDUO_LEDGER_TAB, moved, 'USER_ENTERED')
+    # 1) 선유듀오 가계부 A~E의 다음 빈 행에 직접 기록 (append 컬럼 오배치 방지). 실패 시 시지프 행 보존
+    sy_rows = await asyncio.to_thread(_read_range, service, SEONYUDUO_SHEET_ID, f"{SEONYUDUO_LEDGER_TAB}!A:E")
+    sy_next = len(sy_rows) + 1
+    await asyncio.to_thread(_update_range, service, SEONYUDUO_SHEET_ID, f"{SEONYUDUO_LEDGER_TAB}!A{sy_next}:E{sy_next}", [moved])
     # 2) 시지프 거래내역에서 삭제
     sheet_id = await asyncio.to_thread(_get_sheet_id, service, LEDGER_TX_SHEET)
     if sheet_id is None:
