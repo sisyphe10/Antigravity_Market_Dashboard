@@ -819,6 +819,104 @@ async def daily_newhigh_job(context: ContextTypes.DEFAULT_TYPE):
 
 
 # ============================================================
+# 공시 알림 (매일 16:40) — daily_disclosures.yml(16:30 KST 수집) 산출물(disclosures.json) 사용
+# ============================================================
+import urllib.request
+
+_DISCLOSURES_FILE = os.path.join(DASHBOARD_DIR, 'disclosures.json')
+_DISCLOSURES_RAW_URL = (
+    'https://raw.githubusercontent.com/sisyphe10/Antigravity_Market_Dashboard/main/disclosures.json'
+)
+
+
+def _fetch_disclosures_data():
+    """16:30 GHA 커밋분을 VM pull 없이 반영하기 위해 GitHub raw에서 우선 조회.
+    실패 시 로컬 disclosures.json 폴백. 동기 호출(다른 잡과 동일 패턴)."""
+    try:
+        req = urllib.request.Request(
+            _DISCLOSURES_RAW_URL,
+            headers={'User-Agent': 'ra-sisyphe-bot', 'Cache-Control': 'no-cache'},
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            return json.loads(resp.read().decode('utf-8'))
+    except Exception as e:
+        logging.warning(f"Disclosures raw fetch 실패 → 로컬 폴백: {e}")
+        try:
+            with open(_DISCLOSURES_FILE, encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e2:
+            logging.error(f"Disclosures 로컬 로드도 실패: {e2}")
+            return None
+
+
+def render_disclosures_message(items, today):
+    """오늘(today) 공시 항목들 → HTML 메시지 (종목별 그룹).
+    레이아웃: 종목 •(볼드+밑줄) / 공시 -(1단 들여쓰기, 제목 링크 + 출처배지).
+    들여쓰기는 점자공백 U+2800 — 텔레그램이 일반/nbsp 연속공백을 합치므로.
+    source 누락 항목은 DART로 취급(fetch_kind_disclosures.py 스키마 주석 기준)."""
+    esc = _html.escape
+    NB = "⠀"          # 점자공백(빈 글자) — 들여쓰기 1칸
+    I1 = NB * 2
+
+    total = len(items)
+    if total == 0:
+        return f"{today}\n<b><u>오늘 공시</u></b> (0건)\n\n오늘 공시 없음"
+
+    # 종목명별 그룹 (종목 내 항목 수 많은 순 → 종목명 가나다 보조정렬)
+    groups = {}
+    for it in items:
+        groups.setdefault(it.get('name') or '기타', []).append(it)
+    grp_order = sorted(groups, key=lambda k: (-len(groups[k]), k))
+
+    head = f"<b><u>오늘 공시</u></b> ({total}건)"
+    lines = [today, head, ""]
+    for name in grp_order:
+        rows = groups[name]
+        lines.append(f"• <b><u>{esc(name)}_({len(rows)})</u></b>")
+        for it in rows:
+            src = (it.get('source') or 'DART').upper()
+            badge = '🟦KIND' if src == 'KIND' else '🟧DART'
+            title = esc(it.get('title') or '(제목없음)')
+            url = it.get('url')
+            title_html = f'<a href="{esc(url)}">{title}</a>' if url else title
+            lines.append(f"{I1}- {title_html} | {badge}")
+        lines.append("")
+
+    return "\n".join(lines).rstrip()
+
+
+async def daily_disclosures_job(context: ContextTypes.DEFAULT_TYPE):
+    """매일 16:40 당일 공시 알림 (daily_disclosures.yml가 16:30 KST에 수집·커밋)."""
+    logging.info("Disclosures job started")
+    data = _fetch_disclosures_data()
+    if not data:
+        logging.warning("disclosures.json 로드 실패 → 공시 알림 건너뜀")
+        return
+
+    items = data.get('items', []) if isinstance(data, dict) else (data or [])
+    today = datetime.datetime.now(tz=KST).strftime('%Y-%m-%d')
+    today_items = [it for it in items if it.get('date') == today]
+
+    if not today_items:
+        logging.info(f"오늘({today}) 공시 0건 → 알림 건너뜀")
+        return
+
+    msg = render_disclosures_message(today_items, today)
+    sent = 0
+    for chat_id in SUBSCRIBERS:
+        try:
+            for i in range(0, len(msg), 4000):
+                await context.bot.send_message(
+                    chat_id=chat_id, text=msg[i:i+4000],
+                    parse_mode='HTML', disable_web_page_preview=True,
+                )
+            sent += 1
+        except Exception as e:
+            logging.error(f"Disclosures send failed ({chat_id}): {e}")
+    logging.info(f"Disclosures sent: {len(today_items)}건 → {sent}명")
+
+
+# ============================================================
 # main
 # ============================================================
 if __name__ == "__main__":
@@ -849,6 +947,12 @@ if __name__ == "__main__":
     job_queue.run_daily(
         daily_newhigh_job,
         time=datetime.time(hour=16, minute=0, second=0, tzinfo=kst),
+    )
+
+    # 당일 공시 알림 (16:40 — daily_disclosures.yml가 16:30 KST 수집·커밋 후, GitHub raw 조회)
+    job_queue.run_daily(
+        daily_disclosures_job,
+        time=datetime.time(hour=16, minute=40, second=0, tzinfo=kst),
     )
 
     for h in range(7, 18):
