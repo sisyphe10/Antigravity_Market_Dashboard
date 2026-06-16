@@ -111,8 +111,8 @@ featured_data_kis.json
 .newhigh_test_msg.txt
 .claude/settings.local.json
 
-# 미분류 거래 알림 상태 (VM 로컬, deploy.sh가 백업)
-.ledger_uncat_notified.json
+# 가계부 거래 알림 상태 (VM 로컬, deploy.sh가 백업)
+.ledger_notified.json
 
 # local API key files - never commit
 secrets/

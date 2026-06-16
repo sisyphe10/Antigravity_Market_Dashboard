@@ -17,7 +17,7 @@ BACKUP_FILES=(
     ".budget_milestone"
     ".wisereport_sent.json"
     ".portfolio_report_sent.json"
-    ".ledger_uncat_notified.json"
+    ".ledger_notified.json"
     "stock_price_history.json"
     "execution/research_bot/research_notes.db"
     "etf_data.db"

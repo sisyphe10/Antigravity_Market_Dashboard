@@ -17,8 +17,8 @@ except IOError:
     print("ERROR: sisyphe_bot is already running. Exiting.")
     sys.exit(1)
 
-from telegram import Update
-from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, filters
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, CallbackQueryHandler, filters
 from dotenv import load_dotenv
 
 # 로깅 설정
@@ -2330,49 +2330,91 @@ def check_budget():
 
 
 # ============================================================
-# 미분류 거래 알림 + 답장 분류 (ledger_category 자동 추가)
+# 가계부 거래 알림 + 답장 분류/수정/제외
 # ============================================================
 LEDGER_TX_SHEET = '거래내역'
 LEDGER_RULES_SHEET = 'ledger_category'
 UNCAT_LABEL = '미분류'
-UNCAT_NOTIFY_MARKER = '🏷️ 미분류 거래'
-UNCAT_NOTIFIED_FILE = os.path.join(DASHBOARD_DIR, '.ledger_uncat_notified.json')
+UNCAT_NOTIFY_MARKER = '🏷️ 미분류 거래'      # 미분류 거래 알림 (답장→분류)
+LEDGER_NOTIFY_MARKER = '🧾 가계부 등록'      # 분류된 거래 알림 (답장→수정/제외)
+LEDGER_NOTIFIED_FILE = os.path.join(DASHBOARD_DIR, '.ledger_notified.json')
 
 
-def _load_uncat_notified():
-    """알림 보낸 미분류 거래 키 집합. 파일 없으면 None(최초 실행 → baseline)."""
+def _load_ledger_notified():
+    """알림 보낸 거래 키 집합. 파일 없으면 None(최초 실행 → baseline)."""
     try:
-        with open(UNCAT_NOTIFIED_FILE, 'r', encoding='utf-8') as f:
+        with open(LEDGER_NOTIFIED_FILE, 'r', encoding='utf-8') as f:
             return set(json.load(f) or [])
     except FileNotFoundError:
         return None
     except Exception as e:
-        logging.warning(f"uncat notified 읽기 실패: {e}")
+        logging.warning(f"ledger notified 읽기 실패: {e}")
         return set()
 
 
-def _save_uncat_notified(keys):
+def _save_ledger_notified(keys):
     try:
-        with open(UNCAT_NOTIFIED_FILE, 'w', encoding='utf-8') as f:
+        with open(LEDGER_NOTIFIED_FILE, 'w', encoding='utf-8') as f:
             json.dump(sorted(keys), f, ensure_ascii=False)
     except Exception as e:
-        logging.error(f"uncat notified 저장 실패: {e}")
+        logging.error(f"ledger notified 저장 실패: {e}")
 
 
 def _uncat_key(date, mer, amt):
     return f"{date}|{mer}|{str(amt).replace(',', '').replace(' ', '')}"
 
 
+def _norm_amt(a):
+    """금액 정규화: 콤마/공백/원 제거 (행 매칭용)."""
+    return str(a).replace(',', '').replace(' ', '').replace('원', '').strip()
+
+
+def _get_sheet_id(service, sheet_name):
+    """탭 이름 → sheetId(gid). 행 삭제(batchUpdate)에 필요."""
+    meta = service.spreadsheets().get(spreadsheetId=SISYPHE_SHEET_ID).execute()
+    for sh in meta.get('sheets', []):
+        if sh.get('properties', {}).get('title') == sheet_name:
+            return sh['properties']['sheetId']
+    return None
+
+
+def _update_cell(service, sheet_name, a1, value):
+    """단일 셀 RAW 업데이트 (예: ledger_category!B5)."""
+    service.spreadsheets().values().update(
+        spreadsheetId=SISYPHE_SHEET_ID,
+        range=f'{sheet_name}!{a1}',
+        valueInputOption='RAW',
+        body={'values': [[value]]}
+    ).execute()
+
+
+def _delete_sheet_row(service, sheet_id, row_index):
+    """0-based 행 인덱스(헤더=0) 1개 삭제."""
+    service.spreadsheets().batchUpdate(
+        spreadsheetId=SISYPHE_SHEET_ID,
+        body={'requests': [{
+            'deleteDimension': {
+                'range': {
+                    'sheetId': sheet_id,
+                    'dimension': 'ROWS',
+                    'startIndex': row_index,
+                    'endIndex': row_index + 1,
+                }
+            }
+        }]}
+    ).execute()
+
+
 async def check_uncategorized_job(context: ContextTypes.DEFAULT_TYPE):
-    """거래내역에서 카테고리='미분류'인 신규 행 발견 시 텔레그램 알림."""
+    """거래내역에 신규 행이 추가되면 텔레그램 알림 (분류/미분류 모두)."""
     import html
     try:
         service = _get_sheets_service()
         if not service:
             return
         rows = await asyncio.to_thread(_read_sheet, service, LEDGER_TX_SHEET)
-        notified = _load_uncat_notified()
-        seed = notified is None  # 최초 실행: 기존 미분류는 조용히 baseline (스팸 방지)
+        notified = _load_ledger_notified()
+        seed = notified is None  # 최초 실행: 기존 거래는 조용히 baseline (스팸 방지)
         if seed:
             notified = set()
         new_items = []
@@ -2381,76 +2423,220 @@ async def check_uncategorized_job(context: ContextTypes.DEFAULT_TYPE):
             cat  = row[2] if len(row) > 2 else ''
             amt  = row[3] if len(row) > 3 else ''
             mer  = row[4] if len(row) > 4 else ''
-            if cat == UNCAT_LABEL and mer:
-                key = _uncat_key(date, mer, amt)
-                if key not in notified:
-                    notified.add(key)
-                    new_items.append((mer, amt, date))
+            if not mer:
+                continue
+            key = _uncat_key(date, mer, amt)
+            if key not in notified:
+                notified.add(key)
+                new_items.append((cat, mer, amt, date))
         if seed:
-            _save_uncat_notified(notified)
-            logging.info(f"uncat baseline: 기존 미분류 {len(notified)}건 무음 처리")
+            _save_ledger_notified(notified)
+            logging.info(f"ledger baseline: 기존 {len(notified)}건 무음 처리")
             return
-        for mer, amt, date in new_items:
+        for cat, mer, amt, date in new_items:
             try:
                 amt_disp = f"{int(str(amt).replace(',', '')):,}원"
             except Exception:
                 amt_disp = f"{amt}원"
-            text = (
-                f"{UNCAT_NOTIFY_MARKER}\n"
-                f"가맹점: {html.escape(str(mer))}\n"
-                f"금액: {amt_disp}\n"
-                f"날짜: {html.escape(str(date))}\n\n"
-                f"이 메시지에 <b>답장</b>으로 카테고리를 보내주세요.\n"
-                f"예) <code>식비</code>\n"
-                f"키워드를 바꾸려면 <code>키워드=카테고리</code> (예: <code>아식스=운동</code>)"
-            )
+            if (not cat) or cat == UNCAT_LABEL:
+                text = (
+                    f"{UNCAT_NOTIFY_MARKER}\n"
+                    f"가맹점: {html.escape(str(mer))}\n"
+                    f"금액: {amt_disp}\n"
+                    f"날짜: {html.escape(str(date))}\n\n"
+                    f"이 메시지에 <b>답장</b>으로 카테고리를 보내주세요.\n"
+                    f"예) <code>식비</code>\n"
+                    f"키워드를 바꾸려면 <code>키워드=카테고리</code> (예: <code>아식스=운동</code>)\n"
+                    f"가계부에서 빼려면 <code>제외</code>"
+                )
+            else:
+                text = (
+                    f"{LEDGER_NOTIFY_MARKER}\n"
+                    f"가맹점: {html.escape(str(mer))}\n"
+                    f"금액: {amt_disp}\n"
+                    f"카테고리: {html.escape(str(cat))}\n"
+                    f"날짜: {html.escape(str(date))}\n\n"
+                    f"카테고리가 잘못됐으면 이 메시지에 <b>답장</b>으로 수정 (예: <code>생활용품</code>)\n"
+                    f"가계부에서 빼려면 <code>제외</code>"
+                )
             for uid in SUBSCRIBERS:
                 try:
                     await context.bot.send_message(chat_id=uid, text=text, parse_mode='HTML')
                 except Exception as e:
-                    logging.warning(f"uncat 알림 전송 실패 ({uid}): {e}")
+                    logging.warning(f"ledger 알림 전송 실패 ({uid}): {e}")
         if new_items:
-            _save_uncat_notified(notified)
-            logging.info(f"uncat 알림 {len(new_items)}건 전송")
+            _save_ledger_notified(notified)
+            logging.info(f"ledger 알림 {len(new_items)}건 전송")
     except Exception as e:
         logging.error(f"check_uncategorized_job 오류: {e}")
 
 
+def _resolve_rule_op(rules, merchant, kw, cat):
+    """답장을 ledger_category 연산으로 해석. update/append/noop/error 딕셔너리 반환.
+    kw 지정 시 정확일치 행, 미지정 시 가맹점 매칭 행(수식 첫 매칭 모사) 기준."""
+    if kw:
+        for i, r in enumerate(rules):
+            if r and r[0].strip() == kw:
+                old = (r[1] if len(r) > 1 else '').strip()
+                if old == cat:
+                    return {'action': 'noop', 'text': f"ℹ️ '{kw}' → '{cat}' 규칙이 이미 있습니다."}
+                return {'action': 'update', 'row': i + 1, 'kw': kw, 'old': old, 'cat': cat}
+        return {'action': 'append', 'kw': kw, 'cat': cat}
+    for i, r in enumerate(rules):
+        if i == 0:  # 헤더(키워드|카테고리)
+            continue
+        k = (r[0].strip() if r and len(r) > 0 else '')
+        if k and k.lower() in merchant.lower():
+            old = (r[1] if len(r) > 1 else '').strip()
+            if old == cat:
+                return {'action': 'noop', 'text': f"ℹ️ '{k}' → '{cat}' 규칙이 이미 있습니다."}
+            return {'action': 'update', 'row': i + 1, 'kw': k, 'old': old, 'cat': cat}
+    if not merchant:
+        return {'action': 'error', 'text': "가맹점을 알 수 없어 키워드를 지정해야 합니다. 형식: 키워드=카테고리"}
+    return {'action': 'append', 'kw': merchant, 'cat': cat}
+
+
+async def _ledger_apply_op(service, op):
+    """해석된 op를 실제 시트에 반영하고 결과 텍스트를 반환."""
+    act = op['action']
+    if act in ('noop', 'error'):
+        return op['text']
+    if act == 'update':
+        await asyncio.to_thread(_update_cell, service, LEDGER_RULES_SHEET, f"B{op['row']}", op['cat'])
+        old = op.get('old') or '(없음)'
+        logging.info(f"ledger_category 수정: {op['kw']} {op.get('old')} -> {op['cat']}")
+        return f"✏️ '{op['kw']}' 규칙 수정: {old} → {op['cat']}\n거래내역이 자동 재분류됩니다."
+    await asyncio.to_thread(_append_row, service, LEDGER_RULES_SHEET, [op['kw'], op['cat']], 'RAW')
+    logging.info(f"ledger_category 추가: {op['kw']} -> {op['cat']}")
+    return f"✅ '{op['kw']}' → '{op['cat']}' 분류 규칙 추가됨.\n거래내역이 자동 재분류됩니다."
+
+
+async def _ledger_upsert_rule(service, context, msg, merchant, kw, cat):
+    """ledger_category 규칙 추가/수정. 결과 카테고리가 기존에 없던 신규면 버튼으로 확인."""
+    rules = await asyncio.to_thread(_read_sheet, service, LEDGER_RULES_SHEET)
+    op = _resolve_rule_op(rules, merchant, kw, cat)
+    if op['action'] in ('noop', 'error'):
+        await msg.reply_text(op['text'])
+        return
+    known = {r[1].strip() for r in rules[1:] if len(r) > 1 and r[1].strip()}
+    if cat in known:
+        await msg.reply_text(await _ledger_apply_op(service, op))
+        return
+    # 기존에 없던 카테고리 → 오타일 수 있으니 확인
+    context.user_data['pending_ledger_op'] = op
+    kb = InlineKeyboardMarkup([[
+        InlineKeyboardButton("➕ 새 카테고리로 추가", callback_data='ledgercat:add'),
+        InlineKeyboardButton("✖️ 취소", callback_data='ledgercat:cancel'),
+    ]])
+    sample = ', '.join(sorted(known)[:12]) if known else '(없음)'
+    await msg.reply_text(
+        f"❓ '{cat}' 은(는) 기존에 없던 카테고리예요.\n"
+        f"오타가 아니라면 새 카테고리로 추가할까요?\n\n"
+        f"기존 카테고리: {sample}\n\n"
+        f"수정하려면 [취소] 후 올바른 카테고리로 다시 답장해주세요.",
+        reply_markup=kb,
+    )
+
+
+async def handle_ledger_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """신규 카테고리 확인 버튼 처리."""
+    q = update.callback_query
+    if not q:
+        return
+    await q.answer()
+    op = context.user_data.pop('pending_ledger_op', None)
+    if (q.data or '') == 'ledgercat:cancel':
+        await q.edit_message_text("↩️ 취소했어요. 올바른 카테고리로 다시 답장해주세요.")
+        return
+    if op is None:
+        await q.edit_message_text("⌛ 만료된 요청이에요. 알림에 다시 답장해주세요.")
+        return
+    service = _get_sheets_service()
+    if not service:
+        await q.edit_message_text("❌ Google 서비스 계정이 설정되지 않았습니다.")
+        return
+    try:
+        await q.edit_message_text(await _ledger_apply_op(service, op))
+    except Exception as e:
+        logging.error(f"ledger_category 신규 적용 실패: {e}")
+        await q.edit_message_text(f"❌ 처리 실패: {e}")
+
+
+async def _ledger_exclude(service, msg, date, merchant, amount):
+    """거래내역에서 해당 행 삭제 (원본 ledger_data는 보존)."""
+    rows = await asyncio.to_thread(_read_sheet, service, LEDGER_TX_SHEET)
+    target = None
+    for i, row in enumerate(rows):
+        if i == 0:
+            continue
+        r_date = row[0] if len(row) > 0 else ''
+        r_amt = _norm_amt(row[3]) if len(row) > 3 else ''
+        r_mer = row[4] if len(row) > 4 else ''
+        if r_date == date and r_mer == merchant and r_amt == amount:
+            target = i
+            break
+    if target is None:
+        await msg.reply_text("❌ 해당 내역을 거래내역에서 못 찾았습니다.\n(이미 제외됐거나 날짜/금액이 바뀐 것 같아요.)")
+        return
+    sheet_id = await asyncio.to_thread(_get_sheet_id, service, LEDGER_TX_SHEET)
+    if sheet_id is None:
+        await msg.reply_text("❌ 거래내역 시트를 찾을 수 없습니다.")
+        return
+    await asyncio.to_thread(_delete_sheet_row, service, sheet_id, target)
+    try:
+        amt_disp = f"{int(amount):,}원"
+    except Exception:
+        amt_disp = f"{amount}원"
+    await msg.reply_text(
+        f"🗑️ 가계부에서 제외됨\n"
+        f"가맹점: {merchant}\n금액: {amt_disp}\n날짜: {date}\n"
+        f"(원본은 ledger_data에 보존)"
+    )
+    logging.info(f"거래 제외: {date}|{merchant}|{amount}")
+
+
 async def handle_uncat_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """미분류 알림에 답장 → ledger_category 탭에 [키워드, 카테고리] 추가 (중복 스킵)."""
-    import re
+    """가계부 알림에 답장 → 분류/수정(ledger_category) 또는 제외(거래내역 행 삭제)."""
+    import re, html
     msg = update.message
     if not msg or not msg.reply_to_message:
         return
     orig = msg.reply_to_message.text or ''
-    if UNCAT_NOTIFY_MARKER not in orig:
-        return  # 우리 미분류 알림에 대한 답장이 아님
-    m = re.search(r'가맹점:\s*(.+)', orig)
-    default_kw = m.group(1).strip() if m else ''
+    if (UNCAT_NOTIFY_MARKER not in orig) and (LEDGER_NOTIFY_MARKER not in orig):
+        return  # 우리 가계부 알림에 대한 답장이 아님
     reply = (msg.text or '').strip()
-    if '=' in reply:
-        kw, cat = [s.strip() for s in reply.split('=', 1)]
-    else:
-        kw, cat = default_kw, reply
-    if not kw or not cat:
-        await msg.reply_text("형식: 카테고리만 보내거나 '키워드=카테고리' (예: 아식스=운동)")
-        return
+    m_mer = re.search(r'가맹점:\s*(.+)', orig)
+    m_amt = re.search(r'금액:\s*(.+)', orig)
+    m_date = re.search(r'날짜:\s*(.+)', orig)
+    merchant = html.unescape(m_mer.group(1).strip()) if m_mer else ''
+    amount = _norm_amt(m_amt.group(1)) if m_amt else ''
+    date = html.unescape(m_date.group(1).strip()) if m_date else ''
+
     service = _get_sheets_service()
     if not service:
         await msg.reply_text("❌ Google 서비스 계정이 설정되지 않았습니다.")
         return
+
+    if reply == '제외':
+        try:
+            await _ledger_exclude(service, msg, date, merchant, amount)
+        except Exception as e:
+            logging.error(f"거래 제외 실패: {e}")
+            await msg.reply_text(f"❌ 제외 실패: {e}")
+        return
+
+    if '=' in reply:
+        kw, cat = [s.strip() for s in reply.split('=', 1)]
+    else:
+        kw, cat = '', reply
+    if not cat:
+        await msg.reply_text("형식: 카테고리만 보내거나 '키워드=카테고리' (예: 아식스=운동), 또는 '제외'")
+        return
     try:
-        existing = await asyncio.to_thread(_read_sheet, service, LEDGER_RULES_SHEET)
-        for r in existing:
-            if r and r[0].strip() == kw:
-                await msg.reply_text(f"ℹ️ '{kw}' 규칙은 이미 있습니다 → {r[1] if len(r) > 1 else ''}")
-                return
-        await asyncio.to_thread(_append_row, service, LEDGER_RULES_SHEET, [kw, cat], 'RAW')
-        await msg.reply_text(f"✅ '{kw}' → '{cat}' 분류 규칙 추가됨.\n거래내역이 자동으로 재분류됩니다.")
-        logging.info(f"ledger_category 규칙 추가: {kw} -> {cat}")
+        await _ledger_upsert_rule(service, context, msg, merchant, kw, cat)
     except Exception as e:
-        logging.error(f"ledger_category 추가 실패: {e}")
-        await msg.reply_text(f"❌ 규칙 추가 실패: {e}")
+        logging.error(f"ledger_category 처리 실패: {e}")
+        await msg.reply_text(f"❌ 규칙 처리 실패: {e}")
 
 
 if __name__ == '__main__':
@@ -2474,6 +2660,7 @@ if __name__ == '__main__':
     application.add_handler(CommandHandler('journal', journal_command))
     application.add_handler(CommandHandler('idea', idea_command))
     application.add_handler(MessageHandler(filters.REPLY & filters.TEXT & ~filters.COMMAND, handle_uncat_reply))
+    application.add_handler(CallbackQueryHandler(handle_ledger_callback, pattern=r'^ledgercat:'))
 
     job_queue = application.job_queue
     try:
@@ -2555,7 +2742,7 @@ if __name__ == '__main__':
     for t in trading_times:
         job_queue.run_daily(auto_portfolio_update_job, time=t)
 
-    # 미분류 거래 알림: 90초마다 거래내역 체크 (신규 미분류 → 텔레그램, 답장으로 분류)
+    # 가계부 거래 알림: 90초마다 거래내역 체크 (신규 거래 전체 → 텔레그램, 답장으로 분류/수정/제외)
     job_queue.run_repeating(check_uncategorized_job, interval=90, first=20)
 
     print(f"Bot started at {datetime.datetime.now()}")
