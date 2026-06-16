@@ -2602,7 +2602,8 @@ async def handle_uncat_reply(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if not msg or not msg.reply_to_message:
         return
     orig = msg.reply_to_message.text or ''
-    if (UNCAT_NOTIFY_MARKER not in orig) and (LEDGER_NOTIFY_MARKER not in orig):
+    # 마커 텍스트 부분으로 인식 (이모지 변형/복사 깨짐에 안전, doPost가 보낸 알림도 매칭)
+    if ('미분류 거래' not in orig) and ('가계부 등록' not in orig):
         return  # 우리 가계부 알림에 대한 답장이 아님
     reply = (msg.text or '').strip()
     m_mer = re.search(r'가맹점:\s*(.+)', orig)
@@ -2742,8 +2743,9 @@ if __name__ == '__main__':
     for t in trading_times:
         job_queue.run_daily(auto_portfolio_update_job, time=t)
 
-    # 가계부 거래 알림: 90초마다 거래내역 체크 (신규 거래 전체 → 텔레그램, 답장으로 분류/수정/제외)
-    job_queue.run_repeating(check_uncategorized_job, interval=90, first=20)
+    # 가계부 거래 알림은 이제 Apps Script doPost가 행 적재 직후 직접 텔레그램으로 전송 (이벤트 드리븐).
+    # 봇은 답장(분류/수정/제외)·버튼만 처리. 폴러는 fallback용으로 코드만 유지(비활성).
+    # job_queue.run_repeating(check_uncategorized_job, interval=90, first=20)
 
     print(f"Bot started at {datetime.datetime.now()}")
     print(f"✅ Daily jobs scheduled:")
