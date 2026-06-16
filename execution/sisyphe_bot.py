@@ -2344,6 +2344,95 @@ SEONYUDUO_SHEET_ID = '1w6q3UwUER7oINuk50LyMzgF2K0Fbt2wgSVJ34vImo0g'
 SEONYUDUO_LEDGER_TAB = '가계부'   # 컬럼: 날짜·유형·카테고리·금액·메모 (+통장)
 SEONYUDUO_MOVE_KEYWORDS = {'선유', '선유듀오', '듀오'}
 
+# 이관 시 @SeonyuDuo_bot(별도 토큰)으로 부부 그룹챗에 지출 알림. chat_id는 운동봇이 캡처해 둔 파일에서 읽음.
+SEONYUDUO_BOT_TOKEN = os.getenv('TELEGRAM_SEONYUDUO_BOT_TOKEN')
+SEONYUDUO_CHATS_FILE = os.path.join(DASHBOARD_DIR, 'seonyuduo_chats.json')
+SEONYUDUO_MONTHLY_BUDGET = 800000  # 월 예산(원), /ledger2와 동일
+
+
+def _load_seonyuduo_chats():
+    """운동봇이 캡처한 그룹챗 id 리스트."""
+    try:
+        with open(SEONYUDUO_CHATS_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f) or {}
+        return list(data.keys()) if isinstance(data, dict) else [str(x) for x in data]
+    except FileNotFoundError:
+        return []
+    except Exception as e:
+        logging.warning(f"선유듀오 chats 읽기 실패: {e}")
+        return []
+
+
+def _seonyuduo_tg_send(chat_id, text):
+    """@SeonyuDuo_bot 토큰으로 동기 전송 (asyncio.to_thread에서 호출). PTB Bot 수명주기 회피."""
+    import urllib.request
+    import urllib.parse
+    data = urllib.parse.urlencode({
+        'chat_id': chat_id, 'text': text,
+        'parse_mode': 'HTML', 'disable_web_page_preview': 'true',
+    }).encode()
+    req = urllib.request.Request(
+        f'https://api.telegram.org/bot{SEONYUDUO_BOT_TOKEN}/sendMessage', data=data)
+    with urllib.request.urlopen(req, timeout=15) as r:
+        return json.loads(r.read().decode())
+
+
+async def _notify_seonyuduo_spend(service, merchant, category, amount):
+    """선유듀오 이관 성공 시 @SeonyuDuo_bot 그룹챗에 지출 알림. 실패해도 이관 결과는 유지."""
+    import html
+    if not SEONYUDUO_BOT_TOKEN:
+        logging.info("선유듀오 봇 토큰 없음 → 그룹 알림 skip")
+        return
+    chats = _load_seonyuduo_chats()
+    if not chats:
+        logging.info("선유듀오 캡처된 그룹챗 없음 → 그룹 알림 skip")
+        return
+    # 선유듀오 가계부 이번달 누적 지출 (/ledger2 total_spent 로직과 동일)
+    total_spent = 0
+    try:
+        rows = await asyncio.to_thread(
+            _read_range, service, SEONYUDUO_SHEET_ID, f'{SEONYUDUO_LEDGER_TAB}!A:F')
+        month_prefix = datetime.datetime.now(tz=KST).strftime('%Y-%m')
+        for r in (rows[1:] if rows else []):
+            if len(r) > 3 and str(r[0]).startswith(month_prefix) and r[1] == '지출':
+                try:
+                    total_spent += int(str(r[3]).replace(',', '') or '0')
+                except ValueError:
+                    pass
+    except Exception as e:
+        logging.warning(f"선유듀오 월 집계 실패(알림은 진행): {e}")
+    budget = SEONYUDUO_MONTHLY_BUDGET
+    pct = round(total_spent / budget * 100) if budget else 0
+    remaining = max(0, budget - total_spent)
+    filled = min(10, max(0, round(pct / 100 * 10)))
+    bar = '█' * filled + '░' * (10 - filled)
+    try:
+        amt_int = int(amount)
+        amt_disp = f"{amt_int:,}원"
+        is_cancel = amt_int < 0
+    except (ValueError, TypeError):
+        amt_disp = f"{amount}원"
+        is_cancel = False
+    head = '↩️ <b>취소/환불</b>' if is_cancel else '💸 <b>지출</b>'
+    text = (
+        f"<b><u>선유듀오 가계부</u></b>\n"
+        f"{head}\n"
+        f"━━━━━━━━━━━━━━━\n"
+        f"🏪 {html.escape(str(merchant))}\n"
+        f"📂 {html.escape(str(category) or '미분류')}\n"
+        f"💰 {amt_disp}\n\n"
+        f"📊 이번달 누적 {total_spent:,}원 · 예산 소진율 {pct}% [{bar}]\n"
+        f"💵 잔액 {remaining:,}원"
+    )
+    sent = 0
+    for cid in chats:
+        try:
+            await asyncio.to_thread(_seonyuduo_tg_send, int(cid), text)
+            sent += 1
+        except Exception as e:
+            logging.warning(f"선유듀오 그룹 알림 전송 실패 ({cid}): {e}")
+    logging.info(f"선유듀오 그룹 지출 알림 {sent}/{len(chats)}건 전송: {merchant} {amt_disp}")
+
 
 def _load_ledger_notified():
     """알림 보낸 거래 키 집합. 파일 없으면 None(최초 실행 → baseline)."""
@@ -2665,6 +2754,11 @@ async def _ledger_move_to_seonyuduo(service, msg, date, merchant, amount):
         f"(시지프 가계부에서는 제외됨)"
     )
     logging.info(f"선유듀오 이동: {date}|{merchant}|{amount}")
+    # 부부 그룹챗(@SeonyuDuo_bot)에 지출 알림 (실패해도 이관 결과는 유지)
+    try:
+        await _notify_seonyuduo_spend(service, moved[4], moved[2], amt_val)
+    except Exception as e:
+        logging.warning(f"선유듀오 그룹 알림 실패(이관은 완료): {e}")
 
 
 async def handle_uncat_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
