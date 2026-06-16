@@ -38,7 +38,7 @@ except ImportError:
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (ApplicationBuilder, ContextTypes, CommandHandler,
-                          MessageHandler, CallbackQueryHandler, filters)
+                          MessageHandler, CallbackQueryHandler, TypeHandler, filters)
 from telegram.error import BadRequest
 from dotenv import load_dotenv
 
@@ -58,12 +58,49 @@ SHEET_TAB = '운동'
 HAIKU_MODEL = 'claude-haiku-4-5-20251001'
 USER_MAP_FILE = os.path.join(ROOT, 'seonyuduo_exercise_user_map.json')
 
-TENNIS_CATEGORIES = ['포핸드', '백핸드', '백핸드 슬라이스', '포핸드 발리', '백핸드 발리', '서브', '공통']
+TENNIS_CATEGORIES = ['포핸드', '백핸드', '슬라이스', '포핸드 발리', '백핸드 발리', '서브', '공통']
 EXERCISE_TYPES = ['테니스', '러닝', '워크아웃']
 WEEKDAY_KO = ['월', '화', '수', '목', '금', '토', '일']  # datetime.weekday(): 월=0
 TYPE_EMOJI = {'테니스': '🎾', '러닝': '🏃', '워크아웃': '💪'}
 
 PENDING_TTL = 900  # 초; 오래된 pending 정리 기준
+
+# 가계부 지출 알림(Sisyphe 봇 → 선유듀오 이관 시)을 보낼 그룹챗 id 저장소.
+# Sisyphe 봇이 이 파일을 읽어 같은 토큰 대신 @SeonyuDuo_bot 토큰으로 전송한다.
+SEONYUDUO_CHATS_FILE = os.path.join(ROOT, 'seonyuduo_chats.json')
+
+
+def _load_chats():
+    try:
+        with open(SEONYUDUO_CHATS_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f) or {}
+    except FileNotFoundError:
+        return {}
+    except Exception as e:
+        logging.warning(f"chats 읽기 실패: {e}")
+        return {}
+
+
+def _save_chats(d):
+    try:
+        with open(SEONYUDUO_CHATS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(d, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        logging.error(f"chats 저장 실패: {e}")
+
+
+async def capture_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """모든 업데이트에서 그룹/슈퍼그룹 chat_id를 비차단 캡처 (group=-1 등록).
+    저장만 하고 propagation은 막지 않아 기존 핸들러는 정상 동작한다."""
+    ch = update.effective_chat
+    if not ch or ch.type not in ('group', 'supergroup'):
+        return
+    chats = _load_chats()
+    key = str(ch.id)
+    if key not in chats:
+        chats[key] = {'type': ch.type, 'title': ch.title or ''}
+        _save_chats(chats)
+        logging.info(f"선유듀오 그룹챗 캡처: {key} ({ch.title})")
 
 
 # ══════════════════════════════════════════════════════════
@@ -186,7 +223,7 @@ def build_system_prompt() -> str:
   · 유형: 반드시 "테니스" / "러닝" / "워크아웃" 중 하나.
     테니스(포핸드/백핸드/발리/서브/슬라이스/랠리/스트로크) → "테니스"; 달리기/조깅/러닝/마라톤/km → "러닝"; 그 외 근력·코어·맨몸(데드리프트/스쿼트/벤치프레스/풀업/플랭크/코어) → "워크아웃".
   · 카테고리: 유형이 "테니스"이면 반드시 다음 7개 중 정확히 하나: {cats}
-    슬라이스 백핸드는 "백핸드 슬라이스". 발리는 포/백 구분해 "포핸드 발리"/"백핸드 발리". 어디에도 안 맞거나 혼합이면 "공통".
+    슬라이스(포핸드든 백핸드든)는 "슬라이스". 발리는 포/백 구분해 "포핸드 발리"/"백핸드 발리". 어디에도 안 맞거나 혼합이면 "공통".
     유형이 "테니스"가 아니면 구체적 운동명(러닝/데드리프트/스쿼트/벤치프레스/코어 등) 자유 텍스트.
   · 장소: 있으면 추출(JD테니스/한강공원/헬스장), 없으면 "".
   · 날짜(YYYY-MM-DD): "오늘"→{today}, "어제"→{yest}, 상대표현은 {today} 기준 역산, 명시일은 정규화, 언급 없으면 {today}.
@@ -201,7 +238,7 @@ def _coerce_tennis_cat(c: str):
     if not c:
         return None
     if '슬라이스' in c:
-        return '백핸드 슬라이스'
+        return '슬라이스'
     if '발리' in c:
         return '포핸드 발리' if '포' in c else ('백핸드 발리' if '백' in c else '공통')
     if '서브' in c:
@@ -398,7 +435,7 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "운동 내용을 자연어로 보내면 → AI가 유형/카테고리/장소/날짜/내용 분류 → 미리보기 확인 후 [저장]\n\n"
         "• 한 메시지에 여러 카테고리를 적으면 <b>카테고리별로 행을 나눠</b> 저장해요.\n"
         "• 유형: 테니스 / 러닝 / 워크아웃 (자동)\n"
-        "• 테니스 카테고리: 포핸드·백핸드·백핸드 슬라이스·포핸드 발리·백핸드 발리·서브·공통\n"
+        "• 테니스 카테고리: 포핸드·백핸드·슬라이스·포핸드 발리·백핸드 발리·서브·공통\n"
         "• 러닝/워크아웃 카테고리: 종목명 자유\n"
         "• 날짜 미기재 시 오늘\n\n"
         "👥 <b>그룹</b>: 일반 텍스트 대신 <code>/fit 운동내용</code> 으로 보내세요 (DM은 그냥 텍스트로).\n"
@@ -452,7 +489,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (update.message.text or '').strip()
     if len(text) < 2:
         await update.message.reply_text(
-            "운동 내용을 적어주세요. 예) 오늘 JD테니스 백핸드 슬라이스 연습")
+            "운동 내용을 적어주세요. 예) 오늘 JD테니스 슬라이스 연습")
         return
     await _process_exercise_text(update, context, text)
 
@@ -548,6 +585,8 @@ def main():
         print("Error: TELEGRAM_SEONYUDUO_BOT_TOKEN is missing.")
         sys.exit(1)
     application = ApplicationBuilder().token(TOKEN).build()
+    # 모든 업데이트에서 그룹 chat_id 캡처 (비차단, 다른 핸들러보다 먼저)
+    application.add_handler(TypeHandler(Update, capture_chat), group=-1)
     application.add_handler(CommandHandler('start', cmd_start))
     application.add_handler(CommandHandler('help', cmd_help))
     application.add_handler(CommandHandler('whoami', cmd_whoami))
