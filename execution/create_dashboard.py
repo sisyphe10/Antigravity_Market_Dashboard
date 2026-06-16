@@ -3682,6 +3682,16 @@ def create_order_section():
                 ],
             },
             {
+                display: 'DB 목표전환형 5차',  // DB 5차(운용 개시 2026-06-12). NH 4호와 동일 구성, 증권사·주문 분리 → 별도 탭. (사용자 지정 순서: DB 5차 앞)
+                jsonKey: 'NH 목표전환형 4호 / DB 목표전환형 5차',
+                templates: [
+                    { label: 'DB 목표전환형 5차', file: '자문지/라이프자산운용_DB 목표전환형 랩 _5차_2026.6.12.xlsx' },
+                ],
+                newSheetTargets: [
+                    { broker: 'DB', product: '목표전환형 5차' },
+                ],
+            },
+            {
                 display: 'NH 목표전환형 4호',  // NH 4호(운용 개시 2026-06-15). DB 5차와 동일 종목/비중이나 증권사·주문 분리 → 별도 탭. 보유종목은 combined 키 공유.
                 jsonKey: 'NH 목표전환형 4호 / DB 목표전환형 5차',
                 templates: [
@@ -3689,16 +3699,6 @@ def create_order_section():
                 ],
                 newSheetTargets: [
                     { broker: 'NH', product: '목표전환형 4호' },
-                ],
-            },
-            {
-                display: 'DB 목표전환형 5차',  // DB 5차(운용 개시 2026-06-12). NH 4호와 동일 구성, 증권사·주문 분리 → 별도 탭.
-                jsonKey: 'NH 목표전환형 4호 / DB 목표전환형 5차',
-                templates: [
-                    { label: 'DB 목표전환형 5차', file: '자문지/라이프자산운용_DB 목표전환형 랩 _5차_2026.6.12.xlsx' },
-                ],
-                newSheetTargets: [
-                    { broker: 'DB', product: '목표전환형 5차' },
                 ],
             },
         ];
@@ -3865,7 +3865,7 @@ def create_order_section():
 
         function renderEmailPanel() {
             var GENERAL = '삼성 트루밸류 / NH Value ESG / DB 개방형';
-            var NH = 'NH 목표전환형 3호';
+            var NH = 'NH 목표전환형 4호';
             var compliance = buildComplianceEmailText();
             var samsung = buildOrderEmailText(GENERAL, orderStocks[GENERAL] || [], orderState[GENERAL] || []);
             var nh = buildOrderEmailText(NH, orderStocks[NH] || [], orderState[NH] || []);
@@ -3980,8 +3980,8 @@ def create_order_section():
         }
 
         function buildOrderEmailText(pfName, stocks, st) {
-            // 일반형 + NH 3호 통합 이메일 (NH 3호 탭에서 활성화)
-            var TARGET_TABS = ['NH 목표전환형 3호'];
+            // 일반형 + NH 목표전환형 통합 이메일 (NH 4호 탭에서 활성화)
+            var TARGET_TABS = ['NH 목표전환형 4호'];
             var GENERAL = '삼성 트루밸류 / NH Value ESG / DB 개방형';
             var lines = [
                 '안녕하십니까.',
@@ -4112,8 +4112,8 @@ def create_order_section():
         }
 
         function buildOrderNateonSection(pfName) {
-            // NH 목표전환형 3호 탭에서만 노출 (일반형 + 목표전환형을 한 박스에 함께)
-            if (pfName !== 'NH 목표전환형 3호') return '';
+            // NH 목표전환형 4호 탭에서만 노출 (일반형 + 목표전환형을 한 박스에 함께)
+            if (pfName !== 'NH 목표전환형 4호') return '';
             var GENERAL = '삼성 트루밸류 / NH Value ESG / DB 개방형';
             var generalText = buildOrderNateonText(orderStocks[GENERAL] || [], orderState[GENERAL] || [], '일반형');
             var targetText = buildOrderNateonText(orderStocks[pfName] || [], orderState[pfName] || [], '목표전환형');
@@ -4637,7 +4637,7 @@ def create_order_section():
 
         // 최종 저장 = 3개 포트폴리오 모두 저장 + finalize 워크플로 1회 트리거
         async function finalizeOrder(_pfNameIgnored) {
-            if (!confirm('최종 저장하시겠습니까?\\n\\n2개 포트폴리오(일반형/NH 목표전환형 3호) 모두 저장 후 GitHub Actions(finalize_orders) 즉시 실행. 1~2분 후 Wrap_NAV.xlsx NEW 시트 + 대시보드 반영.')) return;
+            if (!confirm('최종 저장하시겠습니까?\\n\\n3개 포트폴리오(일반형/DB 목표전환형 5차/NH 목표전환형 4호) 모두 저장 후 GitHub Actions(finalize_orders) 즉시 실행. 1~2분 후 Wrap_NAV.xlsx NEW 시트 + 대시보드 반영.')) return;
             var pat = getGithubPat();
             if (!pat) { alert('PAT 입력이 취소되었습니다.'); return; }
             // 모든 포트폴리오 1회 커밋으로 저장 (탭 간 reason 동기화 보존)
@@ -4923,7 +4923,7 @@ def create_aum_section():
             { display: '삼성 트루밸류',      broker: '삼성', name: '트루밸류' },
             { display: 'NH Value ESG',      broker: 'NH',   name: '다이내믹밸류' },
             { display: 'DB 개방형',         broker: 'DB',   name: '개방형 랩' },
-            { display: 'NH 목표전환형 3호', broker: 'NH',   name: '목표전환형 3호' },  // 운용 개시 2026-05-14
+            { display: 'NH 목표전환형 4호', broker: 'NH',   name: '목표전환형 4호' },  // 운용 개시 2026-06-15
         ];
         var aumLatest = {};       // {broker|name: {date, aum}}
         var aumInputs = {};       // {idx: 사용자 입력 (억원)}
