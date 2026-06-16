@@ -93,7 +93,7 @@ def summarize_daily_notes(messages, date_str):
     for attempt in range(3):
         try:
             response = client.messages.create(
-                model="claude-sonnet-4-20250514",
+                model="claude-sonnet-4-6",
                 max_tokens=16384,
                 messages=[{"role": "user", "content": all_content}]
             )
