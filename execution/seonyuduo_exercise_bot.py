@@ -386,8 +386,8 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "예) <code>오늘 JD테니스 - 포핸드 손목 고정, 백핸드 체중 이동, 발리 짧게 펀치</code>\n"
         "예) <code>어제 헬스장 데드리프트 100kg, 스쿼트 80kg</code>\n"
         "예) <code>한강 5km 25분</code>\n\n"
-        "👥 <b>그룹 채팅에서는</b> <code>/log 운동내용</code> 으로 보내주세요.\n"
-        "예) <code>/log 오늘 JD테니스 포핸드 손목 고정, 백핸드 체중 이동</code>\n\n"
+        "👥 <b>그룹 채팅에서는</b> <code>/fit 운동내용</code> 으로 보내주세요.\n"
+        "예) <code>/fit 오늘 JD테니스 포핸드 손목 고정, 백핸드 체중 이동</code>\n\n"
         "/help 도움말, /whoami 담당자 확인",
         parse_mode='HTML')
 
@@ -401,7 +401,7 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• 테니스 카테고리: 포핸드·백핸드·백핸드 슬라이스·포핸드 발리·백핸드 발리·서브·공통\n"
         "• 러닝/워크아웃 카테고리: 종목명 자유\n"
         "• 날짜 미기재 시 오늘\n\n"
-        "👥 <b>그룹</b>: 일반 텍스트 대신 <code>/log 운동내용</code> 으로 보내세요 (DM은 그냥 텍스트로).\n"
+        "👥 <b>그룹</b>: 일반 텍스트 대신 <code>/fit 운동내용</code> 으로 보내세요 (DM은 그냥 텍스트로).\n"
         "/whoami — 내 담당자(TS/NY) 확인·변경",
         parse_mode='HTML')
 
@@ -464,7 +464,7 @@ async def cmd_log(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not text:
         await update.message.reply_text(
             "운동 내용을 함께 적어주세요.\n"
-            "예) <code>/log 오늘 JD테니스 포핸드 손목 고정, 백핸드 체중 이동</code>",
+            "예) <code>/fit 오늘 JD테니스 포핸드 손목 고정, 백핸드 체중 이동</code>",
             parse_mode='HTML')
         return
     await _process_exercise_text(update, context, text)
@@ -551,7 +551,7 @@ def main():
     application.add_handler(CommandHandler('start', cmd_start))
     application.add_handler(CommandHandler('help', cmd_help))
     application.add_handler(CommandHandler('whoami', cmd_whoami))
-    application.add_handler(CommandHandler(['log', 'ex'], cmd_log))
+    application.add_handler(CommandHandler(['fit', 'log', 'ex'], cmd_log))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     application.add_handler(CallbackQueryHandler(handle_callback))
     print("선유듀오 운동기록 봇 시작")
