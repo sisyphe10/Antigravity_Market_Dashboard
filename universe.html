@@ -49,6 +49,19 @@
         /* DD 열 (1Y 오른쪽) 세로 구분선 — 종목 리스트 16번째, 섹터 수익률 12번째 컬럼 */
         #tab0 th:nth-child(16), #tab0 td:nth-child(16) { border-left: 2px solid #868e96; }
         #sectorContent th:nth-child(12), #sectorContent td:nth-child(12) { border-left: 2px solid #868e96; }
+        /* 기간 수익률 탭 컬럼 비율 */
+        #tab2 th:nth-child(1) { width: 4%; }
+        #tab2 th:nth-child(2) { width: 4%; }
+        #tab2 th:nth-child(3) { width: 10%; }
+        #tab2 th:nth-child(4) { width: 10%; }
+        #tab2 th:nth-child(5) { width: 15%; }
+        #tab2 th:nth-child(6) { width: 15%; }
+        #tab2 th:nth-child(7) { width: 12%; cursor: default; }
+        #tab2 th:nth-child(8) { width: 10%; }
+        #tab2 th:nth-child(9) { width: 10%; }
+        #tab2 th:nth-child(10) { width: 10%; }
+        #tab2 td:nth-child(7) { padding: 0 6px; line-height: 0; }
+        #tab2 td:nth-child(9) { background: #fff8e1; }
         tbody tr:hover { background: #f5f5f5; }
         .positive { color: #cc0000; font-weight: 600; }
         .negative { color: #0055cc; font-weight: 600; }
@@ -102,12 +115,13 @@
 <aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="market.html" class="sidebar-link">Index</a><a href="universe.html" class="sidebar-link active">Universe</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
 <header>
     <h1>🌐 Universe</h1>
-    <div class="last-updated">Updated: 2026-06-16 10:55:37 KST</div>
+    <div class="last-updated">Updated: 2026-06-16 09:13:54 KST</div>
 </header>
 <div class="content">
     <div class="tabs">
         <div class="tab active" onclick="switchTab(0)">종목 리스트</div>
         <div class="tab" onclick="switchTab(1)">섹터 수익률</div>
+        <div class="tab" onclick="switchTab(2)">기간 수익률</div>
     </div>
     <div id="tab0" class="tab-content active">
     <div class="filters">
@@ -152,6 +166,38 @@
             <button onclick="downloadUniverseSector()" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
         </div>
         <div id="sectorContent"><p style="padding:40px;color:#888;">로딩 중...</p></div>
+    </div>
+    <div id="tab2" class="tab-content">
+        <div class="filters">
+            <span style="color:#555;font-weight:600;font-size:14px;">기간</span>
+            <input type="text" id="perStartDate" value="2025-12-30" onchange="formatDateInput(this);renderPeriod()" style="font-family:inherit;font-size:14px;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;background:#fff;color:#222;width:120px;text-align:center;" placeholder="YYYY-MM-DD">
+            <span style="color:#888;">~</span>
+            <input type="text" id="perEndDate" value="" onchange="formatDateInput(this);renderPeriod()" style="font-family:inherit;font-size:14px;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;background:#fff;color:#222;width:120px;text-align:center;" placeholder="YYYY-MM-DD">
+            <div class="csel-wrap" id="cselPerCurWrap">
+                <div class="csel-display" id="cselPerCurDisplay" onclick="toggleCselId('cselPerCurList')">통화</div>
+                <div class="csel-list" id="cselPerCurList"></div>
+            </div>
+            <div class="csel-wrap" id="cselPerSecWrap">
+                <div class="csel-display" id="cselPerSecDisplay" onclick="toggleCselId('cselPerSecList')">섹터</div>
+                <div class="csel-list" id="cselPerSecList"></div>
+            </div>
+            <button onclick="downloadUniversePeriod()" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
+        </div>
+        <table>
+            <thead><tr>
+                <th onclick="doSortPer(0)">#</th>
+                <th onclick="doSortPer(1)">통화</th>
+                <th onclick="doSortPer(2)">섹터</th>
+                <th onclick="doSortPer(3)">티커</th>
+                <th onclick="doSortPer(4)">기업명</th>
+                <th onclick="doSortPer(5)">시가총액</th>
+                <th title="선택 기간 종가 추이 (스파크라인)">스파크 라인</th>
+                <th onclick="doSortPer(7)" title="선택 기간 시작일 종가 → 종료일 종가 기준 (달력 날짜)">기간 수익률</th>
+                <th onclick="doSortPer(8)" title="기간 상대강도 = 종목 기간수익률 − 해당 시장지수 기간수익률 (%p)">RSI</th>
+                <th onclick="doSortPer(9)" title="기간 중 최대 낙폭 (고점→저점)">기간 MDD</th>
+            </tr></thead>
+            <tbody id="tbodyPer"><tr><td colspan="10" style="padding:40px;color:#888;">로딩 중...</td></tr></tbody>
+        </table>
     </div>
 </div>
 <footer>Antigravity Universe</footer>
@@ -208,6 +254,15 @@ Promise.all([
     Object.keys(sec).sort().forEach(function(v){sh+='<div class="csel-item" data-v="'+v+'">'+v+'</div>';});
     document.getElementById('cselSecList').innerHTML=sh;
     document.getElementById('cselSecList').addEventListener('click',function(e){var item=e.target.closest('.csel-item');if(item)pickCselSec(item.getAttribute('data-v'),item.textContent);});
+    // 기간 수익률 탭 필터 (통화/섹터) — 종목 리스트 탭과 동일 옵션
+    var pch='<div class="csel-item selected" data-v="">통화</div>';
+    Object.keys(c).sort().forEach(function(v){pch+='<div class="csel-item" data-v="'+v+'">'+v+'</div>';});
+    document.getElementById('cselPerCurList').innerHTML=pch;
+    document.getElementById('cselPerCurList').addEventListener('click',function(e){var item=e.target.closest('.csel-item');if(item)pickCselPerCur(item.getAttribute('data-v'),item.textContent);});
+    var psh='<div class="csel-item selected" data-v="">섹터</div>';
+    Object.keys(sec).sort().forEach(function(v){psh+='<div class="csel-item" data-v="'+v+'">'+v+'</div>';});
+    document.getElementById('cselPerSecList').innerHTML=psh;
+    document.getElementById('cselPerSecList').addEventListener('click',function(e){var item=e.target.closest('.csel-item');if(item)pickCselPerSec(item.getAttribute('data-v'),item.textContent);});
     render();
 });
 
@@ -314,6 +369,160 @@ function switchTab(idx) {
     document.querySelectorAll('.tab').forEach(function(t,i){ t.classList.toggle('active',i===idx); });
     document.querySelectorAll('.tab-content').forEach(function(t,i){ t.classList.toggle('active',i===idx); });
     if(idx===1) renderSector();
+    if(idx===2) ensureHistThenRender();
+}
+
+// ── 기간 수익률 탭 ──────────────────────────────────────
+// universe_history.json(종목별 일별 종가)을 탭 진입 시 1회 lazy fetch.
+// 기간 수익률 = 시작일 이후 첫 거래일 종가 → 종료일 이전 마지막 거래일 종가.
+// 표의 1W/1M(거래일 lookback 스냅샷)과 다른 탭이라 정합성 충돌 없음.
+var HIST = null, IDXHIST = null, HIST_LOADING = false, perData = [];
+var perSortCol = 7, perSortAsc = false;  // 컬럼: 추이=6, 기간수익률=7(기본 내림차순), RSI=8
+var perHeaders = ['#','통화','섹터','티커','기업명','시가총액','스파크 라인','기간 수익률','RSI','기간 MDD'];
+var _cselPerCurVal = '', _cselPerSecVal = '';
+function formatDateInput(el){var v=el.value.replace(/[^0-9]/g,'');if(v.length===8){el.value=v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8);}}
+function ensureHistThenRender(){
+    if(HIST){ renderPeriod(); return; }
+    if(HIST_LOADING) return;
+    HIST_LOADING = true;
+    document.getElementById('tbodyPer').innerHTML='<tr><td colspan="10" style="padding:40px;color:#888;">시계열 로딩 중...</td></tr>';
+    Promise.all([
+        fetch('universe_history.json?_='+Date.now()).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+        fetch('index_history.json?_='+Date.now()).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+    ]).then(function(res){
+        HIST = res[0] || {dates:[],stocks:{}};
+        IDXHIST = res[1] || {dates:[],indices:{}};
+        HIST_LOADING = false;
+        // 종료일 기본값 = 데이터 마지막 날짜 (사용자가 비워둔 경우만)
+        var end=document.getElementById('perEndDate');
+        if(HIST.dates&&HIST.dates.length&&!end.value) end.value=HIST.dates[HIST.dates.length-1];
+        renderPeriod();
+    });
+}
+function perReturn(ticker, start, end){
+    if(!HIST||!HIST.stocks) return null;
+    var arr=HIST.stocks[ticker]; if(!arr) return null;
+    var dates=HIST.dates, base=null, last=null;
+    for(var i=0;i<dates.length;i++){
+        var v=arr[i]; if(v===null||v===undefined) continue;
+        var d=dates[i]; if(d<start||d>end) continue;
+        if(base===null) base=v; last=v;
+    }
+    if(base===null||last===null||base<=0) return null;
+    return (last/base-1)*100;
+}
+// 선택 기간 중 최대 낙폭(MDD) — 고점 대비 최저 하락률(%, ≤0).
+function perMDD(ticker, start, end){
+    if(!HIST||!HIST.stocks) return null;
+    var arr=HIST.stocks[ticker]; if(!arr) return null;
+    var dates=HIST.dates, peak=null, mdd=0, any=false;
+    for(var i=0;i<dates.length;i++){
+        var v=arr[i]; if(v===null||v===undefined) continue;
+        var d=dates[i]; if(d<start||d>end) continue;
+        any=true;
+        if(peak===null||v>peak) peak=v;
+        if(peak>0){ var dd=(v/peak-1)*100; if(dd<mdd) mdd=dd; }
+    }
+    return any?mdd:null;
+}
+// 시장지수의 선택 기간 수익률 (RSI(기간) 계산용). perReturn과 동일 규칙.
+function indexPerReturn(name, start, end){
+    if(!IDXHIST||!IDXHIST.indices) return null;
+    var arr=IDXHIST.indices[name]; if(!arr) return null;
+    var dates=IDXHIST.dates, base=null, last=null;
+    for(var i=0;i<dates.length;i++){
+        var v=arr[i]; if(v===null||v===undefined) continue;
+        var d=dates[i]; if(d<start||d>end) continue;
+        if(base===null) base=v; last=v;
+    }
+    if(base===null||last===null||base<=0) return null;
+    return (last/base-1)*100;
+}
+// 선택 기간의 종가 추이를 인라인 SVG 스파크라인으로 (검정 단색). 최대 60점 다운샘플(폭 대비 충분).
+function sparkSvg(ticker, start, end, ret){
+    if(!HIST||!HIST.stocks) return '';
+    var arr=HIST.stocks[ticker]; if(!arr) return '';
+    var dates=HIST.dates, ys=[];
+    for(var i=0;i<dates.length;i++){var v=arr[i];if(v===null||v===undefined)continue;var d=dates[i];if(d<start||d>end)continue;ys.push(v);}
+    if(ys.length<2) return '';
+    var maxp=60, pts=ys;
+    if(ys.length>maxp){pts=[];var step=(ys.length-1)/(maxp-1);for(var k=0;k<maxp;k++)pts.push(ys[Math.round(k*step)]);}
+    var min=Math.min.apply(null,pts), max=Math.max.apply(null,pts), rng=(max-min)||1;
+    var W=130,H=26,pad=1,n=pts.length,str='';
+    for(var j=0;j<n;j++){
+        var x=pad+(W-2*pad)*j/(n-1);
+        var y=pad+(H-2*pad)*(1-(pts[j]-min)/rng);
+        str+=(j?' ':'')+x.toFixed(1)+','+y.toFixed(1);
+    }
+    var col='#000';
+    return '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" style="display:block;width:100%;height:100%;">'
+        +'<polyline points="'+str+'" fill="none" stroke="'+col+'" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>';
+}
+function renderPeriod(){
+    if(!D.length||!HIST) return;
+    var start=document.getElementById('perStartDate').value;
+    var end=document.getElementById('perEndDate').value||'9999-12-31';
+    var fc=_cselPerCurVal, fs=_cselPerSecVal;
+    var idxCache={};
+    function idxRet(mkt){ if(!mkt) return null; if(mkt in idxCache) return idxCache[mkt]; var v=indexPerReturn(mkt,start,end); idxCache[mkt]=v; return v; }
+    perData=[];
+    D.forEach(function(r){
+        if(fc&&r[1]!==fc) return;
+        if(fs&&r[2]!==fs) return;
+        var _p=(r[3]||'').indexOf(':')>=0?r[3].split(':')[0]:'';
+        var mkt=INDEX_BY_PREFIX[_p]||'';
+        var ret=perReturn(r[3],start,end);
+        var ir=idxRet(mkt);
+        var rsi=(ret!==null&&ir!==null)?(ret-ir):null;
+        perData.push({cur:r[1]||'',sec:r[2]||'',ticker:r[3]||'',name:r[4]||'',mcap:r[5]||'',mcapRaw:r[16]||0,ret:ret,rsi:rsi,mkt:mkt,mdd:perMDD(r[3],start,end)});
+    });
+    perData.sort(function(a,b){
+        var va,vb;
+        if(perSortCol===5){va=a.mcapRaw;vb=b.mcapRaw;}
+        else if(perSortCol===7){va=(a.ret===null?-Infinity:a.ret);vb=(b.ret===null?-Infinity:b.ret);}
+        else if(perSortCol===8){va=(a.rsi===null?-Infinity:a.rsi);vb=(b.rsi===null?-Infinity:b.rsi);}
+        else if(perSortCol===9){va=(a.mdd===null?-Infinity:a.mdd);vb=(b.mdd===null?-Infinity:b.mdd);}
+        else{var keys={1:'cur',2:'sec',3:'ticker',4:'name'};va=a[keys[perSortCol]]||'';vb=b[keys[perSortCol]]||'';}
+        if(va<vb) return perSortAsc?-1:1;
+        if(va>vb) return perSortAsc?1:-1;
+        return 0;
+    });
+    var h='';
+    perData.forEach(function(s,idx){
+        var tk=s.ticker.indexOf(':')>=0?s.ticker.split(':').pop():s.ticker;
+        var retCell;
+        if(s.ret===null) retCell='<td>-</td>';
+        else{var n=Math.round(s.ret);var cls=n>0?' class="positive"':n<0?' class="negative"':'';retCell='<td'+cls+'>'+(n>0?'+':'')+n+'%</td>';}
+        var rsiCell;
+        if(s.rsi===null) rsiCell='<td>-</td>';
+        else{var rn=Math.round(s.rsi);var rcls=rn>0?' class="positive"':rn<0?' class="negative"':'';var rttl=s.mkt?' title="'+s.mkt+' 대비 기간 초과수익(%p)"':'';rsiCell='<td'+rcls+rttl+'>'+(rn>0?'+':'')+rn+'%</td>';}
+        var mddCell;
+        if(s.mdd===null) mddCell='<td>-</td>';
+        else{var m=Math.round(s.mdd);var mcls=m<0?' class="negative"':'';mddCell='<td'+mcls+'>'+m+'%</td>';}
+        var sparkCell='<td>'+sparkSvg(s.ticker,start,end,s.ret)+'</td>';
+        h+='<tr><td>'+(idx+1)+'</td><td>'+s.cur+'</td><td>'+s.sec+'</td><td>'+tk+'</td><td>'+s.name+'</td><td>'+s.mcap+'</td>'+sparkCell+retCell+rsiCell+mddCell+'</tr>';
+    });
+    if(!h) h='<tr><td colspan="10" style="padding:40px;color:#888;">데이터 없음</td></tr>';
+    document.getElementById('tbodyPer').innerHTML=h;
+    document.querySelectorAll('#tab2 thead th').forEach(function(th,i){th.textContent=i===perSortCol?perHeaders[i]+(perSortAsc?' ▲':' ▼'):perHeaders[i];});
+}
+function doSortPer(col){
+    if(perSortCol===col) perSortAsc=!perSortAsc; else { perSortCol=col; perSortAsc=(col>=5?false:true); }
+    renderPeriod();
+}
+function pickCselPerCur(val,label){
+    _cselPerCurVal=val;
+    document.getElementById('cselPerCurDisplay').textContent=label;
+    document.getElementById('cselPerCurList').classList.remove('open');
+    document.querySelectorAll('#cselPerCurList .csel-item').forEach(function(el){el.classList.toggle('selected',el.getAttribute('data-v')===val);});
+    renderPeriod();
+}
+function pickCselPerSec(val,label){
+    _cselPerSecVal=val;
+    document.getElementById('cselPerSecDisplay').textContent=label;
+    document.getElementById('cselPerSecList').classList.remove('open');
+    document.querySelectorAll('#cselPerSecList .csel-item').forEach(function(el){el.classList.toggle('selected',el.getAttribute('data-v')===val);});
+    renderPeriod();
 }
 
 var _sectorInit = false;
@@ -480,6 +689,16 @@ function downloadUniverseSector() {
     headerRows.forEach(function(r, i){ if (i >= 30) { saved.push([r, r.style.display]); r.style.display = 'none'; } });
     detailRows.forEach(function(r){ saved.push([r, r.style.display]); r.style.display = 'none'; });
     _univCapture(table, 'Universe_Sectors').then(function() {
+        saved.forEach(function(p){ p[0].style.display = p[1]; });
+    });
+}
+function downloadUniversePeriod() {
+    var table = document.querySelector('#tab2 table');
+    if (!table) return;
+    var rows = document.querySelectorAll('#tbodyPer tr');
+    var saved = [];
+    for (var i = 30; i < rows.length; i++) { saved.push([rows[i], rows[i].style.display]); rows[i].style.display = 'none'; }
+    _univCapture(table, 'Universe_Period').then(function() {
         saved.forEach(function(p){ p[0].style.display = p[1]; });
     });
 }

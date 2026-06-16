@@ -37,5 +37,5 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Auto: Universe data update [skip ci]"
-          file_pattern: 'universe.json'
+          file_pattern: 'universe.json universe_history.json'
           skip_fetch: true

@@ -39,6 +39,8 @@ KST = timezone(timedelta(hours=9))
 ROOT = Path(__file__).resolve().parent.parent
 TICKERS_FILE = ROOT / 'universe_tickers.csv'
 OUTPUT_FILE = ROOT / 'universe.json'
+HISTORY_FILE = ROOT / 'universe_history.json'   # 종목별 일별 종가 시계열 (기간 수익률 탭용)
+N_HISTORY = 252                                  # 보존 거래일 수 (≈1년)
 
 # 티커 prefix → yfinance suffix + 통화 매핑
 PREFIX_MAP = {
@@ -119,6 +121,32 @@ def fmt_marcap_krw_eok(marcap_krw: float | None) -> str:
     if jo > 0:
         return f'{jo:,}조{rest:,}억' if rest > 0 else f'{jo:,}조'
     return f'{eok:,}억'
+
+
+def closes_to_hist(closes: 'pd.Series', currency: str, n: int = N_HISTORY) -> dict:
+    """pandas Close Series → {'YYYY-MM-DD': 종가} 최근 n 거래일.
+
+    universe_history.json용 일별 종가 덤프. KRW/JPY는 정수, 그 외 소수 2자리(표시값과 동일 정밀도).
+    """
+    is_int = currency in ('KRW', 'JPY')
+    out: dict = {}
+    for ts, v in closes.tail(n).items():
+        if v is None or pd.isna(v):
+            continue
+        d = ts.strftime('%Y-%m-%d')
+        out[d] = int(round(float(v))) if is_int else round(float(v), 2)
+    return out
+
+
+def dict_to_hist(prices: dict, currency: str, n: int = N_HISTORY) -> dict:
+    """{'YYYY-MM-DD': close} dict → 최근 n개만 추려 반올림. 네이버 폴백 시리즈용."""
+    is_int = currency in ('KRW', 'JPY')
+    out: dict = {}
+    for d, v in sorted(prices.items())[-n:]:
+        if v is None:
+            continue
+        out[d] = int(round(float(v))) if is_int else round(float(v), 2)
+    return out
 
 
 # 통화별 anomaly threshold — 각 시장의 일일 가격제한을 약간 초과하는 값이 의심점.
@@ -430,7 +458,7 @@ def fetch_one(idx: int, raw_ticker: str, sector: str, name: str, fx_to_krw: dict
                         f'{int(marcap_raw_eok):,}' if marcap_raw_eok else '',
                         '', '', '', '', '', '', '',
                         fmt_dd(rets['dd']),
-                    ]
+                    ], dict_to_hist(naver_prices, currency)
                 else:
                     print(f"  Warning: {raw_ticker} ({name}) yfinance anomaly "
                           f"({prev_d} → {cur_d}, {pct:+.1f}%), Naver fallback also failed. Blanked.")
@@ -444,7 +472,7 @@ def fetch_one(idx: int, raw_ticker: str, sector: str, name: str, fx_to_krw: dict
                 f'{int(marcap_raw_eok):,}' if marcap_raw_eok else '',
                 '', '', '', '', '', '', '',
                 '',  # DD — anomaly 데이터로는 신뢰 불가, blank
-            ]
+            ], {}  # 시계열도 신뢰 불가 → main에서 직전 universe_history.json 값으로 폴백
 
         # 23개 컬럼 (Sheets 헤더 + DD)
         return [
@@ -486,6 +514,54 @@ def _load_existing_by_ticker() -> dict[str, list[str]]:
         return {}
 
 
+def _load_existing_history() -> dict:
+    """기존 universe_history.json → {ticker: {date: close}}. 부분 실패 종목 폴백용."""
+    if not HISTORY_FILE.exists():
+        return {}
+    try:
+        with open(HISTORY_FILE, encoding='utf-8') as f:
+            d = json.load(f)
+        dates = d.get('dates', [])
+        out: dict = {}
+        for tk, arr in d.get('stocks', {}).items():
+            out[tk] = {dates[i]: v for i, v in enumerate(arr) if i < len(dates) and v is not None}
+        return out
+    except Exception:
+        return {}
+
+
+def _write_history(hist_by_ticker: dict) -> None:
+    """{ticker: {date: close}} → universe_history.json {dates:[...], stocks:{ticker:[정렬된 종가|null]}}.
+
+    전 종목 거래일 합집합을 공통 날짜축(최근 N_HISTORY)으로 잡고, 종목별 배열을 그 축에 정렬.
+    시장별 휴일이 달라도 같은 축으로 정렬됨(휴장일은 null). 프런트는 ticker로 join.
+    """
+    all_dates: set = set()
+    for h in hist_by_ticker.values():
+        all_dates.update(h.keys())
+    dates = sorted(all_dates)[-N_HISTORY:]
+    date_index = {d: i for i, d in enumerate(dates)}
+    stocks: dict = {}
+    for tk, h in hist_by_ticker.items():
+        arr = [None] * len(dates)
+        has = False
+        for d, v in h.items():
+            j = date_index.get(d)
+            if j is not None:
+                arr[j] = v
+                has = True
+        if has:
+            stocks[tk] = arr
+    out = {
+        'updated_at': datetime.now(KST).strftime('%Y-%m-%d %H:%M KST'),
+        'dates': dates,
+        'stocks': stocks,
+    }
+    with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
+        json.dump(out, f, ensure_ascii=False)
+    print(f"[성공] universe_history.json: {len(stocks)}종목 × {len(dates)}일 / {HISTORY_FILE}")
+
+
 def main() -> None:
     if not TICKERS_FILE.exists():
         raise RuntimeError(f"{TICKERS_FILE} 없음")
@@ -498,6 +574,7 @@ def main() -> None:
 
     existing_by_ticker = _load_existing_by_ticker()
     print(f"기존 universe.json: {len(existing_by_ticker)}종목 (fallback 가능)")
+    existing_hist = _load_existing_history()
 
     # 환율 fetch (KRW 환산용)
     print("환율 fetch 중 (USD/JPY/EUR/HKD/TWD/CAD → KRW)...")
@@ -510,8 +587,8 @@ def main() -> None:
               'DD']
     values: list[list[str]] = [HEADER]
 
-    # 병렬 fetch (worker 5로 줄여 rate limit 회피)
-    results: dict[int, list[str]] = {}
+    # 병렬 fetch (worker 5로 줄여 rate limit 회피). fetch_one은 (row, hist) 튜플 반환.
+    results: dict[int, tuple] = {}
     with ThreadPoolExecutor(max_workers=5) as ex:
         futures = {
             ex.submit(fetch_one, i + 1, r['티커'].strip(), r.get('섹터', '').strip(), r['기업명'].strip(), fx_to_krw): i
@@ -520,9 +597,9 @@ def main() -> None:
         done = 0
         for fut in as_completed(futures):
             i = futures[fut]
-            row = fut.result()
-            if row is not None:
-                results[i] = row
+            res = fut.result()
+            if res is not None:
+                results[i] = res
             done += 1
             if done % 50 == 0:
                 print(f"  진행: {done}/{len(rows)}")
@@ -530,10 +607,12 @@ def main() -> None:
     # 부분 실패 보완 — 새 fetch 실패한 종목은 기존 universe.json 값 사용
     fallback_count = 0
     sequence_fixed: list[list[str]] = []
+    hist_by_ticker: dict = {}   # ticker → {date: close} (universe_history.json용)
     for i, r in enumerate(rows):
         ticker = r['티커'].strip()
         if i in results:
-            row = results[i].copy()
+            row, hist = results[i]
+            row = row.copy()
             # 시가총액 빈값일 때도 기존 값 fallback
             if (not row[5] or not row[14]) and ticker in existing_by_ticker:
                 old = existing_by_ticker[ticker]
@@ -542,6 +621,10 @@ def main() -> None:
                     row[14] = old[14]
                     fallback_count += 1
             sequence_fixed.append(row)
+            # 시계열: 신규 수집분 우선, 비었으면(anomaly blank 등) 직전 universe_history.json 값 보존
+            h = hist if hist else existing_hist.get(ticker, {})
+            if h:
+                hist_by_ticker[ticker] = h
         elif ticker in existing_by_ticker:
             old = existing_by_ticker[ticker].copy()
             old[0] = str(i + 1)  # 순번 갱신
@@ -550,6 +633,9 @@ def main() -> None:
                 old.append('')
             sequence_fixed.append(old)
             fallback_count += 1
+            # fetch 실패 종목도 직전 시계열 보존
+            if ticker in existing_hist:
+                hist_by_ticker[ticker] = existing_hist[ticker]
     values.extend(sequence_fixed)
 
     if fallback_count:
@@ -562,6 +648,8 @@ def main() -> None:
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
         json.dump(out, f, ensure_ascii=False)
     print(f"[성공] universe.json: {len(values) - 1}종목 / {OUTPUT_FILE}")
+
+    _write_history(hist_by_ticker)
 
 
 if __name__ == '__main__':
