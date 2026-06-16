@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-15T18:32:26+09:00",
+  "updated": "2026-06-16T16:21:53+09:00",
   "window_short": 5,
   "window_long": 20,
   "stocks": {
@@ -221,6 +221,23 @@
         "frgn_volume": 206564,
         "inst_value_eok": 444.9,
         "frgn_value_eok": 228.1,
+        "days_available": 20
+      }
+    },
+    "141080": {
+      "last_date": "2026.06.15",
+      "short": {
+        "inst_volume": -137792,
+        "frgn_volume": 88775,
+        "inst_value_eok": -182.6,
+        "frgn_value_eok": 115.6,
+        "days_available": 5
+      },
+      "long": {
+        "inst_volume": -612222,
+        "frgn_volume": 27194,
+        "inst_value_eok": -783.9,
+        "frgn_value_eok": -95.1,
         "days_available": 20
       }
     },
