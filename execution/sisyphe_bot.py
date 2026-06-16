@@ -2339,6 +2339,11 @@ UNCAT_NOTIFY_MARKER = '🏷️ 미분류 거래'      # 미분류 거래 알림 
 LEDGER_NOTIFY_MARKER = '🧾 가계부 등록'      # 분류된 거래 알림 (답장→수정/제외)
 LEDGER_NOTIFIED_FILE = os.path.join(DASHBOARD_DIR, '.ledger_notified.json')
 
+# 선유듀오 공유 시트 (답장 '선유듀오' → 시지프에서 제외 + 선유듀오 가계부로 이동). 같은 서비스계정.
+SEONYUDUO_SHEET_ID = '1w6q3UwUER7oINuk50LyMzgF2K0Fbt2wgSVJ34vImo0g'
+SEONYUDUO_LEDGER_TAB = '가계부'   # 컬럼: 날짜·유형·카테고리·금액·메모 (+통장)
+SEONYUDUO_MOVE_KEYWORD = '선유듀오'
+
 
 def _load_ledger_notified():
     """알림 보낸 거래 키 집합. 파일 없으면 None(최초 실행 → baseline)."""
@@ -2402,6 +2407,15 @@ def _delete_sheet_row(service, sheet_id, row_index):
                 }
             }
         }]}
+    ).execute()
+
+
+def _append_row_to(service, spreadsheet_id, sheet_name, row, value_input_option='USER_ENTERED'):
+    """임의 스프레드시트/탭에 행 추가 (선유듀오 등 시지프 외 시트용)."""
+    service.spreadsheets().values().append(
+        spreadsheetId=spreadsheet_id, range=sheet_name,
+        valueInputOption=value_input_option, insertDataOption='INSERT_ROWS',
+        body={'values': [row]}
     ).execute()
 
 
@@ -2595,6 +2609,57 @@ async def _ledger_exclude(service, msg, date, merchant, amount):
     logging.info(f"거래 제외: {date}|{merchant}|{amount}")
 
 
+async def _ledger_move_to_seonyuduo(service, msg, date, merchant, amount):
+    """시지프 거래내역에서 행을 찾아 선유듀오 가계부로 이동 (선유듀오에 추가 후 시지프에서 삭제)."""
+    rows = await asyncio.to_thread(_read_sheet, service, LEDGER_TX_SHEET)
+    target = None
+    rowvals = None
+    for i, row in enumerate(rows):
+        if i == 0:
+            continue
+        r_date = row[0] if len(row) > 0 else ''
+        r_amt = _norm_amt(row[3]) if len(row) > 3 else ''
+        r_mer = row[4] if len(row) > 4 else ''
+        if r_date == date and r_mer == merchant and r_amt == amount:
+            target = i
+            rowvals = row
+            break
+    if target is None:
+        await msg.reply_text("❌ 해당 내역을 거래내역에서 못 찾았습니다.\n(이미 옮겼거나 날짜/금액이 바뀐 것 같아요.)")
+        return
+    # 옮길 행: [날짜, 유형, 카테고리, 금액(숫자), 메모] — 시지프 카테고리 그대로 이관, 통장(F)은 빈칸
+    amt_raw = _norm_amt(rowvals[3]) if len(rowvals) > 3 else _norm_amt(amount)
+    try:
+        amt_val = int(amt_raw)
+    except Exception:
+        amt_val = amt_raw
+    moved = [
+        rowvals[0] if len(rowvals) > 0 else date,
+        rowvals[1] if len(rowvals) > 1 else '지출',
+        rowvals[2] if len(rowvals) > 2 else '',
+        amt_val,
+        rowvals[4] if len(rowvals) > 4 else merchant,
+    ]
+    # 1) 선유듀오 가계부에 먼저 추가 (실패 시 시지프 행은 보존 → 데이터 손실 방지)
+    await asyncio.to_thread(_append_row_to, service, SEONYUDUO_SHEET_ID, SEONYUDUO_LEDGER_TAB, moved, 'USER_ENTERED')
+    # 2) 시지프 거래내역에서 삭제
+    sheet_id = await asyncio.to_thread(_get_sheet_id, service, LEDGER_TX_SHEET)
+    if sheet_id is None:
+        await msg.reply_text("⚠️ 선유듀오 가계부엔 추가됐지만 시지프 삭제 실패(시트ID 못 찾음). 수동 확인 필요.")
+        return
+    await asyncio.to_thread(_delete_sheet_row, service, sheet_id, target)
+    try:
+        amt_disp = f"{int(amt_raw):,}원"
+    except Exception:
+        amt_disp = f"{amt_raw}원"
+    await msg.reply_text(
+        f"➡️ 선유듀오 가계부로 이동\n"
+        f"가맹점: {moved[4]}\n금액: {amt_disp}\n카테고리: {moved[2] or '미분류'}\n날짜: {moved[0]}\n"
+        f"(시지프 가계부에서는 제외됨)"
+    )
+    logging.info(f"선유듀오 이동: {date}|{merchant}|{amount}")
+
+
 async def handle_uncat_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """가계부 알림에 답장 → 분류/수정(ledger_category) 또는 제외(거래내역 행 삭제)."""
     import re, html
@@ -2624,6 +2689,14 @@ async def handle_uncat_reply(update: Update, context: ContextTypes.DEFAULT_TYPE)
         except Exception as e:
             logging.error(f"거래 제외 실패: {e}")
             await msg.reply_text(f"❌ 제외 실패: {e}")
+        return
+
+    if reply == SEONYUDUO_MOVE_KEYWORD:
+        try:
+            await _ledger_move_to_seonyuduo(service, msg, date, merchant, amount)
+        except Exception as e:
+            logging.error(f"선유듀오 이동 실패: {e}")
+            await msg.reply_text(f"❌ 선유듀오 이동 실패: {e}")
         return
 
     if '=' in reply:
