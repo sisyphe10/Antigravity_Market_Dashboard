@@ -2342,7 +2342,7 @@ LEDGER_NOTIFIED_FILE = os.path.join(DASHBOARD_DIR, '.ledger_notified.json')
 # 선유듀오 공유 시트 (답장 '선유듀오' → 시지프에서 제외 + 선유듀오 가계부로 이동). 같은 서비스계정.
 SEONYUDUO_SHEET_ID = '1w6q3UwUER7oINuk50LyMzgF2K0Fbt2wgSVJ34vImo0g'
 SEONYUDUO_LEDGER_TAB = '가계부'   # 컬럼: 날짜·유형·카테고리·금액·메모 (+통장)
-SEONYUDUO_MOVE_KEYWORD = '선유듀오'
+SEONYUDUO_MOVE_KEYWORDS = {'선유', '선유듀오', '듀오'}
 
 
 def _load_ledger_notified():
@@ -2691,7 +2691,7 @@ async def handle_uncat_reply(update: Update, context: ContextTypes.DEFAULT_TYPE)
             await msg.reply_text(f"❌ 제외 실패: {e}")
         return
 
-    if reply == SEONYUDUO_MOVE_KEYWORD:
+    if reply in SEONYUDUO_MOVE_KEYWORDS:
         try:
             await _ledger_move_to_seonyuduo(service, msg, date, merchant, amount)
         except Exception as e:
