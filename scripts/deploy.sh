@@ -19,6 +19,7 @@ BACKUP_FILES=(
     ".portfolio_report_sent.json"
     ".ledger_notified.json"
     "stock_price_history.json"
+    "seonyuduo_exercise_user_map.json"
     "execution/research_bot/research_notes.db"
     "etf_data.db"
     "execution/earnings_bot/earnings.db"
@@ -67,8 +68,8 @@ restore() {
     done
 }
 
-BOTS=(sisyphe-bot research-notes-bot ra-sisyphe-bot)
-SCRIPTS=(execution/sisyphe_bot.py execution/research_bot/research_notes_bot.py execution/ra_sisyphe_bot.py)
+BOTS=(sisyphe-bot research-notes-bot ra-sisyphe-bot seonyuduo-exercise-bot)
+SCRIPTS=(execution/sisyphe_bot.py execution/research_bot/research_notes_bot.py execution/ra_sisyphe_bot.py execution/seonyuduo_exercise_bot.py)
 EARNINGS_BOT_TIMER=earnings-bot.timer
 KODEX_TIMER=kodex-sectors.timer
 LANDING_HIGHLIGHTS_TIMER=landing-highlights.timer
@@ -182,7 +183,7 @@ install_bot_units() {
     # OnFailure 매핑 변경 등 .service 파일 수정 시 자동 반영. 기존 sisyphe-bot-notify.service는
     # 더 이상 OnFailure target이 아님 (deprecated), unit 자체는 유지 — 외부 수동 호출 호환성 보존.
     local need_reload=0
-    for unit in sisyphe-bot.service ra-sisyphe-bot.service research-notes-bot.service sisyphe-bot-notify@.service; do
+    for unit in sisyphe-bot.service ra-sisyphe-bot.service research-notes-bot.service seonyuduo-exercise-bot.service sisyphe-bot-notify@.service; do
         if [ ! -f "/etc/systemd/system/$unit" ] || ! cmp -s "$REPO_DIR/scripts/$unit" "/etc/systemd/system/$unit"; then
             echo "  → sync $unit"
             sudo cp "$REPO_DIR/scripts/$unit" /etc/systemd/system/
@@ -193,6 +194,11 @@ install_bot_units() {
     if [ "$need_reload" = 1 ]; then
         sudo systemctl daemon-reload
         echo "  ✓ daemon-reload"
+    fi
+    # 신규 봇 최초 1회 enable (기존 봇은 이미 enable됨 → restart 루프가 담당)
+    if ! sudo systemctl is-enabled --quiet seonyuduo-exercise-bot 2>/dev/null; then
+        sudo systemctl enable --now seonyuduo-exercise-bot
+        echo "  ✓ seonyuduo-exercise-bot enabled + started (최초)"
     fi
 }
 

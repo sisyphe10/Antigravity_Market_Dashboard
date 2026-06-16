@@ -1,0 +1,19 @@
+[Unit]
+Description=SeonyuDuo Exercise Telegram Bot
+After=network.target
+StartLimitBurst=10
+StartLimitIntervalSec=300
+OnFailure=sisyphe-bot-notify@seonyuduo-exercise-bot.service
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/Antigravity_Market_Dashboard/execution
+ExecStart=/usr/bin/python3 /home/ubuntu/Antigravity_Market_Dashboard/execution/seonyuduo_exercise_bot.py
+EnvironmentFile=/home/ubuntu/Antigravity_Market_Dashboard/.env
+Restart=always
+RestartSec=10
+Environment=PYTHONIOENCODING=utf-8
+
+[Install]
+WantedBy=multi-user.target
