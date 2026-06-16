@@ -3363,6 +3363,114 @@ def create_cumulative_aum_chart():
         return ""
 
 
+def create_wrap_monthly_returns_table():
+    """RETURN 섹션: 일반형 3종 월별·연간 수익률 캘린더 (토글로 상품 전환).
+    행=연도, 열=1~12월+연간. 월말 NAV 기준 월수익률, 연간=월수익률 복리(누적 NAV와 정확히 일치).
+    상품: 삼성 트루밸류 / NH 다이내믹밸류 일반형(Value ESG) / DB 개방형(개방형 랩). 기본=삼성 트루밸류.
+    색상은 MONTHLY RETURNS 표와 동일(양수 빨강/음수 파랑, 강도 3단계)."""
+    try:
+        nav_file = 'Wrap_NAV.xlsx'
+        if not os.path.exists(nav_file):
+            return ''
+        df = pd.read_excel(nav_file, sheet_name='기준가')
+        if 'Date' not in df.columns:
+            return ''
+        df['Date'] = pd.to_datetime(df['Date'])
+        df = df.set_index('Date').sort_index()
+        products = [('삼성 트루밸류', '트루밸류'),
+                    ('NH 다이내믹밸류 일반형', 'Value ESG'),
+                    ('DB 개방형', '개방형 랩')]
+        MONTHS = list(range(1, 13))
+
+        def color_bg(pct):
+            a = abs(pct)
+            if pct > 0:
+                return '+', ('#ffe8e8' if a <= 5 else '#ffb8b8' if a <= 10 else '#ff7a7a')
+            if pct < 0:
+                return '', ('#e8edff' if a <= 5 else '#b8c5ff' if a <= 10 else '#7a90ff')
+            return '', 'transparent'
+
+        TH = ('padding:7px 4px;background:#f3f4f6;font-weight:700;text-align:center;'
+              'border:1px solid #e5e7eb;font-size:12px;')
+        TD = ('padding:6px 4px;text-align:center;border:1px solid #e5e7eb;'
+              'font-variant-numeric:tabular-nums;font-size:12px;color:#000;')
+
+        latest = df.index.max().strftime('%Y-%m-%d')
+        panels = ''
+        buttons = ''
+        rendered = 0
+        for i, (disp, col) in enumerate(products):
+            if col not in df.columns:
+                continue
+            s = df[col].dropna()
+            if s.empty:
+                continue
+            me = s.resample('ME').last().dropna()
+            prev = float(s.iloc[0])  # 인셉션 NAV(=1000) 기준 첫 부분월
+            monthly = {}
+            for dt, v in me.items():
+                monthly.setdefault(dt.year, {})[dt.month] = (float(v) / prev - 1) * 100
+                prev = float(v)
+            years = sorted(monthly)
+            head = f'<th style="{TH}width:52px;">연도</th>'
+            head += ''.join(f'<th style="{TH}">{m}월</th>' for m in MONTHS)
+            head += f'<th style="{TH}border-left:2px solid #1f2937;">연간</th>'
+            body = ''
+            for y in years:
+                row = f'<td style="{TD}font-weight:700;">{y}</td>'
+                comp = 1.0
+                has = False
+                for m in MONTHS:
+                    if m in monthly[y]:
+                        pct = monthly[y][m]
+                        sign, bg = color_bg(pct)
+                        row += f'<td style="{TD}background:{bg};">{sign}{pct:.1f}%</td>'
+                        comp *= (1 + pct / 100)
+                        has = True
+                    else:
+                        row += f'<td style="{TD}">&nbsp;</td>'
+                if has:
+                    ann = (comp - 1) * 100
+                    sign, bg = color_bg(ann)
+                    row += (f'<td style="{TD}font-weight:700;background:{bg};'
+                            f'border-left:2px solid #1f2937;">{sign}{ann:.1f}%</td>')
+                else:
+                    row += f'<td style="{TD}border-left:2px solid #1f2937;">&nbsp;</td>'
+                body += f'<tr>{row}</tr>'
+            disp_style = 'block' if rendered == 0 else 'none'
+            panels += (f'<div class="wmr-panel" data-prod="{i}" style="display:{disp_style};overflow-x:auto;">'
+                       f'<table style="border-collapse:collapse;width:100%;min-width:760px;'
+                       f'font-family:inherit;table-layout:fixed;">'
+                       f'<thead><tr>{head}</tr></thead><tbody>{body}</tbody></table></div>')
+            btn_cls = 'wmr-btn wmr-btn-active' if rendered == 0 else 'wmr-btn'
+            buttons += f'<button class="{btn_cls}" data-prod="{i}" onclick="showWmr({i})">{disp}</button>'
+            rendered += 1
+
+        if rendered == 0:
+            return ''
+
+        style = ('<style>.wmr-btn{font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;'
+                 'border:1px solid #d1d5db;background:#f9fafb;color:#555;border-radius:8px;cursor:pointer;}'
+                 '.wmr-btn-active{background:#374151;color:#fff;border-color:#374151;}</style>')
+        script = ('<script>function showWmr(i){'
+                  "document.querySelectorAll('.wmr-panel').forEach(function(p){"
+                  "p.style.display=(p.getAttribute('data-prod')==String(i))?'block':'none';});"
+                  "document.querySelectorAll('.wmr-btn').forEach(function(b){"
+                  "b.classList.toggle('wmr-btn-active', b.getAttribute('data-prod')==String(i));});}</script>")
+        card = (f'<div style="max-width:900px;margin:22px auto 0;background:#fff;border-radius:10px;'
+                f'padding:16px 20px;box-shadow:0 2px 4px rgba(0,0,0,0.08);">'
+                f'<div style="font-weight:700;font-size:15px;margin-bottom:4px;">월별 수익률</div>'
+                f'<div style="font-size:12px;color:#888;margin-bottom:12px;">월말 NAV 기준 · '
+                f'연간=월수익률 복리 · 기준일 {latest} (당월·당해년도는 진행 중)</div>'
+                f'{style}'
+                f'<div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">{buttons}</div>'
+                f'{panels}</div>')
+        return card + script
+    except Exception as e:
+        print(f"Error creating wrap monthly returns table: {e}")
+        return ''
+
+
 def create_wrap_returns_table():
     """WRAP 수익률 비교 테이블 HTML (삼성 트루밸류, KOSPI, KOSDAQ) - 날짜 필터 포함"""
     try:
@@ -3436,6 +3544,7 @@ def create_wrap_returns_table():
         dates_sorted_json = json.dumps(sorted(date_list))
         items_json = json.dumps([[d, k] for d, k in items], ensure_ascii=False)
         periods_json = json.dumps(periods)
+        monthly_card = create_wrap_monthly_returns_table()
 
         return f"""
         <div class="category-section">
@@ -3455,6 +3564,7 @@ def create_wrap_returns_table():
                     <tbody>{rows_html}</tbody>
                 </table>
             </div>
+            {monthly_card}
         </div>
         <script>
         (function() {{
@@ -3572,8 +3682,8 @@ def create_order_section():
                 ],
             },
             {
-                display: 'DB 목표전환형 5차',  // 운용 개시 2026-06-12 (NH 4호 2026-06-15 페어 예정, 등록 시 jsonKey 합친 키로 갱신)
-                jsonKey: 'DB 목표전환형 5차',
+                display: 'DB 목표전환형 5차',  // 운용 개시 2026-06-12. NH 4호(06-15) 페어 → PORTFOLIO 제목/jsonKey는 합친 키, ORDER 라벨은 DB 5차 유지
+                jsonKey: 'NH 목표전환형 4호 / DB 목표전환형 5차',
                 templates: [
                     { label: 'DB 목표전환형 5차', file: '자문지/라이프자산운용_DB 목표전환형 랩 _5차_2026.6.12.xlsx' },
                 ],
