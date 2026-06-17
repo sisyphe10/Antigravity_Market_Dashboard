@@ -790,6 +790,17 @@ def render_newhigh_message(data, today):
 async def daily_newhigh_job(context: ContextTypes.DEFAULT_TYPE):
     """매일 16:00 20일 신고가 리스트 알림 (fetch_featured_data_kis.py가 먼저 생성)."""
     logging.info("Newhigh 20d job started")
+    # 거래일 가드: 비거래일엔 미발송. featured-kis 배치(15:50)가 비거래일에도
+    # newhigh_20d.json의 date를 '오늘(달력일)'로 찍어 아래 date 가드를 통과시키는 문제 차단.
+    # KRX 휴장 = 주말 + 법정공휴일(holidays.KR) + 근로자의날(5/1) + 연말휴장(12/31).
+    # (5/1·12/31은 holidays.KR 미포함이라 명시적으로 추가)
+    import holidays as _holidays
+    _d = datetime.datetime.now(tz=KST).date()
+    if (_d.weekday() >= 5
+            or _d in _holidays.KR(years=[_d.year])
+            or (_d.month, _d.day) in ((5, 1), (12, 31))):
+        logging.info("비거래일(주말/공휴일/근로자의날/연말휴장) → 신고가 알림 건너뜀")
+        return
     try:
         with open(_NEWHIGH_FILE, encoding='utf-8') as f:
             data = json.load(f)
