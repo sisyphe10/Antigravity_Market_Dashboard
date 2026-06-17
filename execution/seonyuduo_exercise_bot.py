@@ -542,7 +542,8 @@ async def cmd_ledger(update: Update, context: ContextTypes.DEFAULT_TYPE):
         msg += ("\n📝 <b>사용법</b>\n"
                 "<code>/ledger 지출 식비 점심 15000 생활비</code>\n"
                 "<code>/ledger 수입 급여 생활비충원 800000 생활비</code>\n\n"
-                "형식: /ledger [유형] [카테고리] [메모] [금액] [통장]")
+                "형식: /ledger [유형] [카테고리] [메모] [금액] [통장]\n"
+                "※ 금액은 숫자만. 메모에 숫자만 단독으로 쓰면 금액으로 오인될 수 있어요.")
         await update.message.reply_text(msg, parse_mode='HTML')
         return
 
