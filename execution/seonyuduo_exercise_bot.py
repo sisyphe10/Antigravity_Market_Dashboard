@@ -65,6 +65,12 @@ TYPE_EMOJI = {'테니스': '🎾', '러닝': '🏃', '워크아웃': '💪'}
 
 PENDING_TTL = 900  # 초; 오래된 pending 정리 기준
 
+# /remind (최근 운동 피드백 복습)
+REMIND_SESSIONS = 4          # 보여줄 최근 세션(=구분되는 날짜) 수
+REMIND_PER_CAT_MAX = 6       # 카테고리당 최대 표시 줄 수 (뒤 카테고리 통째 누락 방지)
+REMIND_MAXLEN = 3900         # 텔레그램 4096 한도 여유분
+REMIND_TARGET_LABEL = {'self': '본인', 'other': '상대', 'both': '둘 다'}
+
 # 가계부 지출 알림(Sisyphe 봇 → 선유듀오 이관 시)을 보낼 그룹챗 id 저장소.
 # Sisyphe 봇이 이 파일을 읽어 같은 토큰 대신 @SeonyuDuo_bot 토큰으로 전송한다.
 SEONYUDUO_CHATS_FILE = os.path.join(ROOT, 'seonyuduo_chats.json')
@@ -436,7 +442,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "👥 <b>그룹 채팅에서는</b> <code>/fit 운동내용</code> 으로 보내주세요.\n"
         "예) <code>/fit 오늘 JD테니스 포핸드 손목 고정, 백핸드 체중 이동</code>\n\n"
         "💰 <b>가계부</b>는 <code>/ledger 지출 식비 점심 15000 생활비</code> 처럼 입력해요.\n\n"
-        "/help 도움말, /whoami 담당자 확인",
+        "/remind 복습, /help 도움말, /whoami 담당자 확인",
         parse_mode='HTML')
 
 
@@ -456,6 +462,8 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "   예) <code>/ledger 수입 급여 생활비충원 800000 생활비</code>\n"
         "• 유형: 지출/ㅈ · 수입/ㅅ\n"
         "• <code>/ledger</code> 만 보내면 카테고리 목록 + 예산 소진율\n\n"
+        "<b>🔁 복습</b>\n"
+        "<code>/remind</code> — 유형·대상 골라 최근 운동 피드백 복습 (읽기 전용)\n\n"
         "/whoami — 내 담당자(TS/NY) 확인·변경",
         parse_mode='HTML')
 
@@ -561,20 +569,8 @@ async def cmd_ledger(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     category = args[1]
 
-    # 카테고리 검증 (탭이 비어 valid가 없으면 통과)
-    try:
-        res = service.spreadsheets().values().get(
-            spreadsheetId=SEONYUDUO_SHEET_ID, range='카테고리!A:B').execute()
-        valid = [r[1] for r in res.get('values', []) if len(r) >= 2 and r[0] == tx_type]
-        if valid and category not in valid:
-            await update.message.reply_text(
-                f"❌ '{category}'는 유효하지 않은 카테고리입니다.\n\n{tx_type}: {' · '.join(valid)}",
-                parse_mode='HTML')
-            return
-    except Exception:
-        pass
-
     # 금액/통장/메모 파싱 (/ledger2와 동일: 마지막=통장, 그 앞=금액 / 통장 생략 케이스)
+    # 카테고리 검증보다 먼저 파싱 → 금액 불량이면 신규 카테고리 프롬프트 띄우지 않음
     account = args[-1]
     try:
         amount = int(args[-2].replace(',', ''))
@@ -591,6 +587,32 @@ async def cmd_ledger(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception:
             await update.message.reply_text("❌ 금액(숫자)을 확인하세요.")
             return
+
+    # 카테고리 검증 (탭이 비어 valid가 없으면 통과). 없는 카테고리면 거부 대신 추가 프롬프트.
+    valid = []
+    try:
+        res = service.spreadsheets().values().get(
+            spreadsheetId=SEONYUDUO_SHEET_ID, range='카테고리!A:B').execute()
+        valid = [r[1] for r in res.get('values', []) if len(r) >= 2 and r[0] == tx_type]
+    except Exception:
+        valid = []
+    if valid and category not in valid:
+        context.user_data['pending_sd_ledger'] = {
+            'tx_type': tx_type, 'category': category, 'amount': amount,
+            'memo': memo, 'account': account,
+            'today_str': datetime.datetime.now(tz=KST).strftime('%Y-%m-%d'),
+        }
+        kb = InlineKeyboardMarkup([[
+            InlineKeyboardButton("➕ 추가하고 입력", callback_data='sdcat:add'),
+            InlineKeyboardButton("✖️ 취소", callback_data='sdcat:cancel'),
+        ]])
+        await update.message.reply_text(
+            f"❓ '{category}'는 {tx_type} 카테고리에 없어요.\n"
+            f"새로 추가하고 가계부에 입력할까요?\n\n"
+            f"기존 {tx_type} 카테고리: {' · '.join(valid) if valid else '(없음)'}",
+            reply_markup=kb,
+        )
+        return
 
     try:
         today_str = datetime.datetime.now(tz=KST).strftime('%Y-%m-%d')
@@ -672,10 +694,73 @@ async def cmd_log(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await _process_exercise_text(update, context, text)
 
 
+async def handle_sd_ledger_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """선유듀오 가계부 신규 카테고리 추가 확인 버튼. (q.answer()는 handle_callback에서 이미 호출)"""
+    q = update.callback_query
+    data = q.data or ''
+    if data == 'sdcat:cancel':
+        context.user_data.pop('pending_sd_ledger', None)
+        await q.edit_message_text("↩️ 취소했어요. /ledger 를 다시 입력해주세요.")
+        return
+    op = context.user_data.pop('pending_sd_ledger', None)
+    if op is None:
+        await q.edit_message_text("⌛ 만료된 요청이에요. /ledger 를 다시 입력해주세요.")
+        return
+    service = _get_seonyuduo_service()
+    if not service:
+        await q.edit_message_text("❌ Google 서비스 계정이 설정되지 않았습니다.")
+        return
+    tx_type, category = op['tx_type'], op['category']
+    amount, memo, account, today_str = op['amount'], op['memo'], op['account'], op['today_str']
+    # 1) 카테고리 탭에 추가 [유형, 카테고리, 통장빈칸]
+    try:
+        cat_rows = service.spreadsheets().values().get(
+            spreadsheetId=SEONYUDUO_SHEET_ID, range='카테고리!A:C').execute().get('values', [])
+        cn = len(cat_rows) + 1
+        service.spreadsheets().values().update(
+            spreadsheetId=SEONYUDUO_SHEET_ID, range=f'카테고리!A{cn}:C{cn}',
+            valueInputOption='RAW', body={'values': [[tx_type, category, '']]}).execute()
+        logging.info(f"SeonyuDuo 카테고리 추가: {tx_type} {category}")
+    except Exception as e:
+        logging.error(f"SeonyuDuo 카테고리 추가 실패: {e}")
+        await q.edit_message_text(f"❌ 카테고리 추가 실패: {e}")
+        return
+    # 2) 원래 입력하려던 가계부 거래 완료 (A:F 다음 빈 행에 직접 update)
+    try:
+        existing = service.spreadsheets().values().get(
+            spreadsheetId=SEONYUDUO_SHEET_ID, range='가계부!A:F').execute().get('values', [])
+        n = len(existing) + 1
+        service.spreadsheets().values().update(
+            spreadsheetId=SEONYUDUO_SHEET_ID, range=f'가계부!A{n}:F{n}',
+            valueInputOption='USER_ENTERED',
+            body={'values': [[today_str, tx_type, category, amount, memo, account]]}).execute()
+        emoji = '🔴' if tx_type == '지출' else '🟢'
+        msg = (f"<b><u>선유듀오 가계부</u></b>\n✅ '{category}' 카테고리 추가됨\n"
+               f"{emoji} <b>{tx_type}</b> 입력 완료\n"
+               f"━━━━━━━━━━━━━━━\n📅 {today_str}\n📂 {category}\n💰 {amount:,}원\n")
+        if memo:
+            msg += f"📝 {memo}\n"
+        if account:
+            msg += f"🏦 {account}\n"
+        if tx_type == '지출':
+            msg += _budget_line(_seonyuduo_month_spent(service))
+        await q.edit_message_text(msg, parse_mode='HTML')
+        logging.info(f"SeonyuDuo sdcat confirm: {tx_type} {amount} {category}")
+    except Exception as e:
+        logging.error(f"SeonyuDuo sdcat 가계부 입력 실패: {e}")
+        await q.edit_message_text(f"❌ 가계부 저장 실패 (카테고리는 추가됨): {e}")
+
+
 async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     q = update.callback_query
     await q.answer()
     data = q.data or ''
+
+    # 선유듀오 가계부 신규 카테고리 추가 확인 (q.answer()는 위에서 호출됨)
+    if data.startswith('sdcat:'):
+        await handle_sd_ledger_callback(update, context)
+        return
+
     uid = str(update.effective_user.id)
 
     # 신규 담당자 등록 (분류 결과 대기 중)
@@ -697,6 +782,11 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         m = load_user_map(); m[uid] = who; save_user_map(m)
         await q.edit_message_text(f"✅ 담당자를 <b>{who}</b>로 설정했어요.", parse_mode='HTML')
         return
+
+    # /remind 흐름 (rmd:t:유형 / rmd:s:유형:target) — 멀티콜론이라 아래 split 파싱보다 먼저 처리
+    if data.startswith("rmd:"):
+        if await _handle_remind_callback(q, data):
+            return
 
     # 미리보기 버튼: who/save/cancel + 메시지ID
     try:
@@ -745,6 +835,399 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
 
+# ══════════════════════════════════════════════════════════
+# /remind — 최근 운동 피드백 복습 (읽기 전용, 시트 미수정)
+# ══════════════════════════════════════════════════════════
+def _fetch_recent_sessions(유형: str, who_list: list) -> dict:
+    """'운동' 탭에서 (유형 일치 AND 담당자 ∈ who_list) 행 → 최근 REMIND_SESSIONS개
+    세션(=구분되는 날짜, 최신순)만 추림. 블로킹(시트 read) → executor에서 호출.
+    반환: {'dates': [최신순 날짜…], 'rows': [{'날짜','담당자','카테고리','내용'}…]}"""
+    service = _get_seonyuduo_service()
+    if not service:
+        raise RuntimeError("서비스 계정(GOOGLE_SERVICE_ACCOUNT_KEY) 미설정")
+    res = service.spreadsheets().values().get(
+        spreadsheetId=SEONYUDUO_SHEET_ID, range=f'{SHEET_TAB}!A:G').execute()
+    vals = res.get('values', [])
+    if not vals:
+        return {'dates': [], 'rows': []}
+    idx = {h.strip(): i for i, h in enumerate(vals[0])}
+
+    def cell(r, name):
+        i = idx.get(name)
+        return (r[i].strip() if (i is not None and i < len(r) and r[i] is not None) else '')
+
+    matched = []
+    for r in vals[1:]:
+        if cell(r, '유형') != 유형:
+            continue
+        if cell(r, '담당자') not in who_list:
+            continue
+        matched.append({'날짜': cell(r, '날짜'), '담당자': cell(r, '담당자'),
+                        '카테고리': cell(r, '카테고리'), '내용': cell(r, '내용')})
+
+    def _key(d):
+        try:
+            return datetime.date.fromisoformat(d).isoformat()
+        except ValueError:
+            return ''  # 파싱 실패는 맨 뒤로
+    matched.sort(key=lambda x: _key(x['날짜']), reverse=True)
+
+    seen, dates = set(), []
+    for m in matched:
+        if m['날짜'] not in seen:
+            if len(dates) >= REMIND_SESSIONS:
+                break
+            seen.add(m['날짜']); dates.append(m['날짜'])
+    keep = set(dates)
+    rows = [m for m in matched if m['날짜'] in keep]
+    return {'dates': dates, 'rows': rows}
+
+
+def _format_remind(유형: str, target: str, who_list: list, data: dict) -> str:
+    """최근 세션을 카테고리별로 그룹핑해 HTML 포맷 (원문 내용+날짜 그대로).
+    테니스=TENNIS_CATEGORIES 순서, 그 외=최신 등장순. 카테고리당 최대 REMIND_PER_CAT_MAX줄,
+    전체 REMIND_MAXLEN 가드 (카테고리당 캡으로 뒤 카테고리 통째 누락 방지)."""
+    emoji = TYPE_EMOJI.get(유형, '🏃')
+    tgt = REMIND_TARGET_LABEL.get(target, target)
+    head = (f"{emoji} <b>{html.escape(유형)} · 최근 {len(data['dates'])}회 복습</b>\n"
+            f"👤 {html.escape(tgt)} ({html.escape('+'.join(who_list))})\n"
+            f"━━━━━━━━━━━━━━━\n")
+    rows = data['rows']
+    if not rows:
+        return head + f"📭 최근 {html.escape(유형)} 기록이 없어요."
+
+    default_cat = '공통' if 유형 == '테니스' else 유형
+
+    def _cat_of(r):
+        return r['카테고리'] or default_cat
+
+    if 유형 == '테니스':
+        order = [c for c in TENNIS_CATEGORIES if any(_cat_of(r) == c for r in rows)]
+        for r in rows:  # 7종 밖 카테고리도 뒤에 보존
+            if _cat_of(r) not in order:
+                order.append(_cat_of(r))
+    else:
+        order = []
+        for r in rows:  # rows는 날짜 내림차순 → 최신 등장순
+            if _cat_of(r) not in order:
+                order.append(_cat_of(r))
+
+    parts, dropped = [], False
+    for cat in order:
+        items = [r for r in rows if _cat_of(r) == cat]
+        if not items:
+            continue
+        block = [f"<b>[ {html.escape(cat)} ]</b>"]
+        for r in items[:REMIND_PER_CAT_MAX]:
+            wd = _weekday_char(r['날짜'])
+            date_disp = f"{r['날짜']} ({wd})" if wd else (r['날짜'] or '날짜미상')
+            who_tag = f" · {html.escape(r['담당자'])}" if len(who_list) > 1 else ''
+            block.append(f"  · {html.escape(r['내용'] or '-')}  <i>({date_disp}{who_tag})</i>")
+        if len(items) > REMIND_PER_CAT_MAX:
+            block.append(f"  <i>…외 {len(items) - REMIND_PER_CAT_MAX}건</i>")
+        candidate = '\n'.join(block)
+        if len(head) + sum(len(p) + 2 for p in parts) + len(candidate) > REMIND_MAXLEN:
+            dropped = True
+            break
+        parts.append(candidate)
+
+    body = '\n\n'.join(parts)
+    if dropped:
+        body += '\n\n<i>…(이하 생략, 메시지 길이 초과)</i>'
+    return head + body
+
+
+def _remind_type_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup([[
+        InlineKeyboardButton("💪 워크아웃", callback_data="rmd:t:워크아웃"),
+        InlineKeyboardButton("🏃 러닝", callback_data="rmd:t:러닝"),
+        InlineKeyboardButton("🎾 테니스", callback_data="rmd:t:테니스"),
+    ]])
+
+
+def _remind_target_keyboard(유형: str, uid: str) -> InlineKeyboardMarkup:
+    me = load_user_map().get(uid)  # 등록돼 있으면 버튼에 실제 담당자 표기
+    if me:
+        other = 'NY' if me == 'TS' else 'TS'
+        me_lbl, other_lbl = f"👤 본인 ({me})", f"👥 상대 ({other})"
+    else:
+        me_lbl, other_lbl = "👤 본인", "👥 상대"
+    return InlineKeyboardMarkup([[
+        InlineKeyboardButton(me_lbl, callback_data=f"rmd:s:{유형}:self"),
+        InlineKeyboardButton(other_lbl, callback_data=f"rmd:s:{유형}:other"),
+        InlineKeyboardButton("👫 둘 다", callback_data=f"rmd:s:{유형}:both"),
+    ]])
+
+
+def _resolve_targets(uid: str, target: str):
+    """본인/상대/둘다 → 담당자 코드 리스트. 미등록+본인/상대면 None(안내용)."""
+    me = load_user_map().get(uid)
+    if target == 'both':
+        return ['TS', 'NY']  # 둘 다는 등록 불필요
+    if not me:
+        return None
+    if target == 'self':
+        return [me]
+    return ['NY' if me == 'TS' else 'TS']  # 상대 = 다른 한 명 (2인 부부 전제)
+
+
+async def cmd_remind(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/remind — 유형 선택부터 (그룹·DM 공통, 읽기 전용)."""
+    await update.message.reply_text(
+        "🔁 <b>복습할 운동 유형</b>을 골라주세요.",
+        parse_mode='HTML', reply_markup=_remind_type_keyboard())
+
+
+async def _handle_remind_callback(q, data: str) -> bool:
+    """rmd: 콜백 처리. 처리하면 True (handle_callback에서 즉시 return)."""
+    uid = str(q.from_user.id)
+    parts = data.split(":")  # ['rmd','t',유형] | ['rmd','s',유형,target]
+    if len(parts) == 3 and parts[1] == 't':
+        유형 = parts[2]
+        await q.edit_message_text(
+            f"{TYPE_EMOJI.get(유형, '🏃')} <b>{html.escape(유형)}</b> — 누구 기록을 볼까요?",
+            parse_mode='HTML', reply_markup=_remind_target_keyboard(유형, uid))
+        return True
+    if len(parts) == 4 and parts[1] == 's':
+        유형, target = parts[2], parts[3]
+        who_list = _resolve_targets(uid, target)
+        if who_list is None:
+            await q.edit_message_text(
+                "🙋 담당자가 등록되어 있지 않아요. <code>/whoami</code> 로 먼저 등록해주세요.\n"
+                "('둘 다'는 등록 없이도 볼 수 있어요.)", parse_mode='HTML')
+            return True
+        await q.edit_message_text("🔎 최근 기록을 불러오는 중...")
+        try:
+            loop = asyncio.get_running_loop()
+            res = await loop.run_in_executor(None, _fetch_recent_sessions, 유형, who_list)
+            await q.edit_message_text(_format_remind(유형, target, who_list, res),
+                                      parse_mode='HTML')
+        except Exception as ex:
+            logging.error(f"/remind 조회 실패: {ex}")
+            await q.edit_message_text("❌ 기록 조회에 실패했어요. 잠시 후 다시 시도해주세요.")
+        return True
+    return False
+
+
+# ══════════════════════════════════════════════════════════
+# 구글 캘린더 다이제스트(06:00) + 운동 1시간 전 리마인드 (옥쥬와 빵빵이)
+# ══════════════════════════════════════════════════════════
+# sisyphe_bot.check_dday_alerts와 동일 캘린더. 같은 서비스계정 + calendar.readonly로 읽기.
+SEONYUDUO_CAL_ID = ('a49c912f9e11c6e050c873312ae00a314e45dc075540c86cf428c9921fcbc20c'
+                    '@group.calendar.google.com')
+CAL_REMINDED_FILE = os.path.join(ROOT, '.seonyuduo_cal_reminded.json')
+CAL_POLL_INTERVAL = 300        # 초; 운동 리마인드 폴링 주기(5분)
+CAL_REMIND_LEAD = 3600         # 초; 일정 시작 몇 초 전 리마인드(1시간)
+CAL_DIGEST_HOUR = 6            # 06:00 KST 다이제스트
+CAL_DIGEST_CATCHUP_UNTIL = 10  # 06시에 봇이 죽어있었어도 이 시각(KST)까진 폴링이 다이제스트 따라잡기
+
+# 일정 제목 키워드 → 운동 유형 (구체적 테니스 → 러닝 → 광범위 워크아웃 순으로 검사). 튜닝 가능.
+CAL_KEYWORDS = [
+    ('테니스', ['테니스', 'tennis', '코트', '랠리', '스트로크', '레슨']),
+    ('러닝', ['러닝', '달리기', '조깅', '마라톤', 'run', 'running', '런데이', '하프']),
+    ('워크아웃', ['헬스', 'pt', '웨이트', '운동', '짐', 'gym', '요가', '필라테스', '수영',
+                 '등산', '클라이밍', '골프', '풋살', '축구', '배드민턴', '크로스핏',
+                 '스쿼트', '데드', '벤치', '홈트', '워크아웃', 'workout', '자전거', '라이딩']),
+]
+
+
+def _get_cal_service():
+    """선유듀오 캘린더 읽기용 서비스 (calendar.readonly; 시트 서비스와 별도 스코프)."""
+    from google.oauth2 import service_account
+    from googleapiclient.discovery import build
+    sa_json = os.getenv('GOOGLE_SERVICE_ACCOUNT_KEY')
+    if not sa_json:
+        return None
+    sa_info = json.loads(sa_json)
+    creds = service_account.Credentials.from_service_account_info(
+        sa_info, scopes=['https://www.googleapis.com/auth/calendar.readonly'])
+    return build('calendar', 'v3', credentials=creds)
+
+
+def _fetch_cal_events_sync() -> list:
+    """옥쥬와 빵빵이 캘린더의 '오늘(KST)' 일정 (raw Google event items). 블로킹 → executor에서 호출."""
+    service = _get_cal_service()
+    if not service:
+        raise RuntimeError("서비스 계정(GOOGLE_SERVICE_ACCOUNT_KEY) 미설정")
+    now = datetime.datetime.now(tz=KST)
+    start = datetime.datetime(now.year, now.month, now.day, 0, 0, 0, tzinfo=KST)
+    end = datetime.datetime(now.year, now.month, now.day, 23, 59, 59, tzinfo=KST)
+    res = service.events().list(
+        calendarId=SEONYUDUO_CAL_ID, timeMin=start.isoformat(), timeMax=end.isoformat(),
+        singleEvents=True, orderBy='startTime', maxResults=50).execute()
+    return res.get('items', [])
+
+
+def _event_start_kst(ev: dict):
+    """이벤트 start → KST aware datetime. 종일(date만)이면 None(시간 없음). 파싱 실패 None."""
+    dt_str = ev.get('start', {}).get('dateTime')
+    if not dt_str:
+        return None  # 종일 일정
+    try:
+        return datetime.datetime.fromisoformat(dt_str.replace('Z', '+00:00')).astimezone(KST)
+    except ValueError:
+        return None
+
+
+def _detect_exercise_type(summary: str):
+    """제목 → 운동 유형('테니스'/'러닝'/'워크아웃') 또는 None(운동 아님)."""
+    s = (summary or '').lower()
+    for 유형, kws in CAL_KEYWORDS:
+        if any(kw in s for kw in kws):
+            return 유형
+    return None
+
+
+def _infer_cal_scope(summary: str) -> list:
+    """제목 태그로 피드백 대상: [식]→TS, [여니]→NY, 둘 다/없음 → ['TS','NY']."""
+    s = summary or ''
+    who = []
+    if '[식]' in s:
+        who.append('TS')
+    if '[여니]' in s:
+        who.append('NY')
+    return who or ['TS', 'NY']
+
+
+def _load_cal_reminded() -> dict:
+    try:
+        with open(CAL_REMINDED_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f) or {}
+    except FileNotFoundError:
+        return {}
+    except Exception as e:
+        logging.warning(f"cal_reminded 읽기 실패: {e}")
+        return {}
+
+
+def _save_cal_reminded(d: dict):
+    """오늘 이전 날짜 키 prune 후 원자적 저장. 키: 'YYYY-MM-DD|eventid' 또는 'digest|YYYY-MM-DD'."""
+    today = datetime.datetime.now(tz=KST).date().isoformat()
+
+    def _date_of(k):
+        head, _, tail = k.partition('|')
+        return tail if head == 'digest' else head
+    pruned = {k: v for k, v in d.items() if _date_of(k) >= today}
+    try:
+        tmp = CAL_REMINDED_FILE + '.tmp'
+        with open(tmp, 'w', encoding='utf-8') as f:
+            json.dump(pruned, f, ensure_ascii=False, indent=2)
+        os.replace(tmp, CAL_REMINDED_FILE)  # 원자적 교체
+    except Exception as e:
+        logging.error(f"cal_reminded 저장 실패: {e}")
+
+
+async def _cal_broadcast(context, text: str) -> bool:
+    """캡처된 선유듀오 그룹챗 전체로 발송. 그룹챗 없으면 False."""
+    chats = _load_chats()
+    if not chats:
+        logging.info("선유듀오 그룹챗 미등록 → 캘린더 발송 스킵")
+        return False
+    for cid in chats:
+        try:
+            await context.bot.send_message(chat_id=int(cid), text=text, parse_mode='HTML')
+        except Exception as e:
+            logging.warning(f"캘린더 그룹챗 {cid} 전송 실패: {e}")
+    return True
+
+
+def _format_cal_digest(events: list) -> str:
+    """오늘 일정 → 그룹용 HTML 다이제스트. 운동 일정엔 유형 이모지 부착."""
+    now = datetime.datetime.now(tz=KST)
+    wd = WEEKDAY_KO[now.weekday()]
+    lines = [f"📅 <b>오늘의 일정</b> ({now.strftime('%Y-%m-%d')} {wd}요일)",
+             "━━━━━━━━━━━━━━━"]
+    for ev in events:
+        summary = html.escape(ev.get('summary') or '(제목 없음)')
+        sdt = _event_start_kst(ev)
+        time_str = sdt.strftime('%H:%M') if sdt else '종일'
+        유형 = _detect_exercise_type(ev.get('summary', ''))
+        emoji = (TYPE_EMOJI.get(유형, '') + ' ') if 유형 else ''
+        lines.append(f"• {time_str} · {emoji}{summary}")
+    return '\n'.join(lines)
+
+
+async def _send_daily_digest(context, state: dict):
+    """오늘 다이제스트 발송 (중복방지 digest|date). 일정 0건이면 silent."""
+    today = datetime.datetime.now(tz=KST).date().isoformat()
+    dkey = f"digest|{today}"
+    if dkey in state:
+        return
+    loop = asyncio.get_running_loop()
+    try:
+        events = await loop.run_in_executor(None, _fetch_cal_events_sync)
+    except Exception as e:
+        logging.error(f"캘린더 다이제스트 조회 실패: {e}")
+        return
+    if not events:
+        logging.info("오늘 일정 없음 → 다이제스트 발송 안 함(silent)")
+        state[dkey] = time.time()  # 무일정도 '오늘 처리됨'으로 기록 (폴링 반복조회 방지)
+        _save_cal_reminded(state)
+        return
+    if await _cal_broadcast(context, _format_cal_digest(events)):
+        state[dkey] = time.time()
+        _save_cal_reminded(state)
+        logging.info(f"캘린더 다이제스트 발송 ({len(events)}건)")
+
+
+async def daily_cal_digest_job(context: ContextTypes.DEFAULT_TYPE):
+    """run_daily 06:00 KST — 다이제스트 punctual 발송."""
+    await _send_daily_digest(context, _load_cal_reminded())
+
+
+async def cal_reminder_poll_job(context: ContextTypes.DEFAULT_TYPE):
+    """run_repeating(5분): ①06시 다이제스트 따라잡기(재시작 대비) ②운동 1시간 전 리마인드."""
+    now = datetime.datetime.now(tz=KST)
+    today = now.date().isoformat()
+    state = _load_cal_reminded()
+
+    # ① 다이제스트 따라잡기: 06:00~10:00 사이인데 아직 안 보냈으면 발송 (06시 다운 대비)
+    if CAL_DIGEST_HOUR <= now.hour < CAL_DIGEST_CATCHUP_UNTIL and f"digest|{today}" not in state:
+        await _send_daily_digest(context, state)
+        state = _load_cal_reminded()  # 갱신분 반영
+
+    # ② 운동 1시간 전 리마인드
+    loop = asyncio.get_running_loop()
+    try:
+        events = await loop.run_in_executor(None, _fetch_cal_events_sync)
+    except Exception as e:
+        logging.error(f"리마인드 폴링 캘린더 조회 실패: {e}")
+        return
+    changed = False
+    for ev in events:
+        sdt = _event_start_kst(ev)
+        if sdt is None:
+            continue  # 종일/시간없음 → 1시간 전 스킵
+        유형 = _detect_exercise_type(ev.get('summary', ''))
+        if not 유형:
+            continue
+        reminder_at = sdt - datetime.timedelta(seconds=CAL_REMIND_LEAD)
+        if not (reminder_at <= now < sdt):
+            continue  # 1시간 전 지났고 + 아직 시작 전일 때만 (늦게 떠도 시작 전이면 발송)
+        key = f"{today}|{ev.get('id', '')}"
+        if key in state:
+            continue  # 이미 발송
+        who_list = _infer_cal_scope(ev.get('summary', ''))
+        try:
+            data = await loop.run_in_executor(None, _fetch_recent_sessions, 유형, who_list)
+        except Exception as e:
+            logging.error(f"리마인드용 최근기록 조회 실패: {e}")
+            data = {'dates': [], 'rows': []}
+        mins_left = max(0, int((sdt - now).total_seconds() // 60))
+        target = 'both' if len(who_list) == 2 else who_list[0]
+        emoji = TYPE_EMOJI.get(유형, '🏃')
+        header = (f"⏰ <b>{mins_left}분 후 운동 일정!</b>\n"
+                  f"{emoji} {html.escape(ev.get('summary', ''))} · {sdt.strftime('%H:%M')} 시작\n"
+                  f"━━━━━━━━━━━━━━━\n"
+                  f"💡 지난 피드백 복습하고 가요\n\n")
+        if await _cal_broadcast(context, header + _format_remind(유형, target, who_list, data)):
+            state[key] = time.time()
+            changed = True
+            logging.info(f"운동 리마인드 발송: {ev.get('summary', '')} ({유형}, {who_list})")
+    if changed:
+        _save_cal_reminded(state)
+
+
 def main():
     if not TOKEN:
         print("Error: TELEGRAM_SEONYUDUO_BOT_TOKEN is missing.")
@@ -757,8 +1240,27 @@ def main():
     application.add_handler(CommandHandler('whoami', cmd_whoami))
     application.add_handler(CommandHandler(['fit', 'log', 'ex'], cmd_log))
     application.add_handler(CommandHandler('ledger', cmd_ledger))  # 텔레그램 명령은 ASCII만 (한글 별칭 불가)
+    application.add_handler(CommandHandler('remind', cmd_remind))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     application.add_handler(CallbackQueryHandler(handle_callback))
+
+    # ── 캘린더 다이제스트(06:00 KST) + 운동 1시간 전 리마인드(5분 폴링) ──
+    # run_daily는 APScheduler 크론이라 pytz 타임존 필요 (sisyphe_bot 검증 패턴). 내부 연산은 KST.
+    jq = application.job_queue
+    if jq is not None:
+        try:
+            import pytz
+            digest_time = datetime.time(hour=CAL_DIGEST_HOUR, minute=0, second=0,
+                                        tzinfo=pytz.timezone('Asia/Seoul'))
+        except Exception:
+            digest_time = datetime.time(hour=CAL_DIGEST_HOUR, minute=0, second=0, tzinfo=KST)
+        jq.run_daily(daily_cal_digest_job, time=digest_time, name='cal_daily_digest')
+        jq.run_repeating(cal_reminder_poll_job, interval=CAL_POLL_INTERVAL, first=30,
+                         name='cal_reminder_poll')
+    else:
+        logging.warning("JobQueue 미설치(python-telegram-bot[job-queue]) → 캘린더 잡 비활성. "
+                        "봇 본기능(운동기록/remind/ledger)은 정상. VM엔 설치돼 있어 정상 동작.")
+
     print("선유듀오 운동기록 봇 시작")
     application.run_polling()
 
