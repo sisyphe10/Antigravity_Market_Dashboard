@@ -5382,7 +5382,8 @@ def create_fee_revenue_section():
         var FEE_REVENUE = __PAYLOAD__;
         var REV_CATS = ['개방형', '목표전환형'];
         var REV_BROKER_ORDER = ['삼성', 'NH', 'DB', '한투'];
-        function revFmtWon(n) { return Number(n).toLocaleString('ko-KR') + '원'; }
+        function revFmtNum(n) { return Number(n).toLocaleString('ko-KR'); }        // 안쪽 셀: 숫자만
+        function revFmtWon(n) { return Number(n).toLocaleString('ko-KR') + '원'; } // 합계 라인: 원
         function revProd(r) { return r.label || r.category; }
         // 레코드 목록 → 카테고리별 합계 {개방형, 목표전환형, _total}
         function revCatVals(list) {
@@ -5423,31 +5424,37 @@ def create_fee_revenue_section():
                            ((revProd(a) < revProd(b)) ? -1 : (revProd(a) > revProd(b) ? 1 : 0));
                 }).forEach(function(r) { var k = gkey(r); if (keys.indexOf(k) === -1) keys.push(k); });
             }
-            // 행: 기준값별 카테고리 합계 + 행합계
+            // 상품별 뷰에서만 개시일/종료일 칼럼 추가 (목표전환형 오른쪽).
+            var withDates = view === 'product';
+            // 행: 기준값별 카테고리 합계 (+ 상품별은 개시일/종료일) + 행합계
             var body = keys.map(function(k) {
                 var grp = recs.filter(function(r) { return gkey(r) === k; });
                 var v = revCatVals(grp);
-                var label = gdisp(k);
-                // 상품별 뷰: 상품명 오른쪽에 개시일~종료일 (개방형은 종료일 공란)
-                if (view === 'product' && grp.length && grp[0].start) {
-                    label += ' <span class="rev-dates">' + grp[0].start + ' ~ ' + (grp[0].end || '') + '</span>';
+                var cells = '<td class="rev-key">' + gdisp(k) + '</td>' +
+                    REV_CATS.map(function(c) { return '<td class="rev-amt">' + (v[c] ? revFmtNum(v[c]) : '-') + '</td>'; }).join('');
+                if (withDates) {
+                    var r0 = grp[0] || {};
+                    cells += '<td class="rev-date">' + (r0.start || '') + '</td>' +
+                             '<td class="rev-date">' + (r0.end || '') + '</td>';
                 }
-                return '<tr><td class="rev-key">' + label + '</td>' +
-                    REV_CATS.map(function(c) { return '<td class="rev-amt">' + (v[c] ? revFmtWon(v[c]) : '-') + '</td>'; }).join('') +
-                    '<td class="rev-amt rev-rowtot">' + revFmtWon(v._total) + '</td></tr>';
+                cells += '<td class="rev-amt rev-rowtot">' + revFmtNum(v._total) + '</td>';
+                return '<tr>' + cells + '</tr>';
             }).join('');
-            // 합계 행
+            // 합계 행 (개시일/종료일 칸은 공란)
             var grand = revCatVals(recs);
-            body += '<tr class="fee-row-total"><td class="rev-key">합계</td>' +
-                REV_CATS.map(function(c) { return '<td class="rev-amt">' + revFmtWon(grand[c]) + '</td>'; }).join('') +
-                '<td class="rev-amt">' + revFmtWon(grand._total) + '</td></tr>';
+            var totalCells = '<td class="rev-key">합계</td>' +
+                REV_CATS.map(function(c) { return '<td class="rev-amt">' + revFmtWon(grand[c]) + '</td>'; }).join('');
+            if (withDates) { totalCells += '<td class="rev-date"></td><td class="rev-date"></td>'; }
+            totalCells += '<td class="rev-amt">' + revFmtWon(grand._total) + '</td>';
+            body += '<tr class="fee-row-total">' + totalCells + '</tr>';
             // 첫 열 머리 셀에 기준 선택 버튼을 편입 (엑셀 헤더에서 기준 고르듯)
             var btns = [['quarter', '분기'], ['broker', '증권사'], ['product', '상품']].map(function(b) {
                 return '<button class="rev-viewbtn' + (b[0] === view ? ' active' : '') +
                     '" data-rev-view="' + b[0] + '" onclick="revRender(this.dataset.revView)">' + b[1] + '</button>';
             }).join('');
+            var dateHeads = withDates ? '<th>개시일</th><th>종료일</th>' : '';
             var head = '<tr><th class="rev-headcell"><div class="rev-views">' + btns + '</div></th>' +
-                REV_CATS.map(function(c) { return '<th>' + c + '</th>'; }).join('') + '<th>합계</th></tr>';
+                REV_CATS.map(function(c) { return '<th>' + c + '</th>'; }).join('') + dateHeads + '<th>합계</th></tr>';
             document.getElementById('revTableHost').innerHTML =
                 '<table class="fee-table rev-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>';
         }
@@ -6685,7 +6692,7 @@ def create_dashboard():
         .rev-sum-label {{ font-size: 0.95rem; color: #111; font-weight: 600; }}
         .rev-sum-value {{ font-size: 1.5rem; font-weight: 700; color: #111; margin-top: 4px; font-variant-numeric: tabular-nums; }}
         .rev-updated {{ position: absolute; top: 20px; right: 24px; font-size: 0.78rem; color: #aaa; }}
-        .rev-dates {{ font-weight: 400; color: #888; font-size: 0.82rem; margin-left: 6px; }}
+        .rev-date {{ color: #555; font-size: 0.9rem; font-variant-numeric: tabular-nums; }}
         .rev-headcell {{ padding: 7px 10px !important; }}
         .rev-views {{ display: inline-flex; gap: 5px; margin: 0; background: #fff; padding: 3px; border-radius: 999px; box-shadow: inset 0 0 0 1px #d8dde3; }}
         .rev-viewbtn {{ padding: 5px 14px; border: none; background: transparent; border-radius: 999px; font-size: 0.82rem; font-weight: 600; color: #555; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }}
