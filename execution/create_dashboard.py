@@ -5367,10 +5367,10 @@ def create_fee_revenue_section():
     # 모든 레코드를 한 테이블에 펼쳐두고, 버튼을 누르면 JS(revRender)가 그 기준으로 정렬한다.
     head_html = f"""
         <div class="fee-wrapper rev-wrapper">
+            {updated_html}
             <div class="rev-summary">
-                <div class="rev-sum-label">누적 총매출</div>
+                <div class="rev-sum-label">누적 매출</div>
                 <div class="rev-sum-value" title="{_fmt_won(total)}">{_fmt_eok_man(total)}</div>
-                {updated_html}
             </div>
             <div class="table-container"><div id="revTableHost"></div></div>
             <p class="fee-note">자문사(라이프) 몫 실제 정산 수수료 기준. 단위: 원. 목표전환형은 회차 청산 시 실현 기준.</p>
@@ -5405,7 +5405,7 @@ def create_fee_revenue_section():
                 if (view === 'broker') return r.broker;
                 return r.broker + ' ' + revProd(r);
             }
-            function gdisp(k) { return view === 'quarter' ? k.replace('-', ' ') : k; }
+            function gdisp(k) { if (view !== 'quarter') return k; var m = /^(\\d{4})-Q([1-4])$/.exec(k); return m ? m[1] + '년 ' + m[2] + '분기' : k; }
             // 기준값 순서 결정
             var keys = [];
             if (view === 'broker') {
@@ -5425,8 +5425,14 @@ def create_fee_revenue_section():
             }
             // 행: 기준값별 카테고리 합계 + 행합계
             var body = keys.map(function(k) {
-                var v = revCatVals(recs.filter(function(r) { return gkey(r) === k; }));
-                return '<tr><td class="rev-key">' + gdisp(k) + '</td>' +
+                var grp = recs.filter(function(r) { return gkey(r) === k; });
+                var v = revCatVals(grp);
+                var label = gdisp(k);
+                // 상품별 뷰: 상품명 오른쪽에 개시일~종료일 (개방형은 종료일 공란)
+                if (view === 'product' && grp.length && grp[0].start) {
+                    label += ' <span class="rev-dates">' + grp[0].start + ' ~ ' + (grp[0].end || '') + '</span>';
+                }
+                return '<tr><td class="rev-key">' + label + '</td>' +
                     REV_CATS.map(function(c) { return '<td class="rev-amt">' + (v[c] ? revFmtWon(v[c]) : '-') + '</td>'; }).join('') +
                     '<td class="rev-amt rev-rowtot">' + revFmtWon(v._total) + '</td></tr>';
             }).join('');
@@ -5436,7 +5442,7 @@ def create_fee_revenue_section():
                 REV_CATS.map(function(c) { return '<td class="rev-amt">' + revFmtWon(grand[c]) + '</td>'; }).join('') +
                 '<td class="rev-amt">' + revFmtWon(grand._total) + '</td></tr>';
             // 첫 열 머리 셀에 기준 선택 버튼을 편입 (엑셀 헤더에서 기준 고르듯)
-            var btns = [['quarter', '분기별'], ['broker', '증권사별'], ['product', '상품별']].map(function(b) {
+            var btns = [['quarter', '분기'], ['broker', '증권사'], ['product', '상품']].map(function(b) {
                 return '<button class="rev-viewbtn' + (b[0] === view ? ' active' : '') +
                     '" data-rev-view="' + b[0] + '" onclick="revRender(this.dataset.revView)">' + b[1] + '</button>';
             }).join('');
@@ -6674,10 +6680,12 @@ def create_dashboard():
         /* 매출 (revenue) */
         .rev-empty {{ text-align: center; color: #888; padding: 40px 12px; line-height: 1.8; }}
         .rev-empty code {{ background: #f1f3f5; padding: 2px 7px; border-radius: 5px; font-size: 0.9em; color: #1e40af; }}
+        .rev-wrapper {{ position: relative; }}
         .rev-summary {{ text-align: center; padding: 18px 12px 6px 12px; }}
         .rev-sum-label {{ font-size: 0.95rem; color: #111; font-weight: 600; }}
         .rev-sum-value {{ font-size: 1.5rem; font-weight: 700; color: #111; margin-top: 4px; font-variant-numeric: tabular-nums; }}
-        .rev-updated {{ display: block; margin-top: 6px; font-size: 0.78rem; color: #aaa; }}
+        .rev-updated {{ position: absolute; top: 20px; right: 24px; font-size: 0.78rem; color: #aaa; }}
+        .rev-dates {{ font-weight: 400; color: #888; font-size: 0.82rem; margin-left: 6px; }}
         .rev-headcell {{ padding: 7px 10px !important; }}
         .rev-views {{ display: inline-flex; gap: 5px; margin: 0; background: #fff; padding: 3px; border-radius: 999px; box-shadow: inset 0 0 0 1px #d8dde3; }}
         .rev-viewbtn {{ padding: 5px 14px; border: none; background: transparent; border-radius: 999px; font-size: 0.82rem; font-weight: 600; color: #555; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }}
