@@ -2623,6 +2623,11 @@ def _build_wrap_chart_section(category_label):
                     });
                 });
 
+                // x축 라벨 = 선택된 모든 시리즈 날짜의 합집합(정렬). 시리즈마다 개시일이 달라도
+                // x축을 더 긴 범위(가장 이른 개시일~)로 통일 — 각 시리즈는 자기 날짜에만 점이 찍힘.
+                // (labels 미지정 시 category축이 시리즈별 다른 날짜셋을 잘못 매핑 → "누운 V자" 버그)
+                var allDates = Array.from(new Set(perSeries.reduce(function(a, s){ return a.concat(s.dates); }, []))).sort();
+
                 // 선 끝에 수익률 라벨을 그리는 커스텀 플러그인
                 var endLabelPlugin = {
                     id: 'endLabels',
@@ -2661,7 +2666,7 @@ def _build_wrap_chart_section(category_label):
                 if (wrapChart) wrapChart.destroy();
                 wrapChart = new Chart(document.getElementById('wrapDynamicChart'), {
                     type: 'line',
-                    data: { datasets: datasets },
+                    data: { labels: allDates, datasets: datasets },
                     plugins: [endLabelPlugin],
                     options: {
                         responsive: true, maintainAspectRatio: false,
