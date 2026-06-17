@@ -755,7 +755,7 @@ def main():
     application.add_handler(CommandHandler('help', cmd_help))
     application.add_handler(CommandHandler('whoami', cmd_whoami))
     application.add_handler(CommandHandler(['fit', 'log', 'ex'], cmd_log))
-    application.add_handler(CommandHandler(['ledger', '가계부'], cmd_ledger))
+    application.add_handler(CommandHandler('ledger', cmd_ledger))  # 텔레그램 명령은 ASCII만 (한글 별칭 불가)
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     application.add_handler(CallbackQueryHandler(handle_callback))
     print("선유듀오 운동기록 봇 시작")
