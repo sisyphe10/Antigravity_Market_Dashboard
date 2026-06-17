@@ -852,6 +852,17 @@ def _chart_download_helper_js():
             window.downloadChartImage = function(canvasId, baseName, legendId, extraCanvasId) {
                 var src = document.getElementById(canvasId);
                 if (!src) { console.warn('canvas not found:', canvasId); return; }
+                // ── 고해상도 저장: 클릭 순간에만 차트를 DL_DPR로 재렌더 (화면 해상도는 그대로) ──
+                var DL_DPR = 4;
+                var _getCh = (window.Chart && Chart.getChart) ? function(t){ return Chart.getChart(t); } : function(){ return null; };
+                var _mainChart = _getCh(canvasId);
+                var _extraEl = extraCanvasId ? document.getElementById(extraCanvasId) : null;
+                var _extraChart = (_extraEl && _extraEl.offsetParent !== null) ? _getCh(_extraEl) : null;
+                var _prevMainDpr = _mainChart ? (_mainChart.options.devicePixelRatio || (window.devicePixelRatio || 1)) : null;
+                var _prevExtraDpr = _extraChart ? (_extraChart.options.devicePixelRatio || (window.devicePixelRatio || 1)) : null;
+                if (_mainChart) { _mainChart.options.devicePixelRatio = DL_DPR; _mainChart.resize(); _mainChart.draw(); }
+                if (_extraChart) { _extraChart.options.devicePixelRatio = DL_DPR; _extraChart.resize(); _extraChart.draw(); }
+                try {
                 var w = src.width, h = src.height;
                 var scale = src.clientWidth ? (w / src.clientWidth) : 1;
 
@@ -933,6 +944,10 @@ def _chart_download_helper_js():
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
+                } finally {
+                    if (_mainChart) { _mainChart.options.devicePixelRatio = _prevMainDpr; _mainChart.resize(); _mainChart.draw(); }
+                    if (_extraChart) { _extraChart.options.devicePixelRatio = _prevExtraDpr; _extraChart.resize(); _extraChart.draw(); }
+                }
             };
         }
         </script>
@@ -1064,7 +1079,7 @@ def _build_indices_chart_section(category_label='Indices'):
 
         js_code = """
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = Math.max(4, window.devicePixelRatio || 1); Chart.defaults.elements.line.borderJoinStyle = 'round'; Chart.defaults.elements.line.borderCapStyle = 'round';</script>
+        <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = 2 * (window.devicePixelRatio || 1); Chart.defaults.elements.line.borderJoinStyle = 'round'; Chart.defaults.elements.line.borderCapStyle = 'round';</script>
         <script>function formatDateInput(el){var v=el.value.replace(/[^0-9]/g,'');if(v.length===8){el.value=v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8);}}</script>
         <script>
         (function() {
@@ -2012,7 +2027,7 @@ def _build_combined_chart_section():
                                     data: maVisible,
                                     borderColor: def.color,
                                     backgroundColor: 'transparent',
-                                    borderWidth: 1.8,
+                                    borderWidth: 2,
                                     borderJoinStyle: 'round',
                                     borderCapStyle: 'round',
                                     pointRadius: 0,
@@ -2186,7 +2201,7 @@ def _build_combined_chart_section():
                     plugins: [endLabelPlugin, cmbCrosshairPlugin],
                     options: {
                         responsive: true, maintainAspectRatio: false,
-                        devicePixelRatio: Math.max(4, window.devicePixelRatio || 1),
+                        devicePixelRatio: 2 * (window.devicePixelRatio || 1),
                         layout: { padding: { right: 60 } },
                         interaction: { mode: 'index', intersect: false },
                         plugins: {
@@ -2231,7 +2246,7 @@ def _build_combined_chart_section():
                             plugins: [endLabelPlugin, disp100Plugin, cmbCrosshairPlugin],
                             options: {
                                 responsive: true, maintainAspectRatio: false,
-                                devicePixelRatio: Math.max(4, window.devicePixelRatio || 1),
+                                devicePixelRatio: 2 * (window.devicePixelRatio || 1),
                                 layout: { padding: { right: 60 } },
                                 interaction: { mode: 'index', intersect: false },
                                 plugins: {
@@ -2531,7 +2546,7 @@ def _build_wrap_chart_section(category_label):
 
         js_code = """
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = Math.max(4, window.devicePixelRatio || 1); Chart.defaults.elements.line.borderJoinStyle = 'round'; Chart.defaults.elements.line.borderCapStyle = 'round';</script>
+        <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = 2 * (window.devicePixelRatio || 1); Chart.defaults.elements.line.borderJoinStyle = 'round'; Chart.defaults.elements.line.borderCapStyle = 'round';</script>
         <script>function formatDateInput(el){var v=el.value.replace(/[^0-9]/g,'');if(v.length===8){el.value=v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8);}}</script>
         <script>
         (function() {
@@ -5375,7 +5390,7 @@ def _build_landing_kofia_section():
         <script>
         (function() {
             Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif";
-            Chart.defaults.devicePixelRatio = Math.max(4, window.devicePixelRatio || 1);
+            Chart.defaults.devicePixelRatio = 2 * (window.devicePixelRatio || 1);
             Chart.defaults.elements.line.borderJoinStyle = 'round';
             Chart.defaults.elements.line.borderCapStyle = 'round';
             var KOFIA = KOFIA_DATA_PLACEHOLDER;
@@ -7364,7 +7379,7 @@ function downloadUniversePeriod() {
     <title>SEIBro - US Settlement TOP 50</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = Math.max(4, window.devicePixelRatio || 1); Chart.defaults.elements.line.borderJoinStyle = 'round'; Chart.defaults.elements.line.borderCapStyle = 'round';</script>
+    <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = 2 * (window.devicePixelRatio || 1); Chart.defaults.elements.line.borderJoinStyle = 'round'; Chart.defaults.elements.line.borderCapStyle = 'round';</script>
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
         body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }}
