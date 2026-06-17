@@ -13,7 +13,7 @@
       "current_price": 346500.0,
       "ath_price": 360500.0,
       "dd": -3.8834951456310662,
-      "rsi": 107.28396592216862,
+      "rsi": 110.63238102928325,
       "is_today_new": false
     },
     {
@@ -29,7 +29,7 @@
       "current_price": 2521000.0,
       "ath_price": 2521000.0,
       "dd": 0.0,
-      "rsi": 230.5522815371428,
+      "rsi": 233.90069664425744,
       "is_today_new": false
     },
     {
@@ -45,7 +45,7 @@
       "current_price": 1624000.0,
       "ath_price": 2203000.0,
       "dd": -26.282342260553794,
-      "rsi": -24.132974766079805,
+      "rsi": -20.784559658965172,
       "is_today_new": false
     },
     {
@@ -61,7 +61,7 @@
       "current_price": 447000.0,
       "ath_price": 480000.0,
       "dd": -6.874999999999998,
-      "rsi": 24.3934665118265,
+      "rsi": 26.117981632656594,
       "is_today_new": false
     },
     {
@@ -77,7 +77,7 @@
       "current_price": 1596000.0,
       "ath_price": 1596000.0,
       "dd": 0.0,
-      "rsi": 24.861779597019982,
+      "rsi": 26.48563734678615,
       "is_today_new": false
     },
     {
@@ -86,14 +86,14 @@
       "sector": "소프트웨어",
       "market_cap": 382021.47158,
       "weight": 4.0,
-      "weight_prev": 5.0,
+      "weight_prev": 4.0,
       "today_return": 0.6198347107438017,
-      "contribution": 0.30991735537190085,
+      "contribution": 0.24793388429752067,
       "cumulative_return": -0.7922136713444994,
       "current_price": 243500.0,
       "ath_price": 454000.0,
       "dd": -46.36563876651982,
-      "rsi": -10.533876902109684,
+      "rsi": -8.839550690218168,
       "is_today_new": false
     },
     {
@@ -109,7 +109,7 @@
       "current_price": 2032000.0,
       "ath_price": 2127000.0,
       "dd": -4.466384579219563,
-      "rsi": -1.5956039778688424,
+      "rsi": 0.17721297146062742,
       "is_today_new": false
     },
     {
@@ -125,7 +125,23 @@
       "current_price": 141900.0,
       "ath_price": 141900.0,
       "dd": 0.0,
-      "rsi": 18.617020601129376,
+      "rsi": 20.32737111959577,
+      "is_today_new": false
+    },
+    {
+      "code": "298380",
+      "name": "에이비엘바이오",
+      "sector": "건강관리",
+      "market_cap": 60634.422429,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 9.72644376899696,
+      "contribution": 2.917933130699088,
+      "cumulative_return": -24.801161469511424,
+      "current_price": 108300.0,
+      "ath_price": 245500.0,
+      "dd": -55.88594704684318,
+      "rsi": -15.726090523927748,
       "is_today_new": false
     },
     {
@@ -141,7 +157,7 @@
       "current_price": 103200.0,
       "ath_price": 136400.0,
       "dd": -24.34017595307918,
-      "rsi": -82.13658725357034,
+      "rsi": -78.78817214645571,
       "is_today_new": false
     },
     {
@@ -157,7 +173,7 @@
       "current_price": 133100.0,
       "ath_price": 149900.0,
       "dd": -11.207471647765177,
-      "rsi": -39.52421440891023,
+      "rsi": -37.379588007093,
       "is_today_new": false
     },
     {
@@ -173,7 +189,7 @@
       "current_price": 124000.0,
       "ath_price": 161400.0,
       "dd": -23.172242874845107,
-      "rsi": -48.93732314263968,
+      "rsi": -46.63091578643341,
       "is_today_new": false
     },
     {
@@ -189,7 +205,7 @@
       "current_price": 81700.0,
       "ath_price": 133000.0,
       "dd": -38.57142857142857,
-      "rsi": -8.47102327079875,
+      "rsi": -7.371087160202439,
       "is_today_new": false
     },
     {
@@ -205,7 +221,7 @@
       "current_price": 1145000.0,
       "ath_price": 1630000.0,
       "dd": -29.75460122699386,
-      "rsi": -31.49193370296912,
+      "rsi": -29.767418582139026,
       "is_today_new": false
     },
     {
@@ -221,39 +237,7 @@
       "current_price": 50700.0,
       "ath_price": 54500.0,
       "dd": -6.972477064220184,
-      "rsi": 10.597070155026401,
-      "is_today_new": false
-    },
-    {
-      "code": "020000",
-      "name": "한섬",
-      "sector": "화장품,의류,완구",
-      "market_cap": 4703.461686,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -3.524229074889868,
-      "contribution": -0.7048458149779736,
-      "cumulative_return": -12.908036454018223,
-      "current_price": 21900.0,
-      "ath_price": 51000.0,
-      "dd": -57.05882352941176,
-      "rsi": -52.16661112108161,
-      "is_today_new": false
-    },
-    {
-      "code": "298380",
-      "name": "에이비엘바이오",
-      "sector": "건강관리",
-      "market_cap": 60634.422429,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": 9.72644376899696,
-      "contribution": 0.0,
-      "cumulative_return": -24.801161469511424,
-      "current_price": 108300.0,
-      "ath_price": 245500.0,
-      "dd": -55.88594704684318,
-      "rsi": -16.829224548280365,
+      "rsi": 11.969237036461688,
       "is_today_new": false
     }
   ],
@@ -271,7 +255,7 @@
       "current_price": 346500.0,
       "ath_price": 360500.0,
       "dd": -3.8834951456310662,
-      "rsi": -1.675012388410413,
+      "rsi": 0.01931382348110411,
       "is_today_new": false
     },
     {
@@ -287,7 +271,7 @@
       "current_price": 2521000.0,
       "ath_price": 2521000.0,
       "dd": 0.0,
-      "rsi": 8.138941099961672,
+      "rsi": 9.833267311853188,
       "is_today_new": false
     },
     {
@@ -296,14 +280,14 @@
       "sector": "소프트웨어",
       "market_cap": 382021.47158,
       "weight": 5.0,
-      "weight_prev": 10.0,
+      "weight_prev": 5.0,
       "today_return": 0.6198347107438017,
-      "contribution": 0.6198347107438017,
+      "contribution": 0.30991735537190085,
       "cumulative_return": -1.2971220105391201,
       "current_price": 243500.0,
       "ath_price": 454000.0,
       "dd": -46.36563876651982,
-      "rsi": -10.533876902109684,
+      "rsi": -8.839550690218168,
       "is_today_new": false
     },
     {
@@ -319,7 +303,7 @@
       "current_price": 2032000.0,
       "ath_price": 2127000.0,
       "dd": -4.466384579219563,
-      "rsi": -2.0732617975181222,
+      "rsi": -0.4626727550634868,
       "is_today_new": false
     },
     {
@@ -335,7 +319,7 @@
       "current_price": 146100.0,
       "ath_price": 213500.0,
       "dd": -31.56908665105387,
-      "rsi": 10.215254461704493,
+      "rsi": 11.499546782571512,
       "is_today_new": false
     },
     {
@@ -344,15 +328,15 @@
       "sector": "건강관리",
       "market_cap": 60634.422429,
       "weight": 5.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "weight_prev": 5.0,
+      "today_return": 9.72644376899696,
+      "contribution": 4.863221884498481,
+      "cumulative_return": 0.0,
       "current_price": 108300.0,
       "ath_price": 245500.0,
       "dd": -55.88594704684318,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "042660",
@@ -360,15 +344,15 @@
       "sector": "조선",
       "market_cap": 407836.227414,
       "weight": 5.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "weight_prev": 5.0,
+      "today_return": 3.018575851393189,
+      "contribution": 1.5092879256965948,
+      "cumulative_return": 0.0,
       "current_price": 133100.0,
       "ath_price": 149900.0,
       "dd": -11.207471647765177,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "079550",
@@ -376,64 +360,15 @@
       "sector": "상사,자본재",
       "market_cap": 209000.0,
       "weight": 5.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "weight_prev": 5.0,
+      "today_return": -5.189620758483033,
+      "contribution": -2.594810379241517,
+      "cumulative_return": 0.0,
       "current_price": 950000.0,
       "ath_price": 1020000.0,
       "dd": -6.8627450980392135,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
-  ],
-  "_order_changes": {
-    "삼성 트루밸류 / NH Value ESG / DB 개방형": {
-      "date": "2026-06-17",
-      "added": [
-        {
-          "name": "에이비엘바이오",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "NAVER",
-          "from": 5.0,
-          "to": 4.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "한섬",
-          "weight": 2.0
-        }
-      ]
-    },
-    "NH 목표전환형 4호 / DB 목표전환형 5차": {
-      "date": "2026-06-17",
-      "added": [
-        {
-          "name": "에이비엘바이오",
-          "weight": 5.0
-        },
-        {
-          "name": "한화오션",
-          "weight": 5.0
-        },
-        {
-          "name": "LIG넥스원",
-          "weight": 5.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "NAVER",
-          "from": 10.0,
-          "to": 5.0
-        }
-      ],
-      "removed": []
-    }
-  }
+  ]
 }
