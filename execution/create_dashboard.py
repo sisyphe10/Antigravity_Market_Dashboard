@@ -2595,22 +2595,29 @@ def _build_wrap_chart_section(category_label):
                 // Pass 3: dataset 빌드 — % return 모드는 각 시리즈를 '자기 개시일' 기준 0%로 표시한다.
                 // (공통 시작점 정규화 안 함: 여러 시리즈를 함께 선택해도 각자 자기 개시일부터의 수익률을
                 //  그대로 보여준다. 예: DB 5차 6/12개시·NH 4호 6/15개시를 함께 켜도 각자 개시일 기준. MDD도 독립.)
+                // x축 라벨 = 선택된 모든 시리즈 날짜의 합집합(정렬). 시리즈마다 개시일이 달라도
+                // x축을 더 긴 범위(가장 이른 개시일~)로 통일하고, 각 시리즈 data를 이 라벨에
+                // 인덱스 정렬한 배열(없는 날짜=null)로 만든다.
+                // ★{x,y} 객체 + category labels 혼용 시 호버(index 모드)가 데이터 배열 인덱스와
+                //   라벨이 어긋나 엉뚱한 날짜 값을 표시("누운 V자"·호버 오표시) → 라벨 정렬 배열로
+                //   세로(날짜 컬럼) 스냅 정상화.
+                var allDates = Array.from(new Set(perSeries.reduce(function(a, s){ return a.concat(s.dates); }, []))).sort();
+
                 var datasets = [];
                 perSeries.forEach(function(s) {
                     var d_arr = s.dates;
                     var v_arr = s.vals;
                     if (v_arr.length === 0) return;
 
-                    var data;
+                    var yByDate = {};
                     if (chartMode === 'mdd') {
                         var mddVals = calcMDD(v_arr);
-                        data = d_arr.map(function(d, j) { return { x: d, y: mddVals[j] }; });
+                        d_arr.forEach(function(d, j) { yByDate[d] = mddVals[j]; });
                     } else {
                         var base = v_arr[0];
-                        data = d_arr.map(function(d, j) {
-                            return { x: d, y: Math.round((v_arr[j] / base - 1) * 10000) / 100 };
-                        });
+                        d_arr.forEach(function(d, j) { yByDate[d] = Math.round((v_arr[j] / base - 1) * 10000) / 100; });
                     }
+                    var data = allDates.map(function(d) { return Object.prototype.hasOwnProperty.call(yByDate, d) ? yByDate[d] : null; });
 
                     datasets.push({
                         label: s.name,
@@ -2619,14 +2626,10 @@ def _build_wrap_chart_section(category_label):
                         backgroundColor: 'transparent',
                         borderWidth: (s.name === 'KOSPI' || s.name === 'KOSDAQ') ? 1.5 : 3,
                         pointRadius: 0,
-                        tension: 0.3
+                        tension: 0.3,
+                        spanGaps: false
                     });
                 });
-
-                // x축 라벨 = 선택된 모든 시리즈 날짜의 합집합(정렬). 시리즈마다 개시일이 달라도
-                // x축을 더 긴 범위(가장 이른 개시일~)로 통일 — 각 시리즈는 자기 날짜에만 점이 찍힘.
-                // (labels 미지정 시 category축이 시리즈별 다른 날짜셋을 잘못 매핑 → "누운 V자" 버그)
-                var allDates = Array.from(new Set(perSeries.reduce(function(a, s){ return a.concat(s.dates); }, []))).sort();
 
                 // 선 끝에 수익률 라벨을 그리는 커스텀 플러그인
                 var endLabelPlugin = {
@@ -2638,7 +2641,8 @@ def _build_wrap_chart_section(category_label):
                             if (meta.hidden) return;
                             var last = meta.data[meta.data.length - 1];
                             if (!last) return;
-                            var val = ds.data[ds.data.length - 1].y;
+                            var val = ds.data[ds.data.length - 1];
+                            if (val === null || val === undefined) return;
                             var rounded = Math.sign(val) * Math.round(Math.abs(val));
                             var sign = rounded >= 0 ? '+' : '';
                             var label = sign + rounded + '%';
