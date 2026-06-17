@@ -2402,7 +2402,7 @@ async def _notify_seonyuduo_spend(service, merchant, category, amount):
     except Exception as e:
         logging.warning(f"선유듀오 월 집계 실패(알림은 진행): {e}")
     budget = SEONYUDUO_MONTHLY_BUDGET
-    pct = round(total_spent / budget * 100) if budget else 0
+    pct = max(0, round(total_spent / budget * 100)) if budget else 0  # 환불로 음수면 0% 표시
     remaining = max(0, budget - total_spent)
     filled = min(10, max(0, round(pct / 100 * 10)))
     bar = '█' * filled + '░' * (10 - filled)
