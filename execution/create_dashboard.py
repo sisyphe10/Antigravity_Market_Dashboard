@@ -5406,11 +5406,16 @@ def create_fee_revenue_section():
             });
             o._total = tot; return o;
         }
-        // 버튼 클릭: 활성 기준에 없으면 끝에 추가(클릭 순서), 있으면 해제(최소 1개 유지)
-        function revToggleDim(d) {
-            var i = revActiveDims.indexOf(d);
-            if (i === -1) { revActiveDims.push(d); }
-            else if (revActiveDims.length > 1) { revActiveDims.splice(i, 1); }
+        // 버튼 클릭: 그냥 클릭 = 단일 전환 / Ctrl·Shift+클릭 = 다중 누적(클릭 순서대로 추가, 재클릭 해제)
+        function revToggleDim(d, ev) {
+            var multi = ev && (ev.ctrlKey || ev.shiftKey || ev.metaKey);
+            if (!multi) {
+                revActiveDims = [d];
+            } else {
+                var i = revActiveDims.indexOf(d);
+                if (i === -1) { revActiveDims.push(d); }
+                else if (revActiveDims.length > 1) { revActiveDims.splice(i, 1); }
+            }
             revRender();
         }
         function revRender() {
@@ -5460,7 +5465,7 @@ def create_fee_revenue_section():
                 var idx = revActiveDims.indexOf(b[0]);
                 var sty = idx !== -1 ? ' style="background:' + REV_ORD_SHADES[Math.min(idx, REV_ORD_SHADES.length - 1)] + ';color:#fff;"' : '';
                 return '<button class="rev-viewbtn' + (idx !== -1 ? ' active' : '') +
-                    '" data-rev-view="' + b[0] + '"' + sty + ' onclick="revToggleDim(this.dataset.revView)">' + b[1] + '</button>';
+                    '" data-rev-view="' + b[0] + '"' + sty + ' onclick="revToggleDim(this.dataset.revView, event)">' + b[1] + '</button>';
             }).join('');
             var dimHeads = dims.map(function(d, i) {
                 return i === 0 ? '<th class="rev-headcell"><div class="rev-views">' + btns + '</div></th>'
