@@ -435,20 +435,27 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "예) <code>한강 5km 25분</code>\n\n"
         "👥 <b>그룹 채팅에서는</b> <code>/fit 운동내용</code> 으로 보내주세요.\n"
         "예) <code>/fit 오늘 JD테니스 포핸드 손목 고정, 백핸드 체중 이동</code>\n\n"
+        "💰 <b>가계부</b>는 <code>/ledger 지출 식비 점심 15000 생활비</code> 처럼 입력해요.\n\n"
         "/help 도움말, /whoami 담당자 확인",
         parse_mode='HTML')
 
 
 async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "<b>사용법</b>\n"
-        "운동 내용을 자연어로 보내면 → AI가 유형/카테고리/장소/날짜/내용 분류 → 미리보기 확인 후 [저장]\n\n"
-        "• 한 메시지에 여러 카테고리를 적으면 <b>카테고리별로 행을 나눠</b> 저장해요.\n"
-        "• 유형: 테니스 / 러닝 / 워크아웃 (자동)\n"
+        "<b>📋 선유듀오 봇 사용법</b>\n\n"
+        "<b>🏃 운동 기록</b>\n"
+        "운동 내용을 자연어로 보내면 → AI가 유형/카테고리/날짜 분류 → 미리보기 [저장]\n"
+        "• 그룹에선 <code>/fit 운동내용</code> (DM은 그냥 텍스트)\n"
+        "   예) <code>/fit 오늘 JD테니스 포핸드 손목 고정, 백핸드 체중 이동</code>\n"
+        "• 한 메시지에 여러 카테고리 → 카테고리별로 나눠 저장\n"
         "• 테니스 카테고리: 포핸드·백핸드·슬라이스·포핸드 발리·백핸드 발리·서브·공통\n"
-        "• 러닝/워크아웃 카테고리: 종목명 자유\n"
-        "• 날짜 미기재 시 오늘\n\n"
-        "👥 <b>그룹</b>: 일반 텍스트 대신 <code>/fit 운동내용</code> 으로 보내세요 (DM은 그냥 텍스트로).\n"
+        "• 러닝/워크아웃: 종목명 자유 · 날짜 미기재 시 오늘\n\n"
+        "<b>💰 가계부 입력</b>\n"
+        "<code>/ledger [유형] [카테고리] [메모] [금액] [통장]</code>\n"
+        "   예) <code>/ledger 지출 식비 점심 15000 생활비</code>\n"
+        "   예) <code>/ledger 수입 급여 생활비충원 800000 생활비</code>\n"
+        "• 유형: 지출/ㅈ · 수입/ㅅ\n"
+        "• <code>/ledger</code> 만 보내면 카테고리 목록 + 예산 소진율\n\n"
         "/whoami — 내 담당자(TS/NY) 확인·변경",
         parse_mode='HTML')
 
@@ -462,6 +469,153 @@ async def cmd_whoami(update: Update, context: ContextTypes.DEFAULT_TYPE):
     cur = f"현재 담당자: <b>{who}</b>" if who else "아직 담당자가 등록되지 않았어요."
     await update.message.reply_text(cur + "\n아래에서 선택/변경할 수 있어요.",
                                     parse_mode='HTML', reply_markup=kb)
+
+
+# ── 선유듀오 가계부 입력 (/ledger) ──────────────────────────────────
+SEONYUDUO_BUDGET = 800000  # 월 예산(원)
+
+
+def _seonyuduo_month_spent(service):
+    """선유듀오 가계부 이번달(KST) 지출 합계. 실패 시 None."""
+    try:
+        res = service.spreadsheets().values().get(
+            spreadsheetId=SEONYUDUO_SHEET_ID, range='가계부!A:F').execute()
+        mp = datetime.datetime.now(tz=KST).strftime('%Y-%m')
+        total = 0
+        for r in res.get('values', [])[1:]:
+            if len(r) > 3 and str(r[0]).startswith(mp) and r[1] == '지출':
+                try:
+                    total += int(str(r[3]).replace(',', '') or '0')
+                except ValueError:
+                    pass
+        return total
+    except Exception:
+        return None
+
+
+def _budget_line(total):
+    """예산 소진율 줄. total None이면 빈 문자열."""
+    if total is None:
+        return ''
+    pct = max(0, round(total / SEONYUDUO_BUDGET * 100))
+    remaining = max(0, SEONYUDUO_BUDGET - total)
+    filled = min(10, max(0, round(pct / 100 * 10)))
+    bar = '█' * filled + '░' * (10 - filled)
+    return f"\n📊 예산 소진율 {pct}% [{bar}]\n💵 잔액 {remaining:,}원"
+
+
+async def cmd_ledger(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """선유듀오 가계부 입력: /ledger [유형] [카테고리] [메모] [금액] [통장]"""
+    service = _get_seonyuduo_service()
+    if not service:
+        await update.message.reply_text("❌ Google 서비스 계정이 설정되지 않았습니다.")
+        return
+    args = context.args
+
+    # 인자 없음 → 카테고리/통장 목록 + 예산 + 사용법
+    if not args:
+        expense, income, accounts = [], [], []
+        try:
+            res = service.spreadsheets().values().get(
+                spreadsheetId=SEONYUDUO_SHEET_ID, range='카테고리!A:C').execute()
+            for r in res.get('values', []):
+                if len(r) >= 2:
+                    if r[0] == '지출' and r[1] not in expense:
+                        expense.append(r[1])
+                    elif r[0] == '수입' and r[1] not in income:
+                        income.append(r[1])
+                if len(r) >= 3 and r[2] and r[2] not in accounts:
+                    accounts.append(r[2])
+        except Exception:
+            pass
+        msg = "<b><u>선유듀오 가계부</u></b>\n"
+        bl = _budget_line(_seonyuduo_month_spent(service))
+        if bl:
+            msg += bl + "\n"
+        msg += "\n<b>카테고리</b>\n"
+        if expense:
+            msg += f"지출: {' · '.join(expense)}\n"
+        if income:
+            msg += f"수입: {' · '.join(income)}\n"
+        if accounts:
+            msg += f"통장: {' · '.join(accounts)}\n"
+        msg += ("\n📝 <b>사용법</b>\n"
+                "<code>/ledger 지출 식비 점심 15000 생활비</code>\n"
+                "<code>/ledger 수입 급여 생활비충원 800000 생활비</code>\n\n"
+                "형식: /ledger [유형] [카테고리] [메모] [금액] [통장]")
+        await update.message.reply_text(msg, parse_mode='HTML')
+        return
+
+    if len(args) < 3:
+        await update.message.reply_text(
+            "❌ 형식: /ledger [유형] [카테고리] [메모] [금액] [통장]", parse_mode='HTML')
+        return
+
+    if args[0] in ('지출', 'ㅈ'):
+        tx_type = '지출'
+    elif args[0] in ('수입', 'ㅅ'):
+        tx_type = '수입'
+    else:
+        await update.message.reply_text("❌ 유형은 '지출/ㅈ' 또는 '수입/ㅅ'으로 입력하세요.")
+        return
+    category = args[1]
+
+    # 카테고리 검증 (탭이 비어 valid가 없으면 통과)
+    try:
+        res = service.spreadsheets().values().get(
+            spreadsheetId=SEONYUDUO_SHEET_ID, range='카테고리!A:B').execute()
+        valid = [r[1] for r in res.get('values', []) if len(r) >= 2 and r[0] == tx_type]
+        if valid and category not in valid:
+            await update.message.reply_text(
+                f"❌ '{category}'는 유효하지 않은 카테고리입니다.\n\n{tx_type}: {' · '.join(valid)}",
+                parse_mode='HTML')
+            return
+    except Exception:
+        pass
+
+    # 금액/통장/메모 파싱 (/ledger2와 동일: 마지막=통장, 그 앞=금액 / 통장 생략 케이스)
+    account = args[-1]
+    try:
+        amount = int(args[-2].replace(',', ''))
+        if amount <= 0:
+            raise ValueError
+        memo = ' '.join(args[2:-2]) if len(args) > 4 else ''
+    except Exception:
+        try:
+            amount = int(args[-1].replace(',', ''))
+            if amount <= 0:
+                raise ValueError
+            memo = ' '.join(args[2:-1]) if len(args) > 3 else ''
+            account = ''
+        except Exception:
+            await update.message.reply_text("❌ 금액(숫자)을 확인하세요.")
+            return
+
+    try:
+        today_str = datetime.datetime.now(tz=KST).strftime('%Y-%m-%d')
+        # 안전 기록: A:F 다음 빈 행에 직접 update (보조열 I~K 미관여)
+        existing = service.spreadsheets().values().get(
+            spreadsheetId=SEONYUDUO_SHEET_ID, range='가계부!A:F').execute().get('values', [])
+        n = len(existing) + 1
+        service.spreadsheets().values().update(
+            spreadsheetId=SEONYUDUO_SHEET_ID, range=f'가계부!A{n}:F{n}',
+            valueInputOption='USER_ENTERED',
+            body={'values': [[today_str, tx_type, category, amount, memo, account]]}).execute()
+
+        emoji = '🔴' if tx_type == '지출' else '🟢'
+        msg = (f"<b><u>선유듀오 가계부</u></b>\n{emoji} <b>{tx_type}</b> 입력 완료\n"
+               f"━━━━━━━━━━━━━━━\n📅 {today_str}\n📂 {category}\n💰 {amount:,}원\n")
+        if memo:
+            msg += f"📝 {memo}\n"
+        if account:
+            msg += f"🏦 {account}\n"
+        if tx_type == '지출':
+            msg += _budget_line(_seonyuduo_month_spent(service))
+        await update.message.reply_text(msg, parse_mode='HTML')
+        logging.info(f"SeonyuDuo /ledger: {tx_type} {amount} {category} {memo} {account}")
+    except Exception as e:
+        logging.error(f"SeonyuDuo /ledger error: {e}")
+        await update.message.reply_text(f"❌ 저장 실패: {e}")
 
 
 async def _process_exercise_text(update, context, text: str):
@@ -601,6 +755,7 @@ def main():
     application.add_handler(CommandHandler('help', cmd_help))
     application.add_handler(CommandHandler('whoami', cmd_whoami))
     application.add_handler(CommandHandler(['fit', 'log', 'ex'], cmd_log))
+    application.add_handler(CommandHandler(['ledger', '가계부'], cmd_ledger))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     application.add_handler(CallbackQueryHandler(handle_callback))
     print("선유듀오 운동기록 봇 시작")
