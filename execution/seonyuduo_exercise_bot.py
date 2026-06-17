@@ -83,15 +83,18 @@ def _load_chats():
 
 def _save_chats(d):
     try:
-        with open(SEONYUDUO_CHATS_FILE, 'w', encoding='utf-8') as f:
+        tmp = SEONYUDUO_CHATS_FILE + '.tmp'
+        with open(tmp, 'w', encoding='utf-8') as f:
             json.dump(d, f, ensure_ascii=False, indent=2)
+        os.replace(tmp, SEONYUDUO_CHATS_FILE)  # 원자적 교체 (강제종료 중 깨짐 방지)
     except Exception as e:
         logging.error(f"chats 저장 실패: {e}")
 
 
 async def capture_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """모든 업데이트에서 그룹/슈퍼그룹 chat_id를 비차단 캡처 (group=-1 등록).
-    저장만 하고 propagation은 막지 않아 기존 핸들러는 정상 동작한다."""
+    저장만 하고 propagation은 막지 않아 기존 핸들러는 정상 동작한다.
+    ※ 텔레그램 프라이버시 모드 ON 그룹에선 '명령어(/...)'만 봇에 전달됨 → 캡처도 명령어로 트리거."""
     ch = update.effective_chat
     if not ch or ch.type not in ('group', 'supergroup'):
         return
@@ -101,6 +104,13 @@ async def capture_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         chats[key] = {'type': ch.type, 'title': ch.title or ''}
         _save_chats(chats)
         logging.info(f"선유듀오 그룹챗 캡처: {key} ({ch.title})")
+        try:
+            await context.bot.send_message(
+                chat_id=ch.id,
+                text="✅ 이 그룹을 선유듀오 가계부 지출 알림 대상으로 등록했어요.\n"
+                     "앞으로 시지프에서 '선유'로 이관하면 여기로 지출 내역이 옵니다.")
+        except Exception as e:
+            logging.warning(f"캡처 확인 메시지 전송 실패: {e}")
 
 
 # ══════════════════════════════════════════════════════════
