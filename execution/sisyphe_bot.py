@@ -2298,8 +2298,13 @@ def check_budget():
     budget_categories = []
     for row in budget_rows:
         cat = row[2] if len(row) > 2 else ''
-        amt = int((row[3] if len(row) > 3 else '0').replace(',', '') or '0')
-        if cat and cat not in BUDGET_EXCLUDE:
+        amt_raw = (row[3] if len(row) > 3 else '').replace(',', '').strip()
+        try:
+            amt = int(amt_raw) if amt_raw else 0
+        except ValueError:
+            amt = 0
+        # 금액 빈칸/0 카테고리는 소진율 계산서 중립 (지출도 미포함, 한도도 0)
+        if cat and cat not in BUDGET_EXCLUDE and amt > 0:
             budget_categories.append(cat)
             budget_total += amt
 
@@ -2636,7 +2641,7 @@ async def _ledger_upsert_rule(service, context, msg, merchant, kw, cat):
         InlineKeyboardButton("➕ 새 카테고리로 추가", callback_data='ledgercat:add'),
         InlineKeyboardButton("✖️ 취소", callback_data='ledgercat:cancel'),
     ]])
-    sample = ', '.join(sorted(known)[:12]) if known else '(없음)'
+    sample = ' · '.join(sorted(known)) if known else '(없음)'
     await msg.reply_text(
         f"❓ '{cat}' 은(는) 기존에 없던 카테고리예요.\n"
         f"오타가 아니라면 새 카테고리로 추가할까요?\n\n"
@@ -2664,10 +2669,78 @@ async def handle_ledger_callback(update: Update, context: ContextTypes.DEFAULT_T
         await q.edit_message_text("❌ Google 서비스 계정이 설정되지 않았습니다.")
         return
     try:
-        await q.edit_message_text(await _ledger_apply_op(service, op))
+        result_text = await _ledger_apply_op(service, op)
     except Exception as e:
         logging.error(f"ledger_category 신규 적용 실패: {e}")
         await q.edit_message_text(f"❌ 처리 실패: {e}")
+        return
+    # 이 콜백은 '신규 카테고리(기존에 없던)' 경로에서만 도달 → 예산 탭에 없으면 추가 확인.
+    # op['cat']은 새 카테고리 (append=새 규칙, update=키워드를 새 카테고리로 변경 둘 다 해당).
+    new_cat = (op.get('cat') or '').strip()
+    try:
+        in_budget = await _is_cat_in_budget(service, new_cat)
+    except Exception as e:
+        logging.warning(f"예산 탭 확인 실패, 프롬프트 생략: {e}")
+        in_budget = True
+    if new_cat and not in_budget:
+        context.user_data['pending_budget_cat'] = new_cat
+        context.user_data['pending_budget_text'] = result_text
+        kb = InlineKeyboardMarkup([[
+            InlineKeyboardButton("📊 예산에 추가", callback_data='ledgerbudget:add'),
+            InlineKeyboardButton("건너뛰기", callback_data='ledgerbudget:skip'),
+        ]])
+        await q.edit_message_text(
+            f"{result_text}\n\n"
+            f"💰 '{new_cat}'은(는) 예산 탭에 없어요. 예산 항목으로 추가할까요?\n"
+            f"(금액은 나중에 예산 탭에서 직접 입력)",
+            reply_markup=kb,
+        )
+        return
+    await q.edit_message_text(result_text)
+
+
+async def _is_cat_in_budget(service, cat):
+    """예산 탭 C열(카테고리)에 해당 카테고리가 있는지 확인."""
+    rows = await asyncio.to_thread(_read_sheet, service, '예산')
+    target = (cat or '').strip()
+    for row in rows[1:]:
+        if len(row) > 2 and (row[2] or '').strip() == target:
+            return True
+    return False
+
+
+async def handle_ledger_budget_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """신규 카테고리를 예산 탭에 추가할지 확인하는 버튼 처리."""
+    q = update.callback_query
+    if not q:
+        return
+    await q.answer()
+    text = context.user_data.pop('pending_budget_text', '')
+    cat = context.user_data.pop('pending_budget_cat', None)
+    if (q.data or '') == 'ledgerbudget:skip':
+        await q.edit_message_text(f"{text}\n\n⏭️ 예산 추가는 건너뛰었어요.")
+        return
+    if not cat:
+        await q.edit_message_text("⌛ 만료된 요청이에요. 예산 탭에 직접 추가해주세요.")
+        return
+    service = _get_sheets_service()
+    if not service:
+        await q.edit_message_text("❌ Google 서비스 계정이 설정되지 않았습니다.")
+        return
+    try:
+        rows = await asyncio.to_thread(_read_sheet, service, '예산')
+        # 기존 예산 행의 날짜 재사용(예산 기준월 통일). 비었으면 오늘.
+        date_val = (rows[1][0] if len(rows) > 1 and rows[1] and rows[1][0]
+                    else datetime.datetime.now(KST).strftime('%Y-%m-%d'))
+        await asyncio.to_thread(
+            _append_row, service, '예산',
+            [date_val, '지출', cat, '', '생활비'], 'RAW')
+        logging.info(f"예산 신규 카테고리 추가: {cat}")
+        await q.edit_message_text(
+            f"{text}\n\n✅ '{cat}'을(를) 예산에 추가했어요. (월 금액은 예산 탭에서 직접 입력)")
+    except Exception as e:
+        logging.error(f"예산 추가 실패: {e}")
+        await q.edit_message_text(f"❌ 예산 추가 실패: {e}")
 
 
 async def _ledger_exclude(service, msg, date, merchant, amount):
@@ -2836,6 +2909,7 @@ if __name__ == '__main__':
     application.add_handler(CommandHandler('idea', idea_command))
     application.add_handler(MessageHandler(filters.REPLY & filters.TEXT & ~filters.COMMAND, handle_uncat_reply))
     application.add_handler(CallbackQueryHandler(handle_ledger_callback, pattern=r'^ledgercat:'))
+    application.add_handler(CallbackQueryHandler(handle_ledger_budget_callback, pattern=r'^ledgerbudget:'))
 
     job_queue = application.job_queue
     try:
