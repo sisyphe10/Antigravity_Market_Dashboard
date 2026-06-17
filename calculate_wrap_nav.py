@@ -37,7 +37,8 @@ portfolio_config = {
     '트루밸류': {'base_price': 2021.31, 'start_date': '2025-12-30'},
     'Value ESG': {'base_price': 1980.49, 'start_date': '2025-12-30'},
     '개방형 랩': {'base_price': 1518.52, 'start_date': '2025-12-30'},
-    '목표전환형 5차': {'base_price': 1000.00, 'start_date': '2026-06-12'},  # DB 5차 운용 개시 (AUM 추후 입력, NH 4호 2026-06-15 페어 예정)
+    '목표전환형 5차': {'base_price': 1000.00, 'start_date': '2026-06-12'},  # DB 5차 운용 개시
+    '목표전환형 4호': {'base_price': 1000.00, 'start_date': '2026-06-15'},  # NH 4호 운용 개시 (DB 5차 페어, 6/15 개시구성=DB 5차 처음 동일)
     # '목표전환형 3호': {'base_price': 1000.00, 'start_date': '2026-05-14'},  # NH 3호 완료 (목표달성, 2026-05-27 청산)
     # '목표전환형 4차': {'base_price': 1000.00, 'start_date': '2026-05-18'},  # DB 4차 완료 (목표달성, 2026-05-27 청산)
     # '목표전환형 2호': {'base_price': 1000.00, 'start_date': '2026-04-29'},  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
@@ -160,12 +161,17 @@ if start_date >= end_date and not new_portfolios and not incomplete_portfolios:
     print("\n✅ 이미 최신 데이터까지 업데이트되어 있습니다. (종료)")
     exit()
 
-# 신규 포트폴리오가 있으면 데이터 수집 시작일을 조정
+# 신규 포트폴리오가 있으면 '데이터 수집 시작일'만 앞당긴다 (start_date 자체는 롤백 금지).
+# ★ start_date를 롤백하면 last_date보다 과거에 개시한 포트폴리오를 뒤늦게 추가할 때
+#    기존 포트폴리오가 겹치는 날짜를 잘못된 베이스(마지막 행)로 재계산하고, 신규 row가
+#    기존 컬럼을 NaN으로 덮어써서 published 기준가가 훼손된다. 신규 컬럼은 아래 per-pf
+#    로직이 pf_config_start 기준으로 독립 계산하므로 데이터만 충분히 수집하면 된다.
+data_start_date = start_date
 if new_portfolios:
     earliest_new_start = min(pd.Timestamp(portfolio_config[pf]['start_date']) for pf in new_portfolios)
-    if earliest_new_start < start_date:
-        start_date = earliest_new_start
-    print(f"   - 신규 포트폴리오 감지: {', '.join(new_portfolios)}")
+    if earliest_new_start < data_start_date:
+        data_start_date = earliest_new_start
+    print(f"   - 신규 포트폴리오 감지: {', '.join(new_portfolios)} (데이터 수집 시작 {data_start_date.strftime('%Y-%m-%d')})")
 
 # ---------------------------------------------------------
 # 3. 비중 데이터 전처리
@@ -183,13 +189,13 @@ df_weights['날짜'] = pd.to_datetime(df_weights['날짜'])
 # 4. 데이터 수집
 # ---------------------------------------------------------
 all_codes = df_weights['코드'].unique()
-print(f"2. 데이터 수집 (기간: {start_date.strftime('%Y-%m-%d')} ~ {end_date.strftime('%Y-%m-%d')})")
+print(f"2. 데이터 수집 (기간: {data_start_date.strftime('%Y-%m-%d')} ~ {end_date.strftime('%Y-%m-%d')})")
 
 # 4-1. 개별 종목
 df_change = pd.DataFrame()
 for code in all_codes:
     try:
-        d = fdr.DataReader(code, start=start_date)
+        d = fdr.DataReader(code, start=data_start_date)
         if not d.empty:
             df_change[code] = d['Change']
     except:
@@ -236,7 +242,7 @@ for name in indices:
     except Exception as e:
         print(f"     {name}: 네이버 실패 ({e}), FDR 시도...")
         try:
-            d = fdr.DataReader(indices[name], start=start_date)
+            d = fdr.DataReader(indices[name], start=data_start_date)
             if not d.empty:
                 df_indices[name] = d['Close']
                 print(f"     {name}: FDR ({len(d)}일)")
@@ -337,9 +343,13 @@ if new_pf_results:
     df_new_combined.index.name = 'Date'
 
     if is_update:
-        df_final = pd.concat([df_old, df_new_combined])
-        # 중복 제거 (날짜 기준)
-        df_final = df_final[~df_final.index.duplicated(keep='last')]
+        # 컬럼 인지 병합: 기존(df_old) 값은 보존하고 신규 컬럼·신규 행(df_old가 NaN/없음)만 채운다.
+        # 단순 concat+dedup(keep=last)은 신규 포트폴리오의 과거 row가 기존 컬럼을 NaN으로
+        # 덮어써 published 기준가를 훼손하므로 combine_first 사용 (미완료 마지막 행은 위에서
+        # df_old.iloc[:-1]로 제거되므로 그 날짜는 df_new가 채움 → 정상 갱신).
+        df_final = df_old.combine_first(df_new_combined)
+        ordered = list(df_old.columns) + [c for c in df_final.columns if c not in df_old.columns]
+        df_final = df_final[ordered].sort_index()
     else:
         df_final = df_new_combined
 
