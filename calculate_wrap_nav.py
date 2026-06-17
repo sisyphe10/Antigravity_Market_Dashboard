@@ -157,6 +157,41 @@ if is_update and not new_portfolios:
                 last_prices[key] = initial_base_prices[key]
         current_base_prices = last_prices
 
+# ── 잠정 종가 자가복구 (Fix A) ─────────────────────────────
+# 자동 업데이트가 장중/마감직후(잠정) 종가로 한 행을 기록하면 아래 combine_first가
+# 그 값을 영구 동결한다(지수·NAV 공통). 신규 포트폴리오가 없는 일반 일일 실행에서는
+# 최근 RECOMPUTE_WINDOW 거래일을 다시 계산하도록 마지막 행들을 롤백해, 확정 종가
+# 확보 후 실행이 잠정값을 덮어쓰도록 한다.
+#   · 늦은-추가 훼손버그 방지(start_date 롤백금지)는 new_portfolios가 있을 때만
+#     필요하므로 그 경우는 건드리지 않는다.
+#   · 어떤 포트폴리오의 개시(시드) 행도 절대 지우지 않도록 latest_start로 cap.
+RECOMPUTE_WINDOW = 3
+if is_update and not new_portfolios and not incomplete_portfolios and len(df_old) > 1:
+    latest_start = max(
+        (pd.Timestamp(portfolio_config[pf]['start_date'])
+         for pf in portfolio_config if pf in df_old.columns),
+        default=df_old.index[0],
+    )
+    cut_idx = df_old.index[-RECOMPUTE_WINDOW] if len(df_old) > RECOMPUTE_WINDOW else df_old.index[0]
+    rollback_floor = max(cut_idx, latest_start)  # 개시행 보존
+    keep = df_old[df_old.index <= rollback_floor]
+    if 1 <= len(keep) < len(df_old):
+        dropped = len(df_old) - len(keep)
+        df_old = keep
+        last_date = df_old.index[-1]
+        start_date = last_date
+        last_prices = {}
+        for key in initial_base_prices.keys():
+            val = None
+            if key in df_old.columns:
+                valid = df_old[key].dropna()
+                if not valid.empty:
+                    val = valid.iloc[-1]
+            last_prices[key] = val if (val is not None and not pd.isna(val)) else initial_base_prices[key]
+        current_base_prices = last_prices
+        print(f"   - [Fix A] 최근 {dropped}거래일 재계산 롤백 "
+              f"(start={start_date.strftime('%Y-%m-%d')}, floor={rollback_floor.strftime('%Y-%m-%d')})")
+
 if start_date >= end_date and not new_portfolios and not incomplete_portfolios:
     print("\n✅ 이미 최신 데이터까지 업데이트되어 있습니다. (종료)")
     exit()
@@ -201,7 +236,7 @@ for code in all_codes:
     except:
         pass
 
-# 4-2. 시장 지수 (네이버 금융 → FDR 폴백)
+# 4-2. 시장 지수 (KIS 일자별 확정지수 → 네이버 금융 → FDR 폴백)
 print("   - KOSPI, KOSDAQ 지수 수집 중...")
 df_indices = pd.DataFrame()
 
@@ -232,21 +267,74 @@ def _fetch_naver_index(code, pages=15):
     df = pd.DataFrame(rows).drop_duplicates('Date').set_index('Date').sort_index()
     return df['Close']
 
+def _fetch_kis_index(iscd, start):
+    """KIS 국내업종 일자별지수 확정 종가 → pd.Series(start 이후).
+    거래소 공식 확정 종가라 장중/마감직후 잠정값을 회피한다.
+    1콜당 최근 100거래일 반환 → start까지 FID_INPUT_DATE_1 날짜 페이징."""
+    import os as _os, sys as _sys
+    _sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), 'execution'))
+    import kis_token
+    PATH = '/uapi/domestic-stock/v1/quotations/inquire-index-daily-price'
+    TRID = 'FHPUP02120000'
+    start_ts = pd.Timestamp(start)
+    rows = {}
+    cursor = pd.Timestamp(end_date)
+    for _ in range(8):  # 최대 8콜(=800거래일) 안전상한
+        params = {'FID_COND_MRKT_DIV_CODE': 'U', 'FID_INPUT_ISCD': iscd,
+                  'FID_INPUT_DATE_1': cursor.strftime('%Y%m%d'), 'FID_PERIOD_DIV_CODE': 'D'}
+        j = kis_token.kis_get(PATH, tr_id=TRID, params=params)
+        got = []
+        for r in (j.get('output2') or []):
+            d = r.get('stck_bsop_date'); c = r.get('bstp_nmix_prpr')
+            if not d or c in (None, '', '0'):
+                continue
+            try:
+                got.append((pd.to_datetime(d), float(c)))
+            except Exception:
+                pass
+        if not got:
+            break
+        for d, c in got:
+            rows[d] = c
+        earliest = min(d for d, _ in got)
+        if earliest <= start_ts:
+            break
+        cursor = earliest - pd.Timedelta(days=1)
+    if not rows:
+        return pd.Series(dtype=float)
+    s = pd.Series(rows).sort_index()
+    return s[s.index >= start_ts]
+
+KIS_ISCD = {'KOSPI': '0001', 'KOSDAQ': '1001'}
 naver_codes = {'KOSPI': 'KOSPI', 'KOSDAQ': 'KOSDAQ'}
 for name in indices:
-    try:
-        s = _fetch_naver_index(naver_codes[name])
-        if not s.empty:
-            df_indices[name] = s
-            print(f"     {name}: 네이버 금융 ({len(s)}일)")
-    except Exception as e:
-        print(f"     {name}: 네이버 실패 ({e}), FDR 시도...")
+    s = pd.Series(dtype=float)
+    # 1순위: KIS 일자별 확정 종가 (거래소 공식, 잠정값 회피)
+    if name in KIS_ISCD:
+        try:
+            s = _fetch_kis_index(KIS_ISCD[name], data_start_date)
+            if not s.empty:
+                df_indices[name] = s
+                print(f"     {name}: KIS ({len(s)}일)")
+        except Exception as e:
+            print(f"     {name}: KIS 실패 ({e}), 네이버 시도...")
+    # 2순위: 네이버 금융
+    if s.empty:
+        try:
+            s = _fetch_naver_index(naver_codes[name])
+            if not s.empty:
+                df_indices[name] = s
+                print(f"     {name}: 네이버 금융 ({len(s)}일)")
+        except Exception as e:
+            print(f"     {name}: 네이버 실패 ({e}), FDR 시도...")
+    # 3순위: FDR
+    if s.empty:
         try:
             d = fdr.DataReader(indices[name], start=data_start_date)
             if not d.empty:
                 df_indices[name] = d['Close']
                 print(f"     {name}: FDR ({len(d)}일)")
-        except:
+        except Exception:
             pass
 
 if df_change.empty and df_indices.empty:
