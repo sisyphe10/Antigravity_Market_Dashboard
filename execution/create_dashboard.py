@@ -378,6 +378,7 @@ def get_item_category(item_name):
     # Special handling for Wrap portfolios
     wrap_keywords = ['트루밸류', '삼성 트루밸류', 'Value ESG', 'NH Value ESG',
                      '개방형', 'DB 개방형',
+                     '목표전환형 4호', 'NH 목표전환형 4호',
                      '목표전환형 5차', 'DB 목표전환형 5차']
     if any(keyword in item_name for keyword in wrap_keywords):
         return 'Wrap'
@@ -2482,7 +2483,8 @@ def _build_wrap_chart_section(category_label):
             ('삼성 트루밸류', '트루밸류'),
             ('NH Value ESG', 'Value ESG'),
             ('DB 개방형', '개방형 랩'),
-            ('DB 목표전환형 5차', '목표전환형 5차'),  # 운용 개시 2026-06-12 (NH 4호 2026-06-15 페어 예정)
+            ('NH 목표전환형 4호', '목표전환형 4호'),  # 운용 개시 2026-06-15 (DB 5차 페어, 동일 구성)
+            ('DB 목표전환형 5차', '목표전환형 5차'),  # 운용 개시 2026-06-12 (NH 4호 페어)
             # ('NH 목표전환형 3호', '목표전환형 3호'),  # NH 3호 완료 (2026-05-27 청산, 목표달성)
             # ('DB 목표전환형 4차', '목표전환형 4차'),  # DB 4차 완료 (2026-05-27 청산, 목표달성)
             # ('NH 목표전환형 2호', '목표전환형 2호'),  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
@@ -2493,6 +2495,7 @@ def _build_wrap_chart_section(category_label):
             '삼성 트루밸류': '#1428A0',
             'NH Value ESG': '#0072CE',
             'DB 개방형': '#00854A',
+            'NH 목표전환형 4호': '#0072CE',  # 운용 개시 2026-06-15
             'DB 목표전환형 5차': '#00854A',  # 운용 개시 2026-06-12
             # 'NH 목표전환형 3호': '#0072CE',  # NH 3호 완료 (2026-05-27 청산, 목표달성)
             # 'DB 목표전환형 4차': '#00854A',  # DB 4차 완료 (2026-05-27 청산, 목표달성)
@@ -3500,7 +3503,8 @@ def create_wrap_returns_table():
 
         items = [
             ('삼성 트루밸류', '트루밸류'),
-            ('DB 목표전환형 5차', '목표전환형 5차'),  # 운용 개시 2026-06-12 (NH 4호 2026-06-15 페어 예정)
+            ('NH 목표전환형 4호', '목표전환형 4호'),  # 운용 개시 2026-06-15 (DB 5차 페어, 동일 구성)
+            ('DB 목표전환형 5차', '목표전환형 5차'),  # 운용 개시 2026-06-12 (NH 4호 페어)
             # ('NH 목표전환형 3호', '목표전환형 3호'),  # NH 3호 완료 (2026-05-27 청산, 목표달성)
             # ('DB 목표전환형 4차', '목표전환형 4차'),  # DB 4차 완료 (2026-05-27 청산, 목표달성)
             # ('NH 목표전환형 2호', '목표전환형 2호'),  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
@@ -5373,7 +5377,6 @@ def create_fee_revenue_section():
                 <div class="rev-sum-value" title="{_fmt_won(total)}">{_fmt_eok_man(total)}</div>
             </div>
             <div class="table-container"><div id="revTableHost"></div></div>
-            <p class="fee-note">자문사(라이프) 몫 실제 정산 수수료 기준. 단위: 원. 목표전환형은 회차 청산 시 실현 기준.</p>
         </div>
     """
 
@@ -5382,9 +5385,17 @@ def create_fee_revenue_section():
         var FEE_REVENUE = __PAYLOAD__;
         var REV_CATS = ['개방형', '목표전환형'];
         var REV_BROKER_ORDER = ['삼성', 'NH', 'DB', '한투'];
+        var REV_DIMS = [['quarter', '분기'], ['broker', '증권사'], ['product', '상품']];
+        var REV_ORD_SHADES = ['#1e40af', '#5277cc', '#8aa9e6'];  // 클릭 순서: 진한→연한 (순서 표시)
+        var revActiveDims = ['quarter'];  // 클릭 순서대로 누적되는 그룹 기준 (엑셀 피벗 Rows 영역)
         function revFmtNum(n) { return Number(n).toLocaleString('ko-KR'); }        // 안쪽 셀: 숫자만
         function revFmtWon(n) { return Number(n).toLocaleString('ko-KR') + '원'; } // 합계 라인: 원
         function revProd(r) { return r.label || r.category; }
+        function revFmtQuarter(q) { var m = /^(\\d{4})-Q([1-4])$/.exec(q); return m ? m[1] + '년 ' + m[2] + '분기' : q; }
+        function revDimRaw(d, r) { return d === 'quarter' ? r.quarter : (d === 'broker' ? r.broker : revProd(r)); }
+        function revDimDisp(d, val) { return d === 'quarter' ? revFmtQuarter(val) : val; }
+        function revDimHead(d) { return d === 'quarter' ? '분기' : (d === 'broker' ? '증권사' : '상품'); }
+        function revDimSort(d, val) { return d === 'broker' ? REV_BROKER_ORDER.indexOf(val) : val; }
         // 레코드 목록 → 카테고리별 합계 {개방형, 목표전환형, _total}
         function revCatVals(list) {
             var o = {}, tot = 0;
@@ -5395,70 +5406,72 @@ def create_fee_revenue_section():
             });
             o._total = tot; return o;
         }
-        function revRender(view) {
-            document.querySelectorAll('.rev-viewbtn[data-rev-view]').forEach(function(el) {
-                el.classList.toggle('active', el.getAttribute('data-rev-view') === view);
-            });
+        // 버튼 클릭: 활성 기준에 없으면 끝에 추가(클릭 순서), 있으면 해제(최소 1개 유지)
+        function revToggleDim(d) {
+            var i = revActiveDims.indexOf(d);
+            if (i === -1) { revActiveDims.push(d); }
+            else if (revActiveDims.length > 1) { revActiveDims.splice(i, 1); }
+            revRender();
+        }
+        function revRender() {
+            var dims = revActiveDims;
             var recs = FEE_REVENUE.records;
-            // 선택 기준으로 묶을 키(gkey)와 표시(gdisp) 정의
-            function gkey(r) {
-                if (view === 'quarter') return r.quarter;
-                if (view === 'broker') return r.broker;
-                return r.broker + ' ' + revProd(r);
-            }
-            function gdisp(k) { if (view !== 'quarter') return k; var m = /^(\\d{4})-Q([1-4])$/.exec(k); return m ? m[1] + '년 ' + m[2] + '분기' : k; }
-            // 기준값 순서 결정
-            var keys = [];
-            if (view === 'broker') {
-                keys = REV_BROKER_ORDER.filter(function(b) {
-                    return recs.some(function(r) { return r.broker === b; });
-                });
-            } else if (view === 'quarter') {
-                recs.map(function(r) { return r.quarter; })
-                    .filter(function(v, i, a) { return a.indexOf(v) === i; }).sort()
-                    .forEach(function(q) { keys.push(q); });
-            } else {
-                recs.slice().sort(function(a, b) {
-                    return (REV_CATS.indexOf(a.category) - REV_CATS.indexOf(b.category)) ||
-                           (REV_BROKER_ORDER.indexOf(a.broker) - REV_BROKER_ORDER.indexOf(b.broker)) ||
-                           ((revProd(a) < revProd(b)) ? -1 : (revProd(a) > revProd(b) ? 1 : 0));
-                }).forEach(function(r) { var k = gkey(r); if (keys.indexOf(k) === -1) keys.push(k); });
-            }
-            // 상품별 뷰에서만 개시일/종료일 칼럼 추가 (목표전환형 오른쪽).
-            var withDates = view === 'product';
-            // 행: 기준값별 카테고리 합계 (+ 상품별은 개시일/종료일) + 행합계
-            var body = keys.map(function(k) {
-                var grp = recs.filter(function(r) { return gkey(r) === k; });
-                var v = revCatVals(grp);
-                var cells = '<td class="rev-key">' + gdisp(k) + '</td>' +
+            var withDates = dims.indexOf('product') !== -1;
+            // 복합키(클릭 순서)로 그룹화
+            var groups = {}, order = [];
+            recs.forEach(function(r) {
+                var keyArr = dims.map(function(d) { return revDimRaw(d, r); });
+                var kk = keyArr.join('|#|');
+                if (!groups[kk]) { groups[kk] = { keyArr: keyArr, recs: [] }; order.push(kk); }
+                groups[kk].recs.push(r);
+            });
+            var rows = order.map(function(kk) { return groups[kk]; });
+            rows.sort(function(a, b) {
+                for (var i = 0; i < dims.length; i++) {
+                    var sa = revDimSort(dims[i], a.keyArr[i]), sb = revDimSort(dims[i], b.keyArr[i]);
+                    if (sa < sb) return -1; if (sa > sb) return 1;
+                }
+                return 0;
+            });
+            // 본문
+            var body = rows.map(function(g) {
+                var v = revCatVals(g.recs);
+                var cells = dims.map(function(d, i) { return '<td class="rev-key">' + revDimDisp(d, g.keyArr[i]) + '</td>'; }).join('') +
                     REV_CATS.map(function(c) { return '<td class="rev-amt">' + (v[c] ? revFmtNum(v[c]) : '-') + '</td>'; }).join('');
                 if (withDates) {
-                    var r0 = grp[0] || {};
-                    cells += '<td class="rev-date">' + (r0.start || '') + '</td>' +
-                             '<td class="rev-date">' + (r0.end || '') + '</td>';
+                    var ss = g.recs.map(function(r) { return r.start || ''; });
+                    var ee = g.recs.map(function(r) { return r.end || ''; });
+                    var s0 = ss.every(function(x) { return x === ss[0]; }) ? ss[0] : '';
+                    var e0 = ee.every(function(x) { return x === ee[0]; }) ? ee[0] : '';
+                    cells += '<td class="rev-date">' + s0 + '</td><td class="rev-date">' + e0 + '</td>';
                 }
                 cells += '<td class="rev-amt rev-rowtot">' + revFmtNum(v._total) + '</td>';
                 return '<tr>' + cells + '</tr>';
             }).join('');
-            // 합계 행 (개시일/종료일 칸은 공란)
+            // 합계 행 (기준 칼럼들 병합, 개시일/종료일 칸 공란)
             var grand = revCatVals(recs);
-            var totalCells = '<td class="rev-key">합계</td>' +
+            var totalCells = '<td class="rev-key" colspan="' + dims.length + '">합계</td>' +
                 REV_CATS.map(function(c) { return '<td class="rev-amt">' + revFmtWon(grand[c]) + '</td>'; }).join('');
             if (withDates) { totalCells += '<td class="rev-date"></td><td class="rev-date"></td>'; }
             totalCells += '<td class="rev-amt">' + revFmtWon(grand._total) + '</td>';
             body += '<tr class="fee-row-total">' + totalCells + '</tr>';
-            // 첫 열 머리 셀에 기준 선택 버튼을 편입 (엑셀 헤더에서 기준 고르듯)
-            var btns = [['quarter', '분기'], ['broker', '증권사'], ['product', '상품']].map(function(b) {
-                return '<button class="rev-viewbtn' + (b[0] === view ? ' active' : '') +
-                    '" data-rev-view="' + b[0] + '" onclick="revRender(this.dataset.revView)">' + b[1] + '</button>';
+            // 헤더: 첫 기준 칼럼 머리 셀에 버튼 편입. 활성 기준은 클릭 순서 번호 표시.
+            var btns = REV_DIMS.map(function(b) {
+                var idx = revActiveDims.indexOf(b[0]);
+                var sty = idx !== -1 ? ' style="background:' + REV_ORD_SHADES[Math.min(idx, REV_ORD_SHADES.length - 1)] + ';color:#fff;"' : '';
+                return '<button class="rev-viewbtn' + (idx !== -1 ? ' active' : '') +
+                    '" data-rev-view="' + b[0] + '"' + sty + ' onclick="revToggleDim(this.dataset.revView)">' + b[1] + '</button>';
+            }).join('');
+            var dimHeads = dims.map(function(d, i) {
+                return i === 0 ? '<th class="rev-headcell"><div class="rev-views">' + btns + '</div></th>'
+                               : '<th>' + revDimHead(d) + '</th>';
             }).join('');
             var dateHeads = withDates ? '<th>개시일</th><th>종료일</th>' : '';
-            var head = '<tr><th class="rev-headcell"><div class="rev-views">' + btns + '</div></th>' +
-                REV_CATS.map(function(c) { return '<th>' + c + '</th>'; }).join('') + dateHeads + '<th>합계</th></tr>';
+            var head = '<tr>' + dimHeads + REV_CATS.map(function(c) { return '<th>' + c + '</th>'; }).join('') + dateHeads + '<th>합계</th></tr>';
             document.getElementById('revTableHost').innerHTML =
                 '<table class="fee-table rev-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>';
         }
-        revRender('quarter');
+        revRender();
         </script>
     """.replace('__PAYLOAD__', payload)
 
