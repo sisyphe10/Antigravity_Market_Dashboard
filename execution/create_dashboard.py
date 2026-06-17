@@ -5318,6 +5318,140 @@ def create_fee_section():
     """
 
 
+# ── 매출 탭 (실제 발생 수수료 = 자문사 몫 정산 금액) ──────────────────────
+def load_fee_revenue(path='fee_revenue.json'):
+    """매출(실제 발생 수수료, 자문사 몫) 데이터 로드. 없으면 빈 구조."""
+    try:
+        with open(path, encoding='utf-8') as f:
+            data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {'updated': '', 'records': []}
+    data.setdefault('records', [])
+    return data
+
+
+def _fmt_won(won):
+    """원 단위 정수 표기: '42,768,106원'."""
+    return f"{int(round(won)):,}원"
+
+
+def _fmt_eok_man(won):
+    """원 → 'N억 N,NNN만원' (억 미만은 만원). 매출 요약용 가독 표기."""
+    won = int(round(won))
+    eok, rem = divmod(won, 10**8)
+    man = round(rem / 10**4)
+    if eok > 0:
+        return f"{eok}억 {man:,}만원" if man else f"{eok}억원"
+    return f"{man:,}만원"
+
+
+_REV_CAT_ORDER = ['개방형', '목표전환형']
+_REV_BROKER_ORDER = ['삼성', 'NH', 'DB', '한투']
+
+
+def create_fee_revenue_section():
+    """매출 탭 — 실제 정산 수수료(자문사 몫)를 분기별/증권사별/상품별로 집계."""
+    data = load_fee_revenue()
+    records = [r for r in data.get('records', []) if isinstance(r.get('amount'), (int, float))]
+    updated = data.get('updated', '')
+
+    if not records:
+        return ('<div class="fee-wrapper"><p class="rev-empty">아직 입력된 매출 데이터가 없습니다.<br>'
+                '<code>python add_fee_revenue.py</code> 로 실제 정산 금액을 입력하세요.</p></div>')
+
+    total = sum(r['amount'] for r in records)
+    payload = json.dumps({'records': records, 'updated': updated}, ensure_ascii=False)
+    updated_html = f'<span class="rev-updated">기준일 {updated}</span>' if updated else ''
+
+    # 상단: 누적 총매출 카드 + 정렬 버튼(분기별/증권사별/상품별) + 단일 평면 테이블.
+    # 모든 레코드를 한 테이블에 펼쳐두고, 버튼을 누르면 JS(revRender)가 그 기준으로 정렬한다.
+    head_html = f"""
+        <div class="fee-wrapper rev-wrapper">
+            <div class="rev-summary">
+                <div class="rev-sum-label">누적 총매출</div>
+                <div class="rev-sum-value" title="{_fmt_won(total)}">{_fmt_eok_man(total)}</div>
+                {updated_html}
+            </div>
+            <div class="table-container"><div id="revTableHost"></div></div>
+            <p class="fee-note">자문사(라이프) 몫 실제 정산 수수료 기준. 단위: 원. 목표전환형은 회차 청산 시 실현 기준.</p>
+        </div>
+    """
+
+    script = """
+        <script>
+        var FEE_REVENUE = __PAYLOAD__;
+        var REV_CATS = ['개방형', '목표전환형'];
+        var REV_BROKER_ORDER = ['삼성', 'NH', 'DB', '한투'];
+        function revFmtWon(n) { return Number(n).toLocaleString('ko-KR') + '원'; }
+        function revProd(r) { return r.label || r.category; }
+        // 레코드 목록 → 카테고리별 합계 {개방형, 목표전환형, _total}
+        function revCatVals(list) {
+            var o = {}, tot = 0;
+            REV_CATS.forEach(function(c) {
+                var v = list.filter(function(r) { return r.category === c; })
+                            .reduce(function(s, r) { return s + r.amount; }, 0);
+                o[c] = v; tot += v;
+            });
+            o._total = tot; return o;
+        }
+        function revRender(view) {
+            document.querySelectorAll('.rev-viewbtn[data-rev-view]').forEach(function(el) {
+                el.classList.toggle('active', el.getAttribute('data-rev-view') === view);
+            });
+            var recs = FEE_REVENUE.records;
+            // 선택 기준으로 묶을 키(gkey)와 표시(gdisp) 정의
+            function gkey(r) {
+                if (view === 'quarter') return r.quarter;
+                if (view === 'broker') return r.broker;
+                return r.broker + ' ' + revProd(r);
+            }
+            function gdisp(k) { return view === 'quarter' ? k.replace('-', ' ') : k; }
+            // 기준값 순서 결정
+            var keys = [];
+            if (view === 'broker') {
+                keys = REV_BROKER_ORDER.filter(function(b) {
+                    return recs.some(function(r) { return r.broker === b; });
+                });
+            } else if (view === 'quarter') {
+                recs.map(function(r) { return r.quarter; })
+                    .filter(function(v, i, a) { return a.indexOf(v) === i; }).sort()
+                    .forEach(function(q) { keys.push(q); });
+            } else {
+                recs.slice().sort(function(a, b) {
+                    return (REV_CATS.indexOf(a.category) - REV_CATS.indexOf(b.category)) ||
+                           (REV_BROKER_ORDER.indexOf(a.broker) - REV_BROKER_ORDER.indexOf(b.broker)) ||
+                           ((revProd(a) < revProd(b)) ? -1 : (revProd(a) > revProd(b) ? 1 : 0));
+                }).forEach(function(r) { var k = gkey(r); if (keys.indexOf(k) === -1) keys.push(k); });
+            }
+            // 행: 기준값별 카테고리 합계 + 행합계
+            var body = keys.map(function(k) {
+                var v = revCatVals(recs.filter(function(r) { return gkey(r) === k; }));
+                return '<tr><td class="rev-key">' + gdisp(k) + '</td>' +
+                    REV_CATS.map(function(c) { return '<td class="rev-amt">' + (v[c] ? revFmtWon(v[c]) : '-') + '</td>'; }).join('') +
+                    '<td class="rev-amt rev-rowtot">' + revFmtWon(v._total) + '</td></tr>';
+            }).join('');
+            // 합계 행
+            var grand = revCatVals(recs);
+            body += '<tr class="fee-row-total"><td class="rev-key">합계</td>' +
+                REV_CATS.map(function(c) { return '<td class="rev-amt">' + revFmtWon(grand[c]) + '</td>'; }).join('') +
+                '<td class="rev-amt">' + revFmtWon(grand._total) + '</td></tr>';
+            // 첫 열 머리 셀에 기준 선택 버튼을 편입 (엑셀 헤더에서 기준 고르듯)
+            var btns = [['quarter', '분기별'], ['broker', '증권사별'], ['product', '상품별']].map(function(b) {
+                return '<button class="rev-viewbtn' + (b[0] === view ? ' active' : '') +
+                    '" data-rev-view="' + b[0] + '" onclick="revRender(this.dataset.revView)">' + b[1] + '</button>';
+            }).join('');
+            var head = '<tr><th class="rev-headcell"><div class="rev-views">' + btns + '</div></th>' +
+                REV_CATS.map(function(c) { return '<th>' + c + '</th>'; }).join('') + '<th>합계</th></tr>';
+            document.getElementById('revTableHost').innerHTML =
+                '<table class="fee-table rev-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>';
+        }
+        revRender('quarter');
+        </script>
+    """.replace('__PAYLOAD__', payload)
+
+    return head_html + script
+
+
 def _fmt_jo_eok(won):
     """원 단위 금액 -> 'NN조 N,NNN억원' 표기 (사용자 금액 표기 규칙)."""
     eok = int(round(won / 1e8))
@@ -6386,7 +6520,16 @@ def create_dashboard():
     # ── Generate wrap.html (WRAP + Portfolio + Sector + 공시/Order/AUM tabs) ──
     order_html = create_order_section()
     aum_html = create_aum_section()
-    fee_html = create_fee_section()
+    fee_rate_html = create_fee_section()
+    fee_revenue_html = create_fee_revenue_section()
+    fee_html = f"""
+        <div class="fee-subtabs">
+            <button class="fee-subtab active" data-fee-sub="rate" onclick="feeSwitchSub('rate')">수수료율</button>
+            <button class="fee-subtab" data-fee-sub="revenue" onclick="feeSwitchSub('revenue')">매출</button>
+        </div>
+        <div id="feeSubRate">{fee_rate_html}</div>
+        <div id="feeSubRevenue" style="display:none;">{fee_revenue_html}</div>
+    """
     disclosures_html = create_disclosures_section()
     wrap_page = f"""<!DOCTYPE html>
 <html lang="en">
@@ -6523,6 +6666,28 @@ def create_dashboard():
         .fee-tip-box .tip-list ul {{ margin: 5px 0 0 0; padding-left: 1.4em; list-style-type: circle; }}
         .fee-tip-box .tip-list li {{ margin: 3px 0; }}
         .fee-note {{ margin: 16px 0 0 0; font-size: 0.85rem; color: #888; }}
+        /* Fee sub-tabs (수수료율 / 매출) */
+        .fee-subtabs {{ display: flex; justify-content: center; gap: 8px; margin: 0 auto 20px auto; max-width: 900px; }}
+        .fee-subtab {{ padding: 9px 26px; border: 1.5px solid #d1d5db; background: #fff; border-radius: 999px; font-size: 0.92rem; font-weight: 600; color: #666; cursor: pointer; font-family: inherit; transition: all 0.15s; }}
+        .fee-subtab:hover {{ color: #1e40af; border-color: #1e40af; }}
+        .fee-subtab.active {{ color: #fff; background: #1e40af; border-color: #1e40af; }}
+        /* 매출 (revenue) */
+        .rev-empty {{ text-align: center; color: #888; padding: 40px 12px; line-height: 1.8; }}
+        .rev-empty code {{ background: #f1f3f5; padding: 2px 7px; border-radius: 5px; font-size: 0.9em; color: #1e40af; }}
+        .rev-summary {{ text-align: center; padding: 18px 12px 6px 12px; }}
+        .rev-sum-label {{ font-size: 0.95rem; color: #111; font-weight: 600; }}
+        .rev-sum-value {{ font-size: 1.5rem; font-weight: 700; color: #111; margin-top: 4px; font-variant-numeric: tabular-nums; }}
+        .rev-updated {{ display: block; margin-top: 6px; font-size: 0.78rem; color: #aaa; }}
+        .rev-headcell {{ padding: 7px 10px !important; }}
+        .rev-views {{ display: inline-flex; gap: 5px; margin: 0; background: #fff; padding: 3px; border-radius: 999px; box-shadow: inset 0 0 0 1px #d8dde3; }}
+        .rev-viewbtn {{ padding: 5px 14px; border: none; background: transparent; border-radius: 999px; font-size: 0.82rem; font-weight: 600; color: #555; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }}
+        .rev-viewbtn:hover {{ color: #1e40af; }}
+        .rev-viewbtn.active {{ color: #fff; background: #1e40af; }}
+        .rev-table {{ margin: 0 auto; }}
+        .rev-table td, .rev-table th {{ white-space: nowrap; text-align: center !important; }}
+        .rev-key {{ font-weight: 600; color: #111; }}
+        .rev-amt {{ font-variant-numeric: tabular-nums; }}
+        .rev-rowtot {{ font-weight: 600; color: #111; }}
         /* Password overlay */
         .pw-overlay {{
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -6646,6 +6811,17 @@ def create_dashboard():
         if (tab === 'disclosures' && typeof loadDisclosures === 'function') loadDisclosures();
         if (tab === 'order' && typeof loadOrder === 'function') loadOrder();
         if (tab === 'aum' && typeof loadAUM === 'function') loadAUM();
+    }}
+
+    // 수수료 탭 내부 서브탭 (수수료율 / 매출)
+    function feeSwitchSub(which) {{
+        document.querySelectorAll('.fee-subtab[data-fee-sub]').forEach(function(el) {{
+            el.classList.toggle('active', el.getAttribute('data-fee-sub') === which);
+        }});
+        var rate = document.getElementById('feeSubRate');
+        var rev = document.getElementById('feeSubRevenue');
+        if (rate) rate.style.display = which === 'rate' ? 'block' : 'none';
+        if (rev) rev.style.display = which === 'revenue' ? 'block' : 'none';
     }}
 
     // 상단 네비 WRAP 드롭다운 / 타 페이지에서 wrap.html#tab 진입 시 해당 탭으로 전환

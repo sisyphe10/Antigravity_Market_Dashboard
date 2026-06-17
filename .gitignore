@@ -53,6 +53,7 @@ charts/*
 
 # JSON (워크플로우에서 커밋하는 파일)
 !portfolio_data.json
+!fee_revenue.json
 !kodex_sectors.json
 !featured_data.json
 !seibro_tickers.json

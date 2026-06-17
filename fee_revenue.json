@@ -1,0 +1,13 @@
+{
+  "updated": "2026-06-17",
+  "note": "자문사(라이프) 몫 실제 정산 수수료 매출. 단위: 원. 목표전환형은 회차 청산 시 실현 기준(분기 귀속 확인 필요).",
+  "records": [
+    {"quarter": "2026-Q1", "broker": "삼성", "category": "개방형", "amount": 42768106},
+    {"quarter": "2026-Q1", "broker": "NH", "category": "개방형", "amount": 21184926},
+    {"quarter": "2026-Q1", "broker": "DB", "category": "개방형", "amount": 33149819},
+    {"quarter": "2026-Q1", "broker": "DB", "category": "목표전환형", "label": "목표전환형 1차", "amount": 14561210},
+    {"quarter": "2026-Q2", "broker": "DB", "category": "목표전환형", "label": "목표전환형 2차", "amount": 15709514},
+    {"quarter": "2026-Q2", "broker": "DB", "category": "목표전환형", "label": "목표전환형 3차", "amount": 22371014},
+    {"quarter": "2026-Q2", "broker": "DB", "category": "목표전환형", "label": "목표전환형 4차", "amount": 42750286}
+  ]
+}
