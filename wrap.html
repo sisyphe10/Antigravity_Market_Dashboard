@@ -240,7 +240,7 @@
     <aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="#" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="sidebar-link active">Dashboard</a><a href="#" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="sidebar-link">공시</a><a href="#" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="sidebar-link">Order</a><a href="#" onclick="wrapSwitchTab('aum');return false;" data-wrap-tab="aum" class="sidebar-link">AUM</a><a href="#" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="sidebar-link">수수료</a></aside>
     <header>
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-06-17 17:12:35 KST</div>
+        <div class="last-updated">Updated: 2026-06-17 17:22:02 KST</div>
     </header>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -350,6 +350,11 @@
                     });
                 });
 
+                // x축 라벨 = 선택된 모든 시리즈 날짜의 합집합(정렬). 시리즈마다 개시일이 달라도
+                // x축을 더 긴 범위(가장 이른 개시일~)로 통일 — 각 시리즈는 자기 날짜에만 점이 찍힘.
+                // (labels 미지정 시 category축이 시리즈별 다른 날짜셋을 잘못 매핑 → "누운 V자" 버그)
+                var allDates = Array.from(new Set(perSeries.reduce(function(a, s){ return a.concat(s.dates); }, []))).sort();
+
                 // 선 끝에 수익률 라벨을 그리는 커스텀 플러그인
                 var endLabelPlugin = {
                     id: 'endLabels',
@@ -388,7 +393,7 @@
                 if (wrapChart) wrapChart.destroy();
                 wrapChart = new Chart(document.getElementById('wrapDynamicChart'), {
                     type: 'line',
-                    data: { datasets: datasets },
+                    data: { labels: allDates, datasets: datasets },
                     plugins: [endLabelPlugin],
                     options: {
                         responsive: true, maintainAspectRatio: false,
@@ -743,7 +748,7 @@
                                 <td>005930</td>
                                 <td>삼성전자</td>
                                 <td>반도체</td>
-                                <td>1,965조8,111억</td>
+                                <td>2,025조7,355억</td>
                                 <td>30%</td>
                                 <td class="positive">+1.0%</td>
                                 <td class="positive">+3.1</td>
@@ -759,7 +764,7 @@
                                 <td>000660</td>
                                 <td>SK하이닉스</td>
                                 <td>반도체</td>
-                                <td>1,716조8,999억</td>
+                                <td>1,796조7,226억</td>
                                 <td>25%</td>
                                 <td class="positive">+5.8%</td>
                                 <td class="positive">+14.6</td>
@@ -775,7 +780,7 @@
                                 <td>000150</td>
                                 <td>두산</td>
                                 <td>상사,자본재</td>
-                                <td>26조3,959억</td>
+                                <td>26조2,987억</td>
                                 <td>5%</td>
                                 <td class="negative">-4.4%</td>
                                 <td class="negative">-2.2</td>
@@ -791,7 +796,7 @@
                                 <td>032830</td>
                                 <td>삼성생명</td>
                                 <td>보험</td>
-                                <td>87조4,000억</td>
+                                <td>89조4,000억</td>
                                 <td>5%</td>
                                 <td class="positive">+3.7%</td>
                                 <td class="positive">+1.9</td>
@@ -807,7 +812,7 @@
                                 <td>402340</td>
                                 <td>SK스퀘어</td>
                                 <td>상사,자본재</td>
-                                <td>208조4,942억</td>
+                                <td>210조6,055억</td>
                                 <td>5%</td>
                                 <td class="positive">+6.3%</td>
                                 <td class="positive">+3.2</td>
@@ -823,7 +828,7 @@
                                 <td>035420</td>
                                 <td>NAVER</td>
                                 <td>소프트웨어</td>
-                                <td>38조4,374억</td>
+                                <td>38조2,021억</td>
                                 <td>5%</td>
                                 <td class="positive">+0.6%</td>
                                 <td class="positive">+0.3</td>
@@ -839,7 +844,7 @@
                                 <td>009150</td>
                                 <td>삼성전기</td>
                                 <td>IT하드웨어</td>
-                                <td>150조1,343억</td>
+                                <td>151조7,775억</td>
                                 <td>3%</td>
                                 <td class="negative">-0.8%</td>
                                 <td class="negative">-0.2</td>
@@ -855,7 +860,7 @@
                                 <td>007810</td>
                                 <td>코리아써키트</td>
                                 <td>IT하드웨어</td>
-                                <td>3조2,928억</td>
+                                <td>3조4,031억</td>
                                 <td>3%</td>
                                 <td class="positive">+7.6%</td>
                                 <td class="positive">+2.3</td>
@@ -871,7 +876,7 @@
                                 <td>034020</td>
                                 <td>두산에너빌리티</td>
                                 <td>기계</td>
-                                <td>66조6,824억</td>
+                                <td>66조1,059억</td>
                                 <td>2%</td>
                                 <td class="negative">-0.1%</td>
                                 <td class="negative">-0.0</td>
@@ -887,7 +892,7 @@
                                 <td>042660</td>
                                 <td>한화오션</td>
                                 <td>조선</td>
-                                <td>42조4,995억</td>
+                                <td>40조7,836억</td>
                                 <td>2%</td>
                                 <td class="positive">+3.0%</td>
                                 <td class="positive">+0.6</td>
@@ -903,7 +908,7 @@
                                 <td>007660</td>
                                 <td>이수페타시스</td>
                                 <td>IT하드웨어</td>
-                                <td>9조1,688억</td>
+                                <td>9조1,027억</td>
                                 <td>2%</td>
                                 <td class="positive">+0.8%</td>
                                 <td class="positive">+0.2</td>
@@ -919,7 +924,7 @@
                                 <td>295310</td>
                                 <td>에이치브이엠</td>
                                 <td>비철,목재등</td>
-                                <td>9,874억</td>
+                                <td>9,826억</td>
                                 <td>2%</td>
                                 <td class="negative">-6.9%</td>
                                 <td class="negative">-1.4</td>
@@ -935,7 +940,7 @@
                                 <td>003230</td>
                                 <td>삼양식품</td>
                                 <td>필수소비재</td>
-                                <td>8조9,266억</td>
+                                <td>8조6,253억</td>
                                 <td>2%</td>
                                 <td class="positive">+0.2%</td>
                                 <td class="positive">+0.0</td>
@@ -951,7 +956,7 @@
                                 <td>067310</td>
                                 <td>하나마이크론</td>
                                 <td>반도체</td>
-                                <td>3조3,630억</td>
+                                <td>3조3,697억</td>
                                 <td>2%</td>
                                 <td class="positive">+1.2%</td>
                                 <td class="positive">+0.2</td>
@@ -967,7 +972,7 @@
                                 <td>020000</td>
                                 <td>한섬</td>
                                 <td>화장품,의류,완구</td>
-                                <td>4,681억</td>
+                                <td>4,703억</td>
                                 <td>2%</td>
                                 <td class="negative">-3.5%</td>
                                 <td class="negative">-0.7</td>
@@ -1025,7 +1030,7 @@
                                 <td>005930</td>
                                 <td>삼성전자</td>
                                 <td>반도체</td>
-                                <td>1,965조8,111억</td>
+                                <td>2,025조7,355억</td>
                                 <td>25%</td>
                                 <td class="positive">+1.0%</td>
                                 <td class="positive">+2.6</td>
@@ -1041,7 +1046,7 @@
                                 <td>000660</td>
                                 <td>SK하이닉스</td>
                                 <td>반도체</td>
-                                <td>1,716조8,999억</td>
+                                <td>1,796조7,226억</td>
                                 <td>25%</td>
                                 <td class="positive">+5.8%</td>
                                 <td class="positive">+14.6</td>
@@ -1057,7 +1062,7 @@
                                 <td>035420</td>
                                 <td>NAVER</td>
                                 <td>소프트웨어</td>
-                                <td>38조4,374억</td>
+                                <td>38조2,021억</td>
                                 <td>10%</td>
                                 <td class="positive">+0.6%</td>
                                 <td class="positive">+0.6</td>
@@ -1073,7 +1078,7 @@
                                 <td>009150</td>
                                 <td>삼성전기</td>
                                 <td>IT하드웨어</td>
-                                <td>150조1,343억</td>
+                                <td>151조7,775억</td>
                                 <td>5%</td>
                                 <td class="negative">-0.8%</td>
                                 <td class="negative">-0.4</td>
@@ -1089,7 +1094,7 @@
                                 <td>141080</td>
                                 <td>리가켐바이오</td>
                                 <td>건강관리</td>
-                                <td>5조5,751억</td>
+                                <td>5조4,085억</td>
                                 <td>5%</td>
                                 <td class="positive">+4.6%</td>
                                 <td class="positive">+2.3</td>
