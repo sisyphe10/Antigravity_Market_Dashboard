@@ -2592,27 +2592,13 @@ def _build_wrap_chart_section(category_label):
                     perSeries.push({ name: name, dates: filteredDates, vals: filteredVals });
                 });
 
-                // Pass 2: % return 모드일 때 공통 시작일 산출 (가장 늦은 첫 데이터 일자)
-                // 신규 시리즈(예: DB 개방형 inception 2024-05-16)와 장기 벤치마크(KOSPI 등)를 비교 가능하도록
-                // 모든 시리즈를 같은 0% 기준점에서 시작시킨다. MDD는 시리즈별 독립 유지.
-                var commonStart = '';
-                if (chartMode === 'return') {
-                    perSeries.forEach(function(s) {
-                        if (s.dates[0] > commonStart) commonStart = s.dates[0];
-                    });
-                }
-
-                // Pass 3: dataset 빌드 (공통 base 적용)
+                // Pass 3: dataset 빌드 — % return 모드는 각 시리즈를 '자기 개시일' 기준 0%로 표시한다.
+                // (공통 시작점 정규화 안 함: 여러 시리즈를 함께 선택해도 각자 자기 개시일부터의 수익률을
+                //  그대로 보여준다. 예: DB 5차 6/12개시·NH 4호 6/15개시를 함께 켜도 각자 개시일 기준. MDD도 독립.)
                 var datasets = [];
                 perSeries.forEach(function(s) {
-                    var sliceIdx = 0;
-                    if (chartMode === 'return' && commonStart) {
-                        for (var i = 0; i < s.dates.length; i++) {
-                            if (s.dates[i] >= commonStart) { sliceIdx = i; break; }
-                        }
-                    }
-                    var d_arr = s.dates.slice(sliceIdx);
-                    var v_arr = s.vals.slice(sliceIdx);
+                    var d_arr = s.dates;
+                    var v_arr = s.vals;
                     if (v_arr.length === 0) return;
 
                     var data;
