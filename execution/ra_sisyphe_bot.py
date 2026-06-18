@@ -672,17 +672,6 @@ def build_market_alert_message(stocks_위험, stocks_경고, stocks_주의,
     """3블록(신규/탈출임박/전체현황) 메시지 라인 리스트 생성. 드라이런/잡 공용."""
     esc = _html.escape
 
-    def fmt_line(s):
-        name = esc(s['name'])
-        mcap = esc(fmt_marcap(s['marcap']))
-        line = f"• {name} / {mcap}"
-        if s.get('warn_type') == '투자경고 지정예고':
-            line = f"<u>{line}</u>"
-        return line
-
-    def tagged_line(s):
-        return f"{fmt_line(s)} {_CAT_TAG[s['_cat']]}"
-
     # 카테고리 태그 부여 + 신규여부 마킹
     for s in stocks_위험:
         s['_cat'] = '위험'
@@ -730,25 +719,33 @@ def build_market_alert_message(stocks_위험, stocks_경고, stocks_주의,
                     and current_price <= target_price and not is_15d_high)
         if not price_ok:
             continue
-        when = "판단일 도달" if left == 0 else f"D-{left}"
+        when = f"D-{left}"  # left==0이면 'D-0' (이전 '판단일 도달' 대체)
         date_k = ''
         if 판단일 and 판단일 != '-':
             try:
                 _y, _m, _d = 판단일.split('-')
-                date_k = f"{int(_m)}월 {int(_d)}일"
+                _wd = '월화수목금토일'[datetime.date(int(_y), int(_m), int(_d)).weekday()]
+                date_k = f"{int(_m)}월 {int(_d)}일({_wd})"
             except Exception:
                 date_k = 판단일
         imminent.append((s, s['_cat'], when, date_k, current_price, target_price, left))
 
     # ── 신규 블록 ──────────────────────────────────────────────
+    # 카테고리(위험→경고→주의) 서브섹션으로 분리, 각 섹션 시총 내림차순.
+    # 개별 종목은 밑줄/인라인태그 없이 '• 종목 / 시총'만(서브헤더로 구분).
     new_stocks = _dedup_by_name([s for s in all_stocks if s['_new']])
-    new_stocks.sort(key=lambda x: (x.get('marcap') or 0), reverse=True)
     new_block = []
     if new_stocks:
         new_block.append("")
-        new_block.append("<b>🆕 신규 등록</b>")
-        for s in new_stocks:
-            new_block.append(tagged_line(s))
+        new_block.append("<b>✨ 신규 등록</b>")
+        for cat_key, header in (('위험', '투자위험'), ('경고', '투자경고'), ('주의', '투자주의')):
+            sub = [s for s in new_stocks if s['_cat'] == cat_key]
+            if not sub:
+                continue
+            sub.sort(key=lambda x: (x.get('marcap') or 0), reverse=True)
+            new_block.append(f"<b><u>[{header}]</u></b>")
+            for s in sub:
+                new_block.append(f"• {esc(s['name'])} / {esc(fmt_marcap(s['marcap']))}")
 
     # ── 탈출임박 블록 (투자경고/위험) ──────────────────────────
     # 헤더 아래 [투자경고]→[투자위험] 서브섹션, 각 섹션은 임박순(left 오름차순, 동률 시총↓).
@@ -760,15 +757,14 @@ def build_market_alert_message(stocks_위험, stocks_경고, stocks_주의,
         imm_block.append("<b>🏃 투자경고/위험 탈출 임박</b>")
 
         from itertools import groupby
-        NB = "⠀"          # 점자공백 — 텔레그램 들여쓰기(일반 공백은 병합됨)
 
         def _stock_line(item):
-            s, _ck, _when, _date_k, cur, tgt, _left = item
-            mark = "🆕 " if s['_new'] else ""
-            parts = [f"{mark}{esc(s['name'])}", esc(fmt_marcap(s['marcap']))]
+            # '날짜(요일) / 종목 / 시총 / 가격조건' 한 줄 (🆕 마커 없음, 들여쓰기 없음).
+            s, _ck, _when, date_k, cur, tgt, _left = item
+            parts = [p for p in (date_k, esc(s['name']), esc(fmt_marcap(s['marcap']))) if p]
             if cur is not None and tgt is not None:
                 parts.append(f"{cur:,}원 ≤ {tgt:,}원")
-            return f"{NB * 2}• " + " / ".join(parts)
+            return " / ".join(parts)
 
         first_sub = True
         for cat_key, header in (('경고', '투자경고'), ('위험', '투자위험')):
@@ -781,11 +777,10 @@ def build_market_alert_message(stocks_위험, stocks_경고, stocks_주의,
                 imm_block.append("")
             first_sub = False
             imm_block.append(f"<b><u>[{header}]</u></b>")
-            # 날짜로 그루핑 — 날짜 헤더(불릿) 아래 종목을 하위 불릿(들여쓰기)으로.
-            for _k, grp in groupby(sub, key=lambda x: (x[6], x[3], x[2])):
-                _left, date_k, when = _k
-                date_label = f"{date_k} ({when})" if date_k else when
-                imm_block.append(f"• <b><u>{date_label}</u></b>")
+            # D-마커(when)로 그루핑 — 'D-n' 헤더(불릿) 아래 '날짜(요일) / 종목...' 한 줄씩.
+            for _k, grp in groupby(sub, key=lambda x: (x[6], x[2])):
+                _left, when = _k
+                imm_block.append(f"• <b><u>{when}</u></b>")
                 for it in grp:
                     imm_block.append(_stock_line(it))
 
