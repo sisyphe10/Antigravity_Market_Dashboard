@@ -9,6 +9,10 @@ import sys
 import os
 import threading
 import atexit
+try:
+    import psutil
+except ImportError:
+    psutil = None
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -32,27 +36,57 @@ logging.basicConfig(
 
 
 # ── 중복 실행 방지 ─────────────────────────────────────
-def check_single_instance():
-    if os.path.exists(PID_FILE):
-        with open(PID_FILE) as f:
-            old_pid = int(f.read().strip())
-        # 기존 PID가 실제로 실행 중인지 확인
+# PID 존재 여부만 보면 (1) 죽은 워처가 비정상 종료해 남긴 stale pid, (2) 그 PID가
+# 다른 프로세스로 재활용된 경우에 "이미 실행 중"으로 오판해 재기동이 막힌다.
+# → PID_FILE을 원자적(O_EXCL) 락으로 쓰고, 충돌 시 그 PID가 *실제로* 살아있는
+#   watch_wrap_nav 파이썬 프로세스인지 psutil로 검증한다(레이스 안전 + stale 자가복구).
+def _pid_is_watcher(pid):
+    """pid가 살아있는 watch_wrap_nav.py 파이썬 프로세스면 True."""
+    if pid == os.getpid():
+        return False
+    if psutil is None:
+        # psutil 없으면 보수적 폴백: 살아있으면 워처로 간주
         try:
             import ctypes
-            handle = ctypes.windll.kernel32.OpenProcess(0x0400, False, old_pid)
-            if handle:
-                ctypes.windll.kernel32.CloseHandle(handle)
-                logging.warning(f"이미 실행 중 (PID {old_pid}). 종료합니다.")
-                sys.exit(0)
+            h = ctypes.windll.kernel32.OpenProcess(0x0400, False, pid)
+            if h:
+                ctypes.windll.kernel32.CloseHandle(h)
+                return True
         except Exception:
-            pass  # PID 확인 실패 시 무시하고 계속 실행
+            pass
+        return False
+    try:
+        p = psutil.Process(pid)
+        if "python" not in (p.name() or "").lower():
+            return False
+        return "watch_wrap_nav" in " ".join(p.cmdline()).lower()
+    except Exception:
+        return False
 
-    # 현재 PID 기록
-    with open(PID_FILE, "w") as f:
-        f.write(str(os.getpid()))
 
-    # 종료 시 PID 파일 삭제
-    atexit.register(lambda: os.remove(PID_FILE) if os.path.exists(PID_FILE) else None)
+def check_single_instance():
+    for _ in range(5):
+        try:
+            fd = os.open(PID_FILE, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            os.write(fd, str(os.getpid()).encode())
+            os.close(fd)
+            atexit.register(lambda: os.remove(PID_FILE) if os.path.exists(PID_FILE) else None)
+            return
+        except FileExistsError:
+            try:
+                owner = int(open(PID_FILE).read().strip())
+            except (ValueError, OSError):
+                owner = None
+            if owner is not None and _pid_is_watcher(owner):
+                logging.warning(f"이미 실행 중인 워처 (PID {owner}). 종료합니다.")
+                sys.exit(0)
+            logging.warning(f"stale/foreign pid 파일 (owner={owner}) 제거 후 재시도")
+            try:
+                os.remove(PID_FILE)
+            except OSError:
+                pass
+    logging.error("single-instance 락 획득 실패 — 종료")
+    sys.exit(1)
 
 
 # ── git push ───────────────────────────────────────────
@@ -93,6 +127,13 @@ class WrapNavHandler(FileSystemEventHandler):
 
 
 # ── 메인 ──────────────────────────────────────────────
+def _make_observer(handler):
+    obs = Observer()
+    obs.schedule(handler, path=REPO_DIR, recursive=False)
+    obs.start()
+    return obs
+
+
 if __name__ == "__main__":
     check_single_instance()
 
@@ -102,13 +143,22 @@ if __name__ == "__main__":
     logging.info(f"디바운스: {DEBOUNCE_SECONDS}초, push 정책: local_safe_push sync_and_push (전용 clone, merge-only)")
 
     handler = WrapNavHandler()
-    observer = Observer()
-    observer.schedule(handler, path=REPO_DIR, recursive=False)
-    observer.start()
+    observer = _make_observer(handler)
 
+    # 절전/재개로 Observer 스레드만 죽고 프로세스는 살아있는 좀비 상태가 되면
+    # 파일 변경을 더 이상 감지하지 못한다 → is_alive() 확인 후 자동 재시작.
     try:
         while True:
-            time.sleep(1)
+            time.sleep(5)
+            if not observer.is_alive():
+                logging.warning("Observer 스레드 death 감지 → 재시작 (절전/재개 추정)")
+                try:
+                    observer.stop()
+                    observer.join(timeout=5)
+                except Exception as e:
+                    logging.warning(f"기존 observer 정리 중 예외 무시: {e}")
+                observer = _make_observer(handler)
+                logging.info("Observer 재시작 완료")
     except KeyboardInterrupt:
         observer.stop()
         logging.info("감시 종료")

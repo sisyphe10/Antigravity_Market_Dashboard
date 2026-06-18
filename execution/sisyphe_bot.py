@@ -1285,12 +1285,17 @@ async def daily_calendar_job(context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logging.error(f"Daily calendar job error: {e}")
 
-    # 하이라이트 일정 D-Day 알림
-    await check_dday_alerts(context)
+    # 하이라이트 일정 D-Day 알림 → 선유듀오봇(@SeonyuDuo_bot)으로 이관(MOVE).
+    # 가족 생일/명절·'D-day |' 사전 알림은 이제 seonyuduo_exercise_bot.py 06:00 다이제스트가
+    # 부부 그룹챗으로 발송한다. Sisyphe 개인봇에서는 중복 발송을 막기 위해 호출하지 않음.
+    # (아래 check_dday_alerts는 이력 보존용으로 남겨두되 호출하지 않으며, 호출돼도 즉시 반환)
 
 
 async def check_dday_alerts(context):
-    """하이라이트 일정 한 달 전/일주일 전/하루 전 알림"""
+    """[DEPRECATED] 하이라이트 일정 D-Day 알림 — 선유듀오봇으로 이관됨.
+    seonyuduo_exercise_bot.py 의 _collect_dday_highlights_sync / _send_dday_alerts 가 대체.
+    중복 발송 방지를 위해 즉시 반환한다. (로직은 이력 참조용으로 보존)"""
+    return
     if not SUBSCRIBERS:
         return
 
@@ -2967,7 +2972,7 @@ if __name__ == '__main__':
     job_queue.run_daily(late_market_alert_job, time=late_alert_time)
 
     # 거래시간 30분마다 자동 포트폴리오 업데이트
-    # 09:30, 10:00, 10:30, ..., 15:00, 15:50 KST (마지막 틱은 종가 확정 후)
+    # 09:30, 10:00, 10:30, ..., 15:00, 15:35 KST
     try:
         kst = pytz.timezone('Asia/Seoul')
         trading_times = [
@@ -2975,7 +2980,7 @@ if __name__ == '__main__':
             for h, m in [
                 (9,30),(10,0),(10,30),(11,0),(11,30),
                 (12,0),(12,30),(13,0),(13,30),(14,0),
-                (14,30),(15,0),(15,50)
+                (14,30),(15,0),(15,35)
             ]
         ]
     except:
@@ -2984,7 +2989,7 @@ if __name__ == '__main__':
             for h, m in [
                 (9,30),(10,0),(10,30),(11,0),(11,30),
                 (12,0),(12,30),(13,0),(13,30),(14,0),
-                (14,30),(15,0),(15,50)
+                (14,30),(15,0),(15,35)
             ]
         ]
 

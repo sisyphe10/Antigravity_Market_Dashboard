@@ -1101,12 +1101,13 @@ def _load_cal_reminded() -> dict:
 
 
 def _save_cal_reminded(d: dict):
-    """오늘 이전 날짜 키 prune 후 원자적 저장. 키: 'YYYY-MM-DD|eventid' 또는 'digest|YYYY-MM-DD'."""
+    """오늘 이전 날짜 키 prune 후 원자적 저장.
+    키: 'YYYY-MM-DD|eventid' / 'digest|YYYY-MM-DD' / 'dday|YYYY-MM-DD'."""
     today = datetime.datetime.now(tz=KST).date().isoformat()
 
     def _date_of(k):
         head, _, tail = k.partition('|')
-        return tail if head == 'digest' else head
+        return tail if head in ('digest', 'dday') else head
     pruned = {k: v for k, v in d.items() if _date_of(k) >= today}
     try:
         tmp = CAL_REMINDED_FILE + '.tmp'
@@ -1170,9 +1171,105 @@ async def _send_daily_digest(context, state: dict):
         logging.info(f"캘린더 다이제스트 발송 ({len(events)}건)")
 
 
+# ── 가족 생일/명절 + 'D-day |' 하이라이트 사전 알림 (30일/7일/1일 전) ──
+# sisyphe_bot.check_dday_alerts에서 이관(MOVE). 같은 음력 기념일·같은 캘린더('D-day |' 이벤트)를
+# 선유듀오 부부 그룹챗으로 발송. 06:00 다이제스트와 동일 시점·동일 state 파일(digest|date 옆에 dday|date).
+LUNAR_EVENTS = [
+    {'name': '🎂 혜자 생일', 'month': 3, 'day': 4},
+    {'name': '🎂 동석 생일', 'month': 3, 'day': 12},
+    {'name': '🎂 연순 생일', 'month': 5, 'day': 3},
+    {'name': '🎂 맹호 생일', 'month': 8, 'day': 16},
+    {'name': '🧧 설날', 'month': 1, 'day': 1},
+    {'name': '🌕 추석', 'month': 8, 'day': 15},
+]
+
+
+def _collect_dday_highlights_sync() -> list:
+    """음력 기념일(생일+설/추석) + 캘린더 'D-day |' 이벤트 → [{name, date}]. 블로킹 → executor."""
+    from korean_lunar_calendar import KoreanLunarCalendar
+    today = datetime.datetime.now(tz=KST).date()
+    highlights = []
+
+    # 1) 음력 기념일 (올해/내년 두 해치 펼쳐서 D-N 매칭)
+    cal = KoreanLunarCalendar()
+    for year in (today.year, today.year + 1):
+        for ev in LUNAR_EVENTS:
+            try:
+                if cal.setLunarDate(year, ev['month'], ev['day'], False):
+                    d = datetime.date(cal.solarYear, cal.solarMonth, cal.solarDay)
+                    highlights.append({'name': ev['name'], 'date': d})
+            except Exception:
+                pass
+
+    # 2) Google Calendar 'D-day |' 이벤트 (옥쥬와 빵빵이, 같은 캘린더)
+    try:
+        service = _get_cal_service()
+        if service:
+            time_min = datetime.datetime.combine(today, datetime.time.min).isoformat() + '+09:00'
+            time_max = (datetime.datetime.combine(today + datetime.timedelta(days=400),
+                                                  datetime.time.min).isoformat() + '+09:00')
+            res = service.events().list(
+                calendarId=SEONYUDUO_CAL_ID, timeMin=time_min, timeMax=time_max,
+                singleEvents=True, orderBy='startTime', maxResults=200).execute()
+            for item in res.get('items', []):
+                summary = item.get('summary', '')
+                if summary.startswith('D-day |') or summary.startswith('D-day|'):
+                    clean = summary.split('|', 1)[1].strip()
+                    start = item['start'].get('date') or item['start'].get('dateTime', '')[:10]
+                    d = datetime.date.fromisoformat(start)
+                    highlights.append({'name': f'📌 {clean}', 'date': d})
+    except Exception as e:
+        logging.warning(f"D-Day 캘린더 조회 실패: {e}")
+    return highlights
+
+
+def _format_dday_alerts(highlights: list) -> str:
+    """오늘 기준 D-30/D-7/D-1 매칭 항목만 HTML 메시지로. 매칭 없으면 빈 문자열."""
+    today = datetime.datetime.now(tz=KST).date()
+    alerts = []
+    for ev in highlights:
+        diff = (ev['date'] - today).days
+        if diff == 30:
+            alerts.append(f"📅 <b>[한 달 전]</b> {ev['name']}\n    {ev['date'].strftime('%Y-%m-%d')} (D-30)")
+        elif diff == 7:
+            alerts.append(f"📅 <b>[일주일 전]</b> {ev['name']}\n    {ev['date'].strftime('%Y-%m-%d')} (D-7)")
+        elif diff == 1:
+            alerts.append(f"📅 <b>[내일]</b> {ev['name']}\n    {ev['date'].strftime('%Y-%m-%d')} (D-1)")
+    if not alerts:
+        return ''
+    return ("━━━━━━━━━━━━━━━\n<b>🔔 D-Day 알림</b>\n━━━━━━━━━━━━━━━\n\n"
+            + "\n\n".join(alerts))
+
+
+async def _send_dday_alerts(context, state: dict):
+    """오늘 D-Day 알림 발송 (중복방지 dday|date). 매칭 없으면 silent (그래도 오늘 처리됨 기록)."""
+    today = datetime.datetime.now(tz=KST).date().isoformat()
+    dkey = f"dday|{today}"
+    if dkey in state:
+        return
+    loop = asyncio.get_running_loop()
+    try:
+        highlights = await loop.run_in_executor(None, _collect_dday_highlights_sync)
+    except Exception as e:
+        logging.error(f"D-Day 하이라이트 수집 실패: {e}")
+        return
+    msg = _format_dday_alerts(highlights)
+    if not msg:
+        logging.info("오늘 D-Day 알림 없음 → 발송 안 함(silent)")
+        state[dkey] = time.time()  # 무알림도 '오늘 처리됨' 기록 (폴링 반복조회 방지)
+        _save_cal_reminded(state)
+        return
+    if await _cal_broadcast(context, msg):
+        state[dkey] = time.time()
+        _save_cal_reminded(state)
+        logging.info("D-Day 알림 발송")
+
+
 async def daily_cal_digest_job(context: ContextTypes.DEFAULT_TYPE):
-    """run_daily 06:00 KST — 다이제스트 punctual 발송."""
-    await _send_daily_digest(context, _load_cal_reminded())
+    """run_daily 06:00 KST — 다이제스트 + D-Day 알림 punctual 발송."""
+    state = _load_cal_reminded()
+    await _send_daily_digest(context, state)
+    await _send_dday_alerts(context, _load_cal_reminded())
 
 
 async def cal_reminder_poll_job(context: ContextTypes.DEFAULT_TYPE):
@@ -1181,10 +1278,14 @@ async def cal_reminder_poll_job(context: ContextTypes.DEFAULT_TYPE):
     today = now.date().isoformat()
     state = _load_cal_reminded()
 
-    # ① 다이제스트 따라잡기: 06:00~10:00 사이인데 아직 안 보냈으면 발송 (06시 다운 대비)
-    if CAL_DIGEST_HOUR <= now.hour < CAL_DIGEST_CATCHUP_UNTIL and f"digest|{today}" not in state:
-        await _send_daily_digest(context, state)
-        state = _load_cal_reminded()  # 갱신분 반영
+    # ① 다이제스트 + D-Day 알림 따라잡기: 06:00~10:00 사이인데 아직 안 보냈으면 발송 (06시 다운 대비)
+    if CAL_DIGEST_HOUR <= now.hour < CAL_DIGEST_CATCHUP_UNTIL:
+        if f"digest|{today}" not in state:
+            await _send_daily_digest(context, state)
+            state = _load_cal_reminded()  # 갱신분 반영
+        if f"dday|{today}" not in state:
+            await _send_dday_alerts(context, state)
+            state = _load_cal_reminded()  # 갱신분 반영
 
     # ② 운동 1시간 전 리마인드
     loop = asyncio.get_running_loop()
