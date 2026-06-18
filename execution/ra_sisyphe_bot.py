@@ -1071,9 +1071,16 @@ def render_disclosures_message(items, today):
     NB = "⠀"          # 점자공백(빈 글자) — 들여쓰기 1칸
     I1 = NB * 2
 
+    # 헤더 날짜 + 한글 요일 (파싱 실패 시 요일 생략)
+    try:
+        wd = '월화수목금토일'[datetime.datetime.strptime(today, '%Y-%m-%d').weekday()]
+        date_label = f"{today} ({wd})"
+    except (ValueError, TypeError):
+        date_label = today
+
     total = len(items)
     if total == 0:
-        return f"{today}\n<b><u>오늘 공시</u></b> (0건)\n\n오늘 공시 없음"
+        return f"<b><u>{date_label} 공시 0건</u></b>\n\n공시 없음"
 
     # 종목명별 그룹 (종목 내 항목 수 많은 순 → 종목명 가나다 보조정렬)
     groups = {}
@@ -1081,8 +1088,8 @@ def render_disclosures_message(items, today):
         groups.setdefault(it.get('name') or '기타', []).append(it)
     grp_order = sorted(groups, key=lambda k: (-len(groups[k]), k))
 
-    head = f"<b><u>오늘 공시</u></b> ({total}건)"
-    lines = [today, head]
+    # 헤더 한 줄: '{날짜} ({요일}) 공시 {N}건' 전체 볼드+밑줄
+    lines = [f"<b><u>{date_label} 공시 {total}건</u></b>"]
     for name in grp_order:
         rows = groups[name]
         lines.append(f"• <b><u>{esc(name)}</u></b> ({len(rows)})")
