@@ -3092,6 +3092,8 @@ def create_cumulative_aum_chart():
         # 시작일 — 기준가 첫 유효 = 운용 개시일 (AUM 시트보다 정확).
         end_dates = {}
         first_in_nav = {}
+        last_in_nav = {}            # 회차별 마지막 유효 NAV 일자 (거래일 집계용)
+        nav_trading_days = None     # 기준가 시트의 전체 거래일 인덱스 (공휴일 자동 제외)
         try:
             df_nav = pd.read_excel(nav_file, sheet_name='기준가')
             if 'Date' in df_nav.columns:
@@ -3101,6 +3103,7 @@ def create_cumulative_aum_chart():
                 df_nav.index = pd.to_datetime(df_nav.iloc[:, 0])
                 df_nav = df_nav.iloc[:, 1:]
             nav_latest = df_nav.index.max()
+            nav_trading_days = df_nav.index.sort_values()
             for col in df_nav.columns:
                 if '목표전환형' not in col:
                     continue
@@ -3109,14 +3112,28 @@ def create_cumulative_aum_chart():
                     continue
                 first_in_nav[col] = valid.index[0]
                 last_date = valid.index[-1]
+                last_in_nav[col] = last_date
                 end_dates[col] = '' if last_date >= nav_latest else last_date.strftime('%m/%d')
             # 별칭: 기준가 시트의 '목표전환형' (suffix 없음, DB 1차) → AUM 시트 '목표전환형 1차'
             if '목표전환형' in end_dates:
                 end_dates.setdefault('목표전환형 1차', end_dates['목표전환형'])
             if '목표전환형' in first_in_nav:
                 first_in_nav.setdefault('목표전환형 1차', first_in_nav['목표전환형'])
+            if '목표전환형' in last_in_nav:
+                last_in_nav.setdefault('목표전환형 1차', last_in_nav['목표전환형'])
         except Exception as e:
             print(f"Warning: 종료일 계산 실패: {e}")
+
+        def _trading_days(start_ts, end_ts):
+            """기준가 거래일 인덱스로 start~end 사이 실제 거래일 수 (양끝 포함)."""
+            if start_ts is None or end_ts is None or nav_trading_days is None or len(nav_trading_days) == 0:
+                return None
+            try:
+                mask = (nav_trading_days >= start_ts) & (nav_trading_days <= end_ts)
+                n = int(mask.sum())
+                return n if n > 0 else None
+            except Exception:
+                return None
 
         # 차트 표시는 3/20부터 (이전 데이터는 forward-fill 기준값으로만 사용)
         # 봉은 주봉(각 ISO 주의 마지막 거래일 + 전체 최신일)만 표시
@@ -3236,11 +3253,15 @@ def create_cumulative_aum_chart():
             last_per_iter_all = broker_target.sort_values('날짜').groupby('상품명').last()
             for it_name, it_row in last_per_iter_all.iterrows():
                 start_d = first_in_nav.get(it_name) or first_per_product.get(it_name)
+                end_d = last_in_nav.get(it_name)
+                if end_d is None:
+                    end_d = it_row['날짜']  # 기준가에 없으면 AUM 마지막 일자로 폴백
                 iters.append({
                     'name': it_name,
                     'last_aum': int(it_row['AUM']),
                     'start': start_d,
                     'end': end_dates.get(it_name, ''),
+                    'days': _trading_days(start_d, end_d),
                 })
             iters.sort(key=lambda x: x['start'] if x['start'] is not None else pd.Timestamp('1970-01-01'))
             # 청산 회차 포함 broker 내 모든 회차 마지막 AUM 합 (차트 누적 합산과 동일 기준)
@@ -3254,12 +3275,13 @@ def create_cumulative_aum_chart():
                 aum_s = f"{it['last_aum']/1e8:,.0f}억"
                 start_s = it['start'].strftime('%m/%d') if it['start'] is not None else '-'
                 end_s = it['end'] if it['end'] else '운용 중'
+                days_s = f"{it['days']}거래일" if it.get('days') is not None else '-'
                 tt_rows += (f'<tr><td>{it["name"]}</td><td>{aum_s}</td>'
-                            f'<td>{start_s}</td><td>{end_s}</td></tr>')
+                            f'<td>{start_s}</td><td>{end_s}</td><td>{days_s}</td></tr>')
             return (
                 '<div class="iter-tooltip">'
                 '<table class="iter-table">'
-                '<thead><tr><th>회차</th><th>AUM</th><th>시작일</th><th>종료일</th></tr></thead>'
+                '<thead><tr><th>회차</th><th>AUM</th><th>시작일</th><th>종료일</th><th>거래일</th></tr></thead>'
                 f'<tbody>{tt_rows}</tbody>'
                 '</table></div>'
             )
