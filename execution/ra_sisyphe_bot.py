@@ -731,14 +731,16 @@ def build_market_alert_message(stocks_위험, stocks_경고, stocks_주의,
                         and current_price <= target_price and not is_15d_high)
             if not price_ok:
                 continue
-        # 근거 라벨
-        md = 판단일[5:] if 판단일 and 판단일 != '-' else '?'
-        when = f"판단일 도달({md})" if left == 0 else f"D-{left}({md})"
-        if category != '투자주의' and current_price is not None and target_price is not None:
-            label = f"{when} · {current_price:,}원 ≤ {target_price:,}원"
-        else:
-            label = when
-        imminent.append((s, label))
+        # 근거 컴포넌트 — 필드 순서: [카테고리] (🆕) 이름 / 시총 / D-N / 날짜 / 가격
+        when = "판단일 도달" if left == 0 else f"D-{left}"
+        date_k = ''
+        if 판단일 and 판단일 != '-':
+            try:
+                _y, _m, _d = 판단일.split('-')
+                date_k = f"{int(_y)}년 {int(_m)}월 {int(_d)}일"
+            except Exception:
+                date_k = 판단일
+        imminent.append((s, category, when, date_k, current_price, target_price))
 
     # ── 신규 블록 ──────────────────────────────────────────────
     new_stocks = _dedup_by_name([s for s in all_stocks if s['_new']])
@@ -757,9 +759,20 @@ def build_market_alert_message(stocks_위험, stocks_경고, stocks_주의,
     if imminent:
         imm_block.append("")
         imm_block.append("<b>⏰ 탈출 임박</b>")
-        for s, label in imminent:
+        for s, category, when, date_k, cur, tgt in imminent:
+            name = esc(s['name'])
+            mcap = esc(fmt_marcap(s['marcap']))
+            body = f"{name} / {mcap}"
+            if s.get('warn_type') == '투자경고 지정예고':
+                body = f"<u>{body}</u>"
             mark = " 🆕" if s['_new'] else ""
-            imm_block.append(f"{tagged_line(s)}{mark} · {label}")
+            fields = [body, when]
+            if date_k:
+                fields.append(date_k)
+            if cur is not None and tgt is not None:
+                # 텔레그램 HTML 모드라 '<'는 &lt;로 이스케이프 (표시는 '<=')
+                fields.append(f"{cur:,}원 &lt;= {tgt:,}원")
+            imm_block.append(f"[{category}]{mark} " + " / ".join(fields))
 
     # ── 전체 현황 블록 ─────────────────────────────────────────
     def render_category(stocks, header):
@@ -1077,17 +1090,20 @@ def render_disclosures_message(items, today):
     return "\n".join(lines).rstrip()
 
 
-async def daily_disclosures_job(context: ContextTypes.DEFAULT_TYPE):
-    """매일 발송 시각에 봇이 직접 당일 공시를 수집해 알림.
-
-    과거엔 GHA(16:30 예약)가 수집·커밋한 disclosures.json을 GitHub raw로 읽었으나,
-    GHA 스케줄 cron이 수 시간 지연돼(실제 20~22시) 발송 시점엔 그날치가 없어 매일
-    0건 스킵됐다. 이제 봇이 발송 직전 직접 수집(_refresh_disclosures_local) 후 로컬
-    파일을 읽으므로 GHA 타이밍과 무관하게 당일 공시를 받는다."""
-    logging.info("Disclosures job started")
+async def collect_disclosures_job(context: ContextTypes.DEFAULT_TYPE):
+    """매일 17:00 KST 당일 공시 수집 (발송 30분 전). GHA cron 지연과 무관하게
+    봇이 직접 DART+KIND를 수집해 disclosures.json을 최신화한다."""
+    logging.info("Disclosures collect job started")
     await asyncio.to_thread(_refresh_disclosures_local)
+    logging.info("Disclosures collect job done")
 
-    # 방금 직접 수집한 로컬 파일이 가장 최신(GHA 커밋 전 당일분 포함). 실패 시 raw 폴백.
+
+async def daily_disclosures_job(context: ContextTypes.DEFAULT_TYPE):
+    """매일 17:30 KST 당일 공시 알림. 17:00 collect_disclosures_job가 갱신한
+    로컬 disclosures.json을 읽어 당일분만 발송 (실패 시 GHA raw 폴백)."""
+    logging.info("Disclosures job started")
+
+    # 17:00 수집 잡이 갱신한 로컬 파일을 읽음 (GHA 커밋 전 당일분 포함). 실패 시 raw 폴백.
     data = None
     try:
         with open(_DISCLOSURES_FILE, encoding='utf-8') as f:
@@ -1155,11 +1171,14 @@ if __name__ == "__main__":
         time=datetime.time(hour=16, minute=0, second=0, tzinfo=kst),
     )
 
-    # 당일 공시 알림 (18:30 KST — 봇이 발송 직전 직접 수집. 장 마감 후 올라오는
-    # 수주·자기주식·증자류 공시까지 포함하려 마감 한참 뒤로 둠. GHA 타이밍과 무관)
+    # 당일 공시: 17:00 수집 → 17:30 발송 (봇 자체 수집, GHA 타이밍 무관)
+    job_queue.run_daily(
+        collect_disclosures_job,
+        time=datetime.time(hour=17, minute=0, second=0, tzinfo=kst),
+    )
     job_queue.run_daily(
         daily_disclosures_job,
-        time=datetime.time(hour=18, minute=30, second=0, tzinfo=kst),
+        time=datetime.time(hour=17, minute=30, second=0, tzinfo=kst),
     )
 
     for h in range(7, 18):
