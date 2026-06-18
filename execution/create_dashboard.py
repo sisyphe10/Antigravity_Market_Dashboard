@@ -3726,7 +3726,7 @@ def create_order_section():
             if (_orderLoaded) return;
             _orderLoaded = true;
             try {
-                var res = await fetch('portfolio_data.json');
+                var res = await fetch('portfolio_data.json?_=' + Date.now());
                 if (!res.ok) throw new Error('portfolio_data.json fetch 실패: ' + res.status);
                 var pdata = await res.json();
                 ORDER_PORTFOLIOS.forEach(function(p) {
