@@ -13,7 +13,7 @@
       "current_price": 362500.0,
       "ath_price": 362500.0,
       "dd": 0.0,
-      "rsi": 117.33972355449929,
+      "rsi": 122.1954291094939,
       "is_today_new": false
     },
     {
@@ -29,7 +29,7 @@
       "current_price": 2685000.0,
       "ath_price": 2685000.0,
       "dd": 0.0,
-      "rsi": 254.7231246547145,
+      "rsi": 259.5788302097091,
       "is_today_new": false
     },
     {
@@ -45,7 +45,7 @@
       "current_price": 1634000.0,
       "ath_price": 2203000.0,
       "dd": -25.828415796640947,
-      "rsi": -27.809435038055554,
+      "rsi": -22.953729483060936,
       "is_today_new": false
     },
     {
@@ -61,7 +61,7 @@
       "current_price": 469000.0,
       "ath_price": 480000.0,
       "dd": -2.2916666666666696,
-      "rsi": 28.559326861470357,
+      "rsi": 31.060133178493167,
       "is_today_new": false
     },
     {
@@ -77,7 +77,7 @@
       "current_price": 1700000.0,
       "ath_price": 1700000.0,
       "dd": 0.0,
-      "rsi": 30.941653692699923,
+      "rsi": 33.2964916813671,
       "is_today_new": false
     },
     {
@@ -93,7 +93,7 @@
       "current_price": 235000.0,
       "ath_price": 454000.0,
       "dd": -48.23788546255506,
-      "rsi": -16.43220030688517,
+      "rsi": -13.975172448668394,
       "is_today_new": false
     },
     {
@@ -109,7 +109,7 @@
       "current_price": 2200000.0,
       "ath_price": 2200000.0,
       "dd": 0.0,
-      "rsi": 5.141024012872841,
+      "rsi": 7.711875246507871,
       "is_today_new": false
     },
     {
@@ -125,7 +125,7 @@
       "current_price": 136000.0,
       "ath_price": 141900.0,
       "dd": -4.1578576462297345,
-      "rsi": 10.782853091723176,
+      "rsi": 13.26311860475915,
       "is_today_new": false
     },
     {
@@ -141,7 +141,7 @@
       "current_price": 101300.0,
       "ath_price": 245500.0,
       "dd": -58.73727087576375,
-      "rsi": -18.704568259031007,
+      "rsi": -21.282150756931763,
       "is_today_new": false
     },
     {
@@ -157,7 +157,7 @@
       "current_price": 99600.0,
       "ath_price": 136400.0,
       "dd": -26.97947214076246,
-      "rsi": -91.6494726274524,
+      "rsi": -86.79376707245778,
       "is_today_new": false
     },
     {
@@ -173,7 +173,7 @@
       "current_price": 125100.0,
       "ath_price": 149900.0,
       "dd": -16.544362908605738,
-      "rsi": -48.560171200055144,
+      "rsi": -45.450140334836156,
       "is_today_new": false
     },
     {
@@ -189,7 +189,7 @@
       "current_price": 121400.0,
       "ath_price": 161400.0,
       "dd": -24.783147459727385,
-      "rsi": -54.37031413955431,
+      "rsi": -51.025676556294286,
       "is_today_new": false
     },
     {
@@ -205,7 +205,7 @@
       "current_price": 73900.0,
       "ath_price": 133000.0,
       "dd": -44.43609022556391,
-      "rsi": -13.252468153501141,
+      "rsi": -15.822578407462274,
       "is_today_new": false
     },
     {
@@ -221,7 +221,7 @@
       "current_price": 1111000.0,
       "ath_price": 1630000.0,
       "dd": -31.840490797546018,
-      "rsi": -36.35549193104127,
+      "rsi": -33.854685614018464,
       "is_today_new": false
     },
     {
@@ -237,7 +237,7 @@
       "current_price": 51600.0,
       "ath_price": 54500.0,
       "dd": -5.321100917431187,
-      "rsi": 15.88419956926328,
+      "rsi": 12.67799501051774,
       "is_today_new": false
     }
   ],
@@ -255,7 +255,7 @@
       "current_price": 362500.0,
       "ath_price": 362500.0,
       "dd": 0.0,
-      "rsi": 0.8292000634503305,
+      "rsi": 3.2862279216671064,
       "is_today_new": false
     },
     {
@@ -271,7 +271,7 @@
       "current_price": 2685000.0,
       "ath_price": 2685000.0,
       "dd": 0.0,
-      "rsi": 13.309820218489099,
+      "rsi": 15.766848076705875,
       "is_today_new": false
     },
     {
@@ -280,14 +280,14 @@
       "sector": "IT하드웨어",
       "market_cap": 1643261.312,
       "weight": 10.0,
-      "weight_prev": 5.0,
+      "weight_prev": 10.0,
       "today_return": 8.267716535433072,
-      "contribution": 4.133858267716536,
+      "contribution": 8.267716535433072,
       "cumulative_return": 4.376705017198423,
       "current_price": 2200000.0,
       "ath_price": 2200000.0,
       "dd": 0.0,
-      "rsi": 3.9953439362709453,
+      "rsi": 6.330940303532406,
       "is_today_new": false
     },
     {
@@ -303,7 +303,7 @@
       "current_price": 235000.0,
       "ath_price": 454000.0,
       "dd": -48.23788546255506,
-      "rsi": -16.43220030688517,
+      "rsi": -13.975172448668394,
       "is_today_new": false
     },
     {
@@ -319,7 +319,7 @@
       "current_price": 134500.0,
       "ath_price": 213500.0,
       "dd": -37.002341920374704,
-      "rsi": 4.481191600104162,
+      "rsi": 1.4803147026683505,
       "is_today_new": false
     },
     {
@@ -335,7 +335,7 @@
       "current_price": 101300.0,
       "ath_price": 245500.0,
       "dd": -58.73727087576375,
-      "rsi": -3.456630708636954,
+      "rsi": -6.463527239150513,
       "is_today_new": false
     },
     {
@@ -351,7 +351,7 @@
       "current_price": 125100.0,
       "ath_price": 149900.0,
       "dd": -16.544362908605738,
-      "rsi": -8.26225802727577,
+      "rsi": -6.010518407212617,
       "is_today_new": false
     },
     {
@@ -367,7 +367,7 @@
       "current_price": 884000.0,
       "ath_price": 1020000.0,
       "dd": -13.33333333333333,
-      "rsi": -9.199108041115789,
+      "rsi": -6.947368421052635,
       "is_today_new": false
     },
     {
@@ -376,34 +376,15 @@
       "sector": "기타",
       "market_cap": 1833418.198855,
       "weight": 5.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "weight_prev": 5.0,
+      "today_return": 0.8830022075055187,
+      "contribution": 0.44150110375275936,
+      "cumulative_return": 0.0,
       "current_price": 228500.0,
       "ath_price": 231500.0,
       "dd": -1.295896328293733,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
-  ],
-  "_order_changes": {
-    "NH 목표전환형 4호 / DB 목표전환형 5차": {
-      "date": "2026-06-18",
-      "added": [
-        {
-          "name": "삼성전자우",
-          "weight": 5.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "삼성전기",
-          "from": 5.0,
-          "to": 10.0
-        }
-      ],
-      "removed": []
-    }
-  }
+  ]
 }
