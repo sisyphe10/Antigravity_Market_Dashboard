@@ -16,6 +16,8 @@ import os
 import sys
 import json
 import fcntl
+import asyncio
+import subprocess
 import html as _html
 
 # 중복 실행 방지 (파일 락)
@@ -985,6 +987,40 @@ _DISCLOSURES_RAW_URL = (
 )
 
 
+_FETCH_SCRIPTS = (
+    os.path.join(DASHBOARD_DIR, 'execution', 'fetch_disclosures.py'),       # DART (먼저)
+    os.path.join(DASHBOARD_DIR, 'execution', 'fetch_kind_disclosures.py'),  # KIND (DART 결과 보고 cross-source dedup)
+)
+
+
+def _refresh_disclosures_local():
+    """발송 직전 VM에서 직접 DART+KIND 공시를 수집해 disclosures.json을 최신화.
+
+    GHA daily_disclosures.yml은 16:30 KST 예약이지만 GitHub 무료 스케줄 cron이
+    인기 시간대(정시/30분)에 3~5시간씩 지연돼 실제론 매일 밤 20~22시에야 돈다.
+    그래서 봇이 16:40에 파일을 읽으면 '그날치 수집 전' 상태라 0건으로 스킵됐다.
+    → GHA에 의존하지 않고 봇이 발송 직전 스스로 수집한다 (systemd 스케줄은 정시 보장).
+    DART 먼저, KIND 나중 (KIND가 DART 결과를 보고 중복 제거하므로 순서 중요)."""
+    for script in _FETCH_SCRIPTS:
+        name = os.path.basename(script)
+        try:
+            r = subprocess.run(
+                [sys.executable, script],
+                cwd=DASHBOARD_DIR,
+                env={**os.environ, 'PYTHONIOENCODING': 'utf-8', 'TZ': 'Asia/Seoul'},
+                capture_output=True, text=True, timeout=300,
+            )
+            if r.returncode != 0:
+                logging.warning(f"공시 수집 실패 ({name}, rc={r.returncode}): {(r.stderr or '')[-400:]}")
+            else:
+                tail = (r.stdout or '').strip().splitlines()
+                logging.info(f"공시 수집 OK ({name}): {tail[-1] if tail else ''}")
+        except subprocess.TimeoutExpired:
+            logging.warning(f"공시 수집 타임아웃 ({name})")
+        except Exception as e:
+            logging.warning(f"공시 수집 예외 ({name}): {e}")
+
+
 def _fetch_disclosures_data():
     """16:30 GHA 커밋분을 VM pull 없이 반영하기 위해 GitHub raw에서 우선 조회.
     실패 시 로컬 disclosures.json 폴백. 동기 호출(다른 잡과 동일 패턴)."""
@@ -1042,9 +1078,23 @@ def render_disclosures_message(items, today):
 
 
 async def daily_disclosures_job(context: ContextTypes.DEFAULT_TYPE):
-    """매일 16:40 당일 공시 알림 (daily_disclosures.yml가 16:30 KST에 수집·커밋)."""
+    """매일 발송 시각에 봇이 직접 당일 공시를 수집해 알림.
+
+    과거엔 GHA(16:30 예약)가 수집·커밋한 disclosures.json을 GitHub raw로 읽었으나,
+    GHA 스케줄 cron이 수 시간 지연돼(실제 20~22시) 발송 시점엔 그날치가 없어 매일
+    0건 스킵됐다. 이제 봇이 발송 직전 직접 수집(_refresh_disclosures_local) 후 로컬
+    파일을 읽으므로 GHA 타이밍과 무관하게 당일 공시를 받는다."""
     logging.info("Disclosures job started")
-    data = _fetch_disclosures_data()
+    await asyncio.to_thread(_refresh_disclosures_local)
+
+    # 방금 직접 수집한 로컬 파일이 가장 최신(GHA 커밋 전 당일분 포함). 실패 시 raw 폴백.
+    data = None
+    try:
+        with open(_DISCLOSURES_FILE, encoding='utf-8') as f:
+            data = json.load(f)
+    except Exception as e:
+        logging.warning(f"로컬 disclosures.json 읽기 실패 → raw 폴백: {e}")
+        data = _fetch_disclosures_data()
     if not data:
         logging.warning("disclosures.json 로드 실패 → 공시 알림 건너뜀")
         return
@@ -1105,10 +1155,11 @@ if __name__ == "__main__":
         time=datetime.time(hour=16, minute=0, second=0, tzinfo=kst),
     )
 
-    # 당일 공시 알림 (16:40 — daily_disclosures.yml가 16:30 KST 수집·커밋 후, GitHub raw 조회)
+    # 당일 공시 알림 (18:30 KST — 봇이 발송 직전 직접 수집. 장 마감 후 올라오는
+    # 수주·자기주식·증자류 공시까지 포함하려 마감 한참 뒤로 둠. GHA 타이밍과 무관)
     job_queue.run_daily(
         daily_disclosures_job,
-        time=datetime.time(hour=16, minute=40, second=0, tzinfo=kst),
+        time=datetime.time(hour=18, minute=30, second=0, tzinfo=kst),
     )
 
     for h in range(7, 18):
