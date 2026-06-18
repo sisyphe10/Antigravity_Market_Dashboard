@@ -2922,7 +2922,7 @@ if __name__ == '__main__':
         kst = pytz.timezone('Asia/Seoul')
         weather_time = datetime.time(hour=5, minute=0, second=0, tzinfo=kst)
         calendar_time = datetime.time(hour=5, minute=5, second=0, tzinfo=kst)
-        portfolio_time = datetime.time(hour=16, minute=0, second=0, tzinfo=kst)
+        portfolio_time = datetime.time(hour=17, minute=0, second=0, tzinfo=kst)  # 16→17: KIS 확정 종가 확보 후 publish
         market_alert_time = datetime.time(hour=16, minute=5, second=0, tzinfo=kst)
         journal_time = datetime.time(hour=16, minute=10, second=0, tzinfo=kst)
         nightly_time = datetime.time(hour=16, minute=20, second=0, tzinfo=kst)
@@ -2930,7 +2930,7 @@ if __name__ == '__main__':
     except:
         weather_time = datetime.time(hour=5, minute=0, second=0)
         calendar_time = datetime.time(hour=5, minute=5, second=0)
-        portfolio_time = datetime.time(hour=16, minute=0, second=0)
+        portfolio_time = datetime.time(hour=17, minute=0, second=0)  # 16→17: KIS 확정 종가 확보 후 publish
         market_alert_time = datetime.time(hour=16, minute=5, second=0)
         journal_time = datetime.time(hour=16, minute=10, second=0)
         nightly_time = datetime.time(hour=16, minute=20, second=0)

@@ -339,6 +339,53 @@ def fetch_changes(codes):
     return out
 
 
+# ───────────────────────── 확정 일봉(종가) ─────────────────────────
+_DAILY_PATH = "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice"
+_DAILY_TRID = "FHKST03010100"
+
+
+def fetch_daily_closes(codes, start_ymd, end_ymd, adj="0"):
+    """종목 코드 리스트 → {code(6자리): {'YYYY-MM-DD': 확정 종가(float)}}.
+
+    KIS 일봉은 장 마감(15:30) 후 KRX 확정 종가를 반환 → FDR 일봉(당일 봉 장중 지연/잠정)과 달리
+    NAV 기준가 산출에 적합한 '확정 종가' 소스. 100봉/콜 제한 → 날짜 윈도우 분할.
+    조회 실패 종목은 결과 dict에서 누락(호출측 FDR 폴백). start_ymd/end_ymd: 'YYYYMMDD'.
+    """
+    out = {}
+    for code in [str(c).zfill(6) for c in codes if c]:
+        series = {}
+        cur_end = end_ymd
+        guard = 0
+        while cur_end >= start_ymd and guard < 16:
+            guard += 1
+            params = {
+                "FID_COND_MRKT_DIV_CODE": "J", "FID_INPUT_ISCD": code,
+                "FID_INPUT_DATE_1": start_ymd, "FID_INPUT_DATE_2": cur_end,
+                "FID_PERIOD_DIV_CODE": "D", "FID_ORG_ADJ_PRC": adj,
+            }
+            try:
+                j = kis_get(_DAILY_PATH, tr_id=_DAILY_TRID, params=params)
+            except Exception:
+                break
+            bars = [b for b in (j.get("output2") or [])
+                    if b.get("stck_bsop_date") and b.get("stck_clpr")]
+            if not bars:
+                break
+            for b in bars:
+                dd = b["stck_bsop_date"]
+                try:
+                    series[f"{dd[:4]}-{dd[4:6]}-{dd[6:]}"] = float(b["stck_clpr"])
+                except (TypeError, ValueError):
+                    continue
+            earliest = min(b["stck_bsop_date"] for b in bars)
+            if earliest <= start_ymd:
+                break
+            cur_end = (datetime.strptime(earliest, "%Y%m%d") - timedelta(days=1)).strftime("%Y%m%d")
+        if series:
+            out[code] = series
+    return out
+
+
 if __name__ == "__main__":
     # 스모크 테스트: 토큰 확보(가능하면 캐시/공식캐시 재사용 → 신규 발급 없음)
     t = get_access_token()

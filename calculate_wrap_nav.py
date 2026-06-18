@@ -114,12 +114,14 @@ if not is_update:
     current_base_prices = initial_base_prices
     print(f"   - 계산 시작일: {start_date.strftime('%Y-%m-%d')}")
 
-# 계산 종료일: KST 16시 이후면 당일, 이전이면 전일
+# 계산 종료일: KST 17시 이후면 당일 포함, 이전이면 전일까지.
+#  ★ 17시 가드: KIS 확정 일봉(종가)이 안정적으로 들어오는 시각 이후에만 당일을 publish.
+#    (구 15시 가드 + 16:00 잡 = 장 직후 잠정 종가가 기준가에 동결되던 한 원인 → 17시로 상향)
 from datetime import timezone, timedelta as td
 kst = timezone(td(hours=9))
 now_kst = pd.Timestamp.now(tz=kst)
 today_kst = now_kst.normalize().tz_localize(None)
-if now_kst.hour >= 15:
+if now_kst.hour >= 17:
     end_date = today_kst
 else:
     end_date = today_kst - pd.Timedelta(days=1)
@@ -226,15 +228,42 @@ df_weights['날짜'] = pd.to_datetime(df_weights['날짜'])
 all_codes = df_weights['코드'].unique()
 print(f"2. 데이터 수집 (기간: {data_start_date.strftime('%Y-%m-%d')} ~ {end_date.strftime('%Y-%m-%d')})")
 
-# 4-1. 개별 종목
+# 4-1. 개별 종목 — KIS 확정 일봉(종가) 우선, 실패 종목만 FDR 폴백.
+#  ★ 근본원인 수정: 기존 FDR 'Change'는 장 직후 당일 봉이 잠정 → 16:00 publish 시 NAV 잠정 반영.
+#    KIS 일봉(inquire-daily-itemchartprice)은 장 마감 후 KRX 확정 종가 → close.pct_change()로 등락률 산출
+#    (= FDR 'Change'와 동일 의미, KIS==FDR-final 전 구간 일치 검증 완료).
 df_change = pd.DataFrame()
+_start_ymd = pd.Timestamp(data_start_date).strftime('%Y%m%d')
+_end_ymd = pd.Timestamp(end_date).strftime('%Y%m%d')
+kis_closes = {}
+try:
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'execution'))
+    import kis_token as _kt
+    kis_closes = _kt.fetch_daily_closes(list(all_codes), _start_ymd, _end_ymd)
+    print(f"   - KIS 확정 일봉 수집: {len(kis_closes)}/{len(all_codes)}종목")
+except Exception as e:
+    print(f"   - KIS 일봉 수집 불가({e}) → 전 종목 FDR 폴백")
+
+_fdr_fallback = 0
 for code in all_codes:
-    try:
-        d = fdr.DataReader(code, start=data_start_date)
-        if not d.empty:
-            df_change[code] = d['Change']
-    except:
-        pass
+    s = None
+    ck = str(code).zfill(6)
+    if ck in kis_closes and len(kis_closes[ck]) >= 2:
+        s = pd.Series(kis_closes[ck])
+        s.index = pd.to_datetime(s.index)
+        s = s.sort_index()
+    if s is None or len(s) < 2:
+        try:
+            d = fdr.DataReader(code, start=data_start_date)
+            if not d.empty:
+                s = d['Close']
+                _fdr_fallback += 1
+        except Exception:
+            s = None
+    if s is not None and len(s) >= 2:
+        df_change[code] = s.pct_change()
+if _fdr_fallback:
+    print(f"   - FDR 폴백 종목: {_fdr_fallback}개")
 
 # 4-2. 시장 지수 (KIS 일자별 확정지수 → 네이버 금융 → FDR 폴백)
 print("   - KOSPI, KOSDAQ 지수 수집 중...")
@@ -378,9 +407,11 @@ for pf_name, start_price in current_base_prices.items():
         pf_start_date = start_date
         pf_calc_dates = calc_dates
 
-    w_table = sub_df.pivot(index='날짜', columns='코드', values='비중')
-    full_idx = pf_calc_dates.union(w_table.index).sort_values()
-    w_table = w_table.reindex(full_idx).ffill().fillna(0)
+    # ★ 비중 = '리밸런스일 완전 스냅샷' (NEW 시트 한 날짜 = 그 시점 전체 포트폴리오, 편출종목은 미기재=0).
+    #   과거 reindex(calc_dates).ffill()는 편출된 종목의 옛 비중을 영구히 되살려(resurrect)
+    #   비중합 100% 초과·NAV 왜곡 유발 → 2026-03-23 수동→자동 전환 후 기준가 오염의 주원인.
+    #   따라서 ffill 금지: pivot 후 미기재 종목만 0으로 채우고(fillna), 각 리밸런스일 행을 그대로 사용.
+    w_table = sub_df.pivot_table(index='날짜', columns='코드', values='비중', aggfunc='last').fillna(0)
 
     idx_list = []
     date_list = []
