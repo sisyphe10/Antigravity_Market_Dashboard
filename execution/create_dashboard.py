@@ -3275,7 +3275,7 @@ def create_cumulative_aum_chart():
                 aum_s = f"{it['last_aum']/1e8:,.0f}억"
                 start_s = it['start'].strftime('%m/%d') if it['start'] is not None else '-'
                 end_s = it['end'] if it['end'] else '운용 중'
-                days_s = f"{it['days']}거래일" if it.get('days') is not None else '-'
+                days_s = f"{it['days']}일" if it.get('days') is not None else '-'
                 tt_rows += (f'<tr><td>{it["name"]}</td><td>{aum_s}</td>'
                             f'<td>{start_s}</td><td>{end_s}</td><td>{days_s}</td></tr>')
             return (
