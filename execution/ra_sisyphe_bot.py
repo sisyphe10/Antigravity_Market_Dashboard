@@ -800,9 +800,8 @@ def build_market_alert_message(stocks_위험, stocks_경고, stocks_주의,
         entry_block.append("<b>🔒 투자경고/위험 진입 임박</b>")
         entry_block.append("<b><u>[투자경고]</u></b>")
         for s, cur, escp in entry:
-            mark = "🆕 " if s['_new'] else ""
             entry_block.append(
-                f"• {mark}{esc(s['name'])} / {esc(fmt_marcap(s['marcap']))} / {cur:,}원 ≥ {escp:,}원")
+                f"• {esc(s['name'])} / {esc(fmt_marcap(s['marcap']))} / {cur:,}원 ≥ {escp:,}원")
 
     # ── 전체 현황 블록 ─────────────────────────────────────────
     # 투자경고는 정식 지정 / 지정예고를 별도 섹션으로 분리. 섹션 헤더로 구분되므로
