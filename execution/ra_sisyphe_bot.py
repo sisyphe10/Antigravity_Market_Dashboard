@@ -709,13 +709,13 @@ def build_market_alert_message(stocks_위험, stocks_경고, stocks_주의,
                 best[nm] = (s, it)
         return [it for (_s, it) in best.values()]
 
-    # ── 탈출임박 판정 ──────────────────────────────────────────
-    category_of = {'위험': '투자위험', '경고': '투자경고', '주의': '투자주의'}
-    imminent = []  # (s, label)
+    # ── 탈출임박 판정 (투자경고 + 투자위험) ─────────────────────
+    # 주의는 5영업일 자동해제라 '임박' 행동가치가 낮아 제외. 경고/위험은 판단일(해제판단)
+    # 3영업일 이내 + 가격조건(현재가 ≤ 해제가능주가 & NOT 15일최고가) 충족분만.
+    category_of = {'위험': '투자위험', '경고': '투자경고'}
+    imminent = []  # (s, cat_key, when, date_k, cur, tgt, left)
     for s in all_stocks:
-        # 결정 B(2026-06-18): 탈출임박은 경고·위험만. 투자주의는 5영업일 자동해제라
-        # '임박' 행동가치가 낮고 신규/전체현황에 이미 노출되므로 임박 블록에서 제외.
-        if s['_cat'] == '주의':
+        if s['_cat'] not in ('경고', '위험'):
             continue
         category = category_of[s['_cat']]
         price_df = price_cache.get(s['code']) if s.get('code') else None
@@ -723,24 +723,21 @@ def build_market_alert_message(stocks_위험, stocks_경고, stocks_주의,
         left = _sessions_until(판단일, today, _xkrx)
         if left is None:
             continue
-        판단일_이내 = (left == 0) or (1 <= left <= IMMINENT_BDAYS)
-        if not 판단일_이내:
+        if not ((left == 0) or (1 <= left <= IMMINENT_BDAYS)):
             continue
-        if category != '투자주의':
-            price_ok = (current_price is not None and target_price is not None
-                        and current_price <= target_price and not is_15d_high)
-            if not price_ok:
-                continue
-        # 근거 컴포넌트 — 필드 순서: [카테고리] (🆕) 이름 / 시총 / D-N / 날짜 / 가격
+        price_ok = (current_price is not None and target_price is not None
+                    and current_price <= target_price and not is_15d_high)
+        if not price_ok:
+            continue
         when = "판단일 도달" if left == 0 else f"D-{left}"
         date_k = ''
         if 판단일 and 판단일 != '-':
             try:
                 _y, _m, _d = 판단일.split('-')
-                date_k = f"{int(_y)}년 {int(_m)}월 {int(_d)}일"
+                date_k = f"{int(_m)}월 {int(_d)}일"
             except Exception:
                 date_k = 판단일
-        imminent.append((s, category, when, date_k, current_price, target_price))
+        imminent.append((s, s['_cat'], when, date_k, current_price, target_price, left))
 
     # ── 신규 블록 ──────────────────────────────────────────────
     new_stocks = _dedup_by_name([s for s in all_stocks if s['_new']])
@@ -752,43 +749,54 @@ def build_market_alert_message(stocks_위험, stocks_경고, stocks_주의,
         for s in new_stocks:
             new_block.append(tagged_line(s))
 
-    # ── 탈출임박 블록 ──────────────────────────────────────────
+    # ── 탈출임박 블록 (투자경고/위험) ──────────────────────────
+    # 헤더 아래 [투자경고]→[투자위험] 서브섹션, 각 섹션은 임박순(left 오름차순, 동률 시총↓).
+    # 임박 종목 없는 카테고리는 서브헤더째 생략(공란).
     imminent = _dedup_by_name(imminent, key=lambda x: x[0])
-    imminent.sort(key=lambda x: (x[0].get('marcap') or 0), reverse=True)
     imm_block = []
     if imminent:
         imm_block.append("")
-        imm_block.append("<b>⏰ 탈출 임박</b>")
-        for s, category, when, date_k, cur, tgt in imminent:
-            name = esc(s['name'])
-            mcap = esc(fmt_marcap(s['marcap']))
-            body = f"{name} / {mcap}"
-            if s.get('warn_type') == '투자경고 지정예고':
-                body = f"<u>{body}</u>"
-            mark = " 🆕" if s['_new'] else ""
-            fields = [body, when]
-            if date_k:
-                fields.append(date_k)
+        imm_block.append("<b>⏰ 투자경고/위험 탈출 임박</b>")
+
+        def _imm_line(item):
+            s, _ck, when, date_k, cur, tgt, _left = item
+            mark = "🆕 " if s['_new'] else ""
+            fields = [f"{esc(s['name'])} / {esc(fmt_marcap(s['marcap']))}"]
+            fields.append(f"<b><u>{date_k}</u></b>({when})" if date_k else when)
             if cur is not None and tgt is not None:
-                # 텔레그램 HTML 모드라 '<'는 &lt;로 이스케이프 (표시는 '<=')
-                fields.append(f"{cur:,}원 &lt;= {tgt:,}원")
-            imm_block.append(f"[{category}]{mark} " + " / ".join(fields))
+                fields.append(f"{cur:,}원 ≤ {tgt:,}원")
+            return f"• {mark}" + " / ".join(fields)
+
+        for cat_key, header in (('경고', '투자경고'), ('위험', '투자위험')):
+            sub = [it for it in imminent if it[1] == cat_key]
+            if not sub:
+                continue
+            sub.sort(key=lambda x: (x[6], -(x[0].get('marcap') or 0)))
+            imm_block.append("")
+            imm_block.append(f"<b><u>[{header}]</u></b>")
+            imm_block.extend(_imm_line(it) for it in sub)
 
     # ── 전체 현황 블록 ─────────────────────────────────────────
+    # 투자경고는 정식 지정 / 지정예고를 별도 섹션으로 분리. 섹션 헤더로 구분되므로
+    # 개별 종목 밑줄은 제거(중복). 순서: 위험 → 경고 → 경고 지정예고 → 주의.
     def render_category(stocks, header):
         if not stocks:
             return []
         out = ["", f"<b><u>[{header}]</u></b>"]
         for s in sorted(stocks, key=lambda x: (x.get('marcap') or 0), reverse=True):
-            out.append(fmt_line(s))
+            out.append(f"• {esc(s['name'])} / {esc(fmt_marcap(s['marcap']))}")
         return out
+
+    warn_desig = [s for s in stocks_경고 if s.get('warn_type') != '투자경고 지정예고']
+    warn_pre = [s for s in stocks_경고 if s.get('warn_type') == '투자경고 지정예고']
 
     lines = [f"<b><u>투자유의종목 현황</u></b> ({today})"]
     lines.extend(new_block)
     lines.extend(imm_block)
     lines.extend(["", "━━━━━━━━━━━━━━", "<b>📋 전체 현황</b>"])
     lines.extend(render_category(stocks_위험, '투자위험'))
-    lines.extend(render_category(stocks_경고, '투자경고'))
+    lines.extend(render_category(warn_desig, '투자경고'))
+    lines.extend(render_category(warn_pre, '투자경고 지정예고'))
     lines.extend(render_category(stocks_주의, '투자주의'))
     return lines
 
@@ -1074,10 +1082,10 @@ def render_disclosures_message(items, today):
     grp_order = sorted(groups, key=lambda k: (-len(groups[k]), k))
 
     head = f"<b><u>오늘 공시</u></b> ({total}건)"
-    lines = [today, head, ""]
+    lines = [today, head]
     for name in grp_order:
         rows = groups[name]
-        lines.append(f"• <b><u>{esc(name)}_({len(rows)})</u></b>")
+        lines.append(f"• <b><u>{esc(name)}</u></b> ({len(rows)})")
         for it in rows:
             src = (it.get('source') or 'DART').upper()
             badge = '🟦KIND' if src == 'KIND' else '🟧DART'
