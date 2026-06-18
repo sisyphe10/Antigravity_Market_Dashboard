@@ -667,7 +667,8 @@ def _sessions_until(판단일_str, today_str, _xkrx):
 
 def build_market_alert_message(stocks_위험, stocks_경고, stocks_주의,
                                prev_위험, prev_경고, prev_주의,
-                               price_cache, today, analyze_release, fmt_marcap, _xkrx):
+                               price_cache, today, analyze_release, analyze_escalation,
+                               fmt_marcap, _xkrx):
     """3블록(신규/탈출임박/전체현황) 메시지 라인 리스트 생성. 드라이런/잡 공용."""
     esc = _html.escape
 
@@ -756,25 +757,57 @@ def build_market_alert_message(stocks_위험, stocks_경고, stocks_주의,
     imm_block = []
     if imminent:
         imm_block.append("")
-        imm_block.append("<b>⏰ 투자경고/위험 탈출 임박</b>")
+        imm_block.append("<b>🏃 투자경고/위험 탈출 임박</b>")
 
-        def _imm_line(item):
-            s, _ck, when, date_k, cur, tgt, _left = item
+        from itertools import groupby
+        NB = "⠀"          # 점자공백 — 텔레그램 들여쓰기(일반 공백은 병합됨)
+
+        def _stock_line(item):
+            s, _ck, _when, _date_k, cur, tgt, _left = item
             mark = "🆕 " if s['_new'] else ""
-            fields = [f"{esc(s['name'])} / {esc(fmt_marcap(s['marcap']))}"]
-            fields.append(f"<b><u>{date_k}</u></b>({when})" if date_k else when)
+            parts = [f"{mark}{esc(s['name'])}", esc(fmt_marcap(s['marcap']))]
             if cur is not None and tgt is not None:
-                fields.append(f"{cur:,}원 ≤ {tgt:,}원")
-            return f"• {mark}" + " / ".join(fields)
+                parts.append(f"{cur:,}원 ≤ {tgt:,}원")
+            return f"{NB * 2}• " + " / ".join(parts)
 
+        first_sub = True
         for cat_key, header in (('경고', '투자경고'), ('위험', '투자위험')):
             sub = [it for it in imminent if it[1] == cat_key]
             if not sub:
                 continue
+            # 임박순: 판단일 가까운 순(left↑), 같은 날짜 그룹 내 시총 큰 순.
             sub.sort(key=lambda x: (x[6], -(x[0].get('marcap') or 0)))
-            imm_block.append("")
+            if not first_sub:
+                imm_block.append("")
+            first_sub = False
             imm_block.append(f"<b><u>[{header}]</u></b>")
-            imm_block.extend(_imm_line(it) for it in sub)
+            # 날짜로 그루핑 — 날짜 헤더(불릿) 아래 종목을 하위 불릿(들여쓰기)으로.
+            for _k, grp in groupby(sub, key=lambda x: (x[6], x[3], x[2])):
+                _left, date_k, when = _k
+                date_label = f"{date_k} ({when})" if date_k else when
+                imm_block.append(f"• <b><u>{date_label}</u></b>")
+                for it in grp:
+                    imm_block.append(_stock_line(it))
+
+    # ── 진입임박 블록 (투자주의 '투자경고 지정예고' 중 경고전환가 도달 → 곧 경고 지정) ──
+    entry = []
+    for s in stocks_주의:
+        if s.get('warn_type') != '투자경고 지정예고':
+            continue
+        price_df = price_cache.get(s['code']) if s.get('code') else None
+        cur, escp = analyze_escalation(s, price_df)
+        if cur is not None and escp is not None and cur >= escp:
+            entry.append((s, cur, escp))
+    entry_block = []
+    if entry:
+        entry.sort(key=lambda x: (x[0].get('marcap') or 0), reverse=True)
+        entry_block.append("")
+        entry_block.append("<b>🔒 투자경고/위험 진입 임박</b>")
+        entry_block.append("<b><u>[투자경고]</u></b>")
+        for s, cur, escp in entry:
+            mark = "🆕 " if s['_new'] else ""
+            entry_block.append(
+                f"• {mark}{esc(s['name'])} / {esc(fmt_marcap(s['marcap']))} / {cur:,}원 ≥ {escp:,}원")
 
     # ── 전체 현황 블록 ─────────────────────────────────────────
     # 투자경고는 정식 지정 / 지정예고를 별도 섹션으로 분리. 섹션 헤더로 구분되므로
@@ -787,28 +820,41 @@ def build_market_alert_message(stocks_위험, stocks_경고, stocks_주의,
             out.append(f"• {esc(s['name'])} / {esc(fmt_marcap(s['marcap']))}")
         return out
 
-    warn_desig = [s for s in stocks_경고 if s.get('warn_type') != '투자경고 지정예고']
-    warn_pre = [s for s in stocks_경고 if s.get('warn_type') == '투자경고 지정예고']
+    # 지정예고는 투자주의 fetch에 warn_type='투자경고 지정예고'로 들어옴(경고 fetch는 항상 '-').
+    warn_pre = [s for s in stocks_주의 if s.get('warn_type') == '투자경고 지정예고']
+    caution_pure = [s for s in stocks_주의 if s.get('warn_type') != '투자경고 지정예고']
 
     lines = [f"<b><u>투자유의종목 현황</u></b> ({today})"]
     lines.extend(new_block)
+    lines.extend(entry_block)
     lines.extend(imm_block)
     lines.extend(["", "━━━━━━━━━━━━━━", "<b>📋 전체 현황</b>"])
-    lines.extend(render_category(stocks_위험, '투자위험'))
-    lines.extend(render_category(warn_desig, '투자경고'))
-    lines.extend(render_category(warn_pre, '투자경고 지정예고'))
-    lines.extend(render_category(stocks_주의, '투자주의'))
+    cats = [
+        render_category(stocks_위험, '투자위험'),
+        render_category(stocks_경고, '투자경고'),
+        render_category(warn_pre, '투자경고 지정예고'),
+        render_category(caution_pure, '투자주의'),
+    ]
+    first_cat = True
+    for cat in cats:
+        if not cat:
+            continue
+        if first_cat:
+            cat = cat[1:]  # 첫 카테고리는 선행 빈줄 제거(📋 전체 현황 바로 아래 붙임)
+            first_cat = False
+        lines.extend(cat)
     return lines
 
 
 def collect_market_alert_data():
-    """KIND 수집 + 시총필터 + 경고/위험 주가 fetch. 드라이런/잡 공용.
+    """KIND 수집 + 시총필터 + 경고/위험/지정예고 주가 fetch. 드라이런/잡 공용.
     반환: (stocks_위험, stocks_경고, stocks_주의, price_cache, today,
-           analyze_release, fmt_marcap, _xkrx)"""
+           analyze_release, analyze_escalation, fmt_marcap, _xkrx)"""
     sys.path.insert(0, os.path.join(DASHBOARD_DIR, 'execution'))
     from create_market_alert import (
         get_session, fetch_category, parse_stocks, load_krx_data,
-        fmt_marcap, fetch_all_prices, analyze_release, _xkrx, _kis_fetch_marcap,
+        fmt_marcap, fetch_all_prices, analyze_release, analyze_escalation,
+        _xkrx, _kis_fetch_marcap,
     )
 
     now_kst = datetime.datetime.now(tz=KST)
@@ -851,13 +897,18 @@ def collect_market_alert_data():
     stocks_경고 = [s for s in stocks_경고 if s.get('marcap') and s['marcap'] >= MIN_MARCAP]
     stocks_위험 = [s for s in stocks_위험 if s.get('marcap') and s['marcap'] >= MIN_MARCAP]
 
-    # 주가 fetch는 경고/위험만 (투자주의는 가격 무관, 판단일만 사용)
-    # T2(지정일 전 15거래일)까지 필요 → 120일 (지정일 최대 90일 전 + 15거래일 여유)
+    # 주가 fetch: 경고/위험(해제판단·해제가, T2까지 120일) + 투자주의 내
+    # '투자경고 지정예고'(경고전환가, 35일이면 충분)를 같은 price_cache에 병합.
     codes_pw = [s['code'] for s in (stocks_경고 + stocks_위험) if s.get('code')]
     price_cache = fetch_all_prices(codes_pw, days_back=120) if codes_pw else {}
+    codes_pre = [s['code'] for s in stocks_주의
+                 if s.get('warn_type') == '투자경고 지정예고'
+                 and s.get('code') and s['code'] not in price_cache]
+    if codes_pre:
+        price_cache.update(fetch_all_prices(codes_pre, days_back=35))
 
     return (stocks_위험, stocks_경고, stocks_주의, price_cache, today,
-            analyze_release, fmt_marcap, _xkrx)
+            analyze_release, analyze_escalation, fmt_marcap, _xkrx)
 
 
 async def daily_market_alert_summary_job(context: ContextTypes.DEFAULT_TYPE):
@@ -865,7 +916,7 @@ async def daily_market_alert_summary_job(context: ContextTypes.DEFAULT_TYPE):
     logging.info("Market alert summary job started")
     try:
         (stocks_위험, stocks_경고, stocks_주의, price_cache, today,
-         analyze_release, fmt_marcap, _xkrx) = collect_market_alert_data()
+         analyze_release, analyze_escalation, fmt_marcap, _xkrx) = collect_market_alert_data()
 
         prev = _load_prev_alert()
         prev_위험 = set(prev.get('위험', []))
@@ -875,7 +926,7 @@ async def daily_market_alert_summary_job(context: ContextTypes.DEFAULT_TYPE):
         lines = build_market_alert_message(
             stocks_위험, stocks_경고, stocks_주의,
             prev_위험, prev_경고, prev_주의,
-            price_cache, today, analyze_release, fmt_marcap, _xkrx,
+            price_cache, today, analyze_release, analyze_escalation, fmt_marcap, _xkrx,
         )
 
         _save_alert({
