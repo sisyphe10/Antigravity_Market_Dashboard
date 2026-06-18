@@ -639,76 +639,221 @@ def _save_alert(data):
         json.dump(data, f, ensure_ascii=False)
 
 
+IMMINENT_BDAYS = 3  # 탈출임박 임계: 판단일이 오늘 기준 3영업일 이내(도달 포함)
+_CAT_TAG = {'위험': '[위험]', '경고': '[경고]', '주의': '[주의]'}
+
+
+def _sessions_until(판단일_str, today_str, _xkrx):
+    """today(미포함)~판단일(포함) 남은 KRX 세션 수.
+    반환: None(판단일 미상) | 0(이미 도달=today 이전/당일) | n>=1(D-n 미래)."""
+    import pandas as pd
+    if not 판단일_str or 판단일_str == '-':
+        return None
+    try:
+        d_target = pd.Timestamp(판단일_str)
+        d_today = pd.Timestamp(today_str)
+    except Exception:
+        return None
+    if d_target <= d_today:
+        return 0
+    next_day = d_today + pd.Timedelta(days=1)
+    try:
+        return len(_xkrx.sessions_in_range(next_day, d_target))
+    except Exception:
+        return None
+
+
+def build_market_alert_message(stocks_위험, stocks_경고, stocks_주의,
+                               prev_위험, prev_경고, prev_주의,
+                               price_cache, today, analyze_release, fmt_marcap, _xkrx):
+    """3블록(신규/탈출임박/전체현황) 메시지 라인 리스트 생성. 드라이런/잡 공용."""
+    esc = _html.escape
+
+    def fmt_line(s):
+        name = esc(s['name'])
+        mcap = esc(fmt_marcap(s['marcap']))
+        line = f"• {name} / {mcap}"
+        if s.get('warn_type') == '투자경고 지정예고':
+            line = f"<u>{line}</u>"
+        return line
+
+    def tagged_line(s):
+        return f"{fmt_line(s)} {_CAT_TAG[s['_cat']]}"
+
+    # 카테고리 태그 부여 + 신규여부 마킹
+    for s in stocks_위험:
+        s['_cat'] = '위험'
+        s['_new'] = s['name'] not in prev_위험
+    for s in stocks_경고:
+        s['_cat'] = '경고'
+        s['_new'] = s['name'] not in prev_경고
+    for s in stocks_주의:
+        s['_cat'] = '주의'
+        s['_new'] = s['name'] not in prev_주의
+
+    all_stocks = stocks_위험 + stocks_경고 + stocks_주의
+
+    # 같은 종목명이 여러 카테고리에 동시 지정될 수 있음(예: 투자경고+투자주의).
+    # 통합 신규/임박 블록에서는 종목당 1회만, 더 높은 심각도 카테고리로 표시.
+    _SEV = {'위험': 3, '경고': 2, '주의': 1}
+
+    def _dedup_by_name(items, key=lambda x: x):
+        """심각도 높은 순으로 종목명당 1건만 유지 (순서 보존)."""
+        best = {}
+        for it in items:
+            s = key(it)
+            nm = s['name']
+            if nm not in best or _SEV[s['_cat']] > _SEV[best[nm][0]['_cat']]:
+                best[nm] = (s, it)
+        return [it for (_s, it) in best.values()]
+
+    # ── 탈출임박 판정 ──────────────────────────────────────────
+    category_of = {'위험': '투자위험', '경고': '투자경고', '주의': '투자주의'}
+    imminent = []  # (s, label)
+    for s in all_stocks:
+        # 결정 B(2026-06-18): 탈출임박은 경고·위험만. 투자주의는 5영업일 자동해제라
+        # '임박' 행동가치가 낮고 신규/전체현황에 이미 노출되므로 임박 블록에서 제외.
+        if s['_cat'] == '주의':
+            continue
+        category = category_of[s['_cat']]
+        price_df = price_cache.get(s['code']) if s.get('code') else None
+        판단일, current_price, target_price, is_15d_high, _ = analyze_release(s, price_df, category)
+        left = _sessions_until(판단일, today, _xkrx)
+        if left is None:
+            continue
+        판단일_이내 = (left == 0) or (1 <= left <= IMMINENT_BDAYS)
+        if not 판단일_이내:
+            continue
+        if category != '투자주의':
+            price_ok = (current_price is not None and target_price is not None
+                        and current_price <= target_price and not is_15d_high)
+            if not price_ok:
+                continue
+        # 근거 라벨
+        md = 판단일[5:] if 판단일 and 판단일 != '-' else '?'
+        when = f"판단일 도달({md})" if left == 0 else f"D-{left}({md})"
+        if category != '투자주의' and current_price is not None and target_price is not None:
+            label = f"{when} · {current_price:,}원 ≤ {target_price:,}원"
+        else:
+            label = when
+        imminent.append((s, label))
+
+    # ── 신규 블록 ──────────────────────────────────────────────
+    new_stocks = _dedup_by_name([s for s in all_stocks if s['_new']])
+    new_stocks.sort(key=lambda x: (x.get('marcap') or 0), reverse=True)
+    new_block = []
+    if new_stocks:
+        new_block.append("")
+        new_block.append("<b>🆕 신규 등록</b>")
+        for s in new_stocks:
+            new_block.append(tagged_line(s))
+
+    # ── 탈출임박 블록 ──────────────────────────────────────────
+    imminent = _dedup_by_name(imminent, key=lambda x: x[0])
+    imminent.sort(key=lambda x: (x[0].get('marcap') or 0), reverse=True)
+    imm_block = []
+    if imminent:
+        imm_block.append("")
+        imm_block.append("<b>⏰ 탈출 임박</b>")
+        for s, label in imminent:
+            mark = " 🆕" if s['_new'] else ""
+            imm_block.append(f"{tagged_line(s)}{mark} · {label}")
+
+    # ── 전체 현황 블록 ─────────────────────────────────────────
+    def render_category(stocks, header):
+        if not stocks:
+            return []
+        out = ["", f"<b><u>[{header}]</u></b>"]
+        for s in sorted(stocks, key=lambda x: (x.get('marcap') or 0), reverse=True):
+            out.append(fmt_line(s))
+        return out
+
+    lines = [f"<b><u>투자유의종목 현황</u></b> ({today})"]
+    lines.extend(new_block)
+    lines.extend(imm_block)
+    lines.extend(["", "━━━━━━━━━━━━━━", "<b>📋 전체 현황</b>"])
+    lines.extend(render_category(stocks_위험, '투자위험'))
+    lines.extend(render_category(stocks_경고, '투자경고'))
+    lines.extend(render_category(stocks_주의, '투자주의'))
+    return lines
+
+
+def collect_market_alert_data():
+    """KIND 수집 + 시총필터 + 경고/위험 주가 fetch. 드라이런/잡 공용.
+    반환: (stocks_위험, stocks_경고, stocks_주의, price_cache, today,
+           analyze_release, fmt_marcap, _xkrx)"""
+    sys.path.insert(0, os.path.join(DASHBOARD_DIR, 'execution'))
+    from create_market_alert import (
+        get_session, fetch_category, parse_stocks, load_krx_data,
+        fmt_marcap, fetch_all_prices, analyze_release, _xkrx, _kis_fetch_marcap,
+    )
+
+    now_kst = datetime.datetime.now(tz=KST)
+    today = now_kst.strftime('%Y-%m-%d')
+    start_90 = (now_kst - datetime.timedelta(days=90)).strftime('%Y-%m-%d')
+    start_10 = (now_kst - datetime.timedelta(days=10)).strftime('%Y-%m-%d')
+
+    krx_data = load_krx_data()
+    session = get_session()
+
+    stocks_주의 = parse_stocks(fetch_category(session, '투자주의', start_10, today), '투자주의', krx_data)
+    seen = {}
+    for s in stocks_주의:
+        if s['name'] not in seen or s['designation_date'] > seen[s['name']]['designation_date']:
+            seen[s['name']] = s
+    stocks_주의 = list(seen.values())
+
+    stocks_경고 = parse_stocks(fetch_category(session, '투자경고', start_90, today), '투자경고', krx_data)
+    stocks_위험 = parse_stocks(fetch_category(session, '투자위험', start_90, today), '투자위험', krx_data)
+
+    # KIS 시총 보강 (지정 종목 한정) — FDR marcap 폴백.
+    # FDR StockListing('KRX') 엔드포인트 장애 시 marcap=None → 전 종목 필터 탈락 →
+    # 빈 메시지 발송되는 취약점 방지. HTML 생성기(create_market_alert)와 동일 소스(KIS hts_avls 억원).
+    if _kis_fetch_marcap:
+        _all = stocks_주의 + stocks_경고 + stocks_위험
+        _codes = [s['code'] for s in _all if s.get('code')]
+        try:
+            _kis_mc = _kis_fetch_marcap(_codes)
+        except Exception as e:
+            _kis_mc = {}
+            logging.warning(f"Market alert KIS marcap 보강 실패 → FDR marcap 유지: {e}")
+        for s in _all:
+            v = _kis_mc.get(s.get('code'))
+            if v:
+                s['marcap'] = v
+
+    # 시총 1000억 이상만
+    MIN_MARCAP = 1000
+    stocks_주의 = [s for s in stocks_주의 if s.get('marcap') and s['marcap'] >= MIN_MARCAP]
+    stocks_경고 = [s for s in stocks_경고 if s.get('marcap') and s['marcap'] >= MIN_MARCAP]
+    stocks_위험 = [s for s in stocks_위험 if s.get('marcap') and s['marcap'] >= MIN_MARCAP]
+
+    # 주가 fetch는 경고/위험만 (투자주의는 가격 무관, 판단일만 사용)
+    # T2(지정일 전 15거래일)까지 필요 → 120일 (지정일 최대 90일 전 + 15거래일 여유)
+    codes_pw = [s['code'] for s in (stocks_경고 + stocks_위험) if s.get('code')]
+    price_cache = fetch_all_prices(codes_pw, days_back=120) if codes_pw else {}
+
+    return (stocks_위험, stocks_경고, stocks_주의, price_cache, today,
+            analyze_release, fmt_marcap, _xkrx)
+
+
 async def daily_market_alert_summary_job(context: ContextTypes.DEFAULT_TYPE):
-    """매일 05:15 투자유의종목 텔레그램 요약 알림"""
+    """매일 05:15 투자유의종목 텔레그램 요약 알림 (신규/탈출임박/전체현황 3블록)"""
     logging.info("Market alert summary job started")
     try:
-        sys.path.insert(0, os.path.join(DASHBOARD_DIR, 'execution'))
-        from create_market_alert import (
-            get_session, fetch_category, parse_stocks, load_krx_data,
-            fmt_marcap
-        )
-        esc = _html.escape
+        (stocks_위험, stocks_경고, stocks_주의, price_cache, today,
+         analyze_release, fmt_marcap, _xkrx) = collect_market_alert_data()
 
-        now_kst = datetime.datetime.now(tz=KST)
-        today = now_kst.strftime('%Y-%m-%d')
-        start_90 = (now_kst - datetime.timedelta(days=90)).strftime('%Y-%m-%d')
-        start_10 = (now_kst - datetime.timedelta(days=10)).strftime('%Y-%m-%d')
-
-        krx_data = load_krx_data()
-        session = get_session()
-
-        stocks_주의 = parse_stocks(fetch_category(session, '투자주의', start_10, today), '투자주의', krx_data)
-        seen = {}
-        for s in stocks_주의:
-            if s['name'] not in seen or s['designation_date'] > seen[s['name']]['designation_date']:
-                seen[s['name']] = s
-        stocks_주의 = list(seen.values())
-
-        stocks_경고 = parse_stocks(fetch_category(session, '투자경고', start_90, today), '투자경고', krx_data)
-        stocks_위험 = parse_stocks(fetch_category(session, '투자위험', start_90, today), '투자위험', krx_data)
-
-        # 시총 1000억 이상만
-        MIN_MARCAP = 1000
-        stocks_주의 = [s for s in stocks_주의 if s.get('marcap') and s['marcap'] >= MIN_MARCAP]
-        stocks_경고 = [s for s in stocks_경고 if s.get('marcap') and s['marcap'] >= MIN_MARCAP]
-        stocks_위험 = [s for s in stocks_위험 if s.get('marcap') and s['marcap'] >= MIN_MARCAP]
-
-        # 이전 리스트와 비교
         prev = _load_prev_alert()
         prev_위험 = set(prev.get('위험', []))
         prev_경고 = set(prev.get('경고', []))
         prev_주의 = set(prev.get('주의', []))
 
-        def fmt_line(s):
-            name = esc(s['name'])
-            mcap = esc(fmt_marcap(s['marcap']))
-            line = f"• {name} / {mcap}"
-            if s.get('warn_type') == '투자경고 지정예고':
-                line = f"<u>{line}</u>"
-            return line
-
-        def render_category(stocks, prev_set, header):
-            if not stocks:
-                return []
-            sorted_stocks = sorted(stocks, key=lambda x: (x.get('marcap') or 0), reverse=True)
-            new_stocks = [s for s in sorted_stocks if s['name'] not in prev_set]
-            existing_stocks = [s for s in sorted_stocks if s['name'] in prev_set]
-            out = ["", f"<b><u>[{header}]</u></b>"]
-            if new_stocks:
-                out.append("(신규)")
-                for s in new_stocks:
-                    out.append(fmt_line(s))
-                if existing_stocks:
-                    out.append("----")
-            for s in existing_stocks:
-                out.append(fmt_line(s))
-            return out
-
-        lines = [f"<b><u>투자유의종목 현황</u></b> ({today})"]
-        lines.extend(render_category(stocks_위험, prev_위험, '투자위험'))
-        lines.extend(render_category(stocks_경고, prev_경고, '투자경고'))
-        lines.extend(render_category(stocks_주의, prev_주의, '투자주의'))
+        lines = build_market_alert_message(
+            stocks_위험, stocks_경고, stocks_주의,
+            prev_위험, prev_경고, prev_주의,
+            price_cache, today, analyze_release, fmt_marcap, _xkrx,
+        )
 
         _save_alert({
             '위험': [s['name'] for s in stocks_위험],
