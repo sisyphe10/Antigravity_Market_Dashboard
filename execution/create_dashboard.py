@@ -3402,9 +3402,10 @@ def create_cumulative_aum_chart():
 
 
 def create_wrap_monthly_returns_table():
-    """RETURN 섹션: 일반형 3종 월별·연간 수익률 캘린더 (토글로 상품 전환).
-    행=연도, 열=1~12월+연간. 월말 NAV 기준 월수익률, 연간=월수익률 복리(누적 NAV와 정확히 일치).
-    상품: 삼성 트루밸류 / NH 다이내믹밸류 일반형(Value ESG) / DB 개방형(개방형 랩). 기본=삼성 트루밸류.
+    """RETURN 섹션: 일반형 3종 + KOSPI/KOSDAQ 월별·연간 수익률 캘린더 (토글로 상품 전환).
+    행=연도, 열=1~12월+연간. 월말 NAV(지수) 기준 월수익률, 연간=월수익률 복리(누적 NAV와 정확히 일치).
+    상품: 삼성 트루밸류 / NH 다이내믹밸류 일반형(Value ESG) / DB 개방형(개방형 랩) / KOSPI / KOSDAQ. 기본=삼성 트루밸류.
+    KOSPI/KOSDAQ는 기준가 시트의 동일 컬럼(상단 RETURN 표와 동일 소스)을 월말 리샘플하여 표시.
     색상은 MONTHLY RETURNS 표와 동일(양수 빨강/음수 파랑, 강도 3단계)."""
     try:
         nav_file = 'Wrap_NAV.xlsx'
@@ -3417,7 +3418,9 @@ def create_wrap_monthly_returns_table():
         df = df.set_index('Date').sort_index()
         products = [('삼성 트루밸류', '트루밸류'),
                     ('NH 다이내믹밸류 일반형', 'Value ESG'),
-                    ('DB 개방형', '개방형 랩')]
+                    ('DB 개방형', '개방형 랩'),
+                    ('KOSPI', 'KOSPI'),
+                    ('KOSDAQ', 'KOSDAQ')]
         MONTHS = list(range(1, 13))
 
         def color_bg(pct):
