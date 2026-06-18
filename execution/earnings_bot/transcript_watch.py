@@ -30,8 +30,11 @@ logger = logging.getLogger(__name__)
 
 # attempt 스케줄 — 시간 단위 (event 시각 기준 누적)
 ATTEMPT_SCHEDULE_HOURS = [0, 8, 24, 48, 72, 120, 168, 336]
-# 8회 시도 후 stale_pending → 30일 후 gave_up
-STALE_RETENTION_DAYS = 30
+# 자동 해결 불가 잡 → filed_at 기준 일수 경과 시 gave_up (다이제스트에서 제거).
+# stale_pending은 8회 소진(≈14일) 후 진입하므로 21일이면 진입 후 ~1주 grace.
+STALE_RETENTION_DAYS = 21          # stale_pending (cap 소진)
+LOWCONF_RETENTION_DAYS = 21        # low_confidence (cap 직전 안전망)
+NEEDS_REVIEW_RETENTION_DAYS = 45   # needs_review (수동 override 대기 — 더 길게)
 
 # 컨퍼런스콜이 없는 공시 subtype — transcript 큐 enqueue 제외 (불필요한 parse_failed 방지).
 # 실적(8-K_EARNINGS/6-K_QUARTERLY)·IR Day(웹캐스트 transcript 가능)만 enqueue.
@@ -188,19 +191,25 @@ def _process_one(job: dict, sources: Sequence[TranscriptSource]) -> None:
 
 
 def cleanup_stale(now: datetime | None = None) -> int:
-    """stale_pending 잡 중 event_time + STALE_RETENTION_DAYS 초과 → gave_up."""
+    """자동 해결 불가 잡(stale_pending/low_confidence/needs_review)을 filed_at 기준
+    일정 기간 경과 시 gave_up 으로 전이 → 다이제스트 '미해결' 무한 노출 방지.
+
+    needs_review 는 수동 override 대기 상태라 더 긴 유예(45일)를 둔다."""
     now = now or _utcnow()
-    cutoff = now - timedelta(days=STALE_RETENTION_DAYS)
+    cut_stale = (now - timedelta(days=STALE_RETENTION_DAYS)).isoformat()
+    cut_lowconf = (now - timedelta(days=LOWCONF_RETENTION_DAYS)).isoformat()
+    cut_needs = (now - timedelta(days=NEEDS_REVIEW_RETENTION_DAYS)).isoformat()
     conn = db.get_conn()
     try:
         rows = conn.execute(
             """
             SELECT j.id FROM transcript_jobs j
             JOIN filings f ON j.filing_id = f.id
-            WHERE j.last_status = 'stale_pending'
-              AND f.filed_at < ?
+            WHERE (j.last_status = 'stale_pending'  AND f.filed_at < ?)
+               OR (j.last_status = 'low_confidence' AND f.filed_at < ?)
+               OR (j.last_status = 'needs_review'   AND f.filed_at < ?)
             """,
-            (cutoff.isoformat(),),
+            (cut_stale, cut_lowconf, cut_needs),
         ).fetchall()
         ids = [r['id'] for r in rows]
         if ids:

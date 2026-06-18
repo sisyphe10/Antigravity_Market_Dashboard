@@ -152,12 +152,31 @@ def make_event_from_filing(filing_row: dict, ticker_meta: dict | None = None) ->
 
     expected_title_terms = []
     if fy and fq:
+        ordinal = ["first", "second", "third", "fourth"][fq - 1]
         expected_title_terms.extend([
             f'Q{fq} {fy}',
-            f'{fq}Q{fy % 100}',
-            f'{["first","second","third","fourth"][fq-1]} quarter {fy}',
-            f'Q{fq} FY{fy % 100}',
+            f'{fq}Q{fy % 100:02d}',
+            f'{ordinal} quarter {fy}',
+            f'Q{fq} FY{fy % 100:02d}',
+            f'Q{fq} FY{fy}',            # 4자리 FY 표기 ("Q1 FY2026") substring 매칭용
         ])
+        # 비-캘린더 FY 기업(LULU=1월, TPR=6월 등)은 transcript 소스가 회사 FY를
+        # 다르게 표기할 수 있음(우리 fy=2027인데 소스는 "Q1 FY2026"). fy±1 변형 추가로
+        # 연도 표기 컨벤션 불일치를 흡수. date_delta(±1일) 가중치가 엉뚱한 연도
+        # transcript fetch를 막아 회귀 위험은 낮음.
+        try:
+            from .. import ticker_registry as _tr
+            _fy_end_month = _tr.get_fiscal_year_end_month(ticker)
+        except Exception:
+            _fy_end_month = 12
+        if _fy_end_month != 12:
+            for alt_fy in (fy - 1, fy + 1):
+                expected_title_terms.extend([
+                    f'Q{fq} {alt_fy}',
+                    f'Q{fq} FY{alt_fy}',
+                    f'Q{fq} FY{alt_fy % 100:02d}',
+                    f'{fq}Q{alt_fy % 100:02d}',
+                ])
 
     return EarningsEvent(
         ticker=ticker,

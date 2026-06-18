@@ -111,15 +111,23 @@ def build_morning_digest(now: datetime | None = None) -> str:
             else:
                 white.append(entry)
 
-        # Section 2. 미해결 transcript 큐
-        backlog = conn.execute(
-            """SELECT j.ticker, j.last_status, j.attempt_count, j.last_error,
-                      f.filed_at
+        # Section 2. 미해결 transcript 큐 — '재시도 중'과 '보류·수동대기' 분리.
+        # 보류 = stale_pending(8회 소진)·needs_review(수동 override 대기): 자동 재시도 없음.
+        backlog_active = conn.execute(
+            """SELECT j.ticker, j.last_status, j.attempt_count, j.last_error, f.filed_at
                FROM transcript_jobs j JOIN filings f ON j.filing_id = f.id
-               WHERE j.last_status NOT IN ('success', 'gave_up')
-               ORDER BY f.filed_at DESC LIMIT 30""",
+               WHERE j.last_status NOT IN ('success', 'gave_up',
+                                           'stale_pending', 'needs_review')
+               ORDER BY f.filed_at DESC LIMIT 20""",
         ).fetchall()
-        backlog = [dict(r) for r in backlog]
+        backlog_active = [dict(r) for r in backlog_active]
+        backlog_manual = conn.execute(
+            """SELECT j.ticker, j.last_status, j.attempt_count, j.last_error, f.filed_at
+               FROM transcript_jobs j JOIN filings f ON j.filing_id = f.id
+               WHERE j.last_status IN ('stale_pending', 'needs_review')
+               ORDER BY f.filed_at DESC LIMIT 20""",
+        ).fetchall()
+        backlog_manual = [dict(r) for r in backlog_manual]
 
         # Section 3. 다음 7일 예정
         upcoming = conn.execute(
@@ -154,23 +162,37 @@ def build_morning_digest(now: datetime | None = None) -> str:
     if sub_blocks:
         lines.append('\n\n'.join(sub_blocks))
 
-    lines.extend(['', f'━━ 미해결 ({len(backlog)}건) ━━'])
-    if backlog:
-        for r in backlog[:15]:
-            try:
-                filed_dt = datetime.fromisoformat(
-                    r['filed_at'].replace('Z', '+00:00') if r['filed_at'] else ''
-                )
-                age_days = (now - filed_dt).days
-            except Exception:
-                age_days = '?'
+    def _age_days(filed_at):
+        try:
+            filed_dt = datetime.fromisoformat(
+                filed_at.replace('Z', '+00:00') if filed_at else ''
+            )
+            return (now - filed_dt).days
+        except Exception:
+            return '?'
+
+    lines.extend(['', f'━━ 재시도 중 ({len(backlog_active)}건) ━━'])
+    if backlog_active:
+        for r in backlog_active[:12]:
+            age_days = _age_days(r['filed_at'])
             stale = ' [stale]' if isinstance(age_days, int) and age_days >= STALE_DAYS else ''
             lines.append(
                 f"  • [{r['ticker']}] {age_days}일 전, "
-                f"{r['attempt_count']}회 재시도, {r['last_status']}{stale}"
+                f"{r['attempt_count']}회차, {r['last_status']}{stale}"
             )
-        if len(backlog) > 15:
-            lines.append(f'  ... 외 {len(backlog) - 15}건')
+        if len(backlog_active) > 12:
+            lines.append(f'  ... 외 {len(backlog_active) - 12}건')
+
+    if backlog_manual:
+        lines.extend(['', f'━━ 보류·수동대기 ({len(backlog_manual)}건) ━━'])
+        for r in backlog_manual[:12]:
+            age_days = _age_days(r['filed_at'])
+            lines.append(
+                f"  • [{r['ticker']}] {age_days}일째, "
+                f"{r['attempt_count']}회 소진, {r['last_status']} — 수동확인 필요"
+            )
+        if len(backlog_manual) > 12:
+            lines.append(f'  ... 외 {len(backlog_manual) - 12}건')
 
     lines.extend(['', f'━━ 예정 ({len(upcoming)}건) ━━'])
     if upcoming:
