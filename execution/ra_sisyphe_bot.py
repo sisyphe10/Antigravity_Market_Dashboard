@@ -1092,7 +1092,7 @@ def render_disclosures_message(items, today):
     lines = [f"<b><u>{date_label} 공시 {total}건</u></b>"]
     for name in grp_order:
         rows = groups[name]
-        lines.append(f"• <b><u>{esc(name)}</u></b> ({len(rows)})")
+        lines.append(f"• {esc(name)} ({len(rows)})")
         for it in rows:
             src = (it.get('source') or 'DART').upper()
             badge = '🟦KIND' if src == 'KIND' else '🟧DART'
