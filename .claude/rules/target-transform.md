@@ -1,190 +1,146 @@
 # 목표전환형 랩 추가/제거 SOP
 
-목표전환형 시리즈는 운용 개시 → 목표달성 → 청산을 반복하는 단기 랩 상품. 매번 동일한 9개 파일 매핑이 필요해서 이 문서로 표준화.
+목표전환형 시리즈는 **운용 개시 → 목표달성 → 청산**을 반복하는 단기 랩 상품. NH/DB가 **항상 페어**로 동시 출시·청산된다. 손댈 곳이 **7개 파일 ~13곳**에 흩어져 있어 한두 곳만 빠뜨려도 차트/표가 어긋난다. 그래서 이 문서로 표준화한다.
 
-## 입력 받을 정보 (사용자에게 확인)
+> 실행 커맨드: **`/목표전환형 생성 ...`** / **`/목표전환형 청산 ...`** (`.claude/commands/목표전환형.md`)
 
-추가 시 반드시 확인할 4가지:
-1. **상품명**: 예) `목표전환형 2호` (Wrap_NAV.xlsx 컬럼명 그대로)
-2. **표시명**: 예) `NH 목표전환형 2호` (대시보드/텔레그램 표기)
-3. **운용 개시일**: 예) `2026-04-29`
-4. **운용 개시 AUM**: 예) `237억원` → 23,700,000,000원
-5. **색상**: NH = `#0072CE`, DB = (별도, 1차/2차 케이스 참고)
+---
 
-## 추가 워크플로 (운용 개시)
+## ★ 누락 방지 1순위 규칙 — grep으로 전수 확인
 
-### Step 1. Wrap_NAV.xlsx 데이터 (사용자 + Claude 협업)
+줄 번호는 코드가 자라면서 계속 밀린다. **외우지 말고 직전 회차명을 grep해서 손댈 곳을 한 번에 찾는다.**
 
-**사용자 작업** (대개 먼저 완료):
-- `NEW` 시트: `날짜, 증권사, 상품명, 업종, 코드, 종목, 비중` 형식으로 종목 입력 + push
-  - 종목별 한 행. 예: `2026-04-29, NH, 목표전환형 2호, 반도체, 5930, 삼성전자, 10`
-  - 비중 합계 ≤ 100% (현금 비중 = 100 - 합계)
+```bash
+# 청산/추가 직전, 직전(또는 현재) 회차명으로 전 파일 스캔
+git grep -n '목표전환형 5차' origin/main -- '*.py'
+# create_dashboard.py 가 제일 위험(6곳) → 따로 한 번 더
+git grep -n '목표전환형' origin/main -- 'execution/create_dashboard.py'
+```
 
-**Claude 작업**:
-- `AUM` 시트에 행 추가: `날짜=운용 개시일, 증권사=NH/DB, 상품명, AUM=원 단위 정수`
-  ```python
-  new_row = pd.DataFrame([{
-      '날짜': pd.Timestamp('YYYY-MM-DD'),
-      '증권사': 'NH',  # 또는 'DB'
-      '상품명': '목표전환형 N호',
-      'AUM': N_억 * 100_000_000,
-  }])
-  ```
-- `기준가` 시트는 calculate_wrap_nav.py가 자동 생성 (Step 3에서)
+NH/DB 둘 다 처리했는지, 13곳이 다 잡혔는지 매칭한다.
 
-### Step 2. 코드 9곳 매핑 추가
+---
 
-| # | 파일 | 위치 | 추가 내용 |
+## 손대야 하는 13곳 (현재 origin 기준, 줄 번호는 참고용)
+
+| # | 파일 | 위치(변수) | 추가(생성) / 주석·제거(청산) |
 |---|---|---|---|
-| 1 | `calculate_wrap_nav.py` | `portfolio_config` 딕셔너리 | `'목표전환형 N호': {'base_price': 1000.00, 'start_date': 'YYYY-MM-DD'}` |
-| 2 | `calculate_returns.py` | `ytd_base_dates` 딕셔너리 | `'목표전환형 N호': '운용 개시일'` (YTD = 운용 개시일) |
-| 3 | `execution/create_dashboard.py` | `wrap_keywords` 리스트 (~L205) | `'목표전환형 N호'`, `'NH 목표전환형 N호'` |
-| 4 | `execution/create_dashboard.py` | `chart_series` (`_build_wrap_chart_section`, ~L810) | `('NH 목표전환형 N호', '목표전환형 N호')` |
-| 5 | `execution/create_dashboard.py` | `chart_colors` 딕셔너리 (~L817) | `'NH 목표전환형 N호': '#0072CE'` |
-| 6 | `execution/create_dashboard.py` | `create_wrap_returns_table()` items (~L1560) | `('NH 목표전환형 N호', '목표전환형 N호')` |
-| 7 | `execution/create_portfolio_tables.py` | `PORTFOLIO_DISPLAY_NAMES` (~L21) | `'목표전환형 N호': 'NH 목표전환형 N호'` |
-| 7-2 | `execution/create_portfolio_tables.py` | `PORTFOLIO_GROUPS`의 목표전환형 그룹 `sources` 리스트 | `'목표전환형 N호'` 추가 (아래 "포트폴리오 그룹 묶음" 참고) |
-| 8 | `execution/daily_portfolio_report.py` | `nav_map` (~L71) + `display_names` (~L208) + product list 2곳 (~L100, L214) | 각각 매핑 + 'KOSPI' 앞에 추가 |
-| 9 | `execution/draw_wrap_charts.py` | `PORTFOLIO_NAMES` (~L40) | `'목표전환형 N호': 'NH 목표전환형 N호'` |
-| 10 | `execution/create_dashboard.py` | `create_order_section()` 안의 `ORDER_PORTFOLIOS` 배열 | `{ display: 'NH/DB 목표전환형 N호', jsonKey: 'NH 목표전환형 2호 / DB 목표전환형 3차', template: '자문지/...xlsx' }` 추가 |
-| 11 | `자문지/` 폴더 | 자문지 .xlsx 템플릿 | 새 운용 개시 시 자문지 양식 1개 추가 (R6 헤더 + R7~ 종목, F=변경전, G=변경후, H=주문구분, I=추천사유) |
+| 1 | `calculate_wrap_nav.py` | `portfolio_config` (~L40) | `'목표전환형 N': {'base_price':1000.00,'start_date':'YYYY-MM-DD'}` |
+| 2 | `calculate_returns.py` | `ytd_base_dates` (~L16) | `'목표전환형 N': 'YYYY-MM-DD'` (YTD=개시일) |
+| 3 | `execution/create_dashboard.py` | `wrap_keywords` (~L377) | `'목표전환형 N'`, `'NH/DB 목표전환형 N'` |
+| 4 | `execution/create_dashboard.py` | `chart_series` (~L2515) | `('NH 목표전환형 N','목표전환형 N')` |
+| 5 | `execution/create_dashboard.py` | `chart_colors` (~L2527) | NH=`#0072CE` / DB=`#00854A` |
+| 6 | `execution/create_dashboard.py` | `ORDER_PORTFOLIOS` (~L3779) | `jsonKey`(페어명) + **자문지 .xlsx 경로**(NH·DB 각 1줄) |
+| 7 | `execution/create_dashboard.py` | `TARGET_TABS` (~L4094) | `'NH 목표전환형 N'` (목표전환형 이메일 양식 적용 탭) |
+| 8 | `execution/create_dashboard.py` | 최종저장 `confirm` 문구 (~L4750) | 안내문 상품 목록 갱신 (일반형/DB N차/NH N호) |
+| 9 | `execution/create_portfolio_tables.py` | `PORTFOLIO_DISPLAY_NAMES` (~L24) | `'목표전환형 N':'NH/DB 목표전환형 N'` |
+| 10 | `execution/create_portfolio_tables.py` | `PORTFOLIO_GROUPS` 2번째 그룹 (~L347) | `sources` 추가 + `combined` 페어명 갱신 |
+| 11 | `execution/daily_portfolio_report.py` | `nav_map`(L110)·`display_names`(L305)·**product 리스트 2곳**(L144,L317) | 매핑 + product 리스트는 'KOSPI' 앞에 |
+| 12 | `execution/draw_wrap_charts.py` | `PORTFOLIO_NAMES` (~L40) | `'목표전환형 N':'NH/DB 목표전환형 N'` |
+| 13 | `add_aum.py` | `ACTIVE_TARGET_TRANSFORM` (~L46) | `{'NH':'목표전환형 N호','DB':'목표전환형 N차'}` |
 
-## 포트폴리오 그룹 묶음 (중요)
+**청산 전용 추가 작업** (생성 시엔 없음):
+- `execution/create_portfolio_tables.py` `EXCLUDED_PORTFOLIOS` 집합(~L35)에 회차명 **추가**
+- `calculate_wrap_nav.py` 상단 **완료 이력 주석 블록**(~L13)에 한 줄 추가
 
-`PORTFOLIO_GROUPS` (create_portfolio_tables.py)는 **동일 종목/비중을 공유하는 포트폴리오를 한 묶음으로 표시**하기 위한 일반화된 정의:
+**건드리지 않는 것**:
+- `_build...` **NH 1호 전용 차트**(create_dashboard.py ~L2790)는 historical 하드코딩 → 신규/청산 회차와 무관.
+- AUM 표·누적 AUM 차트는 `'목표전환형'` substring으로 동적 처리 → 회차별 매핑 불필요.
+- (구) AUM **입력** 패널(`create_aum_section`의 `AUM_PRODUCTS`)은 **2026-06-19 제거됨** → 더 이상 touchpoint 아님.
 
+---
+
+## 포트폴리오 그룹 (`PORTFOLIO_GROUPS`, create_portfolio_tables.py)
+
+동일 종목/비중을 공유하는 포트폴리오를 한 묶음으로 표시하는 정의:
 ```python
 PORTFOLIO_GROUPS = [
-    {
-        'sources': ['트루밸류', 'Value ESG', '개방형 랩'],  # 일반형 3개 (영구 운용)
-        'combined': '삼성 트루밸류 / NH Value ESG / DB 개방형',
-        'use': '트루밸류',  # 종목 데이터 가져올 출처
-    },
-    {
-        'sources': ['목표전환형 2호', '목표전환형 3차'],  # 출시-청산 반복하는 단기 랩
-        'combined': 'NH 목표전환형 2호 / DB 목표전환형 3차',
-        'use': '목표전환형 2호',
-    },
+    { 'sources': ['트루밸류','Value ESG','개방형 랩'], 'combined': '삼성 트루밸류 / NH Value ESG / DB 개방형', 'use': '트루밸류' },  # 일반형(영구)
+    { 'sources': ['목표전환형 5차','목표전환형 4호'], 'combined': 'NH 목표전환형 4호 / DB 목표전환형 5차', 'use': '목표전환형 5차' },  # 단기 랩(현재 페어)
 ]
 ```
+- 새 페어 출시: `sources`에 두 회차 추가 + `combined` 페어명 갱신.
+- 청산: `sources`에서 제거(또는 `EXCLUDED_PORTFOLIOS`로 차단).
+- `ORDER_PORTFOLIOS`의 `jsonKey`는 `combined`와 정확히 일치해야 한다 (`portfolio_data.json` 키).
 
-### 그룹 구조 원칙
-- **일반형 그룹**: 영구 운용되는 3개 (삼성 트루밸류 / NH Value ESG / DB 개방형). 셋이 항상 동일 종목/비중으로 운영됨.
-- **목표전환형 그룹**: 출시 → 목표달성 → 청산을 반복하는 단기 랩들. 매번 NH/DB 페어로 동시 출시되며 같은 종목/비중으로 묶음 운영.
+---
 
-### 새 목표전환형 출시 시 작업
-- `PORTFOLIO_GROUPS`의 두 번째 그룹 `sources`에 새 상품명 추가만 하면 됨 (예: `['목표전환형 2호', '목표전환형 3차', '목표전환형 4호']`)
-- `combined`에는 새 페어가 시작될 때 갱신 (예: 4호+5차 페어 시작 시 `'NH 목표전환형 4호 / DB 목표전환형 5차'`)
-- 청산 완료된 회차는 sources에서 제거 (또는 `EXCLUDED_PORTFOLIOS`로 처리)
+## 입력 받을 정보 (생성 시 사용자 확인)
 
-### portfolio_data.json 키 → ORDER 탭 jsonKey 매칭
-| 그룹 | portfolio_data.json 키 |
-|---|---|
-| 일반형 | `삼성 트루밸류 / NH Value ESG / DB 개방형` |
-| 목표전환형 | `NH 목표전환형 2호 / DB 목표전환형 3차` (현재 페어) |
+1. **상품명**: `목표전환형 N호`(NH) / `목표전환형 N차`(DB) — Wrap_NAV.xlsx 컬럼명 그대로
+2. **표시명**: `NH 목표전환형 N호`, `DB 목표전환형 N차`
+3. **운용 개시일**(YYYY-MM-DD), **개시 AUM**(억원)
+4. **색상**: NH `#0072CE` / DB `#00854A`
+5. **자문지 템플릿 파일명** (`자문지/` 폴더)
 
-ORDER 탭 (`create_order_section`)의 `ORDER_PORTFOLIOS` 배열에서 각 항목의 `jsonKey`는 위 표의 합쳐진 키를 가리켜야 함.
+---
 
-### Step 3. 실행 순서 (의존 체인)
+## 🟢 생성(운용 개시) 워크플로
 
+### Step 1. 데이터 (`Wrap_NAV.xlsx`)
+- `NEW` 시트(보통 사용자): `날짜, 증권사, 상품명, 업종, 코드, 종목, 비중` 종목별 1행. 비중합 ≤100(나머지 현금).
+- `AUM` 시트(Claude): 개시일 행 `{날짜=Timestamp, 증권사, 상품명, AUM=원 단위 정수}`.
+- `기준가`/`수익률`은 자동 생성.
+
+### Step 2. 코드 13곳 활성 항목 추가 (위 표)
+- `자문지/` 폴더에 새 자문지 템플릿 .xlsx 1개 추가(6번이 가리키는 경로). R6 헤더 + R7~ 종목(F=변경전, G=변경후, H=주문구분, I=추천사유).
+
+### Step 3. 실행 (의존 체인 순서 엄수)
 ```bash
-# 1. 기준가 시트 자동 갱신 (신규 컬럼 자동 감지)
 PYTHONIOENCODING=utf-8 python calculate_wrap_nav.py
-
-# 2. 수익률 시트 갱신
 PYTHONIOENCODING=utf-8 python calculate_returns.py
-
-# 3. portfolio_data.json 갱신
 PYTHONIOENCODING=utf-8 python execution/create_portfolio_tables.py
-
-# 4. HTML 재생성 (wrap, market, index 등 동시)
 PYTHONIOENCODING=utf-8 python execution/create_dashboard.py
 ```
+- 개시일이 주말/공휴일이면 calculate_wrap_nav가 데이터 못 만들 수 있음 → 다음 거래일 재실행.
+- KST 15시 이전이면 당일 미반영(검증 실패 경고 무시 가능, 16시 이후 재실행).
 
-### Step 4. 검증 (verify_before_done 룰)
+### Step 4. 검증 (`wrap.html` grep, 4개 다 나와야 함)
+- `data-series="NH 목표전환형 N"` (CHART 사이드바)
+- `class="rt-name">NH 목표전환형 N` (RETURN 테이블)
+- `<td>NH</td><td>목표전환형 N</td>` (AUM 테이블)
+- `portfolio-title">NH 목표전환형 N` (PORTFOLIO 종목 테이블)
+- 모든 .py `compile()` syntax 검증.
 
-- [ ] `wrap.html`에서 다음이 모두 보이는지 grep:
-  - `data-series="NH 목표전환형 N호"` (CHART 사이드바)
-  - `class="rt-name">NH 목표전환형 N호` (RETURN 테이블)
-  - `<td>NH</td><td>목표전환형 N호</td><td>N억</td>` (AUM 테이블)
-  - `<h3 class="portfolio-title">NH 목표전환형 N호` (PORTFOLIO 종목 테이블)
-- [ ] 모든 파일 syntax 검증 (`compile()`)
+### Step 5. Push + 라이브 검증
+- 코드(.py) + 재생성 HTML + Wrap_NAV.xlsx push → 라이브 wrap.html에서 마커 재확인.
 
-### Step 5. Push + VM 동기화
+---
 
-```bash
-git add Wrap_NAV.xlsx calculate_*.py execution/*.py featured.html market.html portfolio_data.json universe.html wrap.html
-git commit -m "Add NH 목표전환형 N호 (운용 개시 YYYY-MM-DD, N억원)"
-git push origin main
+## 🔴 청산(목표달성/상환) 워크플로
 
-# VM 동기화 (deploy.sh 또는 직접)
-ssh ubuntu@VM 'cd /home/ubuntu/Antigravity_Market_Dashboard && git fetch origin main && git reset --hard origin/main && sudo systemctl restart sisyphe-bot'
-```
+### Step 1. 시점 — ★장 마감 후
+- **반드시 당일 최종 NAV 산출(~16:00~16:30 KST) 이후** 진행. 목표 도달 당일에 전일값으로 동결하면 청산수익률이 부정확.
+- 거래일 = 개시일~청산일 양끝 포함 영업일 수. **청산일 = `기준가` 시트 마지막 기록일.**
 
-## 제거 워크플로 (운용 종료)
+### Step 2. 코드 13곳 전부 **주석 처리**(삭제 아님 — 이력 보존)
+- 1·2·9·11·12·13: 활성 줄 → `# … # 완료 (YYYY-MM-DD 청산, +N%)`
+- 3·4·5: 해당 항목 제거/주석
+- 6·7·8: `ORDER_PORTFOLIOS` 페어 제거 + `TARGET_TABS` 비우기 + confirm 문구 일반형만으로
+- 10: `PORTFOLIO_GROUPS` sources에서 제거
+- **EXCLUDED_PORTFOLIOS(~L35)에 회차명 추가**
+- `calculate_wrap_nav.py` 상단 이력 블록에 한 줄: `# [N호 NH 목표전환형] 개시 ~ 청산 / 청산 기준가 1,0XX.XX (+N% 목표달성)`
+- `add_aum.py` ACTIVE_TARGET_TRANSFORM: 해당 증권사 줄 주석 (이후 그 전환형 AUM 입력은 에러나야 정상)
 
-목표 달성 또는 청산 시. 참고: `43869e39` 커밋 패턴.
+### Step 3. 데이터 보존 (★사용자 명시 지시)
+- `Wrap_NAV.xlsx`의 `기준가 / 수익률 / NEW / AUM` 시트는 **전부 그대로 둔다.** 화면에서만 빠지고 기록은 남는다.
+- AUM 표는 EXCLUDED 필터 없지만, 청산 다음 영업일 AUM엔 그 상품이 없어 최신 날짜 기준 자동으로 표에서 빠진다.
 
-### Step 1. portfolio_config / 매핑 주석 처리
+### Step 4. 실행·검증·Push (생성과 동일 체인)
+- 재생성 후 `wrap.html`에서 해당 회차 마커 **0** + 잔존 상품 정상 확인 → push → 라이브 검증.
 
-각 파일에서 추가 시 들어간 매핑을 **주석으로 변경** (삭제 아님 — 이력 보존):
+---
 
-```python
-# calculate_wrap_nav.py
-# '목표전환형 N호': {'base_price': 1000.00, 'start_date': 'YYYY-MM-DD'},  # N호 완료 (목표달성, YYYY-MM-DD 청산)
+## 실행 환경·안전 수칙
 
-# calculate_returns.py
-# '목표전환형 N호': 'YYYY-MM-DD',  # 완료
+- **로컬 작업트리는 오염/divergeed** → 항상 **origin/main 기준 격리 worktree**에서 작업: `git worktree add --detach /c/agdeploy_wt origin/main` (★`C:\Users\user` 밖이어야 함). [[project_antigravity_local_safe_push]]
+- ★★**시크릿 스캔 훅 함정**: worktree가 추가 작업디렉토리로 잡히면 그 안의 `execution/kis_token.py`가 스캔 범위에 들어와 **모든 텍스트 응답이 차단**된다(stop_secret_scan.ps1). 대응: worktree 생성 직후 또는 push 완료 후, **텍스트 응답을 내기 전에** `rm -f /c/agdeploy_wt/execution/kis_token.py` (코드 재생성에는 불필요). [[feedback_large_dump_secret_match]]
+- Push는 fast-forward 우선, origin 진행 시 `git merge --no-edit origin/main` 후 재푸시. `[skip ci]`로 장중 무거운 daily_crawl 기동 회피(단, `.claude/**`만 바뀌면 daily_crawl 트리거 안 됨).
+- 배포 금지창 **16:00~17:00 KST**(VM cron race) — VM 배포(deploy.sh) 시. 순수 push는 무관하나 라이브 검증 타이밍 유의. [[feedback_bot_deploy_safety]]
+- 로컬 시계 9h 오차 가능 → 시각 판단은 VM `TZ=Asia/Seoul date`로.
 
-# create_portfolio_tables.py
-# '목표전환형 N호': 'NH 목표전환형 N호',  # 완료
-EXCLUDED_PORTFOLIOS = {..., '목표전환형 N호'}  # 추가
-
-# daily_portfolio_report.py
-# 'NH 목표전환형 N호': '목표전환형 N호',  # 완료
-
-# draw_wrap_charts.py
-# '목표전환형 N호': 'NH 목표전환형 N호',  # 완료
-```
-
-### Step 2. create_dashboard.py 매핑 4곳 제거
-
-- `wrap_keywords`: `'목표전환형 N호'`, `'NH 목표전환형 N호'` 제거
-- `chart_series`: 해당 튜플 제거
-- `chart_colors`: 해당 키 제거
-- `create_wrap_returns_table()` items: 해당 튜플 제거
-
-### Step 3. 청산 정보 메모 (`calculate_wrap_nav.py` 상단)
-
-```python
-# ── 완료된 목표전환형 이력 ───────────────────────────────
-# [N호 NH 목표전환형] YYYY-MM-DD ~ YYYY-MM-DD
-#   시작 기준가: 1,000.00 / 청산 기준가: ~1,XXX.XX (N% 목표달성)
-# ─────────────────────────────────────────────────────────
-```
-
-### Step 4. 실행 + Push
-
-```bash
-python execution/create_portfolio_tables.py  # portfolio_data.json에서 자동 제외
-python execution/create_dashboard.py
-git commit -m "Remove completed portfolio: NH 목표전환형 N호 (목표달성 YYYY-MM-DD)"
-git push
-# VM 동기화
-```
-
-`Wrap_NAV.xlsx`의 `기준가/수익률/NEW/AUM` 시트는 **건드리지 않음** (역사 데이터 보존).
-
-## 자주 하는 실수 / 주의사항
-
-- 매핑 9곳 중 하나라도 빠지면 표시 누락 발생. **체크리스트로 전수 확인**.
-- AUM 시트는 `날짜` 컬럼이 datetime 타입이어야 함 (`pd.Timestamp` 사용).
-- 운용 개시일이 거래일 아니면(주말/공휴일) calculate_wrap_nav.py가 데이터 못 만들 수 있음 → 다음 거래일에 다시 실행.
-- KST 15시 이전이면 당일 데이터 미반영 → "검증 실패" 경고는 무시 가능 (다음 16시 이후 다시 실행하면 채워짐).
-- `wrap_keywords`는 substring 매칭이라 다른 컬럼에 영향 가능. 새 명칭 추가 시 기존 컬럼명과 충돌 없는지 확인.
-
-## 참고 커밋
-
-- 추가 패턴: `7ced629e` (1호 추가), `ca48b432` (2차 추가), `f808da21` (1호 차트 추가)
-- 제거 패턴: `43869e39` (1호+2차 동시 제거)
-- 색상 변경: `f808da21`에 1호 색상 결정 흔적
+## 참고 커밋·임계값
+- 추가: `7ced629e`(1호), `ca48b432`(2차), `f808da21`(1호 차트/색상)
+- 제거: `43869e39`(1호+2차 동시 제거 페어 패턴)
+- 청산 임계값(명목, 수수료·성과급 차감 전): **NH 6.5% / DB 7.5%** [[project_antigravity_target_transform_thresholds]]
+- 청산 이력: [[project_wrap_liquidation_history]]
