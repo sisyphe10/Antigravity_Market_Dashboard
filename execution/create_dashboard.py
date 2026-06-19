@@ -682,9 +682,8 @@ def create_monthly_returns_table():
     if not indices or not rows:
         return ''
 
-    # 컬럼 너비 (table width 900px 기준):
-    #   연도 + 월 합산 120px → 각 60px (6.6667%)
-    #   인덱스 11개 = 나머지 780px → 각 70.91px (7.8788%)
+    # 컬럼 너비 (비율 %, 표 width와 무관하게 자동 스케일 — 표 1000px):
+    #   연도/월 각 6.6667% (=60/900), 인덱스 11개 각 7.8788% (=780/11/900). 합 100%.
     YEAR_MONTH_COL_W = f'{60 / 900 * 100:.4f}%'
     IDX_COL_W = f'{780 / 11 / 900 * 100:.4f}%'
 
@@ -801,11 +800,11 @@ def create_monthly_returns_table():
     html = f"""
         <div class="category-section">
             <h2 class="category-title">MONTHLY RETURNS</h2>
-            <div style="display:flex;justify-content:flex-end;width:900px;max-width:100%;margin:0 auto 8px;">
+            <div style="display:flex;justify-content:flex-end;width:1000px;max-width:100%;margin:0 auto 8px;">
                 <button onclick="downloadElementImage('mrTableWrap','Monthly_Returns')" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
             </div>
             <div id="mrTableWrap" style="overflow-x:auto;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);padding:16px;width:fit-content;max-width:100%;margin:0 auto;">
-                <table style="width:900px;max-width:100%;border-collapse:separate;border-spacing:0;font-size:14px;font-family:inherit;table-layout:fixed;margin:0 auto;border:2px solid #1f2937;box-sizing:border-box;">
+                <table style="width:1000px;max-width:100%;border-collapse:separate;border-spacing:0;font-size:14px;font-family:inherit;table-layout:fixed;margin:0 auto;border:2px solid #1f2937;box-sizing:border-box;">
                     <thead><tr>{head_cells}</tr></thead>
                     <tbody>
 {body_rows_html}                    </tbody>
@@ -3402,10 +3401,11 @@ def create_cumulative_aum_chart():
 
 
 def create_wrap_monthly_returns_table():
-    """RETURN 섹션: 일반형 3종 + KOSPI/KOSDAQ 월별·연간 수익률 캘린더 (토글로 상품 전환).
-    행=연도, 열=1~12월+연간. 월말 NAV(지수) 기준 월수익률, 연간=월수익률 복리(누적 NAV와 정확히 일치).
-    상품: KOSPI / KOSDAQ / 삼성 트루밸류 / NH 다이내믹밸류 일반형(Value ESG) / DB 개방형(개방형 랩). 기본=KOSPI.
-    KOSPI/KOSDAQ는 기준가 시트의 동일 컬럼(상단 RETURN 표와 동일 소스)을 월말 리샘플하여 표시.
+    """RETURN 섹션: 일반형 3종 + KOSPI/KOSDAQ 월별·연간 캘린더 (지표 토글: 수익률/MDD, 상품 토글).
+    행=연도, 열=1~12월+연간. 수익률=월말 NAV(지수) 기준 월수익률, 연간=월수익률 복리(누적 NAV와 정확히 일치).
+    MDD=월 내 최대낙폭(매월 고점 리셋, 일별 cummax), 연간=그 해 전체 최대낙폭(연 내 cummax). 부호 음수.
+    상품: KOSPI / KOSDAQ / 삼성 트루밸류 / NH 다이내믹밸류 일반형(Value ESG) / DB 개방형(개방형 랩). 기본=KOSPI·수익률.
+    KOSPI/KOSDAQ는 기준가 시트의 동일 컬럼(상단 RETURN 표와 동일 소스)을 사용.
     색상은 MONTHLY RETURNS 표와 동일(양수 빨강/음수 파랑, 강도 3단계)."""
     try:
         nav_file = 'Wrap_NAV.xlsx'
@@ -3436,6 +3436,37 @@ def create_wrap_monthly_returns_table():
         TD = ('padding:9px 4px;text-align:center;border:1px solid #e5e7eb;'
               'font-variant-numeric:tabular-nums;font-size:12px;color:#000;white-space:nowrap;')
 
+        def build_body(years, month_map, annual_map, is_mdd):
+            """연×월 캘린더 tbody. is_mdd=False: 연간=월수익률 복리. True: 연간=annual_map(연내 MDD)."""
+            bdy = ''
+            for y in years:
+                row = f'<td style="{TD}font-weight:700;">{y}</td>'
+                comp = 1.0
+                has = False
+                for m in MONTHS:
+                    if m in month_map.get(y, {}):
+                        pct = month_map[y][m]
+                        sign, bg = color_bg(pct)
+                        row += f'<td style="{TD}background:{bg};">{sign}{pct:.1f}%</td>'
+                        comp *= (1 + pct / 100)
+                        has = True
+                    else:
+                        row += f'<td style="{TD}">&nbsp;</td>'
+                if not has:
+                    ann = None
+                elif is_mdd:
+                    ann = annual_map.get(y)
+                else:
+                    ann = (comp - 1) * 100
+                if ann is not None:
+                    sign, bg = color_bg(ann)
+                    row += (f'<td style="{TD}font-weight:700;background:{bg};'
+                            f'border-left:2px solid #1f2937;">{sign}{ann:.1f}%</td>')
+                else:
+                    row += f'<td style="{TD}border-left:2px solid #1f2937;">&nbsp;</td>'
+                bdy += f'<tr>{row}</tr>'
+            return bdy
+
         latest = df.index.max().strftime('%Y-%m-%d')
         panels = ''
         buttons = ''
@@ -3453,36 +3484,25 @@ def create_wrap_monthly_returns_table():
                 monthly.setdefault(dt.year, {})[dt.month] = (float(v) / prev - 1) * 100
                 prev = float(v)
             years = sorted(monthly)
+            # 월별 MDD(월 내 최대낙폭, 매월 고점 리셋) + 연간 MDD(연 내 최대낙폭). 부호 음수.
+            mdd_monthly = {}
+            for (yy, mm), grp in s.groupby([s.index.year, s.index.month]):
+                mdd_monthly.setdefault(yy, {})[mm] = float(((grp / grp.cummax() - 1.0) * 100.0).min())
+            mdd_annual = {}
+            for yy, grp in s.groupby(s.index.year):
+                mdd_annual[yy] = float(((grp / grp.cummax() - 1.0) * 100.0).min())
             head = f'<th style="{TH}width:52px;">연도</th>'
             head += ''.join(f'<th style="{TH}">{m}월</th>' for m in MONTHS)
             head += f'<th style="{TH}border-left:2px solid #1f2937;">연간</th>'
-            body = ''
-            for y in years:
-                row = f'<td style="{TD}font-weight:700;">{y}</td>'
-                comp = 1.0
-                has = False
-                for m in MONTHS:
-                    if m in monthly[y]:
-                        pct = monthly[y][m]
-                        sign, bg = color_bg(pct)
-                        row += f'<td style="{TD}background:{bg};">{sign}{pct:.1f}%</td>'
-                        comp *= (1 + pct / 100)
-                        has = True
-                    else:
-                        row += f'<td style="{TD}">&nbsp;</td>'
-                if has:
-                    ann = (comp - 1) * 100
-                    sign, bg = color_bg(ann)
-                    row += (f'<td style="{TD}font-weight:700;background:{bg};'
-                            f'border-left:2px solid #1f2937;">{sign}{ann:.1f}%</td>')
-                else:
-                    row += f'<td style="{TD}border-left:2px solid #1f2937;">&nbsp;</td>'
-                body += f'<tr>{row}</tr>'
-            disp_style = 'block' if rendered == 0 else 'none'
-            panels += (f'<div class="wmr-panel" data-prod="{i}" style="display:{disp_style};overflow-x:auto;">'
-                       f'<table style="border-collapse:collapse;width:100%;'
-                       f'font-family:inherit;table-layout:fixed;">'
-                       f'<thead><tr>{head}</tr></thead><tbody>{body}</tbody></table></div>')
+            body_ret = build_body(years, monthly, None, False)
+            body_mdd = build_body(years, mdd_monthly, mdd_annual, True)
+            for metric, bdy in (('ret', body_ret), ('mdd', body_mdd)):
+                vis = 'block' if (rendered == 0 and metric == 'ret') else 'none'
+                panels += (f'<div class="wmr-panel" data-prod="{i}" data-metric="{metric}" '
+                           f'style="display:{vis};overflow-x:auto;">'
+                           f'<table style="border-collapse:collapse;width:100%;'
+                           f'font-family:inherit;table-layout:fixed;">'
+                           f'<thead><tr>{head}</tr></thead><tbody>{bdy}</tbody></table></div>')
             btn_cls = 'wmr-btn wmr-btn-active' if rendered == 0 else 'wmr-btn'
             buttons += f'<button class="{btn_cls}" data-prod="{i}" onclick="showWmr({i})">{disp}</button>'
             rendered += 1
@@ -3490,17 +3510,34 @@ def create_wrap_monthly_returns_table():
         if rendered == 0:
             return ''
 
+        metric_buttons = (
+            '<button class="wmr-mbtn wmr-mbtn-active" data-metric="ret" '
+            "onclick=\"showWmrMetric('ret')\">수익률</button>"
+            '<button class="wmr-mbtn" data-metric="mdd" '
+            "onclick=\"showWmrMetric('mdd')\">MDD</button>")
         style = ('<style>.wmr-btn{font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;'
                  'border:1px solid #d1d5db;background:#f9fafb;color:#555;border-radius:8px;cursor:pointer;}'
-                 '.wmr-btn-active{background:#374151;color:#fff;border-color:#374151;}</style>')
-        script = ('<script>function showWmr(i){'
+                 '.wmr-btn-active{background:#374151;color:#fff;border-color:#374151;}'
+                 '.wmr-mbtn{font-family:inherit;font-size:13px;font-weight:600;padding:5px 14px;'
+                 'border:1px solid #d1d5db;background:#f9fafb;color:#555;border-radius:8px;cursor:pointer;}'
+                 '.wmr-mbtn-active{background:#0072CE;color:#fff;border-color:#0072CE;}</style>')
+        script = ('<script>var wmrProd=0,wmrMetric="ret";'
+                  'function wmrApply(){'
                   "document.querySelectorAll('.wmr-panel').forEach(function(p){"
-                  "p.style.display=(p.getAttribute('data-prod')==String(i))?'block':'none';});"
+                  "p.style.display=(p.getAttribute('data-prod')==String(wmrProd)"
+                  "&&p.getAttribute('data-metric')==wmrMetric)?'block':'none';});}"
+                  'function showWmr(i){wmrProd=i;'
                   "document.querySelectorAll('.wmr-btn').forEach(function(b){"
-                  "b.classList.toggle('wmr-btn-active', b.getAttribute('data-prod')==String(i));});}</script>")
+                  "b.classList.toggle('wmr-btn-active', b.getAttribute('data-prod')==String(i));});wmrApply();}"
+                  'function showWmrMetric(m){wmrMetric=m;'
+                  "document.querySelectorAll('.wmr-mbtn').forEach(function(b){"
+                  "b.classList.toggle('wmr-mbtn-active', b.getAttribute('data-metric')==m);});wmrApply();}</script>")
         card = (f'<div style="max-width:1000px;margin:22px auto 0;background:#fff;border-radius:10px;'
                 f'padding:16px 20px;box-shadow:0 2px 4px rgba(0,0,0,0.08);">'
-                f'<div style="font-weight:700;font-size:15px;margin-bottom:12px;">월별 수익률</div>'
+                f'<div style="display:flex;align-items:center;justify-content:space-between;'
+                f'margin-bottom:12px;flex-wrap:wrap;gap:8px;">'
+                f'<div style="font-weight:700;font-size:15px;">월별 수익률</div>'
+                f'<div style="display:flex;gap:6px;">{metric_buttons}</div></div>'
                 f'{style}'
                 f'<div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">{buttons}</div>'
                 f'{panels}</div>')
