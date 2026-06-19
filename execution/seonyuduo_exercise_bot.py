@@ -4,7 +4,7 @@
 
 특징:
   - 한 메시지에 여러 카테고리(예: 포핸드…백핸드…발리…)가 섞이면 카테고리별로 분리해 여러 행으로 기록.
-  - 담당자(TS/NY)는 보낸 사람 텔레그램 계정으로 자동 구분 (미등록 시 [TS][NY] 1회 등록).
+  - 담당자(식/여니, 내부코드 TS/NY)는 보낸 사람 텔레그램 계정으로 자동 구분 (미등록 시 [식][여니] 1회 등록).
   - "확인 후 저장": 미리보기 + [저장]/[취소]/[담당자 변경] → 저장 시 분류 결과·기록 행을 확인 메시지로 회신.
   - 그룹 채팅 지원: 미리보기 상태를 채팅 단위(chat_data)로 보관 → 그룹원 누구나 버튼 사용.
 
@@ -17,6 +17,7 @@ import html
 import json
 import logging
 import os
+import random
 import re
 import sys
 import time
@@ -62,6 +63,7 @@ TENNIS_CATEGORIES = ['포핸드', '백핸드', '슬라이스', '포핸드 발리
 EXERCISE_TYPES = ['테니스', '러닝', '워크아웃']
 WEEKDAY_KO = ['월', '화', '수', '목', '금', '토', '일']  # datetime.weekday(): 월=0
 TYPE_EMOJI = {'테니스': '🎾', '러닝': '🏃', '워크아웃': '💪'}
+WHO_LABEL = {'TS': '식', 'NY': '여니'}  # 사용자 표시용. 내부 코드/콜백/시트값/user_map 키는 TS·NY 유지
 
 PENDING_TTL = 900  # 초; 오래된 pending 정리 기준
 
@@ -70,6 +72,8 @@ REMIND_SESSIONS = 4          # 보여줄 최근 세션(=구분되는 날짜) 수
 REMIND_PER_CAT_MAX = 6       # 카테고리당 최대 표시 줄 수 (뒤 카테고리 통째 누락 방지)
 REMIND_MAXLEN = 3900         # 텔레그램 4096 한도 여유분
 REMIND_TARGET_LABEL = {'self': '본인', 'other': '상대', 'both': '둘 다'}
+FEEDBACK_TIPS_N = 3          # 자동 리마인드에 랜덤으로 붙일 피드백 개수
+FEEDBACK_TIPS_FILE = os.path.join(ROOT, 'seonyuduo_feedback_tips.json')
 
 # 가계부 지출 알림(Sisyphe 봇 → 선유듀오 이관 시)을 보낼 그룹챗 id 저장소.
 # Sisyphe 봇이 이 파일을 읽어 같은 토큰 대신 @SeonyuDuo_bot 토큰으로 전송한다.
@@ -382,7 +386,7 @@ def _format_preview(batch: dict) -> str:
     n = len(es)
     who = es[0].get('담당자', '-') if es else '-'
     head = (f"<b>운동 기록 미리보기{f' ({n}건)' if n > 1 else ''}</b>\n"
-            f"👤 {who}\n━━━━━━━━━━━━━━━\n")
+            f"[{_who_disp(who)}]\n━━━━━━━━━━━━━━━\n")
     body = '\n\n'.join(_entry_block(i, e, n) for i, e in enumerate(es, 1))
     return _warn_lines(batch) + head + body
 
@@ -392,7 +396,7 @@ def _format_saved(batch: dict, rng) -> str:
     n = len(es)
     who = es[0].get('담당자', '-') if es else '-'
     head = (f"✅ <b>운동 시트에 저장했어요{f' ({n}건)' if n > 1 else ''}</b>\n"
-            f"👤 {who}\n━━━━━━━━━━━━━━━\n")
+            f"[{_who_disp(who)}]\n━━━━━━━━━━━━━━━\n")
     body = '\n\n'.join(_entry_block(i, e, n) for i, e in enumerate(es, 1))
     tail = ''
     if rng:
@@ -464,7 +468,7 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• <code>/ledger</code> 만 보내면 카테고리 목록 + 예산 소진율\n\n"
         "<b>🔁 복습</b>\n"
         "<code>/remind</code> — 유형·대상 골라 최근 운동 피드백 복습 (읽기 전용)\n\n"
-        "/whoami — 내 담당자(TS/NY) 확인·변경",
+        "/whoami — 내 담당자(식/여니) 확인·변경",
         parse_mode='HTML')
 
 
@@ -472,9 +476,9 @@ async def cmd_whoami(update: Update, context: ContextTypes.DEFAULT_TYPE):
     uid = str(update.effective_user.id)
     who = load_user_map().get(uid)
     kb = InlineKeyboardMarkup([[
-        InlineKeyboardButton("TS", callback_data="setwho:TS"),
-        InlineKeyboardButton("NY", callback_data="setwho:NY")]])
-    cur = f"현재 담당자: <b>{who}</b>" if who else "아직 담당자가 등록되지 않았어요."
+        InlineKeyboardButton("식", callback_data="setwho:TS"),
+        InlineKeyboardButton("여니", callback_data="setwho:NY")]])
+    cur = f"현재 담당자: <b>[{_who_disp(who)}]</b>" if who else "아직 담당자가 등록되지 않았어요."
     await update.message.reply_text(cur + "\n아래에서 선택/변경할 수 있어요.",
                                     parse_mode='HTML', reply_markup=kb)
 
@@ -658,8 +662,8 @@ async def _process_exercise_text(update, context, text: str):
     if uid not in user_map:
         context.user_data['await_register'] = batch
         kb = InlineKeyboardMarkup([[
-            InlineKeyboardButton("TS", callback_data="reg:TS"),
-            InlineKeyboardButton("NY", callback_data="reg:NY")]])
+            InlineKeyboardButton("식", callback_data="reg:TS"),
+            InlineKeyboardButton("여니", callback_data="reg:NY")]])
         await status.edit_text("처음이시네요! 담당자를 선택하세요.", reply_markup=kb)
         return
 
@@ -769,7 +773,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         m = load_user_map(); m[uid] = who; save_user_map(m)
         batch = context.user_data.pop('await_register', None)
         if not batch:
-            await q.edit_message_text(f"✅ {who}로 등록됐어요. 운동 내용을 다시 보내주세요.")
+            await q.edit_message_text(f"✅ [{_who_disp(who)}] 등록 완료. 운동 내용을 다시 보내주세요.")
             return
         for e in batch['entries']:
             e['담당자'] = who
@@ -780,7 +784,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if data.startswith("setwho:"):
         who = data.split(":", 1)[1]
         m = load_user_map(); m[uid] = who; save_user_map(m)
-        await q.edit_message_text(f"✅ 담당자를 <b>{who}</b>로 설정했어요.", parse_mode='HTML')
+        await q.edit_message_text(f"✅ 담당자 설정 완료: <b>[{_who_disp(who)}]</b>", parse_mode='HTML')
         return
 
     # /remind 흐름 (rmd:t:유형 / rmd:s:유형:target) — 멀티콜론이라 아래 split 파싱보다 먼저 처리
@@ -888,13 +892,13 @@ def _format_remind(유형: str, target: str, who_list: list, data: dict) -> str:
     테니스=TENNIS_CATEGORIES 순서, 그 외=최신 등장순. 카테고리당 최대 REMIND_PER_CAT_MAX줄,
     전체 REMIND_MAXLEN 가드 (카테고리당 캡으로 뒤 카테고리 통째 누락 방지)."""
     emoji = TYPE_EMOJI.get(유형, '🏃')
-    tgt = REMIND_TARGET_LABEL.get(target, target)
+    who_label = '[듀오]' if len(who_list) == 2 else f"[{html.escape(_who_disp(who_list[0]))}]"
     head = (f"{emoji} <b>{html.escape(유형)} · 최근 {len(data['dates'])}회 복습</b>\n"
-            f"👤 {html.escape(tgt)} ({html.escape('+'.join(who_list))})\n"
+            f"{who_label}\n"
             f"━━━━━━━━━━━━━━━\n")
     rows = data['rows']
     if not rows:
-        return head + f"📭 최근 {html.escape(유형)} 기록이 없어요."
+        return head + f"📂 최근 {html.escape(유형)} 기록 없음"
 
     default_cat = '공통' if 유형 == '테니스' else 유형
 
@@ -921,7 +925,7 @@ def _format_remind(유형: str, target: str, who_list: list, data: dict) -> str:
         for r in items[:REMIND_PER_CAT_MAX]:
             wd = _weekday_char(r['날짜'])
             date_disp = f"{r['날짜']} ({wd})" if wd else (r['날짜'] or '날짜미상')
-            who_tag = f" · {html.escape(r['담당자'])}" if len(who_list) > 1 else ''
+            who_tag = f" · {html.escape(_who_disp(r['담당자']))}" if len(who_list) > 1 else ''
             block.append(f"  · {html.escape(r['내용'] or '-')}  <i>({date_disp}{who_tag})</i>")
         if len(items) > REMIND_PER_CAT_MAX:
             block.append(f"  <i>…외 {len(items) - REMIND_PER_CAT_MAX}건</i>")
@@ -937,6 +941,28 @@ def _format_remind(유형: str, target: str, who_list: list, data: dict) -> str:
     return head + body
 
 
+def _load_feedback_tips() -> dict:
+    """유형별 큐레이션 피드백 목록 (코드 수정 없이 JSON 편집으로 추가 가능). TS/NY 공유."""
+    try:
+        with open(FEEDBACK_TIPS_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f) or {}
+    except FileNotFoundError:
+        return {}
+    except Exception as e:
+        logging.warning(f"피드백 목록 읽기 실패: {e}")
+        return {}
+
+
+def _format_feedback_tips(유형: str, n: int = FEEDBACK_TIPS_N) -> str:
+    """유형 풀에서 랜덤 n개를 뽑아 '💡 피드백' 섹션 생성. 풀이 비면(예: 워크아웃) '' 반환→섹션 생략."""
+    tips = _load_feedback_tips().get(유형, [])
+    if not tips:
+        return ''
+    chosen = random.sample(tips, min(n, len(tips)))
+    lines = '\n'.join(f"• {html.escape(t)}" for t in chosen)
+    return f"\n━━━━━━━━━━━━━━━\n📝 <b>피드백</b>\n{lines}"
+
+
 def _remind_type_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup([[
         InlineKeyboardButton("💪 워크아웃", callback_data="rmd:t:워크아웃"),
@@ -949,7 +975,7 @@ def _remind_target_keyboard(유형: str, uid: str) -> InlineKeyboardMarkup:
     me = load_user_map().get(uid)  # 등록돼 있으면 버튼에 실제 담당자 표기
     if me:
         other = 'NY' if me == 'TS' else 'TS'
-        me_lbl, other_lbl = f"👤 본인 ({me})", f"👥 상대 ({other})"
+        me_lbl, other_lbl = f"👤 본인 ({_who_disp(me)})", f"👥 상대 ({_who_disp(other)})"
     else:
         me_lbl, other_lbl = "👤 본인", "👥 상대"
     return InlineKeyboardMarkup([[
@@ -1089,6 +1115,24 @@ def _infer_cal_scope(summary: str) -> list:
     return who or ['TS', 'NY']
 
 
+def _title_with_emoji(summary: str, emoji: str) -> str:
+    """제목의 [식]/[여니] 태그는 앞에 두고, 유형 이모지는 운동명 바로 앞에 끼움.
+    예) '[여니] 테니스' → '[여니] 🎾 테니스', 태그 없으면 '🎾 테니스 레슨'. (HTML escape 포함)"""
+    s = (summary or '').strip()
+    m = re.match(r'^((?:\[[^\]]*\]\s*)+)(.*)$', s)
+    if m:
+        tags = html.escape(re.sub(r'\s+', ' ', m.group(1).strip()))
+        rest = html.escape(m.group(2).strip())
+        core = f"{emoji} {rest}".strip() if rest else emoji
+        return f"{tags} {core}".strip()
+    return f"{emoji} {html.escape(s)}".strip()
+
+
+def _who_disp(code: str) -> str:
+    """담당자 코드(TS/NY) → 사용자 표시 라벨(식/여니). 미지정/기타는 그대로."""
+    return WHO_LABEL.get(code, code)
+
+
 def _load_cal_reminded() -> dict:
     try:
         with open(CAL_REMINDED_FILE, 'r', encoding='utf-8') as f:
@@ -1139,12 +1183,15 @@ def _format_cal_digest(events: list) -> str:
     lines = [f"📅 <b>오늘의 일정</b> ({now.strftime('%Y-%m-%d')} {wd}요일)",
              "━━━━━━━━━━━━━━━"]
     for ev in events:
-        summary = html.escape(ev.get('summary') or '(제목 없음)')
+        raw_summary = ev.get('summary') or '(제목 없음)'
         sdt = _event_start_kst(ev)
         time_str = sdt.strftime('%H:%M') if sdt else '종일'
         유형 = _detect_exercise_type(ev.get('summary', ''))
-        emoji = (TYPE_EMOJI.get(유형, '') + ' ') if 유형 else ''
-        lines.append(f"• {time_str} · {emoji}{summary}")
+        if 유형:
+            title = _title_with_emoji(raw_summary, TYPE_EMOJI.get(유형, ''))
+        else:
+            title = html.escape(raw_summary)
+        lines.append(f"• {time_str} · {title}")
     return '\n'.join(lines)
 
 
@@ -1314,14 +1361,14 @@ async def cal_reminder_poll_job(context: ContextTypes.DEFAULT_TYPE):
         except Exception as e:
             logging.error(f"리마인드용 최근기록 조회 실패: {e}")
             data = {'dates': [], 'rows': []}
-        mins_left = max(0, int((sdt - now).total_seconds() // 60))
         target = 'both' if len(who_list) == 2 else who_list[0]
         emoji = TYPE_EMOJI.get(유형, '🏃')
-        header = (f"⏰ <b>{mins_left}분 후 운동 일정!</b>\n"
-                  f"{emoji} {html.escape(ev.get('summary', ''))} · {sdt.strftime('%H:%M')} 시작\n"
-                  f"━━━━━━━━━━━━━━━\n"
-                  f"💡 지난 피드백 복습하고 가요\n\n")
-        if await _cal_broadcast(context, header + _format_remind(유형, target, who_list, data)):
+        title = _title_with_emoji(ev.get('summary', ''), emoji)
+        header = (f"{title} · {sdt.strftime('%H:%M')} 시작\n"
+                  f"━━━━━━━━━━━━━━━\n\n")
+        msg = (header + _format_remind(유형, target, who_list, data)
+               + _format_feedback_tips(유형))
+        if await _cal_broadcast(context, msg):
             state[key] = time.time()
             changed = True
             logging.info(f"운동 리마인드 발송: {ev.get('summary', '')} ({유형}, {who_list})")
