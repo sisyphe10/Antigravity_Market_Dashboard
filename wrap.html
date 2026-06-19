@@ -236,11 +236,11 @@
     </div>
 
     <div id="mainContent" class="pw-hidden has-sidebar">
-    <nav class="topnav"><div class="topnav-inner"><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab active">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#aum" class="topnav-sub">AUM</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub">Index</a><a href="universe.html" class="topnav-sub">Universe</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
-    <aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="#" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="sidebar-link active">Dashboard</a><a href="#" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="sidebar-link">공시</a><a href="#" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="sidebar-link">Order</a><a href="#" onclick="wrapSwitchTab('aum');return false;" data-wrap-tab="aum" class="sidebar-link">AUM</a><a href="#" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="sidebar-link">수수료</a></aside>
+    <nav class="topnav"><div class="topnav-inner"><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab active">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub">Index</a><a href="universe.html" class="topnav-sub">Universe</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
+    <aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="#" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="sidebar-link active">Dashboard</a><a href="#" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="sidebar-link">공시</a><a href="#" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="sidebar-link">Order</a><a href="#" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="sidebar-link">수수료</a></aside>
     <header>
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-06-19 10:15:54 KST</div>
+        <div class="last-updated">Updated: 2026-06-19 10:45:21 KST</div>
     </header>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -554,7 +554,10 @@
         })();
         </script>
         <div class="category-section">
-            <h2 class="category-title">AUM</h2>
+            <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;max-width:1800px;margin-left:auto;margin-right:auto;">
+                <h2 class="category-title" style="margin-bottom:0;flex:1;">AUM</h2>
+                <a href="https://raw.githubusercontent.com/sisyphe10/Antigravity_Market_Dashboard/main/Wrap_NAV.xlsx" download="Wrap_NAV.xlsx" target="_blank" style="flex-shrink:0;font-family:inherit;font-size:14px;font-weight:600;padding:8px 16px;background:#dc2626;color:#fff;text-decoration:none;border-radius:8px;white-space:nowrap;">Wrap_NAV 다운로드</a>
+            </div>
             <div style="display:flex;gap:100px;align-items:flex-start;max-width:1800px;margin:0 auto;">
                 <div style="width:370px;">
                     <table class="portfolio-table aum-aligned" style="white-space:nowrap;width:370px;table-layout:fixed;">
@@ -2701,231 +2704,6 @@
     
     </div>
 
-    <div id="wrapPanelAUM" style="padding-top:24px;display:none;max-width:1800px;margin:0 auto;">
-    
-        <div id="aumContent"><div style="text-align:center;color:#888;padding:40px;">로딩 중...</div></div>
-        <script>
-        // name = AUM 시트 상품명 (NEW 시트와 다를 수 있음 — NH Value ESG는 AUM 시트에서 '다이내믹밸류'로 기록)
-        var AUM_PRODUCTS = [
-            { display: '삼성 트루밸류',      broker: '삼성', name: '트루밸류' },
-            { display: 'NH Value ESG',      broker: 'NH',   name: '다이내믹밸류' },
-            { display: 'DB 개방형',         broker: 'DB',   name: '개방형 랩' },
-            { display: 'NH 목표전환형 4호', broker: 'NH',   name: '목표전환형 4호' },  // 운용 개시 2026-06-15
-        ];
-        var aumLatest = {};       // {broker|name: {date, aum}}
-        var aumInputs = {};       // {idx: 사용자 입력 (억원)}
-        var aumSelectedDate = '';  // 사용자 지정 날짜 (YYYY-MM-DD), 빈 값이면 오늘
-        var _aumLoaded = false;
-
-        function aumExtractValue(cell) {
-            // ExcelJS는 함수 셀을 {result, formula} 객체로 반환
-            if (typeof cell === 'number') return cell;
-            if (cell && typeof cell === 'object') {
-                if (typeof cell.result === 'number') return cell.result;
-                if (typeof cell.value === 'number') return cell.value;
-            }
-            if (typeof cell === 'string') {
-                var n = parseFloat(cell.replace(/,/g, ''));
-                if (!isNaN(n)) return n;
-            }
-            return null;
-        }
-
-        // KST 안전: new Date().toISOString()은 UTC 변환되어 KST 0~9시에 어제 날짜 반환됨.
-        // 로컬 getFullYear/Month/Date를 직접 사용해서 사용자 시각의 오늘로 고정.
-        function todayLocalIso() {
-            var d = new Date();
-            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-        }
-        function normalizeDateStr(s) {
-            if (typeof s !== 'string') return null;
-            var m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-            return m ? s : null;
-        }
-
-        async function loadAUM() {
-            if (_aumLoaded) return;
-            _aumLoaded = true;
-            try {
-                var url = 'https://raw.githubusercontent.com/sisyphe10/Antigravity_Market_Dashboard/main/Wrap_NAV.xlsx?cb=' + Date.now();
-                var resp = await fetch(url);
-                if (!resp.ok) throw new Error('Wrap_NAV.xlsx fetch 실패: ' + resp.status);
-                var buf = await resp.arrayBuffer();
-                var wb = new ExcelJS.Workbook();
-                await wb.xlsx.load(buf);
-                var ws = wb.getWorksheet('AUM');
-                if (!ws) throw new Error('AUM 시트가 없습니다');
-                aumLatest = {};
-                for (var r = 2; r <= ws.rowCount; r++) {
-                    var row = ws.getRow(r);
-                    var date = row.getCell(1).value;
-                    var broker = row.getCell(2).value;
-                    var product = row.getCell(3).value;
-                    var aumVal = aumExtractValue(row.getCell(4).value);
-                    if (broker && product && aumVal !== null) {
-                        var key = broker + '|' + product;
-                        var existing = aumLatest[key];
-                        if (!existing || (date && date > existing.date)) {
-                            aumLatest[key] = { date: date, aum: aumVal };
-                        }
-                    }
-                }
-                renderAUMPanel();
-            } catch(e) {
-                document.getElementById('aumContent').innerHTML = '<div style="color:#dc2626;padding:40px;text-align:center;">AUM 로드 실패: ' + e.message + '</div>';
-                console.error('loadAUM error:', e);
-                _aumLoaded = false;
-            }
-        }
-
-        function fmtAumDate(d) {
-            if (!d) return '';
-            // string 'YYYY-MM-DD' 또는 'YYYY-MM-DD...' 형태 — 정규식으로 직접 파싱 (Date 변환 우회)
-            if (typeof d === 'string') {
-                var m = d.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-                if (m) return parseInt(m[2]) + '/' + parseInt(m[3]);
-                return '';
-            }
-            if (d instanceof Date && !isNaN(d.getTime())) {
-                return (d.getMonth() + 1) + '/' + d.getDate();
-            }
-            return '';
-        }
-
-        function renderAUMPanel() {
-            var todayIso = todayLocalIso();
-            if (!normalizeDateStr(aumSelectedDate)) aumSelectedDate = todayIso;
-            var html = '<div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);max-width:900px;margin:0 auto;">';
-            html += '<div style="display:flex;align-items:center;margin-bottom:20px;gap:10px;flex-wrap:wrap;">';
-            html += '<h3 style="margin:0;font-size:18px;">AUM 입력</h3>';
-            html += '<label style="font-size:14px;color:#444;display:flex;align-items:center;gap:6px;">날짜 <input type="text" id="aumDateInput" value="' + aumSelectedDate + '" placeholder="YYYY-MM-DD" maxlength="10" onchange="formatDateInput(this)" style="font-family:inherit;font-size:14px;padding:5px 8px;border:1px solid #d1d5db;border-radius:6px;width:120px;text-align:center;"></label>';
-            html += '<a href="https://raw.githubusercontent.com/sisyphe10/Antigravity_Market_Dashboard/main/Wrap_NAV.xlsx" download="Wrap_NAV.xlsx" target="_blank" style="margin-left:auto;font-family:inherit;font-size:14px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;text-decoration:none;border-radius:8px;">Wrap_NAV 다운로드</a>';
-            html += '<button id="aumSaveBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;">저장</button>';
-            html += '</div>';
-            html += '<table style="width:100%;border-collapse:collapse;font-size:15px;">';
-            html += '<thead><tr style="border-bottom:2px solid #e5e7eb;color:#444;">';
-            html += '<th style="padding:10px;text-align:center;width:80px;white-space:nowrap;">증권사</th>';
-            html += '<th style="padding:10px;text-align:center;">상품명</th>';
-            html += '<th style="padding:10px;text-align:center;width:160px;">현재 AUM</th>';
-            html += '<th style="padding:10px;text-align:center;width:200px;">신규 AUM</th>';
-            html += '</tr></thead><tbody>';
-            AUM_PRODUCTS.forEach(function(p, i) {
-                var key = p.broker + '|' + p.name;
-                var latest = aumLatest[key];
-                var currentText = latest
-                    ? Math.round(latest.aum / 1e8).toLocaleString() + '억 (' + fmtAumDate(latest.date) + ')'
-                    : '-';
-                var placeholderVal = latest ? Math.round(latest.aum / 1e8) : '';
-                html += '<tr style="border-bottom:1px solid #eee;">';
-                html += '<td style="padding:12px;text-align:center;">' + p.broker + '</td>';
-                html += '<td style="padding:12px;text-align:center;font-weight:600;">' + p.display + '</td>';
-                html += '<td style="padding:12px;text-align:center;">' + currentText + '</td>';
-                html += '<td style="padding:12px;text-align:center;">';
-                html += '<input type="text" inputmode="decimal" data-idx="' + i + '" value="' + (aumInputs[i] || '') + '" placeholder="' + placeholderVal + '" style="width:90px;text-align:center;padding:6px 8px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;color:#000;"> 억';
-                html += '</td></tr>';
-            });
-            html += '</tbody></table></div>';
-            document.getElementById('aumContent').innerHTML = html;
-            document.querySelectorAll('#aumContent input[data-idx]').forEach(function(el) {
-                el.addEventListener('input', function(e) {
-                    var idx = parseInt(e.target.dataset.idx);
-                    aumInputs[idx] = e.target.value.trim();
-                });
-            });
-            var dateInput = document.getElementById('aumDateInput');
-            if (dateInput) {
-                dateInput.addEventListener('change', function(e) {
-                    var v = (e.target.value || '').trim();
-                    aumSelectedDate = normalizeDateStr(v) || todayLocalIso();
-                });
-            }
-            document.getElementById('aumSaveBtn').addEventListener('click', saveAUM);
-        }
-
-        // AUM 저장 → orders/aum_pending.json 누적 (GHA 16:00 KST에 Wrap_NAV.xlsx로 일괄 반영)
-        // Wrap_NAV.xlsx 동시 수정 충돌 방지 — Wrap_NAV.xlsx는 GHA만 수정
-        async function saveAUM() {
-            var pat = getGithubPat();
-            if (!pat) { alert('PAT 입력이 취소되었습니다.'); return; }
-            var changes = [];
-            AUM_PRODUCTS.forEach(function(p, i) {
-                var v = aumInputs[i];
-                if (v && parseFloat(v) > 0) {
-                    var aumValue = Math.round(parseFloat(v) * 1e8);
-                    var key = p.broker + '|' + p.name;
-                    var latest = aumLatest[key];
-                    if (latest && Math.abs(latest.aum - aumValue) < 1) return;
-                    changes.push({ broker: p.broker, product: p.name, aum: aumValue });
-                }
-            });
-            if (changes.length === 0) {
-                alert('변경할 AUM이 없습니다 (입력값이 현재값과 동일).');
-                return;
-            }
-
-            var saveDateStr = normalizeDateStr(aumSelectedDate) || todayLocalIso();
-            var apiUrl = 'https://api.github.com/repos/' + ORDER_REPO + '/contents/orders/aum_pending.json';
-            var headers = {
-                'Authorization': 'Bearer ' + pat,
-                'Accept': 'application/vnd.github+json',
-                'X-GitHub-Api-Version': '2022-11-28',
-            };
-
-            try {
-                var existing = {};
-                var sha = null;
-                var getResp = await fetch(apiUrl, { headers: headers });
-                if (getResp.ok) {
-                    var data = await getResp.json();
-                    sha = data.sha;
-                    try {
-                        existing = JSON.parse(base64ToUtf8(data.content));
-                        if (typeof existing !== 'object' || Array.isArray(existing)) existing = {};
-                    } catch(_) { existing = {}; }
-                } else if (getResp.status === 401 || getResp.status === 403) {
-                    localStorage.removeItem('github_pat');
-                    throw new Error('인증 실패 (' + getResp.status + '). PAT를 다시 입력하세요.');
-                } else if (getResp.status !== 404) {
-                    throw new Error('GET 실패: ' + getResp.status);
-                }
-
-                // 같은 날짜 + 같은 (broker, product) 덮어쓰기
-                if (!existing[saveDateStr] || !Array.isArray(existing[saveDateStr])) existing[saveDateStr] = [];
-                var dayList = existing[saveDateStr];
-                changes.forEach(function(ch) {
-                    for (var i = dayList.length - 1; i >= 0; i--) {
-                        if (dayList[i].broker === ch.broker && dayList[i].product === ch.product) {
-                            dayList.splice(i, 1);
-                        }
-                    }
-                    dayList.push(ch);
-                });
-
-                var newContent = utf8ToBase64(JSON.stringify(existing, null, 2));
-                var msg = 'AUM pending: ' + saveDateStr + ' (' + changes.length + ' products)';
-                var body = { message: msg, content: newContent };
-                if (sha) body.sha = sha;
-
-                var putResp = await fetch(apiUrl, {
-                    method: 'PUT',
-                    headers: Object.assign({}, headers, { 'Content-Type': 'application/json' }),
-                    body: JSON.stringify(body),
-                });
-                if (!putResp.ok) {
-                    var errTxt = await putResp.text();
-                    throw new Error('PUT 실패: ' + putResp.status + ' ' + errTxt.slice(0, 200));
-                }
-                alert('✅ AUM 임시 저장 완료 (' + changes.length + '건, ' + saveDateStr + ')\n\n장마감 후 16:00 KST에 자동 확정 (Wrap_NAV.xlsx에 반영)\n그 전까지 다시 저장하면 덮어쓰기됩니다.');
-                aumInputs = {};
-            } catch(e) {
-                alert('❌ AUM 저장 실패: ' + e.message);
-                console.error('saveAUM error:', e);
-            }
-        }
-        </script>
-    
-    </div>
-
     <div id="wrapPanelFee" style="padding-top:24px;display:none;max-width:1800px;margin:0 auto;">
     
         <div class="fee-subtabs">
@@ -3091,12 +2869,12 @@
         document.getElementById('mainContent').classList.remove('pw-hidden');
     }
 
-    // Order/AUM 탭 추가 비밀번호 (sha256('2026'))
+    // Order 탭 추가 비밀번호 (sha256('2026'))
     var ORDER_AUM_PW_HASH = '158a323a7ba44870f23d96f1516dd70aa48e9a72db4ebb026b0a89e212a208ab';
 
     async function checkOrderAumPw() {
         if (sessionStorage.getItem('order_aum_auth') === '1') return true;
-        var pw = prompt('Order/AUM 탭 비밀번호 입력');
+        var pw = prompt('Order 탭 비밀번호 입력');
         if (!pw) return false;
         var hash = await sha256(pw);
         if (hash === ORDER_AUM_PW_HASH) {
@@ -3108,8 +2886,8 @@
     }
 
     async function wrapSwitchTab(tab) {
-        // Order/AUM 진입 시 추가 비밀번호 체크
-        if ((tab === 'order' || tab === 'aum') && !(await checkOrderAumPw())) {
+        // Order 진입 시 추가 비밀번호 체크
+        if (tab === 'order' && !(await checkOrderAumPw())) {
             return;  // 인증 실패 시 탭 전환 취소
         }
         document.querySelectorAll('.sidebar-link[data-wrap-tab]').forEach(function(el) {
@@ -3118,11 +2896,9 @@
         document.getElementById('wrapPanelDashboard').style.display = tab === 'dashboard' ? 'block' : 'none';
         document.getElementById('wrapPanelDisclosures').style.display = tab === 'disclosures' ? 'block' : 'none';
         document.getElementById('wrapPanelOrder').style.display = tab === 'order' ? 'block' : 'none';
-        document.getElementById('wrapPanelAUM').style.display = tab === 'aum' ? 'block' : 'none';
         document.getElementById('wrapPanelFee').style.display = tab === 'fee' ? 'block' : 'none';
         if (tab === 'disclosures' && typeof loadDisclosures === 'function') loadDisclosures();
         if (tab === 'order' && typeof loadOrder === 'function') loadOrder();
-        if (tab === 'aum' && typeof loadAUM === 'function') loadAUM();
     }
 
     // 수수료 탭 내부 서브탭 (수수료율 / 매출)
@@ -3139,7 +2915,7 @@
     // 상단 네비 WRAP 드롭다운 / 타 페이지에서 wrap.html#tab 진입 시 해당 탭으로 전환
     function wrapTabFromHash() {
         var h = (location.hash || '').replace('#', '');
-        if (['dashboard', 'disclosures', 'order', 'aum', 'fee'].indexOf(h) !== -1) wrapSwitchTab(h);
+        if (['dashboard', 'disclosures', 'order', 'fee'].indexOf(h) !== -1) wrapSwitchTab(h);
     }
     window.addEventListener('hashchange', wrapTabFromHash);
     if (sessionStorage.getItem('wrap_auth') === '1') wrapTabFromHash();
