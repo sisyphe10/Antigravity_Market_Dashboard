@@ -759,6 +759,39 @@ def create_monthly_returns_table():
 
     body_rows_html = ''
     n_rows = len(rows)
+
+    def make_ytd_row(returns_map, bottom_style):
+        """'- | YTD | ...' 강조 행 (연간/누적 수익률, border-top=DARK)."""
+        def cb(name):
+            return f'border-top:{DARK};border-right:{right_border_for(name)};border-bottom:{bottom_style};'
+        c = f'<td style="padding:6px 12px;text-align:center;font-weight:700;{cb("연도")}">-</td>'
+        c += f'<td style="padding:6px 12px;text-align:center;font-weight:700;{cb("월")}">YTD</td>'
+        for name in indices:
+            v = returns_map.get(name)
+            b = cb(name)
+            if v is None:
+                c += f'<td style="padding:6px 12px;text-align:center;{b}">&nbsp;</td>'
+            else:
+                pct = v * 100
+                sign, bg = color_bg(pct)
+                c += (f'<td style="padding:6px 12px;text-align:center;font-weight:700;background:{bg};'
+                      f'color:#000;font-variant-numeric:tabular-nums;{b}">{sign}{pct:.1f}%</td>')
+        return f'<tr>{c}</tr>\n'
+
+    def annual_returns_for(year):
+        """그 해 월수익률 복리 누적 = 연간 수익률 (= 12월/전년12월 - 1)."""
+        res = {}
+        for name in indices:
+            cumul, has = 1.0, False
+            for rr in rows:
+                if rr.get('year') == year:
+                    v = rr.get('returns', {}).get(name)
+                    if v is not None:
+                        cumul *= (1 + v)
+                        has = True
+            res[name] = (cumul - 1) if has else None
+        return res
+
     for i, r in enumerate(rows):
         y = r.get('year')
         m = r.get('month')
@@ -766,10 +799,16 @@ def create_monthly_returns_table():
         month_label = f'{m}월'
         is_last_body = (i == n_rows - 1)
         next_year_changes = (not is_last_body) and rows[i + 1].get('year') != y
+        # 완료된 연도(다음 행이 다른 연도)면 그 해 12월 다음에 연간 YTD 행 삽입
+        annual_after = annual_returns_for(y) if next_year_changes else None
+        if annual_after is not None and not any(v is not None for v in annual_after.values()):
+            annual_after = None
         if is_last_body and has_ytd:
             bottom = 'none'  # 아래 YTD 행의 border-top:DARK만 보이게
+        elif annual_after is not None:
+            bottom = 'none'  # 아래 연간 YTD 행의 border-top:DARK만 보이게
         elif next_year_changes:
-            bottom = DARK  # 연도 경계 (예: 2025-12 ↔ 2026-1)
+            bottom = DARK  # 연도 경계
         else:
             bottom = LIGHT
         cells = f'<td style="padding:6px 12px;text-align:center;font-variant-numeric:tabular-nums;{cell_borders("연도", bottom)}">{y}</td>'
@@ -784,22 +823,11 @@ def create_monthly_returns_table():
                 sign, bg = color_bg(pct)
                 cells += f'<td style="padding:6px 12px;text-align:center;background:{bg};color:#000;font-variant-numeric:tabular-nums;{borders}">{sign}{pct:.1f}%</td>'
         body_rows_html += f'<tr>{cells}</tr>\n'
+        if annual_after is not None:
+            body_rows_html += make_ytd_row(annual_after, DARK_HEAVY)  # 연간 행 → 아래 굵은 선(2px)으로 다음 연도와 분리
 
     if ytd_returns:
-        def cell_borders_ytd(name):
-            return f'border-top:{DARK};border-right:{right_border_for(name)};border-bottom:{LIGHT};'
-        cells = f'<td style="padding:6px 12px;text-align:center;font-weight:700;{cell_borders_ytd("연도")}">-</td>'
-        cells += f'<td style="padding:6px 12px;text-align:center;font-weight:700;{cell_borders_ytd("월")}">YTD</td>'
-        for name in indices:
-            v = ytd_returns.get(name)
-            borders = cell_borders_ytd(name)
-            if v is None:
-                cells += f'<td style="padding:6px 12px;text-align:center;{borders}">&nbsp;</td>'
-            else:
-                pct = v * 100
-                sign, bg = color_bg(pct)
-                cells += f'<td style="padding:6px 12px;text-align:center;font-weight:700;background:{bg};color:#000;font-variant-numeric:tabular-nums;{borders}">{sign}{pct:.1f}%</td>'
-        body_rows_html += f'<tr>{cells}</tr>\n'
+        body_rows_html += make_ytd_row(ytd_returns, LIGHT)
 
     html = f"""
         <div class="category-section">
