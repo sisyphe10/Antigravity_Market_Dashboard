@@ -3404,7 +3404,7 @@ def create_cumulative_aum_chart():
 def create_wrap_monthly_returns_table():
     """RETURN 섹션: 일반형 3종 + KOSPI/KOSDAQ 월별·연간 수익률 캘린더 (토글로 상품 전환).
     행=연도, 열=1~12월+연간. 월말 NAV(지수) 기준 월수익률, 연간=월수익률 복리(누적 NAV와 정확히 일치).
-    상품: 삼성 트루밸류 / NH 다이내믹밸류 일반형(Value ESG) / DB 개방형(개방형 랩) / KOSPI / KOSDAQ. 기본=삼성 트루밸류.
+    상품: KOSPI / KOSDAQ / 삼성 트루밸류 / NH 다이내믹밸류 일반형(Value ESG) / DB 개방형(개방형 랩). 기본=KOSPI.
     KOSPI/KOSDAQ는 기준가 시트의 동일 컬럼(상단 RETURN 표와 동일 소스)을 월말 리샘플하여 표시.
     색상은 MONTHLY RETURNS 표와 동일(양수 빨강/음수 파랑, 강도 3단계)."""
     try:
@@ -3416,11 +3416,11 @@ def create_wrap_monthly_returns_table():
             return ''
         df['Date'] = pd.to_datetime(df['Date'])
         df = df.set_index('Date').sort_index()
-        products = [('삼성 트루밸류', '트루밸류'),
+        products = [('KOSPI', 'KOSPI'),
+                    ('KOSDAQ', 'KOSDAQ'),
+                    ('삼성 트루밸류', '트루밸류'),
                     ('NH 다이내믹밸류 일반형', 'Value ESG'),
-                    ('DB 개방형', '개방형 랩'),
-                    ('KOSPI', 'KOSPI'),
-                    ('KOSDAQ', 'KOSDAQ')]
+                    ('DB 개방형', '개방형 랩')]
         MONTHS = list(range(1, 13))
 
         def color_bg(pct):
@@ -3498,7 +3498,7 @@ def create_wrap_monthly_returns_table():
                   "p.style.display=(p.getAttribute('data-prod')==String(i))?'block':'none';});"
                   "document.querySelectorAll('.wmr-btn').forEach(function(b){"
                   "b.classList.toggle('wmr-btn-active', b.getAttribute('data-prod')==String(i));});}</script>")
-        card = (f'<div style="max-width:800px;margin:22px auto 0;background:#fff;border-radius:10px;'
+        card = (f'<div style="max-width:1000px;margin:22px auto 0;background:#fff;border-radius:10px;'
                 f'padding:16px 20px;box-shadow:0 2px 4px rgba(0,0,0,0.08);">'
                 f'<div style="font-weight:700;font-size:15px;margin-bottom:12px;">월별 수익률</div>'
                 f'{style}'
@@ -3522,14 +3522,14 @@ def create_wrap_returns_table():
             return ""
 
         items = [
+            ('KOSPI', 'KOSPI'),
+            ('KOSDAQ', 'KOSDAQ'),
             ('삼성 트루밸류', '트루밸류'),
             ('NH 목표전환형 4호', '목표전환형 4호'),  # 운용 개시 2026-06-15 (DB 5차 페어, 동일 구성)
             ('DB 목표전환형 5차', '목표전환형 5차'),  # 운용 개시 2026-06-12 (NH 4호 페어)
             # ('NH 목표전환형 3호', '목표전환형 3호'),  # NH 3호 완료 (2026-05-27 청산, 목표달성)
             # ('DB 목표전환형 4차', '목표전환형 4차'),  # DB 4차 완료 (2026-05-27 청산, 목표달성)
             # ('NH 목표전환형 2호', '목표전환형 2호'),  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
-            ('KOSPI', 'KOSPI'),
-            ('KOSDAQ', 'KOSDAQ'),
         ]
         periods = ['1D', '1W', '1M', '3M', '6M', '1Y', '3Y', 'YTD', 'DD']
 
@@ -3589,7 +3589,7 @@ def create_wrap_returns_table():
         return f"""
         <div class="category-section">
             <h2 class="category-title">RETURN</h2>
-            <div style="max-width:800px;margin:0 auto;background:#fff;border-radius:10px;padding:16px 20px;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
+            <div style="max-width:1000px;margin:0 auto;background:#fff;border-radius:10px;padding:16px 20px;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
                     <span style="font-size:13px;color:#555;font-weight:600;">기준일</span>
                     <button onclick="shiftReturnDate(-1)" style="border:1px solid #d1d5db;background:#f9fafb;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:12px;color:#555;">&lt;</button>
