@@ -74,6 +74,8 @@ charts/*
 !foreign_ir_sources.json
 !wics_all.json
 !kofia_stats.json
+!contribution_data.json
+!dh_codes.json
 
 # 기타
 *.bat

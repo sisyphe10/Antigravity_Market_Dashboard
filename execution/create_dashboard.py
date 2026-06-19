@@ -25,6 +25,7 @@ OUTPUT_FILE = 'market.html'
 TOP_NAV_MAIN = [
     ('wrap',         'wrap.html',          'WRAP',         [
         ('wrap_dashboard',    'wrap.html#dashboard',    'Dashboard'),
+        ('wrap_contribution', 'wrap.html#contribution', '기여도'),
         ('wrap_disclosures',  'wrap.html#disclosures',  '공시'),
         ('wrap_order',        'wrap.html#order',        'Order'),
         ('wrap_fee',          'wrap.html#fee',          '수수료'),
@@ -131,10 +132,11 @@ def sidebar_html(active=''):
 def wrap_sidebar_html():
     """Render the WRAP-specific sidebar (Dashboard / 공시 / Order / 수수료, JS tab switcher)."""
     items = [
-        ('dashboard',   'Dashboard'),
-        ('disclosures', '공시'),
-        ('order',       'Order'),
-        ('fee',         '수수료'),
+        ('dashboard',    'Dashboard'),
+        ('contribution', '기여도'),
+        ('disclosures',  '공시'),
+        ('order',        'Order'),
+        ('fee',          '수수료'),
     ]
     links = ''.join(
         f'<a href="#" onclick="wrapSwitchTab(\'{tab}\');return false;" '
@@ -5475,6 +5477,161 @@ def _build_landing_kofia_section():
     return section
 
 
+def _build_contribution_section():
+    """WRAP 기여도 탭.
+    contribution_data.json 을 탭 첫 진입 시 지연 fetch → 포트폴리오 토글 + 날짜 범위 선택 +
+    종목별/업종별 기여도(bp) + DH(구분) 집계 + 정합성 배너.
+    저장된 일별 기여도(bp)는 가산값. 선택 구간은 Cariño 연결로 종목 합이 기하 포트수익률과 정확히 일치.
+    """
+    return """
+    <div class="category-section" style="max-width:1800px;margin:0 auto;">
+      <h2 class="category-title">기여도</h2>
+      <div id="contribLoading" style="text-align:center;color:#888;padding:40px;">로딩 중...</div>
+      <div id="contribBody" style="display:none;">
+        <div id="contribPfToggle" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;"></div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+          <span style="color:#444;font-size:14px;font-weight:600;">기간</span>
+          <input type="text" id="contribStart" maxlength="10" placeholder="YYYY-MM-DD" onchange="formatDateInput(this);renderContribution()" style="font-family:inherit;font-size:13px;padding:5px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;width:115px;text-align:center;">
+          <span style="color:#888;">~</span>
+          <input type="text" id="contribEnd" maxlength="10" placeholder="YYYY-MM-DD" onchange="formatDateInput(this);renderContribution()" style="font-family:inherit;font-size:13px;padding:5px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;width:115px;text-align:center;">
+          <button onclick="contribResetRange()" style="font-family:inherit;font-size:12px;font-weight:600;padding:5px 12px;background:#f3f4f6;color:#444;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;">전체</button>
+          <span id="contribRangeHint" style="color:#888;font-size:12px;"></span>
+        </div>
+        <div id="contribBanner" style="margin-bottom:14px;"></div>
+        <div id="contribDhCard" style="margin-bottom:18px;"></div>
+        <div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;">
+          <div style="flex:2;min-width:540px;">
+            <div style="font-size:15px;font-weight:700;color:#111;margin-bottom:8px;">종목별 기여도</div>
+            <div id="contribStockTable" style="overflow-x:auto;"></div>
+          </div>
+          <div style="flex:1;min-width:300px;">
+            <div style="font-size:15px;font-weight:700;color:#111;margin-bottom:8px;">업종별 기여도</div>
+            <div id="contribSectorTable"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <style>
+      .contrib-tbl{border-collapse:separate;border-spacing:0;width:100%;font-size:13.5px;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.06);overflow:hidden;}
+      .contrib-tbl th{background:#f3f4f6;color:#444;font-weight:600;padding:9px 10px;text-align:right;white-space:nowrap;border-bottom:2px solid #e5e7eb;cursor:pointer;user-select:none;}
+      .contrib-tbl th.lft,.contrib-tbl td.lft{text-align:left;}
+      .contrib-tbl td{padding:8px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid #f0f0f0;}
+      .contrib-tbl tr:last-child td{border-bottom:none;}
+      .contrib-tbl tbody tr:hover{background:#fafafa;}
+      .contrib-pos{color:#dc2626;font-weight:600;}
+      .contrib-neg{color:#2563eb;font-weight:600;}
+      .dh-pill{display:inline-block;background:#2563eb;color:#fff;font-size:11px;font-weight:700;padding:1px 7px;border-radius:10px;}
+      .contrib-tbl tfoot td{border-top:2px solid #1f2937;font-weight:700;background:#fafafa;}
+    </style>
+    <script>
+    var CONTRIB_DATA=null, contribPf=null, contribSortKey='contrib', contribSortDir=-1;
+    async function loadContribution(){
+      if(CONTRIB_DATA) return;
+      try{
+        var resp=await fetch('contribution_data.json?cb='+Date.now());
+        if(!resp.ok) throw new Error('HTTP '+resp.status);
+        CONTRIB_DATA=await resp.json();
+        var pfs=Object.keys(CONTRIB_DATA.portfolios);
+        var tg=document.getElementById('contribPfToggle');
+        tg.innerHTML=pfs.map(function(p){return '<button class="contrib-pf-btn" data-pf="'+p+'" onclick="contribSetPf(this.dataset.pf)" style="font-family:inherit;font-size:14px;font-weight:600;padding:6px 14px;border-radius:8px;border:1px solid #d1d5db;background:#fff;color:#444;cursor:pointer;">'+p+'</button>';}).join('');
+        document.getElementById('contribLoading').style.display='none';
+        document.getElementById('contribBody').style.display='block';
+        contribSetPf(pfs[0]);
+      }catch(e){
+        document.getElementById('contribLoading').innerHTML='<span style="color:#dc2626;">기여도 데이터 로드 실패: '+e.message+'</span>';
+      }
+    }
+    function contribSetPf(pf){
+      contribPf=pf;
+      document.querySelectorAll('.contrib-pf-btn').forEach(function(b){
+        var on=b.dataset.pf===pf;
+        b.style.background=on?'#dc2626':'#fff'; b.style.color=on?'#fff':'#444'; b.style.borderColor=on?'#dc2626':'#d1d5db';
+      });
+      contribResetRange();
+    }
+    function contribResetRange(){
+      var d=CONTRIB_DATA.portfolios[contribPf];
+      document.getElementById('contribStart').value=d.dates[0];
+      document.getElementById('contribEnd').value=d.dates[d.dates.length-1];
+      document.getElementById('contribRangeHint').textContent='(데이터 '+d.dates[0]+' ~ '+d.dates[d.dates.length-1]+')';
+      renderContribution();
+    }
+    function carinoFactors(prArr){
+      var R=1,i; for(i=0;i<prArr.length;i++) R*=(1+prArr[i]); R-=1;
+      var k=Math.abs(R)<1e-12?1:Math.log(1+R)/R;
+      return prArr.map(function(pr){var kd=Math.abs(pr)<1e-12?1:Math.log(1+pr)/pr; return kd/k;});
+    }
+    function cbp(v){var c=v>=0?'contrib-pos':'contrib-neg'; return '<span class="'+c+'">'+(v>=0?'+':'')+Math.round(v).toLocaleString()+'</span>';}
+    function contribSort(key){ if(contribSortKey===key) contribSortDir*=-1; else {contribSortKey=key; contribSortDir=(key==='name'||key==='sector')?1:-1;} renderContribution(); }
+    function renderContribution(){
+      if(!CONTRIB_DATA||!contribPf) return;
+      var d=CONTRIB_DATA.portfolios[contribPf], dates=d.dates;
+      var s=document.getElementById('contribStart').value, e=document.getElementById('contribEnd').value;
+      var i0=0,i1=dates.length-1,i;
+      for(i=0;i<dates.length;i++){ if(dates[i]>=s){i0=i;break;} }
+      for(i=dates.length-1;i>=0;i--){ if(dates[i]<=e){i1=i;break;} }
+      if(i0>i1){i0=0;i1=dates.length-1;}
+      var n=i1-i0+1;
+      var prSlice=d.port_return.slice(i0,i1+1);
+      var beta=carinoFactors(prSlice);
+      var R=1; for(i=0;i<prSlice.length;i++) R*=(1+prSlice[i]); var portBp=(R-1)*10000;
+      var rows=[],sectors={},dhSum=0,dhW=0,tot=0,t,code;
+      for(code in d.stocks){
+        var st=d.stocks[code], c=st.contrib, w=st.weight, sm=0, ws=0;
+        for(t=0;t<n;t++){ sm+=c[i0+t]*beta[t]; ws+=w[i0+t]; }
+        var avgW=ws/n;
+        if(Math.abs(sm)<1e-9 && avgW<1e-9) continue;
+        rows.push({name:st.name,sector:st.sector,dh:st.dh,contrib:sm,avgW:avgW,ratio:avgW>0?sm/avgW:0});
+        tot+=sm; sectors[st.sector]=(sectors[st.sector]||0)+sm;
+        if(st.dh){ dhSum+=sm; dhW+=avgW; }
+      }
+      rows.sort(function(a,b){var av=a[contribSortKey],bv=b[contribSortKey]; if(typeof av==='string') return contribSortDir*av.localeCompare(bv,'ko'); return contribSortDir*(av-bv);});
+      // 정합성 배너
+      var resid=tot-portBp;
+      document.getElementById('contribBanner').innerHTML=
+        '<div style="background:'+(Math.abs(resid)<1?'#ecfdf5':'#fffbeb')+';border:1px solid '+(Math.abs(resid)<1?'#a7f3d0':'#fde68a')+';border-radius:8px;padding:10px 14px;font-size:13.5px;color:#111;">'
+        +'<b>정합성</b> · 종목 기여도 합 '+cbp(tot)+' bp = 포트 수익률 '+cbp(portBp)+' bp '
+        +(Math.abs(resid)<1?'✅':'(잔차 '+resid.toFixed(2)+'bp)')
+        +' &nbsp;·&nbsp; 기간 '+dates[i0]+' ~ '+dates[i1]+' ('+n+'영업일, '+(portBp/100).toFixed(2)+'%)</div>';
+      // DH 집계 카드
+      var dhShare=portBp!==0?(dhSum/portBp*100):0;
+      var dhEff=dhW>0?(dhSum/dhW):0;
+      document.getElementById('contribDhCard').innerHTML=
+        '<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px 18px;display:flex;gap:34px;flex-wrap:wrap;align-items:center;">'
+        +'<div style="font-weight:700;color:#1e40af;font-size:15px;"><span class="dh-pill">DH</span> 바이콜 기여</div>'
+        +'<div><div style="font-size:12px;color:#666;">기여도 합</div><div style="font-size:18px;font-weight:700;">'+cbp(dhSum)+' bp</div></div>'
+        +'<div><div style="font-size:12px;color:#666;">전체 대비</div><div style="font-size:18px;font-weight:700;">'+dhShare.toFixed(1)+'%</div></div>'
+        +'<div><div style="font-size:12px;color:#666;">평균비중 합</div><div style="font-size:18px;font-weight:700;">'+dhW.toFixed(1)+'%</div></div>'
+        +'<div><div style="font-size:12px;color:#666;">비중당 기여</div><div style="font-size:18px;font-weight:700;">'+cbp(dhEff)+' bp/%</div></div>'
+        +'</div>';
+      // 종목 테이블
+      function sarrow(k){return contribSortKey===k?(contribSortDir<0?' ▾':' ▴'):'';}
+      var h='<table class="contrib-tbl"><thead><tr>'
+        +'<th class="lft" onclick="contribSort(\\'dh\\')">구분'+sarrow('dh')+'</th>'
+        +'<th class="lft" onclick="contribSort(\\'name\\')">종목'+sarrow('name')+'</th>'
+        +'<th class="lft" onclick="contribSort(\\'sector\\')">업종'+sarrow('sector')+'</th>'
+        +'<th onclick="contribSort(\\'avgW\\')">평균비중%'+sarrow('avgW')+'</th>'
+        +'<th onclick="contribSort(\\'contrib\\')">기여도(bp)'+sarrow('contrib')+'</th>'
+        +'<th onclick="contribSort(\\'ratio\\')">비중당(bp/%)'+sarrow('ratio')+'</th></tr></thead><tbody>';
+      rows.forEach(function(r){
+        h+='<tr><td class="lft">'+(r.dh?'<span class="dh-pill">DH</span>':'')+'</td>'
+          +'<td class="lft">'+r.name+'</td><td class="lft" style="color:#666;">'+r.sector+'</td>'
+          +'<td>'+r.avgW.toFixed(2)+'</td><td>'+cbp(r.contrib)+'</td>'
+          +'<td>'+(Math.abs(r.avgW)>1e-9?cbp(r.ratio):'-')+'</td></tr>';
+      });
+      h+='</tbody><tfoot><tr><td class="lft"></td><td class="lft">합계</td><td></td><td></td><td>'+cbp(tot)+'</td><td></td></tr></tfoot></table>';
+      document.getElementById('contribStockTable').innerHTML=h;
+      // 업종 테이블
+      var sarr=Object.keys(sectors).map(function(k){return {sector:k,contrib:sectors[k]};}).sort(function(a,b){return b.contrib-a.contrib;});
+      var sh='<table class="contrib-tbl"><thead><tr><th class="lft">업종</th><th>기여도(bp)</th></tr></thead><tbody>';
+      sarr.forEach(function(r){ sh+='<tr><td class="lft">'+r.sector+'</td><td>'+cbp(r.contrib)+'</td></tr>'; });
+      sh+='</tbody><tfoot><tr><td class="lft">합계</td><td>'+cbp(tot)+'</td></tr></tfoot></table>';
+      document.getElementById('contribSectorTable').innerHTML=sh;
+    }
+    </script>
+    """
+
+
 def create_dashboard():
     # Check if charts directory exists
     if not os.path.exists(CHARTS_DIR):
@@ -6421,6 +6578,7 @@ def create_dashboard():
         <div id="feeSubRevenue" style="display:none;">{fee_revenue_html}</div>
     """
     disclosures_html = create_disclosures_section()
+    contribution_html = _build_contribution_section()
     wrap_page = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6629,6 +6787,10 @@ def create_dashboard():
     {wrap_html}
     </div>
 
+    <div id="wrapPanelContribution" style="padding-top:24px;display:none;">
+    {contribution_html}
+    </div>
+
     <div id="wrapPanelDisclosures" style="padding-top:24px;display:none;">
     {disclosures_html}
     </div>
@@ -6692,9 +6854,11 @@ def create_dashboard():
             el.classList.toggle('active', el.getAttribute('data-wrap-tab') === tab);
         }});
         document.getElementById('wrapPanelDashboard').style.display = tab === 'dashboard' ? 'block' : 'none';
+        document.getElementById('wrapPanelContribution').style.display = tab === 'contribution' ? 'block' : 'none';
         document.getElementById('wrapPanelDisclosures').style.display = tab === 'disclosures' ? 'block' : 'none';
         document.getElementById('wrapPanelOrder').style.display = tab === 'order' ? 'block' : 'none';
         document.getElementById('wrapPanelFee').style.display = tab === 'fee' ? 'block' : 'none';
+        if (tab === 'contribution' && typeof loadContribution === 'function') loadContribution();
         if (tab === 'disclosures' && typeof loadDisclosures === 'function') loadDisclosures();
         if (tab === 'order' && typeof loadOrder === 'function') loadOrder();
     }}
@@ -6713,7 +6877,7 @@ def create_dashboard():
     // 상단 네비 WRAP 드롭다운 / 타 페이지에서 wrap.html#tab 진입 시 해당 탭으로 전환
     function wrapTabFromHash() {{
         var h = (location.hash || '').replace('#', '');
-        if (['dashboard', 'disclosures', 'order', 'fee'].indexOf(h) !== -1) wrapSwitchTab(h);
+        if (['dashboard', 'contribution', 'disclosures', 'order', 'fee'].indexOf(h) !== -1) wrapSwitchTab(h);
     }}
     window.addEventListener('hashchange', wrapTabFromHash);
     if (sessionStorage.getItem('wrap_auth') === '1') wrapTabFromHash();

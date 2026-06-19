@@ -127,6 +127,12 @@ jobs:
         env:
            TZ: 'Asia/Seoul'
 
+      - name: Create Contribution Data (기여도 탭)
+        run: |
+          python execution/create_contribution_data.py || echo "기여도 데이터 생성 실패 (계속 진행)"
+        env:
+           TZ: 'Asia/Seoul'
+
       - name: Install Chrome (for SEIBro Selenium)
         uses: browser-actions/setup-chrome@v1
         with:
