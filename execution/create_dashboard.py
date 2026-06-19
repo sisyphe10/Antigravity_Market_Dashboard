@@ -5500,16 +5500,16 @@ def _build_contribution_section():
         <div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;">
           <div style="flex:2;min-width:480px;">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-              <div style="font-size:15px;font-weight:700;color:#111;">종목별 누적 기여도</div>
+              <div style="font-size:15px;font-weight:700;color:#111;">종목별 누적 기여도 (bp)</div>
               <div style="display:flex;gap:6px;margin-left:auto;">
                 <button id="contribFltAll" class="contrib-flt active" onclick="contribSetFilter(false)">전체</button>
-                <button id="contribFltDh" class="contrib-flt" onclick="contribSetFilter(true)"><span class="dh-pill">DH</span> 바이콜만</button>
+                <button id="contribFltDh" class="contrib-flt" onclick="contribSetFilter(true)">DH</button>
               </div>
             </div>
             <div id="contribStockTable" style="overflow-x:auto;"></div>
           </div>
           <div style="flex:1;min-width:280px;">
-            <div style="font-size:15px;font-weight:700;color:#111;margin-bottom:8px;">업종별 기여도</div>
+            <div style="font-size:15px;font-weight:700;color:#111;margin-bottom:8px;">업종별 누적 기여도 (bp)</div>
             <div id="contribSectorTable"></div>
           </div>
         </div>
@@ -5597,20 +5597,20 @@ def _build_contribution_section():
       var shownSum=0; shown.forEach(function(r){shownSum+=r.contrib;});
       function sarrow(k){return contribSortKey===k?(contribSortDir<0?' ▾':' ▴'):'';}
       var h='<table class="contrib-tbl"><thead><tr>'
-        +'<th onclick="contribSort(\\'dh\\')">구분'+sarrow('dh')+'</th>'
-        +'<th onclick="contribSort(\\'name\\')">종목'+sarrow('name')+'</th>'
         +'<th onclick="contribSort(\\'sector\\')">업종'+sarrow('sector')+'</th>'
-        +'<th onclick="contribSort(\\'contrib\\')">누적 기여도(bp)'+sarrow('contrib')+'</th></tr></thead><tbody>';
+        +'<th onclick="contribSort(\\'name\\')">종목'+sarrow('name')+'</th>'
+        +'<th onclick="contribSort(\\'contrib\\')">기여도'+sarrow('contrib')+'</th>'
+        +'<th onclick="contribSort(\\'dh\\')">구분'+sarrow('dh')+'</th></tr></thead><tbody>';
       if(!shown.length){ h+='<tr><td colspan="4" style="color:#888;padding:18px;">해당 종목 없음</td></tr>'; }
       shown.forEach(function(r){
-        h+='<tr><td>'+(r.dh?'<span class="dh-pill">DH</span>':'')+'</td>'
-          +'<td>'+r.name+'</td><td style="color:#666;">'+r.sector+'</td>'
-          +'<td>'+cbp(r.contrib)+'</td></tr>';
+        h+='<tr><td style="color:#666;">'+r.sector+'</td>'
+          +'<td>'+r.name+'</td><td>'+cbp(r.contrib)+'</td>'
+          +'<td>'+(r.dh?'<span class="dh-pill">DH</span>':'')+'</td></tr>';
       });
-      h+='</tbody><tfoot><tr><td colspan="3">'+(contribDhOnly?'DH 합계':'합계')+'</td><td>'+cbp(shownSum)+'</td></tr></tfoot></table>';
+      h+='</tbody><tfoot><tr><td colspan="2">'+(contribDhOnly?'DH 합계':'합계')+'</td><td>'+cbp(shownSum)+'</td><td></td></tr></tfoot></table>';
       document.getElementById('contribStockTable').innerHTML=h;
       var sarr=Object.keys(sectors).map(function(k){return {sector:k,contrib:sectors[k]};}).sort(function(a,b){return b.contrib-a.contrib;});
-      var sh='<table class="contrib-tbl"><thead><tr><th>업종</th><th>기여도(bp)</th></tr></thead><tbody>';
+      var sh='<table class="contrib-tbl"><thead><tr><th>업종</th><th>기여도</th></tr></thead><tbody>';
       sarr.forEach(function(r){ sh+='<tr><td>'+r.sector+'</td><td>'+cbp(r.contrib)+'</td></tr>'; });
       sh+='</tbody><tfoot><tr><td>합계</td><td>'+cbp(tot)+'</td></tr></tfoot></table>';
       document.getElementById('contribSectorTable').innerHTML=sh;
@@ -6833,8 +6833,8 @@ def create_dashboard():
     }}
 
     async function wrapSwitchTab(tab) {{
-        // Order 진입 시 추가 비밀번호 체크
-        if (tab === 'order' && !(await checkOrderAumPw())) {{
+        // Order / 기여도 진입 시 추가 비밀번호 체크 (sha256('2026'), 동일 게이트 공유)
+        if ((tab === 'order' || tab === 'contribution') && !(await checkOrderAumPw())) {{
             return;  // 인증 실패 시 탭 전환 취소
         }}
         document.querySelectorAll('.sidebar-link[data-wrap-tab]').forEach(function(el) {{
