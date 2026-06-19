@@ -4,7 +4,7 @@ RA_Sisyphe — 리서치/뉴스 알림 텔레그램 봇.
 Jobs:
   - 05:10 KST: Research Notes 헤드라인
   - 05:15 KST: 투자유의종목 일일 요약
-  - 07:00~17:00 KST (매시): WiseReport 신규 리서치 리포트
+  - 07:00~15:00 KST 매시 + 18:00 통합: WiseReport 신규 리서치 리포트
   - 18:00 KST: KNA 세계원전시장동향 신규 게시글
 
 별도 SUBSCRIBERS (subscribers_ra_sisyphe.json), 별도 락 파일.
@@ -79,7 +79,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "매일 일정:\n"
             "- 05:10 Research Notes 헤드라인\n"
             "- 05:15 투자유의종목 현황\n"
-            "- 07:00~17:00 (시간당) WiseReport 리포트\n"
+            "- 07:00~15:00 매시 + 18:00 통합 WiseReport 리포트\n"
             "- 18:00 KNA 세계원전시장동향"
         ),
     )
@@ -161,7 +161,7 @@ async def daily_headlines_job(context: ContextTypes.DEFAULT_TYPE):
 
 
 # ============================================================
-# WiseReport 리서치 리포트 알림 (07:00~17:00 매시)
+# WiseReport 리서치 리포트 알림 (07:00~15:00 매시 + 18:00 통합)
 # ============================================================
 _WISEREPORT_SENT_FILE = os.path.join(DASHBOARD_DIR, '.wisereport_sent.json')
 
@@ -1241,11 +1241,18 @@ if __name__ == "__main__":
         time=datetime.time(hour=17, minute=30, second=0, tzinfo=kst),
     )
 
-    for h in range(7, 18):
+    # 07:00~15:00 매시 정각: 장중 신규 리서치 리포트 실시간 발송
+    for h in range(7, 16):
         job_queue.run_daily(
             wisereport_job,
             time=datetime.time(hour=h, minute=0, second=0, tzinfo=kst),
         )
+    # 장 마감 후(16:00~18:00)에 나오는 리포트는 매시 발송하지 않고
+    # 18:00 에 한 번에 모아서 발송 (dedup 으로 미발송분만 통합 전송)
+    job_queue.run_daily(
+        wisereport_job,
+        time=datetime.time(hour=18, minute=0, second=0, tzinfo=kst),
+    )
 
     # ── sources.json 기반 동적 등록 ───────────────────────────────
     from sources import load_sources_config
@@ -1286,7 +1293,7 @@ if __name__ == "__main__":
     print("  - Research Notes headlines: 05:10 KST")
     print("  - Market alert summary: 05:15 KST (투자유의종목 현황)")
     print("  - 20일 신고가: 16:00 KST (newhigh_20d.json)")
-    print("  - WiseReport: 07:00~17:00 KST (hourly)")
+    print("  - WiseReport: 07:00~15:00 KST 매시 + 18:00 장마감 통합 발송")
     print("  - 해외 IR 사각지대 점검: 월요일 09:10 KST")
     for line in source_schedule_log:
         print(line)
