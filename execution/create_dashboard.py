@@ -5480,8 +5480,8 @@ def _build_landing_kofia_section():
 def _build_contribution_section():
     """WRAP 기여도 탭.
     contribution_data.json 을 탭 첫 진입 시 지연 fetch → 포트폴리오 토글 + 날짜 범위 선택 +
-    종목별/업종별 기여도(bp) + DH(구분) 집계 + 정합성 배너.
-    저장된 일별 기여도(bp)는 가산값. 선택 구간은 Cariño 연결로 종목 합이 기하 포트수익률과 정확히 일치.
+    종목별 누적 기여도(bp) + 업종별 기여도 + DH(구분) 필터.
+    저장된 일별 기여도(bp)는 가산값. 선택 구간은 Cariño 연결로 종목 합이 기하 포트수익률과 일치.
     """
     return """
     <div class="category-section" style="max-width:1800px;margin:0 auto;">
@@ -5497,14 +5497,18 @@ def _build_contribution_section():
           <button onclick="contribResetRange()" style="font-family:inherit;font-size:12px;font-weight:600;padding:5px 12px;background:#f3f4f6;color:#444;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;">전체</button>
           <span id="contribRangeHint" style="color:#888;font-size:12px;"></span>
         </div>
-        <div id="contribBanner" style="margin-bottom:14px;"></div>
-        <div id="contribDhCard" style="margin-bottom:18px;"></div>
         <div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;">
-          <div style="flex:2;min-width:540px;">
-            <div style="font-size:15px;font-weight:700;color:#111;margin-bottom:8px;">종목별 기여도</div>
+          <div style="flex:2;min-width:480px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <div style="font-size:15px;font-weight:700;color:#111;">종목별 누적 기여도</div>
+              <div style="display:flex;gap:6px;margin-left:auto;">
+                <button id="contribFltAll" class="contrib-flt active" onclick="contribSetFilter(false)">전체</button>
+                <button id="contribFltDh" class="contrib-flt" onclick="contribSetFilter(true)"><span class="dh-pill">DH</span> 바이콜만</button>
+              </div>
+            </div>
             <div id="contribStockTable" style="overflow-x:auto;"></div>
           </div>
-          <div style="flex:1;min-width:300px;">
+          <div style="flex:1;min-width:280px;">
             <div style="font-size:15px;font-weight:700;color:#111;margin-bottom:8px;">업종별 기여도</div>
             <div id="contribSectorTable"></div>
           </div>
@@ -5513,18 +5517,19 @@ def _build_contribution_section():
     </div>
     <style>
       .contrib-tbl{border-collapse:separate;border-spacing:0;width:100%;font-size:13.5px;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.06);overflow:hidden;}
-      .contrib-tbl th{background:#f3f4f6;color:#444;font-weight:600;padding:9px 10px;text-align:right;white-space:nowrap;border-bottom:2px solid #e5e7eb;cursor:pointer;user-select:none;}
-      .contrib-tbl th.lft,.contrib-tbl td.lft{text-align:left;}
-      .contrib-tbl td{padding:8px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid #f0f0f0;}
+      .contrib-tbl th{background:#f3f4f6;color:#444;font-weight:600;padding:9px 10px;text-align:center;white-space:nowrap;border-bottom:2px solid #e5e7eb;cursor:pointer;user-select:none;}
+      .contrib-tbl td{padding:8px 10px;text-align:center;white-space:nowrap;border-bottom:1px solid #f0f0f0;}
       .contrib-tbl tr:last-child td{border-bottom:none;}
       .contrib-tbl tbody tr:hover{background:#fafafa;}
       .contrib-pos{color:#dc2626;font-weight:600;}
       .contrib-neg{color:#2563eb;font-weight:600;}
       .dh-pill{display:inline-block;background:#2563eb;color:#fff;font-size:11px;font-weight:700;padding:1px 7px;border-radius:10px;}
       .contrib-tbl tfoot td{border-top:2px solid #1f2937;font-weight:700;background:#fafafa;}
+      .contrib-flt{font-family:inherit;font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:8px;border:1px solid #d1d5db;background:#fff;color:#444;cursor:pointer;}
+      .contrib-flt.active{background:#111;color:#fff;border-color:#111;}
     </style>
     <script>
-    var CONTRIB_DATA=null, contribPf=null, contribSortKey='contrib', contribSortDir=-1;
+    var CONTRIB_DATA=null, contribPf=null, contribSortKey='contrib', contribSortDir=-1, contribDhOnly=false;
     async function loadContribution(){
       if(CONTRIB_DATA) return;
       try{
@@ -5556,6 +5561,12 @@ def _build_contribution_section():
       document.getElementById('contribRangeHint').textContent='(데이터 '+d.dates[0]+' ~ '+d.dates[d.dates.length-1]+')';
       renderContribution();
     }
+    function contribSetFilter(dhOnly){
+      contribDhOnly=dhOnly;
+      document.getElementById('contribFltAll').classList.toggle('active',!dhOnly);
+      document.getElementById('contribFltDh').classList.toggle('active',dhOnly);
+      renderContribution();
+    }
     function carinoFactors(prArr){
       var R=1,i; for(i=0;i<prArr.length;i++) R*=(1+prArr[i]); R-=1;
       var k=Math.abs(R)<1e-12?1:Math.log(1+R)/R;
@@ -5572,60 +5583,36 @@ def _build_contribution_section():
       for(i=dates.length-1;i>=0;i--){ if(dates[i]<=e){i1=i;break;} }
       if(i0>i1){i0=0;i1=dates.length-1;}
       var n=i1-i0+1;
-      var prSlice=d.port_return.slice(i0,i1+1);
-      var beta=carinoFactors(prSlice);
-      var R=1; for(i=0;i<prSlice.length;i++) R*=(1+prSlice[i]); var portBp=(R-1)*10000;
-      var rows=[],sectors={},dhSum=0,dhW=0,tot=0,t,code;
+      var beta=carinoFactors(d.port_return.slice(i0,i1+1));
+      var rows=[],sectors={},code,t,tot=0;
       for(code in d.stocks){
-        var st=d.stocks[code], c=st.contrib, w=st.weight, sm=0, ws=0;
-        for(t=0;t<n;t++){ sm+=c[i0+t]*beta[t]; ws+=w[i0+t]; }
-        var avgW=ws/n;
-        if(Math.abs(sm)<1e-9 && avgW<1e-9) continue;
-        rows.push({name:st.name,sector:st.sector,dh:st.dh,contrib:sm,avgW:avgW,ratio:avgW>0?sm/avgW:0});
+        var st=d.stocks[code], c=st.contrib, w=st.weight, sm=0, held=false;
+        for(t=0;t<n;t++){ sm+=c[i0+t]*beta[t]; if(w[i0+t]>0) held=true; }
+        if(!held) continue;
+        rows.push({name:st.name,sector:st.sector,dh:st.dh,contrib:sm});
         tot+=sm; sectors[st.sector]=(sectors[st.sector]||0)+sm;
-        if(st.dh){ dhSum+=sm; dhW+=avgW; }
       }
       rows.sort(function(a,b){var av=a[contribSortKey],bv=b[contribSortKey]; if(typeof av==='string') return contribSortDir*av.localeCompare(bv,'ko'); return contribSortDir*(av-bv);});
-      // 정합성 배너
-      var resid=tot-portBp;
-      document.getElementById('contribBanner').innerHTML=
-        '<div style="background:'+(Math.abs(resid)<1?'#ecfdf5':'#fffbeb')+';border:1px solid '+(Math.abs(resid)<1?'#a7f3d0':'#fde68a')+';border-radius:8px;padding:10px 14px;font-size:13.5px;color:#111;">'
-        +'<b>정합성</b> · 종목 기여도 합 '+cbp(tot)+' bp = 포트 수익률 '+cbp(portBp)+' bp '
-        +(Math.abs(resid)<1?'✅':'(잔차 '+resid.toFixed(2)+'bp)')
-        +' &nbsp;·&nbsp; 기간 '+dates[i0]+' ~ '+dates[i1]+' ('+n+'영업일, '+(portBp/100).toFixed(2)+'%)</div>';
-      // DH 집계 카드
-      var dhShare=portBp!==0?(dhSum/portBp*100):0;
-      var dhEff=dhW>0?(dhSum/dhW):0;
-      document.getElementById('contribDhCard').innerHTML=
-        '<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px 18px;display:flex;gap:34px;flex-wrap:wrap;align-items:center;">'
-        +'<div style="font-weight:700;color:#1e40af;font-size:15px;"><span class="dh-pill">DH</span> 바이콜 기여</div>'
-        +'<div><div style="font-size:12px;color:#666;">기여도 합</div><div style="font-size:18px;font-weight:700;">'+cbp(dhSum)+' bp</div></div>'
-        +'<div><div style="font-size:12px;color:#666;">전체 대비</div><div style="font-size:18px;font-weight:700;">'+dhShare.toFixed(1)+'%</div></div>'
-        +'<div><div style="font-size:12px;color:#666;">평균비중 합</div><div style="font-size:18px;font-weight:700;">'+dhW.toFixed(1)+'%</div></div>'
-        +'<div><div style="font-size:12px;color:#666;">비중당 기여</div><div style="font-size:18px;font-weight:700;">'+cbp(dhEff)+' bp/%</div></div>'
-        +'</div>';
-      // 종목 테이블
+      var shown=contribDhOnly?rows.filter(function(r){return r.dh;}):rows;
+      var shownSum=0; shown.forEach(function(r){shownSum+=r.contrib;});
       function sarrow(k){return contribSortKey===k?(contribSortDir<0?' ▾':' ▴'):'';}
       var h='<table class="contrib-tbl"><thead><tr>'
-        +'<th class="lft" onclick="contribSort(\\'dh\\')">구분'+sarrow('dh')+'</th>'
-        +'<th class="lft" onclick="contribSort(\\'name\\')">종목'+sarrow('name')+'</th>'
-        +'<th class="lft" onclick="contribSort(\\'sector\\')">업종'+sarrow('sector')+'</th>'
-        +'<th onclick="contribSort(\\'avgW\\')">평균비중%'+sarrow('avgW')+'</th>'
-        +'<th onclick="contribSort(\\'contrib\\')">기여도(bp)'+sarrow('contrib')+'</th>'
-        +'<th onclick="contribSort(\\'ratio\\')">비중당(bp/%)'+sarrow('ratio')+'</th></tr></thead><tbody>';
-      rows.forEach(function(r){
-        h+='<tr><td class="lft">'+(r.dh?'<span class="dh-pill">DH</span>':'')+'</td>'
-          +'<td class="lft">'+r.name+'</td><td class="lft" style="color:#666;">'+r.sector+'</td>'
-          +'<td>'+r.avgW.toFixed(2)+'</td><td>'+cbp(r.contrib)+'</td>'
-          +'<td>'+(Math.abs(r.avgW)>1e-9?cbp(r.ratio):'-')+'</td></tr>';
+        +'<th onclick="contribSort(\\'dh\\')">구분'+sarrow('dh')+'</th>'
+        +'<th onclick="contribSort(\\'name\\')">종목'+sarrow('name')+'</th>'
+        +'<th onclick="contribSort(\\'sector\\')">업종'+sarrow('sector')+'</th>'
+        +'<th onclick="contribSort(\\'contrib\\')">누적 기여도(bp)'+sarrow('contrib')+'</th></tr></thead><tbody>';
+      if(!shown.length){ h+='<tr><td colspan="4" style="color:#888;padding:18px;">해당 종목 없음</td></tr>'; }
+      shown.forEach(function(r){
+        h+='<tr><td>'+(r.dh?'<span class="dh-pill">DH</span>':'')+'</td>'
+          +'<td>'+r.name+'</td><td style="color:#666;">'+r.sector+'</td>'
+          +'<td>'+cbp(r.contrib)+'</td></tr>';
       });
-      h+='</tbody><tfoot><tr><td class="lft"></td><td class="lft">합계</td><td></td><td></td><td>'+cbp(tot)+'</td><td></td></tr></tfoot></table>';
+      h+='</tbody><tfoot><tr><td colspan="3">'+(contribDhOnly?'DH 합계':'합계')+'</td><td>'+cbp(shownSum)+'</td></tr></tfoot></table>';
       document.getElementById('contribStockTable').innerHTML=h;
-      // 업종 테이블
       var sarr=Object.keys(sectors).map(function(k){return {sector:k,contrib:sectors[k]};}).sort(function(a,b){return b.contrib-a.contrib;});
-      var sh='<table class="contrib-tbl"><thead><tr><th class="lft">업종</th><th>기여도(bp)</th></tr></thead><tbody>';
-      sarr.forEach(function(r){ sh+='<tr><td class="lft">'+r.sector+'</td><td>'+cbp(r.contrib)+'</td></tr>'; });
-      sh+='</tbody><tfoot><tr><td class="lft">합계</td><td>'+cbp(tot)+'</td></tr></tfoot></table>';
+      var sh='<table class="contrib-tbl"><thead><tr><th>업종</th><th>기여도(bp)</th></tr></thead><tbody>';
+      sarr.forEach(function(r){ sh+='<tr><td>'+r.sector+'</td><td>'+cbp(r.contrib)+'</td></tr>'; });
+      sh+='</tbody><tfoot><tr><td>합계</td><td>'+cbp(tot)+'</td></tr></tfoot></table>';
       document.getElementById('contribSectorTable').innerHTML=sh;
     }
     </script>
