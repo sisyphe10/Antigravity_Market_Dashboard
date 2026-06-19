@@ -74,5 +74,5 @@ ssh ... "cd /home/ubuntu/Antigravity_Market_Dashboard && bash scripts/deploy.sh 
 ### ra-sisyphe-bot (리서치 알림)
 - 05:10 KST: Research Notes 헤드라인
 - 05:15 KST: 투자유의종목 일일 요약 (텔레그램 메시지)
-- 07:00~17:00 KST 매시 정각: WiseReport 신규 리서치 리포트
+- 07:00~15:00 KST 매시 + 18:00 통합: WiseReport 신규 리서치 리포트
 - 18:00 KST: KNA 세계원전시장동향 신규 게시글
