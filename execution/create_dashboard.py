@@ -8310,41 +8310,60 @@ def generate_hotels_html():
     unique_days = df['collected_at'].str[:10].nunique()
 
     # 시계열 차트: lead+7 호텔별 라인 (데이터 ≥ 3일 누적 시)
-    chart_html = ''
+    # Chart.js로 클라이언트 렌더 — PNG를 굽지 않는다. (매 실행마다 바이너리 PNG가
+    # 새로 생성돼 working tree에 떠 git pull/merge를 막던 충돌을 근본 제거 +
+    # 대시보드 전체 차트 방식을 Chart.js로 통일.)
+    chart_card_html = '<div class="card"><p class="note">시계열 차트는 데이터 3일 이상 누적 후 표시됩니다 (현재 %d일).</p></div>' % unique_days
     if unique_days >= 3:
-        try:
-            import matplotlib
-            matplotlib.use('Agg')
-            import matplotlib.pyplot as plt
-            from matplotlib import font_manager
-            # 한글 폰트
-            for fn in ['Malgun Gothic', 'NanumGothic', 'Noto Sans KR', 'AppleGothic']:
-                if any(fn in f.name for f in font_manager.fontManager.ttflist):
-                    plt.rcParams['font.family'] = fn
-                    break
-            plt.rcParams['axes.unicode_minus'] = False
-
-            df_lead7 = df[df['lead_days'] == 7].copy()
-            df_lead7['date'] = df_lead7['collected_at'].str[:10]
-            # 하루에 여러 번 수집된 경우 마지막 값만 (시간대별 가격 차이는 무시, 일일 최신 스냅샷 기준).
-            df_lead7 = df_lead7.sort_values('collected_at').drop_duplicates(subset=['date', 'hotel'], keep='last')
-            pivot_ts = df_lead7.pivot(index='date', columns='hotel', values='price_krw') / 1000
-
-            fig, ax = plt.subplots(figsize=(13, 6))
-            for col in pivot_ts.columns:
-                ax.plot(pivot_ts.index, pivot_ts[col], marker='o', linewidth=2, label=col)
-            ax.set_title('Hotel ADR 시계열 (lead+7일 기준, 천원)', fontsize=14, fontweight='bold')
-            ax.set_ylabel('1박 가격 (천원)')
-            ax.legend(loc='upper left', bbox_to_anchor=(1.02, 1), fontsize=9)
-            ax.grid(True, alpha=0.3)
-            plt.tight_layout()
-            os.makedirs('charts', exist_ok=True)
-            chart_path = 'charts/hotel_adr_lead7.png'
-            fig.savefig(chart_path, dpi=100, bbox_inches='tight')
-            plt.close(fig)
-            chart_html = f'<img src="{chart_path}" alt="Hotel ADR Timeseries" style="max-width:100%;border:1px solid #ddd;border-radius:8px;">'
-        except Exception as e:
-            print(f'Hotel chart 생성 실패: {e}')
+        df_lead7 = df[df['lead_days'] == 7].copy()
+        df_lead7['date'] = df_lead7['collected_at'].str[:10]
+        # 하루에 여러 번 수집된 경우 마지막 값만 (일일 최신 스냅샷 기준).
+        df_lead7 = df_lead7.sort_values('collected_at').drop_duplicates(subset=['date', 'hotel'], keep='last')
+        pivot_ts = df_lead7.pivot(index='date', columns='hotel', values='price_krw') / 1000
+        ts_labels = [str(d) for d in pivot_ts.index]
+        ts_hotels = sorted(pivot_ts.columns, key=sort_key)  # 표와 동일 정렬(도시→등급)
+        _palette = ['#1428A0', '#0072CE', '#00854A', '#E0001B', '#FF8200',
+                    '#6A1B9A', '#00838F', '#5D4037', '#C2185B', '#558B2F']
+        ts_datasets = []
+        for i, h in enumerate(ts_hotels):
+            ser = pivot_ts[h]
+            ts_datasets.append({
+                'label': h,
+                'data': [None if pd.isna(v) else round(float(v), 1) for v in ser],
+                'borderColor': _palette[i % len(_palette)],
+                'backgroundColor': _palette[i % len(_palette)],
+                'borderWidth': 2, 'pointRadius': 2, 'tension': 0.25, 'spanGaps': True,
+            })
+        _ts_json = json.dumps({'labels': ts_labels, 'datasets': ts_datasets}, ensure_ascii=False)
+        chart_card_html = ("""
+  <div class="card">
+    <h2 style="margin-top:0;font-size:1.2rem;">시계열 (lead+7일, 천원)</h2>
+    <div style="position:relative;height:420px;"><canvas id="hotelAdrChart"></canvas></div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = 2 * (window.devicePixelRatio || 1); Chart.defaults.elements.line.borderJoinStyle = 'round'; Chart.defaults.elements.line.borderCapStyle = 'round';</script>
+  <script>
+  (function(){
+    var D = __HOTEL_ADR_DATA__;
+    new Chart(document.getElementById('hotelAdrChart'), {
+      type: 'line',
+      data: {labels: D.labels, datasets: D.datasets},
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: {mode: 'index', intersect: false},
+        plugins: {
+          legend: {position: 'bottom', labels: {boxWidth: 12, font: {size: 12}}},
+          tooltip: {callbacks: {label: function(c){ return c.dataset.label + ': ' + (c.parsed.y == null ? '-' : c.parsed.y.toLocaleString() + '천원'); }}}
+        },
+        scales: {
+          x: {grid: {display: false}, ticks: {maxRotation: 0, autoSkip: true, color: '#000'}},
+          y: {title: {display: true, text: '1박 가격 (천원)'}, ticks: {color: '#000', callback: function(v){ return v.toLocaleString(); }}}
+        }
+      }
+    });
+  })();
+  </script>
+""").replace('__HOTEL_ADR_DATA__', _ts_json)
 
     # HTML 생성
     update_time = datetime.now(KST).strftime('%Y-%m-%d %H:%M:%S')
@@ -8396,7 +8415,7 @@ def generate_hotels_html():
     <p class="note">※ 각 호텔에서 가장 저렴한 entry 객실 1박 가격 (2인, 환불가능 옵션 우선). Booking.com 기준이라 외국인 가격 포함될 수 있음.</p>
   </div>
 
-  {f'<div class="card"><h2 style="margin-top:0;font-size:1.2rem;">시계열 (lead+7일)</h2>{chart_html}</div>' if chart_html else '<div class="card"><p class="note">시계열 차트는 데이터 3일 이상 누적 후 표시됩니다 (현재 {0}일).</p></div>'.format(unique_days)}
+  {chart_card_html}
 </div>
 </body>
 </html>
