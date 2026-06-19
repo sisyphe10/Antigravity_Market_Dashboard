@@ -3078,10 +3078,10 @@ def create_aum_table():
 
         return f"""
         <div class="category-section">
-            <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;max-width:1800px;margin-left:auto;margin-right:auto;">
-                <h2 class="category-title" style="margin-bottom:0;flex:1;">AUM</h2>
-                <a href="https://raw.githubusercontent.com/sisyphe10/Antigravity_Market_Dashboard/main/Wrap_NAV.xlsx" download="Wrap_NAV.xlsx" target="_blank" style="flex-shrink:0;font-family:inherit;font-size:14px;font-weight:600;padding:8px 16px;background:#dc2626;color:#fff;text-decoration:none;border-radius:8px;white-space:nowrap;">Wrap_NAV 다운로드</a>
-            </div>
+            <h2 class="category-title" style="display:flex;align-items:center;max-width:1800px;margin-left:auto;margin-right:auto;">
+                <span>AUM</span>
+                <a href="https://raw.githubusercontent.com/sisyphe10/Antigravity_Market_Dashboard/main/Wrap_NAV.xlsx" download="Wrap_NAV.xlsx" target="_blank" style="margin-left:auto;text-transform:none;font-family:inherit;font-size:14px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;text-decoration:none;border-radius:8px;">Wrap_NAV</a>
+            </h2>
             <div style="display:flex;gap:100px;align-items:flex-start;max-width:1800px;margin:0 auto;">
                 <div style="width:370px;">
                     <table class="portfolio-table aum-aligned" style="white-space:nowrap;width:370px;table-layout:fixed;">
