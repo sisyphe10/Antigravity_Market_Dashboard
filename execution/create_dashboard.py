@@ -691,10 +691,10 @@ def create_monthly_returns_table():
         return YEAR_MONTH_COL_W if name in ('연도', '월') else IDX_COL_W
     # 그룹 구분선 분리:
     #   DARK   = 월↔KOSPI (시점 vs 데이터 경계, 기존 유지)
-    #   HEAVY  = RUSSELL↔BTC, ETH↔GOLD (자산군 경계, 더 진하게)
+    #   HEAVY  = KOSDAQ↔NIKKEI(한국↔해외), RUSSELL↔BTC, ETH↔GOLD (자산군/지역 경계, 더 진하게)
     #   NO_RIGHT = 연도 (연도↔월 사이 구분선 제거)
     DARK_AFTER = {'월'}
-    HEAVY_AFTER = {'RUSSELL', 'ETH'}
+    HEAVY_AFTER = {'KOSDAQ', 'RUSSELL', 'ETH'}
     NO_RIGHT = {'연도'}
 
     # border-collapse:separate 모드 — 셀마다 독립 테두리 (right + bottom만)
