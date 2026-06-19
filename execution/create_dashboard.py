@@ -824,7 +824,7 @@ def create_monthly_returns_table():
                 cells += f'<td style="padding:6px 12px;text-align:center;background:{bg};color:#000;font-variant-numeric:tabular-nums;{borders}">{sign}{pct:.1f}%</td>'
         body_rows_html += f'<tr>{cells}</tr>\n'
         if annual_after is not None:
-            body_rows_html += make_ytd_row(annual_after, DARK)  # 연간 행 → 다음 연도와 DARK로 분리
+            body_rows_html += make_ytd_row(annual_after, DARK_HEAVY)  # 연간 행 → 아래 굵은 선(2px)으로 다음 연도와 분리
 
     if ytd_returns:
         body_rows_html += make_ytd_row(ytd_returns, LIGHT)
