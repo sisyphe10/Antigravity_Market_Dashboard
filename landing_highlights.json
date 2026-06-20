@@ -1,12 +1,12 @@
 {
-  "updated_at": "2026-06-19 18:35:31 KST",
+  "updated_at": "2026-06-20 18:35:17 KST",
   "slots": [
     {
       "id": "market-1m-leader",
       "category": "Market",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "1M 1위 KOSPI +22.7%, 꼴찌 KOSDAQ -12.4%",
+      "text": "1M 1위 KOSPI +20.6%, 꼴찌 KOSDAQ -9.9%",
       "href": "market.html",
       "spark": {
         "series": [
@@ -109,7 +109,7 @@
       "category": "Market",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "2026-06 11개 자산 중 4/11 상승 — 방향성 부재",
+      "text": "2026-06 11개 자산 중 4/11 상승 — 혼조 양상",
       "href": "market.html",
       "spark": null
     },
@@ -118,7 +118,7 @@
       "category": "Memory",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "DDR5 1W +5.3% ($60) — 수요 회복",
+      "text": "DDR5 1W +5.3% ($60) — 추세 전환 가능성",
       "href": "market.html",
       "spark": {
         "series": [
@@ -197,6 +197,7 @@
           56.5,
           57.0,
           58.0,
+          59.5,
           59.5
         ],
         "trend": "up"
@@ -207,11 +208,10 @@
       "category": "Memory",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "DDR4 1W +1.8% ($56)",
+      "text": "DDR4 1W +0.0% ($56)",
       "href": "market.html",
       "spark": {
         "series": [
-          48.0,
           48.0,
           48.0,
           48.0,
@@ -300,6 +300,7 @@
           56.0,
           56.0,
           56.0,
+          56.0,
           56.0
         ],
         "trend": "flat"
@@ -320,7 +321,6 @@
           14.5,
           14.5,
           14.5,
-          14.5,
           11.5,
           11.5,
           11.5,
@@ -393,6 +393,7 @@
           35.0,
           35.0,
           35.0,
+          40.0,
           40.0,
           40.0,
           40.0,
@@ -413,11 +414,10 @@
       "category": "Crypto",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "BTC 1M -14.8% ($62,503)",
+      "text": "BTC 1M -14.7% ($63,224)",
       "href": "market.html",
       "spark": {
         "series": [
-          69958.8438,
           70655.9297,
           68628.9531,
           67680.0234,
@@ -506,7 +506,8 @@
           66792.0312,
           65882.1094,
           65840.0078,
-          62502.9688
+          62502.9688,
+          63224.3516
         ],
         "trend": "down"
       }
@@ -516,11 +517,10 @@
       "category": "Crypto",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "ETH 1M -16.5% ($1,683)",
+      "text": "ETH 1M -16.3% ($1,704)",
       "href": "market.html",
       "spark": {
         "series": [
-          2135.6597,
           2156.0303,
           2078.1528,
           2042.0039,
@@ -609,7 +609,8 @@
           1829.29,
           1795.2,
           1771.01,
-          1682.7
+          1682.7,
+          1704.3
         ],
         "trend": "down"
       }
@@ -619,11 +620,10 @@
       "category": "Crypto",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "SOL 1M -16.3% ($69)",
+      "text": "SOL 1M -16.6% ($69)",
       "href": "market.html",
       "spark": {
         "series": [
-          89.3573,
           89.8998,
           87.1449,
           85.8339,
@@ -712,7 +712,8 @@
           75.47,
           73.74,
           73.52,
-          68.88
+          68.88,
+          69.27
         ],
         "trend": "down"
       }
@@ -2147,11 +2148,10 @@
       "category": "Commodity",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "SMP 1W +6.0% (125원/kWh)",
+      "text": "SMP 1W +13.3% (107원/kWh)",
       "href": "market.html",
       "spark": {
         "series": [
-          107.71,
           107.52,
           113.43,
           108.62,
@@ -2240,7 +2240,8 @@
           124.22,
           127.72,
           123.49,
-          125.29
+          125.29,
+          106.62
         ],
         "trend": "up"
       }
@@ -3004,11 +3005,10 @@
       "category": "Index",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "S&P500 PER 1M -1.3p (27배) — 역사적 고밸류 영역",
+      "text": "S&P500 PER 1M -1.5p (27배) — 역사적 고밸류 영역",
       "href": "market.html",
       "spark": {
         "series": [
-          26.4577,
           26.2717,
           26.2717,
           26.2717,
@@ -3097,6 +3097,7 @@
           27.0338,
           26.8727,
           26.5371,
+          26.7441,
           26.7441
         ],
         "trend": "down"
@@ -3107,11 +3108,10 @@
       "category": "Index",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "RUSSELL 2000 PER 1M +0.1p (20배) — 소형주 밸류",
+      "text": "RUSSELL 2000 PER 1M -0.2p (20배) — 소형주 밸류",
       "href": "market.html",
       "spark": {
         "series": [
-          18.0745,
           18.0128,
           18.0128,
           18.0128,
@@ -3200,6 +3200,7 @@
           19.6989,
           19.5278,
           19.3807,
+          19.7625,
           19.7625
         ],
         "trend": "flat"
@@ -3210,7 +3211,7 @@
       "category": "Alert",
       "color": "#c2410c",
       "tone": "fact",
-      "text": "오늘 투자주의 33 · 경고 10 · 위험 10",
+      "text": "오늘 투자주의 10 · 경고 10 · 위험 10",
       "href": "market_alert.html",
       "spark": null
     },
@@ -3219,7 +3220,7 @@
       "category": "Featured",
       "color": "#d97706",
       "tone": "fact",
-      "text": "6.19(금) 거래대금 1위: SK하이닉스 20.8조원",
+      "text": "6.20(토) 거래대금 1위: SK하이닉스 20.8조원",
       "href": "featured.html",
       "spark": null
     },
@@ -3228,7 +3229,7 @@
       "category": "Featured",
       "color": "#d97706",
       "tone": "fact",
-      "text": "6.19(금) KOSDAQ 상승률 1위: 제이앤티씨 +29.9%",
+      "text": "6.20(토) KOSDAQ 상승률 1위: 제이앤티씨 +29.9%",
       "href": "featured.html",
       "spark": null
     },
@@ -3237,7 +3238,7 @@
       "category": "Sector",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "KODEX 1M 최강 종이·목재 +114.8% · 최약 전기·가스·수도 -21.4%",
+      "text": "KODEX 1M 최강 보험 +45.6% · 최약 전기·가스·수도 -25.0%",
       "href": "market.html",
       "spark": null
     },
@@ -3246,7 +3247,7 @@
       "category": "SEIBro",
       "color": "#0369a1",
       "tone": "fact",
-      "text": "SEIBro 6.18(목) 결제 1위 SPACE EXPLORATION TECHN-CL A 7.4억$",
+      "text": "SEIBro 6.19(금) 결제 1위 SOXL 3.2억$",
       "href": "seibro.html",
       "spark": null
     },
@@ -3873,7 +3874,7 @@
       "category": "Sector",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "섹터 1M TOP3 종이·목재 +115%, 전기·전자 +39%, 보험 +38% · BOT3 전기·가스·수도 -21%, 출판·매체복제 -15%, 금속 -11%",
+      "text": "섹터 1M TOP3 보험 +46%, 전기·전자 +40%, 기타금융 +30% · BOT3 전기·가스·수도 -25%, 금속 -9%, 증권 -8%",
       "href": "market.html",
       "spark": null
     },
@@ -3882,7 +3883,7 @@
       "category": "Sector",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "섹터 분산 136%p — 극단 쏠림",
+      "text": "섹터 분산 71%p — 극단 쏠림",
       "href": "market.html",
       "spark": null
     },
@@ -3891,7 +3892,7 @@
       "category": "Sector",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "섹터 폭 8강/9약 (29개) — 선택적 강세",
+      "text": "섹터 폭 6강/8약 (29개) — 선택적 강세",
       "href": "market.html",
       "spark": null
     },
@@ -3900,7 +3901,7 @@
       "category": "Sector",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "전기·전자(반도체) 1M +39.5% · 삼성전자 주도",
+      "text": "전기·전자(반도체) 1M +40.0% · 삼성전자 주도",
       "href": "market.html",
       "spark": null
     },
@@ -3909,7 +3910,7 @@
       "category": "Sector",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "제약·바이오 1M -1.8% · 삼성바이오로직스 비중",
+      "text": "제약·바이오 1M -2.9% · 삼성바이오로직스 비중",
       "href": "market.html",
       "spark": null
     }
