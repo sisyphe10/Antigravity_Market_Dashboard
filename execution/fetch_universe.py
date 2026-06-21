@@ -496,7 +496,7 @@ def fetch_one(idx: int, raw_ticker: str, sector: str, name: str, fx_to_krw: dict
             '', '', '', '', '', '', '',
             # 컬럼 22: DD (52주 고점 대비 낙폭)
             fmt_dd(dd),
-        ]
+        ], closes_to_hist(closes, currency)
     except Exception as e:
         print(f"  Warning: {raw_ticker} ({yf_tk}): {e}")
         return None
