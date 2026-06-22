@@ -70,22 +70,31 @@ def git_sync(cwd):
 
 
 def git_push_safe(cwd):
-    """커밋 후 push: 실패 시 fetch+merge+push 재시도"""
-    result = subprocess.run(["git", "push"], cwd=cwd, capture_output=True, text=True, timeout=60)
-    if result.returncode == 0:
-        return True
-    # push 실패 → fetch + merge 시도 (rebase는 바이너리 충돌 시 불가)
-    subprocess.run(["git", "fetch", "origin", "main"], cwd=cwd, capture_output=True, timeout=60)
-    merge = subprocess.run(
-        ["git", "merge", "origin/main", "--strategy-option=ours", "--no-edit"],
-        cwd=cwd, capture_output=True, text=True, timeout=60
-    )
-    if merge.returncode != 0:
-        subprocess.run(["git", "merge", "--abort"], cwd=cwd, capture_output=True, timeout=10)
-        logging.warning("git push failed: merge conflict, aborted")
-        return False
-    result2 = subprocess.run(["git", "push"], cwd=cwd, capture_output=True, text=True, timeout=60)
-    return result2.returncode == 0
+    """커밋 후 push: fetch+merge+push 최대 3회 재시도 (GHA와의 non-ff race 자가해소).
+
+    merge가 -X ours로도 못 푸는 충돌(modify/delete 등)로 abort되면 git_sync(reset
+    --hard origin/main)로 폴백해 VM이 stuck 상태로 미push 커밋을 누적하지 않게 한다.
+    이 경우 해당 회차 push만 1회 누락되며(portfolio 산출물은 재생성 가능) 다음 주기에
+    최신 origin 위에서 재생성·재push 된다. -X ours는 content 충돌 자동해소용으로 유지.
+    """
+    for attempt in range(3):
+        result = subprocess.run(["git", "push"], cwd=cwd, capture_output=True, text=True, timeout=60)
+        if result.returncode == 0:
+            return True
+        # push 실패(대개 non-fast-forward) → fetch + merge 후 재시도 (rebase는 바이너리 충돌 시 불가)
+        subprocess.run(["git", "fetch", "origin", "main"], cwd=cwd, capture_output=True, timeout=60)
+        merge = subprocess.run(
+            ["git", "merge", "origin/main", "--strategy-option=ours", "--no-edit"],
+            cwd=cwd, capture_output=True, text=True, timeout=60
+        )
+        if merge.returncode != 0:
+            # -X ours로도 못 푸는 충돌 → 자가복구: 로컬 커밋 폐기하고 origin에 맞춤(절대 stuck 방지)
+            subprocess.run(["git", "merge", "--abort"], cwd=cwd, capture_output=True, timeout=10)
+            logging.warning(f"git push: merge conflict (attempt {attempt + 1}) → git_sync 폴백 (로컬 커밋 폐기, 재생성됨)")
+            git_sync(cwd)
+            return False
+    logging.warning("git push failed after 3 retries")
+    return False
 
 
 def load_subscribers():
@@ -471,7 +480,7 @@ def run_portfolio_update():
 
     now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
     commit_result = subprocess.run(
-        ["git", "commit", "-m", f"Update portfolio tables ({now_str})"],
+        ["git", "commit", "-m", f"Update portfolio tables ({now_str}) [skip ci]"],
         cwd=dashboard_dir,
         capture_output=True,
         text=True,
