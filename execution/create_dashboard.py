@@ -25,9 +25,9 @@ OUTPUT_FILE = 'market.html'
 TOP_NAV_MAIN = [
     ('wrap',         'wrap.html',          'WRAP',         [
         ('wrap_dashboard',    'wrap.html#dashboard',    'Dashboard'),
-        ('wrap_contribution', 'wrap.html#contribution', '기여도'),
-        ('wrap_disclosures',  'wrap.html#disclosures',  '공시'),
         ('wrap_order',        'wrap.html#order',        'Order'),
+        ('wrap_disclosures',  'wrap.html#disclosures',  '공시'),
+        ('wrap_contribution', 'wrap.html#contribution', '기여도'),
         ('wrap_fee',          'wrap.html#fee',          '수수료'),
     ]),
     ('market',       'market.html',        'Market',       [
@@ -130,12 +130,12 @@ def sidebar_html(active=''):
 
 
 def wrap_sidebar_html():
-    """Render the WRAP-specific sidebar (Dashboard / 공시 / Order / 수수료, JS tab switcher)."""
+    """Render the WRAP-specific sidebar (Dashboard / Order / 공시 / 기여도 / 수수료, JS tab switcher)."""
     items = [
         ('dashboard',    'Dashboard'),
-        ('contribution', '기여도'),
-        ('disclosures',  '공시'),
         ('order',        'Order'),
+        ('disclosures',  '공시'),
+        ('contribution', '기여도'),
         ('fee',          '수수료'),
     ]
     links = ''.join(
@@ -5281,8 +5281,8 @@ def create_fee_revenue_section():
         <div class="fee-wrapper rev-wrapper">
             {updated_html}
             <div class="rev-summary">
-                <div class="rev-sum-label">누적 매출</div>
-                <div class="rev-sum-value" title="{_fmt_won(total)}">{_fmt_eok_man(total)}</div>
+                <span class="rev-sum-label">누적 매출</span>
+                <span class="rev-sum-value" title="{_fmt_won(total)}">{_fmt_eok_man(total)}</span>
             </div>
             <div class="table-container"><div id="revTableHost"></div></div>
         </div>
@@ -6604,7 +6604,7 @@ def create_dashboard():
     fee_revenue_html = create_fee_revenue_section()
     fee_html = f"""
         <div class="fee-subtabs">
-            <button class="fee-subtab active" data-fee-sub="rate" onclick="feeSwitchSub('rate')">수수료율</button>
+            <button class="fee-subtab active" data-fee-sub="rate" onclick="feeSwitchSub('rate')">요율</button>
             <button class="fee-subtab" data-fee-sub="revenue" onclick="feeSwitchSub('revenue')">매출</button>
         </div>
         <div id="feeSubRate">{fee_rate_html}</div>
@@ -6757,8 +6757,8 @@ def create_dashboard():
         .rev-empty code {{ background: #f1f3f5; padding: 2px 7px; border-radius: 5px; font-size: 0.9em; color: #1e40af; }}
         .rev-wrapper {{ position: relative; }}
         .rev-summary {{ text-align: center; padding: 18px 12px 6px 12px; }}
-        .rev-sum-label {{ font-size: 0.95rem; color: #111; font-weight: 600; }}
-        .rev-sum-value {{ font-size: 1.5rem; font-weight: 700; color: #111; margin-top: 4px; font-variant-numeric: tabular-nums; }}
+        .rev-sum-label {{ font-size: 1.05rem; color: #111; font-weight: 600; margin-right: 8px; }}
+        .rev-sum-value {{ font-size: 1.25rem; font-weight: 700; color: #111; font-variant-numeric: tabular-nums; }}
         .rev-updated {{ position: absolute; top: 20px; right: 24px; font-size: 0.78rem; color: #aaa; }}
         .rev-date {{ color: #555; font-size: 0.9rem; font-variant-numeric: tabular-nums; }}
         .rev-headcell {{ padding: 7px 10px !important; }}
@@ -6865,9 +6865,10 @@ def create_dashboard():
     // Order 탭 추가 비밀번호 (sha256('2026'))
     var ORDER_AUM_PW_HASH = '158a323a7ba44870f23d96f1516dd70aa48e9a72db4ebb026b0a89e212a208ab';
 
-    async function checkOrderAumPw() {{
+    var TAB_PW_LABELS = {{ order: 'Order', contribution: '기여도', fee: '수수료' }};
+    async function checkOrderAumPw(label) {{
         if (sessionStorage.getItem('order_aum_auth') === '1') return true;
-        var pw = prompt('Order 탭 비밀번호 입력');
+        var pw = prompt((label || 'WRAP') + ' 탭 비밀번호 입력');
         if (!pw) return false;
         var hash = await sha256(pw);
         if (hash === ORDER_AUM_PW_HASH) {{
@@ -6879,8 +6880,8 @@ def create_dashboard():
     }}
 
     async function wrapSwitchTab(tab) {{
-        // Order / 기여도 진입 시 추가 비밀번호 체크 (sha256('2026'), 동일 게이트 공유)
-        if ((tab === 'order' || tab === 'contribution') && !(await checkOrderAumPw())) {{
+        // Order / 기여도 / 수수료 진입 시 추가 비밀번호 체크 (sha256('2026'), 동일 게이트 공유)
+        if ((tab === 'order' || tab === 'contribution' || tab === 'fee') && !(await checkOrderAumPw(TAB_PW_LABELS[tab]))) {{
             return;  // 인증 실패 시 탭 전환 취소
         }}
         document.querySelectorAll('.sidebar-link[data-wrap-tab]').forEach(function(el) {{
