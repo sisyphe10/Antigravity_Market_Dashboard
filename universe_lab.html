@@ -393,7 +393,7 @@ function buildRanks(uh, ih, IDX1M){
       if(yr===undefined){ dcell='NEW'; cls='new'; }
       else { var d=yr-tr; if(d>0){dcell='▲'+d;cls='up';} else if(d<0){dcell='▼'+(-d);cls='down';} else {dcell='–';cls='flat';} }
       var isNewTop=(yr===undefined||yr>40), v=r[ft];
-      rows+='<tr><td>'+tr+'</td><td class="'+cls+'">'+dcell+(isNewTop&&cls!=='new'?' <span class="new">↑</span>':'')
+      rows+='<tr><td>'+tr+'</td><td class="'+cls+'">'+dcell+(isNewTop&&cls!=='new'?' <span style="color:#111827">↑</span>':'')
         +'</td><td class="l">'+r.name+'</td><td class="l">'+r.sector+'</td>'
         +'<td class="'+(v>0?'pos':v<0?'neg':'')+'">'+(v>0?'+':'')+Math.round(v)+'%</td></tr>';
     });
