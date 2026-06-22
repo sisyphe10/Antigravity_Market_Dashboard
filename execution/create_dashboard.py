@@ -1416,6 +1416,13 @@ def _build_combined_chart_section():
                 # 증시 유동성 (금투협 KOFIA → dataset.csv DEPOSIT). DATA 일반 차트로 개별 시리즈 표시.
                 {'display': '고객예탁금',         'csv': '고객예탁금',         'color': '#2E7D32'},
                 {'display': '신용잔고',           'csv': '신용잔고',           'color': '#C2185B'},
+                # 지수 밸류에이션 (KRX/pykrx data.krx 로그인 → KRX_VALUATION). 후행 PER/PBR/배당수익률.
+                {'display': 'KOSPI PER',          'csv': 'KOSPI PER',          'color': '#6A1B9A'},
+                {'display': 'KOSPI PBR',          'csv': 'KOSPI PBR',          'color': '#8E24AA'},
+                {'display': 'KOSPI 배당수익률',   'csv': 'KOSPI 배당수익률',   'color': '#AB47BC'},
+                {'display': 'KOSDAQ PER',         'csv': 'KOSDAQ PER',         'color': '#00838F'},
+                {'display': 'KOSDAQ PBR',         'csv': 'KOSDAQ PBR',         'color': '#0097A7'},
+                {'display': 'KOSDAQ 배당수익률',  'csv': 'KOSDAQ 배당수익률',  'color': '#26C6DA'},
             ]},
             {'label': 'INDEX_US', 'series': [
                 {'display': 'S&P 500',            'csv': 'S&P 500',            'color': '#2E7D32'},
