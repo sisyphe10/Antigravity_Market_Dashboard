@@ -292,6 +292,24 @@ function fitText(text, font, maxW){
   for(var i=text.length-1; i>=1; i--){ if(_measCtx.measureText(text.slice(0,i)).width <= maxW) return text.slice(0,i); }
   return text.slice(0,1);
 }
+// 히트맵 커스텀 툴팁(네이티브 title 지연 대체) — 마우스 따라 즉시 표시
+var _hmTip=document.createElement('div');
+_hmTip.style.cssText='position:fixed;display:none;z-index:1000;background:rgba(17,24,39,0.96);color:#fff;font:600 12px Pretendard;line-height:1.45;padding:8px 11px;border-radius:8px;white-space:pre-line;pointer-events:none;max-width:300px;box-shadow:0 6px 18px rgba(0,0,0,.28);';
+document.body.appendChild(_hmTip);
+(function(){
+  var host=document.getElementById('heatmap'); if(!host) return;
+  host.addEventListener('mousemove',function(e){
+    var b=e.target.closest?e.target.closest('.hmbox'):null;
+    if(!b){ _hmTip.style.display='none'; return; }
+    _hmTip.textContent=b.getAttribute('data-tip')||'';
+    _hmTip.style.display='block';
+    var r=_hmTip.getBoundingClientRect(), x=e.clientX+14, y=e.clientY+16;
+    if(x+r.width>window.innerWidth-8) x=e.clientX-r.width-14;
+    if(y+r.height>window.innerHeight-8) y=e.clientY-r.height-16;
+    _hmTip.style.left=x+'px'; _hmTip.style.top=y+'px';
+  });
+  host.addEventListener('mouseleave',function(){ _hmTip.style.display='none'; });
+})();
 function renderHeatmap(){
   var host=document.getElementById('heatmap'); if(!host) return;
   var W=host.clientWidth||host.offsetWidth||900, H=host.clientHeight||640;
@@ -317,7 +335,8 @@ function renderHeatmap(){
         var s=rr.item, v=s[METRIC], bg=colorFor(v,METRIC);
         var box=document.createElement('div');
         box.style.cssText='position:absolute;left:'+rr.x+'px;top:'+rr.y+'px;width:'+Math.max(0,rr.w-0.5)+'px;height:'+Math.max(0,rr.h-0.5)+'px;background:'+bg+';overflow:hidden;border:0.5px solid rgba(255,255,255,0.65);display:flex;flex-direction:column;align-items:center;justify-content:center;';
-        box.title=(s.name||s.disp)+' ('+(s.tk.indexOf(':')>=0?s.tk.split(':').pop():s.tk)+')\n'+s.sector+' · 시총 '+Math.round(s.mcap).toLocaleString()+'억 · '+METRICS[METRIC].label+' '+(v==null?'-':((v>0?'+':'')+Math.round(v)+'%'));
+        var _tip=(s.name||s.disp)+' ('+(s.tk.indexOf(':')>=0?s.tk.split(':').pop():s.tk)+')\n'+s.sector+' · 시총 '+Math.round(s.mcap).toLocaleString()+'억 · '+METRICS[METRIC].label+' '+(v==null?'-':((v>0?'+':'')+Math.round(v)+'%'));
+        box.title=_tip; box.className='hmbox'; box.setAttribute('data-tip',_tip);
         if(rr.w>36 && rr.h>24){
           box.innerHTML='<div style="font:700 14px Pretendard;line-height:1.15;color:#111;text-align:center;padding:0 2px;white-space:nowrap;">'+fitText(s.disp,'700 14px Pretendard',rr.w-6)+'</div>'
             +(rr.h>44?'<div style="font:600 12px Pretendard;color:#111;text-align:center;padding:0 2px;white-space:nowrap;">'+(v==null?'':((v>0?'+':'')+Math.round(v)+'%'))+'</div>':'');
