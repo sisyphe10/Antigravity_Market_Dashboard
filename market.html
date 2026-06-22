@@ -495,7 +495,7 @@
     <aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="market.html" class="sidebar-link active">Index</a><a href="universe.html" class="sidebar-link">Universe</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
     <header>
         <h1>📊 Index</h1>
-        <div class="last-updated">Updated: 2026-06-22 10:23:31 KST</div>
+        <div class="last-updated">Updated: 2026-06-22 10:40:51 KST</div>
     </header>
 
     
@@ -588,7 +588,7 @@
         </div>
         
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = 2 * (window.devicePixelRatio || 1); Chart.defaults.elements.line.borderJoinStyle = 'round'; Chart.defaults.elements.line.borderCapStyle = 'round';</script>
+        <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = 2 * (window.devicePixelRatio || 1); Chart.defaults.elements.line.borderJoinStyle = 'round'; Chart.defaults.elements.line.borderCapStyle = 'round'; Chart.defaults.animation = false;</script>
         <script>function formatDateInput(el){var v=el.value.replace(/[^0-9]/g,'');if(v.length===8){el.value=v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8);}}</script>
         <script>
         (function() {
@@ -1113,15 +1113,15 @@
                     </style>
                     <div id="cmbMaRow" style="display:flex;gap:6px;align-items:center;margin-bottom:12px;font-size:13px;">
                         <span style="color:#555;font-weight:600;">이동평균</span>
-                        <button class="cmb-ma-btn" onclick="toggleCmbMA(20,this)">MA20</button>
-                        <button class="cmb-ma-btn" onclick="toggleCmbMA(60,this)">MA60</button>
-                        <button class="cmb-ma-btn" onclick="toggleCmbMA(120,this)">MA120</button>
-                        <button class="cmb-ma-btn" onclick="toggleCmbMA(200,this)">MA200</button>
+                        <button id="cmbMaBtn0" class="cmb-ma-btn" onclick="toggleCmbMA(0,this)">MA20</button>
+                        <button id="cmbMaBtn1" class="cmb-ma-btn" onclick="toggleCmbMA(1,this)">MA60</button>
+                        <button id="cmbMaBtn2" class="cmb-ma-btn" onclick="toggleCmbMA(2,this)">MA120</button>
+                        <button id="cmbMaBtn3" class="cmb-ma-btn" onclick="toggleCmbMA(3,this)">MA200</button>
                         <span style="color:#555;font-weight:600;margin-left:18px;">이격도</span>
-                        <button class="cmb-ma-btn" onclick="toggleCmbDisp(20,this)">20</button>
-                        <button class="cmb-ma-btn" onclick="toggleCmbDisp(60,this)">60</button>
-                        <button class="cmb-ma-btn" onclick="toggleCmbDisp(120,this)">120</button>
-                        <button class="cmb-ma-btn" onclick="toggleCmbDisp(200,this)">200</button>
+                        <button id="cmbDispBtn0" class="cmb-ma-btn" onclick="toggleCmbDisp(0,this)">20</button>
+                        <button id="cmbDispBtn1" class="cmb-ma-btn" onclick="toggleCmbDisp(1,this)">60</button>
+                        <button id="cmbDispBtn2" class="cmb-ma-btn" onclick="toggleCmbDisp(2,this)">120</button>
+                        <button id="cmbDispBtn3" class="cmb-ma-btn" onclick="toggleCmbDisp(3,this)">200</button>
                     </div>
                     <div id="cmbChartCard" style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                         <div style="position:relative;height:600px;">
@@ -1146,15 +1146,48 @@
 
             var expandedGroups = new Set();
 
-            // MA/이격도 토글 상태 — 시리즈 전환·기간 변경에도 유지 (새로고침 시 초기화, 기본 전부 OFF)
+            // MA 슬롯(0~3) 색상. 윈도우 값은 시리즈 빈도에 따라 동적 (MA_WINDOWS).
             var MA_DEFS = [
-                { win: 20,  color: '#d32f2f' },
-                { win: 60,  color: '#f57c00' },
-                { win: 120, color: '#1b5e20' },
-                { win: 200, color: '#1565c0' }
+                { color: '#d32f2f' },
+                { color: '#f57c00' },
+                { color: '#1b5e20' },
+                { color: '#1565c0' }
             ];
-            var maActive = { 20: false, 60: false, 120: false, 200: false };
-            var dispActive = { 20: false, 60: false, 120: false, 200: false };
+            // 빈도별 MA 윈도우 (직전 N개 실측치 기준): 일별=거래일, 월별=개월, 분기=분기
+            var MA_WINDOWS = { D: [20, 60, 120, 200], M: [3, 6, 12, 24], Q: [4, 8, 12, null] };
+            // MA/이격도 토글 상태 — 슬롯 인덱스(0~3) 기준 (윈도우 값이 빈도마다 달라지므로).
+            // 시리즈 전환·기간 변경에도 유지 (새로고침 시 초기화, 기본 전부 OFF)
+            var maActive = { 0: false, 1: false, 2: false, 3: false };
+            var dispActive = { 0: false, 1: false, 2: false, 3: false };
+            // 선택 시리즈 실측치 간격(중앙값)으로 빈도 판정: ≤8일=일별, ≤45일=월별, 그 외=분기
+            function cmbDetectFreq(obs) {
+                if (!obs || obs.length < 3) return 'D';
+                var gaps = [];
+                for (var i = 1; i < obs.length; i++) {
+                    gaps.push((Date.parse(obs[i].date) - Date.parse(obs[i - 1].date)) / 86400000);
+                }
+                gaps.sort(function(a, b){ return a - b; });
+                var med = gaps[Math.floor(gaps.length / 2)];
+                if (med <= 8) return 'D';
+                if (med <= 45) return 'M';
+                return 'Q';
+            }
+            // 빈도별 윈도우로 MA/이격도 버튼 라벨·표시·active 상태 동기화 (raw1에서만 호출)
+            function cmbRelabelMaButtons(wins) {
+                for (var sl = 0; sl < 4; sl++) {
+                    var w = wins[sl];
+                    var mb = document.getElementById('cmbMaBtn' + sl);
+                    var db = document.getElementById('cmbDispBtn' + sl);
+                    if (mb) {
+                        if (w == null) { mb.style.display = 'none'; }
+                        else { mb.style.display = ''; mb.textContent = 'MA' + w; mb.classList.toggle('active', !!maActive[sl]); }
+                    }
+                    if (db) {
+                        if (w == null) { db.style.display = 'none'; }
+                        else { db.style.display = ''; db.textContent = '' + w; db.classList.toggle('active', !!dispActive[sl]); }
+                    }
+                }
+            }
             var cmbDispChart = null;
 
             // 십자선(crosshair) — 세로선은 메인+이격도 패널 동기(같은 날짜 index),
@@ -1440,51 +1473,67 @@
                         yAxisID: yAxisID
                     });
 
-                    // 단일 선택일 때 토글된 MA / 이격도 추가
-                    // 표시 윈도우만으로 MA 계산하면 긴 윈도우가 안 채워지므로,
-                    // 전체 보유 데이터(24개월)로 MA를 먼저 계산한 뒤 가시 영역에 매핑한다.
+                    // 단일 선택일 때 토글된 MA / 이격도 추가.
+                    // MA 윈도우 = 선택 시리즈의 "직전 N개 실측치"(forward-fill 축이 아니라
+                    // 네이티브 관측치 기준). 일별→N 거래일, 월별→N개월, 분기→N분기.
+                    // 윈도우 값은 빈도(MA_WINDOWS)에 따라 슬롯별로 달라지고 버튼 라벨도 동적.
                     if (mode === 'raw1') {
-                        function computeMA(arr, win) {
-                            var out = [];
-                            for (var i = 0; i < arr.length; i++) {
-                                if (i < win - 1) { out.push(null); continue; }
-                                var sum = 0, cnt = 0;
-                                for (var k = i - win + 1; k <= i; k++) {
-                                    if (arr[k] !== null && arr[k] !== undefined) { sum += arr[k]; cnt++; }
-                                }
-                                out.push(cnt === win ? sum / cnt : null);
+                        var fullArr = cmbData.data[s.name];
+                        var fullDates = cmbData.dates;
+                        // 네이티브 관측치 시퀀스 (non-null만, 전체 기간 — 긴 윈도우도 정확히 채움)
+                        var obs = [];
+                        for (var fi = 0; fi < fullArr.length; fi++) {
+                            if (fullArr[fi] !== null && fullArr[fi] !== undefined) {
+                                obs.push({ date: fullDates[fi], val: fullArr[fi] });
+                            }
+                        }
+                        var freq = cmbDetectFreq(obs);
+                        var wins = MA_WINDOWS[freq];
+                        cmbRelabelMaButtons(wins);
+
+                        // 직전 win개 관측치 이동평균 (running sum, O(n))
+                        function computeNativeMA(obsArr, win) {
+                            var out = new Array(obsArr.length);
+                            var runSum = 0;
+                            for (var i = 0; i < obsArr.length; i++) {
+                                runSum += obsArr[i].val;
+                                if (i >= win) runSum -= obsArr[i - win].val;
+                                out[i] = (i >= win - 1) ? runSum / win : null;
                             }
                             return out;
                         }
-                        var fullArr = cmbData.data[s.name];
-                        var fullDates = cmbData.dates;
-                        var fullFilled = [];
-                        var lvf = null;
-                        for (var fi = 0; fi < fullArr.length; fi++) {
-                            if (fullArr[fi] !== null && fullArr[fi] !== undefined) lvf = fullArr[fi];
-                            fullFilled.push(lvf);
+                        // 관측치 MA를 commonDates에 forward-fill 매핑 (raw 선과 같은 리듬)
+                        function buildFilledMap(obsArr, maAtObs) {
+                            var byDate = {};
+                            for (var oi = 0; oi < obsArr.length; oi++) {
+                                byDate[obsArr[oi].date] = { ma: maAtObs[oi], rawVal: obsArr[oi].val };
+                            }
+                            var res = [];
+                            var lastMa = null, lastRaw = null;
+                            for (var ci = 0; ci < commonDates.length; ci++) {
+                                var hit = byDate[commonDates[ci]];
+                                if (hit !== undefined) { lastMa = hit.ma; lastRaw = hit.rawVal; }
+                                res.push({ ma: lastMa, rawVal: lastRaw });
+                            }
+                            return res;
                         }
-                        var dateIdxMap = {};
-                        for (var di = 0; di < fullDates.length; di++) dateIdxMap[fullDates[di]] = di;
-                        // MA도 본 라인과 같은 scale 적용 (KOSPI/KOSDAQ Market Cap은 1e12로 조 단위)
-                        function scaledMA(fullMA) {
-                            return commonDates.map(function(d) {
-                                var ix = dateIdxMap[d];
-                                if (ix === undefined) return null;
-                                var v = fullMA[ix];
-                                if (v === null || v === undefined) return null;
-                                var sv = v / scale;
-                                return scale > 1 ? Math.round(sv) : sv;
-                            });
-                        }
-                        MA_DEFS.forEach(function(def) {
-                            if (!maActive[def.win] && !dispActive[def.win]) return;
-                            var fullMA = computeMA(fullFilled, def.win);
-                            if (maActive[def.win]) {
-                                var maVisible = scaledMA(fullMA);
+
+                        MA_DEFS.forEach(function(def, slot) {
+                            var win = wins[slot];
+                            if (win == null) return;                       // 분기 4번째 슬롯 등 미사용
+                            if (!maActive[slot] && !dispActive[slot]) return;
+                            var maAtObs = computeNativeMA(obs, win);
+                            var filled = buildFilledMap(obs, maAtObs);
+                            if (maActive[slot]) {
+                                // MA도 본 라인과 같은 scale 적용 (KOSPI/KOSDAQ Market Cap은 1e12로 조 단위)
+                                var maVisible = filled.map(function(pt) {
+                                    if (pt.ma === null || pt.ma === undefined) return null;
+                                    var sv = pt.ma / scale;
+                                    return scale > 1 ? Math.round(sv) : sv;
+                                });
                                 // 전 구간 null(데이터 부족)이면 범례 유령 항목 방지를 위해 생략
                                 if (maVisible.some(function(v){ return v !== null; })) datasets.push({
-                                    label: 'MA' + def.win,
+                                    label: 'MA' + win,
                                     data: maVisible,
                                     borderColor: def.color,
                                     backgroundColor: 'transparent',
@@ -1498,18 +1547,15 @@
                                     yAxisID: yAxisID
                                 });
                             }
-                            if (dispActive[def.win]) {
-                                // 이격도 = 가격/MA×100 (비율이라 단위 scale 자동 소거)
-                                var dispVisible = commonDates.map(function(d) {
-                                    var ix = dateIdxMap[d];
-                                    if (ix === undefined) return null;
-                                    var ma = fullMA[ix], pv = fullFilled[ix];
-                                    if (ma === null || ma === undefined || ma === 0) return null;
-                                    if (pv === null || pv === undefined) return null;
-                                    return Math.round(pv / ma * 10000) / 100;
+                            if (dispActive[slot]) {
+                                // 이격도 = 값/MA×100 (비율이라 단위 scale 자동 소거)
+                                var dispVisible = filled.map(function(pt) {
+                                    if (pt.ma === null || pt.ma === undefined || pt.ma === 0) return null;
+                                    if (pt.rawVal === null || pt.rawVal === undefined) return null;
+                                    return Math.round(pt.rawVal / pt.ma * 10000) / 100;
                                 });
                                 if (dispVisible.some(function(v){ return v !== null; })) dispDatasets.push({
-                                    label: '이격도' + def.win,
+                                    label: '이격도' + win,
                                     data: dispVisible,
                                     borderColor: def.color,
                                     backgroundColor: 'transparent',
@@ -1764,14 +1810,14 @@
                 refreshCmbList();
             };
             window.filterCmbSeries = function() { refreshCmbList(); };
-            window.toggleCmbMA = function(win, el) {
-                maActive[win] = !maActive[win];
-                el.classList.toggle('active', maActive[win]);
+            window.toggleCmbMA = function(slot, el) {
+                maActive[slot] = !maActive[slot];
+                el.classList.toggle('active', maActive[slot]);
                 buildCmbChart();
             };
-            window.toggleCmbDisp = function(win, el) {
-                dispActive[win] = !dispActive[win];
-                el.classList.toggle('active', dispActive[win]);
+            window.toggleCmbDisp = function(slot, el) {
+                dispActive[slot] = !dispActive[slot];
+                el.classList.toggle('active', dispActive[slot]);
                 buildCmbChart();
             };
             window.updateCmbChart = buildCmbChart;
