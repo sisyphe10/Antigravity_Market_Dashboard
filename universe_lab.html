@@ -6,6 +6,7 @@
 <title>Universe Lab (프로토타입)</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <style>
   * { box-sizing: border-box; }
   body { margin:0; font-family:'Pretendard Variable',Pretendard,system-ui,-apple-system,sans-serif; background:#f4f5f7; color:#1f2937; }
@@ -23,6 +24,8 @@
   .toolbar .lbl { font-size:13px; font-weight:600; color:#374151; margin-right:4px; }
   .mbtn { font-family:inherit; font-size:13px; font-weight:600; padding:7px 14px; background:#fff; color:#374151; border:1px solid #d1d5db; border-radius:7px; cursor:pointer; }
   .mbtn.active { background:#2563eb; color:#fff; border-color:#2563eb; }
+  .dlbtn { font-family:inherit; font-size:13px; font-weight:600; padding:7px 16px; background:#2563eb; color:#fff; border:none; border-radius:7px; cursor:pointer; margin-left:auto; }
+  .dlbtn:hover { background:#1d4ed8; }
   .card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:14px; }
   .legend { display:flex; align-items:center; gap:6px; font-size:12px; color:#6b7280; margin-top:8px; }
   .legend .bar { width:160px; height:12px; border-radius:3px; background:linear-gradient(90deg,#16a34a,#f3f4f6,#dc2626); }
@@ -67,6 +70,7 @@
     <button class="mbtn" data-m="ytd">YTD</button>
     <button class="mbtn" data-m="dd">DD</button>
     <span class="qcap" style="margin-left:8px;">박스 크기 = 시가총액 · 섹터별 그룹</span>
+    <button class="dlbtn" onclick="downloadHeatmap()">⬇ Download</button>
   </div>
   <div class="card">
     <div id="heatmap"></div>
@@ -79,6 +83,7 @@
 <div class="panel" id="p1">
   <div class="toolbar">
     <span class="qcap">X = 섹터 RSI(1M) (시총가중) · Y = 섹터 1W (시총가중) · 점 크기 = 섹터 시총합</span>
+    <button class="dlbtn" onclick="downloadScatter()">⬇ Download</button>
   </div>
   <div class="card">
     <div style="height:600px;"><canvas id="scatter"></canvas></div>
@@ -294,10 +299,11 @@ function buildScatter(){
   var ya=Math.max(3, Math.ceil(Math.max.apply(null,pts.map(function(p){return Math.abs(p.y);}))+1));
   var quad={ id:'quad', beforeDraw:function(ch){ var a=ch.chartArea,sc=ch.scales,cx=sc.x.getPixelForValue(0),cy=sc.y.getPixelForValue(0),g=ch.ctx;
       g.save();
-      g.fillStyle='rgba(22,163,74,0.05)'; g.fillRect(cx,a.top,a.right-cx,cy-a.top);
-      g.fillStyle='rgba(37,99,235,0.05)'; g.fillRect(a.left,a.top,cx-a.left,cy-a.top);
-      g.fillStyle='rgba(234,179,8,0.05)'; g.fillRect(cx,cy,a.right-cx,a.bottom-cy);
-      g.fillStyle='rgba(220,38,38,0.05)'; g.fillRect(a.left,cy,cx-a.left,a.bottom-cy);
+      g.fillStyle='#ffffff'; g.fillRect(0,0,ch.width,ch.height);                       // PNG 배경 흰색
+      g.fillStyle='rgba(220,38,38,0.05)'; g.fillRect(cx,a.top,a.right-cx,cy-a.top);     // 우상 주도(강세=빨강)
+      g.fillStyle='rgba(37,99,235,0.05)'; g.fillRect(a.left,a.top,cx-a.left,cy-a.top);  // 좌상 개선
+      g.fillStyle='rgba(234,179,8,0.05)'; g.fillRect(cx,cy,a.right-cx,a.bottom-cy);     // 우하 둔화
+      g.fillStyle='rgba(22,163,74,0.05)'; g.fillRect(a.left,cy,cx-a.left,a.bottom-cy);  // 좌하 소외(약세=녹색)
       g.strokeStyle='#cbd5e1'; g.lineWidth=1; g.beginPath(); g.moveTo(cx,a.top); g.lineTo(cx,a.bottom); g.moveTo(a.left,cy); g.lineTo(a.right,cy); g.stroke();
       g.fillStyle='#94a3b8'; g.font='bold 14px Pretendard'; g.textBaseline='top';
       g.textAlign='right'; g.fillText('주도', a.right-8, a.top+6);
@@ -305,9 +311,29 @@ function buildScatter(){
       g.textAlign='right'; g.textBaseline='bottom'; g.fillText('둔화', a.right-8, a.bottom-6);
       g.textAlign='left';  g.fillText('소외', a.left+8, a.bottom-6);
       g.restore();
-  }, afterDatasetsDraw:function(ch){ var g=ch.ctx, meta=ch.getDatasetMeta(0);
-      g.save(); g.font='700 13px Pretendard'; g.fillStyle='#111827'; g.textAlign='center'; g.textBaseline='middle';
-      meta.data.forEach(function(el,i){ var p=ch.data.datasets[0].data[i]; g.fillText(p.sector, el.x, el.y); }); g.restore();
+  }, afterDatasetsDraw:function(ch){
+      var g=ch.ctx, meta=ch.getDatasetMeta(0), area=ch.chartArea, ds=ch.data.datasets[0].data;
+      g.save(); g.font='700 12px Pretendard';
+      // 라벨을 버블 위쪽에 두고, 서로 겹치면 상하로 밀어 충돌 회피 + 리더선
+      var items=meta.data.map(function(el,i){ var rad=ds[i].r||6;
+        return { text:ds[i].sector, bx:el.x, by:el.y, r:rad, w:g.measureText(ds[i].sector).width, h:15, lx:el.x, ly:el.y-rad-9 }; });
+      items.sort(function(a,b){ return a.ly-b.ly; });
+      var placed=[];
+      function hit(x,y,w,h){ for(var k=0;k<placed.length;k++){ var q=placed[k];
+        if(x<q.x+q.w && x+w>q.x && y<q.y+q.h && y+h>q.y) return true; } return false; }
+      items.forEach(function(it){
+        var hw=it.w/2+3, cx=Math.max(area.left+hw, Math.min(area.right-hw, it.lx)); it.lx=cx;
+        var ly=it.ly, tries=0;
+        while(hit(cx-hw, ly-it.h/2, it.w+6, it.h) && tries<60){ tries++; var off=Math.ceil(tries/2)*9; ly=it.ly+(tries%2?-off:off); }
+        ly=Math.max(area.top+9, Math.min(area.bottom-9, ly)); it.ly=ly;
+        placed.push({x:cx-hw, y:ly-it.h/2, w:it.w+6, h:it.h});
+        if(Math.abs(it.ly-(it.by-it.r-9))>3 || Math.abs(it.lx-it.bx)>3){
+          g.strokeStyle='rgba(100,116,139,0.55)'; g.lineWidth=1;
+          g.beginPath(); g.moveTo(it.bx,it.by); g.lineTo(it.lx, it.ly+(it.ly>it.by?-7:7)); g.stroke(); }
+        g.fillStyle='rgba(255,255,255,0.82)'; g.fillRect(cx-hw, ly-it.h/2, it.w+6, it.h);
+        g.fillStyle='#111827'; g.textAlign='center'; g.textBaseline='middle'; g.fillText(it.text, cx, ly);
+      });
+      g.restore();
   }};
   var ctx=document.getElementById('scatter').getContext('2d');
   scatterChart=new Chart(ctx,{ type:'bubble',
@@ -384,6 +410,16 @@ function buildRanks(uh, ih, IDX1M){
   rankBy('w1_t','w1_y','#rankW1 tbody','#exitW1');
   note.textContent='순위 산정 종목 '+recs.length+'개 (history 23거래일 이상) · 오늘='+uDates[uDates.length-1]+', 전일='+uDates[uDates.length-2];
 }
+
+// ── 다운로드 (PNG) ────────────────────────────────────────────────
+function _stamp(){ var d=new Date(),p=function(n){return n<10?'0'+n:''+n;}; return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
+function _savePng(dataUrl, name){ var a=document.createElement('a'); a.href=dataUrl; a.download=name+'_'+_stamp()+'.png'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
+function downloadHeatmap(){
+  var node=document.getElementById('heatmap');
+  if(typeof html2canvas!=='function'){ alert('이미지 라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.'); return; }
+  html2canvas(node, {scale:2, backgroundColor:'#ffffff'}).then(function(cv){ _savePng(cv.toDataURL('image/png'), 'Universe_Heatmap_'+METRICS[METRIC].label.replace(/[()]/g,'')); });
+}
+function downloadScatter(){ if(!scatterChart){ alert('차트가 아직 준비되지 않았습니다.'); return; } _savePng(scatterChart.toBase64Image('image/png',1), 'Universe_SectorRotation'); }
 </script>
 </body>
 </html>
