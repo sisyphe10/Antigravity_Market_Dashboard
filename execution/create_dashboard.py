@@ -6972,6 +6972,7 @@ SIDEBAR_PLACEHOLDER
             <div class="csel-list" id="cselSecList"></div>
         </div>
         <button onclick="downloadUniverseList()" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
+        <button onclick="superDownloadUniverse()" id="superDlBtn" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#2563eb;color:#fff;border:none;border-radius:8px;cursor:pointer;margin-left:8px;">Super Download</button>
     </div>
     <table>
         <thead><tr>
@@ -7539,6 +7540,63 @@ function downloadUniversePeriod() {
     _univCapture(table, 'Universe_Period').then(function() {
         saved.forEach(function(p){ p[0].style.display = p[1]; });
     });
+}
+// ── Super Download: 종목 리스트 + 섹터 수익률을 RSI(1M)↓ / 1W↓ 두 정렬로 PNG 4장 일괄 저장 ──
+function superDownloadUniverse() {
+    var btn = document.getElementById('superDlBtn');
+    if (btn && btn.disabled) return;  // 중복 클릭 방지
+    if (typeof html2canvas !== 'function') { alert('이미지 라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.'); return; }
+    if (!D || !D.length) { alert('데이터 로딩 중입니다. 잠시 후 다시 시도해주세요.'); return; }
+    if (btn) { btn.disabled = true; btn.textContent = '생성 중...'; }
+    // 현재 상태 스냅샷 (정렬/탭) — 끝나면 원복
+    var sCol = sortCol, sAsc = sortAsc, secCol = _secSortCol, secAsc = _secSortAsc;
+    var sTab = 0;
+    document.querySelectorAll('.tab-content').forEach(function(t, i){ if (t.classList.contains('active')) sTab = i; });
+    function delay(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+    // #tab0 헤더 화살표만 갱신 (전역 thead th 오염 방지)
+    function tab0Headers(col, asc){
+        document.querySelectorAll('#tab0 thead th').forEach(function(th, i){
+            th.textContent = (i === col) ? headers[i] + (asc ? ' ▲' : ' ▼') : headers[i];
+        });
+    }
+    // 종목 리스트: col 내림차순 정렬 후 상위 30행만 캡처 (현재 통화/섹터 필터 유지)
+    function capStocks(col, name){
+        sortCol = col; sortAsc = false; tab0Headers(col, false); render();
+        var table = document.querySelector('#tab0 table');
+        var rows = document.querySelectorAll('#tbody tr'), hid = [];
+        for (var i = 30; i < rows.length; i++){ hid.push([rows[i], rows[i].style.display]); rows[i].style.display = 'none'; }
+        return _univCapture(table, name).then(function(){ hid.forEach(function(p){ p[0].style.display = p[1]; }); });
+    }
+    // 섹터 수익률: col 내림차순 정렬 후 헤더행 상위 30 + 세부행 숨기고 캡처 (#tab1 활성 상태에서 호출)
+    function capSectors(col, name){
+        _secSortCol = col; _secSortAsc = false; renderSector();
+        var table = document.querySelector('#sectorContent table');
+        if (!table) return Promise.resolve();
+        var hdr = table.querySelectorAll('tbody tr:not(.sec-detail)');
+        var det = table.querySelectorAll('tbody tr.sec-detail');
+        var hid = [];
+        hdr.forEach(function(r, i){ if (i >= 30){ hid.push([r, r.style.display]); r.style.display = 'none'; } });
+        det.forEach(function(r){ hid.push([r, r.style.display]); r.style.display = 'none'; });
+        return _univCapture(table, name).then(function(){ hid.forEach(function(p){ p[0].style.display = p[1]; }); });
+    }
+    function restore(){
+        sortCol = sCol; sortAsc = sAsc; _secSortCol = secCol; _secSortAsc = secAsc;
+        tab0Headers(sCol, sAsc); render();
+        switchTab(sTab);
+        if (btn){ btn.disabled = false; btn.textContent = 'Super Download'; }
+    }
+    Promise.resolve()
+        .then(function(){ return capStocks(7, 'Universe_Stocks_RSI1M'); })   // 종목 RSI(1M)↓
+        .then(function(){ return delay(500); })
+        .then(function(){ return capStocks(10, 'Universe_Stocks_1W'); })     // 종목 1W↓
+        .then(function(){ return delay(500); })
+        .then(function(){ switchTab(1); return delay(80); })                 // 섹터 탭 가시화 (html2canvas는 display:none 캡처 불가)
+        .then(function(){ return capSectors(3, 'Universe_Sectors_RSI1M'); }) // 섹터 RSI(1M)↓ (col 3)
+        .then(function(){ return delay(500); })
+        .then(function(){ return capSectors(6, 'Universe_Sectors_1W'); })    // 섹터 1W↓ (col 6)
+        .then(function(){ return delay(300); })
+        .then(restore)
+        .catch(function(e){ console.error('superDownloadUniverse:', e); restore(); });
 }
 </script>
 </body>
