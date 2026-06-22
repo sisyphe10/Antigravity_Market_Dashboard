@@ -69,7 +69,6 @@
     <button class="mbtn" data-m="m1">1M</button>
     <button class="mbtn" data-m="ytd">YTD</button>
     <button class="mbtn" data-m="dd">DD</button>
-    <span class="qcap" style="margin-left:8px;">박스 크기 = 시가총액 · 섹터별 그룹</span>
     <button class="dlbtn" onclick="downloadHeatmap()">Download</button>
   </div>
   <div class="card">
@@ -81,7 +80,6 @@
 <!-- 1: 섹터 로테이션 -->
 <div class="panel" id="p1">
   <div class="toolbar">
-    <span class="qcap">X = 섹터 RSI(1M) (시총가중) · Y = 섹터 1W (시총가중) · 점 크기 = 섹터 시총합</span>
     <button class="dlbtn" onclick="downloadScatter()">Download</button>
   </div>
   <div class="card">
@@ -92,19 +90,25 @@
 <!-- 2: 순위 변화 -->
 <div class="panel" id="p2">
   <div class="toolbar">
-    <span class="qcap">오늘 순위 vs 전일 순위 · ▲상승 ▼하락 · NEW=상위 진입 · universe_history(종가)+index_history(지수) 기반</span>
     <button class="dlbtn" onclick="downloadRanks()">Download</button>
   </div>
-  <div class="rk2col">
-    <div class="card">
-      <h3 style="margin:0 0 10px;font-size:15px;">RSI(1M) 순위 (상위 40)</h3>
-      <table id="rankRsi"><thead><tr><th>순위</th><th>Δ</th><th class="l">종목</th><th class="l">섹터</th><th>RSI(1M)</th></tr></thead><tbody></tbody></table>
-      <div class="exit" id="exitRsi"></div>
+  <div id="rankCapture">
+    <div class="rk2col">
+      <div class="card">
+        <h3 style="margin:0 0 10px;font-size:15px;">RSI(1M) 순위 (상위 40)</h3>
+        <table id="rankRsi"><thead><tr><th>순위</th><th>Δ</th><th class="l">종목</th><th class="l">섹터</th><th>RSI(1M)</th></tr></thead><tbody></tbody></table>
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 10px;font-size:15px;">1W 순위 (상위 40)</h3>
+        <table id="rankW1"><thead><tr><th>순위</th><th>Δ</th><th class="l">종목</th><th class="l">섹터</th><th>1W</th></tr></thead><tbody></tbody></table>
+      </div>
     </div>
-    <div class="card">
-      <h3 style="margin:0 0 10px;font-size:15px;">1W 순위 (상위 40)</h3>
-      <table id="rankW1"><thead><tr><th>순위</th><th>Δ</th><th class="l">종목</th><th class="l">섹터</th><th>1W</th></tr></thead><tbody></tbody></table>
-      <div class="exit" id="exitW1"></div>
+    <div class="card" style="margin-top:18px;">
+      <h3 style="margin:0 0 12px;font-size:15px;">순위권 이탈 — 전일 상위 40위 → 오늘 40위 밖</h3>
+      <div class="rk2col">
+        <div><div style="font-weight:700;margin-bottom:6px;">RSI(1M)</div><div id="exitRsi"></div></div>
+        <div><div style="font-weight:700;margin-bottom:6px;">1W</div><div id="exitW1"></div></div>
+      </div>
     </div>
   </div>
   <p class="note" id="rkNote"></p>
@@ -396,9 +400,14 @@ function buildRanks(uh, ih, IDX1M){
     document.querySelector(tbodySel).innerHTML=rows;
     var todayTop=today.slice(0,40).map(function(r){return r.tk;});
     var dropped=yest.slice(0,40).filter(function(r){ return todayTop.indexOf(r.tk)<0; });
-    document.querySelector(exitSel).innerHTML = dropped.length
-      ? ('<b>이탈(전일 40위→밖):</b> '+dropped.map(function(r){return r.name+'(전일 '+yrank[r.tk]+'위)';}).join(', '))
-      : '<span style="color:#cbd5e1">이탈 없음</span>';
+    dropped.sort(function(a,b){ return yrank[a.tk]-yrank[b.tk]; });
+    var eh;
+    if(dropped.length){
+      eh='<table class="exit-tbl"><thead><tr><th>전일 순위</th><th class="l">종목</th><th class="l">섹터</th></tr></thead><tbody>';
+      dropped.forEach(function(r){ eh+='<tr><td>'+yrank[r.tk]+'위</td><td class="l">'+r.name+'</td><td class="l">'+r.sector+'</td></tr>'; });
+      eh+='</tbody></table>';
+    } else { eh='<div style="color:#9ca3af;padding:6px 2px;">이탈 없음</div>'; }
+    document.querySelector(exitSel).innerHTML=eh;
   }
   rankBy('rsi_t','rsi_y','#rankRsi tbody','#exitRsi');
   rankBy('w1_t','w1_y','#rankW1 tbody','#exitW1');
@@ -415,7 +424,7 @@ function downloadHeatmap(){
 }
 function downloadScatter(){ if(!scatterChart){ alert('차트가 아직 준비되지 않았습니다.'); return; } _savePng(scatterChart.toBase64Image('image/png',1), 'Universe_SectorRotation'); }
 function downloadRanks(){
-  var node=document.querySelector('#p2 .rk2col');
+  var node=document.getElementById('rankCapture');
   if(typeof html2canvas!=='function'){ alert('이미지 라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.'); return; }
   html2canvas(node, {scale:2, backgroundColor:'#ffffff'}).then(function(cv){ _savePng(cv.toDataURL('image/png'), 'Universe_Ranks'); });
 }
