@@ -33,6 +33,7 @@ TOP_NAV_MAIN = [
     ('market',       'market.html',        'Market',       [
         ('market',        'market.html',        'Index'),
         ('universe',      'universe.html',      'Universe'),
+        ('universe_lab',  'universe_lab.html',  'Universe Lab'),
         ('featured',      'featured.html',      'Featured'),
         ('market_alert',  'market_alert.html',  '투자유의종목'),
         ('etf',           'etf.html',           'ETF'),
