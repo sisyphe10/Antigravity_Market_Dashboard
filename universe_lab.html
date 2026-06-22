@@ -88,7 +88,6 @@
   <div class="card">
     <div style="height:600px;"><canvas id="scatter"></canvas></div>
   </div>
-  <p class="note">주도(우상): 중기·단기 모두 강세 · 개선(좌상): 단기 반등 · 둔화(우하): 단기 차익실현 · 소외(좌하): 약세 지속 · 라벨이 겹치는 작은 섹터는 생략(마우스 올리면 표시)</p>
 </div>
 
 <!-- 2: 순위 변화 -->
@@ -305,7 +304,7 @@ function buildScatter(){
       g.fillStyle='rgba(234,179,8,0.05)'; g.fillRect(cx,cy,a.right-cx,a.bottom-cy);     // 우하 둔화
       g.fillStyle='rgba(22,163,74,0.05)'; g.fillRect(a.left,cy,cx-a.left,a.bottom-cy);  // 좌하 소외(약세=녹색)
       g.strokeStyle='#cbd5e1'; g.lineWidth=1; g.beginPath(); g.moveTo(cx,a.top); g.lineTo(cx,a.bottom); g.moveTo(a.left,cy); g.lineTo(a.right,cy); g.stroke();
-      g.fillStyle='#94a3b8'; g.font='bold 14px Pretendard'; g.textBaseline='top';
+      g.fillStyle='#111827'; g.font='bold 14px Pretendard'; g.textBaseline='top';
       g.textAlign='right'; g.fillText('주도', a.right-8, a.top+6);
       g.textAlign='left';  g.fillText('개선', a.left+8, a.top+6);
       g.textAlign='right'; g.textBaseline='bottom'; g.fillText('둔화', a.right-8, a.bottom-6);
@@ -336,8 +335,8 @@ function buildScatter(){
       backgroundColor:pts.map(function(p){ var c=diverge((p.x+p.y)/2,15); return c.replace('rgb(','rgba(').replace(')',',0.55)'); }),
       borderColor:'#475569', borderWidth:1 }] },
     options:{ maintainAspectRatio:false, animation:false,
-      scales:{ x:{min:-xa,max:xa,title:{display:true,text:'RSI(1M) — 중기 상대강도 (%p)'},grid:{color:'#f1f5f9'}},
-               y:{min:-ya,max:ya,title:{display:true,text:'1W — 단기 수익률 (%)'},grid:{color:'#f1f5f9'}} },
+      scales:{ x:{min:-xa,max:xa,title:{display:true,text:'RSI(1M) — 중기 상대강도 (%p)',color:'#111827',font:{size:13,weight:'600'}},ticks:{color:'#111827'},grid:{color:'#f1f5f9'}},
+               y:{min:-ya,max:ya,title:{display:true,text:'1W — 단기 수익률 (%)',color:'#111827',font:{size:13,weight:'600'}},ticks:{color:'#111827'},grid:{color:'#f1f5f9'}} },
       plugins:{ legend:{display:false},
         tooltip:{ displayColors:false, callbacks:{ label:function(c){ var d=c.raw; return d.sector+' · 종목 '+d.n+' · 시총 '+Math.round(d.w).toLocaleString()+'억 · RSI '+(d.x>0?'+':'')+Math.round(d.x)+'%, 1W '+(d.y>0?'+':'')+Math.round(d.y)+'%'; } } } }
     }, plugins:[quad] });
