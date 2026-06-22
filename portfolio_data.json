@@ -121,11 +121,11 @@
       "weight_prev": 3.0,
       "today_return": -2.938706968933669,
       "contribution": -0.8816120906801006,
-      "cumulative_return": -11.961293790878958,
+      "cumulative_return": -13.80852967491798,
       "current_price": 115600.0,
       "ath_price": 141900.0,
       "dd": -18.534178999295282,
-      "rsi": -7.587037359824511,
+      "rsi": -33.54956641870983,
       "is_today_new": false
     },
     {
@@ -137,11 +137,11 @@
       "weight_prev": 3.0,
       "today_return": -1.4127144298688195,
       "contribution": -0.42381432896064586,
-      "cumulative_return": -24.000183032854395,
+      "cumulative_return": -5.053449951409139,
       "current_price": 97700.0,
       "ath_price": 245500.0,
       "dd": -60.20366598778004,
-      "rsi": -18.142108809812818,
+      "rsi": -3.4530852593182892,
       "is_today_new": false
     },
     {
