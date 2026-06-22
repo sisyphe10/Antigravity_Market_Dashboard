@@ -45,8 +45,8 @@ portfolio_config = {
     '트루밸류':      {'base_price': 2021.31, 'start_date': '2025-12-30'},
     'Value ESG':     {'base_price': 1980.49, 'start_date': '2025-12-30'},
     '개방형 랩':     {'base_price': 1518.52, 'start_date': '2025-12-30'},
-    '목표전환형 5차': {'base_price': 1000.00, 'start_date': '2026-06-12'},
-    '목표전환형 4호': {'base_price': 1000.00, 'start_date': '2026-06-15'},
+    # '목표전환형 5차': {'base_price': 1000.00, 'start_date': '2026-06-12'},  # DB 5차 완료 (2026-06-19 청산)
+    # '목표전환형 4호': {'base_price': 1000.00, 'start_date': '2026-06-15'},  # NH 4호 완료 (2026-06-19 청산)
 }
 
 

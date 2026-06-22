@@ -111,8 +111,8 @@ def get_latest_nav():
         '삼성 트루밸류': '트루밸류',
         'NH Value ESG': 'Value ESG',
         'DB 개방형 랩': '개방형 랩',
-        'DB 목표전환형 5차': '목표전환형 5차',  # 운용 개시 2026-06-12 (먼저 출시 → 위)
-        'NH 목표전환형 4호': '목표전환형 4호',  # 운용 개시 2026-06-15
+        # 'DB 목표전환형 5차': '목표전환형 5차',  # DB 5차 완료 (2026-06-19 청산, +7.72%)
+        # 'NH 목표전환형 4호': '목표전환형 4호',  # NH 4호 완료 (2026-06-19 청산, +5.38%)
         # 'NH 목표전환형 3호': '목표전환형 3호',  # NH 3호 완료 (2026-05-27 청산, 목표달성)
         # 'DB 목표전환형 4차': '목표전환형 4차',  # DB 4차 완료 (2026-05-27 청산, 목표달성)
         # 'NH 목표전환형 2호': '목표전환형 2호',  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
@@ -141,7 +141,7 @@ def get_latest_returns():
     # 트루밸류, KOSPI, KOSDAQ 수익률 추출
     returns_data = {}
     
-    for product in ['트루밸류', '목표전환형 5차', '목표전환형 4호', 'KOSPI', 'KOSDAQ']:  # DB 5차 먼저 출시 → 위
+    for product in ['트루밸류', 'KOSPI', 'KOSDAQ']:  # NH 4호/DB 5차 청산 (2026-06-19)
         returns_data[product] = {
             '1D': latest_row.get(f'{product}_1D', 'N/A'),
             '1W': latest_row.get(f'{product}_1W', 'N/A'),
@@ -304,8 +304,8 @@ def format_message(date, nav_data, returns_data):
     msg += f"{LINE}\n<b>📈 수익률</b>\n{LINE}\n"
     display_names = {
         '트루밸류': '삼성 트루밸류',
-        '목표전환형 5차': 'DB 목표전환형 5차',  # 운용 개시 2026-06-12 (먼저 출시 → 위)
-        '목표전환형 4호': 'NH 목표전환형 4호',  # 운용 개시 2026-06-15
+        # '목표전환형 5차': 'DB 목표전환형 5차',  # DB 5차 완료 (2026-06-19 청산, +7.72%)
+        # '목표전환형 4호': 'NH 목표전환형 4호',  # NH 4호 완료 (2026-06-19 청산, +5.38%)
         # '목표전환형 3호': 'NH 목표전환형 3호',  # NH 3호 완료 (2026-05-27 청산, 목표달성)
         # '목표전환형 4차': 'DB 목표전환형 4차',  # DB 4차 완료 (2026-05-27 청산, 목표달성)
         # '목표전환형 2호': 'NH 목표전환형 2호',  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
@@ -314,7 +314,7 @@ def format_message(date, nav_data, returns_data):
         'KOSDAQ': 'KOSDAQ',
     }
     periods = ['1D', '1W', '1M', '3M', '6M', '1Y', 'YTD']
-    for product in ['트루밸류', '목표전환형 5차', '목표전환형 4호', 'KOSPI', 'KOSDAQ']:  # DB 5차 먼저 출시 → 위
+    for product in ['트루밸류', 'KOSPI', 'KOSDAQ']:  # NH 4호/DB 5차 청산 (2026-06-19)
         if product in returns_data:
             returns = returns_data[product]
             # N/A가 아닌 항목만 표시

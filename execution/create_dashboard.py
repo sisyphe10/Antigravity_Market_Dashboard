@@ -377,9 +377,7 @@ def get_item_category(item_name):
 
     # Special handling for Wrap portfolios
     wrap_keywords = ['트루밸류', '삼성 트루밸류', 'Value ESG', 'NH Value ESG',
-                     '개방형', 'DB 개방형',
-                     '목표전환형 4호', 'NH 목표전환형 4호',
-                     '목표전환형 5차', 'DB 목표전환형 5차']
+                     '개방형', 'DB 개방형']  # 목표전환형 4호/5차 제거 (2026-06-19 청산)
     if any(keyword in item_name for keyword in wrap_keywords):
         return 'Wrap'
 
@@ -2560,8 +2558,8 @@ def _build_wrap_chart_section(category_label):
             ('삼성 트루밸류', '트루밸류'),
             ('NH Value ESG', 'Value ESG'),
             ('DB 개방형', '개방형 랩'),
-            ('NH 목표전환형 4호', '목표전환형 4호'),  # 운용 개시 2026-06-15 (DB 5차 페어, 동일 구성)
-            ('DB 목표전환형 5차', '목표전환형 5차'),  # 운용 개시 2026-06-12 (NH 4호 페어)
+            # ('NH 목표전환형 4호', '목표전환형 4호'),  # NH 4호 완료 (2026-06-19 청산, +5.38%)
+            # ('DB 목표전환형 5차', '목표전환형 5차'),  # DB 5차 완료 (2026-06-19 청산, +7.72%)
             # ('NH 목표전환형 3호', '목표전환형 3호'),  # NH 3호 완료 (2026-05-27 청산, 목표달성)
             # ('DB 목표전환형 4차', '목표전환형 4차'),  # DB 4차 완료 (2026-05-27 청산, 목표달성)
             # ('NH 목표전환형 2호', '목표전환형 2호'),  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
@@ -2572,8 +2570,8 @@ def _build_wrap_chart_section(category_label):
             '삼성 트루밸류': '#1428A0',
             'NH Value ESG': '#0072CE',
             'DB 개방형': '#00854A',
-            'NH 목표전환형 4호': '#0072CE',  # 운용 개시 2026-06-15
-            'DB 목표전환형 5차': '#00854A',  # 운용 개시 2026-06-12
+            # 'NH 목표전환형 4호': '#0072CE',  # NH 4호 완료 (2026-06-19 청산)
+            # 'DB 목표전환형 5차': '#00854A',  # DB 5차 완료 (2026-06-19 청산)
             # 'NH 목표전환형 3호': '#0072CE',  # NH 3호 완료 (2026-05-27 청산, 목표달성)
             # 'DB 목표전환형 4차': '#00854A',  # DB 4차 완료 (2026-05-27 청산, 목표달성)
             # 'NH 목표전환형 2호': '#0072CE',  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
@@ -3643,8 +3641,8 @@ def create_wrap_returns_table():
             ('KOSPI', 'KOSPI'),
             ('KOSDAQ', 'KOSDAQ'),
             ('삼성 트루밸류', '트루밸류'),
-            ('NH 목표전환형 4호', '목표전환형 4호'),  # 운용 개시 2026-06-15 (DB 5차 페어, 동일 구성)
-            ('DB 목표전환형 5차', '목표전환형 5차'),  # 운용 개시 2026-06-12 (NH 4호 페어)
+            # ('NH 목표전환형 4호', '목표전환형 4호'),  # NH 4호 완료 (2026-06-19 청산, +5.38%)
+            # ('DB 목표전환형 5차', '목표전환형 5차'),  # DB 5차 완료 (2026-06-19 청산, +7.72%)
             # ('NH 목표전환형 3호', '목표전환형 3호'),  # NH 3호 완료 (2026-05-27 청산, 목표달성)
             # ('DB 목표전환형 4차', '목표전환형 4차'),  # DB 4차 완료 (2026-05-27 청산, 목표달성)
             # ('NH 목표전환형 2호', '목표전환형 2호'),  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
@@ -3839,26 +3837,7 @@ def create_order_section():
                     { broker: 'DB',   product: '개방형 랩' },
                 ],
             },
-            {
-                display: 'DB 목표전환형 5차',  // DB 5차(운용 개시 2026-06-12). NH 4호와 동일 구성, 증권사·주문 분리 → 별도 탭. (사용자 지정 순서: DB 5차 앞)
-                jsonKey: 'NH 목표전환형 4호 / DB 목표전환형 5차',
-                templates: [
-                    { label: 'DB 목표전환형 5차', file: '자문지/라이프자산운용_DB 목표전환형 랩 _5차_2026.6.12.xlsx' },
-                ],
-                newSheetTargets: [
-                    { broker: 'DB', product: '목표전환형 5차' },
-                ],
-            },
-            {
-                display: 'NH 목표전환형 4호',  // NH 4호(운용 개시 2026-06-15). DB 5차와 동일 종목/비중이나 증권사·주문 분리 → 별도 탭. 보유종목은 combined 키 공유.
-                jsonKey: 'NH 목표전환형 4호 / DB 목표전환형 5차',
-                templates: [
-                    { label: 'NH 목표전환형 4호', file: '자문지/라이프자산운용_라이프 다이내믹밸류_목표전환형 4호_2026.6.15.xlsx' },
-                ],
-                newSheetTargets: [
-                    { broker: 'NH', product: '목표전환형 4호' },
-                ],
-            },
+            // 목표전환형 NH 4호 / DB 5차 페어 완료 (2026-06-19 청산, 목표달성) — 다음 페어 출시 시 카드 재추가
         ];
         var orderState = {};
         var orderStocks = {};
@@ -4023,17 +4002,11 @@ def create_order_section():
 
         function renderEmailPanel() {
             var GENERAL = '삼성 트루밸류 / NH Value ESG / DB 개방형';
-            var NH = 'NH 목표전환형 4호';
+            // 목표전환형 NH 4호 / DB 5차 청산 (2026-06-19) → 일반형 이메일/네이트온만 노출
             var compliance = buildComplianceEmailText();
             var samsung = buildOrderEmailText(GENERAL, orderStocks[GENERAL] || [], orderState[GENERAL] || []);
-            var nh = buildOrderEmailText(NH, orderStocks[NH] || [], orderState[NH] || []);
-            // 네이트온 (NH 이메일 밑) — 일반형 + 목표전환형 한 박스
-            // ORDER 탭 분리(NH 4호 / DB 5차) 후 둘은 동일 구성이라 한쪽(DB 5차)을 목표전환형 소스로 사용
-            var TGT = 'DB 목표전환형 5차';
-            var nateonText = buildOrderNateonText(orderStocks[GENERAL] || [], orderState[GENERAL] || [], '일반형')
-                + '\\n\\n'
-                + buildOrderNateonText(orderStocks[TGT] || [], orderState[TGT] || [], '목표전환형');
-            var nateonReasonLines = buildNateonReasonLines([GENERAL, TGT]);
+            var nateonText = buildOrderNateonText(orderStocks[GENERAL] || [], orderState[GENERAL] || [], '일반형');
+            var nateonReasonLines = buildNateonReasonLines([GENERAL]);
             if (nateonReasonLines.length) nateonText += '\\n\\n' + nateonReasonLines.join('\\n');
             // 다운로드 섹션 (증권사 순서: 삼성 → NH → DB, 색상도 증권사별)
             var BROKER_ORDER = { '삼성': 0, 'NH': 1, 'DB': 2 };
@@ -4078,8 +4051,7 @@ def create_order_section():
                 + dlSection
                 + buildEmailBox('컴플라이언스 이메일', compliance, '#fffbeb', '#fef3c7', '#92400e', '#d97706')
                 + buildEmailBox('삼성 이메일', samsung, '#f9fafb', '#e5e7eb', '#444', '#374151')
-                + buildEmailBox('NH 이메일', nh, '#f9fafb', '#e5e7eb', '#444', '#374151')
-                + buildEmailBox('네이트온 (NH)', nateonText, '#eef2ff', '#c7d2fe', '#1f5a2a', '#4f46e5')
+                + buildEmailBox('네이트온', nateonText, '#eef2ff', '#c7d2fe', '#1f5a2a', '#4f46e5')
                 + '</div>';
             document.getElementById('orderContent').innerHTML = html;
             document.querySelectorAll('#orderContent .email-tab-dl-btn').forEach(function(btn) {
@@ -4138,8 +4110,8 @@ def create_order_section():
         }
 
         function buildOrderEmailText(pfName, stocks, st) {
-            // 일반형 + NH 목표전환형 통합 이메일 (NH 4호 탭에서 활성화)
-            var TARGET_TABS = ['NH 목표전환형 4호'];
+            // 목표전환형 NH 4호 / DB 5차 청산 (2026-06-19) → 통합 비활성 (일반형 단독 이메일)
+            var TARGET_TABS = [];
             var GENERAL = '삼성 트루밸류 / NH Value ESG / DB 개방형';
             var lines = [
                 '안녕하십니까.',
@@ -4180,24 +4152,9 @@ def create_order_section():
         }
 
         function buildComplianceEmailText() {
-            // 일반형 + 목표전환형(NH 4호 / DB 5차 페어) 통합
+            // 목표전환형 NH 4호 / DB 5차 청산 (2026-06-19) → 일반형만
             var GENERAL = '삼성 트루밸류 / NH Value ESG / DB 개방형';
-            var TARGET = 'DB 목표전환형 5차';
             var gen = buildOrderChanges(orderStocks[GENERAL] || [], orderState[GENERAL] || []);
-            var tgt = buildOrderChanges(orderStocks[TARGET] || [], orderState[TARGET] || []);
-            function dedupe(a, b) {
-                var seen = {}, out = [];
-                a.concat(b).forEach(function(name) {
-                    if (!seen[name]) { seen[name] = true; out.push(name); }
-                });
-                return out;
-            }
-            var combined = {
-                newBuy: dedupe(gen.newBuy, tgt.newBuy),
-                inc:    dedupe(gen.inc,    tgt.inc),
-                dec:    dedupe(gen.dec,    tgt.dec),
-                out:    dedupe(gen.out,    tgt.out)
-            };
             var lines = [
                 '안녕하십니까.',
                 '라이프자산운용 김태식입니다.',
@@ -4205,7 +4162,7 @@ def create_order_section():
                 '랩 자문지 보내드립니다.',
                 '주요 변경 내용은 다음과 같습니다.',
                 ''
-            ].concat(buildEmailSectionLines(combined, null)).concat(['', '감사합니다.']);
+            ].concat(buildEmailSectionLines(gen, null)).concat(['', '감사합니다.']);
             return lines.join('\\n');
         }
 
@@ -4795,7 +4752,7 @@ def create_order_section():
 
         // 최종 저장 = 3개 포트폴리오 모두 저장 + finalize 워크플로 1회 트리거
         async function finalizeOrder(_pfNameIgnored) {
-            if (!confirm('최종 저장하시겠습니까?\\n\\n3개 포트폴리오(일반형/DB 목표전환형 5차/NH 목표전환형 4호) 모두 저장 후 GitHub Actions(finalize_orders) 즉시 실행. 1~2분 후 Wrap_NAV.xlsx NEW 시트 + 대시보드 반영.')) return;
+            if (!confirm('최종 저장하시겠습니까?\\n\\n일반형 포트폴리오 저장 후 GitHub Actions(finalize_orders) 즉시 실행. 1~2분 후 Wrap_NAV.xlsx NEW 시트 + 대시보드 반영.')) return;
             var pat = getGithubPat();
             if (!pat) { alert('PAT 입력이 취소되었습니다.'); return; }
             // 모든 포트폴리오 1회 커밋으로 저장 (탭 간 reason 동기화 보존)
