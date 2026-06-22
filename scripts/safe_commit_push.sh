@@ -43,18 +43,24 @@ XLSX_CONFLICT="bail"
 PREFER_REMOTE_PORTFOLIO=0
 MSG=""
 FILES=()
+PUSH_HEAD=0   # --push-head: push an already-made HEAD commit (VM 호출처가 add+commit 직접 수행)
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -m)                        MSG="$2"; shift 2 ;;
     --xlsx-conflict)           XLSX_CONFLICT="$2"; shift 2 ;;
     --prefer-remote-portfolio) PREFER_REMOTE_PORTFOLIO=1; shift ;;
+    --push-head)               PUSH_HEAD=1; shift ;;
     --)                        shift; FILES=("$@"); break ;;
     *) echo "safe_push: unknown argument: $1" >&2; exit 2 ;;
   esac
 done
 
-if [[ -z "$MSG" || ${#FILES[@]} -eq 0 ]]; then
+if [[ "$PUSH_HEAD" == "1" ]]; then
+  if [[ -n "$MSG" || ${#FILES[@]} -gt 0 ]]; then
+    echo "safe_push: --push-head는 -m/파일 인자를 받지 않습니다 (기존 HEAD 커밋을 push)" >&2; exit 2
+  fi
+elif [[ -z "$MSG" || ${#FILES[@]} -eq 0 ]]; then
   echo "safe_push: usage: -m <msg> [--xlsx-conflict bail|fail] [--prefer-remote-portfolio] -- <files...>" >&2
   exit 2
 fi
@@ -62,23 +68,34 @@ if [[ "$XLSX_CONFLICT" != "bail" && "$XLSX_CONFLICT" != "fail" ]]; then
   echo "safe_push: --xlsx-conflict must be 'bail' or 'fail'" >&2; exit 2
 fi
 
-git config user.name  "github-actions[bot]"
-git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-# Stage only the files that actually exist (file lists include optional artifacts).
-ADD=()
-for f in "${FILES[@]}"; do [[ -e "$f" ]] && ADD+=("$f"); done
-if [[ ${#ADD[@]} -gt 0 ]]; then
-  git add -- "${ADD[@]}" 2>/dev/null || true
+if [[ "$PUSH_HEAD" == "1" ]]; then
+  # VM 경로: 호출처가 이미 자신의 identity 로 add+commit 완료 → 기존 git user 보존(없을 때만 폴백)
+  git config user.name  >/dev/null 2>&1 || git config user.name  "vm-bot"
+  git config user.email >/dev/null 2>&1 || git config user.email "vm-bot@local"
+else
+  git config user.name  "github-actions[bot]"
+  git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 fi
 
-if git diff --cached --quiet; then
-  echo "safe_push: nothing staged — nothing to commit."
-  exit 0
-fi
+if [[ "$PUSH_HEAD" == "1" ]]; then
+  # 이미 만들어진 HEAD 커밋을 push (add/commit 생략). OUR_COMMIT = 현재 HEAD.
+  OUR_COMMIT="$(git rev-parse HEAD)"
+else
+  # Stage only the files that actually exist (file lists include optional artifacts).
+  ADD=()
+  for f in "${FILES[@]}"; do [[ -e "$f" ]] && ADD+=("$f"); done
+  if [[ ${#ADD[@]} -gt 0 ]]; then
+    git add -- "${ADD[@]}" 2>/dev/null || true
+  fi
 
-git commit -m "$MSG"
-OUR_COMMIT="$(git rev-parse HEAD)"
+  if git diff --cached --quiet; then
+    echo "safe_push: nothing staged — nothing to commit."
+    exit 0
+  fi
+
+  git commit -m "$MSG"
+  OUR_COMMIT="$(git rev-parse HEAD)"
+fi
 # Files OUR commit actually changed (relative to its parent). Only these get the
 # whole-file ours/theirs policy; files we didn't touch keep the natural merge
 # result so a concurrent actor's solo change to them is never reverted.

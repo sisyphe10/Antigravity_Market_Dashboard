@@ -69,32 +69,25 @@ def git_sync(cwd):
     subprocess.run(["git", "reset", "--hard", "origin/main"], cwd=cwd, capture_output=True, timeout=30)
 
 
-def git_push_safe(cwd):
-    """커밋 후 push: fetch+merge+push 최대 3회 재시도 (GHA와의 non-ff race 자가해소).
+def git_push_safe(cwd, xlsx_conflict="bail"):
+    """이미 add+commit 된 HEAD 커밋을 race-safe 하게 push (GHA와 push 정책 통일).
 
-    merge가 -X ours로도 못 푸는 충돌(modify/delete 등)로 abort되면 git_sync(reset
-    --hard origin/main)로 폴백해 VM이 stuck 상태로 미push 커밋을 누적하지 않게 한다.
-    이 경우 해당 회차 push만 1회 누락되며(portfolio 산출물은 재생성 가능) 다음 주기에
-    최신 origin 위에서 재생성·재push 된다. -X ours는 content 충돌 자동해소용으로 유지.
+    GHA 3종(recalc/finalize/daily_crawl)이 쓰는 scripts/safe_commit_push.sh 를
+    --push-head 모드로 호출한다. 충돌 시 **whole-file 3-way merge**(우리가 바꾼
+    파일=ours, 안 바꾼 파일=theirs, Wrap_NAV.xlsx는 시트 3-way merge)로 해소 →
+    구 `merge -X ours` 의 blind overwrite(GHA 산출물 통째 덮어쓰기) 제거. 그래도
+    못 풀면 스크립트가 origin/main 으로 reset 후 종료(bail)하므로 VM 이 stuck
+    상태로 미push 커밋을 누적하지 않는다(해당 회차만 누락, 다음 주기 재생성).
     """
-    for attempt in range(3):
-        result = subprocess.run(["git", "push"], cwd=cwd, capture_output=True, text=True, timeout=60)
-        if result.returncode == 0:
-            return True
-        # push 실패(대개 non-fast-forward) → fetch + merge 후 재시도 (rebase는 바이너리 충돌 시 불가)
-        subprocess.run(["git", "fetch", "origin", "main"], cwd=cwd, capture_output=True, timeout=60)
-        merge = subprocess.run(
-            ["git", "merge", "origin/main", "--strategy-option=ours", "--no-edit"],
-            cwd=cwd, capture_output=True, text=True, timeout=60
-        )
-        if merge.returncode != 0:
-            # -X ours로도 못 푸는 충돌 → 자가복구: 로컬 커밋 폐기하고 origin에 맞춤(절대 stuck 방지)
-            subprocess.run(["git", "merge", "--abort"], cwd=cwd, capture_output=True, timeout=10)
-            logging.warning(f"git push: merge conflict (attempt {attempt + 1}) → git_sync 폴백 (로컬 커밋 폐기, 재생성됨)")
-            git_sync(cwd)
-            return False
-    logging.warning("git push failed after 3 retries")
-    return False
+    result = subprocess.run(
+        ["bash", "scripts/safe_commit_push.sh", "--push-head", "--xlsx-conflict", xlsx_conflict],
+        cwd=cwd, capture_output=True, text=True, timeout=180
+    )
+    if result.returncode != 0:
+        logging.warning(f"safe_commit_push 실패 (rc={result.returncode}): "
+                        f"{(result.stdout or '')[-200:]} {(result.stderr or '')[-200:]}")
+        return False
+    return True
 
 
 def load_subscribers():
