@@ -57,7 +57,7 @@
       "weight_prev": 5.0,
       "today_return": -9.356136820925553,
       "contribution": -4.678068410462776,
-      "cumulative_return": 14.57803468208092,
+      "cumulative_return": 13.413704458824572,
       "current_price": 450500.0,
       "ath_price": 497000.0,
       "dd": -9.356136820925553,
@@ -69,11 +69,11 @@
       "name": "SK스퀘어",
       "sector": "상사,자본재",
       "market_cap": 2599580.2042,
-      "weight": 5.0,
+      "weight": 2.0,
       "weight_prev": 5.0,
       "today_return": 10.674157303370785,
       "contribution": 5.337078651685393,
-      "cumulative_return": 36.92441355343179,
+      "cumulative_return": 34.558464791022935,
       "current_price": 1970000.0,
       "ath_price": 1970000.0,
       "dd": 0.0,
@@ -89,7 +89,7 @@
       "weight_prev": 4.0,
       "today_return": -3.2679738562091507,
       "contribution": -1.3071895424836601,
-      "cumulative_return": -7.204327514138187,
+      "cumulative_return": -5.913218970736622,
       "current_price": 222000.0,
       "ath_price": 454000.0,
       "dd": -51.10132158590308,
@@ -105,7 +105,7 @@
       "weight_prev": 3.0,
       "today_return": -1.8502202643171806,
       "contribution": -0.5550660792951542,
-      "cumulative_return": 11.166550244486583,
+      "cumulative_return": 9.135439627724718,
       "current_price": 2228000.0,
       "ath_price": 2270000.0,
       "dd": -1.8502202643171817,
@@ -121,7 +121,7 @@
       "weight_prev": 3.0,
       "today_return": -2.938706968933669,
       "contribution": -0.8816120906801006,
-      "cumulative_return": -13.80852967491798,
+      "cumulative_return": -11.778173492749932,
       "current_price": 115600.0,
       "ath_price": 141900.0,
       "dd": -18.534178999295282,
@@ -137,7 +137,7 @@
       "weight_prev": 3.0,
       "today_return": -1.4127144298688195,
       "contribution": -0.42381432896064586,
-      "cumulative_return": -5.053449951409139,
+      "cumulative_return": -3.8385826771653586,
       "current_price": 97700.0,
       "ath_price": 245500.0,
       "dd": -60.20366598778004,
@@ -169,7 +169,7 @@
       "weight_prev": 3.0,
       "today_return": -9.26791277258567,
       "contribution": -2.7803738317757007,
-      "cumulative_return": -7.507455172146704,
+      "cumulative_return": -7.261727493233694,
       "current_price": 116500.0,
       "ath_price": 149900.0,
       "dd": -22.281521014009343,
@@ -185,7 +185,7 @@
       "weight_prev": 2.0,
       "today_return": 2.4326672458731537,
       "contribution": 0.48653344917463076,
-      "cumulative_return": -13.47682005297618,
+      "cumulative_return": -13.122020386972878,
       "current_price": 117900.0,
       "ath_price": 161400.0,
       "dd": -26.951672862453535,
@@ -201,7 +201,7 @@
       "weight_prev": 2.0,
       "today_return": -2.9918404351767904,
       "contribution": -0.5983680870353582,
-      "cumulative_return": -13.480420468984633,
+      "cumulative_return": -12.695822454308093,
       "current_price": 1070000.0,
       "ath_price": 1630000.0,
       "dd": -34.355828220858896,
@@ -217,12 +217,26 @@
       "weight_prev": 2.0,
       "today_return": 15.918367346938775,
       "contribution": 3.183673469387755,
-      "cumulative_return": 16.932578486875972,
+      "cumulative_return": 14.17085427135678,
       "current_price": 56800.0,
       "ath_price": 56800.0,
       "dd": 0.0,
       "rsi": 31.455534542574625,
       "is_today_new": false
     }
-  ]
+  ],
+  "_order_changes": {
+    "삼성 트루밸류 / NH Value ESG / DB 개방형": {
+      "date": "2026-06-23",
+      "added": [],
+      "changed": [
+        {
+          "name": "SK스퀘어",
+          "from": 5.0,
+          "to": 2.0
+        }
+      ],
+      "removed": []
+    }
+  }
 }
