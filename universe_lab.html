@@ -73,7 +73,6 @@
   </div>
   <div class="card">
     <div id="heatmap"></div>
-    <div class="legend"><span>약세</span><span class="bar"></span><span>강세</span><span id="legScale" style="margin-left:10px;"></span></div>
   </div>
 </div>
 
@@ -200,13 +199,10 @@ window.addEventListener('resize', function(){ clearTimeout(_rzTimer); _rzTimer=s
 document.querySelectorAll('#p0 .mbtn').forEach(function(b){
   b.addEventListener('click', function(){
     document.querySelectorAll('#p0 .mbtn').forEach(function(x){ x.classList.toggle('active', x===b); });
-    METRIC=b.getAttribute('data-m'); updateLegend(); renderHeatmap();
+    METRIC=b.getAttribute('data-m'); renderHeatmap();
   });
 });
-function updateLegend(){
-  var mm=METRICS[METRIC];
-  document.getElementById('legScale').textContent=mm.label+'  ±'+mm.m+(mm.dd?' (0=신고가)':'%');
-}
+// (범례 제거됨)
 // Squarified treemap (Bruls/Huizing/van Wijk). data=[{item,value}] → [{item,x,y,w,h}]
 function squarify(data, x, y, width, height){
   var clean=data.filter(function(d){return d.value>0;});
@@ -241,7 +237,7 @@ function squarify(data, x, y, width, height){
   return result;
 }
 function buildHeatmap(){
-  updateLegend(); renderHeatmap();
+  renderHeatmap();
 }
 function renderHeatmap(){
   var host=document.getElementById('heatmap'); if(!host) return;
@@ -267,11 +263,11 @@ function renderHeatmap(){
       stockRects.forEach(function(rr){
         var s=rr.item, v=s[METRIC], bg=colorFor(v,METRIC);
         var box=document.createElement('div');
-        box.style.cssText='position:absolute;left:'+rr.x+'px;top:'+rr.y+'px;width:'+Math.max(0,rr.w-0.5)+'px;height:'+Math.max(0,rr.h-0.5)+'px;background:'+bg+';overflow:hidden;border:0.5px solid rgba(255,255,255,0.65);';
+        box.style.cssText='position:absolute;left:'+rr.x+'px;top:'+rr.y+'px;width:'+Math.max(0,rr.w-0.5)+'px;height:'+Math.max(0,rr.h-0.5)+'px;background:'+bg+';overflow:hidden;border:0.5px solid rgba(255,255,255,0.65);display:flex;flex-direction:column;align-items:center;justify-content:center;';
         box.title=s.disp+'  ['+s.sector+']\n시총 '+Math.round(s.mcap).toLocaleString()+'억 · '+METRICS[METRIC].label+' '+(v==null?'-':((v>0?'+':'')+Math.round(v)+'%'));
         if(rr.w>36 && rr.h>24){
-          box.innerHTML='<div style="font:700 14px Pretendard;line-height:1.12;color:#111;padding:3px 4px 0;white-space:nowrap;">'+s.disp+'</div>'
-            +(rr.h>44?'<div style="font:600 12px Pretendard;color:#111;padding:0 4px;white-space:nowrap;">'+(v==null?'':((v>0?'+':'')+Math.round(v)+'%'))+'</div>':'');
+          box.innerHTML='<div style="font:700 14px Pretendard;line-height:1.15;color:#111;text-align:center;padding:0 2px;white-space:nowrap;">'+s.disp+'</div>'
+            +(rr.h>44?'<div style="font:600 12px Pretendard;color:#111;text-align:center;padding:0 2px;white-space:nowrap;">'+(v==null?'':((v>0?'+':'')+Math.round(v)+'%'))+'</div>':'');
         }
         frag.appendChild(box);
       });
