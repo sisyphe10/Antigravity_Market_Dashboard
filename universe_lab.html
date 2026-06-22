@@ -239,6 +239,15 @@ function squarify(data, x, y, width, height){
 function buildHeatmap(){
   renderHeatmap();
 }
+var _measCtx = document.createElement('canvas').getContext('2d');
+// 박스 폭(maxW)에 들어가는 만큼만 앞글자를 남김(중간 잘림 방지). 한글/영문 폭 차이 정확 반영.
+function fitText(text, font, maxW){
+  if(maxW<=0||!text) return '';
+  _measCtx.font = font;
+  if(_measCtx.measureText(text).width <= maxW) return text;
+  for(var i=text.length-1; i>=1; i--){ if(_measCtx.measureText(text.slice(0,i)).width <= maxW) return text.slice(0,i); }
+  return text.slice(0,1);
+}
 function renderHeatmap(){
   var host=document.getElementById('heatmap'); if(!host) return;
   var W=host.clientWidth||host.offsetWidth||900, H=host.clientHeight||640;
@@ -266,7 +275,7 @@ function renderHeatmap(){
         box.style.cssText='position:absolute;left:'+rr.x+'px;top:'+rr.y+'px;width:'+Math.max(0,rr.w-0.5)+'px;height:'+Math.max(0,rr.h-0.5)+'px;background:'+bg+';overflow:hidden;border:0.5px solid rgba(255,255,255,0.65);display:flex;flex-direction:column;align-items:center;justify-content:center;';
         box.title=s.disp+'  ['+s.sector+']\n시총 '+Math.round(s.mcap).toLocaleString()+'억 · '+METRICS[METRIC].label+' '+(v==null?'-':((v>0?'+':'')+Math.round(v)+'%'));
         if(rr.w>36 && rr.h>24){
-          box.innerHTML='<div style="font:700 14px Pretendard;line-height:1.15;color:#111;text-align:center;padding:0 2px;white-space:nowrap;">'+s.disp+'</div>'
+          box.innerHTML='<div style="font:700 14px Pretendard;line-height:1.15;color:#111;text-align:center;padding:0 2px;white-space:nowrap;">'+fitText(s.disp,'700 14px Pretendard',rr.w-6)+'</div>'
             +(rr.h>44?'<div style="font:600 12px Pretendard;color:#111;text-align:center;padding:0 2px;white-space:nowrap;">'+(v==null?'':((v>0?'+':'')+Math.round(v)+'%'))+'</div>':'');
         }
         frag.appendChild(box);
