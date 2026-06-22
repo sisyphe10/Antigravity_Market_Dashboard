@@ -25,15 +25,15 @@
   .mbtn.active { background:#2563eb; color:#fff; border-color:#2563eb; }
   .card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:14px; }
   .legend { display:flex; align-items:center; gap:6px; font-size:12px; color:#6b7280; margin-top:8px; }
-  .legend .bar { width:160px; height:12px; border-radius:3px; background:linear-gradient(90deg,#dc2626,#f3f4f6,#16a34a); }
+  .legend .bar { width:160px; height:12px; border-radius:3px; background:linear-gradient(90deg,#16a34a,#f3f4f6,#dc2626); }
   table { width:100%; border-collapse:collapse; font-size:14px; }
   th,td { padding:8px 9px; border-bottom:1px solid #eef0f2; text-align:right; white-space:nowrap; }
   th { background:#f9fafb; color:#374151; font-weight:600; position:sticky; top:0; }
   td.l,th.l { text-align:left; }
-  .pos { color:#16a34a; font-weight:600; }
-  .neg { color:#dc2626; font-weight:600; }
-  .up { color:#16a34a; font-weight:700; }
-  .down { color:#dc2626; font-weight:700; }
+  .pos { color:#dc2626; font-weight:600; }
+  .neg { color:#16a34a; font-weight:600; }
+  .up { color:#dc2626; font-weight:700; }
+  .down { color:#16a34a; font-weight:700; }
   .flat { color:#9ca3af; }
   .new { color:#2563eb; font-weight:700; }
   .rk2col { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
@@ -116,7 +116,7 @@ function shortName(tk,name,cur){ var t=(tk&&tk.indexOf(':')>=0)?tk.split(':').po
 // 색상: 발산형 (음수=빨강, 0=연회색, 양수=초록). DD는 0=초록, 음수=빨강.
 function lerp(a,b,t){ return Math.round(a+(b-a)*t); }
 function rgb(c){ return 'rgb('+c[0]+','+c[1]+','+c[2]+')'; }
-var C_NEG=[220,38,38], C_MID=[243,244,246], C_POS=[22,163,74];
+var C_NEG=[22,163,74], C_MID=[243,244,246], C_POS=[220,38,38];  // 한국식: 강세(양수)=빨강, 약세(음수)=녹색
 function diverge(v, m){
   if(v===null||isNaN(v)) return 'rgb(229,231,235)';
   var t=Math.max(-1,Math.min(1, v/m));
@@ -139,9 +139,7 @@ function colorFor(v, key){
   }
   return diverge(v, mm.m);
 }
-function textOn(bg){ var m=/rgb\((\d+),\s*(\d+),\s*(\d+)\)/.exec(bg); if(!m) return '#1f2937';
-  var L=0.299*(+m[1])+0.587*(+m[2])+0.114*(+m[3]); return L>158?'#1f2937':'#ffffff'; }
-function shadowFor(tc){ return tc==='#ffffff' ? '0 1px 2px rgba(0,0,0,.7),0 0 1px rgba(0,0,0,.5)' : '0 1px 2px rgba(255,255,255,.85),0 0 1px rgba(255,255,255,.7)'; }
+// 트리맵 라벨 글자색은 검정(#111) 통일, 그림자 없음.
 
 var STOCKS=[];     // {tk,name,cur,sector,mcap,rsi,w1,m1,ytd,dd,disp}
 var METRIC='rsi';
@@ -264,9 +262,8 @@ function renderHeatmap(){
         box.style.cssText='position:absolute;left:'+rr.x+'px;top:'+rr.y+'px;width:'+Math.max(0,rr.w-0.5)+'px;height:'+Math.max(0,rr.h-0.5)+'px;background:'+bg+';overflow:hidden;border:0.5px solid rgba(255,255,255,0.65);';
         box.title=s.disp+'  ['+s.sector+']\n시총 '+Math.round(s.mcap).toLocaleString()+'억 · '+METRICS[METRIC].label+' '+(v==null?'-':((v>0?'+':'')+Math.round(v)+'%'));
         if(rr.w>34 && rr.h>22){
-          var tc=textOn(bg), sh=shadowFor(tc);
-          box.innerHTML='<div style="font:700 12px Pretendard;line-height:1.12;color:'+tc+';text-shadow:'+sh+';padding:3px 4px 0;white-space:nowrap;">'+s.disp+'</div>'
-            +(rr.h>38?'<div style="font:600 11px Pretendard;color:'+tc+';text-shadow:'+sh+';padding:0 4px;white-space:nowrap;">'+(v==null?'':((v>0?'+':'')+Math.round(v)+'%'))+'</div>':'');
+          box.innerHTML='<div style="font:700 12px Pretendard;line-height:1.12;color:#111;padding:3px 4px 0;white-space:nowrap;">'+s.disp+'</div>'
+            +(rr.h>38?'<div style="font:600 11px Pretendard;color:#111;padding:0 4px;white-space:nowrap;">'+(v==null?'':((v>0?'+':'')+Math.round(v)+'%'))+'</div>':'');
         }
         frag.appendChild(box);
       });
