@@ -10,24 +10,24 @@
   * { box-sizing: border-box; }
   body { margin:0; font-family:'Pretendard Variable',Pretendard,system-ui,-apple-system,sans-serif; background:#f4f5f7; color:#1f2937; }
   header { padding:18px 24px; background:#111827; color:#fff; display:flex; align-items:center; gap:16px; }
-  header h1 { font-size:18px; margin:0; font-weight:700; }
+  header h1 { font-size:20px; margin:0; font-weight:700; }
   header .sub { font-size:12px; color:#9ca3af; }
   header a.back { margin-left:auto; color:#93c5fd; font-size:13px; text-decoration:none; font-weight:600; }
   .updated { font-size:11px; color:#6b7280; padding:6px 24px; background:#fff; border-bottom:1px solid #e5e7eb; }
   .tabs { display:flex; gap:8px; padding:12px 24px 0; background:#fff; border-bottom:1px solid #e5e7eb; }
-  .tab { padding:8px 16px; font-size:14px; font-weight:600; color:#6b7280; cursor:pointer; border-radius:8px 8px 0 0; }
+  .tab { padding:9px 18px; font-size:15px; font-weight:600; color:#6b7280; cursor:pointer; border-radius:8px 8px 0 0; }
   .tab.active { color:#111827; background:#f4f5f7; border:1px solid #e5e7eb; border-bottom:none; }
   .panel { display:none; padding:18px 24px 40px; }
   .panel.active { display:block; }
   .toolbar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
   .toolbar .lbl { font-size:13px; font-weight:600; color:#374151; margin-right:4px; }
-  .mbtn { font-family:inherit; font-size:12px; font-weight:600; padding:6px 12px; background:#fff; color:#374151; border:1px solid #d1d5db; border-radius:7px; cursor:pointer; }
+  .mbtn { font-family:inherit; font-size:13px; font-weight:600; padding:7px 14px; background:#fff; color:#374151; border:1px solid #d1d5db; border-radius:7px; cursor:pointer; }
   .mbtn.active { background:#2563eb; color:#fff; border-color:#2563eb; }
   .card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:14px; }
-  .legend { display:flex; align-items:center; gap:6px; font-size:11px; color:#6b7280; margin-top:8px; }
+  .legend { display:flex; align-items:center; gap:6px; font-size:12px; color:#6b7280; margin-top:8px; }
   .legend .bar { width:160px; height:12px; border-radius:3px; background:linear-gradient(90deg,#dc2626,#f3f4f6,#16a34a); }
-  table { width:100%; border-collapse:collapse; font-size:13px; }
-  th,td { padding:7px 8px; border-bottom:1px solid #eef0f2; text-align:right; white-space:nowrap; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th,td { padding:8px 9px; border-bottom:1px solid #eef0f2; text-align:right; white-space:nowrap; }
   th { background:#f9fafb; color:#374151; font-weight:600; position:sticky; top:0; }
   td.l,th.l { text-align:left; }
   .pos { color:#16a34a; font-weight:600; }
@@ -38,9 +38,9 @@
   .new { color:#2563eb; font-weight:700; }
   .rk2col { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
   @media (max-width:900px){ .rk2col { grid-template-columns:1fr; } }
-  .note { font-size:11px; color:#9ca3af; margin:6px 0 0; }
-  .exit { font-size:12px; color:#6b7280; margin-top:10px; }
-  .qcap { font-size:11px; color:#9ca3af; }
+  .note { font-size:12px; color:#9ca3af; margin:7px 0 0; }
+  .exit { font-size:13px; color:#6b7280; margin-top:10px; }
+  .qcap { font-size:12px; color:#9ca3af; }
   #heatmap { position:relative; overflow:hidden; background:#fff; width:100%; height:640px; }
 </style>
 </head>
@@ -93,12 +93,12 @@
   </div>
   <div class="rk2col">
     <div class="card">
-      <h3 style="margin:0 0 8px;font-size:14px;">RSI(1M) 순위 (상위 40)</h3>
+      <h3 style="margin:0 0 10px;font-size:15px;">RSI(1M) 순위 (상위 40)</h3>
       <table id="rankRsi"><thead><tr><th>순위</th><th>Δ</th><th class="l">종목</th><th class="l">섹터</th><th>RSI(1M)</th></tr></thead><tbody></tbody></table>
       <div class="exit" id="exitRsi"></div>
     </div>
     <div class="card">
-      <h3 style="margin:0 0 8px;font-size:14px;">1W 순위 (상위 40)</h3>
+      <h3 style="margin:0 0 10px;font-size:15px;">1W 순위 (상위 40)</h3>
       <table id="rankW1"><thead><tr><th>순위</th><th>Δ</th><th class="l">종목</th><th class="l">섹터</th><th>1W</th></tr></thead><tbody></tbody></table>
       <div class="exit" id="exitW1"></div>
     </div>
@@ -139,8 +139,9 @@ function colorFor(v, key){
   }
   return diverge(v, mm.m);
 }
-function textOn(bg){ var m=/rgb\((\d+),\s*(\d+),\s*(\d+)\)/.exec(bg); if(!m) return '#111';
-  var L=0.299*(+m[1])+0.587*(+m[2])+0.114*(+m[3]); return L>165?'#1f2937':'#ffffff'; }
+function textOn(bg){ var m=/rgb\((\d+),\s*(\d+),\s*(\d+)\)/.exec(bg); if(!m) return '#1f2937';
+  var L=0.299*(+m[1])+0.587*(+m[2])+0.114*(+m[3]); return L>158?'#1f2937':'#ffffff'; }
+function shadowFor(tc){ return tc==='#ffffff' ? '0 1px 2px rgba(0,0,0,.7),0 0 1px rgba(0,0,0,.5)' : '0 1px 2px rgba(255,255,255,.85),0 0 1px rgba(255,255,255,.7)'; }
 
 var STOCKS=[];     // {tk,name,cur,sector,mcap,rsi,w1,m1,ytd,dd,disp}
 var METRIC='rsi';
@@ -250,10 +251,10 @@ function renderHeatmap(){
     return {item:{name:k, stocks:bySec[k]}, value:sum};
   });
   var secRects=squarify(sectors, 0,0,W,H);
-  var CAP=14;
+  var CAP=17;
   var frag=document.createDocumentFragment();
   secRects.forEach(function(sr){
-    var showCap = sr.h>26 && sr.w>48;
+    var showCap = sr.h>30 && sr.w>52;
     var innerY=sr.y+(showCap?CAP:0), innerH=sr.h-(showCap?CAP:0);
     if(innerH>2 && sr.w>2){
       var stockRects=squarify(sr.item.stocks.map(function(s){return {item:s,value:s.mcap};}), sr.x, innerY, sr.w, innerH);
@@ -262,16 +263,17 @@ function renderHeatmap(){
         var box=document.createElement('div');
         box.style.cssText='position:absolute;left:'+rr.x+'px;top:'+rr.y+'px;width:'+Math.max(0,rr.w-0.5)+'px;height:'+Math.max(0,rr.h-0.5)+'px;background:'+bg+';overflow:hidden;border:0.5px solid rgba(255,255,255,0.65);';
         box.title=s.disp+'  ['+s.sector+']\n시총 '+Math.round(s.mcap).toLocaleString()+'억 · '+METRICS[METRIC].label+' '+(v==null?'-':((v>0?'+':'')+Math.round(v)+'%'));
-        if(rr.w>30 && rr.h>20){
-          box.innerHTML='<div style="font:600 9px Pretendard;line-height:1.05;color:'+textOn(bg)+';padding:2px 3px 0;white-space:nowrap;">'+s.disp+'</div>'
-            +(rr.h>32?'<div style="font:500 8px Pretendard;color:'+textOn(bg)+';opacity:.85;padding:0 3px;">'+(v==null?'':((v>0?'+':'')+Math.round(v)+'%'))+'</div>':'');
+        if(rr.w>34 && rr.h>22){
+          var tc=textOn(bg), sh=shadowFor(tc);
+          box.innerHTML='<div style="font:700 12px Pretendard;line-height:1.12;color:'+tc+';text-shadow:'+sh+';padding:3px 4px 0;white-space:nowrap;">'+s.disp+'</div>'
+            +(rr.h>38?'<div style="font:600 11px Pretendard;color:'+tc+';text-shadow:'+sh+';padding:0 4px;white-space:nowrap;">'+(v==null?'':((v>0?'+':'')+Math.round(v)+'%'))+'</div>':'');
         }
         frag.appendChild(box);
       });
     }
     if(showCap){
       var cap=document.createElement('div');
-      cap.style.cssText='position:absolute;left:'+sr.x+'px;top:'+sr.y+'px;width:'+sr.w+'px;height:'+CAP+'px;font:700 10px Pretendard;color:#0f172a;background:rgba(255,255,255,0.55);padding:1px 4px;overflow:hidden;white-space:nowrap;pointer-events:none;';
+      cap.style.cssText='position:absolute;left:'+sr.x+'px;top:'+sr.y+'px;width:'+sr.w+'px;height:'+CAP+'px;font:700 12px Pretendard;color:#0f172a;background:rgba(255,255,255,0.62);padding:2px 5px;overflow:hidden;white-space:nowrap;pointer-events:none;';
       cap.textContent=sr.item.name;
       frag.appendChild(cap);
     }
@@ -300,14 +302,14 @@ function buildScatter(){
       g.fillStyle='rgba(234,179,8,0.05)'; g.fillRect(cx,cy,a.right-cx,a.bottom-cy);
       g.fillStyle='rgba(220,38,38,0.05)'; g.fillRect(a.left,cy,cx-a.left,a.bottom-cy);
       g.strokeStyle='#cbd5e1'; g.lineWidth=1; g.beginPath(); g.moveTo(cx,a.top); g.lineTo(cx,a.bottom); g.moveTo(a.left,cy); g.lineTo(a.right,cy); g.stroke();
-      g.fillStyle='#94a3b8'; g.font='bold 12px Pretendard'; g.textBaseline='top';
+      g.fillStyle='#94a3b8'; g.font='bold 14px Pretendard'; g.textBaseline='top';
       g.textAlign='right'; g.fillText('주도', a.right-8, a.top+6);
       g.textAlign='left';  g.fillText('개선', a.left+8, a.top+6);
       g.textAlign='right'; g.textBaseline='bottom'; g.fillText('둔화', a.right-8, a.bottom-6);
       g.textAlign='left';  g.fillText('소외', a.left+8, a.bottom-6);
       g.restore();
   }, afterDatasetsDraw:function(ch){ var g=ch.ctx, meta=ch.getDatasetMeta(0);
-      g.save(); g.font='600 11px Pretendard'; g.fillStyle='#111827'; g.textAlign='center'; g.textBaseline='middle';
+      g.save(); g.font='700 13px Pretendard'; g.fillStyle='#111827'; g.textAlign='center'; g.textBaseline='middle';
       meta.data.forEach(function(el,i){ var p=ch.data.datasets[0].data[i]; g.fillText(p.sector, el.x, el.y); }); g.restore();
   }};
   var ctx=document.getElementById('scatter').getContext('2d');
