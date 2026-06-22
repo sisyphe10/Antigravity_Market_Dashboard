@@ -118,8 +118,13 @@ PYTHONIOENCODING=utf-8 python execution/create_dashboard.py
 - **반드시 당일 최종 NAV 산출(~16:00~16:30 KST) 이후** 진행. 목표 도달 당일에 전일값으로 동결하면 청산수익률이 부정확.
 - 거래일 = 개시일~청산일 양끝 포함 영업일 수. **청산일 = `기준가` 시트 마지막 기록일.**
 
-### Step 2. 코드 13곳 전부 **주석 처리**(삭제 아님 — 이력 보존)
-- 1·2·9·11·12·13: 활성 줄 → `# … # 완료 (YYYY-MM-DD 청산, +N%)`
+### Step 2. 코드 13곳 처리 (삭제 아님 — 이력 보존)
+- ★ **#1 `calculate_wrap_nav.py` portfolio_config는 주석 금지 → `'end_date':'청산일'` 부여.**
+  (주석 처리하면 `combine_first`가 컬럼을 마지막 계산값에서 동결시켜 청산 직전 1~2일 NAV가 누락 →
+  대시보드 회차별 AUM '거래일'이 과소표시. end_date를 주면 컬럼이 청산일까지 완결되고 이후 미계산.
+  엔진이 end_date를 인지하도록 `incomplete_portfolios`·`pf_calc_dates`·최종검증 3곳 보강됨.
+  2026-06-23 DB5차/NH4호 사고 → 근본수정.)
+- 2·9·11·12·13: 활성 줄 → `# … # 완료 (YYYY-MM-DD 청산, +N%)`
 - 3·4·5: 해당 항목 제거/주석
 - 6·7·8: `ORDER_PORTFOLIOS` 페어 제거 + `TARGET_TABS` 비우기 + confirm 문구 일반형만으로
 - 10: `PORTFOLIO_GROUPS` sources에서 제거

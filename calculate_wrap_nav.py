@@ -41,8 +41,8 @@ portfolio_config = {
     '트루밸류': {'base_price': 2021.31, 'start_date': '2025-12-30'},
     'Value ESG': {'base_price': 1980.49, 'start_date': '2025-12-30'},
     '개방형 랩': {'base_price': 1518.52, 'start_date': '2025-12-30'},
-    # '목표전환형 5차': {'base_price': 1000.00, 'start_date': '2026-06-12'},  # DB 5차 완료 (2026-06-19 청산, +7.72%, 목표 7.5% 초과)
-    # '목표전환형 4호': {'base_price': 1000.00, 'start_date': '2026-06-15'},  # NH 4호 완료 (2026-06-19 청산, +5.38%, 임계값 터치 후 매도)
+    '목표전환형 5차': {'base_price': 1000.00, 'start_date': '2026-06-12', 'end_date': '2026-06-19'},  # DB 5차 청산 (end_date로 동결 — 컬럼이 청산일까지 완결되도록; 주석처리 금지)
+    '목표전환형 4호': {'base_price': 1000.00, 'start_date': '2026-06-15', 'end_date': '2026-06-19'},  # NH 4호 청산 (end_date로 동결)
     # '목표전환형 3호': {'base_price': 1000.00, 'start_date': '2026-05-14'},  # NH 3호 완료 (목표달성, 2026-05-27 청산)
     # '목표전환형 4차': {'base_price': 1000.00, 'start_date': '2026-05-18'},  # DB 4차 완료 (목표달성, 2026-05-27 청산)
     # '목표전환형 2호': {'base_price': 1000.00, 'start_date': '2026-04-29'},  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
@@ -143,6 +143,11 @@ if is_update and not new_portfolios:
     last_row = df_old.iloc[-1]
     for pf in initial_base_prices.keys():
         if pf in df_old.columns and pd.isna(last_row.get(pf)):
+            # 청산(end_date) 회차는 청산일 이후 후행 NaN이 정상 → 미완료로 보지 않음
+            # (그렇지 않으면 매 실행마다 미완료 플래그 → 롤백 루프).
+            _ed = portfolio_config[pf].get('end_date')
+            if _ed and pd.Timestamp(_ed) < df_old.index[-1]:
+                continue
             incomplete_portfolios.append(pf)
     if incomplete_portfolios:
         # 마지막 행(NaN 포함)을 제거하고 그 전 날부터 재계산
@@ -402,14 +407,18 @@ for pf_name, start_price in current_base_prices.items():
     pf_config_start = pd.Timestamp(portfolio_config[pf_name]['start_date'])
     is_new_portfolio = is_update and pf_name not in df_old.columns
 
+    # 청산(end_date) 회차는 청산일까지만 계산 (이후 날짜 미생성 → 죽은 회차 연장 방지).
+    pf_config_end = portfolio_config[pf_name].get('end_date')
+    pf_end = min(end_date, pd.Timestamp(pf_config_end)) if pf_config_end else end_date
+
     if is_new_portfolio:
         # 신규 포트폴리오: 설정된 시작일 기준
         pf_start_date = pf_config_start
-        pf_calc_dates = df_change.index[(df_change.index > pf_config_start) & (df_change.index <= end_date)]
+        pf_calc_dates = df_change.index[(df_change.index > pf_config_start) & (df_change.index <= pf_end)]
     else:
         # 기존 포트폴리오: 기존 데이터 이후부터
         pf_start_date = start_date
-        pf_calc_dates = calc_dates
+        pf_calc_dates = calc_dates[calc_dates <= pf_end]
 
     # ★ 비중 = '리밸런스일 완전 스냅샷' (NEW 시트 한 날짜 = 그 시점 전체 포트폴리오, 편출종목은 미기재=0).
     #   과거 reindex(calc_dates).ffill()는 편출된 종목의 옛 비중을 영구히 되살려(resurrect)
@@ -504,6 +513,10 @@ if new_pf_results:
             if pd.isna(val):
                 # 시작일이 미래면 NaN 정상
                 pf_start = pd.Timestamp(portfolio_config[pf]['start_date'])
+                # 청산(end_date) 회차는 청산일 이후 NaN이 정상 → 검증 실패로 보지 않음
+                _ed = portfolio_config[pf].get('end_date')
+                if _ed and pd.Timestamp(_ed) < pd.Timestamp(last_date):
+                    continue
                 if pf_start <= pd.Timestamp(last_date):
                     problems.append(pf)
     if problems:
