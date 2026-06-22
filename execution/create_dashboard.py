@@ -25,9 +25,9 @@ OUTPUT_FILE = 'market.html'
 TOP_NAV_MAIN = [
     ('wrap',         'wrap.html',          'WRAP',         [
         ('wrap_dashboard',    'wrap.html#dashboard',    'Dashboard'),
-        ('wrap_contribution', 'wrap.html#contribution', '기여도'),
-        ('wrap_disclosures',  'wrap.html#disclosures',  '공시'),
         ('wrap_order',        'wrap.html#order',        'Order'),
+        ('wrap_disclosures',  'wrap.html#disclosures',  '공시'),
+        ('wrap_contribution', 'wrap.html#contribution', '기여도'),
         ('wrap_fee',          'wrap.html#fee',          '수수료'),
     ]),
     ('market',       'market.html',        'Market',       [
@@ -130,12 +130,12 @@ def sidebar_html(active=''):
 
 
 def wrap_sidebar_html():
-    """Render the WRAP-specific sidebar (Dashboard / 공시 / Order / 수수료, JS tab switcher)."""
+    """Render the WRAP-specific sidebar (Dashboard / Order / 공시 / 기여도 / 수수료, JS tab switcher)."""
     items = [
         ('dashboard',    'Dashboard'),
-        ('contribution', '기여도'),
-        ('disclosures',  '공시'),
         ('order',        'Order'),
+        ('disclosures',  '공시'),
+        ('contribution', '기여도'),
         ('fee',          '수수료'),
     ]
     links = ''.join(
@@ -1328,7 +1328,13 @@ def _build_indices_chart_section(category_label='Indices'):
                     legendEl.innerHTML = legendHTML;
                 }
 
-                if (idxChart) idxChart.destroy();
+                if (idxChart) {
+                    idxChart.data.labels = commonDates;
+                    idxChart.data.datasets = datasets;
+                    idxChart.options.scales.x.display = datasets.length > 0;
+                    idxChart.update('none');
+                    return;
+                }
                 idxChart = new Chart(document.getElementById('idxDynamicChart'), {
                     type: 'line',
                     data: { labels: commonDates, datasets: datasets },
@@ -2167,7 +2173,7 @@ def _build_combined_chart_section():
                             if (!last) return;
                             var val = ds.data[lastIdx];
                             var label;
-                            if (mode === 'pct') {
+                            if ((chart._cmbMode || 'pct') === 'pct') {
                                 var rounded = Math.sign(val) * Math.round(Math.abs(val));
                                 var sign = rounded >= 0 ? '+' : '';
                                 label = sign + rounded + '%';
@@ -2270,84 +2276,106 @@ def _build_combined_chart_section():
                     return ctx.dataset.label + ': ' + fmtNum(ctx.parsed.y);
                 };
 
-                if (cmbChart) cmbChart.destroy();
-                cmbChart = new Chart(document.getElementById('cmbDynamicChart'), {
-                    type: 'line',
-                    data: { labels: commonDates, datasets: datasets },
-                    plugins: [endLabelPlugin, cmbCrosshairPlugin],
-                    options: {
-                        responsive: true, maintainAspectRatio: false,
-                        devicePixelRatio: 2 * (window.devicePixelRatio || 1),
-                        layout: { padding: { right: 60 } },
-                        interaction: { mode: 'index', intersect: false },
-                        plugins: {
-                            legend: { display: false },
-                            // animation:false — 동기 툴팁이 draw()만으로 위치 갱신되도록 (애니메이션 속성이면 제자리에 멈춤)
-                            tooltip: { animation: false, callbacks: { label: tooltipLabel } }
-                        },
-                        scales: scalesConfig
-                    }
-                });
+                if (cmbChart) {
+                    // 재사용: 인스턴스 유지하고 데이터/축/툴팁만 교체 (destroy+new 멈칫 제거)
+                    cmbChart.data.labels = commonDates;
+                    cmbChart.data.datasets = datasets;
+                    // scales 전체 교체 — 이전 raw2의 y1축 잔재 제거 후 새 구성 적용
+                    var _sc = cmbChart.options.scales;
+                    Object.keys(_sc).forEach(function(k){ delete _sc[k]; });
+                    Object.keys(scalesConfig).forEach(function(k){ _sc[k] = scalesConfig[k]; });
+                    // tooltip 콜백은 mode를 캡처하므로 매번 교체
+                    cmbChart.options.plugins.tooltip.callbacks.label = tooltipLabel;
+                    cmbChart.update('none');
+                } else {
+                    cmbChart = new Chart(document.getElementById('cmbDynamicChart'), {
+                        type: 'line',
+                        data: { labels: commonDates, datasets: datasets },
+                        plugins: [endLabelPlugin, cmbCrosshairPlugin],
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            devicePixelRatio: 2 * (window.devicePixelRatio || 1),
+                            layout: { padding: { right: 60 } },
+                            interaction: { mode: 'index', intersect: false },
+                            plugins: {
+                                legend: { display: false },
+                                // animation:false — 동기 툴팁이 draw()만으로 위치 갱신되도록 (애니메이션 속성이면 제자리에 멈춤)
+                                tooltip: { animation: false, callbacks: { label: tooltipLabel } }
+                            },
+                            scales: scalesConfig
+                        }
+                    });
+                }
+                cmbChart._cmbMode = mode;   // cmbEndLabelPlugin이 draw 시 읽음
 
                 // 이격도 서브패널 — 100 기준선 점선 + 메인 y축 폭에 맞춰 x축 정렬
                 var dispPanel = document.getElementById('cmbDispPanel');
-                if (cmbDispChart) { cmbDispChart.destroy(); cmbDispChart = null; }
                 if (dispPanel) {
                     if (dispDatasets.length > 0) {
                         dispPanel.style.display = '';
-                        var disp100Plugin = {
-                            id: 'cmbDisp100',
-                            beforeDatasetsDraw: function(chart) {
-                                var ys = chart.scales.y;
-                                var area = chart.chartArea;
-                                if (!ys || !area) return;
-                                var y100 = ys.getPixelForValue(100);
-                                if (y100 < area.top || y100 > area.bottom) return;
-                                var c = chart.ctx;
-                                c.save();
-                                c.strokeStyle = '#999';
-                                c.setLineDash([4, 4]);
-                                c.lineWidth = 1;
-                                c.beginPath();
-                                c.moveTo(area.left, y100);
-                                c.lineTo(area.right, y100);
-                                c.stroke();
-                                c.restore();
-                            }
-                        };
                         var mainYWidth = (cmbChart.scales && cmbChart.scales.y) ? cmbChart.scales.y.width : 0;
-                        cmbDispChart = new Chart(document.getElementById('cmbDispChart'), {
-                            type: 'line',
-                            data: { labels: commonDates, datasets: dispDatasets },
-                            plugins: [endLabelPlugin, disp100Plugin, cmbCrosshairPlugin],
-                            options: {
-                                responsive: true, maintainAspectRatio: false,
-                                devicePixelRatio: 2 * (window.devicePixelRatio || 1),
-                                layout: { padding: { right: 60 } },
-                                interaction: { mode: 'index', intersect: false },
-                                plugins: {
-                                    legend: { display: false },
-                                    tooltip: { animation: false, callbacks: { label: function(ctx) {
-                                        if (ctx.parsed.y === null || ctx.parsed.y === undefined) return ctx.dataset.label + ': -';
-                                        return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1);
-                                    } } }
-                                },
-                                scales: {
-                                    x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 11 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
-                                    y: {
-                                        type: 'linear',
-                                        position: 'left',
-                                        grace: '8%',
-                                        afterFit: function(scale) { if (mainYWidth > 0) scale.width = mainYWidth; },
-                                        ticks: { callback: function(v){ return fmtNum(v); }, font: { size: 11 }, color: '#000' },
-                                        grid: { color: '#eee' },
-                                        border: { color: '#000' }
+                        if (cmbDispChart) {
+                            // 재사용: 데이터·y축폭만 갱신
+                            cmbDispChart.data.labels = commonDates;
+                            cmbDispChart.data.datasets = dispDatasets;
+                            cmbDispChart.options.scales.y.afterFit = function(scale) { if (mainYWidth > 0) scale.width = mainYWidth; };
+                            cmbDispChart.update('none');
+                        } else {
+                            var disp100Plugin = {
+                                id: 'cmbDisp100',
+                                beforeDatasetsDraw: function(chart) {
+                                    var ys = chart.scales.y;
+                                    var area = chart.chartArea;
+                                    if (!ys || !area) return;
+                                    var y100 = ys.getPixelForValue(100);
+                                    if (y100 < area.top || y100 > area.bottom) return;
+                                    var c = chart.ctx;
+                                    c.save();
+                                    c.strokeStyle = '#999';
+                                    c.setLineDash([4, 4]);
+                                    c.lineWidth = 1;
+                                    c.beginPath();
+                                    c.moveTo(area.left, y100);
+                                    c.lineTo(area.right, y100);
+                                    c.stroke();
+                                    c.restore();
+                                }
+                            };
+                            cmbDispChart = new Chart(document.getElementById('cmbDispChart'), {
+                                type: 'line',
+                                data: { labels: commonDates, datasets: dispDatasets },
+                                plugins: [endLabelPlugin, disp100Plugin, cmbCrosshairPlugin],
+                                options: {
+                                    responsive: true, maintainAspectRatio: false,
+                                    devicePixelRatio: 2 * (window.devicePixelRatio || 1),
+                                    layout: { padding: { right: 60 } },
+                                    interaction: { mode: 'index', intersect: false },
+                                    plugins: {
+                                        legend: { display: false },
+                                        tooltip: { animation: false, callbacks: { label: function(ctx) {
+                                            if (ctx.parsed.y === null || ctx.parsed.y === undefined) return ctx.dataset.label + ': -';
+                                            return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1);
+                                        } } }
+                                    },
+                                    scales: {
+                                        x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 11 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
+                                        y: {
+                                            type: 'linear',
+                                            position: 'left',
+                                            grace: '8%',
+                                            afterFit: function(scale) { if (mainYWidth > 0) scale.width = mainYWidth; },
+                                            ticks: { callback: function(v){ return fmtNum(v); }, font: { size: 11 }, color: '#000' },
+                                            grid: { color: '#eee' },
+                                            border: { color: '#000' }
+                                        }
                                     }
                                 }
-                            }
-                        });
+                            });
+                        }
+                        cmbDispChart._cmbMode = 'raw1';
                     } else {
                         dispPanel.style.display = 'none';
+                        if (cmbDispChart) { cmbDispChart.destroy(); cmbDispChart = null; }
                     }
                 }
             }
@@ -5238,8 +5266,8 @@ def create_fee_revenue_section():
         <div class="fee-wrapper rev-wrapper">
             {updated_html}
             <div class="rev-summary">
-                <div class="rev-sum-label">누적 매출</div>
-                <div class="rev-sum-value" title="{_fmt_won(total)}">{_fmt_eok_man(total)}</div>
+                <span class="rev-sum-label">누적 매출</span>
+                <span class="rev-sum-value" title="{_fmt_won(total)}">{_fmt_eok_man(total)}</span>
             </div>
             <div class="table-container"><div id="revTableHost"></div></div>
         </div>
@@ -6561,7 +6589,7 @@ def create_dashboard():
     fee_revenue_html = create_fee_revenue_section()
     fee_html = f"""
         <div class="fee-subtabs">
-            <button class="fee-subtab active" data-fee-sub="rate" onclick="feeSwitchSub('rate')">수수료율</button>
+            <button class="fee-subtab active" data-fee-sub="rate" onclick="feeSwitchSub('rate')">요율</button>
             <button class="fee-subtab" data-fee-sub="revenue" onclick="feeSwitchSub('revenue')">매출</button>
         </div>
         <div id="feeSubRate">{fee_rate_html}</div>
@@ -6714,8 +6742,8 @@ def create_dashboard():
         .rev-empty code {{ background: #f1f3f5; padding: 2px 7px; border-radius: 5px; font-size: 0.9em; color: #1e40af; }}
         .rev-wrapper {{ position: relative; }}
         .rev-summary {{ text-align: center; padding: 18px 12px 6px 12px; }}
-        .rev-sum-label {{ font-size: 0.95rem; color: #111; font-weight: 600; }}
-        .rev-sum-value {{ font-size: 1.5rem; font-weight: 700; color: #111; margin-top: 4px; font-variant-numeric: tabular-nums; }}
+        .rev-sum-label {{ font-size: 1.05rem; color: #111; font-weight: 600; margin-right: 8px; }}
+        .rev-sum-value {{ font-size: 1.25rem; font-weight: 700; color: #111; font-variant-numeric: tabular-nums; }}
         .rev-updated {{ position: absolute; top: 20px; right: 24px; font-size: 0.78rem; color: #aaa; }}
         .rev-date {{ color: #555; font-size: 0.9rem; font-variant-numeric: tabular-nums; }}
         .rev-headcell {{ padding: 7px 10px !important; }}
@@ -6822,9 +6850,10 @@ def create_dashboard():
     // Order 탭 추가 비밀번호 (sha256('2026'))
     var ORDER_AUM_PW_HASH = '158a323a7ba44870f23d96f1516dd70aa48e9a72db4ebb026b0a89e212a208ab';
 
-    async function checkOrderAumPw() {{
+    var TAB_PW_LABELS = {{ order: 'Order', contribution: '기여도', fee: '수수료' }};
+    async function checkOrderAumPw(label) {{
         if (sessionStorage.getItem('order_aum_auth') === '1') return true;
-        var pw = prompt('Order 탭 비밀번호 입력');
+        var pw = prompt((label || 'WRAP') + ' 탭 비밀번호 입력');
         if (!pw) return false;
         var hash = await sha256(pw);
         if (hash === ORDER_AUM_PW_HASH) {{
@@ -6836,8 +6865,8 @@ def create_dashboard():
     }}
 
     async function wrapSwitchTab(tab) {{
-        // Order / 기여도 진입 시 추가 비밀번호 체크 (sha256('2026'), 동일 게이트 공유)
-        if ((tab === 'order' || tab === 'contribution') && !(await checkOrderAumPw())) {{
+        // Order / 기여도 / 수수료 진입 시 추가 비밀번호 체크 (sha256('2026'), 동일 게이트 공유)
+        if ((tab === 'order' || tab === 'contribution' || tab === 'fee') && !(await checkOrderAumPw(TAB_PW_LABELS[tab]))) {{
             return;  // 인증 실패 시 탭 전환 취소
         }}
         document.querySelectorAll('.sidebar-link[data-wrap-tab]').forEach(function(el) {{

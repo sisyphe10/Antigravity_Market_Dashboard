@@ -491,11 +491,11 @@
     </style>
 </head>
 <body class="has-sidebar">
-    <nav class="topnav"><div class="topnav-inner"><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab active">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub active">Index</a><a href="universe.html" class="topnav-sub">Universe</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
+    <nav class="topnav"><div class="topnav-inner"><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab active">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub active">Index</a><a href="universe.html" class="topnav-sub">Universe</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
     <aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="market.html" class="sidebar-link active">Index</a><a href="universe.html" class="sidebar-link">Universe</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
     <header>
         <h1>📊 Index</h1>
-        <div class="last-updated">Updated: 2026-06-22 10:40:51 KST</div>
+        <div class="last-updated">Updated: 2026-06-22 11:12:54 KST</div>
     </header>
 
     
@@ -807,7 +807,13 @@
                     legendEl.innerHTML = legendHTML;
                 }
 
-                if (idxChart) idxChart.destroy();
+                if (idxChart) {
+                    idxChart.data.labels = commonDates;
+                    idxChart.data.datasets = datasets;
+                    idxChart.options.scales.x.display = datasets.length > 0;
+                    idxChart.update('none');
+                    return;
+                }
                 idxChart = new Chart(document.getElementById('idxDynamicChart'), {
                     type: 'line',
                     data: { labels: commonDates, datasets: datasets },
@@ -1598,7 +1604,7 @@
                             if (!last) return;
                             var val = ds.data[lastIdx];
                             var label;
-                            if (mode === 'pct') {
+                            if ((chart._cmbMode || 'pct') === 'pct') {
                                 var rounded = Math.sign(val) * Math.round(Math.abs(val));
                                 var sign = rounded >= 0 ? '+' : '';
                                 label = sign + rounded + '%';
@@ -1701,84 +1707,106 @@
                     return ctx.dataset.label + ': ' + fmtNum(ctx.parsed.y);
                 };
 
-                if (cmbChart) cmbChart.destroy();
-                cmbChart = new Chart(document.getElementById('cmbDynamicChart'), {
-                    type: 'line',
-                    data: { labels: commonDates, datasets: datasets },
-                    plugins: [endLabelPlugin, cmbCrosshairPlugin],
-                    options: {
-                        responsive: true, maintainAspectRatio: false,
-                        devicePixelRatio: 2 * (window.devicePixelRatio || 1),
-                        layout: { padding: { right: 60 } },
-                        interaction: { mode: 'index', intersect: false },
-                        plugins: {
-                            legend: { display: false },
-                            // animation:false — 동기 툴팁이 draw()만으로 위치 갱신되도록 (애니메이션 속성이면 제자리에 멈춤)
-                            tooltip: { animation: false, callbacks: { label: tooltipLabel } }
-                        },
-                        scales: scalesConfig
-                    }
-                });
+                if (cmbChart) {
+                    // 재사용: 인스턴스 유지하고 데이터/축/툴팁만 교체 (destroy+new 멈칫 제거)
+                    cmbChart.data.labels = commonDates;
+                    cmbChart.data.datasets = datasets;
+                    // scales 전체 교체 — 이전 raw2의 y1축 잔재 제거 후 새 구성 적용
+                    var _sc = cmbChart.options.scales;
+                    Object.keys(_sc).forEach(function(k){ delete _sc[k]; });
+                    Object.keys(scalesConfig).forEach(function(k){ _sc[k] = scalesConfig[k]; });
+                    // tooltip 콜백은 mode를 캡처하므로 매번 교체
+                    cmbChart.options.plugins.tooltip.callbacks.label = tooltipLabel;
+                    cmbChart.update('none');
+                } else {
+                    cmbChart = new Chart(document.getElementById('cmbDynamicChart'), {
+                        type: 'line',
+                        data: { labels: commonDates, datasets: datasets },
+                        plugins: [endLabelPlugin, cmbCrosshairPlugin],
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            devicePixelRatio: 2 * (window.devicePixelRatio || 1),
+                            layout: { padding: { right: 60 } },
+                            interaction: { mode: 'index', intersect: false },
+                            plugins: {
+                                legend: { display: false },
+                                // animation:false — 동기 툴팁이 draw()만으로 위치 갱신되도록 (애니메이션 속성이면 제자리에 멈춤)
+                                tooltip: { animation: false, callbacks: { label: tooltipLabel } }
+                            },
+                            scales: scalesConfig
+                        }
+                    });
+                }
+                cmbChart._cmbMode = mode;   // cmbEndLabelPlugin이 draw 시 읽음
 
                 // 이격도 서브패널 — 100 기준선 점선 + 메인 y축 폭에 맞춰 x축 정렬
                 var dispPanel = document.getElementById('cmbDispPanel');
-                if (cmbDispChart) { cmbDispChart.destroy(); cmbDispChart = null; }
                 if (dispPanel) {
                     if (dispDatasets.length > 0) {
                         dispPanel.style.display = '';
-                        var disp100Plugin = {
-                            id: 'cmbDisp100',
-                            beforeDatasetsDraw: function(chart) {
-                                var ys = chart.scales.y;
-                                var area = chart.chartArea;
-                                if (!ys || !area) return;
-                                var y100 = ys.getPixelForValue(100);
-                                if (y100 < area.top || y100 > area.bottom) return;
-                                var c = chart.ctx;
-                                c.save();
-                                c.strokeStyle = '#999';
-                                c.setLineDash([4, 4]);
-                                c.lineWidth = 1;
-                                c.beginPath();
-                                c.moveTo(area.left, y100);
-                                c.lineTo(area.right, y100);
-                                c.stroke();
-                                c.restore();
-                            }
-                        };
                         var mainYWidth = (cmbChart.scales && cmbChart.scales.y) ? cmbChart.scales.y.width : 0;
-                        cmbDispChart = new Chart(document.getElementById('cmbDispChart'), {
-                            type: 'line',
-                            data: { labels: commonDates, datasets: dispDatasets },
-                            plugins: [endLabelPlugin, disp100Plugin, cmbCrosshairPlugin],
-                            options: {
-                                responsive: true, maintainAspectRatio: false,
-                                devicePixelRatio: 2 * (window.devicePixelRatio || 1),
-                                layout: { padding: { right: 60 } },
-                                interaction: { mode: 'index', intersect: false },
-                                plugins: {
-                                    legend: { display: false },
-                                    tooltip: { animation: false, callbacks: { label: function(ctx) {
-                                        if (ctx.parsed.y === null || ctx.parsed.y === undefined) return ctx.dataset.label + ': -';
-                                        return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1);
-                                    } } }
-                                },
-                                scales: {
-                                    x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 11 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
-                                    y: {
-                                        type: 'linear',
-                                        position: 'left',
-                                        grace: '8%',
-                                        afterFit: function(scale) { if (mainYWidth > 0) scale.width = mainYWidth; },
-                                        ticks: { callback: function(v){ return fmtNum(v); }, font: { size: 11 }, color: '#000' },
-                                        grid: { color: '#eee' },
-                                        border: { color: '#000' }
+                        if (cmbDispChart) {
+                            // 재사용: 데이터·y축폭만 갱신
+                            cmbDispChart.data.labels = commonDates;
+                            cmbDispChart.data.datasets = dispDatasets;
+                            cmbDispChart.options.scales.y.afterFit = function(scale) { if (mainYWidth > 0) scale.width = mainYWidth; };
+                            cmbDispChart.update('none');
+                        } else {
+                            var disp100Plugin = {
+                                id: 'cmbDisp100',
+                                beforeDatasetsDraw: function(chart) {
+                                    var ys = chart.scales.y;
+                                    var area = chart.chartArea;
+                                    if (!ys || !area) return;
+                                    var y100 = ys.getPixelForValue(100);
+                                    if (y100 < area.top || y100 > area.bottom) return;
+                                    var c = chart.ctx;
+                                    c.save();
+                                    c.strokeStyle = '#999';
+                                    c.setLineDash([4, 4]);
+                                    c.lineWidth = 1;
+                                    c.beginPath();
+                                    c.moveTo(area.left, y100);
+                                    c.lineTo(area.right, y100);
+                                    c.stroke();
+                                    c.restore();
+                                }
+                            };
+                            cmbDispChart = new Chart(document.getElementById('cmbDispChart'), {
+                                type: 'line',
+                                data: { labels: commonDates, datasets: dispDatasets },
+                                plugins: [endLabelPlugin, disp100Plugin, cmbCrosshairPlugin],
+                                options: {
+                                    responsive: true, maintainAspectRatio: false,
+                                    devicePixelRatio: 2 * (window.devicePixelRatio || 1),
+                                    layout: { padding: { right: 60 } },
+                                    interaction: { mode: 'index', intersect: false },
+                                    plugins: {
+                                        legend: { display: false },
+                                        tooltip: { animation: false, callbacks: { label: function(ctx) {
+                                            if (ctx.parsed.y === null || ctx.parsed.y === undefined) return ctx.dataset.label + ': -';
+                                            return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1);
+                                        } } }
+                                    },
+                                    scales: {
+                                        x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 11 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
+                                        y: {
+                                            type: 'linear',
+                                            position: 'left',
+                                            grace: '8%',
+                                            afterFit: function(scale) { if (mainYWidth > 0) scale.width = mainYWidth; },
+                                            ticks: { callback: function(v){ return fmtNum(v); }, font: { size: 11 }, color: '#000' },
+                                            grid: { color: '#eee' },
+                                            border: { color: '#000' }
+                                        }
                                     }
                                 }
-                            }
-                        });
+                            });
+                        }
+                        cmbDispChart._cmbMode = 'raw1';
                     } else {
                         dispPanel.style.display = 'none';
+                        if (cmbDispChart) { cmbDispChart.destroy(); cmbDispChart = null; }
                     }
                 }
             }
