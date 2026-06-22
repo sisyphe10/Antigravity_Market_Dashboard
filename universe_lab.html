@@ -273,7 +273,7 @@ function renderHeatmap(){
         var s=rr.item, v=s[METRIC], bg=colorFor(v,METRIC);
         var box=document.createElement('div');
         box.style.cssText='position:absolute;left:'+rr.x+'px;top:'+rr.y+'px;width:'+Math.max(0,rr.w-0.5)+'px;height:'+Math.max(0,rr.h-0.5)+'px;background:'+bg+';overflow:hidden;border:0.5px solid rgba(255,255,255,0.65);display:flex;flex-direction:column;align-items:center;justify-content:center;';
-        box.title=s.disp+'  ['+s.sector+']\n시총 '+Math.round(s.mcap).toLocaleString()+'억 · '+METRICS[METRIC].label+' '+(v==null?'-':((v>0?'+':'')+Math.round(v)+'%'));
+        box.title=(s.name||s.disp)+' ('+(s.tk.indexOf(':')>=0?s.tk.split(':').pop():s.tk)+')\n'+s.sector+' · 시총 '+Math.round(s.mcap).toLocaleString()+'억 · '+METRICS[METRIC].label+' '+(v==null?'-':((v>0?'+':'')+Math.round(v)+'%'));
         if(rr.w>36 && rr.h>24){
           box.innerHTML='<div style="font:700 14px Pretendard;line-height:1.15;color:#111;text-align:center;padding:0 2px;white-space:nowrap;">'+fitText(s.disp,'700 14px Pretendard',rr.w-6)+'</div>'
             +(rr.h>44?'<div style="font:600 12px Pretendard;color:#111;text-align:center;padding:0 2px;white-space:nowrap;">'+(v==null?'':((v>0?'+':'')+Math.round(v)+'%'))+'</div>':'');
