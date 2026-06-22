@@ -523,18 +523,28 @@ def format_update_summary(portfolio_data):
         lines.append(f"<b><u>[{portfolio_name}]</u></b>")
         lines.append(f"<b><u>오늘: {weighted_return:+.1f}%</u></b>")
 
-        # 보유 종목 전체 — 기여도(contribution) 내림차순 (상위/하위 구분 없음)
+        # 보유 종목 전체 — 기여도(contribution) 내림차순. +기여/−기여 그룹별 구분선·소계.
         ranked = sorted(
             held,
             key=lambda x: (x.get('contribution') if x.get('contribution') is not None else float('-inf')),
             reverse=True
         )
-        for s in ranked:
+
+        def _stock_line(s):
             contrib = s.get('contribution')
             contrib_str = f" {contrib:+.2f}" if contrib is not None else ""
             tr = s.get('today_return')
             tr_str = f" {tr:+.1f}%" if tr is not None else " N/A"
-            lines.append(f"  {s['name']}{tr_str}{contrib_str}")
+            return f"  {s['name']}{tr_str}{contrib_str}"
+
+        pos = [s for s in ranked if (s.get('contribution') or 0) > 0]
+        nonpos = [s for s in ranked if (s.get('contribution') or 0) <= 0]
+        if pos:
+            lines.extend(_stock_line(s) for s in pos)
+            lines.append(f"  ──── 기여 {sum(s['contribution'] for s in pos):+.2f} ────")
+        if nonpos:
+            lines.extend(_stock_line(s) for s in nonpos)
+            lines.append(f"  ──── 기여 {sum((s.get('contribution') or 0) for s in nonpos):+.2f} ────")
 
         lines.append("")
 
