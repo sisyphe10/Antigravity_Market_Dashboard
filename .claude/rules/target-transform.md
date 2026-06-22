@@ -1,6 +1,6 @@
 # 목표전환형 랩 추가/제거 SOP
 
-목표전환형 시리즈는 **운용 개시 → 목표달성 → 청산**을 반복하는 단기 랩 상품. NH/DB가 **항상 페어**로 동시 출시·청산된다. 손댈 곳이 **7개 파일 ~13곳**에 흩어져 있어 한두 곳만 빠뜨려도 차트/표가 어긋난다. 그래서 이 문서로 표준화한다.
+목표전환형 시리즈는 **운용 개시 → 목표달성 → 청산**을 반복하는 단기 랩 상품. NH/DB가 **항상 페어**로 동시 출시·청산된다. 손댈 곳이 **8개 파일 ~14곳**에 흩어져 있어 한두 곳만 빠뜨려도 차트/표가 어긋난다. 그래서 이 문서로 표준화한다.
 
 > 실행 커맨드: **`/목표전환형 생성 ...`** / **`/목표전환형 청산 ...`** (`.claude/commands/목표전환형.md`)
 
@@ -21,7 +21,7 @@ NH/DB 둘 다 처리했는지, 13곳이 다 잡혔는지 매칭한다.
 
 ---
 
-## 손대야 하는 13곳 (현재 origin 기준, 줄 번호는 참고용)
+## 손대야 하는 14곳 (현재 origin 기준, 줄 번호는 참고용)
 
 | # | 파일 | 위치(변수) | 추가(생성) / 주석·제거(청산) |
 |---|---|---|---|
@@ -38,6 +38,11 @@ NH/DB 둘 다 처리했는지, 13곳이 다 잡혔는지 매칭한다.
 | 11 | `execution/daily_portfolio_report.py` | `nav_map`(L110)·`display_names`(L305)·**product 리스트 2곳**(L144,L317) | 매핑 + product 리스트는 'KOSPI' 앞에 |
 | 12 | `execution/draw_wrap_charts.py` | `PORTFOLIO_NAMES` (~L40) | `'목표전환형 N':'NH/DB 목표전환형 N'` |
 | 13 | `add_aum.py` | `ACTIVE_TARGET_TRANSFORM` (~L46) | `{'NH':'목표전환형 N호','DB':'목표전환형 N차'}` |
+| 14 | `execution/create_contribution_data.py` | `portfolio_config` (~L44) | `'목표전환형 N': {'base_price':1000.00,'start_date':'YYYY-MM-DD'}` — calculate_wrap_nav와 동일. 청산=주석 → 기여도 탭 자동 제외. **단 별도 실행 필요**(아래 ★) |
+
+> ⚠️ **create_dashboard.py 함정**: #4 `chart_series` 외에 **`create_wrap_returns_table`의 `items` 리스트(~L3596)도 별도**로 회차 튜플을 가짐 (RETURN 표). 텍스트는 동일(`('NH 목표전환형 N','목표전환형 N')`)하니 grep 시 2곳 다 잡아 둘 다 처리.
+>
+> ★ **#14 재생성**: create_contribution_data.py는 표준 체인(calculate_wrap_nav→calculate_returns→create_portfolio_tables→create_dashboard)에 **없음**. 청산/생성 후 `python execution/create_contribution_data.py` 별도 실행 → `contribution_data.json` 재생성·커밋 (wrap.html 기여도 탭이 런타임 fetch). GHA `daily_crawl.yml`이 매일 자동 실행하므로 코드만 push해도 다음날 수렴하지만, 즉시 반영하려면 직접 실행.
 
 **청산 전용 추가 작업** (생성 시엔 없음):
 - `execution/create_portfolio_tables.py` `EXCLUDED_PORTFOLIOS` 집합(~L35)에 회차명 **추가**
