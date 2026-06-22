@@ -107,24 +107,37 @@ def get_today_return_from_cache(price_df):
     return ((latest_price - prev_price) / prev_price) * 100
 
 
-def get_inclusion_date(code, portfolio_name, nav_df):
-    """포트폴리오 NAV 이력에서 종목 편입일(마지막 전량매도 이후 첫 비중>0 날짜) 반환.
-    RSI '편입 이후' 기준점으로 사용. 추적 개시 전부터 보유한 기존 종목은
-    NAV 첫 등장일(추적 개시일)을 자동 반환하므로 별도 하드코딩 불필요."""
+def find_current_run_start(code, portfolio_name, nav_df):
+    """현재 연속 보유 구간(run)의 시작일 반환.
+    NEW 시트는 리밸런싱일마다 '전체 보유 종목 스냅샷'이므로, 어떤 리밸런싱일에
+    종목이 빠져 있으면(=비중 0 행이 없더라도) 그날 매도된 것으로 본다.
+    명시적 비중=0 행도 부재로 처리. 따라서 '매도 후 재편입'(라운드트립) 시
+    직전 보유분 매수가가 원가에 섞이지 않고, 마지막 재편입일부터 다시 측정한다."""
     try:
-        hist = nav_df[(nav_df['상품명'] == portfolio_name) & (nav_df['코드'] == int(code))]
-        if hist.empty:
+        port = nav_df[nav_df['상품명'] == portfolio_name]
+        if port.empty:
             return None
-        hist = hist.sort_values('날짜')
-        zero_dates = hist[hist['비중'] == 0]['날짜']
-        if not zero_dates.empty:
-            hist = hist[hist['날짜'] > zero_dates.max()]
-        purchases = hist[hist['비중'] > 0]
-        if purchases.empty:
+        all_dates = sorted(pd.to_datetime(port['날짜'].unique()))
+        present = set(pd.to_datetime(
+            port[(port['코드'] == int(code)) & (port['비중'] > 0)]['날짜']))
+        if not present:
             return None
-        return purchases['날짜'].min()
+        run_start = None
+        for d in reversed(all_dates):
+            if d in present:
+                run_start = d
+            else:
+                break
+        return run_start
     except Exception:
         return None
+
+
+def get_inclusion_date(code, portfolio_name, nav_df):
+    """포트폴리오 NAV 이력에서 종목 편입일(현재 연속 보유 구간 시작일) 반환.
+    RSI '편입 이후' 기준점으로 사용 — 누적수익률 기준점(run_start)과 동일.
+    추적 개시 전부터 보유한 기존 종목은 NAV 첫 등장일을 자동 반환."""
+    return find_current_run_start(code, portfolio_name, nav_df)
 
 
 def calculate_cumulative_return(code, stock_name, portfolio_name, nav_df, price_df):
@@ -163,13 +176,15 @@ def calculate_cumulative_return(code, stock_name, portfolio_name, nav_df, price_
         first_date = stock_history['날짜'].min()
         is_2026_new = first_date.year >= 2026
 
-        # 전량 매도 시점 찾기 (weight = 0)
-        zero_weight_dates = stock_history[stock_history['비중'] == 0]['날짜'].tolist()
+        # 현재 연속 보유 구간(run) 시작일 — NEW 시트 스냅샷에서 '부재(매도)'도 경계로 인식.
+        # 명시적 비중=0 행이 없어도, 빠졌다 재편입된 경우 직전 라운드트립 매수가 혼입을 막는다.
+        run_start = find_current_run_start(code, portfolio_name, nav_df)
+        if run_start is None:
+            return {'cumulative_return': None, 'status': 'no_purchases', 'avg_price': None, 'current_price': None, 'dd': None, 'all_time_high': None}
 
-        # 마지막 전량 매도 이후의 데이터만 사용
-        if zero_weight_dates:
-            last_zero_date = max(zero_weight_dates)
-            stock_history = stock_history[stock_history['날짜'] > last_zero_date]
+        # 현재 run 이후 데이터만 사용 (직전 라운드트립 매수가 혼입 방지)
+        stock_history = stock_history[stock_history['날짜'] >= run_start]
+        if run_start > first_date:
             status = 'resold'
         else:
             status = '2026_new' if is_2026_new else 'existing'
