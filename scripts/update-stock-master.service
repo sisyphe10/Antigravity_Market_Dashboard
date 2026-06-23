@@ -1,0 +1,17 @@
+[Unit]
+Description=Antigravity Weekly Stock Master Update (KRX 신규상장/사명변경 → Code 시트)
+After=network-online.target
+Wants=network-online.target
+OnFailure=sisyphe-bot-notify@update-stock-master.service
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/Antigravity_Market_Dashboard
+ExecStart=/bin/bash /home/ubuntu/Antigravity_Market_Dashboard/scripts/run_update_stock_master.sh
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=15min
+
+[Install]
+WantedBy=multi-user.target
