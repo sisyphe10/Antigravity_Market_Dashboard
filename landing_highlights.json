@@ -1,12 +1,12 @@
 {
-  "updated_at": "2026-06-22 18:35:58 KST",
+  "updated_at": "2026-06-23 18:36:01 KST",
   "slots": [
     {
       "id": "market-1m-leader",
       "category": "Market",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "1M 1위 KOSPI +26.3%, 꼴찌 KOSDAQ -8.4%",
+      "text": "1M 1위 KOSPI +24.5%, 꼴찌 KOSDAQ -10.9%",
       "href": "market.html",
       "spark": {
         "series": [
@@ -109,7 +109,7 @@
       "category": "Market",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "2026-06 11개 자산 중 4/11 상승 — 혼조 양상",
+      "text": "2026-06 11개 자산 중 4/11 상승 — 엇갈린 흐름",
       "href": "market.html",
       "spark": null
     },
@@ -200,6 +200,7 @@
           59.5,
           59.5,
           59.5,
+          59.5,
           59.5
         ],
         "trend": "up"
@@ -210,11 +211,10 @@
       "category": "Memory",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "DDR4 1W +0.0% ($56)",
+      "text": "DDR4 1W -0.9% ($56)",
       "href": "market.html",
       "spark": {
         "series": [
-          48.0,
           48.0,
           48.0,
           48.0,
@@ -303,7 +303,8 @@
           56.0,
           56.0,
           56.0,
-          56.0
+          56.0,
+          55.5
         ],
         "trend": "flat"
       }
@@ -320,7 +321,6 @@
           14.5,
           14.5,
           14.5,
-          14.5,
           11.5,
           11.5,
           11.5,
@@ -393,6 +393,7 @@
           35.0,
           35.0,
           35.0,
+          40.0,
           40.0,
           40.0,
           40.0,
@@ -416,11 +417,10 @@
       "category": "Crypto",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "BTC 1M -12.8% ($64,160)",
+      "text": "BTC 1M -9.4% ($64,628)",
       "href": "market.html",
       "spark": {
         "series": [
-          67680.0234,
           71365.3203,
           69948.6328,
           71238.2031,
@@ -509,7 +509,8 @@
           62502.9688,
           63224.3516,
           64120.0508,
-          64159.5391
+          64159.5391,
+          64628.2383
         ],
         "trend": "down"
       }
@@ -519,11 +520,10 @@
       "category": "Crypto",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "ETH 1M -14.0% ($1,729)",
+      "text": "ETH 1M -12.4% ($1,744)",
       "href": "market.html",
       "spark": {
         "series": [
-          2042.0039,
           2179.3367,
           2137.5039,
           2174.7722,
@@ -612,7 +612,8 @@
           1682.7,
           1704.3,
           1738.9399,
-          1728.85
+          1728.85,
+          1744.5
         ],
         "trend": "down"
       }
@@ -622,11 +623,10 @@
       "category": "Crypto",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "SOL 1M -9.8% ($74)",
+      "text": "SOL 1M -8.9% ($73)",
       "href": "market.html",
       "spark": {
         "series": [
-          85.8339,
           91.4465,
           89.6048,
           91.9871,
@@ -715,7 +715,8 @@
           68.88,
           69.27,
           71.94,
-          74.03
+          74.03,
+          73.46
         ],
         "trend": "down"
       }
@@ -1240,11 +1241,10 @@
       "category": "Commodity",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "우라늄 1M -4.9% ($18.5) — 원전 테마",
+      "text": "우라늄 1M -4.6% ($18.6) — 원전 테마",
       "href": "market.html",
       "spark": {
         "series": [
-          20.88,
           21.14,
           20.54,
           21.04,
@@ -1333,7 +1333,8 @@
           19.33,
           19.43,
           19.11,
-          18.54
+          18.54,
+          18.6
         ],
         "trend": "down"
       }
@@ -1892,11 +1893,10 @@
       "category": "Rate",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "US 10Y 1W -8bp (4.4%)",
+      "text": "US 10Y 1W -3bp (4.5%)",
       "href": "market.html",
       "spark": {
         "series": [
-          4.141,
           4.182,
           4.104,
           4.056,
@@ -1985,7 +1985,8 @@
           4.469,
           4.426,
           4.428,
-          4.441
+          4.441,
+          4.509
         ],
         "trend": "flat"
       }
@@ -1995,11 +1996,10 @@
       "category": "Rate",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "US 13W 1W +2bp (3.7%) — 단기금리",
+      "text": "US 13W 1W +4bp (3.7%) — 단기금리",
       "href": "market.html",
       "spark": {
         "series": [
-          3.59,
           3.605,
           3.598,
           3.593,
@@ -2088,7 +2088,8 @@
           3.62,
           3.63,
           3.63,
-          3.658
+          3.658,
+          3.678
         ],
         "trend": "flat"
       }
@@ -2151,11 +2152,10 @@
       "category": "Commodity",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "SMP 1W -10.3% (112원/kWh)",
+      "text": "SMP 1W -15.2% (105원/kWh)",
       "href": "market.html",
       "spark": {
         "series": [
-          108.62,
           99.17,
           101.51,
           111.29,
@@ -2244,7 +2244,8 @@
           125.29,
           106.62,
           95.36,
-          112.12
+          112.12,
+          105.32
         ],
         "trend": "down"
       }
@@ -2493,11 +2494,10 @@
       "category": "Index",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "NASDAQ 1M +2.0% (26,465)",
+      "text": "NASDAQ 1M +0.3% (26,242)",
       "href": "market.html",
       "spark": {
         "series": [
-          23257.0742,
           23128.3125,
           22597.1504,
           22546.6699,
@@ -2586,7 +2586,8 @@
           26669.1953,
           26529.8906,
           26346.3496,
-          26465.0684
+          26465.0684,
+          26242.0078
         ],
         "trend": "flat"
       }
@@ -2596,11 +2597,10 @@
       "category": "Index",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "S&P 500 1M +1.8% (7,510)",
+      "text": "S&P 500 1M +0.9% (7,479)",
       "href": "market.html",
       "spark": {
         "series": [
-          6978.8501,
           6960.8599,
           6832.7598,
           6836.1699,
@@ -2689,7 +2689,8 @@
           7563.9502,
           7530.4102,
           7504.0898,
-          7509.7598
+          7509.7598,
+          7479.29
         ],
         "trend": "flat"
       }
@@ -2802,11 +2803,10 @@
       "category": "Index",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "RUSSELL 2000 1M +7.8% (2,963)",
+      "text": "RUSSELL 2000 1M +7.2% (3,005)",
       "href": "market.html",
       "spark": {
         "series": [
-          2684.8162,
           2695.1382,
           2615.8301,
           2646.7,
@@ -2895,7 +2895,8 @@
           2973.0381,
           2957.4956,
           2975.6475,
-          2963.2268
+          2963.2268,
+          3005.3811
         ],
         "trend": "up"
       }
@@ -3214,7 +3215,7 @@
       "category": "Alert",
       "color": "#c2410c",
       "tone": "fact",
-      "text": "오늘 투자주의 23 · 경고 12 · 위험 12",
+      "text": "오늘 투자주의 20 · 경고 12 · 위험 12",
       "href": "market_alert.html",
       "spark": null
     },
@@ -3223,7 +3224,7 @@
       "category": "Featured",
       "color": "#d97706",
       "tone": "fact",
-      "text": "6.22(월) 거래대금 1위: SK하이닉스 14.9조원",
+      "text": "6.23(화) 거래대금 1위: SK하이닉스 21.9조원",
       "href": "featured.html",
       "spark": null
     },
@@ -3232,7 +3233,7 @@
       "category": "Featured",
       "color": "#d97706",
       "tone": "fact",
-      "text": "6.22(월) KOSDAQ 상승률 1위: 크레오에스지 +26.0%",
+      "text": "6.23(화) KOSDAQ 상승률 1위: 미래나노텍 +29.9%",
       "href": "featured.html",
       "spark": null
     },
@@ -3241,7 +3242,7 @@
       "category": "Sector",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "KODEX 1M 최강 보험 +45.6% · 최약 전기·가스·수도 -25.0%",
+      "text": "KODEX 1M 최강 전기·전자 +30.9% · 최약 전기·가스·수도 -27.6%",
       "href": "market.html",
       "spark": null
     },
@@ -3250,7 +3251,7 @@
       "category": "SEIBro",
       "color": "#0369a1",
       "tone": "fact",
-      "text": "SEIBro 6.19(금) 결제 1위 SOXL 3.2억$",
+      "text": "SEIBro 6.22(월) 결제 1위 285A.T 6.8백만$",
       "href": "seibro.html",
       "spark": null
     },
@@ -3362,11 +3363,10 @@
       "category": "Rate",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "US 10Y 1W -8bp (4.4%) — 중립권",
+      "text": "US 10Y 1W -3bp (4.5%) — 4.5% 상회 부담",
       "href": "market.html",
       "spark": {
         "series": [
-          4.141,
           4.182,
           4.104,
           4.056,
@@ -3455,7 +3455,8 @@
           4.469,
           4.426,
           4.428,
-          4.441
+          4.441,
+          4.509
         ],
         "trend": "flat"
       }
@@ -3469,7 +3470,6 @@
       "href": "market.html",
       "spark": {
         "series": [
-          0.452,
           0.427,
           0.436,
           0.447,
@@ -3558,7 +3558,8 @@
           0.283,
           0.277,
           0.265,
-          0.23
+          0.23,
+          0.225
         ],
         "trend": "down"
       }
@@ -3568,11 +3569,10 @@
       "category": "Rate",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "10Y-30Y 스프레드 +46bp — 완만한 우상향",
+      "text": "10Y-30Y 스프레드 +44bp — 완만한 우상향",
       "href": "market.html",
       "spark": {
         "series": [
-          0.648,
           0.628,
           0.627,
           0.642,
@@ -3661,7 +3661,8 @@
           0.502,
           0.503,
           0.493,
-          0.457
+          0.457,
+          0.44
         ],
         "trend": "down"
       }
@@ -3671,11 +3672,10 @@
       "category": "Rate",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "13W-10Y 스프레드 +78bp — 정상화",
+      "text": "13W-10Y 스프레드 +83bp — 정상화",
       "href": "market.html",
       "spark": {
         "series": [
-          0.551,
           0.577,
           0.506,
           0.463,
@@ -3764,7 +3764,8 @@
           0.849,
           0.796,
           0.798,
-          0.783
+          0.783,
+          0.831
         ],
         "trend": "down"
       }
@@ -3774,11 +3775,10 @@
       "category": "Rate",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "US 30Y 1W -11bp (4.9%) — 모기지 부담권",
+      "text": "US 30Y 1W -7bp (4.9%) — 모기지 부담권",
       "href": "market.html",
       "spark": {
         "series": [
-          4.789,
           4.81,
           4.731,
           4.698,
@@ -3867,7 +3867,8 @@
           4.971,
           4.929,
           4.921,
-          4.898
+          4.898,
+          4.949
         ],
         "trend": "flat"
       }
@@ -3877,7 +3878,7 @@
       "category": "Sector",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "섹터 1M TOP3 보험 +46%, 전기·전자 +40%, 기타금융 +30% · BOT3 전기·가스·수도 -25%, 금속 -9%, 증권 -8%",
+      "text": "섹터 1M TOP3 전기·전자 +31%, 기타금융 +23%, 보험 +18% · BOT3 전기·가스·수도 -28%, 금융 -21%, 증권 -20%",
       "href": "market.html",
       "spark": null
     },
@@ -3886,7 +3887,7 @@
       "category": "Sector",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "섹터 분산 71%p — 극단 쏠림",
+      "text": "섹터 분산 58%p — 극단 쏠림",
       "href": "market.html",
       "spark": null
     },
@@ -3895,7 +3896,7 @@
       "category": "Sector",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "섹터 폭 6강/8약 (29개) — 선택적 강세",
+      "text": "섹터 폭 4강/21약 (29개) — 광범위 약세",
       "href": "market.html",
       "spark": null
     },
@@ -3904,7 +3905,7 @@
       "category": "Sector",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "전기·전자(반도체) 1M +40.0% · 삼성전자 주도",
+      "text": "전기·전자(반도체) 1M +30.9% · SK하이닉스 주도",
       "href": "market.html",
       "spark": null
     },
@@ -3913,7 +3914,7 @@
       "category": "Sector",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "제약·바이오 1M -2.9% · 삼성바이오로직스 비중",
+      "text": "제약·바이오 1M -12.1% · 삼성바이오로직스 비중",
       "href": "market.html",
       "spark": null
     }
