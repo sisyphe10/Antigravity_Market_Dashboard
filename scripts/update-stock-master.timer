@@ -1,0 +1,11 @@
+[Unit]
+Description=Antigravity Weekly Stock Master timer (매주 토 09:00 KST — 신규상장/사명변경 점검)
+
+[Timer]
+OnCalendar=Sat *-*-* 09:00:00 Asia/Seoul
+AccuracySec=1min
+Persistent=true
+Unit=update-stock-master.service
+
+[Install]
+WantedBy=timers.target
