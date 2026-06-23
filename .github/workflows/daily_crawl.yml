@@ -107,6 +107,16 @@ jobs:
         env:
            TZ: 'Asia/Seoul'
 
+      # 외국인 보유비중(코스피/코스닥 + 6종목 지분율). pykrx 로그인 방식 → KRX_ID/KRX_PW 시크릿 필요.
+      # GHA IP에서 로그인 차단되면 VM(daily_krx_valuation 패턴)으로 이전.
+      - name: Fetch KRX Foreign Ownership (코스피/코스닥 + 6종목)
+        run: |
+          python execution/fetch_krx_foreign.py || echo "외국인 보유비중 수집 실패 (계속 진행)"
+        env:
+           TZ: 'Asia/Seoul'
+           KRX_ID: ${{ secrets.KRX_ID }}
+           KRX_PW: ${{ secrets.KRX_PW }}
+
       - name: Fetch Deposit Data (고객예탁금 + 신용잔고)
         run: |
           python execution/fetch_deposit_data.py || echo "예탁금 수집 실패 (계속 진행)"

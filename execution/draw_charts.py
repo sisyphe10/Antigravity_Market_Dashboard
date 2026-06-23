@@ -82,6 +82,9 @@ def draw_charts():
             # ECOS/FRED 매크로 시계열 제외 — market.html 동적 통합 차트에서만 사용되고
             # PNG는 어디서도 참조 안 됨 (매일 69종 PNG 커밋으로 repo 비대화 방지)
             df = df[~df['데이터 타입'].astype(str).str.startswith(('ECOS_', 'FRED_'))]
+            # 외국인 보유비중/지분율은 market.html 동적 Chart.js로만 표시 → PNG 미생성
+            # (매일 PNG 재생성·커밋이 git 머지충돌 유발, Hotel ADR 교훈)
+            df = df[~df['제품명'].astype(str).str.contains('외국인', na=False)]
 
         # Convert date column to datetime
         df['날짜'] = pd.to_datetime(df['날짜'])

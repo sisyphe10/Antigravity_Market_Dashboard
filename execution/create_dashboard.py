@@ -1424,6 +1424,15 @@ def _build_combined_chart_section():
                 {'display': 'KOSDAQ PER',         'csv': 'KOSDAQ PER',         'color': '#00838F'},
                 {'display': 'KOSDAQ PBR',         'csv': 'KOSDAQ PBR',         'color': '#0097A7'},
                 {'display': 'KOSDAQ 배당수익률',  'csv': 'KOSDAQ 배당수익률',  'color': '#26C6DA'},
+                # 외국인 보유비중/지분율 — JS isForeign 분기로 항상 레벨(%) 표시 (정규화 제외)
+                {'display': '코스피 외국인비중',   'csv': 'KOSPI 외국인 보유비중',   'color': '#E91E63'},
+                {'display': '코스닥 외국인비중',   'csv': 'KOSDAQ 외국인 보유비중',  'color': '#F06292'},
+                {'display': '삼성전자 외국인',     'csv': '삼성전자 외국인 지분율',   'color': '#1A237E'},
+                {'display': '삼성전자우 외국인',   'csv': '삼성전자우 외국인 지분율', 'color': '#3949AB'},
+                {'display': 'SK하이닉스 외국인',   'csv': 'SK하이닉스 외국인 지분율', 'color': '#283593'},
+                {'display': '삼성생명 외국인',     'csv': '삼성생명 외국인 지분율',   'color': '#5C6BC0'},
+                {'display': 'SK스퀘어 외국인',     'csv': 'SK스퀘어 외국인 지분율',   'color': '#7986CB'},
+                {'display': '삼성물산 외국인',     'csv': '삼성물산 외국인 지분율',   'color': '#9FA8DA'},
             ]},
             {'label': 'INDEX_US', 'series': [
                 {'display': 'S&P 500',            'csv': 'S&P 500',            'color': '#2E7D32'},
@@ -2019,7 +2028,12 @@ def _build_combined_chart_section():
                         aligned.push(lastVal);
                     }
                     var data;
-                    if (mode === 'pct') {
+                    var isForeign = s.name.indexOf('외국인') >= 0;
+                    var scale = isForeign ? 1 : (seriesScale[s.name] || 1);
+                    if (isForeign) {
+                        // 외국인 보유비중/지분율: 정규화/scale 없이 항상 레벨(%) 표시
+                        data = aligned.slice();
+                    } else if (mode === 'pct') {
                         var base = null;
                         for (var j = 0; j < aligned.length; j++) {
                             if (aligned[j] !== null) { base = aligned[j]; break; }
@@ -2032,14 +2046,13 @@ def _build_combined_chart_section():
                             return Math.round((v / base - 1) * 10000) / 100;
                         });
                     } else {
-                        var scale = seriesScale[s.name] || 1;
                         data = aligned.map(function(v) {
                             if (v === null) return null;
                             var sv = v / scale;
                             return scale > 1 ? Math.round(sv) : sv;
                         });
                     }
-                    var yAxisID = (mode === 'raw2' && idx === 1) ? 'y1' : 'y';
+                    var yAxisID = (mode === 'raw2' && idx === 1 && !isForeign) ? 'y1' : 'y';
                     var clickIdx = cmbClickOrder.indexOf(s.name);
                     datasets.push({
                         label: s.name,
@@ -2053,7 +2066,8 @@ def _build_combined_chart_section():
                         tension: 0.4,
                         cubicInterpolationMode: 'monotone',
                         spanGaps: true,
-                        yAxisID: yAxisID
+                        yAxisID: yAxisID,
+                        _isForeign: isForeign
                     });
 
                     // 단일 선택일 때 토글된 MA / 이격도 추가.
@@ -2127,7 +2141,8 @@ def _build_combined_chart_section():
                                     tension: 0.4,
                                     cubicInterpolationMode: 'monotone',
                                     spanGaps: true,
-                                    yAxisID: yAxisID
+                                    yAxisID: yAxisID,
+                                    _isForeign: isForeign
                                 });
                             }
                             if (dispActive[slot]) {
@@ -2181,7 +2196,9 @@ def _build_combined_chart_section():
                             if (!last) return;
                             var val = ds.data[lastIdx];
                             var label;
-                            if ((chart._cmbMode || 'pct') === 'pct') {
+                            if (ds._isForeign) {
+                                label = val.toFixed(1) + '%';
+                            } else if ((chart._cmbMode || 'pct') === 'pct') {
                                 var rounded = Math.sign(val) * Math.round(Math.abs(val));
                                 var sign = rounded >= 0 ? '+' : '';
                                 label = sign + rounded + '%';
@@ -2267,7 +2284,7 @@ def _build_combined_chart_section():
                         border: { color: '#000' }
                     }
                 };
-                if (mode === 'raw2' && datasets[1]) {
+                if (mode === 'raw2' && datasets.some(function(ds){ return ds.yAxisID === 'y1'; })) {
                     scalesConfig.y1 = {
                         type: 'logarithmic',
                         position: 'right',
