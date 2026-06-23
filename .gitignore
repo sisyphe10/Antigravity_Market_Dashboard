@@ -123,3 +123,9 @@ secrets/
 # Wrap_NAV push hold marker (local_safe_push)
 Wrap_NAV_push.HOLD
 !seonyuduo_feedback_tips.json
+
+# 워처 PID — 재시작마다 변함, 추적 시 영구 dirty로 auto_pull ff 차단 → 추적 제외
+watch_wrap_nav.pid
+
+# auto_pull.ps1 의 dirty 백업 patch (로컬 전용)
+backups/

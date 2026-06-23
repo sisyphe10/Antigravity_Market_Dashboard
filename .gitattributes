@@ -1,1 +1,11 @@
 Wrap_NAV.xlsx -merge
+
+# 바이너리 명시 (diff/merge·가짜 dirty 노이즈 방지)
+*.xlsx binary
+*.png binary
+*.jpg binary
+*.db binary
+
+# Windows 스크립트 줄바꿈 고정 (CRLF 노이즈 방지)
+*.ps1 text eol=crlf
+*.bat text eol=crlf
