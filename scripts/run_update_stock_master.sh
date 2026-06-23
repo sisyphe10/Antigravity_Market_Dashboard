@@ -42,7 +42,7 @@ if git diff --quiet -- Wrap_NAV.xlsx stock_master.json; then
 fi
 
 bash scripts/safe_commit_push.sh \
-    -m "주간 종목 마스터 갱신 ($(TZ=Asia/Seoul date +%F))" \
+    -m "주간 종목 마스터 갱신 ($(TZ=Asia/Seoul date +%F)) [skip ci]" \
     --xlsx-conflict bail \
     -- Wrap_NAV.xlsx stock_master.json
 
