@@ -1,7 +1,13 @@
-"""yfinance에서 11개 지수의 일간 종가 가져와서 월별 수익률 계산 → monthly_returns.json
+"""11개 지수의 일간 종가 가져와서 월별 수익률 계산 → monthly_returns.json
 
 지수 (X축 표시 순서):
   KOSPI, KOSDAQ, NIKKEI, TAIEX, S&P 500, NASDAQ, RUSSELL 2000, BTC, ETH, GOLD, SILVER
+
+소스:
+  KOSPI/KOSDAQ = Wrap_NAV.xlsx '기준가' 시트(KIS 확정지수). 해외 9개 지수 = yfinance.
+  (야후의 한국지수 ^KS11/^KQ11는 지연·부정확 — 2026-06-23 KOSPI -9.99% 폭락이 익일까지
+   야후 미반영되어 WRAP 탭 월별수익률[기준가 시트 기반]과 어긋났던 버그 수정.
+   기준가 시트를 못 읽으면 야후로 graceful 폴백.)
 
 수익률 정의:
   완료된 달 = (해당 달 마지막 종가 / 직전 달 마지막 종가) - 1
@@ -22,6 +28,10 @@ if hasattr(sys.stdout, 'reconfigure'):
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUTPUT_JSON = os.path.join(ROOT, 'monthly_returns.json')
+NAV_FILE = os.path.join(ROOT, 'Wrap_NAV.xlsx')
+NAV_SHEET = '기준가'
+# display_name → 기준가 시트 컬럼명 (KIS 확정지수, 야후 대신 사용). 실패 시 야후 폴백.
+NAV_INDICES = {'KOSPI': 'KOSPI', 'KOSDAQ': 'KOSDAQ'}
 
 KST = timezone(timedelta(hours=9))
 
@@ -60,6 +70,27 @@ def fetch_monthly_closes(ticker: str, start: datetime, end: datetime) -> pd.Seri
     return monthly_last
 
 
+def fetch_monthly_closes_from_nav(col: str) -> pd.Series:
+    """Wrap_NAV.xlsx '기준가' 시트(KIS 확정지수)에서 월별 마지막 종가 Series.
+
+    index=YYYY-MM 문자열, value=close. 야후 경로와 동일한 월말-resample 규칙.
+    파일/시트/컬럼 부재 또는 빈 컬럼이면 ValueError → 호출부에서 야후로 폴백.
+    """
+    df = pd.read_excel(NAV_FILE, sheet_name=NAV_SHEET)
+    df.columns = [str(c).strip() for c in df.columns]  # 컬럼명 방어(공백/BOM)
+    if 'Date' not in df.columns or col not in df.columns:
+        raise ValueError(f"기준가 시트 컬럼 없음: Date/{col}")
+    df['Date'] = pd.to_datetime(df['Date'])
+    s = df.set_index('Date')[col].dropna().sort_index()
+    if isinstance(s.index, pd.DatetimeIndex) and s.index.tz is not None:
+        s.index = s.index.tz_localize(None)
+    if s.empty:
+        raise ValueError(f"기준가 {col} 비어있음")
+    monthly_last = s.groupby(s.index.to_period('M')).last()
+    monthly_last.index = monthly_last.index.astype(str)  # YYYY-MM
+    return monthly_last
+
+
 def main():
     today_kst = datetime.now(tz=KST).date()
     # 2025-01 수익률을 위해 2024-12 종가 필요 → 2024-11-15 부터 안전하게
@@ -72,7 +103,16 @@ def main():
     for name, ticker in INDICES:
         print(f'  {name} ({ticker}) ...', end=' ')
         try:
-            series = fetch_monthly_closes(ticker, start, end)
+            if name in NAV_INDICES:
+                # KOSPI/KOSDAQ: 기준가 시트(KIS 확정지수) 우선, 실패 시 야후 폴백
+                try:
+                    series = fetch_monthly_closes_from_nav(NAV_INDICES[name])
+                    print('[기준가/KIS]', end=' ')
+                except Exception as ne:
+                    print(f'[기준가 실패→야후 폴백: {ne}]', end=' ')
+                    series = fetch_monthly_closes(ticker, start, end)
+            else:
+                series = fetch_monthly_closes(ticker, start, end)
             if series.empty:
                 print('데이터 없음')
                 monthly_data[name] = {}
