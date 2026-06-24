@@ -1,0 +1,273 @@
+"""데이터 수집 신선도 점검 → 일별 수집이 2 거래일 이상 멈추면 텔레그램 경보.
+
+배경(2026-06-24): Hotel ADR 일별 스크래퍼가 6/16 이후 조용히 죽었는데(미커밋 VM
+크론) 아무 알림이 없어 8일간 방치됨. 일별 수집물이 N 거래일 이상 갱신 안 되면
+탐지해 알린다.
+
+판정 원리:
+  각 "일별 수집 시리즈"마다 임계값(영업일)을 두고, 최신 데이터 일자가 그만큼 뒤처지면 경보.
+  - 순수 일별(거래일) 시리즈: 임계 3 영업일 = "최근 2 거래일 연속 누락"에 해당.
+  - 발행 지연이 큰 시리즈(예탁금 T+3, SCFI 주간)는 임계값을 늘려 오탐 방지.
+  - 월별/분기별 매크로(ECOS_MACRO 등), 수동입력(fee_revenue), 명칭변경된 레거시 시리즈는 제외.
+
+소스별 최신일자 추출:
+  - dataset.csv: 데이터 타입별 max(날짜)
+  - *.json: 내부 데이터 일자(있으면) else updated_at
+  - hotel_adr.csv: 스크랩 타임스탬프(0열) max
+
+실행:
+  python execution/check_data_freshness.py            # 점검 + (경보 시) 텔레그램 발송
+  python execution/check_data_freshness.py --dry-run  # 발송 없이 결과만 출력
+환경변수: TELEGRAM_BOT_TOKEN(없으면 TELEGRAM_SISYPHE_BOT_TOKEN), TELEGRAM_CHAT_ID
+항상 exit 0 (워크플로를 실패시키지 않음).
+"""
+import argparse
+import csv
+import json
+import os
+import sys
+from datetime import date, datetime, timezone, timedelta
+
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+
+KST = timezone(timedelta(hours=9))
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# ── 2026 KRX 휴장일(주말 제외 공휴일·연말휴장). 영업일 계산 정확도용. ──────────
+KR_HOLIDAYS_2026 = {
+    '2026-01-01', '2026-02-16', '2026-02-17', '2026-02-18', '2026-03-02',
+    '2026-05-01', '2026-05-05', '2026-05-25', '2026-06-06', '2026-08-15',
+    '2026-09-24', '2026-09-25', '2026-09-26', '2026-10-03', '2026-10-09',
+    '2026-12-25', '2026-12-31',
+}
+
+# ── 일별(거래일) 수집 시리즈: 데이터타입 → 임계 영업일 ───────────────────────
+#   3 = "최근 2 거래일 연속 누락"이면 경보 (정상은 최신=전 거래일이라 gap≈1).
+DATASET_DAILY = {
+    'INDEX_KR': 3, 'INDEX_US': 3, 'INDEX_GLOBAL': 3, 'FX': 3, 'COMMODITY': 3,
+    'KRX_VALUATION': 3, 'ECOS_RATE': 3, 'FRED_RATE': 3, 'INTEREST_RATE': 3,
+    'BATTERY_METAL': 4, 'POLY_SILICON': 4, 'SEIBro': 3,
+    'DRAM': 4, 'NAND': 4, 'DRAM_RETAIL': 4,
+}
+# 발행 지연 큰 dataset 시리즈: (모드, 임계). calendar=달력일, business=영업일
+DATASET_LAGGED = {
+    'DEPOSIT': ('business', 6),        # 고객예탁금/신용잔고: KOFIA T+3 공표
+    'OCEAN_FREIGHT': ('calendar', 11), # SCFI: 주간
+    'CRYPTO': ('calendar', 3),         # 24/7
+}
+# 제외(일별 아님): 월·분기 매크로, 수동, 레거시 명칭변경
+DATASET_IGNORE = {
+    'ECOS_MACRO', 'ECOS_SECTOR', 'FRED_MACRO', 'FRED_SECTOR',
+    'INDEX', 'Memory',
+}
+
+# ── JSON 산출물: 파일 → 임계 영업일 ──────────────────────────────────────────
+JSON_DAILY = {
+    'disclosures.json': 3, 'kodex_sectors.json': 3, 'landing_highlights.json': 3,
+    'featured_data.json': 3, 'featured_news.json': 3, 'investor_trading.json': 3,
+    'index_returns.json': 3, 'index_history.json': 3, 'monthly_returns.json': 3,
+    'universe.json': 3, 'universe_history.json': 3, 'contribution_data.json': 4,
+}
+JSON_LAGGED = {'kofia_stats.json': ('business', 6)}
+
+# hotel_adr.csv (일별 평일 스크랩) — 0열 타임스탬프 기준
+HOTEL_THRESHOLD_BDAYS = 3
+
+LABELS = {
+    'INDEX_KR': 'KR 지수/외인(INDEX_KR)', 'INDEX_US': '미국 지수(INDEX_US)',
+    'INDEX_GLOBAL': '글로벌 지수(NIKKEI/TSEC)', 'FX': '환율(FX)',
+    'COMMODITY': '원자재(COMMODITY)', 'KRX_VALUATION': 'KRX PER/PBR/배당',
+    'ECOS_RATE': 'ECOS 금리(일별)', 'FRED_RATE': 'FRED 금리(일별)',
+    'INTEREST_RATE': '금리(INTEREST_RATE)', 'BATTERY_METAL': '리튬(BATTERY_METAL)',
+    'POLY_SILICON': '폴리실리콘', 'SEIBro': 'SEIBro TOP50',
+    'DRAM': 'DRAM 현물', 'NAND': 'NAND 현물', 'DRAM_RETAIL': 'DRAM 소매최저가',
+    'DEPOSIT': '예탁금/신용잔고', 'OCEAN_FREIGHT': 'SCFI 운임', 'CRYPTO': '암호화폐',
+    'disclosures.json': '보유종목 공시', 'kodex_sectors.json': 'KODEX 섹터',
+    'landing_highlights.json': '랜딩 하이라이트', 'featured_data.json': 'Featured 랭킹',
+    'featured_news.json': 'Featured 뉴스', 'investor_trading.json': '투자자 수급',
+    'index_returns.json': '지수 1M(universe RSI)', 'index_history.json': '지수 일별(RSI/MDD)',
+    'monthly_returns.json': 'Monthly Returns', 'universe.json': 'Universe',
+    'universe_history.json': 'Universe 일별', 'contribution_data.json': '기여도 탭',
+    'kofia_stats.json': 'KOFIA 예탁금', 'hotel_adr.csv': 'Hotel ADR',
+}
+
+
+def parse_d(s):
+    s = str(s).strip()[:10]
+    for fmt in ('%Y-%m-%d', '%Y/%m/%d', '%Y.%m.%d'):
+        try:
+            return datetime.strptime(s, fmt).date()
+        except Exception:
+            pass
+    return None
+
+
+def business_days_between(d0: date, d1: date) -> int:
+    """d0(제외) ~ d1(포함) 사이 영업일 수(주말+KRX휴장 제외). d1<=d0이면 0."""
+    if d1 <= d0:
+        return 0
+    n = 0
+    cur = d0 + timedelta(days=1)
+    while cur <= d1:
+        if cur.weekday() < 5 and cur.strftime('%Y-%m-%d') not in KR_HOLIDAYS_2026:
+            n += 1
+        cur += timedelta(days=1)
+    return n
+
+
+def gap(latest: date, today: date, mode: str) -> int:
+    if mode == 'calendar':
+        return (today - latest).days
+    return business_days_between(latest, today)
+
+
+# ── 소스별 최신일자 추출 ─────────────────────────────────────────────────────
+def dataset_type_max(data_dir: str) -> dict:
+    out = {}
+    path = os.path.join(data_dir, 'dataset.csv')
+    with open(path, encoding='utf-8-sig') as f:
+        for row in csv.DictReader(f):
+            d = parse_d(row.get('날짜', ''))
+            if not d:
+                continue
+            t = row.get('데이터 타입', '?')
+            if t not in out or d > out[t]:
+                out[t] = d
+    return out
+
+
+def json_data_date(path: str):
+    """내부 데이터 일자 우선, 없으면 updated_at 일자. (max YYYY-MM-DD 탐색)"""
+    try:
+        obj = json.load(open(path, encoding='utf-8'))
+    except Exception:
+        return None
+    best = None
+
+    def consider(s):
+        nonlocal best
+        d = parse_d(s)
+        if d and date(2024, 1, 1) <= d <= date(2027, 12, 31):
+            if best is None or d > best:
+                best = d
+
+    def walk(o, depth):
+        if depth > 7:
+            return
+        if isinstance(o, str):
+            consider(o)
+        elif isinstance(o, dict):
+            for k, v in o.items():
+                consider(k)
+                walk(v, depth + 1)
+        elif isinstance(o, list):
+            for v in o:
+                walk(v, depth + 1)
+
+    walk(obj, 0)
+    if best is None and isinstance(obj, dict):
+        for k in ('updated_at', 'updated', 'last_updated'):
+            if isinstance(obj.get(k), str):
+                consider(obj[k])
+    return best
+
+
+def hotel_scrape_max(data_dir: str):
+    path = os.path.join(data_dir, 'hotel_adr.csv')
+    if not os.path.exists(path):
+        return None
+    best = None
+    with open(path, encoding='utf-8-sig') as f:
+        for row in csv.reader(f):
+            if row and row[0][:2] == '20':
+                d = parse_d(row[0][:10])
+                if d and (best is None or d > best):
+                    best = d
+    return best
+
+
+def check(data_dir: str, today: date):
+    """경보 항목 리스트 반환: [(label, latest, gap_value, mode, threshold)]"""
+    alerts = []
+    dmax = dataset_type_max(data_dir)
+
+    def add(label, latest, mode, thr):
+        if latest is None:
+            alerts.append((label, None, None, mode, thr))  # 데이터 자체 없음
+            return
+        g = gap(latest, today, mode)
+        if g >= thr:
+            alerts.append((label, latest, g, mode, thr))
+
+    for typ, thr in DATASET_DAILY.items():
+        add(LABELS.get(typ, typ), dmax.get(typ), 'business', thr)
+    for typ, (mode, thr) in DATASET_LAGGED.items():
+        add(LABELS.get(typ, typ), dmax.get(typ), mode, thr)
+    for fn, thr in JSON_DAILY.items():
+        add(LABELS.get(fn, fn), json_data_date(os.path.join(data_dir, fn)), 'business', thr)
+    for fn, (mode, thr) in JSON_LAGGED.items():
+        add(LABELS.get(fn, fn), json_data_date(os.path.join(data_dir, fn)), mode, thr)
+    add(LABELS['hotel_adr.csv'], hotel_scrape_max(data_dir), 'business', HOTEL_THRESHOLD_BDAYS)
+    return alerts
+
+
+def build_message(alerts, today: date) -> str:
+    lines = [f"\U0001F6A8 데이터 수집 점검 경보 ({today})", "",
+             "다음 일별 수집이 임계 이상 멈췄습니다:", ""]
+    for label, latest, g, mode, thr in sorted(alerts, key=lambda a: (a[2] is not None, -(a[2] or 10**9))):
+        unit = '일' if mode == 'calendar' else '영업일'
+        if latest is None:
+            lines.append(f"• {label} — 데이터 없음")
+        else:
+            lines.append(f"• {label} — 최신 {latest.strftime('%m-%d')} ({g}{unit} 지연, 임계 {thr})")
+    lines += ["", "정상 수집은 생략. (자동 점검 · check_data_freshness.py)"]
+    return "\n".join(lines)
+
+
+def send_telegram(text: str) -> bool:
+    import urllib.request
+    import urllib.parse
+    token = os.environ.get('TELEGRAM_BOT_TOKEN') or os.environ.get('TELEGRAM_SISYPHE_BOT_TOKEN')
+    chat = os.environ.get('TELEGRAM_CHAT_ID')
+    if not token or not chat:
+        print("  ⚠️ TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID 미설정 → 발송 생략")
+        return False
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    data = urllib.parse.urlencode({'chat_id': chat, 'text': text,
+                                   'disable_web_page_preview': 'true'}).encode()
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, data=data), timeout=20) as r:
+            ok = r.status == 200
+            print(f"  텔레그램 발송 {'성공' if ok else 'HTTP '+str(r.status)}")
+            return ok
+    except Exception as e:
+        print(f"  ⚠️ 텔레그램 발송 실패: {e}")
+        return False
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--dry-run', action='store_true', help='발송 없이 결과만 출력')
+    ap.add_argument('--data-dir', default=ROOT, help='데이터 파일 디렉토리(테스트용)')
+    ap.add_argument('--today', default=None, help='기준일 YYYY-MM-DD(테스트용)')
+    args = ap.parse_args()
+
+    today = parse_d(args.today) if args.today else datetime.now(tz=KST).date()
+    print(f"기준일: {today} ({today.strftime('%A')})  data-dir={args.data_dir}")
+
+    alerts = check(args.data_dir, today)
+    if not alerts:
+        print("✅ 일별 수집 전부 정상 (경보 없음)")
+        return
+
+    msg = build_message(alerts, today)
+    print("\n" + msg + "\n")
+    if args.dry_run:
+        print("[dry-run] 발송 생략")
+    else:
+        send_telegram(msg)
+
+
+if __name__ == '__main__':
+    main()

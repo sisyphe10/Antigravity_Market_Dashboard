@@ -1,0 +1,29 @@
+name: Daily Data Health Check
+
+# 일별 수집물이 임계(보통 2 거래일 연속 누락) 이상 멈추면 텔레그램 경보.
+# VM·GHA 양쪽 수집을 origin/main 산출물 신선도로 점검(워크플로 green이어도
+# 개별 시리즈가 멈췄는지 포착). 순수 표준 라이브러리 → pip 설치 불필요(견고).
+
+on:
+  schedule:
+    - cron: '0 2 * * *'   # 11:00 KST (02:00 UTC) — 전일 야간/당일 FRED 수집 settle 후
+  workflow_dispatch:
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run freshness check (alert on 2+ trading-day stale)
+        run: python execution/check_data_freshness.py
+        env:
+          TZ: 'Asia/Seoul'
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
