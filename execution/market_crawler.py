@@ -278,8 +278,33 @@ def crawl_yfinance_data():
 # ==========================================
 # 6. [KR] 한국 지수 + USD 환산
 # ==========================================
+def _load_kr_index_from_nav(months=7):
+    """기준가 시트(KIS 확정지수)에서 KOSPI/KOSDAQ 일별 종가 Series 반환 (최근 months개월).
+    야후 ^KS11/^KQ11의 지연·잠정값 회피(2026-06-23 -9.99% 폭락 익일 미반영 사례).
+    실패 시 (None, None) → 호출부에서 야후 폴백."""
+    try:
+        nav_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'Wrap_NAV.xlsx')
+        df = pd.read_excel(nav_file, sheet_name='기준가')
+        df.columns = [str(c).strip() for c in df.columns]  # 컬럼명 방어(공백/BOM)
+        if 'Date' not in df.columns or 'KOSPI' not in df.columns or 'KOSDAQ' not in df.columns:
+            return None, None
+        df['Date'] = pd.to_datetime(df['Date'])
+        df = df.set_index('Date').sort_index()
+        ko = df['KOSPI'].dropna()
+        kq = df['KOSDAQ'].dropna()
+        if ko.empty or kq.empty:
+            return None, None
+        cutoff = ko.index.max() - pd.Timedelta(days=months * 31)
+        return ko[ko.index >= cutoff], kq[kq.index >= cutoff]
+    except Exception as e:
+        print(f"⚠️ 기준가 시트 로드 실패 → 야후 폴백: {e}")
+        return None, None
+
+
 def crawl_kr_indices():
-    """한국 지수(KOSPI/KOSDAQ) + USD 환산 데이터 수집"""
+    """한국 지수(KOSPI/KOSDAQ) + USD 환산 데이터 수집.
+    KOSPI/KOSDAQ는 KIS 확정지수(기준가 시트) 우선, 실패 시 야후 ^KS11/^KQ11 폴백.
+    환율(KRW=X)은 야후 유지, USD 환산 = KIS종가 / 환율(직전 FX 종가 ffill)."""
     print(f"\n{'=' * 60}")
     print(f"🇰🇷 한국 지수 크롤링 시작")
     print(f"{'=' * 60}")
@@ -287,50 +312,65 @@ def crawl_kr_indices():
     collected_data = []
 
     try:
-        kospi = yf.Ticker('^KS11').history(period='6mo')
-        kosdaq = yf.Ticker('^KQ11').history(period='6mo')
+        # 환율(KRW=X)은 야후 유지
         krw = yf.Ticker('KRW=X').history(period='6mo')
+        krw_close = None
+        if not krw.empty:
+            krw.index = krw.index.tz_localize(None)
+            krw_close = krw['Close']
 
-        if kospi.empty or kosdaq.empty or krw.empty:
-            print("⚠️ 한국 지수 데이터 없음")
-            return
+        # KOSPI/KOSDAQ: KIS 확정지수(기준가 시트) 우선
+        kis_kospi, kis_kosdaq = _load_kr_index_from_nav()
 
-        # 타임존 제거
-        kospi.index = kospi.index.tz_localize(None)
-        kosdaq.index = kosdaq.index.tz_localize(None)
-        krw.index = krw.index.tz_localize(None)
-
-        # KOSPI, KOSDAQ 원본 데이터 (NaN 행은 스킵 — yfinance가 종종 NaN 반환)
-        for date, row in kospi.iterrows():
-            if pd.isna(row['Close']):
-                continue
-            d = date.strftime('%Y-%m-%d')
-            collected_data.append((d, 'KOSPI', float(row['Close']), 'INDEX_KR'))
-
-        for date, row in kosdaq.iterrows():
-            if pd.isna(row['Close']):
-                continue
-            d = date.strftime('%Y-%m-%d')
-            collected_data.append((d, 'KOSDAQ', float(row['Close']), 'INDEX_KR'))
-
-        # USD 환산 (KOSPI/KRW=X, KOSDAQ/KRW=X) — 양쪽 다 NaN 아닐 때만
-        for date in kospi.index:
-            if date not in krw.index:
-                continue
-            kospi_close = kospi.loc[date, 'Close']
-            fx_rate = krw.loc[date, 'Close']
-            if pd.isna(kospi_close) or pd.isna(fx_rate) or fx_rate == 0:
-                continue
-            d = date.strftime('%Y-%m-%d')
-            kospi_usd = float(kospi_close) / float(fx_rate)
-            collected_data.append((d, 'KOSPI/USD', round(kospi_usd, 4), 'INDEX_KR'))
-
-            if date in kosdaq.index:
-                kosdaq_close = kosdaq.loc[date, 'Close']
-                if pd.isna(kosdaq_close):
+        if kis_kospi is not None and kis_kosdaq is not None:
+            # ---- KIS 경로 ----
+            for d, v in kis_kospi.items():
+                collected_data.append((d.strftime('%Y-%m-%d'), 'KOSPI', round(float(v), 4), 'INDEX_KR'))
+            for d, v in kis_kosdaq.items():
+                collected_data.append((d.strftime('%Y-%m-%d'), 'KOSDAQ', round(float(v), 4), 'INDEX_KR'))
+            # USD 환산 = KIS종가 / 환율(직전 FX 종가 ffill)
+            if krw_close is not None:
+                fx = krw_close.reindex(kis_kospi.index, method='ffill')
+                for d in kis_kospi.index:
+                    rate = fx.get(d)
+                    if rate is None or pd.isna(rate) or rate == 0:
+                        continue
+                    ds = d.strftime('%Y-%m-%d')
+                    collected_data.append((ds, 'KOSPI/USD', round(float(kis_kospi[d]) / float(rate), 4), 'INDEX_KR'))
+                    if d in kis_kosdaq.index:
+                        collected_data.append((ds, 'KOSDAQ/USD', round(float(kis_kosdaq[d]) / float(rate), 4), 'INDEX_KR'))
+            print(f"✅ KOSPI/KOSDAQ KIS 확정지수 사용 ({len(kis_kospi)}/{len(kis_kosdaq)}행)")
+        else:
+            # ---- 야후 폴백 (기준가 시트 불가) ----
+            kospi = yf.Ticker('^KS11').history(period='6mo')
+            kosdaq = yf.Ticker('^KQ11').history(period='6mo')
+            if kospi.empty or kosdaq.empty or krw_close is None:
+                print("⚠️ 한국 지수 데이터 없음 (KIS·야후 모두 실패)")
+                return
+            kospi.index = kospi.index.tz_localize(None)
+            kosdaq.index = kosdaq.index.tz_localize(None)
+            for date, row in kospi.iterrows():
+                if pd.isna(row['Close']):
                     continue
-                kosdaq_usd = float(kosdaq_close) / float(fx_rate)
-                collected_data.append((d, 'KOSDAQ/USD', round(kosdaq_usd, 4), 'INDEX_KR'))
+                collected_data.append((date.strftime('%Y-%m-%d'), 'KOSPI', float(row['Close']), 'INDEX_KR'))
+            for date, row in kosdaq.iterrows():
+                if pd.isna(row['Close']):
+                    continue
+                collected_data.append((date.strftime('%Y-%m-%d'), 'KOSDAQ', float(row['Close']), 'INDEX_KR'))
+            for date in kospi.index:
+                if date not in krw_close.index:
+                    continue
+                kospi_close = kospi.loc[date, 'Close']
+                fx_rate = krw_close.loc[date]
+                if pd.isna(kospi_close) or pd.isna(fx_rate) or fx_rate == 0:
+                    continue
+                d = date.strftime('%Y-%m-%d')
+                collected_data.append((d, 'KOSPI/USD', round(float(kospi_close) / float(fx_rate), 4), 'INDEX_KR'))
+                if date in kosdaq.index:
+                    kosdaq_close = kosdaq.loc[date, 'Close']
+                    if pd.isna(kosdaq_close):
+                        continue
+                    collected_data.append((d, 'KOSDAQ/USD', round(float(kosdaq_close) / float(fx_rate), 4), 'INDEX_KR'))
 
         print(f"✓ KOSPI: {len(kospi)}일, KOSDAQ: {len(kosdaq)}일 수집")
         print(f"✓ KOSPI/USD, KOSDAQ/USD 환산 완료")
