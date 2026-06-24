@@ -2011,6 +2011,7 @@
                 + '<button id="orderCancelAllBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">전체 취소</button>'
                 + '<button id="orderSaveBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#f3f4f6;color:#222;border:1px solid #d1d5db;border-radius:8px;cursor:pointer;">저장</button>'
                 + '<button id="orderFinalizeBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;">최종 저장</button>'
+                + '<button id="orderAdditionalBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#2563eb;color:#fff;border:none;border-radius:8px;cursor:pointer;">추가 주문</button>'
                 + '</div>'
                 + '</div>'
                 + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:15px;">'
@@ -2083,6 +2084,8 @@
             if (saveBtn) saveBtn.addEventListener('click', function() { saveAllPendingOrders(false); });
             var finalizeBtn = document.getElementById('orderFinalizeBtn');
             if (finalizeBtn) finalizeBtn.addEventListener('click', function() { finalizeOrder(orderActiveTab); });
+            var additionalBtn = document.getElementById('orderAdditionalBtn');
+            if (additionalBtn) additionalBtn.addEventListener('click', function() { additionalOrder(); });
             var addBtn = document.getElementById('orderAddStockBtn');
             if (addBtn) addBtn.addEventListener('click', function() { addOrderStock(orderActiveTab); });
             // 종목 삭제 (사용자가 추가한 isNew 종목만 가능)
@@ -2409,6 +2412,27 @@
                 alert('❌ 취소 실패: ' + e.message);
                 console.error('cancelAllPendingOrders error:', e);
             }
+        }
+
+        // 추가 주문 = 같은 날 2번째(추가) 주문. 이미 [최종 저장]으로 finalize되어 나간 1번째 주문을
+        // 새 기준으로 삼는다: 변경후 → 변경전으로 옮기고, 추천사유를 비워 새 주문을 작성할 수 있게 함.
+        // 순수 클라이언트 상태 변경(서버 pending 미변경) — 사용자가 새 주문 입력 후 [저장]/[최종 저장] 시 갱신.
+        // 전역(모든 포트폴리오)에 적용 — [최종 저장]이 전역이라 일부만 리셋하면 1번째/2번째가 섞임.
+        function additionalOrder() {
+            if (!confirm('추가 주문을 시작하시겠습니까?\\n\\n현재 "변경후" 비중이 새 "변경전" 기준으로 이동하고, 추천사유가 모두 초기화됩니다.\\n이미 [최종 저장]된 주문은 그대로 기록돼 있습니다.')) return;
+            ORDER_PORTFOLIOS.forEach(function(p) {
+                var pf = p.display;
+                var stocks = orderStocks[pf] || [];
+                var st = orderState[pf] || [];
+                stocks.forEach(function(s, i) {
+                    if (!st[i]) return;
+                    var nw = parseFloat(st[i].newWeight) || 0;
+                    s.weight = nw;        // 변경후 → 변경전 (새 기준)
+                    st[i].newWeight = nw; // 변경후 동일 유지 → 초기 변동 0
+                    st[i].reason = '';    // 추천사유 초기화
+                });
+            });
+            if (orderActiveTab && orderActiveTab !== 'Email') renderOrderPanel(orderActiveTab);
         }
 
         // 최종 저장 = 3개 포트폴리오 모두 저장 + finalize 워크플로 1회 트리거
