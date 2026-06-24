@@ -115,12 +115,21 @@ def main():
     wb.save(WRAP_NAV)
     print(f'\n✅ Wrap_NAV.xlsx 저장 (총 {rows_added_total}행 추가)')
 
-    for d in processed_dates:
+    # 오늘 날짜 entry는 pending_orders.json에 남겨둔다 — 최종 저장 후에도 당일 추천사유가
+    # Order 탭(loadOrder가 pending[todayStr]를 오버레이해 복원)에 계속 보이도록.
+    # NEW 시트 반영(=wb.save)은 위에서 이미 끝났다. processed_dates는 wb.save 실행 게이트로도
+    # 쓰이므로 오늘을 빼지 않고(빼면 오늘만 있을 때 저장이 통째로 skip됨), '삭제 목록'만 과거로 한정.
+    # 자정이 지나면 loadOrder가 새 todayStr만 보므로 화면은 자동 리셋되고,
+    # 어제가 된 entry는 다음 finalize 실행에서 과거(date_str < today_kst)로 정리된다.
+    dates_to_remove = [d for d in processed_dates if d < today_kst]
+    for d in dates_to_remove:
         if d in pending:
             del pending[d]
     with open(PENDING, 'w', encoding='utf-8') as f:
         json.dump(pending, f, ensure_ascii=False, indent=2)
-    print(f'✅ pending_orders.json 에서 {len(processed_dates)}개 날짜 entry 제거')
+    kept_today = any(d >= today_kst for d in processed_dates)
+    print(f'✅ pending_orders.json 정리: 과거 {len(dates_to_remove)}개 entry 삭제'
+          + (f', 오늘({today_kst}) entry 보존' if kept_today else ''))
     return 0
 
 
