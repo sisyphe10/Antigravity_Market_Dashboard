@@ -62,7 +62,14 @@ def get_booking_driver():
     )
     opts.add_experimental_option('excludeSwitches', ['enable-automation'])
 
-    # VM (Ubuntu)에서 snap chromium 사용 시 wrapper 필요 (fetch_seibro_data.py 패턴)
+    # 비-snap google-chrome 우선 — snap chromium은 chromedriver 중첩 샌드박스로
+    # 'session not created: Chrome instance exited' 크래시(2026-06 hotel 수집 중단 원인).
+    # Selenium Manager(selenium 4.6+)가 chrome 버전에 맞는 chromedriver 자동 설치.
+    for chrome_bin in ('/usr/bin/google-chrome', '/usr/bin/google-chrome-stable'):
+        if os.path.exists(chrome_bin):
+            opts.binary_location = chrome_bin
+            return webdriver.Chrome(options=opts)
+    # 폴백: snap chromium wrapper (google-chrome 미설치 환경)
     if os.path.exists('/snap/bin/chromium'):
         opts.binary_location = '/snap/bin/chromium'
         opts.add_argument('--remote-debugging-port=9222')

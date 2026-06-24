@@ -1,0 +1,11 @@
+[Unit]
+Description=Antigravity Hotel ADR timer (매일 12:00 KST 1회)
+
+[Timer]
+OnCalendar=*-*-* 12:00:00 Asia/Seoul
+AccuracySec=1min
+Unit=hotel-adr.service
+Persistent=true
+
+[Install]
+WantedBy=timers.target
