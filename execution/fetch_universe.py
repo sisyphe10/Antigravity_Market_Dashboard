@@ -604,6 +604,12 @@ def main() -> None:
             if done % 50 == 0:
                 print(f"  진행: {done}/{len(rows)}")
 
+    # 전 종목 fetch 실패(yfinance 전면 rate-limit/차단)면 이전 universe.json을 덮지 않고
+    # red 처리 — all-carry-forward로 stale 파일을 쓰면 신선도 모니터가 못 잡는다.
+    if not results:
+        print("[치명] 전 종목 fetch 실패 → universe.json 미갱신(이전 값 보존), exit 1")
+        sys.exit(1)
+
     # 부분 실패 보완 — 새 fetch 실패한 종목은 기존 universe.json 값 사용
     fallback_count = 0
     sequence_fixed: list[list[str]] = []
@@ -641,13 +647,20 @@ def main() -> None:
     if fallback_count:
         print(f"  fallback 적용: {fallback_count}종목 (이전 universe.json 값 보존)")
 
+    # data_date: 이번 run에서 실제 fetch 성공한 종목들의 최신 시세 일자.
+    # carry-forward로 universe.json이 항상 갱신돼도 신선도 모니터가 '진짜' 데이터 일자를
+    # 보게 별도 기록 (updated_at은 매 run now()라 stale 판별에 못 씀).
+    fresh_dates = [max(h) for (_row, h) in results.values() if h]
+    data_date = max(fresh_dates) if fresh_dates else None
+
     out = {
         'updated_at': datetime.now(KST).strftime('%Y-%m-%d %H:%M KST'),
+        'data_date': data_date,
         'values': values,
     }
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
         json.dump(out, f, ensure_ascii=False)
-    print(f"[성공] universe.json: {len(values) - 1}종목 / {OUTPUT_FILE}")
+    print(f"[성공] universe.json: {len(values) - 1}종목, data_date={data_date} / {OUTPUT_FILE}")
 
     _write_history(hist_by_ticker)
 

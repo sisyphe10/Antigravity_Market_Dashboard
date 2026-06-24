@@ -34,12 +34,19 @@ if hasattr(sys.stdout, 'reconfigure'):
 KST = timezone(timedelta(hours=9))
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# ── 2026 KRX 휴장일(주말 제외 공휴일·연말휴장). 영업일 계산 정확도용. ──────────
-KR_HOLIDAYS_2026 = {
+# ── KRX 휴장일(주말 제외 공휴일·대체공휴일·연말휴장). 영업일 계산 정확도용. ──────
+#    ★연 1회 갱신 필요. 미등재 연도는 주말만 반영 → 명절 클러스터 false positive 위험.
+KR_HOLIDAYS = {
+    # 2026 (대체공휴일 8/17 광복절·9/28 추석·10/5 개천절 포함)
     '2026-01-01', '2026-02-16', '2026-02-17', '2026-02-18', '2026-03-02',
-    '2026-05-01', '2026-05-05', '2026-05-25', '2026-06-06', '2026-08-15',
-    '2026-09-24', '2026-09-25', '2026-09-26', '2026-10-03', '2026-10-09',
-    '2026-12-25', '2026-12-31',
+    '2026-05-01', '2026-05-05', '2026-05-25', '2026-06-06',
+    '2026-08-15', '2026-08-17', '2026-09-24', '2026-09-25', '2026-09-26',
+    '2026-09-28', '2026-10-03', '2026-10-05', '2026-10-09', '2026-12-25', '2026-12-31',
+    # 2027 (best-effort, 대체공휴일 포함 — 연초 확정 캘린더로 재검증)
+    '2027-01-01', '2027-02-05', '2027-02-08', '2027-02-09', '2027-03-01',
+    '2027-05-01', '2027-05-05', '2027-05-13', '2027-08-16',
+    '2027-09-14', '2027-09-15', '2027-09-16', '2027-10-04', '2027-10-11',
+    '2027-12-27', '2027-12-31',
 }
 
 # ── 일별(거래일) 수집 시리즈: 데이터타입 → 임계 영업일 ───────────────────────
@@ -47,7 +54,7 @@ KR_HOLIDAYS_2026 = {
 DATASET_DAILY = {
     'INDEX_KR': 3, 'INDEX_US': 3, 'INDEX_GLOBAL': 3, 'FX': 3, 'COMMODITY': 3,
     'KRX_VALUATION': 3, 'ECOS_RATE': 3, 'FRED_RATE': 3, 'INTEREST_RATE': 3,
-    'BATTERY_METAL': 4, 'POLY_SILICON': 4, 'SEIBro': 3,
+    'BATTERY_METAL': 4, 'POLY_SILICON': 4, 'SEIBro': 4,  # SEIBro=예탁원 T+1
     'DRAM': 4, 'NAND': 4, 'DRAM_RETAIL': 4,
 }
 # 발행 지연 큰 dataset 시리즈: (모드, 임계). calendar=달력일, business=영업일
@@ -110,7 +117,7 @@ def business_days_between(d0: date, d1: date) -> int:
     n = 0
     cur = d0 + timedelta(days=1)
     while cur <= d1:
-        if cur.weekday() < 5 and cur.strftime('%Y-%m-%d') not in KR_HOLIDAYS_2026:
+        if cur.weekday() < 5 and cur.strftime('%Y-%m-%d') not in KR_HOLIDAYS:
             n += 1
         cur += timedelta(days=1)
     return n
@@ -137,8 +144,17 @@ def dataset_type_max(data_dir: str) -> dict:
     return out
 
 
-def json_data_date(path: str):
-    """내부 데이터 일자 우선, 없으면 updated_at 일자. (max YYYY-MM-DD 탐색)"""
+def json_top_field_date(path: str, field: str):
+    """JSON 최상위 특정 필드의 날짜(예: universe.json의 data_date). 없으면 None."""
+    try:
+        obj = json.load(open(path, encoding='utf-8'))
+    except Exception:
+        return None
+    return parse_d(obj.get(field)) if isinstance(obj, dict) else None
+
+
+def json_data_date(path: str, today: date):
+    """내부 데이터 일자 우선, 없으면 updated_at 일자. 미래 날짜(스케줄/만기 등)는 today로 상한."""
     try:
         obj = json.load(open(path, encoding='utf-8'))
     except Exception:
@@ -148,7 +164,7 @@ def json_data_date(path: str):
     def consider(s):
         nonlocal best
         d = parse_d(s)
-        if d and date(2024, 1, 1) <= d <= date(2027, 12, 31):
+        if d and date(2024, 1, 1) <= d <= today:
             if best is None or d > best:
                 best = d
 
@@ -205,9 +221,16 @@ def check(data_dir: str, today: date):
     for typ, (mode, thr) in DATASET_LAGGED.items():
         add(LABELS.get(typ, typ), dmax.get(typ), mode, thr)
     for fn, thr in JSON_DAILY.items():
-        add(LABELS.get(fn, fn), json_data_date(os.path.join(data_dir, fn)), 'business', thr)
+        p = os.path.join(data_dir, fn)
+        if fn == 'universe.json':
+            # values 배열엔 날짜가 없어 walk가 updated_at(매 run now)로 폴백 → 전면 carry-forward
+            # stale을 못 잡음. fetch_universe가 쓰는 data_date(실제 시세일)를 우선 사용.
+            latest = json_top_field_date(p, 'data_date') or json_data_date(p, today)
+        else:
+            latest = json_data_date(p, today)
+        add(LABELS.get(fn, fn), latest, 'business', thr)
     for fn, (mode, thr) in JSON_LAGGED.items():
-        add(LABELS.get(fn, fn), json_data_date(os.path.join(data_dir, fn)), mode, thr)
+        add(LABELS.get(fn, fn), json_data_date(os.path.join(data_dir, fn), today), mode, thr)
     add(LABELS['hotel_adr.csv'], hotel_scrape_max(data_dir), 'business', HOTEL_THRESHOLD_BDAYS)
     return alerts
 
