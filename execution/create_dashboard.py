@@ -4811,7 +4811,7 @@ def create_order_section():
         // 순수 클라이언트 상태 변경(서버 pending 미변경) — 사용자가 새 주문 입력 후 [저장]/[최종 저장] 시 갱신.
         // 전역(모든 포트폴리오)에 적용 — [최종 저장]이 전역이라 일부만 리셋하면 1번째/2번째가 섞임.
         function additionalOrder() {
-            if (!confirm('추가 주문을 시작하시겠습니까?\\n\\n현재 "변경후" 비중이 새 "변경전" 기준으로 이동하고, 추천사유가 모두 초기화됩니다.\\n이미 [최종 저장]된 주문은 그대로 기록돼 있습니다.')) return;
+            if (!confirm('추가 주문을 시작하시겠습니까?\\n\\n현재 "변경후" 비중이 새 "변경전" 기준으로 이동하고, 추천사유가 모두 초기화됩니다.\\n이미 [최종 저장]된 주문은 그대로 기록돼 있습니다.\\n\\n추가 주문 입력 후 반드시 [저장]을 눌러주세요 (저장 전 새로고침 시 입력이 사라집니다).')) return;
             ORDER_PORTFOLIOS.forEach(function(p) {
                 var pf = p.display;
                 var stocks = orderStocks[pf] || [];
