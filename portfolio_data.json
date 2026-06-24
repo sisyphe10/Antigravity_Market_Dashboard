@@ -4,7 +4,7 @@
       "code": "005930",
       "name": "삼성전자",
       "sector": "반도체",
-      "market_cap": 0,
+      "market_cap": 19906578.66024,
       "weight": 30.0,
       "weight_prev": 30.0,
       "today_return": 9.838709677419356,
@@ -13,14 +13,14 @@
       "current_price": 340500.0,
       "ath_price": 362500.0,
       "dd": -6.0689655172413755,
-      "rsi": null,
+      "rsi": 111.2581203354321,
       "is_today_new": false
     },
     {
       "code": "000660",
       "name": "SK하이닉스",
       "sector": "반도체",
-      "market_cap": 0,
+      "market_cap": 18387721.017,
       "weight": 25.0,
       "weight_prev": 25.0,
       "today_return": 0.9784735812133072,
@@ -29,14 +29,14 @@
       "current_price": 2580000.0,
       "ath_price": 2919000.0,
       "dd": -11.613566289825282,
-      "rsi": null,
+      "rsi": 250.5607125217594,
       "is_today_new": false
     },
     {
       "code": "000150",
       "name": "두산",
       "sector": "상사,자본재",
-      "market_cap": 0,
+      "market_cap": 250194.75075,
       "weight": 5.0,
       "weight_prev": 5.0,
       "today_return": 0.9144350097975179,
@@ -45,14 +45,14 @@
       "current_price": 1545000.0,
       "ath_price": 2203000.0,
       "dd": -29.868361325465276,
-      "rsi": null,
+      "rsi": -23.883059393418414,
       "is_today_new": false
     },
     {
       "code": "032830",
       "name": "삼성생명",
       "sector": "보험",
-      "market_cap": 0,
+      "market_cap": 866000.0,
       "weight": 5.0,
       "weight_prev": 5.0,
       "today_return": 1.8823529411764703,
@@ -61,110 +61,94 @@
       "current_price": 433000.0,
       "ath_price": 497000.0,
       "dd": -12.87726358148893,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "035420",
-      "name": "NAVER",
-      "sector": "소프트웨어",
-      "market_cap": 0,
-      "weight": 0.0,
-      "weight_prev": 4.0,
-      "today_return": -1.5308641975308643,
-      "contribution": -0.6123456790123457,
-      "cumulative_return": null,
-      "current_price": 199400.0,
-      "ath_price": 454000.0,
-      "dd": -56.07929515418502,
-      "rsi": null,
+      "rsi": 25.077741447142323,
       "is_today_new": false
     },
     {
       "code": "009150",
       "name": "삼성전기",
       "sector": "IT하드웨어",
-      "market_cap": 0,
+      "market_cap": 1466984.18944,
       "weight": 2.0,
-      "weight_prev": 3.0,
+      "weight_prev": 2.0,
       "today_return": -1.306532663316583,
-      "contribution": -0.39195979899497496,
+      "contribution": -0.2613065326633166,
       "cumulative_return": -1.7041615575185798,
       "current_price": 1964000.0,
       "ath_price": 2270000.0,
       "dd": -13.480176211453742,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "007810",
-      "name": "코리아써키트",
-      "sector": "IT하드웨어",
-      "market_cap": 0,
-      "weight": 2.0,
-      "weight_prev": 3.0,
-      "today_return": -2.8599605522682445,
-      "contribution": -0.8579881656804733,
-      "cumulative_return": -21.60764027059292,
-      "current_price": 98500.0,
-      "ath_price": 141900.0,
-      "dd": -30.584918957011975,
-      "rsi": null,
+      "rsi": -0.2982268410472111,
       "is_today_new": false
     },
     {
       "code": "298380",
       "name": "에이비엘바이오",
       "sector": "건강관리",
-      "market_cap": 0,
+      "market_cap": 55315.613444,
       "weight": 2.0,
-      "weight_prev": 3.0,
+      "weight_prev": 2.0,
       "today_return": 7.27470141150923,
-      "contribution": 2.182410423452769,
+      "contribution": 1.454940282301846,
       "cumulative_return": -1.200000000000001,
       "current_price": 98800.0,
       "ath_price": 245500.0,
       "dd": -59.75560081466396,
-      "rsi": null,
+      "rsi": 3.1132207626706654,
       "is_today_new": false
     },
     {
       "code": "034020",
       "name": "두산에너빌리티",
       "sector": "기계",
-      "market_cap": 0,
+      "market_cap": 580348.398276,
       "weight": 2.0,
-      "weight_prev": 3.0,
+      "weight_prev": 2.0,
       "today_return": 1.5695067264573992,
-      "contribution": 0.4708520179372197,
+      "contribution": 0.31390134529147984,
       "cumulative_return": 34.71413838264523,
       "current_price": 90600.0,
       "ath_price": 136400.0,
       "dd": -33.577712609970675,
-      "rsi": null,
+      "rsi": -88.87076351116599,
       "is_today_new": false
     },
     {
       "code": "042660",
       "name": "한화오션",
       "sector": "조선",
-      "market_cap": 0,
+      "market_cap": 324798.19764,
       "weight": 2.0,
-      "weight_prev": 3.0,
+      "weight_prev": 2.0,
       "today_return": 1.4354066985645932,
-      "contribution": 0.4306220095693779,
+      "contribution": 0.2870813397129186,
       "cumulative_return": -15.03514865624338,
       "current_price": 106000.0,
       "ath_price": 149900.0,
       "dd": -29.286190793862577,
-      "rsi": null,
+      "rsi": -53.47139100059435,
+      "is_today_new": false
+    },
+    {
+      "code": "007810",
+      "name": "코리아써키트",
+      "sector": "IT하드웨어",
+      "market_cap": 23622.8807,
+      "weight": 2.0,
+      "weight_prev": 2.0,
+      "today_return": -2.8599605522682445,
+      "contribution": -0.571992110453649,
+      "cumulative_return": -21.60764027059292,
+      "current_price": 98500.0,
+      "ath_price": 141900.0,
+      "dd": -30.584918957011975,
+      "rsi": -38.34559685410163,
       "is_today_new": false
     },
     {
       "code": "003230",
       "name": "삼양식품",
       "sector": "필수소비재",
-      "market_cap": 0,
+      "market_cap": 84520.4283,
       "weight": 2.0,
       "weight_prev": 2.0,
       "today_return": 4.664179104477612,
@@ -173,14 +157,14 @@
       "current_price": 1122000.0,
       "ath_price": 1630000.0,
       "dd": -31.16564417177914,
-      "rsi": null,
+      "rsi": -28.16356670035066,
       "is_today_new": false
     },
     {
       "code": "067310",
       "name": "하나마이크론",
       "sector": "반도체",
-      "market_cap": 0,
+      "market_cap": 32075.840545,
       "weight": 2.0,
       "weight_prev": 2.0,
       "today_return": -2.8197381671701915,
@@ -189,148 +173,56 @@
       "current_price": 48250.0,
       "ath_price": 56800.0,
       "dd": -15.05281690140845,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "402340",
-      "name": "SK스퀘어",
-      "sector": "상사,자본재",
-      "market_cap": 0,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -1.8013100436681224,
-      "contribution": -0.36026200873362446,
-      "cumulative_return": null,
-      "current_price": 1799000.0,
-      "ath_price": 1970000.0,
-      "dd": -8.680203045685275,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "007660",
-      "name": "이수페타시스",
-      "sector": "IT하드웨어",
-      "market_cap": 0,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -0.7400555041628123,
-      "contribution": -0.14801110083256247,
-      "cumulative_return": null,
-      "current_price": 107300.0,
-      "ath_price": 161400.0,
-      "dd": -33.51920693928129,
-      "rsi": null,
+      "rsi": 17.605268506519657,
       "is_today_new": false
     },
     {
       "code": "141080",
       "name": "리가켐바이오",
       "sector": "건강관리",
-      "market_cap": 0,
+      "market_cap": 56491.631868,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "weight_prev": 2.0,
+      "today_return": 10.579710144927535,
+      "contribution": 2.1159420289855073,
+      "cumulative_return": 0.0,
       "current_price": 152600.0,
       "ath_price": 213500.0,
       "dd": -28.524590163934427,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "196170",
       "name": "알테오젠",
       "sector": "건강관리",
-      "market_cap": 0,
+      "market_cap": 199073.264245,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "weight_prev": 2.0,
+      "today_return": 11.561561561561561,
+      "contribution": 2.3123123123123124,
+      "cumulative_return": 0.0,
       "current_price": 371500.0,
       "ath_price": 559000.0,
       "dd": -33.54203935599285,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "226950",
       "name": "올릭스",
       "sector": "건강관리",
-      "market_cap": 0,
+      "market_cap": 28126.316472,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "weight_prev": 2.0,
+      "today_return": 13.909465020576132,
+      "contribution": 2.781893004115226,
+      "cumulative_return": 0.0,
       "current_price": 138400.0,
       "ath_price": 207000.0,
       "dd": -33.14009661835748,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
-  ],
-  "_order_changes": {
-    "삼성 트루밸류 / NH Value ESG / DB 개방형": {
-      "date": "2026-06-24",
-      "added": [
-        {
-          "name": "리가켐바이오",
-          "weight": 2.0
-        },
-        {
-          "name": "알테오젠",
-          "weight": 2.0
-        },
-        {
-          "name": "올릭스",
-          "weight": 2.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "삼성전기",
-          "from": 3.0,
-          "to": 2.0
-        },
-        {
-          "name": "에이비엘바이오",
-          "from": 3.0,
-          "to": 2.0
-        },
-        {
-          "name": "두산에너빌리티",
-          "from": 3.0,
-          "to": 2.0
-        },
-        {
-          "name": "한화오션",
-          "from": 3.0,
-          "to": 2.0
-        },
-        {
-          "name": "코리아써키트",
-          "from": 3.0,
-          "to": 2.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "SK스퀘어",
-          "weight": 2.0
-        },
-        {
-          "name": "NAVER",
-          "weight": 4.0
-        },
-        {
-          "name": "이수페타시스",
-          "weight": 2.0
-        }
-      ]
-    }
-  }
+  ]
 }
