@@ -285,23 +285,41 @@ def create_portfolio_tables():
 
         # 시장 지수 가격 시계열 (RSI = 편입 이후 종목 수익률 − 동일 기간 지수 수익률, %p)
         # KRX는 KOSPI/KOSDAQ만 매핑 (KONEX 등은 RSI 미표시).
-        # fdr KS11/KQ11은 data.krx LOGOUT 차단 → universe.html RSI(1M)과 동일하게 yfinance ^KS11/^KQ11 사용.
+        # KOSPI/KOSDAQ는 기준가 시트(KIS 확정지수) 우선 — 야후 ^KS11/^KQ11 지연·잠정값 회피.
+        # 실패한 지수만 야후 폴백(data.krx LOGOUT 차단으로 fdr 불가).
         INDEX_PRICE_SERIES = {'KOSPI': None, 'KOSDAQ': None}
         try:
-            import yfinance as yf
-            _idx_start = (pd.Timestamp.now() - pd.DateOffset(years=3)).strftime('%Y-%m-%d')
-            for mkt, ticker in [('KOSPI', '^KS11'), ('KOSDAQ', '^KQ11')]:
-                try:
-                    closes = yf.Ticker(ticker).history(start=_idx_start, auto_adjust=False)['Close'].dropna()
-                    if getattr(closes.index, 'tz', None) is not None:
-                        closes.index = closes.index.tz_localize(None)
-                    closes.index = closes.index.normalize()
-                    INDEX_PRICE_SERIES[mkt] = closes if not closes.empty else None
-                    print(f"  지수 {mkt} ({ticker}): {len(closes)}일 (RSI 편입 이후 기준)")
-                except Exception as e:
-                    print(f"  Warning: 지수 {mkt} 로드 실패 (RSI 미표시): {e}")
+            _nav = pd.read_excel(WRAP_NAV_FILE, sheet_name='기준가')
+            _nav.columns = [str(c).strip() for c in _nav.columns]
+            if 'Date' in _nav.columns:
+                _nav['Date'] = pd.to_datetime(_nav['Date'])
+                _nav = _nav.set_index('Date').sort_index()
+                for mkt in ('KOSPI', 'KOSDAQ'):
+                    if mkt in _nav.columns:
+                        s = _nav[mkt].dropna()
+                        s.index = s.index.normalize()
+                        INDEX_PRICE_SERIES[mkt] = s if not s.empty else None
+                        print(f"  지수 {mkt} (KIS 기준가): {len(s)}일 (RSI 편입 이후 기준)")
         except Exception as e:
-            print(f"  Warning: yfinance import 실패 (RSI 미표시): {e}")
+            print(f"  Warning: 기준가 시트 로드 실패 → 야후 폴백: {e}")
+        _missing = [m for m in ('KOSPI', 'KOSDAQ') if INDEX_PRICE_SERIES[m] is None]
+        if _missing:
+            try:
+                import yfinance as yf
+                _idx_start = (pd.Timestamp.now() - pd.DateOffset(years=3)).strftime('%Y-%m-%d')
+                _tk = {'KOSPI': '^KS11', 'KOSDAQ': '^KQ11'}
+                for mkt in _missing:
+                    try:
+                        closes = yf.Ticker(_tk[mkt]).history(start=_idx_start, auto_adjust=False)['Close'].dropna()
+                        if getattr(closes.index, 'tz', None) is not None:
+                            closes.index = closes.index.tz_localize(None)
+                        closes.index = closes.index.normalize()
+                        INDEX_PRICE_SERIES[mkt] = closes if not closes.empty else None
+                        print(f"  지수 {mkt} (야후 폴백): {len(closes)}일 (RSI 편입 이후 기준)")
+                    except Exception as e:
+                        print(f"  Warning: 지수 {mkt} 야후 폴백 실패 (RSI 미표시): {e}")
+            except Exception as e:
+                print(f"  Warning: yfinance import 실패 (RSI 미표시): {e}")
 
         # KRX 종목 리스트 미리 로드 (KRX → KRX-DESC fallback)
         print("2. KRX 종목 리스트 로드 중...")
