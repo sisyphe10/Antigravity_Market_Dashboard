@@ -11,7 +11,8 @@ WorkingDirectory=/home/ubuntu/Antigravity_Market_Dashboard
 ExecStart=/bin/bash /home/ubuntu/Antigravity_Market_Dashboard/scripts/run_hotel_adr.sh
 StandardOutput=journal
 StandardError=journal
-TimeoutStartSec=20min
+# booking.com 30 페이지 × ~37s/page(eager) ≈ 18분 → 35분 캡(넉넉히). 일 1회 백그라운드.
+TimeoutStartSec=35min
 
 [Install]
 WantedBy=multi-user.target

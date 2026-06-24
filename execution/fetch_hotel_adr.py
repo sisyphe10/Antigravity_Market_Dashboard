@@ -49,6 +49,7 @@ def get_booking_driver():
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options
     opts = Options()
+    opts.page_load_strategy = 'eager'  # DOMContentLoaded까지만 대기 (booking 광고/트래커 무한로드 회피)
     opts.add_argument('--headless=new')
     opts.add_argument('--no-sandbox')
     opts.add_argument('--disable-gpu')
@@ -91,7 +92,10 @@ def fetch_booking_min_price(driver, booking_url, search_date):
     checkout = (datetime.datetime.strptime(search_date, '%Y-%m-%d') + datetime.timedelta(days=1)).strftime('%Y-%m-%d')
     url = f'{booking_url}?checkin={search_date}&checkout={checkout}&group_adults=2&no_rooms=1'
     try:
-        driver.get(url)
+        try:
+            driver.get(url)
+        except Exception:
+            pass  # eager+page_load_timeout: 느린 페이지는 부분 로드로 진행 (가격은 보통 먼저 렌더)
         time.sleep(7)
         text = driver.page_source
 
@@ -141,6 +145,7 @@ def main():
 
     try:
         driver = get_booking_driver()
+        driver.set_page_load_timeout(30)  # eager + 30s 캡: 느린 페이지가 무한 블록하지 않도록
         for hotel in HOTEL_MAPPINGS:
             print(f'\n[{hotel["hotel"]}]')
             for lead in LEAD_DAYS:
