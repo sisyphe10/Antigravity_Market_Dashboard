@@ -65,11 +65,14 @@ ssh ... "cd /home/ubuntu/Antigravity_Market_Dashboard && bash scripts/deploy.sh 
 - 16:05 KST: 투자유의종목 재생성 (market_alert.html)
 - 16:10 KST: 투자일지 데이터 수집
 - 16:20 KST: 야간 포트폴리오 새로고침 + Featured 1차
-- 16:30 KST: ETF 데이터 수집
-- 18:30 KST: Featured 2차 (KRX 18:10 배포)
+- 18:30 KST: Featured 2차 (KRX 18:10 배포) — etf.html 재생성·push 포함
 - 20:00 KST: 백업 (16:xx 실패 재시도)
 - 23:00 KST: 투자유의종목 야간 업데이트
 - 08:30 KST: Featured 익일 복구
+
+> ※ ETF 구성종목 수집(구 16:30 봇 잡)은 **systemd 타이머로 분리**됨 (2026-06-25):
+> `etf-collect.timer`(16:30) + `etf-collect-retry.timer`(18:00, idempotent) → `run_etf_collect.sh`.
+> 봇 재시작/배포가 진행 중인 수집을 죽이던 문제 근본해결. etf.html은 18:30 Featured 2차가 재생성.
 
 ### ra-sisyphe-bot (리서치 알림)
 - 05:10 KST: Research Notes 헤드라인

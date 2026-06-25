@@ -75,6 +75,7 @@ SCRIPTS=(execution/sisyphe_bot.py execution/research_bot/research_notes_bot.py e
 EARNINGS_BOT_TIMER=earnings-bot.timer
 KODEX_TIMER=kodex-sectors.timer
 LANDING_HIGHLIGHTS_TIMER=landing-highlights.timer
+ETF_TIMER=etf-collect.timer
 EARNINGS_BOT_SCRIPTS=(
     execution/earnings_bot/runner.py
     execution/earnings_bot/edgar_monitor.py
@@ -124,6 +125,11 @@ healthcheck() {
         echo "✅ $LANDING_HIGHLIGHTS_TIMER is active"
     else
         echo "⚠️  $LANDING_HIGHLIGHTS_TIMER inactive"
+    fi
+    if sudo systemctl is-active --quiet "$ETF_TIMER"; then
+        echo "✅ $ETF_TIMER is active"
+    else
+        echo "⚠️  $ETF_TIMER inactive (한 번도 enable 안 됐을 수 있음)"
     fi
     return $rc
 }
@@ -177,6 +183,34 @@ install_kodex_units() {
     if [ "$need_enable" = 1 ]; then
         sudo systemctl enable --now kodex-sectors.timer
         echo "  ✓ kodex-sectors.timer enabled + started"
+    fi
+}
+
+install_etf_units() {
+    # ETF 구성종목 수집 (매일 16:30 + 18:00 재시도 KST). 봇 apscheduler에서 분리 —
+    # 배포(봇 재시작)가 진행 중인 수집을 죽이지 않도록 별도 systemd 서비스로 실행.
+    local need_reload=0
+    local need_enable=0
+    if [ ! -f /etc/systemd/system/etf-collect.service ]; then
+        echo "🔧 etf-collect systemd unit 최초 설치..."
+        need_enable=1
+    fi
+    for unit in etf-collect.service etf-collect.timer etf-collect-retry.timer; do
+        if [ ! -f "/etc/systemd/system/$unit" ] || ! cmp -s "$REPO_DIR/scripts/$unit" "/etc/systemd/system/$unit"; then
+            echo "  → sync $unit"
+            sudo cp "$REPO_DIR/scripts/$unit" /etc/systemd/system/
+            need_reload=1
+        fi
+    done
+    chmod +x "$REPO_DIR/scripts/run_etf_collect.sh"
+    if [ "$need_reload" = 1 ]; then
+        sudo systemctl daemon-reload
+        echo "  ✓ daemon-reload"
+    fi
+    if [ "$need_enable" = 1 ]; then
+        sudo systemctl enable --now etf-collect.timer
+        sudo systemctl enable --now etf-collect-retry.timer
+        echo "  ✓ etf-collect.timer + etf-collect-retry.timer enabled + started"
     fi
 }
 
@@ -242,6 +276,7 @@ deploy() {
     install_earnings_bot_units
     install_kodex_units
     install_landing_highlights_units
+    install_etf_units
 
     for b in "${BOTS[@]}"; do
         echo "🔄 Restarting $b..."
@@ -274,6 +309,7 @@ reclone() {
     install_earnings_bot_units
     install_kodex_units
     install_landing_highlights_units
+    install_etf_units
 
     for b in "${BOTS[@]}"; do
         echo "🔄 Restarting $b..."

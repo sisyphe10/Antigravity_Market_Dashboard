@@ -1,0 +1,14 @@
+[Unit]
+Description=Antigravity ETF Collection 재시도 timer (매일 18:00 KST — 16:30 실패/부분수집 보충)
+
+# 16:30 수집이 성공해 collection_log ok가 >=1000이면 collect_etf_daily.py가 즉시 스킵 →
+# 이 18:00 실행은 idempotent no-op. 부분수집(예: 배포로 중단)이면 already_done 건너뛰고
+# 나머지를 마저 수집. 18:30 Featured 2차(etf.html 재생성) 전에 끝나도록 18:00로 배치.
+[Timer]
+OnCalendar=*-*-* 18:00:00 Asia/Seoul
+AccuracySec=1min
+Unit=etf-collect.service
+Persistent=true
+
+[Install]
+WantedBy=timers.target

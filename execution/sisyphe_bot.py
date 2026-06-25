@@ -1172,54 +1172,12 @@ async def late_market_alert_job(context: ContextTypes.DEFAULT_TYPE):
         logging.error(f"Late market alert error: {e}")
 
 
-async def daily_etf_collection_job(context: ContextTypes.DEFAULT_TYPE):
-    """매일 18:30 ETF 구성종목 수집 (독립 스크립트 호출)"""
-    logging.info("Daily ETF collection job started")
-    try:
-        result = subprocess.run(
-            [sys.executable, "execution/etf_collector/collect_etf_daily.py"],
-            capture_output=True, text=True, timeout=1800,
-            cwd=DASHBOARD_DIR
-        )
-        if result.returncode == 0:
-            # 마지막 로그 줄 추출
-            last_line = result.stdout.strip().split('\n')[-1] if result.stdout.strip() else ''
-            logging.info(f"ETF collection completed: {last_line}")
-        else:
-            logging.error(f"ETF collection failed: {result.stderr[-500:]}")
-            for chat_id in SUBSCRIBERS:
-                try:
-                    await context.bot.send_message(chat_id=chat_id, text=f"⚠️ ETF 구성종목 수집 실패")
-                except:
-                    pass
-            # 20:00 재시도
-            context.job_queue.run_once(daily_etf_retry_job, when=5400)
-    except subprocess.TimeoutExpired:
-        logging.error("ETF collection timed out (20 min)")
-    except Exception as e:
-        logging.error(f"ETF collection error: {e}")
-
-
-async def daily_etf_retry_job(context: ContextTypes.DEFAULT_TYPE):
-    """ETF 수집 재시도 (20:00)"""
-    logging.info("ETF collection retry started")
-    try:
-        result = subprocess.run(
-            [sys.executable, "execution/etf_collector/collect_etf_daily.py"],
-            capture_output=True, text=True, timeout=1800,
-            cwd=DASHBOARD_DIR
-        )
-        if result.returncode == 0:
-            logging.info("ETF collection retry completed")
-        else:
-            logging.error(f"ETF collection retry also failed: {result.stderr[-300:]}")
-            for chat_id in SUBSCRIBERS:
-                try:
-                    await context.bot.send_message(chat_id=chat_id, text=f"❌ ETF 구성종목 수집 재시도도 실패")
-                except:
-                    pass
-    except Exception as e:
-        logging.error(f"ETF collection retry error: {e}")
+# ETF 구성종목 수집은 systemd 타이머로 이관됨 (2026-06-25):
+#   etf-collect.timer (16:30 KST) + etf-collect-retry.timer (18:00 KST, >=1000 가드로 idempotent)
+#   → run_etf_collect.sh → execution/etf_collector/collect_etf_daily.py
+# 봇 apscheduler 인메모리 잡일 때는 배포(봇 재시작)가 진행 중인 수집을 SIGTERM으로 죽이고
+# 인메모리 재시도까지 소실시켰음 (2026-05-13, 2026-06-25 사고). 타이머는 별도 cgroup이라 무관.
+# etf.html 재생성·push는 기존대로 18:30 Featured 2차 잡(featured_update_job)이 담당.
 
 
 async def nightly_portfolio_refresh_job(context: ContextTypes.DEFAULT_TYPE):
@@ -1251,9 +1209,7 @@ async def evening_backup_job(context: ContextTypes.DEFAULT_TYPE):
         logging.info("Backup: journal data...")
         await daily_journal_job(context)
 
-        # 4. ETF collection (16:30에 실패했을 수 있음)
-        logging.info("Backup: ETF collection...")
-        await daily_etf_collection_job(context)
+        # ETF 수집 백업은 etf-collect-retry.timer(18:00)가 담당 (봇 분리, 위 주석 참고)
 
         logging.info("Evening backup job completed")
     except Exception as e:
@@ -2934,7 +2890,6 @@ if __name__ == '__main__':
         market_alert_time = datetime.time(hour=16, minute=5, second=0, tzinfo=kst)
         journal_time = datetime.time(hour=16, minute=10, second=0, tzinfo=kst)
         nightly_time = datetime.time(hour=16, minute=20, second=0, tzinfo=kst)
-        etf_collection_time = datetime.time(hour=16, minute=30, second=0, tzinfo=kst)
     except:
         weather_time = datetime.time(hour=5, minute=0, second=0)
         calendar_time = datetime.time(hour=5, minute=5, second=0)
@@ -2942,7 +2897,6 @@ if __name__ == '__main__':
         market_alert_time = datetime.time(hour=16, minute=5, second=0)
         journal_time = datetime.time(hour=16, minute=10, second=0)
         nightly_time = datetime.time(hour=16, minute=20, second=0)
-        etf_collection_time = datetime.time(hour=16, minute=30, second=0)
 
     # Featured 수집: 16:20 1차 (정규장 종가), 18:30 2차 (시간외 포함 최종), 08:30 3차 (익일 KRX 지연 복구)
     try:
@@ -2962,7 +2916,7 @@ if __name__ == '__main__':
     job_queue.run_daily(daily_portfolio_job, time=portfolio_time, job_kwargs=DAILY_JOB_KWARGS)
     job_queue.run_daily(daily_market_alert_job, time=market_alert_time, job_kwargs=DAILY_JOB_KWARGS)
     job_queue.run_daily(daily_journal_job, time=journal_time, job_kwargs=DAILY_JOB_KWARGS)
-    job_queue.run_daily(daily_etf_collection_job, time=etf_collection_time, job_kwargs=DAILY_JOB_KWARGS)
+    # ETF 수집(16:30)은 systemd 타이머 etf-collect.timer로 이관 (봇 재시작에 무관)
     job_queue.run_daily(nightly_portfolio_refresh_job, time=nightly_time, job_kwargs=DAILY_JOB_KWARGS)
 
     # 20:00 백업 (16:xx에서 데이터 못 가져온 경우 재시도)
@@ -3018,7 +2972,7 @@ if __name__ == '__main__':
     print(f"  - Journal data: 16:10 KST (투자일지)")
     print(f"  - Auto portfolio update: 09:30~15:35 KST (30분 간격, 거래일만)")
     print(f"  - Nightly portfolio refresh: 16:20 KST (당일 주문 반영)")
-    print(f"  - ETF collection: 16:30 KST (구성종목 수집)")
+    print(f"  - ETF collection: systemd 타이머 etf-collect.timer (16:30 KST, 봇 분리)")
     print(f"  - Evening backup: 20:00 KST (16:xx 실패 시 재시도)")
     print(f"  - Late market alert: 23:00 KST (투자유의종목 야간 업데이트)")
     application.run_polling()

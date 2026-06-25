@@ -1,0 +1,17 @@
+[Unit]
+Description=Antigravity ETF Constituents Collection (전체 ETF 목록 + 구성종목/비중 → etf_data.db)
+After=network-online.target
+Wants=network-online.target
+OnFailure=sisyphe-bot-notify@etf-collect.service
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/Antigravity_Market_Dashboard
+ExecStart=/bin/bash /home/ubuntu/Antigravity_Market_Dashboard/scripts/run_etf_collect.sh
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=30min
+
+[Install]
+WantedBy=multi-user.target

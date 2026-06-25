@@ -1,0 +1,11 @@
+[Unit]
+Description=Antigravity ETF Constituents Collection timer (매일 16:30 KST — 봇 apscheduler에서 분리)
+
+[Timer]
+OnCalendar=*-*-* 16:30:00 Asia/Seoul
+AccuracySec=1min
+Unit=etf-collect.service
+Persistent=true
+
+[Install]
+WantedBy=timers.target
