@@ -40,6 +40,12 @@ SUBSCRIBERS_FILE = os.path.join(DASHBOARD_DIR, 'subscribers.json')
 
 KST = datetime.timezone(datetime.timedelta(hours=9))
 
+# 데일리 스케줄 job misfire 방지 (2026-06-24 journal 16:10 누락 사고).
+# 직전 무거운 job(16:00 리포트 등)이 동기 subprocess로 이벤트 루프를 잠깐 점유하면
+# 후속 job이 몇 초 늦어져 apscheduler 기본 grace(1초)를 넘겨 스킵된다.
+# 10분 유예 + coalesce 로 데일리 수집이 약간 늦어도 반드시 실행되게 한다.
+DAILY_JOB_KWARGS = {'misfire_grace_time': 600, 'coalesce': True}
+
 # 당일 포트폴리오 리포트 전송 추적 (중복 방지) — 봇 재시작에도 살아남도록 파일 영속화
 PORTFOLIO_REPORT_STATE_FILE = os.path.join(DASHBOARD_DIR, '.portfolio_report_sent.json')
 
@@ -1240,6 +1246,10 @@ async def evening_backup_job(context: ContextTypes.DEFAULT_TYPE):
         # 2. Nightly refresh (16:20에 실패했을 수 있음)
         logging.info("Backup: nightly refresh...")
         await loop.run_in_executor(None, _nightly_refresh_sync)
+
+        # 3. Journal data (16:10에 misfire/실패했을 수 있음 — 16:10은 자동복구가 없던 유일 job)
+        logging.info("Backup: journal data...")
+        await daily_journal_job(context)
 
         # 4. ETF collection (16:30에 실패했을 수 있음)
         logging.info("Backup: ETF collection...")
@@ -2943,31 +2953,31 @@ if __name__ == '__main__':
         featured_1st_time = datetime.time(hour=16, minute=20, second=0)
         featured_2nd_time = datetime.time(hour=18, minute=30, second=0)
         featured_3rd_time = datetime.time(hour=8, minute=30, second=0)
-    job_queue.run_daily(featured_update_job, time=featured_1st_time)
-    job_queue.run_daily(featured_update_job, time=featured_2nd_time)
-    job_queue.run_daily(morning_featured_recovery_job, time=featured_3rd_time)
+    job_queue.run_daily(featured_update_job, time=featured_1st_time, job_kwargs=DAILY_JOB_KWARGS)
+    job_queue.run_daily(featured_update_job, time=featured_2nd_time, job_kwargs=DAILY_JOB_KWARGS)
+    job_queue.run_daily(morning_featured_recovery_job, time=featured_3rd_time, job_kwargs=DAILY_JOB_KWARGS)
 
-    job_queue.run_daily(daily_weather_job, time=weather_time)
-    job_queue.run_daily(daily_calendar_job, time=calendar_time)
-    job_queue.run_daily(daily_portfolio_job, time=portfolio_time)
-    job_queue.run_daily(daily_market_alert_job, time=market_alert_time)
-    job_queue.run_daily(daily_journal_job, time=journal_time)
-    job_queue.run_daily(daily_etf_collection_job, time=etf_collection_time)
-    job_queue.run_daily(nightly_portfolio_refresh_job, time=nightly_time)
+    job_queue.run_daily(daily_weather_job, time=weather_time, job_kwargs=DAILY_JOB_KWARGS)
+    job_queue.run_daily(daily_calendar_job, time=calendar_time, job_kwargs=DAILY_JOB_KWARGS)
+    job_queue.run_daily(daily_portfolio_job, time=portfolio_time, job_kwargs=DAILY_JOB_KWARGS)
+    job_queue.run_daily(daily_market_alert_job, time=market_alert_time, job_kwargs=DAILY_JOB_KWARGS)
+    job_queue.run_daily(daily_journal_job, time=journal_time, job_kwargs=DAILY_JOB_KWARGS)
+    job_queue.run_daily(daily_etf_collection_job, time=etf_collection_time, job_kwargs=DAILY_JOB_KWARGS)
+    job_queue.run_daily(nightly_portfolio_refresh_job, time=nightly_time, job_kwargs=DAILY_JOB_KWARGS)
 
     # 20:00 백업 (16:xx에서 데이터 못 가져온 경우 재시도)
     try:
         backup_time = datetime.time(hour=20, minute=0, second=0, tzinfo=pytz.timezone('Asia/Seoul'))
     except:
         backup_time = datetime.time(hour=20, minute=0, second=0)
-    job_queue.run_daily(evening_backup_job, time=backup_time)
+    job_queue.run_daily(evening_backup_job, time=backup_time, job_kwargs=DAILY_JOB_KWARGS)
 
     # 23:00 투자유의종목 야간 업데이트
     try:
         late_alert_time = datetime.time(hour=23, minute=0, second=0, tzinfo=pytz.timezone('Asia/Seoul'))
     except:
         late_alert_time = datetime.time(hour=23, minute=0, second=0)
-    job_queue.run_daily(late_market_alert_job, time=late_alert_time)
+    job_queue.run_daily(late_market_alert_job, time=late_alert_time, job_kwargs=DAILY_JOB_KWARGS)
 
     # 거래시간 30분마다 자동 포트폴리오 업데이트
     # 09:30, 10:00, 10:30, ..., 15:00, 15:35 KST
