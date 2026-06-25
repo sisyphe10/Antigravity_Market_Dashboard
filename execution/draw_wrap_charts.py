@@ -36,20 +36,11 @@ WRAP_NAV_FILE = 'Wrap_NAV.xlsx'
 CHARTS_DIR = 'charts'
 LINE_COLOR = '#404040'  # RGB(64, 64, 64)
 
-# 포트폴리오 매핑 (엑셀 시트의 컬럼명 -> 표시할 이름)
-PORTFOLIO_NAMES = {
-    '트루밸류': '삼성 트루밸류',
-    'Value ESG': 'NH Value ESG',
-    '개방형 랩': 'DB 개방형',
-    # '목표전환형 5차': 'DB 목표전환형 5차',  # DB 5차 완료 (2026-06-19 청산, +7.72%)
-    # '목표전환형 4호': 'NH 목표전환형 4호',  # NH 4호 완료 (2026-06-19 청산, +5.38%)
-    # '목표전환형 3호': 'NH 목표전환형 3호',  # NH 3호 완료 (2026-05-27 청산, 목표달성)
-    # '목표전환형 4차': 'DB 목표전환형 4차',  # DB 4차 완료 (2026-05-27 청산, 목표달성)
-    # '목표전환형 2호': 'NH 목표전환형 2호',  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
-    # '목표전환형 3차': 'DB 목표전환형 3차',  # DB 3차 완료 (2026-05-06, +7.97%, 목표 7.5% 초과)
-    # '목표전환형': 'DB 목표전환형',  # DB 1차 완료 (2026-02-25 청산, 목표 7.5% 달성)
-    # '목표전환형 2차': 'DB 목표전환형 2차',  # DB 2차 완료 (2026-04-15, 목표 7.5% 달성)
-}
+# 포트폴리오 매핑 (엑셀 시트의 컬럼명 -> 표시할 이름) — 단일 출처: execution/wrap_config.py
+import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import wrap_config
+PORTFOLIO_NAMES = wrap_config.portfolio_names()
 
 def smart_format_yaxis(y, pos):
     """

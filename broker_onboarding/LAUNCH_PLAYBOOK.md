@@ -1,0 +1,91 @@
+# 증권사·상품 출시 플레이북 (레지스트리 기반)
+
+> 2026-06-25 인프라 리팩토링 완료 후 기준. **증권사/상품 추가 = `execution/wrap_config.py` 엔트리 추가 + 자문지 + Wrap_NAV.xlsx(NEW·AUM)**.
+> 기존 "8개 파일 14곳 수정" SOP는 폐기 — 이제 1곳(레지스트리)이 모든 파생물을 생성한다.
+
+## 공통 출시 절차
+1. **`execution/wrap_config.py`** 편집:
+   - 신규 증권사면 `BROKERS` 에 `Broker(code, color, order)` 1건.
+   - `PRODUCTS` 에 `Product(...)` 1건 (`active=True`, `keep_in_nav=True`, `end_date=None`).
+   - 페어로 묶어 표시할 상품끼리는 같은 `group` id (단독은 `group=None`).
+2. **자문지/** 폴더에 `advisory_template` 파일 1개.
+3. **Wrap_NAV.xlsx**: `NEW` 시트 종목(증권사/상품명=nav_key) + `AUM` 시트 개시 AUM(증권사/상품명=aum_name).
+4. 검증: `python execution/wrap_config.py` (validate 경고 0 확인 — 개시일 도래 시 NEW/AUM/자문지 존재 강제 점검).
+5. 체인 실행: `calculate_wrap_nav.py → calculate_returns.py → execution/create_portfolio_tables.py → execution/create_dashboard.py` + (기여도) `execution/create_contribution_data.py`.
+6. `wrap.html` 마커 확인 → 푸시.
+
+## 청산
+해당 `Product`: `active=False` + `end_date='YYYY-MM-DD'` 기입. `keep_in_nav`는 청산 직후 한동안 `True` 유지(컬럼 완결), 충분히 지나면 `False`.
+→ `EXCLUDED_PORTFOLIOS`·차트·Order 카드·AUM 표에서 자동 제외, `기준가/수익률/NEW/AUM` 데이터는 보존.
+
+---
+
+## ★ 출시별 사전 작성 엔트리 (개시 AUM·색상·자문지 파일명·상품명은 ✦표시 = 출시 직전 확인)
+
+### 1) NH 목표전환형 5호 — 2026-06-29
+```python
+Product(broker='NH', nav_key='목표전환형 5호', aum_name='목표전환형 5호', ptype='target', kind_label='목표전환형',
+        display='NH 목표전환형 5호', base_price=1000.00, start_date='2026-06-29', ytd_base='2026-06-29',
+        color='#0072CE', advisory_template='자문지/✦NH5호자문지.xlsx',
+        group='TT_2026Q3',          # ✦ NH5/DB6 동일포트면 페어 그룹, 별도 운용이면 group=None
+        active=True, keep_in_nav=True),
+```
+
+### 2) DB 목표전환형 6차 — 2026-07-01
+```python
+Product(broker='DB', nav_key='목표전환형 6차', aum_name='목표전환형 6차', ptype='target', kind_label='목표전환형',
+        display='DB 목표전환형 6차', base_price=1000.00, start_date='2026-07-01', ytd_base='2026-07-01',
+        color='#00854A', advisory_template='자문지/✦DB6차자문지.xlsx',
+        group='TT_2026Q3',          # ✦ NH5와 페어면 동일 group
+        active=True, keep_in_nav=True),
+```
+**페어로 묶을 경우** `GROUPS` 에 추가:
+```python
+GROUPS = {
+    'GENERAL_OPEN': {'use': '트루밸류'},
+    'TT_2026Q3':    {'use': '목표전환형 5호'},   # 대표 nav_key (먼저 개시한 NH5)
+}
+```
+→ 결합 표시 'NH 목표전환형 5호 / DB 목표전환형 6차' 자동, Order 카드 1개에 자문지 2개 자동.
+- ✦ **확인 필요**: NH5호와 DB6차가 동일 종목/비중인가? (과거 페어는 동일포트라 묶었음). 다르면 각각 `group=None` 으로 분리.
+- 6/29~6/30 사이엔 NH5만 활성 → 결합명이 'NH 목표전환형 5호' 단독으로 표시되다 7/1 DB6 합류 시 자동 확장(정상).
+
+### 3) 한투 지속형(일반형) — 2026-07-02  ★신규 증권사
+`BROKERS` 에 추가:
+```python
+Broker('한투', '#✦색상', 40),   # ✦ 한투(한국투자증권) 브랜드 색 (예: KIS 오렌지 #F58220) 확인
+```
+`PRODUCTS` 에 추가:
+```python
+Product(broker='한투', nav_key='✦지속형컬럼명', aum_name='✦지속형AUM명', ptype='general', kind_label='✦일반형',
+        display='한투 지속형', base_price=✦1000.00, start_date='2026-07-02', ytd_base='2026-07-02',
+        color='#✦색상', advisory_template='자문지/✦한투지속형자문지.xlsx',
+        group='GENERAL_OPEN',       # 사용자 결정: 개방형 3종과 합산 그룹 합류
+        active=True, keep_in_nav=True),
+```
+→ 결합 표시가 '삼성 트루밸류 / NH Value ESG / DB 개방형 / 한투 지속형' 으로 자동 확장. broker_colors·BROKER_ORDER·Order 카드 templates/newSheetTargets·GENERAL 문자열·이메일 정렬 전부 자동.
+- ✦ **확인 필요**:
+  - `nav_key`(기준가/NEW 시트 컬럼명) & `aum_name`(AUM 시트 상품명) — NH처럼 다를 수 있음. 동일하면 같게.
+  - `kind_label` = add_aum 입력 시 칠 **유형** 문자열. 기존 일반형 입력은 `일반형` → 일관성 위해 `일반형` 권장(표시명만 '한투 지속형'). 별도 `지속형`으로 칠 거면 `kind_label='지속형'`.
+  - `base_price` 개시 기준가 (개방형 3종은 과거 환산값, 신규는 보통 1000 또는 별도 산정).
+  - `GENERAL_OPEN` 합류 전제 = 동일포트. 한투 지속형이 다른 종목이면 `group=None`(별도 표시)로.
+
+### 4) 한투 목표전환형 — 2026-07-08  ★단독 시리즈
+```python
+Product(broker='한투', nav_key='✦한투목표전환형1호', aum_name='✦한투목표전환형1호', ptype='target', kind_label='목표전환형',
+        display='한투 목표전환형 1호', base_price=1000.00, start_date='2026-07-08', ytd_base='2026-07-08',
+        color='#✦한투색', advisory_template='자문지/✦한투목표전환형자문지.xlsx',
+        group=None,                 # 단독 — 페어 아님
+        active=True, keep_in_nav=True),
+```
+→ `group=None` 이라 개별 차트 계열·개별 Order 카드·개별 AUM 행으로 자동 표시. AUM 누적차트도 `'목표전환형'` substring 동적 처리로 '한투 목표전환형 (누적)' 자동 생성.
+- ✦ **★함정 — nav_key 충돌 주의**: 기존 NH/DB 청산분에 `'목표전환형 1호'`(NH 1호)·`'목표전환형 2호'`… 가 이미 있음. 한투가 `'목표전환형 1호'` 를 쓰면 **기준가 컬럼 충돌 + validate() 중복 에러**. → 한투 target의 `nav_key`/`aum_name`/`기준가 컬럼`/`NEW·AUM 상품명`을 **'한투 목표전환형 1호'처럼 증권사 구분 가능하게** 명명할 것. (display는 어차피 '한투 목표전환형 1호'.)
+- add_aum: 한투 목표전환형 AUM 입력 유형은 `성과형` (resolve_product가 ACTIVE_TARGET_TRANSFORM['한투'] 로 매핑) — `active_target_transform()` 가 자동 포함.
+
+---
+
+## 검증 체크리스트 (각 출시 후)
+- `python execution/wrap_config.py` → validate 경고 0, 파생물 육안 확인.
+- `wrap.html`: `data-series="<display>"`, AUM 표 행, Order 카드(`var ORDER_PORTFOLIOS`), 결합명(`var GENERAL`) 에 신규 상품 반영.
+- 전 .py `compile()`.
+- 회귀: 기존 상품 차트/표/색상 불변.

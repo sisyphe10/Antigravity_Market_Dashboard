@@ -28,25 +28,24 @@
 """
 from __future__ import annotations
 
+import os
 import sys
 import pandas as pd
 
 sys.stdout.reconfigure(encoding='utf-8')
 
+# 단일 출처 레지스트리 (execution/wrap_config.py)
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'execution'))
+import wrap_config
+
 FILE_NAME = 'Wrap_NAV.xlsx'
 SHEET = 'AUM'
 
-FIXED_PRODUCTS = {
-    ('NH', '일반형'): '다이내믹밸류',
-    ('DB', '일반형'): '개방형 랩',
-    ('삼성', '일반형'): '트루밸류',
-}
+# {(증권사, 유형): AUM시트 상품명} — 활성 일반형/지속형 (단일 출처)
+FIXED_PRODUCTS = wrap_config.fixed_products()
 
-ACTIVE_TARGET_TRANSFORM = {
-    # NH 4호 / DB 5차 청산 (2026-06-19, 목표달성) — 신규 회차 출시 시 갱신
-    # 'NH': '목표전환형 4호',
-    # 'DB': '목표전환형 5차',
-}
+# {증권사: AUM시트 상품명} — 활성 목표전환형 (출시/청산 시 wrap_config.PRODUCTS 갱신)
+ACTIVE_TARGET_TRANSFORM = wrap_config.active_target_transform()
 
 
 def resolve_product(brokerage: str, kind: str) -> str:

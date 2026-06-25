@@ -40,14 +40,11 @@ NAV_FILE = os.path.join(BASE, 'Wrap_NAV.xlsx')
 DH_FILE = os.path.join(BASE, 'dh_codes.json')
 OUT_FILE = os.path.join(BASE, 'contribution_data.json')
 
-# calculate_wrap_nav.py 와 동일 (활성 포트폴리오만; 청산분은 주석 유지로 자동 제외)
-portfolio_config = {
-    '트루밸류':      {'base_price': 2021.31, 'start_date': '2025-12-30'},
-    'Value ESG':     {'base_price': 1980.49, 'start_date': '2025-12-30'},
-    '개방형 랩':     {'base_price': 1518.52, 'start_date': '2025-12-30'},
-    # '목표전환형 5차': {'base_price': 1000.00, 'start_date': '2026-06-12'},  # DB 5차 완료 (2026-06-19 청산)
-    # '목표전환형 4호': {'base_price': 1000.00, 'start_date': '2026-06-15'},  # NH 4호 완료 (2026-06-19 청산)
-}
+# 단일 출처: execution/wrap_config.py (활성 상품만; 청산분 자동 제외)
+import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import wrap_config
+portfolio_config = wrap_config.contribution_portfolio_config()
 
 
 def load_dh():
