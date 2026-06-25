@@ -57,11 +57,75 @@
       "weight_prev": 5.0,
       "today_return": 3.233256351039261,
       "contribution": 1.6166281755196308,
-      "cumulative_return": 12.341269841269842,
+      "cumulative_return": 11.491916859122409,
       "current_price": 447000.0,
       "ath_price": 497000.0,
       "dd": -10.060362173038229,
       "rsi": 23.565793968279248,
+      "is_today_new": false
+    },
+    {
+      "code": "298380",
+      "name": "에이비엘바이오",
+      "sector": "건강관리",
+      "market_cap": 53188.08985,
+      "weight": 3.0,
+      "weight_prev": 2.0,
+      "today_return": -3.8461538461538463,
+      "contribution": -0.7692307692307694,
+      "cumulative_return": -4.154302670623144,
+      "current_price": 95000.0,
+      "ath_price": 245500.0,
+      "dd": -61.30346232179227,
+      "rsi": 1.6878629186633853,
+      "is_today_new": false
+    },
+    {
+      "code": "141080",
+      "name": "리가켐바이오",
+      "sector": "건강관리",
+      "market_cap": 57676.253244,
+      "weight": 3.0,
+      "weight_prev": 2.0,
+      "today_return": 2.0969855832241153,
+      "contribution": 0.4193971166448231,
+      "cumulative_return": 0.8283717318146477,
+      "current_price": 155800.0,
+      "ath_price": 213500.0,
+      "dd": -27.025761124121782,
+      "rsi": 4.4614157555525775,
+      "is_today_new": false
+    },
+    {
+      "code": "196170",
+      "name": "알테오젠",
+      "sector": "건강관리",
+      "market_cap": 200948.78625,
+      "weight": 3.0,
+      "weight_prev": 2.0,
+      "today_return": 0.9421265141318977,
+      "contribution": 0.18842530282637954,
+      "cumulative_return": 0.37473233404710093,
+      "current_price": 375000.0,
+      "ath_price": 559000.0,
+      "dd": -32.91592128801432,
+      "rsi": 3.3065566864603713,
+      "is_today_new": false
+    },
+    {
+      "code": "226950",
+      "name": "올릭스",
+      "sector": "건강관리",
+      "market_cap": 28593.733581,
+      "weight": 3.0,
+      "weight_prev": 2.0,
+      "today_return": 1.6618497109826589,
+      "contribution": 0.33236994219653176,
+      "cumulative_return": 0.6581771354986499,
+      "current_price": 140700.0,
+      "ath_price": 207000.0,
+      "dd": -32.028985507246375,
+      "rsi": 4.026279883311135,
       "is_today_new": false
     },
     {
@@ -73,27 +137,11 @@
       "weight_prev": 2.0,
       "today_return": 1.680244399185336,
       "contribution": 0.3360488798370672,
-      "cumulative_return": -0.05255123745652179,
+      "cumulative_return": -0.0477761346831973,
       "current_price": 1997000.0,
       "ath_price": 2270000.0,
       "dd": -12.02643171806167,
       "rsi": -4.385517559769392,
-      "is_today_new": false
-    },
-    {
-      "code": "298380",
-      "name": "에이비엘바이오",
-      "sector": "건강관리",
-      "market_cap": 53188.08985,
-      "weight": 2.0,
-      "weight_prev": 2.0,
-      "today_return": -3.8461538461538463,
-      "contribution": -0.7692307692307694,
-      "cumulative_return": -5.000000000000004,
-      "current_price": 95000.0,
-      "ath_price": 245500.0,
-      "dd": -61.30346232179227,
-      "rsi": 1.6878629186633853,
       "is_today_new": false
     },
     {
@@ -121,7 +169,7 @@
       "weight_prev": 2.0,
       "today_return": -0.37735849056603776,
       "contribution": -0.07547169811320756,
-      "cumulative_return": -15.355770736785857,
+      "cumulative_return": -15.062674535250476,
       "current_price": 105600.0,
       "ath_price": 149900.0,
       "dd": -29.5530353569046,
@@ -137,7 +185,7 @@
       "weight_prev": 2.0,
       "today_return": -3.5532994923857872,
       "contribution": -0.7106598984771575,
-      "cumulative_return": -24.393155590927172,
+      "cumulative_return": -22.67850536440992,
       "current_price": 95000.0,
       "ath_price": 141900.0,
       "dd": -33.05144467935166,
@@ -153,7 +201,7 @@
       "weight_prev": 2.0,
       "today_return": 1.8716577540106951,
       "contribution": 0.37433155080213903,
-      "cumulative_return": -6.253844576583967,
+      "cumulative_return": -5.907704227398192,
       "current_price": 1143000.0,
       "ath_price": 1630000.0,
       "dd": -29.87730061349694,
@@ -169,60 +217,41 @@
       "weight_prev": 2.0,
       "today_return": 0.7253886010362695,
       "contribution": 0.14507772020725387,
-      "cumulative_return": -0.14126107615256567,
+      "cumulative_return": -0.12558511245576165,
       "current_price": 48600.0,
       "ath_price": 56800.0,
       "dd": -14.436619718309862,
       "rsi": 20.636027481866737,
       "is_today_new": false
-    },
-    {
-      "code": "141080",
-      "name": "리가켐바이오",
-      "sector": "건강관리",
-      "market_cap": 57676.253244,
-      "weight": 2.0,
-      "weight_prev": 2.0,
-      "today_return": 2.0969855832241153,
-      "contribution": 0.4193971166448231,
-      "cumulative_return": 2.096985583224109,
-      "current_price": 155800.0,
-      "ath_price": 213500.0,
-      "dd": -27.025761124121782,
-      "rsi": 4.4614157555525775,
-      "is_today_new": false
-    },
-    {
-      "code": "196170",
-      "name": "알테오젠",
-      "sector": "건강관리",
-      "market_cap": 200948.78625,
-      "weight": 2.0,
-      "weight_prev": 2.0,
-      "today_return": 0.9421265141318977,
-      "contribution": 0.18842530282637954,
-      "cumulative_return": 0.9421265141319024,
-      "current_price": 375000.0,
-      "ath_price": 559000.0,
-      "dd": -32.91592128801432,
-      "rsi": 3.3065566864603713,
-      "is_today_new": false
-    },
-    {
-      "code": "226950",
-      "name": "올릭스",
-      "sector": "건강관리",
-      "market_cap": 28593.733581,
-      "weight": 2.0,
-      "weight_prev": 2.0,
-      "today_return": 1.6618497109826589,
-      "contribution": 0.33236994219653176,
-      "cumulative_return": 1.6618497109826658,
-      "current_price": 140700.0,
-      "ath_price": 207000.0,
-      "dd": -32.028985507246375,
-      "rsi": 4.026279883311135,
-      "is_today_new": false
     }
-  ]
+  ],
+  "_order_changes": {
+    "삼성 트루밸류 / NH Value ESG / DB 개방형": {
+      "date": "2026-06-26",
+      "added": [],
+      "changed": [
+        {
+          "name": "에이비엘바이오",
+          "from": 2.0,
+          "to": 3.0
+        },
+        {
+          "name": "리가켐바이오",
+          "from": 2.0,
+          "to": 3.0
+        },
+        {
+          "name": "알테오젠",
+          "from": 2.0,
+          "to": 3.0
+        },
+        {
+          "name": "올릭스",
+          "from": 2.0,
+          "to": 3.0
+        }
+      ],
+      "removed": []
+    }
+  }
 }
