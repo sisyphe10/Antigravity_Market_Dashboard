@@ -13,6 +13,7 @@ KST = timezone(timedelta(hours=9))
 
 # Import shared configuration
 from config import CATEGORY_MAP, CSV_FILE
+import wrap_config  # WRAP 증권사·상품 단일 출처 레지스트리
 
 # Version 3.0 - Added category grouping
 CHARTS_DIR = 'charts'
@@ -377,8 +378,7 @@ def get_item_category(item_name):
         return 'COMMODITIES'
 
     # Special handling for Wrap portfolios
-    wrap_keywords = ['트루밸류', '삼성 트루밸류', 'Value ESG', 'NH Value ESG',
-                     '개방형', 'DB 개방형']  # 목표전환형 4호/5차 제거 (2026-06-19 청산)
+    wrap_keywords = wrap_config.wrap_keywords()  # 단일 출처: execution/wrap_config.py
     if any(keyword in item_name for keyword in wrap_keywords):
         return 'Wrap'
 
@@ -2607,30 +2607,8 @@ def _build_wrap_chart_section(category_label):
             df_nav['Date'] = pd.to_datetime(df_nav['Date'])
             df_nav = df_nav.set_index('Date')
 
-        chart_series = [
-            ('삼성 트루밸류', '트루밸류'),
-            ('NH Value ESG', 'Value ESG'),
-            ('DB 개방형', '개방형 랩'),
-            # ('NH 목표전환형 4호', '목표전환형 4호'),  # NH 4호 완료 (2026-06-19 청산, +5.38%)
-            # ('DB 목표전환형 5차', '목표전환형 5차'),  # DB 5차 완료 (2026-06-19 청산, +7.72%)
-            # ('NH 목표전환형 3호', '목표전환형 3호'),  # NH 3호 완료 (2026-05-27 청산, 목표달성)
-            # ('DB 목표전환형 4차', '목표전환형 4차'),  # DB 4차 완료 (2026-05-27 청산, 목표달성)
-            # ('NH 목표전환형 2호', '목표전환형 2호'),  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
-            ('KOSPI', 'KOSPI'),
-            ('KOSDAQ', 'KOSDAQ'),
-        ]
-        chart_colors = {
-            '삼성 트루밸류': '#1428A0',
-            'NH Value ESG': '#0072CE',
-            'DB 개방형': '#00854A',
-            # 'NH 목표전환형 4호': '#0072CE',  # NH 4호 완료 (2026-06-19 청산)
-            # 'DB 목표전환형 5차': '#00854A',  # DB 5차 완료 (2026-06-19 청산)
-            # 'NH 목표전환형 3호': '#0072CE',  # NH 3호 완료 (2026-05-27 청산, 목표달성)
-            # 'DB 목표전환형 4차': '#00854A',  # DB 4차 완료 (2026-05-27 청산, 목표달성)
-            # 'NH 목표전환형 2호': '#0072CE',  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
-            'KOSPI': '#000000',
-            'KOSDAQ': '#666666',
-        }
+        chart_series = wrap_config.chart_series()  # 단일 출처: execution/wrap_config.py
+        chart_colors = wrap_config.chart_colors()
 
         nav_export = {'dates': [d.strftime('%Y-%m-%d') for d in df_nav.index]}
         for display, col in chart_series:
@@ -3058,7 +3036,7 @@ def create_aum_table():
         total_억 = total_aum / 100_000_000
         rows_html += f'<tr style="border-top:2px solid #000;font-weight:700;"><td colspan="2">합계</td><td>{total_억:,.0f}억</td><td></td></tr>'
         # 증권사별 색상
-        broker_colors = {'삼성': '#1428A0', 'NH': '#0072CE', 'DB': '#00854A'}
+        broker_colors = wrap_config.broker_colors()  # 단일 출처: execution/wrap_config.py
 
         # 일자별 증권사+상품명 기준 AUM (stacked bar용)
         # 차트 구간은 누적 AUM 차트와 동일 (2026-03-20~), 봉은 주봉(주 마지막 거래일)만.
@@ -3276,7 +3254,7 @@ def create_cumulative_aum_chart():
         regular_df = df[~is_target].copy()
         target_df = df[is_target].copy()
 
-        broker_colors = {'삼성': '#1428A0', 'NH': '#0072CE', 'DB': '#00854A'}
+        broker_colors = wrap_config.broker_colors()  # 단일 출처: execution/wrap_config.py
         opacity_levels = [1.0, 0.6, 0.35]
 
         # 전체 날짜 (forward-fill 기준값 계산용, 차트 시작일 이전 포함)
@@ -3548,11 +3526,7 @@ def create_wrap_monthly_returns_table():
             return ''
         df['Date'] = pd.to_datetime(df['Date'])
         df = df.set_index('Date').sort_index()
-        products = [('KOSPI', 'KOSPI'),
-                    ('KOSDAQ', 'KOSDAQ'),
-                    ('삼성 트루밸류', '트루밸류'),
-                    ('NH 다이내믹밸류 일반형', 'Value ESG'),
-                    ('DB 개방형', '개방형 랩')]
+        products = wrap_config.monthly_returns_products()  # 단일 출처: execution/wrap_config.py
         MONTHS = list(range(1, 13))
 
         def color_bg(pct):
@@ -3690,16 +3664,7 @@ def create_wrap_returns_table():
         if df_returns.empty:
             return ""
 
-        items = [
-            ('KOSPI', 'KOSPI'),
-            ('KOSDAQ', 'KOSDAQ'),
-            ('삼성 트루밸류', '트루밸류'),
-            # ('NH 목표전환형 4호', '목표전환형 4호'),  # NH 4호 완료 (2026-06-19 청산, +5.38%)
-            # ('DB 목표전환형 5차', '목표전환형 5차'),  # DB 5차 완료 (2026-06-19 청산, +7.72%)
-            # ('NH 목표전환형 3호', '목표전환형 3호'),  # NH 3호 완료 (2026-05-27 청산, 목표달성)
-            # ('DB 목표전환형 4차', '목표전환형 4차'),  # DB 4차 완료 (2026-05-27 청산, 목표달성)
-            # ('NH 목표전환형 2호', '목표전환형 2호'),  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
-        ]
+        items = wrap_config.wrap_returns_items()  # 단일 출처: execution/wrap_config.py
         periods = ['1D', '1W', '1M', '3M', '6M', '1Y', '3Y', 'YTD', 'DD']
 
         # 모든 날짜-데이터 수집
@@ -3865,7 +3830,15 @@ def create_order_section():
       - Download(빨간) → 자문지/ 템플릿 fetch → R7부터 F/G/H/I 셀 patch → .xlsx 다운로드
       - NH 3호+DB 4차 페어 청산(2026-05-27, 목표달성)으로 NH/DB 페어 모두 비활성. 다음 페어 출시 시 ORDER_PORTFOLIOS 재추가.
     """
-    return """
+    import json as _json
+    # 단일 출처 레지스트리 주입 (execution/wrap_config.py)
+    _order_pf = _json.dumps(wrap_config.order_portfolios(), ensure_ascii=False)
+    _broker_order = _json.dumps(wrap_config.broker_order_map(), ensure_ascii=False)
+    _broker_color = _json.dumps(wrap_config.broker_color_map(), ensure_ascii=False)
+    _broker_codes = _json.dumps(list(wrap_config.broker_order_map().keys()), ensure_ascii=False)
+    _target_tabs = _json.dumps(wrap_config.target_tabs(), ensure_ascii=False)
+    _general = _json.dumps(wrap_config.general_combined_name(), ensure_ascii=False)
+    _html = """
         <div id="orderTabs" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;"></div>
         <div id="orderContent"><div style="text-align:center;color:#888;padding:40px;">로딩 중...</div></div>
         <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
@@ -3875,23 +3848,8 @@ def create_order_section():
         // newSheetTargets: 저장 시 Wrap_NAV.xlsx의 NEW 시트에 행을 추가할 (증권사, 상품명) 매핑
         // 일반형 카드 → 3개 상품(삼성 트루밸류 / NH Value ESG / DB 개방형) 모두에 동일 종목/비중 행 추가
         // 목표전환형 카드 → 1개 상품에만 추가
-        var ORDER_PORTFOLIOS = [
-            {
-                display: '삼성 트루밸류 / NH Value ESG / DB 개방형',
-                jsonKey: '삼성 트루밸류 / NH Value ESG / DB 개방형',
-                templates: [
-                    { label: '삼성 트루밸류',  file: '자문지/라이프자산운용_트루밸류_260427.xlsx' },
-                    { label: 'NH Value ESG',  file: '자문지/라이프자산운용_라이프 다이내믹밸류_일반형 _2026.4.27.xlsx' },
-                    { label: 'DB 개방형',     file: '자문지/라이프자산운용_DB 개방형 랩 _2026.4.27.xlsx' },
-                ],
-                newSheetTargets: [
-                    { broker: '삼성', product: '트루밸류' },
-                    { broker: 'NH',   product: 'Value ESG' },
-                    { broker: 'DB',   product: '개방형 랩' },
-                ],
-            },
-            // 목표전환형 NH 4호 / DB 5차 페어 완료 (2026-06-19 청산, 목표달성) — 다음 페어 출시 시 카드 재추가
-        ];
+        // 단일 출처: execution/wrap_config.py order_portfolios() (결합 그룹 카드 + 단독 target 카드 자동 생성)
+        var ORDER_PORTFOLIOS = __ORDER_PORTFOLIOS__;
         var orderState = {};
         var orderStocks = {};
         var orderActiveTab = null;
@@ -4054,7 +4012,7 @@ def create_order_section():
         }
 
         function renderEmailPanel() {
-            var GENERAL = '삼성 트루밸류 / NH Value ESG / DB 개방형';
+            var GENERAL = __GENERAL__;
             // 목표전환형 NH 4호 / DB 5차 청산 (2026-06-19) → 일반형 이메일/네이트온만 노출
             var compliance = buildComplianceEmailText();
             var samsung = buildOrderEmailText(GENERAL, orderStocks[GENERAL] || [], orderState[GENERAL] || []);
@@ -4062,12 +4020,13 @@ def create_order_section():
             var nateonReasonLines = buildNateonReasonLines([GENERAL]);
             if (nateonReasonLines.length) nateonText += '\\n\\n' + nateonReasonLines.join('\\n');
             // 다운로드 섹션 (증권사 순서: 삼성 → NH → DB, 색상도 증권사별)
-            var BROKER_ORDER = { '삼성': 0, 'NH': 1, 'DB': 2 };
-            var BROKER_COLOR = { '삼성': '#1428A0', 'NH': '#0072CE', 'DB': '#00854A' };
+            var BROKER_ORDER = __BROKER_ORDER__;
+            var BROKER_COLOR = __BROKER_COLOR__;
+            var BROKER_CODES = __BROKER_CODES__;
             function brokerKey(label) {
-                if (label.indexOf('삼성') === 0) return '삼성';
-                if (label.indexOf('NH') === 0) return 'NH';
-                if (label.indexOf('DB') === 0) return 'DB';
+                for (var _i = 0; _i < BROKER_CODES.length; _i++) {
+                    if (label.indexOf(BROKER_CODES[_i]) === 0) return BROKER_CODES[_i];
+                }
                 return 'zz';
             }
             var dlItems = [];
@@ -4164,8 +4123,8 @@ def create_order_section():
 
         function buildOrderEmailText(pfName, stocks, st) {
             // 목표전환형 NH 4호 / DB 5차 청산 (2026-06-19) → 통합 비활성 (일반형 단독 이메일)
-            var TARGET_TABS = [];
-            var GENERAL = '삼성 트루밸류 / NH Value ESG / DB 개방형';
+            var TARGET_TABS = __TARGET_TABS__;
+            var GENERAL = __GENERAL__;
             var lines = [
                 '안녕하십니까.',
                 '라이프자산운용 김태식입니다.',
@@ -4206,7 +4165,7 @@ def create_order_section():
 
         function buildComplianceEmailText() {
             // 목표전환형 NH 4호 / DB 5차 청산 (2026-06-19) → 일반형만
-            var GENERAL = '삼성 트루밸류 / NH Value ESG / DB 개방형';
+            var GENERAL = __GENERAL__;
             var gen = buildOrderChanges(orderStocks[GENERAL] || [], orderState[GENERAL] || []);
             var lines = [
                 '안녕하십니까.',
@@ -4221,7 +4180,7 @@ def create_order_section():
 
         function buildComplianceEmailSection(pfName) {
             // 일반형 탭에서만 노출 (개방형 + 목표전환형 통합본)
-            if (pfName !== '삼성 트루밸류 / NH Value ESG / DB 개방형') return '';
+            if (pfName !== __GENERAL__) return '';
             var text = buildComplianceEmailText();
             return '<div style="margin-top:16px;padding:16px;background:#fffbeb;border:1px solid #fef3c7;border-radius:8px;">'
                 + '<div style="display:flex;align-items:center;margin-bottom:12px;">'
@@ -4280,9 +4239,9 @@ def create_order_section():
         }
 
         function buildOrderNateonSection(pfName) {
-            // NH 목표전환형 4호 탭에서만 노출 (일반형 + 목표전환형을 한 박스에 함께)
-            if (pfName !== 'NH 목표전환형 4호') return '';
-            var GENERAL = '삼성 트루밸류 / NH Value ESG / DB 개방형';
+            // 활성 목표전환형 탭에서만 노출 (일반형 + 목표전환형을 한 박스에 함께)
+            if (__TARGET_TABS__.indexOf(pfName) < 0) return '';
+            var GENERAL = __GENERAL__;
             var generalText = buildOrderNateonText(orderStocks[GENERAL] || [], orderState[GENERAL] || [], '일반형');
             var targetText = buildOrderNateonText(orderStocks[pfName] || [], orderState[pfName] || [], '목표전환형');
             var combined = generalText + '\\n\\n' + targetText;
@@ -4992,6 +4951,13 @@ def create_order_section():
         }
         </script>
     """
+    _html = _html.replace('__ORDER_PORTFOLIOS__', _order_pf)
+    _html = _html.replace('__BROKER_ORDER__', _broker_order)
+    _html = _html.replace('__BROKER_COLOR__', _broker_color)
+    _html = _html.replace('__BROKER_CODES__', _broker_codes)
+    _html = _html.replace('__TARGET_TABS__', _target_tabs)
+    _html = _html.replace('__GENERAL__', _general)
+    return _html
 
 
 def create_disclosures_section():

@@ -12,27 +12,21 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 # Windows console encoding fix
 sys.stdout.reconfigure(encoding='utf-8')
 
+# 단일 출처 레지스트리 (execution/wrap_config.py)
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import wrap_config
+
 # Constants
 WRAP_NAV_FILE = 'Wrap_NAV.xlsx'
 OUTPUT_FILE = 'portfolio_data.json'
 EXISTING_STOCK_BASIS_FILE = 'existing_stock_basis.json'
 
-# 포트폴리오 표시 이름 매핑
-PORTFOLIO_DISPLAY_NAMES = {
-    '트루밸류': '삼성 트루밸류',
-    'Value ESG': 'NH Value ESG',
-    '개방형 랩': 'DB 개방형',
-    # '목표전환형 5차': 'DB 목표전환형 5차',  # DB 5차 완료 (2026-06-19 청산, +7.72%) / NH 4호 (+5.38%) 페어 청산
-    # '목표전환형 3호': 'NH 목표전환형 3호',  # NH 3호 완료 (2026-05-27 청산, 목표달성)
-    # '목표전환형 4차': 'DB 목표전환형 4차',  # DB 4차 완료 (2026-05-27 청산, 목표달성)
-    # '목표전환형 2호': 'NH 목표전환형 2호',  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
-    # '목표전환형 3차': 'DB 목표전환형 3차',  # DB 3차 완료 (2026-05-06, +7.97%, 목표 7.5% 초과)
-    # '목표전환형': 'DB 목표전환형',  # DB 1차 완료 (2026-02-25 청산, 목표 7.5% 달성)
-    # '목표전환형 2차': 'DB 목표전환형 2차 / NH 목표전환형 1호',  # 2차+1호 완료 (2026-04-15, DB 7.5% / NH 6.5% 달성)
-}
+# 포트폴리오 표시 이름 매핑 — 단일 출처: execution/wrap_config.py
+PORTFOLIO_DISPLAY_NAMES = wrap_config.portfolio_display_names()
 
-# 표시 제외 포트폴리오 (역사 데이터는 보존하되 대시보드에서 숨김)
-EXCLUDED_PORTFOLIOS = {'목표전환형', '목표전환형 1호', '목표전환형 2호', '목표전환형 2차', '목표전환형 3차', '목표전환형 3호', '목표전환형 4차', '목표전환형 5차', '목표전환형 4호'}
+# 표시 제외 포트폴리오 (역사 데이터 보존, 대시보드 숨김) — 비활성 상품 자동 파생
+EXCLUDED_PORTFOLIOS = wrap_config.excluded_portfolios()
 
 # 편입일 이전부터 보유 중인 종목의 평균 매수가 (existing_stock_basis.json 로드)
 # 이후 누적 수익률은 (current_price / avg_price - 1) * 100 로 매일 계산
@@ -366,27 +360,9 @@ def create_portfolio_tables():
             json.dump(master_rows, f, ensure_ascii=False)
         print(f"stock_master.json 생성: {len(master_rows)}종목")
 
-        # === 포트폴리오 그룹 정의 (동일 종목/비중을 공유하여 합쳐서 표시) ===
-        # sources: Wrap_NAV.xlsx 상품명 / combined: 표시 결합명 / use: 데이터 가져올 포트폴리오
-        PORTFOLIO_GROUPS = [
-            {
-                'sources': ['트루밸류', 'Value ESG', '개방형 랩'],
-                'combined': '삼성 트루밸류 / NH Value ESG / DB 개방형',
-                'use': '트루밸류',
-            },
-            # NH 4호 + DB 5차 페어 완료 (2026-06-19 청산, 목표달성) — 다음 페어 출시 시 sources 재추가
-            # {
-            #     'sources': ['목표전환형 5차', '목표전환형 4호'],
-            #     'combined': 'NH 목표전환형 4호 / DB 목표전환형 5차',
-            #     'use': '목표전환형 5차',
-            # },
-            # NH 3호 + DB 4차 페어 완료 (2026-05-27 청산, 목표달성) — 다음 페어 출시 시 sources 재추가
-            # {
-            #     'sources': ['목표전환형 3호', '목표전환형 4차'],
-            #     'combined': 'NH 목표전환형 3호 / DB 목표전환형 4차',
-            #     'use': '목표전환형 3호',
-            # },
-        ]
+        # === 포트폴리오 그룹 정의 (동일 종목/비중 합쳐 표시) — 단일 출처: execution/wrap_config.py ===
+        # sources: nav_key / combined: 결합 표시명 / use: 대표 nav_key (활성 멤버 있는 그룹만 생성)
+        PORTFOLIO_GROUPS = wrap_config.portfolio_groups()
 
         today = pd.Timestamp.now().normalize()
 

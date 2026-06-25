@@ -7,6 +7,10 @@ import sys
 # Windows console encoding fix
 sys.stdout.reconfigure(encoding='utf-8')
 
+# 단일 출처 레지스트리 (execution/wrap_config.py)
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'execution'))
+import wrap_config
+
 # ---------------------------------------------------------
 # 1. 설정
 # ---------------------------------------------------------
@@ -36,21 +40,8 @@ sys.stdout.reconfigure(encoding='utf-8')
 #   시작 기준가: 1,000.00 / 청산 기준가: 1,053.79 (+5.38%, 장중 6.5% 터치 후 즉시 전량매도 잔여가) / 운용 5거래일
 # ───────────────────────────────────────────────────────────────────
 
-# 포트폴리오별 초기 기준가 및 시작일
-portfolio_config = {
-    '트루밸류': {'base_price': 2021.31, 'start_date': '2025-12-30'},
-    'Value ESG': {'base_price': 1980.49, 'start_date': '2025-12-30'},
-    '개방형 랩': {'base_price': 1518.52, 'start_date': '2025-12-30'},
-    '목표전환형 5차': {'base_price': 1000.00, 'start_date': '2026-06-12', 'end_date': '2026-06-19'},  # DB 5차 청산 (end_date로 동결 — 컬럼이 청산일까지 완결되도록; 주석처리 금지)
-    '목표전환형 4호': {'base_price': 1000.00, 'start_date': '2026-06-15', 'end_date': '2026-06-19'},  # NH 4호 청산 (end_date로 동결)
-    # '목표전환형 3호': {'base_price': 1000.00, 'start_date': '2026-05-14'},  # NH 3호 완료 (목표달성, 2026-05-27 청산)
-    # '목표전환형 4차': {'base_price': 1000.00, 'start_date': '2026-05-18'},  # DB 4차 완료 (목표달성, 2026-05-27 청산)
-    # '목표전환형 2호': {'base_price': 1000.00, 'start_date': '2026-04-29'},  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
-    # '목표전환형 3차': {'base_price': 1000.00, 'start_date': '2026-04-30'},  # DB 3차 완료 (2026-05-06, +7.97%, 목표 7.5% 초과)
-    # '목표전환형': {'base_price': 1000.00, 'start_date': '2026-02-11'},  # DB 1차 완료 (목표 7.5% 달성)
-    # '목표전환형 2차': {'base_price': 1000.00, 'start_date': '2026-03-16'},  # DB 2차 완료 (2026-04-15, 목표 7.5% 달성)
-    # '목표전환형 1호': {'base_price': 1000.00, 'start_date': '2026-03-25'},  # NH 1호 완료 (2026-04-15, 목표 6.5% 달성)
-}
+# 포트폴리오별 초기 기준가 및 시작일 — 단일 출처: execution/wrap_config.py (keep_in_nav 상품)
+portfolio_config = wrap_config.nav_portfolio_config()
 initial_base_prices = {k: v['base_price'] for k, v in portfolio_config.items()}
 initial_start_date_str = min(cfg['start_date'] for cfg in portfolio_config.values())
 

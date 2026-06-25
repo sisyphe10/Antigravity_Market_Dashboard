@@ -2,29 +2,19 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 import sys
+import os
 
 # Windows console encoding fix
 sys.stdout.reconfigure(encoding='utf-8')
 
+# 단일 출처 레지스트리 (execution/wrap_config.py)
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'execution'))
+import wrap_config
+
 file_name = 'Wrap_NAV.xlsx'
 
-# 포트폴리오별 YTD 기준일 설정
-ytd_base_dates = {
-    '트루밸류': '2025-12-30',
-    'Value ESG': '2025-12-30',
-    '개방형 랩': '2025-12-30',
-    # '목표전환형 5차': '2026-06-12',  # DB 5차 완료 (2026-06-19 청산, +7.72%)
-    # '목표전환형 4호': '2026-06-15',  # NH 4호 완료 (2026-06-19 청산, +5.38%)
-    # '목표전환형 3호': '2026-05-14',  # NH 3호 완료 (2026-05-27 청산, 목표달성)
-    # '목표전환형 4차': '2026-05-18',  # DB 4차 완료 (2026-05-27 청산, 목표달성)
-    # '목표전환형 2호': '2026-04-29',  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
-    # '목표전환형 3차': '2026-04-30',  # DB 3차 완료 (2026-05-06, +7.97%, 목표 7.5% 초과)
-    # '목표전환형': '2026-02-11',  # DB 1차 완료 (2026-02-25 청산, 목표 7.5% 달성)
-    # '목표전환형 2차': '2026-03-16',  # DB 2차 완료 (2026-04-15, 목표 7.5% 달성)
-    # '목표전환형 1호': '2026-03-25',  # NH 1호 완료 (2026-04-15, 목표 6.5% 달성)
-    'KOSPI': '2025-12-30',
-    'KOSDAQ': '2025-12-30',
-}
+# 포트폴리오별 YTD 기준일 설정 — 단일 출처: execution/wrap_config.py (활성 + 벤치마크)
+ytd_base_dates = wrap_config.ytd_base_dates()
 
 print("1. 기준가 데이터 읽기 중...")
 

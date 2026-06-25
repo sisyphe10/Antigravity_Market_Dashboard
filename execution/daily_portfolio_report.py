@@ -17,6 +17,10 @@ load_dotenv()
 # Windows console encoding fix
 sys.stdout.reconfigure(encoding='utf-8')
 
+# 단일 출처 레지스트리 (execution/wrap_config.py)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import wrap_config
+
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
 # httpx INFO 로그가 sendMessage/sendPhoto URL(토큰 path 포함)을 찍으므로 차단
@@ -107,18 +111,7 @@ def get_latest_nav():
         df_filtered = df
 
     # 각 포트폴리오별 NaN이 아닌 마지막 값 가져오기
-    nav_map = {
-        '삼성 트루밸류': '트루밸류',
-        'NH Value ESG': 'Value ESG',
-        'DB 개방형 랩': '개방형 랩',
-        # 'DB 목표전환형 5차': '목표전환형 5차',  # DB 5차 완료 (2026-06-19 청산, +7.72%)
-        # 'NH 목표전환형 4호': '목표전환형 4호',  # NH 4호 완료 (2026-06-19 청산, +5.38%)
-        # 'NH 목표전환형 3호': '목표전환형 3호',  # NH 3호 완료 (2026-05-27 청산, 목표달성)
-        # 'DB 목표전환형 4차': '목표전환형 4차',  # DB 4차 완료 (2026-05-27 청산, 목표달성)
-        # 'NH 목표전환형 2호': '목표전환형 2호',  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
-        # 'DB 목표전환형 3차': '목표전환형 3차',  # DB 3차 완료 (2026-05-06, +7.97%, 목표 7.5% 초과)
-        # 'DB 목표전환형 2차 / NH 목표전환형 1호': '목표전환형 2차',  # 2차+1호 완료 (2026-04-15, DB 7.5% / NH 6.5% 달성)
-    }
+    nav_map = wrap_config.report_nav_map()  # 단일 출처: execution/wrap_config.py
     nav_data = {}
     for display_name, col_name in nav_map.items():
         if col_name in df_filtered.columns:
@@ -141,7 +134,7 @@ def get_latest_returns():
     # 트루밸류, KOSPI, KOSDAQ 수익률 추출
     returns_data = {}
     
-    for product in ['트루밸류', 'KOSPI', 'KOSDAQ']:  # NH 4호/DB 5차 청산 (2026-06-19)
+    for product in wrap_config.report_return_products():  # 단일 출처: execution/wrap_config.py
         returns_data[product] = {
             '1D': latest_row.get(f'{product}_1D', 'N/A'),
             '1W': latest_row.get(f'{product}_1W', 'N/A'),
@@ -302,19 +295,9 @@ def format_message(date, nav_data, returns_data):
 
     # 수익률
     msg += f"{LINE}\n<b>📈 수익률</b>\n{LINE}\n"
-    display_names = {
-        '트루밸류': '삼성 트루밸류',
-        # '목표전환형 5차': 'DB 목표전환형 5차',  # DB 5차 완료 (2026-06-19 청산, +7.72%)
-        # '목표전환형 4호': 'NH 목표전환형 4호',  # NH 4호 완료 (2026-06-19 청산, +5.38%)
-        # '목표전환형 3호': 'NH 목표전환형 3호',  # NH 3호 완료 (2026-05-27 청산, 목표달성)
-        # '목표전환형 4차': 'DB 목표전환형 4차',  # DB 4차 완료 (2026-05-27 청산, 목표달성)
-        # '목표전환형 2호': 'NH 목표전환형 2호',  # NH 2호 완료 (2026-05-06, +7.26%, 목표 6.5% 초과)
-        # '목표전환형 3차': 'DB 목표전환형 3차',  # DB 3차 완료 (2026-05-06, +7.97%, 목표 7.5% 초과)
-        'KOSPI': 'KOSPI',
-        'KOSDAQ': 'KOSDAQ',
-    }
+    display_names = wrap_config.report_display_names()  # 단일 출처: execution/wrap_config.py
     periods = ['1D', '1W', '1M', '3M', '6M', '1Y', 'YTD']
-    for product in ['트루밸류', 'KOSPI', 'KOSDAQ']:  # NH 4호/DB 5차 청산 (2026-06-19)
+    for product in wrap_config.report_return_products():  # 단일 출처: execution/wrap_config.py
         if product in returns_data:
             returns = returns_data[product]
             # N/A가 아닌 항목만 표시
