@@ -29,6 +29,16 @@
       "enabled": true,
       "retry": {"count": 2, "interval_min": 30},
       "translate": {"enabled": true, "model": "claude-haiku-4-5-20251001", "target_lang": "ko"}
+    },
+    {
+      "name": "trendforce",
+      "label": "TrendForce",
+      "icon": "🟢",
+      "schedule": ["08:00"],
+      "enabled": true,
+      "retry": {"count": 2, "interval_min": 30},
+      "translate": {"enabled": true, "model": "claude-haiku-4-5-20251001", "target_lang": "ko"},
+      "staleness_days": 5
     }
   ]
 }

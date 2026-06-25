@@ -256,3 +256,86 @@ def translate_titles(titles: list[str], dry_run: bool = False) -> dict:
         'output_tokens': total_out,
         'dry_run': False,
     }
+
+
+# ── 뉴스 제목+요약 (trendforce 등 다이제스트 어댑터용) ─────────────────────
+SYSTEM_NEWS_SUMMARY = """당신은 영문 IT/반도체/AI/테크 뉴스를 한국 자산운용역을 위해 한국어로 요약하는 전문 애널리스트입니다.
+
+영문 기사 1건(제목 + 본문)을 받아, (1) 제목을 한국어로 번역하고 (2) 핵심을 3~5개 불릿으로 요약합니다.
+
+## 규칙
+1. **고유명사 영문 유지**: 회사/제품/사람/지명은 영문 그대로 (NVIDIA, TSMC, SK hynix, Samsung, HBM4, GB200, Jensen Huang, Arizona 등).
+2. **약어 영문 유지**: EPS, FCF, capex, YoY, QoQ, FY26, bps, GW, MW, AI, GPU, HBM, DRAM, NAND, foundry 등.
+3. **숫자/단위 정확**: 매출·수율·가격·% 등 수치는 절대 변형 금지 ($40.2B, 65.5%, 10~20% 등 그대로).
+4. **관용 표현**: tailwind→순풍, headwind→부담, secular→구조적, guidance→가이던스, ramp→양산 가속.
+5. **불릿 내용**: 사실·수치 중심으로 압축. 기사에 없는 추측 금지. 각 불릿 1~2문장, 존댓말 명사형/평서형 혼용 가능.
+6. 분량: 불릿 3~5개. 본문이 짧으면 2개도 허용.
+
+## 출력 형식 (엄격)
+첫 줄: `제목: <한국어 제목>`
+다음 줄부터 불릿, 각 줄 `- ` 로 시작.
+머리말/꼬리말/메타 멘트 절대 금지. 위 형식만 출력.
+"""
+
+_SUMMARY_TITLE_RE = re.compile(r'^\s*제목\s*[:：]\s*(.+?)\s*$')
+
+
+def summarize_news_to_korean(title: str, body: str, dry_run: bool = False) -> dict:
+    """영문 뉴스 1건 → 한국어 제목 + 불릿 요약.
+
+    Args:
+        title: 영문 제목.
+        body:  영문 본문(평문, HTML 태그 제거된 상태 권장).
+        dry_run: True 면 API 호출 없이 원문 기반 더미 반환.
+
+    Returns:
+        {
+            'title_kr': str,        # 한국어 제목 (실패 시 원문)
+            'summary_kr': str,      # 불릿 요약 ('- '로 시작하는 줄들, \n 결합)
+            'input_tokens': int,
+            'output_tokens': int,
+            'dry_run': bool,
+        }
+    """
+    if dry_run:
+        return {
+            'title_kr': title,
+            'summary_kr': '- [DRY_RUN] 요약 생략',
+            'input_tokens': 0, 'output_tokens': 0, 'dry_run': True,
+        }
+
+    # 본문이 너무 길면 앞부분만 (뉴스 1건은 보통 4K 이하라 충분)
+    body_trimmed = (body or '')[:8000]
+    user_msg = (
+        '다음 영문 뉴스를 시스템 프롬프트 규칙대로 한국어 제목 + 불릿 요약으로 출력하세요.\n\n'
+        f'[원문 제목] {title}\n\n[원문 본문]\n{body_trimmed}'
+    )
+    resp = _call_haiku(
+        [{'role': 'user', 'content': user_msg}],
+        SYSTEM_NEWS_SUMMARY,
+        max_tokens=1500,
+    )
+    text = (resp.get('text') or '').strip()
+
+    title_kr = title
+    bullets: list[str] = []
+    for line in text.splitlines():
+        m = _SUMMARY_TITLE_RE.match(line)
+        if m and title_kr == title:
+            title_kr = m.group(1).strip()
+            continue
+        ls = line.strip()
+        if ls.startswith(('-', '•', '*')):
+            bullets.append('- ' + ls.lstrip('-•* ').strip())
+        elif ls and bullets:
+            # 불릿 줄바꿈 이어짐
+            bullets[-1] += ' ' + ls
+    summary_kr = '\n'.join(bullets) if bullets else (text or '- (요약 없음)')
+
+    return {
+        'title_kr': title_kr,
+        'summary_kr': summary_kr,
+        'input_tokens': resp.get('input_tokens', 0),
+        'output_tokens': resp.get('output_tokens', 0),
+        'dry_run': False,
+    }
