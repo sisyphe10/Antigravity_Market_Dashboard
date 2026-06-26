@@ -70,9 +70,9 @@
       "sector": "건강관리",
       "market_cap": 49660.879681,
       "weight": 3.0,
-      "weight_prev": 2.0,
+      "weight_prev": 3.0,
       "today_return": -6.631578947368421,
-      "contribution": -1.3263157894736843,
+      "contribution": -1.9894736842105267,
       "cumulative_return": -9.495228377648402,
       "current_price": 88700.0,
       "ath_price": 245500.0,
@@ -86,9 +86,9 @@
       "sector": "건강관리",
       "market_cap": 52900.748322,
       "weight": 3.0,
-      "weight_prev": 2.0,
+      "weight_prev": 3.0,
       "today_return": -8.2798459563543,
-      "contribution": -1.6559691912708603,
+      "contribution": -2.4839537869062904,
       "cumulative_return": -2.6434119089794206,
       "current_price": 142900.0,
       "ath_price": 213500.0,
@@ -102,9 +102,9 @@
       "sector": "건강관리",
       "market_cap": 184069.088205,
       "weight": 3.0,
-      "weight_prev": 2.0,
+      "weight_prev": 3.0,
       "today_return": -8.4,
-      "contribution": -1.6800000000000002,
+      "contribution": -2.52,
       "cumulative_return": -3.1575979701155887,
       "current_price": 343500.0,
       "ath_price": 559000.0,
@@ -118,9 +118,9 @@
       "sector": "건강관리",
       "market_cap": 27354.062118,
       "weight": 3.0,
-      "weight_prev": 2.0,
+      "weight_prev": 3.0,
       "today_return": -4.33546552949538,
-      "contribution": -0.8670931058990761,
+      "contribution": -1.300639658848614,
       "cumulative_return": -1.1166617690273273,
       "current_price": 134600.0,
       "ath_price": 207000.0,
@@ -224,34 +224,5 @@
       "rsi": 24.401229329336793,
       "is_today_new": false
     }
-  ],
-  "_order_changes": {
-    "삼성 트루밸류 / NH Value ESG / DB 개방형": {
-      "date": "2026-06-26",
-      "added": [],
-      "changed": [
-        {
-          "name": "에이비엘바이오",
-          "from": 2.0,
-          "to": 3.0
-        },
-        {
-          "name": "리가켐바이오",
-          "from": 2.0,
-          "to": 3.0
-        },
-        {
-          "name": "알테오젠",
-          "from": 2.0,
-          "to": 3.0
-        },
-        {
-          "name": "올릭스",
-          "from": 2.0,
-          "to": 3.0
-        }
-      ],
-      "removed": []
-    }
-  }
+  ]
 }
