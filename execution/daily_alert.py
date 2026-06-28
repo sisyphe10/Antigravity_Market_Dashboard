@@ -146,7 +146,7 @@ def get_naver_weather(location="여의도"):
         result_msg = (
             f"a. 날짜 / {date_str}\n"
             f"b. 날씨 / {weather_flow} {weather_emojis}\n"
-            f"c. 기온 / {temp_flow}\n"
+            f"c. 기온 / <u><b>{temp_flow}</b></u>\n"
             f"d. 미세먼지, 초미세먼지 / {dust}, {ultra_dust}\n"
             f"e. 일출, 일몰 / {sun_info}\n"
             f"f. 특이사항 / {alert_str}"
@@ -170,7 +170,7 @@ async def send_daily_alert():
     
     logging.info(f"Sending message to {chat_id}...")
     bot = Bot(token=token)
-    await bot.send_message(chat_id=chat_id, text=message)
+    await bot.send_message(chat_id=chat_id, text=message, parse_mode='HTML')
     logging.info("Done.")
 
 if __name__ == "__main__":
