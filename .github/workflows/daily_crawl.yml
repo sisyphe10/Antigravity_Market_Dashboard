@@ -169,4 +169,4 @@ jobs:
           bash scripts/safe_commit_push.sh \
             -m "Auto-update: Market data and dashboard [skip ci]" \
             --xlsx-conflict bail \
-            -- dataset.csv charts/*.png index.html market.html wrap.html universe.html seibro.html featured.html featured_data.json portfolio_data.json Wrap_NAV.xlsx kodex_sectors.json seibro_tickers.json monthly_returns.json index_returns.json index_history.json
+            -- dataset.csv charts/*.png index.html market.html wrap.html universe.html seibro.html featured.html featured_data.json portfolio_data.json contribution_data.json Wrap_NAV.xlsx kodex_sectors.json seibro_tickers.json monthly_returns.json index_returns.json index_history.json
