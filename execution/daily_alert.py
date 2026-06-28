@@ -144,9 +144,9 @@ def get_naver_weather(location="여의도"):
         alert_str = '\n'.join(alerts) if alerts else '없음'
 
         result_msg = (
-            f"a. 날짜 / <u><b>{date_str}</b></u>\n"
+            f"<u><b>a. 날짜 / {date_str}</b></u>\n"
             f"b. 날씨 / {weather_flow} {weather_emojis}\n"
-            f"c. 기온 / <u><b>{temp_flow}</b></u>\n"
+            f"<u><b>c. 기온 / {temp_flow}</b></u>\n"
             f"d. 미세먼지, 초미세먼지 / {dust}, {ultra_dust}\n"
             f"e. 일출, 일몰 / {sun_info}\n"
             f"f. 특이사항 / {alert_str}"
