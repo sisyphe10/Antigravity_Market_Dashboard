@@ -3018,7 +3018,10 @@ def create_aum_table():
         # 상단 테이블: 최신 날짜 상품만 (가장 최근 거래일 기준)
         # 정렬: broker AUM 합 내림차순 → broker 안에서 일반형 → 목표전환형 → AUM 내림차순
         max_date = latest['날짜'].max()
-        table_latest = latest[latest['날짜'] == max_date].copy()
+        # 활성 상품(레지스트리)만 — 각 상품의 최신 AUM 행. 신규 출시 상품이 다른 날짜여도
+        # 기존 상품을 가리지 않도록 max_date 단일 스냅샷 대신 active-products 필터 사용.
+        active_aum_names = set(wrap_config.fixed_products().values()) | set(wrap_config.active_target_transform().values())
+        table_latest = latest[latest['상품명'].isin(active_aum_names)].copy()
         broker_total = table_latest.groupby('증권사')['AUM'].sum().sort_values(ascending=False)
         table_latest['broker_rank'] = table_latest['증권사'].map({b: i for i, b in enumerate(broker_total.index)})
         table_latest['is_target'] = table_latest['상품명'].str.contains('목표전환형').astype(int)
@@ -3042,7 +3045,7 @@ def create_aum_table():
         # 차트 구간은 누적 AUM 차트와 동일 (2026-03-20~), 봉은 주봉(주 마지막 거래일)만.
         # 활성 상품만 차트에 표시 (청산 회차는 누적 AUM 차트에서 broker 단위로 누적).
         chart_start = '2026-03-20'
-        chart_active = latest[latest['날짜'] == max_date].copy()
+        chart_active = latest[latest['상품명'].isin(active_aum_names)].copy()
         chart_names = set(chart_active['상품명'])
         chart_df = df[df['상품명'].isin(chart_names)].copy()
         chart_df = chart_df[chart_df['날짜'].dt.strftime('%Y-%m-%d') >= chart_start]
@@ -4013,11 +4016,18 @@ def create_order_section():
 
         function renderEmailPanel() {
             var GENERAL = __GENERAL__;
-            // 목표전환형 NH 4호 / DB 5차 청산 (2026-06-19) → 일반형 이메일/네이트온만 노출
+            var TARGET_TABS = __TARGET_TABS__;  // 활성 목표전환형 (예: ['NH 목표전환형 5호'])
             var compliance = buildComplianceEmailText();
             var samsung = buildOrderEmailText(GENERAL, orderStocks[GENERAL] || [], orderState[GENERAL] || []);
+            var targetBoxes = '';
             var nateonText = buildOrderNateonText(orderStocks[GENERAL] || [], orderState[GENERAL] || [], '일반형');
-            var nateonReasonLines = buildNateonReasonLines([GENERAL]);
+            TARGET_TABS.forEach(function(tt) {
+                var tEmail = buildOrderEmailText(tt, orderStocks[tt] || [], orderState[tt] || []);
+                var brokerLabel = tt.split(' ')[0];
+                targetBoxes += buildEmailBox(brokerLabel + ' 이메일', tEmail, '#f9fafb', '#e5e7eb', '#444', '#374151');
+                nateonText += '\\n\\n' + buildOrderNateonText(orderStocks[tt] || [], orderState[tt] || [], '목표전환형');
+            });
+            var nateonReasonLines = buildNateonReasonLines([GENERAL].concat(TARGET_TABS));
             if (nateonReasonLines.length) nateonText += '\\n\\n' + nateonReasonLines.join('\\n');
             // 다운로드 섹션 (증권사 순서: 삼성 → NH → DB, 색상도 증권사별)
             var BROKER_ORDER = __BROKER_ORDER__;
@@ -4063,6 +4073,7 @@ def create_order_section():
                 + dlSection
                 + buildEmailBox('컴플라이언스 이메일', compliance, '#fffbeb', '#fef3c7', '#92400e', '#d97706')
                 + buildEmailBox('삼성 이메일', samsung, '#f9fafb', '#e5e7eb', '#444', '#374151')
+                + targetBoxes
                 + buildEmailBox('네이트온', nateonText, '#eef2ff', '#c7d2fe', '#1f5a2a', '#4f46e5')
                 + '</div>';
             document.getElementById('orderContent').innerHTML = html;
@@ -4164,9 +4175,19 @@ def create_order_section():
         }
 
         function buildComplianceEmailText() {
-            // 목표전환형 NH 4호 / DB 5차 청산 (2026-06-19) → 일반형만
+            // 일반형 + 활성 목표전환형(TARGET_TABS) 통합 (중복 종목 dedupe)
             var GENERAL = __GENERAL__;
+            var TARGET_TABS = __TARGET_TABS__;
+            function _ddup(a, b) {
+                var seen = {}, out = [];
+                a.concat(b).forEach(function(name) { if (!seen[name]) { seen[name] = true; out.push(name); } });
+                return out;
+            }
             var gen = buildOrderChanges(orderStocks[GENERAL] || [], orderState[GENERAL] || []);
+            TARGET_TABS.forEach(function(tt) {
+                var tgt = buildOrderChanges(orderStocks[tt] || [], orderState[tt] || []);
+                gen = { newBuy: _ddup(gen.newBuy, tgt.newBuy), inc: _ddup(gen.inc, tgt.inc), dec: _ddup(gen.dec, tgt.dec), out: _ddup(gen.out, tgt.out) };
+            });
             var lines = [
                 '안녕하십니까.',
                 '라이프자산운용 김태식입니다.',
