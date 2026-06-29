@@ -3872,8 +3872,10 @@ def create_order_section():
                     // weight_prev 누락 시(구버전 portfolio_data.json) 또는 신규 편입 시: weight 자체 fallback.
                     orderStocks[p.display] = stocks.map(function(s) {
                         var origW = parseFloat(s.weight) || 0;
-                        var prevW = (s.weight_prev != null) ? (parseFloat(s.weight_prev) || 0) : origW;
-                        return { code: s.code, name: s.name, sector: s.sector || '', weight: prevW, is_today_new: !!s.is_today_new };
+                        // 변경전 기준선: 오늘 첫 편입(is_today_new)이면 0(출시 전), 아니면 D-1(weight_prev).
+                        // 추가 주문(additionalOrder)은 변경후→변경전 스냅샷으로 이 기준선을 갱신.
+                        var prevW = s.is_today_new ? 0 : ((s.weight_prev != null) ? (parseFloat(s.weight_prev) || 0) : origW);
+                        return { code: s.code, name: s.name, sector: s.sector || '', weight: prevW };
                     });
                     orderState[p.display] = stocks.map(function(s) {
                         return { newWeight: parseFloat(s.weight) || 0, reason: '' };
@@ -4107,8 +4109,7 @@ def create_order_section():
                 var newW = parseFloat(st[i] && st[i].newWeight) || 0;
                 var name = (s.name || '').trim();
                 if (!name) return;
-                if (s.is_today_new && newW > 0) newBuy.push(name);
-                else if (oldW === 0 && newW > 0) newBuy.push(name);
+                if (oldW === 0 && newW > 0) newBuy.push(name);
                 else if (oldW > 0 && newW === 0) out.push(name);
                 else if (oldW > 0 && newW > oldW) inc.push(name);
                 else if (oldW > 0 && newW < oldW) dec.push(name);
@@ -4220,8 +4221,7 @@ def create_order_section():
                 var newW = parseFloat(st[i] && st[i].newWeight) || 0;
                 var name = (s.name || '').trim();
                 if (!name) return;
-                if (s.is_today_new && newW > 0) newBuy.push({ name: name, weight: newW });
-                else if (oldW === 0 && newW > 0) newBuy.push({ name: name, weight: newW });
+                if (oldW === 0 && newW > 0) newBuy.push({ name: name, weight: newW });
                 else if (oldW > 0 && newW === 0) out.push({ name: name, weight: 0 });
                 else if (oldW > 0 && newW > oldW) inc.push({ name: name, weight: newW });
                 else if (oldW > 0 && newW < oldW) dec.push({ name: name, weight: newW });
@@ -4773,7 +4773,7 @@ def create_order_section():
                     var stocks = pdata[p.jsonKey] || [];
                     orderStocks[p.display] = stocks.map(function(s) {
                         var origW = parseFloat(s.weight) || 0;
-                        var prevW = (s.weight_prev != null) ? (parseFloat(s.weight_prev) || 0) : origW;
+                        var prevW = s.is_today_new ? 0 : ((s.weight_prev != null) ? (parseFloat(s.weight_prev) || 0) : origW);
                         return { code: s.code, name: s.name, sector: s.sector || '', weight: prevW };
                     });
                     orderState[p.display] = stocks.map(function(s) {
