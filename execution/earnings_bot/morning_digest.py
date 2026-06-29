@@ -44,6 +44,35 @@ def _load_subscribers() -> list[int]:
         return []
 
 
+# ─── ticker → 기업명 매핑 (예정 섹션 표기용) ───
+def _load_ticker_names() -> dict[str, str]:
+    """universe.json에서 ticker→기업명 매핑 로드.
+
+    universe '티커' 컬럼은 'NASDAQ:HON' 형태(거래소 prefix 포함) → prefix 제거 후
+    대문자 키로 정규화. 로드 실패 시 빈 dict (예정 섹션은 ticker만 표기로 폴백).
+    """
+    path = DASHBOARD_DIR / 'universe.json'
+    try:
+        with path.open(encoding='utf-8') as f:
+            values = json.load(f).get('values') or []
+        header = values[0]
+        ti, ni = header.index('티커'), header.index('기업명')
+    except Exception as e:
+        logger.warning(f'universe.json 기업명 로드 실패: {e}')
+        return {}
+    names: dict[str, str] = {}
+    for row in values[1:]:
+        if len(row) <= max(ti, ni):
+            continue
+        raw = (row[ti] or '').strip().upper()
+        if ':' in raw:
+            raw = raw.split(':', 1)[1].strip()
+        name = (row[ni] or '').strip()
+        if raw and name:
+            names[raw] = name
+    return names
+
+
 # ─── filing 상태 분류 (accession_number 기준 전수 join) ───
 def _classify_by_accession(accession_number: str, conn) -> tuple[str, str]:
     """accession 단위로 (분류 이모지, 분기 레이블) 반환.
@@ -196,19 +225,17 @@ def build_morning_digest(now: datetime | None = None) -> str:
 
     lines.extend(['', f'━━ 예정 ({len(upcoming)}건) ━━'])
     if upcoming:
-        # 한 줄에 여러 종목 묶기 (가독성)
-        chunks = []
+        # 항목당 한 줄: 티커 / 기업명 / 실적발표일자 (BMO·AMC는 날짜에 부기)
+        names = _load_ticker_names()
         for r in upcoming:
+            t = r['ticker']
+            name = names.get(t.upper(), '')
             hr = (r['hour'] or '').upper()
-            chunks.append(f"[{r['ticker']}] {r['event_date'][5:]}{(' ' + hr) if hr else ''}")
-        line = '  '
-        for c in chunks:
-            if len(line) + len(c) + 3 > 80:
-                lines.append(line.rstrip(' ·'))
-                line = '  '
-            line += c + ' · '
-        if line.strip():
-            lines.append(line.rstrip(' ·'))
+            date_field = f"{r['event_date']}{(' (' + hr + ')') if hr else ''}"
+            if name:
+                lines.append(f'  • {t} / {name} / {date_field}')
+            else:
+                lines.append(f'  • {t} / {date_field}')
 
     return '\n'.join(lines)
 
