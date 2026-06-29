@@ -366,8 +366,8 @@ for name in indices:
         except Exception:
             pass
 
-if df_change.empty and df_indices.empty:
-    print("\n[알림] 해당 기간의 데이터가 없습니다.")
+if df_change.empty:
+    print("\n[알림] 새로 계산할 종목 가격 변동 데이터가 없습니다 (새 거래일 없음 또는 수집 실패). 기존 데이터 보존, 종료.")
     exit()
 
 df_change = df_change.fillna(0)
