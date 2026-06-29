@@ -3907,6 +3907,11 @@ def create_order_section():
                                 orderStocks[p.display].forEach(function(s) {
                                     var key = String(s.code || '').trim();
                                     var saved = key && savedByCode[key];
+                                    // 저장된 변경전 기준선(baseWeight) 복원 → 추가주문 경계가 재로드 후에도 유지.
+                                    // 구버전 저장본(baseWeight 없음)이면 위에서 계산한 is_today_new?0:weight_prev 유지.
+                                    if (saved && saved.baseWeight != null) {
+                                        s.weight = parseFloat(saved.baseWeight) || 0;
+                                    }
                                     newStocks.push(s);
                                     if (saved) {
                                         consumed[key] = true;
@@ -3927,7 +3932,7 @@ def create_order_section():
                                         code: s.code,
                                         name: s.name || '',
                                         sector: s.sector || '',
-                                        weight: 0,
+                                        weight: (s.baseWeight != null ? (parseFloat(s.baseWeight) || 0) : 0),
                                         isNew: true
                                     });
                                     newStates.push({
@@ -4682,6 +4687,7 @@ def create_order_section():
                                 code: String(s.code),
                                 name: s.name || '',
                                 weight: newW,
+                                baseWeight: parseFloat(s.weight) || 0,   // 변경전 기준선(추가주문 경계) 영속화 — finalize는 무시(weight만 사용)
                                 reason: (st[i].reason || '').toString()
                             });
                         }
