@@ -114,7 +114,7 @@ PRODUCTS = [
     # advisory_template은 자문지 .xlsx 확보 시 경로 주입 (현재 Order 탭 직접 입력 운용).
     Product(broker='NH', nav_key='목표전환형 5호', aum_name='목표전환형 5호', ptype='target', kind_label='목표전환형',
             display='NH 목표전환형 5호', base_price=1000.00, start_date='2026-06-29', ytd_base='2026-06-29',
-            color='#0072CE', advisory_template=None, group=None,
+            color='#0072CE', advisory_template='자문지/라이프자산운용_라이프 다이내믹밸류_목표전환형 5호_2026.6.29.xlsx', group=None,
             active=True, keep_in_nav=True),
 
     # 청산 목표전환형 (이력 보존 — EXCLUDED_PORTFOLIOS 자동 파생). active=False.

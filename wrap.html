@@ -240,7 +240,7 @@
     <aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="#" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="sidebar-link active">Dashboard</a><a href="#" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="sidebar-link">Order</a><a href="#" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="sidebar-link">공시</a><a href="#" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="sidebar-link">기여도</a><a href="#" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="sidebar-link">수수료</a></aside>
     <header>
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-06-29 09:30:34 KST</div>
+        <div class="last-updated">Updated: 2026-06-29 09:31:57 KST</div>
     </header>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -1592,7 +1592,7 @@
         // 일반형 카드 → 3개 상품(삼성 트루밸류 / NH Value ESG / DB 개방형) 모두에 동일 종목/비중 행 추가
         // 목표전환형 카드 → 1개 상품에만 추가
         // 단일 출처: execution/wrap_config.py order_portfolios() (결합 그룹 카드 + 단독 target 카드 자동 생성)
-        var ORDER_PORTFOLIOS = [{"display": "삼성 트루밸류 / NH Value ESG / DB 개방형", "jsonKey": "삼성 트루밸류 / NH Value ESG / DB 개방형", "templates": [{"label": "삼성 트루밸류", "file": "자문지/라이프자산운용_트루밸류_260427.xlsx"}, {"label": "NH Value ESG", "file": "자문지/라이프자산운용_라이프 다이내믹밸류_일반형 _2026.4.27.xlsx"}, {"label": "DB 개방형", "file": "자문지/라이프자산운용_DB 개방형 랩 _2026.4.27.xlsx"}], "newSheetTargets": [{"broker": "삼성", "product": "트루밸류"}, {"broker": "NH", "product": "Value ESG"}, {"broker": "DB", "product": "개방형 랩"}]}, {"display": "NH 목표전환형 5호", "jsonKey": "NH 목표전환형 5호", "templates": [], "newSheetTargets": [{"broker": "NH", "product": "목표전환형 5호"}]}];
+        var ORDER_PORTFOLIOS = [{"display": "삼성 트루밸류 / NH Value ESG / DB 개방형", "jsonKey": "삼성 트루밸류 / NH Value ESG / DB 개방형", "templates": [{"label": "삼성 트루밸류", "file": "자문지/라이프자산운용_트루밸류_260427.xlsx"}, {"label": "NH Value ESG", "file": "자문지/라이프자산운용_라이프 다이내믹밸류_일반형 _2026.4.27.xlsx"}, {"label": "DB 개방형", "file": "자문지/라이프자산운용_DB 개방형 랩 _2026.4.27.xlsx"}], "newSheetTargets": [{"broker": "삼성", "product": "트루밸류"}, {"broker": "NH", "product": "Value ESG"}, {"broker": "DB", "product": "개방형 랩"}]}, {"display": "NH 목표전환형 5호", "jsonKey": "NH 목표전환형 5호", "templates": [{"label": "NH 목표전환형 5호", "file": "자문지/라이프자산운용_라이프 다이내믹밸류_목표전환형 5호_2026.6.29.xlsx"}], "newSheetTargets": [{"broker": "NH", "product": "목표전환형 5호"}]}];
         var orderState = {};
         var orderStocks = {};
         var orderActiveTab = null;
