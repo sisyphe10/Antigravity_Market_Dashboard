@@ -3332,13 +3332,14 @@ def create_cumulative_aum_chart():
         first_per_product = df.sort_values('날짜').groupby('상품명').first()['날짜']
         max_date = latest_per_product['날짜'].max()
 
-        # broker 순서: 최신 날짜의 broker AUM 합 내림차순
-        active_all = latest_per_product[latest_per_product['날짜'] == max_date]
-        broker_order = active_all.groupby('증권사')['AUM'].sum().sort_values(ascending=False).index.tolist()
-        # 활성 일반형이 없지만 목표전환형 청산 이력만 있는 broker 포함 (안전망)
-        for b in df['증권사'].unique():
-            if b not in broker_order:
-                broker_order.append(b)
+        # 일반형/개방형은 상품마다 AUM 입력일이 달라 전역 max_date로 거르면(== max_date)
+        # 최근 입력이 없는 상품이 통째로 누락된다 — 오른쪽 차트는 forward-fill로 그려서
+        # 표/차트가 어긋났다(예: NH 목표전환형 5호 단독 출시일 06-29엔 일반형 입력이 없어
+        # 트루밸류/다이내믹밸류/개방형 랩이 표에서 전부 빠짐). 각 일반형 상품의 '자체 최신'
+        # AUM 행을 활성으로 사용 → 차트 datasets(전 일반형 forward-fill)와 동일 기준.
+        regular_latest = latest_per_product[
+            ~latest_per_product['상품명'].str.contains('목표전환형', na=False)
+        ].copy()
 
         target_df_all = df[df['상품명'].str.contains('목표전환형', na=False)]
 
@@ -3398,13 +3399,24 @@ def create_cumulative_aum_chart():
                 '</table></div>'
             )
 
+        # broker 순서: (일반형 자체최신 AUM 합 + 목표전환형 누적) 내림차순.
+        # 일반형/목표전환형 어느 하나라도 있는 모든 broker 포함.
+        all_brokers = list(df['증권사'].unique())
+        target_summaries = {b: _target_summary(b) for b in all_brokers}
+
+        def _broker_total(b):
+            reg = int(regular_latest[regular_latest['증권사'] == b]['AUM'].sum())
+            tgt = target_summaries[b]['cumulative_aum'] if target_summaries[b] else 0
+            return reg + tgt
+
+        broker_order = sorted(all_brokers, key=_broker_total, reverse=True)
+
         cum_rows_html = ''
         cum_total = 0
         for broker in broker_order:
-            # 1) 그 broker의 활성 일반형 (AUM 내림차순)
-            broker_regular = active_all[
-                (active_all['증권사'] == broker) &
-                (~active_all['상품명'].str.contains('목표전환형', na=False))
+            # 1) 그 broker의 일반형/개방형 (각 상품 자체 최신, AUM 내림차순)
+            broker_regular = regular_latest[
+                regular_latest['증권사'] == broker
             ].sort_values('AUM', ascending=False)
             for _, r in broker_regular.iterrows():
                 aum_val = int(r['AUM'])
@@ -3415,7 +3427,7 @@ def create_cumulative_aum_chart():
                     f'<td>{aum_val/1e8:,.0f}억</td><td>{date_str}</td></tr>\n'
                 )
             # 2) 그 broker의 목표전환형 통합 행 (활성 또는 가장 최근 청산)
-            summary = _target_summary(broker)
+            summary = target_summaries.get(broker)
             if summary is not None:
                 cum_total += summary['cumulative_aum']
                 date_str = summary['date'].strftime('%m/%d')
