@@ -3870,6 +3870,32 @@ def create_order_section():
         var orderActiveTab = null;
         var _orderLoaded = false;
 
+        // pending_orders.json 취득 — Contents API 우선(커밋 즉시 반영, Pages 빌드지연 우회)
+        //   → Pages 폴백 → localStorage 미러(원격 이중장애 시). 모두 실패 시 {} (복원 없음, 무해).
+        // repo가 PUBLIC이라 Contents API raw 미디어타입을 비인증으로 읽음(60req/시, 소진 시 폴백).
+        async function fetchPendingOrdersJson() {
+            var apiUrl = 'https://api.github.com/repos/' + ORDER_REPO
+                + '/contents/orders/pending_orders.json?ref=main';
+            try {
+                var r = await fetch(apiUrl, {
+                    headers: { 'Accept': 'application/vnd.github.raw' },
+                    cache: 'no-store',
+                });
+                if (r.ok) return await r.json();
+                if (r.status === 404) return {};   // 파일 미생성(정상)
+            } catch(e) { /* 네트워크 오류 → 폴백 */ }
+            try {
+                var r2 = await fetch('orders/pending_orders.json?_=' + Date.now());
+                if (r2.ok) return await r2.json();
+                if (r2.status === 404) return {};
+            } catch(e) { /* 오프라인 → localStorage 폴백 */ }
+            try {
+                var mirror = localStorage.getItem('pending_orders_mirror');
+                if (mirror) return JSON.parse(mirror);
+            } catch(e) {}
+            return {};
+        }
+
         async function loadOrder() {
             if (_orderLoaded) return;
             _orderLoaded = true;
@@ -3896,9 +3922,8 @@ def create_order_section():
 
                 // 오늘자 임시저장본(pending_orders.json) 화면 복원
                 try {
-                    var pendingRes = await fetch('orders/pending_orders.json?_=' + Date.now());
-                    if (pendingRes.ok) {
-                        var pending = await pendingRes.json();
+                    var pending = await fetchPendingOrdersJson();
+                    if (pending && typeof pending === 'object' && !Array.isArray(pending)) {
                         var dNow = new Date();
                         var todayStr = dNow.getFullYear() + '-'
                             + String(dNow.getMonth() + 1).padStart(2, '0') + '-'
@@ -4731,6 +4756,8 @@ def create_order_section():
                     var errTxt = await putResp.text();
                     throw new Error('PUT 실패: ' + putResp.status + ' ' + errTxt.slice(0, 200));
                 }
+                // localStorage 미러 (fetchPendingOrdersJson 3차 폴백) — 원격 이중장애에도 새로고침 생존
+                try { localStorage.setItem('pending_orders_mirror', JSON.stringify(existing)); } catch(e) {}
                 if (!silent) {
                     alert('✅ 저장 완료 (' + savedPfs.length + '개 포트폴리오, ' + totalRows + '개 종목)\\n\\n탭 간 추천사유 동기화 보존됨. 최종 반영은 [최종 저장] 또는 16:00 KST 자동 처리.');
                 }
