@@ -49,22 +49,6 @@
       "is_today_new": false
     },
     {
-      "code": "000150",
-      "name": "두산",
-      "sector": "상사,자본재",
-      "market_cap": 240802.32645,
-      "weight": 2.0,
-      "weight_prev": 5.0,
-      "today_return": 0.6089309878213802,
-      "contribution": 0.30446549391069017,
-      "cumulative_return": 54.35457294470139,
-      "current_price": 1487000.0,
-      "ath_price": 2203000.0,
-      "dd": -32.501134816159784,
-      "rsi": -30.8555087131418,
-      "is_today_new": false
-    },
-    {
       "code": "298380",
       "name": "에이비엘바이오",
       "sector": "건강관리",
@@ -142,6 +126,22 @@
       "ath_price": 172000.0,
       "dd": -7.558139534883724,
       "rsi": 2.4734883485931336,
+      "is_today_new": false
+    },
+    {
+      "code": "000150",
+      "name": "두산",
+      "sector": "상사,자본재",
+      "market_cap": 240802.32645,
+      "weight": 2.0,
+      "weight_prev": 2.0,
+      "today_return": 0.6089309878213802,
+      "contribution": 0.12178619756427604,
+      "cumulative_return": 54.35457294470139,
+      "current_price": 1487000.0,
+      "ath_price": 2203000.0,
+      "dd": -32.501134816159784,
+      "rsi": -30.8555087131418,
       "is_today_new": false
     },
     {
@@ -230,15 +230,15 @@
       "sector": "소매(유통)",
       "market_cap": 71311.11655,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "weight_prev": 2.0,
+      "today_return": 3.5665294924554183,
+      "contribution": 0.7133058984910836,
+      "cumulative_return": 0.0,
       "current_price": 755000.0,
       "ath_price": 767000.0,
       "dd": -1.5645371577574951,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "237690",
@@ -246,15 +246,15 @@
       "sector": "건강관리",
       "market_cap": 27586.488636,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "weight_prev": 2.0,
+      "today_return": -2.074074074074074,
+      "contribution": -0.4148148148148148,
+      "cumulative_return": 0.0,
       "current_price": 132200.0,
       "ath_price": 168700.0,
       "dd": -21.63604030823948,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
   "NH 목표전환형 5호": [
@@ -264,9 +264,9 @@
       "sector": "반도체",
       "market_cap": 19526570.55072,
       "weight": 20.0,
-      "weight_prev": 15.0,
+      "weight_prev": 20.0,
       "today_return": 3.4055727554179565,
-      "contribution": 5.1083591331269345,
+      "contribution": 6.811145510835913,
       "cumulative_return": 1.4316702819956673,
       "current_price": 334000.0,
       "ath_price": 362500.0,
@@ -280,9 +280,9 @@
       "sector": "반도체",
       "market_cap": 18886612.6725,
       "weight": 20.0,
-      "weight_prev": 15.0,
+      "weight_prev": 20.0,
       "today_return": 0.837138508371385,
-      "contribution": 1.2557077625570776,
+      "contribution": 1.6742770167427703,
       "cumulative_return": 0.3570655702229031,
       "current_price": 2650000.0,
       "ath_price": 2919000.0,
@@ -296,9 +296,9 @@
       "sector": "은행",
       "market_cap": 563953.49706,
       "weight": 7.0,
-      "weight_prev": 5.0,
+      "weight_prev": 7.0,
       "today_return": 3.4482758620689653,
-      "contribution": 1.7241379310344827,
+      "contribution": 2.413793103448276,
       "cumulative_return": 1.4084507042253502,
       "current_price": 159000.0,
       "ath_price": 172000.0,
@@ -344,15 +344,15 @@
       "sector": "건강관리",
       "market_cap": 27586.488636,
       "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "weight_prev": 3.0,
+      "today_return": -2.074074074074074,
+      "contribution": -0.6222222222222221,
+      "cumulative_return": 0.0,
       "current_price": 132200.0,
       "ath_price": 168700.0,
       "dd": -21.63604030823948,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "298380",
@@ -360,15 +360,15 @@
       "sector": "건강관리",
       "market_cap": 55707.525685,
       "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "weight_prev": 3.0,
+      "today_return": -6.660412757973734,
+      "contribution": -1.9981238273921202,
+      "cumulative_return": 0.0,
       "current_price": 99500.0,
       "ath_price": 245500.0,
       "dd": -59.47046843177189,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "226950",
@@ -376,73 +376,15 @@
       "sector": "건강관리",
       "market_cap": 31621.783548,
       "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "weight_prev": 3.0,
+      "today_return": -6.937799043062201,
+      "contribution": -2.08133971291866,
+      "cumulative_return": 0.0,
       "current_price": 155600.0,
       "ath_price": 207000.0,
       "dd": -24.83091787439613,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
-  ],
-  "_order_changes": {
-    "삼성 트루밸류 / NH Value ESG / DB 개방형": {
-      "date": "2026-06-30",
-      "added": [
-        {
-          "name": "신세계",
-          "weight": 2.0
-        },
-        {
-          "name": "에스티팜",
-          "weight": 2.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "두산",
-          "from": 5.0,
-          "to": 2.0
-        }
-      ],
-      "removed": []
-    },
-    "NH 목표전환형 5호": {
-      "date": "2026-06-30",
-      "added": [
-        {
-          "name": "에스티팜",
-          "weight": 3.0
-        },
-        {
-          "name": "에이비엘바이오",
-          "weight": 3.0
-        },
-        {
-          "name": "올릭스",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "삼성전자",
-          "from": 15.0,
-          "to": 20.0
-        },
-        {
-          "name": "SK하이닉스",
-          "from": 15.0,
-          "to": 20.0
-        },
-        {
-          "name": "KB금융",
-          "from": 5.0,
-          "to": 7.0
-        }
-      ],
-      "removed": []
-    }
-  }
+  ]
 }
