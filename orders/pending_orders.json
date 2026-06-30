@@ -317,7 +317,7 @@
           "reason": "안정적인 수주를 바탕으로 향후 몇 년 동안 실적 성장 가능, 국민성장펀드 선정 가능성"
         }
       ],
-      "savedAt": "2026-06-30T00:15:08.232Z"
+      "savedAt": "2026-06-30T00:20:58.125Z"
     },
     "NH 목표전환형 5호": {
       "targets": [
@@ -331,25 +331,25 @@
           "sector": "반도체",
           "code": "005930",
           "name": "삼성전자",
-          "weight": 15,
+          "weight": 20,
           "baseWeight": 15,
-          "reason": ""
+          "reason": "6월 리밸런싱 이후 7월 상승 가능성, 비중 확대"
         },
         {
           "sector": "반도체",
           "code": "000660",
           "name": "SK하이닉스",
-          "weight": 15,
+          "weight": 20,
           "baseWeight": 15,
-          "reason": ""
+          "reason": "6월 리밸런싱 이후 7월 상승 가능성, 비중 확대"
         },
         {
           "sector": "은행",
           "code": "105560",
           "name": "KB금융",
-          "weight": 5,
+          "weight": 7,
           "baseWeight": 5,
-          "reason": ""
+          "reason": "자사주 매입을 통한 주가 반등 확인, 추가 매수"
         },
         {
           "sector": "건강관리",
@@ -366,9 +366,33 @@
           "weight": 3,
           "baseWeight": 3,
           "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "237690",
+          "name": "에스티팜",
+          "weight": 3,
+          "baseWeight": 0,
+          "reason": "안정적인 수주를 바탕으로 향후 몇 년 동안 실적 성장 가능, 국민성장펀드 선정 가능성"
+        },
+        {
+          "sector": "건강관리",
+          "code": "298380",
+          "name": "에이비엘바이오",
+          "weight": 3,
+          "baseWeight": 0,
+          "reason": "릴리와의 BBB셔틀 협업을 통해 마일스톤 받을 가능성 높아 보임, 신규 편입"
+        },
+        {
+          "sector": "건강관리",
+          "code": "226950",
+          "name": "올릭스",
+          "weight": 3,
+          "baseWeight": 0,
+          "reason": "7월 14일 R&D데이 개최, 릴리, 로레알과의 협력 강화 중으로 신규 편입"
         }
       ],
-      "savedAt": "2026-06-30T00:15:08.232Z"
+      "savedAt": "2026-06-30T00:20:58.125Z"
     }
   }
 }
