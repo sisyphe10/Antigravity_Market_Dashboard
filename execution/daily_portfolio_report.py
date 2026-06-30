@@ -158,27 +158,27 @@ def get_portfolio_holdings():
     json_path = 'portfolio_data.json'
     if not os.path.exists(json_path):
         logging.warning(f"{json_path} not found — holdings 섹션 생략")
-        return None, None
+        return None, []
     try:
         with open(json_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
     except Exception as e:
         logging.warning(f"{json_path} 로드 실패: {e}")
-        return None, None
+        return None, []
 
     general = None
-    target = None
+    targets = []
     for key, stocks in data.items():
         if not key or key.startswith('_'):
             continue
         if not isinstance(stocks, list) or not stocks:
             continue
         if '목표전환형' in key:
-            target = (key, stocks)
+            targets.append((key, stocks))
         elif '트루밸류' in key:
             general = (key, stocks)
 
-    return general, target
+    return general, targets
 
 def _color_for(text):
     """양수(+) 빨강, 음수(-) 파랑, 그 외 검정"""
@@ -332,7 +332,7 @@ async def send_report(no_send=False):
     returns_data = get_latest_returns()
 
     logging.info("3. 일반형/목표전환형 종목 구성 로드...")
-    general, target = get_portfolio_holdings()
+    general, targets = get_portfolio_holdings()
 
     logging.info("4. 메시지 포맷팅...")
     message = format_message(date, nav_data, returns_data)
@@ -347,8 +347,11 @@ async def send_report(no_send=False):
         bot = Bot(token=token)
         await bot.send_message(chat_id=chat_id, text=message, parse_mode='HTML')
 
-        # 종목 구성 PNG 표 전송 (일반형 + 운용 중인 목표전환형)
-        for section_title, holdings in [('일반형 랩', general), ('목표전환형 랩', target)]:
+        # 종목 구성 PNG 표 전송 (일반형 + 운용 중인 목표전환형 각각 — 활성 2개 이상도 모두)
+        png_sections = [('일반형 랩', general)]
+        for tkey, tstocks in targets:
+            png_sections.append((tkey, (tkey, tstocks)))
+        for section_title, holdings in png_sections:
             if not holdings:
                 continue
             _, stocks = holdings

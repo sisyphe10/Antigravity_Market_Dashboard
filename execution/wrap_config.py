@@ -116,6 +116,12 @@ PRODUCTS = [
             display='NH 목표전환형 5호', base_price=1000.00, start_date='2026-06-29', ytd_base='2026-06-29',
             color='#0072CE', advisory_template='자문지/라이프자산운용_라이프 다이내믹밸류_목표전환형 5호_2026.6.29.xlsx', group=None,
             active=True, keep_in_nav=True),
+    # DB 목표전환형 6차 — 2026-07-01 개시. 단독(group=None).
+    Product(broker='DB', nav_key='목표전환형 6차', aum_name='목표전환형 6차', ptype='target', kind_label='목표전환형',
+            display='DB 목표전환형 6차', base_price=1000.00, start_date='2026-07-01', ytd_base='2026-07-01',
+            color='#00854A',
+            advisory_template='자문지/라이프자산운용_DB 목표전환형 랩 _6차_2026.7.1.xlsx',
+            group=None, active=True, keep_in_nav=True),
 
     # 청산 목표전환형 (이력 보존 — EXCLUDED_PORTFOLIOS 자동 파생). active=False.
     # 5차/4호는 2026-06-23 end_date 동결 SOP 적용분 → keep_in_nav=True (컬럼 완결).
