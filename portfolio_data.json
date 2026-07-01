@@ -262,15 +262,15 @@
       "sector": "반도체",
       "market_cap": 21639.32868,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "weight_prev": 2.0,
+      "today_return": 8.955223880597014,
+      "contribution": 1.791044776119403,
+      "cumulative_return": 0.0,
       "current_price": 58400.0,
       "ath_price": 71100.0,
       "dd": -17.862165963431785,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
   "NH 목표전환형 5호": [
@@ -320,6 +320,22 @@
       "ath_price": 172000.0,
       "dd": -7.848837209302328,
       "rsi": 4.209849535446086,
+      "is_today_new": false
+    },
+    {
+      "code": "062040",
+      "name": "산일전기",
+      "sector": "기계",
+      "market_cap": 80060.44775,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": 9.643605870020965,
+      "contribution": 4.821802935010482,
+      "cumulative_return": 0.0,
+      "current_price": 261500.0,
+      "ath_price": 333500.0,
+      "dd": -21.58920539730135,
+      "rsi": 0.0,
       "is_today_new": false
     },
     {
@@ -403,36 +419,20 @@
       "is_today_new": false
     },
     {
-      "code": "062040",
-      "name": "산일전기",
-      "sector": "기계",
-      "market_cap": 80060.44775,
-      "weight": 5.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
-      "current_price": 261500.0,
-      "ath_price": 333500.0,
-      "dd": -21.58920539730135,
-      "rsi": null,
-      "is_today_new": true
-    },
-    {
       "code": "089030",
       "name": "테크윙",
       "sector": "반도체",
       "market_cap": 21639.32868,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "weight_prev": 2.0,
+      "today_return": 8.955223880597014,
+      "contribution": 1.791044776119403,
+      "cumulative_return": 0.0,
       "current_price": 58400.0,
       "ath_price": 71100.0,
       "dd": -17.862165963431785,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
   "DB 목표전환형 6차": [
@@ -443,14 +443,14 @@
       "market_cap": 18386546.22216,
       "weight": 20.0,
       "weight_prev": 20.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": -5.838323353293413,
+      "contribution": -11.676646706586828,
+      "cumulative_return": 0.0,
       "current_price": 314500.0,
       "ath_price": 362500.0,
       "dd": -13.241379310344826,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "000660",
@@ -459,14 +459,14 @@
       "market_cap": 18245180.544,
       "weight": 20.0,
       "weight_prev": 20.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": -3.3962264150943398,
+      "contribution": -6.7924528301886795,
+      "cumulative_return": 0.0,
       "current_price": 2560000.0,
       "ath_price": 2919000.0,
       "dd": -12.298732442617332,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "105560",
@@ -475,14 +475,14 @@
       "market_cap": 562180.05839,
       "weight": 7.0,
       "weight_prev": 7.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": -0.3144654088050315,
+      "contribution": -0.22012578616352207,
+      "cumulative_return": 0.0,
       "current_price": 158500.0,
       "ath_price": 172000.0,
       "dd": -7.848837209302328,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "062040",
@@ -491,14 +491,14 @@
       "market_cap": 80060.44775,
       "weight": 5.0,
       "weight_prev": 5.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": 9.643605870020965,
+      "contribution": 4.821802935010482,
+      "cumulative_return": 0.0,
       "current_price": 261500.0,
       "ath_price": 333500.0,
       "dd": -21.58920539730135,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "196170",
@@ -507,14 +507,14 @@
       "market_cap": 191839.10794,
       "weight": 3.0,
       "weight_prev": 3.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": -0.8310249307479225,
+      "contribution": -0.24930747922437674,
+      "cumulative_return": 0.0,
       "current_price": 358000.0,
       "ath_price": 559000.0,
       "dd": -35.95706618962433,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "141080",
@@ -523,14 +523,14 @@
       "market_cap": 55529.127,
       "weight": 3.0,
       "weight_prev": 3.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": 0.06671114076050699,
+      "contribution": 0.020013342228152098,
+      "cumulative_return": 0.0,
       "current_price": 150000.0,
       "ath_price": 213500.0,
       "dd": -29.7423887587822,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "237690",
@@ -539,14 +539,14 @@
       "market_cap": 27461.285208,
       "weight": 3.0,
       "weight_prev": 3.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": -0.45385779122541603,
+      "contribution": -0.1361573373676248,
+      "cumulative_return": 0.0,
       "current_price": 131600.0,
       "ath_price": 168700.0,
       "dd": -21.991701244813278,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "298380",
@@ -555,14 +555,14 @@
       "market_cap": 56827.274945,
       "weight": 3.0,
       "weight_prev": 3.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": 2.0100502512562812,
+      "contribution": 0.6030150753768844,
+      "cumulative_return": 0.0,
       "current_price": 101500.0,
       "ath_price": 245500.0,
       "dd": -58.65580448065173,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "226950",
@@ -571,14 +571,14 @@
       "market_cap": 33938.54661,
       "weight": 3.0,
       "weight_prev": 3.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": 7.326478149100257,
+      "contribution": 2.1979434447300767,
+      "cumulative_return": 0.0,
       "current_price": 167000.0,
       "ath_price": 207000.0,
       "dd": -19.323671497584538,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "089030",
@@ -587,104 +587,28 @@
       "market_cap": 21639.32868,
       "weight": 2.0,
       "weight_prev": 2.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": 8.955223880597014,
+      "contribution": 1.791044776119403,
+      "cumulative_return": 0.0,
       "current_price": 58400.0,
       "ath_price": 71100.0,
       "dd": -17.862165963431785,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
-  "_order_changes": {
-    "삼성 트루밸류 / NH Value ESG / DB 개방형": {
-      "date": "2026-07-01",
-      "added": [
-        {
-          "name": "테크윙",
-          "weight": 2.0
-        }
-      ],
-      "changed": [],
-      "removed": []
-    },
-    "NH 목표전환형 5호": {
-      "date": "2026-07-01",
-      "added": [
-        {
-          "name": "산일전기",
-          "weight": 5.0
-        },
-        {
-          "name": "테크윙",
-          "weight": 2.0
-        }
-      ],
-      "changed": [],
-      "removed": []
-    },
-    "DB 목표전환형 6차": {
-      "date": "2026-07-01",
-      "added": [
-        {
-          "name": "삼성전자",
-          "weight": 20.0
-        },
-        {
-          "name": "SK하이닉스",
-          "weight": 20.0
-        },
-        {
-          "name": "KB금융",
-          "weight": 7.0
-        },
-        {
-          "name": "산일전기",
-          "weight": 5.0
-        },
-        {
-          "name": "알테오젠",
-          "weight": 3.0
-        },
-        {
-          "name": "리가켐바이오",
-          "weight": 3.0
-        },
-        {
-          "name": "에스티팜",
-          "weight": 3.0
-        },
-        {
-          "name": "에이비엘바이오",
-          "weight": 3.0
-        },
-        {
-          "name": "올릭스",
-          "weight": 3.0
-        },
-        {
-          "name": "테크윙",
-          "weight": 2.0
-        }
-      ],
-      "changed": [],
-      "removed": [],
-      "new_fund": true
-    }
-  },
   "_portfolio_meta": {
     "삼성 트루밸류 / NH Value ESG / DB 개방형": {
-      "nav_ytd_d1": 100.02671534796738,
-      "nav_cum_d1": 304.3159999999999
+      "nav_ytd_d1": 95.8482370343985,
+      "nav_cum_d1": 295.87
     },
     "NH 목표전환형 5호": {
-      "nav_ytd_d1": 0.4730000000000123,
-      "nav_cum_d1": 0.4730000000000123
+      "nav_ytd_d1": -1.1600000000000055,
+      "nav_cum_d1": -1.1600000000000055
     },
     "DB 목표전환형 6차": {
-      "nav_ytd_d1": null,
-      "nav_cum_d1": null
+      "nav_ytd_d1": 0.0,
+      "nav_cum_d1": 0.0
     }
   }
 }
