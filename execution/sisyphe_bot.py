@@ -581,12 +581,16 @@ def format_update_summary(portfolio_data):
             changed = ch.get('changed', [])
             removed = ch.get('removed', [])
             if added:
-                _lbl = "신규 개시" if ch.get('new_fund') else "신규"
-                lines.append(f"<b>{_lbl}</b>  " + ", ".join(f"{a['name']} {a['weight']:g}%" for a in added))
-            if changed:
-                lines.append("<b>변경</b>  " + ", ".join(f"{cg['name']} {cg['from']:g}% → {cg['to']:g}%" for cg in changed))
+                lines.append("<b>신규 편입</b>  " + ", ".join(f"{a['name']} {a['weight']:g}%" for a in added))
+            # 비중 변경 → 추가 매수(비중↑) / 비중 축소(비중↓) 분리
+            buys = [cg for cg in changed if cg['to'] > cg['from']]
+            sells = [cg for cg in changed if cg['to'] < cg['from']]
+            if buys:
+                lines.append("<b>추가 매수</b>  " + ", ".join(f"{cg['name']} {cg['from']:g}% → {cg['to']:g}%" for cg in buys))
+            if sells:
+                lines.append("<b>비중 축소</b>  " + ", ".join(f"{cg['name']} {cg['from']:g}% → {cg['to']:g}%" for cg in sells))
             if removed:
-                lines.append("<b>편출</b>  " + ", ".join(f"{r['name']} {r['weight']:g}%" for r in removed))
+                lines.append("<b>전량 편출</b>  " + ", ".join(f"{r['name']} {r['weight']:g}%" for r in removed))
 
     return "\n".join(lines)
 
