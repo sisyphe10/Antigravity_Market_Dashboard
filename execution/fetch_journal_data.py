@@ -109,23 +109,53 @@ def get_index_data(target_date=None):
 
 
 def get_investor_data(date_str):
-    """네이버 금융에서 투자자별 순매수 (개인/외국인/기관)"""
+    """투자자별 순매수 (개인/외국인/기관).
+    - KOSPI/KOSDAQ: 한국투자증권(KIS) 시장별 투자자매매동향(일별) 확정 정산값 사용.
+      (네이버 investorDealTrendDay는 16:10 수집 시 잠정치가 섞여 확정값과 어긋나는 사례가 있어 KIS로 전환. 2026-07-01)
+      순매수 거래대금(_tr_pbmn, 백만원) ÷ 100 = 억원.
+    - 선물(f_*): KIS 시장투자자 엔드포인트가 선물을 다루지 않아 네이버 유지."""
+    try:
+        from execution import kis_token
+    except ImportError:
+        import kis_token
+
     result = {}
-    for sosok, prefix in [('01', 'k'), ('02', 'q'), ('03', 'f')]:
-        r = requests.get(f'https://finance.naver.com/sise/investorDealTrendDay.naver?bizdate={date_str}&sosok={sosok}', headers=HEADERS, timeout=10)
+    _KIS_MKT = [('0001', 'KSP', 'k'), ('1001', 'KSQ', 'q')]
+    for iscd, iscd1, prefix in _KIS_MKT:
+        try:
+            params = {
+                'fid_cond_mrkt_div_code': 'U', 'fid_input_iscd': iscd,
+                'fid_input_date_1': date_str, 'fid_input_iscd_1': iscd1,
+                'fid_input_date_2': date_str, 'fid_input_iscd_2': iscd,
+            }
+            resp = kis_token.kis_get(
+                '/uapi/domestic-stock/v1/quotations/inquire-investor-daily-by-market',
+                'FHPTJ04040000', params)
+            for rec in (resp.get('output') or []):
+                if rec.get('stck_bsop_date') == date_str:
+                    result[f'{prefix}_per'] = str(round(int(rec['prsn_ntby_tr_pbmn']) / 100))
+                    result[f'{prefix}_for'] = str(round(int(rec['frgn_ntby_tr_pbmn']) / 100))
+                    result[f'{prefix}_inst'] = str(round(int(rec['orgn_ntby_tr_pbmn']) / 100))
+                    break
+        except Exception as e:
+            logging.warning(f'{prefix} KIS 투자자 수집 실패: {e}')
+
+    # 선물 투자자 (f_*)는 네이버 유지 (KIS 시장투자자 엔드포인트 미지원)
+    try:
+        r = requests.get(f'https://finance.naver.com/sise/investorDealTrendDay.naver?bizdate={date_str}&sosok=03', headers=HEADERS, timeout=10)
         soup = BeautifulSoup(r.text, 'html.parser')
         tables = soup.select('table')
         if tables:
-            rows = tables[0].select('tr')
-            for row in rows:
+            for row in tables[0].select('tr'):
                 cells = row.select('td')
-                if len(cells) >= 4:
-                    row_date = cells[0].text.strip().replace('.', '')
-                    if row_date == date_str[2:]:  # 26.03.31 매칭
-                        result[f'{prefix}_per'] = cells[1].text.strip().replace(',', '')
-                        result[f'{prefix}_for'] = cells[2].text.strip().replace(',', '')
-                        result[f'{prefix}_inst'] = cells[3].text.strip().replace(',', '')
-                        break
+                if len(cells) >= 4 and cells[0].text.strip().replace('.', '') == date_str[2:]:
+                    result['f_per'] = cells[1].text.strip().replace(',', '')
+                    result['f_for'] = cells[2].text.strip().replace(',', '')
+                    result['f_inst'] = cells[3].text.strip().replace(',', '')
+                    break
+    except Exception as e:
+        logging.warning(f'선물 투자자(네이버) 수집 실패: {e}')
+
     return result
 
 
@@ -260,6 +290,80 @@ def delete_sheet_row(date_str):
     return False
 
 
+def _kis_market_investor_series():
+    """KIS 시장별 투자자매매동향(일별) → {'k':{date:(per,for,inst)}, 'q':{...}} (억원).
+    1콜에 300거래일 시계열 반환."""
+    try:
+        from execution import kis_token
+    except ImportError:
+        import kis_token
+    today = datetime.now(KST).strftime('%Y%m%d')
+    out = {'k': {}, 'q': {}}
+    for iscd, iscd1, prefix in [('0001', 'KSP', 'k'), ('1001', 'KSQ', 'q')]:
+        try:
+            params = {
+                'fid_cond_mrkt_div_code': 'U', 'fid_input_iscd': iscd,
+                'fid_input_date_1': today, 'fid_input_iscd_1': iscd1,
+                'fid_input_date_2': today, 'fid_input_iscd_2': iscd,
+            }
+            resp = kis_token.kis_get(
+                '/uapi/domestic-stock/v1/quotations/inquire-investor-daily-by-market',
+                'FHPTJ04040000', params)
+            for rec in (resp.get('output') or []):
+                d = rec.get('stck_bsop_date')
+                if d:
+                    out[prefix][d] = (
+                        str(round(int(rec['prsn_ntby_tr_pbmn']) / 100)),
+                        str(round(int(rec['frgn_ntby_tr_pbmn']) / 100)),
+                        str(round(int(rec['orgn_ntby_tr_pbmn']) / 100)),
+                    )
+        except Exception as e:
+            logging.warning(f'{prefix} KIS 투자자 시계열 수집 실패: {e}')
+    return out
+
+
+def resync_recent_investor_kis(n=7):
+    """최근 n거래일 KOSPI/KOSDAQ 투자자 순매수를 KIS 확정값으로 재동기화(자가치유).
+    16:10 수집 시 잠정치가 들어와도 다음 실행에서 확정치로 자동 교정.
+    투자자 6개 컬럼(J,K,L / T,U,V)만 좁게 갱신."""
+    import gspread
+    from google.oauth2.service_account import Credentials
+
+    series = _kis_market_investor_series()
+    if not series['k'] and not series['q']:
+        logging.warning('KIS 시계열 없음 → 재동기화 skip')
+        return
+
+    sa_json = os.getenv('GOOGLE_SERVICE_ACCOUNT_KEY')
+    if sa_json:
+        import json
+        creds = Credentials.from_service_account_info(json.loads(sa_json), scopes=['https://www.googleapis.com/auth/spreadsheets'])
+    else:
+        key_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                'extreme-height-486504-c4-b6e5cda22ed7.json')
+        creds = Credentials.from_service_account_file(key_file, scopes=['https://www.googleapis.com/auth/spreadsheets'])
+    gc = gspread.authorize(creds)
+    ws = gc.open_by_key(JOURNAL_SHEET_ID).worksheet('Data')
+
+    vals = ws.get_all_values()
+    data_idx = [i for i, r in enumerate(vals) if i > 0 and r and r[0]]
+    recent = data_idx[-n:]
+    # 최근 n행은 시트 하단에서 연속이어야 함 (안전 가드)
+    if not recent or recent != list(range(recent[0], recent[-1] + 1)):
+        logging.warning('최근 데이터행이 비연속 → 재동기화 skip')
+        return
+
+    start, end = recent[0] + 1, recent[-1] + 1  # 1-based row
+    kospi_block, kosdaq_block = [], []
+    for i in recent:
+        d = vals[i][0].replace('-', '')
+        kospi_block.append(list(series['k'][d]) if d in series['k'] else [vals[i][9], vals[i][10], vals[i][11]])
+        kosdaq_block.append(list(series['q'][d]) if d in series['q'] else [vals[i][19], vals[i][20], vals[i][21]])
+    ws.update(range_name=f'J{start}:L{end}', values=kospi_block, value_input_option='RAW')
+    ws.update(range_name=f'T{start}:V{end}', values=kosdaq_block, value_input_option='RAW')
+    logging.info(f'KIS 투자자 재동기화 완료: 최근 {len(recent)}행 (행 {start}~{end})')
+
+
 def main(target_date=None):
     logging.info('투자일지 데이터 수집 시작')
 
@@ -305,6 +409,14 @@ def main(target_date=None):
 
     # 6. 스프레드시트 저장
     write_to_sheet(idx)
+
+    # 7. 최근 거래일 투자자 수급 KIS 확정값 재동기화 (자가치유) — 라이브 실행만
+    if not target_date:
+        try:
+            resync_recent_investor_kis(n=7)
+        except Exception as e:
+            logging.warning(f'KIS 투자자 재동기화 실패(무시): {e}')
+
     logging.info('완료!')
 
 
