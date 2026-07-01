@@ -1,0 +1,11 @@
+[Unit]
+Description=Antigravity 액티브 ETF 구성 변동 알림 timer (매일 19:00 KST — 수집 16:30/재시도 18:00/etf.html 18:30 이후)
+
+[Timer]
+OnCalendar=*-*-* 19:00:00 Asia/Seoul
+AccuracySec=1min
+Unit=etf-active-alert.service
+Persistent=true
+
+[Install]
+WantedBy=timers.target

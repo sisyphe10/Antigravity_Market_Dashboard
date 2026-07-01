@@ -1,0 +1,17 @@
+[Unit]
+Description=Antigravity 액티브 ETF 구성 변동 텔레그램 알림 (Sisyphe-Bot 구독자 브로드캐스트)
+After=network-online.target
+Wants=network-online.target
+OnFailure=sisyphe-bot-notify@etf-active-alert.service
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=/home/ubuntu/Antigravity_Market_Dashboard
+ExecStart=/bin/bash /home/ubuntu/Antigravity_Market_Dashboard/scripts/run_etf_active_alert.sh
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=10min
+
+[Install]
+WantedBy=multi-user.target

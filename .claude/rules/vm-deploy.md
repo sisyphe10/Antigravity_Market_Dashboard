@@ -73,6 +73,10 @@ ssh ... "cd /home/ubuntu/Antigravity_Market_Dashboard && bash scripts/deploy.sh 
 > ※ ETF 구성종목 수집(구 16:30 봇 잡)은 **systemd 타이머로 분리**됨 (2026-06-25):
 > `etf-collect.timer`(16:30) + `etf-collect-retry.timer`(18:00, idempotent) → `run_etf_collect.sh`.
 > 봇 재시작/배포가 진행 중인 수집을 죽이던 문제 근본해결. etf.html은 18:30 Featured 2차가 재생성.
+> **19:00 KST**: 액티브 ETF 구성 변동 알림 `etf-active-alert.timer` → `run_etf_active_alert.sh` → `execution/etf_active_alert.py`.
+> etf_data.db(전 액티브 ETF 전일 대비 신규편입/편출/비중급변) → subscribers.json 브로드캐스트.
+> 대시보드 etf.html '액티브 ETF' 탭과 동일한 단일 출처 모듈(`execution/etf_collector/active_etf_changes.py`)로 계산 → 숫자 일치.
+> dedup=`.etf_active_alert_sent.json`(키=latest 날짜→휴장일 무발송). deploy.sh `install_etf_units`가 유닛 설치·enable.
 
 ### ra-sisyphe-bot (리서치 알림)
 - 05:10 KST: Research Notes 헤드라인

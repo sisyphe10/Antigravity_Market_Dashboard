@@ -18,6 +18,7 @@ BACKUP_FILES=(
     ".wisereport_sent.json"
     ".portfolio_report_sent.json"
     ".ledger_notified.json"
+    ".etf_active_alert_sent.json"
     "stock_price_history.json"
     "seonyuduo_exercise_user_map.json"
     "seonyuduo_chats.json"
@@ -76,6 +77,11 @@ EARNINGS_BOT_TIMER=earnings-bot.timer
 KODEX_TIMER=kodex-sectors.timer
 LANDING_HIGHLIGHTS_TIMER=landing-highlights.timer
 ETF_TIMER=etf-collect.timer
+ETF_ALERT_TIMER=etf-active-alert.timer
+ETF_ALERT_SCRIPTS=(
+    execution/etf_active_alert.py
+    execution/etf_collector/active_etf_changes.py
+)
 EARNINGS_BOT_SCRIPTS=(
     execution/earnings_bot/runner.py
     execution/earnings_bot/edgar_monitor.py
@@ -88,7 +94,7 @@ EARNINGS_BOT_SCRIPTS=(
 validate() {
     echo "🔍 Validating bot scripts..."
     cd "$REPO_DIR"
-    for s in "${SCRIPTS[@]}" "${EARNINGS_BOT_SCRIPTS[@]}"; do
+    for s in "${SCRIPTS[@]}" "${EARNINGS_BOT_SCRIPTS[@]}" "${ETF_ALERT_SCRIPTS[@]}"; do
         python3 -c "compile(open('$s').read(), '$s', 'exec')" || {
             echo "❌ Syntax error in $s! Aborting."
             return 1
@@ -130,6 +136,11 @@ healthcheck() {
         echo "✅ $ETF_TIMER is active"
     else
         echo "⚠️  $ETF_TIMER inactive (한 번도 enable 안 됐을 수 있음)"
+    fi
+    if sudo systemctl is-active --quiet "$ETF_ALERT_TIMER"; then
+        echo "✅ $ETF_ALERT_TIMER is active"
+    else
+        echo "⚠️  $ETF_ALERT_TIMER inactive (한 번도 enable 안 됐을 수 있음)"
     fi
     return $rc
 }
@@ -195,7 +206,9 @@ install_etf_units() {
         echo "🔧 etf-collect systemd unit 최초 설치..."
         need_enable=1
     fi
-    for unit in etf-collect.service etf-collect.timer etf-collect-retry.timer; do
+    # 액티브 ETF 구성 변동 알림(19:00 KST)도 같은 ETF 도메인 → 함께 동기화.
+    for unit in etf-collect.service etf-collect.timer etf-collect-retry.timer \
+                etf-active-alert.service etf-active-alert.timer; do
         if [ ! -f "/etc/systemd/system/$unit" ] || ! cmp -s "$REPO_DIR/scripts/$unit" "/etc/systemd/system/$unit"; then
             echo "  → sync $unit"
             sudo cp "$REPO_DIR/scripts/$unit" /etc/systemd/system/
@@ -203,6 +216,7 @@ install_etf_units() {
         fi
     done
     chmod +x "$REPO_DIR/scripts/run_etf_collect.sh"
+    chmod +x "$REPO_DIR/scripts/run_etf_active_alert.sh"
     if [ "$need_reload" = 1 ]; then
         sudo systemctl daemon-reload
         echo "  ✓ daemon-reload"
@@ -211,6 +225,11 @@ install_etf_units() {
         sudo systemctl enable --now etf-collect.timer
         sudo systemctl enable --now etf-collect-retry.timer
         echo "  ✓ etf-collect.timer + etf-collect-retry.timer enabled + started"
+    fi
+    # etf-active-alert.timer 는 etf-collect 가 이미 설치된 기존 VM 에서도 켜지도록 독립 체크.
+    if ! sudo systemctl is-enabled --quiet etf-active-alert.timer 2>/dev/null; then
+        sudo systemctl enable --now etf-active-alert.timer
+        echo "  ✓ etf-active-alert.timer enabled + started"
     fi
 }
 

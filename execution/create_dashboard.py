@@ -8083,14 +8083,12 @@ refresh();
         .tables {{ display: flex; gap: 24px; flex-wrap: wrap; }}
         .tables > div {{ flex: 1; min-width: 500px; }}
         table {{ width: 100%; border-collapse: collapse; font-size: 16px; }}
-        thead {{ background: #2E7D32; }}
-        th {{ padding: 8px 6px; text-align: center; font-weight: 600; color: #fff; font-size: 0.78rem; border: 1px solid #1B5E20; }}
-        td {{ padding: 6px 6px; border: 1px solid #ddd; }}
+        thead {{ background: #e9ecef; }}
+        th {{ padding: 8px 6px; text-align: center; font-weight: 600; color: #000; font-size: 0.78rem; background: #e9ecef; box-shadow: inset 0 -2px 0 #000; }}
+        td {{ padding: 6px 6px; border-bottom: 1px solid #dee2e6; }}
         td.c {{ text-align: center; font-variant-numeric: tabular-nums; }}
-        tbody tr:nth-child(even) {{ background: #E8F5E9; }}
-        tbody tr:nth-child(odd) {{ background: #fff; }}
-        tbody tr:hover {{ background: #C8E6C9; }}
-        .section h2 {{ background: #2d7a3a; color: #fff; padding: 8px 12px; border-radius: 4px; font-size: 0.95rem; text-align: center; }}
+        tbody tr:hover {{ background: #f5f5f5; }}
+        .section h2 {{ color: #333; padding: 8px 0; font-size: 0.95rem; text-align: center; }}
         .pos {{ color: #cc0000; font-weight: 600; }}
         .neg {{ color: #0055cc; font-weight: 600; }}
         .tabs {{ display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #2d7a3a; }}
@@ -8666,6 +8664,17 @@ def generate_etf_html():
     dates_json = json.dumps(dates)
     prev_date = prev or ''
 
+    # 액티브 ETF 변동 — 대시보드 '액티브 ETF' 탭과 텔레그램 알림의 단일 출처
+    try:
+        from active_etf_changes import compute_active_etf_changes
+        active_changes = compute_active_etf_changes()
+    except Exception as _e:
+        print(f"active_etf_changes 계산 실패(빈 값으로 렌더): {_e}")
+        active_changes = {'latest': latest, 'prev': prev, 'first_run': (prev is None),
+                          'etfs': [], 'skipped': [],
+                          'totals': {'new': 0, 'exit': 0, 'chg': 0, 'etfs_changed': 0}}
+    active_json = json.dumps(active_changes, ensure_ascii=False)
+
     page = f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -8690,24 +8699,25 @@ header h1 {{ margin: 0; font-size: 33px; color: #333; font-weight: 700; line-hei
 .section-header {{ padding: 14px 20px; font-size: 1rem; font-weight: 700; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }}
 .section-header .count {{ font-size: 0.8rem; color: #888; font-weight: 400; }}
 table {{ width: 100%; border-collapse: collapse; font-size: 16px; }}
-thead {{ background: #2d7a3a; }}
-th {{ padding: 10px 8px; text-align: center; font-weight: 600; color: #fff; cursor: pointer; white-space: nowrap; }}
-th:hover {{ background: #1f5a2a; }}
+thead {{ background: #e9ecef; }}
+th {{ padding: 10px 8px; text-align: center; font-weight: 600; color: #000; cursor: pointer; white-space: nowrap; background: #e9ecef; box-shadow: inset 0 -2px 0 #000; }}
+th:hover {{ background: #ddd; }}
 th .arr {{ font-size: 0.6rem; margin-left: 2px; }}
-td {{ padding: 8px 8px; border-bottom: 1px solid #f0f0f0; text-align: center; }}
-tbody tr:hover {{ background: #f0f7f2; }}
+td {{ padding: 10px 8px; border-bottom: 1px solid #dee2e6; text-align: center; }}
+tbody tr:hover {{ background: #f5f5f5; }}
 tbody tr.etf-row {{ cursor: pointer; }}
-tbody tr.etf-row:hover {{ background: #f0f7f2; }}
+tbody tr.etf-row:hover {{ background: #f5f5f5; }}
 .num {{ text-align: center; font-variant-numeric: tabular-nums; }}
 .pos {{ color: #cc0000; font-weight: 600; }}
 .neg {{ color: #0055cc; font-weight: 600; }}
 .etf-name {{ text-align: center; font-weight: 600; }}
-.constituents-row {{ background: #f0f7f2; }}
+.constituents-row {{ background: #f8f9fa; }}
 .constituents-row td {{ padding: 0; }}
 .const-table {{ width: 100%; font-size: 0.78rem; }}
-.const-table th {{ background: #f0f7f2; color: #333; padding: 6px 8px; font-size: 0.75rem; }}
-.const-table td {{ padding: 5px 8px; border-bottom: 1px solid #f0f7f2; }}
-.const-table tbody tr:hover {{ background: #f0f7f2; }}
+.const-table th {{ background: #e9ecef; color: #000; padding: 6px 8px; font-size: 0.75rem; box-shadow: inset 0 -2px 0 #000; }}
+.const-table td {{ padding: 5px 8px; border-bottom: 1px solid #eee; }}
+.const-table tbody tr:hover {{ background: #f5f5f5; }}
+.active-tag {{ display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: 0.72rem; background: #e9ecef; color: #666; margin-left: 6px; }}
 .search-results {{ display: none; }}
 .search-results.active {{ display: block; }}
 .badge {{ display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }}
@@ -8726,7 +8736,8 @@ tbody tr.etf-row:hover {{ background: #f0f7f2; }}
 <div class="container">
     <div class="etf-tabs" style="display:flex;gap:0;margin-bottom:20px;border-bottom:2px solid #2d7a3a;">
         <div class="etf-tab active" onclick="switchEtfTab(0)" style="padding:10px 24px;cursor:pointer;font-weight:600;font-size:16px;color:#666;border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;background:#f0f0f0;">AUM 상위</div>
-        <div class="etf-tab" onclick="switchEtfTab(1)" style="padding:10px 24px;cursor:pointer;font-weight:600;font-size:16px;color:#666;border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;background:#f0f0f0;">종목 분석</div>
+        <div class="etf-tab" onclick="switchEtfTab(1)" style="padding:10px 24px;cursor:pointer;font-weight:600;font-size:16px;color:#666;border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;background:#f0f0f0;">🎯 액티브 ETF</div>
+        <div class="etf-tab" onclick="switchEtfTab(2)" style="padding:10px 24px;cursor:pointer;font-weight:600;font-size:16px;color:#666;border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;background:#f0f0f0;">종목 분석</div>
     </div>
     <div id="etfTab0" class="etf-tab-content">
     <div class="controls">
@@ -8762,6 +8773,34 @@ tbody tr.etf-row:hover {{ background: #f0f7f2; }}
     </div>
 
     <div id="etfTab1" class="etf-tab-content" style="display:none">
+        <div class="section">
+            <div class="section-header">📋 구성종목 변동 (전일 대비) <span class="count" id="activeChgCount"></span></div>
+            <div id="activeChgMeta" style="padding:8px 20px;font-size:0.82rem;color:#888;"></div>
+            <div style="overflow-x:auto"><table>
+                <thead><tr>
+                    <th>구분</th><th>ETF</th><th>종목</th>
+                    <th>전일(%)</th><th>오늘(%)</th><th>변화(%p)</th>
+                </tr></thead>
+                <tbody id="activeChgBody"></tbody>
+            </table></div>
+        </div>
+        <div class="section">
+            <div class="section-header">🎯 액티브 ETF (AUM 내림차순) <span class="count" id="activeListCount"></span></div>
+            <div style="overflow-x:auto"><table>
+                <thead><tr>
+                    <th onclick="doSortActive(0)">#<span class="arr" id="aarr0"></span></th>
+                    <th onclick="doSortActive(1)">ETF명<span class="arr" id="aarr1"></span></th>
+                    <th onclick="doSortActive(2)">AUM<span class="arr" id="aarr2"></span></th>
+                    <th onclick="doSortActive(3)">NAV<span class="arr" id="aarr3"></span></th>
+                    <th onclick="doSortActive(4)">종가<span class="arr" id="aarr4"></span></th>
+                    <th onclick="doSortActive(5)">거래량<span class="arr" id="aarr5"></span></th>
+                </tr></thead>
+                <tbody id="activeListBody"></tbody>
+            </table></div>
+        </div>
+    </div>
+
+    <div id="etfTab2" class="etf-tab-content" style="display:none">
         <div class="section">
             <div class="section-header">📈 순유입 상위 30 <span class="count">({latest})</span></div>
             <div style="overflow-x:auto"><table>
@@ -8805,6 +8844,7 @@ var allDaily = {daily_json};
 var allConst = {const_json};
 var prevConst = {prev_const_json};
 var dates = {dates_json};
+var activeChanges = {active_json};
 
 var curDate = dates[0] || '';
 var sortCol = 2, sortAsc = false; // default: AUM desc
@@ -8975,7 +9015,98 @@ function switchEtfTab(idx) {{
     }});
     document.getElementById('etfTab0').style.display = idx===0 ? '' : 'none';
     document.getElementById('etfTab1').style.display = idx===1 ? '' : 'none';
-    if (idx===1) renderAnalysis();
+    document.getElementById('etfTab2').style.display = idx===2 ? '' : 'none';
+    if (idx===1) renderActive();
+    if (idx===2) renderAnalysis();
+}}
+
+// ── 액티브 ETF 탭 (activeChanges = Python compute_active_etf_changes 결과, 단일 출처) ──
+var _activeSortCol = 2, _activeSortAsc = false; // 기본 AUM 내림차순
+function doSortActive(col) {{
+    if (_activeSortCol === col) _activeSortAsc = !_activeSortAsc;
+    else {{ _activeSortCol = col; _activeSortAsc = (col <= 1); }}
+    renderActiveList();
+}}
+function renderActiveList() {{
+    var rows = (activeChanges.etfs || []).slice();
+    var cols = ['_idx', 'name', 'aum', 'nav', 'close', 'vol'];
+    var key = cols[_activeSortCol] || 'aum';
+    rows.sort(function(a, b) {{
+        var va = (key === 'name') ? a.name : pn(a[key]);
+        var vb = (key === 'name') ? b.name : pn(b[key]);
+        if (va < vb) return _activeSortAsc ? -1 : 1;
+        if (va > vb) return _activeSortAsc ? 1 : -1;
+        return 0;
+    }});
+    for (var i=0;i<6;i++) {{
+        var el = document.getElementById('aarr'+i);
+        if (el) el.textContent = (i === _activeSortCol) ? (_activeSortAsc ? ' ▲' : ' ▼') : '';
+    }}
+    var h = '';
+    rows.forEach(function(r, i) {{
+        var tag = r.detect ? '' : '<span class="active-tag">변동감지 제외(단기금리/채권형)</span>';
+        h += '<tr>';
+        h += '<td>' + (i+1) + '</td>';
+        h += '<td class="etf-name">' + r.name + tag + '</td>';
+        h += '<td class="num">' + fmtAum(r.aum) + '</td>';
+        h += '<td class="num">' + fmtNum(r.nav) + '</td>';
+        h += '<td class="num">' + fmtNum(r.close) + '</td>';
+        h += '<td class="num">' + fmtNum(r.vol) + '</td>';
+        h += '</tr>';
+    }});
+    document.getElementById('activeListBody').innerHTML = h || '<tr><td colspan="6" style="padding:20px;color:#aaa">액티브 ETF 없음</td></tr>';
+    document.getElementById('activeListCount').textContent = rows.length + '종목';
+}}
+function _wp(v) {{ return (v==null) ? '-' : Number(v).toFixed(2); }}
+var _activeRendered = false;
+function renderActive() {{
+    renderActiveList();
+    if (_activeRendered) return;
+    _activeRendered = true;
+
+    var meta = document.getElementById('activeChgMeta');
+    var body = document.getElementById('activeChgBody');
+    var t = activeChanges.totals || {{new:0,exit:0,chg:0,etfs_changed:0}};
+    if (activeChanges.first_run || !activeChanges.prev) {{
+        meta.textContent = '전일 데이터 없음 (최초 수집) — 변동 비교 불가';
+        body.innerHTML = '';
+        document.getElementById('activeChgCount').textContent = '';
+        return;
+    }}
+    document.getElementById('activeChgCount').textContent =
+        '신규 ' + t.new + ' · 편출 ' + t.exit + ' · 급변 ' + t.chg;
+    var skN = (activeChanges.skipped || []).length;
+    meta.textContent = activeChanges.latest + ' vs 전일 ' + activeChanges.prev
+        + ' · 변동 ETF ' + t.etfs_changed + '개'
+        + (skN ? ' · 비교불가(수집누락) ' + skN + '개' : '');
+
+    var changed = (activeChanges.etfs || []).filter(function(e) {{
+        return e.detect && e.comparable && (e.new.length || e.exit.length || e.chg.length);
+    }});
+    if (!changed.length) {{
+        body.innerHTML = '<tr><td colspan="6" style="padding:20px;color:#aaa;text-align:center">오늘 구성종목 변동 없음</td></tr>';
+        return;
+    }}
+    var flat = [];
+    changed.forEach(function(e) {{
+        e.new.forEach(function(s) {{ flat.push({{type:'편입', etf:e.name, name:s.name, prev:null, cur:s.w, d:s.w}}); }});
+        e.exit.forEach(function(s) {{ flat.push({{type:'편출', etf:e.name, name:s.name, prev:s.prev_w, cur:null, d:-s.prev_w}}); }});
+        e.chg.forEach(function(s) {{ flat.push({{type:'급변', etf:e.name, name:s.name, prev:s.prev_w, cur:s.w, d:s.d}}); }});
+    }});
+    flat.sort(function(a,b) {{ return Math.abs(b.d) - Math.abs(a.d); }});
+    var h = '';
+    flat.forEach(function(r) {{
+        var cls = r.d >= 0 ? 'pos' : 'neg';
+        h += '<tr>'
+          + '<td>' + r.type + '</td>'
+          + '<td class="etf-name">' + r.etf + '</td>'
+          + '<td style="text-align:left">' + r.name + '</td>'
+          + '<td class="num">' + _wp(r.prev) + '</td>'
+          + '<td class="num">' + _wp(r.cur) + '</td>'
+          + '<td class="num ' + cls + '">' + (r.d>=0?'+':'') + _wp(r.d) + '</td>'
+          + '</tr>';
+    }});
+    body.innerHTML = h;
 }}
 
 var _analysisRendered = false;
