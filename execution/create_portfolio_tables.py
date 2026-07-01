@@ -431,7 +431,18 @@ def create_portfolio_tables():
 
             # 당일 finalize된 주문 변경 내역 (아직 표·메시지에 미반영분)
             order_change = None
-            if today_date > disp_date:
+            _today_norm = pd.Timestamp(today_date).normalize()
+            if (not dates_lt_today) and (_today_norm == _today_kst) and today_comp:
+                # 오늘 신규 개시된 펀드 (전일 구성 자체가 없음) — 전체 구성을 신규로 표시.
+                # 일반 diff는 today_date>disp_date를 요구하나, 개시일엔 disp_date가 today로 폴백돼 잡히지 않음.
+                added = sorted(
+                    ({'name': info['name'], 'weight': info['weight']} for info in today_comp.values()),
+                    key=lambda x: x['weight'], reverse=True)
+                order_change = {
+                    'date': _today_norm.strftime('%Y-%m-%d'),
+                    'added': added, 'changed': [], 'removed': [], 'new_fund': True,
+                }
+            elif today_date > disp_date:
                 added, removed, changed = [], [], []
                 for c, info in today_comp.items():
                     if c not in disp_comp:
@@ -589,6 +600,41 @@ def create_portfolio_tables():
         order_changes = {c['display_name']: c['order_change'] for c in portfolio_configs if c.get('order_change')}
         if order_changes:
             portfolio_data['_order_changes'] = order_changes
+
+        # 포트폴리오 단위 YTD·누적수익률(기준가 기반, 전일까지 확정분) — /update 메시지에서 오늘 실시간 등락과 복리 결합해 표시.
+        # · nav_ytd_d1: 레지스트리 base_price 기준(일반형=전략 리셋일 2025-12-30 값, 목표전환형=개시일 1000) = 대시보드 YTD/RETURN 표와 동일.
+        # · nav_cum_d1: 기준가 컬럼 최초값(설정일 1000) 기준 = 펀드 전체 운용기간 누적.
+        #   (목표전환형은 개시=연초라 YTD==누적으로 동일값)
+        # 오늘 개시 펀드(기준가 컬럼 없음)는 None → 봇에서 0으로 보고 오늘 등락만 반영.
+        portfolio_meta = {}
+        try:
+            base_map = {p.nav_key: p.base_price for p in wrap_config.PRODUCTS}
+            nav_px = pd.read_excel(WRAP_NAV_FILE, sheet_name='기준가')
+            nav_px.columns = [str(c).strip() for c in nav_px.columns]
+            if 'Date' in nav_px.columns:
+                nav_px['Date'] = pd.to_datetime(nav_px['Date'])
+                nav_px = nav_px.set_index('Date').sort_index()
+                for cfg in portfolio_configs:
+                    disp = cfg['display_name']
+                    nav_key = cfg['use_portfolio']
+                    ytd_base = base_map.get(nav_key)
+                    nav_ytd_d1 = None
+                    nav_cum_d1 = None
+                    if nav_key in nav_px.columns:
+                        full = nav_px[nav_key].dropna()
+                        col = full[full.index < _today_kst]  # 전일(D-1)까지 확정분만
+                        if not col.empty:
+                            last = float(col.iloc[-1])
+                            if ytd_base:
+                                nav_ytd_d1 = (last / ytd_base - 1) * 100
+                            incep_base = float(full.iloc[0])  # 설정일 기준가(최초 유효값)
+                            if incep_base:
+                                nav_cum_d1 = (last / incep_base - 1) * 100
+                    portfolio_meta[disp] = {'nav_ytd_d1': nav_ytd_d1, 'nav_cum_d1': nav_cum_d1}
+        except Exception as e:
+            print(f"  Warning: _portfolio_meta(YTD/누적수익률) 계산 실패: {e}")
+        if portfolio_meta:
+            portfolio_data['_portfolio_meta'] = portfolio_meta
 
         # JSON 파일로 저장
         print(f"\n5. 결과 저장 중... ({OUTPUT_FILE})")
