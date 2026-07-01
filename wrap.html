@@ -50,6 +50,11 @@
         .wrap-chart-item { cursor: pointer; transition: all 0.15s; }
         .wrap-chart-item:hover td { background: #e9ecef; }
         .wrap-chart-item.active td { background: #222; color: #fff; }
+        .aum-toggle-item { cursor: pointer; transition: background 0.12s, color 0.12s; }
+        .aum-toggle-item:hover td { background: #f1f3f5; }
+        .aum-toggle-item.aum-off td { color: #c3c3c3; }
+        .aum-toggle-item.aum-off .aum-cbar { opacity: 0.18; }
+        .portfolio-table.aum-aligned .iter-row.aum-off > td { color: #9fb3c8; }
         .wrap-tabs { display: flex; justify-content: center; gap: 0; background: #fff; border-bottom: 1px solid #eee; margin-bottom: 20px; position: sticky; top: 0; z-index: 100; }
         .wrap-tab { padding: 14px 28px; border: none; background: none; font-size: 0.95rem; font-weight: 600; color: #999; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; }
         .wrap-tab:hover { color: #333; }
@@ -240,7 +245,7 @@
     <aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="#" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="sidebar-link active">Dashboard</a><a href="#" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="sidebar-link">Order</a><a href="#" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="sidebar-link">공시</a><a href="#" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="sidebar-link">기여도</a><a href="#" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="sidebar-link">수수료</a></aside>
     <header>
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-07-01 10:14:01 KST</div>
+        <div class="last-updated">Updated: 2026-07-01 10:22:27 KST</div>
     </header>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -562,19 +567,20 @@
                 <div style="width:370px;">
                     <table class="portfolio-table aum-aligned" style="white-space:nowrap;width:370px;table-layout:fixed;">
                         <colgroup>
-                            <col style="width:60px"><col style="width:160px"><col style="width:80px"><col style="width:70px">
+                            <col style="width:16px"><col style="width:52px"><col style="width:152px"><col style="width:80px"><col style="width:70px">
                         </colgroup>
                         <thead><tr>
+                            <th></th>
                             <th>증권사</th>
                             <th>상품명</th>
                             <th>AUM</th>
                             <th>기준일</th>
                         </tr></thead>
-                        <tbody><tr><td>삼성</td><td>트루밸류</td><td>532억</td><td>06/29</td></tr>
-<tr><td>NH</td><td>다이내믹밸류</td><td>135억</td><td>06/29</td></tr>
-<tr><td>NH</td><td>목표전환형 5호</td><td>253억</td><td>06/29</td></tr>
-<tr><td>DB</td><td>개방형 랩</td><td>189억</td><td>06/29</td></tr>
-<tr style="border-top:2px solid #000;font-weight:700;"><td colspan="2">합계</td><td>1,110억</td><td></td></tr></tbody>
+                        <tbody><tr class="aum-toggle-item" data-series="삼성 트루밸류" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(20,40,160,1.0);border-radius:2px;margin:0 auto;"></div></td><td>삼성</td><td>트루밸류</td><td>532억</td><td>06/29</td></tr>
+<tr class="aum-toggle-item" data-series="NH 다이내믹밸류" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,114,206,0.6);border-radius:2px;margin:0 auto;"></div></td><td>NH</td><td>다이내믹밸류</td><td>135억</td><td>06/29</td></tr>
+<tr class="aum-toggle-item" data-series="NH 목표전환형 5호" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,114,206,1.0);border-radius:2px;margin:0 auto;"></div></td><td>NH</td><td>목표전환형 5호</td><td>253억</td><td>06/29</td></tr>
+<tr class="aum-toggle-item" data-series="DB 개방형 랩" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,133,74,1.0);border-radius:2px;margin:0 auto;"></div></td><td>DB</td><td>개방형 랩</td><td>189억</td><td>06/29</td></tr>
+<tr style="border-top:2px solid #000;font-weight:700;"><td></td><td colspan="2">합계</td><td>1,110억</td><td></td></tr></tbody>
                     </table>
                 </div>
                 <div style="flex:1;background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
@@ -595,9 +601,14 @@
                     for (var i = 0; i < meta0.data.length; i++) {
                         var total = 0;
                         for (var d = 0; d < datasets.length; d++) {
-                            total += datasets[d].data[i] || 0;
+                            if (chart.isDatasetVisible(d)) total += datasets[d].data[i] || 0;
                         }
-                        var lastMeta = chart.getDatasetMeta(datasets.length - 1);
+                        if (total === 0) continue;
+                        var lastMeta = null;
+                        for (var dv = datasets.length - 1; dv >= 0; dv--) {
+                            if (chart.isDatasetVisible(dv)) { lastMeta = chart.getDatasetMeta(dv); break; }
+                        }
+                        if (!lastMeta) continue;
                         var bar = lastMeta.data[i];
                         if (!bar) continue;
                         ctx.save();
@@ -610,7 +621,7 @@
                     }
                 }
             };
-            new Chart(document.getElementById('aumStackedChart'), {
+            var aumChart = new Chart(document.getElementById('aumStackedChart'), {
                 type: 'bar',
                 data: {
                     labels: aumData.dates.map(function(d) { return d.slice(5); }),
@@ -623,7 +634,7 @@
                     responsive: true, maintainAspectRatio: false,
                     layout: { padding: { top: 20 } },
                     plugins: {
-                        legend: { position: 'bottom', labels: { font: { size: 11 }, color: '#000' } },
+                        legend: { display: false },
                         tooltip: { callbacks: {
                             title: function(ctxs) { return ctxs.length ? aumData.dates[ctxs[0].dataIndex] : ''; },
                             label: function(ctx) { return ctx.dataset.label + ': ' + Math.round(ctx.raw) + '억'; }
@@ -635,6 +646,17 @@
                     }
                 }
             });
+            function findAumIdx(chart, lbl) {
+                for (var i = 0; i < chart.data.datasets.length; i++) { if (chart.data.datasets[i].label === lbl) return i; }
+                return -1;
+            }
+            window.toggleAumSeries = function(el) {
+                el.classList.toggle('aum-off');
+                var idx = findAumIdx(aumChart, el.getAttribute('data-series'));
+                if (idx < 0) return;
+                aumChart.setDatasetVisibility(idx, !el.classList.contains('aum-off'));
+                aumChart.update();
+            };
         })();
         </script>
         
@@ -644,20 +666,21 @@
                 <div style="width:370px;">
                     <table class="portfolio-table aum-aligned" style="white-space:nowrap;width:370px;table-layout:fixed;">
                         <colgroup>
-                            <col style="width:60px"><col style="width:160px"><col style="width:80px"><col style="width:70px">
+                            <col style="width:16px"><col style="width:52px"><col style="width:152px"><col style="width:80px"><col style="width:70px">
                         </colgroup>
                         <thead><tr>
+                            <th></th>
                             <th>증권사</th>
                             <th>상품명</th>
                             <th>AUM</th>
                             <th>기준일</th>
                         </tr></thead>
-                        <tbody><tr><td>NH</td><td>다이내믹밸류</td><td>135억</td><td>06/29</td></tr>
-<tr class="iter-row"><td>NH</td><td style="position:relative;">목표전환형<div class="iter-tooltip"><table class="iter-table"><thead><tr><th>회차</th><th>AUM</th><th>시작일</th><th>종료일</th><th>거래일</th></tr></thead><tbody><tr><td>목표전환형 1호</td><td>147억</td><td>03/25</td><td>04/15</td><td>16일</td></tr><tr><td>목표전환형 2호</td><td>270억</td><td>04/29</td><td>05/06</td><td>4일</td></tr><tr><td>목표전환형 3호</td><td>283억</td><td>05/14</td><td>05/26</td><td>8일</td></tr><tr><td>목표전환형 4호</td><td>216억</td><td>06/15</td><td>06/19</td><td>5일</td></tr><tr><td>목표전환형 5호</td><td>253억</td><td>06/29</td><td>운용 중</td><td>2일</td></tr></tbody></table></div></td><td>1,169억</td><td>06/29</td></tr>
-<tr><td>삼성</td><td>트루밸류</td><td>532억</td><td>06/29</td></tr>
-<tr><td>DB</td><td>개방형 랩</td><td>189억</td><td>06/29</td></tr>
-<tr class="iter-row"><td>DB</td><td style="position:relative;">목표전환형<div class="iter-tooltip"><table class="iter-table"><thead><tr><th>회차</th><th>AUM</th><th>시작일</th><th>종료일</th><th>거래일</th></tr></thead><tbody><tr><td>목표전환형 1차</td><td>25억</td><td>02/11</td><td>02/25</td><td>8일</td></tr><tr><td>목표전환형 2차</td><td>29억</td><td>03/16</td><td>04/15</td><td>23일</td></tr><tr><td>목표전환형 3차</td><td>43억</td><td>04/30</td><td>05/06</td><td>3일</td></tr><tr><td>목표전환형 4차</td><td>80억</td><td>05/18</td><td>05/26</td><td>6일</td></tr><tr><td>목표전환형 5차</td><td>73억</td><td>06/12</td><td>06/19</td><td>6일</td></tr></tbody></table></div></td><td>250억</td><td>06/18</td></tr>
-<tr style="border-top:2px solid #000;font-weight:700;"><td colspan="2">합계</td><td>2,276억</td><td></td></tr></tbody>
+                        <tbody><tr class="aum-toggle-item" data-series="NH 다이내믹밸류" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,114,206,1.0);border-radius:2px;margin:0 auto;"></div></td><td>NH</td><td>다이내믹밸류</td><td>135억</td><td>06/29</td></tr>
+<tr class="iter-row aum-toggle-item" data-series="NH 목표전환형 (누적)" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,114,206,0.6);border-radius:2px;margin:0 auto;"></div></td><td>NH</td><td style="position:relative;">목표전환형<div class="iter-tooltip"><table class="iter-table"><thead><tr><th>회차</th><th>AUM</th><th>시작일</th><th>종료일</th><th>거래일</th></tr></thead><tbody><tr><td>목표전환형 1호</td><td>147억</td><td>03/25</td><td>04/15</td><td>16일</td></tr><tr><td>목표전환형 2호</td><td>270억</td><td>04/29</td><td>05/06</td><td>4일</td></tr><tr><td>목표전환형 3호</td><td>283억</td><td>05/14</td><td>05/26</td><td>8일</td></tr><tr><td>목표전환형 4호</td><td>216억</td><td>06/15</td><td>06/19</td><td>5일</td></tr><tr><td>목표전환형 5호</td><td>253억</td><td>06/29</td><td>운용 중</td><td>2일</td></tr></tbody></table></div></td><td>1,169억</td><td>06/29</td></tr>
+<tr class="aum-toggle-item" data-series="삼성 트루밸류" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(20,40,160,1.0);border-radius:2px;margin:0 auto;"></div></td><td>삼성</td><td>트루밸류</td><td>532억</td><td>06/29</td></tr>
+<tr class="aum-toggle-item" data-series="DB 개방형 랩" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,133,74,1.0);border-radius:2px;margin:0 auto;"></div></td><td>DB</td><td>개방형 랩</td><td>189억</td><td>06/29</td></tr>
+<tr class="iter-row aum-toggle-item" data-series="DB 목표전환형 (누적)" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,133,74,0.6);border-radius:2px;margin:0 auto;"></div></td><td>DB</td><td style="position:relative;">목표전환형<div class="iter-tooltip"><table class="iter-table"><thead><tr><th>회차</th><th>AUM</th><th>시작일</th><th>종료일</th><th>거래일</th></tr></thead><tbody><tr><td>목표전환형 1차</td><td>25억</td><td>02/11</td><td>02/25</td><td>8일</td></tr><tr><td>목표전환형 2차</td><td>29억</td><td>03/16</td><td>04/15</td><td>23일</td></tr><tr><td>목표전환형 3차</td><td>43억</td><td>04/30</td><td>05/06</td><td>3일</td></tr><tr><td>목표전환형 4차</td><td>80억</td><td>05/18</td><td>05/26</td><td>6일</td></tr><tr><td>목표전환형 5차</td><td>73억</td><td>06/12</td><td>06/19</td><td>6일</td></tr></tbody></table></div></td><td>250억</td><td>06/18</td></tr>
+<tr style="border-top:2px solid #000;font-weight:700;"><td></td><td colspan="2">합계</td><td>2,276억</td><td></td></tr></tbody>
                     </table>
                 </div>
                 <div style="flex:1;background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
@@ -677,8 +700,13 @@
                     var meta0 = chart.getDatasetMeta(0);
                     for (var i = 0; i < meta0.data.length; i++) {
                         var total = 0;
-                        for (var d = 0; d < ds.length; d++) total += ds[d].data[i] || 0;
-                        var lastMeta = chart.getDatasetMeta(ds.length - 1);
+                        for (var d = 0; d < ds.length; d++) { if (chart.isDatasetVisible(d)) total += ds[d].data[i] || 0; }
+                        if (total === 0) continue;
+                        var lastMeta = null;
+                        for (var dv = ds.length - 1; dv >= 0; dv--) {
+                            if (chart.isDatasetVisible(dv)) { lastMeta = chart.getDatasetMeta(dv); break; }
+                        }
+                        if (!lastMeta) continue;
                         var bar = lastMeta.data[i];
                         if (!bar) continue;
                         ctx.save();
@@ -691,7 +719,7 @@
                     }
                 }
             };
-            new Chart(document.getElementById('cumulativeAumChart'), {
+            var cumChart = new Chart(document.getElementById('cumulativeAumChart'), {
                 type: 'bar',
                 data: {
                     labels: cData.dates.map(function(d) { return d.slice(5); }),
@@ -704,7 +732,7 @@
                     responsive: true, maintainAspectRatio: false,
                     layout: { padding: { top: 20 } },
                     plugins: {
-                        legend: { position: 'bottom', labels: { font: { size: 11 }, color: '#000' } },
+                        legend: { display: false },
                         tooltip: { callbacks: {
                             title: function(ctxs) { return ctxs.length ? cData.dates[ctxs[0].dataIndex] : ''; },
                             label: function(ctx) { return ctx.dataset.label + ': ' + Math.round(ctx.raw) + '억'; }
@@ -716,6 +744,17 @@
                     }
                 }
             });
+            function findCumIdx(chart, lbl) {
+                for (var i = 0; i < chart.data.datasets.length; i++) { if (chart.data.datasets[i].label === lbl) return i; }
+                return -1;
+            }
+            window.toggleCumAumSeries = function(el) {
+                el.classList.toggle('aum-off');
+                var idx = findCumIdx(cumChart, el.getAttribute('data-series'));
+                if (idx < 0) return;
+                cumChart.setDatasetVisibility(idx, !el.classList.contains('aum-off'));
+                cumChart.update();
+            };
         })();
         </script>
         

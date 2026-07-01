@@ -3028,17 +3028,7 @@ def create_aum_table():
         table_latest = table_latest.sort_values(
             ['broker_rank', 'is_target', 'AUM'], ascending=[True, True, False]
         ).drop(columns=['broker_rank', 'is_target'])
-        rows_html = ''
-        total_aum = 0
-        for _, row in table_latest.iterrows():
-            aum = int(row['AUM'])
-            total_aum += aum
-            aum_억 = aum / 100_000_000
-            date_str = row['날짜'].strftime('%m/%d')
-            rows_html += f'<tr><td>{row["증권사"]}</td><td>{row["상품명"]}</td><td>{aum_억:,.0f}억</td><td>{date_str}</td></tr>\n'
-        total_억 = total_aum / 100_000_000
-        rows_html += f'<tr style="border-top:2px solid #000;font-weight:700;"><td colspan="2">합계</td><td>{total_억:,.0f}억</td><td></td></tr>'
-        # 증권사별 색상
+        # 증권사별 색상 (표 색상바·차트 공용) — 표 행은 product_colors 계산 후 아래에서 생성
         broker_colors = wrap_config.broker_colors()  # 단일 출처: execution/wrap_config.py
 
         # 일자별 증권사+상품명 기준 AUM (stacked bar용)
@@ -3088,6 +3078,24 @@ def create_aum_table():
             op = opacity_levels[min(idx, len(opacity_levels) - 1)]
             product_colors[label] = f'rgba({r},{g},{b},{op})'
 
+        # 표 행 (색상바 + 클릭 토글) — product_colors 계산 후 생성. 행↔차트 계열 매핑 label = 증권사 상품명
+        rows_html = ''
+        total_aum = 0
+        for _, row in table_latest.iterrows():
+            aum = int(row['AUM'])
+            total_aum += aum
+            aum_억 = aum / 100_000_000
+            date_str = row['날짜'].strftime('%m/%d')
+            r_label = f'{row["증권사"]} {row["상품명"]}'
+            cbar = product_colors.get(r_label, '#888888')
+            rows_html += (
+                f'<tr class="aum-toggle-item" data-series="{_html.escape(r_label, quote=True)}" onclick="toggleAumSeries(this)">'
+                f'<td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:{cbar};border-radius:2px;margin:0 auto;"></div></td>'
+                f'<td>{row["증권사"]}</td><td>{row["상품명"]}</td><td>{aum_억:,.0f}억</td><td>{date_str}</td></tr>\n'
+            )
+        total_억 = total_aum / 100_000_000
+        rows_html += f'<tr style="border-top:2px solid #000;font-weight:700;"><td></td><td colspan="2">합계</td><td>{total_억:,.0f}억</td><td></td></tr>'
+
         chart_datasets = []
         for label in all_labels:
             ffilled = _ffill_aum(label)
@@ -3113,9 +3121,14 @@ def create_aum_table():
                     for (var i = 0; i < meta0.data.length; i++) {
                         var total = 0;
                         for (var d = 0; d < datasets.length; d++) {
-                            total += datasets[d].data[i] || 0;
+                            if (chart.isDatasetVisible(d)) total += datasets[d].data[i] || 0;
                         }
-                        var lastMeta = chart.getDatasetMeta(datasets.length - 1);
+                        if (total === 0) continue;
+                        var lastMeta = null;
+                        for (var dv = datasets.length - 1; dv >= 0; dv--) {
+                            if (chart.isDatasetVisible(dv)) { lastMeta = chart.getDatasetMeta(dv); break; }
+                        }
+                        if (!lastMeta) continue;
                         var bar = lastMeta.data[i];
                         if (!bar) continue;
                         ctx.save();
@@ -3128,7 +3141,7 @@ def create_aum_table():
                     }
                 }
             };
-            new Chart(document.getElementById('aumStackedChart'), {
+            var aumChart = new Chart(document.getElementById('aumStackedChart'), {
                 type: 'bar',
                 data: {
                     labels: aumData.dates.map(function(d) { return d.slice(5); }),
@@ -3141,7 +3154,7 @@ def create_aum_table():
                     responsive: true, maintainAspectRatio: false,
                     layout: { padding: { top: 20 } },
                     plugins: {
-                        legend: { position: 'bottom', labels: { font: { size: 11 }, color: '#000' } },
+                        legend: { display: false },
                         tooltip: { callbacks: {
                             title: function(ctxs) { return ctxs.length ? aumData.dates[ctxs[0].dataIndex] : ''; },
                             label: function(ctx) { return ctx.dataset.label + ': ' + Math.round(ctx.raw) + '억'; }
@@ -3153,6 +3166,17 @@ def create_aum_table():
                     }
                 }
             });
+            function findAumIdx(chart, lbl) {
+                for (var i = 0; i < chart.data.datasets.length; i++) { if (chart.data.datasets[i].label === lbl) return i; }
+                return -1;
+            }
+            window.toggleAumSeries = function(el) {
+                el.classList.toggle('aum-off');
+                var idx = findAumIdx(aumChart, el.getAttribute('data-series'));
+                if (idx < 0) return;
+                aumChart.setDatasetVisibility(idx, !el.classList.contains('aum-off'));
+                aumChart.update();
+            };
         })();
         </script>
         """.replace('AUM_DATA_PLACEHOLDER', aum_chart_json)
@@ -3166,9 +3190,10 @@ def create_aum_table():
                 <div style="width:370px;">
                     <table class="portfolio-table aum-aligned" style="white-space:nowrap;width:370px;table-layout:fixed;">
                         <colgroup>
-                            <col style="width:60px"><col style="width:160px"><col style="width:80px"><col style="width:70px">
+                            <col style="width:16px"><col style="width:52px"><col style="width:152px"><col style="width:80px"><col style="width:70px">
                         </colgroup>
                         <thead><tr>
+                            <th></th>
                             <th>증권사</th>
                             <th>상품명</th>
                             <th>AUM</th>
@@ -3411,6 +3436,8 @@ def create_cumulative_aum_chart():
 
         broker_order = sorted(all_brokers, key=_broker_total, reverse=True)
 
+        # 표 행 색상바용: 데이터셋 label → backgroundColor (행↔차트 계열 매핑)
+        cum_color_map = {ds['label']: ds['backgroundColor'] for ds in datasets}
         cum_rows_html = ''
         cum_total = 0
         for broker in broker_order:
@@ -3422,8 +3449,12 @@ def create_cumulative_aum_chart():
                 aum_val = int(r['AUM'])
                 cum_total += aum_val
                 date_str = r['날짜'].strftime('%m/%d')
+                rlabel = f'{broker} {r["상품명"]}'
+                rcolor = cum_color_map.get(rlabel, '#888888')
                 cum_rows_html += (
-                    f'<tr><td>{broker}</td><td>{r["상품명"]}</td>'
+                    f'<tr class="aum-toggle-item" data-series="{_html.escape(rlabel, quote=True)}" onclick="toggleCumAumSeries(this)">'
+                    f'<td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:{rcolor};border-radius:2px;margin:0 auto;"></div></td>'
+                    f'<td>{broker}</td><td>{r["상품명"]}</td>'
                     f'<td>{aum_val/1e8:,.0f}억</td><td>{date_str}</td></tr>\n'
                 )
             # 2) 그 broker의 목표전환형 통합 행 (활성 또는 가장 최근 청산)
@@ -3431,13 +3462,17 @@ def create_cumulative_aum_chart():
             if summary is not None:
                 cum_total += summary['cumulative_aum']
                 date_str = summary['date'].strftime('%m/%d')
+                tlabel = f'{broker} 목표전환형 (누적)'
+                tcolor = cum_color_map.get(tlabel, '#888888')
                 cum_rows_html += (
-                    f'<tr class="iter-row"><td>{broker}</td>'
+                    f'<tr class="iter-row aum-toggle-item" data-series="{_html.escape(tlabel, quote=True)}" onclick="toggleCumAumSeries(this)">'
+                    f'<td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:{tcolor};border-radius:2px;margin:0 auto;"></div></td>'
+                    f'<td>{broker}</td>'
                     f'<td style="position:relative;">목표전환형{_tooltip_html(summary["iters"])}</td>'
                     f'<td>{summary["cumulative_aum"]/1e8:,.0f}억</td>'
                     f'<td>{date_str}</td></tr>\n'
                 )
-        cum_rows_html += f'<tr style="border-top:2px solid #000;font-weight:700;"><td colspan="2">합계</td><td>{cum_total/1e8:,.0f}억</td><td></td></tr>'
+        cum_rows_html += f'<tr style="border-top:2px solid #000;font-weight:700;"><td></td><td colspan="2">합계</td><td>{cum_total/1e8:,.0f}억</td><td></td></tr>'
 
         chart_json = json.dumps({'dates': all_dates, 'datasets': datasets}, ensure_ascii=False)
 
@@ -3453,8 +3488,13 @@ def create_cumulative_aum_chart():
                     var meta0 = chart.getDatasetMeta(0);
                     for (var i = 0; i < meta0.data.length; i++) {
                         var total = 0;
-                        for (var d = 0; d < ds.length; d++) total += ds[d].data[i] || 0;
-                        var lastMeta = chart.getDatasetMeta(ds.length - 1);
+                        for (var d = 0; d < ds.length; d++) { if (chart.isDatasetVisible(d)) total += ds[d].data[i] || 0; }
+                        if (total === 0) continue;
+                        var lastMeta = null;
+                        for (var dv = ds.length - 1; dv >= 0; dv--) {
+                            if (chart.isDatasetVisible(dv)) { lastMeta = chart.getDatasetMeta(dv); break; }
+                        }
+                        if (!lastMeta) continue;
                         var bar = lastMeta.data[i];
                         if (!bar) continue;
                         ctx.save();
@@ -3467,7 +3507,7 @@ def create_cumulative_aum_chart():
                     }
                 }
             };
-            new Chart(document.getElementById('cumulativeAumChart'), {
+            var cumChart = new Chart(document.getElementById('cumulativeAumChart'), {
                 type: 'bar',
                 data: {
                     labels: cData.dates.map(function(d) { return d.slice(5); }),
@@ -3480,7 +3520,7 @@ def create_cumulative_aum_chart():
                     responsive: true, maintainAspectRatio: false,
                     layout: { padding: { top: 20 } },
                     plugins: {
-                        legend: { position: 'bottom', labels: { font: { size: 11 }, color: '#000' } },
+                        legend: { display: false },
                         tooltip: { callbacks: {
                             title: function(ctxs) { return ctxs.length ? cData.dates[ctxs[0].dataIndex] : ''; },
                             label: function(ctx) { return ctx.dataset.label + ': ' + Math.round(ctx.raw) + '억'; }
@@ -3492,6 +3532,17 @@ def create_cumulative_aum_chart():
                     }
                 }
             });
+            function findCumIdx(chart, lbl) {
+                for (var i = 0; i < chart.data.datasets.length; i++) { if (chart.data.datasets[i].label === lbl) return i; }
+                return -1;
+            }
+            window.toggleCumAumSeries = function(el) {
+                el.classList.toggle('aum-off');
+                var idx = findCumIdx(cumChart, el.getAttribute('data-series'));
+                if (idx < 0) return;
+                cumChart.setDatasetVisibility(idx, !el.classList.contains('aum-off'));
+                cumChart.update();
+            };
         })();
         </script>
         """.replace('__CUMULATIVE_DATA__', chart_json)
@@ -3503,9 +3554,10 @@ def create_cumulative_aum_chart():
                 <div style="width:370px;">
                     <table class="portfolio-table aum-aligned" style="white-space:nowrap;width:370px;table-layout:fixed;">
                         <colgroup>
-                            <col style="width:60px"><col style="width:160px"><col style="width:80px"><col style="width:70px">
+                            <col style="width:16px"><col style="width:52px"><col style="width:152px"><col style="width:80px"><col style="width:70px">
                         </colgroup>
                         <thead><tr>
+                            <th></th>
                             <th>증권사</th>
                             <th>상품명</th>
                             <th>AUM</th>
@@ -6764,6 +6816,11 @@ def create_dashboard():
         .wrap-chart-item {{ cursor: pointer; transition: all 0.15s; }}
         .wrap-chart-item:hover td {{ background: #e9ecef; }}
         .wrap-chart-item.active td {{ background: #222; color: #fff; }}
+        .aum-toggle-item {{ cursor: pointer; transition: background 0.12s, color 0.12s; }}
+        .aum-toggle-item:hover td {{ background: #f1f3f5; }}
+        .aum-toggle-item.aum-off td {{ color: #c3c3c3; }}
+        .aum-toggle-item.aum-off .aum-cbar {{ opacity: 0.18; }}
+        .portfolio-table.aum-aligned .iter-row.aum-off > td {{ color: #9fb3c8; }}
         .wrap-tabs {{ display: flex; justify-content: center; gap: 0; background: #fff; border-bottom: 1px solid #eee; margin-bottom: 20px; position: sticky; top: 0; z-index: 100; }}
         .wrap-tab {{ padding: 14px 28px; border: none; background: none; font-size: 0.95rem; font-weight: 600; color: #999; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; }}
         .wrap-tab:hover {{ color: #333; }}
