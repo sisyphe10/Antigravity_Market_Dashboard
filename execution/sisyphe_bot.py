@@ -558,18 +558,17 @@ def format_update_summary(portfolio_data):
         nonpos = [s for s in ranked if (s.get('contribution') or 0) <= 0]
         if pos:
             lines.extend(_stock_line(s) for s in pos)
-            lines.append(f"  <b>──── 기여 {sum(s['contribution'] for s in pos):+.2f} ────</b>")
+            lines.append(f"  <b>= 기여 {sum(s['contribution'] for s in pos):.2f}</b>")
         if nonpos:
             lines.extend(_stock_line(s) for s in nonpos)
-            lines.append(f"  <b>──── 기여 {sum((s.get('contribution') or 0) for s in nonpos):+.2f} ────</b>")
+            lines.append(f"  <b>= 기여 {sum((s.get('contribution') or 0) for s in nonpos):.2f}</b>")
 
         lines.append("")
 
     # ── 주문 변경 내역 (당일 최종 저장분, 다음 거래일 반영 예정) ──
     order_changes = portfolio_data.get('_order_changes') or {}
     if order_changes:
-        lines.append("———————————————")
-        lines.append("<b>주문 변경 내역</b>")
+        lines.append("📋 <b>주문 변경 내역</b>")
         for pname, ch in order_changes.items():
             if not ch:
                 continue
