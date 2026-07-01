@@ -143,9 +143,17 @@
           "weight": 2,
           "baseWeight": 2,
           "reason": ""
+        },
+        {
+          "sector": "반도체",
+          "code": "089030",
+          "name": "테크윙",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": "마이크론 향 메모리 테스터 발주 확대로 인한 단기 실적 성장, 신규장비 메모리 3사 하반기 PO 모멘텀 기대해 신규 편입"
         }
       ],
-      "savedAt": "2026-06-30T23:56:49.729Z"
+      "savedAt": "2026-07-01T04:15:34.567Z"
     },
     "NH 목표전환형 5호": {
       "targets": [
@@ -224,11 +232,19 @@
           "code": "062040",
           "name": "산일전기",
           "weight": 5,
-          "baseWeight": 0,
-          "reason": "산일전기가 벤더로 등록된 블룸에너지가 브룩필드와 AI 인프라 파트너십 5배로 확대, 최근 시장의 관심이 전력으로 다시 옮겨가는 중으로 주가 조정 받은 산일전기 편입"
+          "baseWeight": 5,
+          "reason": ""
+        },
+        {
+          "sector": "반도체",
+          "code": "089030",
+          "name": "테크윙",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": "마이크론 향 메모리 테스터 발주 확대로 인한 단기 실적 성장, 신규장비 메모리 3사 하반기 PO 모멘텀 기대해 신규 편입"
         }
       ],
-      "savedAt": "2026-06-30T23:56:49.729Z"
+      "savedAt": "2026-07-01T04:15:34.567Z"
     },
     "DB 목표전환형 6차": {
       "targets": [
@@ -243,75 +259,83 @@
           "code": "005930",
           "name": "삼성전자",
           "weight": 20,
-          "baseWeight": 0,
-          "reason": "국민연금 리밸런싱 등의 이유로 단기 주가 조정 받고 있으나 펀더멘탈에는 이상무, 신규 편입"
+          "baseWeight": 20,
+          "reason": ""
         },
         {
           "sector": "반도체",
           "code": "000660",
           "name": "SK하이닉스",
           "weight": 20,
-          "baseWeight": 0,
-          "reason": "국민연금 리밸런싱 등의 이유로 단기 주가 조정 받고 있으나 펀더멘탈에는 이상무, 신규 편입"
+          "baseWeight": 20,
+          "reason": ""
         },
         {
           "sector": "은행",
           "code": "105560",
           "name": "KB금융",
           "weight": 7,
-          "baseWeight": 0,
-          "reason": "7월 동안 과거 공시했던 자사주 취득 달성을 위해 일간 300억원 규모로 매입할 것으로 기대, 신규 편입"
-        },
-        {
-          "sector": "건강관리",
-          "code": "196170",
-          "name": "알테오젠",
-          "weight": 3,
-          "baseWeight": 0,
-          "reason": "미국의 금리 인상 가능성 하락 및 하반기 중 바이오 LO 기대"
-        },
-        {
-          "sector": "건강관리",
-          "code": "141080",
-          "name": "리가켐바이오",
-          "weight": 3,
-          "baseWeight": 0,
-          "reason": "국민성장펀드 선정으로 5,000억원 자금 확보, 하반기 LO 기대"
-        },
-        {
-          "sector": "건강관리",
-          "code": "237690",
-          "name": "에스티팜",
-          "weight": 3,
-          "baseWeight": 0,
-          "reason": "안정적인 수주를 바탕으로 향후 몇 년 동안 실적 성장 가능, 국민성장펀드 선정 가능성"
-        },
-        {
-          "sector": "건강관리",
-          "code": "298380",
-          "name": "에이비엘바이오",
-          "weight": 3,
-          "baseWeight": 0,
-          "reason": "릴리와의 BBB셔틀 협업을 통해 마일스톤 받을 가능성 높아 보임, 신규 편입"
-        },
-        {
-          "sector": "건강관리",
-          "code": "226950",
-          "name": "올릭스",
-          "weight": 3,
-          "baseWeight": 0,
-          "reason": "7월 14일 R&D데이 개최, 릴리, 로레알과의 협력 강화 중으로 신규 편입"
+          "baseWeight": 7,
+          "reason": ""
         },
         {
           "sector": "기계",
           "code": "062040",
           "name": "산일전기",
           "weight": 5,
+          "baseWeight": 5,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "196170",
+          "name": "알테오젠",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "141080",
+          "name": "리가켐바이오",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "237690",
+          "name": "에스티팜",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "298380",
+          "name": "에이비엘바이오",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "226950",
+          "name": "올릭스",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "반도체",
+          "code": "089030",
+          "name": "테크윙",
+          "weight": 2,
           "baseWeight": 0,
-          "reason": "산일전기가 벤더로 등록된 블룸에너지가 브룩필드와 AI 인프라 파트너십 5배로 확대, 최근 시장의 관심이 전력으로 다시 옮겨가는 중으로 주가 조정 받은 산일전기 편입"
+          "reason": ""
         }
       ],
-      "savedAt": "2026-06-30T23:56:49.729Z"
+      "savedAt": "2026-07-01T04:15:34.567Z"
     }
   }
 }
