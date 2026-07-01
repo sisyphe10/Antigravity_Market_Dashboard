@@ -558,10 +558,10 @@ def format_update_summary(portfolio_data):
         nonpos = [s for s in ranked if (s.get('contribution') or 0) <= 0]
         if pos:
             lines.extend(_stock_line(s) for s in pos)
-            lines.append(f"  <b>= 기여 {sum(s['contribution'] for s in pos):.2f}</b>")
+            lines.append(f"  <b>= 합산 {sum(s['contribution'] for s in pos):+.2f}</b>")
         if nonpos:
             lines.extend(_stock_line(s) for s in nonpos)
-            lines.append(f"  <b>= 기여 {sum((s.get('contribution') or 0) for s in nonpos):.2f}</b>")
+            lines.append(f"  <b>= 합산 {sum((s.get('contribution') or 0) for s in nonpos):+.2f}</b>")
 
         lines.append("")
 
