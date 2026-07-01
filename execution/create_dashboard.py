@@ -3852,6 +3852,7 @@ def create_order_section():
     _broker_color = _json.dumps(wrap_config.broker_color_map(), ensure_ascii=False)
     _broker_codes = _json.dumps(list(wrap_config.broker_order_map().keys()), ensure_ascii=False)
     _target_tabs = _json.dumps(wrap_config.target_tabs(), ensure_ascii=False)
+    _standalone_general = _json.dumps(wrap_config.standalone_general_tabs(), ensure_ascii=False)
     _general = _json.dumps(wrap_config.general_combined_name(), ensure_ascii=False)
     _html = """
         <div id="orderTabs" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;"></div>
@@ -4061,6 +4062,7 @@ def create_order_section():
         function renderEmailPanel() {
             var GENERAL = __GENERAL__;
             var TARGET_TABS = __TARGET_TABS__;  // 활성 목표전환형 (예: ['NH 목표전환형 5호'])
+            var STANDALONE_GENERAL = __STANDALONE_GENERAL__;  // [{display, broker}] 결합 미합류 단독 일반형(예: 수렴 전 한투 지속형)
             var compliance = buildComplianceEmailText();
             var samsung = buildOrderEmailText(GENERAL, orderStocks[GENERAL] || [], orderState[GENERAL] || []);
             var targetBoxes = '';
@@ -4071,7 +4073,14 @@ def create_order_section():
                 targetBoxes += buildEmailBox(brokerLabel + ' 이메일', tEmail, '#f9fafb', '#e5e7eb', '#444', '#374151');
                 nateonText += '\\n\\n' + buildOrderNateonText(orderStocks[tt] || [], orderState[tt] || [], '목표전환형');
             });
-            var nateonReasonLines = buildNateonReasonLines([GENERAL].concat(TARGET_TABS));
+            var standaloneBoxes = '';
+            STANDALONE_GENERAL.forEach(function(sg) {
+                var sgEmail = buildOrderEmailText(sg.display, orderStocks[sg.display] || [], orderState[sg.display] || []);
+                standaloneBoxes += buildEmailBox(sg.broker + ' 이메일', sgEmail, '#f9fafb', '#e5e7eb', '#444', '#374151');
+                nateonText += '\\n\\n' + buildOrderNateonText(orderStocks[sg.display] || [], orderState[sg.display] || [], sg.display);
+            });
+            var sgDisplays = STANDALONE_GENERAL.map(function(sg) { return sg.display; });
+            var nateonReasonLines = buildNateonReasonLines([GENERAL].concat(TARGET_TABS).concat(sgDisplays));
             if (nateonReasonLines.length) nateonText += '\\n\\n' + nateonReasonLines.join('\\n');
             // 다운로드 섹션 (증권사 순서: 삼성 → NH → DB, 색상도 증권사별)
             var BROKER_ORDER = __BROKER_ORDER__;
@@ -4118,6 +4127,7 @@ def create_order_section():
                 + buildEmailBox('컴플라이언스 이메일', compliance, '#fffbeb', '#fef3c7', '#92400e', '#d97706')
                 + buildEmailBox('삼성 이메일', samsung, '#f9fafb', '#e5e7eb', '#444', '#374151')
                 + targetBoxes
+                + standaloneBoxes
                 + buildEmailBox('네이트온', nateonText, '#eef2ff', '#c7d2fe', '#1f5a2a', '#4f46e5')
                 + '</div>';
             document.getElementById('orderContent').innerHTML = html;
@@ -4222,6 +4232,7 @@ def create_order_section():
             // 일반형 + 활성 목표전환형(TARGET_TABS) 통합 (중복 종목 dedupe)
             var GENERAL = __GENERAL__;
             var TARGET_TABS = __TARGET_TABS__;
+            var STANDALONE_GENERAL = __STANDALONE_GENERAL__;
             function _ddup(a, b) {
                 var seen = {}, out = [];
                 a.concat(b).forEach(function(name) { if (!seen[name]) { seen[name] = true; out.push(name); } });
@@ -4230,6 +4241,10 @@ def create_order_section():
             var gen = buildOrderChanges(orderStocks[GENERAL] || [], orderState[GENERAL] || []);
             TARGET_TABS.forEach(function(tt) {
                 var tgt = buildOrderChanges(orderStocks[tt] || [], orderState[tt] || []);
+                gen = { newBuy: _ddup(gen.newBuy, tgt.newBuy), inc: _ddup(gen.inc, tgt.inc), dec: _ddup(gen.dec, tgt.dec), out: _ddup(gen.out, tgt.out) };
+            });
+            STANDALONE_GENERAL.forEach(function(sg) {
+                var tgt = buildOrderChanges(orderStocks[sg.display] || [], orderState[sg.display] || []);
                 gen = { newBuy: _ddup(gen.newBuy, tgt.newBuy), inc: _ddup(gen.inc, tgt.inc), dec: _ddup(gen.dec, tgt.dec), out: _ddup(gen.out, tgt.out) };
             });
             var lines = [
@@ -4244,8 +4259,9 @@ def create_order_section():
         }
 
         function buildComplianceEmailSection(pfName) {
-            // 일반형 탭에서만 노출 (개방형 + 목표전환형 통합본)
-            if (pfName !== __GENERAL__) return '';
+            // 일반형 탭 + 단독 일반형 탭에서 노출 (개방형 + 목표전환형 + 단독 일반형 통합본)
+            var _sgDisplays = __STANDALONE_GENERAL__.map(function(sg){ return sg.display; });
+            if (pfName !== __GENERAL__ && _sgDisplays.indexOf(pfName) < 0) return '';
             var text = buildComplianceEmailText();
             return '<div style="margin-top:16px;padding:16px;background:#fffbeb;border:1px solid #fef3c7;border-radius:8px;">'
                 + '<div style="display:flex;align-items:center;margin-bottom:12px;">'
@@ -4304,6 +4320,21 @@ def create_order_section():
         }
 
         function buildOrderNateonSection(pfName) {
+            // 단독 일반형 탭: 자신의 단일 섹션만 (목표전환형처럼 GENERAL 결합 안 함)
+            var _sgN = null;
+            __STANDALONE_GENERAL__.forEach(function(sg){ if (sg.display === pfName) _sgN = sg; });
+            if (_sgN) {
+                var sgText = buildOrderNateonText(orderStocks[pfName] || [], orderState[pfName] || [], _sgN.display);
+                var _sgReason = buildNateonReasonLines([pfName]);
+                if (_sgReason.length) sgText += '\\n\\n' + _sgReason.join('\\n');
+                return '<div style="margin-top:16px;padding:16px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;">'
+                    + '<div style="display:flex;align-items:center;margin-bottom:12px;">'
+                    + '<h4 style="margin:0;font-size:15px;color:#1f5a2a;">네이트온 텍스트</h4>'
+                    + '<button class="nateon-copy-btn" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:5px 14px;background:#4f46e5;color:#fff;border:none;border-radius:6px;cursor:pointer;">복사</button>'
+                    + '</div>'
+                    + '<pre class="nateon-text" style="white-space:pre-wrap;font-family:inherit;font-size:14px;color:#222;margin:0;line-height:1.6;">' + escapeHtml(sgText) + '</pre>'
+                    + '</div>';
+            }
             // 활성 목표전환형 탭에서만 노출 (일반형 + 목표전환형을 한 박스에 함께)
             if (__TARGET_TABS__.indexOf(pfName) < 0) return '';
             var GENERAL = __GENERAL__;
@@ -5024,6 +5055,7 @@ def create_order_section():
     _html = _html.replace('__BROKER_COLOR__', _broker_color)
     _html = _html.replace('__BROKER_CODES__', _broker_codes)
     _html = _html.replace('__TARGET_TABS__', _target_tabs)
+    _html = _html.replace('__STANDALONE_GENERAL__', _standalone_general)
     _html = _html.replace('__GENERAL__', _general)
     return _html
 

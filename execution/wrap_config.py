@@ -426,6 +426,17 @@ def target_tabs():
     return [p.display for p in _sorted_active(active_products()) if p.ptype == 'target']
 
 
+def standalone_general_tabs():
+    """create_dashboard.py JS / STANDALONE_GENERAL — group=None & ptype='general' 활성 상품.
+
+    결합(GENERAL_OPEN) 미합류 단독 일반형(예: 수렴 전 한투 지속형). 자체 주문 이메일 박스 대상.
+    {display, broker} 객체 리스트 (broker 분리로 색상·정렬·라벨 안정화). 없으면 [] → 이메일 패널 inert.
+    """
+    return [{'display': p.display, 'broker': p.broker}
+            for p in _sorted_active(active_products())
+            if p.ptype == 'general' and p.group is None]
+
+
 def broker_order_map():
     """create_dashboard.py JS / BROKER_ORDER — {code: 0..N} (정렬용)."""
     return {b.code: i for i, b in enumerate(_brokers_sorted())}
