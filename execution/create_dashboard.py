@@ -8717,7 +8717,9 @@ tbody tr.etf-row:hover {{ background: #f5f5f5; }}
 .const-table th {{ background: #e9ecef; color: #000; padding: 6px 8px; font-size: 0.75rem; box-shadow: inset 0 -2px 0 #000; }}
 .const-table td {{ padding: 5px 8px; border-bottom: 1px solid #eee; }}
 .const-table tbody tr:hover {{ background: #f5f5f5; }}
-.active-tag {{ display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: 0.72rem; background: #e9ecef; color: #666; margin-left: 6px; }}
+.chg-fbtn {{ padding: 5px 16px; border: 1px solid #d1d5db; border-radius: 6px; background: #fff; font-size: 0.85rem; cursor: pointer; font-family: inherit; color: #555; }}
+.chg-fbtn:hover {{ background: #f0f0f0; }}
+.chg-fbtn.active {{ background: #2d7a3a; color: #fff; border-color: #2d7a3a; }}
 .search-results {{ display: none; }}
 .search-results.active {{ display: block; }}
 .badge {{ display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }}
@@ -8774,17 +8776,20 @@ tbody tr.etf-row:hover {{ background: #f5f5f5; }}
 
     <div id="etfTab1" class="etf-tab-content" style="display:none">
         <div class="section">
-            <div class="section-header">📋 구성종목 변동 (전일 대비) <span class="count" id="activeChgCount"></span></div>
+            <div class="section-header">구성종목 변동 <span class="count" id="activeChgCount"></span></div>
+            <div style="padding:10px 16px 0;display:flex;gap:6px;flex-wrap:wrap;">
+                <button class="chg-fbtn active" data-f="all" onclick="setChgFilter('all')">전체</button>
+                <button class="chg-fbtn" data-f="급변" onclick="setChgFilter('급변')">급변</button>
+                <button class="chg-fbtn" data-f="편입" onclick="setChgFilter('편입')">편입</button>
+                <button class="chg-fbtn" data-f="편출" onclick="setChgFilter('편출')">편출</button>
+            </div>
             <div style="overflow-x:auto"><table>
-                <thead><tr>
-                    <th>구분</th><th>ETF</th><th>종목</th>
-                    <th>전일(%)</th><th>오늘(%)</th><th>변화(%p)</th><th>예상 금액</th>
-                </tr></thead>
+                <thead><tr><th>구분</th><th>ETF</th><th>종목</th><th>전일(%)</th><th>오늘(%)</th><th>변화(%p)</th><th>예상 금액</th></tr></thead>
                 <tbody id="activeChgBody"></tbody>
             </table></div>
         </div>
         <div class="section">
-            <div class="section-header">🎯 액티브 ETF (AUM 내림차순) <span class="count" id="activeListCount"></span></div>
+            <div class="section-header">🎯 액티브 ETF <span class="count" id="activeListCount"></span></div>
             <div style="overflow-x:auto"><table>
                 <thead><tr>
                     <th onclick="doSortActive(0)">#<span class="arr" id="aarr0"></span></th>
@@ -9029,7 +9034,8 @@ function doSortActive(col) {{
     renderActiveList();
 }}
 function renderActiveList() {{
-    var rows = (activeChanges.etfs || []).slice();
+    // 주식형 액티브만 (단기금리/채권/MMF 등 detect=false 제외)
+    var rows = (activeChanges.etfs || []).filter(function(e) {{ return e.detect; }});
     var cols = ['_idx', 'name', 'aum', 'aum_chg', 'nav', 'nav_chg', 'close', 'vol'];
     var key = cols[_activeSortCol] || 'aum';
     rows.sort(function(a, b) {{
@@ -9045,10 +9051,9 @@ function renderActiveList() {{
     }}
     var h = '';
     rows.forEach(function(r, i) {{
-        var tag = r.detect ? '' : '<span class="active-tag">변동감지 제외(단기금리/채권형)</span>';
         h += '<tr>';
         h += '<td>' + (i+1) + '</td>';
-        h += '<td class="etf-name">' + r.name + tag + '</td>';
+        h += '<td class="etf-name">' + r.name + '</td>';
         h += '<td class="num">' + fmtAum(r.aum) + '</td>';
         h += pctCell(r.aum_chg);
         h += '<td class="num">' + fmtNum(r.nav) + '</td>';
@@ -9064,47 +9069,51 @@ function _wp(v) {{ return (v==null) ? '-' : Number(v).toFixed(1); }}
 function fmtAmt(v) {{ if (v==null || v===0) return '-'; return (v<0?'-':'+') + fmtAum(Math.abs(v)); }}
 function pctCell(v) {{ if (v==null) return '<td class="num">-</td>'; var c = v>=0?'pos':'neg'; return '<td class="num '+c+'">'+(v>=0?'+':'')+v.toFixed(1)+'%</td>'; }}
 var _activeRendered = false;
+var _activeFlat = [];
+var _chgFilter = 'all';
+var _activeFirstRun = false;
 function renderActive() {{
     renderActiveList();
     if (_activeRendered) return;
     _activeRendered = true;
 
-    var body = document.getElementById('activeChgBody');
-    var t = activeChanges.totals || {{new:0,exit:0,chg:0,etfs_changed:0}};
-    if (activeChanges.first_run || !activeChanges.prev) {{
-        body.innerHTML = '<tr><td colspan="7" style="padding:20px;color:#aaa;text-align:center">전일 데이터 없음 (최초 수집) — 변동 비교 불가</td></tr>';
-        document.getElementById('activeChgCount').textContent = '';
-        return;
-    }}
-    document.getElementById('activeChgCount').textContent =
-        '신규 ' + t.new + ' · 편출 ' + t.exit + ' · 급변 ' + t.chg;
+    var etfs = activeChanges.etfs || [];
+    _activeFirstRun = activeChanges.first_run || !activeChanges.prev;
+    var t = activeChanges.totals || {{new:0,exit:0,chg:0}};
+    var cntEl = document.getElementById('activeChgCount');
+    if (cntEl) cntEl.textContent = _activeFirstRun ? '' : ('편입 '+t.new+' · 편출 '+t.exit+' · 급변 '+t.chg);
 
-    var changed = (activeChanges.etfs || []).filter(function(e) {{
-        return e.detect && e.comparable && (e.new.length || e.exit.length || e.chg.length);
+    // 급변/편입/편출을 한 테이블에 (첫 칼럼=구분), 변화 내림차순(변화 큰 순)
+    _activeFlat = [];
+    etfs.forEach(function(e) {{
+        if (!(e.detect && e.comparable)) return;
+        e.chg.forEach(function(s) {{ _activeFlat.push({{type:'급변', etf:e.name, name:s.name, prev:s.prev_w, cur:s.w, d:s.d, amt:s.amt}}); }});
+        e.new.forEach(function(s) {{ _activeFlat.push({{type:'편입', etf:e.name, name:s.name, prev:null, cur:s.w, d:s.w, amt:s.amt}}); }});
+        e.exit.forEach(function(s) {{ _activeFlat.push({{type:'편출', etf:e.name, name:s.name, prev:s.prev_w, cur:null, d:-s.prev_w, amt:s.amt}}); }});
     }});
-    if (!changed.length) {{
-        body.innerHTML = '<tr><td colspan="7" style="padding:20px;color:#aaa;text-align:center">오늘 구성종목 변동 없음</td></tr>';
+    _activeFlat.sort(function(a,b) {{ return Math.abs(b.d) - Math.abs(a.d); }});
+    renderChgTable();
+}}
+function setChgFilter(f) {{
+    _chgFilter = f;
+    document.querySelectorAll('.chg-fbtn').forEach(function(b) {{ b.classList.toggle('active', b.getAttribute('data-f') === f); }});
+    renderChgTable();
+}}
+function renderChgTable() {{
+    var body = document.getElementById('activeChgBody');
+    var rows = (_chgFilter === 'all') ? _activeFlat : _activeFlat.filter(function(r) {{ return r.type === _chgFilter; }});
+    if (!rows.length) {{
+        body.innerHTML = '<tr><td colspan="7" style="padding:20px;color:#aaa;text-align:center">'
+            + (_activeFirstRun ? '전일 데이터 없음 (최초 수집)' : '해당 변동 없음') + '</td></tr>';
         return;
     }}
-    var flat = [];
-    changed.forEach(function(e) {{
-        e.new.forEach(function(s) {{ flat.push({{type:'편입', etf:e.name, name:s.name, prev:null, cur:s.w, d:s.w, amt:s.amt}}); }});
-        e.exit.forEach(function(s) {{ flat.push({{type:'편출', etf:e.name, name:s.name, prev:s.prev_w, cur:null, d:-s.prev_w, amt:s.amt}}); }});
-        e.chg.forEach(function(s) {{ flat.push({{type:'급변', etf:e.name, name:s.name, prev:s.prev_w, cur:s.w, d:s.d, amt:s.amt}}); }});
-    }});
-    flat.sort(function(a,b) {{ return Math.abs(b.d) - Math.abs(a.d); }});
     var h = '';
-    flat.forEach(function(r) {{
+    rows.forEach(function(r) {{
         var cls = r.d >= 0 ? 'pos' : 'neg';
-        h += '<tr>'
-          + '<td>' + r.type + '</td>'
-          + '<td class="etf-name">' + r.etf + '</td>'
-          + '<td>' + r.name + '</td>'
-          + '<td class="num">' + _wp(r.prev) + '</td>'
-          + '<td class="num">' + _wp(r.cur) + '</td>'
-          + '<td class="num ' + cls + '">' + (r.d>=0?'+':'') + _wp(r.d) + '</td>'
-          + '<td class="num ' + cls + '">' + fmtAmt(r.amt) + '</td>'
-          + '</tr>';
+        h += '<tr><td>'+r.type+'</td><td class="etf-name">'+r.etf+'</td><td>'+r.name+'</td>'
+          + '<td class="num">'+_wp(r.prev)+'</td><td class="num">'+_wp(r.cur)+'</td>'
+          + '<td class="num '+cls+'">'+(r.d>=0?'+':'')+_wp(r.d)+'</td>'
+          + '<td class="num '+cls+'">'+fmtAmt(r.amt)+'</td></tr>';
     }});
     body.innerHTML = h;
 }}

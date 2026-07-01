@@ -28,11 +28,20 @@ CHG_MIN = 1.0      # 비중 급변으로 볼 최소 절대 변화(%p)
 
 # 단기금리/채권형 액티브 — 매일 바스켓이 굴러 '비중 급변' 오탐이 쏟아지므로
 # 변동 '탐지'에서 제외한다(목록에는 그대로 표시). 이름 부분일치(substring).
+# '채권'이 이름에 들어가면 전부 제외(종합채권/단기채권/크레딧채권/투자등급채권 등).
 MM_BOND_EXCLUDE_KEYWORDS = [
     '머니마켓', 'MMF', 'CD금리', 'KOFR', 'SOFR', '통안',
-    '단기채', '단기금융', '단기자금', '종합채권', '국고채', '회사채',
-    '채권액티브', '금리액티브',
+    '단기채', '단기금융', '단기자금', '채권', '국고채', '회사채', '은행채', '카드채',
+    '금리액티브',
 ]
+
+# 현금성 구성종목 — 종목 변동 탐지에서 제외 (원화현금/예수금/예금 등).
+CASH_NAME_KEYWORDS = ['현금', '예수금', '예금', 'KRW', 'CASH', '단기대출']
+
+
+def _is_cash(name):
+    name = name or ''
+    return any(k in name for k in CASH_NAME_KEYWORDS)
 
 # 텔레그램 단일 메시지 최대 길이 (4096 한도 대비 여유)
 TG_CHUNK_LIMIT = 3900
@@ -140,8 +149,10 @@ def compute_active_etf_changes(conn=None):
 
             entry['comparable'] = True
             aum = entry['aum'] or 0  # 예상 편입/편출 금액(원) = 비중변화(%p) × AUM / 100
-            L = {s['c']: s for s in latest_const.get(code, []) if s.get('c') and s.get('n')}
-            P = {s['c']: s for s in prev_const.get(code, []) if s.get('c') and s.get('n')}
+            L = {s['c']: s for s in latest_const.get(code, [])
+                 if s.get('c') and s.get('n') and not _is_cash(s['n'])}
+            P = {s['c']: s for s in prev_const.get(code, [])
+                 if s.get('c') and s.get('n') and not _is_cash(s['n'])}
 
             for c, s in L.items():
                 w = s['w'] or 0
@@ -231,7 +242,7 @@ def format_telegram_message(result):
     lines = []
     lines.append('📌 <b>액티브 ETF 구성 변동</b>')
     lines.append(f'{latest} (전일 {prev} 대비)')
-    lines.append(f"신규 {t.get('new',0)} · 편출 {t.get('exit',0)} · 급변 {t.get('chg',0)}"
+    lines.append(f"편입 {t.get('new',0)} · 편출 {t.get('exit',0)} · 급변 {t.get('chg',0)}"
                  f" · 변동 ETF {t.get('etfs_changed',0)}개")
 
     for e in changed:

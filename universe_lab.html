@@ -10,15 +10,15 @@
 <script>Chart.defaults.devicePixelRatio = 2 * (window.devicePixelRatio || 1); Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.animation = false;</script>
 <style>
   * { box-sizing: border-box; }
-  body { margin:0; font-family:'Pretendard Variable',Pretendard,system-ui,-apple-system,sans-serif; background:#f4f5f7; color:#1f2937; }
-  header { padding:18px 24px; background:#111827; color:#fff; display:flex; align-items:center; gap:16px; }
-  header h1 { font-size:20px; margin:0; font-weight:700; }
-  header .sub { font-size:12px; color:#9ca3af; }
-  header a.back { margin-left:auto; color:#93c5fd; font-size:13px; text-decoration:none; font-weight:600; }
-  .updated { font-size:11px; color:#6b7280; padding:6px 24px; background:#fff; border-bottom:1px solid #e5e7eb; }
-  .tabs { display:flex; gap:8px; padding:12px 24px 0; background:#fff; border-bottom:1px solid #e5e7eb; }
-  .tab { padding:9px 18px; font-size:15px; font-weight:600; color:#6b7280; cursor:pointer; border-radius:8px 8px 0 0; }
-  .tab.active { color:#111827; background:#f4f5f7; border:1px solid #e5e7eb; border-bottom:none; }
+  body { margin:0; font-family:'Pretendard Variable',Pretendard,system-ui,-apple-system,sans-serif; background:#f8f9fa; color:#333; }
+  header { padding:20px 24px; margin:0; text-align:center; position:relative; background:transparent; color:#333; }
+  header h1 { font-size:33px; margin:0; font-weight:700; color:#333; line-height:1.2; }
+  header .sub { display:block; margin-top:8px; font-size:15px; color:#6c757d; }
+  header a.back { color:#2d7a3a; font-size:13px; text-decoration:none; font-weight:600; }
+  .updated { font-size:14px; color:#6c757d; font-style:italic; padding:0 24px 4px; text-align:center; background:transparent; }
+  .tabs { display:flex; gap:0; margin:0 0 20px; padding:12px 24px 0; border-bottom:2px solid #2d7a3a; }
+  .tab { padding:10px 24px; font-size:16px; font-weight:600; color:#666; cursor:pointer; border:1px solid transparent; border-bottom:none; border-radius:8px 8px 0 0; background:#f0f0f0; }
+  .tab.active { color:#2d7a3a; background:#fff; border-color:#2d7a3a #2d7a3a transparent; margin-bottom:-2px; }
   .panel { display:none; padding:18px 24px 40px; }
   .panel.active { display:block; }
   .toolbar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:12px; min-height:34px; }
@@ -31,15 +31,17 @@
   .legend { display:flex; align-items:center; gap:6px; font-size:12px; color:#111827; font-weight:600; margin-top:8px; }
   .legend .bar { width:160px; height:12px; border-radius:3px; background:linear-gradient(90deg,#16a34a,#f3f4f6,#dc2626); }
   table { width:100%; border-collapse:collapse; font-size:15px; }
-  th,td { padding:9px 10px; border-bottom:1px solid #eef0f2; text-align:center; white-space:nowrap; color:#111827; }
-  th { background:#f9fafb; color:#111827; font-weight:700; position:sticky; top:0; }
+  thead { background:#e9ecef; }
+  th { padding:12px 6px; text-align:center; font-weight:600; color:#000; white-space:nowrap; background:#e9ecef; position:sticky; top:0; z-index:10; box-shadow: inset 0 -2px 0 #000; }
+  td { padding:10px 6px; border-bottom:1px solid #dee2e6; text-align:center; white-space:nowrap; color:#111827; }
   td.l,th.l { text-align:center; }
-  .pos { color:#dc2626; font-weight:600; }
-  .neg { color:#16a34a; font-weight:600; }
-  .up { color:#dc2626; font-weight:700; }
-  .down { color:#16a34a; font-weight:700; }
+  tbody tr:hover { background:#f5f5f5; }
+  .pos { color:#cc0000; font-weight:600; }
+  .neg { color:#0055cc; font-weight:600; }
+  .up { color:#cc0000; font-weight:700; }
+  .down { color:#0055cc; font-weight:700; }
   .flat { color:#9ca3af; }
-  .new { color:#2563eb; font-weight:700; }
+  .new { color:#0055cc; font-weight:700; }
   .rk2col { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
   @media (max-width:900px){ .rk2col { grid-template-columns:1fr; } }
   .note { font-size:12px; color:#9ca3af; margin:7px 0 0; }
@@ -92,8 +94,9 @@
 
 </style>
 </head>
-<body>
+<body class="has-sidebar">
 <nav class="topnav"><div class="topnav-inner"><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab active">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub">Index</a><a href="universe.html" class="topnav-sub">Universe</a><a href="universe_lab.html" class="topnav-sub active">Universe Lab</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
+<aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="market.html" class="sidebar-link">Index</a><a href="universe.html" class="sidebar-link">Universe</a><a href="universe_lab.html" class="sidebar-link active">Universe Lab</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
 <header>
   <h1>Universe Lab</h1>
   <span class="sub">히트맵 / 섹터 로테이션 / 순위 변화</span>
