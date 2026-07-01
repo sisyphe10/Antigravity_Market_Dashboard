@@ -326,15 +326,15 @@
       "returns": {
         "KOSPI": 3.9e-05,
         "KOSDAQ": -0.147581,
-        "NIKKEI": 0.047318,
-        "TAIEX": 0.005968,
-        "S&P500": -0.011674,
-        "NASDAQ": -0.03071,
-        "RUSSELL": 0.034136,
-        "BTC": -0.208999,
-        "ETH": -0.221241,
-        "GOLD": -0.113036,
-        "SILVER": -0.20374
+        "NIKKEI": 0.056277,
+        "TAIEX": 0.03114,
+        "S&P500": -0.010646,
+        "NASDAQ": -0.028136,
+        "RUSSELL": 0.035977,
+        "BTC": -0.182677,
+        "ETH": -0.196641,
+        "GOLD": -0.117882,
+        "SILVER": -0.213434
       }
     },
     {
@@ -344,15 +344,15 @@
       "returns": {
         "KOSPI": null,
         "KOSDAQ": null,
-        "NIKKEI": null,
-        "TAIEX": null,
+        "NIKKEI": 0.005302,
+        "TAIEX": 0.019082,
         "S&P500": null,
         "NASDAQ": null,
         "RUSSELL": null,
-        "BTC": null,
-        "ETH": null,
-        "GOLD": null,
-        "SILVER": null
+        "BTC": -0.016565,
+        "ETH": -0.011865,
+        "GOLD": -0.008278,
+        "SILVER": -0.022227
       }
     }
   ],
@@ -361,16 +361,16 @@
     "returns": {
       "KOSPI": 1.011423,
       "KOSDAQ": -0.010038,
-      "NIKKEI": 0.379993,
-      "TAIEX": 0.553671,
-      "S&P500": 0.094379,
-      "NASDAQ": 0.124873,
-      "RUSSELL": 0.216399,
-      "BTC": -0.334905,
-      "ETH": -0.47392,
-      "GOLD": -0.06487,
-      "SILVER": -0.141501
+      "NIKKEI": 0.399175,
+      "TAIEX": 0.622937,
+      "S&P500": 0.095517,
+      "NASDAQ": 0.12786,
+      "RUSSELL": 0.218566,
+      "BTC": -0.324158,
+      "ETH": -0.463741,
+      "GOLD": -0.077677,
+      "SILVER": -0.170802
     }
   },
-  "updated_at": "2026-07-01 01:25:43 KST"
+  "updated_at": "2026-07-01 13:35:12 KST"
 }
