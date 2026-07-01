@@ -4,8 +4,14 @@
 # uncommitted change existed -> 398-commit stale accumulation. This repo's main tree changes are
 # effectively stale/regenerated artifacts (watcher pushes via dedicated clone, bots deploy via
 # deploy.sh, dashboards are regenerated), so origin is authoritative. On ff failure: back up the
-# full diff as a patch, then reset. Defer only if (1) watcher is pushing, (2) Wrap_NAV has an
-# unpushed user save. (English-only: PowerShell 5.x mis-decodes BOM-less UTF-8 Korean.)
+# local uncommitted changes as a patch, then reset. Defer only if (1) watcher is pushing,
+# (2) Wrap_NAV has an unpushed user save. (English-only: PowerShell 5.x mis-decodes BOM-less UTF-8 Korean.)
+#
+# 2026-07-01 root fix #2: backup was `git diff origin/main` = FULL divergence (behind-N commits)
+# + local changes; it grows unbounded as local falls behind (58 commits -> 13 MB) and the run died
+# (0xC000013A) mid-backup before reset -> local stayed behind -> more behind next day (vicious cycle).
+# reset --hard only discards TRACKED uncommitted changes (untracked preserved, 0 commits ahead),
+# so `git diff HEAD` (bounded, small, fast) is the correct + robust backup source.
 $ErrorActionPreference = "Continue"
 Set-Location "C:\Users\user\Antigravity_Market_Dashboard"
 
@@ -25,12 +31,13 @@ if ($behind -eq "0") { Log "already up to date (behind 0)"; exit 0 }
 git merge --ff-only origin/main *> $null
 if ($LASTEXITCODE -eq 0) { Log "ff sync done: $behind commits"; exit 0 }
 
-# Dirty -> back up full diff as a patch (recoverable)
+# Dirty -> back up local uncommitted changes as a patch (recoverable)
 $bakDir = "backups"
 if (-not (Test-Path $bakDir)) { New-Item -ItemType Directory $bakDir -Force | Out-Null }
 $patch = Join-Path $bakDir ("auto_pull_" + (Get-Date -Format "yyyyMMdd_HHmmss") + ".patch")
-git diff origin/main *> $patch
-Log "dirty detected -> patch backup: $patch"
+# `git diff HEAD` (local uncommitted only, bounded), NOT `git diff origin/main` (unbounded divergence).
+git diff HEAD *> $patch
+Log "dirty detected -> patch backup (git diff HEAD): $patch"
 
 # (2) Wrap_NAV unpushed user save (working mtime > origin commit time) -> defer for watcher push
 $wrapDirty = (git status --porcelain -- Wrap_NAV.xlsx 2>$null)
