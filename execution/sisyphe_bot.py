@@ -569,10 +569,13 @@ def format_update_summary(portfolio_data):
     order_changes = portfolio_data.get('_order_changes') or {}
     if order_changes:
         lines.append("📋 <b>주문 변경 내역</b>")
+        _first_oc = True
         for pname, ch in order_changes.items():
             if not ch:
                 continue
-            lines.append("")
+            if not _first_oc:          # 상품 간에만 빈 줄 (헤더 바로 아래 첫 블록은 붙임)
+                lines.append("")
+            _first_oc = False
             lines.append(f"<b>[{pname}]</b>")
             added = ch.get('added', [])
             changed = ch.get('changed', [])
