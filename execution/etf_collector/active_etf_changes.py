@@ -90,9 +90,25 @@ def compute_active_etf_changes(conn=None):
             (latest, f'%{ACTIVE_KEYWORD}%')
         ).fetchall()
 
+        # 전일 시세 맵 (AUM/NAV 전일 대비 변동% 계산용)
+        prev_daily = {}
+        if prev:
+            for pr in conn.execute(
+                    "SELECT etf_code, aum, nav FROM etf_daily WHERE date=?", (prev,)).fetchall():
+                prev_daily[pr['etf_code']] = pr
+
+        def _pct(cur, prv):
+            if cur is None or not prv:
+                return None
+            return (cur - prv) / prv * 100
+
         def base_entry(r):
+            p = prev_daily.get(r['etf_code'])
+            paum = p['aum'] if p else None
+            pnav = p['nav'] if p else None
             return {'code': r['etf_code'], 'name': r['etf_name'], 'aum': r['aum'],
                     'nav': r['nav'], 'close': r['close_price'], 'vol': r['volume'],
+                    'aum_chg': _pct(r['aum'], paum), 'nav_chg': _pct(r['nav'], pnav),
                     'detect': not _is_mm_bond(r['etf_name']),
                     'comparable': False, 'new': [], 'exit': [], 'chg': []}
 
@@ -123,6 +139,7 @@ def compute_active_etf_changes(conn=None):
                 continue
 
             entry['comparable'] = True
+            aum = entry['aum'] or 0  # 예상 편입/편출 금액(원) = 비중변화(%p) × AUM / 100
             L = {s['c']: s for s in latest_const.get(code, []) if s.get('c') and s.get('n')}
             P = {s['c']: s for s in prev_const.get(code, []) if s.get('c') and s.get('n')}
 
@@ -130,18 +147,20 @@ def compute_active_etf_changes(conn=None):
                 w = s['w'] or 0
                 if c not in P:
                     if w >= NEW_MIN:
-                        entry['new'].append({'code': c, 'name': s['n'], 'w': w})
+                        entry['new'].append({'code': c, 'name': s['n'], 'w': w,
+                                             'amt': w * aum / 100})
                 else:
                     pw = P[c]['w'] or 0
                     d = w - pw
                     if abs(d) >= CHG_MIN:
                         entry['chg'].append({'code': c, 'name': s['n'], 'w': w,
-                                             'prev_w': pw, 'd': d})
+                                             'prev_w': pw, 'd': d, 'amt': d * aum / 100})
             for c, s in P.items():
                 if c not in L:
                     pw = s['w'] or 0
                     if pw >= EXIT_MIN:
-                        entry['exit'].append({'code': c, 'name': s['n'], 'prev_w': pw})
+                        entry['exit'].append({'code': c, 'name': s['n'], 'prev_w': pw,
+                                              'amt': -pw * aum / 100})
 
             entry['new'].sort(key=lambda x: -x['w'])
             entry['exit'].sort(key=lambda x: -x['prev_w'])
@@ -171,7 +190,20 @@ def _esc(s):
 
 
 def _fmt_pct(v):
-    return f'{v:.2f}'
+    return f'{v:.1f}'
+
+
+def _fmt_won(v):
+    """예상 편입/편출 금액(원) → 부호 붙은 억/조 표기."""
+    if v is None:
+        return ''
+    a = abs(v)
+    sign = '-' if v < 0 else '+'
+    if a >= 1e12:
+        return f'{sign}{a / 1e12:.1f}조'
+    if a >= 1e8:
+        return f'{sign}{round(a / 1e8):,}억'
+    return f'{sign}{round(a):,}'
 
 
 def format_telegram_message(result):
@@ -206,15 +238,15 @@ def format_telegram_message(result):
         lines.append('')
         lines.append(f"<b>{_esc(e['name'])}</b>")
         if e['new']:
-            items = ', '.join(f"{_esc(s['name'])}({_fmt_pct(s['w'])}%)" for s in e['new'])
+            items = ', '.join(f"{_esc(s['name'])}({_fmt_pct(s['w'])}%, {_fmt_won(s.get('amt'))})" for s in e['new'])
             lines.append(f'편입: {items}')
         if e['exit']:
-            items = ', '.join(f"{_esc(s['name'])}({_fmt_pct(s['prev_w'])}%)" for s in e['exit'])
+            items = ', '.join(f"{_esc(s['name'])}({_fmt_pct(s['prev_w'])}%, {_fmt_won(s.get('amt'))})" for s in e['exit'])
             lines.append(f'편출: {items}')
         if e['chg']:
             items = ', '.join(
                 f"{_esc(s['name'])} {_fmt_pct(s['prev_w'])}→{_fmt_pct(s['w'])}"
-                f"({'+' if s['d'] >= 0 else ''}{_fmt_pct(s['d'])}%p)"
+                f"({'+' if s['d'] >= 0 else ''}{_fmt_pct(s['d'])}%p, {_fmt_won(s.get('amt'))})"
                 for s in e['chg'])
             lines.append(f'급변: {items}')
 

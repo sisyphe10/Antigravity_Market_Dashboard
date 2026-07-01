@@ -8775,11 +8775,10 @@ tbody tr.etf-row:hover {{ background: #f5f5f5; }}
     <div id="etfTab1" class="etf-tab-content" style="display:none">
         <div class="section">
             <div class="section-header">📋 구성종목 변동 (전일 대비) <span class="count" id="activeChgCount"></span></div>
-            <div id="activeChgMeta" style="padding:8px 20px;font-size:0.82rem;color:#888;"></div>
             <div style="overflow-x:auto"><table>
                 <thead><tr>
                     <th>구분</th><th>ETF</th><th>종목</th>
-                    <th>전일(%)</th><th>오늘(%)</th><th>변화(%p)</th>
+                    <th>전일(%)</th><th>오늘(%)</th><th>변화(%p)</th><th>예상 금액</th>
                 </tr></thead>
                 <tbody id="activeChgBody"></tbody>
             </table></div>
@@ -8791,9 +8790,11 @@ tbody tr.etf-row:hover {{ background: #f5f5f5; }}
                     <th onclick="doSortActive(0)">#<span class="arr" id="aarr0"></span></th>
                     <th onclick="doSortActive(1)">ETF명<span class="arr" id="aarr1"></span></th>
                     <th onclick="doSortActive(2)">AUM<span class="arr" id="aarr2"></span></th>
-                    <th onclick="doSortActive(3)">NAV<span class="arr" id="aarr3"></span></th>
-                    <th onclick="doSortActive(4)">종가<span class="arr" id="aarr4"></span></th>
-                    <th onclick="doSortActive(5)">거래량<span class="arr" id="aarr5"></span></th>
+                    <th onclick="doSortActive(3)">전일대비<span class="arr" id="aarr3"></span></th>
+                    <th onclick="doSortActive(4)">NAV<span class="arr" id="aarr4"></span></th>
+                    <th onclick="doSortActive(5)">전일대비<span class="arr" id="aarr5"></span></th>
+                    <th onclick="doSortActive(6)">종가<span class="arr" id="aarr6"></span></th>
+                    <th onclick="doSortActive(7)">거래량<span class="arr" id="aarr7"></span></th>
                 </tr></thead>
                 <tbody id="activeListBody"></tbody>
             </table></div>
@@ -8932,7 +8933,7 @@ function render() {{
             h += '<tr class="constituents-row"><td colspan="6"><table class="const-table">';
             h += '<thead><tr><th>#</th><th>종목명</th><th>종목코드</th><th>비중(%)</th></tr></thead><tbody>';
             cList.forEach(function(c, ci) {{
-                h += '<tr><td>' + (ci+1) + '</td><td style="text-align:left">' + c.n + '</td><td>' + c.c + '</td><td class="num">' + (c.w ? c.w.toFixed(2) : '-') + '</td></tr>';
+                h += '<tr><td>' + (ci+1) + '</td><td>' + c.n + '</td><td>' + c.c + '</td><td class="num">' + (c.w ? c.w.toFixed(2) : '-') + '</td></tr>';
             }});
             if (!cList.length) h += '<tr><td colspan="4" style="color:#aaa;padding:12px">구성종목 데이터 없음</td></tr>';
             h += '</tbody></table></td></tr>';
@@ -9029,7 +9030,7 @@ function doSortActive(col) {{
 }}
 function renderActiveList() {{
     var rows = (activeChanges.etfs || []).slice();
-    var cols = ['_idx', 'name', 'aum', 'nav', 'close', 'vol'];
+    var cols = ['_idx', 'name', 'aum', 'aum_chg', 'nav', 'nav_chg', 'close', 'vol'];
     var key = cols[_activeSortCol] || 'aum';
     rows.sort(function(a, b) {{
         var va = (key === 'name') ? a.name : pn(a[key]);
@@ -9038,7 +9039,7 @@ function renderActiveList() {{
         if (va > vb) return _activeSortAsc ? 1 : -1;
         return 0;
     }});
-    for (var i=0;i<6;i++) {{
+    for (var i=0;i<8;i++) {{
         var el = document.getElementById('aarr'+i);
         if (el) el.textContent = (i === _activeSortCol) ? (_activeSortAsc ? ' ▲' : ' ▼') : '';
     }}
@@ -9049,49 +9050,47 @@ function renderActiveList() {{
         h += '<td>' + (i+1) + '</td>';
         h += '<td class="etf-name">' + r.name + tag + '</td>';
         h += '<td class="num">' + fmtAum(r.aum) + '</td>';
+        h += pctCell(r.aum_chg);
         h += '<td class="num">' + fmtNum(r.nav) + '</td>';
+        h += pctCell(r.nav_chg);
         h += '<td class="num">' + fmtNum(r.close) + '</td>';
         h += '<td class="num">' + fmtNum(r.vol) + '</td>';
         h += '</tr>';
     }});
-    document.getElementById('activeListBody').innerHTML = h || '<tr><td colspan="6" style="padding:20px;color:#aaa">액티브 ETF 없음</td></tr>';
+    document.getElementById('activeListBody').innerHTML = h || '<tr><td colspan="8" style="padding:20px;color:#aaa">액티브 ETF 없음</td></tr>';
     document.getElementById('activeListCount').textContent = rows.length + '종목';
 }}
-function _wp(v) {{ return (v==null) ? '-' : Number(v).toFixed(2); }}
+function _wp(v) {{ return (v==null) ? '-' : Number(v).toFixed(1); }}
+function fmtAmt(v) {{ if (v==null || v===0) return '-'; return (v<0?'-':'+') + fmtAum(Math.abs(v)); }}
+function pctCell(v) {{ if (v==null) return '<td class="num">-</td>'; var c = v>=0?'pos':'neg'; return '<td class="num '+c+'">'+(v>=0?'+':'')+v.toFixed(1)+'%</td>'; }}
 var _activeRendered = false;
 function renderActive() {{
     renderActiveList();
     if (_activeRendered) return;
     _activeRendered = true;
 
-    var meta = document.getElementById('activeChgMeta');
     var body = document.getElementById('activeChgBody');
     var t = activeChanges.totals || {{new:0,exit:0,chg:0,etfs_changed:0}};
     if (activeChanges.first_run || !activeChanges.prev) {{
-        meta.textContent = '전일 데이터 없음 (최초 수집) — 변동 비교 불가';
-        body.innerHTML = '';
+        body.innerHTML = '<tr><td colspan="7" style="padding:20px;color:#aaa;text-align:center">전일 데이터 없음 (최초 수집) — 변동 비교 불가</td></tr>';
         document.getElementById('activeChgCount').textContent = '';
         return;
     }}
     document.getElementById('activeChgCount').textContent =
         '신규 ' + t.new + ' · 편출 ' + t.exit + ' · 급변 ' + t.chg;
-    var skN = (activeChanges.skipped || []).length;
-    meta.textContent = activeChanges.latest + ' vs 전일 ' + activeChanges.prev
-        + ' · 변동 ETF ' + t.etfs_changed + '개'
-        + (skN ? ' · 비교불가(수집누락) ' + skN + '개' : '');
 
     var changed = (activeChanges.etfs || []).filter(function(e) {{
         return e.detect && e.comparable && (e.new.length || e.exit.length || e.chg.length);
     }});
     if (!changed.length) {{
-        body.innerHTML = '<tr><td colspan="6" style="padding:20px;color:#aaa;text-align:center">오늘 구성종목 변동 없음</td></tr>';
+        body.innerHTML = '<tr><td colspan="7" style="padding:20px;color:#aaa;text-align:center">오늘 구성종목 변동 없음</td></tr>';
         return;
     }}
     var flat = [];
     changed.forEach(function(e) {{
-        e.new.forEach(function(s) {{ flat.push({{type:'편입', etf:e.name, name:s.name, prev:null, cur:s.w, d:s.w}}); }});
-        e.exit.forEach(function(s) {{ flat.push({{type:'편출', etf:e.name, name:s.name, prev:s.prev_w, cur:null, d:-s.prev_w}}); }});
-        e.chg.forEach(function(s) {{ flat.push({{type:'급변', etf:e.name, name:s.name, prev:s.prev_w, cur:s.w, d:s.d}}); }});
+        e.new.forEach(function(s) {{ flat.push({{type:'편입', etf:e.name, name:s.name, prev:null, cur:s.w, d:s.w, amt:s.amt}}); }});
+        e.exit.forEach(function(s) {{ flat.push({{type:'편출', etf:e.name, name:s.name, prev:s.prev_w, cur:null, d:-s.prev_w, amt:s.amt}}); }});
+        e.chg.forEach(function(s) {{ flat.push({{type:'급변', etf:e.name, name:s.name, prev:s.prev_w, cur:s.w, d:s.d, amt:s.amt}}); }});
     }});
     flat.sort(function(a,b) {{ return Math.abs(b.d) - Math.abs(a.d); }});
     var h = '';
@@ -9100,10 +9099,11 @@ function renderActive() {{
         h += '<tr>'
           + '<td>' + r.type + '</td>'
           + '<td class="etf-name">' + r.etf + '</td>'
-          + '<td style="text-align:left">' + r.name + '</td>'
+          + '<td>' + r.name + '</td>'
           + '<td class="num">' + _wp(r.prev) + '</td>'
           + '<td class="num">' + _wp(r.cur) + '</td>'
           + '<td class="num ' + cls + '">' + (r.d>=0?'+':'') + _wp(r.d) + '</td>'
+          + '<td class="num ' + cls + '">' + fmtAmt(r.amt) + '</td>'
           + '</tr>';
     }});
     body.innerHTML = h;
