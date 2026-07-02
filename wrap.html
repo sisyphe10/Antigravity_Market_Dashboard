@@ -245,7 +245,7 @@
     <aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="#" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="sidebar-link active">Dashboard</a><a href="#" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="sidebar-link">Order</a><a href="#" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="sidebar-link">공시</a><a href="#" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="sidebar-link">기여도</a><a href="#" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="sidebar-link">수수료</a></aside>
     <header>
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-07-02 08:58:08 KST</div>
+        <div class="last-updated">Updated: 2026-07-02 09:07:57 KST</div>
     </header>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -3088,21 +3088,20 @@
                 var v = ws.getCell(r, 3).value;
                 if (v && String(v).replace(/\s/g, '') === '합계') { sumRow = r; break; }
             }
+            if (sumRow < DATA_START) throw new Error('한투 양식: 합계 행(C열)을 찾을 수 없습니다 — 템플릿 확인 필요');
             var newCount = combined.length;
-            if (sumRow >= DATA_START) {
-                var existingCount = Math.max(0, sumRow - DATA_START - 1);  // 데이터~합계 사이 공백 1행 제외
-                if (newCount > existingCount) {
-                    ws.duplicateRow(DATA_START, newCount - existingCount, true);
-                    sumRow += (newCount - existingCount);
-                } else if (newCount < existingCount) {
-                    ws.spliceRows(DATA_START, existingCount - newCount);
-                    sumRow -= (existingCount - newCount);
-                }
+            var existingCount = Math.max(0, sumRow - DATA_START - 1);  // 데이터~합계 사이 공백 1행 제외
+            if (newCount > existingCount) {
+                ws.duplicateRow(DATA_START, newCount - existingCount, true);
+                sumRow += (newCount - existingCount);
+            } else if (newCount < existingCount) {
+                ws.spliceRows(DATA_START, existingCount - newCount);
+                sumRow -= (existingCount - newCount);
             }
-            // B2 =TODAY() 셀 날짜 포맷 방어 (라이프 양식 B4와 동일 케이스)
+            // B2 =TODAY() 셀 날짜 포맷 방어 (템플릿 실측 포맷 mm-dd-yy 유지)
             var b2 = ws.getCell('B2');
             if (b2 && b2.value && (b2.formula === 'TODAY()' || /TODAY/i.test(String(b2.formula || b2.value)))) {
-                b2.numFmt = 'yyyy-mm-dd';
+                b2.numFmt = 'mm-dd-yy';
             }
             var KIS_ORDER_LABEL = { '신규 편입': '신규매수', '전량 편출': '전량매도', '비중 확대': '비중확대', '비중 축소': '비중축소' };
             combined.forEach(function(s, i) {
@@ -3110,8 +3109,9 @@
                 ws.getCell('A' + r).value = i + 1;
                 ws.getCell('B' + r).value = String(s.code || '').padStart(6, '0');
                 ws.getCell('C' + r).value = s.name;
-                ws.getCell('D' + r).value = s.oldWeight / 100;
-                ws.getCell('E' + r).value = s.newWeight / 100;
+                // 비중 % 숫자 → 소수 (부동소수 오차 스냅: 30.1/100=0.30099999.. 방지)
+                ws.getCell('D' + r).value = Math.round(s.oldWeight * 100) / 10000;
+                ws.getCell('E' + r).value = Math.round(s.newWeight * 100) / 10000;
                 ws.getCell('F' + r).value = KIS_ORDER_LABEL[s.orderType] || null;  // 유지=빈칸
                 ws.getCell('G' + r).value = s.reason || null;
                 ws.getCell('H' + r).value = null;  // 비고 (템플릿 예시값 제거)
