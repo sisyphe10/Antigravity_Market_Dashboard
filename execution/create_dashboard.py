@@ -4534,6 +4534,10 @@ def create_order_section():
                 + '</tr></thead><tbody>' + rows + totalsRow + '</tbody></table></div>'
                 + '<div style="margin-top:12px;text-align:right;"><button id="orderAddStockBtn" style="font-family:inherit;font-size:14px;font-weight:600;padding:6px 14px;background:#f3f4f6;color:#222;border:1px solid #d1d5db;border-radius:8px;cursor:pointer;">+ 종목 추가</button></div>'
                 + '</div>';
+            // 재렌더 직전 현재 포커스(행 idx·필드·커서)를 스냅샷 → 재렌더 후 복원.
+            // 신규종목 blur(autofill)·변경후 input이 패널을 통째로 재렌더하므로, 이 보존이 없으면
+            // Tab/붙여넣기 목적지 input이 파괴돼 포커스가 body로 떨어진다(=Tab 포커스 소실 근본원인).
+            var _prevFocus = _snapshotOrderFocus();
             document.getElementById('orderContent').innerHTML = html;
             document.querySelectorAll('#orderContent input').forEach(function(el) {
                 el.addEventListener('input', function(e) {
@@ -4584,6 +4588,13 @@ def create_order_section():
                     if (!isNaN(idx)) autoFillStockFromCode(idx);
                 });
             });
+            // Tab 이동 흐름(종목명→변경후→추천사유→다음 행) + 추천사유 멀티라인 붙여넣기 분배
+            document.querySelectorAll('#orderContent tbody input[data-field]').forEach(function(el) {
+                el.addEventListener('keydown', handleOrderTabKey);
+            });
+            document.querySelectorAll('#orderContent input[data-field="reason"]').forEach(function(el) {
+                el.addEventListener('paste', handleReasonPaste);
+            });
             var cancelBtn = document.getElementById('orderCancelAllBtn');
             if (cancelBtn) cancelBtn.addEventListener('click', function() { cancelAllPendingOrders(); });
             var saveBtn = document.getElementById('orderSaveBtn');
@@ -4627,6 +4638,72 @@ def create_order_section():
             bindCopy('.email-copy-btn', '.email-text', '#374151');
             bindCopy('.compliance-copy-btn', '.compliance-text', '#d97706');
             bindCopy('.nateon-copy-btn', '.nateon-text', '#4f46e5');
+            _restoreOrderFocus(_prevFocus);
+        }
+
+        // ── Order 입력 UX: 포커스 보존 + Tab 이동 흐름 + 추천사유 멀티라인 붙여넣기 ──
+        // Tab 순회 대상 필드 (이 순서로만 이동; 업종/코드/주문구분/삭제 버튼은 건너뜀)
+        var ORDER_TAB_FIELDS = ['name', 'newWeight', 'reason'];
+        // 현재 #orderContent 안에서 포커스된 입력의 행 idx·필드·커서 위치를 기록
+        function _snapshotOrderFocus() {
+            var ae = document.activeElement;
+            if (!ae || ae.tagName !== 'INPUT' || !ae.dataset || ae.dataset.idx == null || !ae.dataset.field) return null;
+            if (!ae.closest || !ae.closest('#orderContent')) return null;
+            var snap = { idx: ae.dataset.idx, field: ae.dataset.field, start: null, end: null };
+            try { snap.start = ae.selectionStart; snap.end = ae.selectionEnd; } catch (e) {}
+            return snap;
+        }
+        // 재렌더 후 같은 행 idx·필드의 새 입력으로 포커스·커서 복원
+        function _restoreOrderFocus(snap) {
+            if (!snap) return;
+            var el = document.querySelector('#orderContent input[data-idx="' + snap.idx + '"][data-field="' + snap.field + '"]');
+            if (!el) return;
+            el.focus();
+            if (snap.start != null) { try { el.setSelectionRange(snap.start, snap.end); } catch (e) {} }
+        }
+        // Tab 순회 대상 입력들을 화면 순서(행→종목명/변경후/추천사유)대로 반환
+        function _orderTabbables() {
+            return Array.prototype.slice.call(document.querySelectorAll(
+                '#orderContent tbody input[data-field="name"], '
+                + '#orderContent tbody input[data-field="newWeight"], '
+                + '#orderContent tbody input[data-field="reason"]'));
+        }
+        // Tab/Shift+Tab → 종목명→변경후→추천사유→(다음 행) 종목명 순서로 포커스 이동.
+        // 목적지를 직접 focus()하므로 blur→autofill 재렌더가 일어나도 _snapshot/_restore로 유지된다.
+        function handleOrderTabKey(e) {
+            if (e.key !== 'Tab') return;
+            var field = (e.target && e.target.dataset) ? e.target.dataset.field : null;
+            if (ORDER_TAB_FIELDS.indexOf(field) < 0) return;  // 대상 외(코드/업종 등) → 기본 동작
+            var list = _orderTabbables();
+            var pos = list.indexOf(e.target);
+            if (pos < 0) return;
+            var next = e.shiftKey ? list[pos - 1] : list[pos + 1];
+            if (!next) return;  // 표의 끝/처음 → 기본 Tab(표 밖으로) 허용
+            e.preventDefault();
+            next.focus();
+            try { next.setSelectionRange(next.value.length, next.value.length); } catch (_e) {}
+        }
+        // 추천사유 칸 여러 줄 붙여넣기 → 첫 줄은 이 칸, 이후 줄은 아래 행 추천사유로 순서 분배(스프레드시트식).
+        // 채운 칸마다 input 이벤트 dispatch → 상태저장·탭간 추천사유 동기화 훅이 반응.
+        function handleReasonPaste(e) {
+            var el = e.target;
+            if (!el.dataset || el.dataset.field !== 'reason') return;
+            var cd = e.clipboardData || window.clipboardData;
+            var text = cd ? cd.getData('text') : '';
+            if (text == null) return;
+            var lines = text.split(/\\r\\n|\\r|\\n/);
+            while (lines.length > 1 && lines[lines.length - 1] === '') lines.pop();  // 트레일링 개행 제거
+            if (lines.length <= 1) return;  // 한 줄이면 기본 붙여넣기 동작
+            var startIdx = parseInt(el.dataset.idx, 10);
+            if (isNaN(startIdx)) return;
+            e.preventDefault();
+            lines.forEach(function(line, k) {
+                var t = document.querySelector('#orderContent input[data-field="reason"][data-idx="' + (startIdx + k) + '"]');
+                if (!t) return;  // 행 수 초과분은 무시
+                t.value = line;
+                t.dispatchEvent(new Event('input', { bubbles: true }));
+            });
+            renderOrderPanel(orderActiveTab);  // 빈 추천사유 강조 배경 갱신 (포커스는 _snapshot/_restore로 보존)
         }
 
         function addOrderStock(pfName) {
