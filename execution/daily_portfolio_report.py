@@ -135,7 +135,7 @@ def get_latest_returns():
     returns_data = {}
     
     for product in wrap_config.report_return_products():  # 단일 출처: execution/wrap_config.py
-        returns_data[product] = {
+        vals = {
             '1D': latest_row.get(f'{product}_1D', 'N/A'),
             '1W': latest_row.get(f'{product}_1W', 'N/A'),
             '1M': latest_row.get(f'{product}_1M', 'N/A'),
@@ -144,6 +144,10 @@ def get_latest_returns():
             '1Y': latest_row.get(f'{product}_1Y', 'N/A'),
             'YTD': latest_row.get(f'{product}_YTD', 'N/A')
         }
+        # 전 기간 N/A = 수익률 컬럼 자체가 없음 (개시 전 사전 등록 상품 등) → 표에서 제외
+        if all(v == 'N/A' for v in vals.values()):
+            continue
+        returns_data[product] = vals
 
     return returns_data
 
@@ -168,12 +172,16 @@ def get_portfolio_holdings():
 
     general = None
     targets = []
+    # 레지스트리 기준 판별: 한투 '성과모집형'(이름에 목표전환형 미포함) + 단독 일반형('한투 지속형')도
+    # 각각 별도 PNG 섹션으로 포함. '목표전환형' substring은 레거시 페어 키 호환용으로 유지.
+    target_keys = wrap_config.target_display_names()
+    standalone_keys = {sg['display'] for sg in wrap_config.standalone_general_tabs()}
     for key, stocks in data.items():
         if not key or key.startswith('_'):
             continue
         if not isinstance(stocks, list) or not stocks:
             continue
-        if '목표전환형' in key:
+        if key in target_keys or key in standalone_keys or '목표전환형' in key:
             targets.append((key, stocks))
         elif '트루밸류' in key:
             general = (key, stocks)

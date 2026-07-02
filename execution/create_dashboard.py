@@ -3024,7 +3024,8 @@ def create_aum_table():
         table_latest = latest[latest['상품명'].isin(active_aum_names)].copy()
         broker_total = table_latest.groupby('증권사')['AUM'].sum().sort_values(ascending=False)
         table_latest['broker_rank'] = table_latest['증권사'].map({b: i for i, b in enumerate(broker_total.index)})
-        table_latest['is_target'] = table_latest['상품명'].str.contains('목표전환형').astype(int)
+        # target 판별은 레지스트리 기준 (한투 '성과모집형'은 이름에 '목표전환형' 미포함)
+        table_latest['is_target'] = table_latest['상품명'].isin(wrap_config.target_aum_names()).astype(int)
         table_latest = table_latest.sort_values(
             ['broker_rank', 'is_target', 'AUM'], ascending=[True, True, False]
         ).drop(columns=['broker_rank', 'is_target'])
@@ -3241,8 +3242,9 @@ def create_cumulative_aum_chart():
                 df_nav = df_nav.iloc[:, 1:]
             nav_latest = df_nav.index.max()
             nav_trading_days = df_nav.index.sort_values()
+            _target_nav_cols = wrap_config.target_nav_keys()  # 레지스트리 기준 (성과모집형 포함)
             for col in df_nav.columns:
-                if '목표전환형' not in col:
+                if col not in _target_nav_cols:
                     continue
                 valid = df_nav[col].dropna()
                 if valid.empty:
@@ -3278,7 +3280,7 @@ def create_cumulative_aum_chart():
         all_dates_full_range = sorted(d for d in df['날짜'].dt.strftime('%Y-%m-%d').unique() if d >= chart_start)
         all_dates = pick_weekly_last(all_dates_full_range)
 
-        is_target = df['상품명'].str.contains('목표전환형', na=False)
+        is_target = df['상품명'].isin(wrap_config.target_aum_names())  # 레지스트리 기준 (성과모집형 포함)
         regular_df = df[~is_target].copy()
         target_df = df[is_target].copy()
 
@@ -3362,11 +3364,12 @@ def create_cumulative_aum_chart():
         # 표/차트가 어긋났다(예: NH 목표전환형 5호 단독 출시일 06-29엔 일반형 입력이 없어
         # 트루밸류/다이내믹밸류/개방형 랩이 표에서 전부 빠짐). 각 일반형 상품의 '자체 최신'
         # AUM 행을 활성으로 사용 → 차트 datasets(전 일반형 forward-fill)와 동일 기준.
+        _target_aums = wrap_config.target_aum_names()  # 레지스트리 기준 (성과모집형 포함)
         regular_latest = latest_per_product[
-            ~latest_per_product['상품명'].str.contains('목표전환형', na=False)
+            ~latest_per_product['상품명'].isin(_target_aums)
         ].copy()
 
-        target_df_all = df[df['상품명'].str.contains('목표전환형', na=False)]
+        target_df_all = df[df['상품명'].isin(_target_aums)]
 
         def _target_summary(broker):
             broker_target = target_df_all[target_df_all['증권사'] == broker]
@@ -4058,16 +4061,20 @@ def create_order_section():
         // 다운로드 파일명: 자문지 폴더의 기존 파일명 패턴에 맞춰 오늘 날짜로 치환
         // - YYMMDD 패턴 (예: _260427.xlsx)
         // - YYYY.M.D 패턴 (예: _2026.4.27.xlsx)
+        // - YYYYMMDD 패턴 (예: _20260702.xlsx, 한투 양식)
         function buildOutFilename(template, date) {
             var fname = template.file.split('/').pop();
             var yy = (date.getFullYear() % 100).toString().padStart(2, '0');
             var mm = (date.getMonth() + 1).toString().padStart(2, '0');
             var dd = date.getDate().toString().padStart(2, '0');
             var yymmdd = yy + mm + dd;
+            var yyyymmdd = date.getFullYear() + mm + dd;
             var yyyymdd = date.getFullYear() + '.' + (date.getMonth() + 1) + '.' + date.getDate();
-            // 우선순위: YYYY.M.D 매칭 후 YYMMDD
+            // 우선순위: YYYY.M.D → YYYYMMDD(8자리) → YYMMDD(6자리)
             if (/_\d{4}\.\d{1,2}\.\d{1,2}\.xlsx$/.test(fname)) {
                 fname = fname.replace(/_\d{4}\.\d{1,2}\.\d{1,2}\.xlsx$/, '_' + yyyymdd + '.xlsx');
+            } else if (/_\d{8}\.xlsx$/.test(fname)) {
+                fname = fname.replace(/_\d{8}\.xlsx$/, '_' + yyyymmdd + '.xlsx');
             } else if (/_\d{6}\.xlsx$/.test(fname)) {
                 fname = fname.replace(/_\d{6}\.xlsx$/, '_' + yymmdd + '.xlsx');
             }
@@ -4974,6 +4981,55 @@ def create_order_section():
             }
         }
 
+        // 한투(KIS) 자문지 양식 채움.
+        // 구조: B1=상품명 / B2==TODAY() / R3 헤더 / R4~ 데이터
+        //   A=NO, B=종목코드(문자열, 앞 0 보존), C=종목명, D=자문비중(변경전), E=자문비중(변경후),
+        //   F=매매(신규매수/전량매도/비중확대/비중축소, 유지=빈칸), G=자문의견, H=비고
+        // 비중은 소수(0.3=30%) — Order 탭 % 숫자에서 /100 변환.
+        // 마지막 데이터행 아래 공백 1행 + 합계행(C='합계', D/E=SUM) — 행수 자동 조정 후 SUM 범위 재작성.
+        function fillKisAdvisory(ws, combined) {
+            var DATA_START = 4;
+            // 합계행 탐지 (C열 '합계')
+            var sumRow = -1;
+            for (var r = DATA_START; r <= ws.rowCount + 5; r++) {
+                var v = ws.getCell(r, 3).value;
+                if (v && String(v).replace(/\s/g, '') === '합계') { sumRow = r; break; }
+            }
+            var newCount = combined.length;
+            if (sumRow >= DATA_START) {
+                var existingCount = Math.max(0, sumRow - DATA_START - 1);  // 데이터~합계 사이 공백 1행 제외
+                if (newCount > existingCount) {
+                    ws.duplicateRow(DATA_START, newCount - existingCount, true);
+                    sumRow += (newCount - existingCount);
+                } else if (newCount < existingCount) {
+                    ws.spliceRows(DATA_START, existingCount - newCount);
+                    sumRow -= (existingCount - newCount);
+                }
+            }
+            // B2 =TODAY() 셀 날짜 포맷 방어 (라이프 양식 B4와 동일 케이스)
+            var b2 = ws.getCell('B2');
+            if (b2 && b2.value && (b2.formula === 'TODAY()' || /TODAY/i.test(String(b2.formula || b2.value)))) {
+                b2.numFmt = 'yyyy-mm-dd';
+            }
+            var KIS_ORDER_LABEL = { '신규 편입': '신규매수', '전량 편출': '전량매도', '비중 확대': '비중확대', '비중 축소': '비중축소' };
+            combined.forEach(function(s, i) {
+                var r = DATA_START + i;
+                ws.getCell('A' + r).value = i + 1;
+                ws.getCell('B' + r).value = String(s.code || '').padStart(6, '0');
+                ws.getCell('C' + r).value = s.name;
+                ws.getCell('D' + r).value = s.oldWeight / 100;
+                ws.getCell('E' + r).value = s.newWeight / 100;
+                ws.getCell('F' + r).value = KIS_ORDER_LABEL[s.orderType] || null;  // 유지=빈칸
+                ws.getCell('G' + r).value = s.reason || null;
+                ws.getCell('H' + r).value = null;  // 비고 (템플릿 예시값 제거)
+            });
+            if (sumRow >= DATA_START && newCount > 0) {
+                var lastDataRow = DATA_START + newCount - 1;
+                ws.getCell('D' + sumRow).value = { formula: 'SUM(D' + DATA_START + ':D' + lastDataRow + ')' };
+                ws.getCell('E' + sumRow).value = { formula: 'SUM(E' + DATA_START + ':E' + lastDataRow + ')' };
+            }
+        }
+
         async function downloadOrderExcel(pfName, templateIdx) {
             var p = ORDER_PORTFOLIOS.find(function(x) { return x.display === pfName; });
             if (!p) { alert('포트폴리오 매핑 누락: ' + pfName); return; }
@@ -5004,6 +5060,12 @@ def create_order_section():
                     };
                 });
                 combined.sort(function(a, b) { return b.newWeight - a.newWeight; });
+                if (!combined.length) { alert('주문 종목이 없습니다. Order 탭에서 종목을 먼저 입력해 주세요.'); return; }
+
+                if (t.format === 'kis') {
+                    // 한투 양식 (R4~ / A~H / 소수 비중) — 별도 채움 로직
+                    fillKisAdvisory(ws, combined);
+                } else {
 
                 // 자문지 양식의 Total 행 자동 감지 (E열에 'Total' 또는 'TOTAL' 텍스트)
                 var totalRow = -1;
@@ -5084,6 +5146,8 @@ def create_order_section():
                     ws.getCell('G' + totalRow).value = { formula: 'SUM(G7:G' + lastDataRow + ')' };
                     ws.getCell('H' + totalRow).value = { formula: 'G' + totalRow + '-F' + totalRow };
                 }
+
+                }  // end 라이프자산운용 양식 (t.format !== 'kis')
 
                 var out = await wb.xlsx.writeBuffer();
                 var blob = new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
