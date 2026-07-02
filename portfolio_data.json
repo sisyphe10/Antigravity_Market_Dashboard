@@ -637,14 +637,14 @@
       "market_cap": 2012365.3865,
       "weight": 5.0,
       "weight_prev": 5.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": -13.204325554923166,
+      "contribution": -6.602162777461583,
+      "cumulative_return": 0.0,
       "current_price": 1525000.0,
       "ath_price": 1970000.0,
       "dd": -22.58883248730964,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "105560",
@@ -653,14 +653,14 @@
       "market_cap": 585234.7611,
       "weight": 5.0,
       "weight_prev": 5.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": 4.100946372239748,
+      "contribution": 2.050473186119874,
+      "cumulative_return": 0.0,
       "current_price": 165000.0,
       "ath_price": 172000.0,
       "dd": -4.069767441860462,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "161890",
@@ -669,14 +669,14 @@
       "market_cap": 26838.972549,
       "weight": 2.0,
       "weight_prev": 2.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": 6.460674157303371,
+      "contribution": 1.2921348314606742,
+      "cumulative_return": 0.0,
       "current_price": 113700.0,
       "ath_price": 113700.0,
       "dd": 0.0,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "004170",
@@ -685,14 +685,14 @@
       "market_cap": 69138.72492,
       "weight": 2.0,
       "weight_prev": 2.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": -5.670103092783505,
+      "contribution": -1.134020618556701,
+      "cumulative_return": 0.0,
       "current_price": 732000.0,
       "ath_price": 776000.0,
       "dd": -5.670103092783507,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "226950",
@@ -701,14 +701,14 @@
       "market_cap": 31865.653344,
       "weight": 2.0,
       "weight_prev": 2.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": -6.107784431137724,
+      "contribution": -1.2215568862275448,
+      "cumulative_return": 0.0,
       "current_price": 156800.0,
       "ath_price": 207000.0,
       "dd": -24.251207729468593,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "298380",
@@ -717,14 +717,14 @@
       "market_cap": 54307.83911,
       "weight": 2.0,
       "weight_prev": 2.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": -4.433497536945813,
+      "contribution": -0.8866995073891626,
+      "cumulative_return": 0.0,
       "current_price": 97000.0,
       "ath_price": 245500.0,
       "dd": -60.48879837067209,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "141080",
@@ -733,62 +733,16 @@
       "market_cap": 52900.748322,
       "weight": 2.0,
       "weight_prev": 2.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": -4.733333333333333,
+      "contribution": -0.9466666666666667,
+      "cumulative_return": 0.0,
       "current_price": 142900.0,
       "ath_price": 213500.0,
       "dd": -33.06791569086651,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
-  "_order_changes": {
-    "한투 지속형": {
-      "date": "2026-07-02",
-      "added": [
-        {
-          "name": "삼성전자",
-          "weight": 15.0
-        },
-        {
-          "name": "SK하이닉스",
-          "weight": 10.0
-        },
-        {
-          "name": "SK스퀘어",
-          "weight": 5.0
-        },
-        {
-          "name": "KB금융",
-          "weight": 5.0
-        },
-        {
-          "name": "한국콜마",
-          "weight": 2.0
-        },
-        {
-          "name": "신세계",
-          "weight": 2.0
-        },
-        {
-          "name": "올릭스",
-          "weight": 2.0
-        },
-        {
-          "name": "에이비엘바이오",
-          "weight": 2.0
-        },
-        {
-          "name": "리가켐바이오",
-          "weight": 2.0
-        }
-      ],
-      "changed": [],
-      "removed": [],
-      "new_fund": true
-    }
-  },
   "_portfolio_meta": {
     "삼성 트루밸류 / NH Value ESG / DB 개방형": {
       "nav_ytd_d1": 95.8482370343985,
@@ -803,8 +757,8 @@
       "nav_cum_d1": 0.0
     },
     "한투 지속형": {
-      "nav_ytd_d1": null,
-      "nav_cum_d1": null
+      "nav_ytd_d1": 0.0,
+      "nav_cum_d1": 0.0
     }
   }
 }
