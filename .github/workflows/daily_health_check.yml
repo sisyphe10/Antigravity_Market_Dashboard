@@ -27,3 +27,5 @@ jobs:
           TZ: 'Asia/Seoul'
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          # GHA 스케줄 워크플로 무성공 점검용 (미인증은 러너 공유 IP rate limit 위험)
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

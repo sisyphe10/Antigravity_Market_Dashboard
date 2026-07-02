@@ -4,6 +4,10 @@
 크론) 아무 알림이 없어 8일간 방치됨. 일별 수집물이 N 거래일 이상 갱신 안 되면
 탐지해 알린다.
 
+배경2(2026-07-02): earnings_calendar_sync GHA가 6/1부터 한 달간 매일 실패(SA 키
+stale)했는데 산출물이 repo 밖(구글 캘린더)이라 신선도 점검에 안 잡혀 방치됨.
+→ 스케줄(cron) 워크플로의 "마지막 성공 경과일" 점검 추가 (.github/workflows 자동 발견).
+
 판정 원리:
   각 "일별 수집 시리즈"마다 임계값(영업일)을 두고, 최신 데이터 일자가 그만큼 뒤처지면 경보.
   - 순수 일별(거래일) 시리즈: 임계 3 영업일 = "최근 2 거래일 연속 누락"에 해당.
@@ -80,6 +84,14 @@ JSON_LAGGED = {'kofia_stats.json': ('business', 6)}
 
 # hotel_adr.csv (일별 평일 스크랩) — 0열 타임스탬프 기준
 HOTEL_THRESHOLD_BDAYS = 3
+
+# ── GHA 스케줄 워크플로 무성공 감시 ──────────────────────────────────────────
+#   산출물이 repo 밖(구글 캘린더 등)이라 신선도 점검이 못 잡는 실패를 커버.
+#   .github/workflows 에서 cron 스케줄 워크플로를 자동 발견 → GitHub API로
+#   마지막 success run 경과일 점검. 매일 스케줄=3일, 주중 한정=4일(월요일 오탐 방지).
+WORKFLOW_SELF = 'daily_health_check.yml'
+WORKFLOW_DIR = os.path.join(ROOT, '.github', 'workflows')
+GITHUB_REPO = os.environ.get('GITHUB_REPOSITORY', 'sisyphe10/Antigravity_Market_Dashboard')
 
 LABELS = {
     'INDEX_KR': 'KR 지수/외인(INDEX_KR)', 'INDEX_US': '미국 지수(INDEX_US)',
@@ -203,6 +215,90 @@ def hotel_scrape_max(data_dir: str):
     return best
 
 
+def scheduled_workflows():
+    """cron 스케줄이 있는 워크플로 자동 발견 → [(파일명, 임계 달력일)].
+    dow 필드가 '*'가 아니면(주중 한정 등) 4일, 매일이면 3일."""
+    out = []
+    try:
+        names = sorted(os.listdir(WORKFLOW_DIR))
+    except OSError:
+        return out
+    for fn in names:
+        if not fn.endswith(('.yml', '.yaml')) or fn == WORKFLOW_SELF:
+            continue
+        try:
+            with open(os.path.join(WORKFLOW_DIR, fn), encoding='utf-8') as f:
+                lines = f.read().splitlines()
+        except OSError:
+            continue
+        crons = [ln.split('cron:', 1)[1].split('#')[0].strip().strip('\'"')
+                 for ln in lines if 'cron:' in ln and not ln.lstrip().startswith('#')]
+        if not crons:
+            continue
+        fields = crons[0].split()
+        weekday_only = len(fields) == 5 and fields[4] != '*'
+        out.append((fn, 4 if weekday_only else 3))
+    return out
+
+
+def _gh_api(path: str):
+    """GitHub API GET(json). 실패 시 예외 전파."""
+    import urllib.request
+    req = urllib.request.Request(f"https://api.github.com/repos/{GITHUB_REPO}{path}", headers={
+        'Accept': 'application/vnd.github+json', 'User-Agent': 'antigravity-health-check'})
+    tok = os.environ.get('GITHUB_TOKEN')
+    if tok:
+        req.add_header('Authorization', f'Bearer {tok}')
+    with urllib.request.urlopen(req, timeout=20) as r:
+        return json.load(r)
+
+
+def workflow_states():
+    """파일명 → state('active'/'disabled_manually'…) 일괄 조회. 실패 시 None(판별 불가)."""
+    try:
+        wfs = _gh_api('/actions/workflows?per_page=100').get('workflows', [])
+        return {w.get('path', '').rsplit('/', 1)[-1]: w.get('state', '') for w in wfs}
+    except Exception as e:
+        print(f"  ⚠️ workflow 목록 API 실패: {e}")
+        return None
+
+
+def workflow_last_success(fn: str):
+    """워크플로 최신 success run의 KST 일자. 성공 이력 없음=None, API 오류='ERR'.
+    updated_at 사용: 옛 실패 run을 나중에 rerun 성공시켜도 최근 성공으로 인정."""
+    try:
+        runs = _gh_api(f'/actions/workflows/{fn}/runs?status=success&per_page=1'
+                       ).get('workflow_runs', [])
+    except Exception as e:
+        print(f"  ⚠️ workflow API 실패({fn}): {e}")
+        return 'ERR'
+    if not runs:
+        return None
+    ts = runs[0].get('updated_at') or runs[0]['created_at']
+    dt = datetime.strptime(ts, '%Y-%m-%dT%H:%M:%SZ')
+    return dt.replace(tzinfo=timezone.utc).astimezone(KST).date()
+
+
+def check_workflows(today: date):
+    """스케줄 워크플로 경보 리스트: [(파일명, 마지막성공일|None|'ERR', 경과일, 임계)]"""
+    alerts = []
+    states = workflow_states()
+    for fn, thr in scheduled_workflows():
+        if states is not None and states.get(fn, 'active') != 'active':
+            print(f"  (skip) {fn} — 비활성 워크플로 ({states.get(fn)})")
+            continue
+        last = workflow_last_success(fn)
+        if last == 'ERR':
+            alerts.append((fn, 'ERR', None, thr))
+        elif last is None:
+            alerts.append((fn, None, None, thr))
+        else:
+            g = (today - last).days
+            if g >= thr:
+                alerts.append((fn, last, g, thr))
+    return alerts
+
+
 def check(data_dir: str, today: date):
     """경보 항목 리스트 반환: [(label, latest, gap_value, mode, threshold)]"""
     alerts = []
@@ -235,16 +331,27 @@ def check(data_dir: str, today: date):
     return alerts
 
 
-def build_message(alerts, today: date) -> str:
-    lines = [f"\U0001F6A8 데이터 수집 점검 경보 ({today})", "",
-             "다음 일별 수집이 임계 이상 멈췄습니다:", ""]
-    for label, latest, g, mode, thr in sorted(alerts, key=lambda a: (a[2] is not None, -(a[2] or 10**9))):
-        unit = '일' if mode == 'calendar' else '영업일'
-        if latest is None:
-            lines.append(f"• {label} — 데이터 없음")
-        else:
-            lines.append(f"• {label} — 최신 {latest.strftime('%m-%d')} ({g}{unit} 지연, 임계 {thr})")
-    lines += ["", "정상 수집은 생략. (자동 점검 · check_data_freshness.py)"]
+def build_message(alerts, wf_alerts, today: date) -> str:
+    lines = [f"\U0001F6A8 데이터 수집 점검 경보 ({today})"]
+    if alerts:
+        lines += ["", "다음 일별 수집이 임계 이상 멈췄습니다:", ""]
+        for label, latest, g, mode, thr in sorted(alerts, key=lambda a: (a[2] is not None, -(a[2] or 10**9))):
+            unit = '일' if mode == 'calendar' else '영업일'
+            if latest is None:
+                lines.append(f"• {label} — 데이터 없음")
+            else:
+                lines.append(f"• {label} — 최신 {latest.strftime('%m-%d')} ({g}{unit} 지연, 임계 {thr})")
+    if wf_alerts:
+        lines += ["", "GHA 스케줄 워크플로 무성공:", ""]
+        for fn, last, g, thr in wf_alerts:
+            name = fn[:-4] if fn.endswith('.yml') else fn
+            if last == 'ERR':
+                lines.append(f"• {name} — 점검 API 실패 (수동 확인 필요)")
+            elif last is None:
+                lines.append(f"• {name} — 성공 이력 없음")
+            else:
+                lines.append(f"• {name} — 마지막 성공 {last.strftime('%m-%d')} ({g}일 경과, 임계 {thr})")
+    lines += ["", "정상 항목은 생략. (자동 점검 · check_data_freshness.py)"]
     return "\n".join(lines)
 
 
@@ -280,11 +387,12 @@ def main():
     print(f"기준일: {today} ({today.strftime('%A')})  data-dir={args.data_dir}")
 
     alerts = check(args.data_dir, today)
-    if not alerts:
-        print("✅ 일별 수집 전부 정상 (경보 없음)")
+    wf_alerts = check_workflows(today)
+    if not alerts and not wf_alerts:
+        print("✅ 일별 수집·GHA 워크플로 전부 정상 (경보 없음)")
         return
 
-    msg = build_message(alerts, today)
+    msg = build_message(alerts, wf_alerts, today)
     print("\n" + msg + "\n")
     if args.dry_run:
         print("[dry-run] 발송 생략")
