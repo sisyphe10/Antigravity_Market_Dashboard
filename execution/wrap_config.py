@@ -50,6 +50,7 @@ class Product:
     ytd_base: str                     # YTD 기준일 (보통 start_date)
     color: str                        # 차트 계열색 (기본=broker color)
     advisory_template: str | None     # 자문지/ 경로 (Order 카드 Download)
+    advisory_format: str = 'life'     # 자문지 양식 종류 ('life'=라이프자산운용 R7~ B~I | 'kis'=한투 R4~ A~H)
     group: str | None = None          # 결합 그룹 id (None=단독)
     active: bool = True               # 대시보드 활성 표시 여부
     keep_in_nav: bool = True          # calculate_wrap_nav portfolio_config 포함 (청산분도 컬럼 완결용 True 유지)
@@ -76,13 +77,13 @@ BROKERS = [
     Broker('삼성', '#1428A0', 10),
     Broker('NH',   '#0072CE', 20),
     Broker('DB',   '#00854A', 30),
-    Broker('한투', '#F58220', 40),   # 한국투자증권 — 지속형 출시 2026-07-02
+    Broker('한투', '#F58220', 40),   # 한국투자증권 (2026-07-02 지속형 출시)
 ]
 
 # ── 결합 그룹 (동일 종목/비중 → 한 줄로 결합 표시) ──────────────────────
 # use: 결합 그룹의 대표 nav_key (데이터·수익률을 대표로 끌어옴)
 GROUPS = {
-    'GENERAL_OPEN': {'use': '트루밸류'},   # 일반형(영구) 결합 — 한투 지속형 합류 예정
+    'GENERAL_OPEN': {'use': '트루밸류'},   # 일반형(영구) 결합 — 한투 지속형은 포트 수렴 후 합류 검토 (현재 단독)
 }
 
 # ── 벤치마크 (차트·수익률 표 공통) ─────────────────────────────────────
@@ -108,13 +109,12 @@ PRODUCTS = [
             color='#00854A', advisory_template='자문지/라이프자산운용_DB 개방형 랩 _2026.4.27.xlsx',
             group='GENERAL_OPEN', report_label='DB 개방형 랩',
             keywords=('개방형', 'DB 개방형')),
-
-    # 한투 지속형(일반형) — 2026-07-02 출시. 3사와 포트 상이 → 수렴 전 단독(group=None).
-    # 수렴 후 group='GENERAL_OPEN' 1줄 변경으로 4사 결합 (HANTOO_LAUNCH_PLAN.md §8).
-    Product(broker='한투', nav_key='지속형', aum_name='지속형', ptype='general', kind_label='일반형',
+    # 한투 지속형 — 2026-07-02 개시. 신규 계좌 램프업으로 개방형 3종과 포트 수렴 전 단독 표시(group=None).
+    # 수렴 후 GENERAL_OPEN 합류 검토. 자문지는 한투 양식(advisory_format='kis').
+    Product(broker='한투', nav_key='지속형', aum_name='지속형', ptype='general', kind_label='지속형',
             display='한투 지속형', base_price=1000.00, start_date='2026-07-02', ytd_base='2026-07-02',
-            color='#F58220', advisory_template='자문지/라이프자산운용_한투 지속형 랩_2026.7.2.xlsx',
-            group=None, keywords=('지속형', '한투 지속형')),
+            color='#F58220', advisory_template='자문지/한국투자 가치도약랩(라이프자산)_20260702.xlsx',
+            advisory_format='kis', group=None),
 
     # 활성 목표전환형 (단기 랩) — NH 5호 2026-06-29 개시. 단독(group=None), DB 6차(7/1)는 별도.
     # advisory_template은 자문지 .xlsx 확보 시 경로 주입 (현재 Order 탭 직접 입력 운용).
@@ -128,6 +128,12 @@ PRODUCTS = [
             color='#00854A',
             advisory_template='자문지/라이프자산운용_DB 목표전환형 랩 _6차_2026.7.1.xlsx',
             group=None, active=True, keep_in_nav=True),
+    # 한투 성과모집형 1차 — 2026-07-08 개시 예정 (사전 등록: Order 카드 선노출·자문지 준비, 데이터는 개시일부터).
+    # KIS 상품명이 '성과모집형'이라 nav_key에 '목표전환형' 미포함 → target 판별은 substring이 아닌 레지스트리 기준 사용.
+    Product(broker='한투', nav_key='성과모집형 1차', aum_name='성과모집형 1차', ptype='target', kind_label='목표전환형',
+            display='한투 성과모집형 1차', base_price=1000.00, start_date='2026-07-08', ytd_base='2026-07-08',
+            color='#F58220', advisory_template='자문지/한국투자 가치도약랩(라이프자산)(성과모집형 1차)_20260708.xlsx',
+            advisory_format='kis', group=None, active=True, keep_in_nav=True),
 
     # 청산 목표전환형 (이력 보존 — EXCLUDED_PORTFOLIOS 자동 파생). active=False.
     # 5차/4호는 2026-06-23 end_date 동결 SOP 적용분 → keep_in_nav=True (컬럼 완결).
@@ -393,6 +399,22 @@ def active_target_transform():
     return {p.broker: p.aum_name for p in active_products() if p.ptype == 'target'}
 
 
+# ── target 판별 (substring '목표전환형' 대체 — 한투 '성과모집형'처럼 이름에 안 담기는 상품 대응) ──
+def target_nav_keys():
+    """전체(청산 포함) 목표전환형 nav_key 집합 — 기준가/수익률 시트 컬럼 판별용."""
+    return {p.nav_key for p in PRODUCTS if p.ptype == 'target'}
+
+
+def target_aum_names():
+    """전체(청산 포함) 목표전환형 aum_name 집합 — AUM 시트 상품명 판별용."""
+    return {p.aum_name for p in PRODUCTS if p.ptype == 'target'}
+
+
+def target_display_names():
+    """전체(청산 포함) 목표전환형 display 집합 — portfolio_data.json 키 판별용."""
+    return {p.display for p in PRODUCTS if p.ptype == 'target'}
+
+
 # ── Order/이메일 JS 페이로드 ───────────────────────────────────────────
 def general_combined_name():
     """create_dashboard.py JS / GENERAL (일반형 결합 표시명·jsonKey)."""
@@ -409,7 +431,7 @@ def order_portfolios():
         cards.append({
             'display': combined,
             'jsonKey': combined,
-            'templates': [{'label': p.display, 'file': p.advisory_template}
+            'templates': [{'label': p.display, 'file': p.advisory_template, 'format': p.advisory_format}
                           for p in members if p.advisory_template],
             'newSheetTargets': [{'broker': p.broker, 'product': p.nav_key} for p in members],
         })
@@ -417,7 +439,8 @@ def order_portfolios():
     for p in _sorted_active(active_products()):
         if p.group:
             continue
-        templates = [{'label': p.display, 'file': p.advisory_template}] if p.advisory_template else []
+        templates = ([{'label': p.display, 'file': p.advisory_template, 'format': p.advisory_format}]
+                     if p.advisory_template else [])
         cards.append({
             'display': p.display,
             'jsonKey': p.display,

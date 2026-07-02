@@ -51,9 +51,10 @@ ACTIVE_TARGET_TRANSFORM = wrap_config.active_target_transform()
 def resolve_product(brokerage: str, kind: str) -> str:
     if (brokerage, kind) in FIXED_PRODUCTS:
         return FIXED_PRODUCTS[(brokerage, kind)]
-    if kind == '지속형' and (brokerage, '일반형') in FIXED_PRODUCTS:
-        # 한투 지속형은 kind_label='일반형' 등록 — 사용자가 '지속형'으로 입력해도 수용
-        return FIXED_PRODUCTS[(brokerage, '일반형')]
+    _alias = {'지속형': '일반형', '일반형': '지속형'}
+    if kind in _alias and (brokerage, _alias[kind]) in FIXED_PRODUCTS:
+        # 일반형<->지속형 상호 별칭 (한투 지속형은 kind_label='지속형' 등록 — 어느 쪽으로 입력해도 수용)
+        return FIXED_PRODUCTS[(brokerage, _alias[kind])]
     if kind in ('성과형', '전환형'):
         if brokerage not in ACTIVE_TARGET_TRANSFORM:
             raise ValueError(f"{kind} 매핑 없음: {brokerage}")
