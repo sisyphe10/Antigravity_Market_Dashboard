@@ -124,9 +124,15 @@ else:
 print(f"   - 계산 종료일(목표): {end_date.strftime('%Y-%m-%d')}")
 
 # 신규 포트폴리오 확인 (기존 데이터에 없는 포트폴리오)
+#  ★ 개시일 미도래(start_date > end_date) 상품은 신규로 취급하지 않는다.
+#    사전등록 엔트리가 new_portfolios를 상시 비워두지 않으면 아래 미완료 감지·Fix A
+#    자가복구가 개시일까지 통째로 비활성화된다 (2026-07-02 성과모집형 1차 사전등록으로
+#    07-02 기준가 미계산 스켈레톤 행이 일주일간 자가복구 불능 → recalc 검증 실패).
 new_portfolios = []
 if is_update:
-    new_portfolios = [pf for pf in initial_base_prices.keys() if pf not in df_old.columns]
+    new_portfolios = [pf for pf in initial_base_prices.keys()
+                      if pf not in df_old.columns
+                      and pd.Timestamp(portfolio_config[pf]['start_date']) <= end_date]
 
 # 마지막 행에 NaN이 있는 포트폴리오도 미완료로 간주
 incomplete_portfolios = []
@@ -401,6 +407,11 @@ for pf_name, start_price in current_base_prices.items():
     # 청산(end_date) 회차는 청산일까지만 계산 (이후 날짜 미생성 → 죽은 회차 연장 방지).
     pf_config_end = portfolio_config[pf_name].get('end_date')
     pf_end = min(end_date, pd.Timestamp(pf_config_end)) if pf_config_end else end_date
+
+    # ★ 개시일 미도래 신규 상품은 seed(T=0) 기록 금지 — 미래 날짜 스켈레톤 행이
+    #   '마지막 기록일'을 오염시켜 그날의 실제 기준가 계산을 막는다.
+    if is_new_portfolio and pf_config_start > pf_end:
+        continue
 
     if is_new_portfolio:
         # 신규 포트폴리오: 설정된 시작일 기준
