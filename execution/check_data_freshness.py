@@ -66,6 +66,10 @@ DATASET_LAGGED = {
     'DEPOSIT': ('business', 6),        # 고객예탁금/신용잔고: KOFIA T+3 공표
     'OCEAN_FREIGHT': ('calendar', 11), # SCFI: 주간
     'CRYPTO': ('calendar', 3),         # 24/7
+    # SiliconData 지수: 주말 포함 일별, 발행 1~2일 지연. 공개창 7일 → 손실 전(5일) 경보
+    'SDLLMTK': ('calendar', 5),
+    'SDH100RT': ('calendar', 5),
+    'SD_RAM': ('calendar', 5),
 }
 # 제외(일별 아님): 월·분기 매크로, 수동, 레거시 명칭변경
 DATASET_IGNORE = {
@@ -102,6 +106,8 @@ LABELS = {
     'POLY_SILICON': '폴리실리콘', 'SEIBro': 'SEIBro TOP50',
     'DRAM': 'DRAM 현물', 'NAND': 'NAND 현물', 'DRAM_RETAIL': 'DRAM 소매최저가',
     'DEPOSIT': '예탁금/신용잔고', 'OCEAN_FREIGHT': 'SCFI 운임', 'CRYPTO': '암호화폐',
+    'SDLLMTK': 'SiliconData LLM 토큰지수', 'SDH100RT': 'SiliconData H100 렌탈지수',
+    'SD_RAM': 'SiliconData RAM 지수',
     'disclosures.json': '보유종목 공시', 'kodex_sectors.json': 'KODEX 섹터',
     'landing_highlights.json': '랜딩 하이라이트', 'featured_data.json': 'Featured 랭킹',
     'featured_news.json': 'Featured 뉴스', 'investor_trading.json': '투자자 수급',

@@ -26,7 +26,11 @@ CATEGORY_MAP = {
     'ECOS_SECTOR': 'CREDIT & HOUSING',
     'FRED_RATE': 'INTEREST RATES',
     'FRED_MACRO': 'MACRO US',
-    'FRED_SECTOR': 'CREDIT & HOUSING US'
+    'FRED_SECTOR': 'CREDIT & HOUSING US',
+    # SiliconData Silicon Index (fetch_silicondata_index.py, 시리즈별 타입 분리)
+    'SDLLMTK': 'COMMODITIES',
+    'SDH100RT': 'COMMODITIES',
+    'SD_RAM': 'COMMODITIES'
 }
 
 # Target DRAM items to scrape from DRAMeXchange

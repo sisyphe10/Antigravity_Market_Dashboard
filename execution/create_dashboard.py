@@ -1570,6 +1570,10 @@ def _build_combined_chart_section():
                 {'display': 'KRX ETS (KAU25)',            'csv': 'KRX ETS (KAU25)',            'color': '#1ABC9C'},
                 {'display': 'KRX ETS Trading Volume',     'csv': 'KRX ETS Trading Volume',     'color': '#117A65'},
                 {'display': 'SMP',                        'csv': 'SMP',                        'color': '#2d7a3a'},
+                # SiliconData Silicon Index (fetch_silicondata_index.py, 주말 포함 일별)
+                {'display': 'LLM Token Index',            'csv': 'LLM Token Index',            'color': '#00ACC1'},
+                {'display': 'H100 GPU Rental',            'csv': 'H100 GPU Rental',            'color': '#607D8B'},
+                {'display': 'RAM Index',                  'csv': 'RAM Index',                  'color': '#FF7043'},
             ]},
             {'label': 'MEMORY', 'series': [
                 {'display': '삼성 DDR5 소매가', 'csv': '삼성 DDR5 소매가', 'color': '#AD1457'},

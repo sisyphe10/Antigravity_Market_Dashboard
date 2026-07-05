@@ -603,6 +603,13 @@ def main():
     except Exception as e:
         print(f"⚠️ KPX SMP 수집 실패 (계속 진행): {e}")
 
+    # SiliconData Silicon Index 3종 (LLM Token / H100 GPU Rental / RAM)
+    try:
+        from fetch_silicondata_index import crawl_silicondata_indexes
+        crawl_silicondata_indexes()
+    except Exception as e:
+        print(f"⚠️ SiliconData 지수 수집 실패 (계속 진행): {e}")
+
     print(f"\n📁 결과 파일: {CSV_FILE}")
 
 if __name__ == "__main__":
