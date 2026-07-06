@@ -74,6 +74,7 @@ DATASET_LAGGED = {
 DATASET_IGNORE = {
     'ECOS_MACRO', 'ECOS_SECTOR', 'FRED_MACRO', 'FRED_SECTOR',
     'INDEX', 'Memory',
+    'NPS_FUND',  # 국민연금 적립금: 연간+최신월 저빈도 — 일별 감시 부적합
 }
 
 # ── JSON 산출물: 파일 → 임계 영업일 ──────────────────────────────────────────
