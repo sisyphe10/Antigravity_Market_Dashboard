@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.antigravity.catchup</string>
+
+    <!-- One-shot at boot: RunAtLoad fires once when this daemon is loaded
+         (i.e. at every boot, since it lives in /Library/LaunchDaemons).
+         There is no KeepAlive, so launchd runs it exactly once per boot. -->
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>__REPO__/launchd/system/catchup_runner.sh</string>
+    </array>
+
+    <!-- Run as the migration user so stamps/logs it writes are owned by the
+         same account as the timer wrappers (CONTRACT 결정 12). -->
+    <key>UserName</key>
+    <string>__MACMINI_USER__</string>
+
+    <key>WorkingDirectory</key>
+    <string>__REPO__</string>
+
+    <!-- launchd has no login environment; CONTRACT 데몬 환경 표준. -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>/Users/__MACMINI_USER__</string>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>LANG</key>
+        <string>en_US.UTF-8</string>
+        <key>TZ</key>
+        <string>Asia/Seoul</string>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>__REPO__/logs/launchd/catchup.out</string>
+    <key>StandardErrorPath</key>
+    <string>__REPO__/logs/launchd/catchup.err</string>
+
+    <!-- Be gentle at boot: background scheduling class + low-priority I/O so the
+         catch-up sweep never starves interactive work. -->
+    <key>ProcessType</key>
+    <string>Background</string>
+    <key>LowPriorityIO</key>
+    <true/>
+    <key>Nice</key>
+    <integer>5</integer>
+</dict>
+</plist>

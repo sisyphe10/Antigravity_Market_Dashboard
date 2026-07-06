@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.antigravity.sisyphe-bot</string>
+
+    <key>UserName</key>
+    <string>__MACMINI_USER__</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/__MACMINI_USER__/Antigravity_Market_Dashboard/launchd/bots/run_bot.sh</string>
+        <string>sisyphe-bot</string>
+        <string>/Users/__MACMINI_USER__/Antigravity_Market_Dashboard/venv/bin/python3</string>
+        <string>execution/sisyphe_bot.py</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/__MACMINI_USER__/Antigravity_Market_Dashboard</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>/Users/__MACMINI_USER__</string>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>LANG</key>
+        <string>en_US.UTF-8</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+
+    <key>StandardOutPath</key>
+    <string>/Users/__MACMINI_USER__/Antigravity_Market_Dashboard/logs/launchd/sisyphe-bot.out</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/__MACMINI_USER__/Antigravity_Market_Dashboard/logs/launchd/sisyphe-bot.err</string>
+</dict>
+</plist>

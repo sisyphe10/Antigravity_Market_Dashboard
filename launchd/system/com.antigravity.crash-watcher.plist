@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.antigravity.crash-watcher</string>
+
+    <!-- Poll every 5 minutes (systemd StartLimit + OnFailure equivalent).
+         RunAtLoad gives one check shortly after boot as well. -->
+    <key>StartInterval</key>
+    <integer>300</integer>
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>__REPO__/launchd/system/crash_watcher.sh</string>
+    </array>
+
+    <!-- Run as the migration user so the cooldown stamps it writes are owned by
+         the same account as the bot wrappers and the catch-up runner. -->
+    <key>UserName</key>
+    <string>__MACMINI_USER__</string>
+
+    <key>WorkingDirectory</key>
+    <string>__REPO__</string>
+
+    <!-- launchd has no login environment; CONTRACT 데몬 환경 표준. -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>/Users/__MACMINI_USER__</string>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>LANG</key>
+        <string>en_US.UTF-8</string>
+        <key>TZ</key>
+        <string>Asia/Seoul</string>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>__REPO__/logs/launchd/crash-watcher.out</string>
+    <key>StandardErrorPath</key>
+    <string>__REPO__/logs/launchd/crash-watcher.err</string>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+    <key>LowPriorityIO</key>
+    <true/>
+    <key>Nice</key>
+    <integer>5</integer>
+</dict>
+</plist>
