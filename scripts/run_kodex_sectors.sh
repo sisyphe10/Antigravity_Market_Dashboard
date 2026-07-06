@@ -14,7 +14,7 @@ flock -n 200 || { echo "이미 실행 중 — 스킵"; exit 0; }
 # stale .git/index.lock 자동 회복 (60초 이상 오래된 lockfile만 제거)
 LOCKFILE="$REPO/.git/index.lock"
 if [ -f "$LOCKFILE" ]; then
-    LOCK_AGE=$(( $(date +%s) - $(stat -c %Y "$LOCKFILE") ))
+    LOCK_AGE=$(( $(date +%s) - $(stat -c %Y "$LOCKFILE" 2>/dev/null || stat -f %m "$LOCKFILE") ))  # GNU|BSD 겸용
     if [ "$LOCK_AGE" -gt 60 ]; then
         echo "[recovery] stale .git/index.lock 제거 (age=${LOCK_AGE}s)"
         rm -f "$LOCKFILE"
