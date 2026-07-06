@@ -5390,14 +5390,14 @@ FEE_TABLE = [
     {
         'broker': '삼성',
         'types': [
-            # 2026-07-06 계약 확인: 자문사 후취 0.52%, 성과보수 조항 없음 (선취·증권사 몫 미확인)
-            {'type': '개방형',     'pre_broker': None, 'pre_advisor': None, 'post_broker': None, 'post_advisor': 0.52, 'perf_ratio': None},
+            # 2026-07-06 계약 확인: 자문사 후취 0.52%, 성과보수 없음('-') (선취·증권사 몫 미확인)
+            {'type': '개방형',     'pre_broker': None, 'pre_advisor': None, 'post_broker': None, 'post_advisor': 0.52, 'perf_ratio': None, 'perf_text': '-'},
         ],
     },
     {
         'broker': 'NH',
         'types': [
-            {'type': '개방형',     'pre_broker': 0, 'pre_advisor': 0, 'post_broker': 0.9, 'post_advisor': 0.6, 'perf_ratio': (4, 6), 'perf_note': '7% 초과분의 20%'},
+            {'type': '일반형',     'pre_broker': 0, 'pre_advisor': 0, 'post_broker': 0.9, 'post_advisor': 0.6, 'perf_ratio': (4, 6), 'perf_note': '7% 초과분의 20%'},
             {'type': '목표전환형', 'target': 5, 'pre_broker': 1, 'pre_advisor': 0, 'post_broker': 0, 'post_advisor': 0,
              'perf_broker_pct': 0.5, 'perf_advisor_pct': 0.5, 'perf_total_tip': '<ul class="tip-list"><li>성과 보수 = 발생 수익의 20%</li></ul>'},
         ],
@@ -5414,8 +5414,8 @@ FEE_TABLE = [
     {
         'broker': '한투',
         'types': [
-            # 2026-07-06 계약 확인: 지속형 자문사 후취 0.60% (선취·증권사 몫·성과 미확인)
-            {'type': '개방형',     'pre_broker': None, 'pre_advisor': None, 'post_broker': None, 'post_advisor': 0.60, 'perf_ratio': None},
+            # 2026-07-06 계약 확인: 지속형 자문사 후취 0.60%, 성과보수 없음('-') (선취·증권사 몫 미확인)
+            {'type': '지속형',     'pre_broker': None, 'pre_advisor': None, 'post_broker': None, 'post_advisor': 0.60, 'perf_ratio': None, 'perf_text': '-'},
             {'type': '목표전환형', 'pre_broker': None, 'pre_advisor': None, 'post_broker': None, 'post_advisor': None, 'perf_ratio': None},
         ],
     },
@@ -5484,7 +5484,7 @@ def create_fee_section():
                 rows += f'<td class="fee-broker" rowspan="{broker_rowspan}">{broker}</td>'
                 first_broker_row = False
             rows += type_cell
-            target_disp = '-' if t["type"] == '개방형' else _fmt_fee(t.get("target"))
+            target_disp = _fmt_fee(t.get("target")) or '-'  # 목표수익률 없는 상품(개방형·일반형·지속형)은 '-'
             rows += f'<td class="fee-target" rowspan="3">{target_disp}</td>'
             rows += '<td class="fee-share">증권사</td>'
             rows += f'<td class="fee-val">{_fmt_fee(t["pre_broker"])}</td>'
