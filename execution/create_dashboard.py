@@ -3284,9 +3284,7 @@ def create_aum_table():
 
         return f"""
         <div class="category-section">
-            <h2 class="category-title" style="display:flex;align-items:center;max-width:1800px;margin-left:auto;margin-right:auto;">
-                <span>AUM</span>
-            </h2>
+            <h2 class="category-title">AUM</h2>
             <div style="display:flex;gap:100px;align-items:flex-start;max-width:1800px;margin:0 auto;">
                 <div style="width:370px;">
                     <table class="portfolio-table aum-aligned" style="white-space:nowrap;width:370px;table-layout:fixed;">
@@ -5760,10 +5758,10 @@ def create_fee_revenue_section():
     # 모든 레코드를 한 테이블에 펼쳐두고, 버튼으로 그룹 기준을 바꾸면 JS(revRender)가 재집계한다.
     head_html = f"""
         <div class="fee-wrapper rev-wrapper">
-            {updated_html}
             <div class="rev-summary">
                 <span class="rev-sum-label">누적 매출</span>
                 <span class="rev-sum-value" title="{_fmt_won(total)}">{_fmt_eok_man(total)}</span>
+                {updated_html}
             </div>
             <div class="table-container"><div id="revTableHost"></div></div>
         </div>
@@ -7275,10 +7273,10 @@ def create_dashboard():
         .rev-empty {{ text-align: center; color: #888; padding: 40px 12px; line-height: 1.8; }}
         .rev-empty code {{ background: #f1f3f5; padding: 2px 7px; border-radius: 5px; font-size: 0.9em; color: #1e40af; }}
         .rev-wrapper {{ position: relative; max-width: none; width: fit-content; min-width: 720px; }}
-        .rev-summary {{ text-align: center; padding: 18px 12px 6px 12px; }}
-        .rev-sum-label {{ font-size: 1.05rem; color: #111; font-weight: 600; margin-right: 8px; }}
+        .rev-summary {{ position: relative; text-align: center; padding: 18px 12px 6px 12px; }}
+        .rev-sum-label {{ font-size: 1.25rem; color: #111; font-weight: 600; margin-right: 8px; }}
         .rev-sum-value {{ font-size: 1.25rem; font-weight: 700; color: #111; font-variant-numeric: tabular-nums; }}
-        .rev-updated {{ position: absolute; top: 20px; right: 24px; font-size: 0.78rem; color: #aaa; }}
+        .rev-updated {{ position: absolute; right: 0; top: calc(50% + 6px); transform: translateY(-50%); font-size: 0.78rem; color: #aaa; }}
         .rev-date {{ color: #555; font-size: 0.9rem; font-variant-numeric: tabular-nums; }}
         .rev-th {{ cursor: pointer; user-select: none; }}
         .rev-th:hover {{ background: #f1f4f8; }}

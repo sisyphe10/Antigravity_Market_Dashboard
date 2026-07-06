@@ -2,7 +2,8 @@
   "_comment": "기여도 탭 라운드(보유구간) 태그. tags: 코드+scope+기간이 겹치는 라운드에 owner 부여 (start/end null=무제한, scope null=전 포트 / 'GENERAL_OPEN' 등 wrap_config group id 또는 포트명). codes(레거시): 전 라운드 owner=DH. 라운드 자체는 NEW 시트 비중>0 구간에서 자동 감지 — 여기엔 태그만 기록.",
   "tags": [
     {"code": "062040", "name": "산일전기", "owner": "DH", "scope": "GENERAL_OPEN", "start": "2026-04-10", "end": "2026-04-22"},
-    {"code": "003230", "name": "삼양식품", "owner": "DH", "scope": "GENERAL_OPEN", "start": "2026-05-14", "end": null}
+    {"code": "003230", "name": "삼양식품", "owner": "DH", "scope": "GENERAL_OPEN", "start": "2026-05-14", "end": null},
+    {"code": "089030", "name": "테크윙", "owner": "DH", "scope": null, "start": "2026-07-01", "end": null}
   ],
   "codes": [
     "267270",

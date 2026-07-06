@@ -147,10 +147,10 @@
         .rev-empty { text-align: center; color: #888; padding: 40px 12px; line-height: 1.8; }
         .rev-empty code { background: #f1f3f5; padding: 2px 7px; border-radius: 5px; font-size: 0.9em; color: #1e40af; }
         .rev-wrapper { position: relative; max-width: none; width: fit-content; min-width: 720px; }
-        .rev-summary { text-align: center; padding: 18px 12px 6px 12px; }
-        .rev-sum-label { font-size: 1.05rem; color: #111; font-weight: 600; margin-right: 8px; }
+        .rev-summary { position: relative; text-align: center; padding: 18px 12px 6px 12px; }
+        .rev-sum-label { font-size: 1.25rem; color: #111; font-weight: 600; margin-right: 8px; }
         .rev-sum-value { font-size: 1.25rem; font-weight: 700; color: #111; font-variant-numeric: tabular-nums; }
-        .rev-updated { position: absolute; top: 20px; right: 24px; font-size: 0.78rem; color: #aaa; }
+        .rev-updated { position: absolute; right: 0; top: calc(50% + 6px); transform: translateY(-50%); font-size: 0.78rem; color: #aaa; }
         .rev-date { color: #555; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
         .rev-th { cursor: pointer; user-select: none; }
         .rev-th:hover { background: #f1f4f8; }
@@ -247,7 +247,7 @@
     <aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="#" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="sidebar-link active">Dashboard</a><a href="#" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="sidebar-link">Order</a><a href="#" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="sidebar-link">공시</a><a href="#" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="sidebar-link">기여도</a><a href="#" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="sidebar-link">수수료</a></aside>
     <header>
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-07-06 13:22:06 KST</div>
+        <div class="last-updated">Updated: 2026-07-06 13:29:42 KST</div>
     </header>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -566,9 +566,7 @@
         })();
         </script>
         <div class="category-section">
-            <h2 class="category-title" style="display:flex;align-items:center;max-width:1800px;margin-left:auto;margin-right:auto;">
-                <span>AUM</span>
-            </h2>
+            <h2 class="category-title">AUM</h2>
             <div style="display:flex;gap:100px;align-items:flex-start;max-width:1800px;margin:0 auto;">
                 <div style="width:370px;">
                     <table class="portfolio-table aum-aligned" style="white-space:nowrap;width:370px;table-layout:fixed;">
@@ -582,13 +580,13 @@
                             <th>AUM</th>
                             <th>기준일</th>
                         </tr></thead>
-                        <tbody><tr class="aum-toggle-item" data-series="삼성 트루밸류" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(20,40,160,1.0);border-radius:2px;margin:0 auto;"></div></td><td>삼성</td><td>트루밸류</td><td>474억</td><td>07/02</td></tr>
-<tr class="aum-toggle-item" data-series="NH 다이내믹밸류" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,114,206,0.6);border-radius:2px;margin:0 auto;"></div></td><td>NH</td><td>다이내믹밸류</td><td>120억</td><td>07/02</td></tr>
-<tr class="aum-toggle-item" data-series="NH 목표전환형 5호" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,114,206,1.0);border-radius:2px;margin:0 auto;"></div></td><td>NH</td><td>목표전환형 5호</td><td>237억</td><td>07/02</td></tr>
-<tr class="aum-toggle-item" data-series="DB 개방형 랩" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,133,74,1.0);border-radius:2px;margin:0 auto;"></div></td><td>DB</td><td>개방형 랩</td><td>174억</td><td>07/02</td></tr>
-<tr class="aum-toggle-item" data-series="DB 목표전환형 6차" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,133,74,0.6);border-radius:2px;margin:0 auto;"></div></td><td>DB</td><td>목표전환형 6차</td><td>86억</td><td>07/02</td></tr>
-<tr class="aum-toggle-item" data-series="한투 지속형" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(245,130,32,1.0);border-radius:2px;margin:0 auto;"></div></td><td>한투</td><td>지속형</td><td>14억</td><td>07/02</td></tr>
-<tr style="border-top:2px solid #000;font-weight:700;"><td></td><td colspan="2">합계</td><td>1,106억</td><td></td></tr></tbody>
+                        <tbody><tr class="aum-toggle-item" data-series="삼성 트루밸류" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(20,40,160,1.0);border-radius:2px;margin:0 auto;"></div></td><td>삼성</td><td>트루밸류</td><td>497억</td><td>07/03</td></tr>
+<tr class="aum-toggle-item" data-series="NH 다이내믹밸류" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,114,206,0.6);border-radius:2px;margin:0 auto;"></div></td><td>NH</td><td>다이내믹밸류</td><td>126억</td><td>07/03</td></tr>
+<tr class="aum-toggle-item" data-series="NH 목표전환형 5호" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,114,206,1.0);border-radius:2px;margin:0 auto;"></div></td><td>NH</td><td>목표전환형 5호</td><td>244억</td><td>07/03</td></tr>
+<tr class="aum-toggle-item" data-series="DB 개방형 랩" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,133,74,1.0);border-radius:2px;margin:0 auto;"></div></td><td>DB</td><td>개방형 랩</td><td>183억</td><td>07/03</td></tr>
+<tr class="aum-toggle-item" data-series="DB 목표전환형 6차" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,133,74,0.6);border-radius:2px;margin:0 auto;"></div></td><td>DB</td><td>목표전환형 6차</td><td>88억</td><td>07/03</td></tr>
+<tr class="aum-toggle-item" data-series="한투 지속형" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(245,130,32,1.0);border-radius:2px;margin:0 auto;"></div></td><td>한투</td><td>지속형</td><td>10억</td><td>07/03</td></tr>
+<tr style="border-top:2px solid #000;font-weight:700;"><td></td><td colspan="2">합계</td><td>1,148억</td><td></td></tr></tbody>
                     </table>
                 </div>
                 <div style="flex:1;background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
@@ -599,7 +597,7 @@
         
         <script>
         (function() {
-            var aumData = {"dates": ["2026-03-20", "2026-03-27", "2026-04-03", "2026-04-10", "2026-04-17", "2026-04-24", "2026-04-30", "2026-05-08", "2026-05-15", "2026-05-22", "2026-05-29", "2026-06-05", "2026-06-11", "2026-06-19", "2026-06-26", "2026-07-02"], "datasets": [{"label": "삼성 트루밸류", "data": [497, 458, 451, 487, 508, 533, 527, 556, 553, 578, 622, 577, 551, 612, 532, 474], "backgroundColor": "rgba(20,40,160,1.0)"}, {"label": "NH 목표전환형 5호", "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 237], "backgroundColor": "rgba(0,114,206,1.0)"}, {"label": "NH 다이내믹밸류", "data": [74, 67, 68, 72, 75, 78, 114, 125, 125, 132, 134, 129, 123, 144, 134, 120], "backgroundColor": "rgba(0,114,206,0.6)"}, {"label": "DB 개방형 랩", "data": [76, 81, 83, 91, 95, 100, 108, 126, 141, 146, 166, 159, 161, 201, 187, 174], "backgroundColor": "rgba(0,133,74,1.0)"}, {"label": "DB 목표전환형 6차", "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 86], "backgroundColor": "rgba(0,133,74,0.6)"}, {"label": "한투 지속형", "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14], "backgroundColor": "rgba(245,130,32,1.0)"}]};
+            var aumData = {"dates": ["2026-03-20", "2026-03-27", "2026-04-03", "2026-04-10", "2026-04-17", "2026-04-24", "2026-04-30", "2026-05-08", "2026-05-15", "2026-05-22", "2026-05-29", "2026-06-05", "2026-06-11", "2026-06-19", "2026-06-26", "2026-07-03"], "datasets": [{"label": "삼성 트루밸류", "data": [497, 458, 451, 487, 508, 533, 527, 556, 553, 578, 622, 577, 551, 612, 532, 497], "backgroundColor": "rgba(20,40,160,1.0)"}, {"label": "NH 목표전환형 5호", "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 244], "backgroundColor": "rgba(0,114,206,1.0)"}, {"label": "NH 다이내믹밸류", "data": [74, 67, 68, 72, 75, 78, 114, 125, 125, 132, 134, 129, 123, 144, 134, 126], "backgroundColor": "rgba(0,114,206,0.6)"}, {"label": "DB 개방형 랩", "data": [76, 81, 83, 91, 95, 100, 108, 126, 141, 146, 166, 159, 161, 201, 187, 183], "backgroundColor": "rgba(0,133,74,1.0)"}, {"label": "DB 목표전환형 6차", "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 88], "backgroundColor": "rgba(0,133,74,0.6)"}, {"label": "한투 지속형", "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10], "backgroundColor": "rgba(245,130,32,1.0)"}]};
             var totalLabelPlugin = {
                 id: 'totalLabels',
                 afterDatasetsDraw: function(chart) {
@@ -683,13 +681,13 @@
                             <th>AUM</th>
                             <th>기준일</th>
                         </tr></thead>
-                        <tbody><tr class="aum-toggle-item" data-series="NH 다이내믹밸류" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,114,206,1.0);border-radius:2px;margin:0 auto;"></div></td><td>NH</td><td>다이내믹밸류</td><td>120억</td><td>07/02</td></tr>
-<tr class="iter-row aum-toggle-item" data-series="NH 목표전환형 (누적)" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,114,206,0.6);border-radius:2px;margin:0 auto;"></div></td><td>NH</td><td style="position:relative;">목표전환형<div class="iter-tooltip"><table class="iter-table"><thead><tr><th>회차</th><th>AUM</th><th>시작일</th><th>종료일</th><th>거래일</th></tr></thead><tbody><tr><td>목표전환형 1호</td><td>147억</td><td>03/25</td><td>04/15</td><td>16일</td></tr><tr><td>목표전환형 2호</td><td>270억</td><td>04/29</td><td>05/06</td><td>4일</td></tr><tr><td>목표전환형 3호</td><td>283억</td><td>05/14</td><td>05/26</td><td>8일</td></tr><tr><td>목표전환형 4호</td><td>216억</td><td>06/15</td><td>06/19</td><td>5일</td></tr><tr><td>목표전환형 5호</td><td>237억</td><td>06/29</td><td>운용 중</td><td>5일</td></tr></tbody></table></div></td><td>1,153억</td><td>07/02</td></tr>
-<tr class="aum-toggle-item" data-series="DB 개방형 랩" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,133,74,1.0);border-radius:2px;margin:0 auto;"></div></td><td>DB</td><td>개방형 랩</td><td>174억</td><td>07/02</td></tr>
-<tr class="iter-row aum-toggle-item" data-series="DB 목표전환형 (누적)" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,133,74,0.6);border-radius:2px;margin:0 auto;"></div></td><td>DB</td><td style="position:relative;">목표전환형<div class="iter-tooltip"><table class="iter-table"><thead><tr><th>회차</th><th>AUM</th><th>시작일</th><th>종료일</th><th>거래일</th></tr></thead><tbody><tr><td>목표전환형 1차</td><td>25억</td><td>02/11</td><td>02/25</td><td>8일</td></tr><tr><td>목표전환형 2차</td><td>29억</td><td>03/16</td><td>04/15</td><td>23일</td></tr><tr><td>목표전환형 3차</td><td>43억</td><td>04/30</td><td>05/06</td><td>3일</td></tr><tr><td>목표전환형 4차</td><td>80억</td><td>05/18</td><td>05/26</td><td>6일</td></tr><tr><td>목표전환형 5차</td><td>73억</td><td>06/12</td><td>06/19</td><td>6일</td></tr><tr><td>목표전환형 6차</td><td>86억</td><td>07/01</td><td>운용 중</td><td>3일</td></tr></tbody></table></div></td><td>336억</td><td>07/02</td></tr>
-<tr class="aum-toggle-item" data-series="삼성 트루밸류" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(20,40,160,1.0);border-radius:2px;margin:0 auto;"></div></td><td>삼성</td><td>트루밸류</td><td>474억</td><td>07/02</td></tr>
-<tr class="aum-toggle-item" data-series="한투 지속형" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(245,130,32,1.0);border-radius:2px;margin:0 auto;"></div></td><td>한투</td><td>지속형</td><td>14억</td><td>07/02</td></tr>
-<tr style="border-top:2px solid #000;font-weight:700;"><td></td><td colspan="2">합계</td><td>2,272억</td><td></td></tr></tbody>
+                        <tbody><tr class="aum-toggle-item" data-series="NH 다이내믹밸류" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,114,206,1.0);border-radius:2px;margin:0 auto;"></div></td><td>NH</td><td>다이내믹밸류</td><td>126억</td><td>07/03</td></tr>
+<tr class="iter-row aum-toggle-item" data-series="NH 목표전환형 (누적)" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,114,206,0.6);border-radius:2px;margin:0 auto;"></div></td><td>NH</td><td style="position:relative;">목표전환형<div class="iter-tooltip"><table class="iter-table"><thead><tr><th>회차</th><th>AUM</th><th>시작일</th><th>종료일</th><th>거래일</th></tr></thead><tbody><tr><td>목표전환형 1호</td><td>147억</td><td>03/25</td><td>04/15</td><td>16일</td></tr><tr><td>목표전환형 2호</td><td>270억</td><td>04/29</td><td>05/06</td><td>4일</td></tr><tr><td>목표전환형 3호</td><td>283억</td><td>05/14</td><td>05/26</td><td>8일</td></tr><tr><td>목표전환형 4호</td><td>216억</td><td>06/15</td><td>06/19</td><td>5일</td></tr><tr><td>목표전환형 5호</td><td>244억</td><td>06/29</td><td>운용 중</td><td>5일</td></tr></tbody></table></div></td><td>1,160억</td><td>07/03</td></tr>
+<tr class="aum-toggle-item" data-series="DB 개방형 랩" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,133,74,1.0);border-radius:2px;margin:0 auto;"></div></td><td>DB</td><td>개방형 랩</td><td>183억</td><td>07/03</td></tr>
+<tr class="iter-row aum-toggle-item" data-series="DB 목표전환형 (누적)" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,133,74,0.6);border-radius:2px;margin:0 auto;"></div></td><td>DB</td><td style="position:relative;">목표전환형<div class="iter-tooltip"><table class="iter-table"><thead><tr><th>회차</th><th>AUM</th><th>시작일</th><th>종료일</th><th>거래일</th></tr></thead><tbody><tr><td>목표전환형 1차</td><td>25억</td><td>02/11</td><td>02/25</td><td>8일</td></tr><tr><td>목표전환형 2차</td><td>29억</td><td>03/16</td><td>04/15</td><td>23일</td></tr><tr><td>목표전환형 3차</td><td>43억</td><td>04/30</td><td>05/06</td><td>3일</td></tr><tr><td>목표전환형 4차</td><td>80억</td><td>05/18</td><td>05/26</td><td>6일</td></tr><tr><td>목표전환형 5차</td><td>73억</td><td>06/12</td><td>06/19</td><td>6일</td></tr><tr><td>목표전환형 6차</td><td>88억</td><td>07/01</td><td>운용 중</td><td>3일</td></tr></tbody></table></div></td><td>338억</td><td>07/03</td></tr>
+<tr class="aum-toggle-item" data-series="삼성 트루밸류" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(20,40,160,1.0);border-radius:2px;margin:0 auto;"></div></td><td>삼성</td><td>트루밸류</td><td>497억</td><td>07/03</td></tr>
+<tr class="aum-toggle-item" data-series="한투 지속형" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(245,130,32,1.0);border-radius:2px;margin:0 auto;"></div></td><td>한투</td><td>지속형</td><td>10억</td><td>07/03</td></tr>
+<tr style="border-top:2px solid #000;font-weight:700;"><td></td><td colspan="2">합계</td><td>2,314억</td><td></td></tr></tbody>
                     </table>
                 </div>
                 <div style="flex:1;background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
@@ -700,7 +698,7 @@
         
         <script>
         (function() {
-            var cData = {"dates": ["2026-03-20", "2026-03-27", "2026-04-03", "2026-04-10", "2026-04-17", "2026-04-24", "2026-04-30", "2026-05-08", "2026-05-15", "2026-05-22", "2026-05-29", "2026-06-05", "2026-06-11", "2026-06-19", "2026-06-26", "2026-07-02"], "datasets": [{"label": "삼성 트루밸류", "data": [497, 458, 451, 487, 508, 533, 527, 556, 553, 578, 622, 577, 551, 612, 532, 474], "backgroundColor": "rgba(20,40,160,1.0)"}, {"label": "DB 개방형 랩", "data": [76, 81, 83, 91, 95, 100, 108, 126, 141, 146, 166, 159, 161, 201, 187, 174], "backgroundColor": "rgba(0,133,74,1.0)"}, {"label": "NH 다이내믹밸류", "data": [74, 67, 68, 72, 75, 78, 114, 125, 125, 132, 134, 129, 123, 144, 134, 120], "backgroundColor": "rgba(0,114,206,1.0)"}, {"label": "한투 지속형", "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14], "backgroundColor": "rgba(245,130,32,1.0)"}, {"label": "DB 목표전환형 (누적)", "data": [54, 52, 52, 53, 54, 54, 94, 97, 97, 176, 177, 177, 177, 250, 250, 336], "backgroundColor": "rgba(0,133,74,0.6)"}, {"label": "NH 목표전환형 (누적)", "data": [15, 136, 136, 144, 147, 147, 397, 417, 679, 694, 700, 700, 700, 916, 916, 1153], "backgroundColor": "rgba(0,114,206,0.6)"}]};
+            var cData = {"dates": ["2026-03-20", "2026-03-27", "2026-04-03", "2026-04-10", "2026-04-17", "2026-04-24", "2026-04-30", "2026-05-08", "2026-05-15", "2026-05-22", "2026-05-29", "2026-06-05", "2026-06-11", "2026-06-19", "2026-06-26", "2026-07-03"], "datasets": [{"label": "삼성 트루밸류", "data": [497, 458, 451, 487, 508, 533, 527, 556, 553, 578, 622, 577, 551, 612, 532, 497], "backgroundColor": "rgba(20,40,160,1.0)"}, {"label": "DB 개방형 랩", "data": [76, 81, 83, 91, 95, 100, 108, 126, 141, 146, 166, 159, 161, 201, 187, 183], "backgroundColor": "rgba(0,133,74,1.0)"}, {"label": "NH 다이내믹밸류", "data": [74, 67, 68, 72, 75, 78, 114, 125, 125, 132, 134, 129, 123, 144, 134, 126], "backgroundColor": "rgba(0,114,206,1.0)"}, {"label": "한투 지속형", "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10], "backgroundColor": "rgba(245,130,32,1.0)"}, {"label": "DB 목표전환형 (누적)", "data": [54, 52, 52, 53, 54, 54, 94, 97, 97, 176, 177, 177, 177, 250, 250, 338], "backgroundColor": "rgba(0,133,74,0.6)"}, {"label": "NH 목표전환형 (누적)", "data": [15, 136, 136, 144, 147, 147, 397, 417, 679, 694, 700, 700, 700, 916, 916, 1160], "backgroundColor": "rgba(0,114,206,0.6)"}]};
             var totalPlugin = {
                 id: 'cumulativeTotals',
                 afterDatasetsDraw: function(chart) {
@@ -4195,10 +4193,10 @@
     </div>
         <div id="feeSubRevenue" style="display:none;">
         <div class="fee-wrapper rev-wrapper">
-            <span class="rev-updated">기준일 2026-07-06</span>
             <div class="rev-summary">
                 <span class="rev-sum-label">누적 매출</span>
                 <span class="rev-sum-value" title="256,461,641원">2억 5,646만원</span>
+                <span class="rev-updated">기준일 2026-07-06</span>
             </div>
             <div class="table-container"><div id="revTableHost"></div></div>
         </div>
