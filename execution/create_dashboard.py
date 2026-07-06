@@ -5390,7 +5390,8 @@ FEE_TABLE = [
     {
         'broker': '삼성',
         'types': [
-            {'type': '개방형',     'pre_broker': None, 'pre_advisor': None, 'post_broker': None, 'post_advisor': None, 'perf_ratio': None},
+            # 2026-07-06 계약 확인: 자문사 후취 0.52%, 성과보수 조항 없음 (선취·증권사 몫 미확인)
+            {'type': '개방형',     'pre_broker': None, 'pre_advisor': None, 'post_broker': None, 'post_advisor': 0.52, 'perf_ratio': None},
         ],
     },
     {
@@ -5413,7 +5414,8 @@ FEE_TABLE = [
     {
         'broker': '한투',
         'types': [
-            {'type': '개방형',     'pre_broker': None, 'pre_advisor': None, 'post_broker': None, 'post_advisor': None, 'perf_ratio': None},
+            # 2026-07-06 계약 확인: 지속형 자문사 후취 0.60% (선취·증권사 몫·성과 미확인)
+            {'type': '개방형',     'pre_broker': None, 'pre_advisor': None, 'post_broker': None, 'post_advisor': 0.60, 'perf_ratio': None},
             {'type': '목표전환형', 'pre_broker': None, 'pre_advisor': None, 'post_broker': None, 'post_advisor': None, 'perf_ratio': None},
         ],
     },
