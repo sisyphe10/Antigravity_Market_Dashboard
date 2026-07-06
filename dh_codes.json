@@ -3,7 +3,8 @@
   "tags": [
     {"code": "062040", "name": "산일전기", "owner": "DH", "scope": "GENERAL_OPEN", "start": "2026-04-10", "end": "2026-04-22"},
     {"code": "003230", "name": "삼양식품", "owner": "DH", "scope": "GENERAL_OPEN", "start": "2026-05-14", "end": null},
-    {"code": "089030", "name": "테크윙", "owner": "DH", "scope": null, "start": "2026-07-01", "end": null}
+    {"code": "089030", "name": "테크윙", "owner": "DH", "scope": "GENERAL_OPEN", "start": "2026-07-01", "end": null},
+    {"code": "089030", "name": "테크윙", "owner": "DH", "scope": "지속형", "start": "2026-07-01", "end": null}
   ],
   "codes": [
     "267270",
