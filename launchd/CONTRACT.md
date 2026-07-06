@@ -47,5 +47,7 @@
 0-1. **봇 알림 carve-out (codex 승인)** — 봇 wrapper의 "exit≠0 → notify"에서 종료코드 130(SIGINT)·143(SIGTERM)은 launchd 의도적 중지(systemd clean-stop 등가)로 보아 **알림 제외**. crash-signal(SIGSEGV 등)은 알림 대상.
 1. **성공 stamp** — 타이머 wrapper(A2b)는 잡 성공 시 `date +%s > __REPO__/logs/launchd/stamps/<이름>.last` 기록 (mktemp+mv). **기록 실패는 조용히 넘기지 말고 notify + 비정상 종료.** catch-up 러너(A4)는 이 stamp만 읽는다.
 1-1. **잡별 동시실행 락** — `run_timer_job.sh`(A2b)가 잡 이름별 락(mkdir 기반, stale 회수는 rename 방식)을 잡는다. launchd 타이머 발화와 catch-up 직접 실행(A4)이 같은 wrapper를 거치므로 이 락이 중복 실행의 단일 방어선.
-2. **schedule.tsv** — A2b가 `launchd/timers/schedule.tsv` 생성: `이름<TAB>KST 스케줄(cron 5필드)<TAB>실행 커맨드` 8행. A4는 이 파일을 파싱해 "부팅 시점에 놓친 잡"을 판정한다 (A4는 이 파일을 수정하지 않음).
+2. **schedule.tsv** — A2b가 `launchd/timers/schedule.tsv` 생성: `이름<TAB>KST 스케줄(cron 5필드)<TAB>실행 커맨드` 8행. A4는 이 파일을 파싱해 "부팅 시점에 놓친 잡"을 판정한다 (A4는 이 파일을 수정하지 않음). Phase 2에서 install_gha.sh가 GHA 행을 upsert.
+2-1. **catch-up 허용 wrapper (2026-07-07 확장)** — A4의 커맨드 검증 허용 목록 = `launchd/timers/run_timer_job.sh` **및** `launchd/gha/run_gha_job.sh` (둘 다 잡별 락·stamp·notify·타임아웃 소유 wrapper). 그 외 커맨드는 경고+skip.
+2-2. **잡당 tsv 1행 원칙 (결정 19)** — 러너가 같은 이름 복수 행을 같은 stamp로 이중 큐잉하므로, 복수 스케줄 잡(gha-universe 18:30+07:00)도 tsv엔 대표 1행(07:00)만. plist는 전 시각 정확 스케줄 — tsv는 catch-up 앵커일 뿐.
 3. **notify 스크립트** — 모두 repo의 기존 `scripts/notify_sisyphe_failure.sh`를 호출만 (수정 금지).
