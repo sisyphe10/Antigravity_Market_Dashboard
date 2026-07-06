@@ -1526,6 +1526,7 @@ def _build_combined_chart_section():
                 {'display': '외환보유액',            'csv': '외환보유액',            'color': '#4DD0E1'},
                 {'display': '정기예금 잔액',         'csv': '정기예금 잔액',         'color': '#00574B'},
                 {'display': '국민연금 적립금',       'csv': '국민연금 적립금',       'color': '#1B5E20'},
+                {'display': '퇴직연금 적립금',       'csv': '퇴직연금 적립금',       'color': '#827717'},
             ]},
             {'label': 'MACRO US', 'series': [
                 # FRED 미국 매크로 (fetch_fred_data.py; 월·분기 FRED_MACRO는 5년 임베드 창,
@@ -1666,7 +1667,8 @@ def _build_combined_chart_section():
         # '데이터 타입'이 NaN인 빌드타임 inject 행(hotel 등)은 기존 365일 창 유지.
         long_start = latest - timedelta(days=365 * 5)
         if '데이터 타입' in df.columns:
-            long_mask = df['데이터 타입'].isin(['ECOS_MACRO', 'ECOS_SECTOR', 'FRED_MACRO', 'FRED_SECTOR'])
+            long_mask = df['데이터 타입'].isin(['ECOS_MACRO', 'ECOS_SECTOR', 'FRED_MACRO', 'FRED_SECTOR',
+                                                'NPS_FUND', 'KOSIS_PENSION'])
         else:
             long_mask = pd.Series(False, index=df.index)
         df = df[(df['날짜'] <= latest)
@@ -1711,9 +1713,11 @@ def _build_combined_chart_section():
                 return 'Daily'
             if med <= 20:
                 return 'Weekly'
-            return 'Monthly'
+            if med <= 100:
+                return 'Monthly'  # 월간 + 분기
+            return 'Yearly'
 
-        FREQ_RANK = {'Daily': 0, 'Weekly': 1, 'Monthly': 2}
+        FREQ_RANK = {'Daily': 0, 'Weekly': 1, 'Monthly': 2, 'Yearly': 3}
         # 초기 순서: Update 주기(D→W→M) → 그룹 정의 순서 → 시리즈 정의 순서.
         # JS 정렬은 stable sort라 이 순서가 동률 시 2차 기준으로 유지됨.
         decorated = []
@@ -1990,7 +1994,7 @@ def _build_combined_chart_section():
                     if (vals.indexOf(v) === -1) vals.push(v);
                 });
                 if (col === 'rank') {
-                    var rk = { Daily: 0, Weekly: 1, Monthly: 2 };
+                    var rk = { Daily: 0, Weekly: 1, Monthly: 2, Yearly: 3 };
                     vals.sort(function(a, b) { return (rk[a] || 0) - (rk[b] || 0); });
                 } else { vals.sort(); }
                 var cur = cmbFilters[col];
