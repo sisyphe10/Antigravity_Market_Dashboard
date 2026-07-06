@@ -34,12 +34,17 @@ def _load_existing_stock_basis():
     try:
         with open(EXISTING_STOCK_BASIS_FILE, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        return {code: info['avg_price'] for code, info in data.get('stocks', {}).items()}
+        prices = {code: info['avg_price'] for code, info in data.get('stocks', {}).items()}
+        basis_date = pd.to_datetime(data['basis_date']) if data.get('basis_date') else None
+        return prices, basis_date
     except Exception as e:
         print(f"  Warning: {EXISTING_STOCK_BASIS_FILE} 로드 실패: {e}")
-        return {}
+        return {}, None
 
-EXISTING_STOCK_AVG_PRICES = _load_existing_stock_basis()
+# EXISTING_STOCK_AVG_PRICES: 추적 개시 전부터 보유 중인 종목의 고정 평균 매수가.
+# EXISTING_BASIS_DATE: 그 기준가가 유효한 날짜(basis_date). 이 날짜 이후 신규 편입한
+# 포트폴리오는 고정 basis가 아니라 자기 편입 시점부터 직접 계산해야 한다(포트별 편입가 반영).
+EXISTING_STOCK_AVG_PRICES, EXISTING_BASIS_DATE = _load_existing_stock_basis()
 
 
 def _load_naver_marcap():
@@ -139,9 +144,21 @@ def calculate_cumulative_return(code, stock_name, portfolio_name, nav_df, price_
     종목의 누적 수익률 계산 (캐시된 데이터 사용)
     """
     try:
-        # 편입일 이전부터 보유 중인 종목: existing_stock_basis.json 의 avg_price로 매일 재계산
-        # (목표전환형 시리즈는 신규 펀드이므로 직접 계산 경로로)
-        if code in EXISTING_STOCK_AVG_PRICES and not portfolio_name.startswith('목표전환형'):
+        # 현재 연속 보유 구간(run) 시작일 — (상품명, 코드) 단위. 포트폴리오별 편입 시점/라운드트립 반영.
+        run_start = find_current_run_start(code, portfolio_name, nav_df)
+
+        # 편입일 이전부터 보유 중인 종목: existing_stock_basis.json 의 avg_price로 매일 재계산.
+        # 단, 그 고정 basis(2026-02-12 등)는 추적 개시 전부터 '연속 보유 중'인 포트폴리오에만 유효하다.
+        # basis_date 이후 신규 편입한 포트폴리오(신규 펀드·라운드트립 재편입)는 자기 편입 시점부터
+        # 직접 계산해야 포트별로 다른 누적수익률이 나온다 → 고정 basis 미적용.
+        # (목표전환형 시리즈는 신규 펀드이므로 애초에 직접 계산 경로로)
+        held_since_before_basis = (
+            EXISTING_BASIS_DATE is None
+            or (run_start is not None and run_start <= EXISTING_BASIS_DATE)
+        )
+        if (code in EXISTING_STOCK_AVG_PRICES
+                and not portfolio_name.startswith('목표전환형')
+                and held_since_before_basis):
             avg_price = EXISTING_STOCK_AVG_PRICES[code]
             if price_df is None or price_df.empty:
                 return {'cumulative_return': None, 'status': 'existing', 'avg_price': avg_price,
@@ -170,9 +187,8 @@ def calculate_cumulative_return(code, stock_name, portfolio_name, nav_df, price_
         first_date = stock_history['날짜'].min()
         is_2026_new = first_date.year >= 2026
 
-        # 현재 연속 보유 구간(run) 시작일 — NEW 시트 스냅샷에서 '부재(매도)'도 경계로 인식.
-        # 명시적 비중=0 행이 없어도, 빠졌다 재편입된 경우 직전 라운드트립 매수가 혼입을 막는다.
-        run_start = find_current_run_start(code, portfolio_name, nav_df)
+        # run_start(현재 연속 보유 구간 시작일)은 함수 상단에서 이미 계산됨.
+        # NEW 시트 스냅샷에서 '부재(매도)'도 경계로 인식 → 라운드트립 재편입 시 직전 매수가 혼입 방지.
         if run_start is None:
             return {'cumulative_return': None, 'status': 'no_purchases', 'avg_price': None, 'current_price': None, 'dd': None, 'all_time_high': None}
 
