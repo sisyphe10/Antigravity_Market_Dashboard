@@ -1715,7 +1715,7 @@ def _build_combined_chart_section():
                 f'<td style="{cell_base}text-align:center;white-space:nowrap;font-size:11px;'
                 f'text-transform:uppercase;letter-spacing:0.3px;">{group_label}</td>'
                 f'<td class="cmb-chart-item{active}" data-series="{display_esc}"{tooltip_attr} '
-                f'style="{cell_base}text-align:left;padding-left:20px;position:relative;">'
+                f'style="{cell_base}text-align:center;position:relative;">'
                 f'<div class="cmb-color-bar" style="position:absolute;left:6px;top:50%;'
                 f'transform:translateY(-50%);width:4px;height:18px;'
                 f'border-radius:2px;"></div>'
