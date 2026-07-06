@@ -5460,8 +5460,8 @@ FEE_TABLE = [
     {
         'broker': '삼성',
         'types': [
-            # 2026-07-06 계약 확인: 자문사 후취 0.52%, 성과보수 없음('-') (선취·증권사 몫 미확인)
-            {'type': '개방형',     'pre_broker': None, 'pre_advisor': None, 'post_broker': None, 'post_advisor': 0.52, 'perf_ratio': None, 'perf_text': '-'},
+            # 2026-07-06 계약 확인: 선취 없음(0.00%), 자문사 후취 0.52%, 성과보수 없음('-') (후취 증권사 몫 미확인)
+            {'type': '개방형',     'pre_broker': 0, 'pre_advisor': 0, 'post_broker': None, 'post_advisor': 0.52, 'perf_ratio': None, 'perf_text': '-'},
         ],
     },
     {
@@ -5484,8 +5484,8 @@ FEE_TABLE = [
     {
         'broker': '한투',
         'types': [
-            # 2026-07-06 계약 확인: 지속형 자문사 후취 0.60%, 성과보수 없음('-') (선취·증권사 몫 미확인)
-            {'type': '지속형',     'pre_broker': None, 'pre_advisor': None, 'post_broker': None, 'post_advisor': 0.60, 'perf_ratio': None, 'perf_text': '-'},
+            # 2026-07-06 계약 확인: 지속형 선취 없음(0.00%), 자문사 후취 0.60%, 성과보수 없음('-') (후취 증권사 몫 미확인)
+            {'type': '지속형',     'pre_broker': 0, 'pre_advisor': 0, 'post_broker': None, 'post_advisor': 0.60, 'perf_ratio': None, 'perf_text': '-'},
             {'type': '목표전환형', 'pre_broker': None, 'pre_advisor': None, 'post_broker': None, 'post_advisor': None, 'perf_ratio': None},
         ],
     },
