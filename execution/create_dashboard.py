@@ -5771,7 +5771,7 @@ def create_fee_revenue_section():
             document.getElementById('revViewsHost').innerHTML = btns;
             var dimHeads = dims.map(function(d) { return '<th>' + revDimHead(d) + '</th>'; }).join('');
             var dateHeads = withDates ? '<th>개시일</th><th>종료일</th>' : '';
-            var head = '<tr>' + dimHeads + REV_CATS.map(function(c) { return '<th>' + c + '</th>'; }).join('') + dateHeads + '<th>합계</th><th>평균AUM</th><th>수익률</th></tr>';
+            var head = '<tr>' + dimHeads + REV_CATS.map(function(c) { return '<th>' + c + '</th>'; }).join('') + dateHeads + '<th>합계</th><th>평균AUM</th><th>기간 수익률</th></tr>';
             document.getElementById('revTableHost').innerHTML =
                 '<table class="fee-table rev-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>';
         }
