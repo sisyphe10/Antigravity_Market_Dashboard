@@ -146,14 +146,14 @@
         /* 매출 (revenue) */
         .rev-empty { text-align: center; color: #888; padding: 40px 12px; line-height: 1.8; }
         .rev-empty code { background: #f1f3f5; padding: 2px 7px; border-radius: 5px; font-size: 0.9em; color: #1e40af; }
-        .rev-wrapper { position: relative; }
+        .rev-wrapper { position: relative; max-width: none; width: fit-content; min-width: 720px; }
         .rev-summary { text-align: center; padding: 18px 12px 6px 12px; }
         .rev-sum-label { font-size: 1.05rem; color: #111; font-weight: 600; margin-right: 8px; }
         .rev-sum-value { font-size: 1.25rem; font-weight: 700; color: #111; font-variant-numeric: tabular-nums; }
         .rev-updated { position: absolute; top: 20px; right: 24px; font-size: 0.78rem; color: #aaa; }
         .rev-date { color: #555; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
-        .rev-headcell { padding: 7px 10px !important; }
         .rev-views { display: inline-flex; gap: 5px; margin: 0; background: #fff; padding: 3px; border-radius: 999px; box-shadow: inset 0 0 0 1px #d8dde3; }
+        .rev-views-top { position: absolute; top: 20px; left: 24px; }
         .rev-viewbtn { padding: 5px 14px; border: none; background: transparent; border-radius: 999px; font-size: 0.82rem; font-weight: 600; color: #555; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }
         .rev-viewbtn:hover { color: #1e40af; }
         .rev-viewbtn.active { color: #fff; background: #1e40af; }
@@ -245,7 +245,7 @@
     <aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="#" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="sidebar-link active">Dashboard</a><a href="#" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="sidebar-link">Order</a><a href="#" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="sidebar-link">공시</a><a href="#" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="sidebar-link">기여도</a><a href="#" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="sidebar-link">수수료</a></aside>
     <header>
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-07-06 09:42:09 KST</div>
+        <div class="last-updated">Updated: 2026-07-06 09:59:04 KST</div>
     </header>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -3516,28 +3516,31 @@
     </div>
         <div id="feeSubRevenue" style="display:none;">
         <div class="fee-wrapper rev-wrapper">
-            <span class="rev-updated">기준일 2026-06-30</span>
+            <div class="rev-views rev-views-top" id="revViewsHost"></div>
+            <span class="rev-updated">기준일 2026-07-06</span>
             <div class="rev-summary">
                 <span class="rev-sum-label">누적 매출</span>
-                <span class="rev-sum-value" title="233,913,315원">2억 3,391만원</span>
+                <span class="rev-sum-value" title="256,461,641원">2억 5,646만원</span>
             </div>
             <div class="table-container"><div id="revTableHost"></div></div>
         </div>
     
         <script>
-        var FEE_REVENUE = {"records": [{"quarter": "2026-Q1", "broker": "삼성", "category": "개방형", "amount": 42768106, "start": "2023-03-16"}, {"quarter": "2026-Q1", "broker": "NH", "category": "개방형", "amount": 21184926, "start": "2023-03-20"}, {"quarter": "2026-Q1", "broker": "DB", "category": "개방형", "amount": 33149819, "start": "2024-05-16"}, {"quarter": "2026-Q1", "broker": "DB", "category": "목표전환형", "label": "목표전환형 1차", "amount": 14561210, "start": "2026-02-11", "end": "2026-02-25"}, {"quarter": "2026-Q2", "broker": "DB", "category": "목표전환형", "label": "목표전환형 2차", "amount": 15709514, "start": "2026-03-16", "end": "2026-04-15"}, {"quarter": "2026-Q2", "broker": "DB", "category": "목표전환형", "label": "목표전환형 3차", "amount": 22371014, "start": "2026-04-30", "end": "2026-05-06"}, {"quarter": "2026-Q2", "broker": "DB", "category": "목표전환형", "label": "목표전환형 4차", "amount": 42750286, "start": "2026-05-18", "end": "2026-05-27"}, {"quarter": "2026-Q2", "broker": "DB", "category": "목표전환형", "label": "목표전환형 5차", "amount": 41418440, "start": "2026-06-12", "end": "2026-06-19"}], "updated": "2026-06-30"};
+        var FEE_REVENUE = {"records": [{"quarter": "2026-Q1", "broker": "삼성", "category": "개방형", "amount": 42768106, "start": "2023-03-16", "avgAum": 46066665416, "ret": 0.282421, "aumN": 8}, {"quarter": "2026-Q1", "broker": "NH", "category": "개방형", "amount": 21184926, "start": "2023-03-20", "avgAum": 6779077117, "ret": 0.246195, "aumN": 8}, {"quarter": "2026-Q1", "broker": "DB", "category": "개방형", "amount": 33149819, "start": "2024-05-16", "avgAum": 7785950754, "ret": 0.287767, "aumN": 8}, {"quarter": "2026-Q2", "broker": "DB", "category": "개방형", "amount": 22548326, "start": "2024-05-16", "avgAum": 13470358066, "ret": 0.559775, "aumN": 57}, {"quarter": "2026-Q1", "broker": "DB", "category": "목표전환형", "label": "목표전환형 1차", "amount": 14561210, "start": "2026-02-11", "end": "2026-02-25", "avgAum": 2511457278, "ret": 0.07998, "aumN": 1}, {"quarter": "2026-Q2", "broker": "DB", "category": "목표전환형", "label": "목표전환형 2차", "amount": 15709514, "start": "2026-03-16", "end": "2026-04-15", "avgAum": 2750512652, "ret": 0.08075, "aumN": 18}, {"quarter": "2026-Q2", "broker": "DB", "category": "목표전환형", "label": "목표전환형 3차", "amount": 22371014, "start": "2026-04-30", "end": "2026-05-06", "avgAum": 4138385602, "ret": 0.0797, "aumN": 3}, {"quarter": "2026-Q2", "broker": "DB", "category": "목표전환형", "label": "목표전환형 4차", "amount": 42750286, "start": "2026-05-18", "end": "2026-05-27", "avgAum": 7725783482, "ret": 0.05181, "aumN": 6}, {"quarter": "2026-Q2", "broker": "DB", "category": "목표전환형", "label": "목표전환형 5차", "amount": 41418440, "start": "2026-06-12", "end": "2026-06-19", "avgAum": 7056966858, "ret": 0.0772, "aumN": 4}], "updated": "2026-07-06"};
         var REV_CATS = ['개방형', '목표전환형'];
         var REV_BROKER_ORDER = ['삼성', 'NH', 'DB', '한투'];
         var REV_DIMS = [['quarter', '분기'], ['broker', '증권사'], ['product', '상품']];
         var REV_ORD_SHADES = ['#1e40af', '#5277cc', '#8aa9e6'];  // 클릭 순서: 진한→연한 (순서 표시)
-        var revActiveDims = ['quarter'];  // 클릭 순서대로 누적되는 그룹 기준 (엑셀 피벗 Rows 영역)
+        var revActiveDims = ['quarter', 'broker', 'product'];  // 기본: 3기준 모두 활성 (클릭 순서 누적, 엑셀 피벗 Rows 영역)
         function revFmtNum(n) { return Number(n).toLocaleString('ko-KR'); }        // 안쪽 셀: 숫자만
         function revFmtWon(n) { return Number(n).toLocaleString('ko-KR') + '원'; } // 합계 라인: 원
+        function revFmtEok(won) { return Math.round(won / 1e8).toLocaleString('ko-KR') + '억'; }
+        function revFmtPct(x) { return (x >= 0 ? '+' : '') + Math.round(x * 100) + '%'; }
         function revProd(r) { return r.label || r.category; }
         function revFmtQuarter(q) { var m = /^(\d{4})-Q([1-4])$/.exec(q); return m ? m[1] + '년 ' + m[2] + '분기' : q; }
         function revDimRaw(d, r) { return d === 'quarter' ? r.quarter : (d === 'broker' ? r.broker : revProd(r)); }
         function revDimDisp(d, val) { return d === 'quarter' ? revFmtQuarter(val) : val; }
-        function revDimHead(d) { return d === 'quarter' ? '분기' : (d === 'broker' ? '증권사' : '상품'); }
+        function revDimHead(d) { return d === 'quarter' ? '기간' : (d === 'broker' ? '증권사' : '상품'); }
         function revDimSort(d, val) { return d === 'broker' ? REV_BROKER_ORDER.indexOf(val) : val; }
         // 레코드 목록 → 카테고리별 합계 {개방형, 목표전환형, _total}
         function revCatVals(list) {
@@ -3581,6 +3584,13 @@
                 }
                 return 0;
             });
+            // 평균AUM/수익률은 가산 불가 지표 → 단일 레코드 그룹만 표시 (상이 상품·기간 혼합은 '-')
+            function revAvgAum(list) {
+                return (list.length === 1 && list[0].avgAum != null) ? list[0].avgAum : null;
+            }
+            function revRet(list) {
+                return (list.length === 1 && list[0].ret != null) ? list[0].ret : null;
+            }
             // 본문
             var body = rows.map(function(g) {
                 var v = revCatVals(g.recs);
@@ -3594,28 +3604,30 @@
                     cells += '<td class="rev-date">' + s0 + '</td><td class="rev-date">' + e0 + '</td>';
                 }
                 cells += '<td class="rev-amt rev-rowtot">' + revFmtNum(v._total) + '</td>';
+                var ga = revAvgAum(g.recs), gr = revRet(g.recs);
+                var gn = (g.recs.length === 1 && g.recs[0].aumN) ? ' title="AUM 표본 ' + g.recs[0].aumN + '영업일 단순평균"' : '';
+                cells += '<td class="rev-amt"' + gn + '>' + (ga != null ? revFmtEok(ga) : '-') + '</td>';
+                cells += '<td class="rev-amt">' + (gr != null ? revFmtPct(gr) : '-') + '</td>';
                 return '<tr>' + cells + '</tr>';
             }).join('');
-            // 합계 행 (기준 칼럼들 병합, 개시일/종료일 칸 공란)
+            // 합계 행 (기준 칼럼들 병합, 개시일/종료일·평균AUM·수익률 칸 공란)
             var grand = revCatVals(recs);
             var totalCells = '<td class="rev-key" colspan="' + dims.length + '">합계</td>' +
                 REV_CATS.map(function(c) { return '<td class="rev-amt">' + revFmtWon(grand[c]) + '</td>'; }).join('');
             if (withDates) { totalCells += '<td class="rev-date"></td><td class="rev-date"></td>'; }
-            totalCells += '<td class="rev-amt">' + revFmtWon(grand._total) + '</td>';
+            totalCells += '<td class="rev-amt">' + revFmtWon(grand._total) + '</td><td class="rev-amt"></td><td class="rev-amt"></td>';
             body += '<tr class="fee-row-total">' + totalCells + '</tr>';
-            // 헤더: 첫 기준 칼럼 머리 셀에 버튼 편입. 활성 기준은 클릭 순서 번호 표시.
+            // 상단 좌측 버튼 (활성 기준은 클릭 순서대로 진한→연한 배경)
             var btns = REV_DIMS.map(function(b) {
                 var idx = revActiveDims.indexOf(b[0]);
                 var sty = idx !== -1 ? ' style="background:' + REV_ORD_SHADES[Math.min(idx, REV_ORD_SHADES.length - 1)] + ';color:#fff;"' : '';
                 return '<button class="rev-viewbtn' + (idx !== -1 ? ' active' : '') +
                     '" data-rev-view="' + b[0] + '"' + sty + ' onclick="revToggleDim(this.dataset.revView, event)">' + b[1] + '</button>';
             }).join('');
-            var dimHeads = dims.map(function(d, i) {
-                return i === 0 ? '<th class="rev-headcell"><div class="rev-views">' + btns + '</div></th>'
-                               : '<th>' + revDimHead(d) + '</th>';
-            }).join('');
+            document.getElementById('revViewsHost').innerHTML = btns;
+            var dimHeads = dims.map(function(d) { return '<th>' + revDimHead(d) + '</th>'; }).join('');
             var dateHeads = withDates ? '<th>개시일</th><th>종료일</th>' : '';
-            var head = '<tr>' + dimHeads + REV_CATS.map(function(c) { return '<th>' + c + '</th>'; }).join('') + dateHeads + '<th>합계</th></tr>';
+            var head = '<tr>' + dimHeads + REV_CATS.map(function(c) { return '<th>' + c + '</th>'; }).join('') + dateHeads + '<th>합계</th><th>평균AUM</th><th>수익률</th></tr>';
             document.getElementById('revTableHost').innerHTML =
                 '<table class="fee-table rev-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>';
         }

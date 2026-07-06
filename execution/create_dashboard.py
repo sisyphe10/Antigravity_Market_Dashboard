@@ -5554,6 +5554,91 @@ _REV_CAT_ORDER = ['개방형', '목표전환형']
 _REV_BROKER_ORDER = ['삼성', 'NH', 'DB', '한투']
 
 
+def _fee_rev_quarter_bounds(quarter):
+    """'2026-Q1' → (분기 시작, 분기 끝) Timestamp. 형식 불일치면 None."""
+    try:
+        y, q = str(quarter).split('-Q')
+        y, q = int(y), int(q)
+        if not 1 <= q <= 4:
+            return None
+        start = pd.Timestamp(y, 3 * q - 2, 1)
+        return start, start + pd.offsets.QuarterEnd(0)
+    except (ValueError, AttributeError):
+        return None
+
+
+def _fee_rev_find_product(r):
+    """fee 레코드 → wrap_config 상품. 개방형=GENERAL_OPEN(폴백 ptype=general), 목표전환형=라벨 매칭."""
+    label = r.get('label')
+    general_fallback = None
+    for p in wrap_config.PRODUCTS:
+        if p.broker != r.get('broker'):
+            continue
+        if r.get('category') == '개방형':
+            if p.group == 'GENERAL_OPEN':
+                return p
+            if p.ptype == 'general' and general_fallback is None:
+                general_fallback = p
+        elif label and (p.aum_name == label or p.nav_key == label):
+            return p
+    return general_fallback if r.get('category') == '개방형' else None
+
+
+def _fee_rev_metrics(records):
+    """레코드별 평균AUM(해당 기간 AUM 단순평균, 원)·수익률 계산해 avgAum/ret 필드 부여.
+
+    - 평균AUM: AUM 시트에서 기간(개방형=달력분기, 목표전환형=start~end 양끝 포함) 내
+      존재하는 행들의 단순평균 (AUM 시트는 2026-02-24부터라 그 이전 기간은 가용분만).
+    - 수익률: 목표전환형=기간 내 마지막 기준가/설정기준가−1 (청산수익률),
+      개방형=분기말 기준가/직전분기말 기준가−1 (분기 중 개시 상품은 설정기준가 대비).
+    - 데이터 없으면 None → JS가 '-' 렌더.
+    """
+    for r in records:
+        r['avgAum'] = None
+        r['ret'] = None
+    try:
+        nav = pd.read_excel('Wrap_NAV.xlsx', sheet_name='기준가')
+        nav['Date'] = pd.to_datetime(nav['Date'])
+        nav = nav.set_index('Date').sort_index()
+        aum = pd.read_excel('Wrap_NAV.xlsx', sheet_name='AUM')
+        aum['날짜'] = pd.to_datetime(aum['날짜'])
+    except Exception as e:
+        print(f"  ! 매출 평균AUM/수익률 계산 불가 (Wrap_NAV.xlsx 읽기 실패): {e}")
+        return
+    for r in records:
+        p = _fee_rev_find_product(r)
+        if p is None:
+            continue
+        if r.get('category') == '목표전환형':
+            if not (r.get('start') and r.get('end')):
+                continue
+            ps, pe = pd.Timestamp(r['start']), pd.Timestamp(r['end'])
+        else:
+            bounds = _fee_rev_quarter_bounds(r.get('quarter'))
+            if bounds is None:
+                continue
+            ps, pe = bounds
+        rows = aum[(aum['증권사'] == r['broker']) & (aum['상품명'] == p.aum_name)
+                   & (aum['날짜'] >= ps) & (aum['날짜'] <= pe)]
+        if len(rows):
+            r['avgAum'] = int(rows['AUM'].mean())
+            r['aumN'] = int(len(rows))  # 표본 영업일 수 (AUM 시트 2026-02-24 시작 → 부분표본 투명화)
+        if p.nav_key not in nav.columns:
+            continue
+        s = nav[p.nav_key].dropna()
+        if r.get('category') == '목표전환형':
+            seg = s[(s.index >= ps) & (s.index <= pe)]
+            if len(seg):
+                r['ret'] = round(float(seg.iloc[-1]) / float(p.base_price) - 1, 6)
+        else:
+            end_v = s[s.index <= pe]
+            prev_v = s[s.index < ps]
+            if len(end_v) and len(prev_v):
+                r['ret'] = round(float(end_v.iloc[-1]) / float(prev_v.iloc[-1]) - 1, 6)
+            elif len(end_v):
+                r['ret'] = round(float(end_v.iloc[-1]) / float(p.base_price) - 1, 6)
+
+
 def create_fee_revenue_section():
     """매출 탭 — 실제 정산 수수료(자문사 몫)를 분기별/증권사별/상품별로 집계."""
     data = load_fee_revenue()
@@ -5565,13 +5650,15 @@ def create_fee_revenue_section():
                 '<code>python add_fee_revenue.py</code> 로 실제 정산 금액을 입력하세요.</p></div>')
 
     total = sum(r['amount'] for r in records)
+    _fee_rev_metrics(records)  # 평균AUM/수익률 bake (avgAum, ret 필드)
     payload = json.dumps({'records': records, 'updated': updated}, ensure_ascii=False)
     updated_html = f'<span class="rev-updated">기준일 {updated}</span>' if updated else ''
 
-    # 상단: 누적 총매출 카드 + 정렬 버튼(분기별/증권사별/상품별) + 단일 평면 테이블.
-    # 모든 레코드를 한 테이블에 펼쳐두고, 버튼을 누르면 JS(revRender)가 그 기준으로 정렬한다.
+    # 상단: 좌측 그룹 기준 버튼(분기/증권사/상품) + 누적 총매출 카드 + 단일 평면 테이블.
+    # 모든 레코드를 한 테이블에 펼쳐두고, 버튼으로 그룹 기준을 바꾸면 JS(revRender)가 재집계한다.
     head_html = f"""
         <div class="fee-wrapper rev-wrapper">
+            <div class="rev-views rev-views-top" id="revViewsHost"></div>
             {updated_html}
             <div class="rev-summary">
                 <span class="rev-sum-label">누적 매출</span>
@@ -5588,14 +5675,16 @@ def create_fee_revenue_section():
         var REV_BROKER_ORDER = ['삼성', 'NH', 'DB', '한투'];
         var REV_DIMS = [['quarter', '분기'], ['broker', '증권사'], ['product', '상품']];
         var REV_ORD_SHADES = ['#1e40af', '#5277cc', '#8aa9e6'];  // 클릭 순서: 진한→연한 (순서 표시)
-        var revActiveDims = ['quarter'];  // 클릭 순서대로 누적되는 그룹 기준 (엑셀 피벗 Rows 영역)
+        var revActiveDims = ['quarter', 'broker', 'product'];  // 기본: 3기준 모두 활성 (클릭 순서 누적, 엑셀 피벗 Rows 영역)
         function revFmtNum(n) { return Number(n).toLocaleString('ko-KR'); }        // 안쪽 셀: 숫자만
         function revFmtWon(n) { return Number(n).toLocaleString('ko-KR') + '원'; } // 합계 라인: 원
+        function revFmtEok(won) { return Math.round(won / 1e8).toLocaleString('ko-KR') + '억'; }
+        function revFmtPct(x) { return (x >= 0 ? '+' : '') + Math.round(x * 100) + '%'; }
         function revProd(r) { return r.label || r.category; }
         function revFmtQuarter(q) { var m = /^(\\d{4})-Q([1-4])$/.exec(q); return m ? m[1] + '년 ' + m[2] + '분기' : q; }
         function revDimRaw(d, r) { return d === 'quarter' ? r.quarter : (d === 'broker' ? r.broker : revProd(r)); }
         function revDimDisp(d, val) { return d === 'quarter' ? revFmtQuarter(val) : val; }
-        function revDimHead(d) { return d === 'quarter' ? '분기' : (d === 'broker' ? '증권사' : '상품'); }
+        function revDimHead(d) { return d === 'quarter' ? '기간' : (d === 'broker' ? '증권사' : '상품'); }
         function revDimSort(d, val) { return d === 'broker' ? REV_BROKER_ORDER.indexOf(val) : val; }
         // 레코드 목록 → 카테고리별 합계 {개방형, 목표전환형, _total}
         function revCatVals(list) {
@@ -5639,6 +5728,13 @@ def create_fee_revenue_section():
                 }
                 return 0;
             });
+            // 평균AUM/수익률은 가산 불가 지표 → 단일 레코드 그룹만 표시 (상이 상품·기간 혼합은 '-')
+            function revAvgAum(list) {
+                return (list.length === 1 && list[0].avgAum != null) ? list[0].avgAum : null;
+            }
+            function revRet(list) {
+                return (list.length === 1 && list[0].ret != null) ? list[0].ret : null;
+            }
             // 본문
             var body = rows.map(function(g) {
                 var v = revCatVals(g.recs);
@@ -5652,28 +5748,30 @@ def create_fee_revenue_section():
                     cells += '<td class="rev-date">' + s0 + '</td><td class="rev-date">' + e0 + '</td>';
                 }
                 cells += '<td class="rev-amt rev-rowtot">' + revFmtNum(v._total) + '</td>';
+                var ga = revAvgAum(g.recs), gr = revRet(g.recs);
+                var gn = (g.recs.length === 1 && g.recs[0].aumN) ? ' title="AUM 표본 ' + g.recs[0].aumN + '영업일 단순평균"' : '';
+                cells += '<td class="rev-amt"' + gn + '>' + (ga != null ? revFmtEok(ga) : '-') + '</td>';
+                cells += '<td class="rev-amt">' + (gr != null ? revFmtPct(gr) : '-') + '</td>';
                 return '<tr>' + cells + '</tr>';
             }).join('');
-            // 합계 행 (기준 칼럼들 병합, 개시일/종료일 칸 공란)
+            // 합계 행 (기준 칼럼들 병합, 개시일/종료일·평균AUM·수익률 칸 공란)
             var grand = revCatVals(recs);
             var totalCells = '<td class="rev-key" colspan="' + dims.length + '">합계</td>' +
                 REV_CATS.map(function(c) { return '<td class="rev-amt">' + revFmtWon(grand[c]) + '</td>'; }).join('');
             if (withDates) { totalCells += '<td class="rev-date"></td><td class="rev-date"></td>'; }
-            totalCells += '<td class="rev-amt">' + revFmtWon(grand._total) + '</td>';
+            totalCells += '<td class="rev-amt">' + revFmtWon(grand._total) + '</td><td class="rev-amt"></td><td class="rev-amt"></td>';
             body += '<tr class="fee-row-total">' + totalCells + '</tr>';
-            // 헤더: 첫 기준 칼럼 머리 셀에 버튼 편입. 활성 기준은 클릭 순서 번호 표시.
+            // 상단 좌측 버튼 (활성 기준은 클릭 순서대로 진한→연한 배경)
             var btns = REV_DIMS.map(function(b) {
                 var idx = revActiveDims.indexOf(b[0]);
                 var sty = idx !== -1 ? ' style="background:' + REV_ORD_SHADES[Math.min(idx, REV_ORD_SHADES.length - 1)] + ';color:#fff;"' : '';
                 return '<button class="rev-viewbtn' + (idx !== -1 ? ' active' : '') +
                     '" data-rev-view="' + b[0] + '"' + sty + ' onclick="revToggleDim(this.dataset.revView, event)">' + b[1] + '</button>';
             }).join('');
-            var dimHeads = dims.map(function(d, i) {
-                return i === 0 ? '<th class="rev-headcell"><div class="rev-views">' + btns + '</div></th>'
-                               : '<th>' + revDimHead(d) + '</th>';
-            }).join('');
+            document.getElementById('revViewsHost').innerHTML = btns;
+            var dimHeads = dims.map(function(d) { return '<th>' + revDimHead(d) + '</th>'; }).join('');
             var dateHeads = withDates ? '<th>개시일</th><th>종료일</th>' : '';
-            var head = '<tr>' + dimHeads + REV_CATS.map(function(c) { return '<th>' + c + '</th>'; }).join('') + dateHeads + '<th>합계</th></tr>';
+            var head = '<tr>' + dimHeads + REV_CATS.map(function(c) { return '<th>' + c + '</th>'; }).join('') + dateHeads + '<th>합계</th><th>평균AUM</th><th>수익률</th></tr>';
             document.getElementById('revTableHost').innerHTML =
                 '<table class="fee-table rev-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>';
         }
@@ -7053,14 +7151,14 @@ def create_dashboard():
         /* 매출 (revenue) */
         .rev-empty {{ text-align: center; color: #888; padding: 40px 12px; line-height: 1.8; }}
         .rev-empty code {{ background: #f1f3f5; padding: 2px 7px; border-radius: 5px; font-size: 0.9em; color: #1e40af; }}
-        .rev-wrapper {{ position: relative; }}
+        .rev-wrapper {{ position: relative; max-width: none; width: fit-content; min-width: 720px; }}
         .rev-summary {{ text-align: center; padding: 18px 12px 6px 12px; }}
         .rev-sum-label {{ font-size: 1.05rem; color: #111; font-weight: 600; margin-right: 8px; }}
         .rev-sum-value {{ font-size: 1.25rem; font-weight: 700; color: #111; font-variant-numeric: tabular-nums; }}
         .rev-updated {{ position: absolute; top: 20px; right: 24px; font-size: 0.78rem; color: #aaa; }}
         .rev-date {{ color: #555; font-size: 0.9rem; font-variant-numeric: tabular-nums; }}
-        .rev-headcell {{ padding: 7px 10px !important; }}
         .rev-views {{ display: inline-flex; gap: 5px; margin: 0; background: #fff; padding: 3px; border-radius: 999px; box-shadow: inset 0 0 0 1px #d8dde3; }}
+        .rev-views-top {{ position: absolute; top: 20px; left: 24px; }}
         .rev-viewbtn {{ padding: 5px 14px; border: none; background: transparent; border-radius: 999px; font-size: 0.82rem; font-weight: 600; color: #555; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }}
         .rev-viewbtn:hover {{ color: #1e40af; }}
         .rev-viewbtn.active {{ color: #fff; background: #1e40af; }}
