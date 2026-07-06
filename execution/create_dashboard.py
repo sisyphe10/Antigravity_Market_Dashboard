@@ -7028,8 +7028,8 @@ def create_dashboard():
         .lh-nochart {{ font-size: 1.15rem; color: #000; text-align: center; line-height: 1.6; padding: 0 12px; }}
         .lh-meta {{ flex: 0 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px 8px; margin: 0 0 6px; cursor: pointer; }}
         .lh-meta .lh-m {{ text-align: center; }}
-        .lh-meta .lh-mk {{ font-size: 0.7rem; color: #000; letter-spacing: 0.3px; }}
-        .lh-meta .lh-mv {{ font-size: 0.92rem; font-weight: 700; color: #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
+        .lh-meta .lh-mk {{ font-size: 0.88rem; color: #000; letter-spacing: 0.3px; }}
+        .lh-meta .lh-mv {{ font-size: 0.95rem; font-weight: 400; color: #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
         @media (max-width: 640px) {{
             .lh-card {{ aspect-ratio: auto; }}
             .lh-bigchart {{ min-height: 220px; }}
@@ -7045,7 +7045,7 @@ def create_dashboard():
         }}
         .lh-divider {{ border: none; border-top: 1.5px solid #000; margin: 12px 0; }}
         .lh-quote-row {{ display: flex; align-items: center; padding: 4px 0 4px 20px; cursor: pointer; min-height: 36px; }}
-        .lh-quote-text {{ flex: 1 1 auto; font-size: 0.92rem; color: #333; line-height: 1.55; white-space: normal; }}
+        .lh-quote-text {{ flex: 1 1 auto; font-size: 1.08rem; color: #000; line-height: 1.55; white-space: normal; }}
         .lh-quote-text::before {{ content: "•"; color: #000; font-weight: bold; margin-right: 10px; }}
         .lh-author {{ color: #333; font-size: 1em; font-style: italic; margin-left: 8px; white-space: nowrap; }}
         @media (max-width: 600px) {{
@@ -7246,8 +7246,8 @@ def create_dashboard():
         ]).then(function(results) {{
             var hl = results[0];
             slots = (hl && Array.isArray(hl.slots)) ? hl.slots : [];
-            // 차트 데이터 위주: spark 있는 슬롯만 회전 풀에 (텍스트 전용 슬롯 제외)
-            slots = slots.filter(function(s) {{ return s.spark && s.spark.series && s.spark.series.length >= 2; }});
+            // 차트 데이터 위주 + 무명 수치 방지: 이름/단위 메타를 가진 차트 슬롯만 회전
+            slots = slots.filter(function(s) {{ return s.spark && s.spark.series && s.spark.series.length >= 2 && s.name; }});
             if (hl && hl.updated_at) card.title = 'Updated ' + hl.updated_at;
             quotes = Array.isArray(results[1]) ? results[1] : [];
             var slot = pickSlot();
