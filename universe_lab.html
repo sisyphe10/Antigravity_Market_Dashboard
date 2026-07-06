@@ -366,23 +366,23 @@ function buildScatter(){
     g.w+=s.mcap; g.rsi+=s.rsi*s.mcap; g.w1+=s.w1*s.mcap; g.n++;
   });
   var pts=[]; var maxW=0;
-  Object.keys(agg).forEach(function(k){ var g=agg[k]; if(g.w<=0) return; maxW=Math.max(maxW,g.w); pts.push({sector:k,x:g.rsi/g.w,y:g.w1/g.w,w:g.w,n:g.n}); });
+  Object.keys(agg).forEach(function(k){ var g=agg[k]; if(g.w<=0) return; maxW=Math.max(maxW,g.w); pts.push({sector:k,x:g.w1/g.w,y:g.rsi/g.w,w:g.w,n:g.n}); });
   if(!pts.length) return;
   pts.forEach(function(p){ p.r=8+22*Math.sqrt(p.w/maxW); });
-  var xa=Math.max(5, Math.ceil(Math.max.apply(null,pts.map(function(p){return Math.abs(p.x);}))+2));
-  var ya=Math.max(3, Math.ceil(Math.max.apply(null,pts.map(function(p){return Math.abs(p.y);}))+1));
+  var xa=Math.max(3, Math.ceil(Math.max.apply(null,pts.map(function(p){return Math.abs(p.x);}))+1));
+  var ya=Math.max(5, Math.ceil(Math.max.apply(null,pts.map(function(p){return Math.abs(p.y);}))+2));
   var quad={ id:'quad', beforeDraw:function(ch){ var a=ch.chartArea,sc=ch.scales,cx=sc.x.getPixelForValue(0),cy=sc.y.getPixelForValue(0),g=ch.ctx;
       g.save();
       g.fillStyle='#ffffff'; g.fillRect(0,0,ch.width,ch.height);                       // PNG 배경 흰색
       g.fillStyle='rgba(220,38,38,0.05)'; g.fillRect(cx,a.top,a.right-cx,cy-a.top);     // 우상 주도(강세=빨강)
-      g.fillStyle='rgba(37,99,235,0.05)'; g.fillRect(a.left,a.top,cx-a.left,cy-a.top);  // 좌상 개선
-      g.fillStyle='rgba(234,179,8,0.05)'; g.fillRect(cx,cy,a.right-cx,a.bottom-cy);     // 우하 둔화
+      g.fillStyle='rgba(234,179,8,0.05)'; g.fillRect(a.left,a.top,cx-a.left,cy-a.top);  // 좌상 둔화(중기+ 단기-)
+      g.fillStyle='rgba(37,99,235,0.05)'; g.fillRect(cx,cy,a.right-cx,a.bottom-cy);     // 우하 개선(단기+ 중기-)
       g.fillStyle='rgba(22,163,74,0.05)'; g.fillRect(a.left,cy,cx-a.left,a.bottom-cy);  // 좌하 소외(약세=녹색)
       g.strokeStyle='#cbd5e1'; g.lineWidth=1; g.beginPath(); g.moveTo(cx,a.top); g.lineTo(cx,a.bottom); g.moveTo(a.left,cy); g.lineTo(a.right,cy); g.stroke();
       g.fillStyle='#111827'; g.font='bold 14px Pretendard'; g.textBaseline='top';
       g.textAlign='right'; g.fillText('주도', a.right-8, a.top+6);
-      g.textAlign='left';  g.fillText('개선', a.left+8, a.top+6);
-      g.textAlign='right'; g.textBaseline='bottom'; g.fillText('둔화', a.right-8, a.bottom-6);
+      g.textAlign='left';  g.fillText('둔화', a.left+8, a.top+6);
+      g.textAlign='right'; g.textBaseline='bottom'; g.fillText('개선', a.right-8, a.bottom-6);
       g.textAlign='left';  g.fillText('소외', a.left+8, a.bottom-6);
       g.restore();
   }, afterDatasetsDraw:function(ch){
@@ -410,10 +410,10 @@ function buildScatter(){
       backgroundColor:pts.map(function(p){ var c=diverge((p.x+p.y)/2,15); return c.replace('rgb(','rgba(').replace(')',',0.55)'); }),
       borderColor:'#475569', borderWidth:1 }] },
     options:{ maintainAspectRatio:false, animation:false,
-      scales:{ x:{min:-xa,max:xa,title:{display:true,text:'RSI(1M) — 중기 상대강도 (%p)',color:'#111827',font:{size:13,weight:'600'}},ticks:{color:'#111827'},grid:{color:'#f1f5f9'}},
-               y:{min:-ya,max:ya,title:{display:true,text:'1W — 단기 수익률 (%)',color:'#111827',font:{size:13,weight:'600'}},ticks:{color:'#111827'},grid:{color:'#f1f5f9'}} },
+      scales:{ x:{min:-xa,max:xa,title:{display:true,text:'1W (%)',color:'#111827',font:{size:13,weight:'600'}},ticks:{color:'#111827'},grid:{color:'#f1f5f9'}},
+               y:{min:-ya,max:ya,title:{display:true,text:'RSI(1M) (%p)',color:'#111827',font:{size:13,weight:'600'}},ticks:{color:'#111827'},grid:{color:'#f1f5f9'}} },
       plugins:{ legend:{display:false},
-        tooltip:{ displayColors:false, callbacks:{ label:function(c){ var d=c.raw; return d.sector+' · 종목 '+d.n+' · 시총 '+Math.round(d.w).toLocaleString()+'억 · RSI '+(d.x>0?'+':'')+Math.round(d.x)+'%, 1W '+(d.y>0?'+':'')+Math.round(d.y)+'%'; } } } }
+        tooltip:{ displayColors:false, callbacks:{ label:function(c){ var d=c.raw; return d.sector+' · 종목 '+d.n+' · 시총 '+Math.round(d.w).toLocaleString()+'억 · 1W '+(d.x>0?'+':'')+Math.round(d.x)+'%, RSI '+(d.y>0?'+':'')+Math.round(d.y)+'%'; } } } }
     }, plugins:[quad] });
 }
 

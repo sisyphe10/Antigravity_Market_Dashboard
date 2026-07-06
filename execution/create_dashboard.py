@@ -205,11 +205,13 @@ def create_portfolio_tables_html():
 
         # 버튼바: 수수료 서브탭과 동일 pill 스타일 (.fee-subtab CSS 재사용,
         # feeSwitchSub는 [data-fee-sub] 스코프라 [data-pf-btn] 버튼과 충돌 없음)
-        html += '<div class="fee-subtabs" style="flex-wrap:wrap;">' + ''.join(
+        # 한 줄 고정: .fee-subtabs 기본 max-width:900px 해제 + nowrap + 패딩 축소
+        html += ('<div class="fee-subtabs" style="flex-wrap:nowrap;max-width:none;">' + ''.join(
             f'<button class="fee-subtab{" active" if i == 0 else ""}" data-pf-btn="{i}" '
+            f'style="padding:9px 16px;white-space:nowrap;" '
             f'onclick="pfSwitchTab({i})">{name}</button>'
             for i, (name, _k) in enumerate(render_list)
-        ) + '</div>'
+        ) + '</div>')
 
         for sec_idx, (portfolio_name, data_key) in enumerate(render_list):
             stocks = portfolio_data[data_key]
@@ -1103,7 +1105,8 @@ def _build_indices_chart_section(category_label='Indices'):
 
         # 좌측 시리즈 리스트 행
         rows_html = ''
-        defaults_active = {'KOSPI', 'KOSDAQ', 'S&P 500', 'NASDAQ'}
+        # 기본 선택: 전체 7개 지수 (2026-07-06 사용자 요청)
+        defaults_active = {'KOSPI', 'KOSDAQ', 'NIKKEI', 'TSEC', 'S&P 500', 'NASDAQ', 'RUSSELL 2000'}
         for s in series_config:
             display = s['display']
             color = s['color']
@@ -1717,7 +1720,7 @@ def _build_combined_chart_section():
             decorated.append((FREQ_RANK[freq], gi, si, freq, group_label_raw, s, values))
         decorated.sort(key=lambda t: (t[0], t[1], t[2]))
 
-        cell_base = 'padding:6px 8px;font-size:12px;color:#000;'
+        cell_base = 'padding:6px 8px;font-size:13px;color:#000;'
         for rank, gi, si, freq, group_label_raw, s, values in decorated:
             data_export[s['display']] = values
             group_label = _html.escape(group_label_raw)
@@ -1736,7 +1739,7 @@ def _build_combined_chart_section():
                 f'onclick="toggleCmbSeries(this.querySelector(\'.cmb-chart-item\'), event)" '
                 f'style="cursor:pointer;">'
                 f'<td style="{cell_base}text-align:center;white-space:nowrap;">{freq}</td>'
-                f'<td style="{cell_base}text-align:center;white-space:nowrap;font-size:11px;'
+                f'<td style="{cell_base}text-align:center;white-space:nowrap;font-size:12px;'
                 f'text-transform:uppercase;letter-spacing:0.3px;">{group_label}</td>'
                 f'<td class="cmb-chart-item{active}" data-series="{display_esc}"{tooltip_attr} '
                 f'style="{cell_base}text-align:center;">'
@@ -1748,20 +1751,31 @@ def _build_combined_chart_section():
         export_json = json.dumps(export, ensure_ascii=False, separators=(',', ':'))
 
         th_base = ('position:sticky;top:0;z-index:2;background:#f0f0f0;cursor:pointer;'
-                   'user-select:none;font-weight:700;font-size:12px;color:#000;'
+                   'user-select:none;font-weight:700;font-size:13px;color:#000;'
                    'padding:8px 6px;text-align:center;white-space:nowrap;'
                    'border-top:1px solid #000;border-bottom:1px solid #000;')
+        # 필터 ▾: 수수료 매출 테이블(rev-filter)과 동일한 엑셀식 값 체크박스 팝업
+        filter_btn = ('<span class="cmb-filter-btn" data-col="{col}" '
+                      'onclick="cmbOpenFilter(this, event)">▾</span>')
         list_html = (
             '<style>'
             '#cmbSideTable tbody tr:hover td{background:#f5f5f5;}'
             '#cmbSideTable th:hover{background:#e4e4e4;}'
+            '.cmb-filter-btn{display:inline-block;margin-left:4px;color:#9aa4b0;cursor:pointer;}'
+            '.cmb-filter-btn:hover{color:#000;}'
+            '.cmb-filter-btn.cmb-filter-on{color:#000;font-weight:900;}'
+            '.cmb-filter-pop{position:absolute;z-index:30;background:#fff;border:1px solid #d8dde3;'
+            'border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.13);padding:8px 12px;'
+            'max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;min-width:150px;}'
+            '.cmb-filter-item{display:flex;align-items:center;gap:6px;font-size:0.85rem;'
+            'color:#111;white-space:nowrap;cursor:pointer;text-align:left;}'
             '</style>'
             f'<table id="cmbSideTable" class="portfolio-table" style="max-width:500px;margin:0 auto;">'
-            f'<colgroup><col style="width:64px;"><col style="width:150px;"><col></colgroup>'
+            f'<colgroup><col style="width:72px;"><col style="width:155px;"><col></colgroup>'
             f'<thead><tr>'
-            f'<th style="{th_base}" onclick="sortCmbTable(\'rank\')">Update <span id="cmbArr_rank" style="font-size:10px;">▲</span></th>'
-            f'<th style="{th_base}" onclick="sortCmbTable(\'group\')">Group <span id="cmbArr_group" style="font-size:10px;"></span></th>'
-            f'<th style="{th_base}" onclick="sortCmbTable(\'name\')">Data <span id="cmbArr_name" style="font-size:10px;"></span></th>'
+            f'<th style="{th_base}" onclick="sortCmbTable(\'rank\')">Update <span id="cmbArr_rank" style="font-size:10px;">▲</span>{filter_btn.format(col="rank")}</th>'
+            f'<th style="{th_base}" onclick="sortCmbTable(\'group\')">Group <span id="cmbArr_group" style="font-size:10px;"></span>{filter_btn.format(col="group")}</th>'
+            f'<th style="{th_base}" onclick="sortCmbTable(\'name\')">Data <span id="cmbArr_name" style="font-size:10px;"></span>{filter_btn.format(col="name")}</th>'
             f'</tr></thead>'
             f'<tbody>{rows_html}</tbody></table>'
         )
@@ -1932,23 +1946,84 @@ def _build_combined_chart_section():
                 return Number(v).toLocaleString(undefined, { maximumFractionDigits: 2 });
             }
 
-            function cmbSearchQuery() {
-                var inp = document.getElementById('cmbSeriesSearch');
-                return inp ? inp.value.trim().toLowerCase() : '';
+            // ── 엑셀식 칼럼 필터 (수수료 매출 rev-filter 패턴 이식, 검색창 대체) ──
+            // cmbFilters: col -> 허용 표시값 배열 (키 없음 = 전체 허용)
+            var cmbFilters = {};
+            function cmbRowVal(row, col) {
+                if (col === 'rank') return row.cells[0].textContent.trim();
+                if (col === 'group') return row.getAttribute('data-group') || '';
+                return row.getAttribute('data-name') || '';
             }
-
-            // 검색 필터를 DOM에 반영 (시리즈명 또는 그룹명 매칭 행만 표시).
-            // 3칼럼 정렬 테이블 전환으로 아코디언은 제거됨 — 숨김은 검색 필터만 담당.
-            function refreshCmbList() {
-                var q = cmbSearchQuery();
-                document.querySelectorAll('.cmb-series-row').forEach(function(row) {
-                    if (q === '') { row.style.display = ''; return; }
-                    var item = row.querySelector('.cmb-chart-item');
-                    var name = item ? (item.getAttribute('data-series') || '').toLowerCase() : '';
-                    var label = (row.getAttribute('data-group') || '').toLowerCase();
-                    row.style.display = (name.indexOf(q) !== -1 || label.indexOf(q) !== -1) ? '' : 'none';
+            function cmbRowPasses(row, skipCol) {
+                return ['rank', 'group', 'name'].every(function(c) {
+                    if (c === skipCol) return true;
+                    var f = cmbFilters[c];
+                    return !f || f.indexOf(cmbRowVal(row, c)) !== -1;
                 });
             }
+            function cmbApplyFilters() {
+                document.querySelectorAll('.cmb-series-row').forEach(function(row) {
+                    row.style.display = cmbRowPasses(row, null) ? '' : 'none';
+                });
+                ['rank', 'group', 'name'].forEach(function(c) {
+                    var btn = document.querySelector('.cmb-filter-btn[data-col="' + c + '"]');
+                    if (btn) btn.classList.toggle('cmb-filter-on', !!cmbFilters[c]);
+                });
+            }
+            function cmbCloseFilter() {
+                var p = document.getElementById('cmbFilterPop');
+                if (p) p.parentNode.removeChild(p);
+            }
+            window.cmbOpenFilter = function(btn, ev) {
+                ev.stopPropagation();
+                var col = btn.getAttribute('data-col');
+                var existing = document.getElementById('cmbFilterPop');
+                var reopen = !(existing && existing.dataset.col === col);
+                cmbCloseFilter();
+                if (!reopen) return;  // 같은 칼럼 ▾ 재클릭 = 닫기
+                var vals = [];
+                document.querySelectorAll('.cmb-series-row').forEach(function(row) {
+                    if (!cmbRowPasses(row, col)) return;  // 엑셀 자동필터: 타 칼럼 필터 적용 집합 기준
+                    var v = cmbRowVal(row, col);
+                    if (vals.indexOf(v) === -1) vals.push(v);
+                });
+                if (col === 'rank') {
+                    var rk = { Daily: 0, Weekly: 1, Monthly: 2 };
+                    vals.sort(function(a, b) { return (rk[a] || 0) - (rk[b] || 0); });
+                } else { vals.sort(); }
+                var cur = cmbFilters[col];
+                var inner = '<label class="cmb-filter-item"><input type="checkbox" id="cmbFAll"' +
+                    (!cur ? ' checked' : '') + ' onchange="cmbFilterAll(this, \\'' + col + '\\')"> (전체 선택)</label>';
+                vals.forEach(function(v) {
+                    var on = (!cur || cur.indexOf(v) !== -1) ? ' checked' : '';
+                    inner += '<label class="cmb-filter-item"><input type="checkbox" data-val="' +
+                        v.replace(/"/g, '&quot;') + '"' + on + ' onchange="cmbFilterVal(\\'' + col + '\\')"> ' + v + '</label>';
+                });
+                var pop = document.createElement('div');
+                pop.id = 'cmbFilterPop'; pop.className = 'cmb-filter-pop'; pop.dataset.col = col;
+                pop.onclick = function(e) { e.stopPropagation(); };
+                pop.innerHTML = inner;
+                var host = document.getElementById('cmbSideHost');
+                host.appendChild(pop);
+                var br = btn.getBoundingClientRect(), hr = host.getBoundingClientRect();
+                pop.style.left = Math.max(0, br.left - hr.left - 8) + 'px';
+                pop.style.top = (br.bottom - hr.top + 6) + 'px';
+            };
+            window.cmbFilterAll = function(box, col) {
+                document.getElementById('cmbFilterPop').querySelectorAll('input[data-val]').forEach(function(i) { i.checked = box.checked; });
+                if (box.checked) { delete cmbFilters[col]; } else { cmbFilters[col] = []; }
+                cmbApplyFilters();
+            };
+            window.cmbFilterVal = function(col) {
+                var items = document.getElementById('cmbFilterPop').querySelectorAll('input[data-val]');
+                var sel = [];
+                items.forEach(function(i) { if (i.checked) sel.push(i.getAttribute('data-val')); });
+                if (sel.length === items.length) { delete cmbFilters[col]; } else { cmbFilters[col] = sel; }
+                var all = document.getElementById('cmbFAll');
+                if (all) all.checked = sel.length === items.length;
+                cmbApplyFilters();
+            };
+            document.addEventListener('click', cmbCloseFilter);
 
             // 선택 카운터(검색창 아래 "● N개 선택") 재계산 — 중앙화 함수.
             // active 토글이 일어나는 모든 경로가 buildCmbChart()를 거치므로 거기서 호출.
@@ -2464,7 +2539,6 @@ def _build_combined_chart_section():
                 }
                 buildCmbChart();
             };
-            window.filterCmbSeries = function() { refreshCmbList(); };
             window.toggleCmbMA = function(slot, el) {
                 maActive[slot] = !maActive[slot];
                 el.classList.toggle('active', maActive[slot]);
@@ -2488,14 +2562,11 @@ def _build_combined_chart_section():
                 var ae = document.activeElement;
                 var tag = ae && ae.tagName;
                 if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (ae && ae.isContentEditable)) return;
-                var items = Array.prototype.slice.call(document.querySelectorAll('.cmb-chart-item'));
-                // 검색 중이면 필터 매칭(보이는) 항목 사이에서만 내비
-                if (cmbSearchQuery() !== '') {
-                    items = items.filter(function(el) {
+                var items = Array.prototype.slice.call(document.querySelectorAll('.cmb-chart-item'))
+                    .filter(function(el) {
                         var row = el.closest('tr');
-                        return !row || row.style.display !== 'none';
+                        return !row || row.style.display !== 'none';  // 필터 통과(보이는) 행만
                     });
-                }
                 if (items.length === 0) return;
                 e.preventDefault();
                 var activeIdx = -1;
@@ -2517,7 +2588,7 @@ def _build_combined_chart_section():
                 buildCmbChart();
             });
 
-            refreshCmbList();
+            cmbApplyFilters();
             updateCmbSortArrows();
             buildCmbChart();
         })();
@@ -2528,8 +2599,7 @@ def _build_combined_chart_section():
         <div class="category-section">
             <h2 class="category-title">DATA</h2>
             <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;justify-content:center;">
-                <div style="min-width:240px;">
-                    <input type="text" id="cmbSeriesSearch" placeholder="시리즈 검색..." oninput="filterCmbSeries()" autocomplete="off" style="font-family:inherit;font-size:13px;width:100%;box-sizing:border-box;padding:6px 10px;margin-bottom:4px;border:1px solid #d1d5db;border-radius:6px;background:#fff;color:#222;">
+                <div style="min-width:240px;position:relative;" id="cmbSideHost">
                     <div id="cmbSelCount" style="font-size:11px;color:#000;min-height:16px;margin-bottom:4px;padding-left:2px;"></div>
                     <div style="max-height:720px;overflow-y:auto;">{list_html}</div>
                 </div>
