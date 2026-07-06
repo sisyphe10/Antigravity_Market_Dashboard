@@ -28,6 +28,8 @@ CATEGORY_MAP = {
     'FRED_MACRO': 'MACRO US',
     'FRED_SECTOR': 'CREDIT & HOUSING US',
     # SiliconData Silicon Index (fetch_silicondata_index.py, 시리즈별 타입 분리)
+    # 국민연금 적립금 (fetch_nps_fund.py, 저빈도 연간+최신월 누적)
+    'NPS_FUND': 'MACRO KOREA',
     'SDLLMTK': 'COMMODITIES',
     'SDH100RT': 'COMMODITIES',
     'SD_RAM': 'COMMODITIES'

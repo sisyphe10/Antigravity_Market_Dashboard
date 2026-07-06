@@ -46,6 +46,8 @@ jobs:
             exit 0
           fi
           python execution/fetch_kofia_stats.py
+          # 국민연금 적립금 (data.go.kr odcloud, 같은 키) — 내부 graceful skip
+          python execution/fetch_nps_fund.py
 
       - name: Generate Dashboard
         if: env.KOFIA_SKIP != '1'
@@ -59,4 +61,4 @@ jobs:
         run: |
           bash scripts/safe_commit_push.sh \
             -m "Auto-update: KOFIA deposit/credit stats [skip ci]" \
-            -- kofia_stats.json index.html
+            -- kofia_stats.json index.html dataset.csv market.html
