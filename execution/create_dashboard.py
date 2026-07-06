@@ -1524,6 +1524,7 @@ def _build_combined_chart_section():
                 {'display': '수출금액 전년동월비',   'csv': '수출금액 전년동월비',   'color': '#00BFA5'},
                 {'display': '경상수지',              'csv': '경상수지',              'color': '#4DB6AC'},
                 {'display': '외환보유액',            'csv': '외환보유액',            'color': '#4DD0E1'},
+                {'display': '정기예금 잔액',         'csv': '정기예금 잔액',         'color': '#00574B'},
             ]},
             {'label': 'MACRO US', 'series': [
                 # FRED 미국 매크로 (fetch_fred_data.py; 월·분기 FRED_MACRO는 5년 임베드 창,

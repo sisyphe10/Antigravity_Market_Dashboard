@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """한국은행 ECOS 시계열 수집 → dataset.csv
 
-33종: 일별 금리 6 + 파생 2 (ECOS_RATE), 월별 매크로 13 (ECOS_MACRO),
+34종: 일별 금리 6 + 파생 2 (ECOS_RATE), 월별 매크로 14 (ECOS_MACRO),
 신용·부동산 11 + 파생 1 (ECOS_SECTOR).
 
 - 키: env ECOS_API_KEY 우선, 없으면 로컬 .secrets 파일 폴백.
@@ -70,6 +70,7 @@ SERIES = [
     dict(name='수출금액 전년동월비',   stat='901Y118', cycle='M', items=('T002',),   dtype='ECOS_MACRO', backfill='202101', transform='yoy', nd=2),
     dict(name='경상수지',              stat='301Y013', cycle='M', items=('000000',), dtype='ECOS_MACRO', backfill='202101', scale=0.01, nd=1),   # 백만달러→억달러
     dict(name='외환보유액',            stat='732Y001', cycle='M', items=('99',),     dtype='ECOS_MACRO', backfill='202101', scale=1e-5, nd=1),   # 천달러→억달러
+    dict(name='정기예금 잔액',         stat='104Y015', cycle='M', items=('BDAA31',), dtype='ECOS_MACRO', backfill='202101', scale=0.001, nd=1),  # 예금은행 말잔, 십억원→조원
     # ---- 신용·부동산 (ECOS_SECTOR) → CREDIT & HOUSING ----
     dict(name='은행 대출금리 (신규취급)',       stat='121Y006', cycle='M', items=('BECBLA01',), dtype='ECOS_SECTOR', backfill='202101', nd=2),
     dict(name='은행 저축성수신금리 (신규취급)', stat='121Y002', cycle='M', items=('BEABAA2',),  dtype='ECOS_SECTOR', backfill='202101', nd=2),
