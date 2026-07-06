@@ -434,6 +434,8 @@ async def _run_source_job(
     """소스 1건 본 로직. fetch → format → 발송 → commit_state.
 
     retry_count=0=정기, 1+=재시도. retry 정책은 sources.json 의 retry.count / interval_min.
+    중간 실패는 로그만 남기고 조용히 재시도하며, 텔레그램 경보는 재시도 한도
+    소진(최종 실패) 시 1회만 발송한다.
     """
     cfg = _load_source_config(source_name)
     if not cfg:
@@ -447,7 +449,6 @@ async def _run_source_job(
     retry_interval_min = int(retry_cfg.get('interval_min', 30))
 
     now_str = datetime.datetime.now(KST).strftime('%Y-%m-%d %H:%M')
-    retry_prefix = f"🔁 재시도 {retry_count}/{max_retries} " if retry_count > 0 else ""
 
     try:
         from sources import load_adapter
@@ -512,31 +513,28 @@ async def _run_source_job(
 
     except Exception as e:
         logging.error(f"{source_name} job failed (retry={retry_count}): {e}")
-        will_retry = retry_count < max_retries
-        retry_note = (
-            f"\n\n{retry_interval_min}분 뒤 자동 재시도 (시도 {retry_count + 1}/{max_retries})"
-            if will_retry else
-            "\n\n재시도 한도 초과. 수동 점검 필요."
-        )
-        err_msg = (
-            f"⚠️ <b>[{label}] {retry_prefix}수집/전송 오류</b>\n"
-            f"{now_str}\n\n"
-            f"{_html.escape(str(e))}"
-            f"{retry_note}"
-        )
-        for chat_id in SUBSCRIBERS:
-            try:
-                await context.bot.send_message(chat_id=chat_id, text=err_msg, parse_mode='HTML')
-            except Exception as send_err:
-                logging.error(f"{source_name} error notify 전송 실패: {send_err}")
 
-        if will_retry:
+        if retry_count < max_retries:
+            # 중간 실패: 알림 없이 조용히 재시도 예약 (경보는 최종 실패 시 1회만).
             context.job_queue.run_once(
                 _source_retry_job,
                 when=retry_interval_min * 60,
                 data={'source_name': source_name, 'retry_count': retry_count + 1},
                 name=f'{source_name}_retry',
             )
+            return
+
+        err_msg = (
+            f"⚠️ <b>[{label}] 수집/전송 오류</b>\n"
+            f"{now_str}\n\n"
+            f"{_html.escape(str(e))}\n\n"
+            f"총 {max_retries + 1}회 시도 모두 실패 (재시도 소진). 수동 점검 필요."
+        )
+        for chat_id in SUBSCRIBERS:
+            try:
+                await context.bot.send_message(chat_id=chat_id, text=err_msg, parse_mode='HTML')
+            except Exception as send_err:
+                logging.error(f"{source_name} error notify 전송 실패: {send_err}")
 
 
 def _make_source_job(source_name: str):
