@@ -1715,10 +1715,7 @@ def _build_combined_chart_section():
                 f'<td style="{cell_base}text-align:center;white-space:nowrap;font-size:11px;'
                 f'text-transform:uppercase;letter-spacing:0.3px;">{group_label}</td>'
                 f'<td class="cmb-chart-item{active}" data-series="{display_esc}"{tooltip_attr} '
-                f'style="{cell_base}text-align:center;position:relative;">'
-                f'<div class="cmb-color-bar" style="position:absolute;left:6px;top:50%;'
-                f'transform:translateY(-50%);width:4px;height:18px;'
-                f'border-radius:2px;"></div>'
+                f'style="{cell_base}text-align:center;">'
                 f'{display_esc}</td></tr>\n'
             )
 
@@ -1732,7 +1729,6 @@ def _build_combined_chart_section():
                    'border-top:1px solid #000;border-bottom:1px solid #000;')
         list_html = (
             '<style>'
-            '.cmb-chart-item:not(.active) .cmb-color-bar{display:none;}'
             '#cmbSideTable tbody tr:hover td{background:#f5f5f5;}'
             '#cmbSideTable th:hover{background:#e4e4e4;}'
             '</style>'
@@ -1968,12 +1964,23 @@ def _build_combined_chart_section():
                 updateCmbSortArrows();
             };
 
+            // 선택 표시: 행 전체 배경을 해당 시리즈 차트 색의 옅은 틴트(14%)로 하이라이트.
+            // 인라인 스타일이라 tr:hover CSS보다 우선 — 선택 행은 hover에 안 씻김.
+            function hexToTint(hex) {
+                var m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+                if (!m) return 'rgba(0,0,0,0.10)';
+                var n = parseInt(m[1], 16);
+                return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',0.14)';
+            }
             function applyMarkerColors() {
                 document.querySelectorAll('.cmb-chart-item').forEach(function(el) {
-                    var bar = el.querySelector('.cmb-color-bar');
-                    if (!bar) return;
+                    var row = el.closest('tr');
+                    if (!row) return;
                     var idx = cmbClickOrder.indexOf(el.getAttribute('data-series'));
-                    bar.style.background = idx >= 0 ? colorForIndex(idx) : '';
+                    var tint = idx >= 0 ? hexToTint(colorForIndex(idx)) : '';
+                    Array.prototype.forEach.call(row.cells, function(td) {
+                        td.style.background = tint;
+                    });
                 });
             }
 
