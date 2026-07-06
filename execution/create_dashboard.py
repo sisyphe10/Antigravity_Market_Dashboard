@@ -6046,7 +6046,7 @@ def _build_contribution_section():
     <div class="category-section" style="max-width:1800px;margin:0 auto;">
       <h2 class="category-title">기여도</h2>
       <div id="contribLoading" style="text-align:center;color:#888;padding:40px;">로딩 중...</div>
-      <div id="contribBody" style="display:none;">
+      <div id="contribBody" style="display:none;position:relative;">
         <div id="contribPfToggle" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;"></div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
           <span style="color:#444;font-size:14px;font-weight:600;">기간</span>
@@ -6088,7 +6088,100 @@ def _build_contribution_section():
       .contrib-flt.active{background:#111;color:#fff;border-color:#111;}
     </style>
     <script>
-    var CONTRIB_DATA=null, contribPf=null, contribSortKey='contrib', contribSortDir=-1, contribDhOnly=false;
+    var CONTRIB_DATA=null, contribPf=null, contribDhOnly=false;
+    // 엑셀식 정렬·필터 (매출 탭 rev-* 패턴 재사용, 테이블 2개: stock/sector). 포트 전환 시 필터 리셋.
+    function ctbNum(v){return (v>=0?'+':'')+Math.round(v).toLocaleString();}
+    var CTB_TBL={
+      stock:{sort:{key:'contrib',dir:-1}, filters:{}, cols:[
+        {key:'sector', name:'업종',  disp:function(r){return '<span style="color:#666;">'+r.sector+'</span>';}, flt:function(r){return r.sector;}, val:function(r){return r.sector;}},
+        {key:'name',   name:'종목',  disp:function(r){return r.name;}, flt:function(r){return r.name;}, val:function(r){return r.name;}},
+        {key:'start',  name:'개시일', disp:function(r){return '<span style="color:#666;">'+r.start+'</span>';}, flt:function(r){return r.start;}, val:function(r){return r.start;}},
+        {key:'end',    name:'종료일', disp:function(r){return '<span style="color:#666;">'+(r.end||'')+'</span>';}, flt:function(r){return r.end||'';}, val:function(r){return r.end||'';}},
+        {key:'contrib',name:'기여도', disp:function(r){return cbp(r.contrib);}, flt:function(r){return ctbNum(r.contrib);}, val:function(r){return r.contrib;}},
+        {key:'owner',  name:'구분',  disp:function(r){return r.owner?'<span class="dh-pill">'+r.owner+'</span>':'';}, flt:function(r){return r.owner||'';}, val:function(r){return r.owner||'';}}
+      ]},
+      sector:{sort:{key:'contrib',dir:-1}, filters:{}, cols:[
+        {key:'sector', name:'업종',  disp:function(r){return r.sector;}, flt:function(r){return r.sector;}, val:function(r){return r.sector;}},
+        {key:'contrib',name:'기여도', disp:function(r){return cbp(r.contrib);}, flt:function(r){return ctbNum(r.contrib);}, val:function(r){return r.contrib;}}
+      ]}
+    };
+    var ctbRows={stock:[], sector:[]};
+    function ctbColByKey(t,k){var cs=CTB_TBL[t].cols; for(var i=0;i<cs.length;i++){if(cs[i].key===k)return cs[i];} return null;}
+    function ctbPasses(t,r,skipKey){
+      return CTB_TBL[t].cols.every(function(c){
+        if(c.key===skipKey) return true;
+        var f=CTB_TBL[t].filters[c.key];
+        return !f||f.indexOf(String(c.flt(r)))!==-1;
+      });
+    }
+    function ctbSortClick(th){
+      var t=th.dataset.tbl,k=th.dataset.col,s=CTB_TBL[t].sort;
+      if(s.key===k){s.dir=-s.dir;}else{s.key=k;s.dir=(k==='contrib')?-1:1;}
+      renderContribution();
+    }
+    function ctbSorted(t,arr){
+      var s=CTB_TBL[t].sort;
+      if(!s.key) return arr;
+      var c=ctbColByKey(t,s.key),dir=s.dir;
+      return arr.slice().sort(function(a,b){var va=c.val(a),vb=c.val(b); if(va<vb)return -dir; if(va>vb)return dir; return 0;});
+    }
+    function ctbHead(t){
+      var s=CTB_TBL[t].sort;
+      return '<tr>'+CTB_TBL[t].cols.map(function(c){
+        var arrow=s.key===c.key?(s.dir===1?' ▲':' ▼'):'';
+        var on=CTB_TBL[t].filters[c.key]?' rev-filter-on':'';
+        return '<th class="rev-th" data-tbl="'+t+'" data-col="'+c.key+'" onclick="ctbSortClick(this)">'+c.name+arrow+'<span class="rev-filter-btn'+on+'" data-tbl="'+t+'" data-col="'+c.key+'" onclick="ctbOpenFilter(this, event)">▾</span></th>';
+      }).join('')+'</tr>';
+    }
+    function ctbCloseFilter(){var p=document.getElementById('ctbFilterPop'); if(p){p.parentNode.removeChild(p);}}
+    function ctbOpenFilter(btn,ev){
+      ev.stopPropagation();
+      var t=btn.dataset.tbl,k=btn.dataset.col;
+      var existing=document.getElementById('ctbFilterPop');
+      var reopen=!(existing&&existing.dataset.col===k&&existing.dataset.tbl===t);
+      ctbCloseFilter();
+      if(!reopen){return;}  // 같은 칼럼 ▾ 재클릭 = 닫기
+      var c=ctbColByKey(t,k),vals=[];
+      // 고유값 목록: 다른 칼럼 필터가 적용된 집합 기준 (엑셀 자동필터 방식)
+      ctbRows[t].forEach(function(r){
+        if(!ctbPasses(t,r,k)){return;}
+        var v=String(c.flt(r));
+        if(vals.indexOf(v)===-1){vals.push(v);}
+      });
+      vals.sort();
+      var cur=CTB_TBL[t].filters[k];
+      var inner='<label class="rev-filter-item"><input type="checkbox" id="ctbFAll"'+(!cur?' checked':'')+' onchange="ctbFilterAll(this)"> (전체 선택)</label>';
+      vals.forEach(function(v){
+        var on=(!cur||cur.indexOf(v)!==-1)?' checked':'';
+        inner+='<label class="rev-filter-item"><input type="checkbox" data-val="'+v.replace(/"/g,'&quot;')+'"'+on+' onchange="ctbFilterVal(this)"> '+(v===''?'(공란)':v)+'</label>';
+      });
+      var pop=document.createElement('div');
+      pop.id='ctbFilterPop'; pop.className='rev-filter-pop'; pop.dataset.col=k; pop.dataset.tbl=t;
+      pop.onclick=function(e){e.stopPropagation();};
+      pop.innerHTML=inner;
+      var host=document.getElementById('contribBody');
+      host.appendChild(pop);
+      var br=btn.getBoundingClientRect(),hr=host.getBoundingClientRect();
+      pop.style.left=Math.max(0,br.left-hr.left-8)+'px';
+      pop.style.top=(br.bottom-hr.top+6)+'px';
+    }
+    function ctbFilterAll(box){
+      var pop=document.getElementById('ctbFilterPop'),t=pop.dataset.tbl,k=pop.dataset.col;
+      var items=pop.querySelectorAll('input[data-val]');
+      for(var i=0;i<items.length;i++){items[i].checked=box.checked;}
+      if(box.checked){delete CTB_TBL[t].filters[k];}else{CTB_TBL[t].filters[k]=[];}
+      renderContribution();
+    }
+    function ctbFilterVal(box){
+      var pop=document.getElementById('ctbFilterPop'),t=pop.dataset.tbl,k=pop.dataset.col;
+      var items=pop.querySelectorAll('input[data-val]'),sel=[];
+      for(var i=0;i<items.length;i++){if(items[i].checked){sel.push(items[i].dataset.val);}}
+      if(sel.length===items.length){delete CTB_TBL[t].filters[k];}else{CTB_TBL[t].filters[k]=sel;}
+      var all=document.getElementById('ctbFAll');
+      if(all){all.checked=sel.length===items.length;}
+      renderContribution();
+    }
+    document.addEventListener('click', ctbCloseFilter);
     async function loadContribution(){
       if(CONTRIB_DATA) return;
       try{
@@ -6107,6 +6200,7 @@ def _build_contribution_section():
     }
     function contribSetPf(pf){
       contribPf=pf;
+      CTB_TBL.stock.filters={}; CTB_TBL.sector.filters={}; ctbCloseFilter();  // 포트 전환 = 값 집합 변경 → 필터 리셋
       document.querySelectorAll('.contrib-pf-btn').forEach(function(b){
         var on=b.dataset.pf===pf;
         b.style.background=on?'#dc2626':'#fff'; b.style.color=on?'#fff':'#444'; b.style.borderColor=on?'#dc2626':'#d1d5db';
@@ -6132,7 +6226,6 @@ def _build_contribution_section():
       return prArr.map(function(pr){var kd=Math.abs(pr)<1e-12?1:Math.log(1+pr)/pr; return kd/k;});
     }
     function cbp(v){var c=v>=0?'contrib-pos':'contrib-neg'; return '<span class="'+c+'">'+(v>=0?'+':'')+Math.round(v).toLocaleString()+'</span>';}
-    function contribSort(key){ if(contribSortKey===key) contribSortDir*=-1; else {contribSortKey=key; contribSortDir=(key==='contrib')?-1:1;} renderContribution(); }
     function renderContribution(){
       if(!CONTRIB_DATA||!contribPf) return;
       var d=CONTRIB_DATA.portfolios[contribPf], dates=d.dates;
@@ -6155,32 +6248,26 @@ def _build_contribution_section():
           tot+=sm; sectors[st.sector]=(sectors[st.sector]||0)+sm;
         });
       }
-      rows.sort(function(a,b){var av=a[contribSortKey],bv=b[contribSortKey]; if(typeof av==='string') return contribSortDir*av.localeCompare(bv,'ko'); return contribSortDir*(av-bv);});
-      var shown=contribDhOnly?rows.filter(function(r){return r.owner==='DH';}):rows;
+      ctbRows.stock=rows;
+      var sarr=Object.keys(sectors).map(function(k){return {sector:k,contrib:sectors[k]};});
+      ctbRows.sector=sarr;
+      // 종목별: 칼럼 필터 + DH 퀵버튼 AND 적용, 합계는 표시 집합 기준 재계산
+      var shown=ctbSorted('stock',rows.filter(function(r){return ctbPasses('stock',r,null)&&(!contribDhOnly||r.owner==='DH');}));
       var shownSum=0; shown.forEach(function(r){shownSum+=r.contrib;});
-      function sarrow(k){return contribSortKey===k?(contribSortDir<0?' ▾':' ▴'):'';}
-      var h='<table class="contrib-tbl"><thead><tr>'
-        +'<th onclick="contribSort(\\'sector\\')">업종'+sarrow('sector')+'</th>'
-        +'<th onclick="contribSort(\\'name\\')">종목'+sarrow('name')+'</th>'
-        +'<th onclick="contribSort(\\'start\\')">개시일'+sarrow('start')+'</th>'
-        +'<th onclick="contribSort(\\'end\\')">종료일'+sarrow('end')+'</th>'
-        +'<th onclick="contribSort(\\'contrib\\')">기여도'+sarrow('contrib')+'</th>'
-        +'<th onclick="contribSort(\\'owner\\')">구분'+sarrow('owner')+'</th></tr></thead><tbody>';
+      var h='<table class="contrib-tbl"><thead>'+ctbHead('stock')+'</thead><tbody>';
       if(!shown.length){ h+='<tr><td colspan="6" style="color:#888;padding:18px;">해당 종목 없음</td></tr>'; }
       shown.forEach(function(r){
-        h+='<tr><td style="color:#666;">'+r.sector+'</td>'
-          +'<td>'+r.name+'</td>'
-          +'<td style="color:#666;">'+r.start+'</td>'
-          +'<td style="color:#666;">'+(r.end||'')+'</td>'
-          +'<td>'+cbp(r.contrib)+'</td>'
-          +'<td>'+(r.owner?'<span class="dh-pill">'+r.owner+'</span>':'')+'</td></tr>';
+        h+='<tr>'+CTB_TBL.stock.cols.map(function(c){return '<td>'+c.disp(r)+'</td>';}).join('')+'</tr>';
       });
       h+='</tbody><tfoot><tr><td colspan="4">'+(contribDhOnly?'DH 합계':'합계')+'</td><td>'+cbp(shownSum)+'</td><td></td></tr></tfoot></table>';
       document.getElementById('contribStockTable').innerHTML=h;
-      var sarr=Object.keys(sectors).map(function(k){return {sector:k,contrib:sectors[k]};}).sort(function(a,b){return b.contrib-a.contrib;});
-      var sh='<table class="contrib-tbl"><thead><tr><th>업종</th><th>기여도</th></tr></thead><tbody>';
-      sarr.forEach(function(r){ sh+='<tr><td>'+r.sector+'</td><td>'+cbp(r.contrib)+'</td></tr>'; });
-      sh+='</tbody><tfoot><tr><td>합계</td><td>'+cbp(tot)+'</td></tr></tfoot></table>';
+      // 업종별: 자체 칼럼 필터, 합계도 표시 집합 기준 재계산
+      var shown2=ctbSorted('sector',sarr.filter(function(r){return ctbPasses('sector',r,null);}));
+      var secSum=0; shown2.forEach(function(r){secSum+=r.contrib;});
+      var sh='<table class="contrib-tbl"><thead>'+ctbHead('sector')+'</thead><tbody>';
+      if(!shown2.length){ sh+='<tr><td colspan="2" style="color:#888;padding:18px;">해당 업종 없음</td></tr>'; }
+      shown2.forEach(function(r){ sh+='<tr>'+CTB_TBL.sector.cols.map(function(c){return '<td>'+c.disp(r)+'</td>';}).join('')+'</tr>'; });
+      sh+='</tbody><tfoot><tr><td>합계</td><td>'+cbp(secSum)+'</td></tr></tfoot></table>';
       document.getElementById('contribSectorTable').innerHTML=sh;
     }
     </script>
