@@ -379,6 +379,8 @@ function buildScatter(){
       g.fillStyle='rgba(37,99,235,0.05)'; g.fillRect(cx,cy,a.right-cx,a.bottom-cy);     // 우하 개선(단기+ 중기-)
       g.fillStyle='rgba(22,163,74,0.05)'; g.fillRect(a.left,cy,cx-a.left,a.bottom-cy);  // 좌하 소외(약세=녹색)
       g.strokeStyle='#cbd5e1'; g.lineWidth=1; g.beginPath(); g.moveTo(cx,a.top); g.lineTo(cx,a.bottom); g.moveTo(a.left,cy); g.lineTo(a.right,cy); g.stroke();
+      g.fillStyle='#111827'; g.font='600 13px Pretendard'; g.textAlign='left'; g.textBaseline='bottom';
+      g.fillText('RSI(1M) (%p)', 6, a.top-16);  // Y축 라벨 — 가로 표기, 차트와 여백
       g.fillStyle='#111827'; g.font='bold 14px Pretendard'; g.textBaseline='top';
       g.textAlign='right'; g.fillText('주도', a.right-8, a.top+6);
       g.textAlign='left';  g.fillText('둔화', a.left+8, a.top+6);
@@ -409,9 +411,9 @@ function buildScatter(){
     data:{ datasets:[{ data:pts.map(function(p){return {x:p.x,y:p.y,r:p.r,sector:p.sector,w:p.w,n:p.n};}),
       backgroundColor:pts.map(function(p){ var c=diverge((p.x+p.y)/2,15); return c.replace('rgb(','rgba(').replace(')',',0.55)'); }),
       borderColor:'#475569', borderWidth:1 }] },
-    options:{ maintainAspectRatio:false, animation:false,
-      scales:{ x:{min:-xa,max:xa,title:{display:true,text:'1W (%)',color:'#111827',font:{size:13,weight:'600'}},ticks:{color:'#111827'},grid:{color:'#f1f5f9'}},
-               y:{min:-ya,max:ya,title:{display:true,text:'RSI(1M) (%p)',color:'#111827',font:{size:13,weight:'600'}},ticks:{color:'#111827'},grid:{color:'#f1f5f9'}} },
+    options:{ maintainAspectRatio:false, animation:false, layout:{padding:{top:36}},
+      scales:{ x:{min:-xa,max:xa,title:{display:true,text:'1W (%)',align:'end',color:'#111827',font:{size:13,weight:'600'}},ticks:{color:'#111827'},grid:{color:'#f1f5f9'}},
+               y:{min:-ya,max:ya,title:{display:false},ticks:{color:'#111827'},grid:{color:'#f1f5f9'}} },
       plugins:{ legend:{display:false},
         tooltip:{ displayColors:false, callbacks:{ label:function(c){ var d=c.raw; return d.sector+' · 종목 '+d.n+' · 시총 '+Math.round(d.w).toLocaleString()+'억 · 1W '+(d.x>0?'+':'')+Math.round(d.x)+'%, RSI '+(d.y>0?'+':'')+Math.round(d.y)+'%'; } } } }
     }, plugins:[quad] });
