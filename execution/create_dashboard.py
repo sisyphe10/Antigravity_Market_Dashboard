@@ -5658,7 +5658,6 @@ def create_fee_revenue_section():
     # 모든 레코드를 한 테이블에 펼쳐두고, 버튼으로 그룹 기준을 바꾸면 JS(revRender)가 재집계한다.
     head_html = f"""
         <div class="fee-wrapper rev-wrapper">
-            <div class="rev-views rev-views-top" id="revViewsHost"></div>
             {updated_html}
             <div class="rev-summary">
                 <span class="rev-sum-label">누적 매출</span>
@@ -5673,108 +5672,119 @@ def create_fee_revenue_section():
         var FEE_REVENUE = __PAYLOAD__;
         var REV_OPEN_KIND = {'삼성': '개방형', 'NH': '일반형', 'DB': '개방형', '한투': '지속형'};  // 개방형 계열 증권사별 명칭 (실질 동일)
         var REV_BROKER_ORDER = ['삼성', 'NH', 'DB', '한투'];
-        var REV_DIMS = [['quarter', '분기'], ['broker', '증권사'], ['product', '상품']];
-        var REV_ORD_SHADES = ['#1e40af', '#5277cc', '#8aa9e6'];  // 클릭 순서: 진한→연한 (순서 표시)
-        var revActiveDims = ['quarter', 'broker', 'product'];  // 기본: 3기준 모두 활성 (클릭 순서 누적, 엑셀 피벗 Rows 영역)
         function revFmtNum(n) { return Number(n).toLocaleString('ko-KR'); }        // 안쪽 셀: 숫자만
         function revFmtWon(n) { return Number(n).toLocaleString('ko-KR') + '원'; } // 합계 라인: 원
         function revFmtEok(won) { return Math.round(won / 1e8).toLocaleString('ko-KR') + '억'; }
         function revFmtPct(x) { return (x >= 0 ? '+' : '') + Math.round(x * 100) + '%'; }
-        function revProd(r) { return r.label || r.category; }
         function revKind(r) { return r.category === '개방형' ? (REV_OPEN_KIND[r.broker] || '개방형') : r.category; }  // 구분
         function revRound(r) { var m = /(\d+\s*[차호])/.exec(r.label || ''); return m ? m[1] : '-'; }               // 차수
-        function revUniq(list, f) { var o = []; list.forEach(function(r) { var v = f(r); if (o.indexOf(v) === -1) o.push(v); }); return o; }
         function revFmtQuarter(q) { var m = /^(\\d{4})-Q([1-4])$/.exec(q); return m ? m[1] + '년 ' + m[2] + '분기' : q; }
-        function revDimRaw(d, r) { return d === 'quarter' ? r.quarter : (d === 'broker' ? r.broker : revProd(r)); }
-        function revDimDisp(d, val) { return d === 'quarter' ? revFmtQuarter(val) : val; }
-        function revDimHead(d) { return d === 'quarter' ? '기간' : (d === 'broker' ? '증권사' : '상품'); }
-        function revDimSort(d, val) { return d === 'broker' ? REV_BROKER_ORDER.indexOf(val) : val; }
-        function revAmtSum(list) { return list.reduce(function(s, r) { return s + r.amount; }, 0); }
-        // 버튼 클릭: 그냥 클릭 = 단일 전환 / Ctrl·Shift+클릭 = 다중 누적(클릭 순서대로 추가, 재클릭 해제)
-        function revToggleDim(d, ev) {
-            var multi = ev && (ev.ctrlKey || ev.shiftKey || ev.metaKey);
-            if (!multi) {
-                revActiveDims = [d];
-            } else {
-                var i = revActiveDims.indexOf(d);
-                if (i === -1) { revActiveDims.push(d); }
-                else if (revActiveDims.length > 1) { revActiveDims.splice(i, 1); }
-            }
+        // ── 엑셀식 평면 테이블: 헤더 클릭 = 오름/내림 정렬 토글, ▾ = 값 체크박스 필터 ──
+        // 칼럼 순서: 기간/증권사/구분/차수/개시일/종료일/평균AUM/기간 수익률/수수료/합계
+        var REV_COLS = [
+            { key: 'quarter', name: '기간',   cls: 'rev-key',  disp: function(r) { return revFmtQuarter(r.quarter); }, val: function(r) { return r.quarter; } },
+            { key: 'broker',  name: '증권사', cls: 'rev-key',  disp: function(r) { return r.broker; },                 val: function(r) { var i = REV_BROKER_ORDER.indexOf(r.broker); return i === -1 ? 99 : i; } },
+            { key: 'kind',    name: '구분',   cls: 'rev-key',  disp: function(r) { return revKind(r); },               val: function(r) { return revKind(r); } },
+            { key: 'round',   name: '차수',   cls: 'rev-key',  disp: function(r) { return revRound(r); },              val: function(r) { var m = /(\d+)/.exec(revRound(r)); return m ? Number(m[1]) : -1; } },
+            { key: 'start',   name: '개시일', cls: 'rev-date', disp: function(r) { return r.start || ''; },            val: function(r) { return r.start || ''; } },
+            { key: 'end',     name: '종료일', cls: 'rev-date', disp: function(r) { return r.end || ''; },              val: function(r) { return r.end || ''; } },
+            { key: 'avgAum',  name: '평균AUM', cls: 'rev-amt', disp: function(r) { return r.avgAum != null ? revFmtEok(r.avgAum) : '-'; }, val: function(r) { return r.avgAum != null ? r.avgAum : -1; },
+              tip: function(r) { return r.aumN ? 'AUM 표본 ' + r.aumN + '영업일 단순평균' : ''; } },
+            { key: 'ret',     name: '기간 수익률', cls: 'rev-amt', disp: function(r) { return r.ret != null ? revFmtPct(r.ret) : '-'; }, val: function(r) { return r.ret != null ? r.ret : -999; } },
+            { key: 'amount',  name: '수수료', cls: 'rev-amt',  disp: function(r) { return revFmtNum(r.amount); },      val: function(r) { return r.amount; } },
+            { key: 'total',   name: '합계',   cls: 'rev-amt rev-rowtot', disp: function(r) { return revFmtNum(r.amount); }, val: function(r) { return r.amount; } }
+        ];
+        var revSortKey = null, revSortDir = 1;
+        var revFilters = {};  // colKey -> 선택된 표시값 배열 (키 없음 = 전체 허용)
+        function revColByKey(k) { for (var i = 0; i < REV_COLS.length; i++) { if (REV_COLS[i].key === k) return REV_COLS[i]; } return null; }
+        function revPasses(r, skipKey) {
+            return REV_COLS.every(function(c) {
+                if (c.key === skipKey) return true;
+                var f = revFilters[c.key];
+                return !f || f.indexOf(String(c.disp(r))) !== -1;
+            });
+        }
+        function revSortClick(th) {
+            var k = th.dataset.col;
+            if (revSortKey === k) { revSortDir = -revSortDir; } else { revSortKey = k; revSortDir = 1; }
             revRender();
         }
+        function revCloseFilter() { var p = document.getElementById('revFilterPop'); if (p) { p.parentNode.removeChild(p); } }
+        function revOpenFilter(btn, ev) {
+            ev.stopPropagation();
+            var k = btn.dataset.col;
+            var existing = document.getElementById('revFilterPop');
+            var reopen = !(existing && existing.dataset.col === k);
+            revCloseFilter();
+            if (!reopen) { return; }  // 같은 칼럼 ▾ 재클릭 = 닫기
+            var c = revColByKey(k);
+            // 고유값 목록: 다른 칼럼 필터가 적용된 집합 기준 (엑셀 자동필터 방식)
+            var vals = [];
+            FEE_REVENUE.records.forEach(function(r) {
+                if (!revPasses(r, k)) { return; }
+                var v = String(c.disp(r));
+                if (vals.indexOf(v) === -1) { vals.push(v); }
+            });
+            vals.sort();
+            var cur = revFilters[k];
+            var inner = '<label class="rev-filter-item"><input type="checkbox" id="revFAll" data-col="' + k + '"' + (!cur ? ' checked' : '') + ' onchange="revFilterAll(this)"> (전체 선택)</label>';
+            vals.forEach(function(v) {
+                var on = (!cur || cur.indexOf(v) !== -1) ? ' checked' : '';
+                inner += '<label class="rev-filter-item"><input type="checkbox" data-col="' + k + '" data-val="' + v.replace(/"/g, '&quot;') + '"' + on + ' onchange="revFilterVal(this)"> ' + (v === '' ? '(공란)' : v) + '</label>';
+            });
+            var pop = document.createElement('div');
+            pop.id = 'revFilterPop'; pop.className = 'rev-filter-pop'; pop.dataset.col = k;
+            pop.onclick = function(e) { e.stopPropagation(); };
+            pop.innerHTML = inner;
+            var host = document.querySelector('.rev-wrapper');
+            host.appendChild(pop);
+            var br = btn.getBoundingClientRect(), hr = host.getBoundingClientRect();
+            pop.style.left = Math.max(0, br.left - hr.left - 8) + 'px';
+            pop.style.top = (br.bottom - hr.top + 6) + 'px';
+        }
+        function revFilterAll(box) {
+            var k = box.dataset.col;
+            var items = document.getElementById('revFilterPop').querySelectorAll('input[data-val]');
+            for (var i = 0; i < items.length; i++) { items[i].checked = box.checked; }
+            if (box.checked) { delete revFilters[k]; } else { revFilters[k] = []; }
+            revRender();
+        }
+        function revFilterVal(box) {
+            var k = box.dataset.col;
+            var items = document.getElementById('revFilterPop').querySelectorAll('input[data-val]');
+            var sel = [];
+            for (var i = 0; i < items.length; i++) { if (items[i].checked) { sel.push(items[i].dataset.val); } }
+            if (sel.length === items.length) { delete revFilters[k]; } else { revFilters[k] = sel; }
+            var all = document.getElementById('revFAll');
+            if (all) { all.checked = sel.length === items.length; }
+            revRender();
+        }
+        document.addEventListener('click', revCloseFilter);
         function revRender() {
-            var dims = revActiveDims;
-            var recs = FEE_REVENUE.records;
-            var withDates = dims.indexOf('product') !== -1;
-            // 복합키(클릭 순서)로 그룹화
-            var groups = {}, order = [];
-            recs.forEach(function(r) {
-                var keyArr = dims.map(function(d) { return revDimRaw(d, r); });
-                var kk = keyArr.join('|#|');
-                if (!groups[kk]) { groups[kk] = { keyArr: keyArr, recs: [] }; order.push(kk); }
-                groups[kk].recs.push(r);
-            });
-            var rows = order.map(function(kk) { return groups[kk]; });
-            rows.sort(function(a, b) {
-                for (var i = 0; i < dims.length; i++) {
-                    var sa = revDimSort(dims[i], a.keyArr[i]), sb = revDimSort(dims[i], b.keyArr[i]);
-                    if (sa < sb) return -1; if (sa > sb) return 1;
-                }
-                return 0;
-            });
-            // 평균AUM/수익률은 가산 불가 지표 → 단일 레코드 그룹만 표시 (상이 상품·기간 혼합은 '-')
-            function revAvgAum(list) {
-                return (list.length === 1 && list[0].avgAum != null) ? list[0].avgAum : null;
+            var recs = FEE_REVENUE.records.filter(function(r) { return revPasses(r, null); });
+            if (revSortKey) {
+                var sc = revColByKey(revSortKey), dir = revSortDir;
+                recs = recs.slice().sort(function(a, b) {
+                    var va = sc.val(a), vb = sc.val(b);
+                    if (va < vb) return -dir; if (va > vb) return dir; return 0;
+                });
             }
-            function revRet(list) {
-                return (list.length === 1 && list[0].ret != null) ? list[0].ret : null;
-            }
-            // 본문 — 기간/증권사/구분/차수/수수료/개시일/종료일/합계/평균AUM/기간 수익률
-            var body = rows.map(function(g) {
-                var cells = dims.map(function(d, i) {
-                    if (d === 'product') {
-                        return '<td class="rev-key">' + revUniq(g.recs, revKind).join(' / ') + '</td>' +
-                               '<td class="rev-key">' + revUniq(g.recs, revRound).join(' / ') + '</td>';
-                    }
-                    return '<td class="rev-key">' + revDimDisp(d, g.keyArr[i]) + '</td>';
-                }).join('');
-                var amt = revAmtSum(g.recs);
-                cells += '<td class="rev-amt">' + revFmtNum(amt) + '</td>';
-                if (withDates) {
-                    var ss = g.recs.map(function(r) { return r.start || ''; });
-                    var ee = g.recs.map(function(r) { return r.end || ''; });
-                    var s0 = ss.every(function(x) { return x === ss[0]; }) ? ss[0] : '';
-                    var e0 = ee.every(function(x) { return x === ee[0]; }) ? ee[0] : '';
-                    cells += '<td class="rev-date">' + s0 + '</td><td class="rev-date">' + e0 + '</td>';
-                }
-                cells += '<td class="rev-amt rev-rowtot">' + revFmtNum(amt) + '</td>';
-                var ga = revAvgAum(g.recs), gr = revRet(g.recs);
-                var gn = (g.recs.length === 1 && g.recs[0].aumN) ? ' title="AUM 표본 ' + g.recs[0].aumN + '영업일 단순평균"' : '';
-                cells += '<td class="rev-amt"' + gn + '>' + (ga != null ? revFmtEok(ga) : '-') + '</td>';
-                cells += '<td class="rev-amt">' + (gr != null ? revFmtPct(gr) : '-') + '</td>';
-                return '<tr>' + cells + '</tr>';
+            var body = recs.map(function(r) {
+                return '<tr>' + REV_COLS.map(function(c) {
+                    var tip = c.tip ? c.tip(r) : '';
+                    return '<td class="' + c.cls + '"' + (tip ? ' title="' + tip + '"' : '') + '>' + c.disp(r) + '</td>';
+                }).join('') + '</tr>';
             }).join('');
-            // 합계 행 (기준 칼럼들 병합 — product 활성 시 구분+차수 2칸, 개시일/종료일·평균AUM·수익률 칸 공란)
-            var grandTotal = revAmtSum(recs);
-            var keySpan = dims.length + (withDates ? 1 : 0);
-            var totalCells = '<td class="rev-key" colspan="' + keySpan + '">합계</td>' +
-                '<td class="rev-amt">' + revFmtWon(grandTotal) + '</td>';
-            if (withDates) { totalCells += '<td class="rev-date"></td><td class="rev-date"></td>'; }
-            totalCells += '<td class="rev-amt">' + revFmtWon(grandTotal) + '</td><td class="rev-amt"></td><td class="rev-amt"></td>';
-            body += '<tr class="fee-row-total">' + totalCells + '</tr>';
-            // 상단 좌측 버튼 (활성 기준은 클릭 순서대로 진한→연한 배경)
-            var btns = REV_DIMS.map(function(b) {
-                var idx = revActiveDims.indexOf(b[0]);
-                var sty = idx !== -1 ? ' style="background:' + REV_ORD_SHADES[Math.min(idx, REV_ORD_SHADES.length - 1)] + ';color:#fff;"' : '';
-                return '<button class="rev-viewbtn' + (idx !== -1 ? ' active' : '') +
-                    '" data-rev-view="' + b[0] + '"' + sty + ' onclick="revToggleDim(this.dataset.revView, event)">' + b[1] + '</button>';
-            }).join('');
-            document.getElementById('revViewsHost').innerHTML = btns;
-            var dimHeads = dims.map(function(d) {
-                return d === 'product' ? '<th>구분</th><th>차수</th>' : '<th>' + revDimHead(d) + '</th>';
-            }).join('');
-            var dateHeads = withDates ? '<th>개시일</th><th>종료일</th>' : '';
-            var head = '<tr>' + dimHeads + '<th>수수료</th>' + dateHeads + '<th>합계</th><th>평균AUM</th><th>기간 수익률</th></tr>';
+            // 합계 행: 필터 적용된 집합 기준 재계산
+            var tot = recs.reduce(function(s, r) { return s + r.amount; }, 0);
+            body += '<tr class="fee-row-total"><td class="rev-key" colspan="8">합계</td>' +
+                '<td class="rev-amt">' + revFmtWon(tot) + '</td><td class="rev-amt">' + revFmtWon(tot) + '</td></tr>';
+            var head = '<tr>' + REV_COLS.map(function(c) {
+                var arrow = revSortKey === c.key ? (revSortDir === 1 ? ' ▲' : ' ▼') : '';
+                var on = revFilters[c.key] ? ' rev-filter-on' : '';
+                return '<th class="rev-th" data-col="' + c.key + '" onclick="revSortClick(this)">' + c.name + arrow +
+                    '<span class="rev-filter-btn' + on + '" data-col="' + c.key + '" onclick="revOpenFilter(this, event)">▾</span></th>';
+            }).join('') + '</tr>';
             document.getElementById('revTableHost').innerHTML =
                 '<table class="fee-table rev-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>';
         }
@@ -7160,11 +7170,13 @@ def create_dashboard():
         .rev-sum-value {{ font-size: 1.25rem; font-weight: 700; color: #111; font-variant-numeric: tabular-nums; }}
         .rev-updated {{ position: absolute; top: 20px; right: 24px; font-size: 0.78rem; color: #aaa; }}
         .rev-date {{ color: #555; font-size: 0.9rem; font-variant-numeric: tabular-nums; }}
-        .rev-views {{ display: inline-flex; gap: 5px; margin: 0; background: #fff; padding: 3px; border-radius: 999px; box-shadow: inset 0 0 0 1px #d8dde3; }}
-        .rev-views-top {{ position: absolute; top: 20px; left: 24px; }}
-        .rev-viewbtn {{ padding: 5px 14px; border: none; background: transparent; border-radius: 999px; font-size: 0.82rem; font-weight: 600; color: #555; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }}
-        .rev-viewbtn:hover {{ color: #1e40af; }}
-        .rev-viewbtn.active {{ color: #fff; background: #1e40af; }}
+        .rev-th {{ cursor: pointer; user-select: none; }}
+        .rev-th:hover {{ background: #f1f4f8; }}
+        .rev-filter-btn {{ display: inline-block; margin-left: 5px; color: #9aa4b0; cursor: pointer; }}
+        .rev-filter-btn:hover {{ color: #1e40af; }}
+        .rev-filter-btn.rev-filter-on {{ color: #1e40af; font-weight: 700; }}
+        .rev-filter-pop {{ position: absolute; z-index: 30; background: #fff; border: 1px solid #d8dde3; border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,0.13); padding: 8px 12px; max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; min-width: 140px; }}
+        .rev-filter-item {{ display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #111; white-space: nowrap; cursor: pointer; text-align: left; }}
         .rev-table {{ margin: 0 auto; }}
         .rev-table td, .rev-table th {{ white-space: nowrap; text-align: center !important; }}
         .rev-key {{ font-weight: 600; color: #111; }}
