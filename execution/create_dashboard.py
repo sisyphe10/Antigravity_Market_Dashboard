@@ -7020,20 +7020,20 @@ def create_dashboard():
         .lh-card {{ background: #fff; border-radius: 16px; padding: 18px 22px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border: 1.5px solid #d1d5db; width: min(620px, 94vw); aspect-ratio: 1 / 1; margin: 0 auto 26px auto; transition: transform 0.15s, box-shadow 0.15s; display: flex; flex-direction: column; }}
         .lh-card:hover {{ transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.10); }}
         .lh-card[hidden] {{ display: none; }}
-        .lh-head {{ display: flex; align-items: center; justify-content: space-between; flex: 0 0 auto; }}
+        .lh-head {{ display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }}
         .lh-tag {{ flex: 0 0 auto; min-width: 90px; padding: 4px 14px; background: #999; color: #fff; font-size: 0.72rem; font-weight: 700; border-radius: 999px; letter-spacing: 0.4px; text-align: center; white-space: nowrap; }}
-        .lh-bigchart {{ flex: 1 1 auto; min-height: 0; width: 100%; margin: 10px 0 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; }}
+        .lh-name {{ flex: 1 1 auto; font-size: 1.05rem; font-weight: 800; color: #000; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
+        .lh-bigchart {{ flex: 1 1 auto; min-height: 0; width: 100%; margin: 10px 0 8px; padding: 8px; border: 1px solid #000; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; }}
         .lh-bigchart svg {{ width: 100%; height: 100%; display: block; }}
         .lh-nochart {{ font-size: 1.15rem; color: #000; text-align: center; line-height: 1.6; padding: 0 12px; }}
-        .lh-meta {{ flex: 0 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 10px; margin: 6px 0 8px; cursor: pointer; }}
+        .lh-meta {{ flex: 0 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px 8px; margin: 0 0 6px; cursor: pointer; }}
         .lh-meta .lh-m {{ text-align: center; }}
-        .lh-meta .lh-mk {{ font-size: 0.7rem; color: #666; letter-spacing: 0.3px; }}
-        .lh-meta .lh-mv {{ font-size: 0.98rem; font-weight: 700; color: #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
-        .lh-text {{ flex: 0 0 auto; font-size: 0.85rem; color: #333; line-height: 1.4; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
+        .lh-meta .lh-mk {{ font-size: 0.7rem; color: #000; letter-spacing: 0.3px; }}
+        .lh-meta .lh-mv {{ font-size: 0.92rem; font-weight: 700; color: #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
         @media (max-width: 640px) {{
             .lh-card {{ aspect-ratio: auto; }}
             .lh-bigchart {{ min-height: 220px; }}
-            .lh-meta {{ grid-template-columns: repeat(2, 1fr); }}
+            .lh-meta .lh-mv {{ font-size: 0.78rem; }}
         }}
         .lh-shuffle {{ flex: 0 0 56px; width: 56px; background: none; border: none; cursor: pointer; font-size: 2.1rem; opacity: 0.9; padding: 8px 0; transition: opacity 0.15s, transform 0.2s; line-height: 1; color: inherit; text-align: center; display: inline-block; }}
         .lh-shuffle:hover {{ opacity: 1; transform: rotate(20deg); }}
@@ -7063,18 +7063,17 @@ def create_dashboard():
         <div id="landing-card" class="lh-card" hidden>
             <div class="lh-head">
                 <span class="lh-tag">—</span>
+                <span class="lh-name" data-m="name">—</span>
                 <button class="lh-shuffle" type="button" title="다시 뽑기" aria-label="다시 뽑기">🎲</button>
             </div>
             <div class="lh-bigchart"><span class="lh-spark" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"></span></div>
             <div class="lh-meta">
                 <div class="lh-m"><div class="lh-mk">섹터</div><div class="lh-mv" data-m="sector">—</div></div>
-                <div class="lh-m"><div class="lh-mk">종목</div><div class="lh-mv" data-m="name">—</div></div>
                 <div class="lh-m"><div class="lh-mk">기간</div><div class="lh-mv" data-m="period">—</div></div>
                 <div class="lh-m"><div class="lh-mk">수치</div><div class="lh-mv" data-m="latest">—</div></div>
                 <div class="lh-m"><div class="lh-mk">변동폭</div><div class="lh-mv" data-m="chg">—</div></div>
                 <div class="lh-m"><div class="lh-mk">수익률</div><div class="lh-mv" data-m="ret">—</div></div>
             </div>
-            <div class="lh-text">—</div>
             <hr class="lh-divider">
             <div class="lh-quote-row">
                 <span class="lh-quote-text">—</span>
@@ -7090,11 +7089,10 @@ def create_dashboard():
         var quoteRow = card.querySelector('.lh-quote-row');
         var tagEl = card.querySelector('.lh-tag');
         var sparkEl = card.querySelector('.lh-spark');
-        var textEl = card.querySelector('.lh-text');
         var metaEl = card.querySelector('.lh-meta');
         var shuffleBtn = card.querySelector('.lh-shuffle');
         var quoteTextEl = quoteRow.querySelector('.lh-quote-text');
-        function metaCell(k) {{ return metaEl.querySelector('[data-m="' + k + '"]'); }}
+        function metaCell(k) {{ return card.querySelector('[data-m="' + k + '"]'); }}
 
         var slots = [];
         var quotes = [];
@@ -7175,17 +7173,12 @@ def create_dashboard():
             var color = slot.color || '#999';
             tagEl.textContent = slot.category || '';
             tagEl.style.backgroundColor = color;
-            var html = escapeHtml(slot.text || '').replace(/\(([^)]+)\)/g, function(m, inner) {{
-                if (/^[월화수목금토일]$/.test(inner)) return m;
-                return '(<b><u>' + inner + '</u></b>)';
-            }});
-            textEl.innerHTML = html;
             if (slot.spark && slot.spark.series && slot.spark.series.length >= 2) {{
                 renderSpark(slot.spark);
                 metaEl.style.display = '';
             }} else {{
-                // 차트 없는 슬롯(브레드스 등): 차트 영역에 텍스트 크게, 메타 숨김
-                sparkEl.innerHTML = '<div class="lh-nochart">' + html + '</div>';
+                // 안전망: 차트 데이터 없는 슬롯이 섞여 들어온 경우 텍스트만
+                sparkEl.innerHTML = '<div class="lh-nochart">' + escapeHtml(slot.text || '') + '</div>';
                 metaEl.style.display = 'none';
             }}
             renderMeta(slot);
@@ -7253,6 +7246,8 @@ def create_dashboard():
         ]).then(function(results) {{
             var hl = results[0];
             slots = (hl && Array.isArray(hl.slots)) ? hl.slots : [];
+            // 차트 데이터 위주: spark 있는 슬롯만 회전 풀에 (텍스트 전용 슬롯 제외)
+            slots = slots.filter(function(s) {{ return s.spark && s.spark.series && s.spark.series.length >= 2; }});
             if (hl && hl.updated_at) card.title = 'Updated ' + hl.updated_at;
             quotes = Array.isArray(results[1]) ? results[1] : [];
             var slot = pickSlot();
