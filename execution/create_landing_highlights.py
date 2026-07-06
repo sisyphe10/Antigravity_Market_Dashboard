@@ -31,6 +31,8 @@ CATEGORY_COLORS = {
     'Rate':      '#2d7a3a',
     'Sector':    '#2d7a3a',
     'Liquidity': '#2d7a3a',
+    'Macro':     '#2d7a3a',
+    'AI':        '#2d7a3a',
     'Alert':     '#c2410c',
     'Universe':  '#6B21A8',
     'SEIBro':    '#0369a1',
@@ -212,7 +214,11 @@ def load_featured_latest(path):
     return [r for r in rows if r.get('d') == latest], latest
 
 
-def slot(sid, category, tone, text, href, spark_values=None, trend_idx=8):
+def slot(sid, category, tone, text, href, spark_values=None, trend_idx=8,
+         name=None, unit='', value_kind='level', dates=None):
+    """신규 메타(name/unit/value_kind/period)는 옵션 — 위젯이 있으면 카드 메타표에,
+    없으면 구형 텍스트 폴백으로 렌더 (구/신 JSON 어느 조합도 안전).
+    수치/변동폭/수익률은 위젯 JS가 spark.series에서 계산."""
     s = {
         'id': sid,
         'category': category,
@@ -221,14 +227,55 @@ def slot(sid, category, tone, text, href, spark_values=None, trend_idx=8):
         'text': text,
         'href': href,
     }
+    if name:
+        s['name'] = name
+        s['unit'] = unit
+        s['value_kind'] = value_kind  # 'pct'면 수익률 계산 무의미(이미 %) → 위젯이 변동폭(%p)만
     if spark_values and len(spark_values) >= 2:
         s['spark'] = {
             'series': [round(v, 4) for v in spark_values],
             'trend': classify_trend(spark_values, base_idx=trend_idx),
         }
+        if dates and len(dates) == len(spark_values):
+            s['period'] = [str(dates[0]), str(dates[-1])]
     else:
         s['spark'] = None
     return s
+
+
+# ── DATA 탭 신규 시리즈 (2026-07-06 확장) — 제네릭 레지스트리 빌더 ──
+# (id, category, dtype, 데이터명(dataset.csv 제품명), 단위, value_kind)
+DATA_SERIES = [
+    ('ds-deposit',  'Liquidity', 'ECOS_MACRO',    '정기예금 잔액',         '조원', 'level'),
+    ('ds-nps',      'Liquidity', 'NPS_FUND',      '국민연금 적립금',       '조원', 'level'),
+    ('ds-retire',   'Liquidity', 'KOSIS_PENSION', '퇴직연금 적립금',       '조원', 'level'),
+    ('ds-dept',     'Macro',     'KOSIS_MACRO',   '백화점 매출증감률',     '%',    'pct'),
+    ('ds-mart',     'Macro',     'KOSIS_MACRO',   '대형마트 매출증감률',   '%',    'pct'),
+    ('ds-cvs',      'Macro',     'KOSIS_MACRO',   '편의점 매출증감률',     '%',    'pct'),
+    ('ds-ssm',      'Macro',     'KOSIS_MACRO',   'SSM 매출증감률',        '%',    'pct'),
+    ('ds-online',   'Macro',     'KOSIS_MACRO',   '온라인쇼핑 거래액',     '조원', 'level'),
+    ('ds-unemp',    'Macro',     'KOSIS_MACRO',   '실업률 (한국)',         '%',    'pct'),
+    ('ds-capex',    'Macro',     'KOSIS_MACRO',   '설비투자지수',          '',     'level'),
+    ('ds-unsold',   'Macro',     'KOSIS_SECTOR',  '미분양주택 (전국)',     '호',   'level'),
+    ('ds-allprod',  'Macro',     'ECOS_MACRO',    '전산업생산 전년동월비', '%',    'pct'),
+    ('ds-llmtoken', 'AI',        'SDLLMTK',       'LLM Token Index',       '$/1M tokens', 'level'),
+    ('ds-h100',     'AI',        'SDH100RT',      'H100 GPU Rental',       '$/hr', 'level'),
+    ('ds-ram',      'AI',        'SD_RAM',        'RAM Index',             '',     'level'),
+]
+
+
+def build_data_series_slots(ctx):
+    out = []
+    for sid, cat, dtype, name, unit, kind in DATA_SERIES:
+        srs = get_series(ctx['ds'], dtype, name)
+        if not srs or len(srs['values']) < 2:
+            continue
+        vals, dates = srs['values'], srs['dates']
+        text = f"{name} 최신 {vals[-1]:,.4g}{unit} ({dates[-1]})"
+        out.append(slot(sid, cat, 'fact', text, 'market.html', vals,
+                        trend_idx=min(22, len(vals) - 1), name=name, unit=unit,
+                        value_kind=kind, dates=dates))
+    return out
 
 
 def b_market_1m_leader(ctx):
@@ -1044,6 +1091,10 @@ def main():
                 print(f"  ~ {b.__name__:30s} skipped (no data)")
         except Exception as e:
             print(f"  ! {b.__name__:30s} error: {e}")
+
+    ds_slots = build_data_series_slots(ctx)
+    slots.extend(ds_slots)
+    print(f"  + build_data_series_slots -> {len(ds_slots)} slots (DATA 탭 신규 시리즈)")
 
     if not slots:
         print("ERROR: no slots produced", file=sys.stderr)
