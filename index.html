@@ -188,16 +188,36 @@
 
         // 메타 6항목: 수치/변동폭/수익률은 spark.series 첫→끝에서 계산
         // (구 스키마 슬롯은 name/period 없음 → 폴백 표기, 배포 순서 무관)
-        // 타이틀: "편의점 매출증감률 (+4.8%p)" — 이름 + 창 전체 변동폭 (pct 계열=%p, 레벨=단위)
+        // 타이틀: "TSEC (+33%, 5개월)" — 이름 + 창 전체 변화율 + 기간 길이.
+        // 이미 %인 시리즈(매출증감률·실업률·금리 등)는 %끼리 나누면 무의미 → %p 유지.
         function renderTitle(slot) {
             var s = slot.spark && slot.spark.series ? slot.spark.series : null;
             var name = slot.name || slot.category || '—';
             if (!s || s.length < 2) { nameEl.textContent = name; return; }
-            var unit = slot.unit || '';
             var isPct = slot.value_kind === 'pct';
-            var chg = s[s.length - 1] - s[0];
-            var chgTxt = (chg >= 0 ? '+' : '') + fmtVal(chg) + (isPct ? '%p' : (unit ? ' ' + unit : ''));
-            nameEl.textContent = name + ' (' + chgTxt + ')';
+            var first = s[0], last = s[s.length - 1];
+            var chgTxt;
+            if (isPct) {
+                var d = last - first;
+                chgTxt = (d >= 0 ? '+' : '') + d.toFixed(1).replace(/\.0$/, '') + '%p';
+            } else if (first) {
+                var r = (last / first - 1) * 100;
+                chgTxt = (r >= 0 ? '+' : '') + r.toFixed(1).replace(/\.0$/, '') + '%';
+            } else {
+                var a = last - first;
+                chgTxt = (a >= 0 ? '+' : '') + fmtVal(a);
+            }
+            var span = '';
+            var dts = slot.spark.dates;
+            if (dts && dts.length === s.length) {
+                var days = (Date.parse(dts[dts.length - 1]) - Date.parse(dts[0])) / 86400000;
+                if (days >= 1) {
+                    span = days < 60 ? Math.round(days) + '일'
+                         : days < 720 ? Math.round(days / 30.44) + '개월'
+                         : (days / 365.25).toFixed(1).replace(/\.0$/, '') + '년';
+                }
+            }
+            nameEl.textContent = name + ' (' + chgTxt + (span ? ', ' + span : '') + ')';
         }
 
         function renderSlot(slot) {
