@@ -66,9 +66,10 @@ Two passes, so the full "why" is logged before anything runs.
 
 **Pass 2 — re-fire** queued jobs **sequentially** (safety over speed — never fan out). For each:
 
-1. **Command validation (item 4):** the `<command>` must match `.../launchd/timers/run_timer_job.sh
-   <job>` (A2b's shared wrapper, invoked with a job argument); a row that bypasses it is logged and
-   **skipped** (running it unguarded would lose the lock/stamp/notify/timeout guarantees).
+1. **Command validation (item 4 / interface 2-1):** the `<command>` must invoke a lock/stamp/notify/
+   timeout-owning wrapper — `.../launchd/timers/run_timer_job.sh <job>` (timers) or
+   `.../launchd/gha/run_gha_job.sh <job>` (Phase 2 GHA jobs); a row that bypasses both is logged and
+   **skipped** (running it unguarded would lose those guarantees).
 2. **Best-effort pre-check:** `launchctl print system/com.antigravity.<name>`; if `state = running`,
    skip. This is only a courtesy — the authoritative double-run defense is the wrapper's per-job lock.
 3. Otherwise `eval <command>` — i.e. trigger `run_timer_job.sh <job>`.
@@ -113,7 +114,7 @@ starts "current", the install-time fire is a no-op, and the **first real catch-u
   stamp on its next success.
 - **Unreadable/non-numeric stamp:** treated like absent — reseed, no catch-up, `WARN`.
 - **Unparseable cron row:** skip with `WARN`, never guess.
-- **Command bypasses `run_timer_job.sh`:** `SKIP` with a warning (item 4) — never run unguarded.
+- **Command bypasses `run_timer_job.sh` / `run_gha_job.sh`:** `SKIP` with a warning (item 4) — never run unguarded.
 - **dom + dow both restricted:** classic Vixie-cron OR (matches if *either* matches), verified.
 - **Sunday** accepted as both `0` and `7`.
 - **Job already running under launchd:** best-effort `launchctl print` skip; if it can't report

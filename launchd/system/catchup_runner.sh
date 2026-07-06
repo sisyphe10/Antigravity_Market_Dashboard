@@ -212,13 +212,14 @@ run_job() {
   local name="$1" cmd="$2" last="$3" rc=0
   JOB_OUTCOME="skipped"
 
-  # (item 4) Only re-fire commands that go through run_timer_job.sh. A row that
-  # bypasses the wrapper would run without the lock/stamp/notify/timeout
-  # guarantees, so refuse it rather than run it unguarded.
+  # (item 4 / interface 2-1) Only re-fire commands that go through a lock/stamp/
+  # notify/timeout-owning wrapper: run_timer_job.sh (timers) or run_gha_job.sh
+  # (Phase 2 GHA jobs). A row that bypasses both would run unguarded, so refuse it.
   case "$cmd" in
-    *"/launchd/timers/run_timer_job.sh "*) : ;;   # full path + an argument
+    *"/launchd/timers/run_timer_job.sh "*) : ;;   # timer wrapper + an argument
+    *"/launchd/gha/run_gha_job.sh "*) : ;;        # GHA wrapper + an argument
     *)
-      log "SKIP  $name — command is not '.../launchd/timers/run_timer_job.sh <job>'; refusing: $cmd"
+      log "SKIP  $name — command is not a run_timer_job.sh / run_gha_job.sh <job> invocation; refusing: $cmd"
       return 0 ;;
   esac
 
