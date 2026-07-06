@@ -5691,8 +5691,7 @@ def create_fee_revenue_section():
             { key: 'avgAum',  name: '평균AUM', cls: 'rev-amt', disp: function(r) { return r.avgAum != null ? revFmtEok(r.avgAum) : '-'; }, val: function(r) { return r.avgAum != null ? r.avgAum : -1; },
               tip: function(r) { return r.aumN ? 'AUM 표본 ' + r.aumN + '영업일 단순평균' : ''; } },
             { key: 'ret',     name: '기간 수익률', cls: 'rev-amt', disp: function(r) { return r.ret != null ? revFmtPct(r.ret) : '-'; }, val: function(r) { return r.ret != null ? r.ret : -999; } },
-            { key: 'amount',  name: '수수료', cls: 'rev-amt',  disp: function(r) { return revFmtNum(r.amount); },      val: function(r) { return r.amount; } },
-            { key: 'total',   name: '합계',   cls: 'rev-amt rev-rowtot', disp: function(r) { return revFmtNum(r.amount); }, val: function(r) { return r.amount; } }
+            { key: 'amount',  name: '수수료', cls: 'rev-amt rev-rowtot', disp: function(r) { return revFmtNum(r.amount); }, val: function(r) { return r.amount; } }
         ];
         var revSortKey = null, revSortDir = 1;
         var revFilters = {};  // colKey -> 선택된 표시값 배열 (키 없음 = 전체 허용)
@@ -5778,7 +5777,7 @@ def create_fee_revenue_section():
             // 합계 행: 필터 적용된 집합 기준 재계산
             var tot = recs.reduce(function(s, r) { return s + r.amount; }, 0);
             body += '<tr class="fee-row-total"><td class="rev-key" colspan="8">합계</td>' +
-                '<td class="rev-amt">' + revFmtWon(tot) + '</td><td class="rev-amt">' + revFmtWon(tot) + '</td></tr>';
+                '<td class="rev-amt">' + revFmtWon(tot) + '</td></tr>';
             var head = '<tr>' + REV_COLS.map(function(c) {
                 var arrow = revSortKey === c.key ? (revSortDir === 1 ? ' ▲' : ' ▼') : '';
                 var on = revFilters[c.key] ? ' rev-filter-on' : '';
