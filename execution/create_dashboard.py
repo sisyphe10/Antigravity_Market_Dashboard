@@ -187,12 +187,36 @@ def create_portfolio_tables_html():
 
         html = ""
 
-        for portfolio_name, stocks in portfolio_data.items():
-            if portfolio_name.startswith('_'):
-                continue
+        # ── 버튼식 전환 (2026-07-06): 레지스트리 파생 버튼 + 섹션 display 토글 ──
+        # 결합(일반형 3사) 버튼은 같은 결합 섹션 데이터를 공유하되 각자 제목으로 렌더.
+        # 전환 중간상태(코드 새 결합키 vs JSON 구 결합키) 가드: ' / ' 포함 키로 결합 섹션 매칭.
+        combined_json_key = next((k for k in portfolio_data if ' / ' in k), None)
+        render_list = []
+        for b in wrap_config.portfolio_tab_buttons():
+            if b['section_key'] in portfolio_data:
+                data_key = b['section_key']
+            elif ' / ' in b['section_key'] and combined_json_key:
+                data_key = combined_json_key
+            else:
+                continue  # 사전등록 등 데이터 없는 상품 → 버튼/섹션 미표시
+            render_list.append((b['display'], data_key))
+        if not render_list:  # 안전망: 파생 실패 시 기존 나열식 폴백
+            render_list = [(k, k) for k in portfolio_data if not k.startswith('_')]
+
+        # 버튼바: 수수료 서브탭과 동일 pill 스타일 (.fee-subtab CSS 재사용,
+        # feeSwitchSub는 [data-fee-sub] 스코프라 [data-pf-btn] 버튼과 충돌 없음)
+        html += '<div class="fee-subtabs" style="flex-wrap:wrap;">' + ''.join(
+            f'<button class="fee-subtab{" active" if i == 0 else ""}" data-pf-btn="{i}" '
+            f'onclick="pfSwitchTab({i})">{name}</button>'
+            for i, (name, _k) in enumerate(render_list)
+        ) + '</div>'
+
+        for sec_idx, (portfolio_name, data_key) in enumerate(render_list):
+            stocks = portfolio_data[data_key]
+            sec_style = '' if sec_idx == 0 else 'display:none;'
             # 포트폴리오별 테이블 생성
             html += f"""
-            <div class="portfolio-section">
+            <div class="portfolio-section" data-pf-sec="{sec_idx}" style="{sec_style}">
                 <h3 class="portfolio-title">{portfolio_name}</h3>
                 <div class="table-container">
                     <table class="portfolio-table holdings-table" style="table-layout:fixed;">
@@ -3895,7 +3919,7 @@ def create_order_section():
     fetch portfolio_data.json + ExcelJS 클라이언트 사이드 처리 (journal.html 검증된 패턴).
 
     UX:
-      - 1개 포트폴리오 버튼 (트루밸류/NH Value ESG/DB 개방형 묶음)
+      - 1개 포트폴리오 버튼 (트루밸류/NH 다이내믹 밸류/DB 개방형 묶음)
       - 각 버튼 클릭 시 종목 테이블: 변경전(read-only), 변경후(input), 주문구분(자동), 추천사유(input)
       - Download(빨간) → 자문지/ 템플릿 fetch → R7부터 F/G/H/I 셀 patch → .xlsx 다운로드
       - NH 3호+DB 4차 페어 청산(2026-05-27, 목표달성)으로 NH/DB 페어 모두 비활성. 다음 페어 출시 시 ORDER_PORTFOLIOS 재추가.
@@ -3917,7 +3941,7 @@ def create_order_section():
         // 일반형 3개는 종목/비중 동일 → 한 테이블 + 3개 Download 버튼
         // 목표전환형은 주문 시점이 다를 수 있어 별도 카드 유지
         // newSheetTargets: 저장 시 Wrap_NAV.xlsx의 NEW 시트에 행을 추가할 (증권사, 상품명) 매핑
-        // 일반형 카드 → 3개 상품(삼성 트루밸류 / NH Value ESG / DB 개방형) 모두에 동일 종목/비중 행 추가
+        // 일반형 카드 → 3개 상품(삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형) 모두에 동일 종목/비중 행 추가
         // 목표전환형 카드 → 1개 상품에만 추가
         // 단일 출처: execution/wrap_config.py order_portfolios() (결합 그룹 카드 + 단독 target 카드 자동 생성)
         var ORDER_PORTFOLIOS = __ORDER_PORTFOLIOS__;
@@ -6256,7 +6280,7 @@ def create_dashboard():
             elif category == 'Wrap':
                 custom_order = [
                     '삼성 트루밸류',
-                    'NH Value ESG',
+                    'NH 다이내믹 밸류',
                     'DB 개방형',
                 ]
 
@@ -7305,6 +7329,16 @@ def create_dashboard():
         if (tab === 'contribution' && typeof loadContribution === 'function') loadContribution();
         if (tab === 'disclosures' && typeof loadDisclosures === 'function') loadDisclosures();
         if (tab === 'order' && typeof loadOrder === 'function') loadOrder();
+    }}
+
+    // PORTFOLIO 탭 상품 버튼 전환 (.fee-subtab 스타일 재사용, [data-pf-btn] 스코프)
+    function pfSwitchTab(idx) {{
+        document.querySelectorAll('.fee-subtab[data-pf-btn]').forEach(function(el) {{
+            el.classList.toggle('active', el.getAttribute('data-pf-btn') === String(idx));
+        }});
+        document.querySelectorAll('.portfolio-section[data-pf-sec]').forEach(function(el) {{
+            el.style.display = el.getAttribute('data-pf-sec') === String(idx) ? 'block' : 'none';
+        }});
     }}
 
     // 수수료 탭 내부 서브탭 (수수료율 / 매출)

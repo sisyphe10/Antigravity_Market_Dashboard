@@ -99,11 +99,13 @@ PRODUCTS = [
             display='삼성 트루밸류', base_price=2021.31, start_date='2025-12-30', ytd_base='2025-12-30',
             color='#1428A0', advisory_template='자문지/라이프자산운용_트루밸류_260427.xlsx',
             group='GENERAL_OPEN', keywords=('트루밸류', '삼성 트루밸류')),
+    # 2026-07-06 공식 리브랜딩: 표시명 'NH Value ESG' → 'NH 다이내믹 밸류'.
+    # nav_key='Value ESG'는 Wrap_NAV.xlsx 기준가/수익률/NEW 시트 컬럼(데이터 조인 키)이라 유지.
+    # keywords·monthly_label은 기본값(display 추종)으로 복귀 — 명시값이면 display 변경에 안 따라감.
     Product(broker='NH', nav_key='Value ESG', aum_name='다이내믹밸류', ptype='general', kind_label='일반형',
-            display='NH Value ESG', base_price=1980.49, start_date='2025-12-30', ytd_base='2025-12-30',
+            display='NH 다이내믹 밸류', base_price=1980.49, start_date='2025-12-30', ytd_base='2025-12-30',
             color='#0072CE', advisory_template='자문지/라이프자산운용_라이프 다이내믹밸류_일반형 _2026.4.27.xlsx',
-            group='GENERAL_OPEN', monthly_label='NH 다이내믹밸류 일반형',
-            keywords=('Value ESG', 'NH Value ESG')),
+            group='GENERAL_OPEN'),
     Product(broker='DB', nav_key='개방형 랩', aum_name='개방형 랩', ptype='general', kind_label='일반형',
             display='DB 개방형', base_price=1518.52, start_date='2025-12-30', ytd_base='2025-12-30',
             color='#00854A', advisory_template='자문지/라이프자산운용_DB 개방형 랩 _2026.4.27.xlsx',
@@ -264,6 +266,29 @@ def portfolio_groups():
             'use': group_use(gid) or members[0].nav_key,
         })
     return groups
+
+
+def portfolio_tab_buttons():
+    """create_dashboard.py / PORTFOLIO 탭 상단 상품 버튼 목록 (표시 순서대로).
+
+    [{'display': 버튼 라벨, 'section_key': portfolio_data.json 섹션 키}]
+    - GENERAL_OPEN 활성 멤버: 증권사 순서대로 각 1버튼, 데이터는 결합 키 공유
+    - 활성 목표전환형(target): start_date 내림차순 (최근 출시 먼저)
+    - 그룹 미가입 활성 일반형(한투 지속형 등): 마지막
+    출시 전(사전등록) 상품은 portfolio_data.json에 섹션이 없어 렌더 단계에서 자동 제외됨.
+    """
+    btns = []
+    for gid in active_group_ids():
+        combined = combined_display(gid)
+        for p in group_active_members(gid):
+            btns.append({'display': p.display, 'section_key': combined})
+    targets = [p for p in active_products() if p.ptype == 'target']
+    for p in sorted(targets, key=lambda x: x.start_date, reverse=True):
+        btns.append({'display': p.display, 'section_key': p.display})
+    for p in _sorted_active(active_products()):
+        if p.ptype != 'target' and not p.group:
+            btns.append({'display': p.display, 'section_key': p.display})
+    return btns
 
 
 def wrap_keywords():

@@ -134,7 +134,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 📊 **포트폴리오 리포트**
 /portfolio - 포트폴리오 리포트 조회
 • 매일 오후 4시 자동 전송
-• 기준가 (삼성 트루밸류, NH Value ESG, DB 개방형 랩)
+• 기준가 (삼성 트루밸류, NH 다이내믹 밸류, DB 개방형 랩)
 • 수익률 (1D, 1W, 1M, 3M, 6M, 1Y, YTD)
 • 종목별 기여도 상위/하위 5개
 

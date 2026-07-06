@@ -156,7 +156,7 @@ def get_portfolio_holdings():
 
     portfolio_data.json은 create_portfolio_tables.py가 15:35 자동 업데이트 사이클에서
     당일 종가 기준으로 미리 갱신해 둠. 키는 'PORTFOLIO_GROUPS'의 combined 명을 사용:
-    - 일반형: '삼성 트루밸류 / NH Value ESG / DB 개방형'
+    - 일반형: '삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형'
     - 목표전환형: 'NH 목표전환형 N호 / DB 목표전환형 M차' (운용 중일 때만 존재)
     """
     json_path = 'portfolio_data.json'

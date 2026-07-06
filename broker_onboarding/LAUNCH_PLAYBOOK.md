@@ -77,7 +77,7 @@ Product(broker='한투', nav_key='✦지속형컬럼명', aum_name='✦지속형
         group='GENERAL_OPEN',       # 사용자 결정: 개방형 3종과 합산 그룹 합류
         active=True, keep_in_nav=True),
 ```
-→ 결합 표시가 '삼성 트루밸류 / NH Value ESG / DB 개방형 / 한투 지속형' 으로 자동 확장. broker_colors·BROKER_ORDER·Order 카드 templates/newSheetTargets·GENERAL 문자열·이메일 정렬 전부 자동.
+→ 결합 표시가 '삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형 / 한투 지속형' 으로 자동 확장. broker_colors·BROKER_ORDER·Order 카드 templates/newSheetTargets·GENERAL 문자열·이메일 정렬 전부 자동.
 - ✦ **확인 필요**:
   - `nav_key`(기준가/NEW 시트 컬럼명) & `aum_name`(AUM 시트 상품명) — NH처럼 다를 수 있음. 동일하면 같게.
   - `kind_label` = add_aum 입력 시 칠 **유형** 문자열. 기존 일반형 입력은 `일반형` → 일관성 위해 `일반형` 권장(표시명만 '한투 지속형'). 별도 `지속형`으로 칠 거면 `kind_label='지속형'`.
