@@ -10,7 +10,7 @@
 # etf_data.db는 VM 전용(untracked) → push 없음. etf.html 재생성·push는 18:30 Featured 2차 잡 담당.
 set -uo pipefail
 
-REPO=/home/ubuntu/Antigravity_Market_Dashboard
+REPO="${REPO:-$(cd "$(dirname "$0")/.." && pwd)}"  # self-locate (macOS/VM 겸용)
 cd "$REPO"
 
 # 래퍼 레벨 중복 실행 방지 (collect_etf_daily.py 자체 lock과 이중 안전장치)

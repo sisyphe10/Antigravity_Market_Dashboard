@@ -99,7 +99,9 @@ fi
 # Files OUR commit actually changed (relative to its parent). Only these get the
 # whole-file ours/theirs policy; files we didn't touch keep the natural merge
 # result so a concurrent actor's solo change to them is never reverted.
-mapfile -t OUR_CHANGED < <(git diff --name-only "${OUR_COMMIT}^" "${OUR_COMMIT}")
+# bash 3.2 호환 (macOS 기본 bash엔 mapfile 없음)
+OUR_CHANGED=()
+while IFS= read -r _f; do OUR_CHANGED+=("$_f"); done < <(git diff --name-only "${OUR_COMMIT}^" "${OUR_COMMIT}")
 
 xlsx_tracked() { git ls-files --error-unmatch "$XLSX" >/dev/null 2>&1; }
 

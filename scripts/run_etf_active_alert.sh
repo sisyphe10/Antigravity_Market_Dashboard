@@ -6,7 +6,7 @@
 # 대시보드 etf.html '액티브 ETF' 탭과 동일한 단일 출처 모듈(active_etf_changes.py)로 계산 → 숫자 일치.
 set -uo pipefail
 
-REPO=/home/ubuntu/Antigravity_Market_Dashboard
+REPO="${REPO:-$(cd "$(dirname "$0")/.." && pwd)}"  # self-locate (macOS/VM 겸용)
 cd "$REPO"
 
 # 중복 실행 방지

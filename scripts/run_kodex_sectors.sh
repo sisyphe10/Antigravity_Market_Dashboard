@@ -4,7 +4,7 @@
 # 매일 23:30 KST 1회 timer 실행. stale .git/index.lock guard 포함 (60초 이상 = stale).
 set -euo pipefail
 
-REPO=/home/ubuntu/Antigravity_Market_Dashboard
+REPO="${REPO:-$(cd "$(dirname "$0")/.." && pwd)}"  # self-locate (macOS/VM 겸용)
 cd "$REPO"
 
 # 중복 실행 방지 (정상 cron에선 일어날 일 없지만 안전장치)

@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-ENV_FILE="/home/ubuntu/Antigravity_Market_Dashboard/.env"
+ENV_FILE="${ENV_FILE:-$(cd "$(dirname "$0")/.." && pwd)/.env}"  # self-locate
 [ -r "$ENV_FILE" ] && { set -a; source "$ENV_FILE"; set +a; }
 
 # OnFailure에서 systemd template으로 호출됨: sisyphe-bot-notify@<unit-name>.service

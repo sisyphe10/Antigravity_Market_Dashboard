@@ -27,8 +27,17 @@ logging.basicConfig(level=logging.INFO)
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
 # ── 종목 표 PNG 렌더링 설정 ───────────────────────────────
-FONT_REGULAR = '/home/ubuntu/fonts/pretendard/Pretendard-Regular.otf'
-FONT_BOLD = '/home/ubuntu/fonts/pretendard/Pretendard-Bold.otf'
+# 폰트 후보: 환경변수 → VM 경로 → 홈 경로 (macOS 이전 호환). 못 찾으면 즉시 실패(fail-loud → sisyphe_bot 실패 알림 경로).
+import os as _os
+_FONT_DIRS = [d for d in (_os.environ.get('PRETENDARD_DIR'),
+                          '/home/ubuntu/fonts/pretendard',
+                          _os.path.expanduser('~/fonts/pretendard')) if d]
+_FONT_DIR = next((d for d in _FONT_DIRS
+                  if _os.path.isfile(_os.path.join(d, 'Pretendard-Regular.otf'))), None)
+if _FONT_DIR is None:
+    raise RuntimeError('Pretendard 폰트를 찾을 수 없음 — 후보: %s' % _FONT_DIRS)
+FONT_REGULAR = _os.path.join(_FONT_DIR, 'Pretendard-Regular.otf')
+FONT_BOLD = _os.path.join(_FONT_DIR, 'Pretendard-Bold.otf')
 
 # 2배 해상도로 렌더링 (retina 디스플레이 대응)
 SCALE = 2

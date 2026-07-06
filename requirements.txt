@@ -36,3 +36,4 @@ pypdf
 # foreign_ir source adapter (해외 기업 뉴스룸 폴링)
 feedparser
 curl_cffi
+Pillow  # daily_portfolio_report PNG (PIL) - freeze엔 있었으나 선언 누락분

@@ -4,7 +4,7 @@
 # 충돌/push 실패 시: 보호 파일 백업 → origin/main hard reset → 재생성 → 재push (최대 2회).
 set -euo pipefail
 
-REPO=/home/ubuntu/Antigravity_Market_Dashboard
+REPO="${REPO:-$(cd "$(dirname "$0")/.." && pwd)}"  # self-locate (macOS/VM 겸용)
 cd "$REPO"
 
 HOUR=$(TZ=Asia/Seoul date +%H)
