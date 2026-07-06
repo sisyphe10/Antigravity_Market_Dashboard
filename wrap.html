@@ -247,7 +247,7 @@
     <aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="#" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="sidebar-link active">Dashboard</a><a href="#" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="sidebar-link">Order</a><a href="#" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="sidebar-link">공시</a><a href="#" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="sidebar-link">기여도</a><a href="#" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="sidebar-link">수수료</a></aside>
     <header>
         <h1>📈 WRAP</h1>
-        <div class="last-updated">Updated: 2026-07-06 12:30:39 KST</div>
+        <div class="last-updated">Updated: 2026-07-06 12:57:47 KST</div>
     </header>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -2671,7 +2671,7 @@
       return prArr.map(function(pr){var kd=Math.abs(pr)<1e-12?1:Math.log(1+pr)/pr; return kd/k;});
     }
     function cbp(v){var c=v>=0?'contrib-pos':'contrib-neg'; return '<span class="'+c+'">'+(v>=0?'+':'')+Math.round(v).toLocaleString()+'</span>';}
-    function contribSort(key){ if(contribSortKey===key) contribSortDir*=-1; else {contribSortKey=key; contribSortDir=(key==='name'||key==='sector')?1:-1;} renderContribution(); }
+    function contribSort(key){ if(contribSortKey===key) contribSortDir*=-1; else {contribSortKey=key; contribSortDir=(key==='contrib')?-1:1;} renderContribution(); }
     function renderContribution(){
       if(!CONTRIB_DATA||!contribPf) return;
       var d=CONTRIB_DATA.portfolios[contribPf], dates=d.dates;
@@ -2680,32 +2680,41 @@
       for(i=0;i<dates.length;i++){ if(dates[i]>=s){i0=i;break;} }
       for(i=dates.length-1;i>=0;i--){ if(dates[i]<=e){i1=i;break;} }
       if(i0>i1){i0=0;i1=dates.length-1;}
-      var n=i1-i0+1;
       var beta=carinoFactors(d.port_return.slice(i0,i1+1));
+      // 라운드(보유구간)별 별도 행 — 완전 청산 후 재진입은 개시일/종료일이 다른 행으로 분리
       var rows=[],sectors={},code,t,tot=0;
       for(code in d.stocks){
-        var st=d.stocks[code], c=st.contrib, w=st.weight, sm=0, held=false;
-        for(t=0;t<n;t++){ sm+=c[i0+t]*beta[t]; if(w[i0+t]>0) held=true; }
-        if(!held) continue;
-        rows.push({name:st.name,sector:st.sector,dh:st.dh,contrib:sm});
-        tot+=sm; sectors[st.sector]=(sectors[st.sector]||0)+sm;
+        var st=d.stocks[code], c=st.contrib, runs=st.runs||[];
+        runs.forEach(function(run){
+          var a=Math.max(run.i0,i0), b=Math.min(run.i1,i1);
+          if(a>b) return;  // 선택 기간과 안 겹치는 라운드
+          var sm=0;
+          for(t=a;t<=b;t++){ sm+=c[t]*beta[t-i0]; }
+          rows.push({name:st.name,sector:st.sector,owner:run.owner||'',start:run.start,end:run.end||'',contrib:sm});
+          tot+=sm; sectors[st.sector]=(sectors[st.sector]||0)+sm;
+        });
       }
       rows.sort(function(a,b){var av=a[contribSortKey],bv=b[contribSortKey]; if(typeof av==='string') return contribSortDir*av.localeCompare(bv,'ko'); return contribSortDir*(av-bv);});
-      var shown=contribDhOnly?rows.filter(function(r){return r.dh;}):rows;
+      var shown=contribDhOnly?rows.filter(function(r){return r.owner==='DH';}):rows;
       var shownSum=0; shown.forEach(function(r){shownSum+=r.contrib;});
       function sarrow(k){return contribSortKey===k?(contribSortDir<0?' ▾':' ▴'):'';}
       var h='<table class="contrib-tbl"><thead><tr>'
         +'<th onclick="contribSort(\'sector\')">업종'+sarrow('sector')+'</th>'
         +'<th onclick="contribSort(\'name\')">종목'+sarrow('name')+'</th>'
+        +'<th onclick="contribSort(\'start\')">개시일'+sarrow('start')+'</th>'
+        +'<th onclick="contribSort(\'end\')">종료일'+sarrow('end')+'</th>'
         +'<th onclick="contribSort(\'contrib\')">기여도'+sarrow('contrib')+'</th>'
-        +'<th onclick="contribSort(\'dh\')">구분'+sarrow('dh')+'</th></tr></thead><tbody>';
-      if(!shown.length){ h+='<tr><td colspan="4" style="color:#888;padding:18px;">해당 종목 없음</td></tr>'; }
+        +'<th onclick="contribSort(\'owner\')">구분'+sarrow('owner')+'</th></tr></thead><tbody>';
+      if(!shown.length){ h+='<tr><td colspan="6" style="color:#888;padding:18px;">해당 종목 없음</td></tr>'; }
       shown.forEach(function(r){
         h+='<tr><td style="color:#666;">'+r.sector+'</td>'
-          +'<td>'+r.name+'</td><td>'+cbp(r.contrib)+'</td>'
-          +'<td>'+(r.dh?'<span class="dh-pill">DH</span>':'')+'</td></tr>';
+          +'<td>'+r.name+'</td>'
+          +'<td style="color:#666;">'+r.start+'</td>'
+          +'<td style="color:#666;">'+(r.end||'')+'</td>'
+          +'<td>'+cbp(r.contrib)+'</td>'
+          +'<td>'+(r.owner?'<span class="dh-pill">'+r.owner+'</span>':'')+'</td></tr>';
       });
-      h+='</tbody><tfoot><tr><td colspan="2">'+(contribDhOnly?'DH 합계':'합계')+'</td><td>'+cbp(shownSum)+'</td><td></td></tr></tfoot></table>';
+      h+='</tbody><tfoot><tr><td colspan="4">'+(contribDhOnly?'DH 합계':'합계')+'</td><td>'+cbp(shownSum)+'</td><td></td></tr></tfoot></table>';
       document.getElementById('contribStockTable').innerHTML=h;
       var sarr=Object.keys(sectors).map(function(k){return {sector:k,contrib:sectors[k]};}).sort(function(a,b){return b.contrib-a.contrib;});
       var sh='<table class="contrib-tbl"><thead><tr><th>업종</th><th>기여도</th></tr></thead><tbody>';

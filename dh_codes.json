@@ -1,8 +1,10 @@
 {
-  "_comment": "DH(담당 사원) 바이콜 종목 6자리 코드 리스트. create_contribution_data.py가 읽어 기여도 탭 '구분' 열(DH)에 반영. 코드 기준 매칭(종목명 표기 불일치 회피).",
+  "_comment": "기여도 탭 라운드(보유구간) 태그. tags: 코드+scope+기간이 겹치는 라운드에 owner 부여 (start/end null=무제한, scope null=전 포트 / 'GENERAL_OPEN' 등 wrap_config group id 또는 포트명). codes(레거시): 전 라운드 owner=DH. 라운드 자체는 NEW 시트 비중>0 구간에서 자동 감지 — 여기엔 태그만 기록.",
+  "tags": [
+    {"code": "062040", "name": "산일전기", "owner": "DH", "scope": "GENERAL_OPEN", "start": "2026-04-10", "end": "2026-04-22"}
+  ],
   "codes": [
     "003230",
-    "062040",
     "267270",
     "082740"
   ],
