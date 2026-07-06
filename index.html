@@ -136,12 +136,14 @@
             }
             var vals = spark.series;
             var dates = spark.dates || null;
-            // 축 라벨 여백: 좌=Y값, 하=X날짜
-            var w = 560, h = 300, mL = 56, mR = 12, mT = 10, mB = 26;
-            var iw = w - mL - mR, ih = h - mT - mB;
             var mn = Math.min.apply(null, vals);
             var mx = Math.max.apply(null, vals);
             var range = (mx - mn) || 1;
+            // 축 라벨 여백: 좌측은 Y라벨 최장 길이에 맞춰 동적 (여백 과다 방지)
+            var yLabels = [fmtVal(mn), fmtVal((mn + mx) / 2), fmtVal(mx)];
+            var maxLen = Math.max(yLabels[0].length, yLabels[1].length, yLabels[2].length);
+            var w = 560, h = 300, mL = Math.max(30, maxLen * 6.8 + 8), mR = 12, mT = 10, mB = 26;
+            var iw = w - mL - mR, ih = h - mT - mB;
             var stepX = iw / (vals.length - 1);
             var pts = [];
             for (var i = 0; i < vals.length; i++) {
@@ -156,7 +158,7 @@
             for (var yi = 0; yi < 3; yi++) {
                 var yy = mT + ih - ((yLv[yi] - mn) / range) * ih;
                 svg += '<line x1="' + mL + '" y1="' + yy.toFixed(1) + '" x2="' + (w - mR) + '" y2="' + yy.toFixed(1) + '" stroke="#ddd" stroke-width="1" stroke-dasharray="3,3"/>';
-                svg += '<text x="' + (mL - 6) + '" y="' + (yy + 4).toFixed(1) + '" text-anchor="end" font-size="12" fill="#000">' + fmtVal(yLv[yi]) + '</text>';
+                svg += '<text x="' + (mL - 6) + '" y="' + (yy + 4).toFixed(1) + '" text-anchor="end" font-size="12" fill="#000">' + yLabels[yi] + '</text>';
             }
             // X축 날짜 라벨 (시작/1/3/2/3/끝, 연도 걸치면 YYYY-MM, 아니면 MM-DD)
             if (dates && dates.length === vals.length) {
