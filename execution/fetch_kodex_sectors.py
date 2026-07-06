@@ -9,6 +9,7 @@ pykrx 사용:
 결과: kodex_sectors.json (프로젝트 루트)
 """
 
+import os
 import sys
 import json
 import pandas as pd
@@ -17,6 +18,28 @@ from datetime import datetime, timedelta
 sys.stdout.reconfigure(encoding='utf-8')
 
 OUTPUT_FILE = 'kodex_sectors.json'
+
+
+def setup_krx_login():
+    """data.krx 로그인 env 세팅 (pykrx 로그인 패치판은 import 시 KRX_ID/KRX_PW 사용).
+
+    2026-07-03부터 비로그인 OHLCV가 빈 응답 → 1M 수익률 3일 연속 깨짐.
+    fetch_krx_valuation의 자격증명 로더 재사용 (env → secrets/data.krx.txt).
+    반드시 pykrx import 전에 호출. 자격증명 값은 절대 출력하지 않는다.
+    """
+    try:
+        from fetch_krx_valuation import load_krx_creds
+    except ImportError:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from fetch_krx_valuation import load_krx_creds
+    kid, kpw = load_krx_creds()
+    if kid and kpw:
+        os.environ['KRX_ID'] = kid
+        os.environ['KRX_PW'] = kpw
+        print("KRX 로그인 자격증명 로드됨")
+        return True
+    print("⚠️ KRX 자격증명 없음 - 비로그인 시도 (OHLCV 등 일부 빈 응답 가능)")
+    return False
 
 KOSPI200_TICKER  = '1028'   # KOSPI 200
 KOSDAQ150_TICKER = '2203'   # KOSDAQ 150
@@ -166,6 +189,13 @@ def fetch_all():
         df_merged = df_ret.join(cap_sec, how='inner')
         df_merged = df_merged[df_merged[cap_col] > 0]
 
+        # 빈 프레임 가드: OHLCV 빈 응답 시 groupby.apply().to_dict()가 예외 없이
+        # {"종가":{},...} 형태 쓰레기를 반환해 그대로 저장되던 버그 (2026-07-03~05)
+        if df_merged.empty:
+            raise ValueError(
+                f'1M 종가 조인 결과 0행 (now={len(df_now)}, ago={len(df_ago)}) '
+                '- OHLCV 빈 응답 (KRX 로그인 확인)')
+
         def weighted_ret(g):
             total = g[cap_col].sum()
             return (g['수익률'] * g[cap_col]).sum() / total if total > 0 else 0.0
@@ -176,6 +206,10 @@ def fetch_all():
             .round(2)
             .to_dict()
         )
+        # 형태 검증: 키=섹터명, 값=숫자 여야 함
+        if not sector_1m_returns or not all(
+                isinstance(v, (int, float)) for v in sector_1m_returns.values()):
+            raise ValueError(f'1M 결과 형태 이상: {type(sector_1m_returns)}')
         print(f"  → {len(sector_1m_returns)}개 섹터 완료")
         for s, r in sorted(sector_1m_returns.items(), key=lambda x: -x[1])[:5]:
             print(f"    {s}: {r:+.2f}%")
@@ -185,9 +219,30 @@ def fetch_all():
     return benchmark_sectors, stock_sector_map, sector_1m_returns, sector_top_stocks
 
 
+def _prev_good_1m():
+    """직전 저장본의 정상 sector_1m_returns (형태 검증 통과분만). 없으면 {}."""
+    if not os.path.exists(OUTPUT_FILE):
+        return {}
+    try:
+        prev = json.load(open(OUTPUT_FILE, encoding='utf-8'))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    prev_1m = prev.get('sector_1m_returns') or {}
+    if prev_1m and all(isinstance(v, (int, float)) for v in prev_1m.values()):
+        return prev_1m
+    return {}
+
+
 if __name__ == '__main__':
     print("=== KOSPI 200 + KOSDAQ 150 벤치마크 섹터 비중 계산 ===")
+    setup_krx_login()
     sectors, stock_sector_map, sector_1m_returns, sector_top_stocks = fetch_all()
+
+    # 1M 실패 시 직전 정상값 유지 (매일 덮어쓰던 것을 보존으로 변경)
+    if not sector_1m_returns:
+        sector_1m_returns = _prev_good_1m()
+        if sector_1m_returns:
+            print("⚠️ 1M 계산 실패 → 직전 정상값 유지")
 
     if sectors:
         result = {
