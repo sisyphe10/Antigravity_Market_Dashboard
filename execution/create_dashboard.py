@@ -5671,7 +5671,7 @@ def create_fee_revenue_section():
     script = """
         <script>
         var FEE_REVENUE = __PAYLOAD__;
-        var REV_CATS = ['개방형', '목표전환형'];
+        var REV_OPEN_KIND = {'삼성': '개방형', 'NH': '일반형', 'DB': '개방형', '한투': '지속형'};  // 개방형 계열 증권사별 명칭 (실질 동일)
         var REV_BROKER_ORDER = ['삼성', 'NH', 'DB', '한투'];
         var REV_DIMS = [['quarter', '분기'], ['broker', '증권사'], ['product', '상품']];
         var REV_ORD_SHADES = ['#1e40af', '#5277cc', '#8aa9e6'];  // 클릭 순서: 진한→연한 (순서 표시)
@@ -5681,21 +5681,15 @@ def create_fee_revenue_section():
         function revFmtEok(won) { return Math.round(won / 1e8).toLocaleString('ko-KR') + '억'; }
         function revFmtPct(x) { return (x >= 0 ? '+' : '') + Math.round(x * 100) + '%'; }
         function revProd(r) { return r.label || r.category; }
+        function revKind(r) { return r.category === '개방형' ? (REV_OPEN_KIND[r.broker] || '개방형') : r.category; }  // 구분
+        function revRound(r) { var m = /(\d+\s*[차호])/.exec(r.label || ''); return m ? m[1] : '-'; }               // 차수
+        function revUniq(list, f) { var o = []; list.forEach(function(r) { var v = f(r); if (o.indexOf(v) === -1) o.push(v); }); return o; }
         function revFmtQuarter(q) { var m = /^(\\d{4})-Q([1-4])$/.exec(q); return m ? m[1] + '년 ' + m[2] + '분기' : q; }
         function revDimRaw(d, r) { return d === 'quarter' ? r.quarter : (d === 'broker' ? r.broker : revProd(r)); }
         function revDimDisp(d, val) { return d === 'quarter' ? revFmtQuarter(val) : val; }
         function revDimHead(d) { return d === 'quarter' ? '기간' : (d === 'broker' ? '증권사' : '상품'); }
         function revDimSort(d, val) { return d === 'broker' ? REV_BROKER_ORDER.indexOf(val) : val; }
-        // 레코드 목록 → 카테고리별 합계 {개방형, 목표전환형, _total}
-        function revCatVals(list) {
-            var o = {}, tot = 0;
-            REV_CATS.forEach(function(c) {
-                var v = list.filter(function(r) { return r.category === c; })
-                            .reduce(function(s, r) { return s + r.amount; }, 0);
-                o[c] = v; tot += v;
-            });
-            o._total = tot; return o;
-        }
+        function revAmtSum(list) { return list.reduce(function(s, r) { return s + r.amount; }, 0); }
         // 버튼 클릭: 그냥 클릭 = 단일 전환 / Ctrl·Shift+클릭 = 다중 누적(클릭 순서대로 추가, 재클릭 해제)
         function revToggleDim(d, ev) {
             var multi = ev && (ev.ctrlKey || ev.shiftKey || ev.metaKey);
@@ -5735,11 +5729,17 @@ def create_fee_revenue_section():
             function revRet(list) {
                 return (list.length === 1 && list[0].ret != null) ? list[0].ret : null;
             }
-            // 본문
+            // 본문 — 기간/증권사/구분/차수/수수료/개시일/종료일/합계/평균AUM/기간 수익률
             var body = rows.map(function(g) {
-                var v = revCatVals(g.recs);
-                var cells = dims.map(function(d, i) { return '<td class="rev-key">' + revDimDisp(d, g.keyArr[i]) + '</td>'; }).join('') +
-                    REV_CATS.map(function(c) { return '<td class="rev-amt">' + (v[c] ? revFmtNum(v[c]) : '-') + '</td>'; }).join('');
+                var cells = dims.map(function(d, i) {
+                    if (d === 'product') {
+                        return '<td class="rev-key">' + revUniq(g.recs, revKind).join(' / ') + '</td>' +
+                               '<td class="rev-key">' + revUniq(g.recs, revRound).join(' / ') + '</td>';
+                    }
+                    return '<td class="rev-key">' + revDimDisp(d, g.keyArr[i]) + '</td>';
+                }).join('');
+                var amt = revAmtSum(g.recs);
+                cells += '<td class="rev-amt">' + revFmtNum(amt) + '</td>';
                 if (withDates) {
                     var ss = g.recs.map(function(r) { return r.start || ''; });
                     var ee = g.recs.map(function(r) { return r.end || ''; });
@@ -5747,19 +5747,20 @@ def create_fee_revenue_section():
                     var e0 = ee.every(function(x) { return x === ee[0]; }) ? ee[0] : '';
                     cells += '<td class="rev-date">' + s0 + '</td><td class="rev-date">' + e0 + '</td>';
                 }
-                cells += '<td class="rev-amt rev-rowtot">' + revFmtNum(v._total) + '</td>';
+                cells += '<td class="rev-amt rev-rowtot">' + revFmtNum(amt) + '</td>';
                 var ga = revAvgAum(g.recs), gr = revRet(g.recs);
                 var gn = (g.recs.length === 1 && g.recs[0].aumN) ? ' title="AUM 표본 ' + g.recs[0].aumN + '영업일 단순평균"' : '';
                 cells += '<td class="rev-amt"' + gn + '>' + (ga != null ? revFmtEok(ga) : '-') + '</td>';
                 cells += '<td class="rev-amt">' + (gr != null ? revFmtPct(gr) : '-') + '</td>';
                 return '<tr>' + cells + '</tr>';
             }).join('');
-            // 합계 행 (기준 칼럼들 병합, 개시일/종료일·평균AUM·수익률 칸 공란)
-            var grand = revCatVals(recs);
-            var totalCells = '<td class="rev-key" colspan="' + dims.length + '">합계</td>' +
-                REV_CATS.map(function(c) { return '<td class="rev-amt">' + revFmtWon(grand[c]) + '</td>'; }).join('');
+            // 합계 행 (기준 칼럼들 병합 — product 활성 시 구분+차수 2칸, 개시일/종료일·평균AUM·수익률 칸 공란)
+            var grandTotal = revAmtSum(recs);
+            var keySpan = dims.length + (withDates ? 1 : 0);
+            var totalCells = '<td class="rev-key" colspan="' + keySpan + '">합계</td>' +
+                '<td class="rev-amt">' + revFmtWon(grandTotal) + '</td>';
             if (withDates) { totalCells += '<td class="rev-date"></td><td class="rev-date"></td>'; }
-            totalCells += '<td class="rev-amt">' + revFmtWon(grand._total) + '</td><td class="rev-amt"></td><td class="rev-amt"></td>';
+            totalCells += '<td class="rev-amt">' + revFmtWon(grandTotal) + '</td><td class="rev-amt"></td><td class="rev-amt"></td>';
             body += '<tr class="fee-row-total">' + totalCells + '</tr>';
             // 상단 좌측 버튼 (활성 기준은 클릭 순서대로 진한→연한 배경)
             var btns = REV_DIMS.map(function(b) {
@@ -5769,9 +5770,11 @@ def create_fee_revenue_section():
                     '" data-rev-view="' + b[0] + '"' + sty + ' onclick="revToggleDim(this.dataset.revView, event)">' + b[1] + '</button>';
             }).join('');
             document.getElementById('revViewsHost').innerHTML = btns;
-            var dimHeads = dims.map(function(d) { return '<th>' + revDimHead(d) + '</th>'; }).join('');
+            var dimHeads = dims.map(function(d) {
+                return d === 'product' ? '<th>구분</th><th>차수</th>' : '<th>' + revDimHead(d) + '</th>';
+            }).join('');
             var dateHeads = withDates ? '<th>개시일</th><th>종료일</th>' : '';
-            var head = '<tr>' + dimHeads + REV_CATS.map(function(c) { return '<th>' + c + '</th>'; }).join('') + dateHeads + '<th>합계</th><th>평균AUM</th><th>기간 수익률</th></tr>';
+            var head = '<tr>' + dimHeads + '<th>수수료</th>' + dateHeads + '<th>합계</th><th>평균AUM</th><th>기간 수익률</th></tr>';
             document.getElementById('revTableHost').innerHTML =
                 '<table class="fee-table rev-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>';
         }
