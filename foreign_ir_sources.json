@@ -361,10 +361,10 @@
       "ticker": "HON",
       "exchange": "NASDAQ",
       "ir_url": "https://www.honeywell.com/us/en/news",
-      "rss_url": null,
-      "fetch_type": "html",
+      "rss_url": "https://investor.honeywell.com/rss/news-releases.xml",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Official Honeywell news list found via search; static result shows press releases and dated financial releases. No RSS found. | alternate (claude): https://investor.honeywell.com/news",
+      "notes": "2026-07-06: newsroom redesign removed date text from cards -> html extract 0. Switched to live IR RSS (investor.honeywell.com, verified fresh incl. 2026-06-29 Aerospace spin-off releases). ir_url kept as fallback. | prev: Official Honeywell news list found via search; static result shows press releases and dated financial releases. No RSS found. | alternate (claude): https://investor.honeywell.com/news",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
@@ -470,9 +470,9 @@
       "exchange": "NYSE",
       "ir_url": "https://www.eaton.com/us/en-us/company/news-insights/news-releases.html",
       "rss_url": null,
-      "fetch_type": "html",
+      "fetch_type": "coveo",
       "confidence": "high",
-      "notes": "Corporate-hosted news releases. IR landing: /company/investor-relations.html | codex: Fetched official Eaton news releases search/list page; static HTML includes multiple dated releases. No RSS found.",
+      "notes": "2026-07-06: news list moved to Coveo JS component (static HTML has 0 articles since ~2026-06-19) -> custom fetcher _fetch_eaton_coveo in foreign_ir.py scrapes public apigee/Coveo config from page each run, token chain -> search API (hub EATON_NEWSANDINSIGHTS, us/en-us filter). | prev: Corporate-hosted news releases. IR landing: /company/investor-relations.html | codex: Fetched official Eaton news releases search/list page; static HTML includes multiple dated releases. No RSS found.",
       "sources": [
         "claude",
         "codex"

@@ -7,6 +7,7 @@ Generic Source Pipeline 위에서 동작).
 설계:
 - 대상 회사 목록: foreign_ir_sources.json (enabled=true 만)
 - 수집 방식 분기:
+    _CUSTOM_FETCHERS 등록 → 회사 전용 수집기 최우선 (예: ETN Coveo API)
     rss_url 보유  → feedparser 로 RSS/Atom 파싱 (가장 견고, 우선)
     rss 0건/없음  → ir_url HTML 을 날짜-블록 기준 범용 추출
 - 회사별 독립 state: sources_state/foreign_ir.json
@@ -29,7 +30,7 @@ import os
 import re
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime
+from datetime import datetime, timezone as _tz
 from urllib.parse import urljoin, urlparse
 
 import feedparser
@@ -290,6 +291,97 @@ def _clean_text(s: str) -> str:
     return ' '.join(_html.unescape(s or '').split())
 
 
+# ── 커스텀 fetcher (표준 rss/html 로 수집 불가한 회사 전용) ─────────────
+def _api_request(method: str, url: str, headers: dict | None = None,
+                 json_body: dict | None = None, timeout: int = FETCH_TIMEOUT):
+    """JSON API 호출용 (POST/헤더 지원). curl_cffi 우선, requests 폴백."""
+    if _HAS_CURL_CFFI:
+        r = _curl_requests.request(method, url, headers=headers, json=json_body,
+                                   timeout=timeout, impersonate='chrome')
+    else:
+        r = requests.request(method, url, headers=headers, json=json_body, timeout=timeout)
+    r.raise_for_status()
+    return r.json()
+
+
+def _fetch_eaton_coveo(company: dict) -> list[dict]:
+    """ETN(Eaton) 전용: 뉴스 리스트가 Coveo 검색 JS 컴포넌트로 전환(2026-06)되어
+    정적 HTML 에 기사가 0건. 페이지에 공개 임베드된 apigee/Coveo 설정을 매 실행
+    긁어서(키 회전에 자가치유, 저장소에 시크릿 하드코딩 없음) 토큰 체인 후
+    Coveo Search API 로 미국 뉴스릴리스를 최신순 조회한다.
+
+    체인: 뉴스페이지 HTML(설정 추출) → apigee OAuth 토큰 → Coveo 검색 토큰
+          → POST https://{org}.org.coveo.com/rest/search/v2
+    """
+    ir_url = company['ir_url']
+    page = _http_get(ir_url)
+
+    def _attr(name: str) -> str:
+        m = re.search(rf'{name}="([^"]+)"', page)
+        if not m:
+            raise RuntimeError(f'Eaton page config missing: {name}')
+        return _html.unescape(m.group(1))
+
+    apigee_url = _attr('data-coveo-apigee-url')
+    apigee_auth = _attr('data-apigee-auth')
+    api_key = _attr('data-api-key')
+    token_url = _attr('data-coveo-token-url')
+    org = _attr('data-coveo-org-id')
+    hub = 'EATON_NEWSANDINSIGHTS'
+    if hub not in page:  # 컴포넌트 개편 대비: 페이지의 뉴스용 search-hub 폴백
+        hubs = [h for h in re.findall(r'search-hub="([^"]+)"', page) if 'SITESEARCH' not in h]
+        if hubs:
+            hub = hubs[0]
+
+    access = _api_request('POST', apigee_url,
+                          headers={'Authorization': 'Basic ' + apigee_auth})['access_token']
+    coveo_token = _api_request('GET', token_url,
+                               headers={'Authorization': f'Bearer {access}',
+                                        'x-api-key': api_key})['token']
+
+    search_ep = f'https://{org}.org.coveo.com/rest/search/v2'
+    payload = {
+        'searchHub': hub,
+        'locale': 'en-US',
+        'numberOfResults': 60,
+        'sortCriteria': '@p_publish_date descending',
+        # 미국 사이트 소스만 (같은 릴리스가 지역 사이트별로 중복 색인됨).
+        # 소스명이 개편되면 0건 → 아래에서 aq 없이 1회 재시도(자가치유).
+        'aq': '@syssource=="NORTHAMERICA_SITEMAP_SOURCE"',
+    }
+    hdr = {'Authorization': f'Bearer {coveo_token}'}
+    data = _api_request('POST', search_ep, headers=hdr, json_body=payload)
+    if not data.get('results'):
+        payload.pop('aq')
+        data = _api_request('POST', search_ep, headers=hdr, json_body=payload)
+
+    prefix = 'https://www.eaton.com/us/en-us/company/news-insights/news-releases/'
+    items: list[dict] = []
+    seen: set[str] = set()
+    for res in data.get('results', []):
+        url = (res.get('clickUri') or '').split('?')[0]
+        title = _clean_text(res.get('title') or '')
+        if not url.startswith(prefix) or not title or url in seen:
+            continue
+        seen.add(url)
+        ms = (res.get('raw') or {}).get('p_publish_date')
+        date_iso = ''
+        if isinstance(ms, (int, float)) and ms > 0:
+            date_iso = datetime.fromtimestamp(ms / 1000, tz=_tz.utc).strftime('%Y-%m-%d')
+        items.append({'id': url, 'url': url, 'title': title,
+                      'date': date_iso, 'summary': _clean_text(res.get('excerpt') or '')[:300]})
+        if len(items) >= MAX_LIST_PER_COMPANY:
+            break
+    return items
+
+
+# 표준 rss/html 파이프라인으로 못 잡는 회사의 전용 수집기 레지스트리.
+# 커스텀 실패 시 _fetch_company 가 rss/html 경로로 폴백한다.
+_CUSTOM_FETCHERS = {
+    'ETN': _fetch_eaton_coveo,
+}
+
+
 # ── 회사 1건 수집 (state I/O 없음, 순수 함수) ──────────────────────────
 def _fetch_company(company: dict) -> dict:
     """회사 1건의 최신 보도자료 리스트 수집. state 를 건드리지 않는다.
@@ -308,14 +400,22 @@ def _fetch_company(company: dict) -> dict:
 
     try:
         releases: list[dict] = []
-        if rss_url:
+        custom = _CUSTOM_FETCHERS.get(ticker)
+        if custom:
+            try:
+                releases = custom(company)
+                result['method'] = 'custom'
+            except Exception as e:
+                logger.warning(f'[{ticker}] custom fetcher 실패: {e}')
+                releases = []
+        if not releases and rss_url:
             try:
                 releases = _parse_rss(_http_get(rss_url))
-                result['method'] = 'rss'
+                result['method'] = 'rss' if result['method'] is None else f'{result["method"]}->rss'
             except Exception as e:
                 logger.warning(f'[{ticker}] RSS 실패 ({rss_url}): {e}')
                 releases = []
-        # RSS 0건이거나 rss_url 없음 → HTML 폴백
+        # 앞 단계 0건이거나 rss_url 없음 → HTML 폴백
         if not releases and ir_url:
             releases = _extract_html(ir_url, _http_get(ir_url))
             result['method'] = 'html' if result['method'] is None else f'{result["method"]}->html'
