@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-06 15:08:08 KST",
+  "updated_at": "2026-07-06 18:35:56 KST",
   "slots": [
     {
       "id": "market-1m-leader",
@@ -15,7 +15,7 @@
       "category": "Market",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "2026-07 11개 자산 중 5/11 상승 — 혼조 양상",
+      "text": "2026-07 11개 자산 중 5/11 상승 — 엇갈린 흐름",
       "href": "market.html",
       "spark": null
     },
@@ -3143,7 +3143,7 @@
       "category": "Alert",
       "color": "#c2410c",
       "tone": "fact",
-      "text": "오늘 투자주의 28 · 경고 7 · 위험 7",
+      "text": "오늘 투자주의 23 · 경고 6 · 위험 6",
       "href": "market_alert.html",
       "spark": null
     },
@@ -3152,7 +3152,7 @@
       "category": "Featured",
       "color": "#d97706",
       "tone": "fact",
-      "text": "7.5(일) 거래대금 1위: SK하이닉스 18.1조원",
+      "text": "7.6(월) 거래대금 1위: SK하이닉스 10.1조원",
       "href": "featured.html",
       "spark": null
     },
@@ -3161,7 +3161,7 @@
       "category": "Featured",
       "color": "#d97706",
       "tone": "fact",
-      "text": "7.5(일) KOSDAQ 상승률 1위: 동원개발 +29.9%",
+      "text": "7.6(월) KOSPI 상승률 1위: 금호건설 +30.0%",
       "href": "featured.html",
       "spark": null
     },
