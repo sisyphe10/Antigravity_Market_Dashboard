@@ -91,9 +91,11 @@ def snapshot_runs(s):
     return runs
 
 
-def tag_owner(tags, code, buy, sell, pf_scopes):
-    """코드 일치 + scope 일치(None=전 포트) + 기간 겹침(양끝 포함)인 첫 태그의 owner. sell=None → 진행 중."""
+def tag_owner(tags, code, buy, sell, pf_scopes, pf_name=''):
+    """코드 일치 + scope 일치(None=전 포트) + 기간 겹침(양끝 포함)인 태그의 owner.
+    복수 적중 시 첫 태그 사용 + 경고 (모호한 태그 입력 감지). sell=None → 진행 중."""
     a1 = sell if sell is not None else pd.Timestamp.max
+    hits = []
     for t in tags:
         if t['code'] != code:
             continue
@@ -103,8 +105,11 @@ def tag_owner(tags, code, buy, sell, pf_scopes):
         b1 = t['end'] if t['end'] is not None else pd.Timestamp.max
         if buy <= b1 and b0 <= a1:
             t['_hit'] = True
-            return t['owner']
-    return None
+            hits.append(t)
+    if len(hits) > 1:
+        print(f"   ! 경고: 태그 복수 적중 — {pf_name}/{code} 런({buy.date()}~{sell.date() if sell is not None else '진행중'})에 "
+              f"owner {[h['owner'] for h in hits]} 겹침 → 첫 태그({hits[0]['owner']}) 사용")
+    return hits[0]['owner'] if hits else None
 
 
 def main():
@@ -233,7 +238,7 @@ def main():
                     'start': r['buy'].strftime('%Y-%m-%d'),
                     'end': r['sell'].strftime('%Y-%m-%d') if r['sell'] is not None else None,
                     'i0': i0, 'i1': i1,
-                    'owner': tag_owner(dh_tags, c, r['buy'], r['sell'], pf_scopes),
+                    'owner': tag_owner(dh_tags, c, r['buy'], r['sell'], pf_scopes, pf_name),
                 })
             stocks[c] = {
                 'name': name_map.get(c, c),
