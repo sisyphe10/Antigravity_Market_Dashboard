@@ -49,8 +49,6 @@ jobs:
           python execution/fetch_kofia_stats.py
           # 국민연금 적립금 (data.go.kr odcloud, 같은 키) — 내부 graceful skip
           python execution/fetch_nps_fund.py
-          # 퇴직연금 적립금 (KOSIS 연간) — 내부 graceful skip
-          python execution/fetch_pension_kosis.py
 
       - name: Generate Dashboard
         if: env.KOFIA_SKIP != '1'

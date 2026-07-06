@@ -1527,6 +1527,15 @@ def _build_combined_chart_section():
                 {'display': '정기예금 잔액',         'csv': '정기예금 잔액',         'color': '#00574B'},
                 {'display': '국민연금 적립금',       'csv': '국민연금 적립금',       'color': '#1B5E20'},
                 {'display': '퇴직연금 적립금',       'csv': '퇴직연금 적립금',       'color': '#827717'},
+                # KOSIS 실물·소비 (fetch_kosis_series.py, VM 경로)
+                {'display': '전산업생산 전년동월비', 'csv': '전산업생산 전년동월비', 'color': '#00695F'},
+                {'display': '설비투자지수',          'csv': '설비투자지수',          'color': '#00796F'},
+                {'display': '실업률 (한국)',         'csv': '실업률 (한국)',         'color': '#004D45'},
+                {'display': '온라인쇼핑 거래액',     'csv': '온라인쇼핑 거래액',     'color': '#00887E'},
+                {'display': '백화점 매출증감률',     'csv': '백화점 매출증감률',     'color': '#009C8D'},
+                {'display': '대형마트 매출증감률',   'csv': '대형마트 매출증감률',   'color': '#26B0A1'},
+                {'display': '편의점 매출증감률',     'csv': '편의점 매출증감률',     'color': '#4DC4B5'},
+                {'display': 'SSM 매출증감률',        'csv': 'SSM 매출증감률',        'color': '#73D8C9'},
             ]},
             {'label': 'MACRO US', 'series': [
                 # FRED 미국 매크로 (fetch_fred_data.py; 월·분기 FRED_MACRO는 5년 임베드 창,
@@ -1565,6 +1574,7 @@ def _build_combined_chart_section():
                 {'display': 'KB 아파트지수 (서울)',           'csv': 'KB 아파트지수 (서울)',           'color': '#9E9D24'},
                 {'display': '아파트 실거래지수 (전국)',       'csv': '아파트 실거래지수 (전국)',       'color': '#AFB42B'},
                 {'display': '아파트 실거래지수 (서울)',       'csv': '아파트 실거래지수 (서울)',       'color': '#C0CA33'},
+                {'display': '미분양주택 (전국)',              'csv': '미분양주택 (전국)',              'color': '#6D4C41'},
             ]},
             {'label': 'CREDIT & HOUSING US', 'series': [
                 # FRED 미국 신용·부동산 (fetch_fred_data.py; 월·분기 FRED_SECTOR는 5년 임베드 창,
@@ -1668,7 +1678,7 @@ def _build_combined_chart_section():
         long_start = latest - timedelta(days=365 * 5)
         if '데이터 타입' in df.columns:
             long_mask = df['데이터 타입'].isin(['ECOS_MACRO', 'ECOS_SECTOR', 'FRED_MACRO', 'FRED_SECTOR',
-                                                'NPS_FUND', 'KOSIS_PENSION'])
+                                                'NPS_FUND', 'KOSIS_PENSION', 'KOSIS_MACRO', 'KOSIS_SECTOR'])
         else:
             long_mask = pd.Series(False, index=df.index)
         df = df[(df['날짜'] <= latest)

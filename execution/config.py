@@ -31,6 +31,9 @@ CATEGORY_MAP = {
     # 국민연금 적립금 (fetch_nps_fund.py, 저빈도 연간+최신월 누적)
     'NPS_FUND': 'MACRO KOREA',
     'KOSIS_PENSION': 'MACRO KOREA',
+    # KOSIS 레지스트리 (fetch_kosis_series.py, VM kodex 타이머 편승)
+    'KOSIS_MACRO': 'MACRO KOREA',
+    'KOSIS_SECTOR': 'CREDIT & HOUSING',
     'SDLLMTK': 'COMMODITIES',
     'SDH100RT': 'COMMODITIES',
     'SD_RAM': 'COMMODITIES'
