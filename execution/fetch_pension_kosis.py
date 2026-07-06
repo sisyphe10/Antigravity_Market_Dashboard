@@ -53,8 +53,18 @@ def fetch_points(key: str) -> dict:
     }
     url = 'https://kosis.kr/openapi/Param/statisticsParameterData.do?' + urllib.parse.urlencode(params)
     req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        payload = json.loads(r.read().decode('utf-8'))
+    # GHA(해외 IP)에서 KOSIS가 매우 느리거나 차단됨 → 60s + 1회 재시도.
+    # 확실한 자동화 경로는 VM kodex-sectors 타이머 편승 (run_kodex_sectors.sh).
+    payload = None
+    for attempt in range(2):
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                payload = json.loads(r.read().decode('utf-8'))
+            break
+        except (urllib.error.URLError, OSError):
+            if attempt == 1:
+                raise
+    assert payload is not None
     if isinstance(payload, dict) and payload.get('err'):
         raise ValueError(f"KOSIS err {payload.get('err')}")
     out = {}

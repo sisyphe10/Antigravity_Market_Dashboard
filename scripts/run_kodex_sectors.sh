@@ -30,7 +30,10 @@ set +a
 
 PYTHONIOENCODING=utf-8 python3 execution/fetch_kodex_sectors.py
 
-git add kodex_sectors.json
+# 퇴직연금 적립금 (KOSIS 연간) — GHA IP가 KOSIS에 막혀 VM 경로가 확실. 실패해도 계속.
+PYTHONIOENCODING=utf-8 python3 execution/fetch_pension_kosis.py || true
+
+git add kodex_sectors.json dataset.csv
 if git diff --staged --quiet; then
     echo "kodex_sectors.json 변경 없음 — push 스킵"
     exit 0
