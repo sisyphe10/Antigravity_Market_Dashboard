@@ -238,6 +238,7 @@ def slot(sid, category, tone, text, href, spark_values=None, trend_idx=8,
         }
         if dates and len(dates) == len(spark_values):
             s['period'] = [str(dates[0]), str(dates[-1])]
+            s['spark']['dates'] = [str(d) for d in dates]  # X축 눈금 라벨용
     else:
         s['spark'] = None
     return s

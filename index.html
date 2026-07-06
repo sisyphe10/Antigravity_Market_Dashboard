@@ -15,18 +15,13 @@
         .lh-card[hidden] { display: none; }
         .lh-head { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
         .lh-tag { flex: 0 0 auto; min-width: 90px; padding: 4px 14px; background: #999; color: #fff; font-size: 0.72rem; font-weight: 700; border-radius: 999px; letter-spacing: 0.4px; text-align: center; white-space: nowrap; }
-        .lh-name { flex: 1 1 auto; font-size: 1.05rem; font-weight: 800; color: #000; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .lh-name { flex: 1 1 auto; font-size: 1.05rem; font-weight: 400; color: #000; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .lh-bigchart { flex: 1 1 auto; min-height: 0; width: 100%; margin: 10px 0 8px; padding: 8px; border: 1px solid #000; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .lh-bigchart svg { width: 100%; height: 100%; display: block; }
         .lh-nochart { font-size: 1.15rem; color: #000; text-align: center; line-height: 1.6; padding: 0 12px; }
-        .lh-meta { flex: 0 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px 8px; margin: 0 0 6px; cursor: pointer; }
-        .lh-meta .lh-m { text-align: center; }
-        .lh-meta .lh-mk { font-size: 0.88rem; color: #000; letter-spacing: 0.3px; }
-        .lh-meta .lh-mv { font-size: 0.95rem; font-weight: 400; color: #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         @media (max-width: 640px) {
             .lh-card { aspect-ratio: auto; }
             .lh-bigchart { min-height: 220px; }
-            .lh-meta .lh-mv { font-size: 0.78rem; }
         }
         .lh-shuffle { flex: 0 0 56px; width: 56px; background: none; border: none; cursor: pointer; font-size: 2.1rem; opacity: 0.9; padding: 8px 0; transition: opacity 0.15s, transform 0.2s; line-height: 1; color: inherit; text-align: center; display: inline-block; }
         .lh-shuffle:hover { opacity: 1; transform: rotate(20deg); }
@@ -101,13 +96,6 @@
                 <button class="lh-shuffle" type="button" title="다시 뽑기" aria-label="다시 뽑기">🎲</button>
             </div>
             <div class="lh-bigchart"><span class="lh-spark" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"></span></div>
-            <div class="lh-meta">
-                <div class="lh-m"><div class="lh-mk">섹터</div><div class="lh-mv" data-m="sector">—</div></div>
-                <div class="lh-m"><div class="lh-mk">기간</div><div class="lh-mv" data-m="period">—</div></div>
-                <div class="lh-m"><div class="lh-mk">수치</div><div class="lh-mv" data-m="latest">—</div></div>
-                <div class="lh-m"><div class="lh-mk">변동폭</div><div class="lh-mv" data-m="chg">—</div></div>
-                <div class="lh-m"><div class="lh-mk">수익률</div><div class="lh-mv" data-m="ret">—</div></div>
-            </div>
             <hr class="lh-divider">
             <div class="lh-quote-row">
                 <span class="lh-quote-text">—</span>
@@ -123,10 +111,9 @@
         var quoteRow = card.querySelector('.lh-quote-row');
         var tagEl = card.querySelector('.lh-tag');
         var sparkEl = card.querySelector('.lh-spark');
-        var metaEl = card.querySelector('.lh-meta');
+        var nameEl = card.querySelector('.lh-name');
         var shuffleBtn = card.querySelector('.lh-shuffle');
         var quoteTextEl = quoteRow.querySelector('.lh-quote-text');
-        function metaCell(k) { return card.querySelector('[data-m="' + k + '"]'); }
 
         var slots = [];
         var quotes = [];
@@ -148,23 +135,47 @@
                 return;
             }
             var vals = spark.series;
-            var w = 560, h = 300, pad = 10;
+            var dates = spark.dates || null;
+            // 축 라벨 여백: 좌=Y값, 하=X날짜
+            var w = 560, h = 300, mL = 56, mR = 12, mT = 10, mB = 26;
+            var iw = w - mL - mR, ih = h - mT - mB;
             var mn = Math.min.apply(null, vals);
             var mx = Math.max.apply(null, vals);
             var range = (mx - mn) || 1;
-            var stepX = (w - pad * 2) / (vals.length - 1);
+            var stepX = iw / (vals.length - 1);
             var pts = [];
             for (var i = 0; i < vals.length; i++) {
-                var x = pad + i * stepX;
-                var y = h - pad - ((vals[i] - mn) / range) * (h - pad * 2);
+                var x = mL + i * stepX;
+                var y = mT + ih - ((vals[i] - mn) / range) * ih;
                 pts.push(x.toFixed(1) + ',' + y.toFixed(1));
             }
             var color = TREND[spark.trend] || '#555';
-            sparkEl.innerHTML =
-                '<svg viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">' +
-                '<path d="M' + pts.join(' L') + '" fill="none" stroke="' + color +
-                '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>' +
-                '</svg>';
+            var svg = '<svg viewBox="0 0 ' + w + ' ' + h + '" xmlns="http://www.w3.org/2000/svg">';
+            // Y축 라벨 3개(최소/중간/최대) + 점선 그리드
+            var yLv = [mn, (mn + mx) / 2, mx];
+            for (var yi = 0; yi < 3; yi++) {
+                var yy = mT + ih - ((yLv[yi] - mn) / range) * ih;
+                svg += '<line x1="' + mL + '" y1="' + yy.toFixed(1) + '" x2="' + (w - mR) + '" y2="' + yy.toFixed(1) + '" stroke="#ddd" stroke-width="1" stroke-dasharray="3,3"/>';
+                svg += '<text x="' + (mL - 6) + '" y="' + (yy + 4).toFixed(1) + '" text-anchor="end" font-size="12" fill="#000">' + fmtVal(yLv[yi]) + '</text>';
+            }
+            // X축 날짜 라벨 (시작/1/3/2/3/끝, 연도 걸치면 YYYY-MM, 아니면 MM-DD)
+            if (dates && dates.length === vals.length) {
+                var multiYear = dates[0].slice(0, 4) !== dates[dates.length - 1].slice(0, 4);
+                var idxs = [0, Math.round((vals.length - 1) / 3), Math.round(2 * (vals.length - 1) / 3), vals.length - 1];
+                var seen = {};
+                for (var xi = 0; xi < idxs.length; xi++) {
+                    var di = idxs[xi];
+                    if (seen[di]) continue;
+                    seen[di] = 1;
+                    var lb = multiYear ? dates[di].slice(0, 7) : dates[di].slice(5);
+                    var anchor = di === 0 ? 'start' : (di === vals.length - 1 ? 'end' : 'middle');
+                    var xx = mL + di * stepX;
+                    svg += '<text x="' + xx.toFixed(1) + '" y="' + (h - 8) + '" text-anchor="' + anchor + '" font-size="12" fill="#000">' + lb + '</text>';
+                }
+            }
+            svg += '<path d="M' + pts.join(' L') + '" fill="none" stroke="' + color +
+                '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>' + '</svg>';
+            sparkEl.innerHTML = svg;
         }
 
         // 스마트 숫자 포맷: 크기에 따라 소수 자릿수 조절
@@ -177,29 +188,16 @@
 
         // 메타 6항목: 수치/변동폭/수익률은 spark.series 첫→끝에서 계산
         // (구 스키마 슬롯은 name/period 없음 → 폴백 표기, 배포 순서 무관)
-        function renderMeta(slot) {
+        // 타이틀: "편의점 매출증감률 (+4.8%p)" — 이름 + 창 전체 변동폭 (pct 계열=%p, 레벨=단위)
+        function renderTitle(slot) {
             var s = slot.spark && slot.spark.series ? slot.spark.series : null;
+            var name = slot.name || slot.category || '—';
+            if (!s || s.length < 2) { nameEl.textContent = name; return; }
             var unit = slot.unit || '';
             var isPct = slot.value_kind === 'pct';
-            metaCell('sector').textContent = slot.category || '—';
-            metaCell('name').textContent = slot.name || slot.category || '—';
-            metaCell('period').textContent = slot.period ? (slot.period[0] + ' ~ ' + slot.period[1]) : (s ? '최근 ' + s.length + '개 관측' : '—');
-            if (s && s.length >= 2) {
-                var first = s[0], last = s[s.length - 1];
-                metaCell('latest').textContent = fmtVal(last) + (unit ? ' ' + unit : '');
-                var chg = last - first;
-                metaCell('chg').textContent = (chg >= 0 ? '+' : '') + fmtVal(chg) + (isPct ? '%p' : (unit ? ' ' + unit : ''));
-                if (isPct || !first) {
-                    metaCell('ret').textContent = '—';
-                } else {
-                    var ret = (last / first - 1) * 100;
-                    metaCell('ret').textContent = (ret >= 0 ? '+' : '') + ret.toFixed(1) + '%';
-                }
-            } else {
-                metaCell('latest').textContent = '—';
-                metaCell('chg').textContent = '—';
-                metaCell('ret').textContent = '—';
-            }
+            var chg = s[s.length - 1] - s[0];
+            var chgTxt = (chg >= 0 ? '+' : '') + fmtVal(chg) + (isPct ? '%p' : (unit ? ' ' + unit : ''));
+            nameEl.textContent = name + ' (' + chgTxt + ')';
         }
 
         function renderSlot(slot) {
@@ -209,13 +207,11 @@
             tagEl.style.backgroundColor = color;
             if (slot.spark && slot.spark.series && slot.spark.series.length >= 2) {
                 renderSpark(slot.spark);
-                metaEl.style.display = '';
             } else {
                 // 안전망: 차트 데이터 없는 슬롯이 섞여 들어온 경우 텍스트만
                 sparkEl.innerHTML = '<div class="lh-nochart">' + escapeHtml(slot.text || '') + '</div>';
-                metaEl.style.display = 'none';
             }
-            renderMeta(slot);
+            renderTitle(slot);
             prevSlotId = slot.id;
             try { sessionStorage.setItem('lh_prev_id', slot.id); } catch (e) {}
         }
@@ -256,9 +252,6 @@
 
         chartRow.addEventListener('click', function(e) {
             if (e.target.closest('.lh-shuffle')) return;
-            if (currentSlot && currentSlot.href) window.location.href = currentSlot.href;
-        });
-        metaEl.addEventListener('click', function() {
             if (currentSlot && currentSlot.href) window.location.href = currentSlot.href;
         });
 
