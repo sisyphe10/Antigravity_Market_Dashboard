@@ -1686,10 +1686,13 @@ def _build_combined_chart_section():
         if '데이터 타입' in df.columns:
             long_mask = df['데이터 타입'].isin(['ECOS_MACRO', 'ECOS_SECTOR', 'FRED_MACRO', 'FRED_SECTOR',
                                                 'NPS_FUND', 'KOSIS_PENSION', 'KOSIS_MACRO', 'KOSIS_SECTOR', 'JP_CAPEX'])
+            # 연간 시리즈(퇴직연금 등)는 5년 창이면 4점뿐 → 창 제한 없이 전체 임베드 (행 수 미미)
+            full_mask = df['데이터 타입'].isin(['KOSIS_PENSION'])
         else:
             long_mask = pd.Series(False, index=df.index)
+            full_mask = pd.Series(False, index=df.index)
         df = df[(df['날짜'] <= latest)
-                & ((df['날짜'] >= start) | (long_mask & (df['날짜'] >= long_start)))]
+                & ((df['날짜'] >= start) | (long_mask & (df['날짜'] >= long_start)) | full_mask)]
 
         sub = df[df['제품명'].isin(all_csv_names)].copy()
         sub = sub.drop_duplicates(subset=['날짜', '제품명'], keep='last')
