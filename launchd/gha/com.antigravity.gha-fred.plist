@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- WP-A12 GHA 이관 초안 / Wave 1 (저위험·읽기전용·해외 소스). 원본: .github/workflows/daily_fred.yml -->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.antigravity.gha-fred</string>
+    <key>UserName</key>
+    <string>__MACMINI_USER__</string>
+    <key>WorkingDirectory</key>
+    <string>__REPO__</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>__REPO__/launchd/gha/run_gha_job.sh</string>
+        <string>gha-fred</string>
+    </array>
+    <!-- 데몬 환경 표준 (CONTRACT v3): launchd 는 로그인 환경이 없음 → HOME/PATH/LANG 명시 -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>/Users/__MACMINI_USER__</string>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>LANG</key>
+        <string>en_US.UTF-8</string>
+    </dict>
+    <!-- KST 07:50 화~토 (원본 cron '50 22 * * 1-5' UTC = 22:50 월~금 → +9h = 07:50 익일 화~토).
+         launchd Weekday: 2=화 3=수 4=목 5=금 6=토. 시스템 TZ=Asia/Seoul 전제. -->
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict>
+            <key>Weekday</key><integer>2</integer>
+            <key>Hour</key><integer>7</integer>
+            <key>Minute</key><integer>50</integer>
+        </dict>
+        <dict>
+            <key>Weekday</key><integer>3</integer>
+            <key>Hour</key><integer>7</integer>
+            <key>Minute</key><integer>50</integer>
+        </dict>
+        <dict>
+            <key>Weekday</key><integer>4</integer>
+            <key>Hour</key><integer>7</integer>
+            <key>Minute</key><integer>50</integer>
+        </dict>
+        <dict>
+            <key>Weekday</key><integer>5</integer>
+            <key>Hour</key><integer>7</integer>
+            <key>Minute</key><integer>50</integer>
+        </dict>
+        <dict>
+            <key>Weekday</key><integer>6</integer>
+            <key>Hour</key><integer>7</integer>
+            <key>Minute</key><integer>50</integer>
+        </dict>
+    </array>
+    <key>StandardOutPath</key>
+    <string>__REPO__/logs/launchd/gha-fred.out</string>
+    <key>StandardErrorPath</key>
+    <string>__REPO__/logs/launchd/gha-fred.err</string>
+    <key>RunAtLoad</key>
+    <false/>
+</dict>
+</plist>

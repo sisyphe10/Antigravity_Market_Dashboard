@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- WP-A12 GHA 이관 초안 / Wave 3 (상태 변경·최고 민감 — 모든 Wave 안정화 후 최후 이관).
+     원본: .github/workflows/finalize_orders.yml -->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.antigravity.gha-finalize-orders</string>
+    <key>UserName</key>
+    <string>__MACMINI_USER__</string>
+    <key>WorkingDirectory</key>
+    <string>__REPO__</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>__REPO__/launchd/gha/run_gha_job.sh</string>
+        <string>gha-finalize-orders</string>
+    </array>
+    <!-- 데몬 환경 표준 (CONTRACT v3): launchd 는 로그인 환경이 없음 → HOME/PATH/LANG 명시 -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>/Users/__MACMINI_USER__</string>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>LANG</key>
+        <string>en_US.UTF-8</string>
+    </dict>
+    <!-- KST 16:00 매일 (원본 cron '0 7 * * *' UTC = 07:00 → +9h = 16:00 당일). 시스템 TZ=Asia/Seoul 전제.
+         ★ 주문·AUM 확정 파이프라인 — 오동작 시 포트폴리오 데이터 직접 훼손. xlsx-conflict=fail 로 드롭 방지. -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>16</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>__REPO__/logs/launchd/gha-finalize-orders.out</string>
+    <key>StandardErrorPath</key>
+    <string>__REPO__/logs/launchd/gha-finalize-orders.err</string>
+    <key>RunAtLoad</key>
+    <false/>
+</dict>
+</plist>

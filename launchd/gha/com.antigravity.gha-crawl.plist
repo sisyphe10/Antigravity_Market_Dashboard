@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- WP-A12 GHA 이관 초안 / Wave 2 (한국 사이트·IP 민감). 원본: .github/workflows/daily_crawl.yml (스케줄분만).
+     ★ push 트리거분(execution/** 등)은 GHA 잔류(분류 B) — 이 잡은 매일 23:00 스케줄 실행만 대체. -->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.antigravity.gha-crawl</string>
+    <key>UserName</key>
+    <string>__MACMINI_USER__</string>
+    <key>WorkingDirectory</key>
+    <string>__REPO__</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>__REPO__/launchd/gha/run_gha_job.sh</string>
+        <string>gha-crawl</string>
+    </array>
+    <!-- 데몬 환경 표준 (CONTRACT v3): launchd 는 로그인 환경이 없음 → HOME/PATH/LANG 명시 -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>/Users/__MACMINI_USER__</string>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>LANG</key>
+        <string>en_US.UTF-8</string>
+    </dict>
+    <!-- KST 23:00 매일 (원본 cron '0 14 * * *' UTC = 14:00 → +9h = 23:00 당일). 시스템 TZ=Asia/Seoul 전제. -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>23</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>__REPO__/logs/launchd/gha-crawl.out</string>
+    <key>StandardErrorPath</key>
+    <string>__REPO__/logs/launchd/gha-crawl.err</string>
+    <key>RunAtLoad</key>
+    <false/>
+</dict>
+</plist>

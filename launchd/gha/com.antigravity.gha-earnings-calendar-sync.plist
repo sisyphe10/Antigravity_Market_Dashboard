@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- WP-A12 GHA 이관 초안 / Wave 3 (상태 변경·민감, ★VM cron 이중실행 정리 필요).
+     원본: .github/workflows/earnings_calendar_sync.yml -->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.antigravity.gha-earnings-calendar-sync</string>
+    <key>UserName</key>
+    <string>__MACMINI_USER__</string>
+    <key>WorkingDirectory</key>
+    <string>__REPO__</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>__REPO__/launchd/gha/run_gha_job.sh</string>
+        <string>gha-earnings-calendar-sync</string>
+    </array>
+    <!-- 데몬 환경 표준 (CONTRACT v3): launchd 는 로그인 환경이 없음 → HOME/PATH/LANG 명시 -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>/Users/__MACMINI_USER__</string>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>LANG</key>
+        <string>en_US.UTF-8</string>
+    </dict>
+    <!-- KST 07:00 매일 (원본 cron '0 22 * * *' UTC = 22:00 → +9h = 07:00 익일). 시스템 TZ=Asia/Seoul 전제.
+         ★ 현재 VM cron(15:00 KST) + 이 GHA(07:00 KST) 이중 실행 중 — 맥미니 단일화 결정(결정 11). README 참조. -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>7</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>__REPO__/logs/launchd/gha-earnings-calendar-sync.out</string>
+    <key>StandardErrorPath</key>
+    <string>__REPO__/logs/launchd/gha-earnings-calendar-sync.err</string>
+    <key>RunAtLoad</key>
+    <false/>
+</dict>
+</plist>
