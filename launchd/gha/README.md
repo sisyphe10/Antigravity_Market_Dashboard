@@ -105,6 +105,24 @@ launchd `StartCalendarInterval`은 **KST 벽시계 값 그대로** 기술한다.
 - **주의**: 현재 초안은 파이프라인 락을 **잡 전체 구간** 동안 보유한다(GHA 큐 의미에 충실). Phase 2에서
   경합/스루풋 실측 후, `create_dashboard`+push 구간만 감싸도록 좁히는 최적화 여지 있음(자체 리뷰 지점).
 
+### GHA 고유 — heartbeat 방출 (Phase 2 워치독 감시 보조, CONTRACT 인터페이스 4)
+
+wrapper는 **잡 성공 stamp 기록 직후** repo 루트 `heartbeats.json`에 `{"<잡이름>": <epoch>}`를 upsert하고
+그 파일만 `[skip ci]`로 push한다. **9잡 전부 방출**한다(Wave 1부터 heartbeat가 쌓여 감시 커버가 이관 즉시 시작).
+
+- **왜 필요한가**: 맥미니 타이머 실패는 (실행됨+비정상종료) 외에 **(아예 안 돎: 데몬 미적재·정전·TZ드리프트)**가 있고,
+  후자는 wrapper가 안 돌아 `notify_failure`도 없다. 그 '비실행'은 **산출물 파일 신선도**로만 잡는데, `gha-earnings-calendar-sync`
+  (산출물=Google Calendar, repo 밖)와 `gha-finalize-orders`(비시계열)는 dated repo 산출물이 없어 신선도 감시 공백이다
+  (audit `phase2_watchdog_audit.md` §3). heartbeat가 이 공백을 메운다.
+- **흐름**:
+  1. `emit_heartbeat <잡>` — venv python으로 기존 `heartbeats.json` 병합(없거나 파손이면 새 dict) → `<잡>=now-epoch` → **같은 디렉토리 temp → `mv -f`** 원자적 갱신.
+  2. `scripts/safe_commit_push.sh -m "heartbeat: <잡> [skip ci]" -- heartbeats.json` (파일 1개, `[skip ci]`로 daily_crawl 미기동).
+- **소비자**: GHA 잔류 워치독 `check_data_freshness`의 heartbeat 나이 감시 섹션(`patches/heartbeat_freshness.patch` — A14/A15).
+  `HEARTBEAT_JOBS`에 **없는 잡은 침묵**, 파일 부재/파싱 실패도 침묵 → **패치를 어느 시점에 적용해도 안전**(이관 전 상태 무해).
+- **격리(감시 보조라 잡에 안 번짐)**: mktemp·JSON upsert·mv·push 어느 단계가 실패해도 **잡 종료코드(rc)는 불변**,
+  경고 로그만 남긴다(다음 성공 방출이 자연 회복). heartbeat는 데이터 정합이 아니라 "살아있음" 신호라 push 레이스도 무해.
+- **graceful-skip 잡**(API 키 미설정 fred/ecos/kofia/krx)도 rc=0이라 stamp+heartbeat 방출 — "wrapper가 정상 실행됨" 신호로 정확.
+
 ## 컷오버 절차 (잡별 1개씩 — GHA schedule 제거 커밋과 짝)
 
 `GHA_MIGRATION_PLAN.md`의 표준 절차를 따른다. **하루 1개씩, 병행 실행 금지**(push race 방지):
@@ -192,6 +210,7 @@ sudo ./install_gha.sh --list          # 잡/웨이브 목록
 - **`install_gha.sh` schedule.tsv 병합 로직**: 격리 하네스로 upsert(append)·재upsert(동명 교체=단일 유지)·`__REPO__` 치환·TAB 3필드 보존·미지정 잡 rc3 거부·`--remove`(행 제거하되 타이머 행 보존) 전부 확인.
 - **`install_gha.sh` 원자화+롤백 (codex 수정)**: 격리 하네스로 ①정상=temp+mv 설치·토큰치환·upsert 실행·hidden temp 잔재 0 ②upsert 실패→bootout+plist 삭제 롤백 ③bootstrap 실패→plist 삭제·upsert 미도달 ④sed 실패→기존 dst 무손상(직접 쓰기 없음)·temp 정리 전부 확인.
 - **`run_gha_job.sh` 소유권 확인 락 해제 (codex 수정)**: 격리 하네스로 ①우리 pid 락=삭제 ②남의 pid(재획득) 락=보존 ③빈 인자=no-op ④pid 없는 락=보존 확인 — per-job·pipeline 락 공통 함수. Wave 0 확정 패턴(`catchup_runner.sh:96` lock_release) 이식.
+- **`run_gha_job.sh` heartbeat 방출 (인터페이스 4)**: 실제 wrapper를 gha-kofia graceful-skip 경로로 구동한 end-to-end 하네스로 ①빈/부재→heartbeats.json 생성 upsert ②기존 타 잡 엔트리(gha-other) 보존+대상 잡 추가 ③push 스텁 인자 정확(`-m heartbeat: <잡> [skip ci] -- heartbeats.json`) ④push 실패 시 wrapper rc 불변(0)+파일 갱신됨+경고 로그 전부 확인.
 - **plist 9종**: `xml.dom.minidom.parse` + `plistlib.load`로 전부 **well-formed + 유효 plist** 확인.
   `StartCalendarInterval` 파싱 결과가 위 환산표와 1:1 일치, Label=파일명, ProgramArguments 인자=label suffix,
   EnvironmentVariables에 HOME/PATH/LANG 존재까지 자동 대조 → 9/9 OK.

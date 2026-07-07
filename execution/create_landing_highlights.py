@@ -33,6 +33,7 @@ CATEGORY_COLORS = {
     'Liquidity': '#2d7a3a',
     'Macro':     '#2d7a3a',
     'AI':        '#2d7a3a',
+    'CAPEX':     '#2d7a3a',
     'Alert':     '#c2410c',
     'Universe':  '#6B21A8',
     'SEIBro':    '#0369a1',
@@ -264,6 +265,9 @@ DATA_SERIES = [
     ('ds-ram',      'AI',        'SD_RAM',        'RAM Index',             '',     'level'),
     # ── 기존 주요 시리즈 (2026-07-06 카드 개편: 회전 풀은 이름 있는 슬롯만 —
     #    무명 "Commodity 136.4" 표시 방지 위해 이름·단위 명시 레지스트리로 흡수) ──
+    ('ds-seaj',     'CAPEX',     'JP_CAPEX',      'SEAJ 반도체장비 판매고',  '억엔', 'level'),
+    ('ds-jmtba',    'CAPEX',     'JP_CAPEX',      'JMTBA 공작기계 수주총액', '억엔', 'level'),
+    ('ds-jmtba-fx', 'CAPEX',     'JP_CAPEX',      'JMTBA 공작기계 외수',     '억엔', 'level'),
     ('ds-kospi',    'Index',     'INDEX_KR',      'KOSPI',                 'pt',   'level'),
     ('ds-kosdaq',   'Index',     'INDEX_KR',      'KOSDAQ',                'pt',   'level'),
     ('ds-sp500',    'Index',     'INDEX_US',      'S&P 500',               'pt',   'level'),

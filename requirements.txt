@@ -32,6 +32,7 @@ notion-client
 finnhub-python
 tiktoken
 pypdf
+xlrd  # SEAJ back-number .xls (fetch_japan_capex.py)
 
 # foreign_ir source adapter (해외 기업 뉴스룸 폴링)
 feedparser

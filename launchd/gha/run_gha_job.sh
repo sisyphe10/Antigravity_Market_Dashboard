@@ -198,6 +198,48 @@ write_stamp() {
   return 0
 }
 
+# ── heartbeat 방출 (CONTRACT 인터페이스 4 — Phase 2 워치독 감시 보조) ──────────
+#   성공 stamp 직후, repo 루트 heartbeats.json 에 {"<잡>": <epoch>} 를 upsert(원자적)하고
+#   그 파일만 safe_commit_push 로 [skip ci] push. 소비자 = GHA 잔류 워치독
+#   (check_data_freshness heartbeat 나이 감시) — 산출물이 repo 밖(Google Calendar)이거나
+#   비시계열이라 신선도가 못 잡는 잡의 '비실행'을 커버한다. Wave 1부터 전 잡이 방출해
+#   감시 커버가 이관 즉시 시작된다(엔트리 없는 잡은 소비자가 침묵).
+#   ★heartbeat 는 감시 보조 — mktemp/upsert/mv/push 어느 단계 실패도 잡 결과(rc)에 번지지
+#     않고 경고 로그만 남긴다(다음 성공 방출이 자연 회복). venv python 으로 JSON 병합(가장 견고).
+emit_heartbeat() {
+  local name="$1" hb="$REPO/heartbeats.json" tmp now
+  now="$(date +%s)"
+  tmp="$(mktemp "$REPO/.heartbeats.XXXXXX")" || {
+    echo "[run_gha_job] $name: heartbeat mktemp 실패 → 스킵(감시 보조)" >&2; return 0
+  }
+  # 기존 heartbeats.json 병합(없거나 파손이면 새 dict). 결과를 tmp 로 출력 → 원자적 mv.
+  if "$PY" - "$hb" "$name" "$now" > "$tmp" <<'PYHB'
+import json, sys
+path, job, now = sys.argv[1], sys.argv[2], int(sys.argv[3])
+try:
+    with open(path, encoding='utf-8') as f:
+        data = json.load(f)
+    if not isinstance(data, dict):
+        data = {}
+except Exception:
+    data = {}
+data[job] = now
+json.dump(data, sys.stdout, ensure_ascii=False, sort_keys=True, indent=2)
+sys.stdout.write('\n')
+PYHB
+  then
+    if mv -f "$tmp" "$hb"; then
+      /bin/bash scripts/safe_commit_push.sh -m "heartbeat: $name [skip ci]" -- heartbeats.json \
+        || echo "[run_gha_job] $name: heartbeat push 실패 → 경고만(다음 성공 방출 시 회복)" >&2
+    else
+      rm -f "$tmp"; echo "[run_gha_job] $name: heartbeat mv 실패 → 스킵(감시 보조)" >&2
+    fi
+  else
+    rm -f "$tmp"; echo "[run_gha_job] $name: heartbeat JSON upsert 실패 → 스킵(감시 보조)" >&2
+  fi
+  return 0
+}
+
 # ── 이름 → 실제 잡 실행. 각 분기의 exit 코드를 그대로 반환 ──────
 #   실행 커맨드는 대응 워크플로우 yml 의 스텝에서 그대로 도출. `|| echo`(tolerated) 스텝은
 #   원본과 동일하게 실패해도 계속 진행하고, 그 외 스텝은 실패 시 잡 실패로 전파한다.
@@ -395,6 +437,8 @@ if [ "$rc" -eq 0 ]; then
     notify_failure "$NAME"
     exit 70   # EX_SOFTWARE: A4 가 성공으로 오판하지 않도록 명시적 실패
   fi
+  # 성공 stamp 직후 heartbeat 방출(감시 보조). 실패해도 rc 에 번지지 않음(인터페이스 4).
+  emit_heartbeat "$NAME"
 else
   notify_failure "$NAME"
 fi

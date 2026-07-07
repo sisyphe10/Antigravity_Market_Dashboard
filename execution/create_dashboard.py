@@ -1626,6 +1626,12 @@ def _build_combined_chart_section():
                 {'display': 'MLC 64Gb',  'csv': 'MLC 64Gb 8GBx8',            'color': '#4DB6AC'},
                 {'display': 'MLC 32Gb',  'csv': 'MLC 32Gb 4GBx8',            'color': '#80CBC4'},
             ]},
+            {'label': 'CAPEX', 'series': [
+                # 일본 설비투자 지표 (fetch_japan_capex.py, VM 경로, 월간 억엔)
+                {'display': 'SEAJ 반도체장비 판매고', 'csv': 'SEAJ 반도체장비 판매고', 'color': '#B71C1C'},
+                {'display': 'JMTBA 공작기계 수주총액', 'csv': 'JMTBA 공작기계 수주총액', 'color': '#4E342E'},
+                {'display': 'JMTBA 공작기계 외수', 'csv': 'JMTBA 공작기계 외수', 'color': '#8D6E63'},
+            ]},
             {'label': 'HOTELS', 'series': [
                 # hotel_adr.csv의 도시별 일별 평균 ADR (모든 호텔×lead 평균)
                 {'display': 'Hotel 서울', 'csv': 'Hotel 서울', 'color': '#1976D2'},
@@ -1679,7 +1685,7 @@ def _build_combined_chart_section():
         long_start = latest - timedelta(days=365 * 5)
         if '데이터 타입' in df.columns:
             long_mask = df['데이터 타입'].isin(['ECOS_MACRO', 'ECOS_SECTOR', 'FRED_MACRO', 'FRED_SECTOR',
-                                                'NPS_FUND', 'KOSIS_PENSION', 'KOSIS_MACRO', 'KOSIS_SECTOR'])
+                                                'NPS_FUND', 'KOSIS_PENSION', 'KOSIS_MACRO', 'KOSIS_SECTOR', 'JP_CAPEX'])
         else:
             long_mask = pd.Series(False, index=df.index)
         df = df[(df['날짜'] <= latest)
