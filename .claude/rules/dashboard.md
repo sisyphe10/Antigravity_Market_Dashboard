@@ -19,7 +19,8 @@ patterns:
 - hotels.html = Hotels (ADR 추적)
 - etf.html = ETF 구성종목 (조건부, etf_data.db 있을 때만)
 - taiwan.html = Taiwan 월매출 (대만 큐레이션 53종목, 별도 생성기 create_taiwan_page.py)
-- architecture.html = 아키텍처 (수동 관리)
+- universe_lab.html = Universe Lab (create_dashboard.py 생성)
+- architecture.html = 아키텍처 위키 (★2026-07-07 registry 기반 자동 생성으로 전환 — 아래 참조)
 
 ## 파일 생성 의존 체인
 ```
@@ -46,4 +47,4 @@ create_market_alert.py 변경 → market_alert.html 재생성
 - 우측 별도 Home 버튼은 사용 안 함 (탭바가 네비게이션 담당)
 - create_dashboard.py 수정 시 모든 생성 파일 재생성 후 확인
 - UI 변경 시 전체 페이지에서 일관성 확인
-- **architecture.html 동기화 주의**: 자동 생성되지 않고 수동 관리됨. `TOP_NAV_CSS`, `top_nav_html()` 결과(상단 탭바 HTML)를 정적으로 박아넣은 상태이므로, `create_dashboard.py`의 헬퍼 함수(TOP_NAV_MAIN 멤버/순서/라벨, TOP_NAV_CSS, 폰트 등)를 수정할 때마다 architecture.html도 수동으로 동기화해야 함 (안 하면 다른 페이지와 탭바 디자인 어긋남)
+- **architecture.html은 생성물 — 직접 수정 금지 (2026-07-07 전환)**: `architecture/registry.json`(113 컴포넌트 단일 출처) 편집 → `python execution/create_architecture.py` 재생성이 유일한 수정 경로. 컴포넌트(봇/잡/페이지/데이터) 추가·변경 시 registry 항목을 갱신해야 도식도·타임라인·위키·`architecture/wiki/*.md`가 함께 갱신됨. 상단 탭바 스타일 변경 시에도 생성기(create_architecture.py의 탭바 템플릿)를 고치고 재생성.

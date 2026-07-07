@@ -7,12 +7,13 @@ patterns:
 
 # VM 배포 규칙
 
-## 봇 구성 (3개)
+## 봇 구성 (4개)
 | 텔레그램 봇 | systemd | 파일 | 토큰 환경변수 |
 |---|---|---|---|
 | Sisyphe-Bot | sisyphe-bot | execution/sisyphe_bot.py | TELEGRAM_SISYPHE_BOT_TOKEN |
 | Research Notes | research-notes-bot | execution/research_bot/research_notes_bot.py | TELEGRAM_RESEARCH_NOTES_BOT_TOKEN |
 | RA_Sisyphe_bot | ra-sisyphe-bot | execution/ra_sisyphe_bot.py | TELEGRAM_RA_SISYPHE_BOT_TOKEN |
+| SeonyuDuo 운동봇 | seonyuduo-exercise-bot | execution/seonyuduo_exercise_bot.py | TELEGRAM_SEONYUDUO_BOT_TOKEN |
 
 서비스 unit 파일은 모두 `scripts/` 아래에 통일 (sisyphe-bot.service, research-notes-bot.service, ra-sisyphe-bot.service, sisyphe-bot-notify.service).
 
