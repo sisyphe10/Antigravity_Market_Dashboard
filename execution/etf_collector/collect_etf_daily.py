@@ -80,7 +80,8 @@ def collect_constituents(conn, date_str, etf_list, already_done):
                 # stock_code는 PK + NOT NULL → 빈 코드 행 제외(현금/비상장 등).
                 # 과거 버그: 한 행이라도 빈 코드면 executemany 배치 전체가 NOT NULL로
                 # 실패해 해당 ETF 구성종목 전부 손실(매일 ~69개 ETF). 유효 행만 적재.
-                rows = [(date_str, code, c['stock_code'], c['stock_name'], c['weight'])
+                rows = [(date_str, code, c['stock_code'], c['stock_name'], c['weight'],
+                         c.get('qty'), c.get('px'))
                         for c in constituents if c['stock_name'] and c['stock_code']]
                 if rows:
                     insert_constituents_batch(conn, rows)

@@ -45,10 +45,22 @@ def _request(endpoint, params=None):
 
 
 def fetch_constituents(etf_code):
-    """ETF 구성종목/비중 조회. Returns list of {stock_code, stock_name, weight}"""
+    """ETF 구성종목/비중 조회. Returns list of {stock_code, stock_name, weight, qty, px}
+
+    qty=F16499(CU당 보유수량), px=F15001(종목 현재가). 값이 비정상('-'/공백/NaN)이면
+    None — 종목 하나의 파싱 실패가 배치 전체를 죽이지 않도록 예외를 전파하지 않는다
+    (과거 빈 stock_code 배치 실패 사고와 같은 방어 스타일)."""
     results = _request('getEtfPdfRankListWeight', {'code': etf_code})
     if not results:
         return []
+
+    def _fnum(v):
+        """방어적 float 변환 — 실패/NaN이면 None"""
+        try:
+            f = float(v)
+            return f if f == f else None
+        except (ValueError, TypeError):
+            return None
 
     constituents = []
     for r in results:
@@ -71,6 +83,8 @@ def fetch_constituents(etf_code):
             'stock_code': stock_code,
             'stock_name': name,
             'weight': weight,
+            'qty': _fnum(r.get('F16499')),
+            'px': _fnum(r.get('F15001')),
         })
     return constituents
 
