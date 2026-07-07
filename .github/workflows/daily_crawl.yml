@@ -19,7 +19,33 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # push-트리거가 장중(KST)에 크롤을 오발시키는 것을 원천 차단.
+  # 어떤 액터의 어떤 커밋([skip ci] 누락 머지 등)이든 여기서 걸러짐 — 2026-07-07 장중 오발 사고 재발 방지.
+  # schedule(23:00 KST)·workflow_dispatch(수동=의도적)는 무조건 통과.
+  market-hours-gate:
+    runs-on: ubuntu-latest
+    outputs:
+      proceed: ${{ steps.gate.outputs.proceed }}
+    steps:
+      - name: Block push-triggered runs during KRX market hours
+        id: gate
+        run: |
+          if [ "${{ github.event_name }}" != "push" ]; then
+            echo "proceed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          HM=$((10#$(TZ=Asia/Seoul date +%H%M)))
+          DOW=$(TZ=Asia/Seoul date +%u)
+          if [ "$DOW" -le 5 ] && [ "$HM" -ge 900 ] && [ "$HM" -le 1535 ]; then
+            echo "KST 장중 push 트리거 — 잠정치 오염 방지 위해 스킵 (야간 23:00 스케줄이 정규 처리)"
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "proceed=true" >> "$GITHUB_OUTPUT"
+          fi
+
   crawl-and-chart:
+    needs: market-hours-gate
+    if: needs.market-hours-gate.outputs.proceed == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
