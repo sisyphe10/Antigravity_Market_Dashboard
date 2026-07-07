@@ -1812,6 +1812,7 @@ def _build_combined_chart_section():
         (function() {
             var cmbData = CMB_DATA_PLACEHOLDER;
             var cmbChart = null;
+            var cmbAutoRangePending = false;
             var cmbClickOrder = [];
             var clickPalette = ['#000000','#0055cc','#cc0000','#006633','#6a0dad','#cc6600','#008080','#990066'];
             var seriesScale = { 'KOSPI Market Cap': 1e12, 'KOSDAQ Market Cap': 1e12 };
@@ -2121,6 +2122,31 @@ def _build_combined_chart_section():
 
                 var startDate = document.getElementById('cmbStartDate').value;
                 var endDate = document.getElementById('cmbEndDate').value;
+
+                // Monthly/Yearly 시리즈는 최소 12개 관측이 보이도록 시작일 자동 확장.
+                // 선택 변경 시에만 동작(cmbAutoRangePending) — 수동 날짜 입력은 존중.
+                if (cmbAutoRangePending) {
+                    cmbAutoRangePending = false;
+                    var needStart = null;
+                    selected.forEach(function(name) {
+                        var row = document.querySelector('.cmb-series-row[data-name="' + name.replace(/"/g, '\\"') + '"]');
+                        var rank = row ? +row.getAttribute('data-update-rank') : 0;
+                        if (rank < 2) return;   // 0=D, 1=W는 대상 아님
+                        var arr = cmbData.data[name];
+                        if (!arr) return;
+                        var obsDates = [];
+                        for (var i = 0; i < cmbData.dates.length; i++) {
+                            if (arr[i] !== null && arr[i] !== undefined && cmbData.dates[i] <= endDate) obsDates.push(cmbData.dates[i]);
+                        }
+                        if (!obsDates.length) return;
+                        var d12 = obsDates[Math.max(0, obsDates.length - 12)];
+                        if (needStart === null || d12 < needStart) needStart = d12;
+                    });
+                    if (needStart !== null && needStart < startDate) {
+                        startDate = needStart;
+                        document.getElementById('cmbStartDate').value = needStart;
+                    }
+                }
 
                 var perSeries = [];
                 selected.forEach(function(name) {
@@ -2560,6 +2586,7 @@ def _build_combined_chart_section():
                     el.classList.add('active');
                     cmbClickOrder = [key];
                 }
+                cmbAutoRangePending = true;   // 선택 변경 → M/Y 시리즈 최소 12관측 자동 확장
                 buildCmbChart();
             };
             window.toggleCmbMA = function(slot, el) {
