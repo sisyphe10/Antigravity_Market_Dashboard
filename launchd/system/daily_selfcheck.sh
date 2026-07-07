@@ -101,6 +101,11 @@ count_starts_24h() {                    # <shortname> <cutoff> -> restart count
 }
 
 send_telegram() {                       # <message> — token used only as curl arg
+  # Force xtrace OFF here (and swallow the trace line of this very command) so a
+  # `bash -x` run — or inherited xtrace — can never print the expanded .env
+  # export or the curl URL (which carries the token) to stderr / the .err log.
+  # No restore needed: this is the last thing main() does before exit.
+  { set +x; } 2>/dev/null
   local msg="$1" token="" chat=""
   if ! load_env "$REPO/.env"; then
     logf "no .env at $REPO/.env — skipping send (health computed but not delivered)"
