@@ -29,6 +29,14 @@ PY="$REPO/venv/bin/python3"           # 결정 5: pyenv 3.10.12 기반 venv
 STAMP_DIR="$REPO/logs/launchd/stamps"
 LOCK_ROOT="$REPO/logs/launchd/locks"
 
+# ── 체인 게이트 v2 설정 (기본 OFF — schedule.tsv 4번째 컬럼이 비면 전부 미동작) ──
+#   schedule.tsv 는 A2b 가 __REPO__/logs/launchd/schedule.tsv 로 설치(치환본). 여기서는
+#   "내 이름 행의 4번째 컬럼(<선행잡>[:<타임아웃HHMM>])"만 읽어 선행 완료를 기다린다.
+SCHEDULE_TSV="${SCHEDULE_TSV:-$REPO/logs/launchd/schedule.tsv}"
+CHAIN_POLL_SEC="${CHAIN_POLL_SEC:-60}"           # 대기 폴링 간격
+CHAIN_DEFAULT_WAIT_SEC="${CHAIN_DEFAULT_WAIT_SEC:-2700}"  # HHMM 미지정 시 대기(45분)
+CHAIN_MAX_WAIT_SEC="${CHAIN_MAX_WAIT_SEC:-7200}" # ★절대 대기 상한(120분) — 어떤 계산이든 유계화
+
 # 잡의 작업 디렉토리 = repo 루트 (원본 systemd WorkingDirectory 대응)
 cd "$REPO" || { echo "[run_timer_job] cd $REPO 실패" >&2; exit 1; }
 
@@ -224,7 +232,113 @@ run_with_timeout() {
   return "$rc"
 }
 
+# ── 체인 게이트 (v2, 기본 OFF) ──────────────────────────────────
+#   schedule.tsv 4번째 컬럼 = <선행잡>[:<타임아웃HHMM(KST)>]. 비어 있으면(3컬럼 현행 포함)
+#   게이트 없음 = 현행과 100% 동일. ★락 획득 "전"에 대기 → 대기 중 잡별 락을 점유하지 않는다.
+#   신선도 판정: 선행 stamp 가 "오늘(KST 00:00 이후)" 갱신됐는가 = 선행이 오늘 완료됐는가.
+#   타임아웃 데드라인: HHMM 을 ★"게이트 시작"이 아니라 tsv 2번째 컬럼(cron)의 예정 발화 HHMM 에 앵커한다.
+#     데드라인 HHMM ≥ 예정 발화 HHMM → 발화일(오늘) 그 시각 / 미만 → 익일. 이러면 (a) kodex 23:30←crawl:0030
+#     = 익일 00:30, (b) 19:00 잡+1930 인데 19:40 늦은 시작 = 오늘 19:30 이미 경과 → 즉시 timeout+폴백.
+#   ★절대 대기 상한 120분: 어떤 계산이든 deadline=min(계산값, 시작+CHAIN_MAX_WAIT_SEC). 오설정·catch-up
+#     아침 재발화 등 잔여 경계를 전부 "최대 2시간 후 폴백+notify"로 유계화. 미지정 시 now+기본대기(45분).
+#   초과 시 경고+notify 후 ★폴백 실행(스킵 아님) — 선행 지연이 후행 데이터 공백으로 번지지 않게.
+#   ★fail-open: HHMM/예정발화 오형식·범위밖, tsv 부재·불가독은 게이트를 무시하고 잡을 정상 실행
+#     (오타·환경문제가 수집 중단으로 안 번지게). 빈 4번째 컬럼은 애초에 게이트 없음(현행 동일).
+kst_midnight() {  # <now_epoch> → 오늘 00:00 KST epoch (시스템 TZ 무관, 고정 UTC+9)
+  echo $(( ( ($1 + 32400) / 86400 ) * 86400 - 32400 ))
+}
+read_stamp_epoch() {  # <file> → 정수 epoch, 없거나 비정수면 0 (엄격)
+  local v=""
+  [ -f "$1" ] && v="$(head -n1 "$1" 2>/dev/null)"
+  v="${v#"${v%%[![:space:]]*}"}"; v="${v%"${v##*[![:space:]]}"}"
+  case "$v" in ''|*[!0-9]*) echo 0 ;; *) echo "$v" ;; esac
+}
+chain_lookup() {  # <name> → 그 행의 "<cron(2번째)>\t<체인(4번째)>" 출력(없으면 빈 문자열). 3컬럼 하위호환.
+  # ★무음 fail-open: tsv 부재·불가독·행 부재 → 빈 출력(게이트 없음, 기존 플로우 보존).
+  #   ‘성공 경로에서 tsv 를 매 발화 읽는 것’은 수용된 신규 동작(설계 §4). 읽기 오류는 조용히 넘긴다.
+  [ -f "$SCHEDULE_TSV" ] && [ -r "$SCHEDULE_TSV" ] || return 0
+  local c1 c2 c3 c4
+  while IFS=$'\t' read -r c1 c2 c3 c4 || [ -n "$c1" ]; do
+    case "$c1" in ''|\#*) continue ;; esac
+    [ "$c1" = "$1" ] && { printf '%s\t%s' "$c2" "${c4:-}"; return 0; }
+  done < "$SCHEDULE_TSV" 2>/dev/null
+  return 0
+}
+wait_for_chain() {  # <name> — 4번째 컬럼이 있으면 선행 stamp 신선까지 대기 (락 획득 전 호출)
+  local name="$1" row cron spec pred hhmm now today0 deadline stamp cap
+  local hh mm dl_min fmin fhour frest fire_min
+  row="$(chain_lookup "$name")"
+  cron="${row%%$'\t'*}"; spec="${row#*$'\t'}"
+  [ -n "$spec" ] || return 0                    # ★기본 OFF: 컬럼 비면/무매칭 즉시 통과(현행 100% 동일)
+  pred="${spec%%:*}"
+  case "$spec" in *:*) hhmm="${spec#*:}" ;; *) hhmm="" ;; esac
+  [ -n "$pred" ] || return 0
+
+  now="$(date +%s)"; today0="$(kst_midnight "$now")"
+  cap=$(( now + CHAIN_MAX_WAIT_SEC ))           # ★절대 대기 상한(시작+120분)
+
+  if [ -z "$hhmm" ]; then
+    deadline=$(( now + CHAIN_DEFAULT_WAIT_SEC ))            # 타임아웃 미지정 → 기본 대기
+  else
+    # HHMM 검증. 4자리·HH<24·MM<60 아니면 ★fail-open(게이트 무시+경고 1줄, 잡 정상 실행) — 오타 유계화.
+    case "$hhmm" in
+      [0-9][0-9][0-9][0-9]) : ;;
+      *) echo "[run_timer_job] $name: 체인 타임아웃 '$hhmm' 형식오류(HHMM 4자리 아님) → 게이트 무시, 정상 실행" >&2
+         return 0 ;;
+    esac
+    hh=$((10#${hhmm%??})); mm=$((10#${hhmm#??}))
+    if [ "$hh" -ge 24 ] || [ "$mm" -ge 60 ]; then
+      echo "[run_timer_job] $name: 체인 타임아웃 '$hhmm' 범위밖(HH<24·MM<60) → 게이트 무시, 정상 실행" >&2
+      return 0
+    fi
+    dl_min=$(( hh*60 + mm ))
+    # ★데드라인 앵커 = "게이트 시작"이 아니라 tsv 2번째 컬럼(cron)의 예정 발화 HHMM(분·시).
+    #   늦은 시작(launchd 지연/수면해제/catch-up)이 오늘의 정상 데드라인을 익일로 오판하지 않게 한다.
+    read -r fmin fhour frest <<< "$cron"
+    case "${fmin:-}" in ''|*[!0-9]*) fmin="" ;; esac
+    case "${fhour:-}" in ''|*[!0-9]*) fhour="" ;; esac
+    if [ -z "$fmin" ] || [ -z "$fhour" ]; then
+      echo "[run_timer_job] $name: 예정 발화 HHMM 파싱 불가(cron='$cron') → 게이트 무시, 정상 실행" >&2
+      return 0
+    fi
+    fmin=$((10#$fmin)); fhour=$((10#$fhour))
+    if [ "$fmin" -ge 60 ] || [ "$fhour" -ge 24 ]; then
+      echo "[run_timer_job] $name: 예정 발화 범위밖(cron='$cron') → 게이트 무시, 정상 실행" >&2
+      return 0
+    fi
+    fire_min=$(( fhour*60 + fmin ))
+    # 데드라인 HHMM ≥ 예정 발화 HHMM → 발화일(오늘) 그 시각 / 미만 → 익일.
+    if [ "$dl_min" -ge "$fire_min" ]; then
+      deadline=$(( today0 + dl_min*60 ))
+    else
+      deadline=$(( today0 + 86400 + dl_min*60 ))
+    fi
+  fi
+
+  # ★상한 클램프: min(데드라인, 시작+120분). 오설정·catch-up 재발화 등 잔여 경계를 전부 유계화.
+  [ "$deadline" -gt "$cap" ] && deadline="$cap"
+
+  echo "[run_timer_job] $name: 체인 대기 시작 pred='$pred' deadline=$deadline (poll ${CHAIN_POLL_SEC}s)" >&2
+  while : ; do
+    now="$(date +%s)"; today0="$(kst_midnight "$now")"
+    stamp="$(read_stamp_epoch "$STAMP_DIR/$pred.last")"
+    if [ "$stamp" -ge "$today0" ]; then
+      echo "[run_timer_job] $name: 선행 '$pred' 오늘 완료 확인(stamp=$stamp) → 진행" >&2
+      return 0
+    fi
+    if [ "$now" -ge "$deadline" ]; then
+      echo "[run_timer_job] $name: 선행 '$pred' 미완료·타임아웃(deadline=$deadline) → 경고+notify 후 폴백 실행" >&2
+      load_env "$REPO/.env"                     # notify 스크립트가 .env(토큰) 필요할 수 있어 선로드(멱등)
+      "$REPO/scripts/notify_sisyphe_failure.sh" "$name: chain-timeout(pred=$pred)" || true
+      return 0                                  # ★폴백: 스킵 아님, 그대로 실행
+    fi
+    sleep "$CHAIN_POLL_SEC"
+  done
+}
+
 # ── 실행 ────────────────────────────────────────────────────────
+wait_for_chain "$NAME"      # v2 체인 게이트(기본 OFF, 락 획득 전). 4번째 컬럼 비면 즉시 반환.
+
 acquire_lock "$NAME"
 case $? in
   0) : ;;   # 획득

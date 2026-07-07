@@ -1,8 +1,14 @@
-featured-kis	50 15 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh featured-kis
-etf-collect	30 16 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh etf-collect
-etf-collect-retry	0 18 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh etf-collect-retry
-landing-highlights	45 18 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh landing-highlights
-etf-active-alert	0 19 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh etf-active-alert
-kodex-sectors	30 23 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh kodex-sectors
-earnings-bot	0 8 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh earnings-bot
-update-stock-master	0 9 * * 6	/bin/bash __REPO__/launchd/timers/run_timer_job.sh update-stock-master
+# schedule.tsv — catch-up 러너(A4) 앵커 + 타이머 체인 게이트(A2b) 설정
+# 컬럼: <이름>	<KST cron(5필드)>	<실행 커맨드>	<체인 게이트(선택, 4번째)>
+# 4번째 컬럼(체인) = <선행잡>[:<타임아웃HHMM(KST)>]. ★비어 있으면 게이트 없음 = 현행과 100% 동일.
+#   활성화 예) etf-active-alert 행 4번째 컬럼에  etf-collect:1930
+#            → etf-collect 오늘 완료까지 대기, 19:30 KST 초과 시 경고+notify 후 폴백 실행(스킵 아님).
+#   전제·활성화 절차·검증·롤백: playbooks/PHASE2_RUNBOOK.md "부록 W4: 체인 활성화".
+featured-kis	50 15 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh featured-kis	
+etf-collect	30 16 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh etf-collect	
+etf-collect-retry	0 18 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh etf-collect-retry	
+landing-highlights	35 18 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh landing-highlights	
+etf-active-alert	0 19 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh etf-active-alert	
+kodex-sectors	30 23 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh kodex-sectors	
+earnings-bot	0 8 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh earnings-bot	
+update-stock-master	0 9 * * 6	/bin/bash __REPO__/launchd/timers/run_timer_job.sh update-stock-master	
