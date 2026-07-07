@@ -27,9 +27,9 @@ def _canonical_market(name):
     """rprs_mrkt_kor_name(예: KOSPI200, KSQ150, KONEX, KRX100) → 'KOSPI'|'KOSDAQ'|''.
     KOSDAQ150은 'KSQ150'으로 옴. KRX100 등 거래소 판별 불가 값은 ''(호출측 폴백으로 해소)."""
     n = str(name or "").strip().upper()
-    if "KOSPI" in n:
+    if "KOSPI" in n or "코스피" in n:
         return "KOSPI"
-    if "KOSDAQ" in n or n.startswith("KSQ"):
+    if "KOSDAQ" in n or n.startswith("KSQ") or "코스닥" in n:
         return "KOSDAQ"
     return ""
 
