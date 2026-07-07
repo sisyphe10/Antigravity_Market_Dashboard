@@ -7117,7 +7117,7 @@ def create_dashboard():
                 var y = mT + ih - ((vals[i] - mn) / range) * ih;
                 pts.push(x.toFixed(1) + ',' + y.toFixed(1));
             }}
-            var color = TREND[spark.trend] || '#555';
+            var color = '#000';
             var svg = '<svg viewBox="0 0 ' + w + ' ' + h + '" xmlns="http://www.w3.org/2000/svg">';
             // Y축 라벨 3개(최소/중간/최대) + 점선 그리드
             var yLv = [mn, (mn + mx) / 2, mx];
@@ -7185,7 +7185,8 @@ def create_dashboard():
                          : (days / 365.25).toFixed(1).replace(/\.0$/, '') + '년';
                 }}
             }}
-            nameEl.textContent = name + ' (' + chgTxt + (span ? ', ' + span : '') + ')';
+            var chgColor = chgTxt.charAt(0) === '+' ? '#d32f2f' : (chgTxt.charAt(0) === '-' ? '#1976d2' : '#000');
+            nameEl.innerHTML = escapeHtml(name) + ' (<span style="color:' + chgColor + '">' + escapeHtml(chgTxt) + '</span>' + (span ? ', ' + escapeHtml(span) : '') + ')';
         }}
 
         function renderSlot(slot) {{
