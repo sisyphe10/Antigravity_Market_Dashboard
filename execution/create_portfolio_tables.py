@@ -722,6 +722,16 @@ def create_portfolio_tables():
         if portfolio_meta:
             portfolio_data['_portfolio_meta'] = portfolio_meta
 
+        # 시세 기준일: 가격 캐시의 최신 일자 (개장 전엔 전일 → 제목 라벨이 '전일 종가 기준'으로
+        # 표시되게 함. NXT/장전 시세는 수집하지 않으므로 생성 시각과 시세 기준일은 다를 수 있다.)
+        try:
+            _last_px_dates = [df.index[-1] for df in price_cache.values()
+                              if df is not None and not df.empty]
+            if _last_px_dates:
+                portfolio_data['_price_asof'] = max(_last_px_dates).strftime('%Y-%m-%d')
+        except Exception as e:
+            print(f"  Warning: _price_asof 계산 실패: {e}")
+
         # JSON 파일로 저장
         print(f"\n5. 결과 저장 중... ({OUTPUT_FILE})")
         with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
