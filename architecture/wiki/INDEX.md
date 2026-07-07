@@ -122,7 +122,7 @@ Updated: 2026-07-07
 - [Wrap_NAV 워처 (watch_wrap_nav.py)](watcher-wrap-nav.md) — Watcher
 - [대시보드 생성기 (create_dashboard.py)](src-create-dashboard.md) — Source
 - [랜딩 하이라이트 생성 (create_landing_highlights.py)](src-landing-highlights.md) — Source
-- [랜딩 하이라이트 타이머 (18:35)](timer-landing-highlights.md) — Timer
+- [랜딩 하이라이트 타이머 (18:45)](timer-landing-highlights.md) — Timer
 - [비활성 워크플로 (weather · calendar · portfolio-report)](gha-disabled.md) — GHA
 - [외부 데이터 API/소스 집합](ext-data-apis.md) — External
 - [일일 셀프체크 다이제스트 (08:50, dead-man's switch)](daemon-daily-selfcheck.md) — Timer
@@ -146,7 +146,7 @@ Updated: 2026-07-07
 - [ETF 수집 재시도 타이머 (etf-collect-retry 18:00)](timer-etf-collect-retry.md) — 18:00 매일, active
 - [Featured KIS 수집 타이머 (15:50, 신고가)](timer-featured-kis.md) — 15:50 매일, active
 - [KODEX 섹터 타이머 (23:30, +KOSIS/일본capex 편승)](timer-kodex-sectors.md) — 23:30 매일, active
-- [랜딩 하이라이트 타이머 (18:35)](timer-landing-highlights.md) — 18:35 매일, active
+- [랜딩 하이라이트 타이머 (18:45)](timer-landing-highlights.md) — 18:45 매일, active
 - [실적봇 타이머 (earnings-bot)](timer-earnings-bot.md) — 08:00 매일, active
 - [액티브 ETF 변동 알림 타이머 (19:00)](timer-etf-active-alert.md) — 19:00 매일, active
 - [일일 셀프체크 다이제스트 (08:50, dead-man's switch)](daemon-daily-selfcheck.md) — 08:50 매일, planned
@@ -189,7 +189,7 @@ Updated: 2026-07-07
 - [dataset.csv (시장 시계열 통합)](store-dataset-csv.md) — 다수 잡 append, active
 - [featured_data.json / newhigh_20d.json](store-featured-data.md) — Featured 잡 + 15:50, active
 - [fee_revenue.json (수수료 매출)](store-fee-revenue.md) — 수동 입력, active
-- [landing_highlights.json](store-landing-highlights.md) — 18:35 갱신, active
+- [landing_highlights.json](store-landing-highlights.md) — 18:45 갱신, active
 - [portfolio_data.json](store-portfolio-data.md) — 체인 재생성, active
 - [stock_master.json (종목마스터)](store-stock-master.md) — 토 09:00 갱신, active
 - [taiwan_revenue.csv (대만 월매출)](store-taiwan-revenue-csv.md) — 23:20 갱신, active
@@ -244,7 +244,7 @@ Updated: 2026-07-07
 - [다나와 DRAM 최저가 (fetch_danawa_price.py)](src-danawa.md) — 23:00 (daily_crawl), active
 - [대만 월매출 (fetch_taiwan_revenue.py)](src-taiwan-revenue.md) — 23:20 (gha-daily-taiwan-revenue), active
 - [대시보드 생성기 (create_dashboard.py)](src-create-dashboard.md) — 체인 말단 (여러 잡), active
-- [랜딩 하이라이트 생성 (create_landing_highlights.py)](src-landing-highlights.md) — 18:35 (landing-highlights 타이머), active
+- [랜딩 하이라이트 생성 (create_landing_highlights.py)](src-landing-highlights.md) — 18:45 (landing-highlights 타이머), active
 - [마스터 시장 크롤러 (market_crawler.py)](src-market-crawler.md) — 23:00 (daily_crawl), active
 - [수익률 계산 (calculate_returns.py)](src-calculate-returns.md) — 체인 (finalize/recalc/crawl), active
 - [실적 캘린더 sync (earnings_calendar_sync.py)](src-earnings-calendar-sync.md) — 07:00 (GHA) + 15:00 (VM cron), active
@@ -352,7 +352,7 @@ Updated: 2026-07-07
 - [대만 월매출 (fetch_taiwan_revenue.py)](src-taiwan-revenue.md) — Source
 - [대시보드 생성기 (create_dashboard.py)](src-create-dashboard.md) — Source
 - [랜딩 하이라이트 생성 (create_landing_highlights.py)](src-landing-highlights.md) — Source
-- [랜딩 하이라이트 타이머 (18:35)](timer-landing-highlights.md) — Timer
+- [랜딩 하이라이트 타이머 (18:45)](timer-landing-highlights.md) — Timer
 - [마스터 시장 크롤러 (market_crawler.py)](src-market-crawler.md) — Source
 - [비활성 워크플로 (weather · calendar · portfolio-report)](gha-disabled.md) — GHA
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — Bot

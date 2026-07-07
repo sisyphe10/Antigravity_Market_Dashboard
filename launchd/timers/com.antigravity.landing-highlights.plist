@@ -24,14 +24,14 @@
         <key>LANG</key>
         <string>en_US.UTF-8</string>
     </dict>
-    <!-- KST 18:35 매일 (원본: OnCalendar=*-*-* 18:35:00 Asia/Seoul, RandomizedDelaySec=60).
-         launchd에는 RandomizedDelaySec 등가물이 없음 → 지터(≤60s) 생략, 18:35 정각 실행. 단일 잡이라 영향 없음. -->
+    <!-- KST 18:45 매일 (원본 18:35에서 2026-07-07 이격 — Featured 2차 타임아웃 경합 해소, audits/schedule_conflicts.md R1.
+         launchd에는 RandomizedDelaySec 등가물이 없음 → 지터 생략, 정각 실행. 단일 잡이라 영향 없음.) -->
     <key>StartCalendarInterval</key>
     <dict>
         <key>Hour</key>
         <integer>18</integer>
         <key>Minute</key>
-        <integer>35</integer>
+        <integer>45</integer>
     </dict>
     <key>StandardOutPath</key>
     <string>__REPO__/logs/launchd/landing-highlights.out</string>

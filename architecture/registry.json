@@ -1,0 +1,2466 @@
+{
+ "meta": {
+  "updated": "2026-07-07",
+  "projects": [
+   "antigravity"
+  ],
+  "version": 1
+ },
+ "components": [
+  {
+   "id": "infra-vm-macmini",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "infra",
+   "name": "컴퓨트 호스트 (Oracle VM → 맥미니)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "상시",
+   "status": "active",
+   "desc_md": "상시 봇 4종·systemd 타이머 8종·VM cron(git-pull, earnings sync)을 돌리는 리눅스 컴퓨트 호스트. 현재는 Oracle Cloud VM(144.24.70.224, Ubuntu, systemd, Python 3.10.12). \n\n- **이전 진행 중**: 사용자의 맥미니(Apple Silicon, macOS, launchd)로 흡수 예정. Phase 1(봇·타이머·system 데몬)은 임박, Phase 2(GHA 스케줄 잡 흡수)는 안정화 후. 변환물은 `launchd/` 트리에 초안으로 존재.\n- KRX/KOSIS/SEAJ 등 클라우드 IP가 차단하는 소스는 GHA가 아닌 이 호스트에서만 인증 수집이 된다(pykrx 로그인 등).\n- 메모리 356Mi 저사양 → 크롬 selenium 잡이 메모리를 굶기면 다른 잡을 죽이는 사고 이력(호텔 ADR 은퇴 원인).\n- 시각 판단은 로컬 시계 말고 `TZ=Asia/Seoul date`(VM)로.",
+   "code": [
+    "scripts/deploy.sh",
+    "scripts/inventory_vm.sh",
+    "launchd/"
+   ],
+   "depends_on": [
+    "infra-github"
+   ],
+   "alerts": "봇/타이머 실패 → notify_sisyphe_failure.sh → 텔레그램"
+  },
+  {
+   "id": "infra-laptop",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "infra",
+   "name": "작업용 노트북 (ASUS Vivobook, Windows)",
+   "runs_on": "laptop",
+   "schedule_kst": "상시",
+   "status": "active",
+   "desc_md": "사용자의 편집·운영 워크스테이션(Windows 11, i9-13900H). Wrap_NAV.xlsx 편집, 대시보드 코드 작성, 배포 트리거의 사람 손이 닿는 지점.\n\n- `watch_wrap_nav.py` 워처가 상시 떠서 Wrap_NAV.xlsx 저장을 감지→merge→push한다.\n- 로컬 워킹트리는 오염/분기되기 쉬워, 라이브 재생성은 origin 기준 격리 worktree 또는 GHA `workflow_dispatch`로 하는 것이 원칙(로컬 수동 merge/push 금지).\n- Chrome 경로로 HTML 미리보기(Edge 아님).",
+   "code": [
+    "watch_wrap_nav.py",
+    "scripts/local_safe_push.py",
+    "scripts/auto_pull.ps1"
+   ],
+   "depends_on": [
+    "infra-github"
+   ]
+  },
+  {
+   "id": "infra-ups",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "infra",
+   "name": "UPS (무정전 전원, 맥미니 대비)",
+   "runs_on": "external",
+   "status": "planned",
+   "desc_md": "맥미니 자가호스팅 전환에 대비한 무정전 전원 장치. 아직 도입 전(planned).\n\n- 클라우드 VM과 달리 가정 호스팅은 정전에 취약 → catch-up 러너(부팅 시 놓친 잡 복구)와 함께 가용성 축을 이룬다.\n- 정전/재부팅 시 놓친 스케줄 잡은 `daemon-catchup`이 stamp 기준으로 재실행.",
+   "depends_on": [
+    "infra-vm-macmini"
+   ]
+  },
+  {
+   "id": "watcher-wrap-nav",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "watcher",
+   "name": "Wrap_NAV 워처 (watch_wrap_nav.py)",
+   "runs_on": "laptop",
+   "schedule_kst": "상시",
+   "status": "active",
+   "desc_md": "노트북에서 상시 떠서 `Wrap_NAV.xlsx` 저장을 감지하면 3-way merge 후 origin으로 push하는 워처. 사용자가 엑셀에서 NAV/AUM/NEW 시트를 편집·저장하면 자동으로 라이브에 반영되는 손잡이.\n\n- 전용 clone(sync_and_push) + HOLD 프로토콜 + 5분 자가복구 구조로 로컬↔origin 반복 분기를 근본 억제.\n- push는 `merge_wrap_nav.py`의 xlsx 3-way 병합을 태워 바이너리 충돌을 회피.\n- 운영 원칙: 로컬 수동 merge/push 금지 — 편집만 하고 origin 확인 후 deploy.sh만.\n- 로그 `watch_wrap_nav.log`, PID `watch_wrap_nav.pid`.",
+   "code": [
+    "watch_wrap_nav.py",
+    "scripts/merge_wrap_nav.py",
+    "scripts/local_safe_push.py"
+   ],
+   "reads": [
+    "store-wrap-nav-xlsx"
+   ],
+   "writes": [
+    "store-wrap-nav-xlsx"
+   ],
+   "depends_on": [
+    "store-wrap-nav-xlsx",
+    "gha-recalc-wrap-nav"
+   ]
+  },
+  {
+   "id": "bot-sisyphe",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "bot",
+   "name": "Sisyphe-Bot (펀드/일상 텔레그램 봇)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "상시 (내부 잡 05:00~23:00)",
+   "status": "active",
+   "desc_md": "생태계의 중심 봇. python-telegram-bot JobQueue로 하루종일 포트폴리오·시장·가계부 잡을 돌린다(`execution/sisyphe_bot.py`, 134KB).\n\n- **내부 스케줄(KST)**: 05:00 날씨 · 05:05 캘린더 · 09:30~15:35 30분 자동 포트폴리오 업데이트(거래일) · 16:05 투자유의 재생성(`src-create-market-alert`) · 16:10 투자일지(`src-journal-data`) · 16:20/18:30/08:30 Featured 1·2·3차 · 17:00 일간 리포트 publish · 20:00 백업 재시도 · 23:00 투자유의 야간.\n- 가계부: Apps Script doPost가 거래를 직접 텔레그램 전송, 봇은 답장(분류/수정/제외) 처리.\n- systemd `Restart=always`(10회 실패 시 중단+알림). 맥미니에선 launchd KeepAlive + wrapper로 등가 구현.\n- 함정: JobQueue 가드/pytz 필요, 라이브 테스트는 VM 봇 중지 후.",
+   "code": [
+    "execution/sisyphe_bot.py",
+    "scripts/sisyphe-bot.service",
+    "launchd/bots/com.antigravity.sisyphe-bot.plist"
+   ],
+   "reads": [
+    "store-portfolio-data",
+    "store-featured-data",
+    "store-orders-pending"
+   ],
+   "writes": [
+    "page-market-alert",
+    "page-featured",
+    "subscribers.json"
+   ],
+   "depends_on": [
+    "src-create-market-alert",
+    "src-journal-data",
+    "src-investor-trading",
+    "src-create-dashboard",
+    "infra-telegram"
+   ],
+   "alerts": "OnFailure → notify_sisyphe_failure.sh sisyphe-bot → 텔레그램"
+  },
+  {
+   "id": "bot-ra-sisyphe",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "bot",
+   "name": "RA_Sisyphe_bot (리서치 알림 봇)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "상시 (내부 잡 05:10~21:00)",
+   "status": "active",
+   "desc_md": "리서치·공시·뉴스 알림 전담 봇(`execution/ra_sisyphe_bot.py`). 보유종목/시장 관련 외부 소스를 폴링해 텔레그램 다이제스트로 발송.\n\n- **내부 스케줄(KST)**: 05:10 리서치 헤드라인 · 05:15 투자유의 요약 · 07:00~15:00 매시 + 18:00 통합 WiseReport 신규 리포트 · 16:00 20일 신고가 · 17:00 공시 수집→17:30 발송(DART+KIND) · 월 09:10 해외IR 사각지대 점검.\n- **Generic Source Pipeline**: `sources.json`을 부팅 시 로드해 소스별 잡을 등록 — SemiAnalysis(09:00/21:00), TrendForce(08:00), 해외 IR 뉴스룸(07:30/20:00), k-neiss 원전(18:00).\n- 신규 소스 추가 = `execution/sources/<name>.py` + sources.json 엔트리 + deploy.\n- 구독자 `subscribers_ra_sisyphe.json`.",
+   "code": [
+    "execution/ra_sisyphe_bot.py",
+    "scripts/ra-sisyphe-bot.service",
+    "launchd/bots/com.antigravity.ra-sisyphe-bot.plist"
+   ],
+   "reads": [
+    "sources.json",
+    "disclosures.json",
+    "store-featured-data",
+    "page-market-alert"
+   ],
+   "writes": [
+    "store-sources-state",
+    "subscribers_ra_sisyphe.json"
+   ],
+   "depends_on": [
+    "src-generic-pipeline",
+    "src-semianalysis",
+    "src-trendforce",
+    "src-foreign-ir",
+    "src-kna-kneiss",
+    "src-dart-disclosures",
+    "src-kind-disclosures",
+    "infra-telegram"
+   ],
+   "alerts": "OnFailure → notify_sisyphe_failure.sh ra-sisyphe-bot → 텔레그램"
+  },
+  {
+   "id": "bot-research-notes",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "bot",
+   "name": "Research Notes 봇",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "상시 (이벤트 드리븐)",
+   "status": "active",
+   "desc_md": "텔레그램으로 들어온 리서치 메시지(텍스트+이미지)를 Haiku로 상세 요약해 노션에 퍼블리시하는 봇(`execution/research_bot/research_notes_bot.py`).\n\n- 요약 규칙: 토픽별 불릿 8~12개+, 이미 불릿이면 원문 유지, 모든 이미지 첨부, 엄중/중요 표시는 {RED} 태그→노션 빨간색.\n- 메시지·미디어는 로컬 SQLite(`research_notes.db`) + `media/`에 보관 후 노션 페이지로.\n- RA_Sisyphe_bot의 05:10 헤드라인이 이 봇이 쌓은 `research_headlines.json`을 읽어 아침 요약을 만든다.",
+   "code": [
+    "execution/research_bot/research_notes_bot.py",
+    "execution/research_bot/summarizer.py",
+    "execution/research_bot/notion_publisher.py",
+    "scripts/research-notes-bot.service"
+   ],
+   "writes": [
+    "store-research-notes-db",
+    "research_headlines.json"
+   ],
+   "depends_on": [
+    "ext-notion",
+    "infra-telegram"
+   ],
+   "alerts": "OnFailure → notify_sisyphe_failure.sh research-notes-bot → 텔레그램"
+  },
+  {
+   "id": "bot-seonyuduo-exercise",
+   "project": "antigravity",
+   "domain": "personal",
+   "type": "bot",
+   "name": "선유듀오 운동봇 (@SeonyuDuo_bot)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "상시 (06:00 다이제스트 등)",
+   "status": "active",
+   "desc_md": "부부 공유 운동기록 봇(`execution/seonyuduo_exercise_bot.py`). 자연어 운동기록을 Haiku로 파싱해 Google Sheet에 적재하고, 캘린더 다이제스트·리마인드를 보낸다.\n\n- 06:00 다이제스트 + 운동 1시간 전 리마인드(랜덤 피드백 팁). 가계부(ledger) 조회도 지원.\n- 표기: 식/여니/듀오(내부 코드 TS/NY 유지). `/운동피드백` 커맨드.\n- `seonyuduo_exercise_user_map.json`, `seonyuduo_feedback_tips.json`. SeonyuDuo repo 생태계와 연동.",
+   "code": [
+    "execution/seonyuduo_exercise_bot.py",
+    "scripts/seonyuduo-exercise-bot.service",
+    "launchd/bots/com.antigravity.seonyuduo-exercise-bot.plist"
+   ],
+   "reads": [
+    "seonyuduo_exercise_user_map.json",
+    "seonyuduo_feedback_tips.json"
+   ],
+   "depends_on": [
+    "ext-google-workspace",
+    "ext-seonyuduo-repo",
+    "infra-telegram"
+   ],
+   "alerts": "OnFailure → notify_sisyphe_failure.sh seonyuduo-exercise-bot → 텔레그램"
+  },
+  {
+   "id": "timer-earnings-bot",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "timer",
+   "name": "실적봇 타이머 (earnings-bot)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "08:00 매일",
+   "status": "active",
+   "desc_md": "매일 08:00 KST 1회 미국 실적/IR Day 파이프라인 전체를 돌리는 oneshot 타이머(`earnings-bot.timer` → `earnings-bot.service` → `python -m execution.earnings_bot.runner`).\n\n- 한 번 호출로 캘린더 sync + EDGAR/트랜스크립트 폴링 + 번역·요약(Claude) + 노션 퍼블리시 + 아침 다이제스트를 모두 수행.\n- 실행 파이프라인 상세는 `src-earnings-pipeline` 참조.\n- TimeoutStartSec=45min. 실패 시 `earnings-bot-notify.service`(OnFailure)로 텔레그램.\n- 함정: 2026-07-02 GHA calendar sync SA키 stale로 한 달 무성공 → 로컬 키 검증 후 secret 교체 복구.",
+   "code": [
+    "scripts/earnings-bot.timer",
+    "scripts/earnings-bot.service",
+    "launchd/timers/com.antigravity.earnings-bot.plist"
+   ],
+   "writes": [
+    "store-earnings-db"
+   ],
+   "depends_on": [
+    "src-earnings-pipeline"
+   ],
+   "alerts": "OnFailure → earnings-bot-notify.service → notify_sisyphe_failure.sh earnings-bot → 텔레그램"
+  },
+  {
+   "id": "timer-etf-collect",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "timer",
+   "name": "ETF 구성종목 수집 타이머 (etf-collect 16:30)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "16:30 매일",
+   "status": "active",
+   "desc_md": "매일 16:30 KST 전체 ETF 목록 + 구성종목/비중을 수집해 `etf_data.db`에 적재하는 타이머(`run_etf_collect.sh` → `execution/etf_collector/collect_etf_daily.py`).\n\n- 원래 봇 apscheduler 잡이었으나 봇 재시작/배포가 진행 중인 수집을 죽이는 문제로 systemd 타이머로 분리(2026-06-25).\n- 성공(collection_log ok>=1000)이면 즉시 스킵하는 idempotent 설계 → 18:00 재시도와 겹쳐도 안전.\n- TimeoutStartSec=30min. 실패 시 `sisyphe-bot-notify@etf-collect`.",
+   "code": [
+    "scripts/etf-collect.timer",
+    "scripts/etf-collect.service",
+    "scripts/run_etf_collect.sh",
+    "launchd/timers/com.antigravity.etf-collect.plist"
+   ],
+   "writes": [
+    "store-etf-db"
+   ],
+   "depends_on": [
+    "src-etf-collect"
+   ],
+   "alerts": "OnFailure → sisyphe-bot-notify@etf-collect → 텔레그램"
+  },
+  {
+   "id": "timer-etf-collect-retry",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "timer",
+   "name": "ETF 수집 재시도 타이머 (etf-collect-retry 18:00)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "18:00 매일",
+   "status": "active",
+   "desc_md": "16:30 수집의 실패/부분수집을 보충하는 재시도 타이머. 같은 `etf-collect.service`를 18:00 KST에 한 번 더 발화한다.\n\n- 16:30이 성공했으면 `collect_etf_daily.py`가 즉시 스킵(idempotent no-op), 부분수집이면 already_done을 건너뛰고 나머지를 마저 수집.\n- 18:30 Featured 2차(`etf.html` 재생성) 전에 끝나도록 18:00에 배치.",
+   "code": [
+    "scripts/etf-collect-retry.timer",
+    "launchd/timers/com.antigravity.etf-collect-retry.plist"
+   ],
+   "writes": [
+    "store-etf-db"
+   ],
+   "depends_on": [
+    "src-etf-collect",
+    "timer-etf-collect"
+   ],
+   "alerts": "OnFailure → sisyphe-bot-notify@etf-collect → 텔레그램"
+  },
+  {
+   "id": "timer-etf-active-alert",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "timer",
+   "name": "액티브 ETF 변동 알림 타이머 (19:00)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "19:00 매일",
+   "status": "active",
+   "desc_md": "매일 19:00 KST 전 액티브 ETF의 전일 대비 신규편입/편출/비중급변을 계산해 구독자에게 브로드캐스트하는 타이머(`run_etf_active_alert.sh` → `execution/etf_active_alert.py`).\n\n- 대시보드 `etf.html` '액티브 ETF' 탭과 동일한 단일 출처 모듈(`active_etf_changes.py`)로 계산 → 숫자 일치.\n- MMF/채권 제외(주식형만, 액티브 ~313개). dedup=`.etf_active_alert_sent.json`(키=latest 날짜→휴장일 무발송).\n- 수집 16:30/재시도 18:00/etf.html 18:30 이후라 19:00 배치.",
+   "code": [
+    "scripts/etf-active-alert.timer",
+    "scripts/etf-active-alert.service",
+    "scripts/run_etf_active_alert.sh",
+    "execution/etf_active_alert.py",
+    "launchd/timers/com.antigravity.etf-active-alert.plist"
+   ],
+   "reads": [
+    "store-etf-db"
+   ],
+   "writes": [
+    ".etf_active_alert_sent.json"
+   ],
+   "depends_on": [
+    "src-active-etf",
+    "timer-etf-collect",
+    "infra-telegram"
+   ],
+   "alerts": "OnFailure → sisyphe-bot-notify@etf-active-alert → 텔레그램"
+  },
+  {
+   "id": "timer-featured-kis",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "timer",
+   "name": "Featured KIS 수집 타이머 (15:50, 신고가)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "15:50 매일",
+   "status": "active",
+   "desc_md": "매일 15:50 KST 20일 신고가(`newhigh_20d.json`)를 생성하고 테마를 enrich하는 타이머(`fetch_featured_data_kis.py` + `enrich_newhigh_themes.py`).\n\n- 16:00 RA_Sisyphe_bot 신고가 알림에 선행 수집(장 마감 직후 KIS 확정 시세).\n- enrich 실패해도 수집 결과는 유지(ExecStartPost `-` 접두로 서비스 실패 처리 안 함).\n- TimeoutStartSec=15min.",
+   "code": [
+    "scripts/featured-kis.timer",
+    "scripts/featured-kis.service",
+    "launchd/timers/com.antigravity.featured-kis.plist"
+   ],
+   "writes": [
+    "store-featured-data",
+    "featured_data_kis.json"
+   ],
+   "depends_on": [
+    "src-featured-kis"
+   ]
+  },
+  {
+   "id": "timer-kodex-sectors",
+   "project": "antigravity",
+   "domain": "tech-semis",
+   "type": "timer",
+   "name": "KODEX 섹터 타이머 (23:30, +KOSIS/일본capex 편승)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "23:30 매일",
+   "status": "active",
+   "desc_md": "매일 23:30 KST(daily_crawl 23:00 직후) KOSPI200/KOSDAQ150 섹터 비중을 수집하는 타이머. 클라우드 IP가 KRX/KOSIS/SEAJ를 막아 VM 경로 전용이라, GHA로 못 하는 3종 수집이 여기에 편승한다.\n\n- `run_kodex_sectors.sh`가 순서대로: `fetch_kodex_sectors.py`(섹터) → `fetch_kosis_series.py`(KOSIS 유통·소비·고용·미분양·퇴직연금) → `fetch_japan_capex.py`(SEAJ 반도체장비/JMTBA 공작기계).\n- stale `.git/index.lock` 60초 가드 + flock 중복실행 방지 내장.\n- 함정: 실패 알림 문구는 오진 표현, 실제 대개 KRX 인증 오류. loginErrMaxCnt=5 잠금 주의(반복 로그인 금지).",
+   "code": [
+    "scripts/kodex-sectors.timer",
+    "scripts/kodex-sectors.service",
+    "scripts/run_kodex_sectors.sh",
+    "launchd/timers/com.antigravity.kodex-sectors.plist"
+   ],
+   "writes": [
+    "kodex_sectors.json",
+    "store-dataset-csv"
+   ],
+   "depends_on": [
+    "src-kodex-sectors",
+    "src-kosis-series",
+    "src-japan-capex"
+   ],
+   "alerts": "OnFailure → sisyphe-bot-notify@kodex-sectors → 텔레그램"
+  },
+  {
+   "id": "timer-landing-highlights",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "timer",
+   "name": "랜딩 하이라이트 타이머 (18:45)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "18:45 매일",
+   "status": "active",
+   "desc_md": "매일 18:45 KST(Featured 2차 마감 후) index.html 회전 위젯 데이터(sparkline+한줄 코멘트, 50슬롯)를 생성하는 타이머(`run_landing_highlights.sh` → `create_landing_highlights.py`).\n\n- 여러 산출물(market_alert/seibro/featured 등)에서 하이라이트를 뽑아 `landing_highlights.json`으로.\n- RandomizedDelaySec=60. TimeoutStartSec=5min. stale lockfile 주의.\n- 실패 시 `landing-highlights-notify.service`.",
+   "code": [
+    "scripts/landing-highlights.timer",
+    "scripts/landing-highlights.service",
+    "scripts/run_landing_highlights.sh",
+    "launchd/timers/com.antigravity.landing-highlights.plist"
+   ],
+   "reads": [
+    "page-market-alert",
+    "page-seibro",
+    "store-featured-data"
+   ],
+   "writes": [
+    "store-landing-highlights"
+   ],
+   "depends_on": [
+    "src-landing-highlights"
+   ],
+   "alerts": "OnFailure → landing-highlights-notify.service → 텔레그램"
+  },
+  {
+   "id": "timer-update-stock-master",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "timer",
+   "name": "종목마스터 주간 갱신 타이머 (토 09:00)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "토 09:00",
+   "status": "active",
+   "desc_md": "매주 토요일 09:00 KST 신규상장/사명변경을 KRX에서 점검해 Code 시트→`stock_master.json`을 갱신하는 타이머(`run_update_stock_master.sh` → `update_stock_master.py`).\n\n- Order 탭 자동완성이 이 마스터를 소비 → 사명변경 미반영 시 자동완성 실패(리가켐 사고 교훈).\n- 함정: 코드 있는 행만 저장(이름만 입력=조용히 누락).\n- TimeoutStartSec=15min.",
+   "code": [
+    "scripts/update-stock-master.timer",
+    "scripts/update-stock-master.service",
+    "scripts/run_update_stock_master.sh",
+    "launchd/timers/com.antigravity.update-stock-master.plist"
+   ],
+   "writes": [
+    "store-stock-master"
+   ],
+   "depends_on": [
+    "src-stock-master"
+   ],
+   "alerts": "OnFailure → sisyphe-bot-notify@update-stock-master → 텔레그램"
+  },
+  {
+   "id": "daemon-git-pull",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "watcher",
+   "name": "repo 동기화 (git-pull */5)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "*/5분",
+   "status": "active",
+   "desc_md": "5분마다 워킹트리를 origin과 동기화하는 봇·타이머의 생명선. 현재는 VM crontab(`*/5 git checkout -- \"*.html\"; git pull origin main`), 맥미니에선 launchd `com.antigravity.git-pull`(StartInterval=300)로 동등 이전.\n\n- `git checkout -- \"*.html\"`가 핵심: 봇이 HTML을 계속 재생성해 dirty하면 pull이 영구 abort → 먼저 discard 후 fast-forward.\n- pull-only라 push 레이스 없음(각 잡이 자기 safe_commit_push). 성공은 침묵.\n- 맥미니 버전은 연속 실패 12회(=1h)에 텔레그램 1회 경보 + 쿨다운. catch-up 대상 아님(계산 잡 아님).\n- 과거 사고: VM pull cron이 봇 미커밋 HTML로 abort→push job 연쇄실패 → `checkout -- *.html; pull`로 견고화.",
+   "code": [
+    "launchd/system/git_pull.sh",
+    "launchd/system/com.antigravity.git-pull.plist"
+   ],
+   "reads": [
+    "infra-github"
+   ],
+   "depends_on": [
+    "infra-github",
+    "infra-vm-macmini"
+   ],
+   "alerts": "연속 12회 실패 → notify_sisyphe_failure.sh git-pull → 텔레그램 (맥미니 버전)"
+  },
+  {
+   "id": "daemon-crash-watcher",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "watcher",
+   "name": "크래시 루프 워처 (*/5)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "*/5분",
+   "status": "planned",
+   "desc_md": "맥미니 이전에서 systemd `StartLimitBurst`를 대체하는 launchd 데몬(`com.antigravity.crash-watcher`, StartInterval=300). KeepAlive 봇이 크래시 루프에 빠지면 텔레그램 경보.\n\n- 봇 wrapper가 매 기동 시 `logs/launchd/starts/<봇>.log`에 epoch 한 줄 append → 워처가 600초 창 내 5회+ 시작을 루프로 판정.\n- 쿨다운 30분(중복 경보 억제), 성공 알림 시에만 쿨다운 stamp 기록.\n- **초안·검증 완료, 맥미니 컷오버 시 활성(planned).** VM에선 systemd StartLimit이 대응.",
+   "code": [
+    "launchd/system/crash_watcher.sh",
+    "launchd/system/com.antigravity.crash-watcher.plist"
+   ],
+   "reads": [
+    "logs/launchd/starts/"
+   ],
+   "depends_on": [
+    "infra-vm-macmini",
+    "infra-telegram"
+   ],
+   "alerts": "크래시 루프 감지 → notify_sisyphe_failure.sh <봇> → 텔레그램"
+  },
+  {
+   "id": "daemon-daily-selfcheck",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "timer",
+   "name": "일일 셀프체크 다이제스트 (08:50, dead-man's switch)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "08:50 매일",
+   "status": "planned",
+   "desc_md": "맥미니 상태를 매일 08:50 KST 텔레그램 한 줄로 요약하는 launchd 데몬(`com.antigravity.daily-selfcheck`). **정상이어도 매일 발송** — 메시지의 존재 자체가 liveness 신호(침묵=다운).\n\n- 수집: 봇 4종 running 여부 · 타이머 8종 stamp 신선도(OK n/N) · 24h 재시작 수 · 디스크 여유 · git-pull 실패연속/HEAD 나이.\n- 실제 문제(봇 다운/타이머 STALE/디스크 부족)만 ⚠️ 라인으로 헤더를 뒤집는다.\n- 실적 다이제스트(08:00) 후, 신선도 워치독(11:00) 전 배치.\n- **신규 추가(2026-07-06 커밋), 맥미니 전용 → 컷오버 시 활성(planned).** VM엔 대응 잡 없음.",
+   "code": [
+    "launchd/system/daily_selfcheck.sh",
+    "launchd/system/com.antigravity.daily-selfcheck.plist"
+   ],
+   "reads": [
+    "logs/launchd/stamps/",
+    "logs/launchd/starts/"
+   ],
+   "depends_on": [
+    "infra-vm-macmini",
+    "infra-telegram"
+   ],
+   "alerts": "매일 발송(침묵이 곧 경보) → 텔레그램"
+  },
+  {
+   "id": "launchd-gha-phase2",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "infra",
+   "name": "GHA 잡 흡수 layer (launchd Phase 2 초안)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "이관 후 각 잡 스케줄",
+   "status": "planned",
+   "desc_md": "GitHub Actions 스케줄 워크플로 9종을 맥미니 launchd LaunchDaemon으로 흡수하는 Phase 2 사전 산출물(`launchd/gha/`). **초안(draft) — plist XML·스케줄 환산·bash 문법만 검증, 실기 검증은 Phase 2(안정화 2주 뒤).**\n\n- 대상 9잡: gha-fred/universe/ecos/kofia/krx-valuation/disclosures/crawl/earnings-calendar-sync/finalize-orders.\n- 공용 wrapper `run_gha_job.sh`: 잡별 락 + `wrap-nav-pipeline` 공유 락(GHA concurrency 대체) + 안전 .env 파서 + 타임아웃 워치독 + 성공 stamp + 실패 알림 + `heartbeats.json` 방출.\n- UTC→KST 환산 함정: gha-fred는 월~금 22:50 UTC → **화~토 07:50 KST**(요일 +1일).\n- 컷오버: 하루 1잡, 짝 커밋으로 원본 yml의 `schedule:`만 제거(workflow_dispatch 유지=롤백 경로). finalize-orders는 최후.\n- ★이관 시 earnings-calendar-sync 이중 실행(VM cron 15:00 + GHA 07:00) 단일화 필요.",
+   "code": [
+    "launchd/gha/",
+    "launchd/gha/run_gha_job.sh",
+    "launchd/gha/schedule_gha.tsv",
+    "launchd/gha/install_gha.sh"
+   ],
+   "writes": [
+    "store-heartbeats"
+   ],
+   "depends_on": [
+    "infra-vm-macmini",
+    "gha-daily-crawl",
+    "gha-daily-fred",
+    "gha-daily-ecos",
+    "gha-daily-kofia",
+    "gha-daily-universe",
+    "gha-daily-krx-valuation",
+    "gha-daily-disclosures",
+    "gha-earnings-calendar-sync",
+    "gha-finalize-orders"
+   ],
+   "alerts": "wrapper notify_failure → 텔레그램 (맥미니)"
+  },
+  {
+   "id": "gha-daily-crawl",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "gha_workflow",
+   "name": "Daily Market Crawl (23:00)",
+   "runs_on": "gha",
+   "schedule_kst": "23:00 매일 (+ execution/** push 트리거)",
+   "status": "active",
+   "desc_md": "생태계 최대 야간 파이프라인. 23:00 KST(14:00 UTC) 또는 `execution/**`·dataset.csv push 시 기동.\n\n- 순서: yfinance 백필 → 월별수익률 → 지수1M → 메모리엑셀 → **market_crawler**(DRAM/NAND/원자재/크립토/FX/지수/리튬/폴리실리콘/해상운임/SMP/SiliconData) → NAV·수익률 계산 → 다나와 → 차트 → KRX 금/ETS → 외국인 보유 → 예탁금 → wrap차트 → 포트폴리오표 → 기여도 → SEIBro TOP50 → create_dashboard → safe_push.\n- `concurrency: wrap-nav-pipeline`으로 xlsx 쓰기 직렬화. push는 `--xlsx-conflict bail`.\n- 장중 오작동 방지: push-트리거 run은 KRX 장시간 밖으로 게이트(2026-07 추가).\n- Featured/stock_price_history는 GHA IP 차단으로 VM 잡이 담당.",
+   "code": [
+    ".github/workflows/daily_crawl.yml"
+   ],
+   "reads": [
+    "store-wrap-nav-xlsx"
+   ],
+   "writes": [
+    "store-dataset-csv",
+    "store-portfolio-data",
+    "store-contribution-data",
+    "page-featured",
+    "page-market",
+    "page-wrap",
+    "page-universe",
+    "page-seibro",
+    "page-index"
+   ],
+   "depends_on": [
+    "src-market-crawler",
+    "src-monthly-returns",
+    "src-danawa",
+    "src-krx-foreign",
+    "src-seibro",
+    "src-calculate-wrap-nav",
+    "src-calculate-returns",
+    "src-create-portfolio-tables",
+    "src-create-contribution-data",
+    "src-draw-charts",
+    "src-create-dashboard"
+   ],
+   "alerts": "실패 자체 알림 없음 → gha-daily-health-check가 산출물 신선도로 포착"
+  },
+  {
+   "id": "gha-daily-ecos",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "gha_workflow",
+   "name": "Daily ECOS BOK (17:40 평일)",
+   "runs_on": "gha",
+   "schedule_kst": "17:40 평일",
+   "status": "active",
+   "desc_md": "한국은행 ECOS 시계열 33종(금리/매크로/신용·부동산)을 평일 17:40 KST(08:40 UTC) 수집해 dataset.csv→market.html DATA 섹션 재생성.\n\n- 시장금리 T+1 + 당일 오전 발표 월간지표를 하루 1회로 완결 수집. kofia 17:30과 `wrap-nav-pipeline` 그룹으로 직렬화.\n- `ECOS_API_KEY` 미설정 시 graceful skip(실패 알림 없음).\n- 함정: M2=161Y006, 분기전망=첫달 말일.",
+   "code": [
+    ".github/workflows/daily_ecos.yml"
+   ],
+   "writes": [
+    "store-dataset-csv",
+    "page-market"
+   ],
+   "depends_on": [
+    "src-ecos",
+    "src-create-dashboard"
+   ],
+   "alerts": "실패 자체 알림 없음 → gha-daily-health-check"
+  },
+  {
+   "id": "gha-daily-fred",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "gha_workflow",
+   "name": "Daily FRED US Macro (07:50 화~토)",
+   "runs_on": "gha",
+   "schedule_kst": "07:50 화~토",
+   "status": "active",
+   "desc_md": "미국 FRED 시계열 36종(금리/매크로/신용·부동산)을 화~토 07:50 KST(=월~금 22:50 UTC) 수집해 dataset.csv→market.html DATA 재생성.\n\n- 토요일 run이 금요일 밤 미국 고용보고서 등을 다음날 아침 포착. 매 run 전체 재조회.\n- `FRED_API_KEY` 미설정 시 graceful skip.\n- 함정: 주간 시리즈에 5년창 금지.",
+   "code": [
+    ".github/workflows/daily_fred.yml"
+   ],
+   "writes": [
+    "store-dataset-csv",
+    "page-market"
+   ],
+   "depends_on": [
+    "src-fred",
+    "src-create-dashboard"
+   ],
+   "alerts": "실패 자체 알림 없음 → gha-daily-health-check"
+  },
+  {
+   "id": "gha-daily-health-check",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "gha_workflow",
+   "name": "Daily Data Health Check (11:00)",
+   "runs_on": "gha",
+   "schedule_kst": "11:00 매일",
+   "status": "active",
+   "desc_md": "일별 수집물이 임계(보통 2 거래일 연속 누락) 이상 멈추면 텔레그램 경보하는 신선도 워치독(`check_data_freshness.py`, 순수 표준 라이브러리).\n\n- 워크플로가 green이어도 개별 시리즈가 stale인지 origin/main 산출물로 점검(대부분 데이터 잡이 실패 시 조용히 green이라 이 감시가 유일한 그물).\n- GHA 스케줄 워크플로 자체의 '무성공'도 감시(cron 자동발견, 주중형 임계 4일/매일형 3일 — earnings 한 달 사각 재발 방지).\n- Phase 2에선 heartbeats.json 나이 감시 섹션이 추가돼 캘린더/finalize 등 dated 산출 없는 잡 공백을 메움.",
+   "code": [
+    ".github/workflows/daily_health_check.yml",
+    "execution/check_data_freshness.py"
+   ],
+   "reads": [
+    "store-dataset-csv",
+    "store-heartbeats"
+   ],
+   "depends_on": [
+    "infra-github",
+    "infra-telegram"
+   ],
+   "alerts": "stale 감지 → 텔레그램 (이 워크플로가 곧 경보원)"
+  },
+  {
+   "id": "gha-daily-kofia",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "gha_workflow",
+   "name": "Daily KOFIA Stats + NPS (17:30 평일)",
+   "runs_on": "gha",
+   "schedule_kst": "17:30 평일",
+   "status": "active",
+   "desc_md": "고객예탁금/신용잔고(data.go.kr 금투협 종합통계)를 평일 17:30 KST(08:30 UTC) 수집해 `kofia_stats.json`→index.html 랜딩 차트 재생성. 같은 키로 국민연금 적립금(`fetch_nps_fund.py`)도 이어 수집.\n\n- `DATA_GO_KR_API_KEY` 미설정 시 graceful skip. `wrap-nav-pipeline` 그룹.\n- 예탁금=invrDpsgAmt·신용잔고=crdTrFingWhl.\n- 국민연금 적립금은 odcloud 15106894(피벗+uddi 해석 함정).",
+   "code": [
+    ".github/workflows/daily_kofia.yml"
+   ],
+   "writes": [
+    "kofia_stats.json",
+    "page-index",
+    "store-dataset-csv",
+    "page-market"
+   ],
+   "depends_on": [
+    "src-kofia",
+    "src-nps-fund",
+    "src-create-dashboard"
+   ],
+   "alerts": "실패 자체 알림 없음 → gha-daily-health-check"
+  },
+  {
+   "id": "gha-daily-krx-valuation",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "gha_workflow",
+   "name": "Daily KRX Index Valuation (18:30 평일)",
+   "runs_on": "gha",
+   "schedule_kst": "18:30 평일",
+   "status": "active",
+   "desc_md": "코스피/코스닥 지수 후행 PER/PBR/배당수익률(pykrx data.krx 로그인)을 평일 18:30 KST(09:30 UTC) 수집해 dataset.csv→market.html DATA(INDEX_KOREA) 재생성.\n\n- 장 마감 후 KRX 저녁 발표 반영. `KRX_ID`/`KRX_PW` 미설정 시 graceful skip.\n- 클라우드 IP에서도 로그인 됨(외국인 보유는 daily_crawl에서 같은 자격 사용). forward PER은 미제공(Quantiwise 영역).",
+   "code": [
+    ".github/workflows/daily_krx_valuation.yml"
+   ],
+   "writes": [
+    "store-dataset-csv",
+    "page-market"
+   ],
+   "depends_on": [
+    "src-krx-valuation",
+    "src-create-dashboard"
+   ],
+   "alerts": "실패 자체 알림 없음 → gha-daily-health-check"
+  },
+  {
+   "id": "gha-daily-universe",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "gha_workflow",
+   "name": "Daily Universe yfinance (18:30 + 07:00)",
+   "runs_on": "gha",
+   "schedule_kst": "18:30 / 07:00 매일",
+   "status": "active",
+   "desc_md": "관심 유니버스 종목 시세/지표를 하루 2회 yfinance로 수집해 `universe.json`+`universe_history.json` 갱신. 18:30 KST(아시아 장종료 후) + 07:00 KST(미국·유럽 장종료 후).\n\n- 종목 추가 = `universe_tickers.csv` 행 + 타겟 주입(전체 2회 실행 금지). 멀티인스턴스는 별도 worktree.\n- Universe DD 열(52주 낙폭), RSI(1M)는 `fetch_index_returns` 산출을 소비.\n- `wrap-nav-pipeline` 그룹으로 push 직렬화.",
+   "code": [
+    ".github/workflows/daily_universe.yml"
+   ],
+   "reads": [
+    "universe_tickers.csv"
+   ],
+   "writes": [
+    "store-universe-json"
+   ],
+   "depends_on": [
+    "src-universe"
+   ],
+   "alerts": "실패 자체 알림 없음 → gha-daily-health-check"
+  },
+  {
+   "id": "gha-daily-taiwan-revenue",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "gha_workflow",
+   "name": "Daily Taiwan Monthly Revenue (23:20)",
+   "runs_on": "gha",
+   "schedule_kst": "23:20 매일",
+   "status": "active",
+   "desc_md": "대만 상장·상궤 큐레이션 53종목의 월매출(FinMind)을 23:20 KST(14:20 UTC) 수집해 `taiwan_revenue.csv`→`taiwan.html` 생성. daily_crawl 23:00과 +20분 시차로 동시각 기동 회피.\n\n- 순서: `fetch_taiwan_revenue.py` → `--crosscheck`(공식 TWSE/TPEx 대조, 로그만) → `create_taiwan_page.py` → safe_push.\n- GHA cron 지연(3~5h) 감안해도 다음 실행 전 자가치유(100일 롤링 재조회).\n- 시크릿: FINMIND_TOKEN/USER/PASSWORD.",
+   "code": [
+    ".github/workflows/daily_taiwan_revenue.yml"
+   ],
+   "writes": [
+    "store-taiwan-revenue-csv",
+    "page-taiwan"
+   ],
+   "depends_on": [
+    "src-taiwan-revenue",
+    "page-taiwan"
+   ],
+   "alerts": "실패 자체 알림 없음 → gha-daily-health-check"
+  },
+  {
+   "id": "gha-earnings-calendar-sync",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "gha_workflow",
+   "name": "Earnings Calendar Sync (07:00)",
+   "runs_on": "gha",
+   "schedule_kst": "07:00 매일",
+   "status": "active",
+   "desc_md": "Finnhub 실적 일정을 Google Calendar에 동기화하는 워크플로(07:00 KST/22:00 UTC). 산출은 repo 밖(캘린더 직접 기록) → git push 없음.\n\n- ★이중 실행: **VM cron(15:00 KST)도 같은 스크립트를 돌린다** → 맥미니 이전 시 단일화 필요(캘린더 중복 우려).\n- repo 밖 산출이라 신선도 감시 사각 → Phase 2 heartbeat가 커버.\n- 시크릿: FINNHUB_API_KEY, GOOGLE_SERVICE_ACCOUNT_KEY. 실적봇 다이제스트가 이 캘린더를 소비.\n- 교훈: SA키 stale로 한 달 무성공 사각 → 로컬 키 검증 후 secret 교체.",
+   "code": [
+    ".github/workflows/earnings_calendar_sync.yml",
+    "execution/earnings_calendar_sync.py"
+   ],
+   "depends_on": [
+    "src-earnings-calendar-sync",
+    "ext-google-workspace"
+   ],
+   "alerts": "실패 자체 알림 없음 (repo 밖 산출) → Phase 2 heartbeat 감시"
+  },
+  {
+   "id": "gha-finalize-orders",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "gha_workflow",
+   "name": "Finalize Pending Orders + AUM (16:00)",
+   "runs_on": "gha",
+   "schedule_kst": "16:00 매일",
+   "status": "active",
+   "desc_md": "사용자가 브라우저에서 임시저장한 주문/AUM을 16:00 KST(07:00 UTC) 장 마감 후 Wrap_NAV.xlsx의 NEW/AUM 시트에 확정 반영하는 워크플로.\n\n- 순서: finalize_pending_orders → finalize_pending_aum → calc_wrap_nav → calc_returns → create_portfolio_tables → create_dashboard → safe_push(`--xlsx-conflict fail`).\n- xlsx conflict를 fail로 둔 것은 의도적 — dropped commit이 확정 편집을 조용히 잃지 않도록 수동 재실행을 유도.\n- Order 최종저장은 이 워크플로를 workflow_dispatch로 즉시 트리거하기도 함.",
+   "code": [
+    ".github/workflows/finalize_orders.yml"
+   ],
+   "reads": [
+    "store-orders-pending"
+   ],
+   "writes": [
+    "store-wrap-nav-xlsx",
+    "store-portfolio-data",
+    "page-index",
+    "page-market",
+    "page-wrap",
+    "page-universe",
+    "page-seibro",
+    "page-featured"
+   ],
+   "depends_on": [
+    "store-orders-pending",
+    "src-calculate-wrap-nav",
+    "src-calculate-returns",
+    "src-create-portfolio-tables",
+    "src-create-dashboard"
+   ],
+   "alerts": "실패 자체 알림 없음 (repo 밖 dated 산출 없음) → Phase 2 heartbeat 감시"
+  },
+  {
+   "id": "gha-recalc-wrap-nav",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "gha_workflow",
+   "name": "Recalculate Wrap NAV (xlsx push 트리거)",
+   "runs_on": "gha",
+   "schedule_kst": "push 트리거 (Wrap_NAV.xlsx)",
+   "status": "active",
+   "desc_md": "`Wrap_NAV.xlsx`가 push될 때마다 기준가·수익률을 재계산하고 대시보드를 재생성하는 워크플로(스케줄 없음, 파일 트리거).\n\n- 워처가 사용자의 xlsx 편집을 push하면 여기서 라이브 wrap.html/market.html이 갱신된다.\n- `wrap-nav-pipeline` concurrency로 다른 GHA와 xlsx 쓰기를 직렬화 → xlsx 가드는 사람이 직접 xlsx push할 때만 발동.\n- safe_push는 `--xlsx-conflict bail --prefer-remote-portfolio`.\n- 라이브 재생성 수단: `gh workflow run recalc_wrap_nav.yml`.",
+   "code": [
+    ".github/workflows/recalc_wrap_nav.yml"
+   ],
+   "reads": [
+    "store-wrap-nav-xlsx"
+   ],
+   "writes": [
+    "store-portfolio-data",
+    "page-wrap",
+    "page-market",
+    "page-index",
+    "page-universe",
+    "page-seibro",
+    "page-featured"
+   ],
+   "depends_on": [
+    "store-wrap-nav-xlsx",
+    "src-calculate-wrap-nav",
+    "src-calculate-returns",
+    "src-create-portfolio-tables",
+    "src-create-dashboard"
+   ]
+  },
+  {
+   "id": "gha-dormant-push",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "gha_workflow",
+   "name": "휴면 push-트리거 워크플로 (backfill · merge-ddr5)",
+   "runs_on": "gha",
+   "schedule_kst": "push 트리거 (사실상 휴면)",
+   "status": "frozen",
+   "desc_md": "특정 파일 push 시에만 도는, 사실상 휴면 상태의 유틸 워크플로 2종.\n\n- `run_backfill.yml`: 자기 자신(yml) push 시 yfinance 히스토리 백필+차트+대시보드 재생성 후 커밋. 초기 셋업용 잔재.\n- `run_merge_ddr5.yml`: `merge_ddr5_data.py` push 시 DDR5 데이터 병합. 일회성 병합 도구.\n- 둘 다 정기 스케줄 없음, 평소 트리거 안 됨 → status frozen. 삭제보다 보존.",
+   "code": [
+    ".github/workflows/run_backfill.yml",
+    ".github/workflows/run_merge_ddr5.yml"
+   ],
+   "writes": [
+    "store-dataset-csv"
+   ],
+   "depends_on": [
+    "infra-github"
+   ]
+  },
+  {
+   "id": "page-index",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "page",
+   "name": "index.html (랜딩)",
+   "runs_on": "github",
+   "schedule_kst": "생성=여러 잡",
+   "status": "active",
+   "desc_md": "생태계 진입점 랜딩 페이지. sparkline 회전 위젯(50슬롯)+인용구 카드, 상단 탭바 네비게이션(WRAP/Market/Architecture).\n\n- 위젯 데이터는 `landing_highlights.json`(18:45 타이머)+`landing_quotes.json`, 예탁금/신용 차트는 `kofia_stats.json`.\n- `create_dashboard.py`가 생성, kofia/finalize/recalc/crawl 등 여러 잡이 재생성.\n- 좌측 'Age of Emergence' 브랜드 클릭=index로.",
+   "code": [
+    "execution/create_dashboard.py"
+   ],
+   "reads": [
+    "store-landing-highlights",
+    "landing_quotes.json",
+    "kofia_stats.json"
+   ],
+   "depends_on": [
+    "src-create-dashboard",
+    "src-landing-highlights"
+   ],
+   "links": [
+    {
+     "label": "라이브",
+     "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/index.html"
+    }
+   ]
+  },
+  {
+   "id": "page-market",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "page",
+   "name": "market.html (마켓 대시보드)",
+   "runs_on": "github",
+   "schedule_kst": "생성=여러 잡",
+   "status": "active",
+   "desc_md": "시장 데이터 허브. Monthly Returns 표 + Indices/MARKET 동적 차트 + DATA 섹션(ECOS/FRED/KRX/원자재/capex 등 시계열 사이드바).\n\n- DATA 탭 사이드바 3칼럼(Update/Group/Data) 정렬+엑셀필터, 주기 자동판정, 행배경 틴트.\n- 소스: `dataset.csv`(대부분 시계열), `monthly_returns.json`.\n- `create_dashboard.py` 생성. dataset.csv를 쓰는 거의 모든 잡이 재생성.",
+   "code": [
+    "execution/create_dashboard.py"
+   ],
+   "reads": [
+    "store-dataset-csv",
+    "monthly_returns.json"
+   ],
+   "depends_on": [
+    "src-create-dashboard"
+   ],
+   "links": [
+    {
+     "label": "라이브",
+     "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/market.html"
+    }
+   ]
+  },
+  {
+   "id": "page-wrap",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "page",
+   "name": "wrap.html (WRAP 대시보드)",
+   "runs_on": "github",
+   "schedule_kst": "생성=여러 잡",
+   "status": "active",
+   "desc_md": "랩 상품 운용 대시보드. Dashboard/공시/Order/AUM/수수료/기여도 탭 묶음. 자문사 실무의 중심 화면.\n\n- PORTFOLIO 종목표·수익률·차트는 `portfolio_data.json`+`Wrap_NAV.xlsx` 계산 산출을 소비.\n- Order 탭: 임시저장(회색, `orders/pending_orders.json`)→최종저장(초록, finalize 트리거). 기여도 탭은 `contribution_data.json` 런타임 fetch.\n- 증권사·상품 정의는 단일 레지스트리(`execution/wrap_config.py`)에서 파생.\n- `create_dashboard.py` 생성. finalize/recalc가 주 재생성원.",
+   "code": [
+    "execution/create_dashboard.py",
+    "execution/wrap_config.py"
+   ],
+   "reads": [
+    "store-portfolio-data",
+    "store-contribution-data",
+    "store-orders-pending"
+   ],
+   "depends_on": [
+    "src-create-dashboard",
+    "src-create-portfolio-tables",
+    "src-create-contribution-data"
+   ],
+   "links": [
+    {
+     "label": "라이브",
+     "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/wrap.html"
+    }
+   ]
+  },
+  {
+   "id": "page-universe",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "page",
+   "name": "universe.html (Universe)",
+   "runs_on": "github",
+   "schedule_kst": "생성=여러 잡",
+   "status": "active",
+   "desc_md": "관심 유니버스 종목 스크리닝 페이지(시세·52주 낙폭 DD·RSI 1M·외국인 보유비중 등).\n\n- 소스: `universe.json`/`universe_history.json`(하루 2회 yfinance) + 외국인 보유비중(INDEX_KR).\n- `create_dashboard.py` 생성. 종목 추가는 `universe_tickers.csv`로.",
+   "code": [
+    "execution/create_dashboard.py"
+   ],
+   "reads": [
+    "store-universe-json"
+   ],
+   "depends_on": [
+    "src-create-dashboard",
+    "src-universe"
+   ],
+   "links": [
+    {
+     "label": "라이브",
+     "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/universe.html"
+    }
+   ]
+  },
+  {
+   "id": "page-universe-lab",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "page",
+   "name": "universe_lab.html (Universe Lab)",
+   "runs_on": "github",
+   "schedule_kst": "생성=여러 잡",
+   "status": "active",
+   "desc_md": "Universe의 실험(lab) 변형 페이지. 사이드바/스타일을 Universe와 통일해 관리.\n\n- `create_dashboard.py`의 PAGES 목록에 `('universe_lab','universe_lab.html','Universe Lab')`로 등록돼 함께 생성.\n- 소스는 Universe와 공유(universe.json 계열).",
+   "code": [
+    "execution/create_dashboard.py"
+   ],
+   "reads": [
+    "store-universe-json"
+   ],
+   "depends_on": [
+    "src-create-dashboard"
+   ],
+   "links": [
+    {
+     "label": "라이브",
+     "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/universe_lab.html"
+    }
+   ]
+  },
+  {
+   "id": "page-seibro",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "page",
+   "name": "seibro.html (SEIBro)",
+   "runs_on": "github",
+   "schedule_kst": "생성=여러 잡",
+   "status": "active",
+   "desc_md": "SEIBro 결제(예탁결제) TOP 50 관련 데이터 페이지.\n\n- 소스: `fetch_seibro_data.py`(daily_crawl 내 selenium 수집) 산출 `seibro_tickers.json`.\n- `create_dashboard.py` 생성. Chrome selenium 필요라 GHA에 setup-chrome 스텝.",
+   "code": [
+    "execution/create_dashboard.py"
+   ],
+   "reads": [
+    "seibro_tickers.json"
+   ],
+   "depends_on": [
+    "src-create-dashboard",
+    "src-seibro"
+   ],
+   "links": [
+    {
+     "label": "라이브",
+     "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/seibro.html"
+    }
+   ]
+  },
+  {
+   "id": "page-featured",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "page",
+   "name": "featured.html (Featured TOP)",
+   "runs_on": "github",
+   "schedule_kst": "생성=Featured 잡(16:20/18:30/08:30)",
+   "status": "active",
+   "desc_md": "KRX 거래대금/시총/상승률 TOP 종목 페이지(대용량 ~11MB, 종목별 뉴스/테마 임베드).\n\n- 소스: Sisyphe-Bot Featured 잡(16:20 1차/18:30 2차/08:30 익일 복구)이 KIS 배치로 `featured_data.json`을 만들고 create_dashboard로 생성.\n- 20일 신고가는 별도 `newhigh_20d.json`(15:50 타이머).\n- 18:30 2차가 etf.html도 함께 재생성.",
+   "code": [
+    "execution/create_dashboard.py",
+    "execution/fetch_featured_news.py"
+   ],
+   "reads": [
+    "store-featured-data",
+    "featured_news.json"
+   ],
+   "depends_on": [
+    "src-create-dashboard",
+    "bot-sisyphe"
+   ],
+   "links": [
+    {
+     "label": "라이브",
+     "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/featured.html"
+    }
+   ]
+  },
+  {
+   "id": "page-etf",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "page",
+   "name": "etf.html (ETF 구성종목)",
+   "runs_on": "github",
+   "schedule_kst": "생성=18:30 Featured 2차",
+   "status": "active",
+   "desc_md": "ETF 구성종목/비중 + 액티브 ETF 변동 탭 페이지(대용량 ~18MB, 조건부 생성 — `etf_data.db` 있을 때만).\n\n- 소스: `etf_data.db`(16:30/18:00 수집 타이머). 액티브 ETF 탭은 `active_etf_changes.py` 단일 출처(19:00 알림과 숫자 일치).\n- `create_dashboard.py`가 생성하되 VM 18:30 Featured 2차 잡이 실제 재생성.\n- MMF/채권 제외(주식형만), 급변/편입/편출 필터.",
+   "code": [
+    "execution/create_dashboard.py",
+    "execution/etf_collector/active_etf_changes.py"
+   ],
+   "reads": [
+    "store-etf-db"
+   ],
+   "depends_on": [
+    "src-create-dashboard",
+    "src-active-etf",
+    "timer-etf-collect"
+   ],
+   "links": [
+    {
+     "label": "라이브",
+     "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/etf.html"
+    }
+   ]
+  },
+  {
+   "id": "page-market-alert",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "page",
+   "name": "market_alert.html (투자유의종목)",
+   "runs_on": "github",
+   "schedule_kst": "생성=16:05 / 23:00 (sisyphe-bot)",
+   "status": "active",
+   "desc_md": "투자유의/투자경고/투자위험 지정 종목 추적 페이지.\n\n- `create_market_alert.py`(별도 생성기)가 만들며 Sisyphe-Bot 16:05/23:00 잡이 재생성. KIS marcap 사용.\n- 텔레그램 4블록 요약(신규/진입임박/탈출임박/전체현황)은 RA_Sisyphe_bot 05:15 잡.\n- 함정: 지정예고는 투자주의 fetch에 들어옴(경고 아님).",
+   "code": [
+    "execution/create_market_alert.py"
+   ],
+   "depends_on": [
+    "src-create-market-alert"
+   ],
+   "links": [
+    {
+     "label": "라이브",
+     "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/market_alert.html"
+    }
+   ]
+  },
+  {
+   "id": "page-hotels",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "page",
+   "name": "hotels.html (호텔 ADR, 동결)",
+   "runs_on": "github",
+   "status": "frozen",
+   "desc_md": "booking.com 호텔 ADR 추적 페이지. **데이터 동결**(수집 타이머 은퇴 2026-07-06).\n\n- 차트는 PNG→Chart.js 전환 완료(매 실행 PNG 재생성발 머지충돌 소멸)라 페이지 자체는 정상 렌더, 다만 `hotel_adr.csv`가 더 안 갱신됨.\n- `create_dashboard.py`가 여전히 생성 목록에 포함하나 신규 데이터 없음.",
+   "code": [
+    "execution/create_dashboard.py"
+   ],
+   "reads": [
+    "hotel_adr.csv"
+   ],
+   "depends_on": [
+    "src-create-dashboard"
+   ],
+   "links": [
+    {
+     "label": "라이브",
+     "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/hotels.html"
+    }
+   ]
+  },
+  {
+   "id": "page-taiwan",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "page",
+   "name": "taiwan.html (대만 월매출)",
+   "runs_on": "github",
+   "schedule_kst": "생성=23:20 (gha-daily-taiwan-revenue)",
+   "status": "active",
+   "desc_md": "대만 상장 반도체/기술 큐레이션 53종목의 월매출 페이지. 최근 추가된 신규 페이지.\n\n- 소스: FinMind 월매출(`taiwan_revenue.csv`). `create_taiwan_page.py`가 CSV를 읽어 단일 HTML로 렌더.\n- 매일 23:20 KST GHA가 수집→생성→push. 100일 롤링 재조회로 자가치유.",
+   "code": [
+    "execution/create_taiwan_page.py"
+   ],
+   "reads": [
+    "store-taiwan-revenue-csv"
+   ],
+   "depends_on": [
+    "src-taiwan-revenue"
+   ],
+   "links": [
+    {
+     "label": "라이브",
+     "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/taiwan.html"
+    }
+   ]
+  },
+  {
+   "id": "src-create-dashboard",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "pipeline_source",
+   "name": "대시보드 생성기 (create_dashboard.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "체인 말단 (여러 잡)",
+   "status": "active",
+   "desc_md": "생태계의 중앙 렌더러(550KB). dataset.csv·portfolio_data.json·각종 json/db를 읽어 대부분의 라이브 HTML을 한 번에 생성한다.\n\n- 생성: index/market/wrap/universe/universe_lab/seibro/featured/hotels/etf 페이지(등록표 PAGES 기반).\n- 거의 모든 GHA/VM 잡의 마지막 스텝으로 호출됨 → 데이터가 바뀌면 여기서 화면에 반영.\n- 상단 탭바/폰트(Pretendard)/UI 규칙의 단일 정의처. architecture.html은 이 헬퍼를 수동 미러링해야 함.\n- 수정 시 전체 페이지 재생성 후 일관성 확인.",
+   "code": [
+    "execution/create_dashboard.py"
+   ],
+   "reads": [
+    "store-dataset-csv",
+    "store-portfolio-data",
+    "store-contribution-data",
+    "store-etf-db",
+    "store-universe-json",
+    "kodex_sectors.json"
+   ],
+   "writes": [
+    "page-index",
+    "page-market",
+    "page-wrap",
+    "page-universe",
+    "page-universe-lab",
+    "page-seibro",
+    "page-featured",
+    "page-hotels",
+    "page-etf"
+   ],
+   "depends_on": [
+    "src-calculate-returns",
+    "src-create-portfolio-tables"
+   ]
+  },
+  {
+   "id": "src-calculate-wrap-nav",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "pipeline_source",
+   "name": "기준가 엔진 (calculate_wrap_nav.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "체인 (finalize/recalc/crawl)",
+   "status": "active",
+   "desc_md": "Wrap_NAV.xlsx의 NEW(종목·비중)+AUM 시트로 랩 상품별 일별 기준가를 계산해 기준가 시트에 적재하는 NAV 엔진.\n\n- 지수/종가는 KIS 확정 일봉이 primary(잠정 종가 자가복구: 신규 포트폴리오 없는 일반 실행은 최근 3거래일 롤백 재계산).\n- 목표전환형은 end_date로 청산일까지 완결(주석 금지 — combine_first 동결 버그 방지).\n- 상품 정의는 `wrap_config.py` 레지스트리에서 파생.",
+   "code": [
+    "calculate_wrap_nav.py"
+   ],
+   "reads": [
+    "store-wrap-nav-xlsx"
+   ],
+   "writes": [
+    "store-wrap-nav-xlsx"
+   ],
+   "depends_on": [
+    "store-wrap-nav-xlsx",
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-calculate-returns",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "pipeline_source",
+   "name": "수익률 계산 (calculate_returns.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "체인 (finalize/recalc/crawl)",
+   "status": "active",
+   "desc_md": "기준가 시트를 받아 상품별 기간수익률(YTD 등)을 계산해 수익률 시트에 채우는 체인 단계.\n\n- YTD 기준일(`ytd_base_dates`)은 상품 개시일. 목표전환형은 개시일=YTD 기준.\n- calculate_wrap_nav 직후 실행되어 create_portfolio_tables/create_dashboard로 이어진다.",
+   "code": [
+    "calculate_returns.py"
+   ],
+   "reads": [
+    "store-wrap-nav-xlsx"
+   ],
+   "writes": [
+    "store-wrap-nav-xlsx"
+   ],
+   "depends_on": [
+    "src-calculate-wrap-nav"
+   ]
+  },
+  {
+   "id": "src-create-portfolio-tables",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "pipeline_source",
+   "name": "포트폴리오 표 생성 (create_portfolio_tables.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "체인 (finalize/recalc/crawl)",
+   "status": "active",
+   "desc_md": "Wrap_NAV 시트를 읽어 wrap.html PORTFOLIO/Order 탭이 런타임 fetch하는 `portfolio_data.json`을 생성.\n\n- PORTFOLIO_GROUPS로 동일 포트 묶음 표시(개방형 3종 등), EXCLUDED_PORTFOLIOS로 청산 상품 제외.\n- /update·PORTFOLIO 표는 당일 finalize 주문을 D-1 지연 반영(today/disp_date, weight/weight_prev, _order_changes).",
+   "code": [
+    "execution/create_portfolio_tables.py"
+   ],
+   "reads": [
+    "store-wrap-nav-xlsx"
+   ],
+   "writes": [
+    "store-portfolio-data"
+   ],
+   "depends_on": [
+    "src-calculate-returns"
+   ]
+  },
+  {
+   "id": "src-create-contribution-data",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "pipeline_source",
+   "name": "기여도 데이터 (create_contribution_data.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "23:00 (daily_crawl)",
+   "status": "active",
+   "desc_md": "종목/섹터 기여도(bp)를 Cariño 방식 NAV 정합으로 계산해 `contribution_data.json` 생성(wrap.html 기여도 탭이 런타임 fetch).\n\n- 표준 체인(calc→returns→tables→dashboard)에 **없음** → daily_crawl이 매일 별도 실행. 즉시 반영은 직접 실행 필요.\n- 상품 config는 calculate_wrap_nav와 동일 유지(청산=주석→탭 자동 제외).",
+   "code": [
+    "execution/create_contribution_data.py"
+   ],
+   "reads": [
+    "store-wrap-nav-xlsx"
+   ],
+   "writes": [
+    "store-contribution-data"
+   ],
+   "depends_on": [
+    "src-calculate-returns"
+   ]
+  },
+  {
+   "id": "src-draw-charts",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "pipeline_source",
+   "name": "차트 렌더러 (draw_charts + draw_wrap_charts)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "23:00 (daily_crawl)",
+   "status": "active",
+   "desc_md": "dataset.csv/NAV로 market·wrap 차트 PNG를 그리는 렌더 단계.\n\n- daily_crawl에서 `rm -f charts/*.png` 후 재생성.\n- 한글 폰트(Nanum/Pretendard) 필요 — GHA 스텝에서 폰트 설치, 맥미니는 부트스트랩 전제.",
+   "code": [
+    "execution/draw_charts.py",
+    "execution/draw_wrap_charts.py"
+   ],
+   "reads": [
+    "store-dataset-csv",
+    "store-wrap-nav-xlsx"
+   ],
+   "writes": [
+    "charts/"
+   ],
+   "depends_on": [
+    "src-market-crawler"
+   ]
+  },
+  {
+   "id": "src-market-crawler",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "pipeline_source",
+   "name": "마스터 시장 크롤러 (market_crawler.py)",
+   "runs_on": "gha",
+   "schedule_kst": "23:00 (daily_crawl)",
+   "status": "active",
+   "desc_md": "dataset.csv에 원자재·메모리·시세 시계열을 적재하는 daily_crawl의 핵심 수집기.\n\n- 수집: DRAM/NAND(DRAMeXchange), 원자재·크립토·FX·지수(yfinance), SMM 리튬(탄산/수산화), Sunsirs 폴리실리콘, 해상운임(SCFI), 미국/한국/글로벌 지수.\n- 서브 크롤러 호출: `crawl_kpx_smp`(SMP), `crawl_silicondata_indexes`(LLM토큰/H100렌탈/RAM). 각각 실패 격리(계속 진행).\n- 리튬은 별도 모듈 없이 이 크롤러에 접혀 있음(hq.smm.cn).",
+   "code": [
+    "execution/market_crawler.py"
+   ],
+   "reads": [
+    "config.py"
+   ],
+   "writes": [
+    "store-dataset-csv"
+   ],
+   "depends_on": [
+    "src-smp-kpx",
+    "src-silicondata",
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-smp-kpx",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "pipeline_source",
+   "name": "KPX 육지 SMP (fetch_smp_kpx.py)",
+   "runs_on": "gha",
+   "schedule_kst": "23:00 (crawler 내부)",
+   "status": "active",
+   "desc_md": "KPX 육지 SMP(한국 도매 전기 가중평균 원/kWh)를 HTML 파싱으로 수집해 dataset.csv에 통합. market_crawler가 `crawl_kpx_smp`로 호출.\n\n- 기존 행 수정은 append 불가라 전체 재작성(self-heal 패턴).\n- 단독 실행 시 1년치 backfill.",
+   "code": [
+    "execution/fetch_smp_kpx.py"
+   ],
+   "writes": [
+    "store-dataset-csv"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-silicondata",
+   "project": "antigravity",
+   "domain": "tech-semis",
+   "type": "pipeline_source",
+   "name": "SiliconData 지수 3종 (fetch_silicondata_index.py)",
+   "runs_on": "gha",
+   "schedule_kst": "23:00 (crawler 내부)",
+   "status": "active",
+   "desc_md": "SiliconData 포털의 LLM 토큰/H100 GPU 렌탈/RAM 지수 3종을 파싱해 dataset.csv에 적재(COMMODITIES). market_crawler가 `crawl_silicondata_indexes`로 호출.\n\n- portal.silicondata.com RSC 파싱, 주말 포함 일별. 공개창 7일 롤링이라 백필 불가.\n- 신선도 calendar 5일, 타입 3개(SDLLMTK/SDH100RT/SD_RAM) 분리.",
+   "code": [
+    "execution/fetch_silicondata_index.py"
+   ],
+   "writes": [
+    "store-dataset-csv"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-ecos",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "pipeline_source",
+   "name": "ECOS 한국 매크로 33종 (fetch_ecos_data.py)",
+   "runs_on": "gha",
+   "schedule_kst": "17:40 평일 (gha-daily-ecos)",
+   "status": "active",
+   "desc_md": "한국은행 ECOS 시계열 33종(금리/매크로/신용·부동산)을 수집해 dataset.csv DATA 섹션에 통합.\n\n- 인자 순서 함정(ERROR-301) 주의. M2=161Y006, 분기전망=첫달 말일.\n- 시장금리 817Y002·CPI·M2 등 투자용 STAT_CODE 큐레이션.",
+   "code": [
+    "execution/fetch_ecos_data.py"
+   ],
+   "writes": [
+    "store-dataset-csv"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-fred",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "pipeline_source",
+   "name": "FRED 미국 매크로 36종 (fetch_fred_data.py)",
+   "runs_on": "gha",
+   "schedule_kst": "07:50 화~토 (gha-daily-fred)",
+   "status": "active",
+   "desc_md": "미국 FRED 시계열 36종(금리/매크로/신용·부동산)을 수집해 dataset.csv DATA 섹션에 통합. 매 run 전체 재조회.\n\n- 함정: 주간 시리즈에 5년창 금지.",
+   "code": [
+    "execution/fetch_fred_data.py"
+   ],
+   "writes": [
+    "store-dataset-csv"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-kofia",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "pipeline_source",
+   "name": "금투협 예탁금/신용잔고 (fetch_kofia_stats.py)",
+   "runs_on": "gha",
+   "schedule_kst": "17:30 평일 (gha-daily-kofia)",
+   "status": "active",
+   "desc_md": "고객예탁금/신용잔고(data.go.kr 금투협 종합통계)를 수집해 `kofia_stats.json`+dataset.csv에 적재(index.html 랜딩 차트).\n\n- 예탁금=invrDpsgAmt, 신용잔고=crdTrFingWhl. 오퍼레이션 8종 검증 완료.",
+   "code": [
+    "execution/fetch_kofia_stats.py"
+   ],
+   "writes": [
+    "kofia_stats.json",
+    "store-dataset-csv"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-nps-fund",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "pipeline_source",
+   "name": "국민연금 적립금 (fetch_nps_fund.py)",
+   "runs_on": "gha",
+   "schedule_kst": "17:30 평일 (gha-daily-kofia)",
+   "status": "active",
+   "desc_md": "국민연금 적립금(data.go.kr odcloud 15106894, kofia와 같은 키)을 수집해 dataset.csv(MACRO KOREA)에 적재. gha-daily-kofia가 kofia 직후 실행.\n\n- 저빈도(연간+최신월 누적). 함정: 피벗+uddi 해석+활용신청. 내부 graceful skip.",
+   "code": [
+    "execution/fetch_nps_fund.py"
+   ],
+   "writes": [
+    "store-dataset-csv"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-krx-valuation",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "pipeline_source",
+   "name": "KRX 지수 밸류에이션 (fetch_krx_valuation.py)",
+   "runs_on": "gha",
+   "schedule_kst": "18:30 평일 (gha-daily-krx-valuation)",
+   "status": "active",
+   "desc_md": "코스피/코스닥 지수 후행 PER/PBR/배당수익률(pykrx data.krx 로그인)을 수집해 dataset.csv(INDEX_KOREA)에 적재.\n\n- 클라우드 IP서도 로그인됨. forward PER은 미제공(Quantiwise 영역).",
+   "code": [
+    "execution/fetch_krx_valuation.py"
+   ],
+   "writes": [
+    "store-dataset-csv"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-krx-foreign",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "pipeline_source",
+   "name": "외국인 보유비중 (fetch_krx_foreign.py)",
+   "runs_on": "gha",
+   "schedule_kst": "23:00 (daily_crawl)",
+   "status": "active",
+   "desc_md": "코스피/코스닥 + 주요 6종목 외국인 보유비중(pykrx 로그인)을 수집해 dataset.csv(INDEX_KR)에 적재. universe/차트에서 소비.\n\n- 항상 레벨%(누적 아님). 휴장일 조용히 skip, push는 [skip ci].\n- GHA IP 로그인 차단 시 VM 이전 대상.",
+   "code": [
+    "execution/fetch_krx_foreign.py"
+   ],
+   "writes": [
+    "store-dataset-csv"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-seibro",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "pipeline_source",
+   "name": "SEIBro TOP50 (fetch_seibro_data.py)",
+   "runs_on": "gha",
+   "schedule_kst": "23:00 (daily_crawl)",
+   "status": "active",
+   "desc_md": "SEIBro 결제 TOP 50 데이터를 Chrome selenium으로 수집해 `seibro_tickers.json` 생성(seibro.html).\n\n- selenium 필요라 GHA에 setup-chrome 스텝, 맥미니는 부트스트랩 Chrome 전제. 실패는 tolerated.",
+   "code": [
+    "execution/fetch_seibro_data.py"
+   ],
+   "writes": [
+    "seibro_tickers.json"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-universe",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "pipeline_source",
+   "name": "유니버스 수집 (fetch_universe.py)",
+   "runs_on": "gha",
+   "schedule_kst": "18:30 / 07:00 (gha-daily-universe)",
+   "status": "active",
+   "desc_md": "관심 유니버스 종목 시세/지표를 yfinance로 수집해 `universe.json`+`universe_history.json` 생성.\n\n- 52주 낙폭(DD), RSI(1M)는 fetch_index_returns 산출을 소비.\n- 종목 추가=universe_tickers.csv 행+타겟 주입(전체 2회 실행 금지). 멀티인스턴스는 별도 경로.",
+   "code": [
+    "execution/fetch_universe.py",
+    "execution/fetch_index_returns.py"
+   ],
+   "reads": [
+    "universe_tickers.csv"
+   ],
+   "writes": [
+    "store-universe-json"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-monthly-returns",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "pipeline_source",
+   "name": "월별 수익률 11지수 (fetch_monthly_returns.py)",
+   "runs_on": "gha",
+   "schedule_kst": "23:00 (daily_crawl)",
+   "status": "active",
+   "desc_md": "11개 주요 지수의 월별 수익률을 수집해 `monthly_returns.json` 생성(market.html MONTHLY RETURNS 표).\n\n- daily_crawl 초반 스텝. 표는 market.html 상단에 렌더.",
+   "code": [
+    "execution/fetch_monthly_returns.py"
+   ],
+   "writes": [
+    "monthly_returns.json"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-danawa",
+   "project": "antigravity",
+   "domain": "tech-semis",
+   "type": "pipeline_source",
+   "name": "다나와 DRAM 최저가 (fetch_danawa_price.py)",
+   "runs_on": "gha",
+   "schedule_kst": "23:00 (daily_crawl)",
+   "status": "active",
+   "desc_md": "다나와 DRAM 소매 최저가를 수집해 dataset.csv(DRAM_RETAIL)에 적재. daily_crawl 내 tolerated 스텝.",
+   "code": [
+    "execution/fetch_danawa_price.py"
+   ],
+   "writes": [
+    "store-dataset-csv"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-dart-disclosures",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "pipeline_source",
+   "name": "DART 공시 (fetch_disclosures.py)",
+   "runs_on": "gha",
+   "schedule_kst": "16:30 (gha-daily-disclosures)",
+   "status": "active",
+   "desc_md": "보유종목 DART 전자공시를 수집·누적해 `disclosures.json`+`corp_codes.json` 갱신. RA_Sisyphe_bot 공시 다이제스트가 소비.\n\n- 보유종목 기준 current holdings, accumulate.",
+   "code": [
+    "execution/fetch_disclosures.py"
+   ],
+   "writes": [
+    "disclosures.json",
+    "corp_codes.json"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-kind-disclosures",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "pipeline_source",
+   "name": "KIND 거래소 공시 (fetch_kind_disclosures.py)",
+   "runs_on": "gha",
+   "schedule_kst": "16:30 (gha-daily-disclosures)",
+   "status": "active",
+   "desc_md": "KIND(한국거래소) 공시를 수집·누적해 `disclosures.json`에 append(DART와 함께). gha-daily-disclosures 내 DART 다음 스텝.",
+   "code": [
+    "execution/fetch_kind_disclosures.py"
+   ],
+   "writes": [
+    "disclosures.json"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-taiwan-revenue",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "pipeline_source",
+   "name": "대만 월매출 (fetch_taiwan_revenue.py)",
+   "runs_on": "gha",
+   "schedule_kst": "23:20 (gha-daily-taiwan-revenue)",
+   "status": "active",
+   "desc_md": "FinMind로 대만 상장 큐레이션 53종목 월매출을 수집해 `taiwan_revenue.csv` 생성. `create_taiwan_page.py`가 이를 taiwan.html로 렌더.\n\n- `--crosscheck`로 공식 TWSE/TPEx 스냅샷 대조(로그만). 100일 롤링 재조회 자가치유.\n- 시크릿: FINMIND_TOKEN/USER/PASSWORD.",
+   "code": [
+    "execution/fetch_taiwan_revenue.py",
+    "execution/create_taiwan_page.py"
+   ],
+   "writes": [
+    "store-taiwan-revenue-csv",
+    "page-taiwan"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-featured-kis",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "pipeline_source",
+   "name": "Featured KIS/신고가 (fetch_featured_data_kis.py + enrich)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "15:50 (featured-kis 타이머)",
+   "status": "active",
+   "desc_md": "KIS 시세로 20일 신고가(`newhigh_20d.json`)를 만들고 테마를 enrich하는 수집기(15:50 타이머).\n\n- `enrich_newhigh_themes.py`가 Naver 뉴스+Haiku로 테마 부착(실패해도 수집 유지).\n- 16:00 RA_Sisyphe_bot 신고가 알림이 이 산출을 소비. Featured 배치 KIS 전환 완료.",
+   "code": [
+    "execution/fetch_featured_data_kis.py",
+    "execution/enrich_newhigh_themes.py"
+   ],
+   "writes": [
+    "store-featured-data",
+    "featured_data_kis.json"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-kodex-sectors",
+   "project": "antigravity",
+   "domain": "tech-semis",
+   "type": "pipeline_source",
+   "name": "KODEX 섹터 비중 (fetch_kodex_sectors.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "23:30 (kodex 타이머)",
+   "status": "active",
+   "desc_md": "KOSPI200/KOSDAQ150 섹터 비중을 pykrx 로그인으로 수집해 `kodex_sectors.json` 생성.\n\n- 클라우드 IP가 KRX 차단 → VM 전용. loginErrMaxCnt=5 잠금 주의(반복 로그인 금지).\n- 실패 알림 문구는 오진 표현, 실제 대개 KRX 인증(CD006=비번불일치 등).",
+   "code": [
+    "execution/fetch_kodex_sectors.py"
+   ],
+   "writes": [
+    "kodex_sectors.json"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ],
+   "alerts": "OnFailure(kodex-sectors) → 텔레그램"
+  },
+  {
+   "id": "src-kosis-series",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "pipeline_source",
+   "name": "KOSIS 시계열 레지스트리 (fetch_kosis_series.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "23:30 (kodex 타이머 편승)",
+   "status": "active",
+   "desc_md": "KOSIS 통계(유통·소비·고용·미분양·퇴직연금 등)를 레지스트리 방식으로 수집해 dataset.csv(MACRO KOREA/CREDIT & HOUSING)에 적재.\n\n- GHA IP가 KOSIS에 막혀 VM kodex 타이머에 편승. 백화점 매출은 신표 DT_115023_200(구표 11523은 2024.12 동결).\n- 실패해도 계속(|| true).",
+   "code": [
+    "execution/fetch_kosis_series.py"
+   ],
+   "writes": [
+    "store-dataset-csv"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-japan-capex",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "pipeline_source",
+   "name": "일본 CAPEX 지표 (fetch_japan_capex.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "23:30 (kodex 타이머 편승)",
+   "status": "active",
+   "desc_md": "일본 설비투자 3종(월간)을 수집해 dataset.csv(JP_CAPEX / CAPEX 그룹)에 적재. VM kodex 타이머 편승(GHA 해외IP 차단 회피).\n\n- SEAJ 반도체장비 판매고(Shift-JIS xls, 파일명 매월 랜덤→라벨 파싱, 전체 upsert self-heal) + JMTBA 공작기계 수주 총액/외수(속보 PDF+확보 PDF).\n- 의존성 pandas+xlrd(xls)+pypdf. 소스 단위 실패 격리, exit 0. JP_CAPEX는 신선도 감시 제외(월간 지연).\n- ★비교적 신규 시리즈 — REGISTRY_NOTES 참조(전용 스케줄 문서 부재).",
+   "code": [
+    "execution/fetch_japan_capex.py"
+   ],
+   "writes": [
+    "store-dataset-csv"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-stock-master",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "pipeline_source",
+   "name": "종목마스터 갱신 (update_stock_master.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "토 09:00 (update-stock-master 타이머)",
+   "status": "active",
+   "desc_md": "KRX 신규상장/사명변경을 점검해 Code 시트→`stock_master.json` 갱신(Order 자동완성 소스).\n\n- 코드 있는 행만 저장(이름만=조용히 누락). 사명변경 미반영=자동완성 실패(리가켐 사고).",
+   "code": [
+    "execution/update_stock_master.py"
+   ],
+   "writes": [
+    "store-stock-master"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ],
+   "alerts": "OnFailure(update-stock-master) → 텔레그램"
+  },
+  {
+   "id": "src-etf-collect",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "pipeline_source",
+   "name": "ETF 구성종목 수집 (collect_etf_daily.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "16:30 / 18:00 (etf-collect 타이머)",
+   "status": "active",
+   "desc_md": "전체 ETF 목록 + 구성종목/비중을 etfcheck 등에서 수집해 `etf_data.db`(SQLite)에 적재.\n\n- idempotent(성공 시 재실행 스킵). 봇에서 분리된 systemd 타이머가 소유.\n- etf.html 액티브 탭·19:00 알림의 원천 DB.",
+   "code": [
+    "execution/etf_collector/collect_etf_daily.py",
+    "execution/etf_collector/etf_db.py",
+    "execution/etf_collector/etfcheck_client.py"
+   ],
+   "writes": [
+    "store-etf-db"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-active-etf",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "pipeline_source",
+   "name": "액티브 ETF 변동 (active_etf_changes.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "19:00 (etf-active-alert) / 18:30 (etf.html)",
+   "status": "active",
+   "desc_md": "etf_data.db에서 전 액티브 ETF의 전일 대비 신규편입/편출/비중급변을 계산하는 단일 출처 모듈.\n\n- etf.html '액티브 ETF' 탭 임베드 JSON과 19:00 텔레그램 알림(`etf_active_alert.py`)이 모두 이 모듈을 써 숫자가 일치.\n- MMF/채권 제외(주식형만, ~313개).",
+   "code": [
+    "execution/etf_collector/active_etf_changes.py",
+    "execution/etf_active_alert.py"
+   ],
+   "reads": [
+    "store-etf-db"
+   ],
+   "depends_on": [
+    "src-etf-collect"
+   ]
+  },
+  {
+   "id": "src-journal-data",
+   "project": "antigravity",
+   "domain": "personal",
+   "type": "pipeline_source",
+   "name": "투자일지 시장데이터 (fetch_journal_data.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "16:10 (sisyphe-bot)",
+   "status": "active",
+   "desc_md": "투자일지용 시장데이터(상승/하락 종목수 등)를 수집해 Sisyphe의 Google Sheet Data 탭에 적재. Sisyphe-Bot 16:10 잡이 subprocess로 호출.\n\n- 백필 `--date=YYYYMMDD`(상승하락 종목수는 과거 공란). apscheduler misfire로 행 누락되던 것을 grace+coalesce로 수정.\n- 로컬 HTML 페이지 아님 — 산출처는 외부 Google Sheet.",
+   "code": [
+    "execution/fetch_journal_data.py"
+   ],
+   "depends_on": [
+    "ext-google-workspace",
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-investor-trading",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "pipeline_source",
+   "name": "투자자별 수급 (fetch_investor_trading.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "장 마감 후 (sisyphe-bot)",
+   "status": "active",
+   "desc_md": "코스피 투자자별 순매수(개인/외국인/기관 등)를 수집해 `investor_trading.json` 생성(market.html 수급). Sisyphe-Bot 잡이 subprocess로 호출.\n\n- data.krx LOGOUT 차단 이력 → 네이버 investorDealTrendDay 경로 병용.",
+   "code": [
+    "execution/fetch_investor_trading.py"
+   ],
+   "writes": [
+    "investor_trading.json"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-create-market-alert",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "pipeline_source",
+   "name": "투자유의 생성기 (create_market_alert.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "16:05 / 23:00 (sisyphe-bot)",
+   "status": "active",
+   "desc_md": "투자유의/경고/위험 지정 종목 페이지 `market_alert.html`을 생성. Sisyphe-Bot 16:05/23:00 잡이 호출.\n\n- KIS marcap 사용. 지정예고는 투자주의 fetch에 들어옴(경고 아님) 함정.\n- 텔레그램 4블록 요약은 RA_Sisyphe_bot(05:15)가 이 결과를 읽어 별도 발송.",
+   "code": [
+    "execution/create_market_alert.py"
+   ],
+   "writes": [
+    "page-market-alert"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-landing-highlights",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "pipeline_source",
+   "name": "랜딩 하이라이트 생성 (create_landing_highlights.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "18:45 (landing-highlights 타이머)",
+   "status": "active",
+   "desc_md": "index.html 회전 위젯(sparkline+한줄 코멘트, 50슬롯) 데이터 `landing_highlights.json` 생성.\n\n- 여러 산출물(market_alert/seibro/featured 등)에서 하이라이트 슬롯을 뽑는다. Featured 2차(18:30) 마감 후 배치.",
+   "code": [
+    "execution/create_landing_highlights.py"
+   ],
+   "reads": [
+    "page-market-alert",
+    "page-seibro",
+    "store-featured-data"
+   ],
+   "writes": [
+    "store-landing-highlights"
+   ],
+   "alerts": "OnFailure(landing-highlights) → 텔레그램"
+  },
+  {
+   "id": "src-generic-pipeline",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "pipeline_source",
+   "name": "Generic Source Pipeline (execution/sources/)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "상시 (ra-sisyphe 등록)",
+   "status": "active",
+   "desc_md": "뉴스/리서치 소스를 플러그인처럼 등록·폴링하는 공용 프레임워크. `sources.json`의 enabled 항목을 RA_Sisyphe_bot 부팅 시 자동 스케줄 등록.\n\n- 공통: base fetcher + retry + translate(Haiku) + staleness + `split_for_telegram`(헤더 고아 방지) + `sources_state/` 상태.\n- 신규 소스 = `execution/sources/<name>.py` + sources.json 엔트리 + deploy.\n- 현재 소스: semianalysis/trendforce/foreign_ir/kna.",
+   "code": [
+    "execution/sources/__init__.py",
+    "execution/sources/base.py",
+    "execution/sources/_translator.py",
+    "sources.json"
+   ],
+   "reads": [
+    "sources.json"
+   ],
+   "writes": [
+    "store-sources-state"
+   ],
+   "depends_on": [
+    "bot-ra-sisyphe"
+   ]
+  },
+  {
+   "id": "src-semianalysis",
+   "project": "antigravity",
+   "domain": "tech-semis",
+   "type": "pipeline_source",
+   "name": "SemiAnalysis 소스 (sources/semianalysis.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "09:00 / 21:00 (ra-sisyphe)",
+   "status": "active",
+   "desc_md": "SemiAnalysis 뉴스레터 신규 글을 폴링해 텔레그램 다이제스트로 발송(09:00/21:00 KST).\n\n- 소스=wp-json REST(RSS는 캐시 동결이라 금지). staleness 21일.\n- Generic Source Pipeline 위에서 동작.",
+   "code": [
+    "execution/sources/semianalysis.py"
+   ],
+   "reads": [
+    "sources.json"
+   ],
+   "writes": [
+    "store-sources-state"
+   ],
+   "depends_on": [
+    "src-generic-pipeline",
+    "infra-telegram"
+   ]
+  },
+  {
+   "id": "src-trendforce",
+   "project": "antigravity",
+   "domain": "tech-semis",
+   "type": "pipeline_source",
+   "name": "TrendForce 소스 (sources/trendforce.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "08:00 (ra-sisyphe)",
+   "status": "active",
+   "desc_md": "TrendForce 뉴스를 폴링해 Haiku 한글요약 1메시지로 발송(08:00 KST).\n\n- 소스=wp-json REST(RSS는 캐시 동결 금지). staleness 5일. translate 활성(Haiku).",
+   "code": [
+    "execution/sources/trendforce.py"
+   ],
+   "reads": [
+    "sources.json"
+   ],
+   "writes": [
+    "store-sources-state"
+   ],
+   "depends_on": [
+    "src-generic-pipeline",
+    "infra-telegram"
+   ]
+  },
+  {
+   "id": "src-foreign-ir",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "pipeline_source",
+   "name": "해외 기업 IR/뉴스룸 (sources/foreign_ir.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "07:30 / 20:00 (ra-sisyphe)",
+   "status": "active",
+   "desc_md": "해외 기업 IR/뉴스룸 ~134곳을 폴링해 신규 릴리스를 Haiku 한글요약으로 발송(07:30/20:00 KST).\n\n- 403=핑거프린트 회전. 사각지대=월요일 다이제스트. \"없음\"은 침묵.\n- 사이트 개편 복구: 커스텀 fetcher(_CUSTOM_FETCHERS, 예 Coveo/RSS), id체계 바뀌면 state 시딩 필수.\n- 소스 목록 `foreign_ir_sources.json`.",
+   "code": [
+    "execution/sources/foreign_ir.py",
+    "foreign_ir_sources.json"
+   ],
+   "reads": [
+    "foreign_ir_sources.json"
+   ],
+   "writes": [
+    "store-sources-state"
+   ],
+   "depends_on": [
+    "src-generic-pipeline",
+    "infra-telegram"
+   ]
+  },
+  {
+   "id": "src-kna-kneiss",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "pipeline_source",
+   "name": "원전 뉴스 KNA/KNEISS (sources/kna.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "18:00 (ra-sisyphe)",
+   "status": "active",
+   "desc_md": "세계 원전시장동향 신규 게시글을 폴링해 텔레그램 발송(18:00 KST).\n\n- 소스 k-neiss.org 회원게시판 전환(폼 로그인 KNEISS_ID/PW, 클라우드IP OK). fetcher는 `fetch_kneiss_news.py`.\n- 구 `fetch_kna_news.py`는 롤백 보존이었으나 origin에서 삭제됨(dead code 정리). 마지막 본 글 ID는 `kna_state.json`.",
+   "code": [
+    "execution/sources/kna.py",
+    "execution/fetch_kneiss_news.py"
+   ],
+   "reads": [
+    "store-sources-state"
+   ],
+   "writes": [
+    "store-sources-state"
+   ],
+   "depends_on": [
+    "src-generic-pipeline",
+    "infra-telegram"
+   ]
+  },
+  {
+   "id": "src-earnings-pipeline",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "pipeline_source",
+   "name": "실적봇 파이프라인 (execution/earnings_bot/)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "08:00 (earnings-bot 타이머)",
+   "status": "active",
+   "desc_md": "미국 실적/IR Day를 번역·요약해 노션 퍼블리시 + 아침 다이제스트를 만드는 다단 파이프라인(`earnings_bot.runner`).\n\n- 단계: 캘린더 sync → EDGAR/트랜스크립트 감시(edgar_monitor/transcript_watch) → 종목 매칭(matcher/ticker_registry) → YoY 계산 → 프롬프트 빌드→번역(Claude) → 노션 퍼블리시 → morning_digest.\n- 상태 DB=`earnings.db`. 예정 포맷=`티커/발표일자`(기업명 없음 확정). `--dismiss` CLI.\n- 캘린더는 `gha-earnings-calendar-sync`가 채우고 이 파이프라인이 소비.",
+   "code": [
+    "execution/earnings_bot/runner.py",
+    "execution/earnings_bot/morning_digest.py",
+    "execution/earnings_bot/edgar_monitor.py",
+    "execution/earnings_bot/transcript_watch.py",
+    "execution/earnings_bot/notion_publisher.py"
+   ],
+   "reads": [
+    "store-earnings-db"
+   ],
+   "writes": [
+    "store-earnings-db"
+   ],
+   "depends_on": [
+    "src-earnings-calendar-sync",
+    "ext-notion",
+    "ext-data-apis",
+    "infra-telegram"
+   ],
+   "alerts": "타이머 OnFailure → 텔레그램"
+  },
+  {
+   "id": "src-earnings-calendar-sync",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "pipeline_source",
+   "name": "실적 캘린더 sync (earnings_calendar_sync.py)",
+   "runs_on": "gha",
+   "schedule_kst": "07:00 (GHA) + 15:00 (VM cron)",
+   "status": "active",
+   "desc_md": "Finnhub 실적 일정을 Google Calendar에 기록하는 모듈. GHA(07:00 KST)와 VM cron(15:00 KST) **양쪽에서** 실행(이중).\n\n- 맥미니 이전 시 단일화 필요(캘린더 중복 기록 방지). 실적봇 파이프라인이 이 캘린더를 소비.\n- 시크릿: FINNHUB_API_KEY, GOOGLE_SERVICE_ACCOUNT_KEY.",
+   "code": [
+    "execution/earnings_calendar_sync.py"
+   ],
+   "depends_on": [
+    "ext-google-workspace",
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "store-portfolio-data",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "dataset",
+   "name": "portfolio_data.json",
+   "runs_on": "github",
+   "schedule_kst": "체인 재생성",
+   "status": "active",
+   "desc_md": "wrap.html PORTFOLIO/Order 탭이 런타임 fetch하는 포트폴리오 표 데이터. `create_portfolio_tables.py`가 Wrap_NAV로 생성.\n\n- 당일 finalize 주문 D-1 지연 반영 정보 포함(_order_changes 등).\n- safe_commit_push에서 nightly rebuild는 OURS(최신) 유지.",
+   "depends_on": [
+    "src-create-portfolio-tables"
+   ]
+  },
+  {
+   "id": "store-contribution-data",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "dataset",
+   "name": "contribution_data.json",
+   "runs_on": "github",
+   "schedule_kst": "23:00 재생성",
+   "status": "active",
+   "desc_md": "wrap.html 기여도 탭이 런타임 fetch하는 종목/섹터 기여도(bp) 데이터. `create_contribution_data.py`(daily_crawl)가 생성.\n\n- Cariño NAV 정합. VE 01-02 글리치는 미해결 알려진 이슈.",
+   "depends_on": [
+    "src-create-contribution-data"
+   ]
+  },
+  {
+   "id": "store-etf-db",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "store",
+   "name": "etf_data.db (ETF 구성종목 SQLite)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "16:30 / 18:00 갱신",
+   "status": "active",
+   "desc_md": "전체 ETF 목록 + 구성종목/비중을 담는 SQLite DB(~625MB, VM 로컬). etf-collect 타이머가 채운다.\n\n- etf.html 구성종목 탭 + 액티브 ETF 변동 탭 + 19:00 알림의 원천.\n- re-clone 시 백업 대상(deploy.sh BACKUP_FILES). 대용량이라 git 추적하되 주의.",
+   "depends_on": [
+    "src-etf-collect"
+   ]
+  },
+  {
+   "id": "store-stock-master",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "dataset",
+   "name": "stock_master.json (종목마스터)",
+   "runs_on": "github",
+   "schedule_kst": "토 09:00 갱신",
+   "status": "active",
+   "desc_md": "종목코드↔종목명 마스터. Order 탭 자동완성의 소스. update_stock_master 타이머가 주간 갱신.\n\n- 코드 있는 행만 저장(이름만 입력=누락). 사명변경 미반영 시 자동완성 실패.",
+   "depends_on": [
+    "src-stock-master"
+   ]
+  },
+  {
+   "id": "store-universe-json",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "dataset",
+   "name": "universe.json / universe_history.json",
+   "runs_on": "github",
+   "schedule_kst": "18:30 / 07:00 갱신",
+   "status": "active",
+   "desc_md": "유니버스 종목 시세/지표(현재값 + 히스토리). fetch_universe(하루 2회)가 생성, universe.html/universe_lab.html이 소비.\n\n- universe_history.json은 시계열(~1.2MB). 종목 추가는 universe_tickers.csv로.",
+   "depends_on": [
+    "src-universe"
+   ]
+  },
+  {
+   "id": "store-featured-data",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "dataset",
+   "name": "featured_data.json / newhigh_20d.json",
+   "runs_on": "github",
+   "schedule_kst": "Featured 잡 + 15:50",
+   "status": "active",
+   "desc_md": "Featured TOP 종목 데이터(~11MB)와 20일 신고가 데이터. Sisyphe-Bot Featured 잡 + featured-kis 타이머가 생성.\n\n- featured.html(create_dashboard)과 RA_Sisyphe 신고가 알림이 소비.",
+   "depends_on": [
+    "src-featured-kis",
+    "bot-sisyphe"
+   ]
+  },
+  {
+   "id": "store-taiwan-revenue-csv",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "dataset",
+   "name": "taiwan_revenue.csv (대만 월매출)",
+   "runs_on": "github",
+   "schedule_kst": "23:20 갱신",
+   "status": "active",
+   "desc_md": "대만 큐레이션 53종목의 월매출 시계열(FinMind). gha-daily-taiwan-revenue가 생성, create_taiwan_page가 taiwan.html로 렌더.\n\n- 100일 롤링 재조회로 개정 자가치유.",
+   "depends_on": [
+    "src-taiwan-revenue"
+   ]
+  },
+  {
+   "id": "store-landing-highlights",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "dataset",
+   "name": "landing_highlights.json",
+   "runs_on": "github",
+   "schedule_kst": "18:45 갱신",
+   "status": "active",
+   "desc_md": "index.html 회전 위젯(sparkline+코멘트, 50슬롯) 데이터. landing-highlights 타이머가 생성.\n\n- 여러 산출물에서 하이라이트를 종합. index.html이 런타임 소비.",
+   "depends_on": [
+    "src-landing-highlights"
+   ]
+  },
+  {
+   "id": "store-sources-state",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "store",
+   "name": "sources_state/ + kna_state.json",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "소스 폴링 시",
+   "status": "active",
+   "desc_md": "Generic Source Pipeline이 소스별 '마지막으로 본 항목'을 기록하는 상태 저장소(중복 발송 방지).\n\n- foreign_ir/semianalysis/trendforce/kna 각 소스의 dedup 상태. id체계 바뀌면 state 시딩 필수.\n- kna_state.json은 KNA/KNEISS 마지막 글 ID.",
+   "depends_on": [
+    "src-generic-pipeline"
+   ]
+  },
+  {
+   "id": "store-earnings-db",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "store",
+   "name": "earnings.db (실적봇 상태)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "08:00 갱신",
+   "status": "active",
+   "desc_md": "실적봇 파이프라인의 상태 SQLite(~635KB). 발견한 실적/트랜스크립트, 처리·발송 상태, 종목 매칭 캐시 등.\n\n- earnings-bot 타이머가 매일 갱신. 멱등 처리로 재발송 방지.",
+   "depends_on": [
+    "src-earnings-pipeline"
+   ]
+  },
+  {
+   "id": "store-research-notes-db",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "store",
+   "name": "research_notes.db + media/ (리서치봇)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "이벤트 시",
+   "status": "active",
+   "desc_md": "Research Notes 봇이 수신 메시지·이미지를 보관하는 SQLite + 미디어 폴더(VM 로컬, git 미추적).\n\n- 요약→노션 퍼블리시 전 원본 보관. re-clone 시 백업 대상.",
+   "depends_on": [
+    "bot-research-notes"
+   ]
+  },
+  {
+   "id": "store-heartbeats",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "store",
+   "name": "heartbeats.json (Phase 2 워치독 인터페이스)",
+   "runs_on": "github",
+   "schedule_kst": "각 GHA 잡 성공 시",
+   "status": "planned",
+   "desc_md": "맥미니 Phase 2에서 각 GHA 잡 wrapper가 성공 직후 `{\"<잡>\": epoch}`를 upsert하는 liveness 파일.\n\n- 목적: repo 밖 산출(earnings-calendar-sync)·비시계열(finalize-orders)처럼 신선도 감시 사각인 잡의 '살아있음'을 커버.\n- 소비자: `check_data_freshness`의 heartbeat 나이 감시 섹션(patch, A14/A15). HEARTBEAT_JOBS에 없는 잡은 침묵.\n- **planned**: Phase 2 wrapper 활성 후 채워짐. 현재는 아직 정착 안 됨(REGISTRY_NOTES 참조).",
+   "depends_on": [
+    "launchd-gha-phase2"
+   ]
+  },
+  {
+   "id": "daemon-catchup",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "infra",
+   "name": "catch-up 러너 (부팅 시 놓친 잡 복구)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "부팅 시 1회",
+   "status": "planned",
+   "desc_md": "맥미니 이전에서 systemd `Persistent=true`를 대체하는 launchd 데몬(`com.antigravity.catchup`, RunAtLoad=true). 부팅 시 1회, 맥이 꺼진 동안 마지막 스케줄 발화를 놓친 타이머 잡을 판정해 순차 재실행한다.\n\n- 판정: 각 `schedule.tsv` 행의 cron 직전 발화(`cron_prev.py`) vs 성공 stamp 비교 → stamp<직전발화면 재실행 큐잉.\n- 재실행은 잡 wrapper(`run_timer_job.sh`/`run_gha_job.sh`)를 통과 → 잡별 락·stamp·notify를 그대로 태움(이중실행 방어).\n- 정전/재부팅이 잦은 가정 호스팅(UPS 부재) 가용성의 핵심. **초안·검증 완료, 맥미니 컷오버 시 활성(planned).**",
+   "code": [
+    "launchd/system/catchup_runner.sh",
+    "launchd/system/cron_prev.py",
+    "launchd/system/com.antigravity.catchup.plist"
+   ],
+   "reads": [
+    "launchd/timers/schedule.tsv"
+   ],
+   "depends_on": [
+    "infra-vm-macmini"
+   ]
+  },
+  {
+   "id": "ext-data-apis",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "external",
+   "name": "외부 데이터 API/소스 집합",
+   "runs_on": "external",
+   "status": "active",
+   "desc_md": "수집 파이프라인이 호출하는 외부 데이터 제공처 묶음(맥락용 단일 카드). 개별 수집기는 `pipeline_source`가 소유하고, 여기서는 의존하는 외부 면을 한눈에 본다.\n\n- **시세/지수**: KIS OpenAPI(확정지수·시세), yfinance(해외·환율·원자재·크립토), 네이버 금융.\n- **한국 공식통계**: ECOS(한국은행), data.go.kr(금투협/국민연금), KOSIS, KRX(pykrx 로그인), KIND, SEIBro, DART.\n- **미국/해외**: FRED, Finnhub(실적캘린더), SEC EDGAR, FinMind(대만 월매출), SEAJ/JMTBA(일본 capex).\n- **원자재/산업**: SMM(리튬), Sunsirs(폴리실리콘), DRAMeXchange, SiliconData, KPX(SMP), 다나와.\n- **뉴스/리서치**: SemiAnalysis, TrendForce, k-neiss(원전), 해외 IR 뉴스룸 ~134곳.\n- 운영 함정: 클라우드 IP 차단(KRX/KOSIS/SEAJ/watch 스크랩) → 해당 수집은 VM 경로 강제."
+  },
+  {
+   "id": "ext-export-dashboard",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "external",
+   "name": "한국 수출 매출 추정 대시보드",
+   "runs_on": "external",
+   "status": "planned",
+   "desc_md": "HSK 품목+적출지 통계로 상장사 매출을 nowcasting하는 별도 프로젝트(Phase 0, 고신뢰 20~30종목 목표). 제주반도체 캘리브레이션(~95% 설명, A급) 검증 완료.\n\n- 이 repo와 직접 코드 공유는 없으나 반도체 수출↔매출 테마에서 겹친다.\n- 상세 카드는 추후 확장 예정(현재 링크 박스)."
+  },
+  {
+   "id": "ext-google-workspace",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "external",
+   "name": "Google Workspace (Sheets · Calendar · Drive)",
+   "runs_on": "external",
+   "status": "active",
+   "desc_md": "서비스계정(GOOGLE_SERVICE_ACCOUNT_KEY)으로 접근하는 구글 서비스 묶음. 여러 잡의 repo 밖 산출처.\n\n- **Sheets**: 투자일지 데이터(`src-journal-data`), 운동봇 기록.\n- **Calendar**: 미국 실적 일정(`src-earnings-calendar-sync`)이 여기에 직접 이벤트를 기록(repo push 없음) → 신선도 감시 공백이라 Phase 2 heartbeat가 메움.\n- 리서치봇/실적봇 이미지 업로드는 GitHub raw를 쓰고, 여기서는 시트/캘린더가 주."
+  },
+  {
+   "id": "ext-notion",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "external",
+   "name": "Notion (실적·리서치 퍼블리시 대상)",
+   "runs_on": "external",
+   "status": "active",
+   "desc_md": "실적봇과 리서치노트봇이 요약 결과를 퍼블리시하는 노션 워크스페이스(NOTION_API_KEY / NOTION_EARNINGS_DATABASE_ID 등).\n\n- 실적봇: 번역·요약된 미국 실적/IR Day 노트를 실적 DB에 페이지로 생성.\n- 리서치노트봇: 텔레그램 리서치 메시지를 요약→노션 페이지(엄중/중요 표시는 빨간색 텍스트).\n- 이미지는 GitHub에 올린 뒤 URL로 삽입.",
+   "code": [
+    "execution/earnings_bot/notion_publisher.py",
+    "execution/research_bot/notion_publisher.py"
+   ]
+  },
+  {
+   "id": "ext-seonyuduo-repo",
+   "project": "antigravity",
+   "domain": "personal",
+   "type": "external",
+   "name": "SeonyuDuo repo (가족 영상 · 운동봇 연동)",
+   "runs_on": "external",
+   "status": "active",
+   "desc_md": "부부/가족 공유용 별도 GitHub repo(`SeonyuDuo`). 가족 공유 영상 페이지 `video.html`(YouTube Data API 실시간 조회 + 재생목록)와, 이 repo에서 도는 선유듀오 운동봇의 연동 대상.\n\n- 운동봇(`bot-seonyuduo-exercise`)이 자연어 운동기록을 Google Sheet에 적재하고 06:00 다이제스트를 보낸다.\n- 상세 카드는 추후 확장 예정(현재는 링크 박스 수준)."
+  },
+  {
+   "id": "ext-sisyphe",
+   "project": "antigravity",
+   "domain": "personal",
+   "type": "external",
+   "name": "Sisyphe 가계부/운동 대시보드 + 투자일지 시트",
+   "runs_on": "external",
+   "status": "active",
+   "desc_md": "가계부 + 운동기록 대시보드(Ledger/Fitness/Weight 3탭, Google Sheets + data.json 이중, staticrypt 암호화 배포). 별도 생태계지만 이 repo와 두 접점이 있다.\n\n- **투자일지**: `src-journal-data`(fetch_journal_data.py)가 매일 16:10 KST 시장데이터를 Sisyphe의 Google Sheet Data 탭에 적재.\n- **가계부**: 카드 SMS→아이폰 단축어→Apps Script→Sheet 파이프라인. Sisyphe-Bot이 답장으로 분류/수정.\n- 상세 카드는 추후 확장 예정.",
+   "code": [
+    "execution/fetch_journal_data.py"
+   ]
+  },
+  {
+   "id": "gha-claude-code",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "gha_workflow",
+   "name": "Claude Code Action (@claude 이벤트)",
+   "runs_on": "gha",
+   "schedule_kst": "이벤트 (@claude PR/이슈)",
+   "status": "active",
+   "desc_md": "PR/이슈/코멘트에서 `@claude`가 언급되면 Claude Code Action이 도는 워크플로. 코드 자동 리뷰/수정 보조.\n\n- 트리거: issue_comment/PR review comment의 `@claude`, 또는 issues opened/assigned, PR opened/synchronize.\n- `--append-system-prompt \"항상 한글로 답변할 것\"`.\n- 데이터 파이프라인과 무관한 개발 편의 워크플로.",
+   "code": [
+    ".github/workflows/claude.yml"
+   ],
+   "depends_on": [
+    "infra-github"
+   ]
+  },
+  {
+   "id": "gha-daily-disclosures",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "gha_workflow",
+   "name": "Daily Disclosures DART+KIND (16:30)",
+   "runs_on": "gha",
+   "schedule_kst": "16:30 매일",
+   "status": "active",
+   "desc_md": "보유종목 공시를 16:30 KST(07:30 UTC) 장종료 후 수집·누적하는 워크플로. DART(전자공시)+KIND(거래소 공시)를 `disclosures.json`+`corp_codes.json`에 append.\n\n- 봇 알림(RA_Sisyphe 17:00 수집/17:30 발송)과 별개의 GHA 수집 경로 — 타이밍 무관하게 데이터를 축적.\n- git-auto-commit-action으로 두 JSON만 push(맥미니 이전 시 safe_commit_push로 통일 예정).\n- 교훈: GHA 스케줄 cron이 3~5h 지연될 수 있음.",
+   "code": [
+    ".github/workflows/daily_disclosures.yml"
+   ],
+   "writes": [
+    "disclosures.json",
+    "corp_codes.json"
+   ],
+   "depends_on": [
+    "src-dart-disclosures",
+    "src-kind-disclosures"
+   ],
+   "alerts": "실패 자체 알림 없음 → gha-daily-health-check"
+  },
+  {
+   "id": "gha-disabled",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "gha_workflow",
+   "name": "비활성 워크플로 (weather · calendar · portfolio-report)",
+   "runs_on": "gha",
+   "status": "retired",
+   "desc_md": "`.yml.disabled` 확장자로 꺼둔 워크플로 3종. 기능이 봇 내부 잡으로 흡수돼 은퇴.\n\n- `daily_weather.yml.disabled`(05:00 날씨) → Sisyphe-Bot 05:00 날씨 잡으로 대체.\n- `daily_calendar.yml.disabled`(05:10 캘린더) → Sisyphe-Bot 05:05 캘린더 잡으로 대체.\n- `daily_portfolio_report.yml.disabled`(평일 16:00 리포트) → Sisyphe-Bot 17:00 리포트 잡으로 대체.\n- 확장자만 되돌리면 부활 가능하나 현재 중복이라 비활성 유지.",
+   "code": [
+    ".github/workflows/daily_weather.yml.disabled",
+    ".github/workflows/daily_calendar.yml.disabled",
+    ".github/workflows/daily_portfolio_report.yml.disabled"
+   ]
+  },
+  {
+   "id": "infra-github",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "infra",
+   "name": "GitHub (정본 repo · Pages · Actions)",
+   "runs_on": "github",
+   "schedule_kst": "상시",
+   "status": "active",
+   "desc_md": "생태계의 단일 정본(source of truth). `sisyphe10/Antigravity_Market_Dashboard` repo가 코드·데이터·산출 HTML을 모두 보관하고, GitHub Pages가 라이브 대시보드를 서빙하며, GitHub Actions가 스케줄 수집 잡의 컴퓨트 한 축을 담당한다.\n\n- 모든 수집 잡은 산출물을 커밋→push하고, VM은 `*/5` git-pull로 이를 받아 동기화한다(단일 워킹트리 정합).\n- push 레이스는 `scripts/safe_commit_push.sh`(fetch+merge+재시도)가 자가복구, xlsx 바이너리 충돌만 가드로 막는다.\n- 실패해도 워크플로가 green일 수 있어(개별 시리즈 stale) 신선도 감시(`gha-daily-health-check`)가 별도로 존재한다.\n- 운영 팁: `execution/**` push는 장중 `gha-daily-crawl`을 트리거하므로 커밋 메시지에 `[skip ci]` 필수.",
+   "code": [
+    ".github/workflows/",
+    "scripts/safe_commit_push.sh"
+   ],
+   "links": [
+    {
+     "label": "라이브 대시보드",
+     "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/index.html"
+    }
+   ]
+  },
+  {
+   "id": "infra-telegram",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "infra",
+   "name": "텔레그램 (알림·상호작용 채널)",
+   "runs_on": "external",
+   "schedule_kst": "상시",
+   "status": "active",
+   "desc_md": "모든 봇 알림과 실패 경보가 나가는 메신저 채널. 봇별 전용 토큰(Sisyphe/RA_Sisyphe/Research Notes/선유듀오)으로 분리 운용.\n\n- 다이제스트·리서치 알림·투자유의 요약·공시·실적·운동 기록 대화가 여기로 흐른다.\n- 잡 실패는 `scripts/notify_sisyphe_failure.sh`가 텔레그램으로 발송(systemd OnFailure / launchd wrapper 공통).\n- 맥미니 self-check(08:50)는 정상이어도 매일 1회 발송 → 침묵 자체가 dead-man's switch.",
+   "code": [
+    "scripts/notify_sisyphe_failure.sh"
+   ]
+  },
+  {
+   "id": "page-architecture",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "page",
+   "name": "architecture.html (아키텍처)",
+   "runs_on": "github",
+   "schedule_kst": "수동 관리",
+   "status": "active",
+   "desc_md": "생태계 아키텍처를 보여주는 페이지. **자동 생성이 아니라 수동 관리** — 이 레지스트리(`architecture/registry.json`)를 소비하는 렌더러가 향후 대체 예정.\n\n- 현재는 `TOP_NAV_CSS`/`top_nav_html()` 결과를 정적으로 박아넣은 상태라, create_dashboard.py의 탭바 헬퍼를 고칠 때마다 수동 동기화가 필요(안 하면 탭바 어긋남).\n- 본 레지스트리 기반 위키(`architecture/wiki/`)로 이관되면 이 수동 동기화 부담이 해소된다.",
+   "code": [
+    "architecture.html",
+    "architecture/registry.json"
+   ],
+   "reads": [
+    "architecture/registry.json"
+   ],
+   "links": [
+    {
+     "label": "라이브",
+     "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/architecture.html"
+    }
+   ]
+  },
+  {
+   "id": "store-dataset-csv",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "dataset",
+   "name": "dataset.csv (시장 시계열 통합)",
+   "runs_on": "github",
+   "schedule_kst": "다수 잡 append",
+   "status": "active",
+   "desc_md": "생태계의 시계열 데이터 통합 저장소(~1.9MB, append-only). 원자재/메모리/지수/금리/매크로/capex 등 모든 시계열이 `날짜,이름,값,타입` 형태로 쌓인다.\n\n- 기록자: market_crawler, ECOS/FRED/KOFIA/NPS/KRX/KOSIS/일본capex, SMP, SiliconData 등.\n- 소비자: create_dashboard(market.html DATA 섹션), draw_charts.\n- append-only라 과거 잠정값 정정은 rebuild 필요. 타입→카테고리 매핑은 `config.py` CATEGORY_MAP.",
+   "code": [
+    "config.py"
+   ]
+  },
+  {
+   "id": "store-fee-revenue",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "dataset",
+   "name": "fee_revenue.json (수수료 매출)",
+   "runs_on": "github",
+   "schedule_kst": "수동 입력",
+   "status": "active",
+   "desc_md": "WRAP 수수료 탭 '매출' 서브탭 데이터(자문사 몫 실제 정산 수수료). 수동 입력 + `add_fee_revenue.py`로 관리.\n\n- 청산 기준 분기 귀속(DB'차'/NH'호' 정규화). 사용자가 데이터 보내면 자동 처리→create_dashboard 재생성.\n- 2026-06-17 구축·검증(미배포 상태였음).",
+   "code": [
+    "add_fee_revenue.py"
+   ]
+  },
+  {
+   "id": "store-orders-pending",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "store",
+   "name": "orders/ (pending_orders · aum_pending)",
+   "runs_on": "github",
+   "schedule_kst": "사용자 입력 + 16:00 finalize",
+   "status": "active",
+   "desc_md": "사용자가 브라우저 Order/AUM 탭에서 임시저장한 주문/AUM 누적본(GitHub Contents API로 write).\n\n- 16:00 finalize 워크플로가 이를 Wrap_NAV.xlsx NEW/AUM 시트에 확정 반영 후 비운다.\n- 최종저장 후 새로고침 입력소실 방지: pending을 Pages(빌드지연) 대신 Contents API 우선 read.",
+   "code": [
+    "execution/finalize_pending_orders.py",
+    "execution/finalize_pending_aum.py"
+   ]
+  },
+  {
+   "id": "store-wrap-nav-xlsx",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "store",
+   "name": "Wrap_NAV.xlsx (랩 운용 원장)",
+   "runs_on": "github",
+   "schedule_kst": "사용자 편집 + finalize",
+   "status": "active",
+   "desc_md": "랩 상품 운용의 원장 엑셀. NEW(종목·비중)/AUM/기준가/수익률 시트로 구성. 사용자가 직접 편집하는 유일한 바이너리 데이터.\n\n- NEW/AUM은 사람(또는 finalize 잡)이 채우고, 기준가/수익률은 calculate_wrap_nav/returns가 자동 생성.\n- 워처가 저장을 감지→3-way merge→push, recalc_wrap_nav 워크플로가 라이브 반영.\n- 바이너리라 push 충돌 위험 → safe_commit_push xlsx 가드 + merge_wrap_nav 3-way 병합.\n- Excel에서 열려있으면 쓰기 PermissionError."
+  },
+  {
+   "id": "timer-hotel-adr",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "timer",
+   "name": "호텔 ADR 타이머 (12:00, 은퇴)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "12:00 매일 (disabled)",
+   "status": "retired",
+   "desc_md": "booking.com 호텔 ADR(lead +7/+14/+30)을 수집하던 타이머. **2026-07-06 전면 은퇴**(VM timer disabled).\n\n- 은퇴 사유: 크롬 selenium 잡이 저사양 VM 메모리를 굶겨 12:00 /update 잡을 죽인 사고. `hotels.html` 데이터는 동결.\n- systemd 유닛/러너/`fetch_hotel_adr.py`는 origin에서 이미 삭제됨(dead code 정리 커밋 e33ce836). `hotel_adr.csv`·`hotels.html`은 동결 상태로 잔존.\n- launchd 이전 타이머 세트에도 미포함(정상). 이 카드는 이력 보존용.",
+   "code": [
+    "scripts/hotel-adr.timer"
+   ],
+   "writes": [
+    "hotel_adr.csv"
+   ]
+  }
+ ]
+}

@@ -5,7 +5,7 @@ domain: "ops-infra"
 project: "antigravity"
 type: "pipeline_source"
 runs_on: "vm_macmini"
-schedule_kst: "18:35 (landing-highlights 타이머)"
+schedule_kst: "18:45 (landing-highlights 타이머)"
 status: "active"
 code:
   - "execution/create_landing_highlights.py"
@@ -21,7 +21,7 @@ alerts: "OnFailure(landing-highlights) → 텔레그램"
 
 # 랜딩 하이라이트 생성 (create_landing_highlights.py)
 
-**Domain:** 운영 · 인프라 · **Type:** Source · **Runs on:** vm_macmini · **Schedule (KST):** 18:35 (landing-highlights 타이머) · **Status:** active · **Project:** antigravity
+**Domain:** 운영 · 인프라 · **Type:** Source · **Runs on:** vm_macmini · **Schedule (KST):** 18:45 (landing-highlights 타이머) · **Status:** active · **Project:** antigravity
 
 index.html 회전 위젯(sparkline+한줄 코멘트, 50슬롯) 데이터 `landing_highlights.json` 생성.
 

@@ -3,6 +3,7 @@
 *.json
 !package.json
 !tsconfig.json
+!architecture/registry.json
 
 # Python
 __pycache__/

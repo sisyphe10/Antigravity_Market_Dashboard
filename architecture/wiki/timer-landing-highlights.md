@@ -1,11 +1,11 @@
 ---
 id: "timer-landing-highlights"
-name: "랜딩 하이라이트 타이머 (18:35)"
+name: "랜딩 하이라이트 타이머 (18:45)"
 domain: "ops-infra"
 project: "antigravity"
 type: "timer"
 runs_on: "vm_macmini"
-schedule_kst: "18:35 매일"
+schedule_kst: "18:45 매일"
 status: "active"
 code:
   - "scripts/landing-highlights.timer"
@@ -23,11 +23,11 @@ depends_on:
 alerts: "OnFailure → landing-highlights-notify.service → 텔레그램"
 ---
 
-# 랜딩 하이라이트 타이머 (18:35)
+# 랜딩 하이라이트 타이머 (18:45)
 
-**Domain:** 운영 · 인프라 · **Type:** Timer · **Runs on:** vm_macmini · **Schedule (KST):** 18:35 매일 · **Status:** active · **Project:** antigravity
+**Domain:** 운영 · 인프라 · **Type:** Timer · **Runs on:** vm_macmini · **Schedule (KST):** 18:45 매일 · **Status:** active · **Project:** antigravity
 
-매일 18:35 KST(Featured 2차 마감 후) index.html 회전 위젯 데이터(sparkline+한줄 코멘트, 50슬롯)를 생성하는 타이머(`run_landing_highlights.sh` → `create_landing_highlights.py`).
+매일 18:45 KST(Featured 2차 마감 후) index.html 회전 위젯 데이터(sparkline+한줄 코멘트, 50슬롯)를 생성하는 타이머(`run_landing_highlights.sh` → `create_landing_highlights.py`).
 
 - 여러 산출물(market_alert/seibro/featured 등)에서 하이라이트를 뽑아 `landing_highlights.json`으로.
 - RandomizedDelaySec=60. TimeoutStartSec=5min. stale lockfile 주의.
