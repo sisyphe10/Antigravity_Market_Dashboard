@@ -5,7 +5,7 @@ domain: "ops-infra"
 project: "antigravity"
 type: "dataset"
 runs_on: "github"
-schedule_kst: "18:35 갱신"
+schedule_kst: "18:45 갱신"
 status: "active"
 code: []
 reads: []
@@ -17,7 +17,7 @@ alerts: ""
 
 # landing_highlights.json
 
-**Domain:** 운영 · 인프라 · **Type:** Dataset · **Runs on:** github · **Schedule (KST):** 18:35 갱신 · **Status:** active · **Project:** antigravity
+**Domain:** 운영 · 인프라 · **Type:** Dataset · **Runs on:** github · **Schedule (KST):** 18:45 갱신 · **Status:** active · **Project:** antigravity
 
 index.html 회전 위젯(sparkline+코멘트, 50슬롯) 데이터. landing-highlights 타이머가 생성.
 

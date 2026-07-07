@@ -26,7 +26,7 @@ alerts: ""
 
 생태계 진입점 랜딩 페이지. sparkline 회전 위젯(50슬롯)+인용구 카드, 상단 탭바 네비게이션(WRAP/Market/Architecture).
 
-- 위젯 데이터는 `landing_highlights.json`(18:35 타이머)+`landing_quotes.json`, 예탁금/신용 차트는 `kofia_stats.json`.
+- 위젯 데이터는 `landing_highlights.json`(18:45 타이머)+`landing_quotes.json`, 예탁금/신용 차트는 `kofia_stats.json`.
 - `create_dashboard.py`가 생성, kofia/finalize/recalc/crawl 등 여러 잡이 재생성.
 - 좌측 'Age of Emergence' 브랜드 클릭=index로.
 
