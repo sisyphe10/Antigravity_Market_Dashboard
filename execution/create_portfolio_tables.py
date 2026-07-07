@@ -308,34 +308,45 @@ def calculate_cumulative_return(code, stock_name, portfolio_name, nav_df, price_
         if price_df is None or price_df.empty:
             return {'cumulative_return': None, 'status': 'no_price_data', 'avg_price': None, 'current_price': None, 'dd': None, 'all_time_high': None}
 
-        # 각 매수 시점의 종가 가져오기 (캐시된 데이터에서)
-        weighted_sum = 0
-        total_weight = 0
+        # 원가법 평균단가 (2026-07-08 산식 교정): 리밸런싱 스냅포트 행을 전부 '매수'로
+        # 평균내던 옛 방식은 비중이 불변이어도 이후 스냅샷 종가가 원가에 섞여 수익률을
+        # 희석시켰다(테크윙: 실제 -29.6% → -16.1% 표시). 이제 **비중 증가분(delta)만**
+        # 그 날짜 종가로 추가 매수로 반영하고, 비중 불변·감소 시 평균단가는 유지한다
+        # (매도는 평균단가를 바꾸지 않는 표준 원가법).
+        avg_price = None
+        pos_weight = 0.0
 
         for _, row in purchases.iterrows():
             purchase_date = row['날짜']
-            weight = row['비중']
+            weight = float(row['비중'])
+            delta = weight - pos_weight
 
-            try:
-                if purchase_date in price_df.index:
-                    close_price = price_df.loc[purchase_date, 'Close']
-                else:
-                    available_dates = price_df[price_df.index <= purchase_date]
-                    if not available_dates.empty:
-                        close_price = available_dates.iloc[-1]['Close']
+            if delta > 1e-9:  # 비중 비교 엡실론 — 주문변경 diff와 동일 컨벤션
+                try:
+                    if purchase_date in price_df.index:
+                        close_price = price_df.loc[purchase_date, 'Close']
                     else:
-                        close_price = price_df.iloc[0]['Close']
+                        available_dates = price_df[price_df.index <= purchase_date]
+                        if not available_dates.empty:
+                            close_price = available_dates.iloc[-1]['Close']
+                        else:
+                            close_price = price_df.iloc[0]['Close']
 
-                weighted_sum += close_price * weight
-                total_weight += weight
-            except Exception as e:
-                print(f"    Warning: Could not get price for {stock_name} on {purchase_date}: {e}")
-                continue
+                    if avg_price is None or pos_weight <= 0:
+                        avg_price = float(close_price)
+                    else:
+                        avg_price = (avg_price * pos_weight + float(close_price) * delta) / weight
+                    pos_weight = weight  # 단가 확보 성공 시에만 전진
+                except Exception as e:
+                    print(f"    Warning: Could not get price for {stock_name} on {purchase_date}: {e}")
+                    # 단가 확보 실패 → pos_weight도 유지. 실패한 증가분은 다음 성공하는
+                    # 증가 시점의 delta에 합산돼 만회된다 (유령 비중으로 원가가 조용히
+                    # 대체되는 것 방지 — codex 리뷰 지적).
+            else:
+                pos_weight = weight  # 비중 유지/감소는 가격 불필요 — 항상 갱신 (원가 불변)
 
-        if total_weight == 0:
+        if avg_price is None:
             return {'cumulative_return': None, 'status': 'no_valid_prices', 'avg_price': None, 'current_price': None, 'dd': None, 'all_time_high': None}
-
-        avg_price = weighted_sum / total_weight
         current_price = price_df.iloc[-1]['Close']
         cumulative_return = (current_price / avg_price - 1) * 100
 
@@ -710,6 +721,16 @@ def create_portfolio_tables():
             print(f"  Warning: _portfolio_meta(YTD/누적수익률) 계산 실패: {e}")
         if portfolio_meta:
             portfolio_data['_portfolio_meta'] = portfolio_meta
+
+        # 시세 기준일: 가격 캐시의 최신 일자 (개장 전엔 전일 → 제목 라벨이 '전일 종가 기준'으로
+        # 표시되게 함. NXT/장전 시세는 수집하지 않으므로 생성 시각과 시세 기준일은 다를 수 있다.)
+        try:
+            _last_px_dates = [df.index[-1] for df in price_cache.values()
+                              if df is not None and not df.empty]
+            if _last_px_dates:
+                portfolio_data['_price_asof'] = max(_last_px_dates).strftime('%Y-%m-%d')
+        except Exception as e:
+            print(f"  Warning: _price_asof 계산 실패: {e}")
 
         # JSON 파일로 저장
         print(f"\n5. 결과 저장 중... ({OUTPUT_FILE})")

@@ -57,6 +57,17 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_daily_etf_date
             ON etf_daily (etf_code, date);
     """)
+    # 2026-07-08 스키마 확장: CU당 보유수량(qty)·종목 현재가(px) — 비중 변화가
+    # 실제 매매인지 주가 드리프트인지 구분용 (etfcheck F16499/F15001).
+    # earnings_bot/db.py 와 동일한 idempotent ALTER 패턴 (이미 있으면 조용히 무시).
+    for ddl in (
+        "ALTER TABLE etf_constituents ADD COLUMN qty REAL",
+        "ALTER TABLE etf_constituents ADD COLUMN px REAL",
+    ):
+        try:
+            conn.execute(ddl)
+        except sqlite3.OperationalError:
+            pass
     conn.commit()
     conn.close()
 
@@ -80,10 +91,10 @@ def insert_etf_daily_batch(conn, rows):
 
 
 def insert_constituents_batch(conn, rows):
-    """etf_constituents 일괄 INSERT OR REPLACE"""
+    """etf_constituents 일괄 INSERT OR REPLACE (qty/px는 없으면 NULL)"""
     conn.executemany(
-        "INSERT OR REPLACE INTO etf_constituents (date, etf_code, stock_code, stock_name, weight) "
-        "VALUES (?, ?, ?, ?, ?)",
+        "INSERT OR REPLACE INTO etf_constituents (date, etf_code, stock_code, stock_name, weight, qty, px) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?)",
         rows
     )
 
@@ -183,16 +194,27 @@ def get_available_dates():
 
 
 def get_constituents_for_date(date_str=None):
-    """특정 날짜의 전체 구성종목 (etf_code → [{stock_code, stock_name, weight}])"""
+    """특정 날짜의 전체 구성종목 (etf_code → [{c,n,w,q,p}], q/p는 구버전 row에서 None)"""
     conn = get_conn()
     if not date_str:
         date_str = conn.execute("SELECT MAX(date) FROM etf_constituents").fetchone()[0]
-    rows = conn.execute("""
-        SELECT etf_code, stock_code, stock_name, weight
-        FROM etf_constituents
-        WHERE date = ?
-        ORDER BY etf_code, weight DESC
-    """, (date_str,)).fetchall()
+    try:
+        rows = conn.execute("""
+            SELECT etf_code, stock_code, stock_name, weight, qty, px
+            FROM etf_constituents
+            WHERE date = ?
+            ORDER BY etf_code, weight DESC
+        """, (date_str,)).fetchall()
+        has_qty = True
+    except sqlite3.OperationalError:
+        # 마이그레이션 전 DB (qty/px 컬럼 없음) — 구 스키마로 폴백
+        rows = conn.execute("""
+            SELECT etf_code, stock_code, stock_name, weight
+            FROM etf_constituents
+            WHERE date = ?
+            ORDER BY etf_code, weight DESC
+        """, (date_str,)).fetchall()
+        has_qty = False
     conn.close()
     result = {}
     for r in rows:
@@ -203,5 +225,7 @@ def get_constituents_for_date(date_str=None):
             'c': r['stock_code'],
             'n': r['stock_name'],
             'w': r['weight'],
+            'q': r['qty'] if has_qty else None,
+            'p': r['px'] if has_qty else None,
         })
     return result

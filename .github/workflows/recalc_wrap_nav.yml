@@ -20,6 +20,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      # KIS 자격증명 — calculate_wrap_nav(지수 확정치)·create_portfolio_tables(시총/시장구분)가 사용.
+      KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
+      KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
 
     steps:
       - name: Checkout code

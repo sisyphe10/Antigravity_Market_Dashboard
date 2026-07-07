@@ -93,7 +93,7 @@ def _send(token, chat_id, text):
 
 
 def main():
-    from active_etf_changes import compute_active_etf_changes, format_telegram_message, chunk_by_lines
+    from active_etf_changes import compute_active_etf_changes, format_telegram_blocks, pack_blocks
 
     result = compute_active_etf_changes()
     latest = result.get('latest')
@@ -110,8 +110,9 @@ def main():
         logging.info("이미 발송한 날짜(%s) — 무발송", latest)
         return
 
-    msg = format_telegram_message(result)
-    if msg is None:
+    # 3단 구조 원자 블록 (헤더+집계+TOP / ETF별 expandable blockquote) — 2026-07-08 개편
+    blocks = format_telegram_blocks(result)
+    if not blocks:
         logging.info("발송할 내용 없음 — 상태만 갱신(%s)", latest)
         _save_last_sent(latest)
         return
@@ -126,7 +127,7 @@ def main():
         _save_last_sent(latest)
         return
 
-    chunks = chunk_by_lines(msg)
+    chunks = pack_blocks(blocks)
     sent = 0
     for cid in subs:
         ok = True
