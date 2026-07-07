@@ -18,7 +18,7 @@ patterns:
 - featured.html = Featured (KRX 거래대금/시총/상승률 TOP)
 - hotels.html = Hotels (ADR 추적)
 - etf.html = ETF 구성종목 (조건부, etf_data.db 있을 때만)
-- taiwan.html = Taiwan 월매출 (대만 큐레이션 53종목, 별도 생성기 create_taiwan_page.py)
+- Taiwan 월매출 (대만 큐레이션 53종목) = Data 페이지(market.html)의 'Taiwan' 버튼 패널로 임베드. 공유 빌더 execution/taiwan_table.py (독립 taiwan.html·create_taiwan_page.py는 2026-07-07 은퇴)
 - universe_lab.html = Universe Lab (create_dashboard.py 생성)
 - architecture.html = 아키텍처 위키 (★2026-07-07 registry 기반 자동 생성으로 전환 — 아래 참조)
 
@@ -27,7 +27,7 @@ patterns:
 Wrap_NAV.xlsx 변경 → calculate_wrap_nav.py → calculate_returns.py → create_dashboard.py
 dataset.csv 변경 → draw_charts.py → create_dashboard.py
 fetch_monthly_returns.py → monthly_returns.json → market.html (MONTHLY RETURNS 테이블)
-taiwan_universe.csv(큐레이션 53종, 사용자 편집 가능) → fetch_taiwan_revenue.py → taiwan_revenue.csv → create_taiwan_page.py → taiwan.html (GHA daily_taiwan_revenue.yml 23:00 KST)
+taiwan_universe.csv(큐레이션 53종, 사용자 편집 가능) → fetch_taiwan_revenue.py → taiwan_revenue.csv → taiwan_table.py(공유 빌더) → create_dashboard.py가 market.html Data 페이지 'Taiwan' 버튼 패널로 임베드 (GHA daily_taiwan_revenue.yml 23:20 KST가 CSV 갱신 후 market.html 재생성)
 portfolio_data.json (create_portfolio_tables.py) → wrap.html PORTFOLIO + Order 탭 fetch
 orders/pending_orders.json (사용자 브라우저 → GitHub Contents API) → 16:00 KST GHA finalize → Wrap_NAV.xlsx NEW 시트
 create_dashboard.py 변경 → 전체 HTML 재생성 (index, market, wrap, universe, seibro, featured, hotels)

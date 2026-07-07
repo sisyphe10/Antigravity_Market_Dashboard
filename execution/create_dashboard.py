@@ -14,6 +14,7 @@ KST = timezone(timedelta(hours=9))
 # Import shared configuration
 from config import CATEGORY_MAP, CSV_FILE
 import wrap_config  # WRAP 증권사·상품 단일 출처 레지스트리
+import taiwan_table  # Taiwan 월매출 테이블 공유 빌더 (Data 페이지 Taiwan 버튼 패널)
 
 # Version 3.0 - Added category grouping
 CHARTS_DIR = 'charts'
@@ -33,7 +34,6 @@ TOP_NAV_MAIN = [
     ]),
     ('market',       'market.html',        'Market',       [
         ('market',        'market.html',        'Data'),
-        ('taiwan',        'taiwan.html',        'Taiwan'),
         ('universe',      'universe.html',      'Universe'),
         ('universe_lab',  'universe_lab.html',  'Universe Lab'),
         ('featured',      'featured.html',      'Featured'),
@@ -1429,6 +1429,33 @@ def _build_indices_chart_section(category_label='Indices'):
         return ""
 
 
+def _series_country(group_label, s):
+    """DATA 통합차트 사이드 테이블 Country 컬럼 값. 그룹 기본값 + 혼합 그룹(금리/환율)·
+    한국 특이 시리즈(KRX/SMP)는 series 단위로 판정. 완벽 정밀보다 필터 유용성 우선."""
+    g = group_label
+    disp, csvn = s.get('display', ''), s.get('csv', '')
+    if g in ('INDEX_KOREA', 'MACRO KOREA', 'CREDIT & HOUSING', 'HOTELS'):
+        return 'Korea'
+    if g in ('INDEX_US', 'MACRO US', 'CREDIT & HOUSING US'):
+        return 'US'
+    if g == 'CAPEX':
+        return 'Japan'
+    if g in ('CRYPTOCURRENCY', 'MEMORY'):
+        return 'Global'
+    if g == 'COMMODITIES':
+        return 'Korea' if ('KRX' in csvn or csvn == 'SMP') else 'Global'
+    if g == 'INTEREST RATES':
+        return 'US' if (disp.startswith('미 ') or disp.startswith('US') or disp == 'SOFR') else 'Korea'
+    if g == 'EXCHANGE RATE':
+        if 'KRW' in csvn: return 'Korea'
+        if 'CNY' in csvn: return 'China'
+        if 'JPY' in csvn: return 'Japan'
+        if 'TWD' in csvn: return 'Taiwan'
+        if 'EUR' in csvn: return 'Europe'
+        return 'US'  # Dollar Index (DXY), 달러인덱스 광의
+    return 'Global'
+
+
 def _build_combined_chart_section():
     """7개 카테고리(INDEX_KOREA/INDEX_US/EXCHANGE RATE/INTEREST RATES/CRYPTOCURRENCY/Memory/COMMODITIES)
     를 단일 동적 Chart.js 차트로 통합. 좌 사이드바는 카테고리 그룹 헤더 + 토글 항목,
@@ -1759,12 +1786,15 @@ def _build_combined_chart_section():
                 if hotels:
                     tooltip_attr = f' title="{_html.escape(", ".join(hotels))}"'
             display_esc = _html.escape(s['display'])
+            country_esc = _html.escape(_series_country(group_label_raw, s))
             rows_html += (
                 f'<tr class="cmb-series-row" data-group="{group_label}" '
+                f'data-country="{country_esc}" '
                 f'data-update-rank="{rank}" data-name="{display_esc}" '
                 f'onclick="toggleCmbSeries(this.querySelector(\'.cmb-chart-item\'), event)" '
                 f'style="cursor:pointer;">'
                 f'<td style="{cell_base}text-align:center;white-space:nowrap;">{freq}</td>'
+                f'<td style="{cell_base}text-align:center;white-space:nowrap;font-size:12px;">{country_esc}</td>'
                 f'<td style="{cell_base}text-align:center;white-space:nowrap;font-size:12px;'
                 f'text-transform:uppercase;letter-spacing:0.3px;">{group_label}</td>'
                 f'<td class="cmb-chart-item{active}" data-series="{display_esc}"{tooltip_attr} '
@@ -1797,9 +1827,10 @@ def _build_combined_chart_section():
             'color:#111;white-space:nowrap;cursor:pointer;text-align:left;}'
             '</style>'
             f'<table id="cmbSideTable" class="portfolio-table" style="max-width:500px;margin:0 auto;">'
-            f'<colgroup><col style="width:72px;"><col style="width:155px;"><col></colgroup>'
+            f'<colgroup><col style="width:70px;"><col style="width:82px;"><col style="width:132px;"><col></colgroup>'
             f'<thead><tr>'
-            f'<th style="{th_base}" onclick="sortCmbTable(\'rank\')">Update <span id="cmbArr_rank" style="font-size:10px;">▲</span>{filter_btn.format(col="rank")}</th>'
+            f'<th style="{th_base}" onclick="sortCmbTable(\'rank\')">Frequency <span id="cmbArr_rank" style="font-size:10px;">▲</span>{filter_btn.format(col="rank")}</th>'
+            f'<th style="{th_base}" onclick="sortCmbTable(\'country\')">Country <span id="cmbArr_country" style="font-size:10px;"></span>{filter_btn.format(col="country")}</th>'
             f'<th style="{th_base}" onclick="sortCmbTable(\'group\')">Group <span id="cmbArr_group" style="font-size:10px;"></span>{filter_btn.format(col="group")}</th>'
             f'<th style="{th_base}" onclick="sortCmbTable(\'name\')">Data <span id="cmbArr_name" style="font-size:10px;"></span>{filter_btn.format(col="name")}</th>'
             f'</tr></thead>'
@@ -1830,8 +1861,8 @@ def _build_combined_chart_section():
             // 빈도별 MA 윈도우 (직전 N개 실측치 기준): 일별=거래일, 월별=개월, 분기=분기
             var MA_WINDOWS = { D: [20, 60, 120, 200], M: [3, 6, 12, 24], Q: [4, 8, 12, null] };
             // MA/이격도 토글 상태 — 슬롯 인덱스(0~3) 기준 (윈도우 값이 빈도마다 달라지므로).
-            // 시리즈 전환·기간 변경에도 유지 (새로고침 시 초기화, 기본 전부 OFF)
-            var maActive = { 0: false, 1: false, 2: false, 3: false };
+            // 시리즈 전환·기간 변경에도 유지 (새로고침 시 초기화). MA20(slot 0)만 기본 ON.
+            var maActive = { 0: true, 1: false, 2: false, 3: false };
             var dispActive = { 0: false, 1: false, 2: false, 3: false };
             // 선택 시리즈 실측치 간격(중앙값)으로 빈도 판정: ≤8일=일별, ≤45일=월별, 그 외=분기
             function cmbDetectFreq(obs) {
@@ -1978,11 +2009,12 @@ def _build_combined_chart_section():
             var cmbFilters = {};
             function cmbRowVal(row, col) {
                 if (col === 'rank') return row.cells[0].textContent.trim();
+                if (col === 'country') return row.getAttribute('data-country') || '';
                 if (col === 'group') return row.getAttribute('data-group') || '';
                 return row.getAttribute('data-name') || '';
             }
             function cmbRowPasses(row, skipCol) {
-                return ['rank', 'group', 'name'].every(function(c) {
+                return ['rank', 'country', 'group', 'name'].every(function(c) {
                     if (c === skipCol) return true;
                     var f = cmbFilters[c];
                     return !f || f.indexOf(cmbRowVal(row, c)) !== -1;
@@ -1992,7 +2024,7 @@ def _build_combined_chart_section():
                 document.querySelectorAll('.cmb-series-row').forEach(function(row) {
                     row.style.display = cmbRowPasses(row, null) ? '' : 'none';
                 });
-                ['rank', 'group', 'name'].forEach(function(c) {
+                ['rank', 'country', 'group', 'name'].forEach(function(c) {
                     var btn = document.querySelector('.cmb-filter-btn[data-col="' + c + '"]');
                     if (btn) btn.classList.toggle('cmb-filter-on', !!cmbFilters[c]);
                 });
@@ -2066,7 +2098,7 @@ def _build_combined_chart_section():
             // Update 칼럼은 data-update-rank(0/1/2 = D/W/M 의미순) 숫자 비교.
             var _cmbSortKey = 'rank', _cmbSortAsc = true;
             function updateCmbSortArrows() {
-                ['rank', 'group', 'name'].forEach(function(k) {
+                ['rank', 'country', 'group', 'name'].forEach(function(k) {
                     var sp = document.getElementById('cmbArr_' + k);
                     if (sp) sp.textContent = (k === _cmbSortKey) ? (_cmbSortAsc ? '▲' : '▼') : '';
                 });
@@ -2080,6 +2112,7 @@ def _build_combined_chart_section():
                 rows.sort(function(a, b) {
                     var va, vb;
                     if (key === 'rank') { va = +a.getAttribute('data-update-rank'); vb = +b.getAttribute('data-update-rank'); }
+                    else if (key === 'country') { va = (a.getAttribute('data-country') || '').toLowerCase(); vb = (b.getAttribute('data-country') || '').toLowerCase(); }
                     else if (key === 'group') { va = (a.getAttribute('data-group') || '').toLowerCase(); vb = (b.getAttribute('data-group') || '').toLowerCase(); }
                     else { va = (a.getAttribute('data-name') || '').toLowerCase(); vb = (b.getAttribute('data-name') || '').toLowerCase(); }
                     if (va < vb) return _cmbSortAsc ? -1 : 1;
@@ -2471,8 +2504,27 @@ def _build_combined_chart_section():
                     return ctx.dataset.label + ': ' + fmtNum(ctx.parsed.y);
                 };
 
+                // 우측 end-label(예: 예탁금 1,199,264) 잘림 방지 — 최장 라벨 폭만큼 오른쪽 패딩 동적 확보
+                var _measCtx = document.createElement('canvas').getContext('2d');
+                _measCtx.font = 'bold 12px sans-serif';
+                var _maxLabelW = 0;
+                datasets.forEach(function(ds) {
+                    if (ds._skipEndLabel) return;
+                    var lv = null;
+                    for (var _k = ds.data.length - 1; _k >= 0; _k--) { if (ds.data[_k] !== null && ds.data[_k] !== undefined) { lv = ds.data[_k]; break; } }
+                    if (lv === null) return;
+                    var _lbl;
+                    if (ds._isForeign) { _lbl = lv.toFixed(1) + '%'; }
+                    else if (mode === 'pct') { var _r = Math.sign(lv) * Math.round(Math.abs(lv)); _lbl = (_r >= 0 ? '+' : '') + _r + '%'; }
+                    else { _lbl = fmtNum(lv); }
+                    var _w = _measCtx.measureText(_lbl).width;
+                    if (_w > _maxLabelW) _maxLabelW = _w;
+                });
+                var _rightPad = Math.max(60, Math.ceil(_maxLabelW) + 16);
+
                 if (cmbChart) {
                     // 재사용: 인스턴스 유지하고 데이터/축/툴팁만 교체 (destroy+new 멈칫 제거)
+                    cmbChart.options.layout.padding.right = _rightPad;
                     cmbChart.data.labels = commonDates;
                     cmbChart.data.datasets = datasets;
                     // scales 전체 교체 — 이전 raw2의 y1축 잔재 제거 후 새 구성 적용
@@ -2490,7 +2542,7 @@ def _build_combined_chart_section():
                         options: {
                             responsive: true, maintainAspectRatio: false,
                             devicePixelRatio: 2 * (window.devicePixelRatio || 1),
-                            layout: { padding: { right: 60 } },
+                            layout: { padding: { right: _rightPad } },
                             interaction: { mode: 'index', intersect: false },
                             plugins: {
                                 legend: { display: false },
@@ -2536,10 +2588,55 @@ def _build_combined_chart_section():
                                     c.restore();
                                 }
                             };
+                            // 이격도 고점/저점: 극값 지점에서 오른쪽 끝까지 수평 보조선(점선) + 값 라벨
+                            var dispHiLoPlugin = {
+                                id: 'cmbDispHiLo',
+                                afterDatasetsDraw: function(chart) {
+                                    var area = chart.chartArea, ys = chart.scales.y, ctx = chart.ctx;
+                                    if (!area || !ys) return;
+                                    chart.data.datasets.forEach(function(ds, di) {
+                                        var meta = chart.getDatasetMeta(di);
+                                        if (meta.hidden) return;
+                                        var maxV = -Infinity, minV = Infinity, maxI = -1, minI = -1;
+                                        for (var i = 0; i < ds.data.length; i++) {
+                                            var v = ds.data[i];
+                                            if (v === null || v === undefined || isNaN(v)) continue;
+                                            if (v > maxV) { maxV = v; maxI = i; }
+                                            if (v < minV) { minV = v; minI = i; }
+                                        }
+                                        if (maxI < 0) return;
+                                        [{ v: maxV, i: maxI, up: true }, { v: minV, i: minI, up: false }].forEach(function(pt) {
+                                            var p = meta.data[pt.i];
+                                            if (!p) return;
+                                            var py = ys.getPixelForValue(pt.v);
+                                            ctx.save();
+                                            ctx.strokeStyle = ds.borderColor;
+                                            ctx.globalAlpha = 0.55;
+                                            ctx.setLineDash([4, 3]);
+                                            ctx.lineWidth = 1;
+                                            ctx.beginPath();
+                                            ctx.moveTo(p.x, py);
+                                            ctx.lineTo(area.right, py);
+                                            ctx.stroke();
+                                            ctx.setLineDash([]);
+                                            ctx.globalAlpha = 1;
+                                            ctx.fillStyle = ds.borderColor;
+                                            ctx.beginPath();
+                                            ctx.arc(p.x, py, 2.5, 0, 2 * Math.PI);
+                                            ctx.fill();
+                                            ctx.font = 'bold 11px sans-serif';
+                                            ctx.textAlign = 'left';
+                                            ctx.textBaseline = pt.up ? 'bottom' : 'top';
+                                            ctx.fillText(pt.v.toFixed(1), area.right + 4, py + (pt.up ? -2 : 2));
+                                            ctx.restore();
+                                        });
+                                    });
+                                }
+                            };
                             cmbDispChart = new Chart(document.getElementById('cmbDispChart'), {
                                 type: 'line',
                                 data: { labels: commonDates, datasets: dispDatasets },
-                                plugins: [endLabelPlugin, disp100Plugin, cmbCrosshairPlugin],
+                                plugins: [endLabelPlugin, disp100Plugin, dispHiLoPlugin, cmbCrosshairPlugin],
                                 options: {
                                     responsive: true, maintainAspectRatio: false,
                                     devicePixelRatio: 2 * (window.devicePixelRatio || 1),
@@ -2672,7 +2769,7 @@ def _build_combined_chart_section():
                     </style>
                     <div id="cmbMaRow" style="display:flex;gap:6px;align-items:center;margin-bottom:12px;font-size:13px;">
                         <span style="color:#555;font-weight:600;">이동평균</span>
-                        <button id="cmbMaBtn0" class="cmb-ma-btn" onclick="toggleCmbMA(0,this)">MA20</button>
+                        <button id="cmbMaBtn0" class="cmb-ma-btn active" onclick="toggleCmbMA(0,this)">MA20</button>
                         <button id="cmbMaBtn1" class="cmb-ma-btn" onclick="toggleCmbMA(1,this)">MA60</button>
                         <button id="cmbMaBtn2" class="cmb-ma-btn" onclick="toggleCmbMA(2,this)">MA120</button>
                         <button id="cmbMaBtn3" class="cmb-ma-btn" onclick="toggleCmbMA(3,this)">MA200</button>
@@ -6569,6 +6666,19 @@ def create_dashboard():
 
     monthly_returns_html = create_monthly_returns_table()
 
+    # Taiwan 월매출 패널 (Data 페이지 'Taiwan' 버튼) — taiwan_table 공유 빌더로 임베드.
+    # CSV 부재/로드 실패 시 버튼·패널은 유지하되 안내 문구만 표시 (전체 생성 중단 방지).
+    try:
+        _tw_rows = taiwan_table.load_rows()
+        taiwan_panel_content = taiwan_table.taiwan_panel_html(_tw_rows)
+        taiwan_panel_script = taiwan_table.taiwan_script(_tw_rows)
+        taiwan_panel_css = taiwan_table.TAIWAN_CSS
+    except Exception as _tw_err:
+        print(f"Taiwan panel skipped: {_tw_err}")
+        taiwan_panel_content = '<p style="text-align:center;padding:48px;color:#999;">Taiwan 데이터를 불러올 수 없습니다.</p>'
+        taiwan_panel_script = ''
+        taiwan_panel_css = ''
+
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7025,6 +7135,7 @@ def create_dashboard():
         .mkt-subtab.active {{ color: #fff; background: #2d7a3a; border-color: #2d7a3a; }}
         /* 활성 버튼이 곧 섹션 제목이므로 패널 내부 중복 h2 숨김 */
         .mkt-panel > .category-section > .category-title {{ display: none; }}
+        {taiwan_panel_css}
         {TOP_NAV_CSS}
     </style>
 </head>
@@ -7040,6 +7151,7 @@ def create_dashboard():
         <button class="mkt-subtab active" data-mkt-btn="0" onclick="mktSwitchTab(0)">Monthly Returns</button>
         <button class="mkt-subtab" data-mkt-btn="1" onclick="mktSwitchTab(1)">Indices</button>
         <button class="mkt-subtab" data-mkt-btn="2" onclick="mktSwitchTab(2)">Data</button>
+        <button class="mkt-subtab" data-mkt-btn="3" onclick="mktSwitchTab(3)">Taiwan</button>
     </div>
 
     <div class="mkt-panel" data-mkt-sec="0">
@@ -7051,13 +7163,16 @@ def create_dashboard():
     <div class="mkt-panel" data-mkt-sec="2" style="display:none;">
     {data_section_html}
     </div>
+    <div class="mkt-panel" data-mkt-sec="3" style="display:none;">
+    {taiwan_panel_content}
+    </div>
 
     <footer>
         <p>Auto-generated by Antigravity Agent</p>
     </footer>
 
     <script>
-    // Data 페이지 상단 버튼 전환 (Monthly Returns / Indices / Data)
+    // Data 페이지 상단 버튼 전환 (Monthly Returns / Indices / Data / Taiwan)
     function mktSwitchTab(idx) {{
         document.querySelectorAll('.mkt-subtab[data-mkt-btn]').forEach(function(el) {{
             el.classList.toggle('active', el.getAttribute('data-mkt-btn') === String(idx));
@@ -7069,6 +7184,7 @@ def create_dashboard():
         window.dispatchEvent(new Event('resize'));
     }}
     </script>
+    {taiwan_panel_script}
 </body>
 </html>
 """

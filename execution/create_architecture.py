@@ -551,7 +551,7 @@ TOP_NAV_HTML = (
     '<a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div>'
     '<div class="topnav-item"><a href="market.html" class="topnav-tab">Market</a>'
     '<div class="topnav-dropdown">'
-    '<a href="market.html" class="topnav-sub">Index</a>'
+    '<a href="market.html" class="topnav-sub">Data</a>'
     '<a href="universe.html" class="topnav-sub">Universe</a>'
     '<a href="universe_lab.html" class="topnav-sub">Universe Lab</a>'
     '<a href="featured.html" class="topnav-sub">Featured</a>'

@@ -1,7 +1,7 @@
 name: Daily Taiwan Monthly Revenue
 
 # 대만 상장·상궤 큐레이션 53종목 월매출 (FinMind) → taiwan_revenue.csv →
-# taiwan.html 재생성. 대만 기업 공시는 익월 10일 한(증권거래법 §36), 대만시간
+# Data 페이지(market.html) Taiwan 버튼 패널 재생성. 대만 기업 공시는 익월 10일 한(증권거래법 §36), 대만시간
 # 주간~저녁에 분산 → 22:00 대만시(14:00 UTC) 매일 1회 수집으로 당일 발표분 커버.
 # GHA cron 지연(3~5h) 감안해도 다음 실행 전 자가치유(100일 롤링 재조회).
 # 토큰 미설정 시 익명(300req/hr)으로 동작 — skip 없음. 크로스체크는 로그 전용.
@@ -51,9 +51,9 @@ jobs:
         run: |
           python execution/fetch_taiwan_revenue.py --crosscheck
 
-      - name: Generate taiwan.html
+      - name: Regenerate Data page (embeds Taiwan panel into market.html)
         run: |
-          python execution/create_taiwan_page.py
+          python execution/create_dashboard.py
         env:
           TZ: 'Asia/Seoul'
 
@@ -61,4 +61,4 @@ jobs:
         run: |
           bash scripts/safe_commit_push.sh \
             -m "Auto-update: Taiwan monthly revenue [skip ci]" \
-            -- taiwan_revenue.csv taiwan.html
+            -- taiwan_revenue.csv market.html
