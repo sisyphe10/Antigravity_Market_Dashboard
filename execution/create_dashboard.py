@@ -220,7 +220,7 @@ def create_portfolio_tables_html():
             # 포트폴리오별 테이블 생성
             html += f"""
             <div class="portfolio-section" data-pf-sec="{sec_idx}" style="{sec_style}">
-                <h3 class="portfolio-title">{portfolio_name}</h3>
+                <h3 class="portfolio-title">{portfolio_name} <span style="font-size:0.9rem;font-weight:400;color:#000;">({portfolio_updated} 기준)</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table holdings-table" style="table-layout:fixed;">
                         <colgroup>
