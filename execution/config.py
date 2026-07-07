@@ -36,7 +36,8 @@ CATEGORY_MAP = {
     'KOSIS_SECTOR': 'CREDIT & HOUSING',
     'SDLLMTK': 'COMMODITIES',
     'SDH100RT': 'COMMODITIES',
-    'SD_RAM': 'COMMODITIES'
+    'SD_RAM': 'COMMODITIES',
+    'JP_CAPEX': 'CAPEX'
 }
 
 # Target DRAM items to scrape from DRAMeXchange

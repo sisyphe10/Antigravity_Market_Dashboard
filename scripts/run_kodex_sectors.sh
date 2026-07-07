@@ -32,6 +32,7 @@ PYTHONIOENCODING=utf-8 python3 execution/fetch_kodex_sectors.py
 
 # KOSIS 시계열 레지스트리 (유통·소비·고용·미분양·퇴직연금) — GHA IP가 KOSIS에 막혀 VM 경로. 실패해도 계속.
 PYTHONIOENCODING=utf-8 python3 execution/fetch_kosis_series.py || true
+PYTHONIOENCODING=utf-8 python3 execution/fetch_japan_capex.py || true
 
 git add kodex_sectors.json dataset.csv
 if git diff --staged --quiet; then
