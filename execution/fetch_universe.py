@@ -347,6 +347,15 @@ def fetch_one(idx: int, raw_ticker: str, sector: str, name: str, fx_to_krw: dict
     try:
         t = yf.Ticker(yf_tk)
         hist = t.history(period='2y', auto_adjust=False)
+        # TPEx(上櫃) 종목은 Yahoo에서 .TWO 접미사 사용. TPE 프리픽스가 .TW로 비면 .TWO 폴백.
+        # (.TW 정상 데이터면 미발동 → 기존 TWSE/타 거래소 종목 무영향.)
+        if (hist is None or hist.empty) and raw_ticker.startswith('TPE:'):
+            yf_tk_two = raw_ticker.split(':', 1)[1] + '.TWO'
+            t2 = yf.Ticker(yf_tk_two)
+            hist2 = t2.history(period='2y', auto_adjust=False)
+            if hist2 is not None and not hist2.empty:
+                print(f"  Info: {raw_ticker} ({name}) .TW empty -> .TWO fallback ({yf_tk_two}).")
+                t, yf_tk, hist = t2, yf_tk_two, hist2
         if hist.empty or len(hist) < 2:
             return None
         closes = hist['Close'].dropna()
