@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-07 15:12:42 KST",
+  "updated_at": "2026-07-07 18:45:28 KST",
   "slots": [
     {
       "id": "market-1m-leader",
@@ -15,7 +15,7 @@
       "category": "Market",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "2026-07 11개 자산 중 6/11 상승 — 엇갈린 흐름",
+      "text": "2026-07 11개 자산 중 6/11 상승 — 방향성 부재",
       "href": "market.html",
       "spark": null
     },
@@ -24,7 +24,7 @@
       "category": "Memory",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "DDR5 1W +2.2% ($61) — 점진적 반등",
+      "text": "DDR5 1W +2.2% ($61) — 저점 형성 가능성",
       "href": "market.html",
       "spark": {
         "series": [
@@ -2015,7 +2015,7 @@
       "category": "Commodity",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "리튬카보네이트 1M -1.8% — 방향성 부재",
+      "text": "리튬카보네이트 1M -1.8% — 관망세 지속",
       "href": "market.html",
       "spark": {
         "series": [
@@ -3143,7 +3143,7 @@
       "category": "Alert",
       "color": "#c2410c",
       "tone": "fact",
-      "text": "오늘 투자주의 23 · 경고 6 · 위험 6",
+      "text": "오늘 투자주의 21 · 경고 7 · 위험 7",
       "href": "market_alert.html",
       "spark": null
     },
@@ -3152,7 +3152,7 @@
       "category": "Featured",
       "color": "#d97706",
       "tone": "fact",
-      "text": "7.6(월) 거래대금 1위: SK하이닉스 10.1조원",
+      "text": "7.7(화) 거래대금 1위: SK하이닉스 13.9조원",
       "href": "featured.html",
       "spark": null
     },
@@ -3161,7 +3161,7 @@
       "category": "Featured",
       "color": "#d97706",
       "tone": "fact",
-      "text": "7.6(월) KOSPI 상승률 1위: 금호건설 +30.0%",
+      "text": "7.7(화) KOSPI 상승률 1위: 효성화학 +29.8%",
       "href": "featured.html",
       "spark": null
     },
