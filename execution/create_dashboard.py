@@ -182,9 +182,17 @@ def create_portfolio_tables_html():
         with open(portfolio_file, 'r', encoding='utf-8') as f:
             portfolio_data = json.load(f)
 
-        # 포트폴리오 최근 업데이트 시각 (KST 기준)
+        # 포트폴리오 제목 라벨 기준 시각: 생성 시각이 아니라 **시세 기준일**을 따른다.
+        # 개장 전(NXT/장전 시세 미수집)·휴장일엔 가격이 전일 종가이므로 '전일 종가 기준'으로,
+        # 장중·장후엔 당일 데이터이므로 생성 시각(KST)으로 표기 — 생성 시각만 쓰면
+        # 개장 전에 "오늘 08:35 기준"인데 오늘 수익률이 전일 값으로 보이는 모순이 생긴다.
         portfolio_mtime = os.path.getmtime(portfolio_file)
-        portfolio_updated = datetime.fromtimestamp(portfolio_mtime, tz=timezone.utc).astimezone(KST).strftime('%Y-%m-%d %H:%M')
+        _gen_dt = datetime.fromtimestamp(portfolio_mtime, tz=timezone.utc).astimezone(KST)
+        _price_asof = portfolio_data.get('_price_asof')
+        if _price_asof and _price_asof < _gen_dt.strftime('%Y-%m-%d'):
+            portfolio_updated = f"{_price_asof} 종가"
+        else:
+            portfolio_updated = _gen_dt.strftime('%Y-%m-%d %H:%M')
 
         html = ""
 
