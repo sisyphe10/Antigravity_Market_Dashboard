@@ -30,6 +30,8 @@ test_env/
 !dataset.csv
 !hotel_adr.csv
 !universe_tickers.csv
+!taiwan_universe.csv
+!taiwan_revenue.csv
 !Wrap_NAV.xlsx
 !자문지/*.xlsx
 

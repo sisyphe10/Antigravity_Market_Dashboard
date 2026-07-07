@@ -1,0 +1,64 @@
+name: Daily Taiwan Monthly Revenue
+
+# 대만 상장·상궤 큐레이션 53종목 월매출 (FinMind) → taiwan_revenue.csv →
+# taiwan.html 재생성. 대만 기업 공시는 익월 10일 한(증권거래법 §36), 대만시간
+# 주간~저녁에 분산 → 22:00 대만시(14:00 UTC) 매일 1회 수집으로 당일 발표분 커버.
+# GHA cron 지연(3~5h) 감안해도 다음 실행 전 자가치유(100일 롤링 재조회).
+# 토큰 미설정 시 익명(300req/hr)으로 동작 — skip 없음. 크로스체크는 로그 전용.
+
+on:
+  schedule:
+    - cron: '20 14 * * *'  # 22:20 Taiwan / 23:20 KST daily (daily_crawl과 동시각 기동 회피로 +20분)
+  workflow_dispatch:        # Allow manual trigger
+
+concurrency:
+  group: taiwan-revenue-pipeline   # 전용 lane (WRAP 계열 파일을 안 건드리므로 wrap-nav-pipeline과 분리)
+  cancel-in-progress: false
+
+jobs:
+  fetch-taiwan-revenue:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history needed for merge / merge-base
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Fetch Taiwan monthly revenue (FinMind, 53 curated stocks)
+        env:
+          FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}
+          FINMIND_USER: ${{ secrets.FINMIND_USER }}
+          FINMIND_PASSWORD: ${{ secrets.FINMIND_PASSWORD }}
+          TZ: 'Asia/Seoul'
+        run: |
+          python execution/fetch_taiwan_revenue.py
+
+      - name: Cross-check vs official TWSE/TPEx snapshot (log only)
+        continue-on-error: true
+        run: |
+          python execution/fetch_taiwan_revenue.py --crosscheck
+
+      - name: Generate taiwan.html
+        run: |
+          python execution/create_taiwan_page.py
+        env:
+          TZ: 'Asia/Seoul'
+
+      - name: Commit and Push (race-safe)
+        run: |
+          bash scripts/safe_commit_push.sh \
+            -m "Auto-update: Taiwan monthly revenue [skip ci]" \
+            -- taiwan_revenue.csv taiwan.html
