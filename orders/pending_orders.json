@@ -1,1 +1,424 @@
-{}
+{
+  "2026-07-07": {
+    "삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형": {
+      "targets": [
+        {
+          "broker": "삼성",
+          "product": "트루밸류"
+        },
+        {
+          "broker": "NH",
+          "product": "Value ESG"
+        },
+        {
+          "broker": "DB",
+          "product": "개방형 랩"
+        }
+      ],
+      "stocks": [
+        {
+          "sector": "반도체",
+          "code": "005930",
+          "name": "삼성전자",
+          "weight": 30,
+          "baseWeight": 30,
+          "reason": ""
+        },
+        {
+          "sector": "반도체",
+          "code": "000660",
+          "name": "SK하이닉스",
+          "weight": 25,
+          "baseWeight": 25,
+          "reason": ""
+        },
+        {
+          "sector": "보험",
+          "code": "032830",
+          "name": "삼성생명",
+          "weight": 3,
+          "baseWeight": 5,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "298380",
+          "name": "에이비엘바이오",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "141080",
+          "name": "리가켐바이오",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "196170",
+          "name": "알테오젠",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "226950",
+          "name": "올릭스",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "은행",
+          "code": "105560",
+          "name": "KB금융",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "상사,자본재",
+          "code": "000150",
+          "name": "두산",
+          "weight": 0,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "IT하드웨어",
+          "code": "009150",
+          "name": "삼성전기",
+          "weight": 0,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "기계",
+          "code": "034020",
+          "name": "두산에너빌리티",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "조선",
+          "code": "042660",
+          "name": "한화오션",
+          "weight": 0,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "필수소비재",
+          "code": "003230",
+          "name": "삼양식품",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "반도체",
+          "code": "067310",
+          "name": "하나마이크론",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "소매(유통)",
+          "code": "004170",
+          "name": "신세계",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "237690",
+          "name": "에스티팜",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "반도체",
+          "code": "089030",
+          "name": "테크윙",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        }
+      ],
+      "savedAt": "2026-07-07T01:31:41.758Z"
+    },
+    "NH 목표전환형 5호": {
+      "targets": [
+        {
+          "broker": "NH",
+          "product": "목표전환형 5호"
+        }
+      ],
+      "stocks": [
+        {
+          "sector": "반도체",
+          "code": "005930",
+          "name": "삼성전자",
+          "weight": 25,
+          "baseWeight": 20,
+          "reason": ""
+        },
+        {
+          "sector": "반도체",
+          "code": "000660",
+          "name": "SK하이닉스",
+          "weight": 25,
+          "baseWeight": 20,
+          "reason": ""
+        },
+        {
+          "sector": "은행",
+          "code": "105560",
+          "name": "KB금융",
+          "weight": 7,
+          "baseWeight": 7,
+          "reason": ""
+        },
+        {
+          "sector": "기계",
+          "code": "062040",
+          "name": "산일전기",
+          "weight": 5,
+          "baseWeight": 5,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "196170",
+          "name": "알테오젠",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "141080",
+          "name": "리가켐바이오",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "237690",
+          "name": "에스티팜",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "298380",
+          "name": "에이비엘바이오",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "226950",
+          "name": "올릭스",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "반도체",
+          "code": "089030",
+          "name": "테크윙",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        }
+      ],
+      "savedAt": "2026-07-07T01:31:41.758Z"
+    },
+    "DB 목표전환형 6차": {
+      "targets": [
+        {
+          "broker": "DB",
+          "product": "목표전환형 6차"
+        }
+      ],
+      "stocks": [
+        {
+          "sector": "반도체",
+          "code": "005930",
+          "name": "삼성전자",
+          "weight": 20,
+          "baseWeight": 20,
+          "reason": ""
+        },
+        {
+          "sector": "반도체",
+          "code": "000660",
+          "name": "SK하이닉스",
+          "weight": 20,
+          "baseWeight": 20,
+          "reason": ""
+        },
+        {
+          "sector": "은행",
+          "code": "105560",
+          "name": "KB금융",
+          "weight": 7,
+          "baseWeight": 7,
+          "reason": ""
+        },
+        {
+          "sector": "기계",
+          "code": "062040",
+          "name": "산일전기",
+          "weight": 5,
+          "baseWeight": 5,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "196170",
+          "name": "알테오젠",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "141080",
+          "name": "리가켐바이오",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "237690",
+          "name": "에스티팜",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "298380",
+          "name": "에이비엘바이오",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "226950",
+          "name": "올릭스",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "반도체",
+          "code": "089030",
+          "name": "테크윙",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        }
+      ],
+      "savedAt": "2026-07-07T01:31:41.758Z"
+    },
+    "한투 지속형": {
+      "targets": [
+        {
+          "broker": "한투",
+          "product": "지속형"
+        }
+      ],
+      "stocks": [
+        {
+          "sector": "반도체",
+          "code": "005930",
+          "name": "삼성전자",
+          "weight": 15,
+          "baseWeight": 15,
+          "reason": ""
+        },
+        {
+          "sector": "반도체",
+          "code": "000660",
+          "name": "SK하이닉스",
+          "weight": 10,
+          "baseWeight": 10,
+          "reason": ""
+        },
+        {
+          "sector": "상사,자본재",
+          "code": "402340",
+          "name": "SK스퀘어",
+          "weight": 5,
+          "baseWeight": 5,
+          "reason": ""
+        },
+        {
+          "sector": "은행",
+          "code": "105560",
+          "name": "KB금융",
+          "weight": 5,
+          "baseWeight": 5,
+          "reason": ""
+        },
+        {
+          "sector": "화장품,의류,완구",
+          "code": "161890",
+          "name": "한국콜마",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "소매(유통)",
+          "code": "004170",
+          "name": "신세계",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "226950",
+          "name": "올릭스",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "298380",
+          "name": "에이비엘바이오",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "141080",
+          "name": "리가켐바이오",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        }
+      ],
+      "savedAt": "2026-07-07T01:31:41.758Z"
+    }
+  }
+}
