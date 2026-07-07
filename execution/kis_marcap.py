@@ -23,10 +23,22 @@ _INQUIRE_PRICE_PATH = "/uapi/domestic-stock/v1/quotations/inquire-price"
 _TR_ID = "FHKST01010100"
 
 
-def fetch_marcap(codes):
+def _canonical_market(name):
+    """rprs_mrkt_kor_name(예: KOSPI200, KSQ150, KONEX, KRX100) → 'KOSPI'|'KOSDAQ'|''.
+    KOSDAQ150은 'KSQ150'으로 옴. KRX100 등 거래소 판별 불가 값은 ''(호출측 폴백으로 해소)."""
+    n = str(name or "").strip().upper()
+    if "KOSPI" in n:
+        return "KOSPI"
+    if "KOSDAQ" in n or n.startswith("KSQ"):
+        return "KOSDAQ"
+    return ""
+
+
+def fetch_stock_meta(codes):
     """
-    codes: list[str] (종목코드). 반환: {code: 시가총액(억원, int)}.
-    KIS 미사용/실패 종목은 결과에서 빠진다(호출측이 FDR로 폴백).
+    codes: list[str] (종목코드). 반환: {code: {'marcap': 시가총액(억원, int), 'market': 'KOSPI'|'KOSDAQ'}}.
+    inquire_price 1회로 hts_avls(시총)와 rprs_mrkt_kor_name(시장구분)을 함께 확보.
+    KIS 미사용/실패 종목·판별 불가 필드는 결과에서 빠진다(호출측이 FDR/네이버로 폴백).
     """
     result = {}
     if not _AVAILABLE:
@@ -37,7 +49,7 @@ def fetch_marcap(codes):
     try:
         get_access_token()
     except Exception as e:
-        logging.warning("KIS 토큰 확보 실패 → 시가총액 보강 건너뜀: %s", e)
+        logging.warning("KIS 토큰 확보 실패 → 종목 메타 조회 건너뜀: %s", e)
         return result
 
     # 중복 제거 + 공란 제거 (입력 순서 보존)
@@ -51,11 +63,25 @@ def fetch_marcap(codes):
             )
             output = j.get("output") or {}
             avls = output.get("hts_avls")  # 시가총액 (억원)
+            market = _canonical_market(output.get("rprs_mrkt_kor_name"))
+            entry = {}
             if avls not in (None, "", "0"):
-                result[code] = int(avls)
+                entry["marcap"] = int(avls)
+            if market:
+                entry["market"] = market
+            if entry:
+                result[code] = entry
         except Exception as e:
-            logging.debug("KIS marcap 조회 실패 %s: %s", code, e)
+            logging.debug("KIS 종목 메타 조회 실패 %s: %s", code, e)
     return result
+
+
+def fetch_marcap(codes):
+    """
+    codes: list[str] (종목코드). 반환: {code: 시가총액(억원, int)}.
+    KIS 미사용/실패 종목은 결과에서 빠진다(호출측이 FDR로 폴백).
+    """
+    return {c: m["marcap"] for c, m in fetch_stock_meta(codes).items() if "marcap" in m}
 
 
 if __name__ == "__main__":

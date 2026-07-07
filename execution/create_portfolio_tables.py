@@ -47,11 +47,11 @@ def _load_existing_stock_basis():
 EXISTING_STOCK_AVG_PRICES, EXISTING_BASIS_DATE = _load_existing_stock_basis()
 
 
-def _load_naver_marcap():
-    """네이버 증권 시가총액 순위 페이지에서 code → marcap(억) 딕셔너리"""
-    marcap_map = {}
+def _load_naver_meta():
+    """네이버 증권 시가총액 순위 페이지 → {code: {'marcap': 억원 int, 'market': 'KOSPI'|'KOSDAQ'}}"""
+    meta_map = {}
     try:
-        for sosok in [0, 1]:  # 0=KOSPI, 1=KOSDAQ
+        for sosok, market in ((0, 'KOSPI'), (1, 'KOSDAQ')):
             for page in range(1, 40):
                 url = f'https://finance.naver.com/sise/sise_market_sum.naver?sosok={sosok}&page={page}'
                 r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=10)
@@ -73,16 +73,98 @@ def _load_naver_marcap():
                     code = m.group(1) if m else ''
                     marcap_text = cols[6].get_text(strip=True).replace(',', '')
                     try:
-                        marcap_map[code] = int(marcap_text)
+                        meta_map[code] = {'marcap': int(marcap_text), 'market': market}
                     except ValueError:
                         pass
                     found += 1
                 if found == 0:
                     break
-        print(f"  네이버 시가총액: {len(marcap_map)}개 종목")
+        print(f"  네이버 시가총액: {len(meta_map)}개 종목")
     except Exception as e:
         print(f"  Warning: 네이버 시가총액 로드 실패: {e}")
-    return marcap_map
+    return meta_map
+
+
+def _load_fdr_listing_meta():
+    """FDR 종목 리스팅(KRX → KRX-DESC) → {code: {'marcap': 억원, 'market': str}}. 실패 시 빈 dict.
+    (data.krx가 클라우드 IP를 차단하는 환경에서는 둘 다 실패할 수 있다 → 호출측이 네이버 폴백)"""
+    for listing_type in ['KRX', 'KRX-DESC']:
+        try:
+            print(f"  {listing_type} 시도...")
+            krx = fdr.StockListing(listing_type)
+            if krx is None or len(krx) == 0 or 'Code' not in krx.columns:
+                print(f"  Warning: {listing_type} 결과 비어있음")
+                continue
+            has_marcap = 'Marcap' in krx.columns
+            meta = {}
+            for _, r in krx.iterrows():
+                code = str(r['Code']).zfill(6)
+                marcap = 0
+                if has_marcap and pd.notna(r.get('Marcap')) and r.get('Marcap'):
+                    marcap = float(r['Marcap']) / 100000000  # 원 → 억원
+                meta[code] = {
+                    'marcap': marcap,
+                    'market': str(r.get('Market', '') or '').upper(),
+                }
+            print(f"  → {len(meta)}개 종목 (Marcap: {'O' if has_marcap else 'X'})")
+            return meta
+        except Exception as e:
+            print(f"  Warning: {listing_type} 로드 실패: {e}")
+    return {}
+
+
+def load_stock_meta(codes):
+    """종목 시가총액(억원)·시장구분(RSI 지수 매핑용) 확보 — KIS 우선 → FDR 리스팅 → 네이버.
+    반환: {code: {'marcap': float(억원), 'market': str}}. 어떤 실패에서도 예외를 올리지 않는다.
+    (2026-07-07 data.krx의 GHA IP 차단으로 시총 0·RSI null 전멸 → KIS 전환. 네이버 폴백은
+    과거 빈 리스팅 프레임 위에 매핑되어 무효화되던 버그를 dict 직접 사용으로 수정.)"""
+    codes = [c for c in dict.fromkeys(codes) if c]
+    meta = {}
+
+    def _still_missing():
+        return [c for c in codes
+                if c not in meta or not meta[c]['marcap'] or not meta[c]['market']]
+
+    # 1) KIS (inquire_price: 시총 억원 + 대표시장명 — VM/GHA/로컬 공통 동작)
+    try:
+        import kis_marcap
+        kis_meta = kis_marcap.fetch_stock_meta(codes)
+        for c, m in kis_meta.items():
+            meta[c] = {'marcap': m.get('marcap', 0), 'market': m.get('market', '')}
+        print(f"  KIS 시가총액/시장구분: {len(kis_meta)}/{len(codes)}종목")
+    except Exception as e:
+        print(f"  Warning: KIS 시가총액 조회 실패: {e}")
+
+    # 2) FDR 리스팅 폴백 — KIS 미확보분만 보충 (전부 확보됐으면 스킵)
+    if _still_missing():
+        fdr_meta = _load_fdr_listing_meta()
+        for c in _still_missing():
+            f = fdr_meta.get(c)
+            if not f:
+                continue
+            cur = meta.setdefault(c, {'marcap': 0, 'market': ''})
+            if not cur['marcap'] and f['marcap']:
+                cur['marcap'] = f['marcap']
+            if not cur['market'] and f['market']:
+                cur['market'] = f['market']
+
+    # 3) 네이버 폴백 — 코드→값 dict 직접 병합
+    if _still_missing():
+        naver = _load_naver_meta()
+        for c in _still_missing():
+            n = naver.get(c)
+            if not n:
+                continue
+            cur = meta.setdefault(c, {'marcap': 0, 'market': ''})
+            if not cur['marcap'] and n['marcap']:
+                cur['marcap'] = n['marcap']
+            if not cur['market'] and n['market']:
+                cur['market'] = n['market']
+
+    got_mc = sum(1 for c in codes if meta.get(c, {}).get('marcap'))
+    got_mk = sum(1 for c in codes if meta.get(c, {}).get('market'))
+    print(f"  확보: 시가총액 {got_mc}/{len(codes)}, 시장구분 {got_mk}/{len(codes)}")
+    return meta
 
 
 def fetch_price_data(code):
@@ -331,29 +413,6 @@ def create_portfolio_tables():
             except Exception as e:
                 print(f"  Warning: yfinance import 실패 (RSI 미표시): {e}")
 
-        # KRX 종목 리스트 미리 로드 (KRX → KRX-DESC fallback)
-        print("2. KRX 종목 리스트 로드 중...")
-        krx = pd.DataFrame(columns=['Code', 'Marcap'])
-        for listing_type in ['KRX', 'KRX-DESC']:
-            try:
-                print(f"  {listing_type} 시도...")
-                krx = fdr.StockListing(listing_type)
-                has_marcap = 'Marcap' in krx.columns
-                print(f"  → {len(krx)}개 종목 (Marcap: {'O' if has_marcap else 'X'})")
-                break
-            except Exception as e:
-                print(f"  Warning: {listing_type} 로드 실패: {e}")
-
-        # Marcap 컬럼 없으면 네이버에서 보충
-        if 'Marcap' not in krx.columns or krx['Marcap'].sum() == 0:
-            print("  시가총액 데이터 없음 → 네이버에서 보충 중...")
-            naver_marcap = _load_naver_marcap()
-            if 'Code' in krx.columns:
-                krx['Marcap'] = krx['Code'].map(
-                    lambda c: naver_marcap.get(c, 0) * 100_000_000  # 억→원 변환
-                ).fillna(0)
-            print(f"  → 네이버 시가총액 {len(naver_marcap)}개 매핑 완료")
-
         # Code 시트에서 FICS 섹터 매핑 로드
         code_df = pd.read_excel(WRAP_NAV_FILE, sheet_name='Code')
         code_df['종목코드'] = code_df['종목코드'].apply(lambda x: str(x).zfill(6))
@@ -484,6 +543,10 @@ def create_portfolio_tables():
                 'order_change': order_change,
             })
 
+        # === 종목 시가총액/시장구분 로드 (KIS 우선 → FDR 리스팅 → 네이버) ===
+        print(f"\n2. {len(all_codes)}개 종목 시가총액/시장구분 로드 중 (KIS 우선)...")
+        stock_meta = load_stock_meta(sorted(all_codes))
+
         # === 모든 종목 가격을 병렬로 조회 ===
         print(f"\n3. {len(all_codes)}개 종목 가격 병렬 조회 중...")
         price_cache = {}
@@ -521,16 +584,12 @@ def create_portfolio_tables():
                 weight = u['weight']            # 오늘(Order 탭 변경후)
                 weight_prev = u['weight_prev']  # D-1(표·메시지 표시용)
 
-                stock_data = krx[krx['Code'] == code]
+                smeta = stock_meta.get(code) or {}
                 sector = sector_map.get(code, '기타')
                 if pd.isna(sector):
                     sector = '기타'
 
-                if not stock_data.empty:
-                    market_cap = stock_data.iloc[0].get('Marcap', 0)
-                    market_cap_billions = market_cap / 100000000 if market_cap else 0
-                else:
-                    market_cap_billions = 0
+                market_cap_billions = smeta.get('marcap', 0) or 0
 
                 price_df = price_cache.get(code)
 
@@ -570,7 +629,7 @@ def create_portfolio_tables():
                 incl_date = None if is_today_new else get_inclusion_date(code, use_portfolio, nav_df)
                 if incl_date is not None and price_df is not None and not price_df.empty:
                     try:
-                        market = str(stock_data.iloc[0].get('Market', '') or '').upper() if not stock_data.empty else ''
+                        market = str(smeta.get('market', '') or '').upper()
                         idx_key = 'KOSPI' if 'KOSPI' in market else ('KOSDAQ' if 'KOSDAQ' in market else None)
                         idx_series = INDEX_PRICE_SERIES.get(idx_key) if idx_key else None
                         if idx_series is not None and not idx_series.empty:
