@@ -92,6 +92,20 @@ if [ -z "$MACMINI_USER" ]; then
 fi
 [ -n "$MACMINI_USER" ] || MACMINI_USER="$(id -un)"
 
+# 사용자명 형식 엄격 검증 (install_bots.sh valid_user 이식 — 감사 DR3): sed 치환 전 개행/특수문자를
+# 차단해 plist 파손·인젝션 방지. grep -Eq 대신 case 글로브 사용(개행 포함 문자열 전체에 매칭).
+valid_user() {
+  local u="$1"
+  [ -n "$u" ] || return 1
+  case "$u" in [a-z_]*) ;; *) return 1 ;; esac                 # 첫 글자 소문자/밑줄
+  case "$u" in *[!a-z0-9_-]*) return 1 ;; *) return 0 ;; esac  # 허용집합 밖 문자 존재 시 거부
+}
+if ! valid_user "$MACMINI_USER"; then
+  echo "부적합한 사용자명: '$MACMINI_USER' (허용: 소문자/숫자/밑줄/하이픈, 첫 글자 소문자/밑줄)." >&2
+  echo "  실사용자명을 지정하세요: sudo MACMINI_USER=<user> ./install_gha.sh ..." >&2
+  exit 1
+fi
+
 # ── schedule.tsv 행 렌더/병합/제거 (tab 보존, 원자적 mktemp+mv) ──
 render_row() {  # $1=잡 → schedule_gha.tsv 의 해당 행에 __REPO__ 치환해 stdout. 없으면 rc 3.
   awk -F'\t' -v j="$1" -v repo="$REPO" '

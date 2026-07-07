@@ -27,11 +27,25 @@ set -euo pipefail
 SRC_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(cd "$SRC_DIR/../.." && pwd)"
 
-# --- resolve target user ------------------------------------------------------
+# --- resolve + validate target user ------------------------------------------
+# Strict username-format check BEFORE any sed substitution (blocks newline / sed
+# metachars that would corrupt the rendered plist). Uses case-glob, not grep -Eq:
+# grep matches per line, so an embedded newline can slip past ^...$ anchors,
+# whereas case matches the whole string. Mirrors install_bots.sh valid_user() (DR3).
+valid_user() {
+    local u="$1"
+    [ -n "$u" ] || return 1
+    case "$u" in [a-z_]*) ;; *) return 1 ;; esac                 # first char lowercase/_
+    case "$u" in *[!a-z0-9_-]*) return 1 ;; *) return 0 ;; esac  # reject any char outside the set
+}
 MACMINI_USER="${1:-${SUDO_USER:-$USER}}"
-if [ -z "$MACMINI_USER" ] || [ "$MACMINI_USER" = "root" ]; then
-    echo "ERROR: could not determine a non-root target user. Pass it explicitly:" >&2
+if ! valid_user "$MACMINI_USER"; then
+    echo "ERROR: invalid username '$MACMINI_USER' (allowed: lowercase/digits/_/-, first char lowercase/_)." >&2
     echo "       sudo ./install_system.sh <macmini_user>" >&2
+    exit 1
+fi
+if [ "$MACMINI_USER" = "root" ]; then
+    echo "ERROR: MACMINI_USER is root. Pass a real user: sudo ./install_system.sh <macmini_user>" >&2
     exit 1
 fi
 

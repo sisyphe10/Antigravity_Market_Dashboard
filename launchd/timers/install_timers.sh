@@ -29,6 +29,22 @@ if [ -z "$MACMINI_USER" ] || [ "$MACMINI_USER" = "root" ]; then
   exit 1
 fi
 
+# --- 사용자명 형식 엄격 검증 (sed 치환 안전, install_bots.sh valid_user 이식) --------------
+# macOS 사용자명 규칙 + sed 특수문자(&·|·개행·공백·탭·대문자) 원천 차단.
+# ★ grep -Eq 대신 case 글로브: grep 은 행 단위 매칭이라 'a\nb' 같은 개행이 ^...$ 앵커를 통과해
+#   plist 파손을 유발한다. case 는 문자열 전체(개행 포함)에 매칭하므로 개행/제어문자를 정확히 거른다.
+valid_user() {
+  local u="$1"
+  [ -n "$u" ] || return 1
+  case "$u" in [a-z_]*) ;; *) return 1 ;; esac              # 첫 글자 소문자/밑줄
+  case "$u" in *[!a-z0-9_-]*) return 1 ;; *) return 0 ;; esac  # 허용집합 밖 문자 존재 시 거부
+}
+if ! valid_user "$MACMINI_USER"; then
+  echo "ERROR: 부적합한 사용자명 (허용: 소문자/숫자/밑줄/하이픈, 첫 글자는 소문자/밑줄)." >&2
+  echo "       sudo ./install_timers.sh <macmini_user> 형식으로 실사용자명을 넘기세요." >&2
+  exit 1
+fi
+
 USER_HOME="$(dscl . -read "/Users/$MACMINI_USER" NFSHomeDirectory 2>/dev/null | awk '{print $2}')"
 USER_HOME="${USER_HOME:-/Users/$MACMINI_USER}"
 REPO="$USER_HOME/Antigravity_Market_Dashboard"
