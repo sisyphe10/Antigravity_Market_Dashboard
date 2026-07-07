@@ -5916,6 +5916,8 @@ def create_fee_revenue_section():
         var FEE_REVENUE = __PAYLOAD__;
         var REV_OPEN_KIND = {'삼성': '개방형', 'NH': '일반형', 'DB': '개방형', '한투': '지속형'};  // 개방형 계열 증권사별 명칭 (실질 동일)
         var REV_BROKER_ORDER = ['삼성', 'NH', 'DB', '한투'];
+        // 행 배경 = 증권사 대표색의 옅은 톤(흰 위 15%). 검정 계열 글씨 대비비 AA~AAA 유지.
+        var REV_BROKER_BG = {'삼성': 'rgba(20,40,160,0.15)', 'NH': 'rgba(0,114,206,0.15)', 'DB': 'rgba(0,133,74,0.15)', '한투': 'rgba(245,130,32,0.15)'};
         function revFmtNum(n) { return Number(n).toLocaleString('ko-KR'); }        // 안쪽 셀: 숫자만
         function revFmtWon(n) { return Number(n).toLocaleString('ko-KR') + '원'; } // 합계 라인: 원
         function revFmtEok(won) { return Math.round(won / 1e8).toLocaleString('ko-KR') + '억'; }
@@ -5931,7 +5933,7 @@ def create_fee_revenue_section():
             { key: 'kind',    name: '구분',   cls: 'rev-key',  disp: function(r) { return revKind(r); },               val: function(r) { return revKind(r); } },
             { key: 'round',   name: '차수',   cls: 'rev-key',  disp: function(r) { return revRound(r); },              val: function(r) { var m = /(\d+)/.exec(revRound(r)); return m ? Number(m[1]) : -1; } },
             { key: 'start',   name: '개시일', cls: 'rev-date', disp: function(r) { return r.start || ''; },            val: function(r) { return r.start || ''; } },
-            { key: 'end',     name: '종료일', cls: 'rev-date', disp: function(r) { return r.end || ''; },              val: function(r) { return r.end || ''; } },
+            { key: 'end',     name: '종료일', cls: 'rev-date', disp: function(r) { return r.end || '-'; },             val: function(r) { return r.end || ''; } },
             { key: 'avgAum',  name: '평균AUM', cls: 'rev-amt', disp: function(r) { return r.avgAum != null ? revFmtEok(r.avgAum) : '-'; }, val: function(r) { return r.avgAum != null ? r.avgAum : -1; },
               tip: function(r) { return r.aumN ? 'AUM 표본 ' + r.aumN + '영업일 단순평균' : ''; } },
             { key: 'ret',     name: '기간 수익률', cls: 'rev-amt', disp: function(r) { return r.ret != null ? revFmtPct(r.ret) : '-'; }, val: function(r) { return r.ret != null ? r.ret : -999; } },
@@ -6003,6 +6005,20 @@ def create_fee_revenue_section():
             revRender();
         }
         document.addEventListener('click', revCloseFilter);
+        function revRoundNum(r) { var m = /(\d+)/.exec(revRound(r)); return m ? Number(m[1]) : -1; }
+        // 기본 정렬(정렬키 없을 때): 증권사 → 구분(개방형 계열 먼저, 목표전환형 나중) → 기간 → 차수 오름차순
+        function revDefaultCmp(a, b) {
+            var ba = REV_BROKER_ORDER.indexOf(a.broker), bb = REV_BROKER_ORDER.indexOf(b.broker);
+            if (ba === -1) ba = 99; if (bb === -1) bb = 99;
+            if (ba !== bb) return ba - bb;
+            var ca = (a.category === '목표전환형') ? 1 : 0, cb = (b.category === '목표전환형') ? 1 : 0;
+            if (ca !== cb) return ca - cb;
+            if (a.quarter !== b.quarter) return a.quarter < b.quarter ? -1 : 1;
+            var ra = revRoundNum(a), rb = revRoundNum(b);
+            if (ra !== rb) return ra - rb;
+            var sa = a.start || '', sb = b.start || '';
+            return sa < sb ? -1 : (sa > sb ? 1 : 0);
+        }
         function revRender() {
             var recs = FEE_REVENUE.records.filter(function(r) { return revPasses(r, null); });
             if (revSortKey) {
@@ -6011,9 +6027,12 @@ def create_fee_revenue_section():
                     var va = sc.val(a), vb = sc.val(b);
                     if (va < vb) return -dir; if (va > vb) return dir; return 0;
                 });
+            } else {
+                recs = recs.slice().sort(revDefaultCmp);
             }
             var body = recs.map(function(r) {
-                return '<tr>' + REV_COLS.map(function(c) {
+                var _bg = REV_BROKER_BG[r.broker] || '';
+                return '<tr' + (_bg ? ' style="background:' + _bg + '"' : '') + '>' + REV_COLS.map(function(c) {
                     var tip = c.tip ? c.tip(r) : '';
                     return '<td class="' + c.cls + '"' + (tip ? ' title="' + tip + '"' : '') + '>' + c.disp(r) + '</td>';
                 }).join('') + '</tr>';
