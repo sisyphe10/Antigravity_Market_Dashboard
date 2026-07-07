@@ -39,7 +39,13 @@ export PATH="$REPO/venv/bin:$PATH"
 #   mkdir(원자적)로 획득, pid 기록. 이미 살아있는 홀더면 스킵. stale 는 rename 으로 배타 회수
 #   (rm -rf 후 mkdir 재시도식 TOCTOU 금지 — mv 로 고유 임시명 회수 후 내용 확인·삭제).
 LOCK_HELD=""
-release_lock() { [ -n "${LOCK_HELD:-}" ] && rm -rf "$LOCK_HELD"; LOCK_HELD=""; }
+release_lock() {  # 소유권 확인 삭제(= system/catchup_runner.sh:96 lock_release / gha release_one_lock 이식):
+  # 락 dir 의 pid 파일이 아직 우리($$)를 가리킬 때만 삭제. 우리 락이 stale 로 오인돼 타 인스턴스에
+  # rename-회수·재획득된 경우(pid 파일이 새 홀더로 바뀜), 무조건 rm -rf 가 남의 락을 지우는 사고를 막는다.
+  local lock="${LOCK_HELD:-}"
+  [ -n "$lock" ] || return 0
+  [ "$(cat "$lock/pid" 2>/dev/null)" = "$$" ] && rm -rf "$lock"
+}
 trap release_lock EXIT
 
 read_holder() {  # $1=lock dir. pid 를 최대 3회(0.2s 간격) 재시도로 읽어 갓생성 창을 흡수. 실패 시 rc≠0.
