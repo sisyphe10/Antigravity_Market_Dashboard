@@ -7,13 +7,15 @@ import requests
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 ETFCHECK_BASE = 'https://www.etfcheck.co.kr/user/etp/'
-ETFCHECK_KEY = '4lm@flEh68'
+# 2026-07-08 사이트 개편: 키 '4lm@flEh68'→'er@#$dfe^fd12', 버킷 60s→30s, Referer 필수화 (전부 403 원인)
+ETFCHECK_KEY = 'er@#$dfe^fd12'
+ETFCHECK_BUCKET_MS = 30000
 
 
 def generate_checkclient():
-    """시간 기반 Checkclient 인증 해시 생성"""
-    minutes = str(int(time.time() * 1000 / 60000))
-    mapped = ''.join(ETFCHECK_KEY[int(ch)] for ch in minutes)
+    """시간 기반 Checkclient 인증 해시 생성 (30초 버킷)"""
+    bucket = str(int(time.time() * 1000 / ETFCHECK_BUCKET_MS))
+    mapped = ''.join(ETFCHECK_KEY[int(ch)] for ch in bucket)
     return hashlib.sha256(mapped.encode()).hexdigest()
 
 
@@ -30,6 +32,7 @@ def _request(endpoint, params=None):
         params=params,
         headers={
             'User-Agent': 'Mozilla/5.0',
+            'Referer': 'https://www.etfcheck.co.kr/',  # 2026-07-08부터 필수 (없으면 403)
             'Checkclient': generate_checkclient(),
         },
         timeout=30,

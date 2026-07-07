@@ -238,8 +238,16 @@ def format_telegram_message(result):
         if not SEND_HEARTBEAT_ON_EMPTY:
             return None
         comparable_cnt = sum(1 for e in result['etfs'] if e.get('detect') and e.get('comparable'))
-        return (f'📌 <b>액티브 ETF 구성 변동</b>\n{latest} (전일 {prev} 대비)\n\n'
-                f'오늘 변동 없음 (탐지 대상 {comparable_cnt}개 ETF 비교)')
+        skipped_cnt = len(result.get('skipped', []))
+        header = f'📌 <b>액티브 ETF 구성 변동</b>\n{latest} (전일 {prev} 대비)\n\n'
+        # 수집 실패로 비교 자체가 안 된 경우를 '변동 없음'과 구분 (2026-07-08 etfcheck 403 사고)
+        if comparable_cnt == 0 and skipped_cnt:
+            return (header + f'⚠️ 구성종목 수집 실패로 비교 불가 (수집누락 {skipped_cnt}개)\n'
+                    f'데이터 소스(etfcheck) 점검 필요')
+        msg = header + f'오늘 변동 없음 (탐지 대상 {comparable_cnt}개 ETF 비교)'
+        if skipped_cnt:
+            msg += f'\n⚠️ 비교불가(수집누락) {skipped_cnt}개'
+        return msg
 
     lines = []
     lines.append('📌 <b>액티브 ETF 구성 변동</b>')
