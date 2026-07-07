@@ -446,6 +446,14 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Data 페이지 상단 버튼 전환 (Monthly Returns / Indices / Data) */
+        .mkt-subtabs { display: flex; justify-content: center; gap: 8px; margin: 0 auto 28px auto; flex-wrap: wrap; }
+        .mkt-subtab { padding: 9px 26px; border: 1.5px solid #d1d5db; background: #fff; border-radius: 999px; font-size: 0.95rem; font-weight: 600; color: #666; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }
+        .mkt-subtab:hover { color: #2d7a3a; border-color: #2d7a3a; }
+        .mkt-subtab.active { color: #fff; background: #2d7a3a; border-color: #2d7a3a; }
+        /* 활성 버튼이 곧 섹션 제목이므로 패널 내부 중복 h2 숨김 */
+        .mkt-panel > .category-section > .category-title { display: none; }
         
 .topnav { background: #fff; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 100; }
 .topnav-inner { max-width: 1400px; margin: 0 auto; padding: 0 28px; display: flex; align-items: center; height: 72px; gap: 32px; }
@@ -491,13 +499,20 @@
     </style>
 </head>
 <body class="has-sidebar">
-    <nav class="topnav"><div class="topnav-inner"><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab active">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub active">Index</a><a href="universe.html" class="topnav-sub">Universe</a><a href="universe_lab.html" class="topnav-sub">Universe Lab</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="taiwan.html" class="topnav-sub">Taiwan</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
-    <aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="market.html" class="sidebar-link active">Index</a><a href="universe.html" class="sidebar-link">Universe</a><a href="universe_lab.html" class="sidebar-link">Universe Lab</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="taiwan.html" class="sidebar-link">Taiwan</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
+    <nav class="topnav"><div class="topnav-inner"><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab active">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub active">Data</a><a href="taiwan.html" class="topnav-sub">Taiwan</a><a href="universe.html" class="topnav-sub">Universe</a><a href="universe_lab.html" class="topnav-sub">Universe Lab</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
+    <aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a><a href="market.html" class="sidebar-link active">Data</a><a href="taiwan.html" class="sidebar-link">Taiwan</a><a href="universe.html" class="sidebar-link">Universe</a><a href="universe_lab.html" class="sidebar-link">Universe Lab</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
     <header>
-        <h1>📊 Index</h1>
-        <div class="last-updated">Updated: 2026-07-07 13:30:31 KST</div>
+        <h1>Data</h1>
+        <div class="last-updated">Updated: 2026-07-07 14:00:45 KST</div>
     </header>
 
+    <div class="mkt-subtabs">
+        <button class="mkt-subtab active" data-mkt-btn="0" onclick="mktSwitchTab(0)">Monthly Returns</button>
+        <button class="mkt-subtab" data-mkt-btn="1" onclick="mktSwitchTab(1)">Indices</button>
+        <button class="mkt-subtab" data-mkt-btn="2" onclick="mktSwitchTab(2)">Data</button>
+    </div>
+
+    <div class="mkt-panel" data-mkt-sec="0">
     
         <div class="category-section">
             <h2 class="category-title">MONTHLY RETURNS</h2>
@@ -557,10 +572,11 @@
         </script>
     
 
-
+    </div>
+    <div class="mkt-panel" data-mkt-sec="1" style="display:none;">
     
         <div class="category-section">
-            <h2 class="category-title">Indice</h2>
+            <h2 class="category-title">Indices</h2>
             <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;justify-content:center;">
                 <div style="min-width:180px;"><style>.idx-mode-btn{font-family:inherit;font-size:12px;font-weight:600;padding:4px 14px;border:1px solid #d1d5db;border-radius:6px;background:#f3f4f6;color:#444;cursor:pointer;transition:all 0.15s;}.idx-mode-btn.active{background:#1e3a8a;color:#fff;border-color:#1e3a8a;}</style><div style="display:flex;gap:4px;margin-bottom:8px;"><button class="idx-mode-btn active" data-mode="local" onclick="switchIdxMode(this)">Local</button><button class="idx-mode-btn" data-mode="usd" onclick="switchIdxMode(this)">USD</button></div><style>.idx-chart-item:not(.active) .idx-color-bar{visibility:hidden;}</style><table class="portfolio-table" style="max-width:500px;margin:0 auto;"><tbody><tr class="idx-chart-item active" data-series="KOSPI" onclick="toggleIdxSeries(this)"><td style="width:12px;padding:0;text-align:center;vertical-align:middle;"><div class="idx-color-bar" style="display:inline-block;width:4px;height:18px;background:#000000;border-radius:2px;vertical-align:middle;"></div></td><td>KOSPI</td></tr>
 <tr class="idx-chart-item active" data-series="KOSDAQ" onclick="toggleIdxSeries(this)"><td style="width:12px;padding:0;text-align:center;vertical-align:middle;"><div class="idx-color-bar" style="display:inline-block;width:4px;height:18px;background:#666666;border-radius:2px;vertical-align:middle;"></div></td><td>KOSDAQ</td></tr>
@@ -955,6 +971,9 @@
         </script>
     
         
+    </div>
+    <div class="mkt-panel" data-mkt-sec="2" style="display:none;">
+    
         <div class="category-section">
             <h2 class="category-title">DATA</h2>
             <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;justify-content:center;">
@@ -2106,9 +2125,24 @@
         </script>
     
         
+    </div>
 
     <footer>
         <p>Auto-generated by Antigravity Agent</p>
     </footer>
+
+    <script>
+    // Data 페이지 상단 버튼 전환 (Monthly Returns / Indices / Data)
+    function mktSwitchTab(idx) {
+        document.querySelectorAll('.mkt-subtab[data-mkt-btn]').forEach(function(el) {
+            el.classList.toggle('active', el.getAttribute('data-mkt-btn') === String(idx));
+        });
+        document.querySelectorAll('.mkt-panel[data-mkt-sec]').forEach(function(el) {
+            el.style.display = el.getAttribute('data-mkt-sec') === String(idx) ? 'block' : 'none';
+        });
+        // 숨김→표시 전환 시 Chart.js 캔버스 재계산 (responsive 차트)
+        window.dispatchEvent(new Event('resize'));
+    }
+    </script>
 </body>
 </html>
