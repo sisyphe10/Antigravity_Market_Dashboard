@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.antigravity.daily-selfcheck</string>
+
+    <!-- Daily at 08:50 KST (system TZ = Asia/Seoul): after the earnings digest
+         (08:00) and before the freshness watchdog (11:00). No RunAtLoad — this
+         is a once-a-day digest, not a boot-time job. -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>8</integer>
+        <key>Minute</key>
+        <integer>50</integer>
+    </dict>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>__REPO__/launchd/system/daily_selfcheck.sh</string>
+    </array>
+
+    <!-- Run as the migration user so .env / git config / launchctl introspection
+         use that account. -->
+    <key>UserName</key>
+    <string>__MACMINI_USER__</string>
+
+    <key>WorkingDirectory</key>
+    <string>__REPO__</string>
+
+    <!-- launchd has no login environment; CONTRACT 데몬 환경 표준.
+         HOME is required for git config; curl needs a resolvable PATH. -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>/Users/__MACMINI_USER__</string>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>LANG</key>
+        <string>en_US.UTF-8</string>
+        <key>TZ</key>
+        <string>Asia/Seoul</string>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>__REPO__/logs/launchd/daily-selfcheck.out</string>
+    <key>StandardErrorPath</key>
+    <string>__REPO__/logs/launchd/daily-selfcheck.err</string>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+    <key>LowPriorityIO</key>
+    <true/>
+    <key>Nice</key>
+    <integer>5</integer>
+</dict>
+</plist>

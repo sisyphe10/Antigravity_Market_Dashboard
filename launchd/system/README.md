@@ -1,6 +1,6 @@
 # A4 — launchd system daemons (`launchd/system/`)
 
-Three `LaunchDaemon`s that replace systemd/cron features launchd lacks:
+Four `LaunchDaemon`s that replace systemd/cron features launchd lacks:
 
 1. **`com.antigravity.catchup`** — replaces `Persistent=true`. Runs once at boot, works out
    which timer jobs missed their last scheduled fire while the mac was off, and re-runs them
@@ -9,6 +9,8 @@ Three `LaunchDaemon`s that replace systemd/cron features launchd lacks:
    5 minutes and fires a Telegram alert when a KeepAlive bot is crash-looping.
 3. **`com.antigravity.git-pull`** — replaces the VM's `*/5` git-pull cron. Keeps the local checkout
    in sync with origin every 5 minutes (the sync lifeline for bots + timers).
+4. **`com.antigravity.daily-selfcheck`** — a daily 08:50 KST health digest to Telegram. Sent
+   **every day even when healthy** — the message itself is the dead-man's switch (silence = down).
 
 ## Files
 
@@ -21,7 +23,9 @@ Three `LaunchDaemon`s that replace systemd/cron features launchd lacks:
 | `com.antigravity.crash-watcher.plist` | Crash-watcher daemon: `StartInterval=300` (+`RunAtLoad`). |
 | `git_pull.sh` | Repo sync: `git checkout -- "*.html"` then `git pull origin main --quiet`; alerts on a failure streak. |
 | `com.antigravity.git-pull.plist` | Git-pull daemon: `StartInterval=300` (+`RunAtLoad`). |
-| `install_system.sh` | Renders `__MACMINI_USER__`/`__REPO__` tokens (sed) and installs all three daemons. `sudo`. |
+| `daily_selfcheck.sh` | Daily health digest (bots/timers/restarts/disk/git-pull) → one Telegram message. |
+| `com.antigravity.daily-selfcheck.plist` | Self-check daemon: `StartCalendarInterval` 08:50 KST. |
+| `install_system.sh` | Renders `__MACMINI_USER__`/`__REPO__` tokens (sed) and installs all four daemons. `sudo`. |
 | `README.md` | This file. |
 
 All scripts target the stock `/bin/bash` 3.2 and use only tools present on a clean macOS.
@@ -193,6 +197,43 @@ Threshold 12, cooldown 3600 s. Simulated by stubbing `git` to fail and stepping 
 
 ---
 
+## 4. Daily self-check (health digest / dead-man's switch)
+
+At **08:50 KST** (after the earnings digest, before the 11:00 freshness watchdog), `daily_selfcheck.sh`
+gathers the mac's state and sends **one Telegram message** — and it sends it **every day, even when
+everything is fine**, because the message's presence is itself the liveness signal (no message means the
+mac or this job is down, which silence alone cannot distinguish from "all healthy").
+
+What it collects:
+
+- **Bots** — how many of the 4 KeepAlive bots report `state = running` (`launchctl print`).
+- **Timers** — for each `schedule.tsv` job, whether its last stamp covers the most recent scheduled fire
+  (`cron_prev.py`, same rule as catch-up). Reported as `OK n/N`; any STALE jobs are listed with age.
+- **Restarts** — bot (re)starts in the last 24 h from `starts/<bot>.log` (0 = calm). Informational.
+- **Disk** — `logs/launchd` total size, largest log file, and free space (GB, `df -Pk`).
+- **git-pull** — consecutive-failure count (`git-pull.failcount`) and how old the synced HEAD is
+  (`git log -1 --format=%ct origin/main`).
+
+**Message format.** A one-line summary — `✅ 맥미니 셀프체크 | 봇 4/4 · 타이머 OK 8/8 · 재시작 0 ·
+디스크 NNG · HEAD Nh` — followed by detail lines only when relevant. Real problems (bot down, STALE
+timer, git-pull failing, low disk) are `⚠️` lines and flip the header to `⚠️`; restarts and an oversized
+log are `ℹ️` lines that do **not** flip the header.
+
+**Secrets.** The bot token is read from `.env` (`TELEGRAM_SISYPHE_BOT_TOKEN` / `TELEGRAM_CHAT_ID`, via
+the CONTRACT v3 parser) into a local variable and used **only** as a `curl` argument — never echoed or
+logged. If `.env` is missing or the creds are absent, the health is still computed but the send is
+skipped gracefully (logged, exit 0). A send failure logs `curl rc=…` without the token.
+
+### Self-check desk-check (verified, stubbed)
+
+| Scenario | Result |
+|:---|:---|
+| All healthy (4 bots up, no STALE, 0 restarts) | single `✅` summary line, no detail lines |
+| 1 bot down + 1 STALE timer | `⚠️` header + `⚠️ 봇 다운: …` + `⚠️ 타이머 STALE: …(age)` lines |
+| `.env` absent | health computed, send skipped with a log line, exit 0 (no crash, no token leak) |
+
+---
+
 ## Compatibility (macOS / BSD)
 
 - **Stock `/bin/bash` 3.2** — no associative arrays, `mapfile`, or `${x,,}`; the catch-up runner holds
@@ -228,6 +269,9 @@ Threshold 12, cooldown 3600 s. Simulated by stubbing `git` to fail and stepping 
 | `CRASH_COOLDOWN` | `1800` | Minimum seconds between alerts per bot. |
 | `GIT_PULL_FAIL_THRESHOLD` | `12` | Consecutive git-pull failures before alerting (12 × 5 min = 1 h). |
 | `GIT_PULL_NOTIFY_COOLDOWN` | `3600` | Minimum seconds between git-pull alerts while broken. |
+| `SELFCHECK_DISK_MIN_GB` | `5` | Warn in the digest if free disk falls below this (GB). |
+| `SELFCHECK_BIG_LOG_MB` | `50` | Note the largest log in the digest if it exceeds this (MB). |
+| `SELFCHECK_TG_TOKEN_VAR` / `SELFCHECK_TG_CHAT_VAR` | `TELEGRAM_SISYPHE_BOT_TOKEN` / `TELEGRAM_CHAT_ID` | `.env` var names for the Telegram creds. |
 
 ## Deploy layout
 

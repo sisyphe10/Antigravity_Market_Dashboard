@@ -1,8 +1,9 @@
 #!/bin/bash
 # install_system.sh — install the launchd/system daemons on the mac mini:
-#   * com.antigravity.catchup        — one-shot boot catch-up runner (Persistent= repl.)
-#   * com.antigravity.crash-watcher  — 5-min bot crash-loop watcher (StartLimit+OnFailure repl.)
-#   * com.antigravity.git-pull       — 5-min repo sync (VM */5 git-pull cron repl.)
+#   * com.antigravity.catchup         — one-shot boot catch-up runner (Persistent= repl.)
+#   * com.antigravity.crash-watcher   — 5-min bot crash-loop watcher (StartLimit+OnFailure repl.)
+#   * com.antigravity.git-pull        — 5-min repo sync (VM */5 git-pull cron repl.)
+#   * com.antigravity.daily-selfcheck — 08:50 KST daily health digest to Telegram (B9)
 #
 # DEPLOY LAYOUT (CONTRACT "배포 레이아웃"): the whole launchd/ tree is deployed
 # in-place at __REPO__/launchd/. The runner + watcher scripts run FROM there
@@ -57,10 +58,13 @@ CRASH_PLIST_SRC="$SRC_DIR/com.antigravity.crash-watcher.plist"
 CRASH_WATCHER="$SRC_DIR/crash_watcher.sh"
 GITPULL_PLIST_SRC="$SRC_DIR/com.antigravity.git-pull.plist"
 GITPULL_SCRIPT="$SRC_DIR/git_pull.sh"
+SELFCHECK_PLIST_SRC="$SRC_DIR/com.antigravity.daily-selfcheck.plist"
+SELFCHECK_SCRIPT="$SRC_DIR/daily_selfcheck.sh"
 
 for f in "$CATCHUP_PLIST_SRC" "$CATCHUP_RUNNER" "$CRON_HELPER" \
          "$CRASH_PLIST_SRC" "$CRASH_WATCHER" \
-         "$GITPULL_PLIST_SRC" "$GITPULL_SCRIPT"; do
+         "$GITPULL_PLIST_SRC" "$GITPULL_SCRIPT" \
+         "$SELFCHECK_PLIST_SRC" "$SELFCHECK_SCRIPT"; do
     [ -f "$f" ] || { echo "ERROR: missing source file: $f" >&2; exit 1; }
 done
 
@@ -71,8 +75,8 @@ STARTSDIR="$LOGDIR/starts"        # A2a bot wrappers append start epochs here
 
 echo "==> target user : $MACMINI_USER"
 echo "==> repo        : $REPO"
-echo "==> scripts (in-place) : $SRC_DIR/{catchup_runner.sh,crash_watcher.sh,git_pull.sh,cron_prev.py}"
-echo "==> daemons     : $LAUNCHD_DIR/com.antigravity.{catchup,crash-watcher,git-pull}.plist"
+echo "==> scripts (in-place) : $SRC_DIR/{catchup_runner.sh,crash_watcher.sh,git_pull.sh,daily_selfcheck.sh,cron_prev.py}"
+echo "==> daemons     : $LAUNCHD_DIR/com.antigravity.{catchup,crash-watcher,git-pull,daily-selfcheck}.plist"
 
 # --- runtime dirs (owned by the target user) ---------------------------------
 install -d -o "$MACMINI_USER" "$LOGDIR"
@@ -80,7 +84,7 @@ install -d -o "$MACMINI_USER" "$STAMPDIR"
 install -d -o "$MACMINI_USER" "$STARTSDIR"
 
 # --- scripts run in-place: just make sure they're executable (no copy) --------
-chmod 755 "$CATCHUP_RUNNER" "$CRASH_WATCHER" "$GITPULL_SCRIPT" "$CRON_HELPER"
+chmod 755 "$CATCHUP_RUNNER" "$CRASH_WATCHER" "$GITPULL_SCRIPT" "$SELFCHECK_SCRIPT" "$CRON_HELPER"
 
 # --- preseed stamps BEFORE bootstrapping catchup (item 3) --------------------
 # The catchup daemon has RunAtLoad=true, so `launchctl bootstrap` fires it once
@@ -109,12 +113,14 @@ install_daemon() {
 }
 
 # catchup first (its stamps are now preseeded) then the crash watcher + git-pull.
-install_daemon "com.antigravity.catchup"        "$CATCHUP_PLIST_SRC"
-install_daemon "com.antigravity.crash-watcher"  "$CRASH_PLIST_SRC"
-install_daemon "com.antigravity.git-pull"       "$GITPULL_PLIST_SRC"
+install_daemon "com.antigravity.catchup"         "$CATCHUP_PLIST_SRC"
+install_daemon "com.antigravity.crash-watcher"   "$CRASH_PLIST_SRC"
+install_daemon "com.antigravity.git-pull"        "$GITPULL_PLIST_SRC"
+install_daemon "com.antigravity.daily-selfcheck" "$SELFCHECK_PLIST_SRC"
 
 echo
-echo "Installed. catchup runs once at each boot; crash-watcher + git-pull run every 5 min."
+echo "Installed. catchup runs once at each boot; crash-watcher + git-pull run every 5 min;"
+echo "daily-selfcheck runs at 08:50 KST."
 echo
 echo "Dry-run catch-up sweep now (no reboot):"
 echo "    sudo -u $MACMINI_USER /bin/bash $CATCHUP_RUNNER"
@@ -122,8 +128,11 @@ echo "Dry-run crash-watcher now:"
 echo "    sudo -u $MACMINI_USER /bin/bash $CRASH_WATCHER"
 echo "Dry-run git-pull now:"
 echo "    sudo -u $MACMINI_USER /bin/bash $GITPULL_SCRIPT"
+echo "Dry-run daily-selfcheck now (sends a Telegram message):"
+echo "    sudo -u $MACMINI_USER /bin/bash $SELFCHECK_SCRIPT"
 echo "Force an immediate launchd-triggered run:"
 echo "    sudo launchctl kickstart -k system/com.antigravity.catchup"
 echo "    sudo launchctl kickstart -k system/com.antigravity.crash-watcher"
 echo "    sudo launchctl kickstart -k system/com.antigravity.git-pull"
-echo "Logs: $LOGDIR/{catchup,crash-watcher,git-pull}.{out,err}  (git-pull failures also in git-pull.log)"
+echo "    sudo launchctl kickstart -k system/com.antigravity.daily-selfcheck"
+echo "Logs: $LOGDIR/{catchup,crash-watcher,git-pull,daily-selfcheck}.{out,err}"
