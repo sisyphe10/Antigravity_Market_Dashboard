@@ -31,7 +31,7 @@ QTY_DRIFT_TOL = 0.005
 
 # ── 텔레그램 전용 표시 필터 (대시보드 JSON에는 미적용 — 전체 유지) ──
 AMT_MIN_TG = 3e8         # 편입/편출 표시줄 최소 |예상금액|(원): 3억 미만 라인 컷
-TOP_FLOWS = 5            # ③ 종목별 순매매 매수/매도 각 상위 개수
+THEME_FLOW_TOP = 3       # ③ 종목별 순매매 테마당 매수/매도 각 상위 개수
 ETF_AUM_CHG_MIN = 5.0    # ① ETF AUM 전일대비 급변 임계(%)
 ETF_NAV_CHG_MIN = 3.0    # ① ETF NAV 전일대비 급변 임계(%)
 ETF_MOVES_MAX = 10       # ① 표시 상한 (AUM 변동금액순)
@@ -51,6 +51,29 @@ MM_BOND_EXCLUDE_KEYWORDS = [
 
 # 현금성 구성종목 — 종목 변동 탐지에서 제외 (원화현금/예수금/예금 등).
 CASH_NAME_KEYWORDS = ['현금', '예수금', '예금', 'KRW', 'CASH', '단기대출']
+
+# ── ETF 테마 분류 (텔레그램 그룹핑용) — 이름 키워드 첫 매칭 우선, 미매칭='기타' ──
+# 종목의 '섹터'도 별도 업종 마스터 없이 매매 발생 ETF의 테마를 상속 (해외 종목 일관 커버).
+ETF_THEMES = [
+    ('커버드콜·배당', ['커버드콜', '배당', '인컴']),
+    ('반도체·AI', ['반도체', 'AI', '인공지능', '로봇', '팔란티어', '혁신기술']),
+    ('2차전지·에너지', ['2차전지', '배터리', '친환경', '수소', '태양광', '원자력', 'ESS', '전력', '모빌리티']),
+    ('바이오·헬스케어', ['바이오', '헬스케어', '의료', '제약']),
+    ('밸류업·주주가치', ['밸류업', '주주가치', '주주환원', '거버넌스', 'ESG', '가치']),
+    ('컨텐츠·소비', ['컬처', '소비', '여행', '엔터', '플랫폼', 'K뷰티', '음식료']),
+    ('테크·성장', ['테크', '인터넷', '게임', '메타버스', '성장', '이노베이션', 'R&D', '강소기업']),
+    ('미국', ['미국', '나스닥', 'S&P']),
+    ('글로벌·아시아', ['글로벌', '일본', '중국', '차이나', '인도', '아시아', '베트남', '해외']),
+    ('국내 일반', ['코스피', '코스닥', '코리아', '대장장이', '일등기업']),
+]
+
+
+def _etf_theme(name):
+    name = name or ''
+    for label, keywords in ETF_THEMES:
+        if any(k in name for k in keywords):
+            return label
+    return '기타'
 
 
 def _is_cash(name):
@@ -240,6 +263,18 @@ def _fmt_won(v):
     return f'{sign}{a / 1e8:.1f}억'
 
 
+def _fmt_won_abs(v):
+    """부호 없는 절대 금액(원) → 억원 표기 (AUM X→Y 표시용)"""
+    if v is None:
+        return ''
+    a = abs(v)
+    if a >= 1e12:
+        jo = int(a // 1e12)
+        eok = round((a - jo * 1e12) / 1e8)
+        return f'{jo}조 {eok:,}억'
+    return f'{round(a / 1e8):,}억'
+
+
 def format_telegram_message(result):
     """compute_active_etf_changes 결과 → 텔레그램 HTML 메시지(전체 문자열).
 
@@ -362,6 +397,40 @@ def aggregate_stock_flows(result):
     return out
 
 
+def aggregate_stock_flows_by_theme(result):
+    """종목별 순매매를 '매매가 발생한 ETF의 테마'로 나눠 집계.
+
+    같은 종목이 여러 테마의 ETF에서 매매되면 테마별로 각각 잡힌다 (정직한 분해 —
+    반도체 펀드들의 SK하이닉스 매도와 주주가치 펀드들의 매도는 별개 신호).
+    반환: {theme: [{'code','name','amt','n_etfs'}]} — ETF_THEMES 순서, 내용 있는 테마만.
+    """
+    by_theme = {}
+    for e in result['etfs']:
+        if not (e.get('detect') and e.get('comparable')):
+            continue
+        items = (e['new'] + e['exit']
+                 + [s for s in e['chg'] if not s.get('drift')])
+        if not items:
+            continue
+        theme = _etf_theme(e.get('name'))
+        for s in items:
+            key = s.get('code') or s.get('name')
+            if not key:
+                continue
+            t = by_theme.setdefault(theme, {})
+            f = t.setdefault(key, {'name': s.get('name'), 'amt': 0.0, 'etfs': set()})
+            f['amt'] += s.get('amt') or 0
+            f['etfs'].add(e.get('code'))
+    ordered = {}
+    for label in [t[0] for t in ETF_THEMES] + ['기타']:
+        if label in by_theme:
+            flows = [{'code': k, 'name': v['name'], 'amt': v['amt'], 'n_etfs': len(v['etfs'])}
+                     for k, v in by_theme[label].items()]
+            flows.sort(key=lambda x: -abs(x['amt']))
+            ordered[label] = flows
+    return ordered
+
+
 def _flow_line(items):
     """종목별 집계 한 줄: '삼성전자 +14억 (3개 ETF), …' (단일 ETF면 카운트 생략)"""
     parts = []
@@ -419,12 +488,10 @@ def format_telegram_blocks(result):
     ins.sort(key=lambda x: -abs(x[1].get('amt') or 0))
     outs.sort(key=lambda x: -abs(x[1].get('amt') or 0))
 
-    # ③ 종목별 순매매 (전 비교가능 ETF, 드리프트 제외, 컷 없이 합산 → 상위 N 표시)
-    flows = aggregate_stock_flows(result)
-    buys = [f for f in flows if f['amt'] > 0][:TOP_FLOWS]
-    sells = [f for f in flows if f['amt'] < 0][:TOP_FLOWS]
+    # ③ 종목별 순매매 (테마별 집계 — 드리프트 제외, 컷 없이 합산 → 테마당 상위 N 표시)
+    themed_flows = aggregate_stock_flows_by_theme(result)
 
-    if not (etf_moves or ins or outs or buys or sells):
+    if not (etf_moves or ins or outs or themed_flows):
         if not SEND_HEARTBEAT_ON_EMPTY:
             return None
         comparable_cnt = sum(1 for e in result['etfs'] if e.get('detect') and e.get('comparable'))
@@ -439,42 +506,66 @@ def format_telegram_blocks(result):
             msg += f'\n⚠️ 비교불가(수집누락) {skipped_cnt}개'
         return [msg]
 
+    theme_order = [t[0] for t in ETF_THEMES] + ['기타']
+
+    def _by_theme(pairs, name_of):
+        """[(item...)] → {theme: [items]} (ETF_THEMES 순서 유지)"""
+        grouped = {}
+        for it in pairs:
+            grouped.setdefault(_etf_theme(name_of(it)), []).append(it)
+        return {t: grouped[t] for t in theme_order if t in grouped}
+
+    blocks = []
     lines = ['📌 <b>액티브 ETF 데일리</b>', header_meta]
 
     if etf_moves:
         lines.append('')
         lines.append(f'■ <b>ETF 자금·가격 급변</b> (AUM ±{ETF_AUM_CHG_MIN:.0f}% 또는 NAV ±{ETF_NAV_CHG_MIN:.0f}%)')
-        for e in etf_moves:
-            parts = []
-            if e.get('aum_chg') is not None:
-                parts.append(f'AUM {e["aum_chg"]:+.1f}%({_fmt_won(_aum_delta(e))})')
-            if e.get('nav_chg') is not None:
-                parts.append(f'NAV {e["nav_chg"]:+.1f}%')
-            lines.append(f'· {_esc(e["name"])}: {" · ".join(parts)}')
+        for theme, moves in _by_theme(etf_moves, lambda e: e['name']).items():
+            lines.append(f'[{theme}]')
+            for e in moves:
+                parts = []
+                if e.get('aum_chg') is not None and e.get('aum'):
+                    before = e['aum'] / (1 + e['aum_chg'] / 100) if e['aum_chg'] > -100 else None
+                    parts.append(f'AUM {_fmt_won_abs(before)}→{_fmt_won_abs(e["aum"])}'
+                                 f' ({e["aum_chg"]:+.1f}%)')
+                if e.get('nav_chg') is not None:
+                    parts.append(f'NAV {e["nav_chg"]:+.1f}%')
+                lines.append(f'· {_esc(e["name"])}: {" · ".join(parts)}')
+    blocks.append('\n'.join(lines))
 
     if ins or outs:
-        lines.append('')
-        lines.append(f'■ <b>편입/편출</b> (AUM {round(BIG_ETF_AUM_MIN / 1e8):,}억↑ 주식형)')
-        for nm, s in ins[:INOUT_MAX]:
-            lines.append(f'편입 {_esc(s["name"])} — {_esc(nm)} ({_fmt_pct(s["w"])}%, {_fmt_won(s.get("amt"))})')
-        for nm, s in outs[:INOUT_MAX]:
-            lines.append(f'편출 {_esc(s["name"])} — {_esc(nm)} ({_fmt_pct(s["prev_w"])}%, {_fmt_won(s.get("amt"))})')
+        lines = ['', f'■ <b>편입/편출</b> (AUM {round(BIG_ETF_AUM_MIN / 1e8):,}억↑ 주식형)']
+        marked = ([('편입', nm, s, s['w']) for nm, s in ins[:INOUT_MAX]]
+                  + [('편출', nm, s, s['prev_w']) for nm, s in outs[:INOUT_MAX]])
+        for theme, items in _by_theme(marked, lambda it: it[1]).items():
+            lines.append(f'[{theme}]')
+            for kind, nm, s, w in items:
+                lines.append(f'{kind} {_esc(s["name"])} — {_esc(nm)}'
+                             f' ({_fmt_pct(w)}%, {_fmt_won(s.get("amt"))})')
+        blocks.append('\n'.join(lines))
 
-    if buys or sells:
-        lines.append('')
-        lines.append('■ <b>종목별 순매매</b> (전 액티브 합산, 실매매 기준)')
-        if buys:
-            lines.append(f'매수: {_flow_line(buys)}')
-        if sells:
-            lines.append(f'매도: {_flow_line(sells)}')
+    if themed_flows:
+        lines = ['', '■ <b>종목별 순매매</b> (매매 ETF 테마 기준, 실매매만)']
+        for theme, flows in themed_flows.items():
+            buys = [f for f in flows if f['amt'] > 0][:THEME_FLOW_TOP]
+            sells = [f for f in flows if f['amt'] < 0][:THEME_FLOW_TOP]
+            if not (buys or sells):
+                continue
+            lines.append(f'[{theme}]')
+            if buys:
+                lines.append(f'매수: {_flow_line(buys)}')
+            if sells:
+                lines.append(f'매도: {_flow_line(sells)}')
+        blocks.append('\n'.join(lines))
 
+    tail = []
     skipped = result.get('skipped', [])
     if skipped:
-        lines.append('')
-        lines.append(f'⚠️ 비교불가(수집누락) {len(skipped)}개')
-    lines.append('')
-    lines.append(f'전체: <a href="{ETF_URL}">대시보드</a>')
-    return ['\n'.join(lines)]
+        tail.append(f'⚠️ 비교불가(수집누락) {len(skipped)}개')
+    tail.append(f'전체: <a href="{ETF_URL}">대시보드</a>')
+    blocks.append('\n' + '\n'.join(tail))
+    return blocks
 
 
 def _split_oversize_block(block, limit):
