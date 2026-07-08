@@ -55,7 +55,7 @@ def resolve_product(brokerage: str, kind: str) -> str:
     if kind in _alias and (brokerage, _alias[kind]) in FIXED_PRODUCTS:
         # 일반형<->지속형 상호 별칭 (한투 지속형은 kind_label='지속형' 등록 — 어느 쪽으로 입력해도 수용)
         return FIXED_PRODUCTS[(brokerage, _alias[kind])]
-    if kind in ('성과형', '전환형'):
+    if kind in ('성과형', '전환형', '모집형'):  # 모집형=한투 성과모집형 사용자 표기 별칭
         if brokerage not in ACTIVE_TARGET_TRANSFORM:
             raise ValueError(f"{kind} 매핑 없음: {brokerage}")
         return ACTIVE_TARGET_TRANSFORM[brokerage]
