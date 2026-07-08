@@ -70,9 +70,9 @@
       "sector": "건강관리",
       "market_cap": 45630,
       "weight": 2.0,
-      "weight_prev": 3.0,
+      "weight_prev": 2.0,
       "today_return": -13.205537806176784,
-      "contribution": -3.9616613418530355,
+      "contribution": -2.641107561235357,
       "cumulative_return": -19.914837864395686,
       "current_price": 81500.0,
       "ath_price": 245500.0,
@@ -86,9 +86,9 @@
       "sector": "건강관리",
       "market_cap": 44571,
       "weight": 2.0,
-      "weight_prev": 3.0,
+      "weight_prev": 2.0,
       "today_return": -11.600587371512482,
-      "contribution": -3.4801762114537445,
+      "contribution": -2.320117474302496,
       "cumulative_return": -19.392992635572416,
       "current_price": 120400.0,
       "ath_price": 213500.0,
@@ -102,9 +102,9 @@
       "sector": "건강관리",
       "market_cap": 167993,
       "weight": 2.0,
-      "weight_prev": 3.0,
+      "weight_prev": 2.0,
       "today_return": -7.111111111111111,
-      "contribution": -2.1333333333333333,
+      "contribution": -1.4222222222222223,
       "cumulative_return": -13.437643810400369,
       "current_price": 313500.0,
       "ath_price": 559000.0,
@@ -118,9 +118,9 @@
       "sector": "건강관리",
       "market_cap": 24793,
       "weight": 2.0,
-      "weight_prev": 3.0,
+      "weight_prev": 2.0,
       "today_return": -9.428359317000742,
-      "contribution": -2.8285077951002227,
+      "contribution": -1.8856718634001486,
       "cumulative_return": -11.035488575595531,
       "current_price": 122000.0,
       "ath_price": 207000.0,
@@ -207,22 +207,6 @@
       "dd": -46.62447257383966,
       "rsi": -19.484761959861473,
       "is_today_new": false
-    },
-    {
-      "code": "034020",
-      "name": "두산에너빌리티",
-      "sector": "기계",
-      "market_cap": 474015,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -9.313725490196079,
-      "contribution": -1.8627450980392157,
-      "cumulative_return": null,
-      "current_price": 74000.0,
-      "ath_price": 136400.0,
-      "dd": -45.747800586510266,
-      "rsi": null,
-      "is_today_new": false
     }
   ],
   "NH 목표전환형 5호": [
@@ -280,9 +264,9 @@
       "sector": "건강관리",
       "market_cap": 167993,
       "weight": 2.0,
-      "weight_prev": 3.0,
+      "weight_prev": 2.0,
       "today_return": -7.111111111111111,
-      "contribution": -2.1333333333333333,
+      "contribution": -1.4222222222222223,
       "cumulative_return": -15.951742627345844,
       "current_price": 313500.0,
       "ath_price": 559000.0,
@@ -296,9 +280,9 @@
       "sector": "건강관리",
       "market_cap": 44571,
       "weight": 2.0,
-      "weight_prev": 3.0,
+      "weight_prev": 2.0,
       "today_return": -11.600587371512482,
-      "contribution": -3.4801762114537445,
+      "contribution": -2.320117474302496,
       "cumulative_return": -26.089625537139348,
       "current_price": 120400.0,
       "ath_price": 213500.0,
@@ -312,9 +296,9 @@
       "sector": "건강관리",
       "market_cap": 25089,
       "weight": 2.0,
-      "weight_prev": 3.0,
+      "weight_prev": 2.0,
       "today_return": -6.6045066045066045,
-      "contribution": -1.9813519813519815,
+      "contribution": -1.320901320901321,
       "cumulative_return": -9.07715582450832,
       "current_price": 120200.0,
       "ath_price": 168700.0,
@@ -328,9 +312,9 @@
       "sector": "건강관리",
       "market_cap": 45630,
       "weight": 2.0,
-      "weight_prev": 3.0,
+      "weight_prev": 2.0,
       "today_return": -13.205537806176784,
-      "contribution": -3.9616613418530355,
+      "contribution": -2.641107561235357,
       "cumulative_return": -18.090452261306535,
       "current_price": 81500.0,
       "ath_price": 245500.0,
@@ -344,30 +328,14 @@
       "sector": "건강관리",
       "market_cap": 24793,
       "weight": 2.0,
-      "weight_prev": 3.0,
+      "weight_prev": 2.0,
       "today_return": -9.428359317000742,
-      "contribution": -2.8285077951002227,
+      "contribution": -1.8856718634001486,
       "cumulative_return": -21.593830334190233,
       "current_price": 122000.0,
       "ath_price": 207000.0,
       "dd": -41.06280193236715,
       "rsi": -7.275683245190256,
-      "is_today_new": false
-    },
-    {
-      "code": "062040",
-      "name": "산일전기",
-      "sector": "기계",
-      "market_cap": 54557,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": -7.859358841778697,
-      "contribution": -2.3578076525336087,
-      "cumulative_return": null,
-      "current_price": 178200.0,
-      "ath_price": 333500.0,
-      "dd": -46.566716641679164,
-      "rsi": null,
       "is_today_new": false
     },
     {
@@ -442,9 +410,9 @@
       "sector": "건강관리",
       "market_cap": 167993,
       "weight": 2.0,
-      "weight_prev": 3.0,
+      "weight_prev": 2.0,
       "today_return": -7.111111111111111,
-      "contribution": -2.1333333333333333,
+      "contribution": -1.4222222222222223,
       "cumulative_return": -12.430167597765362,
       "current_price": 313500.0,
       "ath_price": 559000.0,
@@ -458,9 +426,9 @@
       "sector": "건강관리",
       "market_cap": 44571,
       "weight": 2.0,
-      "weight_prev": 3.0,
+      "weight_prev": 2.0,
       "today_return": -11.600587371512482,
-      "contribution": -3.4801762114537445,
+      "contribution": -2.320117474302496,
       "cumulative_return": -19.733333333333334,
       "current_price": 120400.0,
       "ath_price": 213500.0,
@@ -474,9 +442,9 @@
       "sector": "건강관리",
       "market_cap": 25089,
       "weight": 2.0,
-      "weight_prev": 3.0,
+      "weight_prev": 2.0,
       "today_return": -6.6045066045066045,
-      "contribution": -1.9813519813519815,
+      "contribution": -1.320901320901321,
       "cumulative_return": -8.662613981762924,
       "current_price": 120200.0,
       "ath_price": 168700.0,
@@ -490,9 +458,9 @@
       "sector": "건강관리",
       "market_cap": 45630,
       "weight": 2.0,
-      "weight_prev": 3.0,
+      "weight_prev": 2.0,
       "today_return": -13.205537806176784,
-      "contribution": -3.9616613418530355,
+      "contribution": -2.641107561235357,
       "cumulative_return": -19.704433497536943,
       "current_price": 81500.0,
       "ath_price": 245500.0,
@@ -506,30 +474,14 @@
       "sector": "건강관리",
       "market_cap": 24793,
       "weight": 2.0,
-      "weight_prev": 3.0,
+      "weight_prev": 2.0,
       "today_return": -9.428359317000742,
-      "contribution": -2.8285077951002227,
+      "contribution": -1.8856718634001486,
       "cumulative_return": -26.94610778443114,
       "current_price": 122000.0,
       "ath_price": 207000.0,
       "dd": -41.06280193236715,
       "rsi": -11.413746456621377,
-      "is_today_new": false
-    },
-    {
-      "code": "062040",
-      "name": "산일전기",
-      "sector": "기계",
-      "market_cap": 54557,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": -7.859358841778697,
-      "contribution": -2.3578076525336087,
-      "cumulative_return": null,
-      "current_price": 178200.0,
-      "ath_price": 333500.0,
-      "dd": -46.566716641679164,
-      "rsi": null,
       "is_today_new": false
     },
     {
@@ -572,9 +524,9 @@
       "sector": "반도체",
       "market_cap": 14795701,
       "weight": 20.0,
-      "weight_prev": 15.0,
+      "weight_prev": 20.0,
       "today_return": -5.679236710586097,
-      "contribution": -8.518855065879144,
+      "contribution": -11.358473421172196,
       "cumulative_return": -4.011096983007745,
       "current_price": 2076000.0,
       "ath_price": 2919000.0,
@@ -703,14 +655,14 @@
       "market_cap": 16223423,
       "weight": 20.0,
       "weight_prev": 20.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": -6.25,
+      "contribution": -12.5,
+      "cumulative_return": 0.0,
       "current_price": 277500.0,
       "ath_price": 362500.0,
       "dd": -23.448275862068968,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "000660",
@@ -719,14 +671,14 @@
       "market_cap": 14795701,
       "weight": 20.0,
       "weight_prev": 20.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": -5.679236710586097,
+      "contribution": -11.358473421172196,
+      "cumulative_return": 0.0,
       "current_price": 2076000.0,
       "ath_price": 2919000.0,
       "dd": -28.879753340184998,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "105560",
@@ -735,176 +687,36 @@
       "market_cap": 606516,
       "weight": 7.0,
       "weight_prev": 7.0,
-      "today_return": null,
-      "contribution": null,
-      "cumulative_return": null,
+      "today_return": -1.2702078521939952,
+      "contribution": -0.8891454965357967,
+      "cumulative_return": 0.0,
       "current_price": 171000.0,
       "ath_price": 173200.0,
       "dd": -1.2702078521939941,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
-  "_order_changes": {
-    "삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형": {
-      "date": "2026-07-08",
-      "added": [],
-      "changed": [
-        {
-          "name": "에이비엘바이오",
-          "from": 3.0,
-          "to": 2.0
-        },
-        {
-          "name": "리가켐바이오",
-          "from": 3.0,
-          "to": 2.0
-        },
-        {
-          "name": "알테오젠",
-          "from": 3.0,
-          "to": 2.0
-        },
-        {
-          "name": "올릭스",
-          "from": 3.0,
-          "to": 2.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "두산에너빌리티",
-          "weight": 2.0
-        }
-      ]
-    },
-    "NH 목표전환형 5호": {
-      "date": "2026-07-08",
-      "added": [],
-      "changed": [
-        {
-          "name": "알테오젠",
-          "from": 3.0,
-          "to": 2.0
-        },
-        {
-          "name": "리가켐바이오",
-          "from": 3.0,
-          "to": 2.0
-        },
-        {
-          "name": "에스티팜",
-          "from": 3.0,
-          "to": 2.0
-        },
-        {
-          "name": "에이비엘바이오",
-          "from": 3.0,
-          "to": 2.0
-        },
-        {
-          "name": "올릭스",
-          "from": 3.0,
-          "to": 2.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "산일전기",
-          "weight": 3.0
-        }
-      ]
-    },
-    "DB 목표전환형 6차": {
-      "date": "2026-07-08",
-      "added": [],
-      "changed": [
-        {
-          "name": "알테오젠",
-          "from": 3.0,
-          "to": 2.0
-        },
-        {
-          "name": "리가켐바이오",
-          "from": 3.0,
-          "to": 2.0
-        },
-        {
-          "name": "에스티팜",
-          "from": 3.0,
-          "to": 2.0
-        },
-        {
-          "name": "에이비엘바이오",
-          "from": 3.0,
-          "to": 2.0
-        },
-        {
-          "name": "올릭스",
-          "from": 3.0,
-          "to": 2.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "산일전기",
-          "weight": 3.0
-        }
-      ]
-    },
-    "한투 지속형": {
-      "date": "2026-07-08",
-      "added": [],
-      "changed": [
-        {
-          "name": "SK하이닉스",
-          "from": 15.0,
-          "to": 20.0
-        }
-      ],
-      "removed": []
-    },
-    "한투 성과모집형 1차": {
-      "date": "2026-07-08",
-      "added": [
-        {
-          "name": "삼성전자",
-          "weight": 20.0
-        },
-        {
-          "name": "SK하이닉스",
-          "weight": 20.0
-        },
-        {
-          "name": "KB금융",
-          "weight": 7.0
-        }
-      ],
-      "changed": [],
-      "removed": [],
-      "new_fund": true
-    }
-  },
   "_portfolio_meta": {
     "삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형": {
-      "nav_ytd_d1": 78.56934364347875,
-      "nav_cum_d1": 260.944
+      "nav_ytd_d1": 68.33835482929386,
+      "nav_cum_d1": 240.26399999999998
     },
     "NH 목표전환형 5호": {
-      "nav_ytd_d1": -7.579999999999998,
-      "nav_cum_d1": -7.579999999999998
+      "nav_ytd_d1": -12.107000000000001,
+      "nav_cum_d1": -12.107000000000001
     },
     "DB 목표전환형 6차": {
-      "nav_ytd_d1": -6.496000000000002,
-      "nav_cum_d1": -6.496000000000002
+      "nav_ytd_d1": -11.077000000000004,
+      "nav_cum_d1": -11.077000000000004
     },
     "한투 지속형": {
-      "nav_ytd_d1": -0.16000000000000458,
-      "nav_cum_d1": -0.16000000000000458
+      "nav_ytd_d1": -3.3460000000000045,
+      "nav_cum_d1": -3.3460000000000045
     },
     "한투 성과모집형 1차": {
-      "nav_ytd_d1": null,
-      "nav_cum_d1": null
+      "nav_ytd_d1": 0.0,
+      "nav_cum_d1": 0.0
     }
   },
   "_price_asof": "2026-07-08"
