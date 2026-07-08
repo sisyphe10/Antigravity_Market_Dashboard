@@ -532,7 +532,7 @@ def format_telegram_blocks(result):
         lines.append(f'■ <b>ETF 자금 유출입</b> (순유출입 ±{ETF_FLOW_PCT_MIN:.0f}% 또는'
                      f' ±{round(ETF_FLOW_AMT_MIN / 1e8):,}억)')
         for theme, moves in _by_theme(etf_moves, lambda x: x[0]['name']).items():
-            lines.append(f'<b>[{theme}]</b>')
+            lines.append(f'<b><u>[{theme}]</u></b>')
             for e, (fp, famt, prev_aum) in moves:
                 label = '순유입' if famt >= 0 else '순유출'
                 detail = f'{fp:+.1f}%'
@@ -547,7 +547,7 @@ def format_telegram_blocks(result):
         marked = ([('편입', nm, s, s['w']) for nm, s in ins[:INOUT_MAX]]
                   + [('편출', nm, s, s['prev_w']) for nm, s in outs[:INOUT_MAX]])
         for theme, items in _by_theme(marked, lambda it: it[1]).items():
-            lines.append(f'<b>[{theme}]</b>')
+            lines.append(f'<b><u>[{theme}]</u></b>')
             for kind, nm, s, w in items:
                 lines.append(f'{kind} {_esc(s["name"])} — {_esc(nm)}'
                              f' ({_fmt_pct(w)}%, {_fmt_won(s.get("amt"))})')
@@ -560,7 +560,7 @@ def format_telegram_blocks(result):
             sells = [f for f in flows if f['amt'] < 0][:THEME_FLOW_TOP]
             if not (buys or sells):
                 continue
-            lines.append(f'<b>[{theme}]</b>')
+            lines.append(f'<b><u>[{theme}]</u></b>')
             if buys:
                 lines.append(f'매수: {_flow_line(buys)}')
             if sells:
