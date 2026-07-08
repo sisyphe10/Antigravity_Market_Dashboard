@@ -30,10 +30,13 @@ CHG_MIN = 1.0      # 비중 급변으로 볼 최소 절대 변화(%p)
 QTY_DRIFT_TOL = 0.005
 
 # ── 텔레그램 전용 표시 필터 (대시보드 JSON에는 미적용 — 전체 유지) ──
-AMT_MIN_TG = 3e8       # ETF별 상세줄 최소 |예상금액|(원): 3억 미만 라인 컷
-PER_ETF_MAX_ITEMS = 15  # ETF당 상세 종목 상한 (블록 비대화 방지, 초과분 '외 N종목')
-TOP_FLOWS = 5          # 종목별 순매수 집계 매수/매도 각 상위 개수
-TOP_MOVES = 5          # '큰 변동 TOP' 개수 (금액순)
+AMT_MIN_TG = 3e8         # 편입/편출 표시줄 최소 |예상금액|(원): 3억 미만 라인 컷
+TOP_FLOWS = 5            # ③ 종목별 순매매 매수/매도 각 상위 개수
+ETF_AUM_CHG_MIN = 5.0    # ① ETF AUM 전일대비 급변 임계(%)
+ETF_NAV_CHG_MIN = 3.0    # ① ETF NAV 전일대비 급변 임계(%)
+ETF_MOVES_MAX = 10       # ① 표시 상한 (AUM 변동금액순)
+BIG_ETF_AUM_MIN = 500e8  # ② '규모 있는' 주식형 액티브 하한 (AUM 500억)
+INOUT_MAX = 10           # ② 편입/편출 각 표시 상한 (금액순)
 
 # 비-주식형 액티브(채권/단기금리/현금성/원자재/멀티에셋/TDF)는 목록·탐지 양쪽에서 제외.
 # → '액티브 ETF' 탭은 순수 주식형 위주. 이름 부분일치(substring).
@@ -328,25 +331,10 @@ def chunk_by_lines(text, limit=TG_CHUNK_LIMIT):
     return chunks
 
 
-# ── 3단 구조 텔레그램 포맷 (2026-07-08 개편) ──────────────────────────────
-# ① 헤더 요약 ② 종목별 순매수 집계 + 큰 변동 TOP ③ ETF별 상세(접힌 인용구).
-# 표시 필터(텔레그램 전용): 드리프트 chg 제외 + |예상금액| ≥ AMT_MIN_TG.
+# ── 3섹션 다이제스트 텔레그램 포맷 (2026-07-08 사용자 확정 양식) ──────────
+# ① ETF 자금·가격 급변 ② 규모 있는 주식형 액티브의 편입/편출 ③ 종목별 순매매.
+# 표시 필터(텔레그램 전용): 드리프트 chg 제외 + 편입/편출줄 |예상금액| ≥ AMT_MIN_TG.
 # 대시보드 JSON은 전량 유지(drift 플래그만 추가) — 숫자 자체는 동일한 단일 출처.
-
-def _tg_view(result):
-    """ETF별 텔레그램 표시용 필터링 뷰: [(entry, tg_new, tg_exit, tg_chg)] (변동 있는 것만)"""
-    view = []
-    for e in result['etfs']:
-        if not (e.get('detect') and e.get('comparable')):
-            continue
-        tg_new = [s for s in e['new'] if abs(s.get('amt') or 0) >= AMT_MIN_TG]
-        tg_exit = [s for s in e['exit'] if abs(s.get('amt') or 0) >= AMT_MIN_TG]
-        tg_chg = [s for s in e['chg'] if not s.get('drift')
-                  and abs(s.get('amt') or 0) >= AMT_MIN_TG]
-        if tg_new or tg_exit or tg_chg:
-            view.append((e, tg_new, tg_exit, tg_chg))
-    return view
-
 
 def aggregate_stock_flows(result):
     """종목별 순매수 집계 (ETF 경계 합산, 실매매만 — 드리프트 chg 제외).
@@ -383,23 +371,14 @@ def _flow_line(items):
     return ', '.join(parts)
 
 
-def _move_line(etf_name, kind, s):
-    """큰 변동 TOP 한 줄"""
-    if kind == 'new':
-        body = f'{_esc(s["name"])} 신규 {_fmt_pct(s["w"])}%'
-    elif kind == 'exit':
-        body = f'{_esc(s["name"])} 편출({_fmt_pct(s["prev_w"])}%)'
-    else:
-        body = (f'{_esc(s["name"])} {_fmt_pct(s["prev_w"])}→{_fmt_pct(s["w"])}%')
-    return f'{_esc(etf_name)}: {body} ({_fmt_won(s.get("amt"))})'
-
-
 def format_telegram_blocks(result):
-    """3단 구조 텔레그램 메시지 — '원자 블록' 문자열 리스트 반환 (None=미발송).
+    """3섹션 다이제스트 텔레그램 메시지 — 블록 문자열 리스트 반환 (None=미발송).
 
-    blocks[0] = 헤더(요약+종목별 순매수+큰 변동 TOP), blocks[1:] = ETF별
-    <blockquote expandable> 상세. 블록 내부는 pack_blocks 가 절대 자르지 않으므로
-    HTML 태그가 청크 경계에서 절단되지 않는다.
+    ① ETF 자금·가격 급변: AUM ±ETF_AUM_CHG_MIN% 또는 NAV ±ETF_NAV_CHG_MIN%
+       (AUM 변동금액순 최대 ETF_MOVES_MAX)
+    ② 편입/편출: AUM ≥ BIG_ETF_AUM_MIN 주식형 액티브의 신규/제외 종목 (금액순)
+    ③ 종목별 순매매: ETF 경계 합산 (편입/편출+실매매 급변, 드리프트 제외)
+    ETF별 전체 상세는 미포함 — 대시보드 링크로 대체. (2026-07-08 사용자 확정 양식)
     """
     latest = result.get('latest')
     prev = result.get('prev')
@@ -407,15 +386,50 @@ def format_telegram_blocks(result):
     if result.get('first_run') or not prev:
         return None  # 전일 데이터 없음 → 미발송
 
-    view = _tg_view(result)
-    header_meta = f'{latest} (전일 {prev} 대비) · 실매매·3억↑ 기준'
+    header_meta = f'{latest} (전일 {prev} 대비)'
+    detect_entries = [e for e in result['etfs'] if e.get('detect')]
 
-    if not view:
+    # ① ETF 자금·가격 급변 (비교가능 여부와 무관 — 시세 테이블 기반)
+    def _aum_delta(e):
+        """AUM 전일대비 변동금액(원) — pct에서 역산"""
+        aum, chg = e.get('aum'), e.get('aum_chg')
+        if not aum or chg is None or chg <= -100:
+            return 0.0
+        return aum - aum / (1 + chg / 100)
+
+    etf_moves = [e for e in detect_entries
+                 if (e.get('aum_chg') is not None and abs(e['aum_chg']) >= ETF_AUM_CHG_MIN)
+                 or (e.get('nav_chg') is not None and abs(e['nav_chg']) >= ETF_NAV_CHG_MIN)]
+    etf_moves.sort(key=lambda e: -abs(_aum_delta(e)))
+    etf_moves = etf_moves[:ETF_MOVES_MAX]
+
+    # ② 규모 있는 주식형 액티브의 편입/편출 (비교가능 ETF만, 3억 컷, 금액순)
+    ins, outs = [], []
+    for e in result['etfs']:
+        if not (e.get('detect') and e.get('comparable')):
+            continue
+        if (e.get('aum') or 0) < BIG_ETF_AUM_MIN:
+            continue
+        for s in e['new']:
+            if abs(s.get('amt') or 0) >= AMT_MIN_TG:
+                ins.append((e['name'], s))
+        for s in e['exit']:
+            if abs(s.get('amt') or 0) >= AMT_MIN_TG:
+                outs.append((e['name'], s))
+    ins.sort(key=lambda x: -abs(x[1].get('amt') or 0))
+    outs.sort(key=lambda x: -abs(x[1].get('amt') or 0))
+
+    # ③ 종목별 순매매 (전 비교가능 ETF, 드리프트 제외, 컷 없이 합산 → 상위 N 표시)
+    flows = aggregate_stock_flows(result)
+    buys = [f for f in flows if f['amt'] > 0][:TOP_FLOWS]
+    sells = [f for f in flows if f['amt'] < 0][:TOP_FLOWS]
+
+    if not (etf_moves or ins or outs or buys or sells):
         if not SEND_HEARTBEAT_ON_EMPTY:
             return None
         comparable_cnt = sum(1 for e in result['etfs'] if e.get('detect') and e.get('comparable'))
         skipped_cnt = len(result.get('skipped', []))
-        head = f'📌 <b>액티브 ETF 구성 변동</b>\n{header_meta}\n\n'
+        head = f'📌 <b>액티브 ETF 데일리</b>\n{header_meta}\n\n'
         # 수집 실패로 비교 자체가 안 된 경우를 '변동 없음'과 구분 (2026-07-08 etfcheck 403 사고)
         if comparable_cnt == 0 and skipped_cnt:
             return [head + f'⚠️ 구성종목 수집 실패로 비교 불가 (수집누락 {skipped_cnt}개)\n'
@@ -425,79 +439,42 @@ def format_telegram_blocks(result):
             msg += f'\n⚠️ 비교불가(수집누락) {skipped_cnt}개'
         return [msg]
 
-    n_new = sum(len(v[1]) for v in view)
-    n_exit = sum(len(v[2]) for v in view)
-    n_chg = sum(len(v[3]) for v in view)
+    lines = ['📌 <b>액티브 ETF 데일리</b>', header_meta]
 
-    lines = ['📌 <b>액티브 ETF 구성 변동</b>', header_meta,
-             f'편입 {n_new} · 편출 {n_exit} · 급변 {n_chg} · 변동 ETF {len(view)}개', '']
+    if etf_moves:
+        lines.append('')
+        lines.append(f'■ <b>ETF 자금·가격 급변</b> (AUM ±{ETF_AUM_CHG_MIN:.0f}% 또는 NAV ±{ETF_NAV_CHG_MIN:.0f}%)')
+        for e in etf_moves:
+            parts = []
+            if e.get('aum_chg') is not None:
+                parts.append(f'AUM {e["aum_chg"]:+.1f}%({_fmt_won(_aum_delta(e))})')
+            if e.get('nav_chg') is not None:
+                parts.append(f'NAV {e["nav_chg"]:+.1f}%')
+            lines.append(f'· {_esc(e["name"])}: {" · ".join(parts)}')
 
-    # ② 종목별 순매수 집계 (집계 자체는 컷 없이, 표시만 상위 N)
-    flows = aggregate_stock_flows(result)
-    buys = [f for f in flows if f['amt'] > 0][:TOP_FLOWS]
-    sells = [f for f in flows if f['amt'] < 0][:TOP_FLOWS]
+    if ins or outs:
+        lines.append('')
+        lines.append(f'■ <b>편입/편출</b> (AUM {round(BIG_ETF_AUM_MIN / 1e8):,}억↑ 주식형)')
+        for nm, s in ins[:INOUT_MAX]:
+            lines.append(f'편입 {_esc(s["name"])} — {_esc(nm)} ({_fmt_pct(s["w"])}%, {_fmt_won(s.get("amt"))})')
+        for nm, s in outs[:INOUT_MAX]:
+            lines.append(f'편출 {_esc(s["name"])} — {_esc(nm)} ({_fmt_pct(s["prev_w"])}%, {_fmt_won(s.get("amt"))})')
+
     if buys or sells:
-        lines.append('■ <b>종목별 순매수</b>')
+        lines.append('')
+        lines.append('■ <b>종목별 순매매</b> (전 액티브 합산, 실매매 기준)')
         if buys:
             lines.append(f'매수: {_flow_line(buys)}')
         if sells:
             lines.append(f'매도: {_flow_line(sells)}')
-        lines.append('')
-
-    # ② 큰 변동 TOP (개별 ETF-종목 라인, 금액순 — 표시 필터 통과분에서)
-    moves = []
-    for e, tg_new, tg_exit, tg_chg in view:
-        moves += [(e['name'], 'new', s) for s in tg_new]
-        moves += [(e['name'], 'exit', s) for s in tg_exit]
-        moves += [(e['name'], 'chg', s) for s in tg_chg]
-    moves.sort(key=lambda m: -abs(m[2].get('amt') or 0))
-    if moves:
-        lines.append(f'■ <b>큰 변동 TOP {min(TOP_MOVES, len(moves))}</b> (금액순)')
-        for i, (nm, kind, s) in enumerate(moves[:TOP_MOVES], 1):
-            lines.append(f'{i}. {_move_line(nm, kind, s)}')
-        lines.append('')
 
     skipped = result.get('skipped', [])
     if skipped:
+        lines.append('')
         lines.append(f'⚠️ 비교불가(수집누락) {len(skipped)}개')
+    lines.append('')
     lines.append(f'전체: <a href="{ETF_URL}">대시보드</a>')
-    lines.append(f'▼ ETF별 상세 {len(view)}개 (탭하여 펼치기)')
-    blocks = ['\n'.join(lines)]
-
-    # ③ ETF별 상세 — 각 ETF가 완결된 expandable blockquote 1개 (원자 블록)
-    for e, tg_new, tg_exit, tg_chg in view:
-        tg_chg = sorted(tg_chg, key=lambda s: -abs(s.get('amt') or 0))
-        # ETF당 종목 수 상한 (new→exit→chg 순 우선)
-        budget = PER_ETF_MAX_ITEMS
-        cut_new, cut_exit, cut_chg = tg_new[:budget], [], []
-        budget -= len(cut_new)
-        cut_exit = tg_exit[:budget]
-        budget -= len(cut_exit)
-        cut_chg = tg_chg[:budget]
-        omitted = (len(tg_new) + len(tg_exit) + len(tg_chg)
-                   - len(cut_new) - len(cut_exit) - len(cut_chg))
-
-        b = [f'<blockquote expandable><b>{_esc(e["name"])}</b>']
-        if cut_new:
-            items = ', '.join(f'{_esc(s["name"])}({_fmt_pct(s["w"])}%, {_fmt_won(s.get("amt"))})'
-                              for s in cut_new)
-            b.append(f'편입: {items}')
-        if cut_exit:
-            items = ', '.join(f'{_esc(s["name"])}({_fmt_pct(s["prev_w"])}%, {_fmt_won(s.get("amt"))})'
-                              for s in cut_exit)
-            b.append(f'편출: {items}')
-        if cut_chg:
-            items = ', '.join(
-                f'{_esc(s["name"])} {_fmt_pct(s["prev_w"])}→{_fmt_pct(s["w"])}'
-                f'({"+" if s["d"] >= 0 else ""}{_fmt_pct(s["d"])}%p, {_fmt_won(s.get("amt"))})'
-                for s in cut_chg)
-            b.append(f'급변: {items}')
-        if omitted > 0:
-            b.append(f'…외 {omitted}종목')
-        b.append('</blockquote>')
-        blocks.append('\n'.join(b))
-
-    return blocks
+    return ['\n'.join(lines)]
 
 
 def _split_oversize_block(block, limit):
