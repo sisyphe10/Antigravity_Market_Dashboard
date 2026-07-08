@@ -32,9 +32,11 @@ QTY_DRIFT_TOL = 0.005
 # ── 텔레그램 전용 표시 필터 (대시보드 JSON에는 미적용 — 전체 유지) ──
 AMT_MIN_TG = 3e8         # 편입/편출 표시줄 최소 |예상금액|(원): 3억 미만 라인 컷
 THEME_FLOW_TOP = 3       # ③ 종목별 순매매 테마당 매수/매도 각 상위 개수
-ETF_AUM_CHG_MIN = 5.0    # ① ETF AUM 전일대비 급변 임계(%)
-ETF_NAV_CHG_MIN = 3.0    # ① ETF NAV 전일대비 급변 임계(%)
-ETF_MOVES_MAX = 10       # ① 표시 상한 (AUM 변동금액순)
+# ① 순유출입 = AUM변동% − NAV변동% (가격 효과 제거한 실제 설정/환매 근사).
+#   NAV 변동 자체는 매매를 유발하지 않으므로 종목 수급 관점에서는 순유출입이 본질.
+ETF_FLOW_PCT_MIN = 3.0   # ① 순유출입 급변 임계(%)
+ETF_FLOW_AMT_MIN = 100e8  # ① 또는 순유출입 금액 임계(원) — 초대형 ETF의 저율·대규모 플로우 포착
+ETF_MOVES_MAX = 10       # ① 표시 상한 (순유출입 금액순)
 BIG_ETF_AUM_MIN = 500e8  # ② '규모 있는' 주식형 액티브 하한 (AUM 500억)
 INOUT_MAX = 10           # ② 편입/편출 각 표시 상한 (금액순)
 
@@ -458,18 +460,25 @@ def format_telegram_blocks(result):
     header_meta = f'{latest} (전일 {prev} 대비)'
     detect_entries = [e for e in result['etfs'] if e.get('detect')]
 
-    # ① ETF 자금·가격 급변 (비교가능 여부와 무관 — 시세 테이블 기반)
-    def _aum_delta(e):
-        """AUM 전일대비 변동금액(원) — pct에서 역산"""
-        aum, chg = e.get('aum'), e.get('aum_chg')
-        if not aum or chg is None or chg <= -100:
-            return 0.0
-        return aum - aum / (1 + chg / 100)
+    # ① ETF 자금 유출입 (비교가능 여부와 무관 — 시세 테이블 기반)
+    def _net_flow(e):
+        """순유출입 근사: (flow_pct, flow_amt(원), prev_aum). 계산 불가면 None.
 
-    etf_moves = [e for e in detect_entries
-                 if (e.get('aum_chg') is not None and abs(e['aum_chg']) >= ETF_AUM_CHG_MIN)
-                 or (e.get('nav_chg') is not None and abs(e['nav_chg']) >= ETF_NAV_CHG_MIN)]
-    etf_moves.sort(key=lambda e: -abs(_aum_delta(e)))
+        flow_pct = AUM변동% − NAV변동% (가격 효과 제거). NAV가 없으면 AUM 변동
+        전체를 flow로 간주(분해 불가 — 과대 표시보다 포착 우선)."""
+        aum, ac, nc = e.get('aum'), e.get('aum_chg'), e.get('nav_chg')
+        if not aum or ac is None or ac <= -100:
+            return None
+        prev_aum = aum / (1 + ac / 100)
+        fp = ac - nc if nc is not None else ac
+        return fp, prev_aum * fp / 100, prev_aum
+
+    etf_moves = []
+    for e in detect_entries:
+        nf = _net_flow(e)
+        if nf and (abs(nf[0]) >= ETF_FLOW_PCT_MIN or abs(nf[1]) >= ETF_FLOW_AMT_MIN):
+            etf_moves.append((e, nf))
+    etf_moves.sort(key=lambda x: -abs(x[1][1]))  # 순유출입 금액순
     etf_moves = etf_moves[:ETF_MOVES_MAX]
 
     # ② 규모 있는 주식형 액티브의 편입/편출 (비교가능 ETF만, 3억 컷, 금액순)
@@ -520,18 +529,17 @@ def format_telegram_blocks(result):
 
     if etf_moves:
         lines.append('')
-        lines.append(f'■ <b>ETF 자금·가격 급변</b> (AUM ±{ETF_AUM_CHG_MIN:.0f}% 또는 NAV ±{ETF_NAV_CHG_MIN:.0f}%)')
-        for theme, moves in _by_theme(etf_moves, lambda e: e['name']).items():
+        lines.append(f'■ <b>ETF 자금 유출입</b> (순유출입 ±{ETF_FLOW_PCT_MIN:.0f}% 또는'
+                     f' ±{round(ETF_FLOW_AMT_MIN / 1e8):,}억)')
+        for theme, moves in _by_theme(etf_moves, lambda x: x[0]['name']).items():
             lines.append(f'[{theme}]')
-            for e in moves:
-                parts = []
-                if e.get('aum_chg') is not None and e.get('aum'):
-                    before = e['aum'] / (1 + e['aum_chg'] / 100) if e['aum_chg'] > -100 else None
-                    parts.append(f'AUM {_fmt_won_abs(before)}→{_fmt_won_abs(e["aum"])}'
-                                 f' ({e["aum_chg"]:+.1f}%)')
+            for e, (fp, famt, prev_aum) in moves:
+                label = '순유입' if famt >= 0 else '순유출'
+                detail = f'{fp:+.1f}%'
                 if e.get('nav_chg') is not None:
-                    parts.append(f'NAV {e["nav_chg"]:+.1f}%')
-                lines.append(f'· {_esc(e["name"])}: {" · ".join(parts)}')
+                    detail += f', 가격 {e["nav_chg"]:+.1f}%'
+                lines.append(f'· {_esc(e["name"])}: AUM {_fmt_won_abs(prev_aum)}→{_fmt_won_abs(e["aum"])}'
+                             f' · {label} {_fmt_won(famt)} ({detail})')
     blocks.append('\n'.join(lines))
 
     if ins or outs:
