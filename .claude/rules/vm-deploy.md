@@ -61,7 +61,7 @@ ssh ... "cd /home/ubuntu/Antigravity_Market_Dashboard && bash scripts/deploy.sh 
 ### sisyphe-bot (펀드/일상)
 - 05:00 KST: 날씨 알림
 - 05:05 KST: 캘린더 알림 + D-Day
-- 09:30~15:35 KST: 30분 간격 포트폴리오 자동 업데이트 (거래일만)
+- 09:10 + 09:30~15:35 KST: 30분 간격 포트폴리오 자동 업데이트 (거래일만, 09:10은 개장 직후 첫 틱)
 - 16:00 KST: 일간 포트폴리오 리포트
 - 16:05 KST: 투자유의종목 재생성 (market_alert.html)
 - 16:10 KST: 투자일지 데이터 수집

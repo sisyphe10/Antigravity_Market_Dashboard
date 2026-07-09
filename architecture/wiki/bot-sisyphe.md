@@ -34,7 +34,7 @@ alerts: "OnFailure → notify_sisyphe_failure.sh sisyphe-bot → 텔레그램"
 
 생태계의 중심 봇. python-telegram-bot JobQueue로 하루종일 포트폴리오·시장·가계부 잡을 돌린다(`execution/sisyphe_bot.py`, 134KB).
 
-- **내부 스케줄(KST)**: 05:00 날씨 · 05:05 캘린더 · 09:30~15:35 30분 자동 포트폴리오 업데이트(거래일) · 16:05 투자유의 재생성(`src-create-market-alert`) · 16:10 투자일지(`src-journal-data`) · 16:20/18:30/08:30 Featured 1·2·3차 · 17:00 일간 리포트 publish · 20:00 백업 재시도 · 23:00 투자유의 야간.
+- **내부 스케줄(KST)**: 05:00 날씨 · 05:05 캘린더 · 09:10·09:30~15:35 30분 자동 포트폴리오 업데이트(거래일) · 16:05 투자유의 재생성(`src-create-market-alert`) · 16:10 투자일지(`src-journal-data`) · 16:20/18:30/08:30 Featured 1·2·3차 · 17:00 일간 리포트 publish · 20:00 백업 재시도 · 23:00 투자유의 야간.
 - 가계부: Apps Script doPost가 거래를 직접 텔레그램 전송, 봇은 답장(분류/수정/제외) 처리.
 - systemd `Restart=always`(10회 실패 시 중단+알림). 맥미니에선 launchd KeepAlive + wrapper로 등가 구현.
 - 함정: JobQueue 가드/pytz 필요, 라이브 테스트는 VM 봇 중지 후.

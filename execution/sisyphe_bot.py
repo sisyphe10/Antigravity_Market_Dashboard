@@ -142,7 +142,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 /update - 실시간 주가 기반 포트폴리오 테이블 즉시 업데이트
 • 오늘 수익률 + 누적 수익률 재계산
 • Dashboard(GitHub Pages) 자동 반영
-• 거래일 09:30~15:35 30분마다 자동 실행
+• 거래일 09:10 + 09:30~15:35 30분마다 자동 실행
 
 🌤️ **날씨 / 일정**
 /weather - 현재 날씨 즉시 조회 (여의도 기준)
@@ -2952,13 +2952,13 @@ if __name__ == '__main__':
     job_queue.run_daily(late_market_alert_job, time=late_alert_time, job_kwargs=DAILY_JOB_KWARGS)
 
     # 거래시간 30분마다 자동 포트폴리오 업데이트
-    # 09:30, 10:00, 10:30, ..., 15:00, 15:35 KST
+    # 09:10(개장 직후), 09:30, 10:00, ..., 15:00, 15:35 KST
     try:
         kst = pytz.timezone('Asia/Seoul')
         trading_times = [
             datetime.time(hour=h, minute=m, second=0, tzinfo=kst)
             for h, m in [
-                (9,30),(10,0),(10,30),(11,0),(11,30),
+                (9,10),(9,30),(10,0),(10,30),(11,0),(11,30),
                 (12,0),(12,30),(13,0),(13,30),(14,0),
                 (14,30),(15,0),(15,35)
             ]
@@ -2967,7 +2967,7 @@ if __name__ == '__main__':
         trading_times = [
             datetime.time(hour=h, minute=m, second=0)
             for h, m in [
-                (9,30),(10,0),(10,30),(11,0),(11,30),
+                (9,10),(9,30),(10,0),(10,30),(11,0),(11,30),
                 (12,0),(12,30),(13,0),(13,30),(14,0),
                 (14,30),(15,0),(15,35)
             ]
@@ -2988,7 +2988,7 @@ if __name__ == '__main__':
     print(f"  - Portfolio report: 16:00 KST")
     print(f"  - Market alert: 16:05 KST (투자유의종목)")
     print(f"  - Journal data: 16:10 KST (투자일지)")
-    print(f"  - Auto portfolio update: 09:30~15:35 KST (30분 간격, 거래일만)")
+    print(f"  - Auto portfolio update: 09:10 + 09:30~15:35 KST (30분 간격, 거래일만)")
     print(f"  - Nightly portfolio refresh: 16:20 KST (당일 주문 반영)")
     print(f"  - ETF collection: systemd 타이머 etf-collect.timer (16:30 KST, 봇 분리)")
     print(f"  - Evening backup: 20:00 KST (16:xx 실패 시 재시도)")
