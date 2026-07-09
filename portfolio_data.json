@@ -197,15 +197,15 @@
       "name": "테크윙",
       "sector": "반도체",
       "market_cap": 14618,
-      "weight": 2.0,
+      "weight": 0.0,
       "weight_prev": 2.0,
       "today_return": 3.9525691699604746,
       "contribution": 0.7905138339920948,
-      "cumulative_return": -32.4486301369863,
+      "cumulative_return": null,
       "current_price": 39450.0,
       "ath_price": 71100.0,
       "dd": -44.51476793248945,
-      "rsi": -17.884687596501013,
+      "rsi": null,
       "is_today_new": false
     }
   ],
@@ -343,15 +343,15 @@
       "name": "테크윙",
       "sector": "반도체",
       "market_cap": 14618,
-      "weight": 2.0,
+      "weight": 0.0,
       "weight_prev": 2.0,
       "today_return": 3.9525691699604746,
       "contribution": 0.7905138339920948,
-      "cumulative_return": -32.4486301369863,
+      "cumulative_return": null,
       "current_price": 39450.0,
       "ath_price": 71100.0,
       "dd": -44.51476793248945,
-      "rsi": -17.884687596501013,
+      "rsi": null,
       "is_today_new": false
     }
   ],
@@ -489,15 +489,15 @@
       "name": "테크윙",
       "sector": "반도체",
       "market_cap": 14618,
-      "weight": 2.0,
+      "weight": 0.0,
       "weight_prev": 2.0,
       "today_return": 3.9525691699604746,
       "contribution": 0.7905138339920948,
-      "cumulative_return": -32.4486301369863,
+      "cumulative_return": null,
       "current_price": 39450.0,
       "ath_price": 71100.0,
       "dd": -44.51476793248945,
-      "rsi": -17.884687596501013,
+      "rsi": null,
       "is_today_new": false
     }
   ],
@@ -697,6 +697,41 @@
       "is_today_new": false
     }
   ],
+  "_order_changes": {
+    "삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형": {
+      "date": "2026-07-09",
+      "added": [],
+      "changed": [],
+      "removed": [
+        {
+          "name": "테크윙",
+          "weight": 2.0
+        }
+      ]
+    },
+    "NH 목표전환형 5호": {
+      "date": "2026-07-09",
+      "added": [],
+      "changed": [],
+      "removed": [
+        {
+          "name": "테크윙",
+          "weight": 2.0
+        }
+      ]
+    },
+    "DB 목표전환형 6차": {
+      "date": "2026-07-09",
+      "added": [],
+      "changed": [],
+      "removed": [
+        {
+          "name": "테크윙",
+          "weight": 2.0
+        }
+      ]
+    }
+  },
   "_portfolio_meta": {
     "삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형": {
       "nav_ytd_d1": 68.33835482929386,
