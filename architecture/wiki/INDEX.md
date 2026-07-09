@@ -25,7 +25,7 @@ Updated: 2026-07-07
 - [seibro.html (SEIBro)](page-seibro.md) — Page
 - [stock_master.json (종목마스터)](store-stock-master.md) — Dataset
 - [국민연금 적립금 (fetch_nps_fund.py)](src-nps-fund.md) — Source
-- [금투협 예탁금/신용잔고 (fetch_kofia_stats.py)](src-kofia.md) — Source
+- [금투협 예탁금/신용잔고/반대매매 (fetch_kofia_stats.py)](src-kofia.md) — Source
 - [액티브 ETF 변동 (active_etf_changes.py)](src-active-etf.md) — Source
 - [액티브 ETF 변동 알림 타이머 (19:00)](timer-etf-active-alert.md) — Timer
 - [외국인 보유비중 (fetch_krx_foreign.py)](src-krx-foreign.md) — Source
@@ -238,7 +238,7 @@ Updated: 2026-07-07
 - [SiliconData 지수 3종 (fetch_silicondata_index.py)](src-silicondata.md) — 23:00 (crawler 내부), active
 - [TrendForce 소스 (sources/trendforce.py)](src-trendforce.md) — 08:00 (ra-sisyphe), active
 - [국민연금 적립금 (fetch_nps_fund.py)](src-nps-fund.md) — 17:30 평일 (gha-daily-kofia), active
-- [금투협 예탁금/신용잔고 (fetch_kofia_stats.py)](src-kofia.md) — 17:30 평일 (gha-daily-kofia), active
+- [금투협 예탁금/신용잔고/반대매매 (fetch_kofia_stats.py)](src-kofia.md) — 17:30 평일 (gha-daily-kofia), active
 - [기여도 데이터 (create_contribution_data.py)](src-create-contribution-data.md) — 23:00 (daily_crawl), active
 - [기준가 엔진 (calculate_wrap_nav.py)](src-calculate-wrap-nav.md) — 체인 (finalize/recalc/crawl), active
 - [다나와 DRAM 최저가 (fetch_danawa_price.py)](src-danawa.md) — 23:00 (daily_crawl), active
@@ -345,7 +345,7 @@ Updated: 2026-07-07
 - [Wrap_NAV 워처 (watch_wrap_nav.py)](watcher-wrap-nav.md) — Watcher
 - [Wrap_NAV.xlsx (랩 운용 원장)](store-wrap-nav-xlsx.md) — Store
 - [국민연금 적립금 (fetch_nps_fund.py)](src-nps-fund.md) — Source
-- [금투협 예탁금/신용잔고 (fetch_kofia_stats.py)](src-kofia.md) — Source
+- [금투협 예탁금/신용잔고/반대매매 (fetch_kofia_stats.py)](src-kofia.md) — Source
 - [기여도 데이터 (create_contribution_data.py)](src-create-contribution-data.md) — Source
 - [기준가 엔진 (calculate_wrap_nav.py)](src-calculate-wrap-nav.md) — Source
 - [다나와 DRAM 최저가 (fetch_danawa_price.py)](src-danawa.md) — Source

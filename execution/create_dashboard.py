@@ -1480,6 +1480,8 @@ def _build_combined_chart_section():
                 # 증시 유동성 (금투협 KOFIA → dataset.csv DEPOSIT). DATA 일반 차트로 개별 시리즈 표시.
                 {'display': '고객예탁금',         'csv': '고객예탁금',         'color': '#2E7D32'},
                 {'display': '신용잔고',           'csv': '신용잔고',           'color': '#C2185B'},
+                # 반대매매금액 = 위탁매매 미수금 반대매매, 억원 (fetch_kofia_stats.py, 2021-10~)
+                {'display': '반대매매금액',       'csv': '반대매매금액',       'color': '#D84315'},
                 # 지수 밸류에이션 (KRX/pykrx data.krx 로그인 → KRX_VALUATION). 후행 PER/PBR/배당수익률.
                 {'display': 'KOSPI PER',          'csv': 'KOSPI PER',          'color': '#6A1B9A'},
                 {'display': 'KOSPI PBR',          'csv': 'KOSPI PBR',          'color': '#8E24AA'},

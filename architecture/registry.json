@@ -635,7 +635,7 @@
    "runs_on": "gha",
    "schedule_kst": "17:30 평일",
    "status": "active",
-   "desc_md": "고객예탁금/신용잔고(data.go.kr 금투협 종합통계)를 평일 17:30 KST(08:30 UTC) 수집해 `kofia_stats.json`→index.html 랜딩 차트 재생성. 같은 키로 국민연금 적립금(`fetch_nps_fund.py`)도 이어 수집.\n\n- `DATA_GO_KR_API_KEY` 미설정 시 graceful skip. `wrap-nav-pipeline` 그룹.\n- 예탁금=invrDpsgAmt·신용잔고=crdTrFingWhl.\n- 국민연금 적립금은 odcloud 15106894(피벗+uddi 해석 함정).",
+   "desc_md": "고객예탁금/신용잔고(data.go.kr 금투협 종합통계)를 평일 17:30 KST(08:30 UTC) 수집해 `kofia_stats.json`→index.html 랜딩 차트 재생성. 반대매매금액(위탁매매 미수금)은 dataset.csv 적재→market.html DATA. 같은 키로 국민연금 적립금(`fetch_nps_fund.py`)도 이어 수집.\n\n- `DATA_GO_KR_API_KEY` 미설정 시 graceful skip. `wrap-nav-pipeline` 그룹.\n- 예탁금=invrDpsgAmt·신용잔고=crdTrFingWhl·반대매매=brkTrdUcolMnyVsOppsTrdAmt(억원).\n- 국민연금 적립금은 odcloud 15106894(피벗+uddi 해석 함정).",
    "code": [
     ".github/workflows/daily_kofia.yml"
    ],
@@ -1395,11 +1395,11 @@
    "project": "antigravity",
    "domain": "market-kr",
    "type": "pipeline_source",
-   "name": "금투협 예탁금/신용잔고 (fetch_kofia_stats.py)",
+   "name": "금투협 예탁금/신용잔고/반대매매 (fetch_kofia_stats.py)",
    "runs_on": "gha",
    "schedule_kst": "17:30 평일 (gha-daily-kofia)",
    "status": "active",
-   "desc_md": "고객예탁금/신용잔고(data.go.kr 금투협 종합통계)를 수집해 `kofia_stats.json`+dataset.csv에 적재(index.html 랜딩 차트).\n\n- 예탁금=invrDpsgAmt, 신용잔고=crdTrFingWhl. 오퍼레이션 8종 검증 완료.",
+   "desc_md": "고객예탁금/신용잔고/반대매매금액(data.go.kr 금투협 종합통계)을 수집해 `kofia_stats.json`+dataset.csv에 적재(index.html 랜딩 차트, market.html DATA).\n\n- 예탁금=invrDpsgAmt, 신용잔고=crdTrFingWhl, 반대매매금액=brkTrdUcolMnyVsOppsTrdAmt(위탁매매 미수금 반대매매, 억원, 2021-10~ 백필). 오퍼레이션 8종 검증 완료.",
    "code": [
     "execution/fetch_kofia_stats.py"
    ],

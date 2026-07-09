@@ -26,10 +26,10 @@ alerts: "실패 자체 알림 없음 → gha-daily-health-check"
 
 **Domain:** 국내 시장 · **Type:** GHA · **Runs on:** gha · **Schedule (KST):** 17:30 평일 · **Status:** active · **Project:** antigravity
 
-고객예탁금/신용잔고(data.go.kr 금투협 종합통계)를 평일 17:30 KST(08:30 UTC) 수집해 `kofia_stats.json`→index.html 랜딩 차트 재생성. 같은 키로 국민연금 적립금(`fetch_nps_fund.py`)도 이어 수집.
+고객예탁금/신용잔고(data.go.kr 금투협 종합통계)를 평일 17:30 KST(08:30 UTC) 수집해 `kofia_stats.json`→index.html 랜딩 차트 재생성. 반대매매금액(위탁매매 미수금)은 dataset.csv 적재→market.html DATA. 같은 키로 국민연금 적립금(`fetch_nps_fund.py`)도 이어 수집.
 
 - `DATA_GO_KR_API_KEY` 미설정 시 graceful skip. `wrap-nav-pipeline` 그룹.
-- 예탁금=invrDpsgAmt·신용잔고=crdTrFingWhl.
+- 예탁금=invrDpsgAmt·신용잔고=crdTrFingWhl·반대매매=brkTrdUcolMnyVsOppsTrdAmt(억원).
 - 국민연금 적립금은 odcloud 15106894(피벗+uddi 해석 함정).
 
 ## Reads
@@ -42,7 +42,7 @@ alerts: "실패 자체 알림 없음 → gha-daily-health-check"
 - [[page-market]] — market.html (마켓 대시보드)
 
 ## Depends on
-- [[src-kofia]] — 금투협 예탁금/신용잔고 (fetch_kofia_stats.py)
+- [[src-kofia]] — 금투협 예탁금/신용잔고/반대매매 (fetch_kofia_stats.py)
 - [[src-nps-fund]] — 국민연금 적립금 (fetch_nps_fund.py)
 - [[src-create-dashboard]] — 대시보드 생성기 (create_dashboard.py)
 

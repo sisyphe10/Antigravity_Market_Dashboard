@@ -1,6 +1,6 @@
 ---
 id: "src-kofia"
-name: "금투협 예탁금/신용잔고 (fetch_kofia_stats.py)"
+name: "금투협 예탁금/신용잔고/반대매매 (fetch_kofia_stats.py)"
 domain: "market-kr"
 project: "antigravity"
 type: "pipeline_source"
@@ -18,13 +18,13 @@ depends_on:
 alerts: ""
 ---
 
-# 금투협 예탁금/신용잔고 (fetch_kofia_stats.py)
+# 금투협 예탁금/신용잔고/반대매매 (fetch_kofia_stats.py)
 
 **Domain:** 국내 시장 · **Type:** Source · **Runs on:** gha · **Schedule (KST):** 17:30 평일 (gha-daily-kofia) · **Status:** active · **Project:** antigravity
 
-고객예탁금/신용잔고(data.go.kr 금투협 종합통계)를 수집해 `kofia_stats.json`+dataset.csv에 적재(index.html 랜딩 차트).
+고객예탁금/신용잔고/반대매매금액(data.go.kr 금투협 종합통계)을 수집해 `kofia_stats.json`+dataset.csv에 적재(index.html 랜딩 차트, market.html DATA).
 
-- 예탁금=invrDpsgAmt, 신용잔고=crdTrFingWhl. 오퍼레이션 8종 검증 완료.
+- 예탁금=invrDpsgAmt, 신용잔고=crdTrFingWhl, 반대매매금액=brkTrdUcolMnyVsOppsTrdAmt(위탁매매 미수금 반대매매, 억원, 2021-10~ 백필). 오퍼레이션 8종 검증 완료.
 
 ## Reads
 - (none)
