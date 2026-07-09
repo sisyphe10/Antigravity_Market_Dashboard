@@ -191,22 +191,6 @@
       "dd": -29.342027267338466,
       "rsi": 3.5022218975461095,
       "is_today_new": false
-    },
-    {
-      "code": "089030",
-      "name": "테크윙",
-      "sector": "반도체",
-      "market_cap": 14618,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": 3.9525691699604746,
-      "contribution": 0.7905138339920948,
-      "cumulative_return": null,
-      "current_price": 39450.0,
-      "ath_price": 71100.0,
-      "dd": -44.51476793248945,
-      "rsi": null,
-      "is_today_new": false
     }
   ],
   "NH 목표전환형 5호": [
@@ -337,22 +321,6 @@
       "dd": -41.35265700483092,
       "rsi": -8.643627073203985,
       "is_today_new": false
-    },
-    {
-      "code": "089030",
-      "name": "테크윙",
-      "sector": "반도체",
-      "market_cap": 14618,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": 3.9525691699604746,
-      "contribution": 0.7905138339920948,
-      "cumulative_return": null,
-      "current_price": 39450.0,
-      "ath_price": 71100.0,
-      "dd": -44.51476793248945,
-      "rsi": null,
-      "is_today_new": false
     }
   ],
   "DB 목표전환형 6차": [
@@ -482,22 +450,6 @@
       "ath_price": 207000.0,
       "dd": -41.35265700483092,
       "rsi": -12.7414466810716,
-      "is_today_new": false
-    },
-    {
-      "code": "089030",
-      "name": "테크윙",
-      "sector": "반도체",
-      "market_cap": 14618,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": 3.9525691699604746,
-      "contribution": 0.7905138339920948,
-      "cumulative_return": null,
-      "current_price": 39450.0,
-      "ath_price": 71100.0,
-      "dd": -44.51476793248945,
-      "rsi": null,
       "is_today_new": false
     }
   ],
@@ -697,61 +649,26 @@
       "is_today_new": false
     }
   ],
-  "_order_changes": {
-    "삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형": {
-      "date": "2026-07-09",
-      "added": [],
-      "changed": [],
-      "removed": [
-        {
-          "name": "테크윙",
-          "weight": 2.0
-        }
-      ]
-    },
-    "NH 목표전환형 5호": {
-      "date": "2026-07-09",
-      "added": [],
-      "changed": [],
-      "removed": [
-        {
-          "name": "테크윙",
-          "weight": 2.0
-        }
-      ]
-    },
-    "DB 목표전환형 6차": {
-      "date": "2026-07-09",
-      "added": [],
-      "changed": [],
-      "removed": [
-        {
-          "name": "테크윙",
-          "weight": 2.0
-        }
-      ]
-    }
-  },
   "_portfolio_meta": {
     "삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형": {
-      "nav_ytd_d1": 68.33835482929386,
-      "nav_cum_d1": 240.26399999999998
+      "nav_ytd_d1": 70.09464159381787,
+      "nav_cum_d1": 243.81399999999996
     },
     "NH 목표전환형 5호": {
-      "nav_ytd_d1": -12.107000000000001,
-      "nav_cum_d1": -12.107000000000001
+      "nav_ytd_d1": -10.972000000000005,
+      "nav_cum_d1": -10.972000000000005
     },
     "DB 목표전환형 6차": {
-      "nav_ytd_d1": -11.077000000000004,
-      "nav_cum_d1": -11.077000000000004
+      "nav_ytd_d1": -9.928999999999998,
+      "nav_cum_d1": -9.928999999999998
     },
     "한투 지속형": {
-      "nav_ytd_d1": -3.3460000000000045,
-      "nav_cum_d1": -3.3460000000000045
+      "nav_ytd_d1": -2.476999999999996,
+      "nav_cum_d1": -2.476999999999996
     },
     "한투 성과모집형 1차": {
-      "nav_ytd_d1": 0.0,
-      "nav_cum_d1": 0.0
+      "nav_ytd_d1": 1.1120000000000019,
+      "nav_cum_d1": 1.1120000000000019
     }
   },
   "_price_asof": "2026-07-09"
