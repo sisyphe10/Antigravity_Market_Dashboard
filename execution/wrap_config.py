@@ -465,10 +465,11 @@ def order_portfolios():
                           for p in members if p.advisory_template],
             'newSheetTargets': [{'broker': p.broker, 'product': p.nav_key} for p in members],
         })
-    # 단독(그룹 없는) 활성 상품 카드 — 보통 한투 단독 목표전환형
-    for p in _sorted_active(active_products()):
-        if p.group:
-            continue
+    # 단독(그룹 없는) 활성 상품 카드 — 일반형(지속형) 먼저, 목표전환형 나중 (2026-07-10 사용자 지정 순서:
+    # 결합 → 한투 지속형 → NH 목표전환형 → DB 목표전환형 → 한투 성과모집형. 각 그룹 내에서는 증권사 순)
+    standalone = [p for p in _sorted_active(active_products()) if not p.group]
+    for p in ([x for x in standalone if x.ptype == 'general']
+              + [x for x in standalone if x.ptype != 'general']):
         templates = ([{'label': p.display, 'file': p.advisory_template, 'format': p.advisory_format}]
                      if p.advisory_template else [])
         cards.append({
