@@ -4161,6 +4161,7 @@ def create_order_section():
     _target_tabs = _json.dumps(wrap_config.target_tabs(), ensure_ascii=False)
     _standalone_general = _json.dumps(wrap_config.standalone_general_tabs(), ensure_ascii=False)
     _general = _json.dumps(wrap_config.general_combined_name(), ensure_ascii=False)
+    _email_pair = _json.dumps(wrap_config.email_pair_map(), ensure_ascii=False)
     _html = """
         <div id="orderTabs" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;"></div>
         <div id="orderContent"><div style="text-align:center;color:#888;padding:40px;">로딩 중...</div></div>
@@ -4376,18 +4377,26 @@ def create_order_section():
             var STANDALONE_GENERAL = __STANDALONE_GENERAL__;  // [{display, broker}] 결합 미합류 단독 일반형(예: 수렴 전 한투 지속형)
             var compliance = buildComplianceEmailText();
             var samsung = buildOrderEmailText(GENERAL, orderStocks[GENERAL] || [], orderState[GENERAL] || []);
+            var EMAIL_PAIR = __EMAIL_PAIR__;
             var targetBoxes = '';
             var nateonText = buildOrderNateonText(orderStocks[GENERAL] || [], orderState[GENERAL] || [], '일반형');
             TARGET_TABS.forEach(function(tt) {
                 var tEmail = buildOrderEmailText(tt, orderStocks[tt] || [], orderState[tt] || []);
                 var brokerLabel = tt.split(' ')[0];
                 targetBoxes += buildEmailBox(brokerLabel + ' 이메일', tEmail, '#f9fafb', '#e5e7eb', '#444', '#374151');
-                nateonText += '\\n\\n' + buildOrderNateonText(orderStocks[tt] || [], orderState[tt] || [], '목표전환형');
+                var ttLabel = (EMAIL_PAIR[tt] && EMAIL_PAIR[tt].targetLabel) || '목표전환형';
+                nateonText += '\\n\\n' + buildOrderNateonText(orderStocks[tt] || [], orderState[tt] || [], ttLabel);
             });
             var standaloneBoxes = '';
             STANDALONE_GENERAL.forEach(function(sg) {
-                var sgEmail = buildOrderEmailText(sg.display, orderStocks[sg.display] || [], orderState[sg.display] || []);
-                standaloneBoxes += buildEmailBox(sg.broker + ' 이메일', sgEmail, '#f9fafb', '#e5e7eb', '#444', '#374151');
+                // 같은 증권사 목표전환형 이메일에 이미 일반형 섹션으로 포함되면 자체 박스 생략 (한투 이메일 중복 방지)
+                var covered = TARGET_TABS.some(function(tt) {
+                    return EMAIL_PAIR[tt] && EMAIL_PAIR[tt].generalKey === sg.display;
+                });
+                if (!covered) {
+                    var sgEmail = buildOrderEmailText(sg.display, orderStocks[sg.display] || [], orderState[sg.display] || []);
+                    standaloneBoxes += buildEmailBox(sg.broker + ' 이메일', sgEmail, '#f9fafb', '#e5e7eb', '#444', '#374151');
+                }
                 nateonText += '\\n\\n' + buildOrderNateonText(orderStocks[sg.display] || [], orderState[sg.display] || [], sg.display);
             });
             var sgDisplays = STANDALONE_GENERAL.map(function(sg) { return sg.display; });
@@ -4498,9 +4507,10 @@ def create_order_section():
         }
 
         function buildOrderEmailText(pfName, stocks, st) {
-            // 목표전환형 NH 4호 / DB 5차 청산 (2026-06-19) → 통합 비활성 (일반형 단독 이메일)
+            // 목표전환형 이메일 = 같은 증권사 일반형 섹션 + 목표전환형 섹션 (EMAIL_PAIR, wrap_config.email_pair_map)
             var TARGET_TABS = __TARGET_TABS__;
             var GENERAL = __GENERAL__;
+            var EMAIL_PAIR = __EMAIL_PAIR__;
             var lines = [
                 '안녕하십니까.',
                 '라이프자산운용 김태식입니다.',
@@ -4510,11 +4520,14 @@ def create_order_section():
                 ''
             ];
             if (TARGET_TABS.indexOf(pfName) >= 0) {
-                var generalChanges = buildOrderChanges(orderStocks[GENERAL] || [], orderState[GENERAL] || []);
+                var pair = EMAIL_PAIR[pfName] || { generalKey: GENERAL, generalLabel: '일반형', targetLabel: '목표전환형' };
                 var targetChanges = buildOrderChanges(stocks, st);
-                lines = lines.concat(buildEmailSectionLines(generalChanges, '일반형'));
-                lines.push('');
-                lines = lines.concat(buildEmailSectionLines(targetChanges, '목표전환형'));
+                if (pair.generalKey) {
+                    var generalChanges = buildOrderChanges(orderStocks[pair.generalKey] || [], orderState[pair.generalKey] || []);
+                    lines = lines.concat(buildEmailSectionLines(generalChanges, pair.generalLabel));
+                    lines.push('');
+                }
+                lines = lines.concat(buildEmailSectionLines(targetChanges, pair.targetLabel));
             } else {
                 var changes = buildOrderChanges(stocks, st);
                 lines = lines.concat(buildEmailSectionLines(changes, null));
@@ -4646,13 +4659,19 @@ def create_order_section():
                     + '<pre class="nateon-text" style="white-space:pre-wrap;font-family:inherit;font-size:14px;color:#222;margin:0;line-height:1.6;">' + escapeHtml(sgText) + '</pre>'
                     + '</div>';
             }
-            // 활성 목표전환형 탭에서만 노출 (일반형 + 목표전환형을 한 박스에 함께)
+            // 활성 목표전환형 탭에서만 노출 (같은 증권사 일반형 + 목표전환형을 한 박스에 함께, EMAIL_PAIR)
             if (__TARGET_TABS__.indexOf(pfName) < 0) return '';
             var GENERAL = __GENERAL__;
-            var generalText = buildOrderNateonText(orderStocks[GENERAL] || [], orderState[GENERAL] || [], '일반형');
-            var targetText = buildOrderNateonText(orderStocks[pfName] || [], orderState[pfName] || [], '목표전환형');
-            var combined = generalText + '\\n\\n' + targetText;
-            var reasonLines = buildNateonReasonLines([GENERAL, pfName]);
+            var _pair = __EMAIL_PAIR__[pfName] || { generalKey: GENERAL, generalLabel: '일반형', targetLabel: '목표전환형' };
+            var targetText = buildOrderNateonText(orderStocks[pfName] || [], orderState[pfName] || [], _pair.targetLabel);
+            var combined = targetText;
+            var reasonPfs = [pfName];
+            if (_pair.generalKey) {
+                var generalText = buildOrderNateonText(orderStocks[_pair.generalKey] || [], orderState[_pair.generalKey] || [], _pair.generalLabel);
+                combined = generalText + '\\n\\n' + targetText;
+                reasonPfs = [_pair.generalKey, pfName];
+            }
+            var reasonLines = buildNateonReasonLines(reasonPfs);
             if (reasonLines.length) combined += '\\n\\n' + reasonLines.join('\\n');
             return '<div style="margin-top:16px;padding:16px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;">'
                 + '<div style="display:flex;align-items:center;margin-bottom:12px;">'
@@ -5502,6 +5521,7 @@ def create_order_section():
     _html = _html.replace('__TARGET_TABS__', _target_tabs)
     _html = _html.replace('__STANDALONE_GENERAL__', _standalone_general)
     _html = _html.replace('__GENERAL__', _general)
+    _html = _html.replace('__EMAIL_PAIR__', _email_pair)
     return _html
 
 

@@ -135,7 +135,8 @@ PRODUCTS = [
             group=None, active=True, keep_in_nav=True, target_threshold_pct=7.5),
     # 한투 성과모집형 1차 — 2026-07-08 개시 예정 (사전 등록: Order 카드 선노출·자문지 준비, 데이터는 개시일부터).
     # KIS 상품명이 '성과모집형'이라 nav_key에 '목표전환형' 미포함 → target 판별은 substring이 아닌 레지스트리 기준 사용.
-    Product(broker='한투', nav_key='성과모집형 1차', aum_name='성과모집형 1차', ptype='target', kind_label='목표전환형',
+    # kind_label='성과모집형' — 이메일/네이트온 섹션 라벨 출처 (add_aum target 해석은 broker 키라 무관).
+    Product(broker='한투', nav_key='성과모집형 1차', aum_name='성과모집형 1차', ptype='target', kind_label='성과모집형',
             display='한투 성과모집형 1차', base_price=1000.00, start_date='2026-07-08', ytd_base='2026-07-08',
             color='#F58220', advisory_template='자문지/한국투자 가치도약랩(라이프자산)(성과모집형 1차)_20260708.xlsx',
             advisory_format='kis', group=None, active=True, keep_in_nav=True,
@@ -493,6 +494,33 @@ def standalone_general_tabs():
     return [{'display': p.display, 'broker': p.broker}
             for p in _sorted_active(active_products())
             if p.ptype == 'general' and p.group is None]
+
+
+def email_pair_map():
+    """create_dashboard.py JS / EMAIL_PAIR — {target_display: {broker, generalKey, generalLabel, targetLabel}}.
+
+    증권사 이메일 본문 결합 규칙: 목표전환형 이메일 = 같은 증권사 일반형 섹션 + 목표전환형 섹션.
+    - 일반형이 결합 그룹 멤버(삼성/NH/DB) → generalKey=결합 표시명, 라벨=kind_label('일반형')
+    - 단독 일반형(한투 지속형) → generalKey=display, 라벨=kind_label('지속형')
+      (이 경우 Email 탭의 단독 일반형 자체 박스는 중복이라 생략 — generalKey 일치로 판별)
+    - 같은 증권사 일반형 없음 → generalKey=None (target 섹션만)
+    targetLabel=target.kind_label (NH/DB='목표전환형', 한투='성과모집형').
+    """
+    out = {}
+    for t in _sorted_active(active_products()):
+        if t.ptype != 'target':
+            continue
+        gen = next((g for g in _sorted_active(active_products())
+                    if g.ptype == 'general' and g.broker == t.broker), None)
+        if gen is None:
+            g_key, g_label = None, None
+        elif gen.group:
+            g_key, g_label = combined_display(gen.group), gen.kind_label
+        else:
+            g_key, g_label = gen.display, gen.kind_label
+        out[t.display] = {'broker': t.broker, 'generalKey': g_key,
+                          'generalLabel': g_label, 'targetLabel': t.kind_label}
+    return out
 
 
 def broker_order_map():
