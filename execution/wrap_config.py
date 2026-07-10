@@ -35,6 +35,7 @@ class Broker:
     code: str          # AUM/NEW 시트 '증권사' 값 ('삼성'|'NH'|'DB'|'한투'...)
     color: str         # 브랜드 색 (#RRGGBB)
     order: int         # 표시·정렬 순서 (작을수록 먼저)
+    messenger: str = '네이트온'  # 주문 공유 메신저 (Email 탭 박스 제목 — 한투='카카오톡')
 
 
 @dataclass(frozen=True)
@@ -80,7 +81,7 @@ BROKERS = [
     Broker('삼성', '#1428A0', 10),
     Broker('NH',   '#0072CE', 20),
     Broker('DB',   '#00854A', 30),
-    Broker('한투', '#F58220', 40),   # 한국투자증권 (2026-07-02 지속형 출시)
+    Broker('한투', '#F58220', 40, messenger='카카오톡'),   # 한국투자증권 (2026-07-02 지속형 출시)
 ]
 
 # ── 결합 그룹 (동일 종목/비중 → 한 줄로 결합 표시) ──────────────────────
@@ -532,6 +533,11 @@ def broker_order_map():
 def broker_color_map():
     """create_dashboard.py JS / BROKER_COLOR — {code: color}."""
     return {b.code: b.color for b in _brokers_sorted()}
+
+
+def broker_messenger_map():
+    """create_dashboard.py JS / BROKER_MESSENGER — {code: 메신저명} (Email 탭 메신저 박스 제목)."""
+    return {b.code: b.messenger for b in _brokers_sorted()}
 
 
 # ── 출시 전 안전 검증 ──────────────────────────────────────────────────
