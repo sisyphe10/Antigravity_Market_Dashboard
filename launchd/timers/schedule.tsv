@@ -7,7 +7,7 @@
 featured-kis	50 15 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh featured-kis	
 etf-collect	30 16 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh etf-collect	
 etf-collect-retry	0 18 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh etf-collect-retry	
-landing-highlights	35 18 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh landing-highlights	
+landing-highlights	45 18 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh landing-highlights	
 etf-active-alert	0 19 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh etf-active-alert	
 kodex-sectors	30 23 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh kodex-sectors	
 earnings-bot	0 8 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh earnings-bot	
