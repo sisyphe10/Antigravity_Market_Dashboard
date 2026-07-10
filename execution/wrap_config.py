@@ -58,6 +58,9 @@ class Product:
     monthly_label: str | None = None  # 월별수익률 표 라벨 (None=display)
     report_label: str | None = None   # 텔레그램 일간리포트 nav_map 라벨 (None=display)
     keywords: tuple = ()              # _categorize Wrap 인식 substring (비면 [nav_key, display])
+    # 목표전환형 명목 청산 트리거 % (순 목표 + 수수료·성과급 버퍼, 기준가 대비).
+    # 일반형=None. 과거 청산분은 미기입(관례: NH 6.5 / DB 7.5). 신규 출시 시 반드시 기입.
+    target_threshold_pct: float | None = None
 
     @property
     def monthly(self) -> str:
@@ -123,19 +126,20 @@ PRODUCTS = [
     Product(broker='NH', nav_key='목표전환형 5호', aum_name='목표전환형 5호', ptype='target', kind_label='목표전환형',
             display='NH 목표전환형 5호', base_price=1000.00, start_date='2026-06-29', ytd_base='2026-06-29',
             color='#0072CE', advisory_template='자문지/라이프자산운용_라이프 다이내믹밸류_목표전환형 5호_2026.6.29.xlsx', group=None,
-            active=True, keep_in_nav=True),
+            active=True, keep_in_nav=True, target_threshold_pct=6.5),
     # DB 목표전환형 6차 — 2026-07-01 개시. 단독(group=None).
     Product(broker='DB', nav_key='목표전환형 6차', aum_name='목표전환형 6차', ptype='target', kind_label='목표전환형',
             display='DB 목표전환형 6차', base_price=1000.00, start_date='2026-07-01', ytd_base='2026-07-01',
             color='#00854A',
             advisory_template='자문지/라이프자산운용_DB 목표전환형 랩 _6차_2026.7.1.xlsx',
-            group=None, active=True, keep_in_nav=True),
+            group=None, active=True, keep_in_nav=True, target_threshold_pct=7.5),
     # 한투 성과모집형 1차 — 2026-07-08 개시 예정 (사전 등록: Order 카드 선노출·자문지 준비, 데이터는 개시일부터).
     # KIS 상품명이 '성과모집형'이라 nav_key에 '목표전환형' 미포함 → target 판별은 substring이 아닌 레지스트리 기준 사용.
     Product(broker='한투', nav_key='성과모집형 1차', aum_name='성과모집형 1차', ptype='target', kind_label='목표전환형',
             display='한투 성과모집형 1차', base_price=1000.00, start_date='2026-07-08', ytd_base='2026-07-08',
             color='#F58220', advisory_template='자문지/한국투자 가치도약랩(라이프자산)(성과모집형 1차)_20260708.xlsx',
-            advisory_format='kis', group=None, active=True, keep_in_nav=True),
+            advisory_format='kis', group=None, active=True, keep_in_nav=True,
+            target_threshold_pct=16.5),  # 순 목표 15% + 버퍼 1.5%p (2026-07-10 사용자 확정)
 
     # 청산 목표전환형 (이력 보존 — EXCLUDED_PORTFOLIOS 자동 파생). active=False.
     # 5차/4호는 2026-06-23 end_date 동결 SOP 적용분 → keep_in_nav=True (컬럼 완결).

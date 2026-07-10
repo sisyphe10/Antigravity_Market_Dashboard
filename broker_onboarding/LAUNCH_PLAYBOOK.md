@@ -8,6 +8,7 @@
    - 신규 증권사면 `BROKERS` 에 `Broker(code, color, order)` 1건.
    - `PRODUCTS` 에 `Product(...)` 1건 (`active=True`, `keep_in_nav=True`, `end_date=None`).
    - 페어로 묶어 표시할 상품끼리는 같은 `group` id (단독은 `group=None`).
+   - 목표전환형이면 `target_threshold_pct` 필수 기입 (명목 청산 트리거 = 순 목표 + 수수료·성과급 버퍼. 관례: NH 6.5 / DB 7.5 / 한투 성과모집형 1차 16.5. 주간보고 등 소비자가 이 값으로 목표 도달 거리를 계산).
 2. **자문지/** 폴더에 `advisory_template` 파일 1개 (**필수 — None 금지**. 없으면 Email/Order 자문지 다운로드가 안 생김. 직전 회차 자문지 복사 → 회차명/날짜만 바꿔 경로 주입).
 3. **Wrap_NAV.xlsx**: `NEW` 시트 종목(증권사/상품명=nav_key) + `AUM` 시트 개시 AUM(증권사/상품명=aum_name).
 4. 검증: `python execution/wrap_config.py` (validate 경고 0 확인 — 개시일 도래 시 NEW/AUM/자문지 존재 강제 점검).
