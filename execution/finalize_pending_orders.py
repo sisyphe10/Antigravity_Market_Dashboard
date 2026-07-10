@@ -6,6 +6,8 @@
    - 카드별 newSheetTargets (broker, product) × stocks 곱 만큼 행 생성
    - 같은 (날짜, broker, product) 기존 행은 먼저 제거 (덮어쓰기)
 3. 처리 완료된 날짜 entry는 pending_orders.json에서 삭제
+4. 오늘 entry(보존분) 카드에 finalizedAt(ISO KST) 스탬프 — 대시보드 Order 탭
+   '최종 저장됨' 배지용. 추가 키일 뿐 기존 targets/stocks/savedAt 구조·값은 불변.
 
 Wrap_NAV.xlsx, orders/pending_orders.json 둘 다 commit 됨.
 """
@@ -44,7 +46,9 @@ def main():
         return 1
     ws = wb['NEW']
 
-    today_kst = datetime.now(tz=KST).strftime('%Y-%m-%d')
+    now_kst = datetime.now(tz=KST)
+    today_kst = now_kst.strftime('%Y-%m-%d')
+    finalized_at_iso = now_kst.isoformat(timespec='seconds')  # 오늘 entry 카드에 스탬프 (배지 단일 출처)
     sorted_dates = sorted(pending.keys())
 
     processed_dates = []
@@ -105,6 +109,13 @@ def main():
                     added += 1
             rows_added_total += added
             print(f'  ✓ {card_name}: {len(stocks)}종목 × {len(targets)}상품 = {added}행 추가')
+
+            # 안4: 클라이언트 '최종 저장됨' 배지용 finalize 스탬프.
+            # 오늘 entry는 pending_orders.json에 보존되므로(과거만 삭제) 이 스탬프가 살아남는다.
+            # 추가 키일 뿐 기존 구조 불변 → 구 클라이언트/파서 하위호환. 이후 사용자가 수정→임시저장하면
+            # 클라 PUT이 finalizedAt 없는 본문으로 덮어써 '임시 저장됨'으로 자연 복귀.
+            if date_str == today_kst:
+                card_entry['finalizedAt'] = finalized_at_iso
 
         processed_dates.append(date_str)
 

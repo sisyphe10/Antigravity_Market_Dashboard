@@ -4180,6 +4180,91 @@ def create_order_section():
         var orderActiveTab = null;
         var _orderLoaded = false;
 
+        // ── 저장 상태 배지 (임시 저장됨 / 최종 저장됨 / 미저장 변경 있음) ──
+        // orderSavedBaseline: pfName → 마지막 성공 저장(또는 클린 로드) 시점 상태 서명. '미저장 변경(=추가 주문)' 판정 기준.
+        //                     ★[추가 주문] 버튼은 baseline을 갱신하지 않으므로, 클릭 직후 화면이 서명과 달라져 '미저장 변경'으로 잡힌다.
+        // orderCardServer:    pfName → {hasPending, finalizedAt, savedAt}. 로드 시 pending_orders.json에서 취득, 저장 시 갱신.
+        // orderSessionAction: 이 브라우저 세션의 마지막 저장 액션 {action:'pending'|'finalized', ts}. localStorage 미러(재로드/인플라이트 보존).
+        //                     서버 상태(finalizedAt/savedAt)와 세션 액션 중 '가장 최신 타임스탬프'를 채택 → 인플라이트/크로스브라우저 모두 정합.
+        var orderSavedBaseline = {};
+        var orderCardServer = {};
+        var orderSessionAction = null;
+        var ORDER_ACTION_LS = 'order_save_action_v1';
+        function orderTodayStr() {
+            var d = new Date();
+            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        }
+        // 현재 카드 상태 서명 (종목 집합 + 변경전/변경후/추천사유). 저장본 서명과 다르면 '미저장 변경'.
+        function orderStateSignature(pfName) {
+            var stocks = (orderStocks[pfName] || []).map(function(s) {
+                return [String(s.code || ''), String(s.name || ''), String(s.sector || ''), parseFloat(s.weight) || 0];
+            });
+            var st = (orderState[pfName] || []).map(function(x) {
+                return [parseFloat(x.newWeight) || 0, String(x.reason || '').trim()];
+            });
+            return JSON.stringify([stocks, st]);
+        }
+        function setOrderBaseline(pfName) { orderSavedBaseline[pfName] = orderStateSignature(pfName); }
+        function orderIsDirty(pfName) {
+            return orderSavedBaseline[pfName] != null && orderStateSignature(pfName) !== orderSavedBaseline[pfName];
+        }
+        function orderSetSessionAction(action) {
+            orderSessionAction = { action: action, ts: Date.now() };
+            try { localStorage.setItem(ORDER_ACTION_LS, JSON.stringify({ date: orderTodayStr(), action: action, ts: orderSessionAction.ts })); } catch (e) {}
+        }
+        function orderClearSessionAction() {
+            orderSessionAction = null;
+            try { localStorage.removeItem(ORDER_ACTION_LS); } catch (e) {}
+        }
+        function orderLoadSessionAction() {
+            orderSessionAction = null;
+            try {
+                var raw = localStorage.getItem(ORDER_ACTION_LS);
+                if (!raw) return;
+                var pa = JSON.parse(raw);
+                if (pa && pa.date === orderTodayStr() && pa.action && pa.ts) orderSessionAction = { action: pa.action, ts: pa.ts };
+            } catch (e) {}
+        }
+        function orderTimeHM(v) {
+            var d = (typeof v === 'number') ? new Date(v) : (v ? new Date(v) : null);
+            if (!d || isNaN(d.getTime())) return '';
+            return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+        }
+        // 상태 판정: 미저장 변경(dirty) 최우선 → 서버 상태(로드분)와 세션 액션 중 최신 타임스탬프 채택.
+        function computeOrderSaveState(pfName) {
+            if (orderIsDirty(pfName)) return { kind: 'dirty' };
+            var cands = [];
+            var srv = orderCardServer[pfName];
+            if (srv && srv.finalizedAt) {
+                var fm = Date.parse(srv.finalizedAt);
+                if (!isNaN(fm)) cands.push({ kind: 'final', ms: fm, disp: srv.finalizedAt });
+            } else if (srv && srv.hasPending) {
+                var pm = srv.savedAt ? Date.parse(srv.savedAt) : 0;
+                cands.push({ kind: 'temp', ms: (isNaN(pm) ? 0 : pm), disp: srv.savedAt });
+            }
+            if (orderSessionAction && orderSessionAction.ts) {
+                cands.push({ kind: (orderSessionAction.action === 'finalized') ? 'final' : 'temp', ms: orderSessionAction.ts, disp: orderSessionAction.ts });
+            }
+            if (!cands.length) return null;
+            cands.sort(function(a, b) { return b.ms - a.ms; });
+            return cands[0];
+        }
+        // 배지 pill (검정 글씨, 배경 음영으로만 구분 — 회색=임시, 초록=최종, 앰버=미저장). 상태 없으면 ''.
+        function buildOrderSaveBadge(pfName) {
+            var s = computeOrderSaveState(pfName);
+            if (!s) return '';
+            var bg, bd, txt;
+            if (s.kind === 'dirty') { bg = '#fef3c7'; bd = '#fcd34d'; txt = '미저장 변경 있음'; }
+            else if (s.kind === 'final') { bg = '#dcfce7'; bd = '#86efac'; txt = '최종 저장됨'; var hf = orderTimeHM(s.disp); if (hf) txt += ' · ' + hf; }
+            else { bg = '#f3f4f6'; bd = '#d1d5db'; txt = '임시 저장됨'; var ht = orderTimeHM(s.disp); if (ht) txt += ' · ' + ht; }
+            return '<span style="display:inline-flex;align-items:center;font-family:inherit;font-size:13px;font-weight:600;color:#222;background:' + bg + ';border:1px solid ' + bd + ';border-radius:999px;padding:3px 12px;white-space:nowrap;">' + txt + '</span>';
+        }
+        // 배지만 재그리기 (추천사유/신규종목 입력 시 전체 재렌더 없이 미저장 변경 즉시 반영).
+        function refreshOrderSaveBadge() {
+            var slot = document.getElementById('orderSaveBadgeSlot');
+            if (slot && orderActiveTab && orderActiveTab !== 'Email') slot.innerHTML = buildOrderSaveBadge(orderActiveTab);
+        }
+
         // pending_orders.json 취득 — Contents API 우선(커밋 즉시 반영, Pages 빌드지연 우회)
         //   → Pages 폴백 → localStorage 미러(원격 이중장애 시). 모두 실패 시 {} (복원 없음, 무해).
         // repo가 PUBLIC이라 Contents API raw 미디어타입을 비인증으로 읽음(60req/시, 소진 시 폴백).
@@ -4228,6 +4313,7 @@ def create_order_section():
                     orderState[p.display] = stocks.map(function(s) {
                         return { newWeight: parseFloat(s.weight) || 0, reason: '' };
                     });
+                    orderCardServer[p.display] = { hasPending: false, finalizedAt: null, savedAt: null };
                 });
 
                 // 오늘자 임시저장본(pending_orders.json) 화면 복원
@@ -4243,6 +4329,8 @@ def create_order_section():
                             ORDER_PORTFOLIOS.forEach(function(p) {
                                 var entry = todayPending[p.display];
                                 if (!entry || !Array.isArray(entry.stocks)) return;
+                                // 서버 저장 상태: finalizedAt 있으면 '최종 저장됨', 없으면 '임시 저장됨'.
+                                orderCardServer[p.display] = { hasPending: true, finalizedAt: entry.finalizedAt || null, savedAt: entry.savedAt || null };
                                 var savedByCode = {};
                                 entry.stocks.forEach(function(s) {
                                     if (s && s.code != null) savedByCode[String(s.code).trim()] = s;
@@ -4296,6 +4384,9 @@ def create_order_section():
                     console.warn('pending_orders.json 복원 실패 (무시):', e);
                 }
 
+                // 저장 상태 배지 초기화: 세션 액션(localStorage) 복원 + 각 카드 baseline = 복원 직후 상태.
+                orderLoadSessionAction();
+                ORDER_PORTFOLIOS.forEach(function(p) { setOrderBaseline(p.display); });
                 renderOrderTabs();
                 switchOrderTab(ORDER_PORTFOLIOS[0].display);
             } catch(e) {
@@ -4796,6 +4887,7 @@ def create_order_section():
             var html = '<div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">'
                 + '<div style="display:flex;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">'
                 + '<h3 style="margin:0;font-size:18px;">' + pfName + '</h3>'
+                + '<span id="orderSaveBadgeSlot" style="display:inline-flex;">' + buildOrderSaveBadge(pfName) + '</span>'
                 + '<div style="margin-left:auto;display:flex;gap:8px;">'
                 + '<button id="orderCancelAllBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">전체 취소</button>'
                 + '<button id="orderSaveBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#f3f4f6;color:#222;border:1px solid #d1d5db;border-radius:8px;cursor:pointer;">임시 저장</button>'
@@ -4856,6 +4948,7 @@ def create_order_section():
                         // 신규 종목 필드 (orderStocks에 직접 반영)
                         orderStocks[orderActiveTab][idx][field] = raw;
                     }
+                    refreshOrderSaveBadge();  // 저장 상태 배지 실시간 갱신 (미저장 변경 감지)
                 });
             });
             // 신규 종목 종목명/코드 blur → 네이버 자동완성으로 나머지 + 업종 자동
@@ -5208,7 +5301,17 @@ def create_order_section():
                 }
                 // localStorage 미러 (fetchPendingOrdersJson 3차 폴백) — 원격 이중장애에도 새로고침 생존
                 try { localStorage.setItem('pending_orders_mirror', JSON.stringify(existing)); } catch(e) {}
+                // 배지: 저장된 카드 baseline 갱신(미저장 변경 해제) + 서버상태를 '임시(finalizedAt 없음)'로 갱신.
+                // 이 PUT은 finalizedAt 없는 본문이라 최종저장본을 덮었을 경우 자연히 '임시 저장됨'으로 복귀한다.
+                savedPfs.forEach(function(pf) {
+                    setOrderBaseline(pf);
+                    var svAt = (existing[todayStr][pf] && existing[todayStr][pf].savedAt) || new Date().toISOString();
+                    orderCardServer[pf] = { hasPending: true, finalizedAt: null, savedAt: svAt };
+                });
                 if (!silent) {
+                    // 직접 [임시 저장] → 세션 액션 'pending' 기록 후 배지 갱신. (최종 저장 경유 silent=true는 finalizeOrder가 'finalized' 기록)
+                    orderSetSessionAction('pending');
+                    if (orderActiveTab && orderActiveTab !== 'Email') refreshOrderSaveBadge();
                     alert('✅ 임시 저장 완료 (' + savedPfs.length + '개 포트폴리오, ' + totalRows + '개 종목)\\n\\n탭 간 추천사유 동기화 보존됨. 최종 반영은 [최종 저장] 또는 16:00 KST 자동 처리.');
                 }
             } catch(e) {
@@ -5276,6 +5379,12 @@ def create_order_section():
                     });
                 });
                 _orderLoaded = true;
+                // 배지: 원본으로 리셋 → 저장 상태 없음(배지 숨김) + 미저장 변경 없음.
+                ORDER_PORTFOLIOS.forEach(function(p) {
+                    orderCardServer[p.display] = { hasPending: false, finalizedAt: null, savedAt: null };
+                    setOrderBaseline(p.display);
+                });
+                orderClearSessionAction();
                 if (orderActiveTab && orderActiveTab !== 'Email') renderOrderPanel(orderActiveTab);
             } catch(e) {
                 alert('❌ 취소 실패: ' + e.message);
@@ -5328,6 +5437,10 @@ def create_order_section():
                     body: JSON.stringify({ ref: 'main' })
                 });
                 if (resp.status === 204) {
+                    // 배지: 워크플로가 finalizedAt를 스탬프하기 전이라도(1~2분 인플라이트) 즉시 '최종 저장됨' 낙관 표시.
+                    // baseline은 위 saveAllPendingOrders(true)가 이미 갱신함. 이후 재로드 시 서버 finalizedAt가 이를 확정.
+                    orderSetSessionAction('finalized');
+                    if (orderActiveTab && orderActiveTab !== 'Email') refreshOrderSaveBadge();
                     alert('✅ 최종 저장 완료\\n\\nfinalize_orders 워크플로 실행 중. 1~2분 후 Wrap_NAV.xlsx + 대시보드 반영. Actions 탭에서 진행상황 확인 가능.');
                 } else if (resp.status === 401 || resp.status === 403) {
                     alert('❌ PAT 권한 부족 (' + resp.status + ')\\n\\nfine-grained PAT 설정에서 Actions 권한을 "Read and write"로 추가하세요.\\nhttps://github.com/settings/personal-access-tokens');
