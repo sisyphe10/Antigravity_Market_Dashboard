@@ -4798,7 +4798,7 @@ def create_order_section():
                 + '<h3 style="margin:0;font-size:18px;">' + pfName + '</h3>'
                 + '<div style="margin-left:auto;display:flex;gap:8px;">'
                 + '<button id="orderCancelAllBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">전체 취소</button>'
-                + '<button id="orderSaveBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#f3f4f6;color:#222;border:1px solid #d1d5db;border-radius:8px;cursor:pointer;">저장</button>'
+                + '<button id="orderSaveBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#f3f4f6;color:#222;border:1px solid #d1d5db;border-radius:8px;cursor:pointer;">임시 저장</button>'
                 + '<button id="orderFinalizeBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;">최종 저장</button>'
                 + '<button id="orderAdditionalBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#2563eb;color:#fff;border:none;border-radius:8px;cursor:pointer;">추가 주문</button>'
                 + '</div>'
@@ -5209,10 +5209,10 @@ def create_order_section():
                 // localStorage 미러 (fetchPendingOrdersJson 3차 폴백) — 원격 이중장애에도 새로고침 생존
                 try { localStorage.setItem('pending_orders_mirror', JSON.stringify(existing)); } catch(e) {}
                 if (!silent) {
-                    alert('✅ 저장 완료 (' + savedPfs.length + '개 포트폴리오, ' + totalRows + '개 종목)\\n\\n탭 간 추천사유 동기화 보존됨. 최종 반영은 [최종 저장] 또는 16:00 KST 자동 처리.');
+                    alert('✅ 임시 저장 완료 (' + savedPfs.length + '개 포트폴리오, ' + totalRows + '개 종목)\\n\\n탭 간 추천사유 동기화 보존됨. 최종 반영은 [최종 저장] 또는 16:00 KST 자동 처리.');
                 }
             } catch(e) {
-                if (!silent) alert('❌ 저장 실패: ' + e.message);
+                if (!silent) alert('❌ 임시 저장 실패: ' + e.message);
                 console.error('saveAllPendingOrders error:', e);
                 throw e;
             }
@@ -5288,7 +5288,7 @@ def create_order_section():
         // 순수 클라이언트 상태 변경(서버 pending 미변경) — 사용자가 새 주문 입력 후 [저장]/[최종 저장] 시 갱신.
         // 전역(모든 포트폴리오)에 적용 — [최종 저장]이 전역이라 일부만 리셋하면 1번째/2번째가 섞임.
         function additionalOrder() {
-            if (!confirm('추가 주문을 시작하시겠습니까?\\n\\n현재 "변경후" 비중이 새 "변경전" 기준으로 이동하고, 추천사유가 모두 초기화됩니다.\\n이미 [최종 저장]된 주문은 그대로 기록돼 있습니다.\\n\\n추가 주문 입력 후 반드시 [저장]을 눌러주세요 (저장 전 새로고침 시 입력이 사라집니다).')) return;
+            if (!confirm('추가 주문을 시작하시겠습니까?\\n\\n현재 "변경후" 비중이 새 "변경전" 기준으로 이동하고, 추천사유가 모두 초기화됩니다.\\n이미 [최종 저장]된 주문은 그대로 기록돼 있습니다.\\n\\n추가 주문 입력 후 반드시 [임시 저장]을 눌러주세요 (임시 저장 전 새로고침 시 입력이 사라집니다).')) return;
             ORDER_PORTFOLIOS.forEach(function(p) {
                 var pf = p.display;
                 var stocks = orderStocks[pf] || [];
