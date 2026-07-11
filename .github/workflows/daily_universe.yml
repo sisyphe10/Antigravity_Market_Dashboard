@@ -1,11 +1,6 @@
 name: Daily Universe (yfinance)
 
 on:
-  schedule:
-    # 아시아 장종료 후 (한국 15:30 / 일본 15:00 / 대만 14:30 / 홍콩 17:00 KST)
-    - cron: '30 9 * * *'   # 18:30 KST (09:30 UTC)
-    # 미국·유럽·캐나다 장종료 후 (NYSE 05~06 KST 다음날 / STOXX 01:30 / TSX 동일)
-    - cron: '0 22 * * *'   # 07:00 KST (22:00 UTC)
   workflow_dispatch:
 
 # 다른 daily 워크플로(recalc/finalize/daily_crawl 등)와 같은 그룹 → GHA끼리 push 직렬화.
