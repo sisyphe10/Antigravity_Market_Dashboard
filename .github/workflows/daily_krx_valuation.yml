@@ -6,8 +6,6 @@ name: Daily KRX Index Valuation
 # ECOS/KOFIA와 동일 concurrency 그룹으로 dataset.csv 쓰기 직렬화.
 
 on:
-  schedule:
-    - cron: '30 9 * * 1-5'  # 18:30 KST weekdays (09:30 UTC)
   workflow_dispatch:        # Allow manual trigger
 
 concurrency:
