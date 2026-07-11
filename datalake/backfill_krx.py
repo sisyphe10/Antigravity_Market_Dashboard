@@ -29,7 +29,10 @@ from dl_common import dataset_dir, merge_into_year_files
 PACE_SEC = 0.5
 MAX_CONSEC_FAIL = 5
 START_YEAR = 1990
-WINDOW_YEARS = 10
+# 실측(2026-07-11): 무수정 OHLCV·시총·밸류·외국인·지수 모두 전 구간(36y) 단일
+# 호출이 캡 없이 반환됨 (data.krx 제공 시작점 = 1995-05-02). 40 = 사실상 단일 윈도우
+# — 종목당 호출 4→1로 감소 (속도 3배·차단 위험 감소). 캡이 재발하면 10으로 되돌릴 것.
+WINDOW_YEARS = 40
 
 PASSES = ["ohlcv", "marcap", "fundamental", "foreign", "etf", "index", "investor"]
 
