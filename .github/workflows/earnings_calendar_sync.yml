@@ -1,8 +1,6 @@
 name: Earnings Calendar Sync
 
 on:
-  schedule:
-    - cron: '0 22 * * *'   # 07:00 KST (UTC 22:00)
   workflow_dispatch:
 
 jobs:
