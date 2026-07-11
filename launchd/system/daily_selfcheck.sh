@@ -188,14 +188,30 @@ main() {
     case "$head_ct" in ''|*[!0-9]*) : ;; *) head_age="$(human_dur $(( now - head_ct )))" ;; esac
   fi
 
+  # --- web serving (W9) -------------------------------------------------------
+  local web_stat="OK" web_warn="" http_local http_ts cur_tgt snap_age_s snap_age="?"
+  http_local="$(curl -s -o /dev/null -m 5 -w '%{http_code}' http://127.0.0.1:8377/index.html 2>/dev/null || echo 000)"
+  http_ts="$(curl -s -o /dev/null -m 10 -w '%{http_code}' https://sisypheui-macmini.tailae16fa.ts.net/index.html 2>/dev/null || echo 000)"
+  cur_tgt="$(readlink /Users/sisyphe/srv/dashboard/current 2>/dev/null || true)"
+  if [ -n "$cur_tgt" ] && [ -f "$cur_tgt/index.html" ]; then
+    snap_age_s=$(( now - $(stat -f %m "$cur_tgt/index.html" 2>/dev/null || echo "$now") ))
+    snap_age="$(human_dur "$snap_age_s")"
+    [ "$snap_age_s" -gt 86400 ] && { web_stat="STALE"; web_warn="⚠️ 웹 스냅숏 ${snap_age} 경과(24h+)"; }
+  else
+    web_stat="NO-SNAP"; web_warn="⚠️ 웹 스냅숏 current 깨짐"
+  fi
+  if [ "$http_local" != "200" ]; then web_stat="DOWN"; web_warn="⚠️ Caddy 응답 ${http_local}"; fi
+  if [ "$http_ts" != "200" ]; then web_stat="DOWN"; web_warn="${web_warn}"$'\n'"⚠️ ts.net 응답 ${http_ts}"; fi
+
   # --- assemble -------------------------------------------------------------
   local summary warn="" info=""
-  summary="맥미니 셀프체크 | 봇 ${bots_up}/${bots_total} · 타이머 ${tim_summary} · 재시작 ${crash_total} · 디스크 ${disk_gb}G · HEAD ${head_age}"
+  summary="맥미니 셀프체크 | 봇 ${bots_up}/${bots_total} · 타이머 ${tim_summary} · 재시작 ${crash_total} · 디스크 ${disk_gb}G · HEAD ${head_age} · 웹 ${web_stat}(${snap_age})"
 
   [ -n "$bots_down" ]                 && warn="$warn"$'\n'"⚠️ 봇 다운:$bots_down"
   [ -n "$tim_stale" ]                 && warn="$warn"$'\n'"⚠️ 타이머 STALE:$tim_stale"
   [ "$gp_fail" -gt 0 ]                && warn="$warn"$'\n'"⚠️ git-pull 연속실패 ${gp_fail}회"
   [ "$disk_gb" -lt "$DISK_MIN_GB" ]   && warn="$warn"$'\n'"⚠️ 디스크 여유 ${disk_gb}G (임계 ${DISK_MIN_GB}G)"
+  [ -n "$web_warn" ]                  && warn="$warn"$'\n'"$web_warn"
   [ "$crash_total" -gt 0 ]            && info="$info"$'\n'"ℹ️ 24h 재시작:$crash_detail"
   [ "$big_kb" -ge $(( BIG_LOG_MB * 1024 )) ] && info="$info"$'\n'"ℹ️ 최대 로그 $(( big_kb / 1024 ))M: ${big_path##*/}"
 
