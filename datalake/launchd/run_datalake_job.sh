@@ -35,9 +35,18 @@ notify() {
     /bin/bash "$REPO/scripts/notify_sisyphe_failure.sh" "$NAME" || true
 }
 
-# ── 잡별 동시실행 락 (mkdir 원자적) ──────────────────────────
+# ── 잡별 동시실행 락 ─────────────────────────────────────────
+#   pid 파일을 담은 임시 디렉토리를 만들어 mv(rename)로 획득 — mkdir 후
+#   pid 기록 사이의 빈 락 창이 없어 stale 오판·탈취가 원천 차단된다.
 LOCK="$LOCK_ROOT/$NAME.lock"
-if ! mkdir "$LOCK" 2>/dev/null; then
+acquire_lock() {
+  local tmp="$LOCK.acq.$$"
+  mkdir "$tmp" 2>/dev/null || return 1
+  echo "$$" > "$tmp/pid"
+  if mv "$tmp" "$LOCK" 2>/dev/null; then return 0; fi
+  rm -rf "$tmp"; return 1
+}
+if ! acquire_lock; then
   HOLD_PID="$(cat "$LOCK/pid" 2>/dev/null || echo "")"
   if [ -n "$HOLD_PID" ] && kill -0 "$HOLD_PID" 2>/dev/null; then
     echo "[datalake] $NAME 이미 실행 중(pid $HOLD_PID) — skip"; exit 0
@@ -45,9 +54,8 @@ if ! mkdir "$LOCK" 2>/dev/null; then
   # stale 회수: rename으로 배타 확보 후 삭제
   STALE="$LOCK.stale.$$"
   if mv "$LOCK" "$STALE" 2>/dev/null; then rm -rf "$STALE"; fi
-  mkdir "$LOCK" 2>/dev/null || { echo "[datalake] 락 획득 실패 — skip"; exit 0; }
+  acquire_lock || { echo "[datalake] 락 획득 실패 — skip"; exit 0; }
 fi
-echo "$$" > "$LOCK/pid"
 release_lock() { [ "$(cat "$LOCK/pid" 2>/dev/null)" = "$$" ] && rm -rf "$LOCK"; }
 trap release_lock EXIT
 
@@ -68,10 +76,20 @@ if [ -f "$REPO/.env" ]; then
 fi
 
 # ── 타임아웃 워치독 하에 실행 ────────────────────────────────
+#   TERM 무시/자식(build_catalog 등) 잔존 대비: TERM → 20s 유예 → 자식 포함 KILL
 echo "[datalake] $NAME 시작 $(date '+%F %T')"
 "${CMD[@]}" &
 JOB_PID=$!
-( sleep "$TIMEOUT" && kill -0 "$JOB_PID" 2>/dev/null && kill -TERM "$JOB_PID" ) &
+(
+  sleep "$TIMEOUT"
+  kill -0 "$JOB_PID" 2>/dev/null || exit 0
+  echo "[datalake] $NAME 타임아웃(${TIMEOUT}s) — TERM" >&2
+  pkill -TERM -P "$JOB_PID" 2>/dev/null
+  kill -TERM "$JOB_PID" 2>/dev/null
+  sleep 20
+  pkill -KILL -P "$JOB_PID" 2>/dev/null
+  kill -KILL "$JOB_PID" 2>/dev/null
+) &
 WATCH_PID=$!
 wait "$JOB_PID"; RC=$?
 kill "$WATCH_PID" 2>/dev/null; wait "$WATCH_PID" 2>/dev/null

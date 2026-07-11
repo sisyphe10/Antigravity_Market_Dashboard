@@ -16,7 +16,7 @@ chown -R "$MACMINI_USER" "$REPO/logs/launchd" 2>/dev/null || true
 for plist in "$SCRIPT_DIR"/com.antigravity.datalake-*.plist; do
   label="$(basename "$plist" .plist)"
   sed -e "s|__MACMINI_USER__|$MACMINI_USER|g" \
-      -e "s|__REPO__|/Users/$MACMINI_USER/Antigravity_Market_Dashboard|g" \
+      -e "s|__REPO__|$REPO|g" \
       "$plist" > "$DEST/$label.plist"
   chown root:wheel "$DEST/$label.plist"
   chmod 644 "$DEST/$label.plist"

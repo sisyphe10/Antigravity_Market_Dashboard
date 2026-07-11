@@ -57,25 +57,39 @@ def main():
     ap.add_argument("--check", action="store_true", help="현황 출력만")
     args = ap.parse_args()
 
+    import time
+
     import duckdb
     datasets = scan_datasets()
     if not datasets:
         print("데이터셋 없음 — 백필 먼저 실행하세요")
         return 0
 
-    con = duckdb.connect(":memory:") if args.check else duckdb.connect(DUCKDB_PATH)
+    if args.check:
+        con = duckdb.connect(":memory:")
+    else:
+        # DuckDB는 단일 writer — 웹 UI의 read_only 연결과 겹치면 잠시 실패할 수 있어 재시도
+        for attempt in range(5):
+            try:
+                con = duckdb.connect(DUCKDB_PATH)
+                break
+            except duckdb.Error as e:
+                if attempt == 4:
+                    print(f"! market.duckdb 쓰기 연결 실패(웹 UI 사용 중?): {e}")
+                    return 1
+                time.sleep(3)
     os.makedirs(CATALOG_DIR, exist_ok=True)
     index_rows = []
 
     for name, files in datasets.items():
         pattern = os.path.join(MARKET_DIR, name, "*.parquet").replace("\\", "/")
+        # union_by_name: 연도 파일 간 컬럼 구성이 달라도(과거분 스키마 진화) 뷰가 깨지지 않게
+        src = f"read_parquet('{pattern}', union_by_name=true)"
         if not args.check:
-            con.execute(f"CREATE OR REPLACE VIEW {name} AS SELECT * FROM read_parquet('{pattern}')")
-        stats = con.execute(
-            f"SELECT COUNT(*), MIN(date), MAX(date) FROM read_parquet('{pattern}')"
-        ).fetchone()
+            con.execute(f"CREATE OR REPLACE VIEW {name} AS SELECT * FROM {src}")
+        stats = con.execute(f"SELECT COUNT(*), MIN(date), MAX(date) FROM {src}").fetchone()
         rows, dmin, dmax = stats
-        cols = con.execute(f"DESCRIBE SELECT * FROM read_parquet('{pattern}') LIMIT 0").fetchall()
+        cols = con.execute(f"DESCRIBE SELECT * FROM {src} LIMIT 0").fetchall()
         col_lines = "\n".join(f"| {c[0]} | {c[1]} |" for c in cols)
         period = f"{str(dmin)[:10]} ~ {str(dmax)[:10]}"
         index_rows.append((name, rows, period))

@@ -19,7 +19,7 @@ import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from dl_common import CATALOG_DIR, DATALAKE_ROOT, DUCKDB_PATH, REPO  # noqa: E402
+from dl_common import CATALOG_DIR, DATALAKE_ROOT, DUCKDB_PATH, MARKET_DIR, REPO  # noqa: E402
 
 from dotenv import load_dotenv  # noqa: E402
 load_dotenv(os.path.join(REPO, ".env"))
@@ -105,11 +105,24 @@ TOOLS = [
 
 _SQL_FORBIDDEN = re.compile(r"\b(ATTACH|COPY|EXPORT|INSTALL|LOAD|CREATE|INSERT|UPDATE|DELETE|DROP|ALTER|PRAGMA|SET)\b", re.I)
 
+# 샌드박스: 파일시스템 접근을 market/ 아래로 제한 + 확장 자동설치·로드 차단.
+# (_SQL_FORBIDDEN 키워드 필터만으로는 read_text('/…/.env') 같은 SELECT 파일함수를
+#  못 막는다 — 프롬프트 인젝션 경유 유출 채널 차단이 목적)
+_DUCK_CONFIG = {
+    "allowed_directories": [MARKET_DIR],
+    "autoinstall_known_extensions": False,
+    "autoload_known_extensions": False,
+    "enable_external_access": True,  # allowed_directories 내부만 허용됨
+}
+
 
 def tool_run_sql(sql):
     if _SQL_FORBIDDEN.search(sql):
         return "ERROR: SELECT만 허용됩니다."
-    con = duckdb.connect(DUCKDB_PATH, read_only=True)
+    try:
+        con = duckdb.connect(DUCKDB_PATH, read_only=True, config=_DUCK_CONFIG)
+    except duckdb.Error as e:
+        return f"ERROR: DB 연결 실패(카탈로그 갱신 중일 수 있음, 잠시 후 재시도): {e}"
     try:
         df = con.execute(sql).fetchdf()
     finally:

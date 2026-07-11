@@ -61,16 +61,22 @@ def resolve_media_path(src):
 
 
 def copy_media(msg, day):
-    """봇 media 파일을 datalake로 복사, md에서 쓸 상대경로 반환 (없으면 None)."""
+    """봇 media 파일을 datalake로 복사, md에서 쓸 상대경로 반환 (없으면 None).
+
+    문서 첨부는 원본 파일명이라 같은 날 basename 충돌 가능 → 메시지 id를
+    prefix로 붙여 유일화한다.
+    """
     src = resolve_media_path(msg.get("media_path"))
     if not src:
         return None
+    uid = msg.get("telegram_message_id") or msg.get("id") or "0"
+    fname = f"{uid}_{os.path.basename(src)}"
     dst_dir = os.path.join(MEDIA_OUT, day)
     os.makedirs(dst_dir, exist_ok=True)
-    dst = os.path.join(dst_dir, os.path.basename(src))
+    dst = os.path.join(dst_dir, fname)
     if not os.path.exists(dst) or os.path.getsize(dst) != os.path.getsize(src):
         shutil.copy2(src, dst)
-    return f"../media/{day}/{os.path.basename(src)}"
+    return f"../media/{day}/{fname}"
 
 
 def render_day(day, messages):

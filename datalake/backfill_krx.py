@@ -82,6 +82,9 @@ def windows(today):
     return result
 
 
+FAIL = object()  # "호출 실패" sentinel — 정상 빈 응답(None/empty)과 구분
+
+
 class Runner:
     """페이싱 + 연속 실패 감시. 실패 5연속이면 RuntimeError로 전체 중단."""
 
@@ -102,23 +105,29 @@ class Runner:
             if self.consec_fail >= MAX_CONSEC_FAIL:
                 raise RuntimeError("연속 실패 한도 도달 — KRX 인증/차단 가능성, 전체 중단") from e
             time.sleep(2)
-            return None
+            return FAIL
 
 
 def fetch_windowed(runner, fetch_fn, today):
-    """윈도우를 최신→과거로 조회, 데이터 이후 빈 윈도우 나오면 중단. 병합 DataFrame 반환."""
+    """윈도우를 최신→과거로 조회. (DataFrame|None, ok) 반환.
+
+    데이터를 본 뒤 '정상 빈 윈도우'를 만나면 상장 전으로 보고 중단.
+    호출 실패(FAIL)가 하나라도 있으면 ok=False — 실패를 상장 전 공백으로
+    오인해 역사가 잘린 채 체크포인트되는 것을 방지한다.
+    """
     import pandas as pd
-    frames, seen_data = [], False
+    frames, seen_data, ok = [], False, True
     for frm, to in windows(today):
         df = runner.call(fetch_fn, frm, to)
+        if df is FAIL:
+            ok = False
+            continue
         if df is not None and not df.empty:
             frames.append(df)
             seen_data = True
         elif seen_data:
             break
-    if not frames:
-        return None
-    return pd.concat(frames)
+    return (pd.concat(frames) if frames else None), ok
 
 
 def staging_path(dataset, key):
@@ -127,23 +136,26 @@ def staging_path(dataset, key):
     return os.path.join(d, f"{key}.parquet")
 
 
+FINALIZE_BATCH = 200  # staging 파일 병합 배치 크기 (전량 concat 시 OOM 방지)
+
+
 def finalize(dataset, key_cols):
-    """staging 전체 → 연도 parquet 병합 후 staging 삭제."""
+    """staging → 연도 parquet 병합 후 staging 삭제 (배치 스트리밍, 멱등)."""
     import pandas as pd
-    files = glob.glob(os.path.join(dataset_dir(dataset), "_staging", "*.parquet"))
+    files = sorted(glob.glob(os.path.join(dataset_dir(dataset), "_staging", "*.parquet")))
     if not files:
         return
-    print(f"[{dataset}] finalize: staging {len(files)}개 병합 중...", flush=True)
-    frames = [pd.read_parquet(f) for f in files]
-    df = pd.concat(frames, ignore_index=True)
-    merge_into_year_files(dataset, df, key_cols)
-    for f in files:
-        os.remove(f)
-    try:
-        os.rmdir(os.path.dirname(files[0]))
-    except OSError:
-        pass
-    print(f"[{dataset}] finalize 완료: {len(df):,}행", flush=True)
+    print(f"[{dataset}] finalize: staging {len(files)}개 병합 (배치 {FINALIZE_BATCH})...", flush=True)
+    total = 0
+    for i in range(0, len(files), FINALIZE_BATCH):
+        batch = files[i:i + FINALIZE_BATCH]
+        df = pd.concat([pd.read_parquet(f) for f in batch], ignore_index=True)
+        merge_into_year_files(dataset, df, key_cols)
+        total += len(df)
+        for f in batch:  # 병합 완료된 배치만 삭제 → 중단돼도 남은 staging으로 재개
+            os.remove(f)
+        print(f"[{dataset}] finalize {min(i + FINALIZE_BATCH, len(files))}/{len(files)} ({total:,}행)", flush=True)
+    print(f"[{dataset}] finalize 완료: {total:,}행", flush=True)
 
 
 def run_per_item(dataset, items, fetch_one, runner, today, key_cols, extra_fn, force=False):
@@ -153,16 +165,25 @@ def run_per_item(dataset, items, fetch_one, runner, today, key_cols, extra_fn, f
     항목 완료 = _staging/<key>.parquet (데이터 없음은 .parquet.empty 마커).
     """
     done_marker = os.path.join(dataset_dir(dataset), ".backfill_done")
+    staging_dir = os.path.join(dataset_dir(dataset), "_staging")
     if os.path.exists(done_marker) and not force:
+        # 잔여 staging 정리 (마커 기록 후 크래시로 남았을 수 있음)
+        if os.path.isdir(staging_dir):
+            import shutil
+            shutil.rmtree(staging_dir, ignore_errors=True)
         print(f"[{dataset}] 이미 백필 완료(.backfill_done) — skip. 재실행하려면 마커 삭제", flush=True)
         return
-    done = skipped = 0
+    done = skipped = deferred = 0
     for idx, key in enumerate(items, 1):
         sp = staging_path(dataset, key)
         if os.path.exists(sp) or os.path.exists(sp + ".empty"):
             skipped += 1
             continue
-        df = fetch_windowed(runner, lambda f, t, k=key: fetch_one(f, t, k), today)
+        df, ok = fetch_windowed(runner, lambda f, t, k=key: fetch_one(f, t, k), today)
+        if not ok:
+            # 일시 실패 포함 — 체크포인트 미기록 → 다음 실행에서 재시도 (역사 절단 방지)
+            deferred += 1
+            continue
         norm = normalize(df, dataset, **extra_fn(key)) if df is not None else None
         if norm is not None and not norm.empty:
             norm.to_parquet(sp, index=False)
@@ -171,17 +192,20 @@ def run_per_item(dataset, items, fetch_one, runner, today, key_cols, extra_fn, f
             open(sp + ".empty", "w").close()
         done += 1
         if idx % 50 == 0:
-            print(f"[{dataset}] {idx}/{len(items)} (신규 {done}, skip {skipped}, 호출 {runner.calls})", flush=True)
-    print(f"[{dataset}] 수집 완료: 신규 {done}, skip {skipped}", flush=True)
+            print(f"[{dataset}] {idx}/{len(items)} (신규 {done}, skip {skipped}, 보류 {deferred}, 호출 {runner.calls})", flush=True)
+    print(f"[{dataset}] 수집 완료: 신규 {done}, skip {skipped}, 보류 {deferred}", flush=True)
+    if deferred:
+        print(f"[{dataset}] ★보류 {deferred}건 — 완료 마커 미기록, 재실행으로 회수 필요", flush=True)
     finalize(dataset, key_cols)
-    # .empty 마커 정리 후 패스 완료 마커 기록
-    for f in glob.glob(os.path.join(dataset_dir(dataset), "_staging", "*.empty")):
-        os.remove(f)
-    try:
-        os.rmdir(os.path.join(dataset_dir(dataset), "_staging"))
-    except OSError:
-        pass
-    open(done_marker, "w").close()
+    if deferred == 0:
+        # 완료 마커 먼저 기록 → 이후 .empty 정리 중 크래시해도 재호출 낭비 없음
+        open(done_marker, "w").close()
+        for f in glob.glob(os.path.join(staging_dir, "*.empty")):
+            os.remove(f)
+        try:
+            os.rmdir(staging_dir)
+        except OSError:
+            pass
 
 
 def main():

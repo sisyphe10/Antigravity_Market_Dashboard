@@ -33,11 +33,45 @@ def year_path(name, year):
     return os.path.join(dataset_dir(name), f"{int(year)}.parquet")
 
 
+@contextlib.contextmanager
+def dataset_lock(name, timeout_sec=1800, stale_sec=7200):
+    """데이터셋 단위 프로세스 간 락 (mkdir 원자성 — 백필·daily·수동 실행 동시 쓰기 방지).
+
+    timeout까지 재시도, mtime이 stale_sec 넘은 락은 회수. 실패 시 RuntimeError.
+    """
+    import time
+    lock_dir = os.path.join(dataset_dir(name), ".merge.lock")
+    deadline = time.time() + timeout_sec
+    while True:
+        try:
+            os.mkdir(lock_dir)
+            break
+        except FileExistsError:
+            try:
+                if time.time() - os.path.getmtime(lock_dir) > stale_sec:
+                    stale = lock_dir + f".stale.{os.getpid()}"
+                    os.rename(lock_dir, stale)
+                    os.rmdir(stale)
+                    continue
+            except OSError:
+                pass
+            if time.time() > deadline:
+                raise RuntimeError(f"{name} 병합 락 획득 실패 ({timeout_sec}s 초과)")
+            time.sleep(2)
+    try:
+        yield
+    finally:
+        try:
+            os.rmdir(lock_dir)
+        except OSError:
+            pass
+
+
 def merge_into_year_files(name, df, key_cols):
     """df(반드시 'date' datetime 컬럼 보유)를 연도별 parquet에 upsert.
 
-    같은 key_cols 조합은 새 값으로 대체(self-heal). 원자적 교체(tmp→rename).
-    반환: {year: (기존행수, 최종행수)}
+    같은 key_cols 조합은 새 값으로 대체(self-heal). 데이터셋 락 하에
+    원자적 교체(pid 고유 tmp→rename). 반환: {year: (기존행수, 최종행수)}
     """
     import pandas as pd
 
@@ -46,21 +80,22 @@ def merge_into_year_files(name, df, key_cols):
     df = df.copy()
     df["date"] = pd.to_datetime(df["date"])
     out = {}
-    for year, chunk in df.groupby(df["date"].dt.year):
-        path = year_path(name, year)
-        before = 0
-        if os.path.exists(path):
-            old = pd.read_parquet(path)
-            before = len(old)
-            merged = pd.concat([old, chunk], ignore_index=True)
-        else:
-            merged = chunk
-        merged = merged.drop_duplicates(subset=key_cols, keep="last")
-        merged = merged.sort_values(key_cols).reset_index(drop=True)
-        tmp = path + ".tmp"
-        merged.to_parquet(tmp, index=False)
-        os.replace(tmp, path)
-        out[int(year)] = (before, len(merged))
+    with dataset_lock(name):
+        for year, chunk in df.groupby(df["date"].dt.year):
+            path = year_path(name, year)
+            before = 0
+            if os.path.exists(path):
+                old = pd.read_parquet(path)
+                before = len(old)
+                merged = pd.concat([old, chunk], ignore_index=True)
+            else:
+                merged = chunk
+            merged = merged.drop_duplicates(subset=key_cols, keep="last")
+            merged = merged.sort_values(key_cols).reset_index(drop=True)
+            tmp = path + f".{os.getpid()}.tmp"
+            merged.to_parquet(tmp, index=False)
+            os.replace(tmp, path)
+            out[int(year)] = (before, len(merged))
     return out
 
 

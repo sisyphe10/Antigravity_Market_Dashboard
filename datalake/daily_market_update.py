@@ -19,7 +19,7 @@ import time
 from datetime import date, timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from dl_common import dataset_dir, merge_into_year_files, year_path
+from dl_common import REPO, merge_into_year_files, year_path
 
 PACE_SEC = 0.5
 LOOKBACK_DAYS = 7
@@ -27,6 +27,44 @@ RANGE_DAYS = 30
 
 # 일별 단면 데이터셋: (pykrx fetch(date, market?), 컬럼 rename은 backfill과 동일)
 from backfill_krx import RENAME  # noqa: E402
+
+# 휴장일/미확정 판정용 대표 컬럼 (전부 0이면 그 날짜 skip) — 종가 없는 데이터셋 포함
+HOLIDAY_GUARD = {
+    "kr_ohlcv": "종가", "kr_etf_ohlcv": "종가",
+    "kr_marcap": "시가총액", "kr_fundamental": "BPS", "kr_foreign": "상장주식수",
+}
+
+
+def load_name_map(dataset):
+    """ticker→종목명 맵. ①해당 데이터셋 최신 연도 parquet ②stock_master.json 순으로 구성.
+
+    일일 단면에는 name이 없으므로 여기서 채운다 — 스키마를 백필본과 동일하게
+    유지해야 연도 경계에서 parquet 스키마가 갈라지지 않고, upsert가 기존
+    name을 NaN으로 덮지 않는다.
+    """
+    import glob as _glob
+    import json
+    import pandas as pd
+    name_map = {}
+    files = sorted(_glob.glob(os.path.join(os.path.dirname(year_path(dataset, 2000)), "[0-9]" * 4 + ".parquet")))
+    if files:
+        try:
+            df = pd.read_parquet(files[-1], columns=["ticker", "name"])
+            name_map = dict(df.dropna().drop_duplicates("ticker", keep="last").values)
+        except Exception:
+            pass
+    sm = os.path.join(REPO, "stock_master.json")
+    if os.path.exists(sm):
+        try:
+            data = json.load(open(sm, encoding="utf-8"))
+            items = data.items() if isinstance(data, dict) else (
+                (r.get("code") or r.get("ticker"), r.get("name")) for r in data)
+            for code, nm in items:
+                if code and nm and code not in name_map:
+                    name_map[str(code)] = nm if isinstance(nm, str) else str(nm)
+        except Exception:
+            pass
+    return name_map
 
 
 def existing_dates(dataset, since):
@@ -42,7 +80,12 @@ def existing_dates(dataset, since):
 
 
 def cross_section(stock, dataset, fetch_by_market, key_cols, markets):
-    """최근 창에서 빠진 날짜의 시장 단면을 수집·upsert."""
+    """최근 창에서 빠진 날짜의 시장 단면을 수집·upsert.
+
+    - 시장 중 하나라도 호출 실패(예외)하면 그 날짜는 통째로 보류 → 다음
+      lookback에서 재시도 (반쪽 적재 후 영구 누락 방지)
+    - 컬럼은 백필본과 동일 순서(date, <값들>, ticker, name, market)로 정렬
+    """
     import pandas as pd
     today = date.today()
     since = today - timedelta(days=LOOKBACK_DAYS)
@@ -50,28 +93,40 @@ def cross_section(stock, dataset, fetch_by_market, key_cols, markets):
     missing = [since + timedelta(days=i) for i in range((today - since).days + 1)
                if (since + timedelta(days=i)) not in have
                and (since + timedelta(days=i)).weekday() < 5]
+    if not missing:
+        print(f"[{dataset}] 누락 없음", flush=True)
+        return
+    name_map = load_name_map(dataset)
+    guard_col = HOLIDAY_GUARD.get(dataset)
     added = 0
     for d in missing:
         ds = d.strftime("%Y%m%d")
-        frames = []
+        frames, failed = [], False
         for mkt in markets:
             time.sleep(PACE_SEC)
             try:
                 df = fetch_by_market(ds, mkt)
             except Exception as e:
-                print(f"  ! {dataset} {ds} {mkt}: {type(e).__name__}", flush=True)
-                continue
-            if df is None or df.empty or (("종가" in df.columns) and (df["종가"] == 0).all()):
+                print(f"  ! {dataset} {ds} {mkt}: {type(e).__name__} — 날짜 보류", flush=True)
+                failed = True
+                break
+            if df is None or df.empty or (
+                    guard_col and guard_col in df.columns and (df[guard_col] == 0).all()):
                 continue  # 휴장일/미확정
-            out = df.reset_index().rename(columns={df.index.name or "티커": "ticker"})
+            out = df.reset_index()
+            out = out.rename(columns={out.columns[0]: "ticker"})  # 인덱스명 무관 방어
             out = out.rename(columns=RENAME[dataset])
             out["date"] = pd.Timestamp(d)
+            out["name"] = out["ticker"].map(name_map).fillna("")
+            # 백필 normalize와 동일한 컬럼 구성·순서 (ETF는 market 없음)
+            keep = ["date"] + [c for c in RENAME[dataset].values() if c in out.columns] \
+                + ["ticker", "name"]
             if mkt:
                 out["market"] = mkt
-            keep = ["date", "ticker"] + [c for c in RENAME[dataset].values() if c in out.columns]
-            if mkt:
                 keep.append("market")
             frames.append(out[keep])
+        if failed:
+            continue
         if frames:
             merge_into_year_files(dataset, pd.concat(frames, ignore_index=True), key_cols)
             added += 1
@@ -124,11 +179,13 @@ def overseas_update():
     from backfill_overseas import fetch_symbol, load_overseas_universe
     universe = load_overseas_universe()
     ok = 0
+    start = (date.today() - timedelta(days=14)).isoformat()
     for symbol, orig, name in universe:
         time.sleep(0.5)
         try:
             import yfinance as yf
-            raw = yf.download(symbol, period="14d", interval="1d",
+            # period 파라미터는 열거값만 허용("14d" 불가) — start= 로 최근 창 지정
+            raw = yf.download(symbol, start=start, interval="1d",
                               auto_adjust=False, progress=False, threads=False)
         except Exception:
             continue
@@ -175,8 +232,12 @@ def main():
     range_update(stock)
     overseas_update()
 
-    subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                                 "build_catalog.py")], check=False)
+    # 카탈로그·뷰 갱신 — 실패를 성공으로 삼키지 않는다 (wrapper가 notify)
+    rc = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                                      "build_catalog.py")], check=False).returncode
+    if rc != 0:
+        print(f"! build_catalog 실패 rc={rc}", flush=True)
+        return 1
     return 0
 
 

@@ -122,7 +122,7 @@ def main():
             print(f"진행 {i}/{len(targets)} (성공 {ok}, 실패 {fail})", flush=True)
 
     print(f"완료: 성공 {ok}, 실패 {fail}, 누적 심볼 {len(done)}", flush=True)
-    return 0 if fail < len(targets) else 1
+    return 1 if (targets and fail == len(targets)) else 0
 
 
 if __name__ == "__main__":
