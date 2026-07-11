@@ -35,16 +35,27 @@ if ! rsync -a \
   log "rsync 실패 - 세대 폐기"; rm -rf "$REL"; exit 1
 fi
 
-# 1.5) 개인용 뷰 가공 (2026-07-11 사용자 확정): ts.net 개인 대시보드에는 WRAP 불요.
-#      스냅숏에서만 wrap.html 삭제 + 전 HTML의 WRAP 내비 링크 제거. repo 원본·GitHub(팀원용)는 불변.
+# 1.5) 개인용 뷰 가공 (2026-07-11 사용자 확정, 통합 설계 반영): ts.net 개인 대시보드에는 WRAP 불요 +
+#      Sisyphe 탭 주입(통합 대시보드 1단계). 스냅숏에서만 가공 — repo 원본·GitHub(팀원용)는 불변.
 rm -f "$REL/wrap.html"
 python3 - "$REL" <<'PYEOF'
 import re, sys, glob, os
 rel = sys.argv[1]
-pat = re.compile(r'<a[^>]*href="wrap\.html[^"]*"[^>]*>.*?</a>\s*', re.S)
+# WRAP topnav 아이템(탭+드롭다운) 통째 제거 → 잔여 wrap 링크 개별 제거
+item_pat = re.compile(r'<div class="topnav-item"><a href="wrap\.html"[^>]*>.*?</div></div>', re.S)
+link_pat = re.compile(r'<a[^>]*href="wrap\.html[^"]*"[^>]*>.*?</a>\s*', re.S)
+SISYPHE = ('<div class="topnav-item"><a href="/sisyphe/index.html" class="topnav-tab">Sisyphe</a>'
+           '<div class="topnav-dropdown">'
+           '<a href="/sisyphe/dashboard.html" class="topnav-sub">가계부·운동</a>'
+           '<a href="/sisyphe/journal.html" class="topnav-sub">투자일지</a>'
+           '</div></div>')
+NAV_END = '</div></div></nav>'
 for f in glob.glob(os.path.join(rel, "*.html")):
     s = open(f, encoding="utf-8").read()
-    n = pat.sub("", s)
+    n = item_pat.sub("", s)
+    n = link_pat.sub("", n)
+    if NAV_END in n and 'topnav-tab">Sisyphe' not in n:
+        n = n.replace(NAV_END, SISYPHE + NAV_END, 1)
     if n != s:
         open(f, "w", encoding="utf-8").write(n)
 PYEOF
