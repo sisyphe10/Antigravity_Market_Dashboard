@@ -357,6 +357,9 @@ if [ "$rc" -eq 0 ]; then
     notify_failure "$NAME"
     exit 70   # EX_SOFTWARE: A4 가 성공으로 오판하지 않도록 명시적 실패
   fi
+  # 게시 스냅숏 갱신 (웹서빙 W5) - 실패해도 잡 rc 불변
+  /bin/bash "$REPO/scripts/publish_snapshot.sh" >> "$REPO/logs/launchd/publish.log" 2>&1 \
+    || echo "[run_timer_job] $NAME: publish_snapshot 실패(경고)" >&2
 else
   notify_failure "$NAME"
 fi

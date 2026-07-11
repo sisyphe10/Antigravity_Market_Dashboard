@@ -1,0 +1,20 @@
+# Antigravity 대시보드 로컬 정적 서빙 (웹서빙 설계 W6)
+# 입구는 tailscale serve 프록시뿐 — 127.0.0.1 바인딩 고정.
+{
+	admin off
+	auto_https off
+}
+
+http://127.0.0.1:8377 {
+	root * /Users/sisyphe/srv/dashboard/current
+	encode gzip
+	@fresh path / *.html *.json *.csv
+	header @fresh Cache-Control "no-cache"
+	file_server
+	log {
+		output file /Users/sisyphe/srv/dashboard/logs/access.log {
+			roll_size 20MiB
+			roll_keep 5
+		}
+	}
+}
