@@ -191,7 +191,9 @@ main() {
   # --- web serving (W9) -------------------------------------------------------
   local web_stat="OK" web_warn="" http_local http_ts cur_tgt snap_age_s snap_age="?"
   http_local="$(curl -s -o /dev/null -m 5 -w '%{http_code}' http://127.0.0.1:8377/index.html 2>/dev/null || echo 000)"
-  http_ts="$(curl -s -o /dev/null -m 10 -w '%{http_code}' https://sisypheui-macmini.tailae16fa.ts.net/index.html 2>/dev/null || echo 000)"
+  # 맥 자신은 MagicDNS 해석 불가(homebrew tailscaled) - tailscale IP를 --resolve로 지정(인증서 검증 유지)
+  local ts_ip; ts_ip="$(/opt/homebrew/bin/tailscale ip -4 2>/dev/null | head -1)"
+  http_ts="$(curl -s -o /dev/null -m 10 --resolve "sisypheui-macmini.tailae16fa.ts.net:443:${ts_ip}" -w '%{http_code}' https://sisypheui-macmini.tailae16fa.ts.net/index.html 2>/dev/null || echo 000)"
   cur_tgt="$(readlink /Users/sisyphe/srv/dashboard/current 2>/dev/null || true)"
   if [ -n "$cur_tgt" ] && [ -f "$cur_tgt/index.html" ]; then
     snap_age_s=$(( now - $(stat -f %m "$cur_tgt/index.html" 2>/dev/null || echo "$now") ))
