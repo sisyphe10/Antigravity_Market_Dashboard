@@ -88,8 +88,16 @@ def windows(today):
 FAIL = object()  # "호출 실패" sentinel — 정상 빈 응답(None/empty)과 구분
 
 
+NET_MAX_CONSEC_FAIL = 30   # 네트워크형(DNS/연결 순단)은 30초 간격 30회 = 15분까지 견딤
+
+
 class Runner:
-    """페이싱 + 연속 실패 감시. 실패 5연속이면 RuntimeError로 전체 중단."""
+    """페이싱 + 연속 실패 감시.
+
+    - 네트워크형 오류(Connection/Timeout/DNS): 30초 대기, 30연속까지 허용
+      (집 공유기 순단이 밤새 배치를 죽이지 않게 — 2026-07-11 실사고)
+    - 그 외(KRX 인증/차단 의심): 2초 대기, 5연속이면 전체 중단
+    """
 
     def __init__(self):
         self.consec_fail = 0
@@ -103,11 +111,15 @@ class Runner:
             self.consec_fail = 0
             return out
         except Exception as e:
+            name = type(e).__name__
+            is_net = ("Connection" in name or "Timeout" in name
+                      or "NameResolution" in repr(e) or "getaddrinfo" in repr(e))
+            limit = NET_MAX_CONSEC_FAIL if is_net else MAX_CONSEC_FAIL
             self.consec_fail += 1
-            print(f"  ! 호출 실패({self.consec_fail}/{MAX_CONSEC_FAIL}): {type(e).__name__}: {e}", flush=True)
-            if self.consec_fail >= MAX_CONSEC_FAIL:
-                raise RuntimeError("연속 실패 한도 도달 — KRX 인증/차단 가능성, 전체 중단") from e
-            time.sleep(2)
+            print(f"  ! 호출 실패({self.consec_fail}/{limit}{'·net' if is_net else ''}): {name}: {e}", flush=True)
+            if self.consec_fail >= limit:
+                raise RuntimeError("연속 실패 한도 도달 — KRX 인증/차단 또는 장기 네트워크 장애, 전체 중단") from e
+            time.sleep(30 if is_net else 2)
             return FAIL
 
 
