@@ -1,6 +1,7 @@
 # 환경 변수 및 비밀 정보
 .env
 *.json
+!heartbeats.json
 !package.json
 !tsconfig.json
 !architecture/registry.json
