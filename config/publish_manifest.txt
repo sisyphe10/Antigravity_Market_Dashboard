@@ -1,7 +1,6 @@
 # 게시 스냅숏 필수 파일 — 하나라도 누락/빈파일이면 게시 거부 (scripts/publish_snapshot.sh)
 index.html
 market.html
-wrap.html
 dataset.csv
 universe.json
 portfolio_data.json

@@ -35,6 +35,21 @@ if ! rsync -a \
   log "rsync 실패 - 세대 폐기"; rm -rf "$REL"; exit 1
 fi
 
+# 1.5) 개인용 뷰 가공 (2026-07-11 사용자 확정): ts.net 개인 대시보드에는 WRAP 불요.
+#      스냅숏에서만 wrap.html 삭제 + 전 HTML의 WRAP 내비 링크 제거. repo 원본·GitHub(팀원용)는 불변.
+rm -f "$REL/wrap.html"
+python3 - "$REL" <<'PYEOF'
+import re, sys, glob, os
+rel = sys.argv[1]
+pat = re.compile(r'<a[^>]*href="wrap\.html[^"]*"[^>]*>.*?</a>\s*', re.S)
+for f in glob.glob(os.path.join(rel, "*.html")):
+    s = open(f, encoding="utf-8").read()
+    n = pat.sub("", s)
+    if n != s:
+        open(f, "w", encoding="utf-8").write(n)
+PYEOF
+if [ -f "$REL/wrap.html" ]; then log "wrap.html 제거 실패 - 세대 폐기"; rm -rf "$REL"; exit 1; fi
+
 # 2) 검증: 매니페스트 필수 파일 존재·비어있지 않음 + 핵심 JSON 파싱
 if [ -f "$MANIFEST" ]; then
   while IFS= read -r f; do
