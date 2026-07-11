@@ -96,6 +96,19 @@ WORKFLOW_SELF = 'daily_health_check.yml'
 WORKFLOW_DIR = os.path.join(ROOT, '.github', 'workflows')
 GITHUB_REPO = os.environ.get('GITHUB_REPOSITORY', 'sisyphe10/Antigravity_Market_Dashboard')
 
+# ── 맥미니 이관 잡 heartbeat 감시 (Phase 2) ──────────────────────────────────
+#   산출물이 repo 밖(구글 캘린더)이거나 비시계열(finalize)이라 신선도가 못 잡는 잡의
+#   '비실행'을 커버. 맥미니 wrapper가 성공 시 heartbeats.json을 [skip ci] push.
+#   heartbeats.json = {잡이름: 마지막 성공 epoch(초)}. 이 워치독은 GHA 잔류라 맥미니
+#   로컬 stamp를 못 봐 repo 커밋본을 읽는다. ★파일 없음/파싱실패=조용히 skip,
+#   존재하는 엔트리만 검사(미이관 잡=엔트리 없음=침묵).
+HEARTBEAT_FILE = 'heartbeats.json'
+HEARTBEAT_THRESHOLD_DEFAULT = 3          # 매일 잡: 3일 무성공이면 경보
+HEARTBEAT_THRESHOLDS = {                 # 잡별 임계(달력일) override
+    'gha-earnings-calendar-sync': 2,     # 매일 → 2일
+    'gha-finalize-orders': 4,            # 주말 무주문 no-op 감안
+}
+
 LABELS = {
     'INDEX_KR': 'KR 지수/외인(INDEX_KR)', 'INDEX_US': '미국 지수(INDEX_US)',
     'INDEX_GLOBAL': '글로벌 지수(NIKKEI/TSEC)', 'FX': '환율(FX)',
@@ -290,6 +303,32 @@ def check_workflows(today: date):
     return alerts
 
 
+def check_heartbeats(data_dir: str, today: date):
+    """맥미니 이관 잡의 heartbeat 정체 경보: [(잡이름, 마지막성공일, 경과일, 임계)].
+    heartbeats.json 없음/파싱 실패 → 조용히 skip. 파일에 존재하는 엔트리만 검사
+    (미이관 잡=엔트리 없음=침묵). 값이 epoch(초)가 아니면 그 엔트리만 조용히 무시."""
+    path = os.path.join(data_dir, HEARTBEAT_FILE)
+    if not os.path.exists(path):
+        return []
+    try:
+        hb = json.load(open(path, encoding='utf-8'))
+    except Exception:
+        return []
+    if not isinstance(hb, dict):
+        return []
+    alerts = []
+    for job, ts in hb.items():
+        thr = HEARTBEAT_THRESHOLDS.get(job, HEARTBEAT_THRESHOLD_DEFAULT)
+        try:
+            last = datetime.fromtimestamp(float(ts), tz=KST).date()
+        except (TypeError, ValueError, OSError, OverflowError):
+            continue
+        g = (today - last).days
+        if g >= thr:
+            alerts.append((job, last, g, thr))
+    return alerts
+
+
 def check(data_dir: str, today: date):
     """경보 항목 리스트 반환: [(label, latest, gap_value, mode, threshold)]"""
     alerts = []
@@ -321,7 +360,7 @@ def check(data_dir: str, today: date):
     return alerts
 
 
-def build_message(alerts, wf_alerts, today: date) -> str:
+def build_message(alerts, wf_alerts, hb_alerts, today: date) -> str:
     lines = [f"\U0001F6A8 데이터 수집 점검 경보 ({today})"]
     if alerts:
         lines += ["", "다음 일별 수집이 임계 이상 멈췄습니다:", ""]
@@ -341,6 +380,10 @@ def build_message(alerts, wf_alerts, today: date) -> str:
                 lines.append(f"• {name} — 성공 이력 없음")
             else:
                 lines.append(f"• {name} — 마지막 성공 {last.strftime('%m-%d')} ({g}일 경과, 임계 {thr})")
+    if hb_alerts:
+        lines += ["", "맥미니 잡 heartbeat 정체:", ""]
+        for job, last, g, thr in hb_alerts:
+            lines.append(f"• 맥미니 잡 {job} heartbeat 정체 {g}일 (마지막 성공 {last.strftime('%m-%d')}, 임계 {thr})")
     lines += ["", "정상 항목은 생략. (자동 점검 · check_data_freshness.py)"]
     return "\n".join(lines)
 
@@ -378,11 +421,12 @@ def main():
 
     alerts = check(args.data_dir, today)
     wf_alerts = check_workflows(today)
-    if not alerts and not wf_alerts:
-        print("✅ 일별 수집·GHA 워크플로 전부 정상 (경보 없음)")
+    hb_alerts = check_heartbeats(args.data_dir, today)
+    if not alerts and not wf_alerts and not hb_alerts:
+        print("✅ 일별 수집·GHA 워크플로·맥미니 heartbeat 전부 정상 (경보 없음)")
         return
 
-    msg = build_message(alerts, wf_alerts, today)
+    msg = build_message(alerts, wf_alerts, hb_alerts, today)
     print("\n" + msg + "\n")
     if args.dry_run:
         print("[dry-run] 발송 생략")
