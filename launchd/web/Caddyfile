@@ -9,11 +9,23 @@
 #   127.0.0.1:8377로 쓰면 호스트 불일치→빈 200 (2026-07-11 실측). 바인딩은 bind로 루프백 고정.
 http://:8377 {
 	bind 127.0.0.1
-	root * /Users/sisyphe/srv/dashboard/current
 	encode gzip
-	@fresh path / *.html *.json *.csv
+	@fresh path / *.html *.json *.csv /sisyphe /sisyphe/
 	header @fresh Cache-Control "no-cache"
-	file_server
+
+	# Sisyphe 개인 대시보드 (가계부·운동·투자일지) — 2026-07-11 통합, 소스=git clone(~/srv/sisyphe_repo, 시간당 pull)
+	handle_path /sisyphe/* {
+		root * /Users/sisyphe/srv/sisyphe_repo
+		@internal path /.git/* /.github/* /scripts/*
+		respond @internal 404
+		file_server {
+			hide .git .github .gitignore .staticrypt.json scripts
+		}
+	}
+	handle {
+		root * /Users/sisyphe/srv/dashboard/current
+		file_server
+	}
 	log {
 		output file /Users/sisyphe/srv/dashboard/logs/access.log {
 			roll_size 20MiB
