@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Datalake 문답</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif;
+         background: #f7f7f5; color: #000; height: 100vh; display: flex; flex-direction: column; }
+  header { padding: 14px 20px; background: #fff; border-bottom: 1px solid #ddd;
+           font-weight: 700; font-size: 16px; }
+  header span { font-weight: 400; color: #666; font-size: 13px; margin-left: 8px; }
+  #chat { flex: 1; overflow-y: auto; padding: 20px; max-width: 900px; width: 100%; margin: 0 auto; }
+  .msg { margin-bottom: 16px; line-height: 1.65; font-size: 14.5px; }
+  .msg.user { text-align: right; }
+  .msg.user .bubble { display: inline-block; background: #e8eef7; border-radius: 12px 12px 2px 12px;
+                      padding: 10px 14px; max-width: 80%; text-align: left; white-space: pre-wrap; }
+  .msg.bot .bubble { display: inline-block; background: #fff; border: 1px solid #e2e2e2;
+                     border-radius: 12px 12px 12px 2px; padding: 12px 16px; max-width: 95%; }
+  .bubble table { border-collapse: collapse; margin: 8px 0; font-size: 13.5px; }
+  .bubble th, .bubble td { border: 1px solid #ccc; padding: 4px 10px; text-align: center; color: #000; }
+  .bubble th { background: #f0f0ee; }
+  .bubble code { background: #f2f2f0; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  .bubble pre { background: #f2f2f0; padding: 10px; border-radius: 8px; overflow-x: auto;
+                margin: 8px 0; font-size: 13px; }
+  .bubble h2, .bubble h3 { margin: 10px 0 6px; font-size: 15px; }
+  .bubble ul, .bubble ol { margin: 6px 0 6px 20px; }
+  .steps { font-size: 12px; color: #888; margin-top: 6px; }
+  .thinking { color: #888; font-style: italic; }
+  footer { padding: 14px 20px 20px; background: #fff; border-top: 1px solid #ddd; }
+  #form { max-width: 900px; margin: 0 auto; display: flex; gap: 8px; }
+  #q { flex: 1; padding: 12px 14px; border: 1px solid #ccc; border-radius: 10px; font-size: 14.5px;
+       font-family: inherit; resize: none; height: 48px; }
+  #send { padding: 0 22px; border: none; border-radius: 10px; background: #1a56db; color: #fff;
+          font-size: 14.5px; font-weight: 600; cursor: pointer; }
+  #send:disabled { background: #9db4dd; cursor: default; }
+</style>
+</head>
+<body>
+<header>Datalake 문답 <span>리서치 노트 · KRX/해외 종가 · 시스템 위키</span></header>
+<div id="chat"></div>
+<footer>
+  <form id="form">
+    <textarea id="q" placeholder="예: 삼성전자 최근 한 달 종가 추이 알려줘 / 6월에 수집한 HBM 관련 노트 요약해줘" rows="1"></textarea>
+    <button id="send" type="submit">질문</button>
+  </form>
+</footer>
+<script>
+const chat = document.getElementById('chat');
+const form = document.getElementById('form');
+const q = document.getElementById('q');
+const send = document.getElementById('send');
+const history = [];
+
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// 최소 markdown 렌더러 (외부 의존 없음): 표·볼드·코드·헤딩·리스트
+function md(src) {
+  const lines = esc(src).split('\n');
+  let html = '', inCode = false, inTable = false, inList = false;
+  const flush = () => { if (inTable) { html += '</table>'; inTable = false; }
+                        if (inList) { html += '</ul>'; inList = false; } };
+  for (let line of lines) {
+    if (line.startsWith('```')) { flush(); html += inCode ? '</pre>' : '<pre>'; inCode = !inCode; continue; }
+    if (inCode) { html += line + '\n'; continue; }
+    let t = line.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+                .replace(/`([^`]+)`/g, '<code>$1</code>');
+    if (/^\|.*\|\s*$/.test(line)) {
+      if (/^\|[\s:|-]+\|\s*$/.test(line)) continue;
+      if (!inTable) { flush(); html += '<table>'; inTable = true; }
+      const cells = t.replace(/^\||\|\s*$/g, '').split('|');
+      const tag = html.endsWith('<table>') ? 'th' : 'td';
+      html += '<tr>' + cells.map(c => `<${tag}>${c.trim()}</${tag}>`).join('') + '</tr>';
+      continue;
+    }
+    if (/^#{2,3}\s/.test(line)) { flush(); html += `<h3>${t.replace(/^#{2,3}\s/, '')}</h3>`; continue; }
+    if (/^[-*]\s/.test(line)) { if (!inList) { flush(); html += '<ul>'; inList = true; }
+                                html += `<li>${t.replace(/^[-*]\s/, '')}</li>`; continue; }
+    flush();
+    html += t + '<br>';
+  }
+  flush();
+  if (inCode) html += '</pre>';
+  return html;
+}
+
+function add(role, content, stepsInfo) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  const inner = role === 'user' ? esc(content) : md(content);
+  let steps = '';
+  if (stepsInfo && stepsInfo.length)
+    steps = `<div class="steps">${stepsInfo.map(s => '🔧 ' + s.tool).join(' · ')}</div>`;
+  div.innerHTML = `<div class="bubble">${inner}${steps}</div>`;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+  return div;
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const question = q.value.trim();
+  if (!question) return;
+  q.value = '';
+  add('user', question);
+  send.disabled = true;
+  const wait = add('bot', '');
+  wait.querySelector('.bubble').innerHTML = '<span class="thinking">데이터 조회 중... (수십 초 걸릴 수 있습니다)</span>';
+  try {
+    const res = await fetch('/ask', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({question, history})
+    });
+    const data = await res.json();
+    wait.remove();
+    add('bot', data.answer, data.steps);
+    history.push({role: 'user', content: question});
+    history.push({role: 'assistant', content: data.answer});
+  } catch (err) {
+    wait.remove();
+    add('bot', '오류: ' + err.message);
+  }
+  send.disabled = false;
+  q.focus();
+});
+
+q.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); }
+});
+</script>
+</body>
+</html>
