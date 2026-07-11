@@ -1,8 +1,6 @@
 name: Finalize Pending Orders + AUM
 
 on:
-  schedule:
-    - cron: '0 7 * * *'   # 16:00 KST = 07:00 UTC
   workflow_dispatch:
 
 concurrency:
