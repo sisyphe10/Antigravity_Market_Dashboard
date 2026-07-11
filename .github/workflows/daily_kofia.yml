@@ -5,8 +5,6 @@ name: Daily KOFIA Stats
 # secrets.DATA_GO_KR_API_KEY 미설정 시 graceful skip (실패 알림 없음).
 
 on:
-  schedule:
-    - cron: '30 8 * * 1-5'  # 17:30 KST weekdays (08:30 UTC)
   workflow_dispatch:        # Allow manual trigger
 
 concurrency:
