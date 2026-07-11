@@ -6,8 +6,6 @@ name: Daily ECOS BOK Series
 # secrets.ECOS_API_KEY 미설정 시 graceful skip (실패 알림 없음).
 
 on:
-  schedule:
-    - cron: '40 8 * * 1-5'  # 17:40 KST weekdays (08:40 UTC)
   workflow_dispatch:        # Allow manual trigger
 
 concurrency:
