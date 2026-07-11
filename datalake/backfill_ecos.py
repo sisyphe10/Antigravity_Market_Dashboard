@@ -27,16 +27,8 @@ FULL_START = {"D": "19950101", "M": "199001", "Q": "1990Q1"}
 
 
 def load_key():
-    key = os.environ.get("ECOS_API_KEY", "").strip()
-    if key:
-        return key
-    path = os.path.join(REPO, "secrets", "api_keys.env")
-    if os.path.exists(path):
-        for line in open(path, encoding="utf-8-sig"):
-            line = line.strip()
-            if line.startswith("ECOS_API_KEY"):
-                return line.split("=", 1)[1].strip().strip('"').strip("'")
-    return ""
+    from dl_common import load_api_key
+    return load_api_key("ECOS_API_KEY")
 
 
 def yoy(rows):

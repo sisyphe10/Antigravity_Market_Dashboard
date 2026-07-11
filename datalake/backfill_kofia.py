@@ -51,16 +51,8 @@ OPERATIONS = {
 
 
 def load_key():
-    key = os.environ.get("DATA_GO_KR_API_KEY", "").strip()
-    if key:
-        return key
-    path = os.path.join(REPO, "secrets", "api_keys.env")
-    if os.path.exists(path):
-        for line in open(path, encoding="utf-8-sig"):
-            line = line.strip()
-            if line.startswith("DATA_GO_KR_API_KEY"):
-                return line.split("=", 1)[1].strip().strip('"').strip("'")
-    return ""
+    from dl_common import load_api_key
+    return load_api_key("DATA_GO_KR_API_KEY")
 
 
 def fetch_page(key, op, page):

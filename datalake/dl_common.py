@@ -99,6 +99,27 @@ def merge_into_year_files(name, df, key_cols):
     return out
 
 
+def load_api_key(name):
+    """API 키 로드: env → secrets/api_keys.env → secrets/<NAME>.txt. 값 미출력."""
+    key = os.environ.get(name, "").strip()
+    if key:
+        return key
+    candidates = [os.path.join(REPO, "secrets", "api_keys.env"),
+                  os.path.join(REPO, "secrets", f"{name}.txt")]
+    for path in candidates:
+        if not os.path.exists(path):
+            continue
+        raw = open(path, encoding="utf-8-sig").read().strip()
+        for line in raw.splitlines():
+            line = line.strip()
+            if line.startswith(name):
+                return line.split("=", 1)[1].strip().strip('"').strip("'")
+        # <NAME>.txt에 키 값만 단독으로 들어있는 경우
+        if path.endswith(f"{name}.txt") and raw and "=" not in raw and "\n" not in raw:
+            return raw
+    return ""
+
+
 # ───────────────────── KRX 로그인 pykrx ─────────────────────
 _KNOWN_ID = {"krx_id", "id", "user", "username", "userid", "login", "loginid"}
 _KNOWN_PW = {"krx_pw", "pw", "pass", "password", "passwd", "pwd", "krx_pwd"}

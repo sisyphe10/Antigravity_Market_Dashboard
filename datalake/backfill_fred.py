@@ -29,16 +29,8 @@ KEEP_FROM = date(1990, 1, 1)
 
 
 def load_key():
-    key = os.environ.get("FRED_API_KEY", "").strip()
-    if key:
-        return key
-    path = os.path.join(REPO, "secrets", "api_keys.env")
-    if os.path.exists(path):
-        for line in open(path, encoding="utf-8-sig"):
-            line = line.strip()
-            if line.startswith("FRED_API_KEY"):
-                return line.split("=", 1)[1].strip().strip('"').strip("'")
-    return ""
+    from dl_common import load_api_key
+    return load_api_key("FRED_API_KEY")
 
 
 def month_end(d):
