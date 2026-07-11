@@ -174,32 +174,54 @@ def range_update(stock):
     print("[kr_investor_value] 갱신 완료", flush=True)
 
 
-def overseas_update():
+def _yf_recent(symbol, start):
     import pandas as pd
-    from backfill_overseas import fetch_symbol, load_overseas_universe
+    import yfinance as yf
+    # period 파라미터는 열거값만 허용("14d" 불가) — start= 로 최근 창 지정
+    raw = yf.download(symbol, start=start, interval="1d",
+                      auto_adjust=False, progress=False, threads=False)
+    if raw is None or raw.empty:
+        return None
+    if isinstance(raw.columns, pd.MultiIndex):
+        raw.columns = raw.columns.get_level_values(0)
+    return raw.reset_index().rename(columns={
+        "Date": "date", "Open": "open", "High": "high", "Low": "low",
+        "Close": "close", "Adj Close": "adj_close", "Volume": "volume"})
+
+
+def overseas_update():
+    from backfill_benchmarks import BENCHMARKS
+    from backfill_overseas import load_overseas_universe
+    start = (date.today() - timedelta(days=14)).isoformat()
+
     universe = load_overseas_universe()
     ok = 0
-    start = (date.today() - timedelta(days=14)).isoformat()
     for symbol, orig, name in universe:
         time.sleep(0.5)
         try:
-            import yfinance as yf
-            # period 파라미터는 열거값만 허용("14d" 불가) — start= 로 최근 창 지정
-            raw = yf.download(symbol, start=start, interval="1d",
-                              auto_adjust=False, progress=False, threads=False)
+            df = _yf_recent(symbol, start)
         except Exception:
             continue
-        if raw is None or raw.empty:
+        if df is None:
             continue
-        if isinstance(raw.columns, pd.MultiIndex):
-            raw.columns = raw.columns.get_level_values(0)
-        df = raw.reset_index().rename(columns={
-            "Date": "date", "Open": "open", "High": "high", "Low": "low",
-            "Close": "close", "Adj Close": "adj_close", "Volume": "volume"})
         df["symbol"], df["source_ticker"], df["name"] = symbol, orig, name
         merge_into_year_files("overseas_ohlcv", df, ["date", "symbol"])
         ok += 1
     print(f"[overseas_ohlcv] {ok}/{len(universe)}종목 최근 14일 갱신", flush=True)
+
+    ok = 0
+    for symbol, name, category in BENCHMARKS:
+        time.sleep(0.5)
+        try:
+            df = _yf_recent(symbol, start)
+        except Exception:
+            continue
+        if df is None:
+            continue
+        df["symbol"], df["name"], df["category"] = symbol, name, category
+        merge_into_year_files("global_markets", df, ["date", "symbol"])
+        ok += 1
+    print(f"[global_markets] {ok}/{len(BENCHMARKS)}심볼 최근 14일 갱신", flush=True)
 
 
 def main():

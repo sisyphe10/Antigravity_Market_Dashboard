@@ -17,7 +17,7 @@ import sys
 from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from dl_common import CATALOG_DIR, DUCKDB_PATH, MARKET_DIR, NOTES_DIR
+from dl_common import CATALOG_DIR, DUCKDB_PATH, MARKET_DIR, NOTES_DIR, REPO
 
 DESCRIPTIONS = {
     "kr_ohlcv": "국내 전 상장종목 일봉 (수정주가). open/high/low/close/volume/value, ticker·name·market",
@@ -28,6 +28,11 @@ DESCRIPTIONS = {
     "kr_etf_ohlcv": "국내 ETF 일봉 + NAV",
     "kr_investor_value": "시장 단위 투자자별 매매대금 일별 (KOSPI/KOSDAQ)",
     "overseas_ohlcv": "해외 유니버스 종목 일봉 (yahoo, adj_close 포함)",
+    "global_markets": "글로벌 벤치마크 일봉 — 지수(S&P500·SOX·VIX 등)·환율·원자재·미 금리·BTC (category 컬럼으로 구분)",
+    "kr_macro": "ECOS 한국 매크로 33종+파생 3종 전체 이력 (기준금리·국고채·CPI·M2·BSI·수출 등, series 컬럼)",
+    "us_macro": "FRED 미국 매크로 36종 전체 이력 (금리·스프레드·CPI·고용·주택 등, series 컬럼)",
+    "kr_flows": "증시 수급 자금 이력 — 투자자예탁금·신용거래융자·미수금 등 (금투협, 억원 단위)",
+    "macro_series": "레포 dataset.csv 뷰 — 기존 수집기가 매일 누적하는 매크로·산업 시계열 (2021~, 지속 갱신)",
 }
 
 EXAMPLE_SQL = {
@@ -35,6 +40,10 @@ EXAMPLE_SQL = {
     "kr_fundamental": "SELECT date, per, pbr FROM kr_fundamental WHERE name='삼성전자' AND date>='2024-01-01' ORDER BY date;",
     "kr_investor_value": "SELECT date, foreigner, institution, individual FROM kr_investor_value WHERE market='KOSPI' ORDER BY date DESC LIMIT 10;",
     "overseas_ohlcv": "SELECT date, adj_close FROM overseas_ohlcv WHERE symbol='NVDA' ORDER BY date DESC LIMIT 20;",
+    "global_markets": "SELECT date, close FROM global_markets WHERE name='필라델피아 반도체지수' ORDER BY date DESC LIMIT 20;",
+    "kr_macro": "SELECT date, value FROM kr_macro WHERE series='국고채 10년' AND date>='2020-01-01' ORDER BY date;",
+    "us_macro": "SELECT date, value FROM us_macro WHERE series='미 CPI 전년동월비' ORDER BY date DESC LIMIT 12;",
+    "kr_flows": "SELECT date, value FROM kr_flows WHERE series='투자자예탁금' ORDER BY date DESC LIMIT 20;",
 }
 
 
@@ -104,6 +113,39 @@ def main():
                 f"## 쿼리 예시\n\n```sql\n{EXAMPLE_SQL.get(name, f'SELECT * FROM {name} ORDER BY date DESC LIMIT 20;')}\n```\n"
             )
             with open(os.path.join(CATALOG_DIR, f"{name}.md"), "w", encoding="utf-8", newline="\n") as f:
+                f.write(md)
+
+    # dataset.csv (레포 누적 매크로 시계열, 2021~ 지속 갱신) → macro_series 뷰
+    # 웹 UI 샌드박스(allowed_directories=market/)를 지키기 위해 사본을 market/ 안에 둔다
+    src_csv = os.path.join(REPO, "dataset.csv")
+    if os.path.exists(src_csv):
+        import shutil
+        ms_dir = os.path.join(MARKET_DIR, "macro_series")
+        os.makedirs(ms_dir, exist_ok=True)
+        dst_csv = os.path.join(ms_dir, "dataset.csv")
+        shutil.copy2(src_csv, dst_csv)
+        csv_path = dst_csv.replace("\\", "/")
+        # strict_mode=false: dataset.csv 일부 행이 RFC4180 비준수 (실측)
+        csv_src = f"read_csv('{csv_path}', header=true, all_varchar=true, strict_mode=false)"
+        if not args.check:
+            con.execute(
+                f"""CREATE OR REPLACE VIEW macro_series AS
+                    SELECT TRY_CAST("날짜" AS DATE) AS date, "제품명" AS series,
+                           TRY_CAST(REPLACE("가격", ',', '') AS DOUBLE) AS value,
+                           "데이터 타입" AS dtype
+                    FROM {csv_src}""")
+        ms_rows = con.execute(f"SELECT COUNT(*) FROM {csv_src}").fetchone()[0]
+        index_rows.append(("macro_series", ms_rows, "2021~ (지속 갱신)"))
+        print(f"  macro_series(dataset.csv): {ms_rows:,}행")
+        if not args.check:
+            md = (
+                "# macro_series\n\n레포 dataset.csv 뷰 — ECOS/FRED/KOSIS/SMP/리튬 등 기존 수집기가 "
+                "매일 누적하는 매크로·산업 시계열 (대체로 2021~). 장기 이력은 kr_macro/us_macro 사용.\n\n"
+                "- 컬럼: date, series(제품명), value, dtype(데이터 타입)\n\n"
+                "## 쿼리 예시\n\n```sql\nSELECT DISTINCT dtype FROM macro_series;\n"
+                "SELECT date, value FROM macro_series WHERE series LIKE '%SMP%' ORDER BY date DESC LIMIT 10;\n```\n"
+            )
+            with open(os.path.join(CATALOG_DIR, "macro_series.md"), "w", encoding="utf-8", newline="\n") as f:
                 f.write(md)
 
     # research notes 현황
