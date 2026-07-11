@@ -2,8 +2,6 @@
 name: Daily Market Crawl
 
 on:
-  schedule:
-    - cron: '0 14 * * *'  # 11:00 PM KST (14:00 UTC)
   workflow_dispatch:      # Allow manual trigger
   push:
     branches:
