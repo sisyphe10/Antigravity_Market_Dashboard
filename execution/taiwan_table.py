@@ -68,6 +68,10 @@ TAIWAN_CSS = """
                            white-space: nowrap; cursor: pointer; }
         .tw-filter-item:hover { background: #f3f4f6; border-radius: 6px; }
         .tw-foot { max-width: 1180px; margin: 12px auto 0; padding: 0 24px; color: #999; font-size: 12px; text-align: center; }
+        .tw-more-btn { display: block; width: 100%; padding: 10px; background: #f9fafb; border: none;
+                       border-top: 1px solid #e5e7eb; color: #374151; font-size: 13px; font-weight: 600;
+                       cursor: pointer; font-family: inherit; }
+        .tw-more-btn:hover { background: #f3f4f6; color: #111; }
 """
 
 
@@ -108,6 +112,8 @@ _TAIWAN_SCRIPT = """<script>
         { name: '누계YoY',    key: '누계YoY(%)', nofilter: true, disp: function(r) { return twFmtPct(r[11]); }, val: function(r) { return twNum(r[11]); } }
     ];
     var twSortCol = -1, twSortDir = 1;
+    var TW_DEFAULT_ROWS = 30;   // 기본 표시 행수 (전체 보기 버튼으로 확장)
+    var twShowAll = false;
     var twFilters = {};  // colIdx -> 선택된 표시값 배열 (키 없음 = 전체 허용)
     function twPasses(r, skipIdx) {
         for (var i = 0; i < TW_COLS.length; i++) {
@@ -184,9 +190,12 @@ _TAIWAN_SCRIPT = """<script>
         }
         return recs;
     }
+    function twToggleAll() { twShowAll = !twShowAll; twRender(); }
     function twRender() {
         var recs = twCurrentRecords();
-        var body = recs.map(function(r) {
+        var total = recs.length;
+        var shown = (!twShowAll && total > TW_DEFAULT_ROWS) ? recs.slice(0, TW_DEFAULT_ROWS) : recs;
+        var body = shown.map(function(r) {
             return '<tr>' + TW_COLS.map(function(c) {
                 return '<td' + (c.cls ? ' class="' + c.cls + '"' : '') + '>' + c.disp(r) + '</td>';
             }).join('') + '</tr>';
@@ -196,8 +205,14 @@ _TAIWAN_SCRIPT = """<script>
             var fbtn = c.nofilter ? '' : '<span class="tw-filter-btn' + (twFilters[i] ? ' tw-filter-on' : '') + '" data-col="' + i + '" onclick="twOpenFilter(this, event)">▾</span>';
             return '<th data-col="' + i + '" onclick="twSortClick(this)">' + c.name + arrow + fbtn + '</th>';
         }).join('') + '</tr>';
+        var more = '';
+        if (total > TW_DEFAULT_ROWS) {
+            more = twShowAll
+                ? '<button class="tw-more-btn" onclick="twToggleAll()">최근 ' + TW_DEFAULT_ROWS + '개만 보기</button>'
+                : '<button class="tw-more-btn" onclick="twToggleAll()">전체 보기 (' + total.toLocaleString('ko-KR') + '행)</button>';
+        }
         document.getElementById('twTableHost').innerHTML =
-            '<table class="tw-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>';
+            '<table class="tw-table"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>' + more;
     }
     // 현재 필터·정렬 상태의 데이터를 CSV로 내려받기 (Excel 한글 호환 위해 UTF-8 BOM)
     function twDownload() {
