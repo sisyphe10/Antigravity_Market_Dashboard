@@ -247,4 +247,7 @@ def root():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=int(os.getenv("DATALAKE_WEBUI_PORT", "8787")))
+    # 기본=로컬 전용. 테일넷 공개는 DATALAKE_WEBUI_HOST에 테일스케일 IP 지정
+    # (테일넷 밖에서는 접근 불가 — tailscale serve 미사용 시의 대안)
+    uvicorn.run(app, host=os.getenv("DATALAKE_WEBUI_HOST", "127.0.0.1"),
+                port=int(os.getenv("DATALAKE_WEBUI_PORT", "8787")))
