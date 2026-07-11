@@ -187,7 +187,8 @@ async def weather_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.edit_message_text(
             chat_id=chat_id,
             message_id=status_msg.message_id,
-            text=message
+            text=message,
+            parse_mode="HTML"
         )
     except Exception as e:
         await context.bot.edit_message_text(
