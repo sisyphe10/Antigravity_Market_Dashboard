@@ -1,8 +1,6 @@
 name: Daily Disclosures (DART + KIND)
 
 on:
-  schedule:
-    - cron: '30 7 * * *'   # 16:30 KST (07:30 UTC) — 장종료 후 수집 (16:40 봇 알림 직전)
   workflow_dispatch:
 
 jobs:
