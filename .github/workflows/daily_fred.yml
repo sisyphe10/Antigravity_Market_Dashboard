@@ -6,8 +6,6 @@ name: Daily FRED US Macro Update
 # secrets.FRED_API_KEY 미설정 시 graceful skip (실패 알림 없음).
 
 on:
-  schedule:
-    - cron: '50 22 * * 1-5'  # 07:50 KST Tue-Sat (22:50 UTC Mon-Fri)
   workflow_dispatch:        # Allow manual trigger
 
 concurrency:
