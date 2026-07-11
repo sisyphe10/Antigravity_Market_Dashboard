@@ -7,8 +7,6 @@ name: Daily Taiwan Monthly Revenue
 # 토큰 미설정 시 익명(300req/hr)으로 동작 — skip 없음. 크로스체크는 로그 전용.
 
 on:
-  schedule:
-    - cron: '20 14 * * *'  # 22:20 Taiwan / 23:20 KST daily (daily_crawl과 동시각 기동 회피로 +20분)
   workflow_dispatch:        # Allow manual trigger
 
 concurrency:
