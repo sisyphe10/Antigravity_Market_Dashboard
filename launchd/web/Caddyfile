@@ -5,7 +5,10 @@
 	auto_https off
 }
 
-http://127.0.0.1:8377 {
+# ★사이트 주소는 호스트 무관(:8377) — tailscale serve 프록시가 Host를 ts.net으로 보내므로
+#   127.0.0.1:8377로 쓰면 호스트 불일치→빈 200 (2026-07-11 실측). 바인딩은 bind로 루프백 고정.
+http://:8377 {
+	bind 127.0.0.1
 	root * /Users/sisyphe/srv/dashboard/current
 	encode gzip
 	@fresh path / *.html *.json *.csv
