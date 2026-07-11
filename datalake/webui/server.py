@@ -105,22 +105,27 @@ TOOLS = [
 
 _SQL_FORBIDDEN = re.compile(r"\b(ATTACH|COPY|EXPORT|INSTALL|LOAD|CREATE|INSERT|UPDATE|DELETE|DROP|ALTER|PRAGMA|SET)\b", re.I)
 
-# 샌드박스: 파일시스템 접근을 market/ 아래로 제한 + 확장 자동설치·로드 차단.
-# (_SQL_FORBIDDEN 키워드 필터만으로는 read_text('/…/.env') 같은 SELECT 파일함수를
-#  못 막는다 — 프롬프트 인젝션 경유 유출 채널 차단이 목적)
-_DUCK_CONFIG = {
-    "allowed_directories": [MARKET_DIR],
-    "autoinstall_known_extensions": False,
-    "autoload_known_extensions": False,
-    "enable_external_access": True,  # allowed_directories 내부만 허용됨
-}
+def _sandboxed_connect():
+    """읽기전용 + 파일시스템 샌드박스 연결.
+
+    _SQL_FORBIDDEN 키워드 필터만으로는 read_text('/…/.env') 같은 SELECT 파일함수를
+    못 막는다 (프롬프트 인젝션 경유 유출 채널). connect config로는 옵션 적용 순서
+    제약에 걸리므로(실측 2026-07-11) 런타임 SET으로: allowed 지정 → 잠금.
+    잠금 후에는 세션 내 재활성화 불가(DuckDB 보장 — 실측 검증).
+    """
+    con = duckdb.connect(DUCKDB_PATH, read_only=True)
+    con.execute(f"SET allowed_directories=['{MARKET_DIR}']")
+    con.execute("SET autoinstall_known_extensions=false")
+    con.execute("SET autoload_known_extensions=false")
+    con.execute("SET enable_external_access=false")
+    return con
 
 
 def tool_run_sql(sql):
     if _SQL_FORBIDDEN.search(sql):
         return "ERROR: SELECT만 허용됩니다."
     try:
-        con = duckdb.connect(DUCKDB_PATH, read_only=True, config=_DUCK_CONFIG)
+        con = _sandboxed_connect()
     except duckdb.Error as e:
         return f"ERROR: DB 연결 실패(카탈로그 갱신 중일 수 있음, 잠시 후 재시도): {e}"
     try:
