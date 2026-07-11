@@ -48,8 +48,8 @@ def get_naver_weather(location="여의도"):
         soup = BeautifulSoup(res.text, "html.parser")
         
         # a. 날짜
-        # GitHub Actions는 UTC일 수 있으므로 KST(+9) 보정
-        now = datetime.datetime.now() + datetime.timedelta(hours=9)
+        # 시스템 시간대와 무관하게 KST 고정 (tz-aware)
+        now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
         days = ["월", "화", "수", "목", "금", "토", "일"]
         day_kor = days[now.weekday()]
         date_str = now.strftime(f"%Y-%m-%d ({day_kor})")
