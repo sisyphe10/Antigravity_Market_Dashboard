@@ -154,8 +154,13 @@ def top_nav_html(active=''):
     """Render the shared top navigation. `active` matches a page key
     (e.g. 'market', 'wrap', 'universe', 'architecture')."""
     main_active = _resolve_main_key(active)
+    # WRAP 독립 페이지화 (2026-07-11, 통합 설계): 팀원용 wrap.html에는 개인 탭(Market/Architecture)을
+    # 노출하지 않는다 — WRAP 탭(자체 드롭다운 포함)만 렌더.
+    nav_items = TOP_NAV_MAIN
+    if main_active == "wrap":
+        nav_items = [e for e in TOP_NAV_MAIN if e[0] == "wrap"]
     parts = []
-    for key, href, label, children in TOP_NAV_MAIN:
+    for key, href, label, children in nav_items:
         cls = 'topnav-tab active' if key == main_active else 'topnav-tab'
         tab_html = f'<a href="{href}" class="{cls}">{label}</a>'
         if children:
