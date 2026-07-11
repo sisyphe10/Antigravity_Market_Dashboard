@@ -23,7 +23,7 @@
 set -u
 
 # ── 잡/웨이브 정의 (bash 3.2: 공백구분 문자열) ──────────────────
-ALL_JOBS="gha-fred gha-universe gha-ecos gha-kofia gha-krx-valuation gha-disclosures gha-crawl gha-earnings-calendar-sync gha-finalize-orders"
+ALL_JOBS="gha-fred gha-universe gha-ecos gha-kofia gha-krx-valuation gha-disclosures gha-crawl gha-earnings-calendar-sync gha-finalize-orders gha-taiwan-revenue"
 
 wave_jobs() {  # $1=1|2|3 → 해당 웨이브 잡 목록. 미지정 웨이브는 rc 1.
   case "$1" in

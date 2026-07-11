@@ -7,3 +7,4 @@ gha-disclosures	30 16 * * *	/bin/bash __REPO__/launchd/gha/run_gha_job.sh gha-di
 gha-crawl	0 23 * * *	/bin/bash __REPO__/launchd/gha/run_gha_job.sh gha-crawl
 gha-earnings-calendar-sync	0 7 * * *	/bin/bash __REPO__/launchd/gha/run_gha_job.sh gha-earnings-calendar-sync
 gha-finalize-orders	0 16 * * *	/bin/bash __REPO__/launchd/gha/run_gha_job.sh gha-finalize-orders
+gha-taiwan-revenue	20 23 * * *	/bin/bash __REPO__/launchd/gha/run_gha_job.sh gha-taiwan-revenue

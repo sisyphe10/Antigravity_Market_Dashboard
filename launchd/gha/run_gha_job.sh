@@ -130,7 +130,7 @@ acquire_pipeline_lock() {
 #   제외: disclosures(concurrency 블록 없음)·earnings-calendar-sync(concurrency 없음, git push 없음)
 is_pipeline_job() {
   case "$1" in
-    gha-fred|gha-universe|gha-ecos|gha-kofia|gha-krx-valuation|gha-crawl|gha-finalize-orders) return 0 ;;
+    gha-fred|gha-universe|gha-ecos|gha-kofia|gha-krx-valuation|gha-crawl|gha-finalize-orders|gha-taiwan-revenue) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -177,6 +177,7 @@ job_timeout_seconds() {
     gha-crawl)                   echo 3600 ;;   # 대형 파이프라인(백필·크롤·차트·SEIBro selenium) ~60min
     gha-earnings-calendar-sync)  echo 900  ;;   # finnhub + Google Calendar sync
     gha-finalize-orders)         echo 1800 ;;   # finalize + calc_wrap_nav + dashboard + push
+    gha-taiwan-revenue)          echo 1800 ;;   # FinMind 53종목 + crosscheck + dashboard
     *)                           echo 1800 ;;   # 미지정 안전 기본
   esac
 }
@@ -365,6 +366,15 @@ run_job() {
         --xlsx-conflict fail \
         -- Wrap_NAV.xlsx orders/pending_orders.json orders/aum_pending.json portfolio_data.json \
            index.html market.html wrap.html universe.html seibro.html featured.html hotels.html || return $?
+      ;;
+    gha-taiwan-revenue)
+      # 원본 daily_taiwan_revenue.yml 3스텝. 토큰 미설정 시 익명(300req/hr) 동작 — skip 없음.
+      "$PY" execution/fetch_taiwan_revenue.py || return $?
+      "$PY" execution/fetch_taiwan_revenue.py --crosscheck || echo "[gha-taiwan-revenue] crosscheck 실패(tolerated, 로그 전용)" >&2
+      "$PY" execution/create_dashboard.py || return $?
+      /bin/bash scripts/safe_commit_push.sh \
+        -m "Auto-update: Taiwan monthly revenue [skip ci]" \
+        -- taiwan_revenue.csv market.html || return $?
       ;;
 
     *)
