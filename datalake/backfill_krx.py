@@ -255,8 +255,11 @@ def main():
 
     force = bool(args.tickers)
     if "ohlcv" in passes:
+        # ★adjusted=False 필수: KRX 수정주가 화면은 요청당 ~666행 캡 + 과거 이력
+        # 자체가 없음 (2026-07-11 실측 — 1997~2006 빈 응답). 무수정은 캡 없음.
+        # 수정주가 이력은 별도 kr_ohlcv_adj (backfill_kr_adjusted.py, yfinance).
         run_per_item("kr_ohlcv", tickers,
-                     lambda f, t, k: stock.get_market_ohlcv(f, t, k, adjusted=True),
+                     lambda f, t, k: stock.get_market_ohlcv(f, t, k, adjusted=False),
                      runner, today, ["date", "ticker"], stock_extra, force=force)
     if "marcap" in passes:
         run_per_item("kr_marcap", tickers,

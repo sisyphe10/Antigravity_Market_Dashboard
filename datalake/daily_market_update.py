@@ -224,6 +224,60 @@ def overseas_update():
     print(f"[global_markets] {ok}/{len(BENCHMARKS)}심볼 최근 14일 갱신", flush=True)
 
 
+def kr_adjusted_update():
+    """kr_ohlcv_adj 최근 14일 배치 갱신 — 기존 parquet의 종목 목록 재사용."""
+    import pandas as pd
+    from backfill_kr_adjusted import DATASET, fetch_batch, yahoo_symbol
+    year = date.today().year
+    tickers = None
+    for y in (year, year - 1):
+        p = year_path(DATASET, y)
+        if os.path.exists(p):
+            tickers = pd.read_parquet(p, columns=["ticker", "name", "market"]) \
+                        .drop_duplicates("ticker")
+            break
+    if tickers is None:
+        print(f"[{DATASET}] 데이터 없음 — backfill_kr_adjusted.py 먼저", flush=True)
+        return
+    rows = list(tickers.itertuples(index=False))
+    start = (date.today() - timedelta(days=14)).isoformat()
+    ok = 0
+    for i in range(0, len(rows), 100):
+        batch = rows[i:i + 100]
+        time.sleep(1.0)
+        try:
+            import yfinance as yf
+            raw = yf.download(" ".join(yahoo_symbol(r.ticker, r.market) for r in batch),
+                              start=start, interval="1d", auto_adjust=False,
+                              progress=False, threads=True, group_by="ticker")
+        except Exception:
+            continue
+        if raw is None or raw.empty:
+            continue
+        merged = []
+        for r in batch:
+            sym = yahoo_symbol(r.ticker, r.market)
+            try:
+                sub = raw[sym] if isinstance(raw.columns, pd.MultiIndex) else raw
+            except KeyError:
+                continue
+            sub = sub.dropna(how="all")
+            if sub.empty:
+                continue
+            df = sub.reset_index().rename(columns={
+                "Date": "date", "Close": "close", "Adj Close": "adj_close",
+                "Volume": "volume"})
+            keep = [c for c in ("date", "close", "adj_close", "volume") if c in df.columns]
+            df = df[keep].dropna(subset=["close"])
+            df["ticker"], df["name"], df["market"] = r.ticker, r.name, r.market
+            merged.append(df)
+            ok += 1
+        if merged:
+            merge_into_year_files(DATASET, pd.concat(merged, ignore_index=True),
+                                  ["date", "ticker"])
+    print(f"[{DATASET}] {ok}/{len(rows)}종목 최근 14일 갱신", flush=True)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--days", type=int, help="국내 단면 lookback 일수 override")
@@ -253,6 +307,7 @@ def main():
                   ["date", "ticker"], (None,))
     range_update(stock)
     overseas_update()
+    kr_adjusted_update()
 
     # 카탈로그·뷰 갱신 — 실패를 성공으로 삼키지 않는다 (wrapper가 notify)
     rc = subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)),
