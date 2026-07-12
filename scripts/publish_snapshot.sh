@@ -26,6 +26,7 @@ trap 'rmdir "$LOCK" 2>/dev/null' EXIT
 
 # 1) 화이트리스트 rsync (exclude 기본 — .env/secrets/.git 구조적 배제)
 if ! rsync -a \
+  --exclude='/.*' \
   --include='/*.html' --include='/*.json' --include='/*.csv' \
   --include='/orders/' --include='/orders/*.json' \
   --include='/architecture/' --include='/architecture/**' \
