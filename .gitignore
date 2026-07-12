@@ -133,3 +133,10 @@ watch_wrap_nav.pid
 
 # auto_pull.ps1 의 dirty 백업 patch (로컬 전용)
 backups/
+
+# SQLite WAL/journal (로컬 상태 — 추적 금지)
+*.db-shm
+*.db-wal
+
+# cutover rsync marker (로컬 전용)
+.migration_rsync_marker
