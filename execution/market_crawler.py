@@ -118,17 +118,41 @@ def crawl_us_indices():
         "RUSSELL 2000": {"idx": "^RUT", "etf": "IWM"}
     }
 
+    # ★진행 중(미마감) 세션 제외 (2026-07-12 fix): 이 잡은 23:00 KST 실행 = 미국 정규장
+    # 장중이라, period="1d" 마지막 봉을 그대로 쓰면 '장중가'가 그날 종가로 영구 기록됨
+    # (save_to_csv 가 (날짜,제품명) 중복을 스킵해 확정 종가로 갱신되지 않음 — dataset 오염 원인).
+    # → 최근 7일 봉에서 마감된 세션만 채택. 마감 전이면 그날은 다음 실행에서 확정치로 적재.
+    try:
+        from zoneinfo import ZoneInfo
+        _now_et = datetime.now(ZoneInfo('America/New_York'))
+    except Exception as e:
+        # fail-closed: ET 시각을 모르면 장중가 오염을 막을 수 없으므로 이번 수집을 통째로 스킵
+        # (다음 실행에서 period=7d 창이 빠진 날을 확정치로 자가치유)
+        print(f"❌ America/New_York 시각 확인 불가({e}) — 미국 지수 수집 스킵 (오염 방지)")
+        return
+
     for name, tickers in targets.items():
         try:
-            # 1. 지수 가격
+            # 1. 지수 가격 (auto_adjust=False 명시 — 원시 종가 고정, yfinance 기본값 변화 차단)
             idx_ticker = yf.Ticker(tickers['idx'])
-            hist = idx_ticker.history(period="1d")
+            hist = idx_ticker.history(period="7d", auto_adjust=False)
 
             if not hist.empty:
-                price = float(hist['Close'].iloc[0])
-                d_date = hist.index[0].strftime('%Y-%m-%d')
-                collected_data.append((d_date, name, price, 'INDEX_US'))
-                print(f"✓ {name}: {price:,.2f}")
+                last_day = hist.index[-1].date()
+                # 정규장 마감 16:00 ET 전이면 오늘 봉 제외. 이 잡은 23:00 KST(=09~10시 ET) 실행이라
+                # 항상 당일 제외 — 조기폐장(13:00 ET) 달력과 무관. 실행 시각을 옮기면 재검토할 것.
+                if last_day == _now_et.date() and _now_et.hour < 16:
+                    hist = hist.iloc[:-1]  # 오늘 봉이 아직 장중 → 제외
+
+            if not hist.empty:
+                # 창 내 마감 세션 전부 적재 (누락일 자가치유; 기존 날짜는 save_to_csv 가 스킵)
+                for ts, row in hist.iterrows():
+                    if pd.isna(row['Close']):
+                        continue
+                    collected_data.append((ts.strftime('%Y-%m-%d'), name, float(row['Close']), 'INDEX_US'))
+                price = float(hist['Close'].iloc[-1])
+                d_date = hist.index[-1].strftime('%Y-%m-%d')
+                print(f"✓ {name}: {price:,.2f} ({d_date} 마감)")
 
                 # 2. 펀더멘탈 (ETF 사용)
                 etf_ticker = yf.Ticker(tickers['etf'])

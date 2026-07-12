@@ -901,12 +901,13 @@ def create_monthly_returns_table():
     body_rows_html = ''
     n_rows = len(rows)
 
-    def make_ytd_row(returns_map, bottom_style):
-        """'- | YTD | ...' 강조 행 (연간/누적 수익률, border-top=DARK)."""
+    def make_ytd_row(returns_map, bottom_style, year_label='-', period_label='YTD'):
+        """강조 행 (연간/누적 수익률, border-top=DARK). 완결 연도는 '연간'으로 라벨해
+        진행 연도 YTD와 혼동 방지 (2026-07-12 사용자 리포트: YTD 행 2개 오독)."""
         def cb(name):
             return f'border-top:{DARK};border-right:{right_border_for(name)};border-bottom:{bottom_style};'
-        c = f'<td style="padding:6px 12px;text-align:center;font-weight:700;{cb("연도")}">-</td>'
-        c += f'<td style="padding:6px 12px;text-align:center;font-weight:700;{cb("월")}">YTD</td>'
+        c = f'<td style="padding:6px 12px;text-align:center;font-weight:700;{cb("연도")}">{year_label}</td>'
+        c += f'<td style="padding:6px 12px;text-align:center;font-weight:700;{cb("월")}">{period_label}</td>'
         for name in indices:
             v = returns_map.get(name)
             b = cb(name)
@@ -965,7 +966,8 @@ def create_monthly_returns_table():
                 cells += f'<td style="padding:6px 12px;text-align:center;background:{bg};color:#000;font-variant-numeric:tabular-nums;{borders}">{sign}{pct:.1f}%</td>'
         body_rows_html += f'<tr>{cells}</tr>\n'
         if annual_after is not None:
-            body_rows_html += make_ytd_row(annual_after, DARK_HEAVY)  # 연간 행 → 아래 굵은 선(2px)으로 다음 연도와 분리
+            # 완결 연도 = '연간' 라벨 (YTD와 구분), 아래 굵은 선(2px)으로 다음 연도와 분리
+            body_rows_html += make_ytd_row(annual_after, DARK_HEAVY, year_label=str(y), period_label='연간')
 
     if ytd_returns:
         body_rows_html += make_ytd_row(ytd_returns, LIGHT)
@@ -1174,9 +1176,10 @@ def _build_indices_chart_section(category_label='Indices'):
             {'display': 'RUSSELL 2000',  'local': 'RUSSELL 2000',  'usd': 'RUSSELL 2000', 'color': '#F57C00'},
         ]
 
-        # 최근 6개월 범위
+        # 임베드 범위: 최근 6개월, 단 최소 YTD(전년 12월 하순 기준가 포함) 보장 —
+        # 180일만 담으면 하반기에 기간을 연초로 늘려도 데이터가 없어 차트가 안 바뀜 (2026-07-12 사용자 리포트)
         latest = df['날짜'].max()
-        start = latest - timedelta(days=180)
+        start = min(latest - timedelta(days=180), pd.Timestamp(latest.year - 1, 12, 20))
         df = df[(df['날짜'] >= start) & (df['날짜'] <= latest)]
 
         # 모든 시리즈를 wide table로 결합 (날짜 인덱스)
@@ -1254,7 +1257,7 @@ def _build_indices_chart_section(category_label='Indices'):
         js_code = """
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = 2 * (window.devicePixelRatio || 1); Chart.defaults.elements.line.borderJoinStyle = 'round'; Chart.defaults.elements.line.borderCapStyle = 'round'; Chart.defaults.animation = false;</script>
-        <script>function formatDateInput(el){var v=el.value.replace(/[^0-9]/g,'');if(v.length===8){el.value=v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8);}}</script>
+        <script>function formatDateInput(el){var v=el.value.replace(/[^0-9]/g,'');if(v.length===8){el.value=v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8);return;}var m=el.value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);if(m){el.value=m[1]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[3]).slice(-2);}}</script>
         <script>
         (function() {
             var idxData = IDX_DATA_PLACEHOLDER;
@@ -3017,7 +3020,7 @@ def _build_wrap_chart_section(category_label):
         js_code = """
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = 2 * (window.devicePixelRatio || 1); Chart.defaults.elements.line.borderJoinStyle = 'round'; Chart.defaults.elements.line.borderCapStyle = 'round'; Chart.defaults.animation = false;</script>
-        <script>function formatDateInput(el){var v=el.value.replace(/[^0-9]/g,'');if(v.length===8){el.value=v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8);}}</script>
+        <script>function formatDateInput(el){var v=el.value.replace(/[^0-9]/g,'');if(v.length===8){el.value=v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8);return;}var m=el.value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);if(m){el.value=m[1]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[3]).slice(-2);}}</script>
         <script>
         (function() {
             var navData = NAV_DATA_PLACEHOLDER;
@@ -8554,7 +8557,7 @@ var HIST = null, IDXHIST = null, HIST_LOADING = false, perData = [];
 var perSortCol = 7, perSortAsc = false;  // 컬럼: 추이=6, 기간수익률=7(기본 내림차순), RSI=8
 var perHeaders = ['#','통화','섹터','티커','기업명','시가총액','스파크 라인','기간 수익률','RSI','기간 MDD'];
 var _cselPerCurVal = '', _cselPerSecVal = '';
-function formatDateInput(el){var v=el.value.replace(/[^0-9]/g,'');if(v.length===8){el.value=v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8);}}
+function formatDateInput(el){var v=el.value.replace(/[^0-9]/g,'');if(v.length===8){el.value=v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8);return;}var m=el.value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);if(m){el.value=m[1]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[3]).slice(-2);}}
 function ensureHistThenRender(){
     if(HIST){ renderPeriod(); return; }
     if(HIST_LOADING) return;
