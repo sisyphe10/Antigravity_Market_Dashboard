@@ -55,7 +55,11 @@ if [ "$CUR" != "$BRANCH" ]; then log "브랜치 이상($CUR) - 중단"; exit 1; 
 # 1) 화이트리스트 rsync — ★Pages = 팀원 WRAP 전용 (2026-07-12 사용자 확정)
 #    개인 대시보드(index/market/featured/etf/...)는 공개 게시하지 않는다. 개인 뷰 = ts.net.
 #    게시 대상 = wrap.html + wrap 이 fetch 하는 데이터(JSON 5종 + orders/)만.
-if ! rsync -a --delete \
+#    ★--delete-excluded 필수: 매니페스트에서 빠진 기존 게시 파일을 실제로 제거
+#      (--delete 만으로는 exclude 에 걸린 파일이 보호되어 잔존 — 2026-07-12 실측).
+#      .git 은 protect 로 삭제 방어, .nojekyll/index.html 은 rsync 직후 재생성.
+if ! rsync -a --delete --delete-excluded \
+  --filter='protect /.git' \
   --exclude='/.*' \
   --exclude='/index.html' \
   --include='/wrap.html' \
