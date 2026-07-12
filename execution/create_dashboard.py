@@ -92,6 +92,52 @@ TOP_NAV_CSS = """
 """.replace('PRETENDARD_STACK_PLACEHOLDER', PRETENDARD_STACK)
 
 
+# ── WRAP 전용 네비 (2026-07-12 개편: 상단=하위탭, 좌측=Dashboard 섹션 목차) ──
+# 공유 top_nav_html()/sidebar_html()/TOP_NAV_CSS 는 무수정 — wrap 이름공간으로 격리.
+WRAP_TABS = [
+    ('dashboard',    'Dashboard'),
+    ('order',        'Order'),
+    ('disclosures',  '공시'),
+    ('contribution', '기여도'),
+    ('fee',          '수수료'),
+]
+WRAP_SECTIONS = [  # (id 전체 문자열 = 단일 출처 — 접두사 조립 금지)
+    ('wrap-sec-chart',     'CHART'),
+    ('wrap-sec-return',    'RETURN'),
+    ('wrap-sec-aum',       'AUM'),
+    ('wrap-sec-portfolio', 'Portfolio'),
+    ('wrap-sec-sector',    'SECTOR WEIGHT'),
+]
+
+WRAP_NAV_CSS = """
+/* WRAP 전용 — wrap.html <style>에서 반드시 TOP_NAV_CSS '뒤'에 삽입 (동일 특이성 후행 override) */
+.wrap-topnav .topnav-inner { padding-left: 28px; }  /* .has-sidebar .topnav-inner 228px 상쇄(브랜드가 topnav 안) */
+.wrap-topnav .topnav-tab { min-width: 0; padding: 10px 22px; }
+.wrap-sidebar { top: 72px; padding: 18px 10px; z-index: 90; }  /* 브랜드 배지 없음 → topnav 아래 시작 */
+#wrapPanelDashboard .category-section { scroll-margin-top: 88px; }
+.wrap-sec-chips { display: none; }
+@media (max-width: 1180px) {
+    .wrap-topnav .topnav-inner { gap: 16px; }
+    .wrap-topnav .topnav-tabs { min-width: 0; overflow-x: auto; scrollbar-width: thin; }
+    .wrap-topnav .topnav-tab { flex: 0 0 auto; }
+}
+@media (max-width: 900px) {
+    .wrap-sec-chips { display: flex; gap: 8px; overflow-x: auto; position: sticky; top: 72px; z-index: 80; background: #fff; padding: 8px 4px; margin: 0 0 16px; }
+    .wrap-sec-chip { flex: 0 0 auto; padding: 8px 16px; border: 1.5px solid #d1d5db; border-radius: 999px; background: #fff; color: #444; font-size: 0.88rem; font-weight: 600; text-decoration: none; font-family: PRETENDARD_STACK_PLACEHOLDER; }
+    .wrap-sec-chip.active { color: #2d7a3a; border-color: #2d7a3a; background: #f0f7f2; }
+}
+@media (max-width: 800px) {
+    .wrap-sec-chips { top: 52px; }  /* 공유 CSS의 topnav 52px 구간과 일치 */
+    .wrap-topnav .topnav-tab { padding: 6px 12px; }
+}
+@media print {
+    .wrap-topnav, .wrap-sidebar, .wrap-sec-chips { display: none !important; }
+    #mainContent.has-sidebar { padding: 0 !important; }
+    #mainContent.has-sidebar .topnav { margin: 0; }
+}
+""".replace('PRETENDARD_STACK_PLACEHOLDER', PRETENDARD_STACK)
+
+
 def _resolve_main_key(active):
     """Given an active page key, return the main tab key it belongs to."""
     for main_key, _, _, children in TOP_NAV_MAIN:
@@ -132,22 +178,45 @@ def sidebar_html(active=''):
     return f'<aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a>{links}</aside>'
 
 
+def wrap_top_nav_html():
+    """WRAP 전용 상단 네비: Life WRAP 브랜드 + 하위 탭 5개 (JS 전환).
+
+    공유 top_nav_html()과 완전 분리 — 다른 페이지 영향 0. 탭은 href에 해시를
+    두되 return false 로 기본 차단 → 게이트 인증 실패 시 해시가 바뀌지 않는다.
+    """
+    parts = []
+    for key, label in WRAP_TABS:
+        active = ' active' if key == 'dashboard' else ''
+        aria = ' aria-current="page"' if key == 'dashboard' else ''
+        parts.append(
+            f'<a href="#{key}" onclick="wrapSwitchTab(\'{key}\');return false;" '
+            f'data-wrap-tab="{key}" class="topnav-tab{active}"{aria}>{label}</a>')
+    tabs = ''.join(parts)
+    return ('<nav class="topnav wrap-topnav"><div class="topnav-inner">'
+            '<a href="wrap.html" class="topnav-brand">Life WRAP</a>'
+            f'<div class="topnav-tabs">{tabs}</div></div></nav>')
+
+
 def wrap_sidebar_html():
-    """Render the WRAP-specific sidebar (Dashboard / Order / 공시 / 기여도 / 수수료, JS tab switcher)."""
-    items = [
-        ('dashboard',    'Dashboard'),
-        ('order',        'Order'),
-        ('disclosures',  '공시'),
-        ('contribution', '기여도'),
-        ('fee',          '수수료'),
-    ]
+    """WRAP Dashboard 섹션 목차 (전 탭 상시 표시, 클릭 시 Dashboard 전환+스크롤).
+
+    브랜드(index.html 링크) 없음 — WRAP은 팀원 전용 독립 페이지 (2026-07-12 개편).
+    """
     links = ''.join(
-        f'<a href="#" onclick="wrapSwitchTab(\'{tab}\');return false;" '
-        f'data-wrap-tab="{tab}" '
-        f'class="sidebar-link{" active" if tab == "dashboard" else ""}">{label}</a>'
-        for tab, label in items
-    )
-    return f'<aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a>{links}</aside>'
+        f'<a href="#{sec_id}" onclick="wrapGoSection(\'{sec_id}\');return false;" '
+        f'class="sidebar-link" data-wrap-sec="{sec_id}">{label}</a>'
+        for sec_id, label in WRAP_SECTIONS)
+    return ('<aside class="sidebar wrap-sidebar" id="wrapSectionNav" '
+            f'aria-label="Dashboard sections">{links}</aside>')
+
+
+def wrap_section_chips_html():
+    """모바일(≤900px) 섹션 점프 칩 — 사이드바 숨김 구간의 대안."""
+    chips = ''.join(
+        f'<a href="#{sec_id}" onclick="wrapGoSection(\'{sec_id}\');return false;" '
+        f'class="wrap-sec-chip" data-wrap-sec="{sec_id}">{label}</a>'
+        for sec_id, label in WRAP_SECTIONS)
+    return f'<div class="wrap-sec-chips">{chips}</div>'
 
 
 def top_nav_html(active=''):
@@ -3094,7 +3163,7 @@ def _build_wrap_chart_section(category_label):
         """.replace('NAV_DATA_PLACEHOLDER', nav_data_json).replace('COLORS_PLACEHOLDER', colors_json).replace('RAW_DATA_PLACEHOLDER', raw_data_json)
 
         return f"""
-        <div class="category-section">
+        <div class="category-section" id="wrap-sec-chart">
             <h2 class="category-title">{category_label}</h2>
             <div style="display:flex;gap:16px;align-items:flex-start;justify-content:center;max-width:1800px;margin:0 auto;">
                 <div style="min-width:180px;">{list_html}</div>
@@ -3442,7 +3511,7 @@ def create_aum_table():
         """.replace('AUM_DATA_PLACEHOLDER', aum_chart_json)
 
         return f"""
-        <div class="category-section">
+        <div class="category-section" id="wrap-sec-aum">
             <h2 class="category-title">AUM</h2>
             <div style="display:flex;gap:100px;align-items:flex-start;max-width:1800px;margin:0 auto;">
                 <div style="width:370px;">
@@ -4048,7 +4117,7 @@ def create_wrap_returns_table():
         monthly_card = create_wrap_monthly_returns_table()
 
         return f"""
-        <div class="category-section">
+        <div class="category-section" id="wrap-sec-return">
             <h2 class="category-title">RETURN</h2>
             <div style="max-width:1000px;margin:0 auto;background:#fff;border-radius:10px;padding:16px 20px;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
@@ -6670,7 +6739,7 @@ def create_dashboard():
                 sector_html = create_sector_section_html()
                 if sector_html:
                     wrap_html += f"""
-            <div class="category-section">
+            <div class="category-section" id="wrap-sec-sector">
                 <h2 class="category-title">SECTOR WEIGHT</h2>
                 <div class="portfolio-section-wrapper">
                     {sector_html}
@@ -6684,7 +6753,7 @@ def create_dashboard():
                 portfolio_html = create_portfolio_tables_html()
                 if portfolio_html:
                     wrap_html += f"""
-            <div class="category-section">
+            <div class="category-section" id="wrap-sec-portfolio">
                 <h2 class="category-title">Portfolio</h2>
                 <div class="portfolio-section-wrapper">
                     {portfolio_html}
@@ -7856,6 +7925,7 @@ def create_dashboard():
         .pw-error {{ color: #dc2626; font-size: 0.9rem; margin-top: 10px; display: none; }}
         .pw-hidden {{ display: none !important; }}
         {TOP_NAV_CSS}
+        {WRAP_NAV_CSS}
     </style>
 </head>
 <body>
@@ -7870,7 +7940,7 @@ def create_dashboard():
     </div>
 
     <div id="mainContent" class="pw-hidden has-sidebar">
-    {top_nav_html('wrap')}
+    {wrap_top_nav_html()}
     {wrap_sidebar_html()}
     <header>
         <h1>📈 WRAP</h1>
@@ -7878,6 +7948,7 @@ def create_dashboard():
     </header>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
+    {wrap_section_chips_html()}
     {wrap_html}
     </div>
 
@@ -7940,13 +8011,26 @@ def create_dashboard():
         return false;
     }}
 
-    async function wrapSwitchTab(tab) {{
-        // Order / 기여도 / 수수료 진입 시 추가 비밀번호 체크 (sha256('2026'), 동일 게이트 공유)
+    // ── WRAP 네비게이션: 탭=상단, 섹션=좌측 (2026-07-12 개편) ──
+    var WRAP_TAB_KEYS = ['dashboard', 'order', 'disclosures', 'contribution', 'fee'];
+    var WRAP_SEC_IDS  = ['wrap-sec-chart', 'wrap-sec-return', 'wrap-sec-aum', 'wrap-sec-portfolio', 'wrap-sec-sector'];
+    var wrapCurrentTab = 'dashboard';
+    var wrapNavSeq = 0;  // 비동기 게이트 중 전환 경합 방지 토큰
+
+    async function wrapSwitchTab(tab, opts) {{
+        opts = opts || {{}};
+        var seq = ++wrapNavSeq;
+        // (불변) Order / 기여도 / 수수료 진입 시 추가 비밀번호 체크 (sha256('2026'), 동일 게이트 공유)
         if ((tab === 'order' || tab === 'contribution' || tab === 'fee') && !(await checkOrderAumPw(TAB_PW_LABELS[tab]))) {{
-            return;  // 인증 실패 시 탭 전환 취소
+            history.replaceState(null, '', '#' + wrapCurrentTab);  // 취소 시 해시-화면 일치 복원
+            return false;
         }}
-        document.querySelectorAll('.sidebar-link[data-wrap-tab]').forEach(function(el) {{
-            el.classList.toggle('active', el.getAttribute('data-wrap-tab') === tab);
+        if (seq !== wrapNavSeq) return false;  // 대기 중 더 새로운 전환 발생 → 이번 요청 폐기
+        wrapCurrentTab = tab;
+        document.querySelectorAll('[data-wrap-tab]').forEach(function(el) {{
+            var on = el.getAttribute('data-wrap-tab') === tab;
+            el.classList.toggle('active', on);
+            if (on) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current');
         }});
         document.getElementById('wrapPanelDashboard').style.display = tab === 'dashboard' ? 'block' : 'none';
         document.getElementById('wrapPanelContribution').style.display = tab === 'contribution' ? 'block' : 'none';
@@ -7956,7 +8040,50 @@ def create_dashboard():
         if (tab === 'contribution' && typeof loadContribution === 'function') loadContribution();
         if (tab === 'disclosures' && typeof loadDisclosures === 'function') loadDisclosures();
         if (tab === 'order' && typeof loadOrder === 'function') loadOrder();
+        if (!opts.preserveHash) history.replaceState(null, '', '#' + tab);  // pushState 금지(히스토리 스팸 방지)
+        if (tab === 'dashboard') updateWrapSectionActive();  // 복귀 시 스파이 수동 갱신
+        return true;
     }}
+
+    // 좌측 목차·모바일 칩: 어느 탭이든 Dashboard 전환 후 섹션 스크롤
+    async function wrapGoSection(secId) {{
+        if (!(await wrapSwitchTab('dashboard', {{ preserveHash: true }}))) return;
+        var el = document.getElementById(secId);
+        if (!el) return;
+        el.scrollIntoView({{  // display 전환 후 레이아웃은 동기 재계산 → rAF 불필요
+            behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+            block: 'start'
+        }});
+        history.replaceState(null, '', '#' + secId);
+    }}
+
+    // 스크롤 스파이: 기준선(96px = sticky nav 72px + 여유)을 지난 '마지막' 섹션 = active
+    var wrapSecEls = null, wrapSpyTick = false;
+    function updateWrapSectionActive() {{
+        if (document.getElementById('mainContent').classList.contains('pw-hidden')) return;  // 게이트 전 무동작
+        if (wrapCurrentTab !== 'dashboard') return;
+        if (!wrapSecEls) wrapSecEls = WRAP_SEC_IDS
+            .map(function(id) {{ return document.getElementById(id); }})
+            .filter(Boolean);  // 목록 1회 캐시
+        if (!wrapSecEls.length) return;
+        var active = wrapSecEls[0];
+        wrapSecEls.forEach(function(sec) {{
+            if (sec.getBoundingClientRect().top <= 96) active = sec;
+        }});
+        if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) {{
+            active = wrapSecEls[wrapSecEls.length - 1];  // 최하단 예외: 마지막 섹션 강제
+        }}
+        document.querySelectorAll('[data-wrap-sec]').forEach(function(el) {{  // 사이드바+칩 동시
+            var on = el.getAttribute('data-wrap-sec') === active.id;
+            el.classList.toggle('active', on);
+            if (on) el.setAttribute('aria-current', 'location'); else el.removeAttribute('aria-current');
+        }});
+    }}
+    window.addEventListener('scroll', function() {{
+        if (wrapSpyTick) return;
+        wrapSpyTick = true;
+        requestAnimationFrame(function() {{ wrapSpyTick = false; updateWrapSectionActive(); }});
+    }}, {{ passive: true }});
 
     // PORTFOLIO 탭 상품 버튼 전환 (.fee-subtab 스타일 재사용, [data-pf-btn] 스코프)
     function pfSwitchTab(idx) {{
@@ -7979,10 +8106,16 @@ def create_dashboard():
         if (rev) rev.style.display = which === 'revenue' ? 'block' : 'none';
     }}
 
-    // 상단 네비 WRAP 드롭다운 / 타 페이지에서 wrap.html#tab 진입 시 해당 탭으로 전환
+    // 해시 라우터 — 함수명 유지(checkPw() 성공 경로가 이 이름을 호출: 무수정).
+    // 탭 해시(#order 등, 타 페이지 WRAP 드롭다운 딥링크)와 섹션 해시(#wrap-sec-*) 공존.
     function wrapTabFromHash() {{
-        var h = (location.hash || '').replace('#', '');
-        if (['dashboard', 'contribution', 'disclosures', 'order', 'fee'].indexOf(h) !== -1) wrapSwitchTab(h);
+        var h = decodeURIComponent((location.hash || '').replace('#', ''));
+        if (WRAP_TAB_KEYS.indexOf(h) !== -1) {{ wrapSwitchTab(h, {{ preserveHash: true }}); return; }}
+        if (WRAP_SEC_IDS.indexOf(h) !== -1) {{
+            var el = document.getElementById(h);
+            if (el) el.scrollIntoView();  // 초기 딥링크는 auto — 게이트 해제 직후 애니메이션 금지
+        }}
+        updateWrapSectionActive();  // 게이트 해제·해시 진입 시 스파이 초기 동기화
     }}
     window.addEventListener('hashchange', wrapTabFromHash);
     if (sessionStorage.getItem('wrap_auth') === '1') wrapTabFromHash();
