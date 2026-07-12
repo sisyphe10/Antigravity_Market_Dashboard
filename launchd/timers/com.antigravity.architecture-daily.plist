@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.antigravity.architecture-daily</string>
+    <key>UserName</key>
+    <string>sisyphe</string>
+    <key>WorkingDirectory</key>
+    <string>/Users/sisyphe/Antigravity_Market_Dashboard</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/sisyphe/Antigravity_Market_Dashboard/scripts/update_architecture_daily.sh</string>
+    </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>/Users/sisyphe</string>
+        <key>PATH</key>
+        <string>/Users/sisyphe/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>LANG</key>
+        <string>en_US.UTF-8</string>
+    </dict>
+    <!-- KST 21:40 매일 — 아키텍처 wiki/registry/페이지 자동 최신화 (2026-07-12) -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>21</integer>
+        <key>Minute</key>
+        <integer>40</integer>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>/Users/sisyphe/Antigravity_Market_Dashboard/logs/launchd/architecture-daily.out</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/sisyphe/Antigravity_Market_Dashboard/logs/launchd/architecture-daily.err</string>
+    <key>RunAtLoad</key>
+    <false/>
+</dict>
+</plist>
