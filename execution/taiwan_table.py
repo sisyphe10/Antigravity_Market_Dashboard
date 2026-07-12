@@ -41,9 +41,11 @@ def load_rows():
 # Namespaced (.tw-*) so it can coexist with the market page's own styles.
 # .tw-container replaces the generic .table-container to avoid collisions.
 TAIWAN_CSS = """
-        .tw-wrapper { max-width: 1180px; margin: 0 auto; padding: 4px 24px 40px; position: relative; }
-        .tw-toolbar { max-width: 1180px; margin: 0 auto; padding: 0 24px 10px; display: flex;
-                      justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+        /* outer가 테이블 실폭에 맞춰 늘어나며 중앙 정렬 — 고정 1180px로 우측이 잘리던 문제 해결 (2026-07-12) */
+        .tw-outer { width: fit-content; max-width: 100%; margin: 0 auto; }
+        .tw-wrapper { padding: 4px 0 28px; position: relative; }
+        .tw-toolbar { padding: 0 0 10px; display: flex;
+                      justify-content: flex-end; align-items: center; gap: 12px; flex-wrap: wrap; }
         .tw-toolbar .tw-src { color: #666; font-size: 0.82rem; }
         .tw-dl-btn { background: #dc2626; color: #fff; border: none; border-radius: 8px;
                      padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
@@ -67,7 +69,7 @@ TAIWAN_CSS = """
         .tw-filter-item { display: block; padding: 3px 6px; font-size: 0.8rem; color: #111;
                            white-space: nowrap; cursor: pointer; }
         .tw-filter-item:hover { background: #f3f4f6; border-radius: 6px; }
-        .tw-foot { max-width: 1180px; margin: 12px auto 0; padding: 0 24px; color: #999; font-size: 12px; text-align: center; }
+        .tw-foot { margin: 12px 0 0; color: #999; font-size: 12px; text-align: center; }
         .tw-more-btn { display: block; width: 100%; padding: 10px; background: #f9fafb; border: none;
                        border-top: 1px solid #e5e7eb; color: #374151; font-size: 13px; font-weight: 600;
                        cursor: pointer; font-family: inherit; }
@@ -78,13 +80,15 @@ TAIWAN_CSS = """
 def taiwan_panel_html(payload_rows):
     # 출처·종목수·최신월 안내 문구는 2026-07-12 사용자 요청으로 제거 (Download 버튼만 유지)
     return """
-    <div class="tw-toolbar">
-        <button class="tw-dl-btn" onclick="twDownload()">Download</button>
+    <div class="tw-outer">
+        <div class="tw-toolbar">
+            <button class="tw-dl-btn" onclick="twDownload()">Download</button>
+        </div>
+        <div class="tw-wrapper">
+            <div class="tw-container"><div id="twTableHost"></div></div>
+        </div>
+        <div class="tw-foot">발표일은 데이터 수집 시점 기준이며 과거분은 공란 · 본 자료는 참고용이며 투자 조언이 아닙니다</div>
     </div>
-    <div class="tw-wrapper">
-        <div class="tw-container"><div id="twTableHost"></div></div>
-    </div>
-    <div class="tw-foot">발표일은 데이터 수집 시점 기준이며 과거분은 공란 · 본 자료는 참고용이며 투자 조언이 아닙니다</div>
     """
 
 
