@@ -108,6 +108,12 @@ xlsx_tracked() { git ls-files --error-unmatch "$XLSX" >/dev/null 2>&1; }
 for attempt in 1 2 3 4 5; do
   if git push origin "HEAD:${BRANCH}"; then
     echo "safe_push: pushed on attempt ${attempt}."
+    # gh-pages 게시 트리거 (맥 전용 — GHA 러너는 Linux 가드로 스킵. 백그라운드
+    # 실행이라 호출측 타임아웃과 무관, 실패해도 push 결과에 영향 없음)
+    if [ "$(uname)" = "Darwin" ] && [ -x "$(pwd)/scripts/publish_pages.sh" ]; then
+      mkdir -p "$(pwd)/logs/launchd" 2>/dev/null || true
+      ( nohup bash "$(pwd)/scripts/publish_pages.sh" >> "$(pwd)/logs/launchd/publish_pages.log" 2>&1 & ) || true
+    fi
     exit 0
   fi
 

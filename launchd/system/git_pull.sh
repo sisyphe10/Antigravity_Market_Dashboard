@@ -62,7 +62,8 @@ main() {
   # Discard bot-regenerated dirty HTML so the pull can fast-forward.
   git checkout -- "*.html" 2>/dev/null || true
 
-  local out rc
+  local out rc before after
+  before="$(git rev-parse HEAD 2>/dev/null)"
   out="$(git pull origin main --quiet 2>&1)"; rc=$?
 
   if [ "$rc" -eq 0 ]; then
@@ -70,6 +71,13 @@ main() {
     if [ "$(read_int "$FAILCOUNT")" != 0 ] || [ -f "$NOTIFIED" ]; then
       atomic_write "$FAILCOUNT" 0
       rm -f "$NOTIFIED"
+    fi
+    # 원격발 변경(GHA 데이터 push, 노트북 xlsx 등) 수신 시 게시 갱신 —
+    # ts.net 스냅숏 + gh-pages 둘 다. 백그라운드·베스트에포트(각자 락으로 직렬화).
+    after="$(git rev-parse HEAD 2>/dev/null)"
+    if [ -n "$before" ] && [ "$before" != "$after" ]; then
+      ( nohup bash "$REPO/scripts/publish_snapshot.sh" >> "$LOGDIR/publish.log" 2>&1 & ) || true
+      ( nohup bash "$REPO/scripts/publish_pages.sh" >> "$LOGDIR/publish_pages.log" 2>&1 & ) || true
     fi
     exit 0
   fi
