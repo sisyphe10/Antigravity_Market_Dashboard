@@ -1,8 +1,8 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 113 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 119 components._
 
-Updated: 2026-07-07
+Updated: 2026-07-12
 
 ## By domain
 
@@ -106,11 +106,12 @@ Updated: 2026-07-07
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — Bot
 - [투자일지 시장데이터 (fetch_journal_data.py)](src-journal-data.md) — Source
 
-### 운영 · 인프라 (25)
+### 운영 · 인프라 (31)
 - [architecture.html (아키텍처)](page-architecture.md) — Page
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — Infra
 - [Claude Code Action (@claude 이벤트)](gha-claude-code.md) — GHA
 - [Daily Data Health Check (11:00)](gha-daily-health-check.md) — GHA
+- [gh-pages 게시 (publish_pages.sh, 팀 WRAP 전용)](web-publish-pages.md) — Infra
 - [GHA 잡 흡수 layer (launchd Phase 2 초안)](launchd-gha-phase2.md) — Infra
 - [GitHub (정본 repo · Pages · Actions)](infra-github.md) — Infra
 - [Google Workspace (Sheets · Calendar · Drive)](ext-google-workspace.md) — External
@@ -118,13 +119,18 @@ Updated: 2026-07-07
 - [index.html (랜딩)](page-index.md) — Page
 - [landing_highlights.json](store-landing-highlights.md) — Dataset
 - [repo 동기화 (git-pull */5)](daemon-git-pull.md) — Watcher
+- [Sisyphe repo 클론 서빙 (시간당 pull)](daemon-sisyphe-pull.md) — Watcher
 - [UPS (무정전 전원, 맥미니 대비)](infra-ups.md) — Infra
 - [Wrap_NAV 워처 (watch_wrap_nav.py)](watcher-wrap-nav.md) — Watcher
+- [개인 스냅숏 게시 (publish_snapshot.sh)](web-publish-snapshot.md) — Infra
 - [대시보드 생성기 (create_dashboard.py)](src-create-dashboard.md) — Source
 - [랜딩 하이라이트 생성 (create_landing_highlights.py)](src-landing-highlights.md) — Source
 - [랜딩 하이라이트 타이머 (18:45)](timer-landing-highlights.md) — Timer
+- [맥미니 데이터레이크 (~/datalake + 문답 위키)](infra-datalake.md) — Infra
 - [비활성 워크플로 (weather · calendar · portfolio-report)](gha-disabled.md) — GHA
+- [아키텍처 자동 최신화 타이머 (21:40, claude 헤드리스)](timer-architecture-daily.md) — Timer
 - [외부 데이터 API/소스 집합](ext-data-apis.md) — External
+- [웹 서빙 (Caddy · com.antigravity.web)](web-caddy.md) — Infra
 - [일일 셀프체크 다이제스트 (08:50, dead-man's switch)](daemon-daily-selfcheck.md) — Timer
 - [작업용 노트북 (ASUS Vivobook, Windows)](infra-laptop.md) — Infra
 - [차트 렌더러 (draw_charts + draw_wrap_charts)](src-draw-charts.md) — Source
@@ -141,15 +147,16 @@ Updated: 2026-07-07
 - [Sisyphe-Bot (펀드/일상 텔레그램 봇)](bot-sisyphe.md) — 상시 (내부 잡 05:00~23:00), active
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — 상시 (06:00 다이제스트 등), active
 
-### Timer (10)
+### Timer (11)
 - [ETF 구성종목 수집 타이머 (etf-collect 16:30)](timer-etf-collect.md) — 16:30 매일, active
 - [ETF 수집 재시도 타이머 (etf-collect-retry 18:00)](timer-etf-collect-retry.md) — 18:00 매일, active
 - [Featured KIS 수집 타이머 (15:50, 신고가)](timer-featured-kis.md) — 15:50 매일, active
 - [KODEX 섹터 타이머 (23:30, +KOSIS/일본capex 편승)](timer-kodex-sectors.md) — 23:30 매일, active
 - [랜딩 하이라이트 타이머 (18:45)](timer-landing-highlights.md) — 18:45 매일, active
 - [실적봇 타이머 (earnings-bot)](timer-earnings-bot.md) — 08:00 매일, active
+- [아키텍처 자동 최신화 타이머 (21:40, claude 헤드리스)](timer-architecture-daily.md) — 21:40 매일, active
 - [액티브 ETF 변동 알림 타이머 (19:00)](timer-etf-active-alert.md) — 19:00 매일, active
-- [일일 셀프체크 다이제스트 (08:50, dead-man's switch)](daemon-daily-selfcheck.md) — 08:50 매일, planned
+- [일일 셀프체크 다이제스트 (08:50, dead-man's switch)](daemon-daily-selfcheck.md) — 08:50 매일, active
 - [종목마스터 주간 갱신 타이머 (토 09:00)](timer-update-stock-master.md) — 토 09:00, active
 - [호텔 ADR 타이머 (12:00, 은퇴)](timer-hotel-adr.md) — 12:00 매일 (disabled), retired
 
@@ -171,7 +178,7 @@ Updated: 2026-07-07
 - [휴면 push-트리거 워크플로 (backfill · merge-ddr5)](gha-dormant-push.md) — push 트리거 (사실상 휴면), frozen
 
 ### Page (12)
-- [architecture.html (아키텍처)](page-architecture.md) — 수동 관리, active
+- [architecture.html (아키텍처)](page-architecture.md) — 생성=21:40 (architecture-daily), active
 - [etf.html (ETF 구성종목)](page-etf.md) — 생성=18:30 Featured 2차, active
 - [featured.html (Featured TOP)](page-featured.md) — 생성=Featured 잡(16:20/18:30/08:30), active
 - [hotels.html (호텔 ADR, 동결)](page-hotels.md) — frozen
@@ -204,11 +211,15 @@ Updated: 2026-07-07
 - [sources_state/ + kna_state.json](store-sources-state.md) — 소스 폴링 시, active
 - [Wrap_NAV.xlsx (랩 운용 원장)](store-wrap-nav-xlsx.md) — 사용자 편집 + finalize, active
 
-### Infra (7)
+### Infra (11)
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — 부팅 시 1회, planned
-- [GHA 잡 흡수 layer (launchd Phase 2 초안)](launchd-gha-phase2.md) — 이관 후 각 잡 스케줄, planned
+- [gh-pages 게시 (publish_pages.sh, 팀 WRAP 전용)](web-publish-pages.md) — push 성공 훅 / 원격변경 훅, active
+- [GHA 잡 흡수 layer (launchd Phase 2 초안)](launchd-gha-phase2.md) — 이관 완료 — 각 잡 스케줄, active
 - [GitHub (정본 repo · Pages · Actions)](infra-github.md) — 상시, active
 - [UPS (무정전 전원, 맥미니 대비)](infra-ups.md) — planned
+- [개인 스냅숏 게시 (publish_snapshot.sh)](web-publish-snapshot.md) — 잡 성공 훅 (여러 잡), active
+- [맥미니 데이터레이크 (~/datalake + 문답 위키)](infra-datalake.md) — 잡별 (20:30 / 23:20 / 23:50 / 일 10:00 / 20분), active
+- [웹 서빙 (Caddy · com.antigravity.web)](web-caddy.md) — 상시, active
 - [작업용 노트북 (ASUS Vivobook, Windows)](infra-laptop.md) — 상시, active
 - [컴퓨트 호스트 (Oracle VM → 맥미니)](infra-vm-macmini.md) — 상시, active
 - [텔레그램 (알림·상호작용 채널)](infra-telegram.md) — 상시, active
@@ -263,14 +274,15 @@ Updated: 2026-07-07
 - [포트폴리오 표 생성 (create_portfolio_tables.py)](src-create-portfolio-tables.md) — 체인 (finalize/recalc/crawl), active
 - [해외 기업 IR/뉴스룸 (sources/foreign_ir.py)](src-foreign-ir.md) — 07:30 / 20:00 (ra-sisyphe), active
 
-### Watcher (3)
+### Watcher (4)
 - [repo 동기화 (git-pull */5)](daemon-git-pull.md) — */5분, active
+- [Sisyphe repo 클론 서빙 (시간당 pull)](daemon-sisyphe-pull.md) — 매시 (1h), active
 - [Wrap_NAV 워처 (watch_wrap_nav.py)](watcher-wrap-nav.md) — 상시, active
 - [크래시 루프 워처 (*/5)](daemon-crash-watcher.md) — */5분, planned
 
 ## By project
 
-### antigravity (113)
+### antigravity (119)
 - [architecture.html (아키텍처)](page-architecture.md) — Page
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — Infra
 - [Claude Code Action (@claude 이벤트)](gha-claude-code.md) — GHA
@@ -302,6 +314,7 @@ Updated: 2026-07-07
 - [Finalize Pending Orders + AUM (16:00)](gha-finalize-orders.md) — GHA
 - [FRED 미국 매크로 36종 (fetch_fred_data.py)](src-fred.md) — Source
 - [Generic Source Pipeline (execution/sources/)](src-generic-pipeline.md) — Source
+- [gh-pages 게시 (publish_pages.sh, 팀 WRAP 전용)](web-publish-pages.md) — Infra
 - [GHA 잡 흡수 layer (launchd Phase 2 초안)](launchd-gha-phase2.md) — Infra
 - [GitHub (정본 repo · Pages · Actions)](infra-github.md) — Infra
 - [Google Workspace (Sheets · Calendar · Drive)](ext-google-workspace.md) — External
@@ -330,6 +343,7 @@ Updated: 2026-07-07
 - [SemiAnalysis 소스 (sources/semianalysis.py)](src-semianalysis.md) — Source
 - [SeonyuDuo repo (가족 영상 · 운동봇 연동)](ext-seonyuduo-repo.md) — External
 - [SiliconData 지수 3종 (fetch_silicondata_index.py)](src-silicondata.md) — Source
+- [Sisyphe repo 클론 서빙 (시간당 pull)](daemon-sisyphe-pull.md) — Watcher
 - [Sisyphe 가계부/운동 대시보드 + 투자일지 시트](ext-sisyphe.md) — External
 - [Sisyphe-Bot (펀드/일상 텔레그램 봇)](bot-sisyphe.md) — Bot
 - [sources_state/ + kna_state.json](store-sources-state.md) — Store
@@ -344,6 +358,7 @@ Updated: 2026-07-07
 - [wrap.html (WRAP 대시보드)](page-wrap.md) — Page
 - [Wrap_NAV 워처 (watch_wrap_nav.py)](watcher-wrap-nav.md) — Watcher
 - [Wrap_NAV.xlsx (랩 운용 원장)](store-wrap-nav-xlsx.md) — Store
+- [개인 스냅숏 게시 (publish_snapshot.sh)](web-publish-snapshot.md) — Infra
 - [국민연금 적립금 (fetch_nps_fund.py)](src-nps-fund.md) — Source
 - [금투협 예탁금/신용잔고/반대매매 (fetch_kofia_stats.py)](src-kofia.md) — Source
 - [기여도 데이터 (create_contribution_data.py)](src-create-contribution-data.md) — Source
@@ -354,18 +369,21 @@ Updated: 2026-07-07
 - [랜딩 하이라이트 생성 (create_landing_highlights.py)](src-landing-highlights.md) — Source
 - [랜딩 하이라이트 타이머 (18:45)](timer-landing-highlights.md) — Timer
 - [마스터 시장 크롤러 (market_crawler.py)](src-market-crawler.md) — Source
+- [맥미니 데이터레이크 (~/datalake + 문답 위키)](infra-datalake.md) — Infra
 - [비활성 워크플로 (weather · calendar · portfolio-report)](gha-disabled.md) — GHA
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — Bot
 - [수익률 계산 (calculate_returns.py)](src-calculate-returns.md) — Source
 - [실적 캘린더 sync (earnings_calendar_sync.py)](src-earnings-calendar-sync.md) — Source
 - [실적봇 타이머 (earnings-bot)](timer-earnings-bot.md) — Timer
 - [실적봇 파이프라인 (execution/earnings_bot/)](src-earnings-pipeline.md) — Source
+- [아키텍처 자동 최신화 타이머 (21:40, claude 헤드리스)](timer-architecture-daily.md) — Timer
 - [액티브 ETF 변동 (active_etf_changes.py)](src-active-etf.md) — Source
 - [액티브 ETF 변동 알림 타이머 (19:00)](timer-etf-active-alert.md) — Timer
 - [외국인 보유비중 (fetch_krx_foreign.py)](src-krx-foreign.md) — Source
 - [외부 데이터 API/소스 집합](ext-data-apis.md) — External
 - [원전 뉴스 KNA/KNEISS (sources/kna.py)](src-kna-kneiss.md) — Source
 - [월별 수익률 11지수 (fetch_monthly_returns.py)](src-monthly-returns.md) — Source
+- [웹 서빙 (Caddy · com.antigravity.web)](web-caddy.md) — Infra
 - [유니버스 수집 (fetch_universe.py)](src-universe.md) — Source
 - [일본 CAPEX 지표 (fetch_japan_capex.py)](src-japan-capex.md) — Source
 - [일일 셀프체크 다이제스트 (08:50, dead-man's switch)](daemon-daily-selfcheck.md) — Timer
