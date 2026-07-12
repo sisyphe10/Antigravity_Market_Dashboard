@@ -189,7 +189,8 @@
         .pw-hidden { display: none !important; }
         
 .topnav { background: #fff; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 100; }
-.topnav-inner { max-width: 1400px; margin: 0 auto; padding: 0 28px; display: flex; align-items: center; height: 72px; gap: 32px; }
+body { margin: 0; }  /* UA 기본 8px 마진 가드 — 전 페이지 이미 0이라 시각 변화 없음 */
+.topnav-inner { max-width: 1400px; margin: 0 auto; padding: 0 28px; box-sizing: border-box; display: flex; align-items: center; height: 72px; gap: 32px; }  /* box-sizing 명시 — 전역 리셋 없는 페이지(market·wrap)에서 1456px로 계산돼 28px 어긋나던 근본 원인 */
 .topnav-brand { font-size: 1.3rem; font-weight: 800; letter-spacing: 1.5px; color: #111; white-space: nowrap; text-decoration: none; font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; }
 .topnav-brand:hover { color: #2d7a3a; }
 .topnav-tabs { display: flex; gap: 12px; flex: 1; align-items: center; }
@@ -214,7 +215,7 @@
 /* Left sidebar — Market-group(+Architecture) pages. 2026-07-12 통일: topnav 는 모든
    페이지에서 랜딩(/)과 동일(전폭·탭 좌측 28px 시작)하고, 사이드바는 topnav '아래'(top:72px)에서
    시작한다 (기존: 사이드바가 nav 위에 얹혀 탭이 228px로 밀림 → 페이지 간 nav 점프 원인). */
-.sidebar { position: fixed; top: 72px; left: 0; bottom: 0; width: 200px; padding: 144px 10px 18px 10px; background: #fff; border-right: 1px solid #e5e7eb; overflow-y: auto; z-index: 90; box-sizing: border-box; }
+.sidebar { position: fixed; top: 72px; left: 0; bottom: 0; width: 200px; padding: 90px 10px 18px 10px; background: #fff; border-right: 1px solid #e5e7eb; overflow-y: auto; z-index: 90; box-sizing: border-box; }  /* padding-top 90 = 배지 72 + 간격 18 (top:72 이동분 보정) */
 .sidebar-brand { position: absolute; top: 0; left: 0; right: 0; height: 72px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; letter-spacing: 2px; color: #1a1a1a; border-bottom: 1px solid #e5e7eb; background: #fff; text-decoration: none; font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; }
 .sidebar-brand:hover { color: #2d7a3a; }
 .sidebar-link { display: block; padding: 12px 11px; margin-bottom: 7px; color: #444; text-decoration: none; font-size: 0.94rem; font-weight: 600; border-radius: 999px; border: 1.5px solid transparent; transition: all 0.12s; font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; text-align: center; }
@@ -231,8 +232,8 @@
 
         
 /* WRAP 전용 — wrap.html <style>에서 반드시 TOP_NAV_CSS '뒤'에 삽입 (동일 특이성 후행 override) */
-body { padding-top: 0; }  /* body 상단 20px 여백 제거 — 미제거 시 페이지 최상단에서 sticky nav가 y=20에 떠
-                             사이드바(top:72 고정) 첫 항목을 가림 (2026-07-12 사용자 리포트 fix) */
+body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav 부유(사이드바 가림), 좌우 20px는
+                          nav 전폭 미달의 원인. 본문 여백은 .has-sidebar padding(!important)이 대체 */
 .wrap-topnav .topnav-inner { padding-left: 28px; }  /* .has-sidebar .topnav-inner 228px 상쇄(브랜드가 topnav 안) */
 .wrap-topnav .topnav-tab { min-width: 0; padding: 10px 22px; }
 .wrap-updated { margin-left: auto; font-size: 12px; color: #888; white-space: nowrap; font-style: italic; }
@@ -289,7 +290,7 @@ body { padding-top: 0; }  /* body 상단 20px 여백 제거 — 미제거 시 �
     </div>
 
     <div id="mainContent" class="pw-hidden has-sidebar">
-    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><div class="topnav-tabs"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div><span class="wrap-updated">Updated: 2026-07-12 16:52:28 KST</span></div></nav>
+    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><div class="topnav-tabs"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div><span class="wrap-updated">Updated: 2026-07-12 17:21:28 KST</span></div></nav>
     <aside class="sidebar wrap-sidebar" id="wrapSectionNav" aria-label="WRAP navigation"><div class="wrap-side-group on" data-side-for="dashboard"><a href="#wrap-sec-chart" onclick="wrapGoSection('wrap-sec-chart');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-chart">CHART</a><a href="#wrap-sec-return" onclick="wrapGoSection('wrap-sec-return');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-return">RETURN</a><a href="#wrap-sec-aum" onclick="wrapGoSection('wrap-sec-aum');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-aum">AUM</a><a href="#wrap-sec-portfolio" onclick="wrapGoSection('wrap-sec-portfolio');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-portfolio">Portfolio</a><a href="#wrap-sec-sector" onclick="wrapGoSection('wrap-sec-sector');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-sector">SECTOR WEIGHT</a></div><div class="wrap-side-group" data-side-for="order" id="wrapSideOrder"></div><div class="wrap-side-group" data-side-for="contribution" id="wrapSideContrib"></div><div class="wrap-side-group" data-side-for="fee"><a href="#" onclick="feeSwitchSub('rate');return false;" class="sidebar-link active" data-side-fee="rate">요율</a><a href="#" onclick="feeSwitchSub('revenue');return false;" class="sidebar-link" data-side-fee="revenue">매출</a></div></aside>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
