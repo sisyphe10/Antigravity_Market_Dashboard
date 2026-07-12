@@ -1,6 +1,6 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 119 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 120 components._
 
 Updated: 2026-07-12
 
@@ -106,7 +106,7 @@ Updated: 2026-07-12
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — Bot
 - [투자일지 시장데이터 (fetch_journal_data.py)](src-journal-data.md) — Source
 
-### 운영 · 인프라 (31)
+### 운영 · 인프라 (32)
 - [architecture.html (아키텍처)](page-architecture.md) — Page
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — Infra
 - [Claude Code Action (@claude 이벤트)](gha-claude-code.md) — GHA
@@ -124,6 +124,7 @@ Updated: 2026-07-12
 - [Wrap_NAV 워처 (watch_wrap_nav.py)](watcher-wrap-nav.md) — Watcher
 - [개인 스냅숏 게시 (publish_snapshot.sh)](web-publish-snapshot.md) — Infra
 - [대시보드 생성기 (create_dashboard.py)](src-create-dashboard.md) — Source
+- [데이터레이크 문답 웹 UI 데몬 (AoE Wiki, 127.0.0.1:8787)](daemon-datalake-webui.md) — Infra
 - [랜딩 하이라이트 생성 (create_landing_highlights.py)](src-landing-highlights.md) — Source
 - [랜딩 하이라이트 타이머 (18:45)](timer-landing-highlights.md) — Timer
 - [맥미니 데이터레이크 (~/datalake + 문답 위키)](infra-datalake.md) — Infra
@@ -211,13 +212,14 @@ Updated: 2026-07-12
 - [sources_state/ + kna_state.json](store-sources-state.md) — 소스 폴링 시, active
 - [Wrap_NAV.xlsx (랩 운용 원장)](store-wrap-nav-xlsx.md) — 사용자 편집 + finalize, active
 
-### Infra (11)
+### Infra (12)
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — 부팅 시 1회, planned
 - [gh-pages 게시 (publish_pages.sh, 팀 WRAP 전용)](web-publish-pages.md) — push 성공 훅 / 원격변경 훅, active
 - [GHA 잡 흡수 layer (launchd Phase 2 초안)](launchd-gha-phase2.md) — 이관 완료 — 각 잡 스케줄, active
 - [GitHub (정본 repo · Pages · Actions)](infra-github.md) — 상시, active
 - [UPS (무정전 전원, 맥미니 대비)](infra-ups.md) — planned
 - [개인 스냅숏 게시 (publish_snapshot.sh)](web-publish-snapshot.md) — 잡 성공 훅 (여러 잡), active
+- [데이터레이크 문답 웹 UI 데몬 (AoE Wiki, 127.0.0.1:8787)](daemon-datalake-webui.md) — 상시, active
 - [맥미니 데이터레이크 (~/datalake + 문답 위키)](infra-datalake.md) — 잡별 (20:30 / 23:20 / 23:50 / 일 10:00 / 20분), active
 - [웹 서빙 (Caddy · com.antigravity.web)](web-caddy.md) — 상시, active
 - [작업용 노트북 (ASUS Vivobook, Windows)](infra-laptop.md) — 상시, active
@@ -282,7 +284,7 @@ Updated: 2026-07-12
 
 ## By project
 
-### antigravity (119)
+### antigravity (120)
 - [architecture.html (아키텍처)](page-architecture.md) — Page
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — Infra
 - [Claude Code Action (@claude 이벤트)](gha-claude-code.md) — GHA
@@ -366,6 +368,7 @@ Updated: 2026-07-12
 - [다나와 DRAM 최저가 (fetch_danawa_price.py)](src-danawa.md) — Source
 - [대만 월매출 (fetch_taiwan_revenue.py)](src-taiwan-revenue.md) — Source
 - [대시보드 생성기 (create_dashboard.py)](src-create-dashboard.md) — Source
+- [데이터레이크 문답 웹 UI 데몬 (AoE Wiki, 127.0.0.1:8787)](daemon-datalake-webui.md) — Infra
 - [랜딩 하이라이트 생성 (create_landing_highlights.py)](src-landing-highlights.md) — Source
 - [랜딩 하이라이트 타이머 (18:45)](timer-landing-highlights.md) — Timer
 - [마스터 시장 크롤러 (market_crawler.py)](src-market-crawler.md) — Source

@@ -2191,28 +2191,6 @@
    ]
   },
   {
-   "id": "daemon-catchup",
-   "project": "antigravity",
-   "domain": "ops-infra",
-   "type": "infra",
-   "name": "catch-up 러너 (부팅 시 놓친 잡 복구)",
-   "runs_on": "vm_macmini",
-   "schedule_kst": "부팅 시 1회",
-   "status": "planned",
-   "desc_md": "맥미니 이전에서 systemd `Persistent=true`를 대체하는 launchd 데몬(`com.antigravity.catchup`, RunAtLoad=true). 부팅 시 1회, 맥이 꺼진 동안 마지막 스케줄 발화를 놓친 타이머 잡을 판정해 순차 재실행한다.\n\n- 판정: 각 `schedule.tsv` 행의 cron 직전 발화(`cron_prev.py`) vs 성공 stamp 비교 → stamp<직전발화면 재실행 큐잉.\n- 재실행은 잡 wrapper(`run_timer_job.sh`/`run_gha_job.sh`)를 통과 → 잡별 락·stamp·notify를 그대로 태움(이중실행 방어).\n- 정전/재부팅이 잦은 가정 호스팅(UPS 부재) 가용성의 핵심. **초안·검증 완료, 맥미니 컷오버 시 활성(planned).**",
-   "code": [
-    "launchd/system/catchup_runner.sh",
-    "launchd/system/cron_prev.py",
-    "launchd/system/com.antigravity.catchup.plist"
-   ],
-   "reads": [
-    "launchd/timers/schedule.tsv"
-   ],
-   "depends_on": [
-    "infra-vm-macmini"
-   ]
-  },
-  {
    "id": "daemon-sisyphe-pull",
    "project": "antigravity",
    "domain": "ops-infra",
@@ -2235,6 +2213,162 @@
     "infra-vm-macmini",
     "ext-sisyphe"
    ]
+  },
+  {
+   "id": "infra-datalake",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "infra",
+   "name": "맥미니 데이터레이크 (~/datalake + 문답 위키)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "잡별 (20:30 / 23:20 / 23:50 / 일 10:00 / 20분)",
+   "status": "active",
+   "desc_md": "2026-07-11 신설(코드는 레포 `datalake/`, 데이터 정본은 레포 외부 `~/datalake`). 덮어쓰기형 산출물의 과거 유실을 막고, 전 상장·해외 유니버스 일봉 종가를 백필하며, DuckDB+Claude API 웹 UI로 자연어 질의를 제공하는 로컬 데이터레이크. 백필 스크립트(KRX/KIS·FRED·ECOS·KOFIA·벤치마크·해외)와 `build_catalog.py` 카탈로그가 함께 있다.\n\n- **launchd 잡 5종**(맥미니 전용):\n  - `datalake-market-update`(20:30) — 일별 증분 적재(`daily_market_update.py`).\n  - `datalake-research-export`(23:20) — Research Notes 원문(`research_notes.db`)을 일별 `.md`+미디어로 아카이브.\n  - `datalake-snapshot`(23:50) — 덮어쓰기형 레포 산출물 일별 gzip 스냅샷.\n  - `datalake-backup`(일 10:00) — private repo 백업(duckdb/staging 제외).\n  - `datalake-sheets-mirror`(20분 폴링, 2026-07-12 신규) — 시지프+선유듀오 구글시트 미러 → `~/datalake/sheets`.\n- 저장: 데이터셋별 연도 파티션 parquet(`kr_ohlcv`·`kr_marcap`·`overseas_ohlcv` 등) + `market.duckdb` 뷰. KRX 수정주가 캡 실측 대응으로 `kr_ohlcv`(무수정)/`kr_ohlcv_adj` 분리.\n- 웹 UI(`datalake/webui/`)는 duckdb 샌드박스(allowed→잠금) 위에서 md 코퍼스 문답. 상세: `datalake/DESIGN.md`.",
+   "code": [
+    "datalake/",
+    "datalake/daily_market_update.py",
+    "datalake/mirror_sheets.py",
+    "datalake/launchd/"
+   ],
+   "reads": [
+    "ext-data-apis",
+    "ext-google-workspace",
+    "store-research-notes-db"
+   ],
+   "writes": [
+    "~/datalake (parquet · duckdb · md 아카이브)"
+   ],
+   "depends_on": [
+    "infra-vm-macmini",
+    "ext-data-apis"
+   ],
+   "alerts": "launchd wrapper 실패 → notify → 텔레그램"
+  },
+  {
+   "id": "page-architecture",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "page",
+   "name": "architecture.html (아키텍처)",
+   "runs_on": "github",
+   "schedule_kst": "생성=21:40 (architecture-daily)",
+   "status": "active",
+   "desc_md": "생태계 아키텍처를 보여주는 페이지. **registry 기반 자동 생성물** — `architecture/wiki/*.md` 코퍼스가 단일 출처이고, `rebuild_registry_from_wiki.py`가 registry.json을, `create_architecture.py`가 architecture.html(+wiki/INDEX.md)을 재생성한다. **직접 수정 금지.**\n\n- 매일 밤 [[timer-architecture-daily]](21:40, claude 헤드리스)가 최근 변경을 위키에 반영하고 registry·html을 재생성해 push → 수동 동기화 부담이 해소됐다.\n- 컴포넌트(봇/잡/페이지/데이터) 추가·변경은 위키 .md를 고쳐야 도식도·타임라인·위키가 함께 갱신된다.",
+   "code": [
+    "architecture.html",
+    "architecture/registry.json",
+    "execution/create_architecture.py"
+   ],
+   "reads": [
+    "architecture/registry.json"
+   ],
+   "depends_on": [
+    "timer-architecture-daily"
+   ],
+   "links": [
+    {
+     "label": "라이브",
+     "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/architecture.html"
+    }
+   ]
+  },
+  {
+   "id": "timer-architecture-daily",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "timer",
+   "name": "아키텍처 자동 최신화 타이머 (21:40, claude 헤드리스)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "21:40 매일",
+   "status": "active",
+   "desc_md": "2026-07-12 신설. 매일 밤 21:40 KST 최근 변경을 읽어 아키텍처 위키를 자동 최신화하는 launchd 타이머(`com.antigravity.architecture-daily` → `update_architecture_daily.sh`). 이 컴포넌트 자신도 위키가 기술하는 실체다.\n\n- ★**전용 클론**(`~/srv/arch_updater/repo`)에서 실행 — 프로덕션 트리의 `reset --hard`/5분 pull cron과 worktree 경합을 원천 차단. push는 이 클론에서 직접, 프로덕션·ts.net 반영은 git-pull cron(원격발 publish 훅)이 5분 내 자동 수행.\n- 흐름: 클론 최신화 → 최근 변경 요약(기본 26h, `ARCH_SINCE`/catch-up은 `ARCH_MAX_TURNS` 상향) → `claude -p`가 **`architecture/wiki/`만** 편집(허용목록 가드로 그 외 변경 전부 폐기) → `rebuild_registry_from_wiki.py`로 registry 재생성 → `create_architecture.py`로 architecture.html 재생성 → `[skip ci]` 커밋 + push(fetch-merge 재시도 3회).\n- claude는 월클럭 워치독(기본 30분, `ARCH_WALL_SEC`)과 `--max-turns`(기본 40)로 제한. 데이터 블록 내 텍스트는 비신뢰(프롬프트 주입 격리).",
+   "code": [
+    "launchd/timers/com.antigravity.architecture-daily.plist",
+    "scripts/update_architecture_daily.sh"
+   ],
+   "writes": [
+    "page-architecture"
+   ],
+   "depends_on": [
+    "infra-vm-macmini",
+    "infra-github",
+    "page-architecture"
+   ],
+   "alerts": "FAIL → notify_sisyphe_failure.sh architecture-daily → 텔레그램"
+  },
+  {
+   "id": "web-publish-pages",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "infra",
+   "name": "gh-pages 게시 (publish_pages.sh, 팀 WRAP 전용)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "push 성공 훅 / 원격변경 훅",
+   "status": "active",
+   "desc_md": "2026-07-12 신설. GitHub Pages를 **팀원 WRAP 전용**으로 축소하며 도입된 `gh-pages` 브랜치 단일 writer. main에서 생성 대시보드 HTML 추적을 중단(git 비대화 대응)하고, 게시물은 이 브랜치로만 내보낸다.\n\n- 호출: `safe_commit_push.sh` push 성공 훅 + `git_pull.sh` 원격발 변경 훅. 맥 전용(GHA 러너에선 조용히 스킵).\n- 게시 대상 = `wrap.html` + wrap이 fetch하는 데이터(`portfolio_data.json`·`contribution_data.json`·`disclosures.json`·`stock_master.json` + `orders/*.json`)만. 개인 대시보드(index/market/featured/etf…)는 공개 안 함 → 개인 뷰는 ts.net([[web-caddy]]).\n- 루트(`/`)는 `wrap.html`로 즉시 리다이렉트(개인 랜딩 미노출).\n- ★rsync 금지(실측): `--delete`는 매니페스트 축소 미반영, `--delete-excluded`는 `.git` 파괴 → \"전체 비우고 명시 복사\"가 결정적. 커밋 수 임계(3000) 초과 시에만 orphan squash 재생성.\n- 게시 전용 clone(`~/srv/pages_publisher/repo`)에서만 gh-pages를 만짐(운영 checkout과 완전 분리).",
+   "code": [
+    "scripts/publish_pages.sh"
+   ],
+   "reads": [
+    "page-wrap",
+    "store-portfolio-data",
+    "store-contribution-data",
+    "store-orders-pending"
+   ],
+   "writes": [
+    "infra-github"
+   ],
+   "depends_on": [
+    "infra-github",
+    "page-wrap"
+   ],
+   "alerts": "실패해도 잡 rc 무관 · 다음 게시에서 재시도"
+  },
+  {
+   "id": "daemon-catchup",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "infra",
+   "name": "catch-up 러너 (부팅 시 놓친 잡 복구)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "부팅 시 1회",
+   "status": "planned",
+   "desc_md": "맥미니 이전에서 systemd `Persistent=true`를 대체하는 launchd 데몬(`com.antigravity.catchup`, RunAtLoad=true). 부팅 시 1회, 맥이 꺼진 동안 마지막 스케줄 발화를 놓친 타이머 잡을 판정해 순차 재실행한다.\n\n- 판정: 각 `schedule.tsv` 행의 cron 직전 발화(`cron_prev.py`) vs 성공 stamp 비교 → stamp<직전발화면 재실행 큐잉.\n- 재실행은 잡 wrapper(`run_timer_job.sh`/`run_gha_job.sh`)를 통과 → 잡별 락·stamp·notify를 그대로 태움(이중실행 방어).\n- 정전/재부팅이 잦은 가정 호스팅(UPS 부재) 가용성의 핵심. **초안·검증 완료, 맥미니 컷오버 시 활성(planned).**",
+   "code": [
+    "launchd/system/catchup_runner.sh",
+    "launchd/system/cron_prev.py",
+    "launchd/system/com.antigravity.catchup.plist"
+   ],
+   "reads": [
+    "launchd/timers/schedule.tsv"
+   ],
+   "depends_on": [
+    "infra-vm-macmini"
+   ]
+  },
+  {
+   "id": "daemon-datalake-webui",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "infra",
+   "name": "데이터레이크 문답 웹 UI 데몬 (AoE Wiki, 127.0.0.1:8787)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "상시",
+   "status": "active",
+   "desc_md": "2026-07-12 신설. 데이터레이크의 DuckDB+Claude API 자연어 문답 UI를 **상시 데몬**으로 띄우는 launchd 서비스(`com.antigravity.datalake-webui`, RunAtLoad + KeepAlive). 기존 수동 기동(`run_webui.sh`)을 데몬화해, ts.net 대시보드의 'Wiki' 탭 백엔드로 상주시킨다.\n\n- 바인딩: FastAPI 서버(`server.py`)가 `127.0.0.1:8787` 루프백 고정 — 직접 공개 노출 없음. Caddy가 `/wiki/*`를 이 포트로 리버스 프록시([[web-caddy]]) → AoE 'Wiki' 탭.\n- 질의 대상 = 데이터레이크 md 코퍼스 + duckdb 샌드박스(allowed→잠금). 소스·설계 상세는 [[infra-datalake]] / `datalake/DESIGN.md`.\n- launchd 관리: `ThrottleInterval=15`로 크래시 루프 억제, 로그는 `logs/launchd/datalake-webui.{out,err}`. 계산 잡 아님(catch-up 대상 아님).",
+   "code": [
+    "datalake/launchd/com.antigravity.datalake-webui.plist",
+    "datalake/webui/run_webui.sh",
+    "datalake/webui/server.py"
+   ],
+   "reads": [
+    "infra-datalake"
+   ],
+   "depends_on": [
+    "infra-vm-macmini",
+    "infra-datalake"
+   ],
+   "alerts": "KeepAlive=true (launchd 자동 재기동, ThrottleInterval=15)"
   },
   {
    "id": "ext-data-apis",
@@ -2359,36 +2493,6 @@
    ]
   },
   {
-   "id": "infra-datalake",
-   "project": "antigravity",
-   "domain": "ops-infra",
-   "type": "infra",
-   "name": "맥미니 데이터레이크 (~/datalake + 문답 위키)",
-   "runs_on": "vm_macmini",
-   "schedule_kst": "잡별 (20:30 / 23:20 / 23:50 / 일 10:00 / 20분)",
-   "status": "active",
-   "desc_md": "2026-07-11 신설(코드는 레포 `datalake/`, 데이터 정본은 레포 외부 `~/datalake`). 덮어쓰기형 산출물의 과거 유실을 막고, 전 상장·해외 유니버스 일봉 종가를 백필하며, DuckDB+Claude API 웹 UI로 자연어 질의를 제공하는 로컬 데이터레이크. 백필 스크립트(KRX/KIS·FRED·ECOS·KOFIA·벤치마크·해외)와 `build_catalog.py` 카탈로그가 함께 있다.\n\n- **launchd 잡 5종**(맥미니 전용):\n  - `datalake-market-update`(20:30) — 일별 증분 적재(`daily_market_update.py`).\n  - `datalake-research-export`(23:20) — Research Notes 원문(`research_notes.db`)을 일별 `.md`+미디어로 아카이브.\n  - `datalake-snapshot`(23:50) — 덮어쓰기형 레포 산출물 일별 gzip 스냅샷.\n  - `datalake-backup`(일 10:00) — private repo 백업(duckdb/staging 제외).\n  - `datalake-sheets-mirror`(20분 폴링, 2026-07-12 신규) — 시지프+선유듀오 구글시트 미러 → `~/datalake/sheets`.\n- 저장: 데이터셋별 연도 파티션 parquet(`kr_ohlcv`·`kr_marcap`·`overseas_ohlcv` 등) + `market.duckdb` 뷰. KRX 수정주가 캡 실측 대응으로 `kr_ohlcv`(무수정)/`kr_ohlcv_adj` 분리.\n- 웹 UI(`datalake/webui/`)는 duckdb 샌드박스(allowed→잠금) 위에서 md 코퍼스 문답. 상세: `datalake/DESIGN.md`.",
-   "code": [
-    "datalake/",
-    "datalake/daily_market_update.py",
-    "datalake/mirror_sheets.py",
-    "datalake/launchd/"
-   ],
-   "reads": [
-    "ext-data-apis",
-    "ext-google-workspace",
-    "store-research-notes-db"
-   ],
-   "writes": [
-    "~/datalake (parquet · duckdb · md 아카이브)"
-   ],
-   "depends_on": [
-    "infra-vm-macmini",
-    "ext-data-apis"
-   ],
-   "alerts": "launchd wrapper 실패 → notify → 텔레그램"
-  },
-  {
    "id": "infra-github",
    "project": "antigravity",
    "domain": "ops-infra",
@@ -2421,34 +2525,6 @@
    "desc_md": "모든 봇 알림과 실패 경보가 나가는 메신저 채널. 봇별 전용 토큰(Sisyphe/RA_Sisyphe/Research Notes/선유듀오)으로 분리 운용.\n\n- 다이제스트·리서치 알림·투자유의 요약·공시·실적·운동 기록 대화가 여기로 흐른다.\n- 잡 실패는 `scripts/notify_sisyphe_failure.sh`가 텔레그램으로 발송(systemd OnFailure / launchd wrapper 공통).\n- 맥미니 self-check(08:50)는 정상이어도 매일 1회 발송 → 침묵 자체가 dead-man's switch.",
    "code": [
     "scripts/notify_sisyphe_failure.sh"
-   ]
-  },
-  {
-   "id": "page-architecture",
-   "project": "antigravity",
-   "domain": "ops-infra",
-   "type": "page",
-   "name": "architecture.html (아키텍처)",
-   "runs_on": "github",
-   "schedule_kst": "생성=21:40 (architecture-daily)",
-   "status": "active",
-   "desc_md": "생태계 아키텍처를 보여주는 페이지. **registry 기반 자동 생성물** — `architecture/wiki/*.md` 코퍼스가 단일 출처이고, `rebuild_registry_from_wiki.py`가 registry.json을, `create_architecture.py`가 architecture.html(+wiki/INDEX.md)을 재생성한다. **직접 수정 금지.**\n\n- 매일 밤 [[timer-architecture-daily]](21:40, claude 헤드리스)가 최근 변경을 위키에 반영하고 registry·html을 재생성해 push → 수동 동기화 부담이 해소됐다.\n- 컴포넌트(봇/잡/페이지/데이터) 추가·변경은 위키 .md를 고쳐야 도식도·타임라인·위키가 함께 갱신된다.",
-   "code": [
-    "architecture.html",
-    "architecture/registry.json",
-    "execution/create_architecture.py"
-   ],
-   "reads": [
-    "architecture/registry.json"
-   ],
-   "depends_on": [
-    "timer-architecture-daily"
-   ],
-   "links": [
-    {
-     "label": "라이브",
-     "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/architecture.html"
-    }
    ]
   },
   {
@@ -2506,30 +2582,6 @@
    "desc_md": "랩 상품 운용의 원장 엑셀. NEW(종목·비중)/AUM/기준가/수익률 시트로 구성. 사용자가 직접 편집하는 유일한 바이너리 데이터.\n\n- NEW/AUM은 사람(또는 finalize 잡)이 채우고, 기준가/수익률은 calculate_wrap_nav/returns가 자동 생성.\n- 워처가 저장을 감지→3-way merge→push, recalc_wrap_nav 워크플로가 라이브 반영.\n- 바이너리라 push 충돌 위험 → safe_commit_push xlsx 가드 + merge_wrap_nav 3-way 병합.\n- Excel에서 열려있으면 쓰기 PermissionError."
   },
   {
-   "id": "timer-architecture-daily",
-   "project": "antigravity",
-   "domain": "ops-infra",
-   "type": "timer",
-   "name": "아키텍처 자동 최신화 타이머 (21:40, claude 헤드리스)",
-   "runs_on": "vm_macmini",
-   "schedule_kst": "21:40 매일",
-   "status": "active",
-   "desc_md": "2026-07-12 신설. 매일 밤 21:40 KST 최근 변경을 읽어 아키텍처 위키를 자동 최신화하는 launchd 타이머(`com.antigravity.architecture-daily` → `update_architecture_daily.sh`). 이 컴포넌트 자신도 위키가 기술하는 실체다.\n\n- ★**전용 클론**(`~/srv/arch_updater/repo`)에서 실행 — 프로덕션 트리의 `reset --hard`/5분 pull cron과 worktree 경합을 원천 차단. push는 이 클론에서 직접, 프로덕션·ts.net 반영은 git-pull cron(원격발 publish 훅)이 5분 내 자동 수행.\n- 흐름: 클론 최신화 → 최근 변경 요약(기본 26h, `ARCH_SINCE`/catch-up은 `ARCH_MAX_TURNS` 상향) → `claude -p`가 **`architecture/wiki/`만** 편집(허용목록 가드로 그 외 변경 전부 폐기) → `rebuild_registry_from_wiki.py`로 registry 재생성 → `create_architecture.py`로 architecture.html 재생성 → `[skip ci]` 커밋 + push(fetch-merge 재시도 3회).\n- claude는 월클럭 워치독(기본 30분, `ARCH_WALL_SEC`)과 `--max-turns`(기본 40)로 제한. 데이터 블록 내 텍스트는 비신뢰(프롬프트 주입 격리).",
-   "code": [
-    "launchd/timers/com.antigravity.architecture-daily.plist",
-    "scripts/update_architecture_daily.sh"
-   ],
-   "writes": [
-    "page-architecture"
-   ],
-   "depends_on": [
-    "infra-vm-macmini",
-    "infra-github",
-    "page-architecture"
-   ],
-   "alerts": "FAIL → notify_sisyphe_failure.sh architecture-daily → 텔레그램"
-  },
-  {
    "id": "timer-hotel-adr",
    "project": "antigravity",
    "domain": "market-global",
@@ -2555,49 +2607,23 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "상시",
    "status": "active",
-   "desc_md": "2026-07-11 신설된 맥미니 자체 서빙 계층. Caddy(`com.antigravity.web`, homebrew, KeepAlive)가 게시 스냅숏을 tailscale(ts.net)로 내보내는 개인 대시보드의 웹서버.\n\n- 입구는 `tailscale serve` 프록시뿐 — Caddy는 `http://:8377` + `bind 127.0.0.1` 루프백 고정(공개 노출 없음). 127.0.0.1:8377 직접 바인딩은 프록시 Host 불일치로 빈 200이 나던 실측 함정 회피.\n- 루트(`/`)는 `~/srv/dashboard/current`(게시 스냅숏, `publish_snapshot.sh` 산출) 정적 서빙 — **스냅숏 디렉토리 직접 수정 금지**.\n- `/sisyphe/*`는 별도 root(`~/srv/sisyphe_repo`, 시간당 pull 클론)로 매핑 — `.git`/`scripts` 등은 404 차단.\n- HTML/JSON/CSV·인덱스는 `Cache-Control: no-cache`. 접근 로그는 `~/srv/dashboard/logs/access.log`(20MiB 롤).",
+   "desc_md": "2026-07-11 신설된 맥미니 자체 서빙 계층. Caddy(`com.antigravity.web`, homebrew, KeepAlive)가 게시 스냅숏을 tailscale(ts.net)로 내보내는 개인 대시보드의 웹서버.\n\n- 입구는 `tailscale serve` 프록시뿐 — Caddy는 `http://:8377` + `bind 127.0.0.1` 루프백 고정(공개 노출 없음). 127.0.0.1:8377 직접 바인딩은 프록시 Host 불일치로 빈 200이 나던 실측 함정 회피.\n- 루트(`/`)는 `~/srv/dashboard/current`(게시 스냅숏, `publish_snapshot.sh` 산출) 정적 서빙 — **스냅숏 디렉토리 직접 수정 금지**.\n- `/sisyphe/*`는 별도 root(`~/srv/sisyphe_repo`, 시간당 pull 클론)로 매핑 — `.git`/`scripts` 등은 404 차단.\n- `/wiki/*`는 `127.0.0.1:8787`([[daemon-datalake-webui]])로 리버스 프록시 — 데이터레이크 문답 UI를 AoE 'Wiki' 탭으로 통합(2026-07-12, `redir /wiki /wiki/ 301`).\n- HTML/JSON/CSV·인덱스는 `Cache-Control: no-cache`. 접근 로그는 `~/srv/dashboard/logs/access.log`(20MiB 롤).",
    "code": [
     "launchd/web/Caddyfile",
     "launchd/web/com.antigravity.web.plist"
    ],
    "reads": [
     "web-publish-snapshot",
-    "daemon-sisyphe-pull"
+    "daemon-sisyphe-pull",
+    "daemon-datalake-webui"
    ],
    "depends_on": [
     "infra-vm-macmini",
     "web-publish-snapshot",
-    "daemon-sisyphe-pull"
+    "daemon-sisyphe-pull",
+    "daemon-datalake-webui"
    ],
    "alerts": "KeepAlive=true (launchd 자동 재기동)"
-  },
-  {
-   "id": "web-publish-pages",
-   "project": "antigravity",
-   "domain": "ops-infra",
-   "type": "infra",
-   "name": "gh-pages 게시 (publish_pages.sh, 팀 WRAP 전용)",
-   "runs_on": "vm_macmini",
-   "schedule_kst": "push 성공 훅 / 원격변경 훅",
-   "status": "active",
-   "desc_md": "2026-07-12 신설. GitHub Pages를 **팀원 WRAP 전용**으로 축소하며 도입된 `gh-pages` 브랜치 단일 writer. main에서 생성 대시보드 HTML 추적을 중단(git 비대화 대응)하고, 게시물은 이 브랜치로만 내보낸다.\n\n- 호출: `safe_commit_push.sh` push 성공 훅 + `git_pull.sh` 원격발 변경 훅. 맥 전용(GHA 러너에선 조용히 스킵).\n- 게시 대상 = `wrap.html` + wrap이 fetch하는 데이터(`portfolio_data.json`·`contribution_data.json`·`disclosures.json`·`stock_master.json` + `orders/*.json`)만. 개인 대시보드(index/market/featured/etf…)는 공개 안 함 → 개인 뷰는 ts.net([[web-caddy]]).\n- 루트(`/`)는 `wrap.html`로 즉시 리다이렉트(개인 랜딩 미노출).\n- ★rsync 금지(실측): `--delete`는 매니페스트 축소 미반영, `--delete-excluded`는 `.git` 파괴 → \"전체 비우고 명시 복사\"가 결정적. 커밋 수 임계(3000) 초과 시에만 orphan squash 재생성.\n- 게시 전용 clone(`~/srv/pages_publisher/repo`)에서만 gh-pages를 만짐(운영 checkout과 완전 분리).",
-   "code": [
-    "scripts/publish_pages.sh"
-   ],
-   "reads": [
-    "page-wrap",
-    "store-portfolio-data",
-    "store-contribution-data",
-    "store-orders-pending"
-   ],
-   "writes": [
-    "infra-github"
-   ],
-   "depends_on": [
-    "infra-github",
-    "page-wrap"
-   ],
-   "alerts": "실패해도 잡 rc 무관 · 다음 게시에서 재시도"
   },
   {
    "id": "web-publish-snapshot",
