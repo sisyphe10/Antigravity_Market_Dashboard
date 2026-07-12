@@ -55,21 +55,16 @@ if [ "$CUR" != "$BRANCH" ]; then log "브랜치 이상($CUR) - 중단"; exit 1; 
 # 1) 화이트리스트 rsync — ★Pages = 팀원 WRAP 전용 (2026-07-12 사용자 확정)
 #    개인 대시보드(index/market/featured/etf/...)는 공개 게시하지 않는다. 개인 뷰 = ts.net.
 #    게시 대상 = wrap.html + wrap 이 fetch 하는 데이터(JSON 5종 + orders/)만.
-#    ★--delete-excluded 필수: 매니페스트에서 빠진 기존 게시 파일을 실제로 제거
-#      (--delete 만으로는 exclude 에 걸린 파일이 보호되어 잔존 — 2026-07-12 실측).
-#      .git 은 protect 로 삭제 방어, .nojekyll/index.html 은 rsync 직후 재생성.
-if ! rsync -a --delete --delete-excluded \
-  --filter='protect /.git' \
-  --exclude='/.*' \
-  --exclude='/index.html' \
-  --include='/wrap.html' \
-  --include='/portfolio_data.json' --include='/contribution_data.json' \
-  --include='/disclosures.json' --include='/stock_master.json' \
-  --include='/orders/' --include='/orders/*.json' \
-  --exclude='*' \
-  "$REPO/" "$WT/"; then
-  log "rsync 실패 - 중단"; exit 1
-fi
+#    ★rsync 금지 (2026-07-12 실측 2건): ①--delete 는 exclude 파일을 보호해 매니페스트
+#      축소가 반영 안 됨 ②--delete-excluded 는 protect 필터에도 .git 을 파괴.
+#      매니페스트가 작고 고정이므로 "전체 비우고 명시적 복사"가 가장 결정적이다.
+find "$WT" -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+cp "$REPO/wrap.html" "$WT/" || { log "wrap.html 복사 실패 - 중단"; exit 1; }
+for f in portfolio_data.json contribution_data.json disclosures.json stock_master.json; do
+  [ -f "$REPO/$f" ] && cp "$REPO/$f" "$WT/"
+done
+mkdir -p "$WT/orders"
+cp "$REPO"/orders/*.json "$WT/orders/" 2>/dev/null || true
 touch .nojekyll
 # 루트(/) 접근 = wrap.html 즉시 리다이렉트 (개인 랜딩 노출 없음, 팀원 편의)
 cat > index.html <<'HTML'
