@@ -108,7 +108,7 @@ form.addEventListener('submit', async (e) => {
   const wait = add('bot', '');
   wait.querySelector('.bubble').innerHTML = '<span class="thinking">데이터 조회 중... (수십 초 걸릴 수 있습니다)</span>';
   try {
-    const res = await fetch('/ask', {
+    const res = await fetch('ask', {  // 상대경로 — /wiki/ 프록시 하위에서도 동작 (2026-07-12)
       method: 'POST', headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({question, history})
     });

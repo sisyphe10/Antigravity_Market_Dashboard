@@ -45,14 +45,15 @@ rel = sys.argv[1]
 # WRAP topnav 아이템(탭+드롭다운) 통째 제거 → 잔여 wrap 링크 개별 제거
 item_pat = re.compile(r'<div class="topnav-item"><a href="wrap\.html"[^>]*>.*?</div></div>', re.S)
 link_pat = re.compile(r'<a[^>]*href="wrap\.html[^"]*"[^>]*>.*?</a>\s*', re.S)
-SISYPHE = ('<div class="topnav-item"><a href="/sisyphe/index.html" class="topnav-tab">Sisyphe</a>'
-           '<div class="topnav-dropdown">'
-           '<a href="/sisyphe/dashboard.html" class="topnav-sub">가계부·운동</a>'
-           '<a href="/sisyphe/journal.html" class="topnav-sub">투자일지</a>'
-           '</div></div>')
+# 탭 순서 = Market > Wiki > Sisyphe > Architecture (2026-07-12 사용자 확정)
+INJECT = ('<div class="topnav-item"><a href="/wiki/" class="topnav-tab">Wiki</a></div>'
+          '<div class="topnav-item"><a href="/sisyphe/index.html" class="topnav-tab">Sisyphe</a>'
+          '<div class="topnav-dropdown">'
+          '<a href="/sisyphe/dashboard.html" class="topnav-sub">가계부·운동</a>'
+          '<a href="/sisyphe/journal.html" class="topnav-sub">투자일지</a>'
+          '</div></div>')
 NAV_END = '</div></div></nav>'
-# 탭 순서 = Market > Sisyphe > Architecture (2026-07-12 사용자 확정)
-# → Architecture 아이템 '앞'에 주입 (active 변형 대응 정규식), 없으면 nav 끝 폴백
+# Architecture 아이템 '앞'에 주입 (active 변형 대응 정규식), 없으면 nav 끝 폴백
 arch_pat = re.compile(r'<div class="topnav-item"><a href="architecture\.html"')
 for f in glob.glob(os.path.join(rel, "*.html")):
     s = open(f, encoding="utf-8").read()
@@ -61,9 +62,9 @@ for f in glob.glob(os.path.join(rel, "*.html")):
     if 'topnav-tab">Sisyphe' not in n:
         m = arch_pat.search(n)
         if m:
-            n = n[:m.start()] + SISYPHE + n[m.start():]
+            n = n[:m.start()] + INJECT + n[m.start():]
         elif NAV_END in n:
-            n = n.replace(NAV_END, SISYPHE + NAV_END, 1)
+            n = n.replace(NAV_END, INJECT + NAV_END, 1)
     if n != s:
         open(f, "w", encoding="utf-8").write(n)
 PYEOF
