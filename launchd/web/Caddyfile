@@ -13,6 +13,12 @@ http://:8377 {
 	@fresh path / *.html *.json *.csv /sisyphe /sisyphe/
 	header @fresh Cache-Control "no-cache"
 
+	# Datalake 문답 위키 — AoE 'Wiki' 탭 (2026-07-12 통합, FastAPI 127.0.0.1:8787 프록시)
+	redir /wiki /wiki/ 301
+	handle_path /wiki/* {
+		reverse_proxy 127.0.0.1:8787
+	}
+
 	# Sisyphe 개인 대시보드 (가계부·운동·투자일지) — 2026-07-11 통합, 소스=git clone(~/srv/sisyphe_repo, 시간당 pull)
 	handle_path /sisyphe/* {
 		root * /Users/sisyphe/srv/sisyphe_repo

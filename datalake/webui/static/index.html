@@ -3,11 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Datalake 문답</title>
+<title>Wiki</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif;
+  html { overflow-y: scroll; }  /* 스크롤바 공간 상시 확보 — 전 페이지 nav 위치 통일 규칙 */
+  body { font-family: 'Pretendard Variable', Pretendard, -apple-system, 'Malgun Gothic', sans-serif;
          background: #f7f7f5; color: #000; height: 100vh; display: flex; flex-direction: column; }
+  /* ── AoE 공통 상단 내비 (다른 탭들과 동일, 2026-07-12) ── */
+  .topnav { background: #fff; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 100; }
+  .topnav-inner { max-width: 1400px; margin: 0 auto; padding: 0 28px; box-sizing: border-box; display: flex; align-items: center; height: 72px; gap: 32px; }
+  .topnav-tabs { display: flex; gap: 12px; flex: 1; align-items: center; }
+  .topnav-item { position: relative; }
+  .topnav-tab { box-sizing: border-box; min-width: 180px; justify-content: center; padding: 10px 24px; display: inline-flex; align-items: center; gap: 6px; color: #444; text-decoration: none; font-size: 1rem; font-weight: 600; border: 1.5px solid #d1d5db; border-radius: 999px; white-space: nowrap; background: #fff; transition: all 0.15s; cursor: pointer; line-height: normal; }
+  .topnav-tab:hover { color: #111; border-color: #2d7a3a; background: #f0f7f2; }
+  .topnav-tab.active { color: #fff; border-color: #2d7a3a; background: #2d7a3a; }
+  .topnav-dropdown { box-sizing: border-box; position: absolute; top: calc(100% + 8px); left: 0; min-width: 180px; width: 100%; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.10); padding: 6px; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity 0.15s, transform 0.15s, visibility 0.15s; z-index: 200; }
+  .topnav-item:hover .topnav-dropdown, .topnav-item:focus-within .topnav-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
+  .topnav-sub { display: block; padding: 9px 14px; color: #333; text-decoration: none; font-size: 0.9rem; font-weight: 500; border-radius: 8px; white-space: nowrap; text-align: center; line-height: normal; }
+  .topnav-sub:hover { background: #f3f4f6; color: #111; }
+  @media (max-width: 800px) {
+    .topnav-inner { padding: 0 12px; gap: 12px; height: 52px; }
+    .topnav-tab { padding: 6px 14px; font-size: 0.85rem; min-width: 0; }
+    .topnav-tabs { gap: 6px; }
+  }
   header { padding: 14px 20px; background: #fff; border-bottom: 1px solid #ddd;
            font-weight: 700; font-size: 16px; }
   header span { font-weight: 400; color: #666; font-size: 13px; margin-left: 8px; }
@@ -38,7 +57,8 @@
 </style>
 </head>
 <body>
-<header>Datalake 문답 <span>리서치 노트 · KRX/해외 종가 · 시스템 위키</span></header>
+<nav class="topnav"><div class="topnav-inner"><div class="topnav-tabs"><div class="topnav-item"><a href="/market.html" class="topnav-tab">Market</a><div class="topnav-dropdown"><a href="/market.html" class="topnav-sub">Data</a><a href="/taiwan.html" class="topnav-sub">Taiwan</a><a href="/universe.html" class="topnav-sub">Universe</a><a href="/universe_lab.html" class="topnav-sub">Universe Lab</a><a href="/featured.html" class="topnav-sub">Featured</a><a href="/market_alert.html" class="topnav-sub">투자유의종목</a><a href="/etf.html" class="topnav-sub">ETF</a><a href="/seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="/wiki/" class="topnav-tab active">Wiki</a></div><div class="topnav-item"><a href="/sisyphe/index.html" class="topnav-tab">Sisyphe</a><div class="topnav-dropdown"><a href="/sisyphe/dashboard.html" class="topnav-sub">가계부·운동</a><a href="/sisyphe/journal.html" class="topnav-sub">투자일지</a></div></div><div class="topnav-item"><a href="/architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
+<header>Wiki</header>
 <div id="chat"></div>
 <footer>
   <form id="form">
@@ -108,7 +128,7 @@ form.addEventListener('submit', async (e) => {
   const wait = add('bot', '');
   wait.querySelector('.bubble').innerHTML = '<span class="thinking">데이터 조회 중... (수십 초 걸릴 수 있습니다)</span>';
   try {
-    const res = await fetch('/ask', {
+    const res = await fetch('ask', {  // 상대경로 — /wiki/ 프록시 하위에서도 동작 (2026-07-12)
       method: 'POST', headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({question, history})
     });
