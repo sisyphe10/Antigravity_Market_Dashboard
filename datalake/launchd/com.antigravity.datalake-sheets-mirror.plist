@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.antigravity.datalake-sheets-mirror</string>
+    <key>UserName</key>
+    <string>__MACMINI_USER__</string>
+    <key>WorkingDirectory</key>
+    <string>__REPO__</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>__REPO__/datalake/launchd/run_datalake_job.sh</string>
+        <string>datalake-sheets-mirror</string>
+    </array>
+    <!-- 데몬 환경 표준 (CONTRACT v3): launchd 는 로그인 환경이 없음 -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>/Users/__MACMINI_USER__</string>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>LANG</key>
+        <string>en_US.UTF-8</string>
+    </dict>
+    <!-- 20분 폴링 — 가계부 시트 준실시간 미러 (Phase 0+2, 2026-07-12) -->
+    <key>StartInterval</key>
+    <integer>1200</integer>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>__REPO__/logs/launchd/datalake-sheets-mirror.out</string>
+    <key>StandardErrorPath</key>
+    <string>__REPO__/logs/launchd/datalake-sheets-mirror.err</string>
+</dict>
+</plist>
