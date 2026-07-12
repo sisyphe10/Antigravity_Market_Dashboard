@@ -140,3 +140,13 @@ backups/
 
 # cutover rsync marker (로컬 전용)
 .migration_rsync_marker
+
+# 생성 대시보드 HTML — gh-pages 게시 전용, main 추적 중단 (2026-07-12 D-수정안)
+/index.html
+/market.html
+/wrap.html
+/featured.html
+/etf.html
+/market_alert.html
+/seibro.html
+/universe.html
