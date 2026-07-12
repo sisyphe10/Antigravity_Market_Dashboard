@@ -51,12 +51,19 @@ SISYPHE = ('<div class="topnav-item"><a href="/sisyphe/index.html" class="topnav
            '<a href="/sisyphe/journal.html" class="topnav-sub">투자일지</a>'
            '</div></div>')
 NAV_END = '</div></div></nav>'
+# 탭 순서 = Market > Sisyphe > Architecture (2026-07-12 사용자 확정)
+# → Architecture 아이템 '앞'에 주입 (active 변형 대응 정규식), 없으면 nav 끝 폴백
+arch_pat = re.compile(r'<div class="topnav-item"><a href="architecture\.html"')
 for f in glob.glob(os.path.join(rel, "*.html")):
     s = open(f, encoding="utf-8").read()
     n = item_pat.sub("", s)
     n = link_pat.sub("", n)
-    if NAV_END in n and 'topnav-tab">Sisyphe' not in n:
-        n = n.replace(NAV_END, SISYPHE + NAV_END, 1)
+    if 'topnav-tab">Sisyphe' not in n:
+        m = arch_pat.search(n)
+        if m:
+            n = n[:m.start()] + SISYPHE + n[m.start():]
+        elif NAV_END in n:
+            n = n.replace(NAV_END, SISYPHE + NAV_END, 1)
     if n != s:
         open(f, "w", encoding="utf-8").write(n)
 PYEOF
