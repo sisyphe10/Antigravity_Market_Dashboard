@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-11 18:45:00 KST",
+  "updated_at": "2026-07-12 11:05:00 KST",
   "slots": [
     {
       "id": "market-1m-leader",
@@ -118,7 +118,7 @@
       "category": "Memory",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "DDR5 1W +1.6% ($62) — 하방 압력 완화",
+      "text": "DDR5 1W +1.6% ($62) — 저점 형성 가능성",
       "href": "market.html",
       "spark": {
         "series": [
@@ -2109,7 +2109,7 @@
       "category": "Commodity",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "리튬카보네이트 1M -6.5% — 공급 부담 가중",
+      "text": "리튬카보네이트 1M -6.5% — 약세 지속",
       "href": "market.html",
       "spark": {
         "series": [
