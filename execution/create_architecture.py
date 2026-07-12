@@ -411,6 +411,18 @@ a { color: #000; }
   .topnav-tabs { gap: 6px; }
 }
 
+/* ---- left sidebar (마켓 계열과 chrome 통일, 2026-07-12 — topnav 아래 top:72px 시작) ---- */
+.sidebar { position: fixed; top: 72px; left: 0; bottom: 0; width: 200px; padding: 144px 10px 18px 10px; background: #fff; border-right: 1px solid #e5e7eb; overflow-y: auto; z-index: 90; box-sizing: border-box; }
+.sidebar-brand { position: absolute; top: 0; left: 0; right: 0; height: 72px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; letter-spacing: 2px; color: #1a1a1a; border-bottom: 1px solid #e5e7eb; background: #fff; text-decoration: none; }
+.sidebar-brand:hover { color: #2d7a3a; }
+.sidebar-link { display: block; padding: 12px 11px; margin-bottom: 7px; color: #444; text-decoration: none; font-size: 0.94rem; font-weight: 600; border-radius: 999px; border: 1.5px solid transparent; transition: all 0.12s; text-align: center; }
+.sidebar-link:hover { background: #f0f7f2; color: #2d7a3a; border-color: #2d7a3a; }
+body { padding-left: 200px; }
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  body { padding-left: 0; }
+}
+
 /* ---- page shell ---- */
 .wrap { max-width: 1400px; margin: 0 auto; padding: 28px 28px 80px; }
 header.page-head { text-align: center; padding: 18px 0 8px; border-bottom: 1px solid #e5e7eb; margin-bottom: 24px; position: relative; }
@@ -560,6 +572,19 @@ TOP_NAV_HTML = (
     '<a href="seibro.html" class="topnav-sub">SEIBro</a></div></div>'
     '<div class="topnav-item"><a href="architecture.html" class="topnav-tab active">Architecture</a></div>'
     '</div></div></nav>'
+)
+
+# 좌측 사이드바 — 마켓 계열 페이지와 chrome 통일 (2026-07-12 사용자 확정)
+SIDEBAR_HTML = (
+    '<aside class="sidebar"><a href="index.html" class="sidebar-brand">AoE</a>'
+    '<a href="market.html" class="sidebar-link">Data</a>'
+    '<a href="universe.html" class="sidebar-link">Universe</a>'
+    '<a href="universe_lab.html" class="sidebar-link">Universe Lab</a>'
+    '<a href="featured.html" class="sidebar-link">Featured</a>'
+    '<a href="market_alert.html" class="sidebar-link">투자유의종목</a>'
+    '<a href="etf.html" class="sidebar-link">ETF</a>'
+    '<a href="seibro.html" class="sidebar-link">SEIBro</a>'
+    '</aside>'
 )
 
 
@@ -1085,6 +1110,7 @@ def build_html(reg, is_real):
     out.append("<style>" + PAGE_CSS + "</style>")
     out.append("</head><body>")
     out.append(TOP_NAV_HTML)
+    out.append(SIDEBAR_HTML)
     out.append('<div class="wrap">')
     out.append('<header class="page-head"><h1>System Architecture</h1>')
     out.append('<div class="last-updated">Updated: %s</div>' % esc(updated))

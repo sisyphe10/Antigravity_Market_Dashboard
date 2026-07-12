@@ -72,8 +72,10 @@ TOP_NAV_CSS = """
     .topnav-tabs { gap: 6px; }
 }
 
-/* Left sidebar — used only on Market-group pages. Sits ABOVE the topnav so its top corner doubles as the AoE brand badge. */
-.sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 200px; padding: 144px 10px 18px 10px; background: #fff; border-right: 1px solid #e5e7eb; overflow-y: auto; z-index: 150; box-sizing: border-box; }
+/* Left sidebar — Market-group(+Architecture) pages. 2026-07-12 통일: topnav 는 모든
+   페이지에서 랜딩(/)과 동일(전폭·탭 좌측 28px 시작)하고, 사이드바는 topnav '아래'(top:72px)에서
+   시작한다 (기존: 사이드바가 nav 위에 얹혀 탭이 228px로 밀림 → 페이지 간 nav 점프 원인). */
+.sidebar { position: fixed; top: 72px; left: 0; bottom: 0; width: 200px; padding: 144px 10px 18px 10px; background: #fff; border-right: 1px solid #e5e7eb; overflow-y: auto; z-index: 90; box-sizing: border-box; }
 .sidebar-brand { position: absolute; top: 0; left: 0; right: 0; height: 72px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; letter-spacing: 2px; color: #1a1a1a; border-bottom: 1px solid #e5e7eb; background: #fff; text-decoration: none; font-family: PRETENDARD_STACK_PLACEHOLDER; }
 .sidebar-brand:hover { color: #2d7a3a; }
 .sidebar-link { display: block; padding: 12px 11px; margin-bottom: 7px; color: #444; text-decoration: none; font-size: 0.94rem; font-weight: 600; border-radius: 999px; border: 1.5px solid transparent; transition: all 0.12s; font-family: PRETENDARD_STACK_PLACEHOLDER; text-align: center; }
@@ -82,12 +84,10 @@ TOP_NAV_CSS = """
 /* Override per-page body styles so all sidebar pages align identically next to the sidebar */
 .has-sidebar { padding-left: 224px !important; padding-right: 24px !important; padding-top: 0 !important; padding-bottom: 24px !important; max-width: none !important; margin: 0 !important; }
 .has-sidebar .topnav { margin-left: -224px; margin-right: -24px; }
-.has-sidebar .topnav-inner { padding-left: 228px; }
 @media (max-width: 900px) {
     .sidebar { display: none; }
     .has-sidebar { padding-left: 24px !important; }
     .has-sidebar .topnav { margin-left: -24px; margin-right: -24px; }
-    .has-sidebar .topnav-inner { padding-left: 12px; }
 }
 """.replace('PRETENDARD_STACK_PLACEHOLDER', PRETENDARD_STACK)
 
