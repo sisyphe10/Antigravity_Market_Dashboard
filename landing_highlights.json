@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-12 11:05:00 KST",
+  "updated_at": "2026-07-12 11:11:05 KST",
   "slots": [
     {
       "id": "market-1m-leader",
@@ -109,7 +109,7 @@
       "category": "Market",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "2026-07 11개 자산 중 6/11 상승 — 방향성 부재",
+      "text": "2026-07 11개 자산 중 6/11 상승 — 혼조 양상",
       "href": "market.html",
       "spark": null
     },
