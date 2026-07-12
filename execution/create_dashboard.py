@@ -1453,15 +1453,15 @@ def _build_indices_chart_section(category_label='Indices'):
                             var rounded = Math.sign(val) * Math.round(Math.abs(val));
                             var sign = rounded >= 0 ? '+' : '';
                             ctx.save();
-                            // 끝점 동그라미 (선 색과 동일한 불투명 단색, 2026-07-12 사용자 요청)
+                            // 끝점 동그라미 3px (선 색과 동일한 불투명 단색, 2026-07-12 사용자 요청)
                             ctx.beginPath();
-                            ctx.arc(last.x, last.y, 4, 0, Math.PI * 2);
+                            ctx.arc(last.x, last.y, 3, 0, Math.PI * 2);
                             ctx.fillStyle = ds.borderColor;
                             ctx.fill();
                             ctx.font = 'bold 12px sans-serif';
                             ctx.fillStyle = ds.borderColor;
                             ctx.textBaseline = 'middle';
-                            ctx.fillText(sign + rounded + '%', last.x + 8, last.y);
+                            ctx.fillText(sign + rounded + '%', last.x + 7, last.y);
                             ctx.restore();
                         });
                     }
@@ -2560,7 +2560,11 @@ def _build_combined_chart_section():
                         ctx.textBaseline = 'middle';
                         entries.forEach(function(e) {
                             ctx.fillStyle = e.color;
-                            ctx.fillText(e.label, e.x, e.y);
+                            // 끝점 동그라미 3px — 라벨은 충돌 회피로 밀릴 수 있으니 실제 점(origY)에 표시
+                            ctx.beginPath();
+                            ctx.arc(e.x - 6, e.origY, 3, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.fillText(e.label, e.x + 1, e.y);
                         });
                         ctx.restore();
                     }
