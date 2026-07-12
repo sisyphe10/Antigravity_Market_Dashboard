@@ -51,6 +51,8 @@ PRETENDARD_STACK = "'Pretendard Variable', Pretendard, system-ui, -apple-system,
 TOP_NAV_CSS = """
 .topnav { background: #fff; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 100; }
 body { margin: 0; }  /* UA 기본 8px 마진 가드 — 전 페이지 이미 0이라 시각 변화 없음 */
+html { overflow-y: scroll; }  /* 스크롤바 공간 상시 확보 — 로드 중 스크롤바 등장으로 nav가
+                                 우→좌로 점프하던 애니메이션 제거 (2026-07-12 사용자 리포트) */
 .topnav-inner { max-width: 1400px; margin: 0 auto; padding: 0 28px; box-sizing: border-box; display: flex; align-items: center; height: 72px; gap: 32px; }  /* box-sizing 명시 — 전역 리셋 없는 페이지(market·wrap)에서 1456px로 계산돼 28px 어긋나던 근본 원인 */
 .topnav-brand { font-size: 1.3rem; font-weight: 800; letter-spacing: 1.5px; color: #111; white-space: nowrap; text-decoration: none; font-family: PRETENDARD_STACK_PLACEHOLDER; }
 .topnav-brand:hover { color: #2d7a3a; }

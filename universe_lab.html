@@ -10,6 +10,7 @@
 <script>Chart.defaults.devicePixelRatio = 2 * (window.devicePixelRatio || 1); Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.animation = false;</script>
 <style>
   * { box-sizing: border-box; }
+  html { overflow-y: scroll; }  /* 스크롤바 공간 상시 확보 — 로드 중 nav 좌우 점프 방지 (전 페이지 공통) */
   body { margin:0; font-family:'Pretendard Variable',Pretendard,system-ui,-apple-system,sans-serif; background:#f8f9fa; color:#333; }
   header { padding:20px 24px; margin:0; text-align:center; position:relative; background:transparent; color:#333; }
   header h1 { font-size:33px; margin:0; font-weight:700; color:#333; line-height:1.2; }

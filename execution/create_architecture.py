@@ -391,6 +391,7 @@ body { font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system,
 a { color: #000; }
 
 /* ---- top nav (matches index.html / market.html) ---- */
+html { overflow-y: scroll; }  /* 스크롤바 공간 상시 확보 — 로드 중 nav 좌우 점프 방지 (전 페이지 공통) */
 .topnav { background: #fff; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 100; }
 .topnav-inner { max-width: 1400px; margin: 0 auto; padding: 0 28px; display: flex; align-items: center; height: 72px; gap: 32px; }
 .topnav-brand { font-size: 1.3rem; font-weight: 800; letter-spacing: 1.5px; color: #111; white-space: nowrap; text-decoration: none; }
