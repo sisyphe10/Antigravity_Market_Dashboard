@@ -540,7 +540,7 @@ h2.block-title { font-size: 1.4rem; color: #111; font-weight: 800; margin-bottom
 
 TOP_NAV_HTML = (
     '<nav class="topnav"><div class="topnav-inner">'
-    '<a href="index.html" class="topnav-brand">AoE</a>'
+    # 브랜드 텍스트 없음 — 다른 페이지(랜딩·마켓 계열)와 상단바 모습 통일 (2026-07-12 사용자)
     '<div class="topnav-tabs">'
     '<div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a>'
     '<div class="topnav-dropdown">'
