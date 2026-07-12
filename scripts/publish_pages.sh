@@ -73,7 +73,11 @@ else
   git commit -q -m "publish: $(date '+%F %T')" || { log "commit 실패"; exit 1; }
   ok=0
   for i in 1 2 3; do
-    if git push -q origin "HEAD:$BRANCH" 2>&1 | grep -v 'failed to store'; then ok=1; break; fi
+    # 주의: `if git push | grep` 은 grep 의 종료코드를 보게 되어 성공을 거부로 오판한다 —
+    # 반드시 push 자체의 rc 로 판정 (키체인 -25308 경고는 stderr 무해 출력)
+    pushout="$(git push origin "HEAD:$BRANCH" 2>&1)"; pushrc=$?
+    printf '%s\n' "$pushout" | grep -v 'failed to store' || true
+    if [ "$pushrc" -eq 0 ]; then ok=1; break; fi
     log "push 거부(attempt $i) - fetch 후 재시도"
     git fetch -q origin "$BRANCH" 2>/dev/null || true
     sleep 3
@@ -91,7 +95,9 @@ if [ "$CNT" -gt "$SQUASH_AT" ]; then
   git add -A
   git commit -q -m "publish: squash $(date '+%F %T')"
   git branch -M "$BRANCH"
-  if git push -q --force-with-lease="refs/heads/$BRANCH:$OLD" origin "HEAD:$BRANCH" 2>&1 | grep -v 'failed to store'; then
+  sqout="$(git push --force-with-lease="refs/heads/$BRANCH:$OLD" origin "HEAD:$BRANCH" 2>&1)"; sqrc=$?
+  printf '%s\n' "$sqout" | grep -v 'failed to store' || true
+  if [ "$sqrc" -eq 0 ]; then
     log "squash 완료 ($CNT -> 1)"
     git fetch -q origin "$BRANCH" 2>/dev/null || true
   else
