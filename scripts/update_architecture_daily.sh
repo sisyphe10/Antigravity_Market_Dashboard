@@ -24,6 +24,7 @@ LOGFILE="$LOGDIR/architecture-daily.log"
 NOTIFY="$PROD/scripts/notify_sisyphe_failure.sh"
 SINCE="${ARCH_SINCE:-26 hours ago}"
 CLAUDE_WALL_SEC="${ARCH_WALL_SEC:-1800}"   # claude 월클럭 상한 (기본 30분)
+MAX_TURNS="${ARCH_MAX_TURNS:-40}"          # 평시 26h 분량 기준. 캐치업은 env로 상향
 
 mkdir -p "$LOGDIR" || { echo "[arch-daily] LOGDIR 생성 실패" >&2; exit 1; }
 log() { echo "[arch-daily $(date '+%F %T')] $*" | tee -a "$LOGFILE"; }
@@ -80,7 +81,7 @@ printf '최근 커밋:\n%s\n\n변경된 코드/인프라 파일:\n%s\n' "$COMMIT
 log "claude 실행 (since=$SINCE, wall=${CLAUDE_WALL_SEC}s)"
 "$CLAUDE" -p "$(cat "$PROMPT_FILE")" \
   --allowedTools "Read,Glob,Grep,Write,Edit,Bash(git log:*),Bash(git show:*),Bash(git diff:*)" \
-  --max-turns 40 >> "$LOGFILE" 2>&1 &
+  --max-turns "$MAX_TURNS" >> "$LOGFILE" 2>&1 &
 CPID=$!
 ( sleep "$CLAUDE_WALL_SEC" && kill -9 "$CPID" 2>/dev/null ) &
 WPID=$!
