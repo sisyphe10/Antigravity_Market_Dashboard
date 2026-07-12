@@ -76,11 +76,9 @@ TAIWAN_CSS = """
 
 
 def taiwan_panel_html(payload_rows):
-    n_stocks = len({r[2] for r in payload_rows})
-    latest = max(r[0] for r in payload_rows) if payload_rows else "-"
-    return f"""
+    # 출처·종목수·최신월 안내 문구는 2026-07-12 사용자 요청으로 제거 (Download 버튼만 유지)
+    return """
     <div class="tw-toolbar">
-        <span class="tw-src">FinMind · TWSE/TPEx 월별 매출 공시 · {n_stocks}종목 · 최신 {latest}</span>
         <button class="tw-dl-btn" onclick="twDownload()">Download</button>
     </div>
     <div class="tw-wrapper">
