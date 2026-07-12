@@ -52,18 +52,25 @@ cd "$WT" || exit 1
 CUR="$(git symbolic-ref --short HEAD 2>/dev/null)"
 if [ "$CUR" != "$BRANCH" ]; then log "브랜치 이상($CUR) - 중단"; exit 1; fi
 
-# 1) 화이트리스트 rsync (publish_snapshot.sh 와 동일 규칙 + 원본 무가공)
+# 1) 화이트리스트 rsync — ★Pages = 팀원 WRAP 전용 (2026-07-12 사용자 확정)
+#    개인 대시보드(index/market/featured/etf/...)는 공개 게시하지 않는다. 개인 뷰 = ts.net.
+#    게시 대상 = wrap.html + wrap 이 fetch 하는 데이터(JSON 5종 + orders/)만.
 if ! rsync -a --delete \
   --exclude='/.*' \
-  --include='/*.html' --include='/*.json' --include='/*.csv' \
+  --exclude='/index.html' \
+  --include='/wrap.html' \
+  --include='/portfolio_data.json' --include='/contribution_data.json' \
+  --include='/disclosures.json' --include='/stock_master.json' \
   --include='/orders/' --include='/orders/*.json' \
-  --include='/architecture/' --include='/architecture/**' \
-  --include='/charts/' --include='/charts/**' \
   --exclude='*' \
   "$REPO/" "$WT/"; then
   log "rsync 실패 - 중단"; exit 1
 fi
 touch .nojekyll
+# 루트(/) 접근 = wrap.html 즉시 리다이렉트 (개인 랜딩 노출 없음, 팀원 편의)
+cat > index.html <<'HTML'
+<!DOCTYPE html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=wrap.html"><title>Life WRAP</title><a href="wrap.html">Life WRAP</a>
+HTML
 
 # 2) 변경 있을 때만 commit + 일반 push
 git add -A
