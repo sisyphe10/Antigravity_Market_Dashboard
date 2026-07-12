@@ -452,6 +452,9 @@ if [ "$rc" -eq 0 ]; then
   # 게시 스냅숏 갱신 (웹서빙 W5) - 실패해도 잡 rc 불변, 다음 성공 게시가 회복
   /bin/bash "$REPO/scripts/publish_snapshot.sh" >> "$REPO/logs/launchd/publish.log" 2>&1 \
     || echo "[run_gha_job] $NAME: publish_snapshot 실패(경고)" >&2
+  # gh-pages 게시 (D-수정안 2026-07-12) - 실패해도 잡 rc 불변, 다음 성공 게시가 회복
+  /bin/bash "$REPO/scripts/publish_pages.sh" >> "$REPO/logs/launchd/publish_pages.log" 2>&1 \
+    || echo "[run_gha_job] $NAME: publish_pages 실패(경고)" >&2
 else
   notify_failure "$NAME"
 fi
