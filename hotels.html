@@ -6,11 +6,11 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <style>
   * { box-sizing: border-box; }
-  body { font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; background: #f5f5f5; margin: 0; padding: 30px; color: #222; }
+  body { font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; background: #f5f5f5; margin: 0; padding: 0; color: #222; }  /* nav 전폭 통일 — 여백은 .container로 이전 */
   .home-btn { position: fixed; top: 20px; right: 20px; background: #e0e0e0; color: #222; padding: 8px 18px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 600; }
   h1 { font-size: 1.8rem; margin-bottom: 8px; }
   .meta { color: #888; font-size: 13px; margin-bottom: 24px; }
-  .container { max-width: 1200px; margin: 0 auto; }
+  .container { max-width: 1260px; margin: 0 auto; padding: 30px; }  /* 본문 실폭 1200 유지(전역 border-box) — body padding 30 이전분 */
   .card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 24px; }
   table { width: 100%; border-collapse: collapse; }
   th { background: #222; color: #fff; padding: 10px 14px; text-align: left; font-weight: 600; font-size: 13px; }
@@ -23,7 +23,8 @@
   .note { font-size: 13px; color: #666; margin-top: 16px; padding: 12px; background: #fff8e1; border-radius: 8px; border-left: 3px solid #ffc107; }
   
 .topnav { background: #fff; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 100; }
-.topnav-inner { max-width: 1400px; margin: 0 auto; padding: 0 28px; display: flex; align-items: center; height: 72px; gap: 32px; }
+body { margin: 0; }  /* UA 기본 8px 마진 가드 — 전 페이지 이미 0이라 시각 변화 없음 */
+.topnav-inner { max-width: 1400px; margin: 0 auto; padding: 0 28px; box-sizing: border-box; display: flex; align-items: center; height: 72px; gap: 32px; }  /* box-sizing 명시 — 전역 리셋 없는 페이지(market·wrap)에서 1456px로 계산돼 28px 어긋나던 근본 원인 */
 .topnav-brand { font-size: 1.3rem; font-weight: 800; letter-spacing: 1.5px; color: #111; white-space: nowrap; text-decoration: none; font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; }
 .topnav-brand:hover { color: #2d7a3a; }
 .topnav-tabs { display: flex; gap: 12px; flex: 1; align-items: center; }
@@ -48,7 +49,7 @@
 /* Left sidebar — Market-group(+Architecture) pages. 2026-07-12 통일: topnav 는 모든
    페이지에서 랜딩(/)과 동일(전폭·탭 좌측 28px 시작)하고, 사이드바는 topnav '아래'(top:72px)에서
    시작한다 (기존: 사이드바가 nav 위에 얹혀 탭이 228px로 밀림 → 페이지 간 nav 점프 원인). */
-.sidebar { position: fixed; top: 72px; left: 0; bottom: 0; width: 200px; padding: 144px 10px 18px 10px; background: #fff; border-right: 1px solid #e5e7eb; overflow-y: auto; z-index: 90; box-sizing: border-box; }
+.sidebar { position: fixed; top: 72px; left: 0; bottom: 0; width: 200px; padding: 90px 10px 18px 10px; background: #fff; border-right: 1px solid #e5e7eb; overflow-y: auto; z-index: 90; box-sizing: border-box; }  /* padding-top 90 = 배지 72 + 간격 18 (top:72 이동분 보정) */
 .sidebar-brand { position: absolute; top: 0; left: 0; right: 0; height: 72px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; letter-spacing: 2px; color: #1a1a1a; border-bottom: 1px solid #e5e7eb; background: #fff; text-decoration: none; font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; }
 .sidebar-brand:hover { color: #2d7a3a; }
 .sidebar-link { display: block; padding: 12px 11px; margin-bottom: 7px; color: #444; text-decoration: none; font-size: 0.94rem; font-weight: 600; border-radius: 999px; border: 1.5px solid transparent; transition: all 0.12s; font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; text-align: center; }
@@ -69,7 +70,7 @@
 <nav class="topnav"><div class="topnav-inner"><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub">Data</a><a href="universe.html" class="topnav-sub">Universe</a><a href="universe_lab.html" class="topnav-sub">Universe Lab</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
 <div class="container">
   <h1>Hotel ADR — Booking.com</h1>
-  <p class="meta">Updated: 2026-07-12 17:02:55 KST · 누적 37일 · 매일 12:00 KST 자동 수집</p>
+  <p class="meta">Updated: 2026-07-12 17:21:28 KST · 누적 37일 · 매일 12:00 KST 자동 수집</p>
 
   <div class="card">
     <h2 style="margin-top:0;font-size:1.2rem;">당일 entry 객실 가격 (체크인 lead time별)</h2>
