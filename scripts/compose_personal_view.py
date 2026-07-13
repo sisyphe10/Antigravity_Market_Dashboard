@@ -1,42 +1,61 @@
 #!/usr/bin/env python3
 """compose_personal_view.py — 게시 스냅숏의 개인용 뷰 합성 (통합 설계 unified_design_claude.md §3.2, 옵션 a).
 
-publish_snapshot.sh 가 새 릴리스 디렉토리(argv[1])를 rsync 한 직후 호출한다.
-두 repo(Antigravity·Sisyphe) 원본과 GitHub(팀원용) 산출물은 불변 — 모든 가공은 이 스냅숏 사본에서만.
+publish_snapshot.sh 가 새 릴리스 디렉토리(argv[1])를 rsync 한 직후 호출. 두 repo·GitHub 산출물 불변,
+모든 가공은 스냅숏 사본에서만. Sisyphe 페이지는 매 실행 sisyphe_plain 원본에서 새로 복사되므로 주입은 항상 pristine 기준.
 
-수행
-  1) WRAP 제거   : wrap.html 삭제 + 전 AoE 페이지의 wrap topnav 아이템/링크 제거
-  2) 정방향 nav  : AoE topnav 에 Wiki·Sisyphe 그룹 주입 (→ /sisyphe/...) — 멱등
-  3) Sisyphe 합성: ~/srv/sisyphe_plain 평문 3페이지를 <REL>/sisyphe/ 로 복사 (평문·데이터는 런타임 Sheets fetch)
-  4) 역방향 nav  : Sisyphe 3페이지 topnav 에 AoE 복귀 pill 주입 (→ /) — 멱등
-  5) 랜딩 브랜드 : Sisyphe index(랜딩) topnav 좌측에 "Sisyphe" 브랜드 주입 (AoE 랜딩 배치 정합) — 멱등
-  6) AoE 통일 CSS: Sisyphe topnav·사이드바·chrome 색/스타일을 AoE 정본(create_dashboard top_nav_html)과
-                   일치시키는 override <style>를 </head> 앞에 주입 — 멱등. 색/pill/액센트만(레이아웃 구조 불변).
-  7) 검증        : sisyphe 페이지 존재·staticrypt 흔적 0·역방향 nav·랜딩 브랜드·통일 CSS 확인. 실패 시 exit1 → 세대 폐기.
+AoE 페이지(11) topnav: WRAP 제거 + Wiki(Architecture 앞) + Invest(->journal) + Sisyphe(맨 오른쪽·아이보리 배경, 단일 탭).
+Sisyphe index/dashboard: Invest pill 제거, ←AoE pill 맨 오른쪽. journal: topnav 를 AoE 세트로 교체(Invest 활성).
+전 Sisyphe 페이지: AoE 통일 CSS + 사이드바 액센트 녹색 + 랜딩 브랜드(index). 검증 실패 시 exit1 -> 세대 폐기.
 """
 import os, re, sys, glob, shutil
 
 REL = sys.argv[1]
 SISYPHE_PLAIN = os.environ.get("SISYPHE_PLAIN", "/Users/sisyphe/srv/sisyphe_plain")
 SISYPHE_PAGES = ("index.html", "dashboard.html", "journal.html")
-
-# 정방향(AoE→Sisyphe) fragment — 탭 순서 Market > Wiki > Sisyphe > Architecture (기존 1.5단계와 동일)
-INJECT = ('<div class="topnav-item"><a href="/wiki/" class="topnav-tab">Wiki</a></div>'
-          '<div class="topnav-item"><a href="/sisyphe/index.html" class="topnav-tab">Sisyphe</a>'
-          '<div class="topnav-dropdown">'
-          '<a href="/sisyphe/dashboard.html" class="topnav-sub">가계부·운동</a>'
-          '<a href="/sisyphe/journal.html" class="topnav-sub">투자일지</a>'
-          '</div></div>')
 NAV_END = '</div></div></nav>'
-# 역방향(Sisyphe→AoE) 복귀 pill — 기존 .topnav-tab 컴포넌트 재사용(새 스타일 없음). aoe-back=멱등·검증 마커.
-AOE_BACK = '<a href="/" class="topnav-tab aoe-back"><span class="icon">←</span>AoE</a>'
-# 랜딩(index) 좌측 브랜드 — AoE 랜딩([brand][tabs]) 배치 정합. 기존 .topnav-brand 스타일 재사용.
-INDEX_BRAND = '<a href="index.html" class="topnav-brand">Sisyphe</a>'
-STATICRYPT_MARKERS = ("staticrypt", "encryptedmsg", "cryptoengine")
 
-# AoE 정본 값(create_dashboard top_nav_html / sidebar, 2026-07-12 픽셀통일)과 일치시키는 override.
-# nav.topnav / .sidebar 특이도로 원본 규칙 확실 상회. 색·pill·브랜드·사이드바 액센트·chrome 배경만 통일하고
-# has-sidebar 오프셋(padding/margin/min-width) 등 레이아웃 구조는 건드리지 않는다(깨짐 방지).
+# ---- AoE 페이지 주입 fragment ----
+WIKI_ITEM = '<div class="topnav-item"><a href="/wiki/" class="topnav-tab">Wiki</a></div>'
+INVEST_ITEM = '<div class="topnav-item"><a href="/sisyphe/journal.html" class="topnav-tab">Invest</a></div>'
+SISYPHE_ITEM = '<div class="topnav-item sisyphe-item"><a href="/sisyphe/index.html" class="topnav-tab sisyphe-tab">Sisyphe</a></div>'
+# 구버전(드롭다운형) Sisyphe 아이템 — copy-current 입력 정규화용 제거 대상
+OLD_SISYPHE_DROPDOWN = ('<div class="topnav-item"><a href="/sisyphe/index.html" class="topnav-tab">Sisyphe</a>'
+                        '<div class="topnav-dropdown"><a href="/sisyphe/dashboard.html" class="topnav-sub">가계부·운동</a>'
+                        '<a href="/sisyphe/journal.html" class="topnav-sub">투자일지</a></div></div>')
+# AoE 페이지: Sisyphe 탭 우측 정렬 + 아이보리 배경(Sisyphe 아이덴티티, 은은)
+AOE_PERSONAL_CSS = (
+    '<style id="aoe-personal-nav">'
+    '.topnav-tabs .topnav-item.sisyphe-item{margin-left:auto}'
+    '.topnav-tab.sisyphe-tab{background:#faf3e3;border-color:#e6d9b8;color:#6b5a2a}'
+    '.topnav-tab.sisyphe-tab:hover{background:#f3e8cf;border-color:#d9c48f;color:#5e4a1a}'
+    '</style>'
+)
+
+# ---- Sisyphe 페이지 주입/치환 ----
+AOE_BACK = '<a href="/" class="topnav-tab aoe-back"><span class="icon">←</span>AoE</a>'
+INDEX_BRAND = '<a href="index.html" class="topnav-brand">Sisyphe</a>'
+INVEST_PILL = '<a href="journal.html" class="topnav-tab t-journal"><span class="icon">\U0001F4DD</span>Invest</a>'
+# journal: topnav 전체를 AoE 세트로 교체(원 wrapper 유지 -> 레이아웃 CSS 그대로). 고정 사이드바(200px)가 좌상단을
+# 덮으므로 journal 한정 offset(padding-left)로 콘텐츠를 사이드바 우측으로 밀어 브랜드/탭 가림 방지.
+NEW_JOURNAL_NAV = (
+    '<nav class="topnav">\n    <div class="topnav-inner"><a href="/" class="topnav-brand">AoE</a>\n'
+    '        <div class="topnav-tabs">\n'
+    '            <a href="/market.html" class="topnav-tab">Market</a>\n'
+    '            <a href="/wiki/" class="topnav-tab">Wiki</a>\n'
+    '            <a href="/architecture.html" class="topnav-tab">Architecture</a>\n'
+    '            <a href="/sisyphe/journal.html" class="topnav-tab active">Invest</a>\n'
+    '            <a href="/sisyphe/index.html" class="topnav-tab sisyphe-tab">Sisyphe</a>\n'
+    '        </div>\n    </div>\n</nav>'
+)
+JOURNAL_OFFSET = (
+    '<style id="aoe-journal-offset">'
+    'nav.topnav .topnav-inner{max-width:none;padding-left:228px;padding-right:24px}'
+    '@media(max-width:900px){nav.topnav .topnav-inner{padding-left:12px;padding-right:12px}}'
+    '</style>'
+)
+
+# AoE 정본(create_dashboard top_nav_html / sidebar, 픽셀통일)과 일치시키는 override — Sisyphe 페이지에만 주입.
 NAV_UNIFY = (
     '<style id="aoe-nav-unify">'
     'nav.topnav{background:#fff;border-bottom-color:#e5e7eb}'
@@ -48,6 +67,9 @@ NAV_UNIFY = (
     'nav.topnav .topnav-tab.t-fitness:hover,nav.topnav .topnav-tab.t-workout:hover,nav.topnav .topnav-tab.t-sheet:hover'
     '{color:#111;border-color:#2d7a3a;background:#f0f7f2}'
     'nav.topnav .topnav-tab.active{color:#fff;border-color:#2d7a3a;background:#2d7a3a}'
+    'nav.topnav .topnav-tab.aoe-back{margin-left:auto}'
+    'nav.topnav .topnav-tab.sisyphe-tab{margin-left:auto;background:#faf3e3;border-color:#e6d9b8;color:#6b5a2a}'
+    'nav.topnav .topnav-tab.sisyphe-tab:hover{background:#f3e8cf;border-color:#d9c48f;color:#5e4a1a}'
     '.topnav-brand,.sidebar-brand{color:#111}'
     '.topnav-brand:hover,.sidebar-brand:hover{color:#2d7a3a}'
     '.sidebar{background:#fff;border-right-color:#e5e7eb}'
@@ -64,6 +86,7 @@ link_pat = re.compile(r'<a[^>]*href="wrap\.html[^"]*"[^>]*>.*?</a>\s*', re.S)
 arch_pat = re.compile(r'<div class="topnav-item"><a href="architecture\.html"')
 tabs_pat = re.compile(r'<div class="topnav-tabs">')
 inner_pat = re.compile(r'<div class="topnav-inner">')
+jnav_pat = re.compile(r'<nav class="topnav">.*?</nav>', re.S)
 
 
 def fail(msg):
@@ -71,7 +94,14 @@ def fail(msg):
     sys.exit(1)
 
 
-# --- 1)+2) AoE 페이지: WRAP 제거 + 정방향 nav 주입 (멱등) ---
+def inject_before_head(s, frag):
+    i = s.lower().find("</head>")
+    if i == -1:
+        return None
+    return s[:i] + frag + s[i:]
+
+
+# ===== 1) AoE 페이지: WRAP 제거 + topnav 재구성 (Wiki / Invest / Sisyphe 우측) =====
 wrap = os.path.join(REL, "wrap.html")
 if os.path.exists(wrap):
     os.remove(wrap)
@@ -79,22 +109,39 @@ for f in glob.glob(os.path.join(REL, "*.html")):
     s = open(f, encoding="utf-8").read()
     n = item_pat.sub("", s)
     n = link_pat.sub("", n)
-    if 'topnav-tab">Sisyphe' not in n:
-        m = arch_pat.search(n)
-        if m:
-            n = n[:m.start()] + INJECT + n[m.start():]
-        elif NAV_END in n:
-            n = n.replace(NAV_END, INJECT + NAV_END, 1)
+    # 정규화: 기존 주입 fragment 제거(clean 입력이면 무동작)
+    for frag in (WIKI_ITEM, INVEST_ITEM, SISYPHE_ITEM, OLD_SISYPHE_DROPDOWN):
+        n = n.replace(frag, "")
+    # Wiki 를 Architecture 앞에(없으면 nav 끝 폴백)
+    m = arch_pat.search(n)
+    if m:
+        n = n[:m.start()] + WIKI_ITEM + n[m.start():]
+    elif NAV_END in n:
+        n = n.replace(NAV_END, WIKI_ITEM + NAV_END, 1)
+    # Invest + Sisyphe 를 nav 끝에(Sisyphe 는 margin-left:auto 로 맨 오른쪽)
+    if NAV_END in n and "sisyphe-tab" not in n:
+        n = n.replace(NAV_END, INVEST_ITEM + SISYPHE_ITEM + NAV_END, 1)
+    # AoE 개인 nav CSS
+    if 'id="aoe-personal-nav"' not in n:
+        r = inject_before_head(n, AOE_PERSONAL_CSS)
+        if r is not None:
+            n = r
     if n != s:
         open(f, "w", encoding="utf-8").write(n)
 
 if os.path.exists(wrap):
     fail("wrap.html 잔존")
 idx = os.path.join(REL, "index.html")
-if os.path.exists(idx) and 'topnav-tab">Sisyphe' not in open(idx, encoding="utf-8").read():
-    fail("index.html: Sisyphe 탭 주입 실패")
+if os.path.exists(idx):
+    t = open(idx, encoding="utf-8").read()
+    if 'sisyphe-tab">Sisyphe' not in t:
+        fail("index.html: Sisyphe 탭(우측) 주입 실패")
+    if '/sisyphe/journal.html" class="topnav-tab">Invest' not in t:
+        fail("index.html: Invest 탭 주입 실패")
+    if 'topnav-sub">가계부' in t:
+        fail("index.html: 구 Sisyphe 드롭다운 잔존")
 
-# --- 3) Sisyphe 평문 합성 ---
+# ===== 2) Sisyphe 평문 합성 (매 실행 pristine 복사) =====
 dst = os.path.join(REL, "sisyphe")
 os.makedirs(dst, exist_ok=True)
 for name in SISYPHE_PAGES:
@@ -103,42 +150,67 @@ for name in SISYPHE_PAGES:
         fail("sisyphe 평문 소스 없음/빈파일: %s" % src)
     shutil.copyfile(src, os.path.join(dst, name))
 
-# --- 4)~6) 역방향 nav + 랜딩 브랜드 + AoE 통일 CSS 주입 + 검증 (멱등, fail-closed) ---
+# ===== 3) Sisyphe 페이지 가공 =====
+STATIC = ("staticrypt", "encryptedmsg", "cryptoengine")
 for name in SISYPHE_PAGES:
     p = os.path.join(dst, name)
     s = open(p, encoding="utf-8").read()
     low = s.lower()
-    for mk in STATICRYPT_MARKERS:
+    for mk in STATIC:
         if mk in low:
-            fail("sisyphe/%s: staticrypt 흔적(%s) — 암호화본 오배치" % (name, mk))
-    changed = False
-    if "aoe-back" not in s:
-        m = tabs_pat.search(s)
-        if not m:
-            fail("sisyphe/%s: topnav-tabs 앵커 없음 — 역방향 nav 주입 불가" % name)
-        s = s[:m.end()] + AOE_BACK + s[m.end():]
-        changed = True
-    if name == "index.html" and 'topnav-brand">Sisyphe' not in s:
-        m = inner_pat.search(s)
-        if not m:
-            fail("sisyphe/index.html: topnav-inner 앵커 없음 — 랜딩 브랜드 주입 불가")
-        s = s[:m.end()] + INDEX_BRAND + s[m.end():]
-        changed = True
-    if "aoe-nav-unify" not in s:
-        i = s.lower().find("</head>")
-        if i == -1:
-            fail("sisyphe/%s: </head> 없음 — 통일 CSS 주입 불가" % name)
-        s = s[:i] + NAV_UNIFY + s[i:]
-        changed = True
-    if changed:
-        open(p, "w", encoding="utf-8").write(s)
-    final = open(p, encoding="utf-8").read()
-    if 'class="topnav-tab aoe-back"' not in final:
-        fail("sisyphe/%s: 역방향 nav 검증 실패" % name)
-    if 'id="aoe-nav-unify"' not in final:
-        fail("sisyphe/%s: AoE 통일 CSS 검증 실패" % name)
-    if name == "index.html" and 'topnav-brand">Sisyphe' not in final:
-        fail("sisyphe/index.html: 랜딩 브랜드 검증 실패")
+            fail("sisyphe/%s: staticrypt 흔적(%s)" % (name, mk))
 
-sys.stdout.write("[compose] OK: WRAP 제거 + 양방향 nav + 랜딩 브랜드 + AoE 통일 CSS + Sisyphe %d페이지 합성 (%s)\n"
-                 % (len(SISYPHE_PAGES), os.path.basename(REL)))
+    if name == "journal.html":
+        # topnav 전체를 AoE 세트로 교체
+        m = jnav_pat.search(s)
+        if not m:
+            fail("sisyphe/journal.html: topnav 블록 없음 — 교체 불가")
+        s = s[:m.start()] + NEW_JOURNAL_NAV + s[m.end():]
+    else:
+        # index/dashboard: Invest pill 제거 + ←AoE(맨 오른쪽은 CSS margin-auto) 주입
+        s = s.replace(INVEST_PILL, "")
+        if "aoe-back" not in s:
+            m = tabs_pat.search(s)
+            if not m:
+                fail("sisyphe/%s: topnav-tabs 앵커 없음" % name)
+            s = s[:m.end()] + AOE_BACK + s[m.end():]
+        if name == "index.html" and 'topnav-brand">Sisyphe' not in s:
+            m = inner_pat.search(s)
+            if not m:
+                fail("sisyphe/index.html: topnav-inner 앵커 없음")
+            s = s[:m.end()] + INDEX_BRAND + s[m.end():]
+
+    # 통일 CSS(전 Sisyphe 페이지)
+    r = inject_before_head(s, NAV_UNIFY)
+    if r is None:
+        fail("sisyphe/%s: </head> 없음" % name)
+    s = r
+    # journal 한정 nav offset(사이드바 우측으로) — 통일 CSS 뒤에 와야 max-width 상회
+    if name == "journal.html":
+        s = inject_before_head(s, JOURNAL_OFFSET)
+
+    open(p, "w", encoding="utf-8").write(s)
+
+    # ---- 검증 ----
+    fin = open(p, encoding="utf-8").read()
+    if 'id="aoe-nav-unify"' not in fin:
+        fail("sisyphe/%s: 통일 CSS 검증 실패" % name)
+    if name == "journal.html":
+        if 'class="topnav-tab active">Invest' not in fin:
+            fail("sisyphe/journal.html: AoE nav(Invest 활성) 검증 실패")
+        if 'sisyphe-tab">Sisyphe' not in fin or 'topnav-brand">AoE' not in fin:
+            fail("sisyphe/journal.html: AoE nav(브랜드/Sisyphe 탭) 검증 실패")
+        if 'dashboard.html#ledger' in fin:
+            fail("sisyphe/journal.html: 구 Sisyphe nav 잔존")
+        if 'id="aoe-journal-offset"' not in fin:
+            fail("sisyphe/journal.html: nav offset 검증 실패")
+    else:
+        if INVEST_PILL in fin:
+            fail("sisyphe/%s: Invest pill 제거 실패" % name)
+        if 'class="topnav-tab aoe-back"' not in fin:
+            fail("sisyphe/%s: ←AoE 주입 실패" % name)
+        if name == "index.html" and 'topnav-brand">Sisyphe' not in fin:
+            fail("sisyphe/index.html: 랜딩 브랜드 검증 실패")
+
+sys.stdout.write("[compose] OK: AoE nav 재구성(Invest·Sisyphe 우측) + Sisyphe 3페이지(journal=AoE세트) 합성 (%s)\n"
+                 % os.path.basename(REL))
