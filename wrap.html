@@ -292,7 +292,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
     </div>
 
     <div id="mainContent" class="pw-hidden has-sidebar">
-    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><div class="topnav-tabs"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div><span class="wrap-updated">Updated: 2026-07-13 15:00:03 KST</span></div></nav>
+    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><div class="topnav-tabs"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div><span class="wrap-updated">Updated: 2026-07-13 15:36:10 KST</span></div></nav>
     <aside class="sidebar wrap-sidebar" id="wrapSectionNav" aria-label="WRAP navigation"><div class="wrap-side-group on" data-side-for="dashboard"><a href="#wrap-sec-chart" onclick="wrapGoSection('wrap-sec-chart');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-chart">CHART</a><a href="#wrap-sec-return" onclick="wrapGoSection('wrap-sec-return');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-return">RETURN</a><a href="#wrap-sec-aum" onclick="wrapGoSection('wrap-sec-aum');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-aum">AUM</a><a href="#wrap-sec-portfolio" onclick="wrapGoSection('wrap-sec-portfolio');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-portfolio">Portfolio</a><a href="#wrap-sec-sector" onclick="wrapGoSection('wrap-sec-sector');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-sector">SECTOR WEIGHT</a></div><div class="wrap-side-group" data-side-for="order" id="wrapSideOrder"></div><div class="wrap-side-group" data-side-for="contribution" id="wrapSideContrib"></div><div class="wrap-side-group" data-side-for="fee"><a href="#" onclick="feeSwitchSub('rate');return false;" class="sidebar-link active" data-side-fee="rate">요율</a><a href="#" onclick="feeSwitchSub('revenue');return false;" class="sidebar-link" data-side-fee="revenue">매출</a></div></aside>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -3046,6 +3046,177 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                 + '</div>';
         }
 
+        // ── 자문지 메일 발송 요청 (2026-07-13, B안: 브라우저 생성 첨부 base64 → 맥 SMTP) ──
+        // 첨부 = downloadOrderExcel 동일 로직으로 오늘 비중 반영 생성 → base64 로 요청 JSON 포함(폴러는 그대로 첨부).
+        // 발송 모드/수신자는 서버(맥 email_config.json)가 결정 — 페이지는 요청만 기록. 기본 test=본인 단독 수신.
+        var ADVISORY_SIGNATURE = '\n\n김 태 식 운용3본부/매니저\n라이프자산운용 Life Asset Management, Inc.\n서울 영등포구 국제금융로 10, Two IFC 14F\n02-6105-6836  |  010-9932-0334  |  kts@investlife.com';
+        var ADVISORY_MAX_REQUEST_BYTES = 900 * 1024;   // Contents API 1MB 한계 가드
+        function _advMD(d) { return (d.getMonth() + 1) + '월 ' + d.getDate() + '일'; }
+        function _advMDJ(d) { return (d.getMonth() + 1) + '월 ' + d.getDate() + '일자'; }
+        function _advYMD(d) { return '' + d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0'); }
+        function _advBroker(key) { return { compliance: null, samsung: '삼성', nh: 'NH', db: 'DB', kis: '한투' }[key]; }
+
+        // 브로커별 자문지 첨부 생성 (해당 증권사 컬럼들의 templates → downloadOrderExcel base64)
+        async function _advAttachments(broker) {
+            if (!broker) return [];
+            var atts = [];
+            var cols = ORDER_PORTFOLIOS.filter(function(p) { return p.broker === broker; });
+            for (var ci = 0; ci < cols.length; ci++) {
+                var p = cols[ci];
+                var tpls = p.templates || [];
+                for (var ti = 0; ti < tpls.length; ti++) {
+                    var r = await downloadOrderExcel(p.display, ti, true);   // returnB64=true
+                    if (r && r.content_b64) atts.push(r);
+                }
+            }
+            return atts;
+        }
+
+        // 5통 조립 (본문=buildOrderEmailText+서명, 첨부=브라우저 생성 base64). async — 첨부 생성 때문.
+        async function buildAdvisoryMails() {
+            var d = new Date();
+            function findCol(broker, isGen) {
+                return ORDER_PORTFOLIOS.filter(function(p) { return p.broker === broker && (!!p.general) === isGen; })[0];
+            }
+            function bodyFor(disp) {
+                return buildOrderEmailText(disp, orderStocks[disp] || [], orderState[disp] || []) + ADVISORY_SIGNATURE;
+            }
+            var genSamsung = findCol('삼성', true);
+            var specs = [
+                { key: 'compliance', label: '컴플라이언스', broker: null,
+                  subject: '[라이프자산운용] 자문형 랩 : ' + _advMD(d) + ' 자문지 송부의 건',
+                  bodyDisp: genSamsung && genSamsung.display },
+                { key: 'samsung', label: '삼성', broker: '삼성',
+                  subject: '[라이프자산운용_트루밸류] 라이프자산운용_트루밸류 ' + _advMDJ(d) + ' 자문지 보내드립니다.',
+                  bodyDisp: genSamsung && genSamsung.display },
+                { key: 'nh', label: 'NH', broker: 'NH',
+                  subject: '[라이프자산운용] NH랩 라이프 다이내믹밸류: ' + _advMDJ(d) + ' 자문지 보내드립니다.',
+                  col: findCol('NH', false) },
+                { key: 'db', label: 'DB', broker: 'DB',
+                  subject: '[라이프자산운용] DB 랩 : ' + _advMD(d) + ' 자문지 보내드립니다.',
+                  col: findCol('DB', false) },
+                { key: 'kis', label: '한투', broker: '한투',
+                  subject: '[라이프자산운용]_한국투자 가치도약랩 자문지_' + _advYMD(d),
+                  col: findCol('한투', false) }
+            ];
+            var mails = [];
+            for (var i = 0; i < specs.length; i++) {
+                var s = specs[i];
+                var disp = s.bodyDisp || (s.col && s.col.display);
+                if (!disp) continue;
+                var atts = await _advAttachments(s.broker);
+                mails.push({ key: s.key, label: s.label, subject: s.subject, body: bodyFor(disp), attachments: atts });
+            }
+            return mails;
+        }
+
+        // 오늘 이미 발송된 키 → {key: 'HH:MM'} (email_send_result.json)
+        async function fetchSentToday() {
+            try {
+                var url = 'https://api.github.com/repos/' + ORDER_REPO + '/contents/orders/email_send_result.json?ref=main&_=' + Date.now();
+                var r = await fetch(url, { headers: { 'Accept': 'application/vnd.github.raw+json' } });
+                if (!r.ok) return {};
+                var res = await r.json();
+                var d = new Date();
+                var today = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+                if (!res || res.date !== today) return {};
+                var hm = '';
+                if (res.processed_at) { var pd = new Date(res.processed_at); hm = String(pd.getHours()).padStart(2, '0') + ':' + String(pd.getMinutes()).padStart(2, '0'); }
+                var out = {};
+                (res.sent || []).forEach(function(k) { out[k] = hm; });
+                return out;
+            } catch (e) { return {}; }
+        }
+
+        function closeSendModal() {
+            var m = document.getElementById('advSendModal');
+            if (m) m.parentNode.removeChild(m);
+        }
+
+        async function openSendModal() {
+            var trigger = document.getElementById('advSendReqBtn');
+            if (trigger) { trigger.disabled = true; trigger.textContent = '자문지 생성 중...'; }
+            var mails, sent;
+            try { mails = await buildAdvisoryMails(); sent = await fetchSentToday(); }
+            catch (e) { alert('미리보기 생성 실패: ' + e.message); if (trigger) { trigger.disabled = false; trigger.textContent = '메일 발송 요청'; } return; }
+            if (trigger) { trigger.disabled = false; trigger.textContent = '메일 발송 요청'; }
+            closeSendModal();
+            var cards = mails.map(function(m, idx) {
+                var attNames = (m.attachments || []).map(function(a) { return a.filename; });
+                var badge = sent[m.key] ? '<span style="margin-left:8px;font-size:12px;font-weight:600;color:#16a34a;background:#dcfce7;border:1px solid #86efac;border-radius:999px;padding:2px 8px;">발송됨 ' + escapeHtml(sent[m.key]) + '</span>' : '';
+                return '<div style="border:1px solid #e5e7eb;border-radius:8px;margin-bottom:12px;overflow:hidden;">'
+                    + '<div style="background:#f3f4f6;padding:8px 12px;display:flex;align-items:center;">'
+                    + '<b style="font-size:14px;color:#222;">' + escapeHtml(m.label) + '</b>' + badge
+                    + '<button class="adv-send-one" data-idx="' + idx + '" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:5px 12px;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer;">개별 발송</button>'
+                    + '</div>'
+                    + '<div style="padding:10px 12px;font-size:13px;color:#374151;border-bottom:1px solid #f0f0f0;"><b>제목</b> ' + escapeHtml(m.subject) + '</div>'
+                    + '<div style="padding:6px 12px;font-size:12px;color:#6b7280;">첨부 ' + (attNames.length ? escapeHtml(attNames.join(', ')) : '없음') + '</div>'
+                    + '<pre style="white-space:pre-wrap;font-family:inherit;font-size:13px;color:#222;margin:0;padding:10px 12px;line-height:1.55;">' + escapeHtml(m.body) + '</pre>'
+                    + '</div>';
+            }).join('');
+            var overlay = document.createElement('div');
+            overlay.id = 'advSendModal';
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;';
+            overlay.innerHTML = '<div style="background:#fff;border-radius:12px;max-width:780px;width:100%;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.25);">'
+                + '<div style="padding:18px 22px;border-bottom:1px solid #e5e7eb;">'
+                + '<h3 style="margin:0;font-size:17px;color:#111;">자문지 메일 발송 요청 — 미리보기 (' + mails.length + '통)</h3>'
+                + '<p style="margin:8px 0 0;font-size:13px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 10px;">실제 발송 수신자·모드는 <b>서버 설정</b>이 결정합니다. 기본 <b>테스트 모드(본인 kts@investlife.com 단독)</b>. 아래 [전체 발송]/[개별 발송]은 발송 <b>요청</b>만 기록합니다.</p>'
+                + '</div>'
+                + '<div style="padding:16px 22px;overflow-y:auto;flex:1;">' + cards + '</div>'
+                + '<div style="padding:14px 22px;border-top:1px solid #e5e7eb;display:flex;gap:10px;justify-content:flex-end;align-items:center;">'
+                + '<span id="advSendMsg" style="margin-right:auto;font-size:13px;color:#6b7280;"></span>'
+                + '<button id="advSendCancel" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 18px;border:1px solid #d1d5db;background:#f3f4f6;color:#222;border-radius:8px;cursor:pointer;">닫기</button>'
+                + '<button id="advSendAll" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 18px;border:none;background:#16a34a;color:#fff;border-radius:8px;cursor:pointer;">전체 발송 (' + mails.length + '통)</button>'
+                + '</div></div>';
+            document.body.appendChild(overlay);
+            overlay.addEventListener('click', function(e) { if (e.target === overlay) closeSendModal(); });
+            document.getElementById('advSendCancel').addEventListener('click', closeSendModal);
+            document.getElementById('advSendAll').addEventListener('click', function() { submitSendRequest(mails, '전체'); });
+            document.querySelectorAll('#advSendModal .adv-send-one').forEach(function(b) {
+                b.addEventListener('click', function() {
+                    var mm = mails[parseInt(b.dataset.idx)];
+                    if (sent[mm.key] && !confirm(mm.label + ' 메일을 재발송하시겠습니까? (오늘 ' + sent[mm.key] + ' 발송됨)')) return;
+                    submitSendRequest([mm], mm.label);
+                });
+            });
+        }
+
+        async function submitSendRequest(mails, tag) {
+            var msg = document.getElementById('advSendMsg');
+            if (msg) msg.textContent = tag + ' 기록 중...';
+            var pat = getGithubPat();
+            if (!pat) { alert('PAT 입력이 취소되었습니다.'); if (msg) msg.textContent = ''; return; }
+            var d = new Date();
+            var todayStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+            // ★요청 mode 는 표시/감사용 — 서버 폴러는 무시하고 email_config.json 모드만 신뢰(가드1).
+            var payload = { date: todayStr, ts: new Date().toISOString(), mode: 'test',
+                note: '발송 모드/수신자는 서버 email_config.json 이 결정. 이 mode 값은 무시됨.',
+                mails: mails.map(function(m) { return { key: m.key, subject: m.subject, body: m.body, attachments: m.attachments || [] }; }) };
+            var payloadStr = JSON.stringify(payload, null, 2);
+            if (new Blob([payloadStr]).size > ADVISORY_MAX_REQUEST_BYTES) {
+                alert('❌ 요청(첨부 포함)이 900KB를 초과합니다. 개별 발송으로 나눠 보내주세요.');
+                if (msg) msg.textContent = ''; return;
+            }
+            var apiUrl = 'https://api.github.com/repos/' + ORDER_REPO + '/contents/orders/email_send_request.json';
+            var headers = { 'Authorization': 'Bearer ' + pat, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' };
+            try {
+                var sha = null;
+                var getResp = await fetch(apiUrl, { headers: headers });
+                if (getResp.ok) { var gd = await getResp.json(); sha = gd.sha; }
+                else if (getResp.status === 401 || getResp.status === 403) { localStorage.removeItem('github_pat'); throw new Error('인증 실패 (' + getResp.status + '). PAT 재입력'); }
+                else if (getResp.status !== 404) { throw new Error('GET 실패: ' + getResp.status); }
+                var body = { message: 'ORDER email send request: ' + todayStr + ' (' + tag + ', ' + mails.length + '통)', content: utf8ToBase64(payloadStr) };
+                if (sha) body.sha = sha;
+                var putResp = await fetch(apiUrl, { method: 'PUT', headers: Object.assign({}, headers, { 'Content-Type': 'application/json' }), body: JSON.stringify(body) });
+                if (!putResp.ok) { var errTxt = await putResp.text(); throw new Error('PUT 실패: ' + putResp.status + ' ' + errTxt.slice(0, 200)); }
+                closeSendModal();
+                alert('✅ 발송 요청 기록 완료 (' + tag + ', ' + mails.length + '통)\n\n서버 폴러가 1분 내 처리합니다. 기본 테스트 모드에서는 본인(kts@investlife.com)에게만 발송되며, 결과는 텔레그램으로 알립니다.');
+            } catch (e) {
+                alert('❌ 발송 요청 실패: ' + e.message);
+                if (msg) msg.textContent = '';
+            }
+        }
+
         function renderEmailPanel() {
             var GENERAL = "삼성 트루밸류";
             var TARGET_TABS = ["NH 목표전환형 5호", "DB 목표전환형 6차", "한투 성과모집형 1차"];  // 활성 목표전환형 (예: ['NH 목표전환형 5호'])
@@ -3069,23 +3240,17 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
             }
             // 2열 그리드 셀 순서: [컴플|삼성] → 증권사별 [이메일|메신저] (NH/DB=네이트온, 한투=카카오톡)
             var cells = [];
-            cells.push(buildEmailBox('삼성 이메일', samsung, '#f9fafb', '#e5e7eb', '#444', '#374151'));
-            cells.push(buildEmailBox('컴플라이언스 이메일', compliance, '#fffbeb', '#fef3c7', '#92400e', '#d97706'));
+            // 2026-07-13 재구성: 이메일 텍스트 카드 제거(발송 미리보기 모달이 전문 확인 대체) — 메신저 카드만 유지(수동 복사용).
+            // 삼성은 목표전환형이 없어 TARGET 루프에 없으므로 삼성 네이트온을 여기서 별도 추가.
+            cells.push(buildEmailBox('삼성 네이트온', buildOrderNateonText(orderStocks[GENERAL] || [], orderState[GENERAL] || [], '일반형'), '#eef2ff', '#c7d2fe', '#1f5a2a', '#4f46e5'));
             TARGET_TABS.forEach(function(tt) {
                 var pair = EMAIL_PAIR[tt] || { broker: tt.split(' ')[0], generalKey: GENERAL, generalLabel: '일반형', targetLabel: '목표전환형' };
-                var tEmail = buildOrderEmailText(tt, orderStocks[tt] || [], orderState[tt] || []);
-                cells.push(buildEmailBox(pair.broker + ' 이메일', tEmail, '#f9fafb', '#e5e7eb', '#444', '#374151'));
                 var mName = BROKER_MESSENGER[pair.broker] || '네이트온';
                 cells.push(buildEmailBox(pair.broker + ' ' + mName, buildMessengerText(pair.generalKey, pair.generalLabel, tt, pair.targetLabel), '#eef2ff', '#c7d2fe', '#1f5a2a', '#4f46e5'));
             });
             STANDALONE_GENERAL.forEach(function(sg) {
-                // 같은 증권사 목표전환형 이메일에 이미 일반형 섹션으로 포함되면 자체 박스 생략 (한투 이메일 중복 방지)
-                var covered = TARGET_TABS.some(function(tt) {
-                    return EMAIL_PAIR[tt] && EMAIL_PAIR[tt].generalKey === sg.display;
-                });
+                var covered = TARGET_TABS.some(function(tt) { return EMAIL_PAIR[tt] && EMAIL_PAIR[tt].generalKey === sg.display; });
                 if (covered) return;
-                var sgEmail = buildOrderEmailText(sg.display, orderStocks[sg.display] || [], orderState[sg.display] || []);
-                cells.push(buildEmailBox(sg.broker + ' 이메일', sgEmail, '#f9fafb', '#e5e7eb', '#444', '#374151'));
                 var sgm = BROKER_MESSENGER[sg.broker] || '네이트온';
                 cells.push(buildEmailBox(sg.broker + ' ' + sgm, buildMessengerText(sg.display, sg.display, null, null), '#eef2ff', '#c7d2fe', '#1f5a2a', '#4f46e5'));
             });
@@ -3129,13 +3294,17 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                 + '<h4 style="margin:0 0 12px 0;font-size:15px;color:#444;">자문지 다운로드</h4>'
                 + dlRows
                 + '</div>';
+            var sendSection = '<div style="margin-bottom:16px;display:flex;justify-content:flex-end;"><button id="advSendReqBtn" style="font-family:inherit;font-size:15px;font-weight:700;padding:10px 22px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">메일 발송 요청</button></div>';
             var html = '<div style="max-width:1200px;margin:0 auto;background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">'
+                + sendSection
                 + dlSection
                 + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:16px;margin-top:16px;align-items:stretch;">'
                 + cells.join('')
                 + '</div>'
                 + '</div>';
             document.getElementById('orderContent').innerHTML = html;
+            var _advBtn = document.getElementById('advSendReqBtn');
+            if (_advBtn) _advBtn.addEventListener('click', openSendModal);
             document.querySelectorAll('#orderContent .email-tab-dl-btn').forEach(function(btn) {
                 btn.addEventListener('click', function() {
                     downloadOrderExcel(btn.dataset.pf, parseInt(btn.dataset.tidx));
@@ -3858,7 +4027,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
             }
         }
 
-        async function downloadOrderExcel(pfName, templateIdx) {
+        async function downloadOrderExcel(pfName, templateIdx, returnB64) {
             var p = ORDER_PORTFOLIOS.find(function(x) { return x.display === pfName; });
             if (!p) { alert('포트폴리오 매핑 누락: ' + pfName); return; }
             if (typeof ExcelJS === 'undefined') { alert('ExcelJS 라이브러리 로드 실패. 새로고침 해주세요.'); return; }
@@ -3978,6 +4147,14 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                 }  // end 라이프자산운용 양식 (t.format !== 'kis')
 
                 var out = await wb.xlsx.writeBuffer();
+                if (returnB64) {
+                    var _bytes = new Uint8Array(out);
+                    var _bin = '';
+                    for (var _o = 0; _o < _bytes.length; _o += 0x8000) {
+                        _bin += String.fromCharCode.apply(null, _bytes.subarray(_o, _o + 0x8000));
+                    }
+                    return { filename: buildOutFilename(t, new Date()), content_b64: btoa(_bin) };
+                }
                 var blob = new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
                 var url = URL.createObjectURL(blob);
                 var a = document.createElement('a');
