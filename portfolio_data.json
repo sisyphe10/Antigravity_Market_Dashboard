@@ -487,22 +487,6 @@
       "is_today_new": false
     },
     {
-      "code": "161890",
-      "name": "한국콜마",
-      "sector": "화장품,의류,완구",
-      "market_cap": 27335,
-      "weight": 2.0,
-      "weight_prev": 2.0,
-      "today_return": 8.732394366197182,
-      "contribution": 1.7464788732394365,
-      "cumulative_return": 1.846965699208436,
-      "current_price": 115800.0,
-      "ath_price": 117800.0,
-      "dd": -1.697792869269954,
-      "rsi": 12.845267235931978,
-      "is_today_new": false
-    },
-    {
       "code": "004170",
       "name": "신세계",
       "sector": "소매(유통)",

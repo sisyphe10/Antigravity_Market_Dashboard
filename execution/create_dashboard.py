@@ -4461,6 +4461,24 @@ def create_order_section():
             return {};
         }
 
+        // 날짜 경과(자정) 후 어제 확정분을 baseline으로 흡수 -> 검정 표시.
+        // portfolio_data.json 은 16:00 재생성이라 그 전(오전)엔 _price_asof 가 어제 날짜.
+        // 스냅숏 기준일 < 오늘이면 확정분은 이미 상시 포트폴리오가 된 것으로 보고 변경 없음 처리.
+        function _orderSnapshotStale(pdata) {
+            try {
+                var asof = pdata && pdata._price_asof;
+                if (!asof) return false;
+                var d = new Date();
+                var today = d.getFullYear() + - + String(d.getMonth() + 1).padStart(2, 0) + - + String(d.getDate()).padStart(2, 0);
+                return String(asof) < today;
+            } catch (e) { return false; }
+        }
+        function _orderPrevBaseline(s, stale) {
+            var origW = parseFloat(s.weight) || 0;
+            if (stale) return origW;   // 날짜 경과 -> 어제 확정분 흡수(검정)
+            return s.is_today_new ? 0 : ((s.weight_prev != null) ? (parseFloat(s.weight_prev) || 0) : origW);
+        }
+
         async function loadOrder() {
             if (_orderLoaded) return;
             _orderLoaded = true;
@@ -4468,6 +4486,7 @@ def create_order_section():
                 var res = await fetch('portfolio_data.json?_=' + Date.now());
                 if (!res.ok) throw new Error('portfolio_data.json fetch 실패: ' + res.status);
                 var pdata = await res.json();
+                var _snapStale = _orderSnapshotStale(pdata);
                 ORDER_PORTFOLIOS.forEach(function(p) {
                     var stocks = pdata[p.jsonKey] || [];
                     // "변경전"은 D-1 기준(weight_prev) — 오늘 finalize된 행 직전 비중.
@@ -4477,7 +4496,7 @@ def create_order_section():
                         var origW = parseFloat(s.weight) || 0;
                         // 변경전 기준선: 오늘 첫 편입(is_today_new)이면 0(출시 전), 아니면 D-1(weight_prev).
                         // 추가 주문(additionalOrder)은 변경후→변경전 스냅샷으로 이 기준선을 갱신.
-                        var prevW = s.is_today_new ? 0 : ((s.weight_prev != null) ? (parseFloat(s.weight_prev) || 0) : origW);
+                        var prevW = _orderPrevBaseline(s, _snapStale);
                         return { code: s.code, name: s.name, sector: s.sector || '', weight: prevW };
                     });
                     orderState[p.display] = stocks.map(function(s) {
@@ -5500,13 +5519,14 @@ def create_order_section():
                 var pdRes = await fetch('portfolio_data.json?_=' + Date.now());
                 if (!pdRes.ok) throw new Error('portfolio_data.json fetch 실패: ' + pdRes.status);
                 var pdata = await pdRes.json();
+                var _snapStale = _orderSnapshotStale(pdata);
                 orderStocks = {};
                 orderState = {};
                 ORDER_PORTFOLIOS.forEach(function(p) {
                     var stocks = pdata[p.jsonKey] || [];
                     orderStocks[p.display] = stocks.map(function(s) {
                         var origW = parseFloat(s.weight) || 0;
-                        var prevW = s.is_today_new ? 0 : ((s.weight_prev != null) ? (parseFloat(s.weight_prev) || 0) : origW);
+                        var prevW = _orderPrevBaseline(s, _snapStale);
                         return { code: s.code, name: s.name, sector: s.sector || '', weight: prevW };
                     });
                     orderState[p.display] = stocks.map(function(s) {
