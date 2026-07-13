@@ -4636,6 +4636,13 @@ def create_order_section():
         function _advMDJ(d) { return (d.getMonth() + 1) + '월 ' + d.getDate() + '일자'; }
         function _advYMD(d) { return '' + d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0'); }
         function _advBroker(key) { return { compliance: null, samsung: '삼성', nh: 'NH', db: 'DB', kis: '한투' }[key]; }
+        // 미리보기 서명 스타일 (폴러 html_body 와 동일 규칙; <pre white-space:pre-wrap> 안이라 줄바꿈은 pre 가 처리)
+        function _advHtmlBody(body) {
+            var esc = escapeHtml(body);
+            esc = esc.replace('김 태 식 운용3본부/매니저', '<b>김 태 식</b> <span style="color:rgba(0,0,0,0.8)">운용3본부/매니저</span>');
+            esc = esc.replace('라이프자산운용 Life Asset Management, Inc.', '라이프자산운용 <span style="color:rgba(0,0,0,0.5)">Life Asset Management, Inc.</span>');
+            return esc;
+        }
 
         // 브로커별 자문지 첨부 생성 (해당 증권사 컬럼들의 templates → downloadOrderExcel base64)
         async function _advAttachments(broker) {
@@ -4733,7 +4740,7 @@ def create_order_section():
                     + '</div>'
                     + '<div style="padding:10px 12px;font-size:13px;color:#374151;border-bottom:1px solid #f0f0f0;"><b>제목</b> ' + escapeHtml(m.subject) + '</div>'
                     + '<div style="padding:6px 12px;font-size:12px;color:#6b7280;">첨부 ' + (attNames.length ? escapeHtml(attNames.join(', ')) : '없음') + '</div>'
-                    + '<pre style="white-space:pre-wrap;font-family:inherit;font-size:13px;color:#222;margin:0;padding:10px 12px;line-height:1.55;">' + escapeHtml(m.body) + '</pre>'
+                    + '<pre style="white-space:pre-wrap;font-family:inherit;font-size:13px;color:#000;margin:0;padding:10px 12px;line-height:1.55;">' + _advHtmlBody(m.body) + '</pre>'
                     + '</div>';
             }).join('');
             var overlay = document.createElement('div');
@@ -4748,8 +4755,8 @@ def create_order_section():
                 + '<div style="padding:14px 22px;border-top:1px solid #e5e7eb;display:flex;gap:10px;justify-content:flex-end;align-items:center;">'
                 + '<span id="advSendMsg" style="margin-right:auto;font-size:13px;color:#6b7280;"></span>'
                 + '<button id="advSendCancel" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 18px;border:1px solid #d1d5db;background:#f3f4f6;color:#222;border-radius:8px;cursor:pointer;">닫기</button>'
-                + '<button id="advSendCompliance" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 18px;border:none;background:#d97706;color:#fff;border-radius:8px;cursor:pointer;">1단계: 컴플라이언스 발송</button>'
-                + '<button id="advSendBrokers"' + (complianceDone ? '' : ' disabled title="컴플라이언스 발송 후 가능"') + ' style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 18px;border:none;background:' + (complianceDone ? '#16a34a' : '#9ca3af') + ';color:#fff;border-radius:8px;cursor:' + (complianceDone ? 'pointer' : 'not-allowed') + ';">2단계: 증권사 발송</button>'
+                + '<button id="advSendCompliance" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 18px;border:none;background:#d97706;color:#fff;border-radius:8px;cursor:pointer;">컴플용 발송</button>'
+                + '<button id="advSendBrokers"' + (complianceDone ? '' : ' disabled title="컴플라이언스 발송 후 가능"') + ' style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 18px;border:none;background:' + (complianceDone ? '#16a34a' : '#9ca3af') + ';color:#fff;border-radius:8px;cursor:' + (complianceDone ? 'pointer' : 'not-allowed') + ';">증권사용 발송</button>'
                 + '</div></div>';
             document.body.appendChild(overlay);
             overlay.addEventListener('click', function(e) { if (e.target === overlay) closeSendModal(); });
@@ -4757,9 +4764,9 @@ def create_order_section():
             var _cMail = mails.filter(function(m){ return m.key === 'compliance'; });
             var _bMails = mails.filter(function(m){ return m.key !== 'compliance'; });
             var _c1 = document.getElementById('advSendCompliance');
-            if (_c1) _c1.addEventListener('click', function() { if (!_cMail.length) { alert('컴플라이언스 메일이 없습니다.'); return; } if (sent['compliance'] && !confirm('컴플라이언스를 재발송하시겠습니까? (오늘 ' + sent['compliance'] + ' 발송됨)')) return; submitSendRequest(_cMail, '1단계 컴플라이언스'); });
+            if (_c1) _c1.addEventListener('click', function() { if (!_cMail.length) { alert('컴플라이언스 메일이 없습니다.'); return; } if (sent['compliance'] && !confirm('컴플라이언스를 재발송하시겠습니까? (오늘 ' + sent['compliance'] + ' 발송됨)')) return; submitSendRequest(_cMail, '컴플용'); });
             var _c2 = document.getElementById('advSendBrokers');
-            if (_c2) _c2.addEventListener('click', function() { if (!complianceDone) { alert('컴플라이언스 발송 후 가능합니다.'); return; } submitSendRequest(_bMails, '2단계 증권사 전체'); });
+            if (_c2) _c2.addEventListener('click', function() { if (!complianceDone) { alert('컴플라이언스 발송 후 가능합니다.'); return; } submitSendRequest(_bMails, '증권사용'); });
             document.querySelectorAll('#advSendModal .adv-send-one').forEach(function(b) {
                 b.addEventListener('click', function() {
                     if (b.disabled) return;
