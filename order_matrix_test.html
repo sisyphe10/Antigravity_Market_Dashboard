@@ -16,7 +16,7 @@
   .pw-error { color:#dc2626; font-size:13px; margin-top:10px; display:none; }
   .pw-hidden { display:none; }
   .wrap { max-width:1500px; margin:0 auto; padding:24px 20px 60px; }
-  .testbar { position:sticky; top:0; z-index:500; background:#fee2e2; border:2px solid #f87171; border-radius:8px; padding:14px 18px; margin-bottom:18px; font-size:17px; font-weight:800; color:#b91c1c; text-align:center; letter-spacing:0.3px; box-shadow:0 2px 10px rgba(0,0,0,0.06); }
+  .testbar { position:sticky; top:0; z-index:500; background:#fee2e2; border:2px solid #fca5a5; border-radius:8px; padding:14px 18px; margin-bottom:18px; font-size:17px; font-weight:800; color:#b91c1c; text-align:center; letter-spacing:0.3px; box-shadow:0 2px 10px rgba(0,0,0,0.06); }
   .testbar .sub2 { display:block; font-size:13px; font-weight:600; color:#92400e; margin-top:4px; }
   h1 { font-size:20px; margin:0 0 4px; }
   .sub { color:#6b7280; font-size:13px; margin-bottom:16px; }
@@ -128,12 +128,12 @@ function reasonTd(code, tempId){ var g=_mtxDirGroups(code); var hasR=g.red.lengt
   function inp(group,val,bg,ph,extra){ return '<input type="text" class="reason mtx-reason" data-code="'+escapeHtml(code)+'" data-group="'+group+'"'+(tempId?' data-tempid="'+tempId+'"':'')+' value="'+escapeHtml(val)+'" placeholder="'+ph+'" style="border:none;background:'+bg+';min-width:0;font-size:13px;'+(extra||'')+'">'; }
   if(hasR&&hasB){ var rv=_mtxGroupReason(code,'red'), bv=_mtxGroupReason(code,'blue');
     var needAny = !rv.trim() || !bv.trim();
-    return '<td style="min-width:260px;padding:0;'+(needAny?'border:2px solid #f87171;':'')+'"><div style="display:flex;align-items:stretch;">'
+    return '<td style="min-width:260px;padding:0;'+(needAny?'border:2px solid #fca5a5;':'')+'"><div style="display:flex;align-items:stretch;">'
       +inp('red', rv, rv.trim()?'transparent':'#fee2e2','','')
       +inp('blue', bv, bv.trim()?'transparent':'#fee2e2','','border-left:1px solid #d9d9d9;')
       +'</div></td>'; }
   var grp = hasR?'red':(hasB?'blue':'all'); var val=_mtxGroupReason(code,grp); var need=(hasR||hasB)&&!val.trim();
-  return '<td style="padding:0;background:'+(need?'#fee2e2':'transparent')+';'+(need?'border:2px solid #f87171;':'')+'">'+inp(grp,val,'transparent','','')+'</td>'; }
+  return '<td style="padding:0;background:'+(need?'#fee2e2':'transparent')+';'+(need?'border:2px solid #fca5a5;':'')+'">'+inp(grp,val,'transparent','','')+'</td>'; }
 function _mtxColSum(pf){ var st=orderState[pf]||[], s=0; st.forEach(function(x){ s+=parseFloat(x.newWeight)||0; }); return s; }
 function _mtxCell(pf,code){ var idx=_mtxFindIdx(pf,code); if(idx<0) return {held:false,color:'#000',ot:'',newWeight:null};
   var prev=parseFloat(orderStocks[pf][idx].weight)||0, nw=parseFloat(orderState[pf][idx].newWeight)||0, ot=calcOrderType(prev,nw);
