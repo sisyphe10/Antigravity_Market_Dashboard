@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order 매트릭스 (테스트)</title>
+<link href='https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css' rel='stylesheet'>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: 'Pretendard Variable', Pretendard, -apple-system, system-ui, sans-serif; background:#f8f9fa; color:#222; margin:0; }
+  .pw-overlay { position:fixed; inset:0; background:#f8f9fa; display:flex; align-items:center; justify-content:center; z-index:1000; }
+  .pw-box { background:#fff; padding:32px 28px; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.1); text-align:center; }
+  .pw-box h2 { margin:0 0 16px; font-size:18px; }
+  .pw-box input { padding:8px 12px; font-size:15px; border:1px solid #d1d5db; border-radius:6px; width:200px; }
+  .pw-box button { margin-left:8px; padding:8px 16px; font-size:15px; background:#222; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+  .pw-error { color:#dc2626; font-size:13px; margin-top:10px; display:none; }
+  .pw-hidden { display:none; }
+  .wrap { max-width:1500px; margin:0 auto; padding:24px 20px 60px; }
+  .testbar { background:#fef3c7; border:1px solid #fcd34d; border-radius:8px; padding:10px 16px; margin-bottom:16px; font-size:14px; font-weight:600; color:#92400e; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  .sub { color:#6b7280; font-size:13px; margin-bottom:16px; }
+  .toolbar { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+  .sync-toggle { display:inline-flex; align-items:center; gap:8px; font-size:14px; font-weight:600; cursor:pointer; user-select:none; padding:6px 12px; border:1.5px solid #d1d5db; border-radius:999px; background:#fff; }
+  .sync-toggle.on { border-color:#2563eb; background:#eff6ff; color:#1d4ed8; }
+  .btn { font-family:inherit; font-size:14px; font-weight:600; padding:6px 14px; border-radius:8px; cursor:pointer; border:1px solid #d1d5db; background:#f3f4f6; color:#222; }
+  .btn.red { background:#dc2626; color:#fff; border:none; }
+  .btn.green { background:#16a34a; color:#fff; border:none; }
+  .btn.blue { background:#2563eb; color:#fff; border:none; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  thead th { padding:8px 4px; text-align:center; border-bottom:2px solid #e5e7eb; color:#444; }
+  .grp-general { background:#eff6ff; }
+  td { padding:6px 4px; text-align:center; }
+  input.cell { width:58px; box-sizing:border-box; text-align:center; padding:4px; border:1px solid #d1d5db; border-radius:4px; font-family:inherit; font-size:15px; font-weight:600; }
+  input.meta { text-align:center; padding:4px 6px; border:1px solid #d1d5db; border-radius:4px; font-family:inherit; font-size:14px; }
+  input.reason { width:100%; box-sizing:border-box; padding:4px 6px; border:1px solid #d1d5db; border-radius:4px; font-family:inherit; font-size:14px; text-align:center; }
+  .totals td { border-top:2px solid #374151; background:#f9fafb; font-weight:700; padding:8px 4px; }
+  .modal-ov { position:fixed; inset:0; background:rgba(0,0,0,0.4); display:none; align-items:center; justify-content:center; z-index:900; }
+  .modal { background:#fff; border-radius:12px; padding:24px; max-width:760px; max-height:80vh; overflow:auto; box-shadow:0 8px 30px rgba(0,0,0,0.2); }
+  .modal h3 { margin:0 0 8px; }
+  .modal pre { background:#f6f8fa; border:1px solid #e5e7eb; border-radius:8px; padding:12px; font-size:12px; overflow:auto; white-space:pre-wrap; }
+  .del-btn { background:none; border:none; cursor:pointer; color:#dc2626; font-size:20px; line-height:1; padding:0 6px; font-weight:bold; }
+</style>
+</head>
+<body>
+<div id="pwOverlay" class="pw-overlay">
+  <div class="pw-box">
+    <h2>🔒 Password Required</h2>
+    <input type="password" id="pwInput" placeholder="비밀번호 입력" autofocus onkeydown="if(event.key==='Enter')checkPw()">
+    <button onclick="checkPw()">확인</button>
+    <div id="pwError" class="pw-error">비밀번호가 틀렸습니다.</div>
+  </div>
+</div>
+
+<div id="app" class="pw-hidden">
+  <div class="wrap">
+    <div class="testbar">⚠️ 테스트 페이지 — 저장 버튼은 실제 저장하지 않습니다(미리보기만). pending_orders.json·실주문 데이터에 영향 없음.</div>
+    <h1>주문 매트릭스 (7컬럼 개별 포트)</h1>
+    <div class="sub">행=전 포트 종목 합집합 · 열=7개 개별 포트 · 셀=변경후 입력(변경전 미표시, 변경 시 색만) · 사유=행당 1칸</div>
+    <div id="orderContent"><div style="padding:40px;text-align:center;color:#888;">로딩 중...</div></div>
+  </div>
+</div>
+
+<div id="modalOv" class="modal-ov"><div class="modal">
+  <h3 id="modalTitle">저장 미리보기 (테스트)</h3>
+  <div id="modalBody"></div>
+  <div style="margin-top:16px;text-align:right;"><button class="btn" onclick="document.getElementById('modalOv').style.display='none'">닫기</button></div>
+</div></div>
+
+<script>
+// ── 게이트 (wrap.html 동일 비밀번호) ──
+async function sha256(msg){ const b=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg)); return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join(''); }
+async function checkPw(){
+  const h=await sha256(document.getElementById('pwInput').value);
+  if(h==='7d78e91672fb21bfd70f2c3a5df40ee3d3cf052ae66a133df53822cc8bad44ee'){
+    document.getElementById('pwOverlay').style.display='none';
+    document.getElementById('app').classList.remove('pw-hidden');
+    sessionStorage.setItem('wrap_auth','1'); testLoadOrder();
+  } else { document.getElementById('pwError').style.display='block'; document.getElementById('pwInput').value=''; document.getElementById('pwInput').focus(); }
+}
+if(sessionStorage.getItem('wrap_auth')==='1'){ document.getElementById('pwOverlay').style.display='none'; document.getElementById('app').classList.remove('pw-hidden'); }
+
+// ── 컬럼 설정 (7개 개별 포트; general=동기 그룹 4종) ──
+var ORDER_PORTFOLIOS = [
+  { display:'삼성 트루밸류',       jsonKey:'삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형', broker:'삼성', product:'트루밸류',      general:true,  label:'삼성 트루밸류' },
+  { display:'NH 다이내믹 밸류',    jsonKey:'삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형', broker:'NH',   product:'Value ESG',    general:true,  label:'NH 다이내믹 밸류' },
+  { display:'DB 개방형',          jsonKey:'삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형', broker:'DB',   product:'개방형 랩',      general:true,  label:'DB 개방형' },
+  { display:'한투 지속형',         jsonKey:'한투 지속형',        broker:'한투', product:'지속형',        general:true,  label:'한투 지속형' },
+  { display:'NH 목표전환형 5호',   jsonKey:'NH 목표전환형 5호',  broker:'NH',   product:'목표전환형 5호', general:false, label:'NH 5호' },
+  { display:'DB 목표전환형 6차',   jsonKey:'DB 목표전환형 6차',  broker:'DB',   product:'목표전환형 6차', general:false, label:'DB 6차' },
+  { display:'한투 성과모집형 1차', jsonKey:'한투 성과모집형 1차', broker:'한투', product:'성과모집형 1차', general:false, label:'한투 성과 1차' },
+];
+var GENERAL_DISPLAYS = ORDER_PORTFOLIOS.filter(function(p){return p.general;}).map(function(p){return p.display;});
+
+var orderStocks = {}, orderState = {}, matrixNewRows = [], _mtxSeq = 0, syncGeneral = true;
+
+function escapeHtml(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function calcOrderType(oldW,newW){ if(oldW===newW) return '유지'; if(oldW===0&&newW>0) return '신규 편입'; if(newW===0&&oldW>0) return '전량 편출'; if(newW>oldW) return '비중 확대'; return '비중 축소'; }
+
+// ── _mtx 헬퍼 (운영 매트릭스와 동일 로직) ──
+function _mtxFindIdx(pf,code){ var a=orderStocks[pf]||[], c=String(code||'').trim(); for(var i=0;i<a.length;i++){ if(String(a[i].code||'').trim()===c) return i; } return -1; }
+function _mtxNewRowCodes(){ var s={}; matrixNewRows.forEach(function(r){ var c=String(r.code||'').trim(); if(c) s[c]=true; }); return s; }
+function _mtxUnion(){ var owned=_mtxNewRowCodes(), order=[], meta={};
+  ORDER_PORTFOLIOS.forEach(function(p){ (orderStocks[p.display]||[]).forEach(function(s){ var c=String(s.code||'').trim(); if(!c||owned[c]) return;
+    if(!meta[c]){ meta[c]={code:c,name:s.name||'',sector:s.sector||''}; order.push(c); } else { if(!meta[c].name&&s.name)meta[c].name=s.name; if(!meta[c].sector&&s.sector)meta[c].sector=s.sector; } }); });
+  return {order:order,meta:meta}; }
+function _mtxReason(code){ var c=String(code||'').trim();
+  for(var pi=0;pi<ORDER_PORTFOLIOS.length;pi++){ var pf=ORDER_PORTFOLIOS[pi].display, a=orderStocks[pf]||[], st=orderState[pf]||[];
+    for(var i=0;i<a.length;i++){ if(String(a[i].code||'').trim()===c){ var r=(st[i]&&st[i].reason||'').toString(); if(r.trim()) return r; } } }
+  var nr=matrixNewRows.filter(function(r){return String(r.code||'').trim()===c;})[0]; return nr?(nr.reason||''):''; }
+function _mtxSetReason(code,reason){ var c=String(code||'').trim();
+  ORDER_PORTFOLIOS.forEach(function(p){ var a=orderStocks[p.display]||[], st=orderState[p.display]||[]; for(var i=0;i<a.length;i++){ if(String(a[i].code||'').trim()===c&&st[i]) st[i].reason=reason; } });
+  matrixNewRows.forEach(function(r){ if(String(r.code||'').trim()===c) r.reason=reason; }); }
+function _mtxColSum(pf){ var st=orderState[pf]||[], s=0; st.forEach(function(x){ s+=parseFloat(x.newWeight)||0; }); return s; }
+function _mtxCell(pf,code){ var idx=_mtxFindIdx(pf,code); if(idx<0) return {held:false,color:'#000',ot:'',newWeight:null};
+  var prev=parseFloat(orderStocks[pf][idx].weight)||0, nw=parseFloat(orderState[pf][idx].newWeight)||0, ot=calcOrderType(prev,nw);
+  var color=(ot==='신규 편입'||ot==='비중 확대')?'#FF0000':((ot==='비중 축소'||ot==='전량 편출')?'#0070C0':'#000');
+  return {held:true,color:color,ot:ot,newWeight:nw}; }
+function _mtxCodeChanged(code){ for(var pi=0;pi<ORDER_PORTFOLIOS.length;pi++){ var c=_mtxCell(ORDER_PORTFOLIOS[pi].display,code); if(c.held&&c.ot&&c.ot!=='유지') return true; } return false; }
+
+function _mtxApplyCell(pf,code,raw,rowMeta){ var c=String(code||'').trim(); if(!c) return; var idx=_mtxFindIdx(pf,c); var s=raw==null?'':String(raw).trim();
+  if(s===''){ if(idx>=0){ var stk=orderStocks[pf][idx]; if(stk._mtxAdded&&(parseFloat(stk.weight)||0)===0){ orderStocks[pf].splice(idx,1); orderState[pf].splice(idx,1); } else { orderState[pf][idx].newWeight=0; } } return; }
+  var val=parseFloat(s)||0;
+  if(idx>=0){ orderState[pf][idx].newWeight=val; } else { var m=rowMeta||_mtxUnion().meta[c]||{code:c,name:'',sector:''}; orderStocks[pf].push({code:c,name:m.name||'',sector:m.sector||'',weight:0,isNew:true,_mtxAdded:true}); orderState[pf].push({newWeight:val,reason:_mtxReason(c)}); } }
+
+// 동기: general 컬럼 편집을 4종에 전파 (rowMeta=신규행 메타 전달)
+function _mtxApplyCellSynced(pf,code,raw,rowMeta){ var meta=ORDER_PORTFOLIOS.filter(function(p){return p.display===pf;})[0];
+  if(syncGeneral && meta && meta.general){ GENERAL_DISPLAYS.forEach(function(d){ _mtxApplyCell(d,code,raw,rowMeta); }); }
+  else { _mtxApplyCell(pf,code,raw,rowMeta); } }
+
+// ── 테스트 로드: portfolio_data.json → 7 컬럼 ──
+async function testLoadOrder(){
+  try {
+    var res = await fetch('portfolio_data.json?_='+Date.now());
+    if(!res.ok) throw new Error('portfolio_data.json '+res.status);
+    var pdata = await res.json();
+    orderStocks={}; orderState={}; matrixNewRows=[];
+    ORDER_PORTFOLIOS.forEach(function(p){
+      var stocks = pdata[p.jsonKey] || [];
+      orderStocks[p.display] = stocks.map(function(s){ var prevW = s.is_today_new ? 0 : ((s.weight_prev!=null)?(parseFloat(s.weight_prev)||0):(parseFloat(s.weight)||0)); return {code:s.code,name:s.name,sector:s.sector||'',weight:prevW}; });
+      orderState[p.display] = stocks.map(function(s){ return {newWeight:parseFloat(s.weight)||0, reason:''}; });
+    });
+    renderOrderMatrix();
+  } catch(e){ document.getElementById('orderContent').innerHTML='<div style="color:#dc2626;padding:40px;">데이터 로드 실패: '+e.message+'</div>'; }
+}
+
+function renderOrderMatrix(){
+  var union=_mtxUnion(); var pfs=ORDER_PORTFOLIOS.map(function(p){return p.display;});
+  function wcell(pf,code,isNew){ var cell=_mtxCell(pf,code); var val=cell.held?cell.newWeight:''; var gen=ORDER_PORTFOLIOS.filter(function(p){return p.display===pf;})[0].general;
+    return '<td class="'+(gen?'grp-general':'')+'"><input type="text" inputmode="decimal" class="cell mtx-w" data-code="'+escapeHtml(code)+'" data-pf="'+escapeHtml(pf)+'"'+(isNew?' data-newrow="1"':'')+' value="'+(val===''?'':val)+'" style="color:'+cell.color+';"></td>'; }
+  var rows='', rank=0;
+  union.order.forEach(function(code){ rank++; var m=union.meta[code]; var reason=_mtxReason(code); var need=_mtxCodeChanged(code)&&!reason.trim(); var cells='';
+    pfs.forEach(function(pf){ cells+=wcell(pf,code,false); });
+    rows+='<tr><td style="color:#666;">'+rank+'</td><td>'+escapeHtml(m.sector||'')+'</td><td>'+escapeHtml(m.code)+'</td><td style="font-weight:600;">'+escapeHtml(m.name||'')+'</td>'+cells
+      +'<td><input type="text" class="reason mtx-reason" data-code="'+escapeHtml(code)+'" value="'+escapeHtml(reason)+'" style="'+(need?'background:#fee2e2;border-color:#fca5a5;':'')+'"></td><td></td></tr>'; });
+  matrixNewRows.forEach(function(r){ rank++; var code=String(r.code||'').trim(); var need=code&&_mtxCodeChanged(code)&&!(r.reason||'').trim(); var cells='';
+    pfs.forEach(function(pf){ cells+=wcell(pf,code,true); });
+    rows+='<tr data-tempid="'+r.tempId+'"><td style="color:#666;">'+rank+'</td>'
+      +'<td><input type="text" class="meta mtx-meta" data-tempid="'+r.tempId+'" data-field="sector" value="'+escapeHtml(r.sector||'')+'" placeholder="업종" style="width:90px;"></td>'
+      +'<td><input type="text" class="meta mtx-meta" data-tempid="'+r.tempId+'" data-field="code" value="'+escapeHtml(r.code||'')+'" placeholder="000000" maxlength="6" style="width:64px;"></td>'
+      +'<td><input type="text" class="meta mtx-meta" data-tempid="'+r.tempId+'" data-field="name" value="'+escapeHtml(r.name||'')+'" placeholder="종목명" style="width:110px;font-weight:600;"></td>'
+      +cells+'<td><input type="text" class="reason mtx-reason" data-code="'+escapeHtml(code)+'" data-tempid="'+r.tempId+'" value="'+escapeHtml(r.reason||'')+'" style="'+(need?'background:#fee2e2;border-color:#fca5a5;':'')+'"></td>'
+      +'<td><button class="del-btn mtx-del" data-tempid="'+r.tempId+'">×</button></td></tr>'; });
+  var totals='';
+  pfs.forEach(function(pf,ci){ var sum=_mtxColSum(pf); var col=(Math.abs(sum-100)<0.5)?'#16a34a':(sum>100?'#dc2626':'#222'); var gen=ORDER_PORTFOLIOS[ci].general;
+    totals+='<td class="'+(gen?'grp-general':'')+'" id="mtx-total-'+ci+'" style="color:'+col+';">'+sum.toFixed(0)+'%</td>'; });
+  var head='';
+  ORDER_PORTFOLIOS.forEach(function(p){ head+='<th class="'+(p.general?'grp-general':'')+'" title="'+escapeHtml(p.display)+'" style="min-width:64px;">'+escapeHtml(p.label)+'</th>'; });
+  var html='<div class="toolbar">'
+    +'<span class="sync-toggle'+(syncGeneral?' on':'')+'" id="syncToggle">'+(syncGeneral?'☑':'☐')+' 일반형 동기 입력 (삼성·NH·DB·한투지속형)</span>'
+    +'<div style="margin-left:auto;display:flex;gap:8px;">'
+    +'<button class="btn red" id="btnCancel">전체 취소 (테스트)</button>'
+    +'<button class="btn" id="btnSave">임시 저장 (테스트)</button>'
+    +'<button class="btn green" id="btnFinal">최종 저장 (테스트)</button>'
+    +'<button class="btn" id="btnAdd">+ 종목 추가</button></div></div>'
+    +'<div style="overflow-x:auto;"><table><thead><tr>'
+    +'<th style="width:34px;">#</th><th>업종</th><th style="width:64px;">코드</th><th>종목명</th>'+head+'<th>추천사유</th><th style="width:34px;"></th>'
+    +'</tr></thead><tbody>'+rows+'<tr class="totals"><td colspan="4" style="text-align:right;color:#444;">합계</td>'+totals+'<td></td><td></td></tr></tbody></table></div>';
+  document.getElementById('orderContent').innerHTML=html;
+  bindHandlers();
+}
+
+function _mtxUpdateTotals(){ ORDER_PORTFOLIOS.forEach(function(p,ci){ var c=document.getElementById('mtx-total-'+ci); if(!c) return; var sum=_mtxColSum(p.display); c.style.color=(Math.abs(sum-100)<0.5)?'#16a34a':(sum>100?'#dc2626':'#222'); c.textContent=sum.toFixed(0)+'%'; }); }
+
+function bindHandlers(){
+  document.getElementById('syncToggle').addEventListener('click', function(){ syncGeneral=!syncGeneral; renderOrderMatrix(); });
+  document.querySelectorAll('input.mtx-w').forEach(function(el){ el.addEventListener('input', function(e){
+    var code=e.target.dataset.code, pf=e.target.dataset.pf, rowMeta=null;
+    if(e.target.dataset.newrow){ var tr=e.target.closest('tr'), tid=tr&&tr.dataset.tempid; var nr=matrixNewRows.filter(function(r){return String(r.tempId)===String(tid);})[0]; if(nr){ code=String(nr.code||'').trim(); rowMeta=nr; } }
+    if(!code) return;
+    _mtxApplyCellSynced(pf,code,e.target.value,rowMeta);
+    renderOrderMatrix();
+    var back=document.querySelector('input.mtx-w[data-code="'+code+'"][data-pf="'+pf+'"]'); if(back){ back.focus(); try{ back.setSelectionRange(back.value.length,back.value.length); }catch(_){} }
+  }); });
+  document.querySelectorAll('input.mtx-reason').forEach(function(el){ el.addEventListener('input', function(e){
+    var code=e.target.dataset.code, tid=e.target.dataset.tempid;
+    if((!code||!code.trim())&&tid){ var nr=matrixNewRows.filter(function(r){return String(r.tempId)===String(tid);})[0]; if(nr) nr.reason=e.target.value; }
+    else if(code){ _mtxSetReason(code,e.target.value); }
+  }); });
+  document.querySelectorAll('input.mtx-meta').forEach(function(el){ el.addEventListener('input', function(e){
+    var nr=matrixNewRows.filter(function(r){return String(r.tempId)===String(e.target.dataset.tempid);})[0]; if(nr) nr[e.target.dataset.field]=e.target.value; }); });
+  document.querySelectorAll('input.mtx-meta[data-field="name"]').forEach(function(el){ el.addEventListener('blur', function(e){ autoFill(e.target.dataset.tempid,'name'); }); });
+  document.querySelectorAll('input.mtx-meta[data-field="code"]').forEach(function(el){ el.addEventListener('blur', function(e){ autoFill(e.target.dataset.tempid,'code'); }); });
+  document.querySelectorAll('.mtx-del').forEach(function(b){ b.addEventListener('click', function(e){ var tid=e.currentTarget.dataset.tempid;
+    var nr=matrixNewRows.filter(function(r){return String(r.tempId)===String(tid);})[0];
+    if(nr&&String(nr.code||'').trim()){ var c=String(nr.code).trim(); ORDER_PORTFOLIOS.forEach(function(p){ var i=_mtxFindIdx(p.display,c); if(i>=0&&orderStocks[p.display][i]._mtxAdded){ orderStocks[p.display].splice(i,1); orderState[p.display].splice(i,1); } }); }
+    matrixNewRows=matrixNewRows.filter(function(r){return String(r.tempId)!==String(tid);}); renderOrderMatrix(); }); });
+  document.getElementById('btnAdd').addEventListener('click', function(){ matrixNewRows.push({tempId:'mtx'+(++_mtxSeq),code:'',name:'',sector:'',reason:''}); renderOrderMatrix(); });
+  document.getElementById('btnCancel').addEventListener('click', function(){ if(confirm('테스트: 원본 데이터로 되돌립니다 (실저장 없음).')) testLoadOrder(); });
+  document.getElementById('btnSave').addEventListener('click', function(){ showSavePreview('임시 저장'); });
+  document.getElementById('btnFinal').addEventListener('click', function(){ showSavePreview('최종 저장'); });
+}
+
+// ── stock_master.json 자동완성 (신규행) ──
+var wicsCache=null, wicsByCode=null, wicsByName=null;
+async function loadWics(){ if(wicsCache) return; var r=await fetch('stock_master.json'); if(!r.ok) return; wicsCache=await r.json(); wicsByCode={}; wicsByName={}; wicsCache.forEach(function(x){ if(x.code)wicsByCode[String(x.code)]=x; if(x.name)wicsByName[String(x.name)]=x; }); }
+function lookupSector(code){ var c=String(code||'').trim(); if(!c) return ''; for(var pi=0;pi<ORDER_PORTFOLIOS.length;pi++){ var a=orderStocks[ORDER_PORTFOLIOS[pi].display]||[]; for(var i=0;i<a.length;i++){ if(String(a[i].code||'').trim()===c&&a[i].sector) return a[i].sector; } } return ''; }
+async function autoFill(tid,src){ var nr=matrixNewRows.filter(function(r){return String(r.tempId)===String(tid);})[0]; if(!nr) return; try{ await loadWics(); if(!wicsCache) return;
+  if(src==='name'){ var nm=String(nr.name||'').trim(); if(!nm) return; var lo=nm.toLowerCase(); var hit=wicsByName[nm]||wicsCache.find(function(x){return x.name&&x.name.toLowerCase()===lo;})||wicsCache.find(function(x){return x.name&&x.name.toLowerCase().indexOf(lo)>=0;}); if(!hit) return; if(!String(nr.code||'').trim())nr.code=hit.code; nr.name=hit.name; if(!String(nr.sector||'').trim())nr.sector=lookupSector(nr.code)||hit.sector||''; }
+  else { var cd=String(nr.code||'').trim(); if(!cd) return; if(/^\d{1,6}$/.test(cd)&&cd.length<6){ cd=cd.padStart(6,'0'); nr.code=cd; } var h2=wicsByCode[cd]; if(!h2) return; if(!String(nr.name||'').trim())nr.name=h2.name; if(!String(nr.sector||'').trim())nr.sector=lookupSector(nr.code)||h2.sector||''; }
+  renderOrderMatrix(); }catch(e){} }
+
+// ── 저장 미리보기 (실저장 차단) ──
+function buildPendingPreview(){
+  var today=new Date(); var ds=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+  var out={}; out[ds]={};
+  ORDER_PORTFOLIOS.forEach(function(p){ var stk=orderStocks[p.display]||[], st=orderState[p.display]||[], rows=[];
+    stk.forEach(function(s,i){ if(s.code) rows.push({sector:s.sector||'',code:String(s.code),name:s.name||'',weight:parseFloat(st[i].newWeight)||0,baseWeight:parseFloat(s.weight)||0,reason:(st[i].reason||'')}); });
+    if(rows.length) out[ds][p.display]={ targets:[{broker:p.broker,product:p.product}], stocks:rows, savedAt:'(테스트 — 미저장)' };
+  });
+  return out;
+}
+function showSavePreview(kind){
+  var preview=buildPendingPreview();
+  var ds=Object.keys(preview)[0], cards=preview[ds]||{};
+  var summary='<div style="margin-bottom:10px;font-size:14px;">아래 구조로 <b>'+kind+'</b>됩니다 (개별 키 '+Object.keys(cards).length+'개). <b style="color:#dc2626;">실제 저장은 하지 않았습니다.</b></div>';
+  var tbl='<table style="font-size:13px;"><thead><tr><th style="text-align:left;">저장 키(포트)</th><th>broker</th><th>product</th><th>종목수</th><th>변경종목</th></tr></thead><tbody>';
+  Object.keys(cards).forEach(function(k){ var c=cards[k]; var chg=c.stocks.filter(function(s){return s.weight!==s.baseWeight;}).length;
+    tbl+='<tr><td style="text-align:left;">'+escapeHtml(k)+'</td><td>'+escapeHtml(c.targets[0].broker)+'</td><td>'+escapeHtml(c.targets[0].product)+'</td><td>'+c.stocks.length+'</td><td>'+chg+'</td></tr>'; });
+  tbl+='</tbody></table>';
+  document.getElementById('modalTitle').textContent=kind+' 미리보기 (테스트 — 실저장 없음)';
+  document.getElementById('modalBody').innerHTML=summary+tbl+'<div style="margin-top:12px;font-size:12px;color:#6b7280;">전체 JSON (finalize·복원이 읽는 형태):</div><pre>'+escapeHtml(JSON.stringify(preview,null,2))+'</pre>';
+  document.getElementById('modalOv').style.display='flex';
+}
+
+if(sessionStorage.getItem('wrap_auth')==='1') testLoadOrder();
+</script>
+</body>
+</html>
