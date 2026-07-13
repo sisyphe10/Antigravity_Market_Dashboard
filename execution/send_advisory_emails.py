@@ -30,8 +30,8 @@ if hasattr(sys.stdout, 'reconfigure'):
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO_SLUG = os.environ.get('GITHUB_REPOSITORY', 'sisyphe10/Antigravity_Market_Dashboard')
 CONFIG_PATH = os.path.expanduser('~/email_config.json')          # 맥 로컬 전용 (repo 밖)
-ADVISORY_DIR = os.path.join(ROOT, '자문지')
 RESULT_PATH = os.path.join(ROOT, 'orders', 'email_send_result.json')
+MAX_ATTACH_TOTAL = 5 * 1024 * 1024   # 폴러측 방어 상한(클라이언트가 요청 900KB 로 이미 제한)
 KST = timezone(timedelta(hours=9))
 # ★가드 핵심(codex 리뷰 치명 반영): test 안전 기준·BCC 기록 주소는 config 와 무관한 고정 상수.
 #   config.from 이 실수/악의로 오염돼도 test 발송은 이 주소 단독으로만 나간다.
@@ -83,25 +83,29 @@ def assert_test_safety(mode, rcpts):
         raise SendGuardError('TEST 모드 위반: 본인(%s) 외 수신자 %r — 전체 발송 차단' % (self_n, bad))
 
 
-def resolve_attachments(patterns, advisory_dir):
-    """attach 패턴별로 자문지/ 에서 매칭 최신(수정시각) 파일 1개씩. 매칭 없으면 예외.
+def decode_attachments(mail):
+    """★첨부는 오직 요청 JSON 의 base64(클라이언트 downloadOrderExcel 생성본)에서만.
+    자문지/ 폴더는 절대 참조하지 않는다(과거 템플릿 오발송 원천 차단). (filename, bytes) 리스트 반환."""
+    import base64
+    out, total = [], 0
+    for a in (mail.get('attachments') or []):
+        fn = a.get('filename') or 'attachment.xlsx'
+        b64 = a.get('content_b64') or ''
+        try:
+            raw = base64.b64decode(b64, validate=True)
+        except Exception as e:
+            raise SendGuardError('첨부 base64 디코드 실패(%s): %s' % (fn, str(e)[:80]))
+        if not raw:
+            raise SendGuardError('첨부 내용 없음: %s' % fn)
+        total += len(raw)
+        out.append((fn, raw))
+    if total > MAX_ATTACH_TOTAL:
+        raise SendGuardError('첨부 총량 초과: %d bytes' % total)
+    return out
 
-    ※ 첨부 최신성 정책(Q1) 확정 전 기본값 = '패턴 매칭 최신 파일'. finalize 가 오늘 자문지를
-       자문지/ 에 갱신 커밋하는 흐름이면 그대로 최신본이 잡힌다.
-    """
-    result = []
-    for pat in patterns:
-        cands = [f for f in os.listdir(advisory_dir)
-                 if pat in f and f.lower().endswith(('.xlsx', '.xls'))]
-        if not cands:
-            raise FileNotFoundError('자문지 첨부 매칭 없음: %r (dir=%s)' % (pat, advisory_dir))
-        cands.sort(key=lambda f: os.path.getmtime(os.path.join(advisory_dir, f)))
-        result.append(os.path.join(advisory_dir, cands[-1]))
-    return result
 
-
-def build_mime(mail, rcpts, from_hdr, attachment_paths):
-    """MIME 조립. body/subject 는 요청(wrap.html buildOrderEmailText 산출물) 그대로 사용."""
+def build_mime(mail, rcpts, from_hdr, attachments):
+    """MIME 조립. body/subject 는 요청(buildOrderEmailText 산출물) 그대로. attachments=[(filename, bytes)]."""
     from email.mime.multipart import MIMEMultipart
     from email.mime.text import MIMEText
     from email.mime.application import MIMEApplication
@@ -112,21 +116,17 @@ def build_mime(mail, rcpts, from_hdr, attachment_paths):
         msg['Cc'] = ', '.join(rcpts['cc'])
     msg['Subject'] = mail['subject']
     msg.attach(MIMEText(mail.get('body', ''), 'plain', 'utf-8'))
-    for path in attachment_paths:
-        with open(path, 'rb') as f:
-            part = MIMEApplication(
-                f.read(),
-                _subtype='vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        fname = os.path.basename(path)
-        part.add_header('Content-Disposition', 'attachment',
-                        filename=('utf-8', '', fname))
+    for fname, raw in attachments:
+        part = MIMEApplication(
+            raw, _subtype='vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        part.add_header('Content-Disposition', 'attachment', filename=('utf-8', '', fname))
         msg.attach(part)
     return msg
 
 
-def build_send_plan(mode, mails, config, advisory_dir):
-    """pre-flight: 전 메일의 수신자 해석 + 가드3 assert + 첨부 해석을 **발송 전** 일괄 수행.
-    하나라도 실패하면 예외 → 호출부가 전체 배치를 중단(부분발송 방지)."""
+def build_send_plan(mode, mails, config):
+    """pre-flight: 전 메일의 키 검증 + 수신자 해석 + 가드3 assert + 첨부(요청 base64) 디코드를
+    **발송 전** 일괄 수행. 하나라도 실패하면 예외 → 호출부가 전체 배치를 중단(부분발송 방지)."""
     accounts = config.get('accounts', {})
     keys = [m.get('key') for m in mails]
     if len(keys) != len(set(keys)):
@@ -139,7 +139,7 @@ def build_send_plan(mode, mails, config, advisory_dir):
             raise SendGuardError('email_config.json 에 계정 미정의: %r' % key)
         rcpts = resolve_recipients(mode, acct)
         assert_test_safety(mode, rcpts)                     # ★가드3
-        atts = resolve_attachments(acct.get('attach', []), advisory_dir)
+        atts = decode_attachments(mail)                     # 요청 base64 만 (자문지/ 미참조)
         plan.append({'mail': mail, 'rcpts': rcpts, 'attachments': atts})
     return plan
 
@@ -272,7 +272,7 @@ def main():
     now = datetime.now(KST)
     # pre-flight: 전 메일 가드 통과 + 첨부 해석 (하나라도 실패 시 예외 → 전체 중단)
     try:
-        plan = build_send_plan(mode, req.get('mails', []), config, ADVISORY_DIR)
+        plan = build_send_plan(mode, req.get('mails', []), config)
     except SendGuardError as e:
         print('❌ 가드 차단: %s' % e)
         send_telegram('🚫 자문지 메일 발송 차단(가드)\n%s\n요청 ts=%s' % (e, ts))
