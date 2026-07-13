@@ -1,8 +1,8 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 120 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 121 components._
 
-Updated: 2026-07-12
+Updated: 2026-07-13
 
 ## By domain
 
@@ -66,7 +66,7 @@ Updated: 2026-07-12
 - [TrendForce 소스 (sources/trendforce.py)](src-trendforce.md) — Source
 - [다나와 DRAM 최저가 (fetch_danawa_price.py)](src-danawa.md) — Source
 
-### 포트폴리오 · WRAP (17)
+### 포트폴리오 · WRAP (18)
 - [contribution_data.json](store-contribution-data.md) — Dataset
 - [Featured KIS 수집 타이머 (15:50, 신고가)](timer-featured-kis.md) — Timer
 - [Featured KIS/신고가 (fetch_featured_data_kis.py + enrich)](src-featured-kis.md) — Source
@@ -83,6 +83,7 @@ Updated: 2026-07-12
 - [기여도 데이터 (create_contribution_data.py)](src-create-contribution-data.md) — Source
 - [기준가 엔진 (calculate_wrap_nav.py)](src-calculate-wrap-nav.md) — Source
 - [수익률 계산 (calculate_returns.py)](src-calculate-returns.md) — Source
+- [자문지 메일 발송 폴러 (send-advisory-emails 60초)](timer-advisory-emails.md) — Timer
 - [포트폴리오 표 생성 (create_portfolio_tables.py)](src-create-portfolio-tables.md) — Source
 
 ### 뉴스 · 리서치 (13)
@@ -148,7 +149,7 @@ Updated: 2026-07-12
 - [Sisyphe-Bot (펀드/일상 텔레그램 봇)](bot-sisyphe.md) — 상시 (내부 잡 05:00~23:00), active
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — 상시 (06:00 다이제스트 등), active
 
-### Timer (11)
+### Timer (12)
 - [ETF 구성종목 수집 타이머 (etf-collect 16:30)](timer-etf-collect.md) — 16:30 매일, active
 - [ETF 수집 재시도 타이머 (etf-collect-retry 18:00)](timer-etf-collect-retry.md) — 18:00 매일, active
 - [Featured KIS 수집 타이머 (15:50, 신고가)](timer-featured-kis.md) — 15:50 매일, active
@@ -158,6 +159,7 @@ Updated: 2026-07-12
 - [아키텍처 자동 최신화 타이머 (21:40, claude 헤드리스)](timer-architecture-daily.md) — 21:40 매일, active
 - [액티브 ETF 변동 알림 타이머 (19:00)](timer-etf-active-alert.md) — 19:00 매일, active
 - [일일 셀프체크 다이제스트 (08:50, dead-man's switch)](daemon-daily-selfcheck.md) — 08:50 매일, active
+- [자문지 메일 발송 폴러 (send-advisory-emails 60초)](timer-advisory-emails.md) — 60초 폴러 (상시), active
 - [종목마스터 주간 갱신 타이머 (토 09:00)](timer-update-stock-master.md) — 토 09:00, active
 - [호텔 ADR 타이머 (12:00, 은퇴)](timer-hotel-adr.md) — 12:00 매일 (disabled), retired
 
@@ -284,7 +286,7 @@ Updated: 2026-07-12
 
 ## By project
 
-### antigravity (120)
+### antigravity (121)
 - [architecture.html (아키텍처)](page-architecture.md) — Page
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — Infra
 - [Claude Code Action (@claude 이벤트)](gha-claude-code.md) — GHA
@@ -390,6 +392,7 @@ Updated: 2026-07-12
 - [유니버스 수집 (fetch_universe.py)](src-universe.md) — Source
 - [일본 CAPEX 지표 (fetch_japan_capex.py)](src-japan-capex.md) — Source
 - [일일 셀프체크 다이제스트 (08:50, dead-man's switch)](daemon-daily-selfcheck.md) — Timer
+- [자문지 메일 발송 폴러 (send-advisory-emails 60초)](timer-advisory-emails.md) — Timer
 - [작업용 노트북 (ASUS Vivobook, Windows)](infra-laptop.md) — Infra
 - [종목마스터 갱신 (update_stock_master.py)](src-stock-master.md) — Source
 - [종목마스터 주간 갱신 타이머 (토 09:00)](timer-update-stock-master.md) — Timer

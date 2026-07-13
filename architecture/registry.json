@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-07-12",
+  "updated": "2026-07-13",
   "projects": [
    "antigravity"
   ],
@@ -898,7 +898,7 @@
    "runs_on": "github",
    "schedule_kst": "생성=여러 잡",
    "status": "active",
-   "desc_md": "랩 상품 운용 대시보드. Dashboard/공시/Order/AUM/수수료/기여도 탭 묶음. 자문사 실무의 중심 화면.\n\n- **독립 페이지화(2026-07-12, 'Life WRAP' 리브랜드)**: 팀원 전용 페이지로 분리 — 개인 탭을 nav에서 제거하고, 탭 축을 뒤집어(탭 상단, 섹션 TOC 좌측) 탭별 컨텍스추얼 사이드바를 둔다. **팀원 공개는 gh-pages 전용**([[web-publish-pages]]) — 개인 대시보드([[web-caddy]] ts.net)에는 이 페이지가 빠지고 대신 Sisyphe 탭이 들어간다.\n- PORTFOLIO 종목표·수익률·차트는 `portfolio_data.json`+`Wrap_NAV.xlsx` 계산 산출을 소비.\n- Order 탭: 임시저장(회색, `orders/pending_orders.json`)→최종저장(초록, finalize 트리거). 기여도 탭은 `contribution_data.json` 런타임 fetch. 주문 접수는 웹(wrap.html→GitHub Contents API) 유지 — 별도 주문봇 스캐폴드는 폐기됐다.\n- 증권사·상품 정의는 단일 레지스트리(`execution/wrap_config.py`)에서 파생.\n- `create_dashboard.py` 생성. finalize/recalc가 주 재생성원.",
+   "desc_md": "랩 상품 운용 대시보드. Dashboard/공시/Order/AUM/수수료/기여도 탭 묶음. 자문사 실무의 중심 화면.\n\n- **독립 페이지화(2026-07-12, 'Life WRAP' 리브랜드)**: 팀원 전용 페이지로 분리 — 개인 탭을 nav에서 제거하고, 탭 축을 뒤집어(탭 상단, 섹션 TOC 좌측) 탭별 컨텍스추얼 사이드바를 둔다. **팀원 공개는 gh-pages 전용**([[web-publish-pages]]) — 개인 대시보드([[web-caddy]] ts.net)에는 이 페이지가 빠지고 대신 Sisyphe 탭이 들어간다.\n- PORTFOLIO 종목표·수익률·차트는 `portfolio_data.json`+`Wrap_NAV.xlsx` 계산 산출을 소비.\n- Order 탭: 임시저장(회색, `orders/pending_orders.json`)→최종저장(초록, finalize 트리거). 기여도 탭은 `contribution_data.json` 런타임 fetch. 주문 접수는 웹(wrap.html→GitHub Contents API) 유지 — 별도 주문봇 스캐폴드는 폐기됐다.\n- **Order 통합 매트릭스(2026-07-13)**: 포트별 카드 → 합집합 행(종목)×포트 열 매트릭스 VIEW로 개편. 7개 개별 컬럼은 `wrap_config.order_matrix_columns()`로 동적 생성, 개별키 실저장, 일반형 동기화 토글(삼성 트루밸류 컬럼 정렬), cash row 포함. pending 스키마·save/finalize/email/excel 계층은 불변(VIEW 층만 교체). 정본 디자인은 은퇴한 test 페이지에서 1:1 이식.\n- **Email 탭 발송 요청(2026-07-13)**: [컴플 메일]/[증권사 메일] 2버튼 각자 모달, 첨부 base64 생성(900KB 가드)+미리보기(하이웍스 실서명 HTML). [메일 발송 요청]이 `orders/email_send_request.json`을 Contents API로 기록 → [[timer-advisory-emails]] 60초 폴러가 하이웍스 SMTP로 발송. (컴플라이언스 선발송 게이팅은 사용자 지시로 제거.)\n- 증권사·상품 정의는 단일 레지스트리(`execution/wrap_config.py`)에서 파생.\n- `create_dashboard.py` 생성. finalize/recalc가 주 재생성원.",
    "code": [
     "execution/create_dashboard.py",
     "execution/wrap_config.py"
@@ -1055,54 +1055,6 @@
     {
      "label": "라이브",
      "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/etf.html"
-    }
-   ]
-  },
-  {
-   "id": "page-market-alert",
-   "project": "antigravity",
-   "domain": "market-kr",
-   "type": "page",
-   "name": "market_alert.html (투자유의종목)",
-   "runs_on": "github",
-   "schedule_kst": "생성=16:05 / 23:00 (sisyphe-bot)",
-   "status": "active",
-   "desc_md": "투자유의/투자경고/투자위험 지정 종목 추적 페이지.\n\n- `create_market_alert.py`(별도 생성기)가 만들며 Sisyphe-Bot 16:05/23:00 잡이 재생성. KIS marcap 사용.\n- 텔레그램 4블록 요약(신규/진입임박/탈출임박/전체현황)은 RA_Sisyphe_bot 05:15 잡.\n- 함정: 지정예고는 투자주의 fetch에 들어옴(경고 아님).",
-   "code": [
-    "execution/create_market_alert.py"
-   ],
-   "depends_on": [
-    "src-create-market-alert"
-   ],
-   "links": [
-    {
-     "label": "라이브",
-     "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/market_alert.html"
-    }
-   ]
-  },
-  {
-   "id": "page-hotels",
-   "project": "antigravity",
-   "domain": "market-global",
-   "type": "page",
-   "name": "hotels.html (호텔 ADR, 동결)",
-   "runs_on": "github",
-   "status": "frozen",
-   "desc_md": "booking.com 호텔 ADR 추적 페이지. **데이터 동결**(수집 타이머 은퇴 2026-07-06).\n\n- 차트는 PNG→Chart.js 전환 완료(매 실행 PNG 재생성발 머지충돌 소멸)라 페이지 자체는 정상 렌더, 다만 `hotel_adr.csv`가 더 안 갱신됨.\n- `create_dashboard.py`가 여전히 생성 목록에 포함하나 신규 데이터 없음.",
-   "code": [
-    "execution/create_dashboard.py"
-   ],
-   "reads": [
-    "hotel_adr.csv"
-   ],
-   "depends_on": [
-    "src-create-dashboard"
-   ],
-   "links": [
-    {
-     "label": "라이브",
-     "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/hotels.html"
     }
    ]
   },
@@ -2022,175 +1974,6 @@
    ]
   },
   {
-   "id": "store-portfolio-data",
-   "project": "antigravity",
-   "domain": "portfolio-wrap",
-   "type": "dataset",
-   "name": "portfolio_data.json",
-   "runs_on": "github",
-   "schedule_kst": "체인 재생성",
-   "status": "active",
-   "desc_md": "wrap.html PORTFOLIO/Order 탭이 런타임 fetch하는 포트폴리오 표 데이터. `create_portfolio_tables.py`가 Wrap_NAV로 생성.\n\n- 당일 finalize 주문 D-1 지연 반영 정보 포함(_order_changes 등).\n- safe_commit_push에서 nightly rebuild는 OURS(최신) 유지.",
-   "depends_on": [
-    "src-create-portfolio-tables"
-   ]
-  },
-  {
-   "id": "store-contribution-data",
-   "project": "antigravity",
-   "domain": "portfolio-wrap",
-   "type": "dataset",
-   "name": "contribution_data.json",
-   "runs_on": "github",
-   "schedule_kst": "23:00 재생성",
-   "status": "active",
-   "desc_md": "wrap.html 기여도 탭이 런타임 fetch하는 종목/섹터 기여도(bp) 데이터. `create_contribution_data.py`(daily_crawl)가 생성.\n\n- Cariño NAV 정합. VE 01-02 글리치는 미해결 알려진 이슈.",
-   "depends_on": [
-    "src-create-contribution-data"
-   ]
-  },
-  {
-   "id": "store-etf-db",
-   "project": "antigravity",
-   "domain": "market-kr",
-   "type": "store",
-   "name": "etf_data.db (ETF 구성종목 SQLite)",
-   "runs_on": "vm_macmini",
-   "schedule_kst": "16:30 / 18:00 갱신",
-   "status": "active",
-   "desc_md": "전체 ETF 목록 + 구성종목/비중을 담는 SQLite DB(~625MB, VM 로컬). etf-collect 타이머가 채운다.\n\n- etf.html 구성종목 탭 + 액티브 ETF 변동 탭 + 19:00 알림의 원천.\n- re-clone 시 백업 대상(deploy.sh BACKUP_FILES). 대용량이라 git 추적하되 주의.",
-   "depends_on": [
-    "src-etf-collect"
-   ]
-  },
-  {
-   "id": "store-stock-master",
-   "project": "antigravity",
-   "domain": "market-kr",
-   "type": "dataset",
-   "name": "stock_master.json (종목마스터)",
-   "runs_on": "github",
-   "schedule_kst": "토 09:00 갱신",
-   "status": "active",
-   "desc_md": "종목코드↔종목명 마스터. Order 탭 자동완성의 소스. update_stock_master 타이머가 주간 갱신.\n\n- 코드 있는 행만 저장(이름만 입력=누락). 사명변경 미반영 시 자동완성 실패.",
-   "depends_on": [
-    "src-stock-master"
-   ]
-  },
-  {
-   "id": "store-universe-json",
-   "project": "antigravity",
-   "domain": "market-global",
-   "type": "dataset",
-   "name": "universe.json / universe_history.json",
-   "runs_on": "github",
-   "schedule_kst": "18:30 / 07:00 갱신",
-   "status": "active",
-   "desc_md": "유니버스 종목 시세/지표(현재값 + 히스토리). fetch_universe(하루 2회)가 생성, universe.html/universe_lab.html이 소비.\n\n- universe_history.json은 시계열(~1.2MB). 종목 추가는 universe_tickers.csv로.",
-   "depends_on": [
-    "src-universe"
-   ]
-  },
-  {
-   "id": "store-featured-data",
-   "project": "antigravity",
-   "domain": "portfolio-wrap",
-   "type": "dataset",
-   "name": "featured_data.json / newhigh_20d.json",
-   "runs_on": "github",
-   "schedule_kst": "Featured 잡 + 15:50",
-   "status": "active",
-   "desc_md": "Featured TOP 종목 데이터(~11MB)와 20일 신고가 데이터. Sisyphe-Bot Featured 잡 + featured-kis 타이머가 생성.\n\n- featured.html(create_dashboard)과 RA_Sisyphe 신고가 알림이 소비.",
-   "depends_on": [
-    "src-featured-kis",
-    "bot-sisyphe"
-   ]
-  },
-  {
-   "id": "store-taiwan-revenue-csv",
-   "project": "antigravity",
-   "domain": "market-global",
-   "type": "dataset",
-   "name": "taiwan_revenue.csv (대만 월매출)",
-   "runs_on": "github",
-   "schedule_kst": "23:20 갱신",
-   "status": "active",
-   "desc_md": "대만 큐레이션 53종목의 월매출 시계열(FinMind). gha-daily-taiwan-revenue가 생성, create_taiwan_page가 taiwan.html로 렌더.\n\n- 100일 롤링 재조회로 개정 자가치유.",
-   "depends_on": [
-    "src-taiwan-revenue"
-   ]
-  },
-  {
-   "id": "store-landing-highlights",
-   "project": "antigravity",
-   "domain": "ops-infra",
-   "type": "dataset",
-   "name": "landing_highlights.json",
-   "runs_on": "github",
-   "schedule_kst": "18:45 갱신",
-   "status": "active",
-   "desc_md": "index.html 회전 위젯(sparkline+코멘트, 50슬롯) 데이터. landing-highlights 타이머가 생성.\n\n- 여러 산출물에서 하이라이트를 종합. index.html이 런타임 소비.",
-   "depends_on": [
-    "src-landing-highlights"
-   ]
-  },
-  {
-   "id": "store-sources-state",
-   "project": "antigravity",
-   "domain": "news-research",
-   "type": "store",
-   "name": "sources_state/ + kna_state.json",
-   "runs_on": "vm_macmini",
-   "schedule_kst": "소스 폴링 시",
-   "status": "active",
-   "desc_md": "Generic Source Pipeline이 소스별 '마지막으로 본 항목'을 기록하는 상태 저장소(중복 발송 방지).\n\n- foreign_ir/semianalysis/trendforce/kna 각 소스의 dedup 상태. id체계 바뀌면 state 시딩 필수.\n- kna_state.json은 KNA/KNEISS 마지막 글 ID.",
-   "depends_on": [
-    "src-generic-pipeline"
-   ]
-  },
-  {
-   "id": "store-earnings-db",
-   "project": "antigravity",
-   "domain": "news-research",
-   "type": "store",
-   "name": "earnings.db (실적봇 상태)",
-   "runs_on": "vm_macmini",
-   "schedule_kst": "08:00 갱신",
-   "status": "active",
-   "desc_md": "실적봇 파이프라인의 상태 SQLite(~635KB). 발견한 실적/트랜스크립트, 처리·발송 상태, 종목 매칭 캐시 등.\n\n- earnings-bot 타이머가 매일 갱신. 멱등 처리로 재발송 방지.",
-   "depends_on": [
-    "src-earnings-pipeline"
-   ]
-  },
-  {
-   "id": "store-research-notes-db",
-   "project": "antigravity",
-   "domain": "news-research",
-   "type": "store",
-   "name": "research_notes.db + media/ (리서치봇)",
-   "runs_on": "vm_macmini",
-   "schedule_kst": "이벤트 시",
-   "status": "active",
-   "desc_md": "Research Notes 봇이 수신 메시지·이미지를 보관하는 SQLite + 미디어 폴더(VM 로컬, git 미추적).\n\n- 요약→노션 퍼블리시 전 원본 보관. re-clone 시 백업 대상.",
-   "depends_on": [
-    "bot-research-notes"
-   ]
-  },
-  {
-   "id": "store-heartbeats",
-   "project": "antigravity",
-   "domain": "ops-infra",
-   "type": "store",
-   "name": "heartbeats.json (Phase 2 워치독 인터페이스)",
-   "runs_on": "github",
-   "schedule_kst": "각 GHA 잡 성공 시",
-   "status": "planned",
-   "desc_md": "맥미니 Phase 2에서 각 GHA 잡 wrapper가 성공 직후 `{\"<잡>\": epoch}`를 upsert하는 liveness 파일.\n\n- 목적: repo 밖 산출(earnings-calendar-sync)·비시계열(finalize-orders)처럼 신선도 감시 사각인 잡의 '살아있음'을 커버.\n- 소비자: `check_data_freshness`의 heartbeat 나이 감시 섹션(patch, A14/A15). HEARTBEAT_JOBS에 없는 잡은 침묵.\n- **planned**: Phase 2 wrapper 활성 후 채워짐. 현재는 아직 정착 안 됨(REGISTRY_NOTES 참조).",
-   "depends_on": [
-    "launchd-gha-phase2"
-   ]
-  },
-  {
    "id": "daemon-sisyphe-pull",
    "project": "antigravity",
    "domain": "ops-infra",
@@ -2243,34 +2026,6 @@
     "ext-data-apis"
    ],
    "alerts": "launchd wrapper 실패 → notify → 텔레그램"
-  },
-  {
-   "id": "page-architecture",
-   "project": "antigravity",
-   "domain": "ops-infra",
-   "type": "page",
-   "name": "architecture.html (아키텍처)",
-   "runs_on": "github",
-   "schedule_kst": "생성=21:40 (architecture-daily)",
-   "status": "active",
-   "desc_md": "생태계 아키텍처를 보여주는 페이지. **registry 기반 자동 생성물** — `architecture/wiki/*.md` 코퍼스가 단일 출처이고, `rebuild_registry_from_wiki.py`가 registry.json을, `create_architecture.py`가 architecture.html(+wiki/INDEX.md)을 재생성한다. **직접 수정 금지.**\n\n- 매일 밤 [[timer-architecture-daily]](21:40, claude 헤드리스)가 최근 변경을 위키에 반영하고 registry·html을 재생성해 push → 수동 동기화 부담이 해소됐다.\n- 컴포넌트(봇/잡/페이지/데이터) 추가·변경은 위키 .md를 고쳐야 도식도·타임라인·위키가 함께 갱신된다.",
-   "code": [
-    "architecture.html",
-    "architecture/registry.json",
-    "execution/create_architecture.py"
-   ],
-   "reads": [
-    "architecture/registry.json"
-   ],
-   "depends_on": [
-    "timer-architecture-daily"
-   ],
-   "links": [
-    {
-     "label": "라이브",
-     "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/architecture.html"
-    }
-   ]
   },
   {
    "id": "timer-architecture-daily",
@@ -2528,6 +2283,96 @@
    ]
   },
   {
+   "id": "page-architecture",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "page",
+   "name": "architecture.html (아키텍처)",
+   "runs_on": "github",
+   "schedule_kst": "생성=21:40 (architecture-daily)",
+   "status": "active",
+   "desc_md": "생태계 아키텍처를 보여주는 페이지. **registry 기반 자동 생성물** — `architecture/wiki/*.md` 코퍼스가 단일 출처이고, `rebuild_registry_from_wiki.py`가 registry.json을, `create_architecture.py`가 architecture.html(+wiki/INDEX.md)을 재생성한다. **직접 수정 금지.**\n\n- 매일 밤 [[timer-architecture-daily]](21:40, claude 헤드리스)가 최근 변경을 위키에 반영하고 registry·html을 재생성해 push → 수동 동기화 부담이 해소됐다.\n- 컴포넌트(봇/잡/페이지/데이터) 추가·변경은 위키 .md를 고쳐야 도식도·타임라인·위키가 함께 갱신된다.",
+   "code": [
+    "architecture.html",
+    "architecture/registry.json",
+    "execution/create_architecture.py"
+   ],
+   "reads": [
+    "architecture/registry.json"
+   ],
+   "depends_on": [
+    "timer-architecture-daily"
+   ],
+   "links": [
+    {
+     "label": "라이브",
+     "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/architecture.html"
+    }
+   ]
+  },
+  {
+   "id": "page-hotels",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "page",
+   "name": "hotels.html (호텔 ADR, 동결)",
+   "runs_on": "github",
+   "status": "frozen",
+   "desc_md": "booking.com 호텔 ADR 추적 페이지. **데이터 동결**(수집 타이머 은퇴 2026-07-06).\n\n- 차트는 PNG→Chart.js 전환 완료(매 실행 PNG 재생성발 머지충돌 소멸)라 페이지 자체는 정상 렌더, 다만 `hotel_adr.csv`가 더 안 갱신됨.\n- `create_dashboard.py`가 여전히 생성 목록에 포함하나 신규 데이터 없음.",
+   "code": [
+    "execution/create_dashboard.py"
+   ],
+   "reads": [
+    "hotel_adr.csv"
+   ],
+   "depends_on": [
+    "src-create-dashboard"
+   ],
+   "links": [
+    {
+     "label": "라이브",
+     "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/hotels.html"
+    }
+   ]
+  },
+  {
+   "id": "page-market-alert",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "page",
+   "name": "market_alert.html (투자유의종목)",
+   "runs_on": "github",
+   "schedule_kst": "생성=16:05 / 23:00 (sisyphe-bot)",
+   "status": "active",
+   "desc_md": "투자유의/투자경고/투자위험 지정 종목 추적 페이지.\n\n- `create_market_alert.py`(별도 생성기)가 만들며 Sisyphe-Bot 16:05/23:00 잡이 재생성. KIS marcap 사용.\n- 텔레그램 4블록 요약(신규/진입임박/탈출임박/전체현황)은 RA_Sisyphe_bot 05:15 잡.\n- 함정: 지정예고는 투자주의 fetch에 들어옴(경고 아님).",
+   "code": [
+    "execution/create_market_alert.py"
+   ],
+   "depends_on": [
+    "src-create-market-alert"
+   ],
+   "links": [
+    {
+     "label": "라이브",
+     "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/market_alert.html"
+    }
+   ]
+  },
+  {
+   "id": "store-contribution-data",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "dataset",
+   "name": "contribution_data.json",
+   "runs_on": "github",
+   "schedule_kst": "23:00 재생성",
+   "status": "active",
+   "desc_md": "wrap.html 기여도 탭이 런타임 fetch하는 종목/섹터 기여도(bp) 데이터. `create_contribution_data.py`(daily_crawl)가 생성.\n\n- Cariño NAV 정합. VE 01-02 글리치는 미해결 알려진 이슈.",
+   "depends_on": [
+    "src-create-contribution-data"
+   ]
+  },
+  {
    "id": "store-dataset-csv",
    "project": "antigravity",
    "domain": "market-global",
@@ -2539,6 +2384,49 @@
    "desc_md": "생태계의 시계열 데이터 통합 저장소(~1.9MB, append-only). 원자재/메모리/지수/금리/매크로/capex 등 모든 시계열이 `날짜,이름,값,타입` 형태로 쌓인다.\n\n- 기록자: market_crawler, ECOS/FRED/KOFIA/NPS/KRX/KOSIS/일본capex, SMP, SiliconData 등.\n- 소비자: create_dashboard(market.html DATA 섹션), draw_charts.\n- append-only라 과거 잠정값 정정은 rebuild 필요. 타입→카테고리 매핑은 `config.py` CATEGORY_MAP.",
    "code": [
     "config.py"
+   ]
+  },
+  {
+   "id": "store-earnings-db",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "store",
+   "name": "earnings.db (실적봇 상태)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "08:00 갱신",
+   "status": "active",
+   "desc_md": "실적봇 파이프라인의 상태 SQLite(~635KB). 발견한 실적/트랜스크립트, 처리·발송 상태, 종목 매칭 캐시 등.\n\n- earnings-bot 타이머가 매일 갱신. 멱등 처리로 재발송 방지.",
+   "depends_on": [
+    "src-earnings-pipeline"
+   ]
+  },
+  {
+   "id": "store-etf-db",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "store",
+   "name": "etf_data.db (ETF 구성종목 SQLite)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "16:30 / 18:00 갱신",
+   "status": "active",
+   "desc_md": "전체 ETF 목록 + 구성종목/비중을 담는 SQLite DB(~625MB, VM 로컬). etf-collect 타이머가 채운다.\n\n- etf.html 구성종목 탭 + 액티브 ETF 변동 탭 + 19:00 알림의 원천.\n- re-clone 시 백업 대상(deploy.sh BACKUP_FILES). 대용량이라 git 추적하되 주의.",
+   "depends_on": [
+    "src-etf-collect"
+   ]
+  },
+  {
+   "id": "store-featured-data",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "dataset",
+   "name": "featured_data.json / newhigh_20d.json",
+   "runs_on": "github",
+   "schedule_kst": "Featured 잡 + 15:50",
+   "status": "active",
+   "desc_md": "Featured TOP 종목 데이터(~11MB)와 20일 신고가 데이터. Sisyphe-Bot Featured 잡 + featured-kis 타이머가 생성.\n\n- featured.html(create_dashboard)과 RA_Sisyphe 신고가 알림이 소비.",
+   "depends_on": [
+    "src-featured-kis",
+    "bot-sisyphe"
    ]
   },
   {
@@ -2556,6 +2444,34 @@
    ]
   },
   {
+   "id": "store-heartbeats",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "store",
+   "name": "heartbeats.json (Phase 2 워치독 인터페이스)",
+   "runs_on": "github",
+   "schedule_kst": "각 GHA 잡 성공 시",
+   "status": "planned",
+   "desc_md": "맥미니 Phase 2에서 각 GHA 잡 wrapper가 성공 직후 `{\"<잡>\": epoch}`를 upsert하는 liveness 파일.\n\n- 목적: repo 밖 산출(earnings-calendar-sync)·비시계열(finalize-orders)처럼 신선도 감시 사각인 잡의 '살아있음'을 커버.\n- 소비자: `check_data_freshness`의 heartbeat 나이 감시 섹션(patch, A14/A15). HEARTBEAT_JOBS에 없는 잡은 침묵.\n- **planned**: Phase 2 wrapper 활성 후 채워짐. 현재는 아직 정착 안 됨(REGISTRY_NOTES 참조).",
+   "depends_on": [
+    "launchd-gha-phase2"
+   ]
+  },
+  {
+   "id": "store-landing-highlights",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "dataset",
+   "name": "landing_highlights.json",
+   "runs_on": "github",
+   "schedule_kst": "18:45 갱신",
+   "status": "active",
+   "desc_md": "index.html 회전 위젯(sparkline+코멘트, 50슬롯) 데이터. landing-highlights 타이머가 생성.\n\n- 여러 산출물에서 하이라이트를 종합. index.html이 런타임 소비.",
+   "depends_on": [
+    "src-landing-highlights"
+   ]
+  },
+  {
    "id": "store-orders-pending",
    "project": "antigravity",
    "domain": "portfolio-wrap",
@@ -2564,10 +2480,94 @@
    "runs_on": "github",
    "schedule_kst": "사용자 입력 + 16:00 finalize",
    "status": "active",
-   "desc_md": "사용자가 브라우저 Order/AUM 탭에서 임시저장한 주문/AUM 누적본(GitHub Contents API로 write).\n\n- 16:00 finalize 워크플로가 이를 Wrap_NAV.xlsx NEW/AUM 시트에 확정 반영 후 비운다.\n- 최종저장 후 새로고침 입력소실 방지: pending을 Pages(빌드지연) 대신 Contents API 우선 read.",
+   "desc_md": "사용자가 브라우저 Order/AUM 탭에서 임시저장한 주문/AUM 누적본(GitHub Contents API로 write).\n\n- 16:00 finalize 워크플로가 이를 Wrap_NAV.xlsx NEW/AUM 시트에 확정 반영 후 비운다.\n- 최종저장 후 새로고침 입력소실 방지: pending을 Pages(빌드지연) 대신 Contents API 우선 read.\n- **`orders/email_send_request.json`**(2026-07-13): Email 탭 [메일 발송 요청]이 Contents API로 기록하는 자문지 메일 발송 요청(첨부 base64 포함). [[timer-advisory-emails]] 60초 폴러가 감지·발송하고 처리 결과·멱등 스탬프를 `orders/email_send_result.json`에 기록.",
    "code": [
     "execution/finalize_pending_orders.py",
     "execution/finalize_pending_aum.py"
+   ]
+  },
+  {
+   "id": "store-portfolio-data",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "dataset",
+   "name": "portfolio_data.json",
+   "runs_on": "github",
+   "schedule_kst": "체인 재생성",
+   "status": "active",
+   "desc_md": "wrap.html PORTFOLIO/Order 탭이 런타임 fetch하는 포트폴리오 표 데이터. `create_portfolio_tables.py`가 Wrap_NAV로 생성.\n\n- 당일 finalize 주문 D-1 지연 반영 정보 포함(_order_changes 등).\n- safe_commit_push에서 nightly rebuild는 OURS(최신) 유지.",
+   "depends_on": [
+    "src-create-portfolio-tables"
+   ]
+  },
+  {
+   "id": "store-research-notes-db",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "store",
+   "name": "research_notes.db + media/ (리서치봇)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "이벤트 시",
+   "status": "active",
+   "desc_md": "Research Notes 봇이 수신 메시지·이미지를 보관하는 SQLite + 미디어 폴더(VM 로컬, git 미추적).\n\n- 요약→노션 퍼블리시 전 원본 보관. re-clone 시 백업 대상.",
+   "depends_on": [
+    "bot-research-notes"
+   ]
+  },
+  {
+   "id": "store-sources-state",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "store",
+   "name": "sources_state/ + kna_state.json",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "소스 폴링 시",
+   "status": "active",
+   "desc_md": "Generic Source Pipeline이 소스별 '마지막으로 본 항목'을 기록하는 상태 저장소(중복 발송 방지).\n\n- foreign_ir/semianalysis/trendforce/kna 각 소스의 dedup 상태. id체계 바뀌면 state 시딩 필수.\n- kna_state.json은 KNA/KNEISS 마지막 글 ID.",
+   "depends_on": [
+    "src-generic-pipeline"
+   ]
+  },
+  {
+   "id": "store-stock-master",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "dataset",
+   "name": "stock_master.json (종목마스터)",
+   "runs_on": "github",
+   "schedule_kst": "토 09:00 갱신",
+   "status": "active",
+   "desc_md": "종목코드↔종목명 마스터. Order 탭 자동완성의 소스. update_stock_master 타이머가 주간 갱신.\n\n- 코드 있는 행만 저장(이름만 입력=누락). 사명변경 미반영 시 자동완성 실패.",
+   "depends_on": [
+    "src-stock-master"
+   ]
+  },
+  {
+   "id": "store-taiwan-revenue-csv",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "dataset",
+   "name": "taiwan_revenue.csv (대만 월매출)",
+   "runs_on": "github",
+   "schedule_kst": "23:20 갱신",
+   "status": "active",
+   "desc_md": "대만 큐레이션 53종목의 월매출 시계열(FinMind). gha-daily-taiwan-revenue가 생성, create_taiwan_page가 taiwan.html로 렌더.\n\n- 100일 롤링 재조회로 개정 자가치유.",
+   "depends_on": [
+    "src-taiwan-revenue"
+   ]
+  },
+  {
+   "id": "store-universe-json",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "dataset",
+   "name": "universe.json / universe_history.json",
+   "runs_on": "github",
+   "schedule_kst": "18:30 / 07:00 갱신",
+   "status": "active",
+   "desc_md": "유니버스 종목 시세/지표(현재값 + 히스토리). fetch_universe(하루 2회)가 생성, universe.html/universe_lab.html이 소비.\n\n- universe_history.json은 시계열(~1.2MB). 종목 추가는 universe_tickers.csv로.",
+   "depends_on": [
+    "src-universe"
    ]
   },
   {
@@ -2580,6 +2580,34 @@
    "schedule_kst": "사용자 편집 + finalize",
    "status": "active",
    "desc_md": "랩 상품 운용의 원장 엑셀. NEW(종목·비중)/AUM/기준가/수익률 시트로 구성. 사용자가 직접 편집하는 유일한 바이너리 데이터.\n\n- NEW/AUM은 사람(또는 finalize 잡)이 채우고, 기준가/수익률은 calculate_wrap_nav/returns가 자동 생성.\n- 워처가 저장을 감지→3-way merge→push, recalc_wrap_nav 워크플로가 라이브 반영.\n- 바이너리라 push 충돌 위험 → safe_commit_push xlsx 가드 + merge_wrap_nav 3-way 병합.\n- Excel에서 열려있으면 쓰기 PermissionError."
+  },
+  {
+   "id": "timer-advisory-emails",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "timer",
+   "name": "자문지 메일 발송 폴러 (send-advisory-emails 60초)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "60초 폴러 (상시)",
+   "status": "active",
+   "desc_md": "2026-07-13 신설. wrap.html Email 탭의 [메일 발송 요청]이 GitHub Contents API로 기록한 `orders/email_send_request.json`을 감지해 하이웍스 SMTP로 자문지 메일(컴플/삼성/NH/DB/한투)을 발송하는 launchd 60초 폴러. `run_timer_job.sh send-advisory-emails` → `execution/send_advisory_emails.py`.\n\n- **StartInterval=60**(StartCalendarInterval 아님). 요청이 없으면 즉시 exit0, 락으로 중복 실행 방어.\n- **안전 3중 가드**: ① 발송 모드는 맥 로컬 `~/email_config.json`의 `mode`만 신뢰(기본 `test`) — 요청 파일의 mode 필드는 감사용, 발송 판단에 미사용. ② real 전환은 config `mode=='real'` **그리고** `real_send_armed==True`(2단계 명시) + 사용자 승인 후에만, 코드가 자동 전환 안 함. ③ 발송 직전 assert: test인데 수신자에 본인(`kts@investlife.com`) 외 주소가 하나라도 있으면 `SendGuardError`로 **전체 배치 중단**(부분발송 없음) + 텔레그램 알림.\n- **멱등**: 처리한 요청 ts를 `orders/email_send_result.json` + `logs/launchd/send-advisory-emails.processed`에 기록, 재실행 시 ts≤마지막처리 스킵. 비밀번호·메일 전문은 로그 미기록(요약만). SMTP 비번은 `.env HIWORKS_MAIL_PASSWORD`.\n- **첨부**: 요청 base64만 사용(자문지/ 폴더 매칭·fallback 없음), 폴러측 총량 상한 5MiB(클라이언트가 900KB로 이미 제한).\n- 컴플라이언스 선발송 게이팅은 2026-07-13 사용자 지시로 제거(UI enable + 폴러 guard 해제) — 증권사 키가 컴플 발송 성공을 더는 요구하지 않음.\n- 일시 5xx/네트워크로 GitHub 요청 조회가 실패해도 배치를 죽이지 않고, 연속 10회(≈10분)마다만 알림(분당 스팸 방지).",
+   "code": [
+    "execution/send_advisory_emails.py",
+    "launchd/timers/com.antigravity.send-advisory-emails.plist",
+    "launchd/timers/run_timer_job.sh"
+   ],
+   "reads": [
+    "store-orders-pending",
+    "page-wrap"
+   ],
+   "writes": [
+    "store-orders-pending"
+   ],
+   "depends_on": [
+    "infra-vm-macmini",
+    "page-wrap"
+   ],
+   "alerts": "OnFailure(연속 실패 ~10분) → notify_sisyphe_failure.sh → 텔레그램"
   },
   {
    "id": "timer-hotel-adr",
@@ -2607,7 +2635,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "상시",
    "status": "active",
-   "desc_md": "2026-07-11 신설된 맥미니 자체 서빙 계층. Caddy(`com.antigravity.web`, homebrew, KeepAlive)가 게시 스냅숏을 tailscale(ts.net)로 내보내는 개인 대시보드의 웹서버.\n\n- 입구는 `tailscale serve` 프록시뿐 — Caddy는 `http://:8377` + `bind 127.0.0.1` 루프백 고정(공개 노출 없음). 127.0.0.1:8377 직접 바인딩은 프록시 Host 불일치로 빈 200이 나던 실측 함정 회피.\n- 루트(`/`)는 `~/srv/dashboard/current`(게시 스냅숏, `publish_snapshot.sh` 산출) 정적 서빙 — **스냅숏 디렉토리 직접 수정 금지**.\n- `/sisyphe/*`는 별도 root(`~/srv/sisyphe_repo`, 시간당 pull 클론)로 매핑 — `.git`/`scripts` 등은 404 차단.\n- `/wiki/*`는 `127.0.0.1:8787`([[daemon-datalake-webui]])로 리버스 프록시 — 데이터레이크 문답 UI를 AoE 'Wiki' 탭으로 통합(2026-07-12, `redir /wiki /wiki/ 301`).\n- HTML/JSON/CSV·인덱스는 `Cache-Control: no-cache`. 접근 로그는 `~/srv/dashboard/logs/access.log`(20MiB 롤).",
+   "desc_md": "2026-07-11 신설된 맥미니 자체 서빙 계층. Caddy(`com.antigravity.web`, homebrew, KeepAlive)가 게시 스냅숏을 tailscale(ts.net)로 내보내는 개인 대시보드의 웹서버.\n\n- 입구는 `tailscale serve` 프록시뿐 — Caddy는 `http://:8377` + `bind 127.0.0.1` 루프백 고정(공개 노출 없음). 127.0.0.1:8377 직접 바인딩은 프록시 Host 불일치로 빈 200이 나던 실측 함정 회피.\n- 루트(`/`)는 `~/srv/dashboard/current`(게시 스냅숏, `publish_snapshot.sh` 산출) 정적 서빙 — **스냅숏 디렉토리 직접 수정 금지**. Sisyphe 개인 페이지(`/sisyphe/*`)도 이제 이 스냅숏의 `current/sisyphe/`(2026-07-13 평문 전환, [[web-publish-snapshot]]의 `compose_personal_view.py`가 합성 — staticrypt 암호화 직서빙 폐기)에서 fallback handle로 서빙된다.\n- `/journal/*`(2026-07-13): 개인 투자일지 차트(\"Escape Velocity\") — 테일넷 + basic_auth 이중 게이트, `~/Journal/web` 정적 서빙(`no-store`). **데이터·자격증명·페이지 전부 `~/Journal` 로컬 전용으로 git/게시 파이프라인과 격리**(전역 규칙 Journal 섹션). `~/Journal/caddy_auth.snippet` import — 없으면 caddy 기동 실패하니 Journal 폴더 이동 시 이 라우트 먼저 수정.\n- `/wiki/*`는 `127.0.0.1:8787`([[daemon-datalake-webui]])로 리버스 프록시 — 데이터레이크 문답 UI를 AoE 'Wiki' 탭으로 통합(2026-07-12, `redir /wiki /wiki/ 301`).\n- HTML/JSON/CSV·인덱스는 `Cache-Control: no-cache`. 접근 로그는 `~/srv/dashboard/logs/access.log`(20MiB 롤).",
    "code": [
     "launchd/web/Caddyfile",
     "launchd/web/com.antigravity.web.plist"
@@ -2634,9 +2662,10 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "잡 성공 훅 (여러 잡)",
    "status": "active",
-   "desc_md": "2026-07-11 신설. 잡 wrapper(`run_gha_job.sh`/`run_timer_job.sh`) 성공 직후 호출되어 repo 산출물을 개인 ts.net 대시보드로 게시하는 스냅숏 게시기. Caddy가 서빙하는 `~/srv/dashboard/current`의 유일한 writer.\n\n- 동작: 화이트리스트 rsync(`*.html`/`*.json`/`*.csv`/`orders/`/`architecture/`/`charts/`, `.env`·`.git` 구조적 배제) → `releases/rel-<ts>` 새 세대 → 검증 → `current` 심링크 원자 교체(rename(2)). 어떤 실패에서도 기존 current는 안 깨진다.\n- **개인용 가공(1.5단계)**: 스냅숏에서만 `wrap.html` 제거 + topnav에 Sisyphe 탭 주입(Market > Sisyphe > Architecture 순). repo 원본·GitHub(팀원용)은 불변.\n- mkdir 원자 락(120s)으로 게시 직렬화. 실패해도 잡 rc에 영향 없음(호출측 `|| true`).\n- 팀원용 공개 게시는 별도 경로([[web-publish-pages]], gh-pages).",
+   "desc_md": "2026-07-11 신설. 잡 wrapper(`run_gha_job.sh`/`run_timer_job.sh`) 성공 직후 호출되어 repo 산출물을 개인 ts.net 대시보드로 게시하는 스냅숏 게시기. Caddy가 서빙하는 `~/srv/dashboard/current`의 유일한 writer.\n\n- 동작: 화이트리스트 rsync(`*.html`/`*.json`/`*.csv`/`orders/`/`architecture/`/`charts/`, `.env`·`.git` 구조적 배제) → `releases/rel-<ts>` 새 세대 → 검증 → `current` 심링크 원자 교체(rename(2)). 어떤 실패에서도 기존 current는 안 깨진다.\n- **개인용 가공(1.5단계, `compose_personal_view.py`)**: rsync 직후 새 릴리스 사본에서만 가공 — `wrap.html` 제거 + AoE 11페이지 topnav 재구성(Wiki·Invest(→/journal)·우측 Sisyphe 탭) + `~/srv/sisyphe_plain` 원본에서 Sisyphe 평문 3페이지(index/dashboard/journal)를 `current/sisyphe/`로 합성(2026-07-13 staticrypt 암호화 폐기, 테일넷 한정이라 암호 프롬프트 제거 목적). 검증(sisyphe 존재·staticrypt 0·역방향 nav) 실패 시 세대 폐기. repo 원본·GitHub(팀원용)은 불변.\n- mkdir 원자 락(120s)으로 게시 직렬화. 실패해도 잡 rc에 영향 없음(호출측 `|| true`).\n- 팀원용 공개 게시는 별도 경로([[web-publish-pages]], gh-pages).",
    "code": [
     "scripts/publish_snapshot.sh",
+    "scripts/compose_personal_view.py",
     "config/publish_manifest.txt"
    ],
    "writes": [
