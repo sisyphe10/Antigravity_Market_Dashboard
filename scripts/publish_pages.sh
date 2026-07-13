@@ -60,6 +60,8 @@ if [ "$CUR" != "$BRANCH" ]; then log "브랜치 이상($CUR) - 중단"; exit 1; 
 #      매니페스트가 작고 고정이므로 "전체 비우고 명시적 복사"가 가장 결정적이다.
 find "$WT" -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
 cp "$REPO/wrap.html" "$WT/" || { log "wrap.html 복사 실패 - 중단"; exit 1; }
+# TEMP(2026-07-13): Order 매트릭스 테스트 페이지 — 사용자 검토용. 승인 후 운영 이식 시 이 줄과 파일 제거.
+cp "$REPO/order_matrix_test.html" "$WT/" 2>/dev/null || true
 for f in portfolio_data.json contribution_data.json disclosures.json stock_master.json; do
   [ -f "$REPO/$f" ] && cp "$REPO/$f" "$WT/"
 done
