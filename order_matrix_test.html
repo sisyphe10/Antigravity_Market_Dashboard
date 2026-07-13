@@ -31,7 +31,8 @@
   thead th { padding:8px 4px; text-align:center; border-bottom:2px solid #e5e7eb; color:#444; background:#f3f4f6; }
   .grp-general { background:transparent; }
   thead th, tbody td { border:1px solid #d9d9d9; }
-  td { padding:6px 4px; text-align:center; }
+  td { padding:6px 12px; text-align:center; }
+  thead th { padding:8px 12px; }
   thead th, tbody td { white-space:nowrap; }
   input.cell { width:100%; box-sizing:border-box; text-align:center; padding:4px; border:none; background:transparent; border-radius:0; font-family:inherit; font-size:15px; font-weight:600; }
   input.meta { text-align:center; padding:4px 6px; border:none; background:transparent; border-radius:0; font-family:inherit; font-size:14px; }
@@ -188,8 +189,8 @@ function renderOrderMatrix(){
   var head='';
   ORDER_PORTFOLIOS.forEach(function(p){ head+='<th class="wcol '+(p.general?'grp-general':'')+'" title="'+escapeHtml(p.display)+'" style="min-width:64px;">'+escapeHtml(p.label)+'</th>'; });
   var html='<div class="toolbar">'
-    +'<span class="sync-toggle'+(syncGeneral?' on':'')+'" id="syncToggle">일반형 동기화</span>'
     +'<div style="margin-left:auto;display:flex;gap:8px;">'
+    +'<span class="sync-toggle'+(syncGeneral?' on':'')+'" id="syncToggle">일반형 동기화</span>'
     +'<button class="btn red" id="btnCancel">전체 취소 (테스트)</button>'
     +'<button class="btn" id="btnSave">임시 저장 (테스트)</button>'
     +'<button class="btn green" id="btnFinal">최종 저장 (테스트)</button>'
