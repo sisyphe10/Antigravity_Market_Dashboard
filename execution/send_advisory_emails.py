@@ -37,6 +37,8 @@ KST = timezone(timedelta(hours=9))
 #   config.from 이 실수/악의로 오염돼도 test 발송은 이 주소 단독으로만 나간다.
 SELF_CANONICAL = 'kts@investlife.com'
 STATE_STAMP = os.path.join(ROOT, 'logs', 'launchd', 'send-advisory-emails.processed')
+COMPLIANCE_STAMP = os.path.join(ROOT, 'logs', 'launchd', 'compliance_sent.date')
+BROKER_KEYS = ('samsung', 'nh', 'db', 'kis')
 
 
 class SendGuardError(Exception):
@@ -81,6 +83,14 @@ def assert_test_safety(mode, rcpts):
     bad = [r for r in allrc if norm_addr(r) != self_n]
     if bad:
         raise SendGuardError('TEST 모드 위반: 본인(%s) 외 수신자 %r — 전체 발송 차단' % (self_n, bad))
+
+
+def broker_keys_needing_compliance(keys, compliance_done):
+    """컴플라이언스 선발송 규칙: compliance 미발송 상태에서 증권사 키가 있으면 그 목록 반환(위반).
+    compliance 키는 항상 허용. test/real 동일 적용(흐름 자체를 강제)."""
+    if compliance_done:
+        return []
+    return [k for k in keys if k in BROKER_KEYS]
 
 
 def decode_attachments(mail):
@@ -220,6 +230,23 @@ def mark_processing(ts):
     os.replace(tmp, STATE_STAMP)
 
 
+def compliance_sent_today():
+    """오늘(KST) 컴플라이언스 발송 성공 기록이 있으면 True."""
+    try:
+        with open(COMPLIANCE_STAMP, encoding='utf-8') as f:
+            return f.read().strip() == datetime.now(KST).strftime('%Y-%m-%d')
+    except Exception:
+        return False
+
+
+def mark_compliance_sent():
+    os.makedirs(os.path.dirname(COMPLIANCE_STAMP), exist_ok=True)
+    tmp = COMPLIANCE_STAMP + '.tmp'
+    with open(tmp, 'w', encoding='utf-8') as f:
+        f.write(datetime.now(KST).strftime('%Y-%m-%d'))
+    os.replace(tmp, COMPLIANCE_STAMP)
+
+
 def smtp_send(config, msg, rcpts, password):
     """SMTP SSL 465 발송. ★password 는 절대 로그/예외메시지에 넣지 않음."""
     import smtplib
@@ -270,6 +297,17 @@ def main():
         return 0                                   # 비번 준비 전엔 조용히 대기(재시도)
 
     now = datetime.now(KST)
+    # ★컴플라이언스 선발송 규칙(서버 강제): 증권사 키는 오늘 compliance 발송 성공 후에만.
+    #   UI 우회/버그 대비. compliance 키는 항상 허용. test/real 동일.
+    _need = broker_keys_needing_compliance([m.get('key') for m in req.get('mails', [])], compliance_sent_today())
+    if _need:
+        print('❌ 컴플라이언스 선발송 필요: %r' % _need)
+        send_telegram('🚫 자문지 메일 거부 — 컴플라이언스 선발송 필요\n증권사 %r 는 오늘 컴플라이언스 발송 후 가능\n요청 ts=%s' % (_need, ts))
+        push_result({'date': now.strftime('%Y-%m-%d'), 'ts': ts, 'mode': mode, 'sent': [], 'failed': [],
+                     'blocked': '컴플라이언스 선발송 필요: %r' % _need, 'processed_at': now.isoformat()})
+        mark_processing(ts)
+        return 1
+
     # pre-flight: 전 메일 가드 통과 + 첨부 해석 (하나라도 실패 시 예외 → 전체 중단)
     try:
         plan = build_send_plan(mode, req.get('mails', []), config)
@@ -303,6 +341,8 @@ def main():
     result = {'date': now.strftime('%Y-%m-%d'), 'ts': ts, 'mode': mode,
               'sent': sent, 'failed': failed, 'processed_at': now.isoformat()}
     push_result(result)
+    if 'compliance' in sent:               # 컴플라이언스 발송 성공 → 증권사 발송 잠금 해제(오늘)
+        mark_compliance_sent()
     tag = '[TEST→본인]' if mode == 'test' else '[실발송]'
     summary = '📧 자문지 메일 %s %d통 발송' % (tag, len(sent))
     if failed:
