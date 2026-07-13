@@ -4378,7 +4378,7 @@ def create_order_section():
             var s = computeOrderSaveState(pfName);
             if (!s) return '';
             var bg, bd, txt;
-            if (s.kind === 'dirty') { bg = '#fef3c7'; bd = '#fcd34d'; txt = '미저장 변경 있음'; }
+            if (s.kind === 'dirty') { bg = '#fef3c7'; bd = '#fcd34d'; txt = '미저장'; }
             else if (s.kind === 'final') { bg = '#dcfce7'; bd = '#86efac'; txt = '최종 저장됨'; var hf = orderTimeHM(s.disp); if (hf) txt += ' · ' + hf; }
             else { bg = '#f3f4f6'; bd = '#d1d5db'; txt = '임시 저장됨'; var ht = orderTimeHM(s.disp); if (ht) txt += ' · ' + ht; }
             return '<span style="display:inline-flex;align-items:center;font-family:inherit;font-size:13px;font-weight:600;color:#222;background:' + bg + ';border:1px solid ' + bd + ';border-radius:999px;padding:3px 12px;white-space:nowrap;">' + txt + '</span>';
