@@ -54,6 +54,9 @@ JOURNAL_OFFSET = (
     '@media(max-width:900px){nav.topnav .topnav-inner{padding-left:12px;padding-right:12px}}'
     '</style>'
 )
+# index/dashboard 한정: Sisyphe 구역 표시용 은은한 웜톤 nav 바 (통일 CSS 뒤 주입 -> 흰색 상회).
+# journal 은 AoE 세트(=AoE 구역)라 흰색 유지. "약간"만 다르게 — Sisyphe 탭 배경(#faf3e3)과 같은 계열.
+SISYPHE_WARM_BAR = '<style id="sisyphe-warm-bar">nav.topnav{background:#fbf8ef;border-bottom-color:#ece4d3}</style>'
 
 # AoE 정본(create_dashboard top_nav_html / sidebar, 픽셀통일)과 일치시키는 override — Sisyphe 페이지에만 주입.
 NAV_UNIFY = (
@@ -188,6 +191,9 @@ for name in SISYPHE_PAGES:
     # journal 한정 nav offset(사이드바 우측으로) — 통일 CSS 뒤에 와야 max-width 상회
     if name == "journal.html":
         s = inject_before_head(s, JOURNAL_OFFSET)
+    else:
+        # index/dashboard: Sisyphe 구역 웜톤 nav 바
+        s = inject_before_head(s, SISYPHE_WARM_BAR)
 
     open(p, "w", encoding="utf-8").write(s)
 
@@ -204,11 +210,15 @@ for name in SISYPHE_PAGES:
             fail("sisyphe/journal.html: 구 Sisyphe nav 잔존")
         if 'id="aoe-journal-offset"' not in fin:
             fail("sisyphe/journal.html: nav offset 검증 실패")
+        if 'sisyphe-warm-bar' in fin:
+            fail("sisyphe/journal.html: 웜톤 바 오주입(AoE 구역=흰색이어야)")
     else:
         if INVEST_PILL in fin:
             fail("sisyphe/%s: Invest pill 제거 실패" % name)
         if 'class="topnav-tab aoe-back"' not in fin:
             fail("sisyphe/%s: ←AoE 주입 실패" % name)
+        if 'id="sisyphe-warm-bar"' not in fin:
+            fail("sisyphe/%s: 웜톤 nav 바 주입 실패" % name)
         if name == "index.html" and 'topnav-brand">Sisyphe' not in fin:
             fail("sisyphe/index.html: 랜딩 브랜드 검증 실패")
 
