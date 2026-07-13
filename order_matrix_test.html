@@ -41,7 +41,6 @@
   .modal h3 { margin:0 0 8px; }
   .modal pre { background:#f6f8fa; border:1px solid #e5e7eb; border-radius:8px; padding:12px; font-size:12px; overflow:auto; white-space:pre-wrap; }
   .del-btn { background:none; border:none; cursor:pointer; color:#dc2626; font-size:20px; line-height:1; padding:0 6px; font-weight:bold; }
-  .pf-col { border-left:1px solid #ececec; }
 </style>
 </head>
 <body>
@@ -197,7 +196,7 @@ function renderOrderMatrix(){
     +'<div style="overflow-x:auto;"><table><thead><tr>'
     +'<th style="width:34px;">#</th><th>업종</th><th style="width:64px;">코드</th><th>종목명</th>'+head+'<th>추천사유</th><th style="width:34px;"></th>'
     +'</tr></thead><tbody>'+rows
-    +'<tr class="addrow"><td colspan="3"></td><td style="padding:8px 4px;"><button class="btn" id="btnAdd" style="border-style:dashed;">+ 종목 추가</button></td>'+ORDER_PORTFOLIOS.map(function(){return '<td class="pf-col"></td>';}).join('')+'<td></td><td></td></tr>'
+    +'<tr class="addrow"><td colspan="3"></td><td style="padding:8px 4px;"><button class="btn" id="btnAdd" style="border-style:dashed;">+ 종목 추가</button></td>'+ORDER_PORTFOLIOS.map(function(){return '<td class="wcol"></td>';}).join('')+'<td></td><td></td></tr>'
     +'<tr class="totals"><td colspan="4" style="text-align:right;color:#444;">합계</td>'+totals+'<td></td><td></td></tr></tbody></table></div>';
   document.getElementById('orderContent').innerHTML=html;
   bindHandlers();
