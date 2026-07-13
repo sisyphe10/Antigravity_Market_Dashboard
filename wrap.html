@@ -292,7 +292,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
     </div>
 
     <div id="mainContent" class="pw-hidden has-sidebar">
-    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><div class="topnav-tabs"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div><span class="wrap-updated">Updated: 2026-07-13 15:36:10 KST</span></div></nav>
+    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><div class="topnav-tabs"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div><span class="wrap-updated">Updated: 2026-07-13 15:49:05 KST</span></div></nav>
     <aside class="sidebar wrap-sidebar" id="wrapSectionNav" aria-label="WRAP navigation"><div class="wrap-side-group on" data-side-for="dashboard"><a href="#wrap-sec-chart" onclick="wrapGoSection('wrap-sec-chart');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-chart">CHART</a><a href="#wrap-sec-return" onclick="wrapGoSection('wrap-sec-return');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-return">RETURN</a><a href="#wrap-sec-aum" onclick="wrapGoSection('wrap-sec-aum');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-aum">AUM</a><a href="#wrap-sec-portfolio" onclick="wrapGoSection('wrap-sec-portfolio');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-portfolio">Portfolio</a><a href="#wrap-sec-sector" onclick="wrapGoSection('wrap-sec-sector');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-sector">SECTOR WEIGHT</a></div><div class="wrap-side-group" data-side-for="order" id="wrapSideOrder"></div><div class="wrap-side-group" data-side-for="contribution" id="wrapSideContrib"></div><div class="wrap-side-group" data-side-for="fee"><a href="#" onclick="feeSwitchSub('rate');return false;" class="sidebar-link active" data-side-fee="rate">요율</a><a href="#" onclick="feeSwitchSub('revenue');return false;" class="sidebar-link" data-side-fee="revenue">매출</a></div></aside>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -3643,16 +3643,17 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
           pfs.forEach(function(pf,ci){ var c=100-_mtxColSum(pf); var gen=ORDER_PORTFOLIOS[ci].general;
             cash+='<td class="wcol '+(gen?'grp-general':'')+'" id="mtx-cash-'+ci+'" style="color:'+(c<0?'#dc2626':'#222')+';">'+c.toFixed(0)+'%</td>'; });
           var head='';
-          ORDER_PORTFOLIOS.forEach(function(p){ head+='<th class="wcol '+(p.general?'grp-general':'')+'" title="'+escapeHtml(p.display)+'" style="min-width:64px;">'+escapeHtml(p.label)+'</th>'; });
+          var _fg=true;
+          ORDER_PORTFOLIOS.forEach(function(p){ var _m=(p.general&&_fg)?' data-firstgen="1"':''; if(p.general)_fg=false; head+='<th class="wcol '+(p.general?'grp-general':'')+'"'+_m+' title="'+escapeHtml(p.display)+'" style="min-width:64px;">'+escapeHtml(p.label)+'</th>'; });
           var html='<div class="toolbar">'
             +'<span id="orderSaveBadgeSlot" style="display:inline-flex;">'+buildOrderSaveBadgeGlobal()+'</span>'
             +'<div style="margin-left:auto;display:flex;gap:8px;">'
-            +'<span class="sync-toggle'+(syncGeneral?' on':'')+'" id="syncToggle">일반형 동기화</span>'
             +'<button class="btn red" id="btnCancel">전체 취소</button>'
             +'<button class="btn" id="btnSave">임시 저장</button>'
             +'<button class="btn green" id="btnFinal">최종 저장</button>'
             +'<button class="btn blue" id="btnAdditional">추가 주문</button>'
             +'</div></div>'
+            +'<div id="syncRow" style="margin-bottom:8px;"><span class="sync-toggle'+(syncGeneral?' on':'')+'" id="syncToggle">일반형 동기화</span></div>'
             +'<div style="overflow-x:auto;border:1px solid #000;"><table><thead><tr>'
             +'<th>#</th><th>업종</th><th>코드</th><th>종목명</th>'+head+'<th style="width:99%;">추천사유</th>'
             +'</tr></thead><tbody>'+rows
@@ -3665,6 +3666,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
 
         function bindMatrixHandlers(){
           document.getElementById('syncToggle').addEventListener('click', function(){ syncGeneral=!syncGeneral; renderOrderMatrix(); });
+          (function(){ var fg=document.querySelector('#orderContent th[data-firstgen]'), sr=document.getElementById('syncRow'), oc=document.getElementById('orderContent'); if(fg&&sr&&oc){ var off=fg.getBoundingClientRect().left - oc.getBoundingClientRect().left; sr.style.paddingLeft=Math.max(0,off)+'px'; } })();
           document.querySelectorAll('#orderContent input.mtx-w').forEach(function(el){ el.addEventListener('input', function(e){
             var code=e.target.dataset.code, pf=e.target.dataset.pf, rowMeta=null;
             if(e.target.dataset.newrow){ var tr=e.target.closest('tr'), tid=tr&&tr.dataset.tempid; var nr=matrixNewRows.filter(function(r){return String(r.tempId)===String(tid);})[0]; if(nr){ code=String(nr.code||'').trim(); rowMeta=nr; } }
