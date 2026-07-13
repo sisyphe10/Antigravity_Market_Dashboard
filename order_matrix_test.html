@@ -39,6 +39,7 @@
   input.reason { width:100%; box-sizing:border-box; padding:10px 6px 10px 14px; border:none; background:transparent; border-radius:0; font-family:inherit; font-size:14px; text-align:left; }
   input.cell:focus, input.meta:focus, input.reason:focus { outline:2px solid #94a3b8; outline-offset:-2px; background:#fff; }
   .totals td { border-top:2px solid #374151; background:#f3f4f6; font-weight:700; padding:8px 4px; }
+  .cashrow td { background:#f3f4f6; font-weight:700; padding:8px 4px; }
   .modal-ov { position:fixed; inset:0; background:rgba(0,0,0,0.4); display:none; align-items:center; justify-content:center; z-index:900; }
   .modal { background:#fff; border-radius:12px; padding:24px; max-width:760px; max-height:80vh; overflow:auto; box-shadow:0 8px 30px rgba(0,0,0,0.2); }
   .modal h3 { margin:0 0 8px; }
@@ -186,6 +187,9 @@ function renderOrderMatrix(){
   var totals='';
   pfs.forEach(function(pf,ci){ var sum=_mtxColSum(pf); var col=(Math.abs(sum-100)<0.5)?'#16a34a':(sum>100?'#dc2626':'#222'); var gen=ORDER_PORTFOLIOS[ci].general;
     totals+='<td class="wcol '+(gen?'grp-general':'')+'" id="mtx-total-'+ci+'" style="color:'+col+';">'+sum.toFixed(0)+'%</td>'; });
+  var cash='';
+  pfs.forEach(function(pf,ci){ var c=100-_mtxColSum(pf); var gen=ORDER_PORTFOLIOS[ci].general;
+    cash+='<td class="wcol '+(gen?'grp-general':'')+'" id="mtx-cash-'+ci+'" style="color:'+(c<0?'#dc2626':'#222')+';">'+c.toFixed(0)+'%</td>'; });
   var head='';
   ORDER_PORTFOLIOS.forEach(function(p){ head+='<th class="wcol '+(p.general?'grp-general':'')+'" title="'+escapeHtml(p.display)+'" style="min-width:64px;">'+escapeHtml(p.label)+'</th>'; });
   var html='<div class="toolbar">'
@@ -199,12 +203,14 @@ function renderOrderMatrix(){
     +'<th>#</th><th>업종</th><th>코드</th><th>종목명</th>'+head+'<th style="width:99%;">추천사유</th>'
     +'</tr></thead><tbody>'+rows
     +'<tr class="addrow"><td colspan="3"></td><td style="padding:8px 4px;"><button class="btn" id="btnAdd" style="background:#2563eb;color:#fff;border:none;">+ 종목 추가</button></td>'+ORDER_PORTFOLIOS.map(function(){return '<td class="pf-col"></td>';}).join('')+'<td></td></tr>'
-    +'<tr class="totals"><td colspan="4" style="text-align:center;color:#444;">합계</td>'+totals+'<td></td></tr></tbody></table></div>';
+    +'<tr class="totals"><td colspan="4" style="text-align:center;color:#444;">합계</td>'+totals+'<td></td></tr>'
+    +'<tr class="cashrow"><td colspan="4" style="text-align:center;color:#444;">현금</td>'+cash+'<td></td></tr></tbody></table></div>';
   document.getElementById('orderContent').innerHTML=html;
   bindHandlers();
 }
 
-function _mtxUpdateTotals(){ ORDER_PORTFOLIOS.forEach(function(p,ci){ var c=document.getElementById('mtx-total-'+ci); if(!c) return; var sum=_mtxColSum(p.display); c.style.color=(Math.abs(sum-100)<0.5)?'#16a34a':(sum>100?'#dc2626':'#222'); c.textContent=sum.toFixed(0)+'%'; }); }
+function _mtxUpdateTotals(){ ORDER_PORTFOLIOS.forEach(function(p,ci){ var c=document.getElementById('mtx-total-'+ci); if(!c) return; var sum=_mtxColSum(p.display); c.style.color=(Math.abs(sum-100)<0.5)?'#16a34a':(sum>100?'#dc2626':'#222'); c.textContent=sum.toFixed(0)+'%';
+  var k=document.getElementById('mtx-cash-'+ci); if(k){ var cash=100-sum; k.style.color=cash<0?'#dc2626':'#222'; k.textContent=cash.toFixed(0)+'%'; } }); }
 
 function bindHandlers(){
   document.getElementById('syncToggle').addEventListener('click', function(){ syncGeneral=!syncGeneral; renderOrderMatrix(); });
