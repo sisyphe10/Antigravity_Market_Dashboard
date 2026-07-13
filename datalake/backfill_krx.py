@@ -2,7 +2,8 @@
 """KRX 과거 일봉 데이터 전량 백필 (pykrx 로그인판, 재개 가능).
 
 전 상장종목(KOSPI+KOSDAQ) 상장일부터 오늘까지, 일봉·종가 기준.
-패스별 진행: ohlcv → marcap → fundamental → foreign → etf → index → investor
+패스별 진행: ohlcv → marcap → foreign → etf → index → investor
+(fundamental 패스는 2026-07-13 제외 — KRX 주당지표가 연간 확정실적 기준이라 분기 밸류에이션 용도로 무의미)
 
 안전 규칙 (★KRX 계정 잠금 방지):
 - 호출 간 0.5s 페이싱, 연속 실패 5회 → 즉시 중단(재실행 시 이어서)
@@ -34,7 +35,7 @@ START_YEAR = 1990
 # — 종목당 호출 4→1로 감소 (속도 3배·차단 위험 감소). 캡이 재발하면 10으로 되돌릴 것.
 WINDOW_YEARS = 40
 
-PASSES = ["ohlcv", "marcap", "fundamental", "foreign", "etf", "index", "investor"]
+PASSES = ["ohlcv", "marcap", "foreign", "etf", "index", "investor"]
 
 # 데이터셋별 (pykrx 컬럼 → 영문 컬럼) — 없는 컬럼은 무시
 RENAME = {
@@ -42,8 +43,6 @@ RENAME = {
                  "거래량": "volume", "거래대금": "value", "등락률": "change_pct"},
     "kr_marcap": {"시가총액": "marcap", "거래량": "volume", "거래대금": "value",
                   "상장주식수": "shares"},
-    "kr_fundamental": {"BPS": "bps", "PER": "per", "PBR": "pbr", "EPS": "eps",
-                       "DIV": "div", "DPS": "dps"},
     "kr_foreign": {"상장주식수": "shares", "보유수량": "held", "지분율": "ratio",
                    "한도수량": "limit_qty", "한도소진률": "exhaustion"},
     "kr_etf_ohlcv": {"NAV": "nav", "시가": "open", "고가": "high", "저가": "low",
@@ -240,7 +239,7 @@ def main():
 
     # 종목 유니버스 (KOSPI+KOSDAQ 현재 상장 전 종목)
     tickers, market_of, name_of = [], {}, {}
-    if any(p in passes for p in ("ohlcv", "marcap", "fundamental", "foreign")):
+    if any(p in passes for p in ("ohlcv", "marcap", "foreign")):
         for mkt in ("KOSPI", "KOSDAQ"):
             for t in runner.call(stock.get_market_ticker_list, tdy, market=mkt) or []:
                 tickers.append(t)
@@ -249,7 +248,7 @@ def main():
         if args.tickers:
             want = set(args.tickers.split(","))
             tickers = [t for t in tickers if t in want]
-            for ds in ("kr_ohlcv", "kr_marcap", "kr_fundamental", "kr_foreign"):
+            for ds in ("kr_ohlcv", "kr_marcap", "kr_foreign"):
                 for t in tickers:
                     for suf in ("", ".empty"):
                         p = staging_path(ds, t) + suf
@@ -279,10 +278,6 @@ def main():
     if "marcap" in passes:
         run_per_item("kr_marcap", tickers,
                      lambda f, t, k: stock.get_market_cap(f, t, k),
-                     runner, today, ["date", "ticker"], stock_extra, force=force)
-    if "fundamental" in passes:
-        run_per_item("kr_fundamental", tickers,
-                     lambda f, t, k: stock.get_market_fundamental(f, t, k),
                      runner, today, ["date", "ticker"], stock_extra, force=force)
     if "foreign" in passes:
         run_per_item("kr_foreign", tickers,

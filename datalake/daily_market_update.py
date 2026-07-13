@@ -31,7 +31,7 @@ from backfill_krx import RENAME  # noqa: E402
 # 휴장일/미확정 판정용 대표 컬럼 (전부 0이면 그 날짜 skip) — 종가 없는 데이터셋 포함
 HOLIDAY_GUARD = {
     "kr_ohlcv": "종가", "kr_etf_ohlcv": "종가",
-    "kr_marcap": "시가총액", "kr_fundamental": "BPS", "kr_foreign": "상장주식수",
+    "kr_marcap": "시가총액", "kr_foreign": "상장주식수",
 }
 
 
@@ -295,9 +295,6 @@ def main():
                   ["date", "ticker"], ("KOSPI", "KOSDAQ"))
     cross_section(stock, "kr_marcap",
                   lambda d, m: stock.get_market_cap(d, market=m),
-                  ["date", "ticker"], ("KOSPI", "KOSDAQ"))
-    cross_section(stock, "kr_fundamental",
-                  lambda d, m: stock.get_market_fundamental(d, market=m),
                   ["date", "ticker"], ("KOSPI", "KOSDAQ"))
     cross_section(stock, "kr_foreign",
                   lambda d, m: stock.get_exhaustion_rates_of_foreign_investment(d, market=m),

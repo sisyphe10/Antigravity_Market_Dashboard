@@ -23,7 +23,6 @@ DESCRIPTIONS = {
     "kr_ohlcv": "국내 전 상장종목 일봉 — ★무수정 원시세 (KRX 정본, 액면분할 미반영). 장기 수익률 계산은 kr_ohlcv_adj 사용",
     "kr_ohlcv_adj": "국내 전 상장종목 수정주가 일봉 (야후 adj_close) — ★수익률·차트용. 원시세·거래대금은 kr_ohlcv",
     "kr_marcap": "국내 종목별 시가총액·상장주식수 일별",
-    "kr_fundamental": "국내 종목별 후행 밸류에이션 일별 (per/pbr/eps/bps/div/dps)",
     "kr_foreign": "국내 종목별 외국인 보유비중(레벨) 일별",
     "kr_index_ohlcv": "KRX 지수 일봉 (KOSPI/KOSDAQ/KRX/테마 전 시리즈)",
     "kr_etf_ohlcv": "국내 ETF 일봉 + NAV",
@@ -39,7 +38,6 @@ DESCRIPTIONS = {
 EXAMPLE_SQL = {
     "kr_ohlcv": "SELECT date, close, value FROM kr_ohlcv WHERE name='삼성전자' ORDER BY date DESC LIMIT 20;",
     "kr_ohlcv_adj": "SELECT date, adj_close FROM kr_ohlcv_adj WHERE name='삼성전자' AND date>='2015-01-01' ORDER BY date;",
-    "kr_fundamental": "SELECT date, per, pbr FROM kr_fundamental WHERE name='삼성전자' AND date>='2024-01-01' ORDER BY date;",
     "kr_investor_value": "SELECT date, foreigner, institution, individual FROM kr_investor_value WHERE market='KOSPI' ORDER BY date DESC LIMIT 10;",
     "overseas_ohlcv": "SELECT date, adj_close FROM overseas_ohlcv WHERE symbol='NVDA' ORDER BY date DESC LIMIT 20;",
     "global_markets": "SELECT date, close FROM global_markets WHERE name='필라델피아 반도체지수' ORDER BY date DESC LIMIT 20;",
