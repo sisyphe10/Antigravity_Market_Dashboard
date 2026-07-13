@@ -21,8 +21,8 @@
   h1 { font-size:20px; margin:0 0 4px; }
   .sub { color:#6b7280; font-size:13px; margin-bottom:16px; }
   .toolbar { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
-  .sync-toggle { display:inline-flex; align-items:center; gap:8px; font-size:14px; font-weight:600; cursor:pointer; user-select:none; padding:6px 12px; border:1.5px solid #d1d5db; border-radius:999px; background:#fff; }
-  .sync-toggle.on { border-color:#2563eb; background:#eff6ff; color:#1d4ed8; }
+  .sync-toggle { display:inline-flex; align-items:center; gap:8px; font-size:14px; font-weight:600; cursor:pointer; user-select:none; padding:6px 12px; border:1.5px solid #d1d5db; border-radius:8px; background:#fff; color:#000; }
+  .sync-toggle.on { border-color:#2563eb; background:#eff6ff; color:#000; }
   .btn { font-family:inherit; font-size:14px; font-weight:600; padding:6px 14px; border-radius:8px; cursor:pointer; border:1px solid #d1d5db; background:#f3f4f6; color:#222; }
   .btn.red { background:#dc2626; color:#fff; border:none; }
   .btn.green { background:#16a34a; color:#fff; border:none; }
@@ -126,11 +126,11 @@ function reasonTd(code, tempId){ var g=_mtxDirGroups(code); var hasR=g.red.lengt
   function inp(group,val,bc,bg,ph){ return '<input type="text" class="reason mtx-reason" data-code="'+escapeHtml(code)+'" data-group="'+group+'"'+(tempId?' data-tempid="'+tempId+'"':'')+' value="'+escapeHtml(val)+'" placeholder="'+ph+'" style="border:1.5px solid '+bc+';background:'+bg+';min-width:0;font-size:13px;">'; }
   if(hasR&&hasB){ var rv=_mtxGroupReason(code,'red'), bv=_mtxGroupReason(code,'blue');
     return '<td style="min-width:260px;"><div style="display:flex;gap:6px;">'
-      +inp('red', rv, rv.trim()?'#fca5a5':'#d1d5db', rv.trim()?'#fff':'#e9ecf0','편입·확대 사유')
-      +inp('blue', bv, bv.trim()?'#93c5fd':'#d1d5db', bv.trim()?'#fff':'#e9ecf0','축소·편출 사유')
+      +inp('red', rv, rv.trim()?'#fca5a5':'#fca5a5', rv.trim()?'#fff':'#fee2e2','편입·확대 사유')
+      +inp('blue', bv, bv.trim()?'#93c5fd':'#fca5a5', bv.trim()?'#fff':'#fee2e2','축소·편출 사유')
       +'</div></td>'; }
-  var grp = hasR?'red':(hasB?'blue':'all'); var val=_mtxGroupReason(code,grp);
-  var bc = '#d1d5db'; var bg = val.trim()?'#fff':'#e9ecf0';
+  var grp = hasR?'red':(hasB?'blue':'all'); var val=_mtxGroupReason(code,grp); var need=(hasR||hasB)&&!val.trim();
+  var bc = need?'#fca5a5':'#d1d5db'; var bg = need?'#fee2e2':'#fff';
   return '<td>'+inp(grp,val,bc,bg,'')+'</td>'; }
 function _mtxColSum(pf){ var st=orderState[pf]||[], s=0; st.forEach(function(x){ s+=parseFloat(x.newWeight)||0; }); return s; }
 function _mtxCell(pf,code){ var idx=_mtxFindIdx(pf,code); if(idx<0) return {held:false,color:'#000',ot:'',newWeight:null};
@@ -197,7 +197,7 @@ function renderOrderMatrix(){
     +'<div style="overflow-x:auto;"><table><thead><tr>'
     +'<th style="width:34px;">#</th><th>업종</th><th style="width:64px;">코드</th><th>종목명</th>'+head+'<th>추천사유</th><th style="width:34px;"></th>'
     +'</tr></thead><tbody>'+rows
-    +'<tr class="addrow"><td colspan="3"></td><td style="padding:8px 4px;"><button class="btn" id="btnAdd" style="background:#2563eb;color:#fff;border:none;font-weight:700;">+ 종목 추가</button></td>'+ORDER_PORTFOLIOS.map(function(){return '<td class="pf-col"></td>';}).join('')+'<td></td><td></td></tr>'
+    +'<tr class="addrow"><td colspan="3"></td><td style="padding:8px 4px;"><button class="btn" id="btnAdd" style="background:#2563eb;color:#fff;border:none;">+ 종목 추가</button></td>'+ORDER_PORTFOLIOS.map(function(){return '<td class="pf-col"></td>';}).join('')+'<td></td><td></td></tr>'
     +'<tr class="totals"><td colspan="4" style="text-align:center;color:#444;">합계</td>'+totals+'<td></td><td></td></tr></tbody></table></div>';
   document.getElementById('orderContent').innerHTML=html;
   bindHandlers();
