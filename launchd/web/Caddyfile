@@ -19,15 +19,9 @@ http://:8377 {
 		reverse_proxy 127.0.0.1:8787
 	}
 
-	# Sisyphe 개인 대시보드 (가계부·운동·투자일지) — 2026-07-11 통합, 소스=git clone(~/srv/sisyphe_repo, 시간당 pull)
-	handle_path /sisyphe/* {
-		root * /Users/sisyphe/srv/sisyphe_repo
-		@internal path /.git/* /.github/* /scripts/*
-		respond @internal 404
-		file_server {
-			hide .git .github .gitignore .staticrypt.json scripts
-		}
-	}
+	# Sisyphe 개인 대시보드 (가계부·운동·투자일지) — 2026-07-13 평문 전환.
+	#   compose_personal_view.py 가 평문 3페이지를 게시 스냅숏 current/sisyphe/ 로 합성 → 아래 fallback handle 이 서빙.
+	#   (이전: staticrypt 암호화본 직서빙 handle_path. 테일넷 한정이라 암호 프롬프트 제거가 목적.)
 	handle {
 		root * /Users/sisyphe/srv/dashboard/current
 		file_server

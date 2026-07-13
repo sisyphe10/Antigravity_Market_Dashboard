@@ -36,38 +36,12 @@ if ! rsync -a \
   log "rsync 실패 - 세대 폐기"; rm -rf "$REL"; exit 1
 fi
 
-# 1.5) 개인용 뷰 가공 (2026-07-11 사용자 확정, 통합 설계 반영): ts.net 개인 대시보드에는 WRAP 불요 +
-#      Sisyphe 탭 주입(통합 대시보드 1단계). 스냅숏에서만 가공 — repo 원본·GitHub(팀원용)는 불변.
-rm -f "$REL/wrap.html"
-python3 - "$REL" <<'PYEOF'
-import re, sys, glob, os
-rel = sys.argv[1]
-# WRAP topnav 아이템(탭+드롭다운) 통째 제거 → 잔여 wrap 링크 개별 제거
-item_pat = re.compile(r'<div class="topnav-item"><a href="wrap\.html"[^>]*>.*?</div></div>', re.S)
-link_pat = re.compile(r'<a[^>]*href="wrap\.html[^"]*"[^>]*>.*?</a>\s*', re.S)
-# 탭 순서 = Market > Wiki > Sisyphe > Architecture (2026-07-12 사용자 확정)
-INJECT = ('<div class="topnav-item"><a href="/wiki/" class="topnav-tab">Wiki</a></div>'
-          '<div class="topnav-item"><a href="/sisyphe/index.html" class="topnav-tab">Sisyphe</a>'
-          '<div class="topnav-dropdown">'
-          '<a href="/sisyphe/dashboard.html" class="topnav-sub">가계부·운동</a>'
-          '<a href="/sisyphe/journal.html" class="topnav-sub">투자일지</a>'
-          '</div></div>')
-NAV_END = '</div></div></nav>'
-# Architecture 아이템 '앞'에 주입 (active 변형 대응 정규식), 없으면 nav 끝 폴백
-arch_pat = re.compile(r'<div class="topnav-item"><a href="architecture\.html"')
-for f in glob.glob(os.path.join(rel, "*.html")):
-    s = open(f, encoding="utf-8").read()
-    n = item_pat.sub("", s)
-    n = link_pat.sub("", n)
-    if 'topnav-tab">Sisyphe' not in n:
-        m = arch_pat.search(n)
-        if m:
-            n = n[:m.start()] + INJECT + n[m.start():]
-        elif NAV_END in n:
-            n = n.replace(NAV_END, INJECT + NAV_END, 1)
-    if n != s:
-        open(f, "w", encoding="utf-8").write(n)
-PYEOF
+# 1.5) 개인용 뷰 합성 (compose_personal_view.py, 통합 설계 unified_design §3.2): WRAP 제거 +
+#      AoE↔Sisyphe 통합 nav 주입 + Sisyphe 평문(~/srv/sisyphe_plain) 합성. repo·GitHub 원본 불변,
+#      스냅숏 사본에서만 가공. 검증(sisyphe 존재·staticrypt 0·역방향 nav) 실패 시 세대 폐기.
+if ! python3 "$REPO/scripts/compose_personal_view.py" "$REL"; then
+  log "개인용 뷰 합성 실패 - 세대 폐기"; rm -rf "$REL"; exit 1
+fi
 if [ -f "$REL/wrap.html" ]; then log "wrap.html 제거 실패 - 세대 폐기"; rm -rf "$REL"; exit 1; fi
 
 # 2) 검증: 매니페스트 필수 파일 존재·비어있지 않음 + 핵심 JSON 파싱
