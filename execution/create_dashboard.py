@@ -4722,13 +4722,14 @@ def create_order_section():
             catch (e) { alert('미리보기 생성 실패: ' + e.message); if (trigger) { trigger.disabled = false; trigger.textContent = '메일 발송 요청'; } return; }
             if (trigger) { trigger.disabled = false; trigger.textContent = '메일 발송 요청'; }
             closeSendModal();
+            var complianceDone = !!sent['compliance'];
             var cards = mails.map(function(m, idx) {
                 var attNames = (m.attachments || []).map(function(a) { return a.filename; });
                 var badge = sent[m.key] ? '<span style="margin-left:8px;font-size:12px;font-weight:600;color:#16a34a;background:#dcfce7;border:1px solid #86efac;border-radius:999px;padding:2px 8px;">발송됨 ' + escapeHtml(sent[m.key]) + '</span>' : '';
                 return '<div style="border:1px solid #e5e7eb;border-radius:8px;margin-bottom:12px;overflow:hidden;">'
                     + '<div style="background:#f3f4f6;padding:8px 12px;display:flex;align-items:center;">'
                     + '<b style="font-size:14px;color:#222;">' + escapeHtml(m.label) + '</b>' + badge
-                    + '<button class="adv-send-one" data-idx="' + idx + '" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:5px 12px;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer;">개별 발송</button>'
+                    + (function(){ var locked = (m.key !== 'compliance') && !complianceDone; return '<button class="adv-send-one" data-idx="' + idx + '"' + (locked ? ' disabled title="컴플라이언스 발송 후 가능"' : '') + ' style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:5px 12px;background:' + (locked ? '#9ca3af' : '#2563eb') + ';color:#fff;border:none;border-radius:6px;cursor:' + (locked ? 'not-allowed' : 'pointer') + ';">개별 발송</button>'; })()
                     + '</div>'
                     + '<div style="padding:10px 12px;font-size:13px;color:#374151;border-bottom:1px solid #f0f0f0;"><b>제목</b> ' + escapeHtml(m.subject) + '</div>'
                     + '<div style="padding:6px 12px;font-size:12px;color:#6b7280;">첨부 ' + (attNames.length ? escapeHtml(attNames.join(', ')) : '없음') + '</div>'
@@ -4741,21 +4742,29 @@ def create_order_section():
             overlay.innerHTML = '<div style="background:#fff;border-radius:12px;max-width:780px;width:100%;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.25);">'
                 + '<div style="padding:18px 22px;border-bottom:1px solid #e5e7eb;">'
                 + '<h3 style="margin:0;font-size:17px;color:#111;">자문지 메일 발송 요청 — 미리보기 (' + mails.length + '통)</h3>'
-                + '<p style="margin:8px 0 0;font-size:13px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 10px;">실제 발송 수신자·모드는 <b>서버 설정</b>이 결정합니다. 기본 <b>테스트 모드(본인 kts@investlife.com 단독)</b>. 아래 [전체 발송]/[개별 발송]은 발송 <b>요청</b>만 기록합니다.</p>'
+                + '<p style="margin:8px 0 0;font-size:13px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 10px;">실제 발송 수신자·모드는 <b>서버 설정</b>이 결정합니다. 기본 <b>테스트 모드(본인 kts@investlife.com 단독)</b>. ★<b>컴플라이언스 발송 후에야 증권사 발송이 열립니다.</b> 버튼은 발송 <b>요청</b>만 기록합니다.</p>'
                 + '</div>'
                 + '<div style="padding:16px 22px;overflow-y:auto;flex:1;">' + cards + '</div>'
                 + '<div style="padding:14px 22px;border-top:1px solid #e5e7eb;display:flex;gap:10px;justify-content:flex-end;align-items:center;">'
                 + '<span id="advSendMsg" style="margin-right:auto;font-size:13px;color:#6b7280;"></span>'
                 + '<button id="advSendCancel" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 18px;border:1px solid #d1d5db;background:#f3f4f6;color:#222;border-radius:8px;cursor:pointer;">닫기</button>'
-                + '<button id="advSendAll" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 18px;border:none;background:#16a34a;color:#fff;border-radius:8px;cursor:pointer;">전체 발송 (' + mails.length + '통)</button>'
+                + '<button id="advSendCompliance" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 18px;border:none;background:#d97706;color:#fff;border-radius:8px;cursor:pointer;">1단계: 컴플라이언스 발송</button>'
+                + '<button id="advSendBrokers"' + (complianceDone ? '' : ' disabled title="컴플라이언스 발송 후 가능"') + ' style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 18px;border:none;background:' + (complianceDone ? '#16a34a' : '#9ca3af') + ';color:#fff;border-radius:8px;cursor:' + (complianceDone ? 'pointer' : 'not-allowed') + ';">2단계: 증권사 발송</button>'
                 + '</div></div>';
             document.body.appendChild(overlay);
             overlay.addEventListener('click', function(e) { if (e.target === overlay) closeSendModal(); });
             document.getElementById('advSendCancel').addEventListener('click', closeSendModal);
-            document.getElementById('advSendAll').addEventListener('click', function() { submitSendRequest(mails, '전체'); });
+            var _cMail = mails.filter(function(m){ return m.key === 'compliance'; });
+            var _bMails = mails.filter(function(m){ return m.key !== 'compliance'; });
+            var _c1 = document.getElementById('advSendCompliance');
+            if (_c1) _c1.addEventListener('click', function() { if (!_cMail.length) { alert('컴플라이언스 메일이 없습니다.'); return; } if (sent['compliance'] && !confirm('컴플라이언스를 재발송하시겠습니까? (오늘 ' + sent['compliance'] + ' 발송됨)')) return; submitSendRequest(_cMail, '1단계 컴플라이언스'); });
+            var _c2 = document.getElementById('advSendBrokers');
+            if (_c2) _c2.addEventListener('click', function() { if (!complianceDone) { alert('컴플라이언스 발송 후 가능합니다.'); return; } submitSendRequest(_bMails, '2단계 증권사 전체'); });
             document.querySelectorAll('#advSendModal .adv-send-one').forEach(function(b) {
                 b.addEventListener('click', function() {
+                    if (b.disabled) return;
                     var mm = mails[parseInt(b.dataset.idx)];
+                    if (mm.key !== 'compliance' && !complianceDone) { alert('컴플라이언스 발송 후 가능합니다.'); return; }
                     if (sent[mm.key] && !confirm(mm.label + ' 메일을 재발송하시겠습니까? (오늘 ' + sent[mm.key] + ' 발송됨)')) return;
                     submitSendRequest([mm], mm.label);
                 });
