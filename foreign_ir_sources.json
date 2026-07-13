@@ -1944,11 +1944,11 @@
       "domain": "cadence.com",
       "ticker": "CDNS",
       "exchange": "NASDAQ",
-      "ir_url": "https://www.cadence.com/en_US/home/company/newsroom.html",
-      "rss_url": null,
-      "fetch_type": "html",
+      "ir_url": "https://newsroom.cadence.com/press-releases/default.aspx",
+      "rss_url": "https://newsroom.cadence.com/rss/pressrelease.aspx",
+      "fetch_type": "rss",
       "confidence": "high",
-      "notes": "Official Cadence newsroom list verified; no RSS feed found. | alternate (claude): https://www.cadence.com/en_US/home/company/newsroom/press-releases.html | 2026-05-29 Phase3-2 적용 (추출기 개선으로 동작)",
+      "notes": "2026-07-13: cadence.com newsroom redirects to Q4-hosted newsroom.cadence.com (JS list, html extract 0) since ~07-09 -> switched to Q4 standard RSS (verified live, latest 06-08; investor.cadence.com feed is IR-calendar only). Old: https://www.cadence.com/en_US/home/company/newsroom.html | 2026-05-29 Phase3-2 적용 (추출기 개선으로 동작)",
       "sources": [
         "codex (preferred)",
         "claude (alternate)"
