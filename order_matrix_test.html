@@ -195,7 +195,7 @@ function renderOrderMatrix(){
     +'<button class="btn" id="btnSave">임시 저장 (테스트)</button>'
     +'<button class="btn green" id="btnFinal">최종 저장 (테스트)</button>'
     +'</div></div>'
-    +'<div style="overflow-x:auto;"><table><thead><tr>'
+    +'<div style="overflow-x:auto;border:1px solid #000;"><table><thead><tr>'
     +'<th>#</th><th>업종</th><th>코드</th><th>종목명</th>'+head+'<th style="width:99%;">추천사유</th>'
     +'</tr></thead><tbody>'+rows
     +'<tr class="addrow"><td colspan="3"></td><td style="padding:8px 4px;"><button class="btn" id="btnAdd" style="background:#2563eb;color:#fff;border:none;">+ 종목 추가</button></td>'+ORDER_PORTFOLIOS.map(function(){return '<td class="pf-col"></td>';}).join('')+'<td></td></tr>'
