@@ -324,17 +324,6 @@ def main():
         return 0                                   # 비번 준비 전엔 조용히 대기(재시도)
 
     now = datetime.now(KST)
-    # ★컴플라이언스 선발송 규칙(서버 강제): 증권사 키는 오늘 compliance 발송 성공 후에만.
-    #   UI 우회/버그 대비. compliance 키는 항상 허용. test/real 동일.
-    _need = broker_keys_needing_compliance([m.get('key') for m in req.get('mails', [])], compliance_sent_today())
-    if _need:
-        print('❌ 컴플라이언스 선발송 필요: %r' % _need)
-        send_telegram('🚫 자문지 메일 거부 — 컴플라이언스 선발송 필요\n증권사 %r 는 오늘 컴플라이언스 발송 후 가능\n요청 ts=%s' % (_need, ts))
-        push_result({'date': now.strftime('%Y-%m-%d'), 'ts': ts, 'mode': mode, 'sent': [], 'failed': [],
-                     'blocked': '컴플라이언스 선발송 필요: %r' % _need, 'processed_at': now.isoformat()})
-        mark_processing(ts)
-        return 1
-
     # pre-flight: 전 메일 가드 통과 + 첨부 해석 (하나라도 실패 시 예외 → 전체 중단)
     try:
         plan = build_send_plan(mode, req.get('mails', []), config)
