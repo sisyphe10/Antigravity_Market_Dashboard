@@ -65,6 +65,9 @@ for f in portfolio_data.json contribution_data.json disclosures.json stock_maste
 done
 mkdir -p "$WT/orders"
 cp "$REPO"/orders/*.json "$WT/orders/" 2>/dev/null || true
+# 자문지 엑셀 템플릿 — Order 탭 Download 가 fetch (2026-07-13: 화이트리스트 누락으로 404 났던 것 복원)
+mkdir -p "$WT/자문지"
+cp "$REPO"/자문지/*.xlsx "$WT/자문지/" 2>/dev/null || true
 touch .nojekyll
 # 루트(/) 접근 = wrap.html 즉시 리다이렉트 (개인 랜딩 노출 없음, 팀원 편의)
 cat > index.html <<'HTML'
