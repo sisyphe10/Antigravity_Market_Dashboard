@@ -25,6 +25,7 @@ http://:8377 {
 	redir /journal /journal/ 301
 	handle_path /journal/* {
 		import /Users/sisyphe/Journal/caddy_auth.snippet
+		header Cache-Control "no-store"
 		root * /Users/sisyphe/Journal/web
 		file_server
 	}
