@@ -32,6 +32,7 @@
   .grp-general { background:transparent; }
   thead th, tbody td { border:1px solid #d9d9d9; }
   td { padding:6px 4px; text-align:center; }
+  thead th, tbody td { white-space:nowrap; }
   input.cell { width:100%; box-sizing:border-box; text-align:center; padding:4px; border:none; background:transparent; border-radius:0; font-family:inherit; font-size:15px; font-weight:600; }
   input.meta { text-align:center; padding:4px 6px; border:none; background:transparent; border-radius:0; font-family:inherit; font-size:14px; }
   input.reason { width:100%; box-sizing:border-box; padding:8px 6px; border:none; background:transparent; border-radius:0; font-family:inherit; font-size:14px; text-align:left; }
@@ -126,12 +127,12 @@ function reasonTd(code, tempId){ var g=_mtxDirGroups(code); var hasR=g.red.lengt
   function inp(group,val,bg,ph,extra){ return '<input type="text" class="reason mtx-reason" data-code="'+escapeHtml(code)+'" data-group="'+group+'"'+(tempId?' data-tempid="'+tempId+'"':'')+' value="'+escapeHtml(val)+'" placeholder="'+ph+'" style="border:none;background:'+bg+';min-width:0;font-size:13px;'+(extra||'')+'">'; }
   if(hasR&&hasB){ var rv=_mtxGroupReason(code,'red'), bv=_mtxGroupReason(code,'blue');
     return '<td style="min-width:260px;padding:0;"><div style="display:flex;">'
-      +inp('red', rv, rv.trim()?'transparent':'#fee2e2','편입·확대 사유','')
-      +inp('blue', bv, bv.trim()?'transparent':'#fee2e2','축소·편출 사유','border-left:1px solid #d9d9d9;')
+      +inp('red', rv, rv.trim()?'transparent':'#fee2e2','','')
+      +inp('blue', bv, bv.trim()?'transparent':'#fee2e2','','border-left:1px solid #d9d9d9;')
       +'</div></td>'; }
   var grp = hasR?'red':(hasB?'blue':'all'); var val=_mtxGroupReason(code,grp); var need=(hasR||hasB)&&!val.trim();
   var bg = need?'#fee2e2':'transparent';
-  return '<td style="padding:0;">'+inp(grp,val,bg,(hasR||hasB)?(hasR?'편입·확대 사유':'축소·편출 사유'):'','')+'</td>'; }
+  return '<td style="padding:0;">'+inp(grp,val,bg,'','')+'</td>'; }
 function _mtxColSum(pf){ var st=orderState[pf]||[], s=0; st.forEach(function(x){ s+=parseFloat(x.newWeight)||0; }); return s; }
 function _mtxCell(pf,code){ var idx=_mtxFindIdx(pf,code); if(idx<0) return {held:false,color:'#000',ot:'',newWeight:null};
   var prev=parseFloat(orderStocks[pf][idx].weight)||0, nw=parseFloat(orderState[pf][idx].newWeight)||0, ot=calcOrderType(prev,nw);
@@ -173,15 +174,14 @@ function renderOrderMatrix(){
   union.order.forEach(function(code){ rank++; var m=union.meta[code]; var cells='';
     pfs.forEach(function(pf){ cells+=wcell(pf,code,false); });
     rows+='<tr><td style="color:#666;">'+rank+'</td><td>'+escapeHtml(m.sector||'')+'</td><td>'+escapeHtml(m.code)+'</td><td style="font-weight:600;">'+escapeHtml(m.name||'')+'</td>'+cells
-      +reasonTd(code)+'<td></td></tr>'; });
+      +reasonTd(code)+'</tr>'; });
   matrixNewRows.forEach(function(r){ rank++; var code=String(r.code||'').trim(); var cells='';
     pfs.forEach(function(pf){ cells+=wcell(pf,code,true); });
-    rows+='<tr data-tempid="'+r.tempId+'"><td style="color:#666;">'+rank+'</td>'
+    rows+='<tr data-tempid="'+r.tempId+'"><td><button class="del-btn mtx-del" data-tempid="'+r.tempId+'" title="행 삭제">×</button></td>'
       +'<td><input type="text" class="meta mtx-meta" data-tempid="'+r.tempId+'" data-field="sector" value="'+escapeHtml(r.sector||'')+'" placeholder="업종" style="width:90px;"></td>'
       +'<td><input type="text" class="meta mtx-meta" data-tempid="'+r.tempId+'" data-field="code" value="'+escapeHtml(r.code||'')+'" placeholder="000000" maxlength="6" style="width:64px;"></td>'
       +'<td><input type="text" class="meta mtx-meta" data-tempid="'+r.tempId+'" data-field="name" value="'+escapeHtml(r.name||'')+'" placeholder="종목명" style="width:110px;font-weight:600;"></td>'
-      +cells+reasonTd(code, r.tempId)
-      +'<td><button class="del-btn mtx-del" data-tempid="'+r.tempId+'">×</button></td></tr>'; });
+      +cells+reasonTd(code, r.tempId)+'</tr>'; });
   var totals='';
   pfs.forEach(function(pf,ci){ var sum=_mtxColSum(pf); var col=(Math.abs(sum-100)<0.5)?'#16a34a':(sum>100?'#dc2626':'#222'); var gen=ORDER_PORTFOLIOS[ci].general;
     totals+='<td class="wcol '+(gen?'grp-general':'')+'" id="mtx-total-'+ci+'" style="color:'+col+';">'+sum.toFixed(0)+'%</td>'; });
@@ -195,10 +195,10 @@ function renderOrderMatrix(){
     +'<button class="btn green" id="btnFinal">최종 저장 (테스트)</button>'
     +'</div></div>'
     +'<div style="overflow-x:auto;"><table><thead><tr>'
-    +'<th style="width:34px;">#</th><th>업종</th><th style="width:64px;">코드</th><th>종목명</th>'+head+'<th>추천사유</th><th style="width:34px;"></th>'
+    +'<th>#</th><th>업종</th><th>코드</th><th>종목명</th>'+head+'<th style="width:99%;">추천사유</th>'
     +'</tr></thead><tbody>'+rows
-    +'<tr class="addrow"><td colspan="3"></td><td style="padding:8px 4px;"><button class="btn" id="btnAdd" style="background:#2563eb;color:#fff;border:none;">+ 종목 추가</button></td>'+ORDER_PORTFOLIOS.map(function(){return '<td class="pf-col"></td>';}).join('')+'<td></td><td></td></tr>'
-    +'<tr class="totals"><td colspan="4" style="text-align:center;color:#444;">합계</td>'+totals+'<td></td><td></td></tr></tbody></table></div>';
+    +'<tr class="addrow"><td colspan="3"></td><td style="padding:8px 4px;"><button class="btn" id="btnAdd" style="background:#2563eb;color:#fff;border:none;">+ 종목 추가</button></td>'+ORDER_PORTFOLIOS.map(function(){return '<td class="pf-col"></td>';}).join('')+'<td></td></tr>'
+    +'<tr class="totals"><td colspan="4" style="text-align:center;color:#444;">합계</td>'+totals+'<td></td></tr></tbody></table></div>';
   document.getElementById('orderContent').innerHTML=html;
   bindHandlers();
 }
