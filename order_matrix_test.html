@@ -32,9 +32,9 @@
   .grp-general { background:transparent; }
   thead th, tbody td { border:1px solid #d9d9d9; }
   td { padding:6px 4px; text-align:center; }
-  input.cell { width:58px; box-sizing:border-box; text-align:center; padding:4px; border:1px solid #d1d5db; background:#fff; border-radius:4px; font-family:inherit; font-size:15px; font-weight:600; }
-  input.meta { text-align:center; padding:4px 6px; border:1px solid #d1d5db; background:#fff; border-radius:4px; font-family:inherit; font-size:14px; }
-  input.reason { width:100%; box-sizing:border-box; padding:4px 6px; border:none; background:transparent; border-radius:0; font-family:inherit; font-size:14px; text-align:left; }
+  input.cell { width:100%; box-sizing:border-box; text-align:center; padding:4px; border:none; background:transparent; border-radius:0; font-family:inherit; font-size:15px; font-weight:600; }
+  input.meta { text-align:center; padding:4px 6px; border:none; background:transparent; border-radius:0; font-family:inherit; font-size:14px; }
+  input.reason { width:100%; box-sizing:border-box; padding:8px 6px; border:none; background:transparent; border-radius:0; font-family:inherit; font-size:14px; text-align:left; }
   input.cell:focus, input.meta:focus, input.reason:focus { outline:2px solid #94a3b8; outline-offset:-2px; background:#fff; }
   .totals td { border-top:2px solid #374151; background:#f3f4f6; font-weight:700; padding:8px 4px; }
   .modal-ov { position:fixed; inset:0; background:rgba(0,0,0,0.4); display:none; align-items:center; justify-content:center; z-index:900; }
@@ -123,15 +123,15 @@ function _mtxSetReasonGroup(code, group, reason){ var g=_mtxDirGroups(code); var
   matrixNewRows.forEach(function(r){ if(String(r.code||'').trim()===String(code).trim()){ if(group==='all') r.reason=reason; else r['reason_'+group]=reason; } }); }
 // 추천사유 td: 한 행에 빨강·파랑 방향이 둘 다 있으면 2칸(그룹색 테두리), 아니면 1칸
 function reasonTd(code, tempId){ var g=_mtxDirGroups(code); var hasR=g.red.length>0, hasB=g.blue.length>0;
-  function inp(group,val,bc,bg,ph){ return '<input type="text" class="reason mtx-reason" data-code="'+escapeHtml(code)+'" data-group="'+group+'"'+(tempId?' data-tempid="'+tempId+'"':'')+' value="'+escapeHtml(val)+'" placeholder="'+ph+'" style="border:1.5px solid '+bc+';background:'+bg+';min-width:0;font-size:13px;">'; }
+  function inp(group,val,bg,ph,extra){ return '<input type="text" class="reason mtx-reason" data-code="'+escapeHtml(code)+'" data-group="'+group+'"'+(tempId?' data-tempid="'+tempId+'"':'')+' value="'+escapeHtml(val)+'" placeholder="'+ph+'" style="border:none;background:'+bg+';min-width:0;font-size:13px;'+(extra||'')+'">'; }
   if(hasR&&hasB){ var rv=_mtxGroupReason(code,'red'), bv=_mtxGroupReason(code,'blue');
-    return '<td style="min-width:260px;"><div style="display:flex;gap:6px;">'
-      +inp('red', rv, rv.trim()?'#fca5a5':'#fca5a5', rv.trim()?'#fff':'#fee2e2','편입·확대 사유')
-      +inp('blue', bv, bv.trim()?'#93c5fd':'#fca5a5', bv.trim()?'#fff':'#fee2e2','축소·편출 사유')
+    return '<td style="min-width:260px;padding:0;"><div style="display:flex;">'
+      +inp('red', rv, rv.trim()?'transparent':'#fee2e2','편입·확대 사유','')
+      +inp('blue', bv, bv.trim()?'transparent':'#fee2e2','축소·편출 사유','border-left:1px solid #d9d9d9;')
       +'</div></td>'; }
   var grp = hasR?'red':(hasB?'blue':'all'); var val=_mtxGroupReason(code,grp); var need=(hasR||hasB)&&!val.trim();
-  var bc = need?'#fca5a5':'#d1d5db'; var bg = need?'#fee2e2':'#fff';
-  return '<td>'+inp(grp,val,bc,bg,'')+'</td>'; }
+  var bg = need?'#fee2e2':'transparent';
+  return '<td style="padding:0;">'+inp(grp,val,bg,(hasR||hasB)?(hasR?'편입·확대 사유':'축소·편출 사유'):'','')+'</td>'; }
 function _mtxColSum(pf){ var st=orderState[pf]||[], s=0; st.forEach(function(x){ s+=parseFloat(x.newWeight)||0; }); return s; }
 function _mtxCell(pf,code){ var idx=_mtxFindIdx(pf,code); if(idx<0) return {held:false,color:'#000',ot:'',newWeight:null};
   var prev=parseFloat(orderStocks[pf][idx].weight)||0, nw=parseFloat(orderState[pf][idx].newWeight)||0, ot=calcOrderType(prev,nw);
