@@ -4838,8 +4838,6 @@ def create_order_section():
             // 2열 그리드 셀 순서: [컴플|삼성] → 증권사별 [이메일|메신저] (NH/DB=네이트온, 한투=카카오톡)
             var cells = [];
             // 2026-07-13 재구성: 이메일 텍스트 카드 제거(발송 미리보기 모달이 전문 확인 대체) — 메신저 카드만 유지(수동 복사용).
-            // 삼성은 목표전환형이 없어 TARGET 루프에 없으므로 삼성 네이트온을 여기서 별도 추가.
-            cells.push(buildEmailBox('삼성 네이트온', buildOrderNateonText(orderStocks[GENERAL] || [], orderState[GENERAL] || [], '일반형'), '#eef2ff', '#c7d2fe', '#1f5a2a', '#4f46e5'));
             TARGET_TABS.forEach(function(tt) {
                 var pair = EMAIL_PAIR[tt] || { broker: tt.split(' ')[0], generalKey: GENERAL, generalLabel: '일반형', targetLabel: '목표전환형' };
                 var mName = BROKER_MESSENGER[pair.broker] || '네이트온';

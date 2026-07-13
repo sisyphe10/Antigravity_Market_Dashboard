@@ -555,6 +555,8 @@ def email_pair_map():
             g_key, g_label = gen.display, gen.kind_label
         else:
             g_key, g_label = gen.display, gen.kind_label
+        if gen is not None and gen.broker == 'DB':
+            g_label = '개방형'                          # DB 일반형 섹션 라벨 (kind_label='일반형'은 add_aum 공유라 유지)
         out[t.display] = {'broker': t.broker, 'generalKey': g_key,
                           'generalLabel': g_label, 'targetLabel': t.kind_label}
     return out
