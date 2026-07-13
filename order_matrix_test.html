@@ -202,7 +202,7 @@ function renderOrderMatrix(){
     +'<div style="overflow-x:auto;border:1px solid #000;"><table><thead><tr>'
     +'<th>#</th><th>업종</th><th>코드</th><th>종목명</th>'+head+'<th style="width:99%;">추천사유</th>'
     +'</tr></thead><tbody>'+rows
-    +'<tr class="addrow"><td colspan="3"></td><td style="padding:8px 4px;"><button class="btn" id="btnAdd" style="background:#2563eb;color:#fff;border:none;border-radius:4px;padding:4px 12px;font-size:13px;line-height:1.5;">+ 종목 추가</button></td>'+ORDER_PORTFOLIOS.map(function(){return '<td class="pf-col"></td>';}).join('')+'<td></td></tr>'
+    +'<tr class="addrow"><td colspan="3"></td><td style="padding:8px 4px;"><button class="btn" id="btnAdd" style="background:#2563eb;color:#fff;border:none;border-radius:4px;padding:4px 12px;font-size:14px;line-height:1.5;">+ 종목 추가</button></td>'+ORDER_PORTFOLIOS.map(function(){return '<td class="pf-col"></td>';}).join('')+'<td></td></tr>'
     +'<tr class="totals"><td colspan="4" style="text-align:center;color:#444;">합계</td>'+totals+'<td></td></tr>'
     +'<tr class="cashrow"><td colspan="4" style="text-align:center;color:#444;">현금</td>'+cash+'<td></td></tr></tbody></table></div>';
   document.getElementById('orderContent').innerHTML=html;
