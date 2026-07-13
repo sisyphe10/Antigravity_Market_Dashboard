@@ -114,17 +114,26 @@ def decode_attachments(mail):
     return out
 
 
+# 서명 시작 마커(plain 본문 안) + 하이웍스 실서명 HTML 원본(정확 재현)
+SIG_MARKER = '김 태 식 운용3본부/매니저'
+SIG_HTML_INNER = (
+    '<p style="margin:0;"><b>김 태 식 <span style="color:#404040;">운용3본부/매니저</span></b></p>'
+    '<p style="margin:0;"><b>라이프자산운용 <span style="color:#858585;">Life Asset Management, Inc.</span></b>'
+    '<br>서울 영등포구 국제금융로 10, Two IFC 14F</p>'
+    '<p style="margin:0;">02-6105-6836&nbsp;&nbsp;|&nbsp;&nbsp;010-9932-0334&nbsp;&nbsp;|&nbsp;&nbsp;'
+    '<a href="mailto:kts@investlife.com" style="color:#163fc7;text-decoration:underline;">kts@investlife.com</a></p>'
+)
+
+
 def html_body(plain):
-    """plain 본문 → HTML. 텍스트는 그대로(줄바꿈 <br>), **서명 블록만 스타일**(정본 고정 라인).
-    김 태 식=볼드 검정 / 운용3본부/매니저=20% 희석 / 영문사명=50% 희석 / 나머지 검정."""
+    """plain 본문 → HTML(굴림 12px). 메시지부는 평문 그대로(<br>), 서명 블록은 하이웍스 실서명 HTML로 교체.
+    plain 폴백은 원문 그대로(build_mime의 text/plain)."""
     import html as _html
-    esc = _html.escape(plain)
-    esc = esc.replace('김 태 식 운용3본부/매니저',
-                      '<b>김 태 식</b> <span style="color:rgba(0,0,0,0.8)">운용3본부/매니저</span>')
-    esc = esc.replace('라이프자산운용 Life Asset Management, Inc.',
-                      '라이프자산운용 <span style="color:rgba(0,0,0,0.5)">Life Asset Management, Inc.</span>')
-    return ('<div style="font-family:\'맑은 고딕\',Malgun Gothic,sans-serif;font-size:14px;color:#000;line-height:1.6;">'
-            + esc.replace('\n', '<br>') + '</div>')
+    idx = plain.find(SIG_MARKER)
+    msg = plain[:idx] if idx >= 0 else plain
+    inner = _html.escape(msg).replace('\n', '<br>') + (SIG_HTML_INNER if idx >= 0 else '')
+    return ('<div style="font-family:굴림,Gulim,sans-serif;font-size:12px;line-height:1.6;color:#000;">'
+            + inner + '</div>')
 
 
 def build_mime(mail, rcpts, from_hdr, attachments):
