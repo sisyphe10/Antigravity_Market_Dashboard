@@ -19,6 +19,16 @@ http://:8377 {
 		reverse_proxy 127.0.0.1:8787
 	}
 
+	# Journal 개인 투자일지 차트 (2026-07-13) — 테일넷+비밀번호(basic_auth) 이중.
+	#   데이터·자격증명·페이지 전부 ~/Journal 로컬 전용 — git/게시 파이프라인과 격리 (전역 CLAUDE.md Journal 섹션).
+	#   ★~/Journal/caddy_auth.snippet 없으면 caddy 기동 실패 — Journal 폴더 이동 시 이 라우트 먼저 수정.
+	redir /journal /journal/ 301
+	handle_path /journal/* {
+		import /Users/sisyphe/Journal/caddy_auth.snippet
+		root * /Users/sisyphe/Journal/web
+		file_server
+	}
+
 	# Sisyphe 개인 대시보드 (가계부·운동·투자일지) — 2026-07-13 평문 전환.
 	#   compose_personal_view.py 가 평문 3페이지를 게시 스냅숏 current/sisyphe/ 로 합성 → 아래 fallback handle 이 서빙.
 	#   (이전: staticrypt 암호화본 직서빙 handle_path. 테일넷 한정이라 암호 프롬프트 제거가 목적.)
