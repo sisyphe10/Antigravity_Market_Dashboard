@@ -9,9 +9,10 @@ publish_snapshot.sh 가 새 릴리스 디렉토리(argv[1])를 rsync 한 직후 
   2) 정방향 nav  : AoE topnav 에 Wiki·Sisyphe 그룹 주입 (→ /sisyphe/...) — 멱등
   3) Sisyphe 합성: ~/srv/sisyphe_plain 평문 3페이지를 <REL>/sisyphe/ 로 복사 (평문·데이터는 런타임 Sheets fetch)
   4) 역방향 nav  : Sisyphe 3페이지 topnav 에 AoE 복귀 pill 주입 (→ /) — 멱등
-  5) AoE 통일 CSS: Sisyphe topnav·chrome 색/스타일을 AoE 정본(create_dashboard top_nav_html)과 일치시키는
-                   override <style>를 </head> 앞에 주입 — 멱등. 색/pill/브랜드 액센트만(레이아웃 구조 불변).
-  6) 검증        : sisyphe 페이지 존재·staticrypt 흔적 0·역방향 nav·통일 CSS 주입 확인. 실패 시 exit1 → 세대 폐기.
+  5) 랜딩 브랜드 : Sisyphe index(랜딩) topnav 좌측에 "Sisyphe" 브랜드 주입 (AoE 랜딩 배치 정합) — 멱등
+  6) AoE 통일 CSS: Sisyphe topnav·사이드바·chrome 색/스타일을 AoE 정본(create_dashboard top_nav_html)과
+                   일치시키는 override <style>를 </head> 앞에 주입 — 멱등. 색/pill/액센트만(레이아웃 구조 불변).
+  7) 검증        : sisyphe 페이지 존재·staticrypt 흔적 0·역방향 nav·랜딩 브랜드·통일 CSS 확인. 실패 시 exit1 → 세대 폐기.
 """
 import os, re, sys, glob, shutil
 
@@ -29,10 +30,12 @@ INJECT = ('<div class="topnav-item"><a href="/wiki/" class="topnav-tab">Wiki</a>
 NAV_END = '</div></div></nav>'
 # 역방향(Sisyphe→AoE) 복귀 pill — 기존 .topnav-tab 컴포넌트 재사용(새 스타일 없음). aoe-back=멱등·검증 마커.
 AOE_BACK = '<a href="/" class="topnav-tab aoe-back"><span class="icon">←</span>AoE</a>'
+# 랜딩(index) 좌측 브랜드 — AoE 랜딩([brand][tabs]) 배치 정합. 기존 .topnav-brand 스타일 재사용.
+INDEX_BRAND = '<a href="index.html" class="topnav-brand">Sisyphe</a>'
 STATICRYPT_MARKERS = ("staticrypt", "encryptedmsg", "cryptoengine")
 
-# AoE 정본 topnav 값(create_dashboard top_nav_html, 2026-07-12 픽셀통일)과 일치시키는 override.
-# nav.topnav 특이도(요소+클래스)로 원본 규칙 확실 상회. 색·pill·브랜드 액센트·chrome 배경만 통일하고
+# AoE 정본 값(create_dashboard top_nav_html / sidebar, 2026-07-12 픽셀통일)과 일치시키는 override.
+# nav.topnav / .sidebar 특이도로 원본 규칙 확실 상회. 색·pill·브랜드·사이드바 액센트·chrome 배경만 통일하고
 # has-sidebar 오프셋(padding/margin/min-width) 등 레이아웃 구조는 건드리지 않는다(깨짐 방지).
 NAV_UNIFY = (
     '<style id="aoe-nav-unify">'
@@ -49,6 +52,9 @@ NAV_UNIFY = (
     '.topnav-brand:hover,.sidebar-brand:hover{color:#2d7a3a}'
     '.sidebar{background:#fff;border-right-color:#e5e7eb}'
     '.sidebar-brand{background:#fff;border-bottom-color:#e5e7eb}'
+    '.sidebar .sidebar-link{color:#444}'
+    '.sidebar .sidebar-link:hover{background:#f0f7f2;color:#2d7a3a;border-color:#2d7a3a}'
+    '.sidebar .sidebar-link.active{background:transparent;color:#2d7a3a;border-color:#2d7a3a}'
     'body{background:#f8f9fa}'
     '</style>'
 )
@@ -57,6 +63,7 @@ item_pat = re.compile(r'<div class="topnav-item"><a href="wrap\.html"[^>]*>.*?</
 link_pat = re.compile(r'<a[^>]*href="wrap\.html[^"]*"[^>]*>.*?</a>\s*', re.S)
 arch_pat = re.compile(r'<div class="topnav-item"><a href="architecture\.html"')
 tabs_pat = re.compile(r'<div class="topnav-tabs">')
+inner_pat = re.compile(r'<div class="topnav-inner">')
 
 
 def fail(msg):
@@ -96,7 +103,7 @@ for name in SISYPHE_PAGES:
         fail("sisyphe 평문 소스 없음/빈파일: %s" % src)
     shutil.copyfile(src, os.path.join(dst, name))
 
-# --- 4)+5) 역방향 nav + AoE 통일 CSS 주입 + 검증 (멱등, fail-closed) ---
+# --- 4)~6) 역방향 nav + 랜딩 브랜드 + AoE 통일 CSS 주입 + 검증 (멱등, fail-closed) ---
 for name in SISYPHE_PAGES:
     p = os.path.join(dst, name)
     s = open(p, encoding="utf-8").read()
@@ -111,6 +118,12 @@ for name in SISYPHE_PAGES:
             fail("sisyphe/%s: topnav-tabs 앵커 없음 — 역방향 nav 주입 불가" % name)
         s = s[:m.end()] + AOE_BACK + s[m.end():]
         changed = True
+    if name == "index.html" and 'topnav-brand">Sisyphe' not in s:
+        m = inner_pat.search(s)
+        if not m:
+            fail("sisyphe/index.html: topnav-inner 앵커 없음 — 랜딩 브랜드 주입 불가")
+        s = s[:m.end()] + INDEX_BRAND + s[m.end():]
+        changed = True
     if "aoe-nav-unify" not in s:
         i = s.lower().find("</head>")
         if i == -1:
@@ -124,6 +137,8 @@ for name in SISYPHE_PAGES:
         fail("sisyphe/%s: 역방향 nav 검증 실패" % name)
     if 'id="aoe-nav-unify"' not in final:
         fail("sisyphe/%s: AoE 통일 CSS 검증 실패" % name)
+    if name == "index.html" and 'topnav-brand">Sisyphe' not in final:
+        fail("sisyphe/index.html: 랜딩 브랜드 검증 실패")
 
-sys.stdout.write("[compose] OK: WRAP 제거 + 양방향 nav + AoE 통일 CSS + Sisyphe %d페이지 합성 (%s)\n"
+sys.stdout.write("[compose] OK: WRAP 제거 + 양방향 nav + 랜딩 브랜드 + AoE 통일 CSS + Sisyphe %d페이지 합성 (%s)\n"
                  % (len(SISYPHE_PAGES), os.path.basename(REL)))
