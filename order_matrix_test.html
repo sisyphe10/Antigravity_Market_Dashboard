@@ -16,7 +16,8 @@
   .pw-error { color:#dc2626; font-size:13px; margin-top:10px; display:none; }
   .pw-hidden { display:none; }
   .wrap { max-width:1500px; margin:0 auto; padding:24px 20px 60px; }
-  .testbar { background:#fef3c7; border:1px solid #fcd34d; border-radius:8px; padding:10px 16px; margin-bottom:16px; font-size:14px; font-weight:600; color:#92400e; }
+  .testbar { position:sticky; top:0; z-index:500; background:#fee2e2; border:2px solid #f87171; border-radius:8px; padding:14px 18px; margin-bottom:18px; font-size:17px; font-weight:800; color:#b91c1c; text-align:center; letter-spacing:0.3px; box-shadow:0 2px 10px rgba(0,0,0,0.06); }
+  .testbar .sub2 { display:block; font-size:13px; font-weight:600; color:#92400e; margin-top:4px; }
   h1 { font-size:20px; margin:0 0 4px; }
   .sub { color:#6b7280; font-size:13px; margin-bottom:16px; }
   .toolbar { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
@@ -53,7 +54,7 @@
 
 <div id="app" class="pw-hidden">
   <div class="wrap">
-    <div class="testbar">⚠️ 테스트 페이지 — 저장 버튼은 실제 저장하지 않습니다(미리보기만). pending_orders.json·실주문 데이터에 영향 없음.</div>
+    <div class="testbar">🧪 테스트 페이지 — 실제 주문에 반영되지 않음<span class="sub2">저장 버튼은 미리보기 전용입니다 · pending_orders.json·실주문 데이터에 영향 없음</span></div>
     <h1>주문 매트릭스 (7컬럼 개별 포트)</h1>
     <div class="sub">행=전 포트 종목 합집합 · 열=7개 개별 포트 · 셀=변경후 입력(변경전 미표시, 변경 시 색만) · 사유=행당 1칸</div>
     <div id="orderContent"><div style="padding:40px;text-align:center;color:#888;">로딩 중...</div></div>
