@@ -378,6 +378,12 @@ def build_edges(reg):
             add(cid, ref, "write")
         for ref in c.get("depends_on", []) or []:  # comp depends on ref: ref -> comp
             add(ref, cid, "dep")
+    # Drop dep edges that merely duplicate an existing read/write between the
+    # same pair — a read/write already implies the dependency, so the extra
+    # gray line is pure visual clutter. Keeps dep edges that are the only link.
+    flow_pairs = {frozenset((e["a"], e["b"])) for e in edges if e["k"] != "dep"}
+    edges = [e for e in edges
+             if e["k"] != "dep" or frozenset((e["a"], e["b"])) not in flow_pairs]
     return edges
 
 
@@ -438,7 +444,7 @@ h2.block-title { font-size: 1.4rem; color: #111; font-weight: 800; margin-bottom
 
 /* ---- diagram ---- */
 .diagram { position: relative; }
-.edge-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: visible; }
+.edge-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; overflow: visible; }
 .layers { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 14px; }
 .layer { border: 1px solid #e5e7eb; border-radius: 12px; background: #fff; padding: 12px 14px; }
 .layer-head { font-size: 0.82rem; font-weight: 700; color: #111; letter-spacing: 0.3px; margin-bottom: 4px; }
@@ -455,9 +461,12 @@ h2.block-title { font-size: 1.4rem; color: #111; font-weight: 800; margin-bottom
 .node.st-retired { opacity: 0.55; filter: grayscale(0.6); }
 .node.node-dim { opacity: 0.28; }
 .node.node-hl { box-shadow: 0 0 0 2.5px #2d7a3a; }
-.edge-line { stroke-width: 1.6; fill: none; opacity: 0.5; transition: opacity 0.12s, stroke-width 0.12s; }
-.edge-line.edge-hl { opacity: 1; stroke-width: 3; }
-.edge-line.edge-dim { opacity: 0.06; }
+/* Edges are hidden by default (clean diagram); a node's own edges are revealed
+   only while it is hovered/focused, drawn on top of the cards (edge-svg z-index). */
+.edge-line { stroke-width: 1.6; fill: none; opacity: 0; transition: opacity 0.12s, stroke-width 0.12s; }
+.edge-line.edge-hl { opacity: 0.92; stroke-width: 2.2; }
+.edge-line.edge-hl.edge-k-dep { opacity: 0.4; stroke-width: 1.3; }  /* depends_on recedes; data flow leads */
+.edge-line.edge-dim { opacity: 0; }
 
 /* ---- timeline ---- */
 .timeline { border: 1px solid #e5e7eb; border-radius: 12px; background: #fff; padding: 14px 16px; overflow-x: auto; }
@@ -868,6 +877,7 @@ PAGE_JS = """
   var diagram = document.querySelector(".diagram");
   var svg = document.getElementById("edgeSvg");
   var lineEls = [];
+  var activeNodeId = "";  // node currently hovered/focused — survives a redraw
 
   function nodeEl(id) { return diagram.querySelector('.node[data-id="' + cssEsc(id) + '"]'); }
   function cssEsc(s) { return String(s).replace(/["\\\\]/g, "\\\\$&"); }
@@ -911,16 +921,19 @@ PAGE_JS = """
       var d = "M" + ax + "," + ay + " C" + ax + "," + (ay + by) / 2 + " " + bx + "," + (ay + by) / 2 + " " + bx + "," + by;
       var ln = document.createElementNS(SVGNS, "path");
       ln.setAttribute("d", d);
-      ln.setAttribute("class", "edge-line");
+      ln.setAttribute("class", "edge-line edge-k-" + e.k);
       ln.setAttribute("stroke", color);
       ln.setAttribute("marker-end", "url(#arrow-" + e.k + ")");
       ln.dataset.a = e.a; ln.dataset.b = e.b;
       svg.appendChild(ln);
       lineEls.push(ln);
     });
+    // paths were rebuilt fresh — restore highlight if a node is still active
+    if (activeNodeId) highlight(activeNodeId);
   }
 
   function highlight(id) {
+    activeNodeId = id;
     var connected = {};
     lineEls.forEach(function (ln) {
       if (ln.dataset.a === id || ln.dataset.b === id) {
@@ -935,6 +948,7 @@ PAGE_JS = """
     });
   }
   function clearHighlight() {
+    activeNodeId = "";
     lineEls.forEach(function (ln) { ln.classList.remove("edge-hl", "edge-dim"); });
     diagram.querySelectorAll(".node").forEach(function (n) { n.classList.remove("node-hl", "node-dim"); });
   }
@@ -1051,6 +1065,9 @@ PAGE_JS = """
   window.addEventListener("resize", scheduleDraw);
   window.addEventListener("load", function () { drawEdges(); initHash(); });
   drawEdges();
+  // Recompute once the web font (Pretendard) settles — otherwise box reflow
+  // leaves the (hidden) edge paths anchored to stale positions.
+  if (document.fonts && document.fonts.ready) { document.fonts.ready.then(function () { drawEdges(); }); }
 })();
 """
 
@@ -1104,7 +1121,7 @@ def build_html(reg, is_real):
     # Section 1: diagram
     out.append('<section class="block">')
     out.append('<h2 class="block-title">계층 도식도</h2>')
-    out.append('<div class="block-sub">박스를 클릭하면 아래 위키 카드로 이동합니다. 박스에 마우스를 올리면 연결선(reads/writes/depends_on)이 강조됩니다. 같은 레이어 내부 의존은 카드 텍스트로만 표시됩니다.</div>')
+    out.append('<div class="block-sub">박스에 마우스를 올리면 그 컴포넌트의 연결선만 나타납니다 (읽기=초록·쓰기=빨강·의존=옅은 회색). 박스를 클릭하면 아래 위키 카드로 이동합니다. 같은 레이어 내부 의존은 카드 텍스트로만 표시됩니다.</div>')
     out.append(build_legend())
     out.append(build_diagram(comps, by_id))
     out.append('</section>')
