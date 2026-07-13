@@ -5224,16 +5224,17 @@ def create_order_section():
           pfs.forEach(function(pf,ci){ var c=100-_mtxColSum(pf); var gen=ORDER_PORTFOLIOS[ci].general;
             cash+='<td class="wcol '+(gen?'grp-general':'')+'" id="mtx-cash-'+ci+'" style="color:'+(c<0?'#dc2626':'#222')+';">'+c.toFixed(0)+'%</td>'; });
           var head='';
-          ORDER_PORTFOLIOS.forEach(function(p){ head+='<th class="wcol '+(p.general?'grp-general':'')+'" title="'+escapeHtml(p.display)+'" style="min-width:64px;">'+escapeHtml(p.label)+'</th>'; });
+          var _fg=true;
+          ORDER_PORTFOLIOS.forEach(function(p){ var _m=(p.general&&_fg)?' data-firstgen="1"':''; if(p.general)_fg=false; head+='<th class="wcol '+(p.general?'grp-general':'')+'"'+_m+' title="'+escapeHtml(p.display)+'" style="min-width:64px;">'+escapeHtml(p.label)+'</th>'; });
           var html='<div class="toolbar">'
             +'<span id="orderSaveBadgeSlot" style="display:inline-flex;">'+buildOrderSaveBadgeGlobal()+'</span>'
             +'<div style="margin-left:auto;display:flex;gap:8px;">'
-            +'<span class="sync-toggle'+(syncGeneral?' on':'')+'" id="syncToggle">일반형 동기화</span>'
             +'<button class="btn red" id="btnCancel">전체 취소</button>'
             +'<button class="btn" id="btnSave">임시 저장</button>'
             +'<button class="btn green" id="btnFinal">최종 저장</button>'
             +'<button class="btn blue" id="btnAdditional">추가 주문</button>'
             +'</div></div>'
+            +'<div id="syncRow" style="margin-bottom:8px;"><span class="sync-toggle'+(syncGeneral?' on':'')+'" id="syncToggle">일반형 동기화</span></div>'
             +'<div style="overflow-x:auto;border:1px solid #000;"><table><thead><tr>'
             +'<th>#</th><th>업종</th><th>코드</th><th>종목명</th>'+head+'<th style="width:99%;">추천사유</th>'
             +'</tr></thead><tbody>'+rows
@@ -5246,6 +5247,7 @@ def create_order_section():
 
         function bindMatrixHandlers(){
           document.getElementById('syncToggle').addEventListener('click', function(){ syncGeneral=!syncGeneral; renderOrderMatrix(); });
+          (function(){ var fg=document.querySelector('#orderContent th[data-firstgen]'), sr=document.getElementById('syncRow'), oc=document.getElementById('orderContent'); if(fg&&sr&&oc){ var off=fg.getBoundingClientRect().left - oc.getBoundingClientRect().left; sr.style.paddingLeft=Math.max(0,off)+'px'; } })();
           document.querySelectorAll('#orderContent input.mtx-w').forEach(function(el){ el.addEventListener('input', function(e){
             var code=e.target.dataset.code, pf=e.target.dataset.pf, rowMeta=null;
             if(e.target.dataset.newrow){ var tr=e.target.closest('tr'), tid=tr&&tr.dataset.tempid; var nr=matrixNewRows.filter(function(r){return String(r.tempId)===String(tid);})[0]; if(nr){ code=String(nr.code||'').trim(); rowMeta=nr; } }
