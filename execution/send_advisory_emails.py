@@ -1,0 +1,279 @@
+# -*- coding: utf-8 -*-
+"""orders/email_send_request.json → 하이웍스 SMTP 자문지 메일 발송 (B안, 2026-07-13)
+
+launchd 60초 폴러(run_timer_job.sh send-advisory-emails)가 호출. wrap.html Email 탭의
+[메일 발송 요청]이 Contents API+PAT로 기록한 요청을 감지해 5통(컴플/삼성/NH/DB/한투) 발송.
+
+★★★ 안전 3중 가드 (codex 리뷰 중점) ★★★
+  가드1 — 모드 단일출처: 발송 모드는 **맥 로컬 ~/email_config.json 의 mode 만** 신뢰(기본 'test').
+          요청 파일(email_send_request.json)의 mode 필드는 감사/표시용으로만 저장, 발송 판단에 절대 미사용.
+          → 페이지 조작/버그로 real 전환 불가.
+  가드2 — real 전환 조건: config mode 값 변경 + 사용자 명시 승인 후에만. 코드가 자동 전환하지 않음.
+  가드3 — 발송 직전 assert: mode=='test' 인데 To/CC/BCC 에 본인(SELF) 외 주소가 하나라도 있으면
+          SendGuardError → **전체 배치 중단(부분발송 없음) + 텔레그램 알림**. test 모드 수신자는
+          resolve_recipients 가 To=[본인]·CC=[]·BCC=[] 로만 구성하고, assert 는 그 위의 방어선.
+
+멱등: 요청 ts 를 처리 후 orders/email_send_result.json 에 기록. 재실행 시 ts<=마지막처리 스킵.
+비밀번호·메일 전문 로그 미기록 (요약만). SMTP 비번은 .env HIWORKS_MAIL_PASSWORD(사용자 입력).
+"""
+import json
+import os
+import re
+import sys
+import time
+import subprocess
+from datetime import datetime, timezone, timedelta
+
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REPO_SLUG = os.environ.get('GITHUB_REPOSITORY', 'sisyphe10/Antigravity_Market_Dashboard')
+CONFIG_PATH = os.path.expanduser('~/email_config.json')          # 맥 로컬 전용 (repo 밖)
+ADVISORY_DIR = os.path.join(ROOT, '자문지')
+RESULT_PATH = os.path.join(ROOT, 'orders', 'email_send_result.json')
+KST = timezone(timedelta(hours=9))
+SELF_FALLBACK = 'kts@investlife.com'
+
+
+class SendGuardError(Exception):
+    """test-safety 위반 등 발송 차단 사유 (전체 배치 중단)."""
+
+
+# ─────────────────────────── 순수 가드/조립 함수 (단위테스트 대상) ───────────────────────────
+def norm_addr(s):
+    """'이름 <email@x>' 또는 'email@x' → 소문자 이메일만. 비교·assert 정규화용."""
+    m = re.search(r'<([^>]+)>', s or '')
+    addr = m.group(1) if m else (s or '')
+    return addr.strip().lower()
+
+
+def resolve_mode(config):
+    """가드1: mode 는 config 만 신뢰. test/real 외 값·누락 → 'test'."""
+    mode = (config or {}).get('mode', 'test')
+    return mode if mode in ('test', 'real') else 'test'
+
+
+def resolve_recipients(mode, acct, self_addr):
+    """가드3 기반: test → 본인 단독(To=[본인],CC=[],BCC=[]). real → 실수신자 + BCC 본인(보낸기록)."""
+    if mode == 'test':
+        return {'to': [self_addr], 'cc': [], 'bcc': []}
+    return {
+        'to': list(acct.get('to', [])),
+        'cc': list(acct.get('cc', [])),
+        'bcc': [self_addr],
+    }
+
+
+def assert_test_safety(mode, rcpts, self_addr):
+    """가드3: test 모드인데 본인 외 주소가 하나라도 있으면 발송 차단."""
+    if mode != 'test':
+        return
+    self_n = norm_addr(self_addr)
+    allrc = list(rcpts.get('to', [])) + list(rcpts.get('cc', [])) + list(rcpts.get('bcc', []))
+    bad = [r for r in allrc if norm_addr(r) != self_n]
+    if bad:
+        raise SendGuardError('TEST 모드 위반: 본인(%s) 외 수신자 %r — 전체 발송 차단' % (self_n, bad))
+
+
+def resolve_attachments(patterns, advisory_dir):
+    """attach 패턴별로 자문지/ 에서 매칭 최신(수정시각) 파일 1개씩. 매칭 없으면 예외.
+
+    ※ 첨부 최신성 정책(Q1) 확정 전 기본값 = '패턴 매칭 최신 파일'. finalize 가 오늘 자문지를
+       자문지/ 에 갱신 커밋하는 흐름이면 그대로 최신본이 잡힌다.
+    """
+    result = []
+    for pat in patterns:
+        cands = [f for f in os.listdir(advisory_dir)
+                 if pat in f and f.lower().endswith(('.xlsx', '.xls'))]
+        if not cands:
+            raise FileNotFoundError('자문지 첨부 매칭 없음: %r (dir=%s)' % (pat, advisory_dir))
+        cands.sort(key=lambda f: os.path.getmtime(os.path.join(advisory_dir, f)))
+        result.append(os.path.join(advisory_dir, cands[-1]))
+    return result
+
+
+def build_mime(mail, rcpts, from_hdr, attachment_paths):
+    """MIME 조립. body/subject 는 요청(wrap.html buildOrderEmailText 산출물) 그대로 사용."""
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
+    from email.mime.application import MIMEApplication
+    msg = MIMEMultipart()
+    msg['From'] = from_hdr
+    msg['To'] = ', '.join(rcpts['to'])
+    if rcpts.get('cc'):
+        msg['Cc'] = ', '.join(rcpts['cc'])
+    msg['Subject'] = mail['subject']
+    msg.attach(MIMEText(mail.get('body', ''), 'plain', 'utf-8'))
+    for path in attachment_paths:
+        with open(path, 'rb') as f:
+            part = MIMEApplication(
+                f.read(),
+                _subtype='vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        fname = os.path.basename(path)
+        part.add_header('Content-Disposition', 'attachment',
+                        filename=('utf-8', '', fname))
+        msg.attach(part)
+    return msg
+
+
+def build_send_plan(mode, mails, config, advisory_dir):
+    """pre-flight: 전 메일의 수신자 해석 + 가드3 assert + 첨부 해석을 **발송 전** 일괄 수행.
+    하나라도 실패하면 예외 → 호출부가 전체 배치를 중단(부분발송 방지)."""
+    self_addr = norm_addr(config.get('from', SELF_FALLBACK))
+    accounts = config.get('accounts', {})
+    plan = []
+    for mail in mails:
+        key = mail.get('key')
+        acct = accounts.get(key)
+        if acct is None:
+            raise SendGuardError('email_config.json 에 계정 미정의: %r' % key)
+        rcpts = resolve_recipients(mode, acct, self_addr)
+        assert_test_safety(mode, rcpts, self_addr)          # ★가드3
+        atts = resolve_attachments(acct.get('attach', []), advisory_dir)
+        plan.append({'mail': mail, 'rcpts': rcpts, 'attachments': atts})
+    return plan
+
+
+# ─────────────────────────── I/O·발송·알림 (부작용) ───────────────────────────
+def send_telegram(text):
+    import urllib.request
+    import urllib.parse
+    token = os.environ.get('TELEGRAM_BOT_TOKEN') or os.environ.get('TELEGRAM_SISYPHE_BOT_TOKEN')
+    chat = os.environ.get('TELEGRAM_CHAT_ID')
+    if not token or not chat:
+        print('  ⚠️ TELEGRAM 토큰/챗 미설정 → 알림 생략')
+        return False
+    url = 'https://api.telegram.org/bot%s/sendMessage' % token
+    data = urllib.parse.urlencode({'chat_id': chat, 'text': text,
+                                   'disable_web_page_preview': 'true'}).encode()
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, data=data), timeout=20) as r:
+            return r.status == 200
+    except Exception as e:
+        print('  ⚠️ 텔레그램 실패: %s' % e)
+        return False
+
+
+def fetch_request():
+    """요청을 GitHub Contents API(raw)로 직접 읽어 로컬 pull 지연/레이스 우회. 없으면 None."""
+    import urllib.request
+    import urllib.error
+    url = 'https://api.github.com/repos/%s/contents/orders/email_send_request.json?ref=main' % REPO_SLUG
+    headers = {'Accept': 'application/vnd.github.raw+json',
+               'X-GitHub-Api-Version': '2022-11-28',
+               'User-Agent': 'send-advisory-emails'}
+    tok = os.environ.get('GH_PAT') or os.environ.get('GITHUB_TOKEN')
+    if tok:
+        headers['Authorization'] = 'Bearer ' + tok
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=20) as r:
+            return json.loads(r.read().decode('utf-8'))
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return None
+        raise
+
+
+def last_processed_ts():
+    if not os.path.exists(RESULT_PATH):
+        return ''
+    try:
+        with open(RESULT_PATH, encoding='utf-8') as f:
+            return (json.load(f) or {}).get('ts', '') or ''
+    except Exception:
+        return ''
+
+
+def smtp_send(config, msg, rcpts, password):
+    """SMTP SSL 465 발송. ★password 는 절대 로그/예외메시지에 넣지 않음."""
+    import smtplib
+    smtp = config['smtp']
+    envelope_from = norm_addr(config.get('from', SELF_FALLBACK))
+    all_rcpt = list(rcpts['to']) + list(rcpts.get('cc', [])) + list(rcpts.get('bcc', []))
+    with smtplib.SMTP_SSL(smtp['host'], int(smtp['port']), timeout=30) as s:
+        s.login(smtp['user'], password)
+        s.sendmail(envelope_from, all_rcpt, msg.as_string())
+
+
+def push_result(result):
+    os.makedirs(os.path.dirname(RESULT_PATH), exist_ok=True)
+    with open(RESULT_PATH, 'w', encoding='utf-8') as f:
+        json.dump(result, f, ensure_ascii=False, indent=2)
+    try:
+        subprocess.run(
+            ['bash', 'scripts/safe_commit_push.sh', '-m',
+             'ORDER email send result: %s (%s, %d통)' % (
+                 result.get('date', ''), result.get('mode', ''), len(result.get('sent', []))),
+             '--', 'orders/email_send_result.json'],
+            cwd=ROOT, timeout=180, check=False)
+    except Exception as e:
+        print('  ⚠️ result push 실패: %s' % e)
+
+
+def main():
+    req = fetch_request()
+    if not req or not isinstance(req, dict):
+        return 0                                   # 요청 없음 → 조용히 종료
+    ts = req.get('ts', '')
+    if not ts:
+        print('⚪ 요청에 ts 없음 → 스킵')
+        return 0
+    if ts <= last_processed_ts():
+        return 0                                   # 멱등: 이미 처리
+
+    if not os.path.exists(CONFIG_PATH):
+        print('⚪ email_config.json 없음 → 대기(설정 전)')
+        return 0
+    with open(CONFIG_PATH, encoding='utf-8') as f:
+        config = json.load(f)
+
+    mode = resolve_mode(config)                    # ★가드1: config 만 신뢰
+    password = os.environ.get('HIWORKS_MAIL_PASSWORD')
+    if not password:
+        print('⚪ HIWORKS_MAIL_PASSWORD 미설정 → 대기(비번 입력 전)')
+        return 0                                   # 비번 준비 전엔 조용히 대기(재시도)
+
+    now = datetime.now(KST)
+    # pre-flight: 전 메일 가드 통과 + 첨부 해석 (하나라도 실패 시 예외 → 전체 중단)
+    try:
+        plan = build_send_plan(mode, req.get('mails', []), config, ADVISORY_DIR)
+    except SendGuardError as e:
+        print('❌ 가드 차단: %s' % e)
+        send_telegram('🚫 자문지 메일 발송 차단(가드)\n%s\n요청 ts=%s' % (e, ts))
+        push_result({'date': now.strftime('%Y-%m-%d'), 'ts': ts, 'mode': mode,
+                     'sent': [], 'failed': [], 'blocked': str(e),
+                     'processed_at': now.isoformat()})
+        return 1
+    except Exception as e:
+        print('❌ pre-flight 실패: %s' % e)
+        send_telegram('❌ 자문지 메일 준비 실패\n%s\n요청 ts=%s' % (str(e)[:200], ts))
+        return 1
+
+    sent, failed = [], []
+    for item in plan:
+        key = item['mail'].get('key')
+        try:
+            msg = build_mime(item['mail'], item['rcpts'], config.get('from', SELF_FALLBACK),
+                             item['attachments'])
+            smtp_send(config, msg, item['rcpts'], password)
+            sent.append(key)
+            print('  ✅ %s 발송 (수신 %d)' % (key, len(item['rcpts']['to'])))
+        except Exception as e:
+            failed.append({'key': key, 'err': str(e)[:200]})
+            print('  ❌ %s 실패: %s' % (key, str(e)[:200]))
+
+    result = {'date': now.strftime('%Y-%m-%d'), 'ts': ts, 'mode': mode,
+              'sent': sent, 'failed': failed, 'processed_at': now.isoformat()}
+    push_result(result)
+    tag = '[TEST→본인]' if mode == 'test' else '[실발송]'
+    summary = '📧 자문지 메일 %s %d통 발송' % (tag, len(sent))
+    if failed:
+        summary += ', 실패 %d (%s)' % (len(failed), ', '.join(f['key'] for f in failed))
+    send_telegram(summary)
+    print(summary)
+    return 0 if not failed else 1
+
+
+if __name__ == '__main__':
+    sys.exit(main())
