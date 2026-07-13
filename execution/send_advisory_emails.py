@@ -39,6 +39,8 @@ SELF_CANONICAL = 'kts@investlife.com'
 STATE_STAMP = os.path.join(ROOT, 'logs', 'launchd', 'send-advisory-emails.processed')
 COMPLIANCE_STAMP = os.path.join(ROOT, 'logs', 'launchd', 'compliance_sent.date')
 BROKER_KEYS = ('samsung', 'nh', 'db', 'kis')
+FETCHFAIL_STATE = os.path.join(ROOT, 'logs', 'launchd', 'send-advisory-emails.fetchfail')
+FETCHFAIL_ALERT_EVERY = 10   # 60초 폴러: 연속 10회(≈10분)마다만 알림 — 일시 5xx 로 분당 알림 스팸 방지
 
 
 class SendGuardError(Exception):
@@ -201,8 +203,43 @@ def send_telegram(text):
         return False
 
 
+def _bump_fetch_failures():
+    """연속 조회 실패 카운터 +1 (파일 기반 — 폴러 재실행 간 유지). 증가 후 값 반환."""
+    try:
+        with open(FETCHFAIL_STATE, encoding='utf-8') as f:
+            n = int(f.read().strip() or 0)
+    except Exception:
+        n = 0
+    n += 1
+    os.makedirs(os.path.dirname(FETCHFAIL_STATE), exist_ok=True)
+    tmp = FETCHFAIL_STATE + '.tmp'
+    with open(tmp, 'w', encoding='utf-8') as f:
+        f.write(str(n))
+    os.replace(tmp, FETCHFAIL_STATE)
+    return n
+
+
+def _reset_fetch_failures():
+    try:
+        os.remove(FETCHFAIL_STATE)
+    except OSError:
+        pass
+
+
+def _tolerate_fetch_error(reason):
+    """일시 오류(5xx·네트워크·파싱) → None 반환으로 다음 폴(60초 뒤)에 재시도.
+    연속 FETCHFAIL_ALERT_EVERY 회마다만 예외를 올려 wrapper OnFailure 알림 1건 발생
+    — 장기 장애는 ≈10분 간격 리마인드, 일시 장애는 무음."""
+    n = _bump_fetch_failures()
+    print('  ⚠️ 요청 조회 일시 오류(연속 %d회): %s → 다음 폴 재시도' % (n, reason))
+    if n % FETCHFAIL_ALERT_EVERY == 0:
+        raise RuntimeError('요청 조회 연속 %d회 실패 — 최근 원인: %s' % (n, reason))
+    return None
+
+
 def fetch_request():
-    """요청을 GitHub Contents API(raw)로 직접 읽어 로컬 pull 지연/레이스 우회. 없으면 None."""
+    """요청을 GitHub Contents API(raw)로 직접 읽어 로컬 pull 지연/레이스 우회. 없으면 None.
+    404=요청 없음(정상). 그 외 오류는 전부 _tolerate_fetch_error 로 위임(연속 실패 가드)."""
     import urllib.request
     import urllib.error
     url = 'https://api.github.com/repos/%s/contents/orders/email_send_request.json?ref=main' % REPO_SLUG
@@ -214,11 +251,18 @@ def fetch_request():
         headers['Authorization'] = 'Bearer ' + tok
     try:
         with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=20) as r:
-            return json.loads(r.read().decode('utf-8'))
+            req = json.loads(r.read().decode('utf-8'))
     except urllib.error.HTTPError as e:
         if e.code == 404:
+            _reset_fetch_failures()
             return None
-        raise
+        return _tolerate_fetch_error('HTTP %d %s' % (e.code, getattr(e, 'reason', '') or ''))
+    except OSError as e:                      # URLError·timeout 포함(모두 OSError 계열)
+        return _tolerate_fetch_error(str(e)[:120])
+    except ValueError as e:                   # 200이지만 본문이 JSON 아님(요청 파일 오염 등)
+        return _tolerate_fetch_error('JSON 파싱 실패: %s' % str(e)[:80])
+    _reset_fetch_failures()
+    return req
 
 
 def last_processed_ts():
