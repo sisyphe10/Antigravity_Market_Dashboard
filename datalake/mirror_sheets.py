@@ -15,6 +15,7 @@ import os
 import re
 import sys
 import tempfile
+import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from dl_common import DATALAKE_ROOT, REPO  # noqa: E402
@@ -98,12 +99,18 @@ def main():
 
     errors = []
     for folder, (sheet_id, desc) in SHEETS.items():
-        try:
-            n = mirror_one(svc, folder, sheet_id)
-            print(f"[mirror] {folder}({desc}): 탭 {n}개 완료")
-        except Exception as e:  # noqa: BLE001 — 시트 단위 격리, 실패는 집계 후 비정상 종료
-            errors.append(f"{folder}: {e}")
-            print(f"[mirror] {folder} 실패: {e}", file=sys.stderr)
+        for attempt in range(3):  # 일시 장애(read timeout 등)는 재시도로 흡수 — 알림은 3회 연속 실패만
+            try:
+                n = mirror_one(svc, folder, sheet_id)
+                print(f"[mirror] {folder}({desc}): 탭 {n}개 완료")
+                break
+            except Exception as e:  # noqa: BLE001 — 시트 단위 격리, 실패는 집계 후 비정상 종료
+                if attempt < 2:
+                    print(f"[mirror] {folder} {attempt + 1}차 실패, 재시도: {e}", file=sys.stderr)
+                    time.sleep(15 * (attempt + 1))
+                else:
+                    errors.append(f"{folder}: {e}")
+                    print(f"[mirror] {folder} 실패: {e}", file=sys.stderr)
     if errors:
         sys.exit(1)
 
