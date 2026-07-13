@@ -121,8 +121,10 @@ for f in glob.glob(os.path.join(REL, "*.html")):
         n = n[:m.start()] + WIKI_ITEM + n[m.start():]
     elif NAV_END in n:
         n = n.replace(NAV_END, WIKI_ITEM + NAV_END, 1)
-    # Invest + Sisyphe 를 nav 끝에(Sisyphe 는 margin-left:auto 로 맨 오른쪽)
-    if NAV_END in n and "sisyphe-tab" not in n:
+    # Invest + Sisyphe 를 nav 끝에(Sisyphe 는 margin-left:auto 로 맨 오른쪽).
+    # 가드는 nav 마크업 전용 마커('sisyphe-tab">Sisyphe')로 — 'sisyphe-tab' 만 보면 주입된 CSS(aoe-personal-nav)에
+    # 걸려 copy-current 재실행 시 재주입이 막힘. 정규화가 SISYPHE_ITEM 을 지웠으므로 마크업 마커는 사라진 상태.
+    if NAV_END in n and 'sisyphe-tab">Sisyphe' not in n:
         n = n.replace(NAV_END, INVEST_ITEM + SISYPHE_ITEM + NAV_END, 1)
     # AoE 개인 nav CSS
     if 'id="aoe-personal-nav"' not in n:
