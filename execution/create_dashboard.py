@@ -3172,7 +3172,52 @@ def _build_wrap_chart_section(category_label):
                 });
             }
 
-            window.toggleWrapSeries = function(el) { el.classList.toggle('active'); buildChart(); };
+            // 단일 포트폴리오 선택 시 기간 자동 세팅: 비교지수(KOSPI/KOSDAQ)를 제외한 활성
+            // 시리즈가 정확히 1개면 기간 입력을 그 포트폴리오의 운용기간(첫~마지막 유효 NAV)으로
+            // 맞춘다. 지수만 토글할 때는 재발화하지 않고(수동 입력 보존), 조건이 깨지면
+            // 자동 세팅된 값 그대로일 때만 전체 기간으로 복원한다.
+            var WRAP_BENCH = { 'KOSPI': 1, 'KOSDAQ': 1 };
+            var wrapAutoPort = null;   // 마지막 자동 세팅 대상 포트폴리오
+            var wrapAutoRange = null;  // 마지막 자동 세팅 값 "start|end"
+            function wrapSeriesRange(name) {
+                var arr = rawData[name];
+                if (!arr) return null;
+                var first = null, last = null;
+                for (var i = 0; i < navData.dates.length; i++) {
+                    if (arr[i] !== null && arr[i] !== undefined) {
+                        if (first === null) first = navData.dates[i];
+                        last = navData.dates[i];
+                    }
+                }
+                return first ? { start: first, end: last } : null;
+            }
+            function wrapAutoPeriod() {
+                var ports = [];
+                document.querySelectorAll('.wrap-chart-item.active').forEach(function(e) {
+                    var n = e.getAttribute('data-series');
+                    if (!WRAP_BENCH[n]) ports.push(n);
+                });
+                var sEl = document.getElementById('wrapStartDate');
+                var eEl = document.getElementById('wrapEndDate');
+                if (ports.length === 1) {
+                    if (ports[0] === wrapAutoPort) return; // 지수 토글 등 — 유지
+                    var r = wrapSeriesRange(ports[0]);
+                    if (!r) return;
+                    sEl.value = r.start;
+                    eEl.value = r.end;
+                    wrapAutoPort = ports[0];
+                    wrapAutoRange = r.start + '|' + r.end;
+                } else {
+                    // 수동 입력이 아닌(=직전 자동값 그대로) 경우에만 전체 기간 복원
+                    if (wrapAutoRange && sEl.value + '|' + eEl.value === wrapAutoRange) {
+                        sEl.value = navData.dates[0];
+                        eEl.value = navData.dates[navData.dates.length - 1];
+                    }
+                    wrapAutoPort = null;
+                    wrapAutoRange = null;
+                }
+            }
+            window.toggleWrapSeries = function(el) { el.classList.toggle('active'); wrapAutoPeriod(); buildChart(); };
             window.updateWrapChart = buildChart;
             window.switchChartMode = function(el) {
                 document.querySelectorAll('.wrap-mode-btn').forEach(function(b) { b.classList.remove('active'); });
