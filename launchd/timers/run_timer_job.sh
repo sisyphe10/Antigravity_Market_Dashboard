@@ -140,6 +140,7 @@ job_timeout_seconds() {
     kodex-sectors)        echo 600  ;;   # 원본 10min
     earnings-bot)         echo 2700 ;;   # 원본 45min
     update-stock-master)  echo 900  ;;   # 원본 15min
+    send-advisory-emails) echo 300  ;;   # SMTP 5통 여유(신규 60초 폴러)
     *)                    echo 1800 ;;   # 미지정 안전 기본(90s 대신 30min)
   esac
 }
@@ -187,6 +188,7 @@ run_job() {
     kodex-sectors)        /bin/bash scripts/run_kodex_sectors.sh      || return $? ;;
     earnings-bot)         "$PY" -m execution.earnings_bot.runner       || return $? ;;
     update-stock-master)  /bin/bash scripts/run_update_stock_master.sh || return $? ;;
+    send-advisory-emails) "$PY" execution/send_advisory_emails.py || return $? ;;
     *)
       echo "[run_timer_job] 알 수 없는 잡: $1" >&2
       return 64
