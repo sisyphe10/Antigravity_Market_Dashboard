@@ -36,7 +36,7 @@
   thead th, tbody td { white-space:nowrap; }
   input.cell { width:100%; box-sizing:border-box; text-align:center; padding:4px; border:none; background:transparent; border-radius:0; font-family:inherit; font-size:15px; font-weight:600; }
   input.meta { text-align:center; padding:4px 6px; border:none; background:transparent; border-radius:0; font-family:inherit; font-size:14px; }
-  input.reason { width:100%; box-sizing:border-box; padding:8px 6px 8px 14px; border:none; background:transparent; border-radius:0; font-family:inherit; font-size:14px; text-align:left; }
+  input.reason { width:100%; box-sizing:border-box; padding:10px 6px 10px 14px; border:none; background:transparent; border-radius:0; font-family:inherit; font-size:14px; text-align:left; }
   input.cell:focus, input.meta:focus, input.reason:focus { outline:2px solid #94a3b8; outline-offset:-2px; background:#fff; }
   .totals td { border-top:2px solid #374151; background:#f3f4f6; font-weight:700; padding:8px 4px; }
   .modal-ov { position:fixed; inset:0; background:rgba(0,0,0,0.4); display:none; align-items:center; justify-content:center; z-index:900; }
@@ -91,7 +91,7 @@ var ORDER_PORTFOLIOS = [
   { display:'한투 지속형',         jsonKey:'한투 지속형',        broker:'한투', product:'지속형',        general:true,  label:'한투 지속형' },
   { display:'NH 목표전환형 5호',   jsonKey:'NH 목표전환형 5호',  broker:'NH',   product:'목표전환형 5호', general:false, label:'NH 5호' },
   { display:'DB 목표전환형 6차',   jsonKey:'DB 목표전환형 6차',  broker:'DB',   product:'목표전환형 6차', general:false, label:'DB 6차' },
-  { display:'한투 성과모집형 1차', jsonKey:'한투 성과모집형 1차', broker:'한투', product:'성과모집형 1차', general:false, label:'한투 성과 1차' },
+  { display:'한투 성과모집형 1차', jsonKey:'한투 성과모집형 1차', broker:'한투', product:'성과모집형 1차', general:false, label:'한투 1차' },
 ];
 var GENERAL_DISPLAYS = ORDER_PORTFOLIOS.filter(function(p){return p.general;}).map(function(p){return p.display;});
 
@@ -127,13 +127,12 @@ function _mtxSetReasonGroup(code, group, reason){ var g=_mtxDirGroups(code); var
 function reasonTd(code, tempId){ var g=_mtxDirGroups(code); var hasR=g.red.length>0, hasB=g.blue.length>0;
   function inp(group,val,bg,ph,extra){ return '<input type="text" class="reason mtx-reason" data-code="'+escapeHtml(code)+'" data-group="'+group+'"'+(tempId?' data-tempid="'+tempId+'"':'')+' value="'+escapeHtml(val)+'" placeholder="'+ph+'" style="border:none;background:'+bg+';min-width:0;font-size:13px;'+(extra||'')+'">'; }
   if(hasR&&hasB){ var rv=_mtxGroupReason(code,'red'), bv=_mtxGroupReason(code,'blue');
-    return '<td style="min-width:260px;padding:0;"><div style="display:flex;">'
+    return '<td style="min-width:260px;padding:0;"><div style="display:flex;align-items:stretch;">'
       +inp('red', rv, rv.trim()?'transparent':'#fee2e2','','')
       +inp('blue', bv, bv.trim()?'transparent':'#fee2e2','','border-left:1px solid #d9d9d9;')
       +'</div></td>'; }
   var grp = hasR?'red':(hasB?'blue':'all'); var val=_mtxGroupReason(code,grp); var need=(hasR||hasB)&&!val.trim();
-  var bg = need?'#fee2e2':'transparent';
-  return '<td style="padding:0;">'+inp(grp,val,bg,'','')+'</td>'; }
+  return '<td style="padding:0;background:'+(need?'#fee2e2':'transparent')+';">'+inp(grp,val,'transparent','','')+'</td>'; }
 function _mtxColSum(pf){ var st=orderState[pf]||[], s=0; st.forEach(function(x){ s+=parseFloat(x.newWeight)||0; }); return s; }
 function _mtxCell(pf,code){ var idx=_mtxFindIdx(pf,code); if(idx<0) return {held:false,color:'#000',ot:'',newWeight:null};
   var prev=parseFloat(orderStocks[pf][idx].weight)||0, nw=parseFloat(orderState[pf][idx].newWeight)||0, ot=calcOrderType(prev,nw);
