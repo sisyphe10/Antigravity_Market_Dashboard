@@ -172,13 +172,16 @@ for name in SISYPHE_PAGES:
             fail("sisyphe/journal.html: topnav 블록 없음 — 교체 불가")
         s = s[:m.start()] + NEW_JOURNAL_NAV + s[m.end():]
     else:
-        # index/dashboard: Invest pill 제거 + ←AoE(맨 오른쪽은 CSS margin-auto) 주입
+        # index/dashboard: Invest pill 제거 + ←AoE 를 topnav-tabs 의 '마지막 자식'으로 주입.
+        # (첫 자식에 margin-left:auto 를 주면 뒤 pill 들까지 통째로 우측으로 밀리므로 반드시 마지막에 배치.)
+        # topnav-tabs 는 중첩 div 없이 <a> pill 만 담으므로 여는 태그 뒤 첫 </div> 가 닫는 태그다.
         s = s.replace(INVEST_PILL, "")
         if "aoe-back" not in s:
             m = tabs_pat.search(s)
             if not m:
                 fail("sisyphe/%s: topnav-tabs 앵커 없음" % name)
-            s = s[:m.end()] + AOE_BACK + s[m.end():]
+            close = s.index("</div>", m.end())
+            s = s[:close] + AOE_BACK + s[close:]
         if name == "index.html" and 'topnav-brand">Sisyphe' not in s:
             m = inner_pat.search(s)
             if not m:
@@ -217,8 +220,13 @@ for name in SISYPHE_PAGES:
     else:
         if INVEST_PILL in fin:
             fail("sisyphe/%s: Invest pill 제거 실패" % name)
-        if 'class="topnav-tab aoe-back"' not in fin:
-            fail("sisyphe/%s: ←AoE 주입 실패" % name)
+        # ←AoE 가 topnav-tabs 의 '마지막 자식'인지 마크업 순서로 검증(CSS 존재만으론 시각 결과 보장 못 함)
+        mt = tabs_pat.search(fin)
+        tc = fin.index("</div>", mt.end())
+        tabs_inner = fin[mt.end():tc]
+        last_a = tabs_inner.rfind("<a ")
+        if last_a < 0 or "aoe-back" not in tabs_inner[last_a:]:
+            fail("sisyphe/%s: ←AoE 가 topnav-tabs 마지막 자식 아님(순서 오류)" % name)
         if 'id="sisyphe-warm-bar"' not in fin:
             fail("sisyphe/%s: 웜톤 nav 바 주입 실패" % name)
         if name == "index.html" and 'topnav-brand">Sisyphe' not in fin:
