@@ -114,24 +114,42 @@ def decode_attachments(mail):
     return out
 
 
+def html_body(plain):
+    """plain 본문 → HTML. 텍스트는 그대로(줄바꿈 <br>), **서명 블록만 스타일**(정본 고정 라인).
+    김 태 식=볼드 검정 / 운용3본부/매니저=20% 희석 / 영문사명=50% 희석 / 나머지 검정."""
+    import html as _html
+    esc = _html.escape(plain)
+    esc = esc.replace('김 태 식 운용3본부/매니저',
+                      '<b>김 태 식</b> <span style="color:rgba(0,0,0,0.8)">운용3본부/매니저</span>')
+    esc = esc.replace('라이프자산운용 Life Asset Management, Inc.',
+                      '라이프자산운용 <span style="color:rgba(0,0,0,0.5)">Life Asset Management, Inc.</span>')
+    return ('<div style="font-family:\'맑은 고딕\',Malgun Gothic,sans-serif;font-size:14px;color:#000;line-height:1.6;">'
+            + esc.replace('\n', '<br>') + '</div>')
+
+
 def build_mime(mail, rcpts, from_hdr, attachments):
-    """MIME 조립. body/subject 는 요청(buildOrderEmailText 산출물) 그대로. attachments=[(filename, bytes)]."""
+    """MIME 조립: multipart/mixed(대체 plain+html + 첨부). body/subject 는 요청 그대로.
+    attachments=[(filename, bytes)]. HTML 은 서명만 스타일(html_body)."""
     from email.mime.multipart import MIMEMultipart
     from email.mime.text import MIMEText
     from email.mime.application import MIMEApplication
-    msg = MIMEMultipart()
-    msg['From'] = from_hdr
-    msg['To'] = ', '.join(rcpts['to'])
+    plain = mail.get('body', '')
+    outer = MIMEMultipart('mixed')
+    outer['From'] = from_hdr
+    outer['To'] = ', '.join(rcpts['to'])
     if rcpts.get('cc'):
-        msg['Cc'] = ', '.join(rcpts['cc'])
-    msg['Subject'] = mail['subject']
-    msg.attach(MIMEText(mail.get('body', ''), 'plain', 'utf-8'))
+        outer['Cc'] = ', '.join(rcpts['cc'])
+    outer['Subject'] = mail['subject']
+    alt = MIMEMultipart('alternative')
+    alt.attach(MIMEText(plain, 'plain', 'utf-8'))                 # 폴백
+    alt.attach(MIMEText(html_body(plain), 'html', 'utf-8'))       # 서명 스타일본
+    outer.attach(alt)
     for fname, raw in attachments:
         part = MIMEApplication(
             raw, _subtype='vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         part.add_header('Content-Disposition', 'attachment', filename=('utf-8', '', fname))
-        msg.attach(part)
-    return msg
+        outer.attach(part)
+    return outer
 
 
 def build_send_plan(mode, mails, config):
