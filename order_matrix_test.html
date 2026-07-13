@@ -30,6 +30,7 @@
   table { width:100%; border-collapse:collapse; font-size:14px; }
   thead th { padding:8px 4px; text-align:center; border-bottom:2px solid #e5e7eb; color:#444; }
   .grp-general { background:#eff6ff; }
+  .wcol { border-left:1px solid #ececec; }
   td { padding:6px 4px; text-align:center; }
   input.cell { width:58px; box-sizing:border-box; text-align:center; padding:4px; border:1px solid #d1d5db; border-radius:4px; font-family:inherit; font-size:15px; font-weight:600; }
   input.meta { text-align:center; padding:4px 6px; border:1px solid #d1d5db; border-radius:4px; font-family:inherit; font-size:14px; }
@@ -166,7 +167,7 @@ async function testLoadOrder(){
 function renderOrderMatrix(){
   var union=_mtxUnion(); var pfs=ORDER_PORTFOLIOS.map(function(p){return p.display;});
   function wcell(pf,code,isNew){ var cell=_mtxCell(pf,code); var val=cell.held?cell.newWeight:''; var gen=ORDER_PORTFOLIOS.filter(function(p){return p.display===pf;})[0].general;
-    return '<td class="'+(gen?'grp-general':'')+'"><input type="text" inputmode="decimal" class="cell mtx-w" data-code="'+escapeHtml(code)+'" data-pf="'+escapeHtml(pf)+'"'+(isNew?' data-newrow="1"':'')+' value="'+(val===''?'':val)+'" style="color:'+cell.color+';"></td>'; }
+    return '<td class="wcol '+(gen?'grp-general':'')+'"><input type="text" inputmode="decimal" class="cell mtx-w" data-code="'+escapeHtml(code)+'" data-pf="'+escapeHtml(pf)+'"'+(isNew?' data-newrow="1"':'')+' value="'+(val===''?'':val)+'" style="color:'+cell.color+';"></td>'; }
   var rows='', rank=0;
   union.order.forEach(function(code){ rank++; var m=union.meta[code]; var cells='';
     pfs.forEach(function(pf){ cells+=wcell(pf,code,false); });
@@ -182,9 +183,9 @@ function renderOrderMatrix(){
       +'<td><button class="del-btn mtx-del" data-tempid="'+r.tempId+'">×</button></td></tr>'; });
   var totals='';
   pfs.forEach(function(pf,ci){ var sum=_mtxColSum(pf); var col=(Math.abs(sum-100)<0.5)?'#16a34a':(sum>100?'#dc2626':'#222'); var gen=ORDER_PORTFOLIOS[ci].general;
-    totals+='<td class="'+(gen?'grp-general':'')+'" id="mtx-total-'+ci+'" style="color:'+col+';">'+sum.toFixed(0)+'%</td>'; });
+    totals+='<td class="wcol '+(gen?'grp-general':'')+'" id="mtx-total-'+ci+'" style="color:'+col+';">'+sum.toFixed(0)+'%</td>'; });
   var head='';
-  ORDER_PORTFOLIOS.forEach(function(p){ head+='<th class="'+(p.general?'grp-general':'')+'" title="'+escapeHtml(p.display)+'" style="min-width:64px;">'+escapeHtml(p.label)+'</th>'; });
+  ORDER_PORTFOLIOS.forEach(function(p){ head+='<th class="wcol '+(p.general?'grp-general':'')+'" title="'+escapeHtml(p.display)+'" style="min-width:64px;">'+escapeHtml(p.label)+'</th>'; });
   var html='<div class="toolbar">'
     +'<span class="sync-toggle'+(syncGeneral?' on':'')+'" id="syncToggle">일반형 동기화</span>'
     +'<div style="margin-left:auto;display:flex;gap:8px;">'
