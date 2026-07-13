@@ -4497,7 +4497,7 @@ def create_order_section():
                         var todayPending = pending && pending[todayStr];
                         if (todayPending) {
                             ORDER_PORTFOLIOS.forEach(function(p) {
-                                var entry = todayPending[p.display];
+                                var entry = todayPending[p.display] || (p.jsonKey && p.jsonKey !== p.display ? todayPending[p.jsonKey] : null);  // 구버전 결합 키 저장본 폴백 (2026-07-13 매트릭스 전환 당일 하위호환)
                                 if (!entry || !Array.isArray(entry.stocks)) return;
                                 // 서버 저장 상태: finalizedAt 있으면 '최종 저장됨', 없으면 '임시 저장됨'.
                                 orderCardServer[p.display] = { hasPending: true, finalizedAt: entry.finalizedAt || null, savedAt: entry.savedAt || null };
