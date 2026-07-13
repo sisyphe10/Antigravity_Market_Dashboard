@@ -4749,9 +4749,6 @@ def create_order_section():
                     + '<div style="padding:10px 12px;">' + _advHtmlBody(m.body) + '</div>'
                     + '</div>';
             }).join('');
-            var notice = isComp
-                ? '기본 <b>테스트 모드(본인 kts@investlife.com 단독)</b>. [컴플용 발송]은 발송 <b>요청</b>만 기록합니다.'
-                : '기본 <b>테스트 모드(본인 kts@investlife.com 단독)</b>. ★<b>증권사 발송은 오늘 컴플라이언스 발송 후에만 열립니다</b>(모달 열람·미리보기는 언제나 가능). 버튼은 발송 <b>요청</b>만 기록합니다.';
             var footerBtn = isComp
                 ? '<button id="advSendCompliance" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 18px;border:none;background:#d97706;color:#fff;border-radius:8px;cursor:pointer;">컴플용 발송</button>'
                 : '<button id="advSendBrokers"' + (complianceDone ? '' : ' disabled title="컴플 발송 후 가능"') + ' style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 18px;border:none;background:' + (complianceDone ? '#16a34a' : '#9ca3af') + ';color:#fff;border-radius:8px;cursor:' + (complianceDone ? 'pointer' : 'not-allowed') + ';">증권사용 발송</button>';
@@ -4761,7 +4758,6 @@ def create_order_section():
             overlay.innerHTML = '<div style="background:#fff;border-radius:12px;max-width:780px;width:100%;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.25);">'
                 + '<div style="padding:18px 22px;border-bottom:1px solid #e5e7eb;">'
                 + '<h3 style="margin:0;font-size:17px;color:#111;">' + (isComp ? '컴플라이언스 메일' : '증권사 메일') + ' — 미리보기 (' + mails.length + '통)</h3>'
-                + '<p style="margin:8px 0 0;font-size:13px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 10px;">실제 발송 수신자·모드는 <b>서버 설정</b>이 결정합니다. ' + notice + '</p>'
                 + '</div>'
                 + '<div style="padding:16px 22px;overflow-y:auto;flex:1;">' + cards + '</div>'
                 + '<div style="padding:14px 22px;border-top:1px solid #e5e7eb;display:flex;gap:10px;justify-content:flex-end;align-items:center;">'
