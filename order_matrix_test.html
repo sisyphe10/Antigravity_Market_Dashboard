@@ -56,7 +56,6 @@
   <div class="wrap">
     <div class="testbar">🧪 테스트 페이지 — 실제 주문에 반영되지 않음<span class="sub2">저장 버튼은 미리보기 전용입니다 · pending_orders.json·실주문 데이터에 영향 없음</span></div>
     <h1>주문 매트릭스 (7컬럼 개별 포트)</h1>
-    <div class="sub">행=전 포트 종목 합집합 · 열=7개 개별 포트 · 셀=변경후 입력(변경전 미표시, 변경 시 색만) · 사유=행당 1칸</div>
     <div id="orderContent"><div style="padding:40px;text-align:center;color:#888;">로딩 중...</div></div>
   </div>
 </div>
@@ -172,10 +171,12 @@ function renderOrderMatrix(){
     +'<button class="btn red" id="btnCancel">전체 취소 (테스트)</button>'
     +'<button class="btn" id="btnSave">임시 저장 (테스트)</button>'
     +'<button class="btn green" id="btnFinal">최종 저장 (테스트)</button>'
-    +'<button class="btn" id="btnAdd">+ 종목 추가</button></div></div>'
+    +'</div></div>'
     +'<div style="overflow-x:auto;"><table><thead><tr>'
     +'<th style="width:34px;">#</th><th>업종</th><th style="width:64px;">코드</th><th>종목명</th>'+head+'<th>추천사유</th><th style="width:34px;"></th>'
-    +'</tr></thead><tbody>'+rows+'<tr class="totals"><td colspan="4" style="text-align:right;color:#444;">합계</td>'+totals+'<td></td><td></td></tr></tbody></table></div>';
+    +'</tr></thead><tbody>'+rows
+    +'<tr class="addrow"><td colspan="'+(4+ORDER_PORTFOLIOS.length+2)+'" style="text-align:left;padding:8px 4px;"><button class="btn" id="btnAdd" style="border-style:dashed;">+ 종목 추가</button></td></tr>'
+    +'<tr class="totals"><td colspan="4" style="text-align:right;color:#444;">합계</td>'+totals+'<td></td><td></td></tr></tbody></table></div>';
   document.getElementById('orderContent').innerHTML=html;
   bindHandlers();
 }
