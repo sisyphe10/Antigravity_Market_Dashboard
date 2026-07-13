@@ -4637,11 +4637,12 @@ def create_order_section():
         function _advYMD(d) { return '' + d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0'); }
         function _advBroker(key) { return { compliance: null, samsung: '삼성', nh: 'NH', db: 'DB', kis: '한투' }[key]; }
         // 미리보기 서명 스타일 (폴러 html_body 와 동일 규칙; <pre white-space:pre-wrap> 안이라 줄바꿈은 pre 가 처리)
+        var ADVISORY_SIG_HTML = '<p style="margin:0;"><b>김 태 식 <span style="color:#404040;">운용3본부/매니저</span></b></p><p style="margin:0;"><b>라이프자산운용 <span style="color:#858585;">Life Asset Management, Inc.</span></b><br>서울 영등포구 국제금융로 10, Two IFC 14F</p><p style="margin:0;">02-6105-6836&nbsp;&nbsp;|&nbsp;&nbsp;010-9932-0334&nbsp;&nbsp;|&nbsp;&nbsp;<a href="mailto:kts@investlife.com" style="color:#163fc7;text-decoration:underline;">kts@investlife.com</a></p>';
         function _advHtmlBody(body) {
-            var esc = escapeHtml(body);
-            esc = esc.replace('김 태 식 운용3본부/매니저', '<b>김 태 식</b> <span style="color:rgba(0,0,0,0.8)">운용3본부/매니저</span>');
-            esc = esc.replace('라이프자산운용 Life Asset Management, Inc.', '라이프자산운용 <span style="color:rgba(0,0,0,0.5)">Life Asset Management, Inc.</span>');
-            return esc;
+            var mi = body.indexOf('김 태 식 운용3본부/매니저');
+            var msg = mi >= 0 ? body.slice(0, mi) : body;
+            var esc = escapeHtml(msg).split(String.fromCharCode(10)).join('<br>');
+            return '<div style="font-family:굴림,Gulim,sans-serif;font-size:12px;line-height:1.6;color:#000;">' + esc + (mi >= 0 ? ADVISORY_SIG_HTML : '') + '</div>';
         }
 
         // 브로커별 자문지 첨부 생성 (해당 증권사 컬럼들의 templates → downloadOrderExcel base64)
@@ -4745,7 +4746,7 @@ def create_order_section():
                     + '</div>'
                     + '<div style="padding:10px 12px;font-size:13px;color:#374151;border-bottom:1px solid #f0f0f0;"><b>제목</b> ' + escapeHtml(m.subject) + '</div>'
                     + '<div style="padding:6px 12px;font-size:12px;color:#6b7280;">첨부 ' + (attNames.length ? escapeHtml(attNames.join(', ')) : '없음') + '</div>'
-                    + '<pre style="white-space:pre-wrap;font-family:inherit;font-size:13px;color:#000;margin:0;padding:10px 12px;line-height:1.55;">' + _advHtmlBody(m.body) + '</pre>'
+                    + '<div style="padding:10px 12px;">' + _advHtmlBody(m.body) + '</div>'
                     + '</div>';
             }).join('');
             var notice = isComp
