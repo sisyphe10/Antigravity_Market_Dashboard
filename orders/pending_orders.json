@@ -113,7 +113,7 @@
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-13T01:47:07.918Z"
+      "savedAt": "2026-07-13T01:50:09.439Z"
     },
     "한투 지속형": {
       "targets": [
@@ -212,7 +212,7 @@
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-13T01:47:07.918Z"
+      "savedAt": "2026-07-13T01:50:09.439Z"
     },
     "NH 목표전환형 5호": {
       "targets": [
@@ -226,7 +226,7 @@
           "sector": "반도체",
           "code": "005930",
           "name": "삼성전자",
-          "weight": 15,
+          "weight": 20,
           "baseWeight": 30,
           "reason": ""
         },
@@ -234,7 +234,7 @@
           "sector": "반도체",
           "code": "000660",
           "name": "SK하이닉스",
-          "weight": 15,
+          "weight": 20,
           "baseWeight": 30,
           "reason": ""
         },
@@ -287,7 +287,7 @@
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-13T01:47:07.918Z"
+      "savedAt": "2026-07-13T01:50:09.439Z"
     },
     "DB 목표전환형 6차": {
       "targets": [
@@ -301,7 +301,7 @@
           "sector": "반도체",
           "code": "000660",
           "name": "SK하이닉스",
-          "weight": 15,
+          "weight": 20,
           "baseWeight": 30,
           "reason": ""
         },
@@ -309,7 +309,7 @@
           "sector": "반도체",
           "code": "005930",
           "name": "삼성전자",
-          "weight": 15,
+          "weight": 20,
           "baseWeight": 30,
           "reason": ""
         },
@@ -362,7 +362,7 @@
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-13T01:47:07.918Z"
+      "savedAt": "2026-07-13T01:50:09.439Z"
     },
     "한투 성과모집형 1차": {
       "targets": [
@@ -376,7 +376,7 @@
           "sector": "반도체",
           "code": "005930",
           "name": "삼성전자",
-          "weight": 15,
+          "weight": 20,
           "baseWeight": 30,
           "reason": ""
         },
@@ -384,7 +384,7 @@
           "sector": "반도체",
           "code": "000660",
           "name": "SK하이닉스",
-          "weight": 15,
+          "weight": 20,
           "baseWeight": 30,
           "reason": ""
         },
@@ -397,7 +397,7 @@
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-13T01:47:07.918Z"
+      "savedAt": "2026-07-13T01:50:09.439Z"
     }
   }
 }
