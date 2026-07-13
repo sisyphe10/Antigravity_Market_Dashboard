@@ -4323,16 +4323,17 @@ def create_order_section():
     """
     import json as _json
     # 단일 출처 레지스트리 주입 (execution/wrap_config.py)
-    _order_pf = _json.dumps(wrap_config.order_portfolios(), ensure_ascii=False)
+    _order_pf = _json.dumps(wrap_config.order_matrix_columns(), ensure_ascii=False)
     _broker_order = _json.dumps(wrap_config.broker_order_map(), ensure_ascii=False)
     _broker_color = _json.dumps(wrap_config.broker_color_map(), ensure_ascii=False)
     _broker_codes = _json.dumps(list(wrap_config.broker_order_map().keys()), ensure_ascii=False)
     _target_tabs = _json.dumps(wrap_config.target_tabs(), ensure_ascii=False)
     _standalone_general = _json.dumps(wrap_config.standalone_general_tabs(), ensure_ascii=False)
-    _general = _json.dumps(wrap_config.general_combined_name(), ensure_ascii=False)
+    _general = _json.dumps('삼성 트루밸류', ensure_ascii=False)
     _email_pair = _json.dumps(wrap_config.email_pair_map(), ensure_ascii=False)
     _broker_messenger = _json.dumps(wrap_config.broker_messenger_map(), ensure_ascii=False)
     _html = """
+        <style>#orderContent table{width:100%;border-collapse:collapse;font-size:14px;}#orderContent thead th{padding:8px 12px;text-align:center;border-bottom:2px solid #e5e7eb;color:#444;background:#f3f4f6;white-space:nowrap;}#orderContent thead th,#orderContent tbody td{border:1px solid #d9d9d9;white-space:nowrap;}#orderContent tbody td{padding:6px 12px;text-align:center;}#orderContent .grp-general{background:transparent;}#orderContent input.cell{width:100%;box-sizing:border-box;text-align:center;padding:4px;border:none;background:transparent;border-radius:0;font-family:inherit;font-size:15px;font-weight:600;}#orderContent input.meta{text-align:center;padding:4px 6px;border:none;background:transparent;border-radius:0;font-family:inherit;font-size:14px;}#orderContent input.reason{width:100%;box-sizing:border-box;padding:10px 6px 10px 14px;border:none;background:transparent;border-radius:0;font-family:inherit;font-size:14px;text-align:left;}#orderContent input.cell:focus,#orderContent input.meta:focus,#orderContent input.reason:focus{outline:2px solid #94a3b8;outline-offset:-2px;background:#fff;}#orderContent .totals td{border-top:2px solid #374151;background:#f3f4f6;font-weight:700;padding:8px 4px;}#orderContent .cashrow td{background:#eff6ff;font-weight:700;padding:8px 4px;}#orderContent .toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;}#orderContent .sync-toggle{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;cursor:pointer;user-select:none;padding:6px 12px;border:1.5px solid #d1d5db;border-radius:8px;background:#fff;color:#000;}#orderContent .sync-toggle.on{border-color:#2563eb;background:#2563eb;color:#fff;}#orderContent .btn{font-family:inherit;font-size:14px;font-weight:600;padding:6px 14px;border-radius:8px;cursor:pointer;border:1px solid #d1d5db;background:#f3f4f6;color:#222;}#orderContent .btn.red{background:#dc2626;color:#fff;border:none;}#orderContent .btn.green{background:#16a34a;color:#fff;border:none;}#orderContent .btn.blue{background:#2563eb;color:#fff;border:none;}#orderContent .del-btn{background:none;border:none;cursor:pointer;color:#dc2626;font-size:20px;line-height:1;padding:0 6px;font-weight:bold;}#orderContent .addrow td{background:#fff;}</style>
         <div id="orderTabs" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;"></div>
         <div id="orderContent"><div style="text-align:center;color:#888;padding:40px;">로딩 중...</div></div>
         <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
@@ -4431,7 +4432,7 @@ def create_order_section():
         // 배지만 재그리기 (추천사유/신규종목 입력 시 전체 재렌더 없이 미저장 변경 즉시 반영).
         function refreshOrderSaveBadge() {
             var slot = document.getElementById('orderSaveBadgeSlot');
-            if (slot && orderActiveTab && orderActiveTab !== 'Email') slot.innerHTML = buildOrderSaveBadge(orderActiveTab);
+            if (slot && orderActiveTab && orderActiveTab !== 'Email') slot.innerHTML = buildOrderSaveBadgeGlobal();
         }
 
         // pending_orders.json 취득 — Contents API 우선(커밋 즉시 반영, Pages 빌드지연 우회)
@@ -4557,7 +4558,7 @@ def create_order_section():
                 orderLoadSessionAction();
                 ORDER_PORTFOLIOS.forEach(function(p) { setOrderBaseline(p.display); });
                 renderOrderTabs();
-                switchOrderTab(ORDER_PORTFOLIOS[0].display);
+                switchOrderTab('주문');
             } catch(e) {
                 document.getElementById('orderContent').innerHTML = '<div style="color:#dc2626;padding:40px;">데이터 로드 실패: ' + e.message + '</div>';
                 console.error('loadOrder error:', e);
@@ -4597,10 +4598,7 @@ def create_order_section():
 
         function renderOrderTabs() {
             var html = '';
-            ORDER_PORTFOLIOS.forEach(function(p) {
-                html += '<button class="order-pf-btn" data-pf="' + p.display + '" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 16px;background:#f3f4f6;color:#444;border:none;border-radius:8px;cursor:pointer;">' + p.display + '</button>';
-            });
-            // Email 탭 (모든 이메일 텍스트 모음)
+            html += '<button class="order-pf-btn" data-pf="주문" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 16px;background:#f3f4f6;color:#444;border:none;border-radius:8px;cursor:pointer;">주문</button>';
             html += '<button class="order-pf-btn" data-pf="Email" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 16px;background:#f3f4f6;color:#444;border:none;border-radius:8px;cursor:pointer;">Email</button>';
             document.getElementById('orderTabs').innerHTML = html;
             document.querySelectorAll('.order-pf-btn').forEach(function(b) {
@@ -4608,18 +4606,14 @@ def create_order_section():
             });
         }
 
-        function switchOrderTab(pfName) {
-            orderActiveTab = pfName;
+        function switchOrderTab(which) {
+            orderActiveTab = which;
             document.querySelectorAll('.order-pf-btn').forEach(function(b) {
-                var active = b.dataset.pf === pfName;
+                var active = b.dataset.pf === which;
                 b.style.background = active ? '#222' : '#f3f4f6';
                 b.style.color = active ? '#fff' : '#444';
             });
-            if (pfName === 'Email') {
-                renderEmailPanel();
-            } else {
-                renderOrderPanel(pfName);
-            }
+            if (which === 'Email') { renderEmailPanel(); } else { renderOrderMatrix(); }
         }
 
         function buildEmailBox(title, text, bgColor, borderColor, titleColor, btnBg) {
@@ -4991,375 +4985,147 @@ def create_order_section():
             });
         }
 
-        function renderOrderPanel(pfName) {
-            syncReasonFromOtherTabs(pfName);
-            var stocks = orderStocks[pfName] || [];
-            var st = orderState[pfName] || [];
-            var oldSum = stocks.reduce(function(a, s) { return a + s.weight; }, 0);
-            var newSum = st.reduce(function(a, x) { return a + (parseFloat(x.newWeight) || 0); }, 0);
-            var sumColor = (Math.abs(newSum - oldSum) < 0.01) ? '#16a34a' : (newSum > 100 ? '#dc2626' : '#222');
-            var rows = '';
-            stocks.forEach(function(s, i) {
-                var orderState_i = st[i];
-                var ot = calcOrderType(s.weight, parseFloat(orderState_i.newWeight) || 0);
-                var sectorCell = s.isNew
-                    ? '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="sector" value="' + (s.sector || '').replace(/"/g, '&quot;') + '" placeholder="업종" style="width:100px;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;color:#000;"></td>'
-                    : '<td style="text-align:center;padding:8px;">' + s.sector + '</td>';
-                var codeCell = s.isNew
-                    ? '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="code" value="' + s.code + '" placeholder="000000" maxlength="6" style="width:70px;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;color:#000;"></td>'
-                    : '<td style="text-align:center;padding:8px;">' + s.code + '</td>';
-                var nameCell = s.isNew
-                    ? '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="name" value="' + (s.name || '').replace(/"/g, '&quot;') + '" placeholder="종목명" style="width:120px;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;font-weight:600;color:#000;"></td>'
-                    : '<td style="text-align:center;font-weight:600;padding:8px;">' + s.name + '</td>';
-                // 주문구분이 유지가 아닌데 추천사유가 비어있으면 입력란을 밝은 붉은색으로 강조
-                var reasonEmpty = !(orderState_i.reason || '').toString().trim();
-                var reasonNeeded = (ot !== '유지') && reasonEmpty;
-                var reasonBg = reasonNeeded ? '#fee2e2' : '#fff';
-                var reasonBorder = reasonNeeded ? '#fca5a5' : '#d1d5db';
-                // 삭제 버튼: 사용자가 Order 탭에서 추가한 종목(isNew=true)만 표시.
-                // portfolio_data.json 출처 종목은 변경후=0(전량 편출)으로 표현하므로 행 삭제 불필요.
-                var deleteCell = s.isNew
-                    ? '<td style="text-align:center;padding:8px;"><button class="order-del-btn" data-idx="' + i + '" title="종목 삭제" style="background:none;border:none;cursor:pointer;color:#dc2626;font-size:20px;line-height:1;padding:0 6px;font-weight:bold;">×</button></td>'
-                    : '<td style="padding:8px;"></td>';
-                // 주문구분 배지: 자문지 엑셀 H열과 동일 색상 (편입/확대=#FF0000, 축소/편출=#0070C0).
-                // 셀 자체 배경 대신 inline-block span을 써서 전체취소·저장·최종저장 버튼과 동일한 라운드(8px).
-                var otBg = '';
-                if (ot === '신규 편입' || ot === '비중 확대') otBg = '#FF0000';
-                else if (ot === '비중 축소' || ot === '전량 편출') otBg = '#0070C0';
-                var otInner = otBg
-                    ? '<span style="display:inline-block;padding:4px 12px;background:' + otBg + ';color:#000;border-radius:8px;white-space:nowrap;">' + ot + '</span>'
-                    : ot;
-                rows += '<tr>'
-                    + '<td style="text-align:center;padding:8px;">' + (i + 1) + '</td>'
-                    + sectorCell + codeCell + nameCell
-                    + '<td style="text-align:center;padding:8px;">' + s.weight + '</td>'
-                    + '<td style="text-align:center;padding:8px;"><input type="text" inputmode="decimal" data-idx="' + i + '" data-field="newWeight" value="' + orderState_i.newWeight + '" style="width:65px;box-sizing:border-box;text-align:center;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;font-family:inherit;font-size:15px;color:#000;"></td>'
-                    + '<td style="text-align:center;padding:8px;">' + otInner + '</td>'
-                    + '<td style="text-align:center;padding:8px;"><input type="text" data-idx="' + i + '" data-field="reason" value="' + (orderState_i.reason || '').replace(/"/g, '&quot;') + '" style="width:100%;box-sizing:border-box;padding:4px 6px;border:1px solid ' + reasonBorder + ';background:' + reasonBg + ';border-radius:4px;font-family:inherit;font-size:15px;text-align:center;color:#000;"></td>'
-                    + deleteCell
-                    + '</tr>';
-            });
-            // 합계 행: 변경전/변경후 SUM, 주문구분 자리에 변경전·후 비중 차이 (양수 빨강, 음수 파랑)
-            var weightDiff = newSum - oldSum;
-            var diffColor, diffSign;
-            if (weightDiff > 0) { diffColor = '#dc2626'; diffSign = '+'; }
-            else if (weightDiff < 0) { diffColor = '#1f4cb8'; diffSign = ''; }
-            else { diffColor = '#444'; diffSign = ''; }
-            var totalsRow = '<tr style="border-top:2px solid #374151;background:#f9fafb;font-weight:700;">'
-                + '<td colspan="4" style="padding:8px;text-align:right;color:#444;">합계</td>'
-                + '<td style="padding:8px;text-align:center;">' + oldSum.toFixed(0) + '%</td>'
-                + '<td style="padding:8px;text-align:center;color:' + sumColor + ';">' + newSum.toFixed(0) + '%</td>'
-                + '<td style="padding:8px;text-align:center;color:' + diffColor + ';font-weight:700;">' + diffSign + weightDiff.toFixed(0) + '%</td>'
-                + '<td></td>'
-                + '<td></td>'
-                + '</tr>';
-            var html = '<div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">'
-                + '<div style="display:flex;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">'
-                + '<h3 style="margin:0;font-size:18px;">' + pfName + '</h3>'
-                + '<span id="orderSaveBadgeSlot" style="display:inline-flex;">' + buildOrderSaveBadge(pfName) + '</span>'
-                + '<div style="margin-left:auto;display:flex;gap:8px;">'
-                + '<button id="orderCancelAllBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">전체 취소</button>'
-                + '<button id="orderSaveBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#f3f4f6;color:#222;border:1px solid #d1d5db;border-radius:8px;cursor:pointer;">임시 저장</button>'
-                + '<button id="orderFinalizeBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;">최종 저장</button>'
-                + '<button id="orderAdditionalBtn" style="font-family:inherit;font-size:15px;font-weight:600;padding:6px 14px;background:#2563eb;color:#fff;border:none;border-radius:8px;cursor:pointer;">추가 주문</button>'
-                + '</div>'
-                + '</div>'
-                + '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:15px;">'
-                + '<thead><tr style="border-bottom:2px solid #e5e7eb;color:#444;">'
-                + '<th style="padding:8px;text-align:center;width:40px;">순위</th>'
-                + '<th style="padding:8px;text-align:center;">업종</th>'
-                + '<th style="padding:8px;text-align:center;width:70px;">코드</th>'
-                + '<th style="padding:8px;text-align:center;">종목명</th>'
-                + '<th style="padding:8px;text-align:center;width:70px;">변경전</th>'
-                + '<th style="padding:8px;text-align:center;width:90px;">변경후</th>'
-                + '<th style="padding:8px;text-align:center;width:100px;">주문구분</th>'
-                + '<th style="padding:8px;text-align:center;">추천사유</th>'
-                + '<th style="padding:8px;text-align:center;width:40px;"></th>'
-                + '</tr></thead><tbody>' + rows + totalsRow + '</tbody></table></div>'
-                + '<div style="margin-top:12px;text-align:right;"><button id="orderAddStockBtn" style="font-family:inherit;font-size:14px;font-weight:600;padding:6px 14px;background:#f3f4f6;color:#222;border:1px solid #d1d5db;border-radius:8px;cursor:pointer;">+ 종목 추가</button></div>'
-                + '</div>';
-            // 재렌더 직전 현재 포커스(행 idx·필드·커서)를 스냅샷 → 재렌더 후 복원.
-            // 신규종목 blur(autofill)·변경후 input이 패널을 통째로 재렌더하므로, 이 보존이 없으면
-            // Tab/붙여넣기 목적지 input이 파괴돼 포커스가 body로 떨어진다(=Tab 포커스 소실 근본원인).
-            var _prevFocus = _snapshotOrderFocus();
-            document.getElementById('orderContent').innerHTML = html;
-            document.querySelectorAll('#orderContent input').forEach(function(el) {
-                el.addEventListener('input', function(e) {
-                    var idx = parseInt(e.target.dataset.idx);
-                    var field = e.target.dataset.field;
-                    var raw = e.target.value;
-                    if (field === 'newWeight') {
-                        orderState[orderActiveTab][idx][field] = parseFloat(raw) || 0;
-                        renderOrderPanel(orderActiveTab);
-                        var refocus = document.querySelector('#orderContent input[data-idx="' + idx + '"][data-field="newWeight"]');
-                        if (refocus) { refocus.focus(); refocus.setSelectionRange(refocus.value.length, refocus.value.length); }
-                    } else if (field === 'reason') {
-                        orderState[orderActiveTab][idx][field] = raw;
-                        // 같은 종목 코드 + 같은 주문구분일 때만 다른 탭의 추천사유 동기화
-                        var curStock = orderStocks[orderActiveTab][idx];
-                        var key = (curStock && curStock.code != null) ? String(curStock.code).trim() : '';
-                        var curType = calcOrderType(parseFloat(curStock.weight) || 0,
-                                                    parseFloat(orderState[orderActiveTab][idx].newWeight) || 0);
-                        if (key) {
-                            Object.keys(orderStocks).forEach(function(tab) {
-                                if (tab === orderActiveTab) return;
-                                orderStocks[tab].forEach(function(s, i) {
-                                    if (String(s.code || '').trim() !== key) return;
-                                    var otherType = calcOrderType(parseFloat(s.weight) || 0,
-                                                                  parseFloat(orderState[tab][i].newWeight) || 0);
-                                    if (otherType === curType) {
-                                        orderState[tab][i].reason = raw;
-                                    }
-                                });
-                            });
-                        }
-                    } else if (field === 'code' || field === 'name' || field === 'sector') {
-                        // 신규 종목 필드 (orderStocks에 직접 반영)
-                        orderStocks[orderActiveTab][idx][field] = raw;
-                    }
-                    refreshOrderSaveBadge();  // 저장 상태 배지 실시간 갱신 (미저장 변경 감지)
-                });
-            });
-            // 신규 종목 종목명/코드 blur → 네이버 자동완성으로 나머지 + 업종 자동
-            document.querySelectorAll('#orderContent input[data-field="name"]').forEach(function(el) {
-                el.addEventListener('blur', function(e) {
-                    var idx = parseInt(e.target.dataset.idx);
-                    if (!isNaN(idx)) autoFillStockFromName(idx);
-                });
-            });
-            document.querySelectorAll('#orderContent input[data-field="code"]').forEach(function(el) {
-                el.addEventListener('blur', function(e) {
-                    var idx = parseInt(e.target.dataset.idx);
-                    if (!isNaN(idx)) autoFillStockFromCode(idx);
-                });
-            });
-            // Tab 이동 흐름(종목명→변경후→추천사유→다음 행) + 추천사유 멀티라인 붙여넣기 분배
-            document.querySelectorAll('#orderContent tbody input[data-field]').forEach(function(el) {
-                el.addEventListener('keydown', handleOrderTabKey);
-            });
-            document.querySelectorAll('#orderContent input[data-field="reason"]').forEach(function(el) {
-                el.addEventListener('paste', handleReasonPaste);
-            });
-            var cancelBtn = document.getElementById('orderCancelAllBtn');
-            if (cancelBtn) cancelBtn.addEventListener('click', function() { cancelAllPendingOrders(); });
-            var saveBtn = document.getElementById('orderSaveBtn');
-            if (saveBtn) saveBtn.addEventListener('click', function() { saveAllPendingOrders(false); });
-            var finalizeBtn = document.getElementById('orderFinalizeBtn');
-            if (finalizeBtn) finalizeBtn.addEventListener('click', function() { finalizeOrder(orderActiveTab); });
-            var additionalBtn = document.getElementById('orderAdditionalBtn');
-            if (additionalBtn) additionalBtn.addEventListener('click', function() { additionalOrder(); });
-            var addBtn = document.getElementById('orderAddStockBtn');
-            if (addBtn) addBtn.addEventListener('click', function() { addOrderStock(orderActiveTab); });
-            // 종목 삭제 (사용자가 추가한 isNew 종목만 가능)
-            document.querySelectorAll('#orderContent .order-del-btn').forEach(function(btn) {
-                btn.addEventListener('click', function(e) {
-                    var idx = parseInt(e.currentTarget.dataset.idx);
-                    if (isNaN(idx)) return;
-                    orderStocks[orderActiveTab].splice(idx, 1);
-                    orderState[orderActiveTab].splice(idx, 1);
-                    renderOrderPanel(orderActiveTab);
-                });
-            });
-            function bindCopy(btnSel, preSel, defaultBg) {
-                document.querySelectorAll('#orderContent ' + btnSel).forEach(function(btn) {
-                    btn.addEventListener('click', function() {
-                        var section = btn.parentElement.parentElement;
-                        var pre = section.querySelector(preSel);
-                        if (!pre) return;
-                        navigator.clipboard.writeText(pre.textContent).then(function() {
-                            var original = btn.textContent;
-                            btn.textContent = '복사됨';
-                            btn.style.background = '#16a34a';
-                            setTimeout(function() {
-                                btn.textContent = original;
-                                btn.style.background = defaultBg;
-                            }, 1500);
-                        }).catch(function(err) {
-                            alert('복사 실패: ' + err.message);
-                        });
-                    });
-                });
-            }
-            bindCopy('.email-copy-btn', '.email-text', '#374151');
-            bindCopy('.compliance-copy-btn', '.compliance-text', '#d97706');
-            bindCopy('.nateon-copy-btn', '.nateon-text', '#4f46e5');
-            _restoreOrderFocus(_prevFocus);
+        // ── 통합 주문 매트릭스 (2026-07-13, 정본=order_matrix_test.html 이식) ──
+        // per-portfolio orderStocks/orderState 위의 VIEW. 저장/복원/finalize/email/download 무수정 재사용.
+        var GENERAL_DISPLAYS = ORDER_PORTFOLIOS.filter(function(p){return p.general;}).map(function(p){return p.display;});
+        var matrixNewRows = [], _mtxSeq = 0, syncGeneral = true;
+
+        function _mtxFindIdx(pf,code){ var a=orderStocks[pf]||[], c=String(code||'').trim(); for(var i=0;i<a.length;i++){ if(String(a[i].code||'').trim()===c) return i; } return -1; }
+        function _mtxNewRowCodes(){ var s={}; matrixNewRows.forEach(function(r){ var c=String(r.code||'').trim(); if(c) s[c]=true; }); return s; }
+        function _mtxUnion(){ var owned=_mtxNewRowCodes(), order=[], meta={};
+          ORDER_PORTFOLIOS.forEach(function(p){ (orderStocks[p.display]||[]).forEach(function(s){ var c=String(s.code||'').trim(); if(!c||owned[c]) return;
+            if(!meta[c]){ meta[c]={code:c,name:s.name||'',sector:s.sector||''}; order.push(c); } else { if(!meta[c].name&&s.name)meta[c].name=s.name; if(!meta[c].sector&&s.sector)meta[c].sector=s.sector; } }); });
+          return {order:order,meta:meta}; }
+        function _mtxReason(code){ var c=String(code||'').trim();
+          for(var pi=0;pi<ORDER_PORTFOLIOS.length;pi++){ var pf=ORDER_PORTFOLIOS[pi].display, a=orderStocks[pf]||[], st=orderState[pf]||[];
+            for(var i=0;i<a.length;i++){ if(String(a[i].code||'').trim()===c){ var r=(st[i]&&st[i].reason||'').toString(); if(r.trim()) return r; } } }
+          var nr=matrixNewRows.filter(function(r){return String(r.code||'').trim()===c;})[0]; return nr?(nr.reason||''):''; }
+        function _mtxDirGroups(code){ var red=[], blue=[]; ORDER_PORTFOLIOS.forEach(function(p){ var c=_mtxCell(p.display,code); if(!c.held) return; if(c.ot==='신규 편입'||c.ot==='비중 확대') red.push(p.display); else if(c.ot==='비중 축소'||c.ot==='전량 편출') blue.push(p.display); }); return {red:red, blue:blue}; }
+        function _mtxGroupReason(code, group){ var g=_mtxDirGroups(code); var pfs = group==='red'?g.red:(group==='blue'?g.blue:ORDER_PORTFOLIOS.map(function(p){return p.display;}));
+          for(var i=0;i<pfs.length;i++){ var idx=_mtxFindIdx(pfs[i],code); if(idx>=0){ var r=(orderState[pfs[i]][idx].reason||'').toString(); if(r.trim()) return r; } }
+          var nr=matrixNewRows.filter(function(r){return String(r.code||'').trim()===String(code).trim();})[0];
+          if(nr){ return (group==='all'?nr.reason:(nr['reason_'+group]||nr.reason))||''; } return ''; }
+        function _mtxSetReasonGroup(code, group, reason){ var g=_mtxDirGroups(code); var pfs = group==='red'?g.red:(group==='blue'?g.blue:ORDER_PORTFOLIOS.map(function(p){return p.display;}));
+          pfs.forEach(function(pf){ var idx=_mtxFindIdx(pf,code); if(idx>=0&&orderState[pf][idx]) orderState[pf][idx].reason=reason; });
+          matrixNewRows.forEach(function(r){ if(String(r.code||'').trim()===String(code).trim()){ if(group==='all') r.reason=reason; else r['reason_'+group]=reason; } }); }
+        function reasonTd(code, tempId){ var g=_mtxDirGroups(code); var hasR=g.red.length>0, hasB=g.blue.length>0;
+          function inp(group,val,bg,ph,extra){ return '<input type="text" class="reason mtx-reason" data-code="'+escapeHtml(code)+'" data-group="'+group+'"'+(tempId?' data-tempid="'+tempId+'"':'')+' value="'+escapeHtml(val)+'" placeholder="'+ph+'" style="border:none;background:'+bg+';min-width:0;font-size:13px;'+(extra||'')+'">'; }
+          if(hasR&&hasB){ var rv=_mtxGroupReason(code,'red'), bv=_mtxGroupReason(code,'blue');
+            var needAny = !rv.trim() || !bv.trim();
+            return '<td style="min-width:260px;padding:0;'+(needAny?'border:2px solid #fca5a5;':'')+'"><div style="display:flex;align-items:stretch;">'
+              +inp('red', rv, rv.trim()?'transparent':'#fee2e2','','')
+              +inp('blue', bv, bv.trim()?'transparent':'#fee2e2','','border-left:1px solid #d9d9d9;')
+              +'</div></td>'; }
+          var grp = hasR?'red':(hasB?'blue':'all'); var val=_mtxGroupReason(code,grp); var need=(hasR||hasB)&&!val.trim();
+          return '<td style="padding:0;background:'+(need?'#fee2e2':'transparent')+';'+(need?'border:2px solid #fca5a5;':'')+'">'+inp(grp,val,'transparent','','')+'</td>'; }
+        function _mtxColSum(pf){ var st=orderState[pf]||[], s=0; st.forEach(function(x){ s+=parseFloat(x.newWeight)||0; }); return s; }
+        function _mtxCell(pf,code){ var idx=_mtxFindIdx(pf,code); if(idx<0) return {held:false,color:'#000',ot:'',newWeight:null};
+          var prev=parseFloat(orderStocks[pf][idx].weight)||0, nw=parseFloat(orderState[pf][idx].newWeight)||0, ot=calcOrderType(prev,nw);
+          var color=(ot==='신규 편입'||ot==='비중 확대')?'#FF0000':((ot==='비중 축소'||ot==='전량 편출')?'#0070C0':'#000');
+          return {held:true,color:color,ot:ot,newWeight:nw}; }
+        function _mtxCodeChanged(code){ for(var pi=0;pi<ORDER_PORTFOLIOS.length;pi++){ var c=_mtxCell(ORDER_PORTFOLIOS[pi].display,code); if(c.held&&c.ot&&c.ot!=='유지') return true; } return false; }
+        function _mtxApplyCell(pf,code,raw,rowMeta){ var c=String(code||'').trim(); if(!c) return; var idx=_mtxFindIdx(pf,c); var s=raw==null?'':String(raw).trim();
+          if(s===''){ if(idx>=0){ var stk=orderStocks[pf][idx]; if(stk._mtxAdded&&(parseFloat(stk.weight)||0)===0){ orderStocks[pf].splice(idx,1); orderState[pf].splice(idx,1); } else { orderState[pf][idx].newWeight=0; } } return; }
+          var val=parseFloat(s)||0;
+          if(idx>=0){ orderState[pf][idx].newWeight=val; } else { var m=rowMeta||_mtxUnion().meta[c]||{code:c,name:'',sector:''}; orderStocks[pf].push({code:c,name:m.name||'',sector:m.sector||'',weight:0,isNew:true,_mtxAdded:true}); orderState[pf].push({newWeight:val,reason:_mtxReason(c)}); } }
+        function _mtxApplyCellSynced(pf,code,raw,rowMeta){ var meta=ORDER_PORTFOLIOS.filter(function(p){return p.display===pf;})[0];
+          if(syncGeneral && meta && meta.general){ GENERAL_DISPLAYS.forEach(function(d){ _mtxApplyCell(d,code,raw,rowMeta); }); }
+          else { _mtxApplyCell(pf,code,raw,rowMeta); } }
+
+        function renderOrderMatrix(){
+          var union=_mtxUnion(); var pfs=ORDER_PORTFOLIOS.map(function(p){return p.display;});
+          function wcell(pf,code,isNew){ var cell=_mtxCell(pf,code); var val=cell.held?cell.newWeight:''; var gen=ORDER_PORTFOLIOS.filter(function(p){return p.display===pf;})[0].general;
+            return '<td class="wcol '+(gen?'grp-general':'')+'"><input type="text" inputmode="decimal" class="cell mtx-w" data-code="'+escapeHtml(code)+'" data-pf="'+escapeHtml(pf)+'"'+(isNew?' data-newrow="1"':'')+' value="'+(val===''?'':val)+'" style="color:'+cell.color+';"></td>'; }
+          var rows='', rank=0;
+          union.order.forEach(function(code){ rank++; var m=union.meta[code]; var cells='';
+            pfs.forEach(function(pf){ cells+=wcell(pf,code,false); });
+            rows+='<tr><td style="color:#666;">'+rank+'</td><td>'+escapeHtml(m.sector||'')+'</td><td>'+escapeHtml(m.code)+'</td><td style="font-weight:600;">'+escapeHtml(m.name||'')+'</td>'+cells
+              +reasonTd(code)+'</tr>'; });
+          matrixNewRows.forEach(function(r){ rank++; var code=String(r.code||'').trim(); var cells='';
+            pfs.forEach(function(pf){ cells+=wcell(pf,code,true); });
+            rows+='<tr data-tempid="'+r.tempId+'"><td><button class="del-btn mtx-del" data-tempid="'+r.tempId+'" title="행 삭제">×</button></td>'
+              +'<td><input type="text" class="meta mtx-meta" data-tempid="'+r.tempId+'" data-field="sector" value="'+escapeHtml(r.sector||'')+'" placeholder="업종" style="width:90px;"></td>'
+              +'<td><input type="text" class="meta mtx-meta" data-tempid="'+r.tempId+'" data-field="code" value="'+escapeHtml(r.code||'')+'" placeholder="000000" maxlength="6" style="width:64px;"></td>'
+              +'<td><input type="text" class="meta mtx-meta" data-tempid="'+r.tempId+'" data-field="name" value="'+escapeHtml(r.name||'')+'" placeholder="종목명" style="width:110px;font-weight:600;"></td>'
+              +cells+reasonTd(code, r.tempId)+'</tr>'; });
+          var totals='';
+          pfs.forEach(function(pf,ci){ var sum=_mtxColSum(pf); var col=(Math.abs(sum-100)<0.5)?'#16a34a':(sum>100?'#dc2626':'#222'); var gen=ORDER_PORTFOLIOS[ci].general;
+            totals+='<td class="wcol '+(gen?'grp-general':'')+'" id="mtx-total-'+ci+'" style="color:'+col+';">'+sum.toFixed(0)+'%</td>'; });
+          var cash='';
+          pfs.forEach(function(pf,ci){ var c=100-_mtxColSum(pf); var gen=ORDER_PORTFOLIOS[ci].general;
+            cash+='<td class="wcol '+(gen?'grp-general':'')+'" id="mtx-cash-'+ci+'" style="color:'+(c<0?'#dc2626':'#222')+';">'+c.toFixed(0)+'%</td>'; });
+          var head='';
+          ORDER_PORTFOLIOS.forEach(function(p){ head+='<th class="wcol '+(p.general?'grp-general':'')+'" title="'+escapeHtml(p.display)+'" style="min-width:64px;">'+escapeHtml(p.label)+'</th>'; });
+          var html='<div class="toolbar">'
+            +'<span id="orderSaveBadgeSlot" style="display:inline-flex;">'+buildOrderSaveBadgeGlobal()+'</span>'
+            +'<div style="margin-left:auto;display:flex;gap:8px;">'
+            +'<span class="sync-toggle'+(syncGeneral?' on':'')+'" id="syncToggle">일반형 동기화</span>'
+            +'<button class="btn red" id="btnCancel">전체 취소</button>'
+            +'<button class="btn" id="btnSave">임시 저장</button>'
+            +'<button class="btn green" id="btnFinal">최종 저장</button>'
+            +'<button class="btn blue" id="btnAdditional">추가 주문</button>'
+            +'</div></div>'
+            +'<div style="overflow-x:auto;border:1px solid #000;"><table><thead><tr>'
+            +'<th>#</th><th>업종</th><th>코드</th><th>종목명</th>'+head+'<th style="width:99%;">추천사유</th>'
+            +'</tr></thead><tbody>'+rows
+            +'<tr class="addrow"><td colspan="3"></td><td style="padding:8px 4px;"><button class="btn" id="btnAdd" style="background:#2563eb;color:#fff;border:none;border-radius:4px;padding:4px 12px;font-size:14px;line-height:1.5;">+ 종목 추가</button></td>'+ORDER_PORTFOLIOS.map(function(){return '<td class="wcol"></td>';}).join('')+'<td></td></tr>'
+            +'<tr class="totals"><td colspan="4" style="text-align:center;color:#444;">합계</td>'+totals+'<td></td></tr>'
+            +'<tr class="cashrow"><td colspan="4" style="text-align:center;color:#444;">현금</td>'+cash+'<td></td></tr></tbody></table></div>';
+          document.getElementById('orderContent').innerHTML=html;
+          bindMatrixHandlers();
         }
 
-        // ── Order 입력 UX: 포커스 보존 + Tab 이동 흐름 + 추천사유 멀티라인 붙여넣기 ──
-        // Tab 순회 대상 필드 (이 순서로만 이동; 업종/코드/주문구분/삭제 버튼은 건너뜀)
-        var ORDER_TAB_FIELDS = ['name', 'newWeight', 'reason'];
-        // 현재 #orderContent 안에서 포커스된 입력의 행 idx·필드·커서 위치를 기록
-        function _snapshotOrderFocus() {
-            var ae = document.activeElement;
-            if (!ae || ae.tagName !== 'INPUT' || !ae.dataset || ae.dataset.idx == null || !ae.dataset.field) return null;
-            if (!ae.closest || !ae.closest('#orderContent')) return null;
-            var snap = { idx: ae.dataset.idx, field: ae.dataset.field, start: null, end: null };
-            try { snap.start = ae.selectionStart; snap.end = ae.selectionEnd; } catch (e) {}
-            return snap;
-        }
-        // 재렌더 후 같은 행 idx·필드의 새 입력으로 포커스·커서 복원
-        function _restoreOrderFocus(snap) {
-            if (!snap) return;
-            var el = document.querySelector('#orderContent input[data-idx="' + snap.idx + '"][data-field="' + snap.field + '"]');
-            if (!el) return;
-            el.focus();
-            if (snap.start != null) { try { el.setSelectionRange(snap.start, snap.end); } catch (e) {} }
-        }
-        // Tab 순회 대상 입력들을 화면 순서(행→종목명/변경후/추천사유)대로 반환
-        function _orderTabbables() {
-            return Array.prototype.slice.call(document.querySelectorAll(
-                '#orderContent tbody input[data-field="name"], '
-                + '#orderContent tbody input[data-field="newWeight"], '
-                + '#orderContent tbody input[data-field="reason"]'));
-        }
-        // Tab/Shift+Tab → 종목명→변경후→추천사유→(다음 행) 종목명 순서로 포커스 이동.
-        // 목적지를 직접 focus()하므로 blur→autofill 재렌더가 일어나도 _snapshot/_restore로 유지된다.
-        function handleOrderTabKey(e) {
-            if (e.key !== 'Tab') return;
-            var field = (e.target && e.target.dataset) ? e.target.dataset.field : null;
-            if (ORDER_TAB_FIELDS.indexOf(field) < 0) return;  // 대상 외(코드/업종 등) → 기본 동작
-            var list = _orderTabbables();
-            var pos = list.indexOf(e.target);
-            if (pos < 0) return;
-            var next = e.shiftKey ? list[pos - 1] : list[pos + 1];
-            if (!next) return;  // 표의 끝/처음 → 기본 Tab(표 밖으로) 허용
-            e.preventDefault();
-            next.focus();
-            try { next.setSelectionRange(next.value.length, next.value.length); } catch (_e) {}
-        }
-        // 추천사유 칸 여러 줄 붙여넣기 → 첫 줄은 이 칸, 이후 줄은 아래 행 추천사유로 순서 분배(스프레드시트식).
-        // 채운 칸마다 input 이벤트 dispatch → 상태저장·탭간 추천사유 동기화 훅이 반응.
-        function handleReasonPaste(e) {
-            var el = e.target;
-            if (!el.dataset || el.dataset.field !== 'reason') return;
-            var cd = e.clipboardData || window.clipboardData;
-            var text = cd ? cd.getData('text') : '';
-            if (text == null) return;
-            var lines = text.split(/\\r\\n|\\r|\\n/);
-            while (lines.length > 1 && lines[lines.length - 1] === '') lines.pop();  // 트레일링 개행 제거
-            if (lines.length <= 1) return;  // 한 줄이면 기본 붙여넣기 동작
-            var startIdx = parseInt(el.dataset.idx, 10);
-            if (isNaN(startIdx)) return;
-            e.preventDefault();
-            lines.forEach(function(line, k) {
-                var t = document.querySelector('#orderContent input[data-field="reason"][data-idx="' + (startIdx + k) + '"]');
-                if (!t) return;  // 행 수 초과분은 무시
-                t.value = line;
-                t.dispatchEvent(new Event('input', { bubbles: true }));
-            });
-            renderOrderPanel(orderActiveTab);  // 빈 추천사유 강조 배경 갱신 (포커스는 _snapshot/_restore로 보존)
+        function bindMatrixHandlers(){
+          document.getElementById('syncToggle').addEventListener('click', function(){ syncGeneral=!syncGeneral; renderOrderMatrix(); });
+          document.querySelectorAll('#orderContent input.mtx-w').forEach(function(el){ el.addEventListener('input', function(e){
+            var code=e.target.dataset.code, pf=e.target.dataset.pf, rowMeta=null;
+            if(e.target.dataset.newrow){ var tr=e.target.closest('tr'), tid=tr&&tr.dataset.tempid; var nr=matrixNewRows.filter(function(r){return String(r.tempId)===String(tid);})[0]; if(nr){ code=String(nr.code||'').trim(); rowMeta=nr; } }
+            if(!code) return;
+            _mtxApplyCellSynced(pf,code,e.target.value,rowMeta);
+            renderOrderMatrix();
+            var back=document.querySelector('#orderContent input.mtx-w[data-code="'+code+'"][data-pf="'+pf+'"]'); if(back){ back.focus(); try{ back.setSelectionRange(back.value.length,back.value.length); }catch(_){} }
+            refreshOrderSaveBadge();
+          }); });
+          document.querySelectorAll('#orderContent input.mtx-reason').forEach(function(el){ el.addEventListener('input', function(e){
+            var code=e.target.dataset.code, tid=e.target.dataset.tempid, grp=e.target.dataset.group||'all';
+            if((!code||!code.trim())&&tid){ var nr=matrixNewRows.filter(function(r){return String(r.tempId)===String(tid);})[0]; if(nr){ if(grp==='all') nr.reason=e.target.value; else nr['reason_'+grp]=e.target.value; } }
+            else if(code){ _mtxSetReasonGroup(code,grp,e.target.value); }
+            refreshOrderSaveBadge();
+          }); });
+          document.querySelectorAll('#orderContent input.mtx-meta').forEach(function(el){ el.addEventListener('input', function(e){
+            var nr=matrixNewRows.filter(function(r){return String(r.tempId)===String(e.target.dataset.tempid);})[0]; if(nr) nr[e.target.dataset.field]=e.target.value; }); });
+          document.querySelectorAll('#orderContent input.mtx-meta[data-field="name"]').forEach(function(el){ el.addEventListener('blur', function(e){ autoFillMtx(e.target.dataset.tempid,'name'); }); });
+          document.querySelectorAll('#orderContent input.mtx-meta[data-field="code"]').forEach(function(el){ el.addEventListener('blur', function(e){ autoFillMtx(e.target.dataset.tempid,'code'); }); });
+          document.querySelectorAll('#orderContent .mtx-del').forEach(function(b){ b.addEventListener('click', function(e){ var tid=e.currentTarget.dataset.tempid;
+            var nr=matrixNewRows.filter(function(r){return String(r.tempId)===String(tid);})[0];
+            if(nr&&String(nr.code||'').trim()){ var c=String(nr.code).trim(); ORDER_PORTFOLIOS.forEach(function(p){ var i=_mtxFindIdx(p.display,c); if(i>=0&&orderStocks[p.display][i]._mtxAdded){ orderStocks[p.display].splice(i,1); orderState[p.display].splice(i,1); } }); }
+            matrixNewRows=matrixNewRows.filter(function(r){return String(r.tempId)!==String(tid);}); renderOrderMatrix(); }); });
+          document.getElementById('btnAdd').addEventListener('click', function(){ matrixNewRows.push({tempId:'mtx'+(++_mtxSeq),code:'',name:'',sector:'',reason:''}); renderOrderMatrix(); });
+          var cb=document.getElementById('btnCancel'); if(cb) cb.addEventListener('click', function(){ cancelAllPendingOrders(); });
+          var sb=document.getElementById('btnSave'); if(sb) sb.addEventListener('click', function(){ saveAllPendingOrders(false); });
+          var fb=document.getElementById('btnFinal'); if(fb) fb.addEventListener('click', function(){ finalizeOrder(null); });
+          var ab=document.getElementById('btnAdditional'); if(ab) ab.addEventListener('click', function(){ additionalOrder(); });
         }
 
-        function addOrderStock(pfName) {
-            orderStocks[pfName].push({ code: '', name: '', sector: '', weight: 0, isNew: true });
-            orderState[pfName].push({ newWeight: 0, reason: '' });
-            renderOrderPanel(pfName);
-        }
+        // 전역 저장 배지 (어느 포트든 dirty=미저장, 아니면 최신 저장상태)
+        function buildOrderSaveBadgeGlobal(){
+          var anyDirty=ORDER_PORTFOLIOS.some(function(p){ return orderIsDirty(p.display); }); var kind, disp=null;
+          if(anyDirty){ kind='dirty'; } else { var best=null; ORDER_PORTFOLIOS.forEach(function(p){ var s=computeOrderSaveState(p.display); if(s&&s.kind!=='dirty'&&(best===null||(s.ms||0)>(best.ms||0))) best=s; }); if(!best) return ''; kind=best.kind; disp=best.disp; }
+          var bg,bd,txt;
+          if(kind==='dirty'){ bg='#fef3c7'; bd='#fcd34d'; txt='미저장'; }
+          else if(kind==='final'){ bg='#dcfce7'; bd='#86efac'; txt='최종 저장됨'; var hf=orderTimeHM(disp); if(hf) txt+=' · '+hf; }
+          else { bg='#f3f4f6'; bd='#d1d5db'; txt='임시 저장됨'; var ht=orderTimeHM(disp); if(ht) txt+=' · '+ht; }
+          return '<span style="display:inline-flex;align-items:center;font-family:inherit;font-size:13px;font-weight:600;color:#222;background:'+bg+';border:1px solid '+bd+';border-radius:999px;padding:3px 12px;white-space:nowrap;">'+txt+'</span>'; }
 
-        // 같은 종목코드가 다른 탭에 이미 있으면 그 sector를 가져옴 (KRX 분류 lookup).
-        function lookupSectorByCode(code) {
-            var c = String(code || '').trim();
-            if (!c) return '';
-            var pfs = Object.keys(orderStocks);
-            for (var p = 0; p < pfs.length; p++) {
-                var arr = orderStocks[pfs[p]] || [];
-                for (var i = 0; i < arr.length; i++) {
-                    var s = arr[i];
-                    if (String(s.code || '').trim() === c && s.sector && String(s.sector).trim()) {
-                        return String(s.sector).trim();
-                    }
-                }
-            }
-            return '';
-        }
+        // stock_master.json 자동완성 (신규행)
+        var wicsCache=null, wicsByCode=null, wicsByName=null;
+        async function loadWics(){ if(wicsCache) return; var r=await fetch('stock_master.json'); if(!r.ok) return; wicsCache=await r.json(); wicsByCode={}; wicsByName={}; wicsCache.forEach(function(x){ if(x.code)wicsByCode[String(x.code)]=x; if(x.name)wicsByName[String(x.name)]=x; }); }
+        function lookupSector(code){ var c=String(code||'').trim(); if(!c) return ''; for(var pi=0;pi<ORDER_PORTFOLIOS.length;pi++){ var a=orderStocks[ORDER_PORTFOLIOS[pi].display]||[]; for(var i=0;i<a.length;i++){ if(String(a[i].code||'').trim()===c&&a[i].sector) return a[i].sector; } } return ''; }
+        async function autoFillMtx(tid,src){ var nr=matrixNewRows.filter(function(r){return String(r.tempId)===String(tid);})[0]; if(!nr) return; try{ await loadWics(); if(!wicsCache) return;
+          if(src==='name'){ var nm=String(nr.name||'').trim(); if(!nm) return; var lo=nm.toLowerCase(); var hit=wicsByName[nm]||wicsCache.find(function(x){return x.name&&x.name.toLowerCase()===lo;})||wicsCache.find(function(x){return x.name&&x.name.toLowerCase().indexOf(lo)>=0;}); if(!hit) return; if(!String(nr.code||'').trim())nr.code=hit.code; nr.name=hit.name; if(!String(nr.sector||'').trim())nr.sector=lookupSector(nr.code)||hit.sector||''; }
+          else { var cd=String(nr.code||'').trim(); if(!cd) return; if(/^\\d{1,6}$/.test(cd)&&cd.length<6){ cd=cd.padStart(6,'0'); nr.code=cd; } var h2=wicsByCode[cd]; if(!h2) return; if(!String(nr.name||'').trim())nr.name=h2.name; if(!String(nr.sector||'').trim())nr.sector=lookupSector(nr.code)||h2.sector||''; }
+          renderOrderMatrix(); }catch(e){} }
 
-        // KRX 전 종목 마스터(stock_master.json) 1회 로드 + name/code 인덱스 캐시.
-        // 같은 origin이라 CORS 영향 없음. Wrap_NAV.xlsx Code 시트가 소스라서 portfolio_data.json의 섹터 표기와 일치.
-        // 누락 종목(최근 신규IPO 등)은 수동 입력 fallback. (네이버 API는 GH Pages origin을 403으로 차단 → 외부 API 불가)
-        var wicsAllCache = null;
-        var wicsByCode = null;
-        var wicsByName = null;
-        async function loadWicsAll() {
-            if (wicsAllCache) return wicsAllCache;
-            var resp = await fetch('stock_master.json');
-            if (!resp.ok) throw new Error('stock_master.json fetch 실패: ' + resp.status);
-            wicsAllCache = await resp.json();
-            wicsByCode = {};
-            wicsByName = {};
-            wicsAllCache.forEach(function(x) {
-                if (x.code) wicsByCode[String(x.code)] = x;
-                if (x.name) wicsByName[String(x.name)] = x;
-            });
-            return wicsAllCache;
-        }
-
-        // 신규 종목 행에서 종목명 입력 후 blur → stock_master.json lookup으로 코드/업종 채움.
-        async function autoFillStockFromName(idx) {
-            var stocks = orderStocks[orderActiveTab];
-            if (!stocks || !stocks[idx] || !stocks[idx].isNew) return;
-            var s = stocks[idx];
-            var name = String(s.name || '').trim();
-            if (!name) return;
-            try {
-                await loadWicsAll();
-                var hit = wicsByName[name];
-                if (!hit) {
-                    // 부분 일치 fallback (대소문자 무시)
-                    var lower = name.toLowerCase();
-                    hit = wicsAllCache.find(function(x) { return x.name && x.name.toLowerCase() === lower; })
-                       || wicsAllCache.find(function(x) { return x.name && x.name.toLowerCase().indexOf(lower) >= 0; });
-                }
-                if (!hit) {
-                    console.warn('autoFillStockFromName: stock_master.json에 없음 →', name);
-                    return;
-                }
-                if (!String(s.code || '').trim()) s.code = hit.code;
-                s.name = hit.name;  // 정식 종목명으로 보정
-                if (!String(s.sector || '').trim()) {
-                    var sec = lookupSectorByCode(s.code) || hit.sector || '';
-                    if (sec) s.sector = sec;
-                }
-                renderOrderPanel(orderActiveTab);
-            } catch (e) {
-                console.warn('autoFillStockFromName 실패:', e);
-            }
-        }
-
-        // 신규 종목 행에서 코드 입력 후 blur → stock_master.json lookup으로 종목명/업종 채움.
-        async function autoFillStockFromCode(idx) {
-            var stocks = orderStocks[orderActiveTab];
-            if (!stocks || !stocks[idx] || !stocks[idx].isNew) return;
-            var s = stocks[idx];
-            var code = String(s.code || '').trim();
-            if (!code) return;
-            // "5930" → "005930" 0-padding (한국 종목은 6자리)
-            if (/^\d{1,6}$/.test(code) && code.length < 6) {
-                code = code.padStart(6, '0');
-                s.code = code;
-            }
-            try {
-                await loadWicsAll();
-                var hit = wicsByCode[code];
-                if (!hit) {
-                    console.warn('autoFillStockFromCode: stock_master.json에 없음 →', code);
-                    return;
-                }
-                if (!String(s.name || '').trim()) s.name = hit.name;
-                if (!String(s.sector || '').trim()) {
-                    var sec = lookupSectorByCode(s.code) || hit.sector || '';
-                    if (sec) s.sector = sec;
-                }
-                renderOrderPanel(orderActiveTab);
-            } catch (e) {
-                console.warn('autoFillStockFromCode 실패:', e);
-            }
-        }
-
-        // ─────────────────────────────────────────────────────────────
-        // 저장: GitHub Contents API → orders/wrap_orders.json 누적
-        // PAT는 localStorage('github_pat')에 1회 저장 후 재사용
-        // ─────────────────────────────────────────────────────────────
         var ORDER_REPO = 'sisyphe10/Antigravity_Market_Dashboard';
         var ORDER_FILE_PATH = 'orders/wrap_orders.json';
 
@@ -5554,7 +5320,8 @@ def create_order_section():
                     setOrderBaseline(p.display);
                 });
                 orderClearSessionAction();
-                if (orderActiveTab && orderActiveTab !== 'Email') renderOrderPanel(orderActiveTab);
+                matrixNewRows = [];
+                if (orderActiveTab && orderActiveTab !== 'Email') renderOrderMatrix();
             } catch(e) {
                 alert('❌ 취소 실패: ' + e.message);
                 console.error('cancelAllPendingOrders error:', e);
@@ -5579,7 +5346,7 @@ def create_order_section():
                     st[i].reason = '';    // 추천사유 초기화
                 });
             });
-            if (orderActiveTab && orderActiveTab !== 'Email') renderOrderPanel(orderActiveTab);
+            if (orderActiveTab && orderActiveTab !== 'Email') renderOrderMatrix();
         }
 
         // 최종 저장 = 3개 포트폴리오 모두 저장 + finalize 워크플로 1회 트리거

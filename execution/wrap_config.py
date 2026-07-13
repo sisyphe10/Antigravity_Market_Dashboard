@@ -482,6 +482,41 @@ def order_portfolios():
     return cards
 
 
+def order_matrix_columns():
+    """create_dashboard.py Order 매트릭스 컬럼 — 개별 상품 1컬럼 (일반형 왼쪽·동기화 그룹, 목표전환/성과 오른쪽).
+
+    2026-07-13: 결합 카드 해체. 일반형(ptype='general')은 증권사 순 왼쪽(동기화 그룹),
+    목표전환·성과모집(ptype!='general')은 오른쪽. 레지스트리(active_products) 동적 — 청산 시 컬럼 자동 소멸.
+    일반형 jsonKey=결합 데이터키(order_portfolios와 동일 산식 → portfolio_data.json 키 정합), 목표전환=display.
+    """
+    def _tmpl(p):
+        return ([{'label': p.display, 'file': p.advisory_template, 'format': p.advisory_format}]
+                if p.advisory_template else [])
+    def _short(p):
+        toks = (p.nav_key or p.display).split()
+        last = toks[-1] if toks else ''
+        if last and (last.endswith('호') or last.endswith('차')):
+            return p.broker + ' ' + last
+        return p.display
+    # 결합 데이터키: order_portfolios()와 바이트 동일 산식 (' / '.join(member.display)) → portfolio_data.json 키 정합
+    combined_by_gid = {}
+    for gid in active_group_ids():
+        combined_by_gid[gid] = ' / '.join(m.display for m in group_active_members(gid))
+    generals = [p for p in _sorted_active(active_products()) if p.ptype == 'general']
+    cols = []
+    for p in generals:
+        jkey = combined_by_gid.get(p.group, p.display) if p.group else p.display
+        cols.append({'display': p.display, 'jsonKey': jkey,
+                     'broker': p.broker, 'product': p.nav_key, 'general': True, 'label': p.display,
+                     'templates': _tmpl(p), 'newSheetTargets': [{'broker': p.broker, 'product': p.nav_key}]})
+    for p in _sorted_active(active_products()):
+        if p.ptype != 'general':
+            cols.append({'display': p.display, 'jsonKey': p.display,
+                         'broker': p.broker, 'product': p.nav_key, 'general': False, 'label': _short(p),
+                         'templates': _tmpl(p), 'newSheetTargets': [{'broker': p.broker, 'product': p.nav_key}]})
+    return cols
+
+
 def target_tabs():
     """create_dashboard.py JS / TARGET_TABS (활성 목표전환형 display — 결합 이메일/네이트온 노출 대상)."""
     return [p.display for p in _sorted_active(active_products()) if p.ptype == 'target']
@@ -517,7 +552,7 @@ def email_pair_map():
         if gen is None:
             g_key, g_label = None, None
         elif gen.group:
-            g_key, g_label = combined_display(gen.group), gen.kind_label
+            g_key, g_label = gen.display, gen.kind_label
         else:
             g_key, g_label = gen.display, gen.kind_label
         out[t.display] = {'broker': t.broker, 'generalKey': g_key,
