@@ -4558,7 +4558,7 @@ def create_order_section():
                 orderLoadSessionAction();
                 ORDER_PORTFOLIOS.forEach(function(p) { setOrderBaseline(p.display); });
                 renderOrderTabs();
-                switchOrderTab('Order Matrix');
+                switchOrderTab('Matrix');
             } catch(e) {
                 document.getElementById('orderContent').innerHTML = '<div style="color:#dc2626;padding:40px;">데이터 로드 실패: ' + e.message + '</div>';
                 console.error('loadOrder error:', e);
@@ -4598,7 +4598,7 @@ def create_order_section():
 
         function renderOrderTabs() {
             var html = '';
-            html += '<button class="order-pf-btn" data-pf="Order Matrix" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 16px;background:#f3f4f6;color:#444;border:none;border-radius:8px;cursor:pointer;">Order Matrix</button>';
+            html += '<button class="order-pf-btn" data-pf="Matrix" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 16px;background:#f3f4f6;color:#444;border:none;border-radius:8px;cursor:pointer;">Matrix</button>';
             html += '<button class="order-pf-btn" data-pf="Email" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 16px;background:#f3f4f6;color:#444;border:none;border-radius:8px;cursor:pointer;">Email</button>';
             document.getElementById('orderTabs').innerHTML = html;
             document.querySelectorAll('.order-pf-btn').forEach(function(b) {
