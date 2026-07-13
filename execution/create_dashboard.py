@@ -8187,7 +8187,7 @@ def create_dashboard():
         }});
         host.innerHTML = html;
         host.querySelectorAll('[data-side-pf]').forEach(function(a) {{
-            a.addEventListener('click', function(e) {{ e.preventDefault(); clickFn(a.dataset.pf); }});
+            a.addEventListener('click', function(e) {{ e.preventDefault(); clickFn(a.dataset.sidePf); }});
         }});
     }}
     function wrapMirrorOrderSide() {{
