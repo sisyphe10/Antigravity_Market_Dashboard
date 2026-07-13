@@ -4611,8 +4611,8 @@ def create_order_section():
             }
             // 2열 그리드 셀 순서: [컴플|삼성] → 증권사별 [이메일|메신저] (NH/DB=네이트온, 한투=카카오톡)
             var cells = [];
-            cells.push(buildEmailBox('컴플라이언스 이메일', compliance, '#fffbeb', '#fef3c7', '#92400e', '#d97706'));
             cells.push(buildEmailBox('삼성 이메일', samsung, '#f9fafb', '#e5e7eb', '#444', '#374151'));
+            cells.push(buildEmailBox('컴플라이언스 이메일', compliance, '#fffbeb', '#fef3c7', '#92400e', '#d97706'));
             TARGET_TABS.forEach(function(tt) {
                 var pair = EMAIL_PAIR[tt] || { broker: tt.split(' ')[0], generalKey: GENERAL, generalLabel: '일반형', targetLabel: '목표전환형' };
                 var tEmail = buildOrderEmailText(tt, orderStocks[tt] || [], orderState[tt] || []);
