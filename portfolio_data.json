@@ -6,9 +6,9 @@
       "sector": "반도체",
       "market_cap": 15375713,
       "weight": 25.0,
-      "weight_prev": 20.0,
+      "weight_prev": 25.0,
       "today_return": 3.3398821218074657,
-      "contribution": 6.679764243614931,
+      "contribution": 8.349705304518665,
       "cumulative_return": 341.76934164441997,
       "current_price": 263000.0,
       "ath_price": 362500.0,
@@ -22,9 +22,9 @@
       "sector": "반도체",
       "market_cap": 13633996,
       "weight": 25.0,
-      "weight_prev": 20.0,
+      "weight_prev": 25.0,
       "today_return": 3.685636856368564,
-      "contribution": 7.371273712737128,
+      "contribution": 9.21409214092141,
       "cumulative_return": 552.746614785424,
       "current_price": 1913000.0,
       "ath_price": 2919000.0,
@@ -38,14 +38,62 @@
       "sector": "은행",
       "market_cap": 638438,
       "weight": 2.0,
-      "weight_prev": 5.0,
+      "weight_prev": 2.0,
       "today_return": -3.329752953813104,
-      "contribution": -1.664876476906552,
+      "contribution": -0.6659505907626208,
       "cumulative_return": 8.446800819375833,
       "current_price": 180000.0,
       "ath_price": 186200.0,
       "dd": -3.329752953813103,
       "rsi": 35.4303041344752,
+      "is_today_new": false
+    },
+    {
+      "code": "003230",
+      "name": "삼양식품",
+      "sector": "필수소비재",
+      "market_cap": 80754,
+      "weight": 2.0,
+      "weight_prev": 2.0,
+      "today_return": -3.423423423423423,
+      "contribution": -0.6846846846846847,
+      "cumulative_return": -25.503822098679642,
+      "current_price": 1072000.0,
+      "ath_price": 1630000.0,
+      "dd": -34.23312883435583,
+      "rsi": -11.41383048065726,
+      "is_today_new": false
+    },
+    {
+      "code": "067310",
+      "name": "하나마이크론",
+      "sector": "반도체",
+      "market_cap": 25429,
+      "weight": 2.0,
+      "weight_prev": 2.0,
+      "today_return": 0.13089005235602094,
+      "contribution": 0.026178010471204192,
+      "cumulative_return": -11.560693641618503,
+      "current_price": 38250.0,
+      "ath_price": 56800.0,
+      "dd": -32.65845070422535,
+      "rsi": 7.4337370834205,
+      "is_today_new": false
+    },
+    {
+      "code": "004170",
+      "name": "신세계",
+      "sector": "소매(유통)",
+      "market_cap": 52987,
+      "weight": 2.0,
+      "weight_prev": 2.0,
+      "today_return": -5.0761421319796955,
+      "contribution": -1.0152284263959392,
+      "cumulative_return": -25.6953642384106,
+      "current_price": 561000.0,
+      "ath_price": 776000.0,
+      "dd": -27.706185567010312,
+      "rsi": -6.587786564659237,
       "is_today_new": false
     },
     {
@@ -100,7 +148,7 @@
       "code": "226950",
       "name": "올릭스",
       "sector": "건강관리",
-      "market_cap": 25139,
+      "market_cap": 25968,
       "weight": 2.0,
       "weight_prev": 2.0,
       "today_return": -2.980392156862745,
@@ -110,54 +158,6 @@
       "ath_price": 207000.0,
       "dd": -40.24154589371981,
       "rsi": 3.1615910189921603,
-      "is_today_new": false
-    },
-    {
-      "code": "003230",
-      "name": "삼양식품",
-      "sector": "필수소비재",
-      "market_cap": 80754,
-      "weight": 2.0,
-      "weight_prev": 2.0,
-      "today_return": -3.423423423423423,
-      "contribution": -0.6846846846846847,
-      "cumulative_return": -25.503822098679642,
-      "current_price": 1072000.0,
-      "ath_price": 1630000.0,
-      "dd": -34.23312883435583,
-      "rsi": -11.41383048065726,
-      "is_today_new": false
-    },
-    {
-      "code": "067310",
-      "name": "하나마이크론",
-      "sector": "반도체",
-      "market_cap": 25429,
-      "weight": 2.0,
-      "weight_prev": 2.0,
-      "today_return": 0.13089005235602094,
-      "contribution": 0.026178010471204192,
-      "cumulative_return": -11.560693641618503,
-      "current_price": 38250.0,
-      "ath_price": 56800.0,
-      "dd": -32.65845070422535,
-      "rsi": 7.4337370834205,
-      "is_today_new": false
-    },
-    {
-      "code": "004170",
-      "name": "신세계",
-      "sector": "소매(유통)",
-      "market_cap": 52987,
-      "weight": 2.0,
-      "weight_prev": 2.0,
-      "today_return": -5.0761421319796955,
-      "contribution": -1.0152284263959392,
-      "cumulative_return": -25.6953642384106,
-      "current_price": 561000.0,
-      "ath_price": 776000.0,
-      "dd": -27.706185567010312,
-      "rsi": -6.587786564659237,
       "is_today_new": false
     },
     {
@@ -184,9 +184,9 @@
       "sector": "반도체",
       "market_cap": 15375713,
       "weight": 25.0,
-      "weight_prev": 15.0,
+      "weight_prev": 25.0,
       "today_return": 3.3398821218074657,
-      "contribution": 5.009823182711199,
+      "contribution": 8.349705304518665,
       "cumulative_return": -10.422343324250683,
       "current_price": 263000.0,
       "ath_price": 362500.0,
@@ -200,9 +200,9 @@
       "sector": "반도체",
       "market_cap": 13633996,
       "weight": 25.0,
-      "weight_prev": 15.0,
+      "weight_prev": 25.0,
       "today_return": 3.685636856368564,
-      "contribution": 5.528455284552845,
+      "contribution": 9.21409214092141,
       "cumulative_return": -15.230203394336861,
       "current_price": 1913000.0,
       "ath_price": 2919000.0,
@@ -216,9 +216,9 @@
       "sector": "은행",
       "market_cap": 638438,
       "weight": 2.0,
-      "weight_prev": 7.0,
+      "weight_prev": 2.0,
       "today_return": -3.329752953813104,
-      "contribution": -2.330827067669173,
+      "contribution": -0.6659505907626208,
       "cumulative_return": 15.9687068568799,
       "current_price": 180000.0,
       "ath_price": 186200.0,
@@ -294,7 +294,7 @@
       "code": "226950",
       "name": "올릭스",
       "sector": "건강관리",
-      "market_cap": 25139,
+      "market_cap": 25968,
       "weight": 2.0,
       "weight_prev": 2.0,
       "today_return": -2.980392156862745,
@@ -314,9 +314,9 @@
       "sector": "반도체",
       "market_cap": 13633996,
       "weight": 25.0,
-      "weight_prev": 15.0,
+      "weight_prev": 25.0,
       "today_return": 3.685636856368564,
-      "contribution": 5.528455284552845,
+      "contribution": 9.21409214092141,
       "cumulative_return": -14.111255780541466,
       "current_price": 1913000.0,
       "ath_price": 2919000.0,
@@ -330,9 +330,9 @@
       "sector": "반도체",
       "market_cap": 15375713,
       "weight": 25.0,
-      "weight_prev": 15.0,
+      "weight_prev": 25.0,
       "today_return": 3.3398821218074657,
-      "contribution": 5.009823182711199,
+      "contribution": 8.349705304518665,
       "cumulative_return": -9.028017986855764,
       "current_price": 263000.0,
       "ath_price": 362500.0,
@@ -346,9 +346,9 @@
       "sector": "은행",
       "market_cap": 638438,
       "weight": 2.0,
-      "weight_prev": 7.0,
+      "weight_prev": 2.0,
       "today_return": -3.329752953813104,
-      "contribution": -2.330827067669173,
+      "contribution": -0.6659505907626208,
       "cumulative_return": 13.564668769716093,
       "current_price": 180000.0,
       "ath_price": 186200.0,
@@ -424,7 +424,7 @@
       "code": "226950",
       "name": "올릭스",
       "sector": "건강관리",
-      "market_cap": 25139,
+      "market_cap": 25968,
       "weight": 2.0,
       "weight_prev": 2.0,
       "today_return": -2.980392156862745,
@@ -444,9 +444,9 @@
       "sector": "반도체",
       "market_cap": 15375713,
       "weight": 25.0,
-      "weight_prev": 20.0,
+      "weight_prev": 25.0,
       "today_return": 3.3398821218074657,
-      "contribution": 6.679764243614931,
+      "contribution": 8.349705304518665,
       "cumulative_return": -6.891668633467063,
       "current_price": 263000.0,
       "ath_price": 362500.0,
@@ -460,9 +460,9 @@
       "sector": "반도체",
       "market_cap": 13633996,
       "weight": 25.0,
-      "weight_prev": 20.0,
+      "weight_prev": 25.0,
       "today_return": 3.685636856368564,
-      "contribution": 7.371273712737128,
+      "contribution": 9.21409214092141,
       "cumulative_return": -9.65334844620761,
       "current_price": 1913000.0,
       "ath_price": 2919000.0,
@@ -476,9 +476,9 @@
       "sector": "은행",
       "market_cap": 638438,
       "weight": 2.0,
-      "weight_prev": 5.0,
+      "weight_prev": 2.0,
       "today_return": -3.329752953813104,
-      "contribution": -1.664876476906552,
+      "contribution": -0.6659505907626208,
       "cumulative_return": 9.090909090909083,
       "current_price": 180000.0,
       "ath_price": 186200.0,
@@ -503,10 +503,26 @@
       "is_today_new": false
     },
     {
+      "code": "003230",
+      "name": "삼양식품",
+      "sector": "필수소비재",
+      "market_cap": 80754,
+      "weight": 2.0,
+      "weight_prev": 2.0,
+      "today_return": -3.423423423423423,
+      "contribution": -0.6846846846846847,
+      "cumulative_return": -3.4234234234234218,
+      "current_price": 1072000.0,
+      "ath_price": 1630000.0,
+      "dd": -34.23312883435583,
+      "rsi": -4.156499861700292,
+      "is_today_new": false
+    },
+    {
       "code": "226950",
       "name": "올릭스",
       "sector": "건강관리",
-      "market_cap": 25139,
+      "market_cap": 25968,
       "weight": 2.0,
       "weight_prev": 2.0,
       "today_return": -2.980392156862745,
@@ -581,22 +597,6 @@
       "dd": -50.0,
       "rsi": -9.766324117746006,
       "is_today_new": false
-    },
-    {
-      "code": "003230",
-      "name": "삼양식품",
-      "sector": "필수소비재",
-      "market_cap": 80754,
-      "weight": 2.0,
-      "weight_prev": 2.0,
-      "today_return": -3.423423423423423,
-      "contribution": -0.6846846846846847,
-      "cumulative_return": -3.4234234234234218,
-      "current_price": 1072000.0,
-      "ath_price": 1630000.0,
-      "dd": -34.23312883435583,
-      "rsi": -4.156499861700292,
-      "is_today_new": false
     }
   ],
   "한투 성과모집형 1차": [
@@ -606,9 +606,9 @@
       "sector": "반도체",
       "market_cap": 15375713,
       "weight": 25.0,
-      "weight_prev": 15.0,
+      "weight_prev": 25.0,
       "today_return": 3.3398821218074657,
-      "contribution": 5.009823182711199,
+      "contribution": 8.349705304518665,
       "cumulative_return": -3.733528550512444,
       "current_price": 263000.0,
       "ath_price": 362500.0,
@@ -622,9 +622,9 @@
       "sector": "반도체",
       "market_cap": 13633996,
       "weight": 25.0,
-      "weight_prev": 15.0,
+      "weight_prev": 25.0,
       "today_return": 3.685636856368564,
-      "contribution": 5.528455284552845,
+      "contribution": 9.21409214092141,
       "cumulative_return": -5.837763339240009,
       "current_price": 1913000.0,
       "ath_price": 2919000.0,
@@ -638,9 +638,9 @@
       "sector": "은행",
       "market_cap": 638438,
       "weight": 2.0,
-      "weight_prev": 7.0,
+      "weight_prev": 2.0,
       "today_return": -3.329752953813104,
-      "contribution": -2.330827067669173,
+      "contribution": -0.6659505907626208,
       "cumulative_return": 5.263157894736836,
       "current_price": 180000.0,
       "ath_price": 186200.0,
@@ -649,138 +649,26 @@
       "is_today_new": false
     }
   ],
-  "_order_changes": {
-    "삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형": {
-      "date": "2026-07-14",
-      "added": [],
-      "changed": [
-        {
-          "name": "삼성전자",
-          "from": 20.0,
-          "to": 25.0
-        },
-        {
-          "name": "SK하이닉스",
-          "from": 20.0,
-          "to": 25.0
-        },
-        {
-          "name": "KB금융",
-          "from": 5.0,
-          "to": 2.0
-        }
-      ],
-      "removed": []
-    },
-    "NH 목표전환형 5호": {
-      "date": "2026-07-14",
-      "added": [],
-      "changed": [
-        {
-          "name": "삼성전자",
-          "from": 15.0,
-          "to": 25.0
-        },
-        {
-          "name": "SK하이닉스",
-          "from": 15.0,
-          "to": 25.0
-        },
-        {
-          "name": "KB금융",
-          "from": 7.0,
-          "to": 2.0
-        }
-      ],
-      "removed": []
-    },
-    "DB 목표전환형 6차": {
-      "date": "2026-07-14",
-      "added": [],
-      "changed": [
-        {
-          "name": "SK하이닉스",
-          "from": 15.0,
-          "to": 25.0
-        },
-        {
-          "name": "삼성전자",
-          "from": 15.0,
-          "to": 25.0
-        },
-        {
-          "name": "KB금융",
-          "from": 7.0,
-          "to": 2.0
-        }
-      ],
-      "removed": []
-    },
-    "한투 지속형": {
-      "date": "2026-07-14",
-      "added": [],
-      "changed": [
-        {
-          "name": "삼성전자",
-          "from": 20.0,
-          "to": 25.0
-        },
-        {
-          "name": "SK하이닉스",
-          "from": 20.0,
-          "to": 25.0
-        },
-        {
-          "name": "KB금융",
-          "from": 5.0,
-          "to": 2.0
-        }
-      ],
-      "removed": []
-    },
-    "한투 성과모집형 1차": {
-      "date": "2026-07-14",
-      "added": [],
-      "changed": [
-        {
-          "name": "삼성전자",
-          "from": 15.0,
-          "to": 25.0
-        },
-        {
-          "name": "SK하이닉스",
-          "from": 15.0,
-          "to": 25.0
-        },
-        {
-          "name": "KB금융",
-          "from": 7.0,
-          "to": 2.0
-        }
-      ],
-      "removed": []
-    }
-  },
   "_portfolio_meta": {
     "삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형": {
-      "nav_ytd_d1": 58.80147033359553,
-      "nav_cum_d1": 220.987
+      "nav_ytd_d1": 59.65141418189195,
+      "nav_cum_d1": 222.705
     },
     "NH 목표전환형 5호": {
-      "nav_ytd_d1": -16.815,
-      "nav_cum_d1": -16.815
+      "nav_ytd_d1": -16.577999999999992,
+      "nav_cum_d1": -16.577999999999992
     },
     "DB 목표전환형 6차": {
-      "nav_ytd_d1": -15.839999999999998,
-      "nav_cum_d1": -15.839999999999998
+      "nav_ytd_d1": -15.600999999999999,
+      "nav_cum_d1": -15.600999999999999
     },
     "한투 지속형": {
-      "nav_ytd_d1": -9.384999999999998,
-      "nav_cum_d1": -9.384999999999998
+      "nav_ytd_d1": -8.902999999999995,
+      "nav_cum_d1": -8.902999999999995
     },
     "한투 성과모집형 1차": {
-      "nav_ytd_d1": -5.811999999999995,
-      "nav_cum_d1": -5.811999999999995
+      "nav_ytd_d1": -5.0389999999999935,
+      "nav_cum_d1": -5.0389999999999935
     }
   },
   "_price_asof": "2026-07-14"
