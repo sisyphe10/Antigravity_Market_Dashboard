@@ -34,7 +34,18 @@ FOREIGN_PRIVATE_ISSUERS: dict[str, dict] = {
     'ASML':  {'country': 'NL', 'exchange': 'NASDAQ', 'note': 'ASML Holding NV (ADR)'},
     'TSM':   {'country': 'TW', 'exchange': 'NYSE',   'note': 'Taiwan Semiconductor (ADR)'},
     'CCJ':   {'country': 'CA', 'exchange': 'NYSE',   'note': 'Cameco Corporation (Canadian uranium)'},
-    # 향후 ADR 추가 시 여기에 등록 (예: BABA, NIO, SHOP, NVO 등)
+    # 2026-07-15 universe USD 전수 스캔(SEC submissions API)으로 활성 FPI 10종 일괄 등록.
+    # 판별 기준: 최신 6-K가 현행이고 최근 8-K/10-K 없음. (NXPI/SATL/SHOP/SN은 8-K 전환 완료라 제외)
+    'AS':    {'country': 'FI', 'exchange': 'NYSE',   'note': 'Amer Sports'},
+    'BABA':  {'country': 'CN', 'exchange': 'NYSE',   'note': 'Alibaba Group (ADR)'},
+    'ERIC':  {'country': 'SE', 'exchange': 'NASDAQ', 'note': 'Ericsson (ADR)'},
+    'JD':    {'country': 'CN', 'exchange': 'NASDAQ', 'note': 'JD.com (ADR)'},
+    'NOK':   {'country': 'FI', 'exchange': 'NYSE',   'note': 'Nokia (ADR)'},
+    'NVO':   {'country': 'DK', 'exchange': 'NYSE',   'note': 'Novo Nordisk (ADR)'},
+    'NXE':   {'country': 'CA', 'exchange': 'NYSE',   'note': 'NexGen Energy (Canadian uranium)'},
+    'ONON':  {'country': 'CH', 'exchange': 'NYSE',   'note': 'On Holding'},
+    'SE':    {'country': 'SG', 'exchange': 'NYSE',   'note': 'Sea Ltd (ADR)'},
+    'SPOT':  {'country': 'LU', 'exchange': 'NYSE',   'note': 'Spotify Technology'},
 }
 
 
