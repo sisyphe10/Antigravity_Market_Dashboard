@@ -32,6 +32,8 @@ alerts: ""
 - PORTFOLIO 종목표·수익률·차트는 `portfolio_data.json`+`Wrap_NAV.xlsx` 계산 산출을 소비.
 - Order 탭: 임시저장(회색, `orders/pending_orders.json`)→최종저장(초록, finalize 트리거). 기여도 탭은 `contribution_data.json` 런타임 fetch. 주문 접수는 웹(wrap.html→GitHub Contents API) 유지 — 별도 주문봇 스캐폴드는 폐기됐다.
 - **Order 통합 매트릭스(2026-07-13)**: 포트별 카드 → 합집합 행(종목)×포트 열 매트릭스 VIEW로 개편. 7개 개별 컬럼은 `wrap_config.order_matrix_columns()`로 동적 생성, 개별키 실저장, 일반형 동기화 토글(삼성 트루밸류 컬럼 정렬), cash row 포함. pending 스키마·save/finalize/email/excel 계층은 불변(VIEW 층만 교체). 정본 디자인은 은퇴한 test 페이지에서 1:1 이식.
+- **매트릭스 입력 보조(2026-07-14)**: 일반형에 이어 **전환형 동기화** 토글 추가(`syncToggle`/`syncToggleTarget` 2개 병렬) — 같은 그룹 열에 값을 일괄 전파. Tab 네비게이션은 동기화가 켜진 그룹의 **대표 열 1개만 순회**(`_mtxTabStops`)하고 추천사유는 별도 체인 — 수십 종목×7포트 수기 입력의 키 이동 부담을 줄인다.
+- **ORDER 롤오버 게이트(2026-07-14)**: '변경전' 기준선은 D-1(`weight_prev`)이나, `portfolio_data.json`의 `_price_asof`가 오늘보다 이르면(16:00 재생성 전 오전) 어제 확정분을 baseline으로 흡수해 변경 없음(검정)으로 표시(`_orderSnapshotStale`). 자정을 넘긴 확정 주문이 이튿날 오전까지 '변동'으로 남던 것을 해소.
 - **Email 탭 발송 요청(2026-07-13)**: [컴플 메일]/[증권사 메일] 2버튼 각자 모달, 첨부 base64 생성(900KB 가드)+미리보기(하이웍스 실서명 HTML). [메일 발송 요청]이 `orders/email_send_request.json`을 Contents API로 기록 → [[timer-advisory-emails]] 60초 폴러가 하이웍스 SMTP로 발송. (컴플라이언스 선발송 게이팅은 사용자 지시로 제거.)
 - 증권사·상품 정의는 단일 레지스트리(`execution/wrap_config.py`)에서 파생.
 - `create_dashboard.py` 생성. finalize/recalc가 주 재생성원.

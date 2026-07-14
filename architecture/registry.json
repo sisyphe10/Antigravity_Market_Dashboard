@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-07-13",
+  "updated": "2026-07-14",
   "projects": [
    "antigravity"
   ],
@@ -898,7 +898,7 @@
    "runs_on": "github",
    "schedule_kst": "생성=여러 잡",
    "status": "active",
-   "desc_md": "랩 상품 운용 대시보드. Dashboard/공시/Order/AUM/수수료/기여도 탭 묶음. 자문사 실무의 중심 화면.\n\n- **독립 페이지화(2026-07-12, 'Life WRAP' 리브랜드)**: 팀원 전용 페이지로 분리 — 개인 탭을 nav에서 제거하고, 탭 축을 뒤집어(탭 상단, 섹션 TOC 좌측) 탭별 컨텍스추얼 사이드바를 둔다. **팀원 공개는 gh-pages 전용**([[web-publish-pages]]) — 개인 대시보드([[web-caddy]] ts.net)에는 이 페이지가 빠지고 대신 Sisyphe 탭이 들어간다.\n- PORTFOLIO 종목표·수익률·차트는 `portfolio_data.json`+`Wrap_NAV.xlsx` 계산 산출을 소비.\n- Order 탭: 임시저장(회색, `orders/pending_orders.json`)→최종저장(초록, finalize 트리거). 기여도 탭은 `contribution_data.json` 런타임 fetch. 주문 접수는 웹(wrap.html→GitHub Contents API) 유지 — 별도 주문봇 스캐폴드는 폐기됐다.\n- **Order 통합 매트릭스(2026-07-13)**: 포트별 카드 → 합집합 행(종목)×포트 열 매트릭스 VIEW로 개편. 7개 개별 컬럼은 `wrap_config.order_matrix_columns()`로 동적 생성, 개별키 실저장, 일반형 동기화 토글(삼성 트루밸류 컬럼 정렬), cash row 포함. pending 스키마·save/finalize/email/excel 계층은 불변(VIEW 층만 교체). 정본 디자인은 은퇴한 test 페이지에서 1:1 이식.\n- **Email 탭 발송 요청(2026-07-13)**: [컴플 메일]/[증권사 메일] 2버튼 각자 모달, 첨부 base64 생성(900KB 가드)+미리보기(하이웍스 실서명 HTML). [메일 발송 요청]이 `orders/email_send_request.json`을 Contents API로 기록 → [[timer-advisory-emails]] 60초 폴러가 하이웍스 SMTP로 발송. (컴플라이언스 선발송 게이팅은 사용자 지시로 제거.)\n- 증권사·상품 정의는 단일 레지스트리(`execution/wrap_config.py`)에서 파생.\n- `create_dashboard.py` 생성. finalize/recalc가 주 재생성원.",
+   "desc_md": "랩 상품 운용 대시보드. Dashboard/공시/Order/AUM/수수료/기여도 탭 묶음. 자문사 실무의 중심 화면.\n\n- **독립 페이지화(2026-07-12, 'Life WRAP' 리브랜드)**: 팀원 전용 페이지로 분리 — 개인 탭을 nav에서 제거하고, 탭 축을 뒤집어(탭 상단, 섹션 TOC 좌측) 탭별 컨텍스추얼 사이드바를 둔다. **팀원 공개는 gh-pages 전용**([[web-publish-pages]]) — 개인 대시보드([[web-caddy]] ts.net)에는 이 페이지가 빠지고 대신 Sisyphe 탭이 들어간다.\n- PORTFOLIO 종목표·수익률·차트는 `portfolio_data.json`+`Wrap_NAV.xlsx` 계산 산출을 소비.\n- Order 탭: 임시저장(회색, `orders/pending_orders.json`)→최종저장(초록, finalize 트리거). 기여도 탭은 `contribution_data.json` 런타임 fetch. 주문 접수는 웹(wrap.html→GitHub Contents API) 유지 — 별도 주문봇 스캐폴드는 폐기됐다.\n- **Order 통합 매트릭스(2026-07-13)**: 포트별 카드 → 합집합 행(종목)×포트 열 매트릭스 VIEW로 개편. 7개 개별 컬럼은 `wrap_config.order_matrix_columns()`로 동적 생성, 개별키 실저장, 일반형 동기화 토글(삼성 트루밸류 컬럼 정렬), cash row 포함. pending 스키마·save/finalize/email/excel 계층은 불변(VIEW 층만 교체). 정본 디자인은 은퇴한 test 페이지에서 1:1 이식.\n- **매트릭스 입력 보조(2026-07-14)**: 일반형에 이어 **전환형 동기화** 토글 추가(`syncToggle`/`syncToggleTarget` 2개 병렬) — 같은 그룹 열에 값을 일괄 전파. Tab 네비게이션은 동기화가 켜진 그룹의 **대표 열 1개만 순회**(`_mtxTabStops`)하고 추천사유는 별도 체인 — 수십 종목×7포트 수기 입력의 키 이동 부담을 줄인다.\n- **ORDER 롤오버 게이트(2026-07-14)**: '변경전' 기준선은 D-1(`weight_prev`)이나, `portfolio_data.json`의 `_price_asof`가 오늘보다 이르면(16:00 재생성 전 오전) 어제 확정분을 baseline으로 흡수해 변경 없음(검정)으로 표시(`_orderSnapshotStale`). 자정을 넘긴 확정 주문이 이튿날 오전까지 '변동'으로 남던 것을 해소.\n- **Email 탭 발송 요청(2026-07-13)**: [컴플 메일]/[증권사 메일] 2버튼 각자 모달, 첨부 base64 생성(900KB 가드)+미리보기(하이웍스 실서명 HTML). [메일 발송 요청]이 `orders/email_send_request.json`을 Contents API로 기록 → [[timer-advisory-emails]] 60초 폴러가 하이웍스 SMTP로 발송. (컴플라이언스 선발송 게이팅은 사용자 지시로 제거.)\n- 증권사·상품 정의는 단일 레지스트리(`execution/wrap_config.py`)에서 파생.\n- `create_dashboard.py` 생성. finalize/recalc가 주 재생성원.",
    "code": [
     "execution/create_dashboard.py",
     "execution/wrap_config.py"
@@ -2006,7 +2006,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "잡별 (20:30 / 23:20 / 23:50 / 일 10:00 / 20분)",
    "status": "active",
-   "desc_md": "2026-07-11 신설(코드는 레포 `datalake/`, 데이터 정본은 레포 외부 `~/datalake`). 덮어쓰기형 산출물의 과거 유실을 막고, 전 상장·해외 유니버스 일봉 종가를 백필하며, DuckDB+Claude API 웹 UI로 자연어 질의를 제공하는 로컬 데이터레이크. 백필 스크립트(KRX/KIS·FRED·ECOS·KOFIA·벤치마크·해외)와 `build_catalog.py` 카탈로그가 함께 있다.\n\n- **launchd 잡 5종**(맥미니 전용):\n  - `datalake-market-update`(20:30) — 일별 증분 적재(`daily_market_update.py`).\n  - `datalake-research-export`(23:20) — Research Notes 원문(`research_notes.db`)을 일별 `.md`+미디어로 아카이브.\n  - `datalake-snapshot`(23:50) — 덮어쓰기형 레포 산출물 일별 gzip 스냅샷.\n  - `datalake-backup`(일 10:00) — private repo 백업(duckdb/staging 제외).\n  - `datalake-sheets-mirror`(20분 폴링, 2026-07-12 신규) — 시지프+선유듀오 구글시트 미러 → `~/datalake/sheets`.\n- 저장: 데이터셋별 연도 파티션 parquet(`kr_ohlcv`·`kr_marcap`·`overseas_ohlcv` 등) + `market.duckdb` 뷰. KRX 수정주가 캡 실측 대응으로 `kr_ohlcv`(무수정)/`kr_ohlcv_adj` 분리.\n- 웹 UI(`datalake/webui/`)는 duckdb 샌드박스(allowed→잠금) 위에서 md 코퍼스 문답. 상세: `datalake/DESIGN.md`.",
+   "desc_md": "2026-07-11 신설(코드는 레포 `datalake/`, 데이터 정본은 레포 외부 `~/datalake`). 덮어쓰기형 산출물의 과거 유실을 막고, 전 상장·해외 유니버스 일봉 종가를 백필하며, DuckDB+Claude API 웹 UI로 자연어 질의를 제공하는 로컬 데이터레이크. 백필 스크립트(KRX/KIS·FRED·ECOS·KOFIA·벤치마크·해외)와 `build_catalog.py` 카탈로그가 함께 있다.\n\n- **launchd 잡 5종**(맥미니 전용):\n  - `datalake-market-update`(20:30) — 일별 증분 적재(`daily_market_update.py`).\n  - `datalake-research-export`(23:20) — Research Notes 원문(`research_notes.db`)을 일별 `.md`+미디어로 아카이브.\n  - `datalake-snapshot`(23:50) — 덮어쓰기형 레포 산출물 일별 gzip 스냅샷.\n  - `datalake-backup`(일 10:00) — private repo 백업(duckdb/staging 제외).\n  - `datalake-sheets-mirror`(20분 폴링, 2026-07-12 신규) — 시지프+선유듀오 구글시트 미러 → `~/datalake/sheets`. 시트 단위 격리 + **3회 재시도(15s·30s 백오프, 2026-07-14)** — read timeout 등 일시 장애를 흡수하고 3회 연속 실패만 비정상 종료→알림(오탐 알림 억제).\n- 저장: 데이터셋별 연도 파티션 parquet(`kr_ohlcv`·`kr_marcap`·`overseas_ohlcv` 등) + `market.duckdb` 뷰. KRX 수정주가 캡 실측 대응으로 `kr_ohlcv`(무수정)/`kr_ohlcv_adj` 분리.\n- 웹 UI(`datalake/webui/`)는 duckdb 샌드박스(allowed→잠금) 위에서 md 코퍼스 문답. 상세: `datalake/DESIGN.md`.",
    "code": [
     "datalake/",
     "datalake/daily_market_update.py",
@@ -2078,6 +2078,34 @@
     "page-wrap"
    ],
    "alerts": "실패해도 잡 rc 무관 · 다음 게시에서 재시도"
+  },
+  {
+   "id": "timer-advisory-emails",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "timer",
+   "name": "자문지 메일 발송 폴러 (send-advisory-emails 60초)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "60초 폴러 (상시)",
+   "status": "active",
+   "desc_md": "2026-07-13 신설. wrap.html Email 탭의 [메일 발송 요청]이 GitHub Contents API로 기록한 `orders/email_send_request.json`을 감지해 하이웍스 SMTP로 자문지 메일(컴플/삼성/NH/DB/한투)을 발송하는 launchd 60초 폴러. `run_timer_job.sh send-advisory-emails` → `execution/send_advisory_emails.py`.\n\n- **StartInterval=60**(StartCalendarInterval 아님). 요청이 없으면 즉시 exit0, 락으로 중복 실행 방어.\n- **안전 3중 가드**: ① 발송 모드는 맥 로컬 `~/email_config.json`의 `mode`만 신뢰(기본 `test`) — 요청 파일의 mode 필드는 감사용, 발송 판단에 미사용. ② real 전환은 config `mode=='real'` **그리고** `real_send_armed==True`(2단계 명시) + 사용자 승인 후에만, 코드가 자동 전환 안 함. ③ 발송 직전 assert: test인데 수신자에 본인(`kts@investlife.com`) 외 주소가 하나라도 있으면 `SendGuardError`로 **전체 배치 중단**(부분발송 없음) + 텔레그램 알림.\n- **수신처**: test=본인(`kts@investlife.com`) 단독. real=요청 계정의 to/cc 그대로. **real BCC 본인 제외(2026-07-14)** — 운용3본부(multiasset) CC에 본인이 이미 포함돼 중복 수신되던 것을 해소(보낸기록용 BCC 폐기). 본인 주소는 config가 아닌 코드 상수(`SELF_CANONICAL`)라 config 오염으로도 test 수신자가 바뀌지 않는다.\n- **멱등**: 처리한 요청 ts를 `orders/email_send_result.json` + `logs/launchd/send-advisory-emails.processed`에 기록, 재실행 시 ts≤마지막처리 스킵. 비밀번호·메일 전문은 로그 미기록(요약만). SMTP 비번은 `.env HIWORKS_MAIL_PASSWORD`.\n- **첨부**: 요청 base64만 사용(자문지/ 폴더 매칭·fallback 없음), 폴러측 총량 상한 5MiB(클라이언트가 900KB로 이미 제한).\n- 컴플라이언스 선발송 게이팅은 2026-07-13 사용자 지시로 제거(UI enable + 폴러 guard 해제) — 증권사 키가 컴플 발송 성공을 더는 요구하지 않음.\n- 일시 5xx/네트워크로 GitHub 요청 조회가 실패해도 배치를 죽이지 않고, 연속 10회(≈10분)마다만 알림(분당 스팸 방지).",
+   "code": [
+    "execution/send_advisory_emails.py",
+    "launchd/timers/com.antigravity.send-advisory-emails.plist",
+    "launchd/timers/run_timer_job.sh"
+   ],
+   "reads": [
+    "store-orders-pending",
+    "page-wrap"
+   ],
+   "writes": [
+    "store-orders-pending"
+   ],
+   "depends_on": [
+    "infra-vm-macmini",
+    "page-wrap"
+   ],
+   "alerts": "OnFailure(연속 실패 ~10분) → notify_sisyphe_failure.sh → 텔레그램"
   },
   {
    "id": "daemon-catchup",
@@ -2291,7 +2319,7 @@
    "runs_on": "github",
    "schedule_kst": "생성=21:40 (architecture-daily)",
    "status": "active",
-   "desc_md": "생태계 아키텍처를 보여주는 페이지. **registry 기반 자동 생성물** — `architecture/wiki/*.md` 코퍼스가 단일 출처이고, `rebuild_registry_from_wiki.py`가 registry.json을, `create_architecture.py`가 architecture.html(+wiki/INDEX.md)을 재생성한다. **직접 수정 금지.**\n\n- 매일 밤 [[timer-architecture-daily]](21:40, claude 헤드리스)가 최근 변경을 위키에 반영하고 registry·html을 재생성해 push → 수동 동기화 부담이 해소됐다.\n- 컴포넌트(봇/잡/페이지/데이터) 추가·변경은 위키 .md를 고쳐야 도식도·타임라인·위키가 함께 갱신된다.",
+   "desc_md": "생태계 아키텍처를 보여주는 페이지. **registry 기반 자동 생성물** — `architecture/wiki/*.md` 코퍼스가 단일 출처이고, `rebuild_registry_from_wiki.py`가 registry.json을, `create_architecture.py`가 architecture.html(+wiki/INDEX.md)을 재생성한다. **직접 수정 금지.**\n\n- 매일 밤 [[timer-architecture-daily]](21:40, claude 헤드리스)가 최근 변경을 위키에 반영하고 registry·html을 재생성해 push → 수동 동기화 부담이 해소됐다.\n- 컴포넌트(봇/잡/페이지/데이터) 추가·변경은 위키 .md를 고쳐야 도식도·타임라인·위키가 함께 갱신된다.\n- **reads/writes 이중 표기 규약(2026-07-14 명문화)**: 이 두 필드는 컴포넌트 id(`store-wrap-nav-xlsx`)와, 노드로 모델링하지 않은 원시 데이터 산출물(`~/datalake (parquet …)`, `kodex_sectors.json`) 양쪽을 가리킨다. 전자만 노드로 해석되고 후자는 카드 텍스트로만 렌더된다. `create_architecture.validate()`는 확장자·경로구분자·`~`·공백이 있는 참조를 산출물로 보고 건너뛰어(오탐 WARN 45건 제거) 오타 id(`store-featured-dat`)만 broken link로 잡는다. `depends_on`은 예외 없이 컴포넌트 id여야 한다.",
    "code": [
     "architecture.html",
     "architecture/registry.json",
@@ -2580,34 +2608,6 @@
    "schedule_kst": "사용자 편집 + finalize",
    "status": "active",
    "desc_md": "랩 상품 운용의 원장 엑셀. NEW(종목·비중)/AUM/기준가/수익률 시트로 구성. 사용자가 직접 편집하는 유일한 바이너리 데이터.\n\n- NEW/AUM은 사람(또는 finalize 잡)이 채우고, 기준가/수익률은 calculate_wrap_nav/returns가 자동 생성.\n- 워처가 저장을 감지→3-way merge→push, recalc_wrap_nav 워크플로가 라이브 반영.\n- 바이너리라 push 충돌 위험 → safe_commit_push xlsx 가드 + merge_wrap_nav 3-way 병합.\n- Excel에서 열려있으면 쓰기 PermissionError."
-  },
-  {
-   "id": "timer-advisory-emails",
-   "project": "antigravity",
-   "domain": "portfolio-wrap",
-   "type": "timer",
-   "name": "자문지 메일 발송 폴러 (send-advisory-emails 60초)",
-   "runs_on": "vm_macmini",
-   "schedule_kst": "60초 폴러 (상시)",
-   "status": "active",
-   "desc_md": "2026-07-13 신설. wrap.html Email 탭의 [메일 발송 요청]이 GitHub Contents API로 기록한 `orders/email_send_request.json`을 감지해 하이웍스 SMTP로 자문지 메일(컴플/삼성/NH/DB/한투)을 발송하는 launchd 60초 폴러. `run_timer_job.sh send-advisory-emails` → `execution/send_advisory_emails.py`.\n\n- **StartInterval=60**(StartCalendarInterval 아님). 요청이 없으면 즉시 exit0, 락으로 중복 실행 방어.\n- **안전 3중 가드**: ① 발송 모드는 맥 로컬 `~/email_config.json`의 `mode`만 신뢰(기본 `test`) — 요청 파일의 mode 필드는 감사용, 발송 판단에 미사용. ② real 전환은 config `mode=='real'` **그리고** `real_send_armed==True`(2단계 명시) + 사용자 승인 후에만, 코드가 자동 전환 안 함. ③ 발송 직전 assert: test인데 수신자에 본인(`kts@investlife.com`) 외 주소가 하나라도 있으면 `SendGuardError`로 **전체 배치 중단**(부분발송 없음) + 텔레그램 알림.\n- **멱등**: 처리한 요청 ts를 `orders/email_send_result.json` + `logs/launchd/send-advisory-emails.processed`에 기록, 재실행 시 ts≤마지막처리 스킵. 비밀번호·메일 전문은 로그 미기록(요약만). SMTP 비번은 `.env HIWORKS_MAIL_PASSWORD`.\n- **첨부**: 요청 base64만 사용(자문지/ 폴더 매칭·fallback 없음), 폴러측 총량 상한 5MiB(클라이언트가 900KB로 이미 제한).\n- 컴플라이언스 선발송 게이팅은 2026-07-13 사용자 지시로 제거(UI enable + 폴러 guard 해제) — 증권사 키가 컴플 발송 성공을 더는 요구하지 않음.\n- 일시 5xx/네트워크로 GitHub 요청 조회가 실패해도 배치를 죽이지 않고, 연속 10회(≈10분)마다만 알림(분당 스팸 방지).",
-   "code": [
-    "execution/send_advisory_emails.py",
-    "launchd/timers/com.antigravity.send-advisory-emails.plist",
-    "launchd/timers/run_timer_job.sh"
-   ],
-   "reads": [
-    "store-orders-pending",
-    "page-wrap"
-   ],
-   "writes": [
-    "store-orders-pending"
-   ],
-   "depends_on": [
-    "infra-vm-macmini",
-    "page-wrap"
-   ],
-   "alerts": "OnFailure(연속 실패 ~10분) → notify_sisyphe_failure.sh → 텔레그램"
   },
   {
    "id": "timer-hotel-adr",
