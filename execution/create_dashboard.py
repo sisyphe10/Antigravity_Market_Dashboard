@@ -4836,7 +4836,7 @@ def create_order_section():
                 var putResp = await fetch(apiUrl, { method: 'PUT', headers: Object.assign({}, headers, { 'Content-Type': 'application/json' }), body: JSON.stringify(body) });
                 if (!putResp.ok) { var errTxt = await putResp.text(); throw new Error('PUT 실패: ' + putResp.status + ' ' + errTxt.slice(0, 200)); }
                 closeSendModal();
-                alert('✅ 발송 요청 기록 완료 (' + tag + ', ' + mails.length + '통)\\n\\n서버 폴러가 1분 내 처리합니다. 기본 테스트 모드에서는 본인(kts@investlife.com)에게만 발송되며, 결과는 텔레그램으로 알립니다.');
+                alert('✅ 발송 요청 기록 완료 (' + tag + ', ' + mails.length + '통)\\n\\n서버 폴러가 1분 내 실제 수신처로 발송합니다. 결과는 텔레그램으로 알립니다.');
             } catch (e) {
                 alert('❌ 발송 요청 실패: ' + e.message);
                 if (msg) msg.textContent = '';
