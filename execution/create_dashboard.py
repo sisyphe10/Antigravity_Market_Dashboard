@@ -4914,16 +4914,18 @@ def create_order_section():
                     + '<button class="email-tab-dl-btn" data-pf="' + it.pf + '" data-tidx="' + it.ti + '" style="font-family:inherit;font-size:14px;font-weight:600;padding:6px 14px;background:' + btnColor + ';color:#fff;border:none;border-radius:8px;cursor:pointer;min-width:160px;text-align:center;">' + it.label + '</button>'
                     + '</div>';
             });
-            var dlSection = '<div style="margin-bottom:8px;padding:16px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;">'
-                + '<h4 style="margin:0 0 12px 0;font-size:15px;color:#444;">자문지 다운로드</h4>'
-                + dlRows
-                + '</div>';
-            var sendSection = '<div style="margin-bottom:16px;display:flex;justify-content:flex-end;gap:10px;">'
+            var sendButtons = '<div style="display:flex;gap:10px;flex-shrink:0;">'
                 + '<button id="advBtnCompliance" style="font-family:inherit;font-size:15px;font-weight:700;padding:10px 22px;background:#d97706;color:#fff;border:none;border-radius:8px;cursor:pointer;">컴플 메일</button>'
                 + '<button id="advBtnBrokers" style="font-family:inherit;font-size:15px;font-weight:700;padding:10px 22px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">증권사 메일</button>'
                 + '</div>';
+            var dlSection = '<div style="margin-bottom:8px;padding:16px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;">'
+                + '<h4 style="margin:0 0 12px 0;font-size:15px;color:#444;">이메일</h4>'
+                + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;">'
+                + sendButtons
+                + '<div style="flex:1;min-width:0;">' + dlRows + '</div>'
+                + '</div>'
+                + '</div>';
             var html = '<div style="max-width:1200px;margin:0 auto;background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">'
-                + sendSection
                 + dlSection
                 + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:16px;margin-top:16px;align-items:stretch;">'
                 + cells.join('')
