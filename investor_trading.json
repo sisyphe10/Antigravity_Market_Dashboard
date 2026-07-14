@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-13T18:32:08+09:00",
+  "updated": "2026-07-14T16:21:31+09:00",
   "window_short": 5,
   "window_long": 20,
   "stocks": {
@@ -71,23 +71,6 @@
         "days_available": 20
       }
     },
-    "032830": {
-      "last_date": "2026.07.13",
-      "short": {
-        "inst_volume": -61149,
-        "frgn_volume": 135077,
-        "inst_value_eok": -199.9,
-        "frgn_value_eok": 454.4,
-        "days_available": 5
-      },
-      "long": {
-        "inst_volume": 85732,
-        "frgn_volume": 162768,
-        "inst_value_eok": 455.6,
-        "frgn_value_eok": 546.0,
-        "days_available": 20
-      }
-    },
     "067310": {
       "last_date": "2026.07.13",
       "short": {
@@ -136,23 +119,6 @@
         "frgn_volume": -730730,
         "inst_value_eok": 394.9,
         "frgn_value_eok": -1124.0,
-        "days_available": 20
-      }
-    },
-    "161890": {
-      "last_date": "2026.07.13",
-      "short": {
-        "inst_volume": -41288,
-        "frgn_volume": 184864,
-        "inst_value_eok": -27.8,
-        "frgn_value_eok": 182.2,
-        "days_available": 5
-      },
-      "long": {
-        "inst_volume": 838718,
-        "frgn_volume": 39646,
-        "inst_value_eok": 825.1,
-        "frgn_value_eok": 85.6,
         "days_available": 20
       }
     },
@@ -221,23 +187,6 @@
         "frgn_volume": -444699,
         "inst_value_eok": 757.4,
         "frgn_value_eok": -475.2,
-        "days_available": 20
-      }
-    },
-    "402340": {
-      "last_date": "2026.07.13",
-      "short": {
-        "inst_volume": -327736,
-        "frgn_volume": 382231,
-        "inst_value_eok": -4185.9,
-        "frgn_value_eok": 4964.5,
-        "days_available": 5
-      },
-      "long": {
-        "inst_volume": 1492987,
-        "frgn_volume": -3062468,
-        "inst_value_eok": 26482.2,
-        "frgn_value_eok": -54780.2,
         "days_available": 20
       }
     }
