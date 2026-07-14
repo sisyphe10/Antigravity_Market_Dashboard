@@ -5205,7 +5205,8 @@ def create_order_section():
         // ── 통합 주문 매트릭스 (2026-07-13, 정본=order_matrix_test.html 이식) ──
         // per-portfolio orderStocks/orderState 위의 VIEW. 저장/복원/finalize/email/download 무수정 재사용.
         var GENERAL_DISPLAYS = ORDER_PORTFOLIOS.filter(function(p){return p.general;}).map(function(p){return p.display;});
-        var matrixNewRows = [], _mtxSeq = 0, syncGeneral = true;
+        var TARGET_DISPLAYS = ORDER_PORTFOLIOS.filter(function(p){return !p.general;}).map(function(p){return p.display;});
+        var matrixNewRows = [], _mtxSeq = 0, syncGeneral = true, syncTarget = false;
 
         function _mtxFindIdx(pf,code){ var a=orderStocks[pf]||[], c=String(code||'').trim(); for(var i=0;i<a.length;i++){ if(String(a[i].code||'').trim()===c) return i; } return -1; }
         function _mtxNewRowCodes(){ var s={}; matrixNewRows.forEach(function(r){ var c=String(r.code||'').trim(); if(c) s[c]=true; }); return s; }
@@ -5236,6 +5237,9 @@ def create_order_section():
           var grp = hasR?'red':(hasB?'blue':'all'); var val=_mtxGroupReason(code,grp); var need=(hasR||hasB)&&!val.trim();
           return '<td style="padding:0;background:'+(need?'#fee2e2':'transparent')+';'+(need?'border:2px solid #fca5a5;':'')+'">'+inp(grp,val,'transparent','','')+'</td>'; }
         function _mtxColSum(pf){ var st=orderState[pf]||[], s=0; st.forEach(function(x){ s+=parseFloat(x.newWeight)||0; }); return s; }
+        function _mtxColPrevSum(pf){ var a=orderStocks[pf]||[], s=0; a.forEach(function(x){ s+=parseFloat(x.weight)||0; }); return s; }
+        function _mtxTabStops(){ var g=[], t=[]; ORDER_PORTFOLIOS.forEach(function(p,ci){ if(p.general) g.push(ci); else t.push(ci); });
+          var gs=(syncGeneral&&g.length)?[g[0]]:g; var ts=(syncTarget&&t.length)?[t[0]]:t; return gs.concat(ts); }
         function _mtxCell(pf,code){ var idx=_mtxFindIdx(pf,code); if(idx<0) return {held:false,color:'#000',ot:'',newWeight:null};
           var prev=parseFloat(orderStocks[pf][idx].weight)||0, nw=parseFloat(orderState[pf][idx].newWeight)||0, ot=calcOrderType(prev,nw);
           var color=(ot==='신규 편입'||ot==='비중 확대')?'#FF0000':((ot==='비중 축소'||ot==='전량 편출')?'#0070C0':'#000');
@@ -5247,19 +5251,20 @@ def create_order_section():
           if(idx>=0){ orderState[pf][idx].newWeight=val; } else { var m=rowMeta||_mtxUnion().meta[c]||{code:c,name:'',sector:''}; orderStocks[pf].push({code:c,name:m.name||'',sector:m.sector||'',weight:0,isNew:true,_mtxAdded:true}); orderState[pf].push({newWeight:val,reason:_mtxReason(c)}); } }
         function _mtxApplyCellSynced(pf,code,raw,rowMeta){ var meta=ORDER_PORTFOLIOS.filter(function(p){return p.display===pf;})[0];
           if(syncGeneral && meta && meta.general){ GENERAL_DISPLAYS.forEach(function(d){ _mtxApplyCell(d,code,raw,rowMeta); }); }
+          else if(syncTarget && meta && !meta.general){ TARGET_DISPLAYS.forEach(function(d){ _mtxApplyCell(d,code,raw,rowMeta); }); }
           else { _mtxApplyCell(pf,code,raw,rowMeta); } }
 
         function renderOrderMatrix(){
           var union=_mtxUnion(); var pfs=ORDER_PORTFOLIOS.map(function(p){return p.display;});
-          function wcell(pf,code,isNew){ var cell=_mtxCell(pf,code); var val=cell.held?cell.newWeight:''; var gen=ORDER_PORTFOLIOS.filter(function(p){return p.display===pf;})[0].general;
-            return '<td class="wcol '+(gen?'grp-general':'')+'"><input type="text" inputmode="decimal" class="cell mtx-w" data-code="'+escapeHtml(code)+'" data-pf="'+escapeHtml(pf)+'"'+(isNew?' data-newrow="1"':'')+' value="'+(val===''?'':val)+'" style="color:'+cell.color+';"></td>'; }
+          function wcell(pf,code,isNew,ci){ var cell=_mtxCell(pf,code); var val=cell.held?cell.newWeight:''; var gen=ORDER_PORTFOLIOS.filter(function(p){return p.display===pf;})[0].general;
+            return '<td class="wcol '+(gen?'grp-general':'')+'"><input type="text" inputmode="decimal" class="cell mtx-w" data-code="'+escapeHtml(code)+'" data-pf="'+escapeHtml(pf)+'" data-col="'+ci+'"'+(isNew?' data-newrow="1"':'')+' value="'+(val===''?'':val)+'" style="color:'+cell.color+';"></td>'; }
           var rows='', rank=0;
           union.order.forEach(function(code){ rank++; var m=union.meta[code]; var cells='';
-            pfs.forEach(function(pf){ cells+=wcell(pf,code,false); });
+            pfs.forEach(function(pf,ci){ cells+=wcell(pf,code,false,ci); });
             rows+='<tr><td style="color:#666;">'+rank+'</td><td>'+escapeHtml(m.sector||'')+'</td><td>'+escapeHtml(m.code)+'</td><td style="font-weight:600;">'+escapeHtml(m.name||'')+'</td>'+cells
               +reasonTd(code)+'</tr>'; });
           matrixNewRows.forEach(function(r){ rank++; var code=String(r.code||'').trim(); var cells='';
-            pfs.forEach(function(pf){ cells+=wcell(pf,code,true); });
+            pfs.forEach(function(pf,ci){ cells+=wcell(pf,code,true,ci); });
             rows+='<tr data-tempid="'+r.tempId+'"><td><button class="del-btn mtx-del" data-tempid="'+r.tempId+'" title="행 삭제">×</button></td>'
               +'<td><input type="text" class="meta mtx-meta" data-tempid="'+r.tempId+'" data-field="sector" value="'+escapeHtml(r.sector||'')+'" placeholder="업종" style="width:90px;"></td>'
               +'<td><input type="text" class="meta mtx-meta" data-tempid="'+r.tempId+'" data-field="code" value="'+escapeHtml(r.code||'')+'" placeholder="000000" maxlength="6" style="width:64px;"></td>'
@@ -5271,9 +5276,12 @@ def create_order_section():
           var cash='';
           pfs.forEach(function(pf,ci){ var c=100-_mtxColSum(pf); var gen=ORDER_PORTFOLIOS[ci].general;
             cash+='<td class="wcol '+(gen?'grp-general':'')+'" id="mtx-cash-'+ci+'" style="color:'+(c<0?'#dc2626':'#222')+';">'+c.toFixed(0)+'%</td>'; });
+          var diff='';
+          pfs.forEach(function(pf,ci){ var d=Number((_mtxColSum(pf)-_mtxColPrevSum(pf)).toFixed(1)); var gen=ORDER_PORTFOLIOS[ci].general;
+            var dc=d>0?'#FF0000':(d<0?'#0070C0':'#222'); diff+='<td class="wcol '+(gen?'grp-general':'')+'" style="color:'+dc+';">'+(d>0?'+':'')+d+'%</td>'; });
           var head='';
-          var _fg=true;
-          ORDER_PORTFOLIOS.forEach(function(p){ var _m=(p.general&&_fg)?' data-firstgen="1"':''; if(p.general)_fg=false; head+='<th class="wcol '+(p.general?'grp-general':'')+'"'+_m+' title="'+escapeHtml(p.display)+'" style="min-width:64px;">'+escapeHtml(p.label)+'</th>'; });
+          var _fg=true, _ft=true;
+          ORDER_PORTFOLIOS.forEach(function(p){ var _m=(p.general&&_fg)?' data-firstgen="1"':''; if(p.general)_fg=false; var _mt=(!p.general&&_ft)?' data-firsttarget="1"':''; if(!p.general)_ft=false; head+='<th class="wcol '+(p.general?'grp-general':'')+'"'+_m+_mt+' title="'+escapeHtml(p.display)+'" style="min-width:64px;">'+escapeHtml(p.label)+'</th>'; });
           var html='<div class="toolbar">'
             +'<span id="orderSaveBadgeSlot" style="display:inline-flex;">'+buildOrderSaveBadgeGlobal()+'</span>'
             +'<div style="margin-left:auto;display:flex;gap:8px;">'
@@ -5282,10 +5290,11 @@ def create_order_section():
             +'<button class="btn green" id="btnFinal">최종 저장</button>'
             +'<button class="btn blue" id="btnAdditional">추가 주문</button>'
             +'</div></div>'
-            +'<div id="syncRow" style="margin-bottom:8px;"><span class="sync-toggle'+(syncGeneral?' on':'')+'" id="syncToggle">일반형 동기화</span></div>'
+            +'<div id="syncRow" style="position:relative;height:30px;margin-bottom:8px;"><span class="sync-toggle'+(syncGeneral?' on':'')+'" id="syncToggle" style="position:absolute;top:0;">일반형 동기화</span><span class="sync-toggle'+(syncTarget?' on':'')+'" id="syncToggleTarget" style="position:absolute;top:0;">전환형 동기화</span></div>'
             +'<div style="overflow-x:auto;border:1px solid #000;"><table><thead><tr>'
             +'<th>#</th><th>업종</th><th>코드</th><th>종목명</th>'+head+'<th style="width:99%;">추천사유</th>'
             +'</tr></thead><tbody>'+rows
+            +'<tr class="diffrow"><td colspan="4" style="text-align:center;color:#444;">변동</td>'+diff+'<td></td></tr>'
             +'<tr class="addrow"><td colspan="3"></td><td style="padding:8px 4px;"><button class="btn" id="btnAdd" style="background:#2563eb;color:#fff;border:none;border-radius:4px;padding:4px 12px;font-size:14px;line-height:1.5;">+ 종목 추가</button></td>'+ORDER_PORTFOLIOS.map(function(){return '<td class="wcol"></td>';}).join('')+'<td></td></tr>'
             +'<tr class="totals"><td colspan="4" style="text-align:center;color:#444;">합계</td>'+totals+'<td></td></tr>'
             +'<tr class="cashrow"><td colspan="4" style="text-align:center;color:#444;">현금</td>'+cash+'<td></td></tr></tbody></table></div>';
@@ -5295,7 +5304,23 @@ def create_order_section():
 
         function bindMatrixHandlers(){
           document.getElementById('syncToggle').addEventListener('click', function(){ syncGeneral=!syncGeneral; renderOrderMatrix(); });
-          (function(){ var fg=document.querySelector('#orderContent th[data-firstgen]'), sr=document.getElementById('syncRow'), oc=document.getElementById('orderContent'); if(fg&&sr&&oc){ var off=fg.getBoundingClientRect().left - oc.getBoundingClientRect().left; sr.style.paddingLeft=Math.max(0,off)+'px'; } })();
+          var _stt=document.getElementById('syncToggleTarget'); if(_stt) _stt.addEventListener('click', function(){ syncTarget=!syncTarget; renderOrderMatrix(); });
+          (function(){ var oc=document.getElementById('orderContent'); if(!oc) return; var ocL=oc.getBoundingClientRect().left;
+            var fg=document.querySelector('#orderContent th[data-firstgen]'), _s1=document.getElementById('syncToggle'); if(fg&&_s1){ _s1.style.left=Math.max(0,fg.getBoundingClientRect().left-ocL)+'px'; }
+            var ft=document.querySelector('#orderContent th[data-firsttarget]'), _s2=document.getElementById('syncToggleTarget'); if(ft&&_s2){ _s2.style.left=Math.max(0,ft.getBoundingClientRect().left-ocL)+'px'; } })();
+          (function(){ var oc=document.getElementById('orderContent'); if(!oc) return;
+            function focusCol(tr,col){ if(!tr) return false; var el=tr.querySelector('input.mtx-w[data-col="'+col+'"]'); if(el){ el.focus(); try{el.setSelectionRange(el.value.length,el.value.length);}catch(_){} return true; } return false; }
+            function rowHasW(tr){ return !!(tr&&tr.querySelector&&tr.querySelector('input.mtx-w')); }
+            function nextWRow(tr){ var n=tr.nextElementSibling; while(n){ if(rowHasW(n)) return n; n=n.nextElementSibling; } return null; }
+            function prevWRow(tr){ var n=tr.previousElementSibling; while(n){ if(rowHasW(n)) return n; n=n.previousElementSibling; } return null; }
+            oc.querySelectorAll('input.mtx-w').forEach(function(el){ el.addEventListener('keydown', function(e){ if(e.key!=='Tab') return;
+              var stops=_mtxTabStops(); if(!stops.length) return; var col=parseInt(e.target.dataset.col,10); var tr=e.target.closest('tr'); e.preventDefault();
+              if(e.shiftKey){ var ps=null; for(var i=stops.length-1;i>=0;i--){ if(stops[i]<col){ ps=stops[i]; break; } } if(ps!==null){ focusCol(tr,ps); } else { var pr=prevWRow(tr); if(pr) focusCol(pr,stops[stops.length-1]); } }
+              else { var ns=null; for(var j=0;j<stops.length;j++){ if(stops[j]>col){ ns=stops[j]; break; } } if(ns!==null){ focusCol(tr,ns); } else { var nr=nextWRow(tr); if(nr) focusCol(nr,stops[0]); } }
+            }); });
+            var reasons=Array.prototype.slice.call(oc.querySelectorAll('input.mtx-reason'));
+            reasons.forEach(function(el,i){ el.addEventListener('keydown', function(e){ if(e.key!=='Tab') return; e.preventDefault(); var j=e.shiftKey?i-1:i+1; if(j>=0&&j<reasons.length){ reasons[j].focus(); try{reasons[j].select();}catch(_){} } }); });
+          })();
           document.querySelectorAll('#orderContent input.mtx-w').forEach(function(el){ el.addEventListener('input', function(e){
             var code=e.target.dataset.code, pf=e.target.dataset.pf, rowMeta=null;
             if(e.target.dataset.newrow){ var tr=e.target.closest('tr'), tid=tr&&tr.dataset.tempid; var nr=matrixNewRows.filter(function(r){return String(r.tempId)===String(tid);})[0]; if(nr){ code=String(nr.code||'').trim(); rowMeta=nr; } }
