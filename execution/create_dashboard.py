@@ -4469,7 +4469,7 @@ def create_order_section():
                 var asof = pdata && pdata._price_asof;
                 if (!asof) return false;
                 var d = new Date();
-                var today = d.getFullYear() + - + String(d.getMonth() + 1).padStart(2, 0) + - + String(d.getDate()).padStart(2, 0);
+                var today = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
                 return String(asof) < today;
             } catch (e) { return false; }
         }
