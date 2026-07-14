@@ -49,6 +49,15 @@ EARNINGS_SIGNAL_KEYWORDS = (
     'total revenue', 'revenue of', 'revenues of', 'net revenue',
 )
 
+# ★2026-07-15: 자사주매입 정형공시 네거티브 가드 (홍콩거래소 FF305 등).
+# BABA 'Next Day Disclosure Return'(매입 단가 per share 표 포함)이 EARNINGS_SIGNAL에 걸려
+# 6-K_QUARTERLY/HIGH 오분류 + transcript 잡 생성된 사고. 실적 보도자료가 자사주매입을
+# '언급'하는 것과 달리 아래 문구는 정형 반환서식 제목이라 실적 문서에 등장하지 않음.
+BUYBACK_FORM_KEYWORDS = (
+    'next day disclosure return',
+    'monthly return of equity issuer',
+)
+
 # 8-K item 번호 정규식 (예: "Item 2.02", "2.02,9.01", "2.02 / 9.01")
 ITEM_RE = re.compile(r'(?:Item\s*)?(\d\.\d{2})', flags=re.IGNORECASE)
 
@@ -211,6 +220,11 @@ def _classify_6k(exhibits: dict[str, str], attachments_meta: list[dict]) -> tupl
     # 1) 월별 매출 (가장 구체적 — 'revenue'가 실적신호와 겹치므로 먼저 처리)
     if any(meta.get('is_monthly_revenue') for meta in attachments_meta):
         return 'NORMAL', '6-K_MONTHLY'
+
+    # 1.5) 자사주매입 정형공시 (HK FF305 Next Day Disclosure Return 등) — 매입단가
+    #      'per share' 표가 실적신호에 걸리므로 분기실적 판정보다 먼저 EVENT로 분기.
+    if any(k in body_text for k in BUYBACK_FORM_KEYWORDS):
+        return 'NORMAL', '6-K_EVENT'
 
     # 2) 분기 실적 = EX-99 첨부 + 본문 재무 실적 신호. ASML(다중)·TSM/Cameco(단일) 모두 해당.
     if ex99_count >= 1 and has_earnings:
