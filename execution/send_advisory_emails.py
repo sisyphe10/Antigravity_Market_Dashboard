@@ -65,14 +65,15 @@ def resolve_mode(config):
 
 
 def resolve_recipients(mode, acct):
-    """가드3 기반: test → 본인(SELF_CANONICAL) 단독. real → 실수신자 + BCC 본인(보낸기록).
-    ★본인 주소는 config 가 아닌 고정 상수 — config 오염으로도 test 수신자가 바뀌지 않는다."""
+    """가드3 기반: test → 본인(SELF_CANONICAL) 단독. real → 실수신자만(BCC 없음).
+    ★본인 주소는 config 가 아닌 고정 상수 — config 오염으로도 test 수신자가 바뀌지 않는다.
+    ★real BCC 본인 제외(2026-07-14): 운용3본부(multiasset) CC 에 본인이 포함돼 중복 수신되던 것 해소."""
     if mode == 'test':
         return {'to': [SELF_CANONICAL], 'cc': [], 'bcc': []}
     return {
         'to': list(acct.get('to', [])),
         'cc': list(acct.get('cc', [])),
-        'bcc': [SELF_CANONICAL],
+        'bcc': [],
     }
 
 
