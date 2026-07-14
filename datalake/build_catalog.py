@@ -33,6 +33,12 @@ DESCRIPTIONS = {
     "us_macro": "FRED 미국 매크로 36종 전체 이력 (금리·스프레드·CPI·고용·주택 등, series 컬럼)",
     "kr_flows": "증시 수급 자금 이력 — 투자자예탁금·신용거래융자·미수금 등 (금투협, 억원 단위)",
     "macro_series": "레포 dataset.csv 뷰 — 기존 수집기가 매일 누적하는 매크로·산업 시계열 (2021~, 지속 갱신)",
+    "kr_short": "종목별 일별 공매도 — 거래량·거래대금·잔고수량·잔고금액 (KRX SRT30001). "
+                "거래비중=÷kr_ohlcv.volume, 잔고비중=÷kr_marcap.shares 조인 파생. 잔고는 T+2 공시. "
+                "★공매도 전면금지 2023-11-06~2025-03-30, 부분금지 2020-03-16~2021-05-02 구간 빈 값 정상",
+    "kr_short_investor": "시장단위 투자자별 공매도 (KOSPI/KOSDAQ, metric=volume|value, 기관/개인/외국인/기타)",
+    "kr_futures_ohlcv": "KRX 선물 월물별 일별 시세+미결제약정(oi) — 7상품(K200·미니K200·KOSDAQ150·KRX300·"
+                        "국채3y/10y·달러), 스프레드 제외. 상품 단위 합계는 kr_futures_oi_daily 뷰",
 }
 
 EXAMPLE_SQL = {
@@ -44,6 +50,13 @@ EXAMPLE_SQL = {
     "kr_macro": "SELECT date, value FROM kr_macro WHERE series='국고채 10년' AND date>='2020-01-01' ORDER BY date;",
     "us_macro": "SELECT date, value FROM us_macro WHERE series='미 CPI 전년동월비' ORDER BY date DESC LIMIT 12;",
     "kr_flows": "SELECT date, value FROM kr_flows WHERE series='투자자예탁금' ORDER BY date DESC LIMIT 20;",
+    "kr_short": "SELECT s.date, s.short_volume, s.short_volume/o.volume AS short_ratio, s.balance_qty\n"
+                "FROM kr_short s JOIN kr_ohlcv o USING(date, ticker)\n"
+                "WHERE s.name='삼성전자' ORDER BY s.date DESC LIMIT 20;",
+    "kr_short_investor": "SELECT date, foreigner, institution FROM kr_short_investor "
+                         "WHERE market='KOSPI' AND metric='value' ORDER BY date DESC LIMIT 20;",
+    "kr_futures_ohlcv": "SELECT date, name, close, oi FROM kr_futures_ohlcv "
+                        "WHERE prod='KRDRVFUK2I' ORDER BY date DESC, oi DESC LIMIT 20;",
 }
 
 
@@ -114,6 +127,23 @@ def main():
             )
             with open(os.path.join(CATALOG_DIR, f"{name}.md"), "w", encoding="utf-8", newline="\n") as f:
                 f.write(md)
+
+    # 선물 상품 단위 미결제약정 합산 뷰 (월물 합계)
+    if "kr_futures_ohlcv" in datasets and not args.check:
+        con.execute(
+            """CREATE OR REPLACE VIEW kr_futures_oi_daily AS
+               SELECT date, prod, prod_name, SUM(oi) AS oi,
+                      SUM(volume) AS volume, SUM(value) AS value
+               FROM kr_futures_ohlcv GROUP BY date, prod, prod_name""")
+        md = (
+            "# kr_futures_oi_daily\n\nkr_futures_ohlcv의 상품 단위 일별 합산 뷰 — "
+            "월물 합계 미결제약정(oi)·거래량·거래대금.\n\n"
+            "## 쿼리 예시\n\n```sql\nSELECT date, oi FROM kr_futures_oi_daily "
+            "WHERE prod_name='KOSPI200 선물' ORDER BY date DESC LIMIT 20;\n```\n"
+        )
+        with open(os.path.join(CATALOG_DIR, "kr_futures_oi_daily.md"), "w",
+                  encoding="utf-8", newline="\n") as f:
+            f.write(md)
 
     # dataset.csv (레포 누적 매크로 시계열, 2021~ 지속 갱신) → macro_series 뷰
     # 웹 UI 샌드박스(allowed_directories=market/)를 지키기 위해 사본을 market/ 안에 둔다
