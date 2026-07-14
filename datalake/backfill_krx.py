@@ -3,7 +3,15 @@
 
 전 상장종목(KOSPI+KOSDAQ) 상장일부터 오늘까지, 일봉·종가 기준.
 패스별 진행: ohlcv → marcap → foreign → etf → index → investor
+            → short → short_investor → futures
 (fundamental 패스는 2026-07-13 제외 — KRX 주당지표가 연간 확정실적 기준이라 분기 밸류에이션 용도로 무의미)
+
+공매도·선물 패스 (2026-07-15 추가):
+- short: 종목별 공매도 통합(거래량·거래대금·잔고수량·잔고금액) — SRT30001, 1콜/종목.
+  ★전면금지 2023-11-06~2025-03-30, 부분금지 2020-03-16~2021-05-02 구간 빈 값 정상.
+- short_investor: 시장단위 투자자별 공매도 (KOSPI/KOSDAQ × 거래량/거래대금 = 4콜)
+- futures: 선물 7상품 월물별 시세+미결제약정 — ★날짜축(pykrx 기간조회 미구현),
+  api 래퍼가 미결제약정 컬럼을 버리므로 core 전종목시세(MDCSTAT12501) 직접 호출.
 
 안전 규칙 (★KRX 계정 잠금 방지):
 - 호출 간 0.5s 페이싱, 연속 실패 5회 → 즉시 중단(재실행 시 이어서)
@@ -35,7 +43,28 @@ START_YEAR = 1990
 # — 종목당 호출 4→1로 감소 (속도 3배·차단 위험 감소). 캡이 재발하면 10으로 되돌릴 것.
 WINDOW_YEARS = 40
 
-PASSES = ["ohlcv", "marcap", "foreign", "etf", "index", "investor"]
+PASSES = ["ohlcv", "marcap", "foreign", "etf", "index", "investor",
+          "short", "short_investor", "futures"]
+
+# 선물 백필 대상 상품 (prodId, 상장일, 라벨) — 상장일은 헛콜 방지용 하한일 뿐
+# (이전 날짜는 빈 응답). KOFEX 출신 상품(국채·달러)은 2005 KRX 통합 이전
+# 이력이 화면에 없을 수 있음 — 빈 응답으로 자연 처리.
+FUT_PRODUCTS = [
+    ("KRDRVFUK2I", "1996-05-03", "KOSPI200 선물"),
+    ("KRDRVFUMKI", "2015-07-20", "미니 KOSPI200 선물"),
+    ("KRDRVFUKQI", "2015-11-23", "KOSDAQ150 선물"),
+    ("KRDRVFUXI3", "2018-03-26", "KRX300 선물"),
+    ("KRDRVFUBM3", "1999-09-29", "3년 국채 선물"),
+    ("KRDRVFUBMA", "2008-02-25", "10년 국채 선물"),
+    ("KRDRVFUUSD", "1999-04-23", "미국달러 선물"),
+]
+
+# 전종목시세(MDCSTAT12501) 원컬럼 → 저장 컬럼
+FUT_COL = {"ISU_SRT_CD": "contract_cd", "ISU_NM": "name",
+           "TDD_CLSPRC": "close", "TDD_OPNPRC": "open", "TDD_HGPRC": "high",
+           "TDD_LWPRC": "low", "SPOT_PRC": "spot", "SETL_PRC": "settle",
+           "ACC_TRDVOL": "volume", "ACC_TRDVAL": "value",
+           "ACC_OPNINT_QTY": "oi"}
 
 # 데이터셋별 (pykrx 컬럼 → 영문 컬럼) — 없는 컬럼은 무시
 RENAME = {
@@ -52,6 +81,10 @@ RENAME = {
                        "거래량": "volume", "거래대금": "value", "상장시가총액": "marcap"},
     "kr_investor_value": {"기관합계": "institution", "기타법인": "other_corp",
                           "개인": "individual", "외국인합계": "foreigner", "전체": "total"},
+    "kr_short": {"거래량": "short_volume", "거래대금": "short_value",
+                 "잔고수량": "balance_qty", "잔고금액": "balance_value"},
+    "kr_short_investor": {"기관": "institution", "개인": "individual",
+                          "외국인": "foreigner", "기타": "other", "합계": "total"},
 }
 
 
@@ -71,12 +104,12 @@ def normalize(df, dataset, **extra_cols):
     return out
 
 
-def windows(today):
-    """[(from, to)] 최신→과거 순 10년 윈도우."""
+def windows(today, years=WINDOW_YEARS):
+    """[(from, to)] 최신→과거 순 윈도우 (기본 40y = 사실상 단일)."""
     result = []
     end_year = today.year
     while end_year >= START_YEAR:
-        start_year = max(end_year - WINDOW_YEARS + 1, START_YEAR)
+        start_year = max(end_year - years + 1, START_YEAR)
         frm = f"{start_year}0101"
         to = today.strftime("%Y%m%d") if end_year == today.year else f"{end_year}1231"
         result.append((frm, to))
@@ -122,7 +155,7 @@ class Runner:
             return FAIL
 
 
-def fetch_windowed(runner, fetch_fn, today):
+def fetch_windowed(runner, fetch_fn, today, years=WINDOW_YEARS):
     """윈도우를 최신→과거로 조회. (DataFrame|None, ok) 반환.
 
     데이터를 본 뒤 '정상 빈 윈도우'를 만나면 상장 전으로 보고 중단.
@@ -131,7 +164,7 @@ def fetch_windowed(runner, fetch_fn, today):
     """
     import pandas as pd
     frames, seen_data, ok = [], False, True
-    for frm, to in windows(today):
+    for frm, to in windows(today, years):
         df = runner.call(fetch_fn, frm, to)
         if df is FAIL:
             ok = False
@@ -172,7 +205,8 @@ def finalize(dataset, key_cols):
     print(f"[{dataset}] finalize 완료: {total:,}행", flush=True)
 
 
-def run_per_item(dataset, items, fetch_one, runner, today, key_cols, extra_fn, force=False):
+def run_per_item(dataset, items, fetch_one, runner, today, key_cols, extra_fn,
+                 force=False, years=WINDOW_YEARS):
     """items(식별자 목록)를 하나씩 staging으로 백필. 완료 후 finalize.
 
     체크포인트 2단: 패스 전체 완료 = <dataset>/.backfill_done 마커,
@@ -193,7 +227,7 @@ def run_per_item(dataset, items, fetch_one, runner, today, key_cols, extra_fn, f
         if os.path.exists(sp) or os.path.exists(sp + ".empty"):
             skipped += 1
             continue
-        df, ok = fetch_windowed(runner, lambda f, t, k=key: fetch_one(f, t, k), today)
+        df, ok = fetch_windowed(runner, lambda f, t, k=key: fetch_one(f, t, k), today, years)
         if not ok:
             # 일시 실패 포함 — 체크포인트 미기록 → 다음 실행에서 재시도 (역사 절단 방지)
             deferred += 1
@@ -222,6 +256,100 @@ def run_per_item(dataset, items, fetch_one, runner, today, key_cols, extra_fn, f
             pass
 
 
+def fut_frame(raw, d, prod, prod_name):
+    """전종목시세 원본 → 저장 스키마. 스프레드(코드 4xxx, OI 없음)·비선물 행 제외.
+
+    daily_market_update.py도 공유한다 — 백필·일일 스키마 단일화.
+    """
+    import pandas as pd
+    if raw is None or len(raw) == 0:
+        return None
+    df = pd.DataFrame(raw)
+    if "ISU_SRT_CD" not in df.columns:
+        return None
+    if "SECUGRP_ID" in df.columns:
+        df = df[df["SECUGRP_ID"] == "FU"]
+    df = df[~df["ISU_SRT_CD"].astype(str).str.startswith("4")]
+    if df.empty:
+        return None
+    out = pd.DataFrame()
+    out["contract_cd"] = df["ISU_SRT_CD"].astype(str)
+    out["name"] = df["ISU_NM"].astype(str)
+    for src, dst in FUT_COL.items():
+        if dst in ("contract_cd", "name") or src not in df.columns:
+            continue
+        s = df[src].astype(str).str.replace(",", "", regex=False)
+        out[dst] = pd.to_numeric(s, errors="coerce")  # '-' → NaN
+    out.insert(0, "date", pd.Timestamp(d))
+    out["prod"] = prod
+    out["prod_name"] = prod_name
+    return out
+
+
+def load_trading_days():
+    """kr_ohlcv 연도 parquet의 고유 날짜 = 거래일 달력 (휴일 헛콜 방지)."""
+    import pandas as pd
+    days = set()
+    for p in sorted(glob.glob(os.path.join(dataset_dir("kr_ohlcv"), "[0-9]" * 4 + ".parquet"))):
+        s = pd.read_parquet(p, columns=["date"])["date"].drop_duplicates()
+        days |= {d.date() for d in s}
+    return sorted(days)
+
+
+def run_futures(runner, today):
+    """선물 날짜축 백필 — 체크포인트 = _staging/<상품>_<연도>.parquet."""
+    import pandas as pd
+    from pykrx.website.krx.future.core import 전종목시세
+    dataset = "kr_futures_ohlcv"
+    done_marker = os.path.join(dataset_dir(dataset), ".backfill_done")
+    staging_dir = os.path.join(dataset_dir(dataset), "_staging")
+    if os.path.exists(done_marker):
+        print(f"[{dataset}] 이미 백필 완료(.backfill_done) — skip", flush=True)
+        return
+    tdays = load_trading_days()
+    if not tdays:
+        raise RuntimeError("kr_ohlcv 거래일 달력 없음 — ohlcv 패스 먼저 실행")
+    view = 전종목시세()
+    deferred = 0
+    for prod, start, label in FUT_PRODUCTS:
+        start_d = date.fromisoformat(start)
+        for year in range(start_d.year, today.year + 1):
+            key = f"{prod}_{year}"
+            sp = staging_path(dataset, key)
+            if os.path.exists(sp) or os.path.exists(sp + ".empty"):
+                continue
+            days = [d for d in tdays if d.year == year and d >= start_d]
+            frames, fail = [], False
+            for d in days:
+                raw = runner.call(view.fetch, d.strftime("%Y%m%d"), prod)
+                if raw is FAIL:
+                    fail = True
+                    break
+                fr = fut_frame(raw, d, prod, label)
+                if fr is not None:
+                    frames.append(fr)
+            if fail:
+                deferred += 1
+                continue
+            if frames:
+                pd.concat(frames, ignore_index=True).to_parquet(sp, index=False)
+            else:
+                open(sp + ".empty", "w").close()
+            print(f"[{dataset}] {label} {year}: {sum(len(f) for f in frames):,}행 "
+                  f"({len(days)}거래일, 호출 {runner.calls})", flush=True)
+    if deferred:
+        print(f"[{dataset}] ★보류 {deferred}개 연도 — 완료 마커 미기록, 재실행으로 회수", flush=True)
+    finalize(dataset, ["date", "contract_cd"])
+    if deferred == 0:
+        open(done_marker, "w").close()
+        for f in glob.glob(os.path.join(staging_dir, "*.empty")):
+            os.remove(f)
+        try:
+            os.rmdir(staging_dir)
+        except OSError:
+            pass
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pass", dest="only_pass", choices=PASSES, help="특정 패스만 실행")
@@ -239,7 +367,7 @@ def main():
 
     # 종목 유니버스 (KOSPI+KOSDAQ 현재 상장 전 종목)
     tickers, market_of, name_of = [], {}, {}
-    if any(p in passes for p in ("ohlcv", "marcap", "foreign")):
+    if any(p in passes for p in ("ohlcv", "marcap", "foreign", "short")):
         for mkt in ("KOSPI", "KOSDAQ"):
             for t in runner.call(stock.get_market_ticker_list, tdy, market=mkt) or []:
                 tickers.append(t)
@@ -248,7 +376,7 @@ def main():
         if args.tickers:
             want = set(args.tickers.split(","))
             tickers = [t for t in tickers if t in want]
-            for ds in ("kr_ohlcv", "kr_marcap", "kr_foreign"):
+            for ds in ("kr_ohlcv", "kr_marcap", "kr_foreign", "kr_short"):
                 for t in tickers:
                     for suf in ("", ".empty"):
                         p = staging_path(ds, t) + suf
@@ -326,6 +454,32 @@ def main():
         run_per_item("kr_investor_value", ["KOSPI", "KOSDAQ"],
                      lambda f, t, k: stock.get_market_trading_value_by_date(f, t, k),
                      runner, today, ["date", "market"], lambda k: {"market": k})
+
+    if "short" in passes:
+        # SRT30001 통합 화면: 거래량·거래대금·잔고수량·잔고금액 1콜.
+        # 거래비중=÷kr_ohlcv.volume, 잔고비중=÷kr_marcap.shares 조인 파생.
+        run_per_item("kr_short", tickers,
+                     lambda f, t, k: stock.get_shorting_status_by_date(f, t, k),
+                     runner, today, ["date", "ticker"], stock_extra, force=force)
+
+    if "short_investor" in passes:
+        si_items = [f"{m}_{x}" for m in ("KOSPI", "KOSDAQ") for x in ("volume", "value")]
+
+        def si_fetch(f, t, k):
+            mkt, metric = k.rsplit("_", 1)
+            fn = (stock.get_shorting_investor_volume_by_date if metric == "volume"
+                  else stock.get_shorting_investor_value_by_date)
+            return fn(f, t, mkt)
+
+        def si_extra(k):
+            mkt, metric = k.rsplit("_", 1)
+            return {"market": mkt, "metric": metric}
+
+        run_per_item("kr_short_investor", si_items, si_fetch, runner, today,
+                     ["date", "market", "metric"], si_extra)
+
+    if "futures" in passes:
+        run_futures(runner, today)
 
     print(f"백필 종료 — 총 호출 {runner.calls}회", flush=True)
     return 0

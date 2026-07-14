@@ -133,6 +133,112 @@ def cross_section(stock, dataset, fetch_by_market, key_cols, markets):
     print(f"[{dataset}] 신규 {added}일 (누락 후보 {len(missing)}일)", flush=True)
 
 
+def short_update(stock):
+    """kr_short — 일별 단면 3화면(거래량·거래대금·잔고) × 2시장 병합 upsert.
+
+    잔고는 T+2 공시라 최근 1~2일은 NaN으로 들어옴 — lookback 재조회가
+    행 전체를 새 값으로 대체(self-heal)하므로 자연 수렴.
+    ※ 공매도 전면금지 구간에선 거래량 합 0 → 그 날짜 skip (빈 값 정상).
+    """
+    import pandas as pd
+    dataset = "kr_short"
+    today = date.today()
+    since = today - timedelta(days=LOOKBACK_DAYS)
+    have = existing_dates(dataset, since)
+    missing = [since + timedelta(days=i) for i in range((today - since).days + 1)
+               if (since + timedelta(days=i)) not in have
+               and (since + timedelta(days=i)).weekday() < 5]
+    if not missing:
+        print(f"[{dataset}] 누락 없음", flush=True)
+        return
+    name_map = load_name_map(dataset)
+    added = 0
+    for d in missing:
+        ds = d.strftime("%Y%m%d")
+        frames, failed = [], False
+        for mkt in ("KOSPI", "KOSDAQ"):
+            try:
+                time.sleep(PACE_SEC)
+                vol = stock.get_shorting_volume_by_ticker(ds, mkt)
+                time.sleep(PACE_SEC)
+                val = stock.get_shorting_value_by_ticker(ds, mkt)
+                time.sleep(PACE_SEC)
+                bal = stock.get_shorting_balance_by_ticker(ds, mkt)
+            except Exception as e:
+                print(f"  ! {dataset} {ds} {mkt}: {type(e).__name__} — 날짜 보류", flush=True)
+                failed = True
+                break
+            if vol is None or vol.empty or "공매도" not in vol.columns \
+                    or (vol["공매도"] == 0).all():
+                continue  # 휴장일/미공표/전면금지
+            out = pd.DataFrame(index=vol.index)
+            out["short_volume"] = vol["공매도"]
+            if val is not None and not val.empty and "공매도" in val.columns:
+                out["short_value"] = val["공매도"].reindex(out.index)
+            if bal is not None and not bal.empty and "공매도잔고" in bal.columns:
+                out["balance_qty"] = bal["공매도잔고"].reindex(out.index)
+                out["balance_value"] = bal["공매도금액"].reindex(out.index)
+            out = out.reset_index()
+            out = out.rename(columns={out.columns[0]: "ticker"})
+            out["date"] = pd.Timestamp(d)
+            out["name"] = out["ticker"].map(name_map).fillna("")
+            out["market"] = mkt
+            keep = ["date"] + [c for c in RENAME[dataset].values() if c in out.columns] \
+                + ["ticker", "name", "market"]
+            frames.append(out[keep])
+        if failed:
+            continue
+        if frames:
+            merge_into_year_files(dataset, pd.concat(frames, ignore_index=True),
+                                  ["date", "ticker"])
+            added += 1
+    print(f"[{dataset}] 신규 {added}일 (누락 후보 {len(missing)}일)", flush=True)
+
+
+def futures_update(stock):
+    """kr_futures_ohlcv — 상품별 일별 단면(월물별 시세+미결제) upsert.
+
+    백필과 동일 소스: pykrx core 전종목시세(MDCSTAT12501). api 래퍼는
+    미결제약정 컬럼을 버리므로 사용 금지 (backfill_krx.fut_frame 공유).
+    """
+    import pandas as pd
+    from backfill_krx import FUT_PRODUCTS, fut_frame
+    from pykrx.website.krx.future.core import 전종목시세
+    dataset = "kr_futures_ohlcv"
+    view = 전종목시세()
+    today = date.today()
+    since = today - timedelta(days=LOOKBACK_DAYS)
+    have = existing_dates(dataset, since)
+    missing = [since + timedelta(days=i) for i in range((today - since).days + 1)
+               if (since + timedelta(days=i)) not in have
+               and (since + timedelta(days=i)).weekday() < 5]
+    if not missing:
+        print(f"[{dataset}] 누락 없음", flush=True)
+        return
+    added = 0
+    for d in missing:
+        ds = d.strftime("%Y%m%d")
+        frames, failed = [], False
+        for prod, _start, label in FUT_PRODUCTS:
+            time.sleep(PACE_SEC)
+            try:
+                raw = view.fetch(ds, prod)
+            except Exception as e:
+                print(f"  ! {dataset} {ds} {prod}: {type(e).__name__} — 날짜 보류", flush=True)
+                failed = True
+                break
+            fr = fut_frame(raw, d, prod, label)
+            if fr is not None:
+                frames.append(fr)
+        if failed:
+            continue
+        if frames:
+            merge_into_year_files(dataset, pd.concat(frames, ignore_index=True),
+                                  ["date", "contract_cd"])
+            added += 1
+    print(f"[{dataset}] 신규 {added}일 (누락 후보 {len(missing)}일)", flush=True)
+
+
 def range_update(stock):
     """지수·투자자·해외 — 최근 RANGE_DAYS 범위 재조회 upsert."""
     import pandas as pd
@@ -172,6 +278,22 @@ def range_update(stock):
         if norm is not None:
             merge_into_year_files("kr_investor_value", norm, ["date", "market"])
     print("[kr_investor_value] 갱신 완료", flush=True)
+
+    # 시장단위 투자자별 공매도 (4콜) — 최근 창 재조회 upsert
+    for mkt in ("KOSPI", "KOSDAQ"):
+        for metric, fn in (("volume", stock.get_shorting_investor_volume_by_date),
+                           ("value", stock.get_shorting_investor_value_by_date)):
+            time.sleep(PACE_SEC)
+            try:
+                df = fn(frm, to, mkt)
+            except Exception as e:
+                print(f"  ! short_investor {mkt} {metric}: {type(e).__name__}", flush=True)
+                continue
+            norm = normalize(df, "kr_short_investor", market=mkt, metric=metric)
+            if norm is not None:
+                merge_into_year_files("kr_short_investor", norm,
+                                      ["date", "market", "metric"])
+    print("[kr_short_investor] 갱신 완료", flush=True)
 
 
 def _yf_recent(symbol, start):
@@ -302,6 +424,8 @@ def main():
     cross_section(stock, "kr_etf_ohlcv",
                   lambda d, m: stock.get_etf_ohlcv_by_ticker(d),
                   ["date", "ticker"], (None,))
+    short_update(stock)
+    futures_update(stock)
     range_update(stock)
     overseas_update()
     kr_adjusted_update()
