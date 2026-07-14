@@ -32,7 +32,7 @@
 
 - `.env`에 JSON 블롭 값(예: GOOGLE_SERVICE_ACCOUNT_KEY)을 넣을 땐 **홑따옴표로 감싼 원문 JSON** —
   겉 쌍따옴표+이스케이프 형식은 wrapper 파서(겉따옴표 한 쌍만 제거)를 거치며 깨진다.
-- push 시 `failed to store: -61/-25308` 키체인 경고는 무해(자격 저장만 실패, push는 성공).
+- push 시 `failed to store: -61/-25308` 키체인 경고는 무해했음(자격 저장만 실패, push는 성공). **2026-07-14 제거**: `~/.gitconfig`에서 `credential.helper`를 빈값으로 리셋 후 `store`만 지정 → 헤드리스 데몬에서 접근 불가한 osxkeychain 헬퍼를 체인에서 제외(자격증명은 `~/.git-credentials` 파일 사용). 재등장 시 `git config --global --get-all credential.helper`가 `(빈값)`+`store` 인지 확인.
 - 시각 판단은 반드시 이 맥의 `date`(KST) 기준.
 
 ## 파일 배치 규칙

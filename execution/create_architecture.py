@@ -305,6 +305,18 @@ def load_registry():
     return SAMPLE_REGISTRY, False
 
 
+def _looks_like_data_artifact(ref):
+    """A reads/writes entry may point either at a component id OR at a raw data
+    artifact (a file, directory or path) that is documented but not modelled as
+    its own node. Component ids are flat kebab tokens ('store-wrap-nav-xlsx');
+    artifacts carry a filename extension, a path separator, a home prefix or
+    whitespace. Only the former should resolve to a component, so artifact-like
+    refs are shown as card text (build_edges already drops them) and must not be
+    flagged as broken links. A genuinely mistyped id ('store-featured-dat') has
+    none of these characters and is still reported."""
+    return any(ch in ref for ch in "./~ ")
+
+
 def validate(reg):
     """Check referential integrity. Returns a list of warning strings and also
     writes each to stderr. Broken id references in depends_on/reads/writes and
@@ -336,6 +348,10 @@ def validate(reg):
         for field in ("depends_on", "reads", "writes"):
             for ref in c.get(field, []) or []:
                 if ref not in known:
+                    # reads/writes double as raw data-artifact annotations;
+                    # depends_on must always name a component.
+                    if field in ("reads", "writes") and _looks_like_data_artifact(ref):
+                        continue
                     warnings.append("component '%s' %s -> unknown id '%s'" % (cid, field, ref))
         for lk in c.get("links", []) or []:
             if not isinstance(lk, dict) or "url" not in lk:
