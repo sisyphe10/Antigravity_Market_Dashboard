@@ -2,10 +2,11 @@
 # daily_selfcheck.sh — once-a-day mac-mini health digest to Telegram (B9 / A17).
 #
 # WHY
-#   A single daily "here's how the mac is doing" message. Crucially it is sent
-#   EVERY day even when everything is fine — the message itself is the dead-man's
-#   switch (no message == the mac or this job is down, which silence alone can't
-#   distinguish from "all healthy").
+#   A daily health check that messages Telegram ONLY when something is wrong.
+#   2026-07-15 (user request): the original design sent an OK message every day
+#   as a dead-man's switch, but the daily noise outweighed it. The dead-man role
+#   is covered externally by the GHA daily_health_check watchdog (11:00 KST),
+#   so an all-healthy run now just logs locally and stays silent.
 #
 # WHAT IT REPORTS (one Telegram message)
 #   * bots     — how many of the 4 KeepAlive bots are `state = running`
@@ -217,10 +218,14 @@ main() {
   [ "$crash_total" -gt 0 ]            && info="$info"$'\n'"ℹ️ 24h 재시작:$crash_detail"
   [ "$big_kb" -ge $(( BIG_LOG_MB * 1024 )) ] && info="$info"$'\n'"ℹ️ 최대 로그 $(( big_kb / 1024 ))M: ${big_path##*/}"
 
-  local head
-  if [ -n "$warn" ]; then head="⚠️"; else head="✅"; fi
+  # 2026-07-15 사용자 지시: 이상 없으면 무음 — warn 없을 땐 로그만 남기고 발송 생략.
+  # (데드맨 감시는 GHA daily_health_check 11:00 KST가 외부에서 담당)
+  if [ -z "$warn" ]; then
+    logf "selfcheck OK (suppressed): $summary$info"
+    exit 0
+  fi
 
-  send_telegram "$head $summary$warn$info"
+  send_telegram "⚠️ $summary$warn$info"
   exit 0
 }
 
