@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>관심종목 시세판</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #fff; color: #111;
+    font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif;
+  }
+  /* AoE 공통 topnav (개인 뷰 세트와 동일 룩) */
+  nav.topnav { background: #fff; border-bottom: 1px solid #e5e7eb; }
+  nav.topnav .topnav-inner {
+    max-width: 1400px; margin: 0 auto; padding: 10px 24px;
+    display: flex; align-items: center; gap: 18px;
+  }
+  .topnav-brand { font-size: 16px; font-weight: 800; color: #111; text-decoration: none; }
+  .topnav-brand:hover { color: #2d7a3a; }
+  .topnav-tabs { display: flex; gap: 8px; flex: 1; }
+  .topnav-tab {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 5px 14px; font-size: 13px; color: #444; text-decoration: none;
+    border: 1px solid #d1d5db; border-radius: 8px; background: #fff;
+  }
+  .topnav-tab:hover { color: #111; border-color: #2d7a3a; background: #f0f7f2; }
+  .topnav-tab.active { color: #fff; border-color: #2d7a3a; background: #2d7a3a; }
+  .topnav-tab.sisyphe-tab { margin-left: auto; background: #faf3e3; border-color: #e6d9b8; color: #6b5a2a; }
+  .topnav-tab.sisyphe-tab:hover { background: #f3e8cf; border-color: #d9c48f; color: #5e4a1a; }
+  .topbar {
+    position: sticky; top: 0; z-index: 20; background: #fff;
+    border-bottom: 1px solid #e5e5e5; padding: 8px 16px 0;
+  }
+  .titlerow { display: flex; align-items: baseline; gap: 14px; }
+  .titlerow h1 { font-size: 15px; font-weight: 700; margin: 0 0 6px; }
+  .titlerow .meta { font-size: 12px; color: #888; }
+  .tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+  .tab {
+    flex: 0 0 auto; padding: 4px 12px; font-size: 12.5px; cursor: pointer;
+    border: 1px solid #ddd; border-radius: 14px; background: #fff; color: #555;
+    white-space: nowrap; user-select: none;
+  }
+  .tab.active { background: #111; color: #fff; border-color: #111; }
+  .content { display: flex; gap: 24px; padding: 10px 16px; align-items: flex-start; flex-wrap: wrap; }
+  .panel { flex: 1 1 560px; min-width: 500px; max-width: 880px; }
+  .panel h2 {
+    font-size: 13px; font-weight: 700; margin: 4px 0 6px;
+    padding: 5px 10px; background: #f4f6f8; border-radius: 6px;
+  }
+  .panel h2 .cnt { font-weight: 400; color: #888; margin-left: 6px; font-size: 11.5px; }
+  .panel h2 .gname { outline: none; border-radius: 3px; padding: 0 2px; }
+  .panel h2 .gname:focus { background: #fff; box-shadow: 0 0 0 1px #bbb; }
+  .panel h2 .hint { font-weight: 400; color: #aaa; font-size: 11px; margin-left: 8px; }
+  .empty { color: #aaa; font-size: 12.5px; padding: 8px 10px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    position: sticky; top: var(--thead-top, 74px); z-index: 5; background: #fafafa;
+    font-weight: 600; color: #555; padding: 6px 10px;
+    border-bottom: 1px solid #ddd; text-align: right; white-space: nowrap;
+    cursor: pointer; user-select: none;
+  }
+  thead th.star, thead th.name { cursor: default; }
+  thead th.name { text-align: left; }
+  thead th .arw { font-size: 10px; color: #111; margin-left: 2px; }
+  td { padding: 4px 10px; border-bottom: 1px solid #f2f2f2; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  td.name { text-align: left; }
+  td.name .code { color: #aaa; font-size: 11px; margin-left: 6px; }
+  td.star, th.star { width: 26px; padding: 4px 2px 4px 8px; text-align: center; }
+  td.star { cursor: pointer; color: #ccc; font-size: 13px; }
+  td.star.on { color: #f5a623; }
+  td.star .gno { font-size: 9px; vertical-align: super; color: #b98510; }
+  .up { color: #d13d3d; }
+  .down { color: #1261c4; }
+  .flat { color: #555; }
+  tbody tr:hover td { background: #fcfcf5; }
+  #starmenu {
+    position: absolute; z-index: 50; background: #fff; border: 1px solid #ccc;
+    border-radius: 8px; box-shadow: 0 4px 14px rgba(0,0,0,.12); padding: 4px;
+    display: none; min-width: 150px;
+  }
+  #starmenu .mi {
+    padding: 5px 10px; font-size: 12.5px; cursor: pointer; border-radius: 5px;
+    display: flex; justify-content: space-between; gap: 10px;
+  }
+  #starmenu .mi:hover { background: #f4f6f8; }
+  #starmenu .mi .chk { color: #f5a623; }
+</style>
+</head>
+<body>
+<nav class="topnav">
+    <div class="topnav-inner"><a href="/" class="topnav-brand">AoE</a>
+        <div class="topnav-tabs">
+            <a href="/watchlist/" class="topnav-tab active">Watchlist</a>
+            <a href="/market.html" class="topnav-tab">Market</a>
+            <a href="/wiki/" class="topnav-tab">Wiki</a>
+            <a href="/architecture.html" class="topnav-tab">Architecture</a>
+            <a href="/sisyphe/journal.html" class="topnav-tab">Invest</a>
+            <a href="/sisyphe/index.html" class="topnav-tab sisyphe-tab">Sisyphe</a>
+        </div>
+    </div>
+</nav>
+<div class="topbar" id="topbar">
+  <div class="titlerow">
+    <h1>관심종목 시세판</h1>
+    <span class="meta" id="meta">연결 중…</span>
+  </div>
+  <div class="tabs" id="tabs"></div>
+</div>
+<div class="content" id="content"></div>
+<div id="starmenu"></div>
+<script>
+const COLS = [
+  ['price', '현재가'], ['chg', '등락률'], ['trdval', '거래대금'], ['mcap', '시가총액'],
+];
+const WL_KEY = 'quoteboard_watchlists_v1';
+const VIEW_KEY = 'quoteboard_view_v1';
+let DATA = null;
+let sortKey = 'mcap', sortDir = -1;
+
+function loadView() {
+  try {
+    const v = JSON.parse(localStorage.getItem(VIEW_KEY));
+    if (v && v.mode) return v;
+  } catch (e) {}
+  return { mode: 'wl', secs: [] };   // mode: 'wl' | 'all' | 'sectors', secs=클릭 순서
+}
+let VIEW = loadView();
+const saveView = () => localStorage.setItem(VIEW_KEY, JSON.stringify(VIEW));
+let menuCode = null;               // 팝오버 대상 종목
+// 그룹명 편집 중 여부는 activeElement로 판정 (포커스 이벤트 미발화 환경 대비)
+const isEditingName = () =>
+  document.activeElement && document.activeElement.classList &&
+  document.activeElement.classList.contains('gname');
+
+function loadWL() {
+  try {
+    const w = JSON.parse(localStorage.getItem(WL_KEY));
+    if (w && w.length === 3) return w;
+  } catch (e) {}
+  return [{ name: '관심종목 1', codes: [] },
+          { name: '관심종목 2', codes: [] },
+          { name: '관심종목 3', codes: [] }];
+}
+let WL = loadWL();
+const saveWL = () => localStorage.setItem(WL_KEY, JSON.stringify(WL));
+const memberOf = code => WL.map((g, i) => g.codes.includes(code) ? i : -1).filter(i => i >= 0);
+
+const comma = n => Math.round(n).toLocaleString('ko-KR');
+function fmtEok(won) {             // 원 → 억원 (1조 이상 = NN조 N,NNN억)
+  if (!won) return '-';
+  const eok = won / 1e8;
+  if (eok >= 10000) {
+    const jo = Math.floor(eok / 10000);
+    const rest = Math.round(eok - jo * 10000);
+    return rest ? `${comma(jo)}조 ${comma(rest)}억` : `${comma(jo)}조`;
+  }
+  return comma(eok) + '억';
+}
+function fmtChg(c) {
+  const s = (c > 0 ? '+' : '') + c.toFixed(1) + '%';
+  return `<span class="${c > 0 ? 'up' : c < 0 ? 'down' : 'flat'}">${s}</span>`;
+}
+
+function sectorGroups(rows) {      // 섹터 목록 (합산 시총 내림차순)
+  const g = new Map();
+  for (const r of rows) {
+    if (!g.has(r.sector)) g.set(r.sector, []);
+    g.get(r.sector).push(r);
+  }
+  return [...g.entries()]
+    .map(([sec, rs]) => ({ sec, rows: rs, sum: rs.reduce((a, r) => a + r.mcap, 0) }))
+    .sort((a, b) => b.sum - a.sum);
+}
+
+function tabsHTML(groups) {        // [관심종목, 전체] + 개별 섹터 (토글 멀티선택)
+  let h = `<div class="tab${VIEW.mode === 'wl' ? ' active' : ''}" data-kind="wl">★ 관심종목</div>` +
+          `<div class="tab${VIEW.mode === 'all' ? ' active' : ''}" data-kind="all">전체</div>`;
+  for (const g of groups) {
+    const on = VIEW.mode === 'sectors' && VIEW.secs.includes(g.sec);
+    h += `<div class="tab${on ? ' active' : ''}" data-kind="sec" data-sec="${g.sec}">${g.sec}</div>`;
+  }
+  return h;
+}
+
+function theadHTML() {
+  let h = '<thead><tr><th class="star">★</th><th class="name">종목</th>';
+  for (const [key, label] of COLS) {
+    const arw = key === sortKey ? `<span class="arw">${sortDir < 0 ? '▼' : '▲'}</span>` : '';
+    h += `<th data-key="${key}">${label}${arw}</th>`;
+  }
+  return h + '</tr></thead>';
+}
+
+function rowHTML(r) {
+  const mem = memberOf(r.code);
+  const star = mem.length
+    ? `★<span class="gno">${mem.map(i => i + 1).join(',')}</span>`
+    : '☆';
+  return `<tr><td class="star${mem.length ? ' on' : ''}" data-code="${r.code}">${star}</td>` +
+         `<td class="name">${r.name}<span class="code">${r.code}</span></td>` +
+         `<td>${comma(r.price)}</td><td>${fmtChg(r.chg)}</td>` +
+         `<td>${fmtEok(r.trdval)}</td><td>${fmtEok(r.mcap)}</td></tr>`;
+}
+
+function tableHTML(rows) {
+  const sorted = [...rows].sort((a, b) => (a[sortKey] - b[sortKey]) * sortDir);
+  return `<table>${theadHTML()}<tbody>${sorted.map(rowHTML).join('')}</tbody></table>`;
+}
+
+function sectorPanelHTML(sec, rows) {
+  return `<div class="panel"><h2>${sec}<span class="cnt">${rows.length}</span></h2>${tableHTML(rows)}</div>`;
+}
+
+function wlPanelHTML(g, gi, byCode) {
+  const rows = g.codes.map(c => byCode.get(c)).filter(Boolean);
+  const body = rows.length
+    ? tableHTML(rows)
+    : '<div class="empty">비어 있음 — 종목 행의 ☆을 눌러 추가</div>';
+  return `<div class="panel"><h2>` +
+         `<span class="gname" contenteditable="true" spellcheck="false" data-gi="${gi}">${g.name}</span>` +
+         `<span class="cnt">${rows.length}</span><span class="hint">이름 클릭해 수정</span></h2>${body}</div>`;
+}
+
+function render() {
+  if (!DATA || isEditingName() || menuCode !== null) return;
+  const groups = sectorGroups(DATA.rows);
+  document.getElementById('tabs').innerHTML = tabsHTML(groups);
+
+  let html;
+  if (VIEW.mode === 'wl') {
+    const byCode = new Map(DATA.rows.map(r => [r.code, r]));
+    html = WL.map((g, gi) => wlPanelHTML(g, gi, byCode)).join('');
+  } else if (VIEW.mode === 'all') {
+    html = groups.map(g => sectorPanelHTML(g.sec, g.rows)).join('');
+  } else {
+    const byName = new Map(groups.map(g => [g.sec, g]));
+    const shown = VIEW.secs.map(s => byName.get(s)).filter(Boolean);   // 클릭 순서 유지
+    html = shown.length
+      ? shown.map(g => sectorPanelHTML(g.sec, g.rows)).join('')
+      : '<div class="empty">위 섹터 탭을 눌러 화면에 추가</div>';
+  }
+  document.getElementById('content').innerHTML = html;
+
+  const m = DATA.meta;
+  document.getElementById('meta').textContent =
+    `${m.quoted}/${m.total}종목 · 시세 ${m.sweep_at || '-'} (스윕 ${(m.sweep_ms / 1000).toFixed(1)}s${m.fail ? ', 실패 ' + m.fail : ''})`;
+  document.documentElement.style.setProperty('--thead-top',
+    document.getElementById('topbar').offsetHeight + 'px');
+}
+
+// ── 탭 전환 (섹터=토글 멀티선택, 클릭 순서대로 패널 표시) ──
+document.getElementById('tabs').addEventListener('click', e => {
+  const t = e.target.closest('.tab');
+  if (!t) return;
+  if (t.dataset.kind === 'sec') {
+    if (VIEW.mode !== 'sectors') { VIEW.mode = 'sectors'; }
+    const i = VIEW.secs.indexOf(t.dataset.sec);
+    if (i >= 0) VIEW.secs.splice(i, 1); else VIEW.secs.push(t.dataset.sec);
+  } else {
+    VIEW.mode = t.dataset.kind;    // 'wl' | 'all'
+  }
+  saveView();
+  window.scrollTo(0, 0);
+  closeMenu();
+  render();
+});
+
+// ── 정렬 + 별표 팝오버 ──
+document.getElementById('content').addEventListener('click', e => {
+  const star = e.target.closest('td.star');
+  if (star) { openMenu(star, star.dataset.code); return; }
+  const th = e.target.closest('th[data-key]');
+  if (!th) return;
+  const key = th.dataset.key;
+  if (key === sortKey) sortDir = -sortDir;
+  else { sortKey = key; sortDir = -1; }
+  render();
+});
+
+const menu = document.getElementById('starmenu');
+function openMenu(anchor, code) {
+  menuCode = code;
+  menu.innerHTML = WL.map((g, i) => {
+    const on = g.codes.includes(code);
+    return `<div class="mi" data-gi="${i}"><span>${g.name}</span><span class="chk">${on ? '★' : ''}</span></div>`;
+  }).join('');
+  const rc = anchor.getBoundingClientRect();
+  menu.style.left = (rc.left + window.scrollX) + 'px';
+  menu.style.top = (rc.bottom + window.scrollY + 2) + 'px';
+  menu.style.display = 'block';
+}
+function closeMenu() { menuCode = null; menu.style.display = 'none'; }
+menu.addEventListener('click', e => {
+  const mi = e.target.closest('.mi');
+  if (!mi || menuCode === null) return;
+  const g = WL[+mi.dataset.gi];
+  const idx = g.codes.indexOf(menuCode);
+  if (idx >= 0) g.codes.splice(idx, 1); else g.codes.push(menuCode);
+  saveWL();
+  const code = menuCode; closeMenu(); menuCode = null;
+  render();
+});
+document.addEventListener('click', e => {
+  if (menuCode !== null && !e.target.closest('#starmenu') && !e.target.closest('td.star')) {
+    closeMenu(); render();
+  }
+});
+
+// ── 그룹명 편집 (input 즉시 저장 — 포커스 이벤트 의존 제거) ──
+function saveName(el) {
+  const gi = +el.dataset.gi;
+  const name = el.textContent.trim();
+  if (Number.isInteger(gi) && WL[gi] && name) { WL[gi].name = name; saveWL(); }
+}
+document.getElementById('content').addEventListener('input', e => {
+  if (e.target.classList.contains('gname')) saveName(e.target);
+});
+document.getElementById('content').addEventListener('focusout', e => {
+  if (e.target.classList.contains('gname')) {
+    saveName(e.target);
+    render();
+  }
+});
+document.getElementById('content').addEventListener('keydown', e => {
+  if (e.target.classList.contains('gname') && e.key === 'Enter') {
+    e.preventDefault();
+    e.target.blur();
+    render();
+  }
+});
+
+async function tick() {
+  try {
+    const res = await fetch('data');   // 상대경로 — /watchlist/ 프록시·로컬 직서빙 겸용
+    DATA = await res.json();
+    render();
+  } catch (e) {
+    document.getElementById('meta').textContent = '서버 연결 끊김';
+  }
+}
+tick();
+setInterval(tick, 1000);
+</script>
+</body>
+</html>

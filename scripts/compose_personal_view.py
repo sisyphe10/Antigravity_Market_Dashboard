@@ -16,6 +16,7 @@ SISYPHE_PAGES = ("index.html", "dashboard.html", "journal.html")
 NAV_END = '</div></div></nav>'
 
 # ---- AoE 페이지 주입 fragment ----
+WATCHLIST_ITEM = '<div class="topnav-item"><a href="/watchlist/" class="topnav-tab">Watchlist</a></div>'
 WIKI_ITEM = '<div class="topnav-item"><a href="/wiki/" class="topnav-tab">Wiki</a></div>'
 INVEST_ITEM = '<div class="topnav-item"><a href="/sisyphe/journal.html" class="topnav-tab">Invest</a></div>'
 SISYPHE_ITEM = '<div class="topnav-item sisyphe-item"><a href="/sisyphe/index.html" class="topnav-tab sisyphe-tab">Sisyphe</a></div>'
@@ -41,6 +42,7 @@ INVEST_PILL = '<a href="journal.html" class="topnav-tab t-journal"><span class="
 NEW_JOURNAL_NAV = (
     '<nav class="topnav">\n    <div class="topnav-inner"><a href="/" class="topnav-brand">AoE</a>\n'
     '        <div class="topnav-tabs">\n'
+    '            <a href="/watchlist/" class="topnav-tab">Watchlist</a>\n'
     '            <a href="/market.html" class="topnav-tab">Market</a>\n'
     '            <a href="/wiki/" class="topnav-tab">Wiki</a>\n'
     '            <a href="/architecture.html" class="topnav-tab">Architecture</a>\n'
@@ -87,6 +89,7 @@ NAV_UNIFY = (
 item_pat = re.compile(r'<div class="topnav-item"><a href="wrap\.html"[^>]*>.*?</div></div>', re.S)
 link_pat = re.compile(r'<a[^>]*href="wrap\.html[^"]*"[^>]*>.*?</a>\s*', re.S)
 arch_pat = re.compile(r'<div class="topnav-item"><a href="architecture\.html"')
+market_pat = re.compile(r'<div class="topnav-item"><a href="market\.html"')
 tabs_pat = re.compile(r'<div class="topnav-tabs">')
 inner_pat = re.compile(r'<div class="topnav-inner">')
 jnav_pat = re.compile(r'<nav class="topnav">.*?</nav>', re.S)
@@ -113,8 +116,16 @@ for f in glob.glob(os.path.join(REL, "*.html")):
     n = item_pat.sub("", s)
     n = link_pat.sub("", n)
     # 정규화: 기존 주입 fragment 제거(clean 입력이면 무동작)
-    for frag in (WIKI_ITEM, INVEST_ITEM, SISYPHE_ITEM, OLD_SISYPHE_DROPDOWN):
+    for frag in (WATCHLIST_ITEM, WIKI_ITEM, INVEST_ITEM, SISYPHE_ITEM, OLD_SISYPHE_DROPDOWN):
         n = n.replace(frag, "")
+    # Watchlist 를 Market 앞에(없으면 tabs 여는 태그 직후 폴백) — ts.net 첫화면(관심종목 시세판)
+    m = market_pat.search(n)
+    if m:
+        n = n[:m.start()] + WATCHLIST_ITEM + n[m.start():]
+    else:
+        mt = tabs_pat.search(n)
+        if mt:
+            n = n[:mt.end()] + WATCHLIST_ITEM + n[mt.end():]
     # Wiki 를 Architecture 앞에(없으면 nav 끝 폴백)
     m = arch_pat.search(n)
     if m:
@@ -145,6 +156,10 @@ if os.path.exists(idx):
         fail("index.html: Invest 탭 주입 실패")
     if 'topnav-sub">가계부' in t:
         fail("index.html: 구 Sisyphe 드롭다운 잔존")
+    if '/watchlist/" class="topnav-tab">Watchlist' not in t:
+        fail("index.html: Watchlist 탭 주입 실패")
+    if t.find('>Watchlist<') > t.find('href="market.html"') > -1:
+        fail("index.html: Watchlist 탭이 Market 앞이 아님")
 
 # ===== 2) Sisyphe 평문 합성 (매 실행 pristine 복사) =====
 dst = os.path.join(REL, "sisyphe")
