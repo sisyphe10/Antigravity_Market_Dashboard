@@ -44,6 +44,12 @@
   .titlerow { display: flex; align-items: baseline; gap: 14px; }
   .titlerow h1 { font-size: 15px; font-weight: 700; margin: 0 0 6px; }
   .titlerow .meta { font-size: 12px; color: #888; }
+  .titlerow #q {
+    margin-left: auto; font-family: inherit; font-size: 12.5px; color: #111;
+    border: 1px solid #d1d5db; border-radius: 14px; padding: 4px 12px; width: 190px;
+    outline: none; background: #fafafa;
+  }
+  .titlerow #q:focus { background: #fff; border-color: #2d7a3a; }
   .tabs { display: flex; flex-wrap: wrap; gap: 4px; padding-bottom: 6px; }   /* 섹터 탭 줄바꿈(2줄) */
   .tab {
     flex: 0 0 auto; padding: 4px 12px; font-size: 12.5px; cursor: pointer;
@@ -60,7 +66,8 @@
   .panel h2 .cnt { font-weight: 400; color: #888; margin-left: 6px; font-size: 11.5px; }
   .panel h2 .gname { outline: none; border-radius: 3px; padding: 0 2px; }
   .panel h2 .gname:focus { background: #fff; box-shadow: 0 0 0 1px #bbb; }
-  .panel h2 .hint { font-weight: 400; color: #aaa; font-size: 11px; margin-left: 8px; }
+  .panel h2 .gadd { cursor: pointer; color: #2d7a3a; font-weight: 700; margin-left: 8px; padding: 0 4px; border-radius: 4px; }
+  .panel h2 .gadd:hover { background: #e6f0e8; }
   .empty { color: #aaa; font-size: 12.5px; padding: 8px 10px; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   thead th {
@@ -94,6 +101,20 @@
   }
   #starmenu .mi:hover { background: #f4f6f8; }
   #starmenu .mi .chk { color: #f5a623; }
+  #addmenu {
+    position: absolute; z-index: 50; background: #fff; border: 1px solid #ccc;
+    border-radius: 8px; box-shadow: 0 4px 14px rgba(0,0,0,.12); padding: 6px;
+    display: none; width: 230px;
+  }
+  #addmenu #addq {
+    width: 100%; font-family: inherit; font-size: 12.5px; padding: 5px 8px;
+    border: 1px solid #d1d5db; border-radius: 6px; outline: none; margin-bottom: 4px;
+  }
+  #addmenu .mi {
+    padding: 5px 8px; font-size: 12.5px; cursor: pointer; border-radius: 5px;
+    display: flex; justify-content: space-between; gap: 10px;
+  }
+  #addmenu .mi:hover { background: #f4f6f8; }
 </style>
 </head>
 <body>
@@ -102,11 +123,16 @@
   <div class="titlerow">
     <h1>관심종목 시세판</h1>
     <span class="meta" id="meta">연결 중…</span>
+    <input id="q" type="search" placeholder="검색 (종목명/코드)" autocomplete="off">
   </div>
   <div class="tabs" id="tabs"></div>
 </div>
 <div class="content" id="content"></div>
 <div id="starmenu"></div>
+<div id="addmenu">
+  <input id="addq" type="search" placeholder="종목명/코드" autocomplete="off">
+  <div id="addres"></div>
+</div>
 <script>
 const COLS = [
   ['price', '현재가'], ['chg', '등락률'], ['trdval', '거래대금'], ['mcap', '시가총액'],
@@ -236,16 +262,23 @@ function wlPanelHTML(g, gi, byCode) {
     : '<div class="empty">비어 있음 — 종목 행의 ☆을 눌러 추가</div>';
   return `<div class="panel"><h2>` +
          `<span class="gname" contenteditable="true" spellcheck="false" data-gi="${gi}">${g.name}</span>` +
-         `<span class="cnt">${rows.length}</span><span class="hint">이름 클릭해 수정</span></h2>${body}</div>`;
+         `<span class="cnt">${rows.length}</span>` +
+         `<span class="gadd" data-gi="${gi}" title="종목 추가">＋</span></h2>${body}</div>`;
 }
 
 function render() {
-  if (!DATA || isEditingName() || menuCode !== null) return;
+  if (!DATA || isEditingName() || menuCode !== null || addGi !== null) return;
   const groups = sectorGroups(DATA.rows);
   document.getElementById('tabs').innerHTML = tabsHTML(groups);
 
+  const q = document.getElementById('q').value.trim().toLowerCase();
   let html;
-  if (VIEW.mode === 'wl') {
+  if (q) {                            // 전역 검색 — 모든 탭에서 우선 표시
+    const rows = DATA.rows.filter(r => r.name.toLowerCase().includes(q) || r.code.startsWith(q));
+    rows.sort((a, b) => b.mcap - a.mcap);
+    html = `<div class="panel"><h2>검색 결과<span class="cnt">${rows.length}</span></h2>` +
+           (rows.length ? tableHTML(rows) : '<div class="empty">결과 없음</div>') + '</div>';
+  } else if (VIEW.mode === 'wl') {
     const byCode = new Map(DATA.rows.map(r => [r.code, r]));
     html = WL.map((g, gi) => wlPanelHTML(g, gi, byCode)).join('');
   } else if (VIEW.mode === 'all') {
@@ -290,8 +323,10 @@ document.getElementById('tabs').addEventListener('click', e => {
   render();
 });
 
-// ── 정렬 + 별표 팝오버 ──
+// ── 정렬 + 별표 팝오버 + 그룹 종목 추가(+) ──
 document.getElementById('content').addEventListener('click', e => {
+  const ga = e.target.closest('.gadd');
+  if (ga) { openAdd(ga, +ga.dataset.gi); return; }
   const star = e.target.closest('td.star');
   if (star) { openMenu(star, star.dataset.code); return; }
   const th = e.target.closest('th[data-key]');
@@ -300,6 +335,45 @@ document.getElementById('content').addEventListener('click', e => {
   if (key === sortKey) sortDir = -sortDir;
   else { sortKey = key; sortDir = -1; }
   render();
+});
+
+// ── 전역 검색 ──
+document.getElementById('q').addEventListener('input', () => render());
+
+// ── 그룹 종목 추가 팝오버 ──
+let addGi = null;
+const addmenu = document.getElementById('addmenu');
+function openAdd(anchor, gi) {
+  addGi = gi;
+  const rc = anchor.getBoundingClientRect();
+  addmenu.style.left = (rc.left + window.scrollX) + 'px';
+  addmenu.style.top = (rc.bottom + window.scrollY + 2) + 'px';
+  addmenu.style.display = 'block';
+  const aq = document.getElementById('addq');
+  aq.value = '';
+  renderAddResults('');
+  aq.focus();
+}
+function closeAdd() { addGi = null; addmenu.style.display = 'none'; }
+function renderAddResults(aq) {
+  if (!DATA || addGi === null) return;
+  aq = aq.trim().toLowerCase();
+  const inGroup = new Set(WL[addGi].codes);
+  let rows = DATA.rows.filter(r => !inGroup.has(r.code));
+  if (aq) rows = rows.filter(r => r.name.toLowerCase().includes(aq) || r.code.startsWith(aq));
+  rows.sort((a, b) => b.mcap - a.mcap);
+  document.getElementById('addres').innerHTML = rows.slice(0, 8).map(r =>
+    `<div class="mi" data-code="${r.code}"><span>${r.name}</span>` +
+    `<span style="color:#aaa;font-size:11px;">${r.code}</span></div>`).join('') ||
+    '<div class="mi" style="color:#aaa;cursor:default;">결과 없음</div>';
+}
+document.getElementById('addq').addEventListener('input', e => renderAddResults(e.target.value));
+document.getElementById('addres').addEventListener('click', e => {
+  const mi = e.target.closest('.mi');
+  if (!mi || !mi.dataset.code || addGi === null) return;
+  WL[addGi].codes.push(mi.dataset.code);
+  saveWL();
+  renderAddResults(document.getElementById('addq').value);   // 연속 추가 가능하게 열어둠
 });
 
 const menu = document.getElementById('starmenu');
@@ -328,6 +402,9 @@ menu.addEventListener('click', e => {
 document.addEventListener('click', e => {
   if (menuCode !== null && !e.target.closest('#starmenu') && !e.target.closest('td.star')) {
     closeMenu(); render();
+  }
+  if (addGi !== null && !e.target.closest('#addmenu') && !e.target.closest('.gadd')) {
+    closeAdd(); render();
   }
 });
 

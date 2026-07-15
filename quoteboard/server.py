@@ -229,8 +229,15 @@ def sync_wl_from_portfolio():
                         if any(p in key for p in pats):
                             codes += _pf_codes(v)
                     codes = list(dict.fromkeys(codes))
-                    if codes and codes != wl[gi]['codes']:
-                        wl[gi]['codes'] = codes
+                    if not codes:
+                        continue
+                    # 수동 추가분(직전 auto에 없던 코드)은 보존, 포트 이탈 종목(auto였던 것)만 제거
+                    prev_auto = set(wl[gi].get('auto') or [])
+                    manual = [c for c in wl[gi]['codes'] if c not in prev_auto and c not in codes]
+                    new_codes = codes + manual
+                    if new_codes != wl[gi]['codes'] or codes != (wl[gi].get('auto') or []):
+                        wl[gi]['codes'] = new_codes
+                        wl[gi]['auto'] = codes
                         changed = True
                 if changed:
                     save_wl(wl)

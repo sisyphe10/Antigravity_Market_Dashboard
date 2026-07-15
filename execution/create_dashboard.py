@@ -105,8 +105,8 @@ WRAP_TABS = [
     ('fee',          '수수료'),
 ]
 WRAP_SECTIONS = [  # (id 전체 문자열 = 단일 출처 — 접두사 조립 금지)
-    ('wrap-sec-chart',     'CHART'),
-    ('wrap-sec-return',    'RETURN'),
+    ('wrap-sec-chart',     'RETURN'),    # 차트+수익률 표 나란히 (2026-07-15 CHART→RETURN 개명)
+    ('wrap-sec-return',    'MONTHLY'),   # 월별·연간 캘린더만 잔류
     ('wrap-sec-aum',       'AUM'),
     ('wrap-sec-portfolio', 'Portfolio'),
     ('wrap-sec-sector',    'SECTOR WEIGHT'),
@@ -331,18 +331,32 @@ def create_portfolio_tables_html():
 
         # 버튼바: 수수료 서브탭과 동일 pill 스타일 (.fee-subtab CSS 재사용,
         # feeSwitchSub는 [data-fee-sub] 스코프라 [data-pf-btn] 버튼과 충돌 없음)
-        # 한 줄 고정: .fee-subtabs 기본 max-width:900px 해제 + nowrap + 패딩 축소
-        _pf_btn_bar = ''
-        for i, (name, _k) in enumerate(render_list):
-            if divider_at == i and i > 0:      # 일반형 | 목표전환형 구분자
-                _pf_btn_bar += ('<span style="align-self:center;color:#adb5bd;'
-                                'font-weight:600;padding:0 6px;">|</span>')
-            _pf_btn_bar += (
-                f'<button class="fee-subtab{" active" if i == 0 else ""}" data-pf-btn="{i}" '
-                f'style="padding:9px 16px;white-space:nowrap;" '
-                f'onclick="pfSwitchTab({i})">{name}</button>')
-        html += ('<div class="fee-subtabs" style="flex-wrap:nowrap;max-width:none;">'
-                 + _pf_btn_bar + '</div>')
+        # 2단 구조(2026-07-15): 그룹 라벨(일반형/개방형/지속형 | 목표전환형/성과모집형) + 버튼 줄.
+        # divider 앞/뒤를 그룹 박스로 나누고 사이에 세로 구분자.
+        def _pf_btn(i, name):
+            return (f'<button class="fee-subtab{" active" if i == 0 else ""}" data-pf-btn="{i}" '
+                    f'style="padding:9px 16px;white-space:nowrap;" '
+                    f'onclick="pfSwitchTab({i})">{name}</button>')
+
+        if divider_at and 0 < divider_at < len(render_list):
+            _groups = [(wrap_config.PF_TAB_GROUP_LABELS[0],
+                        [(i, n) for i, (n, _k) in enumerate(render_list) if i < divider_at]),
+                       (wrap_config.PF_TAB_GROUP_LABELS[1],
+                        [(i, n) for i, (n, _k) in enumerate(render_list) if i >= divider_at])]
+            _boxes = []
+            for label, items in _groups:
+                _boxes.append(
+                    '<div style="display:flex;flex-direction:column;gap:4px;">'
+                    f'<div style="text-align:center;font-weight:700;font-size:0.9rem;color:#111;">{label}</div>'
+                    '<div class="fee-subtabs" style="flex-wrap:nowrap;max-width:none;margin:0;">'
+                    + ''.join(_pf_btn(i, n) for i, n in items) + '</div></div>')
+            html += ('<div style="display:flex;align-items:stretch;gap:10px;justify-content:center;">'
+                     + _boxes[0]
+                     + '<span style="align-self:center;color:#adb5bd;font-weight:600;padding:0 2px;">|</span>'
+                     + _boxes[1] + '</div>')
+        else:
+            html += ('<div class="fee-subtabs" style="flex-wrap:nowrap;max-width:none;">'
+                     + ''.join(_pf_btn(i, n) for i, (n, _k) in enumerate(render_list)) + '</div>')
 
         for sec_idx, (portfolio_name, data_key) in enumerate(render_list):
             stocks = portfolio_data[data_key]
@@ -2987,8 +3001,8 @@ def _build_hotel_mini_summary():
         return ''
 
 
-def _build_wrap_chart_section(category_label):
-    """동적 Chart.js 수익률 비교 차트 (멀티 셀렉트)"""
+def _build_wrap_chart_section(category_label, right_panel=''):
+    """동적 Chart.js 수익률 비교 차트 (멀티 셀렉트). right_panel=차트 우측 병치 HTML(수익률 표)."""
     try:
         df_nav = pd.read_excel('Wrap_NAV.xlsx', sheet_name='기준가')
         if 'Date' in df_nav.columns:
@@ -3288,6 +3302,7 @@ def _build_wrap_chart_section(category_label):
                         <div id="wrapChartLegend" style="margin-top:12px;text-align:center;color:#222;"></div>
                     </div>
                 </div>
+                <div style="flex:0 1 auto;min-width:0;overflow-x:auto;">{right_panel}</div>
             </div>
         </div>
         {js_code}
@@ -4155,15 +4170,18 @@ def create_wrap_monthly_returns_table():
 
 
 def create_wrap_returns_table():
-    """WRAP 수익률 비교 테이블 HTML (삼성 트루밸류, KOSPI, KOSDAQ) - 날짜 필터 포함"""
+    """WRAP 수익률 비교 테이블 — (표 카드, 잔여 섹션) 튜플 반환 (2026-07-15 분리).
+
+    표 카드는 _build_wrap_chart_section 우측 패널로 병치, 잔여 섹션(wrap-sec-return)엔
+    월별·연간 캘린더(MONTHLY)와 표 구동 JS만 남는다."""
     try:
         nav_file = 'Wrap_NAV.xlsx'
         if not os.path.exists(nav_file):
-            return ""
+            return "", ""
 
         df_returns = pd.read_excel(nav_file, sheet_name='수익률')
         if df_returns.empty:
-            return ""
+            return "", ""
 
         items = wrap_config.wrap_returns_items()  # 단일 출처: execution/wrap_config.py
         periods = ['1D', '1W', '1M', '3M', '6M', '1Y', '3Y', 'YTD', 'DD']
@@ -4185,7 +4203,7 @@ def create_wrap_returns_table():
             date_list.append(date_str)
 
         if not date_list:
-            return ""
+            return "", ""
 
         latest_date = date_list[-1]
         earliest_date = date_list[0]
@@ -4221,10 +4239,8 @@ def create_wrap_returns_table():
         periods_json = json.dumps(periods)
         monthly_card = create_wrap_monthly_returns_table()
 
-        return f"""
-        <div class="category-section" id="wrap-sec-return">
-            <h2 class="category-title">RETURN</h2>
-            <div style="max-width:1000px;margin:0 auto;background:#fff;border-radius:10px;padding:16px 20px;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
+        table_card = f"""
+            <div style="background:#fff;border-radius:10px;padding:16px 20px;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
                     <span style="font-size:13px;color:#555;font-weight:600;">기준일</span>
                     <button onclick="shiftReturnDate(-1)" style="border:1px solid #d1d5db;background:#f9fafb;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:12px;color:#555;">&lt;</button>
@@ -4238,7 +4254,11 @@ def create_wrap_returns_table():
                     </thead>
                     <tbody>{rows_html}</tbody>
                 </table>
-            </div>
+            </div>"""
+
+        rest = f"""
+        <div class="category-section" id="wrap-sec-return">
+            <h2 class="category-title">MONTHLY</h2>
             {monthly_card}
         </div>
         <script>
@@ -4315,9 +4335,10 @@ def create_wrap_returns_table():
             document.getElementById('return-actual-date-label').style.display = 'none';
         }})();
         </script>"""
+        return table_card, rest
     except Exception as e:
         print(f"Error creating wrap returns table: {e}")
-        return ""
+        return "", ""
 
 
 def create_order_section():
@@ -7005,7 +7026,7 @@ def create_dashboard():
 
             # Wrap 카테고리는 git 커밋 날짜로 날짜 표시 (git pull 시 mtime이 바뀌므로)
             if category == 'Wrap':
-                category_label = 'CHART'
+                category_label = 'RETURN'   # 2026-07-15 CHART→RETURN 개명 (표를 차트 우측에 병치)
             else:
                 category_label = category
 
@@ -7013,8 +7034,9 @@ def create_dashboard():
             target = wrap_html if category == 'Wrap' else charts_html
 
             if category == 'Wrap':
-                wrap_html += _build_wrap_chart_section(category_label)
-                wrap_html += create_wrap_returns_table()
+                _rt_card, _rt_rest = create_wrap_returns_table()
+                wrap_html += _build_wrap_chart_section(category_label, right_panel=_rt_card)
+                wrap_html += _rt_rest
                 wrap_html += create_aum_table()
                 wrap_html += create_cumulative_aum_chart()
             else:

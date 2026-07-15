@@ -274,6 +274,10 @@ def portfolio_groups():
     return groups
 
 
+# PORTFOLIO 탭 버튼 그룹 라벨 (2026-07-15 사용자 지정) — divider 앞/뒤 그룹의 머리글
+PF_TAB_GROUP_LABELS = ('일반형/개방형/지속형', '목표전환형/성과모집형')
+
+
 def portfolio_tab_buttons():
     """create_dashboard.py / PORTFOLIO 탭 상단 상품 버튼 목록 (표시 순서대로).
 
