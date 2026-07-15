@@ -405,9 +405,14 @@ def main():
     if 'compliance' in sent:               # 컴플라이언스 발송 성공 → 증권사 발송 잠금 해제(오늘)
         mark_compliance_sent()
     tag = '[TEST→본인]' if mode == 'test' else '[실발송]'
+    # 수신처 라벨 표기 (2026-07-15 사용자 요청: 컴플/증권사 어디로 갔는지 알림에 명시)
+    key_labels = {'compliance': '컴플', 'samsung': '삼성', 'nh': 'NH', 'db': 'DB', 'kis': '한투'}
     summary = '📧 자문지 메일 %s %d통 발송' % (tag, len(sent))
+    if sent:
+        summary += ' — %s' % ', '.join(key_labels.get(k, k) for k in sent)
     if failed:
-        summary += ', 실패 %d (%s)' % (len(failed), ', '.join(f['key'] for f in failed))
+        summary += '\n실패 %d — %s' % (
+            len(failed), ', '.join(key_labels.get(f['key'], f['key']) for f in failed))
     send_telegram(summary)
     print(summary)
     return 0 if not failed else 1
