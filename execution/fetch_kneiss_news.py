@@ -184,7 +184,9 @@ def _clean_body(text):
 def parse_detail(html_text):
     """view.do 응답에서 (제목, 날짜, 본문, paywalled) 추출.
 
-    paywalled=True → 회원전용 차단(news_view/본문 영역 없음).
+    paywalled=True → 회원전용 차단(news_view 컨테이너도, 본문/이미지/첨부도 없음).
+    본문 텍스트가 없어도 이미지·첨부가 있으면 정상 게시글이다
+    (2026-07 월간 종합 글이 이미지+PDF 첨부 형식으로 게시됨 — #7919).
     """
     nv = re.search(
         r'<div[^>]*class="[^"]*news_view[^"]*"[^>]*>(.*?)<div class="taR',
@@ -208,28 +210,89 @@ def parse_detail(html_text):
             break
 
     body = ''
+    has_img = False
     mt = re.search(r'<div[^>]*class="[^"]*\btext\b[^"]*"[^>]*>(.*?)</div>',
                    block, re.DOTALL)
     if mt:
         raw = mt.group(1)
+        has_img = re.search(r'<img\b', raw, re.I) is not None
         raw = re.sub(r'<\s*br\s*/?\s*>', '\n', raw, flags=re.I)
         raw = re.sub(r'</\s*p\s*>', '\n', raw, flags=re.I)
         raw = re.sub(r'<[^>]+>', '', raw)
         body = _clean_body(raw)
 
-    paywalled = not body
+    paywalled = not body and not has_img and not parse_attachments(block)
     return title, date_str, body, paywalled
 
 
+def parse_attachments(html_text):
+    """첨부파일 목록 [(파일명, atchFileId, fileSn)] 추출.
+
+    마크업: <a title="첨부파일(이름.pdf) 다운로드 새창 열림" ...
+            onclick=" yhLib.file.download('ATCH_ID','FILE_SN'); ...">
+    """
+    atts = []
+    for m in re.finditer(
+        r'title="첨부파일\((.*?)\) 다운로드[^"]*"[^>]*?'
+        r"yhLib\.file\.download\('([0-9A-Fa-f]+)'\s*,\s*'([0-9A-Fa-f]+)'\)",
+        html_text, re.DOTALL,
+    ):
+        atts.append({
+            'name': html.unescape(m.group(1).strip()),
+            'atch_file_id': m.group(2),
+            'file_sn': m.group(3),
+        })
+    return atts
+
+
+PDF_TEXT_MAX = 12000  # 텔레그램 분할 발송(4000자 청크) 감안 상한
+
+
+def _fetch_pdf_text(session, att):
+    """첨부 PDF 다운로드 → 텍스트 추출. 실패 시 '' (발송은 계속)."""
+    try:
+        r = session.get(
+            f'{BASE}/common/file/download.do',
+            params={'atchFileId': att['atch_file_id'], 'fileSn': att['file_sn']},
+            timeout=REQ_TIMEOUT,
+        )
+        if r.status_code != 200 or not r.content.startswith(b'%PDF'):
+            return ''
+        import io
+        from pypdf import PdfReader
+        pages = [p.extract_text() or '' for p in PdfReader(io.BytesIO(r.content)).pages]
+        text = re.sub(r'^\s*-\s*\d+\s*-\s*$', '', '\n'.join(pages), flags=re.M)  # 페이지 번호
+        text = _clean_body(text)
+        if len(text) > PDF_TEXT_MAX:
+            text = text[:PDF_TEXT_MAX] + '\n…(이하 생략 — 원문 PDF 참조)'
+        return text.strip()
+    except Exception:
+        return ''
+
+
 def fetch_post_detail(session, idx):
-    """본문 페이지 POST → (제목, 날짜, 본문, paywalled)."""
+    """본문 페이지 POST → (제목, 날짜, 본문, paywalled).
+
+    본문이 이미지/첨부 전용이면 PDF 첨부에서 텍스트를 추출해 본문으로 쓰고,
+    추출 불가 시 첨부 안내 문구로 대체한다.
+    """
     r = session.post(
         f'{BASE}{VIEW_PATH}',
         data={'idx': str(idx), 'searchCondition': '', 'searchTxt': '', 'page': '1'},
         timeout=REQ_TIMEOUT,
         headers={'Referer': f'{BASE}{LIST_PATH}'},
     )
-    return parse_detail(r.text)
+    title, date_str, body, paywalled = parse_detail(r.text)
+    if not paywalled and not body:
+        atts = parse_attachments(r.text)
+        pdf = next((a for a in atts if a['name'].lower().endswith('.pdf')), None)
+        if pdf:
+            body = _fetch_pdf_text(session, pdf)
+        if not body:
+            body = '(본문이 이미지/첨부파일 형식입니다 — 원문 링크 참조)'
+        if atts:
+            body += '\n\n📎 첨부: ' + ' / '.join(a['name'] for a in atts)
+    return title, date_str, body, paywalled
 
 
 # ── state ───────────────────────────────────────────────────────────────────
