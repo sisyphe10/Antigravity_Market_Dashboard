@@ -101,27 +101,29 @@ def seed_shares():
     return False
 
 
-def refresh_shares():
-    """KIS inquire-price로 전 종목 상장주식수 갱신 (매일 1회, 백그라운드)."""
+def refresh_shares(targets=None):
+    """KIS inquire-price로 상장주식수 갱신 (targets=None이면 전 종목, 지정 시 누락분만)."""
     today = datetime.now(KST).strftime('%Y-%m-%d')
+    fetch_list = targets if targets else [s['code'] for s in STOCKS]
     got, fail = {}, 0
-    for s in STOCKS:
+    for code in fetch_list:
         try:
             j = kis_get(PRICE_PATH, tr_id=PRICE_TRID,
                         params={'FID_COND_MRKT_DIV_CODE': 'J',
-                                'FID_INPUT_ISCD': s['code']})
+                                'FID_INPUT_ISCD': code})
             n = _to_int((j.get('output') or {}).get('lstn_stcn'))
             if n:
-                got[s['code']] = n
+                got[code] = n
         except Exception:
             fail += 1
     if got:
         with _LOCK:
             SHARES.update(got)
             META['shares_date'] = today
-        json.dump({'date': today, 'shares': got},
+            merged = dict(SHARES)
+        json.dump({'date': today, 'shares': merged},
                   open(SHARES_CACHE, 'w', encoding='utf-8'))
-    logging.info('상장주식수 갱신 완료 %d/%d (실패 %d)', len(got), len(STOCKS), fail)
+    logging.info('상장주식수 갱신 완료 %d/%d (실패 %d)', len(got), len(fetch_list), fail)
 
 
 def sweep_once(codes):
@@ -336,8 +338,11 @@ def main():
     STOCKS.extend(load_universe())
     logging.info('유니버스 로드: %d종목', len(STOCKS))
     fresh = seed_shares()
+    missing = [s['code'] for s in STOCKS if s['code'] not in SHARES]
     if not fresh:
         threading.Thread(target=refresh_shares, daemon=True).start()
+    elif missing:   # 오늘자 캐시라도 신규 추가 종목의 상장주식수는 즉시 보충
+        threading.Thread(target=refresh_shares, args=(missing,), daemon=True).start()
     threading.Thread(target=poll_loop, args=(args.interval,), daemon=True).start()
     threading.Thread(target=sync_wl_from_portfolio, daemon=True).start()
 
