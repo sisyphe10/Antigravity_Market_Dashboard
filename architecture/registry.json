@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-07-14",
+  "updated": "2026-07-16",
   "projects": [
    "antigravity"
   ],
@@ -463,11 +463,11 @@
    "project": "antigravity",
    "domain": "ops-infra",
    "type": "timer",
-   "name": "일일 셀프체크 다이제스트 (08:50, dead-man's switch)",
+   "name": "일일 셀프체크 다이제스트 (08:50, 이상 시에만 발송)",
    "runs_on": "vm_macmini",
    "schedule_kst": "08:50 매일",
    "status": "active",
-   "desc_md": "맥미니 상태를 매일 08:50 KST 텔레그램 한 줄로 요약하는 launchd 데몬(`com.antigravity.daily-selfcheck`). **정상이어도 매일 발송** — 메시지의 존재 자체가 liveness 신호(침묵=다운). 2026-07-11 컷오버로 라이브.\n\n- 수집: 봇 4종 running 여부 · 타이머 8종 stamp 신선도(OK n/N) · 24h 재시작 수 · 디스크 여유 · git-pull 실패연속/HEAD 나이.\n- **웹 섹션(2026-07-11 W9 추가)**: Caddy(`com.antigravity.web`) running · ts.net 도달성(자기 ts.net을 tailscale IP로 resolve) · 게시 스냅숏(`current`) 나이.\n- 실제 문제(봇 다운/타이머 STALE/디스크 부족/웹 다운)만 ⚠️ 라인으로 헤더를 뒤집는다.\n- 실적 다이제스트(08:00) 후, 신선도 워치독(11:00) 전 배치.",
+   "desc_md": "맥미니 상태를 매일 08:50 KST 점검해 **이상이 있을 때만** 텔레그램으로 요약을 보내는 launchd 데몬(`com.antigravity.daily-selfcheck`). 2026-07-11 컷오버로 라이브.\n\n- ★**2026-07-15 설계 반전(사용자 지시)**: 원래는 정상이어도 매일 발송해 메시지 존재 자체가 liveness 신호인 dead-man's switch였으나, 매일의 정상 알림 소음이 그 값어치를 넘어선다고 판단 — warn이 없으면 발송을 생략하고 로컬 로그만 남긴다. **dead-man 감시 역할은 외부 워치독([[gha-daily-health-check]], 11:00 KST)이 승계** — 맥미니가 통째로 죽어도 GitHub 쪽에서 잡히므로 침묵이 감시 공백이 되지 않는다.\n\n- 수집: 봇 4종 running 여부 · 타이머 8종 stamp 신선도(OK n/N) · 24h 재시작 수 · 디스크 여유 · git-pull 실패연속/HEAD 나이.\n- **웹 섹션(2026-07-11 W9 추가)**: Caddy(`com.antigravity.web`) running · ts.net 도달성(자기 ts.net을 tailscale IP로 resolve) · 게시 스냅숏(`current`) 나이.\n- 실제 문제(봇 다운/타이머 STALE/디스크 부족/웹 다운)만 ⚠️ 라인이 되고, 그 warn 유무가 곧 발송 여부다. ℹ️ 라인(24h 재시작 수·대형 로그)은 참고 정보라 단독으로는 발송을 유발하지 않는다.\n- 실적 다이제스트(08:00) 후, 신선도 워치독(11:00) 전 배치.",
    "code": [
     "launchd/system/daily_selfcheck.sh",
     "launchd/system/com.antigravity.daily-selfcheck.plist"
@@ -480,7 +480,7 @@
     "infra-vm-macmini",
     "infra-telegram"
    ],
-   "alerts": "매일 발송(침묵이 곧 경보) → 텔레그램"
+   "alerts": "이상(⚠️) 있을 때만 발송 → 텔레그램 · 정상일은 무음(로그만)"
   },
   {
    "id": "launchd-gha-phase2",
@@ -842,7 +842,7 @@
    "runs_on": "github",
    "schedule_kst": "생성=여러 잡",
    "status": "active",
-   "desc_md": "생태계 진입점 랜딩 페이지. sparkline 회전 위젯(50슬롯)+인용구 카드, 상단 탭바 네비게이션(WRAP/Market/Architecture).\n\n- 위젯 데이터는 `landing_highlights.json`(18:45 타이머)+`landing_quotes.json`, 예탁금/신용 차트는 `kofia_stats.json`.\n- `create_dashboard.py`가 생성, kofia/finalize/recalc/crawl 등 여러 잡이 재생성.\n- 좌측 'Age of Emergence' 브랜드 클릭=index로.",
+   "desc_md": "생태계 진입점 랜딩 페이지. sparkline 회전 위젯(50슬롯)+인용구 카드, 상단 탭바 네비게이션(WRAP/Market/Architecture).\n\n- 위젯 데이터는 `landing_highlights.json`(18:45 타이머)+`landing_quotes.json`, 예탁금/신용 차트는 `kofia_stats.json`.\n- `create_dashboard.py`가 생성, kofia/finalize/recalc/crawl 등 여러 잡이 재생성.\n- 좌측 'Age of Emergence' 브랜드 클릭=index로.\n- 2026-07-15부터 **개인 ts.net에서는 첫 화면이 아니다** — Caddy가 루트를 `/watchlist/`([[daemon-watchlist-quoteboard]])로 302 리다이렉트해 `/index.html` 직접 접근으로만 열린다([[web-caddy]]). GitHub Pages(팀원용) 게시본은 종전대로 랜딩.",
    "code": [
     "execution/create_dashboard.py"
    ],
@@ -1933,7 +1933,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "08:00 (earnings-bot 타이머)",
    "status": "active",
-   "desc_md": "미국 실적/IR Day를 번역·요약해 노션 퍼블리시 + 아침 다이제스트를 만드는 다단 파이프라인(`earnings_bot.runner`).\n\n- 단계: 캘린더 sync → EDGAR/트랜스크립트 감시(edgar_monitor/transcript_watch) → 종목 매칭(matcher/ticker_registry) → YoY 계산 → 프롬프트 빌드→번역(Claude) → 노션 퍼블리시 → morning_digest.\n- 상태 DB=`earnings.db`. 예정 포맷=`티커/발표일자`(기업명 없음 확정). `--dismiss` CLI.\n- 캘린더는 `gha-earnings-calendar-sync`가 채우고 이 파이프라인이 소비.",
+   "desc_md": "미국 실적/IR Day를 번역·요약해 노션 퍼블리시 + 아침 다이제스트를 만드는 다단 파이프라인(`earnings_bot.runner`).\n\n- 단계: 캘린더 sync → EDGAR/트랜스크립트 감시(edgar_monitor/transcript_watch) → 종목 매칭(matcher/ticker_registry) → YoY 계산 → 프롬프트 빌드→번역(Claude) → 노션 퍼블리시 → morning_digest.\n- **외국 사기업(FPI) 6-K 감시(2026-07-15 확장)**: 미국 기업의 8-K와 달리 ADR·외국 발행사는 6-K로 실적을 내므로 `ticker_registry.FOREIGN_PRIVATE_ISSUERS`에 등록된 티커만 6-K 경로를 탄다. universe USD 전수 스캔(SEC submissions API)으로 활성 FPI 10종(AS·BABA·ERIC·JD·NOK·NVO·NXE·ONON·SE·SPOT)을 일괄 등록해 기존 3종(ASML·TSM·CCJ)과 합쳐 13종. 판별 기준=최신 6-K가 현행이고 최근 8-K/10-K 없음(NXPI·SATL·SHOP·SN은 8-K 전환 완료라 제외). 미등록이 곧 미수신인 구조 — ERIC Q2(6-K, 2026-07-14) 누락이 계기였다.\n- **오탐 차단(2026-07-15)**: matcher는 company_name 스코어링에서 맨 티커를 제외하고 티커 언급을 word-boundary로 잡는다(타사 트랜스크립트의 인명 'Eric Mendelson'이 ERIC에 0.8로 매칭되던 HEICO 케이스 → 0.577 < 0.7). attachment_parser는 HK FF305 'Next Day Disclosure Return'·월간 자사주 매입 양식을 실적 신호 규칙보다 **먼저** `6-K_EVENT`로 분류(BABA 자사주 표의 'per share'가 `6-K_QUARTERLY`/HIGH를 유발하던 건).\n- 상태 DB=`earnings.db`. 예정 포맷=`티커/발표일자`(기업명 없음 확정). `--dismiss` CLI.\n- 캘린더는 `gha-earnings-calendar-sync`가 채우고 이 파이프라인이 소비.",
    "code": [
     "execution/earnings_bot/runner.py",
     "execution/earnings_bot/morning_digest.py",
@@ -2006,7 +2006,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "잡별 (20:30 / 23:20 / 23:50 / 일 10:00 / 20분)",
    "status": "active",
-   "desc_md": "2026-07-11 신설(코드는 레포 `datalake/`, 데이터 정본은 레포 외부 `~/datalake`). 덮어쓰기형 산출물의 과거 유실을 막고, 전 상장·해외 유니버스 일봉 종가를 백필하며, DuckDB+Claude API 웹 UI로 자연어 질의를 제공하는 로컬 데이터레이크. 백필 스크립트(KRX/KIS·FRED·ECOS·KOFIA·벤치마크·해외)와 `build_catalog.py` 카탈로그가 함께 있다.\n\n- **launchd 잡 5종**(맥미니 전용):\n  - `datalake-market-update`(20:30) — 일별 증분 적재(`daily_market_update.py`).\n  - `datalake-research-export`(23:20) — Research Notes 원문(`research_notes.db`)을 일별 `.md`+미디어로 아카이브.\n  - `datalake-snapshot`(23:50) — 덮어쓰기형 레포 산출물 일별 gzip 스냅샷.\n  - `datalake-backup`(일 10:00) — private repo 백업(duckdb/staging 제외).\n  - `datalake-sheets-mirror`(20분 폴링, 2026-07-12 신규) — 시지프+선유듀오 구글시트 미러 → `~/datalake/sheets`. 시트 단위 격리 + **3회 재시도(15s·30s 백오프, 2026-07-14)** — read timeout 등 일시 장애를 흡수하고 3회 연속 실패만 비정상 종료→알림(오탐 알림 억제).\n- 저장: 데이터셋별 연도 파티션 parquet(`kr_ohlcv`·`kr_marcap`·`overseas_ohlcv` 등) + `market.duckdb` 뷰. KRX 수정주가 캡 실측 대응으로 `kr_ohlcv`(무수정)/`kr_ohlcv_adj` 분리.\n- 웹 UI(`datalake/webui/`)는 duckdb 샌드박스(allowed→잠금) 위에서 md 코퍼스 문답. 상세: `datalake/DESIGN.md`.",
+   "desc_md": "2026-07-11 신설(코드는 레포 `datalake/`, 데이터 정본은 레포 외부 `~/datalake`). 덮어쓰기형 산출물의 과거 유실을 막고, 전 상장·해외 유니버스 일봉 종가를 백필하며, DuckDB+Claude API 웹 UI로 자연어 질의를 제공하는 로컬 데이터레이크. 백필 스크립트(KRX/KIS·FRED·ECOS·KOFIA·벤치마크·해외)와 `build_catalog.py` 카탈로그가 함께 있다.\n\n- **launchd 잡 5종**(맥미니 전용):\n  - `datalake-market-update`(20:30) — 일별 증분 적재(`daily_market_update.py`).\n  - `datalake-research-export`(23:20) — Research Notes 원문(`research_notes.db`)을 일별 `.md`+미디어로 아카이브.\n  - `datalake-snapshot`(23:50) — 덮어쓰기형 레포 산출물 일별 gzip 스냅샷.\n  - `datalake-backup`(일 10:00) — private repo 백업(duckdb/staging 제외).\n  - `datalake-sheets-mirror`(20분 폴링, 2026-07-12 신규) — 시지프+선유듀오 구글시트 미러 → `~/datalake/sheets`. 시트 단위 격리 + **3회 재시도(15s·30s 백오프, 2026-07-14)** — read timeout 등 일시 장애를 흡수하고 3회 연속 실패만 비정상 종료→알림(오탐 알림 억제).\n- 저장: 데이터셋별 연도 파티션 parquet(`kr_ohlcv`·`kr_marcap`·`overseas_ohlcv` 등) + `market.duckdb` 뷰. KRX 수정주가 캡 실측 대응으로 `kr_ohlcv`(무수정)/`kr_ohlcv_adj` 분리.\n- **공매도·선물 패스(2026-07-15 신규)**: `kr_short`(종목별 일별 공매도 거래량·거래대금·잔고수량/금액, KRX SRT30001 — 잔고는 T+2 공시라 최근 1~2일 NaN이 lookback 재조회로 self-heal. ★전면금지 2023-11-06~2025-03-30·부분금지 2020-03-16~2021-05-02 구간은 빈 값이 정상) · `kr_short_investor`(시장단위 투자자별 공매도) · `kr_futures_ohlcv`(선물 7상품 월물별 시세+미결제약정, 상품 단위 합계는 `kr_futures_oi_daily` 뷰). 선물 OI는 pykrx api wrapper가 `ACC_OPNINT_QTY`를 떨궈 **core 전종목시세(MDCSTAT12501) 클래스를 직접 호출**하고, 백필은 (상품,연도) 단위 staging 체크포인트로 재개한다.\n- 웹 UI(`datalake/webui/`)는 duckdb 샌드박스(allowed→잠금) 위에서 md 코퍼스 문답. 상세: `datalake/DESIGN.md`.",
    "code": [
     "datalake/",
     "datalake/daily_market_update.py",
@@ -2152,6 +2152,37 @@
     "infra-datalake"
    ],
    "alerts": "KeepAlive=true (launchd 자동 재기동, ThrottleInterval=15)"
+  },
+  {
+   "id": "daemon-watchlist-quoteboard",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "infra",
+   "name": "관심종목 시세판 데몬 (Watchlist, 127.0.0.1:8778)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "상시 (스윕 장중 1s · 장외 60s)",
+   "status": "active",
+   "desc_md": "2026-07-15 신설. POP HTS 상시실행을 대체하는 KIS 실시간 시세판을 **상시 데몬**으로 띄우는 launchd 서비스(`com.antigravity.watchlist`, RunAtLoad + KeepAlive, `run_bot.sh watchlist` wrapper 경유). **ts.net 대시보드의 첫 화면** — Caddy가 루트(`/`)를 `/watchlist/`로 302 리다이렉트하므로 기존 랜딩([[page-index]])은 `/index.html` 직접 접근으로 밀렸다([[web-caddy]]).\n\n- 바인딩: stdlib `ThreadingHTTPServer`(`server.py`)가 `127.0.0.1:8778` 루프백 고정 — 직접 공개 노출 없음. Caddy가 `/watchlist/*`를 이 포트로 리버스 프록시(`no-store`). 라우트는 `/`(index.html) · `/data`(시세 JSON, 프런트 1초 폴링) · `/wl`(관심그룹 GET/POST) 3종, 쿼리스트링은 무시.\n- 종목: `universe_tickers.csv`의 KRX/KOSDAQ 전 종목(~463). 시세는 KIS multprice(`FHKST11300006`) **30종목/콜 배치** 스윕 — 장중(평일 08:50~15:45) 1초, 장외 60초(KIS 쿼터 절약), 배치 실패 시 최대 10초 지수 백오프.\n- 시총 = 현재가 × 상장주식수. 상장주식수는 KIS `inquire-price`로 매일 1회 갱신하고 `shares_cache.json`에 캐시 — 기동 시 오늘자 캐시 > 이전 캐시 > `kis_universe_master.json` 순으로 seed해 즉시 시작하고, 오늘자 캐시라도 누락 종목만 별도 보충(2026-07-15).\n- 관심그룹 3종은 **서버 저장**(`watchlists.json`, 기기 공통 — 브라우저 로컬 아님). 그룹 1·2는 `portfolio_data.json`에서 10분 주기 **키워드 매칭 자동 동기화**(1=일반형/개방형/지속형, 2=목표전환형/성과모집형)라 회차 교체에 자동 추종한다. 수동 추가분은 직전 `auto` 목록과의 차집합으로 식별해 보존, 포트에서 빠진 auto 종목만 제거. 그룹 3은 수동 전용.\n- 프런트(`index.html`): AoE topnav 동형 · 섹터 탭 멀티선택 · 정렬 · 전역 검색창에서 그룹 추가. 로그는 `logs/launchd/watchlist.{out,err}`. 계산 잡 아님(catch-up 대상 아님).",
+   "code": [
+    "launchd/web/com.antigravity.watchlist.plist",
+    "quoteboard/server.py",
+    "quoteboard/index.html"
+   ],
+   "reads": [
+    "store-portfolio-data",
+    "universe_tickers.csv",
+    "kis_universe_master.json"
+   ],
+   "writes": [
+    "quoteboard/watchlists.json",
+    "quoteboard/shares_cache.json"
+   ],
+   "depends_on": [
+    "infra-vm-macmini",
+    "ext-data-apis",
+    "store-portfolio-data"
+   ],
+   "alerts": "KeepAlive=true (launchd 자동 재기동, ThrottleInterval=10)"
   },
   {
    "id": "ext-data-apis",
@@ -2635,7 +2666,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "상시",
    "status": "active",
-   "desc_md": "2026-07-11 신설된 맥미니 자체 서빙 계층. Caddy(`com.antigravity.web`, homebrew, KeepAlive)가 게시 스냅숏을 tailscale(ts.net)로 내보내는 개인 대시보드의 웹서버.\n\n- 입구는 `tailscale serve` 프록시뿐 — Caddy는 `http://:8377` + `bind 127.0.0.1` 루프백 고정(공개 노출 없음). 127.0.0.1:8377 직접 바인딩은 프록시 Host 불일치로 빈 200이 나던 실측 함정 회피.\n- 루트(`/`)는 `~/srv/dashboard/current`(게시 스냅숏, `publish_snapshot.sh` 산출) 정적 서빙 — **스냅숏 디렉토리 직접 수정 금지**. Sisyphe 개인 페이지(`/sisyphe/*`)도 이제 이 스냅숏의 `current/sisyphe/`(2026-07-13 평문 전환, [[web-publish-snapshot]]의 `compose_personal_view.py`가 합성 — staticrypt 암호화 직서빙 폐기)에서 fallback handle로 서빙된다.\n- `/journal/*`(2026-07-13): 개인 투자일지 차트(\"Escape Velocity\") — 테일넷 + basic_auth 이중 게이트, `~/Journal/web` 정적 서빙(`no-store`). **데이터·자격증명·페이지 전부 `~/Journal` 로컬 전용으로 git/게시 파이프라인과 격리**(전역 규칙 Journal 섹션). `~/Journal/caddy_auth.snippet` import — 없으면 caddy 기동 실패하니 Journal 폴더 이동 시 이 라우트 먼저 수정.\n- `/wiki/*`는 `127.0.0.1:8787`([[daemon-datalake-webui]])로 리버스 프록시 — 데이터레이크 문답 UI를 AoE 'Wiki' 탭으로 통합(2026-07-12, `redir /wiki /wiki/ 301`).\n- HTML/JSON/CSV·인덱스는 `Cache-Control: no-cache`. 접근 로그는 `~/srv/dashboard/logs/access.log`(20MiB 롤).",
+   "desc_md": "2026-07-11 신설된 맥미니 자체 서빙 계층. Caddy(`com.antigravity.web`, homebrew, KeepAlive)가 게시 스냅숏을 tailscale(ts.net)로 내보내는 개인 대시보드의 웹서버.\n\n- 입구는 `tailscale serve` 프록시뿐 — Caddy는 `http://:8377` + `bind 127.0.0.1` 루프백 고정(공개 노출 없음). 127.0.0.1:8377 직접 바인딩은 프록시 Host 불일치로 빈 200이 나던 실측 함정 회피.\n- **루트(`/`)는 2026-07-15부터 `/watchlist/`로 302 리다이렉트** — 첫 화면이 관심종목 시세판([[daemon-watchlist-quoteboard]])으로 바뀌었고, 기존 랜딩([[page-index]])은 `/index.html` 직접 접근으로만 열린다. 게시 스냅숏(`~/srv/dashboard/current`, `publish_snapshot.sh` 산출)은 그 아래 fallback handle이 정적 서빙 — **스냅숏 디렉토리 직접 수정 금지**. Sisyphe 개인 페이지(`/sisyphe/*`)도 이제 이 스냅숏의 `current/sisyphe/`(2026-07-13 평문 전환, [[web-publish-snapshot]]의 `compose_personal_view.py`가 합성 — staticrypt 암호화 직서빙 폐기)에서 fallback handle로 서빙된다.\n- `/journal/*`(2026-07-13): 개인 투자일지 차트(\"Escape Velocity\") — 테일넷 + basic_auth 이중 게이트, `~/Journal/web` 정적 서빙(`no-store`). **데이터·자격증명·페이지 전부 `~/Journal` 로컬 전용으로 git/게시 파이프라인과 격리**(전역 규칙 Journal 섹션). `~/Journal/caddy_auth.snippet` import — 없으면 caddy 기동 실패하니 Journal 폴더 이동 시 이 라우트 먼저 수정.\n- `/wiki/*`는 `127.0.0.1:8787`([[daemon-datalake-webui]])로 리버스 프록시 — 데이터레이크 문답 UI를 AoE 'Wiki' 탭으로 통합(2026-07-12, `redir /wiki /wiki/ 301`).\n- `/watchlist/*`(2026-07-15): 관심종목 시세판 데몬 `127.0.0.1:8778`([[daemon-watchlist-quoteboard]]) 리버스 프록시(`no-store`, `redir /watchlist /watchlist/ 301`). 위 루트 302와 짝 — ts.net 첫 화면.\n- `/plan-api/*`(2026-07-15): Sisyphe Ledger 'Plan' 자금계획 JSON(`~/Journal/plan_web.json`, 계좌번호 포함) API — `~/Journal/scripts/plan_api.py` 백엔드(`127.0.0.1:8790`, launchd `com.antigravity.plan-api`, 레포 밖)로 프록시. **게이트는 테일넷 단독**(basic_auth는 당일 `plan_auth.snippet` import 도입 → 별도 realm 전환 → 제거로 정리). ★소스의 라우트 주석은 'basic_auth 이중'이라 적혀 있으나 실제 설정엔 auth import가 없다 — 주석이 stale.\n- HTML/JSON/CSV·인덱스는 `Cache-Control: no-cache`. 접근 로그는 `~/srv/dashboard/logs/access.log`(20MiB 롤).",
    "code": [
     "launchd/web/Caddyfile",
     "launchd/web/com.antigravity.web.plist"
@@ -2643,13 +2674,15 @@
    "reads": [
     "web-publish-snapshot",
     "daemon-sisyphe-pull",
-    "daemon-datalake-webui"
+    "daemon-datalake-webui",
+    "daemon-watchlist-quoteboard"
    ],
    "depends_on": [
     "infra-vm-macmini",
     "web-publish-snapshot",
     "daemon-sisyphe-pull",
-    "daemon-datalake-webui"
+    "daemon-datalake-webui",
+    "daemon-watchlist-quoteboard"
    ],
    "alerts": "KeepAlive=true (launchd 자동 재기동)"
   },
@@ -2662,7 +2695,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "잡 성공 훅 (여러 잡)",
    "status": "active",
-   "desc_md": "2026-07-11 신설. 잡 wrapper(`run_gha_job.sh`/`run_timer_job.sh`) 성공 직후 호출되어 repo 산출물을 개인 ts.net 대시보드로 게시하는 스냅숏 게시기. Caddy가 서빙하는 `~/srv/dashboard/current`의 유일한 writer.\n\n- 동작: 화이트리스트 rsync(`*.html`/`*.json`/`*.csv`/`orders/`/`architecture/`/`charts/`, `.env`·`.git` 구조적 배제) → `releases/rel-<ts>` 새 세대 → 검증 → `current` 심링크 원자 교체(rename(2)). 어떤 실패에서도 기존 current는 안 깨진다.\n- **개인용 가공(1.5단계, `compose_personal_view.py`)**: rsync 직후 새 릴리스 사본에서만 가공 — `wrap.html` 제거 + AoE 11페이지 topnav 재구성(Wiki·Invest(→/journal)·우측 Sisyphe 탭) + `~/srv/sisyphe_plain` 원본에서 Sisyphe 평문 3페이지(index/dashboard/journal)를 `current/sisyphe/`로 합성(2026-07-13 staticrypt 암호화 폐기, 테일넷 한정이라 암호 프롬프트 제거 목적). 검증(sisyphe 존재·staticrypt 0·역방향 nav) 실패 시 세대 폐기. repo 원본·GitHub(팀원용)은 불변.\n- mkdir 원자 락(120s)으로 게시 직렬화. 실패해도 잡 rc에 영향 없음(호출측 `|| true`).\n- 팀원용 공개 게시는 별도 경로([[web-publish-pages]], gh-pages).",
+   "desc_md": "2026-07-11 신설. 잡 wrapper(`run_gha_job.sh`/`run_timer_job.sh`) 성공 직후 호출되어 repo 산출물을 개인 ts.net 대시보드로 게시하는 스냅숏 게시기. Caddy가 서빙하는 `~/srv/dashboard/current`의 유일한 writer.\n\n- 동작: 화이트리스트 rsync(`*.html`/`*.json`/`*.csv`/`orders/`/`architecture/`/`charts/`, `.env`·`.git` 구조적 배제) → `releases/rel-<ts>` 새 세대 → 검증 → `current` 심링크 원자 교체(rename(2)). 어떤 실패에서도 기존 current는 안 깨진다.\n- **개인용 가공(1.5단계, `compose_personal_view.py`)**: rsync 직후 새 릴리스 사본에서만 가공 — `wrap.html` 제거 + AoE 11페이지 topnav 재구성(**Watchlist(→/watchlist/, Market 앞 — 2026-07-15)**·Wiki·Invest(→/journal)·우측 Sisyphe 탭) + `~/srv/sisyphe_plain` 원본에서 Sisyphe 평문 3페이지(index/dashboard/journal)를 `current/sisyphe/`로 합성(2026-07-13 staticrypt 암호화 폐기, 테일넷 한정이라 암호 프롬프트 제거 목적). 주입은 기존 fragment를 먼저 제거하고 다시 넣는 정규화 방식이라 재실행에 멱등. 검증(sisyphe 존재·staticrypt 0·역방향 nav·Watchlist 탭 존재+Market 앞 순서) 실패 시 세대 폐기. repo 원본·GitHub(팀원용)은 불변.\n- mkdir 원자 락(120s)으로 게시 직렬화. 실패해도 잡 rc에 영향 없음(호출측 `|| true`).\n- 팀원용 공개 게시는 별도 경로([[web-publish-pages]], gh-pages).",
    "code": [
     "scripts/publish_snapshot.sh",
     "scripts/compose_personal_view.py",

@@ -1,8 +1,8 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 121 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 122 components._
 
-Updated: 2026-07-14
+Updated: 2026-07-16
 
 ## By domain
 
@@ -107,7 +107,7 @@ Updated: 2026-07-14
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — Bot
 - [투자일지 시장데이터 (fetch_journal_data.py)](src-journal-data.md) — Source
 
-### 운영 · 인프라 (32)
+### 운영 · 인프라 (33)
 - [architecture.html (아키텍처)](page-architecture.md) — Page
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — Infra
 - [Claude Code Action (@claude 이벤트)](gha-claude-code.md) — GHA
@@ -124,6 +124,7 @@ Updated: 2026-07-14
 - [UPS (무정전 전원, 맥미니 대비)](infra-ups.md) — Infra
 - [Wrap_NAV 워처 (watch_wrap_nav.py)](watcher-wrap-nav.md) — Watcher
 - [개인 스냅숏 게시 (publish_snapshot.sh)](web-publish-snapshot.md) — Infra
+- [관심종목 시세판 데몬 (Watchlist, 127.0.0.1:8778)](daemon-watchlist-quoteboard.md) — Infra
 - [대시보드 생성기 (create_dashboard.py)](src-create-dashboard.md) — Source
 - [데이터레이크 문답 웹 UI 데몬 (AoE Wiki, 127.0.0.1:8787)](daemon-datalake-webui.md) — Infra
 - [랜딩 하이라이트 생성 (create_landing_highlights.py)](src-landing-highlights.md) — Source
@@ -133,7 +134,7 @@ Updated: 2026-07-14
 - [아키텍처 자동 최신화 타이머 (21:40, claude 헤드리스)](timer-architecture-daily.md) — Timer
 - [외부 데이터 API/소스 집합](ext-data-apis.md) — External
 - [웹 서빙 (Caddy · com.antigravity.web)](web-caddy.md) — Infra
-- [일일 셀프체크 다이제스트 (08:50, dead-man's switch)](daemon-daily-selfcheck.md) — Timer
+- [일일 셀프체크 다이제스트 (08:50, 이상 시에만 발송)](daemon-daily-selfcheck.md) — Timer
 - [작업용 노트북 (ASUS Vivobook, Windows)](infra-laptop.md) — Infra
 - [차트 렌더러 (draw_charts + draw_wrap_charts)](src-draw-charts.md) — Source
 - [컴퓨트 호스트 (Oracle VM → 맥미니)](infra-vm-macmini.md) — Infra
@@ -158,7 +159,7 @@ Updated: 2026-07-14
 - [실적봇 타이머 (earnings-bot)](timer-earnings-bot.md) — 08:00 매일, active
 - [아키텍처 자동 최신화 타이머 (21:40, claude 헤드리스)](timer-architecture-daily.md) — 21:40 매일, active
 - [액티브 ETF 변동 알림 타이머 (19:00)](timer-etf-active-alert.md) — 19:00 매일, active
-- [일일 셀프체크 다이제스트 (08:50, dead-man's switch)](daemon-daily-selfcheck.md) — 08:50 매일, active
+- [일일 셀프체크 다이제스트 (08:50, 이상 시에만 발송)](daemon-daily-selfcheck.md) — 08:50 매일, active
 - [자문지 메일 발송 폴러 (send-advisory-emails 60초)](timer-advisory-emails.md) — 60초 폴러 (상시), active
 - [종목마스터 주간 갱신 타이머 (토 09:00)](timer-update-stock-master.md) — 토 09:00, active
 - [호텔 ADR 타이머 (12:00, 은퇴)](timer-hotel-adr.md) — 12:00 매일 (disabled), retired
@@ -214,13 +215,14 @@ Updated: 2026-07-14
 - [sources_state/ + kna_state.json](store-sources-state.md) — 소스 폴링 시, active
 - [Wrap_NAV.xlsx (랩 운용 원장)](store-wrap-nav-xlsx.md) — 사용자 편집 + finalize, active
 
-### Infra (12)
+### Infra (13)
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — 부팅 시 1회, planned
 - [gh-pages 게시 (publish_pages.sh, 팀 WRAP 전용)](web-publish-pages.md) — push 성공 훅 / 원격변경 훅, active
 - [GHA 잡 흡수 layer (launchd Phase 2 초안)](launchd-gha-phase2.md) — 이관 완료 — 각 잡 스케줄, active
 - [GitHub (정본 repo · Pages · Actions)](infra-github.md) — 상시, active
 - [UPS (무정전 전원, 맥미니 대비)](infra-ups.md) — planned
 - [개인 스냅숏 게시 (publish_snapshot.sh)](web-publish-snapshot.md) — 잡 성공 훅 (여러 잡), active
+- [관심종목 시세판 데몬 (Watchlist, 127.0.0.1:8778)](daemon-watchlist-quoteboard.md) — 상시 (스윕 장중 1s · 장외 60s), active
 - [데이터레이크 문답 웹 UI 데몬 (AoE Wiki, 127.0.0.1:8787)](daemon-datalake-webui.md) — 상시, active
 - [맥미니 데이터레이크 (~/datalake + 문답 위키)](infra-datalake.md) — 잡별 (20:30 / 23:20 / 23:50 / 일 10:00 / 20분), active
 - [웹 서빙 (Caddy · com.antigravity.web)](web-caddy.md) — 상시, active
@@ -286,7 +288,7 @@ Updated: 2026-07-14
 
 ## By project
 
-### antigravity (121)
+### antigravity (122)
 - [architecture.html (아키텍처)](page-architecture.md) — Page
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — Infra
 - [Claude Code Action (@claude 이벤트)](gha-claude-code.md) — GHA
@@ -363,6 +365,7 @@ Updated: 2026-07-14
 - [Wrap_NAV 워처 (watch_wrap_nav.py)](watcher-wrap-nav.md) — Watcher
 - [Wrap_NAV.xlsx (랩 운용 원장)](store-wrap-nav-xlsx.md) — Store
 - [개인 스냅숏 게시 (publish_snapshot.sh)](web-publish-snapshot.md) — Infra
+- [관심종목 시세판 데몬 (Watchlist, 127.0.0.1:8778)](daemon-watchlist-quoteboard.md) — Infra
 - [국민연금 적립금 (fetch_nps_fund.py)](src-nps-fund.md) — Source
 - [금투협 예탁금/신용잔고/반대매매 (fetch_kofia_stats.py)](src-kofia.md) — Source
 - [기여도 데이터 (create_contribution_data.py)](src-create-contribution-data.md) — Source
@@ -391,7 +394,7 @@ Updated: 2026-07-14
 - [웹 서빙 (Caddy · com.antigravity.web)](web-caddy.md) — Infra
 - [유니버스 수집 (fetch_universe.py)](src-universe.md) — Source
 - [일본 CAPEX 지표 (fetch_japan_capex.py)](src-japan-capex.md) — Source
-- [일일 셀프체크 다이제스트 (08:50, dead-man's switch)](daemon-daily-selfcheck.md) — Timer
+- [일일 셀프체크 다이제스트 (08:50, 이상 시에만 발송)](daemon-daily-selfcheck.md) — Timer
 - [자문지 메일 발송 폴러 (send-advisory-emails 60초)](timer-advisory-emails.md) — Timer
 - [작업용 노트북 (ASUS Vivobook, Windows)](infra-laptop.md) — Infra
 - [종목마스터 갱신 (update_stock_master.py)](src-stock-master.md) — Source

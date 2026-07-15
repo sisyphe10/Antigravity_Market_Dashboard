@@ -29,6 +29,7 @@ alerts: ""
 - 위젯 데이터는 `landing_highlights.json`(18:45 타이머)+`landing_quotes.json`, 예탁금/신용 차트는 `kofia_stats.json`.
 - `create_dashboard.py`가 생성, kofia/finalize/recalc/crawl 등 여러 잡이 재생성.
 - 좌측 'Age of Emergence' 브랜드 클릭=index로.
+- 2026-07-15부터 **개인 ts.net에서는 첫 화면이 아니다** — Caddy가 루트를 `/watchlist/`([[daemon-watchlist-quoteboard]])로 302 리다이렉트해 `/index.html` 직접 접근으로만 열린다([[web-caddy]]). GitHub Pages(팀원용) 게시본은 종전대로 랜딩.
 
 ## Reads
 - [[store-landing-highlights]] — landing_highlights.json

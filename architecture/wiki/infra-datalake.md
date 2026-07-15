@@ -37,6 +37,7 @@ alerts: "launchd wrapper 실패 → notify → 텔레그램"
   - `datalake-backup`(일 10:00) — private repo 백업(duckdb/staging 제외).
   - `datalake-sheets-mirror`(20분 폴링, 2026-07-12 신규) — 시지프+선유듀오 구글시트 미러 → `~/datalake/sheets`. 시트 단위 격리 + **3회 재시도(15s·30s 백오프, 2026-07-14)** — read timeout 등 일시 장애를 흡수하고 3회 연속 실패만 비정상 종료→알림(오탐 알림 억제).
 - 저장: 데이터셋별 연도 파티션 parquet(`kr_ohlcv`·`kr_marcap`·`overseas_ohlcv` 등) + `market.duckdb` 뷰. KRX 수정주가 캡 실측 대응으로 `kr_ohlcv`(무수정)/`kr_ohlcv_adj` 분리.
+- **공매도·선물 패스(2026-07-15 신규)**: `kr_short`(종목별 일별 공매도 거래량·거래대금·잔고수량/금액, KRX SRT30001 — 잔고는 T+2 공시라 최근 1~2일 NaN이 lookback 재조회로 self-heal. ★전면금지 2023-11-06~2025-03-30·부분금지 2020-03-16~2021-05-02 구간은 빈 값이 정상) · `kr_short_investor`(시장단위 투자자별 공매도) · `kr_futures_ohlcv`(선물 7상품 월물별 시세+미결제약정, 상품 단위 합계는 `kr_futures_oi_daily` 뷰). 선물 OI는 pykrx api wrapper가 `ACC_OPNINT_QTY`를 떨궈 **core 전종목시세(MDCSTAT12501) 클래스를 직접 호출**하고, 백필은 (상품,연도) 단위 staging 체크포인트로 재개한다.
 - 웹 UI(`datalake/webui/`)는 duckdb 샌드박스(allowed→잠금) 위에서 md 코퍼스 문답. 상세: `datalake/DESIGN.md`.
 
 ## Reads
