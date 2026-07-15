@@ -25,6 +25,7 @@ NOTIFY="$PROD/scripts/notify_sisyphe_failure.sh"
 SINCE="${ARCH_SINCE:-26 hours ago}"
 CLAUDE_WALL_SEC="${ARCH_WALL_SEC:-1800}"   # claude 월클럭 상한 (기본 30분)
 MAX_TURNS="${ARCH_MAX_TURNS:-40}"          # 평시 26h 분량 기준. 캐치업은 env로 상향
+MAX_TURNS_RETRY="${ARCH_MAX_TURNS_RETRY:-100}"  # 자가 재시도 시 턴 상한 (커밋 많은 날 대비)
 
 mkdir -p "$LOGDIR" || { echo "[arch-daily] LOGDIR 생성 실패" >&2; exit 1; }
 log() { echo "[arch-daily $(date '+%F %T')] $*" | tee -a "$LOGFILE"; }
@@ -77,18 +78,28 @@ fi
 printf '최근 커밋:\n%s\n\n변경된 코드/인프라 파일:\n%s\n' "$COMMITS" "$FILES"
 } > "$PROMPT_FILE"
 
-# ── 2) claude 실행 (월클럭 워치독) ───────────────────────────
-log "claude 실행 (since=$SINCE, wall=${CLAUDE_WALL_SEC}s)"
-"$CLAUDE" -p "$(cat "$PROMPT_FILE")" \
-  --allowedTools "Read,Glob,Grep,Write,Edit,Bash(git log:*),Bash(git show:*),Bash(git diff:*)" \
-  --max-turns "$MAX_TURNS" >> "$LOGFILE" 2>&1 &
-CPID=$!
-( sleep "$CLAUDE_WALL_SEC" && kill -9 "$CPID" 2>/dev/null ) &
-WPID=$!
-wait "$CPID"; CLAUDE_RC=$?
-kill "$WPID" 2>/dev/null; wait "$WPID" 2>/dev/null
+# ── 2) claude 실행 (월클럭 워치독 + 실패 시 턴 상향 1회 자가 재시도) ─────
+run_claude() {  # $1=턴 상한, $2=월클럭 상한(초)
+  log "claude 실행 (since=$SINCE, turns=$1, wall=$2s)"
+  "$CLAUDE" -p "$(cat "$PROMPT_FILE")" \
+    --allowedTools "Read,Glob,Grep,Write,Edit,Bash(git log:*),Bash(git show:*),Bash(git diff:*)" \
+    --max-turns "$1" >> "$LOGFILE" 2>&1 &
+  CPID=$!
+  ( sleep "$2" && kill -9 "$CPID" 2>/dev/null ) &
+  WPID=$!
+  wait "$CPID"; CLAUDE_RC=$?
+  kill "$WPID" 2>/dev/null; wait "$WPID" 2>/dev/null
+}
+run_claude "$MAX_TURNS" "$CLAUDE_WALL_SEC"
+if [ "$CLAUDE_RC" -ne 0 ]; then
+  # 최빈 실패 = 커밋 많은 날 max turns(기본 40) 초과 (rc=1, 2026-07-13·07-15 실사례).
+  # 수동 복구 절차(턴·월클럭 상향 재실행)를 자동화 — 1차의 부분 편집은 2차 claude가
+  # 이어서 완성하고, 아래 3) 가드가 허용경로 밖 변경을 걸러낸다.
+  log "claude rc=$CLAUDE_RC — 턴 상향(${MAX_TURNS_RETRY}) 자가 재시도"
+  run_claude "$MAX_TURNS_RETRY" 3600
+fi
 rm -f "$PROMPT_FILE"
-[ "$CLAUDE_RC" -ne 0 ] && fail "claude rc=$CLAUDE_RC (137=월클럭 초과)"
+[ "$CLAUDE_RC" -ne 0 ] && fail "claude rc=$CLAUDE_RC — 재시도 포함 실패 (137=월클럭 초과, rc=1은 대개 max-turns — $LOGFILE 확인)"
 
 # ── 3) 가드: wiki 외 변경 전부 폐기 (NUL-safe, 신규/삭제/리네임 포함) ──
 git add -A -- architecture/wiki || fail "wiki stage 실패"
