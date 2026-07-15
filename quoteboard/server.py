@@ -238,13 +238,14 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(data)
 
     def do_GET(self):
-        if self.path.startswith('/data'):
+        path = self.path.split('?', 1)[0]           # 쿼리스트링 무시
+        if path.startswith('/data'):
             self._send(build_payload(), 'application/json')
-        elif self.path.startswith('/wl'):
+        elif path.startswith('/wl'):
             with _LOCK:
                 body = json.dumps(load_wl(), ensure_ascii=False)
             self._send(body, 'application/json')
-        elif self.path in ('/', '/index.html'):
+        elif path in ('/', '/index.html'):
             html = open(os.path.join(BASE, 'index.html'), encoding='utf-8').read()
             self._send(html, 'text/html')
         else:
