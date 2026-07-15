@@ -404,10 +404,11 @@ def main():
     push_result(result)
     if 'compliance' in sent:               # 컴플라이언스 발송 성공 → 증권사 발송 잠금 해제(오늘)
         mark_compliance_sent()
-    tag = '[TEST→본인]' if mode == 'test' else '[실발송]'
+    # 실발송은 무태그, 테스트만 표시 (2026-07-15 사용자 요청: [실발송] 태그 제거)
+    tag = '[TEST→본인] ' if mode == 'test' else ''
     # 수신처 라벨 표기 (2026-07-15 사용자 요청: 컴플/증권사 어디로 갔는지 알림에 명시)
     key_labels = {'compliance': '컴플', 'samsung': '삼성', 'nh': 'NH', 'db': 'DB', 'kis': '한투'}
-    summary = '📧 자문지 메일 %s %d통 발송' % (tag, len(sent))
+    summary = '📧 자문지 메일 %s%d통 발송' % (tag, len(sent))
     if sent:
         summary += ' — %s' % ', '.join(key_labels.get(k, k) for k in sent)
     if failed:
