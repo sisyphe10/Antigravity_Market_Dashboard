@@ -30,6 +30,14 @@ http://:8377 {
 		file_server
 	}
 
+	# Sisyphe Ledger 'Plan' API (2026-07-15) — 자금계획 JSON(~/Journal/plan_web.json, 계좌번호 포함).
+	#   테일넷 + journal 동일 basic_auth 이중. 백엔드=~/Journal/scripts/plan_api.py (127.0.0.1:8790, launchd com.antigravity.plan-api).
+	handle_path /plan-api/* {
+		import /Users/sisyphe/Journal/caddy_auth.snippet
+		header Cache-Control "no-store"
+		reverse_proxy 127.0.0.1:8790
+	}
+
 	# Sisyphe 개인 대시보드 (가계부·운동·투자일지) — 2026-07-13 평문 전환.
 	#   compose_personal_view.py 가 평문 3페이지를 게시 스냅숏 current/sisyphe/ 로 합성 → 아래 fallback handle 이 서빙.
 	#   (이전: staticrypt 암호화본 직서빙 handle_path. 테일넷 한정이라 암호 프롬프트 제거가 목적.)
