@@ -191,6 +191,56 @@ def build_payload():
     return json.dumps({'meta': meta, 'rows': rows}, ensure_ascii=False)
 
 
+# ── 관심그룹 1·2 = 포트폴리오 자동 동기화 (10분 주기, 키워드 매칭이라 회차 변경에도 추종) ──
+PF_JSON = os.path.join(ROOT, 'portfolio_data.json')
+PF_GROUP_PATTERNS = [('트루밸류', '지속형'),          # 그룹1: 일반형/개방형/지속형
+                     ('목표전환형', '성과모집형')]    # 그룹2: 목표전환형/성과모집형
+PF_SYNC_SEC = 600
+
+
+def _pf_codes(v):
+    out = []
+
+    def walk(x):
+        if isinstance(x, dict):
+            for k, vv in x.items():
+                if k in ('code', '코드') and isinstance(vv, str) and vv.isdigit() and len(vv) == 6:
+                    out.append(vv)
+                else:
+                    walk(vv)
+        elif isinstance(x, list):
+            for e in x:
+                walk(e)
+    walk(v)
+    return out
+
+
+def sync_wl_from_portfolio():
+    """portfolio_data.json → 관심그룹 1·2 codes 갱신 (이름·그룹3 보존, 변경 시에만 저장)."""
+    while True:
+        try:
+            pf = json.load(open(PF_JSON, encoding='utf-8'))
+            with _LOCK:
+                wl = load_wl()
+                changed = False
+                for gi, pats in enumerate(PF_GROUP_PATTERNS):
+                    codes = []
+                    for key, v in pf.items():
+                        if any(p in key for p in pats):
+                            codes += _pf_codes(v)
+                    codes = list(dict.fromkeys(codes))
+                    if codes and codes != wl[gi]['codes']:
+                        wl[gi]['codes'] = codes
+                        changed = True
+                if changed:
+                    save_wl(wl)
+                    logging.info('관심그룹 포트 동기화: 1=%d종목, 2=%d종목',
+                                 len(wl[0]['codes']), len(wl[1]['codes']))
+        except Exception as e:
+            logging.warning('포트 동기화 실패: %s', e)
+        time.sleep(PF_SYNC_SEC)
+
+
 def load_wl():
     try:
         w = json.load(open(WL_PATH, encoding='utf-8'))
@@ -282,6 +332,7 @@ def main():
     if not fresh:
         threading.Thread(target=refresh_shares, daemon=True).start()
     threading.Thread(target=poll_loop, args=(args.interval,), daemon=True).start()
+    threading.Thread(target=sync_wl_from_portfolio, daemon=True).start()
 
     srv = ThreadingHTTPServer(('127.0.0.1', args.port), Handler)
     logging.info('시세판: http://127.0.0.1:%d/  (스윕 %.1fs)', args.port, args.interval)
