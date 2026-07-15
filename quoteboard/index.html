@@ -11,32 +11,40 @@
     margin: 0; background: #fff; color: #111;
     font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif;
   }
-  /* AoE 공통 topnav (개인 뷰 세트와 동일 룩) */
-  nav.topnav { background: #fff; border-bottom: 1px solid #e5e7eb; }
-  nav.topnav .topnav-inner {
-    max-width: 1400px; margin: 0 auto; padding: 10px 24px;
-    display: flex; align-items: center; gap: 18px;
-  }
-  .topnav-brand { font-size: 16px; font-weight: 800; color: #111; text-decoration: none; }
+  /* AoE 공통 topnav — 대시보드 생성 페이지(create_dashboard)와 동일 CSS 원문 + 개인 뷰(aoe-personal-nav) */
+  .topnav { background: #fff; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 100; }
+  .topnav-inner { max-width: 1400px; margin: 0 auto; padding: 0 28px; box-sizing: border-box; display: flex; align-items: center; height: 72px; gap: 32px; }
+  .topnav-brand { font-size: 1.3rem; font-weight: 800; letter-spacing: 1.5px; color: #111; white-space: nowrap; text-decoration: none; font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; }
   .topnav-brand:hover { color: #2d7a3a; }
-  .topnav-tabs { display: flex; gap: 8px; flex: 1; }
-  .topnav-tab {
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    padding: 5px 14px; font-size: 13px; color: #444; text-decoration: none;
-    border: 1px solid #d1d5db; border-radius: 8px; background: #fff;
-  }
+  .topnav-tabs { display: flex; gap: 12px; flex: 1; align-items: center; }
+  .topnav-item { position: relative; }
+  .topnav-tab { box-sizing: border-box; min-width: 180px; justify-content: center; padding: 10px 24px; display: inline-flex; align-items: center; gap: 6px; color: #444; text-decoration: none; font-size: 1rem; font-weight: 600; border: 1.5px solid #d1d5db; border-radius: 999px; white-space: nowrap; background: #fff; transition: all 0.15s; font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; cursor: pointer; }
   .topnav-tab:hover { color: #111; border-color: #2d7a3a; background: #f0f7f2; }
   .topnav-tab.active { color: #fff; border-color: #2d7a3a; background: #2d7a3a; }
-  .topnav-tab.sisyphe-tab { margin-left: auto; background: #faf3e3; border-color: #e6d9b8; color: #6b5a2a; }
+  .topnav-tab .caret { font-size: 0.7rem; opacity: 0.7; }
+  .topnav-dropdown { box-sizing: border-box; position: absolute; top: calc(100% + 8px); left: 0; min-width: 180px; width: 100%; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.10); padding: 6px; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity 0.15s, transform 0.15s, visibility 0.15s; z-index: 200; }
+  .topnav-item:hover .topnav-dropdown,
+  .topnav-item:focus-within .topnav-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
+  .topnav-sub { display: block; padding: 9px 14px; color: #333; text-decoration: none; font-size: 0.9rem; font-weight: 500; border-radius: 8px; white-space: nowrap; text-align: center; font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; }
+  .topnav-sub:hover { background: #f3f4f6; color: #111; }
+  .topnav-sub.active { background: #f0f7f2; color: #2d7a3a; font-weight: 700; }
+  @media (max-width: 800px) {
+    .topnav-inner { padding: 0 12px; gap: 12px; height: 52px; }
+    .topnav-brand { font-size: 0.95rem; }
+    .topnav-tab { padding: 6px 14px; font-size: 0.85rem; }
+    .topnav-tabs { gap: 6px; }
+  }
+  .topnav-tabs .topnav-item.sisyphe-item { margin-left: auto; }
+  .topnav-tab.sisyphe-tab { background: #faf3e3; border-color: #e6d9b8; color: #6b5a2a; }
   .topnav-tab.sisyphe-tab:hover { background: #f3e8cf; border-color: #d9c48f; color: #5e4a1a; }
   .topbar {
-    position: sticky; top: 0; z-index: 20; background: #fff;
+    position: sticky; top: var(--nav-h, 72px); z-index: 20; background: #fff;
     border-bottom: 1px solid #e5e5e5; padding: 8px 16px 0;
   }
   .titlerow { display: flex; align-items: baseline; gap: 14px; }
   .titlerow h1 { font-size: 15px; font-weight: 700; margin: 0 0 6px; }
   .titlerow .meta { font-size: 12px; color: #888; }
-  .tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 4px; padding-bottom: 6px; }   /* 섹터 탭 줄바꿈(2줄) */
   .tab {
     flex: 0 0 auto; padding: 4px 12px; font-size: 12.5px; cursor: pointer;
     border: 1px solid #ddd; border-radius: 14px; background: #fff; color: #555;
@@ -89,18 +97,7 @@
 </style>
 </head>
 <body>
-<nav class="topnav">
-    <div class="topnav-inner"><a href="/" class="topnav-brand">AoE</a>
-        <div class="topnav-tabs">
-            <a href="/watchlist/" class="topnav-tab active">Watchlist</a>
-            <a href="/market.html" class="topnav-tab">Market</a>
-            <a href="/wiki/" class="topnav-tab">Wiki</a>
-            <a href="/architecture.html" class="topnav-tab">Architecture</a>
-            <a href="/sisyphe/journal.html" class="topnav-tab">Invest</a>
-            <a href="/sisyphe/index.html" class="topnav-tab sisyphe-tab">Sisyphe</a>
-        </div>
-    </div>
-</nav>
+<nav class="topnav"><div class="topnav-inner"><a href="/index.html" class="topnav-brand">AoE</a><div class="topnav-tabs"><div class="topnav-item"><a href="/watchlist/" class="topnav-tab active">Watchlist</a></div><div class="topnav-item"><a href="/market.html" class="topnav-tab">Market</a><div class="topnav-dropdown"><a href="/market.html" class="topnav-sub">Data</a><a href="/universe.html" class="topnav-sub">Universe</a><a href="/universe_lab.html" class="topnav-sub">Universe Lab</a><a href="/featured.html" class="topnav-sub">Featured</a><a href="/market_alert.html" class="topnav-sub">투자유의종목</a><a href="/etf.html" class="topnav-sub">ETF</a><a href="/seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="/wiki/" class="topnav-tab">Wiki</a></div><div class="topnav-item"><a href="/architecture.html" class="topnav-tab">Architecture</a></div><div class="topnav-item"><a href="/sisyphe/journal.html" class="topnav-tab">Invest</a></div><div class="topnav-item sisyphe-item"><a href="/sisyphe/index.html" class="topnav-tab sisyphe-tab">Sisyphe</a></div></div></div></nav>
 <div class="topbar" id="topbar">
   <div class="titlerow">
     <h1>관심종목 시세판</h1>
@@ -264,9 +261,11 @@ function render() {
 
   const m = DATA.meta;
   document.getElementById('meta').textContent =
-    `${m.quoted}/${m.total}종목 · 시세 ${m.sweep_at || '-'} (스윕 ${(m.sweep_ms / 1000).toFixed(1)}s${m.fail ? ', 실패 ' + m.fail : ''})`;
+    `${m.quoted}/${m.total}종목 · 시세 ${m.sweep_at || '-'}` + (m.fail ? ` · 수신 실패 ${m.fail}건` : '');
+  const navH = document.querySelector('nav.topnav').offsetHeight;
+  document.documentElement.style.setProperty('--nav-h', navH + 'px');
   document.documentElement.style.setProperty('--thead-top',
-    document.getElementById('topbar').offsetHeight + 'px');
+    navH + document.getElementById('topbar').offsetHeight + 'px');
 }
 
 // ── 탭 전환 (섹터: 일반 클릭=단독 표시, Ctrl/Shift/Cmd+클릭=추가·제거, 클릭 순서대로 패널 표시) ──

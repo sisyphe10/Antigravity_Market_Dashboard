@@ -2,7 +2,7 @@
 관심종목 실시간 시세판 서버 (POP HTS 상시실행 대체).
 
 - 종목: universe_tickers.csv의 KRX:/KOSDAQ: 종목 전부 (~463)
-- 시세: KIS multprice(FHKST11300006) 30종목/콜 배치, 기본 3초 스윕
+- 시세: KIS multprice(FHKST11300006) 30종목/콜 배치, 기본 1초 스윕(실패 시 최대 10초 백오프)
 - 시총: 현재가 x 상장주식수 (상장주식수는 KIS inquire-price로 매일 1회 갱신,
         첫 기동은 kis_universe_master.json / 이전 캐시로 즉시 시작)
 - 서빙: http://127.0.0.1:8778/  (index.html + /data JSON, 프런트는 1초 폴링)
@@ -161,14 +161,17 @@ def effective_interval(base):
 
 def poll_loop(interval):
     codes = [s['code'] for s in STOCKS]
+    backoff = 0.0     # 배치 실패(KIS 한도 충돌 등) 시 스윕 간격 일시 확대 → 정상 복귀 시 해제
     while True:
         t0 = time.time()
         fail = sweep_once(codes)
+        backoff = min((backoff or 1.0) * 2, 10.0) if fail else 0.0
         with _LOCK:
             META['sweep_at'] = datetime.now(KST).strftime('%H:%M:%S')
             META['sweep_ms'] = int((time.time() - t0) * 1000)
             META['fail'] = fail
-        time.sleep(max(0.0, effective_interval(interval) - (time.time() - t0)))
+        target = max(effective_interval(interval), backoff)
+        time.sleep(max(0.0, target - (time.time() - t0)))
 
 
 def build_payload():
@@ -268,7 +271,7 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--interval', type=float, default=3.0, help='스윕 주기(초)')
+    ap.add_argument('--interval', type=float, default=1.0, help='스윕 주기(초)')
     ap.add_argument('--port', type=int, default=8778)
     args = ap.parse_args()
 
