@@ -277,10 +277,11 @@ def portfolio_groups():
 def portfolio_tab_buttons():
     """create_dashboard.py / PORTFOLIO 탭 상단 상품 버튼 목록 (표시 순서대로).
 
-    [{'display': 버튼 라벨, 'section_key': portfolio_data.json 섹션 키}]
-    - GENERAL_OPEN 활성 멤버: 증권사 순서대로 각 1버튼, 데이터는 결합 키 공유
-    - 활성 목표전환형(target): start_date 내림차순 (최근 출시 먼저)
-    - 그룹 미가입 활성 일반형(한투 지속형 등): 마지막
+    [{'display': 버튼 라벨, 'section_key': portfolio_data.json 섹션 키}] + {'divider': True} 1개
+    순서 (2026-07-15 사용자 지정):
+    - 일반형: GENERAL_OPEN 활성 멤버(증권사순, 데이터는 결합 키 공유) → 그룹 미가입 일반형(한투 지속형 등)
+    - {'divider': True} — 일반형 | 목표전환형 시각 구분 (target 없으면 미삽입)
+    - 목표전환형(kind_label '목표전환형', start_date 내림차순: DB 6차 → NH 5호) → 기타 target(성과모집형 등)
     출시 전(사전등록) 상품은 portfolio_data.json에 섹션이 없어 렌더 단계에서 자동 제외됨.
     """
     btns = []
@@ -288,12 +289,16 @@ def portfolio_tab_buttons():
         combined = combined_display(gid)
         for p in group_active_members(gid):
             btns.append({'display': p.display, 'section_key': combined})
-    targets = [p for p in active_products() if p.ptype == 'target']
-    for p in sorted(targets, key=lambda x: x.start_date, reverse=True):
-        btns.append({'display': p.display, 'section_key': p.display})
     for p in _sorted_active(active_products()):
         if p.ptype != 'target' and not p.group:
             btns.append({'display': p.display, 'section_key': p.display})
+    targets = sorted([p for p in active_products() if p.ptype == 'target'],
+                     key=lambda x: x.start_date, reverse=True)
+    targets = sorted(targets, key=lambda x: x.kind_label != '목표전환형')   # 성과모집형 등은 뒤로 (stable)
+    if btns and targets:
+        btns.append({'divider': True})
+    for p in targets:
+        btns.append({'display': p.display, 'section_key': p.display})
     return btns
 
 

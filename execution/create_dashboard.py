@@ -313,7 +313,11 @@ def create_portfolio_tables_html():
         # 전환 중간상태(코드 새 결합키 vs JSON 구 결합키) 가드: ' / ' 포함 키로 결합 섹션 매칭.
         combined_json_key = next((k for k in portfolio_data if ' / ' in k), None)
         render_list = []
+        divider_at = None                      # 일반형 | 목표전환형 구분 위치 (버튼 인덱스)
         for b in wrap_config.portfolio_tab_buttons():
+            if b.get('divider'):
+                divider_at = len(render_list)
+                continue
             if b['section_key'] in portfolio_data:
                 data_key = b['section_key']
             elif ' / ' in b['section_key'] and combined_json_key:
@@ -323,16 +327,22 @@ def create_portfolio_tables_html():
             render_list.append((b['display'], data_key))
         if not render_list:  # 안전망: 파생 실패 시 기존 나열식 폴백
             render_list = [(k, k) for k in portfolio_data if not k.startswith('_')]
+            divider_at = None
 
         # 버튼바: 수수료 서브탭과 동일 pill 스타일 (.fee-subtab CSS 재사용,
         # feeSwitchSub는 [data-fee-sub] 스코프라 [data-pf-btn] 버튼과 충돌 없음)
         # 한 줄 고정: .fee-subtabs 기본 max-width:900px 해제 + nowrap + 패딩 축소
-        html += ('<div class="fee-subtabs" style="flex-wrap:nowrap;max-width:none;">' + ''.join(
-            f'<button class="fee-subtab{" active" if i == 0 else ""}" data-pf-btn="{i}" '
-            f'style="padding:9px 16px;white-space:nowrap;" '
-            f'onclick="pfSwitchTab({i})">{name}</button>'
-            for i, (name, _k) in enumerate(render_list)
-        ) + '</div>')
+        _pf_btn_bar = ''
+        for i, (name, _k) in enumerate(render_list):
+            if divider_at == i and i > 0:      # 일반형 | 목표전환형 구분자
+                _pf_btn_bar += ('<span style="align-self:center;color:#adb5bd;'
+                                'font-weight:600;padding:0 6px;">|</span>')
+            _pf_btn_bar += (
+                f'<button class="fee-subtab{" active" if i == 0 else ""}" data-pf-btn="{i}" '
+                f'style="padding:9px 16px;white-space:nowrap;" '
+                f'onclick="pfSwitchTab({i})">{name}</button>')
+        html += ('<div class="fee-subtabs" style="flex-wrap:nowrap;max-width:none;">'
+                 + _pf_btn_bar + '</div>')
 
         for sec_idx, (portfolio_name, data_key) in enumerate(render_list):
             stocks = portfolio_data[data_key]
