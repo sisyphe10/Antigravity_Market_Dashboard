@@ -134,17 +134,36 @@ const isEditingName = () =>
   document.activeElement && document.activeElement.classList &&
   document.activeElement.classList.contains('gname');
 
-function loadWL() {
-  try {
-    const w = JSON.parse(localStorage.getItem(WL_KEY));
-    if (w && w.length === 3) return w;
-  } catch (e) {}
-  return [{ name: '관심종목 1', codes: [] },
+// 관심종목 그룹 = 서버 저장(기기 공통). 탭 선택/정렬은 브라우저별(localStorage) 유지.
+let WL = [{ name: '관심종목 1', codes: [] },
           { name: '관심종목 2', codes: [] },
           { name: '관심종목 3', codes: [] }];
+let wlTimer = null;
+function saveWL() {                // 400ms 디바운스 후 서버 POST
+  clearTimeout(wlTimer);
+  wlTimer = setTimeout(() => {
+    fetch('wl', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(WL) }).catch(() => {});
+  }, 400);
 }
-let WL = loadWL();
-const saveWL = () => localStorage.setItem(WL_KEY, JSON.stringify(WL));
+async function loadWLServer() {
+  try {
+    const w = await fetch('wl').then(r => r.json());
+    if (Array.isArray(w) && w.length === 3) {
+      // 1회 마이그레이션: 서버가 비어있고 이 브라우저(localStorage)에 담긴 게 있으면 승계
+      let local = null;
+      try { local = JSON.parse(localStorage.getItem(WL_KEY)); } catch (e) {}
+      if (w.every(g => !g.codes.length) && local && local.some(g => g.codes && g.codes.length)) {
+        WL = local;
+        saveWL();
+      } else {
+        WL = w;
+      }
+      render();
+    }
+  } catch (e) {}
+}
+loadWLServer();
 const memberOf = code => WL.map((g, i) => g.codes.includes(code) ? i : -1).filter(i => i >= 0);
 
 const comma = n => Math.round(n).toLocaleString('ko-KR');
@@ -250,14 +269,19 @@ function render() {
     document.getElementById('topbar').offsetHeight + 'px');
 }
 
-// ── 탭 전환 (섹터=토글 멀티선택, 클릭 순서대로 패널 표시) ──
+// ── 탭 전환 (섹터: 일반 클릭=단독 표시, Ctrl/Shift/Cmd+클릭=추가·제거, 클릭 순서대로 패널 표시) ──
 document.getElementById('tabs').addEventListener('click', e => {
   const t = e.target.closest('.tab');
   if (!t) return;
   if (t.dataset.kind === 'sec') {
-    if (VIEW.mode !== 'sectors') { VIEW.mode = 'sectors'; }
-    const i = VIEW.secs.indexOf(t.dataset.sec);
-    if (i >= 0) VIEW.secs.splice(i, 1); else VIEW.secs.push(t.dataset.sec);
+    const multi = e.ctrlKey || e.metaKey || e.shiftKey;
+    if (VIEW.mode !== 'sectors') VIEW.mode = 'sectors';
+    if (multi) {
+      const i = VIEW.secs.indexOf(t.dataset.sec);
+      if (i >= 0) VIEW.secs.splice(i, 1); else VIEW.secs.push(t.dataset.sec);
+    } else {
+      VIEW.secs = [t.dataset.sec];
+    }
   } else {
     VIEW.mode = t.dataset.kind;    // 'wl' | 'all'
   }
@@ -311,7 +335,7 @@ document.addEventListener('click', e => {
 // ── 그룹명 편집 (input 즉시 저장 — 포커스 이벤트 의존 제거) ──
 function saveName(el) {
   const gi = +el.dataset.gi;
-  const name = el.textContent.trim();
+  const name = el.textContent.trim().slice(0, 40);   // 서버 검증 한도
   if (Number.isInteger(gi) && WL[gi] && name) { WL[gi].name = name; saveWL(); }
 }
 document.getElementById('content').addEventListener('input', e => {

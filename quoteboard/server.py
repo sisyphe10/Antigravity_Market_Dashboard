@@ -29,6 +29,7 @@ KST = timezone(timedelta(hours=9))
 UNIVERSE_CSV = os.path.join(ROOT, 'universe_tickers.csv')
 MASTER_FILE = os.path.join(ROOT, 'kis_universe_master.json')
 SHARES_CACHE = os.path.join(BASE, 'shares_cache.json')
+WL_PATH = os.path.join(BASE, 'watchlists.json')     # 관심종목 그룹 (기기 공통, 서버 저장)
 
 MULTI_PATH = '/uapi/domestic-stock/v1/quotations/intstock-multprice'
 MULTI_TRID = 'FHKST11300006'
@@ -187,6 +188,39 @@ def build_payload():
     return json.dumps({'meta': meta, 'rows': rows}, ensure_ascii=False)
 
 
+def load_wl():
+    try:
+        w = json.load(open(WL_PATH, encoding='utf-8'))
+        if isinstance(w, list) and len(w) == 3:
+            return w
+    except Exception:
+        pass
+    return [{'name': '관심종목 %d' % i, 'codes': []} for i in (1, 2, 3)]
+
+
+def valid_wl(w):
+    if not (isinstance(w, list) and len(w) == 3):
+        return False
+    for g in w:
+        if not isinstance(g, dict):
+            return False
+        if not isinstance(g.get('name'), str) or not (0 < len(g['name']) <= 40):
+            return False
+        codes = g.get('codes')
+        if not isinstance(codes, list) or len(codes) > 500:
+            return False
+        if not all(isinstance(c, str) and c.isdigit() and len(c) == 6 for c in codes):
+            return False
+    return True
+
+
+def save_wl(w):
+    tmp = WL_PATH + '.tmp'
+    with open(tmp, 'w', encoding='utf-8') as f:
+        json.dump(w, f, ensure_ascii=False)
+    os.replace(tmp, WL_PATH)
+
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass
@@ -203,11 +237,33 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path.startswith('/data'):
             self._send(build_payload(), 'application/json')
+        elif self.path.startswith('/wl'):
+            with _LOCK:
+                body = json.dumps(load_wl(), ensure_ascii=False)
+            self._send(body, 'application/json')
         elif self.path in ('/', '/index.html'):
             html = open(os.path.join(BASE, 'index.html'), encoding='utf-8').read()
             self._send(html, 'text/html')
         else:
             self.send_error(404)
+
+    def do_POST(self):
+        if not self.path.startswith('/wl'):
+            self.send_error(404)
+            return
+        try:
+            n = int(self.headers.get('Content-Length') or 0)
+            if not 0 < n <= 100_000:
+                raise ValueError
+            w = json.loads(self.rfile.read(n).decode('utf-8'))
+            if not valid_wl(w):
+                raise ValueError
+        except Exception:
+            self.send_error(400)
+            return
+        with _LOCK:
+            save_wl(w)
+        self._send('{"ok": 1}', 'application/json')
 
 
 def main():
