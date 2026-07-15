@@ -105,8 +105,8 @@ WRAP_TABS = [
     ('fee',          '수수료'),
 ]
 WRAP_SECTIONS = [  # (id 전체 문자열 = 단일 출처 — 접두사 조립 금지)
-    ('wrap-sec-chart',     'RETURN'),    # 차트+수익률 표 나란히 (2026-07-15 CHART→RETURN 개명)
-    ('wrap-sec-return',    'MONTHLY'),   # 월별·연간 캘린더만 잔류
+    ('wrap-sec-chart',     'CHART'),
+    ('wrap-sec-return',    'RETURN'),
     ('wrap-sec-aum',       'AUM'),
     ('wrap-sec-portfolio', 'Portfolio'),
     ('wrap-sec-sector',    'SECTOR WEIGHT'),
@@ -3001,8 +3001,8 @@ def _build_hotel_mini_summary():
         return ''
 
 
-def _build_wrap_chart_section(category_label, right_panel=''):
-    """동적 Chart.js 수익률 비교 차트 (멀티 셀렉트). right_panel=차트 우측 병치 HTML(수익률 표)."""
+def _build_wrap_chart_section(category_label):
+    """동적 Chart.js 수익률 비교 차트 (멀티 셀렉트)"""
     try:
         df_nav = pd.read_excel('Wrap_NAV.xlsx', sheet_name='기준가')
         if 'Date' in df_nav.columns:
@@ -3302,7 +3302,6 @@ def _build_wrap_chart_section(category_label, right_panel=''):
                         <div id="wrapChartLegend" style="margin-top:12px;text-align:center;color:#222;"></div>
                     </div>
                 </div>
-                <div style="flex:0 1 auto;min-width:0;overflow-x:auto;">{right_panel}</div>
             </div>
         </div>
         {js_code}
@@ -4170,18 +4169,15 @@ def create_wrap_monthly_returns_table():
 
 
 def create_wrap_returns_table():
-    """WRAP 수익률 비교 테이블 — (표 카드, 잔여 섹션) 튜플 반환 (2026-07-15 분리).
-
-    표 카드는 _build_wrap_chart_section 우측 패널로 병치, 잔여 섹션(wrap-sec-return)엔
-    월별·연간 캘린더(MONTHLY)와 표 구동 JS만 남는다."""
+    """WRAP 수익률 비교 테이블 HTML (삼성 트루밸류, KOSPI, KOSDAQ) - 날짜 필터 포함"""
     try:
         nav_file = 'Wrap_NAV.xlsx'
         if not os.path.exists(nav_file):
-            return "", ""
+            return ""
 
         df_returns = pd.read_excel(nav_file, sheet_name='수익률')
         if df_returns.empty:
-            return "", ""
+            return ""
 
         items = wrap_config.wrap_returns_items()  # 단일 출처: execution/wrap_config.py
         periods = ['1D', '1W', '1M', '3M', '6M', '1Y', '3Y', 'YTD', 'DD']
@@ -4203,7 +4199,7 @@ def create_wrap_returns_table():
             date_list.append(date_str)
 
         if not date_list:
-            return "", ""
+            return ""
 
         latest_date = date_list[-1]
         earliest_date = date_list[0]
@@ -4239,8 +4235,10 @@ def create_wrap_returns_table():
         periods_json = json.dumps(periods)
         monthly_card = create_wrap_monthly_returns_table()
 
-        table_card = f"""
-            <div style="background:#fff;border-radius:10px;padding:16px 20px;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
+        return f"""
+        <div class="category-section" id="wrap-sec-return">
+            <h2 class="category-title">RETURN</h2>
+            <div style="max-width:1000px;margin:0 auto;background:#fff;border-radius:10px;padding:16px 20px;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
                     <span style="font-size:13px;color:#555;font-weight:600;">기준일</span>
                     <button onclick="shiftReturnDate(-1)" style="border:1px solid #d1d5db;background:#f9fafb;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:12px;color:#555;">&lt;</button>
@@ -4254,11 +4252,7 @@ def create_wrap_returns_table():
                     </thead>
                     <tbody>{rows_html}</tbody>
                 </table>
-            </div>"""
-
-        rest = f"""
-        <div class="category-section" id="wrap-sec-return">
-            <h2 class="category-title">MONTHLY</h2>
+            </div>
             {monthly_card}
         </div>
         <script>
@@ -4335,10 +4329,9 @@ def create_wrap_returns_table():
             document.getElementById('return-actual-date-label').style.display = 'none';
         }})();
         </script>"""
-        return table_card, rest
     except Exception as e:
         print(f"Error creating wrap returns table: {e}")
-        return "", ""
+        return ""
 
 
 def create_order_section():
@@ -7026,7 +7019,7 @@ def create_dashboard():
 
             # Wrap 카테고리는 git 커밋 날짜로 날짜 표시 (git pull 시 mtime이 바뀌므로)
             if category == 'Wrap':
-                category_label = 'RETURN'   # 2026-07-15 CHART→RETURN 개명 (표를 차트 우측에 병치)
+                category_label = 'CHART'
             else:
                 category_label = category
 
@@ -7034,9 +7027,8 @@ def create_dashboard():
             target = wrap_html if category == 'Wrap' else charts_html
 
             if category == 'Wrap':
-                _rt_card, _rt_rest = create_wrap_returns_table()
-                wrap_html += _build_wrap_chart_section(category_label, right_panel=_rt_card)
-                wrap_html += _rt_rest
+                wrap_html += _build_wrap_chart_section(category_label)
+                wrap_html += create_wrap_returns_table()
                 wrap_html += create_aum_table()
                 wrap_html += create_cumulative_aum_chart()
             else:
