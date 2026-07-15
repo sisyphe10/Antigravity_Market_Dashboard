@@ -19,6 +19,15 @@ http://:8377 {
 		reverse_proxy 127.0.0.1:8787
 	}
 
+	# Watchlist 관심종목 시세판 (2026-07-15) — quoteboard/server.py 데몬(127.0.0.1:8778) 프록시.
+	#   ts.net 첫화면: 루트(/)를 /watchlist/ 로 리다이렉트 (기존 랜딩 index.html 은 /index.html 로 직접 접근만 가능).
+	redir / /watchlist/ 302
+	redir /watchlist /watchlist/ 301
+	handle_path /watchlist/* {
+		header Cache-Control "no-store"
+		reverse_proxy 127.0.0.1:8778
+	}
+
 	# Journal 개인 투자일지 차트 (2026-07-13) — 테일넷+비밀번호(basic_auth) 이중.
 	#   데이터·자격증명·페이지 전부 ~/Journal 로컬 전용 — git/게시 파이프라인과 격리 (전역 CLAUDE.md Journal 섹션).
 	#   ★~/Journal/caddy_auth.snippet 없으면 caddy 기동 실패 — Journal 폴더 이동 시 이 라우트 먼저 수정.
