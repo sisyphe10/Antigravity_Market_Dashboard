@@ -96,8 +96,14 @@ def normalize(df, dataset, **extra_cols):
     out = df.reset_index()
     out = out.rename(columns={out.columns[0]: "date"})
     out = out.rename(columns=RENAME[dataset])
+    # pykrx가 일부 종목(ETF 등)에 중복 컬럼을 반환하면 이후 컬럼 대입이
+    # "cannot reindex on an axis with duplicate labels"로 죽음 → 첫 번째만 유지 (2026-07-15 실사고)
+    if out.columns.duplicated().any():
+        out = out.loc[:, ~out.columns.duplicated()]
     keep = ["date"] + [c for c in RENAME[dataset].values() if c in out.columns]
     out = out[keep]
+    if out["date"].duplicated().any():          # 동일 날짜 중복행 방어 (뒤값=정정치 우선)
+        out = out.drop_duplicates(subset="date", keep="last")
     for k, v in extra_cols.items():
         out[k] = v
     out["date"] = pd.to_datetime(out["date"])
