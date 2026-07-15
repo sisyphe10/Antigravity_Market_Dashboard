@@ -79,7 +79,7 @@ def format_message(post: dict, label: str, icon: str) -> str:
         f"{post['url']}\n\n"
     )
     if post.get('paywalled') and not post.get('body'):
-        return header + '🔒 회원 전용 콘텐츠 — 로그인 실패로 본문을 가져오지 못했습니다.'
+        return header + '🔒 회원 전용 콘텐츠 — 본문을 가져오지 못했습니다 (로그인/열람권한 확인 필요).'
     body_lines = []
     for ln in post.get('body', '').split('\n'):
         escaped = _html.escape(ln)
