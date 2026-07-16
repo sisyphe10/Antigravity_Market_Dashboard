@@ -2176,6 +2176,26 @@ def _build_combined_chart_section():
                 return Number(v).toLocaleString(undefined, { maximumFractionDigits: 2 });
             }
 
+            // 억원 단위 금액 시리즈 — 1조(=1만억) 이상은 'N조 N,NNN억' 통일 (2026-07-16 사용자 확정)
+            var cmbEokSeries = { '고객예탁금': 1, '신용잔고': 1, '반대매매금액': 1,
+                '삼성전자 미결제 금액': 1, '하이닉스 미결제 금액': 1,
+                '삼성전자 공매도잔고': 1, '하이닉스 공매도잔고': 1,
+                '삼성전자 시가총액': 1, '하이닉스 시가총액': 1,
+                '삼성전자 레버리지 ETF AUM': 1, '하이닉스 레버리지 ETF AUM': 1 };
+            function fmtEokFull(v) {   // 끝값·툴팁용: 1,537조 5,713억
+                var a = Math.abs(v), sgn = v < 0 ? '-' : '';
+                if (a >= 10000) {
+                    var jo = Math.floor(a / 10000), eok = Math.round(a % 10000);
+                    return sgn + jo.toLocaleString() + '조' + (eok ? ' ' + eok.toLocaleString() + '억' : '');
+                }
+                return sgn + Math.round(a).toLocaleString() + '억';
+            }
+            function fmtEokTick(v) {   // 축 눈금용(짧게): 1,537.6조 / 5,000억
+                var a = Math.abs(v), sgn = v < 0 ? '-' : '';
+                if (a >= 10000) return sgn + (a / 10000).toLocaleString(undefined, { maximumFractionDigits: 1 }) + '조';
+                return sgn + Math.round(a).toLocaleString() + '억';
+            }
+
             // ── 엑셀식 칼럼 필터 (수수료 매출 rev-filter 패턴 이식, 검색창 대체) ──
             // cmbFilters: col -> 허용 표시값 배열 (키 없음 = 전체 허용)
             var cmbFilters = {};
@@ -2391,6 +2411,8 @@ def _build_combined_chart_section():
                 // 단일 선택(raw1)일 때만 MA/이격도 버튼 활성 (상태 값은 보존)
                 var maRow = document.getElementById('cmbMaRow');
                 if (maRow) maRow.classList.toggle('cmb-ma-disabled', mode !== 'raw1');
+                var yEok = mode !== 'pct' && perSeries.length > 0 && !!cmbEokSeries[perSeries[0].name];
+                var y1Eok = mode === 'raw2' && perSeries.length > 1 && !!cmbEokSeries[perSeries[1].name];
 
                 var datasets = [];
                 var dispDatasets = [];
@@ -2600,7 +2622,7 @@ def _build_combined_chart_section():
                                 label = sign + rounded + '%';
                             } else {
                                 // 끝값 라벨: 정수부 4자리(>=1000)부터 소수 제외, 그 외 최대 2자리 (2026-07-16 사용자 확정)
-                                label = Number(val).toLocaleString(undefined, { maximumFractionDigits: Math.abs(val) >= 1000 ? 0 : 2 });
+                                label = cmbEokSeries[ds.label] ? fmtEokFull(val) : Number(val).toLocaleString(undefined, { maximumFractionDigits: Math.abs(val) >= 1000 ? 0 : 2 });
                             }
                             entries.push({ x: last.x + 6, origY: last.y, y: last.y, label: label, color: ds.borderColor });
                         });
@@ -2681,7 +2703,7 @@ def _build_combined_chart_section():
                         position: 'left',
                         grace: '8%',
                         afterBuildTicks: cmbEnsureBoundTicks,
-                        ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return mode === 'pct' ? v + '%' : fmtNum(v); }, font: { size: 15 }, color: '#000' },
+                        ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return mode === 'pct' ? v + '%' : (yEok ? fmtEokTick(v) : fmtNum(v)); }, font: { size: 15 }, color: '#000' },
                         grid: { color: '#eee' },
                         border: { color: '#000', width: 2 }
                     }
@@ -2692,7 +2714,7 @@ def _build_combined_chart_section():
                         position: 'right',
                         grace: '8%',
                         afterBuildTicks: cmbEnsureBoundTicks,
-                        ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return fmtNum(v); }, font: { size: 15 }, color: '#000' },
+                        ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return y1Eok ? fmtEokTick(v) : fmtNum(v); }, font: { size: 15 }, color: '#000' },
                         grid: { drawOnChartArea: false },
                         border: { color: '#000', width: 2 }
                     };
@@ -2701,12 +2723,12 @@ def _build_combined_chart_section():
                 var tooltipLabel = function(ctx) {
                     if (ctx.parsed.y === null || ctx.parsed.y === undefined) return ctx.dataset.label + ': -';
                     if (mode === 'pct') return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%';
-                    return ctx.dataset.label + ': ' + fmtNum(ctx.parsed.y);
+                    return ctx.dataset.label + ': ' + (cmbEokSeries[ctx.dataset.label] ? fmtEokFull(ctx.parsed.y) : fmtNum(ctx.parsed.y));
                 };
 
                 // 우측 end-label(예: 예탁금 1,199,264) 잘림 방지 — 최장 라벨 폭만큼 오른쪽 패딩 동적 확보
                 var _measCtx = document.createElement('canvas').getContext('2d');
-                _measCtx.font = 'bold 12px sans-serif';
+                _measCtx.font = 'bold 15px sans-serif';
                 var _maxLabelW = 0;
                 datasets.forEach(function(ds) {
                     if (ds._skipEndLabel) return;
@@ -2716,7 +2738,7 @@ def _build_combined_chart_section():
                     var _lbl;
                     if (ds._isForeign) { _lbl = lv.toFixed(1) + '%'; }
                     else if (mode === 'pct') { var _r = Math.sign(lv) * Math.round(Math.abs(lv)); _lbl = (_r >= 0 ? '+' : '') + _r + '%'; }
-                    else { _lbl = fmtNum(lv); }
+                    else { _lbl = cmbEokSeries[ds.label] ? fmtEokFull(lv) : Number(lv).toLocaleString(undefined, { maximumFractionDigits: Math.abs(lv) >= 1000 ? 0 : 2 }); }
                     var _w = _measCtx.measureText(_lbl).width;
                     if (_w > _maxLabelW) _maxLabelW = _w;
                 });
