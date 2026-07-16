@@ -2553,6 +2553,27 @@ def _build_combined_chart_section():
                     });
                 }
 
+                // Y축 시작·끝값 눈금 보장 (2026-07-16 사용자 확정) — grace로 벌어진 축 양끝에
+                // 라벨이 없던 문제. 끝 눈금이 축 경계와 2% 이내면 스냅, 멀면 경계 눈금 추가.
+                function cmbEnsureBoundTicks(ax) {
+                    var t = ax.ticks;
+                    if (!t || !t.length) return;
+                    var span = ax.max - ax.min;
+                    if (!(span > 0)) return;
+                    if ((t[0].value - ax.min) / span > 0.02) t.unshift({ value: ax.min });
+                    else t[0].value = ax.min;
+                    if ((ax.max - t[t.length - 1].value) / span > 0.02) t.push({ value: ax.max });
+                    else t[t.length - 1].value = ax.max;
+                    // 로그축 등 눈금 과다 시 8개로 솎기 (양끝 보존, 균등 샘플)
+                    var MAXT = 8;
+                    if (t.length > MAXT) {
+                        var keep = [t[0]];
+                        for (var k = 1; k < MAXT - 1; k++) keep.push(t[Math.round(k * (t.length - 1) / (MAXT - 1))]);
+                        keep.push(t[t.length - 1]);
+                        ax.ticks = keep.filter(function(x, i, arr) { return i === 0 || x.value !== arr[i - 1].value; });
+                    }
+                }
+
                 var endLabelPlugin = {
                     id: 'cmbEndLabels',
                     afterDatasetsDraw: function(chart) {
@@ -2578,8 +2599,8 @@ def _build_combined_chart_section():
                                 var sign = rounded >= 0 ? '+' : '';
                                 label = sign + rounded + '%';
                             } else {
-                                // 끝값 라벨 소수점 제거 (잘림 방지, 2026-07-16) — |v|<10만 한 자리 유지(괴리율·PBR 0 뭉개짐 방지)
-                                label = Number(val).toLocaleString(undefined, { maximumFractionDigits: Math.abs(val) < 10 ? 1 : 0 });
+                                // 끝값 라벨: 정수부 4자리(>=1000)부터 소수 제외, 그 외 최대 2자리 (2026-07-16 사용자 확정)
+                                label = Number(val).toLocaleString(undefined, { maximumFractionDigits: Math.abs(val) >= 1000 ? 0 : 2 });
                             }
                             entries.push({ x: last.x + 6, origY: last.y, y: last.y, label: label, color: ds.borderColor });
                         });
@@ -2659,7 +2680,8 @@ def _build_combined_chart_section():
                         type: yType,
                         position: 'left',
                         grace: '8%',
-                        ticks: { maxTicksLimit: 8, autoSkip: true, callback: function(v){ return mode === 'pct' ? v + '%' : fmtNum(v); }, font: { size: 15 }, color: '#000' },
+                        afterBuildTicks: cmbEnsureBoundTicks,
+                        ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return mode === 'pct' ? v + '%' : fmtNum(v); }, font: { size: 15 }, color: '#000' },
                         grid: { color: '#eee' },
                         border: { color: '#000', width: 2 }
                     }
@@ -2669,7 +2691,8 @@ def _build_combined_chart_section():
                         type: (window.cmbLogOn === false ? 'linear' : 'logarithmic'),
                         position: 'right',
                         grace: '8%',
-                        ticks: { maxTicksLimit: 8, autoSkip: true, callback: function(v){ return fmtNum(v); }, font: { size: 15 }, color: '#000' },
+                        afterBuildTicks: cmbEnsureBoundTicks,
+                        ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return fmtNum(v); }, font: { size: 15 }, color: '#000' },
                         grid: { drawOnChartArea: false },
                         border: { color: '#000', width: 2 }
                     };
@@ -2832,8 +2855,9 @@ def _build_combined_chart_section():
                                             type: 'linear',
                                             position: 'left',
                                             grace: '8%',
+                        afterBuildTicks: cmbEnsureBoundTicks,
                                             afterFit: function(scale) { if (mainYWidth > 0) scale.width = mainYWidth; },
-                                            ticks: { maxTicksLimit: 8, autoSkip: true, callback: function(v){ return fmtNum(v); }, font: { size: 15 }, color: '#000' },
+                                            ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return fmtNum(v); }, font: { size: 15 }, color: '#000' },
                                             grid: { color: '#eee' },
                                             border: { color: '#000', width: 2 }
                                         }
