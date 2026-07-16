@@ -297,8 +297,27 @@ def render_holdings_png(title, stocks):
     return img
 
 
+def _group_reps():
+    """일반형/목표전환형 그룹 대표 상품 (레지스트리 정렬순 첫 상품, 일반형은 group_use 우선).
+
+    2026-07-16 통합: 그룹 내 전 상품 포트 수렴 → 텍스트(기준가·수익률)는 대표만 표기.
+    """
+    prods = wrap_config._sorted_active(wrap_config.active_products())
+    gen = tgt = None
+    for p in prods:
+        if p.ptype == 'general' and gen is None:
+            key = (wrap_config.group_use(p.group) or p.nav_key) if p.group else p.nav_key
+            gen = next((x for x in prods if x.nav_key == key), p)
+        elif p.ptype == 'target' and tgt is None:
+            tgt = p
+    return gen, tgt
+
+
 def format_message(date, nav_data, returns_data):
-    """텔레그램 텍스트 메시지 포맷 (HTML) — 헤더 + 기준가 + 수익률만 (종목 표는 별도 사진 전송)"""
+    """텔레그램 텍스트 메시지 포맷 (HTML) — 헤더 + 기준가 + 수익률만 (종목 표는 별도 사진 전송)
+
+    2026-07-16 통합: 기준가·수익률 모두 그룹 대표만 — 일반형 랩 / 목표전환형 랩 (+벤치마크).
+    """
     LINE = "━━━━━━━━━━━━━━━"
 
     # 실제 데이터 날짜 기준
@@ -308,16 +327,24 @@ def format_message(date, nav_data, returns_data):
 
     msg = f"<b>📊 포트폴리오 리포트</b>\n{date_str}\n"
 
-    # 기준가
-    msg += f"{LINE}\n<b>💰 기준가</b>\n{LINE}\n"
-    for name, value in nav_data.items():
-        msg += f"<b>{name}  {value:,.2f}</b>\n"
+    gen, tgt = _group_reps()
+    reps = [('일반형 랩', p) for p in (gen,) if p] + [('목표전환형 랩', p) for p in (tgt,) if p]
 
-    # 수익률
+    # 기준가 — 그룹 대표만
+    msg += f"{LINE}\n<b>💰 기준가</b>\n{LINE}\n"
+    for label, p in reps:
+        if p.report in nav_data:
+            msg += f"<b>{label}  {nav_data[p.report]:,.2f}</b>\n"
+
+    # 수익률 — 그룹 대표 + 벤치마크
     msg += f"{LINE}\n<b>📈 수익률</b>\n{LINE}\n"
-    display_names = wrap_config.report_display_names()  # 단일 출처: execution/wrap_config.py
+    display_names = {p.nav_key: label for label, p in reps}
+    products = [p.nav_key for _, p in reps]
+    for b in wrap_config.BENCHMARKS:
+        products.append(b['nav_key'])
+        display_names[b['nav_key']] = b['display']
     periods = ['1D', '1W', '1M', '3M', '6M', '1Y', 'YTD']
-    for product in wrap_config.report_return_products():  # 단일 출처: execution/wrap_config.py
+    for product in products:
         if product in returns_data:
             returns = returns_data[product]
             # N/A가 아닌 항목만 표시
@@ -367,27 +394,19 @@ async def send_report(no_send=False):
         bot = Bot(token=token)
         await bot.send_message(chat_id=chat_id, text=message, parse_mode='HTML')
 
-        # 종목 구성 PNG 표 전송 — 그룹당 대표 1장 (2026-07-16 통합: 일반형/전환형 각 포트 수렴).
-        # 안전가드: 그룹 내 구성(종목·비중 0.1%p)이 대표와 다른 상품이 있으면 캡션에 ⚠️ 표기.
-        def _sig(stocks):
-            return sorted((s.get('name'), round(s.get('weight') or 0, 1)) for s in stocks)
-
-        for section_title, members in (('일반형 랩', generals), ('목표전환형 랩', targets)):
-            if not members:
-                continue
-            rep_key, rep_stocks = members[0]
-            rep_sig = _sig(rep_stocks)
-            diverged = [k for k, st in members[1:] if _sig(st) != rep_sig]
-            caption = f"■ {section_title}"
-            if diverged:
-                caption += f"\n⚠️ 대표({rep_key})와 구성 상이: {', '.join(diverged)}"
-                logging.warning(f"{section_title} 구성 불일치: {diverged}")
-            img = render_holdings_png(section_title, rep_stocks)
+        # 종목 구성 PNG 표 전송 — 전체 개별 (일반형 랩 + 단독 일반형 + 운용 중인 목표전환형 각각)
+        png_sections = []
+        if generals:
+            png_sections.append(('일반형 랩', generals[0][1]))
+            png_sections.extend((k, st) for k, st in generals[1:])
+        png_sections.extend((k, st) for k, st in targets)
+        for section_title, stocks in png_sections:
+            img = render_holdings_png(section_title, stocks)
             buf = BytesIO()
             img.save(buf, format='PNG')
             buf.seek(0)
-            await bot.send_photo(chat_id=chat_id, photo=buf, caption=caption)
-            logging.info(f"{section_title} 사진 전송 완료 ({img.size[0]}x{img.size[1]}px, 대표={rep_key})")
+            await bot.send_photo(chat_id=chat_id, photo=buf, caption=f"■ {section_title}")
+            logging.info(f"{section_title} 사진 전송 완료 ({img.size[0]}x{img.size[1]}px)")
 
     logging.info("완료!")
     print(f"\n전송된 메시지:\n{message}")
