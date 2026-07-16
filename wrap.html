@@ -292,7 +292,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
     </div>
 
     <div id="mainContent" class="pw-hidden has-sidebar">
-    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><div class="topnav-tabs"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div><span class="wrap-updated">Updated: 2026-07-16 15:09:21 KST</span></div></nav>
+    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><div class="topnav-tabs"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div><span class="wrap-updated">Updated: 2026-07-16 15:10:21 KST</span></div></nav>
     <aside class="sidebar wrap-sidebar" id="wrapSectionNav" aria-label="WRAP navigation"><div class="wrap-side-group on" data-side-for="dashboard"><a href="#wrap-sec-chart" onclick="wrapGoSection('wrap-sec-chart');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-chart">CHART</a><a href="#wrap-sec-return" onclick="wrapGoSection('wrap-sec-return');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-return">RETURN</a><a href="#wrap-sec-aum" onclick="wrapGoSection('wrap-sec-aum');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-aum">AUM</a><a href="#wrap-sec-portfolio" onclick="wrapGoSection('wrap-sec-portfolio');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-portfolio">Portfolio</a><a href="#wrap-sec-sector" onclick="wrapGoSection('wrap-sec-sector');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-sector">SECTOR WEIGHT</a></div><div class="wrap-side-group" data-side-for="order" id="wrapSideOrder"></div><div class="wrap-side-group" data-side-for="contribution" id="wrapSideContrib"></div><div class="wrap-side-group" data-side-for="fee"><a href="#" onclick="feeSwitchSub('rate');return false;" class="sidebar-link active" data-side-fee="rate">요율</a><a href="#" onclick="feeSwitchSub('revenue');return false;" class="sidebar-link" data-side-fee="revenue">매출</a></div></aside>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -505,10 +505,14 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                     }
                 });
                 // ★기존 버그 수정(2026-07-16): 숨김 상태(height 0)에서 생성되면 눈금이 퇴화 —
-                // 표시 후 자가 재계산 (탭 전환·해시 진입 순서와 무관하게 동작)
-                setTimeout(function() {
-                    if (wrapChart && wrapChart.height === 0) { wrapChart.resize(); wrapChart.update('none'); }
-                }, 150);
+                // 가시화될 때까지 최대 10초 감지 후 자가 재계산 (진입 게이트·탭 순서와 무관)
+                var _wrapHealTry = 0;
+                var _wrapHealTimer = setInterval(function() {
+                    if (!wrapChart || ++_wrapHealTry > 40) { clearInterval(_wrapHealTimer); return; }
+                    if (wrapChart.height > 0) { clearInterval(_wrapHealTimer); return; }
+                    var cv = document.getElementById('wrapDynamicChart');
+                    if (cv && cv.offsetParent !== null) { wrapChart.resize(); wrapChart.update('none'); }
+                }, 250);
             }
 
             // 단일 포트폴리오 선택 시 기간 자동 세팅: 비교지수(KOSPI/KOSDAQ)를 제외한 활성
