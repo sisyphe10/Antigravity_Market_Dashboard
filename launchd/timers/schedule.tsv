@@ -12,3 +12,4 @@ etf-active-alert	0 19 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh e
 kodex-sectors	30 23 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh kodex-sectors	
 earnings-bot	0 8 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh earnings-bot	
 update-stock-master	0 9 * * 6	/bin/bash __REPO__/launchd/timers/run_timer_job.sh update-stock-master	
+memento-telegram	0 12 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh memento-telegram	
