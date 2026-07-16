@@ -164,14 +164,12 @@ def main():
     today = now.strftime('%Y-%m-%d')
     cfg = load_config()
 
-    k = kospi_ma20()
-    if k and k[0] < today and now.weekday() < 5:
-        # 평일인데 오늘자 지수가 없음 → 휴장 또는 수집 지연으로 보고 조용히 종료
-        print('wrap_principle_check: KOSPI last=%s < today(%s) — skip (휴장/지연)' % (k[0], today))
-        return 0
     if now.weekday() >= 5:
         print('wrap_principle_check: weekend — skip')
         return 0
+    # KOSPI 는 dataset.csv 최신 가용일 기준(17:10 시점엔 통상 D-1) — 20일선 레짐 판정엔 충분,
+    # 메시지에 기준일을 명기한다. portfolio_data.json 은 30분 주기 갱신이라 당일 데이터.
+    k = kospi_ma20()
 
     lines = check_portfolios(cfg)
 
@@ -183,10 +181,10 @@ def main():
         lines.extend(nav_lines)
 
     if k:
-        _, close, ma20 = k
+        kdate, close, ma20 = k
         if close < ma20:
             lines.append('■ 시장')
-            lines.append('- KOSPI %.2f < 20일선 %.2f → 레버리지 전량 정리 원칙 확인' % (close, ma20))
+            lines.append('- KOSPI %.2f < 20일선 %.2f (%s 종가 기준) → 레버리지 전량 정리 원칙 확인' % (close, ma20, kdate))
 
     if not lines:
         print('wrap_principle_check: no violations — silent')
