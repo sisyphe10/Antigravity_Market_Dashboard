@@ -2795,7 +2795,7 @@ def _build_combined_chart_section():
                             } else {
                                 pct = 0;
                             }
-                            pctStr = '<span>' + (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%</span>';
+                            pctStr = '<span>' + (pct >= 0 ? '+' : '') + fmtUniformFix(pct, Math.abs(pct)) + '%</span>';
                         }
                         return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:13px;">' +
                             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
@@ -2804,7 +2804,7 @@ def _build_combined_chart_section():
                     // 이격도는 기간 변화율 대신 마지막 값 표시 (100 기준 과열/침체 지표)
                     legendHTML += dispDatasets.map(function(ds) {
                         var vals = ds.data.filter(function(v) { return v !== null && v !== undefined && !isNaN(v); });
-                        var lastStr = vals.length ? '<span>' + vals[vals.length - 1].toFixed(1) + '</span>' : '';
+                        var lastStr = vals.length ? '<span>' + fmtUniformFix(vals[vals.length - 1], Math.abs(vals[vals.length - 1])) + '</span>' : '';
                         return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:13px;">' +
                             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + ds.borderColor + ';"></span>' +
                             ds.label + lastStr + '</span>';
