@@ -161,8 +161,11 @@ if os.path.exists(idx):
         if marker not in t:
             fail("index.html: %s 탭 주입 실패" % what)
     # 순서: Watchlist < Market < Invest < Memento < Ledger < Wiki(right-group) < Architecture
+    # ★'right-group' 단독 검색 금지 — head 의 aoe-personal-nav CSS(.topnav-item.right-group)가
+    #   nav 마크업보다 먼저 매칭돼 순서 검증이 항상 실패(2026-07-16 게시 동결 사고). 마크업 전용
+    #   마커 'topnav-item right-group'(class 속성, 공백 구분)만 사용.
     pos = [t.find('>Watchlist<'), t.find('>Market<'), t.find('>Invest<'), t.find('>Memento<'),
-           t.find('>Ledger<'), t.find('right-group'), t.rfind('>Architecture<')]
+           t.find('>Ledger<'), t.find('topnav-item right-group'), t.rfind('>Architecture<')]
     if -1 in pos or pos != sorted(pos):
         fail("index.html: 탭 순서 오류 %s" % pos)
     if 'sisyphe-tab' in t or 'topnav-sub">가계부' in t:
