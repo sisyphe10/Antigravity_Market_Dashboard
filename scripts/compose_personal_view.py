@@ -81,8 +81,9 @@ NAV_UNIFY = (
     'nav.topnav .topnav-brand{color:#fff;font-size:1.1rem;letter-spacing:3.5px;align-self:center}'
     'nav.topnav .topnav-brand:hover{color:#7fc78f}'
     # 좌상단 사이드바 배지 = 다크 nav 와 한 몸(같은 높이·색·그린 라인) — AoE 브랜드 색 통일(2026-07-16)
+    # right:-1px = 사이드바 밝은 border-right 가 배지 구간에서 흰 세로선으로 비치는 것 차폐(배지가 1px 덮음)
     '.sidebar-brand{height:54px;background:#101418;color:#fff;font-size:1.1rem;font-weight:800;'
-    'letter-spacing:3.5px;border-bottom:2px solid #2d7a3a}'
+    'letter-spacing:3.5px;border-bottom:2px solid #2d7a3a;right:-1px}'
     '.sidebar-brand:hover{color:#7fc78f}'
     '.sidebar{background:#fff;border-right-color:#e5e7eb}'
     '.sidebar .sidebar-link{color:#444}'
