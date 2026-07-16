@@ -85,10 +85,12 @@ NAV_UNIFY = (
     '.sidebar-brand{height:54px;background:#101418;color:#fff;font-size:1.1rem;font-weight:800;'
     'letter-spacing:3.5px;border-bottom:2px solid #2d7a3a;right:-1px}'
     '.sidebar-brand:hover{color:#7fc78f}'
-    '.sidebar{background:#fff;border-right-color:#e5e7eb}'
-    '.sidebar .sidebar-link{color:#444}'
-    '.sidebar .sidebar-link:hover{background:#f0f7f2;color:#2d7a3a;border-color:#2d7a3a}'
-    '.sidebar .sidebar-link.active{background:transparent;color:#2d7a3a;border-color:#2d7a3a}'
+    # 사이드바 다크 A안(2026-07-16): 다크 bg + 좌측 3px 레드 인디케이터 (nav 와 한 세트)
+    '.sidebar{background:#101418;border-right-color:#2a323b}'
+    '.sidebar .sidebar-link{color:#9aa4ae;font-size:0.9rem;padding:11px 14px;margin-bottom:2px;'
+    'border:none;border-left:3px solid transparent;border-radius:0;text-align:left}'
+    '.sidebar .sidebar-link:hover{background:#1a2027;color:#fff;border-color:transparent;border-left-color:transparent}'
+    '.sidebar .sidebar-link.active{background:#1c1416;color:#fff;font-weight:700;border-left-color:#991B1B}'
     'body{background:#f8f9fa}'
     '</style>'
 )

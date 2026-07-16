@@ -78,12 +78,12 @@ html { overflow-y: scroll; }  /* 스크롤바 공간 상시 확보 — 로드 �
 /* Left sidebar — Market-group(+Architecture) pages. 2026-07-12 통일: topnav 는 모든
    페이지에서 랜딩(/)과 동일(전폭·탭 좌측 28px 시작)하고, 사이드바는 topnav '아래'(top:72px)에서
    시작한다 (기존: 사이드바가 nav 위에 얹혀 탭이 228px로 밀림 → 페이지 간 nav 점프 원인). */
-.sidebar { position: fixed; top: 54px; left: 0; bottom: 0; width: 200px; padding: 18px 10px; background: #fff; border-right: 1px solid #e5e7eb; overflow-y: auto; z-index: 90; box-sizing: border-box; }  /* 배지 제거 — 링크(Data…)가 nav 바로 아래에서 시작 (2026-07-12) */
-.sidebar-brand { position: absolute; top: 0; left: 0; right: 0; height: 54px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 800; letter-spacing: 2px; color: #1a1a1a; border-bottom: 1px solid #e5e7eb; background: #fff; text-decoration: none; font-family: PRETENDARD_STACK_PLACEHOLDER; }
+.sidebar { position: fixed; top: 54px; left: 0; bottom: 0; width: 200px; padding: 18px 10px; background: #101418; border-right: 1px solid #2a323b; overflow-y: auto; z-index: 90; box-sizing: border-box; }  /* 배지 제거 — 링크(Data…)가 nav 바로 아래에서 시작 (2026-07-12) */
+.sidebar-brand { position: absolute; top: 0; left: 0; right: 0; height: 54px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 800; letter-spacing: 3.5px; color: #fff; border-bottom: 2px solid #2d7a3a; background: #101418; text-decoration: none; font-family: PRETENDARD_STACK_PLACEHOLDER; }
 .sidebar-brand:hover { color: #2d7a3a; }
-.sidebar-link { display: block; padding: 12px 11px; margin-bottom: 7px; color: #444; text-decoration: none; font-size: 0.94rem; font-weight: 600; border-radius: 999px; border: 1.5px solid transparent; transition: all 0.12s; font-family: PRETENDARD_STACK_PLACEHOLDER; text-align: center; }
-.sidebar-link:hover { background: #f0f7f2; color: #2d7a3a; border-color: #2d7a3a; }
-.sidebar-link.active { background: transparent; color: #2d7a3a; border-color: #2d7a3a; }
+.sidebar-link { display: block; padding: 11px 14px; margin-bottom: 2px; color: #9aa4ae; text-decoration: none; font-size: 0.9rem; font-weight: 600; border-radius: 0; border: none; border-left: 3px solid transparent; transition: all 0.12s; font-family: PRETENDARD_STACK_PLACEHOLDER; text-align: left; }
+.sidebar-link:hover { background: #1a2027; color: #fff; }
+.sidebar-link.active { background: #1c1416; color: #fff; font-weight: 700; border-left-color: #991B1B; }
 /* Override per-page body styles so all sidebar pages align identically next to the sidebar */
 .has-sidebar { padding-left: 224px !important; padding-right: 24px !important; padding-top: 0 !important; padding-bottom: 24px !important; max-width: none !important; margin: 0 !important; }
 .has-sidebar .topnav { margin-left: -224px; margin-right: -24px; }
@@ -137,6 +137,11 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
     .wrap-topnav .topnav-inner { height: 52px; }
     .wrap-topnav .topnav-tab { padding: 6px 14px; }
 }
+/* WRAP 사이드바 라이트 원복 (2026-07-16) — 공유 .sidebar* 다크 전환에서 wrap 제외 */
+.wrap-sidebar { background: #fff; border-right: 1px solid #e5e7eb; }
+.wrap-sidebar .sidebar-link { padding: 12px 11px; margin-bottom: 7px; color: #444; font-size: 0.94rem; border-radius: 999px; border: 1.5px solid transparent; text-align: center; }
+.wrap-sidebar .sidebar-link:hover { background: #f0f7f2; color: #2d7a3a; border-color: #2d7a3a; }
+.wrap-sidebar .sidebar-link.active { background: transparent; color: #2d7a3a; border-color: #2d7a3a; }
 .wrap-updated { margin-left: auto; font-size: 12px; color: #888; white-space: nowrap; font-style: italic; }
 .wrap-sidebar { top: 72px; padding: 18px 10px; z-index: 90; }  /* 브랜드 배지 없음 → topnav 아래 시작 */
 .wrap-side-group { display: none; }
