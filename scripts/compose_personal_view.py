@@ -59,19 +59,25 @@ JOURNAL_OFFSET = (
 )
 
 # AoE 정본(create_dashboard top_nav_html / sidebar, 픽셀통일)과 일치시키는 override — Sisyphe 페이지에만 주입.
+# 2026-07-16 블룸버그 다크 통일: 바 #101418·하단 2px 그린 라인·액티브=와인 레드 채움(#991B1B)·높이 54px.
 NAV_UNIFY = (
     '<style id="aoe-nav-unify">'
-    'nav.topnav{background:#fff;border-bottom-color:#e5e7eb}'
-    'nav.topnav .topnav-inner{max-width:1400px;box-sizing:border-box}'
+    'nav.topnav{background:#101418;border-bottom:2px solid #2d7a3a}'
+    'nav.topnav .topnav-inner{max-width:1400px;box-sizing:border-box;align-items:stretch;height:54px;gap:36px}'
+    'nav.topnav .topnav-tabs{display:flex;flex:1;gap:2px;align-items:stretch}'
     'nav.topnav .topnav-tab,nav.topnav .topnav-tab.t-journal,nav.topnav .topnav-tab.t-ledger,'
     'nav.topnav .topnav-tab.t-fitness,nav.topnav .topnav-tab.t-workout,nav.topnav .topnav-tab.t-sheet'
-    '{box-sizing:border-box;gap:6px;justify-content:center;color:#444;border-color:#d1d5db;background:#fff}'
+    '{box-sizing:border-box;display:inline-flex;align-items:center;gap:6px;justify-content:center;'
+    'min-width:0;padding:0 18px;color:#9aa4ae;border:none;border-radius:0;background:transparent;'
+    'font-size:0.92rem;font-weight:600;letter-spacing:0.3px;transition:color 0.12s,background 0.12s}'
     'nav.topnav .topnav-tab:hover,nav.topnav .topnav-tab.t-journal:hover,nav.topnav .topnav-tab.t-ledger:hover,'
     'nav.topnav .topnav-tab.t-fitness:hover,nav.topnav .topnav-tab.t-workout:hover,nav.topnav .topnav-tab.t-sheet:hover'
-    '{color:#111;border-color:#2d7a3a;background:#f0f7f2}'
-    'nav.topnav .topnav-tab.active{color:#fff;border-color:#2d7a3a;background:#2d7a3a}'
-    '.topnav-brand,.sidebar-brand{color:#111}'
-    '.topnav-brand:hover,.sidebar-brand:hover{color:#2d7a3a}'
+    '{color:#fff;border:none;background:#1a2027}'
+    'nav.topnav .topnav-tab.active{color:#fff;border:none;background:#991B1B;font-weight:700}'
+    'nav.topnav .topnav-brand{color:#fff;font-size:1.1rem;letter-spacing:3.5px;align-self:center}'
+    'nav.topnav .topnav-brand:hover{color:#7fc78f}'
+    '.sidebar-brand{color:#111}'
+    '.sidebar-brand:hover{color:#2d7a3a}'
     '.sidebar{background:#fff;border-right-color:#e5e7eb}'
     '.sidebar-brand{background:#fff;border-bottom-color:#e5e7eb}'
     '.sidebar .sidebar-link{color:#444}'

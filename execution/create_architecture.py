@@ -414,27 +414,27 @@ a { color: #000; }
 
 /* ---- top nav (matches index.html / market.html) ---- */
 html { overflow-y: scroll; }  /* 스크롤바 공간 상시 확보 — 로드 중 nav 좌우 점프 방지 (전 페이지 공통) */
-.topnav { background: #fff; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 100; }
-.topnav-inner { max-width: 1400px; margin: 0 auto; padding: 0 28px; display: flex; align-items: center; height: 72px; gap: 32px; }
-.topnav-brand { font-size: 1.3rem; font-weight: 800; letter-spacing: 1.5px; color: #111; white-space: nowrap; text-decoration: none; }
-.topnav-brand:hover { color: #2d7a3a; }
-.topnav-tabs { display: flex; gap: 12px; flex: 1; align-items: center; }
-.topnav-item { position: relative; }
-.topnav-tab { box-sizing: border-box; min-width: 180px; justify-content: center; padding: 10px 24px; display: inline-flex; align-items: center; gap: 6px; color: #444; text-decoration: none; font-size: 1rem; font-weight: 600; border: 1.5px solid #d1d5db; border-radius: 999px; white-space: nowrap; background: #fff; transition: all 0.15s; cursor: pointer; }
-.topnav-tab:hover { color: #111; border-color: #2d7a3a; background: #f0f7f2; }
-.topnav-tab.active { color: #fff; border-color: #2d7a3a; background: #2d7a3a; }
-.topnav-dropdown { box-sizing: border-box; position: absolute; top: calc(100% + 8px); left: 0; min-width: 180px; width: 100%; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.10); padding: 6px; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity 0.15s, transform 0.15s, visibility 0.15s; z-index: 200; }
+.topnav { background: #101418; border-bottom: 2px solid #2d7a3a; position: sticky; top: 0; z-index: 100; }
+.topnav-inner { max-width: 1400px; margin: 0 auto; padding: 0 28px; box-sizing: border-box; display: flex; align-items: stretch; height: 54px; gap: 36px; }
+.topnav-brand { font-size: 1.1rem; font-weight: 800; letter-spacing: 3.5px; color: #fff; white-space: nowrap; text-decoration: none; align-self: center; }
+.topnav-brand:hover { color: #7fc78f; }
+.topnav-tabs { display: flex; gap: 2px; flex: 1; align-items: stretch; }
+.topnav-item { position: relative; display: flex; align-items: stretch; }
+.topnav-tab { box-sizing: border-box; display: inline-flex; align-items: center; gap: 6px; padding: 0 18px; color: #9aa4ae; text-decoration: none; font-size: 0.92rem; font-weight: 600; letter-spacing: 0.3px; border: none; border-radius: 0; white-space: nowrap; background: transparent; transition: color 0.12s, background 0.12s; cursor: pointer; }
+.topnav-tab:hover { color: #fff; background: #1a2027; }
+.topnav-tab.active { color: #fff; background: #991B1B; font-weight: 700; }
+.topnav-dropdown { box-sizing: border-box; position: absolute; top: 100%; left: 0; min-width: 180px; width: max-content; background: #14181d; border: 1px solid #2a323b; border-radius: 0; box-shadow: 0 8px 24px rgba(0,0,0,0.35); padding: 4px 0; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity 0.15s, transform 0.15s, visibility 0.15s; z-index: 200; }
 .topnav-item:hover .topnav-dropdown, .topnav-item:focus-within .topnav-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
-.topnav-sub { display: block; padding: 9px 14px; color: #333; text-decoration: none; font-size: 0.9rem; font-weight: 500; border-radius: 8px; white-space: nowrap; text-align: center; }
-.topnav-sub:hover { background: #f3f4f6; color: #111; }
+.topnav-sub { display: block; padding: 9px 16px; color: #b7c0c9; text-decoration: none; font-size: 0.9rem; font-weight: 500; border-radius: 0; white-space: nowrap; text-align: center; }
+.topnav-sub:hover { background: #1a2027; color: #fff; }
 /* 이 페이지 body 는 line-height:1.6 — nav·사이드바가 상속하면 탭 알약이 다른 페이지보다
    ~8px 커져 상단바 세로 모습이 달라진다 (2026-07-12 사용자 리포트). normal 로 표준화. */
 .topnav-tab, .topnav-sub, .topnav-brand, .sidebar-link, .sidebar-brand { line-height: normal; }
 @media (max-width: 800px) {
-  .topnav-inner { padding: 0 12px; gap: 12px; height: 52px; }
+  .topnav-inner { padding: 0 12px; gap: 12px; height: 46px; }
   .topnav-brand { font-size: 0.95rem; }
   .topnav-tab { padding: 6px 14px; font-size: 0.85rem; min-width: 0; }
-  .topnav-tabs { gap: 6px; }
+  .topnav-tabs { display: flex; gap: 2px; flex: 1; align-items: stretch; }
 }
 
 /* 사이드바 없음 — Market 하위 메뉴는 이 페이지와 무관 (2026-07-12 사용자 확정, 랜딩·Wiki와 동일) */

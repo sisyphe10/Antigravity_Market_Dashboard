@@ -49,48 +49,48 @@ PRETENDARD_LINK = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orio
 PRETENDARD_STACK = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"
 
 TOP_NAV_CSS = """
-.topnav { background: #fff; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 100; }
+.topnav { background: #101418; border-bottom: 2px solid #2d7a3a; position: sticky; top: 0; z-index: 100; }
 body { margin: 0; }  /* UA 기본 8px 마진 가드 — 전 페이지 이미 0이라 시각 변화 없음 */
 html { overflow-y: scroll; }  /* 스크롤바 공간 상시 확보 — 로드 중 스크롤바 등장으로 nav가
                                  우→좌로 점프하던 애니메이션 제거 (2026-07-12 사용자 리포트) */
-.topnav-inner { max-width: 1400px; margin: 0 auto; padding: 0 28px; box-sizing: border-box; display: flex; align-items: center; height: 72px; gap: 32px; }  /* box-sizing 명시 — 전역 리셋 없는 페이지(market·wrap)에서 1456px로 계산돼 28px 어긋나던 근본 원인 */
-.topnav-brand { font-size: 1.3rem; font-weight: 800; letter-spacing: 1.5px; color: #111; white-space: nowrap; text-decoration: none; font-family: PRETENDARD_STACK_PLACEHOLDER; }
-.topnav-brand:hover { color: #2d7a3a; }
-.topnav-tabs { display: flex; gap: 12px; flex: 1; align-items: center; }
-.topnav-item { position: relative; }
-.topnav-tab { box-sizing: border-box; min-width: 180px; justify-content: center; padding: 10px 24px; display: inline-flex; align-items: center; gap: 6px; color: #444; text-decoration: none; font-size: 1rem; font-weight: 600; border: 1.5px solid #d1d5db; border-radius: 999px; white-space: nowrap; background: #fff; transition: all 0.15s; font-family: PRETENDARD_STACK_PLACEHOLDER; cursor: pointer; }
-.topnav-tab:hover { color: #111; border-color: #2d7a3a; background: #f0f7f2; }
-.topnav-tab.active { color: #fff; border-color: #2d7a3a; background: #2d7a3a; }
+.topnav-inner { max-width: 1400px; margin: 0 auto; padding: 0 28px; box-sizing: border-box; display: flex; align-items: stretch; height: 54px; gap: 36px; }  /* box-sizing 명시 — 전역 리셋 없는 페이지(market·wrap)에서 1456px로 계산돼 28px 어긋나던 근본 원인 */
+.topnav-brand { font-size: 1.1rem; font-weight: 800; letter-spacing: 3.5px; color: #fff; white-space: nowrap; text-decoration: none; align-self: center; font-family: PRETENDARD_STACK_PLACEHOLDER; }
+.topnav-brand:hover { color: #7fc78f; }
+.topnav-tabs { display: flex; gap: 2px; flex: 1; align-items: stretch; }
+.topnav-item { position: relative; display: flex; align-items: stretch; }
+.topnav-tab { box-sizing: border-box; display: inline-flex; align-items: center; gap: 6px; padding: 0 18px; color: #9aa4ae; text-decoration: none; font-size: 0.92rem; font-weight: 600; letter-spacing: 0.3px; border: none; border-radius: 0; white-space: nowrap; background: transparent; transition: color 0.12s, background 0.12s; cursor: pointer; font-family: PRETENDARD_STACK_PLACEHOLDER; }
+.topnav-tab:hover { color: #fff; background: #1a2027; }
+.topnav-tab.active { color: #fff; background: #991B1B; font-weight: 700; }
 .topnav-tab .caret { font-size: 0.7rem; opacity: 0.7; }
-.topnav-dropdown { box-sizing: border-box; position: absolute; top: calc(100% + 8px); left: 0; min-width: 180px; width: 100%; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.10); padding: 6px; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity 0.15s, transform 0.15s, visibility 0.15s; z-index: 200; }
+.topnav-dropdown { box-sizing: border-box; position: absolute; top: 100%; left: 0; min-width: 180px; width: max-content; background: #14181d; border: 1px solid #2a323b; border-radius: 0; box-shadow: 0 8px 24px rgba(0,0,0,0.35); padding: 4px 0; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity 0.15s, transform 0.15s, visibility 0.15s; z-index: 200; }
 .topnav-item:hover .topnav-dropdown,
 .topnav-item:focus-within .topnav-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
-.topnav-sub { display: block; padding: 9px 14px; color: #333; text-decoration: none; font-size: 0.9rem; font-weight: 500; border-radius: 8px; white-space: nowrap; text-align: center; font-family: PRETENDARD_STACK_PLACEHOLDER; }
-.topnav-sub:hover { background: #f3f4f6; color: #111; }
-.topnav-sub.active { background: #f0f7f2; color: #2d7a3a; font-weight: 700; }
+.topnav-sub { display: block; padding: 9px 16px; color: #b7c0c9; text-decoration: none; font-size: 0.9rem; font-weight: 500; border-radius: 0; white-space: nowrap; text-align: center; font-family: PRETENDARD_STACK_PLACEHOLDER; }
+.topnav-sub:hover { background: #1a2027; color: #fff; }
+.topnav-sub.active { background: #2a1515; color: #e08585; font-weight: 700; }
 @media (max-width: 800px) {
-    .topnav-inner { padding: 0 12px; gap: 12px; height: 52px; }
+    .topnav-inner { padding: 0 12px; gap: 12px; height: 46px; }
     .topnav-brand { font-size: 0.95rem; }
-    .topnav-tab { padding: 6px 14px; font-size: 0.85rem; }
-    .topnav-tabs { gap: 6px; }
+    .topnav-tab { padding: 0 12px; font-size: 0.85rem; }
+    .topnav-tabs { display: flex; gap: 2px; flex: 1; align-items: stretch; }
 }
 
 /* Left sidebar — Market-group(+Architecture) pages. 2026-07-12 통일: topnav 는 모든
    페이지에서 랜딩(/)과 동일(전폭·탭 좌측 28px 시작)하고, 사이드바는 topnav '아래'(top:72px)에서
    시작한다 (기존: 사이드바가 nav 위에 얹혀 탭이 228px로 밀림 → 페이지 간 nav 점프 원인). */
-.sidebar { position: fixed; top: 72px; left: 0; bottom: 0; width: 200px; padding: 18px 10px; background: #fff; border-right: 1px solid #e5e7eb; overflow-y: auto; z-index: 90; box-sizing: border-box; }  /* 배지 제거 — 링크(Data…)가 nav 바로 아래에서 시작 (2026-07-12) */
-.sidebar-brand { position: absolute; top: 0; left: 0; right: 0; height: 72px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; letter-spacing: 2px; color: #1a1a1a; border-bottom: 1px solid #e5e7eb; background: #fff; text-decoration: none; font-family: PRETENDARD_STACK_PLACEHOLDER; }
+.sidebar { position: fixed; top: 54px; left: 0; bottom: 0; width: 200px; padding: 18px 10px; background: #fff; border-right: 1px solid #e5e7eb; overflow-y: auto; z-index: 90; box-sizing: border-box; }  /* 배지 제거 — 링크(Data…)가 nav 바로 아래에서 시작 (2026-07-12) */
+.sidebar-brand { position: absolute; top: 0; left: 0; right: 0; height: 54px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 800; letter-spacing: 2px; color: #1a1a1a; border-bottom: 1px solid #e5e7eb; background: #fff; text-decoration: none; font-family: PRETENDARD_STACK_PLACEHOLDER; }
 .sidebar-brand:hover { color: #2d7a3a; }
 .sidebar-link { display: block; padding: 12px 11px; margin-bottom: 7px; color: #444; text-decoration: none; font-size: 0.94rem; font-weight: 600; border-radius: 999px; border: 1.5px solid transparent; transition: all 0.12s; font-family: PRETENDARD_STACK_PLACEHOLDER; text-align: center; }
 .sidebar-link:hover { background: #f0f7f2; color: #2d7a3a; border-color: #2d7a3a; }
 .sidebar-link.active { background: transparent; color: #2d7a3a; border-color: #2d7a3a; }
 /* Override per-page body styles so all sidebar pages align identically next to the sidebar */
 .has-sidebar { padding-left: 224px !important; padding-right: 24px !important; padding-top: 0 !important; padding-bottom: 24px !important; max-width: none !important; margin: 0 !important; }
-.has-sidebar .topnav { margin-left: -224px; margin-right: -24px; }
+.has-sidebar .topnav { background: #101418; border-bottom: 2px solid #2d7a3a; position: sticky; top: 0; z-index: 100; }
 @media (max-width: 900px) {
     .sidebar { display: none; }
     .has-sidebar { padding-left: 24px !important; }
-    .has-sidebar .topnav { margin-left: -24px; margin-right: -24px; }
+    .has-sidebar .topnav { background: #101418; border-bottom: 2px solid #2d7a3a; position: sticky; top: 0; z-index: 100; }
 }
 """.replace('PRETENDARD_STACK_PLACEHOLDER', PRETENDARD_STACK)
 
@@ -119,12 +119,12 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
 .wrap-topnav .topnav-inner { padding-left: 28px; }  /* .has-sidebar .topnav-inner 228px 상쇄(브랜드가 topnav 안) */
 .wrap-topnav .topnav-tab { min-width: 0; padding: 10px 22px; }
 .wrap-updated { margin-left: auto; font-size: 12px; color: #888; white-space: nowrap; font-style: italic; }
-.wrap-sidebar { top: 72px; padding: 18px 10px; z-index: 90; }  /* 브랜드 배지 없음 → topnav 아래 시작 */
+.wrap-sidebar { top: 54px; padding: 18px 10px; z-index: 90; }  /* 브랜드 배지 없음 → topnav 아래 시작 */
 .wrap-side-group { display: none; }
 .wrap-side-group.on { display: block; }
 /* 공시 탭: 사이드바 없음 + 본문 전폭 */
 .has-sidebar.wrap-sidebar-off { padding-left: 24px !important; }
-.has-sidebar.wrap-sidebar-off .topnav { margin-left: -24px; }
+.has-sidebar.wrap-sidebar-off .topnav { background: #101418; border-bottom: 2px solid #2d7a3a; position: sticky; top: 0; z-index: 100; }
 .wrap-sidebar-off .wrap-sidebar { display: none; }
 /* 섹션 제목 심플화 (wrap 페이지 한정 — 이 CSS는 wrap.html에만 삽입됨) */
 .category-title { background: none; border-left: none; border-radius: 0; padding: 0 0 4px; font-size: 1.5rem; font-weight: 800; color: #000; }
@@ -140,11 +140,11 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
 }
 @media (max-width: 1180px) {
     .wrap-topnav .topnav-inner { gap: 16px; }
-    .wrap-topnav .topnav-tabs { min-width: 0; overflow-x: auto; scrollbar-width: thin; }
+    .wrap-topnav .topnav-tabs { display: flex; gap: 2px; flex: 1; align-items: stretch; }
     .wrap-topnav .topnav-tab { flex: 0 0 auto; }
 }
 @media (max-width: 900px) {
-    .wrap-sec-chips { display: flex; gap: 8px; overflow-x: auto; position: sticky; top: 72px; z-index: 80; background: #fff; padding: 8px 4px; margin: 0 0 16px; }
+    .wrap-sec-chips { display: flex; gap: 8px; overflow-x: auto; position: sticky; top: 54px; z-index: 80; background: #fff; padding: 8px 4px; margin: 0 0 16px; }
     .wrap-sec-chip { flex: 0 0 auto; padding: 8px 16px; border: 1.5px solid #d1d5db; border-radius: 999px; background: #fff; color: #444; font-size: 0.88rem; font-weight: 600; text-decoration: none; font-family: PRETENDARD_STACK_PLACEHOLDER; }
     .wrap-sec-chip.active { color: #2d7a3a; border-color: #2d7a3a; background: #f0f7f2; }
 }
@@ -155,7 +155,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
 @media print {
     .wrap-topnav, .wrap-sidebar, .wrap-sec-chips { display: none !important; }
     #mainContent.has-sidebar { padding: 0 !important; }
-    #mainContent.has-sidebar .topnav { margin: 0; }
+    #mainContent.has-sidebar .topnav { background: #101418; border-bottom: 2px solid #2d7a3a; position: sticky; top: 0; z-index: 100; }
 }
 """.replace('PRETENDARD_STACK_PLACEHOLDER', PRETENDARD_STACK)
 
@@ -8434,7 +8434,7 @@ def create_dashboard():
         history.replaceState(null, '', '#' + secId);
     }}
 
-    // 스크롤 스파이: 기준선(96px = sticky nav 72px + 여유)을 지난 '마지막' 섹션 = active
+    // 스크롤 스파이: 기준선(78px = sticky nav 54px + 여유)을 지난 '마지막' 섹션 = active
     var wrapSecEls = null, wrapSpyTick = false;
     function updateWrapSectionActive() {{
         if (document.getElementById('mainContent').classList.contains('pw-hidden')) return;  // 게이트 전 무동작
