@@ -2606,7 +2606,7 @@ def _build_combined_chart_section():
                     afterDraw: function(chart) {
                         var u = window._cmbAxisUnits;
                         if (!u) return;
-                        var ctx = chart.ctx, ty = chart.chartArea.top - 8;
+                        var ctx = chart.ctx, ty = chart.chartArea.top - 20;   // 최상단 눈금 라벨과 겹침 방지
                         ctx.save();
                         ctx.font = 'bold 13px sans-serif';
                         ctx.fillStyle = '#000';
@@ -2642,7 +2642,10 @@ def _build_combined_chart_section():
                                 label = sign + rounded + '%';
                             } else {
                                 // 끝값 라벨: 정수부 4자리(>=1000)부터 소수 제외, 그 외 최대 2자리 (2026-07-16 사용자 확정)
-                                label = cmbEokSeries[ds.label] ? fmtEokFull(val) : Number(val).toLocaleString(undefined, { maximumFractionDigits: Math.abs(val) < 10 ? 2 : (Math.abs(val) < 1000 ? 1 : 0) });
+                                // 끝값 = 숫자만 (억원 시리즈는 축 단위(조/억)로 환산 — 단위는 축 상단 주석이 담당)
+                                var _u = window._cmbAxisUnits || {};
+                                var _vv = (cmbEokSeries[ds.label] && (ds.yAxisID === 'y1' ? _u.y1 : _u.y) === '(조원)') ? val / 10000 : val;
+                                label = Number(_vv).toLocaleString(undefined, { maximumFractionDigits: Math.abs(_vv) < 10 ? 2 : (Math.abs(_vv) < 1000 ? 1 : 0) });
                             }
                             entries.push({ x: last.x + 6, origY: last.y, y: last.y, label: label, color: ds.borderColor });
                         });
@@ -2774,7 +2777,7 @@ def _build_combined_chart_section():
                     var _lbl;
                     if (ds._isForeign) { _lbl = lv.toFixed(1) + '%'; }
                     else if (mode === 'pct') { var _r = Math.sign(lv) * Math.round(Math.abs(lv)); _lbl = (_r >= 0 ? '+' : '') + _r + '%'; }
-                    else { _lbl = cmbEokSeries[ds.label] ? fmtEokFull(lv) : Number(lv).toLocaleString(undefined, { maximumFractionDigits: Math.abs(lv) < 10 ? 2 : (Math.abs(lv) < 1000 ? 1 : 0) }); }
+                    else { var _mu = window._cmbAxisUnits || {}; var _mv = (cmbEokSeries[ds.label] && (ds.yAxisID === 'y1' ? _mu.y1 : _mu.y) === '(조원)') ? lv / 10000 : lv; _lbl = Number(_mv).toLocaleString(undefined, { maximumFractionDigits: Math.abs(_mv) < 10 ? 2 : (Math.abs(_mv) < 1000 ? 1 : 0) }); }
                     var _w = _measCtx.measureText(_lbl).width;
                     if (_w > _maxLabelW) _maxLabelW = _w;
                 });
@@ -2783,7 +2786,7 @@ def _build_combined_chart_section():
                 if (cmbChart) {
                     // 재사용: 인스턴스 유지하고 데이터/축/툴팁만 교체 (destroy+new 멈칫 제거)
                     cmbChart.options.layout.padding.right = _rightPad;
-                    cmbChart.options.layout.padding.top = (window._cmbAxisUnits.y || window._cmbAxisUnits.y1) ? 22 : 6;
+                    cmbChart.options.layout.padding.top = (window._cmbAxisUnits.y || window._cmbAxisUnits.y1) ? 34 : 6;
                     cmbChart.data.labels = commonDates;
                     cmbChart.data.datasets = datasets;
                     // scales 전체 교체 — 이전 raw2의 y1축 잔재 제거 후 새 구성 적용
@@ -2801,7 +2804,7 @@ def _build_combined_chart_section():
                         options: {
                             responsive: true, maintainAspectRatio: false,
                             devicePixelRatio: 2 * (window.devicePixelRatio || 1),
-                            layout: { padding: { right: _rightPad, top: (window._cmbAxisUnits.y || window._cmbAxisUnits.y1) ? 22 : 6 } },
+                            layout: { padding: { right: _rightPad, top: (window._cmbAxisUnits.y || window._cmbAxisUnits.y1) ? 34 : 6 } },
                             interaction: { mode: 'index', intersect: false },
                             plugins: {
                                 legend: { display: false },
