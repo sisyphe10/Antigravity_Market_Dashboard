@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key><string>com.antigravity.plan-api</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Users/sisyphe/Antigravity_Market_Dashboard/launchd/bots/run_bot.sh</string>
+		<string>plan-api</string>
+		<string>/Users/sisyphe/Antigravity_Market_Dashboard/venv/bin/python3</string>
+		<string>/Users/sisyphe/Journal/scripts/plan_api.py</string>
+	</array>
+	<key>WorkingDirectory</key><string>/Users/sisyphe/Antigravity_Market_Dashboard</string>
+	<key>UserName</key><string>sisyphe</string>
+	<key>RunAtLoad</key><true/>
+	<key>KeepAlive</key><true/>
+	<key>ThrottleInterval</key><integer>10</integer>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>HOME</key><string>/Users/sisyphe</string>
+		<key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+		<key>LANG</key><string>en_US.UTF-8</string>
+		<key>PYTHONIOENCODING</key><string>utf-8</string>
+	</dict>
+	<key>StandardOutPath</key><string>/Users/sisyphe/Antigravity_Market_Dashboard/logs/launchd/plan-api.out</string>
+	<key>StandardErrorPath</key><string>/Users/sisyphe/Antigravity_Market_Dashboard/logs/launchd/plan-api.err</string>
+</dict>
+</plist>

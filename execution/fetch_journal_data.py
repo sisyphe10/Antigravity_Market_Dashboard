@@ -1,10 +1,12 @@
 """
-투자일지 시장 데이터 자동 수집 → Google Spreadsheet 입력
+투자일지 시장 데이터 자동 수집 → Google Spreadsheet + 로컬 journal_market.json 이중기록
 - 네이버 금융: 지수, 변동, 거래대금, 투자자별
 - KRX OpenAPI: 상승/보합/하락 종목수
+- 로컬 JSON은 journal.html이 /plan-api/journal-data 로 읽음 (2026-07-16 Sheets 이관, 시트 기록은 백업용 유지)
 """
 import sys
 import os
+import json
 import logging
 import requests
 from bs4 import BeautifulSoup
@@ -16,6 +18,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 
 JOURNAL_SHEET_ID = '13HXDxF62ILXyRz7meRZ5CxJT5HfWAwIKc8IsCavuVXk'
+LOCAL_MARKET_JSON = os.path.expanduser('~/Journal/journal_market.json')
 KRX_API_KEY = 'E9E8B0A915D74BC59CFA41D5534CF19EF4B24C9E'
 HEADERS = {'User-Agent': 'Mozilla/5.0'}
 KST = timezone(timedelta(hours=9))
@@ -184,6 +187,54 @@ def get_rise_fall_count():
     return result
 
 
+def _page_row(day_name, data, blank_nq=False):
+    """journal.html이 쓰는 필드명으로 변환한 행 dict (시트 컬럼 A~AM 1:1)."""
+    g = data.get
+    return {
+        'dow': day_name,
+        'kClose': g('k_close', ''), 'kChg': g('k_chg', ''), 'kVol': g('k_vol', ''), 'kVolChg': g('k_vol_chg', ''),
+        'kUp': g('k_up', ''), 'kFlat': g('k_flat', ''), 'kDown': g('k_down', ''),
+        'kPer': g('k_per', ''), 'kFor': g('k_for', ''), 'kInst': g('k_inst', ''),
+        'qClose': g('q_close', ''), 'qChg': g('q_chg', ''), 'qVol': g('q_vol', ''), 'qVolChg': g('q_vol_chg', ''),
+        'qUp': g('q_up', ''), 'qFlat': g('q_flat', ''), 'qDown': g('q_down', ''),
+        'qPer': g('q_per', ''), 'qFor': g('q_for', ''), 'qInst': g('q_inst', ''),
+        'k_ma120': g('k_ma120', ''), 'q_ma120': g('q_ma120', ''),
+        'nqClose': '' if blank_nq else g('nq_close', ''), 'nqChg': '' if blank_nq else g('nq_chg', ''),
+        'nqVol': '' if blank_nq else g('nq_vol', ''), 'nqVolChg': '' if blank_nq else g('nq_vol_chg', ''),
+        'fClose': g('f_close', ''), 'fChg': g('f_chg', ''), 'fVol': g('f_vol', ''), 'fVolChg': g('f_vol_chg', ''),
+        'fUp': '-', 'fFlat': '-', 'fDown': '-',
+        'fPer': g('f_per', ''), 'fFor': g('f_for', ''), 'fInst': g('f_inst', ''),
+        'f_ma120': g('f_ma120', ''),
+    }
+
+
+def _load_local_market():
+    if os.path.exists(LOCAL_MARKET_JSON):
+        with open(LOCAL_MARKET_JSON, encoding='utf-8') as f:
+            return json.load(f)
+    return {'rows': {}}
+
+
+def _save_local_market(doc):
+    doc['updated'] = datetime.now(KST).isoformat(timespec='seconds')
+    tmp = LOCAL_MARKET_JSON + '.tmp'
+    with open(tmp, 'w', encoding='utf-8') as f:
+        json.dump(doc, f, ensure_ascii=False, indent=1)
+        f.write('\n')
+    os.replace(tmp, LOCAL_MARKET_JSON)
+
+
+def update_local_market(date_str, day_name, data, blank_nq=False):
+    """로컬 journal_market.json upsert — 실패해도 시트 파이프라인은 계속(경고만)."""
+    try:
+        doc = _load_local_market()
+        doc.setdefault('rows', {})[date_str] = _page_row(day_name, data, blank_nq)
+        _save_local_market(doc)
+        logging.info(f'{date_str} 로컬 journal_market.json 갱신')
+    except Exception as e:
+        logging.warning(f'로컬 journal_market.json 갱신 실패(무시): {e}')
+
+
 def write_to_sheet(data):
     """Google Spreadsheet에 데이터 쓰기"""
     import gspread
@@ -240,6 +291,7 @@ def write_to_sheet(data):
                 data.get('f_per', ''), data.get('f_for', ''), data.get('f_inst', ''),
                 data.get('f_ma120', ''),
             ]], value_input_option='RAW')
+            update_local_market(date_str, day_name, data, blank_nq=True)
             return
 
     # 새 행 추가
@@ -260,6 +312,7 @@ def write_to_sheet(data):
     ]
     ws.append_row(row, value_input_option='RAW')
     logging.info(f'{date_str} 새 행 추가 완료')
+    update_local_market(date_str, day_name, data)
 
 
 def delete_sheet_row(date_str):
@@ -281,13 +334,23 @@ def delete_sheet_row(date_str):
     sh = gc.open_by_key(JOURNAL_SHEET_ID)
     ws = sh.worksheet('Data')
     existing = ws.col_values(1)
+    deleted = False
     for i, v in enumerate(existing):
         if date_str in str(v):
             ws.delete_rows(i + 1)
             logging.info(f'{date_str} 행 삭제 완료 (행 {i+1})')
-            return True
-    logging.info(f'{date_str} 행을 찾을 수 없음')
-    return False
+            deleted = True
+            break
+    if not deleted:
+        logging.info(f'{date_str} 행을 찾을 수 없음')
+    try:
+        doc = _load_local_market()
+        if doc.get('rows', {}).pop(date_str, None) is not None:
+            _save_local_market(doc)
+            logging.info(f'{date_str} 로컬 행 삭제')
+    except Exception as e:
+        logging.warning(f'로컬 행 삭제 실패(무시): {e}')
+    return deleted
 
 
 def _kis_market_investor_series():
@@ -362,6 +425,28 @@ def resync_recent_investor_kis(n=7):
     ws.update(range_name=f'J{start}:L{end}', values=kospi_block, value_input_option='RAW')
     ws.update(range_name=f'T{start}:V{end}', values=kosdaq_block, value_input_option='RAW')
     logging.info(f'KIS 투자자 재동기화 완료: 최근 {len(recent)}행 (행 {start}~{end})')
+
+    # 로컬 journal_market.json에도 동일 패치
+    try:
+        doc = _load_local_market()
+        rows = doc.get('rows', {})
+        changed = 0
+        for i in recent:
+            ds = vals[i][0]
+            d = ds.replace('-', '')
+            r = rows.get(ds)
+            if not r:
+                continue
+            if d in series['k']:
+                r['kPer'], r['kFor'], r['kInst'] = series['k'][d]
+                changed += 1
+            if d in series['q']:
+                r['qPer'], r['qFor'], r['qInst'] = series['q'][d]
+        if changed:
+            _save_local_market(doc)
+            logging.info(f'로컬 투자자 재동기화: {changed}행')
+    except Exception as e:
+        logging.warning(f'로컬 투자자 재동기화 실패(무시): {e}')
 
 
 def main(target_date=None):
