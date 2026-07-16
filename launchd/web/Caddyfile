@@ -20,8 +20,10 @@ http://:8377 {
 	}
 
 	# Watchlist 관심종목 시세판 (2026-07-15) — quoteboard/server.py 데몬(127.0.0.1:8778) 프록시.
-	#   ts.net 첫화면: 루트(/)를 /watchlist/ 로 리다이렉트 (기존 랜딩 index.html 은 /index.html 로 직접 접근만 가능).
-	redir / /watchlist/ 302
+	# ★2026-07-16 사용자 확정: AoE 기본화면 = Memento. 루트(/)와 구 랜딩(/index.html) 모두
+	#   /sisyphe/memento.html 로 리다이렉트 — 랜딩 페이지 폐지(파일은 잡들이 계속 생성하나 접근 불가).
+	redir / /sisyphe/memento.html 302
+	redir /index.html /sisyphe/memento.html 302
 	redir /watchlist /watchlist/ 301
 	handle_path /watchlist/* {
 		header Cache-Control "no-store"
