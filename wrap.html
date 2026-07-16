@@ -292,7 +292,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
     </div>
 
     <div id="mainContent" class="pw-hidden has-sidebar">
-    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><div class="topnav-tabs"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div><span class="wrap-updated">Updated: 2026-07-16 15:01:22 KST</span></div></nav>
+    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><div class="topnav-tabs"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div><span class="wrap-updated">Updated: 2026-07-16 15:04:39 KST</span></div></nav>
     <aside class="sidebar wrap-sidebar" id="wrapSectionNav" aria-label="WRAP navigation"><div class="wrap-side-group on" data-side-for="dashboard"><a href="#wrap-sec-chart" onclick="wrapGoSection('wrap-sec-chart');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-chart">CHART</a><a href="#wrap-sec-return" onclick="wrapGoSection('wrap-sec-return');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-return">RETURN</a><a href="#wrap-sec-aum" onclick="wrapGoSection('wrap-sec-aum');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-aum">AUM</a><a href="#wrap-sec-portfolio" onclick="wrapGoSection('wrap-sec-portfolio');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-portfolio">Portfolio</a><a href="#wrap-sec-sector" onclick="wrapGoSection('wrap-sec-sector');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-sector">SECTOR WEIGHT</a></div><div class="wrap-side-group" data-side-for="order" id="wrapSideOrder"></div><div class="wrap-side-group" data-side-for="contribution" id="wrapSideContrib"></div><div class="wrap-side-group" data-side-for="fee"><a href="#" onclick="feeSwitchSub('rate');return false;" class="sidebar-link active" data-side-fee="rate">요율</a><a href="#" onclick="feeSwitchSub('revenue');return false;" class="sidebar-link" data-side-fee="revenue">매출</a></div></aside>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -407,12 +407,40 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                         data: data,
                         borderColor: chartColors[s.name] || '#888',
                         backgroundColor: 'transparent',
-                        borderWidth: (s.name === 'KOSPI' || s.name === 'KOSDAQ') ? 1.5 : 3,
+                        borderWidth: (s.name === 'KOSPI' || s.name === 'KOSDAQ') ? 2 : 3,
                         pointRadius: 0,
                         tension: 0.3,
                         spanGaps: false
                     });
                 });
+
+                // ── 2026-07-16 표기 표준 헬퍼 (양식 소급 통일 — 기능 아님) ──
+                function wrapBandFix(v, maxAbs) {   // 자릿수 밴드: <10 2dp, 10~99 1dp 고정, 100+ 정수
+                    var dp = maxAbs < 10 ? 2 : (maxAbs < 100 ? 1 : 0);
+                    return Number(v).toLocaleString(undefined, { minimumFractionDigits: dp, maximumFractionDigits: dp });
+                }
+                function wrapEnsureTicks(ax) {      // 눈금 <=8 + 양끝 필수 + 최소 간격(range/9)
+                    var t = ax.ticks;
+                    if (!t || !t.length) return;
+                    var span = ax.max - ax.min;
+                    if (!(span > 0)) return;
+                    if ((t[0].value - ax.min) / span > 0.02) t.unshift({ value: ax.min }); else t[0].value = ax.min;
+                    if ((ax.max - t[t.length - 1].value) / span > 0.02) t.push({ value: ax.max }); else t[t.length - 1].value = ax.max;
+                    var MAXT = 8, lo = t[0].value, hi = t[t.length - 1].value, rng = hi - lo;
+                    if (rng > 0 && t.length > 2) {
+                        var minGap = rng / (MAXT + 1), kept = [t[0]];
+                        for (var k = 1; k < t.length - 1; k++) {
+                            if (kept.length < MAXT - 1 && t[k].value - kept[kept.length - 1].value >= minGap
+                                && hi - t[k].value >= minGap) kept.push(t[k]);
+                        }
+                        kept.push(t[t.length - 1]);
+                        ax.ticks = kept;
+                    }
+                }
+                var _wrapMaxAbs = 0;
+                datasets.forEach(function(ds) { ds.data.forEach(function(v) {
+                    if (v !== null && Math.abs(v) > _wrapMaxAbs) _wrapMaxAbs = Math.abs(v); }); });
+                window._wrapBandMax = _wrapMaxAbs;
 
                 // 선 끝에 수익률 라벨을 그리는 커스텀 플러그인
                 var endLabelPlugin = {
@@ -422,15 +450,22 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                         chart.data.datasets.forEach(function(ds, i) {
                             var meta = chart.getDatasetMeta(i);
                             if (meta.hidden) return;
-                            var last = meta.data[meta.data.length - 1];
+                            var lastIdx = -1;
+                            for (var k = ds.data.length - 1; k >= 0; k--) {
+                                if (ds.data[k] !== null && ds.data[k] !== undefined) { lastIdx = k; break; }
+                            }
+                            if (lastIdx < 0) return;
+                            var last = meta.data[lastIdx];
                             if (!last) return;
-                            var val = ds.data[ds.data.length - 1];
-                            if (val === null || val === undefined) return;
-                            var rounded = Math.sign(val) * Math.round(Math.abs(val));
-                            var sign = rounded >= 0 ? '+' : '';
-                            var label = sign + rounded + '%';
+                            var val = ds.data[lastIdx];
+                            var sign = val >= 0 ? '+' : '';
+                            var label = sign + wrapBandFix(val, window._wrapBandMax || Math.abs(val)) + '%';
                             ctx.save();
-                            ctx.font = 'bold 12px sans-serif';
+                            ctx.beginPath();
+                            ctx.arc(last.x, last.y, 3, 0, Math.PI * 2);
+                            ctx.fillStyle = ds.borderColor;
+                            ctx.fill();
+                            ctx.font = 'bold 15px sans-serif';
                             ctx.fillStyle = ds.borderColor;
                             ctx.textBaseline = 'middle';
                             ctx.fillText(label, last.x + 6, last.y);
@@ -461,14 +496,19 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                         interaction: { mode: 'index', intersect: false },
                         plugins: {
                             legend: { display: false },
-                            tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%'; } } }
+                            tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + (ctx.parsed.y >= 0 ? '+' : '') + wrapBandFix(ctx.parsed.y, window._wrapBandMax || 100) + '%'; } } }
                         },
                         scales: {
-                            x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val) { var d = this.getLabelForValue(val); if (!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 11 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
-                            y: { ticks: { callback: function(v) { return v + '%'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' }, border: { color: '#000' } }
+                            x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val) { var d = this.getLabelForValue(val); if (!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
+                            y: { grace: '8%', afterBuildTicks: wrapEnsureTicks, ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v) { return wrapBandFix(v, window._wrapBandMax || 100) + '%'; }, font: { size: 15 }, color: '#000' }, grid: { color: '#eee' }, border: { color: '#000', width: 2 } }
                         }
                     }
                 });
+                // ★기존 버그 수정(2026-07-16): 숨김 상태(height 0)에서 생성되면 눈금이 퇴화 —
+                // 표시 후 자가 재계산 (탭 전환·해시 진입 순서와 무관하게 동작)
+                setTimeout(function() {
+                    if (wrapChart && wrapChart.height === 0) { wrapChart.resize(); wrapChart.update('none'); }
+                }, 150);
             }
 
             // 단일 포트폴리오 선택 시 기간 자동 세팅: 비교지수(KOSPI/KOSDAQ)를 제외한 활성
