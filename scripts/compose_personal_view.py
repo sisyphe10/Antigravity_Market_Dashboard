@@ -17,20 +17,22 @@ SISYPHE_PAGES = ("index.html", "dashboard.html", "journal.html", "memento.html")
 NAV_END = '</div></div></nav>'
 
 # ---- AoE 페이지 주입 fragment ----
+# 2026-07-16 정렬 확정: 좌 Watchlist·Market·Invest·Memento·Ledger / 우(margin-left:auto) Wiki·Architecture
 WATCHLIST_ITEM = '<div class="topnav-item"><a href="/watchlist/" class="topnav-tab">Watchlist</a></div>'
-WIKI_ITEM = '<div class="topnav-item"><a href="/wiki/" class="topnav-tab">Wiki</a></div>'
-INVEST_ITEM = '<div class="topnav-item personal-first"><a href="/sisyphe/journal.html" class="topnav-tab">Invest</a></div>'
+WIKI_ITEM = '<div class="topnav-item right-group"><a href="/wiki/" class="topnav-tab">Wiki</a></div>'
+INVEST_ITEM = '<div class="topnav-item"><a href="/sisyphe/journal.html" class="topnav-tab">Invest</a></div>'
 MEMENTO_ITEM = '<div class="topnav-item"><a href="/sisyphe/memento.html" class="topnav-tab">Memento</a></div>'
 LEDGER_ITEM = '<div class="topnav-item"><a href="/sisyphe/dashboard.html" class="topnav-tab">Ledger</a></div>'
 ARCH_ITEM_PLAIN = '<div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div>'
 # 구세대 fragment — copy-current 입력 정규화용 제거 대상
-OLD_INVEST_ITEM = '<div class="topnav-item"><a href="/sisyphe/journal.html" class="topnav-tab">Invest</a></div>'
+OLD_WIKI_ITEM = '<div class="topnav-item"><a href="/wiki/" class="topnav-tab">Wiki</a></div>'
+OLD_INVEST_ITEM_P1 = '<div class="topnav-item personal-first"><a href="/sisyphe/journal.html" class="topnav-tab">Invest</a></div>'
 OLD_SISYPHE_ITEM = '<div class="topnav-item sisyphe-item"><a href="/sisyphe/index.html" class="topnav-tab sisyphe-tab">Sisyphe</a></div>'
 OLD_SISYPHE_DROPDOWN = ('<div class="topnav-item"><a href="/sisyphe/index.html" class="topnav-tab">Sisyphe</a>'
                         '<div class="topnav-dropdown"><a href="/sisyphe/dashboard.html" class="topnav-sub">가계부·운동</a>'
                         '<a href="/sisyphe/journal.html" class="topnav-sub">투자일지</a></div></div>')
 AOE_PERSONAL_CSS = ('<style id="aoe-personal-nav">'
-                    '.topnav-tabs .topnav-item.personal-first{margin-left:auto}'
+                    '.topnav-tabs .topnav-item.right-group{margin-left:auto}'
                     '</style>')
 
 # ---- Sisyphe 페이지: topnav 를 AoE 세트로 교체 ----
@@ -42,10 +44,10 @@ def sisyphe_aoe_nav(active):
         '        <div class="topnav-tabs">\n'
         '            <a href="/watchlist/" class="topnav-tab">Watchlist</a>\n'
         '            <a href="/market.html" class="topnav-tab">Market</a>\n'
-        '            <a href="/wiki/" class="topnav-tab">Wiki</a>\n'
-        '            <a href="/sisyphe/journal.html" class="%s" style="margin-left:auto">Invest</a>\n'
+        '            <a href="/sisyphe/journal.html" class="%s">Invest</a>\n'
         '            <a href="/sisyphe/memento.html" class="%s">Memento</a>\n'
         '            <a href="/sisyphe/dashboard.html" class="%s">Ledger</a>\n'
+        '            <a href="/wiki/" class="topnav-tab" style="margin-left:auto">Wiki</a>\n'
         '            <a href="/architecture.html" class="topnav-tab">Architecture</a>\n'
         '        </div>\n    </div>\n</nav>'
     ) % (cls('invest'), cls('memento'), cls('ledger'))
@@ -118,8 +120,8 @@ for f in glob.glob(os.path.join(REL, "*.html")):
     n = item_pat.sub("", s)
     n = link_pat.sub("", n)
     # 정규화: 기존 주입 fragment·구 Sisyphe 잔재 제거(clean 입력이면 무동작)
-    for frag in (WATCHLIST_ITEM, WIKI_ITEM, INVEST_ITEM, OLD_INVEST_ITEM, MEMENTO_ITEM, LEDGER_ITEM,
-                 OLD_SISYPHE_ITEM, OLD_SISYPHE_DROPDOWN):
+    for frag in (WATCHLIST_ITEM, WIKI_ITEM, OLD_WIKI_ITEM, INVEST_ITEM, OLD_INVEST_ITEM_P1,
+                 MEMENTO_ITEM, LEDGER_ITEM, OLD_SISYPHE_ITEM, OLD_SISYPHE_DROPDOWN):
         n = n.replace(frag, "")
     n = personal_css_pat.sub("", n)
     # Architecture 원본 아이템 추출(있으면) — 우측 그룹 맨 끝으로 이동. active 상태 보존.
@@ -137,10 +139,11 @@ for f in glob.glob(os.path.join(REL, "*.html")):
         mt = tabs_pat.search(n)
         if mt:
             n = n[:mt.end()] + WATCHLIST_ITEM + n[mt.end():]
-    # Wiki + 우측 개인 그룹(Invest·Memento·Ledger) + Architecture 를 nav 끝에.
+    # 좌측 잔여 그룹(Invest·Memento·Ledger) + 우측 그룹(Wiki·Architecture) 을 nav 끝에.
+    # (정규화 후 남은 기존 아이템 = Watchlist·Market 뿐이므로 append 순서가 곧 좌측 순서)
     # 가드: 이미 Memento 마크업이 있으면 재주입 금지(정규화가 지웠으므로 통상 미존재).
     if NAV_END in n and 'topnav-tab">Memento' not in n:
-        n = n.replace(NAV_END, WIKI_ITEM + INVEST_ITEM + MEMENTO_ITEM + LEDGER_ITEM + arch_html + NAV_END, 1)
+        n = n.replace(NAV_END, INVEST_ITEM + MEMENTO_ITEM + LEDGER_ITEM + WIKI_ITEM + arch_html + NAV_END, 1)
     if 'id="aoe-personal-nav"' not in n:
         r = inject_before_head(n, AOE_PERSONAL_CSS)
         if r is not None:
@@ -153,14 +156,15 @@ if os.path.exists(wrap):
 idx = os.path.join(REL, "index.html")
 if os.path.exists(idx):
     t = open(idx, encoding="utf-8").read()
-    for marker, what in ((WATCHLIST_ITEM, 'Watchlist'), (WIKI_ITEM, 'Wiki'), (INVEST_ITEM, 'Invest'),
+    for marker, what in ((WATCHLIST_ITEM, 'Watchlist'), (WIKI_ITEM, 'Wiki(우측)'), (INVEST_ITEM, 'Invest'),
                          (MEMENTO_ITEM, 'Memento'), (LEDGER_ITEM, 'Ledger')):
         if marker not in t:
             fail("index.html: %s 탭 주입 실패" % what)
-    if t.find('>Memento<') < t.find('personal-first') or t.find('>Ledger<') < t.find('>Memento<'):
-        fail("index.html: 우측 그룹 순서 오류")
-    if t.rfind('>Architecture<') < t.rfind('>Ledger<'):
-        fail("index.html: Architecture 가 맨 끝이 아님")
+    # 순서: Watchlist < Market < Invest < Memento < Ledger < Wiki(right-group) < Architecture
+    pos = [t.find('>Watchlist<'), t.find('>Market<'), t.find('>Invest<'), t.find('>Memento<'),
+           t.find('>Ledger<'), t.find('right-group'), t.rfind('>Architecture<')]
+    if -1 in pos or pos != sorted(pos):
+        fail("index.html: 탭 순서 오류 %s" % pos)
     if 'sisyphe-tab' in t or 'topnav-sub">가계부' in t:
         fail("index.html: 구 Sisyphe 탭 잔존")
 
