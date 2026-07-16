@@ -39,3 +39,10 @@ curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_SISYPHE_BOT_TOKEN}/sendM
   -d 'parse_mode=HTML' \
   -d "text=${TEXT}"
 echo
+
+# ── 자가진단 2단계 (2026-07-16): headless claude 가 로그·코드를 읽고 원인
+# 진단을 🩺 후속 메시지로 발송 (읽기 전용, 잡당 60분 쿨다운, 실패해도 무해).
+DIAG="$(cd "$(dirname "$0")" && pwd)/diagnose_failure.sh"
+if [ -x "$DIAG" ]; then
+  nohup "$DIAG" "$UNIT" >/dev/null 2>&1 &
+fi
