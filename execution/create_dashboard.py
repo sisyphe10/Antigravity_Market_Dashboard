@@ -2677,13 +2677,21 @@ def _build_combined_chart_section():
                     else t[0].value = ax.min;
                     if ((ax.max - t[t.length - 1].value) / span > 0.02) t.push({ value: ax.max });
                     else t[t.length - 1].value = ax.max;
-                    // 로그축 등 눈금 과다 시 8개로 솎기 (양끝 보존, 균등 샘플)
+                    // 최종 선별 (2026-07-16 1안 확정): 양끝 고정 + 내부는 스케일 공간(로그축=log)
+                    // 최소 간격을 확보하며 최대 8개 — 경계·밀집 눈금의 라벨 겹침 원천 차단
                     var MAXT = 8;
-                    if (t.length > MAXT) {
-                        var keep = [t[0]];
-                        for (var k = 1; k < MAXT - 1; k++) keep.push(t[Math.round(k * (t.length - 1) / (MAXT - 1))]);
-                        keep.push(t[t.length - 1]);
-                        ax.ticks = keep.filter(function(x, i, arr) { return i === 0 || x.value !== arr[i - 1].value; });
+                    var sv = function(v) { return (ax.type === 'logarithmic' && v > 0) ? Math.log(v) : v; };
+                    var lo = sv(t[0].value), hi = sv(t[t.length - 1].value), rng = hi - lo;
+                    if (rng > 0 && t.length > 2) {
+                        var minGap = rng / (MAXT + 1);
+                        var kept = [t[0]];
+                        for (var k = 1; k < t.length - 1; k++) {
+                            if (kept.length < MAXT - 1
+                                && sv(t[k].value) - sv(kept[kept.length - 1].value) >= minGap
+                                && hi - sv(t[k].value) >= minGap) kept.push(t[k]);
+                        }
+                        kept.push(t[t.length - 1]);
+                        ax.ticks = kept;
                     }
                 }
 
