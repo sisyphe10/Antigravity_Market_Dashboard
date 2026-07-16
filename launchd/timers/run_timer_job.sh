@@ -142,6 +142,7 @@ job_timeout_seconds() {
     update-stock-master)  echo 900  ;;   # 원본 15min
     send-advisory-emails) echo 300  ;;   # SMTP 5통 여유(신규 60초 폴러)
     memento-telegram)     echo 120  ;;   # 텔레그램 1통(따끔어)
+    wrap-principle-check) echo 300  ;;   # 포트폴리오 원칙 점검+텔레그램
     *)                    echo 1800 ;;   # 미지정 안전 기본(90s 대신 30min)
   esac
 }
@@ -191,6 +192,7 @@ run_job() {
     update-stock-master)  /bin/bash scripts/run_update_stock_master.sh || return $? ;;
     send-advisory-emails) "$PY" execution/send_advisory_emails.py || return $? ;;
     memento-telegram)     "$PY" "$HOME/Journal/scripts/memento_telegram.py" || return $? ;;
+    wrap-principle-check) "$PY" execution/wrap_principle_check.py || return $? ;;
     *)
       echo "[run_timer_job] 알 수 없는 잡: $1" >&2
       return 64
