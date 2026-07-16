@@ -2729,9 +2729,12 @@ def _build_combined_chart_section():
                     });
                 });
                 var yJo = yEok && _yMaxAbs >= 10000, y1Jo = y1Eok && _y1MaxAbs >= 10000;
+                // seriesScale 1e12 시리즈(KOSPI/KOSDAQ Market Cap)는 값이 이미 조 단위 — 주석만 표기
+                var yJoPre = mode !== 'pct' && perSeries.length > 0 && seriesScale[perSeries[0].name] === 1e12;
+                var y1JoPre = mode === 'raw2' && perSeries.length > 1 && seriesScale[perSeries[1].name] === 1e12;
                 window._cmbAxisUnits = {
-                    y: yEok ? (yJo ? '(조원)' : '(억원)') : null,
-                    y1: y1Eok ? (y1Jo ? '(조원)' : '(억원)') : null
+                    y: yEok ? (yJo ? '(조원)' : '(억원)') : (yJoPre ? '(조원)' : null),
+                    y1: y1Eok ? (y1Jo ? '(조원)' : '(억원)') : (y1JoPre ? '(조원)' : null)
                 };
 
                 var yType = (mode === 'pct') ? 'linear' : (window.cmbLogOn === false ? 'linear' : 'logarithmic');
