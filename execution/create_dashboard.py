@@ -2596,6 +2596,26 @@ def _build_combined_chart_section():
                     }
                 }
 
+                function cmbEokTickVal(v, jo) {
+                    return jo ? (v / 10000).toLocaleString(undefined, { maximumFractionDigits: 1 })
+                              : Math.round(v).toLocaleString();
+                }
+                // Y축 단위 주석 — 눈금엔 숫자만, 단위는 축 최상단 위에 1회 표기 (2026-07-16 사용자 확정)
+                var cmbAxisUnitPlugin = {
+                    id: 'cmbAxisUnit',
+                    afterDraw: function(chart) {
+                        var u = window._cmbAxisUnits;
+                        if (!u) return;
+                        var ctx = chart.ctx, ty = chart.chartArea.top - 8;
+                        ctx.save();
+                        ctx.font = 'bold 13px sans-serif';
+                        ctx.fillStyle = '#000';
+                        if (u.y) { ctx.textAlign = 'right'; ctx.fillText(u.y, chart.scales.y.right + 2, ty); }
+                        if (u.y1 && chart.scales.y1) { ctx.textAlign = 'left'; ctx.fillText(u.y1, chart.scales.y1.left - 2, ty); }
+                        ctx.restore();
+                    }
+                };
+
                 var endLabelPlugin = {
                     id: 'cmbEndLabels',
                     afterDatasetsDraw: function(chart) {
@@ -2695,6 +2715,22 @@ def _build_combined_chart_section():
                     legendEl.innerHTML = legendHTML;
                 }
 
+                var _yMaxAbs = 0, _y1MaxAbs = 0;
+                datasets.forEach(function(ds) {
+                    if (ds._skipEndLabel) return;
+                    ds.data.forEach(function(v) {
+                        if (v === null || v === undefined) return;
+                        var a = Math.abs(v);
+                        if (ds.yAxisID === 'y1') { if (a > _y1MaxAbs) _y1MaxAbs = a; }
+                        else if (a > _yMaxAbs) _yMaxAbs = a;
+                    });
+                });
+                var yJo = yEok && _yMaxAbs >= 10000, y1Jo = y1Eok && _y1MaxAbs >= 10000;
+                window._cmbAxisUnits = {
+                    y: yEok ? (yJo ? '(조원)' : '(억원)') : null,
+                    y1: y1Eok ? (y1Jo ? '(조원)' : '(억원)') : null
+                };
+
                 var yType = (mode === 'pct') ? 'linear' : (window.cmbLogOn === false ? 'linear' : 'logarithmic');
                 var scalesConfig = {
                     x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
@@ -2703,7 +2739,7 @@ def _build_combined_chart_section():
                         position: 'left',
                         grace: '8%',
                         afterBuildTicks: cmbEnsureBoundTicks,
-                        ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return mode === 'pct' ? v + '%' : (yEok ? fmtEokTick(v) : fmtNum(v)); }, font: { size: 15 }, color: '#000' },
+                        ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return mode === 'pct' ? v + '%' : (yEok ? cmbEokTickVal(v, yJo) : fmtNum(v)); }, font: { size: 15 }, color: '#000' },
                         grid: { color: '#eee' },
                         border: { color: '#000', width: 2 }
                     }
@@ -2714,7 +2750,7 @@ def _build_combined_chart_section():
                         position: 'right',
                         grace: '8%',
                         afterBuildTicks: cmbEnsureBoundTicks,
-                        ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return y1Eok ? fmtEokTick(v) : fmtNum(v); }, font: { size: 15 }, color: '#000' },
+                        ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return y1Eok ? cmbEokTickVal(v, y1Jo) : fmtNum(v); }, font: { size: 15 }, color: '#000' },
                         grid: { drawOnChartArea: false },
                         border: { color: '#000', width: 2 }
                     };
@@ -2747,6 +2783,7 @@ def _build_combined_chart_section():
                 if (cmbChart) {
                     // 재사용: 인스턴스 유지하고 데이터/축/툴팁만 교체 (destroy+new 멈칫 제거)
                     cmbChart.options.layout.padding.right = _rightPad;
+                    cmbChart.options.layout.padding.top = (window._cmbAxisUnits.y || window._cmbAxisUnits.y1) ? 22 : 6;
                     cmbChart.data.labels = commonDates;
                     cmbChart.data.datasets = datasets;
                     // scales 전체 교체 — 이전 raw2의 y1축 잔재 제거 후 새 구성 적용
@@ -2760,11 +2797,11 @@ def _build_combined_chart_section():
                     cmbChart = new Chart(document.getElementById('cmbDynamicChart'), {
                         type: 'line',
                         data: { labels: commonDates, datasets: datasets },
-                        plugins: [endLabelPlugin, cmbCrosshairPlugin],
+                        plugins: [endLabelPlugin, cmbAxisUnitPlugin, cmbCrosshairPlugin],
                         options: {
                             responsive: true, maintainAspectRatio: false,
                             devicePixelRatio: 2 * (window.devicePixelRatio || 1),
-                            layout: { padding: { right: _rightPad } },
+                            layout: { padding: { right: _rightPad, top: (window._cmbAxisUnits.y || window._cmbAxisUnits.y1) ? 22 : 6 } },
                             interaction: { mode: 'index', intersect: false },
                             plugins: {
                                 legend: { display: false },
