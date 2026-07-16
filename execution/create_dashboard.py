@@ -2642,7 +2642,7 @@ def _build_combined_chart_section():
                                 label = sign + rounded + '%';
                             } else {
                                 // 끝값 라벨: 정수부 4자리(>=1000)부터 소수 제외, 그 외 최대 2자리 (2026-07-16 사용자 확정)
-                                label = cmbEokSeries[ds.label] ? fmtEokFull(val) : Number(val).toLocaleString(undefined, { maximumFractionDigits: Math.abs(val) >= 1000 ? 0 : 2 });
+                                label = cmbEokSeries[ds.label] ? fmtEokFull(val) : Number(val).toLocaleString(undefined, { maximumFractionDigits: Math.abs(val) < 10 ? 2 : (Math.abs(val) < 1000 ? 1 : 0) });
                             }
                             entries.push({ x: last.x + 6, origY: last.y, y: last.y, label: label, color: ds.borderColor });
                         });
@@ -2774,7 +2774,7 @@ def _build_combined_chart_section():
                     var _lbl;
                     if (ds._isForeign) { _lbl = lv.toFixed(1) + '%'; }
                     else if (mode === 'pct') { var _r = Math.sign(lv) * Math.round(Math.abs(lv)); _lbl = (_r >= 0 ? '+' : '') + _r + '%'; }
-                    else { _lbl = cmbEokSeries[ds.label] ? fmtEokFull(lv) : Number(lv).toLocaleString(undefined, { maximumFractionDigits: Math.abs(lv) >= 1000 ? 0 : 2 }); }
+                    else { _lbl = cmbEokSeries[ds.label] ? fmtEokFull(lv) : Number(lv).toLocaleString(undefined, { maximumFractionDigits: Math.abs(lv) < 10 ? 2 : (Math.abs(lv) < 1000 ? 1 : 0) }); }
                     var _w = _measCtx.measureText(_lbl).width;
                     if (_w > _maxLabelW) _maxLabelW = _w;
                 });
