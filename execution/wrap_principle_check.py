@@ -154,20 +154,29 @@ def build_state(cfg, ports, navs, kospi):
 
 
 def build_actions(cfg, ports, kospi):
-    """행위 룰(당일) → 표시문구 리스트."""
-    acts = []
+    """행위 룰(당일) → {action_key: 표시문구}. 종목 단위 집계(상품 중복 제거),
+    당일 이미 발송한 key 는 main()에서 걸러 재발송을 막는다."""
+    water, newbuy = {}, {}
     bear = bool(kospi and kospi[1] < kospi[2])
     for product, holds in ports.items():
         for h in holds:
+            code = h.get('code') or h.get('name')
             w, wp, tr = h.get('weight'), h.get('weight_prev'), h.get('today_return')
             if (isinstance(w, (int, float)) and isinstance(wp, (int, float)) and isinstance(tr, (int, float))
                     and not h.get('is_today_new')
                     and w - wp >= cfg['watering_weight_up_pp'] and tr <= cfg['watering_day_return_pct']):
-                acts.append('물타기 의심 (원칙17): %s %s 당일 %+.1f%%인데 비중 %.1f%%→%.1f%%'
-                            % (product, h.get('name'), tr, wp, w))
+                e = water.setdefault(code, {'name': h.get('name'), 'tr': tr, 'n': 0})
+                e['n'] += 1
             if h.get('is_today_new') and bear:
-                acts.append('약세장 신규 편입 (원칙11 확인): %s %s (비중 %.1f%%)'
-                            % (product, h.get('name'), h.get('weight') or 0.0))
+                e = newbuy.setdefault(code, {'name': h.get('name'), 'w': h.get('weight') or 0.0, 'n': 0})
+                e['n'] += 1
+    acts = {}
+    for code, e in water.items():
+        acts['water|%s' % code] = ('물타기 의심 (원칙17): %s 당일 %+.1f%%인데 비중 확대 (%d개 상품)'
+                                   % (e['name'], e['tr'], e['n']))
+    for code, e in newbuy.items():
+        acts['newbear|%s' % code] = ('약세장 신규 편입 (원칙11 확인): %s 비중 %.1f%% (%d개 상품)'
+                                     % (e['name'], e['w'], e['n']))
     return acts
 
 
@@ -219,26 +228,32 @@ def main():
     actions = build_actions(cfg, ports, kospi)
 
     baseline = not os.path.exists(STATE_PATH)  # 첫 실행: 스냅숏만 저장, 🆕 도배 방지
-    prev = {}
+    seed = bool(os.environ.get('WPC_SEED'))    # 무발송 시드 모드(배포 직후 상태 동기화용)
+    prev, prev_doc = {}, {}
     try:
         with open(STATE_PATH, encoding='utf-8') as f:
-            prev = json.load(f).get('state', {})
+            prev_doc = json.load(f)
+        prev = prev_doc.get('state', {})
     except (OSError, ValueError):
         pass
     new_keys = [] if baseline else [k for k in state if k not in prev]
     resolved = [] if baseline else [k for k in prev if k not in state]
+    # 행위 룰 당일 재발송 차단: 같은 날짜에 이미 보낸 action key 제외
+    today_str = now.strftime('%Y-%m-%d')
+    sent_before = set(prev_doc.get('actions_sent', [])) if prev_doc.get('date') == today_str else set()
+    actions_new = {k: v for k, v in actions.items() if k not in sent_before}
 
     age_h = (datetime.now().timestamp() - os.path.getmtime(PORTFOLIO_JSON)) / 3600.0
     stale = age_h > cfg['stale_hours']
 
     monday_full = now.weekday() == 0 and not baseline
-    must_send = bool(actions or new_keys or resolved or stale) or (monday_full and state)
+    must_send = (not seed) and (bool(actions_new or new_keys or resolved or stale) or (monday_full and state))
 
     if must_send:
-        head = '\U0001F9ED WRAP 원칙 점검 — %s (%s)' % (now.strftime('%Y-%m-%d'), DOW[now.weekday()])
+        head = '\U0001F9ED WRAP 원칙 점검 — %s (%s)' % (today_str, DOW[now.weekday()])
         parts = [head + (' — 주간 전체 상세' if monday_full else '')]
-        if actions:
-            parts.append('[오늘 행동]\n' + '\n'.join('- ' + a for a in actions))
+        if actions_new:
+            parts.append('[오늘 행동]\n' + '\n'.join('- ' + actions_new[k] for k in sorted(actions_new)))
         if new_keys:
             parts.append('[신규 위반] \U0001F195\n' + '\n'.join('- %s: %s' % (LABEL[k.split('|')[0]], state[k]) for k in sorted(new_keys)))
         if resolved:
@@ -251,16 +266,19 @@ def main():
             parts.append('⚠ portfolio_data.json이 %.0f시간 전 데이터 (갱신 지연 의심)' % age_h)
         ok = send_telegram('\n\n'.join(parts))
         print('wrap_principle_check: sent=%s actions=%d new=%d resolved=%d persist=%d'
-              % (ok, len(actions), len(new_keys), len(resolved), len(state)))
+              % (ok, len(actions_new), len(new_keys), len(resolved), len(state)))
         if not ok:
             return 1
     else:
-        print('wrap_principle_check: no changes (persist=%d) — silent' % len(state))
+        print('wrap_principle_check: silent (seed=%s, persist=%d, actions_already_sent=%d)'
+              % (seed, len(state), len(sent_before & set(actions))))
 
     os.makedirs('logs', exist_ok=True)
     tmp = STATE_PATH + '.tmp'
     with open(tmp, 'w', encoding='utf-8') as f:
-        json.dump({'date': now.strftime('%Y-%m-%d'), 'state': state}, f, ensure_ascii=False, indent=1)
+        json.dump({'date': today_str, 'state': state,
+                   'actions_sent': sorted(sent_before | set(actions))},
+                  f, ensure_ascii=False, indent=1)
     os.replace(tmp, STATE_PATH)
     return 0
 
