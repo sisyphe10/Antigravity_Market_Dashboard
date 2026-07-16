@@ -3496,10 +3496,14 @@ def _build_wrap_chart_section(category_label):
                     }
                 });
                 // ★기존 버그 수정(2026-07-16): 숨김 상태(height 0)에서 생성되면 눈금이 퇴화 —
-                // 표시 후 자가 재계산 (탭 전환·해시 진입 순서와 무관하게 동작)
-                setTimeout(function() {
-                    if (wrapChart && wrapChart.height === 0) { wrapChart.resize(); wrapChart.update('none'); }
-                }, 150);
+                // 가시화될 때까지 최대 10초 감지 후 자가 재계산 (진입 게이트·탭 순서와 무관)
+                var _wrapHealTry = 0;
+                var _wrapHealTimer = setInterval(function() {
+                    if (!wrapChart || ++_wrapHealTry > 40) { clearInterval(_wrapHealTimer); return; }
+                    if (wrapChart.height > 0) { clearInterval(_wrapHealTimer); return; }
+                    var cv = document.getElementById('wrapDynamicChart');
+                    if (cv && cv.offsetParent !== null) { wrapChart.resize(); wrapChart.update('none'); }
+                }, 250);
             }
 
             // 단일 포트폴리오 선택 시 기간 자동 세팅: 비교지수(KOSPI/KOSDAQ)를 제외한 활성
