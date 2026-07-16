@@ -109,6 +109,10 @@ def check_portfolios(cfg):
     with open(PORTFOLIO_JSON, encoding='utf-8') as f:
         data = json.load(f)
     for product, holds in data.items():
+        # '_order_changes'/'_portfolio_meta'/'_price_asof' 등 메타 키 및 비리스트 섹션 제외
+        if product.startswith('_') or not isinstance(holds, list):
+            continue
+        holds = [h for h in holds if isinstance(h, dict)]
         v = []
         n = len(holds)
         if n > cfg['max_holdings']:
