@@ -53,6 +53,8 @@ def sisyphe_aoe_nav(active):
     ) % (cls('invest'), cls('memento'), cls('ledger'))
 
 ACTIVE_OF = {'journal.html': 'invest', 'dashboard.html': 'ledger', 'memento.html': 'memento'}
+# 사이드바 코너 배지(AoE)가 브랜드 역할 — nav 자체 브랜드는 중복이라 숨김 (journal/dashboard 한정, memento=사이드바 없음)
+CORNER_BRAND = '<style id="aoe-corner-brand">nav.topnav .topnav-brand{display:none}</style>'
 JOURNAL_OFFSET = (
     '<style id="aoe-journal-offset">'
     'nav.topnav .topnav-inner{max-width:none;padding-left:228px;padding-right:24px}'
@@ -78,10 +80,11 @@ NAV_UNIFY = (
     'nav.topnav .topnav-tab.active{color:#fff;border:none;background:#991B1B;font-weight:700}'
     'nav.topnav .topnav-brand{color:#fff;font-size:1.1rem;letter-spacing:3.5px;align-self:center}'
     'nav.topnav .topnav-brand:hover{color:#7fc78f}'
-    '.sidebar-brand{color:#111}'
-    '.sidebar-brand:hover{color:#2d7a3a}'
+    # 좌상단 사이드바 배지 = 다크 nav 와 한 몸(같은 높이·색·그린 라인) — AoE 브랜드 색 통일(2026-07-16)
+    '.sidebar-brand{height:54px;background:#101418;color:#fff;font-size:1.1rem;font-weight:800;'
+    'letter-spacing:3.5px;border-bottom:2px solid #2d7a3a}'
+    '.sidebar-brand:hover{color:#7fc78f}'
     '.sidebar{background:#fff;border-right-color:#e5e7eb}'
-    '.sidebar-brand{background:#fff;border-bottom-color:#e5e7eb}'
     '.sidebar .sidebar-link{color:#444}'
     '.sidebar .sidebar-link:hover{background:#f0f7f2;color:#2d7a3a;border-color:#2d7a3a}'
     '.sidebar .sidebar-link.active{background:transparent;color:#2d7a3a;border-color:#2d7a3a}'
@@ -210,6 +213,8 @@ for name in SISYPHE_PAGES:
     if name == "journal.html":
         # 고정 사이드바(200px)가 좌상단을 덮으므로 journal 한정 offset — 통일 CSS 뒤 주입
         s = inject_before_head(s, JOURNAL_OFFSET)
+    if name in ("journal.html", "dashboard.html"):
+        s = inject_before_head(s, CORNER_BRAND)
 
     open(p, "w", encoding="utf-8").write(s)
 
