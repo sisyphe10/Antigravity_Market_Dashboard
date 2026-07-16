@@ -1608,6 +1608,72 @@ def _series_country(group_label, s):
     return 'Global'
 
 
+# DATA 차트 시리즈별 축 단위 (display명 기준; 전수 조사 2026-07-16 — 값 규모 실측 검증).
+# '억원'은 축 최대 1조 이상이면 (조원)으로 자동 승격 + 눈금/끝값 환산. 그 외는 주석만.
+CMB_SERIES_UNITS = {
+    # INDEX_KOREA
+    'KOSPI Market Cap': '조원', 'KOSDAQ Market Cap': '조원',
+    '고객예탁금': '억원', '신용잔고': '억원', '반대매매금액': '억원',
+    'KOSPI PER': '배', 'KOSPI PBR': '배', 'KOSDAQ PER': '배', 'KOSDAQ PBR': '배',
+    'KOSPI 배당수익률': '%', 'KOSDAQ 배당수익률': '%',
+    '코스피 외국인비중': '%', '코스닥 외국인비중': '%', '삼성전자 외국인': '%', '삼성전자우 외국인': '%',
+    'SK하이닉스 외국인': '%', '삼성생명 외국인': '%', 'SK스퀘어 외국인': '%', '삼성물산 외국인': '%',
+    # DERIVATIVES KR
+    '삼성전자 현선물 괴리율': '%', '하이닉스 현선물 괴리율': '%',
+    '삼성전자 미결제약정': '계약', '하이닉스 미결제약정': '계약',
+    '삼성전자 미결제 금액': '억원', '하이닉스 미결제 금액': '억원',
+    '삼성전자 공매도잔고': '억원', '하이닉스 공매도잔고': '억원',
+    '삼성전자 시가총액': '억원', '하이닉스 시가총액': '억원',
+    '삼성전자 레버리지 ETF AUM': '억원', '하이닉스 레버리지 ETF AUM': '억원',
+    # INDEX_US
+    'S&P 500 PER': '배', 'S&P 500 PBR': '배', 'NASDAQ PER': '배', 'NASDAQ PBR': '배',
+    'RUSSELL 2000 PER': '배', 'RUSSELL 2000 PBR': '배',
+    # EXCHANGE RATE
+    'KRW/USD': '원', 'CNY/USD': '위안', 'JPY/USD': '엔', 'TWD/USD': '대만달러', 'EUR/USD': '$',
+    # INTEREST RATES (수익률 %, 스프레드 %p)
+    'US03M': '%', 'US02Y': '%', 'US05Y': '%', 'US10Y': '%', 'US30Y': '%',
+    '한국 기준금리': '%', '국고채 3년': '%', '국고채 10년': '%', 'CD 91일': '%', 'CP 91일': '%',
+    '회사채 3년 AA-': '%', '장단기 스프레드 10Y-3Y': '%p', '신용 스프레드 AA-3Y': '%p',
+    '미 기준금리 상단': '%', '미 장단기 금리차 10Y-2Y': '%p', '미 장단기 금리차 10Y-3M': '%p',
+    '미 BBB 스프레드': '%p', '미 하이일드 스프레드': '%p', '미 실질금리 10Y': '%',
+    '미 기대인플레 BEI 10Y': '%', '미 기대인플레 5Y5Y': '%', 'SOFR': '%',
+    # MACRO KOREA
+    'CPI 전년동월비': '%', 'PPI 전년동월비': '%', '기대인플레이션 1년': '%', 'M2 전년동월비': '%',
+    '제조업 가동률': '%', '수출금액 전년동월비': '%', '경상수지': '억달러', '외환보유액': '억달러',
+    '정기예금 잔액': '조원', '국민연금 적립금': '조원', '퇴직연금 적립금': '조원',
+    '전산업생산 전년동월비': '%', '실업률 (한국)': '%', '온라인쇼핑 거래액': '조원',
+    '백화점 매출증감률': '%', '대형마트 매출증감률': '%', '편의점 매출증감률': '%', 'SSM 매출증감률': '%',
+    # MACRO US
+    '미 역레포 잔고': '$T', '미 연준 총자산': '$T',
+    '미 신규 실업수당청구': '만건', '미 연속 실업수당청구': '만건', '미 JOLTS 구인': '만건',
+    '미 비농업고용 증감': '천명', '미 실업률': '%',
+    '미 CPI 전년동월비': '%', '미 근원 CPI 전년동월비': '%', '미 근원 PCE 전년동월비': '%',
+    '미 PPI 전년동월비': '%', '미 시간당임금 전년동월비': '%', '미 소매판매 전년동월비': '%',
+    '미 산업생산 전년동월비': '%', '미 근원자본재 수주 전년동월비': '%',
+    '미 Sahm Rule 침체지표': '%p', '미 GDPNow 성장률': '%',
+    # CREDIT & HOUSING
+    '은행 대출금리 (신규취급)': '%', '은행 저축성수신금리 (신규취급)': '%', '예대금리차 (신규)': '%p',
+    '가계대출 잔액': '조원', '가계신용': '조원', '미분양주택 (전국)': '호',
+    # CREDIT & HOUSING US
+    '미 모기지 30년 금리': '%', '미 주택착공': '만호', '미 건축허가': '만호', '미 기존주택판매': '만호',
+    '미 케이스-실러 주택가격 전년동월비': '%',
+    # CRYPTOCURRENCY
+    'BTC': '$', 'ETH': '$', 'BNB': '$', 'XRP': '$', 'SOL': '$',
+    # COMMODITIES
+    'Gold': '$/oz', 'Silver': '$/oz', 'Copper': '$/lb', 'WTI': '$/bbl', 'Brent': '$/bbl',
+    'Natural Gas': '$/MMBtu', 'Wheat': '¢/bu', 'Uranium': '$/lb',
+    'Lithium Carbonate': '위안/톤', 'Lithium Hydroxide': '위안/톤', 'Poly Silicon': '위안/톤',
+    'KRX GOLD Trading Volume': '억원', 'KRX ETS Trading Volume': '억원',
+    'KRX ETS (KAU25)': '원/톤', 'SMP': '원/kWh', 'H100 GPU Rental': '$/h',
+    # MEMORY
+    '삼성 DDR5 소매가': '원', 'SK하이닉스 DDR5 소매가': '원',
+    'DDR5 16Gb': '$', 'DDR4 8Gb': '$', 'SLC 2Gb': '$', 'SLC 1Gb': '$', 'MLC 64Gb': '$', 'MLC 32Gb': '$',
+    # CAPEX / HOTELS
+    'SEAJ 반도체장비 판매고': '억엔', 'JMTBA 공작기계 수주총액': '억엔', 'JMTBA 공작기계 외수': '억엔',
+    'Hotel 서울': '원', 'Hotel 부산': '원', 'Hotel 제주': '원', 'Hotel 경주': '원',
+}
+
+
 def _build_combined_chart_section():
     """7개 카테고리(INDEX_KOREA/INDEX_US/EXCHANGE RATE/INTEREST RATES/CRYPTOCURRENCY/Memory/COMMODITIES)
     를 단일 동적 Chart.js 차트로 통합. 좌 사이드바는 카테고리 그룹 헤더 + 토글 항목,
@@ -2017,6 +2083,7 @@ def _build_combined_chart_section():
         <script>
         (function() {
             var cmbData = CMB_DATA_PLACEHOLDER;
+            var cmbSeriesUnit = CMB_UNIT_PLACEHOLDER;
             var cmbChart = null;
             var cmbAutoRangePending = false;
             var cmbClickOrder = [];
@@ -2177,11 +2244,8 @@ def _build_combined_chart_section():
             }
 
             // 억원 단위 금액 시리즈 — 1조(=1만억) 이상은 'N조 N,NNN억' 통일 (2026-07-16 사용자 확정)
-            var cmbEokSeries = { '고객예탁금': 1, '신용잔고': 1, '반대매매금액': 1,
-                '삼성전자 미결제 금액': 1, '하이닉스 미결제 금액': 1,
-                '삼성전자 공매도잔고': 1, '하이닉스 공매도잔고': 1,
-                '삼성전자 시가총액': 1, '하이닉스 시가총액': 1,
-                '삼성전자 레버리지 ETF AUM': 1, '하이닉스 레버리지 ETF AUM': 1 };
+            var cmbEokSeries = {};
+            Object.keys(cmbSeriesUnit).forEach(function(k) { if (cmbSeriesUnit[k] === '억원') cmbEokSeries[k] = 1; });
             function fmtEokFull(v) {   // 끝값·툴팁용: 1,537조 5,713억
                 var a = Math.abs(v), sgn = v < 0 ? '-' : '';
                 if (a >= 10000) {
@@ -2729,12 +2793,16 @@ def _build_combined_chart_section():
                     });
                 });
                 var yJo = yEok && _yMaxAbs >= 10000, y1Jo = y1Eok && _y1MaxAbs >= 10000;
-                // seriesScale 1e12 시리즈(KOSPI/KOSDAQ Market Cap)는 값이 이미 조 단위 — 주석만 표기
-                var yJoPre = mode !== 'pct' && perSeries.length > 0 && seriesScale[perSeries[0].name] === 1e12;
-                var y1JoPre = mode === 'raw2' && perSeries.length > 1 && seriesScale[perSeries[1].name] === 1e12;
+                // 시리즈별 단위 맵(CMB_SERIES_UNITS) 기반 축 주석 — 억원은 1조 이상 시 (조원) 승격
+                function cmbUnitLabel(name, jo) {
+                    var u = cmbSeriesUnit[name];
+                    if (!u) return null;
+                    if (u === '억원') return jo ? '(조원)' : '(억원)';
+                    return '(' + u + ')';
+                }
                 window._cmbAxisUnits = {
-                    y: yEok ? (yJo ? '(조원)' : '(억원)') : (yJoPre ? '(조원)' : null),
-                    y1: y1Eok ? (y1Jo ? '(조원)' : '(억원)') : (y1JoPre ? '(조원)' : null)
+                    y: (mode !== 'pct' && perSeries.length > 0) ? cmbUnitLabel(perSeries[0].name, yJo) : null,
+                    y1: (mode === 'raw2' && perSeries.length > 1) ? cmbUnitLabel(perSeries[1].name, y1Jo) : null
                 };
 
                 var yType = (mode === 'pct') ? 'linear' : (window.cmbLogOn === false ? 'linear' : 'logarithmic');
@@ -3009,7 +3077,7 @@ def _build_combined_chart_section():
             buildCmbChart();
         })();
         </script>
-        """.replace('CMB_DATA_PLACEHOLDER', export_json)
+        """.replace('CMB_DATA_PLACEHOLDER', export_json).replace('CMB_UNIT_PLACEHOLDER', json.dumps(CMB_SERIES_UNITS, ensure_ascii=False))
 
         return f"""
         <div class="category-section">
