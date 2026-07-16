@@ -2244,6 +2244,13 @@ def _build_combined_chart_section():
                 return Number(v).toLocaleString(undefined, { maximumFractionDigits: 2 });
             }
 
+            // 자릿수 원칙 (2026-07-16 사용자 확정): |v|<10 소수 둘째, 10~999 첫째, 1000+ 정수
+            function fmtByMag(v) {
+                if (v === null || v === undefined) return '-';
+                var a = Math.abs(v);
+                return Number(v).toLocaleString(undefined, { maximumFractionDigits: a < 10 ? 2 : (a < 1000 ? 1 : 0) });
+            }
+
             // 억원 단위 금액 시리즈 — 1조(=1만억) 이상은 'N조 N,NNN억' 통일 (2026-07-16 사용자 확정)
             var cmbEokSeries = {};
             Object.keys(cmbSeriesUnit).forEach(function(k) { if (cmbSeriesUnit[k] === '억원') cmbEokSeries[k] = 1; });
@@ -2662,8 +2669,7 @@ def _build_combined_chart_section():
                 }
 
                 function cmbEokTickVal(v, jo) {
-                    return jo ? (v / 10000).toLocaleString(undefined, { maximumFractionDigits: 1 })
-                              : Math.round(v).toLocaleString();
+                    return fmtByMag(jo ? v / 10000 : v);
                 }
                 // Y축 단위 주석 — 눈금엔 숫자만, 단위는 축 최상단 위에 1회 표기 (2026-07-16 사용자 확정)
                 var cmbAxisUnitPlugin = {
@@ -2814,7 +2820,7 @@ def _build_combined_chart_section():
                         position: 'left',
                         grace: '8%',
                         afterBuildTicks: cmbEnsureBoundTicks,
-                        ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return mode === 'pct' ? v + '%' : (yEok ? cmbEokTickVal(v, yJo) : fmtNum(v)); }, font: { size: 15 }, color: '#000' },
+                        ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return mode === 'pct' ? v + '%' : (yEok ? cmbEokTickVal(v, yJo) : fmtByMag(v)); }, font: { size: 15 }, color: '#000' },
                         grid: { color: '#eee' },
                         border: { color: '#000', width: 2 }
                     }
@@ -2825,7 +2831,7 @@ def _build_combined_chart_section():
                         position: 'right',
                         grace: '8%',
                         afterBuildTicks: cmbEnsureBoundTicks,
-                        ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return y1Eok ? cmbEokTickVal(v, y1Jo) : fmtNum(v); }, font: { size: 15 }, color: '#000' },
+                        ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return y1Eok ? cmbEokTickVal(v, y1Jo) : fmtByMag(v); }, font: { size: 15 }, color: '#000' },
                         grid: { drawOnChartArea: false },
                         border: { color: '#000', width: 2 }
                     };
@@ -2991,7 +2997,7 @@ def _build_combined_chart_section():
                                             grace: '8%',
                         afterBuildTicks: cmbEnsureBoundTicks,
                                             afterFit: function(scale) { if (mainYWidth > 0) scale.width = mainYWidth; },
-                                            ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return fmtNum(v); }, font: { size: 15 }, color: '#000' },
+                                            ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return fmtByMag(v); }, font: { size: 15 }, color: '#000' },
                                             grid: { color: '#eee' },
                                             border: { color: '#000', width: 2 }
                                         }
