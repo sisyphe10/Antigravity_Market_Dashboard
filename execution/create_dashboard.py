@@ -2578,7 +2578,8 @@ def _build_combined_chart_section():
                                 var sign = rounded >= 0 ? '+' : '';
                                 label = sign + rounded + '%';
                             } else {
-                                label = fmtNum(val);
+                                // 끝값 라벨 소수점 제거 (잘림 방지, 2026-07-16) — |v|<10만 한 자리 유지(괴리율·PBR 0 뭉개짐 방지)
+                                label = Number(val).toLocaleString(undefined, { maximumFractionDigits: Math.abs(val) < 10 ? 1 : 0 });
                             }
                             entries.push({ x: last.x + 6, origY: last.y, y: last.y, label: label, color: ds.borderColor });
                         });
@@ -2658,7 +2659,7 @@ def _build_combined_chart_section():
                         type: yType,
                         position: 'left',
                         grace: '8%',
-                        ticks: { callback: function(v){ return mode === 'pct' ? v + '%' : fmtNum(v); }, font: { size: 15 }, color: '#000' },
+                        ticks: { maxTicksLimit: 8, autoSkip: true, callback: function(v){ return mode === 'pct' ? v + '%' : fmtNum(v); }, font: { size: 15 }, color: '#000' },
                         grid: { color: '#eee' },
                         border: { color: '#000', width: 2 }
                     }
@@ -2668,7 +2669,7 @@ def _build_combined_chart_section():
                         type: (window.cmbLogOn === false ? 'linear' : 'logarithmic'),
                         position: 'right',
                         grace: '8%',
-                        ticks: { callback: function(v){ return fmtNum(v); }, font: { size: 15 }, color: '#000' },
+                        ticks: { maxTicksLimit: 8, autoSkip: true, callback: function(v){ return fmtNum(v); }, font: { size: 15 }, color: '#000' },
                         grid: { drawOnChartArea: false },
                         border: { color: '#000', width: 2 }
                     };
@@ -2832,7 +2833,7 @@ def _build_combined_chart_section():
                                             position: 'left',
                                             grace: '8%',
                                             afterFit: function(scale) { if (mainYWidth > 0) scale.width = mainYWidth; },
-                                            ticks: { callback: function(v){ return fmtNum(v); }, font: { size: 15 }, color: '#000' },
+                                            ticks: { maxTicksLimit: 8, autoSkip: true, callback: function(v){ return fmtNum(v); }, font: { size: 15 }, color: '#000' },
                                             grid: { color: '#eee' },
                                             border: { color: '#000', width: 2 }
                                         }
