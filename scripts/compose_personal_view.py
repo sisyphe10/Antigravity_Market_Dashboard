@@ -12,7 +12,7 @@ import os, re, sys, glob, shutil
 
 REL = sys.argv[1]
 SISYPHE_PLAIN = os.environ.get("SISYPHE_PLAIN", "/Users/sisyphe/srv/sisyphe_plain")
-SISYPHE_PAGES = ("index.html", "dashboard.html", "journal.html")
+SISYPHE_PAGES = ("index.html", "dashboard.html", "journal.html", "memento.html")
 NAV_END = '</div></div></nav>'
 
 # ---- AoE 페이지 주입 fragment ----
