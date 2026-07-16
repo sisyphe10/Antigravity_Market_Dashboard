@@ -2879,7 +2879,7 @@ def _build_combined_chart_section():
                     var _w = _measCtx.measureText(_lbl).width;
                     if (_w > _maxLabelW) _maxLabelW = _w;
                 });
-                var _rightPad = Math.max(60, Math.ceil(_maxLabelW) + 16);
+                var _rightPad = Math.max(60, Math.ceil(_maxLabelW) + 12);
 
                 if (cmbChart) {
                     // 재사용: 인스턴스 유지하고 데이터/축/툴팁만 교체 (destroy+new 멈칫 제거)
