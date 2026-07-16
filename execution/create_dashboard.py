@@ -2653,12 +2653,12 @@ def _build_combined_chart_section():
 
                 var yType = (mode === 'pct') ? 'linear' : (window.cmbLogOn === false ? 'linear' : 'logarithmic');
                 var scalesConfig = {
-                    x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 12 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
+                    x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 13 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
                     y: {
                         type: yType,
                         position: 'left',
                         grace: '8%',
-                        ticks: { callback: function(v){ return mode === 'pct' ? v + '%' : fmtNum(v); }, font: { size: 12 }, color: '#000' },
+                        ticks: { callback: function(v){ return mode === 'pct' ? v + '%' : fmtNum(v); }, font: { size: 13 }, color: '#000' },
                         grid: { color: '#eee' },
                         border: { color: '#000' }
                     }
@@ -2668,7 +2668,7 @@ def _build_combined_chart_section():
                         type: (window.cmbLogOn === false ? 'linear' : 'logarithmic'),
                         position: 'right',
                         grace: '8%',
-                        ticks: { callback: function(v){ return fmtNum(v); }, font: { size: 12 }, color: '#000' },
+                        ticks: { callback: function(v){ return fmtNum(v); }, font: { size: 13 }, color: '#000' },
                         grid: { drawOnChartArea: false },
                         border: { color: '#000' }
                     };
@@ -2826,13 +2826,13 @@ def _build_combined_chart_section():
                                         } } }
                                     },
                                     scales: {
-                                        x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 12 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
+                                        x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 13 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
                                         y: {
                                             type: 'linear',
                                             position: 'left',
                                             grace: '8%',
                                             afterFit: function(scale) { if (mainYWidth > 0) scale.width = mainYWidth; },
-                                            ticks: { callback: function(v){ return fmtNum(v); }, font: { size: 12 }, color: '#000' },
+                                            ticks: { callback: function(v){ return fmtNum(v); }, font: { size: 13 }, color: '#000' },
                                             grid: { color: '#eee' },
                                             border: { color: '#000' }
                                         }
@@ -3209,8 +3209,8 @@ def _build_wrap_chart_section(category_label):
                             tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%'; } } }
                         },
                         scales: {
-                            x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val) { var d = this.getLabelForValue(val); if (!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 12 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
-                            y: { ticks: { callback: function(v) { return v + '%'; }, font: { size: 12 }, color: '#000' }, grid: { color: '#eee' }, border: { color: '#000' } }
+                            x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val) { var d = this.getLabelForValue(val); if (!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 11 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
+                            y: { ticks: { callback: function(v) { return v + '%'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' }, border: { color: '#000' } }
                         }
                     }
                 });
@@ -3629,8 +3629,8 @@ def create_aum_table():
                         } }
                     },
                     scales: {
-                        x: { stacked: true, ticks: { font: { size: 12 }, color: '#000' }, grid: { display: false } },
-                        y: { stacked: true, ticks: { callback: function(v) { return v + '억'; }, font: { size: 12 }, color: '#000' }, grid: { color: '#eee' } }
+                        x: { stacked: true, ticks: { font: { size: 11 }, color: '#000' }, grid: { display: false } },
+                        y: { stacked: true, ticks: { callback: function(v) { return v + '억'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' } }
                     }
                 }
             });
@@ -3995,8 +3995,8 @@ def create_cumulative_aum_chart():
                         } }
                     },
                     scales: {
-                        x: { stacked: true, ticks: { font: { size: 12 }, color: '#000' }, grid: { display: false } },
-                        y: { stacked: true, ticks: { callback: function(v) { return v + '억'; }, font: { size: 12 }, color: '#000' }, grid: { color: '#eee' } }
+                        x: { stacked: true, ticks: { font: { size: 11 }, color: '#000' }, grid: { display: false } },
+                        y: { stacked: true, ticks: { callback: function(v) { return v + '억'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' } }
                     }
                 }
             });
@@ -6539,8 +6539,8 @@ def _build_landing_kofia_section():
                         tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + (ctx.parsed.y === null ? '-' : fmtJoEok(ctx.parsed.y)); } } }
                     },
                     scales: {
-                        x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val) { var d = this.getLabelForValue(val); if (!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 12 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
-                        y: { ticks: { callback: function(v) { return Math.round(v / 1e11) / 10 + '조원'; }, font: { size: 12 }, color: '#000' }, grid: { color: '#eee' }, border: { color: '#000' } }
+                        x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val) { var d = this.getLabelForValue(val); if (!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 11 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
+                        y: { ticks: { callback: function(v) { return Math.round(v / 1e11) / 10 + '조원'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' }, border: { color: '#000' } }
                     }
                 };
             }
@@ -7558,19 +7558,19 @@ def create_dashboard():
     </header>
 
     <div class="mkt-subtabs">
-        <button class="mkt-subtab active" data-mkt-btn="0" onclick="mktSwitchTab(0)">Monthly Returns</button>
+        <button class="mkt-subtab active" data-mkt-btn="2" onclick="mktSwitchTab(2)">Data</button>
+        <button class="mkt-subtab" data-mkt-btn="0" onclick="mktSwitchTab(0)">Monthly Returns</button>
         <button class="mkt-subtab" data-mkt-btn="1" onclick="mktSwitchTab(1)">Indices</button>
-        <button class="mkt-subtab" data-mkt-btn="2" onclick="mktSwitchTab(2)">Data</button>
         <button class="mkt-subtab" data-mkt-btn="3" onclick="mktSwitchTab(3)">Taiwan</button>
     </div>
 
-    <div class="mkt-panel" data-mkt-sec="0">
+    <div class="mkt-panel" data-mkt-sec="0" style="display:none;">
     {monthly_returns_html}
     </div>
     <div class="mkt-panel" data-mkt-sec="1" style="display:none;">
     {indices_section_html}
     </div>
-    <div class="mkt-panel" data-mkt-sec="2" style="display:none;">
+    <div class="mkt-panel" data-mkt-sec="2">
     {data_section_html}
     </div>
     <div class="mkt-panel" data-mkt-sec="3" style="display:none;">
