@@ -1614,7 +1614,6 @@ CMB_SERIES_UNITS = {
     # INDEX_KOREA
     'KOSPI Market Cap': '조원', 'KOSDAQ Market Cap': '조원',
     '고객예탁금': '억원', '신용잔고': '억원', '반대매매금액': '억원',
-    'KOSPI PER': '배', 'KOSPI PBR': '배', 'KOSDAQ PER': '배', 'KOSDAQ PBR': '배',
     'KOSPI 배당수익률': '%', 'KOSDAQ 배당수익률': '%',
     '코스피 외국인비중': '%', '코스닥 외국인비중': '%', '삼성전자 외국인': '%', '삼성전자우 외국인': '%',
     'SK하이닉스 외국인': '%', '삼성생명 외국인': '%', 'SK스퀘어 외국인': '%', '삼성물산 외국인': '%',
@@ -1626,8 +1625,6 @@ CMB_SERIES_UNITS = {
     '삼성전자 시가총액': '억원', '하이닉스 시가총액': '억원',
     '삼성전자 레버리지 ETF AUM': '억원', '하이닉스 레버리지 ETF AUM': '억원',
     # INDEX_US
-    'S&P 500 PER': '배', 'S&P 500 PBR': '배', 'NASDAQ PER': '배', 'NASDAQ PBR': '배',
-    'RUSSELL 2000 PER': '배', 'RUSSELL 2000 PBR': '배',
     # EXCHANGE RATE
     'KRW/USD': '원', 'CNY/USD': '위안', 'JPY/USD': '엔', 'TWD/USD': '대만달러', 'EUR/USD': '$',
     # INTEREST RATES (수익률 %, 스프레드 %p)
@@ -2692,7 +2689,7 @@ def _build_combined_chart_section():
                         if (!u) return;
                         var ctx = chart.ctx, ty = chart.chartArea.top - 20;   // 최상단 눈금 라벨과 겹침 방지
                         ctx.save();
-                        ctx.font = 'bold 13px sans-serif';
+                        ctx.font = '13px sans-serif';
                         ctx.fillStyle = '#000';
                         if (u.y) { ctx.textAlign = 'right'; ctx.fillText(u.y, chart.scales.y.right + 2, ty); }
                         if (u.y1 && chart.scales.y1) { ctx.textAlign = 'left'; ctx.fillText(u.y1, chart.scales.y1.left - 2, ty); }
@@ -2727,9 +2724,8 @@ def _build_combined_chart_section():
                             } else {
                                 // 끝값 라벨: 정수부 4자리(>=1000)부터 소수 제외, 그 외 최대 2자리 (2026-07-16 사용자 확정)
                                 // 끝값 = 숫자만 (억원 시리즈는 축 단위(조/억)로 환산 — 단위는 축 상단 주석이 담당)
-                                var _u = window._cmbAxisUnits || {};
-                                var _jo = cmbEokSeries[ds.label] && (ds.yAxisID === 'y1' ? _u.y1 : _u.y) === '(조원)';
-                                var _f2 = _jo ? 10000 : 1;
+                                var _f2 = (chart.canvas.id === 'cmbDynamicChart')
+                                    ? ((window._cmbAxisConv || {})[ds.yAxisID || 'y'] || 1) : 1;
                                 var _ax = chart.scales[ds.yAxisID || 'y'] || chart.scales.y;
                                 var _m2 = Math.max(Math.abs(_ax.min || 0), Math.abs(_ax.max || 0)) / _f2;
                                 label = fmtUniform(val / _f2, _m2);
@@ -2827,6 +2823,8 @@ def _build_combined_chart_section():
                     y: (mode !== 'pct' && perSeries.length > 0) ? cmbUnitLabel(perSeries[0].name, yJo) : null,
                     y1: (mode === 'raw2' && perSeries.length > 1) ? cmbUnitLabel(perSeries[1].name, y1Jo) : null
                 };
+                // 축별 표시 환산 계수 — MA 등 파생선도 같은 축 규칙을 타도록 축 기준으로 기록
+                window._cmbAxisConv = { y: (yEok && yJo) ? 10000 : 1, y1: (y1Eok && y1Jo) ? 10000 : 1 };
 
                 var yType = (mode === 'pct') ? 'linear' : (window.cmbLogOn === false ? 'linear' : 'logarithmic');
                 var scalesConfig = {
@@ -2856,7 +2854,8 @@ def _build_combined_chart_section():
                 var tooltipLabel = function(ctx) {
                     if (ctx.parsed.y === null || ctx.parsed.y === undefined) return ctx.dataset.label + ': -';
                     if (mode === 'pct') return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%';
-                    return ctx.dataset.label + ': ' + (cmbEokSeries[ctx.dataset.label] ? fmtEokFull(ctx.parsed.y) : fmtNum(ctx.parsed.y));
+                    var _eokAx = (ctx.dataset.yAxisID || 'y') === 'y1' ? y1Eok : yEok;
+                    return ctx.dataset.label + ': ' + (_eokAx ? fmtEokFull(ctx.parsed.y) : fmtNum(ctx.parsed.y));
                 };
 
                 // 우측 end-label(예: 예탁금 1,199,264) 잘림 방지 — 최장 라벨 폭만큼 오른쪽 패딩 동적 확보
@@ -2871,7 +2870,7 @@ def _build_combined_chart_section():
                     var _lbl;
                     if (ds._isForeign) { _lbl = lv.toFixed(1) + '%'; }
                     else if (mode === 'pct') { var _r = Math.sign(lv) * Math.round(Math.abs(lv)); _lbl = (_r >= 0 ? '+' : '') + _r + '%'; }
-                    else { var _mu = window._cmbAxisUnits || {}; var _mj = cmbEokSeries[ds.label] && (ds.yAxisID === 'y1' ? _mu.y1 : _mu.y) === '(조원)'; var _mf = _mj ? 10000 : 1; _lbl = fmtUniform(lv / _mf, (ds.yAxisID === 'y1' ? _y1MaxAbs : _yMaxAbs) / _mf); }
+                    else { var _mf = (ds.yAxisID === 'y1' ? (y1Eok && y1Jo) : (yEok && yJo)) ? 10000 : 1; _lbl = fmtUniform(lv / _mf, (ds.yAxisID === 'y1' ? _y1MaxAbs : _yMaxAbs) / _mf); }
                     var _w = _measCtx.measureText(_lbl).width;
                     if (_w > _maxLabelW) _maxLabelW = _w;
                 });
