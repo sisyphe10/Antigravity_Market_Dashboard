@@ -3496,7 +3496,8 @@ def _build_wrap_chart_section(category_label):
                     }
                 });
                 // ★기존 버그 수정(2026-07-16): 숨김 상태(height 0)에서 생성되면 눈금이 퇴화 —
-                // 가시화될 때까지 최대 10초 감지 후 자가 재계산 (진입 게이트·탭 순서와 무관)
+                // 가시화될 때까지 최대 10초 감지 후 자가 재계산 (진입 게이트·탭 순서와 무관).
+                // 폴링 상한(10s) 이후의 늦은 게이트 해제는 checkPw가 _wrapHealKick으로 직접 발동.
                 var _wrapHealTry = 0;
                 var _wrapHealTimer = setInterval(function() {
                     if (!wrapChart || ++_wrapHealTry > 40) { clearInterval(_wrapHealTimer); return; }
@@ -3504,6 +3505,9 @@ def _build_wrap_chart_section(category_label):
                     var cv = document.getElementById('wrapDynamicChart');
                     if (cv && cv.offsetParent !== null) { wrapChart.resize(); wrapChart.update('none'); }
                 }, 250);
+                window._wrapHealKick = function() {
+                    if (wrapChart && wrapChart.height === 0) { wrapChart.resize(); wrapChart.update('none'); }
+                };
             }
 
             // 단일 포트폴리오 선택 시 기간 자동 세팅: 비교지수(KOSPI/KOSDAQ)를 제외한 활성
@@ -8442,6 +8446,7 @@ def create_dashboard():
             document.getElementById('mainContent').classList.remove('pw-hidden');
             sessionStorage.setItem('wrap_auth', '1');
             if (typeof wrapTabFromHash === 'function') wrapTabFromHash();
+            if (typeof _wrapHealKick === 'function') _wrapHealKick();  // 폴링(10s) 만료 후 늦은 해제 대비
         }} else {{
             document.getElementById('pwError').style.display = 'block';
             document.getElementById('pwInput').value = '';
