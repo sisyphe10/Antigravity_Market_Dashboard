@@ -2252,12 +2252,12 @@ def _build_combined_chart_section():
             // (예: 축이 7.57~40이면 전부 소수 첫째 자리 — 7.6, 9, 10, 15)
             function fmtUniform(v, maxAbs) {
                 if (v === null || v === undefined) return '-';
-                var dp = maxAbs < 10 ? 2 : (maxAbs < 1000 ? 1 : 0);
+                var dp = maxAbs < 10 ? 2 : (maxAbs < 100 ? 1 : 0);   // 일의자리 2dp·십의자리 1dp·백의자리+ 정수
                 return Number(v).toLocaleString(undefined, { maximumFractionDigits: dp });
             }
             function fmtUniformFix(v, maxAbs) {   // 끝값용: 축 자릿수로 패딩 (84 -> 84.0)
                 if (v === null || v === undefined) return '-';
-                var dp = maxAbs < 10 ? 2 : (maxAbs < 1000 ? 1 : 0);
+                var dp = maxAbs < 10 ? 2 : (maxAbs < 100 ? 1 : 0);   // 일의자리 2dp·십의자리 1dp·백의자리+ 정수
                 return Number(v).toLocaleString(undefined, { minimumFractionDigits: dp, maximumFractionDigits: dp });
             }
             function cmbTickFmt(v, ax, jo) {
