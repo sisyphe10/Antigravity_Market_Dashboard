@@ -2251,6 +2251,19 @@ def _build_combined_chart_section():
                 return Number(v).toLocaleString(undefined, { maximumFractionDigits: a < 10 ? 2 : (a < 1000 ? 1 : 0) });
             }
 
+            // 축 자릿수 통일 (2026-07-16 사용자 확정): 같은 축 안에서는 최대값의 원칙을 따름
+            // (예: 축이 7.57~40이면 전부 소수 첫째 자리 — 7.6, 9, 10, 15)
+            function fmtUniform(v, maxAbs) {
+                if (v === null || v === undefined) return '-';
+                var dp = maxAbs < 10 ? 2 : (maxAbs < 1000 ? 1 : 0);
+                return Number(v).toLocaleString(undefined, { maximumFractionDigits: dp });
+            }
+            function cmbTickFmt(v, ax, jo) {
+                var f = jo ? 10000 : 1;
+                var m = Math.max(Math.abs(ax.min || 0), Math.abs(ax.max || 0)) / f;
+                return fmtUniform(v / f, m);
+            }
+
             // 억원 단위 금액 시리즈 — 1조(=1만억) 이상은 'N조 N,NNN억' 통일 (2026-07-16 사용자 확정)
             var cmbEokSeries = {};
             Object.keys(cmbSeriesUnit).forEach(function(k) { if (cmbSeriesUnit[k] === '억원') cmbEokSeries[k] = 1; });
@@ -2715,8 +2728,11 @@ def _build_combined_chart_section():
                                 // 끝값 라벨: 정수부 4자리(>=1000)부터 소수 제외, 그 외 최대 2자리 (2026-07-16 사용자 확정)
                                 // 끝값 = 숫자만 (억원 시리즈는 축 단위(조/억)로 환산 — 단위는 축 상단 주석이 담당)
                                 var _u = window._cmbAxisUnits || {};
-                                var _vv = (cmbEokSeries[ds.label] && (ds.yAxisID === 'y1' ? _u.y1 : _u.y) === '(조원)') ? val / 10000 : val;
-                                label = Number(_vv).toLocaleString(undefined, { maximumFractionDigits: Math.abs(_vv) < 10 ? 2 : (Math.abs(_vv) < 1000 ? 1 : 0) });
+                                var _jo = cmbEokSeries[ds.label] && (ds.yAxisID === 'y1' ? _u.y1 : _u.y) === '(조원)';
+                                var _f2 = _jo ? 10000 : 1;
+                                var _ax = chart.scales[ds.yAxisID || 'y'] || chart.scales.y;
+                                var _m2 = Math.max(Math.abs(_ax.min || 0), Math.abs(_ax.max || 0)) / _f2;
+                                label = fmtUniform(val / _f2, _m2);
                             }
                             entries.push({ x: last.x + 6, origY: last.y, y: last.y, label: label, color: ds.borderColor });
                         });
@@ -2820,7 +2836,7 @@ def _build_combined_chart_section():
                         position: 'left',
                         grace: '8%',
                         afterBuildTicks: cmbEnsureBoundTicks,
-                        ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return mode === 'pct' ? v + '%' : (yEok ? cmbEokTickVal(v, yJo) : fmtByMag(v)); }, font: { size: 15 }, color: '#000' },
+                        ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return mode === 'pct' ? v + '%' : cmbTickFmt(v, this, yEok && yJo); }, font: { size: 15 }, color: '#000' },
                         grid: { color: '#eee' },
                         border: { color: '#000', width: 2 }
                     }
@@ -2831,7 +2847,7 @@ def _build_combined_chart_section():
                         position: 'right',
                         grace: '8%',
                         afterBuildTicks: cmbEnsureBoundTicks,
-                        ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return y1Eok ? cmbEokTickVal(v, y1Jo) : fmtByMag(v); }, font: { size: 15 }, color: '#000' },
+                        ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return cmbTickFmt(v, this, y1Eok && y1Jo); }, font: { size: 15 }, color: '#000' },
                         grid: { drawOnChartArea: false },
                         border: { color: '#000', width: 2 }
                     };
@@ -2855,7 +2871,7 @@ def _build_combined_chart_section():
                     var _lbl;
                     if (ds._isForeign) { _lbl = lv.toFixed(1) + '%'; }
                     else if (mode === 'pct') { var _r = Math.sign(lv) * Math.round(Math.abs(lv)); _lbl = (_r >= 0 ? '+' : '') + _r + '%'; }
-                    else { var _mu = window._cmbAxisUnits || {}; var _mv = (cmbEokSeries[ds.label] && (ds.yAxisID === 'y1' ? _mu.y1 : _mu.y) === '(조원)') ? lv / 10000 : lv; _lbl = Number(_mv).toLocaleString(undefined, { maximumFractionDigits: Math.abs(_mv) < 10 ? 2 : (Math.abs(_mv) < 1000 ? 1 : 0) }); }
+                    else { var _mu = window._cmbAxisUnits || {}; var _mj = cmbEokSeries[ds.label] && (ds.yAxisID === 'y1' ? _mu.y1 : _mu.y) === '(조원)'; var _mf = _mj ? 10000 : 1; _lbl = fmtUniform(lv / _mf, (ds.yAxisID === 'y1' ? _y1MaxAbs : _yMaxAbs) / _mf); }
                     var _w = _measCtx.measureText(_lbl).width;
                     if (_w > _maxLabelW) _maxLabelW = _w;
                 });
@@ -2997,7 +3013,7 @@ def _build_combined_chart_section():
                                             grace: '8%',
                         afterBuildTicks: cmbEnsureBoundTicks,
                                             afterFit: function(scale) { if (mainYWidth > 0) scale.width = mainYWidth; },
-                                            ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return fmtByMag(v); }, font: { size: 15 }, color: '#000' },
+                                            ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return cmbTickFmt(v, this, false); }, font: { size: 15 }, color: '#000' },
                                             grid: { color: '#eee' },
                                             border: { color: '#000', width: 2 }
                                         }
