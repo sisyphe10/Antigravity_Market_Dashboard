@@ -1639,7 +1639,7 @@ CMB_SERIES_UNITS = {
     '미 기대인플레 BEI 10Y': '%', '미 기대인플레 5Y5Y': '%', 'SOFR': '%',
     # MACRO KOREA
     'CPI 전년동월비': '%', 'PPI 전년동월비': '%', '기대인플레이션 1년': '%', 'M2 전년동월비': '%',
-    '제조업 가동률': '%', '수출금액 전년동월비': '%', '경상수지': '$억', '외환보유액': '$억',
+    '제조업 가동률': '%', '수출금액 전년동월비': '%', '경상수지': '$B', '외환보유액': '$B',
     '정기예금 잔액': '조원', '국민연금 적립금': '조원', '퇴직연금 적립금': '조원',
     '전산업생산 전년동월비': '%', '실업률 (한국)': '%', '온라인쇼핑 거래액': '조원',
     '백화점 매출증감률': '%', '대형마트 매출증감률': '%', '편의점 매출증감률': '%', 'SSM 매출증감률': '%',
@@ -2088,7 +2088,8 @@ def _build_combined_chart_section():
             var cmbAutoRangePending = false;
             var cmbClickOrder = [];
             var clickPalette = ['#000000','#0055cc','#cc0000','#006633','#6a0dad','#cc6600','#008080','#990066'];
-            var seriesScale = { 'KOSPI Market Cap': 1e12, 'KOSDAQ Market Cap': 1e12 };
+            var seriesScale = { 'KOSPI Market Cap': 1e12, 'KOSDAQ Market Cap': 1e12,
+                                '경상수지': 10, '외환보유액': 10 };   // 억달러 -> $B
 
             // MA 슬롯(0~3) 색상. 윈도우 값은 시리즈 빈도에 따라 동적 (MA_WINDOWS).
             var MA_DEFS = [
@@ -2510,7 +2511,7 @@ def _build_combined_chart_section():
                         data = aligned.map(function(v) {
                             if (v === null) return null;
                             var sv = v / scale;
-                            return scale > 1 ? Math.round(sv) : sv;
+                            return scale >= 1e8 ? Math.round(sv) : sv;
                         });
                     }
                     var yAxisID = (mode === 'raw2' && idx === 1 && !isForeign) ? 'y1' : 'y';
@@ -2587,7 +2588,7 @@ def _build_combined_chart_section():
                                 var maVisible = filled.map(function(pt) {
                                     if (pt.ma === null || pt.ma === undefined) return null;
                                     var sv = pt.ma / scale;
-                                    return scale > 1 ? Math.round(sv) : sv;
+                                    return scale >= 1e8 ? Math.round(sv) : sv;
                                 });
                                 // 전 구간 null(데이터 부족)이면 범례 유령 항목 방지를 위해 생략
                                 if (maVisible.some(function(v){ return v !== null; })) datasets.push({
