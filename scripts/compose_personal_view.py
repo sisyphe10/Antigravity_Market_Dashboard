@@ -210,10 +210,10 @@ for name in SISYPHE_PAGES:
     if r is None:
         fail("sisyphe/%s: </head> 없음" % name)
     s = r
-    if name == "journal.html":
-        # 고정 사이드바(200px)가 좌상단을 덮으므로 journal 한정 offset — 통일 CSS 뒤 주입
-        s = inject_before_head(s, JOURNAL_OFFSET)
     if name in ("journal.html", "dashboard.html"):
+        # 고정 사이드바(200px, z-150)가 nav 좌측(Watchlist)을 덮으므로 offset — 통일 CSS 뒤 주입
+        # (2026-07-16 dashboard 확장: journal 만 적용돼 Ledger 에서 Watchlist 탭이 가려지던 문제)
+        s = inject_before_head(s, JOURNAL_OFFSET)
         s = inject_before_head(s, CORNER_BRAND)
 
     open(p, "w", encoding="utf-8").write(s)
@@ -230,8 +230,8 @@ for name in SISYPHE_PAGES:
         fail("sisyphe/%s: 활성 탭(%s) 검증 실패" % (name, active_label))
     if 'sisyphe-warm-bar' in fin:
         fail("sisyphe/%s: 웜톤 바 잔존" % name)
-    if name == "journal.html" and 'id="aoe-journal-offset"' not in fin:
-        fail("sisyphe/journal.html: nav offset 검증 실패")
+    if name in ("journal.html", "dashboard.html") and 'id="aoe-journal-offset"' not in fin:
+        fail("sisyphe/%s: nav offset 검증 실패" % name)
 
 sys.stdout.write("[compose] OK: 단일 AoE nav(좌 Watchlist·Market·Invest·Memento·Ledger / 우 Wiki·Arch) + Sisyphe 4페이지 합성 (%s)\n"
                  % os.path.basename(REL))
