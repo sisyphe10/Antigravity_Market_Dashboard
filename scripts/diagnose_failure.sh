@@ -104,8 +104,25 @@ fi
 [ -n "$MSG" ] || MSG="(자가진단이 결과를 내지 못했습니다 — 기본 알림의 로그 명령으로 확인해 주세요)"
 dlog "진단 종료 rc=$RC (${#MSG} chars)"
 
-# ── 후속 발송 (평문 — HTML 파싱 실패 위험 회피) ─────────────
-curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_SISYPHE_BOT_TOKEN}/sendMessage" \
+# ── 후속 발송 ────────────────────────────────────────────────
+# claude 출력은 평문 계약 → 전체 HTML 이스케이프 후 원인('무슨 일')·결론('지금 할 일')
+# 줄만 <b><u> 강조. 파싱 실패 시 평문 폴백이라 발송 자체는 항상 성공.
+HTML_MSG="$(printf '%s' "$MSG" | sed \
+  -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g' \
+  -e 's|^\(• *무슨 일.*\)$|<b><u>\1</u></b>|' \
+  -e 's|^\(• *지금 할 일.*\)$|<b><u>\1</u></b>|')"
+RESP="$(curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_SISYPHE_BOT_TOKEN}/sendMessage" \
   --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+  -d 'parse_mode=HTML' \
   --data-urlencode "text=🩺 [$UNIT] 자가진단
+$HTML_MSG" 2>/dev/null)"
+case "$RESP" in
+  *'"ok":true'*) ;;
+  *)
+    dlog "HTML 발송 실패 → 평문 폴백"
+    curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_SISYPHE_BOT_TOKEN}/sendMessage" \
+      --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+      --data-urlencode "text=🩺 [$UNIT] 자가진단
 $MSG" >/dev/null 2>&1 || dlog "텔레그램 발송 실패"
+    ;;
+esac
