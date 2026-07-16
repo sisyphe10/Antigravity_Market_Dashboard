@@ -1454,12 +1454,40 @@ def _build_indices_chart_section(category_label='Indices'):
                         data: pct,
                         borderColor: idxColors[s.name] || '#888',
                         backgroundColor: 'transparent',
-                        borderWidth: 2,
+                        borderWidth: 3,
                         pointRadius: 0,
                         tension: 0.3,
                         spanGaps: true
                     });
                 });
+
+                // ── 2026-07-16 표기 표준 헬퍼 (양식 소급 통일 — 기능 아님) ──
+                function idxBandFix(v, maxAbs) {   // 자릿수 밴드: <10 2dp, 10~99 1dp 고정, 100+ 정수
+                    var dp = maxAbs < 10 ? 2 : (maxAbs < 100 ? 1 : 0);
+                    return Number(v).toLocaleString(undefined, { minimumFractionDigits: dp, maximumFractionDigits: dp });
+                }
+                function idxEnsureTicks(ax) {      // 눈금 <=8 + 양끝 필수 + 최소 간격(range/9)
+                    var t = ax.ticks;
+                    if (!t || !t.length) return;
+                    var span = ax.max - ax.min;
+                    if (!(span > 0)) return;
+                    if ((t[0].value - ax.min) / span > 0.02) t.unshift({ value: ax.min }); else t[0].value = ax.min;
+                    if ((ax.max - t[t.length - 1].value) / span > 0.02) t.push({ value: ax.max }); else t[t.length - 1].value = ax.max;
+                    var MAXT = 8, lo = t[0].value, hi = t[t.length - 1].value, rng = hi - lo;
+                    if (rng > 0 && t.length > 2) {
+                        var minGap = rng / (MAXT + 1), kept = [t[0]];
+                        for (var k = 1; k < t.length - 1; k++) {
+                            if (kept.length < MAXT - 1 && t[k].value - kept[kept.length - 1].value >= minGap
+                                && hi - t[k].value >= minGap) kept.push(t[k]);
+                        }
+                        kept.push(t[t.length - 1]);
+                        ax.ticks = kept;
+                    }
+                }
+                var _idxMaxAbs = 0;
+                datasets.forEach(function(ds) { ds.data.forEach(function(v) {
+                    if (v !== null && Math.abs(v) > _idxMaxAbs) _idxMaxAbs = Math.abs(v); }); });
+                window._idxBandMax = _idxMaxAbs;
 
                 var endLabelPlugin = {
                     id: 'idxEndLabels',
@@ -1477,18 +1505,17 @@ def _build_indices_chart_section(category_label='Indices'):
                             var last = meta.data[lastIdx];
                             if (!last) return;
                             var val = ds.data[lastIdx];
-                            var rounded = Math.sign(val) * Math.round(Math.abs(val));
-                            var sign = rounded >= 0 ? '+' : '';
+                            var sign = val >= 0 ? '+' : '';
                             ctx.save();
                             // 끝점 동그라미 3px (선 색과 동일한 불투명 단색, 2026-07-12 사용자 요청)
                             ctx.beginPath();
                             ctx.arc(last.x, last.y, 3, 0, Math.PI * 2);
                             ctx.fillStyle = ds.borderColor;
                             ctx.fill();
-                            ctx.font = 'bold 12px sans-serif';
+                            ctx.font = 'bold 15px sans-serif';
                             ctx.fillStyle = ds.borderColor;
                             ctx.textBaseline = 'middle';
-                            ctx.fillText(sign + rounded + '%', last.x + 7, last.y);
+                            ctx.fillText(sign + idxBandFix(val, window._idxBandMax || Math.abs(val)) + '%', last.x + 7, last.y);
                             ctx.restore();
                         });
                     }
@@ -1527,11 +1554,11 @@ def _build_indices_chart_section(category_label='Indices'):
                         plugins: {
                             legend: { display: false },
                             // animation:false — 스냅 툴팁이 draw()만으로 위치 갱신되도록 (애니메이션 속성이면 제자리에 멈춤)
-                            tooltip: { animation: false, callbacks: { label: function(ctx){ return ctx.dataset.label + ': ' + (ctx.parsed.y === null ? '-' : ctx.parsed.y.toFixed(1) + '%'); } } }
+                            tooltip: { animation: false, callbacks: { label: function(ctx){ return ctx.dataset.label + ': ' + (ctx.parsed.y === null ? '-' : (ctx.parsed.y >= 0 ? '+' : '') + idxBandFix(ctx.parsed.y, window._idxBandMax || 100) + '%'); } } }
                         },
                         scales: {
-                            x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 11 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
-                            y: { ticks: { callback: function(v){ return v + '%'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' }, border: { color: '#000' } }
+                            x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
+                            y: { grace: '8%', afterBuildTicks: idxEnsureTicks, ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return (v >= 0 ? '' : '') + idxBandFix(v, window._idxBandMax || 100) + '%'; }, font: { size: 15 }, color: '#000' }, grid: { color: '#eee' }, border: { color: '#000', width: 2 } }
                         }
                     }
                 });
@@ -3371,12 +3398,40 @@ def _build_wrap_chart_section(category_label):
                         data: data,
                         borderColor: chartColors[s.name] || '#888',
                         backgroundColor: 'transparent',
-                        borderWidth: (s.name === 'KOSPI' || s.name === 'KOSDAQ') ? 1.5 : 3,
+                        borderWidth: (s.name === 'KOSPI' || s.name === 'KOSDAQ') ? 2 : 3,
                         pointRadius: 0,
                         tension: 0.3,
                         spanGaps: false
                     });
                 });
+
+                // ── 2026-07-16 표기 표준 헬퍼 (양식 소급 통일 — 기능 아님) ──
+                function wrapBandFix(v, maxAbs) {   // 자릿수 밴드: <10 2dp, 10~99 1dp 고정, 100+ 정수
+                    var dp = maxAbs < 10 ? 2 : (maxAbs < 100 ? 1 : 0);
+                    return Number(v).toLocaleString(undefined, { minimumFractionDigits: dp, maximumFractionDigits: dp });
+                }
+                function wrapEnsureTicks(ax) {      // 눈금 <=8 + 양끝 필수 + 최소 간격(range/9)
+                    var t = ax.ticks;
+                    if (!t || !t.length) return;
+                    var span = ax.max - ax.min;
+                    if (!(span > 0)) return;
+                    if ((t[0].value - ax.min) / span > 0.02) t.unshift({ value: ax.min }); else t[0].value = ax.min;
+                    if ((ax.max - t[t.length - 1].value) / span > 0.02) t.push({ value: ax.max }); else t[t.length - 1].value = ax.max;
+                    var MAXT = 8, lo = t[0].value, hi = t[t.length - 1].value, rng = hi - lo;
+                    if (rng > 0 && t.length > 2) {
+                        var minGap = rng / (MAXT + 1), kept = [t[0]];
+                        for (var k = 1; k < t.length - 1; k++) {
+                            if (kept.length < MAXT - 1 && t[k].value - kept[kept.length - 1].value >= minGap
+                                && hi - t[k].value >= minGap) kept.push(t[k]);
+                        }
+                        kept.push(t[t.length - 1]);
+                        ax.ticks = kept;
+                    }
+                }
+                var _wrapMaxAbs = 0;
+                datasets.forEach(function(ds) { ds.data.forEach(function(v) {
+                    if (v !== null && Math.abs(v) > _wrapMaxAbs) _wrapMaxAbs = Math.abs(v); }); });
+                window._wrapBandMax = _wrapMaxAbs;
 
                 // 선 끝에 수익률 라벨을 그리는 커스텀 플러그인
                 var endLabelPlugin = {
@@ -3386,15 +3441,22 @@ def _build_wrap_chart_section(category_label):
                         chart.data.datasets.forEach(function(ds, i) {
                             var meta = chart.getDatasetMeta(i);
                             if (meta.hidden) return;
-                            var last = meta.data[meta.data.length - 1];
+                            var lastIdx = -1;
+                            for (var k = ds.data.length - 1; k >= 0; k--) {
+                                if (ds.data[k] !== null && ds.data[k] !== undefined) { lastIdx = k; break; }
+                            }
+                            if (lastIdx < 0) return;
+                            var last = meta.data[lastIdx];
                             if (!last) return;
-                            var val = ds.data[ds.data.length - 1];
-                            if (val === null || val === undefined) return;
-                            var rounded = Math.sign(val) * Math.round(Math.abs(val));
-                            var sign = rounded >= 0 ? '+' : '';
-                            var label = sign + rounded + '%';
+                            var val = ds.data[lastIdx];
+                            var sign = val >= 0 ? '+' : '';
+                            var label = sign + wrapBandFix(val, window._wrapBandMax || Math.abs(val)) + '%';
                             ctx.save();
-                            ctx.font = 'bold 12px sans-serif';
+                            ctx.beginPath();
+                            ctx.arc(last.x, last.y, 3, 0, Math.PI * 2);
+                            ctx.fillStyle = ds.borderColor;
+                            ctx.fill();
+                            ctx.font = 'bold 15px sans-serif';
                             ctx.fillStyle = ds.borderColor;
                             ctx.textBaseline = 'middle';
                             ctx.fillText(label, last.x + 6, last.y);
@@ -3425,14 +3487,19 @@ def _build_wrap_chart_section(category_label):
                         interaction: { mode: 'index', intersect: false },
                         plugins: {
                             legend: { display: false },
-                            tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%'; } } }
+                            tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + (ctx.parsed.y >= 0 ? '+' : '') + wrapBandFix(ctx.parsed.y, window._wrapBandMax || 100) + '%'; } } }
                         },
                         scales: {
-                            x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val) { var d = this.getLabelForValue(val); if (!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 11 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
-                            y: { ticks: { callback: function(v) { return v + '%'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' }, border: { color: '#000' } }
+                            x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val) { var d = this.getLabelForValue(val); if (!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
+                            y: { grace: '8%', afterBuildTicks: wrapEnsureTicks, ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v) { return wrapBandFix(v, window._wrapBandMax || 100) + '%'; }, font: { size: 15 }, color: '#000' }, grid: { color: '#eee' }, border: { color: '#000', width: 2 } }
                         }
                     }
                 });
+                // ★기존 버그 수정(2026-07-16): 숨김 상태(height 0)에서 생성되면 눈금이 퇴화 —
+                // 표시 후 자가 재계산 (탭 전환·해시 진입 순서와 무관하게 동작)
+                setTimeout(function() {
+                    if (wrapChart && wrapChart.height === 0) { wrapChart.resize(); wrapChart.update('none'); }
+                }, 150);
             }
 
             // 단일 포트폴리오 선택 시 기간 자동 세팅: 비교지수(KOSPI/KOSDAQ)를 제외한 활성
@@ -7811,6 +7878,18 @@ def create_dashboard():
         }});
         // 숨김→표시 전환 시 Chart.js 캔버스 재계산 (responsive 차트)
         window.dispatchEvent(new Event('resize'));
+        // ★기존 버그 수정(2026-07-16): display:none에서 생성된 차트(height 0)는 ResizeObserver가
+        // 안 붙어 첫 표시 때 ±500% 퇴화 눈금이 남음 — 표시된 패널 안의 차트를 강제 재계산.
+        setTimeout(function() {{
+            var panel = document.querySelector('.mkt-panel[data-mkt-sec="' + idx + '"]');
+            var reg = (window.Chart && Chart.instances) ? Chart.instances : {{}};
+            Object.keys(reg).forEach(function(k) {{
+                var c = reg[k];
+                if (c && c.canvas && panel && panel.contains(c.canvas) && c.height === 0) {{
+                    c.resize(); c.update('none');
+                }}
+            }});
+        }}, 60);
     }}
     </script>
     {taiwan_panel_script}
