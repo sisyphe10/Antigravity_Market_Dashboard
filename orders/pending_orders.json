@@ -829,9 +829,17 @@
           "weight": 2,
           "baseWeight": 2,
           "reason": ""
+        },
+        {
+          "sector": "에너지",
+          "code": "010950",
+          "name": "S-Oil",
+          "weight": 2,
+          "baseWeight": 0,
+          "reason": "중동 지역 내 정유 CAPA의 장기적인 훼손으로 유가 가격과 무관하게 정유 CAPA의 희소성이 높아지는 중, 연간 호실적 예상"
         }
       ],
-      "savedAt": "2026-07-16T04:40:03.274Z"
+      "savedAt": "2026-07-16T04:44:37.710Z"
     },
     "NH 다이내믹 밸류": {
       "targets": [
@@ -944,9 +952,17 @@
           "weight": 2,
           "baseWeight": 2,
           "reason": ""
+        },
+        {
+          "sector": "에너지",
+          "code": "010950",
+          "name": "S-Oil",
+          "weight": 2,
+          "baseWeight": 0,
+          "reason": "중동 지역 내 정유 CAPA의 장기적인 훼손으로 유가 가격과 무관하게 정유 CAPA의 희소성이 높아지는 중, 연간 호실적 예상"
         }
       ],
-      "savedAt": "2026-07-16T04:40:03.274Z"
+      "savedAt": "2026-07-16T04:44:37.710Z"
     },
     "DB 개방형": {
       "targets": [
@@ -1059,9 +1075,17 @@
           "weight": 2,
           "baseWeight": 2,
           "reason": ""
+        },
+        {
+          "sector": "에너지",
+          "code": "010950",
+          "name": "S-Oil",
+          "weight": 2,
+          "baseWeight": 0,
+          "reason": "중동 지역 내 정유 CAPA의 장기적인 훼손으로 유가 가격과 무관하게 정유 CAPA의 희소성이 높아지는 중, 연간 호실적 예상"
         }
       ],
-      "savedAt": "2026-07-16T04:40:03.274Z"
+      "savedAt": "2026-07-16T04:44:37.710Z"
     },
     "한투 지속형": {
       "targets": [
@@ -1174,9 +1198,17 @@
           "weight": 0,
           "baseWeight": 0,
           "reason": ""
+        },
+        {
+          "sector": "에너지",
+          "code": "010950",
+          "name": "S-Oil",
+          "weight": 2,
+          "baseWeight": 0,
+          "reason": "중동 지역 내 정유 CAPA의 장기적인 훼손으로 유가 가격과 무관하게 정유 CAPA의 희소성이 높아지는 중, 연간 호실적 예상"
         }
       ],
-      "savedAt": "2026-07-16T04:40:03.274Z"
+      "savedAt": "2026-07-16T04:44:37.710Z"
     },
     "NH 목표전환형 5호": {
       "targets": [
@@ -1273,9 +1305,17 @@
           "weight": 2,
           "baseWeight": 2,
           "reason": ""
+        },
+        {
+          "sector": "에너지",
+          "code": "010950",
+          "name": "S-Oil",
+          "weight": 2,
+          "baseWeight": 0,
+          "reason": "중동 지역 내 정유 CAPA의 장기적인 훼손으로 유가 가격과 무관하게 정유 CAPA의 희소성이 높아지는 중, 연간 호실적 예상"
         }
       ],
-      "savedAt": "2026-07-16T04:40:03.274Z"
+      "savedAt": "2026-07-16T04:44:37.710Z"
     },
     "DB 목표전환형 6차": {
       "targets": [
@@ -1372,9 +1412,17 @@
           "weight": 2,
           "baseWeight": 2,
           "reason": ""
+        },
+        {
+          "sector": "에너지",
+          "code": "010950",
+          "name": "S-Oil",
+          "weight": 2,
+          "baseWeight": 0,
+          "reason": "중동 지역 내 정유 CAPA의 장기적인 훼손으로 유가 가격과 무관하게 정유 CAPA의 희소성이 높아지는 중, 연간 호실적 예상"
         }
       ],
-      "savedAt": "2026-07-16T04:40:03.274Z"
+      "savedAt": "2026-07-16T04:44:37.710Z"
     },
     "한투 성과모집형 1차": {
       "targets": [
@@ -1446,10 +1494,18 @@
           "name": "올릭스",
           "weight": 2,
           "baseWeight": 0,
-          "reason": ""
+          "reason": "기관 투자자 및 애널리스트 대상 R&D 데이에서 긍정적인 소식 전달, 바이오 섹터 내에서 상대적으로 강세인 주가로 신규 편입"
+        },
+        {
+          "sector": "에너지",
+          "code": "010950",
+          "name": "S-Oil",
+          "weight": 2,
+          "baseWeight": 0,
+          "reason": "중동 지역 내 정유 CAPA의 장기적인 훼손으로 유가 가격과 무관하게 정유 CAPA의 희소성이 높아지는 중, 연간 호실적 예상"
         }
       ],
-      "savedAt": "2026-07-16T04:40:03.274Z"
+      "savedAt": "2026-07-16T04:44:37.710Z"
     }
   }
 }
