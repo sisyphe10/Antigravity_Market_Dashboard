@@ -20,7 +20,10 @@ NAV_END = '</div></div></nav>'
 # 2026-07-16 정렬 확정: 좌 Watchlist·Market·Invest·Memento·Ledger / 우(margin-left:auto) Wiki·Architecture
 WATCHLIST_ITEM = '<div class="topnav-item"><a href="/watchlist/" class="topnav-tab">Watchlist</a></div>'
 WIKI_ITEM = '<div class="topnav-item right-group"><a href="/wiki/" class="topnav-tab">Wiki</a></div>'
-INVEST_ITEM = '<div class="topnav-item"><a href="/sisyphe/journal.html" class="topnav-tab">Invest</a></div>'
+# 2026-07-16 사용자 지시: Invest → Journal 로 개명 + Weekly 별도 탭(딥링크 #weekly)
+JOURNAL_ITEM = '<div class="topnav-item"><a href="/sisyphe/journal.html" class="topnav-tab">Journal</a></div>'
+WEEKLY_ITEM = '<div class="topnav-item"><a href="/sisyphe/journal.html#weekly" class="topnav-tab">Weekly</a></div>'
+OLD_INVEST_ITEM = '<div class="topnav-item"><a href="/sisyphe/journal.html" class="topnav-tab">Invest</a></div>'
 MEMENTO_ITEM = '<div class="topnav-item"><a href="/sisyphe/memento.html" class="topnav-tab">Memento</a></div>'
 LEDGER_ITEM = '<div class="topnav-item"><a href="/sisyphe/dashboard.html" class="topnav-tab">Ledger</a></div>'
 ARCH_ITEM_PLAIN = '<div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div>'
@@ -44,15 +47,26 @@ def sisyphe_aoe_nav(active):
         '        <div class="topnav-tabs">\n'
         '            <a href="/watchlist/" class="topnav-tab">Watchlist</a>\n'
         '            <a href="/market.html" class="topnav-tab">Market</a>\n'
-        '            <a href="/sisyphe/journal.html" class="%s">Invest</a>\n'
+        '            <a href="/sisyphe/journal.html" class="%s">Journal</a>\n'
+        '            <a href="/sisyphe/journal.html#weekly" class="topnav-tab">Weekly</a>\n'
         '            <a href="/sisyphe/memento.html" class="%s">Memento</a>\n'
         '            <a href="/sisyphe/dashboard.html" class="%s">Ledger</a>\n'
         '            <a href="/wiki/" class="topnav-tab" style="margin-left:auto">Wiki</a>\n'
         '            <a href="/architecture.html" class="topnav-tab">Architecture</a>\n'
         '        </div>\n    </div>\n</nav>'
-    ) % (cls('invest'), cls('memento'), cls('ledger'))
+    ) % (cls('journal'), cls('memento'), cls('ledger'))
 
-ACTIVE_OF = {'journal.html': 'invest', 'dashboard.html': 'ledger', 'memento.html': 'memento'}
+ACTIVE_OF = {'journal.html': 'journal', 'dashboard.html': 'ledger', 'memento.html': 'memento'}
+# journal 페이지: 해시(#weekly)에 따라 nav 액티브를 Journal↔Weekly 로 전환 + 페이지 서브탭 동기화
+HASH_ACTIVE_JS = (
+    '<script id="aoe-nav-hash-active">document.addEventListener("DOMContentLoaded",function(){'
+    'var nav=document.querySelector("nav.topnav");if(!nav)return;'
+    'var j=nav.querySelector(\'a[href="/sisyphe/journal.html"]\');'
+    'var w=nav.querySelector(\'a[href="/sisyphe/journal.html#weekly"]\');'
+    'function u(sync){var wk=location.hash==="#weekly";'
+    'if(j)j.classList.toggle("active",!wk);if(w)w.classList.toggle("active",wk);'
+    'if(sync&&typeof switchTab==="function")switchTab(wk?"weekly":"journal");}'
+    'window.addEventListener("hashchange",function(){u(true)});u(false);});</script>')
 # 1안(2026-07-16 사용자 확정): 사이드바 전면 제거 — journal(서브내비=본문 tab-bar)·dashboard 공통.
 # 본문 좌측 오프셋도 해제. (구 JOURNAL_OFFSET·CORNER_BRAND 는 사이드바와 함께 폐기)
 NO_SIDEBAR = '<style id="aoe-nosidebar">.sidebar{display:none}.has-sidebar{padding-left:24px !important}</style>'
@@ -127,7 +141,8 @@ for f in glob.glob(os.path.join(REL, "*.html")):
     n = item_pat.sub("", s)
     n = link_pat.sub("", n)
     # 정규화: 기존 주입 fragment·구 Sisyphe 잔재 제거(clean 입력이면 무동작)
-    for frag in (WATCHLIST_ITEM, WIKI_ITEM, OLD_WIKI_ITEM, INVEST_ITEM, OLD_INVEST_ITEM_P1,
+    for frag in (WATCHLIST_ITEM, WIKI_ITEM, OLD_WIKI_ITEM, JOURNAL_ITEM, WEEKLY_ITEM,
+                 OLD_INVEST_ITEM, OLD_INVEST_ITEM_P1,
                  MEMENTO_ITEM, LEDGER_ITEM, OLD_SISYPHE_ITEM, OLD_SISYPHE_DROPDOWN):
         n = n.replace(frag, "")
     n = personal_css_pat.sub("", n)
@@ -150,7 +165,7 @@ for f in glob.glob(os.path.join(REL, "*.html")):
     # (정규화 후 남은 기존 아이템 = Watchlist·Market 뿐이므로 append 순서가 곧 좌측 순서)
     # 가드: 이미 Memento 마크업이 있으면 재주입 금지(정규화가 지웠으므로 통상 미존재).
     if NAV_END in n and 'topnav-tab">Memento' not in n:
-        n = n.replace(NAV_END, INVEST_ITEM + MEMENTO_ITEM + LEDGER_ITEM + WIKI_ITEM + arch_html + NAV_END, 1)
+        n = n.replace(NAV_END, JOURNAL_ITEM + WEEKLY_ITEM + MEMENTO_ITEM + LEDGER_ITEM + WIKI_ITEM + arch_html + NAV_END, 1)
     if 'id="aoe-personal-nav"' not in n:
         r = inject_before_head(n, AOE_PERSONAL_CSS)
         if r is not None:
@@ -163,16 +178,16 @@ if os.path.exists(wrap):
 idx = os.path.join(REL, "index.html")
 if os.path.exists(idx):
     t = open(idx, encoding="utf-8").read()
-    for marker, what in ((WATCHLIST_ITEM, 'Watchlist'), (WIKI_ITEM, 'Wiki(우측)'), (INVEST_ITEM, 'Invest'),
-                         (MEMENTO_ITEM, 'Memento'), (LEDGER_ITEM, 'Ledger')):
+    for marker, what in ((WATCHLIST_ITEM, 'Watchlist'), (WIKI_ITEM, 'Wiki(우측)'), (JOURNAL_ITEM, 'Journal'),
+                         (WEEKLY_ITEM, 'Weekly'), (MEMENTO_ITEM, 'Memento'), (LEDGER_ITEM, 'Ledger')):
         if marker not in t:
             fail("index.html: %s 탭 주입 실패" % what)
-    # 순서: Watchlist < Market < Invest < Memento < Ledger < Wiki(right-group) < Architecture
+    # 순서: Watchlist < Market < Journal < Weekly < Memento < Ledger < Wiki(right-group) < Architecture
     # ★'right-group' 단독 검색 금지 — head 의 aoe-personal-nav CSS(.topnav-item.right-group)가
     #   nav 마크업보다 먼저 매칭돼 순서 검증이 항상 실패(2026-07-16 게시 동결 사고). 마크업 전용
     #   마커 'topnav-item right-group'(class 속성, 공백 구분)만 사용.
-    pos = [t.find('>Watchlist<'), t.find('>Market<'), t.find('>Invest<'), t.find('>Memento<'),
-           t.find('>Ledger<'), t.find('topnav-item right-group'), t.rfind('>Architecture<')]
+    pos = [t.find('>Watchlist<'), t.find('>Market<'), t.find('>Journal<'), t.find('>Weekly<'),
+           t.find('>Memento<'), t.find('>Ledger<'), t.find('topnav-item right-group'), t.rfind('>Architecture<')]
     if -1 in pos or pos != sorted(pos):
         fail("index.html: 탭 순서 오류 %s" % pos)
     if 'sisyphe-tab' in t or 'topnav-sub">가계부' in t:
@@ -216,6 +231,8 @@ for name in SISYPHE_PAGES:
     s = r
     if name in ("journal.html", "dashboard.html"):
         s = inject_before_head(s, NO_SIDEBAR)
+    if name == "journal.html":
+        s = inject_before_head(s, HASH_ACTIVE_JS)
 
     open(p, "w", encoding="utf-8").write(s)
 
@@ -225,7 +242,7 @@ for name in SISYPHE_PAGES:
         fail("sisyphe/%s: 통일 CSS 검증 실패" % name)
     if 'topnav-brand">AoE' not in fin:
         fail("sisyphe/%s: AoE nav 교체 검증 실패" % name)
-    active_label = {'invest': 'Invest', 'memento': 'Memento', 'ledger': 'Ledger'}[ACTIVE_OF[name]]
+    active_label = {'journal': 'Journal', 'memento': 'Memento', 'ledger': 'Ledger'}[ACTIVE_OF[name]]
     chk = fin.replace(' style="margin-left:auto"', '')
     if ('class="topnav-tab active">%s</a>' % active_label) not in chk:
         fail("sisyphe/%s: 활성 탭(%s) 검증 실패" % (name, active_label))
