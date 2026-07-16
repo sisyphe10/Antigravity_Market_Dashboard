@@ -2812,14 +2812,19 @@ def _build_combined_chart_section():
                     legendEl.innerHTML = legendHTML;
                 }
 
-                var _yMaxAbs = 0, _y1MaxAbs = 0;
+                var _yMaxAbs = 0, _y1MaxAbs = 0, _yMinPos = Infinity, _y1MinPos = Infinity;
                 datasets.forEach(function(ds) {
                     if (ds._skipEndLabel) return;
                     ds.data.forEach(function(v) {
                         if (v === null || v === undefined) return;
                         var a = Math.abs(v);
-                        if (ds.yAxisID === 'y1') { if (a > _y1MaxAbs) _y1MaxAbs = a; }
-                        else if (a > _yMaxAbs) _yMaxAbs = a;
+                        if (ds.yAxisID === 'y1') {
+                            if (a > _y1MaxAbs) _y1MaxAbs = a;
+                            if (v > 0 && v < _y1MinPos) _y1MinPos = v;
+                        } else {
+                            if (a > _yMaxAbs) _yMaxAbs = a;
+                            if (v > 0 && v < _yMinPos) _yMinPos = v;
+                        }
                     });
                 });
                 var yJo = yEok && _yMaxAbs >= 10000, y1Jo = y1Eok && _y1MaxAbs >= 10000;
@@ -2839,13 +2844,24 @@ def _build_combined_chart_section():
                 // 자릿수 밴드는 grace 포함 축 경계가 아니라 데이터 최대값으로 판정 (96.9 + grace = 104 -> 정수 오판 방지)
                 window._cmbAxisMaxAbs = { y: _yMaxAbs, y1: _y1MaxAbs };
 
+                function cmbLogPad(minPos, maxV) {
+                    if (!(minPos > 0) || !(maxV > 0) || minPos === Infinity) return null;
+                    var llo = Math.log10(minPos), lhi = Math.log10(maxV);
+                    var pad = (lhi - llo) * (0.05 / 0.90) || 0.02;
+                    return { min: Math.pow(10, llo - pad), max: Math.pow(10, lhi + pad) };
+                }
                 var yType = (mode === 'pct') ? 'linear' : (window.cmbLogOn === false ? 'linear' : 'logarithmic');
+                var yLogPad = yType === 'logarithmic' ? cmbLogPad(_yMinPos, _yMaxAbs) : null;
+                var y1Type = window.cmbLogOn === false ? 'linear' : 'logarithmic';
+                var y1LogPad = y1Type === 'logarithmic' ? cmbLogPad(_y1MinPos, _y1MaxAbs) : null;
                 var scalesConfig = {
                     x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
                     y: {
                         type: yType,
                         position: 'left',
                         grace: '8%',
+                        min: yLogPad ? yLogPad.min : undefined,
+                        max: yLogPad ? yLogPad.max : undefined,
                         afterBuildTicks: cmbEnsureBoundTicks,
                         ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return mode === 'pct' ? v + '%' : cmbTickFmt(v, this, yEok && yJo); }, font: { size: 15 }, color: '#000' },
                         grid: { color: '#eee' },
@@ -2854,9 +2870,11 @@ def _build_combined_chart_section():
                 };
                 if (mode === 'raw2' && datasets.some(function(ds){ return ds.yAxisID === 'y1'; })) {
                     scalesConfig.y1 = {
-                        type: (window.cmbLogOn === false ? 'linear' : 'logarithmic'),
+                        type: y1Type,
                         position: 'right',
                         grace: '8%',
+                        min: y1LogPad ? y1LogPad.min : undefined,
+                        max: y1LogPad ? y1LogPad.max : undefined,
                         afterBuildTicks: cmbEnsureBoundTicks,
                         ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return cmbTickFmt(v, this, y1Eok && y1Jo); }, font: { size: 15 }, color: '#000' },
                         grid: { drawOnChartArea: false },
