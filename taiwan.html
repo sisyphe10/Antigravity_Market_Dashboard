@@ -67,11 +67,11 @@
 .sidebar-link.active { background: transparent; color: #2d7a3a; border-color: #2d7a3a; }
 /* Override per-page body styles so all sidebar pages align identically next to the sidebar */
 .has-sidebar { padding-left: 224px !important; padding-right: 24px !important; padding-top: 0 !important; padding-bottom: 24px !important; max-width: none !important; margin: 0 !important; }
-.has-sidebar .topnav { background: #101418; border-bottom: 2px solid #2d7a3a; position: sticky; top: 0; z-index: 100; }
+.has-sidebar .topnav { margin-left: -224px; margin-right: -24px; }
 @media (max-width: 900px) {
     .sidebar { display: none; }
     .has-sidebar { padding-left: 24px !important; }
-    .has-sidebar .topnav { background: #101418; border-bottom: 2px solid #2d7a3a; position: sticky; top: 0; z-index: 100; }
+    .has-sidebar .topnav { margin-left: -24px; margin-right: -24px; }
 }
 
     </style>
