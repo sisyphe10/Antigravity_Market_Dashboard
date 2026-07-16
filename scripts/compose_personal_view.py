@@ -55,7 +55,7 @@ def sisyphe_aoe_nav(active):
 ACTIVE_OF = {'journal.html': 'invest', 'dashboard.html': 'ledger', 'memento.html': 'memento'}
 # 1안(2026-07-16 사용자 확정): 사이드바 전면 제거 — journal(서브내비=본문 tab-bar)·dashboard 공통.
 # 본문 좌측 오프셋도 해제. (구 JOURNAL_OFFSET·CORNER_BRAND 는 사이드바와 함께 폐기)
-NO_SIDEBAR = '<style id="aoe-nosidebar">.sidebar{display:none}.has-sidebar{padding-left:24px}</style>'
+NO_SIDEBAR = '<style id="aoe-nosidebar">.sidebar{display:none}.has-sidebar{padding-left:24px !important}</style>'
 JOURNAL_OFFSET = (
     '<style id="aoe-journal-offset">'
     'nav.topnav .topnav-inner{max-width:none;padding-left:228px;padding-right:24px}'
