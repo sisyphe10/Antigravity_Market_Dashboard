@@ -164,25 +164,26 @@ def get_portfolio_holdings():
     """portfolio_data.json에서 일반형 / 목표전환형 그룹 추출
 
     portfolio_data.json은 create_portfolio_tables.py가 15:35 자동 업데이트 사이클에서
-    당일 종가 기준으로 미리 갱신해 둠. 키는 'PORTFOLIO_GROUPS'의 combined 명을 사용:
-    - 일반형: '삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형'
-    - 목표전환형: 'NH 목표전환형 N호 / DB 목표전환형 M차' (운용 중일 때만 존재)
+    당일 종가 기준으로 미리 갱신해 둠. 키는 'PORTFOLIO_GROUPS'의 combined 명을 사용.
+
+    2026-07-16 통합: 그룹 내 전 상품 포트 수렴(일반형 4종·전환형 전체) → 그룹당 리스트로
+    반환하고 전송부가 대표 1장씩만 보낸다. 반환: (generals, targets) — 각 [(key, stocks)].
+    generals[0]=결합 일반형(트루밸류 대표), 이후 단독 일반형(한투 지속형 등).
     """
     json_path = 'portfolio_data.json'
     if not os.path.exists(json_path):
         logging.warning(f"{json_path} not found — holdings 섹션 생략")
-        return None, []
+        return [], []
     try:
         with open(json_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
     except Exception as e:
         logging.warning(f"{json_path} 로드 실패: {e}")
-        return None, []
+        return [], []
 
-    general = None
+    generals = []
     targets = []
-    # 레지스트리 기준 판별: 한투 '성과모집형'(이름에 목표전환형 미포함) + 단독 일반형('한투 지속형')도
-    # 각각 별도 PNG 섹션으로 포함. '목표전환형' substring은 레거시 페어 키 호환용으로 유지.
+    # 레지스트리 기준 판별. '목표전환형' substring은 레거시 페어 키 호환용으로 유지.
     target_keys = wrap_config.target_display_names()
     standalone_keys = {sg['display'] for sg in wrap_config.standalone_general_tabs()}
     for key, stocks in data.items():
@@ -190,12 +191,14 @@ def get_portfolio_holdings():
             continue
         if not isinstance(stocks, list) or not stocks:
             continue
-        if key in target_keys or key in standalone_keys or '목표전환형' in key:
+        if key in standalone_keys:
+            generals.append((key, stocks))
+        elif key in target_keys or '목표전환형' in key:
             targets.append((key, stocks))
         elif '트루밸류' in key:
-            general = (key, stocks)
+            generals.insert(0, (key, stocks))  # 결합 일반형 = 그룹 대표(맨 앞)
 
-    return general, targets
+    return generals, targets
 
 def _color_for(text):
     """양수(+) 빨강, 음수(-) 파랑, 그 외 검정"""
@@ -349,7 +352,7 @@ async def send_report(no_send=False):
     returns_data = get_latest_returns()
 
     logging.info("3. 일반형/목표전환형 종목 구성 로드...")
-    general, targets = get_portfolio_holdings()
+    generals, targets = get_portfolio_holdings()
 
     logging.info("4. 메시지 포맷팅...")
     message = format_message(date, nav_data, returns_data)
@@ -364,20 +367,27 @@ async def send_report(no_send=False):
         bot = Bot(token=token)
         await bot.send_message(chat_id=chat_id, text=message, parse_mode='HTML')
 
-        # 종목 구성 PNG 표 전송 (일반형 + 운용 중인 목표전환형 각각 — 활성 2개 이상도 모두)
-        png_sections = [('일반형 랩', general)]
-        for tkey, tstocks in targets:
-            png_sections.append((tkey, (tkey, tstocks)))
-        for section_title, holdings in png_sections:
-            if not holdings:
+        # 종목 구성 PNG 표 전송 — 그룹당 대표 1장 (2026-07-16 통합: 일반형/전환형 각 포트 수렴).
+        # 안전가드: 그룹 내 구성(종목·비중 0.1%p)이 대표와 다른 상품이 있으면 캡션에 ⚠️ 표기.
+        def _sig(stocks):
+            return sorted((s.get('name'), round(s.get('weight') or 0, 1)) for s in stocks)
+
+        for section_title, members in (('일반형 랩', generals), ('목표전환형 랩', targets)):
+            if not members:
                 continue
-            _, stocks = holdings
-            img = render_holdings_png(section_title, stocks)
+            rep_key, rep_stocks = members[0]
+            rep_sig = _sig(rep_stocks)
+            diverged = [k for k, st in members[1:] if _sig(st) != rep_sig]
+            caption = f"■ {section_title}"
+            if diverged:
+                caption += f"\n⚠️ 대표({rep_key})와 구성 상이: {', '.join(diverged)}"
+                logging.warning(f"{section_title} 구성 불일치: {diverged}")
+            img = render_holdings_png(section_title, rep_stocks)
             buf = BytesIO()
             img.save(buf, format='PNG')
             buf.seek(0)
-            await bot.send_photo(chat_id=chat_id, photo=buf, caption=f"■ {section_title}")
-            logging.info(f"{section_title} 사진 전송 완료 ({img.size[0]}x{img.size[1]}px)")
+            await bot.send_photo(chat_id=chat_id, photo=buf, caption=caption)
+            logging.info(f"{section_title} 사진 전송 완료 ({img.size[0]}x{img.size[1]}px, 대표={rep_key})")
 
     logging.info("완료!")
     print(f"\n전송된 메시지:\n{message}")
