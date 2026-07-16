@@ -518,28 +518,43 @@ def format_update_summary(portfolio_data):
     # 포트폴리오 단위 누적수익률(전일까지 확정 기준가 기반) — create_portfolio_tables가 계산.
     meta = portfolio_data.get('_portfolio_meta') or {}
 
+    # 2026-07-16 통합: 그룹 내 전 상품 포트 수렴 → 구성(종목·D-1 비중)이 같은 상품끼리
+    # 한 블록으로 묶어 종목 기여 리스트는 1회만 표시. 상품별 YTD/누적 숫자는 줄로 보존.
+    # 구성이 어긋난 상품은 자동으로 별도 블록 (수렴 전/신규 출시 대응).
+    def _sig(stocks):
+        return tuple(sorted((s['name'], round(_disp_w(s) or 0, 1))
+                            for s in stocks if (_disp_w(s) or 0) > 0))
+
+    sig_groups = {}  # sig -> [portfolio_name...] (portfolio_data 순서 유지)
     for portfolio_name, stocks in portfolio_data.items():
         if portfolio_name.startswith('_'):
             continue
+        sig_groups.setdefault(_sig(stocks), []).append(portfolio_name)
+
+    for sig, pnames in sig_groups.items():
+        rep_stocks = portfolio_data[pnames[0]]
         # D-1 보유분만 표시 (당일 신규 편입은 다음 거래일부터)
-        held = [s for s in stocks if (_disp_w(s) or 0) > 0]
-        # 포트폴리오 가중 평균 수익률
+        held = [s for s in rep_stocks if (_disp_w(s) or 0) > 0]
+        # 포트폴리오 가중 평균 수익률 (구성 동일 → 그룹 공통)
         # 비중 합계가 100% 미만이면 나머지는 현금(수익률 0%)으로 처리
         weighted_return = sum(
             _disp_w(s) * (s['today_return'] or 0)
             for s in held
         ) / 100
 
-        # YTD/누적 = 전일까지 확정 기준가 수익률 × 오늘 실시간 가중등락 (복리 결합).
-        # 오늘 개시 펀드는 nav_*_d1=None → 0으로 보고 오늘 등락만 반영. (목표전환형은 YTD==누적)
-        pmeta = meta.get(portfolio_name) or {}
-        _ytd = pmeta.get('nav_ytd_d1'); _ytd = 0.0 if _ytd is None else _ytd
-        _cum = pmeta.get('nav_cum_d1'); _cum = 0.0 if _cum is None else _cum
-        ytd_return = ((1 + _ytd / 100) * (1 + weighted_return / 100) - 1) * 100
-        cum_return = ((1 + _cum / 100) * (1 + weighted_return / 100) - 1) * 100
+        title = '전체 포트폴리오' if len(sig_groups) == 1 else ' · '.join(pnames)
+        lines.append(f"<b><u>[{title}]</u></b>")
+        lines.append(f"<b><u>오늘: {weighted_return:+.1f}%</u></b>")
 
-        lines.append(f"<b><u>[{portfolio_name}]</u></b>")
-        lines.append(f"<b><u>오늘: {weighted_return:+.1f}%  YTD: {ytd_return:+.1f}%  누적: {cum_return:+.1f}%</u></b>")
+        # 상품별 YTD/누적 = 전일까지 확정 기준가 수익률 × 오늘 실시간 가중등락 (복리 결합).
+        # 오늘 개시 펀드는 nav_*_d1=None → 0으로 보고 오늘 등락만 반영. (목표전환형은 YTD==누적)
+        for portfolio_name in pnames:
+            pmeta = meta.get(portfolio_name) or {}
+            _ytd = pmeta.get('nav_ytd_d1'); _ytd = 0.0 if _ytd is None else _ytd
+            _cum = pmeta.get('nav_cum_d1'); _cum = 0.0 if _cum is None else _cum
+            ytd_return = ((1 + _ytd / 100) * (1 + weighted_return / 100) - 1) * 100
+            cum_return = ((1 + _cum / 100) * (1 + weighted_return / 100) - 1) * 100
+            lines.append(f"<b>{portfolio_name}</b>  YTD {ytd_return:+.1f}%  누적 {cum_return:+.1f}%")
 
         # 보유 종목 전체 — 기여도(contribution) 내림차순. +기여/−기여 그룹별 구분선·소계.
         ranked = sorted(

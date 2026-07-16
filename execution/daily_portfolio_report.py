@@ -49,6 +49,7 @@ COL_WIDTHS = {
     '비중': 75 * SCALE,
     '당일': 95 * SCALE,
     '기여': 70 * SCALE,
+    'YTD': 95 * SCALE,
     '누적': 105 * SCALE,
 }
 ROW_HEIGHT = 30 * SCALE
@@ -257,6 +258,7 @@ def render_holdings_png(title, stocks):
         name = s.get('name', '?')
         weight = s.get('weight')
         today_ret = s.get('today_return')
+        ytd_ret = s.get('ytd_return')
         cum_ret = s.get('cumulative_return')
         contrib = (weight / 100) * today_ret if (weight is not None and today_ret is not None) else None
 
@@ -275,6 +277,7 @@ def render_holdings_png(title, stocks):
 
         today_str = f"{today_ret:+.1f}%" if today_ret is not None else "-"
         contrib_str = f"{contrib:+.1f}" if contrib is not None else "-"
+        ytd_str = f"{ytd_ret:+.1f}%" if ytd_ret is not None else "-"
         cum_str = f"{cum_ret:+.1f}%" if cum_ret is not None else "-"
 
         cells = [
@@ -283,6 +286,7 @@ def render_holdings_png(title, stocks):
             (f"{weight:.1f}%" if weight is not None else "-", TEXT_COLOR),
             (today_str, _color_for(today_str)),
             (contrib_str, _color_for(contrib_str)),
+            (ytd_str, _color_for(ytd_str)),
             (cum_str, _color_for(cum_str)),
         ]
 
@@ -297,26 +301,10 @@ def render_holdings_png(title, stocks):
     return img
 
 
-def _group_reps():
-    """일반형/목표전환형 그룹 대표 상품 (레지스트리 정렬순 첫 상품, 일반형은 group_use 우선).
-
-    2026-07-16 통합: 그룹 내 전 상품 포트 수렴 → 텍스트(기준가·수익률)는 대표만 표기.
-    """
-    prods = wrap_config._sorted_active(wrap_config.active_products())
-    gen = tgt = None
-    for p in prods:
-        if p.ptype == 'general' and gen is None:
-            key = (wrap_config.group_use(p.group) or p.nav_key) if p.group else p.nav_key
-            gen = next((x for x in prods if x.nav_key == key), p)
-        elif p.ptype == 'target' and tgt is None:
-            tgt = p
-    return gen, tgt
-
-
 def format_message(date, nav_data, returns_data):
     """텔레그램 텍스트 메시지 포맷 (HTML) — 헤더 + 기준가 + 수익률만 (종목 표는 별도 사진 전송)
 
-    2026-07-16 통합: 기준가·수익률 모두 그룹 대표만 — 일반형 랩 / 목표전환형 랩 (+벤치마크).
+    전 상품 개별 표기. 수익률 순서(2026-07-16): KOSPI → KOSDAQ → 일반형들 → 목표전환형들.
     """
     LINE = "━━━━━━━━━━━━━━━"
 
@@ -327,24 +315,22 @@ def format_message(date, nav_data, returns_data):
 
     msg = f"<b>📊 포트폴리오 리포트</b>\n{date_str}\n"
 
-    gen, tgt = _group_reps()
-    reps = [('일반형 랩', p) for p in (gen,) if p] + [('목표전환형 랩', p) for p in (tgt,) if p]
-
-    # 기준가 — 그룹 대표만
+    # 기준가 — 전 상품 개별
     msg += f"{LINE}\n<b>💰 기준가</b>\n{LINE}\n"
-    for label, p in reps:
-        if p.report in nav_data:
-            msg += f"<b>{label}  {nav_data[p.report]:,.2f}</b>\n"
+    for name, value in nav_data.items():
+        msg += f"<b>{name}  {value:,.2f}</b>\n"
 
-    # 수익률 — 그룹 대표 + 벤치마크
+    # 수익률 — 전 상품 개별, 벤치마크 선두 정렬
     msg += f"{LINE}\n<b>📈 수익률</b>\n{LINE}\n"
-    display_names = {p.nav_key: label for label, p in reps}
-    products = [p.nav_key for _, p in reps]
-    for b in wrap_config.BENCHMARKS:
-        products.append(b['nav_key'])
-        display_names[b['nav_key']] = b['display']
+    display_names = wrap_config.report_display_names()  # 단일 출처: execution/wrap_config.py
+    all_products = wrap_config.report_return_products()  # 단일 출처: execution/wrap_config.py
+    bench = [b['nav_key'] for b in wrap_config.BENCHMARKS]
+    tkeys = wrap_config.target_nav_keys()
+    ordered = ([p for p in bench if p in all_products]
+               + [p for p in all_products if p not in bench and p not in tkeys]
+               + [p for p in all_products if p in tkeys])
     periods = ['1D', '1W', '1M', '3M', '6M', '1Y', 'YTD']
-    for product in products:
+    for product in ordered:
         if product in returns_data:
             returns = returns_data[product]
             # N/A가 아닌 항목만 표시

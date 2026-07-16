@@ -633,6 +633,22 @@ def create_portfolio_tables():
                     except:
                         pass
 
+                # YTD: 전년 말 종가 대비 등락률. 올해 상장 등 전년 데이터 없으면 올해 첫 종가 대비.
+                ytd_return = None
+                if price_df is not None and not price_df.empty and current_price is not None:
+                    try:
+                        year_start = pd.Timestamp(pd.Timestamp.now(tz='Asia/Seoul').year, 1, 1)
+                        prev_year = price_df[price_df.index < year_start]
+                        if not prev_year.empty:
+                            ytd_base = float(prev_year.iloc[-1]['Close'])
+                        else:
+                            cur_year = price_df[price_df.index >= year_start]
+                            ytd_base = float(cur_year.iloc[0]['Close']) if len(cur_year) > 1 else None
+                        if ytd_base and ytd_base > 0:
+                            ytd_return = (current_price / ytd_base - 1) * 100
+                    except Exception:
+                        pass
+
                 # RSI = 편입 이후 종목 수익률 − 동일 기간 시장 지수 수익률 (%p). 양수 = 시장 대비 초과.
                 # 기준점 = 편입일(마지막 전량매도 이후 첫 비중>0 날짜) 당일 종가(on-or-before, 누적수익률과 동일).
                 # 종목·지수 모두 같은 편입일부터 현재까지 측정 → 동일 종목도 포트폴리오별 편입일 다르면 RSI 다름.
@@ -665,6 +681,7 @@ def create_portfolio_tables():
                     'weight_prev': weight_prev,
                     'today_return': today_return,
                     'contribution': contribution,
+                    'ytd_return': ytd_return,
                     'cumulative_return': cumulative_return,
                     'current_price': current_price,
                     'ath_price': ath_price,
