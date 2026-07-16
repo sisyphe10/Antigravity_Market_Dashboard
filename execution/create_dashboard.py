@@ -1621,6 +1621,8 @@ def _build_combined_chart_section():
                 {'display': 'KOSDAQ',             'csv': 'KOSDAQ',             'color': '#1976D2'},
                 {'display': 'KOSDAQ/USD',         'csv': 'KOSDAQ/USD',         'color': '#5294D8'},
                 {'display': 'KOSDAQ Market Cap',  'csv': 'KOSDAQ Market Cap',  'color': '#7BAEDF'},
+                # 변동성지수 (KIS 업종 U/0503 — fetch_deriv_daily.py, 2026-07-16 신설)
+                {'display': 'VKOSPI',             'csv': 'VKOSPI',             'color': '#DB2777'},
                 # 증시 유동성 (금투협 KOFIA → dataset.csv DEPOSIT). DATA 일반 차트로 개별 시리즈 표시.
                 {'display': '고객예탁금',         'csv': '고객예탁금',         'color': '#2E7D32'},
                 {'display': '신용잔고',           'csv': '신용잔고',           'color': '#C2185B'},
@@ -1642,6 +1644,22 @@ def _build_combined_chart_section():
                 {'display': '삼성생명 외국인',     'csv': '삼성생명 외국인 지분율',   'color': '#5C6BC0'},
                 {'display': 'SK스퀘어 외국인',     'csv': 'SK스퀘어 외국인 지분율',   'color': '#7986CB'},
                 {'display': '삼성물산 외국인',     'csv': '삼성물산 외국인 지분율',   'color': '#9FA8DA'},
+            ]},
+            {'label': 'DERIVATIVES KR', 'series': [
+                # 삼전·하이닉스 파생·수급 (fetch_deriv_daily.py — KRX 인증, 23:30 kodex 잡 편입, 2026-07-16)
+                # 단위: 괴리율=%, 미결제약정=계약, 금액·잔고·시총·AUM=억원. 공매도잔고는 T+2 공시.
+                {'display': '삼성전자 현선물 괴리율',   'csv': '삼성전자 현선물 괴리율',   'color': '#DC2626'},
+                {'display': '삼성전자 미결제약정',      'csv': '삼성전자 미결제약정',      'color': '#1B5E20'},
+                {'display': '삼성전자 미결제 금액',     'csv': '삼성전자 미결제약정 금액', 'color': '#0891B2'},
+                {'display': '삼성전자 공매도잔고',      'csv': '삼성전자 공매도잔고',      'color': '#1F4E9C'},
+                {'display': '삼성전자 시가총액',        'csv': '삼성전자 시가총액',        'color': '#A21CAF'},
+                {'display': '삼성전자 레버리지 ETF AUM', 'csv': '삼성전자 레버리지 ETF AUM', 'color': '#C2185B'},
+                {'display': '하이닉스 현선물 괴리율',   'csv': 'SK하이닉스 현선물 괴리율',   'color': '#9333EA'},
+                {'display': '하이닉스 미결제약정',      'csv': 'SK하이닉스 미결제약정',      'color': '#0072CE'},
+                {'display': '하이닉스 미결제 금액',     'csv': 'SK하이닉스 미결제약정 금액', 'color': '#713F12'},
+                {'display': '하이닉스 공매도잔고',      'csv': 'SK하이닉스 공매도잔고',      'color': '#00854A'},
+                {'display': '하이닉스 시가총액',        'csv': 'SK하이닉스 시가총액',        'color': '#64748B'},
+                {'display': '하이닉스 레버리지 ETF AUM', 'csv': 'SK하이닉스 레버리지 ETF AUM', 'color': '#0F766E'},
             ]},
             {'label': 'INDEX_US', 'series': [
                 {'display': 'S&P 500',            'csv': 'S&P 500',            'color': '#2E7D32'},
@@ -2368,7 +2386,7 @@ def _build_combined_chart_section():
                 });
                 var commonDates = Object.keys(dateSet).sort();
 
-                var mode = perSeries.length === 1 ? 'raw1' : (perSeries.length === 2 ? 'raw2' : 'pct');
+                var mode = window.cmbForceNorm ? 'pct' : (perSeries.length === 1 ? 'raw1' : (perSeries.length === 2 ? 'raw2' : 'pct'));
 
                 // 단일 선택(raw1)일 때만 MA/이격도 버튼 활성 (상태 값은 보존)
                 var maRow = document.getElementById('cmbMaRow');
@@ -2416,7 +2434,7 @@ def _build_combined_chart_section():
                         data: data,
                         borderColor: colorForIndex(clickIdx >= 0 ? clickIdx : 0),
                         backgroundColor: 'transparent',
-                        borderWidth: 2,
+                        borderWidth: 3,
                         borderJoinStyle: 'round',
                         borderCapStyle: 'round',
                         pointRadius: 0,
@@ -2491,7 +2509,7 @@ def _build_combined_chart_section():
                                     data: maVisible,
                                     borderColor: def.color,
                                     backgroundColor: 'transparent',
-                                    borderWidth: 2,
+                                    borderWidth: 2.5,
                                     borderJoinStyle: 'round',
                                     borderCapStyle: 'round',
                                     pointRadius: 0,
@@ -2514,7 +2532,7 @@ def _build_combined_chart_section():
                                     data: dispVisible,
                                     borderColor: def.color,
                                     backgroundColor: 'transparent',
-                                    borderWidth: 1.8,
+                                    borderWidth: 2.2,
                                     borderJoinStyle: 'round',
                                     borderCapStyle: 'round',
                                     pointRadius: 0,
@@ -2633,24 +2651,24 @@ def _build_combined_chart_section():
                     legendEl.innerHTML = legendHTML;
                 }
 
-                var yType = (mode === 'pct') ? 'linear' : 'logarithmic';
+                var yType = (mode === 'pct') ? 'linear' : (window.cmbLogOn === false ? 'linear' : 'logarithmic');
                 var scalesConfig = {
-                    x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 11 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
+                    x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 12 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
                     y: {
                         type: yType,
                         position: 'left',
                         grace: '8%',
-                        ticks: { callback: function(v){ return mode === 'pct' ? v + '%' : fmtNum(v); }, font: { size: 11 }, color: '#000' },
+                        ticks: { callback: function(v){ return mode === 'pct' ? v + '%' : fmtNum(v); }, font: { size: 12 }, color: '#000' },
                         grid: { color: '#eee' },
                         border: { color: '#000' }
                     }
                 };
                 if (mode === 'raw2' && datasets.some(function(ds){ return ds.yAxisID === 'y1'; })) {
                     scalesConfig.y1 = {
-                        type: 'logarithmic',
+                        type: (window.cmbLogOn === false ? 'linear' : 'logarithmic'),
                         position: 'right',
                         grace: '8%',
-                        ticks: { callback: function(v){ return fmtNum(v); }, font: { size: 11 }, color: '#000' },
+                        ticks: { callback: function(v){ return fmtNum(v); }, font: { size: 12 }, color: '#000' },
                         grid: { drawOnChartArea: false },
                         border: { color: '#000' }
                     };
@@ -2808,13 +2826,13 @@ def _build_combined_chart_section():
                                         } } }
                                     },
                                     scales: {
-                                        x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 11 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
+                                        x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 12 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
                                         y: {
                                             type: 'linear',
                                             position: 'left',
                                             grace: '8%',
                                             afterFit: function(scale) { if (mainYWidth > 0) scale.width = mainYWidth; },
-                                            ticks: { callback: function(v){ return fmtNum(v); }, font: { size: 11 }, color: '#000' },
+                                            ticks: { callback: function(v){ return fmtNum(v); }, font: { size: 12 }, color: '#000' },
                                             grid: { color: '#eee' },
                                             border: { color: '#000' }
                                         }
@@ -2917,6 +2935,8 @@ def _build_combined_chart_section():
                         <input type="text" id="cmbStartDate" value="{first_date}" onchange="formatDateInput(this);updateCmbChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                         <span style="color:#888;">~</span>
                         <input type="text" id="cmbEndDate" value="{last_date}" onchange="formatDateInput(this);updateCmbChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
+                        <button id="cmbLogBtn" class="cmb-ma-btn active" style="margin-left:14px;border-radius:20px;" onclick="window.cmbLogOn = (window.cmbLogOn === false); this.classList.toggle('active', window.cmbLogOn !== false); updateCmbChart();">Log</button>
+                        <button id="cmbNormBtn" class="cmb-ma-btn" style="border-radius:20px;" onclick="window.cmbForceNorm = !window.cmbForceNorm; this.classList.toggle('active', !!window.cmbForceNorm); updateCmbChart();">정규화</button>
                         <button onclick="downloadChartImage('cmbDynamicChart','AoE_Data','cmbChartLegend','cmbDispChart')" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
                         <button onclick="clearCmbSelections()" style="font-family:inherit;font-size:13px;font-weight:600;padding:4px 14px;background:#f3f4f6;color:#444;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;margin-left:8px;">전체 해제</button>
                     </div>
@@ -2938,7 +2958,7 @@ def _build_combined_chart_section():
                         <button id="cmbDispBtn3" class="cmb-ma-btn" onclick="toggleCmbDisp(3,this)">200</button>
                     </div>
                     <div id="cmbChartCard" style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
-                        <div style="position:relative;height:600px;">
+                        <div style="position:relative;height:562px;">
                             <canvas id="cmbDynamicChart"></canvas>
                         </div>
                         <div id="cmbDispPanel" style="display:none;position:relative;height:160px;margin-top:8px;">
@@ -3189,8 +3209,8 @@ def _build_wrap_chart_section(category_label):
                             tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%'; } } }
                         },
                         scales: {
-                            x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val) { var d = this.getLabelForValue(val); if (!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 11 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
-                            y: { ticks: { callback: function(v) { return v + '%'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' }, border: { color: '#000' } }
+                            x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val) { var d = this.getLabelForValue(val); if (!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 12 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
+                            y: { ticks: { callback: function(v) { return v + '%'; }, font: { size: 12 }, color: '#000' }, grid: { color: '#eee' }, border: { color: '#000' } }
                         }
                     }
                 });
@@ -3609,8 +3629,8 @@ def create_aum_table():
                         } }
                     },
                     scales: {
-                        x: { stacked: true, ticks: { font: { size: 11 }, color: '#000' }, grid: { display: false } },
-                        y: { stacked: true, ticks: { callback: function(v) { return v + '억'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' } }
+                        x: { stacked: true, ticks: { font: { size: 12 }, color: '#000' }, grid: { display: false } },
+                        y: { stacked: true, ticks: { callback: function(v) { return v + '억'; }, font: { size: 12 }, color: '#000' }, grid: { color: '#eee' } }
                     }
                 }
             });
@@ -3975,8 +3995,8 @@ def create_cumulative_aum_chart():
                         } }
                     },
                     scales: {
-                        x: { stacked: true, ticks: { font: { size: 11 }, color: '#000' }, grid: { display: false } },
-                        y: { stacked: true, ticks: { callback: function(v) { return v + '억'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' } }
+                        x: { stacked: true, ticks: { font: { size: 12 }, color: '#000' }, grid: { display: false } },
+                        y: { stacked: true, ticks: { callback: function(v) { return v + '억'; }, font: { size: 12 }, color: '#000' }, grid: { color: '#eee' } }
                     }
                 }
             });
@@ -6519,8 +6539,8 @@ def _build_landing_kofia_section():
                         tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + (ctx.parsed.y === null ? '-' : fmtJoEok(ctx.parsed.y)); } } }
                     },
                     scales: {
-                        x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val) { var d = this.getLabelForValue(val); if (!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 11 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
-                        y: { ticks: { callback: function(v) { return Math.round(v / 1e11) / 10 + '조원'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' }, border: { color: '#000' } }
+                        x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val) { var d = this.getLabelForValue(val); if (!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 12 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
+                        y: { ticks: { callback: function(v) { return Math.round(v / 1e11) / 10 + '조원'; }, font: { size: 12 }, color: '#000' }, grid: { color: '#eee' }, border: { color: '#000' } }
                     }
                 };
             }
