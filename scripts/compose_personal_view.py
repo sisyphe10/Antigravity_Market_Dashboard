@@ -228,5 +228,5 @@ for name in SISYPHE_PAGES:
     if name == "journal.html" and 'id="aoe-journal-offset"' not in fin:
         fail("sisyphe/journal.html: nav offset 검증 실패")
 
-sys.stdout.write("[compose] OK: 단일 AoE nav(좌 Watchlist·Market·Wiki / 우 Invest·Memento·Ledger·Arch) + Sisyphe 4페이지 합성 (%s)\n"
+sys.stdout.write("[compose] OK: 단일 AoE nav(좌 Watchlist·Market·Invest·Memento·Ledger / 우 Wiki·Arch) + Sisyphe 4페이지 합성 (%s)\n"
                  % os.path.basename(REL))
