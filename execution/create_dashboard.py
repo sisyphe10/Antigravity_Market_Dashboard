@@ -2262,7 +2262,11 @@ def _build_combined_chart_section():
             }
             function cmbTickFmt(v, ax, jo) {
                 var f = jo ? 10000 : 1;
-                var m = Math.max(Math.abs(ax.min || 0), Math.abs(ax.max || 0)) / f;
+                var m;
+                if (ax.chart && ax.chart.canvas && ax.chart.canvas.id === 'cmbDynamicChart' && window._cmbAxisMaxAbs)
+                    m = (window._cmbAxisMaxAbs[ax.id] || Math.abs(ax.max || 0)) / f;
+                else
+                    m = Math.max(Math.abs(ax.min || 0), Math.abs(ax.max || 0)) / f;
                 return fmtUniform(v / f, m);
             }
 
@@ -2732,7 +2736,9 @@ def _build_combined_chart_section():
                                 var _f2 = (chart.canvas.id === 'cmbDynamicChart')
                                     ? ((window._cmbAxisConv || {})[ds.yAxisID || 'y'] || 1) : 1;
                                 var _ax = chart.scales[ds.yAxisID || 'y'] || chart.scales.y;
-                                var _m2 = Math.max(Math.abs(_ax.min || 0), Math.abs(_ax.max || 0)) / _f2;
+                                var _m2 = ((chart.canvas.id === 'cmbDynamicChart' && window._cmbAxisMaxAbs)
+                                    ? (window._cmbAxisMaxAbs[ds.yAxisID || 'y'] || 0)
+                                    : Math.max(Math.abs(_ax.min || 0), Math.abs(_ax.max || 0))) / _f2;
                                 label = fmtUniformFix(val / _f2, _m2);
                             }
                             entries.push({ x: last.x + 6, origY: last.y, y: last.y, label: label, color: ds.borderColor });
@@ -2830,6 +2836,8 @@ def _build_combined_chart_section():
                 };
                 // 축별 표시 환산 계수 — MA 등 파생선도 같은 축 규칙을 타도록 축 기준으로 기록
                 window._cmbAxisConv = { y: (yEok && yJo) ? 10000 : 1, y1: (y1Eok && y1Jo) ? 10000 : 1 };
+                // 자릿수 밴드는 grace 포함 축 경계가 아니라 데이터 최대값으로 판정 (96.9 + grace = 104 -> 정수 오판 방지)
+                window._cmbAxisMaxAbs = { y: _yMaxAbs, y1: _y1MaxAbs };
 
                 var yType = (mode === 'pct') ? 'linear' : (window.cmbLogOn === false ? 'linear' : 'logarithmic');
                 var scalesConfig = {
