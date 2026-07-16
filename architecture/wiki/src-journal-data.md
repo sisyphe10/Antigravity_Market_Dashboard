@@ -10,7 +10,8 @@ status: "active"
 code:
   - "execution/fetch_journal_data.py"
 reads: []
-writes: []
+writes:
+  - "~/Journal/journal_market.json"
 depends_on:
   - "ext-google-workspace"
   - "ext-data-apis"
@@ -25,12 +26,13 @@ alerts: ""
 
 - 백필 `--date=YYYYMMDD`(상승하락 종목수는 과거 공란). apscheduler misfire로 행 누락되던 것을 grace+coalesce로 수정.
 - 로컬 HTML 페이지 아님 — 산출처는 외부 Google Sheet.
+- 2026-07-16 **이중기록**: 같은 데이터를 `~/Journal/journal_market.json`에도 upsert(패치 경로 포함). 시트 왕복 없이 로컬에서 읽으려는 것으로, **로컬 쓰기가 실패해도 시트 파이프라인은 경고만 남기고 계속**한다(부수 효과 취급). Journal 자산은 맥미니 로컬 전용이라 git·게시 파이프라인과 격리(전역 규칙 Journal 섹션).
 
 ## Reads
 - (none)
 
 ## Writes
-- (none)
+- `~/Journal/journal_market.json`
 
 ## Depends on
 - [[ext-google-workspace]] — Google Workspace (Sheets · Calendar · Drive)

@@ -29,13 +29,14 @@ alerts: "KeepAlive=true (launchd 자동 재기동, ThrottleInterval=10)"
 
 **Domain:** 운영 · 인프라 · **Type:** Infra · **Runs on:** vm_macmini · **Schedule (KST):** 상시 (스윕 장중 1s · 장외 60s) · **Status:** active · **Project:** antigravity
 
-2026-07-15 신설. POP HTS 상시실행을 대체하는 KIS 실시간 시세판을 **상시 데몬**으로 띄우는 launchd 서비스(`com.antigravity.watchlist`, RunAtLoad + KeepAlive, `run_bot.sh watchlist` wrapper 경유). **ts.net 대시보드의 첫 화면** — Caddy가 루트(`/`)를 `/watchlist/`로 302 리다이렉트하므로 기존 랜딩([[page-index]])은 `/index.html` 직접 접근으로 밀렸다([[web-caddy]]).
+2026-07-15 신설. POP HTS 상시실행을 대체하는 KIS 실시간 시세판을 **상시 데몬**으로 띄우는 launchd 서비스(`com.antigravity.watchlist`, RunAtLoad + KeepAlive, `run_bot.sh watchlist` wrapper 경유). 신설 당일엔 ts.net 첫 화면이었으나(루트 302 대상), **2026-07-16 첫 화면은 Memento로 넘어갔다** — 이제 `/watchlist/`와 nav 탭(좌측 선두)으로 진입한다([[web-caddy]]).
 
 - 바인딩: stdlib `ThreadingHTTPServer`(`server.py`)가 `127.0.0.1:8778` 루프백 고정 — 직접 공개 노출 없음. Caddy가 `/watchlist/*`를 이 포트로 리버스 프록시(`no-store`). 라우트는 `/`(index.html) · `/data`(시세 JSON, 프런트 1초 폴링) · `/wl`(관심그룹 GET/POST) 3종, 쿼리스트링은 무시.
 - 종목: `universe_tickers.csv`의 KRX/KOSDAQ 전 종목(~463). 시세는 KIS multprice(`FHKST11300006`) **30종목/콜 배치** 스윕 — 장중(평일 08:50~15:45) 1초, 장외 60초(KIS 쿼터 절약), 배치 실패 시 최대 10초 지수 백오프.
 - 시총 = 현재가 × 상장주식수. 상장주식수는 KIS `inquire-price`로 매일 1회 갱신하고 `shares_cache.json`에 캐시 — 기동 시 오늘자 캐시 > 이전 캐시 > `kis_universe_master.json` 순으로 seed해 즉시 시작하고, 오늘자 캐시라도 누락 종목만 별도 보충(2026-07-15).
 - 관심그룹 3종은 **서버 저장**(`watchlists.json`, 기기 공통 — 브라우저 로컬 아님). 그룹 1·2는 `portfolio_data.json`에서 10분 주기 **키워드 매칭 자동 동기화**(1=일반형/개방형/지속형, 2=목표전환형/성과모집형)라 회차 교체에 자동 추종한다. 수동 추가분은 직전 `auto` 목록과의 차집합으로 식별해 보존, 포트에서 빠진 auto 종목만 제거. 그룹 3은 수동 전용.
-- 프런트(`index.html`): AoE topnav 동형 · 섹터 탭 멀티선택 · 정렬 · 전역 검색창에서 그룹 추가. 로그는 `logs/launchd/watchlist.{out,err}`. 계산 잡 아님(catch-up 대상 아님).
+- 프런트(`quoteboard/index.html`): AoE topnav 동형 · 섹터 탭 멀티선택 · 정렬 · 전역 검색창에서 그룹 추가. 로그는 `logs/launchd/watchlist.{out,err}`. 계산 잡 아님(catch-up 대상 아님).
+- ★**nav는 손으로 맞춰야 하는 사본**: 이 페이지는 스냅숏이 아니라 데몬에서 직접 서빙되므로 [[web-publish-snapshot]]의 `compose_personal_view.py` nav 주입이 **닿지 않는다**. 2026-07-16 nav 개편(Sisyphe 드롭다운 해체 → Watchlist·Memento·Weekly 승격, 좌/우 2그룹) 때도 [[daemon-datalake-webui]]의 Wiki 페이지와 함께 이 파일의 마크업을 따로 고쳐 통일했다 — nav를 바꾸면 여기도 같이 고쳐야 어긋나지 않는다.
 
 ## Reads
 - [[store-portfolio-data]] — portfolio_data.json

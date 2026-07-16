@@ -1,12 +1,12 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 122 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 126 components._
 
 Updated: 2026-07-16
 
 ## By domain
 
-### 국내 시장 (27)
+### 국내 시장 (28)
 - [Daily Disclosures DART+KIND (16:30)](gha-daily-disclosures.md) — GHA
 - [Daily KOFIA Stats + NPS (17:30 평일)](gha-daily-kofia.md) — GHA
 - [Daily KRX Index Valuation (18:30 평일)](gha-daily-krx-valuation.md) — GHA
@@ -33,6 +33,7 @@ Updated: 2026-07-16
 - [종목마스터 주간 갱신 타이머 (토 09:00)](timer-update-stock-master.md) — Timer
 - [투자유의 생성기 (create_market_alert.py)](src-create-market-alert.md) — Source
 - [투자자별 수급 (fetch_investor_trading.py)](src-investor-trading.md) — Source
+- [파생·수급 13종 (fetch_deriv_daily.py)](src-deriv-daily.md) — Source
 - [한국 수출 매출 추정 대시보드](ext-export-dashboard.md) — External
 
 ### 해외 · 매크로 (21)
@@ -60,13 +61,13 @@ Updated: 2026-07-16
 
 ### 반도체 · 테크 (6)
 - [KODEX 섹터 비중 (fetch_kodex_sectors.py)](src-kodex-sectors.md) — Source
-- [KODEX 섹터 타이머 (23:30, +KOSIS/일본capex 편승)](timer-kodex-sectors.md) — Timer
+- [KODEX 섹터 타이머 (23:30, +KOSIS/일본capex/파생 편승)](timer-kodex-sectors.md) — Timer
 - [SemiAnalysis 소스 (sources/semianalysis.py)](src-semianalysis.md) — Source
 - [SiliconData 지수 3종 (fetch_silicondata_index.py)](src-silicondata.md) — Source
 - [TrendForce 소스 (sources/trendforce.py)](src-trendforce.md) — Source
 - [다나와 DRAM 최저가 (fetch_danawa_price.py)](src-danawa.md) — Source
 
-### 포트폴리오 · WRAP (18)
+### 포트폴리오 · WRAP (19)
 - [contribution_data.json](store-contribution-data.md) — Dataset
 - [Featured KIS 수집 타이머 (15:50, 신고가)](timer-featured-kis.md) — Timer
 - [Featured KIS/신고가 (fetch_featured_data_kis.py + enrich)](src-featured-kis.md) — Source
@@ -78,6 +79,7 @@ Updated: 2026-07-16
 - [portfolio_data.json](store-portfolio-data.md) — Dataset
 - [Recalculate Wrap NAV (xlsx push 트리거)](gha-recalc-wrap-nav.md) — GHA
 - [Sisyphe-Bot (펀드/일상 텔레그램 봇)](bot-sisyphe.md) — Bot
+- [WRAP 원칙 점검 타이머 (17:10, 변화 시에만 발송)](timer-wrap-principle-check.md) — Timer
 - [wrap.html (WRAP 대시보드)](page-wrap.md) — Page
 - [Wrap_NAV.xlsx (랩 운용 원장)](store-wrap-nav-xlsx.md) — Store
 - [기여도 데이터 (create_contribution_data.py)](src-create-contribution-data.md) — Source
@@ -101,13 +103,14 @@ Updated: 2026-07-16
 - [원전 뉴스 KNA/KNEISS (sources/kna.py)](src-kna-kneiss.md) — Source
 - [해외 기업 IR/뉴스룸 (sources/foreign_ir.py)](src-foreign-ir.md) — Source
 
-### 개인 · 가족 (4)
+### 개인 · 가족 (5)
+- [Memento 점심 텔레그램 타이머 (12:00)](timer-memento-telegram.md) — Timer
 - [SeonyuDuo repo (가족 영상 · 운동봇 연동)](ext-seonyuduo-repo.md) — External
 - [Sisyphe 가계부/운동 대시보드 + 투자일지 시트](ext-sisyphe.md) — External
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — Bot
 - [투자일지 시장데이터 (fetch_journal_data.py)](src-journal-data.md) — Source
 
-### 운영 · 인프라 (33)
+### 운영 · 인프라 (34)
 - [architecture.html (아키텍처)](page-architecture.md) — Page
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — Infra
 - [Claude Code Action (@claude 이벤트)](gha-claude-code.md) — GHA
@@ -119,6 +122,7 @@ Updated: 2026-07-16
 - [heartbeats.json (Phase 2 워치독 인터페이스)](store-heartbeats.md) — Store
 - [index.html (랜딩)](page-index.md) — Page
 - [landing_highlights.json](store-landing-highlights.md) — Dataset
+- [Plan API 데몬 (Sisyphe Ledger 자금계획, 127.0.0.1:8790)](daemon-plan-api.md) — Infra
 - [repo 동기화 (git-pull */5)](daemon-git-pull.md) — Watcher
 - [Sisyphe repo 클론 서빙 (시간당 pull)](daemon-sisyphe-pull.md) — Watcher
 - [UPS (무정전 전원, 맥미니 대비)](infra-ups.md) — Infra
@@ -150,11 +154,13 @@ Updated: 2026-07-16
 - [Sisyphe-Bot (펀드/일상 텔레그램 봇)](bot-sisyphe.md) — 상시 (내부 잡 05:00~23:00), active
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — 상시 (06:00 다이제스트 등), active
 
-### Timer (12)
+### Timer (14)
 - [ETF 구성종목 수집 타이머 (etf-collect 16:30)](timer-etf-collect.md) — 16:30 매일, active
 - [ETF 수집 재시도 타이머 (etf-collect-retry 18:00)](timer-etf-collect-retry.md) — 18:00 매일, active
 - [Featured KIS 수집 타이머 (15:50, 신고가)](timer-featured-kis.md) — 15:50 매일, active
-- [KODEX 섹터 타이머 (23:30, +KOSIS/일본capex 편승)](timer-kodex-sectors.md) — 23:30 매일, active
+- [KODEX 섹터 타이머 (23:30, +KOSIS/일본capex/파생 편승)](timer-kodex-sectors.md) — 23:30 매일, active
+- [Memento 점심 텔레그램 타이머 (12:00)](timer-memento-telegram.md) — 12:00 매일, active
+- [WRAP 원칙 점검 타이머 (17:10, 변화 시에만 발송)](timer-wrap-principle-check.md) — 17:10 평일, active
 - [랜딩 하이라이트 타이머 (18:45)](timer-landing-highlights.md) — 18:45 매일, active
 - [실적봇 타이머 (earnings-bot)](timer-earnings-bot.md) — 08:00 매일, active
 - [아키텍처 자동 최신화 타이머 (21:40, claude 헤드리스)](timer-architecture-daily.md) — 21:40 매일, active
@@ -215,11 +221,12 @@ Updated: 2026-07-16
 - [sources_state/ + kna_state.json](store-sources-state.md) — 소스 폴링 시, active
 - [Wrap_NAV.xlsx (랩 운용 원장)](store-wrap-nav-xlsx.md) — 사용자 편집 + finalize, active
 
-### Infra (13)
+### Infra (14)
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — 부팅 시 1회, planned
 - [gh-pages 게시 (publish_pages.sh, 팀 WRAP 전용)](web-publish-pages.md) — push 성공 훅 / 원격변경 훅, active
 - [GHA 잡 흡수 layer (launchd Phase 2 초안)](launchd-gha-phase2.md) — 이관 완료 — 각 잡 스케줄, active
 - [GitHub (정본 repo · Pages · Actions)](infra-github.md) — 상시, active
+- [Plan API 데몬 (Sisyphe Ledger 자금계획, 127.0.0.1:8790)](daemon-plan-api.md) — 상시, active
 - [UPS (무정전 전원, 맥미니 대비)](infra-ups.md) — planned
 - [개인 스냅숏 게시 (publish_snapshot.sh)](web-publish-snapshot.md) — 잡 성공 훅 (여러 잡), active
 - [관심종목 시세판 데몬 (Watchlist, 127.0.0.1:8778)](daemon-watchlist-quoteboard.md) — 상시 (스윕 장중 1s · 장외 60s), active
@@ -238,7 +245,7 @@ Updated: 2026-07-16
 - [외부 데이터 API/소스 집합](ext-data-apis.md) — active
 - [한국 수출 매출 추정 대시보드](ext-export-dashboard.md) — planned
 
-### Source (40)
+### Source (41)
 - [DART 공시 (fetch_disclosures.py)](src-dart-disclosures.md) — 16:30 (gha-daily-disclosures), active
 - [ECOS 한국 매크로 33종 (fetch_ecos_data.py)](src-ecos.md) — 17:40 평일 (gha-daily-ecos), active
 - [ETF 구성종목 수집 (collect_etf_daily.py)](src-etf-collect.md) — 16:30 / 18:00 (etf-collect 타이머), active
@@ -277,6 +284,7 @@ Updated: 2026-07-16
 - [투자유의 생성기 (create_market_alert.py)](src-create-market-alert.md) — 16:05 / 23:00 (sisyphe-bot), active
 - [투자일지 시장데이터 (fetch_journal_data.py)](src-journal-data.md) — 16:10 (sisyphe-bot), active
 - [투자자별 수급 (fetch_investor_trading.py)](src-investor-trading.md) — 장 마감 후 (sisyphe-bot), active
+- [파생·수급 13종 (fetch_deriv_daily.py)](src-deriv-daily.md) — 23:30 (kodex 타이머 편승), active
 - [포트폴리오 표 생성 (create_portfolio_tables.py)](src-create-portfolio-tables.md) — 체인 (finalize/recalc/crawl), active
 - [해외 기업 IR/뉴스룸 (sources/foreign_ir.py)](src-foreign-ir.md) — 07:30 / 20:00 (ra-sisyphe), active
 
@@ -288,7 +296,7 @@ Updated: 2026-07-16
 
 ## By project
 
-### antigravity (122)
+### antigravity (126)
 - [architecture.html (아키텍처)](page-architecture.md) — Page
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — Infra
 - [Claude Code Action (@claude 이벤트)](gha-claude-code.md) — GHA
@@ -329,15 +337,17 @@ Updated: 2026-07-16
 - [index.html (랜딩)](page-index.md) — Page
 - [KIND 거래소 공시 (fetch_kind_disclosures.py)](src-kind-disclosures.md) — Source
 - [KODEX 섹터 비중 (fetch_kodex_sectors.py)](src-kodex-sectors.md) — Source
-- [KODEX 섹터 타이머 (23:30, +KOSIS/일본capex 편승)](timer-kodex-sectors.md) — Timer
+- [KODEX 섹터 타이머 (23:30, +KOSIS/일본capex/파생 편승)](timer-kodex-sectors.md) — Timer
 - [KOSIS 시계열 레지스트리 (fetch_kosis_series.py)](src-kosis-series.md) — Source
 - [KPX 육지 SMP (fetch_smp_kpx.py)](src-smp-kpx.md) — Source
 - [KRX 지수 밸류에이션 (fetch_krx_valuation.py)](src-krx-valuation.md) — Source
 - [landing_highlights.json](store-landing-highlights.md) — Dataset
 - [market.html (마켓 대시보드)](page-market.md) — Page
 - [market_alert.html (투자유의종목)](page-market-alert.md) — Page
+- [Memento 점심 텔레그램 타이머 (12:00)](timer-memento-telegram.md) — Timer
 - [Notion (실적·리서치 퍼블리시 대상)](ext-notion.md) — External
 - [orders/ (pending_orders · aum_pending)](store-orders-pending.md) — Store
+- [Plan API 데몬 (Sisyphe Ledger 자금계획, 127.0.0.1:8790)](daemon-plan-api.md) — Infra
 - [portfolio_data.json](store-portfolio-data.md) — Dataset
 - [RA_Sisyphe_bot (리서치 알림 봇)](bot-ra-sisyphe.md) — Bot
 - [Recalculate Wrap NAV (xlsx push 트리거)](gha-recalc-wrap-nav.md) — GHA
@@ -361,6 +371,7 @@ Updated: 2026-07-16
 - [universe.json / universe_history.json](store-universe-json.md) — Dataset
 - [universe_lab.html (Universe Lab)](page-universe-lab.md) — Page
 - [UPS (무정전 전원, 맥미니 대비)](infra-ups.md) — Infra
+- [WRAP 원칙 점검 타이머 (17:10, 변화 시에만 발송)](timer-wrap-principle-check.md) — Timer
 - [wrap.html (WRAP 대시보드)](page-wrap.md) — Page
 - [Wrap_NAV 워처 (watch_wrap_nav.py)](watcher-wrap-nav.md) — Watcher
 - [Wrap_NAV.xlsx (랩 운용 원장)](store-wrap-nav-xlsx.md) — Store
@@ -406,6 +417,7 @@ Updated: 2026-07-16
 - [투자유의 생성기 (create_market_alert.py)](src-create-market-alert.md) — Source
 - [투자일지 시장데이터 (fetch_journal_data.py)](src-journal-data.md) — Source
 - [투자자별 수급 (fetch_investor_trading.py)](src-investor-trading.md) — Source
+- [파생·수급 13종 (fetch_deriv_daily.py)](src-deriv-daily.md) — Source
 - [포트폴리오 표 생성 (create_portfolio_tables.py)](src-create-portfolio-tables.md) — Source
 - [한국 수출 매출 추정 대시보드](ext-export-dashboard.md) — External
 - [해외 기업 IR/뉴스룸 (sources/foreign_ir.py)](src-foreign-ir.md) — Source

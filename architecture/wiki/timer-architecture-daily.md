@@ -29,6 +29,7 @@ alerts: "FAIL → notify_sisyphe_failure.sh architecture-daily → 텔레그램"
 - ★**전용 클론**(`~/srv/arch_updater/repo`)에서 실행 — 프로덕션 트리의 `reset --hard`/5분 pull cron과 worktree 경합을 원천 차단. push는 이 클론에서 직접, 프로덕션·ts.net 반영은 git-pull cron(원격발 publish 훅)이 5분 내 자동 수행.
 - 흐름: 클론 최신화 → 최근 변경 요약(기본 26h, `ARCH_SINCE`/catch-up은 `ARCH_MAX_TURNS` 상향) → `claude -p`가 **`architecture/wiki/`만** 편집(허용목록 가드로 그 외 변경 전부 폐기) → `rebuild_registry_from_wiki.py`로 registry 재생성 → `create_architecture.py`로 architecture.html 재생성 → `[skip ci]` 커밋 + push(fetch-merge 재시도 3회).
 - claude는 월클럭 워치독(기본 30분, `ARCH_WALL_SEC`)과 `--max-turns`(기본 40)로 제한. 데이터 블록 내 텍스트는 비신뢰(프롬프트 주입 격리).
+- **자가 재시도(2026-07-16)**: claude rc≠0이면 턴 상한을 `ARCH_MAX_TURNS_RETRY`(기본 100)로, 월클럭을 3600초로 올려 **1회 재실행**. 커밋이 많은 날 max-turns(40) 초과로 07-13·07-15 두 번 수동 캐치업이 필요했던 그 복구를 자동화한 것. 오해를 부르던 '137=월클럭' 실패 문구도 함께 정정.
 
 ## Reads
 - (none)

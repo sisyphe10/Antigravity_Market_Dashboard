@@ -26,7 +26,7 @@ alerts: ""
 2026-07-11 신설. Sisyphe 개인 대시보드(가계부·운동·투자일지)를 통합 서빙하려고 그 repo를 `~/srv/sisyphe_repo`에 클론해 두고 시간당 최신화하는 launchd 데몬(`com.antigravity.sisyphe-pull`, StartInterval=3600).
 
 - 동작: `git -C ~/srv/sisyphe_repo pull --ff-only --quiet`. RunAtLoad=true.
-- Caddy가 이 클론을 `/sisyphe/*` 경로로 서빙([[web-caddy]]) → ts.net 통합 대시보드의 'Sisyphe' 탭 소스.
+- `/sisyphe/*`로 서빙되는 개인 페이지(Journal·Weekly·Memento·Ledger)의 상류 원본 — 2026-07-16 'Sisyphe' 전용 탭이 해체되고 각 페이지가 AoE topnav 탭으로 승격된 뒤로도 소스는 이 클론이다([[ext-sisyphe]]). **AoE 기본 화면인 `memento.html`도 여기서 온다** → 이 pull이 멈추면 첫 화면이 낡는다.
 - pull-only ff-only라 레이스 없음. 계산 잡 아님(catch-up 대상 아님).
 
 ## Reads
