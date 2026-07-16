@@ -2601,7 +2601,7 @@ def _build_combined_chart_section():
                             }
                         }
                         ctx.save();
-                        ctx.font = 'bold 12px sans-serif';
+                        ctx.font = 'bold 15px sans-serif';
                         ctx.textBaseline = 'middle';
                         entries.forEach(function(e) {
                             ctx.fillStyle = e.color;
@@ -2653,14 +2653,14 @@ def _build_combined_chart_section():
 
                 var yType = (mode === 'pct') ? 'linear' : (window.cmbLogOn === false ? 'linear' : 'logarithmic');
                 var scalesConfig = {
-                    x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 13 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
+                    x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
                     y: {
                         type: yType,
                         position: 'left',
                         grace: '8%',
-                        ticks: { callback: function(v){ return mode === 'pct' ? v + '%' : fmtNum(v); }, font: { size: 13 }, color: '#000' },
+                        ticks: { callback: function(v){ return mode === 'pct' ? v + '%' : fmtNum(v); }, font: { size: 15 }, color: '#000' },
                         grid: { color: '#eee' },
-                        border: { color: '#000' }
+                        border: { color: '#000', width: 2 }
                     }
                 };
                 if (mode === 'raw2' && datasets.some(function(ds){ return ds.yAxisID === 'y1'; })) {
@@ -2668,9 +2668,9 @@ def _build_combined_chart_section():
                         type: (window.cmbLogOn === false ? 'linear' : 'logarithmic'),
                         position: 'right',
                         grace: '8%',
-                        ticks: { callback: function(v){ return fmtNum(v); }, font: { size: 13 }, color: '#000' },
+                        ticks: { callback: function(v){ return fmtNum(v); }, font: { size: 15 }, color: '#000' },
                         grid: { drawOnChartArea: false },
-                        border: { color: '#000' }
+                        border: { color: '#000', width: 2 }
                     };
                 }
 
@@ -2826,15 +2826,15 @@ def _build_combined_chart_section():
                                         } } }
                                     },
                                     scales: {
-                                        x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 13 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000' } },
+                                        x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
                                         y: {
                                             type: 'linear',
                                             position: 'left',
                                             grace: '8%',
                                             afterFit: function(scale) { if (mainYWidth > 0) scale.width = mainYWidth; },
-                                            ticks: { callback: function(v){ return fmtNum(v); }, font: { size: 13 }, color: '#000' },
+                                            ticks: { callback: function(v){ return fmtNum(v); }, font: { size: 15 }, color: '#000' },
                                             grid: { color: '#eee' },
-                                            border: { color: '#000' }
+                                            border: { color: '#000', width: 2 }
                                         }
                                     }
                                 }
