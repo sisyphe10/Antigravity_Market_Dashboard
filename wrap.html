@@ -217,12 +217,12 @@ html { overflow-y: scroll; }  /* 스크롤바 공간 상시 확보 — 로드 �
 /* Left sidebar — Market-group(+Architecture) pages. 2026-07-12 통일: topnav 는 모든
    페이지에서 랜딩(/)과 동일(전폭·탭 좌측 28px 시작)하고, 사이드바는 topnav '아래'(top:72px)에서
    시작한다 (기존: 사이드바가 nav 위에 얹혀 탭이 228px로 밀림 → 페이지 간 nav 점프 원인). */
-.sidebar { position: fixed; top: 54px; left: 0; bottom: 0; width: 200px; padding: 18px 10px; background: #fff; border-right: 1px solid #e5e7eb; overflow-y: auto; z-index: 90; box-sizing: border-box; }  /* 배지 제거 — 링크(Data…)가 nav 바로 아래에서 시작 (2026-07-12) */
-.sidebar-brand { position: absolute; top: 0; left: 0; right: 0; height: 54px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 800; letter-spacing: 2px; color: #1a1a1a; border-bottom: 1px solid #e5e7eb; background: #fff; text-decoration: none; font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; }
+.sidebar { position: fixed; top: 54px; left: 0; bottom: 0; width: 200px; padding: 18px 10px; background: #101418; border-right: 1px solid #2a323b; overflow-y: auto; z-index: 90; box-sizing: border-box; }  /* 배지 제거 — 링크(Data…)가 nav 바로 아래에서 시작 (2026-07-12) */
+.sidebar-brand { position: absolute; top: 0; left: 0; right: 0; height: 54px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 800; letter-spacing: 3.5px; color: #fff; border-bottom: 2px solid #2d7a3a; background: #101418; text-decoration: none; font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; }
 .sidebar-brand:hover { color: #2d7a3a; }
-.sidebar-link { display: block; padding: 12px 11px; margin-bottom: 7px; color: #444; text-decoration: none; font-size: 0.94rem; font-weight: 600; border-radius: 999px; border: 1.5px solid transparent; transition: all 0.12s; font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; text-align: center; }
-.sidebar-link:hover { background: #f0f7f2; color: #2d7a3a; border-color: #2d7a3a; }
-.sidebar-link.active { background: transparent; color: #2d7a3a; border-color: #2d7a3a; }
+.sidebar-link { display: block; padding: 11px 14px; margin-bottom: 2px; color: #9aa4ae; text-decoration: none; font-size: 0.9rem; font-weight: 600; border-radius: 0; border: none; border-left: 3px solid transparent; transition: all 0.12s; font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; text-align: left; }
+.sidebar-link:hover { background: #1a2027; color: #fff; }
+.sidebar-link.active { background: #1c1416; color: #fff; font-weight: 700; border-left-color: #991B1B; }
 /* Override per-page body styles so all sidebar pages align identically next to the sidebar */
 .has-sidebar { padding-left: 224px !important; padding-right: 24px !important; padding-top: 0 !important; padding-bottom: 24px !important; max-width: none !important; margin: 0 !important; }
 .has-sidebar .topnav { margin-left: -224px; margin-right: -24px; }
@@ -257,6 +257,11 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
     .wrap-topnav .topnav-inner { height: 52px; }
     .wrap-topnav .topnav-tab { padding: 6px 14px; }
 }
+/* WRAP 사이드바 라이트 원복 (2026-07-16) — 공유 .sidebar* 다크 전환에서 wrap 제외 */
+.wrap-sidebar { background: #fff; border-right: 1px solid #e5e7eb; }
+.wrap-sidebar .sidebar-link { padding: 12px 11px; margin-bottom: 7px; color: #444; font-size: 0.94rem; border-radius: 999px; border: 1.5px solid transparent; text-align: center; }
+.wrap-sidebar .sidebar-link:hover { background: #f0f7f2; color: #2d7a3a; border-color: #2d7a3a; }
+.wrap-sidebar .sidebar-link.active { background: transparent; color: #2d7a3a; border-color: #2d7a3a; }
 .wrap-updated { margin-left: auto; font-size: 12px; color: #888; white-space: nowrap; font-style: italic; }
 .wrap-sidebar { top: 72px; padding: 18px 10px; z-index: 90; }  /* 브랜드 배지 없음 → topnav 아래 시작 */
 .wrap-side-group { display: none; }
@@ -311,7 +316,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
     </div>
 
     <div id="mainContent" class="pw-hidden has-sidebar">
-    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><div class="topnav-tabs"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div><span class="wrap-updated">Updated: 2026-07-16 16:00:16 KST</span></div></nav>
+    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><div class="topnav-tabs"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div><span class="wrap-updated">Updated: 2026-07-16 16:13:39 KST</span></div></nav>
     <aside class="sidebar wrap-sidebar" id="wrapSectionNav" aria-label="WRAP navigation"><div class="wrap-side-group on" data-side-for="dashboard"><a href="#wrap-sec-chart" onclick="wrapGoSection('wrap-sec-chart');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-chart">CHART</a><a href="#wrap-sec-return" onclick="wrapGoSection('wrap-sec-return');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-return">RETURN</a><a href="#wrap-sec-aum" onclick="wrapGoSection('wrap-sec-aum');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-aum">AUM</a><a href="#wrap-sec-portfolio" onclick="wrapGoSection('wrap-sec-portfolio');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-portfolio">Portfolio</a><a href="#wrap-sec-sector" onclick="wrapGoSection('wrap-sec-sector');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-sector">SECTOR WEIGHT</a></div><div class="wrap-side-group" data-side-for="order" id="wrapSideOrder"></div><div class="wrap-side-group" data-side-for="contribution" id="wrapSideContrib"></div><div class="wrap-side-group" data-side-for="fee"><a href="#" onclick="feeSwitchSub('rate');return false;" class="sidebar-link active" data-side-fee="rate">요율</a><a href="#" onclick="feeSwitchSub('revenue');return false;" class="sidebar-link" data-side-fee="revenue">매출</a></div></aside>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
