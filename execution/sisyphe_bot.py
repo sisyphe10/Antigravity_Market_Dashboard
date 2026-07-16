@@ -542,11 +542,8 @@ def format_update_summary(portfolio_data):
             for s in held
         ) / 100
 
-        title = '전체 포트폴리오' if len(sig_groups) == 1 else ' · '.join(pnames)
-        lines.append(f"<b><u>[{title}]</u></b>")
-        lines.append(f"<b><u>오늘: {weighted_return:+.1f}%</u></b>")
-
-        # 상품별 YTD/누적 = 전일까지 확정 기준가 수익률 × 오늘 실시간 가중등락 (복리 결합).
+        # 상품별 요약: [상품명] 줄 + 수익률 줄 (2026-07-16 사용자 지시 — 수익률은 줄 바꿔서).
+        # YTD/누적 = 전일까지 확정 기준가 수익률 × 오늘 실시간 가중등락 (복리 결합).
         # 오늘 개시 펀드는 nav_*_d1=None → 0으로 보고 오늘 등락만 반영. (목표전환형은 YTD==누적)
         for portfolio_name in pnames:
             pmeta = meta.get(portfolio_name) or {}
@@ -554,7 +551,9 @@ def format_update_summary(portfolio_data):
             _cum = pmeta.get('nav_cum_d1'); _cum = 0.0 if _cum is None else _cum
             ytd_return = ((1 + _ytd / 100) * (1 + weighted_return / 100) - 1) * 100
             cum_return = ((1 + _cum / 100) * (1 + weighted_return / 100) - 1) * 100
-            lines.append(f"<b>{portfolio_name}</b>  YTD {ytd_return:+.1f}%  누적 {cum_return:+.1f}%")
+            lines.append(f"<b><u>[{portfolio_name}]</u></b>")
+            lines.append(f"<b>1D {weighted_return:+.1f}% | "
+                         f"YTD {ytd_return:+.1f}% | 누적 {cum_return:+.1f}%</b>")
 
         # 보유 종목 전체 — 기여도(contribution) 내림차순. +기여/−기여 그룹별 구분선·소계.
         ranked = sorted(
@@ -597,16 +596,16 @@ def format_update_summary(portfolio_data):
             changed = ch.get('changed', [])
             removed = ch.get('removed', [])
             if added:
-                lines.append("<b>신규 편입</b>  " + ", ".join(f"{a['name']} {a['weight']:g}%" for a in added))
+                lines.append("<b>신규 편입</b> | " + ", ".join(f"{a['name']} {a['weight']:g}%" for a in added))
             # 비중 변경 → 추가 매수(비중↑) / 비중 축소(비중↓) 분리
             buys = [cg for cg in changed if cg['to'] > cg['from']]
             sells = [cg for cg in changed if cg['to'] < cg['from']]
             if buys:
-                lines.append("<b>추가 매수</b>  " + ", ".join(f"{cg['name']} {cg['from']:g}% → {cg['to']:g}%" for cg in buys))
+                lines.append("<b>추가 매수</b> | " + ", ".join(f"{cg['name']} {cg['from']:g}% → {cg['to']:g}%" for cg in buys))
             if sells:
-                lines.append("<b>비중 축소</b>  " + ", ".join(f"{cg['name']} {cg['from']:g}% → {cg['to']:g}%" for cg in sells))
+                lines.append("<b>비중 축소</b> | " + ", ".join(f"{cg['name']} {cg['from']:g}% → {cg['to']:g}%" for cg in sells))
             if removed:
-                lines.append("<b>전량 편출</b>  " + ", ".join(f"{r['name']} {r['weight']:g}%" for r in removed))
+                lines.append("<b>전량 편출</b> | " + ", ".join(f"{r['name']} {r['weight']:g}%" for r in removed))
 
     return "\n".join(lines)
 
