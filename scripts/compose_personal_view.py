@@ -53,10 +53,9 @@ def sisyphe_aoe_nav(active):
     ) % (cls('invest'), cls('memento'), cls('ledger'))
 
 ACTIVE_OF = {'journal.html': 'invest', 'dashboard.html': 'ledger', 'memento.html': 'memento'}
-# 사이드바 코너 배지(AoE)가 브랜드 역할 — nav 자체 브랜드는 중복이라 숨김 (journal 한정)
-CORNER_BRAND = '<style id="aoe-corner-brand">nav.topnav .topnav-brand{display:none}</style>'
-# Ledger(dashboard)=사이드바 콘텐츠 없음(배지뿐인 빈 기둥) → 통째 제거 + 본문 오프셋 해제 (2026-07-16 사용자 지시)
-LEDGER_NO_SIDEBAR = '<style id="aoe-ledger-nosidebar">.sidebar{display:none}.has-sidebar{padding-left:24px}</style>'
+# 1안(2026-07-16 사용자 확정): 사이드바 전면 제거 — journal(서브내비=본문 tab-bar)·dashboard 공통.
+# 본문 좌측 오프셋도 해제. (구 JOURNAL_OFFSET·CORNER_BRAND 는 사이드바와 함께 폐기)
+NO_SIDEBAR = '<style id="aoe-nosidebar">.sidebar{display:none}.has-sidebar{padding-left:24px}</style>'
 JOURNAL_OFFSET = (
     '<style id="aoe-journal-offset">'
     'nav.topnav .topnav-inner{max-width:none;padding-left:228px;padding-right:24px}'
@@ -215,12 +214,8 @@ for name in SISYPHE_PAGES:
     if r is None:
         fail("sisyphe/%s: </head> 없음" % name)
     s = r
-    if name == "journal.html":
-        # 고정 사이드바(200px, z-150)가 nav 좌측(Watchlist)을 덮으므로 offset — 통일 CSS 뒤 주입
-        s = inject_before_head(s, JOURNAL_OFFSET)
-        s = inject_before_head(s, CORNER_BRAND)
-    if name == "dashboard.html":
-        s = inject_before_head(s, LEDGER_NO_SIDEBAR)
+    if name in ("journal.html", "dashboard.html"):
+        s = inject_before_head(s, NO_SIDEBAR)
 
     open(p, "w", encoding="utf-8").write(s)
 
@@ -236,10 +231,8 @@ for name in SISYPHE_PAGES:
         fail("sisyphe/%s: 활성 탭(%s) 검증 실패" % (name, active_label))
     if 'sisyphe-warm-bar' in fin:
         fail("sisyphe/%s: 웜톤 바 잔존" % name)
-    if name == "journal.html" and 'id="aoe-journal-offset"' not in fin:
-        fail("sisyphe/journal.html: nav offset 검증 실패")
-    if name == "dashboard.html" and 'id="aoe-ledger-nosidebar"' not in fin:
-        fail("sisyphe/dashboard.html: 사이드바 제거 검증 실패")
+    if name in ("journal.html", "dashboard.html") and 'id="aoe-nosidebar"' not in fin:
+        fail("sisyphe/%s: 사이드바 제거 검증 실패" % name)
 
 sys.stdout.write("[compose] OK: 단일 AoE nav(좌 Watchlist·Market·Invest·Memento·Ledger / 우 Wiki·Arch) + Sisyphe 4페이지 합성 (%s)\n"
                  % os.path.basename(REL))
