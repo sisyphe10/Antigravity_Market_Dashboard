@@ -2255,6 +2255,11 @@ def _build_combined_chart_section():
                 var dp = maxAbs < 10 ? 2 : (maxAbs < 1000 ? 1 : 0);
                 return Number(v).toLocaleString(undefined, { maximumFractionDigits: dp });
             }
+            function fmtUniformFix(v, maxAbs) {   // 끝값용: 축 자릿수로 패딩 (84 -> 84.0)
+                if (v === null || v === undefined) return '-';
+                var dp = maxAbs < 10 ? 2 : (maxAbs < 1000 ? 1 : 0);
+                return Number(v).toLocaleString(undefined, { minimumFractionDigits: dp, maximumFractionDigits: dp });
+            }
             function cmbTickFmt(v, ax, jo) {
                 var f = jo ? 10000 : 1;
                 var m = Math.max(Math.abs(ax.min || 0), Math.abs(ax.max || 0)) / f;
@@ -2728,7 +2733,7 @@ def _build_combined_chart_section():
                                     ? ((window._cmbAxisConv || {})[ds.yAxisID || 'y'] || 1) : 1;
                                 var _ax = chart.scales[ds.yAxisID || 'y'] || chart.scales.y;
                                 var _m2 = Math.max(Math.abs(_ax.min || 0), Math.abs(_ax.max || 0)) / _f2;
-                                label = fmtUniform(val / _f2, _m2);
+                                label = fmtUniformFix(val / _f2, _m2);
                             }
                             entries.push({ x: last.x + 6, origY: last.y, y: last.y, label: label, color: ds.borderColor });
                         });
@@ -2870,7 +2875,7 @@ def _build_combined_chart_section():
                     var _lbl;
                     if (ds._isForeign) { _lbl = lv.toFixed(1) + '%'; }
                     else if (mode === 'pct') { var _r = Math.sign(lv) * Math.round(Math.abs(lv)); _lbl = (_r >= 0 ? '+' : '') + _r + '%'; }
-                    else { var _mf = (ds.yAxisID === 'y1' ? (y1Eok && y1Jo) : (yEok && yJo)) ? 10000 : 1; _lbl = fmtUniform(lv / _mf, (ds.yAxisID === 'y1' ? _y1MaxAbs : _yMaxAbs) / _mf); }
+                    else { var _mf = (ds.yAxisID === 'y1' ? (y1Eok && y1Jo) : (yEok && yJo)) ? 10000 : 1; _lbl = fmtUniformFix(lv / _mf, (ds.yAxisID === 'y1' ? _y1MaxAbs : _yMaxAbs) / _mf); }
                     var _w = _measCtx.measureText(_lbl).width;
                     if (_w > _maxLabelW) _maxLabelW = _w;
                 });
