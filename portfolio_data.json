@@ -154,89 +154,21 @@
       "is_today_new": false
     },
     {
-      "code": "298380",
-      "name": "에이비엘바이오",
-      "sector": "건강관리",
-      "market_cap": 42327,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -4.665825977301387,
-      "contribution": -0.9331651954602775,
-      "ytd_return": -62.2,
-      "cumulative_return": null,
-      "current_price": 75600.0,
-      "ath_price": 245500.0,
-      "dd": -69.20570264765784,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "141080",
-      "name": "리가켐바이오",
-      "sector": "건강관리",
-      "market_cap": 38389,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -6.576576576576576,
-      "contribution": -1.3153153153153152,
-      "ytd_return": -40.299366724237196,
-      "cumulative_return": null,
-      "current_price": 103700.0,
-      "ath_price": 213500.0,
-      "dd": -51.42857142857142,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "196170",
-      "name": "알테오젠",
-      "sector": "건강관리",
-      "market_cap": 148166,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -4.15944540727903,
-      "contribution": -0.831889081455806,
-      "ytd_return": -38.487208008898776,
-      "cumulative_return": null,
-      "current_price": 276500.0,
-      "ath_price": 559000.0,
-      "dd": -50.53667262969588,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "067310",
-      "name": "하나마이크론",
-      "sector": "반도체",
-      "market_cap": 23767,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -8.801020408163266,
-      "contribution": -1.7602040816326534,
-      "ytd_return": 38.834951456310684,
-      "cumulative_return": null,
-      "current_price": 35750.0,
-      "ath_price": 56800.0,
-      "dd": -37.059859154929576,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
       "code": "010950",
       "name": "S-Oil",
       "sector": "에너지",
       "market_cap": 163132,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 2.0,
+      "today_return": 3.205128205128205,
+      "contribution": 0.6410256410256411,
       "ytd_return": 74.57831325301206,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 144900.0,
       "ath_price": 144900.0,
       "dd": 0.0,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
   "NH 목표전환형 5호": [
@@ -377,72 +309,21 @@
       "is_today_new": false
     },
     {
-      "code": "196170",
-      "name": "알테오젠",
-      "sector": "건강관리",
-      "market_cap": 148166,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -4.15944540727903,
-      "contribution": -0.831889081455806,
-      "ytd_return": -38.487208008898776,
-      "cumulative_return": null,
-      "current_price": 276500.0,
-      "ath_price": 559000.0,
-      "dd": -50.53667262969588,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "141080",
-      "name": "리가켐바이오",
-      "sector": "건강관리",
-      "market_cap": 38389,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -6.576576576576576,
-      "contribution": -1.3153153153153152,
-      "ytd_return": -40.299366724237196,
-      "cumulative_return": null,
-      "current_price": 103700.0,
-      "ath_price": 213500.0,
-      "dd": -51.42857142857142,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "298380",
-      "name": "에이비엘바이오",
-      "sector": "건강관리",
-      "market_cap": 42327,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -4.665825977301387,
-      "contribution": -0.9331651954602775,
-      "ytd_return": -62.2,
-      "cumulative_return": null,
-      "current_price": 75600.0,
-      "ath_price": 245500.0,
-      "dd": -69.20570264765784,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
       "code": "010950",
       "name": "S-Oil",
       "sector": "에너지",
       "market_cap": 163132,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 2.0,
+      "today_return": 3.205128205128205,
+      "contribution": 0.6410256410256411,
       "ytd_return": 74.57831325301206,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 144900.0,
       "ath_price": 144900.0,
       "dd": 0.0,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
   "DB 목표전환형 6차": [
@@ -583,72 +464,21 @@
       "is_today_new": false
     },
     {
-      "code": "196170",
-      "name": "알테오젠",
-      "sector": "건강관리",
-      "market_cap": 148166,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -4.15944540727903,
-      "contribution": -0.831889081455806,
-      "ytd_return": -38.487208008898776,
-      "cumulative_return": null,
-      "current_price": 276500.0,
-      "ath_price": 559000.0,
-      "dd": -50.53667262969588,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "141080",
-      "name": "리가켐바이오",
-      "sector": "건강관리",
-      "market_cap": 38389,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -6.576576576576576,
-      "contribution": -1.3153153153153152,
-      "ytd_return": -40.299366724237196,
-      "cumulative_return": null,
-      "current_price": 103700.0,
-      "ath_price": 213500.0,
-      "dd": -51.42857142857142,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "298380",
-      "name": "에이비엘바이오",
-      "sector": "건강관리",
-      "market_cap": 42327,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -4.665825977301387,
-      "contribution": -0.9331651954602775,
-      "ytd_return": -62.2,
-      "cumulative_return": null,
-      "current_price": 75600.0,
-      "ath_price": 245500.0,
-      "dd": -69.20570264765784,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
       "code": "010950",
       "name": "S-Oil",
       "sector": "에너지",
       "market_cap": 163132,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 2.0,
+      "today_return": 3.205128205128205,
+      "contribution": 0.6410256410256411,
       "ytd_return": 74.57831325301206,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 144900.0,
       "ath_price": 144900.0,
       "dd": 0.0,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
   "한투 지속형": [
@@ -806,72 +636,21 @@
       "is_today_new": false
     },
     {
-      "code": "298380",
-      "name": "에이비엘바이오",
-      "sector": "건강관리",
-      "market_cap": 42327,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -4.665825977301387,
-      "contribution": -0.9331651954602775,
-      "ytd_return": -62.2,
-      "cumulative_return": null,
-      "current_price": 75600.0,
-      "ath_price": 245500.0,
-      "dd": -69.20570264765784,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "141080",
-      "name": "리가켐바이오",
-      "sector": "건강관리",
-      "market_cap": 38389,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -6.576576576576576,
-      "contribution": -1.3153153153153152,
-      "ytd_return": -40.299366724237196,
-      "cumulative_return": null,
-      "current_price": 103700.0,
-      "ath_price": 213500.0,
-      "dd": -51.42857142857142,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "196170",
-      "name": "알테오젠",
-      "sector": "건강관리",
-      "market_cap": 148166,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -4.15944540727903,
-      "contribution": -0.831889081455806,
-      "ytd_return": -38.487208008898776,
-      "cumulative_return": null,
-      "current_price": 276500.0,
-      "ath_price": 559000.0,
-      "dd": -50.53667262969588,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
       "code": "010950",
       "name": "S-Oil",
       "sector": "에너지",
       "market_cap": 163132,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 2.0,
+      "today_return": 3.205128205128205,
+      "contribution": 0.6410256410256411,
       "ytd_return": 74.57831325301206,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 144900.0,
       "ath_price": 144900.0,
       "dd": 0.0,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
   "한투 성과모집형 1차": [
@@ -983,16 +762,16 @@
       "sector": "건강관리",
       "market_cap": 25949,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 2.0,
+      "today_return": 1.056910569105691,
+      "contribution": 0.2113821138211382,
       "ytd_return": 4.278523489932895,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 124300.0,
       "ath_price": 168700.0,
       "dd": -26.31890930646117,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "226950",
@@ -1000,16 +779,16 @@
       "sector": "건강관리",
       "market_cap": 28676,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 2.0,
+      "today_return": 4.115853658536586,
+      "contribution": 0.8231707317073171,
       "ytd_return": -2.7065527065527117,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 136600.0,
       "ath_price": 207000.0,
       "dd": -34.009661835748794,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "010950",
@@ -1017,159 +796,38 @@
       "sector": "에너지",
       "market_cap": 163132,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 2.0,
+      "today_return": 3.205128205128205,
+      "contribution": 0.6410256410256411,
       "ytd_return": 74.57831325301206,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 144900.0,
       "ath_price": 144900.0,
       "dd": 0.0,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
-  "_order_changes": {
-    "삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형": {
-      "date": "2026-07-16",
-      "added": [
-        {
-          "name": "S-Oil",
-          "weight": 2.0
-        }
-      ],
-      "changed": [],
-      "removed": [
-        {
-          "name": "에이비엘바이오",
-          "weight": 2.0
-        },
-        {
-          "name": "리가켐바이오",
-          "weight": 2.0
-        },
-        {
-          "name": "알테오젠",
-          "weight": 2.0
-        },
-        {
-          "name": "하나마이크론",
-          "weight": 2.0
-        }
-      ]
-    },
-    "NH 목표전환형 5호": {
-      "date": "2026-07-16",
-      "added": [
-        {
-          "name": "S-Oil",
-          "weight": 2.0
-        }
-      ],
-      "changed": [],
-      "removed": [
-        {
-          "name": "알테오젠",
-          "weight": 2.0
-        },
-        {
-          "name": "리가켐바이오",
-          "weight": 2.0
-        },
-        {
-          "name": "에이비엘바이오",
-          "weight": 2.0
-        }
-      ]
-    },
-    "DB 목표전환형 6차": {
-      "date": "2026-07-16",
-      "added": [
-        {
-          "name": "S-Oil",
-          "weight": 2.0
-        }
-      ],
-      "changed": [],
-      "removed": [
-        {
-          "name": "알테오젠",
-          "weight": 2.0
-        },
-        {
-          "name": "리가켐바이오",
-          "weight": 2.0
-        },
-        {
-          "name": "에이비엘바이오",
-          "weight": 2.0
-        }
-      ]
-    },
-    "한투 지속형": {
-      "date": "2026-07-16",
-      "added": [
-        {
-          "name": "S-Oil",
-          "weight": 2.0
-        }
-      ],
-      "changed": [],
-      "removed": [
-        {
-          "name": "에이비엘바이오",
-          "weight": 2.0
-        },
-        {
-          "name": "리가켐바이오",
-          "weight": 2.0
-        },
-        {
-          "name": "알테오젠",
-          "weight": 2.0
-        }
-      ]
-    },
-    "한투 성과모집형 1차": {
-      "date": "2026-07-16",
-      "added": [
-        {
-          "name": "에스티팜",
-          "weight": 2.0
-        },
-        {
-          "name": "올릭스",
-          "weight": 2.0
-        },
-        {
-          "name": "S-Oil",
-          "weight": 2.0
-        }
-      ],
-      "changed": [],
-      "removed": []
-    }
-  },
   "_portfolio_meta": {
     "삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형": {
-      "nav_ytd_d1": 66.6528142640169,
-      "nav_cum_d1": 236.857
+      "nav_ytd_d1": 53.789374217710304,
+      "nav_cum_d1": 210.85599999999997
     },
     "NH 목표전환형 5호": {
-      "nav_ytd_d1": -13.107000000000003,
-      "nav_cum_d1": -13.107000000000003
+      "nav_ytd_d1": -19.655999999999995,
+      "nav_cum_d1": -19.655999999999995
     },
     "DB 목표전환형 6차": {
-      "nav_ytd_d1": -12.088999999999995,
-      "nav_cum_d1": -12.088999999999995
+      "nav_ytd_d1": -18.714999999999993,
+      "nav_cum_d1": -18.714999999999993
     },
     "한투 지속형": {
-      "nav_ytd_d1": -4.952999999999996,
-      "nav_cum_d1": -4.952999999999996
+      "nav_ytd_d1": -12.122,
+      "nav_cum_d1": -12.122
     },
     "한투 성과모집형 1차": {
-      "nav_ytd_d1": -1.4349999999999974,
-      "nav_cum_d1": -1.4349999999999974
+      "nav_ytd_d1": -8.662999999999998,
+      "nav_cum_d1": -8.662999999999998
     }
   },
   "_price_asof": "2026-07-16"
