@@ -252,7 +252,7 @@ function sectorGroups(rows) {      // 섹터 목록 (합산 시총 내림차순)
 }
 
 function tabsHTML(groups) {        // [관심종목, 전체] + 개별 섹터 (토글 멀티선택)
-  let h = `<div class="tab${VIEW.mode === 'wl' ? ' active' : ''}" data-kind="wl">★ 관심종목</div>` +
+  let h = `<div class="tab${VIEW.mode === 'wl' ? ' active' : ''}" data-kind="wl" title="관심종목">★</div>` +
           `<div class="tab${VIEW.mode === 'all' ? ' active' : ''}" data-kind="all">전체</div>`;
   for (const g of groups) {
     const on = VIEW.mode === 'sectors' && VIEW.secs.includes(g.sec);
