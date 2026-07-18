@@ -64,9 +64,10 @@ AOE_DARK_CSS = (
     'td:not([style*=color]){color:#d9dde2!important}'
     'tbody tr:hover td{background:#191a1d!important}'
     '.cmb-series-row td:not(.cmb-chart-item):not([style*=color]){color:#c9ced4!important}'
+    '.cmb-series-row td[style*="color:#000"]{color:#c9ced4!important}'
     # 등락색 다크용 재단언 — td 일괄 규칙보다 뒤에 두어 우선 적용
-    '.pos,.positive{color:#ff5a5a!important}'
-    '.neg,.negative{color:#5aa2ff!important}'
+    '.pos,td.pos,.positive,td.positive{color:#ff5a5a!important}'
+    '.neg,td.neg,.negative,td.negative{color:#5aa2ff!important}'
     # 인라인 밝은 배경(히트 틴트·경보 핑크) 위 글자는 어둡게 유지
     'td[style*=background],tr[style*=background] td{color:#333!important}'
     '.tabs{border-bottom-color:#fb8b1e!important}'
