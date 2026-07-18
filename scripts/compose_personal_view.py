@@ -88,8 +88,8 @@ AOE_DARK_CSS = (
     '.node .node-name{color:#f2f4f6!important}'
     '.node .node-sched{color:#8a919a!important}'
     '.tl-band-count{background:#1a1b1e!important;color:#d9dde2!important}'
-    '.qrow.starred{background:#1a1610!important}
-    .sidebar-link.active{border-bottom-color:#fb8b1e!important}'
+    '.qrow.starred{background:#1a1610!important}'
+    '.sidebar-link.active{border-bottom-color:#fb8b1e!important}'
     '.today-date{color:#c9ced4!important}'
     '.qcard{background:#14171b!important;color:#e8e6df!important;border-color:#27282b!important;box-shadow:none!important}'
     '.qcard .qsrc,.qcard .qsrc .qnote{color:#8a919a!important}'

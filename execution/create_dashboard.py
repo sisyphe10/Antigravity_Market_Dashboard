@@ -7876,8 +7876,8 @@ def create_dashboard():
 <body class="has-sidebar">
     {top_nav_html('market')}
     {sidebar_html('market')}
-    <header>
-        <div class="last-updated">Updated: {now}</div>
+    <header style="margin:0;padding:8px 28px 0;text-align:right;">
+        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: {now}</div>
     </header>
 
     <div class="mkt-subtabs">
