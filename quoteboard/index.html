@@ -184,8 +184,9 @@ let sortKey = 'mcap', sortDir = -1;
 
 function loadView() {
   try {
+    // 2026-07-18: 진입 첫 화면은 항상 관심종목(wl) — 저장된 mode 무시, 섹터 선택(secs)만 승계
     const v = JSON.parse(localStorage.getItem(VIEW_KEY));
-    if (v && v.mode) return v;
+    if (v && v.mode) return { mode: 'wl', secs: v.secs || [] };
   } catch (e) {}
   return { mode: 'wl', secs: [] };   // mode: 'wl' | 'all' | 'sectors', secs=클릭 순서
 }
