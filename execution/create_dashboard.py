@@ -144,7 +144,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
 /* WRAP 사이드바 라이트 원복 (2026-07-16) — 공유 .sidebar* 다크/스트립 전환에서 wrap 제외.
    공유 규칙이 가로 스트립(sticky flex)으로 바뀌어도 wrap 은 원래 좌측 세로 기둥 레이아웃 유지. */
 /* 2026-07-18: 사이드바 폐지 — 스트립 아래 가로 필 버튼 줄 (AoE Market 내부 버튼 형태) */
-.wrap-sidebar { position: static; width: auto; margin: 0; padding: 16px 28px 0; background: transparent; border: none; overflow: visible; box-sizing: border-box; }
+.wrap-sidebar { position: static; display: block; width: auto; margin: 0; padding: 16px 28px 0; background: transparent; border: none; overflow: visible; box-sizing: border-box; }
 .wrap-sidebar:not(:has(.wrap-side-group.on)) { display: none; }
 #mainContent.has-sidebar { padding-left: 24px !important; }
 #mainContent.has-sidebar.wrap-sidebar-off { padding-left: 24px !important; }
