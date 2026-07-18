@@ -104,7 +104,7 @@ AOE_DARK_CSS = (
     '.section-count,.category-date{font-size:13px!important}'
     '.sidebar,.ledger-subtabs,.mm-main .subtabs{height:42px!important;'
     'box-sizing:border-box!important;align-items:stretch!important;overflow:hidden!important}'
-    '.sidebar-link,.ledger-subtab,.mm-main .subtabs .subtab{height:41px!important;font-size:0.92rem!important}'
+    '.sidebar-link,.ledger-subtab,.mm-main .subtabs .subtab{height:41px!important;font-size:16px!important}'
     'button[style*="#dc2626"]{background:#fb8b1e!important;color:#101418!important;'
     'border:1.5px solid #fb8b1e!important;border-radius:2px!important}'
     'button[style*="#2563eb"]{background:transparent!important;color:#fb8b1e!important;'

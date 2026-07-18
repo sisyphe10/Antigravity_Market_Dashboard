@@ -129,7 +129,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
 .wrap-topnav .topnav-item { display: block; position: relative; }
 /* 하위 스트립 (AoE 형태, 색=WRAP 라이트) */
 .wrap-strip { position: sticky; top: 56px; display: flex; justify-content: center; align-items: stretch; gap: 2px; height: 42px; padding: 0 28px; background: #f8f9fa; border-bottom: 1px solid #e5e7eb; z-index: 95; box-sizing: border-box; }
-.wrap-strip .topnav-tab { display: inline-flex; align-items: center; height: 41px; padding: 0 16px; color: #666; font-size: 0.92rem; font-weight: 600; letter-spacing: 0.3px; border: none; border-radius: 0; border-bottom: 2px solid transparent; background: transparent; transition: color 0.12s; }
+.wrap-strip .topnav-tab { display: inline-flex; align-items: center; height: 41px; padding: 0 16px; color: #666; font-size: 16px; font-weight: 600; letter-spacing: 0.3px; border: none; border-radius: 0; border-bottom: 2px solid transparent; background: transparent; transition: color 0.12s; }
 .wrap-strip .topnav-tab:hover { color: #111; background: transparent; border-color: transparent; }
 .wrap-strip .topnav-tab.active { color: #111; font-weight: 700; background: transparent; border-bottom-color: #2d7a3a; }
 .wrap-topnav .topnav-dropdown { top: calc(100% + 8px); width: 100%; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.10); padding: 6px; }
