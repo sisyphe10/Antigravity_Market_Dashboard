@@ -2981,6 +2981,7 @@ def _build_combined_chart_section():
                     Object.keys(scalesConfig).forEach(function(k){ _sc[k] = scalesConfig[k]; });
                     // tooltip 콜백은 mode를 캡처하므로 매번 교체
                     cmbChart.options.plugins.tooltip.callbacks.label = tooltipLabel;
+                    cmbChart._cmbMode = mode;   // update 전 대입 — 첫 draw가 endLabel에서 읽음
                     cmbChart.update('none');
                 } else {
                     cmbChart = new Chart(document.getElementById('cmbDynamicChart'), {
@@ -3000,8 +3001,9 @@ def _build_combined_chart_section():
                             scales: scalesConfig
                         }
                     });
+                    cmbChart._cmbMode = mode;   // 생성자 첫 draw는 mode 미설정으로 끝값이 +N% 오표기 -> 재렌더로 교정
+                    cmbChart.update('none');
                 }
-                cmbChart._cmbMode = mode;   // cmbEndLabelPlugin이 draw 시 읽음
 
                 // 이격도 서브패널 — 100 기준선 점선 + 메인 y축 폭에 맞춰 x축 정렬
                 var dispPanel = document.getElementById('cmbDispPanel');
@@ -3112,8 +3114,9 @@ def _build_combined_chart_section():
                                     }
                                 }
                             });
+                            cmbDispChart._cmbMode = 'raw1';   // 생성자 첫 draw 전 대입 + 재렌더 (B와 동일 사유)
+                            cmbDispChart.update('none');
                         }
-                        cmbDispChart._cmbMode = 'raw1';
                     } else {
                         dispPanel.style.display = 'none';
                         if (cmbDispChart) { cmbDispChart.destroy(); cmbDispChart = null; }
