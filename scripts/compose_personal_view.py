@@ -68,8 +68,7 @@ AOE_DARK_CSS = (
     'td{border-color:#222326!important}'
     'td:not([style*=color]){color:#d9dde2!important}'
     'tbody tr:hover td{background:#191a1d!important}'
-    '.cmb-series-row td:not(.cmb-chart-item):not([style*=color]){color:#c9ced4!important}'
-    '.cmb-series-row td[style*="color:#000"]{color:#c9ced4!important}'
+    '.cmb-series-row td{color:#c9ced4!important}'
     # 등락색 다크용 재단언 — td 일괄 규칙보다 뒤에 두어 우선 적용
     '.pos,td.pos,.positive,td.positive{color:#ff5a5a!important}'
     '.neg,td.neg,.negative,td.negative{color:#5aa2ff!important}'
