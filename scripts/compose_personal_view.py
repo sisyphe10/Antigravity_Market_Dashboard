@@ -40,8 +40,9 @@ AOE_PERSONAL_CSS = ('<style id="aoe-personal-nav">'
 
 # 2026-07-18 본문 블룸버그 터미널 다크(시안 A Terminal Black, 사용자 확정): AoE 루트 페이지 전체.
 # 배경 거의 검정 + 앰버(#fb8b1e) 강조. ★차트 패널(.chart-card/.cmb-chart-item 등, canvas 포함 컨테이너)은
-# 흰색 유지 — Chart.js 텍스트가 다크 전제라 다크 카드에 두면 안 보임. 등락색 인라인 스타일 보존을 위해
-# td 텍스트색은 :not([style*=color]) 한정. Sisyphe 페이지(sisyphe/)는 미적용(구역 구분 유지).
+# 흰색 유지 — Chart.js 텍스트가 다크 전제라 다크 카드에 두면 안 보임. 등락색: 클래스(.pos/.neg 등)는
+# 다크용 밝은 톤으로 재단언(td 일괄 규칙이 덮는 문제 v2 보정), 인라인 밝은 배경 셀은 어두운 글자 유지.
+# Sisyphe 페이지(sisyphe/)는 미적용(구역 구분 유지). v2: 스크린샷 검증 보정 6건(2026-07-18).
 AOE_DARK_CSS = (
     '<style id="aoe-terminal-dark">'
     ':root{--bg-color:#0a0a0a;--card-bg:#111214;--text-color:#d9dde2;--category-bg:#1a1b1e}'
@@ -57,11 +58,18 @@ AOE_DARK_CSS = (
     'box-shadow:none!important}'
     '.date-bar input,.controls select,.filters select,select,input[type=date],input[type=text]'
     '{background:#141517!important;color:#d9dde2!important;border-color:#3a3b3e!important}'
-    '.category-title,.section>h2,.section>h3{color:#fb8b1e!important;letter-spacing:1.5px}'
+    '.category-title,.section>h2,.section>h3,h2.block-title{color:#fb8b1e!important;letter-spacing:1.5px}'
     'th{background:#1a1b1e!important;color:#fb8b1e!important;border-color:#2a2b2e!important}'
     'td{border-color:#222326!important}'
     'td:not([style*=color]){color:#d9dde2!important}'
     'tbody tr:hover td{background:#191a1d!important}'
+    '.cmb-series-row td:not(.cmb-chart-item):not([style*=color]){color:#c9ced4!important}'
+    # 등락색 다크용 재단언 — td 일괄 규칙보다 뒤에 두어 우선 적용
+    '.pos,.positive{color:#ff5a5a!important}'
+    '.neg,.negative{color:#5aa2ff!important}'
+    # 인라인 밝은 배경(히트 틴트·경보 핑크) 위 글자는 어둡게 유지
+    'td[style*=background],tr[style*=background] td{color:#333!important}'
+    '.tabs{border-bottom-color:#fb8b1e!important}'
     '.subtab,.mkt-subtab,.tab,.mbtn,.chg-fbtn,.nav-button,.tw-more-btn,.tw-dl-btn,'
     '.cmb-filter-btn,.cmb-ma-btn'
     '{background:#141517!important;color:#9aa4ae!important;border:1.5px solid #3a3b3e!important;'
@@ -72,6 +80,12 @@ AOE_DARK_CSS = (
     '.mbtn.active,.nav-button.active'
     '{background:#fb8b1e!important;color:#101418!important;border-color:#fb8b1e!important;'
     'font-weight:700}'
+    '.stat-card{border-left-color:#fb8b1e!important}'
+    '.stat-card .label{color:#8a919a!important}'
+    '.stat-card .value{color:#f2f4f6!important}'
+    '.node .node-name{color:#f2f4f6!important}'
+    '.node .node-sched{color:#8a919a!important}'
+    '.tl-band-count{background:#1a1b1e!important;color:#d9dde2!important}'
     '.chart-card,.sector-card,.cmb-chart-item,.idx-chart-item,.lh-card,#heatmap,'
     '.chart-container,.section:has(canvas),div:has(>canvas)'
     '{background:#fff!important;color:#333!important}'
