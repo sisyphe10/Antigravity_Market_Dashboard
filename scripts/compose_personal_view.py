@@ -56,7 +56,8 @@ AOE_DARK_CSS = (
     '.csel-display,.csel-list,.cmb-filter-pop,.tw-filter-pop,.layer,.node,.timeline'
     '{background:#111214!important;color:#d9dde2!important;border-color:#27282b!important;'
     'box-shadow:none!important}'
-    '.date-bar input,.controls select,.filters select,select,input[type=date],input[type=text]'
+    '.date-bar input,.controls select,.filters select,select,textarea,input[type=date],input[type=text],'
+    '.qrow,.plan-in'
     '{background:#141517!important;color:#d9dde2!important;border-color:#3a3b3e!important}'
     '.category-title,.section>h2,.section>h3,h2.block-title{color:#fb8b1e!important;letter-spacing:1.5px}'
     'th{background:#1a1b1e!important;color:#fb8b1e!important;border-color:#2a2b2e!important}'
@@ -87,6 +88,7 @@ AOE_DARK_CSS = (
     '.node .node-name{color:#f2f4f6!important}'
     '.node .node-sched{color:#8a919a!important}'
     '.tl-band-count{background:#1a1b1e!important;color:#d9dde2!important}'
+    '.qrow.starred{background:#1a1610!important}'
     '.chart-card,.sector-card,.cmb-chart-item,.idx-chart-item,.lh-card,#heatmap,'
     '.chart-container,.section:has(canvas),div:has(>canvas)'
     '{background:#fff!important;color:#333!important}'
@@ -98,7 +100,7 @@ def sisyphe_aoe_nav(active):
     def cls(name):
         return 'topnav-tab active' if name == active else 'topnav-tab'
     return (
-        '<nav class="topnav">\n    <div class="topnav-inner"><a href="/" class="topnav-brand">AoE</a>\n'
+        '<nav class="topnav">\n    <div class="topnav-inner"><a href="/" class="topnav-brand">AGE OF EMERGENCE</a>\n'
         '        <div class="topnav-tabs">\n'
         '            <a href="/watchlist/" class="topnav-tab">Watchlist</a>\n'
         '            <a href="/market.html" class="topnav-tab">Market</a>\n'
@@ -195,6 +197,8 @@ for f in glob.glob(os.path.join(REL, "*.html")):
     s = open(f, encoding="utf-8").read()
     n = item_pat.sub("", s)
     n = link_pat.sub("", n)
+    # 2026-07-18: 브랜드 풀네임 (create_dashboard 원천도 변경 — 정적 페이지 대응 겸 멱등)
+    n = n.replace('class="topnav-brand">AoE</a>', 'class="topnav-brand">AGE OF EMERGENCE</a>')
     # 정규화: 기존 주입 fragment·구 Sisyphe 잔재 제거(clean 입력이면 무동작)
     for frag in (WATCHLIST_ITEM, WIKI_ITEM, OLD_WIKI_ITEM, JOURNAL_ITEM, WEEKLY_ITEM,
                  OLD_INVEST_ITEM, OLD_INVEST_ITEM_P1,
@@ -294,6 +298,11 @@ for name in SISYPHE_PAGES:
     if r is None:
         fail("sisyphe/%s: </head> 없음" % name)
     s = r
+    # 2026-07-18 사용자 지시: Sisyphe 구역 구분 폐지 — AoE terminal-dark 를 동일 주입
+    r = inject_before_head(s, AOE_DARK_CSS)
+    if r is None:
+        fail("sisyphe/%s: 다크 CSS 주입 실패" % name)
+    s = r
     if name in ("journal.html", "dashboard.html"):
         s = inject_before_head(s, NO_SIDEBAR)
     if name == "journal.html":
@@ -305,7 +314,9 @@ for name in SISYPHE_PAGES:
     fin = open(p, encoding="utf-8").read()
     if 'id="aoe-nav-unify"' not in fin:
         fail("sisyphe/%s: 통일 CSS 검증 실패" % name)
-    if 'topnav-brand">AoE' not in fin:
+    if 'id="aoe-terminal-dark"' not in fin:
+        fail("sisyphe/%s: 다크 CSS 검증 실패" % name)
+    if 'topnav-brand">AGE OF EMERGENCE' not in fin:
         fail("sisyphe/%s: AoE nav 교체 검증 실패" % name)
     active_label = {'journal': 'Journal', 'memento': 'Memento', 'ledger': 'Ledger'}[ACTIVE_OF[name]]
     chk = fin.replace(' style="margin-left:auto"', '')

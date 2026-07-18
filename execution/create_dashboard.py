@@ -305,7 +305,7 @@ def top_nav_html(active=''):
     return (
         '<nav class="topnav"><div class="topnav-inner">'
         # AoE 브랜드 = 상단바 층위, 전 개인 페이지 동일 (2026-07-12 사용자 — 사이드바 배지에서 이동)
-        '<a href="index.html" class="topnav-brand">AoE</a>'
+        '<a href="index.html" class="topnav-brand">AGE OF EMERGENCE</a>'
         '<div class="topnav-tabs">' + ''.join(parts) + '</div>'
         '</div></nav>'
     )
