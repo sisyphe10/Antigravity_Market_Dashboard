@@ -29,7 +29,7 @@ alerts: ""
 - 위젯 데이터는 `landing_highlights.json`(18:45 타이머)+`landing_quotes.json`, 예탁금/신용 차트는 `kofia_stats.json`.
 - `create_dashboard.py`가 생성, kofia/finalize/recalc/crawl 등 여러 잡이 재생성.
 - 좌측 'Age of Emergence' 브랜드 클릭=index로.
-- ★**개인 ts.net에서는 2026-07-16부로 폐지** — Caddy가 루트(`/`)와 `/index.html`을 **모두** `/sisyphe/memento.html`로 302 리다이렉트해 접근 경로가 없다([[web-caddy]]). 파일은 잡들이 계속 생성하고 스냅숏에도 실리지만 개인 화면에서는 도달 불가. 하루 전(07-15) 루트가 `/watchlist/`로 옮겨가며 '직접 접근으로만 열림'이던 것이 한 세대 만에 완전 폐지로 굳었다.
+- ★**개인 ts.net에서는 2026-07-16부로 폐지** — Caddy가 루트(`/`)와 `/index.html`을 **모두** 리다이렉트해 접근 경로가 없다([[web-caddy]]). 리다이렉트 목적지는 흔들렸으나(07-15 `/watchlist/` → 07-16 `/sisyphe/memento.html` → **07-18 다시 `/watchlist/`**) 어느 세대든 이 랜딩으로는 돌아오지 않는다. 파일은 잡들이 계속 생성하고 스냅숏에도 실리지만 개인 화면에서는 도달 불가.
 - **GitHub Pages(팀원용) 게시본은 종전대로 랜딩** — 이 페이지가 살아 있는 이유. 개인 뷰의 nav 재구성은 `compose_personal_view.py`가 스냅숏 사본에서만 수행하므로 repo 원본·팀 게시본은 불변([[web-publish-snapshot]]).
 
 ## Reads

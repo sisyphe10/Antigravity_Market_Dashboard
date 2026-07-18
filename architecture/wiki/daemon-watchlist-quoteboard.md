@@ -29,7 +29,7 @@ alerts: "KeepAlive=true (launchd 자동 재기동, ThrottleInterval=10)"
 
 **Domain:** 운영 · 인프라 · **Type:** Infra · **Runs on:** vm_macmini · **Schedule (KST):** 상시 (스윕 장중 1s · 장외 60s) · **Status:** active · **Project:** antigravity
 
-2026-07-15 신설. POP HTS 상시실행을 대체하는 KIS 실시간 시세판을 **상시 데몬**으로 띄우는 launchd 서비스(`com.antigravity.watchlist`, RunAtLoad + KeepAlive, `run_bot.sh watchlist` wrapper 경유). 신설 당일엔 ts.net 첫 화면이었으나(루트 302 대상), **2026-07-16 첫 화면은 Memento로 넘어갔다** — 이제 `/watchlist/`와 nav 탭(좌측 선두)으로 진입한다([[web-caddy]]).
+2026-07-15 신설. POP HTS 상시실행을 대체하는 KIS 실시간 시세판을 **상시 데몬**으로 띄우는 launchd 서비스(`com.antigravity.watchlist`, RunAtLoad + KeepAlive, `run_bot.sh watchlist` wrapper 경유). 신설 당일엔 ts.net 첫 화면이었고(루트 302 대상), 2026-07-16 잠시 Memento로 넘어갔다가 **2026-07-18 다시 첫 화면으로 복귀** — 루트(`/`)·`/index.html`이 `/watchlist/`로 302된다([[web-caddy]]). nav 탭(좌측 선두)으로도 진입한다.
 
 - 바인딩: stdlib `ThreadingHTTPServer`(`server.py`)가 `127.0.0.1:8778` 루프백 고정 — 직접 공개 노출 없음. Caddy가 `/watchlist/*`를 이 포트로 리버스 프록시(`no-store`). 라우트는 `/`(index.html) · `/data`(시세 JSON, 프런트 1초 폴링) · `/wl`(관심그룹 GET/POST) 3종, 쿼리스트링은 무시.
 - 종목: `universe_tickers.csv`의 KRX/KOSDAQ 전 종목(~463). 시세는 KIS multprice(`FHKST11300006`) **30종목/콜 배치** 스윕 — 장중(평일 08:50~15:45) 1초, 장외 60초(KIS 쿼터 절약), 배치 실패 시 최대 10초 지수 백오프.

@@ -28,7 +28,7 @@ alerts: "KeepAlive=true (launchd 자동 재기동, ThrottleInterval=15)"
 
 - 바인딩: FastAPI 서버(`server.py`)가 `127.0.0.1:8787` 루프백 고정 — 직접 공개 노출 없음. Caddy가 `/wiki/*`를 이 포트로 리버스 프록시([[web-caddy]]) → AoE 'Wiki' 탭.
 - 질의 대상 = 데이터레이크 md 코퍼스 + duckdb 샌드박스(allowed→잠금). 소스·설계 상세는 [[infra-datalake]] / `datalake/DESIGN.md`.
-- ★**nav는 손으로 맞춰야 하는 사본**(`datalake/webui/static/index.html`): 이 페이지는 스냅숏이 아니라 데몬에서 직접 서빙되므로 [[web-publish-snapshot]]의 `compose_personal_view.py` nav 주입이 **닿지 않는다**. 2026-07-16 nav 개편 때 [[daemon-watchlist-quoteboard]]와 함께 이 파일의 topnav 마크업을 따로 고쳐 통일했다(`Wiki` 탭에 `margin-left:auto`를 줘 Wiki·Architecture를 우측 그룹으로 미는 것도 여기 사본에 직접 박혀 있다).
+- ★**nav는 손으로 맞춰야 하는 사본**(`datalake/webui/static/index.html`): 이 페이지는 스냅숏이 아니라 데몬에서 직접 서빙되므로 [[web-publish-snapshot]]의 `compose_personal_view.py` nav 주입이 **닿지 않는다**. 2026-07-16 nav 개편 때 [[daemon-watchlist-quoteboard]]와 함께 이 파일의 topnav 마크업을 따로 고쳐 통일했다(`Wiki` 탭에 `margin-left:auto`를 줘 Wiki·Architecture를 우측 그룹으로 미는 것도 여기 사본에 직접 박혀 있다). 2026-07-18 브랜드 라벨을 `AoE` → `AGE OF EMERGENCE`로 확장할 때도 이 사본을 손으로 맞췄다([[web-publish-snapshot]]).
 - launchd 관리: `ThrottleInterval=15`로 크래시 루프 억제, 로그는 `logs/launchd/datalake-webui.{out,err}`. 계산 잡 아님(catch-up 대상 아님).
 
 ## Reads

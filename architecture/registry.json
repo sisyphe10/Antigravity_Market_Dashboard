@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-07-16",
+  "updated": "2026-07-18",
   "projects": [
    "antigravity"
   ],
@@ -844,7 +844,7 @@
    "runs_on": "github",
    "schedule_kst": "생성=여러 잡",
    "status": "active",
-   "desc_md": "팀원용 게시본(GitHub Pages)의 진입점 랜딩 페이지. sparkline 회전 위젯(50슬롯)+인용구 카드, 상단 탭바 네비게이션(WRAP/Market/Architecture).\n\n- 위젯 데이터는 `landing_highlights.json`(18:45 타이머)+`landing_quotes.json`, 예탁금/신용 차트는 `kofia_stats.json`.\n- `create_dashboard.py`가 생성, kofia/finalize/recalc/crawl 등 여러 잡이 재생성.\n- 좌측 'Age of Emergence' 브랜드 클릭=index로.\n- ★**개인 ts.net에서는 2026-07-16부로 폐지** — Caddy가 루트(`/`)와 `/index.html`을 **모두** `/sisyphe/memento.html`로 302 리다이렉트해 접근 경로가 없다([[web-caddy]]). 파일은 잡들이 계속 생성하고 스냅숏에도 실리지만 개인 화면에서는 도달 불가. 하루 전(07-15) 루트가 `/watchlist/`로 옮겨가며 '직접 접근으로만 열림'이던 것이 한 세대 만에 완전 폐지로 굳었다.\n- **GitHub Pages(팀원용) 게시본은 종전대로 랜딩** — 이 페이지가 살아 있는 이유. 개인 뷰의 nav 재구성은 `compose_personal_view.py`가 스냅숏 사본에서만 수행하므로 repo 원본·팀 게시본은 불변([[web-publish-snapshot]]).",
+   "desc_md": "팀원용 게시본(GitHub Pages)의 진입점 랜딩 페이지. sparkline 회전 위젯(50슬롯)+인용구 카드, 상단 탭바 네비게이션(WRAP/Market/Architecture).\n\n- 위젯 데이터는 `landing_highlights.json`(18:45 타이머)+`landing_quotes.json`, 예탁금/신용 차트는 `kofia_stats.json`.\n- `create_dashboard.py`가 생성, kofia/finalize/recalc/crawl 등 여러 잡이 재생성.\n- 좌측 'Age of Emergence' 브랜드 클릭=index로.\n- ★**개인 ts.net에서는 2026-07-16부로 폐지** — Caddy가 루트(`/`)와 `/index.html`을 **모두** 리다이렉트해 접근 경로가 없다([[web-caddy]]). 리다이렉트 목적지는 흔들렸으나(07-15 `/watchlist/` → 07-16 `/sisyphe/memento.html` → **07-18 다시 `/watchlist/`**) 어느 세대든 이 랜딩으로는 돌아오지 않는다. 파일은 잡들이 계속 생성하고 스냅숏에도 실리지만 개인 화면에서는 도달 불가.\n- **GitHub Pages(팀원용) 게시본은 종전대로 랜딩** — 이 페이지가 살아 있는 이유. 개인 뷰의 nav 재구성은 `compose_personal_view.py`가 스냅숏 사본에서만 수행하므로 repo 원본·팀 게시본은 불변([[web-publish-snapshot]]).",
    "code": [
     "execution/create_dashboard.py"
    ],
@@ -900,7 +900,7 @@
    "runs_on": "github",
    "schedule_kst": "생성=여러 잡",
    "status": "active",
-   "desc_md": "랩 상품 운용 대시보드. Dashboard/공시/Order/AUM/수수료/기여도 탭 묶음. 자문사 실무의 중심 화면.\n\n- **독립 페이지화(2026-07-12, 'Life WRAP' 리브랜드)**: 팀원 전용 페이지로 분리 — 개인 탭을 nav에서 제거하고, 탭 축을 뒤집어(탭 상단, 섹션 TOC 좌측) 탭별 컨텍스추얼 사이드바를 둔다. **팀원 공개는 gh-pages 전용**([[web-publish-pages]]) — 개인 대시보드([[web-caddy]] ts.net)에서는 `compose_personal_view.py`가 이 페이지를 아예 제거한다([[web-publish-snapshot]]).\n- ★**AoE 다크 nav 통일에서 제외(2026-07-16)**: 개인 뷰 전 페이지가 단일 AoE 다크 topnav로 통일될 때 **wrap.html만 원래의 라이트 nav(흰 배경+알약 탭)를 유지**한다 — 팀원용 페이지라 개인 뷰의 nav 재구성 대상이 아니라는 정책 결정. 생성기의 다크 `TOP_NAV_CSS`를 `.wrap-topnav` 스코프에서 되돌리는 방식이라, **nav 스타일을 손댈 때 이 갈래를 깨기 쉽다**(nav 높이 72px에 사이드바·chips sticky·스크롤스파이 기준선이 물려 있음).\n- PORTFOLIO 종목표·수익률·차트는 `portfolio_data.json`+`Wrap_NAV.xlsx` 계산 산출을 소비(최상위 `_` prefix 메타 키 규약은 [[store-portfolio-data]]).\n- **CHART 자가복구 2중 안전망(2026-07-16)**: 이 페이지는 비밀번호 게이트(`pw-hidden`) 뒤에 있어 **차트가 숨겨진 상태(height 0)에서 생성되면 축 눈금이 퇴화한 채 굳는다**(Chart.js). ① 250ms×40회(10초) 가시성 폴링 — 캔버스가 실제 표시되는 순간 `resize()+update('none')` 1회. ② 폴링 10초를 넘겨 비밀번호를 늦게 푸는 경우를 폴링이 놓치므로, `checkPw()` 성공 경로가 `_wrapHealKick()`을 직접 호출. 폴링=best-effort·시간제한, unlock 콜백=이벤트 기반 확정 트리거로 서로를 메운다.\n  - ★사고 사례: nav 스타일 커밋(`1733fdca`)이 **stale 워킹트리로 파일을 통째 덮어써 3분 전의 unlock heal-kick을 조용히 삭제** → `1e4c1732`로 재적용. 자동 커밋 잡이 상시 도는 프로덕션 트리에서 오래된 트리 기반 전체 덮어쓰기가 무관한 수정을 되돌리는 알려진 실패 모드다.\n- Order 탭: 임시저장(회색, `orders/pending_orders.json`)→최종저장(초록, finalize 트리거). 기여도 탭은 `contribution_data.json` 런타임 fetch. 주문 접수는 웹(wrap.html→GitHub Contents API) 유지 — 별도 주문봇 스캐폴드는 폐기됐다.\n- **Order 통합 매트릭스(2026-07-13)**: 포트별 카드 → 합집합 행(종목)×포트 열 매트릭스 VIEW로 개편. 7개 개별 컬럼은 `wrap_config.order_matrix_columns()`로 동적 생성, 개별키 실저장, 일반형 동기화 토글(삼성 트루밸류 컬럼 정렬), cash row 포함. pending 스키마·save/finalize/email/excel 계층은 불변(VIEW 층만 교체). 정본 디자인은 은퇴한 test 페이지에서 1:1 이식.\n- **매트릭스 입력 보조(2026-07-14)**: 일반형에 이어 **전환형 동기화** 토글 추가(`syncToggle`/`syncToggleTarget` 2개 병렬) — 같은 그룹 열에 값을 일괄 전파. Tab 네비게이션은 동기화가 켜진 그룹의 **대표 열 1개만 순회**(`_mtxTabStops`)하고 추천사유는 별도 체인 — 수십 종목×7포트 수기 입력의 키 이동 부담을 줄인다.\n- **ORDER 롤오버 게이트(2026-07-14)**: '변경전' 기준선은 D-1(`weight_prev`)이나, `portfolio_data.json`의 `_price_asof`가 오늘보다 이르면(16:00 재생성 전 오전) 어제 확정분을 baseline으로 흡수해 변경 없음(검정)으로 표시(`_orderSnapshotStale`). 자정을 넘긴 확정 주문이 이튿날 오전까지 '변동'으로 남던 것을 해소.\n- **Email 탭 발송 요청(2026-07-13)**: [컴플 메일]/[증권사 메일] 2버튼 각자 모달, 첨부 base64 생성(900KB 가드)+미리보기(하이웍스 실서명 HTML). [메일 발송 요청]이 `orders/email_send_request.json`을 Contents API로 기록 → [[timer-advisory-emails]] 60초 폴러가 하이웍스 SMTP로 발송. (컴플라이언스 선발송 게이팅은 사용자 지시로 제거.)\n- 증권사·상품 정의는 단일 레지스트리(`execution/wrap_config.py`)에서 파생.\n- `create_dashboard.py` 생성. finalize/recalc가 주 재생성원.",
+   "desc_md": "랩 상품 운용 대시보드. Dashboard/공시/Order/AUM/수수료/기여도 탭 묶음. 자문사 실무의 중심 화면.\n\n- **독립 페이지화(2026-07-12, 'Life WRAP' 리브랜드)**: 팀원 전용 페이지로 분리 — 개인 탭을 nav에서 제거하고, 탭 축을 뒤집어(탭 상단, 섹션 TOC를 탭별 컨텍스추얼 사이드바로) 배치했다. **팀원 공개는 gh-pages 전용**([[web-publish-pages]]) — 개인 대시보드([[web-caddy]] ts.net)에서는 `compose_personal_view.py`가 이 페이지를 아예 제거한다([[web-publish-snapshot]]).\n- **좌측 사이드바 폐지 → 가로 스트립 3단(2026-07-18)**: AoE Market 폼에 맞춰 nav를 3단 가로 밴드로 재배치했다. ① **54px 브랜드 바**(`.wrap-topnav`, `Life WRAP` 브랜드 + 우측 `Updated`만), ② **42px 필 스트립**(`.wrap-strip`, sticky) — 5개 WRAP 탭(dashboard/order/공시/기여도/수수료)이 72px topnav에서 이 스트립으로 이동, ③ 스트립 아래 **섹션 TOC**(구 좌측 `.wrap-sidebar`) — 좌측 고정 레일에서 **가로 중앙정렬 사각 필 버튼 줄**로 바뀌었다(`display:flex/flex-wrap`, `공시` 탭은 숨김). 섹션 TOC의 스크롤스파이/그룹전환 **JS는 불변**(레이아웃 CSS만 교체), 본문 좌측 오프셋도 224px→24px로 해제. \n- ★**AoE 다크 nav 통일에서 제외(2026-07-16)**: 개인 뷰 전 페이지가 단일 AoE 다크 topnav로 통일될 때 **wrap.html만 원래의 라이트 nav(흰 배경+알약 탭)를 유지**한다 — 팀원용 페이지라 개인 뷰의 nav 재구성 대상이 아니라는 정책 결정. 생성기의 다크 `TOP_NAV_CSS`를 `.wrap-topnav` 스코프에서 되돌리는 방식이라, **nav 스타일을 손댈 때 이 갈래를 깨기 쉽다**(브랜드 바·스트립·섹션 TOC sticky·스크롤스파이 기준선이 서로 물려 있음).\n- PORTFOLIO 종목표·수익률·차트는 `portfolio_data.json`+`Wrap_NAV.xlsx` 계산 산출을 소비(최상위 `_` prefix 메타 키 규약은 [[store-portfolio-data]]).\n- **CHART 자가복구 2중 안전망(2026-07-16)**: 이 페이지는 비밀번호 게이트(`pw-hidden`) 뒤에 있어 **차트가 숨겨진 상태(height 0)에서 생성되면 축 눈금이 퇴화한 채 굳는다**(Chart.js). ① 250ms×40회(10초) 가시성 폴링 — 캔버스가 실제 표시되는 순간 `resize()+update('none')` 1회. ② 폴링 10초를 넘겨 비밀번호를 늦게 푸는 경우를 폴링이 놓치므로, `checkPw()` 성공 경로가 `_wrapHealKick()`을 직접 호출. 폴링=best-effort·시간제한, unlock 콜백=이벤트 기반 확정 트리거로 서로를 메운다.\n  - ★사고 사례: nav 스타일 커밋(`1733fdca`)이 **stale 워킹트리로 파일을 통째 덮어써 3분 전의 unlock heal-kick을 조용히 삭제** → `1e4c1732`로 재적용. 자동 커밋 잡이 상시 도는 프로덕션 트리에서 오래된 트리 기반 전체 덮어쓰기가 무관한 수정을 되돌리는 알려진 실패 모드다.\n- Order 탭: 임시저장(회색, `orders/pending_orders.json`)→최종저장(초록, finalize 트리거). 기여도 탭은 `contribution_data.json` 런타임 fetch. 주문 접수는 웹(wrap.html→GitHub Contents API) 유지 — 별도 주문봇 스캐폴드는 폐기됐다.\n- **Order 통합 매트릭스(2026-07-13)**: 포트별 카드 → 합집합 행(종목)×포트 열 매트릭스 VIEW로 개편. 7개 개별 컬럼은 `wrap_config.order_matrix_columns()`로 동적 생성, 개별키 실저장, 일반형 동기화 토글(삼성 트루밸류 컬럼 정렬), cash row 포함. pending 스키마·save/finalize/email/excel 계층은 불변(VIEW 층만 교체). 정본 디자인은 은퇴한 test 페이지에서 1:1 이식.\n- **매트릭스 입력 보조(2026-07-14)**: 일반형에 이어 **전환형 동기화** 토글 추가(`syncToggle`/`syncToggleTarget` 2개 병렬) — 같은 그룹 열에 값을 일괄 전파. Tab 네비게이션은 동기화가 켜진 그룹의 **대표 열 1개만 순회**(`_mtxTabStops`)하고 추천사유는 별도 체인 — 수십 종목×7포트 수기 입력의 키 이동 부담을 줄인다.\n- **ORDER 롤오버 게이트(2026-07-14)**: '변경전' 기준선은 D-1(`weight_prev`)이나, `portfolio_data.json`의 `_price_asof`가 오늘보다 이르면(16:00 재생성 전 오전) 어제 확정분을 baseline으로 흡수해 변경 없음(검정)으로 표시(`_orderSnapshotStale`). 자정을 넘긴 확정 주문이 이튿날 오전까지 '변동'으로 남던 것을 해소.\n- **Email 탭 발송 요청(2026-07-13)**: [컴플 메일]/[증권사 메일] 2버튼 각자 모달, 첨부 base64 생성(900KB 가드)+미리보기(하이웍스 실서명 HTML). [메일 발송 요청]이 `orders/email_send_request.json`을 Contents API로 기록 → [[timer-advisory-emails]] 60초 폴러가 하이웍스 SMTP로 발송. (컴플라이언스 선발송 게이팅은 사용자 지시로 제거.)\n- 증권사·상품 정의는 단일 레지스트리(`execution/wrap_config.py`)에서 파생.\n- `create_dashboard.py` 생성. finalize/recalc가 주 재생성원.",
    "code": [
     "execution/create_dashboard.py",
     "execution/wrap_config.py"
@@ -2121,7 +2121,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "상시 (스윕 장중 1s · 장외 60s)",
    "status": "active",
-   "desc_md": "2026-07-15 신설. POP HTS 상시실행을 대체하는 KIS 실시간 시세판을 **상시 데몬**으로 띄우는 launchd 서비스(`com.antigravity.watchlist`, RunAtLoad + KeepAlive, `run_bot.sh watchlist` wrapper 경유). 신설 당일엔 ts.net 첫 화면이었으나(루트 302 대상), **2026-07-16 첫 화면은 Memento로 넘어갔다** — 이제 `/watchlist/`와 nav 탭(좌측 선두)으로 진입한다([[web-caddy]]).\n\n- 바인딩: stdlib `ThreadingHTTPServer`(`server.py`)가 `127.0.0.1:8778` 루프백 고정 — 직접 공개 노출 없음. Caddy가 `/watchlist/*`를 이 포트로 리버스 프록시(`no-store`). 라우트는 `/`(index.html) · `/data`(시세 JSON, 프런트 1초 폴링) · `/wl`(관심그룹 GET/POST) 3종, 쿼리스트링은 무시.\n- 종목: `universe_tickers.csv`의 KRX/KOSDAQ 전 종목(~463). 시세는 KIS multprice(`FHKST11300006`) **30종목/콜 배치** 스윕 — 장중(평일 08:50~15:45) 1초, 장외 60초(KIS 쿼터 절약), 배치 실패 시 최대 10초 지수 백오프.\n- 시총 = 현재가 × 상장주식수. 상장주식수는 KIS `inquire-price`로 매일 1회 갱신하고 `shares_cache.json`에 캐시 — 기동 시 오늘자 캐시 > 이전 캐시 > `kis_universe_master.json` 순으로 seed해 즉시 시작하고, 오늘자 캐시라도 누락 종목만 별도 보충(2026-07-15).\n- 관심그룹 3종은 **서버 저장**(`watchlists.json`, 기기 공통 — 브라우저 로컬 아님). 그룹 1·2는 `portfolio_data.json`에서 10분 주기 **키워드 매칭 자동 동기화**(1=일반형/개방형/지속형, 2=목표전환형/성과모집형)라 회차 교체에 자동 추종한다. 수동 추가분은 직전 `auto` 목록과의 차집합으로 식별해 보존, 포트에서 빠진 auto 종목만 제거. 그룹 3은 수동 전용.\n- 프런트(`quoteboard/index.html`): AoE topnav 동형 · 섹터 탭 멀티선택 · 정렬 · 전역 검색창에서 그룹 추가. 로그는 `logs/launchd/watchlist.{out,err}`. 계산 잡 아님(catch-up 대상 아님).\n- ★**nav는 손으로 맞춰야 하는 사본**: 이 페이지는 스냅숏이 아니라 데몬에서 직접 서빙되므로 [[web-publish-snapshot]]의 `compose_personal_view.py` nav 주입이 **닿지 않는다**. 2026-07-16 nav 개편(Sisyphe 드롭다운 해체 → Watchlist·Memento·Weekly 승격, 좌/우 2그룹) 때도 [[daemon-datalake-webui]]의 Wiki 페이지와 함께 이 파일의 마크업을 따로 고쳐 통일했다 — nav를 바꾸면 여기도 같이 고쳐야 어긋나지 않는다.",
+   "desc_md": "2026-07-15 신설. POP HTS 상시실행을 대체하는 KIS 실시간 시세판을 **상시 데몬**으로 띄우는 launchd 서비스(`com.antigravity.watchlist`, RunAtLoad + KeepAlive, `run_bot.sh watchlist` wrapper 경유). 신설 당일엔 ts.net 첫 화면이었고(루트 302 대상), 2026-07-16 잠시 Memento로 넘어갔다가 **2026-07-18 다시 첫 화면으로 복귀** — 루트(`/`)·`/index.html`이 `/watchlist/`로 302된다([[web-caddy]]). nav 탭(좌측 선두)으로도 진입한다.\n\n- 바인딩: stdlib `ThreadingHTTPServer`(`server.py`)가 `127.0.0.1:8778` 루프백 고정 — 직접 공개 노출 없음. Caddy가 `/watchlist/*`를 이 포트로 리버스 프록시(`no-store`). 라우트는 `/`(index.html) · `/data`(시세 JSON, 프런트 1초 폴링) · `/wl`(관심그룹 GET/POST) 3종, 쿼리스트링은 무시.\n- 종목: `universe_tickers.csv`의 KRX/KOSDAQ 전 종목(~463). 시세는 KIS multprice(`FHKST11300006`) **30종목/콜 배치** 스윕 — 장중(평일 08:50~15:45) 1초, 장외 60초(KIS 쿼터 절약), 배치 실패 시 최대 10초 지수 백오프.\n- 시총 = 현재가 × 상장주식수. 상장주식수는 KIS `inquire-price`로 매일 1회 갱신하고 `shares_cache.json`에 캐시 — 기동 시 오늘자 캐시 > 이전 캐시 > `kis_universe_master.json` 순으로 seed해 즉시 시작하고, 오늘자 캐시라도 누락 종목만 별도 보충(2026-07-15).\n- 관심그룹 3종은 **서버 저장**(`watchlists.json`, 기기 공통 — 브라우저 로컬 아님). 그룹 1·2는 `portfolio_data.json`에서 10분 주기 **키워드 매칭 자동 동기화**(1=일반형/개방형/지속형, 2=목표전환형/성과모집형)라 회차 교체에 자동 추종한다. 수동 추가분은 직전 `auto` 목록과의 차집합으로 식별해 보존, 포트에서 빠진 auto 종목만 제거. 그룹 3은 수동 전용.\n- 프런트(`quoteboard/index.html`): AoE topnav 동형 · 섹터 탭 멀티선택 · 정렬 · 전역 검색창에서 그룹 추가. 로그는 `logs/launchd/watchlist.{out,err}`. 계산 잡 아님(catch-up 대상 아님).\n- ★**nav는 손으로 맞춰야 하는 사본**: 이 페이지는 스냅숏이 아니라 데몬에서 직접 서빙되므로 [[web-publish-snapshot]]의 `compose_personal_view.py` nav 주입이 **닿지 않는다**. 2026-07-16 nav 개편(Sisyphe 드롭다운 해체 → Watchlist·Memento·Weekly 승격, 좌/우 2그룹) 때도 [[daemon-datalake-webui]]의 Wiki 페이지와 함께 이 파일의 마크업을 따로 고쳐 통일했다 — nav를 바꾸면 여기도 같이 고쳐야 어긋나지 않는다.",
    "code": [
     "launchd/web/com.antigravity.watchlist.plist",
     "quoteboard/server.py",
@@ -2142,6 +2142,101 @@
     "store-portfolio-data"
    ],
    "alerts": "KeepAlive=true (launchd 자동 재기동, ThrottleInterval=10)"
+  },
+  {
+   "id": "daemon-plan-api",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "infra",
+   "name": "Plan API 데몬 (Sisyphe Ledger 자금계획, 127.0.0.1:8790)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "상시",
+   "status": "active",
+   "desc_md": "2026-07-15 신설. Sisyphe Ledger 'Plan' 탭의 자금계획 JSON을 서빙하는 상시 데몬(`com.antigravity.plan-api`, RunAtLoad + KeepAlive). Caddy가 `/plan-api/*`를 이 포트로 리버스 프록시([[web-caddy]]).\n\n- 바인딩: `127.0.0.1:8790` 루프백 고정 — 직접 공개 노출 없음. 게이트는 **테일넷 단독**(Caddy 라우트 주석은 'basic_auth 이중'이라 적혀 있으나 실제 설정엔 auth import가 없다 — 주석이 stale).\n- **백엔드 코드·데이터 모두 repo 밖** — plist가 `~/Journal/scripts/plan_api.py`를 repo venv 파이썬으로 띄우고, 데이터는 `~/Journal/plan_web.json`(**계좌번호 포함**). Journal 자산은 맥미니 로컬 전용으로 git·게시 파이프라인과 격리(전역 규칙 Journal 섹션) → repo가 소유하는 것은 launchd 유닛뿐.\n- launchd 관리: `ThrottleInterval=10`으로 크래시 루프 억제, 실행은 봇 공용 wrapper `launchd/bots/run_bot.sh plan-api`, 로그는 `logs/launchd/plan-api.{out,err}`. 계산 잡 아님(catch-up 대상 아님).\n- ★plist의 경로가 프로덕션 트리(`~/Antigravity_Market_Dashboard`)로 하드코딩돼 있다 — 다른 타이머 plist의 `__REPO__` 토큰 치환 방식과 달라 클론에서 그대로 쓸 수 없다.",
+   "code": [
+    "launchd/web/com.antigravity.plan-api.plist",
+    "launchd/bots/run_bot.sh"
+   ],
+   "reads": [
+    "ext-sisyphe"
+   ],
+   "depends_on": [
+    "infra-vm-macmini",
+    "ext-sisyphe"
+   ],
+   "alerts": "KeepAlive=true (launchd 자동 재기동, ThrottleInterval=10)"
+  },
+  {
+   "id": "src-deriv-daily",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "pipeline_source",
+   "name": "파생·수급 13종 (fetch_deriv_daily.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "23:30 (kodex 타이머 편승)",
+   "status": "active",
+   "desc_md": "2026-07-16 신설. 삼성전자·SK하이닉스의 파생·수급 지표와 VKOSPI를 매일 수집해 `dataset.csv`에 적재하는 소스. 이력은 커밋 `19eeefcd`로 백필됐다.\n\n- **시리즈 13종** — 종목별(삼성전자·SK하이닉스) 6종: 현선물 괴리율(%, KRX MDCSTAT12501 최근월물), 미결제약정(계약, 전월물 합산), 미결제약정 금액(억원, 합산계약×승수10주×최근월물 종가), 공매도잔고(억원, pykrx, **T+2 공시**), 시가총액(억원, pykrx), 레버리지 ETF AUM(억원, KRX MDCSTAT04501 단일종목 레버리지·인버스 제외 순자산 합산). 여기에 `VKOSPI`(pt, KIS FHKUP03500100 업종 U/0503).\n- 기본 최근 7일 upsert(휴장일 조용 skip → T+2 공매도가 자연 보정), `--days N`으로 조정.\n- **실행 경로**: `run_kodex_sectors.sh`가 kodex→KOSIS→일본capex 다음 4번째로 `|| true` 호출 — 즉 23:30 [[timer-kodex-sectors]] 편승이다. KRX 인증이 필요해 클라우드 IP가 막히는 VM 전용 경로에 얹은 것으로, KRX 로그인은 kodex와 직렬화된다.\n- ★**함정**: 소스 docstring은 '맥미니 launchd deriv-daily (23:40 KST)'라고 적혀 있으나 그런 타이머 유닛은 없다(`schedule.tsv`·`launchd/timers/` 모두 부재) — 실제는 위 23:30 편승. docstring이 stale.\n- 소비자: `create_dashboard.py`가 market.html DATA 탭 '파생·수급' 그룹 차트로 그린다([[page-market]]).",
+   "code": [
+    "execution/fetch_deriv_daily.py"
+   ],
+   "writes": [
+    "store-dataset-csv"
+   ],
+   "depends_on": [
+    "timer-kodex-sectors",
+    "ext-data-apis"
+   ],
+   "alerts": "실패해도 타이머 계속(|| true) — 결손은 신선도 점검(3영업일)이 경보"
+  },
+  {
+   "id": "timer-memento-telegram",
+   "project": "antigravity",
+   "domain": "personal",
+   "type": "timer",
+   "name": "Memento 점심 텔레그램 타이머 (12:00)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "12:00 매일",
+   "status": "active",
+   "desc_md": "2026-07-16 신설. 매일 12:00 KST '오늘의 따끔어'(Memento)를 텔레그램으로 1통 보내는 타이머(`com.antigravity.memento-telegram`). 같은 문구를 화면으로 보는 경로가 AoE 'Memento' 탭([[web-caddy]]의 기본 화면).\n\n- **실행 스크립트는 repo 밖** — `run_timer_job.sh memento-telegram`이 `~/Journal/scripts/memento_telegram.py`를 repo venv 파이썬으로 호출한다. Journal 자산은 맥미니 로컬 전용이라 git·게시 파이프라인과 격리(전역 규칙 Journal 섹션) → 이 위키가 기술할 수 있는 실체는 타이머 배선까지다.\n- wrapper 타임아웃 120초(텔레그램 1통), 설치는 `install_timers.sh` NAMES 목록. `RunAtLoad=false`.\n- 계산 잡이 아니라 알림 잡 — 놓친 실행을 뒤늦게 보내면 '점심 따끔어'의 의미가 없다.",
+   "code": [
+    "launchd/timers/com.antigravity.memento-telegram.plist",
+    "launchd/timers/run_timer_job.sh"
+   ],
+   "depends_on": [
+    "infra-vm-macmini",
+    "infra-telegram",
+    "ext-sisyphe"
+   ],
+   "alerts": "FAIL → notify_sisyphe_failure.sh memento-telegram → 텔레그램"
+  },
+  {
+   "id": "timer-wrap-principle-check",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "timer",
+   "name": "WRAP 원칙 점검 타이머 (17:10, 변화 시에만 발송)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "17:10 평일",
+   "status": "active",
+   "desc_md": "2026-07-16 신설. 매일 17:10 KST WRAP 포트폴리오의 투자원칙 준수를 점검해 **위반 상태가 변했을 때만** 텔레그램(🧭)으로 알리는 타이머(`com.antigravity.wrap-principle-check` → `execution/wrap_principle_check.py`). 16:xx 수집·리포트 잡들 뒤에 배치.\n\n- **알림 설계(v2, 변화 기반)**: 행위 룰(당일 발생 시 항상) = 물타기 의심(원칙17)·약세장 신규 편입(원칙11). 상태 룰(변화 기반) = 계좌 MDD(원칙3)·섹터 쏠림(원칙26)·종목 DD·삥(원칙25)·종목 수 상한·단일 종목 쏠림·지수 20일선(원칙8) — 신규 진입 🆕 / 해소 ✅ 에만 상세, 지속분은 요약 1줄. **변화·행위가 없으면 평일 침묵**, 월요일은 전체 상세 리포트.\n- 전일 상태 = `logs/wrap_principle_state.json`(diff 근거). 첫 실행은 baseline 스냅숏만 저장해 🆕 도배를 막고, `WPC_SEED` 환경변수는 무발송 시드 모드(배포 직후 상태 동기화용). 행위 룰은 `actions_sent`+날짜로 당일 재발송 차단, 종목 단위 룰은 상품 중복 없이 1회만 표기.\n- 임계값은 `config/wrap_principles_config.json`(없으면 코드의 `DEFAULTS` — 종목 수 15·최소비중 2%·섹터 65%·종목 DD -30%·NAV MDD -10% 등). 주말은 자체 스킵.\n- 입력은 `portfolio_data.json`(보유·비중)·`Wrap_NAV.xlsx`(NAV 드로다운)·`dataset.csv`(KOSPI 20일선, 17:10 시점엔 통상 D-1 종가라 기준일을 문구에 명기). `portfolio_data.json`이 30시간보다 오래되면 갱신 지연 경고를 덧붙인다.\n- wrapper 타임아웃 300초(`run_timer_job.sh`), 설치는 `install_timers.sh` NAMES 목록.",
+   "code": [
+    "launchd/timers/com.antigravity.wrap-principle-check.plist",
+    "execution/wrap_principle_check.py"
+   ],
+   "reads": [
+    "store-portfolio-data",
+    "store-wrap-nav-xlsx",
+    "store-dataset-csv",
+    "config/wrap_principles_config.json"
+   ],
+   "writes": [
+    "logs/wrap_principle_state.json"
+   ],
+   "depends_on": [
+    "src-create-portfolio-tables",
+    "infra-telegram"
+   ],
+   "alerts": "FAIL → notify_sisyphe_failure.sh wrap-principle-check → 텔레그램"
   },
   {
    "id": "daemon-catchup",
@@ -2174,7 +2269,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "상시",
    "status": "active",
-   "desc_md": "2026-07-12 신설. 데이터레이크의 DuckDB+Claude API 자연어 문답 UI를 **상시 데몬**으로 띄우는 launchd 서비스(`com.antigravity.datalake-webui`, RunAtLoad + KeepAlive). 기존 수동 기동(`run_webui.sh`)을 데몬화해, ts.net 대시보드의 'Wiki' 탭 백엔드로 상주시킨다.\n\n- 바인딩: FastAPI 서버(`server.py`)가 `127.0.0.1:8787` 루프백 고정 — 직접 공개 노출 없음. Caddy가 `/wiki/*`를 이 포트로 리버스 프록시([[web-caddy]]) → AoE 'Wiki' 탭.\n- 질의 대상 = 데이터레이크 md 코퍼스 + duckdb 샌드박스(allowed→잠금). 소스·설계 상세는 [[infra-datalake]] / `datalake/DESIGN.md`.\n- ★**nav는 손으로 맞춰야 하는 사본**(`datalake/webui/static/index.html`): 이 페이지는 스냅숏이 아니라 데몬에서 직접 서빙되므로 [[web-publish-snapshot]]의 `compose_personal_view.py` nav 주입이 **닿지 않는다**. 2026-07-16 nav 개편 때 [[daemon-watchlist-quoteboard]]와 함께 이 파일의 topnav 마크업을 따로 고쳐 통일했다(`Wiki` 탭에 `margin-left:auto`를 줘 Wiki·Architecture를 우측 그룹으로 미는 것도 여기 사본에 직접 박혀 있다).\n- launchd 관리: `ThrottleInterval=15`로 크래시 루프 억제, 로그는 `logs/launchd/datalake-webui.{out,err}`. 계산 잡 아님(catch-up 대상 아님).",
+   "desc_md": "2026-07-12 신설. 데이터레이크의 DuckDB+Claude API 자연어 문답 UI를 **상시 데몬**으로 띄우는 launchd 서비스(`com.antigravity.datalake-webui`, RunAtLoad + KeepAlive). 기존 수동 기동(`run_webui.sh`)을 데몬화해, ts.net 대시보드의 'Wiki' 탭 백엔드로 상주시킨다.\n\n- 바인딩: FastAPI 서버(`server.py`)가 `127.0.0.1:8787` 루프백 고정 — 직접 공개 노출 없음. Caddy가 `/wiki/*`를 이 포트로 리버스 프록시([[web-caddy]]) → AoE 'Wiki' 탭.\n- 질의 대상 = 데이터레이크 md 코퍼스 + duckdb 샌드박스(allowed→잠금). 소스·설계 상세는 [[infra-datalake]] / `datalake/DESIGN.md`.\n- ★**nav는 손으로 맞춰야 하는 사본**(`datalake/webui/static/index.html`): 이 페이지는 스냅숏이 아니라 데몬에서 직접 서빙되므로 [[web-publish-snapshot]]의 `compose_personal_view.py` nav 주입이 **닿지 않는다**. 2026-07-16 nav 개편 때 [[daemon-watchlist-quoteboard]]와 함께 이 파일의 topnav 마크업을 따로 고쳐 통일했다(`Wiki` 탭에 `margin-left:auto`를 줘 Wiki·Architecture를 우측 그룹으로 미는 것도 여기 사본에 직접 박혀 있다). 2026-07-18 브랜드 라벨을 `AoE` → `AGE OF EMERGENCE`로 확장할 때도 이 사본을 손으로 맞췄다([[web-publish-snapshot]]).\n- launchd 관리: `ThrottleInterval=15`로 크래시 루프 억제, 로그는 `logs/launchd/datalake-webui.{out,err}`. 계산 잡 아님(catch-up 대상 아님).",
    "code": [
     "datalake/launchd/com.antigravity.datalake-webui.plist",
     "datalake/webui/run_webui.sh",
@@ -2188,29 +2283,6 @@
     "infra-datalake"
    ],
    "alerts": "KeepAlive=true (launchd 자동 재기동, ThrottleInterval=15)"
-  },
-  {
-   "id": "daemon-plan-api",
-   "project": "antigravity",
-   "domain": "ops-infra",
-   "type": "infra",
-   "name": "Plan API 데몬 (Sisyphe Ledger 자금계획, 127.0.0.1:8790)",
-   "runs_on": "vm_macmini",
-   "schedule_kst": "상시",
-   "status": "active",
-   "desc_md": "2026-07-15 신설. Sisyphe Ledger 'Plan' 탭의 자금계획 JSON을 서빙하는 상시 데몬(`com.antigravity.plan-api`, RunAtLoad + KeepAlive). Caddy가 `/plan-api/*`를 이 포트로 리버스 프록시([[web-caddy]]).\n\n- 바인딩: `127.0.0.1:8790` 루프백 고정 — 직접 공개 노출 없음. 게이트는 **테일넷 단독**(Caddy 라우트 주석은 'basic_auth 이중'이라 적혀 있으나 실제 설정엔 auth import가 없다 — 주석이 stale).\n- **백엔드 코드·데이터 모두 repo 밖** — plist가 `~/Journal/scripts/plan_api.py`를 repo venv 파이썬으로 띄우고, 데이터는 `~/Journal/plan_web.json`(**계좌번호 포함**). Journal 자산은 맥미니 로컬 전용으로 git·게시 파이프라인과 격리(전역 규칙 Journal 섹션) → repo가 소유하는 것은 launchd 유닛뿐.\n- launchd 관리: `ThrottleInterval=10`으로 크래시 루프 억제, 실행은 봇 공용 wrapper `launchd/bots/run_bot.sh plan-api`, 로그는 `logs/launchd/plan-api.{out,err}`. 계산 잡 아님(catch-up 대상 아님).\n- ★plist의 경로가 프로덕션 트리(`~/Antigravity_Market_Dashboard`)로 하드코딩돼 있다 — 다른 타이머 plist의 `__REPO__` 토큰 치환 방식과 달라 클론에서 그대로 쓸 수 없다.",
-   "code": [
-    "launchd/web/com.antigravity.plan-api.plist",
-    "launchd/bots/run_bot.sh"
-   ],
-   "reads": [
-    "ext-sisyphe"
-   ],
-   "depends_on": [
-    "infra-vm-macmini",
-    "ext-sisyphe"
-   ],
-   "alerts": "KeepAlive=true (launchd 자동 재기동, ThrottleInterval=10)"
   },
   {
    "id": "ext-data-apis",
@@ -2445,28 +2517,6 @@
      "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/market_alert.html"
     }
    ]
-  },
-  {
-   "id": "src-deriv-daily",
-   "project": "antigravity",
-   "domain": "market-kr",
-   "type": "pipeline_source",
-   "name": "파생·수급 13종 (fetch_deriv_daily.py)",
-   "runs_on": "vm_macmini",
-   "schedule_kst": "23:30 (kodex 타이머 편승)",
-   "status": "active",
-   "desc_md": "2026-07-16 신설. 삼성전자·SK하이닉스의 파생·수급 지표와 VKOSPI를 매일 수집해 `dataset.csv`에 적재하는 소스. 이력은 커밋 `19eeefcd`로 백필됐다.\n\n- **시리즈 13종** — 종목별(삼성전자·SK하이닉스) 6종: 현선물 괴리율(%, KRX MDCSTAT12501 최근월물), 미결제약정(계약, 전월물 합산), 미결제약정 금액(억원, 합산계약×승수10주×최근월물 종가), 공매도잔고(억원, pykrx, **T+2 공시**), 시가총액(억원, pykrx), 레버리지 ETF AUM(억원, KRX MDCSTAT04501 단일종목 레버리지·인버스 제외 순자산 합산). 여기에 `VKOSPI`(pt, KIS FHKUP03500100 업종 U/0503).\n- 기본 최근 7일 upsert(휴장일 조용 skip → T+2 공매도가 자연 보정), `--days N`으로 조정.\n- **실행 경로**: `run_kodex_sectors.sh`가 kodex→KOSIS→일본capex 다음 4번째로 `|| true` 호출 — 즉 23:30 [[timer-kodex-sectors]] 편승이다. KRX 인증이 필요해 클라우드 IP가 막히는 VM 전용 경로에 얹은 것으로, KRX 로그인은 kodex와 직렬화된다.\n- ★**함정**: 소스 docstring은 '맥미니 launchd deriv-daily (23:40 KST)'라고 적혀 있으나 그런 타이머 유닛은 없다(`schedule.tsv`·`launchd/timers/` 모두 부재) — 실제는 위 23:30 편승. docstring이 stale.\n- 소비자: `create_dashboard.py`가 market.html DATA 탭 '파생·수급' 그룹 차트로 그린다([[page-market]]).",
-   "code": [
-    "execution/fetch_deriv_daily.py"
-   ],
-   "writes": [
-    "store-dataset-csv"
-   ],
-   "depends_on": [
-    "timer-kodex-sectors",
-    "ext-data-apis"
-   ],
-   "alerts": "실패해도 타이머 계속(|| true) — 결손은 신선도 점검(3영업일)이 경보"
   },
   {
    "id": "store-contribution-data",
@@ -2709,56 +2759,6 @@
    ]
   },
   {
-   "id": "timer-memento-telegram",
-   "project": "antigravity",
-   "domain": "personal",
-   "type": "timer",
-   "name": "Memento 점심 텔레그램 타이머 (12:00)",
-   "runs_on": "vm_macmini",
-   "schedule_kst": "12:00 매일",
-   "status": "active",
-   "desc_md": "2026-07-16 신설. 매일 12:00 KST '오늘의 따끔어'(Memento)를 텔레그램으로 1통 보내는 타이머(`com.antigravity.memento-telegram`). 같은 문구를 화면으로 보는 경로가 AoE 'Memento' 탭([[web-caddy]]의 기본 화면).\n\n- **실행 스크립트는 repo 밖** — `run_timer_job.sh memento-telegram`이 `~/Journal/scripts/memento_telegram.py`를 repo venv 파이썬으로 호출한다. Journal 자산은 맥미니 로컬 전용이라 git·게시 파이프라인과 격리(전역 규칙 Journal 섹션) → 이 위키가 기술할 수 있는 실체는 타이머 배선까지다.\n- wrapper 타임아웃 120초(텔레그램 1통), 설치는 `install_timers.sh` NAMES 목록. `RunAtLoad=false`.\n- 계산 잡이 아니라 알림 잡 — 놓친 실행을 뒤늦게 보내면 '점심 따끔어'의 의미가 없다.",
-   "code": [
-    "launchd/timers/com.antigravity.memento-telegram.plist",
-    "launchd/timers/run_timer_job.sh"
-   ],
-   "depends_on": [
-    "infra-vm-macmini",
-    "infra-telegram",
-    "ext-sisyphe"
-   ],
-   "alerts": "FAIL → notify_sisyphe_failure.sh memento-telegram → 텔레그램"
-  },
-  {
-   "id": "timer-wrap-principle-check",
-   "project": "antigravity",
-   "domain": "portfolio-wrap",
-   "type": "timer",
-   "name": "WRAP 원칙 점검 타이머 (17:10, 변화 시에만 발송)",
-   "runs_on": "vm_macmini",
-   "schedule_kst": "17:10 평일",
-   "status": "active",
-   "desc_md": "2026-07-16 신설. 매일 17:10 KST WRAP 포트폴리오의 투자원칙 준수를 점검해 **위반 상태가 변했을 때만** 텔레그램(🧭)으로 알리는 타이머(`com.antigravity.wrap-principle-check` → `execution/wrap_principle_check.py`). 16:xx 수집·리포트 잡들 뒤에 배치.\n\n- **알림 설계(v2, 변화 기반)**: 행위 룰(당일 발생 시 항상) = 물타기 의심(원칙17)·약세장 신규 편입(원칙11). 상태 룰(변화 기반) = 계좌 MDD(원칙3)·섹터 쏠림(원칙26)·종목 DD·삥(원칙25)·종목 수 상한·단일 종목 쏠림·지수 20일선(원칙8) — 신규 진입 🆕 / 해소 ✅ 에만 상세, 지속분은 요약 1줄. **변화·행위가 없으면 평일 침묵**, 월요일은 전체 상세 리포트.\n- 전일 상태 = `logs/wrap_principle_state.json`(diff 근거). 첫 실행은 baseline 스냅숏만 저장해 🆕 도배를 막고, `WPC_SEED` 환경변수는 무발송 시드 모드(배포 직후 상태 동기화용). 행위 룰은 `actions_sent`+날짜로 당일 재발송 차단, 종목 단위 룰은 상품 중복 없이 1회만 표기.\n- 임계값은 `config/wrap_principles_config.json`(없으면 코드의 `DEFAULTS` — 종목 수 15·최소비중 2%·섹터 65%·종목 DD -30%·NAV MDD -10% 등). 주말은 자체 스킵.\n- 입력은 `portfolio_data.json`(보유·비중)·`Wrap_NAV.xlsx`(NAV 드로다운)·`dataset.csv`(KOSPI 20일선, 17:10 시점엔 통상 D-1 종가라 기준일을 문구에 명기). `portfolio_data.json`이 30시간보다 오래되면 갱신 지연 경고를 덧붙인다.\n- wrapper 타임아웃 300초(`run_timer_job.sh`), 설치는 `install_timers.sh` NAMES 목록.",
-   "code": [
-    "launchd/timers/com.antigravity.wrap-principle-check.plist",
-    "execution/wrap_principle_check.py"
-   ],
-   "reads": [
-    "store-portfolio-data",
-    "store-wrap-nav-xlsx",
-    "store-dataset-csv",
-    "config/wrap_principles_config.json"
-   ],
-   "writes": [
-    "logs/wrap_principle_state.json"
-   ],
-   "depends_on": [
-    "src-create-portfolio-tables",
-    "infra-telegram"
-   ],
-   "alerts": "FAIL → notify_sisyphe_failure.sh wrap-principle-check → 텔레그램"
-  },
-  {
    "id": "web-caddy",
    "project": "antigravity",
    "domain": "ops-infra",
@@ -2767,7 +2767,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "상시",
    "status": "active",
-   "desc_md": "2026-07-11 신설된 맥미니 자체 서빙 계층. Caddy(`com.antigravity.web`, homebrew, KeepAlive)가 게시 스냅숏을 tailscale(ts.net)로 내보내는 개인 대시보드의 웹서버.\n\n- 입구는 `tailscale serve` 프록시뿐 — Caddy는 `http://:8377` + `bind 127.0.0.1` 루프백 고정(공개 노출 없음). 127.0.0.1:8377 직접 바인딩은 프록시 Host 불일치로 빈 200이 나던 실측 함정 회피.\n- **루트(`/`)는 2026-07-16부터 `/sisyphe/memento.html`로 302 리다이렉트** — 사용자 확정으로 AoE 기본 화면이 Memento가 됐다. **구 랜딩(`/index.html`)도 같은 곳으로 302** → 랜딩 페이지는 개인 ts.net에서 폐지(파일은 잡들이 계속 생성하나 접근 불가, [[page-index]]). 2026-07-15의 `/` → `/watchlist/` 302를 한 세대 만에 대체한 것으로, Watchlist는 `/watchlist/`와 nav 탭으로 남는다([[daemon-watchlist-quoteboard]]).\n- 게시 스냅숏(`~/srv/dashboard/current`, `publish_snapshot.sh` 산출)은 맨 아래 fallback handle이 정적 서빙 — **스냅숏 디렉토리 직접 수정 금지**. Sisyphe 개인 페이지(`/sisyphe/*`)도 이 스냅숏의 `current/sisyphe/`(2026-07-13 평문 전환, [[web-publish-snapshot]]의 `compose_personal_view.py`가 합성 — staticrypt 암호화 직서빙 폐기)에서 서빙된다. 기본 화면인 `memento.html`이 이 경로에 있으므로 **compose 실패로 세대가 폐기되면 루트 진입 자체가 깨진다**.\n- `/journal/*`(2026-07-13): 개인 투자일지 차트(\"Escape Velocity\") — 테일넷 + basic_auth 이중 게이트, `~/Journal/web` 정적 서빙(`no-store`). **데이터·자격증명·페이지 전부 `~/Journal` 로컬 전용으로 git/게시 파이프라인과 격리**(전역 규칙 Journal 섹션). `~/Journal/caddy_auth.snippet` import — 없으면 caddy 기동 실패하니 Journal 폴더 이동 시 이 라우트 먼저 수정.\n- `/wiki/*`는 `127.0.0.1:8787`([[daemon-datalake-webui]])로 리버스 프록시 — 데이터레이크 문답 UI를 AoE 'Wiki' 탭으로 통합(2026-07-12, `redir /wiki /wiki/ 301`).\n- `/watchlist/*`(2026-07-15): 관심종목 시세판 데몬 `127.0.0.1:8778`([[daemon-watchlist-quoteboard]]) 리버스 프록시(`no-store`, `redir /watchlist /watchlist/ 301`).\n- `/plan-api/*`(2026-07-15): Sisyphe Ledger 'Plan' 자금계획 JSON(`~/Journal/plan_web.json`, 계좌번호 포함) API — `plan_api.py` 백엔드(`127.0.0.1:8790`, [[daemon-plan-api]])로 프록시. **게이트는 테일넷 단독**(basic_auth는 당일 `plan_auth.snippet` import 도입 → 별도 realm 전환 → 제거로 정리). ★소스의 라우트 주석은 'basic_auth 이중'이라 적혀 있으나 실제 설정엔 auth import가 없다 — 주석이 stale.\n- HTML/JSON/CSV·인덱스는 `Cache-Control: no-cache`. 접근 로그는 `~/srv/dashboard/logs/access.log`(20MiB 롤).",
+   "desc_md": "2026-07-11 신설된 맥미니 자체 서빙 계층. Caddy(`com.antigravity.web`, homebrew, KeepAlive)가 게시 스냅숏을 tailscale(ts.net)로 내보내는 개인 대시보드의 웹서버.\n\n- 입구는 `tailscale serve` 프록시뿐 — Caddy는 `http://:8377` + `bind 127.0.0.1` 루프백 고정(공개 노출 없음). 127.0.0.1:8377 직접 바인딩은 프록시 Host 불일치로 빈 200이 나던 실측 함정 회피.\n- **루트(`/`)는 2026-07-18부터 다시 `/watchlist/`로 302 리다이렉트** — 사용자 확정으로 AoE 기본 화면이 Watchlist로 되돌아왔다([[daemon-watchlist-quoteboard]]). **구 랜딩(`/index.html`)도 같은 곳으로 302** → 랜딩 페이지는 개인 ts.net에서 폐지(파일은 잡들이 계속 생성하나 접근 불가, [[page-index]]). 기본 화면은 세 세대에 걸쳐 흔들렸다: 2026-07-15 `/watchlist/` → 07-16 `/sisyphe/memento.html`(Memento) → 07-18 다시 `/watchlist/`. Memento는 이제 nav 'Memento' 탭(`/sisyphe/memento.html`)으로만 진입한다.\n- 게시 스냅숏(`~/srv/dashboard/current`, `publish_snapshot.sh` 산출)은 맨 아래 fallback handle이 정적 서빙 — **스냅숏 디렉토리 직접 수정 금지**. Sisyphe 개인 페이지(`/sisyphe/*`)도 이 스냅숏의 `current/sisyphe/`(2026-07-13 평문 전환, [[web-publish-snapshot]]의 `compose_personal_view.py`가 합성 — staticrypt 암호화 직서빙 폐기)에서 서빙된다. 기본 화면인 `memento.html`이 이 경로에 있으므로 **compose 실패로 세대가 폐기되면 루트 진입 자체가 깨진다**.\n- `/journal/*`(2026-07-13): 개인 투자일지 차트(\"Escape Velocity\") — 테일넷 + basic_auth 이중 게이트, `~/Journal/web` 정적 서빙(`no-store`). **데이터·자격증명·페이지 전부 `~/Journal` 로컬 전용으로 git/게시 파이프라인과 격리**(전역 규칙 Journal 섹션). `~/Journal/caddy_auth.snippet` import — 없으면 caddy 기동 실패하니 Journal 폴더 이동 시 이 라우트 먼저 수정.\n- `/wiki/*`는 `127.0.0.1:8787`([[daemon-datalake-webui]])로 리버스 프록시 — 데이터레이크 문답 UI를 AoE 'Wiki' 탭으로 통합(2026-07-12, `redir /wiki /wiki/ 301`).\n- `/watchlist/*`(2026-07-15): 관심종목 시세판 데몬 `127.0.0.1:8778`([[daemon-watchlist-quoteboard]]) 리버스 프록시(`no-store`, `redir /watchlist /watchlist/ 301`).\n- `/plan-api/*`(2026-07-15): Sisyphe Ledger 'Plan' 자금계획 JSON(`~/Journal/plan_web.json`, 계좌번호 포함) API — `plan_api.py` 백엔드(`127.0.0.1:8790`, [[daemon-plan-api]])로 프록시. **게이트는 테일넷 단독**(basic_auth는 당일 `plan_auth.snippet` import 도입 → 별도 realm 전환 → 제거로 정리). ★소스의 라우트 주석은 'basic_auth 이중'이라 적혀 있으나 실제 설정엔 auth import가 없다 — 주석이 stale.\n- HTML/JSON/CSV·인덱스는 `Cache-Control: no-cache`. 접근 로그는 `~/srv/dashboard/logs/access.log`(20MiB 롤).",
    "code": [
     "launchd/web/Caddyfile",
     "launchd/web/com.antigravity.web.plist"
@@ -2798,7 +2798,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "잡 성공 훅 (여러 잡)",
    "status": "active",
-   "desc_md": "2026-07-11 신설. 잡 wrapper(`run_gha_job.sh`/`run_timer_job.sh`) 성공 직후 호출되어 repo 산출물을 개인 ts.net 대시보드로 게시하는 스냅숏 게시기. Caddy가 서빙하는 `~/srv/dashboard/current`의 유일한 writer.\n\n- 동작: 화이트리스트 rsync(`*.html`/`*.json`/`*.csv`/`orders/`/`architecture/`/`charts/`, `.env`·`.git` 구조적 배제) → `releases/rel-<ts>` 새 세대 → 검증 → `current` 심링크 원자 교체(rename(2)). 어떤 실패에서도 기존 current는 안 깨진다.\n- **개인용 가공(1.5단계, `compose_personal_view.py`)**: rsync 직후 새 릴리스 사본에서만 가공 — `wrap.html` 제거 + AoE topnav 재구성 + `~/srv/sisyphe_plain` 원본에서 Sisyphe 평문 페이지를 `current/sisyphe/`로 합성(2026-07-13 staticrypt 암호화 폐기, 테일넷 한정이라 암호 프롬프트 제거 목적). 주입은 기존 fragment를 먼저 제거하고 다시 넣는 정규화 방식이라 재실행에 멱등. 검증 실패 시 `exit 1` → 세대 폐기. repo 원본·GitHub(팀원용)은 불변.\n- **2026-07-16 Sisyphe 구역 해체**: 별도 'Sisyphe' 탭·아이보리 강조·웜톤 바·←AoE 필을 걷어내고 **단일 AoE topnav로 전 페이지 통일**. 탭 순서 = 좌 `Watchlist · Market · Journal · Weekly · Memento · Ledger` / 우(`margin-left:auto`) `Wiki · Architecture`. 합성 대상은 평문 4페이지(index/dashboard/journal/**memento**)로 늘었고, Sisyphe 페이지의 topnav는 AoE 세트로 통째 교체(해당 탭 active)된다.\n  - `Invest` → **`Journal`**로 개명 + `Weekly`를 딥링크(`journal.html#weekly`) 별도 탭으로 분리. 해시에 따라 nav active를 Journal↔Weekly로 바꾸고 페이지 서브탭까지 동기화하는 스크립트를 주입.\n  - `/sisyphe/index.html`은 **Memento 리다이렉트 스텁**으로 격하 — AoE 기본 화면이 `memento.html`이 됐다([[web-caddy]]).\n  - `wrap.html`은 팀 페이지라 **AoE 다크 nav 적용 대상에서 제외**(원래의 라이트 nav 유지, [[page-wrap]]) — 이 트리에서 게시되진 않지만 nav 주입 규칙이 갈린다.\n  - ★**nav 주입은 스냅숏 안의 정적 파일까지만 닿는다**: 리버스 프록시로 붙는 두 데몬 페이지([[daemon-watchlist-quoteboard]] `/watchlist/` · [[daemon-datalake-webui]] `/wiki/`)는 스냅숏을 거치지 않아 **각자 topnav 마크업 사본을 들고 있고 손으로 맞춰야 한다**. 즉 AoE nav의 생산자는 이 합성기 하나가 아니라 `create_dashboard.py`·`create_architecture.py`·두 데몬 정적파일까지 여러 곳 — 탭을 추가·개명하면 전부 훑어야 어긋나지 않는다.\n- mkdir 원자 락(120s)으로 게시 직렬화. 실패해도 잡 rc에 영향 없음(호출측 `|| true`).\n- 팀원용 공개 게시는 별도 경로([[web-publish-pages]], gh-pages).",
+   "desc_md": "2026-07-11 신설. 잡 wrapper(`run_gha_job.sh`/`run_timer_job.sh`) 성공 직후 호출되어 repo 산출물을 개인 ts.net 대시보드로 게시하는 스냅숏 게시기. Caddy가 서빙하는 `~/srv/dashboard/current`의 유일한 writer.\n\n- 동작: 화이트리스트 rsync(`*.html`/`*.json`/`*.csv`/`orders/`/`architecture/`/`charts/`, `.env`·`.git` 구조적 배제) → `releases/rel-<ts>` 새 세대 → 검증 → `current` 심링크 원자 교체(rename(2)). 어떤 실패에서도 기존 current는 안 깨진다.\n- **개인용 가공(1.5단계, `compose_personal_view.py`)**: rsync 직후 새 릴리스 사본에서만 가공 — `wrap.html` 제거 + AoE topnav 재구성 + `~/srv/sisyphe_plain` 원본에서 Sisyphe 평문 페이지를 `current/sisyphe/`로 합성(2026-07-13 staticrypt 암호화 폐기, 테일넷 한정이라 암호 프롬프트 제거 목적). 주입은 기존 fragment를 먼저 제거하고 다시 넣는 정규화 방식이라 재실행에 멱등. 검증 실패 시 `exit 1` → 세대 폐기. repo 원본·GitHub(팀원용)은 불변.\n- **2026-07-16 Sisyphe 구역 해체**: 별도 'Sisyphe' 탭·아이보리 강조·웜톤 바·←AoE 필을 걷어내고 **단일 AoE topnav로 전 페이지 통일**. 탭 순서 = 좌 `Watchlist · Market · Journal · Weekly · Memento · Ledger` / 우(`margin-left:auto`) `Wiki · Architecture`. 합성 대상은 평문 4페이지(index/dashboard/journal/**memento**)로 늘었고, Sisyphe 페이지의 topnav는 AoE 세트로 통째 교체(해당 탭 active)된다.\n  - `Invest` → **`Journal`**로 개명 + `Weekly`를 딥링크(`journal.html#weekly`) 별도 탭으로 분리. 해시에 따라 nav active를 Journal↔Weekly로 바꾸고 페이지 서브탭까지 동기화하는 스크립트를 주입.\n  - `/sisyphe/index.html`은 **Memento 리다이렉트 스텁**으로 격하 — AoE 기본 화면이 `memento.html`이 됐다([[web-caddy]]).\n  - `wrap.html`은 팀 페이지라 **AoE 다크 nav 적용 대상에서 제외**(원래의 라이트 nav 유지, [[page-wrap]]) — 이 트리에서 게시되진 않지만 nav 주입 규칙이 갈린다.\n  - ★**nav 주입은 스냅숏 안의 정적 파일까지만 닿는다**: 리버스 프록시로 붙는 두 데몬 페이지([[daemon-watchlist-quoteboard]] `/watchlist/` · [[daemon-datalake-webui]] `/wiki/`)는 스냅숏을 거치지 않아 **각자 topnav 마크업 사본을 들고 있고 손으로 맞춰야 한다**. 즉 AoE nav의 생산자는 이 합성기 하나가 아니라 `create_dashboard.py`·`create_architecture.py`·두 데몬 정적파일까지 여러 곳 — 탭을 추가·개명하면 전부 훑어야 어긋나지 않는다.\n- **2026-07-18 터미널 다크 테마 주입(게시-시 변환 단계 추가)**: 합성기가 새 `AOE_DARK_CSS`(`<style id=\"aoe-terminal-dark\">`)를 모든 AoE 루트 페이지 `</head>` 앞에 주입한다 — 블룸버그 터미널풍 다크(거의 검정 배경 `#0a0a0a` + 앰버 `#fb8b1e` 강조, 정수 타이포 스케일 28/18/16/13/12). nav 주입과 동형으로 **기존 주입을 먼저 제거하고 다시 넣는 멱등** 방식(`dark_pat`). ★**차트 패널은 흰색 유지** — Chart.js 텍스트가 라이트 전제라 `.chart-card`/`.cmb-chart-item`/`canvas` 포함 컨테이너는 다크에서 제외한다. 등락색은 다크용 밝은 톤으로 재단언, 인라인 밝은 배경 셀은 어두운 글자 유지. `market.html`·`index.html`에 이 CSS가 없으면 검증 `fail`로 세대 폐기.\n  - **Sisyphe 구역 구분 완전 폐지**: 2026-07-16엔 Sisyphe 페이지를 다크 대상에서 제외해 구역을 구분했으나, 사용자 지시로 **Sisyphe 평문 페이지(index/dashboard/journal/memento)에도 동일 다크를 주입** — AoE와 Sisyphe가 시각적으로 완전 통일됐다. `wrap.html`은 여전히 라이트 예외([[page-wrap]]).\n  - **브랜드 라벨 `AoE` → `AGE OF EMERGENCE`**: 원천(`create_dashboard.py`)·Sisyphe nav 교체·정적 페이지 멱등 치환 모두에서 브랜드 전체 이름으로 확장. 리버스 프록시 두 데몬 페이지의 nav 사본([[daemon-watchlist-quoteboard]]·[[daemon-datalake-webui]])도 손으로 맞춰 통일했다.\n- mkdir 원자 락(120s)으로 게시 직렬화. 실패해도 잡 rc에 영향 없음(호출측 `|| true`).\n- 팀원용 공개 게시는 별도 경로([[web-publish-pages]], gh-pages).",
    "code": [
     "scripts/publish_snapshot.sh",
     "scripts/compose_personal_view.py",

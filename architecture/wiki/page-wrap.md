@@ -28,8 +28,9 @@ alerts: ""
 
 랩 상품 운용 대시보드. Dashboard/공시/Order/AUM/수수료/기여도 탭 묶음. 자문사 실무의 중심 화면.
 
-- **독립 페이지화(2026-07-12, 'Life WRAP' 리브랜드)**: 팀원 전용 페이지로 분리 — 개인 탭을 nav에서 제거하고, 탭 축을 뒤집어(탭 상단, 섹션 TOC 좌측) 탭별 컨텍스추얼 사이드바를 둔다. **팀원 공개는 gh-pages 전용**([[web-publish-pages]]) — 개인 대시보드([[web-caddy]] ts.net)에서는 `compose_personal_view.py`가 이 페이지를 아예 제거한다([[web-publish-snapshot]]).
-- ★**AoE 다크 nav 통일에서 제외(2026-07-16)**: 개인 뷰 전 페이지가 단일 AoE 다크 topnav로 통일될 때 **wrap.html만 원래의 라이트 nav(흰 배경+알약 탭)를 유지**한다 — 팀원용 페이지라 개인 뷰의 nav 재구성 대상이 아니라는 정책 결정. 생성기의 다크 `TOP_NAV_CSS`를 `.wrap-topnav` 스코프에서 되돌리는 방식이라, **nav 스타일을 손댈 때 이 갈래를 깨기 쉽다**(nav 높이 72px에 사이드바·chips sticky·스크롤스파이 기준선이 물려 있음).
+- **독립 페이지화(2026-07-12, 'Life WRAP' 리브랜드)**: 팀원 전용 페이지로 분리 — 개인 탭을 nav에서 제거하고, 탭 축을 뒤집어(탭 상단, 섹션 TOC를 탭별 컨텍스추얼 사이드바로) 배치했다. **팀원 공개는 gh-pages 전용**([[web-publish-pages]]) — 개인 대시보드([[web-caddy]] ts.net)에서는 `compose_personal_view.py`가 이 페이지를 아예 제거한다([[web-publish-snapshot]]).
+- **좌측 사이드바 폐지 → 가로 스트립 3단(2026-07-18)**: AoE Market 폼에 맞춰 nav를 3단 가로 밴드로 재배치했다. ① **54px 브랜드 바**(`.wrap-topnav`, `Life WRAP` 브랜드 + 우측 `Updated`만), ② **42px 필 스트립**(`.wrap-strip`, sticky) — 5개 WRAP 탭(dashboard/order/공시/기여도/수수료)이 72px topnav에서 이 스트립으로 이동, ③ 스트립 아래 **섹션 TOC**(구 좌측 `.wrap-sidebar`) — 좌측 고정 레일에서 **가로 중앙정렬 사각 필 버튼 줄**로 바뀌었다(`display:flex/flex-wrap`, `공시` 탭은 숨김). 섹션 TOC의 스크롤스파이/그룹전환 **JS는 불변**(레이아웃 CSS만 교체), 본문 좌측 오프셋도 224px→24px로 해제. 
+- ★**AoE 다크 nav 통일에서 제외(2026-07-16)**: 개인 뷰 전 페이지가 단일 AoE 다크 topnav로 통일될 때 **wrap.html만 원래의 라이트 nav(흰 배경+알약 탭)를 유지**한다 — 팀원용 페이지라 개인 뷰의 nav 재구성 대상이 아니라는 정책 결정. 생성기의 다크 `TOP_NAV_CSS`를 `.wrap-topnav` 스코프에서 되돌리는 방식이라, **nav 스타일을 손댈 때 이 갈래를 깨기 쉽다**(브랜드 바·스트립·섹션 TOC sticky·스크롤스파이 기준선이 서로 물려 있음).
 - PORTFOLIO 종목표·수익률·차트는 `portfolio_data.json`+`Wrap_NAV.xlsx` 계산 산출을 소비(최상위 `_` prefix 메타 키 규약은 [[store-portfolio-data]]).
 - **CHART 자가복구 2중 안전망(2026-07-16)**: 이 페이지는 비밀번호 게이트(`pw-hidden`) 뒤에 있어 **차트가 숨겨진 상태(height 0)에서 생성되면 축 눈금이 퇴화한 채 굳는다**(Chart.js). ① 250ms×40회(10초) 가시성 폴링 — 캔버스가 실제 표시되는 순간 `resize()+update('none')` 1회. ② 폴링 10초를 넘겨 비밀번호를 늦게 푸는 경우를 폴링이 놓치므로, `checkPw()` 성공 경로가 `_wrapHealKick()`을 직접 호출. 폴링=best-effort·시간제한, unlock 콜백=이벤트 기반 확정 트리거로 서로를 메운다.
   - ★사고 사례: nav 스타일 커밋(`1733fdca`)이 **stale 워킹트리로 파일을 통째 덮어써 3분 전의 unlock heal-kick을 조용히 삭제** → `1e4c1732`로 재적용. 자동 커밋 잡이 상시 도는 프로덕션 트리에서 오래된 트리 기반 전체 덮어쓰기가 무관한 수정을 되돌리는 알려진 실패 모드다.
