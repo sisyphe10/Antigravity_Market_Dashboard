@@ -94,6 +94,7 @@ AOE_DARK_CSS = (
     '.tl-band-count{background:#1a1b1e!important;color:#d9dde2!important}'
     '.qrow.starred{background:#1a1610!important}'
     '.sidebar-link.active{border-bottom-color:#fb8b1e!important}'
+    '.sidebar{justify-content:center!important}'
     '.cmb-series-row:has(.cmb-chart-item.active) td{background:#4a2d0a!important;color:#ffb45e!important;font-weight:700!important}'
     '.cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) td{background:#241a3d!important;color:#b9a1fc!important;font-weight:700!important}'
     '.cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) td{background:#0a3038!important;color:#67e0f4!important;font-weight:700!important}'
