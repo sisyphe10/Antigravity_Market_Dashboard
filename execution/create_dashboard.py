@@ -117,29 +117,33 @@ WRAP_NAV_CSS = """
 body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav 부유(사이드바 가림), 좌우 20px는
                           nav 전폭 미달의 원인. 본문 여백은 .has-sidebar padding(!important)이 대체 */
 .wrap-topnav .topnav-inner { padding-left: 28px; }  /* .has-sidebar .topnav-inner 228px 상쇄(브랜드가 topnav 안) */
-.wrap-topnav .topnav-tab { min-width: 0; padding: 10px 22px; }
+
 /* WRAP 라이트 복원 (2026-07-16) — Life WRAP=팀원용 독립 페이지, AoE 다크 통일에서 제외.
    TOP_NAV_CSS(다크)를 .wrap-topnav 스코프로 원래 라이트 알약 스타일로 되돌린다. */
-.wrap-topnav { background: #fff; border-bottom: 1px solid #e5e7eb; }
-.wrap-topnav .topnav-inner { align-items: center; height: 72px; gap: 32px; }
-.wrap-topnav .topnav-brand { font-size: 1.3rem; letter-spacing: 1.5px; color: #111; align-self: auto; }
+.wrap-topnav { background: #fff; border-bottom: 2px solid #2d7a3a; }
+.wrap-topnav .wrap-updated { margin-left: auto; }
+.wrap-topnav .topnav-inner { align-items: center; height: 54px; gap: 32px; }
+.wrap-topnav .topnav-brand { font-size: 1.1rem; font-weight: 800; letter-spacing: 3.5px; color: #111; align-self: auto; }
 .wrap-topnav .topnav-brand:hover { color: #2d7a3a; }
 .wrap-topnav .topnav-tabs { gap: 12px; align-items: center; }
 .wrap-topnav .topnav-item { display: block; position: relative; }
-.wrap-topnav .topnav-tab { padding: 10px 22px; color: #444; font-size: 1rem; font-weight: 600; letter-spacing: 0; border: 1.5px solid #d1d5db; border-radius: 999px; background: #fff; transition: all 0.15s; }
-.wrap-topnav .topnav-tab:hover { color: #111; border-color: #2d7a3a; background: #f0f7f2; }
-.wrap-topnav .topnav-tab.active { color: #fff; border-color: #2d7a3a; background: #2d7a3a; }
+/* 하위 스트립 (AoE 형태, 색=WRAP 라이트) */
+.wrap-strip { position: sticky; top: 56px; display: flex; justify-content: center; align-items: stretch; gap: 2px; height: 42px; padding: 0 28px; background: #f8f9fa; border-bottom: 1px solid #e5e7eb; z-index: 95; box-sizing: border-box; }
+.wrap-strip .topnav-tab { display: inline-flex; align-items: center; height: 41px; padding: 0 16px; color: #666; font-size: 0.92rem; font-weight: 600; letter-spacing: 0.3px; border: none; border-radius: 0; border-bottom: 2px solid transparent; background: transparent; transition: color 0.12s; }
+.wrap-strip .topnav-tab:hover { color: #111; background: transparent; border-color: transparent; }
+.wrap-strip .topnav-tab.active { color: #111; font-weight: 700; background: transparent; border-bottom-color: #2d7a3a; }
 .wrap-topnav .topnav-dropdown { top: calc(100% + 8px); width: 100%; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.10); padding: 6px; }
 .wrap-topnav .topnav-sub { padding: 9px 14px; color: #333; border-radius: 8px; }
 .wrap-topnav .topnav-sub:hover { background: #f3f4f6; color: #111; }
 .wrap-topnav .topnav-sub.active { background: #f0f7f2; color: #2d7a3a; }
 @media (max-width: 900px) {
-    .wrap-topnav .topnav-inner { height: 52px; }
-    .wrap-topnav .topnav-tab { padding: 6px 14px; }
+    .wrap-topnav .topnav-inner { height: 46px; }
+    .wrap-strip { top: 48px; padding: 0 12px; }
+    .wrap-strip .topnav-tab { padding: 0 10px; }
 }
 /* WRAP 사이드바 라이트 원복 (2026-07-16) — 공유 .sidebar* 다크/스트립 전환에서 wrap 제외.
    공유 규칙이 가로 스트립(sticky flex)으로 바뀌어도 wrap 은 원래 좌측 세로 기둥 레이아웃 유지. */
-.wrap-sidebar { position: fixed; top: 72px; left: 0; bottom: 0; width: 200px; margin: 0; display: block; gap: 0; padding: 18px 10px; background: #fff; border-right: 1px solid #e5e7eb; border-bottom: none; overflow-y: auto; overflow-x: hidden; z-index: 90; box-sizing: border-box; }
+.wrap-sidebar { position: fixed; top: 98px; left: 0; bottom: 0; width: 200px; margin: 0; display: block; gap: 0; padding: 18px 10px; background: #fff; border-right: 1px solid #e5e7eb; border-bottom: none; overflow-y: auto; overflow-x: hidden; z-index: 90; box-sizing: border-box; }
 #mainContent.has-sidebar { padding-left: 224px !important; }
 #mainContent.has-sidebar.wrap-sidebar-off { padding-left: 24px !important; }
 .wrap-sidebar .sidebar-link { display: block; height: auto; padding: 12px 11px; margin: 0 0 7px; color: #444; font-size: 0.94rem; border-radius: 999px; border: 1.5px solid transparent; text-align: center; white-space: normal; }
@@ -244,9 +248,11 @@ def wrap_top_nav_html(updated=''):
             f'data-wrap-tab="{key}" class="topnav-tab{active}"{aria}>{label}</a>')
     tabs = ''.join(parts)
     upd = f'<span class="wrap-updated">Updated: {updated}</span>' if updated else ''
+    # 2026-07-18: AoE 형태 통일 — 네비=브랜드+Updated만(54px), 탭 5개는 별도 스트립(42px)
     return ('<nav class="topnav wrap-topnav"><div class="topnav-inner">'
             '<a href="wrap.html" class="topnav-brand">Life WRAP</a>'
-            f'<div class="topnav-tabs">{tabs}</div>{upd}</div></nav>')
+            f'{upd}</div></nav>'
+            f'<div class="wrap-strip">{tabs}</div>')
 
 
 def wrap_sidebar_html():
