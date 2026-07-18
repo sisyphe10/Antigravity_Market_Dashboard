@@ -38,6 +38,46 @@ AOE_PERSONAL_CSS = ('<style id="aoe-personal-nav">'
                     '.topnav-tabs .topnav-item.right-group{margin-left:auto}'
                     '</style>')
 
+# 2026-07-18 본문 블룸버그 터미널 다크(시안 A Terminal Black, 사용자 확정): AoE 루트 페이지 전체.
+# 배경 거의 검정 + 앰버(#fb8b1e) 강조. ★차트 패널(.chart-card/.cmb-chart-item 등, canvas 포함 컨테이너)은
+# 흰색 유지 — Chart.js 텍스트가 다크 전제라 다크 카드에 두면 안 보임. 등락색 인라인 스타일 보존을 위해
+# td 텍스트색은 :not([style*=color]) 한정. Sisyphe 페이지(sisyphe/)는 미적용(구역 구분 유지).
+AOE_DARK_CSS = (
+    '<style id="aoe-terminal-dark">'
+    ':root{--bg-color:#0a0a0a;--card-bg:#111214;--text-color:#d9dde2;--category-bg:#1a1b1e}'
+    'body{background:#0a0a0a!important;color:#d9dde2!important}'
+    'nav.topnav{border-bottom-color:#fb8b1e!important}'
+    'nav.topnav .topnav-tab.active{background:#fb8b1e!important;color:#101418!important}'
+    'nav.topnav .topnav-brand:hover{color:#fb8b1e!important}'
+    'header h1{color:#f2f4f6!important}'
+    '.last-updated{color:#8a919a!important}'
+    '.section,.mkt-panel,.table-container,.stat-card,.card,.constituents-row,'
+    '.csel-display,.csel-list,.cmb-filter-pop,.tw-filter-pop,.layer,.node,.timeline'
+    '{background:#111214!important;color:#d9dde2!important;border-color:#27282b!important;'
+    'box-shadow:none!important}'
+    '.date-bar input,.controls select,.filters select,select,input[type=date],input[type=text]'
+    '{background:#141517!important;color:#d9dde2!important;border-color:#3a3b3e!important}'
+    '.category-title,.section>h2,.section>h3{color:#fb8b1e!important;letter-spacing:1.5px}'
+    'th{background:#1a1b1e!important;color:#fb8b1e!important;border-color:#2a2b2e!important}'
+    'td{border-color:#222326!important}'
+    'td:not([style*=color]){color:#d9dde2!important}'
+    'tbody tr:hover td{background:#191a1d!important}'
+    '.subtab,.mkt-subtab,.tab,.mbtn,.chg-fbtn,.nav-button,.tw-more-btn,.tw-dl-btn,'
+    '.cmb-filter-btn,.cmb-ma-btn'
+    '{background:#141517!important;color:#9aa4ae!important;border:1.5px solid #3a3b3e!important;'
+    'border-radius:2px!important}'
+    '.subtab:hover,.mkt-subtab:hover,.tab:hover,.mbtn:hover,.nav-button:hover'
+    '{color:#fb8b1e!important;border-color:#fb8b1e!important}'
+    '.subtab.active,.mkt-subtab.active,.tab.active,.cmb-filter-btn.active,.cmb-ma-btn.active,'
+    '.mbtn.active,.nav-button.active'
+    '{background:#fb8b1e!important;color:#101418!important;border-color:#fb8b1e!important;'
+    'font-weight:700}'
+    '.chart-card,.sector-card,.cmb-chart-item,.idx-chart-item,.lh-card,#heatmap,'
+    '.chart-container,.section:has(canvas),div:has(>canvas)'
+    '{background:#fff!important;color:#333!important}'
+    '</style>')
+dark_pat = re.compile(r'<style id="aoe-terminal-dark">.*?</style>', re.S)
+
 # ---- Sisyphe 페이지: topnav 를 AoE 세트로 교체 ----
 def sisyphe_aoe_nav(active):
     def cls(name):
@@ -146,6 +186,7 @@ for f in glob.glob(os.path.join(REL, "*.html")):
                  MEMENTO_ITEM, LEDGER_ITEM, OLD_SISYPHE_ITEM, OLD_SISYPHE_DROPDOWN):
         n = n.replace(frag, "")
     n = personal_css_pat.sub("", n)
+    n = dark_pat.sub("", n)
     # Architecture 원본 아이템 추출(있으면) — 우측 그룹 맨 끝으로 이동. active 상태 보존.
     m = arch_pat.search(n)
     if m:
@@ -170,6 +211,10 @@ for f in glob.glob(os.path.join(REL, "*.html")):
         r = inject_before_head(n, AOE_PERSONAL_CSS)
         if r is not None:
             n = r
+    if 'id="aoe-terminal-dark"' not in n:
+        r = inject_before_head(n, AOE_DARK_CSS)
+        if r is not None:
+            n = r
     if n != s:
         open(f, "w", encoding="utf-8").write(n)
 
@@ -192,6 +237,11 @@ if os.path.exists(idx):
         fail("index.html: 탭 순서 오류 %s" % pos)
     if 'sisyphe-tab' in t or 'topnav-sub">가계부' in t:
         fail("index.html: 구 Sisyphe 탭 잔존")
+
+for pg in ("market.html", "index.html"):
+    pp = os.path.join(REL, pg)
+    if os.path.exists(pp) and 'id="aoe-terminal-dark"' not in open(pp, encoding="utf-8").read():
+        fail("%s: terminal-dark CSS 누락" % pg)
 
 # ===== 2) Sisyphe 평문 합성 (매 실행 pristine 복사) =====
 dst = os.path.join(REL, "sisyphe")
