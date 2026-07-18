@@ -148,7 +148,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
 .wrap-sidebar:not(:has(.wrap-side-group.on)) { display: none; }
 #mainContent.has-sidebar { padding-left: 24px !important; }
 #mainContent.has-sidebar.wrap-sidebar-off { padding-left: 24px !important; }
-.wrap-sidebar .sidebar-link { display: inline-flex; align-items: center; height: auto; padding: 8px 22px; margin: 0; color: #666; font-size: 0.95rem; font-weight: 600; border-radius: 999px; border: 1.5px solid #d1d5db; background: #fff; text-align: center; white-space: nowrap; transition: all 0.15s; }
+.wrap-sidebar .sidebar-link { display: inline-flex; align-items: center; height: auto; padding: 8px 22px; margin: 0; color: #666; font-size: 0.95rem; font-weight: 600; border-radius: 2px; border: 1.5px solid #d1d5db; background: #fff; text-align: center; white-space: nowrap; transition: all 0.15s; }
 .wrap-sidebar .sidebar-link:hover { background: #f0f7f2; color: #2d7a3a; border-color: #2d7a3a; }
 .wrap-sidebar .sidebar-link.active { background: #2d7a3a; color: #fff; border-color: #2d7a3a; font-weight: 700; }
 .wrap-updated { margin-left: auto; font-size: 12px; color: #888; white-space: nowrap; font-style: italic; }
