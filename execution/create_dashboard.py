@@ -7877,7 +7877,6 @@ def create_dashboard():
     {top_nav_html('market')}
     {sidebar_html('market')}
     <header>
-        <h1>Data</h1>
         <div class="last-updated">Updated: {now}</div>
     </header>
 
