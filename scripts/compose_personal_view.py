@@ -115,7 +115,7 @@ AOE_DARK_CSS = (
     '.node .node-type{background:#101214!important;color:#d9dde2!important}'
     '.mm-main{padding-top:0!important}'
     '.mm-main .subtabs{margin:0 calc(50% - 50vw) 18px!important}'
-    '.ledger-subtabs{margin:-32px calc(50% - 50vw) 18px!important}'
+    '.ledger-subtabs{margin:0 calc(50% - 50vw) 18px!important}'
     '.cmb-series-row:has(.cmb-chart-item.active) td{background:#4a2d0a!important;color:#ffb45e!important;font-weight:700!important}'
     '.cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) td{background:#241a3d!important;color:#b9a1fc!important;font-weight:700!important}'
     '.cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) td{background:#0a3038!important;color:#67e0f4!important;font-weight:700!important}'
