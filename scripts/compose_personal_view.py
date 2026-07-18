@@ -94,7 +94,7 @@ AOE_DARK_CSS = (
     '.qcard{background:#14171b!important;color:#e8e6df!important;border-color:#27282b!important;box-shadow:none!important}'
     '.qcard .qsrc,.qcard .qsrc .qnote{color:#8a919a!important}'
     '.plan-gcell{background:#111214!important}'
-    '.chart-card,.sector-card,.cmb-chart-item,.idx-chart-item,.lh-card,#heatmap,'
+    '.chart-card,.sector-card,.idx-chart-item,.lh-card,#heatmap,'
     '.chart-container,.section:has(canvas),div:has(>canvas)'
     '{background:#fff!important;color:#333!important}'
     '</style>')
