@@ -13,17 +13,17 @@
   /* ── AoE 공통 상단 내비 (다른 탭들과 동일, 2026-07-12) ── */
   .topnav { background: #101418; border-bottom: 2px solid #fb8b1e; position: sticky; top: 0; z-index: 100; }
   .topnav-inner { max-width: 1400px; margin: 0 auto; padding: 0 28px; box-sizing: border-box; display: flex; align-items: stretch; height: 54px; gap: 36px; }
-  .topnav-brand { font-size: 1.1rem; font-weight: 800; letter-spacing: 3.5px; color: #14171b; white-space: nowrap; text-decoration: none; align-self: center; }
+  .topnav-brand { font-size: 1.1rem; font-weight: 800; letter-spacing: 3.5px; color: #fff; white-space: nowrap; text-decoration: none; align-self: center; }
   .topnav-brand:hover { color: #fb8b1e; }
   .topnav-tabs { display: flex; gap: 2px; flex: 1; align-items: stretch; }
   .topnav-item { position: relative; display: flex; align-items: stretch; }
   .topnav-tab { box-sizing: border-box; display: inline-flex; align-items: center; gap: 6px; padding: 0 18px; color: #9aa4ae; text-decoration: none; font-size: 0.92rem; font-weight: 600; letter-spacing: 0.3px; border: none; border-radius: 0; white-space: nowrap; background: transparent; transition: color 0.12s, background 0.12s; cursor: pointer; }
-  .topnav-tab:hover { color: #14171b; background: #1a2027; }
+  .topnav-tab:hover { color: #fff; background: #1a2027; }
   .topnav-tab.active { color: #101418; background: #fb8b1e; font-weight: 700; }
   .topnav-dropdown { box-sizing: border-box; position: absolute; top: 100%; left: 0; min-width: 180px; width: max-content; background: #14181d; border: 1px solid #2a323b; border-radius: 0; box-shadow: 0 8px 24px rgba(0,0,0,0.35); padding: 4px 0; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity 0.15s, transform 0.15s, visibility 0.15s; z-index: 200; }
   .topnav-item:hover .topnav-dropdown, .topnav-item:focus-within .topnav-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
   .topnav-sub { display: block; padding: 9px 16px; color: #b7c0c9; text-decoration: none; font-size: 0.9rem; font-weight: 500; border-radius: 0; white-space: nowrap; text-align: center; }
-  .topnav-sub:hover { background: #1a2027; color: #14171b; }
+  .topnav-sub:hover { background: #1a2027; color: #fff; }
   @media (max-width: 800px) {
     .topnav-inner { padding: 0 12px; gap: 12px; height: 46px; }
     .topnav-tab { padding: 6px 14px; font-size: 0.85rem; min-width: 0; }
@@ -37,11 +37,11 @@
   .msg.user { text-align: right; }
   .msg.user .bubble { display: inline-block; background: #241a0d; border-radius: 12px 12px 2px 12px;
                       padding: 10px 14px; max-width: 80%; text-align: left; white-space: pre-wrap; }
-  .msg.bot .bubble { display: inline-block; background: #14171b; border: 1px solid #e2e2e2;
+  .msg.bot .bubble { display: inline-block; background: #14171b; border: 1px solid #27282b;
                      border-radius: 12px 12px 12px 2px; padding: 12px 16px; max-width: 95%; }
   .bubble table { border-collapse: collapse; margin: 8px 0; font-size: 13.5px; }
   .bubble th, .bubble td { border: 1px solid #3a3b3e; padding: 4px 10px; text-align: center; color: #d9dde2; }
-  .bubble th { background: #f0f0ee; }
+  .bubble th { background: #1a1b1e; color: #fb8b1e; }
   .bubble code { background: #111214; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
   .bubble pre { background: #111214; padding: 10px; border-radius: 8px; overflow-x: auto;
                 margin: 8px 0; font-size: 13px; }
@@ -51,11 +51,11 @@
   .thinking { color: #8a919a; font-style: italic; }
   footer { padding: 14px 20px 20px; background: #14171b; border-top: 1px solid #27282b; }
   #form { max-width: 900px; margin: 0 auto; display: flex; gap: 8px; }
-  #q { flex: 1; padding: 12px 14px; border: 1px solid #3a3b3e; border-radius: 10px; font-size: 14.5px;
+  #q { flex: 1; padding: 12px 14px; background: #141517; color: #d9dde2; border: 1px solid #3a3b3e; border-radius: 10px; font-size: 14.5px;
        font-family: inherit; resize: none; height: 48px; }
-  #send { padding: 0 22px; border: none; border-radius: 10px; background: #1a56db; color: #14171b;
+  #send { padding: 0 22px; border: none; border-radius: 10px; background: #fb8b1e; color: #14171b;
           font-size: 14.5px; font-weight: 600; cursor: pointer; }
-  #send:disabled { background: #9db4dd; cursor: default; }
+  #send:disabled { background: #7a4d16; cursor: default; }
 </style>
 </head>
 <body>
