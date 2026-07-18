@@ -90,6 +90,7 @@ AOE_DARK_CSS = (
     '.tl-band-count{background:#1a1b1e!important;color:#d9dde2!important}'
     '.qrow.starred{background:#1a1610!important}'
     '.sidebar-link.active{border-bottom-color:#fb8b1e!important}'
+    '.cmb-chart-item.active{background:#4a2d0a!important;color:#ffb45e!important;font-weight:700!important}'
     '.today-date{color:#c9ced4!important}'
     '.qcard{background:#14171b!important;color:#e8e6df!important;border-color:#27282b!important;box-shadow:none!important}'
     '.qcard .qsrc,.qcard .qsrc .qnote{color:#8a919a!important}'
