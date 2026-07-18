@@ -143,16 +143,17 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
 }
 /* WRAP 사이드바 라이트 원복 (2026-07-16) — 공유 .sidebar* 다크/스트립 전환에서 wrap 제외.
    공유 규칙이 가로 스트립(sticky flex)으로 바뀌어도 wrap 은 원래 좌측 세로 기둥 레이아웃 유지. */
-.wrap-sidebar { position: fixed; top: 98px; left: 0; bottom: 0; width: 200px; margin: 0; display: block; gap: 0; padding: 18px 10px; background: #fff; border-right: 1px solid #e5e7eb; border-bottom: none; overflow-y: auto; overflow-x: hidden; z-index: 90; box-sizing: border-box; }
-#mainContent.has-sidebar { padding-left: 224px !important; }
+/* 2026-07-18: 사이드바 폐지 — 스트립 아래 가로 필 버튼 줄 (AoE Market 내부 버튼 형태) */
+.wrap-sidebar { position: static; width: auto; margin: 0; padding: 16px 28px 0; background: transparent; border: none; overflow: visible; box-sizing: border-box; }
+.wrap-sidebar:not(:has(.wrap-side-group.on)) { display: none; }
+#mainContent.has-sidebar { padding-left: 24px !important; }
 #mainContent.has-sidebar.wrap-sidebar-off { padding-left: 24px !important; }
-.wrap-sidebar .sidebar-link { display: block; height: auto; padding: 12px 11px; margin: 0 0 7px; color: #444; font-size: 0.94rem; border-radius: 999px; border: 1.5px solid transparent; text-align: center; white-space: normal; }
+.wrap-sidebar .sidebar-link { display: inline-flex; align-items: center; height: auto; padding: 8px 22px; margin: 0; color: #666; font-size: 0.95rem; font-weight: 600; border-radius: 999px; border: 1.5px solid #d1d5db; background: #fff; text-align: center; white-space: nowrap; transition: all 0.15s; }
 .wrap-sidebar .sidebar-link:hover { background: #f0f7f2; color: #2d7a3a; border-color: #2d7a3a; }
-.wrap-sidebar .sidebar-link.active { background: transparent; color: #2d7a3a; border-color: #2d7a3a; }
+.wrap-sidebar .sidebar-link.active { background: #2d7a3a; color: #fff; border-color: #2d7a3a; font-weight: 700; }
 .wrap-updated { margin-left: auto; font-size: 12px; color: #888; white-space: nowrap; font-style: italic; }
-.wrap-sidebar { top: 72px; padding: 18px 10px; z-index: 90; }  /* 브랜드 배지 없음 → topnav 아래 시작 */
 .wrap-side-group { display: none; }
-.wrap-side-group.on { display: block; }
+.wrap-side-group.on { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 /* 공시 탭: 사이드바 없음 + 본문 전폭 */
 .has-sidebar.wrap-sidebar-off { padding-left: 24px !important; }
 .has-sidebar.wrap-sidebar-off .topnav { margin-left: -24px; }
