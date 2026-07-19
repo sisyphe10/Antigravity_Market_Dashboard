@@ -6,5 +6,6 @@ gha-krx-valuation	30 18 * * 1-5	/bin/bash __REPO__/launchd/gha/run_gha_job.sh gh
 gha-disclosures	30 16 * * *	/bin/bash __REPO__/launchd/gha/run_gha_job.sh gha-disclosures
 gha-crawl	0 23 * * *	/bin/bash __REPO__/launchd/gha/run_gha_job.sh gha-crawl
 gha-earnings-calendar-sync	0 7 * * *	/bin/bash __REPO__/launchd/gha/run_gha_job.sh gha-earnings-calendar-sync
+gha-earnings-ir-day	15 7 * * *	/bin/bash __REPO__/launchd/gha/run_gha_job.sh gha-earnings-ir-day
 gha-finalize-orders	0 16 * * *	/bin/bash __REPO__/launchd/gha/run_gha_job.sh gha-finalize-orders
 gha-taiwan-revenue	20 23 * * *	/bin/bash __REPO__/launchd/gha/run_gha_job.sh gha-taiwan-revenue

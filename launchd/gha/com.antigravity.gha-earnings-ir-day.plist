@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- 2026-07-20: earnings_calendar_sync 에서 IR Day(Finnhub 315종목 + EDGAR 8-K)를 별도 잡으로
+     분리. 캘린더 sync(07:00)가 900s 를 거의 소진해 IR Day 가 강제종료되던 문제 → 07:15 별도 실행 +
+     타임아웃 1800s(run_gha_job.sh job_timeout_seconds). 실행은 skip-earnings 플래그. -->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.antigravity.gha-earnings-ir-day</string>
+    <key>UserName</key>
+    <string>__MACMINI_USER__</string>
+    <key>WorkingDirectory</key>
+    <string>__REPO__</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>__REPO__/launchd/gha/run_gha_job.sh</string>
+        <string>gha-earnings-ir-day</string>
+    </array>
+    <!-- 데몬 환경 표준 (CONTRACT v3): launchd 는 로그인 환경이 없음 → HOME/PATH/LANG 명시 -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>/Users/__MACMINI_USER__</string>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>LANG</key>
+        <string>en_US.UTF-8</string>
+    </dict>
+    <!-- KST 07:15 매일 (캘린더 sync 07:00 뒤 스태거). 시스템 TZ=Asia/Seoul 전제. -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>7</integer>
+        <key>Minute</key>
+        <integer>15</integer>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>__REPO__/logs/launchd/gha-earnings-ir-day.out</string>
+    <key>StandardErrorPath</key>
+    <string>__REPO__/logs/launchd/gha-earnings-ir-day.err</string>
+    <key>RunAtLoad</key>
+    <false/>
+</dict>
+</plist>

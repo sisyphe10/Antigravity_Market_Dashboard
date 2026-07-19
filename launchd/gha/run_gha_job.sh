@@ -175,7 +175,8 @@ job_timeout_seconds() {
     gha-krx-valuation)           echo 900  ;;   # pykrx 로그인 + fetch
     gha-disclosures)             echo 900  ;;   # DART + KIND fetch
     gha-crawl)                   echo 3600 ;;   # 대형 파이프라인(백필·크롤·차트·SEIBro selenium) ~60min
-    gha-earnings-calendar-sync)  echo 900  ;;   # finnhub + Google Calendar sync
+    gha-earnings-calendar-sync)  echo 1800 ;;   # 실적 캘린더 Google Calendar 쓰기(146건×~3s) ~15min → 상향
+    gha-earnings-ir-day)         echo 1800 ;;   # IR Day: Finnhub 뉴스 315종목 + EDGAR 8-K (느림)
     gha-finalize-orders)         echo 1800 ;;   # finalize + calc_wrap_nav + dashboard + push
     gha-taiwan-revenue)          echo 1800 ;;   # FinMind 53종목 + crosscheck + dashboard
     *)                           echo 1800 ;;   # 미지정 안전 기본
@@ -348,8 +349,16 @@ run_job() {
 
     # ── earnings_calendar_sync.yml (Wave 3, ★VM cron 이중실행 정리) ──
     #   git push 없음(Google Calendar/Sheet 직접 기록). 파이썬 스크립트만 실행.
+    #   2026-07-20: 실적 캘린더 sync 와 IR Day 를 별도 잡으로 분리(IR Day Finnhub 315종목이
+    #   느려 900s 초과 → 강제종료되던 문제). 캘린더 sync 만 --skip-ir-day 로.
     gha-earnings-calendar-sync)
-      "$PY" execution/earnings_calendar_sync.py || return $?
+      "$PY" execution/earnings_calendar_sync.py --skip-ir-day || return $?
+      ;;
+
+    # ── earnings IR Day (2026-07-20 분리) — Finnhub 뉴스 315종목 + EDGAR 8-K.
+    #   느린 단계라 타임아웃 상향(1800s). 캘린더 sync 15분 뒤(07:15) 실행. git push 없음.
+    gha-earnings-ir-day)
+      "$PY" execution/earnings_calendar_sync.py --skip-earnings || return $?
       ;;
 
     # ── finalize_orders.yml (Wave 3, 최고 민감 — 최후 이관) ──
