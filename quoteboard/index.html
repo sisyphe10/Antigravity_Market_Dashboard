@@ -73,15 +73,13 @@
   thead th {
     position: sticky; top: var(--thead-top, 74px); z-index: 5; background: #fafafa;
     font-weight: 600; color: #555; padding: 6px 10px;
-    border-bottom: 1px solid #ddd; text-align: right; white-space: nowrap;
+    border-bottom: 1px solid #ddd; text-align: center; white-space: nowrap;
     cursor: pointer; user-select: none;
   }
-  thead th.star, thead th.name { cursor: default; }
-  thead th.name { text-align: left; }
+  thead th.star, thead th.name, thead th.codeh { cursor: default; }
   thead th .arw { font-size: 10px; color: #111; margin-left: 2px; }
-  td { padding: 4px 10px; border-bottom: 1px solid #f2f2f2; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
-  td.name { text-align: left; }
-  td.name .code { color: #aaa; font-size: 11px; margin-left: 6px; }
+  td { padding: 4px 10px; border-bottom: 1px solid #f2f2f2; text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  td.code { color: #aaa; font-size: 11px; }
   td.star, th.star { width: 26px; padding: 4px 2px 4px 8px; text-align: center; }
   td.star { cursor: pointer; color: #ccc; font-size: 13px; }
   td.star.on { color: #f5a623; }
@@ -136,7 +134,7 @@ nav.topnav{border-bottom-color:#fb8b1e}
 thead th{background:#1a1b1e;color:#fb8b1e;border-bottom:1px solid #2a2b2e}
 thead th .arw{color:#fb8b1e}
 td{border-bottom:1px solid #222326}
-td.name .code{color:#fff}
+td.code{color:#fff}
 tbody tr:hover td{background:#191a1d}
 .up{color:#ff453a}
 .down{color:#2e9bff}
@@ -152,7 +150,7 @@ table{font-size:16px}
 thead th{font-size:12px}
 .panel h2{font-size:18px}
 .panel h2 .cnt{font-size:13px}
-td.name .code{font-size:13px}
+td.code{font-size:13px}
 .titlerow h1{font-size:18px}
 .titlerow .meta{font-size:13px}
 </style>
@@ -268,7 +266,7 @@ function tabsHTML(groups) {        // [관심종목, 전체] + 개별 섹터 (�
 }
 
 function theadHTML() {
-  let h = '<thead><tr><th class="star">★</th><th class="name">종목</th>';
+  let h = '<thead><tr><th class="star">★</th><th class="name">종목</th><th class="codeh">코드</th>';
   for (const [key, label] of COLS) {
     const arw = key === sortKey ? `<span class="arw">${sortDir < 0 ? '▼' : '▲'}</span>` : '';
     h += `<th data-key="${key}">${label}${arw}</th>`;
@@ -282,7 +280,7 @@ function rowHTML(r) {
     ? `★<span class="gno">${mem.map(i => i + 1).join(',')}</span>`
     : '☆';
   return `<tr><td class="star${mem.length ? ' on' : ''}" data-code="${r.code}">${star}</td>` +
-         `<td class="name">${r.name}<span class="code">${r.code}</span></td>` +
+         `<td class="name">${r.name}</td><td class="code">${r.code}</td>` +
          `<td>${comma(r.price)}</td><td>${fmtChg(r.chg)}</td>` +
          `<td>${fmtEok(r.trdval)}</td><td>${fmtEok(r.mcap)}</td></tr>`;
 }
