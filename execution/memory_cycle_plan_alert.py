@@ -83,6 +83,7 @@ def analyze(s):
     after_low = since[since.index > low_date]
     reb_high = float(after_low.max()) if len(after_low) else None
     reb_pct = reb_high / s["peak"] * 100 if reb_high else None
+    started = reb_high is not None and reb_high >= low * 1.05   # 저점 대비 +5% 이상이면 '반등 개시'
 
     triggers = []
     # 이벤트 트리거 (발동 시에만 메시지 하단에 표시)
@@ -110,7 +111,9 @@ def analyze(s):
         fmt(s["norm_low"], s), below, fmt(s["bear_low"], s),
         fmt(s["band"][0], s), fmt(s["band"][1], s), fmt(s["bear_reb"], s),
     )
-    return block, triggers, reb_pct
+    info = {"reb_pct": reb_pct, "started": started, "last": last,
+            "post_low_high": max(last, reb_high or 0)}
+    return block, triggers, info
 
 
 def send_telegram(text):
@@ -127,26 +130,29 @@ def send_telegram(text):
 
 def main():
     now = datetime.now(KST)
-    blocks, all_triggers, rebs = [], [], {}
+    blocks, all_triggers, infos = [], [], {}
     for s in STOCKS:
         try:
-            block, triggers, reb_pct = analyze(s)
+            block, triggers, info = analyze(s)
             blocks.append(block)
             all_triggers.extend(triggers)
-            rebs[s["name"]] = reb_pct
+            infos[s["name"]] = info
         except Exception as e:
             blocks.append("%s  조회 실패: %s" % (s["name"], e))
             all_triggers.append("⚠ %s 데이터 조회 실패 — 수동 확인 필요" % s["name"])
 
-    def r(name):
-        v = rebs.get(name)
-        return "%.0f%%" % v if v is not None else "미개시"
+    # 예/아니오 관문 3개: ①반등 개시(어느 한 종목이라도 저점 대비 +5%) ②MU $1,019(84%) 도달 ③무인지대(88%) 통과
+    def mark(b):
+        return "✔" if b else "✖"
+    g1 = any(i["started"] for i in infos.values())
+    mu = infos.get("마이크론")
+    g2 = bool(mu and mu["post_low_high"] >= 1019)
+    g3 = any(i["reb_pct"] is not None and i["reb_pct"] >= 88 for i in infos.values())
 
     msg = "📐 메모리 플랜 %s\n\n" % now.strftime("%m/%d")
     msg += "\n\n".join(blocks)
     msg += "\n\n★판별 = MU $1,020(84%) 돌파 여부"
-    msg += "\n반등 수준: 삼전 %s · 닉스 %s · MU %s (판별선 84%%)" % (
-        r("삼성전자"), r("SK하이닉스"), r("마이크론"))
+    msg += "\n✔체크: 반등 개시? %s · MU $1,020 돌파? %s · 84~88%% 통과? %s" % (mark(g1), mark(g2), mark(g3))
     if all_triggers:
         msg += "\n" + "\n".join(all_triggers)
 
