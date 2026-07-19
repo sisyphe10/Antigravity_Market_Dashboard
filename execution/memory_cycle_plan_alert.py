@@ -20,37 +20,41 @@ STOCKS = [
     {
         "name": "삼성전자", "ticker": "005930.KS", "cur": "KRW",
         "peak": 362500, "anchor": "2026-07-02",
-        "trim": 300900,                             # 1차 축소선(정점의 83%)
-        "confirm88": 319000,                        # 통상형 확인선(88%)
-        "band": (338400, 360900),                   # 통상형 목표(93~100%)
-        "deep25": 239700,                           # 통상형 깊은25% 저점(-34%)
+        "norm_low": 248900,                         # 통상형 중앙 저점(-31%)
         "bear_low": 190900,                         # 약세장형 중앙 저점(-47%)
+        "band": (338400, 360900),                   # 통상형 반등(93~100%)
+        "bear_reb": 301000,                         # 약세장형 반등 천장(~83%)
+        "confirm88": 319000,                        # 통상형 확인선(88%) — 트리거용
+        "deep25": 239700,                           # 통상형 깊은25% 저점(-34%) — 트리거용
     },
     {
         "name": "SK하이닉스", "ticker": "000660.KS", "cur": "KRW",
         "peak": 2919000, "anchor": "2026-07-02",
-        "trim": 2422800,
-        "confirm88": 2568700,
-        "band": (2808500, 2885700),
-        "deep25": 1792200,
+        "norm_low": 1973500,
         "bear_low": 1230700,
+        "band": (2808500, 2885700),
+        "bear_reb": 2410100,
+        "confirm88": 2568700,
+        "deep25": 1792200,
     },
     {
         "name": "마이크론", "ticker": "MU", "cur": "USD",
         "peak": 1213.0, "anchor": "2026-07-07",
-        "trim": 1007.0,
-        "confirm88": 1067.0,
-        "band": (1160.0, 1204.0),
-        "deep25": 746.0,
+        "norm_low": 846.0,
         "bear_low": 514.0,
+        "band": (1160.0, 1204.0),
+        "bear_reb": 1016.0,
+        "confirm88": 1067.0,
+        "deep25": 746.0,
     },
 ]
 
 
 def fmt(v, cur):
+    # 표기 반올림 (2026-07-19 사용자 확정): KRW=천원 단위, USD=십달러 단위. half-up 고정(파이썬 round는 은행가 반올림)
     if cur == "KRW":
-        return f"{v:,.0f}"
-    return f"${v:,.0f}"
+        return f"{int(v / 1000 + 0.5) * 1000:,d}"
+    return f"${int(v / 10 + 0.5) * 10:,d}"
 
 
 def fetch_closes(ticker, start):
@@ -79,41 +83,31 @@ def analyze(s):
     reb_pct = reb_high / s["peak"] * 100 if reb_high else None
 
     triggers = []
-    # 단계 판정 (저점 이후 반등 기준)
-    if reb_pct is None:
-        stage = "저점 탐색 중"
-    elif reb_pct >= 93:
-        stage = "🎯 목표밴드 — 잔여 처분 구간"
-    elif reb_pct >= 88:
-        stage = "✅ 통상형 확정 — 잔여 홀드"
-        if cur_pct < 93:
-            triggers.append("✅ 통상형 확인선(88%) 통과 — 역사상 이후 전부 93%+ 도달")
-    elif reb_pct >= 84:
-        stage = "무인지대(84~88%) — 확인 대기"
-    elif cur_pct >= 83:
-        stage = "🔽 1차 축소 구간(83~85%) 진입"
-        triggers.append("🔽 %s 1차 축소 구간 진입 — 보험성 축소 검토" % s["name"])
-    else:
-        stage = "반등 관찰 중" if reb_pct else "저점 탐색 중"
-
-    # 약세장 판정 트리거 A: 저점 후 반등고점이 81~88%에서 형성된 뒤 고점 대비 -10% 이탈
-    if reb_pct is not None and 81 <= reb_pct < 88 and last <= reb_high * 0.90:
-        triggers.append("⚠ %s 약세장 판정: 반등고점(정점의 %.0f%%) -10%% 이탈 — 철수 검토" % (s["name"], reb_pct))
-    # 트리거 B: 통상형 깊은25% 저점 하회
+    # 이벤트 트리거 (발동 시에만 메시지 하단에 표시)
+    if reb_pct is not None:
+        if reb_pct >= 88 and cur_pct < 93:
+            triggers.append("✅ %s 통상형 확인선(88%%) 통과 — 역사상 이후 전부 93%%+ 도달" % s["name"])
+        if reb_pct >= 93:
+            triggers.append("🎯 %s 통상형 목표밴드(93~100%%) 진입 — 잔여 처분 구간" % s["name"])
+        if 83 <= reb_pct < 84:
+            triggers.append("🔽 %s 반등이 약세장 천장(83~84%%) 도달 — 1차 축소 검토 구간" % s["name"])
+        # 약세장 판정: 저점 후 반등고점이 81~88%에서 형성된 뒤 고점 대비 -10% 이탈
+        if 81 <= reb_pct < 88 and last <= reb_high * 0.90:
+            triggers.append("⚠ %s 약세장 판정: 반등고점(정점의 %.0f%%) -10%% 이탈 — 철수 검토" % (s["name"], reb_pct))
+    # 통상형 깊은25% 저점 하회
     if last < s["deep25"]:
         triggers.append("⚠ %s 통상형 깊은25%%(%s) 하회 — 약세장 저점 %s 참조" % (s["name"], fmt(s["deep25"], s["cur"]), fmt(s["bear_low"], s["cur"])))
 
     c = s["cur"]
+    below = "(하회)" if last < s["norm_low"] else ""
     block = (
-        "%s  %s (%s) · 정점比 %.0f%%\n"
-        "  단계: %s\n"
-        "  🔽축소 %s   ✅확인 %s\n"
-        "  🎯목표 %s~%s   ⛔경계 %s"
+        "%s %s · 정점비 %.0f%%\n"
+        "저점: 통상 %s%s | 약세 %s\n"
+        "반등: 통상 %s~%s | 약세 ~%s"
     ) % (
-        s["name"], fmt(last, c), last_date, cur_pct,
-        stage,
-        fmt(s["trim"], c), fmt(s["confirm88"], c),
-        fmt(s["band"][0], c), fmt(s["band"][1], c), fmt(s["deep25"], c),
+        s["name"], fmt(last, c), cur_pct,
+        fmt(s["norm_low"], c), below, fmt(s["bear_low"], c),
+        fmt(s["band"][0], c), fmt(s["band"][1], c), fmt(s["bear_reb"], c),
     )
     return block, triggers, reb_pct
 
@@ -145,9 +139,9 @@ def main():
             blocks.append("%s  조회 실패: %s" % (s["name"], e))
             all_triggers.append("⚠ %s 데이터 조회 실패 — 수동 확인 필요" % s["name"])
 
-    msg = "📐 메모리 플랜 점검 %s\n\n" % now.strftime("%m/%d")
+    msg = "📐 메모리 플랜 %s\n\n" % now.strftime("%m/%d")
     msg += "\n\n".join(blocks)
-    msg += "\n\n★첫 신호 = MU $1,019(84%) 돌파"
+    msg += "\n\n★판별 = MU $1,020(84%) 돌파 여부"
     if all_triggers:
         msg += "\n" + "\n".join(all_triggers)
 
