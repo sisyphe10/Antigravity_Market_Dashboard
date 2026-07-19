@@ -2603,6 +2603,12 @@ def _build_combined_chart_section():
                     }
                     var yAxisID = (mode === 'raw2' && idx === 1 && !isForeign) ? 'y1' : 'y';
                     var clickIdx = cmbClickOrder.indexOf(s.name);
+                    // %/%p 단위 시리즈 범례용 원본 첫/끝값 — pct 모드에서는 data가 정규화돼
+                    // 원본 레벨을 잃으므로 여기(aligned)서 미리 떠 둔다.
+                    var rawFirst = null, rawLast = null;
+                    for (var rj = 0; rj < aligned.length; rj++) {
+                        if (aligned[rj] !== null) { if (rawFirst === null) rawFirst = aligned[rj]; rawLast = aligned[rj]; }
+                    }
                     datasets.push({
                         label: s.name,
                         data: data,
@@ -2616,7 +2622,10 @@ def _build_combined_chart_section():
                         cubicInterpolationMode: 'monotone',
                         spanGaps: true,
                         yAxisID: yAxisID,
-                        _isForeign: isForeign
+                        _isForeign: isForeign,
+                        _unit: cmbSeriesUnit[s.name] || '',
+                        _rawFirst: rawFirst,
+                        _rawLast: rawLast
                     });
 
                     // 단일 선택일 때 토글된 MA / 이격도 추가.
@@ -2679,6 +2688,7 @@ def _build_combined_chart_section():
                                 });
                                 // 전 구간 null(데이터 부족)이면 범례 유령 항목 방지를 위해 생략
                                 if (maVisible.some(function(v){ return v !== null; })) datasets.push({
+                                    _unit: cmbSeriesUnit[s.name] || '',
                                     label: 'MA' + win,
                                     data: maVisible,
                                     borderColor: def.color,
@@ -2851,9 +2861,19 @@ def _build_combined_chart_section():
                         var c = ds.borderColor;
                         // 설정 기간 변화율: pct 모드는 정규화된 값이라 last 자체가 변화율,
                         // raw 모드는 (last/first - 1)*100. 첫/마지막 non-null 값으로 계산.
+                        // 값 자체가 %/%p인 시리즈는 상대 변화율이 아니라 레벨 차이를 %p로 표기
+                        // (pct 모드는 데이터가 정규화돼 있어 _rawFirst/_rawLast 사용).
                         var vals = ds.data.filter(function(v) { return v !== null && v !== undefined && !isNaN(v); });
                         var pctStr = '';
-                        if (vals.length >= 2) {
+                        var unit = ds._unit || '';
+                        if ((unit === '%' || unit === '%p') && vals.length >= 2) {
+                            var pf = (mode === 'pct' && ds._rawFirst !== undefined) ? ds._rawFirst : vals[0];
+                            var pl = (mode === 'pct' && ds._rawLast !== undefined) ? ds._rawLast : vals[vals.length - 1];
+                            if (pf !== null && pl !== null) {
+                                var dp = pl - pf;
+                                pctStr = '<span>' + (dp >= 0 ? '+' : '') + fmtUniformFix(dp, Math.abs(dp)) + '%p</span>';
+                            }
+                        } else if (vals.length >= 2) {
                             var first = vals[0];
                             var last = vals[vals.length - 1];
                             var pct;
