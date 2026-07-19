@@ -131,7 +131,19 @@ AOE_DARK_CSS = (
     '{background:#fff!important;color:#333!important}'
     # 흰 패널 내부 td 구제: 범용 td:not([style*=color])의 밝은 글자(#d9dde2)가 흰 바탕에
     # 얹히면 씻겨 보임 — Monthly Returns 연도·월 셀, Indices 사이드바 (2026-07-19)
-    '#mrTableWrap td,tr.idx-chart-item td{color:#333!important}'
+    'tr.idx-chart-item td{color:#333!important}'
+    # Monthly Returns = 생성기 다크 네이티브(2026-07-19) — 틴트 셀은 흰 글자 유지
+    '#mrTableWrap td[style*=background]{color:#fff!important}'
+    # Universe RSI(1M)/YTD 컬럼 하이라이트: 라이트 파스텔(#fff8e1/#f3f0ff) -> 다크 팔레트
+    # (딤 앰버/딤 바이올렛). 등락색 글자 복원 — td[style*=background]의 #333 강제를 재역전.
+    'td[style*="#fff8e1"],th[style*="#fff8e1"],#tab2 td:nth-child(9){background:#2e2410!important}'
+    'td[style*="#f3f0ff"],th[style*="#f3f0ff"]{background:#241a3d!important}'
+    'td[style*="#fff8e1"].positive,td[style*="#f3f0ff"].positive,'
+    '#tab2 td:nth-child(9).positive{color:#ff453a!important}'
+    'td[style*="#fff8e1"].negative,td[style*="#f3f0ff"].negative,'
+    '#tab2 td:nth-child(9).negative{color:#2e9bff!important}'
+    'td[style*="#fff8e1"]:not(.positive):not(.negative),'
+    'td[style*="#f3f0ff"]:not(.positive):not(.negative){color:#d9dde2!important}'
     '</style>')
 dark_pat = re.compile(r'<style id="aoe-terminal-dark">.*?</style>', re.S)
 
