@@ -121,8 +121,8 @@ nav.topnav{border-bottom-color:#fb8b1e}
 .topnav-brand:hover{color:#fb8b1e}
 .topbar{background:#101418;border-bottom:1px solid #23272d}
 .titlerow .meta{color:#fff}
-.titlerow #q{background:#141517 url("data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 width=%2714%27 height=%2714%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%238a919a%27 stroke-width=%272.4%27 stroke-linecap=%27round%27><circle cx=%2711%27 cy=%2711%27 r=%277%27/><line x1=%2716.5%27 y1=%2716.5%27 x2=%2721%27 y2=%2721%27/></svg>") no-repeat 9px center;color:#fff;border-color:#3a3b3e;padding-left:28px}
-.titlerow #q:focus{background:#141517;border-color:#fb8b1e}
+.titlerow #q{background:#141517 url("data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 width=%2714%27 height=%2714%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27white%27 stroke-width=%272.4%27 stroke-linecap=%27round%27><circle cx=%2711%27 cy=%2711%27 r=%277%27/><line x1=%2716.5%27 y1=%2716.5%27 x2=%2721%27 y2=%2721%27/></svg>") no-repeat 9px center;color:#fff;border:2px solid #fff;padding-left:28px}
+.titlerow #q:focus{background-color:#141517;border-color:#fb8b1e}
 .tab{background:#141517;color:#fff;border-color:#3a3b3e}
 .tab.active{background:#fb8b1e;color:#101418;border-color:#fb8b1e}
 .panel h2{background:#14171b;color:#fff;text-align:center}
@@ -332,7 +332,7 @@ function render() {
 
   const m = DATA.meta;
   document.getElementById('meta').textContent =
-    `${m.quoted}/${m.total}종목 · 시세 ${m.sweep_at || '-'}` + (m.fail ? ` · 수신 실패 ${m.fail}건` : '');
+    `${m.quoted}/${m.total}종목 · ${m.sweep_at || '-'}` + (m.fail ? ` · 수신 실패 ${m.fail}건` : '');
   const navH = document.querySelector('nav.topnav').offsetHeight;
   document.documentElement.style.setProperty('--nav-h', navH + 'px');
   document.documentElement.style.setProperty('--thead-top',
