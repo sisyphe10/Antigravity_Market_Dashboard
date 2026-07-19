@@ -68,7 +68,8 @@ def load_universe():
             if not tk.startswith(('KRX:', 'KOSDAQ:')):
                 continue
             code = tk.split(':')[1]
-            if not code.isdigit() or code in seen:
+            # KRX 신형 영숫자 코드 허용 (예: 0126Z0 삼성에피스홀딩스, 0009K0 에임드바이오)
+            if not (len(code) == 6 and code.isalnum()) or code in seen:
                 continue
             seen.add(code)
             rows.append({'code': code,
