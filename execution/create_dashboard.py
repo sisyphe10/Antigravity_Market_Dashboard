@@ -7937,6 +7937,12 @@ def create_dashboard():
             }});
         }}, 60);
     }}
+    // 딥링크: market.html#taiwan 등 해시로 서브탭 직행 (구 standalone taiwan.html 리다이렉트 수용)
+    (function() {{
+        var m = {{ data: 2, monthly: 0, indices: 1, taiwan: 3 }};
+        var h = (location.hash || '').replace('#', '').toLowerCase();
+        if (m.hasOwnProperty(h)) mktSwitchTab(m[h]);
+    }})();
     </script>
     {taiwan_panel_script}
 </body>
