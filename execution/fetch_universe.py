@@ -41,6 +41,8 @@ TICKERS_FILE = ROOT / 'universe_tickers.csv'
 OUTPUT_FILE = ROOT / 'universe.json'
 HISTORY_FILE = ROOT / 'universe_history.json'   # 종목별 일별 종가 시계열 (기간 수익률 탭용)
 N_HISTORY = 252                                  # 보존 거래일 수 (≈1년)
+RETRY_ROUNDS = 2                                 # 1차 fetch 실패분 재시도 라운드 수
+RETRY_SLEEP = 60                                 # 재시도 라운드 전 대기(초) — rate limit 회복용
 
 # 티커 prefix → yfinance suffix + 통화 매핑
 PREFIX_MAP = {
@@ -311,7 +313,8 @@ def compute_returns_from_dict(prices: dict) -> dict | None:
     }
 
 
-def detect_data_anomaly(closes: 'pd.Series', threshold: float = 0.30, window: int = 7):
+def detect_data_anomaly(closes: 'pd.Series', threshold: float = 0.30, window: int = 7,
+                        dividends: 'pd.Series | None' = None):
     """
     최근 window 영업일에서 인접 일간 절대변동률이 threshold를 **초과**하면
     (prev_date, prev_close, curr_date, curr_close, pct) 반환. 없으면 None.
@@ -324,6 +327,11 @@ def detect_data_anomaly(closes: 'pd.Series', threshold: float = 0.30, window: in
     데이터 오류 가능성 (코미코 2026-05-18 -51.7% 사례). threshold는 통화별로
     THRESHOLD_BY_CURRENCY를 통해 fetch_one()에서 전달.
 
+    dividends: 배당락 보정 — auto_adjust=False 종가라 배당락일엔 배당금만큼 갭이 생겨
+    (하락+배당락)이 가격제한 초과처럼 보이는 오탐 발생 (Winway/Novatek 2026-07 대만
+    배당 시즌 사례, 특히 팩트체크 미커버 시장). 판정은 배당 가산 변동률로 하되
+    반환 pct는 원시 변동률 유지 (confirm_anomaly_real의 네이버 원시 종가 대조용).
+
     EPS 마진: 161200/124000 = 1.30000000000000004 같은 부동소수점 노이즈를 흡수해
     정확한 상한가/하한가가 false positive로 잡히지 않게 함.
     """
@@ -331,7 +339,15 @@ def detect_data_anomaly(closes: 'pd.Series', threshold: float = 0.30, window: in
     recent = closes.tail(window + 1)
     if len(recent) < 2:
         return None
-    pct = recent.pct_change()
+    raw_pct = recent.pct_change()
+    pct = raw_pct
+    if dividends is not None:
+        try:
+            div = dividends.reindex(recent.index).fillna(0.0)
+            if float(div.sum()) > 0:
+                pct = (recent + div) / recent.shift(1) - 1
+        except Exception:
+            pct = raw_pct
     abs_pct = pct.abs()
     if abs_pct.max() <= threshold + EPS:
         return None
@@ -345,7 +361,7 @@ def detect_data_anomaly(closes: 'pd.Series', threshold: float = 0.30, window: in
         float(recent.loc[prev_idx]),
         max_idx.strftime('%Y-%m-%d'),
         float(recent.loc[max_idx]),
-        float(pct.loc[max_idx]) * 100,
+        float(raw_pct.loc[max_idx]) * 100,
     )
 
 
@@ -377,7 +393,8 @@ def fetch_one(idx: int, raw_ticker: str, sector: str, name: str, fx_to_krw: dict
         # Sanity check — 통화별 가격제한 초과 점프는 yfinance 데이터 오류 가능성
         # (코미코 5/18 -51.7% 같은 사례). 적발 시 수익률 모두 blank 처리.
         threshold = THRESHOLD_BY_CURRENCY.get(currency, DEFAULT_ANOMALY_THRESHOLD)
-        anomaly = detect_data_anomaly(closes, threshold=threshold, window=7)
+        divs = hist['Dividends'] if 'Dividends' in hist.columns else None
+        anomaly = detect_data_anomaly(closes, threshold=threshold, window=7, dividends=divs)
 
         # 기간별 lookback (거래일 기준)
         def lookback_pct(days: int) -> float | None:
@@ -627,6 +644,28 @@ def main() -> None:
             done += 1
             if done % 50 == 0:
                 print(f"  진행: {done}/{len(rows)}")
+
+    # 실패 종목만 후속 재시도 — rate limit 꼬리(매 run 후반부 실패분)는 잠시 쉬면
+    # 대부분 회복됨. 전체 재실행과 달리 쿼터를 앞에서 소모하지 않아 꼬리가 안 굳는다.
+    for retry_round in range(1, RETRY_ROUNDS + 1):
+        failed = [i for i in range(len(rows)) if i not in results]
+        if not failed:
+            break
+        print(f"  재시도 라운드 {retry_round}/{RETRY_ROUNDS}: {len(failed)}종목, {RETRY_SLEEP}s 대기 후 시작")
+        time.sleep(RETRY_SLEEP)
+        with ThreadPoolExecutor(max_workers=3) as ex:
+            futures = {
+                ex.submit(fetch_one, i + 1, rows[i]['티커'].strip(), rows[i].get('섹터', '').strip(),
+                          rows[i]['기업명'].strip(), fx_to_krw): i
+                for i in failed
+            }
+            for fut in as_completed(futures):
+                i = futures[fut]
+                res = fut.result()
+                if res is not None:
+                    results[i] = res
+        recovered = len(failed) - sum(1 for i in failed if i not in results)
+        print(f"  재시도 라운드 {retry_round} 결과: {recovered}/{len(failed)} 회복")
 
     # 전 종목 fetch 실패(yfinance 전면 rate-limit/차단)면 이전 universe.json을 덮지 않고
     # red 처리 — all-carry-forward로 stale 파일을 쓰면 신선도 모니터가 못 잡는다.
