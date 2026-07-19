@@ -18,7 +18,7 @@ KST = timezone(timedelta(hours=9))
 
 STOCKS = [
     {
-        "name": "삼성전자", "ticker": "005930.KS", "cur": "KRW",
+        "name": "삼성전자", "ticker": "005930.KS", "cur": "KRW", "unit": 1000,
         "peak": 362500, "anchor": "2026-07-02",
         "norm_low": 248900,                         # 통상형 중앙 저점(-31%)
         "bear_low": 190900,                         # 약세장형 중앙 저점(-47%)
@@ -28,7 +28,7 @@ STOCKS = [
         "deep25": 239700,                           # 통상형 깊은25% 저점(-34%) — 트리거용
     },
     {
-        "name": "SK하이닉스", "ticker": "000660.KS", "cur": "KRW",
+        "name": "SK하이닉스", "ticker": "000660.KS", "cur": "KRW", "unit": 10000,
         "peak": 2919000, "anchor": "2026-07-02",
         "norm_low": 1973500,
         "bear_low": 1230700,
@@ -38,7 +38,7 @@ STOCKS = [
         "deep25": 1792200,
     },
     {
-        "name": "마이크론", "ticker": "MU", "cur": "USD",
+        "name": "마이크론", "ticker": "MU", "cur": "USD", "unit": 10,
         "peak": 1213.0, "anchor": "2026-07-07",
         "norm_low": 846.0,
         "bear_low": 514.0,
@@ -50,11 +50,13 @@ STOCKS = [
 ]
 
 
-def fmt(v, cur):
-    # 표기 반올림 (2026-07-19 사용자 확정): KRW=천원 단위, USD=십달러 단위. half-up 고정(파이썬 round는 은행가 반올림)
-    if cur == "KRW":
-        return f"{int(v / 1000 + 0.5) * 1000:,d}"
-    return f"${int(v / 10 + 0.5) * 10:,d}"
+def fmt(v, s):
+    # 표기 반올림 (2026-07-19 사용자 확정): 삼전=천원·하이닉스=만원·MU=십달러. half-up 고정(파이썬 round는 은행가 반올림)
+    u = s["unit"]
+    r = int(v / u + 0.5) * u
+    if s["cur"] == "KRW":
+        return f"{r:,d}"
+    return f"${r:,d}"
 
 
 def fetch_closes(ticker, start):
@@ -96,18 +98,17 @@ def analyze(s):
             triggers.append("⚠ %s 약세장 판정: 반등고점(정점의 %.0f%%) -10%% 이탈 — 철수 검토" % (s["name"], reb_pct))
     # 통상형 깊은25% 저점 하회
     if last < s["deep25"]:
-        triggers.append("⚠ %s 통상형 깊은25%%(%s) 하회 — 약세장 저점 %s 참조" % (s["name"], fmt(s["deep25"], s["cur"]), fmt(s["bear_low"], s["cur"])))
+        triggers.append("⚠ %s 통상형 깊은25%%(%s) 하회 — 약세장 저점 %s 참조" % (s["name"], fmt(s["deep25"], s), fmt(s["bear_low"], s)))
 
-    c = s["cur"]
     below = "(하회)" if last < s["norm_low"] else ""
     block = (
         "%s %s · 정점비 %.0f%%\n"
         "저점: 통상 %s%s | 약세 %s\n"
         "반등: 통상 %s~%s | 약세 ~%s"
     ) % (
-        s["name"], fmt(last, c), cur_pct,
-        fmt(s["norm_low"], c), below, fmt(s["bear_low"], c),
-        fmt(s["band"][0], c), fmt(s["band"][1], c), fmt(s["bear_reb"], c),
+        s["name"], fmt(last, s), cur_pct,
+        fmt(s["norm_low"], s), below, fmt(s["bear_low"], s),
+        fmt(s["band"][0], s), fmt(s["band"][1], s), fmt(s["bear_reb"], s),
     )
     return block, triggers, reb_pct
 
