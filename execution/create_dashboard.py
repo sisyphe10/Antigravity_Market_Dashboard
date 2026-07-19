@@ -9016,7 +9016,7 @@ document.addEventListener('click', function(e) {
     });
 });
 
-var _secSortCol = 3, _secSortAsc = false;
+var _secSortCol = 4, _secSortAsc = false;  // 기본 = RSI(1M) 내림차순 (합산 시총 칼럼 삽입으로 col 4)
 function sortSector(col) {
     if(_secSortCol === col) _secSortAsc = !_secSortAsc;
     else { _secSortCol = col; _secSortAsc = false; }
@@ -9255,15 +9255,14 @@ function renderSector() {
     }
     function fv(v) { if(v===null) return '-'; var s=v>0?'+':''; return s+Math.round(v)+'%'; }
     function cls(v) { if(v===null) return ''; return v>0?'positive':v<0?'negative':''; }
-    function avgMcap(g) { return g.mcapN>0 ? g.mcapSum/g.mcapN : null; }
-    function fmcap(v) { if(v===null) return '-'; v=Math.round(v); if(v>=10000) return Math.floor(v/10000)+'조'+(v%10000).toLocaleString()+'억'; return v.toLocaleString()+'억'; }
+    function fmcap(v) { if(!v) return '-'; v=Math.round(v); if(v>=10000) return Math.floor(v/10000).toLocaleString()+'조'+(v%10000).toLocaleString()+'억'; return v.toLocaleString()+'억'; }
 
     var colMap = [null,null,'cnt',null,'rsi','ytd','d1','w1','m1','m3','m6','y1','dd'];
     var secs = Object.keys(agg).sort(function(a,b) {
         var va, vb;
         if(_secSortCol <= 1) { va=a; vb=b; return _secSortAsc?va.localeCompare(vb):vb.localeCompare(va); }
         if(_secSortCol === 2) { va=agg[a].cnt; vb=agg[b].cnt; }
-        else if(_secSortCol === 3) { va=avgMcap(agg[a])||0; vb=avgMcap(agg[b])||0; }
+        else if(_secSortCol === 3) { va=agg[a].mcapSum; vb=agg[b].mcapSum; }
         else { var k=colMap[_secSortCol]; va=wavg(agg[a][k])||0; vb=wavg(agg[b][k])||0; }
         return _secSortAsc ? va-vb : vb-va;
     });
@@ -9287,7 +9286,7 @@ function renderSector() {
     });
     for(var k in stocksBySec) stocksBySec[k].sort(function(a,b){return b.mcapVal-a.mcapVal;});
 
-    var secHeaders = ['#','섹터','종목수','평균 시총','RSI(1M)','YTD','1D','1W','1M','3M','6M','1Y','DD'];
+    var secHeaders = ['#','섹터','종목수','합산 시총','RSI(1M)','YTD','1D','1W','1M','3M','6M','1Y','DD'];
     var html = '<table style="width:100%;table-layout:fixed;border-collapse:collapse"><thead><tr>';
     secHeaders.forEach(function(h,i) {
         var bg = i===4?' style="background:#241a3d;cursor:pointer"':(i===5?' style="background:#0a3038;cursor:pointer"':' style="cursor:pointer"');
@@ -9298,7 +9297,7 @@ function renderSector() {
         var g = agg[sec];
         var vals = [wavg(g.rsi),wavg(g.ytd),wavg(g.d1),wavg(g.w1),wavg(g.m1),wavg(g.m3),wavg(g.m6),wavg(g.y1),wavg(g.dd)];
         html += '<tr style="cursor:pointer" onclick="toggleSec('+idx+')">';
-        html += '<td>' + (idx+1) + '</td><td style="font-weight:600">' + sec + '</td><td>' + g.cnt + '</td><td>' + fmcap(avgMcap(g)) + '</td>';
+        html += '<td>' + (idx+1) + '</td><td style="font-weight:600">' + sec + '</td><td>' + g.cnt + '</td><td>' + fmcap(g.mcapSum) + '</td>';
         vals.forEach(function(v,i) {
             var bg = i===0?' style="background:#241a3d"':(i===1?' style="background:#0a3038"':'');
             html += '<td class="'+cls(v)+'"'+bg+'>' + fv(v) + '</td>';
