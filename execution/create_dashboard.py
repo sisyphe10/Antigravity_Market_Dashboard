@@ -8751,7 +8751,7 @@ def create_dashboard():
         #tab0 th:nth-child(n+8) { width: 6%; }
         /* DD 열 (1Y 오른쪽) 세로 구분선 — 종목 리스트 16번째, 섹터 수익률 12번째 컬럼 */
         #tab0 th:nth-child(16), #tab0 td:nth-child(16) { border-left: 2px solid #868e96; }
-        #sectorContent th:nth-child(12), #sectorContent td:nth-child(12) { border-left: 2px solid #868e96; }
+        #sectorContent th:nth-child(13), #sectorContent td:nth-child(13) { border-left: 2px solid #868e96; }
         /* 기간 수익률 탭 컬럼 비율 */
         #tab2 th:nth-child(1) { width: 4%; }
         #tab2 th:nth-child(2) { width: 4%; }
@@ -9223,7 +9223,7 @@ function renderSector() {
     var agg = {};
     filtered.forEach(function(r) {
         var sec = r[2] || '기타';
-        if(!agg[sec]) agg[sec] = {cnt:0, rsi:[], ytd:[], d1:[], w1:[], m1:[], m3:[], m6:[], y1:[], dd:[]};
+        if(!agg[sec]) agg[sec] = {cnt:0, mcapSum:0, mcapN:0, rsi:[], ytd:[], d1:[], w1:[], m1:[], m3:[], m6:[], y1:[], dd:[]};
         var g = agg[sec];
         var mcap = parseFloat(String(r[5]||'0').replace(/,/g,'').replace(/조/g,'*10000').replace(/억원/g,'').replace(/억/g,''));
         // 조/억 파싱
@@ -9236,6 +9236,7 @@ function renderSector() {
         if(!mcapVal) mcapVal = parseFloat(mcapStr.replace(/,/g,'')) || 0;
 
         g.cnt++;
+        if(mcapVal>0) { g.mcapSum += mcapVal; g.mcapN++; }
         var vals = [r[7],r[8],r[9],r[10],r[11],r[12],r[13],r[14],r[15]];
         var arrs = [g.rsi,g.ytd,g.d1,g.w1,g.m1,g.m3,g.m6,g.y1,g.dd];
         for(var i=0;i<9;i++) {
@@ -9254,12 +9255,15 @@ function renderSector() {
     }
     function fv(v) { if(v===null) return '-'; var s=v>0?'+':''; return s+Math.round(v)+'%'; }
     function cls(v) { if(v===null) return ''; return v>0?'positive':v<0?'negative':''; }
+    function avgMcap(g) { return g.mcapN>0 ? g.mcapSum/g.mcapN : null; }
+    function fmcap(v) { if(v===null) return '-'; v=Math.round(v); if(v>=10000) return Math.floor(v/10000)+'조'+(v%10000).toLocaleString()+'억'; return v.toLocaleString()+'억'; }
 
-    var colMap = [null,null,'cnt','rsi','ytd','d1','w1','m1','m3','m6','y1','dd'];
+    var colMap = [null,null,'cnt',null,'rsi','ytd','d1','w1','m1','m3','m6','y1','dd'];
     var secs = Object.keys(agg).sort(function(a,b) {
         var va, vb;
         if(_secSortCol <= 1) { va=a; vb=b; return _secSortAsc?va.localeCompare(vb):vb.localeCompare(va); }
         if(_secSortCol === 2) { va=agg[a].cnt; vb=agg[b].cnt; }
+        else if(_secSortCol === 3) { va=avgMcap(agg[a])||0; vb=avgMcap(agg[b])||0; }
         else { var k=colMap[_secSortCol]; va=wavg(agg[a][k])||0; vb=wavg(agg[b][k])||0; }
         return _secSortAsc ? va-vb : vb-va;
     });
@@ -9283,10 +9287,10 @@ function renderSector() {
     });
     for(var k in stocksBySec) stocksBySec[k].sort(function(a,b){return b.mcapVal-a.mcapVal;});
 
-    var secHeaders = ['#','섹터','종목수','RSI(1M)','YTD','1D','1W','1M','3M','6M','1Y','DD'];
+    var secHeaders = ['#','섹터','종목수','평균 시총','RSI(1M)','YTD','1D','1W','1M','3M','6M','1Y','DD'];
     var html = '<table style="width:100%;table-layout:fixed;border-collapse:collapse"><thead><tr>';
     secHeaders.forEach(function(h,i) {
-        var bg = i===3?' style="background:#241a3d;cursor:pointer"':(i===4?' style="background:#0a3038;cursor:pointer"':' style="cursor:pointer"');
+        var bg = i===4?' style="background:#241a3d;cursor:pointer"':(i===5?' style="background:#0a3038;cursor:pointer"':' style="cursor:pointer"');
         html += '<th'+bg+' onclick="sortSector('+i+')">' + h + (_secSortCol===i ? (_secSortAsc?' ▲':' ▼') : '') + '</th>';
     });
     html += '</tr></thead><tbody>';
@@ -9294,7 +9298,7 @@ function renderSector() {
         var g = agg[sec];
         var vals = [wavg(g.rsi),wavg(g.ytd),wavg(g.d1),wavg(g.w1),wavg(g.m1),wavg(g.m3),wavg(g.m6),wavg(g.y1),wavg(g.dd)];
         html += '<tr style="cursor:pointer" onclick="toggleSec('+idx+')">';
-        html += '<td>' + (idx+1) + '</td><td style="font-weight:600">' + sec + '</td><td>' + g.cnt + '</td>';
+        html += '<td>' + (idx+1) + '</td><td style="font-weight:600">' + sec + '</td><td>' + g.cnt + '</td><td>' + fmcap(avgMcap(g)) + '</td>';
         vals.forEach(function(v,i) {
             var bg = i===0?' style="background:#241a3d"':(i===1?' style="background:#0a3038"':'');
             html += '<td class="'+cls(v)+'"'+bg+'>' + fv(v) + '</td>';
@@ -9307,7 +9311,7 @@ function renderSector() {
             function sc(v){if(!v)return'-';var n=parseFloat(String(v).replace(/%/g,'').replace(/,/g,''));if(isNaN(n))return v;return(n>0?'<span class="positive">+':'<span class="negative">')+Math.round(n)+'%</span>';}
             html += '<tr class="sec-detail sec-'+idx+'" style="display:none;font-size:14px">';
             html += '<td>'+tk+'</td><td style="padding-left:8px;text-align:left">'+s.name+'</td>';
-            html += '<td>'+(s.mcap||'')+'</td>';
+            html += '<td></td><td>'+(s.mcap||'')+'</td>';
             var _ttl=s.mkt?' title="'+s.mkt+'"':'';
             html += '<td style="background:#241a3d"'+_ttl+'>'+sc(s.rsi)+'</td><td style="background:#0a3038">'+sc(s.ytd)+'</td><td>'+sc(s.d1)+'</td><td>'+sc(s.w1)+'</td><td>'+sc(s.m1)+'</td><td>'+sc(s.m3)+'</td><td>'+sc(s.m6)+'</td><td>'+sc(s.y1)+'</td><td>'+sc(s.dd)+'</td>';
             html += '</tr>';
@@ -9415,9 +9419,9 @@ function superDownloadUniverse() {
         .then(function(){ return capStocks(10, 'Universe_Stocks_1W'); })     // 종목 1W↓
         .then(function(){ return delay(500); })
         .then(function(){ switchTab(1); return delay(80); })                 // 섹터 탭 가시화 (html2canvas는 display:none 캡처 불가)
-        .then(function(){ return capSectors(3, 'Universe_Sectors_RSI1M'); }) // 섹터 RSI(1M)↓ (col 3)
+        .then(function(){ return capSectors(4, 'Universe_Sectors_RSI1M'); }) // 섹터 RSI(1M)↓ (col 4, 평균 시총 삽입으로 +1)
         .then(function(){ return delay(500); })
-        .then(function(){ return capSectors(6, 'Universe_Sectors_1W'); })    // 섹터 1W↓ (col 6)
+        .then(function(){ return capSectors(7, 'Universe_Sectors_1W'); })    // 섹터 1W↓ (col 7, 평균 시총 삽입으로 +1)
         .then(function(){ return delay(300); })
         .then(restore)
         .catch(function(e){ console.error('superDownloadUniverse:', e); restore(); });
