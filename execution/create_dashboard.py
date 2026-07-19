@@ -8709,9 +8709,10 @@ def create_dashboard():
         .nav-group { margin-top: 10px; }
         .nav-button { display: inline-block; padding: 6px 16px; border-radius: 6px; text-decoration: none; color: #fff; font-size: 0.85rem; font-weight: 600; background: #333; }
         .content { padding: 24px; max-width: 1800px; margin: 0 auto; }
-        .tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #2d7a3a; }
-        .tab { padding: 10px 24px; cursor: pointer; font-weight: 600; font-size: 16px; color: #666; border: 1px solid transparent; border-bottom: none; border-radius: 8px 8px 0 0; background: #f0f0f0; }
-        .tab.active { color: #2d7a3a; background: #fff; border-color: #2d7a3a #2d7a3a transparent; margin-bottom: -2px; }
+        .tabs { display: flex; justify-content: center; gap: 8px; margin: 0 auto 28px; flex-wrap: wrap; }
+        .tab { padding: 9px 26px; cursor: pointer; font-weight: 600; font-size: 0.95rem; color: #666; border: 1.5px solid #d1d5db; border-radius: 999px; background: #fff; white-space: nowrap; }
+        .tab:hover { color: #2d7a3a; border-color: #2d7a3a; }
+        .tab.active { color: #fff; background: #2d7a3a; border-color: #2d7a3a; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .filters { margin-bottom: 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
@@ -9701,9 +9702,10 @@ refresh();
         .section h2 {{ color: #333; padding: 8px 0; font-size: 0.95rem; text-align: center; }}
         .pos {{ color: #cc0000; font-weight: 600; }}
         .neg {{ color: #0055cc; font-weight: 600; }}
-        .tabs {{ display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #2d7a3a; }}
-        .tab {{ padding: 10px 24px; cursor: pointer; font-weight: 600; font-size: 16px; color: #666; border: 1px solid transparent; border-bottom: none; border-radius: 8px 8px 0 0; background: #f0f0f0; }}
-        .tab.active {{ color: #2d7a3a; background: #fff; border-color: #2d7a3a #2d7a3a transparent; margin-bottom: -2px; }}
+        .tabs {{ display: flex; justify-content: center; gap: 8px; margin: 0 auto 28px; flex-wrap: wrap; }}
+        .tab {{ padding: 9px 26px; cursor: pointer; font-weight: 600; font-size: 0.95rem; color: #666; border: 1.5px solid #d1d5db; border-radius: 999px; background: #fff; white-space: nowrap; }}
+        .tab:hover {{ color: #2d7a3a; border-color: #2d7a3a; }}
+        .tab.active {{ color: #fff; background: #2d7a3a; border-color: #2d7a3a; }}
         .tab-content {{ display: none; }}
         .tab-content.active {{ display: block; }}
         .notable-news {{ font-size: 13px; color: #333; line-height: 1.8; }}
