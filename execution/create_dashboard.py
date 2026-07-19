@@ -9255,7 +9255,10 @@ function renderSector() {
     }
     function fv(v) { if(v===null) return '-'; var s=v>0?'+':''; return s+Math.round(v)+'%'; }
     function cls(v) { if(v===null) return ''; return v>0?'positive':v<0?'negative':''; }
-    function fmcap(v) { if(!v) return '-'; v=Math.round(v); if(v>=10000) return Math.floor(v/10000).toLocaleString()+'조'+(v%10000).toLocaleString()+'억'; return v.toLocaleString()+'억'; }
+    function fmcap(v) { if(!v) return '-'; v=Math.round(v);
+        if(v>=100000000) return Math.floor(v/100000000).toLocaleString()+'경'+Math.floor(v/10000%10000).toLocaleString()+'조'+(v%10000).toLocaleString()+'억';
+        if(v>=10000) return Math.floor(v/10000).toLocaleString()+'조'+(v%10000).toLocaleString()+'억';
+        return v.toLocaleString()+'억'; }
 
     var colMap = [null,null,'cnt',null,'rsi','ytd','d1','w1','m1','m3','m6','y1','dd'];
     var secs = Object.keys(agg).sort(function(a,b) {
@@ -9309,8 +9312,8 @@ function renderSector() {
             var tk = s.ticker.indexOf(':')>=0 ? s.ticker.split(':').pop() : s.ticker;
             function sc(v){if(!v)return'-';var n=parseFloat(String(v).replace(/%/g,'').replace(/,/g,''));if(isNaN(n))return v;return(n>0?'<span class="positive">+':'<span class="negative">')+Math.round(n)+'%</span>';}
             html += '<tr class="sec-detail sec-'+idx+'" style="display:none;font-size:14px">';
-            html += '<td>'+tk+'</td><td style="padding-left:8px;text-align:left">'+s.name+'</td>';
-            html += '<td></td><td>'+(s.mcap||'')+'</td>';
+            html += '<td></td><td style="padding-left:8px;text-align:left">'+s.name+'</td>';
+            html += '<td>'+tk+'</td><td>'+(s.mcap||'')+'</td>';
             var _ttl=s.mkt?' title="'+s.mkt+'"':'';
             html += '<td style="background:#241a3d"'+_ttl+'>'+sc(s.rsi)+'</td><td style="background:#0a3038">'+sc(s.ytd)+'</td><td>'+sc(s.d1)+'</td><td>'+sc(s.w1)+'</td><td>'+sc(s.m1)+'</td><td>'+sc(s.m3)+'</td><td>'+sc(s.m6)+'</td><td>'+sc(s.y1)+'</td><td>'+sc(s.dd)+'</td>';
             html += '</tr>';
