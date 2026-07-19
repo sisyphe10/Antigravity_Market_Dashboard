@@ -906,10 +906,11 @@ def create_monthly_returns_table():
     NO_RIGHT = {'연도'}
 
     # border-collapse:separate 모드 — 셀마다 독립 테두리 (right + bottom만)
-    LIGHT = '1px solid #e5e7eb'           # 가로선 (행 사이)
-    LIGHT_VERT = '1px solid #6b7280'      # 일반 세로선 (gray-500)
-    DARK = '1.5px solid #374151'          # 기존 그룹 구분 (gray-700)
-    DARK_HEAVY = '2px solid #1f2937'      # 강조 그룹 구분 + 외곽 (gray-800)
+    # 2026-07-19 블룸버그 다크 전환: 다크 바탕에서는 강조 구분선일수록 밝게
+    LIGHT = '1px solid #26282c'           # 가로선 (행 사이)
+    LIGHT_VERT = '1px solid #3a3d42'      # 일반 세로선
+    DARK = '1.5px solid #4a4e55'          # 기존 그룹 구분
+    DARK_HEAVY = '2px solid #5c6168'      # 강조 그룹 구분 + 외곽
 
     def right_border_for(name):
         if name in NO_RIGHT: return 'none'
@@ -921,7 +922,7 @@ def create_monthly_returns_table():
         return f'border-right:{right_border_for(name)};border-bottom:{bottom_style};'
 
     def th_style_for(name):
-        return (f'padding:8px 6px;background:#f3f4f6;font-weight:700;text-align:center;'
+        return (f'padding:8px 6px;background:#1a1c1f;color:#fb8b1e;font-weight:700;text-align:center;'
                 f'width:{col_width_for(name)};{cell_borders(name, True)}')
 
     head_cells = f'<th style="{th_style_for("연도")}">연도</th>'
@@ -930,13 +931,14 @@ def create_monthly_returns_table():
         head_cells += f'<th style="{th_style_for(name)}">{_html.escape(name)}</th>'
 
     def color_bg(pct):
+        # 다크 히트틴트: 스킨 등락색(#ff453a/#2e9bff) 계열을 어둡게 깐 3단계
         abs_pct = abs(pct)
         if pct > 0:
             sign = '+'
-            bg = '#ffe8e8' if abs_pct <= 5 else ('#ffb8b8' if abs_pct <= 10 else '#ff7a7a')
+            bg = '#33150f' if abs_pct <= 5 else ('#611f16' if abs_pct <= 10 else '#992e1f')
         elif pct < 0:
             sign = ''
-            bg = '#e8edff' if abs_pct <= 5 else ('#b8c5ff' if abs_pct <= 10 else '#7a90ff')
+            bg = '#102338' if abs_pct <= 5 else ('#1a3a5c' if abs_pct <= 10 else '#265a8f')
         else:
             sign = ''
             bg = 'transparent'
@@ -980,7 +982,7 @@ def create_monthly_returns_table():
                 pct = v * 100
                 sign, bg = color_bg(pct)
                 c += (f'<td style="padding:6px 12px;text-align:center;font-weight:700;background:{bg};'
-                      f'color:#000;font-variant-numeric:tabular-nums;{b}">{sign}{pct:.1f}%</td>')
+                      f'color:#fff;font-variant-numeric:tabular-nums;{b}">{sign}{pct:.1f}%</td>')
         return f'<tr>{c}</tr>\n'
 
     def annual_returns_for(year):
@@ -1026,7 +1028,7 @@ def create_monthly_returns_table():
             else:
                 pct = v * 100
                 sign, bg = color_bg(pct)
-                cells += f'<td style="padding:6px 12px;text-align:center;background:{bg};color:#000;font-variant-numeric:tabular-nums;{borders}">{sign}{pct:.1f}%</td>'
+                cells += f'<td style="padding:6px 12px;text-align:center;background:{bg};color:#fff;font-variant-numeric:tabular-nums;{borders}">{sign}{pct:.1f}%</td>'
         body_rows_html += f'<tr>{cells}</tr>\n'
         if annual_after is not None:
             # 완결 연도 = '연간' 라벨 (YTD와 구분), 아래 굵은 선(2px)으로 다음 연도와 분리
@@ -1041,7 +1043,7 @@ def create_monthly_returns_table():
             <div style="display:flex;justify-content:flex-end;width:1000px;max-width:100%;margin:0 auto 8px;">
                 <button onclick="downloadElementImage('mrTableWrap','Monthly_Returns')" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
             </div>
-            <div id="mrTableWrap" style="overflow-x:auto;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05);padding:16px;width:fit-content;max-width:100%;margin:0 auto;">
+            <div id="mrTableWrap" style="overflow-x:auto;background:#101214;border:1px solid #27282b;border-radius:8px;padding:16px;width:fit-content;max-width:100%;margin:0 auto;">
                 <table style="width:1000px;max-width:100%;border-collapse:separate;border-spacing:0;font-size:14px;font-family:inherit;table-layout:fixed;margin:0 auto;border:2px solid #1f2937;box-sizing:border-box;">
                     <thead><tr>{head_cells}</tr></thead>
                     <tbody>

@@ -144,6 +144,11 @@ AOE_DARK_CSS = (
     '.chart-card,.sector-card,.idx-chart-item,.lh-card,'
     '.chart-container,.section:has(canvas),div:has(>canvas)'
     '{background:#fff!important;color:#333!important}'
+    # 흰 패널 내부 td 구제: 범용 td:not([style*=color])의 밝은 글자가 흰 바탕에 씻김 — Indices 사이드바
+    # (2026-07-19 0c55c2d8, 병합 유실 후 재복원)
+    'tr.idx-chart-item td{color:#333!important}'
+    # Monthly Returns = 생성기 다크 네이티브(416b0842 재복원) — 틴트 셀은 흰 글자 유지
+    '#mrTableWrap td[style*=background]{color:#fff!important}'
     # 다크 네이티브 차트 예외 (사용자 지정: SEIBro 막대·Universe Lab 산점도) — id 명시도로 화이트리스트 이김
     '.section:has(#topChart),div:has(>#topChart),.card:has(#scatter),div:has(>#scatter)'
     '{background:#111214!important;color:#d9dde2!important}'
