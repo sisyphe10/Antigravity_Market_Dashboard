@@ -372,15 +372,15 @@ function buildScatter(){
   var ya=Math.max(5, Math.ceil(Math.max.apply(null,pts.map(function(p){return Math.abs(p.y);}))+2));
   var quad={ id:'quad', beforeDraw:function(ch){ var a=ch.chartArea,sc=ch.scales,cx=sc.x.getPixelForValue(0),cy=sc.y.getPixelForValue(0),g=ch.ctx;
       g.save();
-      g.fillStyle='#ffffff'; g.fillRect(0,0,ch.width,ch.height);                       // PNG 배경 흰색
-      g.fillStyle='rgba(220,38,38,0.05)'; g.fillRect(cx,a.top,a.right-cx,cy-a.top);     // 우상 주도(강세=빨강)
-      g.fillStyle='rgba(234,179,8,0.05)'; g.fillRect(a.left,a.top,cx-a.left,cy-a.top);  // 좌상 둔화(중기+ 단기-)
-      g.fillStyle='rgba(37,99,235,0.05)'; g.fillRect(cx,cy,a.right-cx,a.bottom-cy);     // 우하 개선(단기+ 중기-)
-      g.fillStyle='rgba(22,163,74,0.05)'; g.fillRect(a.left,cy,cx-a.left,a.bottom-cy);  // 좌하 소외(약세=녹색)
-      g.strokeStyle='#cbd5e1'; g.lineWidth=1; g.beginPath(); g.moveTo(cx,a.top); g.lineTo(cx,a.bottom); g.moveTo(a.left,cy); g.lineTo(a.right,cy); g.stroke();
-      g.fillStyle='#111827'; g.font='600 13px Pretendard'; g.textAlign='left'; g.textBaseline='bottom';
+      g.fillStyle='#111214'; g.fillRect(0,0,ch.width,ch.height);                       // PNG 배경 = 터미널 다크
+      g.fillStyle='rgba(220,38,38,0.12)'; g.fillRect(cx,a.top,a.right-cx,cy-a.top);     // 우상 주도(강세=빨강)
+      g.fillStyle='rgba(234,179,8,0.12)'; g.fillRect(a.left,a.top,cx-a.left,cy-a.top);  // 좌상 둔화(중기+ 단기-)
+      g.fillStyle='rgba(37,99,235,0.12)'; g.fillRect(cx,cy,a.right-cx,a.bottom-cy);     // 우하 개선(단기+ 중기-)
+      g.fillStyle='rgba(22,163,74,0.12)'; g.fillRect(a.left,cy,cx-a.left,a.bottom-cy);  // 좌하 소외(약세=녹색)
+      g.strokeStyle='#3a3b3e'; g.lineWidth=1; g.beginPath(); g.moveTo(cx,a.top); g.lineTo(cx,a.bottom); g.moveTo(a.left,cy); g.lineTo(a.right,cy); g.stroke();
+      g.fillStyle='#d9dde2'; g.font='600 13px Pretendard'; g.textAlign='left'; g.textBaseline='bottom';
       g.fillText('RSI(1M) (%p)', 6, a.top-16);  // Y축 라벨 — 가로 표기, 차트와 여백
-      g.fillStyle='#111827'; g.font='bold 14px Pretendard'; g.textBaseline='top';
+      g.fillStyle='#d9dde2'; g.font='bold 14px Pretendard'; g.textBaseline='top';
       g.textAlign='right'; g.fillText('주도', a.right-8, a.top+6);
       g.textAlign='left';  g.fillText('둔화', a.left+8, a.top+6);
       g.textAlign='right'; g.textBaseline='bottom'; g.fillText('개선', a.right-8, a.bottom-6);
@@ -388,7 +388,7 @@ function buildScatter(){
       g.restore();
   }, afterDatasetsDraw:function(ch){
       var g=ch.ctx, meta=ch.getDatasetMeta(0), area=ch.chartArea, ds=ch.data.datasets[0].data;
-      g.save(); g.font='700 12px Pretendard'; g.fillStyle='#111827'; g.textAlign='center'; g.textBaseline='middle';
+      g.save(); g.font='700 12px Pretendard'; g.fillStyle='#fff'; g.textAlign='center'; g.textBaseline='middle';
       // 큰 버블부터 라벨 배치(버블 위, 잘리면 아래). 이미 놓인 라벨과 겹치면 생략 — 배경 투명.
       var items=meta.data.map(function(el,i){ return {x:el.x, y:el.y, r:ds[i].r||6, sector:ds[i].sector, w:g.measureText(ds[i].sector).width}; });
       items.sort(function(a,b){ return b.r-a.r; });
@@ -408,11 +408,11 @@ function buildScatter(){
   var ctx=document.getElementById('scatter').getContext('2d');
   scatterChart=new Chart(ctx,{ type:'bubble',
     data:{ datasets:[{ data:pts.map(function(p){return {x:p.x,y:p.y,r:p.r,sector:p.sector,w:p.w,n:p.n};}),
-      backgroundColor:pts.map(function(p){ var c=diverge((p.x+p.y)/2,15); return c.replace('rgb(','rgba(').replace(')',',0.55)'); }),
-      borderColor:'#475569', borderWidth:1 }] },
+      backgroundColor:pts.map(function(p){ var c=diverge((p.x+p.y)/2,15); return c.replace('rgb(','rgba(').replace(')',',0.75)'); }),
+      borderColor:'#8a919a', borderWidth:1 }] },
     options:{ maintainAspectRatio:false, animation:false, layout:{padding:{top:36}},
-      scales:{ x:{min:-xa,max:xa,title:{display:true,text:'1W (%)',align:'end',color:'#111827',font:{size:13,weight:'600'}},ticks:{color:'#111827'},grid:{color:'#f1f5f9'}},
-               y:{min:-ya,max:ya,title:{display:false},ticks:{color:'#111827'},grid:{color:'#f1f5f9'}} },
+      scales:{ x:{min:-xa,max:xa,title:{display:true,text:'1W (%)',align:'end',color:'#d9dde2',font:{size:13,weight:'600'}},ticks:{color:'#d9dde2'},grid:{color:'#2a2b2e'}},
+               y:{min:-ya,max:ya,title:{display:false},ticks:{color:'#d9dde2'},grid:{color:'#2a2b2e'}} },
       plugins:{ legend:{display:false},
         tooltip:{ displayColors:false, callbacks:{ label:function(c){ var d=c.raw; return d.sector+' · 종목 '+d.n+' · 시총 '+Math.round(d.w).toLocaleString()+'억 · 1W '+(d.x>0?'+':'')+Math.round(d.x)+'%, RSI '+(d.y>0?'+':'')+Math.round(d.y)+'%'; } } } }
     }, plugins:[quad] });
@@ -492,13 +492,13 @@ function _savePng(dataUrl, name){ var a=document.createElement('a'); a.href=data
 function downloadHeatmap(){
   var node=document.getElementById('heatmap');
   if(typeof html2canvas!=='function'){ alert('이미지 라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.'); return; }
-  html2canvas(node, {scale:2, backgroundColor:'#ffffff'}).then(function(cv){ _savePng(cv.toDataURL('image/png'), 'Universe_Heatmap_'+METRICS[METRIC].label.replace(/[()]/g,'')); });
+  html2canvas(node, {scale:2, backgroundColor:'#111214'}).then(function(cv){ _savePng(cv.toDataURL('image/png'), 'Universe_Heatmap_'+METRICS[METRIC].label.replace(/[()]/g,'')); });
 }
 function downloadScatter(){ if(!scatterChart){ alert('차트가 아직 준비되지 않았습니다.'); return; } _savePng(scatterChart.toBase64Image('image/png',1), 'Universe_SectorRotation'); }
 function downloadRanks(){
   var node=document.getElementById('rankCapture');
   if(typeof html2canvas!=='function'){ alert('이미지 라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.'); return; }
-  html2canvas(node, {scale:2, backgroundColor:'#ffffff'}).then(function(cv){ _savePng(cv.toDataURL('image/png'), 'Universe_Ranks'); });
+  html2canvas(node, {scale:2, backgroundColor:'#111214'}).then(function(cv){ _savePng(cv.toDataURL('image/png'), 'Universe_Ranks'); });
 }
 </script>
 </body>

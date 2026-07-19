@@ -9596,9 +9596,8 @@ function refresh() {{
             labels: chartData.map(function(d) {{ return getTicker(d.name); }}),
             datasets: [{{
                 data: chartData.map(function(d) {{ return Math.round(d.val / 1000000); }}),
-                backgroundColor: 'rgba(3,105,161,0.5)',
-                borderColor: '#2d7a3a',
-                borderWidth: 1
+                backgroundColor: '#fb8b1e',
+                borderWidth: 0
             }}]
         }},
         options: {{
@@ -9610,8 +9609,8 @@ function refresh() {{
                 tooltip: {{ callbacks: {{ label: function(ctx) {{ return getTicker(chartData[ctx.dataIndex].name) + ': ' + ctx.raw.toLocaleString() + 'M$'; }} }} }}
             }},
             scales: {{
-                x: {{ ticks: {{ callback: function(v) {{ return v.toLocaleString() + 'M$'; }}, font: {{ size: 11 }}, color: '#000' }}, grid: {{ color: '#eee' }} }},
-                y: {{ ticks: {{ font: {{ size: 11 }}, color: '#000' }}, grid: {{ display: false }} }}
+                x: {{ ticks: {{ callback: function(v) {{ return v.toLocaleString() + 'M$'; }}, font: {{ size: 11 }}, color: '#d9dde2' }}, grid: {{ color: '#2a2b2e' }} }},
+                y: {{ ticks: {{ font: {{ size: 11 }}, color: '#d9dde2' }}, grid: {{ display: false }} }}
             }}
         }}
     }});

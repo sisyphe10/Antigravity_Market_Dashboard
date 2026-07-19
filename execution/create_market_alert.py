@@ -389,7 +389,7 @@ def render_table(stocks, category, price_cache):
         else:
             판단일_임박   = False
 
-        # 강조: 판단일 도달=ma-hot(진한 레드 틴트), 5영업일 이내=ma-soon, 나머지=없음
+        # 강조: 판단일 도달=ma-hot(앰버), 5영업일 이내=ma-soon(바이올렛), 나머지=없음
         if category == '투자주의':
             row_bg = ''
         elif 판단일_passed:
@@ -719,10 +719,10 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stoc
         }}
         .data-table tbody tr:last-child td {{ border-bottom: none; }}
         .data-table tbody tr:hover td {{ background: #f9fafb; }}
-        /* 강조 행 = 터미널 다크 레드 틴트 3단 (판단일 도달 > 임박 > 지정예고) */
-        .data-table tr.ma-hot td {{ background: #992e1f !important; color: #fff !important; }}
-        .data-table tr.ma-soon td {{ background: #611f16 !important; color: #ffd9d2 !important; }}
-        .data-table tr.ma-pre td {{ background: #33150f !important; color: #f2c9c0 !important; }}
+        /* 강조 행 = AoE 하이라이트 3색 순환 (판단일 도달=앰버 > 임박=바이올렛 > 지정예고=시안, AOE_STYLE_GUIDE) */
+        .data-table tr.ma-hot td {{ background: #4a2d0a !important; color: #ffb45e !important; }}
+        .data-table tr.ma-soon td {{ background: #241a3d !important; color: #b9a1fc !important; }}
+        .data-table tr.ma-pre td {{ background: #0a3038 !important; color: #67e0f4 !important; }}
         footer {{
             text-align: center; padding: 16px; color: #999; font-size: 14px;
         }}
