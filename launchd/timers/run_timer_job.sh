@@ -144,6 +144,7 @@ job_timeout_seconds() {
     send-advisory-emails) echo 300  ;;   # SMTP 5통 여유(신규 60초 폴러)
     memento-telegram)     echo 120  ;;   # 텔레그램 1통(따끔어)
     wrap-principle-check) echo 300  ;;   # 포트폴리오 원칙 점검+텔레그램
+    memory-cycle-alert)   echo 300  ;;   # 메모리 3사 사이클 플랜 점검+텔레그램
     *)                    echo 1800 ;;   # 미지정 안전 기본(90s 대신 30min)
   esac
 }
@@ -195,6 +196,7 @@ run_job() {
     send-advisory-emails) "$PY" execution/send_advisory_emails.py || return $? ;;
     memento-telegram)     "$PY" "$HOME/Journal/scripts/memento_telegram.py" || return $? ;;
     wrap-principle-check) "$PY" execution/wrap_principle_check.py || return $? ;;
+    memory-cycle-alert)   "$PY" execution/memory_cycle_plan_alert.py || return $? ;;
     *)
       echo "[run_timer_job] 알 수 없는 잡: $1" >&2
       return 64

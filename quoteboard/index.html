@@ -18,7 +18,7 @@
   .topnav-brand:hover { color: #7fc78f; }
   .topnav-tabs { display: flex; gap: 2px; flex: 1; align-items: stretch; }
   .topnav-item { position: relative; display: flex; align-items: stretch; }
-  .topnav-tab { box-sizing: border-box; display: inline-flex; align-items: center; gap: 6px; padding: 0 18px; color: #9aa4ae; text-decoration: none; font-size: 0.92rem; font-weight: 600; letter-spacing: 0.3px; border: none; border-radius: 0; white-space: nowrap; background: transparent; transition: color 0.12s, background 0.12s; cursor: pointer; font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; }
+  .topnav-tab { box-sizing: border-box; display: inline-flex; align-items: center; gap: 6px; padding: 0 18px; color: #fff; text-decoration: none; font-size: 0.92rem; font-weight: 600; letter-spacing: 0.3px; border: none; border-radius: 0; white-space: nowrap; background: transparent; transition: color 0.12s, background 0.12s; cursor: pointer; font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; }
   .topnav-tab:hover { color: #fff; background: #1a2027; }
   .topnav-tab.active { color: #fff; background: #991B1B; font-weight: 700; }
   .topnav-tab .caret { font-size: 0.7rem; opacity: 0.7; }
@@ -73,15 +73,13 @@
   thead th {
     position: sticky; top: var(--thead-top, 74px); z-index: 5; background: #fafafa;
     font-weight: 600; color: #555; padding: 6px 10px;
-    border-bottom: 1px solid #ddd; text-align: right; white-space: nowrap;
+    border-bottom: 1px solid #ddd; text-align: center; white-space: nowrap;
     cursor: pointer; user-select: none;
   }
-  thead th.star, thead th.name { cursor: default; }
-  thead th.name { text-align: left; }
+  thead th.star, thead th.name, thead th.codeh { cursor: default; }
   thead th .arw { font-size: 10px; color: #111; margin-left: 2px; }
-  td { padding: 4px 10px; border-bottom: 1px solid #f2f2f2; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
-  td.name { text-align: left; }
-  td.name .code { color: #aaa; font-size: 11px; margin-left: 6px; }
+  td { padding: 4px 10px; border-bottom: 1px solid #f2f2f2; text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  td.code { color: #aaa; }
   td.star, th.star { width: 26px; padding: 4px 2px 4px 8px; text-align: center; }
   td.star { cursor: pointer; color: #ccc; font-size: 13px; }
   td.star.on { color: #f5a623; }
@@ -117,31 +115,31 @@
   #addmenu .mi:hover { background: #f4f6f8; }
 </style>
 <style id="aoe-terminal-dark">
-body{background:#0a0a0a;color:#d9dde2}
+body{background:#0a0a0a;color:#fff}
 nav.topnav{border-bottom-color:#fb8b1e}
 .topnav-tab.active{background:#fb8b1e;color:#101418}
 .topnav-brand:hover{color:#fb8b1e}
 .topbar{background:#101418;border-bottom:1px solid #23272d}
-.titlerow .meta{color:#8a919a}
-.titlerow #q{background:#141517;color:#d9dde2;border-color:#3a3b3e}
+.titlerow .meta{color:#fff}
+.titlerow #q{background:#141517 url("data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 width=%2714%27 height=%2714%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%238a919a%27 stroke-width=%272.4%27 stroke-linecap=%27round%27><circle cx=%2711%27 cy=%2711%27 r=%277%27/><line x1=%2716.5%27 y1=%2716.5%27 x2=%2721%27 y2=%2721%27/></svg>") no-repeat 9px center;color:#fff;border-color:#3a3b3e;padding-left:28px}
 .titlerow #q:focus{background:#141517;border-color:#fb8b1e}
-.tab{background:#141517;color:#9aa4ae;border-color:#3a3b3e}
+.tab{background:#141517;color:#fff;border-color:#3a3b3e}
 .tab.active{background:#fb8b1e;color:#101418;border-color:#fb8b1e}
-.panel h2{background:#14171b;color:#d9dde2}
-.panel h2 .cnt{color:#8a919a}
+.panel h2{background:#14171b;color:#fff;text-align:center}
+.panel h2 .cnt{color:#fff}
 .panel h2 .gname:focus{background:#141517}
 .panel h2 .gadd{color:#fb8b1e}
 .panel h2 .gadd:hover{background:#241a0d}
-.empty{color:#6b7280}
+.empty{color:#fff}
 thead th{background:#1a1b1e;color:#fb8b1e;border-bottom:1px solid #2a2b2e}
 thead th .arw{color:#fb8b1e}
 td{border-bottom:1px solid #222326}
-td.name .code{color:#6b7280}
+td.code{color:#fff}
 tbody tr:hover td{background:#191a1d}
 .up{color:#ff453a}
 .down{color:#2e9bff}
-.flat{color:#9aa4ae}
-#starmenu,#addmenu{background:#14171b;border-color:#3a3b3e;color:#d9dde2}
+.flat{color:#fff}
+#starmenu,#addmenu{background:#14171b;border-color:#3a3b3e;color:#fff}
 td.star .gno{display:none}
 .tab[data-kind=wl]{color:#67e0f4;font-weight:700}
 .tab[data-kind=wl].active{background:#0a3038;border-color:#67e0f4;color:#67e0f4}
@@ -152,7 +150,6 @@ table{font-size:16px}
 thead th{font-size:12px}
 .panel h2{font-size:18px}
 .panel h2 .cnt{font-size:13px}
-td.name .code{font-size:13px}
 .titlerow h1{font-size:18px}
 .titlerow .meta{font-size:13px}
 </style>
@@ -163,7 +160,7 @@ td.name .code{font-size:13px}
   <div class="titlerow">
     <h1>관심종목 시세판</h1>
     <span class="meta" id="meta">연결 중…</span>
-    <input id="q" type="search" placeholder="검색 (종목명/코드)" autocomplete="off">
+    <input id="q" type="search" aria-label="종목명/코드 검색" autocomplete="off">
   </div>
   <div class="tabs" id="tabs"></div>
 </div>
@@ -268,7 +265,7 @@ function tabsHTML(groups) {        // [관심종목, 전체] + 개별 섹터 (�
 }
 
 function theadHTML() {
-  let h = '<thead><tr><th class="star">★</th><th class="name">종목</th>';
+  let h = '<thead><tr><th class="star">★</th><th class="name">종목</th><th class="codeh">코드</th>';
   for (const [key, label] of COLS) {
     const arw = key === sortKey ? `<span class="arw">${sortDir < 0 ? '▼' : '▲'}</span>` : '';
     h += `<th data-key="${key}">${label}${arw}</th>`;
@@ -282,7 +279,7 @@ function rowHTML(r) {
     ? `★<span class="gno">${mem.map(i => i + 1).join(',')}</span>`
     : '☆';
   return `<tr><td class="star${mem.length ? ' on' : ''}" data-code="${r.code}">${star}</td>` +
-         `<td class="name">${r.name}<span class="code">${r.code}</span></td>` +
+         `<td class="name">${r.name}</td><td class="code">${r.code}</td>` +
          `<td>${comma(r.price)}</td><td>${fmtChg(r.chg)}</td>` +
          `<td>${fmtEok(r.trdval)}</td><td>${fmtEok(r.mcap)}</td></tr>`;
 }

@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-07-18",
+  "updated": "2026-07-19",
   "projects": [
    "antigravity"
   ],
@@ -308,32 +308,6 @@
     "infra-telegram"
    ],
    "alerts": "OnFailure → sisyphe-bot-notify@etf-active-alert → 텔레그램"
-  },
-  {
-   "id": "timer-us-etf-collect",
-   "project": "antigravity",
-   "domain": "market-global",
-   "type": "timer",
-   "name": "미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 09:00)",
-   "runs_on": "macmini",
-   "schedule_kst": "09:00 화~토",
-   "status": "active",
-   "desc_md": "미국(+홍콩) ETF 28종의 NAV·AUM·종가·보수와 USDKRW, 삼성전자·SK하이닉스 보유비중을 yfinance로 수집해 `us_etf_history.csv`에 적재하는 타이머(`run_us_etf_collect.sh` → `execution/etf_collector/collect_us_etf.py`). 2026-07-19 신설.\n\n- 대상: 반도체 지수형·레버리지, 메모리(DRAM/RAM), 홍콩 삼전·하이닉스 2x(7747/7709.HK), 한국 단일(EWY/FLKR), MSCI EM·FTSE 선진 등 한국 포함/미포함 대조군 — 정의는 `us_etf_config.py` 단일 출처.\n- 한국 비중 변동 4지표(총 AUM·실투자·삼전·하이닉스 노출, 원화)를 Sisyphe-Bot으로 아침 발송 (dedup=`.us_etf_alert_sent.json`).\n- 수집 후 `etf.html` 재생성(미국 ETF 서브탭) — 게시는 래퍼의 publish_snapshot이 담당.\n- 홍콩 2종은 yfinance NAV stale이라 가격(HKD)·AUM(USD)만 수집. 09:00 화~토 = 미국 마감+NAV 확정 후.",
-   "code": [
-    "launchd/timers/com.antigravity.us-etf-collect.plist",
-    "scripts/run_us_etf_collect.sh",
-    "execution/etf_collector/collect_us_etf.py",
-    "execution/etf_collector/us_etf_config.py"
-   ],
-   "writes": [
-    "us_etf_history.csv",
-    ".us_etf_alert_sent.json",
-    "etf.html"
-   ],
-   "depends_on": [
-    "infra-telegram"
-   ],
-   "alerts": "실패 시 sisyphe-bot-notify(us-etf-collect) → 텔레그램"
   },
   {
    "id": "timer-featured-kis",
@@ -1066,18 +1040,20 @@
    "runs_on": "github",
    "schedule_kst": "생성=18:30 Featured 2차",
    "status": "active",
-   "desc_md": "ETF 구성종목/비중 + 액티브 ETF 변동 탭 페이지(대용량 ~18MB, 조건부 생성 — `etf_data.db` 있을 때만).\n\n- 소스: `etf_data.db`(16:30/18:00 수집 타이머). 액티브 ETF 탭은 `active_etf_changes.py` 단일 출처(19:00 알림과 숫자 일치).\n- `create_dashboard.py`가 생성하되 VM 18:30 Featured 2차 잡이 실제 재생성.\n- MMF/채권 제외(주식형만), 급변/편입/편출 필터.",
+   "desc_md": "ETF 구성종목/비중 + 액티브 ETF 변동 + 미국 ETF 탭 페이지(대용량 ~18MB, 조건부 생성 — `etf_data.db` 있을 때만).\n\n- 소스: `etf_data.db`(16:30/18:00 수집 타이머). 액티브 ETF 탭은 `active_etf_changes.py` 단일 출처(19:00 알림과 숫자 일치).\n- 미국 ETF 서브탭은 `us_etf_history.csv`(us-etf-collect 화~토 09:00) 소스 — 하이라이트+전체표+AUM 추이 차트+Download. 4개 서브탭 `.mkt-subtab` 다크 스킨 통일(2026-07-19).\n- `create_dashboard.py`가 생성하되 VM 18:30 Featured 2차 잡 + 09:00 us-etf-collect 잡이 실제 재생성.\n- MMF/채권 제외(주식형만), 급변/편입/편출 필터.",
    "code": [
     "execution/create_dashboard.py",
     "execution/etf_collector/active_etf_changes.py"
    ],
    "reads": [
-    "store-etf-db"
+    "store-etf-db",
+    "us_etf_history.csv"
    ],
    "depends_on": [
     "src-create-dashboard",
     "src-active-etf",
-    "timer-etf-collect"
+    "timer-etf-collect",
+    "timer-us-etf-collect"
    ],
    "links": [
     {
@@ -1093,16 +1069,17 @@
    "type": "page",
    "name": "taiwan.html (대만 월매출)",
    "runs_on": "github",
-   "schedule_kst": "생성=23:20 (gha-daily-taiwan-revenue)",
-   "status": "active",
-   "desc_md": "대만 상장 반도체/기술 큐레이션 53종목의 월매출 페이지. 최근 추가된 신규 페이지.\n\n- 소스: FinMind 월매출(`taiwan_revenue.csv`). `create_taiwan_page.py`가 CSV를 읽어 단일 HTML로 렌더.\n- 매일 23:20 KST GHA가 수집→생성→push. 100일 롤링 재조회로 자가치유.",
+   "schedule_kst": "생성=23:20 (gha-daily-taiwan-revenue) — 스텁",
+   "status": "retired",
+   "desc_md": "독립 대만 월매출 페이지는 은퇴 — `taiwan.html`은 이제 리다이렉트 스텁이다(2026-07-19, 3178add4). 대만 상장 반도체/기술 큐레이션 53종목 월매출은 `market.html` Data 페이지의 'Taiwan' 버튼 패널로 임베드된다.\n\n- 콘텐츠 정본은 공유 빌더 `execution/taiwan_table.py`(2026-07-07 독립 `create_taiwan_page.py` 은퇴) → `create_dashboard.py`가 market.html에 삽입. 소스는 여전히 FinMind 월매출(`taiwan_revenue.csv`).\n- `taiwan.html`은 `market.html#taiwan` 해시 딥링크로 리다이렉트하는 얇은 스텁만 남았다. 외부 즐겨찾기·구 링크 보존 목적.\n- 데이터 갱신은 여전히 매일 23:20 KST GHA(gha-daily-taiwan-revenue)가 수집→market.html 재생성→push. 100일 롤링 재조회 자가치유.",
    "code": [
-    "execution/create_taiwan_page.py"
+    "execution/create_dashboard.py"
    ],
    "reads": [
     "store-taiwan-revenue-csv"
    ],
    "depends_on": [
+    "page-market",
     "src-taiwan-revenue"
    ],
    "links": [
@@ -1587,14 +1564,14 @@
    "runs_on": "gha",
    "schedule_kst": "23:20 (gha-daily-taiwan-revenue)",
    "status": "active",
-   "desc_md": "FinMind로 대만 상장 큐레이션 53종목 월매출을 수집해 `taiwan_revenue.csv` 생성. `create_taiwan_page.py`가 이를 taiwan.html로 렌더.\n\n- `--crosscheck`로 공식 TWSE/TPEx 스냅샷 대조(로그만). 100일 롤링 재조회 자가치유.\n- 시크릿: FINMIND_TOKEN/USER/PASSWORD.",
+   "desc_md": "FinMind로 대만 상장 큐레이션 53종목 월매출을 수집해 `taiwan_revenue.csv` 생성. 공유 빌더 `taiwan_table.py`가 이를 `market.html` Data 페이지 'Taiwan' 패널로 렌더(독립 `create_taiwan_page.py`·taiwan.html은 은퇴 — [[page-taiwan]]).\n\n- `--crosscheck`로 공식 TWSE/TPEx 스냅샷 대조(로그만). 100일 롤링 재조회 자가치유.\n- 시크릿: FINMIND_TOKEN/USER/PASSWORD.",
    "code": [
     "execution/fetch_taiwan_revenue.py",
-    "execution/create_taiwan_page.py"
+    "execution/taiwan_table.py"
    ],
    "writes": [
     "store-taiwan-revenue-csv",
-    "page-taiwan"
+    "page-market"
    ],
    "depends_on": [
     "ext-data-apis"
@@ -2783,6 +2760,34 @@
    "writes": [
     "hotel_adr.csv"
    ]
+  },
+  {
+   "id": "timer-us-etf-collect",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "timer",
+   "name": "미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 09:00)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "09:00 화~토",
+   "status": "active",
+   "desc_md": "미국(+홍콩) ETF 28종의 NAV·AUM·종가·보수와 USDKRW 환율, 삼성전자·SK하이닉스 보유비중을 yfinance로 수집해 `us_etf_history.csv`에 적재하는 타이머(`run_us_etf_collect.sh` → `execution/etf_collector/collect_us_etf.py`). 2026-07-19 신설.\n\n- 대상: 반도체 지수형·레버리지(SOXX/SMH/SOXL/SOXS 등), 메모리(DRAM/RAM), 홍콩 삼전·하이닉스 2x(7747/7709.HK), 한국 단일국가(EWY/FLKR), MSCI EM·FTSE 선진 등 한국 포함/미포함 대조군 — 대상 목록·한국 비중 추정 규칙은 `us_etf_config.py` 단일 출처(YTD 종가 백필 포함).\n- 한국 비중 변동 4지표(총 AUM·실투자·삼전 노출·하이닉스 노출, 원화)를 Sisyphe-Bot으로 화~토 아침 발송(dedup=`.us_etf_alert_sent.json`, USDKRW 델타 포함).\n- 수집 후 `etf.html` 미국 ETF 서브탭을 재생성(`create_dashboard.generate_etf_html`, main 미추적 로컬 산출물) → 게시는 래퍼 publish_snapshot이 담당. `us_etf_history.csv`만 race-safe push.\n- 홍콩 2종(.HK)은 yfinance NAV가 stale이라 가격(HKD)·AUM(USD)만 수집. 09:00 화~토 = 미국 마감·NAV 확정 후이자 KRX 개장 전.\n- flock으로 래퍼 중복 실행 방지. Timeout/실패 시 `sisyphe-bot-notify@us-etf-collect`.",
+   "code": [
+    "launchd/timers/com.antigravity.us-etf-collect.plist",
+    "scripts/run_us_etf_collect.sh",
+    "execution/etf_collector/collect_us_etf.py",
+    "execution/etf_collector/us_etf_config.py"
+   ],
+   "writes": [
+    "us_etf_history.csv",
+    ".us_etf_alert_sent.json",
+    "page-etf"
+   ],
+   "depends_on": [
+    "ext-data-apis",
+    "src-create-dashboard",
+    "infra-telegram"
+   ],
+   "alerts": "실패 시 sisyphe-bot-notify(us-etf-collect) → 텔레그램"
   },
   {
    "id": "web-caddy",

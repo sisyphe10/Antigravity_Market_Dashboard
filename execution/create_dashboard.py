@@ -148,7 +148,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
 .wrap-sidebar:not(:has(.wrap-side-group.on)) { display: none; }
 #mainContent.has-sidebar { padding-left: 24px !important; }
 #mainContent.has-sidebar.wrap-sidebar-off { padding-left: 24px !important; }
-.wrap-sidebar .sidebar-link { display: inline-flex; align-items: center; height: auto; padding: 8px 22px; margin: 0; color: #666; font-size: 0.95rem; font-weight: 600; border-radius: 2px; border: 1.5px solid #d1d5db; background: #fff; text-align: center; white-space: nowrap; transition: all 0.15s; }
+.wrap-sidebar .sidebar-link { display: inline-flex; align-items: center; height: auto; padding: 9px 26px; margin: 0; color: #666; font-size: 0.95rem; font-weight: 600; border-radius: 2px; border: 1.5px solid #d1d5db; background: #fff; text-align: center; white-space: nowrap; transition: all 0.15s; }
 .wrap-sidebar .sidebar-link:hover { background: #f0f7f2; color: #2d7a3a; border-color: #2d7a3a; }
 .wrap-sidebar .sidebar-link.active { background: #2d7a3a; color: #fff; border-color: #2d7a3a; font-weight: 700; }
 .wrap-updated { margin-left: auto; font-size: 12px; color: #888; white-space: nowrap; font-style: italic; }
@@ -8716,7 +8716,7 @@ def create_dashboard():
         .last-updated { margin-top: 10px; color: #6c757d; font-size: 15px; font-style: italic; }
         .nav-group { margin-top: 10px; }
         .nav-button { display: inline-block; padding: 6px 16px; border-radius: 6px; text-decoration: none; color: #fff; font-size: 0.85rem; font-weight: 600; background: #333; }
-        .content { padding: 24px; max-width: 1800px; margin: 0 auto; }
+        .content { padding: 0 24px 24px; max-width: 1800px; margin: 0 auto; }
         .tabs { display: flex; justify-content: center; gap: 8px; margin: 0 auto 28px; flex-wrap: wrap; }
         .tab { padding: 9px 26px; cursor: pointer; font-weight: 600; font-size: 0.95rem; color: #666; border: 1.5px solid #d1d5db; border-radius: 999px; background: #fff; white-space: nowrap; }
         .tab:hover { color: #2d7a3a; border-color: #2d7a3a; }
@@ -8751,7 +8751,7 @@ def create_dashboard():
         #tab0 th:nth-child(n+8) { width: 6%; }
         /* DD 열 (1Y 오른쪽) 세로 구분선 — 종목 리스트 16번째, 섹터 수익률 12번째 컬럼 */
         #tab0 th:nth-child(16), #tab0 td:nth-child(16) { border-left: 2px solid #868e96; }
-        #sectorContent th:nth-child(12), #sectorContent td:nth-child(12) { border-left: 2px solid #868e96; }
+        #sectorContent th:nth-child(13), #sectorContent td:nth-child(13) { border-left: 2px solid #868e96; }
         /* 기간 수익률 탭 컬럼 비율 */
         #tab2 th:nth-child(1) { width: 4%; }
         #tab2 th:nth-child(2) { width: 4%; }
@@ -8764,7 +8764,7 @@ def create_dashboard():
         #tab2 th:nth-child(9) { width: 10%; }
         #tab2 th:nth-child(10) { width: 10%; }
         #tab2 td:nth-child(7) { padding: 0 6px; line-height: 0; }
-        #tab2 td:nth-child(9) { background: #2e2410; }
+        #tab2 td:nth-child(9) { background: #241a3d; }
         .sec-detail { background: #16181b; }
         tbody tr:hover { background: #f5f5f5; }
         .positive { color: #cc0000; font-weight: 600; }
@@ -8966,7 +8966,7 @@ function render(){
         for(var i=0;i<16;i++){
             var v=(i===0)?(idx+1):r[i]||'';if(i===3&&v.indexOf(':')>=0)v=v.split(':').pop();var cls='';
             if(pctCols.indexOf(i)>=0&&v){var n=parseFloat(String(v).replace(/%/g,''));if(!isNaN(n))cls=n>0?' class="positive"':n<0?' class="negative"':'';}
-            var bg=(i===7)?' style="background:#2e2410;"':(i===8?' style="background:#241a3d;"':'');
+            var bg=(i===7)?' style="background:#241a3d;"':(i===8?' style="background:#0a3038;"':'');
             var ttl=(i===7&&rowMkt)?' title="'+rowMkt+'"':'';
             h+='<td'+cls+bg+ttl+'>'+v+'</td>';
         }
@@ -9016,7 +9016,7 @@ document.addEventListener('click', function(e) {
     });
 });
 
-var _secSortCol = 3, _secSortAsc = false;
+var _secSortCol = 4, _secSortAsc = false;  // 기본 = RSI(1M) 내림차순 (합산 시총 칼럼 삽입으로 col 4)
 function sortSector(col) {
     if(_secSortCol === col) _secSortAsc = !_secSortAsc;
     else { _secSortCol = col; _secSortAsc = false; }
@@ -9223,7 +9223,7 @@ function renderSector() {
     var agg = {};
     filtered.forEach(function(r) {
         var sec = r[2] || '기타';
-        if(!agg[sec]) agg[sec] = {cnt:0, rsi:[], ytd:[], d1:[], w1:[], m1:[], m3:[], m6:[], y1:[], dd:[]};
+        if(!agg[sec]) agg[sec] = {cnt:0, mcapSum:0, mcapN:0, rsi:[], ytd:[], d1:[], w1:[], m1:[], m3:[], m6:[], y1:[], dd:[]};
         var g = agg[sec];
         var mcap = parseFloat(String(r[5]||'0').replace(/,/g,'').replace(/조/g,'*10000').replace(/억원/g,'').replace(/억/g,''));
         // 조/억 파싱
@@ -9236,6 +9236,7 @@ function renderSector() {
         if(!mcapVal) mcapVal = parseFloat(mcapStr.replace(/,/g,'')) || 0;
 
         g.cnt++;
+        if(mcapVal>0) { g.mcapSum += mcapVal; g.mcapN++; }
         var vals = [r[7],r[8],r[9],r[10],r[11],r[12],r[13],r[14],r[15]];
         var arrs = [g.rsi,g.ytd,g.d1,g.w1,g.m1,g.m3,g.m6,g.y1,g.dd];
         for(var i=0;i<9;i++) {
@@ -9254,12 +9255,17 @@ function renderSector() {
     }
     function fv(v) { if(v===null) return '-'; var s=v>0?'+':''; return s+Math.round(v)+'%'; }
     function cls(v) { if(v===null) return ''; return v>0?'positive':v<0?'negative':''; }
+    function fmcap(v) { if(!v) return '-'; v=Math.round(v);
+        if(v>=100000000) return Math.floor(v/100000000).toLocaleString()+'경'+Math.floor(v/10000%10000).toLocaleString()+'조'+(v%10000).toLocaleString()+'억';
+        if(v>=10000) return Math.floor(v/10000).toLocaleString()+'조'+(v%10000).toLocaleString()+'억';
+        return v.toLocaleString()+'억'; }
 
-    var colMap = [null,null,'cnt','rsi','ytd','d1','w1','m1','m3','m6','y1','dd'];
+    var colMap = [null,null,'cnt',null,'rsi','ytd','d1','w1','m1','m3','m6','y1','dd'];
     var secs = Object.keys(agg).sort(function(a,b) {
         var va, vb;
         if(_secSortCol <= 1) { va=a; vb=b; return _secSortAsc?va.localeCompare(vb):vb.localeCompare(va); }
         if(_secSortCol === 2) { va=agg[a].cnt; vb=agg[b].cnt; }
+        else if(_secSortCol === 3) { va=agg[a].mcapSum; vb=agg[b].mcapSum; }
         else { var k=colMap[_secSortCol]; va=wavg(agg[a][k])||0; vb=wavg(agg[b][k])||0; }
         return _secSortAsc ? va-vb : vb-va;
     });
@@ -9283,10 +9289,13 @@ function renderSector() {
     });
     for(var k in stocksBySec) stocksBySec[k].sort(function(a,b){return b.mcapVal-a.mcapVal;});
 
-    var secHeaders = ['#','섹터','종목수','RSI(1M)','YTD','1D','1W','1M','3M','6M','1Y','DD'];
+    var secHeaders = ['#','섹터','종목수','합산 시총','RSI(1M)','YTD','1D','1W','1M','3M','6M','1Y','DD'];
     var html = '<table style="width:100%;table-layout:fixed;border-collapse:collapse"><thead><tr>';
+    // 칼럼 너비: 섹터·합산 시총은 긴 값(호텔,레스토랑,레저등 / N경N,NNN조N,NNN억) 수용, % 칼럼은 좁게
+    var secWidths = ['3.5%','16%','4.5%','13%','6%'];  // 이후(YTD~DD 8칸)는 균등 7.1%
     secHeaders.forEach(function(h,i) {
-        var bg = i===3?' style="background:#2e2410;cursor:pointer"':(i===4?' style="background:#241a3d;cursor:pointer"':' style="cursor:pointer"');
+        var w = 'width:' + (secWidths[i] || '7.1%');
+        var bg = i===4?' style="background:#241a3d;cursor:pointer;'+w+'"':(i===5?' style="background:#0a3038;cursor:pointer;'+w+'"':' style="cursor:pointer;'+w+'"');
         html += '<th'+bg+' onclick="sortSector('+i+')">' + h + (_secSortCol===i ? (_secSortAsc?' ▲':' ▼') : '') + '</th>';
     });
     html += '</tr></thead><tbody>';
@@ -9294,9 +9303,9 @@ function renderSector() {
         var g = agg[sec];
         var vals = [wavg(g.rsi),wavg(g.ytd),wavg(g.d1),wavg(g.w1),wavg(g.m1),wavg(g.m3),wavg(g.m6),wavg(g.y1),wavg(g.dd)];
         html += '<tr style="cursor:pointer" onclick="toggleSec('+idx+')">';
-        html += '<td>' + (idx+1) + '</td><td style="font-weight:600">' + sec + '</td><td>' + g.cnt + '</td>';
+        html += '<td>' + (idx+1) + '</td><td style="font-weight:600">' + sec + '</td><td>' + g.cnt + '</td><td>' + fmcap(g.mcapSum) + '</td>';
         vals.forEach(function(v,i) {
-            var bg = i===0?' style="background:#2e2410"':(i===1?' style="background:#241a3d"':'');
+            var bg = i===0?' style="background:#241a3d"':(i===1?' style="background:#0a3038"':'');
             html += '<td class="'+cls(v)+'"'+bg+'>' + fv(v) + '</td>';
         });
         html += '</tr>';
@@ -9306,10 +9315,10 @@ function renderSector() {
             var tk = s.ticker.indexOf(':')>=0 ? s.ticker.split(':').pop() : s.ticker;
             function sc(v){if(!v)return'-';var n=parseFloat(String(v).replace(/%/g,'').replace(/,/g,''));if(isNaN(n))return v;return(n>0?'<span class="positive">+':'<span class="negative">')+Math.round(n)+'%</span>';}
             html += '<tr class="sec-detail sec-'+idx+'" style="display:none;font-size:14px">';
-            html += '<td>'+tk+'</td><td style="padding-left:60px;text-align:left">- '+s.name+'</td>';
-            html += '<td>'+(s.mcap||'')+'</td>';
+            html += '<td></td><td>'+s.name+'</td>';
+            html += '<td>'+tk+'</td><td>'+(s.mcap||'')+'</td>';
             var _ttl=s.mkt?' title="'+s.mkt+'"':'';
-            html += '<td style="background:#2e2410"'+_ttl+'>'+sc(s.rsi)+'</td><td style="background:#241a3d">'+sc(s.ytd)+'</td><td>'+sc(s.d1)+'</td><td>'+sc(s.w1)+'</td><td>'+sc(s.m1)+'</td><td>'+sc(s.m3)+'</td><td>'+sc(s.m6)+'</td><td>'+sc(s.y1)+'</td><td>'+sc(s.dd)+'</td>';
+            html += '<td style="background:#241a3d"'+_ttl+'>'+sc(s.rsi)+'</td><td style="background:#0a3038">'+sc(s.ytd)+'</td><td>'+sc(s.d1)+'</td><td>'+sc(s.w1)+'</td><td>'+sc(s.m1)+'</td><td>'+sc(s.m3)+'</td><td>'+sc(s.m6)+'</td><td>'+sc(s.y1)+'</td><td>'+sc(s.dd)+'</td>';
             html += '</tr>';
         });
     });
@@ -9415,9 +9424,9 @@ function superDownloadUniverse() {
         .then(function(){ return capStocks(10, 'Universe_Stocks_1W'); })     // 종목 1W↓
         .then(function(){ return delay(500); })
         .then(function(){ switchTab(1); return delay(80); })                 // 섹터 탭 가시화 (html2canvas는 display:none 캡처 불가)
-        .then(function(){ return capSectors(3, 'Universe_Sectors_RSI1M'); }) // 섹터 RSI(1M)↓ (col 3)
+        .then(function(){ return capSectors(4, 'Universe_Sectors_RSI1M'); }) // 섹터 RSI(1M)↓ (col 4, 평균 시총 삽입으로 +1)
         .then(function(){ return delay(500); })
-        .then(function(){ return capSectors(6, 'Universe_Sectors_1W'); })    // 섹터 1W↓ (col 6)
+        .then(function(){ return capSectors(7, 'Universe_Sectors_1W'); })    // 섹터 1W↓ (col 7, 평균 시총 삽입으로 +1)
         .then(function(){ return delay(300); })
         .then(restore)
         .catch(function(e){ console.error('superDownloadUniverse:', e); restore(); });
@@ -9693,7 +9702,7 @@ refresh();
         header h1 {{ margin: 0; font-size: 33px; color: #333; font-weight: 700; line-height: 1.2; }}
         .last-updated {{ margin-top: 10px; color: #6c757d; font-size: 15px; font-style: italic; }}
         .subtitle {{ color: #6c757d; font-size: 15px; font-style: italic; margin-top: 10px; }}
-        .content {{ padding: 24px; max-width: 1800px; margin: 0 auto; }}
+        .content {{ padding: 0 24px 24px; max-width: 1800px; margin: 0 auto; }}
         .section {{ background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }}
         .section h2 {{ font-size: 1.1rem; color: #333; margin-bottom: 16px; }}
         .date-bar {{ display: flex; align-items: center; gap: 8px; margin-bottom: 20px; font-size: 13px; flex-wrap: wrap; }}
@@ -9730,16 +9739,16 @@ refresh();
     <div class="last-updated">Updated: __FEATURED_UPDATED__</div>
 </header>
 <div class="content">
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab(0)">종목</div>
+        <div class="tab" onclick="switchTab(1)">특이사항</div>
+    </div>
     <div class="date-bar">
         <label>기간</label>
         <input type="text" id="fStartDate" value="{featured_last}" placeholder="YYYY-MM-DD" oninput="tryRefresh()" onchange="refresh()">
         <span>~</span>
         <input type="text" id="fEndDate" value="{featured_last}" placeholder="YYYY-MM-DD" oninput="tryRefresh()" onchange="refresh()">
         <span id="dateLabel" style="color:#888;font-size:12px;"></span>
-    </div>
-    <div class="tabs">
-        <div class="tab active" onclick="switchTab(0)">종목</div>
-        <div class="tab" onclick="switchTab(1)">특이사항</div>
     </div>
     <div id="tab0" class="tab-content active">
     <div class="section">
@@ -10374,7 +10383,7 @@ header {{ padding: 20px 24px; margin: 0 0 40px; text-align: center; position: re
 header h1 {{ margin: 0; font-size: 33px; color: #333; font-weight: 700; line-height: 1.2; }}
         .last-updated {{ margin-top: 10px; color: #6c757d; font-size: 15px; font-style: italic; }}
 .home-btn {{ position: absolute; top: 20px; right: 24px; padding: 6px 16px; background: #e0e0e0; color: #333; text-decoration: none; border-radius: 8px; font-size: 15px; font-weight: 600; }}
-.container {{ max-width: 1800px; margin: 0 auto; padding: 20px; }}
+.container {{ max-width: 1800px; margin: 0 auto; padding: 0 20px 20px; }}
 .controls {{ display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }}
 .controls input {{ padding: 8px 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 0.9rem; font-family: inherit; outline: none; width: 200px; }}
 .controls input:focus {{ border-color: #2d7a3a; }}
@@ -10410,7 +10419,7 @@ tbody tr.etf-row:hover {{ background: #f5f5f5; }}
 .badge {{ display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }}
 .updated {{ text-align: center; font-size: 0.75rem; color: #aaa; margin-top: 10px; }}
 /* 서브탭 — market.html 과 동일한 .mkt-subtab 알약 (다크 스킨은 compose 가 클래스로 덮음) */
-.mkt-subtabs {{ display: flex; justify-content: center; gap: 8px; margin: 0 auto 20px; flex-wrap: wrap; }}
+.mkt-subtabs {{ display: flex; justify-content: center; gap: 8px; margin: 0 auto 28px; flex-wrap: wrap; }}
 .mkt-subtab {{ padding: 9px 26px; border: 1.5px solid #d1d5db; background: #fff; border-radius: 999px; font-size: 0.95rem; font-weight: 600; color: #666; cursor: pointer; font-family: inherit; }}
 .mkt-subtab:hover {{ color: #2d7a3a; border-color: #2d7a3a; }}
 .mkt-subtab.active {{ color: #fff; background: #2d7a3a; border-color: #2d7a3a; }}
@@ -10435,7 +10444,7 @@ tr.us-hl {{ background: #e0f5f9; }}
 <div class="container">
     <div class="mkt-subtabs">
         <button class="mkt-subtab active" data-etf-btn="0" onclick="switchEtfTab(0)">AUM 상위</button>
-        <button class="mkt-subtab" data-etf-btn="1" onclick="switchEtfTab(1)">🎯 액티브 ETF</button>
+        <button class="mkt-subtab" data-etf-btn="1" onclick="switchEtfTab(1)">액티브 ETF</button>
         <button class="mkt-subtab" data-etf-btn="2" onclick="switchEtfTab(2)">종목 분석</button>
         <button class="mkt-subtab" data-etf-btn="3" onclick="switchEtfTab(3)">미국 ETF</button>
     </div>

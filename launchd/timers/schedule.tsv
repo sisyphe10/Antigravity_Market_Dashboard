@@ -15,3 +15,4 @@ us-etf-collect	0 9 * * 2-6	/bin/bash __REPO__/launchd/timers/run_timer_job.sh us
 update-stock-master	0 9 * * 6	/bin/bash __REPO__/launchd/timers/run_timer_job.sh update-stock-master	
 memento-telegram	0 12 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh memento-telegram
 wrap-principle-check	10 17 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh wrap-principle-check
+memory-cycle-alert	45 7 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh memory-cycle-alert

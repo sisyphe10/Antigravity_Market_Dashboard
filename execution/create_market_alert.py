@@ -389,7 +389,7 @@ def render_table(stocks, category, price_cache):
         else:
             판단일_임박   = False
 
-        # 강조: 판단일 도달=ma-hot(앰버), 5영업일 이내=ma-soon(바이올렛), 나머지=없음
+        # 강조: 판단일 도달=ma-hot(바이올렛), 5영업일 이내=ma-soon(시안), 나머지=없음
         if category == '투자주의':
             row_bg = ''
         elif 판단일_passed:
@@ -719,10 +719,10 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stoc
         }}
         .data-table tbody tr:last-child td {{ border-bottom: none; }}
         .data-table tbody tr:hover td {{ background: #f9fafb; }}
-        /* 강조 행 = AoE 하이라이트 3색 순환 (판단일 도달=앰버 > 임박=바이올렛 > 지정예고=시안, AOE_STYLE_GUIDE) */
-        .data-table tr.ma-hot td {{ background: #4a2d0a !important; color: #ffb45e !important; }}
-        .data-table tr.ma-soon td {{ background: #241a3d !important; color: #b9a1fc !important; }}
-        .data-table tr.ma-pre td {{ background: #0a3038 !important; color: #67e0f4 !important; }}
+        /* 강조 행 = AoE 하이라이트 3색 순환 v2 (판단일 도달=바이올렛 > 임박=시안 > 지정예고=에메랄드, AOE_STYLE_GUIDE. 앰버는 상시 액센트라 하이라이트에서 제외) */
+        .data-table tr.ma-hot td {{ background: #241a3d !important; color: #b9a1fc !important; }}
+        .data-table tr.ma-soon td {{ background: #0a3038 !important; color: #67e0f4 !important; }}
+        .data-table tr.ma-pre td {{ background: #10301c !important; color: #4ade80 !important; }}
         footer {{
             text-align: center; padding: 16px; color: #999; font-size: 14px;
         }}
