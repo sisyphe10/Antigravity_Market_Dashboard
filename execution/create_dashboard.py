@@ -9315,7 +9315,7 @@ function renderSector() {
             var tk = s.ticker.indexOf(':')>=0 ? s.ticker.split(':').pop() : s.ticker;
             function sc(v){if(!v)return'-';var n=parseFloat(String(v).replace(/%/g,'').replace(/,/g,''));if(isNaN(n))return v;return(n>0?'<span class="positive">+':'<span class="negative">')+Math.round(n)+'%</span>';}
             html += '<tr class="sec-detail sec-'+idx+'" style="display:none;font-size:14px">';
-            html += '<td></td><td style="padding-left:8px;text-align:left">'+s.name+'</td>';
+            html += '<td></td><td>'+s.name+'</td>';
             html += '<td>'+tk+'</td><td>'+(s.mcap||'')+'</td>';
             var _ttl=s.mkt?' title="'+s.mkt+'"':'';
             html += '<td style="background:#241a3d"'+_ttl+'>'+sc(s.rsi)+'</td><td style="background:#0a3038">'+sc(s.ytd)+'</td><td>'+sc(s.d1)+'</td><td>'+sc(s.w1)+'</td><td>'+sc(s.m1)+'</td><td>'+sc(s.m3)+'</td><td>'+sc(s.m6)+'</td><td>'+sc(s.y1)+'</td><td>'+sc(s.dd)+'</td>';
