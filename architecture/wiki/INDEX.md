@@ -1,8 +1,8 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 126 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 127 components._
 
-Updated: 2026-07-18
+Updated: 2026-07-19
 
 ## By domain
 
@@ -36,7 +36,7 @@ Updated: 2026-07-18
 - [파생·수급 13종 (fetch_deriv_daily.py)](src-deriv-daily.md) — Source
 - [한국 수출 매출 추정 대시보드](ext-export-dashboard.md) — External
 
-### 해외 · 매크로 (21)
+### 해외 · 매크로 (22)
 - [Daily ECOS BOK (17:40 평일)](gha-daily-ecos.md) — GHA
 - [Daily FRED US Macro (07:50 화~토)](gha-daily-fred.md) — GHA
 - [Daily Market Crawl (23:00)](gha-daily-crawl.md) — GHA
@@ -54,6 +54,7 @@ Updated: 2026-07-18
 - [universe_lab.html (Universe Lab)](page-universe-lab.md) — Page
 - [대만 월매출 (fetch_taiwan_revenue.py)](src-taiwan-revenue.md) — Source
 - [마스터 시장 크롤러 (market_crawler.py)](src-market-crawler.md) — Source
+- [미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 09:00)](timer-us-etf-collect.md) — Timer
 - [월별 수익률 11지수 (fetch_monthly_returns.py)](src-monthly-returns.md) — Source
 - [유니버스 수집 (fetch_universe.py)](src-universe.md) — Source
 - [일본 CAPEX 지표 (fetch_japan_capex.py)](src-japan-capex.md) — Source
@@ -154,7 +155,7 @@ Updated: 2026-07-18
 - [Sisyphe-Bot (펀드/일상 텔레그램 봇)](bot-sisyphe.md) — 상시 (내부 잡 05:00~23:00), active
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — 상시 (06:00 다이제스트 등), active
 
-### Timer (14)
+### Timer (15)
 - [ETF 구성종목 수집 타이머 (etf-collect 16:30)](timer-etf-collect.md) — 16:30 매일, active
 - [ETF 수집 재시도 타이머 (etf-collect-retry 18:00)](timer-etf-collect-retry.md) — 18:00 매일, active
 - [Featured KIS 수집 타이머 (15:50, 신고가)](timer-featured-kis.md) — 15:50 매일, active
@@ -162,6 +163,7 @@ Updated: 2026-07-18
 - [Memento 점심 텔레그램 타이머 (12:00)](timer-memento-telegram.md) — 12:00 매일, active
 - [WRAP 원칙 점검 타이머 (17:10, 변화 시에만 발송)](timer-wrap-principle-check.md) — 17:10 평일, active
 - [랜딩 하이라이트 타이머 (18:45)](timer-landing-highlights.md) — 18:45 매일, active
+- [미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 09:00)](timer-us-etf-collect.md) — 09:00 화~토, active
 - [실적봇 타이머 (earnings-bot)](timer-earnings-bot.md) — 08:00 매일, active
 - [아키텍처 자동 최신화 타이머 (21:40, claude 헤드리스)](timer-architecture-daily.md) — 21:40 매일, active
 - [액티브 ETF 변동 알림 타이머 (19:00)](timer-etf-active-alert.md) — 19:00 매일, active
@@ -196,7 +198,7 @@ Updated: 2026-07-18
 - [market.html (마켓 대시보드)](page-market.md) — 생성=여러 잡, active
 - [market_alert.html (투자유의종목)](page-market-alert.md) — 생성=16:05 / 23:00 (sisyphe-bot), active
 - [seibro.html (SEIBro)](page-seibro.md) — 생성=여러 잡, active
-- [taiwan.html (대만 월매출)](page-taiwan.md) — 생성=23:20 (gha-daily-taiwan-revenue), active
+- [taiwan.html (대만 월매출)](page-taiwan.md) — 생성=23:20 (gha-daily-taiwan-revenue) — 스텁, retired
 - [universe.html (Universe)](page-universe.md) — 생성=여러 잡, active
 - [universe_lab.html (Universe Lab)](page-universe-lab.md) — 생성=여러 잡, active
 - [wrap.html (WRAP 대시보드)](page-wrap.md) — 생성=여러 잡, active
@@ -296,7 +298,7 @@ Updated: 2026-07-18
 
 ## By project
 
-### antigravity (126)
+### antigravity (127)
 - [architecture.html (아키텍처)](page-architecture.md) — Page
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — Infra
 - [Claude Code Action (@claude 이벤트)](gha-claude-code.md) — GHA
@@ -389,6 +391,7 @@ Updated: 2026-07-18
 - [랜딩 하이라이트 타이머 (18:45)](timer-landing-highlights.md) — Timer
 - [마스터 시장 크롤러 (market_crawler.py)](src-market-crawler.md) — Source
 - [맥미니 데이터레이크 (~/datalake + 문답 위키)](infra-datalake.md) — Infra
+- [미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 09:00)](timer-us-etf-collect.md) — Timer
 - [비활성 워크플로 (weather · calendar · portfolio-report)](gha-disabled.md) — GHA
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — Bot
 - [수익률 계산 (calculate_returns.py)](src-calculate-returns.md) — Source
