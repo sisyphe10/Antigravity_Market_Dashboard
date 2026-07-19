@@ -126,6 +126,17 @@ AOE_DARK_CSS = (
     '.qcard{background:#14171b!important;color:#e8e6df!important;border-color:#27282b!important;box-shadow:none!important}'
     '.qcard .qsrc,.qcard .qsrc .qnote{color:#8a919a!important}'
     '.plan-gcell{background:#111214!important}'
+    # 미국 ETF 탭 (etf.html, 2026-07-19 사용자 확정): 본문 흰색 기본, 회색은 설명(메타)만.
+    # 실투자 행 = 시안 하이라이트(선택 순환 3번), 한국 O = 녹색, 등락 = 다크 등락색 재단언.
+    '#etfTab3 td{color:#fff!important}'
+    '#etfTab3 td.pos{color:#ff453a!important}'
+    '#etfTab3 td.neg{color:#2e9bff!important}'
+    '#etfTab3 td.us-mut{color:#8a919a!important}'
+    '#etfTab3 td.kr-o{color:#7ec87e!important}'
+    '#etfTab3 tr.us-hl td{background:#0a3038!important}'
+    '#etfTab3 td.us-hl-name{color:#67e0f4!important}'
+    '#etfTab3 .us-dl{background:transparent!important;color:#fb8b1e!important;'
+    'border:1.5px solid #fb8b1e!important}'
     '.chart-card,.sector-card,.idx-chart-item,.lh-card,#heatmap,'
     '.chart-container,.section:has(canvas),div:has(>canvas)'
     '{background:#fff!important;color:#333!important}'

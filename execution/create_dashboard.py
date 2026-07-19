@@ -10286,6 +10286,71 @@ def generate_etf_html():
                           'totals': {'new': 0, 'exit': 0, 'chg': 0, 'etfs_changed': 0}}
     active_json = json.dumps(active_changes, ensure_ascii=False)
 
+    # ── 미국 ETF 탭 (us_etf_history.csv — collect_us_etf 지표 계산과 단일 출처) ──
+    us_hl_html = '<tr><td colspan="5" style="padding:20px">미국 ETF 데이터 없음 (us_etf_history.csv 미수집)</td></tr>'
+    us_rows_json, us_chart_json, us_fx_note = '[]', 'null', ''
+    try:
+        from collect_us_etf import load_history as _us_load, kr_metrics as _us_metrics, fmt_krw as _us_fmt
+        from us_etf_config import US_ETFS as _US_SPECS
+        _us_hist = _us_load()
+        _us_days = sorted({r['date'] for r in _us_hist if r.get('aum_usd')})
+        if _us_days:
+            _ul, _up = _us_days[-1], (_us_days[-2] if len(_us_days) > 1 else None)
+            _rows_l = [r for r in _us_hist if r['date'] == _ul and r.get('aum_usd')]
+            _rows_p = [r for r in _us_hist if _up and r['date'] == _up and r.get('aum_usd')]
+            _cur = _us_metrics(_rows_l)
+            _pm = _us_metrics(_rows_p) if _rows_p else None
+            us_hl_html = ''
+            _items = [('한국 노출 ETF 총 AUM', 'total_aum', False),
+                      ('한국 실투자 금액', 'invested', True),
+                      ('삼성전자 노출액', 'samsung', False),
+                      ('SK하이닉스 노출액', 'hynix', False)]
+            for _i, (_lb, _k, _is_hl) in enumerate(_items, 1):
+                _v = _cur[_k]
+                if _pm and _pm.get(_k):
+                    _d = _v - _pm[_k]
+                    _pct = _d / _pm[_k] * 100
+                    _cl = 'pos' if _d >= 0 else 'neg'
+                    _sg = '+' if _d >= 0 else ''
+                    _delta = f'<td class="{_cl}">{_sg}{_us_fmt(_d)}</td><td class="{_cl}">{_sg}{_pct:.1f}%</td>'
+                else:
+                    _delta = '<td class="us-mut">—</td><td class="us-mut">—</td>'
+                _tr_cl = ' class="us-hl"' if _is_hl else ''
+                _nm_cl = 'us-name us-hl-name' if _is_hl else 'us-name'
+                us_hl_html += (f'<tr{_tr_cl}><td>{_i}</td><td class="{_nm_cl}">{_lb}</td>'
+                               f'<td class="us-big">{_us_fmt(_v)}</td>{_delta}</tr>')
+            us_fx_note = f'{_ul} 종가 · USDKRW {_cur["fx"]:,.0f}'
+            _prev_aum = {r['ticker']: float(r['aum_usd']) for r in _rows_p}
+            _spec_by = {s['ticker']: s for s in _US_SPECS}
+            _js_rows = []
+            for r in sorted(_rows_l, key=lambda x: -float(x['aum_usd'])):
+                _s = _spec_by.get(r['ticker'], {})
+                _aum_eok = float(r['aum_usd']) / 1e8
+                _pa = _prev_aum.get(r['ticker'])
+                _js_rows.append({
+                    'tk': r['ticker'], 'name': _s.get('name', ''), 'grp': _s.get('group', ''),
+                    'kr': 'O' if _s.get('kr') else 'X',
+                    'aum': round(_aum_eok, 1),
+                    'da': (round(_aum_eok - _pa / 1e8, 1) if _pa else None),
+                    'nav': (round(float(r['nav']), 2) if r.get('nav') else None),
+                    'close': (round(float(r['close']), 2) if r.get('close') else None),
+                    'cur': r.get('currency') or 'USD',
+                    'exp': (float(r['expense']) if r.get('expense') else None),
+                })
+            us_rows_json = json.dumps(_js_rows, ensure_ascii=False)
+            _labels, _t, _iv, _sm, _hy = [], [], [], [], []
+            for _d0 in _us_days:
+                _m = _us_metrics([r for r in _us_hist if r['date'] == _d0 and r.get('aum_usd')])
+                _labels.append(_d0)
+                _t.append(round(_m['total_aum'] / 1e4, 2))   # 조원
+                _iv.append(round(_m['invested'] / 1e4, 2))
+                _sm.append(round(_m['samsung'] / 1e4, 2))
+                _hy.append(round(_m['hynix'] / 1e4, 2))
+            us_chart_json = json.dumps({'labels': _labels, 'total': _t, 'invested': _iv,
+                                        'samsung': _sm, 'hynix': _hy})
+    except Exception as _e:
+        print(f"미국 ETF 탭 데이터 준비 실패(빈 탭 렌더): {_e}")
+
     page = f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -10335,6 +10400,18 @@ tbody tr.etf-row:hover {{ background: #f5f5f5; }}
 .search-results.active {{ display: block; }}
 .badge {{ display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }}
 .updated {{ text-align: center; font-size: 0.75rem; color: #aaa; margin-top: 10px; }}
+/* 서브탭 — market.html 과 동일한 .mkt-subtab 알약 (다크 스킨은 compose 가 클래스로 덮음) */
+.mkt-subtabs {{ display: flex; justify-content: center; gap: 8px; margin: 0 auto 20px; flex-wrap: wrap; }}
+.mkt-subtab {{ padding: 9px 26px; border: 1.5px solid #d1d5db; background: #fff; border-radius: 999px; font-size: 0.95rem; font-weight: 600; color: #666; cursor: pointer; font-family: inherit; }}
+.mkt-subtab:hover {{ color: #2d7a3a; border-color: #2d7a3a; }}
+.mkt-subtab.active {{ color: #fff; background: #2d7a3a; border-color: #2d7a3a; }}
+/* 미국 ETF 탭 */
+.us-name {{ font-weight: 600; }}
+.us-big {{ font-size: 22px; font-weight: 600; }}
+tr.us-hl {{ background: #e0f5f9; }}
+.kr-o {{ color: #1b7f3a; font-weight: 700; }}
+.us-mut {{ color: #888; }}
+.us-dl {{ padding: 5px 16px; border: 1.5px solid #2d7a3a; background: #fff; color: #2d7a3a; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }}
 {TOP_NAV_CSS}
 </style>
 </head>
@@ -10347,10 +10424,11 @@ tbody tr.etf-row:hover {{ background: #f5f5f5; }}
 </header>
 
 <div class="container">
-    <div class="etf-tabs" style="display:flex;gap:0;margin-bottom:20px;border-bottom:2px solid #2d7a3a;">
-        <div class="etf-tab active" onclick="switchEtfTab(0)" style="padding:10px 24px;cursor:pointer;font-weight:600;font-size:16px;color:#666;border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;background:#f0f0f0;">AUM 상위</div>
-        <div class="etf-tab" onclick="switchEtfTab(1)" style="padding:10px 24px;cursor:pointer;font-weight:600;font-size:16px;color:#666;border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;background:#f0f0f0;">🎯 액티브 ETF</div>
-        <div class="etf-tab" onclick="switchEtfTab(2)" style="padding:10px 24px;cursor:pointer;font-weight:600;font-size:16px;color:#666;border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;background:#f0f0f0;">종목 분석</div>
+    <div class="mkt-subtabs">
+        <button class="mkt-subtab active" data-etf-btn="0" onclick="switchEtfTab(0)">AUM 상위</button>
+        <button class="mkt-subtab" data-etf-btn="1" onclick="switchEtfTab(1)">🎯 액티브 ETF</button>
+        <button class="mkt-subtab" data-etf-btn="2" onclick="switchEtfTab(2)">종목 분석</button>
+        <button class="mkt-subtab" data-etf-btn="3" onclick="switchEtfTab(3)">미국 ETF</button>
     </div>
     <div id="etfTab0" class="etf-tab-content">
     <div class="controls">
@@ -10454,14 +10532,52 @@ tbody tr.etf-row:hover {{ background: #f5f5f5; }}
             </table></div>
         </div>
     </div>
+
+    <div id="etfTab3" class="etf-tab-content" style="display:none">
+        <div class="section">
+            <div class="section-header">한국 비중 변동 <span class="count">{us_fx_note}</span></div>
+            <div style="overflow-x:auto"><table>
+                <thead><tr><th>#</th><th>항목</th><th>금액</th><th>전일 대비</th><th>%</th></tr></thead>
+                <tbody>{us_hl_html}</tbody>
+            </table></div>
+        </div>
+        <div class="section">
+            <div class="section-header">전체 ETF</div>
+            <div style="overflow-x:auto"><table>
+                <thead><tr>
+                    <th onclick="usSort(0)">#<span class="arr" id="uarr0"></span></th>
+                    <th onclick="usSort(1)">티커<span class="arr" id="uarr1"></span></th>
+                    <th onclick="usSort(2)">상품<span class="arr" id="uarr2"></span></th>
+                    <th onclick="usSort(3)">구분<span class="arr" id="uarr3"></span></th>
+                    <th onclick="usSort(4)">한국<span class="arr" id="uarr4"></span></th>
+                    <th onclick="usSort(5)">AUM<span class="arr" id="uarr5"></span></th>
+                    <th onclick="usSort(6)">ΔAUM<span class="arr" id="uarr6"></span></th>
+                    <th onclick="usSort(7)">NAV($)<span class="arr" id="uarr7"></span></th>
+                    <th onclick="usSort(8)">종가<span class="arr" id="uarr8"></span></th>
+                    <th onclick="usSort(9)">보수(%)<span class="arr" id="uarr9"></span></th>
+                </tr></thead>
+                <tbody id="usTableBody"></tbody>
+            </table></div>
+        </div>
+        <div class="section">
+            <div class="section-header">AUM 추이 <button class="us-dl" onclick="dlUsCsv()">Download</button></div>
+            <div id="usChartWrap" style="position:relative;height:420px;margin:14px 18px 18px;display:none"><canvas id="usAumChart"></canvas></div>
+            <div id="usChartPh" style="padding:40px 20px;text-align:center;color:#888;font-size:13px">AUM 시계열 차트 — 데이터 3일 이상 누적 후 표시</div>
+        </div>
+    </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>if (window.Chart) {{ Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = 2 * (window.devicePixelRatio || 1); Chart.defaults.animation = false; }}</script>
 <script>
 var allDaily = {daily_json};
 var allConst = {const_json};
 var prevConst = {prev_const_json};
 var dates = {dates_json};
 var activeChanges = {active_json};
+var usRows = {us_rows_json};
+var usChart = {us_chart_json};
+usRows.forEach(function(r, i) {{ r._i = i + 1; }});  // AUM 내림차순 순위 (서버 정렬 순서)
 
 var curDate = dates[0] || '';
 var sortCol = 2, sortAsc = false; // default: AUM desc
@@ -10624,18 +10740,105 @@ function onSearch() {{
 }}
 
 function switchEtfTab(idx) {{
-    document.querySelectorAll('.etf-tab').forEach(function(t,i) {{
-        t.style.color = i===idx ? '#2d7a3a' : '#666';
-        t.style.background = i===idx ? '#fff' : '#f0f0f0';
-        t.style.borderColor = i===idx ? '#2d7a3a #2d7a3a transparent' : 'transparent';
-        t.style.marginBottom = i===idx ? '-2px' : '0';
+    // ★인라인 style 색 주입 금지 — 다크 스킨(compose)이 클래스 기반으로 덮을 수 있게 class 토글만 한다.
+    document.querySelectorAll('.mkt-subtab[data-etf-btn]').forEach(function(t,i) {{
+        t.classList.toggle('active', i===idx);
     }});
-    document.getElementById('etfTab0').style.display = idx===0 ? '' : 'none';
-    document.getElementById('etfTab1').style.display = idx===1 ? '' : 'none';
-    document.getElementById('etfTab2').style.display = idx===2 ? '' : 'none';
+    for (var k = 0; k < 4; k++) {{
+        var el = document.getElementById('etfTab'+k);
+        if (el) el.style.display = (k===idx) ? '' : 'none';
+    }}
     if (idx===1) renderActive();
     if (idx===2) renderAnalysis();
+    if (idx===3) renderUsChart();
 }}
+
+// ── 미국 ETF 탭 (usRows = us_etf_history.csv 최신일, 서버 임베드) ──
+var _usSortCol = 5, _usSortAsc = false; // 기본 AUM 내림차순
+function usSort(col) {{
+    if (_usSortCol === col) _usSortAsc = !_usSortAsc;
+    else {{ _usSortCol = col; _usSortAsc = (col <= 4); }}
+    renderUs();
+}}
+function renderUs() {{
+    var keys = ['_i','tk','name','grp','kr','aum','da','nav','close','exp'];
+    var key = keys[_usSortCol] || 'aum';
+    var rows = usRows.slice();
+    rows.sort(function(a, b) {{
+        var sa = a[key], sb = b[key];
+        var va = (typeof sa === 'string') ? sa : (sa == null ? -Infinity : sa);
+        var vb = (typeof sb === 'string') ? sb : (sb == null ? -Infinity : sb);
+        if (va < vb) return _usSortAsc ? -1 : 1;
+        if (va > vb) return _usSortAsc ? 1 : -1;
+        return 0;
+    }});
+    for (var i = 0; i < 10; i++) {{
+        var el = document.getElementById('uarr'+i);
+        if (el) el.textContent = (i === _usSortCol) ? (_usSortAsc ? ' ▲' : ' ▼') : '';
+    }}
+    var h = '';
+    rows.forEach(function(r) {{
+        var da = '—', daCls = 'us-mut';
+        if (r.da != null) {{
+            daCls = r.da >= 0 ? 'pos' : 'neg';
+            da = (r.da >= 0 ? '+' : '') + r.da.toLocaleString() + '억$';
+        }}
+        var close = r.close == null ? '—' : r.close.toLocaleString() + (r.cur === 'HKD' ? ' HKD' : '');
+        h += '<tr><td>' + r._i + '</td>'
+           + '<td style="font-weight:700">' + r.tk + '</td>'
+           + '<td class="us-name">' + r.name + '</td>'
+           + '<td>' + r.grp + '</td>'
+           + '<td' + (r.kr === 'O' ? ' class="kr-o"' : '') + '>' + r.kr + '</td>'
+           + '<td style="font-weight:600">' + Math.round(r.aum).toLocaleString() + '억$</td>'
+           + '<td class="' + daCls + '">' + da + '</td>'
+           + '<td>' + (r.nav == null ? '—' : r.nav.toLocaleString()) + '</td>'
+           + '<td>' + close + '</td>'
+           + '<td>' + (r.exp == null ? '—' : r.exp.toFixed(2)) + '</td></tr>';
+    }});
+    document.getElementById('usTableBody').innerHTML = h || '<tr><td colspan="10" style="padding:20px">데이터 없음</td></tr>';
+}}
+function dlUsCsv() {{
+    var rows = [];
+    document.querySelectorAll('#etfTab3 table').forEach(function(tb) {{
+        tb.querySelectorAll('tr').forEach(function(tr) {{
+            var cells = [].map.call(tr.querySelectorAll('th,td'), function(c) {{
+                return '"' + c.innerText.replace(/"/g, '""').replace(/\\n/g, ' ') + '"';
+            }});
+            if (cells.length) rows.push(cells.join(','));
+        }});
+        rows.push('');
+    }});
+    var blob = new Blob([String.fromCharCode(65279) + rows.join('\\r\\n')], {{type: 'text/csv;charset=utf-8'}});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'us_etf_' + (usChart && usChart.labels.length ? usChart.labels[usChart.labels.length-1] : 'latest') + '.csv';
+    a.click();
+}}
+var _usChartObj = null;
+function renderUsChart() {{
+    if (!usChart || !usChart.labels || usChart.labels.length < 3) return;
+    document.getElementById('usChartPh').style.display = 'none';
+    document.getElementById('usChartWrap').style.display = '';
+    if (_usChartObj || !window.Chart) return;
+    var mk = function(lb, data, color) {{ return {{label: lb, data: data, borderColor: color, backgroundColor: color, borderWidth: 2, pointRadius: 0, tension: 0.2, spanGaps: true}}; }};
+    _usChartObj = new Chart(document.getElementById('usAumChart'), {{
+        type: 'line',
+        data: {{labels: usChart.labels, datasets: [
+            mk('한국 노출 총 AUM', usChart.total, '#1428A0'),
+            mk('한국 실투자', usChart.invested, '#E0001B'),
+            mk('삼성전자 노출', usChart.samsung, '#0072CE'),
+            mk('SK하이닉스 노출', usChart.hynix, '#00854A')
+        ]}},
+        options: {{responsive: true, maintainAspectRatio: false, animation: false,
+            interaction: {{mode: 'index', intersect: false}},
+            plugins: {{legend: {{position: 'bottom', labels: {{boxWidth: 12, font: {{size: 12}}}}}},
+                tooltip: {{callbacks: {{label: function(c) {{ return c.dataset.label + ': ' + (c.parsed.y == null ? '-' : c.parsed.y.toLocaleString() + '조원'); }}}}}}}},
+            scales: {{x: {{grid: {{display: false}}, ticks: {{maxRotation: 0, autoSkip: true, color: '#000'}}}},
+                y: {{title: {{display: true, text: '조원'}}, ticks: {{color: '#000'}}}}}}
+        }}
+    }});
+}}
+renderUs();
 
 // ── 액티브 ETF 탭 (activeChanges = Python compute_active_etf_changes 결과, 단일 출처) ──
 var _activeSortCol = 2, _activeSortAsc = false; // 기본 AUM 내림차순

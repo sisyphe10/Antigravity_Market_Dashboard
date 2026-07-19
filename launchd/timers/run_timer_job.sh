@@ -135,6 +135,7 @@ job_timeout_seconds() {
     featured-kis)         echo 900  ;;   # 원본 TimeoutStartSec=15min
     etf-collect)          echo 1800 ;;   # 원본 30min
     etf-collect-retry)    echo 1800 ;;   # etf-collect.service 공유 → 30min
+    us-etf-collect)       echo 900  ;;   # yfinance 28종 + holdings (신규 2026-07-19)
     landing-highlights)   echo 300  ;;   # 원본 5min
     etf-active-alert)     echo 600  ;;   # 원본 10min
     kodex-sectors)        echo 600  ;;   # 원본 10min
@@ -185,6 +186,7 @@ run_job() {
       #       collect_etf_daily.py 는 재개형(ok>=1000이면 idempotent no-op)이라 재시도 안전.
       /bin/bash scripts/run_etf_collect.sh || return $?
       ;;
+    us-etf-collect)       /bin/bash scripts/run_us_etf_collect.sh     || return $? ;;
     landing-highlights)   /bin/bash scripts/run_landing_highlights.sh || return $? ;;
     etf-active-alert)     /bin/bash scripts/run_etf_active_alert.sh   || return $? ;;
     kodex-sectors)        /bin/bash scripts/run_kodex_sectors.sh      || return $? ;;

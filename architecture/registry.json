@@ -310,6 +310,32 @@
    "alerts": "OnFailure → sisyphe-bot-notify@etf-active-alert → 텔레그램"
   },
   {
+   "id": "timer-us-etf-collect",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "timer",
+   "name": "미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 09:00)",
+   "runs_on": "macmini",
+   "schedule_kst": "09:00 화~토",
+   "status": "active",
+   "desc_md": "미국(+홍콩) ETF 28종의 NAV·AUM·종가·보수와 USDKRW, 삼성전자·SK하이닉스 보유비중을 yfinance로 수집해 `us_etf_history.csv`에 적재하는 타이머(`run_us_etf_collect.sh` → `execution/etf_collector/collect_us_etf.py`). 2026-07-19 신설.\n\n- 대상: 반도체 지수형·레버리지, 메모리(DRAM/RAM), 홍콩 삼전·하이닉스 2x(7747/7709.HK), 한국 단일(EWY/FLKR), MSCI EM·FTSE 선진 등 한국 포함/미포함 대조군 — 정의는 `us_etf_config.py` 단일 출처.\n- 한국 비중 변동 4지표(총 AUM·실투자·삼전·하이닉스 노출, 원화)를 Sisyphe-Bot으로 아침 발송 (dedup=`.us_etf_alert_sent.json`).\n- 수집 후 `etf.html` 재생성(미국 ETF 서브탭) — 게시는 래퍼의 publish_snapshot이 담당.\n- 홍콩 2종은 yfinance NAV stale이라 가격(HKD)·AUM(USD)만 수집. 09:00 화~토 = 미국 마감+NAV 확정 후.",
+   "code": [
+    "launchd/timers/com.antigravity.us-etf-collect.plist",
+    "scripts/run_us_etf_collect.sh",
+    "execution/etf_collector/collect_us_etf.py",
+    "execution/etf_collector/us_etf_config.py"
+   ],
+   "writes": [
+    "us_etf_history.csv",
+    ".us_etf_alert_sent.json",
+    "etf.html"
+   ],
+   "depends_on": [
+    "infra-telegram"
+   ],
+   "alerts": "실패 시 sisyphe-bot-notify(us-etf-collect) → 텔레그램"
+  },
+  {
    "id": "timer-featured-kis",
    "project": "antigravity",
    "domain": "portfolio-wrap",

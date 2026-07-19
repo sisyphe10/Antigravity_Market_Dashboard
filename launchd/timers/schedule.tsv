@@ -10,7 +10,8 @@ etf-collect-retry	0 18 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh 
 landing-highlights	45 18 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh landing-highlights	
 etf-active-alert	0 19 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh etf-active-alert	
 kodex-sectors	30 23 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh kodex-sectors	
-earnings-bot	0 8 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh earnings-bot	
+earnings-bot	0 8 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh earnings-bot
+us-etf-collect	0 9 * * 2-6	/bin/bash __REPO__/launchd/timers/run_timer_job.sh us-etf-collect
 update-stock-master	0 9 * * 6	/bin/bash __REPO__/launchd/timers/run_timer_job.sh update-stock-master	
 memento-telegram	0 12 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh memento-telegram
 wrap-principle-check	10 17 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh wrap-principle-check
