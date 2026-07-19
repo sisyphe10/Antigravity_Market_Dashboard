@@ -2089,6 +2089,9 @@ def _build_combined_chart_section():
                 f'data-update-rank="{rank}" data-name="{display_esc}" '
                 f'onclick="toggleCmbSeries(this.querySelector(\'.cmb-chart-item\'), event)" '
                 f'style="cursor:pointer;">'
+                # 별표(즐겨찾기) — Watchlist 패턴 이식 (2026-07-19). 상태는 localStorage.
+                f'<td class="cmb-star" onclick="cmbToggleStar(this, event)" '
+                f'style="padding:6px 2px;font-size:14px;text-align:center;cursor:pointer;">☆</td>'
                 f'<td style="{cell_base}text-align:center;white-space:nowrap;">{freq}</td>'
                 f'<td style="{cell_base}text-align:center;white-space:nowrap;font-size:12px;">{country_esc}</td>'
                 f'<td style="{cell_base}text-align:center;white-space:nowrap;font-size:12px;'
@@ -2113,6 +2116,12 @@ def _build_combined_chart_section():
             '<style>'
             '#cmbSideTable tbody tr:hover td{background:#f5f5f5;}'
             '#cmbSideTable th:hover{background:#e4e4e4;}'
+            # 별표 색: AoE 다크 스킨이 .cmb-series-row td / 선택행 td를 !important로 덮으므로
+            # (선택행은 앰버 #ffb45e) 더 높은 명시도 + !important 필수. 켜짐 = Watchlist 시안.
+            '#cmbSideTable td.cmb-star{color:#8a9096 !important;user-select:none;}'
+            '#cmbSideTable td.cmb-star.on{color:#67e0f4 !important;}'
+            '#cmbSideTable #cmbStarTh{color:#67e0f4 !important;}'
+            '#cmbSideTable #cmbStarTh.on{background:rgba(103,224,244,0.25) !important;}'
             '.cmb-filter-btn{display:inline-block;margin-left:4px;color:#9aa4b0;cursor:pointer;}'
             '.cmb-filter-btn:hover{color:#000;}'
             '.cmb-filter-btn.cmb-filter-on{color:#000;font-weight:900;}'
@@ -2123,8 +2132,9 @@ def _build_combined_chart_section():
             'color:#111;white-space:nowrap;cursor:pointer;text-align:left;}'
             '</style>'
             f'<table id="cmbSideTable" class="portfolio-table" style="max-width:500px;margin:0 auto;">'
-            f'<colgroup><col style="width:70px;"><col style="width:82px;"><col style="width:132px;"><col></colgroup>'
+            f'<colgroup><col style="width:26px;"><col style="width:70px;"><col style="width:82px;"><col style="width:132px;"><col></colgroup>'
             f'<thead><tr>'
+            f'<th id="cmbStarTh" style="{th_base}" onclick="cmbToggleStarOnly(event)" title="즐겨찾기만 보기 토글">★</th>'
             f'<th style="{th_base}" onclick="sortCmbTable(\'rank\')">Frequency <span id="cmbArr_rank" style="font-size:10px;">▲</span>{filter_btn.format(col="rank")}</th>'
             f'<th style="{th_base}" onclick="sortCmbTable(\'country\')">Country <span id="cmbArr_country" style="font-size:10px;"></span>{filter_btn.format(col="country")}</th>'
             f'<th style="{th_base}" onclick="sortCmbTable(\'group\')">Group <span id="cmbArr_group" style="font-size:10px;"></span>{filter_btn.format(col="group")}</th>'
@@ -2352,7 +2362,7 @@ def _build_combined_chart_section():
             // cmbFilters: col -> 허용 표시값 배열 (키 없음 = 전체 허용)
             var cmbFilters = {};
             function cmbRowVal(row, col) {
-                if (col === 'rank') return row.cells[0].textContent.trim();
+                if (col === 'rank') return row.cells[1].textContent.trim();  // cells[0] = 별표
                 if (col === 'country') return row.getAttribute('data-country') || '';
                 if (col === 'group') return row.getAttribute('data-group') || '';
                 return row.getAttribute('data-name') || '';
@@ -2364,9 +2374,42 @@ def _build_combined_chart_section():
                     return !f || f.indexOf(cmbRowVal(row, c)) !== -1;
                 });
             }
+
+            // ── 별표(즐겨찾기) — Watchlist 패턴 (2026-07-19). localStorage 보존,
+            //    헤더 ★ = 즐겨찾기만 보기 토글 (엑셀식 필터와 AND 결합).
+            var cmbStars = {};
+            try { (JSON.parse(localStorage.getItem('cmbStars') || '[]')).forEach(function(n) { cmbStars[n] = 1; }); } catch (e) {}
+            var cmbStarOnly = false;
+            function cmbSaveStars() { try { localStorage.setItem('cmbStars', JSON.stringify(Object.keys(cmbStars))); } catch (e) {} }
+            function cmbPaintStars() {
+                document.querySelectorAll('.cmb-series-row td.cmb-star').forEach(function(td) {
+                    var on = !!cmbStars[td.parentNode.getAttribute('data-name')];
+                    td.textContent = on ? '★' : '☆';
+                    td.classList.toggle('on', on);
+                });
+                var th = document.getElementById('cmbStarTh');
+                if (th) th.classList.toggle('on', cmbStarOnly);
+            }
+            window.cmbToggleStar = function(td, ev) {
+                ev.stopPropagation();
+                var name = td.parentNode.getAttribute('data-name');
+                if (cmbStars[name]) { delete cmbStars[name]; } else { cmbStars[name] = 1; }
+                cmbSaveStars();
+                cmbPaintStars();
+                if (cmbStarOnly) cmbApplyFilters();
+            };
+            window.cmbToggleStarOnly = function(ev) {
+                ev.stopPropagation();
+                cmbStarOnly = !cmbStarOnly;
+                cmbPaintStars();
+                cmbApplyFilters();
+            };
+
             function cmbApplyFilters() {
                 document.querySelectorAll('.cmb-series-row').forEach(function(row) {
-                    row.style.display = cmbRowPasses(row, null) ? '' : 'none';
+                    var pass = cmbRowPasses(row, null) &&
+                        (!cmbStarOnly || cmbStars[row.getAttribute('data-name')]);
+                    row.style.display = pass ? '' : 'none';
                 });
                 ['rank', 'country', 'group', 'name'].forEach(function(c) {
                     var btn = document.querySelector('.cmb-filter-btn[data-col="' + c + '"]');
@@ -3217,6 +3260,7 @@ def _build_combined_chart_section():
                 buildCmbChart();
             });
 
+            cmbPaintStars();
             cmbApplyFilters();
             updateCmbSortArrows();
             buildCmbChart();
