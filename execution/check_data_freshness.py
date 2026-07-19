@@ -112,6 +112,7 @@ HEARTBEAT_FILE = 'heartbeats.json'
 HEARTBEAT_THRESHOLD_DEFAULT = 3          # 매일 잡: 3일 무성공이면 경보
 HEARTBEAT_THRESHOLDS = {                 # 잡별 임계(달력일) override
     'gha-earnings-calendar-sync': 2,     # 매일 → 2일
+    'gha-earnings-ir-day': 2,            # 매일 → 2일 (2026-07-20 earnings-calendar-sync에서 분리)
     'gha-finalize-orders': 4,            # 주말 무주문 no-op 감안
 }
 
