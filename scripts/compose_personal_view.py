@@ -66,14 +66,18 @@ AOE_DARK_CSS = (
     '.category-title,.section>h2,.section>h3,h2.block-title{color:#fb8b1e!important;letter-spacing:1.5px}'
     'th{background:#1a1b1e!important;color:#fb8b1e!important;border-color:#2a2b2e!important}'
     'td{border-color:#222326!important}'
-    'td:not([style*=color]){color:#d9dde2!important}'
+    'td:not([style*=color]){color:#fff!important}'
+    # 표 셀 가운데 정렬 일괄 (인라인 text-align 지정 셀만 예외 — 긴 본문용)
+    'td:not([style*=text-align]),th:not([style*=text-align]){text-align:center!important}'
     'tbody tr:hover td{background:#191a1d!important}'
-    '.cmb-series-row td{color:#c9ced4!important}'
+    '.cmb-series-row td{color:#fff!important}'
     # 등락색 다크용 재단언 — td 일괄 규칙보다 뒤에 두어 우선 적용
     '.pos,td.pos,.positive,td.positive{color:#ff453a!important}'
     '.neg,td.neg,.negative,td.negative{color:#2e9bff!important}'
     # 인라인 밝은 배경(히트 틴트·경보 핑크) 위 글자는 어둡게 유지
     'td[style*=background],tr[style*=background] td{color:#333!important}'
+    # 다크 틴트 인라인 배경(딤 앰버/딤 바이올렛 — universe RSI/YTD)은 밝은 글자 유지
+    'td[style*="2e2410"],td[style*="241a3d"]{color:#e8e8e8!important}'
     '.tabs{border-bottom-color:#fb8b1e!important}'
     '.subtab,.mkt-subtab,.tab,.mbtn,.chg-fbtn,.nav-button,.tw-more-btn,.tw-dl-btn,'
     '.cmb-filter-btn,.cmb-ma-btn'

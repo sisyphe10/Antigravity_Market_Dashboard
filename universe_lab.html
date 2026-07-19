@@ -30,7 +30,7 @@
   .dlbtn:hover { background:#b91c1c; }
   .card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:14px; }
   .legend { display:flex; align-items:center; gap:6px; font-size:12px; color:#111827; font-weight:600; margin-top:8px; }
-  .legend .bar { width:160px; height:12px; border-radius:3px; background:linear-gradient(90deg,#16a34a,#f3f4f6,#dc2626); }
+  .legend .bar { width:160px; height:12px; border-radius:3px; background:linear-gradient(90deg,#16a34a,#1a1c1f,#dc2626); }
   table { width:100%; border-collapse:collapse; font-size:15px; }
   thead { background:#e9ecef; }
   th { padding:12px 6px; text-align:center; font-weight:600; color:#000; white-space:nowrap; background:#e9ecef; position:sticky; top:0; z-index:10; box-shadow: inset 0 -2px 0 #000; }
@@ -48,7 +48,7 @@
   .note { font-size:12px; color:#9ca3af; margin:7px 0 0; }
   .exit { font-size:13px; color:#6b7280; margin-top:10px; }
   .qcap { font-size:12px; color:#9ca3af; }
-  #heatmap { position:relative; overflow:hidden; background:#fff; width:100%; height:640px; }
+  #heatmap { position:relative; overflow:hidden; background:#111214; width:100%; height:640px; }
 </style>
 <style>
 
@@ -169,9 +169,9 @@ function shortName(tk,name,cur){ var t=(tk&&tk.indexOf(':')>=0)?tk.split(':').po
 // 색상: 발산형 (음수=빨강, 0=연회색, 양수=초록). DD는 0=초록, 음수=빨강.
 function lerp(a,b,t){ return Math.round(a+(b-a)*t); }
 function rgb(c){ return 'rgb('+c[0]+','+c[1]+','+c[2]+')'; }
-var C_NEG=[22,163,74], C_MID=[243,244,246], C_POS=[220,38,38];  // 한국식: 강세(양수)=빨강, 약세(음수)=녹색
+var C_NEG=[22,163,74], C_MID=[26,28,31], C_POS=[220,38,38];  // 한국식: 강세(양수)=빨강, 약세(음수)=녹색. 중간=터미널 다크 뉴트럴
 function diverge(v, m){
-  if(v===null||isNaN(v)) return 'rgb(229,231,235)';
+  if(v===null||isNaN(v)) return 'rgb(42,45,49)';
   var t=Math.max(-1,Math.min(1, v/m));
   if(t>=0){ return rgb([lerp(C_MID[0],C_POS[0],t),lerp(C_MID[1],C_POS[1],t),lerp(C_MID[2],C_POS[2],t)]); }
   var u=-t; return rgb([lerp(C_MID[0],C_NEG[0],u),lerp(C_MID[1],C_NEG[1],u),lerp(C_MID[2],C_NEG[2],u)]);
@@ -186,7 +186,7 @@ var METRICS={
 function colorFor(v, key){
   var mm=METRICS[key];
   if(mm.dd){
-    if(v===null||isNaN(v)) return 'rgb(229,231,235)';
+    if(v===null||isNaN(v)) return 'rgb(42,45,49)';
     var d=Math.max(0,Math.min(1, (-v)/mm.m));  // 0=신고가, 1=깊은 낙폭
     // 빨강(신고가)→연회색→초록(깊은 낙폭): 중간을 연회색으로 우회해 갈색(빨강+초록 혼합) 방지
     if(d<=0.5){ var t=d/0.5; return rgb([lerp(C_POS[0],C_MID[0],t),lerp(C_POS[1],C_MID[1],t),lerp(C_POS[2],C_MID[2],t)]); }
@@ -336,19 +336,19 @@ function renderHeatmap(){
       stockRects.forEach(function(rr){
         var s=rr.item, v=s[METRIC], bg=colorFor(v,METRIC);
         var box=document.createElement('div');
-        box.style.cssText='position:absolute;left:'+rr.x+'px;top:'+rr.y+'px;width:'+Math.max(0,rr.w-0.5)+'px;height:'+Math.max(0,rr.h-0.5)+'px;background:'+bg+';overflow:hidden;border:0.5px solid rgba(255,255,255,0.65);display:flex;flex-direction:column;align-items:center;justify-content:center;';
+        box.style.cssText='position:absolute;left:'+rr.x+'px;top:'+rr.y+'px;width:'+Math.max(0,rr.w-0.5)+'px;height:'+Math.max(0,rr.h-0.5)+'px;background:'+bg+';overflow:hidden;border:0.5px solid rgba(17,18,20,0.9);display:flex;flex-direction:column;align-items:center;justify-content:center;';
         var _tip=(s.name||s.disp)+' ('+(s.tk.indexOf(':')>=0?s.tk.split(':').pop():s.tk)+')\n'+s.sector+' · 시총 '+Math.round(s.mcap).toLocaleString()+'억 · '+METRICS[METRIC].label+' '+(v==null?'-':((v>0?'+':'')+Math.round(v)+'%'));
         box.title=_tip; box.className='hmbox'; box.setAttribute('data-tip',_tip);
         if(rr.w>36 && rr.h>24){
-          box.innerHTML='<div style="font:700 14px Pretendard;line-height:1.15;color:#111;text-align:center;padding:0 2px;white-space:nowrap;">'+fitText(s.disp,'700 14px Pretendard',rr.w-6)+'</div>'
-            +(rr.h>44?'<div style="font:600 12px Pretendard;color:#111;text-align:center;padding:0 2px;white-space:nowrap;">'+(v==null?'':((v>0?'+':'')+Math.round(v)+'%'))+'</div>':'');
+          box.innerHTML='<div style="font:700 14px Pretendard;line-height:1.15;color:#fff;text-align:center;padding:0 2px;white-space:nowrap;">'+fitText(s.disp,'700 14px Pretendard',rr.w-6)+'</div>'
+            +(rr.h>44?'<div style="font:600 12px Pretendard;color:#fff;text-align:center;padding:0 2px;white-space:nowrap;">'+(v==null?'':((v>0?'+':'')+Math.round(v)+'%'))+'</div>':'');
         }
         frag.appendChild(box);
       });
     }
     if(showCap){
       var cap=document.createElement('div');
-      cap.style.cssText='position:absolute;left:'+sr.x+'px;top:'+sr.y+'px;width:'+sr.w+'px;height:'+CAP+'px;font:700 14px Pretendard;color:#0f172a;background:rgba(255,255,255,0.62);padding:2px 6px;overflow:hidden;white-space:nowrap;pointer-events:none;';
+      cap.style.cssText='position:absolute;left:'+sr.x+'px;top:'+sr.y+'px;width:'+sr.w+'px;height:'+CAP+'px;font:700 14px Pretendard;color:#fb8b1e;background:rgba(10,10,10,0.78);padding:2px 6px;overflow:hidden;white-space:nowrap;pointer-events:none;';
       cap.textContent=sr.item.name;
       frag.appendChild(cap);
     }
@@ -465,7 +465,7 @@ function buildRanks(uh, ih, IDX1M){
       if(yr===undefined){ dcell='NEW'; cls='new'; }
       else { var d=yr-tr; if(d>0){dcell='▲'+d;cls='up';} else if(d<0){dcell='▼'+(-d);cls='down';} else {dcell='–';cls='flat';} }
       var isNewTop=(yr===undefined||yr>40), v=r[ft];
-      rows+='<tr><td>'+tr+'</td><td class="'+cls+'">'+dcell+(isNewTop&&cls!=='new'?' <span style="color:#111827">↑</span>':'')
+      rows+='<tr><td>'+tr+'</td><td class="'+cls+'">'+dcell+(isNewTop&&cls!=='new'?' <span style="color:#fb8b1e">↑</span>':'')
         +'</td><td class="l">'+r.name+'</td><td class="l">'+r.sector+'</td>'
         +'<td class="'+(v>0?'pos':v<0?'neg':'')+'">'+(v>0?'+':'')+Math.round(v)+'%</td></tr>';
     });

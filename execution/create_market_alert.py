@@ -389,13 +389,13 @@ def render_table(stocks, category, price_cache):
         else:
             판단일_임박   = False
 
-        # 배경색: 판단일 도달=#fca5a5(진한), 5영업일 이내=#fee2e2(연한), 나머지=없음
+        # 강조: 판단일 도달=ma-hot(진한 레드 틴트), 5영업일 이내=ma-soon, 나머지=없음
         if category == '투자주의':
             row_bg = ''
         elif 판단일_passed:
-            row_bg = ' style="background-color:#fca5a5"'
+            row_bg = ' class="ma-hot"'
         elif 판단일_임박:
-            row_bg = ' style="background-color:#fee2e2"'
+            row_bg = ' class="ma-soon"'
         else:
             row_bg = ''
 
@@ -480,7 +480,7 @@ def render_table_주의(stocks, price_cache):
         else:
             esc_str = '-'
 
-        row_bg = ' style="background-color:#fef2f2"' if is_예고 else ''
+        row_bg = ' class="ma-pre"' if is_예고 else ''
 
         rows_html += f"""
             <tr{row_bg}>
@@ -719,6 +719,10 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stoc
         }}
         .data-table tbody tr:last-child td {{ border-bottom: none; }}
         .data-table tbody tr:hover td {{ background: #f9fafb; }}
+        /* 강조 행 = 터미널 다크 레드 틴트 3단 (판단일 도달 > 임박 > 지정예고) */
+        .data-table tr.ma-hot td {{ background: #992e1f !important; color: #fff !important; }}
+        .data-table tr.ma-soon td {{ background: #611f16 !important; color: #ffd9d2 !important; }}
+        .data-table tr.ma-pre td {{ background: #33150f !important; color: #f2c9c0 !important; }}
         footer {{
             text-align: center; padding: 16px; color: #999; font-size: 14px;
         }}
