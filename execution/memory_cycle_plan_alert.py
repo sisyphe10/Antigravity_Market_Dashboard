@@ -127,22 +127,26 @@ def send_telegram(text):
 
 def main():
     now = datetime.now(KST)
-    blocks, all_triggers = [], []
-    mu_reb = None
+    blocks, all_triggers, rebs = [], [], {}
     for s in STOCKS:
         try:
             block, triggers, reb_pct = analyze(s)
             blocks.append(block)
             all_triggers.extend(triggers)
-            if s["ticker"] == "MU":
-                mu_reb = reb_pct
+            rebs[s["name"]] = reb_pct
         except Exception as e:
             blocks.append("%s  조회 실패: %s" % (s["name"], e))
             all_triggers.append("⚠ %s 데이터 조회 실패 — 수동 확인 필요" % s["name"])
 
+    def r(name):
+        v = rebs.get(name)
+        return "%.0f%%" % v if v is not None else "—"
+
     msg = "📐 메모리 플랜 %s\n\n" % now.strftime("%m/%d")
     msg += "\n\n".join(blocks)
     msg += "\n\n★판별 = MU $1,020(84%) 돌파 여부"
+    msg += "\n✔오늘 체크: 저점 후 반등 삼전 %s · 닉스 %s · MU %s (84%% 도달 시 판별 개시)" % (
+        r("삼성전자"), r("SK하이닉스"), r("마이크론"))
     if all_triggers:
         msg += "\n" + "\n".join(all_triggers)
 
