@@ -795,3 +795,113 @@
 794,로드 중...,미디어와엔터테인먼트,NASDAQ:WBD,Warner Bros. Discovery
 795,로드 중...,소프트웨어와서비스,NASDAQ:WDAY,Workday
 796,로드 중...,유틸리티,NASDAQ:XEL,Xcel Energy
+797,로드 중...,전기통신서비스,NYSE:VZ,Verizon
+798,로드 중...,미디어와엔터테인먼트,NYSE:DIS,Walt Disney Company (The)
+799,로드 중...,미디어와엔터테인먼트,NYSE:LYV,Live Nation Entertainment
+800,로드 중...,전기통신서비스,NASDAQ:ECHO,EchoStar
+801,로드 중...,미디어와엔터테인먼트,NYSE:OMC,Omnicom Group
+802,로드 중...,미디어와엔터테인먼트,NYSE:TKO,TKO Group Holdings
+803,로드 중...,미디어와엔터테인먼트,NASDAQ:NWSA,News Corp (Class A)
+804,로드 중...,미디어와엔터테인먼트,NASDAQ:FOXA,Fox Corporation (Class A)
+805,로드 중...,미디어와엔터테인먼트,NASDAQ:CHTR,Charter Communications
+806,로드 중...,미디어와엔터테인먼트,NASDAQ:TTD,Trade Desk (The)
+807,로드 중...,"호텔,레스토랑,레저등",NYSE:MCD,McDonald's
+808,로드 중...,"호텔,레스토랑,레저등",NYSE:RCL,Royal Caribbean Group
+809,로드 중...,"호텔,레스토랑,레저등",NYSE:HLT,Hilton Worldwide
+810,로드 중...,자동차와부품,NYSE:GM,General Motors
+811,로드 중...,자동차와부품,NYSE:F,Ford Motor
+812,로드 중...,내구소비재와의류,NYSE:GRMN,Garmin
+813,로드 중...,소매(유통),NASDAQ:EBAY,eBay
+814,로드 중...,소매(유통),NYSE:CVNA,Carvana
+815,로드 중...,"호텔,레스토랑,레저등",NYSE:CMG,Chipotle Mexican Grill
+816,로드 중...,소매(유통),NYSE:AZO,AutoZone
+817,로드 중...,가정용품과개인용품,NYSE:CL,Colgate-Palmolive
+818,로드 중...,식품과기본식료품소매,NYSE:TGT,Target
+819,로드 중...,식품과기본식료품소매,NYSE:SYY,Sysco
+820,로드 중...,"식품,음료,담배",NYSE:ADM,Archer Daniels Midland
+821,로드 중...,가정용품과개인용품,NYSE:KVUE,Kenvue
+822,로드 중...,식품과기본식료품소매,NYSE:KR,Kroger
+823,로드 중...,가정용품과개인용품,NYSE:KMB,Kimberly-Clark
+824,로드 중...,"식품,음료,담배",NYSE:HSY,Hershey Company (The)
+825,로드 중...,식품과기본식료품소매,NASDAQ:CASY,Casey's
+826,로드 중...,가정용품과개인용품,NYSE:EL,Estée Lauder Companies (The)
+827,로드 중...,에너지,NYSE:XOM,ExxonMobil
+828,로드 중...,에너지,NYSE:CVX,Chevron
+829,로드 중...,에너지,NYSE:COP,ConocoPhillips
+830,로드 중...,에너지,NYSE:VLO,Valero Energy
+831,로드 중...,에너지,NYSE:WMB,Williams
+832,로드 중...,에너지,NYSE:MPC,Marathon Petroleum
+833,로드 중...,에너지,NYSE:PSX,Phillips 66
+834,로드 중...,에너지,NYSE:EOG,EOG Resources
+835,로드 중...,에너지,NYSE:SLB,Schlumberger
+836,로드 중...,에너지,NYSE:TRGP,Targa Resources
+837,로드 중...,다각화된금융,NYSE:BRK-B,Berkshire Hathaway
+838,로드 중...,은행,NYSE:JPM,JPMorgan Chase
+839,로드 중...,다각화된금융,NYSE:V,Visa
+840,로드 중...,다각화된금융,NYSE:MA,Mastercard
+841,로드 중...,은행,NYSE:BAC,Bank of America
+842,로드 중...,은행,NYSE:MS,Morgan Stanley
+843,로드 중...,은행,NYSE:GS,Goldman Sachs
+844,로드 중...,은행,NYSE:WFC,Wells Fargo
+845,로드 중...,다각화된금융,NYSE:AXP,American Express
+846,로드 중...,은행,NYSE:C,Citigroup
+847,로드 중...,건강관리장비와서비스,NYSE:UNH,UnitedHealth Group
+848,로드 중...,건강관리장비와서비스,NYSE:CVS,CVS Health
+849,로드 중...,건강관리장비와서비스,NYSE:MCK,McKesson
+850,로드 중...,건강관리장비와서비스,NYSE:HCA,HCA Healthcare
+851,로드 중...,건강관리장비와서비스,NYSE:ELV,Elevance Health
+852,로드 중...,건강관리장비와서비스,NYSE:CI,Cigna
+853,로드 중...,건강관리장비와서비스,NYSE:COR,Cencora
+854,로드 중...,건강관리장비와서비스,NYSE:CAH,Cardinal Health
+855,로드 중...,건강관리장비와서비스,NYSE:HUM,Humana
+856,로드 중...,건강관리장비와서비스,NYSE:EW,Edwards Lifesciences
+857,로드 중...,운송,NYSE:CAT,Caterpillar
+858,로드 중...,자본재,NYSE:GE,GE Aerospace
+859,로드 중...,자본재,NYSE:GEV,GE Vernova
+860,로드 중...,운송,NYSE:UNP,Union Pacific
+861,로드 중...,자본재,NYSE:BA,Boeing
+862,로드 중...,자본재,NYSE:DE,Deere &
+863,로드 중...,운송,NYSE:UBER,Uber
+864,로드 중...,자본재,NYSE:PH,Parker Hannifin
+865,로드 중...,자본재,NYSE:LMT,Lockheed Martin
+866,로드 중...,자본재,NYSE:VRT,Vertiv
+867,로드 중...,기술하드웨어와장비,NYSE:DELL,Dell Technologies
+868,로드 중...,기술하드웨어와장비,NYSE:GLW,Corning
+869,로드 중...,기술하드웨어와장비,NYSE:TEL,TE Connectivity
+870,로드 중...,기술하드웨어와장비,NYSE:HPE,Hewlett Packard Enterprise
+871,로드 중...,기술하드웨어와장비,NYSE:KEYS,Keysight Technologies
+872,로드 중...,기술하드웨어와장비,NYSE:COHR,Coherent
+873,로드 중...,기술하드웨어와장비,NYSE:CIEN,Ciena
+874,로드 중...,기술하드웨어와장비,NASDAQ:FLEX,Flex Ltd.
+875,로드 중...,기술하드웨어와장비,NASDAQ:NTAP,NetApp
+876,로드 중...,기술하드웨어와장비,NYSE:JBL,Jabil
+877,로드 중...,소재,NYSE:NEM,Newmont
+878,로드 중...,소재,NYSE:SHW,Sherwin-Williams
+879,로드 중...,소재,NYSE:FCX,Freeport-McMoRan
+880,로드 중...,소재,NYSE:ECL,Ecolab
+881,로드 중...,소재,NYSE:CRH,CRH
+882,로드 중...,소재,NYSE:APD,Air Products
+883,로드 중...,소재,NYSE:CTVA,Corteva
+884,로드 중...,소재,NYSE:NUE,Nucor
+885,로드 중...,소재,NYSE:VMC,Vulcan Materials
+886,로드 중...,소재,NASDAQ:STLD,Steel Dynamics
+887,로드 중...,부동산,NYSE:WELL,Welltower
+888,로드 중...,부동산,NYSE:PLD,Prologis
+889,로드 중...,부동산,NASDAQ:EQIX,Equinix
+890,로드 중...,부동산,NYSE:AMT,American Tower
+891,로드 중...,부동산,NYSE:SPG,Simon Property Group
+892,로드 중...,부동산,NYSE:AVB,AvalonBay Communities
+893,로드 중...,부동산,NYSE:O,Realty Income
+894,로드 중...,부동산,NYSE:DLR,Digital Realty
+895,로드 중...,부동산,NYSE:PSA,Public Storage
+896,로드 중...,부동산,NYSE:VTR,Ventas
+897,로드 중...,유틸리티,NYSE:NEE,NextEra Energy
+898,로드 중...,유틸리티,NYSE:SO,Southern
+899,로드 중...,유틸리티,NYSE:DUK,Duke Energy
+900,로드 중...,유틸리티,NYSE:SRE,Sempra
+901,로드 중...,유틸리티,NYSE:PEG,Public Service Enterprise Group
+902,로드 중...,유틸리티,NYSE:PCG,PG&E
+903,로드 중...,유틸리티,NYSE:ED,Consolidated Edison
+904,로드 중...,유틸리티,NYSE:WEC,WEC Energy Group
+905,로드 중...,유틸리티,NYSE:DTE,DTE Energy
+906,로드 중...,유틸리티,NYSE:AEE,Ameren
