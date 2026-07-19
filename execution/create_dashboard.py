@@ -9291,8 +9291,11 @@ function renderSector() {
 
     var secHeaders = ['#','섹터','종목수','합산 시총','RSI(1M)','YTD','1D','1W','1M','3M','6M','1Y','DD'];
     var html = '<table style="width:100%;table-layout:fixed;border-collapse:collapse"><thead><tr>';
+    // 칼럼 너비: 섹터·합산 시총은 긴 값(호텔,레스토랑,레저등 / N경N,NNN조N,NNN억) 수용, % 칼럼은 좁게
+    var secWidths = ['3.5%','16%','4.5%','13%','6%'];  // 이후(YTD~DD 8칸)는 균등 7.1%
     secHeaders.forEach(function(h,i) {
-        var bg = i===4?' style="background:#241a3d;cursor:pointer"':(i===5?' style="background:#0a3038;cursor:pointer"':' style="cursor:pointer"');
+        var w = 'width:' + (secWidths[i] || '7.1%');
+        var bg = i===4?' style="background:#241a3d;cursor:pointer;'+w+'"':(i===5?' style="background:#0a3038;cursor:pointer;'+w+'"':' style="cursor:pointer;'+w+'"');
         html += '<th'+bg+' onclick="sortSector('+i+')">' + h + (_secSortCol===i ? (_secSortAsc?' ▲':' ▼') : '') + '</th>';
     });
     html += '</tr></thead><tbody>';
