@@ -24,9 +24,9 @@ self-locate(`launchd/gha/` → 두 단계 상위)한다. plist·`schedule_gha.ts
 
 | 파일 | 역할 |
 |---|---|
-| `com.antigravity.gha-<이름>.plist` × 9 | LaunchDaemon 정의 (`StartCalendarInterval` = KST, `EnvironmentVariables` HOME/PATH/LANG) |
+| `com.antigravity.gha-<이름>.plist` × 11 | LaunchDaemon 정의 (`StartCalendarInterval` = KST, `EnvironmentVariables` HOME/PATH/LANG) |
 | `run_gha_job.sh` | 공용 wrapper — self-locate + 잡별 동시실행 락 + **wrap-nav-pipeline 공유 락** + 안전 .env 파서 + 타임아웃 워치독 + 실행 + 원자적 성공 stamp + 실패 알림. ★`timers/run_timer_job.sh`를 **패턴 복제**(참조/수정 안 함, 소유권 분리) |
-| `schedule_gha.tsv` | A4 catch-up 러너용 계약 파일 (`이름\tcron(5필드 KST)\t실행커맨드`, 9행) |
+| `schedule_gha.tsv` | A4 catch-up 러너용 계약 파일 (`이름\tcron(5필드 KST)\t실행커맨드`, 11행) |
 | `install_gha.sh` | 컷오버용 잡 단위 설치/제거기 — 잡별/웨이브별 plist 토큰 치환→`/Library/LaunchDaemons`→bootstrap + **공유 schedule.tsv upsert**, `--remove` 롤백. bash 3.2 호환 |
 | `README.md` | 본 문서 |
 
@@ -41,8 +41,12 @@ self-locate(`launchd/gha/` → 두 단계 상위)한다. plist·`schedule_gha.ts
 | `gha-krx-valuation` | `daily_krx_valuation.yml` | 18:30 월~금 | fetch_krx_valuation → create_dashboard → safe_push(dataset.csv, market.html) | 900s | 2 | ✔ | `KRX_ID`+`KRX_PW` (없으면 skip) |
 | `gha-disclosures` | `daily_disclosures.yml` | 16:30 매일 | fetch_disclosures + fetch_kind_disclosures → safe_push(disclosures.json, corp_codes.json) | 900s | 2 | ✘ | `DART_API_KEY` |
 | `gha-crawl` | `daily_crawl.yml` (스케줄분만) | 23:00 매일 | 대형 파이프라인(백필·크롤·NAV·차트·SEIBro) → create_dashboard → safe_push(다수, `--xlsx-conflict bail`) | 3600s | 2 | ✔ | `KRX_ID`/`KRX_PW`(외국인, tolerated) |
-| `gha-earnings-calendar-sync` | `earnings_calendar_sync.yml` | 07:00 매일 | earnings_calendar_sync (git push 없음, Google Calendar 직접 기록) | 900s | 3 | ✘ | `FINNHUB_API_KEY`, `GOOGLE_SERVICE_ACCOUNT_KEY` |
+| `gha-earnings-calendar-sync` | `earnings_calendar_sync.yml` | 07:00 매일 | earnings_calendar_sync **`--skip-ir-day`** (실적 캘린더만, git push 없음, Google Calendar 직접 기록) | 1800s | 3 | ✘ | `FINNHUB_API_KEY`, `GOOGLE_SERVICE_ACCOUNT_KEY` |
+| `gha-earnings-ir-day` | `earnings_calendar_sync.yml` | 07:15 매일 | earnings_calendar_sync **`--skip-earnings`** (IR Day = Finnhub 뉴스 315종목 + EDGAR 8-K, git push 없음) | 1800s | 3 | ✘ | `FINNHUB_API_KEY`, `GOOGLE_SERVICE_ACCOUNT_KEY` |
 | `gha-finalize-orders` | `finalize_orders.yml` | 16:00 매일 | finalize_pending_orders + finalize_pending_aum → calc_wrap_nav → calc_returns → create_portfolio_tables → create_dashboard → safe_push(`--xlsx-conflict fail`) | 1800s | 3 | ✔ | 없음 |
+| `gha-taiwan-revenue` | `daily_taiwan_revenue.yml` | 23:20 매일 | fetch_taiwan_revenue + crosscheck(tolerated) → create_dashboard → safe_push(taiwan_revenue.csv, market.html) | 1800s | — | ✘ | FinMind(익명 폴백) |
+
+> **2026-07-20 분리(★)**: `gha-earnings-calendar-sync`(07:00)가 실적 캘린더 Google Calendar 쓰기(~146건×3s)만으로 900s를 소진해 뒤따르던 IR Day(Finnhub 315종목)가 워치독에 강제종료됐다. → 실적/`IR Day`를 **두 잡으로 분리**(`--skip-ir-day`/`--skip-earnings`), IR Day는 07:15로 스태거·타임아웃 900→1800s. IR Day 실측 소요 ~9분(315종목). 두 잡은 `agearn…`/`agird…`로 이벤트 ID 네임스페이스가 달라 캘린더 중복 없음.
 
 > **Timeout 주(★)**: 원본 GHA yml 9종 **어디에도 `timeout-minutes` 지정이 없다**(GHA 기본 360분 적용).
 > 위 Timeout은 워치독용으로 잡 성격에 맞춰 **내가 부여한 보수적 추정치**다. Phase 2 실측 후 조정 대상.

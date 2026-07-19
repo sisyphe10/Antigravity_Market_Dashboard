@@ -15,7 +15,8 @@
 #   sudo ./install_gha.sh --list          # 잡/웨이브 목록 출력
 #
 #   <잡이름> ∈ gha-fred | gha-universe | gha-ecos | gha-kofia | gha-krx-valuation
-#             | gha-disclosures | gha-crawl | gha-earnings-calendar-sync | gha-finalize-orders
+#             | gha-disclosures | gha-crawl | gha-earnings-calendar-sync | gha-earnings-ir-day
+#             | gha-finalize-orders | gha-taiwan-revenue
 #
 # 맥 사용자(=UserName·HOME 토큰): 환경변수 MACMINI_USER > SUDO_USER > REPO 소유자(stat) > id -un.
 # REPO 경로: 이 스크립트가 항상 __REPO__/launchd/gha/ 아래 → 두 단계 상위(self-locate, 토큰 불필요).
@@ -46,9 +47,10 @@ usage:
   sudo ./install_gha.sh --remove <잡>   # 롤백(bootout+plist삭제+tsv행 제거)
   sudo ./install_gha.sh --list          # 목록
 잡: gha-fred gha-universe gha-ecos gha-kofia gha-krx-valuation
-    gha-disclosures gha-crawl gha-earnings-calendar-sync gha-finalize-orders
+    gha-disclosures gha-crawl gha-earnings-calendar-sync gha-earnings-ir-day
+    gha-finalize-orders gha-taiwan-revenue
 Wave1: fred/universe/ecos/kofia   Wave2: krx-valuation/disclosures/crawl
-Wave3: earnings-calendar-sync/finalize-orders
+Wave3: earnings-calendar-sync/earnings-ir-day/finalize-orders
 USAGE
 }
 
@@ -58,7 +60,7 @@ MODE="install"; TARGET=""
 case "$1" in
   -h|--help)  usage; exit 0 ;;
   --list)
-    echo "잡 9종: $ALL_JOBS"
+    echo "잡 11종: $ALL_JOBS"
     echo "Wave1: $(wave_jobs 1)"
     echo "Wave2: $(wave_jobs 2)"
     echo "Wave3: $(wave_jobs 3)"
