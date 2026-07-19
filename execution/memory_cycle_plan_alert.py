@@ -253,7 +253,7 @@ def main():
 
     # 예/아니오 관문 3개: ①반등 개시(어느 한 종목이라도 저점 대비 +5%) ②MU $1,019(84%) 도달 ③무인지대(88%) 통과
     def mark(b):
-        return "✔" if b else "✖"
+        return "O" if b else "X"
     g1 = any(i["started"] for i in infos.values())
     mu = infos.get("마이크론")
     g2 = bool(mu and mu["post_low_high"] >= 1019)
@@ -264,7 +264,7 @@ def main():
     news = contract_news_line()
 
     wd = ["월", "화", "수", "목", "금", "토", "일"][now.weekday()]
-    msg = "<메모리 플랜 %s(%s)>\n\n" % (now.strftime("%m.%d"), wd)
+    msg = "< 메모리 플랜 %s(%s) >\n\n" % (now.strftime("%m.%d"), wd)
     msg += "\n\n".join(blocks)
     msg += "\n\n* 판별 = MU $1,020(84%) 돌파 여부"
     msg += "\n* 체크: 반등 개시? %s · MU $1,020 돌파? %s · 84~88%% 통과? %s" % (mark(g1), mark(g2), mark(g3))
