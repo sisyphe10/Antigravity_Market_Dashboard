@@ -217,9 +217,12 @@ def build_message(day, cur, prev=None):
             d = v - prev[key]
             pct = d / prev[key] * 100 if prev[key] else 0.0
             sign = '+' if d >= 0 else ''
-            lines.append(f'{label}: <b>{fmt_krw(v)}</b> | 변동 {sign}{fmt_krw(d)}({sign}{pct:.1f}%)')
+            line = f'{label}: <b>{fmt_krw(v)}</b> | 변동 {sign}{fmt_krw(d)}({sign}{pct:.1f}%)'
         else:
-            lines.append(f'{label}: <b>{fmt_krw(v)}</b>')
+            line = f'{label}: <b>{fmt_krw(v)}</b>'
+        if key == 'invested':  # 핵심 지표 강조 (사용자 지정: 볼드+밑줄)
+            line = '<u><b>' + line.replace('<b>', '').replace('</b>', '') + '</b></u>'
+        lines.append(line)
     if not prev:
         lines.append('')
         lines.append('<i>※ 첫 수집 — 변동은 다음 수집부터 표시</i>')
