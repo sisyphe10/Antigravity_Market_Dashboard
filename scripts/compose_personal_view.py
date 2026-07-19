@@ -77,7 +77,7 @@ AOE_DARK_CSS = (
     # 인라인 밝은 배경(히트 틴트·경보 핑크) 위 글자는 어둡게 유지
     'td[style*=background],tr[style*=background] td{color:#333!important}'
     # 다크 틴트 인라인 배경(딤 앰버/딤 바이올렛 — universe RSI/YTD)은 밝은 글자 유지
-    'td[style*="2e2410"],td[style*="241a3d"]{color:#e8e8e8!important}'
+    'td[style*="241a3d"],td[style*="0a3038"]{color:#e8e8e8!important}'
     '.tabs{border-bottom-color:#fb8b1e!important}'
     '.subtab,.mkt-subtab,.tab,.mbtn,.chg-fbtn,.nav-button,.tw-more-btn,.tw-dl-btn,'
     '.cmb-filter-btn,.cmb-ma-btn'
@@ -95,7 +95,7 @@ AOE_DARK_CSS = (
     '.node .node-name{color:#f2f4f6!important}'
     '.node .node-sched{color:#8a919a!important}'
     '.tl-band-count{background:#1a1b1e!important;color:#d9dde2!important}'
-    '.qrow.starred{background:#1a1610!important}'
+    '.qrow.starred{background:#241a3d!important}'
     '.sidebar-link.active{border-bottom-color:#fb8b1e!important}'
     '.sidebar{justify-content:center!important}'
     # 타이포 정수 스케일 (2026-07-18 사용자 확정): 대제목28/섹션18/표본문16/메타13/표헤더12
@@ -137,8 +137,8 @@ AOE_DARK_CSS = (
     '#etfTab3 td.neg{color:#2e9bff!important}'
     '#etfTab3 td.us-mut{color:#8a919a!important}'
     '#etfTab3 td.kr-o{color:#7ec87e!important}'
-    '#etfTab3 tr.us-hl td{background:#0a3038!important}'
-    '#etfTab3 td.us-hl-name{color:#67e0f4!important}'
+    '#etfTab3 tr.us-hl td{background:#241a3d!important}'
+    '#etfTab3 td.us-hl-name{color:#b9a1fc!important}'
     '#etfTab3 .us-dl{background:transparent!important;color:#fb8b1e!important;'
     'border:1.5px solid #fb8b1e!important}'
     '.chart-card,.sector-card,.idx-chart-item,.lh-card,'

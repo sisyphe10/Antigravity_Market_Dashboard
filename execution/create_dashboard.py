@@ -8764,7 +8764,7 @@ def create_dashboard():
         #tab2 th:nth-child(9) { width: 10%; }
         #tab2 th:nth-child(10) { width: 10%; }
         #tab2 td:nth-child(7) { padding: 0 6px; line-height: 0; }
-        #tab2 td:nth-child(9) { background: #2e2410; }
+        #tab2 td:nth-child(9) { background: #241a3d; }
         .sec-detail { background: #16181b; }
         tbody tr:hover { background: #f5f5f5; }
         .positive { color: #cc0000; font-weight: 600; }
@@ -8966,7 +8966,7 @@ function render(){
         for(var i=0;i<16;i++){
             var v=(i===0)?(idx+1):r[i]||'';if(i===3&&v.indexOf(':')>=0)v=v.split(':').pop();var cls='';
             if(pctCols.indexOf(i)>=0&&v){var n=parseFloat(String(v).replace(/%/g,''));if(!isNaN(n))cls=n>0?' class="positive"':n<0?' class="negative"':'';}
-            var bg=(i===7)?' style="background:#2e2410;"':(i===8?' style="background:#241a3d;"':'');
+            var bg=(i===7)?' style="background:#241a3d;"':(i===8?' style="background:#0a3038;"':'');
             var ttl=(i===7&&rowMkt)?' title="'+rowMkt+'"':'';
             h+='<td'+cls+bg+ttl+'>'+v+'</td>';
         }
@@ -9286,7 +9286,7 @@ function renderSector() {
     var secHeaders = ['#','섹터','종목수','RSI(1M)','YTD','1D','1W','1M','3M','6M','1Y','DD'];
     var html = '<table style="width:100%;table-layout:fixed;border-collapse:collapse"><thead><tr>';
     secHeaders.forEach(function(h,i) {
-        var bg = i===3?' style="background:#2e2410;cursor:pointer"':(i===4?' style="background:#241a3d;cursor:pointer"':' style="cursor:pointer"');
+        var bg = i===3?' style="background:#241a3d;cursor:pointer"':(i===4?' style="background:#0a3038;cursor:pointer"':' style="cursor:pointer"');
         html += '<th'+bg+' onclick="sortSector('+i+')">' + h + (_secSortCol===i ? (_secSortAsc?' ▲':' ▼') : '') + '</th>';
     });
     html += '</tr></thead><tbody>';
@@ -9296,7 +9296,7 @@ function renderSector() {
         html += '<tr style="cursor:pointer" onclick="toggleSec('+idx+')">';
         html += '<td>' + (idx+1) + '</td><td style="font-weight:600">' + sec + '</td><td>' + g.cnt + '</td>';
         vals.forEach(function(v,i) {
-            var bg = i===0?' style="background:#2e2410"':(i===1?' style="background:#241a3d"':'');
+            var bg = i===0?' style="background:#241a3d"':(i===1?' style="background:#0a3038"':'');
             html += '<td class="'+cls(v)+'"'+bg+'>' + fv(v) + '</td>';
         });
         html += '</tr>';
@@ -9309,7 +9309,7 @@ function renderSector() {
             html += '<td>'+tk+'</td><td style="padding-left:60px;text-align:left">- '+s.name+'</td>';
             html += '<td>'+(s.mcap||'')+'</td>';
             var _ttl=s.mkt?' title="'+s.mkt+'"':'';
-            html += '<td style="background:#2e2410"'+_ttl+'>'+sc(s.rsi)+'</td><td style="background:#241a3d">'+sc(s.ytd)+'</td><td>'+sc(s.d1)+'</td><td>'+sc(s.w1)+'</td><td>'+sc(s.m1)+'</td><td>'+sc(s.m3)+'</td><td>'+sc(s.m6)+'</td><td>'+sc(s.y1)+'</td><td>'+sc(s.dd)+'</td>';
+            html += '<td style="background:#241a3d"'+_ttl+'>'+sc(s.rsi)+'</td><td style="background:#0a3038">'+sc(s.ytd)+'</td><td>'+sc(s.d1)+'</td><td>'+sc(s.w1)+'</td><td>'+sc(s.m1)+'</td><td>'+sc(s.m3)+'</td><td>'+sc(s.m6)+'</td><td>'+sc(s.y1)+'</td><td>'+sc(s.dd)+'</td>';
             html += '</tr>';
         });
     });
