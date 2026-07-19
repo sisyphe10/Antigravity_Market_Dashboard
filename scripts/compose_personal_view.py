@@ -129,6 +129,9 @@ AOE_DARK_CSS = (
     '.chart-card,.sector-card,.idx-chart-item,.lh-card,#heatmap,'
     '.chart-container,.section:has(canvas),div:has(>canvas)'
     '{background:#fff!important;color:#333!important}'
+    # 흰 패널 내부 td 구제: 범용 td:not([style*=color])의 밝은 글자(#d9dde2)가 흰 바탕에
+    # 얹히면 씻겨 보임 — Monthly Returns 연도·월 셀, Indices 사이드바 (2026-07-19)
+    '#mrTableWrap td,tr.idx-chart-item td{color:#333!important}'
     '</style>')
 dark_pat = re.compile(r'<style id="aoe-terminal-dark">.*?</style>', re.S)
 
