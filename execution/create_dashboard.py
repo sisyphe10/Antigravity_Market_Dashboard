@@ -10544,7 +10544,7 @@ tr.us-hl {{ background: #e0f5f9; }}
 
     <div id="etfTab3" class="etf-tab-content" style="display:none">
         <div class="section">
-            <div class="section-header">한국 비중 변동 <span class="count">{us_fx_note}</span></div>
+            <div class="section-header">한국 비중 변동</div>
             <div style="overflow-x:auto"><table>
                 <thead><tr><th>#</th><th>항목</th><th>금액</th><th>전일 대비</th><th>%</th></tr></thead>
                 <tbody>{us_hl_html}</tbody>
