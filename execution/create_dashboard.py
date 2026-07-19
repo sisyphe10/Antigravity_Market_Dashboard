@@ -10435,7 +10435,7 @@ tr.us-hl {{ background: #e0f5f9; }}
 <div class="container">
     <div class="mkt-subtabs">
         <button class="mkt-subtab active" data-etf-btn="0" onclick="switchEtfTab(0)">AUM 상위</button>
-        <button class="mkt-subtab" data-etf-btn="1" onclick="switchEtfTab(1)">🎯 액티브 ETF</button>
+        <button class="mkt-subtab" data-etf-btn="1" onclick="switchEtfTab(1)">액티브 ETF</button>
         <button class="mkt-subtab" data-etf-btn="2" onclick="switchEtfTab(2)">종목 분석</button>
         <button class="mkt-subtab" data-etf-btn="3" onclick="switchEtfTab(3)">미국 ETF</button>
     </div>
