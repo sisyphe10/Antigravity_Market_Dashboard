@@ -331,7 +331,7 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--interval', type=float, default=1.0, help='스윕 주기(초)')
+    ap.add_argument('--interval', type=float, default=2.0, help='스윕 주기(초)')
     ap.add_argument('--port', type=int, default=8778)
     args = ap.parse_args()
 
