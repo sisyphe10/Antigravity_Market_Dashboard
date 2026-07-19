@@ -141,9 +141,14 @@ AOE_DARK_CSS = (
     '#etfTab3 td.us-hl-name{color:#67e0f4!important}'
     '#etfTab3 .us-dl{background:transparent!important;color:#fb8b1e!important;'
     'border:1.5px solid #fb8b1e!important}'
-    '.chart-card,.sector-card,.idx-chart-item,.lh-card,#heatmap,'
+    '.chart-card,.sector-card,.idx-chart-item,.lh-card,'
     '.chart-container,.section:has(canvas),div:has(>canvas)'
     '{background:#fff!important;color:#333!important}'
+    # 다크 네이티브 차트 예외 (사용자 지정: SEIBro 막대·Universe Lab 산점도) — id 명시도로 화이트리스트 이김
+    '.section:has(#topChart),div:has(>#topChart),.card:has(#scatter),div:has(>#scatter)'
+    '{background:#111214!important;color:#d9dde2!important}'
+    # 무클래스 표 캡션류(h2~h4, Featured "거래대금 TOP 30" 등) = 흰색. 앰버 섹션타이틀 규칙(.section>h2 등)이 명시도로 우선
+    'h2,h3,h4{color:#fff!important}'
     '</style>')
 dark_pat = re.compile(r'<style id="aoe-terminal-dark">.*?</style>', re.S)
 
