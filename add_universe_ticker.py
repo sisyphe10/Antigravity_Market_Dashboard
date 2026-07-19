@@ -80,6 +80,9 @@ def read_input() -> str:
 
 
 def main() -> None:
+    allow_new_sector = '--new-sector' in sys.argv
+    if allow_new_sector:
+        sys.argv.remove('--new-sector')
     text = read_input()
     new_rows: list[dict] = []
     for line in text.splitlines():
@@ -90,6 +93,21 @@ def main() -> None:
     if not new_rows:
         print("입력이 비어있습니다.")
         return
+
+    # 섹터 라벨 검증 — fetch_universe.ALLOWED_SECTORS 기준 (오타·라벨 난립 방지)
+    if not allow_new_sector:
+        try:
+            sys.path.insert(0, str(ROOT / 'execution'))
+            from fetch_universe import ALLOWED_SECTORS
+        except Exception:
+            ALLOWED_SECTORS = None
+        if ALLOWED_SECTORS:
+            unknown = sorted({r['sector'] for r in new_rows} - ALLOWED_SECTORS)
+            if unknown:
+                print(f"[중단] 미등록 섹터 라벨: {unknown}")
+                print("  오타면 기존 라벨로 수정 (목록: execution/fetch_universe.py ALLOWED_SECTORS)")
+                print("  새 라벨을 의도했다면 --new-sector로 재실행 후 ALLOWED_SECTORS에도 추가")
+                sys.exit(1)
 
     # 기존 CSV 읽기
     existing_tickers: set[str] = set()
