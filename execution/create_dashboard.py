@@ -8716,7 +8716,7 @@ def create_dashboard():
         .last-updated { margin-top: 10px; color: #6c757d; font-size: 15px; font-style: italic; }
         .nav-group { margin-top: 10px; }
         .nav-button { display: inline-block; padding: 6px 16px; border-radius: 6px; text-decoration: none; color: #fff; font-size: 0.85rem; font-weight: 600; background: #333; }
-        .content { padding: 24px; max-width: 1800px; margin: 0 auto; }
+        .content { padding: 0 24px 24px; max-width: 1800px; margin: 0 auto; }
         .tabs { display: flex; justify-content: center; gap: 8px; margin: 0 auto 28px; flex-wrap: wrap; }
         .tab { padding: 9px 26px; cursor: pointer; font-weight: 600; font-size: 0.95rem; color: #666; border: 1.5px solid #d1d5db; border-radius: 999px; background: #fff; white-space: nowrap; }
         .tab:hover { color: #2d7a3a; border-color: #2d7a3a; }
@@ -9693,7 +9693,7 @@ refresh();
         header h1 {{ margin: 0; font-size: 33px; color: #333; font-weight: 700; line-height: 1.2; }}
         .last-updated {{ margin-top: 10px; color: #6c757d; font-size: 15px; font-style: italic; }}
         .subtitle {{ color: #6c757d; font-size: 15px; font-style: italic; margin-top: 10px; }}
-        .content {{ padding: 24px; max-width: 1800px; margin: 0 auto; }}
+        .content {{ padding: 0 24px 24px; max-width: 1800px; margin: 0 auto; }}
         .section {{ background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }}
         .section h2 {{ font-size: 1.1rem; color: #333; margin-bottom: 16px; }}
         .date-bar {{ display: flex; align-items: center; gap: 8px; margin-bottom: 20px; font-size: 13px; flex-wrap: wrap; }}
@@ -9730,16 +9730,16 @@ refresh();
     <div class="last-updated">Updated: __FEATURED_UPDATED__</div>
 </header>
 <div class="content">
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab(0)">종목</div>
+        <div class="tab" onclick="switchTab(1)">특이사항</div>
+    </div>
     <div class="date-bar">
         <label>기간</label>
         <input type="text" id="fStartDate" value="{featured_last}" placeholder="YYYY-MM-DD" oninput="tryRefresh()" onchange="refresh()">
         <span>~</span>
         <input type="text" id="fEndDate" value="{featured_last}" placeholder="YYYY-MM-DD" oninput="tryRefresh()" onchange="refresh()">
         <span id="dateLabel" style="color:#888;font-size:12px;"></span>
-    </div>
-    <div class="tabs">
-        <div class="tab active" onclick="switchTab(0)">종목</div>
-        <div class="tab" onclick="switchTab(1)">특이사항</div>
     </div>
     <div id="tab0" class="tab-content active">
     <div class="section">
@@ -10374,7 +10374,7 @@ header {{ padding: 20px 24px; margin: 0 0 40px; text-align: center; position: re
 header h1 {{ margin: 0; font-size: 33px; color: #333; font-weight: 700; line-height: 1.2; }}
         .last-updated {{ margin-top: 10px; color: #6c757d; font-size: 15px; font-style: italic; }}
 .home-btn {{ position: absolute; top: 20px; right: 24px; padding: 6px 16px; background: #e0e0e0; color: #333; text-decoration: none; border-radius: 8px; font-size: 15px; font-weight: 600; }}
-.container {{ max-width: 1800px; margin: 0 auto; padding: 20px; }}
+.container {{ max-width: 1800px; margin: 0 auto; padding: 0 20px 20px; }}
 .controls {{ display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }}
 .controls input {{ padding: 8px 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 0.9rem; font-family: inherit; outline: none; width: 200px; }}
 .controls input:focus {{ border-color: #2d7a3a; }}
@@ -10410,7 +10410,7 @@ tbody tr.etf-row:hover {{ background: #f5f5f5; }}
 .badge {{ display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }}
 .updated {{ text-align: center; font-size: 0.75rem; color: #aaa; margin-top: 10px; }}
 /* 서브탭 — market.html 과 동일한 .mkt-subtab 알약 (다크 스킨은 compose 가 클래스로 덮음) */
-.mkt-subtabs {{ display: flex; justify-content: center; gap: 8px; margin: 0 auto 20px; flex-wrap: wrap; }}
+.mkt-subtabs {{ display: flex; justify-content: center; gap: 8px; margin: 0 auto 28px; flex-wrap: wrap; }}
 .mkt-subtab {{ padding: 9px 26px; border: 1.5px solid #d1d5db; background: #fff; border-radius: 999px; font-size: 0.95rem; font-weight: 600; color: #666; cursor: pointer; font-family: inherit; }}
 .mkt-subtab:hover {{ color: #2d7a3a; border-color: #2d7a3a; }}
 .mkt-subtab.active {{ color: #fff; background: #2d7a3a; border-color: #2d7a3a; }}
