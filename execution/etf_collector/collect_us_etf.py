@@ -220,8 +220,9 @@ def build_message(day, cur, prev=None):
             line = f'{label}: <b>{fmt_krw(v)}</b> | 변동 {sign}{fmt_krw(d)}({sign}{pct:.1f}%)'
         else:
             line = f'{label}: <b>{fmt_krw(v)}</b>'
-        if key == 'invested':  # 핵심 지표 강조 (사용자 지정: 볼드+밑줄)
-            line = '<u><b>' + line.replace('<b>', '').replace('</b>', '') + '</b></u>'
+        if key == 'invested':  # 핵심 지표 강조 (사용자 확정 B안: 인용 블록+💰)
+            line = ('<blockquote>\U0001F4B0 <b>'
+                    + line.replace('<b>', '').replace('</b>', '') + '</b></blockquote>')
         lines.append(line)
     if not prev:
         lines.append('')
