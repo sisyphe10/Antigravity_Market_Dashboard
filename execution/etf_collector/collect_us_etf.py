@@ -323,21 +323,29 @@ def main():
         return
     day = us_session_date()
     hist = load_history()
-    if any(r['date'] == day and r.get('aum_usd') for r in hist):
-        logging.info('오늘(%s) 이미 수집됨 — 스킵', day)
-        return
-    fx = fetch_fx()
-    rows = collect(fx)
-    if len(rows) < len(US_ETFS) * 0.7:
-        raise RuntimeError(f'수집 성공 {len(rows)}/{len(US_ETFS)} — 부분 실패로 중단')
-    append_rows(day, rows)
-    logging.info('%s 수집 완료: %d종', day, len(rows))
+    todays = [r for r in hist if r['date'] == day and r.get('aum_usd')]
+    if todays:
+        # 이미 수집된 날 — 수집은 스킵하되 발송은 계속 (dedup 이 중복 발송을 막는다)
+        logging.info('오늘(%s) 이미 수집됨 — 수집 스킵, 발송 단계 진행', day)
+        rows_dated = todays
+    else:
+        fx = fetch_fx()
+        rows = collect(fx)
+        if len(rows) < len(US_ETFS) * 0.7:
+            raise RuntimeError(f'수집 성공 {len(rows)}/{len(US_ETFS)} — 부분 실패로 중단')
+        append_rows(day, rows)
+        logging.info('%s 수집 완료: %d종', day, len(rows))
+        rows_dated = [{'date': day, **r} for r in rows]
 
-    cur = kr_metrics([{'date': day, **r} for r in rows])
-    prev_days = sorted({r['date'] for r in hist if r.get('aum_usd')})
+    cur = kr_metrics(rows_dated)
+    prev_days = sorted({r['date'] for r in hist if r.get('aum_usd') and r['date'] != day})
     prev = kr_metrics([r for r in hist if r['date'] == prev_days[-1]]) if prev_days else None
     msg = build_message(day, cur, prev)
-    print(msg.replace('<b>', '').replace('</b>', '').replace('<i>', '').replace('</i>', ''))
+    plain = msg.replace('<b>', '').replace('</b>', '').replace('<i>', '').replace('</i>', '')
+    try:
+        print(plain)
+    except UnicodeEncodeError:  # 콘솔이 cp949 등일 때 (수동 실행 방어)
+        print(plain.encode('ascii', 'ignore').decode())
     if '--no-send' not in sys.argv:
         send_telegram(day, msg)
 
