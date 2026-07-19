@@ -217,7 +217,7 @@ def build_message(day, cur, prev=None):
             d = v - prev[key]
             pct = d / prev[key] * 100 if prev[key] else 0.0
             sign = '+' if d >= 0 else ''
-            lines.append(f'{label}: <b>{fmt_krw(v)}</b> ({sign}{fmt_krw(d)}, {sign}{pct:.1f}%)')
+            lines.append(f'{label}: <b>{fmt_krw(v)}</b> | 변동 {sign}{fmt_krw(d)}({sign}{pct:.1f}%)')
         else:
             lines.append(f'{label}: <b>{fmt_krw(v)}</b>')
     if not prev:
@@ -228,7 +228,7 @@ def build_message(day, cur, prev=None):
     if prev and prev.get('fx'):
         d = cur['fx'] - prev['fx']
         sign = '+' if d >= 0 else ''
-        fx_line += f' ({sign}{d:,.0f}원, {sign}{d / prev["fx"] * 100:.1f}%)'
+        fx_line += f' | 변동 {sign}{d:,.0f}원({sign}{d / prev["fx"] * 100:.1f}%)'
     lines.append(f'<i>{fx_line}</i>')
     return '\n'.join(lines)
 
