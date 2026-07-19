@@ -140,12 +140,12 @@ def main():
 
     def r(name):
         v = rebs.get(name)
-        return "%.0f%%" % v if v is not None else "—"
+        return "%.0f%%" % v if v is not None else "미개시"
 
     msg = "📐 메모리 플랜 %s\n\n" % now.strftime("%m/%d")
     msg += "\n\n".join(blocks)
     msg += "\n\n★판별 = MU $1,020(84%) 돌파 여부"
-    msg += "\n✔오늘 체크: 저점 후 반등 삼전 %s · 닉스 %s · MU %s (84%% 도달 시 판별 개시)" % (
+    msg += "\n반등 수준: 삼전 %s · 닉스 %s · MU %s (판별선 84%%)" % (
         r("삼성전자"), r("SK하이닉스"), r("마이크론"))
     if all_triggers:
         msg += "\n" + "\n".join(all_triggers)
