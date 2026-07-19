@@ -9,7 +9,7 @@
     <key>WorkingDirectory</key>
     <string>__REPO__</string>
     <!-- 미국 ETF NAV·AUM 수집 + 한국 비중 변동 텔레그램 + etf.html 재생성 (2026-07-19 신설).
-         화~토 09:00 KST = 미국 장 마감(+NAV 확정) 후. 일·월 미실행(미국 휴장). -->
+         화~토 08:30 KST = 미국 장 마감 후·한국장 개장 전. 일·월 미실행(미국 휴장). -->
     <key>ProgramArguments</key>
     <array>
         <string>/bin/bash</string>
@@ -26,14 +26,14 @@
         <key>LANG</key>
         <string>en_US.UTF-8</string>
     </dict>
-    <!-- KST 09:00 화~토 (launchd Weekday: 0=일). 시스템 TZ=Asia/Seoul 전제. -->
+    <!-- KST 08:30 화~토 (launchd Weekday: 0=일). 시스템 TZ=Asia/Seoul 전제. -->
     <key>StartCalendarInterval</key>
     <array>
-        <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>0</integer></dict>
-        <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>0</integer></dict>
-        <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>0</integer></dict>
-        <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>0</integer></dict>
-        <dict><key>Weekday</key><integer>6</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>0</integer></dict>
+        <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>30</integer></dict>
+        <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>30</integer></dict>
+        <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>30</integer></dict>
+        <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>30</integer></dict>
+        <dict><key>Weekday</key><integer>6</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>30</integer></dict>
     </array>
     <key>StandardOutPath</key>
     <string>__REPO__/logs/launchd/us-etf-collect.out</string>

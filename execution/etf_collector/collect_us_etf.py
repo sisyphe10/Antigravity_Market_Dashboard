@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """미국(+홍콩) ETF NAV·AUM 일별 수집 + 한국 비중 변동 텔레그램 (Sisyphe-Bot).
 
-맥미니 launchd us-etf-collect.timer(화~토 09:00 KST)가 실행한다.
+맥미니 launchd us-etf-collect.timer(화~토 08:30 KST — 미국 마감 후·한국장 개장 전)가 실행한다.
 - yfinance: NAV(navPrice)·AUM(totalAssets)·종가·보수 + USDKRW 환율
 - 삼성전자·SK하이닉스 보유비중: funds_data.top_holdings 자동 (미검출 시 정적 폴백)
 - us_etf_history.csv 에 미국 세션 날짜 기준 append (동일 날짜 재실행 = idempotent 스킵)
@@ -224,7 +224,12 @@ def build_message(day, cur, prev=None):
         lines.append('')
         lines.append('<i>※ 첫 수집 — 변동은 다음 수집부터 표시</i>')
     lines.append('')
-    lines.append(f'<i>USDKRW {cur["fx"]:,.0f}</i>')
+    fx_line = f'USDKRW {cur["fx"]:,.0f}'
+    if prev and prev.get('fx'):
+        d = cur['fx'] - prev['fx']
+        sign = '+' if d >= 0 else ''
+        fx_line += f' ({sign}{d:,.0f}원, {sign}{d / prev["fx"] * 100:.1f}%)'
+    lines.append(f'<i>{fx_line}</i>')
     return '\n'.join(lines)
 
 
