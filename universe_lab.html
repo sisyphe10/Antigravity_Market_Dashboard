@@ -16,10 +16,11 @@
   header h1 { font-size:33px; margin:0; font-weight:700; color:#333; line-height:1.2; }
   header .sub { display:block; margin-top:8px; font-size:15px; color:#6c757d; }
   header a.back { color:#2d7a3a; font-size:13px; text-decoration:none; font-weight:600; }
-  .updated { font-size:14px; color:#6c757d; font-style:italic; padding:0 24px 4px; text-align:center; background:transparent; }
-  .tabs { display:flex; gap:0; margin:0 0 20px; padding:12px 24px 0; border-bottom:2px solid #2d7a3a; }
-  .tab { padding:10px 24px; font-size:16px; font-weight:600; color:#666; cursor:pointer; border:1px solid transparent; border-bottom:none; border-radius:8px 8px 0 0; background:#f0f0f0; }
-  .tab.active { color:#2d7a3a; background:#fff; border-color:#2d7a3a #2d7a3a transparent; margin-bottom:-2px; }
+  .last-updated { margin-top:10px; color:#6c757d; font-size:15px; font-style:italic; }
+  .tabs { display:flex; justify-content:center; gap:8px; margin:0 auto 28px; padding:12px 24px 0; flex-wrap:wrap; }
+  .tab { padding:9px 26px; font-size:0.95rem; font-weight:600; color:#666; cursor:pointer; border:1.5px solid #d1d5db; border-radius:999px; background:#fff; white-space:nowrap; }
+  .tab:hover { color:#2d7a3a; border-color:#2d7a3a; }
+  .tab.active { color:#fff; background:#2d7a3a; border-color:#2d7a3a; }
   .panel { display:none; padding:18px 24px 40px; }
   .panel.active { display:block; }
   .toolbar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:12px; min-height:34px; }
@@ -99,8 +100,8 @@
 <header>
   <h1>Universe Lab</h1>
   <span class="sub">히트맵 / 섹터 로테이션 / 순위 변화</span>
+  <div class="last-updated" id="updated">로딩 중...</div>
 </header>
-<div class="updated" id="updated">로딩 중...</div>
 <div class="tabs">
   <div class="tab active" data-p="0">히트맵</div>
   <div class="tab" data-p="1">섹터 로테이션</div>
@@ -207,7 +208,7 @@ Promise.all([
   fetch('index_history.json?_='+Date.now()).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
 ]).then(function(res){
   var uni=res[0], idxRet=res[1]||{}, uh=res[2], ih=res[3];
-  document.getElementById('updated').textContent='데이터: universe '+(uni.updated_at||'')+(uh&&uh.dates?(' · history '+uh.dates[uh.dates.length-1]):'');
+  document.getElementById('updated').textContent='Updated: '+String(uni.updated_at||'').slice(0,10);
   var IDX1M=(idxRet&&idxRet.returns_1m)?idxRet.returns_1m:{};
   var vals=(uni.values||[]).slice(1);
   // universe.json 컬럼: 1=통화,2=섹터,3=티커,4=기업명,5=시총표시,7=YTD,9=1W,10=1M,14=시총raw(억),22=DD
