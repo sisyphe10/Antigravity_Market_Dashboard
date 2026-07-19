@@ -213,7 +213,7 @@ def analyze(s):
 
     below = "(하회)" if last < s["norm_low"] else ""
     block = (
-        "%s %s · 정점비 %.0f%%\n"
+        "<b>%s %s · 정점비 %.0f%%</b>\n"
         "저점: 통상 %s%s | 약세 %s\n"
         "반등: 통상 %s~%s | 약세 ~%s"
     ) % (
@@ -232,7 +232,7 @@ def send_telegram(text):
     if not token or not chat_id:
         sys.stderr.write("memory_cycle_plan_alert: missing telegram env\n")
         return False
-    body = urllib.parse.urlencode({"chat_id": chat_id, "text": text}).encode()
+    body = urllib.parse.urlencode({"chat_id": chat_id, "text": text, "parse_mode": "HTML"}).encode()
     req = urllib.request.Request("https://api.telegram.org/bot%s/sendMessage" % token, data=body)
     with urllib.request.urlopen(req, timeout=30) as res:
         return bool(json.load(res).get("ok"))
@@ -264,7 +264,7 @@ def main():
     news = contract_news_line()
 
     wd = ["월", "화", "수", "목", "금", "토", "일"][now.weekday()]
-    msg = "< 메모리 플랜 %s(%s) >\n\n" % (now.strftime("%m.%d"), wd)
+    msg = "<b>&lt; 메모리 플랜 %s(%s) &gt;</b>\n\n" % (now.strftime("%m.%d"), wd)
     msg += "\n\n".join(blocks)
     msg += "\n\n* 판별 = MU $1,020(84%) 돌파 여부"
     msg += "\n* 체크: 반등 개시? %s · MU $1,020 돌파? %s · 84~88%% 통과? %s" % (mark(g1), mark(g2), mark(g3))
