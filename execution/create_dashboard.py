@@ -3429,6 +3429,8 @@ def _build_wrap_chart_section(category_label):
                     for (var i = 0; i < navData.dates.length; i++) {
                         var d = navData.dates[i];
                         if (d >= startDate && d <= endDate && rawData[name][i] !== null) {
+                            // 비중 모드: 비중 데이터 있는 날짜만 포함 → x축이 데이터 구간으로 자동 축소
+                            if (chartMode === 'weight' && (!weightData[name] || weightData[name][i] === null)) continue;
                             filteredDates.push(d);
                             filteredVals.push(rawData[name][i]);
                             filteredWts.push(weightData[name] ? weightData[name][i] : null);
