@@ -48,6 +48,16 @@ http://:8377 {
 		reverse_proxy 127.0.0.1:8790
 	}
 
+	# 삼성·하이닉스 현선물/공매도/레버리지ETF + 건설 수주잔고 차트 뷰어 (2026-07-20)
+	#   정적 서빙 — root=~/work/charts/260715_현선물공매도 (대시보드 repo와 분리). 기본 진입=chart_viewer2.html.
+	redir /charts /charts/chart_viewer2.html 302
+	redir /charts/ /charts/chart_viewer2.html 302
+	handle_path /charts/* {
+		header Cache-Control "no-cache"
+		root * /Users/sisyphe/work/charts/260715_현선물공매도
+		file_server
+	}
+
 	# Sisyphe 개인 대시보드 (가계부·운동·투자일지) — 2026-07-13 평문 전환.
 	#   compose_personal_view.py 가 평문 3페이지를 게시 스냅숏 current/sisyphe/ 로 합성 → 아래 fallback handle 이 서빙.
 	#   (이전: staticrypt 암호화본 직서빙 handle_path. 테일넷 한정이라 암호 프롬프트 제거가 목적.)
