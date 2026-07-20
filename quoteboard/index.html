@@ -58,7 +58,7 @@
   }
   .tab.active { background: #111; color: #fff; border-color: #111; }
   .content { display: flex; gap: 24px; padding: 10px 16px 20vh; align-items: flex-start; flex-wrap: wrap; }   /* 하단 여백 — 마지막 섹터 열람 편의 */
-  .panel { flex: 1 1 560px; min-width: 500px; max-width: 880px; }
+  .panel { flex: 1 1 560px; min-width: 500px; max-width: 880px; overflow-x: auto; }   /* 넘치면 패널 내부 스크롤 — 페이지 가로 스크롤 방지 */
   .panel h2 {
     font-size: 13px; font-weight: 700; margin: 4px 0 6px;
     padding: 5px 10px; background: #f4f6f8; border-radius: 6px;
@@ -72,14 +72,15 @@
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   thead th {
     position: sticky; top: var(--thead-top, 74px); z-index: 5; background: #fafafa;
-    font-weight: 600; color: #555; padding: 6px 10px;
+    font-weight: 600; color: #555; padding: 6px 8px;
     border-bottom: 1px solid #ddd; text-align: center; white-space: nowrap;
     cursor: pointer; user-select: none;
   }
   thead th.star, thead th.name, thead th.codeh { cursor: default; }
   thead th .arw { font-size: 10px; color: #111; margin-left: 2px; }
-  td { padding: 4px 10px; border-bottom: 1px solid #f2f2f2; text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  td { padding: 4px 8px; border-bottom: 1px solid #f2f2f2; text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
   td.code { color: #aaa; }
+  td.name { max-width: 190px; overflow: hidden; text-overflow: ellipsis; }   /* 긴 ETF명 말줄임 (전체 이름=툴팁) */
   td.star, th.star { width: 26px; padding: 4px 2px 4px 8px; text-align: center; }
   td.star { cursor: pointer; color: #ccc; font-size: 13px; }
   td.star.on { color: #f5a623; }
@@ -299,7 +300,7 @@ function rowHTML(r) {
     ? `★<span class="gno">${mem.map(i => i + 1).join(',')}</span>`
     : '☆';
   return `<tr><td class="star${mem.length ? ' on' : ''}" data-code="${r.code}">${star}</td>` +
-         `<td class="name">${r.name}</td><td class="code">${r.code}</td>` +
+         `<td class="name" title="${r.name}">${r.name}</td><td class="code">${r.code}</td>` +
          `<td>${comma(r.price)}</td><td>${fmtChg(r.chg)}</td>` +
          `<td>${fmtEok(r.trdval)}</td><td>${fmtEok(r.mcap)}</td></tr>`;
 }
