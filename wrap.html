@@ -333,7 +333,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
     </div>
 
     <div id="mainContent" class="pw-hidden has-sidebar">
-    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><span class="wrap-updated">Updated: 2026-07-20 10:22:37 KST</span></div></nav><div class="wrap-strip"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div>
+    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><span class="wrap-updated">Updated: 2026-07-20 10:26:32 KST</span></div></nav><div class="wrap-strip"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div>
     <aside class="sidebar wrap-sidebar" id="wrapSectionNav" aria-label="WRAP navigation"><div class="wrap-side-group on" data-side-for="dashboard"><a href="#wrap-sec-chart" onclick="wrapGoSection('wrap-sec-chart');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-chart">CHART</a><a href="#wrap-sec-return" onclick="wrapGoSection('wrap-sec-return');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-return">RETURN</a><a href="#wrap-sec-aum" onclick="wrapGoSection('wrap-sec-aum');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-aum">AUM</a><a href="#wrap-sec-portfolio" onclick="wrapGoSection('wrap-sec-portfolio');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-portfolio">Portfolio</a><a href="#wrap-sec-sector" onclick="wrapGoSection('wrap-sec-sector');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-sector">SECTOR WEIGHT</a></div><div class="wrap-side-group" data-side-for="order" id="wrapSideOrder"></div><div class="wrap-side-group" data-side-for="contribution" id="wrapSideContrib"></div><div class="wrap-side-group" data-side-for="fee"><a href="#" onclick="feeSwitchSub('rate');return false;" class="sidebar-link active" data-side-fee="rate">요율</a><a href="#" onclick="feeSwitchSub('revenue');return false;" class="sidebar-link" data-side-fee="revenue">매출</a></div></aside>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -346,12 +346,12 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
         .wrap-side-wrap { max-height: 640px; overflow-y: auto; border: 1px solid #d1d5db; border-radius: 8px; }
         .wrap-side-table { border-collapse: collapse; width: 100%; font-size: 13px; background: #fff; }
         .wrap-side-table th { position: sticky; top: 0; z-index: 2; background: #f0f0f0; font-weight: 700; font-size: 13px; color: #000; padding: 8px 6px; text-align: center; white-space: nowrap; border-bottom: 2px solid #374151; user-select: none; }
-        .wrap-side-table td { border: 1px solid #e5e7eb; padding: 6px 8px; white-space: nowrap; }
+        .wrap-side-table td { border: 1px solid #e5e7eb; padding: 6px 8px; white-space: nowrap; text-align: center; color: #000; }
         .wrap-chart-row { cursor: pointer; user-select: none; }
         .wrap-chart-row:hover:not(.active) { background: #f3f4f6; }
-        .wcr-num { text-align: center; color: #888; font-size: 12px; width: 26px; }
-        .wcr-name { text-align: left; font-weight: 600; }
-        .wcr-metric { text-align: center; width: 56px; }
+        .wcr-num { font-size: 12px; width: 26px; }
+        .wcr-name { font-weight: 600; }
+        .wcr-metric { width: 56px; }
         #wrapMetricMenu { display: none; position: absolute; z-index: 30; background: #fff; border: 1px solid #d1d5db; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 13px; }
         #wrapMetricMenu div { padding: 7px 18px; cursor: pointer; text-align: center; }
         #wrapMetricMenu div:hover { background: #f3f4f6; }
@@ -414,7 +414,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                         <div style="position:relative;height:500px;">
                             <canvas id="wrapDynamicChart"></canvas>
                         </div>
-                        <div id="wrapChartLegend" style="margin-top:12px;text-align:center;color:#222;"></div>
+                        <div id="wrapChartLegend" style="margin-top:12px;text-align:center;color:#000;"></div>
                     </div>
                 </div>
             </div>
@@ -613,7 +613,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                 if (legendEl) {
                     legendEl.innerHTML = datasets.map(function(ds) {
                         var c = ds.borderColor;
-                        return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:13px;">' +
+                        return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:15px;color:#000;">' +
                             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
                             ds.label + '</span>';
                     }).join('');
