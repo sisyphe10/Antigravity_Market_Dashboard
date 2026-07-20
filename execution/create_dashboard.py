@@ -3401,7 +3401,10 @@ def _build_wrap_chart_section(category_label):
             var weightData = WEIGHT_DATA_PLACEHOLDER;
             var chartColors = COLORS_PLACEHOLDER;
             var wrapChart = null;
-            var chartMode = 'return'; // 'return' | 'mdd' | 'weight'(투자 비중 = 100 - 현금)
+            // 2026-07-20: 모드 배타(radio) → 중첩 토글 — 수익률/MDD/비중을 한 차트에 겹쳐 표시
+            // (Market DATA 차트 방식). 비중은 수익률·MDD와 겹칠 때 우측 보조축(y1).
+            var chartModes = { 'return': true, 'mdd': false, 'weight': false };
+            var MODE_LABEL = { 'return': '수익률', 'mdd': 'MDD', 'weight': '비중' };
 
             function calcMDD(vals) {
                 var peak = vals[0];
@@ -3418,6 +3421,8 @@ def _build_wrap_chart_section(category_label):
                 document.querySelectorAll('.wrap-chart-item.active').forEach(function(el) { selected.push(el.getAttribute('data-series')); });
                 var startDate = document.getElementById('wrapStartDate').value;
                 var endDate = document.getElementById('wrapEndDate').value;
+                var activeModes = ['return', 'mdd', 'weight'].filter(function(m) { return chartModes[m]; });
+                var weightOnly = chartModes.weight && !chartModes['return'] && !chartModes.mdd;
 
                 // Pass 1: 시리즈별 필터링 데이터 수집
                 var perSeries = [];
@@ -3429,8 +3434,9 @@ def _build_wrap_chart_section(category_label):
                     for (var i = 0; i < navData.dates.length; i++) {
                         var d = navData.dates[i];
                         if (d >= startDate && d <= endDate && rawData[name][i] !== null) {
-                            // 비중 모드: 비중 데이터 있는 날짜만 포함 → x축이 데이터 구간으로 자동 축소
-                            if (chartMode === 'weight' && (!weightData[name] || weightData[name][i] === null)) continue;
+                            // 비중 단독 모드: 비중 데이터 있는 날짜만 포함 → x축이 데이터 구간으로 자동 축소
+                            // (수익률·MDD와 겹칠 땐 x축은 수익률 기준 전체 구간 유지)
+                            if (weightOnly && (!weightData[name] || weightData[name][i] === null)) continue;
                             filteredDates.push(d);
                             filteredVals.push(rawData[name][i]);
                             filteredWts.push(weightData[name] ? weightData[name][i] : null);
@@ -3451,36 +3457,48 @@ def _build_wrap_chart_section(category_label):
                 //   세로(날짜 컬럼) 스냅 정상화.
                 var allDates = Array.from(new Set(perSeries.reduce(function(a, s){ return a.concat(s.dates); }, []))).sort();
 
+                // 비중이 수익률/MDD와 겹칠 땐 우측 보조축(y1), 비중 단독이면 좌측 주축(y) 그대로.
+                var weightAxis = weightOnly ? 'y' : 'y1';
+                var multiMode = activeModes.length > 1;
+
                 var datasets = [];
                 perSeries.forEach(function(s) {
                     var d_arr = s.dates;
                     var v_arr = s.vals;
                     if (v_arr.length === 0) return;
+                    var pcolor = chartColors[s.name] || '#888';
+                    var isBench = (s.name === 'KOSPI' || s.name === 'KOSDAQ');
 
-                    var yByDate = {};
-                    if (chartMode === 'weight') {
-                        // 비중 모드: NEW 시트 기반 투자 비중(100-현금). 벤치마크 등 비중 데이터 없는 시리즈 제외.
-                        if (!weightData[s.name]) return;
-                        d_arr.forEach(function(d, j) { yByDate[d] = s.wts[j]; });
-                    } else if (chartMode === 'mdd') {
-                        var mddVals = calcMDD(v_arr);
-                        d_arr.forEach(function(d, j) { yByDate[d] = mddVals[j]; });
-                    } else {
-                        var base = v_arr[0];
-                        d_arr.forEach(function(d, j) { yByDate[d] = Math.round((v_arr[j] / base - 1) * 10000) / 100; });
-                    }
-                    var data = allDates.map(function(d) { return Object.prototype.hasOwnProperty.call(yByDate, d) ? yByDate[d] : null; });
+                    activeModes.forEach(function(m) {
+                        var yByDate = {};
+                        if (m === 'weight') {
+                            // 비중: NEW 시트 기반 투자 비중(100-현금). 벤치마크 등 비중 데이터 없는 시리즈 제외.
+                            if (!weightData[s.name]) return;
+                            d_arr.forEach(function(d, j) { if (s.wts[j] !== null) yByDate[d] = s.wts[j]; });
+                        } else if (m === 'mdd') {
+                            var mddVals = calcMDD(v_arr);
+                            d_arr.forEach(function(d, j) { yByDate[d] = mddVals[j]; });
+                        } else {
+                            var base = v_arr[0];
+                            d_arr.forEach(function(d, j) { yByDate[d] = Math.round((v_arr[j] / base - 1) * 10000) / 100; });
+                        }
+                        var data = allDates.map(function(d) { return Object.prototype.hasOwnProperty.call(yByDate, d) ? yByDate[d] : null; });
+                        if (!data.some(function(v) { return v !== null; })) return;
 
-                    datasets.push({
-                        label: s.name,
-                        data: data,
-                        borderColor: chartColors[s.name] || '#888',
-                        backgroundColor: 'transparent',
-                        borderWidth: (s.name === 'KOSPI' || s.name === 'KOSDAQ') ? 2 : 3,
-                        pointRadius: 0,
-                        tension: chartMode === 'weight' ? 0 : 0.3,
-                        stepped: chartMode === 'weight' ? 'before' : false,
-                        spanGaps: false
+                        datasets.push({
+                            label: s.name + (multiMode ? ' · ' + MODE_LABEL[m] : ''),
+                            data: data,
+                            borderColor: pcolor,
+                            backgroundColor: 'transparent',
+                            borderWidth: m === 'return' ? (isBench ? 2 : 3) : 2,
+                            borderDash: m === 'mdd' ? [6, 4] : (m === 'weight' && multiMode ? [2, 3] : []),
+                            pointRadius: 0,
+                            tension: m === 'weight' ? 0 : 0.3,
+                            stepped: m === 'weight' ? 'before' : false,
+                            spanGaps: false,
+                            yAxisID: m === 'weight' ? weightAxis : 'y',
+                            _mode: m
+                        });
                     });
                 });
 
@@ -3507,10 +3525,14 @@ def _build_wrap_chart_section(category_label):
                         ax.ticks = kept;
                     }
                 }
-                var _wrapMaxAbs = 0;
+                var _wrapMaxAbs = 0, _wrapMaxAbsY1 = 0;
                 datasets.forEach(function(ds) { ds.data.forEach(function(v) {
-                    if (v !== null && Math.abs(v) > _wrapMaxAbs) _wrapMaxAbs = Math.abs(v); }); });
+                    if (v === null) return;
+                    if (ds.yAxisID === 'y1') { if (Math.abs(v) > _wrapMaxAbsY1) _wrapMaxAbsY1 = Math.abs(v); }
+                    else if (Math.abs(v) > _wrapMaxAbs) _wrapMaxAbs = Math.abs(v);
+                }); });
                 window._wrapBandMax = _wrapMaxAbs;
+                window._wrapBandMaxY1 = _wrapMaxAbsY1;
 
                 // 선 끝에 수익률 라벨을 그리는 커스텀 플러그인
                 var endLabelPlugin = {
@@ -3528,8 +3550,9 @@ def _build_wrap_chart_section(category_label):
                             var last = meta.data[lastIdx];
                             if (!last) return;
                             var val = ds.data[lastIdx];
-                            var sign = (chartMode === 'weight') ? '' : (val >= 0 ? '+' : '');
-                            var label = sign + wrapBandFix(val, window._wrapBandMax || Math.abs(val)) + '%';
+                            var sign = (ds._mode === 'weight') ? '' : (val >= 0 ? '+' : '');
+                            var bandMax = ds.yAxisID === 'y1' ? (window._wrapBandMaxY1 || Math.abs(val)) : (window._wrapBandMax || Math.abs(val));
+                            var label = sign + wrapBandFix(val, bandMax) + '%';
                             ctx.save();
                             ctx.beginPath();
                             ctx.arc(last.x, last.y, 3, 0, Math.PI * 2);
@@ -3566,11 +3589,13 @@ def _build_wrap_chart_section(category_label):
                         interaction: { mode: 'index', intersect: false },
                         plugins: {
                             legend: { display: false },
-                            tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + (chartMode !== 'weight' && ctx.parsed.y >= 0 ? '+' : '') + wrapBandFix(ctx.parsed.y, window._wrapBandMax || 100) + '%'; } } }
+                            tooltip: { callbacks: { label: function(ctx) { var ds = ctx.dataset; var sign = (ds._mode !== 'weight' && ctx.parsed.y >= 0) ? '+' : ''; var bm = ds.yAxisID === 'y1' ? (window._wrapBandMaxY1 || 100) : (window._wrapBandMax || 100); return ds.label + ': ' + sign + wrapBandFix(ctx.parsed.y, bm) + '%'; } } }
                         },
                         scales: {
                             x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val) { var d = this.getLabelForValue(val); if (!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
-                            y: { grace: '8%', afterBuildTicks: wrapEnsureTicks, ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v) { return wrapBandFix(v, window._wrapBandMax || 100) + '%'; }, font: { size: 15 }, color: '#000' }, grid: { color: '#eee' }, border: { color: '#000', width: 2 } }
+                            y: { grace: '8%', afterBuildTicks: wrapEnsureTicks, ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v) { return wrapBandFix(v, window._wrapBandMax || 100) + '%'; }, font: { size: 15 }, color: '#000' }, grid: { color: '#eee' }, border: { color: '#000', width: 2 } },
+                            // 비중 보조축 (수익률/MDD와 겹칠 때만 표시, 그리드 미표시로 주축과 혼동 방지)
+                            y1: { display: chartModes.weight && !weightOnly, position: 'right', min: 0, suggestedMax: 100, grace: '8%', ticks: { maxTicksLimit: 6, callback: function(v) { return wrapBandFix(v, window._wrapBandMaxY1 || 100) + '%'; }, font: { size: 15 }, color: '#666' }, grid: { drawOnChartArea: false }, border: { color: '#666', width: 2 } }
                         }
                     }
                 });
@@ -3637,9 +3662,12 @@ def _build_wrap_chart_section(category_label):
             window.toggleWrapSeries = function(el) { el.classList.toggle('active'); wrapAutoPeriod(); buildChart(); };
             window.updateWrapChart = buildChart;
             window.switchChartMode = function(el) {
-                document.querySelectorAll('.wrap-mode-btn').forEach(function(b) { b.classList.remove('active'); });
-                el.classList.add('active');
-                chartMode = el.getAttribute('data-mode');
+                // 중첩 토글: 켜기/끄기 자유, 단 최소 1개는 유지
+                var m = el.getAttribute('data-mode');
+                var activeCnt = ['return', 'mdd', 'weight'].filter(function(k) { return chartModes[k]; }).length;
+                if (chartModes[m] && activeCnt === 1) return;
+                chartModes[m] = !chartModes[m];
+                el.classList.toggle('active', chartModes[m]);
                 buildChart();
             };
             window.downloadWrapChart = function() {
