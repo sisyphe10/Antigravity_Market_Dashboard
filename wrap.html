@@ -333,7 +333,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
     </div>
 
     <div id="mainContent" class="pw-hidden has-sidebar">
-    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><span class="wrap-updated">Updated: 2026-07-20 09:30:04 KST</span></div></nav><div class="wrap-strip"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div>
+    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><span class="wrap-updated">Updated: 2026-07-20 10:00:05 KST</span></div></nav><div class="wrap-strip"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div>
     <aside class="sidebar wrap-sidebar" id="wrapSectionNav" aria-label="WRAP navigation"><div class="wrap-side-group on" data-side-for="dashboard"><a href="#wrap-sec-chart" onclick="wrapGoSection('wrap-sec-chart');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-chart">CHART</a><a href="#wrap-sec-return" onclick="wrapGoSection('wrap-sec-return');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-return">RETURN</a><a href="#wrap-sec-aum" onclick="wrapGoSection('wrap-sec-aum');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-aum">AUM</a><a href="#wrap-sec-portfolio" onclick="wrapGoSection('wrap-sec-portfolio');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-portfolio">Portfolio</a><a href="#wrap-sec-sector" onclick="wrapGoSection('wrap-sec-sector');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-sector">SECTOR WEIGHT</a></div><div class="wrap-side-group" data-side-for="order" id="wrapSideOrder"></div><div class="wrap-side-group" data-side-for="contribution" id="wrapSideContrib"></div><div class="wrap-side-group" data-side-for="fee"><a href="#" onclick="feeSwitchSub('rate');return false;" class="sidebar-link active" data-side-fee="rate">요율</a><a href="#" onclick="feeSwitchSub('revenue');return false;" class="sidebar-link" data-side-fee="revenue">매출</a></div></aside>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -798,14 +798,14 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                             <th>AUM</th>
                             <th>기준일</th>
                         </tr></thead>
-                        <tbody><tr class="aum-toggle-item" data-series="삼성 트루밸류" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(20,40,160,1.0);border-radius:2px;margin:0 auto;"></div></td><td>삼성</td><td>트루밸류</td><td>437억</td><td>07/15</td></tr>
-<tr class="aum-toggle-item" data-series="NH 다이내믹밸류" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,114,206,0.6);border-radius:2px;margin:0 auto;"></div></td><td>NH</td><td>다이내믹밸류</td><td>111억</td><td>07/15</td></tr>
-<tr class="aum-toggle-item" data-series="NH 목표전환형 5호" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,114,206,1.0);border-radius:2px;margin:0 auto;"></div></td><td>NH</td><td>목표전환형 5호</td><td>225억</td><td>07/15</td></tr>
-<tr class="aum-toggle-item" data-series="DB 개방형 랩" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,133,74,1.0);border-radius:2px;margin:0 auto;"></div></td><td>DB</td><td>개방형 랩</td><td>166억</td><td>07/15</td></tr>
-<tr class="aum-toggle-item" data-series="DB 목표전환형 6차" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,133,74,0.6);border-radius:2px;margin:0 auto;"></div></td><td>DB</td><td>목표전환형 6차</td><td>82억</td><td>07/15</td></tr>
-<tr class="aum-toggle-item" data-series="한투 지속형" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(245,130,32,0.6);border-radius:2px;margin:0 auto;"></div></td><td>한투</td><td>지속형</td><td>26억</td><td>07/15</td></tr>
-<tr class="aum-toggle-item" data-series="한투 성과모집형 1차" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(245,130,32,1.0);border-radius:2px;margin:0 auto;"></div></td><td>한투</td><td>성과모집형 1차</td><td>58억</td><td>07/15</td></tr>
-<tr style="border-top:2px solid #000;font-weight:700;"><td></td><td colspan="2">합계</td><td>1,105억</td><td></td></tr></tbody>
+                        <tbody><tr class="aum-toggle-item" data-series="삼성 트루밸류" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(20,40,160,1.0);border-radius:2px;margin:0 auto;"></div></td><td>삼성</td><td>트루밸류</td><td>403억</td><td>07/16</td></tr>
+<tr class="aum-toggle-item" data-series="NH 다이내믹밸류" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,114,206,0.6);border-radius:2px;margin:0 auto;"></div></td><td>NH</td><td>다이내믹밸류</td><td>103억</td><td>07/16</td></tr>
+<tr class="aum-toggle-item" data-series="NH 목표전환형 5호" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,114,206,1.0);border-radius:2px;margin:0 auto;"></div></td><td>NH</td><td>목표전환형 5호</td><td>209억</td><td>07/16</td></tr>
+<tr class="aum-toggle-item" data-series="DB 개방형 랩" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,133,74,1.0);border-radius:2px;margin:0 auto;"></div></td><td>DB</td><td>개방형 랩</td><td>154억</td><td>07/16</td></tr>
+<tr class="aum-toggle-item" data-series="DB 목표전환형 6차" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,133,74,0.6);border-radius:2px;margin:0 auto;"></div></td><td>DB</td><td>목표전환형 6차</td><td>76억</td><td>07/16</td></tr>
+<tr class="aum-toggle-item" data-series="한투 지속형" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(245,130,32,0.6);border-radius:2px;margin:0 auto;"></div></td><td>한투</td><td>지속형</td><td>25억</td><td>07/16</td></tr>
+<tr class="aum-toggle-item" data-series="한투 성과모집형 1차" onclick="toggleAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(245,130,32,1.0);border-radius:2px;margin:0 auto;"></div></td><td>한투</td><td>성과모집형 1차</td><td>56억</td><td>07/16</td></tr>
+<tr style="border-top:2px solid #000;font-weight:700;"><td></td><td colspan="2">합계</td><td>1,025억</td><td></td></tr></tbody>
                     </table>
                 </div>
                 <div style="flex:1;background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
@@ -816,7 +816,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
         
         <script>
         (function() {
-            var aumData = {"dates": ["2026-03-20", "2026-03-27", "2026-04-03", "2026-04-10", "2026-04-17", "2026-04-24", "2026-04-30", "2026-05-08", "2026-05-15", "2026-05-22", "2026-05-29", "2026-06-05", "2026-06-11", "2026-06-19", "2026-06-26", "2026-07-03", "2026-07-10", "2026-07-15"], "datasets": [{"label": "삼성 트루밸류", "data": [497, 458, 451, 487, 508, 533, 527, 556, 553, 578, 622, 577, 551, 612, 532, 497, 455, 437], "backgroundColor": "rgba(20,40,160,1.0)"}, {"label": "NH 목표전환형 5호", "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 244, 230, 225], "backgroundColor": "rgba(0,114,206,1.0)"}, {"label": "NH 다이내믹밸류", "data": [74, 67, 68, 72, 75, 78, 114, 125, 125, 132, 134, 129, 123, 144, 134, 126, 114, 111], "backgroundColor": "rgba(0,114,206,0.6)"}, {"label": "DB 개방형 랩", "data": [76, 81, 83, 91, 95, 100, 108, 126, 141, 146, 166, 159, 161, 201, 187, 183, 169, 166], "backgroundColor": "rgba(0,133,74,1.0)"}, {"label": "DB 목표전환형 6차", "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 88, 83, 82], "backgroundColor": "rgba(0,133,74,0.6)"}, {"label": "한투 성과모집형 1차", "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 61, 58], "backgroundColor": "rgba(245,130,32,1.0)"}, {"label": "한투 지속형", "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 32, 26], "backgroundColor": "rgba(245,130,32,0.6)"}]};
+            var aumData = {"dates": ["2026-03-20", "2026-03-27", "2026-04-03", "2026-04-10", "2026-04-17", "2026-04-24", "2026-04-30", "2026-05-08", "2026-05-15", "2026-05-22", "2026-05-29", "2026-06-05", "2026-06-11", "2026-06-19", "2026-06-26", "2026-07-03", "2026-07-10", "2026-07-16"], "datasets": [{"label": "삼성 트루밸류", "data": [497, 458, 451, 487, 508, 533, 527, 556, 553, 578, 622, 577, 551, 612, 532, 497, 455, 403], "backgroundColor": "rgba(20,40,160,1.0)"}, {"label": "NH 목표전환형 5호", "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 244, 230, 209], "backgroundColor": "rgba(0,114,206,1.0)"}, {"label": "NH 다이내믹밸류", "data": [74, 67, 68, 72, 75, 78, 114, 125, 125, 132, 134, 129, 123, 144, 134, 126, 114, 103], "backgroundColor": "rgba(0,114,206,0.6)"}, {"label": "DB 개방형 랩", "data": [76, 81, 83, 91, 95, 100, 108, 126, 141, 146, 166, 159, 161, 201, 187, 183, 169, 154], "backgroundColor": "rgba(0,133,74,1.0)"}, {"label": "DB 목표전환형 6차", "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 88, 83, 76], "backgroundColor": "rgba(0,133,74,0.6)"}, {"label": "한투 성과모집형 1차", "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 61, 56], "backgroundColor": "rgba(245,130,32,1.0)"}, {"label": "한투 지속형", "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 32, 25], "backgroundColor": "rgba(245,130,32,0.6)"}]};
             var totalLabelPlugin = {
                 id: 'totalLabels',
                 afterDatasetsDraw: function(chart) {
@@ -900,14 +900,14 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                             <th>AUM</th>
                             <th>기준일</th>
                         </tr></thead>
-                        <tbody><tr class="aum-toggle-item" data-series="NH 다이내믹밸류" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,114,206,1.0);border-radius:2px;margin:0 auto;"></div></td><td>NH</td><td>다이내믹밸류</td><td>111억</td><td>07/15</td></tr>
-<tr class="iter-row aum-toggle-item" data-series="NH 목표전환형 (누적)" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,114,206,0.6);border-radius:2px;margin:0 auto;"></div></td><td>NH</td><td style="position:relative;">목표전환형<div class="iter-tooltip"><table class="iter-table"><thead><tr><th>회차</th><th>AUM</th><th>시작일</th><th>종료일</th><th>거래일</th></tr></thead><tbody><tr><td>목표전환형 1호</td><td>147억</td><td>03/25</td><td>04/15</td><td>16일</td></tr><tr><td>목표전환형 2호</td><td>270억</td><td>04/29</td><td>05/06</td><td>4일</td></tr><tr><td>목표전환형 3호</td><td>283억</td><td>05/14</td><td>05/26</td><td>8일</td></tr><tr><td>목표전환형 4호</td><td>216억</td><td>06/15</td><td>06/19</td><td>5일</td></tr><tr><td>목표전환형 5호</td><td>225억</td><td>06/29</td><td>운용 중</td><td>14일</td></tr></tbody></table></div></td><td>1,142억</td><td>07/15</td></tr>
-<tr class="aum-toggle-item" data-series="DB 개방형 랩" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,133,74,1.0);border-radius:2px;margin:0 auto;"></div></td><td>DB</td><td>개방형 랩</td><td>166억</td><td>07/15</td></tr>
-<tr class="iter-row aum-toggle-item" data-series="DB 목표전환형 (누적)" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,133,74,0.6);border-radius:2px;margin:0 auto;"></div></td><td>DB</td><td style="position:relative;">목표전환형<div class="iter-tooltip"><table class="iter-table"><thead><tr><th>회차</th><th>AUM</th><th>시작일</th><th>종료일</th><th>거래일</th></tr></thead><tbody><tr><td>목표전환형 1차</td><td>25억</td><td>02/11</td><td>02/25</td><td>8일</td></tr><tr><td>목표전환형 2차</td><td>29억</td><td>03/16</td><td>04/15</td><td>23일</td></tr><tr><td>목표전환형 3차</td><td>43억</td><td>04/30</td><td>05/06</td><td>3일</td></tr><tr><td>목표전환형 4차</td><td>80억</td><td>05/18</td><td>05/26</td><td>6일</td></tr><tr><td>목표전환형 5차</td><td>73억</td><td>06/12</td><td>06/19</td><td>6일</td></tr><tr><td>목표전환형 6차</td><td>82억</td><td>07/01</td><td>운용 중</td><td>12일</td></tr></tbody></table></div></td><td>332억</td><td>07/15</td></tr>
-<tr class="aum-toggle-item" data-series="삼성 트루밸류" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(20,40,160,1.0);border-radius:2px;margin:0 auto;"></div></td><td>삼성</td><td>트루밸류</td><td>437억</td><td>07/15</td></tr>
-<tr class="aum-toggle-item" data-series="한투 지속형" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(245,130,32,1.0);border-radius:2px;margin:0 auto;"></div></td><td>한투</td><td>지속형</td><td>26억</td><td>07/15</td></tr>
-<tr class="iter-row aum-toggle-item" data-series="한투 목표전환형 (누적)" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(245,130,32,0.6);border-radius:2px;margin:0 auto;"></div></td><td>한투</td><td style="position:relative;">목표전환형<div class="iter-tooltip"><table class="iter-table"><thead><tr><th>회차</th><th>AUM</th><th>시작일</th><th>종료일</th><th>거래일</th></tr></thead><tbody><tr><td>성과모집형 1차</td><td>58억</td><td>07/08</td><td>운용 중</td><td>7일</td></tr></tbody></table></div></td><td>58억</td><td>07/15</td></tr>
-<tr style="border-top:2px solid #000;font-weight:700;"><td></td><td colspan="2">합계</td><td>2,271억</td><td></td></tr></tbody>
+                        <tbody><tr class="aum-toggle-item" data-series="NH 다이내믹밸류" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,114,206,1.0);border-radius:2px;margin:0 auto;"></div></td><td>NH</td><td>다이내믹밸류</td><td>103억</td><td>07/16</td></tr>
+<tr class="iter-row aum-toggle-item" data-series="NH 목표전환형 (누적)" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,114,206,0.6);border-radius:2px;margin:0 auto;"></div></td><td>NH</td><td style="position:relative;">목표전환형<div class="iter-tooltip"><table class="iter-table"><thead><tr><th>회차</th><th>AUM</th><th>시작일</th><th>종료일</th><th>거래일</th></tr></thead><tbody><tr><td>목표전환형 1호</td><td>147억</td><td>03/25</td><td>04/15</td><td>16일</td></tr><tr><td>목표전환형 2호</td><td>270억</td><td>04/29</td><td>05/06</td><td>4일</td></tr><tr><td>목표전환형 3호</td><td>283억</td><td>05/14</td><td>05/26</td><td>8일</td></tr><tr><td>목표전환형 4호</td><td>216억</td><td>06/15</td><td>06/19</td><td>5일</td></tr><tr><td>목표전환형 5호</td><td>209억</td><td>06/29</td><td>운용 중</td><td>14일</td></tr></tbody></table></div></td><td>1,125억</td><td>07/16</td></tr>
+<tr class="aum-toggle-item" data-series="DB 개방형 랩" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,133,74,1.0);border-radius:2px;margin:0 auto;"></div></td><td>DB</td><td>개방형 랩</td><td>154억</td><td>07/16</td></tr>
+<tr class="iter-row aum-toggle-item" data-series="DB 목표전환형 (누적)" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(0,133,74,0.6);border-radius:2px;margin:0 auto;"></div></td><td>DB</td><td style="position:relative;">목표전환형<div class="iter-tooltip"><table class="iter-table"><thead><tr><th>회차</th><th>AUM</th><th>시작일</th><th>종료일</th><th>거래일</th></tr></thead><tbody><tr><td>목표전환형 1차</td><td>25억</td><td>02/11</td><td>02/25</td><td>8일</td></tr><tr><td>목표전환형 2차</td><td>29억</td><td>03/16</td><td>04/15</td><td>23일</td></tr><tr><td>목표전환형 3차</td><td>43억</td><td>04/30</td><td>05/06</td><td>3일</td></tr><tr><td>목표전환형 4차</td><td>80억</td><td>05/18</td><td>05/26</td><td>6일</td></tr><tr><td>목표전환형 5차</td><td>73억</td><td>06/12</td><td>06/19</td><td>6일</td></tr><tr><td>목표전환형 6차</td><td>76억</td><td>07/01</td><td>운용 중</td><td>12일</td></tr></tbody></table></div></td><td>326억</td><td>07/16</td></tr>
+<tr class="aum-toggle-item" data-series="삼성 트루밸류" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(20,40,160,1.0);border-radius:2px;margin:0 auto;"></div></td><td>삼성</td><td>트루밸류</td><td>403억</td><td>07/16</td></tr>
+<tr class="aum-toggle-item" data-series="한투 지속형" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(245,130,32,1.0);border-radius:2px;margin:0 auto;"></div></td><td>한투</td><td>지속형</td><td>25억</td><td>07/16</td></tr>
+<tr class="iter-row aum-toggle-item" data-series="한투 목표전환형 (누적)" onclick="toggleCumAumSeries(this)"><td style="padding:0;"><div class="aum-cbar" style="width:4px;height:14px;background:rgba(245,130,32,0.6);border-radius:2px;margin:0 auto;"></div></td><td>한투</td><td style="position:relative;">목표전환형<div class="iter-tooltip"><table class="iter-table"><thead><tr><th>회차</th><th>AUM</th><th>시작일</th><th>종료일</th><th>거래일</th></tr></thead><tbody><tr><td>성과모집형 1차</td><td>56억</td><td>07/08</td><td>운용 중</td><td>7일</td></tr></tbody></table></div></td><td>56억</td><td>07/16</td></tr>
+<tr style="border-top:2px solid #000;font-weight:700;"><td></td><td colspan="2">합계</td><td>2,191억</td><td></td></tr></tbody>
                     </table>
                 </div>
                 <div style="flex:1;background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
@@ -918,7 +918,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
         
         <script>
         (function() {
-            var cData = {"dates": ["2026-03-20", "2026-03-27", "2026-04-03", "2026-04-10", "2026-04-17", "2026-04-24", "2026-04-30", "2026-05-08", "2026-05-15", "2026-05-22", "2026-05-29", "2026-06-05", "2026-06-11", "2026-06-19", "2026-06-26", "2026-07-03", "2026-07-10", "2026-07-15"], "datasets": [{"label": "삼성 트루밸류", "data": [497, 458, 451, 487, 508, 533, 527, 556, 553, 578, 622, 577, 551, 612, 532, 497, 455, 437], "backgroundColor": "rgba(20,40,160,1.0)"}, {"label": "DB 개방형 랩", "data": [76, 81, 83, 91, 95, 100, 108, 126, 141, 146, 166, 159, 161, 201, 187, 183, 169, 166], "backgroundColor": "rgba(0,133,74,1.0)"}, {"label": "NH 다이내믹밸류", "data": [74, 67, 68, 72, 75, 78, 114, 125, 125, 132, 134, 129, 123, 144, 134, 126, 114, 111], "backgroundColor": "rgba(0,114,206,1.0)"}, {"label": "한투 지속형", "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 32, 26], "backgroundColor": "rgba(245,130,32,1.0)"}, {"label": "DB 목표전환형 (누적)", "data": [54, 52, 52, 53, 54, 54, 94, 97, 97, 176, 177, 177, 177, 250, 250, 338, 333, 332], "backgroundColor": "rgba(0,133,74,0.6)"}, {"label": "NH 목표전환형 (누적)", "data": [15, 136, 136, 144, 147, 147, 397, 417, 679, 694, 700, 700, 700, 916, 916, 1160, 1146, 1142], "backgroundColor": "rgba(0,114,206,0.6)"}, {"label": "한투 목표전환형 (누적)", "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 61, 58], "backgroundColor": "rgba(245,130,32,0.6)"}]};
+            var cData = {"dates": ["2026-03-20", "2026-03-27", "2026-04-03", "2026-04-10", "2026-04-17", "2026-04-24", "2026-04-30", "2026-05-08", "2026-05-15", "2026-05-22", "2026-05-29", "2026-06-05", "2026-06-11", "2026-06-19", "2026-06-26", "2026-07-03", "2026-07-10", "2026-07-16"], "datasets": [{"label": "삼성 트루밸류", "data": [497, 458, 451, 487, 508, 533, 527, 556, 553, 578, 622, 577, 551, 612, 532, 497, 455, 403], "backgroundColor": "rgba(20,40,160,1.0)"}, {"label": "DB 개방형 랩", "data": [76, 81, 83, 91, 95, 100, 108, 126, 141, 146, 166, 159, 161, 201, 187, 183, 169, 154], "backgroundColor": "rgba(0,133,74,1.0)"}, {"label": "NH 다이내믹밸류", "data": [74, 67, 68, 72, 75, 78, 114, 125, 125, 132, 134, 129, 123, 144, 134, 126, 114, 103], "backgroundColor": "rgba(0,114,206,1.0)"}, {"label": "한투 지속형", "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 32, 25], "backgroundColor": "rgba(245,130,32,1.0)"}, {"label": "DB 목표전환형 (누적)", "data": [54, 52, 52, 53, 54, 54, 94, 97, 97, 176, 177, 177, 177, 250, 250, 338, 333, 326], "backgroundColor": "rgba(0,133,74,0.6)"}, {"label": "NH 목표전환형 (누적)", "data": [15, 136, 136, 144, 147, 147, 397, 417, 679, 694, 700, 700, 700, 916, 916, 1160, 1146, 1125], "backgroundColor": "rgba(0,114,206,0.6)"}, {"label": "한투 목표전환형 (누적)", "data": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 61, 56], "backgroundColor": "rgba(245,130,32,0.6)"}]};
             var totalPlugin = {
                 id: 'cumulativeTotals',
                 afterDatasetsDraw: function(chart) {
@@ -990,7 +990,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                 <div class="portfolio-section-wrapper">
                     <div style="display:flex;align-items:stretch;gap:10px;justify-content:center;"><div style="display:flex;flex-direction:column;gap:4px;"><div style="text-align:center;font-weight:700;font-size:0.9rem;color:#111;">일반형/개방형/지속형</div><div class="fee-subtabs" style="flex-wrap:nowrap;max-width:none;margin:0;"><button class="fee-subtab active" data-pf-btn="0" style="padding:9px 16px;white-space:nowrap;" onclick="pfSwitchTab(0)">삼성 트루밸류</button><button class="fee-subtab" data-pf-btn="1" style="padding:9px 16px;white-space:nowrap;" onclick="pfSwitchTab(1)">NH 다이내믹 밸류</button><button class="fee-subtab" data-pf-btn="2" style="padding:9px 16px;white-space:nowrap;" onclick="pfSwitchTab(2)">DB 개방형</button><button class="fee-subtab" data-pf-btn="3" style="padding:9px 16px;white-space:nowrap;" onclick="pfSwitchTab(3)">한투 지속형</button></div></div><span style="align-self:center;color:#adb5bd;font-weight:600;padding:0 2px;">|</span><div style="display:flex;flex-direction:column;gap:4px;"><div style="text-align:center;font-weight:700;font-size:0.9rem;color:#111;">목표전환형/성과모집형</div><div class="fee-subtabs" style="flex-wrap:nowrap;max-width:none;margin:0;"><button class="fee-subtab" data-pf-btn="4" style="padding:9px 16px;white-space:nowrap;" onclick="pfSwitchTab(4)">DB 목표전환형 6차</button><button class="fee-subtab" data-pf-btn="5" style="padding:9px 16px;white-space:nowrap;" onclick="pfSwitchTab(5)">NH 목표전환형 5호</button><button class="fee-subtab" data-pf-btn="6" style="padding:9px 16px;white-space:nowrap;" onclick="pfSwitchTab(6)">한투 성과모집형 1차</button></div></div></div>
             <div class="portfolio-section" data-pf-sec="0" style="">
-                <h3 class="portfolio-title">삼성 트루밸류 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-07-20 09:30 기준)</span></h3>
+                <h3 class="portfolio-title">삼성 트루밸류 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-07-20 10:00 기준)</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table holdings-table" style="table-layout:fixed;">
                         <colgroup>
@@ -1020,15 +1020,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>005930</td>
                                 <td>삼성전자</td>
                                 <td>반도체</td>
-                                <td>1,492조2,626억</td>
+                                <td>1,464조4,928억</td>
                                 <td>30%</td>
-                                <td class="">+0.0%</td>
-                                <td class="">+0.0</td>
-                                <td class="positive">+330.0%</td>
-                                <td style="border-left:2px solid #000;">256,000</td>
+                                <td class="negative">-1.8%</td>
+                                <td class="negative">-5.3</td>
+                                <td class="positive">+313.4%</td>
+                                <td style="border-left:2px solid #000;">250,500</td>
                                 <td>362,500</td>
-                                <td class="negative">-29.4%</td>
-                                <td class="positive">+72.7%</td>
+                                <td class="negative">-30.9%</td>
+                                <td class="positive">+67.5%</td>
                             </tr>
                 
                             <tr>
@@ -1036,15 +1036,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>000660</td>
                                 <td>SK하이닉스</td>
                                 <td>반도체</td>
-                                <td>1,327조518억</td>
+                                <td>1,303조5,326억</td>
                                 <td>30%</td>
-                                <td class="positive">+1.1%</td>
-                                <td class="positive">+3.4</td>
-                                <td class="positive">+544.3%</td>
-                                <td style="border-left:2px solid #000;">1,867,000</td>
+                                <td class="negative">-0.5%</td>
+                                <td class="negative">-1.6</td>
+                                <td class="positive">+518.3%</td>
+                                <td style="border-left:2px solid #000;">1,822,000</td>
                                 <td>2,919,000</td>
-                                <td class="negative">-36.0%</td>
-                                <td class="positive">+164.5%</td>
+                                <td class="negative">-37.6%</td>
+                                <td class="positive">+156.6%</td>
                             </tr>
                 
                             <tr>
@@ -1052,15 +1052,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>005935</td>
                                 <td>삼성전자우</td>
                                 <td>기타</td>
-                                <td>139조6,126억</td>
+                                <td>138조4,893억</td>
                                 <td>5%</td>
-                                <td class="positive">+1.2%</td>
-                                <td class="positive">+0.6</td>
-                                <td class="negative">-8.4%</td>
-                                <td style="border-left:2px solid #000;">173,800</td>
+                                <td class="positive">+0.3%</td>
+                                <td class="positive">+0.1</td>
+                                <td class="negative">-9.8%</td>
+                                <td style="border-left:2px solid #000;">172,600</td>
                                 <td>235,000</td>
-                                <td class="negative">-26.0%</td>
-                                <td class="negative">-3.1%</td>
+                                <td class="negative">-26.6%</td>
+                                <td class="negative">-3.7%</td>
                             </tr>
                 
                             <tr>
@@ -1068,15 +1068,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>402340</td>
                                 <td>SK스퀘어</td>
                                 <td>상사,자본재</td>
-                                <td>160조1,975억</td>
+                                <td>157조2,944억</td>
                                 <td>5%</td>
-                                <td class="positive">+0.2%</td>
-                                <td class="positive">+0.1</td>
-                                <td class="negative">-11.6%</td>
-                                <td style="border-left:2px solid #000;">1,219,000</td>
+                                <td class="negative">-1.5%</td>
+                                <td class="negative">-0.7</td>
+                                <td class="negative">-15.3%</td>
+                                <td style="border-left:2px solid #000;">1,188,000</td>
                                 <td>1,970,000</td>
-                                <td class="negative">-38.1%</td>
-                                <td class="negative">-5.4%</td>
+                                <td class="negative">-39.7%</td>
+                                <td class="negative">-7.7%</td>
                             </tr>
                 
                             <tr>
@@ -1084,15 +1084,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>004170</td>
                                 <td>신세계</td>
                                 <td>소매(유통)</td>
-                                <td>5조3,082억</td>
+                                <td>5조2,704억</td>
                                 <td>3%</td>
-                                <td class="negative">-4.6%</td>
-                                <td class="negative">-1.4</td>
-                                <td class="negative">-23.7%</td>
-                                <td style="border-left:2px solid #000;">565,000</td>
+                                <td class="negative">-5.1%</td>
+                                <td class="negative">-1.5</td>
+                                <td class="negative">-24.8%</td>
+                                <td style="border-left:2px solid #000;">560,000</td>
                                 <td>776,000</td>
-                                <td class="negative">-27.2%</td>
-                                <td class="negative">-5.6%</td>
+                                <td class="negative">-27.8%</td>
+                                <td class="negative">-6.3%</td>
                             </tr>
                 
                             <tr>
@@ -1100,15 +1100,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>105560</td>
                                 <td>KB금융</td>
                                 <td>은행</td>
-                                <td>61조418억</td>
+                                <td>61조3,964억</td>
                                 <td>2%</td>
-                                <td class="negative">-4.9%</td>
-                                <td class="negative">-1.0</td>
-                                <td class="negative">-0.9%</td>
-                                <td style="border-left:2px solid #000;">172,900</td>
+                                <td class="negative">-4.4%</td>
+                                <td class="negative">-0.9</td>
+                                <td class="negative">-0.3%</td>
+                                <td style="border-left:2px solid #000;">173,100</td>
                                 <td>186,200</td>
-                                <td class="">-7.1%</td>
-                                <td class="positive">+31.2%</td>
+                                <td class="">-7.0%</td>
+                                <td class="positive">+31.4%</td>
                             </tr>
                 
                             <tr>
@@ -1116,15 +1116,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>226950</td>
                                 <td>올릭스</td>
                                 <td>건강관리</td>
-                                <td>2조6,618억</td>
+                                <td>2조5,338억</td>
                                 <td>2%</td>
-                                <td class="negative">-7.4%</td>
-                                <td class="negative">-1.5</td>
-                                <td class="negative">-13.9%</td>
-                                <td style="border-left:2px solid #000;">127,500</td>
+                                <td class="negative">-11.6%</td>
+                                <td class="negative">-2.3</td>
+                                <td class="negative">-22.2%</td>
+                                <td style="border-left:2px solid #000;">120,700</td>
                                 <td>207,000</td>
-                                <td class="negative">-38.4%</td>
-                                <td class="positive">+5.0%</td>
+                                <td class="negative">-41.7%</td>
+                                <td class="positive">+0.1%</td>
                             </tr>
                 
                             <tr>
@@ -1132,15 +1132,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>003230</td>
                                 <td>삼양식품</td>
                                 <td>필수소비재</td>
-                                <td>8조227억</td>
+                                <td>7조9,398억</td>
                                 <td>2%</td>
-                                <td class="negative">-0.4%</td>
-                                <td class="negative">-0.1</td>
-                                <td class="negative">-26.3%</td>
-                                <td style="border-left:2px solid #000;">1,065,000</td>
+                                <td class="negative">-1.4%</td>
+                                <td class="negative">-0.3</td>
+                                <td class="negative">-27.6%</td>
+                                <td style="border-left:2px solid #000;">1,056,000</td>
                                 <td>1,630,000</td>
-                                <td class="negative">-34.7%</td>
-                                <td class="negative">-11.4%</td>
+                                <td class="negative">-35.2%</td>
+                                <td class="negative">-12.1%</td>
                             </tr>
                 
                             <tr>
@@ -1148,15 +1148,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>237690</td>
                                 <td>에스티팜</td>
                                 <td>건강관리</td>
-                                <td>2조4,842억</td>
+                                <td>2조4,717억</td>
                                 <td>2%</td>
-                                <td class="negative">-4.3%</td>
+                                <td class="negative">-4.8%</td>
                                 <td class="negative">-0.9</td>
-                                <td class="negative">-13.8%</td>
-                                <td style="border-left:2px solid #000;">119,000</td>
+                                <td class="negative">-14.8%</td>
+                                <td style="border-left:2px solid #000;">118,200</td>
                                 <td>168,700</td>
-                                <td class="negative">-29.5%</td>
-                                <td class="positive">+3.6%</td>
+                                <td class="negative">-29.9%</td>
+                                <td class="positive">+3.0%</td>
                             </tr>
                 
                             <tr>
@@ -1164,22 +1164,22 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>010950</td>
                                 <td>S-Oil</td>
                                 <td>에너지</td>
-                                <td>16조4,821억</td>
+                                <td>16조6,960억</td>
                                 <td>2%</td>
-                                <td class="positive">+1.0%</td>
-                                <td class="positive">+0.2</td>
-                                <td class="positive">+1.2%</td>
-                                <td style="border-left:2px solid #000;">145,200</td>
-                                <td>145,200</td>
+                                <td class="positive">+2.1%</td>
+                                <td class="positive">+0.4</td>
+                                <td class="positive">+4.5%</td>
+                                <td style="border-left:2px solid #000;">148,400</td>
+                                <td>148,400</td>
                                 <td class="">0.0%</td>
-                                <td class="positive">+0.2%</td>
+                                <td class="positive">+2.4%</td>
                             </tr>
                 
                             <tr class="total-row">
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
                                 <td style="font-weight: 600;">83%</td>
-                                <td class="negative" style="font-weight: 600;">-0.0%</td>
-                                <td class="negative" style="font-weight: 600;">-0.4</td>
+                                <td class="negative" style="font-weight: 600;">-1.3%</td>
+                                <td class="negative" style="font-weight: 600;">-13.1</td>
                                 <td style="font-weight: 600;">-</td>
                                 <td style="border-left:2px solid #000;">-</td>
                                 <td>-</td>
@@ -1192,7 +1192,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
             </div>
             
             <div class="portfolio-section" data-pf-sec="1" style="display:none;">
-                <h3 class="portfolio-title">NH 다이내믹 밸류 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-07-20 09:30 기준)</span></h3>
+                <h3 class="portfolio-title">NH 다이내믹 밸류 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-07-20 10:00 기준)</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table holdings-table" style="table-layout:fixed;">
                         <colgroup>
@@ -1222,15 +1222,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>005930</td>
                                 <td>삼성전자</td>
                                 <td>반도체</td>
-                                <td>1,492조2,626억</td>
+                                <td>1,464조4,928억</td>
                                 <td>30%</td>
-                                <td class="">+0.0%</td>
-                                <td class="">+0.0</td>
-                                <td class="positive">+330.0%</td>
-                                <td style="border-left:2px solid #000;">256,000</td>
+                                <td class="negative">-1.8%</td>
+                                <td class="negative">-5.3</td>
+                                <td class="positive">+313.4%</td>
+                                <td style="border-left:2px solid #000;">250,500</td>
                                 <td>362,500</td>
-                                <td class="negative">-29.4%</td>
-                                <td class="positive">+72.7%</td>
+                                <td class="negative">-30.9%</td>
+                                <td class="positive">+67.5%</td>
                             </tr>
                 
                             <tr>
@@ -1238,15 +1238,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>000660</td>
                                 <td>SK하이닉스</td>
                                 <td>반도체</td>
-                                <td>1,327조518억</td>
+                                <td>1,303조5,326억</td>
                                 <td>30%</td>
-                                <td class="positive">+1.1%</td>
-                                <td class="positive">+3.4</td>
-                                <td class="positive">+544.3%</td>
-                                <td style="border-left:2px solid #000;">1,867,000</td>
+                                <td class="negative">-0.5%</td>
+                                <td class="negative">-1.6</td>
+                                <td class="positive">+518.3%</td>
+                                <td style="border-left:2px solid #000;">1,822,000</td>
                                 <td>2,919,000</td>
-                                <td class="negative">-36.0%</td>
-                                <td class="positive">+164.5%</td>
+                                <td class="negative">-37.6%</td>
+                                <td class="positive">+156.6%</td>
                             </tr>
                 
                             <tr>
@@ -1254,15 +1254,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>005935</td>
                                 <td>삼성전자우</td>
                                 <td>기타</td>
-                                <td>139조6,126억</td>
+                                <td>138조4,893억</td>
                                 <td>5%</td>
-                                <td class="positive">+1.2%</td>
-                                <td class="positive">+0.6</td>
-                                <td class="negative">-8.4%</td>
-                                <td style="border-left:2px solid #000;">173,800</td>
+                                <td class="positive">+0.3%</td>
+                                <td class="positive">+0.1</td>
+                                <td class="negative">-9.8%</td>
+                                <td style="border-left:2px solid #000;">172,600</td>
                                 <td>235,000</td>
-                                <td class="negative">-26.0%</td>
-                                <td class="negative">-3.1%</td>
+                                <td class="negative">-26.6%</td>
+                                <td class="negative">-3.7%</td>
                             </tr>
                 
                             <tr>
@@ -1270,15 +1270,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>402340</td>
                                 <td>SK스퀘어</td>
                                 <td>상사,자본재</td>
-                                <td>160조1,975억</td>
+                                <td>157조2,944억</td>
                                 <td>5%</td>
-                                <td class="positive">+0.2%</td>
-                                <td class="positive">+0.1</td>
-                                <td class="negative">-11.6%</td>
-                                <td style="border-left:2px solid #000;">1,219,000</td>
+                                <td class="negative">-1.5%</td>
+                                <td class="negative">-0.7</td>
+                                <td class="negative">-15.3%</td>
+                                <td style="border-left:2px solid #000;">1,188,000</td>
                                 <td>1,970,000</td>
-                                <td class="negative">-38.1%</td>
-                                <td class="negative">-5.4%</td>
+                                <td class="negative">-39.7%</td>
+                                <td class="negative">-7.7%</td>
                             </tr>
                 
                             <tr>
@@ -1286,15 +1286,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>004170</td>
                                 <td>신세계</td>
                                 <td>소매(유통)</td>
-                                <td>5조3,082억</td>
+                                <td>5조2,704억</td>
                                 <td>3%</td>
-                                <td class="negative">-4.6%</td>
-                                <td class="negative">-1.4</td>
-                                <td class="negative">-23.7%</td>
-                                <td style="border-left:2px solid #000;">565,000</td>
+                                <td class="negative">-5.1%</td>
+                                <td class="negative">-1.5</td>
+                                <td class="negative">-24.8%</td>
+                                <td style="border-left:2px solid #000;">560,000</td>
                                 <td>776,000</td>
-                                <td class="negative">-27.2%</td>
-                                <td class="negative">-5.6%</td>
+                                <td class="negative">-27.8%</td>
+                                <td class="negative">-6.3%</td>
                             </tr>
                 
                             <tr>
@@ -1302,15 +1302,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>105560</td>
                                 <td>KB금융</td>
                                 <td>은행</td>
-                                <td>61조418억</td>
+                                <td>61조3,964억</td>
                                 <td>2%</td>
-                                <td class="negative">-4.9%</td>
-                                <td class="negative">-1.0</td>
-                                <td class="negative">-0.9%</td>
-                                <td style="border-left:2px solid #000;">172,900</td>
+                                <td class="negative">-4.4%</td>
+                                <td class="negative">-0.9</td>
+                                <td class="negative">-0.3%</td>
+                                <td style="border-left:2px solid #000;">173,100</td>
                                 <td>186,200</td>
-                                <td class="">-7.1%</td>
-                                <td class="positive">+31.2%</td>
+                                <td class="">-7.0%</td>
+                                <td class="positive">+31.4%</td>
                             </tr>
                 
                             <tr>
@@ -1318,15 +1318,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>226950</td>
                                 <td>올릭스</td>
                                 <td>건강관리</td>
-                                <td>2조6,618억</td>
+                                <td>2조5,338억</td>
                                 <td>2%</td>
-                                <td class="negative">-7.4%</td>
-                                <td class="negative">-1.5</td>
-                                <td class="negative">-13.9%</td>
-                                <td style="border-left:2px solid #000;">127,500</td>
+                                <td class="negative">-11.6%</td>
+                                <td class="negative">-2.3</td>
+                                <td class="negative">-22.2%</td>
+                                <td style="border-left:2px solid #000;">120,700</td>
                                 <td>207,000</td>
-                                <td class="negative">-38.4%</td>
-                                <td class="positive">+5.0%</td>
+                                <td class="negative">-41.7%</td>
+                                <td class="positive">+0.1%</td>
                             </tr>
                 
                             <tr>
@@ -1334,15 +1334,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>003230</td>
                                 <td>삼양식품</td>
                                 <td>필수소비재</td>
-                                <td>8조227억</td>
+                                <td>7조9,398억</td>
                                 <td>2%</td>
-                                <td class="negative">-0.4%</td>
-                                <td class="negative">-0.1</td>
-                                <td class="negative">-26.3%</td>
-                                <td style="border-left:2px solid #000;">1,065,000</td>
+                                <td class="negative">-1.4%</td>
+                                <td class="negative">-0.3</td>
+                                <td class="negative">-27.6%</td>
+                                <td style="border-left:2px solid #000;">1,056,000</td>
                                 <td>1,630,000</td>
-                                <td class="negative">-34.7%</td>
-                                <td class="negative">-11.4%</td>
+                                <td class="negative">-35.2%</td>
+                                <td class="negative">-12.1%</td>
                             </tr>
                 
                             <tr>
@@ -1350,15 +1350,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>237690</td>
                                 <td>에스티팜</td>
                                 <td>건강관리</td>
-                                <td>2조4,842억</td>
+                                <td>2조4,717억</td>
                                 <td>2%</td>
-                                <td class="negative">-4.3%</td>
+                                <td class="negative">-4.8%</td>
                                 <td class="negative">-0.9</td>
-                                <td class="negative">-13.8%</td>
-                                <td style="border-left:2px solid #000;">119,000</td>
+                                <td class="negative">-14.8%</td>
+                                <td style="border-left:2px solid #000;">118,200</td>
                                 <td>168,700</td>
-                                <td class="negative">-29.5%</td>
-                                <td class="positive">+3.6%</td>
+                                <td class="negative">-29.9%</td>
+                                <td class="positive">+3.0%</td>
                             </tr>
                 
                             <tr>
@@ -1366,22 +1366,22 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>010950</td>
                                 <td>S-Oil</td>
                                 <td>에너지</td>
-                                <td>16조4,821억</td>
+                                <td>16조6,960억</td>
                                 <td>2%</td>
-                                <td class="positive">+1.0%</td>
-                                <td class="positive">+0.2</td>
-                                <td class="positive">+1.2%</td>
-                                <td style="border-left:2px solid #000;">145,200</td>
-                                <td>145,200</td>
+                                <td class="positive">+2.1%</td>
+                                <td class="positive">+0.4</td>
+                                <td class="positive">+4.5%</td>
+                                <td style="border-left:2px solid #000;">148,400</td>
+                                <td>148,400</td>
                                 <td class="">0.0%</td>
-                                <td class="positive">+0.2%</td>
+                                <td class="positive">+2.4%</td>
                             </tr>
                 
                             <tr class="total-row">
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
                                 <td style="font-weight: 600;">83%</td>
-                                <td class="negative" style="font-weight: 600;">-0.0%</td>
-                                <td class="negative" style="font-weight: 600;">-0.4</td>
+                                <td class="negative" style="font-weight: 600;">-1.3%</td>
+                                <td class="negative" style="font-weight: 600;">-13.1</td>
                                 <td style="font-weight: 600;">-</td>
                                 <td style="border-left:2px solid #000;">-</td>
                                 <td>-</td>
@@ -1394,7 +1394,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
             </div>
             
             <div class="portfolio-section" data-pf-sec="2" style="display:none;">
-                <h3 class="portfolio-title">DB 개방형 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-07-20 09:30 기준)</span></h3>
+                <h3 class="portfolio-title">DB 개방형 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-07-20 10:00 기준)</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table holdings-table" style="table-layout:fixed;">
                         <colgroup>
@@ -1424,15 +1424,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>005930</td>
                                 <td>삼성전자</td>
                                 <td>반도체</td>
-                                <td>1,492조2,626억</td>
+                                <td>1,464조4,928억</td>
                                 <td>30%</td>
-                                <td class="">+0.0%</td>
-                                <td class="">+0.0</td>
-                                <td class="positive">+330.0%</td>
-                                <td style="border-left:2px solid #000;">256,000</td>
+                                <td class="negative">-1.8%</td>
+                                <td class="negative">-5.3</td>
+                                <td class="positive">+313.4%</td>
+                                <td style="border-left:2px solid #000;">250,500</td>
                                 <td>362,500</td>
-                                <td class="negative">-29.4%</td>
-                                <td class="positive">+72.7%</td>
+                                <td class="negative">-30.9%</td>
+                                <td class="positive">+67.5%</td>
                             </tr>
                 
                             <tr>
@@ -1440,15 +1440,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>000660</td>
                                 <td>SK하이닉스</td>
                                 <td>반도체</td>
-                                <td>1,327조518억</td>
+                                <td>1,303조5,326억</td>
                                 <td>30%</td>
-                                <td class="positive">+1.1%</td>
-                                <td class="positive">+3.4</td>
-                                <td class="positive">+544.3%</td>
-                                <td style="border-left:2px solid #000;">1,867,000</td>
+                                <td class="negative">-0.5%</td>
+                                <td class="negative">-1.6</td>
+                                <td class="positive">+518.3%</td>
+                                <td style="border-left:2px solid #000;">1,822,000</td>
                                 <td>2,919,000</td>
-                                <td class="negative">-36.0%</td>
-                                <td class="positive">+164.5%</td>
+                                <td class="negative">-37.6%</td>
+                                <td class="positive">+156.6%</td>
                             </tr>
                 
                             <tr>
@@ -1456,15 +1456,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>005935</td>
                                 <td>삼성전자우</td>
                                 <td>기타</td>
-                                <td>139조6,126억</td>
+                                <td>138조4,893억</td>
                                 <td>5%</td>
-                                <td class="positive">+1.2%</td>
-                                <td class="positive">+0.6</td>
-                                <td class="negative">-8.4%</td>
-                                <td style="border-left:2px solid #000;">173,800</td>
+                                <td class="positive">+0.3%</td>
+                                <td class="positive">+0.1</td>
+                                <td class="negative">-9.8%</td>
+                                <td style="border-left:2px solid #000;">172,600</td>
                                 <td>235,000</td>
-                                <td class="negative">-26.0%</td>
-                                <td class="negative">-3.1%</td>
+                                <td class="negative">-26.6%</td>
+                                <td class="negative">-3.7%</td>
                             </tr>
                 
                             <tr>
@@ -1472,15 +1472,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>402340</td>
                                 <td>SK스퀘어</td>
                                 <td>상사,자본재</td>
-                                <td>160조1,975억</td>
+                                <td>157조2,944억</td>
                                 <td>5%</td>
-                                <td class="positive">+0.2%</td>
-                                <td class="positive">+0.1</td>
-                                <td class="negative">-11.6%</td>
-                                <td style="border-left:2px solid #000;">1,219,000</td>
+                                <td class="negative">-1.5%</td>
+                                <td class="negative">-0.7</td>
+                                <td class="negative">-15.3%</td>
+                                <td style="border-left:2px solid #000;">1,188,000</td>
                                 <td>1,970,000</td>
-                                <td class="negative">-38.1%</td>
-                                <td class="negative">-5.4%</td>
+                                <td class="negative">-39.7%</td>
+                                <td class="negative">-7.7%</td>
                             </tr>
                 
                             <tr>
@@ -1488,15 +1488,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>004170</td>
                                 <td>신세계</td>
                                 <td>소매(유통)</td>
-                                <td>5조3,082억</td>
+                                <td>5조2,704억</td>
                                 <td>3%</td>
-                                <td class="negative">-4.6%</td>
-                                <td class="negative">-1.4</td>
-                                <td class="negative">-23.7%</td>
-                                <td style="border-left:2px solid #000;">565,000</td>
+                                <td class="negative">-5.1%</td>
+                                <td class="negative">-1.5</td>
+                                <td class="negative">-24.8%</td>
+                                <td style="border-left:2px solid #000;">560,000</td>
                                 <td>776,000</td>
-                                <td class="negative">-27.2%</td>
-                                <td class="negative">-5.6%</td>
+                                <td class="negative">-27.8%</td>
+                                <td class="negative">-6.3%</td>
                             </tr>
                 
                             <tr>
@@ -1504,15 +1504,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>105560</td>
                                 <td>KB금융</td>
                                 <td>은행</td>
-                                <td>61조418억</td>
+                                <td>61조3,964억</td>
                                 <td>2%</td>
-                                <td class="negative">-4.9%</td>
-                                <td class="negative">-1.0</td>
-                                <td class="negative">-0.9%</td>
-                                <td style="border-left:2px solid #000;">172,900</td>
+                                <td class="negative">-4.4%</td>
+                                <td class="negative">-0.9</td>
+                                <td class="negative">-0.3%</td>
+                                <td style="border-left:2px solid #000;">173,100</td>
                                 <td>186,200</td>
-                                <td class="">-7.1%</td>
-                                <td class="positive">+31.2%</td>
+                                <td class="">-7.0%</td>
+                                <td class="positive">+31.4%</td>
                             </tr>
                 
                             <tr>
@@ -1520,15 +1520,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>226950</td>
                                 <td>올릭스</td>
                                 <td>건강관리</td>
-                                <td>2조6,618억</td>
+                                <td>2조5,338억</td>
                                 <td>2%</td>
-                                <td class="negative">-7.4%</td>
-                                <td class="negative">-1.5</td>
-                                <td class="negative">-13.9%</td>
-                                <td style="border-left:2px solid #000;">127,500</td>
+                                <td class="negative">-11.6%</td>
+                                <td class="negative">-2.3</td>
+                                <td class="negative">-22.2%</td>
+                                <td style="border-left:2px solid #000;">120,700</td>
                                 <td>207,000</td>
-                                <td class="negative">-38.4%</td>
-                                <td class="positive">+5.0%</td>
+                                <td class="negative">-41.7%</td>
+                                <td class="positive">+0.1%</td>
                             </tr>
                 
                             <tr>
@@ -1536,15 +1536,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>003230</td>
                                 <td>삼양식품</td>
                                 <td>필수소비재</td>
-                                <td>8조227억</td>
+                                <td>7조9,398억</td>
                                 <td>2%</td>
-                                <td class="negative">-0.4%</td>
-                                <td class="negative">-0.1</td>
-                                <td class="negative">-26.3%</td>
-                                <td style="border-left:2px solid #000;">1,065,000</td>
+                                <td class="negative">-1.4%</td>
+                                <td class="negative">-0.3</td>
+                                <td class="negative">-27.6%</td>
+                                <td style="border-left:2px solid #000;">1,056,000</td>
                                 <td>1,630,000</td>
-                                <td class="negative">-34.7%</td>
-                                <td class="negative">-11.4%</td>
+                                <td class="negative">-35.2%</td>
+                                <td class="negative">-12.1%</td>
                             </tr>
                 
                             <tr>
@@ -1552,15 +1552,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>237690</td>
                                 <td>에스티팜</td>
                                 <td>건강관리</td>
-                                <td>2조4,842억</td>
+                                <td>2조4,717억</td>
                                 <td>2%</td>
-                                <td class="negative">-4.3%</td>
+                                <td class="negative">-4.8%</td>
                                 <td class="negative">-0.9</td>
-                                <td class="negative">-13.8%</td>
-                                <td style="border-left:2px solid #000;">119,000</td>
+                                <td class="negative">-14.8%</td>
+                                <td style="border-left:2px solid #000;">118,200</td>
                                 <td>168,700</td>
-                                <td class="negative">-29.5%</td>
-                                <td class="positive">+3.6%</td>
+                                <td class="negative">-29.9%</td>
+                                <td class="positive">+3.0%</td>
                             </tr>
                 
                             <tr>
@@ -1568,22 +1568,22 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>010950</td>
                                 <td>S-Oil</td>
                                 <td>에너지</td>
-                                <td>16조4,821억</td>
+                                <td>16조6,960억</td>
                                 <td>2%</td>
-                                <td class="positive">+1.0%</td>
-                                <td class="positive">+0.2</td>
-                                <td class="positive">+1.2%</td>
-                                <td style="border-left:2px solid #000;">145,200</td>
-                                <td>145,200</td>
+                                <td class="positive">+2.1%</td>
+                                <td class="positive">+0.4</td>
+                                <td class="positive">+4.5%</td>
+                                <td style="border-left:2px solid #000;">148,400</td>
+                                <td>148,400</td>
                                 <td class="">0.0%</td>
-                                <td class="positive">+0.2%</td>
+                                <td class="positive">+2.4%</td>
                             </tr>
                 
                             <tr class="total-row">
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
                                 <td style="font-weight: 600;">83%</td>
-                                <td class="negative" style="font-weight: 600;">-0.0%</td>
-                                <td class="negative" style="font-weight: 600;">-0.4</td>
+                                <td class="negative" style="font-weight: 600;">-1.3%</td>
+                                <td class="negative" style="font-weight: 600;">-13.1</td>
                                 <td style="font-weight: 600;">-</td>
                                 <td style="border-left:2px solid #000;">-</td>
                                 <td>-</td>
@@ -1596,7 +1596,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
             </div>
             
             <div class="portfolio-section" data-pf-sec="3" style="display:none;">
-                <h3 class="portfolio-title">한투 지속형 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-07-20 09:30 기준)</span></h3>
+                <h3 class="portfolio-title">한투 지속형 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-07-20 10:00 기준)</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table holdings-table" style="table-layout:fixed;">
                         <colgroup>
@@ -1626,15 +1626,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>005930</td>
                                 <td>삼성전자</td>
                                 <td>반도체</td>
-                                <td>1,492조2,626억</td>
+                                <td>1,464조4,928억</td>
                                 <td>30%</td>
-                                <td class="">+0.0%</td>
-                                <td class="">+0.0</td>
-                                <td class="negative">-9.2%</td>
-                                <td style="border-left:2px solid #000;">256,000</td>
+                                <td class="negative">-1.8%</td>
+                                <td class="negative">-5.3</td>
+                                <td class="negative">-12.7%</td>
+                                <td style="border-left:2px solid #000;">250,500</td>
                                 <td>362,500</td>
-                                <td class="negative">-29.4%</td>
-                                <td class="positive">+0.3%</td>
+                                <td class="negative">-30.9%</td>
+                                <td class="negative">-1.6%</td>
                             </tr>
                 
                             <tr>
@@ -1642,15 +1642,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>000660</td>
                                 <td>SK하이닉스</td>
                                 <td>반도체</td>
-                                <td>1,327조518억</td>
+                                <td>1,303조5,326억</td>
                                 <td>30%</td>
-                                <td class="positive">+1.1%</td>
-                                <td class="positive">+3.4</td>
-                                <td class="negative">-10.6%</td>
-                                <td style="border-left:2px solid #000;">1,867,000</td>
+                                <td class="negative">-0.5%</td>
+                                <td class="negative">-1.6</td>
+                                <td class="negative">-14.2%</td>
+                                <td style="border-left:2px solid #000;">1,822,000</td>
                                 <td>2,919,000</td>
-                                <td class="negative">-36.0%</td>
-                                <td class="negative">-3.8%</td>
+                                <td class="negative">-37.6%</td>
+                                <td class="negative">-5.9%</td>
                             </tr>
                 
                             <tr>
@@ -1658,15 +1658,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>005935</td>
                                 <td>삼성전자우</td>
                                 <td>기타</td>
-                                <td>139조6,126억</td>
+                                <td>138조4,893억</td>
                                 <td>5%</td>
-                                <td class="positive">+1.2%</td>
-                                <td class="positive">+0.6</td>
-                                <td class="negative">-8.4%</td>
-                                <td style="border-left:2px solid #000;">173,800</td>
+                                <td class="positive">+0.3%</td>
+                                <td class="positive">+0.1</td>
+                                <td class="negative">-9.8%</td>
+                                <td style="border-left:2px solid #000;">172,600</td>
                                 <td>235,000</td>
-                                <td class="negative">-26.0%</td>
-                                <td class="negative">-3.1%</td>
+                                <td class="negative">-26.6%</td>
+                                <td class="negative">-3.7%</td>
                             </tr>
                 
                             <tr>
@@ -1674,15 +1674,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>402340</td>
                                 <td>SK스퀘어</td>
                                 <td>상사,자본재</td>
-                                <td>160조1,975억</td>
+                                <td>157조2,944억</td>
                                 <td>5%</td>
-                                <td class="positive">+0.2%</td>
-                                <td class="positive">+0.1</td>
-                                <td class="negative">-11.6%</td>
-                                <td style="border-left:2px solid #000;">1,219,000</td>
+                                <td class="negative">-1.5%</td>
+                                <td class="negative">-0.7</td>
+                                <td class="negative">-15.3%</td>
+                                <td style="border-left:2px solid #000;">1,188,000</td>
                                 <td>1,970,000</td>
-                                <td class="negative">-38.1%</td>
-                                <td class="negative">-5.4%</td>
+                                <td class="negative">-39.7%</td>
+                                <td class="negative">-7.7%</td>
                             </tr>
                 
                             <tr>
@@ -1690,15 +1690,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>004170</td>
                                 <td>신세계</td>
                                 <td>소매(유통)</td>
-                                <td>5조3,082억</td>
+                                <td>5조2,704억</td>
                                 <td>3%</td>
-                                <td class="negative">-4.6%</td>
-                                <td class="negative">-1.4</td>
-                                <td class="negative">-22.0%</td>
-                                <td style="border-left:2px solid #000;">565,000</td>
+                                <td class="negative">-5.1%</td>
+                                <td class="negative">-1.5</td>
+                                <td class="negative">-23.1%</td>
+                                <td style="border-left:2px solid #000;">560,000</td>
                                 <td>776,000</td>
-                                <td class="negative">-27.2%</td>
-                                <td class="negative">-12.0%</td>
+                                <td class="negative">-27.8%</td>
+                                <td class="negative">-12.7%</td>
                             </tr>
                 
                             <tr>
@@ -1706,15 +1706,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>105560</td>
                                 <td>KB금융</td>
                                 <td>은행</td>
-                                <td>61조418억</td>
+                                <td>61조3,964억</td>
                                 <td>2%</td>
-                                <td class="negative">-4.9%</td>
-                                <td class="negative">-1.0</td>
-                                <td class="negative">-0.4%</td>
-                                <td style="border-left:2px solid #000;">172,900</td>
+                                <td class="negative">-4.4%</td>
+                                <td class="negative">-0.9</td>
+                                <td class="positive">+0.3%</td>
+                                <td style="border-left:2px solid #000;">173,100</td>
                                 <td>186,200</td>
-                                <td class="">-7.1%</td>
-                                <td class="positive">+15.6%</td>
+                                <td class="">-7.0%</td>
+                                <td class="positive">+15.7%</td>
                             </tr>
                 
                             <tr>
@@ -1722,15 +1722,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>226950</td>
                                 <td>올릭스</td>
                                 <td>건강관리</td>
-                                <td>2조6,618억</td>
+                                <td>2조5,338억</td>
                                 <td>2%</td>
-                                <td class="negative">-7.4%</td>
-                                <td class="negative">-1.5</td>
-                                <td class="negative">-24.7%</td>
-                                <td style="border-left:2px solid #000;">127,500</td>
+                                <td class="negative">-11.6%</td>
+                                <td class="negative">-2.3</td>
+                                <td class="negative">-32.0%</td>
+                                <td style="border-left:2px solid #000;">120,700</td>
                                 <td>207,000</td>
-                                <td class="negative">-38.4%</td>
-                                <td class="negative">-10.0%</td>
+                                <td class="negative">-41.7%</td>
+                                <td class="negative">-14.4%</td>
                             </tr>
                 
                             <tr>
@@ -1738,15 +1738,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>237690</td>
                                 <td>에스티팜</td>
                                 <td>건강관리</td>
-                                <td>2조4,842억</td>
+                                <td>2조4,717억</td>
                                 <td>2%</td>
-                                <td class="negative">-4.3%</td>
+                                <td class="negative">-4.8%</td>
                                 <td class="negative">-0.9</td>
-                                <td class="negative">-9.5%</td>
-                                <td style="border-left:2px solid #000;">119,000</td>
+                                <td class="negative">-10.6%</td>
+                                <td style="border-left:2px solid #000;">118,200</td>
                                 <td>168,700</td>
-                                <td class="negative">-29.5%</td>
-                                <td class="negative">-4.5%</td>
+                                <td class="negative">-29.9%</td>
+                                <td class="negative">-5.2%</td>
                             </tr>
                 
                             <tr>
@@ -1754,15 +1754,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>003230</td>
                                 <td>삼양식품</td>
                                 <td>필수소비재</td>
-                                <td>8조227억</td>
+                                <td>7조9,398억</td>
                                 <td>2%</td>
-                                <td class="negative">-0.4%</td>
-                                <td class="negative">-0.1</td>
-                                <td class="negative">-4.4%</td>
-                                <td style="border-left:2px solid #000;">1,065,000</td>
+                                <td class="negative">-1.4%</td>
+                                <td class="negative">-0.3</td>
+                                <td class="negative">-6.2%</td>
+                                <td style="border-left:2px solid #000;">1,056,000</td>
                                 <td>1,630,000</td>
-                                <td class="negative">-34.7%</td>
-                                <td class="negative">-4.3%</td>
+                                <td class="negative">-35.2%</td>
+                                <td class="negative">-5.1%</td>
                             </tr>
                 
                             <tr>
@@ -1770,22 +1770,22 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>010950</td>
                                 <td>S-Oil</td>
                                 <td>에너지</td>
-                                <td>16조4,821억</td>
+                                <td>16조6,960억</td>
                                 <td>2%</td>
-                                <td class="positive">+1.0%</td>
-                                <td class="positive">+0.2</td>
-                                <td class="positive">+1.2%</td>
-                                <td style="border-left:2px solid #000;">145,200</td>
-                                <td>145,200</td>
+                                <td class="positive">+2.1%</td>
+                                <td class="positive">+0.4</td>
+                                <td class="positive">+4.5%</td>
+                                <td style="border-left:2px solid #000;">148,400</td>
+                                <td>148,400</td>
                                 <td class="">0.0%</td>
-                                <td class="positive">+0.2%</td>
+                                <td class="positive">+2.4%</td>
                             </tr>
                 
                             <tr class="total-row">
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
                                 <td style="font-weight: 600;">83%</td>
-                                <td class="negative" style="font-weight: 600;">-0.0%</td>
-                                <td class="negative" style="font-weight: 600;">-0.4</td>
+                                <td class="negative" style="font-weight: 600;">-1.3%</td>
+                                <td class="negative" style="font-weight: 600;">-13.1</td>
                                 <td style="font-weight: 600;">-</td>
                                 <td style="border-left:2px solid #000;">-</td>
                                 <td>-</td>
@@ -1798,7 +1798,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
             </div>
             
             <div class="portfolio-section" data-pf-sec="4" style="display:none;">
-                <h3 class="portfolio-title">DB 목표전환형 6차 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-07-20 09:30 기준)</span></h3>
+                <h3 class="portfolio-title">DB 목표전환형 6차 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-07-20 10:00 기준)</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table holdings-table" style="table-layout:fixed;">
                         <colgroup>
@@ -1828,15 +1828,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>000660</td>
                                 <td>SK하이닉스</td>
                                 <td>반도체</td>
-                                <td>1,327조518억</td>
+                                <td>1,303조5,326억</td>
                                 <td>30%</td>
-                                <td class="positive">+1.1%</td>
-                                <td class="positive">+3.4</td>
-                                <td class="negative">-14.3%</td>
-                                <td style="border-left:2px solid #000;">1,867,000</td>
+                                <td class="negative">-0.5%</td>
+                                <td class="negative">-1.6</td>
+                                <td class="negative">-17.7%</td>
+                                <td style="border-left:2px solid #000;">1,822,000</td>
                                 <td>2,919,000</td>
-                                <td class="negative">-36.0%</td>
-                                <td class="negative">-9.2%</td>
+                                <td class="negative">-37.6%</td>
+                                <td class="negative">-11.0%</td>
                             </tr>
                 
                             <tr>
@@ -1844,15 +1844,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>005930</td>
                                 <td>삼성전자</td>
                                 <td>반도체</td>
-                                <td>1,492조2,626억</td>
+                                <td>1,464조4,928억</td>
                                 <td>30%</td>
-                                <td class="">+0.0%</td>
-                                <td class="">+0.0</td>
-                                <td class="negative">-11.0%</td>
-                                <td style="border-left:2px solid #000;">256,000</td>
+                                <td class="negative">-1.8%</td>
+                                <td class="negative">-5.3</td>
+                                <td class="negative">-14.4%</td>
+                                <td style="border-left:2px solid #000;">250,500</td>
                                 <td>362,500</td>
-                                <td class="negative">-29.4%</td>
-                                <td class="negative">-0.7%</td>
+                                <td class="negative">-30.9%</td>
+                                <td class="negative">-2.5%</td>
                             </tr>
                 
                             <tr>
@@ -1860,15 +1860,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>005935</td>
                                 <td>삼성전자우</td>
                                 <td>기타</td>
-                                <td>139조6,126억</td>
+                                <td>138조4,893억</td>
                                 <td>5%</td>
-                                <td class="positive">+1.2%</td>
-                                <td class="positive">+0.6</td>
-                                <td class="negative">-8.4%</td>
-                                <td style="border-left:2px solid #000;">173,800</td>
+                                <td class="positive">+0.3%</td>
+                                <td class="positive">+0.1</td>
+                                <td class="negative">-9.8%</td>
+                                <td style="border-left:2px solid #000;">172,600</td>
                                 <td>235,000</td>
-                                <td class="negative">-26.0%</td>
-                                <td class="negative">-3.1%</td>
+                                <td class="negative">-26.6%</td>
+                                <td class="negative">-3.7%</td>
                             </tr>
                 
                             <tr>
@@ -1876,15 +1876,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>402340</td>
                                 <td>SK스퀘어</td>
                                 <td>상사,자본재</td>
-                                <td>160조1,975억</td>
+                                <td>157조2,944억</td>
                                 <td>5%</td>
-                                <td class="positive">+0.2%</td>
-                                <td class="positive">+0.1</td>
-                                <td class="negative">-11.6%</td>
-                                <td style="border-left:2px solid #000;">1,219,000</td>
+                                <td class="negative">-1.5%</td>
+                                <td class="negative">-0.7</td>
+                                <td class="negative">-15.3%</td>
+                                <td style="border-left:2px solid #000;">1,188,000</td>
                                 <td>1,970,000</td>
-                                <td class="negative">-38.1%</td>
-                                <td class="negative">-5.4%</td>
+                                <td class="negative">-39.7%</td>
+                                <td class="negative">-7.7%</td>
                             </tr>
                 
                             <tr>
@@ -1892,15 +1892,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>004170</td>
                                 <td>신세계</td>
                                 <td>소매(유통)</td>
-                                <td>5조3,082억</td>
+                                <td>5조2,704억</td>
                                 <td>3%</td>
-                                <td class="negative">-4.6%</td>
-                                <td class="negative">-1.4</td>
-                                <td class="negative">-11.6%</td>
-                                <td style="border-left:2px solid #000;">565,000</td>
+                                <td class="negative">-5.1%</td>
+                                <td class="negative">-1.5</td>
+                                <td class="negative">-12.9%</td>
+                                <td style="border-left:2px solid #000;">560,000</td>
                                 <td>776,000</td>
-                                <td class="negative">-27.2%</td>
-                                <td class="negative">-1.0%</td>
+                                <td class="negative">-27.8%</td>
+                                <td class="negative">-1.8%</td>
                             </tr>
                 
                             <tr>
@@ -1908,15 +1908,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>105560</td>
                                 <td>KB금융</td>
                                 <td>은행</td>
-                                <td>61조418억</td>
+                                <td>61조3,964억</td>
                                 <td>2%</td>
-                                <td class="negative">-4.9%</td>
-                                <td class="negative">-1.0</td>
-                                <td class="positive">+3.7%</td>
-                                <td style="border-left:2px solid #000;">172,900</td>
+                                <td class="negative">-4.4%</td>
+                                <td class="negative">-0.9</td>
+                                <td class="positive">+4.4%</td>
+                                <td style="border-left:2px solid #000;">173,100</td>
                                 <td>186,200</td>
-                                <td class="">-7.1%</td>
-                                <td class="positive">+26.9%</td>
+                                <td class="">-7.0%</td>
+                                <td class="positive">+27.1%</td>
                             </tr>
                 
                             <tr>
@@ -1924,15 +1924,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>237690</td>
                                 <td>에스티팜</td>
                                 <td>건강관리</td>
-                                <td>2조4,842억</td>
+                                <td>2조4,717억</td>
                                 <td>2%</td>
-                                <td class="negative">-4.3%</td>
+                                <td class="negative">-4.8%</td>
                                 <td class="negative">-0.9</td>
-                                <td class="negative">-13.4%</td>
-                                <td style="border-left:2px solid #000;">119,000</td>
+                                <td class="negative">-14.4%</td>
+                                <td style="border-left:2px solid #000;">118,200</td>
                                 <td>168,700</td>
-                                <td class="negative">-29.5%</td>
-                                <td class="positive">+5.2%</td>
+                                <td class="negative">-29.9%</td>
+                                <td class="positive">+4.6%</td>
                             </tr>
                 
                             <tr>
@@ -1940,15 +1940,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>226950</td>
                                 <td>올릭스</td>
                                 <td>건강관리</td>
-                                <td>2조6,618억</td>
+                                <td>2조5,338억</td>
                                 <td>2%</td>
-                                <td class="negative">-7.4%</td>
-                                <td class="negative">-1.5</td>
-                                <td class="negative">-29.3%</td>
-                                <td style="border-left:2px solid #000;">127,500</td>
+                                <td class="negative">-11.6%</td>
+                                <td class="negative">-2.3</td>
+                                <td class="negative">-36.1%</td>
+                                <td style="border-left:2px solid #000;">120,700</td>
                                 <td>207,000</td>
-                                <td class="negative">-38.4%</td>
-                                <td class="negative">-8.9%</td>
+                                <td class="negative">-41.7%</td>
+                                <td class="negative">-12.9%</td>
                             </tr>
                 
                             <tr>
@@ -1956,22 +1956,22 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>010950</td>
                                 <td>S-Oil</td>
                                 <td>에너지</td>
-                                <td>16조4,821억</td>
+                                <td>16조6,960억</td>
                                 <td>2%</td>
-                                <td class="positive">+1.0%</td>
-                                <td class="positive">+0.2</td>
-                                <td class="positive">+1.2%</td>
-                                <td style="border-left:2px solid #000;">145,200</td>
-                                <td>145,200</td>
+                                <td class="positive">+2.1%</td>
+                                <td class="positive">+0.4</td>
+                                <td class="positive">+4.5%</td>
+                                <td style="border-left:2px solid #000;">148,400</td>
+                                <td>148,400</td>
                                 <td class="">0.0%</td>
-                                <td class="positive">+0.2%</td>
+                                <td class="positive">+2.4%</td>
                             </tr>
                 
                             <tr class="total-row">
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
                                 <td style="font-weight: 600;">81%</td>
-                                <td class="negative" style="font-weight: 600;">-0.0%</td>
-                                <td class="negative" style="font-weight: 600;">-0.4</td>
+                                <td class="negative" style="font-weight: 600;">-1.3%</td>
+                                <td class="negative" style="font-weight: 600;">-12.8</td>
                                 <td style="font-weight: 600;">-</td>
                                 <td style="border-left:2px solid #000;">-</td>
                                 <td>-</td>
@@ -1984,7 +1984,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
             </div>
             
             <div class="portfolio-section" data-pf-sec="5" style="display:none;">
-                <h3 class="portfolio-title">NH 목표전환형 5호 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-07-20 09:30 기준)</span></h3>
+                <h3 class="portfolio-title">NH 목표전환형 5호 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-07-20 10:00 기준)</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table holdings-table" style="table-layout:fixed;">
                         <colgroup>
@@ -2014,15 +2014,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>005930</td>
                                 <td>삼성전자</td>
                                 <td>반도체</td>
-                                <td>1,492조2,626억</td>
+                                <td>1,464조4,928억</td>
                                 <td>30%</td>
-                                <td class="">+0.0%</td>
-                                <td class="">+0.0</td>
-                                <td class="negative">-12.1%</td>
-                                <td style="border-left:2px solid #000;">256,000</td>
+                                <td class="negative">-1.8%</td>
+                                <td class="negative">-5.3</td>
+                                <td class="negative">-15.5%</td>
+                                <td style="border-left:2px solid #000;">250,500</td>
                                 <td>362,500</td>
-                                <td class="negative">-29.4%</td>
-                                <td class="negative">-2.0%</td>
+                                <td class="negative">-30.9%</td>
+                                <td class="negative">-3.7%</td>
                             </tr>
                 
                             <tr>
@@ -2030,15 +2030,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>000660</td>
                                 <td>SK하이닉스</td>
                                 <td>반도체</td>
-                                <td>1,327조518억</td>
+                                <td>1,303조5,326억</td>
                                 <td>30%</td>
-                                <td class="positive">+1.1%</td>
-                                <td class="positive">+3.4</td>
-                                <td class="negative">-15.2%</td>
-                                <td style="border-left:2px solid #000;">1,867,000</td>
+                                <td class="negative">-0.5%</td>
+                                <td class="negative">-1.6</td>
+                                <td class="negative">-18.6%</td>
+                                <td style="border-left:2px solid #000;">1,822,000</td>
                                 <td>2,919,000</td>
-                                <td class="negative">-36.0%</td>
-                                <td class="negative">-10.2%</td>
+                                <td class="negative">-37.6%</td>
+                                <td class="negative">-11.9%</td>
                             </tr>
                 
                             <tr>
@@ -2046,15 +2046,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>005935</td>
                                 <td>삼성전자우</td>
                                 <td>기타</td>
-                                <td>139조6,126억</td>
+                                <td>138조4,893억</td>
                                 <td>5%</td>
-                                <td class="positive">+1.2%</td>
-                                <td class="positive">+0.6</td>
-                                <td class="negative">-8.4%</td>
-                                <td style="border-left:2px solid #000;">173,800</td>
+                                <td class="positive">+0.3%</td>
+                                <td class="positive">+0.1</td>
+                                <td class="negative">-9.8%</td>
+                                <td style="border-left:2px solid #000;">172,600</td>
                                 <td>235,000</td>
-                                <td class="negative">-26.0%</td>
-                                <td class="negative">-3.1%</td>
+                                <td class="negative">-26.6%</td>
+                                <td class="negative">-3.7%</td>
                             </tr>
                 
                             <tr>
@@ -2062,15 +2062,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>402340</td>
                                 <td>SK스퀘어</td>
                                 <td>상사,자본재</td>
-                                <td>160조1,975억</td>
+                                <td>157조2,944억</td>
                                 <td>5%</td>
-                                <td class="positive">+0.2%</td>
-                                <td class="positive">+0.1</td>
-                                <td class="negative">-11.6%</td>
-                                <td style="border-left:2px solid #000;">1,219,000</td>
+                                <td class="negative">-1.5%</td>
+                                <td class="negative">-0.7</td>
+                                <td class="negative">-15.3%</td>
+                                <td style="border-left:2px solid #000;">1,188,000</td>
                                 <td>1,970,000</td>
-                                <td class="negative">-38.1%</td>
-                                <td class="negative">-5.4%</td>
+                                <td class="negative">-39.7%</td>
+                                <td class="negative">-7.7%</td>
                             </tr>
                 
                             <tr>
@@ -2078,15 +2078,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>004170</td>
                                 <td>신세계</td>
                                 <td>소매(유통)</td>
-                                <td>5조3,082억</td>
+                                <td>5조2,704억</td>
                                 <td>3%</td>
-                                <td class="negative">-4.6%</td>
-                                <td class="negative">-1.4</td>
-                                <td class="negative">-11.6%</td>
-                                <td style="border-left:2px solid #000;">565,000</td>
+                                <td class="negative">-5.1%</td>
+                                <td class="negative">-1.5</td>
+                                <td class="negative">-12.9%</td>
+                                <td style="border-left:2px solid #000;">560,000</td>
                                 <td>776,000</td>
-                                <td class="negative">-27.2%</td>
-                                <td class="negative">-1.0%</td>
+                                <td class="negative">-27.8%</td>
+                                <td class="negative">-1.8%</td>
                             </tr>
                 
                             <tr>
@@ -2094,15 +2094,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>105560</td>
                                 <td>KB금융</td>
                                 <td>은행</td>
-                                <td>61조418억</td>
+                                <td>61조3,964억</td>
                                 <td>2%</td>
-                                <td class="negative">-4.9%</td>
-                                <td class="negative">-1.0</td>
-                                <td class="positive">+5.9%</td>
-                                <td style="border-left:2px solid #000;">172,900</td>
+                                <td class="negative">-4.4%</td>
+                                <td class="negative">-0.9</td>
+                                <td class="positive">+6.6%</td>
+                                <td style="border-left:2px solid #000;">173,100</td>
                                 <td>186,200</td>
-                                <td class="">-7.1%</td>
-                                <td class="positive">+31.2%</td>
+                                <td class="">-7.0%</td>
+                                <td class="positive">+31.4%</td>
                             </tr>
                 
                             <tr>
@@ -2110,15 +2110,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>237690</td>
                                 <td>에스티팜</td>
                                 <td>건강관리</td>
-                                <td>2조4,842억</td>
+                                <td>2조4,717억</td>
                                 <td>2%</td>
-                                <td class="negative">-4.3%</td>
+                                <td class="negative">-4.8%</td>
                                 <td class="negative">-0.9</td>
-                                <td class="negative">-13.8%</td>
-                                <td style="border-left:2px solid #000;">119,000</td>
+                                <td class="negative">-14.8%</td>
+                                <td style="border-left:2px solid #000;">118,200</td>
                                 <td>168,700</td>
-                                <td class="negative">-29.5%</td>
-                                <td class="positive">+3.6%</td>
+                                <td class="negative">-29.9%</td>
+                                <td class="positive">+3.0%</td>
                             </tr>
                 
                             <tr>
@@ -2126,15 +2126,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>226950</td>
                                 <td>올릭스</td>
                                 <td>건강관리</td>
-                                <td>2조6,618억</td>
+                                <td>2조5,338억</td>
                                 <td>2%</td>
-                                <td class="negative">-7.4%</td>
-                                <td class="negative">-1.5</td>
-                                <td class="negative">-24.1%</td>
-                                <td style="border-left:2px solid #000;">127,500</td>
+                                <td class="negative">-11.6%</td>
+                                <td class="negative">-2.3</td>
+                                <td class="negative">-31.5%</td>
+                                <td style="border-left:2px solid #000;">120,700</td>
                                 <td>207,000</td>
-                                <td class="negative">-38.4%</td>
-                                <td class="negative">-4.5%</td>
+                                <td class="negative">-41.7%</td>
+                                <td class="negative">-8.9%</td>
                             </tr>
                 
                             <tr>
@@ -2142,22 +2142,22 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>010950</td>
                                 <td>S-Oil</td>
                                 <td>에너지</td>
-                                <td>16조4,821억</td>
+                                <td>16조6,960억</td>
                                 <td>2%</td>
-                                <td class="positive">+1.0%</td>
-                                <td class="positive">+0.2</td>
-                                <td class="positive">+1.2%</td>
-                                <td style="border-left:2px solid #000;">145,200</td>
-                                <td>145,200</td>
+                                <td class="positive">+2.1%</td>
+                                <td class="positive">+0.4</td>
+                                <td class="positive">+4.5%</td>
+                                <td style="border-left:2px solid #000;">148,400</td>
+                                <td>148,400</td>
                                 <td class="">0.0%</td>
-                                <td class="positive">+0.2%</td>
+                                <td class="positive">+2.4%</td>
                             </tr>
                 
                             <tr class="total-row">
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
                                 <td style="font-weight: 600;">81%</td>
-                                <td class="negative" style="font-weight: 600;">-0.0%</td>
-                                <td class="negative" style="font-weight: 600;">-0.4</td>
+                                <td class="negative" style="font-weight: 600;">-1.3%</td>
+                                <td class="negative" style="font-weight: 600;">-12.8</td>
                                 <td style="font-weight: 600;">-</td>
                                 <td style="border-left:2px solid #000;">-</td>
                                 <td>-</td>
@@ -2170,7 +2170,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
             </div>
             
             <div class="portfolio-section" data-pf-sec="6" style="display:none;">
-                <h3 class="portfolio-title">한투 성과모집형 1차 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-07-20 09:30 기준)</span></h3>
+                <h3 class="portfolio-title">한투 성과모집형 1차 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-07-20 10:00 기준)</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table holdings-table" style="table-layout:fixed;">
                         <colgroup>
@@ -2200,15 +2200,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>005930</td>
                                 <td>삼성전자</td>
                                 <td>반도체</td>
-                                <td>1,492조2,626억</td>
+                                <td>1,464조4,928억</td>
                                 <td>30%</td>
-                                <td class="">+0.0%</td>
-                                <td class="">+0.0</td>
-                                <td class="negative">-6.7%</td>
-                                <td style="border-left:2px solid #000;">256,000</td>
+                                <td class="negative">-1.8%</td>
+                                <td class="negative">-5.3</td>
+                                <td class="negative">-10.3%</td>
+                                <td style="border-left:2px solid #000;">250,500</td>
                                 <td>362,500</td>
-                                <td class="negative">-29.4%</td>
-                                <td class="negative">-1.9%</td>
+                                <td class="negative">-30.9%</td>
+                                <td class="negative">-3.8%</td>
                             </tr>
                 
                             <tr>
@@ -2216,15 +2216,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>000660</td>
                                 <td>SK하이닉스</td>
                                 <td>반도체</td>
-                                <td>1,327조518억</td>
+                                <td>1,303조5,326억</td>
                                 <td>30%</td>
-                                <td class="positive">+1.1%</td>
-                                <td class="positive">+3.4</td>
-                                <td class="negative">-7.4%</td>
-                                <td style="border-left:2px solid #000;">1,867,000</td>
+                                <td class="negative">-0.5%</td>
+                                <td class="negative">-1.6</td>
+                                <td class="negative">-11.2%</td>
+                                <td style="border-left:2px solid #000;">1,822,000</td>
                                 <td>2,919,000</td>
-                                <td class="negative">-36.0%</td>
-                                <td class="negative">-4.2%</td>
+                                <td class="negative">-37.6%</td>
+                                <td class="negative">-6.4%</td>
                             </tr>
                 
                             <tr>
@@ -2232,15 +2232,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>005935</td>
                                 <td>삼성전자우</td>
                                 <td>기타</td>
-                                <td>139조6,126억</td>
+                                <td>138조4,893억</td>
                                 <td>5%</td>
-                                <td class="positive">+1.2%</td>
-                                <td class="positive">+0.6</td>
-                                <td class="negative">-8.4%</td>
-                                <td style="border-left:2px solid #000;">173,800</td>
+                                <td class="positive">+0.3%</td>
+                                <td class="positive">+0.1</td>
+                                <td class="negative">-9.8%</td>
+                                <td style="border-left:2px solid #000;">172,600</td>
                                 <td>235,000</td>
-                                <td class="negative">-26.0%</td>
-                                <td class="negative">-3.1%</td>
+                                <td class="negative">-26.6%</td>
+                                <td class="negative">-3.7%</td>
                             </tr>
                 
                             <tr>
@@ -2248,15 +2248,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>402340</td>
                                 <td>SK스퀘어</td>
                                 <td>상사,자본재</td>
-                                <td>160조1,975억</td>
+                                <td>157조2,944억</td>
                                 <td>5%</td>
-                                <td class="positive">+0.2%</td>
-                                <td class="positive">+0.1</td>
-                                <td class="negative">-11.6%</td>
-                                <td style="border-left:2px solid #000;">1,219,000</td>
+                                <td class="negative">-1.5%</td>
+                                <td class="negative">-0.7</td>
+                                <td class="negative">-15.3%</td>
+                                <td style="border-left:2px solid #000;">1,188,000</td>
                                 <td>1,970,000</td>
-                                <td class="negative">-38.1%</td>
-                                <td class="negative">-5.4%</td>
+                                <td class="negative">-39.7%</td>
+                                <td class="negative">-7.7%</td>
                             </tr>
                 
                             <tr>
@@ -2264,15 +2264,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>004170</td>
                                 <td>신세계</td>
                                 <td>소매(유통)</td>
-                                <td>5조3,082억</td>
+                                <td>5조2,704억</td>
                                 <td>3%</td>
-                                <td class="negative">-4.6%</td>
-                                <td class="negative">-1.4</td>
-                                <td class="negative">-11.6%</td>
-                                <td style="border-left:2px solid #000;">565,000</td>
+                                <td class="negative">-5.1%</td>
+                                <td class="negative">-1.5</td>
+                                <td class="negative">-12.9%</td>
+                                <td style="border-left:2px solid #000;">560,000</td>
                                 <td>776,000</td>
-                                <td class="negative">-27.2%</td>
-                                <td class="negative">-1.0%</td>
+                                <td class="negative">-27.8%</td>
+                                <td class="negative">-1.8%</td>
                             </tr>
                 
                             <tr>
@@ -2280,15 +2280,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>105560</td>
                                 <td>KB금융</td>
                                 <td>은행</td>
-                                <td>61조418억</td>
+                                <td>61조3,964억</td>
                                 <td>2%</td>
-                                <td class="negative">-4.9%</td>
-                                <td class="negative">-1.0</td>
-                                <td class="negative">-3.9%</td>
-                                <td style="border-left:2px solid #000;">172,900</td>
+                                <td class="negative">-4.4%</td>
+                                <td class="negative">-0.9</td>
+                                <td class="negative">-3.2%</td>
+                                <td style="border-left:2px solid #000;">173,100</td>
                                 <td>186,200</td>
-                                <td class="">-7.1%</td>
-                                <td class="positive">+7.0%</td>
+                                <td class="">-7.0%</td>
+                                <td class="positive">+7.1%</td>
                             </tr>
                 
                             <tr>
@@ -2296,15 +2296,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>237690</td>
                                 <td>에스티팜</td>
                                 <td>건강관리</td>
-                                <td>2조4,842억</td>
+                                <td>2조4,717억</td>
                                 <td>2%</td>
-                                <td class="negative">-4.3%</td>
+                                <td class="negative">-4.8%</td>
                                 <td class="negative">-0.9</td>
-                                <td class="negative">-8.3%</td>
-                                <td style="border-left:2px solid #000;">119,000</td>
+                                <td class="negative">-9.4%</td>
+                                <td style="border-left:2px solid #000;">118,200</td>
                                 <td>168,700</td>
-                                <td class="negative">-29.5%</td>
-                                <td class="negative">-4.3%</td>
+                                <td class="negative">-29.9%</td>
+                                <td class="negative">-4.9%</td>
                             </tr>
                 
                             <tr>
@@ -2312,15 +2312,15 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>226950</td>
                                 <td>올릭스</td>
                                 <td>건강관리</td>
-                                <td>2조6,618억</td>
+                                <td>2조5,338억</td>
                                 <td>2%</td>
-                                <td class="negative">-7.4%</td>
-                                <td class="negative">-1.5</td>
-                                <td class="negative">-13.6%</td>
-                                <td style="border-left:2px solid #000;">127,500</td>
+                                <td class="negative">-11.6%</td>
+                                <td class="negative">-2.3</td>
+                                <td class="negative">-21.9%</td>
+                                <td style="border-left:2px solid #000;">120,700</td>
                                 <td>207,000</td>
-                                <td class="negative">-38.4%</td>
-                                <td class="negative">-6.7%</td>
+                                <td class="negative">-41.7%</td>
+                                <td class="negative">-11.6%</td>
                             </tr>
                 
                             <tr>
@@ -2328,22 +2328,22 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                                 <td>010950</td>
                                 <td>S-Oil</td>
                                 <td>에너지</td>
-                                <td>16조4,821억</td>
+                                <td>16조6,960억</td>
                                 <td>2%</td>
-                                <td class="positive">+1.0%</td>
-                                <td class="positive">+0.2</td>
-                                <td class="positive">+1.2%</td>
-                                <td style="border-left:2px solid #000;">145,200</td>
-                                <td>145,200</td>
+                                <td class="positive">+2.1%</td>
+                                <td class="positive">+0.4</td>
+                                <td class="positive">+4.5%</td>
+                                <td style="border-left:2px solid #000;">148,400</td>
+                                <td>148,400</td>
                                 <td class="">0.0%</td>
-                                <td class="positive">+0.2%</td>
+                                <td class="positive">+2.4%</td>
                             </tr>
                 
                             <tr class="total-row">
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
                                 <td style="font-weight: 600;">81%</td>
-                                <td class="negative" style="font-weight: 600;">-0.0%</td>
-                                <td class="negative" style="font-weight: 600;">-0.4</td>
+                                <td class="negative" style="font-weight: 600;">-1.3%</td>
+                                <td class="negative" style="font-weight: 600;">-12.8</td>
                                 <td style="font-weight: 600;">-</td>
                                 <td style="border-left:2px solid #000;">-</td>
                                 <td>-</td>
