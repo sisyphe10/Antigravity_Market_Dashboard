@@ -49,6 +49,22 @@
           "reason": ""
         },
         {
+          "sector": "필수소비재",
+          "code": "003230",
+          "name": "삼양식품",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "에너지",
+          "code": "010950",
+          "name": "S-Oil",
+          "weight": 3,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
           "sector": "은행",
           "code": "105560",
           "name": "KB금융",
@@ -65,32 +81,15 @@
           "reason": "바이오 섹터의 호재 발표에도 주가가 전혀 반응하지 못하고 있어 리스크 관리 차원에서 전량 편출"
         },
         {
-          "sector": "필수소비재",
-          "code": "003230",
-          "name": "삼양식품",
-          "weight": 2,
-          "baseWeight": 2,
-          "reason": ""
-        },
-        {
           "sector": "건강관리",
           "code": "237690",
           "name": "에스티팜",
           "weight": 0,
           "baseWeight": 2,
           "reason": "바이오 섹터의 호재 발표에도 주가가 전혀 반응하지 못하고 있어 리스크 관리 차원에서 전량 편출"
-        },
-        {
-          "sector": "에너지",
-          "code": "010950",
-          "name": "S-Oil",
-          "weight": 2,
-          "baseWeight": 2,
-          "reason": ""
         }
       ],
-      "savedAt": "2026-07-20T01:55:44.566Z",
-      "finalizedAt": "2026-07-20T10:57:26+09:00"
+      "savedAt": "2026-07-20T04:29:20.160Z"
     },
     "NH 다이내믹 밸류": {
       "targets": [
@@ -141,6 +140,22 @@
           "reason": ""
         },
         {
+          "sector": "필수소비재",
+          "code": "003230",
+          "name": "삼양식품",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "에너지",
+          "code": "010950",
+          "name": "S-Oil",
+          "weight": 3,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
           "sector": "은행",
           "code": "105560",
           "name": "KB금융",
@@ -157,32 +172,15 @@
           "reason": "바이오 섹터의 호재 발표에도 주가가 전혀 반응하지 못하고 있어 리스크 관리 차원에서 전량 편출"
         },
         {
-          "sector": "필수소비재",
-          "code": "003230",
-          "name": "삼양식품",
-          "weight": 2,
-          "baseWeight": 2,
-          "reason": ""
-        },
-        {
           "sector": "건강관리",
           "code": "237690",
           "name": "에스티팜",
           "weight": 0,
           "baseWeight": 2,
           "reason": "바이오 섹터의 호재 발표에도 주가가 전혀 반응하지 못하고 있어 리스크 관리 차원에서 전량 편출"
-        },
-        {
-          "sector": "에너지",
-          "code": "010950",
-          "name": "S-Oil",
-          "weight": 2,
-          "baseWeight": 2,
-          "reason": ""
         }
       ],
-      "savedAt": "2026-07-20T01:55:44.567Z",
-      "finalizedAt": "2026-07-20T10:57:26+09:00"
+      "savedAt": "2026-07-20T04:29:20.160Z"
     },
     "DB 개방형": {
       "targets": [
@@ -233,6 +231,22 @@
           "reason": ""
         },
         {
+          "sector": "필수소비재",
+          "code": "003230",
+          "name": "삼양식품",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "에너지",
+          "code": "010950",
+          "name": "S-Oil",
+          "weight": 3,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
           "sector": "은행",
           "code": "105560",
           "name": "KB금융",
@@ -249,32 +263,15 @@
           "reason": "바이오 섹터의 호재 발표에도 주가가 전혀 반응하지 못하고 있어 리스크 관리 차원에서 전량 편출"
         },
         {
-          "sector": "필수소비재",
-          "code": "003230",
-          "name": "삼양식품",
-          "weight": 2,
-          "baseWeight": 2,
-          "reason": ""
-        },
-        {
           "sector": "건강관리",
           "code": "237690",
           "name": "에스티팜",
           "weight": 0,
           "baseWeight": 2,
           "reason": "바이오 섹터의 호재 발표에도 주가가 전혀 반응하지 못하고 있어 리스크 관리 차원에서 전량 편출"
-        },
-        {
-          "sector": "에너지",
-          "code": "010950",
-          "name": "S-Oil",
-          "weight": 2,
-          "baseWeight": 2,
-          "reason": ""
         }
       ],
-      "savedAt": "2026-07-20T01:55:44.567Z",
-      "finalizedAt": "2026-07-20T10:57:26+09:00"
+      "savedAt": "2026-07-20T04:29:20.160Z"
     },
     "한투 지속형": {
       "targets": [
@@ -325,6 +322,22 @@
           "reason": ""
         },
         {
+          "sector": "필수소비재",
+          "code": "003230",
+          "name": "삼양식품",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "에너지",
+          "code": "010950",
+          "name": "S-Oil",
+          "weight": 3,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
           "sector": "은행",
           "code": "105560",
           "name": "KB금융",
@@ -347,26 +360,9 @@
           "weight": 0,
           "baseWeight": 2,
           "reason": "바이오 섹터의 호재 발표에도 주가가 전혀 반응하지 못하고 있어 리스크 관리 차원에서 전량 편출"
-        },
-        {
-          "sector": "필수소비재",
-          "code": "003230",
-          "name": "삼양식품",
-          "weight": 2,
-          "baseWeight": 2,
-          "reason": ""
-        },
-        {
-          "sector": "에너지",
-          "code": "010950",
-          "name": "S-Oil",
-          "weight": 2,
-          "baseWeight": 2,
-          "reason": ""
         }
       ],
-      "savedAt": "2026-07-20T01:55:44.567Z",
-      "finalizedAt": "2026-07-20T10:57:26+09:00"
+      "savedAt": "2026-07-20T04:29:20.160Z"
     },
     "NH 목표전환형 5호": {
       "targets": [
@@ -417,6 +413,14 @@
           "reason": ""
         },
         {
+          "sector": "에너지",
+          "code": "010950",
+          "name": "S-Oil",
+          "weight": 3,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
           "sector": "은행",
           "code": "105560",
           "name": "KB금융",
@@ -439,18 +443,9 @@
           "weight": 0,
           "baseWeight": 2,
           "reason": "바이오 섹터의 호재 발표에도 주가가 전혀 반응하지 못하고 있어 리스크 관리 차원에서 전량 편출"
-        },
-        {
-          "sector": "에너지",
-          "code": "010950",
-          "name": "S-Oil",
-          "weight": 2,
-          "baseWeight": 2,
-          "reason": ""
         }
       ],
-      "savedAt": "2026-07-20T01:55:44.567Z",
-      "finalizedAt": "2026-07-20T10:57:26+09:00"
+      "savedAt": "2026-07-20T04:29:20.160Z"
     },
     "DB 목표전환형 6차": {
       "targets": [
@@ -501,6 +496,14 @@
           "reason": ""
         },
         {
+          "sector": "에너지",
+          "code": "010950",
+          "name": "S-Oil",
+          "weight": 3,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
           "sector": "은행",
           "code": "105560",
           "name": "KB금융",
@@ -523,18 +526,9 @@
           "weight": 0,
           "baseWeight": 2,
           "reason": "바이오 섹터의 호재 발표에도 주가가 전혀 반응하지 못하고 있어 리스크 관리 차원에서 전량 편출"
-        },
-        {
-          "sector": "에너지",
-          "code": "010950",
-          "name": "S-Oil",
-          "weight": 2,
-          "baseWeight": 2,
-          "reason": ""
         }
       ],
-      "savedAt": "2026-07-20T01:55:44.567Z",
-      "finalizedAt": "2026-07-20T10:57:26+09:00"
+      "savedAt": "2026-07-20T04:29:20.160Z"
     },
     "한투 성과모집형 1차": {
       "targets": [
@@ -585,6 +579,14 @@
           "reason": ""
         },
         {
+          "sector": "에너지",
+          "code": "010950",
+          "name": "S-Oil",
+          "weight": 3,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
           "sector": "은행",
           "code": "105560",
           "name": "KB금융",
@@ -607,18 +609,9 @@
           "weight": 0,
           "baseWeight": 2,
           "reason": "바이오 섹터의 호재 발표에도 주가가 전혀 반응하지 못하고 있어 리스크 관리 차원에서 전량 편출"
-        },
-        {
-          "sector": "에너지",
-          "code": "010950",
-          "name": "S-Oil",
-          "weight": 2,
-          "baseWeight": 2,
-          "reason": ""
         }
       ],
-      "savedAt": "2026-07-20T01:55:44.567Z",
-      "finalizedAt": "2026-07-20T10:57:26+09:00"
+      "savedAt": "2026-07-20T04:29:20.160Z"
     }
   }
 }
