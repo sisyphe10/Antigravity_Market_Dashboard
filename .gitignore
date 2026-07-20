@@ -35,6 +35,7 @@ test_env/
 !taiwan_universe.csv
 !taiwan_revenue.csv
 !us_etf_history.csv
+!quoteboard/etf_tickers.csv
 !Wrap_NAV.xlsx
 !자문지/*.xlsx
 
