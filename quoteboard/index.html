@@ -266,9 +266,12 @@ function sectorGroups(rows) {      // 섹터 목록 (합산 시총 내림차순)
     if (!g.has(r.sector)) g.set(r.sector, []);
     g.get(r.sector).push(r);
   }
-  return [...g.entries()]
+  const arr = [...g.entries()]
     .map(([sec, rs]) => ({ sec, rows: rs, sum: rs.reduce((a, r) => a + r.mcap, 0) }))
     .sort((a, b) => b.sum - a.sum);
+  const ei = arr.findIndex(x => x.sec === 'ETF');   // ETF 그룹은 항상 맨 앞
+  if (ei > 0) arr.unshift(arr.splice(ei, 1)[0]);
+  return arr;
 }
 
 function tabsHTML(groups) {        // [관심종목, 전체] + 개별 섹터 (토글 멀티선택)
@@ -329,7 +332,7 @@ function render() {
   const q = document.getElementById('q').value.trim().toLowerCase();
   let html;
   if (q) {                            // 전역 검색 — 모든 탭에서 우선 표시
-    const rows = DATA.rows.filter(r => r.name.toLowerCase().includes(q) || r.code.startsWith(q));
+    const rows = DATA.rows.filter(r => r.name.toLowerCase().includes(q) || r.code.toLowerCase().startsWith(q));
     rows.sort((a, b) => b.mcap - a.mcap);
     html = `<div class="panel"><h2>검색 결과<span class="cnt">${rows.length}</span></h2>` +
            (rows.length ? tableHTML(rows) : '<div class="empty">결과 없음</div>') + '</div>';
@@ -416,7 +419,7 @@ function renderAddResults(aq) {
   aq = aq.trim().toLowerCase();
   const inGroup = new Set(WL[addGi].codes);
   let rows = DATA.rows.filter(r => !inGroup.has(r.code));
-  if (aq) rows = rows.filter(r => r.name.toLowerCase().includes(aq) || r.code.startsWith(aq));
+  if (aq) rows = rows.filter(r => r.name.toLowerCase().includes(aq) || r.code.toLowerCase().startsWith(aq));
   rows.sort((a, b) => b.mcap - a.mcap);
   document.getElementById('addres').innerHTML = rows.slice(0, 8).map(r =>
     `<div class="mi" data-code="${r.code}"><span>${r.name}</span>` +

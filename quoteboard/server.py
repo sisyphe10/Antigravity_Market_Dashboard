@@ -27,6 +27,7 @@ from kis_token import kis_get  # noqa: E402  (0.06s 자체 스로틀 내장)
 
 KST = timezone(timedelta(hours=9))
 UNIVERSE_CSV = os.path.join(ROOT, 'universe_tickers.csv')
+ETF_CSV = os.path.join(BASE, 'etf_tickers.csv')     # 선별 ETF (universe와 분리, 섹터='ETF')
 MASTER_FILE = os.path.join(ROOT, 'kis_universe_master.json')
 SHARES_CACHE = os.path.join(BASE, 'shares_cache.json')
 WL_PATH = os.path.join(BASE, 'watchlists.json')     # 관심종목 그룹 (기기 공통, 서버 저장)
@@ -77,6 +78,24 @@ def load_universe():
             rows.append({'code': code,
                          'name': (r.get('기업명') or '').strip(),
                          'sector': (r.get('섹터') or '').strip() or '기타'})
+    return rows
+
+
+def load_etfs():
+    """quoteboard/etf_tickers.csv → 선별 ETF 목록 (섹터='ETF'). 파일 없으면 빈 목록."""
+    rows, seen = [], set()
+    try:
+        with open(ETF_CSV, encoding='utf-8-sig') as f:
+            for r in csv.DictReader(f):
+                code = (r.get('코드') or '').strip().upper()
+                if not (len(code) == 6 and code.isalnum()) or code in seen:
+                    continue
+                seen.add(code)
+                rows.append({'code': code,
+                             'name': (r.get('종목명') or '').strip() or code,
+                             'sector': 'ETF'})
+    except FileNotFoundError:
+        pass
     return rows
 
 
@@ -274,7 +293,8 @@ def valid_wl(w):
         codes = g.get('codes')
         if not isinstance(codes, list) or len(codes) > 500:
             return False
-        if not all(isinstance(c, str) and c.isdigit() and len(c) == 6 for c in codes):
+        # KRX 신형 영숫자 코드·ETF 포함 (예: 0167A0)
+        if not all(isinstance(c, str) and len(c) == 6 and c.isalnum() for c in codes):
             return False
     return True
 
@@ -407,7 +427,9 @@ def main():
     args = ap.parse_args()
 
     STOCKS.extend(load_universe())
-    logging.info('유니버스 로드: %d종목', len(STOCKS))
+    have = {s['code'] for s in STOCKS}
+    STOCKS.extend(e for e in load_etfs() if e['code'] not in have)
+    logging.info('유니버스 로드: %d종목 (ETF 포함)', len(STOCKS))
     fresh = seed_shares()
     missing = [s['code'] for s in STOCKS if s['code'] not in SHARES]
     if not fresh:
