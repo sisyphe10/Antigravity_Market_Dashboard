@@ -43,7 +43,7 @@ START_YEAR = 1990
 # — 종목당 호출 4→1로 감소 (속도 3배·차단 위험 감소). 캡이 재발하면 10으로 되돌릴 것.
 WINDOW_YEARS = 40
 
-PASSES = ["ohlcv", "marcap", "foreign", "etf", "index", "investor",
+PASSES = ["ohlcv", "marcap", "foreign", "fundamental", "etf", "index", "investor",
           "short", "short_investor", "futures"]
 
 # 선물 백필 대상 상품 (prodId, 상장일, 라벨) — 상장일은 헛콜 방지용 하한일 뿐
@@ -72,6 +72,8 @@ RENAME = {
                  "거래량": "volume", "거래대금": "value", "등락률": "change_pct"},
     "kr_marcap": {"시가총액": "marcap", "거래량": "volume", "거래대금": "value",
                   "상장주식수": "shares"},
+    "kr_fundamental": {"BPS": "bps", "PER": "per", "PBR": "pbr", "EPS": "eps",
+                       "DIV": "div", "DPS": "dps"},
     "kr_foreign": {"상장주식수": "shares", "보유수량": "held", "지분율": "ratio",
                    "한도수량": "limit_qty", "한도소진률": "exhaustion"},
     "kr_etf_ohlcv": {"NAV": "nav", "시가": "open", "고가": "high", "저가": "low",
@@ -373,7 +375,7 @@ def main():
 
     # 종목 유니버스 (KOSPI+KOSDAQ 현재 상장 전 종목)
     tickers, market_of, name_of = [], {}, {}
-    if any(p in passes for p in ("ohlcv", "marcap", "foreign", "short")):
+    if any(p in passes for p in ("ohlcv", "marcap", "foreign", "fundamental", "short")):
         for mkt in ("KOSPI", "KOSDAQ"):
             for t in runner.call(stock.get_market_ticker_list, tdy, market=mkt) or []:
                 tickers.append(t)
@@ -416,6 +418,12 @@ def main():
     if "foreign" in passes:
         run_per_item("kr_foreign", tickers,
                      lambda f, t, k: stock.get_exhaustion_rates_of_foreign_investment(f, t, k),
+                     runner, today, ["date", "ticker"], stock_extra, force=force)
+    if "fundamental" in passes:
+        # ★KRX 주당지표(BPS/PER/PBR/EPS/DIV/DPS) — 연간 확정 BPS 기준이라 분기 정밀 밸류엔 부정확(계단식),
+        # 장기 PBR/PER 밴드·사이클 고점 분석엔 표준 소스. (2026-07-20 재활성화, 사용자 요청)
+        run_per_item("kr_fundamental", tickers,
+                     lambda f, t, k: stock.get_market_fundamental(f, t, k),
                      runner, today, ["date", "ticker"], stock_extra, force=force)
 
     if "etf" in passes:
