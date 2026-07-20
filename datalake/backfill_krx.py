@@ -106,6 +106,7 @@ def normalize(df, dataset, **extra_cols):
     out = out[keep]
     if out["date"].duplicated().any():          # 동일 날짜 중복행 방어 (뒤값=정정치 우선)
         out = out.drop_duplicates(subset="date", keep="last")
+    out = out.reset_index(drop=True)          # 중복 인덱스 방어 → 이후 컬럼 대입 안전 (ETF 크래시 fix 2026-07-21)
     for k, v in extra_cols.items():
         out[k] = v
     out["date"] = pd.to_datetime(out["date"])
