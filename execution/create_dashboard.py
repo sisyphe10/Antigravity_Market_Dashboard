@@ -1926,6 +1926,8 @@ def _build_combined_chart_section():
                 {'display': 'Copper',                     'csv': 'Copper',                     'color': '#B87333'},
                 {'display': 'WTI',                        'csv': 'WTI Crude Oil',              'color': '#2C3E50'},
                 {'display': 'Brent',                      'csv': 'Brent Crude Oil',            'color': '#34495E'},
+                # 정제마진 3-2-1 크랙스프레드 (NY Harbor, FRED 파생 — fetch_fred_data.py, $/bbl)
+                {'display': '3-2-1 Crack Spread',         'csv': '미 3-2-1 크랙스프레드',       'color': '#E67E22'},
                 {'display': 'Natural Gas',                'csv': 'Natural Gas',                'color': '#16A085'},
                 {'display': 'Wheat',                      'csv': 'Wheat',                      'color': '#F39C12'},
                 {'display': 'Uranium',                    'csv': 'Uranium',                    'color': '#27AE60'},

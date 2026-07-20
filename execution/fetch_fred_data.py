@@ -264,6 +264,7 @@ def fmt(v: float, nd: int) -> str:
 
 def main() -> int:
     use_fredgraph = '--use-fredgraph' in sys.argv
+    crack_only = '--crack-only' in sys.argv   # 파생 크랙스프레드만 백필 (원계열 재조회 churn 회피)
     key = ''
     if not use_fredgraph:
         key = load_key()
@@ -317,7 +318,7 @@ def main() -> int:
 
     ok = 0
     failed = []
-    for s in SERIES:
+    for s in (SERIES if not crack_only else []):
         try:
             if use_fredgraph:
                 raw = fredgraph_fetch(s['fred_id'], s['start'])
@@ -371,6 +372,33 @@ def main() -> int:
             print(f"  ⚠️ {s['name']} [{s['fred_id']}]: {type(e).__name__}")
         time.sleep(FREDGRAPH_SLEEP if use_fredgraph else API_SLEEP)
 
+    # ----- 파생 계열: 3-2-1 크랙스프레드 (NY Harbor, WTI·휘발유·증류유) -----
+    # (2×휘발유 + 1×증류유)×42 − 3×WTI, ÷3 → $/bbl. 원계열은 계산용으로만 fetch(dataset.csv 미등재).
+    CRACK_NAME = '미 3-2-1 크랙스프레드'
+    CRACK_IDS = {'wti': 'DCOILWTICO', 'gaso': 'DGASNYH', 'dist': 'DHOILNYH'}  # NY Harbor 스팟
+    CRACK_START = '2025-01-01'
+    try:
+        comp = {}
+        for slot, fid in CRACK_IDS.items():
+            raw = fredgraph_fetch(fid, CRACK_START) if use_fredgraph else api_fetch(key, fid, CRACK_START)
+            comp[slot] = {d: v for d, v in raw}
+            time.sleep(FREDGRAPH_SLEEP if use_fredgraph else API_SLEEP)
+        common = sorted(set(comp['wti']) & set(comp['gaso']) & set(comp['dist']))
+        cadded = 0
+        clast_stamp = clast_val = None
+        for d in common:
+            if d > today or d.weekday() >= 5:      # 미래·주말 가드 (원계열은 영업일이나 방어적)
+                continue
+            crack = (2 * comp['gaso'][d] * 42 + comp['dist'][d] * 42 - 3 * comp['wti'][d]) / 3
+            cadded += upsert(d.isoformat(), CRACK_NAME, crack, 1, 'FRED_RATE')
+            if clast_stamp is None or d > clast_stamp:
+                clast_stamp, clast_val = d, crack
+        latest = f"{clast_stamp.isoformat()}={fmt(clast_val, 1)}" if clast_stamp else '-'
+        print(f"  ✓ {CRACK_NAME} [파생]: 공통일 {len(common)}, 신규 {cadded}, 최신 {latest}")
+    except Exception as e:
+        failed.append(CRACK_NAME)
+        print(f"  ⚠️ {CRACK_NAME} [파생]: {type(e).__name__}")
+
     if healed:
         # 개정 반영은 전체 재작성 필요 (신규 행은 all_rows에 이미 포함)
         with open(CSV_PATH, 'w', newline='', encoding='utf-8-sig') as f:
@@ -388,7 +416,7 @@ def main() -> int:
     print(f"\nFRED 수집 완료: 시리즈 {ok}/{len(SERIES)} 성공, 신규 {len(new_rows)}건, 개정 {healed}건")
     if failed:
         print(f"실패 시리즈: {', '.join(failed)}")
-    if ok == 0:
+    if ok == 0 and not crack_only:
         print('전 시리즈 실패 — FRED 장애 의심')
         return 1
     return 0
