@@ -1,8 +1,8 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 127 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 128 components._
 
-Updated: 2026-07-19
+Updated: 2026-07-20
 
 ## By domain
 
@@ -60,13 +60,14 @@ Updated: 2026-07-19
 - [일본 CAPEX 지표 (fetch_japan_capex.py)](src-japan-capex.md) — Source
 - [호텔 ADR 타이머 (12:00, 은퇴)](timer-hotel-adr.md) — Timer
 
-### 반도체 · 테크 (6)
+### 반도체 · 테크 (7)
 - [KODEX 섹터 비중 (fetch_kodex_sectors.py)](src-kodex-sectors.md) — Source
 - [KODEX 섹터 타이머 (23:30, +KOSIS/일본capex/파생 편승)](timer-kodex-sectors.md) — Timer
 - [SemiAnalysis 소스 (sources/semianalysis.py)](src-semianalysis.md) — Source
 - [SiliconData 지수 3종 (fetch_silicondata_index.py)](src-silicondata.md) — Source
 - [TrendForce 소스 (sources/trendforce.py)](src-trendforce.md) — Source
 - [다나와 DRAM 최저가 (fetch_danawa_price.py)](src-danawa.md) — Source
+- [메모리 사이클 플랜 알림 타이머 (07:45)](timer-memory-cycle-alert.md) — Timer
 
 ### 포트폴리오 · WRAP (19)
 - [contribution_data.json](store-contribution-data.md) — Dataset
@@ -155,7 +156,7 @@ Updated: 2026-07-19
 - [Sisyphe-Bot (펀드/일상 텔레그램 봇)](bot-sisyphe.md) — 상시 (내부 잡 05:00~23:00), active
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — 상시 (06:00 다이제스트 등), active
 
-### Timer (15)
+### Timer (16)
 - [ETF 구성종목 수집 타이머 (etf-collect 16:30)](timer-etf-collect.md) — 16:30 매일, active
 - [ETF 수집 재시도 타이머 (etf-collect-retry 18:00)](timer-etf-collect-retry.md) — 18:00 매일, active
 - [Featured KIS 수집 타이머 (15:50, 신고가)](timer-featured-kis.md) — 15:50 매일, active
@@ -163,6 +164,7 @@ Updated: 2026-07-19
 - [Memento 점심 텔레그램 타이머 (12:00)](timer-memento-telegram.md) — 12:00 매일, active
 - [WRAP 원칙 점검 타이머 (17:10, 변화 시에만 발송)](timer-wrap-principle-check.md) — 17:10 평일, active
 - [랜딩 하이라이트 타이머 (18:45)](timer-landing-highlights.md) — 18:45 매일, active
+- [메모리 사이클 플랜 알림 타이머 (07:45)](timer-memory-cycle-alert.md) — 07:45 매일, active
 - [미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 09:00)](timer-us-etf-collect.md) — 09:00 화~토, active
 - [실적봇 타이머 (earnings-bot)](timer-earnings-bot.md) — 08:00 매일, active
 - [아키텍처 자동 최신화 타이머 (21:40, claude 헤드리스)](timer-architecture-daily.md) — 21:40 매일, active
@@ -231,7 +233,7 @@ Updated: 2026-07-19
 - [Plan API 데몬 (Sisyphe Ledger 자금계획, 127.0.0.1:8790)](daemon-plan-api.md) — 상시, active
 - [UPS (무정전 전원, 맥미니 대비)](infra-ups.md) — planned
 - [개인 스냅숏 게시 (publish_snapshot.sh)](web-publish-snapshot.md) — 잡 성공 훅 (여러 잡), active
-- [관심종목 시세판 데몬 (Watchlist, 127.0.0.1:8778)](daemon-watchlist-quoteboard.md) — 상시 (스윕 장중 1s · 장외 60s), active
+- [관심종목 시세판 데몬 (Watchlist, 127.0.0.1:8778)](daemon-watchlist-quoteboard.md) — 상시 (스윕 장중 2s · 장외 60s), active
 - [데이터레이크 문답 웹 UI 데몬 (AoE Wiki, 127.0.0.1:8787)](daemon-datalake-webui.md) — 상시, active
 - [맥미니 데이터레이크 (~/datalake + 문답 위키)](infra-datalake.md) — 잡별 (20:30 / 23:20 / 23:50 / 일 10:00 / 20분), active
 - [웹 서빙 (Caddy · com.antigravity.web)](web-caddy.md) — 상시, active
@@ -298,7 +300,7 @@ Updated: 2026-07-19
 
 ## By project
 
-### antigravity (127)
+### antigravity (128)
 - [architecture.html (아키텍처)](page-architecture.md) — Page
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — Infra
 - [Claude Code Action (@claude 이벤트)](gha-claude-code.md) — GHA
@@ -391,6 +393,7 @@ Updated: 2026-07-19
 - [랜딩 하이라이트 타이머 (18:45)](timer-landing-highlights.md) — Timer
 - [마스터 시장 크롤러 (market_crawler.py)](src-market-crawler.md) — Source
 - [맥미니 데이터레이크 (~/datalake + 문답 위키)](infra-datalake.md) — Infra
+- [메모리 사이클 플랜 알림 타이머 (07:45)](timer-memory-cycle-alert.md) — Timer
 - [미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 09:00)](timer-us-etf-collect.md) — Timer
 - [비활성 워크플로 (weather · calendar · portfolio-report)](gha-disabled.md) — GHA
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — Bot

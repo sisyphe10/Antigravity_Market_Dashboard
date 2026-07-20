@@ -36,11 +36,12 @@ alerts: "wrapper notify_failure → 텔레그램 (맥미니)"
 
 GitHub Actions 스케줄 워크플로를 맥미니 launchd LaunchDaemon으로 흡수하는 Phase 2 레이어(`launchd/gha/`). **2026-07-11 컷오버 완료 — GHA 이관 잡 10종(taiwan 포함)이 맥미니에서 라이브.** 각 원본 yml은 `schedule:`만 제거되고 `workflow_dispatch`는 롤백 경로로 유지된다.
 
-- 대상 10잡: gha-fred/universe/ecos/kofia/krx-valuation/disclosures/crawl/earnings-calendar-sync/finalize-orders + taiwan-revenue(plan 이후 추가, 10번째).
+- 대상 10잡: gha-fred/universe/ecos/kofia/krx-valuation/disclosures/crawl/earnings-calendar-sync/finalize-orders + taiwan-revenue(plan 이후 추가, 10번째). 이후 earnings-ir-day(2026-07-20 분리, 11번째)가 더해졌다.
 - 공용 wrapper `run_gha_job.sh`: 잡별 락 + `wrap-nav-pipeline` 공유 락(GHA concurrency 대체) + 안전 .env 파서 + 타임아웃 워치독 + 성공 stamp + 실패 알림 + `heartbeats.json` 방출 + 성공 훅에서 [[web-publish-snapshot]] 게시.
 - UTC→KST 환산 함정: gha-fred는 월~금 22:50 UTC → **화~토 07:50 KST**(요일 +1일).
 - 컷오버는 하루 1잡 짝 커밋으로 진행됐고 finalize-orders가 최후였다.
 - ★earnings-calendar-sync 이중 실행(VM cron 15:00 + GHA 07:00) 단일화는 이관 시 정리 대상.
+- ★**earnings IR Day 분리(2026-07-20)**: `gha-earnings-calendar-sync`가 캘린더 쓰기만으로 900s를 소진해 IR Day(Finnhub 315종목 + EDGAR 8-K)가 강제종료 → `earnings_calendar_sync.py`를 `--skip-ir-day`/`--skip-earnings` 플래그로 쪼개 **11번째 launchd 잡 `gha-earnings-ir-day`(07:15)**를 신설(같은 스크립트, 별도 yml 없음). 두 잡 타임아웃 900→1800s(`run_gha_job.sh` `job_timeout_seconds`), `schedule_gha.tsv`·`install_gha.sh`(ALL_JOBS/Wave3) 등재.
 
 ## Reads
 - (none)

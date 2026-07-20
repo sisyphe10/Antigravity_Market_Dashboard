@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-07-19",
+  "updated": "2026-07-20",
   "projects": [
    "antigravity"
   ],
@@ -469,7 +469,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "08:50 매일",
    "status": "active",
-   "desc_md": "맥미니 상태를 매일 08:50 KST 점검해 **이상이 있을 때만** 텔레그램으로 요약을 보내는 launchd 데몬(`com.antigravity.daily-selfcheck`). 2026-07-11 컷오버로 라이브.\n\n- ★**2026-07-15 설계 반전(사용자 지시)**: 원래는 정상이어도 매일 발송해 메시지 존재 자체가 liveness 신호인 dead-man's switch였으나, 매일의 정상 알림 소음이 그 값어치를 넘어선다고 판단 — warn이 없으면 발송을 생략하고 로컬 로그만 남긴다. **dead-man 감시 역할은 외부 워치독([[gha-daily-health-check]], 11:00 KST)이 승계** — 맥미니가 통째로 죽어도 GitHub 쪽에서 잡히므로 침묵이 감시 공백이 되지 않는다.\n\n- 수집: 봇 4종 running 여부 · **`schedule.tsv` 등재 타이머**(2026-07-16 기준 10종 — memento-telegram·wrap-principle-check 추가) stamp 신선도(OK n/N) · 24h 재시작 수 · 디스크 여유 · git-pull 실패연속/HEAD 나이. 타이머 목록은 하드코딩이 아니라 `schedule.tsv`를 읽어 열거 — 새 타이머는 그 표에 등재되는 순간 자동으로 감시망에 든다.\n- **웹 섹션(2026-07-11 W9 추가)**: Caddy(`com.antigravity.web`) running · ts.net 도달성(자기 ts.net을 tailscale IP로 resolve) · 게시 스냅숏(`current`) 나이.\n- 실제 문제(봇 다운/타이머 STALE/디스크 부족/웹 다운)만 ⚠️ 라인이 되고, 그 warn 유무가 곧 발송 여부다. ℹ️ 라인(24h 재시작 수·대형 로그)은 참고 정보라 단독으로는 발송을 유발하지 않는다.\n- 실적 다이제스트(08:00) 후, 신선도 워치독(11:00) 전 배치.",
+   "desc_md": "맥미니 상태를 매일 08:50 KST 점검해 **이상이 있을 때만** 텔레그램으로 요약을 보내는 launchd 데몬(`com.antigravity.daily-selfcheck`). 2026-07-11 컷오버로 라이브.\n\n- ★**2026-07-15 설계 반전(사용자 지시)**: 원래는 정상이어도 매일 발송해 메시지 존재 자체가 liveness 신호인 dead-man's switch였으나, 매일의 정상 알림 소음이 그 값어치를 넘어선다고 판단 — warn이 없으면 발송을 생략하고 로컬 로그만 남긴다. **dead-man 감시 역할은 외부 워치독([[gha-daily-health-check]], 11:00 KST)이 승계** — 맥미니가 통째로 죽어도 GitHub 쪽에서 잡히므로 침묵이 감시 공백이 되지 않는다.\n\n- 수집: 봇 4종 running 여부 · **`schedule.tsv` 등재 타이머**(2026-07-16 기준 10종 — memento-telegram·wrap-principle-check 추가) stamp 신선도(OK n/N) · 24h 재시작 수 · 디스크 여유 · git-pull 실패연속/HEAD 나이. 타이머 목록은 하드코딩이 아니라 `schedule.tsv`를 읽어 열거 — 새 타이머는 그 표에 등재되는 순간 자동으로 감시망에 든다.\n- **웹 섹션(2026-07-11 W9 추가)**: Caddy(`com.antigravity.web`) running · ts.net 도달성(자기 ts.net을 tailscale IP로 resolve) · 게시 스냅숏(`current`) 나이. 2026-07-20 도달성 프로브 대상을 `/index.html` → `/watchlist/`로 교체 — 랜딩 폐지로 `/index.html`이 302 리다이렉트를 반환해 false DOWN으로 잡히던 문제([[web-caddy]]).\n- 실제 문제(봇 다운/타이머 STALE/디스크 부족/웹 다운)만 ⚠️ 라인이 되고, 그 warn 유무가 곧 발송 여부다. ℹ️ 라인(24h 재시작 수·대형 로그)은 참고 정보라 단독으로는 발송을 유발하지 않는다.\n- 실적 다이제스트(08:00) 후, 신선도 워치독(11:00) 전 배치.",
    "code": [
     "launchd/system/daily_selfcheck.sh",
     "launchd/system/com.antigravity.daily-selfcheck.plist"
@@ -493,7 +493,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "이관 완료 — 각 잡 스케줄",
    "status": "active",
-   "desc_md": "GitHub Actions 스케줄 워크플로를 맥미니 launchd LaunchDaemon으로 흡수하는 Phase 2 레이어(`launchd/gha/`). **2026-07-11 컷오버 완료 — GHA 이관 잡 10종(taiwan 포함)이 맥미니에서 라이브.** 각 원본 yml은 `schedule:`만 제거되고 `workflow_dispatch`는 롤백 경로로 유지된다.\n\n- 대상 10잡: gha-fred/universe/ecos/kofia/krx-valuation/disclosures/crawl/earnings-calendar-sync/finalize-orders + taiwan-revenue(plan 이후 추가, 10번째).\n- 공용 wrapper `run_gha_job.sh`: 잡별 락 + `wrap-nav-pipeline` 공유 락(GHA concurrency 대체) + 안전 .env 파서 + 타임아웃 워치독 + 성공 stamp + 실패 알림 + `heartbeats.json` 방출 + 성공 훅에서 [[web-publish-snapshot]] 게시.\n- UTC→KST 환산 함정: gha-fred는 월~금 22:50 UTC → **화~토 07:50 KST**(요일 +1일).\n- 컷오버는 하루 1잡 짝 커밋으로 진행됐고 finalize-orders가 최후였다.\n- ★earnings-calendar-sync 이중 실행(VM cron 15:00 + GHA 07:00) 단일화는 이관 시 정리 대상.",
+   "desc_md": "GitHub Actions 스케줄 워크플로를 맥미니 launchd LaunchDaemon으로 흡수하는 Phase 2 레이어(`launchd/gha/`). **2026-07-11 컷오버 완료 — GHA 이관 잡 10종(taiwan 포함)이 맥미니에서 라이브.** 각 원본 yml은 `schedule:`만 제거되고 `workflow_dispatch`는 롤백 경로로 유지된다.\n\n- 대상 10잡: gha-fred/universe/ecos/kofia/krx-valuation/disclosures/crawl/earnings-calendar-sync/finalize-orders + taiwan-revenue(plan 이후 추가, 10번째). 이후 earnings-ir-day(2026-07-20 분리, 11번째)가 더해졌다.\n- 공용 wrapper `run_gha_job.sh`: 잡별 락 + `wrap-nav-pipeline` 공유 락(GHA concurrency 대체) + 안전 .env 파서 + 타임아웃 워치독 + 성공 stamp + 실패 알림 + `heartbeats.json` 방출 + 성공 훅에서 [[web-publish-snapshot]] 게시.\n- UTC→KST 환산 함정: gha-fred는 월~금 22:50 UTC → **화~토 07:50 KST**(요일 +1일).\n- 컷오버는 하루 1잡 짝 커밋으로 진행됐고 finalize-orders가 최후였다.\n- ★earnings-calendar-sync 이중 실행(VM cron 15:00 + GHA 07:00) 단일화는 이관 시 정리 대상.\n- ★**earnings IR Day 분리(2026-07-20)**: `gha-earnings-calendar-sync`가 캘린더 쓰기만으로 900s를 소진해 IR Day(Finnhub 315종목 + EDGAR 8-K)가 강제종료 → `earnings_calendar_sync.py`를 `--skip-ir-day`/`--skip-earnings` 플래그로 쪼개 **11번째 launchd 잡 `gha-earnings-ir-day`(07:15)**를 신설(같은 스크립트, 별도 yml 없음). 두 잡 타임아웃 900→1800s(`run_gha_job.sh` `job_timeout_seconds`), `schedule_gha.tsv`·`install_gha.sh`(ALL_JOBS/Wave3) 등재.",
    "code": [
     "launchd/gha/",
     "launchd/gha/run_gha_job.sh",
@@ -735,7 +735,7 @@
    "runs_on": "gha",
    "schedule_kst": "07:00 매일",
    "status": "active",
-   "desc_md": "Finnhub 실적 일정을 Google Calendar에 동기화하는 워크플로(07:00 KST/22:00 UTC). 산출은 repo 밖(캘린더 직접 기록) → git push 없음.\n\n- ★이중 실행: **VM cron(15:00 KST)도 같은 스크립트를 돌린다** → 맥미니 이전 시 단일화 필요(캘린더 중복 우려).\n- repo 밖 산출이라 신선도 감시 사각 → Phase 2 heartbeat가 커버.\n- 시크릿: FINNHUB_API_KEY, GOOGLE_SERVICE_ACCOUNT_KEY. 실적봇 다이제스트가 이 캘린더를 소비.\n- 교훈: SA키 stale로 한 달 무성공 사각 → 로컬 키 검증 후 secret 교체.",
+   "desc_md": "Finnhub 실적 일정을 Google Calendar에 동기화하는 워크플로(07:00 KST/22:00 UTC). 산출은 repo 밖(캘린더 직접 기록) → git push 없음.\n\n- ★이중 실행: **VM cron(15:00 KST)도 같은 스크립트를 돌린다** → 맥미니 이전 시 단일화 필요(캘린더 중복 우려).\n- ★**IR Day 분리(2026-07-20)**: 맥미니 launchd 흡수 잡(`gha-earnings-calendar-sync`)에서 IR Day(Finnhub 315종목 + EDGAR 8-K)가 캘린더 sync의 900s 소진으로 강제종료 → `--skip-ir-day`(07:00 캘린더) / `--skip-earnings`(07:15 IR Day, `gha-earnings-ir-day`) 두 launchd 잡으로 분리, 타임아웃 900→1800s. 별도 GHA yml은 없다(launchd 레이어 분리, [[launchd-gha-phase2]]).\n- repo 밖 산출이라 신선도 감시 사각 → Phase 2 heartbeat가 커버.\n- 시크릿: FINNHUB_API_KEY, GOOGLE_SERVICE_ACCOUNT_KEY. 실적봇 다이제스트가 이 캘린더를 소비.\n- 교훈: SA키 stale로 한 달 무성공 사각 → 로컬 키 검증 후 secret 교체.",
    "code": [
     ".github/workflows/earnings_calendar_sync.yml",
     "execution/earnings_calendar_sync.py"
@@ -873,7 +873,7 @@
    "runs_on": "github",
    "schedule_kst": "생성=여러 잡",
    "status": "active",
-   "desc_md": "시장 데이터 허브. Monthly Returns 표 + Indices/MARKET 동적 차트 + DATA 섹션(ECOS/FRED/KRX/원자재/capex 등 시계열 사이드바).\n\n- DATA 탭 사이드바 3칼럼(Update/Group/Data) 정렬+엑셀필터, 주기 자동판정, 행배경 틴트. 2026-07-16부터 **Data 서브탭이 첫 탭이자 기본값**.\n- 소스: `dataset.csv`(대부분 시계열), `monthly_returns.json`.\n- `create_dashboard.py` 생성. dataset.csv를 쓰는 거의 모든 잡이 재생성.\n- 2026-07-16 **DATA 차트 포맷 표준화**(다수 커밋): Y축 상단 단위 주석 + 눈금은 숫자만, 축 min/max 항상 라벨링에 눈금 8개 상한, 자릿수 밴드별 소수 자리 통일(10 미만 2dp / 1000 미만 1dp / 이상 정수), 금액 시계열 단위 환산(억원→조원, 달러 계열→$억/$B), log 스케일은 5–95% 로그공간 패딩, 우측 패딩=실측 라벨폭+12px. 16:9 비율·굵은 선·norm/log 토글 버튼. Indices/WRAP 차트도 같은 표준으로 retrofit.\n- '파생·수급' 그룹(삼성전자·SK하이닉스 파생·수급 + VKOSPI 13종)은 [[src-deriv-daily]]가 적재.",
+   "desc_md": "시장 데이터 허브. Monthly Returns 표 + Indices/MARKET 동적 차트 + DATA 섹션(ECOS/FRED/KRX/원자재/capex 등 시계열 사이드바).\n\n- DATA 탭 사이드바 3칼럼(Update/Group/Data) 정렬+엑셀필터, 주기 자동판정, 행배경 틴트. 2026-07-16부터 **Data 서브탭이 첫 탭이자 기본값**.\n- 소스: `dataset.csv`(대부분 시계열), `monthly_returns.json`.\n- `create_dashboard.py` 생성. dataset.csv를 쓰는 거의 모든 잡이 재생성.\n- 2026-07-16 **DATA 차트 포맷 표준화**(다수 커밋): Y축 상단 단위 주석 + 눈금은 숫자만, 축 min/max 항상 라벨링에 눈금 8개 상한, 자릿수 밴드별 소수 자리 통일(10 미만 2dp / 1000 미만 1dp / 이상 정수), 금액 시계열 단위 환산(억원→조원, 달러 계열→$억/$B), log 스케일은 5–95% 로그공간 패딩, 우측 패딩=실측 라벨폭+12px. 16:9 비율·굵은 선·norm/log 토글 버튼. Indices/WRAP 차트도 같은 표준으로 retrofit.\n- '파생·수급' 그룹(삼성전자·SK하이닉스 파생·수급 + VKOSPI 13종)은 [[src-deriv-daily]]가 적재.\n- DATA 사이드바 별표 즐겨찾기(2026-07-20)는 ts.net에서 [[daemon-watchlist-quoteboard]]의 `/stars` 엔드포인트(`market_stars.json`)에 **서버 저장**돼 기기 간 공유되고, 데몬에 못 닿는 환경(GitHub Pages)에서는 localStorage로 폴백.",
    "code": [
     "execution/create_dashboard.py"
    ],
@@ -1338,7 +1338,7 @@
    "runs_on": "gha",
    "schedule_kst": "07:50 화~토 (gha-daily-fred)",
    "status": "active",
-   "desc_md": "미국 FRED 시계열 36종(금리/매크로/신용·부동산)을 수집해 dataset.csv DATA 섹션에 통합. 매 run 전체 재조회.\n\n- 함정: 주간 시리즈에 5년창 금지.",
+   "desc_md": "미국 FRED 시계열 36종(금리/매크로/신용·부동산)을 수집해 dataset.csv DATA 섹션에 통합. 매 run 전체 재조회.\n\n- 함정: 주간 시리즈에 5년창 금지.\n- 파생 계열(2026-07-20): 원계열 36종 외에 **미 3-2-1 크랙스프레드**(NY Harbor)를 계산해 DATA COMMODITIES에 등재 — (2×휘발유 + 증류유)×42 − 3×WTI, ÷3 = $/bbl. 계산용 원계열(WTI/휘발유/증류유 스팟)은 fetch만 하고 dataset.csv엔 미등재. `--crack-only` 플래그로 원계열 재조회 churn 없이 파생만 백필.",
    "code": [
     "execution/fetch_fred_data.py"
    ],
@@ -1972,7 +1972,7 @@
    "runs_on": "gha",
    "schedule_kst": "07:00 (GHA) + 15:00 (VM cron)",
    "status": "active",
-   "desc_md": "Finnhub 실적 일정을 Google Calendar에 기록하는 모듈. GHA(07:00 KST)와 VM cron(15:00 KST) **양쪽에서** 실행(이중).\n\n- 맥미니 이전 시 단일화 필요(캘린더 중복 기록 방지). 실적봇 파이프라인이 이 캘린더를 소비.\n- 시크릿: FINNHUB_API_KEY, GOOGLE_SERVICE_ACCOUNT_KEY.",
+   "desc_md": "Finnhub 실적 일정을 Google Calendar에 기록하는 모듈. GHA(07:00 KST)와 VM cron(15:00 KST) **양쪽에서** 실행(이중).\n\n- 맥미니 이전 시 단일화 필요(캘린더 중복 기록 방지). 실적봇 파이프라인이 이 캘린더를 소비.\n- ★**IR Day 분리(2026-07-20)**: 한 스크립트가 두 일을 하던 것을 플래그로 쪼갰다 — 캘린더 sync(146건 Google Calendar 쓰기, 느림)와 IR Day 수집(Finnhub 뉴스 315종목 + EDGAR 8-K, 느림)이 한 잡 900s 타임아웃을 함께 소진해 IR Day가 강제종료되던 문제. `--skip-ir-day`(캘린더만) / `--skip-earnings`(IR Day만)로 분리하고 맥미니 launchd에서 두 잡으로 스태거 실행(07:00 캘린더 + **07:15 IR Day**, [[launchd-gha-phase2]]의 `gha-earnings-ir-day`). 두 잡 모두 타임아웃 1800s로 상향.\n- 시크릿: FINNHUB_API_KEY, GOOGLE_SERVICE_ACCOUNT_KEY.",
    "code": [
     "execution/earnings_calendar_sync.py"
    ],
@@ -2014,7 +2014,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "잡별 (20:30 / 23:20 / 23:50 / 일 10:00 / 20분)",
    "status": "active",
-   "desc_md": "2026-07-11 신설(코드는 레포 `datalake/`, 데이터 정본은 레포 외부 `~/datalake`). 덮어쓰기형 산출물의 과거 유실을 막고, 전 상장·해외 유니버스 일봉 종가를 백필하며, DuckDB+Claude API 웹 UI로 자연어 질의를 제공하는 로컬 데이터레이크. 백필 스크립트(KRX/KIS·FRED·ECOS·KOFIA·벤치마크·해외)와 `build_catalog.py` 카탈로그가 함께 있다.\n\n- **launchd 잡 5종**(맥미니 전용):\n  - `datalake-market-update`(20:30) — 일별 증분 적재(`daily_market_update.py`).\n  - `datalake-research-export`(23:20) — Research Notes 원문(`research_notes.db`)을 일별 `.md`+미디어로 아카이브.\n  - `datalake-snapshot`(23:50) — 덮어쓰기형 레포 산출물 일별 gzip 스냅샷.\n  - `datalake-backup`(일 10:00) — private repo 백업(duckdb/staging 제외).\n  - `datalake-sheets-mirror`(20분 폴링, 2026-07-12 신규) — 시지프+선유듀오 구글시트 미러 → `~/datalake/sheets`. 시트 단위 격리 + **3회 재시도(15s·30s 백오프, 2026-07-14)** — read timeout 등 일시 장애를 흡수하고 3회 연속 실패만 비정상 종료→알림(오탐 알림 억제).\n- 저장: 데이터셋별 연도 파티션 parquet(`kr_ohlcv`·`kr_marcap`·`overseas_ohlcv` 등) + `market.duckdb` 뷰. KRX 수정주가 캡 실측 대응으로 `kr_ohlcv`(무수정)/`kr_ohlcv_adj` 분리.\n- **공매도·선물 패스(2026-07-15 신규)**: `kr_short`(종목별 일별 공매도 거래량·거래대금·잔고수량/금액, KRX SRT30001 — 잔고는 T+2 공시라 최근 1~2일 NaN이 lookback 재조회로 self-heal. ★전면금지 2023-11-06~2025-03-30·부분금지 2020-03-16~2021-05-02 구간은 빈 값이 정상) · `kr_short_investor`(시장단위 투자자별 공매도) · `kr_futures_ohlcv`(선물 7상품 월물별 시세+미결제약정, 상품 단위 합계는 `kr_futures_oi_daily` 뷰). 선물 OI는 pykrx api wrapper가 `ACC_OPNINT_QTY`를 떨궈 **core 전종목시세(MDCSTAT12501) 클래스를 직접 호출**하고, 백필은 (상품,연도) 단위 staging 체크포인트로 재개한다.\n- 웹 UI(`datalake/webui/`)는 duckdb 샌드박스(allowed→잠금) 위에서 md 코퍼스 문답. 상세: `datalake/DESIGN.md`.",
+   "desc_md": "2026-07-11 신설(코드는 레포 `datalake/`, 데이터 정본은 레포 외부 `~/datalake`). 덮어쓰기형 산출물의 과거 유실을 막고, 전 상장·해외 유니버스 일봉 종가를 백필하며, DuckDB+Claude API 웹 UI로 자연어 질의를 제공하는 로컬 데이터레이크. 백필 스크립트(KRX/KIS·FRED·ECOS·KOFIA·벤치마크·해외)와 `build_catalog.py` 카탈로그가 함께 있다.\n\n- **launchd 잡 5종**(맥미니 전용):\n  - `datalake-market-update`(20:30) — 일별 증분 적재(`daily_market_update.py`).\n  - `datalake-research-export`(23:20) — Research Notes 원문(`research_notes.db`)을 일별 `.md`+미디어로 아카이브.\n  - `datalake-snapshot`(23:50) — 덮어쓰기형 레포 산출물 일별 gzip 스냅샷.\n  - `datalake-backup`(일 10:00) — private repo 백업(duckdb/staging 제외).\n  - `datalake-sheets-mirror`(20분 폴링, 2026-07-12 신규) — 시지프+선유듀오 구글시트 미러 → `~/datalake/sheets`. 시트 단위 격리 + **3회 재시도(15s·30s 백오프, 2026-07-14)** — read timeout 등 일시 장애를 흡수하고 3회 연속 실패만 비정상 종료→알림(오탐 알림 억제).\n- 저장: 데이터셋별 연도 파티션 parquet(`kr_ohlcv`·`kr_marcap`·`overseas_ohlcv` 등) + `market.duckdb` 뷰. KRX 수정주가 캡 실측 대응으로 `kr_ohlcv`(무수정)/`kr_ohlcv_adj` 분리.\n- **`kr_fundamental` 패스(2026-07-20 재활성화)**: KRX 주당지표(BPS/PER/PBR/EPS/DIV/DPS). 연간 확정 BPS 기준이라 분기 정밀 밸류엔 계단식으로 부정확해 2026-07-13 제외됐으나, 장기 PBR/PER 밴드·사이클 고점 분석엔 표준 소스라 사용자 요청으로 되살림.\n- **공매도·선물 패스(2026-07-15 신규)**: `kr_short`(종목별 일별 공매도 거래량·거래대금·잔고수량/금액, KRX SRT30001 — 잔고는 T+2 공시라 최근 1~2일 NaN이 lookback 재조회로 self-heal. ★전면금지 2023-11-06~2025-03-30·부분금지 2020-03-16~2021-05-02 구간은 빈 값이 정상) · `kr_short_investor`(시장단위 투자자별 공매도) · `kr_futures_ohlcv`(선물 7상품 월물별 시세+미결제약정, 상품 단위 합계는 `kr_futures_oi_daily` 뷰). 선물 OI는 pykrx api wrapper가 `ACC_OPNINT_QTY`를 떨궈 **core 전종목시세(MDCSTAT12501) 클래스를 직접 호출**하고, 백필은 (상품,연도) 단위 staging 체크포인트로 재개한다.\n- 웹 UI(`datalake/webui/`)는 duckdb 샌드박스(allowed→잠금) 위에서 md 코퍼스 문답. 상세: `datalake/DESIGN.md`.",
    "code": [
     "datalake/",
     "datalake/daily_market_update.py",
@@ -2122,9 +2122,9 @@
    "type": "infra",
    "name": "관심종목 시세판 데몬 (Watchlist, 127.0.0.1:8778)",
    "runs_on": "vm_macmini",
-   "schedule_kst": "상시 (스윕 장중 1s · 장외 60s)",
+   "schedule_kst": "상시 (스윕 장중 2s · 장외 60s)",
    "status": "active",
-   "desc_md": "2026-07-15 신설. POP HTS 상시실행을 대체하는 KIS 실시간 시세판을 **상시 데몬**으로 띄우는 launchd 서비스(`com.antigravity.watchlist`, RunAtLoad + KeepAlive, `run_bot.sh watchlist` wrapper 경유). 신설 당일엔 ts.net 첫 화면이었고(루트 302 대상), 2026-07-16 잠시 Memento로 넘어갔다가 **2026-07-18 다시 첫 화면으로 복귀** — 루트(`/`)·`/index.html`이 `/watchlist/`로 302된다([[web-caddy]]). nav 탭(좌측 선두)으로도 진입한다.\n\n- 바인딩: stdlib `ThreadingHTTPServer`(`server.py`)가 `127.0.0.1:8778` 루프백 고정 — 직접 공개 노출 없음. Caddy가 `/watchlist/*`를 이 포트로 리버스 프록시(`no-store`). 라우트는 `/`(index.html) · `/data`(시세 JSON, 프런트 1초 폴링) · `/wl`(관심그룹 GET/POST) 3종, 쿼리스트링은 무시.\n- 종목: `universe_tickers.csv`의 KRX/KOSDAQ 전 종목(~463). 시세는 KIS multprice(`FHKST11300006`) **30종목/콜 배치** 스윕 — 장중(평일 08:50~15:45) 1초, 장외 60초(KIS 쿼터 절약), 배치 실패 시 최대 10초 지수 백오프.\n- 시총 = 현재가 × 상장주식수. 상장주식수는 KIS `inquire-price`로 매일 1회 갱신하고 `shares_cache.json`에 캐시 — 기동 시 오늘자 캐시 > 이전 캐시 > `kis_universe_master.json` 순으로 seed해 즉시 시작하고, 오늘자 캐시라도 누락 종목만 별도 보충(2026-07-15).\n- 관심그룹 3종은 **서버 저장**(`watchlists.json`, 기기 공통 — 브라우저 로컬 아님). 그룹 1·2는 `portfolio_data.json`에서 10분 주기 **키워드 매칭 자동 동기화**(1=일반형/개방형/지속형, 2=목표전환형/성과모집형)라 회차 교체에 자동 추종한다. 수동 추가분은 직전 `auto` 목록과의 차집합으로 식별해 보존, 포트에서 빠진 auto 종목만 제거. 그룹 3은 수동 전용.\n- 프런트(`quoteboard/index.html`): AoE topnav 동형 · 섹터 탭 멀티선택 · 정렬 · 전역 검색창에서 그룹 추가. 로그는 `logs/launchd/watchlist.{out,err}`. 계산 잡 아님(catch-up 대상 아님).\n- ★**nav는 손으로 맞춰야 하는 사본**: 이 페이지는 스냅숏이 아니라 데몬에서 직접 서빙되므로 [[web-publish-snapshot]]의 `compose_personal_view.py` nav 주입이 **닿지 않는다**. 2026-07-16 nav 개편(Sisyphe 드롭다운 해체 → Watchlist·Memento·Weekly 승격, 좌/우 2그룹) 때도 [[daemon-datalake-webui]]의 Wiki 페이지와 함께 이 파일의 마크업을 따로 고쳐 통일했다 — nav를 바꾸면 여기도 같이 고쳐야 어긋나지 않는다.",
+   "desc_md": "2026-07-15 신설. POP HTS 상시실행을 대체하는 KIS 실시간 시세판을 **상시 데몬**으로 띄우는 launchd 서비스(`com.antigravity.watchlist`, RunAtLoad + KeepAlive, `run_bot.sh watchlist` wrapper 경유). 신설 당일엔 ts.net 첫 화면이었고(루트 302 대상), 2026-07-16 잠시 Memento로 넘어갔다가 **2026-07-18 다시 첫 화면으로 복귀** — 루트(`/`)·`/index.html`이 `/watchlist/`로 302된다([[web-caddy]]). nav 탭(좌측 선두)으로도 진입한다.\n\n- 바인딩: stdlib `ThreadingHTTPServer`(`server.py`)가 `127.0.0.1:8778` 루프백 고정 — 직접 공개 노출 없음. Caddy가 `/watchlist/*`를 이 포트로 리버스 프록시(`no-store`). 라우트는 `/`(index.html) · `/data`(시세 JSON, 프런트 폴링) · `/wl`(관심그룹 GET/POST) · **`/stars`(market DATA 차트 별표, GET/POST)** · **`/prefs`(AoE 화면 뷰 설정 KV, GET/POST=키 단위 병합)** 5종, 쿼리스트링은 무시.\n- **서버 저장 상태(2026-07-20 확장)**: 관심그룹(`watchlists.json`) 외에 market.html DATA 차트 별표(`market_stars.json`, [[page-market]]가 fetch)와 기기 공통 뷰 설정(`prefs.json`, 관심종목 뷰의 섹터 선택+정렬 등)을 서버에 둔다 — 브라우저 localStorage를 서버 저장으로 승격해 기기 간 공유. POST는 최대 100KB, `/prefs`는 다른 페이지 키를 보존하는 키 단위 병합.\n- 종목: `universe_tickers.csv`의 KRX/KOSDAQ 전 종목(~587, 알파뉴메릭 코드 `0126Z0` 등 허용). 별도 큐레이션 ETF 그룹(`etf_tickers.csv`, `sector='ETF'` 첫 탭 고정, 2026-07-20). 시세는 KIS multprice(`FHKST11300006`) **30종목/콜 배치** 스윕 — 장중(평일 08:50~15:45) 2초(2026-07-20 1s→2s, 20콜/스윕에 KIS 쿼터 50% 헤드룸 확보), 장외 60초, 배치 실패 시 최대 10초 지수 백오프.\n- 시총 = 현재가 × 상장주식수. 상장주식수는 KIS `inquire-price`로 매일 1회 갱신하고 `shares_cache.json`에 캐시 — 기동 시 오늘자 캐시 > 이전 캐시 > `kis_universe_master.json` 순으로 seed해 즉시 시작하고, 오늘자 캐시라도 누락 종목만 별도 보충(2026-07-15).\n- 관심그룹 3종은 **서버 저장**(`watchlists.json`, 기기 공통 — 브라우저 로컬 아님). 그룹 1·2는 `portfolio_data.json`에서 10분 주기 **키워드 매칭 자동 동기화**(1=일반형/개방형/지속형, 2=목표전환형/성과모집형)라 회차 교체에 자동 추종한다. 수동 추가분은 직전 `auto` 목록과의 차집합으로 식별해 보존, 포트에서 빠진 auto 종목만 제거. 그룹 3은 수동 전용.\n- 프런트(`quoteboard/index.html`): AoE topnav 동형 · 섹터 탭 멀티선택 · 정렬 · 전역 검색창에서 그룹 추가. 로그는 `logs/launchd/watchlist.{out,err}`. 계산 잡 아님(catch-up 대상 아님).\n- ★**nav는 손으로 맞춰야 하는 사본**: 이 페이지는 스냅숏이 아니라 데몬에서 직접 서빙되므로 [[web-publish-snapshot]]의 `compose_personal_view.py` nav 주입이 **닿지 않는다**. 2026-07-16 nav 개편(Sisyphe 드롭다운 해체 → Watchlist·Memento·Weekly 승격, 좌/우 2그룹) 때도 [[daemon-datalake-webui]]의 Wiki 페이지와 함께 이 파일의 마크업을 따로 고쳐 통일했다 — nav를 바꾸면 여기도 같이 고쳐야 어긋나지 않는다.",
    "code": [
     "launchd/web/com.antigravity.watchlist.plist",
     "quoteboard/server.py",
@@ -2137,7 +2137,9 @@
    ],
    "writes": [
     "quoteboard/watchlists.json",
-    "quoteboard/shares_cache.json"
+    "quoteboard/shares_cache.json",
+    "quoteboard/market_stars.json",
+    "quoteboard/prefs.json"
    ],
    "depends_on": [
     "infra-vm-macmini",
@@ -2240,6 +2242,34 @@
     "infra-telegram"
    ],
    "alerts": "FAIL → notify_sisyphe_failure.sh wrap-principle-check → 텔레그램"
+  },
+  {
+   "id": "timer-us-etf-collect",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "timer",
+   "name": "미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 09:00)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "09:00 화~토",
+   "status": "active",
+   "desc_md": "미국(+홍콩) ETF 28종의 NAV·AUM·종가·보수와 USDKRW 환율, 삼성전자·SK하이닉스 보유비중을 yfinance로 수집해 `us_etf_history.csv`에 적재하는 타이머(`run_us_etf_collect.sh` → `execution/etf_collector/collect_us_etf.py`). 2026-07-19 신설.\n\n- 대상: 반도체 지수형·레버리지(SOXX/SMH/SOXL/SOXS 등), 메모리(DRAM/RAM), 홍콩 삼전·하이닉스 2x(7747/7709.HK), 한국 단일국가(EWY/FLKR), MSCI EM·FTSE 선진 등 한국 포함/미포함 대조군 — 대상 목록·한국 비중 추정 규칙은 `us_etf_config.py` 단일 출처(YTD 종가 백필 포함).\n- 한국 비중 변동 4지표(총 AUM·실투자·삼전 노출·하이닉스 노출, 원화)를 Sisyphe-Bot으로 화~토 아침 발송(dedup=`.us_etf_alert_sent.json`, USDKRW 델타 포함).\n- 수집 후 `etf.html` 미국 ETF 서브탭을 재생성(`create_dashboard.generate_etf_html`, main 미추적 로컬 산출물) → 게시는 래퍼 publish_snapshot이 담당. `us_etf_history.csv`만 race-safe push.\n- 홍콩 2종(.HK)은 yfinance NAV가 stale이라 가격(HKD)·AUM(USD)만 수집. 09:00 화~토 = 미국 마감·NAV 확정 후이자 KRX 개장 전.\n- flock으로 래퍼 중복 실행 방지. Timeout/실패 시 `sisyphe-bot-notify@us-etf-collect`.",
+   "code": [
+    "launchd/timers/com.antigravity.us-etf-collect.plist",
+    "scripts/run_us_etf_collect.sh",
+    "execution/etf_collector/collect_us_etf.py",
+    "execution/etf_collector/us_etf_config.py"
+   ],
+   "writes": [
+    "us_etf_history.csv",
+    ".us_etf_alert_sent.json",
+    "page-etf"
+   ],
+   "depends_on": [
+    "ext-data-apis",
+    "src-create-dashboard",
+    "infra-telegram"
+   ],
+   "alerts": "실패 시 sisyphe-bot-notify(us-etf-collect) → 텔레그램"
   },
   {
    "id": "daemon-catchup",
@@ -2762,32 +2792,29 @@
    ]
   },
   {
-   "id": "timer-us-etf-collect",
+   "id": "timer-memory-cycle-alert",
    "project": "antigravity",
-   "domain": "market-global",
+   "domain": "tech-semis",
    "type": "timer",
-   "name": "미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 09:00)",
+   "name": "메모리 사이클 플랜 알림 타이머 (07:45)",
    "runs_on": "vm_macmini",
-   "schedule_kst": "09:00 화~토",
+   "schedule_kst": "07:45 매일",
    "status": "active",
-   "desc_md": "미국(+홍콩) ETF 28종의 NAV·AUM·종가·보수와 USDKRW 환율, 삼성전자·SK하이닉스 보유비중을 yfinance로 수집해 `us_etf_history.csv`에 적재하는 타이머(`run_us_etf_collect.sh` → `execution/etf_collector/collect_us_etf.py`). 2026-07-19 신설.\n\n- 대상: 반도체 지수형·레버리지(SOXX/SMH/SOXL/SOXS 등), 메모리(DRAM/RAM), 홍콩 삼전·하이닉스 2x(7747/7709.HK), 한국 단일국가(EWY/FLKR), MSCI EM·FTSE 선진 등 한국 포함/미포함 대조군 — 대상 목록·한국 비중 추정 규칙은 `us_etf_config.py` 단일 출처(YTD 종가 백필 포함).\n- 한국 비중 변동 4지표(총 AUM·실투자·삼전 노출·하이닉스 노출, 원화)를 Sisyphe-Bot으로 화~토 아침 발송(dedup=`.us_etf_alert_sent.json`, USDKRW 델타 포함).\n- 수집 후 `etf.html` 미국 ETF 서브탭을 재생성(`create_dashboard.generate_etf_html`, main 미추적 로컬 산출물) → 게시는 래퍼 publish_snapshot이 담당. `us_etf_history.csv`만 race-safe push.\n- 홍콩 2종(.HK)은 yfinance NAV가 stale이라 가격(HKD)·AUM(USD)만 수집. 09:00 화~토 = 미국 마감·NAV 확정 후이자 KRX 개장 전.\n- flock으로 래퍼 중복 실행 방지. Timeout/실패 시 `sisyphe-bot-notify@us-etf-collect`.",
+   "desc_md": "2026-07-19 신설. 매일 07:45 KST 메모리 3사(삼성전자·SK하이닉스·마이크론) 사이클 액션플랜 레벨을 점검해 텔레그램 1통을 보내는 타이머(`com.antigravity.memory-cycle-alert` → `run_timer_job.sh memory-cycle-alert` → `execution/memory_cycle_plan_alert.py`). MU 새벽 종가 + KR 전일 종가가 모이는 아침 시간대에 실행.\n\n- 판정 기준은 repo 밖 `work/analysis/260719_메모리3사_주가실적PER/메모리3사_사이클_리포트.md`(85% 기준). 반등고점(‘−20% 앵커 이후 최저점’이 나온 뒤의 최고 종가) vs 전고점의 84~88% ‘무인지대’ 통과를 판별해 통상형(기저율 80%, 반등 93~100%)/약세장형(20%, 천장 79~84%) 시나리오와 단계·트리거를 표시. 마이크론 84%/88%가 선행 신호.\n- DRAM 현물/고정가 감시 라인(백워데이션 전조) 동반 — 현물 이력은 `logs/dram_spot_log.csv`에 누적, 고정거래가는 트렌드포스/DRAMeXchange 발표 감지 시 수동 상수 갱신.\n- 데이터=yfinance 종가([[ext-data-apis]]). 발송은 `TELEGRAM_SISYPHE_BOT_TOKEN` + `TELEGRAM_CHAT_ID`로 사용자 개인 chat 1통(구독자 브로드캐스트 아님).\n- 계산·적재 잡이 아니라 알림 잡 — `run_timer_job.sh` 타임아웃 300초, `RunAtLoad=false`, 설치는 `install_timers.sh` NAMES 목록. 놓친 실행을 뒤늦게 보내면 아침 점검의 의미가 없다(catch-up 성격 아님).",
    "code": [
-    "launchd/timers/com.antigravity.us-etf-collect.plist",
-    "scripts/run_us_etf_collect.sh",
-    "execution/etf_collector/collect_us_etf.py",
-    "execution/etf_collector/us_etf_config.py"
+    "launchd/timers/com.antigravity.memory-cycle-alert.plist",
+    "launchd/timers/run_timer_job.sh",
+    "execution/memory_cycle_plan_alert.py"
    ],
-   "writes": [
-    "us_etf_history.csv",
-    ".us_etf_alert_sent.json",
-    "page-etf"
+   "reads": [
+    "ext-data-apis"
    ],
    "depends_on": [
-    "ext-data-apis",
-    "src-create-dashboard",
-    "infra-telegram"
+    "infra-vm-macmini",
+    "infra-telegram",
+    "ext-data-apis"
    ],
-   "alerts": "실패 시 sisyphe-bot-notify(us-etf-collect) → 텔레그램"
+   "alerts": "FAIL → notify_sisyphe_failure.sh memory-cycle-alert → 텔레그램"
   },
   {
    "id": "web-caddy",
@@ -2798,7 +2825,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "상시",
    "status": "active",
-   "desc_md": "2026-07-11 신설된 맥미니 자체 서빙 계층. Caddy(`com.antigravity.web`, homebrew, KeepAlive)가 게시 스냅숏을 tailscale(ts.net)로 내보내는 개인 대시보드의 웹서버.\n\n- 입구는 `tailscale serve` 프록시뿐 — Caddy는 `http://:8377` + `bind 127.0.0.1` 루프백 고정(공개 노출 없음). 127.0.0.1:8377 직접 바인딩은 프록시 Host 불일치로 빈 200이 나던 실측 함정 회피.\n- **루트(`/`)는 2026-07-18부터 다시 `/watchlist/`로 302 리다이렉트** — 사용자 확정으로 AoE 기본 화면이 Watchlist로 되돌아왔다([[daemon-watchlist-quoteboard]]). **구 랜딩(`/index.html`)도 같은 곳으로 302** → 랜딩 페이지는 개인 ts.net에서 폐지(파일은 잡들이 계속 생성하나 접근 불가, [[page-index]]). 기본 화면은 세 세대에 걸쳐 흔들렸다: 2026-07-15 `/watchlist/` → 07-16 `/sisyphe/memento.html`(Memento) → 07-18 다시 `/watchlist/`. Memento는 이제 nav 'Memento' 탭(`/sisyphe/memento.html`)으로만 진입한다.\n- 게시 스냅숏(`~/srv/dashboard/current`, `publish_snapshot.sh` 산출)은 맨 아래 fallback handle이 정적 서빙 — **스냅숏 디렉토리 직접 수정 금지**. Sisyphe 개인 페이지(`/sisyphe/*`)도 이 스냅숏의 `current/sisyphe/`(2026-07-13 평문 전환, [[web-publish-snapshot]]의 `compose_personal_view.py`가 합성 — staticrypt 암호화 직서빙 폐기)에서 서빙된다. 기본 화면인 `memento.html`이 이 경로에 있으므로 **compose 실패로 세대가 폐기되면 루트 진입 자체가 깨진다**.\n- `/journal/*`(2026-07-13): 개인 투자일지 차트(\"Escape Velocity\") — 테일넷 + basic_auth 이중 게이트, `~/Journal/web` 정적 서빙(`no-store`). **데이터·자격증명·페이지 전부 `~/Journal` 로컬 전용으로 git/게시 파이프라인과 격리**(전역 규칙 Journal 섹션). `~/Journal/caddy_auth.snippet` import — 없으면 caddy 기동 실패하니 Journal 폴더 이동 시 이 라우트 먼저 수정.\n- `/wiki/*`는 `127.0.0.1:8787`([[daemon-datalake-webui]])로 리버스 프록시 — 데이터레이크 문답 UI를 AoE 'Wiki' 탭으로 통합(2026-07-12, `redir /wiki /wiki/ 301`).\n- `/watchlist/*`(2026-07-15): 관심종목 시세판 데몬 `127.0.0.1:8778`([[daemon-watchlist-quoteboard]]) 리버스 프록시(`no-store`, `redir /watchlist /watchlist/ 301`).\n- `/plan-api/*`(2026-07-15): Sisyphe Ledger 'Plan' 자금계획 JSON(`~/Journal/plan_web.json`, 계좌번호 포함) API — `plan_api.py` 백엔드(`127.0.0.1:8790`, [[daemon-plan-api]])로 프록시. **게이트는 테일넷 단독**(basic_auth는 당일 `plan_auth.snippet` import 도입 → 별도 realm 전환 → 제거로 정리). ★소스의 라우트 주석은 'basic_auth 이중'이라 적혀 있으나 실제 설정엔 auth import가 없다 — 주석이 stale.\n- HTML/JSON/CSV·인덱스는 `Cache-Control: no-cache`. 접근 로그는 `~/srv/dashboard/logs/access.log`(20MiB 롤).",
+   "desc_md": "2026-07-11 신설된 맥미니 자체 서빙 계층. Caddy(`com.antigravity.web`, homebrew, KeepAlive)가 게시 스냅숏을 tailscale(ts.net)로 내보내는 개인 대시보드의 웹서버.\n\n- 입구는 `tailscale serve` 프록시뿐 — Caddy는 `http://:8377` + `bind 127.0.0.1` 루프백 고정(공개 노출 없음). 127.0.0.1:8377 직접 바인딩은 프록시 Host 불일치로 빈 200이 나던 실측 함정 회피.\n- **루트(`/`)는 2026-07-18부터 다시 `/watchlist/`로 302 리다이렉트** — 사용자 확정으로 AoE 기본 화면이 Watchlist로 되돌아왔다([[daemon-watchlist-quoteboard]]). **구 랜딩(`/index.html`)도 같은 곳으로 302** → 랜딩 페이지는 개인 ts.net에서 폐지(파일은 잡들이 계속 생성하나 접근 불가, [[page-index]]). 기본 화면은 세 세대에 걸쳐 흔들렸다: 2026-07-15 `/watchlist/` → 07-16 `/sisyphe/memento.html`(Memento) → 07-18 다시 `/watchlist/`. Memento는 이제 nav 'Memento' 탭(`/sisyphe/memento.html`)으로만 진입한다.\n- 게시 스냅숏(`~/srv/dashboard/current`, `publish_snapshot.sh` 산출)은 맨 아래 fallback handle이 정적 서빙 — **스냅숏 디렉토리 직접 수정 금지**. Sisyphe 개인 페이지(`/sisyphe/*`)도 이 스냅숏의 `current/sisyphe/`(2026-07-13 평문 전환, [[web-publish-snapshot]]의 `compose_personal_view.py`가 합성 — staticrypt 암호화 직서빙 폐기)에서 서빙된다. 기본 화면인 `memento.html`이 이 경로에 있으므로 **compose 실패로 세대가 폐기되면 루트 진입 자체가 깨진다**.\n- `/journal/*`(2026-07-13): 개인 투자일지 차트(\"Escape Velocity\") — 테일넷 + basic_auth 이중 게이트, `~/Journal/web` 정적 서빙(`no-store`). **데이터·자격증명·페이지 전부 `~/Journal` 로컬 전용으로 git/게시 파이프라인과 격리**(전역 규칙 Journal 섹션). `~/Journal/caddy_auth.snippet` import — 없으면 caddy 기동 실패하니 Journal 폴더 이동 시 이 라우트 먼저 수정.\n- `/wiki/*`는 `127.0.0.1:8787`([[daemon-datalake-webui]])로 리버스 프록시 — 데이터레이크 문답 UI를 AoE 'Wiki' 탭으로 통합(2026-07-12, `redir /wiki /wiki/ 301`).\n- `/watchlist/*`(2026-07-15): 관심종목 시세판 데몬 `127.0.0.1:8778`([[daemon-watchlist-quoteboard]]) 리버스 프록시(`no-store`, `redir /watchlist /watchlist/ 301`).\n- `/charts/*`(2026-07-20): 삼성·하이닉스 현선물/공매도/레버리지ETF + 건설 수주잔고 차트 뷰어. **repo 밖 정적 서빙** — `root=~/work/charts/260715_현선물공매도`(대시보드 repo와 분리), 기본 진입 `/charts`·`/charts/`는 `chart_viewer2.html`로 302. `no-cache`. 산출물은 spot 분석 폴더라 게시 스냅숏/git 파이프라인 밖.\n- `/plan-api/*`(2026-07-15): Sisyphe Ledger 'Plan' 자금계획 JSON(`~/Journal/plan_web.json`, 계좌번호 포함) API — `plan_api.py` 백엔드(`127.0.0.1:8790`, [[daemon-plan-api]])로 프록시. **게이트는 테일넷 단독**(basic_auth는 당일 `plan_auth.snippet` import 도입 → 별도 realm 전환 → 제거로 정리). ★소스의 라우트 주석은 'basic_auth 이중'이라 적혀 있으나 실제 설정엔 auth import가 없다 — 주석이 stale.\n- HTML/JSON/CSV·인덱스는 `Cache-Control: no-cache`. 접근 로그는 `~/srv/dashboard/logs/access.log`(20MiB 롤).",
    "code": [
     "launchd/web/Caddyfile",
     "launchd/web/com.antigravity.web.plist"
