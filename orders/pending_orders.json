@@ -54,7 +54,7 @@
           "name": "KB금융",
           "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "자사주 매입 이벤트 종료 이후 주가 반등을 모색하지 못하고 하락하여 남은 물량 전량 편출"
         },
         {
           "sector": "건강관리",
@@ -62,7 +62,7 @@
           "name": "올릭스",
           "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "바이오 섹터의 호재 발표에도 주가가 전혀 반응하지 못하고 있어 리스크 관리 차원에서 전량 편출"
         },
         {
           "sector": "필수소비재",
@@ -78,18 +78,18 @@
           "name": "에스티팜",
           "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "바이오 섹터의 호재 발표에도 주가가 전혀 반응하지 못하고 있어 리스크 관리 차원에서 전량 편출"
         },
         {
           "sector": "에너지",
           "code": "010950",
           "name": "S-Oil",
-          "weight": 0,
+          "weight": 2,
           "baseWeight": 2,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-20T01:54:17.371Z"
+      "savedAt": "2026-07-20T01:55:44.566Z"
     },
     "NH 다이내믹 밸류": {
       "targets": [
@@ -145,7 +145,7 @@
           "name": "KB금융",
           "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "자사주 매입 이벤트 종료 이후 주가 반등을 모색하지 못하고 하락하여 남은 물량 전량 편출"
         },
         {
           "sector": "건강관리",
@@ -153,7 +153,7 @@
           "name": "올릭스",
           "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "바이오 섹터의 호재 발표에도 주가가 전혀 반응하지 못하고 있어 리스크 관리 차원에서 전량 편출"
         },
         {
           "sector": "필수소비재",
@@ -169,18 +169,18 @@
           "name": "에스티팜",
           "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "바이오 섹터의 호재 발표에도 주가가 전혀 반응하지 못하고 있어 리스크 관리 차원에서 전량 편출"
         },
         {
           "sector": "에너지",
           "code": "010950",
           "name": "S-Oil",
-          "weight": 0,
+          "weight": 2,
           "baseWeight": 2,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-20T01:54:17.371Z"
+      "savedAt": "2026-07-20T01:55:44.567Z"
     },
     "DB 개방형": {
       "targets": [
@@ -236,7 +236,7 @@
           "name": "KB금융",
           "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "자사주 매입 이벤트 종료 이후 주가 반등을 모색하지 못하고 하락하여 남은 물량 전량 편출"
         },
         {
           "sector": "건강관리",
@@ -244,7 +244,7 @@
           "name": "올릭스",
           "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "바이오 섹터의 호재 발표에도 주가가 전혀 반응하지 못하고 있어 리스크 관리 차원에서 전량 편출"
         },
         {
           "sector": "필수소비재",
@@ -260,18 +260,18 @@
           "name": "에스티팜",
           "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "바이오 섹터의 호재 발표에도 주가가 전혀 반응하지 못하고 있어 리스크 관리 차원에서 전량 편출"
         },
         {
           "sector": "에너지",
           "code": "010950",
           "name": "S-Oil",
-          "weight": 0,
+          "weight": 2,
           "baseWeight": 2,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-20T01:54:17.371Z"
+      "savedAt": "2026-07-20T01:55:44.567Z"
     },
     "한투 지속형": {
       "targets": [
@@ -285,17 +285,17 @@
           "sector": "반도체",
           "code": "005930",
           "name": "삼성전자",
-          "weight": 20,
+          "weight": 25,
           "baseWeight": 30,
-          "reason": ""
+          "reason": "AI DC 투자 지속가능성 및 메모리 업체들의 '27, '28년 실적에 대한 시장의 의심이 확대됨에 따라 주가 급한 조정, 리스크 관리 차원에서 비중 조절"
         },
         {
           "sector": "반도체",
           "code": "000660",
           "name": "SK하이닉스",
-          "weight": 20,
+          "weight": 25,
           "baseWeight": 30,
-          "reason": ""
+          "reason": "AI DC 투자 지속가능성 및 메모리 업체들의 '27, '28년 실적에 대한 시장의 의심이 확대됨에 따라 주가 급한 조정, 리스크 관리 차원에서 비중 조절"
         },
         {
           "sector": "기타",
@@ -327,7 +327,7 @@
           "name": "KB금융",
           "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "자사주 매입 이벤트 종료 이후 주가 반등을 모색하지 못하고 하락하여 남은 물량 전량 편출"
         },
         {
           "sector": "건강관리",
@@ -335,7 +335,7 @@
           "name": "올릭스",
           "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "바이오 섹터의 호재 발표에도 주가가 전혀 반응하지 못하고 있어 리스크 관리 차원에서 전량 편출"
         },
         {
           "sector": "건강관리",
@@ -343,7 +343,7 @@
           "name": "에스티팜",
           "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "바이오 섹터의 호재 발표에도 주가가 전혀 반응하지 못하고 있어 리스크 관리 차원에서 전량 편출"
         },
         {
           "sector": "필수소비재",
@@ -357,12 +357,12 @@
           "sector": "에너지",
           "code": "010950",
           "name": "S-Oil",
-          "weight": 0,
+          "weight": 2,
           "baseWeight": 2,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-20T01:54:17.371Z"
+      "savedAt": "2026-07-20T01:55:44.567Z"
     },
     "NH 목표전환형 5호": {
       "targets": [
@@ -418,7 +418,7 @@
           "name": "KB금융",
           "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "자사주 매입 이벤트 종료 이후 주가 반등을 모색하지 못하고 하락하여 남은 물량 전량 편출"
         },
         {
           "sector": "건강관리",
@@ -426,7 +426,7 @@
           "name": "에스티팜",
           "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "바이오 섹터의 호재 발표에도 주가가 전혀 반응하지 못하고 있어 리스크 관리 차원에서 전량 편출"
         },
         {
           "sector": "건강관리",
@@ -434,18 +434,18 @@
           "name": "올릭스",
           "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "바이오 섹터의 호재 발표에도 주가가 전혀 반응하지 못하고 있어 리스크 관리 차원에서 전량 편출"
         },
         {
           "sector": "에너지",
           "code": "010950",
           "name": "S-Oil",
-          "weight": 0,
+          "weight": 2,
           "baseWeight": 2,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-20T01:54:17.371Z"
+      "savedAt": "2026-07-20T01:55:44.567Z"
     },
     "DB 목표전환형 6차": {
       "targets": [
@@ -501,7 +501,7 @@
           "name": "KB금융",
           "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "자사주 매입 이벤트 종료 이후 주가 반등을 모색하지 못하고 하락하여 남은 물량 전량 편출"
         },
         {
           "sector": "건강관리",
@@ -509,7 +509,7 @@
           "name": "에스티팜",
           "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "바이오 섹터의 호재 발표에도 주가가 전혀 반응하지 못하고 있어 리스크 관리 차원에서 전량 편출"
         },
         {
           "sector": "건강관리",
@@ -517,18 +517,18 @@
           "name": "올릭스",
           "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "바이오 섹터의 호재 발표에도 주가가 전혀 반응하지 못하고 있어 리스크 관리 차원에서 전량 편출"
         },
         {
           "sector": "에너지",
           "code": "010950",
           "name": "S-Oil",
-          "weight": 0,
+          "weight": 2,
           "baseWeight": 2,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-20T01:54:17.371Z"
+      "savedAt": "2026-07-20T01:55:44.567Z"
     },
     "한투 성과모집형 1차": {
       "targets": [
@@ -584,7 +584,7 @@
           "name": "KB금융",
           "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "자사주 매입 이벤트 종료 이후 주가 반등을 모색하지 못하고 하락하여 남은 물량 전량 편출"
         },
         {
           "sector": "건강관리",
@@ -592,7 +592,7 @@
           "name": "에스티팜",
           "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "바이오 섹터의 호재 발표에도 주가가 전혀 반응하지 못하고 있어 리스크 관리 차원에서 전량 편출"
         },
         {
           "sector": "건강관리",
@@ -600,18 +600,18 @@
           "name": "올릭스",
           "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "바이오 섹터의 호재 발표에도 주가가 전혀 반응하지 못하고 있어 리스크 관리 차원에서 전량 편출"
         },
         {
           "sector": "에너지",
           "code": "010950",
           "name": "S-Oil",
-          "weight": 0,
+          "weight": 2,
           "baseWeight": 2,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-20T01:54:17.371Z"
+      "savedAt": "2026-07-20T01:55:44.567Z"
     }
   }
 }
