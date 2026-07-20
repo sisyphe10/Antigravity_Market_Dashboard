@@ -183,12 +183,29 @@ function loadView() {
   try {
     // 2026-07-18: 진입 첫 화면은 항상 관심종목(wl) — 저장된 mode 무시, 섹터 선택(secs)만 승계
     const v = JSON.parse(localStorage.getItem(VIEW_KEY));
-    if (v && v.mode) return { mode: 'wl', secs: v.secs || [] };
+    if (v && v.mode) {
+      if (v.sortKey) { sortKey = v.sortKey; sortDir = v.sortDir || -1; }
+      return { mode: 'wl', secs: v.secs || [] };
+    }
   } catch (e) {}
   return { mode: 'wl', secs: [] };   // mode: 'wl' | 'all' | 'sectors', secs=클릭 순서
 }
 let VIEW = loadView();
-const saveView = () => localStorage.setItem(VIEW_KEY, JSON.stringify(VIEW));
+// 뷰 설정(섹터 선택·정렬) = 서버 저장(/prefs 병합, 기기 공통) + localStorage는 즉시표시 캐시 (2026-07-20)
+const saveView = () => {
+  const v = { mode: VIEW.mode, secs: VIEW.secs, sortKey, sortDir };
+  try { localStorage.setItem(VIEW_KEY, JSON.stringify(v)); } catch (e) {}
+  fetch('prefs', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                   body: JSON.stringify({ [VIEW_KEY]: v }) }).catch(() => {});
+};
+fetch('prefs').then(r => r.ok ? r.json() : null).then(p => {
+  const v = p && p[VIEW_KEY];
+  if (!v) return;
+  VIEW.secs = v.secs || [];
+  if (v.sortKey) { sortKey = v.sortKey; sortDir = v.sortDir || -1; }
+  try { localStorage.setItem(VIEW_KEY, JSON.stringify(v)); } catch (e) {}
+  if (DATA) render();
+}).catch(() => {});
 let menuCode = null;               // 팝오버 대상 종목
 // 그룹명 편집 중 여부는 activeElement로 판정 (포커스 이벤트 미발화 환경 대비)
 const isEditingName = () =>
@@ -372,6 +389,7 @@ document.getElementById('content').addEventListener('click', e => {
   const key = th.dataset.key;
   if (key === sortKey) sortDir = -sortDir;
   else { sortKey = key; sortDir = -1; }
+  saveView();
   render();
 });
 
