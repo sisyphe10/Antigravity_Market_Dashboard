@@ -3532,6 +3532,8 @@ def _build_wrap_chart_section(category_label):
             var aumData = AUM_DATA_PLACEHOLDER;
             var chartColors = COLORS_PLACEHOLDER;
             var wrapChart = null;
+            // 클릭 순서 추적 — 첫 항목 = 앵커(x축 기간 결정). 초기값은 기본 선택 행과 일치.
+            var wrapClickOrder = ['삼성 트루밸류|return'];
             // 2026-07-20 사이드테이블 개편: 행 = (상품 × 구분) 한 시리즈. 축 = y(수익률·MDD %)/y1(비중 %)/y2(AUM 억).
             var METRIC_LABEL = { 'return': '수익률', 'mdd': 'MDD', 'weight': '비중', 'aum': 'AUM' };
             // 같은 계열 명도 단계 (점선 대신 색으로 구분): AUM 진함 > 수익률 기본 > MDD 연함 > 비중 가장 연함.
@@ -3576,7 +3578,7 @@ def _build_wrap_chart_section(category_label):
                 var endDate = document.getElementById('wrapEndDate').value;
 
                 // Pass 1: (상품×구분) 페어별 유효 데이터 수집 — 각 지표의 데이터 있는 날짜만.
-                // x축 = 선택 페어 유효날짜의 합집합 → 비중/AUM만 선택하면 자연히 그 구간으로 축소.
+                // x축 = 앵커(첫 클릭) 페어의 데이터 기간 — 클릭 순서가 축을 결정 (2026-07-20).
                 var perPair = [];
                 pairs.forEach(function(p) {
                     if (!rawData[p.name]) return;
@@ -3608,7 +3610,14 @@ def _build_wrap_chart_section(category_label):
                 // ★{x,y} 객체 + category labels 혼용 시 호버(index 모드)가 데이터 배열 인덱스와
                 //   라벨이 어긋나 엉뚱한 날짜 값을 표시("누운 V자"·호버 오표시) → 라벨 정렬 배열로
                 //   세로(날짜 컬럼) 스냅 정상화.
-                var allDates = Array.from(new Set(perSeries.reduce(function(a, s){ return a.concat(s.dates); }, []))).sort();
+                // x축 = 앵커(첫 클릭·잔존 선택 중 가장 이른 클릭) 페어의 유효 날짜. 앵커가 데이터를 못 내면 합집합 폴백.
+                var allDates = null;
+                for (var oi = 0; oi < wrapClickOrder.length && !allDates; oi++) {
+                    for (var pi = 0; pi < perPair.length; pi++) {
+                        if (perPair[pi].name + '|' + perPair[pi].metric === wrapClickOrder[oi]) { allDates = perPair[pi].dates.slice(); break; }
+                    }
+                }
+                if (!allDates) allDates = Array.from(new Set(perSeries.reduce(function(a, s){ return a.concat(s.dates); }, []))).sort();
 
                 // 구분이 2종 이상 섞이면 라벨·툴팁에 지표명 병기
                 var _metricSet = {};
@@ -3632,7 +3641,7 @@ def _build_wrap_chart_section(category_label):
 
                     var isBench = (s.name === 'KOSPI' || s.name === 'KOSDAQ');
                     datasets.push({
-                        label: s.name + (multiMetric ? ' · ' + METRIC_LABEL[s.metric] : ''),
+                        label: s.name + (multiMetric ? ' | ' + METRIC_LABEL[s.metric] : ''),
                         data: data,
                         borderColor: metricColor(chartColors[s.name] || '#888', s.metric),
                         backgroundColor: 'transparent',
@@ -3796,63 +3805,52 @@ def _build_wrap_chart_section(category_label):
                 };
             }
 
-            // 단일 포트폴리오 선택 시 기간 자동 세팅: 비교지수(KOSPI/KOSDAQ)를 제외한 활성
-            // 시리즈가 정확히 1개면 기간 입력을 그 포트폴리오의 운용기간(첫~마지막 유효 NAV)으로
-            // 맞춘다. 지수만 토글할 때는 재발화하지 않고(수동 입력 보존), 조건이 깨지면
-            // 자동 세팅된 값 그대로일 때만 전체 기간으로 복원한다.
-            var WRAP_BENCH = { 'KOSPI': 1, 'KOSDAQ': 1 };
-            var wrapAutoPort = null;   // 마지막 자동 세팅 대상 포트폴리오
-            var wrapAutoRange = null;  // 마지막 자동 세팅 값 "start|end"
-            function wrapSeriesRange(name) {
-                var arr = rawData[name];
-                if (!arr) return null;
+            // 앵커 기반 기간·x축 (2026-07-20): 첫 클릭(앵커) 시리즈의 전체 데이터 기간이 x축.
+            // 클릭 순서 추적 — DATA 탭 cmbClickOrder 패턴. 앵커 제거 시 다음 잔존 선택이 승계.
+            function pairRange(name, metric) {
+                var raw = rawData[name];
+                if (!raw) return null;
+                var src = metric === 'weight' ? weightData[name] : (metric === 'aum' ? aumData[name] : raw);
+                if (!src) return null;
                 var first = null, last = null;
                 for (var i = 0; i < navData.dates.length; i++) {
-                    if (arr[i] !== null && arr[i] !== undefined) {
-                        if (first === null) first = navData.dates[i];
-                        last = navData.dates[i];
-                    }
+                    if (raw[i] === null || raw[i] === undefined) continue;       // NAV 활성 구간
+                    if (src[i] === null || src[i] === undefined) continue;       // 지표 데이터 존재
+                    if (first === null) first = navData.dates[i];
+                    last = navData.dates[i];
                 }
                 return first ? { start: first, end: last } : null;
             }
-            function wrapAutoPeriod() {
-                var ports = [], _seen = {};
-                document.querySelectorAll('.wrap-chart-row.active').forEach(function(e) {
-                    var n = e.getAttribute('data-series');
-                    if (!WRAP_BENCH[n] && !_seen[n]) { _seen[n] = 1; ports.push(n); }
-                });
-                var sEl = document.getElementById('wrapStartDate');
-                var eEl = document.getElementById('wrapEndDate');
-                if (ports.length === 1) {
-                    if (ports[0] === wrapAutoPort) return; // 지수 토글 등 — 유지
-                    var r = wrapSeriesRange(ports[0]);
-                    if (!r) return;
-                    sEl.value = r.start;
-                    eEl.value = r.end;
-                    wrapAutoPort = ports[0];
-                    wrapAutoRange = r.start + '|' + r.end;
-                } else {
-                    // 수동 입력이 아닌(=직전 자동값 그대로) 경우에만 전체 기간 복원
-                    if (wrapAutoRange && sEl.value + '|' + eEl.value === wrapAutoRange) {
-                        sEl.value = navData.dates[0];
-                        eEl.value = navData.dates[navData.dates.length - 1];
-                    }
-                    wrapAutoPort = null;
-                    wrapAutoRange = null;
-                }
+            function applyAnchorPeriod() {
+                if (!wrapClickOrder.length) return;
+                var p = wrapClickOrder[0].split('|');
+                var r = pairRange(p[0], p[1]);
+                if (!r) return;
+                document.getElementById('wrapStartDate').value = r.start;
+                document.getElementById('wrapEndDate').value = r.end;
             }
-            // 행 클릭 = 전환(단일 선택) / Shift·Ctrl·⌘+클릭 = 토글 추가 — DATA 탭(toggleCmbSeries)과 동일 문법
+            // 행 클릭 = 전환(단일 선택, 기간=그 시리즈 전체) / Shift·Ctrl·⌘+클릭 = 토글 추가(축 유지)
             window.toggleWrapRow = function(el, ev) {
                 var multi = ev && (ev.shiftKey || ev.ctrlKey || ev.metaKey);
+                var key = el.getAttribute('data-series') + '|' + el.getAttribute('data-metric');
                 if (multi) {
                     el.classList.toggle('active');
+                    var idx = wrapClickOrder.indexOf(key);
+                    if (el.classList.contains('active')) {
+                        if (idx < 0) wrapClickOrder.push(key);
+                    } else if (idx >= 0) {
+                        wrapClickOrder.splice(idx, 1);
+                        if (idx === 0) applyAnchorPeriod();   // 앵커 제거 → 다음 선택이 축 승계
+                    }
                 } else {
                     document.querySelectorAll('.wrap-chart-row.active').forEach(function(x) {
                         if (x !== el) x.classList.remove('active');
                     });
                     el.classList.add('active');
+                    wrapClickOrder = [key];
+                    applyAnchorPeriod();
                 }
-                wrapAutoPeriod(); buildChart();
+                buildChart();
             };
             // 구분 헤더 필터 (표시만 거름 — 선택 상태는 유지)
             window.toggleWrapMetricMenu = function(ev) {
