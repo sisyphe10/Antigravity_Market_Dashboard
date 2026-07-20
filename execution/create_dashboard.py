@@ -3697,10 +3697,19 @@ def _build_wrap_chart_section(category_label):
                 }
 
                 // 선 끝에 수익률 라벨을 그리는 커스텀 플러그인
+                // 끝값 라벨 (2026-07-20 개선): 항상 오른쪽 배치 — 우측 축이 있으면 축 너비 바깥(패딩 영역)에,
+                // 여러 시리즈면 세로 충돌 회피(최소 17px 간격, web-chart 표준). 점(dot)은 실제 위치 유지.
                 var endLabelPlugin = {
                     id: 'endLabels',
                     afterDatasetsDraw: function(chart) {
                         var ctx = chart.ctx;
+                        var area = chart.chartArea;
+                        var rightAxesW = 0;
+                        ['y1', 'y2'].forEach(function(id) {
+                            var sc = chart.scales[id];
+                            if (sc && sc.options.display && sc.options.position === 'right') rightAxesW += sc.width;
+                        });
+                        var entries = [];
                         chart.data.datasets.forEach(function(ds, i) {
                             var meta = chart.getDatasetMeta(i);
                             if (meta.hidden) return;
@@ -3711,20 +3720,28 @@ def _build_wrap_chart_section(category_label):
                             if (lastIdx < 0) return;
                             var last = meta.data[lastIdx];
                             if (!last) return;
-                            var val = ds.data[lastIdx];
-                            var label = fmtByMode(ds._mode, ds.yAxisID, val);
-                            ctx.save();
-                            ctx.beginPath();
-                            ctx.arc(last.x, last.y, 3, 0, Math.PI * 2);
-                            ctx.fillStyle = ds.borderColor;
-                            ctx.fill();
-                            ctx.font = 'bold 15px sans-serif';
-                            ctx.fillStyle = ds.borderColor;
-                            ctx.textBaseline = 'middle';
-                            if (_anyRight) { ctx.textAlign = 'right'; ctx.fillText(label, last.x - 8, last.y); }
-                            else { ctx.textAlign = 'left'; ctx.fillText(label, last.x + 6, last.y); }
-                            ctx.restore();
+                            entries.push({ x: last.x, dotY: last.y, y: last.y,
+                                           label: fmtByMode(ds._mode, ds.yAxisID, ds.data[lastIdx]),
+                                           color: ds.borderColor });
                         });
+                        entries.sort(function(a, b) { return a.y - b.y; });
+                        for (var e = 1; e < entries.length; e++) {
+                            if (entries[e].y - entries[e - 1].y < 17) entries[e].y = entries[e - 1].y + 17;
+                        }
+                        ctx.save();
+                        ctx.font = 'bold 15px sans-serif';
+                        ctx.textBaseline = 'middle';
+                        ctx.textAlign = 'left';
+                        entries.forEach(function(en) {
+                            ctx.beginPath();
+                            ctx.arc(en.x, en.dotY, 3, 0, Math.PI * 2);
+                            ctx.fillStyle = en.color;
+                            ctx.fill();
+                            var lx = Math.max(en.x + 6, area.right + rightAxesW + 4);
+                            ctx.fillStyle = en.color;
+                            ctx.fillText(en.label, lx, en.y);
+                        });
+                        ctx.restore();
                     }
                 };
 
@@ -3749,7 +3766,20 @@ def _build_wrap_chart_section(category_label):
                 });
                 var _y1Pos = _useY ? 'right' : 'left';
                 var _y2Pos = (_useY || _useY1) ? 'right' : 'left';
-                var _anyRight = (_useY1 && _y1Pos === 'right') || (_useY2 && _y2Pos === 'right');
+                // 동적 우측 패딩 (web-chart 표준 '+15'): 가장 긴 끝값 라벨 폭 + 여유 — 우측 축 바깥 라벨 공간 확보
+                var _mctx = document.createElement('canvas').getContext('2d');
+                _mctx.font = 'bold 15px sans-serif';
+                var _maxLblW = 0;
+                datasets.forEach(function(ds) {
+                    for (var k = ds.data.length - 1; k >= 0; k--) {
+                        if (ds.data[k] !== null && ds.data[k] !== undefined) {
+                            var w = _mctx.measureText(fmtByMode(ds._mode, ds.yAxisID, ds.data[k])).width;
+                            if (w > _maxLblW) _maxLblW = w;
+                            break;
+                        }
+                    }
+                });
+                var _padRight = Math.max(60, Math.ceil(_maxLblW) + 15);
 
                 // 사이드테이블 선택 행 = 시리즈 색 배경 (테이블이 범례 역할). 글씨색은 배경 명도로 흑/백 자동.
                 function textColorFor(c) {
@@ -3779,7 +3809,7 @@ def _build_wrap_chart_section(category_label):
                     plugins: [endLabelPlugin],
                     options: {
                         responsive: true, maintainAspectRatio: false,
-                        layout: { padding: { right: 60 } },
+                        layout: { padding: { right: _padRight } },
                         interaction: { mode: 'index', intersect: false },
                         plugins: {
                             legend: { display: false },
