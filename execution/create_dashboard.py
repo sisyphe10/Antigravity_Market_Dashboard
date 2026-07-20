@@ -3491,12 +3491,12 @@ def _build_wrap_chart_section(category_label):
         .wrap-side-wrap {{ max-height: 640px; overflow-y: auto; border: 1px solid #d1d5db; border-radius: 8px; }}
         .wrap-side-table {{ border-collapse: collapse; width: 100%; font-size: 13px; background: #fff; }}
         .wrap-side-table th {{ position: sticky; top: 0; z-index: 2; background: #f0f0f0; font-weight: 700; font-size: 13px; color: #000; padding: 8px 6px; text-align: center; white-space: nowrap; border-bottom: 2px solid #374151; user-select: none; }}
-        .wrap-side-table td {{ border: 1px solid #e5e7eb; padding: 6px 8px; white-space: nowrap; }}
+        .wrap-side-table td {{ border: 1px solid #e5e7eb; padding: 6px 8px; white-space: nowrap; text-align: center; color: #000; }}
         .wrap-chart-row {{ cursor: pointer; user-select: none; }}
         .wrap-chart-row:hover:not(.active) {{ background: #f3f4f6; }}
-        .wcr-num {{ text-align: center; color: #888; font-size: 12px; width: 26px; }}
-        .wcr-name {{ text-align: left; font-weight: 600; }}
-        .wcr-metric {{ text-align: center; width: 56px; }}
+        .wcr-num {{ font-size: 12px; width: 26px; }}
+        .wcr-name {{ font-weight: 600; }}
+        .wcr-metric {{ width: 56px; }}
         #wrapMetricMenu {{ display: none; position: absolute; z-index: 30; background: #fff; border: 1px solid #d1d5db; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 13px; }}
         #wrapMetricMenu div {{ padding: 7px 18px; cursor: pointer; text-align: center; }}
         #wrapMetricMenu div:hover {{ background: #f3f4f6; }}
@@ -3712,7 +3712,7 @@ def _build_wrap_chart_section(category_label):
                 if (legendEl) {
                     legendEl.innerHTML = datasets.map(function(ds) {
                         var c = ds.borderColor;
-                        return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:13px;">' +
+                        return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:15px;color:#000;">' +
                             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
                             ds.label + '</span>';
                     }).join('');
@@ -3905,7 +3905,7 @@ def _build_wrap_chart_section(category_label):
                         <div style="position:relative;height:500px;">
                             <canvas id="wrapDynamicChart"></canvas>
                         </div>
-                        <div id="wrapChartLegend" style="margin-top:12px;text-align:center;color:#222;"></div>
+                        <div id="wrapChartLegend" style="margin-top:12px;text-align:center;color:#000;"></div>
                     </div>
                 </div>
             </div>
