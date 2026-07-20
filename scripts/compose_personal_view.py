@@ -127,8 +127,8 @@ AOE_DARK_CSS = (
     '.cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) td{background:#0a3038!important;color:#67e0f4!important;font-weight:700!important}'
     '.cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) td{background:#10301c!important;color:#4ade80!important;font-weight:700!important}'
     '.today-date{color:#c9ced4!important}'
-    '.qcard{background:#14171b!important;color:#e8e6df!important;border-color:#27282b!important;box-shadow:none!important}'
-    '.qcard .qsrc,.qcard .qsrc .qnote{color:#8a919a!important}'
+    '.qcard{background:#14171b!important;color:#fff!important;border-color:#27282b!important;box-shadow:none!important}'
+    '.qcard .qsrc,.qcard .qsrc .qnote{color:#fff!important}'
     '.plan-gcell{background:#111214!important}'
     # 미국 ETF 탭 (etf.html, 2026-07-19 사용자 확정): 본문 흰색 기본, 회색은 설명(메타)만.
     # 실투자 행 = 시안 하이라이트(선택 순환 3번), 한국 O = 녹색, 등락 = 다크 등락색 재단언.
