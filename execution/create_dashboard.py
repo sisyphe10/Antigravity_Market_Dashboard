@@ -3494,6 +3494,8 @@ def _build_wrap_chart_section(category_label):
         .wrap-side-table td {{ border: 1px solid #e5e7eb; padding: 6px 8px; white-space: nowrap; text-align: center; color: #000; }}
         .wrap-chart-row {{ cursor: pointer; user-select: none; }}
         .wrap-chart-row:hover:not(.active) {{ background: #f3f4f6; }}
+        /* 선택 행: tr 인라인 color(명도 기반 흑/백)가 td에 상속되도록 — td 기본 #000 규칙보다 우선 */
+        .wrap-chart-row.active td {{ color: inherit; font-weight: 700; }}
         .wcr-num {{ font-size: 12px; width: 26px; }}
         .wcr-name {{ font-weight: 600; }}
         .wcr-metric {{ width: 56px; }}
@@ -3532,18 +3534,27 @@ def _build_wrap_chart_section(category_label):
             var wrapChart = null;
             // 2026-07-20 사이드테이블 개편: 행 = (상품 × 구분) 한 시리즈. 축 = y(수익률·MDD %)/y1(비중 %)/y2(AUM 억).
             var METRIC_LABEL = { 'return': '수익률', 'mdd': 'MDD', 'weight': '비중', 'aum': 'AUM' };
-            // 같은 계열 명도 단계 (점선 대신 색으로 구분): AUM 진함 > 수익률 기본 > MDD 연함 > 비중 가장 연함
-            function mixColor(hex, target, t) {
-                var r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
-                r = Math.round(r + (target[0] - r) * t); g = Math.round(g + (target[1] - g) * t); b = Math.round(b + (target[2] - b) * t);
-                return 'rgb(' + r + ',' + g + ',' + b + ')';
+            // 같은 계열 명도 단계 (점선 대신 색으로 구분): AUM 진함 > 수익률 기본 > MDD 연함 > 비중 가장 연함.
+            // ★흰색 혼합은 채도가 빨려 탁해짐 → HSL 명도만 조정(채도 하한 유지)으로 선명한 계열색 생성 (2026-07-20).
+            function hexToHsl(hex) {
+                var r = parseInt(hex.slice(1, 3), 16) / 255, g = parseInt(hex.slice(3, 5), 16) / 255, b = parseInt(hex.slice(5, 7), 16) / 255;
+                var mx = Math.max(r, g, b), mn = Math.min(r, g, b), h = 0, s = 0, l = (mx + mn) / 2;
+                if (mx !== mn) {
+                    var d = mx - mn;
+                    s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+                    if (mx === r) h = ((g - b) / d + (g < b ? 6 : 0));
+                    else if (mx === g) h = (b - r) / d + 2;
+                    else h = (r - g) / d + 4;
+                    h *= 60;
+                }
+                return { h: Math.round(h), s: Math.round(s * 100), l: Math.round(l * 100) };
             }
             function metricColor(base, m) {
-                if (base.charAt(0) !== '#') return base;
-                if (m === 'mdd') return mixColor(base, [255, 255, 255], 0.35);
-                if (m === 'weight') return mixColor(base, [255, 255, 255], 0.6);
-                if (m === 'aum') return mixColor(base, [0, 0, 0], 0.25);
-                return base;
+                if (base.charAt(0) !== '#' || m === 'return') return base;
+                var c = hexToHsl(base);
+                if (m === 'aum') return 'hsl(' + c.h + ',' + Math.min(100, c.s + 8) + '%,' + Math.max(14, c.l - 16) + '%)';
+                if (m === 'mdd') return 'hsl(' + c.h + ',' + Math.max(35, c.s - 5) + '%,' + Math.min(74, c.l + 15) + '%)';
+                return 'hsl(' + c.h + ',' + Math.max(30, c.s - 8) + '%,' + Math.min(84, c.l + 28) + '%)';   // weight
             }
 
             function calcMDD(vals) {
@@ -3726,15 +3737,21 @@ def _build_wrap_chart_section(category_label):
                     else _useY = true;
                 });
 
-                // 사이드테이블 선택 행 = 시리즈 색 배경 (테이블이 범례 역할)
+                // 사이드테이블 선택 행 = 시리즈 색 배경 (테이블이 범례 역할). 글씨색은 배경 명도로 흑/백 자동.
+                function textColorFor(c) {
+                    if (c.charAt(0) === '#') {
+                        var lum = 0.299 * parseInt(c.slice(1, 3), 16) + 0.587 * parseInt(c.slice(3, 5), 16) + 0.114 * parseInt(c.slice(5, 7), 16);
+                        return lum > 150 ? '#000' : '#fff';
+                    }
+                    var mh = c.match(/hsl\(\s*[\d.]+\s*,\s*[\d.]+%\s*,\s*([\d.]+)%/);
+                    if (mh) return parseFloat(mh[1]) > 58 ? '#000' : '#fff';
+                    return '#fff';
+                }
                 document.querySelectorAll('.wrap-chart-row').forEach(function(el) {
                     if (el.classList.contains('active')) {
                         var c = metricColor(chartColors[el.getAttribute('data-series')] || '#888', el.getAttribute('data-metric'));
                         el.style.background = c;
-                        var mm = c.match(/\d+/g);
-                        var lum = mm && mm.length >= 3 ? (0.299 * mm[0] + 0.587 * mm[1] + 0.114 * mm[2]) : 0;
-                        if (c.charAt(0) === '#') { lum = 0.299 * parseInt(c.slice(1, 3), 16) + 0.587 * parseInt(c.slice(3, 5), 16) + 0.114 * parseInt(c.slice(5, 7), 16); }
-                        el.style.color = lum > 150 ? '#000' : '#fff';
+                        el.style.color = textColorFor(c);
                     } else {
                         el.style.background = '';
                         el.style.color = '';
