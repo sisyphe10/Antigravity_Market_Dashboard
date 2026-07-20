@@ -31,6 +31,7 @@ MASTER_FILE = os.path.join(ROOT, 'kis_universe_master.json')
 SHARES_CACHE = os.path.join(BASE, 'shares_cache.json')
 WL_PATH = os.path.join(BASE, 'watchlists.json')     # 관심종목 그룹 (기기 공통, 서버 저장)
 STARS_PATH = os.path.join(BASE, 'market_stars.json')  # market DATA 차트 별표 (기기 공통, 서버 저장)
+PREFS_PATH = os.path.join(BASE, 'prefs.json')       # AoE 화면 뷰 설정 KV (기기 공통, POST=병합)
 
 MULTI_PATH = '/uapi/domestic-stock/v1/quotations/intstock-multprice'
 MULTI_TRID = 'FHKST11300006'
@@ -308,6 +309,29 @@ def save_stars(s):
     os.replace(tmp, STARS_PATH)
 
 
+def load_prefs():
+    """AoE 페이지 화면 뷰 설정 KV (탭 선택·정렬 등). POST는 키 단위 병합 (2026-07-20)."""
+    try:
+        p = json.load(open(PREFS_PATH, encoding='utf-8'))
+        if isinstance(p, dict):
+            return p
+    except Exception:
+        pass
+    return {}
+
+
+def valid_prefs(p):
+    return (isinstance(p, dict) and 0 < len(p) <= 100
+            and all(isinstance(k, str) and 0 < len(k) <= 64 for k in p))
+
+
+def save_prefs(p):
+    tmp = PREFS_PATH + '.tmp'
+    with open(tmp, 'w', encoding='utf-8') as f:
+        json.dump(p, f, ensure_ascii=False)
+    os.replace(tmp, PREFS_PATH)
+
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass
@@ -333,6 +357,10 @@ class Handler(BaseHTTPRequestHandler):
             with _LOCK:
                 body = json.dumps(load_stars(), ensure_ascii=False)
             self._send(body, 'application/json')
+        elif path.startswith('/prefs'):
+            with _LOCK:
+                body = json.dumps(load_prefs(), ensure_ascii=False)
+            self._send(body, 'application/json')
         elif path in ('/', '/index.html'):
             html = open(os.path.join(BASE, 'index.html'), encoding='utf-8').read()
             self._send(html, 'text/html')
@@ -341,7 +369,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         path = self.path.split('?', 1)[0]
-        if not (path.startswith('/wl') or path.startswith('/stars')):
+        if not (path.startswith('/wl') or path.startswith('/stars') or path.startswith('/prefs')):
             self.send_error(404)
             return
         try:
@@ -352,7 +380,10 @@ class Handler(BaseHTTPRequestHandler):
             if path.startswith('/wl'):
                 if not valid_wl(body):
                     raise ValueError
-            elif not valid_stars(body):
+            elif path.startswith('/stars'):
+                if not valid_stars(body):
+                    raise ValueError
+            elif not valid_prefs(body):
                 raise ValueError
         except Exception:
             self.send_error(400)
@@ -360,8 +391,12 @@ class Handler(BaseHTTPRequestHandler):
         with _LOCK:
             if path.startswith('/wl'):
                 save_wl(body)
-            else:
+            elif path.startswith('/stars'):
                 save_stars(body)
+            else:                       # /prefs = 키 단위 병합 (다른 페이지 키 보존)
+                merged = load_prefs()
+                merged.update(body)
+                save_prefs(merged)
         self._send('{"ok": 1}', 'application/json')
 
 
