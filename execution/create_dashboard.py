@@ -5373,7 +5373,7 @@ def create_order_section():
             var specs = [
                 { key: 'compliance', label: '컴플라이언스', broker: null,
                   subject: '[라이프자산운용] 자문형 랩 : ' + _advMD(d) + ' 자문지 송부의 건',
-                  bodyDisp: genSamsung && genSamsung.display },
+                  unionBody: true },
                 { key: 'samsung', label: '삼성', broker: '삼성',
                   subject: '[라이프자산운용_트루밸류] 라이프자산운용_트루밸류 ' + _advMDJ(d) + ' 자문지 보내드립니다.',
                   bodyDisp: genSamsung && genSamsung.display },
@@ -5392,9 +5392,10 @@ def create_order_section():
                 var s = specs[i];
                 if (onlyKeys && onlyKeys.indexOf(s.key) < 0) continue;
                 var disp = s.bodyDisp || (s.col && s.col.display);
-                if (!disp) continue;
+                if (!disp && !s.unionBody) continue;
                 var atts = await _advAttachments(s.broker);
-                mails.push({ key: s.key, label: s.label, subject: s.subject, body: bodyFor(disp), attachments: atts });
+                var body = s.unionBody ? buildComplianceUnionBody() : bodyFor(disp);
+                mails.push({ key: s.key, label: s.label, subject: s.subject, body: body, attachments: atts });
             }
             return mails;
         }
@@ -5702,6 +5703,33 @@ def create_order_section():
             return lines.join('\\n');
         }
 
+        // 컴플라이언스 메일 본문 = Order 탭 전 포트폴리오(일반형+목표전환형) 변경분의 합집합.
+        // 개별 증권사 메일은 각 포트 기준이지만, 컴플은 전 상품 변경을 단일 [주요 내용]으로 취합해야
+        // 특정 포트 단독 변경(예: 한투 지속형만 삼성전자/SK하이닉스 축소)이 누락되지 않는다.
+        function buildComplianceUnionBody() {
+            var acc = { newBuy: [], inc: [], dec: [], out: [] };
+            var seen = { newBuy: {}, inc: {}, dec: {}, out: {} };
+            ORDER_PORTFOLIOS.forEach(function(p) {
+                var disp = p.display;
+                var ch = buildOrderChanges(orderStocks[disp] || [], orderState[disp] || []);
+                ['newBuy', 'inc', 'dec', 'out'].forEach(function(k) {
+                    ch[k].forEach(function(nm) { if (nm && !seen[k][nm]) { seen[k][nm] = 1; acc[k].push(nm); } });
+                });
+            });
+            var lines = [
+                '안녕하십니까.',
+                '라이프자산운용 김태식입니다.',
+                '',
+                '랩 자문지 보내드립니다.',
+                '주요 변경 내용은 다음과 같습니다.',
+                ''
+            ];
+            lines = lines.concat(buildEmailSectionLines(acc, null));
+            lines.push('');
+            lines.push('감사합니다.');
+            return lines.join('\\n') + ADVISORY_SIGNATURE;
+        }
+
         function escapeHtml(s) {
             return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         }
@@ -5888,7 +5916,7 @@ def create_order_section():
         // per-portfolio orderStocks/orderState 위의 VIEW. 저장/복원/finalize/email/download 무수정 재사용.
         var GENERAL_DISPLAYS = ORDER_PORTFOLIOS.filter(function(p){return p.general;}).map(function(p){return p.display;});
         var TARGET_DISPLAYS = ORDER_PORTFOLIOS.filter(function(p){return !p.general;}).map(function(p){return p.display;});
-        var matrixNewRows = [], _mtxSeq = 0, syncGeneral = true, syncTarget = false;
+        var matrixNewRows = [], _mtxSeq = 0, syncGeneral = true, syncTarget = true;
 
         function _mtxFindIdx(pf,code){ var a=orderStocks[pf]||[], c=String(code||'').trim(); for(var i=0;i<a.length;i++){ if(String(a[i].code||'').trim()===c) return i; } return -1; }
         function _mtxNewRowCodes(){ var s={}; matrixNewRows.forEach(function(r){ var c=String(r.code||'').trim(); if(c) s[c]=true; }); return s; }
@@ -5991,7 +6019,7 @@ def create_order_section():
             var fg=document.querySelector('#orderContent th[data-firstgen]'), _s1=document.getElementById('syncToggle'); if(fg&&_s1){ _s1.style.left=Math.max(0,fg.getBoundingClientRect().left-ocL)+'px'; }
             var ft=document.querySelector('#orderContent th[data-firsttarget]'), _s2=document.getElementById('syncToggleTarget'); if(ft&&_s2){ _s2.style.left=Math.max(0,ft.getBoundingClientRect().left-ocL)+'px'; } })();
           (function(){ var oc=document.getElementById('orderContent'); if(!oc) return;
-            function focusCol(tr,col){ if(!tr) return false; var el=tr.querySelector('input.mtx-w[data-col="'+col+'"]'); if(el){ el.focus(); try{el.setSelectionRange(el.value.length,el.value.length);}catch(_){} return true; } return false; }
+            function focusCol(tr,col){ if(!tr) return false; var el=tr.querySelector('input.mtx-w[data-col="'+col+'"]'); if(el){ el.focus(); try{el.select();}catch(_){} return true; } return false; }
             function rowHasW(tr){ return !!(tr&&tr.querySelector&&tr.querySelector('input.mtx-w')); }
             function nextWRow(tr){ var n=tr.nextElementSibling; while(n){ if(rowHasW(n)) return n; n=n.nextElementSibling; } return null; }
             function prevWRow(tr){ var n=tr.previousElementSibling; while(n){ if(rowHasW(n)) return n; n=n.previousElementSibling; } return null; }
