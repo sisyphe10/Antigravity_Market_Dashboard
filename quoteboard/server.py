@@ -30,6 +30,7 @@ UNIVERSE_CSV = os.path.join(ROOT, 'universe_tickers.csv')
 MASTER_FILE = os.path.join(ROOT, 'kis_universe_master.json')
 SHARES_CACHE = os.path.join(BASE, 'shares_cache.json')
 WL_PATH = os.path.join(BASE, 'watchlists.json')     # 관심종목 그룹 (기기 공통, 서버 저장)
+STARS_PATH = os.path.join(BASE, 'market_stars.json')  # market DATA 차트 별표 (기기 공통, 서버 저장)
 
 MULTI_PATH = '/uapi/domestic-stock/v1/quotations/intstock-multprice'
 MULTI_TRID = 'FHKST11300006'
@@ -284,6 +285,29 @@ def save_wl(w):
     os.replace(tmp, WL_PATH)
 
 
+def load_stars():
+    """market.html DATA 차트 별표(시리즈명 리스트). 기기 공통, 서버 저장 (2026-07-20)."""
+    try:
+        s = json.load(open(STARS_PATH, encoding='utf-8'))
+        if valid_stars(s):
+            return s
+    except Exception:
+        pass
+    return []
+
+
+def valid_stars(s):
+    return (isinstance(s, list) and len(s) <= 300
+            and all(isinstance(x, str) and 0 < len(x) <= 80 for x in s))
+
+
+def save_stars(s):
+    tmp = STARS_PATH + '.tmp'
+    with open(tmp, 'w', encoding='utf-8') as f:
+        json.dump(s, f, ensure_ascii=False)
+    os.replace(tmp, STARS_PATH)
+
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass
@@ -305,6 +329,10 @@ class Handler(BaseHTTPRequestHandler):
             with _LOCK:
                 body = json.dumps(load_wl(), ensure_ascii=False)
             self._send(body, 'application/json')
+        elif path.startswith('/stars'):
+            with _LOCK:
+                body = json.dumps(load_stars(), ensure_ascii=False)
+            self._send(body, 'application/json')
         elif path in ('/', '/index.html'):
             html = open(os.path.join(BASE, 'index.html'), encoding='utf-8').read()
             self._send(html, 'text/html')
@@ -312,21 +340,28 @@ class Handler(BaseHTTPRequestHandler):
             self.send_error(404)
 
     def do_POST(self):
-        if not self.path.startswith('/wl'):
+        path = self.path.split('?', 1)[0]
+        if not (path.startswith('/wl') or path.startswith('/stars')):
             self.send_error(404)
             return
         try:
             n = int(self.headers.get('Content-Length') or 0)
             if not 0 < n <= 100_000:
                 raise ValueError
-            w = json.loads(self.rfile.read(n).decode('utf-8'))
-            if not valid_wl(w):
+            body = json.loads(self.rfile.read(n).decode('utf-8'))
+            if path.startswith('/wl'):
+                if not valid_wl(body):
+                    raise ValueError
+            elif not valid_stars(body):
                 raise ValueError
         except Exception:
             self.send_error(400)
             return
         with _LOCK:
-            save_wl(w)
+            if path.startswith('/wl'):
+                save_wl(body)
+            else:
+                save_stars(body)
         self._send('{"ok": 1}', 'application/json')
 
 

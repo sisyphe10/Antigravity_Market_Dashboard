@@ -2377,12 +2377,30 @@ def _build_combined_chart_section():
                 });
             }
 
-            // ── 별표(즐겨찾기) — Watchlist 패턴 (2026-07-19). localStorage 보존,
-            //    헤더 ★ = 즐겨찾기만 보기 토글 (엑셀식 필터와 AND 결합).
+            // ── 별표(즐겨찾기) — Watchlist 패턴 (2026-07-19). 헤더 ★ = 즐겨찾기만 보기 토글
+            //    (엑셀식 필터와 AND 결합). 상태 = 맥미니 서버 저장(/watchlist/stars, 기기 공통,
+            //    2026-07-20 전환) + localStorage는 즉시표시 캐시·오프라인 폴백.
             var cmbStars = {};
             try { (JSON.parse(localStorage.getItem('cmbStars') || '[]')).forEach(function(n) { cmbStars[n] = 1; }); } catch (e) {}
             var cmbStarOnly = false;
-            function cmbSaveStars() { try { localStorage.setItem('cmbStars', JSON.stringify(Object.keys(cmbStars))); } catch (e) {} }
+            try {
+                fetch('/watchlist/stars').then(function(r) { return r.ok ? r.json() : null; }).then(function(a) {
+                    if (!Array.isArray(a)) return;
+                    cmbStars = {};
+                    a.forEach(function(n) { cmbStars[n] = 1; });
+                    try { localStorage.setItem('cmbStars', JSON.stringify(a)); } catch (e) {}
+                    cmbPaintStars();
+                    if (cmbStarOnly) cmbApplyFilters();
+                }).catch(function() {});
+            } catch (e) {}
+            function cmbSaveStars() {
+                var arr = Object.keys(cmbStars);
+                try { localStorage.setItem('cmbStars', JSON.stringify(arr)); } catch (e) {}
+                try {
+                    fetch('/watchlist/stars', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(arr) }).catch(function() {});
+                } catch (e) {}
+            }
             function cmbPaintStars() {
                 document.querySelectorAll('.cmb-series-row td.cmb-star').forEach(function(td) {
                     var on = !!cmbStars[td.parentNode.getAttribute('data-name')];
