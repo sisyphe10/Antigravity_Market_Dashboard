@@ -3339,8 +3339,38 @@ def _build_wrap_chart_section(category_label):
                 vals = df_nav[col].tolist()
                 raw_export[display] = [round(v, 2) if pd.notna(v) else None for v in vals]
 
+        # 비중 모드 (2026-07-20): 투자 비중 = NEW 시트 종목 비중 합(= 100 - 현금).
+        # 리밸런스일에만 기록되므로 스텝 시계열로 만들고 NAV 활성 구간에만 forward-fill.
+        # NEW 상품명 == nav_key(col) 정확 일치 매칭 (substring 금지 — '목표전환형' vs '목표전환형 1호').
+        weight_export = {'dates': nav_export['dates']}
+        try:
+            df_new_w = pd.read_excel('Wrap_NAV.xlsx', sheet_name='NEW')
+            df_new_w['날짜'] = pd.to_datetime(df_new_w['날짜'])
+            for display, col in chart_series:
+                if col not in df_nav.columns or display not in raw_export:
+                    continue
+                sub = df_new_w[df_new_w['상품명'].astype(str) == col]
+                if sub.empty:
+                    continue  # 벤치마크(KOSPI/KOSDAQ) 등 NEW 기록 없는 시리즈는 비중 모드 제외
+                wmap = sub.groupby(sub['날짜'].dt.strftime('%Y-%m-%d'))['비중'].sum().to_dict()
+                rdates = sorted(wmap)
+                raw_vals = raw_export[display]
+                series = []
+                ri = -1
+                for i, d in enumerate(nav_export['dates']):
+                    while ri + 1 < len(rdates) and rdates[ri + 1] <= d:
+                        ri += 1
+                    if raw_vals[i] is None or ri < 0:
+                        series.append(None)  # 운용 전/청산 후 또는 첫 리밸런스 이전
+                    else:
+                        series.append(round(float(wmap[rdates[ri]]), 2))
+                weight_export[display] = series
+        except Exception as _we:
+            print(f"WRAP 비중 시계열 생성 실패(비중 모드 빈 데이터): {_we}")
+
         nav_data_json = json.dumps(nav_export, ensure_ascii=False)
         raw_data_json = json.dumps(raw_export, ensure_ascii=False)
+        weight_data_json = json.dumps(weight_export, ensure_ascii=False)
         colors_json = json.dumps(chart_colors, ensure_ascii=False)
 
         benchmarks = {'KOSPI', 'KOSDAQ'}
@@ -3353,7 +3383,7 @@ def _build_wrap_chart_section(category_label):
             color = chart_colors.get(display, '#888')
             active = ' active' if display == '삼성 트루밸류' else ''
             rows_html += f'<tr class="wrap-chart-item{active}" data-series="{display}" onclick="toggleWrapSeries(this)"><td style="width:6px;padding:0;"><div style="width:4px;height:100%;background:{color};border-radius:2px;"></div></td><td>{display}</td></tr>\n'
-        mode_html = '<div style="display:flex;gap:4px;margin-bottom:8px;"><button class="wrap-mode-btn active" data-mode="return" onclick="switchChartMode(this)">수익률</button><button class="wrap-mode-btn" data-mode="mdd" onclick="switchChartMode(this)">MDD</button></div>'
+        mode_html = '<div style="display:flex;gap:4px;margin-bottom:8px;"><button class="wrap-mode-btn active" data-mode="return" onclick="switchChartMode(this)">수익률</button><button class="wrap-mode-btn" data-mode="mdd" onclick="switchChartMode(this)">MDD</button><button class="wrap-mode-btn" data-mode="weight" onclick="switchChartMode(this)">비중</button></div>'
         list_html = mode_html + f'<table class="portfolio-table" style="max-width:500px;margin:0 auto;"><tbody>{rows_html}</tbody></table>'
 
         dates = nav_export['dates']
@@ -3368,9 +3398,10 @@ def _build_wrap_chart_section(category_label):
         (function() {
             var navData = NAV_DATA_PLACEHOLDER;
             var rawData = RAW_DATA_PLACEHOLDER;
+            var weightData = WEIGHT_DATA_PLACEHOLDER;
             var chartColors = COLORS_PLACEHOLDER;
             var wrapChart = null;
-            var chartMode = 'return'; // 'return' or 'mdd'
+            var chartMode = 'return'; // 'return' | 'mdd' | 'weight'(투자 비중 = 100 - 현금)
 
             function calcMDD(vals) {
                 var peak = vals[0];
@@ -3394,15 +3425,17 @@ def _build_wrap_chart_section(category_label):
                     if (!rawData[name]) return;
                     var filteredDates = [];
                     var filteredVals = [];
+                    var filteredWts = [];
                     for (var i = 0; i < navData.dates.length; i++) {
                         var d = navData.dates[i];
                         if (d >= startDate && d <= endDate && rawData[name][i] !== null) {
                             filteredDates.push(d);
                             filteredVals.push(rawData[name][i]);
+                            filteredWts.push(weightData[name] ? weightData[name][i] : null);
                         }
                     }
                     if (filteredVals.length === 0) return;
-                    perSeries.push({ name: name, dates: filteredDates, vals: filteredVals });
+                    perSeries.push({ name: name, dates: filteredDates, vals: filteredVals, wts: filteredWts });
                 });
 
                 // Pass 3: dataset 빌드 — % return 모드는 각 시리즈를 '자기 개시일' 기준 0%로 표시한다.
@@ -3423,7 +3456,11 @@ def _build_wrap_chart_section(category_label):
                     if (v_arr.length === 0) return;
 
                     var yByDate = {};
-                    if (chartMode === 'mdd') {
+                    if (chartMode === 'weight') {
+                        // 비중 모드: NEW 시트 기반 투자 비중(100-현금). 벤치마크 등 비중 데이터 없는 시리즈 제외.
+                        if (!weightData[s.name]) return;
+                        d_arr.forEach(function(d, j) { yByDate[d] = s.wts[j]; });
+                    } else if (chartMode === 'mdd') {
                         var mddVals = calcMDD(v_arr);
                         d_arr.forEach(function(d, j) { yByDate[d] = mddVals[j]; });
                     } else {
@@ -3439,7 +3476,8 @@ def _build_wrap_chart_section(category_label):
                         backgroundColor: 'transparent',
                         borderWidth: (s.name === 'KOSPI' || s.name === 'KOSDAQ') ? 2 : 3,
                         pointRadius: 0,
-                        tension: 0.3,
+                        tension: chartMode === 'weight' ? 0 : 0.3,
+                        stepped: chartMode === 'weight' ? 'before' : false,
                         spanGaps: false
                     });
                 });
@@ -3488,7 +3526,7 @@ def _build_wrap_chart_section(category_label):
                             var last = meta.data[lastIdx];
                             if (!last) return;
                             var val = ds.data[lastIdx];
-                            var sign = val >= 0 ? '+' : '';
+                            var sign = (chartMode === 'weight') ? '' : (val >= 0 ? '+' : '');
                             var label = sign + wrapBandFix(val, window._wrapBandMax || Math.abs(val)) + '%';
                             ctx.save();
                             ctx.beginPath();
@@ -3526,7 +3564,7 @@ def _build_wrap_chart_section(category_label):
                         interaction: { mode: 'index', intersect: false },
                         plugins: {
                             legend: { display: false },
-                            tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + (ctx.parsed.y >= 0 ? '+' : '') + wrapBandFix(ctx.parsed.y, window._wrapBandMax || 100) + '%'; } } }
+                            tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + (chartMode !== 'weight' && ctx.parsed.y >= 0 ? '+' : '') + wrapBandFix(ctx.parsed.y, window._wrapBandMax || 100) + '%'; } } }
                         },
                         scales: {
                             x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val) { var d = this.getLabelForValue(val); if (!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
@@ -3632,7 +3670,7 @@ def _build_wrap_chart_section(category_label):
             buildChart();
         })();
         </script>
-        """.replace('NAV_DATA_PLACEHOLDER', nav_data_json).replace('COLORS_PLACEHOLDER', colors_json).replace('RAW_DATA_PLACEHOLDER', raw_data_json)
+        """.replace('NAV_DATA_PLACEHOLDER', nav_data_json).replace('COLORS_PLACEHOLDER', colors_json).replace('RAW_DATA_PLACEHOLDER', raw_data_json).replace('WEIGHT_DATA_PLACEHOLDER', weight_data_json)
 
         return f"""
         <div class="category-section" id="wrap-sec-chart">
