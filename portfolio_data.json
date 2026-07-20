@@ -91,9 +91,9 @@
       "sector": "에너지",
       "market_cap": 165159,
       "weight": 3.0,
-      "weight_prev": 2.0,
+      "weight_prev": 3.0,
       "today_return": 1.2422360248447204,
-      "contribution": 0.2484472049689441,
+      "contribution": 0.37267080745341613,
       "ytd_return": 76.74698795180723,
       "cumulative_return": 0.8247422680412342,
       "current_price": 146700.0,
@@ -117,57 +117,6 @@
       "ath_price": 1630000.0,
       "dd": -35.39877300613497,
       "rsi": -8.467276598415319,
-      "is_today_new": false
-    },
-    {
-      "code": "105560",
-      "name": "KB금융",
-      "sector": "은행",
-      "market_cap": 598713,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -6.7918277194919945,
-      "contribution": -1.3583655438983988,
-      "ytd_return": 35.36487570168405,
-      "cumulative_return": null,
-      "current_price": 168800.0,
-      "ath_price": 186200.0,
-      "dd": -9.344790547798066,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "226950",
-      "name": "올릭스",
-      "sector": "건강관리",
-      "market_cap": 24099,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -15.95900439238653,
-      "contribution": -3.191800878477306,
-      "ytd_return": -18.23361823361823,
-      "cumulative_return": null,
-      "current_price": 114800.0,
-      "ath_price": 207000.0,
-      "dd": -44.54106280193236,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "237690",
-      "name": "에스티팜",
-      "sector": "건강관리",
-      "market_cap": 23778,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -8.3668543845535,
-      "contribution": -1.6733708769107,
-      "ytd_return": -4.446308724832216,
-      "cumulative_return": null,
-      "current_price": 113900.0,
-      "ath_price": 168700.0,
-      "dd": -32.483698873740366,
-      "rsi": null,
       "is_today_new": false
     }
   ],
@@ -263,66 +212,15 @@
       "sector": "에너지",
       "market_cap": 165159,
       "weight": 3.0,
-      "weight_prev": 2.0,
+      "weight_prev": 3.0,
       "today_return": 1.2422360248447204,
-      "contribution": 0.2484472049689441,
+      "contribution": 0.37267080745341613,
       "ytd_return": 76.74698795180723,
       "cumulative_return": 0.8247422680412342,
       "current_price": 146700.0,
       "ath_price": 146700.0,
       "dd": 0.0,
       "rsi": 5.704160195738783,
-      "is_today_new": false
-    },
-    {
-      "code": "105560",
-      "name": "KB금융",
-      "sector": "은행",
-      "market_cap": 598713,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -6.7918277194919945,
-      "contribution": -1.3583655438983988,
-      "ytd_return": 35.36487570168405,
-      "cumulative_return": null,
-      "current_price": 168800.0,
-      "ath_price": 186200.0,
-      "dd": -9.344790547798066,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "237690",
-      "name": "에스티팜",
-      "sector": "건강관리",
-      "market_cap": 23778,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -8.3668543845535,
-      "contribution": -1.6733708769107,
-      "ytd_return": -4.446308724832216,
-      "cumulative_return": null,
-      "current_price": 113900.0,
-      "ath_price": 168700.0,
-      "dd": -32.483698873740366,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "226950",
-      "name": "올릭스",
-      "sector": "건강관리",
-      "market_cap": 24099,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -15.95900439238653,
-      "contribution": -3.191800878477306,
-      "ytd_return": -18.23361823361823,
-      "cumulative_return": null,
-      "current_price": 114800.0,
-      "ath_price": 207000.0,
-      "dd": -44.54106280193236,
-      "rsi": null,
       "is_today_new": false
     }
   ],
@@ -418,66 +316,15 @@
       "sector": "에너지",
       "market_cap": 165159,
       "weight": 3.0,
-      "weight_prev": 2.0,
+      "weight_prev": 3.0,
       "today_return": 1.2422360248447204,
-      "contribution": 0.2484472049689441,
+      "contribution": 0.37267080745341613,
       "ytd_return": 76.74698795180723,
       "cumulative_return": 0.8247422680412342,
       "current_price": 146700.0,
       "ath_price": 146700.0,
       "dd": 0.0,
       "rsi": 5.704160195738783,
-      "is_today_new": false
-    },
-    {
-      "code": "105560",
-      "name": "KB금융",
-      "sector": "은행",
-      "market_cap": 598713,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -6.7918277194919945,
-      "contribution": -1.3583655438983988,
-      "ytd_return": 35.36487570168405,
-      "cumulative_return": null,
-      "current_price": 168800.0,
-      "ath_price": 186200.0,
-      "dd": -9.344790547798066,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "237690",
-      "name": "에스티팜",
-      "sector": "건강관리",
-      "market_cap": 23778,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -8.3668543845535,
-      "contribution": -1.6733708769107,
-      "ytd_return": -4.446308724832216,
-      "cumulative_return": null,
-      "current_price": 113900.0,
-      "ath_price": 168700.0,
-      "dd": -32.483698873740366,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "226950",
-      "name": "올릭스",
-      "sector": "건강관리",
-      "market_cap": 24099,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -15.95900439238653,
-      "contribution": -3.191800878477306,
-      "ytd_return": -18.23361823361823,
-      "cumulative_return": null,
-      "current_price": 114800.0,
-      "ath_price": 207000.0,
-      "dd": -44.54106280193236,
-      "rsi": null,
       "is_today_new": false
     }
   ],
@@ -488,9 +335,9 @@
       "sector": "반도체",
       "market_cap": 14264920,
       "weight": 25.0,
-      "weight_prev": 30.0,
+      "weight_prev": 25.0,
       "today_return": -4.313725490196078,
-      "contribution": -12.941176470588236,
+      "contribution": -10.784313725490195,
       "ytd_return": 103.50291909924935,
       "cumulative_return": -13.466653531671746,
       "current_price": 244000.0,
@@ -505,9 +352,9 @@
       "sector": "반도체",
       "market_cap": 12572070,
       "weight": 25.0,
-      "weight_prev": 30.0,
+      "weight_prev": 25.0,
       "today_return": -4.234527687296417,
-      "contribution": -12.70358306188925,
+      "contribution": -10.586319218241043,
       "ytd_return": 170.96774193548384,
       "cumulative_return": -16.4574946720341,
       "current_price": 1764000.0,
@@ -573,9 +420,9 @@
       "sector": "에너지",
       "market_cap": 165159,
       "weight": 3.0,
-      "weight_prev": 2.0,
+      "weight_prev": 3.0,
       "today_return": 1.2422360248447204,
-      "contribution": 0.2484472049689441,
+      "contribution": 0.37267080745341613,
       "ytd_return": 76.74698795180723,
       "cumulative_return": 0.8247422680412342,
       "current_price": 146700.0,
@@ -599,57 +446,6 @@
       "ath_price": 1630000.0,
       "dd": -35.39877300613497,
       "rsi": -0.8650750640017524,
-      "is_today_new": false
-    },
-    {
-      "code": "105560",
-      "name": "KB금융",
-      "sector": "은행",
-      "market_cap": 598713,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -6.7918277194919945,
-      "contribution": -1.3583655438983988,
-      "ytd_return": 35.36487570168405,
-      "cumulative_return": null,
-      "current_price": 168800.0,
-      "ath_price": 186200.0,
-      "dd": -9.344790547798066,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "226950",
-      "name": "올릭스",
-      "sector": "건강관리",
-      "market_cap": 24099,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -15.95900439238653,
-      "contribution": -3.191800878477306,
-      "ytd_return": -18.23361823361823,
-      "cumulative_return": null,
-      "current_price": 114800.0,
-      "ath_price": 207000.0,
-      "dd": -44.54106280193236,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "237690",
-      "name": "에스티팜",
-      "sector": "건강관리",
-      "market_cap": 23778,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -8.3668543845535,
-      "contribution": -1.6733708769107,
-      "ytd_return": -4.446308724832216,
-      "cumulative_return": null,
-      "current_price": 113900.0,
-      "ath_price": 168700.0,
-      "dd": -32.483698873740366,
-      "rsi": null,
       "is_today_new": false
     }
   ],
@@ -745,9 +541,9 @@
       "sector": "에너지",
       "market_cap": 165159,
       "weight": 3.0,
-      "weight_prev": 2.0,
+      "weight_prev": 3.0,
       "today_return": 1.2422360248447204,
-      "contribution": 0.2484472049689441,
+      "contribution": 0.37267080745341613,
       "ytd_return": 76.74698795180723,
       "cumulative_return": 0.8247422680412342,
       "current_price": 146700.0,
@@ -755,216 +551,28 @@
       "dd": 0.0,
       "rsi": 5.704160195738783,
       "is_today_new": false
-    },
-    {
-      "code": "105560",
-      "name": "KB금융",
-      "sector": "은행",
-      "market_cap": 598713,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -6.7918277194919945,
-      "contribution": -1.3583655438983988,
-      "ytd_return": 35.36487570168405,
-      "cumulative_return": null,
-      "current_price": 168800.0,
-      "ath_price": 186200.0,
-      "dd": -9.344790547798066,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "237690",
-      "name": "에스티팜",
-      "sector": "건강관리",
-      "market_cap": 23778,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -8.3668543845535,
-      "contribution": -1.6733708769107,
-      "ytd_return": -4.446308724832216,
-      "cumulative_return": null,
-      "current_price": 113900.0,
-      "ath_price": 168700.0,
-      "dd": -32.483698873740366,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "226950",
-      "name": "올릭스",
-      "sector": "건강관리",
-      "market_cap": 24099,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -15.95900439238653,
-      "contribution": -3.191800878477306,
-      "ytd_return": -18.23361823361823,
-      "cumulative_return": null,
-      "current_price": 114800.0,
-      "ath_price": 207000.0,
-      "dd": -44.54106280193236,
-      "rsi": null,
-      "is_today_new": false
     }
   ],
-  "_order_changes": {
-    "삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형": {
-      "date": "2026-07-20",
-      "added": [],
-      "changed": [
-        {
-          "name": "S-Oil",
-          "from": 2.0,
-          "to": 3.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "KB금융",
-          "weight": 2.0
-        },
-        {
-          "name": "올릭스",
-          "weight": 2.0
-        },
-        {
-          "name": "에스티팜",
-          "weight": 2.0
-        }
-      ]
-    },
-    "NH 목표전환형 5호": {
-      "date": "2026-07-20",
-      "added": [],
-      "changed": [
-        {
-          "name": "S-Oil",
-          "from": 2.0,
-          "to": 3.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "KB금융",
-          "weight": 2.0
-        },
-        {
-          "name": "에스티팜",
-          "weight": 2.0
-        },
-        {
-          "name": "올릭스",
-          "weight": 2.0
-        }
-      ]
-    },
-    "DB 목표전환형 6차": {
-      "date": "2026-07-20",
-      "added": [],
-      "changed": [
-        {
-          "name": "S-Oil",
-          "from": 2.0,
-          "to": 3.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "KB금융",
-          "weight": 2.0
-        },
-        {
-          "name": "에스티팜",
-          "weight": 2.0
-        },
-        {
-          "name": "올릭스",
-          "weight": 2.0
-        }
-      ]
-    },
-    "한투 지속형": {
-      "date": "2026-07-20",
-      "added": [],
-      "changed": [
-        {
-          "name": "삼성전자",
-          "from": 30.0,
-          "to": 25.0
-        },
-        {
-          "name": "SK하이닉스",
-          "from": 30.0,
-          "to": 25.0
-        },
-        {
-          "name": "S-Oil",
-          "from": 2.0,
-          "to": 3.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "KB금융",
-          "weight": 2.0
-        },
-        {
-          "name": "올릭스",
-          "weight": 2.0
-        },
-        {
-          "name": "에스티팜",
-          "weight": 2.0
-        }
-      ]
-    },
-    "한투 성과모집형 1차": {
-      "date": "2026-07-20",
-      "added": [],
-      "changed": [
-        {
-          "name": "S-Oil",
-          "from": 2.0,
-          "to": 3.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "KB금융",
-          "weight": 2.0
-        },
-        {
-          "name": "에스티팜",
-          "weight": 2.0
-        },
-        {
-          "name": "올릭스",
-          "weight": 2.0
-        }
-      ]
-    }
-  },
   "_portfolio_meta": {
     "삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형": {
-      "nav_ytd_d1": 53.789374217710304,
-      "nav_cum_d1": 210.85599999999997
+      "nav_ytd_d1": 48.078721225343976,
+      "nav_cum_d1": 199.31300000000002
     },
     "NH 목표전환형 5호": {
-      "nav_ytd_d1": -19.655999999999995,
-      "nav_cum_d1": -19.655999999999995
+      "nav_ytd_d1": -22.614999999999995,
+      "nav_cum_d1": -22.614999999999995
     },
     "DB 목표전환형 6차": {
-      "nav_ytd_d1": -18.714999999999993,
-      "nav_cum_d1": -18.714999999999993
+      "nav_ytd_d1": -21.709,
+      "nav_cum_d1": -21.709
     },
     "한투 지속형": {
-      "nav_ytd_d1": -12.122,
-      "nav_cum_d1": -12.122
+      "nav_ytd_d1": -15.385000000000005,
+      "nav_cum_d1": -15.385000000000005
     },
     "한투 성과모집형 1차": {
-      "nav_ytd_d1": -8.662000000000003,
-      "nav_cum_d1": -8.662000000000003
+      "nav_ytd_d1": -12.026000000000003,
+      "nav_cum_d1": -12.026000000000003
     }
   },
   "_price_asof": "2026-07-20"
