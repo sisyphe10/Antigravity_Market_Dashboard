@@ -52,7 +52,7 @@
           "sector": "은행",
           "code": "105560",
           "name": "KB금융",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         },
@@ -60,7 +60,7 @@
           "sector": "건강관리",
           "code": "226950",
           "name": "올릭스",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         },
@@ -76,7 +76,7 @@
           "sector": "건강관리",
           "code": "237690",
           "name": "에스티팜",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         },
@@ -84,12 +84,12 @@
           "sector": "에너지",
           "code": "010950",
           "name": "S-Oil",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-20T00:40:00.406Z"
+      "savedAt": "2026-07-20T01:54:17.371Z"
     },
     "NH 다이내믹 밸류": {
       "targets": [
@@ -143,7 +143,7 @@
           "sector": "은행",
           "code": "105560",
           "name": "KB금융",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         },
@@ -151,7 +151,7 @@
           "sector": "건강관리",
           "code": "226950",
           "name": "올릭스",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         },
@@ -167,7 +167,7 @@
           "sector": "건강관리",
           "code": "237690",
           "name": "에스티팜",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         },
@@ -175,12 +175,12 @@
           "sector": "에너지",
           "code": "010950",
           "name": "S-Oil",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-20T00:40:00.406Z"
+      "savedAt": "2026-07-20T01:54:17.371Z"
     },
     "DB 개방형": {
       "targets": [
@@ -234,7 +234,7 @@
           "sector": "은행",
           "code": "105560",
           "name": "KB금융",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         },
@@ -242,7 +242,7 @@
           "sector": "건강관리",
           "code": "226950",
           "name": "올릭스",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         },
@@ -258,7 +258,7 @@
           "sector": "건강관리",
           "code": "237690",
           "name": "에스티팜",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         },
@@ -266,12 +266,12 @@
           "sector": "에너지",
           "code": "010950",
           "name": "S-Oil",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-20T00:40:00.406Z"
+      "savedAt": "2026-07-20T01:54:17.371Z"
     },
     "한투 지속형": {
       "targets": [
@@ -285,7 +285,7 @@
           "sector": "반도체",
           "code": "005930",
           "name": "삼성전자",
-          "weight": 30,
+          "weight": 20,
           "baseWeight": 30,
           "reason": ""
         },
@@ -293,7 +293,7 @@
           "sector": "반도체",
           "code": "000660",
           "name": "SK하이닉스",
-          "weight": 30,
+          "weight": 20,
           "baseWeight": 30,
           "reason": ""
         },
@@ -325,7 +325,7 @@
           "sector": "은행",
           "code": "105560",
           "name": "KB금융",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         },
@@ -333,7 +333,7 @@
           "sector": "건강관리",
           "code": "226950",
           "name": "올릭스",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         },
@@ -341,7 +341,7 @@
           "sector": "건강관리",
           "code": "237690",
           "name": "에스티팜",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         },
@@ -357,12 +357,12 @@
           "sector": "에너지",
           "code": "010950",
           "name": "S-Oil",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-20T00:40:00.406Z"
+      "savedAt": "2026-07-20T01:54:17.371Z"
     },
     "NH 목표전환형 5호": {
       "targets": [
@@ -416,7 +416,7 @@
           "sector": "은행",
           "code": "105560",
           "name": "KB금융",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         },
@@ -424,7 +424,7 @@
           "sector": "건강관리",
           "code": "237690",
           "name": "에스티팜",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         },
@@ -432,7 +432,7 @@
           "sector": "건강관리",
           "code": "226950",
           "name": "올릭스",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         },
@@ -440,12 +440,12 @@
           "sector": "에너지",
           "code": "010950",
           "name": "S-Oil",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-20T00:40:00.406Z"
+      "savedAt": "2026-07-20T01:54:17.371Z"
     },
     "DB 목표전환형 6차": {
       "targets": [
@@ -499,7 +499,7 @@
           "sector": "은행",
           "code": "105560",
           "name": "KB금융",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         },
@@ -507,7 +507,7 @@
           "sector": "건강관리",
           "code": "237690",
           "name": "에스티팜",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         },
@@ -515,7 +515,7 @@
           "sector": "건강관리",
           "code": "226950",
           "name": "올릭스",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         },
@@ -523,12 +523,12 @@
           "sector": "에너지",
           "code": "010950",
           "name": "S-Oil",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-20T00:40:00.406Z"
+      "savedAt": "2026-07-20T01:54:17.371Z"
     },
     "한투 성과모집형 1차": {
       "targets": [
@@ -582,7 +582,7 @@
           "sector": "은행",
           "code": "105560",
           "name": "KB금융",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         },
@@ -590,7 +590,7 @@
           "sector": "건강관리",
           "code": "237690",
           "name": "에스티팜",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         },
@@ -598,7 +598,7 @@
           "sector": "건강관리",
           "code": "226950",
           "name": "올릭스",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         },
@@ -606,12 +606,12 @@
           "sector": "에너지",
           "code": "010950",
           "name": "S-Oil",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-20T00:40:00.406Z"
+      "savedAt": "2026-07-20T01:54:17.371Z"
     }
   }
 }
