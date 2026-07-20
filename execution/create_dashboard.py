@@ -3721,7 +3721,8 @@ def _build_wrap_chart_section(category_label):
                             ctx.font = 'bold 15px sans-serif';
                             ctx.fillStyle = ds.borderColor;
                             ctx.textBaseline = 'middle';
-                            ctx.fillText(label, last.x + 6, last.y);
+                            if (_anyRight) { ctx.textAlign = 'right'; ctx.fillText(label, last.x - 8, last.y); }
+                            else { ctx.textAlign = 'left'; ctx.fillText(label, last.x + 6, last.y); }
                             ctx.restore();
                         });
                     }
@@ -3738,13 +3739,17 @@ def _build_wrap_chart_section(category_label):
                     }).join('');
                 }
 
-                // 사용 중인 축만 표시
+                // 사용 중인 축만 표시. 좌축(y)이 비면 보조축을 좌측으로 승격 —
+                // 비중/AUM 단독 선택 시 축이 왼쪽에 오고, 우측 축과 끝값 라벨 겹침도 사라짐 (2026-07-20 fix).
                 var _useY = false, _useY1 = false, _useY2 = false;
                 datasets.forEach(function(ds) {
                     if (ds.yAxisID === 'y1') _useY1 = true;
                     else if (ds.yAxisID === 'y2') _useY2 = true;
                     else _useY = true;
                 });
+                var _y1Pos = _useY ? 'right' : 'left';
+                var _y2Pos = (_useY || _useY1) ? 'right' : 'left';
+                var _anyRight = (_useY1 && _y1Pos === 'right') || (_useY2 && _y2Pos === 'right');
 
                 // 사이드테이블 선택 행 = 시리즈 색 배경 (테이블이 범례 역할). 글씨색은 배경 명도로 흑/백 자동.
                 function textColorFor(c) {
@@ -3784,9 +3789,9 @@ def _build_wrap_chart_section(category_label):
                             x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val) { var d = this.getLabelForValue(val); if (!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
                             y: { display: _useY, grace: '8%', afterBuildTicks: wrapEnsureTicks, ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v) { return wrapBandFix(v, window._wrapBandMax || 100) + '%'; }, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', drawOnChartArea: _useY }, border: { color: '#000', width: 2 } },
                             // 비중 보조축 (우측 %). 주축 미사용 시 그리드 승계.
-                            y1: { display: _useY1, position: 'right', min: 0, suggestedMax: 100, grace: '8%', ticks: { maxTicksLimit: 6, callback: function(v) { return wrapBandFix(v, window._wrapBandMaxY1 || 100) + '%'; }, font: { size: 15 }, color: '#666' }, grid: { color: '#eee', drawOnChartArea: !_useY }, border: { color: '#666', width: 2 } },
+                            y1: { display: _useY1, position: _y1Pos, min: 0, suggestedMax: 100, grace: '8%', ticks: { maxTicksLimit: 6, callback: function(v) { return wrapBandFix(v, window._wrapBandMaxY1 || 100) + '%'; }, font: { size: 15 }, color: '#666' }, grid: { color: '#eee', drawOnChartArea: !_useY }, border: { color: '#666', width: 2 } },
                             // AUM 보조축 (우측 바깥, 억원). 주·비중축 미사용 시 그리드 승계.
-                            y2: { display: _useY2, position: 'right', grace: '8%', ticks: { maxTicksLimit: 6, callback: function(v) { return wrapBandFix(v, window._wrapBandMaxY2 || 100) + '억'; }, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', drawOnChartArea: !_useY && !_useY1 }, border: { color: '#000', width: 2 } }
+                            y2: { display: _useY2, position: _y2Pos, grace: '8%', ticks: { maxTicksLimit: 6, callback: function(v) { return wrapBandFix(v, window._wrapBandMaxY2 || 100) + '억'; }, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', drawOnChartArea: !_useY && !_useY1 }, border: { color: '#000', width: 2 } }
                         }
                     }
                 });
