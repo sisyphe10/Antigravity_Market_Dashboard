@@ -39,6 +39,7 @@ alerts: "KeepAlive=true (launchd 자동 재기동)"
 - `/journal/*`(2026-07-13): 개인 투자일지 차트("Escape Velocity") — 테일넷 + basic_auth 이중 게이트, `~/Journal/web` 정적 서빙(`no-store`). **데이터·자격증명·페이지 전부 `~/Journal` 로컬 전용으로 git/게시 파이프라인과 격리**(전역 규칙 Journal 섹션). `~/Journal/caddy_auth.snippet` import — 없으면 caddy 기동 실패하니 Journal 폴더 이동 시 이 라우트 먼저 수정.
 - `/wiki/*`는 `127.0.0.1:8787`([[daemon-datalake-webui]])로 리버스 프록시 — 데이터레이크 문답 UI를 AoE 'Wiki' 탭으로 통합(2026-07-12, `redir /wiki /wiki/ 301`).
 - `/watchlist/*`(2026-07-15): 관심종목 시세판 데몬 `127.0.0.1:8778`([[daemon-watchlist-quoteboard]]) 리버스 프록시(`no-store`, `redir /watchlist /watchlist/ 301`).
+- `/charts/*`(2026-07-20): 삼성·하이닉스 현선물/공매도/레버리지ETF + 건설 수주잔고 차트 뷰어. **repo 밖 정적 서빙** — `root=~/work/charts/260715_현선물공매도`(대시보드 repo와 분리), 기본 진입 `/charts`·`/charts/`는 `chart_viewer2.html`로 302. `no-cache`. 산출물은 spot 분석 폴더라 게시 스냅숏/git 파이프라인 밖.
 - `/plan-api/*`(2026-07-15): Sisyphe Ledger 'Plan' 자금계획 JSON(`~/Journal/plan_web.json`, 계좌번호 포함) API — `plan_api.py` 백엔드(`127.0.0.1:8790`, [[daemon-plan-api]])로 프록시. **게이트는 테일넷 단독**(basic_auth는 당일 `plan_auth.snippet` import 도입 → 별도 realm 전환 → 제거로 정리). ★소스의 라우트 주석은 'basic_auth 이중'이라 적혀 있으나 실제 설정엔 auth import가 없다 — 주석이 stale.
 - HTML/JSON/CSV·인덱스는 `Cache-Control: no-cache`. 접근 로그는 `~/srv/dashboard/logs/access.log`(20MiB 롤).
 
