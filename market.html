@@ -540,7 +540,7 @@ html { overflow-y: scroll; }  /* 스크롤바 공간 상시 확보 — 로드 �
     <nav class="topnav"><div class="topnav-inner"><a href="index.html" class="topnav-brand">AGE OF EMERGENCE</a><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab active">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub active">Data</a><a href="universe.html" class="topnav-sub">Universe</a><a href="universe_lab.html" class="topnav-sub">Universe Lab</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
     <aside class="sidebar"><a href="market.html" class="sidebar-link active">Data</a><a href="universe.html" class="sidebar-link">Universe</a><a href="universe_lab.html" class="sidebar-link">Universe Lab</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
     <header style="margin:0;padding:8px 28px 0;text-align:right;">
-        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-07-21 11:00:03 KST</div>
+        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-07-21 11:14:08 KST</div>
     </header>
 
     <div class="mkt-subtabs">
@@ -2106,9 +2106,9 @@ html { overflow-y: scroll; }  /* 스크롤바 공간 상시 확보 — 로드 �
                             // 밀려도 어느 선의 값인지 읽히게. 이동량이 미미하면 생략.
                             if (labelX - e.dotX > 10 || Math.abs(e.y - e.origY) > 1) {
                                 ctx.save();
-                                ctx.globalAlpha = 0.55;
+                                ctx.globalAlpha = 0.6;
                                 ctx.strokeStyle = e.color;
-                                ctx.lineWidth = 1;
+                                ctx.lineWidth = 2;   // 2026-07-21 사용자: 리더선 더 두껍게 (1→2)
                                 ctx.beginPath();
                                 ctx.moveTo(e.dotX + 4, e.origY);
                                 ctx.lineTo(labelX - 3, e.y);
