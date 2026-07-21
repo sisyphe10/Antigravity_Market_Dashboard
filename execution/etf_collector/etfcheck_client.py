@@ -1,4 +1,5 @@
 """etfcheck.co.kr 내부 API 클라이언트"""
+import os
 import hashlib
 import time
 import json
@@ -8,8 +9,14 @@ from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_excep
 
 ETFCHECK_BASE = 'https://www.etfcheck.co.kr/user/etp/'
 # 2026-07-08 사이트 개편: 키 '4lm@flEh68'→'er@#$dfe^fd12', 버킷 60s→30s, Referer 필수화 (전부 403 원인)
-ETFCHECK_KEY = 'er@#$dfe^fd12'
+# 2026-07-21 키 재로테이션: 'er@#$dfe^fd12'→'#$dser#GVEWS329@' (버킷 30s 동일). build.js 내
+#   axios.interceptors.request 의 n="#$dser#GVEWS329@" 에서 추출·검증(200/success). [[project_antigravity_active_etf_alert]]
+ETFCHECK_KEY = '#$dser#GVEWS329@'
 ETFCHECK_BUCKET_MS = 30000
+
+# 2026-07-21 맥미니 공인 IP(124.56.182.242)가 etfcheck WAF에 IP 차단(정적 파일까지 403) →
+#   ETFCHECK_PROXY 설정 시 requests가 해당 프록시로 우회(맥미니→Oracle VM SSH SOCKS5). run_etf_collect.sh가 주입.
+ETFCHECK_PROXY = os.environ.get('ETFCHECK_PROXY') or None
 
 
 def generate_checkclient():
@@ -27,6 +34,7 @@ def generate_checkclient():
 )
 def _request(endpoint, params=None):
     """etfcheck API 호출 (timeout 30s, transient 실패 시 최대 3회 retry with exponential backoff)"""
+    proxies = {'http': ETFCHECK_PROXY, 'https': ETFCHECK_PROXY} if ETFCHECK_PROXY else None
     resp = requests.get(
         ETFCHECK_BASE + endpoint,
         params=params,
@@ -35,6 +43,7 @@ def _request(endpoint, params=None):
             'Referer': 'https://www.etfcheck.co.kr/',  # 2026-07-08부터 필수 (없으면 403)
             'Checkclient': generate_checkclient(),
         },
+        proxies=proxies,
         timeout=30,
     )
     resp.raise_for_status()
