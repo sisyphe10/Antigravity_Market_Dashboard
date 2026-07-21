@@ -66,14 +66,15 @@ def _classify_by_accession(accession_number: str, conn) -> tuple[str, str]:
         q_label = f"{a['fiscal_quarter']}Q{a['fiscal_year'] % 100:02d}"
 
     t = conn.execute(
-        """SELECT t.translated_kr, t.notion_appended_at FROM transcripts t
+        """SELECT t.translated_kr, t.notion_appended_at, t.md_saved_at FROM transcripts t
            JOIN filings f ON t.filing_id = f.id
            WHERE f.accession_number=? AND t.match_confidence >= 0.7
            ORDER BY t.match_confidence DESC, t.fetched_at DESC LIMIT 1""",
         (accession_number,),
     ).fetchone()
 
-    if t and t['translated_kr'] and t['notion_appended_at']:
+    # 2026-07-21: 저장 완료 신호 = Notion append(구) OR datalake md 저장(신)
+    if t and t['translated_kr'] and (t['notion_appended_at'] or t['md_saved_at']):
         return ('🟢', q_label)
     return ('🟡', q_label)
 

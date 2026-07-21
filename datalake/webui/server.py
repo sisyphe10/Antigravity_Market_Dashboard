@@ -3,7 +3,7 @@
 
 질문 → Claude(claude-opus-4-8, adaptive thinking)가 도구 4종으로 데이터를 직접 조회해 답변:
   run_sql       : market.duckdb 읽기전용 SQL
-  search_notes  : research_notes/catalog/architecture-wiki md 코퍼스 정규식 검색
+  search_notes  : research_notes/catalog/architecture-wiki/transcripts md 코퍼스 정규식 검색
   read_file     : 코퍼스 파일 읽기 (datalake·wiki 내부만)
   list_datasets : 카탈로그 INDEX
 
@@ -36,6 +36,7 @@ STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 WIKI_DIR = os.path.join(REPO, "architecture", "wiki")
 SEARCH_ROOTS = [
     os.path.join(DATALAKE_ROOT, "research_notes"),
+    os.path.join(DATALAKE_ROOT, "transcripts"),  # 어닝콜 한국어 번역 전문 (earnings_bot)
     CATALOG_DIR,
     WIKI_DIR,
 ]
@@ -49,6 +50,7 @@ SYSTEM = """너는 사용자의 개인 데이터레이크 사서(librarian)다. 
 1. market.duckdb 뷰 (run_sql): 카탈로그는 list_datasets로 확인. 국내 전 상장종목 일봉(수정주가)·시총·밸류에이션·외국인 보유·지수·ETF·투자자별 매매대금·해외 유니버스 일봉.
 2. 리서치 노트 원문 (search_notes → read_file): research_notes/YYYY/YYYY-MM-DD.md — 텔레그램으로 수집한 증권사 리포트 요지·기사·메모 원문.
 3. 시스템 위키 (search_notes): architecture wiki — 이 대시보드 시스템의 봇·잡·페이지 구조.
+4. 어닝콜 번역 전문 (search_notes → read_file): transcripts/YYYY/YYYY-MM-DD_티커_*.md — 미국 유니버스 종목 실적 컨퍼런스콜 한국어 번역 전문. 파일이 길면 read_file의 offset으로 이어서 읽는다.
 
 ## 규칙
 - 수치 질문은 반드시 run_sql로 실제 조회 후 답한다. 추측 금지, 조회 실패 시 실패했다고 밝힌다.
@@ -72,7 +74,7 @@ TOOLS = [
     },
     {
         "name": "search_notes",
-        "description": "md 코퍼스(리서치 노트 원문·카탈로그·시스템 위키)를 정규식으로 검색. 파일경로:줄번호와 매칭 줄을 반환.",
+        "description": "md 코퍼스(리서치 노트 원문·카탈로그·시스템 위키·어닝콜 번역 전문)를 정규식으로 검색. 파일경로:줄번호와 매칭 줄을 반환.",
         "input_schema": {
             "type": "object",
             "properties": {
@@ -85,14 +87,16 @@ TOOLS = [
     },
     {
         "name": "read_file",
-        "description": "코퍼스 파일 전체 읽기. search_notes가 반환한 경로를 그대로 전달.",
+        "description": "코퍼스 파일 읽기 (1회 최대 20000자). search_notes가 반환한 경로를 그대로 전달. 응답 끝에 '(truncated ...)'가 붙으면 offset을 늘려 이어서 읽는다.",
         "input_schema": {
             "type": "object",
-            "properties": {"path": {"type": "string", "description": "search_notes 결과의 파일 경로"}},
+            "properties": {
+                "path": {"type": "string", "description": "search_notes 결과의 파일 경로"},
+                "offset": {"type": "integer", "description": "읽기 시작 문자 위치 (기본 0). 긴 파일 이어읽기용."},
+            },
             "required": ["path"],
             "additionalProperties": False,
         },
-        "strict": True,
     },
     {
         "name": "list_datasets",
@@ -162,7 +166,7 @@ def tool_search_notes(pattern, max_results=40):
     return "\n".join(hits) if hits else "(매칭 없음)"
 
 
-def tool_read_file(path):
+def tool_read_file(path, offset=0):
     real = os.path.realpath(path)
     allowed = [os.path.realpath(DATALAKE_ROOT), os.path.realpath(WIKI_DIR)]
     if not any(real == a or real.startswith(a + os.sep) for a in allowed):
@@ -170,7 +174,11 @@ def tool_read_file(path):
     if not os.path.isfile(real):
         return "ERROR: 파일 없음"
     text = open(real, encoding="utf-8", errors="replace").read()
-    return text[:20000] + ("\n...(truncated)" if len(text) > 20000 else "")
+    offset = max(0, int(offset or 0))
+    chunk = text[offset:offset + 20000]
+    remain = len(text) - (offset + len(chunk))
+    suffix = f"\n...(truncated — 남은 {remain}자, offset={offset + len(chunk)} 로 이어읽기)" if remain > 0 else ""
+    return chunk + suffix
 
 
 def tool_list_datasets():
@@ -191,7 +199,7 @@ def execute_tool(name, args):
         if name == "search_notes":
             return tool_search_notes(args["pattern"], args.get("max_results") or 40), False
         if name == "read_file":
-            return tool_read_file(args["path"]), False
+            return tool_read_file(args["path"], args.get("offset") or 0), False
         if name == "list_datasets":
             return tool_list_datasets(), False
         return f"ERROR: 알 수 없는 도구 {name}", True

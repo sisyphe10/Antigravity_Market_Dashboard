@@ -7,7 +7,8 @@
   4. translator.process_pending() — fetched filings 분석 (Sonnet 호출, 비용 발생)
   5. translator.translate_pending_transcripts() — 번역 미완료 transcript Haiku 처리
   6. notion_publisher.publish_pending() — analyzed 결과 Notion 발행
-  7. notion_publisher.append_pending_translations() — 번역 완료 transcript 페이지 append
+  7. transcript_store.save_pending() — 번역 완료 transcript를 datalake md로 저장
+     (2026-07-21 Notion append 대체 — 구 append_pending_translations는 롤백용 잔존)
   8. transcript_digest.run() — 운영 다이제스트 (콘솔/journal 디버그용)
   9. morning_digest.run() — 사용자용 텔레그램 다이제스트 (RA_Sisyphe 채널)
 
@@ -60,6 +61,7 @@ def run_pipeline() -> dict:
         notion_publisher,
         scheduler,
         transcript_digest,
+        transcript_store,
         transcript_watch,
         translator,
     )
@@ -88,9 +90,9 @@ def run_pipeline() -> dict:
     summary.append(_safe('notion_publisher.publish_pending',
                          lambda: notion_publisher.publish_pending(limit=5)))
 
-    # 7) notion_publisher (한국어 transcript append)
-    summary.append(_safe('notion_publisher.append_pending_translations',
-                         lambda: notion_publisher.append_pending_translations(limit=5)))
+    # 7) transcript_store (한국어 transcript → datalake md 저장, 2026-07-21 Notion append 대체)
+    summary.append(_safe('transcript_store.save_pending',
+                         lambda: transcript_store.save_pending(limit=10)))
 
     # 8) transcript_digest — 운영 디버그 (journal에만, 텔레그램 발송 X)
     summary.append(_safe('transcript_digest.run', transcript_digest.run))

@@ -119,6 +119,9 @@ def init_db() -> None:
             "ALTER TABLE transcripts ADD COLUMN translated_at TEXT",
             "ALTER TABLE transcripts ADD COLUMN notion_appended_at TEXT",
             "ALTER TABLE transcripts ADD COLUMN notion_page_id TEXT",
+            # 2026-07-21: Notion append → datalake md 저장 전환 (transcript_store.py)
+            "ALTER TABLE transcripts ADD COLUMN md_path TEXT",
+            "ALTER TABLE transcripts ADD COLUMN md_saved_at TEXT",
         ):
             try:
                 conn.execute(ddl)
@@ -489,6 +492,43 @@ def get_pending_notion_append_transcripts(limit: int = 5) -> list[dict]:
             (limit,),
         ).fetchall()
         return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+def get_pending_md_save_transcripts(limit: int = 10) -> list[dict]:
+    """번역 완료 + datalake md 미저장 transcripts (transcript_store 러너 단계용)."""
+    conn = get_conn()
+    try:
+        rows = conn.execute(
+            """
+            SELECT t.*, f.ticker, f.accession_number, f.filed_at
+            FROM transcripts t
+            JOIN filings f ON t.filing_id = f.id
+            WHERE t.translated_kr IS NOT NULL
+              AND t.md_saved_at IS NULL
+            ORDER BY t.translated_at DESC LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+def mark_transcript_md_saved(transcript_id: int, md_path: str) -> None:
+    conn = get_conn()
+    try:
+        conn.execute(
+            """
+            UPDATE transcripts SET
+              md_saved_at = datetime('now'),
+              md_path = ?
+            WHERE id = ?
+            """,
+            (md_path, transcript_id),
+        )
+        conn.commit()
     finally:
         conn.close()
 
