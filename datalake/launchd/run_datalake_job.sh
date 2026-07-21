@@ -6,8 +6,8 @@
 # catch-up 러너 대상 아님 — 각 잡이 lookback/멱등으로 자가치유 (DESIGN.md §5).
 #
 # 사용법: run_datalake_job.sh <이름>
-#   <이름> ∈ datalake-market-update | datalake-research-export
-#           | datalake-snapshot | datalake-backup
+#   <이름> ∈ datalake-market-update | datalake-macro-update
+#           | datalake-research-export | datalake-snapshot | datalake-backup
 set -u
 
 NAME="${1:?usage: run_datalake_job.sh <name>}"
@@ -24,6 +24,7 @@ export PATH="$REPO/venv/bin:$PATH"
 # ── 잡 정의: 커맨드·타임아웃(초) ─────────────────────────────
 case "$NAME" in
   datalake-market-update)   CMD=("$PY" "$REPO/datalake/daily_market_update.py");  TIMEOUT=7200 ;;
+  datalake-macro-update)    CMD=("$PY" "$REPO/datalake/daily_macro_update.py");   TIMEOUT=2700 ;;
   datalake-research-export) CMD=("$PY" "$REPO/datalake/export_research_notes.py"); TIMEOUT=900 ;;
   datalake-snapshot)        CMD=("$PY" "$REPO/datalake/snapshot_archiver.py");     TIMEOUT=600 ;;
   datalake-backup)          CMD=(/bin/bash "$REPO/datalake/backup_datalake.sh");   TIMEOUT=3600 ;;

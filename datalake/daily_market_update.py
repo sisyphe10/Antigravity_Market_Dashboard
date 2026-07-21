@@ -32,6 +32,7 @@ from backfill_krx import RENAME  # noqa: E402
 HOLIDAY_GUARD = {
     "kr_ohlcv": "종가", "kr_etf_ohlcv": "종가",
     "kr_marcap": "시가총액", "kr_foreign": "상장주식수",
+    "kr_fundamental": "BPS",
 }
 
 
@@ -420,6 +421,10 @@ def main():
                   ["date", "ticker"], ("KOSPI", "KOSDAQ"))
     cross_section(stock, "kr_foreign",
                   lambda d, m: stock.get_exhaustion_rates_of_foreign_investment(d, market=m),
+                  ["date", "ticker"], ("KOSPI", "KOSDAQ"))
+    # 주당지표(BPS/PER/PBR 등) — 보관용 (연간 확정실적 계단식, 현재 밸류 차트엔 미사용)
+    cross_section(stock, "kr_fundamental",
+                  lambda d, m: stock.get_market_fundamental(d, market=m),
                   ["date", "ticker"], ("KOSPI", "KOSDAQ"))
     cross_section(stock, "kr_etf_ohlcv",
                   lambda d, m: stock.get_etf_ohlcv_by_ticker(d),
