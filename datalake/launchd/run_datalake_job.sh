@@ -25,6 +25,7 @@ export PATH="$REPO/venv/bin:$PATH"
 case "$NAME" in
   datalake-market-update)   CMD=("$PY" "$REPO/datalake/daily_market_update.py");  TIMEOUT=7200 ;;
   datalake-macro-update)    CMD=("$PY" "$REPO/datalake/daily_macro_update.py");   TIMEOUT=2700 ;;
+  viewer-daily)             CMD=("$PY" "$HOME/work/charts/260715_현선물공매도/run_daily.py"); TIMEOUT=3600 ;;
   datalake-research-export) CMD=("$PY" "$REPO/datalake/export_research_notes.py"); TIMEOUT=900 ;;
   datalake-snapshot)        CMD=("$PY" "$REPO/datalake/snapshot_archiver.py");     TIMEOUT=600 ;;
   datalake-backup)          CMD=(/bin/bash "$REPO/datalake/backup_datalake.sh");   TIMEOUT=3600 ;;
