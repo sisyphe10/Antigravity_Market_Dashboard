@@ -1,8 +1,8 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 128 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 129 components._
 
-Updated: 2026-07-20
+Updated: 2026-07-21
 
 ## By domain
 
@@ -90,7 +90,7 @@ Updated: 2026-07-20
 - [자문지 메일 발송 폴러 (send-advisory-emails 60초)](timer-advisory-emails.md) — Timer
 - [포트폴리오 표 생성 (create_portfolio_tables.py)](src-create-portfolio-tables.md) — Source
 
-### 뉴스 · 리서치 (13)
+### 뉴스 · 리서치 (14)
 - [Earnings Calendar Sync (07:00)](gha-earnings-calendar-sync.md) — GHA
 - [earnings.db (실적봇 상태)](store-earnings-db.md) — Store
 - [Generic Source Pipeline (execution/sources/)](src-generic-pipeline.md) — Source
@@ -102,6 +102,7 @@ Updated: 2026-07-20
 - [실적 캘린더 sync (earnings_calendar_sync.py)](src-earnings-calendar-sync.md) — Source
 - [실적봇 타이머 (earnings-bot)](timer-earnings-bot.md) — Timer
 - [실적봇 파이프라인 (execution/earnings_bot/)](src-earnings-pipeline.md) — Source
+- [어닝콜 번역 전문 md (~/datalake/transcripts/)](store-transcripts-md.md) — Store
 - [원전 뉴스 KNA/KNEISS (sources/kna.py)](src-kna-kneiss.md) — Source
 - [해외 기업 IR/뉴스룸 (sources/foreign_ir.py)](src-foreign-ir.md) — Source
 
@@ -216,7 +217,7 @@ Updated: 2026-07-20
 - [taiwan_revenue.csv (대만 월매출)](store-taiwan-revenue-csv.md) — 23:20 갱신, active
 - [universe.json / universe_history.json](store-universe-json.md) — 18:30 / 07:00 갱신, active
 
-### Store (7)
+### Store (8)
 - [earnings.db (실적봇 상태)](store-earnings-db.md) — 08:00 갱신, active
 - [etf_data.db (ETF 구성종목 SQLite)](store-etf-db.md) — 16:30 / 18:00 갱신, active
 - [heartbeats.json (Phase 2 워치독 인터페이스)](store-heartbeats.md) — 각 GHA 잡 성공 시, planned
@@ -224,6 +225,7 @@ Updated: 2026-07-20
 - [research_notes.db + media/ (리서치봇)](store-research-notes-db.md) — 이벤트 시, active
 - [sources_state/ + kna_state.json](store-sources-state.md) — 소스 폴링 시, active
 - [Wrap_NAV.xlsx (랩 운용 원장)](store-wrap-nav-xlsx.md) — 사용자 편집 + finalize, active
+- [어닝콜 번역 전문 md (~/datalake/transcripts/)](store-transcripts-md.md) — 08:00 (earnings-bot 타이머), active
 
 ### Infra (14)
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — 부팅 시 1회, planned
@@ -300,7 +302,7 @@ Updated: 2026-07-20
 
 ## By project
 
-### antigravity (128)
+### antigravity (129)
 - [architecture.html (아키텍처)](page-architecture.md) — Page
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — Infra
 - [Claude Code Action (@claude 이벤트)](gha-claude-code.md) — GHA
@@ -404,6 +406,7 @@ Updated: 2026-07-20
 - [아키텍처 자동 최신화 타이머 (21:40, claude 헤드리스)](timer-architecture-daily.md) — Timer
 - [액티브 ETF 변동 (active_etf_changes.py)](src-active-etf.md) — Source
 - [액티브 ETF 변동 알림 타이머 (19:00)](timer-etf-active-alert.md) — Timer
+- [어닝콜 번역 전문 md (~/datalake/transcripts/)](store-transcripts-md.md) — Store
 - [외국인 보유비중 (fetch_krx_foreign.py)](src-krx-foreign.md) — Source
 - [외부 데이터 API/소스 집합](ext-data-apis.md) — External
 - [원전 뉴스 KNA/KNEISS (sources/kna.py)](src-kna-kneiss.md) — Source
