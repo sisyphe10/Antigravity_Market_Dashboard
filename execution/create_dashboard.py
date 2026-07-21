@@ -2989,9 +2989,9 @@ def _build_combined_chart_section():
                             // 밀려도 어느 선의 값인지 읽히게. 이동량이 미미하면 생략.
                             if (labelX - e.dotX > 10 || Math.abs(e.y - e.origY) > 1) {
                                 ctx.save();
-                                ctx.globalAlpha = 0.55;
+                                ctx.globalAlpha = 0.6;
                                 ctx.strokeStyle = e.color;
-                                ctx.lineWidth = 1;
+                                ctx.lineWidth = 2;   // 2026-07-21 사용자: 리더선 더 두껍게 (1→2)
                                 ctx.beginPath();
                                 ctx.moveTo(e.dotX + 4, e.origY);
                                 ctx.lineTo(labelX - 3, e.y);
