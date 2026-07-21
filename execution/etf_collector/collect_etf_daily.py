@@ -33,13 +33,28 @@ except IOError:
     sys.exit(1)
 
 
-def fetch_etf_list(date_str):
-    """KRX OpenAPI에서 전체 ETF 목록 + 일별 시세 조회"""
+def fetch_etf_list(date_str, max_attempts=6):
+    """KRX OpenAPI에서 전체 ETF 목록 + 일별 시세 조회.
+
+    2026-07-21: KRX(data-dbg.krx.co.kr, Akamai)가 간헐적으로 응답을 끊어(ReadTimeout)
+    단발 호출이 통째로 실패하는 일이 잦다(맥미니·VM·타 IP 3지점 동일 관측 → 소스측 간헐 장애).
+    pykrx 클라이언트엔 재시도가 없어 여기서 지수 백오프로 감싼다. curl 관측상 성공률이
+    간헐적이라 몇 회 재시도로 대개 통과한다."""
     from pykrx_openapi import KRXOpenAPI
     import pandas as pd
 
-    api = KRXOpenAPI(KRX_API_KEY)
-    result = api.get_etf_daily_trade(date_str.replace('-', ''))
+    api = KRXOpenAPI(KRX_API_KEY, timeout=20)
+    result = None
+    for attempt in range(1, max_attempts + 1):
+        try:
+            result = api.get_etf_daily_trade(date_str.replace('-', ''))
+            break
+        except Exception as e:
+            if attempt == max_attempts:
+                raise
+            wait = min(2 ** attempt, 20)
+            logging.warning(f"  KRX 목록 조회 실패(시도 {attempt}/{max_attempts}): {str(e)[:80]} — {wait}s 후 재시도")
+            time.sleep(wait)
     df = pd.DataFrame(result['OutBlock_1'])
 
     etfs = []
@@ -161,23 +176,37 @@ def main():
         conn.close()
         return
 
-    # Step 1: KRX OpenAPI → ETF 목록 + 일별 시세
-    logging.info("Step 1: Fetching ETF list from KRX OpenAPI...")
-    try:
-        etf_list = fetch_etf_list(date_str)
-        logging.info(f"  {len(etf_list)} ETFs fetched")
-    except Exception as e:
-        logging.error(f"KRX API failed: {e}")
-        conn.close()
-        sys.exit(1)
+    # Step 1: ETF 목록 확보 — 해당 날짜 etf_daily가 이미 있으면 재사용(KRX 건너뜀), 없으면 KRX 조회.
+    # 2026-07-21: KRX 간헐 장애 시에도 (a) 재시도 타이머 실행이나 (b) 목록만 먼저 확보된 날의
+    #   구성종목 복구가 KRX 재접속 없이 진행되도록 한다. 목록은 하루 한 번만 KRX에 의존.
+    existing = conn.execute(
+        "SELECT etf_code, etf_name, close_price, nav, volume, aum, market_cap "
+        "FROM etf_daily WHERE date=?", (date_str,)
+    ).fetchall()
+    if existing:
+        etf_list = [
+            {'etf_code': r['etf_code'], 'etf_name': r['etf_name'], 'close_price': r['close_price'],
+             'nav': r['nav'], 'volume': r['volume'], 'aum': r['aum'], 'market_cap': r['market_cap']}
+            for r in existing
+        ]
+        logging.info(f"Step 1: 기존 etf_daily {len(etf_list)}종목 재사용 (KRX 건너뜀)")
+    else:
+        logging.info("Step 1: Fetching ETF list from KRX OpenAPI...")
+        try:
+            etf_list = fetch_etf_list(date_str)
+            logging.info(f"  {len(etf_list)} ETFs fetched")
+        except Exception as e:
+            logging.error(f"KRX API failed: {e}")
+            conn.close()
+            sys.exit(1)
 
-    # etf_daily INSERT
-    daily_rows = [(date_str, e['etf_code'], e['etf_name'], e['close_price'],
-                    e['nav'], e['volume'], e['aum'], e['market_cap'])
-                   for e in etf_list]
-    insert_etf_daily_batch(conn, daily_rows)
-    conn.commit()
-    logging.info(f"  etf_daily: {len(daily_rows)} rows inserted")
+        # etf_daily INSERT
+        daily_rows = [(date_str, e['etf_code'], e['etf_name'], e['close_price'],
+                        e['nav'], e['volume'], e['aum'], e['market_cap'])
+                       for e in etf_list]
+        insert_etf_daily_batch(conn, daily_rows)
+        conn.commit()
+        logging.info(f"  etf_daily: {len(daily_rows)} rows inserted")
 
     # Step 2: etfcheck → 구성종목/비중
     logging.info("Step 2: Fetching constituents from etfcheck...")

@@ -14,8 +14,9 @@ ETFCHECK_BASE = 'https://www.etfcheck.co.kr/user/etp/'
 ETFCHECK_KEY = '#$dser#GVEWS329@'
 ETFCHECK_BUCKET_MS = 30000
 
-# 2026-07-21 맥미니 공인 IP(124.56.182.242)가 etfcheck WAF에 IP 차단(정적 파일까지 403) →
-#   ETFCHECK_PROXY 설정 시 requests가 해당 프록시로 우회(맥미니→Oracle VM SSH SOCKS5). run_etf_collect.sh가 주입.
+# 2026-07-21 맥미니 공인 IP가 etfcheck WAF에 IP 차단(정적 파일까지 403). 현 운영은 수집 자체를
+#   Oracle VM(직결 200)에서 실행하므로 프록시 불필요(VM엔 ETFCHECK_PROXY 미설정 → 직결). 이 훅은
+#   선택적 dormant 옵션으로 남겨둔다(설정 시 requests가 해당 SOCKS/HTTP 프록시로 우회).
 ETFCHECK_PROXY = os.environ.get('ETFCHECK_PROXY') or None
 
 

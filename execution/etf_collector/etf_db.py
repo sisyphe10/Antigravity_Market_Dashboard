@@ -2,7 +2,10 @@
 import sqlite3
 import os
 
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'etf_data.db')
+# 2026-07-21: ETF_DB_PATH 환경변수로 오버라이드 가능(하위호환 — 미설정 시 기존 repo_root/etf_data.db).
+# VM-side 수집이 소형 전송 DB(/tmp/etf_transfer_*.db)에 당일분만 쓰도록 하기 위함. 맥미니 정본은 미설정 경로 유지.
+DB_PATH = os.environ.get('ETF_DB_PATH') or os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'etf_data.db')
 
 
 def get_conn():
