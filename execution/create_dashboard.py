@@ -2210,6 +2210,8 @@ def _build_combined_chart_section():
             // 십자선(crosshair) — 세로선은 메인+이격도 패널 동기(같은 날짜 index),
             // 가로선은 커서가 올라가 있는 차트에만. 두 차트가 같은 labels 배열을 공유해 x 정렬 보장.
             var cmbHoverState = { idx: null, yPx: null, activeId: null };
+            // 클릭 핀 상태 — 날짜 문자열로 저장 (기간/시리즈 변경 후에도 같은 날짜가 남아 있으면 유지)
+            var cmbPin = { date: null };
             // 반대편 차트에도 같은 날짜의 툴팁(데이터값) 표시.
             // tooltip.setActiveElements가 내부에서 tooltip.update까지 수행하므로 이후 draw()만 하면 됨.
             function cmbSyncTooltip(other, idx) {
@@ -2249,6 +2251,17 @@ def _build_combined_chart_section():
                                 other.draw();
                             }
                         }
+                        return;
+                    }
+                    // 클릭 = 데이터 카드 고정(핀) — 같은 날짜 재클릭 해제, 다른 지점 클릭 이동 (2026-07-21 표준)
+                    if (e.type === 'click' && chart.canvas.id === 'cmbDynamicChart') {
+                        var pIdx = Math.round(chart.scales.x.getValueForPixel(e.x));
+                        var pMax = chart.data.labels.length - 1;
+                        if (pIdx < 0) pIdx = 0;
+                        if (pIdx > pMax) pIdx = pMax;
+                        var pDate = chart.data.labels[pIdx];
+                        cmbPin.date = (cmbPin.date === pDate) ? null : pDate;
+                        args.changed = true;
                         return;
                     }
                     if (e.type !== 'mousemove') return;
@@ -2305,6 +2318,74 @@ def _build_combined_chart_section():
                         ctx.lineTo(area.right, cmbHoverState.yPx);
                         ctx.stroke();
                     }
+                    ctx.restore();
+                }
+            };
+
+            // 클릭 핀 플러그인 (2026-07-21 표준): 클릭한 날짜의 세로 점선 + 데이터 카드를 캔버스에
+            // 상주로 그림 — 플러그인이 직접 그려 Download PNG에도 포함. 값 포맷은 툴팁과 공용
+            // (chart._cmbTipLabel = 빌드 시점 tooltipLabel 콜백).
+            var cmbPinPlugin = {
+                id: 'cmbPinCard',
+                afterDraw: function(chart) {
+                    if (chart.canvas.id !== 'cmbDynamicChart' || cmbPin.date === null) return;
+                    var idx = chart.data.labels.indexOf(cmbPin.date);
+                    if (idx < 0) return;   // 창 밖으로 나가면 표시만 생략 (상태는 유지)
+                    var area = chart.chartArea, xs = chart.scales.x, ctx = chart.ctx;
+                    if (!area || !xs) return;
+                    var xPx = xs.getPixelForValue(idx);
+                    if (xPx < area.left - 1 || xPx > area.right + 1) return;
+                    ctx.save();
+                    ctx.strokeStyle = 'rgba(17,17,17,0.45)';
+                    ctx.setLineDash([4, 4]);
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(xPx, area.top);
+                    ctx.lineTo(xPx, area.bottom);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    var lines = [];
+                    chart.data.datasets.forEach(function(ds, di) {
+                        var meta = chart.getDatasetMeta(di);
+                        if (meta.hidden) return;
+                        var v = ds.data[idx];
+                        if (v === null || v === undefined) return;
+                        var txt = chart._cmbTipLabel
+                            ? chart._cmbTipLabel({ dataset: ds, parsed: { y: v } })
+                            : (ds.label + ': ' + v);
+                        lines.push({ txt: txt, color: ds.borderColor });
+                    });
+                    if (!lines.length) { ctx.restore(); return; }
+                    var title = String(cmbPin.date);
+                    ctx.font = 'bold 13px sans-serif';
+                    var w = ctx.measureText(title).width;
+                    ctx.font = '13px sans-serif';
+                    lines.forEach(function(l) { var tw = ctx.measureText(l.txt).width + 14; if (tw > w) w = tw; });
+                    var pad = 10, lh = 19;
+                    var boxW = w + pad * 2, boxH = pad * 2 + lh * (lines.length + 1);
+                    var bx = xPx + 12;
+                    if (bx + boxW > area.right) bx = xPx - 12 - boxW;
+                    if (bx < area.left) bx = area.left + 4;
+                    var by = area.top + 8;
+                    ctx.fillStyle = 'rgba(0,0,0,0.8)';
+                    ctx.beginPath();
+                    ctx.roundRect(bx, by, boxW, boxH, 6);
+                    ctx.fill();
+                    ctx.textBaseline = 'middle';
+                    ctx.textAlign = 'left';
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 13px sans-serif';
+                    ctx.fillText(title, bx + pad, by + pad + lh / 2);
+                    ctx.font = '13px sans-serif';
+                    lines.forEach(function(l, li) {
+                        var ly = by + pad + lh * (li + 1) + lh / 2;
+                        ctx.fillStyle = l.color;
+                        ctx.beginPath();
+                        ctx.arc(bx + pad + 4, ly, 4, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#fff';
+                        ctx.fillText(l.txt, bx + pad + 14, ly);
+                    });
                     ctx.restore();
                 }
             };
@@ -2875,7 +2956,7 @@ def _build_combined_chart_section():
                                     : Math.max(Math.abs(_ax.min || 0), Math.abs(_ax.max || 0))) / _f2;
                                 label = fmtUniformFix(val / _f2, _m2);
                             }
-                            entries.push({ x: last.x + 6, origY: last.y, y: last.y, label: label, color: ds.borderColor });
+                            entries.push({ dotX: last.x, origY: last.y, y: last.y, label: label, color: ds.borderColor });
                         });
                         if (entries.length === 0) return;
                         // y 오름차순 정렬 후 minGap 강제 (위→아래 충돌 시 아래로 밀기)
@@ -2895,16 +2976,38 @@ def _build_combined_chart_section():
                                 if (entries[j-1].y > entries[j].y - minGap) entries[j-1].y = entries[j].y - minGap;
                             }
                         }
+                        // 라벨 x = 우측 축(y1 등) '바깥' 공통 열 (2026-07-21 사용자 확정) —
+                        // 선은 우축에 접한 채 두고, 끝값 숫자는 축 눈금 오른쪽에 그려 눈금과 겹침 원천 차단.
+                        var rightAxesW = 0;
+                        Object.keys(chart.scales).forEach(function(sid) {
+                            var sc = chart.scales[sid];
+                            if (sid !== 'x' && sc && sc.options && sc.options.position === 'right' && sc.width) rightAxesW += sc.width;
+                        });
+                        var labelX = (area ? area.right : 0) + rightAxesW + 4;
                         ctx.save();
                         ctx.font = 'bold 15px sans-serif';
                         ctx.textBaseline = 'middle';
+                        ctx.textAlign = 'left';
                         entries.forEach(function(e) {
+                            // 리더선: 끝점→라벨 (계열색 55%, web-chart 표준) — 라벨이 축 바깥·충돌회피로
+                            // 밀려도 어느 선의 값인지 읽히게. 이동량이 미미하면 생략.
+                            if (labelX - e.dotX > 10 || Math.abs(e.y - e.origY) > 1) {
+                                ctx.save();
+                                ctx.globalAlpha = 0.55;
+                                ctx.strokeStyle = e.color;
+                                ctx.lineWidth = 1;
+                                ctx.beginPath();
+                                ctx.moveTo(e.dotX + 4, e.origY);
+                                ctx.lineTo(labelX - 3, e.y);
+                                ctx.stroke();
+                                ctx.restore();
+                            }
                             ctx.fillStyle = e.color;
                             // 끝점 동그라미 3px — 라벨은 충돌 회피로 밀릴 수 있으니 실제 점(origY)에 표시
                             ctx.beginPath();
-                            ctx.arc(e.x - 6, e.origY, 3, 0, Math.PI * 2);
+                            ctx.arc(e.dotX, e.origY, 3, 0, Math.PI * 2);
                             ctx.fill();
-                            ctx.fillText(e.label, e.x + 1, e.y);
+                            ctx.fillText(e.label, labelX, e.y);
                         });
                         ctx.restore();
                     }
@@ -2931,7 +3034,7 @@ def _build_combined_chart_section():
                             }
                             pctStr = '<span>' + (pct >= 0 ? '+' : '') + fmtUniformFix(pct, Math.abs(pct)) + '%</span>';
                         }
-                        return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:13px;">' +
+                        return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:14px;">' +
                             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
                             ds.label + pctStr + '</span>';
                     }).join('');
@@ -2939,7 +3042,7 @@ def _build_combined_chart_section():
                     legendHTML += dispDatasets.map(function(ds) {
                         var vals = ds.data.filter(function(v) { return v !== null && v !== undefined && !isNaN(v); });
                         var lastStr = vals.length ? '<span>' + fmtUniformFix(vals[vals.length - 1], Math.abs(vals[vals.length - 1])) + '</span>' : '';
-                        return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:13px;">' +
+                        return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:14px;">' +
                             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + ds.borderColor + ';"></span>' +
                             ds.label + lastStr + '</span>';
                     }).join('');
@@ -3053,13 +3156,14 @@ def _build_combined_chart_section():
                     Object.keys(scalesConfig).forEach(function(k){ _sc[k] = scalesConfig[k]; });
                     // tooltip 콜백은 mode를 캡처하므로 매번 교체
                     cmbChart.options.plugins.tooltip.callbacks.label = tooltipLabel;
+                    cmbChart._cmbTipLabel = tooltipLabel;   // 클릭 핀 카드가 같은 포맷 사용
                     cmbChart._cmbMode = mode;   // update 전 대입 — 첫 draw가 endLabel에서 읽음
                     cmbChart.update('none');
                 } else {
                     cmbChart = new Chart(document.getElementById('cmbDynamicChart'), {
                         type: 'line',
                         data: { labels: commonDates, datasets: datasets },
-                        plugins: [endLabelPlugin, cmbAxisUnitPlugin, cmbCrosshairPlugin],
+                        plugins: [endLabelPlugin, cmbAxisUnitPlugin, cmbCrosshairPlugin, cmbPinPlugin],
                         options: {
                             responsive: true, maintainAspectRatio: false,
                             devicePixelRatio: 2 * (window.devicePixelRatio || 1),
@@ -3068,12 +3172,14 @@ def _build_combined_chart_section():
                             plugins: {
                                 legend: { display: false },
                                 // animation:false — 동기 툴팁이 draw()만으로 위치 갱신되도록 (애니메이션 속성이면 제자리에 멈춤)
-                                tooltip: { animation: false, callbacks: { label: tooltipLabel } }
+                                // 글씨 +1px (12→13, 2026-07-21 사용자 확정 — 클릭 핀 카드와 동일 크기)
+                                tooltip: { animation: false, titleFont: { size: 13 }, bodyFont: { size: 13 }, callbacks: { label: tooltipLabel } }
                             },
                             scales: scalesConfig
                         }
                     });
                     cmbChart._cmbMode = mode;   // 생성자 첫 draw는 mode 미설정으로 끝값이 +N% 오표기 -> 재렌더로 교정
+                    cmbChart._cmbTipLabel = tooltipLabel;   // 클릭 핀 카드가 같은 포맷 사용
                     cmbChart.update('none');
                 }
 
