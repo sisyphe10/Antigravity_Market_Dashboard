@@ -2865,13 +2865,9 @@ def _build_combined_chart_section():
                     }
                 });
 
-                if (mode === 'raw2') {
-                    var padCount = 3;
-                    for (var p = 0; p < padCount; p++) commonDates.push('');
-                    datasets.forEach(function(ds) {
-                        for (var q = 0; q < padCount; q++) ds.data.push(null);
-                    });
-                }
+                // (2026-07-21) 구 raw2 3열 패딩 제거 — 끝점을 왼쪽으로 당겨 라벨 자리를 만들던
+                // 옛 미봉책이었으나, 끝값 라벨을 우축 바깥 공통 열로 뺀 뒤로는 불필요하고 오히려
+                // 끝점이 우축에서 떨어지는 원인이었음. 이제 끝점이 우축(y1)에 접한다 (사용자 요청).
 
                 // Y축 시작·끝값 눈금 보장 (2026-07-16 사용자 확정) — grace로 벌어진 축 양끝에
                 // 라벨이 없던 문제. 끝 눈금이 축 경계와 2% 이내면 스냅, 멀면 경계 눈금 추가.
