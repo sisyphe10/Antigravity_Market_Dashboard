@@ -368,11 +368,11 @@ body{background:#0a0a0a;color:#d9dde2;font-family:'Pretendard Variable',Pretenda
 header{padding:14px 20px 10px;border-bottom:1px solid #27282b;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
 header h1{font-size:18px;color:#fb8b1e;font-weight:700;}
 .tabs{display:flex;gap:6px;}
-.tab{font-size:13px;font-weight:600;padding:5px 14px;border:1.5px solid #3a3b3e;border-radius:2px;background:#141517;color:#9aa4ae;cursor:pointer;}
+.tab{font-size:13px;font-weight:600;padding:5px 14px;border:1.5px solid #3a3b3e;border-radius:2px;background:#141517;color:#fff;cursor:pointer;}
 .tab.on{background:#fb8b1e;border-color:#fb8b1e;color:#0a0a0a;}
 .searchwrap{margin-left:auto;position:relative;display:flex;align-items:center;}
 .searchwrap svg{position:absolute;left:9px;pointer-events:none;}
-#q{background:#141517;border:1px solid #3a3b3e;border-radius:2px;color:#d9dde2;font-family:inherit;font-size:13px;padding:6px 10px 6px 30px;width:210px;}
+#q{background:#141517;border:1px solid #fff;border-radius:2px;color:#d9dde2;font-family:inherit;font-size:13px;padding:6px 10px 6px 30px;width:210px;}
 #q:focus{outline:1px solid #fb8b1e;}
 main{flex:1;display:flex;min-height:0;}
 #list{width:320px;min-width:240px;border-right:1px solid #27282b;overflow-y:auto;}
@@ -485,9 +485,14 @@ function markString(s){var doc=document.getElementById('doc'),map=textMap(doc),i
 function applyHL(){(HL[CUR]||[]).forEach(function(s){markString(s);});bindMarks();}
 function saveHL(){fetch('library/highlights',{method:'POST',headers:{'Content-Type':'application/json'},
   body:JSON.stringify({rel:CUR,items:HL[CUR]||[]})});}
-function removeMark(m){var t=m.textContent;
+var UNDO=[];  // 하이라이트 자체 undo 스택 (Ctrl+Z)
+function removeMark(m,skipUndo){var t=m.textContent;
   HL[CUR]=(HL[CUR]||[]).filter(function(x){return x!==t;});saveHL();
+  if(!skipUndo)UNDO.push({t:'remove',s:t,rel:CUR});
   var p=m.parentNode;while(m.firstChild)p.insertBefore(m.firstChild,m);p.removeChild(m);p.normalize();}
+function addHL(s,skipUndo){HL[CUR]=(HL[CUR]||[]).concat([s]);saveHL();
+  if(!skipUndo)UNDO.push({t:'add',s:s,rel:CUR});
+  if(markString(s))bindMarks();}
 function bindMarks(){Array.prototype.forEach.call(document.querySelectorAll('#doc mark.hl'),function(m){
   m.title='Ctrl+Shift+H로 해제';});}
 // ── 읽기 전용 contenteditable (노션식 캐럿 이동·Shift+화살표 선택, 수정은 차단) ──
@@ -508,9 +513,21 @@ document.addEventListener('keydown',function(e){
   if(m){removeMark(m);return;}
   var s=sel.toString().trim();
   if(s.length<2||s.length>2000)return;
-  HL[CUR]=(HL[CUR]||[]).concat([s]);saveHL();
-  if(markString(s))bindMarks();
+  addHL(s);
   sel.removeAllRanges();hlBtn.style.display='none';});
+// Ctrl+Z = 마지막 하이라이트 동작 되돌리기 (브라우저 기본 undo는 차단 — contenteditable DOM 오염 방지)
+document.addEventListener('keydown',function(e){
+  if(!(e.ctrlKey&&!e.shiftKey&&(e.key==='z'||e.key==='Z')))return;
+  var inDoc=docEl.contains(document.activeElement)||docEl===document.activeElement;
+  var sel=window.getSelection();
+  if(sel&&sel.anchorNode&&docEl.contains(sel.anchorNode))inDoc=true;
+  if(inDoc)e.preventDefault();
+  var a=UNDO.pop();
+  if(!a||a.rel!==CUR){if(a)UNDO.push(a);return;}
+  if(a.t==='add'){
+    var ms=document.querySelectorAll('#doc mark.hl');
+    for(var i=ms.length-1;i>=0;i--){if(ms[i].textContent===a.s){removeMark(ms[i],true);break;}}
+  }else{addHL(a.s,true);}});
 var hlBtn=document.getElementById('hlBtn');
 document.getElementById('doc').addEventListener('mouseup',function(){
   setTimeout(function(){var sel=window.getSelection(),s=sel?sel.toString().trim():'';
@@ -521,8 +538,7 @@ document.getElementById('doc').addEventListener('mouseup',function(){
     hlBtn.style.display='block';hlBtn.dataset.sel=s;},10);});
 hlBtn.addEventListener('mousedown',function(ev){ev.preventDefault();ev.stopPropagation();
   var s=hlBtn.dataset.sel;if(!s||!CUR)return;
-  HL[CUR]=(HL[CUR]||[]).concat([s]);saveHL();
-  if(markString(s))bindMarks();
+  addHL(s);
   window.getSelection().removeAllRanges();hlBtn.style.display='none';});
 document.addEventListener('mousedown',function(e){if(e.target!==hlBtn)hlBtn.style.display='none';});
 function draw(){
@@ -535,7 +551,7 @@ function draw(){
   document.getElementById('list').innerHTML=items.map(function(x,i){
     return '<div class="item" data-rel="'+esc(x.rel)+'">'
       +'<div class="t"><span class="tk">'+esc(x.ticker||'—')+'</span><span class="badge '+x.kind+'">'+(x.kind==='transcript'?'전문':'분석')+'</span></div>'
-      +'<div class="m"><span style="color:#fff;">'+esc(x.date)+'</span> · '+(x.size/1024).toFixed(0)+'KB</div></div>';
+      +'<div class="m"><span style="color:#fff;">'+esc(x.date)+'</span></div></div>';
   }).join('');
   Array.prototype.forEach.call(document.querySelectorAll('.item'),function(el){
     el.addEventListener('click',function(){
