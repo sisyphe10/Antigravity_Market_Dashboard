@@ -212,13 +212,17 @@ def analyze(s):
         triggers.append("⚠ %s 통상형 깊은25%%(%s) 하회 — 약세장 저점 %s 참조" % (s["name"], fmt(s["deep25"], s), fmt(s["bear_low"], s)))
 
     below = "(하회)" if last < s["norm_low"] else ""
+    low_line = ""
+    if len(since):
+        low_line = "\n이번 저점: %s (%s, %.0f%%)" % (
+            fmt(low, s), low_date.strftime("%m/%d"), low / s["peak"] * 100)
     block = (
         "<b><u>%s %s · 정점비 %.0f%%</u></b>\n"
-        "저점: 통상 %s%s | 약세 %s\n"
+        "저점: 통상 %s%s | 약세 %s%s\n"
         "반등: 통상 %s~%s | 약세 ~%s"
     ) % (
         s["name"], fmt(last, s), cur_pct,
-        fmt(s["norm_low"], s), below, fmt(s["bear_low"], s),
+        fmt(s["norm_low"], s), below, fmt(s["bear_low"], s), low_line,
         fmt(s["band"][0], s), fmt(s["band"][1], s), fmt(s["bear_reb"], s),
     )
     info = {"reb_pct": reb_pct, "started": started, "last": last,

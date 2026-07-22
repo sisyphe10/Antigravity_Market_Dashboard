@@ -3,6 +3,7 @@ Google Calendar 일정 조회 스크립트 (서비스 계정 방식)
 GitHub Actions에서 실행 가능
 """
 import os
+import re
 import sys
 import json
 import logging
@@ -122,6 +123,34 @@ def get_today_events():
     
     return events_by_calendar
 
+# 투자 활동 실적 이벤트: 제목 프리픽스(KST 발표 시간대) 기준 표시 순서·이모지
+SLOT_ORDER = {'미정': 0, '새벽': 1, '저녁': 2, '밤': 3}
+SLOT_EMOJI = {'미정': '❔', '새벽': '🌅', '저녁': '🌆', '밤': '🌙'}
+
+
+def _load_marketcap_map():
+    """universe.json → {티커: 시가총액 raw(억원)}. 실패 시 빈 dict(원래 순서 유지)."""
+    try:
+        path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'universe.json')
+        with open(path, encoding='utf-8') as f:
+            vals = json.load(f)['values']
+        t_idx = vals[0].index('티커')
+        m_idx = vals[0].index('시가총액 raw')
+        caps = {}
+        for row in vals[1:]:
+            if len(row) <= max(t_idx, m_idx):
+                continue
+            ticker = row[t_idx].split(':', 1)[-1].strip().upper()
+            try:
+                caps[ticker] = float(str(row[m_idx]).replace(',', ''))
+            except ValueError:
+                pass
+        return caps
+    except Exception as e:
+        logging.warning(f"universe.json 시총 로드 실패(정렬 생략): {e}")
+        return {}
+
+
 def format_calendar_message(events_by_calendar):
     """캘린더 일정을 텔레그램 메시지 형식으로 변환 (캘린더별 구분)"""
     kst = timezone(timedelta(hours=9))
@@ -153,18 +182,35 @@ def format_calendar_message(events_by_calendar):
             msg += f"<b><u>{line}</u></b>\n" if is_bold else f"{line}\n"
 
     # 투자 활동 캘린더 일정 (별도 섹션, 항상 볼드)
+    # 종일(실적) 이벤트는 시간대(미정>새벽>저녁>밤) → 시총 내림차순으로 정렬,
+    # 시간대 이모지를 불릿 대신 표시. 시간 있는 일정은 기존대로 시간순 먼저.
     if investment_events:
         msg += f"\n💼 투자 활동\n"
+        caps = _load_marketcap_map()
+
+        def _slot(ev):
+            s = ev.get('summary', '')
+            return s.split(' | ', 1)[0].strip() if ' | ' in s else ''
+
+        def _cap(ev):
+            m = re.search(r'\[([^\]]+)\]', ev.get('summary', ''))
+            return caps.get(m.group(1).upper(), 0) if m else 0
+
+        timed, allday = [], []
         for event in investment_events:
             start = event['start'].get('dateTime', event['start'].get('date'))
-            summary = event.get('summary', '(제목 없음)')
+            (timed if 'T' in start else allday).append(event)
+        allday.sort(key=lambda ev: (SLOT_ORDER.get(_slot(ev), 99), -_cap(ev)))
 
-            # 시간 파싱
-            if 'T' in start:  # 시간이 있는 일정
-                dt = datetime.fromisoformat(start.replace('Z', '+00:00')).astimezone(kst)
-                time_str = dt.strftime('%H:%M')
-                msg += f"<b>• {time_str} - {summary}</b>\n"
-            else:  # 종일 일정
+        for event in timed:
+            dt = datetime.fromisoformat(event['start']['dateTime'].replace('Z', '+00:00')).astimezone(kst)
+            msg += f"<b>• {dt.strftime('%H:%M')} - {event.get('summary', '(제목 없음)')}</b>\n"
+        for event in allday:
+            summary = event.get('summary', '(제목 없음)')
+            emoji = SLOT_EMOJI.get(_slot(event))
+            if emoji:
+                msg += f"<b>{emoji} {summary}</b>\n"
+            else:
                 msg += f"<b>• 종일 - {summary}</b>\n"
     
     # 총 일정 개수
