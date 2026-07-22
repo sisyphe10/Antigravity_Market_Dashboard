@@ -1,8 +1,8 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 129 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 130 components._
 
-Updated: 2026-07-21
+Updated: 2026-07-22
 
 ## By domain
 
@@ -81,7 +81,7 @@ Updated: 2026-07-21
 - [portfolio_data.json](store-portfolio-data.md) — Dataset
 - [Recalculate Wrap NAV (xlsx push 트리거)](gha-recalc-wrap-nav.md) — GHA
 - [Sisyphe-Bot (펀드/일상 텔레그램 봇)](bot-sisyphe.md) — Bot
-- [WRAP 원칙 점검 타이머 (17:10, 변화 시에만 발송)](timer-wrap-principle-check.md) — Timer
+- [WRAP 원칙 점검 타이머 (17:10 평일 변화기반 + 일 20:00 전체)](timer-wrap-principle-check.md) — Timer
 - [wrap.html (WRAP 대시보드)](page-wrap.md) — Page
 - [Wrap_NAV.xlsx (랩 운용 원장)](store-wrap-nav-xlsx.md) — Store
 - [기여도 데이터 (create_contribution_data.py)](src-create-contribution-data.md) — Source
@@ -90,7 +90,7 @@ Updated: 2026-07-21
 - [자문지 메일 발송 폴러 (send-advisory-emails 60초)](timer-advisory-emails.md) — Timer
 - [포트폴리오 표 생성 (create_portfolio_tables.py)](src-create-portfolio-tables.md) — Source
 
-### 뉴스 · 리서치 (14)
+### 뉴스 · 리서치 (15)
 - [Earnings Calendar Sync (07:00)](gha-earnings-calendar-sync.md) — GHA
 - [earnings.db (실적봇 상태)](store-earnings-db.md) — Store
 - [Generic Source Pipeline (execution/sources/)](src-generic-pipeline.md) — Source
@@ -99,6 +99,7 @@ Updated: 2026-07-21
 - [Research Notes 봇](bot-research-notes.md) — Bot
 - [research_notes.db + media/ (리서치봇)](store-research-notes-db.md) — Store
 - [sources_state/ + kna_state.json](store-sources-state.md) — Store
+- [실적 분석 1-page md (~/datalake/analyses/)](store-analyses-md.md) — Store
 - [실적 캘린더 sync (earnings_calendar_sync.py)](src-earnings-calendar-sync.md) — Source
 - [실적봇 타이머 (earnings-bot)](timer-earnings-bot.md) — Timer
 - [실적봇 파이프라인 (execution/earnings_bot/)](src-earnings-pipeline.md) — Source
@@ -163,7 +164,7 @@ Updated: 2026-07-21
 - [Featured KIS 수집 타이머 (15:50, 신고가)](timer-featured-kis.md) — 15:50 매일, active
 - [KODEX 섹터 타이머 (23:30, +KOSIS/일본capex/파생 편승)](timer-kodex-sectors.md) — 23:30 매일, active
 - [Memento 점심 텔레그램 타이머 (12:00)](timer-memento-telegram.md) — 12:00 매일, active
-- [WRAP 원칙 점검 타이머 (17:10, 변화 시에만 발송)](timer-wrap-principle-check.md) — 17:10 평일, active
+- [WRAP 원칙 점검 타이머 (17:10 평일 변화기반 + 일 20:00 전체)](timer-wrap-principle-check.md) — 17:10 평일 + 일 20:00 (주간 전체), active
 - [랜딩 하이라이트 타이머 (18:45)](timer-landing-highlights.md) — 18:45 매일, active
 - [메모리 사이클 플랜 알림 타이머 (07:45)](timer-memory-cycle-alert.md) — 07:45 매일, active
 - [미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 09:00)](timer-us-etf-collect.md) — 09:00 화~토, active
@@ -217,7 +218,7 @@ Updated: 2026-07-21
 - [taiwan_revenue.csv (대만 월매출)](store-taiwan-revenue-csv.md) — 23:20 갱신, active
 - [universe.json / universe_history.json](store-universe-json.md) — 18:30 / 07:00 갱신, active
 
-### Store (8)
+### Store (9)
 - [earnings.db (실적봇 상태)](store-earnings-db.md) — 08:00 갱신, active
 - [etf_data.db (ETF 구성종목 SQLite)](store-etf-db.md) — 16:30 / 18:00 갱신, active
 - [heartbeats.json (Phase 2 워치독 인터페이스)](store-heartbeats.md) — 각 GHA 잡 성공 시, planned
@@ -225,6 +226,7 @@ Updated: 2026-07-21
 - [research_notes.db + media/ (리서치봇)](store-research-notes-db.md) — 이벤트 시, active
 - [sources_state/ + kna_state.json](store-sources-state.md) — 소스 폴링 시, active
 - [Wrap_NAV.xlsx (랩 운용 원장)](store-wrap-nav-xlsx.md) — 사용자 편집 + finalize, active
+- [실적 분석 1-page md (~/datalake/analyses/)](store-analyses-md.md) — 08:00 (earnings-bot 타이머), active
 - [어닝콜 번역 전문 md (~/datalake/transcripts/)](store-transcripts-md.md) — 08:00 (earnings-bot 타이머), active
 
 ### Infra (14)
@@ -237,7 +239,7 @@ Updated: 2026-07-21
 - [개인 스냅숏 게시 (publish_snapshot.sh)](web-publish-snapshot.md) — 잡 성공 훅 (여러 잡), active
 - [관심종목 시세판 데몬 (Watchlist, 127.0.0.1:8778)](daemon-watchlist-quoteboard.md) — 상시 (스윕 장중 2s · 장외 60s), active
 - [데이터레이크 문답 웹 UI 데몬 (AoE Wiki, 127.0.0.1:8787)](daemon-datalake-webui.md) — 상시, active
-- [맥미니 데이터레이크 (~/datalake + 문답 위키)](infra-datalake.md) — 잡별 (20:30 / 23:20 / 23:50 / 일 10:00 / 20분), active
+- [맥미니 데이터레이크 (~/datalake + 문답 위키)](infra-datalake.md) — 잡별 (20:30 / 20:50 / 23:20 / 23:50 / 일 10:00 / 20분), active
 - [웹 서빙 (Caddy · com.antigravity.web)](web-caddy.md) — 상시, active
 - [작업용 노트북 (ASUS Vivobook, Windows)](infra-laptop.md) — 상시, active
 - [컴퓨트 호스트 (Oracle VM → 맥미니)](infra-vm-macmini.md) — 상시, active
@@ -302,7 +304,7 @@ Updated: 2026-07-21
 
 ## By project
 
-### antigravity (129)
+### antigravity (130)
 - [architecture.html (아키텍처)](page-architecture.md) — Page
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — Infra
 - [Claude Code Action (@claude 이벤트)](gha-claude-code.md) — GHA
@@ -377,7 +379,7 @@ Updated: 2026-07-21
 - [universe.json / universe_history.json](store-universe-json.md) — Dataset
 - [universe_lab.html (Universe Lab)](page-universe-lab.md) — Page
 - [UPS (무정전 전원, 맥미니 대비)](infra-ups.md) — Infra
-- [WRAP 원칙 점검 타이머 (17:10, 변화 시에만 발송)](timer-wrap-principle-check.md) — Timer
+- [WRAP 원칙 점검 타이머 (17:10 평일 변화기반 + 일 20:00 전체)](timer-wrap-principle-check.md) — Timer
 - [wrap.html (WRAP 대시보드)](page-wrap.md) — Page
 - [Wrap_NAV 워처 (watch_wrap_nav.py)](watcher-wrap-nav.md) — Watcher
 - [Wrap_NAV.xlsx (랩 운용 원장)](store-wrap-nav-xlsx.md) — Store
@@ -400,6 +402,7 @@ Updated: 2026-07-21
 - [비활성 워크플로 (weather · calendar · portfolio-report)](gha-disabled.md) — GHA
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — Bot
 - [수익률 계산 (calculate_returns.py)](src-calculate-returns.md) — Source
+- [실적 분석 1-page md (~/datalake/analyses/)](store-analyses-md.md) — Store
 - [실적 캘린더 sync (earnings_calendar_sync.py)](src-earnings-calendar-sync.md) — Source
 - [실적봇 타이머 (earnings-bot)](timer-earnings-bot.md) — Timer
 - [실적봇 파이프라인 (execution/earnings_bot/)](src-earnings-pipeline.md) — Source

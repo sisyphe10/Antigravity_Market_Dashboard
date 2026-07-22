@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-07-21",
+  "updated": "2026-07-22",
   "projects": [
    "antigravity"
   ],
@@ -1690,17 +1690,21 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "16:30 / 18:00 (etf-collect 타이머)",
    "status": "active",
-   "desc_md": "전체 ETF 목록 + 구성종목/비중을 etfcheck 등에서 수집해 `etf_data.db`(SQLite)에 적재.\n\n- idempotent(성공 시 재실행 스킵). 봇에서 분리된 systemd 타이머가 소유.\n- etf.html 액티브 탭·19:00 알림의 원천 DB.",
+   "desc_md": "전체 ETF 목록 + 구성종목/비중을 etfcheck 등에서 수집해 `etf_data.db`(SQLite)에 적재.\n\n- idempotent(성공 시 재실행 스킵). 봇에서 분리된 타이머가 소유([[timer-etf-collect]] 16:30 / [[timer-etf-collect-retry]] 18:00).\n- etf.html 액티브 탭·19:00 알림의 원천 DB.\n- ★**VM-side 수집 + 정본 병합으로 재설계(2026-07-21)**: 2026-07-11 맥미니 이전 후 맥미니 공인 IP가 한국 금융 소스에 직접 도달 불가 — etfcheck WAF가 IP 차단(정적 파일까지 403), KRX OpenAPI(Akamai)는 SSH SOCKS 터널의 MTU 문제로 타임아웃. 반면 Oracle VM([[infra-vm-macmini]])은 두 소스 모두 직결 200이라, `run_etf_collect.sh`가 **오케스트레이터**로 바뀌었다: ① 수집기 코드를 VM에 scp 동기화 → ② `make_etf_seed.py`로 정본에 이미 있는 당일 목록을 소형 전송 DB에 시드(KRX 재조회 회피 = KRX 간헐장애 내성) → ③ VM에서 `ETF_DB_PATH=전송DB collect_etf_daily.py <날짜>` 실행(구성종목만 etfcheck) + WAL 체크포인트 → ④ 전송 DB scp 회수 → ⑤ `import_etf_transfer.py --min-ok 1000`으로 완결성 검증 후 맥미니 정본(`etf_data.db` ~635M)에 원자적 병합(미달 시 정본 미변경·전송 DB 보존해 재-import 가능). `collect_etf_daily.py`는 날짜 인자와 `ETF_DB_PATH` override를 받도록 확장됐다.\n- (구 방식) 맥미니 로컬 수집 + etfcheck만 SSH SOCKS 프록시(`ETFCHECK_PROXY`)로 우회한 방식은 KRX가 계속 실패해 폐기 — `etfcheck_client.py`의 `ETFCHECK_PROXY` 지원 코드만 잔존.\n- etfcheck 내부 API 키는 사이트 개편마다 로테이션(2026-07-08 → 2026-07-21 `#$dser#GVEWS329@`, 30s 인증 버킷·`Referer` 필수).",
    "code": [
     "execution/etf_collector/collect_etf_daily.py",
     "execution/etf_collector/etf_db.py",
-    "execution/etf_collector/etfcheck_client.py"
+    "execution/etf_collector/etfcheck_client.py",
+    "scripts/run_etf_collect.sh",
+    "scripts/import_etf_transfer.py",
+    "scripts/make_etf_seed.py"
    ],
    "writes": [
     "store-etf-db"
    ],
    "depends_on": [
-    "ext-data-apis"
+    "ext-data-apis",
+    "infra-vm-macmini"
    ]
   },
   {
@@ -1941,21 +1945,24 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "08:00 (earnings-bot 타이머)",
    "status": "active",
-   "desc_md": "미국 실적/IR Day를 번역·요약해 노션 퍼블리시 + 아침 다이제스트를 만드는 다단 파이프라인(`earnings_bot.runner`).\n\n- 단계: 캘린더 sync → EDGAR/트랜스크립트 감시(edgar_monitor/transcript_watch) → 종목 매칭(matcher/ticker_registry) → YoY 계산 → 프롬프트 빌드→번역(Claude) → 노션 퍼블리시(분석 결과) → **번역 전문 datalake md 저장(transcript_store)** → morning_digest.\n- **transcript 본문 저장처 전환(2026-07-21)**: runner 7단계가 종전 `notion_publisher.append_pending_translations`(Notion 페이지 append)에서 `transcript_store.save_pending`으로 교체됐다. 번역 완료 어닝콜 전문은 이제 [[store-transcripts-md]](`~/datalake/transcripts/YYYY/`)에 정본으로 저장된다(구 Notion append 코드는 롤백용 잔존). 저장 여부는 earnings.db `md_path`/`md_saved_at` 컬럼으로 추적하며, morning_digest의 🟢 완료 신호도 `notion_appended_at OR md_saved_at`로 확장됐다. 저장된 md는 [[daemon-datalake-webui]] 코퍼스로 검색된다. (분석 결과의 Notion 퍼블리시=6단계는 그대로 유지.)\n- **외국 사기업(FPI) 6-K 감시(2026-07-15 확장)**: 미국 기업의 8-K와 달리 ADR·외국 발행사는 6-K로 실적을 내므로 `ticker_registry.FOREIGN_PRIVATE_ISSUERS`에 등록된 티커만 6-K 경로를 탄다. universe USD 전수 스캔(SEC submissions API)으로 활성 FPI 10종(AS·BABA·ERIC·JD·NOK·NVO·NXE·ONON·SE·SPOT)을 일괄 등록해 기존 3종(ASML·TSM·CCJ)과 합쳐 13종. 판별 기준=최신 6-K가 현행이고 최근 8-K/10-K 없음(NXPI·SATL·SHOP·SN은 8-K 전환 완료라 제외). 미등록이 곧 미수신인 구조 — ERIC Q2(6-K, 2026-07-14) 누락이 계기였다.\n- **오탐 차단(2026-07-15)**: matcher는 company_name 스코어링에서 맨 티커를 제외하고 티커 언급을 word-boundary로 잡는다(타사 트랜스크립트의 인명 'Eric Mendelson'이 ERIC에 0.8로 매칭되던 HEICO 케이스 → 0.577 < 0.7). attachment_parser는 HK FF305 'Next Day Disclosure Return'·월간 자사주 매입 양식을 실적 신호 규칙보다 **먼저** `6-K_EVENT`로 분류(BABA 자사주 표의 'per share'가 `6-K_QUARTERLY`/HIGH를 유발하던 건).\n- 상태 DB=`earnings.db`. 예정 포맷=`티커/발표일자`(기업명 없음 확정). `--dismiss` CLI.\n- 캘린더는 `gha-earnings-calendar-sync`가 채우고 이 파이프라인이 소비.",
+   "desc_md": "미국 실적/IR Day를 번역·요약해 datalake md로 발행 + 아침 다이제스트를 만드는 다단 파이프라인(`earnings_bot.runner`).\n\n- 단계: 캘린더 sync → EDGAR/트랜스크립트 감시(edgar_monitor/transcript_watch) → 종목 매칭(matcher/ticker_registry) → YoY 계산 → 프롬프트 빌드→번역(Claude) → **분석 1-page md 발행(analysis_store)** → **번역 전문 datalake md 저장(transcript_store)** → morning_digest.\n- **분석 발행처 전환(2026-07-22)**: runner 6단계가 종전 `notion_publisher.publish_pending`(Notion 실적 DB 페이지 생성)에서 `analysis_store.publish_pending`으로 교체됐다. 분석 1-page 시트는 이제 [[store-analyses-md]](`~/datalake/analyses/YYYY/`)에 정본으로 발행된다(구 Notion 코드는 롤백용 잔존). 발행은 earnings.db `stage='published'` upsert(메타 `md_path`)로 기록해 dedup/다이제스트 판정을 유지한다. `backfill_analyses_md.py`로 기존 Notion 분석 페이지를 md 백필했고 [[ext-notion]]은 동결 아카이브로 남는다. 발행된 md는 [[daemon-datalake-webui]] Earnings Library(`/library`)·문답 코퍼스로 열람·검색된다.\n- **transcript 본문 저장처 전환(2026-07-21)**: runner 7단계가 종전 `notion_publisher.append_pending_translations`(Notion 페이지 append)에서 `transcript_store.save_pending`으로 교체됐다. 번역 완료 어닝콜 전문은 이제 [[store-transcripts-md]](`~/datalake/transcripts/YYYY/`)에 정본으로 저장된다(구 Notion append 코드는 롤백용 잔존). 저장 여부는 earnings.db `md_path`/`md_saved_at` 컬럼으로 추적하며, morning_digest의 🟢 완료 신호도 `notion_appended_at OR md_saved_at`로 확장됐다. 저장된 md는 [[daemon-datalake-webui]] 코퍼스로 검색된다.\n- **외국 사기업(FPI) 6-K 감시(2026-07-15 확장)**: 미국 기업의 8-K와 달리 ADR·외국 발행사는 6-K로 실적을 내므로 `ticker_registry.FOREIGN_PRIVATE_ISSUERS`에 등록된 티커만 6-K 경로를 탄다. universe USD 전수 스캔(SEC submissions API)으로 활성 FPI 10종(AS·BABA·ERIC·JD·NOK·NVO·NXE·ONON·SE·SPOT)을 일괄 등록해 기존 3종(ASML·TSM·CCJ)과 합쳐 13종. 판별 기준=최신 6-K가 현행이고 최근 8-K/10-K 없음(NXPI·SATL·SHOP·SN은 8-K 전환 완료라 제외). 미등록이 곧 미수신인 구조 — ERIC Q2(6-K, 2026-07-14) 누락이 계기였다.\n- **오탐 차단(2026-07-15)**: matcher는 company_name 스코어링에서 맨 티커를 제외하고 티커 언급을 word-boundary로 잡는다(타사 트랜스크립트의 인명 'Eric Mendelson'이 ERIC에 0.8로 매칭되던 HEICO 케이스 → 0.577 < 0.7). attachment_parser는 HK FF305 'Next Day Disclosure Return'·월간 자사주 매입 양식을 실적 신호 규칙보다 **먼저** `6-K_EVENT`로 분류(BABA 자사주 표의 'per share'가 `6-K_QUARTERLY`/HIGH를 유발하던 건).\n- 상태 DB=`earnings.db`. 예정 포맷=`티커/발표일자`(기업명 없음 확정). `--dismiss` CLI.\n- 캘린더는 `gha-earnings-calendar-sync`가 채우고 이 파이프라인이 소비.",
    "code": [
     "execution/earnings_bot/runner.py",
     "execution/earnings_bot/morning_digest.py",
     "execution/earnings_bot/edgar_monitor.py",
     "execution/earnings_bot/transcript_watch.py",
     "execution/earnings_bot/notion_publisher.py",
-    "execution/earnings_bot/transcript_store.py"
+    "execution/earnings_bot/transcript_store.py",
+    "execution/earnings_bot/analysis_store.py",
+    "execution/earnings_bot/backfill_analyses_md.py"
    ],
    "reads": [
     "store-earnings-db"
    ],
    "writes": [
     "store-earnings-db",
-    "store-transcripts-md"
+    "store-transcripts-md",
+    "store-analyses-md"
    ],
    "depends_on": [
     "src-earnings-calendar-sync",
@@ -1974,7 +1981,7 @@
    "runs_on": "gha",
    "schedule_kst": "07:00 (GHA) + 15:00 (VM cron)",
    "status": "active",
-   "desc_md": "Finnhub 실적 일정을 Google Calendar에 기록하는 모듈. GHA(07:00 KST)와 VM cron(15:00 KST) **양쪽에서** 실행(이중).\n\n- 맥미니 이전 시 단일화 필요(캘린더 중복 기록 방지). 실적봇 파이프라인이 이 캘린더를 소비.\n- ★**IR Day 분리(2026-07-20)**: 한 스크립트가 두 일을 하던 것을 플래그로 쪼갰다 — 캘린더 sync(146건 Google Calendar 쓰기, 느림)와 IR Day 수집(Finnhub 뉴스 315종목 + EDGAR 8-K, 느림)이 한 잡 900s 타임아웃을 함께 소진해 IR Day가 강제종료되던 문제. `--skip-ir-day`(캘린더만) / `--skip-earnings`(IR Day만)로 분리하고 맥미니 launchd에서 두 잡으로 스태거 실행(07:00 캘린더 + **07:15 IR Day**, [[launchd-gha-phase2]]의 `gha-earnings-ir-day`). 두 잡 모두 타임아웃 1800s로 상향.\n- 시크릿: FINNHUB_API_KEY, GOOGLE_SERVICE_ACCOUNT_KEY.",
+   "desc_md": "Finnhub 실적 일정을 Google Calendar에 기록하는 모듈. GHA(07:00 KST)와 VM cron(15:00 KST) **양쪽에서** 실행(이중).\n\n- 맥미니 이전 시 단일화 필요(캘린더 중복 기록 방지). 실적봇 파이프라인이 이 캘린더를 소비.\n- ★**IR Day 분리(2026-07-20)**: 한 스크립트가 두 일을 하던 것을 플래그로 쪼갰다 — 캘린더 sync(146건 Google Calendar 쓰기, 느림)와 IR Day 수집(Finnhub 뉴스 315종목 + EDGAR 8-K, 느림)이 한 잡 900s 타임아웃을 함께 소진해 IR Day가 강제종료되던 문제. `--skip-ir-day`(캘린더만) / `--skip-earnings`(IR Day만)로 분리하고 맥미니 launchd에서 두 잡으로 스태거 실행(07:00 캘린더 + **07:15 IR Day**, [[launchd-gha-phase2]]의 `gha-earnings-ir-day`). 두 잡 모두 타임아웃 1800s로 상향.\n- **KST 정렬 날짜·라벨(2026-07-22)**: 캘린더 이벤트를 미국 현지 기준이 아니라 한국시간 기준으로 배치·표기한다. 장전(bmo)=KST 당일 저녁·장중(dmh)=KST 당일 밤은 그대로, **장후(amc)만 발표가 KST 다음날 새벽이라 캘린더 날짜를 +1일 이동**. summary 접두어는 `저녁/새벽/밤`, 본문에 `발표일(미국 현지)` + `한국시간` 두 줄을 병기. 시각 미상(hour 없음) 이벤트는 `미정 |` 접두어를 붙인다. event_id(`agearn`+md5)는 미국 현지일 기준이라 불변(중복 방지 유지).\n- 시크릿: FINNHUB_API_KEY, GOOGLE_SERVICE_ACCOUNT_KEY.",
    "code": [
     "execution/earnings_calendar_sync.py"
    ],
@@ -2014,9 +2021,9 @@
    "type": "infra",
    "name": "맥미니 데이터레이크 (~/datalake + 문답 위키)",
    "runs_on": "vm_macmini",
-   "schedule_kst": "잡별 (20:30 / 23:20 / 23:50 / 일 10:00 / 20분)",
+   "schedule_kst": "잡별 (20:30 / 20:50 / 23:20 / 23:50 / 일 10:00 / 20분)",
    "status": "active",
-   "desc_md": "2026-07-11 신설(코드는 레포 `datalake/`, 데이터 정본은 레포 외부 `~/datalake`). 덮어쓰기형 산출물의 과거 유실을 막고, 전 상장·해외 유니버스 일봉 종가를 백필하며, DuckDB+Claude API 웹 UI로 자연어 질의를 제공하는 로컬 데이터레이크. 백필 스크립트(KRX/KIS·FRED·ECOS·KOFIA·벤치마크·해외)와 `build_catalog.py` 카탈로그가 함께 있다.\n\n- **launchd 잡 5종**(맥미니 전용):\n  - `datalake-market-update`(20:30) — 일별 증분 적재(`daily_market_update.py`).\n  - `datalake-research-export`(23:20) — Research Notes 원문(`research_notes.db`)을 일별 `.md`+미디어로 아카이브.\n  - `datalake-snapshot`(23:50) — 덮어쓰기형 레포 산출물 일별 gzip 스냅샷.\n  - `datalake-backup`(일 10:00) — private repo 백업(duckdb/staging 제외).\n  - `datalake-sheets-mirror`(20분 폴링, 2026-07-12 신규) — 시지프+선유듀오 구글시트 미러 → `~/datalake/sheets`. 시트 단위 격리 + **3회 재시도(15s·30s 백오프, 2026-07-14)** — read timeout 등 일시 장애를 흡수하고 3회 연속 실패만 비정상 종료→알림(오탐 알림 억제).\n- 저장: 데이터셋별 연도 파티션 parquet(`kr_ohlcv`·`kr_marcap`·`overseas_ohlcv` 등) + `market.duckdb` 뷰. KRX 수정주가 캡 실측 대응으로 `kr_ohlcv`(무수정)/`kr_ohlcv_adj` 분리.\n- **`kr_fundamental` 패스(2026-07-20 재활성화)**: KRX 주당지표(BPS/PER/PBR/EPS/DIV/DPS). 연간 확정 BPS 기준이라 분기 정밀 밸류엔 계단식으로 부정확해 2026-07-13 제외됐으나, 장기 PBR/PER 밴드·사이클 고점 분석엔 표준 소스라 사용자 요청으로 되살림.\n- **공매도·선물 패스(2026-07-15 신규)**: `kr_short`(종목별 일별 공매도 거래량·거래대금·잔고수량/금액, KRX SRT30001 — 잔고는 T+2 공시라 최근 1~2일 NaN이 lookback 재조회로 self-heal. ★전면금지 2023-11-06~2025-03-30·부분금지 2020-03-16~2021-05-02 구간은 빈 값이 정상) · `kr_short_investor`(시장단위 투자자별 공매도) · `kr_futures_ohlcv`(선물 7상품 월물별 시세+미결제약정, 상품 단위 합계는 `kr_futures_oi_daily` 뷰). 선물 OI는 pykrx api wrapper가 `ACC_OPNINT_QTY`를 떨궈 **core 전종목시세(MDCSTAT12501) 클래스를 직접 호출**하고, 백필은 (상품,연도) 단위 staging 체크포인트로 재개한다.\n- 웹 UI(`datalake/webui/`)는 duckdb 샌드박스(allowed→잠금) 위에서 md 코퍼스 문답. 상세: `datalake/DESIGN.md`.",
+   "desc_md": "2026-07-11 신설(코드는 레포 `datalake/`, 데이터 정본은 레포 외부 `~/datalake`). 덮어쓰기형 산출물의 과거 유실을 막고, 전 상장·해외 유니버스 일봉 종가를 백필하며, DuckDB+Claude API 웹 UI로 자연어 질의를 제공하는 로컬 데이터레이크. 백필 스크립트(KRX/KIS·FRED·ECOS·KOFIA·벤치마크·해외)와 `build_catalog.py` 카탈로그가 함께 있다.\n\n- **launchd 잡 7종**(맥미니 전용, wrapper=`datalake/launchd/run_datalake_job.sh`):\n  - `datalake-market-update`(20:30) — 일별 증분 적재(`daily_market_update.py`). 2026-07-22 `kr_fundamental` 일별 단면(BPS/PER/PBR 등)을 여기에 추가(휴장일 가드).\n  - `datalake-macro-update`(20:50, 2026-07-22 신규) — 매크로 3소스 멱등 재적재(`daily_macro_update.py`): `backfill_ecos`·`backfill_fred`(YoY 계산이 전 이력 필요) 전량 재실행 + `backfill_kofia --pages 1`. GHA 매크로 잡([[gha-daily-ecos]]·[[gha-daily-fred]]·[[gha-daily-kofia]])과 별개로 데이터레이크 정본에 당일분을 채운다.\n  - `datalake-research-export`(23:20) — Research Notes 원문(`research_notes.db`)을 일별 `.md`+미디어로 아카이브.\n  - `datalake-snapshot`(23:50) — 덮어쓰기형 레포 산출물 일별 gzip 스냅샷.\n  - `viewer-daily`(23:50, 2026-07-22 신규) — 현선물/공매도/ETF 차트 뷰어 수집+빌드(`~/work/charts/260715_현선물공매도/run_daily.py`). KRX 야간 배포·kodex 23:30 잡 뒤에 배치.\n  - `datalake-backup`(일 10:00) — private repo 백업(duckdb/staging 제외).\n  - `datalake-sheets-mirror`(20분 폴링, 2026-07-12 신규) — 시지프+선유듀오 구글시트 미러 → `~/datalake/sheets`. 시트 단위 격리 + **3회 재시도(15s·30s 백오프, 2026-07-14)** — read timeout 등 일시 장애를 흡수하고 3회 연속 실패만 비정상 종료→알림(오탐 알림 억제).\n- 저장: 데이터셋별 연도 파티션 parquet(`kr_ohlcv`·`kr_marcap`·`overseas_ohlcv` 등) + `market.duckdb` 뷰. KRX 수정주가 캡 실측 대응으로 `kr_ohlcv`(무수정)/`kr_ohlcv_adj` 분리.\n- **`kr_fundamental` 패스(2026-07-20 재활성화)**: KRX 주당지표(BPS/PER/PBR/EPS/DIV/DPS). 연간 확정 BPS 기준이라 분기 정밀 밸류엔 계단식으로 부정확해 2026-07-13 제외됐으나, 장기 PBR/PER 밴드·사이클 고점 분석엔 표준 소스라 사용자 요청으로 되살림.\n- **공매도·선물 패스(2026-07-15 신규)**: `kr_short`(종목별 일별 공매도 거래량·거래대금·잔고수량/금액, KRX SRT30001 — 잔고는 T+2 공시라 최근 1~2일 NaN이 lookback 재조회로 self-heal. ★전면금지 2023-11-06~2025-03-30·부분금지 2020-03-16~2021-05-02 구간은 빈 값이 정상) · `kr_short_investor`(시장단위 투자자별 공매도) · `kr_futures_ohlcv`(선물 7상품 월물별 시세+미결제약정, 상품 단위 합계는 `kr_futures_oi_daily` 뷰). 선물 OI는 pykrx api wrapper가 `ACC_OPNINT_QTY`를 떨궈 **core 전종목시세(MDCSTAT12501) 클래스를 직접 호출**하고, 백필은 (상품,연도) 단위 staging 체크포인트로 재개한다.\n- 웹 UI(`datalake/webui/`)는 duckdb 샌드박스(allowed→잠금) 위에서 md 코퍼스 문답. 상세: `datalake/DESIGN.md`.",
    "code": [
     "datalake/",
     "datalake/daily_market_update.py",
@@ -2221,11 +2228,11 @@
    "project": "antigravity",
    "domain": "portfolio-wrap",
    "type": "timer",
-   "name": "WRAP 원칙 점검 타이머 (17:10, 변화 시에만 발송)",
+   "name": "WRAP 원칙 점검 타이머 (17:10 평일 변화기반 + 일 20:00 전체)",
    "runs_on": "vm_macmini",
-   "schedule_kst": "17:10 평일",
+   "schedule_kst": "17:10 평일 + 일 20:00 (주간 전체)",
    "status": "active",
-   "desc_md": "2026-07-16 신설. 매일 17:10 KST WRAP 포트폴리오의 투자원칙 준수를 점검해 **위반 상태가 변했을 때만** 텔레그램(🧭)으로 알리는 타이머(`com.antigravity.wrap-principle-check` → `execution/wrap_principle_check.py`). 16:xx 수집·리포트 잡들 뒤에 배치.\n\n- **알림 설계(v2, 변화 기반)**: 행위 룰(당일 발생 시 항상) = 물타기 의심(원칙17)·약세장 신규 편입(원칙11). 상태 룰(변화 기반) = 계좌 MDD(원칙3)·섹터 쏠림(원칙26)·종목 DD·삥(원칙25)·종목 수 상한·단일 종목 쏠림·지수 20일선(원칙8) — 신규 진입 🆕 / 해소 ✅ 에만 상세, 지속분은 요약 1줄. **변화·행위가 없으면 평일 침묵**, 월요일은 전체 상세 리포트.\n- 전일 상태 = `logs/wrap_principle_state.json`(diff 근거). 첫 실행은 baseline 스냅숏만 저장해 🆕 도배를 막고, `WPC_SEED` 환경변수는 무발송 시드 모드(배포 직후 상태 동기화용). 행위 룰은 `actions_sent`+날짜로 당일 재발송 차단, 종목 단위 룰은 상품 중복 없이 1회만 표기.\n- 임계값은 `config/wrap_principles_config.json`(없으면 코드의 `DEFAULTS` — 종목 수 15·최소비중 2%·섹터 65%·종목 DD -30%·NAV MDD -10% 등). 주말은 자체 스킵.\n- 입력은 `portfolio_data.json`(보유·비중)·`Wrap_NAV.xlsx`(NAV 드로다운)·`dataset.csv`(KOSPI 20일선, 17:10 시점엔 통상 D-1 종가라 기준일을 문구에 명기). `portfolio_data.json`이 30시간보다 오래되면 갱신 지연 경고를 덧붙인다.\n- wrapper 타임아웃 300초(`run_timer_job.sh`), 설치는 `install_timers.sh` NAMES 목록.",
+   "desc_md": "2026-07-16 신설. WRAP 포트폴리오의 투자원칙 준수를 점검해 **위반 상태가 변했을 때만** 텔레그램(🧭)으로 알리는 타이머(`com.antigravity.wrap-principle-check` → `execution/wrap_principle_check.py`). 16:xx 수집·리포트 잡들 뒤에 배치.\n\n- **발화 시각(2026-07-22 개정)**: plist `StartCalendarInterval`이 배열로 바뀌어 **매일 17:10**(평일 변화기반 틱) + **일요일 20:00**(주간 전체 상세)에 발화한다. 토요일은 코드가 자체 스킵, 일요일 17:10 틱도 스킵(20:00 전체 틱만 통과: `weekday==6 and hour>=19`). 종전엔 월요일 17:10이 주간 전체 리포트였다. schedule.tsv의 일일 17:10 cron은 selfcheck 계약상 유지하고 일 20:00은 plist에 추가된 별도 발화다.\n- **알림 설계(v2, 변화 기반)**: 행위 룰(당일 발생 시 항상) = 물타기 의심(원칙17)·약세장 신규 편입(원칙11). 상태 룰(변화 기반) = 계좌 MDD(원칙3)·섹터 쏠림(원칙26)·종목 DD·삥(원칙25)·종목 수 상한·단일 종목 쏠림·지수 20일선(원칙8) — 신규 진입 🆕 / 해소 ✅ 에만 상세, 지속분은 요약 1줄. **변화·행위가 없으면 평일 침묵**, **일요일 20:00은 전체 상세 리포트**.\n- 전일 상태 = `logs/wrap_principle_state.json`(diff 근거). 첫 실행은 baseline 스냅숏만 저장해 🆕 도배를 막고, `WPC_SEED` 환경변수는 무발송 시드 모드(배포 직후 상태 동기화용). 행위 룰은 `actions_sent`+날짜로 당일 재발송 차단, 종목 단위 룰은 상품 중복 없이 1회만 표기.\n- 임계값은 `config/wrap_principles_config.json`(없으면 코드의 `DEFAULTS` — 종목 수 15·최소비중 2%·섹터 65%·종목 DD -30%·NAV MDD -10% 등). 토요일은 자체 스킵.\n- 입력은 `portfolio_data.json`(보유·비중)·`Wrap_NAV.xlsx`(NAV 드로다운)·`dataset.csv`(KOSPI 20일선, 17:10 시점엔 통상 D-1 종가라 기준일을 문구에 명기). `portfolio_data.json`이 30시간보다 오래되면 갱신 지연 경고를 덧붙인다.\n- wrapper 타임아웃 300초(`run_timer_job.sh`), 설치는 `install_timers.sh` NAMES 목록.",
    "code": [
     "launchd/timers/com.antigravity.wrap-principle-check.plist",
     "execution/wrap_principle_check.py"
@@ -2299,6 +2306,32 @@
    "alerts": "FAIL → notify_sisyphe_failure.sh memory-cycle-alert → 텔레그램"
   },
   {
+   "id": "daemon-datalake-webui",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "infra",
+   "name": "데이터레이크 문답 웹 UI 데몬 (AoE Wiki, 127.0.0.1:8787)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "상시",
+   "status": "active",
+   "desc_md": "2026-07-12 신설. 데이터레이크의 DuckDB+Claude API 자연어 문답 UI를 **상시 데몬**으로 띄우는 launchd 서비스(`com.antigravity.datalake-webui`, RunAtLoad + KeepAlive). 기존 수동 기동(`run_webui.sh`)을 데몬화해, ts.net 대시보드의 'Wiki' 탭 백엔드로 상주시킨다.\n\n- 바인딩: FastAPI 서버(`server.py`)가 `127.0.0.1:8787` 루프백 고정 — 직접 공개 노출 없음. Caddy가 `/wiki/*`를 이 포트로 리버스 프록시([[web-caddy]]) → AoE 'Wiki'·'Earnings' 탭.\n- 질의 대상 = 데이터레이크 md 코퍼스 + duckdb 샌드박스(allowed→잠금). 소스·설계 상세는 [[infra-datalake]] / `datalake/DESIGN.md`.\n- **코퍼스 확장(2026-07-21)**: SEARCH_ROOTS에 `transcripts`(어닝콜 한국어 번역 전문, [[store-transcripts-md]])를 추가하고 시스템 프롬프트에 어닝콜 전문 소스를 명시. 긴 전문 대응으로 `read_file`에 offset 페이징(1회 최대 20000자, `(truncated ... offset=)` 안내)을 도입.\n- **Earnings Library + analyses 코퍼스(2026-07-22)**: SEARCH_ROOTS에 `analyses`(실적 분석 1-page, [[store-analyses-md]])를 추가하고, 별도 열람 UI 엔드포인트 `/library`(+`/library/list`·`/library/doc`)를 신설. transcripts+analyses md를 필터·프론트매터·md 렌더로 보여주는 'Earnings Library' 페이지(터미널 블랙+앰버)로, ts.net `/wiki/library`에 리버스 프록시되고 nav 'Earnings' 탭이 여기를 가리킨다. 실적봇의 Notion 분석 퍼블리시가 md 발행으로 대체되며([[src-earnings-pipeline]]) 이 UI가 Notion 열람을 대신한다.\n- ★**nav는 손으로 맞춰야 하는 사본**(`datalake/webui/static/index.html`): 이 페이지는 스냅숏이 아니라 데몬에서 직접 서빙되므로 [[web-publish-snapshot]]의 `compose_personal_view.py` nav 주입이 **닿지 않는다**. 2026-07-16 nav 개편 때 [[daemon-watchlist-quoteboard]]와 함께 이 파일의 topnav 마크업을 따로 고쳐 통일했다(`Wiki` 탭에 `margin-left:auto`를 줘 Wiki·Architecture를 우측 그룹으로 미는 것도 여기 사본에 직접 박혀 있다). 2026-07-18 브랜드 라벨을 `AoE` → `AGE OF EMERGENCE`로 확장할 때도 이 사본을 손으로 맞췄다([[web-publish-snapshot]]). 2026-07-22 nav 재편(좌 Watchlist·Market·Journal·Weekly·Earnings·Wiki / 우 Memento·Ledger·Architecture)과 'Earnings'(`/wiki/library`) 탭 추가도 이 사본에 직접 반영했다.\n- launchd 관리: `ThrottleInterval=15`로 크래시 루프 억제, 로그는 `logs/launchd/datalake-webui.{out,err}`. 계산 잡 아님(catch-up 대상 아님).",
+   "code": [
+    "datalake/launchd/com.antigravity.datalake-webui.plist",
+    "datalake/webui/run_webui.sh",
+    "datalake/webui/server.py"
+   ],
+   "reads": [
+    "infra-datalake",
+    "store-transcripts-md",
+    "store-analyses-md"
+   ],
+   "depends_on": [
+    "infra-vm-macmini",
+    "infra-datalake"
+   ],
+   "alerts": "KeepAlive=true (launchd 자동 재기동, ThrottleInterval=15)"
+  },
+  {
    "id": "daemon-catchup",
    "project": "antigravity",
    "domain": "ops-infra",
@@ -2319,31 +2352,6 @@
    "depends_on": [
     "infra-vm-macmini"
    ]
-  },
-  {
-   "id": "daemon-datalake-webui",
-   "project": "antigravity",
-   "domain": "ops-infra",
-   "type": "infra",
-   "name": "데이터레이크 문답 웹 UI 데몬 (AoE Wiki, 127.0.0.1:8787)",
-   "runs_on": "vm_macmini",
-   "schedule_kst": "상시",
-   "status": "active",
-   "desc_md": "2026-07-12 신설. 데이터레이크의 DuckDB+Claude API 자연어 문답 UI를 **상시 데몬**으로 띄우는 launchd 서비스(`com.antigravity.datalake-webui`, RunAtLoad + KeepAlive). 기존 수동 기동(`run_webui.sh`)을 데몬화해, ts.net 대시보드의 'Wiki' 탭 백엔드로 상주시킨다.\n\n- 바인딩: FastAPI 서버(`server.py`)가 `127.0.0.1:8787` 루프백 고정 — 직접 공개 노출 없음. Caddy가 `/wiki/*`를 이 포트로 리버스 프록시([[web-caddy]]) → AoE 'Wiki' 탭.\n- 질의 대상 = 데이터레이크 md 코퍼스 + duckdb 샌드박스(allowed→잠금). 소스·설계 상세는 [[infra-datalake]] / `datalake/DESIGN.md`.\n- **코퍼스 확장(2026-07-21)**: SEARCH_ROOTS에 `transcripts`(어닝콜 한국어 번역 전문, [[store-transcripts-md]])를 추가하고 시스템 프롬프트에 어닝콜 전문 소스를 명시. 긴 전문 대응으로 `read_file`에 offset 페이징(1회 최대 20000자, `(truncated ... offset=)` 안내)을 도입.\n- ★**nav는 손으로 맞춰야 하는 사본**(`datalake/webui/static/index.html`): 이 페이지는 스냅숏이 아니라 데몬에서 직접 서빙되므로 [[web-publish-snapshot]]의 `compose_personal_view.py` nav 주입이 **닿지 않는다**. 2026-07-16 nav 개편 때 [[daemon-watchlist-quoteboard]]와 함께 이 파일의 topnav 마크업을 따로 고쳐 통일했다(`Wiki` 탭에 `margin-left:auto`를 줘 Wiki·Architecture를 우측 그룹으로 미는 것도 여기 사본에 직접 박혀 있다). 2026-07-18 브랜드 라벨을 `AoE` → `AGE OF EMERGENCE`로 확장할 때도 이 사본을 손으로 맞췄다([[web-publish-snapshot]]).\n- launchd 관리: `ThrottleInterval=15`로 크래시 루프 억제, 로그는 `logs/launchd/datalake-webui.{out,err}`. 계산 잡 아님(catch-up 대상 아님).",
-   "code": [
-    "datalake/launchd/com.antigravity.datalake-webui.plist",
-    "datalake/webui/run_webui.sh",
-    "datalake/webui/server.py"
-   ],
-   "reads": [
-    "infra-datalake",
-    "store-transcripts-md"
-   ],
-   "depends_on": [
-    "infra-vm-macmini",
-    "infra-datalake"
-   ],
-   "alerts": "KeepAlive=true (launchd 자동 재기동, ThrottleInterval=15)"
   },
   {
    "id": "ext-data-apis",
@@ -2383,7 +2391,7 @@
    "name": "Notion (실적·리서치 퍼블리시 대상)",
    "runs_on": "external",
    "status": "active",
-   "desc_md": "실적봇과 리서치노트봇이 요약 결과를 퍼블리시하는 노션 워크스페이스(NOTION_API_KEY / NOTION_EARNINGS_DATABASE_ID 등).\n\n- 실적봇: 번역·요약된 미국 실적/IR Day 노트를 실적 DB에 페이지로 생성.\n- 리서치노트봇: 텔레그램 리서치 메시지를 요약→노션 페이지(엄중/중요 표시는 빨간색 텍스트).\n- 이미지는 GitHub에 올린 뒤 URL로 삽입.",
+   "desc_md": "리서치노트봇이 요약 결과를 퍼블리시하는 노션 워크스페이스(NOTION_API_KEY / NOTION_EARNINGS_DATABASE_ID 등). 실적봇에겐 **동결 아카이브**다.\n\n- 실적봇: ~~번역·요약된 미국 실적/IR Day 노트를 실적 DB에 페이지로 생성~~ → **2026-07-22 datalake md 발행으로 대체**됐다. 분석 1-page는 [[store-analyses-md]](`~/datalake/analyses/`), 어닝콜 전문은 [[store-transcripts-md]](2026-07-21)가 정본이며, 기존 Notion 분석 페이지는 `backfill_analyses_md.py`로 md 백필 후 Notion은 동결 아카이브로 남는다(구 `notion_publisher.py`는 롤백용 잔존). [[src-earnings-pipeline]] 참조.\n- 리서치노트봇: 텔레그램 리서치 메시지를 요약→노션 페이지(엄중/중요 표시는 빨간색 텍스트) — 계속 활성.\n- 이미지는 GitHub에 올린 뒤 URL로 삽입.",
    "code": [
     "execution/earnings_bot/notion_publisher.py",
     "execution/research_bot/notion_publisher.py"
@@ -2577,6 +2585,20 @@
      "label": "라이브",
      "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/market_alert.html"
     }
+   ]
+  },
+  {
+   "id": "store-analyses-md",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "store",
+   "name": "실적 분석 1-page md (~/datalake/analyses/)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "08:00 (earnings-bot 타이머)",
+   "status": "active",
+   "desc_md": "2026-07-22 신설. 실적봇이 미국 실적/IR Day를 번역·요약해 만든 **분석 1-page 시트**를 보관하는 데이터레이크 md 코퍼스. 종전엔 Notion 실적 DB 페이지로 퍼블리시했으나, 사용자 결정으로 **분석 시트의 정본은 `~/datalake/analyses/`로 전환**됐다([[store-transcripts-md]] 어닝콜 전문 전환과 동일 패턴, 2026-07-21). 기존 Notion 분석 페이지는 `backfill_analyses_md.py`로 md 백필 후 **Notion=동결 아카이브**로 남긴다([[ext-notion]]).\n\n- 경로: `$DATALAKE_ROOT/analyses/YYYY/YYYY-MM-DD_TICKER_<accession뒤6자리>.md` (filed_at 기준 연도 파티션). 파일명에 accession 뒤 6자리를 넣어 동일 티커·동일일 복수 filing 충돌을 방지.\n- 각 md는 frontmatter(ticker·filed_at·document_subtype·accession 등) + 분석 본문. 발행은 상태 DB([[store-earnings-db]])의 `stage='published'` upsert(메타 `md_path`)로 기록해 기존 dedup/다이제스트 판정을 그대로 유지.\n- 생성 주체 = [[src-earnings-pipeline]]의 `analysis_store.py`(runner 6단계 `publish_pending` — 종전 `notion_publisher.publish_pending` 대체, 구 Notion 코드는 롤백용 잔존). CLI `backfill_analyses_md.py`로 기존 Notion 분석분 소급 생성 가능.\n- 소비: [[daemon-datalake-webui]]가 `analyses`를 SEARCH_ROOTS + Earnings Library(`/library`)에 등록 → AoE 'Wiki' 자연어 문답 검색 및 'Earnings' 탭 열람(transcripts와 함께).",
+   "depends_on": [
+    "src-earnings-pipeline"
    ]
   },
   {
@@ -2873,7 +2895,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "잡 성공 훅 (여러 잡)",
    "status": "active",
-   "desc_md": "2026-07-11 신설. 잡 wrapper(`run_gha_job.sh`/`run_timer_job.sh`) 성공 직후 호출되어 repo 산출물을 개인 ts.net 대시보드로 게시하는 스냅숏 게시기. Caddy가 서빙하는 `~/srv/dashboard/current`의 유일한 writer.\n\n- 동작: 화이트리스트 rsync(`*.html`/`*.json`/`*.csv`/`orders/`/`architecture/`/`charts/`, `.env`·`.git` 구조적 배제) → `releases/rel-<ts>` 새 세대 → 검증 → `current` 심링크 원자 교체(rename(2)). 어떤 실패에서도 기존 current는 안 깨진다.\n- **개인용 가공(1.5단계, `compose_personal_view.py`)**: rsync 직후 새 릴리스 사본에서만 가공 — `wrap.html` 제거 + AoE topnav 재구성 + `~/srv/sisyphe_plain` 원본에서 Sisyphe 평문 페이지를 `current/sisyphe/`로 합성(2026-07-13 staticrypt 암호화 폐기, 테일넷 한정이라 암호 프롬프트 제거 목적). 주입은 기존 fragment를 먼저 제거하고 다시 넣는 정규화 방식이라 재실행에 멱등. 검증 실패 시 `exit 1` → 세대 폐기. repo 원본·GitHub(팀원용)은 불변.\n- **2026-07-16 Sisyphe 구역 해체**: 별도 'Sisyphe' 탭·아이보리 강조·웜톤 바·←AoE 필을 걷어내고 **단일 AoE topnav로 전 페이지 통일**. 탭 순서 = 좌 `Watchlist · Market · Journal · Weekly · Memento · Ledger` / 우(`margin-left:auto`) `Wiki · Architecture`. 합성 대상은 평문 4페이지(index/dashboard/journal/**memento**)로 늘었고, Sisyphe 페이지의 topnav는 AoE 세트로 통째 교체(해당 탭 active)된다.\n  - `Invest` → **`Journal`**로 개명 + `Weekly`를 딥링크(`journal.html#weekly`) 별도 탭으로 분리. 해시에 따라 nav active를 Journal↔Weekly로 바꾸고 페이지 서브탭까지 동기화하는 스크립트를 주입.\n  - `/sisyphe/index.html`은 **Memento 리다이렉트 스텁**으로 격하 — AoE 기본 화면이 `memento.html`이 됐다([[web-caddy]]).\n  - `wrap.html`은 팀 페이지라 **AoE 다크 nav 적용 대상에서 제외**(원래의 라이트 nav 유지, [[page-wrap]]) — 이 트리에서 게시되진 않지만 nav 주입 규칙이 갈린다.\n  - ★**nav 주입은 스냅숏 안의 정적 파일까지만 닿는다**: 리버스 프록시로 붙는 두 데몬 페이지([[daemon-watchlist-quoteboard]] `/watchlist/` · [[daemon-datalake-webui]] `/wiki/`)는 스냅숏을 거치지 않아 **각자 topnav 마크업 사본을 들고 있고 손으로 맞춰야 한다**. 즉 AoE nav의 생산자는 이 합성기 하나가 아니라 `create_dashboard.py`·`create_architecture.py`·두 데몬 정적파일까지 여러 곳 — 탭을 추가·개명하면 전부 훑어야 어긋나지 않는다.\n- **2026-07-18 터미널 다크 테마 주입(게시-시 변환 단계 추가)**: 합성기가 새 `AOE_DARK_CSS`(`<style id=\"aoe-terminal-dark\">`)를 모든 AoE 루트 페이지 `</head>` 앞에 주입한다 — 블룸버그 터미널풍 다크(거의 검정 배경 `#0a0a0a` + 앰버 `#fb8b1e` 강조, 정수 타이포 스케일 28/18/16/13/12). nav 주입과 동형으로 **기존 주입을 먼저 제거하고 다시 넣는 멱등** 방식(`dark_pat`). ★**차트 패널은 흰색 유지** — Chart.js 텍스트가 라이트 전제라 `.chart-card`/`.cmb-chart-item`/`canvas` 포함 컨테이너는 다크에서 제외한다. 등락색은 다크용 밝은 톤으로 재단언, 인라인 밝은 배경 셀은 어두운 글자 유지. `market.html`·`index.html`에 이 CSS가 없으면 검증 `fail`로 세대 폐기.\n  - **Sisyphe 구역 구분 완전 폐지**: 2026-07-16엔 Sisyphe 페이지를 다크 대상에서 제외해 구역을 구분했으나, 사용자 지시로 **Sisyphe 평문 페이지(index/dashboard/journal/memento)에도 동일 다크를 주입** — AoE와 Sisyphe가 시각적으로 완전 통일됐다. `wrap.html`은 여전히 라이트 예외([[page-wrap]]).\n  - **브랜드 라벨 `AoE` → `AGE OF EMERGENCE`**: 원천(`create_dashboard.py`)·Sisyphe nav 교체·정적 페이지 멱등 치환 모두에서 브랜드 전체 이름으로 확장. 리버스 프록시 두 데몬 페이지의 nav 사본([[daemon-watchlist-quoteboard]]·[[daemon-datalake-webui]])도 손으로 맞춰 통일했다.\n- mkdir 원자 락(120s)으로 게시 직렬화. 실패해도 잡 rc에 영향 없음(호출측 `|| true`).\n- 팀원용 공개 게시는 별도 경로([[web-publish-pages]], gh-pages).",
+   "desc_md": "2026-07-11 신설. 잡 wrapper(`run_gha_job.sh`/`run_timer_job.sh`) 성공 직후 호출되어 repo 산출물을 개인 ts.net 대시보드로 게시하는 스냅숏 게시기. Caddy가 서빙하는 `~/srv/dashboard/current`의 유일한 writer.\n\n- 동작: 화이트리스트 rsync(`*.html`/`*.json`/`*.csv`/`orders/`/`architecture/`/`charts/`, `.env`·`.git` 구조적 배제) → `releases/rel-<ts>` 새 세대 → 검증 → `current` 심링크 원자 교체(rename(2)). 어떤 실패에서도 기존 current는 안 깨진다.\n- **개인용 가공(1.5단계, `compose_personal_view.py`)**: rsync 직후 새 릴리스 사본에서만 가공 — `wrap.html` 제거 + AoE topnav 재구성 + `~/srv/sisyphe_plain` 원본에서 Sisyphe 평문 페이지를 `current/sisyphe/`로 합성(2026-07-13 staticrypt 암호화 폐기, 테일넷 한정이라 암호 프롬프트 제거 목적). 주입은 기존 fragment를 먼저 제거하고 다시 넣는 정규화 방식이라 재실행에 멱등. 검증 실패 시 `exit 1` → 세대 폐기. repo 원본·GitHub(팀원용)은 불변.\n- **2026-07-16 Sisyphe 구역 해체**: 별도 'Sisyphe' 탭·아이보리 강조·웜톤 바·←AoE 필을 걷어내고 **단일 AoE topnav로 전 페이지 통일**. 탭 순서 = 좌 `Watchlist · Market · Journal · Weekly · Memento · Ledger` / 우(`margin-left:auto`) `Wiki · Architecture`. 합성 대상은 평문 4페이지(index/dashboard/journal/**memento**)로 늘었고, Sisyphe 페이지의 topnav는 AoE 세트로 통째 교체(해당 탭 active)된다.\n  - `Invest` → **`Journal`**로 개명 + `Weekly`를 딥링크(`journal.html#weekly`) 별도 탭으로 분리. 해시에 따라 nav active를 Journal↔Weekly로 바꾸고 페이지 서브탭까지 동기화하는 스크립트를 주입.\n  - `/sisyphe/index.html`은 **Memento 리다이렉트 스텁**으로 격하 — AoE 기본 화면이 `memento.html`이 됐다([[web-caddy]]).\n  - `wrap.html`은 팀 페이지라 **AoE 다크 nav 적용 대상에서 제외**(원래의 라이트 nav 유지, [[page-wrap]]) — 이 트리에서 게시되진 않지만 nav 주입 규칙이 갈린다.\n  - ★**nav 주입은 스냅숏 안의 정적 파일까지만 닿는다**: 리버스 프록시로 붙는 두 데몬 페이지([[daemon-watchlist-quoteboard]] `/watchlist/` · [[daemon-datalake-webui]] `/wiki/`)는 스냅숏을 거치지 않아 **각자 topnav 마크업 사본을 들고 있고 손으로 맞춰야 한다**. 즉 AoE nav의 생산자는 이 합성기 하나가 아니라 `create_dashboard.py`·`create_architecture.py`·두 데몬 정적파일까지 여러 곳 — 탭을 추가·개명하면 전부 훑어야 어긋나지 않는다.\n- **2026-07-18 터미널 다크 테마 주입(게시-시 변환 단계 추가)**: 합성기가 새 `AOE_DARK_CSS`(`<style id=\"aoe-terminal-dark\">`)를 모든 AoE 루트 페이지 `</head>` 앞에 주입한다 — 블룸버그 터미널풍 다크(거의 검정 배경 `#0a0a0a` + 앰버 `#fb8b1e` 강조, 정수 타이포 스케일 28/18/16/13/12). nav 주입과 동형으로 **기존 주입을 먼저 제거하고 다시 넣는 멱등** 방식(`dark_pat`). ★**차트 패널은 흰색 유지** — Chart.js 텍스트가 라이트 전제라 `.chart-card`/`.cmb-chart-item`/`canvas` 포함 컨테이너는 다크에서 제외한다. 등락색은 다크용 밝은 톤으로 재단언, 인라인 밝은 배경 셀은 어두운 글자 유지. `market.html`·`index.html`에 이 CSS가 없으면 검증 `fail`로 세대 폐기.\n  - **Sisyphe 구역 구분 완전 폐지**: 2026-07-16엔 Sisyphe 페이지를 다크 대상에서 제외해 구역을 구분했으나, 사용자 지시로 **Sisyphe 평문 페이지(index/dashboard/journal/memento)에도 동일 다크를 주입** — AoE와 Sisyphe가 시각적으로 완전 통일됐다. `wrap.html`은 여전히 라이트 예외([[page-wrap]]).\n  - **브랜드 라벨 `AoE` → `AGE OF EMERGENCE`**: 원천(`create_dashboard.py`)·Sisyphe nav 교체·정적 페이지 멱등 치환 모두에서 브랜드 전체 이름으로 확장. 리버스 프록시 두 데몬 페이지의 nav 사본([[daemon-watchlist-quoteboard]]·[[daemon-datalake-webui]])도 손으로 맞춰 통일했다.\n- **2026-07-22 nav 순서 개편 + Earnings 탭**: 탭 순서를 좌 `Watchlist · Market · Journal · Weekly · Earnings · Wiki` / 우(`.right-group{margin-left:auto}`) `Memento · Ledger · Architecture`로 재편. 새 **`Earnings`** 탭은 `/wiki/library`([[daemon-datalake-webui]] Earnings Library)를 가리킨다 — 실적봇 분석의 Notion 퍼블리시가 datalake md 발행으로 대체되며 열람 UI가 여기로 옮겨졌다([[src-earnings-pipeline]]·[[store-analyses-md]]). AoE 페이지·Sisyphe 페이지 nav 교체·리버스 프록시 두 데몬 사본을 모두 이 순서로 맞췄다. (Checklist 탭은 잠시 추가됐다 라이브 nav에서 제거됨 — 직접 URL `sisyphe/checklist.html` 테스트 페이지로만 잔존.)\n- mkdir 원자 락(120s)으로 게시 직렬화. 실패해도 잡 rc에 영향 없음(호출측 `|| true`).\n- 팀원용 공개 게시는 별도 경로([[web-publish-pages]], gh-pages).",
    "code": [
     "scripts/publish_snapshot.sh",
     "scripts/compose_personal_view.py",

@@ -14,11 +14,14 @@ code:
   - "execution/earnings_bot/transcript_watch.py"
   - "execution/earnings_bot/notion_publisher.py"
   - "execution/earnings_bot/transcript_store.py"
+  - "execution/earnings_bot/analysis_store.py"
+  - "execution/earnings_bot/backfill_analyses_md.py"
 reads:
   - "store-earnings-db"
 writes:
   - "store-earnings-db"
   - "store-transcripts-md"
+  - "store-analyses-md"
 depends_on:
   - "src-earnings-calendar-sync"
   - "ext-notion"
@@ -31,10 +34,11 @@ alerts: "타이머 OnFailure → 텔레그램"
 
 **Domain:** 뉴스 · 리서치 · **Type:** Source · **Runs on:** vm_macmini · **Schedule (KST):** 08:00 (earnings-bot 타이머) · **Status:** active · **Project:** antigravity
 
-미국 실적/IR Day를 번역·요약해 노션 퍼블리시 + 아침 다이제스트를 만드는 다단 파이프라인(`earnings_bot.runner`).
+미국 실적/IR Day를 번역·요약해 datalake md로 발행 + 아침 다이제스트를 만드는 다단 파이프라인(`earnings_bot.runner`).
 
-- 단계: 캘린더 sync → EDGAR/트랜스크립트 감시(edgar_monitor/transcript_watch) → 종목 매칭(matcher/ticker_registry) → YoY 계산 → 프롬프트 빌드→번역(Claude) → 노션 퍼블리시(분석 결과) → **번역 전문 datalake md 저장(transcript_store)** → morning_digest.
-- **transcript 본문 저장처 전환(2026-07-21)**: runner 7단계가 종전 `notion_publisher.append_pending_translations`(Notion 페이지 append)에서 `transcript_store.save_pending`으로 교체됐다. 번역 완료 어닝콜 전문은 이제 [[store-transcripts-md]](`~/datalake/transcripts/YYYY/`)에 정본으로 저장된다(구 Notion append 코드는 롤백용 잔존). 저장 여부는 earnings.db `md_path`/`md_saved_at` 컬럼으로 추적하며, morning_digest의 🟢 완료 신호도 `notion_appended_at OR md_saved_at`로 확장됐다. 저장된 md는 [[daemon-datalake-webui]] 코퍼스로 검색된다. (분석 결과의 Notion 퍼블리시=6단계는 그대로 유지.)
+- 단계: 캘린더 sync → EDGAR/트랜스크립트 감시(edgar_monitor/transcript_watch) → 종목 매칭(matcher/ticker_registry) → YoY 계산 → 프롬프트 빌드→번역(Claude) → **분석 1-page md 발행(analysis_store)** → **번역 전문 datalake md 저장(transcript_store)** → morning_digest.
+- **분석 발행처 전환(2026-07-22)**: runner 6단계가 종전 `notion_publisher.publish_pending`(Notion 실적 DB 페이지 생성)에서 `analysis_store.publish_pending`으로 교체됐다. 분석 1-page 시트는 이제 [[store-analyses-md]](`~/datalake/analyses/YYYY/`)에 정본으로 발행된다(구 Notion 코드는 롤백용 잔존). 발행은 earnings.db `stage='published'` upsert(메타 `md_path`)로 기록해 dedup/다이제스트 판정을 유지한다. `backfill_analyses_md.py`로 기존 Notion 분석 페이지를 md 백필했고 [[ext-notion]]은 동결 아카이브로 남는다. 발행된 md는 [[daemon-datalake-webui]] Earnings Library(`/library`)·문답 코퍼스로 열람·검색된다.
+- **transcript 본문 저장처 전환(2026-07-21)**: runner 7단계가 종전 `notion_publisher.append_pending_translations`(Notion 페이지 append)에서 `transcript_store.save_pending`으로 교체됐다. 번역 완료 어닝콜 전문은 이제 [[store-transcripts-md]](`~/datalake/transcripts/YYYY/`)에 정본으로 저장된다(구 Notion append 코드는 롤백용 잔존). 저장 여부는 earnings.db `md_path`/`md_saved_at` 컬럼으로 추적하며, morning_digest의 🟢 완료 신호도 `notion_appended_at OR md_saved_at`로 확장됐다. 저장된 md는 [[daemon-datalake-webui]] 코퍼스로 검색된다.
 - **외국 사기업(FPI) 6-K 감시(2026-07-15 확장)**: 미국 기업의 8-K와 달리 ADR·외국 발행사는 6-K로 실적을 내므로 `ticker_registry.FOREIGN_PRIVATE_ISSUERS`에 등록된 티커만 6-K 경로를 탄다. universe USD 전수 스캔(SEC submissions API)으로 활성 FPI 10종(AS·BABA·ERIC·JD·NOK·NVO·NXE·ONON·SE·SPOT)을 일괄 등록해 기존 3종(ASML·TSM·CCJ)과 합쳐 13종. 판별 기준=최신 6-K가 현행이고 최근 8-K/10-K 없음(NXPI·SATL·SHOP·SN은 8-K 전환 완료라 제외). 미등록이 곧 미수신인 구조 — ERIC Q2(6-K, 2026-07-14) 누락이 계기였다.
 - **오탐 차단(2026-07-15)**: matcher는 company_name 스코어링에서 맨 티커를 제외하고 티커 언급을 word-boundary로 잡는다(타사 트랜스크립트의 인명 'Eric Mendelson'이 ERIC에 0.8로 매칭되던 HEICO 케이스 → 0.577 < 0.7). attachment_parser는 HK FF305 'Next Day Disclosure Return'·월간 자사주 매입 양식을 실적 신호 규칙보다 **먼저** `6-K_EVENT`로 분류(BABA 자사주 표의 'per share'가 `6-K_QUARTERLY`/HIGH를 유발하던 건).
 - 상태 DB=`earnings.db`. 예정 포맷=`티커/발표일자`(기업명 없음 확정). `--dismiss` CLI.
@@ -46,6 +50,7 @@ alerts: "타이머 OnFailure → 텔레그램"
 ## Writes
 - [[store-earnings-db]] — earnings.db (실적봇 상태)
 - [[store-transcripts-md]] — 어닝콜 번역 전문 md (~/datalake/transcripts/)
+- [[store-analyses-md]] — 실적 분석 1-page md (~/datalake/analyses/)
 
 ## Depends on
 - [[src-earnings-calendar-sync]] — 실적 캘린더 sync (earnings_calendar_sync.py)
@@ -60,6 +65,8 @@ alerts: "타이머 OnFailure → 텔레그램"
 - `execution/earnings_bot/transcript_watch.py`
 - `execution/earnings_bot/notion_publisher.py`
 - `execution/earnings_bot/transcript_store.py`
+- `execution/earnings_bot/analysis_store.py`
+- `execution/earnings_bot/backfill_analyses_md.py`
 
 ## Alerts
 ⚠ 타이머 OnFailure → 텔레그램

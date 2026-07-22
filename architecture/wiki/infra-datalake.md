@@ -5,7 +5,7 @@ domain: "ops-infra"
 project: "antigravity"
 type: "infra"
 runs_on: "vm_macmini"
-schedule_kst: "잡별 (20:30 / 23:20 / 23:50 / 일 10:00 / 20분)"
+schedule_kst: "잡별 (20:30 / 20:50 / 23:20 / 23:50 / 일 10:00 / 20분)"
 status: "active"
 code:
   - "datalake/"
@@ -26,14 +26,16 @@ alerts: "launchd wrapper 실패 → notify → 텔레그램"
 
 # 맥미니 데이터레이크 (~/datalake + 문답 위키)
 
-**Domain:** 운영 · 인프라 · **Type:** Infra · **Runs on:** vm_macmini · **Schedule (KST):** 잡별 (20:30 / 23:20 / 23:50 / 일 10:00 / 20분) · **Status:** active · **Project:** antigravity
+**Domain:** 운영 · 인프라 · **Type:** Infra · **Runs on:** vm_macmini · **Schedule (KST):** 잡별 (20:30 / 20:50 / 23:20 / 23:50 / 일 10:00 / 20분) · **Status:** active · **Project:** antigravity
 
 2026-07-11 신설(코드는 레포 `datalake/`, 데이터 정본은 레포 외부 `~/datalake`). 덮어쓰기형 산출물의 과거 유실을 막고, 전 상장·해외 유니버스 일봉 종가를 백필하며, DuckDB+Claude API 웹 UI로 자연어 질의를 제공하는 로컬 데이터레이크. 백필 스크립트(KRX/KIS·FRED·ECOS·KOFIA·벤치마크·해외)와 `build_catalog.py` 카탈로그가 함께 있다.
 
-- **launchd 잡 5종**(맥미니 전용):
-  - `datalake-market-update`(20:30) — 일별 증분 적재(`daily_market_update.py`).
+- **launchd 잡 7종**(맥미니 전용, wrapper=`datalake/launchd/run_datalake_job.sh`):
+  - `datalake-market-update`(20:30) — 일별 증분 적재(`daily_market_update.py`). 2026-07-22 `kr_fundamental` 일별 단면(BPS/PER/PBR 등)을 여기에 추가(휴장일 가드).
+  - `datalake-macro-update`(20:50, 2026-07-22 신규) — 매크로 3소스 멱등 재적재(`daily_macro_update.py`): `backfill_ecos`·`backfill_fred`(YoY 계산이 전 이력 필요) 전량 재실행 + `backfill_kofia --pages 1`. GHA 매크로 잡([[gha-daily-ecos]]·[[gha-daily-fred]]·[[gha-daily-kofia]])과 별개로 데이터레이크 정본에 당일분을 채운다.
   - `datalake-research-export`(23:20) — Research Notes 원문(`research_notes.db`)을 일별 `.md`+미디어로 아카이브.
   - `datalake-snapshot`(23:50) — 덮어쓰기형 레포 산출물 일별 gzip 스냅샷.
+  - `viewer-daily`(23:50, 2026-07-22 신규) — 현선물/공매도/ETF 차트 뷰어 수집+빌드(`~/work/charts/260715_현선물공매도/run_daily.py`). KRX 야간 배포·kodex 23:30 잡 뒤에 배치.
   - `datalake-backup`(일 10:00) — private repo 백업(duckdb/staging 제외).
   - `datalake-sheets-mirror`(20분 폴링, 2026-07-12 신규) — 시지프+선유듀오 구글시트 미러 → `~/datalake/sheets`. 시트 단위 격리 + **3회 재시도(15s·30s 백오프, 2026-07-14)** — read timeout 등 일시 장애를 흡수하고 3회 연속 실패만 비정상 종료→알림(오탐 알림 억제).
 - 저장: 데이터셋별 연도 파티션 parquet(`kr_ohlcv`·`kr_marcap`·`overseas_ohlcv` 등) + `market.duckdb` 뷰. KRX 수정주가 캡 실측 대응으로 `kr_ohlcv`(무수정)/`kr_ohlcv_adj` 분리.
