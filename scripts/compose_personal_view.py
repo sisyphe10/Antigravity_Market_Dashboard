@@ -28,6 +28,8 @@ JOURNAL_ITEM = '<div class="topnav-item"><a href="/sisyphe/journal.html" class="
 WEEKLY_ITEM = '<div class="topnav-item"><a href="/sisyphe/journal.html#weekly" class="topnav-tab">Weekly</a></div>'
 OLD_INVEST_ITEM = '<div class="topnav-item"><a href="/sisyphe/journal.html" class="topnav-tab">Invest</a></div>'
 MEMENTO_ITEM = '<div class="topnav-item"><a href="/sisyphe/memento.html" class="topnav-tab">Memento</a></div>'
+# 2026-07-22 순서 개편: 좌 Watchlist·Market·Journal·Weekly·Earnings·Wiki / 우 Memento·Ledger·Architecture
+MEMENTO_ITEM_R = '<div class="topnav-item right-group"><a href="/sisyphe/memento.html" class="topnav-tab">Memento</a></div>'
 LEDGER_ITEM = '<div class="topnav-item"><a href="/sisyphe/dashboard.html" class="topnav-tab">Ledger</a></div>'
 ARCH_ITEM_PLAIN = '<div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div>'
 # 구세대 fragment — copy-current 입력 정규화용 제거 대상
@@ -171,10 +173,10 @@ def sisyphe_aoe_nav(active):
         '            <a href="/market.html" class="topnav-tab">Market</a>\n'
         '            <a href="/sisyphe/journal.html" class="%s">Journal</a>\n'
         '            <a href="/sisyphe/journal.html#weekly" class="topnav-tab">Weekly</a>\n'
-        '            <a href="/sisyphe/memento.html" class="%s">Memento</a>\n'
-        '            <a href="/sisyphe/dashboard.html" class="%s">Ledger</a>\n'
-        '            <a href="/wiki/" class="topnav-tab" style="margin-left:auto">Wiki</a>\n'
         '            <a href="/wiki/library" class="topnav-tab">Earnings</a>\n'
+        '            <a href="/wiki/" class="topnav-tab">Wiki</a>\n'
+        '            <a href="/sisyphe/memento.html" class="%s" style="margin-left:auto">Memento</a>\n'
+        '            <a href="/sisyphe/dashboard.html" class="%s">Ledger</a>\n'
         '            <a href="/architecture.html" class="topnav-tab">Architecture</a>\n'
         '        </div>\n    </div>\n</nav>'
     ) % (cls('journal'), cls('memento'), cls('ledger'))
@@ -270,7 +272,7 @@ for f in glob.glob(os.path.join(REL, "*.html")):
     # 정규화: 기존 주입 fragment·구 Sisyphe 잔재 제거(clean 입력이면 무동작)
     for frag in (WATCHLIST_ITEM, WIKI_ITEM, OLD_WIKI_ITEM, EARNINGS_ITEM, CHECKLIST_ITEM, JOURNAL_ITEM, WEEKLY_ITEM,
                  OLD_INVEST_ITEM, OLD_INVEST_ITEM_P1,
-                 MEMENTO_ITEM, LEDGER_ITEM, OLD_SISYPHE_ITEM, OLD_SISYPHE_DROPDOWN):
+                 MEMENTO_ITEM, MEMENTO_ITEM_R, LEDGER_ITEM, OLD_SISYPHE_ITEM, OLD_SISYPHE_DROPDOWN):
         n = n.replace(frag, "")
     n = personal_css_pat.sub("", n)
     n = dark_pat.sub("", n)
@@ -293,7 +295,8 @@ for f in glob.glob(os.path.join(REL, "*.html")):
     # (정규화 후 남은 기존 아이템 = Watchlist·Market 뿐이므로 append 순서가 곧 좌측 순서)
     # 가드: 이미 Memento 마크업이 있으면 재주입 금지(정규화가 지웠으므로 통상 미존재).
     if NAV_END in n and 'topnav-tab">Memento' not in n:
-        n = n.replace(NAV_END, JOURNAL_ITEM + WEEKLY_ITEM + MEMENTO_ITEM + LEDGER_ITEM + WIKI_ITEM + EARNINGS_ITEM + arch_html + NAV_END, 1)
+        # 좌: Journal·Weekly·Earnings·Wiki(OLD_WIKI_ITEM=plain 마크업 재사용) / 우: Memento(right-group)·Ledger·Arch
+        n = n.replace(NAV_END, JOURNAL_ITEM + WEEKLY_ITEM + EARNINGS_ITEM + OLD_WIKI_ITEM + MEMENTO_ITEM_R + LEDGER_ITEM + arch_html + NAV_END, 1)
     if 'id="aoe-personal-nav"' not in n:
         r = inject_before_head(n, AOE_PERSONAL_CSS)
         if r is not None:
@@ -310,18 +313,19 @@ if os.path.exists(wrap):
 idx = os.path.join(REL, "index.html")
 if os.path.exists(idx):
     t = open(idx, encoding="utf-8").read()
-    for marker, what in ((WATCHLIST_ITEM, 'Watchlist'), (WIKI_ITEM, 'Wiki(우측)'), (EARNINGS_ITEM, 'Earnings'),
+    for marker, what in ((WATCHLIST_ITEM, 'Watchlist'), (OLD_WIKI_ITEM, 'Wiki(좌측)'), (EARNINGS_ITEM, 'Earnings'),
                          (JOURNAL_ITEM, 'Journal'),
-                         (WEEKLY_ITEM, 'Weekly'), (MEMENTO_ITEM, 'Memento'), (LEDGER_ITEM, 'Ledger')):
+                         (WEEKLY_ITEM, 'Weekly'), (MEMENTO_ITEM_R, 'Memento(우측)'), (LEDGER_ITEM, 'Ledger')):
         if marker not in t:
             fail("index.html: %s 탭 주입 실패" % what)
     # 순서: Watchlist < Market < Journal < Weekly < Memento < Ledger < Wiki(right-group) < Architecture
     # ★'right-group' 단독 검색 금지 — head 의 aoe-personal-nav CSS(.topnav-item.right-group)가
     #   nav 마크업보다 먼저 매칭돼 순서 검증이 항상 실패(2026-07-16 게시 동결 사고). 마크업 전용
     #   마커 'topnav-item right-group'(class 속성, 공백 구분)만 사용.
+    # 순서: Watchlist < Market < Journal < Weekly < Earnings < Wiki < Memento(right-group) < Ledger < Architecture
     pos = [t.find('>Watchlist<'), t.find('>Market<'), t.find('>Journal<'), t.find('>Weekly<'),
-           t.find('>Memento<'), t.find('>Ledger<'), t.find('topnav-item right-group'),
-           t.find('>Earnings<'), t.rfind('>Architecture<')]
+           t.find('>Earnings<'), t.find('>Wiki<'), t.find('topnav-item right-group'),
+           t.find('>Memento<'), t.find('>Ledger<'), t.rfind('>Architecture<')]
     if -1 in pos or pos != sorted(pos):
         fail("index.html: 탭 순서 오류 %s" % pos)
     if 'sisyphe-tab' in t or 'topnav-sub">가계부' in t:
