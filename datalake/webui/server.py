@@ -487,10 +487,14 @@ function mdRender(md){
 function textMap(root){var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),ns=[],tx='',n;
   while((n=w.nextNode())){ns.push({node:n,start:tx.length});tx+=n.nodeValue;}return {nodes:ns,text:tx};}
 function locate(map,idx){for(var i=map.nodes.length-1;i>=0;i--){if(map.nodes[i].start<=idx)return {node:map.nodes[i].node,offset:idx-map.nodes[i].start};}return null;}
+// 끝 경계는 이전 노드의 '끝'을 선택 — 다음 블록 시작(offset 0)으로 넘어가면
+// range가 문단 경계를 넘어 추출 시 빈 줄이 생긴다 (2026-07-22 실측 버그)
+function locateEnd(map,idx){for(var i=map.nodes.length-1;i>=0;i--){var n=map.nodes[i];
+  if(n.start<idx||(i===0&&n.start<=idx))return {node:n.node,offset:idx-n.start};}return null;}
 function ns(x){return typeof x==='string'?{s:x,c:1}:x;}
 function markString(s,c){var doc=document.getElementById('doc'),map=textMap(doc),idx=map.text.indexOf(s);
   if(idx<0)return false;
-  var st=locate(map,idx),en=locate(map,idx+s.length);if(!st||!en)return false;
+  var st=locate(map,idx),en=locateEnd(map,idx+s.length);if(!st||!en)return false;
   var r=document.createRange();
   try{r.setStart(st.node,st.offset);r.setEnd(en.node,en.offset);
     var m=document.createElement('mark');m.className='hl c'+(c||1);
@@ -506,9 +510,14 @@ function removeMark(m,skipUndo){var t=m.textContent;
   if(!skipUndo)UNDO.push({t:'remove',s:t,c:hit?hit.c:1,rel:CUR});
   var p=m.parentNode;while(m.firstChild)p.insertBefore(m.firstChild,m);p.removeChild(m);p.normalize();}
 function addHL(s,c,skipUndo){c=c||1;LASTC=c;
-  HL[CUR]=(HL[CUR]||[]).concat([{s:s,c:c}]);saveHL();
-  if(!skipUndo)UNDO.push({t:'add',s:s,c:c,rel:CUR});
-  if(markString(s,c))bindMarks();}
+  // 여러 줄 선택은 줄 단위 분리 (본문 텍스트맵엔 블록 간 개행이 없어 통짜 매칭 불가)
+  var segs=String(s).split(/\\n+/).map(function(x){return x.trim();}).filter(function(x){return x.length>=2;});
+  if(!segs.length)return;
+  segs.forEach(function(seg){
+    HL[CUR]=(HL[CUR]||[]).concat([{s:seg,c:c}]);
+    if(!skipUndo)UNDO.push({t:'add',s:seg,c:c,rel:CUR});
+    markString(seg,c);});
+  saveHL();bindMarks();}
 function bindMarks(){Array.prototype.forEach.call(document.querySelectorAll('#doc mark.hl'),function(m){
   m.title='Ctrl+Shift+H로 해제';});}
 // ── 읽기 전용 contenteditable (노션식 캐럿 이동·Shift+화살표 선택, 수정은 차단) ──
