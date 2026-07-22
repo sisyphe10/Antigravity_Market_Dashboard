@@ -108,7 +108,7 @@ AOE_DARK_CSS = (
     '.tl-band-count{background:#1a1b1e!important;color:#d9dde2!important}'
     '.qrow.starred{background:#241a3d!important}'
     '.sidebar-link.active{border-bottom-color:#fb8b1e!important}'
-    '.sidebar{justify-content:center!important;gap:0!important}''.sidebar-link+.sidebar-link,.ledger-subtab+.ledger-subtab,.mm-main .subtabs .subtab+.subtab{margin-left:-1px!important}''.sidebar-link.active,.ledger-subtab.active{position:relative;z-index:1}'
+    '.sidebar{justify-content:center!important}'
     # 타이포 정수 스케일 (2026-07-18 사용자 확정): 대제목28/섹션18/표본문16/메타13/표헤더12
     'table,td{font-size:17px!important}'
     'th{font-size:15px!important}'
@@ -119,7 +119,7 @@ AOE_DARK_CSS = (
     '.section-count,.category-date{font-size:14px!important}'
     '.sidebar,.ledger-subtabs,.mm-main .subtabs{height:42px!important;'
     'box-sizing:border-box!important;align-items:stretch!important;overflow:hidden!important}'
-    '.sidebar-link,.ledger-subtab,.mm-main .subtabs .subtab{height:41px!important;font-size:18px!important;border:1px solid #565a60!important;border-radius:2px!important}'
+    '.sidebar-link,.ledger-subtab,.mm-main .subtabs .subtab{height:41px!important;font-size:18px!important}'
     'button[style*="#dc2626"]{background:#fb8b1e!important;color:#101418!important;'
     'border:1.5px solid #fb8b1e!important;border-radius:2px!important}'
     'button[style*="#2563eb"]{background:transparent!important;color:#fb8b1e!important;'
