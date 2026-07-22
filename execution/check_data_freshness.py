@@ -78,6 +78,7 @@ DATASET_IGNORE = {
     'NPS_FUND',  # 국민연금 적립금: 연간+최신월 저빈도 — 일별 감시 부적합
     'KOSIS_PENSION',  # 퇴직연금 적립금: 연 1회 (통계청 12월 발표)
     'KOSIS_MACRO', 'KOSIS_SECTOR', 'JP_CAPEX',  # KOSIS 월간 (발표 1~2개월 지연)
+    'IMMIGRATION',  # 법무부 출입국 월간 (익월 하순~월말 갱신)
 }
 
 # ── JSON 산출물: 파일 → 임계 영업일 ──────────────────────────────────────────

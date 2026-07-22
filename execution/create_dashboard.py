@@ -1862,6 +1862,12 @@ def _build_combined_chart_section():
                 {'display': '대형마트 매출증감률',   'csv': '대형마트 매출증감률',   'color': '#26B0A1'},
                 {'display': '편의점 매출증감률',     'csv': '편의점 매출증감률',     'color': '#4DC4B5'},
                 {'display': 'SSM 매출증감률',        'csv': 'SSM 매출증감률',        'color': '#73D8C9'},
+                # 법무부 출입국 (fetch_immigration.py, data.go.kr — 맥미니 경로, 만명)
+                {'display': '외국인 입국자',            'csv': '외국인 입국자',            'color': '#028090'},
+                {'display': '국민 출국자',              'csv': '국민 출국자',              'color': '#05668D'},
+                {'display': '체류외국인 총계',          'csv': '체류외국인 총계',          'color': '#00A896'},
+                {'display': '체류외국인 취업(E)',       'csv': '체류외국인 취업(E)',       'color': '#02C39A'},
+                {'display': '체류외국인 유학(D2·D4)',   'csv': '체류외국인 유학(D2·D4)',   'color': '#679436'},
             ]},
             {'label': 'MACRO US', 'series': [
                 # FRED 미국 매크로 (fetch_fred_data.py; 월·분기 FRED_MACRO는 5년 임베드 창,
@@ -2012,7 +2018,8 @@ def _build_combined_chart_section():
         long_start = latest - timedelta(days=365 * 5)
         if '데이터 타입' in df.columns:
             long_mask = df['데이터 타입'].isin(['ECOS_MACRO', 'ECOS_SECTOR', 'FRED_MACRO', 'FRED_SECTOR',
-                                                'NPS_FUND', 'KOSIS_PENSION', 'KOSIS_MACRO', 'KOSIS_SECTOR', 'JP_CAPEX'])
+                                                'NPS_FUND', 'KOSIS_PENSION', 'KOSIS_MACRO', 'KOSIS_SECTOR', 'JP_CAPEX',
+                                                'IMMIGRATION'])
             # 연간 시리즈(퇴직연금 등)는 5년 창이면 4점뿐 → 창 제한 없이 전체 임베드 (행 수 미미)
             full_mask = df['데이터 타입'].isin(['KOSIS_PENSION'])
         else:
