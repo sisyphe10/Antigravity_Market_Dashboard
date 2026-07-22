@@ -339,7 +339,13 @@ def library_highlights_save(req: HighlightReq):
             data = _j.load(f)
     except (OSError, ValueError):
         data = {}
-    items = [s for s in req.items if isinstance(s, str) and s.strip()]
+    items = []
+    for it in req.items:
+        if isinstance(it, str) and it.strip():
+            items.append({"s": it, "c": 1})  # 구버전(문자열) 호환
+        elif isinstance(it, dict) and str(it.get("s", "")).strip():
+            c = it.get("c", 1)
+            items.append({"s": str(it["s"]), "c": c if c in (1, 2, 3) else 1})
     if items:
         data[req.rel] = items
     else:
@@ -386,7 +392,7 @@ main{flex:1;display:flex;min-height:0;}
 .badge{font-size:11px;font-weight:700;border-radius:2px;padding:1px 6px;vertical-align:1px;}
 .badge.transcript{background:#0a3038;color:#67e0f4;}
 .badge.analysis{background:#10301c;color:#4ade80;}
-#doc{flex:1;overflow-y:auto;padding:26px 34px 60px;line-height:1.75;caret-color:#fb8b1e;}
+#doc{flex:1;overflow-y:auto;padding:26px 34px 60px;line-height:1.75;caret-color:#fb8b1e;color:#fff;}
 #doc:focus{outline:none;}
 #doc .empty{color:#8a919a;font-size:16px;margin-top:40px;text-align:center;}
 #doc h1{font-size:28px;color:#fb8b1e;margin:18px 0 10px;}
@@ -397,14 +403,19 @@ main{flex:1;display:flex;min-height:0;}
 #doc li{margin:3px 0;}
 #doc table{border-collapse:collapse;margin:12px 0;font-size:15px;}
 #doc th{background:#1a1b1e;color:#fb8b1e;font-size:12px;padding:6px 12px;border:1px solid #27282b;}
-#doc td{padding:6px 12px;border:1px solid #27282b;}
-#doc blockquote{border-left:3px solid #fb8b1e;padding:4px 14px;color:#c9ced4;background:#111214;margin:10px 0;}
+#doc td{padding:6px 12px;border:1px solid #27282b;color:#fff;}
+#doc blockquote{border-left:3px solid #fb8b1e;padding:4px 14px;color:#fff;background:#111214;margin:10px 0;}
 #doc code{background:#1a1b1e;border-radius:2px;padding:1px 5px;font-size:14px;}
 #doc hr{border:none;border-top:1px solid #27282b;margin:16px 0;}
 #doc .fm{background:#111214;border:1px solid #27282b;border-radius:2px;padding:10px 14px;font-size:13px;color:#8a919a;margin-top:26px;}
 #doc .fm b{color:#ffb45e;font-weight:600;}
-#doc mark.hl{background:rgba(251,139,30,0.28);color:inherit;border-radius:2px;cursor:pointer;}
-#hlBtn{position:fixed;display:none;z-index:10;font-family:inherit;font-size:12.5px;font-weight:700;padding:5px 12px;border:none;border-radius:2px;background:#fb8b1e;color:#0a0a0a;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.5);}
+#doc mark.hl{border-radius:2px;}
+#doc mark.hl.c1{background:#241a3d;color:#b9a1fc;}
+#doc mark.hl.c2{background:#0a3038;color:#67e0f4;}
+#doc mark.hl.c3{background:#10301c;color:#4ade80;}
+#hlPop{position:fixed;display:none;z-index:10;gap:8px;padding:7px 10px;background:#141517;border:1px solid #3a3b3e;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.5);}
+#hlPop .dot{width:18px;height:18px;border-radius:50%;border:1.5px solid #0a0a0a;cursor:pointer;padding:0;}
+#hlPop .d1{background:#b9a1fc;}#hlPop .d2{background:#67e0f4;}#hlPop .d3{background:#4ade80;}
 @media(max-width:760px){#list{width:44%;}#doc{padding:16px;}}
 </style></head><body>
 <header>
@@ -423,7 +434,7 @@ main{flex:1;display:flex;min-height:0;}
   <div id="list"></div>
   <div id="doc" contenteditable="true" spellcheck="false"><div class="empty">좌측에서 문서를 선택하세요</div></div>
 </main>
-<button id="hlBtn">하이라이트</button>
+<div id="hlPop"><button class="dot d1" data-c="1" title="바이올렛"></button><button class="dot d2" data-c="2" title="시안"></button><button class="dot d3" data-c="3" title="에메랄드"></button></div>
 <script>
 var ALL=[], KIND='all', Q='', HL={}, CUR=null;
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -474,25 +485,28 @@ function mdRender(md){
 function textMap(root){var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),ns=[],tx='',n;
   while((n=w.nextNode())){ns.push({node:n,start:tx.length});tx+=n.nodeValue;}return {nodes:ns,text:tx};}
 function locate(map,idx){for(var i=map.nodes.length-1;i>=0;i--){if(map.nodes[i].start<=idx)return {node:map.nodes[i].node,offset:idx-map.nodes[i].start};}return null;}
-function markString(s){var doc=document.getElementById('doc'),map=textMap(doc),idx=map.text.indexOf(s);
+function ns(x){return typeof x==='string'?{s:x,c:1}:x;}
+function markString(s,c){var doc=document.getElementById('doc'),map=textMap(doc),idx=map.text.indexOf(s);
   if(idx<0)return false;
   var st=locate(map,idx),en=locate(map,idx+s.length);if(!st||!en)return false;
   var r=document.createRange();
   try{r.setStart(st.node,st.offset);r.setEnd(en.node,en.offset);
-    var m=document.createElement('mark');m.className='hl';m.title='클릭하면 하이라이트 해제';
+    var m=document.createElement('mark');m.className='hl c'+(c||1);
     m.appendChild(r.extractContents());r.insertNode(m);}catch(e){return false;}
   return true;}
-function applyHL(){(HL[CUR]||[]).forEach(function(s){markString(s);});bindMarks();}
+function applyHL(){(HL[CUR]||[]).forEach(function(x){var it=ns(x);markString(it.s,it.c);});bindMarks();}
 function saveHL(){fetch('library/highlights',{method:'POST',headers:{'Content-Type':'application/json'},
   body:JSON.stringify({rel:CUR,items:HL[CUR]||[]})});}
-var UNDO=[];  // 하이라이트 자체 undo 스택 (Ctrl+Z)
+var UNDO=[],LASTC=1;  // 하이라이트 자체 undo 스택 (Ctrl+Z) + 마지막 사용 색
 function removeMark(m,skipUndo){var t=m.textContent;
-  HL[CUR]=(HL[CUR]||[]).filter(function(x){return x!==t;});saveHL();
-  if(!skipUndo)UNDO.push({t:'remove',s:t,rel:CUR});
+  var hit=(HL[CUR]||[]).map(ns).filter(function(x){return x.s===t;})[0];
+  HL[CUR]=(HL[CUR]||[]).filter(function(x){return ns(x).s!==t;});saveHL();
+  if(!skipUndo)UNDO.push({t:'remove',s:t,c:hit?hit.c:1,rel:CUR});
   var p=m.parentNode;while(m.firstChild)p.insertBefore(m.firstChild,m);p.removeChild(m);p.normalize();}
-function addHL(s,skipUndo){HL[CUR]=(HL[CUR]||[]).concat([s]);saveHL();
-  if(!skipUndo)UNDO.push({t:'add',s:s,rel:CUR});
-  if(markString(s))bindMarks();}
+function addHL(s,c,skipUndo){c=c||1;LASTC=c;
+  HL[CUR]=(HL[CUR]||[]).concat([{s:s,c:c}]);saveHL();
+  if(!skipUndo)UNDO.push({t:'add',s:s,c:c,rel:CUR});
+  if(markString(s,c))bindMarks();}
 function bindMarks(){Array.prototype.forEach.call(document.querySelectorAll('#doc mark.hl'),function(m){
   m.title='Ctrl+Shift+H로 해제';});}
 // ── 읽기 전용 contenteditable (노션식 캐럿 이동·Shift+화살표 선택, 수정은 차단) ──
@@ -513,8 +527,8 @@ document.addEventListener('keydown',function(e){
   if(m){removeMark(m);return;}
   var s=sel.toString().trim();
   if(s.length<2||s.length>2000)return;
-  addHL(s);
-  sel.removeAllRanges();hlBtn.style.display='none';});
+  addHL(s,LASTC);
+  sel.removeAllRanges();hlPop.style.display='none';});
 // Ctrl+Z = 마지막 하이라이트 동작 되돌리기 (브라우저 기본 undo는 차단 — contenteditable DOM 오염 방지)
 document.addEventListener('keydown',function(e){
   if(!(e.ctrlKey&&!e.shiftKey&&(e.key==='z'||e.key==='Z')))return;
@@ -527,20 +541,21 @@ document.addEventListener('keydown',function(e){
   if(a.t==='add'){
     var ms=document.querySelectorAll('#doc mark.hl');
     for(var i=ms.length-1;i>=0;i--){if(ms[i].textContent===a.s){removeMark(ms[i],true);break;}}
-  }else{addHL(a.s,true);}});
-var hlBtn=document.getElementById('hlBtn');
+  }else{addHL(a.s,a.c,true);}});
+var hlPop=document.getElementById('hlPop');
 document.getElementById('doc').addEventListener('mouseup',function(){
   setTimeout(function(){var sel=window.getSelection(),s=sel?sel.toString().trim():'';
-    if(!CUR||s.length<2||s.length>2000){hlBtn.style.display='none';return;}
+    if(!CUR||s.length<2||s.length>2000){hlPop.style.display='none';return;}
     var rect=sel.getRangeAt(0).getBoundingClientRect();
-    hlBtn.style.left=Math.max(8,rect.left+rect.width/2-40)+'px';
-    hlBtn.style.top=Math.max(8,rect.top-38)+'px';
-    hlBtn.style.display='block';hlBtn.dataset.sel=s;},10);});
-hlBtn.addEventListener('mousedown',function(ev){ev.preventDefault();ev.stopPropagation();
-  var s=hlBtn.dataset.sel;if(!s||!CUR)return;
-  addHL(s);
-  window.getSelection().removeAllRanges();hlBtn.style.display='none';});
-document.addEventListener('mousedown',function(e){if(e.target!==hlBtn)hlBtn.style.display='none';});
+    hlPop.style.left=Math.max(8,rect.left+rect.width/2-45)+'px';
+    hlPop.style.top=Math.max(8,rect.top-44)+'px';
+    hlPop.style.display='flex';hlPop.dataset.sel=s;},10);});
+Array.prototype.forEach.call(hlPop.querySelectorAll('.dot'),function(d){
+  d.addEventListener('mousedown',function(ev){ev.preventDefault();ev.stopPropagation();
+    var s=hlPop.dataset.sel;if(!s||!CUR)return;
+    addHL(s,parseInt(d.dataset.c,10));
+    window.getSelection().removeAllRanges();hlPop.style.display='none';});});
+document.addEventListener('mousedown',function(e){if(!hlPop.contains(e.target))hlPop.style.display='none';});
 function draw(){
   var q=Q.toLowerCase();
   var items=ALL.filter(function(x){
