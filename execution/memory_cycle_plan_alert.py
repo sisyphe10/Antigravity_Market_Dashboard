@@ -170,18 +170,22 @@ def fmt(v, s):
 
 
 def fetch_closes(ticker, start):
+    """(종가, 장중저가) 시리즈 튜플. 판정 로직=종가, '이번 저점' 표시=장중저가."""
     import yfinance as yf
-    px = yf.download(ticker, start=start, auto_adjust=False, progress=False)["Close"]
-    if hasattr(px, "columns"):
-        px = px[ticker]
-    px = px.dropna()
-    if len(px) == 0:
+    df = yf.download(ticker, start=start, auto_adjust=False, progress=False)
+    out = []
+    for field in ("Close", "Low"):
+        px = df[field]
+        if hasattr(px, "columns"):
+            px = px[ticker]
+        out.append(px.dropna())
+    if len(out[0]) == 0:
         raise RuntimeError(f"{ticker}: no price data")
-    return px
+    return out[0], out[1]
 
 
 def analyze(s):
-    px = fetch_closes(s["ticker"], "2026-06-01")
+    px, lows = fetch_closes(s["ticker"], "2026-06-01")
     last = float(px.iloc[-1])
     last_date = px.index[-1].strftime("%m/%d")
     cur_pct = last / s["peak"] * 100
@@ -213,9 +217,13 @@ def analyze(s):
 
     below = "(하회)" if last < s["norm_low"] else ""
     low_line = ""
-    if len(since):
-        low_line = "\n<b><u>이번 저점: %s (%s, %.0f%%)</u></b>" % (
-            fmt(low, s), low_date.strftime("%m/%d"), low / s["peak"] * 100)
+    lows_since = lows[lows.index >= s["anchor"]]
+    if len(lows_since):
+        ilow = float(lows_since.min())
+        ild = lows_since.idxmin()
+        wd = ["월", "화", "수", "목", "금", "토", "일"][ild.weekday()]
+        low_line = "\n<b><u>이번 저점: %s (%d.%d(%s), %.0f%%)</u></b>" % (
+            fmt(ilow, s), ild.month, ild.day, wd, ilow / s["peak"] * 100)
     block = (
         "<b><u>%s %s · 정점비 %.0f%%</u></b>\n"
         "저점: 통상 %s%s | 약세 %s%s\n"
