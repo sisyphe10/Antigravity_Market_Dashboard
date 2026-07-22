@@ -371,6 +371,20 @@ _LIBRARY_HTML = """<!DOCTYPE html>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:#0a0a0a;color:#d9dde2;font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif;height:100vh;display:flex;flex-direction:column;}
+/* ── AoE 공통 상단 내비 (다른 탭들과 동일) ── */
+.topnav{background:#101418;border-bottom:2px solid #fb8b1e;position:sticky;top:0;z-index:100;}
+.topnav-inner{max-width:1400px;margin:0 auto;padding:0 28px;display:flex;align-items:stretch;height:54px;gap:36px;}
+.topnav-brand{font-size:1.1rem;font-weight:800;letter-spacing:3.5px;color:#fff;white-space:nowrap;text-decoration:none;align-self:center;}
+.topnav-brand:hover{color:#fb8b1e;}
+.topnav-tabs{display:flex;gap:2px;flex:1;align-items:stretch;}
+.topnav-item{position:relative;display:flex;align-items:stretch;}
+.topnav-tab{display:inline-flex;align-items:center;gap:6px;padding:0 18px;color:#9aa4ae;text-decoration:none;font-size:0.92rem;font-weight:600;letter-spacing:0.3px;white-space:nowrap;background:transparent;transition:color .12s,background .12s;}
+.topnav-tab:hover{color:#fff;background:#1a2027;}
+.topnav-tab.active{color:#101418;background:#fb8b1e;font-weight:700;}
+.topnav-dropdown{position:absolute;top:100%;left:0;min-width:180px;width:max-content;background:#14181d;border:1px solid #2a323b;box-shadow:0 8px 24px rgba(0,0,0,.35);padding:4px 0;opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .15s,transform .15s,visibility .15s;z-index:200;}
+.topnav-item:hover .topnav-dropdown,.topnav-item:focus-within .topnav-dropdown{opacity:1;visibility:visible;transform:translateY(0);}
+.topnav-sub{display:block;padding:9px 16px;color:#b7c0c9;text-decoration:none;font-size:0.9rem;font-weight:500;white-space:nowrap;text-align:center;}
+.topnav-sub:hover{background:#1a2027;color:#fff;}
 header{padding:14px 20px 10px;border-bottom:1px solid #27282b;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
 header h1{font-size:20px;color:#fb8b1e;font-weight:700;}
 .tabs{display:flex;gap:6px;}
@@ -389,7 +403,7 @@ main{flex:1;display:flex;min-height:0;}
 .item.on .t{color:#b9a1fc;}
 .item .t .tk{color:#fb8b1e;}
 .item .m{font-size:14.5px;color:#8a919a;margin-top:2px;}
-.badge{font-size:12px;font-weight:700;border-radius:2px;padding:1px 6px;vertical-align:1px;}
+.badge{font-size:13.5px;font-weight:700;border-radius:2px;padding:1px 6px;vertical-align:1px;}
 .badge.transcript{background:#0a3038;color:#67e0f4;}
 .badge.analysis{background:#10301c;color:#4ade80;}
 #doc{flex:1;overflow-y:auto;padding:26px 34px 60px;line-height:1.75;caret-color:#fb8b1e;color:#fff;user-select:text;}
@@ -419,6 +433,7 @@ main{flex:1;display:flex;min-height:0;}
 #hlPop .d1{background:#b9a1fc;}#hlPop .d2{background:#67e0f4;}#hlPop .d3{background:#4ade80;}
 @media(max-width:760px){#list{width:44%;}#doc{padding:16px;}}
 </style></head><body>
+<nav class="topnav"><div class="topnav-inner"><a href="/index.html" class="topnav-brand">AGE OF EMERGENCE</a><div class="topnav-tabs"><div class="topnav-item"><a href="/watchlist/" class="topnav-tab">Watchlist</a></div><div class="topnav-item"><a href="/market.html" class="topnav-tab">Market</a><div class="topnav-dropdown"><a href="/market.html" class="topnav-sub">Data</a><a href="/universe.html" class="topnav-sub">Universe</a><a href="/universe_lab.html" class="topnav-sub">Universe Lab</a><a href="/featured.html" class="topnav-sub">Featured</a><a href="/market_alert.html" class="topnav-sub">투자유의종목</a><a href="/etf.html" class="topnav-sub">ETF</a><a href="/seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="/sisyphe/journal.html" class="topnav-tab">Journal</a></div><div class="topnav-item"><a href="/sisyphe/journal.html#weekly" class="topnav-tab">Weekly</a></div><div class="topnav-item"><a href="/sisyphe/memento.html" class="topnav-tab">Memento</a></div><div class="topnav-item"><a href="/sisyphe/dashboard.html" class="topnav-tab">Ledger</a></div><div class="topnav-item" style="margin-left:auto"><a href="/wiki/" class="topnav-tab">Wiki</a></div><div class="topnav-item"><a href="/wiki/library" class="topnav-tab active">Earnings</a></div><div class="topnav-item"><a href="/architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
 <header>
   <h1>Earnings Library</h1>
   <div class="tabs">
