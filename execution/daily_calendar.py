@@ -123,9 +123,8 @@ def get_today_events():
     
     return events_by_calendar
 
-# 투자 활동 실적 이벤트: 제목 프리픽스(KST 발표 시간대) 기준 표시 순서·이모지
+# 투자 활동 실적 이벤트: 제목 프리픽스(KST 발표 시간대) 기준 표시 순서
 SLOT_ORDER = {'미정': 0, '새벽': 1, '저녁': 2, '밤': 3}
-SLOT_EMOJI = {'미정': '❔', '새벽': '🌅', '저녁': '🌆', '밤': '🌙'}
 
 
 def _load_marketcap_map():
@@ -182,8 +181,8 @@ def format_calendar_message(events_by_calendar):
             msg += f"<b><u>{line}</u></b>\n" if is_bold else f"{line}\n"
 
     # 투자 활동 캘린더 일정 (별도 섹션, 항상 볼드)
-    # 종일(실적) 이벤트는 시간대(미정>새벽>저녁>밤) → 시총 내림차순으로 정렬,
-    # 시간대 이모지를 불릿 대신 표시. 시간 있는 일정은 기존대로 시간순 먼저.
+    # 종일(실적) 이벤트는 시간대(미정>새벽>저녁>밤) → 시총 내림차순으로 정렬.
+    # 시간 있는 일정은 기존대로 시간순 먼저.
     if investment_events:
         msg += f"\n📊 투자 활동\n"
         caps = _load_marketcap_map()
@@ -207,11 +206,7 @@ def format_calendar_message(events_by_calendar):
             msg += f"<b>• {dt.strftime('%H:%M')} - {event.get('summary', '(제목 없음)')}</b>\n"
         for event in allday:
             summary = event.get('summary', '(제목 없음)')
-            emoji = SLOT_EMOJI.get(_slot(event))
-            if emoji:
-                msg += f"<b>{emoji} {summary}</b>\n"
-            else:
-                msg += f"<b>• 종일 - {summary}</b>\n"
+            msg += f"<b>• 종일 - {summary}</b>\n"
     
     # 총 일정 개수
     total_count = len(main_events) + len(investment_events)
