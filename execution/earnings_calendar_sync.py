@@ -266,7 +266,7 @@ def build_earnings_event(earnings, company_name):
     prefix_word = KST_HOUR_PREFIX.get(hour)
     yy = str(y)[-2:] if y else ''
     core = f"[{ticker}] {q}Q{yy} Earnings"
-    summary = f"{prefix_word} | {core}" if prefix_word else core
+    summary = f"{prefix_word or '미정'} | {core}"
 
     # 캘린더 표시일: amc는 한국시간 발표가 다음날 새벽이므로 +1일
     kst_date = ed
