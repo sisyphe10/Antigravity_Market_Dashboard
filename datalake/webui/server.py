@@ -367,11 +367,12 @@ _LIBRARY_HTML = """<!DOCTYPE html>
 body{background:#0a0a0a;color:#d9dde2;font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif;height:100vh;display:flex;flex-direction:column;}
 header{padding:14px 20px 10px;border-bottom:1px solid #27282b;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
 header h1{font-size:18px;color:#fb8b1e;font-weight:700;}
-header .cnt{font-size:13px;color:#8a919a;}
 .tabs{display:flex;gap:6px;}
 .tab{font-size:13px;font-weight:600;padding:5px 14px;border:1.5px solid #3a3b3e;border-radius:2px;background:#141517;color:#9aa4ae;cursor:pointer;}
 .tab.on{background:#fb8b1e;border-color:#fb8b1e;color:#0a0a0a;}
-#q{background:#141517;border:1px solid #3a3b3e;border-radius:2px;color:#d9dde2;font-family:inherit;font-size:13px;padding:6px 10px;width:200px;}
+.searchwrap{margin-left:auto;position:relative;display:flex;align-items:center;}
+.searchwrap svg{position:absolute;left:9px;pointer-events:none;}
+#q{background:#141517;border:1px solid #3a3b3e;border-radius:2px;color:#d9dde2;font-family:inherit;font-size:13px;padding:6px 10px 6px 30px;width:210px;}
 #q:focus{outline:1px solid #fb8b1e;}
 main{flex:1;display:flex;min-height:0;}
 #list{width:320px;min-width:240px;border-right:1px solid #27282b;overflow-y:auto;}
@@ -412,8 +413,10 @@ main{flex:1;display:flex;min-height:0;}
     <button class="tab" data-k="analysis">분석</button>
     <button class="tab" data-k="transcript">콜 전문</button>
   </div>
-  <input id="q" placeholder="티커·날짜 필터 (예: MSCI, 07-21)">
-  <span class="cnt" id="cnt"></span>
+  <span class="searchwrap">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="7"/><line x1="16" y1="16" x2="21.5" y2="21.5"/></svg>
+    <input id="q">
+  </span>
 </header>
 <main>
   <div id="list"></div>
@@ -506,11 +509,10 @@ function draw(){
     if(!q)return true;
     return (x.ticker+' '+x.date+' '+x.rel+' '+x.title).toLowerCase().indexOf(q)>=0;
   });
-  document.getElementById('cnt').textContent=items.length+'건';
   document.getElementById('list').innerHTML=items.map(function(x,i){
     return '<div class="item" data-rel="'+esc(x.rel)+'">'
       +'<div class="t"><span class="tk">'+esc(x.ticker||'—')+'</span><span class="badge '+x.kind+'">'+(x.kind==='transcript'?'전문':'분석')+'</span></div>'
-      +'<div class="m">'+esc(x.date)+' · '+(x.size/1024).toFixed(0)+'KB</div></div>';
+      +'<div class="m"><span style="color:#fff;">'+esc(x.date)+'</span> · '+(x.size/1024).toFixed(0)+'KB</div></div>';
   }).join('');
   Array.prototype.forEach.call(document.querySelectorAll('.item'),function(el){
     el.addEventListener('click',function(){
