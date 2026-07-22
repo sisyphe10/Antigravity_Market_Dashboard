@@ -106,7 +106,7 @@ AOE_DARK_CSS = (
     '.sidebar{justify-content:center!important}'
     # 타이포 정수 스케일 (2026-07-18 사용자 확정): 대제목28/섹션18/표본문16/메타13/표헤더12
     'table,td{font-size:17px!important}'
-    'th{font-size:13px!important}'
+    'th{font-size:15px!important}'
     '.category-title{font-size:30px!important}'
     '.section>h2,.section>h3,.section-title,.section-header,.sector-group h3,'
     'h2.block-title,.wg-head .wg-title,.chart-box h3,.category-detail h3,'
