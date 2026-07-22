@@ -204,8 +204,13 @@ def format_calendar_message(events_by_calendar):
         for event in timed:
             dt = datetime.fromisoformat(event['start']['dateTime'].replace('Z', '+00:00')).astimezone(kst)
             msg += f"<b>• {dt.strftime('%H:%M')} - {event.get('summary', '(제목 없음)')}</b>\n"
+        prev_slot = None
         for event in allday:
             summary = event.get('summary', '(제목 없음)')
+            slot = _slot(event)
+            if prev_slot is not None and slot != prev_slot:
+                msg += '─' * 14 + '\n'
+            prev_slot = slot
             msg += f"<b>• 종일 - {summary}</b>\n"
     
     # 총 일정 개수
