@@ -185,7 +185,7 @@ def format_calendar_message(events_by_calendar):
     # 종일(실적) 이벤트는 시간대(미정>새벽>저녁>밤) → 시총 내림차순으로 정렬,
     # 시간대 이모지를 불릿 대신 표시. 시간 있는 일정은 기존대로 시간순 먼저.
     if investment_events:
-        msg += f"\n💼 투자 활동\n"
+        msg += f"\n📊 투자 활동\n"
         caps = _load_marketcap_map()
 
         def _slot(ev):
