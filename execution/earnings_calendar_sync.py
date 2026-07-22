@@ -35,7 +35,9 @@ SHEETS_ID = '1KR9RJN53G-yJtnowQbg5bcAiIBfrkIeNqN_PO2UOCTM'
 CAL_ID = 's7m7ahc836cajffbt98vae3m1k@group.calendar.google.com'
 FINNHUB_API = 'https://finnhub.io/api/v1'
 HOUR_LABEL = {'bmo': 'Before (장전)', 'amc': 'After (장후)', 'dmh': 'During (장중)'}
-HOUR_PREFIX = {'bmo': 'Before', 'amc': 'After', 'dmh': 'During'}
+# 한국시간 기준 표기: 미국 장전(bmo)=KST 당일 저녁, 장후(amc)=KST 다음날 새벽,
+# 장중(dmh)=KST 당일 밤(개장 22:30/23:30). amc만 캘린더 날짜를 +1일 이동.
+KST_HOUR_PREFIX = {'bmo': '저녁', 'amc': '새벽', 'dmh': '밤'}
 
 IR_DAY_KEYWORDS = re.compile(
     r'\b(investor\s+day|analyst\s+day|capital\s+markets\s+day|shareholder\s+day)\b',
@@ -261,10 +263,15 @@ def build_earnings_event(earnings, company_name):
     y = earnings.get('year')
 
     hour_disp = HOUR_LABEL.get(hour, '시간 미정')
-    prefix_word = HOUR_PREFIX.get(hour)
+    prefix_word = KST_HOUR_PREFIX.get(hour)
     yy = str(y)[-2:] if y else ''
     core = f"[{ticker}] {q}Q{yy} Earnings"
     summary = f"{prefix_word} | {core}" if prefix_word else core
+
+    # 캘린더 표시일: amc는 한국시간 발표가 다음날 새벽이므로 +1일
+    kst_date = ed
+    if hour == 'amc':
+        kst_date = (datetime.fromisoformat(ed) + timedelta(days=1)).strftime('%Y-%m-%d')
 
     eps_est = earnings.get('epsEstimate')
     rev_est = earnings.get('revenueEstimate')
@@ -273,7 +280,11 @@ def build_earnings_event(earnings, company_name):
 
     lines = [
         f"기업: {company_name}",
-        f"발표일: {ed} ({hour_disp})",
+        f"발표일(미국 현지): {ed} ({hour_disp})",
+    ]
+    if prefix_word:
+        lines.append(f"한국시간: {kst_date} {prefix_word}")
+    lines += [
         f"EPS 추정: {format_number(eps_est)}",
         f"Revenue 추정: {format_number(rev_est)}",
     ]
@@ -293,12 +304,12 @@ def build_earnings_event(earnings, company_name):
         stable_key = f"{ticker}_{ed}"
     eid = 'agearn' + hashlib.md5(stable_key.encode()).hexdigest()[:16]
 
-    end_date = (datetime.fromisoformat(ed) + timedelta(days=1)).strftime('%Y-%m-%d')
+    end_date = (datetime.fromisoformat(kst_date) + timedelta(days=1)).strftime('%Y-%m-%d')
     return {
         'id': eid,
         'summary': summary,
         'description': '\n'.join(lines),
-        'start': {'date': ed},
+        'start': {'date': kst_date},
         'end': {'date': end_date},
     }
 
