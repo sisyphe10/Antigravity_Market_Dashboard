@@ -40,7 +40,7 @@ OLD_SISYPHE_DROPDOWN = ('<div class="topnav-item"><a href="/sisyphe/index.html" 
                         '<div class="topnav-dropdown"><a href="/sisyphe/dashboard.html" class="topnav-sub">가계부·운동</a>'
                         '<a href="/sisyphe/journal.html" class="topnav-sub">투자일지</a></div></div>')
 AOE_UPDATED_JS = ('<script id="aoe-updated-move">document.addEventListener("DOMContentLoaded",function(){'
-                  'var u=document.querySelector(".last-updated"),s=document.querySelector(".tabs")||document.querySelector(".sidebar");'
+                  'var u=document.querySelector(".last-updated"),s=document.querySelector(".mkt-subtabs")||document.querySelector(".tabs")||document.querySelector(".sidebar");'
                   'if(u&&s){var w=document.createElement("div");w.style.cssText="text-align:right;padding:4px 28px 0";'
                   'w.appendChild(u);s.insertAdjacentElement("afterend",w);}});</script>')
 
