@@ -231,6 +231,19 @@ def crawl_dram_nand(data_type):
                             collected_data.append((current_date, save_name, val, data_type))
                             found_items.add(item_name)
                             print(f"✓ {item_name}: ${price}")
+                            # 세션 평균가 추가 수집 (DRAM만, 2026-07-23~) — 기존 시리즈는 최고가(High) 컬럼.
+                            # 행 구조: 최고 | 최저 | 세션최고 | 세션최저 | 세션평균 | 변동% → 숫자 5번째=평균
+                            if data_type == 'DRAM':
+                                nums = []
+                                for c in cells[1:]:
+                                    t = c.text.strip().replace(',', '')
+                                    try:
+                                        nums.append(float(t))
+                                    except ValueError:
+                                        pass
+                                if len(nums) >= 5 and nums[1] <= nums[4] <= nums[0]:  # 최저≤평균≤최고 정합
+                                    collected_data.append((current_date, save_name + ' Avg', nums[4], data_type))
+                                    print(f"✓ {item_name} Avg: ${nums[4]}")
                     except:
                         pass
 

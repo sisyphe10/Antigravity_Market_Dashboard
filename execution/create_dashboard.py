@@ -1727,7 +1727,7 @@ CMB_SERIES_UNITS = {
     'KRX ETS (KAU25)': '원/톤', 'SMP': '원/kWh', 'H100 GPU Rental': '$/h',
     # MEMORY
     '삼성 DDR5 소매가': '원', 'SK하이닉스 DDR5 소매가': '원',
-    'DDR5 16Gb': '$', 'DDR4 8Gb': '$', 'SLC 2Gb': '$', 'SLC 1Gb': '$', 'MLC 64Gb': '$', 'MLC 32Gb': '$',
+    'DDR5 16Gb': '$', 'DDR5 16Gb Avg': '$', 'DDR4 8Gb': '$', 'DDR4 8Gb Avg': '$', 'SLC 2Gb': '$', 'SLC 1Gb': '$', 'MLC 64Gb': '$', 'MLC 32Gb': '$',
     # CAPEX / HOTELS
     'SEAJ 반도체장비 판매고': '억엔', 'JMTBA 공작기계 수주총액': '억엔', 'JMTBA 공작기계 외수': '억엔',
     'Hotel 서울': '원', 'Hotel 부산': '원', 'Hotel 제주': '원', 'Hotel 경주': '원',
@@ -1953,7 +1953,9 @@ def _build_combined_chart_section():
                 {'display': '삼성 DDR5 소매가', 'csv': '삼성 DDR5 소매가', 'color': '#AD1457'},
                 {'display': 'SK하이닉스 DDR5 소매가', 'csv': 'SK하이닉스 DDR5 소매가', 'color': '#6A1B9A'},
                 {'display': 'DDR5 16Gb', 'csv': 'DDR5 16G (2Gx8) 4800/5600', 'color': '#E91E63'},
+                {'display': 'DDR5 16Gb Avg', 'csv': 'DDR5 16G (2Gx8) 4800/5600 Avg', 'color': '#880E4F'},
                 {'display': 'DDR4 8Gb',  'csv': 'DDR4 8Gb (1Gx8) 3200',      'color': '#F48FB1'},
+                {'display': 'DDR4 8Gb Avg', 'csv': 'DDR4 8Gb (1Gx8) 3200 Avg', 'color': '#C2185B'},
                 {'display': 'SLC 2Gb',   'csv': 'SLC 2Gb 256MBx8',           'color': '#00897B'},
                 {'display': 'SLC 1Gb',   'csv': 'SLC 1Gb 128MBx8',           'color': '#26A69A'},
                 {'display': 'MLC 64Gb',  'csv': 'MLC 64Gb 8GBx8',            'color': '#4DB6AC'},
@@ -7715,9 +7717,11 @@ def create_dashboard():
             elif category == 'MEMORY':
                 custom_order = [
                     'DDR5 16G (2Gx8) 4800/5600',
+                    'DDR5 16G (2Gx8) 4800/5600 Avg',
                     'DDR4 16Gb (2Gx8)3200',
                     'DDR4 16Gb (1Gx16)3200',
                     'DDR4 8Gb (1Gx8) 3200',
+                    'DDR4 8Gb (1Gx8) 3200 Avg',
                     'DDR4 8Gb (512Mx16) 3200',
                     'SLC 2Gb 256MBx8',
                     'SLC 1Gb 128MBx8',
