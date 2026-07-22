@@ -157,7 +157,7 @@ def format_calendar_message(events_by_calendar):
     date_str = now.strftime('%Y-%m-%d')
     day_kor = ["월", "화", "수", "목", "금", "토", "일"][now.weekday()]
     
-    msg = f"🗓️ 오늘의 일정 ({date_str} {day_kor}요일)\n\n"
+    msg = f"<b>🗓️ 오늘의 일정 ({date_str} {day_kor}요일)</b>\n\n"
     
     main_events = events_by_calendar.get('main', [])
     investment_events = events_by_calendar.get('investment', [])
@@ -184,7 +184,7 @@ def format_calendar_message(events_by_calendar):
     # 종일(실적) 이벤트는 시간대(미정>새벽>저녁>밤) → 시총 내림차순으로 정렬.
     # 시간 있는 일정은 기존대로 시간순 먼저.
     if investment_events:
-        msg += f"\n🌐 투자 활동\n"
+        msg += f"\n<b>🌐 투자 활동</b>\n"
         caps = _load_marketcap_map()
 
         def _slot(ev):
@@ -204,8 +204,13 @@ def format_calendar_message(events_by_calendar):
         for event in timed:
             dt = datetime.fromisoformat(event['start']['dateTime'].replace('Z', '+00:00')).astimezone(kst)
             msg += f"<b>• {dt.strftime('%H:%M')} - {event.get('summary', '(제목 없음)')}</b>\n"
+        prev_slot = None
         for event in allday:
             summary = event.get('summary', '(제목 없음)')
+            slot = _slot(event)
+            if prev_slot is not None and slot != prev_slot:
+                msg += '─' * 14 + '\n'
+            prev_slot = slot
             msg += f"<b>• 종일 - {summary}</b>\n"
     
     # 총 일정 개수
