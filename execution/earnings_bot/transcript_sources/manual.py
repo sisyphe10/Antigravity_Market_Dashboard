@@ -37,7 +37,7 @@ class ManualOverrideSource(TranscriptSource):
         text = article.get_text('\n', strip=True)
         prepared, qa = MotleyFoolSource()._split_sections(text)
         if not prepared and not qa:
-            prepared = text[:50000]
+            prepared = text[:80000]
 
         return ParsedTranscript(
             source_url=candidate.url,
