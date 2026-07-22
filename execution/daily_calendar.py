@@ -209,7 +209,7 @@ def format_calendar_message(events_by_calendar):
             summary = event.get('summary', '(제목 없음)')
             slot = _slot(event)
             if prev_slot is not None and slot != prev_slot:
-                msg += '—' * 10 + '\n'
+                msg += '─' * 14 + '\n'
             prev_slot = slot
             msg += f"<b>• 종일 - {summary}</b>\n"
     
