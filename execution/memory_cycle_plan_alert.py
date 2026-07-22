@@ -56,8 +56,8 @@ SPOT_LOG = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__
                         "logs", "dram_spot_log.csv")
 # 고정거래가 상수 — 트렌드포스/DRAMeXchange 월별 발표 감지 시 수동 갱신 (미등록=None)
 CONTRACT = {
-    "DDR5": {"price": None, "month": None},   # DDR5 16Gb (2Gx8) 고정가
-    "DDR4": {"price": None, "month": None},   # DDR4 8Gb (1Gx8) 고정가
+    "DDR5": {"price": None, "month": None},   # DDR5 16Gb (2Gx8) 고정가 — 신뢰 가능한 발표 미확인
+    "DDR4": {"price": 21.0, "month": "6월"},  # DDR4 8Gb (1Gx8) 고정가 — DRAMeXchange 6월 평균 $21, 역대 최고 (이포커스 2026-07-02 보도, 5월 $20·4월 $16)
 }
 
 
