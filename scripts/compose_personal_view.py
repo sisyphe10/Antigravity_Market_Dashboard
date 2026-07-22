@@ -53,6 +53,7 @@ AOE_DARK_CSS = (
     ':root{--bg-color:#0a0a0a;--card-bg:#111214;--text-color:#d9dde2;--category-bg:#1a1b1e}'
     'body{background:#0a0a0a!important;color:#d9dde2!important}'
     'nav.topnav{border-bottom-color:#fb8b1e!important}'
+    'nav.topnav .topnav-tab{font-size:1rem!important}'  # 2026-07-22 타이포 개정: 탭 0.92→1rem
     'nav.topnav .topnav-tab.active{background:#fb8b1e!important;color:#101418!important}'
     'nav.topnav .topnav-brand:hover{color:#fb8b1e!important}'
     'header h1{color:#f2f4f6!important}'
