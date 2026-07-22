@@ -9,15 +9,44 @@ Universe Earnings DB의 전체 페이지에서 1-page 분석 본문(컨퍼런스
 사용: venv/bin/python3 -m execution.earnings_bot.backfill_analyses_md [--force] [--dry-run] [--limit N]
 """
 import argparse
+import json
 import os
 import re
 import sys
-
-from notion_client import Client
+import time
+import urllib.parse
+import urllib.request
 
 DATALAKE_ROOT = os.path.expanduser(os.getenv("DATALAKE_ROOT", "~/datalake"))
 ANALYSES_DIR = os.path.join(DATALAKE_ROOT, "analyses")
 TRANSCRIPT_MARKER = "컨퍼런스콜 전문"
+API = "https://api.notion.com/v1"
+PACE_SEC = 0.35  # Notion 3req/s 제한
+
+
+class NotionHTTP:
+    """notion_publisher와 동일한 raw HTTP 방식 (SDK 버전 비의존)."""
+
+    def __init__(self, key):
+        self.h = {"Authorization": f"Bearer {key}", "Notion-Version": "2022-06-28",
+                  "Content-Type": "application/json"}
+
+    def _req(self, url, body=None, method="GET"):
+        time.sleep(PACE_SEC)
+        req = urllib.request.Request(url, data=json.dumps(body).encode() if body else None,
+                                     headers=self.h, method=method)
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return json.loads(r.read().decode("utf-8"))
+
+    def query_db(self, dbid, cursor=None):
+        body = {"page_size": 100}
+        if cursor:
+            body["start_cursor"] = cursor
+        return self._req(f"{API}/databases/{dbid}/query", body, "POST")
+
+    def children(self, block_id, cursor=None):
+        qs = "page_size=100" + (f"&start_cursor={urllib.parse.quote(cursor)}" if cursor else "")
+        return self._req(f"{API}/blocks/{block_id}/children?{qs}")
 
 
 def _rt_text(rich):
@@ -53,8 +82,7 @@ def _prop_text(p):
 def _iter_blocks(cli, block_id):
     cursor = None
     while True:
-        resp = cli.blocks.children.list(block_id=block_id, page_size=100,
-                                        **({"start_cursor": cursor} if cursor else {}))
+        resp = cli.children(block_id, cursor)
         yield from resp.get("results", [])
         if not resp.get("has_more"):
             return
@@ -142,12 +170,11 @@ def main():
     if not (key and dbid):
         print("ERROR: NOTION_EARNINGS_API_KEY / NOTION_EARNINGS_DATABASE_ID 필요")
         return 1
-    cli = Client(auth=key)
+    cli = NotionHTTP(key)
 
     pages, cursor = [], None
     while True:
-        resp = cli.databases.query(database_id=dbid, page_size=100,
-                                   **({"start_cursor": cursor} if cursor else {}))
+        resp = cli.query_db(dbid, cursor)
         pages += resp.get("results", [])
         if not resp.get("has_more"):
             break
