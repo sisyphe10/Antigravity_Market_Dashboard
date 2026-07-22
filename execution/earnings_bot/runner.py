@@ -56,9 +56,9 @@ def _safe(name: str, fn) -> dict:
 def run_pipeline() -> dict:
     """orchestrator main entry."""
     from . import (
+        analysis_store,
         edgar_monitor,
         morning_digest,
-        notion_publisher,
         scheduler,
         transcript_digest,
         transcript_store,
@@ -86,9 +86,9 @@ def run_pipeline() -> dict:
     summary.append(_safe('translator.translate_pending_transcripts',
                          lambda: translator.translate_pending_transcripts(limit=3)))
 
-    # 6) notion_publisher (분석 publish)
-    summary.append(_safe('notion_publisher.publish_pending',
-                         lambda: notion_publisher.publish_pending(limit=5)))
+    # 6) analysis_store (분석 md 발행 — 2026-07-22 Notion publish 대체, 구 코드는 롤백용 잔존)
+    summary.append(_safe('analysis_store.publish_pending',
+                         lambda: analysis_store.publish_pending(limit=5)))
 
     # 7) transcript_store (한국어 transcript → datalake md 저장, 2026-07-21 Notion append 대체)
     summary.append(_safe('transcript_store.save_pending',

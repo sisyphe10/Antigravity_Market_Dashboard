@@ -37,6 +37,7 @@ WIKI_DIR = os.path.join(REPO, "architecture", "wiki")
 SEARCH_ROOTS = [
     os.path.join(DATALAKE_ROOT, "research_notes"),
     os.path.join(DATALAKE_ROOT, "transcripts"),  # 어닝콜 한국어 번역 전문 (earnings_bot)
+    os.path.join(DATALAKE_ROOT, "analyses"),     # 실적 1-page 분석 시트 md (2026-07-22 Notion→md 이전)
     CATALOG_DIR,
     WIKI_DIR,
 ]
@@ -246,6 +247,215 @@ def ask(req: AskRequest):
         messages.append({"role": "user", "content": results})
 
     return JSONResponse({"answer": "도구 호출 한도를 초과했습니다. 질문을 좁혀 주세요.", "steps": steps})
+
+
+# ── Earnings Library — 어닝 md 열람 (transcripts + analyses) ──────────
+from fastapi.responses import HTMLResponse  # noqa: E402
+
+LIBRARY_ROOTS = {
+    "transcript": os.path.join(DATALAKE_ROOT, "transcripts"),
+    "analysis": os.path.join(DATALAKE_ROOT, "analyses"),
+}
+
+
+def _frontmatter(path, limit=2048):
+    """md 선두 frontmatter(--- ... ---)를 dict로. 없으면 {}."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            head = f.read(limit)
+    except OSError:
+        return {}
+    if not head.startswith("---"):
+        return {}
+    end = head.find("\n---", 3)
+    if end < 0:
+        return {}
+    meta = {}
+    for line in head[3:end].strip().splitlines():
+        if ":" in line:
+            k, v = line.split(":", 1)
+            meta[k.strip()] = v.strip().strip('"').strip("'")
+    return meta
+
+
+@app.get("/library/list")
+def library_list():
+    items = []
+    for kind, root_dir in LIBRARY_ROOTS.items():
+        if not os.path.isdir(root_dir):
+            continue
+        for base, _dirs, files in os.walk(root_dir):
+            for fn in files:
+                if not fn.endswith(".md"):
+                    continue
+                p = os.path.join(base, fn)
+                meta = _frontmatter(p)
+                items.append({
+                    "kind": kind,
+                    "rel": os.path.relpath(p, DATALAKE_ROOT).replace(os.sep, "/"),
+                    "date": (meta.get("date") or fn[:10]),
+                    "ticker": meta.get("ticker") or (fn.split("_")[1] if fn.count("_") >= 1 else ""),
+                    "title": meta.get("title", ""),
+                    "size": os.path.getsize(p),
+                })
+    items.sort(key=lambda x: (x["date"], x["rel"]), reverse=True)
+    return JSONResponse({"items": items})
+
+
+@app.get("/library/doc")
+def library_doc(rel: str):
+    p = os.path.realpath(os.path.join(DATALAKE_ROOT, rel))
+    ok = any(p.startswith(os.path.realpath(r) + os.sep) for r in LIBRARY_ROOTS.values())
+    if not ok or not p.endswith(".md") or not os.path.isfile(p):
+        return JSONResponse({"error": "잘못된 경로"}, status_code=400)
+    with open(p, encoding="utf-8") as f:
+        content = f.read()
+    return JSONResponse({"rel": rel, "content": content})
+
+
+@app.get("/library")
+def library_page():
+    return HTMLResponse(_LIBRARY_HTML)
+
+
+_LIBRARY_HTML = """<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Earnings Library</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#0a0a0a;color:#d9dde2;font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif;height:100vh;display:flex;flex-direction:column;}
+header{padding:14px 20px 10px;border-bottom:1px solid #27282b;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+header h1{font-size:18px;color:#fb8b1e;font-weight:700;}
+header .cnt{font-size:13px;color:#8a919a;}
+.tabs{display:flex;gap:6px;}
+.tab{font-size:13px;font-weight:600;padding:5px 14px;border:1.5px solid #3a3b3e;border-radius:2px;background:#141517;color:#9aa4ae;cursor:pointer;}
+.tab.on{background:#fb8b1e;border-color:#fb8b1e;color:#0a0a0a;}
+#q{background:#141517;border:1px solid #3a3b3e;border-radius:2px;color:#d9dde2;font-family:inherit;font-size:13px;padding:6px 10px;width:200px;}
+#q:focus{outline:1px solid #fb8b1e;}
+main{flex:1;display:flex;min-height:0;}
+#list{width:320px;min-width:240px;border-right:1px solid #27282b;overflow-y:auto;}
+.item{padding:9px 14px;border-bottom:1px solid #1a1b1e;cursor:pointer;}
+.item:hover{background:#14171b;}
+.item.on{background:#241a3d;}
+.item .t{font-size:16px;font-weight:600;color:#c9ced4;display:flex;gap:8px;align-items:baseline;}
+.item.on .t{color:#b9a1fc;}
+.item .t .tk{color:#ffb45e;}
+.item .m{font-size:13px;color:#8a919a;margin-top:2px;}
+.badge{font-size:11px;font-weight:700;border-radius:2px;padding:1px 6px;vertical-align:1px;}
+.badge.transcript{background:#0a3038;color:#67e0f4;}
+.badge.analysis{background:#10301c;color:#4ade80;}
+#doc{flex:1;overflow-y:auto;padding:26px 34px 60px;line-height:1.75;}
+#doc .empty{color:#8a919a;font-size:16px;margin-top:40px;text-align:center;}
+#doc h1{font-size:28px;color:#fb8b1e;margin:18px 0 10px;}
+#doc h2{font-size:18px;color:#ffb45e;margin:22px 0 8px;border-bottom:1px solid #27282b;padding-bottom:4px;}
+#doc h3{font-size:16px;color:#ffb45e;margin:16px 0 6px;}
+#doc p{font-size:16px;margin:8px 0;}
+#doc ul,#doc ol{margin:8px 0 8px 22px;font-size:16px;}
+#doc li{margin:3px 0;}
+#doc table{border-collapse:collapse;margin:12px 0;font-size:15px;}
+#doc th{background:#1a1b1e;color:#fb8b1e;font-size:12px;padding:6px 12px;border:1px solid #27282b;}
+#doc td{padding:6px 12px;border:1px solid #27282b;}
+#doc blockquote{border-left:3px solid #fb8b1e;padding:4px 14px;color:#c9ced4;background:#111214;margin:10px 0;}
+#doc code{background:#1a1b1e;border-radius:2px;padding:1px 5px;font-size:14px;}
+#doc hr{border:none;border-top:1px solid #27282b;margin:16px 0;}
+#doc .fm{background:#111214;border:1px solid #27282b;border-radius:2px;padding:10px 14px;font-size:13px;color:#8a919a;margin-bottom:14px;}
+#doc .fm b{color:#ffb45e;font-weight:600;}
+@media(max-width:760px){#list{width:44%;}#doc{padding:16px;}}
+</style></head><body>
+<header>
+  <h1>Earnings Library</h1>
+  <div class="tabs">
+    <button class="tab on" data-k="all">전체</button>
+    <button class="tab" data-k="analysis">분석</button>
+    <button class="tab" data-k="transcript">콜 전문</button>
+  </div>
+  <input id="q" placeholder="티커·날짜 필터 (예: MSCI, 07-21)">
+  <span class="cnt" id="cnt"></span>
+</header>
+<main>
+  <div id="list"></div>
+  <div id="doc"><div class="empty">좌측에서 문서를 선택하세요</div></div>
+</main>
+<script>
+var ALL=[], KIND='all', Q='';
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function inline(s){
+  s=esc(s);
+  s=s.replace(/\\*\\*([^*]+)\\*\\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<code>$1</code>');
+  return s;
+}
+function mdRender(md){
+  // frontmatter 분리
+  var fm='';
+  if(md.slice(0,3)==='---'){var e=md.indexOf('\\n---',3);if(e>0){
+    var meta=md.slice(3,e).trim().split('\\n').map(function(l){var i=l.indexOf(':');
+      return i>0?'<b>'+esc(l.slice(0,i).trim())+'</b> '+esc(l.slice(i+1).trim()):esc(l);}).join(' · ');
+    fm='<div class="fm">'+meta+'</div>'; md=md.slice(e+4);}}
+  var lines=md.split('\\n'), out=[fm], i=0, listOpen=null;
+  function closeList(){if(listOpen){out.push('</'+listOpen+'>');listOpen=null;}}
+  while(i<lines.length){
+    var l=lines[i];
+    if(/^\\s*\\|/.test(l)){ // 표
+      closeList(); var rows=[];
+      while(i<lines.length && /^\\s*\\|/.test(lines[i])){rows.push(lines[i]);i++;}
+      var html='<table>';
+      rows.forEach(function(r,ri){
+        if(/^\\s*\\|[\\s:|-]+\\|\\s*$/.test(r)) return; // 구분선
+        var cells=r.trim().replace(/^\\||\\|$/g,'').split('|');
+        var tag=(ri===0)?'th':'td';
+        html+='<tr>'+cells.map(function(c){return '<'+tag+'>'+inline(c.trim())+'</'+tag+'>';}).join('')+'</tr>';
+      });
+      out.push(html+'</table>'); continue;
+    }
+    if(/^###\\s/.test(l)){closeList();out.push('<h3>'+inline(l.slice(4))+'</h3>');}
+    else if(/^##\\s/.test(l)){closeList();out.push('<h2>'+inline(l.slice(3))+'</h2>');}
+    else if(/^#\\s/.test(l)){closeList();out.push('<h1>'+inline(l.slice(2))+'</h1>');}
+    else if(/^\\s*[-*]\\s/.test(l)){if(listOpen!=='ul'){closeList();out.push('<ul>');listOpen='ul';}out.push('<li>'+inline(l.replace(/^\\s*[-*]\\s/,''))+'</li>');}
+    else if(/^\\s*\\d+\\.\\s/.test(l)){if(listOpen!=='ol'){closeList();out.push('<ol>');listOpen='ol';}out.push('<li>'+inline(l.replace(/^\\s*\\d+\\.\\s/,''))+'</li>');}
+    else if(/^>\\s?/.test(l)){closeList();out.push('<blockquote>'+inline(l.replace(/^>\\s?/,''))+'</blockquote>');}
+    else if(/^(---|\\*\\*\\*)\\s*$/.test(l)){closeList();out.push('<hr>');}
+    else if(l.trim()===''){closeList();}
+    else{closeList();out.push('<p>'+inline(l)+'</p>');}
+    i++;
+  }
+  closeList();
+  return out.join('');
+}
+function draw(){
+  var q=Q.toLowerCase();
+  var items=ALL.filter(function(x){
+    if(KIND!=='all'&&x.kind!==KIND)return false;
+    if(!q)return true;
+    return (x.ticker+' '+x.date+' '+x.rel+' '+x.title).toLowerCase().indexOf(q)>=0;
+  });
+  document.getElementById('cnt').textContent=items.length+'건';
+  document.getElementById('list').innerHTML=items.map(function(x,i){
+    return '<div class="item" data-rel="'+esc(x.rel)+'">'
+      +'<div class="t"><span class="tk">'+esc(x.ticker||'—')+'</span><span class="badge '+x.kind+'">'+(x.kind==='transcript'?'전문':'분석')+'</span></div>'
+      +'<div class="m">'+esc(x.date)+' · '+(x.size/1024).toFixed(0)+'KB</div></div>';
+  }).join('');
+  Array.prototype.forEach.call(document.querySelectorAll('.item'),function(el){
+    el.addEventListener('click',function(){
+      Array.prototype.forEach.call(document.querySelectorAll('.item.on'),function(o){o.classList.remove('on');});
+      el.classList.add('on');
+      fetch('library/doc?rel='+encodeURIComponent(el.dataset.rel)).then(function(r){return r.json();}).then(function(j){
+        document.getElementById('doc').innerHTML=j.error?('<div class="empty">'+esc(j.error)+'</div>'):mdRender(j.content);
+        document.getElementById('doc').scrollTop=0;
+      });
+    });
+  });
+}
+Array.prototype.forEach.call(document.querySelectorAll('.tab'),function(b){
+  b.addEventListener('click',function(){
+    Array.prototype.forEach.call(document.querySelectorAll('.tab'),function(t){t.classList.remove('on');});
+    b.classList.add('on'); KIND=b.dataset.k; draw();
+  });
+});
+document.getElementById('q').addEventListener('input',function(e){Q=e.target.value;draw();});
+fetch('library/list').then(function(r){return r.json();}).then(function(j){ALL=j.items;draw();});
+</script></body></html>"""
 
 
 @app.get("/")
