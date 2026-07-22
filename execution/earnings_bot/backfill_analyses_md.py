@@ -114,8 +114,8 @@ def _block_md(cli, b):
     if t == "table":
         rows = []
         for i, row in enumerate(_iter_blocks(cli, b["id"])):
-            cells = ["".join(_rt_text(c) for c in cell) if isinstance(cell, list) else _rt_text(cell)
-                     for cell in (row.get("table_row") or {}).get("cells", [])]
+            # cell 자체가 rich_text 리스트 — _rt_text에 통째로 전달
+            cells = [_rt_text(cell) for cell in (row.get("table_row") or {}).get("cells", [])]
             cells = [c.replace("|", "\\|").replace("\n", " ") for c in cells]
             rows.append("| " + " | ".join(cells) + " |")
             if i == 0:
