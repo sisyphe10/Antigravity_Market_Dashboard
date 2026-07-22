@@ -276,7 +276,7 @@ def main():
     news = contract_news_line()
 
     wd = ["월", "화", "수", "목", "금", "토", "일"][now.weekday()]
-    msg = "<b><u>&lt; 메모리 플랜 %s(%s) &gt;</u></b>\n\n" % (now.strftime("%m.%d"), wd)
+    msg = "<b>&lt; 메모리 플랜 %s(%s) &gt;</b>\n\n" % (now.strftime("%m.%d"), wd)
     msg += "\n\n".join(blocks)
     msg += "\n\n* 판별 = MU $1,020(84%) 돌파 여부"
     msg += "\n* 체크: 반등 개시? %s · MU $1,020 돌파? %s · 84~88%% 통과? %s" % (mark(g1), mark(g2), mark(g3))
