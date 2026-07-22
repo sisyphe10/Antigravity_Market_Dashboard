@@ -130,7 +130,21 @@ def publish_pending(limit: int = 5) -> list[dict]:
     results = []
     for r in rows:
         try:
-            results.append(publish_analysis_md(r['id']))
+            # filing_analyses는 fetched filing_id를 참조 → parent_filing_id 역추적 (notion판과 동일)
+            conn = db.get_conn()
+            try:
+                meta_row = conn.execute(
+                    "SELECT metadata_json FROM filings WHERE id=?", (r['id'],)).fetchone()
+                parent_id = r['id']
+                if meta_row and meta_row['metadata_json']:
+                    try:
+                        parent_id = json.loads(meta_row['metadata_json']).get(
+                            'parent_filing_id', r['id'])
+                    except json.JSONDecodeError:
+                        pass
+            finally:
+                conn.close()
+            results.append(publish_analysis_md(parent_id))
         except Exception as e:  # noqa: BLE001 — 단건 실패가 배치를 막지 않게
             results.append({'filing_id': r['id'], 'error': f'{type(e).__name__}: {e}'})
     return results
