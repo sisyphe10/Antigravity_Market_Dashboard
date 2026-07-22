@@ -41,7 +41,7 @@ OLD_SISYPHE_DROPDOWN = ('<div class="topnav-item"><a href="/sisyphe/index.html" 
                         '<a href="/sisyphe/journal.html" class="topnav-sub">투자일지</a></div></div>')
 AOE_UPDATED_JS = ('<script id="aoe-updated-move">document.addEventListener("DOMContentLoaded",function(){'
                   'var u=document.querySelector(".last-updated"),s=document.querySelector(".mkt-subtabs")||document.querySelector(".tabs")||document.querySelector(".sidebar");'
-                  'if(u&&s){var w=document.createElement("div");w.style.cssText="text-align:right;padding:4px 28px 0";'
+                  'if(u&&s){var w=document.createElement("div");w.style.cssText="text-align:right;padding:4px 28px 14px";'
                   'w.appendChild(u);s.insertAdjacentElement("afterend",w);}});</script>')
 
 AOE_PERSONAL_CSS = ('<style id="aoe-personal-nav">'
