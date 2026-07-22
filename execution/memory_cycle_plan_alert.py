@@ -214,7 +214,7 @@ def analyze(s):
     below = "(하회)" if last < s["norm_low"] else ""
     low_line = ""
     if len(since):
-        low_line = "\n이번 저점: %s (%s, %.0f%%)" % (
+        low_line = "\n<b><u>이번 저점: %s (%s, %.0f%%)</u></b>" % (
             fmt(low, s), low_date.strftime("%m/%d"), low / s["peak"] * 100)
     block = (
         "<b><u>%s %s · 정점비 %.0f%%</u></b>\n"
