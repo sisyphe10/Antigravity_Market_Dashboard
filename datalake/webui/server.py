@@ -386,7 +386,8 @@ main{flex:1;display:flex;min-height:0;}
 .badge{font-size:11px;font-weight:700;border-radius:2px;padding:1px 6px;vertical-align:1px;}
 .badge.transcript{background:#0a3038;color:#67e0f4;}
 .badge.analysis{background:#10301c;color:#4ade80;}
-#doc{flex:1;overflow-y:auto;padding:26px 34px 60px;line-height:1.75;}
+#doc{flex:1;overflow-y:auto;padding:26px 34px 60px;line-height:1.75;caret-color:#fb8b1e;}
+#doc:focus{outline:none;}
 #doc .empty{color:#8a919a;font-size:16px;margin-top:40px;text-align:center;}
 #doc h1{font-size:28px;color:#fb8b1e;margin:18px 0 10px;}
 #doc h2{font-size:18px;color:#ffb45e;margin:22px 0 8px;border-bottom:1px solid #27282b;padding-bottom:4px;}
@@ -420,7 +421,7 @@ main{flex:1;display:flex;min-height:0;}
 </header>
 <main>
   <div id="list"></div>
-  <div id="doc"><div class="empty">좌측에서 문서를 선택하세요</div></div>
+  <div id="doc" contenteditable="true" spellcheck="false"><div class="empty">좌측에서 문서를 선택하세요</div></div>
 </main>
 <button id="hlBtn">하이라이트</button>
 <script>
@@ -484,10 +485,32 @@ function markString(s){var doc=document.getElementById('doc'),map=textMap(doc),i
 function applyHL(){(HL[CUR]||[]).forEach(function(s){markString(s);});bindMarks();}
 function saveHL(){fetch('library/highlights',{method:'POST',headers:{'Content-Type':'application/json'},
   body:JSON.stringify({rel:CUR,items:HL[CUR]||[]})});}
+function removeMark(m){var t=m.textContent;
+  HL[CUR]=(HL[CUR]||[]).filter(function(x){return x!==t;});saveHL();
+  var p=m.parentNode;while(m.firstChild)p.insertBefore(m.firstChild,m);p.removeChild(m);p.normalize();}
 function bindMarks(){Array.prototype.forEach.call(document.querySelectorAll('#doc mark.hl'),function(m){
-  m.onclick=function(ev){ev.stopPropagation();var t=m.textContent;
-    HL[CUR]=(HL[CUR]||[]).filter(function(x){return x!==t;});saveHL();
-    var p=m.parentNode;while(m.firstChild)p.insertBefore(m.firstChild,m);p.removeChild(m);p.normalize();};});}
+  m.title='Ctrl+Shift+H로 해제';});}
+// ── 읽기 전용 contenteditable (노션식 캐럿 이동·Shift+화살표 선택, 수정은 차단) ──
+var docEl=document.getElementById('doc');
+['beforeinput','paste','cut','drop'].forEach(function(ev){
+  docEl.addEventListener(ev,function(e){e.preventDefault();});});
+function markAt(node){while(node&&node!==docEl){
+  if(node.nodeType===1&&node.classList&&node.classList.contains('hl'))return node;
+  node=node.parentNode;}return null;}
+// Ctrl+Shift+H = 하이라이트 토글 (선택 → 적용, 하이라이트 안/캐럿 → 해제)
+document.addEventListener('keydown',function(e){
+  if(!(e.ctrlKey&&e.shiftKey&&(e.key==='H'||e.key==='h')))return;
+  e.preventDefault();
+  if(!CUR)return;
+  var sel=window.getSelection();
+  if(!sel||!sel.rangeCount)return;
+  var m=markAt(sel.anchorNode)||markAt(sel.focusNode);
+  if(m){removeMark(m);return;}
+  var s=sel.toString().trim();
+  if(s.length<2||s.length>2000)return;
+  HL[CUR]=(HL[CUR]||[]).concat([s]);saveHL();
+  if(markString(s))bindMarks();
+  sel.removeAllRanges();hlBtn.style.display='none';});
 var hlBtn=document.getElementById('hlBtn');
 document.getElementById('doc').addEventListener('mouseup',function(){
   setTimeout(function(){var sel=window.getSelection(),s=sel?sel.toString().trim():'';
