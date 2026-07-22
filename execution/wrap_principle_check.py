@@ -6,7 +6,7 @@
 #   행위 룰(당일 발생시 항상): 물타기 의심(원칙17) · 약세장 신규 편입(원칙11)
 #   상태 룰(변화 기반): 계좌 MDD(원칙3) · 섹터 쏠림(원칙26) · 종목 DD · 삥(원칙25) ·
 #     종목 수 상한 · 지수 20일선(원칙8) — 신규 진입 🆕 / 해소 ✅ 시에만 상세,
-#     지속분은 요약 1줄. 변화·행위 없으면 평일 침묵, 월요일은 전체 상세 리포트.
+#     지속분은 요약 1줄. 변화·행위 없으면 평일 침묵, 일요일 20:00 전체 상세 리포트.
 #   종목 단위 룰(종목 DD)은 상품 중복 없이 1회만 표기("N개 상품 보유").
 # 전일 상태 = logs/wrap_principle_state.json (diff 근거, 거래일마다 갱신).
 # 임계값 = config/wrap_principles_config.json (없으면 DEFAULTS).
@@ -216,7 +216,8 @@ def send_telegram(text):
 
 def main():
     now = datetime.now(KST)
-    if now.weekday() >= 5:
+    # 토요일 skip. 일요일은 20:00 전체 점검 틱만 통과(17:10 일일 틱은 skip).
+    if now.weekday() == 5 or (now.weekday() == 6 and now.hour < 19):
         print('wrap_principle_check: weekend — skip')
         return 0
     cfg = load_config()
@@ -246,19 +247,19 @@ def main():
     age_h = (datetime.now().timestamp() - os.path.getmtime(PORTFOLIO_JSON)) / 3600.0
     stale = age_h > cfg['stale_hours']
 
-    monday_full = now.weekday() == 0 and not baseline
-    must_send = (not seed) and (bool(actions_new or new_keys or resolved or stale) or (monday_full and state))
+    sunday_full = now.weekday() == 6 and not baseline
+    must_send = (not seed) and (bool(actions_new or new_keys or resolved or stale) or (sunday_full and state))
 
     if must_send:
         head = '\U0001F9ED WRAP 원칙 점검 — %s (%s)' % (today_str, DOW[now.weekday()])
-        parts = [head + (' — 주간 전체 상세' if monday_full else '')]
+        parts = [head + (' — 주간 전체 상세' if sunday_full else '')]
         if actions_new:
             parts.append('[오늘 행동]\n' + '\n'.join('- ' + actions_new[k] for k in sorted(actions_new)))
         if new_keys:
             parts.append('[신규 위반] \U0001F195\n' + '\n'.join('- %s: %s' % (LABEL[k.split('|')[0]], state[k]) for k in sorted(new_keys)))
         if resolved:
             parts.append('[해소] ✅\n' + '\n'.join('- %s: %s' % (LABEL[k.split('|')[0]], prev[k]) for k in sorted(resolved)))
-        if monday_full and state:
+        if sunday_full and state:
             parts.append('\n'.join(full_detail(state)))
         else:
             parts.append('지속 중: ' + group_summary({k: v for k, v in state.items() if k not in new_keys}))
