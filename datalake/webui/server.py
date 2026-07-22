@@ -313,6 +313,45 @@ def library_doc(rel: str):
     return JSONResponse({"rel": rel, "content": content})
 
 
+HIGHLIGHT_PATH = os.path.join(DATALAKE_ROOT, "library", "highlights.json")
+
+
+@app.get("/library/highlights")
+def library_highlights():
+    import json as _j
+    try:
+        with open(HIGHLIGHT_PATH, encoding="utf-8") as f:
+            return JSONResponse(_j.load(f))
+    except (OSError, ValueError):
+        return JSONResponse({})
+
+
+class HighlightReq(BaseModel):
+    rel: str
+    items: list
+
+
+@app.post("/library/highlights")
+def library_highlights_save(req: HighlightReq):
+    import json as _j
+    try:
+        with open(HIGHLIGHT_PATH, encoding="utf-8") as f:
+            data = _j.load(f)
+    except (OSError, ValueError):
+        data = {}
+    items = [s for s in req.items if isinstance(s, str) and s.strip()]
+    if items:
+        data[req.rel] = items
+    else:
+        data.pop(req.rel, None)
+    os.makedirs(os.path.dirname(HIGHLIGHT_PATH), exist_ok=True)
+    tmp = HIGHLIGHT_PATH + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        _j.dump(data, f, ensure_ascii=False)
+    os.replace(tmp, HIGHLIGHT_PATH)
+    return JSONResponse({"ok": True, "count": len(items)})
+
+
 @app.get("/library")
 def library_page():
     return HTMLResponse(_LIBRARY_HTML)
@@ -360,8 +399,10 @@ main{flex:1;display:flex;min-height:0;}
 #doc blockquote{border-left:3px solid #fb8b1e;padding:4px 14px;color:#c9ced4;background:#111214;margin:10px 0;}
 #doc code{background:#1a1b1e;border-radius:2px;padding:1px 5px;font-size:14px;}
 #doc hr{border:none;border-top:1px solid #27282b;margin:16px 0;}
-#doc .fm{background:#111214;border:1px solid #27282b;border-radius:2px;padding:10px 14px;font-size:13px;color:#8a919a;margin-bottom:14px;}
+#doc .fm{background:#111214;border:1px solid #27282b;border-radius:2px;padding:10px 14px;font-size:13px;color:#8a919a;margin-top:26px;}
 #doc .fm b{color:#ffb45e;font-weight:600;}
+#doc mark.hl{background:rgba(251,139,30,0.28);color:inherit;border-radius:2px;cursor:pointer;}
+#hlBtn{position:fixed;display:none;z-index:10;font-family:inherit;font-size:12.5px;font-weight:700;padding:5px 12px;border:none;border-radius:2px;background:#fb8b1e;color:#0a0a0a;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.5);}
 @media(max-width:760px){#list{width:44%;}#doc{padding:16px;}}
 </style></head><body>
 <header>
@@ -378,8 +419,9 @@ main{flex:1;display:flex;min-height:0;}
   <div id="list"></div>
   <div id="doc"><div class="empty">좌측에서 문서를 선택하세요</div></div>
 </main>
+<button id="hlBtn">하이라이트</button>
 <script>
-var ALL=[], KIND='all', Q='';
+var ALL=[], KIND='all', Q='', HL={}, CUR=null;
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function inline(s){
   s=esc(s);
@@ -393,7 +435,7 @@ function mdRender(md){
     var meta=md.slice(3,e).trim().split('\\n').map(function(l){var i=l.indexOf(':');
       return i>0?'<b>'+esc(l.slice(0,i).trim())+'</b> '+esc(l.slice(i+1).trim()):esc(l);}).join(' · ');
     fm='<div class="fm">'+meta+'</div>'; md=md.slice(e+4);}}
-  var lines=md.split('\\n'), out=[fm], i=0, listOpen=null;
+  var lines=md.split('\\n'), out=[], i=0, listOpen=null;
   function closeList(){if(listOpen){out.push('</'+listOpen+'>');listOpen=null;}}
   while(i<lines.length){
     var l=lines[i];
@@ -421,8 +463,42 @@ function mdRender(md){
     i++;
   }
   closeList();
+  out.push(fm);  // 메타 정보는 본문 맨 아래 (2026-07-22 사용자 요청)
   return out.join('');
 }
+// ── 하이라이트 (선택 → 저장, 클릭 → 해제; library/highlights.json 영속) ──
+function textMap(root){var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT),ns=[],tx='',n;
+  while((n=w.nextNode())){ns.push({node:n,start:tx.length});tx+=n.nodeValue;}return {nodes:ns,text:tx};}
+function locate(map,idx){for(var i=map.nodes.length-1;i>=0;i--){if(map.nodes[i].start<=idx)return {node:map.nodes[i].node,offset:idx-map.nodes[i].start};}return null;}
+function markString(s){var doc=document.getElementById('doc'),map=textMap(doc),idx=map.text.indexOf(s);
+  if(idx<0)return false;
+  var st=locate(map,idx),en=locate(map,idx+s.length);if(!st||!en)return false;
+  var r=document.createRange();
+  try{r.setStart(st.node,st.offset);r.setEnd(en.node,en.offset);
+    var m=document.createElement('mark');m.className='hl';m.title='클릭하면 하이라이트 해제';
+    m.appendChild(r.extractContents());r.insertNode(m);}catch(e){return false;}
+  return true;}
+function applyHL(){(HL[CUR]||[]).forEach(function(s){markString(s);});bindMarks();}
+function saveHL(){fetch('library/highlights',{method:'POST',headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({rel:CUR,items:HL[CUR]||[]})});}
+function bindMarks(){Array.prototype.forEach.call(document.querySelectorAll('#doc mark.hl'),function(m){
+  m.onclick=function(ev){ev.stopPropagation();var t=m.textContent;
+    HL[CUR]=(HL[CUR]||[]).filter(function(x){return x!==t;});saveHL();
+    var p=m.parentNode;while(m.firstChild)p.insertBefore(m.firstChild,m);p.removeChild(m);p.normalize();};});}
+var hlBtn=document.getElementById('hlBtn');
+document.getElementById('doc').addEventListener('mouseup',function(){
+  setTimeout(function(){var sel=window.getSelection(),s=sel?sel.toString().trim():'';
+    if(!CUR||s.length<2||s.length>2000){hlBtn.style.display='none';return;}
+    var rect=sel.getRangeAt(0).getBoundingClientRect();
+    hlBtn.style.left=Math.max(8,rect.left+rect.width/2-40)+'px';
+    hlBtn.style.top=Math.max(8,rect.top-38)+'px';
+    hlBtn.style.display='block';hlBtn.dataset.sel=s;},10);});
+hlBtn.addEventListener('mousedown',function(ev){ev.preventDefault();ev.stopPropagation();
+  var s=hlBtn.dataset.sel;if(!s||!CUR)return;
+  HL[CUR]=(HL[CUR]||[]).concat([s]);saveHL();
+  if(markString(s))bindMarks();
+  window.getSelection().removeAllRanges();hlBtn.style.display='none';});
+document.addEventListener('mousedown',function(e){if(e.target!==hlBtn)hlBtn.style.display='none';});
 function draw(){
   var q=Q.toLowerCase();
   var items=ALL.filter(function(x){
@@ -441,8 +517,10 @@ function draw(){
       Array.prototype.forEach.call(document.querySelectorAll('.item.on'),function(o){o.classList.remove('on');});
       el.classList.add('on');
       fetch('library/doc?rel='+encodeURIComponent(el.dataset.rel)).then(function(r){return r.json();}).then(function(j){
+        CUR=el.dataset.rel;
         document.getElementById('doc').innerHTML=j.error?('<div class="empty">'+esc(j.error)+'</div>'):mdRender(j.content);
         document.getElementById('doc').scrollTop=0;
+        if(!j.error)applyHL();
       });
     });
   });
@@ -455,6 +533,7 @@ Array.prototype.forEach.call(document.querySelectorAll('.tab'),function(b){
 });
 document.getElementById('q').addEventListener('input',function(e){Q=e.target.value;draw();});
 fetch('library/list').then(function(r){return r.json();}).then(function(j){ALL=j.items;draw();});
+fetch('library/highlights').then(function(r){return r.json();}).then(function(j){HL=j||{};});
 </script></body></html>"""
 
 
