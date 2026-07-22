@@ -4,11 +4,11 @@
       "code": "005930",
       "name": "삼성전자",
       "sector": "반도체",
-      "market_cap": 15229556,
+      "market_cap": 15229555.77384,
       "weight": 25.0,
-      "weight_prev": 30.0,
+      "weight_prev": 25.0,
       "today_return": 0.5791505791505791,
-      "contribution": 1.7374517374517373,
+      "contribution": 1.4478764478764479,
       "ytd_return": 117.26438698915764,
       "cumulative_return": 337.57001330179247,
       "current_price": 260500.0,
@@ -21,11 +21,11 @@
       "code": "000660",
       "name": "SK하이닉스",
       "sector": "반도체",
-      "market_cap": 13042453,
+      "market_cap": 13042453.2795,
       "weight": 20.0,
-      "weight_prev": 30.0,
+      "weight_prev": 20.0,
       "today_return": -0.32679738562091504,
-      "contribution": -0.9803921568627451,
+      "contribution": -0.6535947712418301,
       "ytd_return": 181.10599078341014,
       "cumulative_return": 524.4256691360825,
       "current_price": 1830000.0,
@@ -38,11 +38,11 @@
       "code": "005935",
       "name": "삼성전자우",
       "sector": "기타",
-      "market_cap": 1485189,
+      "market_cap": 1485189.096753,
       "weight": 3.0,
-      "weight_prev": 5.0,
+      "weight_prev": 3.0,
       "today_return": 2.2651933701657456,
-      "contribution": 1.1325966850828728,
+      "contribution": 0.6795580110497237,
       "ytd_return": 107.51121076233186,
       "cumulative_return": -3.5937499999999956,
       "current_price": 185100.0,
@@ -55,11 +55,11 @@
       "code": "402340",
       "name": "SK스퀘어",
       "sector": "상사,자본재",
-      "market_cap": 1623088,
+      "market_cap": 1623088.1478,
       "weight": 3.0,
-      "weight_prev": 5.0,
+      "weight_prev": 3.0,
       "today_return": -1.8355945730247407,
-      "contribution": -0.9177972865123704,
+      "contribution": -0.5506783719074222,
       "ytd_return": 234.23913043478262,
       "cumulative_return": -10.998552821997109,
       "current_price": 1230000.0,
@@ -72,7 +72,7 @@
       "code": "004170",
       "name": "신세계",
       "sector": "소매(유통)",
-      "market_cap": 51665,
+      "market_cap": 51665.14007,
       "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": -2.6690391459074734,
@@ -89,7 +89,7 @@
       "code": "010950",
       "name": "S-Oil",
       "sector": "에너지",
-      "market_cap": 159530,
+      "market_cap": 159529.816264,
       "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": 0.07062146892655367,
@@ -103,10 +103,27 @@
       "is_today_new": false
     },
     {
+      "code": "080220",
+      "name": "제주반도체",
+      "sector": "반도체",
+      "market_cap": 25832.12475,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": -4.21455938697318,
+      "contribution": -1.264367816091954,
+      "ytd_return": 184.62998102466793,
+      "cumulative_return": 0.0,
+      "current_price": 75000.0,
+      "ath_price": 134000.0,
+      "dd": -44.029850746268664,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "003230",
       "name": "삼양식품",
       "sector": "필수소비재",
-      "market_cap": 83541,
+      "market_cap": 83541.13635,
       "weight": 2.0,
       "weight_prev": 2.0,
       "today_return": -0.7162041181736795,
@@ -120,72 +137,55 @@
       "is_today_new": false
     },
     {
-      "code": "080220",
-      "name": "제주반도체",
-      "sector": "반도체",
-      "market_cap": 25832,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": 184.62998102466793,
-      "cumulative_return": null,
-      "current_price": 75000.0,
-      "ath_price": 134000.0,
-      "dd": -44.029850746268664,
-      "rsi": null,
-      "is_today_new": true
-    },
-    {
       "code": "105560",
       "name": "KB금융",
       "sector": "은행",
-      "market_cap": 621058,
+      "market_cap": 621058.222234,
       "weight": 1.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 1.0,
+      "today_return": 0.632183908045977,
+      "contribution": 0.0632183908045977,
       "ytd_return": 40.41700080192463,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 175100.0,
       "ath_price": 186200.0,
       "dd": -5.961331901181522,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "086790",
       "name": "하나금융지주",
       "sector": "은행",
-      "market_cap": 361068,
+      "market_cap": 361067.956368,
       "weight": 1.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 1.0,
+      "today_return": -0.7541478129713424,
+      "contribution": -0.07541478129713425,
       "ytd_return": 39.85122210414453,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 131600.0,
       "ath_price": 136800.0,
       "dd": -3.801169590643272,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "005380",
       "name": "현대차",
       "sector": "자동차",
-      "market_cap": 855887,
+      "market_cap": 855887.46188,
       "weight": 1.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 1.0,
+      "today_return": 4.761904761904762,
+      "contribution": 0.47619047619047616,
       "ytd_return": 40.978077571669466,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 418000.0,
       "ath_price": 750000.0,
       "dd": -44.266666666666666,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
   "NH 목표전환형 5호": [
@@ -193,11 +193,11 @@
       "code": "005930",
       "name": "삼성전자",
       "sector": "반도체",
-      "market_cap": 15229556,
+      "market_cap": 15229555.77384,
       "weight": 25.0,
-      "weight_prev": 30.0,
+      "weight_prev": 25.0,
       "today_return": 0.5791505791505791,
-      "contribution": 1.7374517374517373,
+      "contribution": 1.4478764478764479,
       "ytd_return": 117.26438698915764,
       "cumulative_return": -10.557939914163095,
       "current_price": 260500.0,
@@ -210,11 +210,11 @@
       "code": "000660",
       "name": "SK하이닉스",
       "sector": "반도체",
-      "market_cap": 13042453,
+      "market_cap": 13042453.2795,
       "weight": 20.0,
-      "weight_prev": 30.0,
+      "weight_prev": 20.0,
       "today_return": -0.32679738562091504,
-      "contribution": -0.9803921568627451,
+      "contribution": -0.6535947712418301,
       "ytd_return": 181.10599078341014,
       "cumulative_return": -17.84819123863679,
       "current_price": 1830000.0,
@@ -224,14 +224,31 @@
       "is_today_new": false
     },
     {
+      "code": "080220",
+      "name": "제주반도체",
+      "sector": "반도체",
+      "market_cap": 25832.12475,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": -4.21455938697318,
+      "contribution": -2.1072796934865905,
+      "ytd_return": 184.62998102466793,
+      "cumulative_return": 0.0,
+      "current_price": 75000.0,
+      "ath_price": 134000.0,
+      "dd": -44.029850746268664,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "005935",
       "name": "삼성전자우",
       "sector": "기타",
-      "market_cap": 1485189,
+      "market_cap": 1485189.096753,
       "weight": 3.0,
-      "weight_prev": 5.0,
+      "weight_prev": 3.0,
       "today_return": 2.2651933701657456,
-      "contribution": 1.1325966850828728,
+      "contribution": 0.6795580110497237,
       "ytd_return": 107.51121076233186,
       "cumulative_return": -3.5937499999999956,
       "current_price": 185100.0,
@@ -244,11 +261,11 @@
       "code": "402340",
       "name": "SK스퀘어",
       "sector": "상사,자본재",
-      "market_cap": 1623088,
+      "market_cap": 1623088.1478,
       "weight": 3.0,
-      "weight_prev": 5.0,
+      "weight_prev": 3.0,
       "today_return": -1.8355945730247407,
-      "contribution": -0.9177972865123704,
+      "contribution": -0.5506783719074222,
       "ytd_return": 234.23913043478262,
       "cumulative_return": -10.998552821997109,
       "current_price": 1230000.0,
@@ -261,7 +278,7 @@
       "code": "004170",
       "name": "신세계",
       "sector": "소매(유통)",
-      "market_cap": 51665,
+      "market_cap": 51665.14007,
       "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": -2.6690391459074734,
@@ -278,7 +295,7 @@
       "code": "010950",
       "name": "S-Oil",
       "sector": "에너지",
-      "market_cap": 159530,
+      "market_cap": 159529.816264,
       "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": 0.07062146892655367,
@@ -290,23 +307,6 @@
       "dd": -3.4083162917518783,
       "rsi": -1.8726720115352147,
       "is_today_new": false
-    },
-    {
-      "code": "080220",
-      "name": "제주반도체",
-      "sector": "반도체",
-      "market_cap": 25832,
-      "weight": 5.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": 184.62998102466793,
-      "cumulative_return": null,
-      "current_price": 75000.0,
-      "ath_price": 134000.0,
-      "dd": -44.029850746268664,
-      "rsi": null,
-      "is_today_new": true
     }
   ],
   "DB 목표전환형 6차": [
@@ -314,11 +314,11 @@
       "code": "005930",
       "name": "삼성전자",
       "sector": "반도체",
-      "market_cap": 15229556,
+      "market_cap": 15229555.77384,
       "weight": 25.0,
-      "weight_prev": 30.0,
+      "weight_prev": 25.0,
       "today_return": 0.5791505791505791,
-      "contribution": 1.7374517374517373,
+      "contribution": 1.4478764478764479,
       "ytd_return": 117.26438698915764,
       "cumulative_return": -9.39130434782609,
       "current_price": 260500.0,
@@ -331,11 +331,11 @@
       "code": "000660",
       "name": "SK하이닉스",
       "sector": "반도체",
-      "market_cap": 13042453,
+      "market_cap": 13042453.2795,
       "weight": 20.0,
-      "weight_prev": 30.0,
+      "weight_prev": 20.0,
       "today_return": -0.32679738562091504,
-      "contribution": -0.9803921568627451,
+      "contribution": -0.6535947712418301,
       "ytd_return": 181.10599078341014,
       "cumulative_return": -16.934599235919357,
       "current_price": 1830000.0,
@@ -345,14 +345,31 @@
       "is_today_new": false
     },
     {
+      "code": "080220",
+      "name": "제주반도체",
+      "sector": "반도체",
+      "market_cap": 25832.12475,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": -4.21455938697318,
+      "contribution": -2.1072796934865905,
+      "ytd_return": 184.62998102466793,
+      "cumulative_return": 0.0,
+      "current_price": 75000.0,
+      "ath_price": 134000.0,
+      "dd": -44.029850746268664,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "005935",
       "name": "삼성전자우",
       "sector": "기타",
-      "market_cap": 1485189,
+      "market_cap": 1485189.096753,
       "weight": 3.0,
-      "weight_prev": 5.0,
+      "weight_prev": 3.0,
       "today_return": 2.2651933701657456,
-      "contribution": 1.1325966850828728,
+      "contribution": 0.6795580110497237,
       "ytd_return": 107.51121076233186,
       "cumulative_return": -3.5937499999999956,
       "current_price": 185100.0,
@@ -365,11 +382,11 @@
       "code": "402340",
       "name": "SK스퀘어",
       "sector": "상사,자본재",
-      "market_cap": 1623088,
+      "market_cap": 1623088.1478,
       "weight": 3.0,
-      "weight_prev": 5.0,
+      "weight_prev": 3.0,
       "today_return": -1.8355945730247407,
-      "contribution": -0.9177972865123704,
+      "contribution": -0.5506783719074222,
       "ytd_return": 234.23913043478262,
       "cumulative_return": -10.998552821997109,
       "current_price": 1230000.0,
@@ -382,7 +399,7 @@
       "code": "004170",
       "name": "신세계",
       "sector": "소매(유통)",
-      "market_cap": 51665,
+      "market_cap": 51665.14007,
       "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": -2.6690391459074734,
@@ -399,7 +416,7 @@
       "code": "010950",
       "name": "S-Oil",
       "sector": "에너지",
-      "market_cap": 159530,
+      "market_cap": 159529.816264,
       "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": 0.07062146892655367,
@@ -411,23 +428,6 @@
       "dd": -3.4083162917518783,
       "rsi": -1.8726720115352147,
       "is_today_new": false
-    },
-    {
-      "code": "080220",
-      "name": "제주반도체",
-      "sector": "반도체",
-      "market_cap": 25832,
-      "weight": 5.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": 184.62998102466793,
-      "cumulative_return": null,
-      "current_price": 75000.0,
-      "ath_price": 134000.0,
-      "dd": -44.029850746268664,
-      "rsi": null,
-      "is_today_new": true
     }
   ],
   "한투 지속형": [
@@ -435,7 +435,7 @@
       "code": "005930",
       "name": "삼성전자",
       "sector": "반도체",
-      "market_cap": 15229556,
+      "market_cap": 15229555.77384,
       "weight": 25.0,
       "weight_prev": 25.0,
       "today_return": 0.5791505791505791,
@@ -452,11 +452,11 @@
       "code": "000660",
       "name": "SK하이닉스",
       "sector": "반도체",
-      "market_cap": 13042453,
+      "market_cap": 13042453.2795,
       "weight": 20.0,
-      "weight_prev": 25.0,
+      "weight_prev": 20.0,
       "today_return": -0.32679738562091504,
-      "contribution": -0.8169934640522876,
+      "contribution": -0.6535947712418301,
       "ytd_return": 181.10599078341014,
       "cumulative_return": -13.33175467677007,
       "current_price": 1830000.0,
@@ -469,11 +469,11 @@
       "code": "005935",
       "name": "삼성전자우",
       "sector": "기타",
-      "market_cap": 1485189,
+      "market_cap": 1485189.096753,
       "weight": 3.0,
-      "weight_prev": 5.0,
+      "weight_prev": 3.0,
       "today_return": 2.2651933701657456,
-      "contribution": 1.1325966850828728,
+      "contribution": 0.6795580110497237,
       "ytd_return": 107.51121076233186,
       "cumulative_return": -3.5937499999999956,
       "current_price": 185100.0,
@@ -486,11 +486,11 @@
       "code": "402340",
       "name": "SK스퀘어",
       "sector": "상사,자본재",
-      "market_cap": 1623088,
+      "market_cap": 1623088.1478,
       "weight": 3.0,
-      "weight_prev": 5.0,
+      "weight_prev": 3.0,
       "today_return": -1.8355945730247407,
-      "contribution": -0.9177972865123704,
+      "contribution": -0.5506783719074222,
       "ytd_return": 234.23913043478262,
       "cumulative_return": -10.998552821997109,
       "current_price": 1230000.0,
@@ -503,7 +503,7 @@
       "code": "004170",
       "name": "신세계",
       "sector": "소매(유통)",
-      "market_cap": 51665,
+      "market_cap": 51665.14007,
       "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": -2.6690391459074734,
@@ -520,7 +520,7 @@
       "code": "010950",
       "name": "S-Oil",
       "sector": "에너지",
-      "market_cap": 159530,
+      "market_cap": 159529.816264,
       "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": 0.07062146892655367,
@@ -534,10 +534,27 @@
       "is_today_new": false
     },
     {
+      "code": "080220",
+      "name": "제주반도체",
+      "sector": "반도체",
+      "market_cap": 25832.12475,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": -4.21455938697318,
+      "contribution": -1.264367816091954,
+      "ytd_return": 184.62998102466793,
+      "cumulative_return": 0.0,
+      "current_price": 75000.0,
+      "ath_price": 134000.0,
+      "dd": -44.029850746268664,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "003230",
       "name": "삼양식품",
       "sector": "필수소비재",
-      "market_cap": 83541,
+      "market_cap": 83541.13635,
       "weight": 2.0,
       "weight_prev": 2.0,
       "today_return": -0.7162041181736795,
@@ -551,72 +568,55 @@
       "is_today_new": false
     },
     {
-      "code": "080220",
-      "name": "제주반도체",
-      "sector": "반도체",
-      "market_cap": 25832,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": 184.62998102466793,
-      "cumulative_return": null,
-      "current_price": 75000.0,
-      "ath_price": 134000.0,
-      "dd": -44.029850746268664,
-      "rsi": null,
-      "is_today_new": true
-    },
-    {
       "code": "105560",
       "name": "KB금융",
       "sector": "은행",
-      "market_cap": 621058,
+      "market_cap": 621058.222234,
       "weight": 1.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 1.0,
+      "today_return": 0.632183908045977,
+      "contribution": 0.0632183908045977,
       "ytd_return": 40.41700080192463,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 175100.0,
       "ath_price": 186200.0,
       "dd": -5.961331901181522,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "086790",
       "name": "하나금융지주",
       "sector": "은행",
-      "market_cap": 361068,
+      "market_cap": 361067.956368,
       "weight": 1.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 1.0,
+      "today_return": -0.7541478129713424,
+      "contribution": -0.07541478129713425,
       "ytd_return": 39.85122210414453,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 131600.0,
       "ath_price": 136800.0,
       "dd": -3.801169590643272,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "005380",
       "name": "현대차",
       "sector": "자동차",
-      "market_cap": 855887,
+      "market_cap": 855887.46188,
       "weight": 1.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 1.0,
+      "today_return": 4.761904761904762,
+      "contribution": 0.47619047619047616,
       "ytd_return": 40.978077571669466,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 418000.0,
       "ath_price": 750000.0,
       "dd": -44.266666666666666,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
   "한투 성과모집형 1차": [
@@ -624,11 +624,11 @@
       "code": "005930",
       "name": "삼성전자",
       "sector": "반도체",
-      "market_cap": 15229556,
+      "market_cap": 15229555.77384,
       "weight": 25.0,
-      "weight_prev": 30.0,
+      "weight_prev": 25.0,
       "today_return": 0.5791505791505791,
-      "contribution": 1.7374517374517373,
+      "contribution": 1.4478764478764479,
       "ytd_return": 117.26438698915764,
       "cumulative_return": -5.013673655423878,
       "current_price": 260500.0,
@@ -641,11 +641,11 @@
       "code": "000660",
       "name": "SK하이닉스",
       "sector": "반도체",
-      "market_cap": 13042453,
+      "market_cap": 13042453.2795,
       "weight": 20.0,
-      "weight_prev": 30.0,
+      "weight_prev": 20.0,
       "today_return": -0.32679738562091504,
-      "contribution": -0.9803921568627451,
+      "contribution": -0.6535947712418301,
       "ytd_return": 181.10599078341014,
       "cumulative_return": -10.29411764705882,
       "current_price": 1830000.0,
@@ -655,14 +655,31 @@
       "is_today_new": false
     },
     {
+      "code": "080220",
+      "name": "제주반도체",
+      "sector": "반도체",
+      "market_cap": 25832.12475,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": -4.21455938697318,
+      "contribution": -2.1072796934865905,
+      "ytd_return": 184.62998102466793,
+      "cumulative_return": 0.0,
+      "current_price": 75000.0,
+      "ath_price": 134000.0,
+      "dd": -44.029850746268664,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "005935",
       "name": "삼성전자우",
       "sector": "기타",
-      "market_cap": 1485189,
+      "market_cap": 1485189.096753,
       "weight": 3.0,
-      "weight_prev": 5.0,
+      "weight_prev": 3.0,
       "today_return": 2.2651933701657456,
-      "contribution": 1.1325966850828728,
+      "contribution": 0.6795580110497237,
       "ytd_return": 107.51121076233186,
       "cumulative_return": -3.5937499999999956,
       "current_price": 185100.0,
@@ -675,11 +692,11 @@
       "code": "402340",
       "name": "SK스퀘어",
       "sector": "상사,자본재",
-      "market_cap": 1623088,
+      "market_cap": 1623088.1478,
       "weight": 3.0,
-      "weight_prev": 5.0,
+      "weight_prev": 3.0,
       "today_return": -1.8355945730247407,
-      "contribution": -0.9177972865123704,
+      "contribution": -0.5506783719074222,
       "ytd_return": 234.23913043478262,
       "cumulative_return": -10.998552821997109,
       "current_price": 1230000.0,
@@ -692,7 +709,7 @@
       "code": "004170",
       "name": "신세계",
       "sector": "소매(유통)",
-      "market_cap": 51665,
+      "market_cap": 51665.14007,
       "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": -2.6690391459074734,
@@ -709,7 +726,7 @@
       "code": "010950",
       "name": "S-Oil",
       "sector": "에너지",
-      "market_cap": 159530,
+      "market_cap": 159529.816264,
       "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": 0.07062146892655367,
@@ -721,226 +738,28 @@
       "dd": -3.4083162917518783,
       "rsi": -1.8726720115352147,
       "is_today_new": false
-    },
-    {
-      "code": "080220",
-      "name": "제주반도체",
-      "sector": "반도체",
-      "market_cap": 25832,
-      "weight": 5.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": 184.62998102466793,
-      "cumulative_return": null,
-      "current_price": 75000.0,
-      "ath_price": 134000.0,
-      "dd": -44.029850746268664,
-      "rsi": null,
-      "is_today_new": true
     }
   ],
-  "_order_changes": {
-    "삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형": {
-      "date": "2026-07-22",
-      "added": [
-        {
-          "name": "제주반도체",
-          "weight": 3.0
-        },
-        {
-          "name": "KB금융",
-          "weight": 1.0
-        },
-        {
-          "name": "하나금융지주",
-          "weight": 1.0
-        },
-        {
-          "name": "현대차",
-          "weight": 1.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "삼성전자",
-          "from": 30.0,
-          "to": 25.0
-        },
-        {
-          "name": "SK하이닉스",
-          "from": 30.0,
-          "to": 20.0
-        },
-        {
-          "name": "삼성전자우",
-          "from": 5.0,
-          "to": 3.0
-        },
-        {
-          "name": "SK스퀘어",
-          "from": 5.0,
-          "to": 3.0
-        }
-      ],
-      "removed": []
-    },
-    "NH 목표전환형 5호": {
-      "date": "2026-07-22",
-      "added": [
-        {
-          "name": "제주반도체",
-          "weight": 5.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "삼성전자",
-          "from": 30.0,
-          "to": 25.0
-        },
-        {
-          "name": "SK하이닉스",
-          "from": 30.0,
-          "to": 20.0
-        },
-        {
-          "name": "삼성전자우",
-          "from": 5.0,
-          "to": 3.0
-        },
-        {
-          "name": "SK스퀘어",
-          "from": 5.0,
-          "to": 3.0
-        }
-      ],
-      "removed": []
-    },
-    "DB 목표전환형 6차": {
-      "date": "2026-07-22",
-      "added": [
-        {
-          "name": "제주반도체",
-          "weight": 5.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "SK하이닉스",
-          "from": 30.0,
-          "to": 20.0
-        },
-        {
-          "name": "삼성전자",
-          "from": 30.0,
-          "to": 25.0
-        },
-        {
-          "name": "삼성전자우",
-          "from": 5.0,
-          "to": 3.0
-        },
-        {
-          "name": "SK스퀘어",
-          "from": 5.0,
-          "to": 3.0
-        }
-      ],
-      "removed": []
-    },
-    "한투 지속형": {
-      "date": "2026-07-22",
-      "added": [
-        {
-          "name": "제주반도체",
-          "weight": 3.0
-        },
-        {
-          "name": "KB금융",
-          "weight": 1.0
-        },
-        {
-          "name": "하나금융지주",
-          "weight": 1.0
-        },
-        {
-          "name": "현대차",
-          "weight": 1.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "SK하이닉스",
-          "from": 25.0,
-          "to": 20.0
-        },
-        {
-          "name": "삼성전자우",
-          "from": 5.0,
-          "to": 3.0
-        },
-        {
-          "name": "SK스퀘어",
-          "from": 5.0,
-          "to": 3.0
-        }
-      ],
-      "removed": []
-    },
-    "한투 성과모집형 1차": {
-      "date": "2026-07-22",
-      "added": [
-        {
-          "name": "제주반도체",
-          "weight": 5.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "삼성전자",
-          "from": 30.0,
-          "to": 25.0
-        },
-        {
-          "name": "SK하이닉스",
-          "from": 30.0,
-          "to": 20.0
-        },
-        {
-          "name": "삼성전자우",
-          "from": 5.0,
-          "to": 3.0
-        },
-        {
-          "name": "SK스퀘어",
-          "from": 5.0,
-          "to": 3.0
-        }
-      ],
-      "removed": []
-    }
-  },
   "_portfolio_meta": {
     "삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형": {
-      "nav_ytd_d1": 53.90266708223874,
-      "nav_cum_d1": 211.085
+      "nav_ytd_d1": 53.91008801222969,
+      "nav_cum_d1": 211.10000000000002
     },
     "NH 목표전환형 5호": {
-      "nav_ytd_d1": -19.665999999999993,
-      "nav_cum_d1": -19.665999999999993
+      "nav_ytd_d1": -19.650000000000002,
+      "nav_cum_d1": -19.650000000000002
     },
     "DB 목표전환형 6차": {
-      "nav_ytd_d1": -18.725,
-      "nav_cum_d1": -18.725
+      "nav_ytd_d1": -18.710000000000004,
+      "nav_cum_d1": -18.710000000000004
     },
     "한투 지속형": {
-      "nav_ytd_d1": -12.490000000000002,
-      "nav_cum_d1": -12.490000000000002
+      "nav_ytd_d1": -12.497000000000003,
+      "nav_cum_d1": -12.497000000000003
     },
     "한투 성과모집형 1차": {
-      "nav_ytd_d1": -8.672999999999998,
-      "nav_cum_d1": -8.672999999999998
+      "nav_ytd_d1": -8.655999999999997,
+      "nav_cum_d1": -8.655999999999997
     }
   },
   "_price_asof": "2026-07-22"
