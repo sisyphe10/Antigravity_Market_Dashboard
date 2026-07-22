@@ -39,6 +39,11 @@ OLD_SISYPHE_ITEM = '<div class="topnav-item sisyphe-item"><a href="/sisyphe/inde
 OLD_SISYPHE_DROPDOWN = ('<div class="topnav-item"><a href="/sisyphe/index.html" class="topnav-tab">Sisyphe</a>'
                         '<div class="topnav-dropdown"><a href="/sisyphe/dashboard.html" class="topnav-sub">가계부·운동</a>'
                         '<a href="/sisyphe/journal.html" class="topnav-sub">투자일지</a></div></div>')
+AOE_UPDATED_JS = ('<script id="aoe-updated-move">document.addEventListener("DOMContentLoaded",function(){'
+                  'var u=document.querySelector("header .last-updated"),s=document.querySelector(".sidebar");'
+                  'if(u&&s){var w=document.createElement("div");w.style.cssText="text-align:right;padding:4px 28px 0";'
+                  'w.appendChild(u);s.insertAdjacentElement("afterend",w);}});</script>')
+
 AOE_PERSONAL_CSS = ('<style id="aoe-personal-nav">'
                     '.topnav-tabs .topnav-item.right-group{margin-left:auto}'
                     '</style>')
@@ -60,7 +65,7 @@ AOE_DARK_CSS = (
     '.last-updated{color:#8a919a!important}'
     'header h1{display:none!important}'
     'header .subtitle,header .sub{display:none!important}'
-    'header{margin:0!important;padding:8px 28px 0!important;text-align:right!important}'
+    'header{margin:0!important;padding:0 28px!important;text-align:right!important}'
     '.last-updated{margin:0!important;font-size:0.78rem!important}'
     '.section,.mkt-panel,.table-container,.stat-card,.card,.constituents-row,'
     '.csel-display,.csel-list,.cmb-filter-pop,.tw-filter-pop,.layer,.node,.timeline'
@@ -87,7 +92,7 @@ AOE_DARK_CSS = (
     '.tabs{border-bottom-color:#fb8b1e!important}'
     '.subtab,.mkt-subtab,.tab,.mbtn,.chg-fbtn,.nav-button,.tw-more-btn,.tw-dl-btn,'
     '.cmb-filter-btn,.cmb-ma-btn'
-    '{background:#141517!important;color:#9aa4ae!important;border:1.5px solid #3a3b3e!important;'
+    '{background:#141517!important;color:#9aa4ae!important;border:1.5px solid #565a60!important;'
     'border-radius:2px!important}'
     '.subtab:hover,.mkt-subtab:hover,.tab:hover,.mbtn:hover,.nav-button:hover'
     '{color:#fb8b1e!important;border-color:#fb8b1e!important}'
@@ -114,7 +119,7 @@ AOE_DARK_CSS = (
     '.section-count,.category-date{font-size:14px!important}'
     '.sidebar,.ledger-subtabs,.mm-main .subtabs{height:42px!important;'
     'box-sizing:border-box!important;align-items:stretch!important;overflow:hidden!important}'
-    '.sidebar-link,.ledger-subtab,.mm-main .subtabs .subtab{height:41px!important;font-size:17px!important}'
+    '.sidebar-link,.ledger-subtab,.mm-main .subtabs .subtab{height:41px!important;font-size:18px!important;border:1.5px solid #565a60!important;border-radius:2px!important}'
     'button[style*="#dc2626"]{background:#fb8b1e!important;color:#101418!important;'
     'border:1.5px solid #fb8b1e!important;border-radius:2px!important}'
     'button[style*="#2563eb"]{background:transparent!important;color:#fb8b1e!important;'
@@ -300,6 +305,10 @@ for f in glob.glob(os.path.join(REL, "*.html")):
         n = n.replace(NAV_END, JOURNAL_ITEM + WEEKLY_ITEM + EARNINGS_ITEM + OLD_WIKI_ITEM + MEMENTO_ITEM_R + LEDGER_ITEM + arch_html + NAV_END, 1)
     if 'id="aoe-personal-nav"' not in n:
         r = inject_before_head(n, AOE_PERSONAL_CSS)
+        if r is not None:
+            n = r
+    if 'id="aoe-updated-move"' not in n:
+        r = inject_before_head(n, AOE_UPDATED_JS)
         if r is not None:
             n = r
     if 'id="aoe-terminal-dark"' not in n:
