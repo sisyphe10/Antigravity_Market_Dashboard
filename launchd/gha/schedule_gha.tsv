@@ -1,7 +1,7 @@
 gha-fred	50 7 * * 2-6	/bin/bash __REPO__/launchd/gha/run_gha_job.sh gha-fred
 gha-universe	0 7 * * *	/bin/bash __REPO__/launchd/gha/run_gha_job.sh gha-universe
 gha-ecos	40 17 * * 1-5	/bin/bash __REPO__/launchd/gha/run_gha_job.sh gha-ecos
-gha-kofia	30 17 * * 1-5	/bin/bash __REPO__/launchd/gha/run_gha_job.sh gha-kofia
+gha-kofia	30 21 * * 1-5	/bin/bash __REPO__/launchd/gha/run_gha_job.sh gha-kofia
 gha-krx-valuation	30 18 * * 1-5	/bin/bash __REPO__/launchd/gha/run_gha_job.sh gha-krx-valuation
 gha-disclosures	30 16 * * *	/bin/bash __REPO__/launchd/gha/run_gha_job.sh gha-disclosures
 gha-crawl	0 23 * * *	/bin/bash __REPO__/launchd/gha/run_gha_job.sh gha-crawl

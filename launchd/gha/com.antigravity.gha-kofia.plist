@@ -25,33 +25,35 @@
         <key>LANG</key>
         <string>en_US.UTF-8</string>
     </dict>
-    <!-- KST 17:30 평일(월~금) (원본 cron '30 8 * * 1-5' UTC = 08:30 월~금 → +9h = 17:30 당일, 요일 불변).
+    <!-- KST 21:30 평일(월~금). 원래 17:30(원본 cron '30 8 * * 1-5' UTC+9h)이었으나
+         17시대 Wrap_NAV.xlsx push 잡들과의 safe_push 레이스로 커밋 드랍이 반복되어
+         2026-07-23 조용한 시간대로 이동 (KOFIA T+2 공표라 수집 데이터 동일).
          launchd Weekday: 1=월 2=화 3=수 4=목 5=금. 시스템 TZ=Asia/Seoul 전제. -->
     <key>StartCalendarInterval</key>
     <array>
         <dict>
             <key>Weekday</key><integer>1</integer>
-            <key>Hour</key><integer>17</integer>
+            <key>Hour</key><integer>21</integer>
             <key>Minute</key><integer>30</integer>
         </dict>
         <dict>
             <key>Weekday</key><integer>2</integer>
-            <key>Hour</key><integer>17</integer>
+            <key>Hour</key><integer>21</integer>
             <key>Minute</key><integer>30</integer>
         </dict>
         <dict>
             <key>Weekday</key><integer>3</integer>
-            <key>Hour</key><integer>17</integer>
+            <key>Hour</key><integer>21</integer>
             <key>Minute</key><integer>30</integer>
         </dict>
         <dict>
             <key>Weekday</key><integer>4</integer>
-            <key>Hour</key><integer>17</integer>
+            <key>Hour</key><integer>21</integer>
             <key>Minute</key><integer>30</integer>
         </dict>
         <dict>
             <key>Weekday</key><integer>5</integer>
-            <key>Hour</key><integer>17</integer>
+            <key>Hour</key><integer>21</integer>
             <key>Minute</key><integer>30</integer>
         </dict>
     </array>
