@@ -392,8 +392,9 @@ main{flex:1;display:flex;min-height:0;}
 .badge{font-size:12px;font-weight:700;border-radius:2px;padding:1px 6px;vertical-align:1px;}
 .badge.transcript{background:#0a3038;color:#67e0f4;}
 .badge.analysis{background:#10301c;color:#4ade80;}
-#doc{flex:1;overflow-y:auto;padding:26px 34px 60px;line-height:1.75;caret-color:#fb8b1e;color:#fff;}
+#doc{flex:1;overflow-y:auto;padding:26px 34px 60px;line-height:1.75;caret-color:#fb8b1e;color:#fff;user-select:text;}
 #doc:focus{outline:none;}
+#doc *{-webkit-user-drag:none;}
 #doc .empty{color:#8a919a;font-size:18px;margin-top:40px;text-align:center;}
 #doc h1{font-size:30px;color:#fb8b1e;margin:18px 0 10px;}
 #doc h2{font-size:24px;color:#fb8b1e;margin:22px 0 8px;border-bottom:1px solid #27282b;padding-bottom:4px;}
@@ -522,7 +523,7 @@ function bindMarks(){Array.prototype.forEach.call(document.querySelectorAll('#do
   m.title='Ctrl+Shift+H로 해제';});}
 // ── 읽기 전용 contenteditable (노션식 캐럿 이동·Shift+화살표 선택, 수정은 차단) ──
 var docEl=document.getElementById('doc');
-['beforeinput','paste','cut','drop'].forEach(function(ev){
+['beforeinput','paste','cut','drop','dragstart'].forEach(function(ev){
   docEl.addEventListener(ev,function(e){e.preventDefault();});});
 function markAt(node){while(node&&node!==docEl){
   if(node.nodeType===1&&node.classList&&node.classList.contains('hl'))return node;
