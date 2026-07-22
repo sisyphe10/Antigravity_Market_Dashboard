@@ -387,7 +387,7 @@ main{flex:1;display:flex;min-height:0;}
 .item.on{background:#241a3d;}
 .item .t{font-size:16px;font-weight:600;color:#c9ced4;display:flex;gap:8px;align-items:baseline;}
 .item.on .t{color:#b9a1fc;}
-.item .t .tk{color:#ffb45e;}
+.item .t .tk{color:#fb8b1e;}
 .item .m{font-size:13px;color:#8a919a;margin-top:2px;}
 .badge{font-size:11px;font-weight:700;border-radius:2px;padding:1px 6px;vertical-align:1px;}
 .badge.transcript{background:#0a3038;color:#67e0f4;}
