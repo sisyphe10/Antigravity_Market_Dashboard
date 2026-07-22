@@ -20,6 +20,8 @@ NAV_END = '</div></div></nav>'
 # 2026-07-16 정렬 확정: 좌 Watchlist·Market·Invest·Memento·Ledger / 우(margin-left:auto) Wiki·Architecture
 WATCHLIST_ITEM = '<div class="topnav-item"><a href="/watchlist/" class="topnav-tab">Watchlist</a></div>'
 WIKI_ITEM = '<div class="topnav-item right-group"><a href="/wiki/" class="topnav-tab">Wiki</a></div>'
+# 2026-07-22 Earnings Library (실적 분석·콜 전문 md 열람) — Wiki 오른쪽
+EARNINGS_ITEM = '<div class="topnav-item"><a href="/wiki/library" class="topnav-tab">Earnings</a></div>'
 # 2026-07-16 사용자 지시: Invest → Journal 로 개명 + Weekly 별도 탭(딥링크 #weekly)
 CHECKLIST_ITEM = '<div class="topnav-item"><a href="/sisyphe/checklist.html" class="topnav-tab">Checklist</a></div>'
 JOURNAL_ITEM = '<div class="topnav-item"><a href="/sisyphe/journal.html" class="topnav-tab">Journal</a></div>'
@@ -172,6 +174,7 @@ def sisyphe_aoe_nav(active):
         '            <a href="/sisyphe/memento.html" class="%s">Memento</a>\n'
         '            <a href="/sisyphe/dashboard.html" class="%s">Ledger</a>\n'
         '            <a href="/wiki/" class="topnav-tab" style="margin-left:auto">Wiki</a>\n'
+        '            <a href="/wiki/library" class="topnav-tab">Earnings</a>\n'
         '            <a href="/architecture.html" class="topnav-tab">Architecture</a>\n'
         '        </div>\n    </div>\n</nav>'
     ) % (cls('journal'), cls('memento'), cls('ledger'))
@@ -265,7 +268,7 @@ for f in glob.glob(os.path.join(REL, "*.html")):
     # 2026-07-18: 브랜드 풀네임 (create_dashboard 원천도 변경 — 정적 페이지 대응 겸 멱등)
     n = n.replace('class="topnav-brand">AoE</a>', 'class="topnav-brand">AGE OF EMERGENCE</a>')
     # 정규화: 기존 주입 fragment·구 Sisyphe 잔재 제거(clean 입력이면 무동작)
-    for frag in (WATCHLIST_ITEM, WIKI_ITEM, OLD_WIKI_ITEM, CHECKLIST_ITEM, JOURNAL_ITEM, WEEKLY_ITEM,
+    for frag in (WATCHLIST_ITEM, WIKI_ITEM, OLD_WIKI_ITEM, EARNINGS_ITEM, CHECKLIST_ITEM, JOURNAL_ITEM, WEEKLY_ITEM,
                  OLD_INVEST_ITEM, OLD_INVEST_ITEM_P1,
                  MEMENTO_ITEM, LEDGER_ITEM, OLD_SISYPHE_ITEM, OLD_SISYPHE_DROPDOWN):
         n = n.replace(frag, "")
@@ -290,7 +293,7 @@ for f in glob.glob(os.path.join(REL, "*.html")):
     # (정규화 후 남은 기존 아이템 = Watchlist·Market 뿐이므로 append 순서가 곧 좌측 순서)
     # 가드: 이미 Memento 마크업이 있으면 재주입 금지(정규화가 지웠으므로 통상 미존재).
     if NAV_END in n and 'topnav-tab">Memento' not in n:
-        n = n.replace(NAV_END, JOURNAL_ITEM + WEEKLY_ITEM + MEMENTO_ITEM + LEDGER_ITEM + WIKI_ITEM + arch_html + NAV_END, 1)
+        n = n.replace(NAV_END, JOURNAL_ITEM + WEEKLY_ITEM + MEMENTO_ITEM + LEDGER_ITEM + WIKI_ITEM + EARNINGS_ITEM + arch_html + NAV_END, 1)
     if 'id="aoe-personal-nav"' not in n:
         r = inject_before_head(n, AOE_PERSONAL_CSS)
         if r is not None:
@@ -307,7 +310,8 @@ if os.path.exists(wrap):
 idx = os.path.join(REL, "index.html")
 if os.path.exists(idx):
     t = open(idx, encoding="utf-8").read()
-    for marker, what in ((WATCHLIST_ITEM, 'Watchlist'), (WIKI_ITEM, 'Wiki(우측)'), (JOURNAL_ITEM, 'Journal'),
+    for marker, what in ((WATCHLIST_ITEM, 'Watchlist'), (WIKI_ITEM, 'Wiki(우측)'), (EARNINGS_ITEM, 'Earnings'),
+                         (JOURNAL_ITEM, 'Journal'),
                          (WEEKLY_ITEM, 'Weekly'), (MEMENTO_ITEM, 'Memento'), (LEDGER_ITEM, 'Ledger')):
         if marker not in t:
             fail("index.html: %s 탭 주입 실패" % what)
@@ -316,7 +320,8 @@ if os.path.exists(idx):
     #   nav 마크업보다 먼저 매칭돼 순서 검증이 항상 실패(2026-07-16 게시 동결 사고). 마크업 전용
     #   마커 'topnav-item right-group'(class 속성, 공백 구분)만 사용.
     pos = [t.find('>Watchlist<'), t.find('>Market<'), t.find('>Journal<'), t.find('>Weekly<'),
-           t.find('>Memento<'), t.find('>Ledger<'), t.find('topnav-item right-group'), t.rfind('>Architecture<')]
+           t.find('>Memento<'), t.find('>Ledger<'), t.find('topnav-item right-group'),
+           t.find('>Earnings<'), t.rfind('>Architecture<')]
     if -1 in pos or pos != sorted(pos):
         fail("index.html: 탭 순서 오류 %s" % pos)
     if 'sisyphe-tab' in t or 'topnav-sub">가계부' in t:
