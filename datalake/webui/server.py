@@ -499,8 +499,8 @@ function markString(s,c){var doc=document.getElementById('doc'),map=textMap(doc)
   var r=document.createRange();
   try{r.setStart(st.node,st.offset);r.setEnd(en.node,en.offset);
     var m=document.createElement('mark');m.className='hl c'+(c||1);
-    m.appendChild(r.extractContents());r.insertNode(m);}catch(e){return false;}
-  return true;}
+    m.appendChild(r.extractContents());r.insertNode(m);}catch(e){return null;}
+  return m;}
 function applyHL(){(HL[CUR]||[]).forEach(function(x){var it=ns(x);markString(it.s,it.c);});bindMarks();}
 function saveHL(){fetch('library/highlights',{method:'POST',headers:{'Content-Type':'application/json'},
   body:JSON.stringify({rel:CUR,items:HL[CUR]||[]})});}
@@ -513,12 +513,13 @@ function removeMark(m,skipUndo){var t=m.textContent;
 function addHL(s,c,skipUndo){c=c||1;LASTC=c;
   // 여러 줄 선택은 줄 단위 분리 (본문 텍스트맵엔 블록 간 개행이 없어 통짜 매칭 불가)
   var segs=String(s).split(/\\n+/).map(function(x){return x.trim();}).filter(function(x){return x.length>=2;});
-  if(!segs.length)return;
+  if(!segs.length)return null;
+  var lastM=null;
   segs.forEach(function(seg){
     HL[CUR]=(HL[CUR]||[]).concat([{s:seg,c:c}]);
     if(!skipUndo)UNDO.push({t:'add',s:seg,c:c,rel:CUR});
-    markString(seg,c);});
-  saveHL();bindMarks();}
+    var m=markString(seg,c);if(m)lastM=m;});
+  saveHL();bindMarks();return lastM;}
 function bindMarks(){Array.prototype.forEach.call(document.querySelectorAll('#doc mark.hl'),function(m){
   m.title='Ctrl+Shift+H로 해제';});}
 // ── 읽기 전용 contenteditable (노션식 캐럿 이동·Shift+화살표 선택, 수정은 차단) ──
@@ -536,11 +537,16 @@ document.addEventListener('keydown',function(e){
   var sel=window.getSelection();
   if(!sel||!sel.rangeCount)return;
   var m=markAt(sel.anchorNode)||markAt(sel.focusNode);
-  if(m){removeMark(m);return;}
+  function caretAfter(node){try{var r=document.createRange();
+    if(node&&node.nodeType===3){r.setStart(node,node.nodeValue.length);}else if(node){r.setStartAfter(node);}else{return;}
+    r.collapse(true);sel.removeAllRanges();sel.addRange(r);}catch(_){}}
+  if(m){var prev=m.previousSibling,par=m.parentNode;removeMark(m);
+    caretAfter(prev&&prev.nodeType===3?prev:par.firstChild);return;}
   var s=sel.toString().trim();
   if(s.length<2||s.length>2000)return;
-  addHL(s,LASTC);
-  sel.removeAllRanges();hlPop.style.display='none';});
+  var nm=addHL(s,LASTC);
+  if(nm){caretAfter(nm);}else{sel.removeAllRanges();}
+  hlPop.style.display='none';});
 // Ctrl+Z = 마지막 하이라이트 동작 되돌리기 (브라우저 기본 undo는 차단 — contenteditable DOM 오염 방지)
 document.addEventListener('keydown',function(e){
   if(!(e.ctrlKey&&!e.shiftKey&&(e.key==='z'||e.key==='Z')))return;
