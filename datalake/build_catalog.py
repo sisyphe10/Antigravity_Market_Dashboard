@@ -23,6 +23,8 @@ DESCRIPTIONS = {
     "kr_ohlcv": "국내 전 상장종목 일봉 — ★무수정 원시세 (KRX 정본, 액면분할 미반영). 장기 수익률 계산은 kr_ohlcv_adj 사용",
     "kr_ohlcv_adj": "국내 전 상장종목 수정주가 일봉 (야후 adj_close) — ★수익률·차트용. 원시세·거래대금은 kr_ohlcv",
     "kr_marcap": "국내 종목별 시가총액·상장주식수 일별",
+    "kr_fundamental": "국내 종목별 주당지표 일별 (BPS/PER/PBR/EPS/DIV/DPS) — ★KRX 기준=연간 확정실적 계단식(TTM 아님). "
+                      "현재 밸류 정밀 분석엔 부적합, 장기 PBR/PER 밴드·사이클 분석용 (2026-07-22 뷰 재등록)",
     "kr_foreign": "국내 종목별 외국인 보유비중(레벨) 일별",
     "kr_index_ohlcv": "KRX 지수 일봉 (KOSPI/KOSDAQ/KRX/테마 전 시리즈)",
     "kr_etf_ohlcv": "국내 ETF 일봉 + NAV",
