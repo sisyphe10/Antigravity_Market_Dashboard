@@ -390,8 +390,8 @@ main{flex:1;display:flex;min-height:0;}
 #doc:focus{outline:none;}
 #doc .empty{color:#8a919a;font-size:16px;margin-top:40px;text-align:center;}
 #doc h1{font-size:28px;color:#fb8b1e;margin:18px 0 10px;}
-#doc h2{font-size:18px;color:#ffb45e;margin:22px 0 8px;border-bottom:1px solid #27282b;padding-bottom:4px;}
-#doc h3{font-size:16px;color:#ffb45e;margin:16px 0 6px;}
+#doc h2{font-size:22px;color:#fb8b1e;margin:22px 0 8px;border-bottom:1px solid #27282b;padding-bottom:4px;}
+#doc h3{font-size:20px;color:#fb8b1e;margin:16px 0 6px;}
 #doc p{font-size:16px;margin:8px 0;}
 #doc ul,#doc ol{margin:8px 0 8px 22px;font-size:16px;}
 #doc li{margin:3px 0;}
