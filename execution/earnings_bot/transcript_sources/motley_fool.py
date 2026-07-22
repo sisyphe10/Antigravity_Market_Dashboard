@@ -187,7 +187,7 @@ class MotleyFoolSource(TranscriptSource):
         prepared_remarks, qa = self._split_sections(text)
         if not prepared_remarks and not qa:
             # 섹션 분리 실패 — 폴백: 전체 본문을 prepared_remarks로
-            prepared_remarks = text[:80000]
+            prepared_remarks = text[:100000]
             qa = ''
 
         # 신뢰도는 호출자(transcript_watch)가 matcher.py로 산출. 여기선 placeholder.
@@ -280,4 +280,4 @@ class MotleyFoolSource(TranscriptSource):
             prepared = text[prep_start:].strip()
             qa = ''
 
-        return prepared[:80000], qa[:80000]
+        return prepared[:100000], qa[:100000]
