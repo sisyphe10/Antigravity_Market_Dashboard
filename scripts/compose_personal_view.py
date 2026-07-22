@@ -13,7 +13,7 @@ import os, re, sys, glob, shutil
 
 REL = sys.argv[1]
 SISYPHE_PLAIN = os.environ.get("SISYPHE_PLAIN", "/Users/sisyphe/srv/sisyphe_plain")
-SISYPHE_PAGES = ("index.html", "dashboard.html", "journal.html", "memento.html", "checklist.html")
+SISYPHE_PAGES = ("index.html", "dashboard.html", "journal.html", "memento.html", "checklist.html", "checklist_test.html")
 NAV_END = '</div></div></nav>'
 
 # ---- AoE 페이지 주입 fragment ----
@@ -177,7 +177,8 @@ def sisyphe_aoe_nav(active):
         '        </div>\n    </div>\n</nav>'
     ) % (cls('checklist'), cls('journal'), cls('memento'), cls('ledger'))
 
-ACTIVE_OF = {'journal.html': 'journal', 'dashboard.html': 'ledger', 'memento.html': 'memento', 'checklist.html': 'checklist'}
+ACTIVE_OF = {'journal.html': 'journal', 'dashboard.html': 'ledger', 'memento.html': 'memento',
+             'checklist.html': 'checklist', 'checklist_test.html': 'checklist'}
 # journal 페이지: 해시(#weekly)에 따라 nav 액티브를 Journal↔Weekly 로 전환 + 페이지 서브탭 동기화
 HASH_ACTIVE_JS = (
     '<script id="aoe-nav-hash-active">document.addEventListener("DOMContentLoaded",function(){'
