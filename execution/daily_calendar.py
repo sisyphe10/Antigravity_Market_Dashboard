@@ -157,7 +157,7 @@ def format_calendar_message(events_by_calendar):
     date_str = now.strftime('%Y-%m-%d')
     day_kor = ["월", "화", "수", "목", "금", "토", "일"][now.weekday()]
     
-    msg = f"📅 오늘의 일정 ({date_str} {day_kor}요일)\n\n"
+    msg = f"🗓️ 오늘의 일정 ({date_str} {day_kor}요일)\n\n"
     
     main_events = events_by_calendar.get('main', [])
     investment_events = events_by_calendar.get('investment', [])
