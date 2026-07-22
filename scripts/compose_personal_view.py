@@ -13,7 +13,7 @@ import os, re, sys, glob, shutil
 
 REL = sys.argv[1]
 SISYPHE_PLAIN = os.environ.get("SISYPHE_PLAIN", "/Users/sisyphe/srv/sisyphe_plain")
-SISYPHE_PAGES = ("index.html", "dashboard.html", "journal.html", "memento.html")
+SISYPHE_PAGES = ("index.html", "dashboard.html", "journal.html", "memento.html", "checklist_test.html")
 NAV_END = '</div></div></nav>'
 
 # ---- AoE 페이지 주입 fragment ----
@@ -21,6 +21,7 @@ NAV_END = '</div></div></nav>'
 WATCHLIST_ITEM = '<div class="topnav-item"><a href="/watchlist/" class="topnav-tab">Watchlist</a></div>'
 WIKI_ITEM = '<div class="topnav-item right-group"><a href="/wiki/" class="topnav-tab">Wiki</a></div>'
 # 2026-07-16 사용자 지시: Invest → Journal 로 개명 + Weekly 별도 탭(딥링크 #weekly)
+CHECKLIST_ITEM = '<div class="topnav-item"><a href="/sisyphe/checklist.html" class="topnav-tab">Checklist</a></div>'
 JOURNAL_ITEM = '<div class="topnav-item"><a href="/sisyphe/journal.html" class="topnav-tab">Journal</a></div>'
 WEEKLY_ITEM = '<div class="topnav-item"><a href="/sisyphe/journal.html#weekly" class="topnav-tab">Weekly</a></div>'
 OLD_INVEST_ITEM = '<div class="topnav-item"><a href="/sisyphe/journal.html" class="topnav-tab">Invest</a></div>'
@@ -175,7 +176,9 @@ def sisyphe_aoe_nav(active):
         '        </div>\n    </div>\n</nav>'
     ) % (cls('journal'), cls('memento'), cls('ledger'))
 
-ACTIVE_OF = {'journal.html': 'journal', 'dashboard.html': 'ledger', 'memento.html': 'memento'}
+# checklist_test.html = 테스트 페이지(직접 URL 전용, nav 탭 없음 → active 없음)
+ACTIVE_OF = {'journal.html': 'journal', 'dashboard.html': 'ledger', 'memento.html': 'memento',
+             'checklist_test.html': None}
 # journal 페이지: 해시(#weekly)에 따라 nav 액티브를 Journal↔Weekly 로 전환 + 페이지 서브탭 동기화
 HASH_ACTIVE_JS = (
     '<script id="aoe-nav-hash-active">document.addEventListener("DOMContentLoaded",function(){'
@@ -262,7 +265,7 @@ for f in glob.glob(os.path.join(REL, "*.html")):
     # 2026-07-18: 브랜드 풀네임 (create_dashboard 원천도 변경 — 정적 페이지 대응 겸 멱등)
     n = n.replace('class="topnav-brand">AoE</a>', 'class="topnav-brand">AGE OF EMERGENCE</a>')
     # 정규화: 기존 주입 fragment·구 Sisyphe 잔재 제거(clean 입력이면 무동작)
-    for frag in (WATCHLIST_ITEM, WIKI_ITEM, OLD_WIKI_ITEM, JOURNAL_ITEM, WEEKLY_ITEM,
+    for frag in (WATCHLIST_ITEM, WIKI_ITEM, OLD_WIKI_ITEM, CHECKLIST_ITEM, JOURNAL_ITEM, WEEKLY_ITEM,
                  OLD_INVEST_ITEM, OLD_INVEST_ITEM_P1,
                  MEMENTO_ITEM, LEDGER_ITEM, OLD_SISYPHE_ITEM, OLD_SISYPHE_DROPDOWN):
         n = n.replace(frag, "")
@@ -380,10 +383,11 @@ for name in SISYPHE_PAGES:
         fail("sisyphe/%s: 다크 CSS 검증 실패" % name)
     if 'topnav-brand">AGE OF EMERGENCE' not in fin:
         fail("sisyphe/%s: AoE nav 교체 검증 실패" % name)
-    active_label = {'journal': 'Journal', 'memento': 'Memento', 'ledger': 'Ledger'}[ACTIVE_OF[name]]
-    chk = fin.replace(' style="margin-left:auto"', '')
-    if ('class="topnav-tab active">%s</a>' % active_label) not in chk:
-        fail("sisyphe/%s: 활성 탭(%s) 검증 실패" % (name, active_label))
+    if ACTIVE_OF[name]:
+        active_label = {'journal': 'Journal', 'memento': 'Memento', 'ledger': 'Ledger'}[ACTIVE_OF[name]]
+        chk = fin.replace(' style="margin-left:auto"', '')
+        if ('class="topnav-tab active">%s</a>' % active_label) not in chk:
+            fail("sisyphe/%s: 활성 탭(%s) 검증 실패" % (name, active_label))
     if 'sisyphe-warm-bar' in fin:
         fail("sisyphe/%s: 웜톤 바 잔존" % name)
     if name in ("journal.html", "dashboard.html") and 'id="aoe-nosidebar"' not in fin:

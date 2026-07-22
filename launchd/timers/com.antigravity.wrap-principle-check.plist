@@ -24,14 +24,24 @@
         <key>LANG</key>
         <string>en_US.UTF-8</string>
     </dict>
-    <!-- KST 17:10 매일 — WRAP 포트폴리오 원칙 준수 점검(위반 시에만 텔레그램). 16:xx 수집 잡들 이후로 배치. -->
+    <!-- KST 17:10 매일(평일 변화기반) + 일 20:00(주간 전체 상세) — WRAP 원칙 준수 점검. 16:xx 수집 잡들 이후로 배치. -->
     <key>StartCalendarInterval</key>
-    <dict>
-        <key>Hour</key>
-        <integer>17</integer>
-        <key>Minute</key>
-        <integer>10</integer>
-    </dict>
+    <array>
+        <dict>
+            <key>Hour</key>
+            <integer>17</integer>
+            <key>Minute</key>
+            <integer>10</integer>
+        </dict>
+        <dict>
+            <key>Weekday</key>
+            <integer>0</integer>
+            <key>Hour</key>
+            <integer>20</integer>
+            <key>Minute</key>
+            <integer>0</integer>
+        </dict>
+    </array>
     <key>StandardOutPath</key>
     <string>__REPO__/logs/launchd/wrap-principle-check.out</string>
     <key>StandardErrorPath</key>
