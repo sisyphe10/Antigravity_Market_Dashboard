@@ -8872,15 +8872,15 @@ def create_dashboard():
         .pw-hidden {{ display: none !important; }}
         {TOP_NAV_CSS}
         {WRAP_NAV_CSS}
-        /* 타이포 정수 스케일 (2026-07-18 AoE 공통 기준: 28/18/16/13/12) — 라이트 테마 불변 */
-        .category-title {{ font-size: 28px !important; }}
+        /* 타이포 정수 스케일 (2026-07-22 개정, AoE 공통: 대제목30/섹션20/표17/헤더15/메타14) */
+        .category-title {{ font-size: 30px !important; }}
         .portfolio-title, .sector-card-title, .fee-title, .pw-box h2,
-        .sect-panel-title {{ font-size: 18px !important; }}
+        .sect-panel-title {{ font-size: 20px !important; }}
         .portfolio-table, .sector-table, .rt-table, .fee-table,
-        #orderContent table {{ font-size: 16px !important; }}
+        #orderContent table {{ font-size: 17px !important; }}
         .portfolio-table th, .sector-table th, .rt-table th, .fee-table th,
-        #orderContent th {{ font-size: 12px !important; }}
-        .sect-not-held-label {{ font-size: 13px !important; }}
+        #orderContent th {{ font-size: 15px !important; }}
+        .sect-not-held-label {{ font-size: 14px !important; }}
     </style>
 </head>
 <body>

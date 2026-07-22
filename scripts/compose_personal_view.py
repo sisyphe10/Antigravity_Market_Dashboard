@@ -108,7 +108,7 @@ AOE_DARK_CSS = (
     '.tl-band-count{background:#1a1b1e!important;color:#d9dde2!important}'
     '.qrow.starred{background:#241a3d!important}'
     '.sidebar-link.active{border-bottom-color:#fb8b1e!important}'
-    '.sidebar{justify-content:center!important}'
+    '.sidebar{justify-content:center!important;gap:0!important}''.sidebar-link+.sidebar-link,.ledger-subtab+.ledger-subtab,.mm-main .subtabs .subtab+.subtab{margin-left:-1.5px!important}''.sidebar-link.active,.ledger-subtab.active{position:relative;z-index:1}'
     # 타이포 정수 스케일 (2026-07-18 사용자 확정): 대제목28/섹션18/표본문16/메타13/표헤더12
     'table,td{font-size:17px!important}'
     'th{font-size:15px!important}'
