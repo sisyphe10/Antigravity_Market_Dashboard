@@ -30,7 +30,7 @@ from fastapi import FastAPI  # noqa: E402
 from fastapi.responses import FileResponse, JSONResponse  # noqa: E402
 from pydantic import BaseModel  # noqa: E402
 
-MODEL = "claude-opus-4-8"
+MODEL = "claude-sonnet-5"  # 2026-07-22 Opus 4.8 → Sonnet 5 (비용 절감, 사용자 결정)
 MAX_LOOP = 12
 STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 WIKI_DIR = os.path.join(REPO, "architecture", "wiki")
