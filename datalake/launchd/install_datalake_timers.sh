@@ -13,7 +13,7 @@ DEST=/Library/LaunchDaemons
 mkdir -p "$REPO/logs/launchd/stamps" "$REPO/logs/launchd/locks"
 chown -R "$MACMINI_USER" "$REPO/logs/launchd" 2>/dev/null || true
 
-for plist in "$SCRIPT_DIR"/com.antigravity.datalake-*.plist; do
+for plist in "$SCRIPT_DIR"/com.antigravity.*.plist; do
   label="$(basename "$plist" .plist)"
   sed -e "s|__MACMINI_USER__|$MACMINI_USER|g" \
       -e "s|__REPO__|$REPO|g" \
