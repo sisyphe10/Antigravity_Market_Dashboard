@@ -3580,53 +3580,50 @@ def _build_wrap_chart_section(category_label):
         aum_data_json = json.dumps(aum_export, ensure_ascii=False)
         colors_json = json.dumps(chart_colors, ensure_ascii=False)
 
-        # ── 사이드테이블 (2026-07-20 개편): DATA 탭 엑셀형 — 행 = (상품 × 구분) 한 시리즈.
-        #    클릭=전환(단일), Shift/Ctrl/⌘+클릭=토글 추가. 구분 헤더 클릭=지표 필터.
-        #    벤치마크(KOSPI/KOSDAQ)는 수익률·MDD 행만 생성.
+        # ── 사이드 패널 (2026-07-23 개편): 엑셀형 테이블 폐기 → 상품명·구분 버튼 2열 단일 카드.
+        #    클릭=전환(단일), Shift/Ctrl/⌘+클릭=토글 추가. 시리즈 = (선택 상품 × 선택 구분) 전 조합.
+        #    키보드: ↑↓=열 내 이동(단일 전환)·←→=열 이동(같은 행, 단일 전환)·Enter=토글 추가.
+        #    벤치마크(KOSPI/KOSDAQ)는 비중·AUM 조합에서 자동 제외.
         benchmarks = {'KOSPI', 'KOSDAQ'}
         _metrics_all = [('return', '수익률'), ('mdd', 'MDD'), ('weight', '비중'), ('aum', 'AUM')]
-        _metrics_bench = [('return', '수익률'), ('mdd', 'MDD')]
-        rows_html = ''
+        prod_btns_html = ''
         added_separator = False
-        _rn = 0
         for display, _ in chart_series:
             if display in benchmarks and not added_separator:
-                rows_html += '<tr class="wcr-sep"><td colspan="3" style="padding:0;border-bottom:2px solid #000;"></td></tr>\n'
+                prod_btns_html += '<hr class="wrap-side-sep">\n'
                 added_separator = True
-            for _mk, _ml in (_metrics_bench if display in benchmarks else _metrics_all):
-                _rn += 1
-                active = ' active' if (display == '삼성 트루밸류' and _mk == 'return') else ''
-                rows_html += (f'<tr class="wrap-chart-row{active}" data-series="{display}" data-metric="{_mk}" '
-                              f'onclick="toggleWrapRow(this, event)">'
-                              f'<td class="wcr-num">{_rn}</td><td class="wcr-name">{display}</td>'
-                              f'<td class="wcr-metric">{_ml}</td></tr>\n')
+            _c = chart_colors.get(display, '#888')
+            prod_btns_html += (f'<button class="wrap-prod-btn" data-prod="{display}" onclick="wrapProdClick(this, event)">'
+                               f'<span class="wrap-side-dot" style="background:{_c}"></span>{display}</button>\n')
+        met_btns_html = ''.join(
+            f'<button class="wrap-met-btn" data-met="{_mk}" onclick="wrapMetClick(this, event)">{_ml}</button>\n'
+            for _mk, _ml in _metrics_all)
         list_html = f'''<style>
-        .wrap-side-wrap {{ max-height: 640px; overflow-y: auto; border: 1px solid #d1d5db; border-radius: 8px; }}
-        .wrap-side-table {{ border-collapse: collapse; width: 100%; font-size: 13px; background: #fff; }}
-        .wrap-side-table th {{ position: sticky; top: 0; z-index: 2; background: #f0f0f0; font-weight: 700; font-size: 13px; color: #000; padding: 8px 6px; text-align: center; white-space: nowrap; border-bottom: 2px solid #374151; user-select: none; }}
-        .wrap-side-table td {{ border: 1px solid #e5e7eb; padding: 6px 8px; white-space: nowrap; text-align: center; color: #000; }}
-        .wrap-chart-row {{ cursor: pointer; user-select: none; }}
-        .wrap-chart-row:hover:not(.active) {{ background: #f3f4f6; }}
-        /* 선택 행: tr 인라인 color(명도 기반 흑/백)가 td에 상속되도록 — td 기본 #000 규칙보다 우선 */
-        .wrap-chart-row.active td {{ color: inherit; font-weight: 700; }}
-        .wcr-num {{ font-size: 12px; width: 26px; }}
-        .wcr-name {{ font-weight: 600; }}
-        .wcr-metric {{ width: 56px; }}
-        #wrapMetricMenu {{ display: none; position: absolute; z-index: 30; background: #fff; border: 1px solid #d1d5db; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 13px; }}
-        #wrapMetricMenu div {{ padding: 7px 18px; cursor: pointer; text-align: center; }}
-        #wrapMetricMenu div:hover {{ background: #f3f4f6; }}
+        .wrap-side-panel {{ width: 330px; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 6px; display: flex; gap: 6px; }}
+        .wrap-col-prod {{ flex: 1 1 auto; }}
+        .wrap-col-metric {{ flex: 0 0 90px; border-left: 1px solid #f0f0f2; padding-left: 6px; }}
+        .wrap-col-head {{ height: 34px; line-height: 34px; text-align: center; font-size: 13px; font-weight: 800; color: #000; background: #f3f4f6; border-radius: 8px; margin-bottom: 4px; user-select: none; }}
+        .wrap-prod-btn {{ display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 36px; padding: 0 8px; background: transparent; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 600; color: #111827; user-select: none; }}
+        .wrap-prod-btn:hover:not(.active) {{ background: #f3f4f6; }}
+        .wrap-prod-btn.active {{ font-weight: 800; }}
+        .wrap-side-dot {{ width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }}
+        .wrap-side-sep {{ border: none; border-top: 1px solid #e5e7eb; margin: 6px 4px; }}
+        .wrap-met-btn {{ display: block; width: 100%; height: 36px; background: transparent; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 600; color: #111827; user-select: none; text-align: center; }}
+        .wrap-met-btn:hover:not(.active) {{ background: #f3f4f6; }}
+        .wrap-met-btn.active {{ background: #111827; color: #fff; font-weight: 700; }}
+        .wrap-kb-cursor {{ outline: 2px solid #111827; outline-offset: -2px; }}
+        /* 진한 배경(선택된 구분 버튼) 위에서는 흰 링 — 동색이라 안 보이는 문제 방지 */
+        .wrap-met-btn.active.wrap-kb-cursor {{ outline-color: #fff; outline-offset: -3px; }}
         </style>
-        <div style="position:relative;">
-        <div class="wrap-side-wrap"><table class="wrap-side-table">
-        <thead><tr><th>#</th><th>상품명</th><th id="wrapMetricFilterTh" onclick="toggleWrapMetricMenu(event)" style="cursor:pointer;" title="구분 필터"><span id="wrapMetricFilterLabel">구분 ▾</span></th></tr></thead>
-        <tbody>{rows_html}</tbody></table></div>
-        <div id="wrapMetricMenu">
-            <div onclick="filterWrapMetric('all')">전체</div>
-            <div onclick="filterWrapMetric('return')">수익률</div>
-            <div onclick="filterWrapMetric('mdd')">MDD</div>
-            <div onclick="filterWrapMetric('weight')">비중</div>
-            <div onclick="filterWrapMetric('aum')">AUM</div>
-        </div>
+        <div class="wrap-side-panel">
+            <div class="wrap-col-prod">
+                <div class="wrap-col-head">상품명</div>
+                <div id="wrapProdBtns">{prod_btns_html}</div>
+            </div>
+            <div class="wrap-col-metric">
+                <div class="wrap-col-head">구분</div>
+                <div id="wrapMetBtns">{met_btns_html}</div>
+            </div>
         </div>'''
 
         dates = nav_export['dates']
@@ -3645,9 +3642,16 @@ def _build_wrap_chart_section(category_label):
             var aumData = AUM_DATA_PLACEHOLDER;
             var chartColors = COLORS_PLACEHOLDER;
             var wrapChart = null;
-            // 클릭 순서 추적 — 첫 항목 = 앵커(x축 기간 결정). 초기값은 기본 선택 행과 일치.
-            var wrapClickOrder = ['삼성 트루밸류|return'];
-            // 2026-07-20 사이드테이블 개편: 행 = (상품 × 구분) 한 시리즈. 축 = y(수익률·MDD %)/y1(비중 %)/y2(AUM 억).
+            // 2026-07-23 버튼 패널 개편: 선택 = 상품 집합 × 구분 집합 → 전 조합이 시리즈.
+            // 클릭 순서 추적 — (상품 order[0] × 구분 order[0]) = 앵커(x축 기간 결정).
+            var wrapSelProd = { '삼성 트루밸류': true };
+            var wrapSelMet = { 'return': true };
+            var wrapProdOrder = ['삼성 트루밸류'];
+            var wrapMetOrder = ['return'];
+            var PROD_LIST = Array.prototype.map.call(document.querySelectorAll('#wrapProdBtns .wrap-prod-btn'), function(b) { return b.getAttribute('data-prod'); });
+            var MET_LIST = ['return', 'mdd', 'weight', 'aum'];
+            var BENCH_SET = { 'KOSPI': 1, 'KOSDAQ': 1 };
+            var wrapKbCursor = { col: 'prod', idx: 0 };   // 키보드 커서
             var METRIC_LABEL = { 'return': '수익률', 'mdd': 'MDD', 'weight': '비중', 'aum': 'AUM' };
             // 같은 계열 명도 단계 (점선 대신 색으로 구분): AUM 진함 > 수익률 기본 > MDD 연함 > 비중 가장 연함.
             // ★흰색 혼합은 채도가 빨려 탁해짐 → HSL 명도만 조정(채도 하한 유지)으로 선명한 계열색 생성 (2026-07-20).
@@ -3683,9 +3687,16 @@ def _build_wrap_chart_section(category_label):
             }
 
             function buildChart() {
+                renderWrapSideButtons();
+                // 선택 상품 × 선택 구분 전 조합 (벤치마크는 비중·AUM 제외)
                 var pairs = [];
-                document.querySelectorAll('.wrap-chart-row.active').forEach(function(el) {
-                    pairs.push({ name: el.getAttribute('data-series'), metric: el.getAttribute('data-metric') });
+                PROD_LIST.forEach(function(nm) {
+                    if (!wrapSelProd[nm]) return;
+                    MET_LIST.forEach(function(mk) {
+                        if (!wrapSelMet[mk]) return;
+                        if (BENCH_SET[nm] && (mk === 'weight' || mk === 'aum')) return;
+                        pairs.push({ name: nm, metric: mk });
+                    });
                 });
                 var startDate = document.getElementById('wrapStartDate').value;
                 var endDate = document.getElementById('wrapEndDate').value;
@@ -3723,11 +3734,13 @@ def _build_wrap_chart_section(category_label):
                 // ★{x,y} 객체 + category labels 혼용 시 호버(index 모드)가 데이터 배열 인덱스와
                 //   라벨이 어긋나 엉뚱한 날짜 값을 표시("누운 V자"·호버 오표시) → 라벨 정렬 배열로
                 //   세로(날짜 컬럼) 스냅 정상화.
-                // x축 = 앵커(첫 클릭·잔존 선택 중 가장 이른 클릭) 페어의 유효 날짜. 앵커가 데이터를 못 내면 합집합 폴백.
+                // x축 = 앵커(상품·구분 각 첫 클릭 조합, 데이터 없으면 클릭 순서대로 폴백) 페어의 유효 날짜. 전부 실패 시 합집합.
                 var allDates = null;
-                for (var oi = 0; oi < wrapClickOrder.length && !allDates; oi++) {
-                    for (var pi = 0; pi < perPair.length; pi++) {
-                        if (perPair[pi].name + '|' + perPair[pi].metric === wrapClickOrder[oi]) { allDates = perPair[pi].dates.slice(); break; }
+                for (var oi = 0; oi < wrapProdOrder.length && !allDates; oi++) {
+                    for (var mi = 0; mi < wrapMetOrder.length && !allDates; mi++) {
+                        for (var pi = 0; pi < perPair.length; pi++) {
+                            if (perPair[pi].name === wrapProdOrder[oi] && perPair[pi].metric === wrapMetOrder[mi]) { allDates = perPair[pi].dates.slice(); break; }
+                        }
                     }
                 }
                 if (!allDates) allDates = Array.from(new Set(perSeries.reduce(function(a, s){ return a.concat(s.dates); }, []))).sort();
@@ -3894,27 +3907,6 @@ def _build_wrap_chart_section(category_label):
                 });
                 var _padRight = Math.max(60, Math.ceil(_maxLblW) + 15);
 
-                // 사이드테이블 선택 행 = 시리즈 색 배경 (테이블이 범례 역할). 글씨색은 배경 명도로 흑/백 자동.
-                function textColorFor(c) {
-                    if (c.charAt(0) === '#') {
-                        var lum = 0.299 * parseInt(c.slice(1, 3), 16) + 0.587 * parseInt(c.slice(3, 5), 16) + 0.114 * parseInt(c.slice(5, 7), 16);
-                        return lum > 150 ? '#000' : '#fff';
-                    }
-                    var mh = c.match(/hsl\(\s*[\d.]+\s*,\s*[\d.]+%\s*,\s*([\d.]+)%/);
-                    if (mh) return parseFloat(mh[1]) > 58 ? '#000' : '#fff';
-                    return '#fff';
-                }
-                document.querySelectorAll('.wrap-chart-row').forEach(function(el) {
-                    if (el.classList.contains('active')) {
-                        var c = metricColor(chartColors[el.getAttribute('data-series')] || '#888', el.getAttribute('data-metric'));
-                        el.style.background = c;
-                        el.style.color = textColorFor(c);
-                    } else {
-                        el.style.background = '';
-                        el.style.color = '';
-                    }
-                });
-
                 if (wrapChart) wrapChart.destroy();
                 wrapChart = new Chart(document.getElementById('wrapDynamicChart'), {
                     type: 'line',
@@ -3970,52 +3962,114 @@ def _build_wrap_chart_section(category_label):
                 return first ? { start: first, end: last } : null;
             }
             function applyAnchorPeriod() {
-                if (!wrapClickOrder.length) return;
-                var p = wrapClickOrder[0].split('|');
-                var r = pairRange(p[0], p[1]);
-                if (!r) return;
-                document.getElementById('wrapStartDate').value = r.start;
-                document.getElementById('wrapEndDate').value = r.end;
-            }
-            // 행 클릭 = 전환(단일 선택, 기간=그 시리즈 전체) / Shift·Ctrl·⌘+클릭 = 토글 추가(축 유지)
-            window.toggleWrapRow = function(el, ev) {
-                var multi = ev && (ev.shiftKey || ev.ctrlKey || ev.metaKey);
-                var key = el.getAttribute('data-series') + '|' + el.getAttribute('data-metric');
-                if (multi) {
-                    el.classList.toggle('active');
-                    var idx = wrapClickOrder.indexOf(key);
-                    if (el.classList.contains('active')) {
-                        if (idx < 0) wrapClickOrder.push(key);
-                    } else if (idx >= 0) {
-                        wrapClickOrder.splice(idx, 1);
-                        if (idx === 0) applyAnchorPeriod();   // 앵커 제거 → 다음 선택이 축 승계
+                for (var oi = 0; oi < wrapProdOrder.length; oi++) {
+                    for (var mi = 0; mi < wrapMetOrder.length; mi++) {
+                        var r = pairRange(wrapProdOrder[oi], wrapMetOrder[mi]);
+                        if (r) {
+                            document.getElementById('wrapStartDate').value = r.start;
+                            document.getElementById('wrapEndDate').value = r.end;
+                            return;
+                        }
                     }
-                } else {
-                    document.querySelectorAll('.wrap-chart-row.active').forEach(function(x) {
-                        if (x !== el) x.classList.remove('active');
-                    });
-                    el.classList.add('active');
-                    wrapClickOrder = [key];
-                    applyAnchorPeriod();
                 }
+            }
+            // 사이드 버튼 활성/커서 표시 — 상품=옅은 계열색 틴트+계열색 글씨, 구분=진한 채움
+            function wrapTint(hex, a) {
+                if (hex.charAt(0) !== '#') return hex;
+                return 'rgba(' + parseInt(hex.slice(1, 3), 16) + ',' + parseInt(hex.slice(3, 5), 16) + ',' + parseInt(hex.slice(5, 7), 16) + ',' + a + ')';
+            }
+            function renderWrapSideButtons() {
+                document.querySelectorAll('#wrapProdBtns .wrap-prod-btn').forEach(function(el, i) {
+                    var nm = el.getAttribute('data-prod');
+                    var on = !!wrapSelProd[nm];
+                    el.classList.toggle('active', on);
+                    el.classList.toggle('wrap-kb-cursor', wrapKbCursor.col === 'prod' && wrapKbCursor.idx === i);
+                    var c = chartColors[nm] || '#888';
+                    el.style.background = on ? wrapTint(c, 0.13) : '';
+                    el.style.color = on ? c : '';
+                });
+                document.querySelectorAll('#wrapMetBtns .wrap-met-btn').forEach(function(el, i) {
+                    el.classList.toggle('active', !!wrapSelMet[el.getAttribute('data-met')]);
+                    el.classList.toggle('wrap-kb-cursor', wrapKbCursor.col === 'met' && wrapKbCursor.idx === i);
+                });
+            }
+            // 선택 토글 공용: 단일 전환(true 반환=기간 재적용) / multi=토글 추가(앵커 헤드 제거 시 true)
+            function wrapToggleSel(sel, order, key, multi) {
+                if (multi) {
+                    if (sel[key]) {
+                        delete sel[key];
+                        var i = order.indexOf(key);
+                        if (i >= 0) order.splice(i, 1);
+                        if (!Object.keys(sel).length) { sel[key] = true; order.push(key); return false; }
+                        return i === 0;   // 앵커 헤드 제거 → 다음 선택이 축 승계
+                    }
+                    sel[key] = true;
+                    order.push(key);
+                    return false;
+                }
+                Object.keys(sel).forEach(function(k) { delete sel[k]; });
+                sel[key] = true;
+                order.length = 0;
+                order.push(key);
+                return true;
+            }
+            // 버튼 클릭 = 전환(단일, 기간=앵커 전체) / Shift·Ctrl·⌘+클릭 = 토글 추가(축 유지)
+            window.wrapProdClick = function(el, ev) {
+                var multi = ev && (ev.shiftKey || ev.ctrlKey || ev.metaKey);
+                var nm = el.getAttribute('data-prod');
+                var needPeriod = wrapToggleSel(wrapSelProd, wrapProdOrder, nm, multi);
+                wrapKbCursor = { col: 'prod', idx: PROD_LIST.indexOf(nm) };
+                if (needPeriod) applyAnchorPeriod();
                 buildChart();
             };
-            // 구분 헤더 필터 (표시만 거름 — 선택 상태는 유지)
-            window.toggleWrapMetricMenu = function(ev) {
-                ev.stopPropagation();
-                var m = document.getElementById('wrapMetricMenu');
-                m.style.display = m.style.display === 'block' ? 'none' : 'block';
+            window.wrapMetClick = function(el, ev) {
+                var multi = ev && (ev.shiftKey || ev.ctrlKey || ev.metaKey);
+                var mk = el.getAttribute('data-met');
+                var needPeriod = wrapToggleSel(wrapSelMet, wrapMetOrder, mk, multi);
+                wrapKbCursor = { col: 'met', idx: MET_LIST.indexOf(mk) };
+                if (needPeriod) applyAnchorPeriod();
+                buildChart();
             };
-            window.filterWrapMetric = function(mk) {
-                document.querySelectorAll('.wrap-chart-row').forEach(function(el) {
-                    el.style.display = (mk === 'all' || el.getAttribute('data-metric') === mk) ? '' : 'none';
-                });
-                document.getElementById('wrapMetricFilterLabel').textContent = (mk === 'all' ? '구분' : METRIC_LABEL[mk]) + ' ▾';
-                document.getElementById('wrapMetricMenu').style.display = 'none';
-            };
-            document.addEventListener('click', function() {
-                var m = document.getElementById('wrapMetricMenu');
-                if (m) m.style.display = 'none';
+            // 키보드: ↑↓=열 내 이동(단일 전환, 순환)·←→=열 이동(같은 행, 단일 전환)·Enter=토글 추가.
+            // Shift/Ctrl+화살표=토글 추가 이동. 차트 재계산은 마지막 입력 후 80ms 모아서 1회(연타 랙 방지).
+            var _wrapKbTimer = null;
+            document.addEventListener('keydown', function(e) {
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter'].indexOf(e.key) < 0) return;
+                var t = e.target;
+                if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
+                var panel = document.getElementById('wrapProdBtns');
+                if (!panel || panel.offsetParent === null) return;   // CHART 섹션 비가시(다른 탭/게이트) 시 무시
+                e.preventDefault();
+                var multi = e.shiftKey || e.ctrlKey || e.metaKey;
+                var needPeriod = false;
+                if (e.key === 'Enter') {
+                    if (wrapKbCursor.col === 'prod') needPeriod = wrapToggleSel(wrapSelProd, wrapProdOrder, PROD_LIST[wrapKbCursor.idx], true);
+                    else needPeriod = wrapToggleSel(wrapSelMet, wrapMetOrder, MET_LIST[wrapKbCursor.idx], true);
+                } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                    if (wrapKbCursor.col === 'prod') {
+                        wrapKbCursor = { col: 'met', idx: Math.min(wrapKbCursor.idx, MET_LIST.length - 1) };
+                        needPeriod = wrapToggleSel(wrapSelMet, wrapMetOrder, MET_LIST[wrapKbCursor.idx], multi);
+                    } else {
+                        wrapKbCursor = { col: 'prod', idx: Math.min(wrapKbCursor.idx, PROD_LIST.length - 1) };
+                        needPeriod = wrapToggleSel(wrapSelProd, wrapProdOrder, PROD_LIST[wrapKbCursor.idx], multi);
+                    }
+                } else {
+                    var d = e.key === 'ArrowUp' ? -1 : 1;
+                    if (wrapKbCursor.col === 'prod') {
+                        wrapKbCursor.idx = (wrapKbCursor.idx + d + PROD_LIST.length) % PROD_LIST.length;
+                        needPeriod = wrapToggleSel(wrapSelProd, wrapProdOrder, PROD_LIST[wrapKbCursor.idx], multi);
+                    } else {
+                        wrapKbCursor.idx = (wrapKbCursor.idx + d + MET_LIST.length) % MET_LIST.length;
+                        needPeriod = wrapToggleSel(wrapSelMet, wrapMetOrder, MET_LIST[wrapKbCursor.idx], multi);
+                    }
+                }
+                renderWrapSideButtons();   // 버튼 상태·커서는 즉시 반영
+                var _np = needPeriod;
+                if (_wrapKbTimer) clearTimeout(_wrapKbTimer);
+                _wrapKbTimer = setTimeout(function() {
+                    if (_np) applyAnchorPeriod();
+                    buildChart();
+                }, 80);
             });
             window.updateWrapChart = buildChart;
             window.downloadWrapChart = function() {
@@ -4054,7 +4108,7 @@ def _build_wrap_chart_section(category_label):
         <div class="category-section" id="wrap-sec-chart">
             <h2 class="category-title">{category_label}</h2>
             <div style="display:flex;gap:16px;align-items:flex-start;justify-content:center;max-width:1800px;margin:0 auto;">
-                <div style="min-width:270px;">{list_html}</div>
+                <div style="flex:0 0 330px;">{list_html}</div>
                 <div style="width:1000px;">
                     <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;font-size:13px;">
                         <span style="color:#555;font-weight:600;">기간</span>
