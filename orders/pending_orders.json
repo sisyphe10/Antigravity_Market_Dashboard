@@ -1,778 +1,4 @@
 {
-  "2026-07-23": {
-    "삼성 트루밸류": {
-      "targets": [
-        {
-          "broker": "삼성",
-          "product": "트루밸류"
-        }
-      ],
-      "stocks": [
-        {
-          "sector": "반도체",
-          "code": "005930",
-          "name": "삼성전자",
-          "weight": 25,
-          "baseWeight": 25,
-          "reason": ""
-        },
-        {
-          "sector": "반도체",
-          "code": "000660",
-          "name": "SK하이닉스",
-          "weight": 25,
-          "baseWeight": 20,
-          "reason": "구글의 CAPEX에 대한 의지 확인으로 비중 재차 확대, 향후 빅테크들 실적발표에서도 긍정적인 콜 기대"
-        },
-        {
-          "sector": "기타",
-          "code": "005935",
-          "name": "삼성전자우",
-          "weight": 5,
-          "baseWeight": 3,
-          "reason": "구글의 CAPEX에 대한 의지 확인으로 비중 재차 확대, 향후 빅테크들 실적발표에서도 긍정적인 콜 기대"
-        },
-        {
-          "sector": "상사,자본재",
-          "code": "402340",
-          "name": "SK스퀘어",
-          "weight": 3,
-          "baseWeight": 3,
-          "reason": ""
-        },
-        {
-          "sector": "소매(유통)",
-          "code": "004170",
-          "name": "신세계",
-          "weight": 3,
-          "baseWeight": 3,
-          "reason": ""
-        },
-        {
-          "sector": "에너지",
-          "code": "010950",
-          "name": "S-Oil",
-          "weight": 3,
-          "baseWeight": 3,
-          "reason": ""
-        },
-        {
-          "sector": "반도체",
-          "code": "080220",
-          "name": "제주반도체",
-          "weight": 5,
-          "baseWeight": 3,
-          "reason": "DDR4의 현물가 급등세가 가파른 상황으로, 하반기에도 긍정적인 실적 기대, 비중 확대"
-        },
-        {
-          "sector": "필수소비재",
-          "code": "003230",
-          "name": "삼양식품",
-          "weight": 2,
-          "baseWeight": 2,
-          "reason": ""
-        },
-        {
-          "sector": "은행",
-          "code": "105560",
-          "name": "KB금융",
-          "weight": 1,
-          "baseWeight": 1,
-          "reason": ""
-        },
-        {
-          "sector": "은행",
-          "code": "086790",
-          "name": "하나금융지주",
-          "weight": 1,
-          "baseWeight": 1,
-          "reason": ""
-        },
-        {
-          "sector": "자동차",
-          "code": "005380",
-          "name": "현대차",
-          "weight": 1,
-          "baseWeight": 1,
-          "reason": ""
-        },
-        {
-          "sector": "건설,건축관련",
-          "code": "006360",
-          "name": "GS건설",
-          "weight": 1,
-          "baseWeight": 0,
-          "reason": "동해시에 데이터센터 건설 예정으로, 기확보한 전력과 용수를 바탕으로 속도감 있게 진행될 예정으로 신규 매수"
-        },
-        {
-          "sector": "통신서비스",
-          "code": "017670",
-          "name": "SK텔레콤",
-          "weight": 1,
-          "baseWeight": 0,
-          "reason": "SK 그룹 내 AI 컨트롤타워 역할, 앤스로픽 IPO 기대감도 여전히 유효"
-        },
-        {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 1,
-          "baseWeight": 0,
-          "reason": "국내 데이터센터 사업에 대한 시장의 긍정적인 평가로 각세종을 기반으로 용량 확대 중인 네이버 신규 매수"
-        }
-      ],
-      "savedAt": "2026-07-23T00:51:56.099Z",
-      "finalizedAt": "2026-07-23T16:00:04+09:00"
-    },
-    "NH 다이내믹 밸류": {
-      "targets": [
-        {
-          "broker": "NH",
-          "product": "Value ESG"
-        }
-      ],
-      "stocks": [
-        {
-          "sector": "반도체",
-          "code": "005930",
-          "name": "삼성전자",
-          "weight": 25,
-          "baseWeight": 25,
-          "reason": ""
-        },
-        {
-          "sector": "반도체",
-          "code": "000660",
-          "name": "SK하이닉스",
-          "weight": 25,
-          "baseWeight": 20,
-          "reason": "구글의 CAPEX에 대한 의지 확인으로 비중 재차 확대, 향후 빅테크들 실적발표에서도 긍정적인 콜 기대"
-        },
-        {
-          "sector": "기타",
-          "code": "005935",
-          "name": "삼성전자우",
-          "weight": 5,
-          "baseWeight": 3,
-          "reason": "구글의 CAPEX에 대한 의지 확인으로 비중 재차 확대, 향후 빅테크들 실적발표에서도 긍정적인 콜 기대"
-        },
-        {
-          "sector": "상사,자본재",
-          "code": "402340",
-          "name": "SK스퀘어",
-          "weight": 3,
-          "baseWeight": 3,
-          "reason": ""
-        },
-        {
-          "sector": "소매(유통)",
-          "code": "004170",
-          "name": "신세계",
-          "weight": 3,
-          "baseWeight": 3,
-          "reason": ""
-        },
-        {
-          "sector": "에너지",
-          "code": "010950",
-          "name": "S-Oil",
-          "weight": 3,
-          "baseWeight": 3,
-          "reason": ""
-        },
-        {
-          "sector": "반도체",
-          "code": "080220",
-          "name": "제주반도체",
-          "weight": 5,
-          "baseWeight": 3,
-          "reason": "DDR4의 현물가 급등세가 가파른 상황으로, 하반기에도 긍정적인 실적 기대, 비중 확대"
-        },
-        {
-          "sector": "필수소비재",
-          "code": "003230",
-          "name": "삼양식품",
-          "weight": 2,
-          "baseWeight": 2,
-          "reason": ""
-        },
-        {
-          "sector": "은행",
-          "code": "105560",
-          "name": "KB금융",
-          "weight": 1,
-          "baseWeight": 1,
-          "reason": ""
-        },
-        {
-          "sector": "은행",
-          "code": "086790",
-          "name": "하나금융지주",
-          "weight": 1,
-          "baseWeight": 1,
-          "reason": ""
-        },
-        {
-          "sector": "자동차",
-          "code": "005380",
-          "name": "현대차",
-          "weight": 1,
-          "baseWeight": 1,
-          "reason": ""
-        },
-        {
-          "sector": "건설,건축관련",
-          "code": "006360",
-          "name": "GS건설",
-          "weight": 1,
-          "baseWeight": 0,
-          "reason": "동해시에 데이터센터 건설 예정으로, 기확보한 전력과 용수를 바탕으로 속도감 있게 진행될 예정으로 신규 매수"
-        },
-        {
-          "sector": "통신서비스",
-          "code": "017670",
-          "name": "SK텔레콤",
-          "weight": 1,
-          "baseWeight": 0,
-          "reason": "SK 그룹 내 AI 컨트롤타워 역할, 앤스로픽 IPO 기대감도 여전히 유효"
-        },
-        {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 1,
-          "baseWeight": 0,
-          "reason": "국내 데이터센터 사업에 대한 시장의 긍정적인 평가로 각세종을 기반으로 용량 확대 중인 네이버 신규 매수"
-        }
-      ],
-      "savedAt": "2026-07-23T00:51:56.099Z",
-      "finalizedAt": "2026-07-23T16:00:04+09:00"
-    },
-    "DB 개방형": {
-      "targets": [
-        {
-          "broker": "DB",
-          "product": "개방형 랩"
-        }
-      ],
-      "stocks": [
-        {
-          "sector": "반도체",
-          "code": "005930",
-          "name": "삼성전자",
-          "weight": 25,
-          "baseWeight": 25,
-          "reason": ""
-        },
-        {
-          "sector": "반도체",
-          "code": "000660",
-          "name": "SK하이닉스",
-          "weight": 25,
-          "baseWeight": 20,
-          "reason": "구글의 CAPEX에 대한 의지 확인으로 비중 재차 확대, 향후 빅테크들 실적발표에서도 긍정적인 콜 기대"
-        },
-        {
-          "sector": "기타",
-          "code": "005935",
-          "name": "삼성전자우",
-          "weight": 5,
-          "baseWeight": 3,
-          "reason": "구글의 CAPEX에 대한 의지 확인으로 비중 재차 확대, 향후 빅테크들 실적발표에서도 긍정적인 콜 기대"
-        },
-        {
-          "sector": "상사,자본재",
-          "code": "402340",
-          "name": "SK스퀘어",
-          "weight": 3,
-          "baseWeight": 3,
-          "reason": ""
-        },
-        {
-          "sector": "소매(유통)",
-          "code": "004170",
-          "name": "신세계",
-          "weight": 3,
-          "baseWeight": 3,
-          "reason": ""
-        },
-        {
-          "sector": "에너지",
-          "code": "010950",
-          "name": "S-Oil",
-          "weight": 3,
-          "baseWeight": 3,
-          "reason": ""
-        },
-        {
-          "sector": "반도체",
-          "code": "080220",
-          "name": "제주반도체",
-          "weight": 5,
-          "baseWeight": 3,
-          "reason": "DDR4의 현물가 급등세가 가파른 상황으로, 하반기에도 긍정적인 실적 기대, 비중 확대"
-        },
-        {
-          "sector": "필수소비재",
-          "code": "003230",
-          "name": "삼양식품",
-          "weight": 2,
-          "baseWeight": 2,
-          "reason": ""
-        },
-        {
-          "sector": "은행",
-          "code": "105560",
-          "name": "KB금융",
-          "weight": 1,
-          "baseWeight": 1,
-          "reason": ""
-        },
-        {
-          "sector": "은행",
-          "code": "086790",
-          "name": "하나금융지주",
-          "weight": 1,
-          "baseWeight": 1,
-          "reason": ""
-        },
-        {
-          "sector": "자동차",
-          "code": "005380",
-          "name": "현대차",
-          "weight": 1,
-          "baseWeight": 1,
-          "reason": ""
-        },
-        {
-          "sector": "건설,건축관련",
-          "code": "006360",
-          "name": "GS건설",
-          "weight": 1,
-          "baseWeight": 0,
-          "reason": "동해시에 데이터센터 건설 예정으로, 기확보한 전력과 용수를 바탕으로 속도감 있게 진행될 예정으로 신규 매수"
-        },
-        {
-          "sector": "통신서비스",
-          "code": "017670",
-          "name": "SK텔레콤",
-          "weight": 1,
-          "baseWeight": 0,
-          "reason": "SK 그룹 내 AI 컨트롤타워 역할, 앤스로픽 IPO 기대감도 여전히 유효"
-        },
-        {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 1,
-          "baseWeight": 0,
-          "reason": "국내 데이터센터 사업에 대한 시장의 긍정적인 평가로 각세종을 기반으로 용량 확대 중인 네이버 신규 매수"
-        }
-      ],
-      "savedAt": "2026-07-23T00:51:56.099Z",
-      "finalizedAt": "2026-07-23T16:00:04+09:00"
-    },
-    "한투 지속형": {
-      "targets": [
-        {
-          "broker": "한투",
-          "product": "지속형"
-        }
-      ],
-      "stocks": [
-        {
-          "sector": "반도체",
-          "code": "005930",
-          "name": "삼성전자",
-          "weight": 25,
-          "baseWeight": 25,
-          "reason": ""
-        },
-        {
-          "sector": "반도체",
-          "code": "000660",
-          "name": "SK하이닉스",
-          "weight": 25,
-          "baseWeight": 20,
-          "reason": "구글의 CAPEX에 대한 의지 확인으로 비중 재차 확대, 향후 빅테크들 실적발표에서도 긍정적인 콜 기대"
-        },
-        {
-          "sector": "기타",
-          "code": "005935",
-          "name": "삼성전자우",
-          "weight": 5,
-          "baseWeight": 3,
-          "reason": "구글의 CAPEX에 대한 의지 확인으로 비중 재차 확대, 향후 빅테크들 실적발표에서도 긍정적인 콜 기대"
-        },
-        {
-          "sector": "상사,자본재",
-          "code": "402340",
-          "name": "SK스퀘어",
-          "weight": 3,
-          "baseWeight": 3,
-          "reason": ""
-        },
-        {
-          "sector": "소매(유통)",
-          "code": "004170",
-          "name": "신세계",
-          "weight": 3,
-          "baseWeight": 3,
-          "reason": ""
-        },
-        {
-          "sector": "에너지",
-          "code": "010950",
-          "name": "S-Oil",
-          "weight": 3,
-          "baseWeight": 3,
-          "reason": ""
-        },
-        {
-          "sector": "반도체",
-          "code": "080220",
-          "name": "제주반도체",
-          "weight": 5,
-          "baseWeight": 3,
-          "reason": "DDR4의 현물가 급등세가 가파른 상황으로, 하반기에도 긍정적인 실적 기대, 비중 확대"
-        },
-        {
-          "sector": "필수소비재",
-          "code": "003230",
-          "name": "삼양식품",
-          "weight": 2,
-          "baseWeight": 2,
-          "reason": ""
-        },
-        {
-          "sector": "은행",
-          "code": "105560",
-          "name": "KB금융",
-          "weight": 1,
-          "baseWeight": 1,
-          "reason": ""
-        },
-        {
-          "sector": "은행",
-          "code": "086790",
-          "name": "하나금융지주",
-          "weight": 1,
-          "baseWeight": 1,
-          "reason": ""
-        },
-        {
-          "sector": "자동차",
-          "code": "005380",
-          "name": "현대차",
-          "weight": 1,
-          "baseWeight": 1,
-          "reason": ""
-        },
-        {
-          "sector": "건설,건축관련",
-          "code": "006360",
-          "name": "GS건설",
-          "weight": 1,
-          "baseWeight": 0,
-          "reason": "동해시에 데이터센터 건설 예정으로, 기확보한 전력과 용수를 바탕으로 속도감 있게 진행될 예정으로 신규 매수"
-        },
-        {
-          "sector": "통신서비스",
-          "code": "017670",
-          "name": "SK텔레콤",
-          "weight": 1,
-          "baseWeight": 0,
-          "reason": "SK 그룹 내 AI 컨트롤타워 역할, 앤스로픽 IPO 기대감도 여전히 유효"
-        },
-        {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 1,
-          "baseWeight": 0,
-          "reason": "국내 데이터센터 사업에 대한 시장의 긍정적인 평가로 각세종을 기반으로 용량 확대 중인 네이버 신규 매수"
-        }
-      ],
-      "savedAt": "2026-07-23T00:51:56.099Z",
-      "finalizedAt": "2026-07-23T16:00:04+09:00"
-    },
-    "NH 목표전환형 5호": {
-      "targets": [
-        {
-          "broker": "NH",
-          "product": "목표전환형 5호"
-        }
-      ],
-      "stocks": [
-        {
-          "sector": "반도체",
-          "code": "005930",
-          "name": "삼성전자",
-          "weight": 25,
-          "baseWeight": 25,
-          "reason": ""
-        },
-        {
-          "sector": "반도체",
-          "code": "000660",
-          "name": "SK하이닉스",
-          "weight": 25,
-          "baseWeight": 20,
-          "reason": "구글의 CAPEX에 대한 의지 확인으로 비중 재차 확대, 향후 빅테크들 실적발표에서도 긍정적인 콜 기대"
-        },
-        {
-          "sector": "반도체",
-          "code": "080220",
-          "name": "제주반도체",
-          "weight": 7,
-          "baseWeight": 5,
-          "reason": "DDR4의 현물가 급등세가 가파른 상황으로, 하반기에도 긍정적인 실적 기대, 비중 확대"
-        },
-        {
-          "sector": "기타",
-          "code": "005935",
-          "name": "삼성전자우",
-          "weight": 5,
-          "baseWeight": 3,
-          "reason": "구글의 CAPEX에 대한 의지 확인으로 비중 재차 확대, 향후 빅테크들 실적발표에서도 긍정적인 콜 기대"
-        },
-        {
-          "sector": "상사,자본재",
-          "code": "402340",
-          "name": "SK스퀘어",
-          "weight": 3,
-          "baseWeight": 3,
-          "reason": ""
-        },
-        {
-          "sector": "소매(유통)",
-          "code": "004170",
-          "name": "신세계",
-          "weight": 3,
-          "baseWeight": 3,
-          "reason": ""
-        },
-        {
-          "sector": "에너지",
-          "code": "010950",
-          "name": "S-Oil",
-          "weight": 3,
-          "baseWeight": 3,
-          "reason": ""
-        },
-        {
-          "sector": "건설,건축관련",
-          "code": "006360",
-          "name": "GS건설",
-          "weight": 2,
-          "baseWeight": 0,
-          "reason": "동해시에 데이터센터 건설 예정으로, 기확보한 전력과 용수를 바탕으로 속도감 있게 진행될 예정으로 신규 매수"
-        },
-        {
-          "sector": "통신서비스",
-          "code": "017670",
-          "name": "SK텔레콤",
-          "weight": 2,
-          "baseWeight": 0,
-          "reason": "SK 그룹 내 AI 컨트롤타워 역할, 앤스로픽 IPO 기대감도 여전히 유효"
-        },
-        {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 2,
-          "baseWeight": 0,
-          "reason": "국내 데이터센터 사업에 대한 시장의 긍정적인 평가로 각세종을 기반으로 용량 확대 중인 네이버 신규 매수"
-        }
-      ],
-      "savedAt": "2026-07-23T00:51:56.099Z",
-      "finalizedAt": "2026-07-23T16:00:04+09:00"
-    },
-    "DB 목표전환형 6차": {
-      "targets": [
-        {
-          "broker": "DB",
-          "product": "목표전환형 6차"
-        }
-      ],
-      "stocks": [
-        {
-          "sector": "반도체",
-          "code": "005930",
-          "name": "삼성전자",
-          "weight": 25,
-          "baseWeight": 25,
-          "reason": ""
-        },
-        {
-          "sector": "반도체",
-          "code": "000660",
-          "name": "SK하이닉스",
-          "weight": 25,
-          "baseWeight": 20,
-          "reason": "구글의 CAPEX에 대한 의지 확인으로 비중 재차 확대, 향후 빅테크들 실적발표에서도 긍정적인 콜 기대"
-        },
-        {
-          "sector": "반도체",
-          "code": "080220",
-          "name": "제주반도체",
-          "weight": 7,
-          "baseWeight": 5,
-          "reason": "DDR4의 현물가 급등세가 가파른 상황으로, 하반기에도 긍정적인 실적 기대, 비중 확대"
-        },
-        {
-          "sector": "기타",
-          "code": "005935",
-          "name": "삼성전자우",
-          "weight": 5,
-          "baseWeight": 3,
-          "reason": "구글의 CAPEX에 대한 의지 확인으로 비중 재차 확대, 향후 빅테크들 실적발표에서도 긍정적인 콜 기대"
-        },
-        {
-          "sector": "상사,자본재",
-          "code": "402340",
-          "name": "SK스퀘어",
-          "weight": 3,
-          "baseWeight": 3,
-          "reason": ""
-        },
-        {
-          "sector": "소매(유통)",
-          "code": "004170",
-          "name": "신세계",
-          "weight": 3,
-          "baseWeight": 3,
-          "reason": ""
-        },
-        {
-          "sector": "에너지",
-          "code": "010950",
-          "name": "S-Oil",
-          "weight": 3,
-          "baseWeight": 3,
-          "reason": ""
-        },
-        {
-          "sector": "건설,건축관련",
-          "code": "006360",
-          "name": "GS건설",
-          "weight": 2,
-          "baseWeight": 0,
-          "reason": "동해시에 데이터센터 건설 예정으로, 기확보한 전력과 용수를 바탕으로 속도감 있게 진행될 예정으로 신규 매수"
-        },
-        {
-          "sector": "통신서비스",
-          "code": "017670",
-          "name": "SK텔레콤",
-          "weight": 2,
-          "baseWeight": 0,
-          "reason": "SK 그룹 내 AI 컨트롤타워 역할, 앤스로픽 IPO 기대감도 여전히 유효"
-        },
-        {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 2,
-          "baseWeight": 0,
-          "reason": "국내 데이터센터 사업에 대한 시장의 긍정적인 평가로 각세종을 기반으로 용량 확대 중인 네이버 신규 매수"
-        }
-      ],
-      "savedAt": "2026-07-23T00:51:56.099Z",
-      "finalizedAt": "2026-07-23T16:00:04+09:00"
-    },
-    "한투 성과모집형 1차": {
-      "targets": [
-        {
-          "broker": "한투",
-          "product": "성과모집형 1차"
-        }
-      ],
-      "stocks": [
-        {
-          "sector": "반도체",
-          "code": "005930",
-          "name": "삼성전자",
-          "weight": 25,
-          "baseWeight": 25,
-          "reason": ""
-        },
-        {
-          "sector": "반도체",
-          "code": "000660",
-          "name": "SK하이닉스",
-          "weight": 25,
-          "baseWeight": 20,
-          "reason": "구글의 CAPEX에 대한 의지 확인으로 비중 재차 확대, 향후 빅테크들 실적발표에서도 긍정적인 콜 기대"
-        },
-        {
-          "sector": "반도체",
-          "code": "080220",
-          "name": "제주반도체",
-          "weight": 7,
-          "baseWeight": 5,
-          "reason": "DDR4의 현물가 급등세가 가파른 상황으로, 하반기에도 긍정적인 실적 기대, 비중 확대"
-        },
-        {
-          "sector": "기타",
-          "code": "005935",
-          "name": "삼성전자우",
-          "weight": 5,
-          "baseWeight": 3,
-          "reason": "구글의 CAPEX에 대한 의지 확인으로 비중 재차 확대, 향후 빅테크들 실적발표에서도 긍정적인 콜 기대"
-        },
-        {
-          "sector": "상사,자본재",
-          "code": "402340",
-          "name": "SK스퀘어",
-          "weight": 3,
-          "baseWeight": 3,
-          "reason": ""
-        },
-        {
-          "sector": "소매(유통)",
-          "code": "004170",
-          "name": "신세계",
-          "weight": 3,
-          "baseWeight": 3,
-          "reason": ""
-        },
-        {
-          "sector": "에너지",
-          "code": "010950",
-          "name": "S-Oil",
-          "weight": 3,
-          "baseWeight": 3,
-          "reason": ""
-        },
-        {
-          "sector": "건설,건축관련",
-          "code": "006360",
-          "name": "GS건설",
-          "weight": 2,
-          "baseWeight": 0,
-          "reason": "동해시에 데이터센터 건설 예정으로, 기확보한 전력과 용수를 바탕으로 속도감 있게 진행될 예정으로 신규 매수"
-        },
-        {
-          "sector": "통신서비스",
-          "code": "017670",
-          "name": "SK텔레콤",
-          "weight": 2,
-          "baseWeight": 0,
-          "reason": "SK 그룹 내 AI 컨트롤타워 역할, 앤스로픽 IPO 기대감도 여전히 유효"
-        },
-        {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 2,
-          "baseWeight": 0,
-          "reason": "국내 데이터센터 사업에 대한 시장의 긍정적인 평가로 각세종을 기반으로 용량 확대 중인 네이버 신규 매수"
-        }
-      ],
-      "savedAt": "2026-07-23T00:51:56.099Z",
-      "finalizedAt": "2026-07-23T16:00:04+09:00"
-    }
-  },
   "2026-07-24": {
     "삼성 트루밸류": {
       "targets": [
@@ -874,7 +100,7 @@
           "sector": "건설,건축관련",
           "code": "006360",
           "name": "GS건설",
-          "weight": 2,
+          "weight": 1,
           "baseWeight": 1,
           "reason": ""
         },
@@ -882,7 +108,7 @@
           "sector": "통신서비스",
           "code": "017670",
           "name": "SK텔레콤",
-          "weight": 2,
+          "weight": 1,
           "baseWeight": 1,
           "reason": ""
         },
@@ -890,12 +116,13 @@
           "sector": "소프트웨어",
           "code": "035420",
           "name": "NAVER",
-          "weight": 2,
+          "weight": 1,
           "baseWeight": 1,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-23T22:51:28.694Z"
+      "savedAt": "2026-07-23T22:50:42.913Z",
+      "finalizedAt": "2026-07-24T07:52:24+09:00"
     },
     "NH 다이내믹 밸류": {
       "targets": [
@@ -997,7 +224,7 @@
           "sector": "건설,건축관련",
           "code": "006360",
           "name": "GS건설",
-          "weight": 2,
+          "weight": 1,
           "baseWeight": 1,
           "reason": ""
         },
@@ -1005,7 +232,7 @@
           "sector": "통신서비스",
           "code": "017670",
           "name": "SK텔레콤",
-          "weight": 2,
+          "weight": 1,
           "baseWeight": 1,
           "reason": ""
         },
@@ -1013,12 +240,13 @@
           "sector": "소프트웨어",
           "code": "035420",
           "name": "NAVER",
-          "weight": 2,
+          "weight": 1,
           "baseWeight": 1,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-23T22:51:28.694Z"
+      "savedAt": "2026-07-23T22:50:42.914Z",
+      "finalizedAt": "2026-07-24T07:52:24+09:00"
     },
     "DB 개방형": {
       "targets": [
@@ -1120,7 +348,7 @@
           "sector": "건설,건축관련",
           "code": "006360",
           "name": "GS건설",
-          "weight": 2,
+          "weight": 1,
           "baseWeight": 1,
           "reason": ""
         },
@@ -1128,7 +356,7 @@
           "sector": "통신서비스",
           "code": "017670",
           "name": "SK텔레콤",
-          "weight": 2,
+          "weight": 1,
           "baseWeight": 1,
           "reason": ""
         },
@@ -1136,12 +364,13 @@
           "sector": "소프트웨어",
           "code": "035420",
           "name": "NAVER",
-          "weight": 2,
+          "weight": 1,
           "baseWeight": 1,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-23T22:51:28.694Z"
+      "savedAt": "2026-07-23T22:50:42.914Z",
+      "finalizedAt": "2026-07-24T07:52:24+09:00"
     },
     "한투 지속형": {
       "targets": [
@@ -1243,7 +472,7 @@
           "sector": "건설,건축관련",
           "code": "006360",
           "name": "GS건설",
-          "weight": 2,
+          "weight": 1,
           "baseWeight": 1,
           "reason": ""
         },
@@ -1251,7 +480,7 @@
           "sector": "통신서비스",
           "code": "017670",
           "name": "SK텔레콤",
-          "weight": 2,
+          "weight": 1,
           "baseWeight": 1,
           "reason": ""
         },
@@ -1259,12 +488,13 @@
           "sector": "소프트웨어",
           "code": "035420",
           "name": "NAVER",
-          "weight": 2,
+          "weight": 1,
           "baseWeight": 1,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-23T22:51:28.694Z"
+      "savedAt": "2026-07-23T22:50:42.914Z",
+      "finalizedAt": "2026-07-24T07:52:24+09:00"
     },
     "NH 목표전환형 5호": {
       "targets": [
@@ -1334,7 +564,7 @@
           "sector": "건설,건축관련",
           "code": "006360",
           "name": "GS건설",
-          "weight": 4,
+          "weight": 2,
           "baseWeight": 2,
           "reason": ""
         },
@@ -1342,7 +572,7 @@
           "sector": "통신서비스",
           "code": "017670",
           "name": "SK텔레콤",
-          "weight": 4,
+          "weight": 2,
           "baseWeight": 2,
           "reason": ""
         },
@@ -1350,12 +580,13 @@
           "sector": "소프트웨어",
           "code": "035420",
           "name": "NAVER",
-          "weight": 4,
+          "weight": 2,
           "baseWeight": 2,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-23T22:51:28.694Z"
+      "savedAt": "2026-07-23T22:50:42.914Z",
+      "finalizedAt": "2026-07-24T07:52:24+09:00"
     },
     "DB 목표전환형 6차": {
       "targets": [
@@ -1425,7 +656,7 @@
           "sector": "건설,건축관련",
           "code": "006360",
           "name": "GS건설",
-          "weight": 4,
+          "weight": 2,
           "baseWeight": 2,
           "reason": ""
         },
@@ -1433,7 +664,7 @@
           "sector": "통신서비스",
           "code": "017670",
           "name": "SK텔레콤",
-          "weight": 4,
+          "weight": 2,
           "baseWeight": 2,
           "reason": ""
         },
@@ -1441,12 +672,13 @@
           "sector": "소프트웨어",
           "code": "035420",
           "name": "NAVER",
-          "weight": 4,
+          "weight": 2,
           "baseWeight": 2,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-23T22:51:28.694Z"
+      "savedAt": "2026-07-23T22:50:42.914Z",
+      "finalizedAt": "2026-07-24T07:52:24+09:00"
     },
     "한투 성과모집형 1차": {
       "targets": [
@@ -1516,7 +748,7 @@
           "sector": "건설,건축관련",
           "code": "006360",
           "name": "GS건설",
-          "weight": 4,
+          "weight": 2,
           "baseWeight": 2,
           "reason": ""
         },
@@ -1524,7 +756,7 @@
           "sector": "통신서비스",
           "code": "017670",
           "name": "SK텔레콤",
-          "weight": 4,
+          "weight": 2,
           "baseWeight": 2,
           "reason": ""
         },
@@ -1532,12 +764,13 @@
           "sector": "소프트웨어",
           "code": "035420",
           "name": "NAVER",
-          "weight": 4,
+          "weight": 2,
           "baseWeight": 2,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-23T22:51:28.694Z"
+      "savedAt": "2026-07-23T22:50:42.914Z",
+      "finalizedAt": "2026-07-24T07:52:24+09:00"
     }
   }
 }
