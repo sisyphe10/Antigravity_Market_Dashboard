@@ -333,7 +333,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
     </div>
 
     <div id="mainContent" class="pw-hidden has-sidebar">
-    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><span class="wrap-updated">Updated: 2026-07-23 09:30:10 KST</span></div></nav><div class="wrap-strip"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div>
+    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><span class="wrap-updated">Updated: 2026-07-23 09:54:34 KST</span></div></nav><div class="wrap-strip"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div>
     <aside class="sidebar wrap-sidebar" id="wrapSectionNav" aria-label="WRAP navigation"><div class="wrap-side-group on" data-side-for="dashboard"><a href="#wrap-sec-chart" onclick="wrapGoSection('wrap-sec-chart');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-chart">CHART</a><a href="#wrap-sec-return" onclick="wrapGoSection('wrap-sec-return');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-return">RETURN</a><a href="#wrap-sec-aum" onclick="wrapGoSection('wrap-sec-aum');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-aum">AUM</a><a href="#wrap-sec-portfolio" onclick="wrapGoSection('wrap-sec-portfolio');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-portfolio">Portfolio</a><a href="#wrap-sec-sector" onclick="wrapGoSection('wrap-sec-sector');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-sector">SECTOR WEIGHT</a></div><div class="wrap-side-group" data-side-for="order" id="wrapSideOrder"></div><div class="wrap-side-group" data-side-for="contribution" id="wrapSideContrib"></div><div class="wrap-side-group" data-side-for="fee"><a href="#" onclick="feeSwitchSub('rate');return false;" class="sidebar-link active" data-side-fee="rate">요율</a><a href="#" onclick="feeSwitchSub('revenue');return false;" class="sidebar-link" data-side-fee="revenue">매출</a></div></aside>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -358,6 +358,8 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
         .wrap-kb-cursor { outline: 2px solid #111827; outline-offset: -2px; }
         /* 진한 배경(선택된 구분 버튼) 위에서는 흰 링 — 동색이라 안 보이는 문제 방지 */
         .wrap-met-btn.active.wrap-kb-cursor { outline-color: #fff; outline-offset: -3px; }
+        /* 모바일: 길게 누르기 제스처용 — iOS 콜아웃·더블탭 줌 억제 */
+        .wrap-prod-btn, .wrap-met-btn { -webkit-touch-callout: none; touch-action: manipulation; }
         </style>
         <div class="wrap-side-panel">
             <div class="wrap-col-prod">
@@ -801,6 +803,41 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
                 if (needPeriod) applyAnchorPeriod();
                 buildChart();
             };
+            // 모바일 길게 누르기(500ms) = 토글 추가 (Ctrl+클릭 동일) — 2026-07-23.
+            // 짧은 탭=단일 전환(기존 click 경로). 10px 이상 움직이면 스크롤로 보고 취소.
+            // 발동 후 따라오는 click은 capture 단계 stopPropagation으로 무효화(인라인 onclick 차단).
+            function wrapAttachLongPress(containerId, handler) {
+                var cont = document.getElementById(containerId);
+                if (!cont) return;
+                var timer = null, sx = 0, sy = 0, fired = false;
+                cont.addEventListener('touchstart', function(e) {
+                    var btn = e.target.closest('button');
+                    if (!btn) return;
+                    fired = false;
+                    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+                    if (timer) clearTimeout(timer);
+                    timer = setTimeout(function() {
+                        timer = null;
+                        fired = true;
+                        handler(btn, { ctrlKey: true });
+                        if (navigator.vibrate) navigator.vibrate(10);
+                    }, 500);
+                }, { passive: true });
+                cont.addEventListener('touchmove', function(e) {
+                    if (!timer) return;
+                    var dx = e.touches[0].clientX - sx, dy = e.touches[0].clientY - sy;
+                    if (dx * dx + dy * dy > 100) { clearTimeout(timer); timer = null; }
+                }, { passive: true });
+                ['touchend', 'touchcancel'].forEach(function(ev) {
+                    cont.addEventListener(ev, function() { if (timer) { clearTimeout(timer); timer = null; } });
+                });
+                cont.addEventListener('click', function(e) {
+                    if (fired) { e.stopPropagation(); e.preventDefault(); fired = false; }
+                }, true);
+                cont.addEventListener('contextmenu', function(e) { e.preventDefault(); });   // Android 길게 누르기 메뉴 억제
+            }
+            wrapAttachLongPress('wrapProdBtns', window.wrapProdClick);
+            wrapAttachLongPress('wrapMetBtns', window.wrapMetClick);
             // 키보드: ↑↓=열 내 이동(단일 전환, 순환)·←→=열 이동(같은 행, 단일 전환)·Enter=토글 추가.
             // Shift/Ctrl+화살표=토글 추가 이동. 차트 재계산은 마지막 입력 후 80ms 모아서 1회(연타 랙 방지).
             var _wrapKbTimer = null;
