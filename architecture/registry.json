@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-07-22",
+  "updated": "2026-07-23",
   "projects": [
    "antigravity"
   ],
@@ -341,7 +341,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "23:30 매일",
    "status": "active",
-   "desc_md": "매일 23:30 KST(daily_crawl 23:00 직후) KOSPI200/KOSDAQ150 섹터 비중을 수집하는 타이머. 클라우드 IP가 KRX/KOSIS/SEAJ를 막아 VM 경로 전용이라, GHA로 못 하는 수집들이 여기에 편승한다.\n\n- `run_kodex_sectors.sh`가 순서대로: `fetch_kodex_sectors.py`(섹터) → `fetch_kosis_series.py`(KOSIS 유통·소비·고용·미분양·퇴직연금) → `fetch_japan_capex.py`(SEAJ 반도체장비/JMTBA 공작기계) → `fetch_deriv_daily.py`(삼전·하이닉스 파생·수급 13종, 2026-07-16 추가 — [[src-deriv-daily]]). 편승 3종은 전부 `|| true`라 실패해도 섹터 push는 진행.\n- stale `.git/index.lock` 60초 가드 + flock 중복실행 방지 내장. push 대상은 `kodex_sectors.json` + `dataset.csv`.\n- 함정: 실패 알림 문구는 오진 표현, 실제 대개 KRX 인증 오류. loginErrMaxCnt=5 잠금 주의(반복 로그인 금지).",
+   "desc_md": "매일 23:30 KST(daily_crawl 23:00 직후) KOSPI200/KOSDAQ150 섹터 비중을 수집하는 타이머. 클라우드 IP가 KRX/KOSIS/SEAJ를 막아 VM 경로 전용이라, GHA로 못 하는 수집들이 여기에 편승한다.\n\n- `run_kodex_sectors.sh`가 순서대로: `fetch_kodex_sectors.py`(섹터) → `fetch_kosis_series.py`(KOSIS 유통·소비·고용·미분양·퇴직연금) → `fetch_japan_capex.py`(SEAJ 반도체장비/JMTBA 공작기계) → `fetch_immigration.py`(법무부 출입국 월별 5종, 2026-07-23 추가 — [[src-immigration]]) → `fetch_deriv_daily.py`(삼전·하이닉스 파생·수급 13종, 2026-07-16 추가 — [[src-deriv-daily]]). 편승 4종은 전부 `|| true`라 실패해도 섹터 push는 진행.\n- stale `.git/index.lock` 60초 가드 + flock 중복실행 방지 내장. push 대상은 `kodex_sectors.json` + `dataset.csv`.\n- 함정: 실패 알림 문구는 오진 표현, 실제 대개 KRX 인증 오류. loginErrMaxCnt=5 잠금 주의(반복 로그인 금지).",
    "code": [
     "scripts/kodex-sectors.timer",
     "scripts/kodex-sectors.service",
@@ -356,6 +356,7 @@
     "src-kodex-sectors",
     "src-kosis-series",
     "src-japan-capex",
+    "src-immigration",
     "src-deriv-daily"
    ],
    "alerts": "OnFailure → sisyphe-bot-notify@kodex-sectors → 텔레그램"
@@ -569,7 +570,7 @@
    "runs_on": "gha",
    "schedule_kst": "17:40 평일",
    "status": "active",
-   "desc_md": "한국은행 ECOS 시계열 33종(금리/매크로/신용·부동산)을 평일 17:40 KST(08:40 UTC) 수집해 dataset.csv→market.html DATA 섹션 재생성.\n\n- 시장금리 T+1 + 당일 오전 발표 월간지표를 하루 1회로 완결 수집. kofia 17:30과 `wrap-nav-pipeline` 그룹으로 직렬화.\n- `ECOS_API_KEY` 미설정 시 graceful skip(실패 알림 없음).\n- 함정: M2=161Y006, 분기전망=첫달 말일.",
+   "desc_md": "한국은행 ECOS 시계열 33종(금리/매크로/신용·부동산)을 평일 17:40 KST(08:40 UTC) 수집해 dataset.csv→market.html DATA 섹션 재생성.\n\n- 시장금리 T+1 + 당일 오전 발표 월간지표를 하루 1회로 완결 수집. kofia(2026-07-23 21:30으로 이동)와 `wrap-nav-pipeline` 그룹으로 직렬화.\n- `ECOS_API_KEY` 미설정 시 graceful skip(실패 알림 없음).\n- 함정: M2=161Y006, 분기전망=첫달 말일.",
    "code": [
     ".github/workflows/daily_ecos.yml"
    ],
@@ -635,11 +636,11 @@
    "project": "antigravity",
    "domain": "market-kr",
    "type": "gha_workflow",
-   "name": "Daily KOFIA Stats + NPS (17:30 평일)",
+   "name": "Daily KOFIA Stats + NPS (21:30 평일)",
    "runs_on": "gha",
-   "schedule_kst": "17:30 평일",
+   "schedule_kst": "21:30 평일",
    "status": "active",
-   "desc_md": "고객예탁금/신용잔고(data.go.kr 금투협 종합통계)를 평일 17:30 KST(08:30 UTC) 수집해 `kofia_stats.json`→index.html 랜딩 차트 재생성. 반대매매금액(위탁매매 미수금)은 dataset.csv 적재→market.html DATA. 같은 키로 국민연금 적립금(`fetch_nps_fund.py`)도 이어 수집.\n\n- `DATA_GO_KR_API_KEY` 미설정 시 graceful skip. `wrap-nav-pipeline` 그룹.\n- 예탁금=invrDpsgAmt·신용잔고=crdTrFingWhl·반대매매=brkTrdUcolMnyVsOppsTrdAmt(억원).\n- 국민연금 적립금은 odcloud 15106894(피벗+uddi 해석 함정).",
+   "desc_md": "고객예탁금/신용잔고(data.go.kr 금투협 종합통계)를 평일 21:30 KST 수집해 `kofia_stats.json`→index.html 랜딩 차트 재생성. 반대매매금액(위탁매매 미수금)은 dataset.csv 적재→market.html DATA. 같은 키로 국민연금 적립금(`fetch_nps_fund.py`)도 이어 수집.\n\n- ★2026-07-23 17:30→21:30 이동: 17시대 Wrap_NAV.xlsx push 잡들과의 safe_push 레이스로 커밋 드랍이 반복돼 조용한 시간대로 옮김(KOFIA T+2 공표라 수집 데이터 동일). launchd `com.antigravity.gha-kofia.plist`(맥미니 트리거)와 워크플로 cron 함께 이동.\n- `DATA_GO_KR_API_KEY` 미설정 시 graceful skip. `wrap-nav-pipeline` 그룹.\n- 예탁금=invrDpsgAmt·신용잔고=crdTrFingWhl·반대매매=brkTrdUcolMnyVsOppsTrdAmt(억원).\n- 국민연금 적립금은 odcloud 15106894(피벗+uddi 해석 함정).",
    "code": [
     ".github/workflows/daily_kofia.yml"
    ],
@@ -1253,7 +1254,7 @@
    "runs_on": "gha",
    "schedule_kst": "23:00 (daily_crawl)",
    "status": "active",
-   "desc_md": "dataset.csv에 원자재·메모리·시세 시계열을 적재하는 daily_crawl의 핵심 수집기.\n\n- 수집: DRAM/NAND(DRAMeXchange), 원자재·크립토·FX·지수(yfinance), SMM 리튬(탄산/수산화), Sunsirs 폴리실리콘, 해상운임(SCFI), 미국/한국/글로벌 지수.\n- 서브 크롤러 호출: `crawl_kpx_smp`(SMP), `crawl_silicondata_indexes`(LLM토큰/H100렌탈/RAM). 각각 실패 격리(계속 진행).\n- 리튬은 별도 모듈 없이 이 크롤러에 접혀 있음(hq.smm.cn).\n- ★미국 지수는 **마감 세션만 적재**(2026-07-12 수정): 장중 스냅샷이 종가로 오염되던 문제를 완결 세션 기준 수집 + 오염 행 재작성으로 근본수정. 지수 임베드는 YTD 보장.",
+   "desc_md": "dataset.csv에 원자재·메모리·시세 시계열을 적재하는 daily_crawl의 핵심 수집기.\n\n- 수집: DRAM/NAND(DRAMeXchange), 원자재·크립토·FX·지수(yfinance), SMM 리튬(탄산/수산화), Sunsirs 폴리실리콘, 해상운임(SCFI), 미국/한국/글로벌 지수.\n- 서브 크롤러 호출: `crawl_kpx_smp`(SMP), `crawl_silicondata_indexes`(LLM토큰/H100렌탈/RAM). 각각 실패 격리(계속 진행).\n- 리튬은 별도 모듈 없이 이 크롤러에 접혀 있음(hq.smm.cn).\n- DRAM은 기존 최고가(High) 시리즈에 더해 **세션 평균가를 `<이름> Avg` 시리즈로 병행 수집**(2026-07-23~, 최저≤평균≤최고 정합 검증) → MEMORY 차트 그룹에 배선.\n- ★미국 지수는 **마감 세션만 적재**(2026-07-12 수정): 장중 스냅샷이 종가로 오염되던 문제를 완결 세션 기준 수집 + 오염 행 재작성으로 근본수정. 지수 임베드는 YTD 보장.",
    "code": [
     "execution/market_crawler.py"
    ],
@@ -1356,7 +1357,7 @@
    "type": "pipeline_source",
    "name": "금투협 예탁금/신용잔고/반대매매 (fetch_kofia_stats.py)",
    "runs_on": "gha",
-   "schedule_kst": "17:30 평일 (gha-daily-kofia)",
+   "schedule_kst": "21:30 평일 (gha-daily-kofia)",
    "status": "active",
    "desc_md": "고객예탁금/신용잔고/반대매매금액(data.go.kr 금투협 종합통계)을 수집해 `kofia_stats.json`+dataset.csv에 적재(index.html 랜딩 차트, market.html DATA).\n\n- 예탁금=invrDpsgAmt, 신용잔고=crdTrFingWhl, 반대매매금액=brkTrdUcolMnyVsOppsTrdAmt(위탁매매 미수금 반대매매, 억원, 2021-10~ 백필). 오퍼레이션 8종 검증 완료.",
    "code": [
@@ -1377,7 +1378,7 @@
    "type": "pipeline_source",
    "name": "국민연금 적립금 (fetch_nps_fund.py)",
    "runs_on": "gha",
-   "schedule_kst": "17:30 평일 (gha-daily-kofia)",
+   "schedule_kst": "21:30 평일 (gha-daily-kofia)",
    "status": "active",
    "desc_md": "국민연금 적립금(data.go.kr odcloud 15106894, kofia와 같은 키)을 수집해 dataset.csv(MACRO KOREA)에 적재. gha-daily-kofia가 kofia 직후 실행.\n\n- 저빈도(연간+최신월 누적). 함정: 피벗+uddi 해석+활용신청. 내부 graceful skip.",
    "code": [
@@ -2585,6 +2586,26 @@
      "label": "라이브",
      "url": "https://sisyphe10.github.io/Antigravity_Market_Dashboard/market_alert.html"
     }
+   ]
+  },
+  {
+   "id": "src-immigration",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "pipeline_source",
+   "name": "출입국 월별 통계 (fetch_immigration.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "23:30 (kodex 타이머 편승)",
+   "status": "active",
+   "desc_md": "법무부 출입국·외국인정책 통계월보(data.go.kr odcloud)를 수집해 dataset.csv(MACRO KOREA / IMMIGRATION 그룹, market.html DATA 탭)에 적재. data.go.kr이 GHA 해외 IP를 차단해 VM kodex 타이머(23:30)에 편승(KOSIS·일본 CAPEX와 동일 경로).\n\n- 소스 2종: 15099985(월별 출입국자: 국민/외국인 × 입국/출국) + 15100016(체류자격별 체류외국인). 시리즈 5종(만명): 외국인 입국자·국민 출국자·체류외국인 총계·취업(E)·유학(D2·D4). 익월 하순~월말 갱신, 2022.1~ 백필.\n- ★UDDI 함정: 파일 버전이 매월 새 UDDI로 갱신 → 스웨거 문서(infuser.odcloud.kr)에서 최신 버전을 동적 해석(하드코딩 금지). 컬럼명 공백·체류자격 표기(D2/유학D2/D2유학 3형) 변형은 키 정규화·정규식 코드 추출로 흡수.\n- 전량 재조회 후 upsert(개정 self-heal). 실패는 경고 후 exit 0(다음 run 회수). `DATA_GO_KR_API_KEY` 미설정 시 skip. 신선도 감시 제외(IMMIGRATION은 DATASET_IGNORE, 월간·~1달 지연).",
+   "code": [
+    "execution/fetch_immigration.py"
+   ],
+   "writes": [
+    "store-dataset-csv"
+   ],
+   "depends_on": [
+    "ext-data-apis"
    ]
   },
   {

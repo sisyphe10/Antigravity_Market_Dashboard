@@ -1,14 +1,14 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 130 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 131 components._
 
-Updated: 2026-07-22
+Updated: 2026-07-23
 
 ## By domain
 
-### 국내 시장 (28)
+### 국내 시장 (29)
 - [Daily Disclosures DART+KIND (16:30)](gha-daily-disclosures.md) — GHA
-- [Daily KOFIA Stats + NPS (17:30 평일)](gha-daily-kofia.md) — GHA
+- [Daily KOFIA Stats + NPS (21:30 평일)](gha-daily-kofia.md) — GHA
 - [Daily KRX Index Valuation (18:30 평일)](gha-daily-krx-valuation.md) — GHA
 - [DART 공시 (fetch_disclosures.py)](src-dart-disclosures.md) — Source
 - [ETF 구성종목 수집 (collect_etf_daily.py)](src-etf-collect.md) — Source
@@ -31,6 +31,7 @@ Updated: 2026-07-22
 - [외국인 보유비중 (fetch_krx_foreign.py)](src-krx-foreign.md) — Source
 - [종목마스터 갱신 (update_stock_master.py)](src-stock-master.md) — Source
 - [종목마스터 주간 갱신 타이머 (토 09:00)](timer-update-stock-master.md) — Timer
+- [출입국 월별 통계 (fetch_immigration.py)](src-immigration.md) — Source
 - [투자유의 생성기 (create_market_alert.py)](src-create-market-alert.md) — Source
 - [투자자별 수급 (fetch_investor_trading.py)](src-investor-trading.md) — Source
 - [파생·수급 13종 (fetch_deriv_daily.py)](src-deriv-daily.md) — Source
@@ -182,7 +183,7 @@ Updated: 2026-07-22
 - [Daily Disclosures DART+KIND (16:30)](gha-daily-disclosures.md) — 16:30 매일, active
 - [Daily ECOS BOK (17:40 평일)](gha-daily-ecos.md) — 17:40 평일, active
 - [Daily FRED US Macro (07:50 화~토)](gha-daily-fred.md) — 07:50 화~토, active
-- [Daily KOFIA Stats + NPS (17:30 평일)](gha-daily-kofia.md) — 17:30 평일, active
+- [Daily KOFIA Stats + NPS (21:30 평일)](gha-daily-kofia.md) — 21:30 평일, active
 - [Daily KRX Index Valuation (18:30 평일)](gha-daily-krx-valuation.md) — 18:30 평일, active
 - [Daily Market Crawl (23:00)](gha-daily-crawl.md) — 23:00 매일 (+ execution/** push 트리거), active
 - [Daily Taiwan Monthly Revenue (23:20)](gha-daily-taiwan-revenue.md) — 23:20 매일, active
@@ -253,7 +254,7 @@ Updated: 2026-07-22
 - [외부 데이터 API/소스 집합](ext-data-apis.md) — active
 - [한국 수출 매출 추정 대시보드](ext-export-dashboard.md) — planned
 
-### Source (41)
+### Source (42)
 - [DART 공시 (fetch_disclosures.py)](src-dart-disclosures.md) — 16:30 (gha-daily-disclosures), active
 - [ECOS 한국 매크로 33종 (fetch_ecos_data.py)](src-ecos.md) — 17:40 평일 (gha-daily-ecos), active
 - [ETF 구성종목 수집 (collect_etf_daily.py)](src-etf-collect.md) — 16:30 / 18:00 (etf-collect 타이머), active
@@ -269,8 +270,8 @@ Updated: 2026-07-22
 - [SemiAnalysis 소스 (sources/semianalysis.py)](src-semianalysis.md) — 09:00 / 21:00 (ra-sisyphe), active
 - [SiliconData 지수 3종 (fetch_silicondata_index.py)](src-silicondata.md) — 23:00 (crawler 내부), active
 - [TrendForce 소스 (sources/trendforce.py)](src-trendforce.md) — 08:00 (ra-sisyphe), active
-- [국민연금 적립금 (fetch_nps_fund.py)](src-nps-fund.md) — 17:30 평일 (gha-daily-kofia), active
-- [금투협 예탁금/신용잔고/반대매매 (fetch_kofia_stats.py)](src-kofia.md) — 17:30 평일 (gha-daily-kofia), active
+- [국민연금 적립금 (fetch_nps_fund.py)](src-nps-fund.md) — 21:30 평일 (gha-daily-kofia), active
+- [금투협 예탁금/신용잔고/반대매매 (fetch_kofia_stats.py)](src-kofia.md) — 21:30 평일 (gha-daily-kofia), active
 - [기여도 데이터 (create_contribution_data.py)](src-create-contribution-data.md) — 23:00 (daily_crawl), active
 - [기준가 엔진 (calculate_wrap_nav.py)](src-calculate-wrap-nav.md) — 체인 (finalize/recalc/crawl), active
 - [다나와 DRAM 최저가 (fetch_danawa_price.py)](src-danawa.md) — 23:00 (daily_crawl), active
@@ -289,6 +290,7 @@ Updated: 2026-07-22
 - [일본 CAPEX 지표 (fetch_japan_capex.py)](src-japan-capex.md) — 23:30 (kodex 타이머 편승), active
 - [종목마스터 갱신 (update_stock_master.py)](src-stock-master.md) — 토 09:00 (update-stock-master 타이머), active
 - [차트 렌더러 (draw_charts + draw_wrap_charts)](src-draw-charts.md) — 23:00 (daily_crawl), active
+- [출입국 월별 통계 (fetch_immigration.py)](src-immigration.md) — 23:30 (kodex 타이머 편승), active
 - [투자유의 생성기 (create_market_alert.py)](src-create-market-alert.md) — 16:05 / 23:00 (sisyphe-bot), active
 - [투자일지 시장데이터 (fetch_journal_data.py)](src-journal-data.md) — 16:10 (sisyphe-bot), active
 - [투자자별 수급 (fetch_investor_trading.py)](src-investor-trading.md) — 장 마감 후 (sisyphe-bot), active
@@ -304,7 +306,7 @@ Updated: 2026-07-22
 
 ## By project
 
-### antigravity (130)
+### antigravity (131)
 - [architecture.html (아키텍처)](page-architecture.md) — Page
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — Infra
 - [Claude Code Action (@claude 이벤트)](gha-claude-code.md) — GHA
@@ -313,7 +315,7 @@ Updated: 2026-07-22
 - [Daily Disclosures DART+KIND (16:30)](gha-daily-disclosures.md) — GHA
 - [Daily ECOS BOK (17:40 평일)](gha-daily-ecos.md) — GHA
 - [Daily FRED US Macro (07:50 화~토)](gha-daily-fred.md) — GHA
-- [Daily KOFIA Stats + NPS (17:30 평일)](gha-daily-kofia.md) — GHA
+- [Daily KOFIA Stats + NPS (21:30 평일)](gha-daily-kofia.md) — GHA
 - [Daily KRX Index Valuation (18:30 평일)](gha-daily-krx-valuation.md) — GHA
 - [Daily Market Crawl (23:00)](gha-daily-crawl.md) — GHA
 - [Daily Taiwan Monthly Revenue (23:20)](gha-daily-taiwan-revenue.md) — GHA
@@ -423,6 +425,7 @@ Updated: 2026-07-22
 - [종목마스터 갱신 (update_stock_master.py)](src-stock-master.md) — Source
 - [종목마스터 주간 갱신 타이머 (토 09:00)](timer-update-stock-master.md) — Timer
 - [차트 렌더러 (draw_charts + draw_wrap_charts)](src-draw-charts.md) — Source
+- [출입국 월별 통계 (fetch_immigration.py)](src-immigration.md) — Source
 - [컴퓨트 호스트 (Oracle VM → 맥미니)](infra-vm-macmini.md) — Infra
 - [크래시 루프 워처 (*/5)](daemon-crash-watcher.md) — Watcher
 - [텔레그램 (알림·상호작용 채널)](infra-telegram.md) — Infra

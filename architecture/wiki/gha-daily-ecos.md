@@ -25,7 +25,7 @@ alerts: "실패 자체 알림 없음 → gha-daily-health-check"
 
 한국은행 ECOS 시계열 33종(금리/매크로/신용·부동산)을 평일 17:40 KST(08:40 UTC) 수집해 dataset.csv→market.html DATA 섹션 재생성.
 
-- 시장금리 T+1 + 당일 오전 발표 월간지표를 하루 1회로 완결 수집. kofia 17:30과 `wrap-nav-pipeline` 그룹으로 직렬화.
+- 시장금리 T+1 + 당일 오전 발표 월간지표를 하루 1회로 완결 수집. kofia(2026-07-23 21:30으로 이동)와 `wrap-nav-pipeline` 그룹으로 직렬화.
 - `ECOS_API_KEY` 미설정 시 graceful skip(실패 알림 없음).
 - 함정: M2=161Y006, 분기전망=첫달 말일.
 
