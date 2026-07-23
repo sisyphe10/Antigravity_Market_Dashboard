@@ -874,7 +874,7 @@
           "sector": "건설,건축관련",
           "code": "006360",
           "name": "GS건설",
-          "weight": 1,
+          "weight": 2,
           "baseWeight": 1,
           "reason": ""
         },
@@ -882,7 +882,7 @@
           "sector": "통신서비스",
           "code": "017670",
           "name": "SK텔레콤",
-          "weight": 1,
+          "weight": 2,
           "baseWeight": 1,
           "reason": ""
         },
@@ -890,12 +890,12 @@
           "sector": "소프트웨어",
           "code": "035420",
           "name": "NAVER",
-          "weight": 1,
+          "weight": 2,
           "baseWeight": 1,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-23T22:50:42.913Z"
+      "savedAt": "2026-07-23T22:51:28.694Z"
     },
     "NH 다이내믹 밸류": {
       "targets": [
@@ -997,7 +997,7 @@
           "sector": "건설,건축관련",
           "code": "006360",
           "name": "GS건설",
-          "weight": 1,
+          "weight": 2,
           "baseWeight": 1,
           "reason": ""
         },
@@ -1005,7 +1005,7 @@
           "sector": "통신서비스",
           "code": "017670",
           "name": "SK텔레콤",
-          "weight": 1,
+          "weight": 2,
           "baseWeight": 1,
           "reason": ""
         },
@@ -1013,12 +1013,12 @@
           "sector": "소프트웨어",
           "code": "035420",
           "name": "NAVER",
-          "weight": 1,
+          "weight": 2,
           "baseWeight": 1,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-23T22:50:42.914Z"
+      "savedAt": "2026-07-23T22:51:28.694Z"
     },
     "DB 개방형": {
       "targets": [
@@ -1120,7 +1120,7 @@
           "sector": "건설,건축관련",
           "code": "006360",
           "name": "GS건설",
-          "weight": 1,
+          "weight": 2,
           "baseWeight": 1,
           "reason": ""
         },
@@ -1128,7 +1128,7 @@
           "sector": "통신서비스",
           "code": "017670",
           "name": "SK텔레콤",
-          "weight": 1,
+          "weight": 2,
           "baseWeight": 1,
           "reason": ""
         },
@@ -1136,12 +1136,12 @@
           "sector": "소프트웨어",
           "code": "035420",
           "name": "NAVER",
-          "weight": 1,
+          "weight": 2,
           "baseWeight": 1,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-23T22:50:42.914Z"
+      "savedAt": "2026-07-23T22:51:28.694Z"
     },
     "한투 지속형": {
       "targets": [
@@ -1243,7 +1243,7 @@
           "sector": "건설,건축관련",
           "code": "006360",
           "name": "GS건설",
-          "weight": 1,
+          "weight": 2,
           "baseWeight": 1,
           "reason": ""
         },
@@ -1251,7 +1251,7 @@
           "sector": "통신서비스",
           "code": "017670",
           "name": "SK텔레콤",
-          "weight": 1,
+          "weight": 2,
           "baseWeight": 1,
           "reason": ""
         },
@@ -1259,12 +1259,12 @@
           "sector": "소프트웨어",
           "code": "035420",
           "name": "NAVER",
-          "weight": 1,
+          "weight": 2,
           "baseWeight": 1,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-23T22:50:42.914Z"
+      "savedAt": "2026-07-23T22:51:28.694Z"
     },
     "NH 목표전환형 5호": {
       "targets": [
@@ -1334,7 +1334,7 @@
           "sector": "건설,건축관련",
           "code": "006360",
           "name": "GS건설",
-          "weight": 2,
+          "weight": 4,
           "baseWeight": 2,
           "reason": ""
         },
@@ -1342,7 +1342,7 @@
           "sector": "통신서비스",
           "code": "017670",
           "name": "SK텔레콤",
-          "weight": 2,
+          "weight": 4,
           "baseWeight": 2,
           "reason": ""
         },
@@ -1350,12 +1350,12 @@
           "sector": "소프트웨어",
           "code": "035420",
           "name": "NAVER",
-          "weight": 2,
+          "weight": 4,
           "baseWeight": 2,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-23T22:50:42.914Z"
+      "savedAt": "2026-07-23T22:51:28.694Z"
     },
     "DB 목표전환형 6차": {
       "targets": [
@@ -1425,7 +1425,7 @@
           "sector": "건설,건축관련",
           "code": "006360",
           "name": "GS건설",
-          "weight": 2,
+          "weight": 4,
           "baseWeight": 2,
           "reason": ""
         },
@@ -1433,7 +1433,7 @@
           "sector": "통신서비스",
           "code": "017670",
           "name": "SK텔레콤",
-          "weight": 2,
+          "weight": 4,
           "baseWeight": 2,
           "reason": ""
         },
@@ -1441,12 +1441,12 @@
           "sector": "소프트웨어",
           "code": "035420",
           "name": "NAVER",
-          "weight": 2,
+          "weight": 4,
           "baseWeight": 2,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-23T22:50:42.914Z"
+      "savedAt": "2026-07-23T22:51:28.694Z"
     },
     "한투 성과모집형 1차": {
       "targets": [
@@ -1516,7 +1516,7 @@
           "sector": "건설,건축관련",
           "code": "006360",
           "name": "GS건설",
-          "weight": 2,
+          "weight": 4,
           "baseWeight": 2,
           "reason": ""
         },
@@ -1524,7 +1524,7 @@
           "sector": "통신서비스",
           "code": "017670",
           "name": "SK텔레콤",
-          "weight": 2,
+          "weight": 4,
           "baseWeight": 2,
           "reason": ""
         },
@@ -1532,12 +1532,12 @@
           "sector": "소프트웨어",
           "code": "035420",
           "name": "NAVER",
-          "weight": 2,
+          "weight": 4,
           "baseWeight": 2,
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-23T22:50:42.914Z"
+      "savedAt": "2026-07-23T22:51:28.694Z"
     }
   }
 }
