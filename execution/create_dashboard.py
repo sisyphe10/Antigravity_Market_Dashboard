@@ -3614,6 +3614,8 @@ def _build_wrap_chart_section(category_label):
         .wrap-kb-cursor {{ outline: 2px solid #111827; outline-offset: -2px; }}
         /* 진한 배경(선택된 구분 버튼) 위에서는 흰 링 — 동색이라 안 보이는 문제 방지 */
         .wrap-met-btn.active.wrap-kb-cursor {{ outline-color: #fff; outline-offset: -3px; }}
+        /* 모바일: 길게 누르기 제스처용 — iOS 콜아웃·더블탭 줌 억제 */
+        .wrap-prod-btn, .wrap-met-btn {{ -webkit-touch-callout: none; touch-action: manipulation; }}
         </style>
         <div class="wrap-side-panel">
             <div class="wrap-col-prod">
@@ -4030,6 +4032,41 @@ def _build_wrap_chart_section(category_label):
                 if (needPeriod) applyAnchorPeriod();
                 buildChart();
             };
+            // 모바일 길게 누르기(500ms) = 토글 추가 (Ctrl+클릭 동일) — 2026-07-23.
+            // 짧은 탭=단일 전환(기존 click 경로). 10px 이상 움직이면 스크롤로 보고 취소.
+            // 발동 후 따라오는 click은 capture 단계 stopPropagation으로 무효화(인라인 onclick 차단).
+            function wrapAttachLongPress(containerId, handler) {
+                var cont = document.getElementById(containerId);
+                if (!cont) return;
+                var timer = null, sx = 0, sy = 0, fired = false;
+                cont.addEventListener('touchstart', function(e) {
+                    var btn = e.target.closest('button');
+                    if (!btn) return;
+                    fired = false;
+                    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+                    if (timer) clearTimeout(timer);
+                    timer = setTimeout(function() {
+                        timer = null;
+                        fired = true;
+                        handler(btn, { ctrlKey: true });
+                        if (navigator.vibrate) navigator.vibrate(10);
+                    }, 500);
+                }, { passive: true });
+                cont.addEventListener('touchmove', function(e) {
+                    if (!timer) return;
+                    var dx = e.touches[0].clientX - sx, dy = e.touches[0].clientY - sy;
+                    if (dx * dx + dy * dy > 100) { clearTimeout(timer); timer = null; }
+                }, { passive: true });
+                ['touchend', 'touchcancel'].forEach(function(ev) {
+                    cont.addEventListener(ev, function() { if (timer) { clearTimeout(timer); timer = null; } });
+                });
+                cont.addEventListener('click', function(e) {
+                    if (fired) { e.stopPropagation(); e.preventDefault(); fired = false; }
+                }, true);
+                cont.addEventListener('contextmenu', function(e) { e.preventDefault(); });   // Android 길게 누르기 메뉴 억제
+            }
+            wrapAttachLongPress('wrapProdBtns', window.wrapProdClick);
+            wrapAttachLongPress('wrapMetBtns', window.wrapMetClick);
             // 키보드: ↑↓=열 내 이동(단일 전환, 순환)·←→=열 이동(같은 행, 단일 전환)·Enter=토글 추가.
             // Shift/Ctrl+화살표=토글 추가 이동. 차트 재계산은 마지막 입력 후 80ms 모아서 1회(연타 랙 방지).
             var _wrapKbTimer = null;
