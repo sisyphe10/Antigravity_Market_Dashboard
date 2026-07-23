@@ -23,9 +23,9 @@
       "sector": "반도체",
       "market_cap": 13676758,
       "weight": 25.0,
-      "weight_prev": 20.0,
+      "weight_prev": 25.0,
       "today_return": 4.863387978142077,
-      "contribution": 9.726775956284156,
+      "contribution": 12.158469945355193,
       "ytd_return": 194.77726574500767,
       "cumulative_return": 554.79391206128,
       "current_price": 1919000.0,
@@ -40,9 +40,9 @@
       "sector": "기타",
       "market_cap": 1533331,
       "weight": 5.0,
-      "weight_prev": 3.0,
+      "weight_prev": 5.0,
       "today_return": 3.2414910858995136,
-      "contribution": 0.9724473257698542,
+      "contribution": 1.620745542949757,
       "ytd_return": 114.237668161435,
       "cumulative_return": -0.28177833437695865,
       "current_price": 191100.0,
@@ -57,9 +57,9 @@
       "sector": "반도체",
       "market_cap": 27864,
       "weight": 5.0,
-      "weight_prev": 3.0,
+      "weight_prev": 5.0,
       "today_return": 7.866666666666666,
-      "contribution": 2.36,
+      "contribution": 3.933333333333333,
       "ytd_return": 207.02087286527515,
       "cumulative_return": 4.576008273009302,
       "current_price": 80900.0,
@@ -193,16 +193,16 @@
       "sector": "건설,건축관련",
       "market_cap": 29440,
       "weight": 1.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 1.0,
+      "today_return": 18.213058419243985,
+      "contribution": 1.8213058419243986,
       "ytd_return": 74.61928934010152,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 34400.0,
       "ath_price": 54700.0,
       "dd": -37.111517367458866,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "017670",
@@ -210,16 +210,16 @@
       "sector": "통신서비스",
       "market_cap": 213716,
       "weight": 1.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 1.0,
+      "today_return": 5.738575982996812,
+      "contribution": 0.5738575982996812,
       "ytd_return": 85.98130841121497,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 99500.0,
       "ath_price": 125200.0,
       "dd": -20.527156549520765,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "035420",
@@ -227,16 +227,16 @@
       "sector": "소프트웨어",
       "market_cap": 345277,
       "weight": 1.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 1.0,
+      "today_return": 11.731843575418994,
+      "contribution": 1.1731843575418994,
       "ytd_return": -9.278350515463918,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 220000.0,
       "ath_price": 454000.0,
       "dd": -51.541850220264315,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
   "NH 목표전환형 5호": [
@@ -263,9 +263,9 @@
       "sector": "반도체",
       "market_cap": 13676758,
       "weight": 25.0,
-      "weight_prev": 20.0,
+      "weight_prev": 25.0,
       "today_return": 4.863387978142077,
-      "contribution": 9.726775956284156,
+      "contribution": 12.158469945355193,
       "ytd_return": 194.77726574500767,
       "cumulative_return": -11.398054666338354,
       "current_price": 1919000.0,
@@ -280,9 +280,9 @@
       "sector": "반도체",
       "market_cap": 27864,
       "weight": 7.0,
-      "weight_prev": 5.0,
+      "weight_prev": 7.0,
       "today_return": 7.866666666666666,
-      "contribution": 3.933333333333333,
+      "contribution": 5.506666666666667,
       "ytd_return": 207.02087286527515,
       "cumulative_return": 5.495529061102822,
       "current_price": 80900.0,
@@ -297,9 +297,9 @@
       "sector": "기타",
       "market_cap": 1533331,
       "weight": 5.0,
-      "weight_prev": 3.0,
+      "weight_prev": 5.0,
       "today_return": 3.2414910858995136,
-      "contribution": 0.9724473257698542,
+      "contribution": 1.620745542949757,
       "ytd_return": 114.237668161435,
       "cumulative_return": -0.28177833437695865,
       "current_price": 191100.0,
@@ -365,16 +365,16 @@
       "sector": "건설,건축관련",
       "market_cap": 29440,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 2.0,
+      "today_return": 18.213058419243985,
+      "contribution": 3.642611683848797,
       "ytd_return": 74.61928934010152,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 34400.0,
       "ath_price": 54700.0,
       "dd": -37.111517367458866,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "017670",
@@ -382,16 +382,16 @@
       "sector": "통신서비스",
       "market_cap": 213716,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 2.0,
+      "today_return": 5.738575982996812,
+      "contribution": 1.1477151965993624,
       "ytd_return": 85.98130841121497,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 99500.0,
       "ath_price": 125200.0,
       "dd": -20.527156549520765,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "035420",
@@ -399,16 +399,16 @@
       "sector": "소프트웨어",
       "market_cap": 345277,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 2.0,
+      "today_return": 11.731843575418994,
+      "contribution": 2.346368715083799,
       "ytd_return": -9.278350515463918,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 220000.0,
       "ath_price": 454000.0,
       "dd": -51.541850220264315,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
   "DB 목표전환형 6차": [
@@ -435,9 +435,9 @@
       "sector": "반도체",
       "market_cap": 13676758,
       "weight": 25.0,
-      "weight_prev": 20.0,
+      "weight_prev": 25.0,
       "today_return": 4.863387978142077,
-      "contribution": 9.726775956284156,
+      "contribution": 12.158469945355193,
       "ytd_return": 194.77726574500767,
       "cumulative_return": -10.588929614213837,
       "current_price": 1919000.0,
@@ -452,9 +452,9 @@
       "sector": "반도체",
       "market_cap": 27864,
       "weight": 7.0,
-      "weight_prev": 5.0,
+      "weight_prev": 7.0,
       "today_return": 7.866666666666666,
-      "contribution": 3.933333333333333,
+      "contribution": 5.506666666666667,
       "ytd_return": 207.02087286527515,
       "cumulative_return": 5.495529061102822,
       "current_price": 80900.0,
@@ -469,9 +469,9 @@
       "sector": "기타",
       "market_cap": 1533331,
       "weight": 5.0,
-      "weight_prev": 3.0,
+      "weight_prev": 5.0,
       "today_return": 3.2414910858995136,
-      "contribution": 0.9724473257698542,
+      "contribution": 1.620745542949757,
       "ytd_return": 114.237668161435,
       "cumulative_return": -0.28177833437695865,
       "current_price": 191100.0,
@@ -537,16 +537,16 @@
       "sector": "건설,건축관련",
       "market_cap": 29440,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 2.0,
+      "today_return": 18.213058419243985,
+      "contribution": 3.642611683848797,
       "ytd_return": 74.61928934010152,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 34400.0,
       "ath_price": 54700.0,
       "dd": -37.111517367458866,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "017670",
@@ -554,16 +554,16 @@
       "sector": "통신서비스",
       "market_cap": 213716,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 2.0,
+      "today_return": 5.738575982996812,
+      "contribution": 1.1477151965993624,
       "ytd_return": 85.98130841121497,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 99500.0,
       "ath_price": 125200.0,
       "dd": -20.527156549520765,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "035420",
@@ -571,16 +571,16 @@
       "sector": "소프트웨어",
       "market_cap": 345277,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 2.0,
+      "today_return": 11.731843575418994,
+      "contribution": 2.346368715083799,
       "ytd_return": -9.278350515463918,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 220000.0,
       "ath_price": 454000.0,
       "dd": -51.541850220264315,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
   "한투 지속형": [
@@ -607,9 +607,9 @@
       "sector": "반도체",
       "market_cap": 13676758,
       "weight": 25.0,
-      "weight_prev": 20.0,
+      "weight_prev": 25.0,
       "today_return": 4.863387978142077,
-      "contribution": 9.726775956284156,
+      "contribution": 12.158469945355193,
       "ytd_return": 194.77726574500767,
       "cumulative_return": -7.428847081524359,
       "current_price": 1919000.0,
@@ -624,9 +624,9 @@
       "sector": "기타",
       "market_cap": 1533331,
       "weight": 5.0,
-      "weight_prev": 3.0,
+      "weight_prev": 5.0,
       "today_return": 3.2414910858995136,
-      "contribution": 0.9724473257698542,
+      "contribution": 1.620745542949757,
       "ytd_return": 114.237668161435,
       "cumulative_return": -0.28177833437695865,
       "current_price": 191100.0,
@@ -641,9 +641,9 @@
       "sector": "반도체",
       "market_cap": 27864,
       "weight": 5.0,
-      "weight_prev": 3.0,
+      "weight_prev": 5.0,
       "today_return": 7.866666666666666,
-      "contribution": 2.36,
+      "contribution": 3.933333333333333,
       "ytd_return": 207.02087286527515,
       "cumulative_return": 4.576008273009302,
       "current_price": 80900.0,
@@ -777,16 +777,16 @@
       "sector": "건설,건축관련",
       "market_cap": 29440,
       "weight": 1.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 1.0,
+      "today_return": 18.213058419243985,
+      "contribution": 1.8213058419243986,
       "ytd_return": 74.61928934010152,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 34400.0,
       "ath_price": 54700.0,
       "dd": -37.111517367458866,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "017670",
@@ -794,16 +794,16 @@
       "sector": "통신서비스",
       "market_cap": 213716,
       "weight": 1.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 1.0,
+      "today_return": 5.738575982996812,
+      "contribution": 0.5738575982996812,
       "ytd_return": 85.98130841121497,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 99500.0,
       "ath_price": 125200.0,
       "dd": -20.527156549520765,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "035420",
@@ -811,16 +811,16 @@
       "sector": "소프트웨어",
       "market_cap": 345277,
       "weight": 1.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 1.0,
+      "today_return": 11.731843575418994,
+      "contribution": 1.1731843575418994,
       "ytd_return": -9.278350515463918,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 220000.0,
       "ath_price": 454000.0,
       "dd": -51.541850220264315,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
   "한투 성과모집형 1차": [
@@ -847,9 +847,9 @@
       "sector": "반도체",
       "market_cap": 13676758,
       "weight": 25.0,
-      "weight_prev": 20.0,
+      "weight_prev": 25.0,
       "today_return": 4.863387978142077,
-      "contribution": 9.726775956284156,
+      "contribution": 12.158469945355193,
       "ytd_return": 194.77726574500767,
       "cumulative_return": -4.802063696795322,
       "current_price": 1919000.0,
@@ -864,9 +864,9 @@
       "sector": "반도체",
       "market_cap": 27864,
       "weight": 7.0,
-      "weight_prev": 5.0,
+      "weight_prev": 7.0,
       "today_return": 7.866666666666666,
-      "contribution": 3.933333333333333,
+      "contribution": 5.506666666666667,
       "ytd_return": 207.02087286527515,
       "cumulative_return": 5.495529061102822,
       "current_price": 80900.0,
@@ -881,9 +881,9 @@
       "sector": "기타",
       "market_cap": 1533331,
       "weight": 5.0,
-      "weight_prev": 3.0,
+      "weight_prev": 5.0,
       "today_return": 3.2414910858995136,
-      "contribution": 0.9724473257698542,
+      "contribution": 1.620745542949757,
       "ytd_return": 114.237668161435,
       "cumulative_return": -0.28177833437695865,
       "current_price": 191100.0,
@@ -949,16 +949,16 @@
       "sector": "건설,건축관련",
       "market_cap": 29440,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 2.0,
+      "today_return": 18.213058419243985,
+      "contribution": 3.642611683848797,
       "ytd_return": 74.61928934010152,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 34400.0,
       "ath_price": 54700.0,
       "dd": -37.111517367458866,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "017670",
@@ -966,16 +966,16 @@
       "sector": "통신서비스",
       "market_cap": 213716,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 2.0,
+      "today_return": 5.738575982996812,
+      "contribution": 1.1477151965993624,
       "ytd_return": 85.98130841121497,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 99500.0,
       "ath_price": 125200.0,
       "dd": -20.527156549520765,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     },
     {
       "code": "035420",
@@ -983,215 +983,38 @@
       "sector": "소프트웨어",
       "market_cap": 345277,
       "weight": 2.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 2.0,
+      "today_return": 11.731843575418994,
+      "contribution": 2.346368715083799,
       "ytd_return": -9.278350515463918,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 220000.0,
       "ath_price": 454000.0,
       "dd": -51.541850220264315,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
-  "_order_changes": {
-    "삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형": {
-      "date": "2026-07-23",
-      "added": [
-        {
-          "name": "GS건설",
-          "weight": 1.0
-        },
-        {
-          "name": "SK텔레콤",
-          "weight": 1.0
-        },
-        {
-          "name": "NAVER",
-          "weight": 1.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "SK하이닉스",
-          "from": 20.0,
-          "to": 25.0
-        },
-        {
-          "name": "삼성전자우",
-          "from": 3.0,
-          "to": 5.0
-        },
-        {
-          "name": "제주반도체",
-          "from": 3.0,
-          "to": 5.0
-        }
-      ],
-      "removed": []
-    },
-    "NH 목표전환형 5호": {
-      "date": "2026-07-23",
-      "added": [
-        {
-          "name": "GS건설",
-          "weight": 2.0
-        },
-        {
-          "name": "SK텔레콤",
-          "weight": 2.0
-        },
-        {
-          "name": "NAVER",
-          "weight": 2.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "SK하이닉스",
-          "from": 20.0,
-          "to": 25.0
-        },
-        {
-          "name": "제주반도체",
-          "from": 5.0,
-          "to": 7.0
-        },
-        {
-          "name": "삼성전자우",
-          "from": 3.0,
-          "to": 5.0
-        }
-      ],
-      "removed": []
-    },
-    "DB 목표전환형 6차": {
-      "date": "2026-07-23",
-      "added": [
-        {
-          "name": "GS건설",
-          "weight": 2.0
-        },
-        {
-          "name": "SK텔레콤",
-          "weight": 2.0
-        },
-        {
-          "name": "NAVER",
-          "weight": 2.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "SK하이닉스",
-          "from": 20.0,
-          "to": 25.0
-        },
-        {
-          "name": "제주반도체",
-          "from": 5.0,
-          "to": 7.0
-        },
-        {
-          "name": "삼성전자우",
-          "from": 3.0,
-          "to": 5.0
-        }
-      ],
-      "removed": []
-    },
-    "한투 지속형": {
-      "date": "2026-07-23",
-      "added": [
-        {
-          "name": "GS건설",
-          "weight": 1.0
-        },
-        {
-          "name": "SK텔레콤",
-          "weight": 1.0
-        },
-        {
-          "name": "NAVER",
-          "weight": 1.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "SK하이닉스",
-          "from": 20.0,
-          "to": 25.0
-        },
-        {
-          "name": "삼성전자우",
-          "from": 3.0,
-          "to": 5.0
-        },
-        {
-          "name": "제주반도체",
-          "from": 3.0,
-          "to": 5.0
-        }
-      ],
-      "removed": []
-    },
-    "한투 성과모집형 1차": {
-      "date": "2026-07-23",
-      "added": [
-        {
-          "name": "GS건설",
-          "weight": 2.0
-        },
-        {
-          "name": "SK텔레콤",
-          "weight": 2.0
-        },
-        {
-          "name": "NAVER",
-          "weight": 2.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "SK하이닉스",
-          "from": 20.0,
-          "to": 25.0
-        },
-        {
-          "name": "제주반도체",
-          "from": 5.0,
-          "to": 7.0
-        },
-        {
-          "name": "삼성전자우",
-          "from": 3.0,
-          "to": 5.0
-        }
-      ],
-      "removed": []
-    }
-  },
   "_portfolio_meta": {
     "삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형": {
-      "nav_ytd_d1": 53.91008801222969,
-      "nav_cum_d1": 211.10000000000002
+      "nav_ytd_d1": 57.6274792090278,
+      "nav_cum_d1": 218.614
     },
     "NH 목표전환형 5호": {
-      "nav_ytd_d1": -19.650999999999996,
-      "nav_cum_d1": -19.650999999999996
+      "nav_ytd_d1": -17.635,
+      "nav_cum_d1": -17.635
     },
     "DB 목표전환형 6차": {
-      "nav_ytd_d1": -18.708999999999996,
-      "nav_cum_d1": -18.708999999999996
+      "nav_ytd_d1": -16.671000000000003,
+      "nav_cum_d1": -16.671000000000003
     },
     "한투 지속형": {
-      "nav_ytd_d1": -12.497000000000003,
-      "nav_cum_d1": -12.497000000000003
+      "nav_ytd_d1": -10.38300000000001,
+      "nav_cum_d1": -10.38300000000001
     },
     "한투 성과모집형 1차": {
-      "nav_ytd_d1": -8.65499999999999,
-      "nav_cum_d1": -8.65499999999999
+      "nav_ytd_d1": -6.3640000000000025,
+      "nav_cum_d1": -6.3640000000000025
     }
   },
   "_price_asof": "2026-07-23"
