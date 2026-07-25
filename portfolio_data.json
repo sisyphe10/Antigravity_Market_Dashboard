@@ -6,9 +6,9 @@
       "sector": "반도체",
       "market_cap": 14586465,
       "weight": 30.0,
-      "weight_prev": 25.0,
+      "weight_prev": 30.0,
       "today_return": -7.592592592592593,
-      "contribution": -18.98148148148148,
+      "contribution": -22.777777777777775,
       "ytd_return": 108.09007506255215,
       "cumulative_return": 319.09296859423114,
       "current_price": 249500.0,
@@ -246,9 +246,9 @@
       "sector": "반도체",
       "market_cap": 14586465,
       "weight": 30.0,
-      "weight_prev": 25.0,
+      "weight_prev": 30.0,
       "today_return": -7.592592592592593,
-      "contribution": -18.98148148148148,
+      "contribution": -22.777777777777775,
       "ytd_return": 108.09007506255215,
       "cumulative_return": -12.23801846695003,
       "current_price": 249500.0,
@@ -418,9 +418,9 @@
       "sector": "반도체",
       "market_cap": 14586465,
       "weight": 30.0,
-      "weight_prev": 25.0,
+      "weight_prev": 30.0,
       "today_return": -7.592592592592593,
-      "contribution": -18.98148148148148,
+      "contribution": -22.777777777777775,
       "ytd_return": 108.09007506255215,
       "cumulative_return": -11.262596324836993,
       "current_price": 249500.0,
@@ -590,9 +590,9 @@
       "sector": "반도체",
       "market_cap": 14586465,
       "weight": 30.0,
-      "weight_prev": 25.0,
+      "weight_prev": 30.0,
       "today_return": -7.592592592592593,
-      "contribution": -18.98148148148148,
+      "contribution": -22.777777777777775,
       "ytd_return": 108.09007506255215,
       "cumulative_return": -9.784555635535764,
       "current_price": 249500.0,
@@ -830,9 +830,9 @@
       "sector": "반도체",
       "market_cap": 14586465,
       "weight": 30.0,
-      "weight_prev": 25.0,
+      "weight_prev": 30.0,
       "today_return": -7.592592592592593,
-      "contribution": -18.98148148148148,
+      "contribution": -22.777777777777775,
       "ytd_return": 108.09007506255215,
       "cumulative_return": -7.635354002776495,
       "current_price": 249500.0,
@@ -995,88 +995,26 @@
       "is_today_new": false
     }
   ],
-  "_order_changes": {
-    "삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형": {
-      "date": "2026-07-24",
-      "added": [],
-      "changed": [
-        {
-          "name": "삼성전자",
-          "from": 25.0,
-          "to": 30.0
-        }
-      ],
-      "removed": []
-    },
-    "NH 목표전환형 5호": {
-      "date": "2026-07-24",
-      "added": [],
-      "changed": [
-        {
-          "name": "삼성전자",
-          "from": 25.0,
-          "to": 30.0
-        }
-      ],
-      "removed": []
-    },
-    "DB 목표전환형 6차": {
-      "date": "2026-07-24",
-      "added": [],
-      "changed": [
-        {
-          "name": "삼성전자",
-          "from": 25.0,
-          "to": 30.0
-        }
-      ],
-      "removed": []
-    },
-    "한투 지속형": {
-      "date": "2026-07-24",
-      "added": [],
-      "changed": [
-        {
-          "name": "삼성전자",
-          "from": 25.0,
-          "to": 30.0
-        }
-      ],
-      "removed": []
-    },
-    "한투 성과모집형 1차": {
-      "date": "2026-07-24",
-      "added": [],
-      "changed": [
-        {
-          "name": "삼성전자",
-          "from": 25.0,
-          "to": 30.0
-        }
-      ],
-      "removed": []
-    }
-  },
   "_portfolio_meta": {
     "삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형": {
-      "nav_ytd_d1": 57.6274792090278,
-      "nav_cum_d1": 218.614
+      "nav_ytd_d1": 48.664479965962656,
+      "nav_cum_d1": 200.49699999999996
     },
     "NH 목표전환형 5호": {
-      "nav_ytd_d1": -17.635999999999996,
-      "nav_cum_d1": -17.635999999999996
+      "nav_ytd_d1": -22.641999999999996,
+      "nav_cum_d1": -22.641999999999996
     },
     "DB 목표전환형 6차": {
-      "nav_ytd_d1": -16.67000000000001,
-      "nav_cum_d1": -16.67000000000001
+      "nav_ytd_d1": -21.736,
+      "nav_cum_d1": -21.736
     },
     "한투 지속형": {
-      "nav_ytd_d1": -10.384000000000004,
-      "nav_cum_d1": -10.384000000000004
+      "nav_ytd_d1": -15.479,
+      "nav_cum_d1": -15.479
     },
     "한투 성과모집형 1차": {
-      "nav_ytd_d1": -6.3640000000000025,
-      "nav_cum_d1": -6.3640000000000025
+      "nav_ytd_d1": -12.056000000000001,
+      "nav_cum_d1": -12.056000000000001
     }
   },
   "_price_asof": "2026-07-24"
