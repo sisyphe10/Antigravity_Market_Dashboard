@@ -1179,7 +1179,14 @@ def _element_download_helper_js():
                 var el = document.getElementById(elementId);
                 if (!el) { console.warn('element not found:', elementId); return; }
                 if (typeof html2canvas !== 'function') { alert('이미지 라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.'); return; }
-                html2canvas(el, { scale: 2, backgroundColor: '#ffffff', scrollX: 0, scrollY: -window.scrollY }).then(function(canvas) {
+                // 배경 = 요소 조상의 실제 배경색 (2026-07-26): 다크 테마에서 흰 배경 하드코딩 시
+                // 밝은 글자가 흰 바탕에 찍혀 안 보이던 문제 수정. 라이트 페이지(WRAP)는 그대로 흰색.
+                var bg = (function(n){ var c; while (n && n !== document.documentElement) {
+                    c = getComputedStyle(n).backgroundColor;
+                    if (c && c !== 'rgba(0, 0, 0, 0)' && c !== 'transparent') return c;
+                    n = n.parentElement; }
+                    return getComputedStyle(document.body).backgroundColor || '#ffffff'; })(el);
+                html2canvas(el, { scale: 2, backgroundColor: bg, scrollX: 0, scrollY: -window.scrollY }).then(function(canvas) {
                     var d = new Date();
                     var pad = function(n){ return n<10 ? '0'+n : ''+n; };
                     var stamp = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
@@ -9842,7 +9849,13 @@ function renderSector() {
 // ── 이미지 다운로드 (html2canvas, 상위 30개) ──────────────────
 function _univCapture(node, baseName) {
     if (typeof html2canvas !== 'function') { alert('이미지 라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.'); return Promise.resolve(); }
-    return html2canvas(node, { scale: 2, backgroundColor: '#ffffff', scrollX: 0, scrollY: -window.scrollY }).then(function(canvas) {
+    // 배경 = 요소 조상의 실제 배경색 (2026-07-26): 다크 테마 흰 배경 하드코딩 → 글자 안 보임 수정
+    var bg = (function(n){ var c; while (n && n !== document.documentElement) {
+        c = getComputedStyle(n).backgroundColor;
+        if (c && c !== 'rgba(0, 0, 0, 0)' && c !== 'transparent') return c;
+        n = n.parentElement; }
+        return getComputedStyle(document.body).backgroundColor || '#ffffff'; })(node);
+    return html2canvas(node, { scale: 2, backgroundColor: bg, scrollX: 0, scrollY: -window.scrollY }).then(function(canvas) {
         var d = new Date();
         var pad = function(n){ return n<10 ? '0'+n : ''+n; };
         var stamp = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
