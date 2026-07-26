@@ -33,6 +33,9 @@ import os
 import re
 import sys
 
+# AoE 상단 네비 정본 (2026-07-26 통일) — 같은 execution/ 디렉토리
+from nav_style import NAV_CSS as AOE_NAV_CSS, PRETENDARD_LINK, nav_html
+
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
@@ -412,30 +415,8 @@ body { font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system,
        background: #f8f9fa; color: #000; line-height: 1.6; }
 a { color: #000; }
 
-/* ---- top nav (matches index.html / market.html) ---- */
-html { overflow-y: scroll; }  /* 스크롤바 공간 상시 확보 — 로드 중 nav 좌우 점프 방지 (전 페이지 공통) */
-.topnav { background: #101418; border-bottom: 2px solid #2d7a3a; position: sticky; top: 0; z-index: 100; }
-.topnav-inner { max-width: 1400px; margin: 0 auto; padding: 0 28px; box-sizing: border-box; display: flex; align-items: stretch; height: 54px; gap: 36px; }
-.topnav-brand { font-size: 1.1rem; font-weight: 800; letter-spacing: 3.5px; color: #fff; white-space: nowrap; text-decoration: none; align-self: center; }
-.topnav-brand:hover { color: #7fc78f; }
-.topnav-tabs { display: flex; gap: 2px; flex: 1; align-items: stretch; }
-.topnav-item { position: relative; display: flex; align-items: stretch; }
-.topnav-tab { box-sizing: border-box; display: inline-flex; align-items: center; gap: 6px; padding: 0 18px; color: #9aa4ae; text-decoration: none; font-size: 0.92rem; font-weight: 600; letter-spacing: 0.3px; border: none; border-radius: 0; white-space: nowrap; background: transparent; transition: color 0.12s, background 0.12s; cursor: pointer; }
-.topnav-tab:hover { color: #fff; background: #1a2027; }
-.topnav-tab.active { color: #fff; background: #991B1B; font-weight: 700; }
-.topnav-dropdown { box-sizing: border-box; position: absolute; top: 100%; left: 0; min-width: 180px; width: max-content; background: #14181d; border: 1px solid #2a323b; border-radius: 0; box-shadow: 0 8px 24px rgba(0,0,0,0.35); padding: 4px 0; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity 0.15s, transform 0.15s, visibility 0.15s; z-index: 200; }
-.topnav-item:hover .topnav-dropdown, .topnav-item:focus-within .topnav-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
-.topnav-sub { display: block; padding: 9px 16px; color: #b7c0c9; text-decoration: none; font-size: 0.9rem; font-weight: 500; border-radius: 0; white-space: nowrap; text-align: center; }
-.topnav-sub:hover { background: #1a2027; color: #fff; }
-/* 이 페이지 body 는 line-height:1.6 — nav·사이드바가 상속하면 탭 알약이 다른 페이지보다
-   ~8px 커져 상단바 세로 모습이 달라진다 (2026-07-12 사용자 리포트). normal 로 표준화. */
-.topnav-tab, .topnav-sub, .topnav-brand, .sidebar-link, .sidebar-brand { line-height: normal; }
-@media (max-width: 800px) {
-  .topnav-inner { padding: 0 12px; gap: 12px; height: 46px; }
-  .topnav-brand { font-size: 0.95rem; }
-  .topnav-tab { padding: 6px 14px; font-size: 0.85rem; min-width: 0; }
-  .topnav-tabs { display: flex; gap: 2px; flex: 1; align-items: stretch; }
-}
+/* ---- top nav: 정본 nav_style.NAV_CSS 가 build 시 이 CSS 앞에 삽입됨 (2026-07-26 통일)
+   — .topnav* 규칙을 여기 다시 넣지 말 것. line-height:normal 도 정본에 포함. ---- */
 
 /* 사이드바 없음 — Market 하위 메뉴는 이 페이지와 무관 (2026-07-12 사용자 확정, 랜딩·Wiki와 동일) */
 
@@ -569,30 +550,8 @@ h2.block-title { font-size: 1.4rem; color: #111; font-weight: 800; margin-bottom
 }
 """
 
-TOP_NAV_HTML = (
-    '<nav class="topnav"><div class="topnav-inner">'
-    # AoE 브랜드 = 상단바 층위, 전 개인 페이지 동일 (2026-07-12 확정)
-    '<a href="index.html" class="topnav-brand">AoE</a>'
-    '<div class="topnav-tabs">'
-    '<div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a>'
-    '<div class="topnav-dropdown">'
-    '<a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a>'
-    '<a href="wrap.html#order" class="topnav-sub">Order</a>'
-    '<a href="wrap.html#disclosures" class="topnav-sub">공시</a>'
-    '<a href="wrap.html#contribution" class="topnav-sub">기여도</a>'
-    '<a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div>'
-    '<div class="topnav-item"><a href="market.html" class="topnav-tab">Market</a>'
-    '<div class="topnav-dropdown">'
-    '<a href="market.html" class="topnav-sub">Data</a>'
-    '<a href="universe.html" class="topnav-sub">Universe</a>'
-    '<a href="universe_lab.html" class="topnav-sub">Universe Lab</a>'
-    '<a href="featured.html" class="topnav-sub">Featured</a>'
-    '<a href="market_alert.html" class="topnav-sub">투자유의종목</a>'
-    '<a href="etf.html" class="topnav-sub">ETF</a>'
-    '<a href="seibro.html" class="topnav-sub">SEIBro</a></div></div>'
-    '<div class="topnav-item"><a href="architecture.html" class="topnav-tab active">Architecture</a></div>'
-    '</div></div></nav>'
-)
+# 정본 네비 (2026-07-26 통일) — 탭 구성·마크업은 execution/nav_style.py 단일 출처
+TOP_NAV_HTML = nav_html('architecture')
 
 # 사이드바 제거 (2026-07-12 사용자 확정) — Market 하위 메뉴는 이 페이지와 무관
 
@@ -1124,7 +1083,8 @@ def build_html(reg, is_real):
     out.append('<meta charset="UTF-8">')
     out.append('<meta name="viewport" content="width=device-width, initial-scale=1.0">')
     out.append("<title>System Architecture — Age of Emergence</title>")
-    out.append("<style>" + PAGE_CSS + "</style>")
+    out.append(PRETENDARD_LINK)  # 웹폰트 로드 — 네비 글꼴 전 페이지 통일 (2026-07-26)
+    out.append("<style>" + AOE_NAV_CSS + "\n" + PAGE_CSS + "</style>")
     out.append("</head><body>")
     out.append(TOP_NAV_HTML)
     out.append('<div class="wrap">')

@@ -24,6 +24,7 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(BASE)
 sys.path.insert(0, os.path.join(ROOT, 'execution'))
 from kis_token import kis_get  # noqa: E402  (0.06s 자체 스로틀 내장)
+import nav_style  # noqa: E402  — AoE 상단 네비 정본 (2026-07-26 통일)
 
 KST = timezone(timedelta(hours=9))
 UNIVERSE_CSV = os.path.join(ROOT, 'universe_tickers.csv')
@@ -352,6 +353,20 @@ def save_prefs(p):
     os.replace(tmp, PREFS_PATH)
 
 
+def _load_index():
+    """index.html 네비 마커 블록을 정본(nav_style)으로 치환 후 캐시 (기동 시 1회).
+    마커 미발견 시 원본 서빙 (경고 로그) — 기동 실패로 시세판을 죽이지 않는다."""
+    raw = open(os.path.join(BASE, 'index.html'), encoding='utf-8').read()
+    out, ok = nav_style.materialize(raw, active='watchlist')
+    if not ok:
+        logging.warning('index.html 네비 마커 미발견 — 원본 서빙')
+        return raw
+    return out
+
+
+_INDEX_HTML = _load_index()
+
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass
@@ -382,8 +397,7 @@ class Handler(BaseHTTPRequestHandler):
                 body = json.dumps(load_prefs(), ensure_ascii=False)
             self._send(body, 'application/json')
         elif path in ('/', '/index.html'):
-            html = open(os.path.join(BASE, 'index.html'), encoding='utf-8').read()
-            self._send(html, 'text/html')
+            self._send(_INDEX_HTML, 'text/html')
         else:
             self.send_error(404)
 

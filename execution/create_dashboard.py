@@ -44,36 +44,11 @@ TOP_NAV_MAIN = [
     ('architecture', 'architecture.html',  'Architecture', None),
 ]
 
-# Standard Pretendard font stack (use everywhere)
-PRETENDARD_LINK = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">'
-PRETENDARD_STACK = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"
+# Standard Pretendard font stack — 정본은 nav_style.py (2026-07-26 네비 통일)
+from nav_style import PRETENDARD_LINK, PRETENDARD_STACK, NAV_CSS as AOE_NAV_CSS  # noqa: E402
 
-TOP_NAV_CSS = """
-.topnav { background: #101418; border-bottom: 2px solid #2d7a3a; position: sticky; top: 0; z-index: 100; }
-body { margin: 0; }  /* UA 기본 8px 마진 가드 — 전 페이지 이미 0이라 시각 변화 없음 */
-html { overflow-y: scroll; }  /* 스크롤바 공간 상시 확보 — 로드 중 스크롤바 등장으로 nav가
-                                 우→좌로 점프하던 애니메이션 제거 (2026-07-12 사용자 리포트) */
-.topnav-inner { max-width: 1400px; margin: 0 auto; padding: 0 28px; box-sizing: border-box; display: flex; align-items: stretch; height: 54px; gap: 36px; }  /* box-sizing 명시 — 전역 리셋 없는 페이지(market·wrap)에서 1456px로 계산돼 28px 어긋나던 근본 원인 */
-.topnav-brand { font-size: 1.1rem; font-weight: 800; letter-spacing: 3.5px; color: #fff; white-space: nowrap; text-decoration: none; align-self: center; font-family: PRETENDARD_STACK_PLACEHOLDER; }
-.topnav-brand:hover { color: #7fc78f; }
-.topnav-tabs { display: flex; gap: 2px; flex: 1; align-items: stretch; }
-.topnav-item { position: relative; display: flex; align-items: stretch; }
-.topnav-tab { box-sizing: border-box; display: inline-flex; align-items: center; gap: 6px; padding: 0 18px; color: #9aa4ae; text-decoration: none; font-size: 0.92rem; font-weight: 600; letter-spacing: 0.3px; border: none; border-radius: 0; white-space: nowrap; background: transparent; transition: color 0.12s, background 0.12s; cursor: pointer; font-family: PRETENDARD_STACK_PLACEHOLDER; }
-.topnav-tab:hover { color: #fff; background: #1a2027; }
-.topnav-tab.active { color: #fff; background: #991B1B; font-weight: 700; }
-.topnav-tab .caret { font-size: 0.7rem; opacity: 0.7; }
-.topnav-dropdown { box-sizing: border-box; position: absolute; top: 100%; left: 0; min-width: 180px; width: max-content; background: #14181d; border: 1px solid #2a323b; border-radius: 0; box-shadow: 0 8px 24px rgba(0,0,0,0.35); padding: 4px 0; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity 0.15s, transform 0.15s, visibility 0.15s; z-index: 200; }
-.topnav-item:hover .topnav-dropdown,
-.topnav-item:focus-within .topnav-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
-.topnav-sub { display: block; padding: 9px 16px; color: #b7c0c9; text-decoration: none; font-size: 0.9rem; font-weight: 500; border-radius: 0; white-space: nowrap; text-align: center; font-family: PRETENDARD_STACK_PLACEHOLDER; }
-.topnav-sub:hover { background: #1a2027; color: #fff; }
-.topnav-sub.active { background: #2a1515; color: #e08585; font-weight: 700; }
-@media (max-width: 800px) {
-    .topnav-inner { padding: 0 12px; gap: 12px; height: 46px; }
-    .topnav-brand { font-size: 0.95rem; }
-    .topnav-tab { padding: 0 12px; font-size: 0.85rem; }
-    .topnav-tabs { display: flex; gap: 2px; flex: 1; align-items: stretch; }
-}
+TOP_NAV_CSS = AOE_NAV_CSS + """
+/* ── .topnav* 정본 규칙은 위 nav_style.NAV_CSS 에서 옴 (2026-07-26 통일) — 여기 추가 금지 ── */
 
 /* Left sidebar — Market-group(+Architecture) pages. 2026-07-12 통일: topnav 는 모든
    페이지에서 랜딩(/)과 동일(전폭·탭 좌측 28px 시작)하고, 사이드바는 topnav '아래'(top:72px)에서

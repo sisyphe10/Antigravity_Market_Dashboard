@@ -21,6 +21,9 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from dl_common import CATALOG_DIR, DATALAKE_ROOT, DUCKDB_PATH, MARKET_DIR, REPO  # noqa: E402
 
+sys.path.insert(0, os.path.join(REPO, "execution"))
+import nav_style  # noqa: E402  — AoE 상단 네비 정본 (2026-07-26 통일)
+
 from dotenv import load_dotenv  # noqa: E402
 load_dotenv(os.path.join(REPO, ".env"))
 
@@ -371,20 +374,8 @@ _LIBRARY_HTML = """<!DOCTYPE html>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:#0a0a0a;color:#d9dde2;font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif;height:100vh;display:flex;flex-direction:column;}
-/* ── AoE 공통 상단 내비 (다른 탭들과 동일) ── */
-.topnav{background:#101418;border-bottom:2px solid #fb8b1e;position:sticky;top:0;z-index:100;}
-.topnav-inner{max-width:1400px;margin:0 auto;padding:0 28px;display:flex;align-items:stretch;height:54px;gap:36px;}
-.topnav-brand{font-size:1.1rem;font-weight:800;letter-spacing:3.5px;color:#fff;white-space:nowrap;text-decoration:none;align-self:center;}
-.topnav-brand:hover{color:#fb8b1e;}
-.topnav-tabs{display:flex;gap:2px;flex:1;align-items:stretch;}
-.topnav-item{position:relative;display:flex;align-items:stretch;}
-.topnav-tab{display:inline-flex;align-items:center;gap:6px;padding:0 18px;color:#9aa4ae;text-decoration:none;font-size:0.92rem;font-weight:600;letter-spacing:0.3px;white-space:nowrap;background:transparent;transition:color .12s,background .12s;}
-.topnav-tab:hover{color:#fff;background:#1a2027;}
-.topnav-tab.active{color:#101418;background:#fb8b1e;font-weight:700;}
-.topnav-dropdown{position:absolute;top:100%;left:0;min-width:180px;width:max-content;background:#14181d;border:1px solid #2a323b;box-shadow:0 8px 24px rgba(0,0,0,.35);padding:4px 0;opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .15s,transform .15s,visibility .15s;z-index:200;}
-.topnav-item:hover .topnav-dropdown,.topnav-item:focus-within .topnav-dropdown{opacity:1;visibility:visible;transform:translateY(0);}
-.topnav-sub{display:block;padding:9px 16px;color:#b7c0c9;text-decoration:none;font-size:0.9rem;font-weight:500;white-space:nowrap;text-align:center;}
-.topnav-sub:hover{background:#1a2027;color:#fff;}
+/* ── AoE 공통 상단 내비 — 기동 시 nav_style.NAV_CSS 로 치환 (정본, 직접 수정 금지) ── */
+/*__AOE_NAV_CSS__*/
 header{padding:14px 20px 10px;border-bottom:1px solid #27282b;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
 header h1{font-size:22px;color:#fb8b1e;font-weight:700;}
 .tabs{display:flex;gap:6px;}
@@ -433,7 +424,7 @@ main{flex:1;display:flex;min-height:0;}
 #hlPop .d1{background:#b9a1fc;}#hlPop .d2{background:#67e0f4;}#hlPop .d3{background:#4ade80;}
 @media(max-width:760px){#list{width:44%;}#doc{padding:16px;}}
 </style></head><body>
-<nav class="topnav"><div class="topnav-inner"><a href="/index.html" class="topnav-brand">AGE OF EMERGENCE</a><div class="topnav-tabs"><div class="topnav-item"><a href="/watchlist/" class="topnav-tab">Watchlist</a></div><div class="topnav-item"><a href="/market.html" class="topnav-tab">Market</a><div class="topnav-dropdown"><a href="/market.html" class="topnav-sub">Data</a><a href="/universe.html" class="topnav-sub">Universe</a><a href="/universe_lab.html" class="topnav-sub">Universe Lab</a><a href="/featured.html" class="topnav-sub">Featured</a><a href="/market_alert.html" class="topnav-sub">투자유의종목</a><a href="/etf.html" class="topnav-sub">ETF</a><a href="/seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="/sisyphe/journal.html" class="topnav-tab">Journal</a></div><div class="topnav-item"><a href="/sisyphe/journal.html#weekly" class="topnav-tab">Weekly</a></div><div class="topnav-item"><a href="/wiki/library" class="topnav-tab active">Earnings</a></div><div class="topnav-item"><a href="/wiki/" class="topnav-tab">Wiki</a></div><div class="topnav-item" style="margin-left:auto"><a href="/sisyphe/memento.html" class="topnav-tab">Memento</a></div><div class="topnav-item"><a href="/sisyphe/dashboard.html" class="topnav-tab">Ledger</a></div><div class="topnav-item"><a href="/architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
+<!--__AOE_NAV__-->
 <header>
   <h1>Earnings Library</h1>
   <div class="tabs">
@@ -625,10 +616,32 @@ fetch('library/list').then(function(r){return r.json();}).then(function(j){ALL=j
 fetch('library/highlights').then(function(r){return r.json();}).then(function(j){HL=j||{};});
 </script></body></html>"""
 
+# 네비 정본 치환 (기동 시 1회) — 토큰 미존재 시 기동 실패로 곧장 드러난다
+assert '/*__AOE_NAV_CSS__*/' in _LIBRARY_HTML and '<!--__AOE_NAV__-->' in _LIBRARY_HTML
+_LIBRARY_HTML = (_LIBRARY_HTML
+                 .replace('/*__AOE_NAV_CSS__*/', nav_style.NAV_CSS)
+                 .replace('<!--__AOE_NAV__-->', nav_style.nav_html('earnings')))
+
+
+def _load_wiki_index():
+    """static/index.html 을 읽어 네비 마커 블록을 정본으로 치환 후 메모리 캐시 (기동 시 1회).
+
+    마커 미발견 시 원본을 그대로 서빙 (경고 로그) — 기동 실패로 Wiki 를 죽이지 않는다.
+    """
+    raw = open(os.path.join(STATIC_DIR, "index.html"), encoding="utf-8").read()
+    out, ok = nav_style.materialize(raw, active="wiki")
+    if not ok:
+        sys.stderr.write("[webui] WARN: static/index.html 네비 마커 미발견 — 원본 서빙\n")
+        return raw
+    return out
+
+
+_WIKI_INDEX_HTML = _load_wiki_index()
+
 
 @app.get("/")
 def root():
-    return FileResponse(os.path.join(STATIC_DIR, "index.html"))
+    return HTMLResponse(_WIKI_INDEX_HTML)
 
 
 if __name__ == "__main__":
