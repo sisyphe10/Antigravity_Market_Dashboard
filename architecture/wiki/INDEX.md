@@ -1,6 +1,6 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 131 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 132 components._
 
 Updated: 2026-07-23
 
@@ -115,7 +115,8 @@ Updated: 2026-07-23
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — Bot
 - [투자일지 시장데이터 (fetch_journal_data.py)](src-journal-data.md) — Source
 
-### 운영 · 인프라 (34)
+### 운영 · 인프라 (35)
+- [AoE 스타일 정본 (nav_style.py)](src-nav-style.md) — Source
 - [architecture.html (아키텍처)](page-architecture.md) — Page
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — Infra
 - [Claude Code Action (@claude 이벤트)](gha-claude-code.md) — GHA
@@ -254,7 +255,8 @@ Updated: 2026-07-23
 - [외부 데이터 API/소스 집합](ext-data-apis.md) — active
 - [한국 수출 매출 추정 대시보드](ext-export-dashboard.md) — planned
 
-### Source (42)
+### Source (43)
+- [AoE 스타일 정본 (nav_style.py)](src-nav-style.md) — import 시 (상시), active
 - [DART 공시 (fetch_disclosures.py)](src-dart-disclosures.md) — 16:30 (gha-daily-disclosures), active
 - [ECOS 한국 매크로 33종 (fetch_ecos_data.py)](src-ecos.md) — 17:40 평일 (gha-daily-ecos), active
 - [ETF 구성종목 수집 (collect_etf_daily.py)](src-etf-collect.md) — 16:30 / 18:00 (etf-collect 타이머), active
@@ -306,7 +308,8 @@ Updated: 2026-07-23
 
 ## By project
 
-### antigravity (131)
+### antigravity (132)
+- [AoE 스타일 정본 (nav_style.py)](src-nav-style.md) — Source
 - [architecture.html (아키텍처)](page-architecture.md) — Page
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — Infra
 - [Claude Code Action (@claude 이벤트)](gha-claude-code.md) — GHA

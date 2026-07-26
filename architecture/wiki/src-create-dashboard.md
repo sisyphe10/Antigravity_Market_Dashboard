@@ -40,7 +40,7 @@ alerts: ""
 
 - 생성: index/market/wrap/universe/universe_lab/seibro/featured/hotels/etf 페이지(등록표 PAGES 기반).
 - 거의 모든 GHA/VM 잡의 마지막 스텝으로 호출됨 → 데이터가 바뀌면 여기서 화면에 반영.
-- 상단 탭바/폰트(Pretendard)/UI 규칙의 단일 정의처. architecture.html은 이 헬퍼를 수동 미러링해야 함.
+- 상단 네비·다크/WRAP 팔레트·Pretendard·캡처 JS는 execution/nav_style.py 정본에서 import (2026-07-26 통일 — 수동 미러링 폐지).
 - 수정 시 전체 페이지 재생성 후 일관성 확인.
 
 ## Reads

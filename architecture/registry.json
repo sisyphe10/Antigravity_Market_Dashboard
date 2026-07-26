@@ -1091,6 +1091,22 @@
    ]
   },
   {
+   "id": "src-nav-style",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "pipeline_source",
+   "name": "AoE 스타일 정본 (nav_style.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "import 시 (상시)",
+   "status": "active",
+   "desc_md": "AoE 전 페이지 공통 스타일의 유일한 출처 (2026-07-26 네비 드리프트 근본해결).\n\n- 상단 네비 정본: NAV_CSS(+scoped)·nav_html(active)·materialize(마커 치환).\n- 다크 PALETTE·라이트 WRAP_PALETTE: compose 주입 CSS 와 앱 3종(var(--aoe-*))·WRAP(var(--wrap-*)) 이 파생.\n- H2C_FREEZE_JS: html2canvas 캡처 색고정 (틴트 셀 #333 굳음 버그 차단).\n- 소비자: create_dashboard·create_architecture(재생성 시) / webui·quoteboard 서버(기동 시 치환) / compose(publish 시 교체).\n- ★수정 규칙: 네비·색 변경은 반드시 이 파일에서만. 다크 주입 CSS 에 nav !important 재단언 금지.",
+   "code": [
+    "execution/nav_style.py"
+   ],
+   "reads": [],
+   "writes": []
+  },
+  {
    "id": "src-create-dashboard",
    "project": "antigravity",
    "domain": "ops-infra",
@@ -1099,7 +1115,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "체인 말단 (여러 잡)",
    "status": "active",
-   "desc_md": "생태계의 중앙 렌더러(550KB). dataset.csv·portfolio_data.json·각종 json/db를 읽어 대부분의 라이브 HTML을 한 번에 생성한다.\n\n- 생성: index/market/wrap/universe/universe_lab/seibro/featured/hotels/etf 페이지(등록표 PAGES 기반).\n- 거의 모든 GHA/VM 잡의 마지막 스텝으로 호출됨 → 데이터가 바뀌면 여기서 화면에 반영.\n- 상단 탭바/폰트(Pretendard)/UI 규칙의 단일 정의처. architecture.html은 이 헬퍼를 수동 미러링해야 함.\n- 수정 시 전체 페이지 재생성 후 일관성 확인.",
+   "desc_md": "생태계의 중앙 렌더러(550KB). dataset.csv·portfolio_data.json·각종 json/db를 읽어 대부분의 라이브 HTML을 한 번에 생성한다.\n\n- 생성: index/market/wrap/universe/universe_lab/seibro/featured/hotels/etf 페이지(등록표 PAGES 기반).\n- 거의 모든 GHA/VM 잡의 마지막 스텝으로 호출됨 → 데이터가 바뀌면 여기서 화면에 반영.\n- 상단 네비·다크/WRAP 팔레트·Pretendard·캡처 JS는 execution/nav_style.py 정본에서 import (2026-07-26 통일 — 수동 미러링 폐지).\n- 수정 시 전체 페이지 재생성 후 일관성 확인.",
    "code": [
     "execution/create_dashboard.py"
    ],
