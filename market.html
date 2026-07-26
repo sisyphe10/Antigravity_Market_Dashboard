@@ -533,7 +533,7 @@ body{margin:0}
     <nav class="topnav"><div class="topnav-inner"><a href="index.html" class="topnav-brand">AGE OF EMERGENCE</a><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab active">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub active">Data</a><a href="universe.html" class="topnav-sub">Universe</a><a href="universe_lab.html" class="topnav-sub">Universe Lab</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
     <aside class="sidebar"><a href="market.html" class="sidebar-link active">Data</a><a href="universe.html" class="sidebar-link">Universe</a><a href="universe_lab.html" class="sidebar-link">Universe Lab</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
     <header style="margin:0;padding:8px 28px 0;text-align:right;">
-        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-07-26 20:36:55 KST</div>
+        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-07-26 20:47:15 KST</div>
     </header>
 
     <div class="mkt-subtabs">
@@ -582,6 +582,30 @@ body{margin:0}
         
         <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
         <script>
+        if (typeof window._h2cFreeze !== 'function') {
+            // 캡처 전 계산된 색을 인라인 고정 (2026-07-26): html2canvas가 동일 명시도 !important
+            // 규칙의 후행 우선을 무시해 다크 틴트 셀 글자를 #333으로 굳히던 문제의 근본 차단.
+            // 원복은 style '속성 문자열' 그대로 — cssText 재직렬화 금지 ([style*=...] 셀렉터 보호).
+            // 동일 정의가 universe 페이지 스크립트에도 있음 (guard로 1회만 등록).
+            window._h2cFreeze = function(root) {
+                var nodes = [root].concat(Array.prototype.slice.call(root.querySelectorAll('*')));
+                var saved = [];
+                nodes.forEach(function(n) {
+                    if (n.nodeType !== 1) return;
+                    var cs = getComputedStyle(n);
+                    saved.push([n, n.getAttribute('style')]);
+                    n.style.color = cs.color;
+                    var b = cs.backgroundColor;
+                    if (b && b !== 'rgba(0, 0, 0, 0)' && b !== 'transparent') n.style.backgroundColor = b;
+                });
+                return function() {
+                    saved.forEach(function(p) {
+                        if (p[1] === null) p[0].removeAttribute('style');
+                        else p[0].setAttribute('style', p[1]);
+                    });
+                };
+            };
+        }
         if (typeof window.downloadElementImage !== 'function') {
             window.downloadElementImage = function(elementId, baseName) {
                 var el = document.getElementById(elementId);
@@ -594,7 +618,9 @@ body{margin:0}
                     if (c && c !== 'rgba(0, 0, 0, 0)' && c !== 'transparent') return c;
                     n = n.parentElement; }
                     return getComputedStyle(document.body).backgroundColor || '#ffffff'; })(el);
+                var unfreeze = window._h2cFreeze(el);
                 html2canvas(el, { scale: 2, backgroundColor: bg, scrollX: 0, scrollY: -window.scrollY }).then(function(canvas) {
+                    unfreeze();
                     var d = new Date();
                     var pad = function(n){ return n<10 ? '0'+n : ''+n; };
                     var stamp = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
@@ -604,7 +630,7 @@ body{margin:0}
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
-                });
+                }).catch(function(e) { unfreeze(); console.error('downloadElementImage:', e); });
             };
         }
         </script>
