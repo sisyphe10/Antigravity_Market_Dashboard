@@ -124,7 +124,7 @@ def nav_html(active=None, sub_active=None):
 #   비활성 탭 #9aa4ae       = 다수 사본 값 (watchlist 만 #fff 였음 → 통일)
 #   활성 = 앰버/#101418     = AOE_STYLE_GUIDE 확정값
 #   드롭다운 active 앰버    = 구 레드(#2a1515/#e08585) 폐기, 가이드 선택 하이라이트 ①앰버 계열
-_PAGE_RULES = [  # 페이지 레벨 가드 — scoped 렌더(기존 페이지 CSS override 용)에서는 제외
+_PAGE_RULES = [  # 페이지 레벨 가드 — scoped 렌더 포함 전 소비자 공통 (2026-07-27)
     ('html', 'overflow-y:scroll'),   # 스크롤바 공간 상시 확보 — 로드 중 nav 좌우 점프 방지
     ('body', 'margin:0'),
 ]
@@ -147,7 +147,8 @@ _NAV_RULES = [
      'line-height:normal;border:none;border-radius:0;white-space:nowrap;background:transparent;'
      'transition:color 0.12s,background 0.12s;cursor:pointer;font-family:' + PRETENDARD_STACK),
     ('.topnav-tab:hover', 'color:#fff;background:#1a2027'),
-    ('.topnav-tab.active', 'color:' + PALETTE['nav-bg'] + ';background:' + PALETTE['amber'] + ';font-weight:700'),
+    ('.topnav-tab.active', 'color:' + PALETTE['nav-bg'] + ';background:' + PALETTE['amber'] + ';font-weight:600;'
+     'text-shadow:0.4px 0 currentColor,-0.4px 0 currentColor'),  # 유사볼드 — 700은 글자폭이 늘어 뒤 탭이 페이지마다 1~3px 밀림 (2026-07-27)
     ('.topnav-dropdown',
      'box-sizing:border-box;position:absolute;top:100%;left:0;min-width:180px;width:max-content;'
      'background:#14181d;border:1px solid #2a323b;border-radius:0;'
@@ -186,7 +187,7 @@ def _scope_sel(sel):
 
 
 def render_nav_css(scoped=False):
-    rules = ([] if scoped else list(_PAGE_RULES)) + _NAV_RULES
+    rules = list(_PAGE_RULES) + _NAV_RULES  # scoped 포함 (2026-07-27): memento 등 짧은 페이지 스크롤바 부재로 nav +8px 점프
     lines = []
     for sel, decl in rules:
         s = _scope_sel(sel) if scoped else sel
