@@ -6,6 +6,9 @@
 <title>관심종목 시세판</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <style>
+/* AOE-PALETTE-BEGIN (정본: execution/nav_style.py — 직접 수정 금지) */
+:root{--aoe-bg:#0a0a0a;--aoe-card:#111214;--aoe-card2:#14171b;--aoe-nav-bg:#101418;--aoe-border:#27282b;--aoe-input-bg:#141517;--aoe-input-border:#3a3b3e;--aoe-hover:#191a1d;--aoe-text:#d9dde2;--aoe-muted:#8a919a;--aoe-amber:#fb8b1e;--aoe-amber-bright:#ffb45e;--aoe-th-bg:#1a1b1e;--aoe-up:#ff453a;--aoe-down:#2e9bff;--aoe-hl-amber-bg:#4a2d0a;--aoe-hl-amber-fg:#ffb45e;--aoe-hl1-bg:#241a3d;--aoe-hl1-fg:#b9a1fc;--aoe-hl2-bg:#0a3038;--aoe-hl2-fg:#67e0f4;--aoe-hl3-bg:#10301c;--aoe-hl3-fg:#4ade80}
+/* AOE-PALETTE-END */
   * { box-sizing: border-box; }
   body {
     margin: 0; background: #fff; color: #111;
@@ -110,37 +113,37 @@ body{margin:0}
   #addmenu .mi:hover { background: #f4f6f8; }
 </style>
 <style id="aoe-terminal-dark">
-body{background:#0a0a0a;color:#fff}
-nav.topnav{border-bottom-color:#fb8b1e}
-.topnav-tab.active{background:#fb8b1e;color:#101418}
-.topnav-brand:hover{color:#fb8b1e}
-.topbar{background:#101418;border-bottom:1px solid #23272d}
+body{background:var(--aoe-bg);color:#fff}
+nav.topnav{border-bottom-color:var(--aoe-amber)}
+.topnav-tab.active{background:var(--aoe-amber);color:var(--aoe-nav-bg)}
+.topnav-brand:hover{color:var(--aoe-amber)}
+.topbar{background:var(--aoe-nav-bg);border-bottom:1px solid #23272d}
 .titlerow .meta{color:#fff}
-.titlerow #q{background:#141517 url("data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 width=%2714%27 height=%2714%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27white%27 stroke-width=%272.4%27 stroke-linecap=%27round%27><circle cx=%2711%27 cy=%2711%27 r=%277%27/><line x1=%2716.5%27 y1=%2716.5%27 x2=%2721%27 y2=%2721%27/></svg>") no-repeat 9px center;color:#fff;border:2px solid #fff;padding-left:28px}
-.titlerow #q:focus{background-color:#141517;border-color:#fb8b1e}
-.tab{background:#141517;color:#fff;border-color:#3a3b3e}
-.tab.active{background:#fb8b1e;color:#101418;border-color:#fb8b1e}
-.panel h2{background:#14171b;color:#fff;text-align:center}
+.titlerow #q{background:var(--aoe-input-bg) url("data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 width=%2714%27 height=%2714%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27white%27 stroke-width=%272.4%27 stroke-linecap=%27round%27><circle cx=%2711%27 cy=%2711%27 r=%277%27/><line x1=%2716.5%27 y1=%2716.5%27 x2=%2721%27 y2=%2721%27/></svg>") no-repeat 9px center;color:#fff;border:2px solid #fff;padding-left:28px}
+.titlerow #q:focus{background-color:var(--aoe-input-bg);border-color:var(--aoe-amber)}
+.tab{background:var(--aoe-input-bg);color:#fff;border-color:var(--aoe-input-border)}
+.tab.active{background:var(--aoe-amber);color:var(--aoe-nav-bg);border-color:var(--aoe-amber)}
+.panel h2{background:var(--aoe-card2);color:#fff;text-align:center}
 .panel h2 .cnt{color:#fff}
-.panel h2 .gname:focus{background:#141517}
-.panel h2 .gadd{color:#fb8b1e}
+.panel h2 .gname:focus{background:var(--aoe-input-bg)}
+.panel h2 .gadd{color:var(--aoe-amber)}
 .panel h2 .gadd:hover{background:#241a0d}
 .empty{color:#fff}
-thead th{background:#1a1b1e;color:#fb8b1e;border-bottom:1px solid #2a2b2e}
-thead th .arw{color:#fb8b1e}
+thead th{background:var(--aoe-th-bg);color:var(--aoe-amber);border-bottom:1px solid #2a2b2e}
+thead th .arw{color:var(--aoe-amber)}
 td{border-bottom:1px solid #222326}
 td.code{color:#fff}
-tbody tr:hover td{background:#191a1d}
-.up{color:#ff453a}
-.down{color:#2e9bff}
+tbody tr:hover td{background:var(--aoe-hover)}
+.up{color:var(--aoe-up)}
+.down{color:var(--aoe-down)}
 .flat{color:#fff}
-#starmenu,#addmenu{background:#14171b;border-color:#3a3b3e;color:#fff}
+#starmenu,#addmenu{background:var(--aoe-card2);border-color:var(--aoe-input-border);color:#fff}
 td.star .gno{display:none}
-.tab[data-kind=wl]{color:#67e0f4;font-weight:700}
-.tab[data-kind=wl].active{background:#0a3038;border-color:#67e0f4;color:#67e0f4}
-thead th.star{color:#67e0f4}
-td.star.on{color:#67e0f4}
-#starmenu .mi .chk{color:#67e0f4}
+.tab[data-kind=wl]{color:var(--aoe-hl2-fg);font-weight:700}
+.tab[data-kind=wl].active{background:var(--aoe-hl2-bg);border-color:var(--aoe-hl2-fg);color:var(--aoe-hl2-fg)}
+thead th.star{color:var(--aoe-hl2-fg)}
+td.star.on{color:var(--aoe-hl2-fg)}
+#starmenu .mi .chk{color:var(--aoe-hl2-fg)}
 table{font-size:16px}
 thead th{font-size:12px}
 .panel h2{font-size:18px}

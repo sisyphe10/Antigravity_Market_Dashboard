@@ -372,56 +372,57 @@ _LIBRARY_HTML = """<!DOCTYPE html>
 <title>Earnings Library</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <style>
+/*__AOE_PALETTE__*/
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:#0a0a0a;color:#d9dde2;font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif;height:100vh;display:flex;flex-direction:column;}
+body{background:var(--aoe-bg);color:var(--aoe-text);font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif;height:100vh;display:flex;flex-direction:column;}
 /* ── AoE 공통 상단 내비 — 기동 시 nav_style.NAV_CSS 로 치환 (정본, 직접 수정 금지) ── */
 /*__AOE_NAV_CSS__*/
-header{padding:14px 20px 10px;border-bottom:1px solid #27282b;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
-header h1{font-size:22px;color:#fb8b1e;font-weight:700;}
+header{padding:14px 20px 10px;border-bottom:1px solid var(--aoe-border);display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+header h1{font-size:22px;color:var(--aoe-amber);font-weight:700;}
 .tabs{display:flex;gap:6px;}
-.tab{font-size:16px;font-weight:600;padding:5px 14px;border:1.5px solid #3a3b3e;border-radius:2px;background:#141517;color:#fff;cursor:pointer;}
-.tab.on{background:#fb8b1e;border-color:#fb8b1e;color:#0a0a0a;}
+.tab{font-size:16px;font-weight:600;padding:5px 14px;border:1.5px solid var(--aoe-input-border);border-radius:2px;background:var(--aoe-input-bg);color:#fff;cursor:pointer;}
+.tab.on{background:var(--aoe-amber);border-color:var(--aoe-amber);color:var(--aoe-bg);}
 .searchwrap{margin-left:auto;position:relative;display:flex;align-items:center;}
 .searchwrap svg{position:absolute;left:9px;pointer-events:none;}
-#q{background:#141517;border:1px solid #fff;border-radius:2px;color:#d9dde2;font-family:inherit;font-size:16px;padding:6px 10px 6px 30px;width:210px;}
-#q:focus{outline:1px solid #fb8b1e;}
+#q{background:var(--aoe-input-bg);border:1px solid #fff;border-radius:2px;color:var(--aoe-text);font-family:inherit;font-size:16px;padding:6px 10px 6px 30px;width:210px;}
+#q:focus{outline:1px solid var(--aoe-amber);}
 main{flex:1;display:flex;min-height:0;}
-#list{width:320px;min-width:240px;border-right:1px solid #27282b;overflow-y:auto;}
-.item{padding:9px 14px;border-bottom:1px solid #1a1b1e;cursor:pointer;}
-.item:hover{background:#14171b;}
-.item.on{background:#241a3d;}
+#list{width:320px;min-width:240px;border-right:1px solid var(--aoe-border);overflow-y:auto;}
+.item{padding:9px 14px;border-bottom:1px solid var(--aoe-th-bg);cursor:pointer;}
+.item:hover{background:var(--aoe-card2);}
+.item.on{background:var(--aoe-hl1-bg);}
 .item .t{font-size:20px;font-weight:600;color:#c9ced4;display:flex;gap:8px;align-items:baseline;}
-.item.on .t{color:#b9a1fc;}
-.item .t .tk{color:#fb8b1e;}
-.item .m{font-size:16px;color:#8a919a;margin-top:2px;}
+.item.on .t{color:var(--aoe-hl1-fg);}
+.item .t .tk{color:var(--aoe-amber);}
+.item .m{font-size:16px;color:var(--aoe-muted);margin-top:2px;}
 .badge{font-size:15px;font-weight:700;border-radius:2px;padding:1px 6px;vertical-align:1px;}
-.badge.transcript{background:#0a3038;color:#67e0f4;}
-.badge.analysis{background:#10301c;color:#4ade80;}
-#doc{flex:1;overflow-y:auto;padding:26px 34px 60px;line-height:1.75;caret-color:#fb8b1e;color:#fff;user-select:text;}
+.badge.transcript{background:var(--aoe-hl2-bg);color:var(--aoe-hl2-fg);}
+.badge.analysis{background:var(--aoe-hl3-bg);color:var(--aoe-hl3-fg);}
+#doc{flex:1;overflow-y:auto;padding:26px 34px 60px;line-height:1.75;caret-color:var(--aoe-amber);color:#fff;user-select:text;}
 #doc:focus{outline:none;}
 #doc *{-webkit-user-drag:none;}
-#doc .empty{color:#8a919a;font-size:20px;margin-top:40px;text-align:center;}
-#doc h1{font-size:32px;color:#fb8b1e;margin:18px 0 10px;}
-#doc h2{font-size:26px;color:#fb8b1e;margin:22px 0 8px;border-bottom:1px solid #27282b;padding-bottom:4px;}
-#doc h3{font-size:24px;color:#fb8b1e;margin:16px 0 6px;}
+#doc .empty{color:var(--aoe-muted);font-size:20px;margin-top:40px;text-align:center;}
+#doc h1{font-size:32px;color:var(--aoe-amber);margin:18px 0 10px;}
+#doc h2{font-size:26px;color:var(--aoe-amber);margin:22px 0 8px;border-bottom:1px solid var(--aoe-border);padding-bottom:4px;}
+#doc h3{font-size:24px;color:var(--aoe-amber);margin:16px 0 6px;}
 #doc p{font-size:20px;margin:8px 0;}
 #doc ul,#doc ol{margin:8px 0 8px 22px;font-size:20px;}
 #doc li{margin:3px 0;}
 #doc table{border-collapse:collapse;margin:12px 0;font-size:19px;}
-#doc th{background:#1a1b1e;color:#fb8b1e;font-size:15px;padding:6px 12px;border:1px solid #27282b;}
-#doc td{padding:6px 12px;border:1px solid #27282b;color:#fff;text-align:center;}
-#doc blockquote{border-left:3px solid #fb8b1e;padding:4px 14px;color:#fff;background:#111214;margin:10px 0;}
-#doc code{background:#1a1b1e;border-radius:2px;padding:1px 5px;font-size:18px;}
-#doc hr{border:none;border-top:1px solid #27282b;margin:16px 0;}
-#doc .fm{background:#111214;border:1px solid #27282b;border-radius:2px;padding:10px 14px;font-size:16px;color:#8a919a;margin-top:26px;}
-#doc .fm b{color:#ffb45e;font-weight:600;}
+#doc th{background:var(--aoe-th-bg);color:var(--aoe-amber);font-size:15px;padding:6px 12px;border:1px solid var(--aoe-border);}
+#doc td{padding:6px 12px;border:1px solid var(--aoe-border);color:#fff;text-align:center;}
+#doc blockquote{border-left:3px solid var(--aoe-amber);padding:4px 14px;color:#fff;background:var(--aoe-card);margin:10px 0;}
+#doc code{background:var(--aoe-th-bg);border-radius:2px;padding:1px 5px;font-size:18px;}
+#doc hr{border:none;border-top:1px solid var(--aoe-border);margin:16px 0;}
+#doc .fm{background:var(--aoe-card);border:1px solid var(--aoe-border);border-radius:2px;padding:10px 14px;font-size:16px;color:var(--aoe-muted);margin-top:26px;}
+#doc .fm b{color:var(--aoe-amber-bright);font-weight:600;}
 #doc mark.hl{border-radius:2px;}
-#doc mark.hl.c1{background:#241a3d;color:#b9a1fc;}
-#doc mark.hl.c2{background:#0a3038;color:#67e0f4;}
-#doc mark.hl.c3{background:#10301c;color:#4ade80;}
-#hlPop{position:fixed;display:none;z-index:10;gap:8px;padding:7px 10px;background:#141517;border:1px solid #3a3b3e;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.5);}
-#hlPop .dot{width:20px;height:20px;border-radius:50%;border:1.5px solid #0a0a0a;cursor:pointer;padding:0;}
-#hlPop .d1{background:#b9a1fc;}#hlPop .d2{background:#67e0f4;}#hlPop .d3{background:#4ade80;}
+#doc mark.hl.c1{background:var(--aoe-hl1-bg);color:var(--aoe-hl1-fg);}
+#doc mark.hl.c2{background:var(--aoe-hl2-bg);color:var(--aoe-hl2-fg);}
+#doc mark.hl.c3{background:var(--aoe-hl3-bg);color:var(--aoe-hl3-fg);}
+#hlPop{position:fixed;display:none;z-index:10;gap:8px;padding:7px 10px;background:var(--aoe-input-bg);border:1px solid var(--aoe-input-border);border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.5);}
+#hlPop .dot{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--aoe-bg);cursor:pointer;padding:0;}
+#hlPop .d1{background:var(--aoe-hl1-fg);}#hlPop .d2{background:var(--aoe-hl2-fg);}#hlPop .d3{background:var(--aoe-hl3-fg);}
 @media(max-width:760px){#list{width:44%;}#doc{padding:16px;}}
 </style></head><body>
 <!--__AOE_NAV__-->
@@ -618,7 +619,9 @@ fetch('library/highlights').then(function(r){return r.json();}).then(function(j)
 
 # 네비 정본 치환 (기동 시 1회) — 토큰 미존재 시 기동 실패로 곧장 드러난다
 assert '/*__AOE_NAV_CSS__*/' in _LIBRARY_HTML and '<!--__AOE_NAV__-->' in _LIBRARY_HTML
+assert '/*__AOE_PALETTE__*/' in _LIBRARY_HTML
 _LIBRARY_HTML = (_LIBRARY_HTML
+                 .replace('/*__AOE_PALETTE__*/', nav_style.PALETTE_CSS_VARS)
                  .replace('/*__AOE_NAV_CSS__*/', nav_style.NAV_CSS)
                  .replace('<!--__AOE_NAV__-->', nav_style.nav_html('earnings')))
 

@@ -22,6 +22,37 @@ PRETENDARD_STACK = "'Pretendard Variable', Pretendard, system-ui, -apple-system,
 PRETENDARD_LINK = ('<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/'
                    'pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">')
 
+# ---- 다크 팔레트 정본 (2026-07-26 확장) ----
+# AOE_STYLE_GUIDE.md 팔레트 표의 코드 구현체. 색 변경은 반드시 여기서만 —
+# compose(스냅숏 주입 CSS)·별도 앱 3종(Earnings/Wiki/Watchlist의 var(--aoe-*))이 파생.
+# ※ 등락색은 다크용 밝은 톤 실사용값(#ff453a/#2e9bff)으로 확정 (가이드 구값 #ff5a5a/#5aa2ff 폐기).
+PALETTE = {
+    'bg':           '#0a0a0a',   # 페이지 배경
+    'card':         '#111214',   # 카드/패널
+    'card2':        '#14171b',   # 보조 패널 (하이라이트 컬럼 등)
+    'nav-bg':       '#101418',   # 상단바
+    'border':       '#27282b',   # 보더
+    'input-bg':     '#141517',   # 입력·버튼류 배경
+    'input-border': '#3a3b3e',   # 입력류 보더
+    'hover':        '#191a1d',   # 행 hover
+    'text':         '#d9dde2',   # 본문
+    'muted':        '#8a919a',   # 뮤트 텍스트
+    'amber':        '#fb8b1e',   # 강조 앰버
+    'amber-bright': '#ffb45e',   # 밝은 앰버
+    'th-bg':        '#1a1b1e',   # 표 헤더 배경
+    'up':           '#ff453a',   # 상승 (다크용)
+    'down':         '#2e9bff',   # 하락 (다크용)
+    'hl-amber-bg':  '#4a2d0a', 'hl-amber-fg': '#ffb45e',   # 선택 하이라이트 ①앰버
+    'hl1-bg': '#241a3d', 'hl1-fg': '#b9a1fc',              # ②바이올렛
+    'hl2-bg': '#0a3038', 'hl2-fg': '#67e0f4',              # ③시안
+    'hl3-bg': '#10301c', 'hl3-fg': '#4ade80',              # ④에메랄드
+}
+AMBER = PALETTE['amber']
+
+# 별도 앱용 CSS 변수 선언 — 앱 CSS 는 var(--aoe-*) 로 참조, 기동 시 이 블록이 치환된다
+PALETTE_CSS_VARS = ':root{' + ';'.join(
+    '--aoe-%s:%s' % (k, v) for k, v in PALETTE.items()) + '}'
+
 BRAND = 'AGE OF EMERGENCE'
 BRAND_HREF = '/index.html'   # Caddy가 /watchlist/ 로 redirect (랜딩 폐지 후 동작 동일)
 
@@ -83,14 +114,14 @@ _PAGE_RULES = [  # 페이지 레벨 가드 — scoped 렌더(기존 페이지 CS
 ]
 _NAV_RULES = [
     ('.topnav',
-     'background:#101418;border-bottom:2px solid #fb8b1e;position:sticky;top:0;z-index:100'),
+     'background:' + PALETTE['nav-bg'] + ';border-bottom:2px solid ' + PALETTE['amber'] + ';position:sticky;top:0;z-index:100'),
     ('.topnav-inner',
      'max-width:1400px;margin:0 auto;padding:0 28px;box-sizing:border-box;'
      'display:flex;align-items:stretch;height:54px;gap:36px'),
     ('.topnav-brand',
      'font-size:1.1rem;font-weight:800;letter-spacing:3.5px;color:#fff;white-space:nowrap;'
      'text-decoration:none;align-self:center;line-height:normal;font-family:' + PRETENDARD_STACK),
-    ('.topnav-brand:hover', 'color:#fb8b1e'),
+    ('.topnav-brand:hover', 'color:' + PALETTE['amber']),
     ('.topnav-tabs', 'display:flex;gap:2px;flex:1;align-items:stretch'),
     ('.topnav-item', 'position:relative;display:flex;align-items:stretch'),
     ('.topnav-tabs .topnav-item.right-group', 'margin-left:auto'),
@@ -100,7 +131,7 @@ _NAV_RULES = [
      'line-height:normal;border:none;border-radius:0;white-space:nowrap;background:transparent;'
      'transition:color 0.12s,background 0.12s;cursor:pointer;font-family:' + PRETENDARD_STACK),
     ('.topnav-tab:hover', 'color:#fff;background:#1a2027'),
-    ('.topnav-tab.active', 'color:#101418;background:#fb8b1e;font-weight:700'),
+    ('.topnav-tab.active', 'color:' + PALETTE['nav-bg'] + ';background:' + PALETTE['amber'] + ';font-weight:700'),
     ('.topnav-dropdown',
      'box-sizing:border-box;position:absolute;top:100%;left:0;min-width:180px;width:max-content;'
      'background:#14181d;border:1px solid #2a323b;border-radius:0;'
@@ -114,7 +145,7 @@ _NAV_RULES = [
      'font-weight:500;border-radius:0;white-space:nowrap;text-align:center;line-height:normal;'
      'font-family:' + PRETENDARD_STACK),
     ('.topnav-sub:hover', 'background:#1a2027;color:#fff'),
-    ('.topnav-sub.active', 'background:#4a2d0a;color:#ffb45e;font-weight:700'),
+    ('.topnav-sub.active', 'background:' + PALETTE['hl-amber-bg'] + ';color:' + PALETTE['hl-amber-fg'] + ';font-weight:700'),
 ]
 _NAV_MEDIA_RULES = [
     ('.topnav-inner', 'padding:0 12px;gap:12px;height:46px'),
@@ -158,11 +189,43 @@ NAV_CSS_SCOPED = render_nav_css(scoped=True)
 # ---- 정적 HTML 물리 반영/기동 시 치환 (wiki index.html, quoteboard index.html) ----
 CSS_MARK_BEGIN = '/* AOE-NAV-CSS-BEGIN (정본: execution/nav_style.py — 직접 수정 금지) */'
 CSS_MARK_END = '/* AOE-NAV-CSS-END */'
+PALETTE_MARK_BEGIN = '/* AOE-PALETTE-BEGIN (정본: execution/nav_style.py — 직접 수정 금지) */'
+PALETTE_MARK_END = '/* AOE-PALETTE-END */'
+
+# ---- 공용 캡처 색고정 JS (2026-07-26) ----
+# html2canvas 가 동일 명시도 !important 간 후행 우선을 무시해 다크 틴트 셀 글자를 #333 으로
+# 굳히는 버그 차단: 캡처 전 계산된 색을 인라인 !important 로 고정, 캡처 후 style '속성
+# 문자열'을 그대로 원복 (cssText 재직렬화 금지 — [style*=...] 셀렉터 보호).
+# 소비자: create_dashboard(_element_download_helper_js·universe 페이지) — <script> 안에 splice.
+H2C_FREEZE_JS = '''
+if (typeof window._h2cFreeze !== 'function') {
+    window._h2cFreeze = function(root) {
+        var nodes = [root].concat(Array.prototype.slice.call(root.querySelectorAll('*')));
+        var saved = [];
+        nodes.forEach(function(n) {
+            if (n.nodeType !== 1) return;
+            var cs = getComputedStyle(n);
+            saved.push([n, n.getAttribute('style')]);
+            n.style.setProperty('color', cs.color, 'important');
+            var b = cs.backgroundColor;
+            if (b && b !== 'rgba(0, 0, 0, 0)' && b !== 'transparent') n.style.setProperty('background-color', b, 'important');
+        });
+        return function() {
+            saved.forEach(function(p) {
+                if (p[1] === null) p[0].removeAttribute('style');
+                else p[0].setAttribute('style', p[1]);
+            });
+        };
+    };
+}
+'''
 
 import re as _re  # noqa: E402
 
 _CSS_BLOCK_PAT = _re.compile(
     _re.escape(CSS_MARK_BEGIN) + '.*?' + _re.escape(CSS_MARK_END), _re.S)
+_PAL_BLOCK_PAT = _re.compile(
+    _re.escape(PALETTE_MARK_BEGIN) + '.*?' + _re.escape(PALETTE_MARK_END), _re.S)
 _NAV_BLOCK_PAT = _re.compile(r'<nav class="topnav">.*?</nav>', _re.S)
 
 
@@ -175,4 +238,7 @@ def materialize(html_text, active=None, sub_active=None):
     new_css = CSS_MARK_BEGIN + '\n' + NAV_CSS + '\n' + CSS_MARK_END
     out, n_css = _CSS_BLOCK_PAT.subn(lambda m: new_css, html_text, 1)
     out, n_nav = _NAV_BLOCK_PAT.subn(lambda m: nav_html(active, sub_active), out, 1)
+    # 팔레트 마커는 선택적 — 있으면 최신 PALETTE 로 치환 (2026-07-26 색톤 정본화)
+    new_pal = PALETTE_MARK_BEGIN + '\n' + PALETTE_CSS_VARS + '\n' + PALETTE_MARK_END
+    out = _PAL_BLOCK_PAT.sub(lambda m: new_pal, out, 1)
     return out, (n_css == 1 and n_nav == 1)

@@ -45,7 +45,7 @@ TOP_NAV_MAIN = [
 ]
 
 # Standard Pretendard font stack — 정본은 nav_style.py (2026-07-26 네비 통일)
-from nav_style import PRETENDARD_LINK, PRETENDARD_STACK, NAV_CSS as AOE_NAV_CSS  # noqa: E402
+from nav_style import PRETENDARD_LINK, PRETENDARD_STACK, NAV_CSS as AOE_NAV_CSS, H2C_FREEZE_JS  # noqa: E402
 
 TOP_NAV_CSS = AOE_NAV_CSS + """
 /* ── .topnav* 정본 규칙은 위 nav_style.NAV_CSS 에서 옴 (2026-07-26 통일) — 여기 추가 금지 ── */
@@ -1174,30 +1174,7 @@ def _element_download_helper_js():
     return """
         <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
         <script>
-        if (typeof window._h2cFreeze !== 'function') {
-            // 캡처 전 계산된 색을 인라인 고정 (2026-07-26): html2canvas가 동일 명시도 !important
-            // 규칙의 후행 우선을 무시해 다크 틴트 셀 글자를 #333으로 굳히던 문제의 근본 차단.
-            // 원복은 style '속성 문자열' 그대로 — cssText 재직렬화 금지 ([style*=...] 셀렉터 보호).
-            // 동일 정의가 universe 페이지 스크립트에도 있음 (guard로 1회만 등록).
-            window._h2cFreeze = function(root) {
-                var nodes = [root].concat(Array.prototype.slice.call(root.querySelectorAll('*')));
-                var saved = [];
-                nodes.forEach(function(n) {
-                    if (n.nodeType !== 1) return;
-                    var cs = getComputedStyle(n);
-                    saved.push([n, n.getAttribute('style')]);
-                    n.style.setProperty('color', cs.color, 'important');
-                    var b = cs.backgroundColor;
-                    if (b && b !== 'rgba(0, 0, 0, 0)' && b !== 'transparent') n.style.setProperty('background-color', b, 'important');
-                });
-                return function() {
-                    saved.forEach(function(p) {
-                        if (p[1] === null) p[0].removeAttribute('style');
-                        else p[0].setAttribute('style', p[1]);
-                    });
-                };
-            };
-        }
+        """ + H2C_FREEZE_JS + """
         if (typeof window.downloadElementImage !== 'function') {
             window.downloadElementImage = function(elementId, baseName) {
                 var el = document.getElementById(elementId);
@@ -7973,7 +7950,7 @@ def create_dashboard():
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Market Data Dashboard</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+    {PRETENDARD_LINK}
     <style>
         :root {{
             --bg-color: #f8f9fa;
@@ -8507,7 +8484,7 @@ def create_dashboard():
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Age of Emergence</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+    {PRETENDARD_LINK}
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
         body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; background: #f8f9fa; color: #333; min-height: 100vh; }}
@@ -8797,7 +8774,7 @@ def create_dashboard():
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WRAP</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+    {PRETENDARD_LINK}
     <style>
         :root {{ --bg-color: #f8f9fa; --card-bg: #ffffff; --text-color: #333333; }}
         body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; font-size: 1.05rem; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; }}
@@ -9251,7 +9228,7 @@ def create_dashboard():
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Universe</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+    """ + PRETENDARD_LINK + """
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -9879,29 +9856,7 @@ function renderSector() {
 }
 
 // ── 이미지 다운로드 (html2canvas, 상위 30개) ──────────────────
-if (typeof window._h2cFreeze !== 'function') {
-    // 캡처 전 계산된 색 인라인 고정 (2026-07-26) — _element_download_helper_js 와 동일 정의 (guard 1회 등록).
-    // html2canvas가 동일 명시도 !important 후행 우선을 무시해 다크 틴트 셀 글자가 #333으로 굳던 문제 차단.
-    // 원복은 style '속성 문자열' 그대로 — cssText 재직렬화 금지 ([style*=...] 셀렉터 보호).
-    window._h2cFreeze = function(root) {
-        var nodes = [root].concat(Array.prototype.slice.call(root.querySelectorAll('*')));
-        var saved = [];
-        nodes.forEach(function(n) {
-            if (n.nodeType !== 1) return;
-            var cs = getComputedStyle(n);
-            saved.push([n, n.getAttribute('style')]);
-            n.style.setProperty('color', cs.color, 'important');
-            var b = cs.backgroundColor;
-            if (b && b !== 'rgba(0, 0, 0, 0)' && b !== 'transparent') n.style.setProperty('background-color', b, 'important');
-        });
-        return function() {
-            saved.forEach(function(p) {
-                if (p[1] === null) p[0].removeAttribute('style');
-                else p[0].setAttribute('style', p[1]);
-            });
-        };
-    };
-}
+""" + H2C_FREEZE_JS + """
 function _univCapture(node, baseName) {
     if (typeof html2canvas !== 'function') { alert('이미지 라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.'); return Promise.resolve(); }
     // 배경 = 요소 조상의 실제 배경색 (2026-07-26): 다크 테마 흰 배경 하드코딩 → 글자 안 보임 수정
@@ -10063,7 +10018,7 @@ function superDownloadUniverse() {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SEIBro - US Settlement TOP 50</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+    {PRETENDARD_LINK}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = 2 * (window.devicePixelRatio || 1); Chart.defaults.elements.line.borderJoinStyle = 'round'; Chart.defaults.elements.line.borderCapStyle = 'round'; Chart.defaults.animation = false;</script>
     <style>
@@ -10276,7 +10231,7 @@ refresh();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Featured</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+    {PRETENDARD_LINK}
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
         body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }}
@@ -10786,7 +10741,7 @@ def generate_hotels_html():
 <head>
 <meta charset="utf-8">
 <title>Hotel ADR - Antigravity Dashboard</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+{PRETENDARD_LINK}
 <style>
   * {{ box-sizing: border-box; }}
   body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; background: #f5f5f5; margin: 0; padding: 0; color: #222; }}  /* nav 전폭 통일 — 여백은 .container로 이전 */
@@ -10957,7 +10912,7 @@ def generate_etf_html():
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ETF Dashboard</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+{PRETENDARD_LINK}
 <style>
 * {{ box-sizing: border-box; margin: 0; padding: 0; }}
 body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }}
