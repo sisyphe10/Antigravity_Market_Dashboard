@@ -9314,6 +9314,8 @@ def create_dashboard():
         tbody tr:hover { background: #f5f5f5; }
         .positive { color: #cc0000; font-weight: 600; }
         .negative { color: #0055cc; font-weight: 600; }
+        /* 기업명 컬럼 + 현재 정렬 컬럼 하이라이트 (클래스 방식 — 인라인 style 금지: 게시 다크 CSS의 td[style*=background] 규칙과 충돌) */
+        .col-hl { background: #14171b; }
         footer { text-align: center; padding: 24px; color: #999; font-size: 14px; }
         TOP_NAV_CSS_PLACEHOLDER
     </style>
@@ -9510,10 +9512,12 @@ function render(){
         if(r[3]){var rp=r[3].indexOf(':')>=0?r[3].split(':')[0]:'';rowMkt=INDEX_BY_PREFIX[rp]||'';}
         for(var i=0;i<16;i++){
             var v=(i===0)?(idx+1):r[i]||'';if(i===3&&v.indexOf(':')>=0)v=v.split(':').pop();var cls='';
-            if(pctCols.indexOf(i)>=0&&v){var n=parseFloat(String(v).replace(/%/g,''));if(!isNaN(n))cls=n>0?' class="positive"':n<0?' class="negative"':'';}
+            if(pctCols.indexOf(i)>=0&&v){var n=parseFloat(String(v).replace(/%/g,''));if(!isNaN(n))cls=n>0?'positive':n<0?'negative':'';}
+            if(i===4||i===sortCol)cls+=(cls?' ':'')+'col-hl';  // 기업명 + 현재 정렬 컬럼 하이라이트
+            var clsA=cls?' class="'+cls+'"':'';
             var bg=(i===7)?' style="background:#241a3d;"':(i===8?' style="background:#0a3038;"':'');
             var ttl=(i===7&&rowMkt)?' title="'+rowMkt+'"':'';
-            h+='<td'+cls+bg+ttl+'>'+v+'</td>';
+            h+='<td'+clsA+bg+ttl+'>'+v+'</td>';
         }
         h+='</tr>';
     });
@@ -9697,19 +9701,21 @@ function renderPeriod(){
         return 0;
     });
     var h='';
+    // 기업명(4) + 현재 정렬 컬럼(perSortCol) 하이라이트 — base 클래스와 병합해 class 속성 생성
+    function hlA(i,base){var c=base||'';if(i===4||i===perSortCol)c+=(c?' ':'')+'col-hl';return c?' class="'+c+'"':'';}
     perData.forEach(function(s,idx){
         var tk=s.ticker.indexOf(':')>=0?s.ticker.split(':').pop():s.ticker;
         var retCell;
-        if(s.ret===null) retCell='<td>-</td>';
-        else{var n=Math.round(s.ret);var cls=n>0?' class="positive"':n<0?' class="negative"':'';retCell='<td'+cls+'>'+(n>0?'+':'')+n+'%</td>';}
+        if(s.ret===null) retCell='<td'+hlA(7)+'>-</td>';
+        else{var n=Math.round(s.ret);var cls=n>0?'positive':n<0?'negative':'';retCell='<td'+hlA(7,cls)+'>'+(n>0?'+':'')+n+'%</td>';}
         var rsiCell;
-        if(s.rsi===null) rsiCell='<td>-</td>';
-        else{var rn=Math.round(s.rsi);var rcls=rn>0?' class="positive"':rn<0?' class="negative"':'';var rttl=s.mkt?' title="'+s.mkt+' 대비 기간 초과수익(%p)"':'';rsiCell='<td'+rcls+rttl+'>'+(rn>0?'+':'')+rn+'%</td>';}
+        if(s.rsi===null) rsiCell='<td'+hlA(8)+'>-</td>';
+        else{var rn=Math.round(s.rsi);var rcls=rn>0?'positive':rn<0?'negative':'';var rttl=s.mkt?' title="'+s.mkt+' 대비 기간 초과수익(%p)"':'';rsiCell='<td'+hlA(8,rcls)+rttl+'>'+(rn>0?'+':'')+rn+'%</td>';}
         var mddCell;
-        if(s.mdd===null) mddCell='<td>-</td>';
-        else{var m=Math.round(s.mdd);var mcls=m<0?' class="negative"':'';mddCell='<td'+mcls+'>'+m+'%</td>';}
+        if(s.mdd===null) mddCell='<td'+hlA(9)+'>-</td>';
+        else{var m=Math.round(s.mdd);var mcls=m<0?'negative':'';mddCell='<td'+hlA(9,mcls)+'>'+m+'%</td>';}
         var sparkCell='<td>'+sparkSvg(s.ticker,start,end,s.ret)+'</td>';
-        h+='<tr><td>'+(idx+1)+'</td><td>'+s.cur+'</td><td>'+s.sec+'</td><td>'+tk+'</td><td>'+s.name+'</td><td>'+s.mcap+'</td>'+sparkCell+retCell+rsiCell+mddCell+'</tr>';
+        h+='<tr><td'+hlA(0)+'>'+(idx+1)+'</td><td'+hlA(1)+'>'+s.cur+'</td><td'+hlA(2)+'>'+s.sec+'</td><td'+hlA(3)+'>'+tk+'</td><td'+hlA(4)+'>'+s.name+'</td><td'+hlA(5)+'>'+s.mcap+'</td>'+sparkCell+retCell+rsiCell+mddCell+'</tr>';
     });
     if(!h) h='<tr><td colspan="10" style="padding:40px;color:#888;">데이터 없음</td></tr>';
     document.getElementById('tbodyPer').innerHTML=h;
