@@ -1186,9 +1186,9 @@ def _element_download_helper_js():
                     if (n.nodeType !== 1) return;
                     var cs = getComputedStyle(n);
                     saved.push([n, n.getAttribute('style')]);
-                    n.style.color = cs.color;
+                    n.style.setProperty('color', cs.color, 'important');
                     var b = cs.backgroundColor;
-                    if (b && b !== 'rgba(0, 0, 0, 0)' && b !== 'transparent') n.style.backgroundColor = b;
+                    if (b && b !== 'rgba(0, 0, 0, 0)' && b !== 'transparent') n.style.setProperty('background-color', b, 'important');
                 });
                 return function() {
                     saved.forEach(function(p) {
@@ -9884,9 +9884,9 @@ if (typeof window._h2cFreeze !== 'function') {
             if (n.nodeType !== 1) return;
             var cs = getComputedStyle(n);
             saved.push([n, n.getAttribute('style')]);
-            n.style.color = cs.color;
+            n.style.setProperty('color', cs.color, 'important');
             var b = cs.backgroundColor;
-            if (b && b !== 'rgba(0, 0, 0, 0)' && b !== 'transparent') n.style.backgroundColor = b;
+            if (b && b !== 'rgba(0, 0, 0, 0)' && b !== 'transparent') n.style.setProperty('background-color', b, 'important');
         });
         return function() {
             saved.forEach(function(p) {
