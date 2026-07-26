@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-07-23",
+  "updated": "2026-07-26",
   "projects": [
    "antigravity"
   ],
@@ -1091,22 +1091,6 @@
    ]
   },
   {
-   "id": "src-nav-style",
-   "project": "antigravity",
-   "domain": "ops-infra",
-   "type": "pipeline_source",
-   "name": "AoE 스타일 정본 (nav_style.py)",
-   "runs_on": "vm_macmini",
-   "schedule_kst": "import 시 (상시)",
-   "status": "active",
-   "desc_md": "AoE 전 페이지 공통 스타일의 유일한 출처 (2026-07-26 네비 드리프트 근본해결).\n\n- 상단 네비 정본: NAV_CSS(+scoped)·nav_html(active)·materialize(마커 치환).\n- 다크 PALETTE·라이트 WRAP_PALETTE: compose 주입 CSS 와 앱 3종(var(--aoe-*))·WRAP(var(--wrap-*)) 이 파생.\n- H2C_FREEZE_JS: html2canvas 캡처 색고정 (틴트 셀 #333 굳음 버그 차단).\n- 소비자: create_dashboard·create_architecture(재생성 시) / webui·quoteboard 서버(기동 시 치환) / compose(publish 시 교체).\n- ★수정 규칙: 네비·색 변경은 반드시 이 파일에서만. 다크 주입 CSS 에 nav !important 재단언 금지.",
-   "code": [
-    "execution/nav_style.py"
-   ],
-   "reads": [],
-   "writes": []
-  },
-  {
    "id": "src-create-dashboard",
    "project": "antigravity",
    "domain": "ops-infra",
@@ -2040,7 +2024,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "잡별 (20:30 / 20:50 / 23:20 / 23:50 / 일 10:00 / 20분)",
    "status": "active",
-   "desc_md": "2026-07-11 신설(코드는 레포 `datalake/`, 데이터 정본은 레포 외부 `~/datalake`). 덮어쓰기형 산출물의 과거 유실을 막고, 전 상장·해외 유니버스 일봉 종가를 백필하며, DuckDB+Claude API 웹 UI로 자연어 질의를 제공하는 로컬 데이터레이크. 백필 스크립트(KRX/KIS·FRED·ECOS·KOFIA·벤치마크·해외)와 `build_catalog.py` 카탈로그가 함께 있다.\n\n- **launchd 잡 7종**(맥미니 전용, wrapper=`datalake/launchd/run_datalake_job.sh`):\n  - `datalake-market-update`(20:30) — 일별 증분 적재(`daily_market_update.py`). 2026-07-22 `kr_fundamental` 일별 단면(BPS/PER/PBR 등)을 여기에 추가(휴장일 가드).\n  - `datalake-macro-update`(20:50, 2026-07-22 신규) — 매크로 3소스 멱등 재적재(`daily_macro_update.py`): `backfill_ecos`·`backfill_fred`(YoY 계산이 전 이력 필요) 전량 재실행 + `backfill_kofia --pages 1`. GHA 매크로 잡([[gha-daily-ecos]]·[[gha-daily-fred]]·[[gha-daily-kofia]])과 별개로 데이터레이크 정본에 당일분을 채운다.\n  - `datalake-research-export`(23:20) — Research Notes 원문(`research_notes.db`)을 일별 `.md`+미디어로 아카이브.\n  - `datalake-snapshot`(23:50) — 덮어쓰기형 레포 산출물 일별 gzip 스냅샷.\n  - `viewer-daily`(23:50, 2026-07-22 신규) — 현선물/공매도/ETF 차트 뷰어 수집+빌드(`~/work/charts/260715_현선물공매도/run_daily.py`). KRX 야간 배포·kodex 23:30 잡 뒤에 배치.\n  - `datalake-backup`(일 10:00) — private repo 백업(duckdb/staging 제외).\n  - `datalake-sheets-mirror`(20분 폴링, 2026-07-12 신규) — 시지프+선유듀오 구글시트 미러 → `~/datalake/sheets`. 시트 단위 격리 + **3회 재시도(15s·30s 백오프, 2026-07-14)** — read timeout 등 일시 장애를 흡수하고 3회 연속 실패만 비정상 종료→알림(오탐 알림 억제).\n- 저장: 데이터셋별 연도 파티션 parquet(`kr_ohlcv`·`kr_marcap`·`overseas_ohlcv` 등) + `market.duckdb` 뷰. KRX 수정주가 캡 실측 대응으로 `kr_ohlcv`(무수정)/`kr_ohlcv_adj` 분리.\n- **`kr_fundamental` 패스(2026-07-20 재활성화)**: KRX 주당지표(BPS/PER/PBR/EPS/DIV/DPS). 연간 확정 BPS 기준이라 분기 정밀 밸류엔 계단식으로 부정확해 2026-07-13 제외됐으나, 장기 PBR/PER 밴드·사이클 고점 분석엔 표준 소스라 사용자 요청으로 되살림.\n- **공매도·선물 패스(2026-07-15 신규)**: `kr_short`(종목별 일별 공매도 거래량·거래대금·잔고수량/금액, KRX SRT30001 — 잔고는 T+2 공시라 최근 1~2일 NaN이 lookback 재조회로 self-heal. ★전면금지 2023-11-06~2025-03-30·부분금지 2020-03-16~2021-05-02 구간은 빈 값이 정상) · `kr_short_investor`(시장단위 투자자별 공매도) · `kr_futures_ohlcv`(선물 7상품 월물별 시세+미결제약정, 상품 단위 합계는 `kr_futures_oi_daily` 뷰). 선물 OI는 pykrx api wrapper가 `ACC_OPNINT_QTY`를 떨궈 **core 전종목시세(MDCSTAT12501) 클래스를 직접 호출**하고, 백필은 (상품,연도) 단위 staging 체크포인트로 재개한다.\n- 웹 UI(`datalake/webui/`)는 duckdb 샌드박스(allowed→잠금) 위에서 md 코퍼스 문답. 상세: `datalake/DESIGN.md`.",
+   "desc_md": "2026-07-11 신설(코드는 레포 `datalake/`, 데이터 정본은 레포 외부 `~/datalake`). 덮어쓰기형 산출물의 과거 유실을 막고, 전 상장·해외 유니버스 일봉 종가를 백필하며, DuckDB+Claude API 웹 UI로 자연어 질의를 제공하는 로컬 데이터레이크. 백필 스크립트(KRX/KIS·FRED·ECOS·KOFIA·벤치마크·해외)와 `build_catalog.py` 카탈로그가 함께 있다.\n\n- **launchd 잡 7종**(맥미니 전용, wrapper=`datalake/launchd/run_datalake_job.sh`):\n  - `datalake-market-update`(20:30) — 일별 증분 적재(`daily_market_update.py`). 2026-07-22 `kr_fundamental` 일별 단면(BPS/PER/PBR 등)을 여기에 추가(휴장일 가드).\n  - `datalake-macro-update`(20:50, 2026-07-22 신규) — 매크로 3소스 멱등 재적재(`daily_macro_update.py`): `backfill_ecos`·`backfill_fred`(YoY 계산이 전 이력 필요) 전량 재실행 + `backfill_kofia --pages 1`. GHA 매크로 잡([[gha-daily-ecos]]·[[gha-daily-fred]]·[[gha-daily-kofia]])과 별개로 데이터레이크 정본에 당일분을 채운다.\n  - `datalake-research-export`(23:20) — Research Notes 원문(`research_notes.db`)을 일별 `.md`+미디어로 아카이브.\n  - `datalake-snapshot`(23:50) — 덮어쓰기형 레포 산출물 일별 gzip 스냅샷.\n  - `viewer-daily`(23:50, 2026-07-22 신규) — 현선물/공매도/ETF 차트 뷰어 수집+빌드(`~/work/charts/260715_현선물공매도/run_daily.py`). KRX 야간 배포·kodex 23:30 잡 뒤에 배치.\n  - `datalake-backup`(일 10:00) — private repo 백업(duckdb/staging 제외).\n  - `datalake-sheets-mirror`(20분 폴링, 2026-07-12 신규) — 시지프+선유듀오 구글시트 미러 → `~/datalake/sheets`. 시트 단위 격리 + **3회 재시도(15s·30s 백오프, 2026-07-14)** — read timeout 등 일시 장애를 흡수하고 3회 연속 실패만 비정상 종료→알림(오탐 알림 억제).\n- 저장: 데이터셋별 연도 파티션 parquet(`kr_ohlcv`·`kr_marcap`·`overseas_ohlcv` 등) + `market.duckdb` 뷰. KRX 수정주가 캡 실측 대응으로 `kr_ohlcv`(무수정)/`kr_ohlcv_adj` 분리.\n- **`kr_fundamental` 패스(2026-07-20 재활성화)**: KRX 주당지표(BPS/PER/PBR/EPS/DIV/DPS). 연간 확정 BPS 기준이라 분기 정밀 밸류엔 계단식으로 부정확해 2026-07-13 제외됐으나, 장기 PBR/PER 밴드·사이클 고점 분석엔 표준 소스라 사용자 요청으로 되살림.\n- **공매도·선물 패스(2026-07-15 신규)**: `kr_short`(종목별 일별 공매도 거래량·거래대금·잔고수량/금액, KRX SRT30001 — 잔고는 T+2 공시라 최근 1~2일 NaN이 lookback 재조회로 self-heal. ★전면금지 2023-11-06~2025-03-30·부분금지 2020-03-16~2021-05-02 구간은 빈 값이 정상) · `kr_short_investor`(시장단위 투자자별 공매도) · `kr_futures_ohlcv`(선물 7상품 월물별 시세+미결제약정, 상품 단위 합계는 `kr_futures_oi_daily` 뷰). 선물 OI는 pykrx api wrapper가 `ACC_OPNINT_QTY`를 떨궈 **core 전종목시세(MDCSTAT12501) 클래스를 직접 호출**하고, 백필은 (상품,연도) 단위 staging 체크포인트로 재개한다.\n- **파생 투자자별 수급 패스(`kr_deriv_investor`, 2026-07-26 신규)**: 파생상품 투자자별 순매수를 일별 적재(KRX [13106] MDCSTAT13103). 10상품(선물 7상품+K200옵션+선물전체+옵션전체) × 단위 2종(`metric`=volume 계약 | value 원) × 방향 3종(`side`=ask 매도 | bid 매수 | net 순매수)에 세부 주체 9종(금융투자~외국인) + 기관합계 파생 컬럼. pykrx 미노출 화면이라 `KrxWebIo`를 `backfill_krx.py`에 직접 구현해 호출한다. 일별 증분은 `daily_market_update.py`의 `deriv_investor_update()`가 최근 `RANGE_DAYS` 창을 재조회(10×2×3=60콜, ~30초) upsert. 검증: 7/20주 K200선물 외국인 순매수 −1,308계약이 네이버 교차 일치. `build_catalog.py`에 뷰 설명·예시 SQL 등록.\n- 웹 UI(`datalake/webui/`)는 duckdb 샌드박스(allowed→잠금) 위에서 md 코퍼스 문답. 상세: `datalake/DESIGN.md`.",
    "code": [
     "datalake/",
     "datalake/daily_market_update.py",
@@ -2349,6 +2333,26 @@
    "alerts": "KeepAlive=true (launchd 자동 재기동, ThrottleInterval=15)"
   },
   {
+   "id": "src-immigration",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "pipeline_source",
+   "name": "출입국 월별 통계 (fetch_immigration.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "23:30 (kodex 타이머 편승)",
+   "status": "active",
+   "desc_md": "법무부 출입국·외국인정책 통계월보(data.go.kr odcloud)를 수집해 dataset.csv(MACRO KOREA / IMMIGRATION 그룹, market.html DATA 탭)에 적재. data.go.kr이 GHA 해외 IP를 차단해 VM kodex 타이머(23:30)에 편승(KOSIS·일본 CAPEX와 동일 경로).\n\n- 소스 2종: 15099985(월별 출입국자: 국민/외국인 × 입국/출국) + 15100016(체류자격별 체류외국인). 시리즈 5종(만명): 외국인 입국자·국민 출국자·체류외국인 총계·취업(E)·유학(D2·D4). 익월 하순~월말 갱신, 2022.1~ 백필.\n- ★UDDI 함정: 파일 버전이 매월 새 UDDI로 갱신 → 스웨거 문서(infuser.odcloud.kr)에서 최신 버전을 동적 해석(하드코딩 금지). 컬럼명 공백·체류자격 표기(D2/유학D2/D2유학 3형) 변형은 키 정규화·정규식 코드 추출로 흡수.\n- 전량 재조회 후 upsert(개정 self-heal). 실패는 경고 후 exit 0(다음 run 회수). `DATA_GO_KR_API_KEY` 미설정 시 skip. 신선도 감시 제외(IMMIGRATION은 DATASET_IGNORE, 월간·~1달 지연).",
+   "code": [
+    "execution/fetch_immigration.py"
+   ],
+   "writes": [
+    "store-dataset-csv"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
    "id": "daemon-catchup",
    "project": "antigravity",
    "domain": "ops-infra",
@@ -2605,23 +2609,17 @@
    ]
   },
   {
-   "id": "src-immigration",
+   "id": "src-nav-style",
    "project": "antigravity",
-   "domain": "market-kr",
+   "domain": "ops-infra",
    "type": "pipeline_source",
-   "name": "출입국 월별 통계 (fetch_immigration.py)",
+   "name": "AoE 스타일 정본 (nav_style.py)",
    "runs_on": "vm_macmini",
-   "schedule_kst": "23:30 (kodex 타이머 편승)",
+   "schedule_kst": "import 시 (상시)",
    "status": "active",
-   "desc_md": "법무부 출입국·외국인정책 통계월보(data.go.kr odcloud)를 수집해 dataset.csv(MACRO KOREA / IMMIGRATION 그룹, market.html DATA 탭)에 적재. data.go.kr이 GHA 해외 IP를 차단해 VM kodex 타이머(23:30)에 편승(KOSIS·일본 CAPEX와 동일 경로).\n\n- 소스 2종: 15099985(월별 출입국자: 국민/외국인 × 입국/출국) + 15100016(체류자격별 체류외국인). 시리즈 5종(만명): 외국인 입국자·국민 출국자·체류외국인 총계·취업(E)·유학(D2·D4). 익월 하순~월말 갱신, 2022.1~ 백필.\n- ★UDDI 함정: 파일 버전이 매월 새 UDDI로 갱신 → 스웨거 문서(infuser.odcloud.kr)에서 최신 버전을 동적 해석(하드코딩 금지). 컬럼명 공백·체류자격 표기(D2/유학D2/D2유학 3형) 변형은 키 정규화·정규식 코드 추출로 흡수.\n- 전량 재조회 후 upsert(개정 self-heal). 실패는 경고 후 exit 0(다음 run 회수). `DATA_GO_KR_API_KEY` 미설정 시 skip. 신선도 감시 제외(IMMIGRATION은 DATASET_IGNORE, 월간·~1달 지연).",
+   "desc_md": "AoE 전 페이지 공통 스타일의 유일한 출처 (2026-07-26 네비 드리프트 근본해결).\n\n- 상단 네비 정본: NAV_CSS(+scoped)·nav_html(active)·materialize(마커 치환).\n- 다크 PALETTE·라이트 WRAP_PALETTE: compose 주입 CSS 와 앱 3종(var(--aoe-*))·WRAP(var(--wrap-*)) 이 파생.\n- H2C_FREEZE_JS: html2canvas 캡처 색고정 (틴트 셀 #333 굳음 버그 차단).\n- 소비자: create_dashboard·create_architecture(재생성 시) / webui·quoteboard 서버(기동 시 치환) / compose(publish 시 교체).\n- ★수정 규칙: 네비·색 변경은 반드시 이 파일에서만. 다크 주입 CSS 에 nav !important 재단언 금지.",
    "code": [
-    "execution/fetch_immigration.py"
-   ],
-   "writes": [
-    "store-dataset-csv"
-   ],
-   "depends_on": [
-    "ext-data-apis"
+    "execution/nav_style.py"
    ]
   },
   {

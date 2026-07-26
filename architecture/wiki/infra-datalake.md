@@ -41,6 +41,7 @@ alerts: "launchd wrapper 실패 → notify → 텔레그램"
 - 저장: 데이터셋별 연도 파티션 parquet(`kr_ohlcv`·`kr_marcap`·`overseas_ohlcv` 등) + `market.duckdb` 뷰. KRX 수정주가 캡 실측 대응으로 `kr_ohlcv`(무수정)/`kr_ohlcv_adj` 분리.
 - **`kr_fundamental` 패스(2026-07-20 재활성화)**: KRX 주당지표(BPS/PER/PBR/EPS/DIV/DPS). 연간 확정 BPS 기준이라 분기 정밀 밸류엔 계단식으로 부정확해 2026-07-13 제외됐으나, 장기 PBR/PER 밴드·사이클 고점 분석엔 표준 소스라 사용자 요청으로 되살림.
 - **공매도·선물 패스(2026-07-15 신규)**: `kr_short`(종목별 일별 공매도 거래량·거래대금·잔고수량/금액, KRX SRT30001 — 잔고는 T+2 공시라 최근 1~2일 NaN이 lookback 재조회로 self-heal. ★전면금지 2023-11-06~2025-03-30·부분금지 2020-03-16~2021-05-02 구간은 빈 값이 정상) · `kr_short_investor`(시장단위 투자자별 공매도) · `kr_futures_ohlcv`(선물 7상품 월물별 시세+미결제약정, 상품 단위 합계는 `kr_futures_oi_daily` 뷰). 선물 OI는 pykrx api wrapper가 `ACC_OPNINT_QTY`를 떨궈 **core 전종목시세(MDCSTAT12501) 클래스를 직접 호출**하고, 백필은 (상품,연도) 단위 staging 체크포인트로 재개한다.
+- **파생 투자자별 수급 패스(`kr_deriv_investor`, 2026-07-26 신규)**: 파생상품 투자자별 순매수를 일별 적재(KRX [13106] MDCSTAT13103). 10상품(선물 7상품+K200옵션+선물전체+옵션전체) × 단위 2종(`metric`=volume 계약 | value 원) × 방향 3종(`side`=ask 매도 | bid 매수 | net 순매수)에 세부 주체 9종(금융투자~외국인) + 기관합계 파생 컬럼. pykrx 미노출 화면이라 `KrxWebIo`를 `backfill_krx.py`에 직접 구현해 호출한다. 일별 증분은 `daily_market_update.py`의 `deriv_investor_update()`가 최근 `RANGE_DAYS` 창을 재조회(10×2×3=60콜, ~30초) upsert. 검증: 7/20주 K200선물 외국인 순매수 −1,308계약이 네이버 교차 일치. `build_catalog.py`에 뷰 설명·예시 SQL 등록.
 - 웹 UI(`datalake/webui/`)는 duckdb 샌드박스(allowed→잠금) 위에서 md 코퍼스 문답. 상세: `datalake/DESIGN.md`.
 
 ## Reads
