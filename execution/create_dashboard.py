@@ -58,7 +58,7 @@ TOP_NAV_CSS = AOE_NAV_CSS + """
 .sidebar-brand:hover { color: #2d7a3a; }
 .sidebar-link { display: inline-flex; align-items: center; padding: 0 14px; height: 38px; margin: 0; color: #9aa4ae; text-decoration: none; font-size: 0.85rem; font-weight: 600; border-radius: 0; border: none; border-bottom: 2px solid transparent; transition: all 0.12s; font-family: PRETENDARD_STACK_PLACEHOLDER; white-space: nowrap; }
 .sidebar-link:hover { background: transparent; color: #fff; }
-.sidebar-link.active { background: transparent; color: #fff; font-weight: 700; border-bottom-color: #991B1B; }
+.sidebar-link.active { background: transparent; color: #fff; font-weight: 700; border-bottom-color: #fb8b1e; }  /* 가이드: 활성=앰버 밑줄 (2026-07-27, 구 와인레드 잔재 제거) */
 /* Override per-page body styles so all sidebar pages align identically next to the sidebar */
 .has-sidebar { padding-left: 24px !important; padding-right: 24px !important; padding-top: 0 !important; padding-bottom: 24px !important; max-width: none !important; margin: 0 !important; }
 .has-sidebar .topnav { margin-left: -24px; margin-right: -24px; }

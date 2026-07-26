@@ -292,6 +292,15 @@ for name in SISYPHE_PAGES:
         fail("sisyphe 평문 소스 없음/빈파일: %s" % src)
     shutil.copyfile(src, os.path.join(dst, name))
 
+
+# corp_codes_lite.json 복사 — journal DART 자동채움 lookup (2026-07-27: GitHub Pages 404 → 로컬 서빙).
+# 원본=sisyphe_repo(시간당 pull). 없으면 경고만 — journal 은 GAS 폴백으로 동작.
+_cc_src = os.path.expanduser("~/srv/sisyphe_repo/corp_codes_lite.json")
+if os.path.isfile(_cc_src) and os.path.getsize(_cc_src) > 0:
+    shutil.copyfile(_cc_src, os.path.join(dst, "corp_codes_lite.json"))
+else:
+    sys.stderr.write("[compose] 경고: corp_codes_lite.json 원본 없음 — journal GAS 폴백\n")
+
 # ===== 3) Sisyphe 페이지 가공 =====
 STATIC = ("staticrypt", "encryptedmsg", "cryptoengine")
 for name in SISYPHE_PAGES:
