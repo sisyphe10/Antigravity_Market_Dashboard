@@ -1174,6 +1174,30 @@ def _element_download_helper_js():
     return """
         <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
         <script>
+        if (typeof window._h2cFreeze !== 'function') {
+            // 캡처 전 계산된 색을 인라인 고정 (2026-07-26): html2canvas가 동일 명시도 !important
+            // 규칙의 후행 우선을 무시해 다크 틴트 셀 글자를 #333으로 굳히던 문제의 근본 차단.
+            // 원복은 style '속성 문자열' 그대로 — cssText 재직렬화 금지 ([style*=...] 셀렉터 보호).
+            // 동일 정의가 universe 페이지 스크립트에도 있음 (guard로 1회만 등록).
+            window._h2cFreeze = function(root) {
+                var nodes = [root].concat(Array.prototype.slice.call(root.querySelectorAll('*')));
+                var saved = [];
+                nodes.forEach(function(n) {
+                    if (n.nodeType !== 1) return;
+                    var cs = getComputedStyle(n);
+                    saved.push([n, n.getAttribute('style')]);
+                    n.style.color = cs.color;
+                    var b = cs.backgroundColor;
+                    if (b && b !== 'rgba(0, 0, 0, 0)' && b !== 'transparent') n.style.backgroundColor = b;
+                });
+                return function() {
+                    saved.forEach(function(p) {
+                        if (p[1] === null) p[0].removeAttribute('style');
+                        else p[0].setAttribute('style', p[1]);
+                    });
+                };
+            };
+        }
         if (typeof window.downloadElementImage !== 'function') {
             window.downloadElementImage = function(elementId, baseName) {
                 var el = document.getElementById(elementId);
@@ -1186,7 +1210,9 @@ def _element_download_helper_js():
                     if (c && c !== 'rgba(0, 0, 0, 0)' && c !== 'transparent') return c;
                     n = n.parentElement; }
                     return getComputedStyle(document.body).backgroundColor || '#ffffff'; })(el);
+                var unfreeze = window._h2cFreeze(el);
                 html2canvas(el, { scale: 2, backgroundColor: bg, scrollX: 0, scrollY: -window.scrollY }).then(function(canvas) {
+                    unfreeze();
                     var d = new Date();
                     var pad = function(n){ return n<10 ? '0'+n : ''+n; };
                     var stamp = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
@@ -1196,7 +1222,7 @@ def _element_download_helper_js():
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
-                });
+                }).catch(function(e) { unfreeze(); console.error('downloadElementImage:', e); });
             };
         }
         </script>
@@ -9847,6 +9873,29 @@ function renderSector() {
 }
 
 // ── 이미지 다운로드 (html2canvas, 상위 30개) ──────────────────
+if (typeof window._h2cFreeze !== 'function') {
+    // 캡처 전 계산된 색 인라인 고정 (2026-07-26) — _element_download_helper_js 와 동일 정의 (guard 1회 등록).
+    // html2canvas가 동일 명시도 !important 후행 우선을 무시해 다크 틴트 셀 글자가 #333으로 굳던 문제 차단.
+    // 원복은 style '속성 문자열' 그대로 — cssText 재직렬화 금지 ([style*=...] 셀렉터 보호).
+    window._h2cFreeze = function(root) {
+        var nodes = [root].concat(Array.prototype.slice.call(root.querySelectorAll('*')));
+        var saved = [];
+        nodes.forEach(function(n) {
+            if (n.nodeType !== 1) return;
+            var cs = getComputedStyle(n);
+            saved.push([n, n.getAttribute('style')]);
+            n.style.color = cs.color;
+            var b = cs.backgroundColor;
+            if (b && b !== 'rgba(0, 0, 0, 0)' && b !== 'transparent') n.style.backgroundColor = b;
+        });
+        return function() {
+            saved.forEach(function(p) {
+                if (p[1] === null) p[0].removeAttribute('style');
+                else p[0].setAttribute('style', p[1]);
+            });
+        };
+    };
+}
 function _univCapture(node, baseName) {
     if (typeof html2canvas !== 'function') { alert('이미지 라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.'); return Promise.resolve(); }
     // 배경 = 요소 조상의 실제 배경색 (2026-07-26): 다크 테마 흰 배경 하드코딩 → 글자 안 보임 수정
@@ -9855,7 +9904,9 @@ function _univCapture(node, baseName) {
         if (c && c !== 'rgba(0, 0, 0, 0)' && c !== 'transparent') return c;
         n = n.parentElement; }
         return getComputedStyle(document.body).backgroundColor || '#ffffff'; })(node);
+    var unfreeze = window._h2cFreeze(node);
     return html2canvas(node, { scale: 2, backgroundColor: bg, scrollX: 0, scrollY: -window.scrollY }).then(function(canvas) {
+        unfreeze();
         var d = new Date();
         var pad = function(n){ return n<10 ? '0'+n : ''+n; };
         var stamp = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
@@ -9865,7 +9916,7 @@ function _univCapture(node, baseName) {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-    });
+    }).catch(function(e) { unfreeze(); console.error('_univCapture:', e); });
 }
 function downloadUniverseList() {
     var table = document.querySelector('#tab0 table');
