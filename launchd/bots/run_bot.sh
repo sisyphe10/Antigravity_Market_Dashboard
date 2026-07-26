@@ -59,13 +59,16 @@ load_env() {
 
 # --- 네트워크 대기 (best-effort) -------------------------------------------
 # 부팅 직후 네트워크 미준비 상태에서 봇이 텔레그램에 붙지 못하는 초기 루프 완화.
-# 최대 120초(5초 간격) 폴링. 실패해도 진행하여 봇 자체 재시도에 맡긴다.
+# 최대 30초(5초 간격) 폴링. 실패해도 진행하여 봇 자체 재시도에 맡긴다.
+#
+# ★2026-07-26 curl 로 교체: 이전 구현은 `(exec 3<>/dev/tcp/host/443)` 였는데 맥미니의
+#   /bin/bash 3.2.57(darwin25)에서 /dev/tcp 접근 시 프로세스가 즉시 SIGKILL(Killed: 9) 된다
+#   — 네트워크가 정상이어도 조건이 **항상 거짓**이라 모든 봇이 매 기동마다 120초를 통째로
+#   버리고 있었다(watchlist.err 가 이 kill 메시지로 도배). curl 은 같은 확인을 0.7초에 끝낸다.
 wait_for_network() {
-    local host="api.telegram.org" port=443 waited=0
-    while [ "$waited" -lt 120 ]; do
-        if (exec 3<>"/dev/tcp/$host/$port") 2>/dev/null; then
-            return 0
-        fi
+    local waited=0
+    while [ "$waited" -lt 30 ]; do
+        curl -sS -m 3 -o /dev/null https://api.telegram.org 2>/dev/null && return 0
         sleep 5
         waited=$((waited + 5))
     done
