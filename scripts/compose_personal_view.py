@@ -56,10 +56,8 @@ AOE_DARK_CSS = (
     '<style id="aoe-terminal-dark">'
     ':root{--bg-color:#0a0a0a;--card-bg:#111214;--text-color:#d9dde2;--category-bg:#1a1b1e}'
     'body{background:#0a0a0a!important;color:#d9dde2!important}'
-    'nav.topnav{border-bottom-color:#fb8b1e!important}'
-    'nav.topnav .topnav-tab{font-size:1rem!important}'  # 2026-07-22 타이포 개정: 탭 0.92→1rem
-    'nav.topnav .topnav-tab.active{background:#fb8b1e!important;color:#101418!important}'
-    'nav.topnav .topnav-brand:hover{color:#fb8b1e!important}'
+    # (구) nav.topnav 색·폰트 재단언 4줄 제거 (2026-07-26): 정본 aoe-nav-canon 이 이미 앰버·1rem —
+    # !important 재단언은 모바일 미디어쿼리(0.85rem)까지 덮어 폭별 드리프트를 만들었다.
     'header h1{color:#f2f4f6!important}'
     '.last-updated{color:#8a919a!important}'
     'header h1{display:none!important}'
