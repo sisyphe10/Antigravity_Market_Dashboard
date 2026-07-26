@@ -49,6 +49,22 @@ PALETTE = {
 }
 AMBER = PALETTE['amber']
 
+# ---- Life WRAP 라이트 팔레트 정본 (2026-07-26) ----
+# WRAP(팀 전용, gh-pages)은 라이트 테마 유지가 의도된 예외 — 다크 PALETTE 와 별도 정본.
+# create_dashboard 의 WRAP 전용 구간이 var(--wrap-*) 로 참조, :root 선언은 wrap_page 에 주입.
+WRAP_PALETTE = {
+    'green':     '#2d7a3a',   # 브랜드 그린 (라인·활성)
+    'green-bg':  '#f0f7f2',   # 그린 틴트 배경
+    'bg':        '#f8f9fa',   # 페이지 배경
+    'border':    '#e5e7eb',   # 옅은 보더
+    'border2':   '#d1d5db',   # 진한 보더 (버튼류)
+    'neutral':   '#f3f4f6',   # 중립 배경
+    'red':       '#dc2626',   # 주요 액션 (최종저장 등)
+    'blue':      '#2563eb',   # 보조 액션
+}
+WRAP_CSS_VARS = ':root{' + ';'.join(
+    '--wrap-%s:%s' % (k, v) for k, v in WRAP_PALETTE.items()) + '}'
+
 # 별도 앱용 CSS 변수 선언 — 앱 CSS 는 var(--aoe-*) 로 참조, 기동 시 이 블록이 치환된다
 PALETTE_CSS_VARS = ':root{' + ';'.join(
     '--aoe-%s:%s' % (k, v) for k, v in PALETTE.items()) + '}'

@@ -45,7 +45,7 @@ TOP_NAV_MAIN = [
 ]
 
 # Standard Pretendard font stack — 정본은 nav_style.py (2026-07-26 네비 통일)
-from nav_style import PRETENDARD_LINK, PRETENDARD_STACK, NAV_CSS as AOE_NAV_CSS, H2C_FREEZE_JS  # noqa: E402
+from nav_style import PRETENDARD_LINK, PRETENDARD_STACK, NAV_CSS as AOE_NAV_CSS, H2C_FREEZE_JS, WRAP_CSS_VARS  # noqa: E402
 
 TOP_NAV_CSS = AOE_NAV_CSS + """
 /* ── .topnav* 정본 규칙은 위 nav_style.NAV_CSS 에서 옴 (2026-07-26 통일) — 여기 추가 금지 ── */
@@ -95,22 +95,22 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
 
 /* WRAP 라이트 복원 (2026-07-16) — Life WRAP=팀원용 독립 페이지, AoE 다크 통일에서 제외.
    TOP_NAV_CSS(다크)를 .wrap-topnav 스코프로 원래 라이트 알약 스타일로 되돌린다. */
-.wrap-topnav { background: #fff; border-bottom: 2px solid #2d7a3a; }
+.wrap-topnav { background: #fff; border-bottom: 2px solid var(--wrap-green); }
 .wrap-topnav .wrap-updated { margin-left: auto; }
 .wrap-topnav .topnav-inner { align-items: center; height: 54px; gap: 32px; }
 .wrap-topnav .topnav-brand { font-size: 1.1rem; font-weight: 800; letter-spacing: 3.5px; color: #111; align-self: auto; }
-.wrap-topnav .topnav-brand:hover { color: #2d7a3a; }
+.wrap-topnav .topnav-brand:hover { color: var(--wrap-green); }
 .wrap-topnav .topnav-tabs { gap: 12px; align-items: center; }
 .wrap-topnav .topnav-item { display: block; position: relative; }
 /* 하위 스트립 (AoE 형태, 색=WRAP 라이트) */
-.wrap-strip { position: sticky; top: 56px; display: flex; justify-content: center; align-items: stretch; gap: 2px; height: 42px; padding: 0 28px; background: #f8f9fa; border-bottom: 1px solid #e5e7eb; z-index: 95; box-sizing: border-box; }
+.wrap-strip { position: sticky; top: 56px; display: flex; justify-content: center; align-items: stretch; gap: 2px; height: 42px; padding: 0 28px; background: var(--wrap-bg); border-bottom: 1px solid var(--wrap-border); z-index: 95; box-sizing: border-box; }
 .wrap-strip .topnav-tab { display: inline-flex; align-items: center; height: 41px; padding: 0 16px; color: #666; font-size: 16px; font-weight: 600; letter-spacing: 0.3px; border: none; border-radius: 0; border-bottom: 2px solid transparent; background: transparent; transition: color 0.12s; }
 .wrap-strip .topnav-tab:hover { color: #111; background: transparent; border-color: transparent; }
-.wrap-strip .topnav-tab.active { color: #111; font-weight: 700; background: transparent; border-bottom-color: #2d7a3a; }
-.wrap-topnav .topnav-dropdown { top: calc(100% + 8px); width: 100%; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.10); padding: 6px; }
+.wrap-strip .topnav-tab.active { color: #111; font-weight: 700; background: transparent; border-bottom-color: var(--wrap-green); }
+.wrap-topnav .topnav-dropdown { top: calc(100% + 8px); width: 100%; background: #fff; border: 1px solid var(--wrap-border); border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.10); padding: 6px; }
 .wrap-topnav .topnav-sub { padding: 9px 14px; color: #333; border-radius: 8px; }
-.wrap-topnav .topnav-sub:hover { background: #f3f4f6; color: #111; }
-.wrap-topnav .topnav-sub.active { background: #f0f7f2; color: #2d7a3a; }
+.wrap-topnav .topnav-sub:hover { background: var(--wrap-neutral); color: #111; }
+.wrap-topnav .topnav-sub.active { background: var(--wrap-green-bg); color: var(--wrap-green); }
 @media (max-width: 900px) {
     .wrap-topnav .topnav-inner { height: 46px; }
     .wrap-strip { top: 48px; padding: 0 12px; }
@@ -123,9 +123,9 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
 .wrap-sidebar:not(:has(.wrap-side-group.on)) { display: none; }
 #mainContent.has-sidebar { padding-left: 24px !important; }
 #mainContent.has-sidebar.wrap-sidebar-off { padding-left: 24px !important; }
-.wrap-sidebar .sidebar-link { display: inline-flex; align-items: center; height: auto; padding: 9px 26px; margin: 0; color: #666; font-size: 0.95rem; font-weight: 600; border-radius: 2px; border: 1.5px solid #d1d5db; background: #fff; text-align: center; white-space: nowrap; transition: all 0.15s; }
-.wrap-sidebar .sidebar-link:hover { background: #f0f7f2; color: #2d7a3a; border-color: #2d7a3a; }
-.wrap-sidebar .sidebar-link.active { background: #2d7a3a; color: #fff; border-color: #2d7a3a; font-weight: 700; }
+.wrap-sidebar .sidebar-link { display: inline-flex; align-items: center; height: auto; padding: 9px 26px; margin: 0; color: #666; font-size: 0.95rem; font-weight: 600; border-radius: 2px; border: 1.5px solid var(--wrap-border2); background: #fff; text-align: center; white-space: nowrap; transition: all 0.15s; }
+.wrap-sidebar .sidebar-link:hover { background: var(--wrap-green-bg); color: var(--wrap-green); border-color: var(--wrap-green); }
+.wrap-sidebar .sidebar-link.active { background: var(--wrap-green); color: #fff; border-color: var(--wrap-green); font-weight: 700; }
 .wrap-updated { margin-left: auto; font-size: 12px; color: #888; white-space: nowrap; font-style: italic; }
 .wrap-side-group { display: none; }
 .wrap-side-group.on { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
@@ -135,7 +135,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
 .wrap-sidebar-off .wrap-sidebar { display: none; }
 /* 섹션 제목 심플화 (wrap 페이지 한정 — 이 CSS는 wrap.html에만 삽입됨) */
 .category-title { background: none; border-left: none; border-radius: 0; padding: 0 0 4px; font-size: 1.5rem; font-weight: 800; color: #000; }
-/* Dashboard 좌측 목록 테이블 가독성 — 기본 배경 흰색 (페이지 배경 #f8f9fa 위 대비 부족, 2026-07-12 사용자)
+/* Dashboard 좌측 목록 테이블 가독성 — 기본 배경 흰색 (페이지 배경 var(--wrap-bg) 위 대비 부족, 2026-07-12 사용자)
    hover(#e9ecef)·active(#222)는 td 단위 배경이라 그대로 우선 적용된다 */
 #wrapPanelDashboard .portfolio-table { background: #fff; }
 #wrapPanelDashboard .category-section { scroll-margin-top: 88px; }
@@ -152,8 +152,8 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
 }
 @media (max-width: 900px) {
     .wrap-sec-chips { display: flex; gap: 8px; overflow-x: auto; position: sticky; top: 72px; z-index: 80; background: #fff; padding: 8px 4px; margin: 0 0 16px; }
-    .wrap-sec-chip { flex: 0 0 auto; padding: 8px 16px; border: 1.5px solid #d1d5db; border-radius: 999px; background: #fff; color: #444; font-size: 0.88rem; font-weight: 600; text-decoration: none; font-family: PRETENDARD_STACK_PLACEHOLDER; }
-    .wrap-sec-chip.active { color: #2d7a3a; border-color: #2d7a3a; background: #f0f7f2; }
+    .wrap-sec-chip { flex: 0 0 auto; padding: 8px 16px; border: 1.5px solid var(--wrap-border2); border-radius: 999px; background: #fff; color: #444; font-size: 0.88rem; font-weight: 600; text-decoration: none; font-family: PRETENDARD_STACK_PLACEHOLDER; }
+    .wrap-sec-chip.active { color: var(--wrap-green); border-color: var(--wrap-green); background: var(--wrap-green-bg); }
 }
 @media (max-width: 800px) {
     .wrap-sec-chips { top: 52px; }  /* 공유 CSS의 topnav 52px 구간과 일치 */
@@ -3584,17 +3584,17 @@ def _build_wrap_chart_section(category_label):
             f'<button class="wrap-met-btn" data-met="{_mk}" onclick="wrapMetClick(this, event)">{_ml}</button>\n'
             for _mk, _ml in _metrics_all)
         list_html = f'''<style>
-        .wrap-side-panel {{ width: 330px; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 6px; display: flex; gap: 6px; }}
+        .wrap-side-panel {{ width: 330px; background: #fff; border: 1px solid var(--wrap-border); border-radius: 12px; padding: 6px; display: flex; gap: 6px; }}
         .wrap-col-prod {{ flex: 1 1 auto; }}
         .wrap-col-metric {{ flex: 0 0 90px; border-left: 1px solid #f0f0f2; padding-left: 6px; }}
-        .wrap-col-head {{ height: 34px; line-height: 34px; text-align: center; font-size: 13px; font-weight: 800; color: #000; background: #f3f4f6; border-radius: 8px; margin-bottom: 4px; user-select: none; }}
+        .wrap-col-head {{ height: 34px; line-height: 34px; text-align: center; font-size: 13px; font-weight: 800; color: #000; background: var(--wrap-neutral); border-radius: 8px; margin-bottom: 4px; user-select: none; }}
         .wrap-prod-btn {{ display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 36px; padding: 0 8px; background: transparent; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 600; color: #111827; user-select: none; }}
-        .wrap-prod-btn:hover:not(.active) {{ background: #f3f4f6; }}
+        .wrap-prod-btn:hover:not(.active) {{ background: var(--wrap-neutral); }}
         .wrap-prod-btn.active {{ font-weight: 800; }}
         .wrap-side-dot {{ width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }}
-        .wrap-side-sep {{ border: none; border-top: 1px solid #e5e7eb; margin: 6px 4px; }}
+        .wrap-side-sep {{ border: none; border-top: 1px solid var(--wrap-border); margin: 6px 4px; }}
         .wrap-met-btn {{ display: block; width: 100%; height: 36px; background: transparent; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 600; color: #111827; user-select: none; text-align: center; }}
-        .wrap-met-btn:hover:not(.active) {{ background: #f3f4f6; }}
+        .wrap-met-btn:hover:not(.active) {{ background: var(--wrap-neutral); }}
         .wrap-met-btn.active {{ background: #111827; color: #fff; font-weight: 700; }}
         .wrap-kb-cursor {{ outline: 2px solid #111827; outline-offset: -2px; }}
         /* 진한 배경(선택된 구분 버튼) 위에서는 흰 링 — 동색이라 안 보이는 문제 방지 */
@@ -4134,11 +4134,11 @@ def _build_wrap_chart_section(category_label):
                 <div style="width:1000px;">
                     <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;font-size:13px;">
                         <span style="color:#555;font-weight:600;">기간</span>
-                        <input type="text" id="wrapStartDate" value="{first_date}" onchange="formatDateInput(this);updateWrapChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
+                        <input type="text" id="wrapStartDate" value="{first_date}" onchange="formatDateInput(this);updateWrapChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid var(--wrap-border2);border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                         <span style="color:#888;">~</span>
-                        <input type="text" id="wrapEndDate" value="{last_date}" onchange="formatDateInput(this);updateWrapChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
-                        <button onclick="downloadWrapChart()" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
-                        <a href="https://raw.githubusercontent.com/sisyphe10/Antigravity_Market_Dashboard/main/Wrap_NAV.xlsx" download="Wrap_NAV.xlsx" target="_blank" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#2563eb;color:#fff;text-decoration:none;border-radius:8px;">Raw_Data</a>
+                        <input type="text" id="wrapEndDate" value="{last_date}" onchange="formatDateInput(this);updateWrapChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid var(--wrap-border2);border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
+                        <button onclick="downloadWrapChart()" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:var(--wrap-red);color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
+                        <a href="https://raw.githubusercontent.com/sisyphe10/Antigravity_Market_Dashboard/main/Wrap_NAV.xlsx" download="Wrap_NAV.xlsx" target="_blank" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:var(--wrap-blue);color:#fff;text-decoration:none;border-radius:8px;">Raw_Data</a>
                     </div>
                     <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                         <div style="position:relative;height:500px;">
@@ -4252,7 +4252,7 @@ def _build_target_transform_chart_section():
                         { label: '목표전환형 1호', data: D.target, borderColor: '#e11d48', backgroundColor: 'transparent', borderWidth: 3, pointRadius: 0, tension: 0.3, yAxisID: 'y' },
                         { label: 'KOSPI', data: D.kospi, borderColor: '#000000', backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, tension: 0.3, yAxisID: 'y' },
                         { label: 'KOSDAQ', data: D.kosdaq, borderColor: '#666666', backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 0, tension: 0.3, yAxisID: 'y' },
-                        { label: '투자 비중 (%)', data: D.weights, showLine: false, pointRadius: 6, pointHoverRadius: 8, pointBackgroundColor: '#dc2626', pointBorderColor: '#dc2626', yAxisID: 'y1', spanGaps: false }
+                        { label: '투자 비중 (%)', data: D.weights, showLine: false, pointRadius: 6, pointHoverRadius: 8, pointBackgroundColor: 'var(--wrap-red)', pointBorderColor: 'var(--wrap-red)', yAxisID: 'y1', spanGaps: false }
                     ]
                 },
                 options: {
@@ -4897,9 +4897,9 @@ def create_wrap_monthly_returns_table():
                 return '', ('#e8edff' if a <= 5 else '#b8c5ff' if a <= 10 else '#7a90ff')
             return '', 'transparent'
 
-        TH = ('padding:8px 4px;background:#f3f4f6;font-weight:700;text-align:center;'
-              'border:1px solid #e5e7eb;font-size:12px;white-space:nowrap;')
-        TD = ('padding:9px 4px;text-align:center;border:1px solid #e5e7eb;'
+        TH = ('padding:8px 4px;background:var(--wrap-neutral);font-weight:700;text-align:center;'
+              'border:1px solid var(--wrap-border);font-size:12px;white-space:nowrap;')
+        TD = ('padding:9px 4px;text-align:center;border:1px solid var(--wrap-border);'
               'font-variant-numeric:tabular-nums;font-size:12px;color:#000;white-space:nowrap;')
 
         def build_body(years, month_map, annual_map, is_mdd):
@@ -4982,10 +4982,10 @@ def create_wrap_monthly_returns_table():
             '<button class="wmr-mbtn" data-metric="mdd" '
             "onclick=\"showWmrMetric('mdd')\">MDD</button>")
         style = ('<style>.wmr-btn{font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;'
-                 'border:1px solid #d1d5db;background:#f9fafb;color:#555;border-radius:8px;cursor:pointer;}'
+                 'border:1px solid var(--wrap-border2);background:#f9fafb;color:#555;border-radius:8px;cursor:pointer;}'
                  '.wmr-btn-active{background:#374151;color:#fff;border-color:#374151;}'
                  '.wmr-mbtn{font-family:inherit;font-size:13px;font-weight:600;padding:5px 14px;'
-                 'border:1px solid #d1d5db;background:#f9fafb;color:#555;border-radius:8px;cursor:pointer;}'
+                 'border:1px solid var(--wrap-border2);background:#f9fafb;color:#555;border-radius:8px;cursor:pointer;}'
                  '.wmr-mbtn-active{background:#0072CE;color:#fff;border-color:#0072CE;}</style>')
         script = ('<script>var wmrProd=0,wmrMetric="ret";'
                   'function wmrApply(){'
@@ -5086,9 +5086,9 @@ def create_wrap_returns_table():
             <div style="max-width:1000px;margin:0 auto;background:#fff;border-radius:10px;padding:16px 20px;box-shadow:0 2px 4px rgba(0,0,0,0.08);">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
                     <span style="font-size:13px;color:#555;font-weight:600;">기준일</span>
-                    <button onclick="shiftReturnDate(-1)" style="border:1px solid #d1d5db;background:#f9fafb;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:12px;color:#555;">&lt;</button>
-                    <span id="return-date-display" style="font-size:13px;padding:4px 12px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;">{latest_date}</span>
-                    <button onclick="shiftReturnDate(1)" style="border:1px solid #d1d5db;background:#f9fafb;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:12px;color:#555;">&gt;</button>
+                    <button onclick="shiftReturnDate(-1)" style="border:1px solid var(--wrap-border2);background:#f9fafb;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:12px;color:#555;">&lt;</button>
+                    <span id="return-date-display" style="font-size:13px;padding:4px 12px;border:1px solid var(--wrap-border2);border-radius:6px;background:#f9fafb;color:#222;">{latest_date}</span>
+                    <button onclick="shiftReturnDate(1)" style="border:1px solid var(--wrap-border2);background:#f9fafb;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:12px;color:#555;">&gt;</button>
                     <span id="return-actual-date-label" style="font-size:12px;color:#888;"></span>
                 </div>
                 <table class="rt-table">
@@ -5202,7 +5202,7 @@ def create_order_section():
     _email_pair = _json.dumps(wrap_config.email_pair_map(), ensure_ascii=False)
     _broker_messenger = _json.dumps(wrap_config.broker_messenger_map(), ensure_ascii=False)
     _html = """
-        <style>#orderContent table{width:100%;border-collapse:collapse;font-size:14px;}#orderContent thead th{padding:8px 12px;text-align:center;border-bottom:2px solid #e5e7eb;color:#444;background:#f3f4f6;white-space:nowrap;}#orderContent thead th,#orderContent tbody td{border:1px solid #d9d9d9;white-space:nowrap;}#orderContent tbody td{padding:6px 12px;text-align:center;}#orderContent thead th.grp-general,#orderContent tbody td.grp-general{background:rgba(130,185,115,0.045);}#orderContent thead th.grp-target,#orderContent tbody td.grp-target{background:rgba(242,120,162,0.04);}#orderContent input.cell{width:100%;box-sizing:border-box;text-align:center;padding:4px;border:none;background:transparent;border-radius:0;font-family:inherit;font-size:15px;font-weight:600;}#orderContent input.meta{text-align:center;padding:4px 6px;border:none;background:transparent;border-radius:0;font-family:inherit;font-size:14px;}#orderContent input.reason{width:100%;box-sizing:border-box;padding:10px 6px 10px 14px;border:none;background:transparent;border-radius:0;font-family:inherit;font-size:14px;text-align:left;}#orderContent input.cell:focus,#orderContent input.meta:focus,#orderContent input.reason:focus{outline:2px solid #94a3b8;outline-offset:-2px;background:#fff;}#orderContent .totals td{border-top:2px solid #374151;background:#f3f4f6;font-weight:700;padding:8px 4px;}#orderContent .cashrow td{background:#eff6ff;font-weight:700;padding:8px 4px;}#orderContent .diffrow td{font-weight:700;padding:8px 4px;}#orderContent .toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;}#orderContent .sync-toggle{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;cursor:pointer;user-select:none;padding:6px 12px;border:1.5px solid #d1d5db;border-radius:8px;background:#fff;color:#000;}#orderContent .sync-toggle.on{border-color:#2563eb;background:#2563eb;color:#fff;}#orderContent .btn{font-family:inherit;font-size:14px;font-weight:600;padding:6px 14px;border-radius:8px;cursor:pointer;border:1px solid #d1d5db;background:#f3f4f6;color:#222;}#orderContent .btn.red{background:#dc2626;color:#fff;border:none;}#orderContent .btn.green{background:#16a34a;color:#fff;border:none;}#orderContent .btn.blue{background:#2563eb;color:#fff;border:none;}#orderContent .del-btn{background:none;border:none;cursor:pointer;color:#dc2626;font-size:20px;line-height:1;padding:0 6px;font-weight:bold;}#orderContent .addrow td{background:#fff;}</style>
+        <style>#orderContent table{width:100%;border-collapse:collapse;font-size:14px;}#orderContent thead th{padding:8px 12px;text-align:center;border-bottom:2px solid var(--wrap-border);color:#444;background:var(--wrap-neutral);white-space:nowrap;}#orderContent thead th,#orderContent tbody td{border:1px solid #d9d9d9;white-space:nowrap;}#orderContent tbody td{padding:6px 12px;text-align:center;}#orderContent thead th.grp-general,#orderContent tbody td.grp-general{background:rgba(130,185,115,0.045);}#orderContent thead th.grp-target,#orderContent tbody td.grp-target{background:rgba(242,120,162,0.04);}#orderContent input.cell{width:100%;box-sizing:border-box;text-align:center;padding:4px;border:none;background:transparent;border-radius:0;font-family:inherit;font-size:15px;font-weight:600;}#orderContent input.meta{text-align:center;padding:4px 6px;border:none;background:transparent;border-radius:0;font-family:inherit;font-size:14px;}#orderContent input.reason{width:100%;box-sizing:border-box;padding:10px 6px 10px 14px;border:none;background:transparent;border-radius:0;font-family:inherit;font-size:14px;text-align:left;}#orderContent input.cell:focus,#orderContent input.meta:focus,#orderContent input.reason:focus{outline:2px solid #94a3b8;outline-offset:-2px;background:#fff;}#orderContent .totals td{border-top:2px solid #374151;background:var(--wrap-neutral);font-weight:700;padding:8px 4px;}#orderContent .cashrow td{background:#eff6ff;font-weight:700;padding:8px 4px;}#orderContent .diffrow td{font-weight:700;padding:8px 4px;}#orderContent .toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;}#orderContent .sync-toggle{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;cursor:pointer;user-select:none;padding:6px 12px;border:1.5px solid var(--wrap-border2);border-radius:8px;background:#fff;color:#000;}#orderContent .sync-toggle.on{border-color:var(--wrap-blue);background:var(--wrap-blue);color:#fff;}#orderContent .btn{font-family:inherit;font-size:14px;font-weight:600;padding:6px 14px;border-radius:8px;cursor:pointer;border:1px solid var(--wrap-border2);background:var(--wrap-neutral);color:#222;}#orderContent .btn.red{background:var(--wrap-red);color:#fff;border:none;}#orderContent .btn.green{background:#16a34a;color:#fff;border:none;}#orderContent .btn.blue{background:var(--wrap-blue);color:#fff;border:none;}#orderContent .del-btn{background:none;border:none;cursor:pointer;color:var(--wrap-red);font-size:20px;line-height:1;padding:0 6px;font-weight:bold;}#orderContent .addrow td{background:#fff;}</style>
         <div id="orderTabs" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;"></div>
         <div id="orderContent"><div style="text-align:center;color:#888;padding:40px;">로딩 중...</div></div>
         <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
@@ -5295,7 +5295,7 @@ def create_order_section():
             var bg, bd, txt;
             if (s.kind === 'dirty') { bg = '#fef3c7'; bd = '#fcd34d'; txt = '미저장'; }
             else if (s.kind === 'final') { bg = '#dcfce7'; bd = '#86efac'; txt = '최종 저장됨'; var hf = orderTimeHM(s.disp); if (hf) txt += ' · ' + hf; }
-            else { bg = '#f3f4f6'; bd = '#d1d5db'; txt = '임시 저장됨'; var ht = orderTimeHM(s.disp); if (ht) txt += ' · ' + ht; }
+            else { bg = 'var(--wrap-neutral)'; bd = 'var(--wrap-border2)'; txt = '임시 저장됨'; var ht = orderTimeHM(s.disp); if (ht) txt += ' · ' + ht; }
             return '<span style="display:inline-flex;align-items:center;font-family:inherit;font-size:13px;font-weight:600;color:#222;background:' + bg + ';border:1px solid ' + bd + ';border-radius:999px;padding:3px 12px;white-space:nowrap;">' + txt + '</span>';
         }
         // 배지만 재그리기 (추천사유/신규종목 입력 시 전체 재렌더 없이 미저장 변경 즉시 반영).
@@ -5448,7 +5448,7 @@ def create_order_section():
                 renderOrderTabs();
                 switchOrderTab('Matrix');
             } catch(e) {
-                document.getElementById('orderContent').innerHTML = '<div style="color:#dc2626;padding:40px;">데이터 로드 실패: ' + e.message + '</div>';
+                document.getElementById('orderContent').innerHTML = '<div style="color:var(--wrap-red);padding:40px;">데이터 로드 실패: ' + e.message + '</div>';
                 console.error('loadOrder error:', e);
             }
         }
@@ -5486,8 +5486,8 @@ def create_order_section():
 
         function renderOrderTabs() {
             var html = '';
-            html += '<button class="order-pf-btn" data-pf="Matrix" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 16px;background:#f3f4f6;color:#444;border:none;border-radius:8px;cursor:pointer;">Matrix</button>';
-            html += '<button class="order-pf-btn" data-pf="Email" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 16px;background:#f3f4f6;color:#444;border:none;border-radius:8px;cursor:pointer;">Email</button>';
+            html += '<button class="order-pf-btn" data-pf="Matrix" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 16px;background:var(--wrap-neutral);color:#444;border:none;border-radius:8px;cursor:pointer;">Matrix</button>';
+            html += '<button class="order-pf-btn" data-pf="Email" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 16px;background:var(--wrap-neutral);color:#444;border:none;border-radius:8px;cursor:pointer;">Email</button>';
             document.getElementById('orderTabs').innerHTML = html;
             document.querySelectorAll('.order-pf-btn').forEach(function(b) {
                 b.addEventListener('click', function() { switchOrderTab(b.dataset.pf); });
@@ -5498,7 +5498,7 @@ def create_order_section():
             orderActiveTab = which;
             document.querySelectorAll('.order-pf-btn').forEach(function(b) {
                 var active = b.dataset.pf === which;
-                b.style.background = active ? '#222' : '#f3f4f6';
+                b.style.background = active ? '#222' : 'var(--wrap-neutral)';
                 b.style.color = active ? '#fff' : '#444';
             });
             if (which === 'Email') { renderEmailPanel(); } else { renderOrderMatrix(); }
@@ -5628,9 +5628,9 @@ def create_order_section():
             var cards = mails.map(function(m, idx) {
                 var attNames = (m.attachments || []).map(function(a) { return a.filename; });
                 var badge = sent[m.key] ? '<span style="margin-left:8px;font-size:12px;font-weight:600;color:#16a34a;background:#dcfce7;border:1px solid #86efac;border-radius:999px;padding:2px 8px;">발송됨 ' + escapeHtml(sent[m.key]) + '</span>' : '';
-                var indiv = isComp ? '' : '<button class="adv-send-one" data-idx="' + idx + '" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:5px 12px;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer;">개별 발송</button>';
-                return '<div style="border:1px solid #e5e7eb;border-radius:8px;margin-bottom:12px;overflow:hidden;">'
-                    + '<div style="background:#f3f4f6;padding:8px 12px;display:flex;align-items:center;">'
+                var indiv = isComp ? '' : '<button class="adv-send-one" data-idx="' + idx + '" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:5px 12px;background:var(--wrap-blue);color:#fff;border:none;border-radius:6px;cursor:pointer;">개별 발송</button>';
+                return '<div style="border:1px solid var(--wrap-border);border-radius:8px;margin-bottom:12px;overflow:hidden;">'
+                    + '<div style="background:var(--wrap-neutral);padding:8px 12px;display:flex;align-items:center;">'
                     + '<b style="font-size:14px;color:#222;">' + escapeHtml(m.label) + '</b>' + badge + indiv
                     + '</div>'
                     + '<div style="padding:10px 12px;font-size:13px;color:#374151;border-bottom:1px solid #f0f0f0;"><b>제목</b> ' + escapeHtml(m.subject) + '</div>'
@@ -5645,13 +5645,13 @@ def create_order_section():
             overlay.id = 'advSendModal';
             overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;';
             overlay.innerHTML = '<div style="background:#fff;border-radius:12px;max-width:780px;width:100%;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.25);">'
-                + '<div style="padding:18px 22px;border-bottom:1px solid #e5e7eb;">'
+                + '<div style="padding:18px 22px;border-bottom:1px solid var(--wrap-border);">'
                 + '<h3 style="margin:0;font-size:17px;color:#111;">' + (isComp ? '컴플라이언스 메일' : '증권사 메일') + ' — 미리보기 (' + mails.length + '통)</h3>'
                 + '</div>'
                 + '<div style="padding:16px 22px;overflow-y:auto;flex:1;">' + cards + '</div>'
-                + '<div style="padding:14px 22px;border-top:1px solid #e5e7eb;display:flex;gap:10px;justify-content:flex-end;align-items:center;">'
+                + '<div style="padding:14px 22px;border-top:1px solid var(--wrap-border);display:flex;gap:10px;justify-content:flex-end;align-items:center;">'
                 + '<span id="advSendMsg" style="margin-right:auto;font-size:13px;color:#6b7280;"></span>'
-                + '<button id="advSendCancel" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 18px;border:1px solid #d1d5db;background:#f3f4f6;color:#222;border-radius:8px;cursor:pointer;">닫기</button>'
+                + '<button id="advSendCancel" style="font-family:inherit;font-size:14px;font-weight:600;padding:8px 18px;border:1px solid var(--wrap-border2);background:var(--wrap-neutral);color:#222;border-radius:8px;cursor:pointer;">닫기</button>'
                 + footerBtn
                 + '</div></div>';
             document.body.appendChild(overlay);
@@ -5778,7 +5778,7 @@ def create_order_section():
                 }
                 prevBroker = it.broker;
                 var outName = buildOutFilename(it.t, new Date());
-                var btnColor = BROKER_COLOR[it.broker] || '#dc2626';
+                var btnColor = BROKER_COLOR[it.broker] || 'var(--wrap-red)';
                 dlRows += '<div style="display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-bottom:8px;">'
                     + '<span style="font-size:13px;color:#666;font-family:\\'Pretendard Variable\\', Pretendard, sans-serif;">' + outName + ' →</span>'
                     + '<button class="email-tab-dl-btn" data-pf="' + it.pf + '" data-tidx="' + it.ti + '" style="font-family:inherit;font-size:14px;font-weight:600;padding:6px 14px;background:' + btnColor + ';color:#fff;border:none;border-radius:8px;cursor:pointer;min-width:160px;text-align:center;">' + it.label + '</button>'
@@ -5786,9 +5786,9 @@ def create_order_section():
             });
             var sendButtons = '<div style="display:flex;gap:10px;flex-shrink:0;">'
                 + '<button id="advBtnCompliance" style="font-family:inherit;font-size:15px;font-weight:700;padding:10px 22px;background:#d97706;color:#fff;border:none;border-radius:8px;cursor:pointer;">컴플 메일</button>'
-                + '<button id="advBtnBrokers" style="font-family:inherit;font-size:15px;font-weight:700;padding:10px 22px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">증권사 메일</button>'
+                + '<button id="advBtnBrokers" style="font-family:inherit;font-size:15px;font-weight:700;padding:10px 22px;background:var(--wrap-red);color:#fff;border:none;border-radius:8px;cursor:pointer;">증권사 메일</button>'
                 + '</div>';
-            var dlSection = '<div style="margin-bottom:8px;padding:16px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;">'
+            var dlSection = '<div style="margin-bottom:8px;padding:16px;background:#f9fafb;border:1px solid var(--wrap-border);border-radius:8px;">'
                 + '<h4 style="margin:0 0 12px 0;font-size:15px;color:#444;">이메일</h4>'
                 + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;">'
                 + sendButtons
@@ -5925,7 +5925,7 @@ def create_order_section():
 
         function buildOrderEmailSection(pfName, stocks, st) {
             var emailText = buildOrderEmailText(pfName, stocks, st);
-            return '<div style="margin-top:24px;padding:16px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;">'
+            return '<div style="margin-top:24px;padding:16px;background:#f9fafb;border:1px solid var(--wrap-border);border-radius:8px;">'
                 + '<div style="display:flex;align-items:center;margin-bottom:12px;">'
                 + '<h4 style="margin:0;font-size:15px;color:#444;">이메일 텍스트</h4>'
                 + '<button class="email-copy-btn" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:5px 14px;background:#374151;color:#fff;border:none;border-radius:6px;cursor:pointer;">복사</button>'
@@ -6170,11 +6170,11 @@ def create_order_section():
               +'<td><input type="text" class="meta mtx-meta" data-tempid="'+r.tempId+'" data-field="name" value="'+escapeHtml(r.name||'')+'" placeholder="종목명" style="width:110px;font-weight:600;"></td>'
               +cells+reasonTd(code, r.tempId)+'</tr>'; });
           var totals='';
-          pfs.forEach(function(pf,ci){ var sum=_mtxColSum(pf); var col=(Math.abs(sum-100)<0.5)?'#16a34a':(sum>100?'#dc2626':'#222'); var gen=ORDER_PORTFOLIOS[ci].general;
+          pfs.forEach(function(pf,ci){ var sum=_mtxColSum(pf); var col=(Math.abs(sum-100)<0.5)?'#16a34a':(sum>100?'var(--wrap-red)':'#222'); var gen=ORDER_PORTFOLIOS[ci].general;
             totals+='<td class="wcol '+(gen?'grp-general':'grp-target')+'" id="mtx-total-'+ci+'" style="color:'+col+';">'+sum.toFixed(0)+'%</td>'; });
           var cash='';
           pfs.forEach(function(pf,ci){ var c=100-_mtxColSum(pf); var gen=ORDER_PORTFOLIOS[ci].general;
-            cash+='<td class="wcol '+(gen?'grp-general':'grp-target')+'" id="mtx-cash-'+ci+'" style="color:'+(c<0?'#dc2626':'#222')+';">'+c.toFixed(0)+'%</td>'; });
+            cash+='<td class="wcol '+(gen?'grp-general':'grp-target')+'" id="mtx-cash-'+ci+'" style="color:'+(c<0?'var(--wrap-red)':'#222')+';">'+c.toFixed(0)+'%</td>'; });
           var diff='';
           pfs.forEach(function(pf,ci){ var d=Number((_mtxColSum(pf)-_mtxColPrevSum(pf)).toFixed(1)); var gen=ORDER_PORTFOLIOS[ci].general;
             var dc=d>0?'#FF0000':(d<0?'#0070C0':'#222'); diff+='<td class="wcol '+(gen?'grp-general':'grp-target')+'" style="color:'+dc+';">'+(d>0?'+':'')+d+'%</td>'; });
@@ -6194,7 +6194,7 @@ def create_order_section():
             +'<th>#</th><th>업종</th><th>코드</th><th>종목명</th>'+head+'<th style="width:99%;">추천사유</th>'
             +'</tr></thead><tbody>'+rows
             +'<tr class="diffrow"><td colspan="4" style="text-align:center;color:#444;">변동</td>'+diff+'<td></td></tr>'
-            +'<tr class="addrow"><td colspan="3"></td><td style="padding:8px 4px;"><button class="btn" id="btnAdd" style="background:#2563eb;color:#fff;border:none;border-radius:4px;padding:4px 12px;font-size:14px;line-height:1.5;">+ 종목 추가</button></td>'+ORDER_PORTFOLIOS.map(function(p){return '<td class="wcol '+(p.general?'grp-general':'grp-target')+'"></td>';}).join('')+'<td></td></tr>'
+            +'<tr class="addrow"><td colspan="3"></td><td style="padding:8px 4px;"><button class="btn" id="btnAdd" style="background:var(--wrap-blue);color:#fff;border:none;border-radius:4px;padding:4px 12px;font-size:14px;line-height:1.5;">+ 종목 추가</button></td>'+ORDER_PORTFOLIOS.map(function(p){return '<td class="wcol '+(p.general?'grp-general':'grp-target')+'"></td>';}).join('')+'<td></td></tr>'
             +'<tr class="totals"><td colspan="4" style="text-align:center;color:#444;">합계</td>'+totals+'<td></td></tr>'
             +'<tr class="cashrow"><td colspan="4" style="text-align:center;color:#444;">현금</td>'+cash+'<td></td></tr></tbody></table></div>';
           document.getElementById('orderContent').innerHTML=html;
@@ -6257,7 +6257,7 @@ def create_order_section():
           var bg,bd,txt;
           if(kind==='dirty'){ bg='#fef3c7'; bd='#fcd34d'; txt='미저장'; }
           else if(kind==='final'){ bg='#dcfce7'; bd='#86efac'; txt='최종 저장됨'; var hf=orderTimeHM(disp); if(hf) txt+=' · '+hf; }
-          else { bg='#f3f4f6'; bd='#d1d5db'; txt='임시 저장됨'; var ht=orderTimeHM(disp); if(ht) txt+=' · '+ht; }
+          else { bg='var(--wrap-neutral)'; bd='var(--wrap-border2)'; txt='임시 저장됨'; var ht=orderTimeHM(disp); if(ht) txt+=' · '+ht; }
           return '<span style="display:inline-flex;align-items:center;font-family:inherit;font-size:13px;font-weight:600;color:#222;background:'+bg+';border:1px solid '+bd+';border-radius:999px;padding:3px 12px;white-space:nowrap;">'+txt+'</span>'; }
 
         // stock_master.json 자동완성 (신규행)
@@ -6752,7 +6752,7 @@ def create_disclosures_section():
                 <span id="disclLastUpdated" style="font-size:13px;color:#666;"></span>
                 <label style="margin-left:auto;font-size:14px;color:#444;display:flex;align-items:center;gap:8px;">
                     종목 필터
-                    <select id="disclStockFilter" style="padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-family:inherit;font-size:14px;background:#fff;min-width:160px;text-align:center;text-align-last:center;">
+                    <select id="disclStockFilter" style="padding:6px 10px;border:1px solid var(--wrap-border2);border-radius:6px;font-family:inherit;font-size:14px;background:#fff;min-width:160px;text-align:center;text-align-last:center;">
                         <option value="">전체</option>
                     </select>
                 </label>
@@ -6816,7 +6816,7 @@ def create_disclosures_section():
                 return;
             }
             var html = '<table style="width:100%;border-collapse:collapse;font-size:14px;">';
-            html += '<thead><tr style="background:#f3f4f6;border-bottom:2px solid #d1d5db;">'
+            html += '<thead><tr style="background:var(--wrap-neutral);border-bottom:2px solid var(--wrap-border2);">'
                   + '<th style="padding:10px;text-align:center;width:110px;">공시일</th>'
                   + '<th style="padding:10px;text-align:center;width:140px;">종목</th>'
                   + '<th style="padding:10px;text-align:left;width:280px;">제목</th>'
@@ -6829,13 +6829,13 @@ def create_disclosures_section():
                 var name = (it.name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 // source 배지: KIND(거래소) 진녹 / DART(금감원, 기본) 회색
                 var src = it.source || 'DART';
-                var badgeBg = src === 'KIND' ? '#2d7a3a' : '#6c757d';
+                var badgeBg = src === 'KIND' ? 'var(--wrap-green)' : '#6c757d';
                 var badge = '<span style="display:inline-block;background:' + badgeBg + ';color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;margin-right:6px;vertical-align:middle;">' + src + '</span>';
-                html += '<tr style="border-bottom:1px solid #e5e7eb;">'
+                html += '<tr style="border-bottom:1px solid var(--wrap-border);">'
                       + '<td style="padding:8px;text-align:center;color:#444;white-space:nowrap;">' + it.date + '</td>'
                       + '<td style="padding:8px;text-align:center;font-weight:600;color:#1f2937;">' + name + '<div style="font-size:11px;color:#888;">' + it.code + '</div></td>'
                       + '<td style="padding:8px;text-align:left;color:#222;font-weight:500;">' + badge + title + '</td>'
-                      + '<td style="padding:8px;text-align:center;"><a href="' + it.url + '" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:none;font-weight:700;font-size:20px;line-height:1;">⧉</a></td>'
+                      + '<td style="padding:8px;text-align:center;"><a href="' + it.url + '" target="_blank" rel="noopener" style="color:var(--wrap-blue);text-decoration:none;font-weight:700;font-size:20px;line-height:1;">⧉</a></td>'
                       + '<td style="padding:8px;text-align:left;color:#555;line-height:1.5;">' + summary + '</td>'
                       + '</tr>';
             });
@@ -7447,10 +7447,10 @@ def _build_contribution_section():
         <div id="contribPfToggle" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;"></div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
           <span style="color:#444;font-size:14px;font-weight:600;">기간</span>
-          <input type="text" id="contribStart" maxlength="10" placeholder="YYYY-MM-DD" onchange="formatDateInput(this);renderContribution()" style="font-family:inherit;font-size:13px;padding:5px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;width:115px;text-align:center;">
+          <input type="text" id="contribStart" maxlength="10" placeholder="YYYY-MM-DD" onchange="formatDateInput(this);renderContribution()" style="font-family:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--wrap-border2);border-radius:6px;background:#f9fafb;width:115px;text-align:center;">
           <span style="color:#888;">~</span>
-          <input type="text" id="contribEnd" maxlength="10" placeholder="YYYY-MM-DD" onchange="formatDateInput(this);renderContribution()" style="font-family:inherit;font-size:13px;padding:5px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;width:115px;text-align:center;">
-          <button onclick="contribResetRange()" style="font-family:inherit;font-size:12px;font-weight:600;padding:5px 12px;background:#f3f4f6;color:#444;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;">전체</button>
+          <input type="text" id="contribEnd" maxlength="10" placeholder="YYYY-MM-DD" onchange="formatDateInput(this);renderContribution()" style="font-family:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--wrap-border2);border-radius:6px;background:#f9fafb;width:115px;text-align:center;">
+          <button onclick="contribResetRange()" style="font-family:inherit;font-size:12px;font-weight:600;padding:5px 12px;background:var(--wrap-neutral);color:#444;border:1px solid var(--wrap-border2);border-radius:6px;cursor:pointer;">전체</button>
           <span id="contribRangeHint" style="color:#888;font-size:12px;"></span>
         </div>
         <div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;">
@@ -7473,15 +7473,15 @@ def _build_contribution_section():
     </div>
     <style>
       .contrib-tbl{border-collapse:separate;border-spacing:0;width:100%;font-size:13.5px;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.06);overflow:hidden;}
-      .contrib-tbl th{background:#f3f4f6;color:#444;font-weight:600;padding:9px 10px;text-align:center;white-space:nowrap;border-bottom:2px solid #e5e7eb;cursor:pointer;user-select:none;}
+      .contrib-tbl th{background:var(--wrap-neutral);color:#444;font-weight:600;padding:9px 10px;text-align:center;white-space:nowrap;border-bottom:2px solid var(--wrap-border);cursor:pointer;user-select:none;}
       .contrib-tbl td{padding:8px 10px;text-align:center;white-space:nowrap;border-bottom:1px solid #f0f0f0;}
       .contrib-tbl tr:last-child td{border-bottom:none;}
       .contrib-tbl tbody tr:hover{background:#fafafa;}
-      .contrib-pos{color:#dc2626;font-weight:600;}
-      .contrib-neg{color:#2563eb;font-weight:600;}
-      .dh-pill{display:inline-block;background:#2563eb;color:#fff;font-size:11px;font-weight:700;padding:1px 7px;border-radius:10px;}
+      .contrib-pos{color:var(--wrap-red);font-weight:600;}
+      .contrib-neg{color:var(--wrap-blue);font-weight:600;}
+      .dh-pill{display:inline-block;background:var(--wrap-blue);color:#fff;font-size:11px;font-weight:700;padding:1px 7px;border-radius:10px;}
       .contrib-tbl tfoot td{border-top:2px solid #1f2937;font-weight:700;background:#fafafa;}
-      .contrib-flt{font-family:inherit;font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:8px;border:1px solid #d1d5db;background:#fff;color:#444;cursor:pointer;}
+      .contrib-flt{font-family:inherit;font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:8px;border:1px solid var(--wrap-border2);background:#fff;color:#444;cursor:pointer;}
       .contrib-flt.active{background:#111;color:#fff;border-color:#111;}
     </style>
     <script>
@@ -7587,12 +7587,12 @@ def _build_contribution_section():
         CONTRIB_DATA=await resp.json();
         var pfs=Object.keys(CONTRIB_DATA.portfolios);
         var tg=document.getElementById('contribPfToggle');
-        tg.innerHTML=pfs.map(function(p){return '<button class="contrib-pf-btn" data-pf="'+p+'" onclick="contribSetPf(this.dataset.pf)" style="font-family:inherit;font-size:14px;font-weight:600;padding:6px 14px;border-radius:8px;border:1px solid #d1d5db;background:#fff;color:#444;cursor:pointer;">'+p+'</button>';}).join('');
+        tg.innerHTML=pfs.map(function(p){return '<button class="contrib-pf-btn" data-pf="'+p+'" onclick="contribSetPf(this.dataset.pf)" style="font-family:inherit;font-size:14px;font-weight:600;padding:6px 14px;border-radius:8px;border:1px solid var(--wrap-border2);background:#fff;color:#444;cursor:pointer;">'+p+'</button>';}).join('');
         document.getElementById('contribLoading').style.display='none';
         document.getElementById('contribBody').style.display='block';
         contribSetPf(pfs[0]);
       }catch(e){
-        document.getElementById('contribLoading').innerHTML='<span style="color:#dc2626;">기여도 데이터 로드 실패: '+e.message+'</span>';
+        document.getElementById('contribLoading').innerHTML='<span style="color:var(--wrap-red);">기여도 데이터 로드 실패: '+e.message+'</span>';
       }
     }
     function contribSetPf(pf){
@@ -7600,7 +7600,7 @@ def _build_contribution_section():
       CTB_TBL.stock.filters={}; CTB_TBL.sector.filters={}; ctbCloseFilter();  // 포트 전환 = 값 집합 변경 → 필터 리셋
       document.querySelectorAll('.contrib-pf-btn').forEach(function(b){
         var on=b.dataset.pf===pf;
-        b.style.background=on?'#dc2626':'#fff'; b.style.color=on?'#fff':'#444'; b.style.borderColor=on?'#dc2626':'#d1d5db';
+        b.style.background=on?'var(--wrap-red)':'#fff'; b.style.color=on?'#fff':'#444'; b.style.borderColor=on?'var(--wrap-red)':'var(--wrap-border2)';
       });
       contribResetRange();
     }
@@ -8776,13 +8776,14 @@ def create_dashboard():
     <title>WRAP</title>
     {PRETENDARD_LINK}
     <style>
-        :root {{ --bg-color: #f8f9fa; --card-bg: #ffffff; --text-color: #333333; }}
+    {WRAP_CSS_VARS}
+        :root {{ --bg-color: var(--wrap-bg); --card-bg: #ffffff; --text-color: #333333; }}
         body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; font-size: 1.05rem; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; }}
         header {{ text-align: center; margin-bottom: 40px; padding: 20px; background-color: #000000; border-radius: 12px; }}
         h1 {{ margin: 0; font-size: 33px; color: #ffffff; }}
         .last-updated {{ margin-top: 10px; color: #6c757d; font-size: 15px; font-style: italic; }}
         .nav-group {{ display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; justify-content: center; }}
-        .nav-button {{ display: inline-block; padding: 8px 20px; background-color: #2d7a3a; color: #ffffff; text-decoration: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; transition: background-color 0.2s; }}
+        .nav-button {{ display: inline-block; padding: 8px 20px; background-color: var(--wrap-green); color: #ffffff; text-decoration: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; transition: background-color 0.2s; }}
         .nav-button:hover {{ background-color: #357abd; }}
         .category-section {{ margin-bottom: 50px; }}
         .category-title {{ font-size: 1.8rem; color: #000000; margin-bottom: 20px; padding: 10px 16px; background-color: #e0e0e0; border-left: 4px solid #000000; border-radius: 4px; text-transform: uppercase; }}
@@ -8847,7 +8848,7 @@ def create_dashboard():
         .sector-legend {{ display: flex; align-items: center; gap: 16px; font-size: 0.92rem; color: #333; }}
         .legend-item {{ display: flex; align-items: center; gap: 5px; }}
         .legend-dot {{ width: 12px; height: 12px; border-radius: 2px; display: inline-block; flex-shrink: 0; }}
-        .portfolio-dot {{ background: #2d7a3a; }}
+        .portfolio-dot {{ background: var(--wrap-green); }}
         .kodex-dot {{ background: #444; }}
         .sector-table-wrap {{ overflow-x: auto; }}
         .sector-table {{ width: 100%; border-collapse: collapse; font-size: 1.0rem; }}
@@ -8869,7 +8870,7 @@ def create_dashboard():
         .sect-right-stocks {{ font-size: 0.83rem; color: #444; font-weight: 500; padding: 0 8px 5px 12px !important; border-bottom: 1px solid #eee; }}
         .sect-detail-row td {{ padding: 0 12px 6px 12px !important; border-bottom: 1px solid #eee; }}
         .sect-detail {{ font-size: 0.85rem; color: #888; line-height: 1.4; }}
-        .sect-detail-mine {{ color: #2d7a3a; font-weight: 700; }}
+        .sect-detail-mine {{ color: var(--wrap-green); font-weight: 700; }}
         .sect-detail-bm {{ color: #444; font-weight: 500; }}
         .sect-detail-sep {{ color: #ccc; }}
         @media (max-width: 800px) {{ .sector-header-bar, .sector-three-panel {{ grid-template-columns: 1fr; }} }}
@@ -8910,7 +8911,7 @@ def create_dashboard():
         .fee-note {{ margin: 16px 0 0 0; font-size: 0.85rem; color: #888; }}
         /* Fee sub-tabs (수수료율 / 매출) */
         .fee-subtabs {{ display: flex; justify-content: center; gap: 8px; margin: 0 auto 20px auto; max-width: 900px; }}
-        .fee-subtab {{ padding: 9px 26px; border: 1.5px solid #d1d5db; background: #fff; border-radius: 999px; font-size: 0.92rem; font-weight: 600; color: #666; cursor: pointer; font-family: inherit; transition: all 0.15s; }}
+        .fee-subtab {{ padding: 9px 26px; border: 1.5px solid var(--wrap-border2); background: #fff; border-radius: 999px; font-size: 0.92rem; font-weight: 600; color: #666; cursor: pointer; font-family: inherit; transition: all 0.15s; }}
         .fee-subtab:hover {{ color: #1e40af; border-color: #1e40af; }}
         .fee-subtab.active {{ color: #fff; background: #1e40af; border-color: #1e40af; }}
         /* 매출 (revenue) */
@@ -8937,7 +8938,7 @@ def create_dashboard():
         /* Password overlay */
         .pw-overlay {{
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #f8f9fa; display: flex; align-items: center; justify-content: center;
+            background: var(--wrap-bg); display: flex; align-items: center; justify-content: center;
             z-index: 9999;
         }}
         .pw-box {{
@@ -8955,7 +8956,7 @@ def create_dashboard():
             background: #1e40af; color: #fff; border: none; border-radius: 8px; cursor: pointer;
         }}
         .pw-box button:hover {{ background: #1e3a8a; }}
-        .pw-error {{ color: #dc2626; font-size: 0.9rem; margin-top: 10px; display: none; }}
+        .pw-error {{ color: var(--wrap-red); font-size: 0.9rem; margin-top: 10px; display: none; }}
         .pw-hidden {{ display: none !important; }}
         {TOP_NAV_CSS}
         {WRAP_NAV_CSS}
