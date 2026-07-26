@@ -8,50 +8,147 @@ import requests
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 ETFCHECK_BASE = 'https://www.etfcheck.co.kr/user/etp/'
+ETFCHECK_HOME = 'https://www.etfcheck.co.kr/'
 # 2026-07-08 사이트 개편: 키 '4lm@flEh68'→'er@#$dfe^fd12', 버킷 60s→30s, Referer 필수화 (전부 403 원인)
-# 2026-07-21 키 재로테이션: 'er@#$dfe^fd12'→'#$dser#GVEWS329@' (버킷 30s 동일). build.js 내
-#   axios.interceptors.request 의 n="#$dser#GVEWS329@" 에서 추출·검증(200/success). [[project_antigravity_active_etf_alert]]
-ETFCHECK_KEY = '#$dser#GVEWS329@'
+# 2026-07-21 키 재로테이션: 'er@#$dfe^fd12'→'#$dser#GVEWS329@' (버킷 30s 동일).
+# 2026-07-26 두 가지 동시 변경으로 07-22부터 전량 403 (수집 중단):
+#   (1) 키가 build.js 인라인 → 웹팩 모듈 1867(`E.a.key`)로 이동·재로테이션: '#$dser#GVEWS329@'→'d$MsKjvz'(8자).
+#       8자라 버킷 숫자 8·9는 JS `n[8]`/`n[9]`=undefined → 문자열 'undefined'가 그대로 이어붙는다(아래 복제).
+#   (2) API가 세션 쿠키 connect.sid 요구: 홈페이지를 먼저 GET해 세션을 연 뒤 그 쿠키를 실어야 통과.
+#       (bare requests.get → 403). _get_session()으로 세션 확보·403 시 1회 재수립. [[project_antigravity_active_etf_alert]]
+ETFCHECK_KEY = 'd$MsKjvz'
 ETFCHECK_BUCKET_MS = 30000
+
+# 2026-07-26 etfcheck가 레이트리밋 도입: ~30요청 후 IP 전체를 403(sticky, 쿨다운 김).
+#   대응(중앙화): (a) 요청 최소 간격 ETFCHECK_MIN_INTERVAL초 (b) ROTATE_EVERY건마다 세션 선제
+#   로테이션(per-session 카운트 리셋 겨냥) (c) 403 시 세션 재수립 + 장기 백오프(쿨다운 대기,
+#   IP 재자극 방지). 간격/로테이션은 환경변수로 무재배포 튜닝 가능.
+ETFCHECK_MIN_INTERVAL = float(os.environ.get('ETFCHECK_MIN_INTERVAL', '3.0'))
+ETFCHECK_ROTATE_EVERY = int(os.environ.get('ETFCHECK_ROTATE_EVERY', '25'))
+_last_req_ts = 0.0
+_req_count = 0
 
 # 2026-07-21 맥미니 공인 IP가 etfcheck WAF에 IP 차단(정적 파일까지 403). 현 운영은 수집 자체를
 #   Oracle VM(직결 200)에서 실행하므로 프록시 불필요(VM엔 ETFCHECK_PROXY 미설정 → 직결). 이 훅은
 #   선택적 dormant 옵션으로 남겨둔다(설정 시 requests가 해당 SOCKS/HTTP 프록시로 우회).
 ETFCHECK_PROXY = os.environ.get('ETFCHECK_PROXY') or None
 
+logger = logging.getLogger(__name__)
+
+_session = None
+
+
+def _new_session():
+    """새 세션 생성 + 홈페이지 GET으로 connect.sid 세션 쿠키 확보 (2026-07-26 API 요구)."""
+    s = requests.Session()
+    s.headers.update({
+        'User-Agent': ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+                       '(KHTML, like Gecko) Chrome/126 Safari/537.36'),
+        'Referer': 'https://www.etfcheck.co.kr/',
+    })
+    if ETFCHECK_PROXY:
+        s.proxies = {'http': ETFCHECK_PROXY, 'https': ETFCHECK_PROXY}
+    try:
+        s.get(ETFCHECK_HOME, timeout=30)  # Set-Cookie: connect.sid
+    except requests.exceptions.RequestException:
+        pass  # 쿠키 확보 실패해도 요청은 시도(다음 403에서 재수립)
+    return s
+
+
+def _get_session():
+    global _session
+    if _session is None:
+        _session = _new_session()
+    return _session
+
+
+def _reset_session():
+    global _session
+    _session = _new_session()
+    return _session
+
+
+def _pace():
+    """요청 최소 간격 강제 (레이트리밋 회피). 모든 _request 호출에 공통 적용."""
+    global _last_req_ts
+    dt = time.time() - _last_req_ts
+    if dt < ETFCHECK_MIN_INTERVAL:
+        time.sleep(ETFCHECK_MIN_INTERVAL - dt)
+    _last_req_ts = time.time()
+
 
 def generate_checkclient():
-    """시간 기반 Checkclient 인증 해시 생성 (30초 버킷)"""
+    """시간 기반 Checkclient 인증 해시 생성 (30초 버킷).
+
+    JS(build.js) 원본: n=key, a=String(floor(Date.now()/3e4)); r=''; for i: r+=n[a[i]-'0'].
+    키가 8자라 버킷 숫자 8·9는 n[8]/n[9]=undefined → JS 문자열 결합이 'undefined'를 이어붙인다.
+    이 동작을 그대로 복제한다(미복제 시 8·9 포함 버킷에서 해시 불일치 → 403)."""
     bucket = str(int(time.time() * 1000 / ETFCHECK_BUCKET_MS))
-    mapped = ''.join(ETFCHECK_KEY[int(ch)] for ch in bucket)
+    mapped = ''.join(
+        ETFCHECK_KEY[i] if i < len(ETFCHECK_KEY) else 'undefined'
+        for i in (int(ch) for ch in bucket)
+    )
     return hashlib.sha256(mapped.encode()).hexdigest()
 
 
-@retry(
-    stop=stop_after_attempt(3),
-    wait=wait_exponential(multiplier=1, min=2, max=10),
-    retry=retry_if_exception_type((requests.exceptions.Timeout, requests.exceptions.ConnectionError)),
-    reraise=True,
-)
-def _request(endpoint, params=None):
-    """etfcheck API 호출 (timeout 30s, transient 실패 시 최대 3회 retry with exponential backoff)"""
-    proxies = {'http': ETFCHECK_PROXY, 'https': ETFCHECK_PROXY} if ETFCHECK_PROXY else None
-    resp = requests.get(
+# 403(레이트리밋/IP 쿨다운) 시 재시도 전 대기(초). 세션을 새로 열고 이만큼 쉰 뒤 재시도.
+# 쿨다운을 넉넉히 넘겨 IP 재자극을 막는다. 마지막 실패는 예외 → 수집기가 err 기록·retry_failed가 재차 시도.
+_403_BACKOFF = [90, 180, 300]
+# 네트워크 transient(Timeout/ConnectionError) 재시도 대기(초).
+_NET_BACKOFF = [2, 5, 10]
+
+
+def _do(sess, endpoint, params):
+    return sess.get(
         ETFCHECK_BASE + endpoint,
         params=params,
         headers={
-            'User-Agent': 'Mozilla/5.0',
-            'Referer': 'https://www.etfcheck.co.kr/',  # 2026-07-08부터 필수 (없으면 403)
             'Checkclient': generate_checkclient(),
+            # 2026-07-26 WAF가 axios 시그니처 검사 — 없으면 403
+            'Accept': 'application/json, text/plain, */*',
+            'X-Requested-With': 'XMLHttpRequest',
         },
-        proxies=proxies,
         timeout=30,
     )
-    resp.raise_for_status()
-    data = resp.json()
-    if not data.get('success'):
-        raise ValueError(f"API error: {data.get('message', 'unknown')}")
-    return data.get('results', [])
+
+
+def _request(endpoint, params=None):
+    """etfcheck API 호출 (세션 쿠키 + Checkclient 인증, 레이트리밋 대응 스로틀 내장).
+
+    - 요청 최소 간격 강제(_pace) + ROTATE_EVERY건마다 세션 선제 로테이션.
+    - 403(레이트리밋/IP 쿨다운): 세션 재수립 + 장기 백오프 후 재시도(_403_BACKOFF), 소진 시 예외.
+    - Timeout/ConnectionError: 짧은 백오프 재시도(_NET_BACKOFF)."""
+    global _req_count
+    net_i = 0
+    b403_i = 0
+    while True:
+        # 세션 선제 로테이션(per-session 카운트 리셋 겨냥)
+        if _req_count > 0 and _req_count % ETFCHECK_ROTATE_EVERY == 0:
+            _reset_session()
+        _pace()
+        sess = _get_session()
+        try:
+            resp = _do(sess, endpoint, params)
+        except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
+            if net_i >= len(_NET_BACKOFF):
+                raise
+            time.sleep(_NET_BACKOFF[net_i]); net_i += 1
+            continue
+        _req_count += 1
+
+        if resp.status_code in (401, 403):
+            # 레이트리밋/세션만료 → 세션 재수립 + 장기 백오프 후 재시도
+            _reset_session()
+            if b403_i >= len(_403_BACKOFF):
+                resp.raise_for_status()  # 소진 → HTTPError 전파
+            time.sleep(_403_BACKOFF[b403_i]); b403_i += 1
+            continue
+
+        resp.raise_for_status()
+        data = resp.json()
+        if not data.get('success'):
+            raise ValueError(f"API error: {data.get('message', 'unknown')}")
+        return data.get('results', [])
 
 
 def fetch_constituents(etf_code):
