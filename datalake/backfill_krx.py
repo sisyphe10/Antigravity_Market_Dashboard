@@ -12,6 +12,10 @@
 - short_investor: 시장단위 투자자별 공매도 (KOSPI/KOSDAQ × 거래량/거래대금 = 4콜)
 - futures: 선물 7상품 월물별 시세+미결제약정 — ★날짜축(pykrx 기간조회 미구현),
   api 래퍼가 미결제약정 컬럼을 버리므로 core 전종목시세(MDCSTAT12501) 직접 호출.
+- deriv_investor: 파생 투자자별 수급 (2026-07-26 추가) — [13106] 화면의 일별추이
+  MDCSTAT13103 직접 호출(pykrx 미구현). ★상품코드는 isuCd=KR___xxxxx 형식
+  (시세 화면의 KRDRVxxxxx와 다름 — prodId로 넣으면 조용히 전부 0 반환).
+  단위 prtType(QTY=계약/AMT=원) × 방향 prtCheck(DO=매도/SU=매수/SUN=순매수).
 
 안전 규칙 (★KRX 계정 잠금 방지):
 - 호출 간 0.5s 페이싱, 연속 실패 5회 → 즉시 중단(재실행 시 이어서)
@@ -44,7 +48,7 @@ START_YEAR = 1990
 WINDOW_YEARS = 40
 
 PASSES = ["ohlcv", "marcap", "foreign", "fundamental", "etf", "index", "investor",
-          "short", "short_investor", "futures"]
+          "short", "short_investor", "futures", "deriv_investor"]
 
 # 선물 백필 대상 상품 (prodId, 상장일, 라벨) — 상장일은 헛콜 방지용 하한일 뿐
 # (이전 날짜는 빈 응답). KOFEX 출신 상품(국채·달러)은 2005 KRX 통합 이전
@@ -65,6 +69,32 @@ FUT_COL = {"ISU_SRT_CD": "contract_cd", "ISU_NM": "name",
            "TDD_LWPRC": "low", "SPOT_PRC": "spot", "SETL_PRC": "settle",
            "ACC_TRDVOL": "volume", "ACC_TRDVAL": "value",
            "ACC_OPNINT_QTY": "oi"}
+
+# 파생 투자자별 수급 대상 상품 (isuCd, 상장일, 라벨) — FUT_PRODUCTS와 동일 7상품
+# + K200옵션 + 선물/옵션 합계. ★코드 형식 KR___xxxxx (투자자별 화면 전용).
+DRVINV_PRODUCTS = [
+    ("KR___FUK2I", "1996-05-03", "KOSPI200 선물"),
+    ("KR___FUMKI", "2015-07-20", "미니 KOSPI200 선물"),
+    ("KR___FUKQI", "2015-11-23", "KOSDAQ150 선물"),
+    ("KR___FUXI3", "2018-03-26", "KRX300 선물"),
+    ("KR___FUBM3", "1999-09-29", "3년 국채 선물"),
+    ("KR___FUBMA", "2008-02-25", "10년 국채 선물"),
+    ("KR___FUUSD", "1999-04-23", "미국달러 선물"),
+    ("KR___OPK2I", "1997-07-07", "KOSPI200 옵션"),
+    ("KR___FUTTT", "1996-05-03", "선물 전체"),
+    ("KR___OPTTT", "1997-07-07", "옵션 전체"),
+]
+
+# 일별추이(MDCSTAT13103) 원컬럼 → 저장 컬럼. A07(기관합계)은 이 bld에 없음 —
+# 기관합계는 fin_invest~pension 합산으로 파생. A10/A11 차이 = 기타외국인.
+DRVINV_COL = {"A01": "fin_invest", "A02": "insurance", "A03": "trust",
+              "A04": "bank", "A05": "other_fin", "A06": "pension",
+              "A08": "other_corp", "A09": "individual",
+              "A10": "foreigner", "A11": "foreigner_total",
+              "AMT_OR_QTY": "total"}
+
+DRVINV_PRT = {"QTY": "volume", "AMT": "value"}
+DRVINV_CHK = {"DO": "ask", "SU": "bid", "SUN": "net"}
 
 # 데이터셋별 (pykrx 컬럼 → 영문 컬럼) — 없는 컬럼은 무시
 RENAME = {
@@ -87,6 +117,7 @@ RENAME = {
                  "잔고수량": "balance_qty", "잔고금액": "balance_value"},
     "kr_short_investor": {"기관": "institution", "개인": "individual",
                           "외국인": "foreigner", "기타": "other", "합계": "total"},
+    "kr_deriv_investor": DRVINV_COL,
 }
 
 
@@ -295,6 +326,86 @@ def fut_frame(raw, d, prod, prod_name):
     return out
 
 
+_drvinv_view = None
+
+
+def drvinv_view():
+    """[13106] 파생 투자자별 거래실적 일별추이(MDCSTAT13103) — pykrx 미구현.
+
+    KrxWebIo 서브클래스로 직접 구현 (로그인 세션·헤더는 pykrx가 관리).
+    daily_market_update.py와 공유. ★isuCd 필수, prodId는 빈 값이어야 함.
+    """
+    global _drvinv_view
+    if _drvinv_view is None:
+        import pandas as pd
+        from pykrx.website.krx.krxio import KrxWebIo
+
+        class 파생투자자별추이(KrxWebIo):
+            @property
+            def bld(self):
+                return "dbms/MDC/STAT/standard/MDCSTAT13103"
+
+            def fetch(self, strtDd, endDd, isuCd, prtType, prtCheck):
+                result = self.read(inqTpCd="2", prodId="", isuOpt="", isuCd=isuCd,
+                                   isuCd2="", aggBasTpCd="", strtDd=strtDd,
+                                   endDd=endDd, prtType=prtType, prtCheck=prtCheck,
+                                   detailView="Y", share="1", money="1")
+                return pd.DataFrame(result.get("output", []))
+
+        _drvinv_view = 파생투자자별추이()
+    return _drvinv_view
+
+
+def drvinv_frame(raw):
+    """13103 원본 → date 인덱스 + 숫자 변환. 컬럼명은 A코드 유지(normalize가 개명).
+
+    daily_market_update.py도 공유한다 — 백필·일일 스키마 단일화.
+    """
+    import pandas as pd
+    if raw is None or raw.empty or "TRD_DD" not in raw.columns:
+        return None
+    df = raw.copy()
+    df["date"] = pd.to_datetime(df["TRD_DD"], format="%Y/%m/%d")
+    df = df.set_index("date")
+    for a in DRVINV_COL:
+        if a in df.columns:
+            df[a] = pd.to_numeric(df[a].astype(str).str.replace(",", "", regex=False),
+                                  errors="coerce")
+    df = df[[a for a in DRVINV_COL if a in df.columns]]
+    return None if df.dropna(how="all").empty else df
+
+
+def drvinv_key_parts(key):
+    """staging key 'KR___FUK2I-QTY-SUN' → (isuCd, prtType, prtCheck).
+
+    ★상품코드에 '_'가 있어 구분자는 '-' 사용, rsplit 고정 2회.
+    """
+    return key.rsplit("-", 2)
+
+
+def run_deriv_investor(runner, today):
+    """파생 투자자별 수급 백필 — 상품 × 단위(2) × 방향(3) = 60개 항목.
+
+    ★10y 윈도우 사용: 이 화면의 장기 단일호출 무캡은 미실측이라 보수적으로.
+    """
+    view = drvinv_view()
+    prod_name = {p: n for p, _s, n in DRVINV_PRODUCTS}
+    items = [f"{p}-{prt}-{chk}" for p, _s, _n in DRVINV_PRODUCTS
+             for prt in DRVINV_PRT for chk in DRVINV_CHK]
+
+    def dv_fetch(f, t, k):
+        prod, prt, chk = drvinv_key_parts(k)
+        return drvinv_frame(view.fetch(f, t, prod, prt, chk))
+
+    def dv_extra(k):
+        prod, prt, chk = drvinv_key_parts(k)
+        return {"prod": prod, "prod_name": prod_name[prod],
+                "metric": DRVINV_PRT[prt], "side": DRVINV_CHK[chk]}
+
+    run_per_item("kr_deriv_investor", items, dv_fetch, runner, today,
+                 ["date", "prod", "metric", "side"], dv_extra, years=10)
+
+
 def load_trading_days():
     """kr_ohlcv 연도 parquet의 고유 날짜 = 거래일 달력 (휴일 헛콜 방지)."""
     import pandas as pd
@@ -495,6 +606,9 @@ def main():
 
     if "futures" in passes:
         run_futures(runner, today)
+
+    if "deriv_investor" in passes:
+        run_deriv_investor(runner, today)
 
     print(f"백필 종료 — 총 호출 {runner.calls}회", flush=True)
     return 0

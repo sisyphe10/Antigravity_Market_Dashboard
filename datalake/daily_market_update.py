@@ -297,6 +297,37 @@ def range_update(stock):
     print("[kr_short_investor] 갱신 완료", flush=True)
 
 
+def deriv_investor_update():
+    """kr_deriv_investor — 파생 투자자별 수급 최근 창 재조회 upsert.
+
+    상품 10 × 단위 2 × 방향 3 = 60콜 (~30초). 소스·스키마는 backfill_krx 공유.
+    """
+    from backfill_krx import (DRVINV_CHK, DRVINV_PRODUCTS, DRVINV_PRT,
+                              drvinv_frame, drvinv_view, normalize)
+    today = date.today()
+    frm = (today - timedelta(days=RANGE_DAYS)).strftime("%Y%m%d")
+    to = today.strftime("%Y%m%d")
+    view = drvinv_view()
+    for prod, _start, label in DRVINV_PRODUCTS:
+        for prt in DRVINV_PRT:
+            for chk in DRVINV_CHK:
+                time.sleep(PACE_SEC)
+                try:
+                    df = drvinv_frame(view.fetch(frm, to, prod, prt, chk))
+                except Exception as e:
+                    print(f"  ! deriv_investor {prod} {prt} {chk}: {type(e).__name__}",
+                          flush=True)
+                    continue
+                if df is None:
+                    continue
+                norm = normalize(df, "kr_deriv_investor", prod=prod, prod_name=label,
+                                 metric=DRVINV_PRT[prt], side=DRVINV_CHK[chk])
+                if norm is not None:
+                    merge_into_year_files("kr_deriv_investor", norm,
+                                          ["date", "prod", "metric", "side"])
+    print("[kr_deriv_investor] 갱신 완료", flush=True)
+
+
 def _yf_recent(symbol, start):
     import pandas as pd
     import yfinance as yf
@@ -432,6 +463,7 @@ def main():
     short_update(stock)
     futures_update(stock)
     range_update(stock)
+    deriv_investor_update()
     overseas_update()
     kr_adjusted_update()
 
