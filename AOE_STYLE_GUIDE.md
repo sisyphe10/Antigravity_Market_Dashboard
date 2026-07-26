@@ -31,7 +31,10 @@ ts.net(AGE OF EMERGENCE) 전 페이지의 표준. **새 탭/페이지를 추가�
 
 ## 구조 스펙
 
-- **상단 네비**: 배경 `#101418`, 하단 2px 앰버 라인, 브랜드 `AGE OF EMERGENCE`(800, letter-spacing 3.5px, 흰색), 활성 탭 = 앰버 배경 + `#101418` 글자. 높이 54px.
+- **상단 네비**: 배경 `#101418`, 하단 2px 앰버 라인, 브랜드 `AGE OF EMERGENCE`(800, letter-spacing 3.5px, 흰색), 활성 탭 = 앰버 배경 + `#101418` 글자. 높이 54px. 탭 1rem/600 `#9aa4ae`, line-height normal, Pretendard.
+  **★정본 = `execution/nav_style.py` 단일 출처 (2026-07-26 통일)** — 네비 CSS·탭 구성 수정은 반드시 그 파일에서만.
+  소비자 6곳(create_dashboard·create_architecture·webui server·quoteboard·compose)이 import/기동치환/게시교체로 전파.
+  다크 주입 CSS(compose AOE_DARK_CSS)에 `nav.topnav ... !important` 재단언 금지 — 모바일 미디어쿼리를 덮어 드리프트 재발.
 - **서브탭 스트립**: 네비 바로 아래 밀착(sticky top:54px), 풀블리드, 배경 `#161b21`, 하단 1px `#2a323b`, 탭 높이 41px(스트립 42px)·직사각(radius 0)·16px/600, **가운데 정렬**, 활성 = 흰 글자 700 + 앰버 2px 밑줄. 알약(pill) 탭 금지.
 - **페이지 큰 제목 금지**: 위치는 스트립이 말해준다. Updated 표기만 우상단(0.78rem, 이탤릭, `#8a919a`).
 - **차트 패널은 흰색 유지**: Chart.js 텍스트가 다크 전제. 차트를 담는 컨테이너만 흰색, 목록/선택 UI는 다크.
