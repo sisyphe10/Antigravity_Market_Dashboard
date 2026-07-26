@@ -41,6 +41,9 @@ DESCRIPTIONS = {
     "kr_short_investor": "시장단위 투자자별 공매도 (KOSPI/KOSDAQ, metric=volume|value, 기관/개인/외국인/기타)",
     "kr_futures_ohlcv": "KRX 선물 월물별 일별 시세+미결제약정(oi) — 7상품(K200·미니K200·KOSDAQ150·KRX300·"
                         "국채3y/10y·달러), 스프레드 제외. 상품 단위 합계는 kr_futures_oi_daily 뷰",
+    "kr_deriv_investor": "파생상품 투자자별 수급 일별 (KRX [13106] MDCSTAT13103) — 선물 7상품+K200옵션+"
+                         "선물/옵션 전체, metric=volume(계약)|value(원), side=ask(매도)|bid(매수)|net(순매수). "
+                         "세부 주체 9종(금융투자~외국인), 기관합계=fin_invest+insurance+trust+bank+other_fin+pension",
 }
 
 EXAMPLE_SQL = {
@@ -59,6 +62,9 @@ EXAMPLE_SQL = {
                          "WHERE market='KOSPI' AND metric='value' ORDER BY date DESC LIMIT 20;",
     "kr_futures_ohlcv": "SELECT date, name, close, oi FROM kr_futures_ohlcv "
                         "WHERE prod='KRDRVFUK2I' ORDER BY date DESC, oi DESC LIMIT 20;",
+    "kr_deriv_investor": "SELECT date_trunc('week', date) wk, sum(foreigner_total) frn_net\n"
+                         "FROM kr_deriv_investor WHERE prod='KR___FUK2I' AND metric='volume' AND side='net'\n"
+                         "GROUP BY 1 ORDER BY 1 DESC LIMIT 10;",
 }
 
 
