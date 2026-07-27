@@ -1,5 +1,6 @@
 """etfcheck.co.kr 내부 API 클라이언트"""
 import os
+import re
 import hashlib
 import time
 import json
@@ -16,8 +17,17 @@ ETFCHECK_HOME = 'https://www.etfcheck.co.kr/'
 #       8자라 버킷 숫자 8·9는 JS `n[8]`/`n[9]`=undefined → 문자열 'undefined'가 그대로 이어붙는다(아래 복제).
 #   (2) API가 세션 쿠키 connect.sid 요구: 홈페이지를 먼저 GET해 세션을 연 뒤 그 쿠키를 실어야 통과.
 #       (bare requests.get → 403). _get_session()으로 세션 확보·403 시 1회 재수립. [[project_antigravity_active_etf_alert]]
-ETFCHECK_KEY = 'd$MsKjvz'
+# 2026-07-27 키가 6일새 4번 로테이션(4lm@flEh68 → er@#$dfe^fd12 → #$dser#GVEWS329@ → d$MsKjvz
+#   → csdXMPdc). 하드코딩 추격을 끝내고 **build.js에서 런타임 추출**한다(웹팩
+#   모듈의 `{key:"…"}` 유일 매칭). 추출 실패 시 아래 폴백 상수를 쓰고, 403을 만나면 force 재추출해 장중 로테이션도
+#   자가치유한다. build.js는 ~5.4MB라 프로세스당 1회만 받는다(KEY_TTL).
+ETFCHECK_KEY = 'csdXMPdc'          # 폴백(최후 확인 2026-07-27)
 ETFCHECK_BUCKET_MS = 30000
+ETFCHECK_BUILD_JS = 'https://www.etfcheck.co.kr/js/build.js'
+_KEY_RE = re.compile(r'\{key:"([^"]{4,32})"\}')
+_KEY_TTL = 3600.0
+_key_cache = None
+_key_ts = 0.0
 
 # 2026-07-26 etfcheck가 레이트리밋 도입: ~30요청 후 IP 전체를 403(sticky, 쿨다운 김).
 #   대응(중앙화): (a) 요청 최소 간격 ETFCHECK_MIN_INTERVAL초 (b) ROTATE_EVERY건마다 세션 선제
@@ -77,15 +87,46 @@ def _pace():
     _last_req_ts = time.time()
 
 
+def _resolve_key(force=False):
+    """Checkclient 키를 build.js에서 추출(프로세스 캐시 _KEY_TTL초). 실패 시 ETFCHECK_KEY 폴백.
+
+    사이트가 키를 웹팩 모듈로 옮긴 뒤 수시 로테이션하므로 상수 추격은 실패한다(2026-07-22~27
+    수집 전면 중단의 직접 원인). 매칭은 모듈 리터럴 `{key:"…"}` 하나뿐이며, 2건 이상 잡히면
+    구조가 바뀐 것이므로 폴백을 쓴다(오탐 키로 전량 403 내는 쪽이 더 나쁘다)."""
+    global _key_cache, _key_ts
+    if _key_cache and not force and (time.time() - _key_ts) < _KEY_TTL:
+        return _key_cache
+    try:
+        proxies = {'http': ETFCHECK_PROXY, 'https': ETFCHECK_PROXY} if ETFCHECK_PROXY else None
+        resp = requests.get(
+            ETFCHECK_BUILD_JS, timeout=60, proxies=proxies,
+            headers={'User-Agent': 'Mozilla/5.0', 'Referer': ETFCHECK_HOME},
+        )
+        resp.raise_for_status()
+        found = set(_KEY_RE.findall(resp.text))
+        if len(found) == 1:
+            key = found.pop()
+            if key != _key_cache:
+                logger.info('etfcheck 키 갱신: %s (len=%d)', key, len(key))
+            _key_cache, _key_ts = key, time.time()
+            return _key_cache
+        logger.warning('etfcheck 키 추출 실패(매칭 %d건) — 폴백 상수 사용', len(found))
+    except requests.exceptions.RequestException as e:
+        logger.warning('etfcheck build.js 조회 실패(%s) — 폴백 상수 사용', e)
+    _key_cache, _key_ts = (_key_cache or ETFCHECK_KEY), time.time()
+    return _key_cache
+
+
 def generate_checkclient():
     """시간 기반 Checkclient 인증 해시 생성 (30초 버킷).
 
     JS(build.js) 원본: n=key, a=String(floor(Date.now()/3e4)); r=''; for i: r+=n[a[i]-'0'].
     키가 8자라 버킷 숫자 8·9는 n[8]/n[9]=undefined → JS 문자열 결합이 'undefined'를 이어붙인다.
     이 동작을 그대로 복제한다(미복제 시 8·9 포함 버킷에서 해시 불일치 → 403)."""
+    key = _resolve_key()
     bucket = str(int(time.time() * 1000 / ETFCHECK_BUCKET_MS))
     mapped = ''.join(
-        ETFCHECK_KEY[i] if i < len(ETFCHECK_KEY) else 'undefined'
+        key[i] if i < len(key) else 'undefined'
         for i in (int(ch) for ch in bucket)
     )
     return hashlib.sha256(mapped.encode()).hexdigest()
@@ -137,7 +178,8 @@ def _request(endpoint, params=None):
         _req_count += 1
 
         if resp.status_code in (401, 403):
-            # 레이트리밋/세션만료 → 세션 재수립 + 장기 백오프 후 재시도
+            # 레이트리밋/세션만료/키 로테이션 → 키 재추출 + 세션 재수립 + 장기 백오프 후 재시도
+            _resolve_key(force=True)
             _reset_session()
             if b403_i >= len(_403_BACKOFF):
                 resp.raise_for_status()  # 소진 → HTTPError 전파
