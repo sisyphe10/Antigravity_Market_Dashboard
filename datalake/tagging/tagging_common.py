@@ -27,6 +27,17 @@ ALIASES_PATH = os.path.join(HERE, "aliases_manual.csv")
 ENTITIES_EXTRA_PATH = os.path.join(HERE, "entities_extra.csv")
 UNIVERSE_PATH = os.path.join(REPO, "universe_tickers.csv")
 
+# URL·도메인. 본문의 링크 안에는 기업명이 도메인으로 들어가 있어(blog.naver.com,
+# bloomberg.com, digitimes.com …) 그대로 매칭하면 대량 오탐이 된다. 매칭 전에
+# 같은 길이의 공백으로 덮어 위치는 보존하면서 내용만 무력화한다.
+URL_RE = re.compile(
+    r"https?://\S+"
+    r"|www\.[^\s)\]]+"
+    r"|\b[\w-]+(?:\.[\w-]+)*\.(?:com|net|org|kr|io|me|tv|co|jp|cn|tw|gov|edu|info|biz|news|app)"
+    r"(?:/[^\s)\]]*)?",
+    re.IGNORECASE,
+)
+
 # 증권사 리서치 헤더: "[SK증권 반도체 한동희]", "[메리츠증권 반도체/디스플레이 김선우]"
 HEADER_RE = re.compile(r"\[([^\[\]]{2,40}?(?:증권|투자증권|자산운용|리서치|투자자문))[^\[\]]{0,40}\]")
 # 본문 말미 출처: "(by https://t.me/...)", "- 로이터", "by J.P.Morgan"
@@ -256,8 +267,10 @@ def _iter_hits(text, alias, mode):
             yield m.start(), m.end(), m.group(0)
         return
     if mode == "symbol":
+        # 대소문자를 구분한다. 티커는 대문자로 쓰는 것이 관례이고, 소문자까지
+        # 허용하면 WELL→"well", COST→"cost" 처럼 일반 영단어를 종목으로 잡는다.
         pat = r"(?<![0-9A-Za-z])\$?" + re.escape(alias) + r"(?![0-9A-Za-z])"
-        for m in re.finditer(pat, t, re.IGNORECASE):
+        for m in re.finditer(pat, t):
             yield m.start(), m.end(), m.group(0)
         return
     if mode == "symbol_dollar":
@@ -307,6 +320,8 @@ def find_candidates(text, alias_index, max_hits_per_alias=3):
     text = nfkc(text or "")
     if not text:
         return []
+    # URL 안의 도메인은 기업 언급이 아니다 (위치 보존을 위해 같은 길이로 치환)
+    text = URL_RE.sub(lambda m: " " * len(m.group(0)), text)
     src_spans = detect_source_spans(text)
     seen, out = set(), []
     for e in alias_index["entries"]:

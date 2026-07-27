@@ -114,6 +114,11 @@ def load_tags(day):
 
     out = {}
     try:
+        # 태깅에 성공했지만 테마·개체가 하나도 안 붙은 메시지(이미지만 있는 항목 등)도
+        # '처리 완료'다. 빈 엔트리를 먼저 깔아야 tag_status 가 partial 로 오판되지 않는다.
+        for r in conn.execute("SELECT message_id FROM items WHERE day=? AND status='succeeded'",
+                              (day,)):
+            out[r["message_id"]] = {"themes": [], "entities": []}
         rows = conn.execute(
             "SELECT t.message_id, t.theme_id, t.rank FROM theme_assignments t"
             " JOIN items i ON i.message_id=t.message_id"
