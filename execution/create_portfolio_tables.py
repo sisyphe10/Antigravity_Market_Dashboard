@@ -684,6 +684,11 @@ def create_portfolio_tables():
                     'ytd_return': ytd_return,
                     'cumulative_return': cumulative_return,
                     'current_price': current_price,
+                    # 시세 기준일 = current_price/cumulative_return이 반영한 가격의 날짜.
+                    # 장중이면 오늘(FDR 당일 봉) → 소비측(sisyphe_bot /update)이 당일 등락률을
+                    # 또 곱하지 않도록 하는 판별키. 종가 이전이면 D-1.
+                    'price_date': (price_df.index[-1].strftime('%Y-%m-%d')
+                                   if price_df is not None and not price_df.empty else None),
                     'ath_price': ath_price,
                     'dd': dd,
                     'rsi': rsi,
