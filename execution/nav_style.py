@@ -22,6 +22,14 @@ PRETENDARD_STACK = "'Pretendard Variable', Pretendard, system-ui, -apple-system,
 PRETENDARD_LINK = ('<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/'
                    'pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">')
 
+# ---- 로컬 벤더 자산 (2026-07-27 CDN 셀프호스팅, assets/vendor/) ----
+# ts.net AoE 페이지 전용 절대경로. ★WRAP(gh-pages 프로젝트 사이트 = /repo/ 하위)은 절대경로가
+# 깨지므로 wrap 구간은 CDN 유지 — wrap 코드에서 이 상수들을 쓰지 말 것.
+VENDOR_PRETENDARD_CSS = '/assets/vendor/pretendard/pretendardvariable.min.css'
+VENDOR_CHART_JS = '/assets/vendor/js/chart.umd.min.js'        # Chart.js v4.5.1 고정 (구 CDN 무버전)
+VENDOR_HTML2CANVAS_JS = '/assets/vendor/js/html2canvas.min.js'  # 1.4.1
+PRETENDARD_LINK_LOCAL = '<link rel="stylesheet" href="%s">' % VENDOR_PRETENDARD_CSS
+
 # ---- 다크 팔레트 정본 (2026-07-26 확장) ----
 # AOE_STYLE_GUIDE.md 팔레트 표의 코드 구현체. 색 변경은 반드시 여기서만 —
 # compose(스냅숏 주입 CSS)·별도 앱 3종(Earnings/Wiki/Watchlist의 var(--aoe-*))이 파생.

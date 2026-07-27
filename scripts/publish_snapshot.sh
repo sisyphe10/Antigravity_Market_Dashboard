@@ -30,6 +30,7 @@ if ! rsync -a \
   --include='/*.html' --include='/*.json' --include='/*.csv' \
   --include='/orders/' --include='/orders/*.json' \
   --include='/architecture/' --include='/architecture/**' \
+  --include='/assets/' --include='/assets/**' \
   --include='/charts/' --include='/charts/**' \
   --exclude='*' \
   "$REPO/" "$REL/"; then

@@ -45,7 +45,7 @@ TOP_NAV_MAIN = [
 ]
 
 # Standard Pretendard font stack — 정본은 nav_style.py (2026-07-26 네비 통일)
-from nav_style import PRETENDARD_LINK, PRETENDARD_STACK, NAV_CSS as AOE_NAV_CSS, H2C_FREEZE_JS, WRAP_CSS_VARS  # noqa: E402
+from nav_style import PRETENDARD_LINK, PRETENDARD_LINK_LOCAL, VENDOR_CHART_JS, VENDOR_HTML2CANVAS_JS, PRETENDARD_STACK, NAV_CSS as AOE_NAV_CSS, H2C_FREEZE_JS, WRAP_CSS_VARS  # noqa: E402
 
 TOP_NAV_CSS = AOE_NAV_CSS + """
 /* ── .topnav* 정본 규칙은 위 nav_style.NAV_CSS 에서 옴 (2026-07-26 통일) — 여기 추가 금지 ── */
@@ -1173,7 +1173,7 @@ def _chart_download_helper_js():
 def _element_download_helper_js():
     """DOM 요소(테이블 등) → PNG 다운로드 (html2canvas). 페이지에 여러 번 inject되어도 1회만 등록."""
     return """
-        <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+        <script src="/assets/vendor/js/html2canvas.min.js"></script>
         <script>
         """ + H2C_FREEZE_JS + """
         if (typeof window.downloadElementImage !== 'function') {
@@ -1306,7 +1306,7 @@ def _build_indices_chart_section(category_label='Indices'):
         last_date = dates[-1] if dates else ''
 
         js_code = """
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="/assets/vendor/js/chart.umd.min.js"></script>
         <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = 2 * (window.devicePixelRatio || 1); Chart.defaults.elements.line.borderJoinStyle = 'round'; Chart.defaults.elements.line.borderCapStyle = 'round'; Chart.defaults.animation = false;</script>
         <script>function formatDateInput(el){var v=el.value.replace(/[^0-9]/g,'');if(v.length===8){el.value=v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8);return;}var m=el.value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);if(m){el.value=m[1]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[3]).slice(-2);}}</script>
         <script>
@@ -7370,7 +7370,7 @@ def _build_landing_kofia_section():
             <div style="position:relative;height:240px;"><canvas id="kofiaCreditChart"></canvas></div>
             <div id="kofiaCreditLegend" class="lh-kofia-legend"></div>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="/assets/vendor/js/chart.umd.min.js"></script>
         <script>
         (function() {
             Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif";
@@ -7951,7 +7951,7 @@ def create_dashboard():
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Market Data Dashboard</title>
-    {PRETENDARD_LINK}
+    {PRETENDARD_LINK_LOCAL}
     <style>
         :root {{
             --bg-color: #f8f9fa;
@@ -8485,7 +8485,7 @@ def create_dashboard():
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Age of Emergence</title>
-    {PRETENDARD_LINK}
+    {PRETENDARD_LINK_LOCAL}
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
         body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; background: #f8f9fa; color: #333; min-height: 100vh; }}
@@ -9230,8 +9230,8 @@ def create_dashboard():
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Universe</title>
-    """ + PRETENDARD_LINK + """
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    """ + PRETENDARD_LINK_LOCAL + """
+    <script src="/assets/vendor/js/html2canvas.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }
@@ -10020,8 +10020,8 @@ function superDownloadUniverse() {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SEIBro - US Settlement TOP 50</title>
-    {PRETENDARD_LINK}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {PRETENDARD_LINK_LOCAL}
+    <script src="/assets/vendor/js/chart.umd.min.js"></script>
     <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = 2 * (window.devicePixelRatio || 1); Chart.defaults.elements.line.borderJoinStyle = 'round'; Chart.defaults.elements.line.borderCapStyle = 'round'; Chart.defaults.animation = false;</script>
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
@@ -10233,7 +10233,7 @@ refresh();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Featured</title>
-    {PRETENDARD_LINK}
+    {PRETENDARD_LINK_LOCAL}
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
         body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }}
@@ -10711,7 +10711,7 @@ def generate_hotels_html():
     <h2 style="margin-top:0;font-size:1.2rem;">시계열 (lead+7일, 천원)</h2>
     <div style="position:relative;height:420px;"><canvas id="hotelAdrChart"></canvas></div>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/assets/vendor/js/chart.umd.min.js"></script>
   <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = 2 * (window.devicePixelRatio || 1); Chart.defaults.elements.line.borderJoinStyle = 'round'; Chart.defaults.elements.line.borderCapStyle = 'round'; Chart.defaults.animation = false;</script>
   <script>
   (function(){
@@ -10743,7 +10743,7 @@ def generate_hotels_html():
 <head>
 <meta charset="utf-8">
 <title>Hotel ADR - Antigravity Dashboard</title>
-{PRETENDARD_LINK}
+{PRETENDARD_LINK_LOCAL}
 <style>
   * {{ box-sizing: border-box; }}
   body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; background: #f5f5f5; margin: 0; padding: 0; color: #222; }}  /* nav 전폭 통일 — 여백은 .container로 이전 */
@@ -10914,7 +10914,7 @@ def generate_etf_html():
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ETF Dashboard</title>
-{PRETENDARD_LINK}
+{PRETENDARD_LINK_LOCAL}
 <style>
 * {{ box-sizing: border-box; margin: 0; padding: 0; }}
 body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; font-size: 1.05rem; background: #f8f9fa; color: #333; }}
@@ -11124,7 +11124,7 @@ tr.us-hl {{ background: #e0f5f9; }}
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/assets/vendor/js/chart.umd.min.js"></script>
 <script>if (window.Chart) {{ Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = 2 * (window.devicePixelRatio || 1); Chart.defaults.animation = false; }}</script>
 <script>
 var allDaily = {daily_json};

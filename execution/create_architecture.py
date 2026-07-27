@@ -34,7 +34,7 @@ import re
 import sys
 
 # AoE 상단 네비 정본 (2026-07-26 통일) — 같은 execution/ 디렉토리
-from nav_style import NAV_CSS as AOE_NAV_CSS, PRETENDARD_LINK, nav_html
+from nav_style import NAV_CSS as AOE_NAV_CSS, PRETENDARD_LINK_LOCAL, nav_html
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -1083,7 +1083,7 @@ def build_html(reg, is_real):
     out.append('<meta charset="UTF-8">')
     out.append('<meta name="viewport" content="width=device-width, initial-scale=1.0">')
     out.append("<title>System Architecture — Age of Emergence</title>")
-    out.append(PRETENDARD_LINK)  # 웹폰트 로드 — 네비 글꼴 전 페이지 통일 (2026-07-26)
+    out.append(PRETENDARD_LINK_LOCAL)  # 웹폰트 로드 — 네비 글꼴 전 페이지 통일 (2026-07-26)
     out.append("<style>" + AOE_NAV_CSS + "\n" + PAGE_CSS + "</style>")
     out.append("</head><body>")
     out.append(TOP_NAV_HTML)

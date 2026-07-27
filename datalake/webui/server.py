@@ -370,7 +370,7 @@ _LIBRARY_HTML = """<!DOCTYPE html>
 <html lang="ko"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Earnings Library</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="/assets/vendor/pretendard/pretendardvariable.min.css">
 <style>
 /*__AOE_PALETTE__*/
 *{box-sizing:border-box;margin:0;padding:0;}

@@ -634,7 +634,7 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stoc
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>투자유의종목 현황</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+    <link rel="stylesheet" href="/assets/vendor/pretendard/pretendardvariable.min.css">
     <style>
         * {{ box-sizing: border-box; margin: 0; padding: 0; }}
         body {{
