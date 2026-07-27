@@ -220,6 +220,64 @@ def fetch_naver_kr(code: str, days: int = 400) -> dict[str, int]:
 NAVER_WORLD_DIRECT_SUFFIX = {'TYO': '.T', 'HKG': '.HK'}
 US_PREFIXES = {'NASDAQ', 'NYSE', 'NYSEAMERICAN'}
 
+# ── 중국 A주(SHA/SHE) primary 소스 = 텐센트 gtimg ────────────────────────────
+# Yahoo를 A주 primary로 쓰지 않는 이유 (2026-07-27 확인):
+#   ① 신규 상장 심볼 생성이 며칠 지연 — CXMT(688825) 상장일에 chart·search 모두 404
+#   ② 기존 rate limit 꼬리(run 후반 ~30종 fallback)에 A주도 노출
+#   ③ 텐센트는 전복권(qfq) 일봉이라 분할·무증 미반영 오류가 구조적으로 없음
+#      (= Yahoo 전용 오류를 잡는 anomaly 가드가 A주엔 불필요)
+# 시총 교차검증(688981 SMIC A): 텐센트 12,413억위안 ≒ eastmoney f116 12,472억위안
+#   ≒ Yahoo 12,305억위안 — 가격 시점차(145.00/145.69/143.73위안) 보정 후 일치.
+# 텐센트 실패 시 fetch_one이 기존 yfinance 경로로 폴백하므로 단일 소스 의존은 아니다.
+CN_PREFIX_GTIMG = {'SHA': 'sh', 'SHE': 'sz'}
+
+
+def fetch_tencent_cn(prefix: str, code: str, n: int = 400) -> tuple[dict[str, float], float | None]:
+    """텐센트 gtimg → ({YYYY-MM-DD: 전복권 종가}, 총시총 위안). 실패 시 ({}, None).
+
+    일봉  : web.ifzq.gtimg.cn/appstock/app/fqkline/get?param=sh688981,day,,,<n>,qfq
+            행 = [날짜, 시가, 종가, 고가, 저가, 거래량]. 응답 키는 'qfqday'/'day' 둘 다 관측.
+    시총  : qt.gtimg.cn/q=sh688981 의 '~' 구분 필드 [45]=총시총(억위안), [44]=유통시총, [3]=현재가.
+    ★필드 인덱스는 비공식(문서 없음)이라 필드가 밀리면 조용한 오류가 된다 → sanity 3종
+      (총시총>0 / 유통시총≤총시총 / 현재가가 일봉 마지막과 ±30% 이내) 실패 시 시총 None.
+    """
+    market = CN_PREFIX_GTIMG.get(prefix)
+    if not market:
+        return {}, None
+    sym = f'{market}{code}'
+
+    prices: dict[str, float] = {}
+    d = _http_json(f'https://web.ifzq.gtimg.cn/appstock/app/fqkline/get?param={sym},day,,,{n},qfq')
+    if d and d.get('code') == 0:
+        node = (d.get('data') or {}).get(sym) or {}
+        for r in (node.get('qfqday') or node.get('day') or []):
+            try:
+                dt, close = str(r[0]), float(r[2])
+            except (IndexError, TypeError, ValueError):
+                continue
+            if close > 0 and len(dt) == 10:
+                prices[dt] = close
+
+    marcap = None
+    try:
+        req = urllib.request.Request(f'https://qt.gtimg.cn/q={sym}',
+                                     headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=10) as r:
+            raw = r.read().decode('gbk', errors='replace')
+        fields = raw.split('"')[1].split('~') if '"' in raw else []
+        if len(fields) > 45:
+            total_eok = float(fields[45] or 0)     # 억위안
+            circ_eok = float(fields[44] or 0)
+            last_q = float(fields[3] or 0)
+            ok = total_eok > 0 and 0 < circ_eok <= total_eok * 1.001
+            if ok and prices and last_q > 0:
+                ok = abs(last_q / prices[max(prices)] - 1) <= 0.30
+            if ok:
+                marcap = total_eok * 1e8           # 억위안 → 위안
+    except Exception:
+        marcap = None
+    return prices, marcap
+
 
 def _http_json(url: str):
     req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
@@ -376,6 +434,38 @@ def fetch_one(idx: int, raw_ticker: str, sector: str, name: str, fx_to_krw: dict
     yf_tk, currency = to_yf_ticker(raw_ticker)
     if not yf_tk:
         return None
+
+    # 중국 A주는 텐센트 primary (위 CN_PREFIX_GTIMG 주석 참조). 실패 시 아래 yfinance 경로로 폴백.
+    # 전복권 소스라 Yahoo식 분할·무증 미반영 오류가 없어 anomaly 가드는 적용하지 않는다
+    # (네이버 폴백 경로와 동일한 dict 기반 계산).
+    if raw_ticker.split(':', 1)[0] in CN_PREFIX_GTIMG:
+        cn_prefix, cn_code = raw_ticker.split(':', 1)
+        cn_prices, cn_marcap = fetch_tencent_cn(cn_prefix, cn_code)
+        cn_rets = compute_returns_from_dict(cn_prices)
+        # 상장 첫날은 봉이 1개뿐이라 수익률 계산 불가 → 가격·시총만 채우고 수익률/DD는 blank.
+        if cn_rets is None and len(cn_prices) == 1:
+            only_close = float(next(iter(cn_prices.values())))
+            cn_rets = {'last': only_close, 'ytd': None, '1d': None, '1w': None, '1m': None,
+                       '3m': None, '6m': None, '1y': None, 'dd': None}
+        if cn_rets:
+            cn_krw = cn_marcap * fx_to_krw.get(currency, 1.0) if cn_marcap else None
+            return [
+                str(idx), currency, sector, raw_ticker, name,
+                fmt_marcap_krw_eok(cn_krw),
+                f"{cn_rets['last']:,.2f}",
+                fmt_pct(cn_rets['ytd']),
+                fmt_pct(cn_rets['1d']),
+                fmt_pct(cn_rets['1w']),
+                fmt_pct(cn_rets['1m']),
+                fmt_pct(cn_rets['3m']),
+                fmt_pct(cn_rets['6m']),
+                fmt_pct(cn_rets['1y']),
+                f'{int(cn_krw / 1e8):,}' if cn_krw else '',
+                '', '', '', '', '', '', '',
+                fmt_dd(cn_rets['dd']),
+            ], dict_to_hist(cn_prices, currency)
+        print(f"  Info: {raw_ticker} ({name}) 텐센트 실패 → yfinance 폴백.")
+
     try:
         t = yf.Ticker(yf_tk)
         hist = t.history(period='2y', auto_adjust=False)
