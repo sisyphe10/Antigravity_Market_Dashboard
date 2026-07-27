@@ -47,6 +47,25 @@ mark_drop() {
   echo "$(date "+%Y-%m-%d %H:%M:%S") $1" >> "$SAFE_PUSH_DROP_MARKER" 2>/dev/null || true
 }
 
+# 머지 직전에 임시 보관한 '형제 잡의 미커밋 산출물' 상태 (★2026-07-27, 아래 dirty worktree guard 참조)
+DIRTY_BAK=""
+DIRTY_FILES=()
+
+# 보관본을 워킹트리에 원위치시킨다. 인덱스/HEAD 는 머지 결과 그대로 두고 워킹트리만
+# 진입 시점으로 되돌리는 것이 목적 — 형제 잡이 자기 차례에 add/commit 하므로 여기서 커밋하지 않는다.
+restore_dirty() {
+  [[ -n "$DIRTY_BAK" ]] || return 0
+  if [[ ${#DIRTY_FILES[@]} -gt 0 ]]; then
+    for _df in "${DIRTY_FILES[@]}"; do
+      [[ -f "$DIRTY_BAK/$_df" ]] && cp -p "$DIRTY_BAK/$_df" "$_df" 2>/dev/null
+    done
+  fi
+  rm -rf "$DIRTY_BAK"
+  DIRTY_BAK=""
+  DIRTY_FILES=()
+  return 0
+}
+
 XLSX_CONFLICT="bail"
 PREFER_REMOTE_PORTFOLIO=0
 MSG=""
@@ -173,11 +192,46 @@ for attempt in 1 2 3 4 5; do
     fi
   fi
 
+  # ---- dirty worktree guard (★2026-07-27 fix) ----------------------------
+  # git merge 는 "머지가 덮어쓸 추적파일"에 미커밋 변경이 있으면 시작조차 못 하고 abort 한다
+  # (error: Your local changes ... would be overwritten by merge → Merge with strategy ort failed).
+  # 그러면 아래 ours/theirs 해소 루프는 충돌이 0건이라 공회전하고, 재시도 5회가 전부 거부돼
+  # 우리 커밋이 고아로 남는다 → 다음 잡의 `git reset --hard origin/main` 이 조용히 폐기.
+  # (7/27 실피해: 17:40 ECOS 커밋이 폐기돼 당일 금리 7종 유실)
+  # 더티의 정체는 형제 잡이 재생성만 하고 아직 커밋하지 않은 산출물(portfolio_data.json·
+  # *.html·disclosures.json 등)이라 버려서도 안 된다 → 워킹트리 사본을 임시 보관하고 HEAD 로
+  # 되돌려 머지를 가능하게 한 뒤, 머지 커밋 후 restore_dirty 로 원위치시킨다.
+  # ※형제 잡이 보관~원위치 사이에 같은 파일을 다시 쓰면 그 회차 재생성분은 덮인다(다음 재생성으로 자가치유).
+  DIRTY_BAK=""
+  DIRTY_FILES=()
+  while IFS= read -r _df; do
+    [[ -z "$_df" ]] && continue
+    [[ -z "$DIRTY_BAK" ]] && DIRTY_BAK="$(mktemp -d)"
+    mkdir -p "$DIRTY_BAK/$(dirname "$_df")" 2>/dev/null || true
+    cp -p "$_df" "$DIRTY_BAK/$_df" 2>/dev/null || true
+    DIRTY_FILES+=("$_df")
+    git checkout HEAD -- "$_df" 2>/dev/null || true
+  done < <(git diff --name-only HEAD)
+  if [[ ${#DIRTY_FILES[@]} -gt 0 ]]; then
+    echo "safe_push: 미커밋 산출물 ${#DIRTY_FILES[@]}건 임시 보관 후 머지 (${DIRTY_FILES[*]})"
+  fi
+
   # ---- whole-file merge -------------------------------------------------
   # Regenerated artifacts must never be line-spliced (auto-merging two
   # independently regenerated JSON/HTML files can corrupt them), so for the
   # files OUR commit changed we force whole-file selection per policy.
-  git merge --no-ff --no-commit "origin/${BRANCH}" || true
+  if ! git merge --no-ff --no-commit "origin/${BRANCH}"; then
+    # ★2026-07-27 fix: '충돌로 멈춤'과 '머지 미개시'는 다르다. MERGE_HEAD 가 없으면 후자이고,
+    # 이때 해소 루프는 할 일이 없어 재시도가 무의미하다 → `|| true` 로 삼키지 말고 즉시 실패시킨다.
+    # (드랍 마커를 남기므로 run_gha_job.sh 가 heartbeat/stamp 를 억제 → 신선도 점검에 잡힌다)
+    if [[ ! -e "$(git rev-parse --git-dir)/MERGE_HEAD" ]]; then
+      echo "::error::safe_push: merge did not start (attempt ${attempt}) — 정리되지 않은 워킹트리 변경이 남아 있습니다."
+      git status --short | head -20
+      mark_drop "merge-not-started: 우리 커밋 미push — ${MSG:-<no msg>}"
+      restore_dirty
+      exit 1
+    fi
+  fi
 
   for f in "${OUR_CHANGED[@]}"; do
     if [[ "$f" == "$PORTFOLIO_JSON" && "$PREFER_REMOTE_PORTFOLIO" == "1" ]] \
@@ -208,6 +262,9 @@ for attempt in 1 2 3 4 5; do
   fi
 
   git commit --no-edit -m "Merge origin/${BRANCH} before push [skip ci]" || true
+
+  # 임시 보관한 형제 잡의 미커밋 산출물을 워킹트리에 원위치 (다음 회차 push 전).
+  restore_dirty
 done
 
 echo "::error::safe_push: exhausted push retries."
