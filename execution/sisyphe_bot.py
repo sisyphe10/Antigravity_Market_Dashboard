@@ -434,6 +434,12 @@ def run_portfolio_update():
 
     # 3. today_return, contribution, cumulative_return 업데이트
     logging.info("Update Step 3: Updating returns...")
+    # Step 0(create_portfolio_tables 재생성)이 장중이면 FDR 당일 봉(현재가)으로 이미
+    # cumulative_return을 계산해 둔다. 여기서 당일 등락률을 또 곱하면 오늘 등락이 두 번
+    # 반영된다(2026-07-27 발견: S-Oil 정상 -2.06% → 화면 -7.63%). 따라서 종목의
+    # price_date가 오늘이면 재곱하지 않고, 전일 시세로 계산된 경우에만 오늘 등락을 얹는다.
+    _kst_today = datetime.datetime.now(
+        datetime.timezone(datetime.timedelta(hours=9))).strftime('%Y-%m-%d')
     for portfolio_name, stocks in portfolio_data.items():
         if portfolio_name.startswith('_'):
             continue
@@ -446,7 +452,7 @@ def run_portfolio_update():
                 _wp = s.get('weight_prev')
                 _wp = s['weight'] if _wp is None else _wp
                 s['contribution'] = (_wp / 100) * (today_return / 100) * 1000
-                if prev_cumulative is not None:
+                if prev_cumulative is not None and s.get('price_date') != _kst_today:
                     s['cumulative_return'] = ((1 + prev_cumulative / 100) * (1 + today_return / 100) - 1) * 100
             else:
                 s['contribution'] = None
