@@ -9728,7 +9728,7 @@ function renderSector() {
     if(!_sectorInit) {
         var curs = {};
         D.forEach(function(r){ if(r[1]) curs[r[1]]=1; });
-        var curOrder = ['KRW','USD','HKD','TWD','EUR','CAD'];
+        var curOrder = ['KRW','USD','HKD','TWD','CNY','EUR','CAD'];
         var keys = Object.keys(curs).sort(function(a,b){
             var ia=curOrder.indexOf(a),ib=curOrder.indexOf(b);
             if(ia<0)ia=99;if(ib<0)ib=99;return ia-ib;

@@ -55,6 +55,8 @@ PREFIX_MAP = {
     'TYO':         {'suffix': '.T',  'currency': 'JPY'},   # 도쿄 (NIKKEI)
     'TSE':         {'suffix': '.TO', 'currency': 'CAD'},   # 토론토
     'HKG':         {'suffix': '.HK', 'currency': 'HKD'},   # 홍콩
+    'SHA':         {'suffix': '.SS', 'currency': 'CNY'},   # 상하이 (SSE 본토·科创板)
+    'SHE':         {'suffix': '.SZ', 'currency': 'CNY'},   # 선전 (SZSE 본토·创业板)
     'AMS':         {'suffix': '.AS', 'currency': 'EUR'},   # 암스테르담
     'ETR':         {'suffix': '.DE', 'currency': 'EUR'},   # 프랑크푸르트 (XETRA)
     'EPA':         {'suffix': '.PA', 'currency': 'EUR'},   # 파리
@@ -72,7 +74,7 @@ ALLOWED_SECTORS = {
 
 # 통화 → KRW 환율 fetch (yfinance Forex 페어). 시가총액 KRW 환산용.
 def fetch_fx_to_krw() -> dict[str, float]:
-    """USD/JPY/EUR/HKD/TWD/CAD → KRW 환율 dict. 실패 시 fallback 환율 사용."""
+    """USD/JPY/EUR/HKD/TWD/CAD/CNY → KRW 환율 dict. 실패 시 fallback 환율 사용."""
     pairs = {
         'USD': 'KRW=X',       # USDKRW
         'JPY': 'JPYKRW=X',
@@ -80,9 +82,11 @@ def fetch_fx_to_krw() -> dict[str, float]:
         'HKD': 'HKDKRW=X',
         'TWD': 'TWDKRW=X',
         'CAD': 'CADKRW=X',
+        'CNY': 'CNYKRW=X',
     }
-    # 폴백 (yfinance fetch 실패 시) — 2026-05 대략치
-    fallback = {'USD': 1380, 'JPY': 9.0, 'EUR': 1500, 'HKD': 177, 'TWD': 43, 'CAD': 1010}
+    # 폴백 (yfinance fetch 실패 시) — 2026-05 대략치 (CNY는 2026-07 실측)
+    fallback = {'USD': 1380, 'JPY': 9.0, 'EUR': 1500, 'HKD': 177, 'TWD': 43, 'CAD': 1010,
+                'CNY': 216}
     rates: dict[str, float] = {'KRW': 1.0}
     for ccy, pair in pairs.items():
         try:
@@ -162,11 +166,13 @@ def dict_to_hist(prices: dict, currency: str, n: int = N_HISTORY) -> dict:
 
 
 # 통화별 anomaly threshold — 각 시장의 일일 가격제한을 약간 초과하는 값이 의심점.
-# KRW/JPY: ±30%, TWD: ±10%, 가격제한 없는 시장(USD/EUR/HKD/CAD): 50% (실적 갭업/뉴스 변동 흡수).
+# KRW/JPY: ±30%, TWD: ±10%, CNY: ±20%(科创板/创业板 제한폭 20%, 본토 메인보드는 10%),
+# 가격제한 없는 시장(USD/EUR/HKD/CAD): 50% (실적 갭업/뉴스 변동 흡수).
 THRESHOLD_BY_CURRENCY = {
     'KRW': 0.30,
     'JPY': 0.30,
     'TWD': 0.10,
+    'CNY': 0.20,
     'USD': 0.50,
     'EUR': 0.50,
     'HKD': 0.50,
