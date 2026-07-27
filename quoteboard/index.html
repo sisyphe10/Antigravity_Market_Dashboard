@@ -291,20 +291,23 @@ function theadHTML() {
   return h + '</tr></thead>';
 }
 
-function rowHTML(r) {
+// gi = 이 행이 그려지는 관심그룹 인덱스 (그룹 패널일 때만). 섹터·검색 패널은 undefined.
+function rowHTML(r, gi) {
   const mem = memberOf(r.code);
   const star = mem.length
     ? `★<span class="gno">${mem.map(i => i + 1).join(',')}</span>`
     : '☆';
-  return `<tr><td class="star${mem.length ? ' on' : ''}" data-code="${r.code}">${star}</td>` +
+  const giAttr = gi === undefined ? '' : ` data-gi="${gi}"`;
+  const tip = gi === undefined ? '' : ' title="클릭 = 이 그룹에서 제거"';
+  return `<tr><td class="star${mem.length ? ' on' : ''}" data-code="${r.code}"${giAttr}${tip}>${star}</td>` +
          `<td class="name" title="${r.name}">${r.name}</td><td class="code">${r.code}</td>` +
          `<td>${comma(r.price)}</td><td>${fmtChg(r.chg)}</td>` +
          `<td>${fmtEok(r.trdval)}</td><td>${fmtEok(r.mcap)}</td></tr>`;
 }
 
-function tableHTML(rows) {
+function tableHTML(rows, gi) {
   const sorted = [...rows].sort((a, b) => (a[sortKey] - b[sortKey]) * sortDir);
-  return `<table>${theadHTML()}<tbody>${sorted.map(rowHTML).join('')}</tbody></table>`;
+  return `<table>${theadHTML()}<tbody>${sorted.map(r => rowHTML(r, gi)).join('')}</tbody></table>`;
 }
 
 function sectorPanelHTML(sec, rows) {
@@ -314,7 +317,7 @@ function sectorPanelHTML(sec, rows) {
 function wlPanelHTML(g, gi, byCode) {
   const rows = g.codes.map(c => byCode.get(c)).filter(Boolean);
   const body = rows.length
-    ? tableHTML(rows)
+    ? tableHTML(rows, gi)
     : '<div class="empty">비어 있음 — 종목 행의 ☆을 눌러 추가</div>';
   return `<div class="panel"><h2>` +
          `<span class="gname" contenteditable="true" spellcheck="false" data-gi="${gi}">${g.name}</span>` +
@@ -384,7 +387,17 @@ document.getElementById('content').addEventListener('click', e => {
   const ga = e.target.closest('.gadd');
   if (ga) { openAdd(ga, +ga.dataset.gi); return; }
   const star = e.target.closest('td.star');
-  if (star) { openMenu(star, star.dataset.code); return; }
+  if (star) {
+    // 관심그룹 패널의 별표 = 이미 그 그룹 소속이므로 팝오버 없이 즉시 해제.
+    // 섹터·검색 패널은 여러 그룹에 걸칠 수 있어 기존대로 그룹 팝오버를 연다.
+    if (star.dataset.gi !== undefined) {
+      const g = WL[+star.dataset.gi];
+      const idx = g ? g.codes.indexOf(star.dataset.code) : -1;
+      if (idx >= 0) { g.codes.splice(idx, 1); saveWL(); render(); return; }
+    }
+    openMenu(star, star.dataset.code);
+    return;
+  }
   const th = e.target.closest('th[data-key]');
   if (!th) return;
   const key = th.dataset.key;
