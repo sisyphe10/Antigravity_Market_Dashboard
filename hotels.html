@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Hotel ADR - Antigravity Dashboard</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<link rel="stylesheet" href="/assets/vendor/pretendard/pretendardvariable.min.css">
 <style>
   * { box-sizing: border-box; }
   body { font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; background: #f5f5f5; margin: 0; padding: 0; color: #222; }  /* nav 전폭 통일 — 여백은 .container로 이전 */
@@ -32,7 +32,7 @@ body{margin:0}
 .topnav-tabs .topnav-item.right-group{margin-left:auto}
 .topnav-tab{box-sizing:border-box;display:inline-flex;align-items:center;gap:6px;padding:0 18px;color:#9aa4ae;text-decoration:none;font-size:1rem;font-weight:600;letter-spacing:0.3px;line-height:normal;border:none;border-radius:0;white-space:nowrap;background:transparent;transition:color 0.12s,background 0.12s;cursor:pointer;font-family:'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif}
 .topnav-tab:hover{color:#fff;background:#1a2027}
-.topnav-tab.active{color:#101418;background:#fb8b1e;font-weight:700}
+.topnav-tab.active{color:#101418;background:#fb8b1e;font-weight:600;text-shadow:0.4px 0 currentColor,-0.4px 0 currentColor}
 .topnav-dropdown{box-sizing:border-box;position:absolute;top:100%;left:0;min-width:180px;width:max-content;background:#14181d;border:1px solid #2a323b;border-radius:0;box-shadow:0 8px 24px rgba(0,0,0,0.35);padding:4px 0;opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity 0.15s,transform 0.15s,visibility 0.15s;z-index:200}
 .topnav-item:hover .topnav-dropdown,.topnav-item:focus-within .topnav-dropdown{opacity:1;visibility:visible;transform:translateY(0)}
 .topnav-sub{display:block;padding:9px 16px;color:#b7c0c9;text-decoration:none;font-size:0.9rem;font-weight:500;border-radius:0;white-space:nowrap;text-align:center;line-height:normal;font-family:'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif}
@@ -49,11 +49,11 @@ body{margin:0}
 .sidebar-brand:hover { color: #2d7a3a; }
 .sidebar-link { display: inline-flex; align-items: center; padding: 0 14px; height: 38px; margin: 0; color: #9aa4ae; text-decoration: none; font-size: 0.85rem; font-weight: 600; border-radius: 0; border: none; border-bottom: 2px solid transparent; transition: all 0.12s; font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; white-space: nowrap; }
 .sidebar-link:hover { background: transparent; color: #fff; }
-.sidebar-link.active { background: transparent; color: #fff; font-weight: 700; border-bottom-color: #991B1B; }
+.sidebar-link.active { background: transparent; color: #fff; font-weight: 700; border-bottom-color: #fb8b1e; }  /* 가이드: 활성=앰버 밑줄 (2026-07-27, 구 와인레드 잔재 제거) */
 /* Override per-page body styles so all sidebar pages align identically next to the sidebar */
 .has-sidebar { padding-left: 24px !important; padding-right: 24px !important; padding-top: 0 !important; padding-bottom: 24px !important; max-width: none !important; margin: 0 !important; }
 .has-sidebar .topnav { margin-left: -24px; margin-right: -24px; }
-@media (max-width: 900px) {
+@media (max-width: 800px) {  /* 2026-07-27: nav 정본(nav_style 800px)과 통일 — 800~900px 혼합 구간 제거 */
     .sidebar { display: none; }
     .has-sidebar { padding-left: 24px !important; }
     .has-sidebar .topnav { margin-left: -24px; margin-right: -24px; }
@@ -65,7 +65,7 @@ body{margin:0}
 <nav class="topnav"><div class="topnav-inner"><a href="index.html" class="topnav-brand">AGE OF EMERGENCE</a><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub">Data</a><a href="universe.html" class="topnav-sub">Universe</a><a href="universe_lab.html" class="topnav-sub">Universe Lab</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
 <div class="container">
   <h1>Hotel ADR — Booking.com</h1>
-  <p class="meta">Updated: 2026-07-26 20:48:57 KST · 누적 37일 · 매일 12:00 KST 자동 수집</p>
+  <p class="meta">Updated: 2026-07-27 16:00:14 KST · 누적 37일 · 매일 12:00 KST 자동 수집</p>
 
   <div class="card">
     <h2 style="margin-top:0;font-size:1.2rem;">당일 entry 객실 가격 (체크인 lead time별)</h2>
@@ -97,7 +97,7 @@ body{margin:0}
     <h2 style="margin-top:0;font-size:1.2rem;">시계열 (lead+7일, 천원)</h2>
     <div style="position:relative;height:420px;"><canvas id="hotelAdrChart"></canvas></div>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/assets/vendor/js/chart.umd.min.js"></script>
   <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = 2 * (window.devicePixelRatio || 1); Chart.defaults.elements.line.borderJoinStyle = 'round'; Chart.defaults.elements.line.borderCapStyle = 'round'; Chart.defaults.animation = false;</script>
   <script>
   (function(){
