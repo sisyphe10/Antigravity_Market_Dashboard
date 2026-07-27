@@ -116,6 +116,28 @@ HEARTBEAT_THRESHOLDS = {                 # 잡별 임계(달력일) override
     'gha-earnings-ir-day': 2,            # 매일 → 2일 (2026-07-20 earnings-calendar-sync에서 분리)
     'gha-finalize-orders': 4,            # 주말 무주문 no-op 감안
 }
+HEARTBEAT_WEEKDAY_ONLY = 4               # ★평일(월~금) 한정 잡: 금요일 성공 후 월요일 점검=3일이라 기본값이면 매주 오탐
+GHA_SCHEDULE_TSV = os.path.join(ROOT, 'launchd', 'gha', 'schedule_gha.tsv')
+
+
+def weekday_only_jobs():
+    """schedule_gha.tsv에서 cron dow 필드가 '*'가 아닌(주말 미실행) 잡 이름 집합.
+    파일 없음/파싱 실패 → 빈 집합(=기존 임계 유지). GHA 워크플로 점검의 dow 규칙과 동일 취지."""
+    jobs = set()
+    try:
+        with open(GHA_SCHEDULE_TSV, encoding='utf-8') as fh:
+            for line in fh:
+                if line.startswith('#') or not line.strip():
+                    continue
+                parts = line.rstrip().split('\t')
+                if len(parts) < 2:
+                    continue
+                fields = parts[1].split()
+                if len(fields) >= 5 and fields[4] != '*':
+                    jobs.add(parts[0].strip())
+    except Exception:
+        return set()
+    return jobs
 
 LABELS = {
     'INDEX_KR': 'KR 지수/외인(INDEX_KR)', 'INDEX_US': '미국 지수(INDEX_US)',
@@ -342,8 +364,11 @@ def check_heartbeats(data_dir: str, today: date):
     if not isinstance(hb, dict):
         return []
     alerts = []
+    wk = weekday_only_jobs()
     for job, ts in hb.items():
-        thr = HEARTBEAT_THRESHOLDS.get(job, HEARTBEAT_THRESHOLD_DEFAULT)
+        thr = HEARTBEAT_THRESHOLDS.get(job)
+        if thr is None:
+            thr = HEARTBEAT_WEEKDAY_ONLY if job in wk else HEARTBEAT_THRESHOLD_DEFAULT
         try:
             last = datetime.fromtimestamp(float(ts), tz=KST).date()
         except (TypeError, ValueError, OSError, OverflowError):

@@ -148,7 +148,9 @@ for attempt in 1 2 3 4 5; do
         rm -rf "$MERGE_TMPD"
       fi
     fi
-    if [[ -z "$MERGED_XLSX" ]]; then
+    # ★2026-07-27 fix: 우리 커밋이 xlsx를 건드리지 않았으면 충돌이 아니다(머지가 origin것을 그대로 가져감).
+    # 기존엔 origin이 xlsx를 앞서기만 하면 dataset.csv만 담긴 수집 커밋까지 드랭돼 ECOS/KOFIA 수집분이 유실됐다.
+    if [[ -z "$MERGED_XLSX" ]] && ! git diff --quiet "$base" "HEAD" -- "$XLSX"; then
       if [[ "$XLSX_CONFLICT" == "fail" ]]; then
         echo "::error::safe_push: origin advanced ${XLSX} under us — refusing to clobber (NEW/AUM edits at risk). Re-run this workflow."
         git reset --hard "origin/${BRANCH}"
