@@ -152,3 +152,7 @@ backups/
 /market_alert.html
 /seibro.html
 /universe.html
+
+# Research Notes 태깅 온톨로지·별칭 사전 (datalake/tagging)
+!datalake/tagging/*.json
+!datalake/tagging/*.csv

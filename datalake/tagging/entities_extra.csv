@@ -1,0 +1,69 @@
+entity_id,type,label_ko,label_en,industry,aliases
+private:openai,private_company,오픈AI,OpenAI,AI모델,오픈AI|OpenAI|챗GPT|ChatGPT|GPT-5|Codex
+private:anthropic,private_company,앤스로픽,Anthropic,AI모델,앤스로픽|앤트로픽|Anthropic|Claude|클로드|Fable|페이블
+private:spacex,private_company,스페이스X,SpaceX,우주항공,스페이스X|SpaceX|스타링크|Starlink
+private:xai,private_company,xAI,xAI,AI모델,xAI|Grok|그록
+private:moonshot,private_company,문샷AI,Moonshot AI,AI모델,문샷|Moonshot|Kimi|키미
+private:deepseek,private_company,딥시크,DeepSeek,AI모델,딥시크|DeepSeek
+private:bytedance,private_company,바이트댄스,ByteDance,인터넷,바이트댄스|ByteDance|틱톡
+private:blueorigin,private_company,블루오리진,Blue Origin,우주항공,블루오리진|Blue Origin
+private:ymtc,private_company,YMTC,YMTC,반도체,YMTC|양쯔메모리|长江存储
+private:cursor,private_company,커서,Cursor,소프트웨어,Cursor|커서
+private:perplexity,private_company,퍼플렉시티,Perplexity,AI서비스,퍼플렉시티|Perplexity
+private:dunamu,private_company,두나무,Dunamu,핀테크,두나무|업비트
+inst:bok,institution,한국은행,Bank of Korea,중앙은행,한국은행|한은|BOK
+inst:fed,institution,연준,Federal Reserve,중앙은행,연준|Fed|FOMC|연방준비제도
+inst:fsc,institution,금융위원회,Financial Services Commission,규제기관,금융위원회|금융위
+inst:fss,institution,금융감독원,Financial Supervisory Service,규제기관,금융감독원|금감원
+inst:krx,institution,한국거래소,Korea Exchange,거래소,한국거래소|거래소|KRX
+inst:ksd,institution,한국예탁결제원,Korea Securities Depository,인프라,예탁결제원|KSD
+inst:nps,institution,국민연금,National Pension Service,연기금,국민연금|국민연금공단
+inst:kdb,institution,산업은행,Korea Development Bank,정책금융,산업은행|산은|KDB
+inst:morgan_stanley,institution,모건스탠리,Morgan Stanley,증권사,모건스탠리|Morgan Stanley|MS
+inst:goldman_sachs,institution,골드만삭스,Goldman Sachs,증권사,골드만삭스|골드만|Goldman|GS리서치
+inst:jpmorgan,institution,JP모건,J.P. Morgan,증권사,JP모건|JPMorgan|JP Morgan|JPM
+inst:bofa,institution,뱅크오브아메리카,Bank of America,증권사,BofA|뱅크오브아메리카|BAC|메릴린치
+inst:citi,institution,씨티,Citi,증권사,씨티|Citi|Citigroup
+inst:ubs,institution,UBS,UBS,증권사,UBS
+inst:hsbc,institution,HSBC,HSBC,증권사,HSBC
+inst:barclays,institution,바클레이즈,Barclays,증권사,바클레이즈|Barclays
+inst:clsa,institution,CLSA,CLSA,증권사,CLSA
+inst:daiwa,institution,다이와,Daiwa,증권사,다이와|Daiwa
+inst:keybanc,institution,키뱅크,KeyBanc,증권사,키뱅크|KeyBanc
+inst:semianalysis,institution,세미애널리시스,SemiAnalysis,리서치,세미애널리시스|SemiAnalysis
+inst:trendforce,institution,트렌드포스,TrendForce,리서치,트렌드포스|TrendForce
+inst:digitimes,institution,디지타임스,DigiTimes,미디어,디지타임스|DigiTimes
+inst:idc,institution,IDC,IDC,리서치,IDC
+inst:gartner,institution,가트너,Gartner,리서치,가트너|Gartner
+inst:bloomberg,institution,블룸버그,Bloomberg,미디어,블룸버그|Bloomberg
+inst:reuters,institution,로이터,Reuters,미디어,로이터|Reuters
+inst:ft,institution,파이낸셜타임스,Financial Times,미디어,파이낸셜타임스|파이낸셜 타임즈|FT
+inst:wsj,institution,월스트리트저널,Wall Street Journal,미디어,월스트리트저널|WSJ
+inst:nyt,institution,뉴욕타임스,New York Times,미디어,뉴욕타임스|NYT
+inst:cnbc,institution,CNBC,CNBC,미디어,CNBC
+inst:theinformation,institution,디인포메이션,The Information,미디어,디인포메이션|The Information|theinformation
+inst:nrc,institution,미국원자력규제위원회,NRC,규제기관,NRC|원자력규제위원회
+inst:doe,institution,미국에너지부,Department of Energy,정부,에너지부|DOE
+inst:ustr,institution,미국무역대표부,USTR,정부,USTR|무역대표부
+inst:sec_us,institution,미국증권거래위원회,SEC,규제기관,SEC|증권거래위원회
+inst:mss_china,institution,중국공업정보화부,MIIT,정부,공업정보화부|MIIT
+inst:kofia,institution,금융투자협회,KOFIA,협회,금융투자협회|금투협
+person:choi_taewon,person,최태원,Chey Tae-won,,최태원
+person:lee_jaeyong,person,이재용,Lee Jae-yong,,이재용
+person:jun_younghyun,person,전영현,Jun Young-hyun,,전영현
+person:kwak_nojung,person,곽노정,Kwak Noh-jung,,곽노정
+person:jensen_huang,person,젠슨황,Jensen Huang,,젠슨 황|젠슨황|Jensen Huang
+person:lisa_su,person,리사수,Lisa Su,,리사 수|리사수|Lisa Su
+person:sam_altman,person,샘올트먼,Sam Altman,,샘 올트먼|샘올트먼|Sam Altman
+person:elon_musk,person,일론머스크,Elon Musk,,일론 머스크|일론머스크|Elon Musk|머스크
+person:mark_zuckerberg,person,저커버그,Mark Zuckerberg,,저커버그|Zuckerberg
+person:satya_nadella,person,나델라,Satya Nadella,,나델라|Nadella
+person:lip_bu_tan,person,립부탄,Lip-Bu Tan,,립부 탄|립부탄|Lip-Bu Tan|탄 CEO
+person:warren_buffett,person,워런버핏,Warren Buffett,,워런 버핏|워렌 버핏|버핏|Buffett
+person:howard_marks,person,하워드막스,Howard Marks,,하워드 막스|Howard Marks
+person:michael_burry,person,마이클버리,Michael Burry,,마이클 버리|버리|Burry
+person:jim_chanos,person,짐차노스,Jim Chanos,,차노스|Chanos
+person:donald_trump,person,트럼프,Donald Trump,,트럼프|Trump
+person:nick_timiraos,person,닉티미라오스,Nick Timiraos,,닉 티미라오스|Timiraos
+person:cc_wei,person,웨이저자,C.C. Wei,,웨이저자|C.C. Wei
+person:gavin_baker,person,개빈베이커,Gavin Baker,,개빈 베이커|Gavin Baker
