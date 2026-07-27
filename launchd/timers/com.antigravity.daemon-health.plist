@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.antigravity.daemon-health</string>
+    <!-- UserName 없음 = root 실행 (의도): launchctl kickstart -k system/* 자가복구에 root 필요.
+         스크립트는 localhost probe + kickstart + 텔레그램만 수행 (2026-07-27). -->
+    <key>WorkingDirectory</key>
+    <string>__REPO__</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>__REPO__/launchd/timers/run_timer_job.sh</string>
+        <string>daemon-health</string>
+    </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>/Users/__MACMINI_USER__</string>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>LANG</key>
+        <string>en_US.UTF-8</string>
+    </dict>
+    <!-- KST 11:00 매일 — 웹 데몬 3종(watchlist 8778 / datalake-webui 8787 / plan-api 8790) 헬스체크 -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>11</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>__REPO__/logs/launchd/daemon-health.out</string>
+    <key>StandardErrorPath</key>
+    <string>__REPO__/logs/launchd/daemon-health.err</string>
+    <key>RunAtLoad</key>
+    <false/>
+</dict>
+</plist>

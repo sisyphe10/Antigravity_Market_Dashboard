@@ -145,6 +145,7 @@ job_timeout_seconds() {
     memento-telegram)     echo 120  ;;   # 텔레그램 1통(따끔어)
     wrap-principle-check) echo 300  ;;   # 포트폴리오 원칙 점검+텔레그램
     memory-cycle-alert)   echo 300  ;;   # 메모리 3사 사이클 플랜 점검+텔레그램
+    daemon-health)        echo 600  ;;   # 웹 데몬 3종 probe+kickstart(plan-api 130s 대기 포함)
     *)                    echo 1800 ;;   # 미지정 안전 기본(90s 대신 30min)
   esac
 }
@@ -197,6 +198,7 @@ run_job() {
     memento-telegram)     "$PY" "$HOME/Journal/scripts/memento_telegram.py" || return $? ;;
     wrap-principle-check) "$PY" execution/wrap_principle_check.py || return $? ;;
     memory-cycle-alert)   "$PY" execution/memory_cycle_plan_alert.py || return $? ;;
+    daemon-health)        /bin/bash scripts/check_daemon_ports.sh || return $? ;;
     *)
       echo "[run_timer_job] 알 수 없는 잡: $1" >&2
       return 64

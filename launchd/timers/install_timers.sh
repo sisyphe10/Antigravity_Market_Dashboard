@@ -68,7 +68,8 @@ echo "WRAPPER      = $WRAPPER (in-place)"
 DAEMON_DIR="/Library/LaunchDaemons"
 NAMES=(featured-kis etf-collect etf-collect-retry landing-highlights \
        etf-active-alert kodex-sectors earnings-bot update-stock-master \
-       memento-telegram wrap-principle-check us-etf-collect memory-cycle-alert)
+       memento-telegram wrap-principle-check us-etf-collect memory-cycle-alert \
+       daemon-health)
 
 # 토큰 치환 헬퍼: stdin → stdout
 render() {

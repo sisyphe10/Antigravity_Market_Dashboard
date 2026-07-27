@@ -62,7 +62,7 @@ TOP_NAV_CSS = AOE_NAV_CSS + """
 /* Override per-page body styles so all sidebar pages align identically next to the sidebar */
 .has-sidebar { padding-left: 24px !important; padding-right: 24px !important; padding-top: 0 !important; padding-bottom: 24px !important; max-width: none !important; margin: 0 !important; }
 .has-sidebar .topnav { margin-left: -24px; margin-right: -24px; }
-@media (max-width: 900px) {
+@media (max-width: 800px) {  /* 2026-07-27: nav 정본(nav_style 800px)과 통일 — 800~900px 혼합 구간 제거 */
     .sidebar { display: none; }
     .has-sidebar { padding-left: 24px !important; }
     .has-sidebar .topnav { margin-left: -24px; margin-right: -24px; }
