@@ -39,6 +39,14 @@ BRANCH="${GITHUB_REF_NAME:-main}"
 XLSX="Wrap_NAV.xlsx"
 PORTFOLIO_JSON="portfolio_data.json"
 
+# 커밋 드랍을 호출부에 알리는 마커 (2026-07-27). SAFE_PUSH_DROP_MARKER 가 설정된 경우에만 기록하므로
+# GHA 러너(미설정)에선 무동작. 맥미니 run_gha_job.sh 는 이 마커를 보고 stamp/heartbeat 를 억제한다.
+# 취지: '잡 성공'을 보는 이유는 결국 데이터가 남았는지이므로, 드랍이면 성공으로 기록하면 안 된다.
+mark_drop() {
+  [ -n "${SAFE_PUSH_DROP_MARKER:-}" ] || return 0
+  echo "$(date "+%Y-%m-%d %H:%M:%S") $1" >> "$SAFE_PUSH_DROP_MARKER" 2>/dev/null || true
+}
+
 XLSX_CONFLICT="bail"
 PREFER_REMOTE_PORTFOLIO=0
 MSG=""
@@ -153,10 +161,12 @@ for attempt in 1 2 3 4 5; do
     if [[ -z "$MERGED_XLSX" ]] && ! git diff --quiet "$base" "HEAD" -- "$XLSX"; then
       if [[ "$XLSX_CONFLICT" == "fail" ]]; then
         echo "::error::safe_push: origin advanced ${XLSX} under us — refusing to clobber (NEW/AUM edits at risk). Re-run this workflow."
+        mark_drop "xlsx-guard(fail): 우리 커밋 드랍 — ${MSG:-<no msg>}"
         git reset --hard "origin/${BRANCH}"
         exit 1
       else
         echo "::warning::safe_push: origin advanced ${XLSX} under us — dropping our commit (will re-trigger on next xlsx push)."
+        mark_drop "xlsx-guard(bail): 우리 커밋 드랍 — ${MSG:-<no msg>}"
         git reset --hard "origin/${BRANCH}"
         exit 0
       fi

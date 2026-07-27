@@ -38,6 +38,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="$(cd "$SCRIPT_DIR/../.." && pwd)"
 PY="$REPO/venv/bin/python3"           # 결정 5: pyenv 3.10.12 기반 venv
 STAMP_DIR="$REPO/logs/launchd/stamps"
+# ── 데이터 커밋 드랍 마커 (2026-07-27, safe_commit_push.sh 연동) ──
+#   '잡은 성공했는데 push 가 커밋을 드랍' = heartbeat 가 놓치던 진짜 실패(7/23 kofia·7/27 ecos 유실).
+#   실행 전 비우고, 잡 성공 후 마커가 있으면 stamp/heartbeat 를 기록하지 않고 실패로 처리한다.
+export SAFE_PUSH_DROP_MARKER="$REPO/logs/launchd/.push_dropped.$NAME"
+rm -f "$SAFE_PUSH_DROP_MARKER"
 LOCK_ROOT="$REPO/logs/launchd/locks"
 PIPELINE_LOCK="$LOCK_ROOT/wrap-nav-pipeline.lock"   # GHA concurrency 그룹 대체 공유 락
 
@@ -451,6 +456,12 @@ run_with_timeout "$(job_timeout_seconds "$NAME")" "$NAME"
 rc=$?
 
 if [ "$rc" -eq 0 ]; then
+  if [ -s "$SAFE_PUSH_DROP_MARKER" ]; then
+    echo "[run_gha_job] $NAME: 데이터 커밋이 드랍됨 → 성공으로 기록하지 않음" >&2
+    cat "$SAFE_PUSH_DROP_MARKER" >&2
+    notify_failure "$NAME"
+    exit 75   # EX_TEMPFAIL: stamp/heartbeat 미기록 → 워치독이 정체로 잡고, 재실행 대상이 된다
+  fi
   if ! write_stamp "$NAME"; then
     echo "[run_gha_job] $NAME: stamp 기록 실패 → notify + 비정상 종료" >&2
     notify_failure "$NAME"
