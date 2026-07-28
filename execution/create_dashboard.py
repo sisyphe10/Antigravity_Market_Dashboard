@@ -2515,9 +2515,14 @@ def _build_combined_chart_section():
                 td2.textContent = '';   // 텍스트 없는 구분선 — 개수는 툴바 버튼이 표시
                 tr.appendChild(td2);
                 tr.style.display = shown ? '' : 'none';
-                tbody.insertBefore(tr, tbody.firstChild);
-                var ref = tr;   // 기존 상대순서 유지하며 구분행 뒤로 이동
-                pinned.forEach(function(r) { ref.parentNode.insertBefore(r, ref.nextSibling); ref = r; });
+                // 별표 행을 맨 위로 (기존 상대순서 유지) → 구분선은 마지막 별표 행 '뒤'
+                var ref = null;
+                pinned.forEach(function(r) {
+                    if (ref === null) { tbody.insertBefore(r, tbody.firstChild); }
+                    else { ref.parentNode.insertBefore(r, ref.nextSibling); }
+                    ref = r;
+                });
+                if (ref) ref.parentNode.insertBefore(tr, ref.nextSibling);
             };
             window.cmbToggleStar = function(td, ev) {
                 ev.stopPropagation();
