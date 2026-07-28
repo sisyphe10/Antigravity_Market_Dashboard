@@ -533,7 +533,7 @@ body{margin:0}
     <nav class="topnav"><div class="topnav-inner"><a href="index.html" class="topnav-brand">AGE OF EMERGENCE</a><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab active">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub active">Data</a><a href="universe.html" class="topnav-sub">Universe</a><a href="universe_lab.html" class="topnav-sub">Universe Lab</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
     <aside class="sidebar"><a href="market.html" class="sidebar-link active">Data</a><a href="universe.html" class="sidebar-link">Universe</a><a href="universe_lab.html" class="sidebar-link">Universe Lab</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
     <header style="margin:0;padding:8px 28px 0;text-align:right;">
-        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-07-29 08:08:38 KST</div>
+        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-07-29 08:13:09 KST</div>
     </header>
 
     <div class="mkt-subtabs">
@@ -1330,6 +1330,14 @@ if (typeof window._h2cFreeze !== 'function') {
             var maActive = { 0: true, 1: false, 2: false, 3: false };
             var dispActive = { 0: false, 1: false, 2: false, 3: false };
             // 선택 시리즈 실측치 간격(중앙값)으로 빈도 판정: ≤8일=일별, ≤45일=월별, 그 외=분기
+            window.cmbXLabel = function(d) {
+                if (!d) return '';
+                if (window._cmbXQuarter) {
+                    var q = Math.floor((parseInt(d.slice(5, 7), 10) - 1) / 3) + 1;
+                    return q + 'Q' + d.slice(2, 4);
+                }
+                return d.slice(2, 4) + '/' + d.slice(5, 7);
+            };
             function cmbDetectFreq(obs) {
                 if (!obs || obs.length < 3) return 'D';
                 var gaps = [];
@@ -1510,7 +1518,7 @@ if (typeof window._h2cFreeze !== 'function') {
                         lines.push({ txt: txt, color: ds.borderColor });
                     });
                     if (!lines.length) { ctx.restore(); return; }
-                    var title = String(cmbPin.date);
+                    var title = window.cmbXLabel ? window.cmbXLabel(String(cmbPin.date)) : String(cmbPin.date);
                     ctx.font = 'bold 13px sans-serif';
                     var w = ctx.measureText(title).width;
                     ctx.font = '13px sans-serif';
@@ -2021,6 +2029,14 @@ if (typeof window._h2cFreeze !== 'function') {
                 var _u0 = perSeries.length > 0 ? (cmbSeriesUnit[perSeries[0].name] || '') : '';
                 var _u1 = perSeries.length > 1 ? (cmbSeriesUnit[perSeries[1].name] || '') : '';
                 var _sameUnit = (_u0 === _u1);
+                // ★분기 시리즈 표기 (2026-07-29): 선택 시리즈가 '전부' 분기일 때만 X축·핀 카드·
+                //   툴팁 제목을 1Q26 형식으로. 다른 주기가 섞이면 종전 26/04 형식 유지.
+                //   분기 스탬프는 관측월 말일(2026-04-30 = 2Q26)이라 월에서 바로 분기를 낸다.
+                window._cmbXQuarter = perSeries.length > 0 && perSeries.every(function(s) {
+                    return cmbDetectFreq(Object.keys(s.lookup).sort().map(function(d) {
+                        return { date: d };
+                    })) === 'Q';
+                });
                 perSeries.forEach(function(s, idx) {
                     var aligned = [];
                     var lastVal = null;
@@ -2435,7 +2451,7 @@ if (typeof window._h2cFreeze !== 'function') {
                 var y1Type = window.cmbLogOn === false ? 'linear' : 'logarithmic';
                 var y1LogPad = y1Type === 'logarithmic' ? cmbLogPad(_y1MinPos, _y1MaxAbs) : null;
                 var scalesConfig = {
-                    x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
+                    x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ return window.cmbXLabel(this.getLabelForValue(val)); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
                     y: {
                         type: yType,
                         position: 'left',
@@ -2522,7 +2538,7 @@ if (typeof window._h2cFreeze !== 'function') {
                                 legend: { display: false },
                                 // animation:false — 동기 툴팁이 draw()만으로 위치 갱신되도록 (애니메이션 속성이면 제자리에 멈춤)
                                 // 글씨 +1px (12→13, 2026-07-21 사용자 확정 — 클릭 핀 카드와 동일 크기)
-                                tooltip: { animation: false, titleFont: { size: 13 }, bodyFont: { size: 13 }, callbacks: { label: tooltipLabel } }
+                                tooltip: { animation: false, titleFont: { size: 13 }, bodyFont: { size: 13 }, callbacks: { title: function(cs){ return cs.length ? window.cmbXLabel(cs[0].label) : ''; }, label: tooltipLabel } }
                             },
                             scales: scalesConfig
                         }
@@ -2627,7 +2643,7 @@ if (typeof window._h2cFreeze !== 'function') {
                                         } } }
                                     },
                                     scales: {
-                                        x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
+                                        x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val){ return window.cmbXLabel(this.getLabelForValue(val)); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
                                         y: {
                                             type: 'linear',
                                             position: 'left',

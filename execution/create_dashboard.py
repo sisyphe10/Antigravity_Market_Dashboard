@@ -2207,6 +2207,14 @@ def _build_combined_chart_section():
             var maActive = { 0: true, 1: false, 2: false, 3: false };
             var dispActive = { 0: false, 1: false, 2: false, 3: false };
             // 선택 시리즈 실측치 간격(중앙값)으로 빈도 판정: ≤8일=일별, ≤45일=월별, 그 외=분기
+            window.cmbXLabel = function(d) {
+                if (!d) return '';
+                if (window._cmbXQuarter) {
+                    var q = Math.floor((parseInt(d.slice(5, 7), 10) - 1) / 3) + 1;
+                    return q + 'Q' + d.slice(2, 4);
+                }
+                return d.slice(2, 4) + '/' + d.slice(5, 7);
+            };
             function cmbDetectFreq(obs) {
                 if (!obs || obs.length < 3) return 'D';
                 var gaps = [];
@@ -2387,7 +2395,7 @@ def _build_combined_chart_section():
                         lines.push({ txt: txt, color: ds.borderColor });
                     });
                     if (!lines.length) { ctx.restore(); return; }
-                    var title = String(cmbPin.date);
+                    var title = window.cmbXLabel ? window.cmbXLabel(String(cmbPin.date)) : String(cmbPin.date);
                     ctx.font = 'bold 13px sans-serif';
                     var w = ctx.measureText(title).width;
                     ctx.font = '13px sans-serif';
@@ -2898,6 +2906,14 @@ def _build_combined_chart_section():
                 var _u0 = perSeries.length > 0 ? (cmbSeriesUnit[perSeries[0].name] || '') : '';
                 var _u1 = perSeries.length > 1 ? (cmbSeriesUnit[perSeries[1].name] || '') : '';
                 var _sameUnit = (_u0 === _u1);
+                // ★분기 시리즈 표기 (2026-07-29): 선택 시리즈가 '전부' 분기일 때만 X축·핀 카드·
+                //   툴팁 제목을 1Q26 형식으로. 다른 주기가 섞이면 종전 26/04 형식 유지.
+                //   분기 스탬프는 관측월 말일(2026-04-30 = 2Q26)이라 월에서 바로 분기를 낸다.
+                window._cmbXQuarter = perSeries.length > 0 && perSeries.every(function(s) {
+                    return cmbDetectFreq(Object.keys(s.lookup).sort().map(function(d) {
+                        return { date: d };
+                    })) === 'Q';
+                });
                 perSeries.forEach(function(s, idx) {
                     var aligned = [];
                     var lastVal = null;
@@ -3312,7 +3328,7 @@ def _build_combined_chart_section():
                 var y1Type = window.cmbLogOn === false ? 'linear' : 'logarithmic';
                 var y1LogPad = y1Type === 'logarithmic' ? cmbLogPad(_y1MinPos, _y1MaxAbs) : null;
                 var scalesConfig = {
-                    x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
+                    x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ return window.cmbXLabel(this.getLabelForValue(val)); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
                     y: {
                         type: yType,
                         position: 'left',
@@ -3399,7 +3415,7 @@ def _build_combined_chart_section():
                                 legend: { display: false },
                                 // animation:false — 동기 툴팁이 draw()만으로 위치 갱신되도록 (애니메이션 속성이면 제자리에 멈춤)
                                 // 글씨 +1px (12→13, 2026-07-21 사용자 확정 — 클릭 핀 카드와 동일 크기)
-                                tooltip: { animation: false, titleFont: { size: 13 }, bodyFont: { size: 13 }, callbacks: { label: tooltipLabel } }
+                                tooltip: { animation: false, titleFont: { size: 13 }, bodyFont: { size: 13 }, callbacks: { title: function(cs){ return cs.length ? window.cmbXLabel(cs[0].label) : ''; }, label: tooltipLabel } }
                             },
                             scales: scalesConfig
                         }
@@ -3504,7 +3520,7 @@ def _build_combined_chart_section():
                                         } } }
                                     },
                                     scales: {
-                                        x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
+                                        x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val){ return window.cmbXLabel(this.getLabelForValue(val)); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
                                         y: {
                                             type: 'linear',
                                             position: 'left',
