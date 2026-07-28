@@ -170,6 +170,9 @@ write_stamp() {
   mkdir -p "$STAMP_DIR" || return 1
   tmp="$(mktemp "$STAMP_DIR/.$name.XXXXXX")" || return 1
   if ! date +%s > "$tmp"; then rm -f "$tmp"; return 1; fi
+  # mktemp 은 0600 — root 로 도는 잡(daemon-health)의 stamp 를 sisyphe 로 도는
+  # daily_selfcheck 가 읽지 못해 '무stamp' 로 오탐했다 (2026-07-29).
+  chmod 0644 "$tmp" 2>/dev/null || true
   mv -f "$tmp" "$STAMP_DIR/$name.last" || { rm -f "$tmp"; return 1; }
   return 0
 }

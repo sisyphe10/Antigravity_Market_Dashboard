@@ -5,8 +5,10 @@
 #            → etf-collect 오늘 완료까지 대기, 19:30 KST 초과 시 경고+notify 후 폴백 실행(스킵 아님).
 #   전제·활성화 절차·검증·롤백: playbooks/PHASE2_RUNBOOK.md "부록 W4: 체인 활성화".
 featured-kis	50 15 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh featured-kis	
-etf-collect	30 16 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh etf-collect	
-etf-collect-retry	0 18 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh etf-collect-retry	
+# [PAUSED 2026-07-29] etf-collect / etf-collect-retry — 국내 ETF 수집 당분간 중단(사용자 결정).
+#   재개: 아래 두 행 주석 해제 + install_timers.sh NAMES 에 두 이름 복원 후 sudo ./install_timers.sh
+#etf-collect	30 16 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh etf-collect	
+#etf-collect-retry	0 18 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh etf-collect-retry	
 landing-highlights	45 18 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh landing-highlights	
 etf-active-alert	0 19 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh etf-active-alert	
 kodex-sectors	30 23 * * *	/bin/bash __REPO__/launchd/timers/run_timer_job.sh kodex-sectors	

@@ -66,7 +66,9 @@ echo "REPO         = $REPO"
 echo "WRAPPER      = $WRAPPER (in-place)"
 
 DAEMON_DIR="/Library/LaunchDaemons"
-NAMES=(featured-kis etf-collect etf-collect-retry landing-highlights \
+# ★ 2026-07-29: etf-collect / etf-collect-retry 는 국내 ETF 수집 중단(사용자 결정)으로 NAMES 에서 제외.
+#   plist 파일은 보존 — 재개 시 두 이름을 NAMES 에 되돌리고 schedule.tsv 주석만 풀면 된다.
+NAMES=(featured-kis landing-highlights \
        etf-active-alert kodex-sectors earnings-bot update-stock-master \
        memento-telegram wrap-principle-check us-etf-collect memory-cycle-alert \
        daemon-health)
