@@ -1,12 +1,12 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 144 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 142 components._
 
 Updated: 2026-07-28
 
 ## By domain
 
-### Claude 스킬 · 커맨드 (11)
+### Claude 스킬 · 커맨드 (9)
 - [/aum — WRAP 일일 AUM 입력](cmd-aum.md) — Skill
 - [/긴급코멘트 — 급락일 시장 코멘트](cmd-urgent-comment.md) — Skill
 - [/목표전환형 — 랩 생성·청산 일괄](cmd-target-transform.md) — Skill
@@ -14,8 +14,6 @@ Updated: 2026-07-28
 - [/운동피드백 — 선유듀오 피드백 팁 추가](cmd-exercise-feedback.md) — Skill
 - [/운용보고서 — 월간 운용보고서 4종](cmd-operating-report.md) — Skill
 - [/주간보고 — 금요일 WRAP 주간 보고](cmd-weekly-report.md) — Skill
-- [/차트 — 발표용 차트 호출](cmd-chart.md) — Skill
-- [seminar-chart 스킬 (발표·PPT 정적 차트)](skill-seminar-chart.md) — Skill
 - [web-chart 스킬 (웹 인터랙티브 차트 표준)](skill-web-chart.md) — Skill
 - [금융 분석 스킬 팩 (설치형 8종)](skill-finance-pack.md) — Skill
 
@@ -321,7 +319,7 @@ Updated: 2026-07-28
 - [Wrap_NAV 워처 (watch_wrap_nav.py)](watcher-wrap-nav.md) — 상시, active
 - [크래시 루프 워처 (*/5)](daemon-crash-watcher.md) — */5분, planned
 
-### Skill (11)
+### Skill (9)
 - [/aum — WRAP 일일 AUM 입력](cmd-aum.md) — 호출 시, active
 - [/긴급코멘트 — 급락일 시장 코멘트](cmd-urgent-comment.md) — 호출 시, active
 - [/목표전환형 — 랩 생성·청산 일괄](cmd-target-transform.md) — 호출 시, active
@@ -329,14 +327,12 @@ Updated: 2026-07-28
 - [/운동피드백 — 선유듀오 피드백 팁 추가](cmd-exercise-feedback.md) — 호출 시, active
 - [/운용보고서 — 월간 운용보고서 4종](cmd-operating-report.md) — 호출 시, active
 - [/주간보고 — 금요일 WRAP 주간 보고](cmd-weekly-report.md) — 호출 시, active
-- [/차트 — 발표용 차트 호출](cmd-chart.md) — 호출 시, active
-- [seminar-chart 스킬 (발표·PPT 정적 차트)](skill-seminar-chart.md) — 호출 시, active
 - [web-chart 스킬 (웹 인터랙티브 차트 표준)](skill-web-chart.md) — 호출 시, active
 - [금융 분석 스킬 팩 (설치형 8종)](skill-finance-pack.md) — 호출 시, active
 
 ## By project
 
-### antigravity (144)
+### antigravity (142)
 - [/aum — WRAP 일일 AUM 입력](cmd-aum.md) — Skill
 - [/긴급코멘트 — 급락일 시장 코멘트](cmd-urgent-comment.md) — Skill
 - [/목표전환형 — 랩 생성·청산 일괄](cmd-target-transform.md) — Skill
@@ -344,7 +340,6 @@ Updated: 2026-07-28
 - [/운동피드백 — 선유듀오 피드백 팁 추가](cmd-exercise-feedback.md) — Skill
 - [/운용보고서 — 월간 운용보고서 4종](cmd-operating-report.md) — Skill
 - [/주간보고 — 금요일 WRAP 주간 보고](cmd-weekly-report.md) — Skill
-- [/차트 — 발표용 차트 호출](cmd-chart.md) — Skill
 - [AoE 스타일 정본 (nav_style.py)](src-nav-style.md) — Source
 - [architecture.html (아키텍처)](page-architecture.md) — Page
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — Infra
@@ -406,7 +401,6 @@ Updated: 2026-07-28
 - [SEIBro TOP50 (fetch_seibro_data.py)](src-seibro.md) — Source
 - [seibro.html (SEIBro)](page-seibro.md) — Page
 - [SemiAnalysis 소스 (sources/semianalysis.py)](src-semianalysis.md) — Source
-- [seminar-chart 스킬 (발표·PPT 정적 차트)](skill-seminar-chart.md) — Skill
 - [SeonyuDuo repo (가족 영상 · 운동봇 연동)](ext-seonyuduo-repo.md) — External
 - [SiliconData 지수 3종 (fetch_silicondata_index.py)](src-silicondata.md) — Source
 - [Sisyphe repo 클론 서빙 (시간당 pull)](daemon-sisyphe-pull.md) — Watcher

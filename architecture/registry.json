@@ -2532,24 +2532,6 @@
    ]
   },
   {
-   "id": "skill-seminar-chart",
-   "project": "antigravity",
-   "domain": "claude-tooling",
-   "type": "skill",
-   "name": "seminar-chart 스킬 (발표·PPT 정적 차트)",
-   "runs_on": "laptop",
-   "schedule_kst": "호출 시",
-   "status": "active",
-   "desc_md": "발표·PPT·세미나용 matplotlib 차트를 'Market 대시보드' 양식으로 그리는 규칙 모음.\n\n- 확정 규칙: 점선 그리드 · 위/오른쪽 테두리 제거 · **끝값만 라벨(동그라미)** · 하단 범례 · 제목/Y축 라벨 없음 · Pretendard · 좌우 2패널 비교.\n- 재사용 헬퍼 `chart_styles.py` 가 위 룩을 자동 적용한다.\n- 데이터 수집은 범위 밖 — '룩과 규칙'만 담당한다.",
-   "code": [
-    "~/.claude/skills/seminar-chart/SKILL.md",
-    "~/.claude/skills/seminar-chart/chart_styles.py"
-   ],
-   "depends_on": [
-    "infra-laptop"
-   ]
-  },
-  {
    "id": "skill-web-chart",
    "project": "antigravity",
    "domain": "claude-tooling",
@@ -2558,30 +2540,13 @@
    "runs_on": "laptop",
    "schedule_kst": "호출 시",
    "status": "active",
-   "desc_md": "대시보드 양식의 웹 인터랙티브 차트(Chart.js) 통일 표준. WRAP CHART 탭·Market DATA 차트·단독 뷰어에서 확립된 규칙을 한 곳에 모았다.\n\n- 사이드바 계열 토글 · 트레이딩뷰식 크로스헤어+데이터 카드 · 기간 버튼 · 정규화/YTD/Log · Y축 5~95% 커버 · 끝값 라벨(겹침 회피) · **DPR 4 고해상 Download**.\n- 정적 PNG(발표용)는 [[skill-seminar-chart]] 담당 — 별개 스킬이다.",
+   "desc_md": "대시보드 양식의 웹 인터랙티브 차트(Chart.js) 통일 표준. WRAP CHART 탭·Market DATA 차트·단독 뷰어에서 확립된 규칙을 한 곳에 모았다.\n\n- 사이드바 계열 토글 · 트레이딩뷰식 크로스헤어+데이터 카드 · 기간 버튼 · 정규화/YTD/Log · Y축 5~95% 커버 · 끝값 라벨(겹침 회피) · **DPR 4 고해상 Download**.\n- **발표용 정적 PNG도 이 스킬이 담당한다** — 세미나 사이즈 800×450(16:9) + DPR4 Download = 3200×1800 PNG.\n  (2026-07-28 사용자 결정: matplotlib 기반 seminar-chart 스킬과 `/차트` 커맨드는 은퇴, 백업 `~/.claude/_archive/removed_20260728/`.)",
    "code": [
     "~/.claude/skills/web-chart/SKILL.md"
    ],
    "depends_on": [
     "infra-laptop",
     "page-wrap"
-   ]
-  },
-  {
-   "id": "cmd-chart",
-   "project": "antigravity",
-   "domain": "claude-tooling",
-   "type": "skill",
-   "name": "/차트 — 발표용 차트 호출",
-   "runs_on": "laptop",
-   "schedule_kst": "호출 시",
-   "status": "active",
-   "desc_md": "발표·PPT용 차트를 그릴 때 부르는 얇은 진입점. 실제 규칙은 [[skill-seminar-chart]] 가 갖고 있고 이 커맨드는 그 스킬을 호출한다.",
-   "code": [
-    "~/.claude/commands/차트.md"
-   ],
-   "depends_on": [
-    "skill-seminar-chart"
    ]
   },
   {
