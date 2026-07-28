@@ -2124,6 +2124,9 @@ def _build_combined_chart_section():
             '.cmb-filter-btn{display:inline-block;margin-left:2px;color:#9aa4b0;cursor:pointer;}'
             '#cmbSideTable tr.cmb-pin-head td{background:#0891b2;padding:0;height:2px;'
             'line-height:0;font-size:0;border:0;}'
+            '#cmbSideTable tr.cmb-pinned{cursor:grab!important;}'
+            '#cmbSideTable tr.cmb-drag td{opacity:0.45;}'
+            '#cmbSideTable tr.cmb-drop td{box-shadow:inset 0 -2px 0 #67e0f4;}'
             '.cmb-filter-btn:hover{color:#000;}'
             '.cmb-filter-btn.cmb-filter-on{color:#000;font-weight:900;}'
             '.cmb-filter-pop{position:absolute;z-index:30;background:#fff;border:1px solid #d8dde3;'
@@ -2461,12 +2464,17 @@ def _build_combined_chart_section():
             //    (엑셀식 필터와 AND 결합). 상태 = 맥미니 서버 저장(/watchlist/stars, 기기 공통,
             //    2026-07-20 전환) + localStorage는 즉시표시 캐시·오프라인 폴백.
             var cmbStars = {};
-            try { (JSON.parse(localStorage.getItem('cmbStars') || '[]')).forEach(function(n) { cmbStars[n] = 1; }); } catch (e) {}
+            var cmbStarList = [];   // 사용자 지정 순서(드래그). 서버 저장 형식 = 이 배열 그대로
+            try {
+                cmbStarList = JSON.parse(localStorage.getItem('cmbStars') || '[]') || [];
+                cmbStarList.forEach(function(n) { cmbStars[n] = 1; });
+            } catch (e) { cmbStarList = []; }
             var cmbStarOnly = false;
             try {
                 fetch('/watchlist/stars').then(function(r) { return r.ok ? r.json() : null; }).then(function(a) {
                     if (!Array.isArray(a)) return;
                     cmbStars = {};
+                    cmbStarList = a.slice();
                     a.forEach(function(n) { cmbStars[n] = 1; });
                     try { localStorage.setItem('cmbStars', JSON.stringify(a)); } catch (e) {}
                     cmbPaintStars();
@@ -2474,7 +2482,9 @@ def _build_combined_chart_section():
                 }).catch(function() {});
             } catch (e) {}
             function cmbSaveStars() {
-                var arr = Object.keys(cmbStars);
+                var arr = cmbStarList.filter(function(n) { return cmbStars[n]; });
+                Object.keys(cmbStars).forEach(function(n) { if (arr.indexOf(n) < 0) arr.push(n); });
+                cmbStarList = arr;
                 try { localStorage.setItem('cmbStars', JSON.stringify(arr)); } catch (e) {}
                 try {
                     fetch('/watchlist/stars', { method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -2491,6 +2501,47 @@ def _build_combined_chart_section():
                 if (th) th.classList.toggle('on', cmbStarOnly);
                 window.cmbApplyPin();
             }
+            // 고정 블록 드래그 순서 변경 (2026-07-28). 순서 정본 = cmbStarList(서버 저장 배열).
+            var _cmbDragName = null;
+            function cmbClearDrop() {
+                document.querySelectorAll('#cmbSideTable tr.cmb-drop').forEach(function(x) { x.classList.remove('cmb-drop'); });
+            }
+            function cmbBindDrag(row) {
+                if (row._cmbDrag) return;   // 중복 바인드 방지 (cmbApplyPin 은 자주 불린다)
+                row._cmbDrag = 1;
+                row.addEventListener('dragstart', function(e) {
+                    if (!row.classList.contains('cmb-pinned')) { e.preventDefault(); return; }
+                    _cmbDragName = row.getAttribute('data-name');
+                    row.classList.add('cmb-drag');
+                    try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', _cmbDragName); } catch (x) {}
+                });
+                row.addEventListener('dragover', function(e) {
+                    if (!_cmbDragName || !row.classList.contains('cmb-pinned')) return;
+                    e.preventDefault();
+                    try { e.dataTransfer.dropEffect = 'move'; } catch (x) {}
+                    if (row.getAttribute('data-name') !== _cmbDragName) { cmbClearDrop(); row.classList.add('cmb-drop'); }
+                });
+                row.addEventListener('drop', function(e) {
+                    e.preventDefault(); e.stopPropagation();
+                    cmbClearDrop();
+                    var to = row.getAttribute('data-name');
+                    if (!_cmbDragName || to === _cmbDragName) return;
+                    var from = cmbStarList.indexOf(_cmbDragName), ti = cmbStarList.indexOf(to);
+                    if (from < 0 || ti < 0) return;
+                    cmbStarList.splice(from, 1);
+                    var ni = cmbStarList.indexOf(to);
+                    cmbStarList.splice(from < ti ? ni + 1 : ni, 0, _cmbDragName);   // 아래로=뒤에, 위로=앞에
+                    cmbSaveStars();
+                    window.cmbApplyPin();
+                });
+                row.addEventListener('dragend', function() {
+                    row.classList.remove('cmb-drag');
+                    cmbClearDrop();
+                    _cmbDragName = null;
+                    window._cmbDragJustEnded = 1;   // 드롭 직후 click 이 차트 선택을 건드리지 않도록
+                    setTimeout(function() { window._cmbDragJustEnded = 0; }, 150);
+                });
+            }
             // 별표 행을 테이블 맨 위로 고정 + 구분행 삽입 (2026-07-28).
             // 상태를 DOM(td.cmb-star.on)에서 읽으므로 정렬·필터 어느 경로에서 불러도 동작한다.
             window.cmbApplyPin = function() {
@@ -2505,7 +2556,25 @@ def _build_combined_chart_section():
                 });
                 var btn = document.getElementById('cmbStarLoadBtn');
                 if (btn) btn.textContent = '★ ' + pinned.length + '개 올리기';
+                tbody.querySelectorAll('tr.cmb-pinned').forEach(function(r) {
+                    r.classList.remove('cmb-pinned'); r.removeAttribute('draggable');
+                });
+                if (!window._cmbDragGuard) {   // 드롭 직후 잔여 click 삼키기 (캡처 단계)
+                    window._cmbDragGuard = 1;
+                    var tbl = document.getElementById('cmbSideTable');
+                    if (tbl) tbl.addEventListener('click', function(e) {
+                        if (window._cmbDragJustEnded) { e.stopPropagation(); e.preventDefault(); }
+                    }, true);
+                }
                 if (!pinned.length) return;
+                // 표시 순서 = 사용자 지정(cmbStarList). 목록에 없는 별표는 뒤로.
+                pinned.sort(function(a, b) {
+                    var ia = cmbStarList.indexOf(a.getAttribute('data-name'));
+                    var ib = cmbStarList.indexOf(b.getAttribute('data-name'));
+                    if (ia < 0) { ia = 9999; }
+                    if (ib < 0) { ib = 9999; }
+                    return ia - ib;
+                });
                 var tr = document.createElement('tr');
                 tr.id = 'cmbPinHead';
                 tr.className = 'cmb-pin-head';
@@ -2520,6 +2589,9 @@ def _build_combined_chart_section():
                 pinned.forEach(function(r) {
                     if (ref === null) { tbody.insertBefore(r, tbody.firstChild); }
                     else { ref.parentNode.insertBefore(r, ref.nextSibling); }
+                    r.classList.add('cmb-pinned');
+                    r.setAttribute('draggable', 'true');
+                    cmbBindDrag(r);
                     ref = r;
                 });
                 if (ref) ref.parentNode.insertBefore(tr, ref.nextSibling);
@@ -2527,7 +2599,14 @@ def _build_combined_chart_section():
             window.cmbToggleStar = function(td, ev) {
                 ev.stopPropagation();
                 var name = td.parentNode.getAttribute('data-name');
-                if (cmbStars[name]) { delete cmbStars[name]; } else { cmbStars[name] = 1; }
+                if (cmbStars[name]) {
+                    delete cmbStars[name];
+                    var si = cmbStarList.indexOf(name);
+                    if (si >= 0) cmbStarList.splice(si, 1);
+                } else {
+                    cmbStars[name] = 1;
+                    if (cmbStarList.indexOf(name) < 0) cmbStarList.push(name);
+                }
                 cmbSaveStars();
                 cmbPaintStars();
                 if (cmbStarOnly) cmbApplyFilters();
