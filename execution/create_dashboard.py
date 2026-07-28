@@ -2122,8 +2122,8 @@ def _build_combined_chart_section():
             '#cmbSideTable #cmbStarTh{color:#67e0f4 !important;}'
             '#cmbSideTable #cmbStarTh.on{background:rgba(103,224,244,0.25) !important;}'
             '.cmb-filter-btn{display:inline-block;margin-left:2px;color:#9aa4b0;cursor:pointer;}'
-            '#cmbSideTable tr.cmb-pin-head td{background:#eef2f5;color:#0f766e;font-weight:700;'
-            'font-size:12px;letter-spacing:1.2px;text-align:left;padding:5px 10px;}'
+            '#cmbSideTable tr.cmb-pin-head td{background:#0891b2;padding:0;height:2px;'
+            'line-height:0;font-size:0;border:0;}'
             '.cmb-filter-btn:hover{color:#000;}'
             '.cmb-filter-btn.cmb-filter-on{color:#000;font-weight:900;}'
             '.cmb-filter-pop{position:absolute;z-index:30;background:#fff;border:1px solid #d8dde3;'
@@ -2512,7 +2512,7 @@ def _build_combined_chart_section():
                 var td2 = document.createElement('td');
                 td2.colSpan = 5;
                 var shown = pinned.filter(function(r) { return r.style.display !== 'none'; }).length;
-                td2.textContent = '★ 즐겨찾기 ' + shown;
+                td2.textContent = '';   // 텍스트 없는 구분선 — 개수는 툴바 버튼이 표시
                 tr.appendChild(td2);
                 tr.style.display = shown ? '' : 'none';
                 tbody.insertBefore(tr, tbody.firstChild);

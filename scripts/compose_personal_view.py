@@ -82,9 +82,8 @@ AOE_DARK_CSS = (
     '.cmb-series-row td{color:#fff!important}'
     # 별표 고정 섹션 구분행 (2026-07-28): 라이트 원본 CSS를 다크로 재단언.
     # ★일괄 td 규칙(font-size 17px·border)이 !important 라 여기도 !important 필수.
-    '#cmbSideTable tr.cmb-pin-head td{background:#0f1417!important;color:' + P['hl2-fg'] + '!important;'
-    'font-weight:700!important;font-size:12px!important;letter-spacing:1.2px!important;'
-    'text-align:left!important;padding:5px 10px!important;border-bottom:1px solid #223038!important}'
+    '#cmbSideTable tr.cmb-pin-head td{background:' + P['hl2-fg'] + '!important;padding:0!important;'
+    'height:2px!important;line-height:0!important;font-size:0!important;border:0!important}'
     # 등락색 다크용 재단언 — td 일괄 규칙보다 뒤에 두어 우선 적용
     '.pos,td.pos,.positive,td.positive{color:' + P['up'] + '!important}'
     '.neg,td.neg,.negative,td.negative{color:' + P['down'] + '!important}'
