@@ -103,6 +103,7 @@ LAYERS = [
     (5, "라이브 페이지", "Live pages served to the browser"),
 ]
 LAYER_IDS = [n for (n, _t, _d) in LAYERS]
+SKILL_LAYER = 0   # 이 레이어만 박스 대신 표로 렌더 (스킬·커맨드)
 
 # Kinds of cross-layer connection edges and their line colour.
 EDGE_KIND = {
@@ -475,6 +476,21 @@ h2.block-title { font-size: 1.4rem; color: #111; font-weight: 800; margin-bottom
 .node.st-retired { opacity: 0.55; filter: grayscale(0.6); }
 .node.node-dim { opacity: 0.28; }
 .node.node-hl { box-shadow: 0 0 0 2.5px #2d7a3a; }
+
+/* ---- skill layer: 박스 대신 표 (행이 .node 를 겸함) ---- */
+.skill-table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: auto; }
+.skill-table th { background: #f3f4f6; border: 1px solid #d1d5db; padding: 6px 10px;
+                  font-size: 12px; font-weight: 700; color: #000; text-align: center; white-space: nowrap; }
+.skill-table td { border: 1px solid #e5e7eb; padding: 6px 10px; color: #000; vertical-align: middle; }
+.skill-table tr.node { display: table-row; border: 0; border-radius: 0; padding: 0;
+                       min-width: 0; max-width: none; background: transparent; box-shadow: none; }
+.skill-table tr.node:hover { transform: none; box-shadow: none; }
+.skill-table tr.node:hover td { background: #f6f8f7; }
+.skill-table tr.node.node-hl { box-shadow: none; }
+.skill-table tr.node.node-hl td { background: #e7f3ea; }
+.skill-table .sk-name { font-weight: 700; white-space: nowrap; }
+.skill-table .sk-kind { white-space: nowrap; }
+.skill-table .sk-code code { font-family: 'Consolas', 'Courier New', monospace; font-size: 11.5px; }
 /* Edges are hidden by default (clean diagram); a node's own edges are revealed
    only while it is hovered/focused, drawn on top of the cards (edge-svg z-index). */
 .edge-line { stroke-width: 1.6; fill: none; opacity: 0; transition: opacity 0.12s, stroke-width 0.12s; }
@@ -604,6 +620,29 @@ def build_diagram(comps, by_id):
         parts.append('<div class="layer-nodes">')
         if not buckets[n]:
             parts.append('<div class="layer-desc" style="opacity:.6">— (none)</div>')
+        if n == SKILL_LAYER and buckets[n]:
+            # 스킬·커맨드는 박스가 아니라 표로 (2026-07-28 사용자 지시). 행에 .node/data-id 를
+            # 그대로 달아 두어 연결선·호버 하이라이트·클릭 점프 JS 가 카드와 동일하게 동작한다.
+            parts.append('<table class="skill-table"><thead><tr>'
+                         '<th>이름</th><th>구분</th><th>하는 일</th><th>파일</th>'
+                         '</tr></thead><tbody>')
+            for c in buckets[n]:
+                cid = c.get("id", "")
+                nm = c.get("name") or cid
+                kind = "커맨드" if nm.lstrip().startswith("/") else "스킬"
+                code0 = (c.get("code") or [""])[0].split(" ")[0]
+                parts.append(
+                    '<tr class="node %s" data-id="%s" tabindex="0" role="button" %s>'
+                    % (status_css(c.get("status")), esc(cid), tip_attrs(c)))
+                parts.append('<td class="sk-name" style="text-align:left">%s</td>' % esc(nm))
+                parts.append('<td class="sk-kind">%s</td>' % esc(kind))
+                parts.append('<td class="sk-sum" style="text-align:left">%s</td>'
+                             % esc(first_sentence(c.get("desc_md"), 80)))
+                parts.append('<td class="sk-code" style="text-align:left"><code>%s</code></td>'
+                             % esc(os.path.basename(code0.rstrip("/")) or "—"))
+                parts.append('</tr>')
+            parts.append('</tbody></table></div></div>')
+            continue
         for c in buckets[n]:
             tm = type_meta(c.get("type"))
             cid = c.get("id", "")
