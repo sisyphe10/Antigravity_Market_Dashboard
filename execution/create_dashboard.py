@@ -2119,6 +2119,21 @@ def _build_combined_chart_section():
         # 필터 ▾: 수수료 매출 테이블(rev-filter)과 동일한 엑셀식 값 체크박스 팝업
         filter_btn = ('<span class="cmb-filter-btn" data-col="{col}" '
                       'onclick="cmbOpenFilter(this, event)">▾</span>')
+        # 검색창은 스크롤 컨테이너 '밖'에 둔다 — 안에 두면 스크롤바가 표 첫 행 위까지 올라가고
+        # 검색창 자체도 스크롤돼 사라진다 (2026-07-28).
+        search_box_html = (
+            '<div style="display:flex;justify-content:flex-end;margin:0 0 6px 0;">'
+            '<div style="position:relative;width:220px;">'
+            '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#ffffff" '
+            'stroke-width="2" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);'
+            'pointer-events:none;"><circle cx="7" cy="7" r="4.5"></circle>'
+            '<line x1="10.5" y1="10.5" x2="14.5" y2="14.5" stroke-linecap="round"></line></svg>'
+            '<input id="cmbSearch" type="text" placeholder="검색" autocomplete="off" '
+            'oninput="cmbApplySearch(this.value)" '
+            'style="width:100%;box-sizing:border-box;padding:6px 8px 6px 30px;font-family:inherit;font-size:14px;'
+            'border:1px solid #d1d5db;border-radius:4px;background:#fff;color:#111;">'
+            '</div></div>'
+        )
         list_html = (
             '<style>'
             '#cmbSideTable tbody tr:hover td{background:#f5f5f5;}'
@@ -2145,17 +2160,6 @@ def _build_combined_chart_section():
             '.cmb-filter-item{display:flex;align-items:center;gap:6px;font-size:0.85rem;'
             'color:#111;white-space:nowrap;cursor:pointer;text-align:left;}'
             '</style>'
-            '<div style="display:flex;justify-content:flex-end;margin:0 0 6px 0;">'
-            '<div style="position:relative;width:220px;">'
-            '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#ffffff" '
-            'stroke-width="2" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);'
-            'pointer-events:none;"><circle cx="7" cy="7" r="4.5"></circle>'
-            '<line x1="10.5" y1="10.5" x2="14.5" y2="14.5" stroke-linecap="round"></line></svg>'
-            '<input id="cmbSearch" type="text" placeholder="검색" autocomplete="off" '
-            'oninput="cmbApplySearch(this.value)" '
-            'style="width:100%;box-sizing:border-box;padding:6px 8px 6px 30px;font-family:inherit;font-size:14px;'
-            'border:1px solid #d1d5db;border-radius:4px;background:#fff;color:#111;">'
-            '</div></div>'
             f'<table id="cmbSideTable" class="portfolio-table" style="width:100%;max-width:100%;margin:0 auto;">'
             f'<colgroup><col style="width:26px;"><col style="width:56px;"><col style="width:60px;"><col style="width:150px;"><col style="width:220px;"></colgroup>'
             f'<thead><tr>'
@@ -3530,7 +3534,8 @@ def _build_combined_chart_section():
             <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;justify-content:center;">
                 <div style="min-width:240px;position:relative;" id="cmbSideHost">
                     <div id="cmbSelCount" style="font-size:11px;color:#000;min-height:16px;margin-bottom:4px;padding-left:2px;"></div>
-                    <div style="max-height:720px;overflow-y:auto;">{list_html}</div>
+                    {search_box_html}
+                    <div id="cmbScrollBox" style="max-height:720px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#3a3b3e #111214;">{list_html}</div>
                 </div>
                 <div style="width:1000px;">
                     <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;font-size:13px;">
