@@ -2432,8 +2432,9 @@ def _build_combined_chart_section():
                 return Number(v).toLocaleString(undefined, { maximumFractionDigits: a < 10 ? 2 : (a < 1000 ? 1 : 0) });
             }
 
-            // 축 자릿수 통일 (2026-07-16 사용자 확정): 같은 축 안에서는 최대값의 원칙을 따름
-            // (예: 축이 7.57~40이면 전부 소수 첫째 자리 — 7.6, 9, 10, 15)
+            // 축 자릿수 통일: 같은 축 안에서는 하나의 밴드를 따른다.
+            // ★밴드 기준 = 축의 '최종 끝값' (2026-07-28 변경. 종전 = 축 최대값)
+            //   인자명 maxAbs 는 호환 유지 — 실제로 넘어오는 값은 _cmbAxisBandRef(끝값).
             function fmtUniform(v, maxAbs) {
                 if (v === null || v === undefined) return '-';
                 var dp = maxAbs < 10 ? 2 : (maxAbs < 100 ? 1 : 0);   // 일의자리 2dp·십의자리 1dp·백의자리+ 정수
@@ -2447,8 +2448,8 @@ def _build_combined_chart_section():
             function cmbTickFmt(v, ax, jo) {
                 var f = jo ? 10000 : 1;
                 var m;
-                if (ax.chart && ax.chart.canvas && ax.chart.canvas.id === 'cmbDynamicChart' && window._cmbAxisMaxAbs)
-                    m = (window._cmbAxisMaxAbs[ax.id] || Math.abs(ax.max || 0)) / f;
+                if (ax.chart && ax.chart.canvas && ax.chart.canvas.id === 'cmbDynamicChart' && window._cmbAxisBandRef)
+                    m = (window._cmbAxisBandRef[ax.id] || Math.abs(ax.max || 0)) / f;
                 else
                     m = Math.max(Math.abs(ax.min || 0), Math.abs(ax.max || 0)) / f;
                 return fmtUniform(v / f, m);
@@ -3103,8 +3104,8 @@ def _build_combined_chart_section():
                                 var _f2 = (chart.canvas.id === 'cmbDynamicChart')
                                     ? ((window._cmbAxisConv || {})[ds.yAxisID || 'y'] || 1) : 1;
                                 var _ax = chart.scales[ds.yAxisID || 'y'] || chart.scales.y;
-                                var _m2 = ((chart.canvas.id === 'cmbDynamicChart' && window._cmbAxisMaxAbs)
-                                    ? (window._cmbAxisMaxAbs[ds.yAxisID || 'y'] || 0)
+                                var _m2 = ((chart.canvas.id === 'cmbDynamicChart' && window._cmbAxisBandRef)
+                                    ? (window._cmbAxisBandRef[ds.yAxisID || 'y'] || 0)
                                     : Math.max(Math.abs(_ax.min || 0), Math.abs(_ax.max || 0))) / _f2;
                                 label = fmtUniformFix(val / _f2, _m2);
                             }
@@ -3230,8 +3231,26 @@ def _build_combined_chart_section():
                 };
                 // 축별 표시 환산 계수 — MA 등 파생선도 같은 축 규칙을 타도록 축 기준으로 기록
                 window._cmbAxisConv = { y: (yEok && yJo) ? 10000 : 1, y1: (y1Eok && y1Jo) ? 10000 : 1 };
-                // 자릿수 밴드는 grace 포함 축 경계가 아니라 데이터 최대값으로 판정 (96.9 + grace = 104 -> 정수 오판 방지)
-                window._cmbAxisMaxAbs = { y: _yMaxAbs, y1: _y1MaxAbs };
+                // ★자릿수 밴드 기준 = 축의 '최종 끝값' (2026-07-28 사용자 룰 변경. 종전 = 축 최대값).
+                //   최대값 기준이면 기간에 큰 값이 한 번만 있어도 축 전체가 정수로 뭉개졌다
+                //   (예: ETS 거래대금 끝값 67.56 인데 구간 최대 225.6 -> 68 로 표시).
+                //   MA·이격도 파생선은 제외하고 축에 처음 배정된 주 시리즈의 마지막 실측값을 쓴다.
+                var _yLastAbs = null, _y1LastAbs = null;
+                datasets.forEach(function(ds) {
+                    if (ds._skipEndLabel) return;
+                    if (/^MA\d/.test(ds.label || '') || /^이격도/.test(ds.label || '')) return;
+                    var _ax = (ds.yAxisID === 'y1') ? 'y1' : 'y';
+                    if (_ax === 'y1' ? (_y1LastAbs !== null) : (_yLastAbs !== null)) return;
+                    for (var _i = ds.data.length - 1; _i >= 0; _i--) {
+                        var _v = ds.data[_i];
+                        if (_v === null || _v === undefined || isNaN(_v)) continue;
+                        if (_ax === 'y1') { _y1LastAbs = Math.abs(_v); } else { _yLastAbs = Math.abs(_v); }
+                        break;
+                    }
+                });
+                // 끝값을 못 찾으면(전 구간 결측) 종전대로 최대값으로 폴백
+                window._cmbAxisBandRef = { y: (_yLastAbs === null ? _yMaxAbs : _yLastAbs),
+                                           y1: (_y1LastAbs === null ? _y1MaxAbs : _y1LastAbs) };
 
                 function cmbLogPad(minPos, maxV) {
                     if (!(minPos > 0) || !(maxV > 0) || minPos === Infinity) return null;
@@ -3535,7 +3554,7 @@ def _build_combined_chart_section():
                 <div style="min-width:240px;position:relative;" id="cmbSideHost">
                     <div id="cmbSelCount" style="font-size:11px;color:#000;min-height:16px;margin-bottom:4px;padding-left:2px;"></div>
                     {search_box_html}
-                    <div id="cmbScrollBox" style="max-height:720px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#3a3b3e #111214;">{list_html}</div>
+                    <div id="cmbScrollBox" style="max-height:720px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#6b7178 #111214;">{list_html}</div>
                 </div>
                 <div style="width:1000px;">
                     <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;font-size:13px;">
