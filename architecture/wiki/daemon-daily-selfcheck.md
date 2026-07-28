@@ -29,7 +29,7 @@ alerts: "이상(⚠️) 있을 때만 발송 → 텔레그램 · 정상일은 �
 - ★**2026-07-15 설계 반전(사용자 지시)**: 원래는 정상이어도 매일 발송해 메시지 존재 자체가 liveness 신호인 dead-man's switch였으나, 매일의 정상 알림 소음이 그 값어치를 넘어선다고 판단 — warn이 없으면 발송을 생략하고 로컬 로그만 남긴다. **dead-man 감시 역할은 외부 워치독([[gha-daily-health-check]], 11:00 KST)이 승계** — 맥미니가 통째로 죽어도 GitHub 쪽에서 잡히므로 침묵이 감시 공백이 되지 않는다.
 
 - 수집: 봇 4종 running 여부 · **`schedule.tsv` 등재 타이머**(2026-07-16 기준 10종 — memento-telegram·wrap-principle-check 추가) stamp 신선도(OK n/N) · 24h 재시작 수 · 디스크 여유 · git-pull 실패연속/HEAD 나이. 타이머 목록은 하드코딩이 아니라 `schedule.tsv`를 읽어 열거 — 새 타이머는 그 표에 등재되는 순간 자동으로 감시망에 든다.
-- **웹 섹션(2026-07-11 W9 추가)**: Caddy(`com.antigravity.web`) running · ts.net 도달성(자기 ts.net을 tailscale IP로 resolve) · 게시 스냅숏(`current`) 나이. 2026-07-20 도달성 프로브 대상을 `/index.html` → `/watchlist/`로 교체 — 랜딩 폐지로 `/index.html`이 302 리다이렉트를 반환해 false DOWN으로 잡히던 문제([[web-caddy]]).
+- **웹 섹션(2026-07-11 W9 추가)**: Caddy(`com.antigravity.web`) running · ts.net 도달성(자기 ts.net을 tailscale IP로 resolve) · 게시 스냅숏(`current`) 나이. 2026-07-20 도달성 프로브 대상을 `/index.html` → `/watchlist/`로 교체 — 랜딩 폐지로 `/index.html`이 302 리다이렉트를 반환해 false DOWN으로 잡히던 문제([[web-caddy]]). 이 섹션은 **감지 전용**(warn만 냄) — 웹 데몬 3종의 포트 probe+자가복구(kickstart)는 별도 [[timer-daemon-health]](11:00)가 담당한다.
 - 실제 문제(봇 다운/타이머 STALE/디스크 부족/웹 다운)만 ⚠️ 라인이 되고, 그 warn 유무가 곧 발송 여부다. ℹ️ 라인(24h 재시작 수·대형 로그)은 참고 정보라 단독으로는 발송을 유발하지 않는다.
 - 실적 다이제스트(08:00) 후, 신선도 워치독(11:00) 전 배치.
 

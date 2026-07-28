@@ -27,6 +27,7 @@ alerts: ""
 
 - 52주 낙폭(DD), RSI(1M)는 fetch_index_returns 산출을 소비.
 - 종목 추가=universe_tickers.csv 행+타겟 주입(전체 2회 실행 금지). 멀티인스턴스는 별도 경로.
+- **중국 A주 지원(2026-07-27)**: `PREFIX_MAP`에 SHA→`.SS`(상하이/科创板)·SHE→`.SZ`(선전/创业板) 추가, 통화 CNY(`fetch_fx_to_krw`에 `CNYKRW=X`, 폴백 216). `THRESHOLD_BY_CURRENCY` CNY=0.20(科创板 20% 가격제한). 첫 종목 CXMT(SHA:688825, ChangXin Memory, 2026-07-27 상장). A주 시세 primary는 텐센트 gtimg, yfinance는 폴백.
 
 ## Reads
 - `universe_tickers.csv`

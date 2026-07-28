@@ -44,7 +44,7 @@ ETF 구성종목/비중 + 액티브 ETF 변동 + 미국 ETF 탭 페이지(대용
 - [[src-create-dashboard]] — 대시보드 생성기 (create_dashboard.py)
 - [[src-active-etf]] — 액티브 ETF 변동 (active_etf_changes.py)
 - [[timer-etf-collect]] — ETF 구성종목 수집 타이머 (etf-collect 16:30)
-- [[timer-us-etf-collect]] — 미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 09:00)
+- [[timer-us-etf-collect]] — 미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 08:30)
 
 ## Code
 - `execution/create_dashboard.py`

@@ -61,6 +61,7 @@ TYPE_META = {
     "external":        {"label": "External",   "bg": "#fff3e0", "line": "#ef6c00"},
     "pipeline_source": {"label": "Source",     "bg": "#f1f8e9", "line": "#558b2f"},
     "watcher":         {"label": "Watcher",    "bg": "#ede7f6", "line": "#5e35b1"},
+    "skill":           {"label": "Skill",      "bg": "#fdf2e0", "line": "#b26a00"},
 }
 DEFAULT_TYPE = {"label": "Other", "bg": "#f5f5f5", "line": "#757575"}
 
@@ -75,6 +76,7 @@ STATUS_META = {
 # `domain` field per component; when absent (transition period), the wiki falls
 # back to grouping by `type`.
 DOMAIN_META = {
+    "claude-tooling": {"label": "Claude 스킬 · 커맨드"},
     "market-kr":      {"label": "국내 시장"},
     "market-global":  {"label": "해외 · 매크로"},
     "tech-semis":     {"label": "반도체 · 테크"},
@@ -90,8 +92,10 @@ def domain_label(d):
         return "(미분류)"
     return DOMAIN_META.get(d, {"label": d})["label"]
 
-# 5 layers, top -> bottom on the page.
+# 6 layers, top -> bottom on the page. Layer 0 = 사람이 직접 부르는 진입점
+# (Claude Code 스킬·슬래시 커맨드) — 파이프라인의 맨 앞이라 최상단에 둔다.
 LAYERS = [
+    (0, "Claude Code — 스킬 · 커맨드", "Human entry points: /커맨드 · 스킬 (laptop ~/.claude)"),
     (1, "입력 · 노트북", "Input & notebooks — manual inputs, laptop scripts, external sources"),
     (2, "GitHub — 정본 · Pages · GHA", "Source of truth, GitHub Pages, GitHub Actions workflows"),
     (3, "컴퓨트 — VM → 맥미니", "Always-on compute: bots, timers, watchers (Oracle VM, migrating to Mac mini)"),
@@ -112,6 +116,8 @@ def layer_of(comp):
     """Assign a component to one of the 5 layers (top->bottom)."""
     t = (comp.get("type") or "").strip()
     r = (comp.get("runs_on") or "").strip()
+    if t == "skill":
+        return 0
     if t == "page":
         return 5
     if t in ("dataset", "store"):
@@ -198,10 +204,21 @@ def tip_attrs(c):
 # Minimal markdown -> html (headings, bold, lists, inline+fenced code)
 # ---------------------------------------------------------------------------
 def _inline_md(s):
+    """Inline markdown. Code spans are stashed BEFORE the bold pass so that a
+    glob inside backticks (`assets/**`, `execution/**`) cannot open a phantom
+    ``**`` pair that swallows the next real bold run and emits a stray
+    ``</strong>`` — which failed the html integrity check and killed the whole
+    daily refresh (2026-07-27 arch-daily FAIL, src-nav-style.md)."""
     s = html.escape(s)
-    s = re.sub(r"`([^`]+)`", lambda m: "<code>" + m.group(1) + "</code>", s)
+    spans = []
+
+    def _stash(m):
+        spans.append(m.group(1))
+        return "\x00%d\x00" % (len(spans) - 1)
+
+    s = re.sub(r"`([^`]+)`", _stash, s)
     s = re.sub(r"\*\*([^*]+)\*\*", lambda m: "<strong>" + m.group(1) + "</strong>", s)
-    return s
+    return re.sub(r"\x00(\d+)\x00", lambda m: "<code>" + spans[int(m.group(1))] + "</code>", s)
 
 
 def md_to_html(text):

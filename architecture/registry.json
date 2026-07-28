@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-07-26",
+  "updated": "2026-07-28",
   "projects": [
    "antigravity"
   ],
@@ -470,7 +470,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "08:50 매일",
    "status": "active",
-   "desc_md": "맥미니 상태를 매일 08:50 KST 점검해 **이상이 있을 때만** 텔레그램으로 요약을 보내는 launchd 데몬(`com.antigravity.daily-selfcheck`). 2026-07-11 컷오버로 라이브.\n\n- ★**2026-07-15 설계 반전(사용자 지시)**: 원래는 정상이어도 매일 발송해 메시지 존재 자체가 liveness 신호인 dead-man's switch였으나, 매일의 정상 알림 소음이 그 값어치를 넘어선다고 판단 — warn이 없으면 발송을 생략하고 로컬 로그만 남긴다. **dead-man 감시 역할은 외부 워치독([[gha-daily-health-check]], 11:00 KST)이 승계** — 맥미니가 통째로 죽어도 GitHub 쪽에서 잡히므로 침묵이 감시 공백이 되지 않는다.\n\n- 수집: 봇 4종 running 여부 · **`schedule.tsv` 등재 타이머**(2026-07-16 기준 10종 — memento-telegram·wrap-principle-check 추가) stamp 신선도(OK n/N) · 24h 재시작 수 · 디스크 여유 · git-pull 실패연속/HEAD 나이. 타이머 목록은 하드코딩이 아니라 `schedule.tsv`를 읽어 열거 — 새 타이머는 그 표에 등재되는 순간 자동으로 감시망에 든다.\n- **웹 섹션(2026-07-11 W9 추가)**: Caddy(`com.antigravity.web`) running · ts.net 도달성(자기 ts.net을 tailscale IP로 resolve) · 게시 스냅숏(`current`) 나이. 2026-07-20 도달성 프로브 대상을 `/index.html` → `/watchlist/`로 교체 — 랜딩 폐지로 `/index.html`이 302 리다이렉트를 반환해 false DOWN으로 잡히던 문제([[web-caddy]]).\n- 실제 문제(봇 다운/타이머 STALE/디스크 부족/웹 다운)만 ⚠️ 라인이 되고, 그 warn 유무가 곧 발송 여부다. ℹ️ 라인(24h 재시작 수·대형 로그)은 참고 정보라 단독으로는 발송을 유발하지 않는다.\n- 실적 다이제스트(08:00) 후, 신선도 워치독(11:00) 전 배치.",
+   "desc_md": "맥미니 상태를 매일 08:50 KST 점검해 **이상이 있을 때만** 텔레그램으로 요약을 보내는 launchd 데몬(`com.antigravity.daily-selfcheck`). 2026-07-11 컷오버로 라이브.\n\n- ★**2026-07-15 설계 반전(사용자 지시)**: 원래는 정상이어도 매일 발송해 메시지 존재 자체가 liveness 신호인 dead-man's switch였으나, 매일의 정상 알림 소음이 그 값어치를 넘어선다고 판단 — warn이 없으면 발송을 생략하고 로컬 로그만 남긴다. **dead-man 감시 역할은 외부 워치독([[gha-daily-health-check]], 11:00 KST)이 승계** — 맥미니가 통째로 죽어도 GitHub 쪽에서 잡히므로 침묵이 감시 공백이 되지 않는다.\n\n- 수집: 봇 4종 running 여부 · **`schedule.tsv` 등재 타이머**(2026-07-16 기준 10종 — memento-telegram·wrap-principle-check 추가) stamp 신선도(OK n/N) · 24h 재시작 수 · 디스크 여유 · git-pull 실패연속/HEAD 나이. 타이머 목록은 하드코딩이 아니라 `schedule.tsv`를 읽어 열거 — 새 타이머는 그 표에 등재되는 순간 자동으로 감시망에 든다.\n- **웹 섹션(2026-07-11 W9 추가)**: Caddy(`com.antigravity.web`) running · ts.net 도달성(자기 ts.net을 tailscale IP로 resolve) · 게시 스냅숏(`current`) 나이. 2026-07-20 도달성 프로브 대상을 `/index.html` → `/watchlist/`로 교체 — 랜딩 폐지로 `/index.html`이 302 리다이렉트를 반환해 false DOWN으로 잡히던 문제([[web-caddy]]). 이 섹션은 **감지 전용**(warn만 냄) — 웹 데몬 3종의 포트 probe+자가복구(kickstart)는 별도 [[timer-daemon-health]](11:00)가 담당한다.\n- 실제 문제(봇 다운/타이머 STALE/디스크 부족/웹 다운)만 ⚠️ 라인이 되고, 그 warn 유무가 곧 발송 여부다. ℹ️ 라인(24h 재시작 수·대형 로그)은 참고 정보라 단독으로는 발송을 유발하지 않는다.\n- 실적 다이제스트(08:00) 후, 신선도 워치독(11:00) 전 배치.",
    "code": [
     "launchd/system/daily_selfcheck.sh",
     "launchd/system/com.antigravity.daily-selfcheck.plist"
@@ -1460,7 +1460,7 @@
    "runs_on": "gha",
    "schedule_kst": "18:30 / 07:00 (gha-daily-universe)",
    "status": "active",
-   "desc_md": "관심 유니버스 종목 시세/지표를 yfinance로 수집해 `universe.json`+`universe_history.json` 생성.\n\n- 52주 낙폭(DD), RSI(1M)는 fetch_index_returns 산출을 소비.\n- 종목 추가=universe_tickers.csv 행+타겟 주입(전체 2회 실행 금지). 멀티인스턴스는 별도 경로.",
+   "desc_md": "관심 유니버스 종목 시세/지표를 yfinance로 수집해 `universe.json`+`universe_history.json` 생성.\n\n- 52주 낙폭(DD), RSI(1M)는 fetch_index_returns 산출을 소비.\n- 종목 추가=universe_tickers.csv 행+타겟 주입(전체 2회 실행 금지). 멀티인스턴스는 별도 경로.\n- **중국 A주 지원(2026-07-27)**: `PREFIX_MAP`에 SHA→`.SS`(상하이/科创板)·SHE→`.SZ`(선전/创业板) 추가, 통화 CNY(`fetch_fx_to_krw`에 `CNYKRW=X`, 폴백 216). `THRESHOLD_BY_CURRENCY` CNY=0.20(科创板 20% 가격제한). 첫 종목 CXMT(SHA:688825, ChangXin Memory, 2026-07-27 상장). A주 시세 primary는 텐센트 gtimg, yfinance는 폴백.",
    "code": [
     "execution/fetch_universe.py",
     "execution/fetch_index_returns.py"
@@ -1691,7 +1691,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "16:30 / 18:00 (etf-collect 타이머)",
    "status": "active",
-   "desc_md": "전체 ETF 목록 + 구성종목/비중을 etfcheck 등에서 수집해 `etf_data.db`(SQLite)에 적재.\n\n- idempotent(성공 시 재실행 스킵). 봇에서 분리된 타이머가 소유([[timer-etf-collect]] 16:30 / [[timer-etf-collect-retry]] 18:00).\n- etf.html 액티브 탭·19:00 알림의 원천 DB.\n- ★**VM-side 수집 + 정본 병합으로 재설계(2026-07-21)**: 2026-07-11 맥미니 이전 후 맥미니 공인 IP가 한국 금융 소스에 직접 도달 불가 — etfcheck WAF가 IP 차단(정적 파일까지 403), KRX OpenAPI(Akamai)는 SSH SOCKS 터널의 MTU 문제로 타임아웃. 반면 Oracle VM([[infra-vm-macmini]])은 두 소스 모두 직결 200이라, `run_etf_collect.sh`가 **오케스트레이터**로 바뀌었다: ① 수집기 코드를 VM에 scp 동기화 → ② `make_etf_seed.py`로 정본에 이미 있는 당일 목록을 소형 전송 DB에 시드(KRX 재조회 회피 = KRX 간헐장애 내성) → ③ VM에서 `ETF_DB_PATH=전송DB collect_etf_daily.py <날짜>` 실행(구성종목만 etfcheck) + WAL 체크포인트 → ④ 전송 DB scp 회수 → ⑤ `import_etf_transfer.py --min-ok 1000`으로 완결성 검증 후 맥미니 정본(`etf_data.db` ~635M)에 원자적 병합(미달 시 정본 미변경·전송 DB 보존해 재-import 가능). `collect_etf_daily.py`는 날짜 인자와 `ETF_DB_PATH` override를 받도록 확장됐다.\n- (구 방식) 맥미니 로컬 수집 + etfcheck만 SSH SOCKS 프록시(`ETFCHECK_PROXY`)로 우회한 방식은 KRX가 계속 실패해 폐기 — `etfcheck_client.py`의 `ETFCHECK_PROXY` 지원 코드만 잔존.\n- etfcheck 내부 API 키는 사이트 개편마다 로테이션(2026-07-08 → 2026-07-21 `#$dser#GVEWS329@`, 30s 인증 버킷·`Referer` 필수).",
+   "desc_md": "전체 ETF 목록 + 구성종목/비중을 etfcheck 등에서 수집해 `etf_data.db`(SQLite)에 적재.\n\n- idempotent(성공 시 재실행 스킵). 봇에서 분리된 타이머가 소유([[timer-etf-collect]] 16:30 / [[timer-etf-collect-retry]] 18:00).\n- etf.html 액티브 탭·19:00 알림의 원천 DB.\n- ★**VM-side 수집 + 정본 병합으로 재설계(2026-07-21)**: 2026-07-11 맥미니 이전 후 맥미니 공인 IP가 한국 금융 소스에 직접 도달 불가 — etfcheck WAF가 IP 차단(정적 파일까지 403), KRX OpenAPI(Akamai)는 SSH SOCKS 터널의 MTU 문제로 타임아웃. 반면 Oracle VM([[infra-vm-macmini]])은 두 소스 모두 직결 200이라, `run_etf_collect.sh`가 **오케스트레이터**로 바뀌었다: ① 수집기 코드를 VM에 scp 동기화 → ② `make_etf_seed.py`로 정본에 이미 있는 당일 목록을 소형 전송 DB에 시드(KRX 재조회 회피 = KRX 간헐장애 내성) → ③ VM에서 `ETF_DB_PATH=전송DB collect_etf_daily.py <날짜>` 실행(구성종목만 etfcheck) + WAL 체크포인트 → ④ 전송 DB scp 회수 → ⑤ `import_etf_transfer.py --min-ok 1000`으로 완결성 검증 후 맥미니 정본(`etf_data.db` ~635M)에 원자적 병합(미달 시 정본 미변경·전송 DB 보존해 재-import 가능). `collect_etf_daily.py`는 날짜 인자와 `ETF_DB_PATH` override를 받도록 확장됐다.\n- (구 방식) 맥미니 로컬 수집 + etfcheck만 SSH SOCKS 프록시(`ETFCHECK_PROXY`)로 우회한 방식은 KRX가 계속 실패해 폐기 — `etfcheck_client.py`의 `ETFCHECK_PROXY` 지원 코드만 잔존.\n- etfcheck 내부 API 키(Checkclient 해시 시드)는 사이트가 웹팩 모듈로 옮긴 뒤 수시 로테이션(2026-07 6일새 4번) → **하드코딩 추격을 끝내고 `build.js`에서 런타임 추출**(2026-07-27, `etfcheck_client._resolve_key`). 웹팩 모듈 리터럴 `{key:\"…\"}` 유일 매칭을 뽑아 프로세스당 1회 캐시(`_KEY_TTL` 1h, build.js ~5.4MB), 매칭 2건 이상이면 구조 변경으로 보고 폴백 상수 사용, 403 만나면 force 재추출로 장중 로테이션 자가치유. 30s 인증 버킷·`Referer`·`connect.sid` 세션 쿠키는 여전히 필수. (하드코딩 키가 07-22~27 전면 403의 직접 원인이었다.)",
    "code": [
     "execution/etf_collector/collect_etf_daily.py",
     "execution/etf_collector/etf_db.py",
@@ -2258,11 +2258,11 @@
    "project": "antigravity",
    "domain": "market-global",
    "type": "timer",
-   "name": "미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 09:00)",
+   "name": "미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 08:30)",
    "runs_on": "vm_macmini",
-   "schedule_kst": "09:00 화~토",
+   "schedule_kst": "08:30 화~토",
    "status": "active",
-   "desc_md": "미국(+홍콩) ETF 28종의 NAV·AUM·종가·보수와 USDKRW 환율, 삼성전자·SK하이닉스 보유비중을 yfinance로 수집해 `us_etf_history.csv`에 적재하는 타이머(`run_us_etf_collect.sh` → `execution/etf_collector/collect_us_etf.py`). 2026-07-19 신설.\n\n- 대상: 반도체 지수형·레버리지(SOXX/SMH/SOXL/SOXS 등), 메모리(DRAM/RAM), 홍콩 삼전·하이닉스 2x(7747/7709.HK), 한국 단일국가(EWY/FLKR), MSCI EM·FTSE 선진 등 한국 포함/미포함 대조군 — 대상 목록·한국 비중 추정 규칙은 `us_etf_config.py` 단일 출처(YTD 종가 백필 포함).\n- 한국 비중 변동 4지표(총 AUM·실투자·삼전 노출·하이닉스 노출, 원화)를 Sisyphe-Bot으로 화~토 아침 발송(dedup=`.us_etf_alert_sent.json`, USDKRW 델타 포함).\n- 수집 후 `etf.html` 미국 ETF 서브탭을 재생성(`create_dashboard.generate_etf_html`, main 미추적 로컬 산출물) → 게시는 래퍼 publish_snapshot이 담당. `us_etf_history.csv`만 race-safe push.\n- 홍콩 2종(.HK)은 yfinance NAV가 stale이라 가격(HKD)·AUM(USD)만 수집. 09:00 화~토 = 미국 마감·NAV 확정 후이자 KRX 개장 전.\n- flock으로 래퍼 중복 실행 방지. Timeout/실패 시 `sisyphe-bot-notify@us-etf-collect`.",
+   "desc_md": "미국(+홍콩) ETF 28종의 NAV·AUM·종가·보수와 USDKRW 환율, 삼성전자·SK하이닉스 보유비중을 yfinance로 수집해 `us_etf_history.csv`에 적재하는 타이머(`run_us_etf_collect.sh` → `execution/etf_collector/collect_us_etf.py`). 2026-07-19 신설.\n\n- 대상: 반도체 지수형·레버리지(SOXX/SMH/SOXL/SOXS 등), 메모리(DRAM/RAM), 홍콩 삼전·하이닉스 2x(7747/7709.HK), 한국 단일국가(EWY/FLKR), MSCI EM·FTSE 선진 등 한국 포함/미포함 대조군 — 대상 목록·한국 비중 추정 규칙은 `us_etf_config.py` 단일 출처(YTD 종가 백필 포함).\n- 한국 비중 변동 4지표(총 AUM·실투자·삼전 노출·하이닉스 노출, 원화)를 Sisyphe-Bot으로 화~토 아침 발송(dedup=`.us_etf_alert_sent.json`, USDKRW 델타 포함).\n- 수집 후 `etf.html` 미국 ETF 서브탭을 재생성(`create_dashboard.generate_etf_html`, main 미추적 로컬 산출물) → 게시는 래퍼 publish_snapshot이 담당. `us_etf_history.csv`만 race-safe push.\n- 홍콩 2종(.HK)은 yfinance NAV가 stale이라 가격(HKD)·AUM(USD)만 수집. 08:30 화~토 = 미국 마감·NAV 확정 후이자 KRX 개장 전.\n- flock으로 래퍼 중복 실행 방지. Timeout/실패 시 `sisyphe-bot-notify@us-etf-collect`.",
    "code": [
     "launchd/timers/com.antigravity.us-etf-collect.plist",
     "scripts/run_us_etf_collect.sh",
@@ -2350,6 +2350,238 @@
    ],
    "depends_on": [
     "ext-data-apis"
+   ]
+  },
+  {
+   "id": "timer-daemon-health",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "timer",
+   "name": "웹 데몬 헬스체크 타이머 (11:00, probe+자가복구)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "11:00 매일",
+   "status": "active",
+   "desc_md": "2026-07-27 신설. 매일 11:00 KST AoE 웹 데몬 3종의 포트를 probe하고 다운이면 `launchctl kickstart -k`로 자가복구하는 launchd 타이머(`com.antigravity.daemon-health` → `run_timer_job.sh daemon-health` → `scripts/check_daemon_ports.sh`).\n\n- 대상 3종(다운 시 사용자 체감이 서로 다름): [[daemon-watchlist-quoteboard]] `8778`(첫 화면/리다이렉트 대상 → 죽으면 루트부터 502), [[daemon-datalake-webui]] `8787`(Wiki·Earnings 탭 502), [[daemon-plan-api]] `8790`(Memento/Ledger 데이터 로드·저장 실패, 페이지 자체는 뜸).\n- ★**KeepAlive가 못 살리는 유형을 겨냥**: 세 데몬 모두 launchd `KeepAlive=true`로 자동 재기동되지만, **좀비 프로세스가 포트를 점유해 bind가 반복 실패**하는 경우엔 재기동이 무한 실패한다(실사례: 2026-07-16 plan-api 8790 좀비 점유 → 502 지속). 이 타이머가 그 사각지대를 메운다.\n- 동작: `curl -m5`로 probe(2xx/3xx=정상) → 다운이면 `kickstart -k system/com.antigravity.<name>` 1회 → 대기 후 재probe → 텔레그램 보고. 대기시간은 watchlist·datalake-webui 20초, plan-api 130초(기동 ~120초). run_timer_job 타임아웃 600초.\n- 결과별 발화: 전부 정상(무개입)=**무음 exit 0** / kickstart로 복구=텔레그램 알림+exit 0 / kickstart 후에도 잔존=텔레그램 알림+**exit 1**(러너가 notify_failure 추가 발화, \"좀비 포트 점유 의심: lsof -ti :PORT\" 안내).\n- ★**root 실행(의도)**: plist에 `UserName` 없음 = root — `kickstart -k system/*` 자가복구에 root 권한이 필요하다(수동 user 실행 시 probe만 유효, kickstart는 무효). `install_timers.sh` NAMES 목록에 등재돼 다른 타이머와 함께 설치·enable된다.\n- [[daemon-daily-selfcheck]](08:50)의 웹 섹션이 Caddy·도달성·스냅숏 나이를 **감지만** 하던 것을 보완 — 이쪽은 데몬 포트를 직접 probe하고 **자가복구까지** 수행한다.",
+   "code": [
+    "launchd/timers/com.antigravity.daemon-health.plist",
+    "scripts/check_daemon_ports.sh"
+   ],
+   "depends_on": [
+    "infra-vm-macmini",
+    "infra-telegram",
+    "daemon-watchlist-quoteboard",
+    "daemon-datalake-webui",
+    "daemon-plan-api"
+   ],
+   "alerts": "kickstart 개입 시에만 텔레그램(전부 정상=무음) · 복구 실패 잔존 시 exit 1 → run_timer_job notify_failure 추가 발화"
+  },
+  {
+   "id": "cmd-aum",
+   "project": "antigravity",
+   "domain": "claude-tooling",
+   "type": "skill",
+   "name": "/aum — WRAP 일일 AUM 입력",
+   "runs_on": "laptop",
+   "schedule_kst": "호출 시",
+   "status": "active",
+   "desc_md": "WRAP 일일 AUM 입력을 끝까지 자동 처리하는 커맨드. `add_aum.py` 로 Wrap_NAV.xlsx AUM 시트에 기록 → 워처가 push → recalc GHA 가 기준가 재계산 → **라이브 URL 로 검증**까지가 1회분.\n\n- 상품 목록은 `execution/wrap_config.py` 레지스트리에서 파생 — 청산된 목표전환형에 입력하면 에러가 정상이다.\n- HOLD 엣지케이스(양쪽 xlsx 수정)는 워처가 push 를 보류하고 `Wrap_NAV_push.HOLD` 를 남긴다.",
+   "code": [
+    "~/.claude/commands/aum.md",
+    "add_aum.py"
+   ],
+   "writes": [
+    "store-wrap-nav-xlsx"
+   ],
+   "depends_on": [
+    "watcher-wrap-nav",
+    "gha-recalc-wrap-nav",
+    "infra-laptop"
+   ]
+  },
+  {
+   "id": "cmd-exercise-feedback",
+   "project": "antigravity",
+   "domain": "claude-tooling",
+   "type": "skill",
+   "name": "/운동피드백 — 선유듀오 피드백 팁 추가",
+   "runs_on": "laptop",
+   "schedule_kst": "호출 시",
+   "status": "active",
+   "desc_md": "선유듀오 운동봇의 피드백 팁을 `seonyuduo_feedback_tips.json` 에 정규화·검증해 추가하고 VM 에 배포한다.\n\n- 배포는 반드시 `scripts/deploy.sh` — 수동 python 실행은 파일 락으로 차단된다.\n- **16:00~17:00 KST 배포 금지**(진행 중 잡 강제 종료).",
+   "code": [
+    ".claude/commands/운동피드백.md"
+   ],
+   "depends_on": [
+    "bot-seonyuduo-exercise"
+   ]
+  },
+  {
+   "id": "cmd-operating-report",
+   "project": "antigravity",
+   "domain": "claude-tooling",
+   "type": "skill",
+   "name": "/운용보고서 — 월간 운용보고서 4종",
+   "runs_on": "laptop",
+   "schedule_kst": "호출 시",
+   "status": "active",
+   "desc_md": "라이프자산운용 월간운용보고서 docx 4종을 생성한다. 분기말에는 NH 분기운용보고서 xls 2종이 추가된다.\n\n- 편입 종목 검증은 Wrap_NAV.xlsx 의 **NEW 시트** 기준.\n- 수익률·기준가는 기존 산출물을 재사용하고, 문서 조판만 커맨드가 담당한다.",
+   "code": [
+    "~/.claude/commands/운용보고서.md"
+   ],
+   "reads": [
+    "store-wrap-nav-xlsx"
+   ],
+   "depends_on": [
+    "ext-notion",
+    "infra-laptop"
+   ]
+  },
+  {
+   "id": "cmd-target-transform",
+   "project": "antigravity",
+   "domain": "claude-tooling",
+   "type": "skill",
+   "name": "/목표전환형 — 랩 생성·청산 일괄",
+   "runs_on": "laptop",
+   "schedule_kst": "호출 시",
+   "status": "active",
+   "desc_md": "목표전환형 랩의 **운용 개시 / 목표달성·청산**을 7개 파일 13곳에 걸쳐 일괄 처리하고 검증·푸시까지 수행한다.\n\n- 정본은 `execution/wrap_config.py` 단일 레지스트리 — 엔트리 1건 추가/수정이면 8개 스크립트가 나머지를 파생한다.\n- 청산은 **장 마감 후 최종 NAV 산출 뒤**에만. `portfolio_config` 는 주석 처리 대신 `end_date` 를 부여한다(주석 시 마지막 1~2일 NAV 누락).\n- 실행 체인: calculate_wrap_nav → calculate_returns → create_portfolio_tables → create_dashboard.",
+   "code": [
+    "~/.claude/commands/목표전환형.md (노트북 로컬 · main 미추적)",
+    ".claude/rules/target-transform.md"
+   ],
+   "writes": [
+    "store-wrap-nav-xlsx"
+   ],
+   "depends_on": [
+    "src-create-dashboard",
+    "src-create-portfolio-tables",
+    "infra-laptop"
+   ]
+  },
+  {
+   "id": "cmd-urgent-comment",
+   "project": "antigravity",
+   "domain": "claude-tooling",
+   "type": "skill",
+   "name": "/긴급코멘트 — 급락일 시장 코멘트",
+   "runs_on": "laptop",
+   "schedule_kst": "호출 시",
+   "status": "active",
+   "desc_md": "급락일에 WRAP 고객 송부용 긴급 시장 코멘트 docx 를 만든다(260707 확정 양식).\n\n- 파일명 규약 `YYMMDD_라이프자산_WRAP…` — 요약본과 본문 2종.\n- 지수·업종·수급 숫자는 대시보드 산출물에서 가져와 사람이 쓴 코멘트에 얹는다.",
+   "code": [
+    "~/.claude/commands/긴급코멘트.md"
+   ],
+   "depends_on": [
+    "infra-laptop"
+   ]
+  },
+  {
+   "id": "cmd-weekly-report",
+   "project": "antigravity",
+   "domain": "claude-tooling",
+   "type": "skill",
+   "name": "/주간보고 — 금요일 WRAP 주간 보고",
+   "runs_on": "laptop",
+   "schedule_kst": "호출 시",
+   "status": "active",
+   "desc_md": "매주 금요일 대표 보고용 주간 WRAP 보고 docx 와 채팅 게시용 요약 메시지를 만든다.\n\n- 기준은 **목요일 종가**(1W 구간), 상품별 수익률·기여 종목을 표로 싣는다.\n- 요약은 문서와 별도로 채팅에 그대로 붙일 수 있는 형태로 출력한다.",
+   "code": [
+    "~/.claude/commands/주간보고.md",
+    "generate_weekly_report.py"
+   ],
+   "reads": [
+    "store-wrap-nav-xlsx"
+   ],
+   "depends_on": [
+    "infra-laptop"
+   ]
+  },
+  {
+   "id": "skill-design",
+   "project": "antigravity",
+   "domain": "claude-tooling",
+   "type": "skill",
+   "name": "/설계 스킬 (착수 브리프 + codex 병렬설계)",
+   "runs_on": "laptop",
+   "schedule_kst": "호출 시",
+   "status": "active",
+   "desc_md": "새 기능·페이지·파이프라인·구조 변경을 **착수**할 때 부르는 스킬. Claude 혼자 판단하지 않게 만드는 것이 목적이다.\n\n- 1단계 **4칸 브리프**를 빈칸 없이 확정: 완료 기준 · 레퍼런스 · 데이터 출처 · 되돌리기 위험.\n- 2단계 codex(gpt-5.6-sol)와 **병렬 설계** — brief.md 를 stdin 으로 넘긴다(codex 는 세션 맥락이 없으므로 코드를 브리프에 붙여넣어야 한다).\n- 3단계 두 설계의 **차이만** 취합해 추천안 1개로 좁힌다.\n- 단순 수정·버그픽스·값 갱신에는 쓰지 않는다.",
+   "code": [
+    "~/.claude/skills/설계/SKILL.md"
+   ],
+   "depends_on": [
+    "infra-laptop"
+   ]
+  },
+  {
+   "id": "skill-finance-pack",
+   "project": "antigravity",
+   "domain": "claude-tooling",
+   "type": "skill",
+   "name": "금융 분석 스킬 팩 (설치형 8종)",
+   "runs_on": "laptop",
+   "schedule_kst": "호출 시",
+   "status": "active",
+   "desc_md": "직접 만든 것이 아니라 **설치해 둔** 범용 금융·리서치 분석 스킬 8종. dart/sec-edgar MCP 와 함께 도입했다.\n\n- 기업 경쟁력 11차원(competitive-analysis) · 지배구조/네트워크(corporate-network-analysis) · 실적 업데이트 리포트(earnings-analysis) · 성장주 프레임(growth-stock-analysis).\n- PDF 셀사이드 리포트 판독(investment-report-reader) · 공급망 전가 분석(supply-chain-pass-through) · 테마 리서치(thematic-investment-research) · 회계/재무 종합(finance-super-skill).\n- 이 시스템의 파이프라인과 직접 연결되지는 않는다(분석 작업용 도구).",
+   "code": [
+    "~/.claude/skills/ (competitive-analysis · corporate-network-analysis · earnings-analysis · finance-super-skill · growth-stock-analysis · investment-report-reader · supply-chain-pass-through · thematic-investment-research)"
+   ],
+   "depends_on": [
+    "infra-laptop"
+   ]
+  },
+  {
+   "id": "skill-seminar-chart",
+   "project": "antigravity",
+   "domain": "claude-tooling",
+   "type": "skill",
+   "name": "seminar-chart 스킬 (발표·PPT 정적 차트)",
+   "runs_on": "laptop",
+   "schedule_kst": "호출 시",
+   "status": "active",
+   "desc_md": "발표·PPT·세미나용 matplotlib 차트를 'Market 대시보드' 양식으로 그리는 규칙 모음.\n\n- 확정 규칙: 점선 그리드 · 위/오른쪽 테두리 제거 · **끝값만 라벨(동그라미)** · 하단 범례 · 제목/Y축 라벨 없음 · Pretendard · 좌우 2패널 비교.\n- 재사용 헬퍼 `chart_styles.py` 가 위 룩을 자동 적용한다.\n- 데이터 수집은 범위 밖 — '룩과 규칙'만 담당한다.",
+   "code": [
+    "~/.claude/skills/seminar-chart/SKILL.md",
+    "~/.claude/skills/seminar-chart/chart_styles.py"
+   ],
+   "depends_on": [
+    "infra-laptop"
+   ]
+  },
+  {
+   "id": "skill-web-chart",
+   "project": "antigravity",
+   "domain": "claude-tooling",
+   "type": "skill",
+   "name": "web-chart 스킬 (웹 인터랙티브 차트 표준)",
+   "runs_on": "laptop",
+   "schedule_kst": "호출 시",
+   "status": "active",
+   "desc_md": "대시보드 양식의 웹 인터랙티브 차트(Chart.js) 통일 표준. WRAP CHART 탭·Market DATA 차트·단독 뷰어에서 확립된 규칙을 한 곳에 모았다.\n\n- 사이드바 계열 토글 · 트레이딩뷰식 크로스헤어+데이터 카드 · 기간 버튼 · 정규화/YTD/Log · Y축 5~95% 커버 · 끝값 라벨(겹침 회피) · **DPR 4 고해상 Download**.\n- 정적 PNG(발표용)는 [[skill-seminar-chart]] 담당 — 별개 스킬이다.",
+   "code": [
+    "~/.claude/skills/web-chart/SKILL.md"
+   ],
+   "depends_on": [
+    "infra-laptop",
+    "page-wrap"
+   ]
+  },
+  {
+   "id": "cmd-chart",
+   "project": "antigravity",
+   "domain": "claude-tooling",
+   "type": "skill",
+   "name": "/차트 — 발표용 차트 호출",
+   "runs_on": "laptop",
+   "schedule_kst": "호출 시",
+   "status": "active",
+   "desc_md": "발표·PPT용 차트를 그릴 때 부르는 얇은 진입점. 실제 규칙은 [[skill-seminar-chart]] 가 갖고 있고 이 커맨드는 그 스킬을 호출한다.",
+   "code": [
+    "~/.claude/commands/차트.md"
+   ],
+   "depends_on": [
+    "skill-seminar-chart"
    ]
   },
   {
@@ -2617,7 +2849,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "import 시 (상시)",
    "status": "active",
-   "desc_md": "AoE 전 페이지 공통 스타일의 유일한 출처 (2026-07-26 네비 드리프트 근본해결).\n\n- 상단 네비 정본: NAV_CSS(+scoped)·nav_html(active)·materialize(마커 치환).\n- 다크 PALETTE·라이트 WRAP_PALETTE: compose 주입 CSS 와 앱 3종(var(--aoe-*))·WRAP(var(--wrap-*)) 이 파생.\n- H2C_FREEZE_JS: html2canvas 캡처 색고정 (틴트 셀 #333 굳음 버그 차단).\n- 소비자: create_dashboard·create_architecture(재생성 시) / webui·quoteboard 서버(기동 시 치환) / compose(publish 시 교체).\n- ★수정 규칙: 네비·색 변경은 반드시 이 파일에서만. 다크 주입 CSS 에 nav !important 재단언 금지.",
+   "desc_md": "AoE 전 페이지 공통 스타일의 유일한 출처 (2026-07-26 네비 드리프트 근본해결).\n\n- 상단 네비 정본: NAV_CSS(+scoped)·nav_html(active)·materialize(마커 치환).\n- 다크 PALETTE·라이트 WRAP_PALETTE: compose 주입 CSS 와 앱 3종(var(--aoe-*))·WRAP(var(--wrap-*)) 이 파생.\n- H2C_FREEZE_JS: html2canvas 캡처 색고정 (틴트 셀 #333 굳음 버그 차단).\n- **벤더 자산 셀프호스팅(2026-07-27)**: ts.net AoE 페이지의 Pretendard·Chart.js(v4.5.1 고정)·html2canvas(1.4.1)를 CDN 대신 로컬 `assets/vendor/`에서 서빙 — 상수 `VENDOR_PRETENDARD_CSS`/`VENDOR_CHART_JS`/`VENDOR_HTML2CANVAS_JS`(절대경로 `/assets/vendor/…`). `publish_snapshot.sh`가 `assets/**`를 스냅숏에 포함, webui 등 앱도 로컬 경로 사용. ★**WRAP만 CDN 유지** — gh-pages 프로젝트 사이트(`/repo/` 하위)에선 절대경로가 깨지므로 wrap 코드는 이 상수를 쓰지 않는다.\n- 소비자: create_dashboard·create_architecture(재생성 시) / webui·quoteboard 서버(기동 시 치환) / compose(publish 시 교체).\n- ★수정 규칙: 네비·색 변경은 반드시 이 파일에서만. 다크 주입 CSS 에 nav !important 재단언 금지.",
    "code": [
     "execution/nav_style.py"
    ]

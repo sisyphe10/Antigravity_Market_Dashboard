@@ -1,10 +1,23 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 132 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 144 components._
 
-Updated: 2026-07-26
+Updated: 2026-07-28
 
 ## By domain
+
+### Claude 스킬 · 커맨드 (11)
+- [/aum — WRAP 일일 AUM 입력](cmd-aum.md) — Skill
+- [/긴급코멘트 — 급락일 시장 코멘트](cmd-urgent-comment.md) — Skill
+- [/목표전환형 — 랩 생성·청산 일괄](cmd-target-transform.md) — Skill
+- [/설계 스킬 (착수 브리프 + codex 병렬설계)](skill-design.md) — Skill
+- [/운동피드백 — 선유듀오 피드백 팁 추가](cmd-exercise-feedback.md) — Skill
+- [/운용보고서 — 월간 운용보고서 4종](cmd-operating-report.md) — Skill
+- [/주간보고 — 금요일 WRAP 주간 보고](cmd-weekly-report.md) — Skill
+- [/차트 — 발표용 차트 호출](cmd-chart.md) — Skill
+- [seminar-chart 스킬 (발표·PPT 정적 차트)](skill-seminar-chart.md) — Skill
+- [web-chart 스킬 (웹 인터랙티브 차트 표준)](skill-web-chart.md) — Skill
+- [금융 분석 스킬 팩 (설치형 8종)](skill-finance-pack.md) — Skill
 
 ### 국내 시장 (29)
 - [Daily Disclosures DART+KIND (16:30)](gha-daily-disclosures.md) — GHA
@@ -55,7 +68,7 @@ Updated: 2026-07-26
 - [universe_lab.html (Universe Lab)](page-universe-lab.md) — Page
 - [대만 월매출 (fetch_taiwan_revenue.py)](src-taiwan-revenue.md) — Source
 - [마스터 시장 크롤러 (market_crawler.py)](src-market-crawler.md) — Source
-- [미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 09:00)](timer-us-etf-collect.md) — Timer
+- [미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 08:30)](timer-us-etf-collect.md) — Timer
 - [월별 수익률 11지수 (fetch_monthly_returns.py)](src-monthly-returns.md) — Source
 - [유니버스 수집 (fetch_universe.py)](src-universe.md) — Source
 - [일본 CAPEX 지표 (fetch_japan_capex.py)](src-japan-capex.md) — Source
@@ -115,7 +128,7 @@ Updated: 2026-07-26
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — Bot
 - [투자일지 시장데이터 (fetch_journal_data.py)](src-journal-data.md) — Source
 
-### 운영 · 인프라 (35)
+### 운영 · 인프라 (36)
 - [AoE 스타일 정본 (nav_style.py)](src-nav-style.md) — Source
 - [architecture.html (아키텍처)](page-architecture.md) — Page
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — Infra
@@ -143,6 +156,7 @@ Updated: 2026-07-26
 - [비활성 워크플로 (weather · calendar · portfolio-report)](gha-disabled.md) — GHA
 - [아키텍처 자동 최신화 타이머 (21:40, claude 헤드리스)](timer-architecture-daily.md) — Timer
 - [외부 데이터 API/소스 집합](ext-data-apis.md) — External
+- [웹 데몬 헬스체크 타이머 (11:00, probe+자가복구)](timer-daemon-health.md) — Timer
 - [웹 서빙 (Caddy · com.antigravity.web)](web-caddy.md) — Infra
 - [일일 셀프체크 다이제스트 (08:50, 이상 시에만 발송)](daemon-daily-selfcheck.md) — Timer
 - [작업용 노트북 (ASUS Vivobook, Windows)](infra-laptop.md) — Infra
@@ -160,7 +174,7 @@ Updated: 2026-07-26
 - [Sisyphe-Bot (펀드/일상 텔레그램 봇)](bot-sisyphe.md) — 상시 (내부 잡 05:00~23:00), active
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — 상시 (06:00 다이제스트 등), active
 
-### Timer (16)
+### Timer (17)
 - [ETF 구성종목 수집 타이머 (etf-collect 16:30)](timer-etf-collect.md) — 16:30 매일, active
 - [ETF 수집 재시도 타이머 (etf-collect-retry 18:00)](timer-etf-collect-retry.md) — 18:00 매일, active
 - [Featured KIS 수집 타이머 (15:50, 신고가)](timer-featured-kis.md) — 15:50 매일, active
@@ -169,10 +183,11 @@ Updated: 2026-07-26
 - [WRAP 원칙 점검 타이머 (17:10 평일 변화기반 + 일 20:00 전체)](timer-wrap-principle-check.md) — 17:10 평일 + 일 20:00 (주간 전체), active
 - [랜딩 하이라이트 타이머 (18:45)](timer-landing-highlights.md) — 18:45 매일, active
 - [메모리 사이클 플랜 알림 타이머 (07:45)](timer-memory-cycle-alert.md) — 07:45 매일, active
-- [미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 09:00)](timer-us-etf-collect.md) — 09:00 화~토, active
+- [미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 08:30)](timer-us-etf-collect.md) — 08:30 화~토, active
 - [실적봇 타이머 (earnings-bot)](timer-earnings-bot.md) — 08:00 매일, active
 - [아키텍처 자동 최신화 타이머 (21:40, claude 헤드리스)](timer-architecture-daily.md) — 21:40 매일, active
 - [액티브 ETF 변동 알림 타이머 (19:00)](timer-etf-active-alert.md) — 19:00 매일, active
+- [웹 데몬 헬스체크 타이머 (11:00, probe+자가복구)](timer-daemon-health.md) — 11:00 매일, active
 - [일일 셀프체크 다이제스트 (08:50, 이상 시에만 발송)](daemon-daily-selfcheck.md) — 08:50 매일, active
 - [자문지 메일 발송 폴러 (send-advisory-emails 60초)](timer-advisory-emails.md) — 60초 폴러 (상시), active
 - [종목마스터 주간 갱신 타이머 (토 09:00)](timer-update-stock-master.md) — 토 09:00, active
@@ -306,9 +321,30 @@ Updated: 2026-07-26
 - [Wrap_NAV 워처 (watch_wrap_nav.py)](watcher-wrap-nav.md) — 상시, active
 - [크래시 루프 워처 (*/5)](daemon-crash-watcher.md) — */5분, planned
 
+### Skill (11)
+- [/aum — WRAP 일일 AUM 입력](cmd-aum.md) — 호출 시, active
+- [/긴급코멘트 — 급락일 시장 코멘트](cmd-urgent-comment.md) — 호출 시, active
+- [/목표전환형 — 랩 생성·청산 일괄](cmd-target-transform.md) — 호출 시, active
+- [/설계 스킬 (착수 브리프 + codex 병렬설계)](skill-design.md) — 호출 시, active
+- [/운동피드백 — 선유듀오 피드백 팁 추가](cmd-exercise-feedback.md) — 호출 시, active
+- [/운용보고서 — 월간 운용보고서 4종](cmd-operating-report.md) — 호출 시, active
+- [/주간보고 — 금요일 WRAP 주간 보고](cmd-weekly-report.md) — 호출 시, active
+- [/차트 — 발표용 차트 호출](cmd-chart.md) — 호출 시, active
+- [seminar-chart 스킬 (발표·PPT 정적 차트)](skill-seminar-chart.md) — 호출 시, active
+- [web-chart 스킬 (웹 인터랙티브 차트 표준)](skill-web-chart.md) — 호출 시, active
+- [금융 분석 스킬 팩 (설치형 8종)](skill-finance-pack.md) — 호출 시, active
+
 ## By project
 
-### antigravity (132)
+### antigravity (144)
+- [/aum — WRAP 일일 AUM 입력](cmd-aum.md) — Skill
+- [/긴급코멘트 — 급락일 시장 코멘트](cmd-urgent-comment.md) — Skill
+- [/목표전환형 — 랩 생성·청산 일괄](cmd-target-transform.md) — Skill
+- [/설계 스킬 (착수 브리프 + codex 병렬설계)](skill-design.md) — Skill
+- [/운동피드백 — 선유듀오 피드백 팁 추가](cmd-exercise-feedback.md) — Skill
+- [/운용보고서 — 월간 운용보고서 4종](cmd-operating-report.md) — Skill
+- [/주간보고 — 금요일 WRAP 주간 보고](cmd-weekly-report.md) — Skill
+- [/차트 — 발표용 차트 호출](cmd-chart.md) — Skill
 - [AoE 스타일 정본 (nav_style.py)](src-nav-style.md) — Source
 - [architecture.html (아키텍처)](page-architecture.md) — Page
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — Infra
@@ -370,6 +406,7 @@ Updated: 2026-07-26
 - [SEIBro TOP50 (fetch_seibro_data.py)](src-seibro.md) — Source
 - [seibro.html (SEIBro)](page-seibro.md) — Page
 - [SemiAnalysis 소스 (sources/semianalysis.py)](src-semianalysis.md) — Source
+- [seminar-chart 스킬 (발표·PPT 정적 차트)](skill-seminar-chart.md) — Skill
 - [SeonyuDuo repo (가족 영상 · 운동봇 연동)](ext-seonyuduo-repo.md) — External
 - [SiliconData 지수 3종 (fetch_silicondata_index.py)](src-silicondata.md) — Source
 - [Sisyphe repo 클론 서빙 (시간당 pull)](daemon-sisyphe-pull.md) — Watcher
@@ -384,6 +421,7 @@ Updated: 2026-07-26
 - [universe.json / universe_history.json](store-universe-json.md) — Dataset
 - [universe_lab.html (Universe Lab)](page-universe-lab.md) — Page
 - [UPS (무정전 전원, 맥미니 대비)](infra-ups.md) — Infra
+- [web-chart 스킬 (웹 인터랙티브 차트 표준)](skill-web-chart.md) — Skill
 - [WRAP 원칙 점검 타이머 (17:10 평일 변화기반 + 일 20:00 전체)](timer-wrap-principle-check.md) — Timer
 - [wrap.html (WRAP 대시보드)](page-wrap.md) — Page
 - [Wrap_NAV 워처 (watch_wrap_nav.py)](watcher-wrap-nav.md) — Watcher
@@ -391,6 +429,7 @@ Updated: 2026-07-26
 - [개인 스냅숏 게시 (publish_snapshot.sh)](web-publish-snapshot.md) — Infra
 - [관심종목 시세판 데몬 (Watchlist, 127.0.0.1:8778)](daemon-watchlist-quoteboard.md) — Infra
 - [국민연금 적립금 (fetch_nps_fund.py)](src-nps-fund.md) — Source
+- [금융 분석 스킬 팩 (설치형 8종)](skill-finance-pack.md) — Skill
 - [금투협 예탁금/신용잔고/반대매매 (fetch_kofia_stats.py)](src-kofia.md) — Source
 - [기여도 데이터 (create_contribution_data.py)](src-create-contribution-data.md) — Source
 - [기준가 엔진 (calculate_wrap_nav.py)](src-calculate-wrap-nav.md) — Source
@@ -403,7 +442,7 @@ Updated: 2026-07-26
 - [마스터 시장 크롤러 (market_crawler.py)](src-market-crawler.md) — Source
 - [맥미니 데이터레이크 (~/datalake + 문답 위키)](infra-datalake.md) — Infra
 - [메모리 사이클 플랜 알림 타이머 (07:45)](timer-memory-cycle-alert.md) — Timer
-- [미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 09:00)](timer-us-etf-collect.md) — Timer
+- [미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 08:30)](timer-us-etf-collect.md) — Timer
 - [비활성 워크플로 (weather · calendar · portfolio-report)](gha-disabled.md) — GHA
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — Bot
 - [수익률 계산 (calculate_returns.py)](src-calculate-returns.md) — Source
@@ -419,6 +458,7 @@ Updated: 2026-07-26
 - [외부 데이터 API/소스 집합](ext-data-apis.md) — External
 - [원전 뉴스 KNA/KNEISS (sources/kna.py)](src-kna-kneiss.md) — Source
 - [월별 수익률 11지수 (fetch_monthly_returns.py)](src-monthly-returns.md) — Source
+- [웹 데몬 헬스체크 타이머 (11:00, probe+자가복구)](timer-daemon-health.md) — Timer
 - [웹 서빙 (Caddy · com.antigravity.web)](web-caddy.md) — Infra
 - [유니버스 수집 (fetch_universe.py)](src-universe.md) — Source
 - [일본 CAPEX 지표 (fetch_japan_capex.py)](src-japan-capex.md) — Source
