@@ -2105,8 +2105,8 @@ def _build_combined_chart_section():
         export_json = json.dumps(export, ensure_ascii=False, separators=(',', ':'))
 
         th_base = ('position:sticky;top:0;z-index:2;background:#f0f0f0;cursor:pointer;'
-                   'user-select:none;font-weight:700;font-size:13px;color:#000;'
-                   'padding:8px 6px;text-align:center;white-space:nowrap;'
+                   'user-select:none;font-weight:700;font-size:12px;color:#000;'
+                   'padding:8px 4px;text-align:center;white-space:nowrap;'
                    'border-top:1px solid #000;border-bottom:1px solid #000;')
         # 필터 ▾: 수수료 매출 테이블(rev-filter)과 동일한 엑셀식 값 체크박스 팝업
         filter_btn = ('<span class="cmb-filter-btn" data-col="{col}" '
@@ -2121,7 +2121,7 @@ def _build_combined_chart_section():
             '#cmbSideTable td.cmb-star.on{color:#67e0f4 !important;}'
             '#cmbSideTable #cmbStarTh{color:#67e0f4 !important;}'
             '#cmbSideTable #cmbStarTh.on{background:rgba(103,224,244,0.25) !important;}'
-            '.cmb-filter-btn{display:inline-block;margin-left:4px;color:#9aa4b0;cursor:pointer;}'
+            '.cmb-filter-btn{display:inline-block;margin-left:2px;color:#9aa4b0;cursor:pointer;}'
             '.cmb-filter-btn:hover{color:#000;}'
             '.cmb-filter-btn.cmb-filter-on{color:#000;font-weight:900;}'
             '.cmb-filter-pop{position:absolute;z-index:30;background:#fff;border:1px solid #d8dde3;'
@@ -2131,7 +2131,7 @@ def _build_combined_chart_section():
             'color:#111;white-space:nowrap;cursor:pointer;text-align:left;}'
             '</style>'
             f'<table id="cmbSideTable" class="portfolio-table" style="max-width:500px;margin:0 auto;">'
-            f'<colgroup><col style="width:26px;"><col style="width:70px;"><col style="width:82px;"><col style="width:132px;"><col></colgroup>'
+            f'<colgroup><col style="width:26px;"><col style="width:56px;"><col style="width:60px;"><col style="width:150px;"><col style="width:220px;"></colgroup>'
             f'<thead><tr>'
             f'<th id="cmbStarTh" style="{th_base}" onclick="cmbToggleStarOnly(event)" title="즐겨찾기만 보기 토글">★</th>'
             f'<th style="{th_base}" onclick="sortCmbTable(\'rank\')">Frequency <span id="cmbArr_rank" style="font-size:10px;">▲</span>{filter_btn.format(col="rank")}</th>'
