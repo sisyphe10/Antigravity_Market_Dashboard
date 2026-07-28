@@ -2151,7 +2151,7 @@ def _build_combined_chart_section():
             '<line x1="10.5" y1="10.5" x2="14.5" y2="14.5" stroke-linecap="round"></line></svg>'
             '<input id="cmbSearch" type="text" placeholder="검색" autocomplete="off" '
             'oninput="cmbApplySearch(this.value)" '
-            'style="width:100%;padding:5px 8px 5px 26px;font-family:inherit;font-size:12.5px;'
+            'style="width:100%;box-sizing:border-box;padding:5px 8px 5px 26px;font-family:inherit;font-size:12.5px;'
             'border:1px solid #d1d5db;border-radius:4px;background:#fff;color:#111;">'
             '</div></div>'
             f'<table id="cmbSideTable" class="portfolio-table" style="width:100%;max-width:100%;margin:0 auto;">'
