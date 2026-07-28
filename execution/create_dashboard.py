@@ -2143,6 +2143,17 @@ def _build_combined_chart_section():
             '.cmb-filter-item{display:flex;align-items:center;gap:6px;font-size:0.85rem;'
             'color:#111;white-space:nowrap;cursor:pointer;text-align:left;}'
             '</style>'
+            '<div style="display:flex;justify-content:flex-end;margin:0 0 6px 0;">'
+            '<div style="position:relative;width:220px;">'
+            '<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#9aa4b0" '
+            'stroke-width="2" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);'
+            'pointer-events:none;"><circle cx="7" cy="7" r="4.5"></circle>'
+            '<line x1="10.5" y1="10.5" x2="14.5" y2="14.5" stroke-linecap="round"></line></svg>'
+            '<input id="cmbSearch" type="text" placeholder="검색" autocomplete="off" '
+            'oninput="cmbApplySearch(this.value)" '
+            'style="width:100%;padding:5px 8px 5px 26px;font-family:inherit;font-size:12.5px;'
+            'border:1px solid #d1d5db;border-radius:4px;background:#fff;color:#111;">'
+            '</div></div>'
             f'<table id="cmbSideTable" class="portfolio-table" style="width:100%;max-width:100%;margin:0 auto;">'
             f'<colgroup><col style="width:26px;"><col style="width:56px;"><col style="width:60px;"><col style="width:150px;"><col style="width:220px;"></colgroup>'
             f'<thead><tr>'
@@ -2627,10 +2638,18 @@ def _build_combined_chart_section():
                 cmbApplyFilters();
             };
 
+            // Data 칼럼 검색 — 시리즈명 부분일치, 엑셀 필터·별표 필터와 AND 결합
+            var cmbSearchQ = '';
+            window.cmbApplySearch = function(v) {
+                cmbSearchQ = (v || '').trim().toLowerCase();
+                cmbApplyFilters();
+            };
             function cmbApplyFilters() {
                 document.querySelectorAll('.cmb-series-row').forEach(function(row) {
+                    var _nm = (row.getAttribute('data-name') || '').toLowerCase();
                     var pass = cmbRowPasses(row, null) &&
-                        (!cmbStarOnly || cmbStars[row.getAttribute('data-name')]);
+                        (!cmbStarOnly || cmbStars[row.getAttribute('data-name')]) &&
+                        (!cmbSearchQ || _nm.indexOf(cmbSearchQ) >= 0);
                     row.style.display = pass ? '' : 'none';
                 });
                 ['rank', 'country', 'group', 'name'].forEach(function(c) {
