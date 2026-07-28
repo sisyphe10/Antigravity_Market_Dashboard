@@ -2122,6 +2122,8 @@ def _build_combined_chart_section():
             '#cmbSideTable #cmbStarTh{color:#67e0f4 !important;}'
             '#cmbSideTable #cmbStarTh.on{background:rgba(103,224,244,0.25) !important;}'
             '.cmb-filter-btn{display:inline-block;margin-left:2px;color:#9aa4b0;cursor:pointer;}'
+            '#cmbSideTable tr.cmb-pin-head td{background:#eef2f5;color:#0f766e;font-weight:700;'
+            'font-size:12px;letter-spacing:1.2px;text-align:left;padding:5px 10px;}'
             '.cmb-filter-btn:hover{color:#000;}'
             '.cmb-filter-btn.cmb-filter-on{color:#000;font-weight:900;}'
             '.cmb-filter-pop{position:absolute;z-index:30;background:#fff;border:1px solid #d8dde3;'
@@ -2487,7 +2489,36 @@ def _build_combined_chart_section():
                 });
                 var th = document.getElementById('cmbStarTh');
                 if (th) th.classList.toggle('on', cmbStarOnly);
+                window.cmbApplyPin();
             }
+            // 별표 행을 테이블 맨 위로 고정 + 구분행 삽입 (2026-07-28).
+            // 상태를 DOM(td.cmb-star.on)에서 읽으므로 정렬·필터 어느 경로에서 불러도 동작한다.
+            window.cmbApplyPin = function() {
+                var tbody = document.querySelector('#cmbSideTable tbody');
+                if (!tbody) return;
+                var old = document.getElementById('cmbPinHead');
+                if (old) old.parentNode.removeChild(old);
+                var pinned = [];
+                tbody.querySelectorAll('tr.cmb-series-row').forEach(function(r) {
+                    var td = r.querySelector('td.cmb-star');
+                    if (td && td.classList.contains('on')) pinned.push(r);
+                });
+                var btn = document.getElementById('cmbStarLoadBtn');
+                if (btn) btn.textContent = '★ ' + pinned.length + '개 올리기';
+                if (!pinned.length) return;
+                var tr = document.createElement('tr');
+                tr.id = 'cmbPinHead';
+                tr.className = 'cmb-pin-head';
+                var td2 = document.createElement('td');
+                td2.colSpan = 5;
+                var shown = pinned.filter(function(r) { return r.style.display !== 'none'; }).length;
+                td2.textContent = '★ 즐겨찾기 ' + shown;
+                tr.appendChild(td2);
+                tr.style.display = shown ? '' : 'none';
+                tbody.insertBefore(tr, tbody.firstChild);
+                var ref = tr;   // 기존 상대순서 유지하며 구분행 뒤로 이동
+                pinned.forEach(function(r) { ref.parentNode.insertBefore(r, ref.nextSibling); ref = r; });
+            };
             window.cmbToggleStar = function(td, ev) {
                 ev.stopPropagation();
                 var name = td.parentNode.getAttribute('data-name');
@@ -2513,6 +2544,7 @@ def _build_combined_chart_section():
                     var btn = document.querySelector('.cmb-filter-btn[data-col="' + c + '"]');
                     if (btn) btn.classList.toggle('cmb-filter-on', !!cmbFilters[c]);
                 });
+                window.cmbApplyPin();
             }
             function cmbCloseFilter() {
                 var p = document.getElementById('cmbFilterPop');
@@ -2605,6 +2637,7 @@ def _build_combined_chart_section():
                     return 0; // 동률은 기존 순서 유지 (stable sort)
                 });
                 rows.forEach(function(r) { tbody.appendChild(r); });
+                if (window.cmbApplyPin) window.cmbApplyPin();
                 updateCmbSortArrows();
             };
 
@@ -3321,6 +3354,21 @@ def _build_combined_chart_section():
                 buildCmbChart();
             };
             window.updateCmbChart = buildCmbChart;
+            // 별표 시리즈를 한 번에 차트로 (2026-07-28). 별표 상태는 DOM에서 직접 읽는다.
+            window.cmbLoadStars = function() {
+                var stars = document.querySelectorAll('#cmbSideTable td.cmb-star.on');
+                if (!stars.length) return;
+                document.querySelectorAll('.cmb-chart-item.active').forEach(function(x) { x.classList.remove('active'); });
+                cmbClickOrder = [];
+                stars.forEach(function(td) {
+                    var el = td.parentNode.querySelector('.cmb-chart-item');
+                    if (!el) return;
+                    el.classList.add('active');
+                    cmbClickOrder.push(el.getAttribute('data-series'));
+                });
+                cmbAutoRangePending = true;
+                buildCmbChart();
+            };
             window.clearCmbSelections = function() {
                 document.querySelectorAll('.cmb-chart-item.active').forEach(function(el){ el.classList.remove('active'); });
                 cmbClickOrder = [];
@@ -3384,6 +3432,7 @@ def _build_combined_chart_section():
                         <button id="cmbLogBtn" class="cmb-ma-btn active" style="margin-left:14px;border-radius:20px;" onclick="window.cmbLogOn = (window.cmbLogOn === false); this.classList.toggle('active', window.cmbLogOn !== false); updateCmbChart();">Log</button>
                         <button id="cmbNormBtn" class="cmb-ma-btn" style="border-radius:20px;" onclick="window.cmbForceNorm = !window.cmbForceNorm; this.classList.toggle('active', !!window.cmbForceNorm); updateCmbChart();">정규화</button>
                         <button onclick="downloadChartImage('cmbDynamicChart','AoE_Data','cmbChartLegend','cmbDispChart')" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
+                        <button id="cmbStarLoadBtn" onclick="cmbLoadStars()" style="font-family:inherit;font-size:13px;font-weight:600;padding:4px 14px;background:#f3f4f6;color:#444;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;margin-left:8px;">★ 0개 올리기</button>
                         <button onclick="clearCmbSelections()" style="font-family:inherit;font-size:13px;font-weight:600;padding:4px 14px;background:#f3f4f6;color:#444;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;margin-left:8px;">전체 해제</button>
                     </div>
                     <style>
