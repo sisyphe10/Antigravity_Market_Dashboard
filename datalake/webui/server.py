@@ -16,7 +16,10 @@ ANTHROPIC_API_KEY는 레포 .env에서 로드.
 import json
 import os
 import re
+import sqlite3
 import sys
+import time
+import uuid
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from dl_common import CATALOG_DIR, DATALAKE_ROOT, DUCKDB_PATH, MARKET_DIR, REPO  # noqa: E402
@@ -640,6 +643,93 @@ def _load_wiki_index():
 
 
 _WIKI_INDEX_HTML = _load_wiki_index()
+
+
+# ── 대화 기록 (2026-07-29) ────────────────────────────────────────────────
+# 새로고침·기기 변경에도 남도록 서버에 보관. 단일 uvicorn 프로세스라 sqlite 로 충분.
+CHAT_DB_PATH = os.path.join(DATALAKE_ROOT, "webui_chats.sqlite")
+CHAT_MAX_MESSAGES = 400
+_CHAT_ID_RE = re.compile(r"[0-9a-zA-Z_-]{4,64}\Z")
+
+
+def _chat_db():
+    con = sqlite3.connect(CHAT_DB_PATH, timeout=10)
+    con.execute("PRAGMA journal_mode=WAL")
+    con.execute("CREATE TABLE IF NOT EXISTS chats ("
+                "id TEXT PRIMARY KEY, title TEXT NOT NULL, "
+                "updated_at TEXT NOT NULL, messages TEXT NOT NULL)")
+    return con
+
+
+@app.get("/chats")
+def chats_list():
+    con = _chat_db()
+    try:
+        rows = con.execute("SELECT id, title, updated_at FROM chats "
+                           "ORDER BY updated_at DESC LIMIT 300").fetchall()
+    finally:
+        con.close()
+    return JSONResponse([{"id": r[0], "title": r[1], "updated_at": r[2]} for r in rows])
+
+
+@app.get("/chats/{cid}")
+def chat_get(cid: str):
+    con = _chat_db()
+    try:
+        row = con.execute("SELECT id, title, updated_at, messages FROM chats WHERE id=?",
+                          (cid,)).fetchone()
+    finally:
+        con.close()
+    if not row:
+        return JSONResponse({"error": "not found"}, status_code=404)
+    try:
+        msgs = json.loads(row[3])
+    except ValueError:
+        msgs = []
+    return JSONResponse({"id": row[0], "title": row[1], "updated_at": row[2], "messages": msgs})
+
+
+class ChatSaveRequest(BaseModel):
+    id: str = ""
+    title: str = ""
+    messages: list = []
+
+
+@app.post("/chats")
+def chat_save(req: ChatSaveRequest):
+    msgs = [{"role": m.get("role"), "content": str(m.get("content") or ""),
+             "steps": m.get("steps") or []}
+            for m in req.messages
+            if isinstance(m, dict) and m.get("role") in ("user", "assistant")
+            and str(m.get("content") or "").strip()][-CHAT_MAX_MESSAGES:]
+    if not msgs:
+        return JSONResponse({"ok": False, "error": "empty"}, status_code=400)
+    cid = (req.id or "").strip() or uuid.uuid4().hex[:12]
+    if not _CHAT_ID_RE.match(cid):
+        return JSONResponse({"ok": False, "error": "bad id"}, status_code=400)
+    title = ((req.title or "").strip() or msgs[0]["content"].strip().split("\n")[0])[:60] or "새 대화"
+    now = time.strftime("%Y-%m-%d %H:%M")
+    con = _chat_db()
+    try:
+        con.execute("INSERT INTO chats (id, title, updated_at, messages) VALUES (?,?,?,?) "
+                    "ON CONFLICT(id) DO UPDATE SET title=excluded.title, "
+                    "updated_at=excluded.updated_at, messages=excluded.messages",
+                    (cid, title, now, json.dumps(msgs, ensure_ascii=False)))
+        con.commit()
+    finally:
+        con.close()
+    return JSONResponse({"ok": True, "id": cid, "title": title, "updated_at": now})
+
+
+@app.delete("/chats/{cid}")
+def chat_delete(cid: str):
+    con = _chat_db()
+    try:
+        con.execute("DELETE FROM chats WHERE id=?", (cid,))
+        con.commit()
+    finally:
+        con.close()
+    return JSONResponse({"ok": True})
 
 
 @app.get("/")

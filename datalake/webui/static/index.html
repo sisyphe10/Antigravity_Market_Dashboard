@@ -39,7 +39,7 @@ body{margin:0}
   #chat { flex: 1; overflow-y: auto; padding: 20px; max-width: 900px; width: 100%; margin: 0 auto; }
   .msg { margin-bottom: 16px; line-height: 1.65; font-size: 14.5px; }
   .msg.user { text-align: right; }
-  .msg.user .bubble { display: inline-block; background: #241a0d; border-radius: 12px 12px 2px 12px;
+  .msg.user .bubble { display: inline-block; background: var(--aoe-th-bg); border: 1px solid var(--aoe-amber); color: #fff; border-radius: 12px 12px 2px 12px;
                       padding: 10px 14px; max-width: 80%; text-align: left; white-space: pre-wrap; }
   .msg.bot .bubble { display: inline-block; background: var(--aoe-card2); border: 1px solid var(--aoe-border);
                      border-radius: 12px 12px 12px 2px; padding: 12px 16px; max-width: 95%; }
@@ -66,23 +66,66 @@ body{margin:0}
   .bubble h2, .bubble h3, .bubble ul, .bubble ol, .bubble li,
   .steps, .thinking, #q { color: #fff; }
   #q::placeholder { color: #fff; opacity: 0.55; }
+  /* 대화 기록 사이드바 (2026-07-29) */
+  #shell { flex: 1; display: flex; min-height: 0; }
+  #sidebar { width: 250px; flex: none; display: flex; flex-direction: column; min-height: 0;
+             background: var(--aoe-card); border-right: 1px solid var(--aoe-border); }
+  #newchat { margin: 12px; padding: 9px 12px; background: transparent; color: #fff; cursor: pointer;
+             border: 1px solid var(--aoe-input-border); border-radius: 8px; font-family: inherit;
+             font-size: 13.5px; font-weight: 600; text-align: left; }
+  #newchat:hover { border-color: var(--aoe-amber); color: var(--aoe-amber-bright); }
+  #convs { flex: 1; overflow-y: auto; padding: 0 8px 12px; }
+  .conv { position: relative; padding: 8px 30px 8px 10px; border-radius: 8px; cursor: pointer; color: #fff; }
+  .conv:hover { background: var(--aoe-hover); }
+  .conv.active { background: var(--aoe-hl-amber-bg); }
+  .conv.active .conv-title { color: var(--aoe-amber-bright); }
+  .conv-title { font-size: 13.5px; line-height: 1.4; white-space: nowrap; overflow: hidden;
+                text-overflow: ellipsis; color: #fff; }
+  .conv-date { font-size: 11px; color: #fff; opacity: 0.5; margin-top: 2px; }
+  .conv-del { position: absolute; right: 4px; top: 6px; padding: 2px 5px; border: none; border-radius: 6px;
+              background: transparent; color: #fff; opacity: 0; cursor: pointer; font-size: 13px;
+              font-family: inherit; }
+  .conv:hover .conv-del { opacity: 0.55; }
+  .conv-del:hover { opacity: 1; color: var(--aoe-up); }
+  .conv-del.armed { opacity: 1; color: var(--aoe-up); font-size: 11.5px; font-weight: 700; }
+  #main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  @media (max-width: 800px) { #sidebar { width: 168px; } #newchat { margin: 8px; padding: 8px; } }
+  /* 생각 중 표시 — 앰버 펄스 + 단계 문구 + 경과 초 */
+  .thinking { color: #fff; opacity: 0.9; font-style: normal; display: inline-flex;
+              align-items: center; gap: 9px; }
+  .think-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--aoe-amber);
+               animation: aoe-pulse 1.1s ease-in-out infinite; flex: none; }
+  @keyframes aoe-pulse { 0%, 100% { opacity: 0.25; transform: scale(0.8); }
+                         50% { opacity: 1; transform: scale(1.15); } }
+  .think-sec { color: #fff; opacity: 0.45; font-size: 12px; font-variant-numeric: tabular-nums; }
 </style>
 </head>
 <body>
 <nav class="topnav"><div class="topnav-inner"><a href="/index.html" class="topnav-brand">AGE OF EMERGENCE</a><div class="topnav-tabs"><div class="topnav-item"><a href="/watchlist/" class="topnav-tab">Watchlist</a></div><div class="topnav-item"><a href="/market.html" class="topnav-tab">Market</a><div class="topnav-dropdown"><a href="/market.html" class="topnav-sub">Data</a><a href="/universe.html" class="topnav-sub">Universe</a><a href="/universe_lab.html" class="topnav-sub">Universe Lab</a><a href="/featured.html" class="topnav-sub">Featured</a><a href="/market_alert.html" class="topnav-sub">투자유의종목</a><a href="/etf.html" class="topnav-sub">ETF</a><a href="/seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="/sisyphe/journal.html" class="topnav-tab">Journal</a></div><div class="topnav-item"><a href="/sisyphe/journal.html#weekly" class="topnav-tab">Weekly</a></div><div class="topnav-item"><a href="/wiki/library" class="topnav-tab">Earnings</a></div><div class="topnav-item"><a href="/wiki/" class="topnav-tab active">Wiki</a></div><div class="topnav-item right-group"><a href="/sisyphe/memento.html" class="topnav-tab">Memento</a></div><div class="topnav-item"><a href="/sisyphe/dashboard.html" class="topnav-tab">Ledger</a></div><div class="topnav-item"><a href="/architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
-<div id="chat"></div>
-<footer>
-  <form id="form">
-    <textarea id="q" rows="1"></textarea>
-    <button id="send" type="submit">질문</button>
-  </form>
-</footer>
+<div id="shell">
+  <aside id="sidebar">
+    <button id="newchat" type="button">+ 새 대화</button>
+    <div id="convs"></div>
+  </aside>
+  <main id="main">
+    <div id="chat"></div>
+    <footer>
+      <form id="form">
+        <textarea id="q" rows="1"></textarea>
+        <button id="send" type="submit">질문</button>
+      </form>
+    </footer>
+  </main>
+</div>
 <script>
 const chat = document.getElementById('chat');
 const form = document.getElementById('form');
 const q = document.getElementById('q');
 const send = document.getElementById('send');
+const convs = document.getElementById('convs');
+const newchatBtn = document.getElementById('newchat');
 const history = [];
+let convId = localStorage.getItem('wikiConv') || null;
 
 function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
@@ -137,7 +180,7 @@ form.addEventListener('submit', async (e) => {
   add('user', question);
   send.disabled = true;
   const wait = add('bot', '');
-  wait.querySelector('.bubble').innerHTML = '<span class="thinking">데이터 조회 중... (수십 초 걸릴 수 있습니다)</span>';
+  startThinking(wait.querySelector('.bubble'));
   try {
     const res = await fetch('ask', {  // 상대경로 — /wiki/ 프록시 하위에서도 동작 (2026-07-12)
       method: 'POST', headers: {'Content-Type': 'application/json'},
@@ -147,14 +190,121 @@ form.addEventListener('submit', async (e) => {
     wait.remove();
     add('bot', data.answer, data.steps);
     history.push({role: 'user', content: question});
-    history.push({role: 'assistant', content: data.answer});
+    history.push({role: 'assistant', content: data.answer, steps: data.steps || []});
+    persist();
   } catch (err) {
     wait.remove();
     add('bot', '오류: ' + err.message);
   }
+  stopThinking();
   send.disabled = false;
   q.focus();
 });
+
+// ── 생각 중 표시 (2026-07-29) ─────────────────────────────────────
+const THINK_LINES = ['질문을 뜯어보는 중', '데이터레이크를 뒤지는 중', '쿼리를 짜는 중',
+                     '리서치 노트를 읽는 중', '숫자를 맞춰보는 중', '근거를 정리하는 중',
+                     '답을 다듬는 중'];
+let thinkTimer = null;
+
+function startThinking(box) {
+  const t0 = Date.now();
+  box.innerHTML = '<span class="thinking"><span class="think-dot"></span>' +
+                  '<span class="think-text"></span><span class="think-sec"></span></span>';
+  const txt = box.querySelector('.think-text');
+  const sec = box.querySelector('.think-sec');
+  const tick = () => {
+    const s = Math.round((Date.now() - t0) / 1000);
+    txt.textContent = THINK_LINES[Math.min(Math.floor(s / 7), THINK_LINES.length - 1)] + '…';
+    sec.textContent = s >= 3 ? s + '초' : '';
+  };
+  tick();
+  clearInterval(thinkTimer);
+  thinkTimer = setInterval(tick, 1000);
+}
+
+function stopThinking() { clearInterval(thinkTimer); thinkTimer = null; }
+
+// ── 대화 기록 (서버 저장, 2026-07-29) ─────────────────────────────
+function fmtWhen(s) { return (s || '').slice(5); }  // 07-29 14:03
+
+async function loadList() {
+  try {
+    const list = await (await fetch('chats')).json();
+    convs.innerHTML = '';
+    list.forEach(c => {
+      const d = document.createElement('div');
+      d.className = 'conv' + (c.id === convId ? ' active' : '');
+      d.innerHTML = '<div class="conv-title"></div><div class="conv-date"></div>' +
+                    '<button class="conv-del" type="button" title="삭제">×</button>';
+      d.querySelector('.conv-title').textContent = c.title;
+      d.querySelector('.conv-date').textContent = fmtWhen(c.updated_at);
+      d.addEventListener('click', e => {
+        if (!e.target.classList.contains('conv-del')) openConv(c.id);
+      });
+      d.querySelector('.conv-del').addEventListener('click', e => {
+        e.stopPropagation(); armDelete(e.target, c.id);
+      });
+      convs.appendChild(d);
+    });
+    return list;
+  } catch (err) { return []; }
+}
+
+// 삭제는 2단 확인 (브라우저 confirm 미사용)
+function armDelete(btn, id) {
+  if (btn.classList.contains('armed')) { deleteConv(id); return; }
+  btn.classList.add('armed'); btn.textContent = '삭제?';
+  setTimeout(() => { btn.classList.remove('armed'); btn.textContent = '×'; }, 3000);
+}
+
+async function deleteConv(id) {
+  await fetch('chats/' + id, {method: 'DELETE'});
+  if (id === convId) {
+    convId = null; localStorage.removeItem('wikiConv');
+    history.length = 0; chat.innerHTML = '';
+  }
+  loadList();
+}
+
+function newConv() {
+  convId = null; localStorage.removeItem('wikiConv');
+  history.length = 0; chat.innerHTML = '';
+  loadList(); q.focus();
+}
+
+async function openConv(id) {
+  const res = await fetch('chats/' + id);
+  if (!res.ok) return;
+  const data = await res.json();
+  convId = id; localStorage.setItem('wikiConv', id);
+  history.length = 0; chat.innerHTML = '';
+  (data.messages || []).forEach(m => {
+    history.push(m);
+    add(m.role === 'user' ? 'user' : 'bot', m.content, m.steps);
+  });
+  loadList();
+  chat.scrollTop = chat.scrollHeight;
+}
+
+async function persist() {
+  try {
+    const res = await fetch('chats', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({id: convId || '', messages: history})
+    });
+    const data = await res.json();
+    if (data.id) { convId = data.id; localStorage.setItem('wikiConv', convId); }
+    loadList();
+  } catch (err) { /* 저장 실패해도 대화는 계속 */ }
+}
+
+newchatBtn.addEventListener('click', newConv);
+(async () => {
+  const list = await loadList();
+  if (convId && list.some(c => c.id === convId)) openConv(convId);
+  else if (convId) { convId = null; localStorage.removeItem('wikiConv'); }
+})();
 
 q.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); }
