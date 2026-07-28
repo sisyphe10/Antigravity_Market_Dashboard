@@ -2856,13 +2856,32 @@ def _build_combined_chart_section():
                 // 단일 선택(raw1)일 때만 MA/이격도 버튼 활성 (상태 값은 보존)
                 var maRow = document.getElementById('cmbMaRow');
                 if (maRow) maRow.classList.toggle('cmb-ma-disabled', mode !== 'raw1');
-                // ★이격도(값/MA×100)는 0 을 넘나드는 %·%p 계열에서 MA가 0 근처면 발산한다
-                //   (가드가 ma===0 뿐이라 ma=0.05 면 수천 % 로 튐) → 해당 단위는 버튼 자체를 잠근다.
-                var _dispUnit = (mode === 'raw1' && perSeries.length > 0) ? cmbSeriesUnit[perSeries[0].name] : null;
-                var _dispBlocked = (_dispUnit === '%' || _dispUnit === '%p');
-                window._cmbDispBlocked = _dispBlocked;   // 상태는 보존하고 렌더 시점에만 차단
+                // ★이격도 적격 판정 = 단위가 아니라 '데이터' 기준 (2026-07-28 동적 전환).
+                //   이격도 = 값/MA×100 이라 분모(MA)가 0 근처면 발산한다. 표시 구간에서
+                //     ① 부호가 섞이거나  ② 최소 절대값이 최대 절대값의 2% 미만이면 잠근다.
+                //   종전 단위 기준(%·%p 일괄 차단)은 가동률·외국인비중처럼 '항상 양수인 비율'까지
+                //   막았고, 반대로 0 을 넘나드는 무단위 지수(NFCI −0.552·은행 대출태도지수 −2)는
+                //   놓쳤다. 데이터로 판정하면 신규 시리즈도 자동으로 걸러진다.
+                function cmbDispEligible(s) {
+                    if (!s) return false;
+                    var pos = false, neg = false, mn = Infinity, mx = 0;
+                    var ks = Object.keys(s.lookup);
+                    for (var i = 0; i < ks.length; i++) {
+                        var v = s.lookup[ks[i]];
+                        if (v === null || v === undefined || isNaN(v)) continue;
+                        if (v > 0) { pos = true; } else if (v < 0) { neg = true; }
+                        var a = Math.abs(v);
+                        if (a < mn) mn = a;
+                        if (a > mx) mx = a;
+                    }
+                    if (mx === 0 || mn === Infinity) return false;
+                    if (pos && neg) return false;        // 0 을 넘나드는 계열
+                    return mn >= mx * 0.02;              // 0 에 바짝 붙는 구간이 있으면 부적격
+                }
+                var _dispBlocked = (mode !== 'raw1') || !cmbDispEligible(perSeries[0]);
+                window._cmbDispBlocked = _dispBlocked;   // 선택 상태는 보존하고 렌더 시점에만 차단
                 var dispGroup = document.getElementById('cmbDispGroup');
-                if (dispGroup) dispGroup.classList.toggle('cmb-ma-disabled', mode !== 'raw1' || _dispBlocked);
+                if (dispGroup) dispGroup.classList.toggle('cmb-ma-disabled', _dispBlocked);
                 var yEok = mode !== 'pct' && perSeries.length > 0 && !!cmbEokSeries[perSeries[0].name];
                 var y1Eok = mode === 'raw2' && perSeries.length > 1 && !!cmbEokSeries[perSeries[1].name];
 
@@ -3000,9 +3019,13 @@ def _build_combined_chart_section():
                             if (dispActive[slot] && !window._cmbDispBlocked) {
                                 // 이격도 = 값/MA×100 (비율이라 단위 scale 자동 소거)
                                 var dispVisible = filled.map(function(pt) {
-                                    if (pt.ma === null || pt.ma === undefined || pt.ma === 0) return null;
+                                    if (pt.ma === null || pt.ma === undefined) return null;
                                     if (pt.rawVal === null || pt.rawVal === undefined) return null;
-                                    return Math.round(pt.rawVal / pt.ma * 10000) / 100;
+                                    // 분모 방어: MA 가 값 대비 2% 미만이면 비율이 발산한다 (ma===0 만으론 부족)
+                                    if (Math.abs(pt.ma) < Math.abs(pt.rawVal) * 0.02) return null;
+                                    var _d = pt.rawVal / pt.ma * 100;
+                                    if (!isFinite(_d)) return null;
+                                    return Math.round(_d * 100) / 100;
                                 });
                                 if (dispVisible.some(function(v){ return v !== null; })) dispDatasets.push({
                                     label: '이격도' + win,
