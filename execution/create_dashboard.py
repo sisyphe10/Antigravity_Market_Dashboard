@@ -1705,6 +1705,9 @@ CMB_SERIES_UNITS = {
     '체류외국인 취업(E)': '만명', '체류외국인 유학(D2·D4)': '만명',
     # COMMODITIES
     '3-2-1 Crack Spread': '$/bbl',
+    # SiliconData — 수집기 레지스트리(fetch_silicondata_index.py SILICONDATA_INDEXES)가 단위 정본.
+    #   token=USD/1M tokens, gpu=USD/hr(이미 $/h), ram=index(무단위 정상)
+    'LLM Token Index': '$/1M tokens',
     # CREDIT & HOUSING
     '은행 대출금리 (신규취급)': '%', '은행 저축성수신금리 (신규취급)': '%', '예대금리차 (신규)': '%p',
     '가계대출 잔액': '조원', '가계신용': '조원', '미분양주택 (전국)': '호',
