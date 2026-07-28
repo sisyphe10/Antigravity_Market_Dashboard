@@ -13,16 +13,24 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PY="$REPO/venv/bin/python3"
 rc=0
 
-echo "── 1/4 태깅 (미처리분)"
+echo "── 1/5 태깅 (미처리분)"
 "$PY" "$REPO/datalake/tagging/tag_worker.py" || { echo "[warn] 태깅 실패 — 태그 없이 계속"; rc=1; }
 
-echo "── 2/4 md 아카이브 (어제+오늘)"
+echo "── 2/5 md 아카이브 (어제+오늘)"
 "$PY" "$REPO/datalake/export_research_notes.py" || { echo "[error] 아카이브 생성 실패"; exit 1; }
 
-echo "── 3/4 parquet"
+echo "── 3/5 parquet"
 "$PY" "$REPO/datalake/tagging/export_tags_parquet.py" || { echo "[warn] parquet 실패"; rc=1; }
 
-echo "── 4/4 추이 집계"
+echo "── 4/5 추이 집계"
 "$PY" "$REPO/datalake/tagging/build_theme_trends.py" || { echo "[warn] 집계 실패"; rc=1; }
+
+echo "── 5/5 관심축 차트"
+CHARTS="$HOME/work/charts/260715_현선물공매도"
+if [ -f "$CHARTS/build_research_themes.py" ]; then
+  ( cd "$CHARTS" && "$PY" build_research_themes.py ) || { echo "[warn] 차트 빌드 실패"; rc=1; }
+else
+  echo "[skip] 차트 빌더 없음"
+fi
 
 exit $rc
