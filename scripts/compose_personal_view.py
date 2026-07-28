@@ -167,6 +167,34 @@ AOE_DARK_CSS = (
     '{background:' + P['card'] + '!important;color:' + P['text'] + '!important}'
     # 무클래스 표 캡션류(h2~h4, Featured "거래대금 TOP 30" 등) = 흰색. 앰버 섹션타이틀 규칙(.section>h2 등)이 명시도로 우선
     'h2,h3,h4{color:#fff!important}'
+    # ---- architecture.html 다크 보정 (2026-07-28) ----
+    # 생성기(create_architecture.py)는 라이트 전제라 도식도 밖(설명문·타임라인 라벨·위키 목록/카드)이
+    # 전부 #000~#555 → 다크 배경에서 사실상 안 보였다. 페이지 고유 클래스라 여기서만 보정한다.
+    '.block-sub,.layer-desc,.wiki-count,.wi-sched,.wi-caret,.card-meta,.tl-tick,.tl-band-sub'
+    '{color:' + P['muted'] + '!important}'
+    '.layer-head,.tl-band-name,.wi-name{color:#f2f4f6!important}'
+    '.tl-label,.tl-name{color:#e8ebee!important}'
+    '.tl-freq{background:' + P['input-border'] + '!important;color:' + P['text'] + '!important}'
+    '.tl-axis{border-bottom-color:' + P['input-border'] + '!important}'
+    '.tl-track{background:repeating-linear-gradient(90deg,#1a1b1e 0,#1a1b1e 1px,'
+    'transparent 1px,transparent 12.5%)!important}'
+    '.tl-trigger{color:' + P['text'] + '!important;background:#1a1b1e!important;'
+    'border-color:' + P['input-border'] + '!important}'
+    '.tl-mark{border-color:' + P['bg'] + '!important}'
+    '.tl-band{background:' + P['card2'] + '!important;border-left-color:' + P['amber'] + '!important}'
+    '.tl-band-count{background:' + P['th-bg'] + '!important;color:' + P['text'] + '!important}'
+    '.wg-head{border-bottom-color:' + P['amber'] + '!important}'
+    '.wg-head .wg-title{color:' + P['amber'] + '!important}'
+    '.wg-head .g-count{background:' + P['th-bg'] + '!important;color:' + P['text'] + '!important}'
+    '.wi-summary,.card-desc,.card-desc p,.card-desc li,.card-desc strong,'
+    '.card-desc h4,.card-desc h5,.card-desc h6,.chip-row .chip-k'
+    '{color:' + P['text'] + '!important}'
+    '.witem{border-bottom-color:#1f2023!important}'
+    '.witem-row:hover{background:' + P['hover'] + '!important}'
+    '.wiki-search{background:' + P['input-bg'] + '!important;color:' + P['text'] + '!important;'
+    'border-color:' + P['input-border'] + '!important}'
+    '.legend .sep{background:' + P['input-border'] + '!important}'
+    'header.page-head{border-bottom-color:' + P['border'] + '!important}'
     '</style>')
 dark_pat = re.compile(r'<style id="aoe-terminal-dark">.*?</style>', re.S)
 
