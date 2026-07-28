@@ -2143,6 +2143,17 @@ def _build_combined_chart_section():
             '.cmb-filter-item{display:flex;align-items:center;gap:6px;font-size:0.85rem;'
             'color:#111;white-space:nowrap;cursor:pointer;text-align:left;}'
             '</style>'
+            '<div style="display:flex;justify-content:flex-end;margin:0 0 6px 0;">'
+            '<div style="position:relative;width:220px;">'
+            '<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#9aa4b0" '
+            'stroke-width="2" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);'
+            'pointer-events:none;"><circle cx="7" cy="7" r="4.5"></circle>'
+            '<line x1="10.5" y1="10.5" x2="14.5" y2="14.5" stroke-linecap="round"></line></svg>'
+            '<input id="cmbSearch" type="text" placeholder="검색" autocomplete="off" '
+            'oninput="cmbApplySearch(this.value)" '
+            'style="width:100%;box-sizing:border-box;padding:5px 8px 5px 26px;font-family:inherit;font-size:12.5px;'
+            'border:1px solid #d1d5db;border-radius:4px;background:#fff;color:#111;">'
+            '</div></div>'
             f'<table id="cmbSideTable" class="portfolio-table" style="width:100%;max-width:100%;margin:0 auto;">'
             f'<colgroup><col style="width:26px;"><col style="width:56px;"><col style="width:60px;"><col style="width:150px;"><col style="width:220px;"></colgroup>'
             f'<thead><tr>'
@@ -2168,11 +2179,10 @@ def _build_combined_chart_section():
             var cmbAutoRangePending = false;
             var cmbClickOrder = [];
             var clickPalette = ['#000000','#0055cc','#cc0000','#006633','#6a0dad','#cc6600','#008080','#990066'];
+            // ★KRX GOLD/ETS 거래대금은 dataset.csv 는 원 단위지만 파이썬 export 단계에서 이미
+            //   억원으로 환산돼 넘어온다(412.7357 / 67.5571). 여기서 또 나누면 1억배로 축소된다.
             var seriesScale = { 'KOSPI Market Cap': 1e12, 'KOSDAQ Market Cap': 1e12,
-                                '경상수지': 10, '외환보유액': 10,   // 억달러 -> $B
-                                // ★KRX 거래대금 2종은 원 단위 저장 -> 억원 (2026-07-28).
-                                //   환산이 없어 원값을 억원으로 읽고 조원 승격까지 타서 1억배로 표시됐다.
-                                'KRX GOLD Trading Volume': 1e8, 'KRX ETS Trading Volume': 1e8 };
+                                '경상수지': 10, '외환보유액': 10 };   // 억달러 -> $B
 
             // MA 슬롯(0~3) 색상. 윈도우 값은 시리즈 빈도에 따라 동적 (MA_WINDOWS).
             var MA_DEFS = [
@@ -2628,10 +2638,18 @@ def _build_combined_chart_section():
                 cmbApplyFilters();
             };
 
+            // Data 칼럼 검색 — 시리즈명 부분일치, 엑셀 필터·별표 필터와 AND 결합
+            var cmbSearchQ = '';
+            window.cmbApplySearch = function(v) {
+                cmbSearchQ = (v || '').trim().toLowerCase();
+                cmbApplyFilters();
+            };
             function cmbApplyFilters() {
                 document.querySelectorAll('.cmb-series-row').forEach(function(row) {
+                    var _nm = (row.getAttribute('data-name') || '').toLowerCase();
                     var pass = cmbRowPasses(row, null) &&
-                        (!cmbStarOnly || cmbStars[row.getAttribute('data-name')]);
+                        (!cmbStarOnly || cmbStars[row.getAttribute('data-name')]) &&
+                        (!cmbSearchQ || _nm.indexOf(cmbSearchQ) >= 0);
                     row.style.display = pass ? '' : 'none';
                 });
                 ['rank', 'country', 'group', 'name'].forEach(function(c) {
@@ -2876,8 +2894,7 @@ def _build_combined_chart_section():
                         data = aligned.map(function(v) {
                             if (v === null) return null;
                             var sv = v / scale;
-                            // 정수 반올림은 시총(1e12=조원)에만. 1e8(원->억원)은 소수를 살린다.
-                            return scale >= 1e12 ? Math.round(sv) : sv;
+                            return scale >= 1e8 ? Math.round(sv) : sv;
                         });
                     }
                     var yAxisID = (mode === 'raw2' && idx === 1 && !isForeign) ? 'y1' : 'y';
@@ -2954,7 +2971,7 @@ def _build_combined_chart_section():
                                 var maVisible = filled.map(function(pt) {
                                     if (pt.ma === null || pt.ma === undefined) return null;
                                     var sv = pt.ma / scale;
-                                    return scale >= 1e12 ? Math.round(sv) : sv;
+                                    return scale >= 1e8 ? Math.round(sv) : sv;
                                 });
                                 // 전 구간 null(데이터 부족)이면 범례 유령 항목 방지를 위해 생략
                                 if (maVisible.some(function(v){ return v !== null; })) datasets.push({
