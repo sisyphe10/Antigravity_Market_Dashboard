@@ -60,6 +60,12 @@ body{margin:0}
   #send { padding: 0 22px; border: none; border-radius: 10px; background: var(--aoe-amber); color: var(--aoe-card2);
           font-size: 14.5px; font-weight: 600; cursor: pointer; }
   #send:disabled { background: #7a4d16; cursor: default; }
+  /* 가독성 — 본문 글씨 전부 흰색 (2026-07-29 사용자 요청) */
+  body, #chat, header, header span, .msg, .msg .bubble, .bubble b, .bubble a,
+  .bubble th, .bubble td, .bubble code, .bubble pre,
+  .bubble h2, .bubble h3, .bubble ul, .bubble ol, .bubble li,
+  .steps, .thinking, #q { color: #fff; }
+  #q::placeholder { color: #fff; opacity: 0.55; }
 </style>
 </head>
 <body>
