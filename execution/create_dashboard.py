@@ -2169,7 +2169,10 @@ def _build_combined_chart_section():
             var cmbClickOrder = [];
             var clickPalette = ['#000000','#0055cc','#cc0000','#006633','#6a0dad','#cc6600','#008080','#990066'];
             var seriesScale = { 'KOSPI Market Cap': 1e12, 'KOSDAQ Market Cap': 1e12,
-                                '경상수지': 10, '외환보유액': 10 };   // 억달러 -> $B
+                                '경상수지': 10, '외환보유액': 10,   // 억달러 -> $B
+                                // ★KRX 거래대금 2종은 원 단위 저장 -> 억원 (2026-07-28).
+                                //   환산이 없어 원값을 억원으로 읽고 조원 승격까지 타서 1억배로 표시됐다.
+                                'KRX GOLD Trading Volume': 1e8, 'KRX ETS Trading Volume': 1e8 };
 
             // MA 슬롯(0~3) 색상. 윈도우 값은 시리즈 빈도에 따라 동적 (MA_WINDOWS).
             var MA_DEFS = [
@@ -2209,7 +2212,8 @@ def _build_combined_chart_section():
                     }
                     if (db) {
                         if (w == null) { db.style.display = 'none'; }
-                        else { db.style.display = ''; db.textContent = '' + w; db.classList.toggle('active', !!dispActive[sl]); }
+                        else { db.style.display = ''; db.textContent = '' + w;
+                               db.classList.toggle('active', !!dispActive[sl] && !window._cmbDispBlocked); }
                     }
                 }
             }
@@ -2831,7 +2835,7 @@ def _build_combined_chart_section():
                 //   (가드가 ma===0 뿐이라 ma=0.05 면 수천 % 로 튐) → 해당 단위는 버튼 자체를 잠근다.
                 var _dispUnit = (mode === 'raw1' && perSeries.length > 0) ? cmbSeriesUnit[perSeries[0].name] : null;
                 var _dispBlocked = (_dispUnit === '%' || _dispUnit === '%p');
-                if (_dispBlocked) { dispActive = { 0: false, 1: false, 2: false, 3: false }; }
+                window._cmbDispBlocked = _dispBlocked;   // 상태는 보존하고 렌더 시점에만 차단
                 var dispGroup = document.getElementById('cmbDispGroup');
                 if (dispGroup) dispGroup.classList.toggle('cmb-ma-disabled', mode !== 'raw1' || _dispBlocked);
                 var yEok = mode !== 'pct' && perSeries.length > 0 && !!cmbEokSeries[perSeries[0].name];
@@ -2848,7 +2852,10 @@ def _build_combined_chart_section():
                         aligned.push(lastVal);
                     }
                     var data;
-                    var isForeign = s.name.indexOf('외국인') >= 0;
+                    // ★부분문자열 매칭 금지 (2026-07-28): '외국인 입국자'·'체류외국인 *' 가
+                    //   보유비중으로 오분류돼 만명 값이 % 축에 레벨로 그려지던 버그.
+                    //   보유비중 = 이름이 '외국인'/'외국인비중' 으로 끝나고 단위가 % 인 것만.
+                    var isForeign = /외국인(비중)?$/.test(s.name) && cmbSeriesUnit[s.name] === '%';
                     var scale = isForeign ? 1 : (seriesScale[s.name] || 1);
                     if (isForeign) {
                         // 외국인 보유비중/지분율: 정규화/scale 없이 항상 레벨(%) 표시
@@ -2869,7 +2876,8 @@ def _build_combined_chart_section():
                         data = aligned.map(function(v) {
                             if (v === null) return null;
                             var sv = v / scale;
-                            return scale >= 1e8 ? Math.round(sv) : sv;
+                            // 정수 반올림은 시총(1e12=조원)에만. 1e8(원->억원)은 소수를 살린다.
+                            return scale >= 1e12 ? Math.round(sv) : sv;
                         });
                     }
                     var yAxisID = (mode === 'raw2' && idx === 1 && !isForeign) ? 'y1' : 'y';
@@ -2946,7 +2954,7 @@ def _build_combined_chart_section():
                                 var maVisible = filled.map(function(pt) {
                                     if (pt.ma === null || pt.ma === undefined) return null;
                                     var sv = pt.ma / scale;
-                                    return scale >= 1e8 ? Math.round(sv) : sv;
+                                    return scale >= 1e12 ? Math.round(sv) : sv;
                                 });
                                 // 전 구간 null(데이터 부족)이면 범례 유령 항목 방지를 위해 생략
                                 if (maVisible.some(function(v){ return v !== null; })) datasets.push({
@@ -2965,7 +2973,7 @@ def _build_combined_chart_section():
                                     _isForeign: isForeign
                                 });
                             }
-                            if (dispActive[slot]) {
+                            if (dispActive[slot] && !window._cmbDispBlocked) {
                                 // 이격도 = 값/MA×100 (비율이라 단위 scale 자동 소거)
                                 var dispVisible = filled.map(function(pt) {
                                     if (pt.ma === null || pt.ma === undefined || pt.ma === 0) return null;
