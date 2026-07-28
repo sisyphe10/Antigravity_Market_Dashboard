@@ -78,10 +78,26 @@ render() {
 }
 
 # ── ② schedule.tsv 렌더 → logs/launchd (A4 catch-up 러너가 읽음) ──
+# ★설치된 tsv 는 타이머 + GHA 공용이다. install_gha.sh 가 upsert 해 둔 gha-* 행을
+#   통째 덮어쓰면 그 잡들이 catch-up 커버리지에서 조용히 빠진다(2026-07-28 실사고:
+#   설치 데몬 47개 중 tsv 13행만 남아 gha 12잡 미커버). → 이 스크립트가 소유하는
+#   이름(NAMES)만 갈아끼우고, 그 밖의 행은 기존 파일에서 보존해 뒤에 붙인다.
 install -d -o "$MACMINI_USER" -m 755 "$REPO/logs/launchd"
-render < "$SRC_DIR/schedule.tsv" > "$REPO/logs/launchd/schedule.tsv"
-chown "$MACMINI_USER" "$REPO/logs/launchd/schedule.tsv"
-echo "installed: $REPO/logs/launchd/schedule.tsv"
+DEST_TSV="$REPO/logs/launchd/schedule.tsv"
+TMP_TSV="$(mktemp "${DEST_TSV}.XXXXXX")"
+render < "$SRC_DIR/schedule.tsv" > "$TMP_TSV"
+if [ -f "$DEST_TSV" ]; then
+  OWNED="$(printf '%s\n' "${NAMES[@]}")"
+  # 기존 파일에서 주석/빈줄/우리 소유 행을 뺀 나머지(= gha-* 등 타 설치기 행)를 보존
+  awk -F'\t' -v owned="$OWNED" '
+    BEGIN { n = split(owned, a, "\n"); for (i = 1; i <= n; i++) own[a[i]] = 1 }
+    /^#/ || NF == 0 { next }
+    !($1 in own) { print }
+  ' "$DEST_TSV" >> "$TMP_TSV"
+fi
+mv -f "$TMP_TSV" "$DEST_TSV"
+chown "$MACMINI_USER" "$DEST_TSV"
+echo "installed: $DEST_TSV ($(grep -vc '^#' "$DEST_TSV") 행)"
 # (stamps/locks 디렉토리는 wrapper 가 런타임에 mkdir 하므로 여기서 만들지 않는다.)
 
 # ── ① plist 렌더 → LaunchDaemons → (재)bootstrap ────────────────
