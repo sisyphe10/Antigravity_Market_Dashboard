@@ -1690,13 +1690,21 @@ CMB_SERIES_UNITS = {
     '전산업생산 전년동월비': '%', '실업률 (한국)': '%', '온라인쇼핑 거래액': '조원',
     '백화점 매출증감률': '%', '대형마트 매출증감률': '%', '편의점 매출증감률': '%', 'SSM 매출증감률': '%',
     # MACRO US
-    '미 역레포 잔고': '$T', '미 연준 총자산': '$T',
+    # ★역레포는 FRED RRPONTSYD 원본 단위가 Billions 이고 수집기가 스케일을 적용하지 않는다
+    #   (연준 총자산 WALCL 만 백만→조 환산). 2026-07-28 $T 오등록 수정.
+    '미 역레포 잔고': '$B', '미 연준 총자산': '$T',
     '미 신규 실업수당청구': '만건', '미 연속 실업수당청구': '만건', '미 JOLTS 구인': '만건',
     '미 비농업고용 증감': '천명', '미 실업률': '%',
     '미 CPI 전년동월비': '%', '미 근원 CPI 전년동월비': '%', '미 근원 PCE 전년동월비': '%',
     '미 PPI 전년동월비': '%', '미 시간당임금 전년동월비': '%', '미 소매판매 전년동월비': '%',
     '미 산업생산 전년동월비': '%', '미 근원자본재 수주 전년동월비': '%',
     '미 Sahm Rule 침체지표': '%p', '미 GDPNow 성장률': '%',
+    '미 은행 대출태도 (C&I)': '%',   # FRED DRTSCILM = Net Percentage of Banks Tightening
+    # IMMIGRATION (출입국·체류)
+    '외국인 입국자': '만명', '국민 출국자': '만명', '체류외국인 총계': '만명',
+    '체류외국인 취업(E)': '만명', '체류외국인 유학(D2·D4)': '만명',
+    # COMMODITIES
+    '3-2-1 Crack Spread': '$/bbl',
     # CREDIT & HOUSING
     '은행 대출금리 (신규취급)': '%', '은행 저축성수신금리 (신규취급)': '%', '예대금리차 (신규)': '%p',
     '가계대출 잔액': '조원', '가계신용': '조원', '미분양주택 (전국)': '호',
@@ -2819,6 +2827,13 @@ def _build_combined_chart_section():
                 // 단일 선택(raw1)일 때만 MA/이격도 버튼 활성 (상태 값은 보존)
                 var maRow = document.getElementById('cmbMaRow');
                 if (maRow) maRow.classList.toggle('cmb-ma-disabled', mode !== 'raw1');
+                // ★이격도(값/MA×100)는 0 을 넘나드는 %·%p 계열에서 MA가 0 근처면 발산한다
+                //   (가드가 ma===0 뿐이라 ma=0.05 면 수천 % 로 튐) → 해당 단위는 버튼 자체를 잠근다.
+                var _dispUnit = (mode === 'raw1' && perSeries.length > 0) ? cmbSeriesUnit[perSeries[0].name] : null;
+                var _dispBlocked = (_dispUnit === '%' || _dispUnit === '%p');
+                if (_dispBlocked) { dispActive = { 0: false, 1: false, 2: false, 3: false }; }
+                var dispGroup = document.getElementById('cmbDispGroup');
+                if (dispGroup) dispGroup.classList.toggle('cmb-ma-disabled', mode !== 'raw1' || _dispBlocked);
                 var yEok = mode !== 'pct' && perSeries.length > 0 && !!cmbEokSeries[perSeries[0].name];
                 var y1Eok = mode === 'raw2' && perSeries.length > 1 && !!cmbEokSeries[perSeries[1].name];
 
@@ -3512,11 +3527,13 @@ def _build_combined_chart_section():
                         <button id="cmbMaBtn1" class="cmb-ma-btn" onclick="toggleCmbMA(1,this)">MA60</button>
                         <button id="cmbMaBtn2" class="cmb-ma-btn" onclick="toggleCmbMA(2,this)">MA120</button>
                         <button id="cmbMaBtn3" class="cmb-ma-btn" onclick="toggleCmbMA(3,this)">MA200</button>
-                        <span style="color:#555;font-weight:600;margin-left:18px;">이격도</span>
+                        <span id="cmbDispGroup" style="display:flex;gap:6px;align-items:center;margin-left:18px;">
+                        <span style="color:#555;font-weight:600;">이격도</span>
                         <button id="cmbDispBtn0" class="cmb-ma-btn" onclick="toggleCmbDisp(0,this)">20</button>
                         <button id="cmbDispBtn1" class="cmb-ma-btn" onclick="toggleCmbDisp(1,this)">60</button>
                         <button id="cmbDispBtn2" class="cmb-ma-btn" onclick="toggleCmbDisp(2,this)">120</button>
                         <button id="cmbDispBtn3" class="cmb-ma-btn" onclick="toggleCmbDisp(3,this)">200</button>
+                        </span>
                     </div>
                     <div id="cmbChartCard" style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                         <div style="position:relative;height:562px;">
