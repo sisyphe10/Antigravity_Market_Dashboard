@@ -533,7 +533,7 @@ body{margin:0}
     <nav class="topnav"><div class="topnav-inner"><a href="index.html" class="topnav-brand">AGE OF EMERGENCE</a><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab active">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub active">Data</a><a href="universe.html" class="topnav-sub">Universe</a><a href="universe_lab.html" class="topnav-sub">Universe Lab</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
     <aside class="sidebar"><a href="market.html" class="sidebar-link active">Data</a><a href="universe.html" class="sidebar-link">Universe</a><a href="universe_lab.html" class="sidebar-link">Universe Lab</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
     <header style="margin:0;padding:8px 28px 0;text-align:right;">
-        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-07-28 09:56:25 KST</div>
+        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-07-28 09:59:25 KST</div>
     </header>
 
     <div class="mkt-subtabs">
@@ -1268,7 +1268,6 @@ if (typeof window._h2cFreeze !== 'function') {
                         <button id="cmbLogBtn" class="cmb-ma-btn active" style="margin-left:14px;border-radius:20px;" onclick="window.cmbLogOn = (window.cmbLogOn === false); this.classList.toggle('active', window.cmbLogOn !== false); updateCmbChart();">Log</button>
                         <button id="cmbNormBtn" class="cmb-ma-btn" style="border-radius:20px;" onclick="window.cmbForceNorm = !window.cmbForceNorm; this.classList.toggle('active', !!window.cmbForceNorm); updateCmbChart();">정규화</button>
                         <button onclick="downloadChartImage('cmbDynamicChart','AoE_Data','cmbChartLegend','cmbDispChart')" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
-                        <button id="cmbStarLoadBtn" onclick="cmbLoadStars()" style="font-family:inherit;font-size:13px;font-weight:600;padding:4px 14px;background:#f3f4f6;color:#444;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;margin-left:8px;">★ 0개 올리기</button>
                         <button onclick="clearCmbSelections()" style="font-family:inherit;font-size:13px;font-weight:600;padding:4px 14px;background:#f3f4f6;color:#444;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;margin-left:8px;">전체 해제</button>
                     </div>
                     <style>
@@ -1703,8 +1702,6 @@ if (typeof window._h2cFreeze !== 'function') {
                     var td = r.querySelector('td.cmb-star');
                     if (td && td.classList.contains('on')) pinned.push(r);
                 });
-                var btn = document.getElementById('cmbStarLoadBtn');
-                if (btn) btn.textContent = '★ ' + pinned.length + '개 올리기';
                 tbody.querySelectorAll('tr.cmb-pinned').forEach(function(r) {
                     r.classList.remove('cmb-pinned'); r.removeAttribute('draggable');
                 });
@@ -2587,21 +2584,6 @@ if (typeof window._h2cFreeze !== 'function') {
                 buildCmbChart();
             };
             window.updateCmbChart = buildCmbChart;
-            // 별표 시리즈를 한 번에 차트로 (2026-07-28). 별표 상태는 DOM에서 직접 읽는다.
-            window.cmbLoadStars = function() {
-                var stars = document.querySelectorAll('#cmbSideTable td.cmb-star.on');
-                if (!stars.length) return;
-                document.querySelectorAll('.cmb-chart-item.active').forEach(function(x) { x.classList.remove('active'); });
-                cmbClickOrder = [];
-                stars.forEach(function(td) {
-                    var el = td.parentNode.querySelector('.cmb-chart-item');
-                    if (!el) return;
-                    el.classList.add('active');
-                    cmbClickOrder.push(el.getAttribute('data-series'));
-                });
-                cmbAutoRangePending = true;
-                buildCmbChart();
-            };
             window.clearCmbSelections = function() {
                 document.querySelectorAll('.cmb-chart-item.active').forEach(function(el){ el.classList.remove('active'); });
                 cmbClickOrder = [];

@@ -2554,8 +2554,6 @@ def _build_combined_chart_section():
                     var td = r.querySelector('td.cmb-star');
                     if (td && td.classList.contains('on')) pinned.push(r);
                 });
-                var btn = document.getElementById('cmbStarLoadBtn');
-                if (btn) btn.textContent = '★ ' + pinned.length + '개 올리기';
                 tbody.querySelectorAll('tr.cmb-pinned').forEach(function(r) {
                     r.classList.remove('cmb-pinned'); r.removeAttribute('draggable');
                 });
@@ -3438,21 +3436,6 @@ def _build_combined_chart_section():
                 buildCmbChart();
             };
             window.updateCmbChart = buildCmbChart;
-            // 별표 시리즈를 한 번에 차트로 (2026-07-28). 별표 상태는 DOM에서 직접 읽는다.
-            window.cmbLoadStars = function() {
-                var stars = document.querySelectorAll('#cmbSideTable td.cmb-star.on');
-                if (!stars.length) return;
-                document.querySelectorAll('.cmb-chart-item.active').forEach(function(x) { x.classList.remove('active'); });
-                cmbClickOrder = [];
-                stars.forEach(function(td) {
-                    var el = td.parentNode.querySelector('.cmb-chart-item');
-                    if (!el) return;
-                    el.classList.add('active');
-                    cmbClickOrder.push(el.getAttribute('data-series'));
-                });
-                cmbAutoRangePending = true;
-                buildCmbChart();
-            };
             window.clearCmbSelections = function() {
                 document.querySelectorAll('.cmb-chart-item.active').forEach(function(el){ el.classList.remove('active'); });
                 cmbClickOrder = [];
@@ -3516,7 +3499,6 @@ def _build_combined_chart_section():
                         <button id="cmbLogBtn" class="cmb-ma-btn active" style="margin-left:14px;border-radius:20px;" onclick="window.cmbLogOn = (window.cmbLogOn === false); this.classList.toggle('active', window.cmbLogOn !== false); updateCmbChart();">Log</button>
                         <button id="cmbNormBtn" class="cmb-ma-btn" style="border-radius:20px;" onclick="window.cmbForceNorm = !window.cmbForceNorm; this.classList.toggle('active', !!window.cmbForceNorm); updateCmbChart();">정규화</button>
                         <button onclick="downloadChartImage('cmbDynamicChart','AoE_Data','cmbChartLegend','cmbDispChart')" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
-                        <button id="cmbStarLoadBtn" onclick="cmbLoadStars()" style="font-family:inherit;font-size:13px;font-weight:600;padding:4px 14px;background:#f3f4f6;color:#444;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;margin-left:8px;">★ 0개 올리기</button>
                         <button onclick="clearCmbSelections()" style="font-family:inherit;font-size:13px;font-weight:600;padding:4px 14px;background:#f3f4f6;color:#444;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;margin-left:8px;">전체 해제</button>
                     </div>
                     <style>
