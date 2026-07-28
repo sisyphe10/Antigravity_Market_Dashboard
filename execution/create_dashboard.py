@@ -2890,6 +2890,11 @@ def _build_combined_chart_section():
                 var datasets = [];
                 var dispDatasets = [];
                 var _axAssign = [];   // 축 단위 주석 역산용 (name -> 실제 배정 축)
+                // ★외국인 보유비중의 y축 강제는 '두 시리즈 단위가 같을 때'만 (2026-07-29).
+                //   종전엔 무조건 y 로 묶어서 만명(입국자)과 %(보유비중)가 한 축을 공유했다.
+                var _u0 = perSeries.length > 0 ? (cmbSeriesUnit[perSeries[0].name] || '') : '';
+                var _u1 = perSeries.length > 1 ? (cmbSeriesUnit[perSeries[1].name] || '') : '';
+                var _sameUnit = (_u0 === _u1);
                 perSeries.forEach(function(s, idx) {
                     var aligned = [];
                     var lastVal = null;
@@ -2926,7 +2931,7 @@ def _build_combined_chart_section():
                             return scale >= 1e8 ? Math.round(sv) : sv;
                         });
                     }
-                    var yAxisID = (mode === 'raw2' && idx === 1 && !isForeign) ? 'y1' : 'y';
+                    var yAxisID = (mode === 'raw2' && idx === 1 && !(isForeign && _sameUnit)) ? 'y1' : 'y';
                     _axAssign.push({ name: s.name, ax: yAxisID });   // 축 주석 역산용
                     var clickIdx = cmbClickOrder.indexOf(s.name);
                     datasets.push({
