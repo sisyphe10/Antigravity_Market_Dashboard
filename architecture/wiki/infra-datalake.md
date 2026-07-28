@@ -18,6 +18,7 @@ reads:
   - "store-research-notes-db"
 writes:
   - "~/datalake (parquet · duckdb · md 아카이브)"
+  - "store-research-tags"
 depends_on:
   - "infra-vm-macmini"
   - "ext-data-apis"
@@ -33,7 +34,7 @@ alerts: "launchd wrapper 실패 → notify → 텔레그램"
 - **launchd 잡 7종**(맥미니 전용, wrapper=`datalake/launchd/run_datalake_job.sh`):
   - `datalake-market-update`(20:30) — 일별 증분 적재(`daily_market_update.py`). 2026-07-22 `kr_fundamental` 일별 단면(BPS/PER/PBR 등)을 여기에 추가(휴장일 가드).
   - `datalake-macro-update`(20:50, 2026-07-22 신규) — 매크로 3소스 멱등 재적재(`daily_macro_update.py`): `backfill_ecos`·`backfill_fred`(YoY 계산이 전 이력 필요) 전량 재실행 + `backfill_kofia --pages 1`. GHA 매크로 잡([[gha-daily-ecos]]·[[gha-daily-fred]]·[[gha-daily-kofia]])과 별개로 데이터레이크 정본에 당일분을 채운다.
-  - `datalake-research-export`(23:20) — Research Notes 원문(`research_notes.db`)을 일별 `.md`+미디어로 아카이브.
+  - `datalake-research-export`(23:20) — Research Notes 파이프라인(`datalake/tagging/daily_tag_export.sh`, 2026-07-27부터 태깅 포함): 태깅→md 아카이브→parquet→추이 집계→차트. 원문(`research_notes.db`)을 일별 `.md`+미디어로 아카이브하고, 그 위에 테마·개체 태그를 얹는다(정본 `tag_state.sqlite`). 상세 [[src-research-tagging]] · 출력 [[store-research-tags]].
   - `datalake-snapshot`(23:50) — 덮어쓰기형 레포 산출물 일별 gzip 스냅샷.
   - `viewer-daily`(23:50, 2026-07-22 신규) — 현선물/공매도/ETF 차트 뷰어 수집+빌드(`~/work/charts/260715_현선물공매도/run_daily.py`). KRX 야간 배포·kodex 23:30 잡 뒤에 배치.
   - `datalake-backup`(일 10:00) — private repo 백업(duckdb/staging 제외).
@@ -51,6 +52,7 @@ alerts: "launchd wrapper 실패 → notify → 텔레그램"
 
 ## Writes
 - `~/datalake (parquet · duckdb · md 아카이브)`
+- [[store-research-tags]] — 리서치 태그 정본 (tag_state.sqlite + theme_trends.json + parquet)
 
 ## Depends on
 - [[infra-vm-macmini]] — 컴퓨트 호스트 (Oracle VM → 맥미니)

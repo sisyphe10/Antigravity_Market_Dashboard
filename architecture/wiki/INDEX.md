@@ -1,6 +1,6 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 142 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 144 components._
 
 Updated: 2026-07-28
 
@@ -102,15 +102,17 @@ Updated: 2026-07-28
 - [자문지 메일 발송 폴러 (send-advisory-emails 60초)](timer-advisory-emails.md) — Timer
 - [포트폴리오 표 생성 (create_portfolio_tables.py)](src-create-portfolio-tables.md) — Source
 
-### 뉴스 · 리서치 (15)
+### 뉴스 · 리서치 (17)
 - [Earnings Calendar Sync (07:00)](gha-earnings-calendar-sync.md) — GHA
 - [earnings.db (실적봇 상태)](store-earnings-db.md) — Store
 - [Generic Source Pipeline (execution/sources/)](src-generic-pipeline.md) — Source
 - [Notion (실적·리서치 퍼블리시 대상)](ext-notion.md) — External
 - [RA_Sisyphe_bot (리서치 알림 봇)](bot-ra-sisyphe.md) — Bot
 - [Research Notes 봇](bot-research-notes.md) — Bot
+- [Research Notes 태깅 파이프라인 (datalake/tagging/)](src-research-tagging.md) — Source
 - [research_notes.db + media/ (리서치봇)](store-research-notes-db.md) — Store
 - [sources_state/ + kna_state.json](store-sources-state.md) — Store
+- [리서치 태그 정본 (tag_state.sqlite + theme_trends.json + parquet)](store-research-tags.md) — Store
 - [실적 분석 1-page md (~/datalake/analyses/)](store-analyses-md.md) — Store
 - [실적 캘린더 sync (earnings_calendar_sync.py)](src-earnings-calendar-sync.md) — Source
 - [실적봇 타이머 (earnings-bot)](timer-earnings-bot.md) — Timer
@@ -233,7 +235,7 @@ Updated: 2026-07-28
 - [taiwan_revenue.csv (대만 월매출)](store-taiwan-revenue-csv.md) — 23:20 갱신, active
 - [universe.json / universe_history.json](store-universe-json.md) — 18:30 / 07:00 갱신, active
 
-### Store (9)
+### Store (10)
 - [earnings.db (실적봇 상태)](store-earnings-db.md) — 08:00 갱신, active
 - [etf_data.db (ETF 구성종목 SQLite)](store-etf-db.md) — 16:30 / 18:00 갱신, active
 - [heartbeats.json (Phase 2 워치독 인터페이스)](store-heartbeats.md) — 각 GHA 잡 성공 시, planned
@@ -241,6 +243,7 @@ Updated: 2026-07-28
 - [research_notes.db + media/ (리서치봇)](store-research-notes-db.md) — 이벤트 시, active
 - [sources_state/ + kna_state.json](store-sources-state.md) — 소스 폴링 시, active
 - [Wrap_NAV.xlsx (랩 운용 원장)](store-wrap-nav-xlsx.md) — 사용자 편집 + finalize, active
+- [리서치 태그 정본 (tag_state.sqlite + theme_trends.json + parquet)](store-research-tags.md) — 23:20 (datalake-research-export), active
 - [실적 분석 1-page md (~/datalake/analyses/)](store-analyses-md.md) — 08:00 (earnings-bot 타이머), active
 - [어닝콜 번역 전문 md (~/datalake/transcripts/)](store-transcripts-md.md) — 08:00 (earnings-bot 타이머), active
 
@@ -268,7 +271,7 @@ Updated: 2026-07-28
 - [외부 데이터 API/소스 집합](ext-data-apis.md) — active
 - [한국 수출 매출 추정 대시보드](ext-export-dashboard.md) — planned
 
-### Source (43)
+### Source (44)
 - [AoE 스타일 정본 (nav_style.py)](src-nav-style.md) — import 시 (상시), active
 - [DART 공시 (fetch_disclosures.py)](src-dart-disclosures.md) — 16:30 (gha-daily-disclosures), active
 - [ECOS 한국 매크로 33종 (fetch_ecos_data.py)](src-ecos.md) — 17:40 평일 (gha-daily-ecos), active
@@ -281,6 +284,7 @@ Updated: 2026-07-28
 - [KOSIS 시계열 레지스트리 (fetch_kosis_series.py)](src-kosis-series.md) — 23:30 (kodex 타이머 편승), active
 - [KPX 육지 SMP (fetch_smp_kpx.py)](src-smp-kpx.md) — 23:00 (crawler 내부), active
 - [KRX 지수 밸류에이션 (fetch_krx_valuation.py)](src-krx-valuation.md) — 18:30 평일 (gha-daily-krx-valuation), active
+- [Research Notes 태깅 파이프라인 (datalake/tagging/)](src-research-tagging.md) — 23:20 (datalake-research-export), active
 - [SEIBro TOP50 (fetch_seibro_data.py)](src-seibro.md) — 23:00 (daily_crawl), active
 - [SemiAnalysis 소스 (sources/semianalysis.py)](src-semianalysis.md) — 09:00 / 21:00 (ra-sisyphe), active
 - [SiliconData 지수 3종 (fetch_silicondata_index.py)](src-silicondata.md) — 23:00 (crawler 내부), active
@@ -332,7 +336,7 @@ Updated: 2026-07-28
 
 ## By project
 
-### antigravity (142)
+### antigravity (144)
 - [/aum — WRAP 일일 AUM 입력](cmd-aum.md) — Skill
 - [/긴급코멘트 — 급락일 시장 코멘트](cmd-urgent-comment.md) — Skill
 - [/목표전환형 — 랩 생성·청산 일괄](cmd-target-transform.md) — Skill
@@ -397,6 +401,7 @@ Updated: 2026-07-28
 - [Recalculate Wrap NAV (xlsx push 트리거)](gha-recalc-wrap-nav.md) — GHA
 - [repo 동기화 (git-pull */5)](daemon-git-pull.md) — Watcher
 - [Research Notes 봇](bot-research-notes.md) — Bot
+- [Research Notes 태깅 파이프라인 (datalake/tagging/)](src-research-tagging.md) — Source
 - [research_notes.db + media/ (리서치봇)](store-research-notes-db.md) — Store
 - [SEIBro TOP50 (fetch_seibro_data.py)](src-seibro.md) — Source
 - [seibro.html (SEIBro)](page-seibro.md) — Page
@@ -433,6 +438,7 @@ Updated: 2026-07-28
 - [데이터레이크 문답 웹 UI 데몬 (AoE Wiki, 127.0.0.1:8787)](daemon-datalake-webui.md) — Infra
 - [랜딩 하이라이트 생성 (create_landing_highlights.py)](src-landing-highlights.md) — Source
 - [랜딩 하이라이트 타이머 (18:45)](timer-landing-highlights.md) — Timer
+- [리서치 태그 정본 (tag_state.sqlite + theme_trends.json + parquet)](store-research-tags.md) — Store
 - [마스터 시장 크롤러 (market_crawler.py)](src-market-crawler.md) — Source
 - [맥미니 데이터레이크 (~/datalake + 문답 위키)](infra-datalake.md) — Infra
 - [메모리 사이클 플랜 알림 타이머 (07:45)](timer-memory-cycle-alert.md) — Timer

@@ -2024,7 +2024,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "잡별 (20:30 / 20:50 / 23:20 / 23:50 / 일 10:00 / 20분)",
    "status": "active",
-   "desc_md": "2026-07-11 신설(코드는 레포 `datalake/`, 데이터 정본은 레포 외부 `~/datalake`). 덮어쓰기형 산출물의 과거 유실을 막고, 전 상장·해외 유니버스 일봉 종가를 백필하며, DuckDB+Claude API 웹 UI로 자연어 질의를 제공하는 로컬 데이터레이크. 백필 스크립트(KRX/KIS·FRED·ECOS·KOFIA·벤치마크·해외)와 `build_catalog.py` 카탈로그가 함께 있다.\n\n- **launchd 잡 7종**(맥미니 전용, wrapper=`datalake/launchd/run_datalake_job.sh`):\n  - `datalake-market-update`(20:30) — 일별 증분 적재(`daily_market_update.py`). 2026-07-22 `kr_fundamental` 일별 단면(BPS/PER/PBR 등)을 여기에 추가(휴장일 가드).\n  - `datalake-macro-update`(20:50, 2026-07-22 신규) — 매크로 3소스 멱등 재적재(`daily_macro_update.py`): `backfill_ecos`·`backfill_fred`(YoY 계산이 전 이력 필요) 전량 재실행 + `backfill_kofia --pages 1`. GHA 매크로 잡([[gha-daily-ecos]]·[[gha-daily-fred]]·[[gha-daily-kofia]])과 별개로 데이터레이크 정본에 당일분을 채운다.\n  - `datalake-research-export`(23:20) — Research Notes 원문(`research_notes.db`)을 일별 `.md`+미디어로 아카이브.\n  - `datalake-snapshot`(23:50) — 덮어쓰기형 레포 산출물 일별 gzip 스냅샷.\n  - `viewer-daily`(23:50, 2026-07-22 신규) — 현선물/공매도/ETF 차트 뷰어 수집+빌드(`~/work/charts/260715_현선물공매도/run_daily.py`). KRX 야간 배포·kodex 23:30 잡 뒤에 배치.\n  - `datalake-backup`(일 10:00) — private repo 백업(duckdb/staging 제외).\n  - `datalake-sheets-mirror`(20분 폴링, 2026-07-12 신규) — 시지프+선유듀오 구글시트 미러 → `~/datalake/sheets`. 시트 단위 격리 + **3회 재시도(15s·30s 백오프, 2026-07-14)** — read timeout 등 일시 장애를 흡수하고 3회 연속 실패만 비정상 종료→알림(오탐 알림 억제).\n- 저장: 데이터셋별 연도 파티션 parquet(`kr_ohlcv`·`kr_marcap`·`overseas_ohlcv` 등) + `market.duckdb` 뷰. KRX 수정주가 캡 실측 대응으로 `kr_ohlcv`(무수정)/`kr_ohlcv_adj` 분리.\n- **`kr_fundamental` 패스(2026-07-20 재활성화)**: KRX 주당지표(BPS/PER/PBR/EPS/DIV/DPS). 연간 확정 BPS 기준이라 분기 정밀 밸류엔 계단식으로 부정확해 2026-07-13 제외됐으나, 장기 PBR/PER 밴드·사이클 고점 분석엔 표준 소스라 사용자 요청으로 되살림.\n- **공매도·선물 패스(2026-07-15 신규)**: `kr_short`(종목별 일별 공매도 거래량·거래대금·잔고수량/금액, KRX SRT30001 — 잔고는 T+2 공시라 최근 1~2일 NaN이 lookback 재조회로 self-heal. ★전면금지 2023-11-06~2025-03-30·부분금지 2020-03-16~2021-05-02 구간은 빈 값이 정상) · `kr_short_investor`(시장단위 투자자별 공매도) · `kr_futures_ohlcv`(선물 7상품 월물별 시세+미결제약정, 상품 단위 합계는 `kr_futures_oi_daily` 뷰). 선물 OI는 pykrx api wrapper가 `ACC_OPNINT_QTY`를 떨궈 **core 전종목시세(MDCSTAT12501) 클래스를 직접 호출**하고, 백필은 (상품,연도) 단위 staging 체크포인트로 재개한다.\n- **파생 투자자별 수급 패스(`kr_deriv_investor`, 2026-07-26 신규)**: 파생상품 투자자별 순매수를 일별 적재(KRX [13106] MDCSTAT13103). 10상품(선물 7상품+K200옵션+선물전체+옵션전체) × 단위 2종(`metric`=volume 계약 | value 원) × 방향 3종(`side`=ask 매도 | bid 매수 | net 순매수)에 세부 주체 9종(금융투자~외국인) + 기관합계 파생 컬럼. pykrx 미노출 화면이라 `KrxWebIo`를 `backfill_krx.py`에 직접 구현해 호출한다. 일별 증분은 `daily_market_update.py`의 `deriv_investor_update()`가 최근 `RANGE_DAYS` 창을 재조회(10×2×3=60콜, ~30초) upsert. 검증: 7/20주 K200선물 외국인 순매수 −1,308계약이 네이버 교차 일치. `build_catalog.py`에 뷰 설명·예시 SQL 등록.\n- 웹 UI(`datalake/webui/`)는 duckdb 샌드박스(allowed→잠금) 위에서 md 코퍼스 문답. 상세: `datalake/DESIGN.md`.",
+   "desc_md": "2026-07-11 신설(코드는 레포 `datalake/`, 데이터 정본은 레포 외부 `~/datalake`). 덮어쓰기형 산출물의 과거 유실을 막고, 전 상장·해외 유니버스 일봉 종가를 백필하며, DuckDB+Claude API 웹 UI로 자연어 질의를 제공하는 로컬 데이터레이크. 백필 스크립트(KRX/KIS·FRED·ECOS·KOFIA·벤치마크·해외)와 `build_catalog.py` 카탈로그가 함께 있다.\n\n- **launchd 잡 7종**(맥미니 전용, wrapper=`datalake/launchd/run_datalake_job.sh`):\n  - `datalake-market-update`(20:30) — 일별 증분 적재(`daily_market_update.py`). 2026-07-22 `kr_fundamental` 일별 단면(BPS/PER/PBR 등)을 여기에 추가(휴장일 가드).\n  - `datalake-macro-update`(20:50, 2026-07-22 신규) — 매크로 3소스 멱등 재적재(`daily_macro_update.py`): `backfill_ecos`·`backfill_fred`(YoY 계산이 전 이력 필요) 전량 재실행 + `backfill_kofia --pages 1`. GHA 매크로 잡([[gha-daily-ecos]]·[[gha-daily-fred]]·[[gha-daily-kofia]])과 별개로 데이터레이크 정본에 당일분을 채운다.\n  - `datalake-research-export`(23:20) — Research Notes 파이프라인(`datalake/tagging/daily_tag_export.sh`, 2026-07-27부터 태깅 포함): 태깅→md 아카이브→parquet→추이 집계→차트. 원문(`research_notes.db`)을 일별 `.md`+미디어로 아카이브하고, 그 위에 테마·개체 태그를 얹는다(정본 `tag_state.sqlite`). 상세 [[src-research-tagging]] · 출력 [[store-research-tags]].\n  - `datalake-snapshot`(23:50) — 덮어쓰기형 레포 산출물 일별 gzip 스냅샷.\n  - `viewer-daily`(23:50, 2026-07-22 신규) — 현선물/공매도/ETF 차트 뷰어 수집+빌드(`~/work/charts/260715_현선물공매도/run_daily.py`). KRX 야간 배포·kodex 23:30 잡 뒤에 배치.\n  - `datalake-backup`(일 10:00) — private repo 백업(duckdb/staging 제외).\n  - `datalake-sheets-mirror`(20분 폴링, 2026-07-12 신규) — 시지프+선유듀오 구글시트 미러 → `~/datalake/sheets`. 시트 단위 격리 + **3회 재시도(15s·30s 백오프, 2026-07-14)** — read timeout 등 일시 장애를 흡수하고 3회 연속 실패만 비정상 종료→알림(오탐 알림 억제).\n- 저장: 데이터셋별 연도 파티션 parquet(`kr_ohlcv`·`kr_marcap`·`overseas_ohlcv` 등) + `market.duckdb` 뷰. KRX 수정주가 캡 실측 대응으로 `kr_ohlcv`(무수정)/`kr_ohlcv_adj` 분리.\n- **`kr_fundamental` 패스(2026-07-20 재활성화)**: KRX 주당지표(BPS/PER/PBR/EPS/DIV/DPS). 연간 확정 BPS 기준이라 분기 정밀 밸류엔 계단식으로 부정확해 2026-07-13 제외됐으나, 장기 PBR/PER 밴드·사이클 고점 분석엔 표준 소스라 사용자 요청으로 되살림.\n- **공매도·선물 패스(2026-07-15 신규)**: `kr_short`(종목별 일별 공매도 거래량·거래대금·잔고수량/금액, KRX SRT30001 — 잔고는 T+2 공시라 최근 1~2일 NaN이 lookback 재조회로 self-heal. ★전면금지 2023-11-06~2025-03-30·부분금지 2020-03-16~2021-05-02 구간은 빈 값이 정상) · `kr_short_investor`(시장단위 투자자별 공매도) · `kr_futures_ohlcv`(선물 7상품 월물별 시세+미결제약정, 상품 단위 합계는 `kr_futures_oi_daily` 뷰). 선물 OI는 pykrx api wrapper가 `ACC_OPNINT_QTY`를 떨궈 **core 전종목시세(MDCSTAT12501) 클래스를 직접 호출**하고, 백필은 (상품,연도) 단위 staging 체크포인트로 재개한다.\n- **파생 투자자별 수급 패스(`kr_deriv_investor`, 2026-07-26 신규)**: 파생상품 투자자별 순매수를 일별 적재(KRX [13106] MDCSTAT13103). 10상품(선물 7상품+K200옵션+선물전체+옵션전체) × 단위 2종(`metric`=volume 계약 | value 원) × 방향 3종(`side`=ask 매도 | bid 매수 | net 순매수)에 세부 주체 9종(금융투자~외국인) + 기관합계 파생 컬럼. pykrx 미노출 화면이라 `KrxWebIo`를 `backfill_krx.py`에 직접 구현해 호출한다. 일별 증분은 `daily_market_update.py`의 `deriv_investor_update()`가 최근 `RANGE_DAYS` 창을 재조회(10×2×3=60콜, ~30초) upsert. 검증: 7/20주 K200선물 외국인 순매수 −1,308계약이 네이버 교차 일치. `build_catalog.py`에 뷰 설명·예시 SQL 등록.\n- 웹 UI(`datalake/webui/`)는 duckdb 샌드박스(allowed→잠금) 위에서 md 코퍼스 문답. 상세: `datalake/DESIGN.md`.",
    "code": [
     "datalake/",
     "datalake/daily_market_update.py",
@@ -2037,7 +2037,8 @@
     "store-research-notes-db"
    ],
    "writes": [
-    "~/datalake (parquet · duckdb · md 아카이브)"
+    "~/datalake (parquet · duckdb · md 아카이브)",
+    "store-research-tags"
    ],
    "depends_on": [
     "infra-vm-macmini",
@@ -2820,6 +2821,40 @@
    ]
   },
   {
+   "id": "src-research-tagging",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "pipeline_source",
+   "name": "Research Notes 태깅 파이프라인 (datalake/tagging/)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "23:20 (datalake-research-export)",
+   "status": "active",
+   "desc_md": "2026-07-27 신설. Research Notes 원문(`research_notes.db`)에 **테마·개체(종목/섹터/기관/인물) 태그**를 붙이는 규칙+LLM 하이브리드 파이프라인. exporter([[infra-datalake]]의 `export_research_notes.py`)와 **완전히 분리된 독립 프로세스** — exporter는 매일 어제+오늘을 통째로 재생성하는 멱등 구조라 거기에 LLM을 넣으면 같은 원문에 매일 다시 과금되고 태그가 흔들린다. 그래서 태그 정본을 [[store-research-tags]]의 `tag_state.sqlite`에 두고, Markdown은 그 캐시를 읽어 투영만 한다.\n\n- **`tagging_common.py`** — 온톨로지·개체 마스터·별칭 매칭 공용 모듈. `universe_tickers.csv`가 상장 종목 마스터의 단일 출처이고, 비상장 기업·기관·인물은 `entities_extra.csv`로 분리. 별칭은 strong/weak 2등급(strong=규칙만으로 자동 승인, weak=LLM 문맥 판정 후보). 본문 URL·도메인은 매칭 전 같은 길이 공백으로 덮어(위치 보존) 대량 오탐 차단. 마스터 해시(ontology/universe/alias)를 노출해 캐시 키에 포함.\n- **`tag_worker.py`** — 태깅 워커. ① 규칙 매칭(strong 자동 승인) → ② weak 후보 + 테마 분류만 LLM(micro-batch, `TAG_MODEL` 기본 `claude-haiku-4-5`)에 위임 → ③ 근거·content_hash와 함께 `tag_state.sqlite` 저장. 인자 없이 부르면 캐시 미스(=미태깅분) 전부가 대상이라 전날 실패분도 자동 회수. `--dry-run`(비용 견적)·`--date`·`--sample`·`--retry-failed` 지원.\n- **`export_tags_parquet.py`** — `tag_state.sqlite` → 연도별 parquet 3종(`research_items`·`research_item_themes`·`research_entity_mentions`)으로 내보내 데이터레이크 DuckDB 뷰로 노출.\n- **`build_theme_trends.py`** — 월별 테마·섹터·종목 언급 추이 `theme_trends.json` 집계(절대건수 대신 count·share·unique_sources 3지표, primary/secondary 분리). `~/work/charts/260715_현선물공매도`의 관심축 차트가 소비.\n- **`recompute_rules.py`** — 별칭 사전·규칙만 고쳤을 때 LLM 재호출 없이 규칙 기반 개체 매칭만 재계산(`rule_strong`/`rule_header` 재생성 + URL 안에서만 잡히던 개체 제거). 전량 재태깅(수 시간·수 달러) 회피용 보수 도구.\n\n## 일일 실행 (`daily_tag_export.sh`)\n\n23:20 `datalake-research-export` 잡의 실체([[infra-datalake]] `run_datalake_job.sh`가 이 셸을 호출). 5단계: ① 태깅(미처리분) → ② md 아카이브(어제+오늘) → ③ parquet → ④ 추이 집계 → ⑤ 관심축 차트 빌드. **태깅을 아카이브보다 앞**에 둬 당일 md가 태그와 함께 나오게 한다. 실패 정책: 태깅·parquet·집계가 실패해도 **원문 아카이브 생성은 반드시 진행**(아카이브가 1차 산출물, 태그는 파생물) — 아카이브 실패만 exit 1.",
+   "code": [
+    "datalake/tagging/tagging_common.py",
+    "datalake/tagging/tag_worker.py",
+    "datalake/tagging/export_tags_parquet.py",
+    "datalake/tagging/build_theme_trends.py",
+    "datalake/tagging/recompute_rules.py",
+    "datalake/tagging/daily_tag_export.sh",
+    "datalake/tagging/ontology.json",
+    "datalake/tagging/aliases_manual.csv",
+    "datalake/tagging/entities_extra.csv"
+   ],
+   "reads": [
+    "store-research-notes-db",
+    "universe_tickers.csv"
+   ],
+   "writes": [
+    "store-research-tags"
+   ],
+   "depends_on": [
+    "infra-datalake",
+    "store-research-notes-db"
+   ],
+   "alerts": "태깅·parquet·집계 실패는 warn(아카이브는 계속) · wrapper 실패 → 텔레그램"
+  },
+  {
    "id": "store-analyses-md",
    "project": "antigravity",
    "domain": "news-research",
@@ -2987,6 +3022,20 @@
    "desc_md": "Research Notes 봇이 수신 메시지·이미지를 보관하는 SQLite + 미디어 폴더(VM 로컬, git 미추적).\n\n- 요약→노션 퍼블리시 전 원본 보관. re-clone 시 백업 대상.",
    "depends_on": [
     "bot-research-notes"
+   ]
+  },
+  {
+   "id": "store-research-tags",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "store",
+   "name": "리서치 태그 정본 (tag_state.sqlite + theme_trends.json + parquet)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "23:20 (datalake-research-export)",
+   "status": "active",
+   "desc_md": "2026-07-27 신설. Research Notes 원문에 붙인 테마·개체 태그의 데이터 계층. **정본은 `tag_state.sqlite` 하나**이고, parquet·JSON·Markdown 태그는 전부 여기서 파생되는 투영이다. 경로는 `~/datalake/research_notes/`(레포 외부 데이터레이크, git 미추적).\n\n- **`tag_state.sqlite`** — 태그 정본. 메시지별 테마 배정·개체 언급을 근거(surface/문자위치·method·confidence·rank)와 함께 저장. 캐시 키 = `message_id + content_hash + tagger_version + prompt_hash + ontology_hash + universe_hash + alias_hash` → 원문·마스터가 안 바뀌면 LLM 재호출 없음.\n- **연도 파티션 parquet**(`market/<name>/<year>.parquet`, DuckDB 뷰 등록) — `research_items`(메시지 1행: 날짜·출처채널·유형·길이·테마 수) · `research_item_themes`(메시지×테마: rank/confidence/evidence) · `research_entity_mentions`(메시지×개체: role/method/섹터/표면형). 기계 질의는 여기를 본다.\n- **`theme_trends.json`** — 월별 테마·섹터·종목 언급 추이(count·share·unique_sources, primary/secondary 분리). `~/work/charts/260715_현선물공매도`의 관심축 차트가 소비.\n- Markdown 코퍼스([[store-transcripts-md]]와 나란한 `~/datalake/research_notes/*.md`)의 태그 줄은 [[src-research-tagging]]가 이 캐시를 읽어 투영한 것 — 사람이 읽는 표시일 뿐 기계 질의 대상 아님.",
+   "depends_on": [
+    "src-research-tagging"
    ]
   },
   {
