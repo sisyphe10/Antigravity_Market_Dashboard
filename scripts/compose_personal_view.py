@@ -195,6 +195,16 @@ AOE_DARK_CSS = (
     'border-color:' + P['input-border'] + '!important}'
     '.legend .sep{background:' + P['input-border'] + '!important}'
     'header.page-head{border-bottom-color:' + P['border'] + '!important}'
+    # 타이포 2단 통일 (2026-07-28 사용자 지시): 본문 15px / 보조 13px.
+    # 페이지가 12.5·13.1·14·14.4·15.2·17px 6종으로 난립해 구역마다 크기가 달라 보였다.
+    # ★일괄 'table,td{17px!important}' 를 이겨야 하므로 여기서 !important 로 재단언한다.
+    '.skill-table td,.skill-table .sk-name,.node .node-name,.wi-name,.layer-head,'
+    '.card-desc,.card-desc p,.card-desc li{font-size:15px!important}'
+    '.skill-table th,.skill-table .sk-sum,.skill-table .sk-code,.skill-table .sk-code code,'
+    '.node .node-sched,.layer-desc,.block-sub,.wi-sched,.wi-summary,.card-meta,'
+    '.tl-label,.tl-name,.tl-band-sub,.wiki-count{font-size:13px!important}'
+    '.skill-table .sk-name{font-weight:400!important}'
+    '.skill-table .sk-code code{font-family:inherit!important;color:' + P['muted'] + '!important}'
     '</style>')
 dark_pat = re.compile(r'<style id="aoe-terminal-dark">.*?</style>', re.S)
 

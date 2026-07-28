@@ -478,19 +478,21 @@ h2.block-title { font-size: 1.4rem; color: #111; font-weight: 800; margin-bottom
 .node.node-hl { box-shadow: 0 0 0 2.5px #2d7a3a; }
 
 /* ---- skill layer: 박스 대신 표 (행이 .node 를 겸함) ---- */
-.skill-table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: auto; }
+.skill-table { width: 100%; border-collapse: collapse; font-size: 15px; table-layout: auto; }
 .skill-table th { background: #f3f4f6; border: 1px solid #d1d5db; padding: 6px 10px;
-                  font-size: 12px; font-weight: 700; color: #000; text-align: center; white-space: nowrap; }
-.skill-table td { border: 1px solid #e5e7eb; padding: 6px 10px; color: #000; vertical-align: middle; }
+                  font-size: 13px; font-weight: 700; color: #000; text-align: center; white-space: nowrap; }
+.skill-table td { border: 1px solid #e5e7eb; padding: 7px 10px; color: #000; vertical-align: middle;
+                  font-size: 15px; }
+.skill-table .sk-sum, .skill-table .sk-code { font-size: 13px; }
 .skill-table tr.node { display: table-row; border: 0; border-radius: 0; padding: 0;
                        min-width: 0; max-width: none; background: transparent; box-shadow: none; }
 .skill-table tr.node:hover { transform: none; box-shadow: none; }
 .skill-table tr.node:hover td { background: #f6f8f7; }
 .skill-table tr.node.node-hl { box-shadow: none; }
 .skill-table tr.node.node-hl td { background: #e7f3ea; }
-.skill-table .sk-name { font-weight: 700; white-space: nowrap; }
+.skill-table .sk-name { font-weight: 400; white-space: nowrap; }
 .skill-table .sk-kind { white-space: nowrap; }
-.skill-table .sk-code code { font-family: 'Consolas', 'Courier New', monospace; font-size: 11.5px; }
+.skill-table .sk-code code { font-family: inherit; font-size: 13px; color: #555; }
 /* Edges are hidden by default (clean diagram); a node's own edges are revealed
    only while it is hovered/focused, drawn on top of the cards (edge-svg z-index). */
 .edge-line { stroke-width: 1.6; fill: none; opacity: 0; transition: opacity 0.12s, stroke-width 0.12s; }
@@ -629,8 +631,15 @@ def build_diagram(comps, by_id):
             for c in buckets[n]:
                 cid = c.get("id", "")
                 nm = c.get("name") or cid
-                kind = "커맨드" if nm.lstrip().startswith("/") else "스킬"
-                code0 = (c.get("code") or [""])[0].split(" ")[0]
+                # 이름 열은 호출명만 — " — 설명" / " (부연)" 꼬리와 접미사 '스킬'을 떼어낸다.
+                nm = re.split(r"\s+—\s+|\s+\(", nm)[0].strip()
+                nm = re.sub(r"\s*스킬$", "", nm)
+                kind = "커맨드" if cid.startswith("cmd-") else "스킬"
+                code0 = (c.get("code") or [""])[0].split(" ")[0].rstrip("/")
+                # SKILL.md 는 전부 같은 파일명이라 스킬 폴더명을 보여준다.
+                fname = os.path.basename(code0)
+                if fname.upper() == "SKILL.MD":
+                    fname = os.path.basename(os.path.dirname(code0)) + "/"
                 parts.append(
                     '<tr class="node %s" data-id="%s" tabindex="0" role="button" %s>'
                     % (status_css(c.get("status")), esc(cid), tip_attrs(c)))
@@ -639,7 +648,7 @@ def build_diagram(comps, by_id):
                 parts.append('<td class="sk-sum" style="text-align:left">%s</td>'
                              % esc(first_sentence(c.get("desc_md"), 80)))
                 parts.append('<td class="sk-code" style="text-align:left"><code>%s</code></td>'
-                             % esc(os.path.basename(code0.rstrip("/")) or "—"))
+                             % esc(fname or "—"))
                 parts.append('</tr>')
             parts.append('</tbody></table></div></div>')
             continue
