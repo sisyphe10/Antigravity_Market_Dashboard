@@ -2452,7 +2452,9 @@ def _build_combined_chart_section():
                     m = (window._cmbAxisBandRef[ax.id] || Math.abs(ax.max || 0)) / f;
                 else
                     m = Math.max(Math.abs(ax.min || 0), Math.abs(ax.max || 0)) / f;
-                return fmtUniform(v / f, m);
+                var _vv = v / f;
+                // 로그 축에서 대역이 넓으면 큰 눈금에 소수가 붙는다 → 1,000 이상은 정수 (2026-07-28)
+                return fmtUniform(_vv, Math.abs(_vv) >= 1000 ? 1000 : m);
             }
 
             // 억원 단위 금액 시리즈 — 1조(=1만억) 이상은 'N조 N,NNN억' 통일 (2026-07-16 사용자 확정)
@@ -2887,6 +2889,7 @@ def _build_combined_chart_section():
 
                 var datasets = [];
                 var dispDatasets = [];
+                var _axAssign = [];   // 축 단위 주석 역산용 (name -> 실제 배정 축)
                 perSeries.forEach(function(s, idx) {
                     var aligned = [];
                     var lastVal = null;
@@ -2924,6 +2927,7 @@ def _build_combined_chart_section():
                         });
                     }
                     var yAxisID = (mode === 'raw2' && idx === 1 && !isForeign) ? 'y1' : 'y';
+                    _axAssign.push({ name: s.name, ax: yAxisID });   // 축 주석 역산용
                     var clickIdx = cmbClickOrder.indexOf(s.name);
                     datasets.push({
                         label: s.name,
@@ -3116,11 +3120,13 @@ def _build_combined_chart_section():
                             var val = ds.data[lastIdx];
                             var label;
                             if (ds._isForeign) {
-                                label = val.toFixed(1) + '%';
+                                // 값에 단위 금지 — % 는 축 상단 주석이 담당 (2026-07-28)
+                                var _bf = (window._cmbAxisBandRef || {})[ds.yAxisID || 'y'] || Math.abs(val);
+                                label = fmtUniformFix(val, _bf);
                             } else if ((chart._cmbMode || 'pct') === 'pct') {
-                                var rounded = Math.sign(val) * Math.round(Math.abs(val));
-                                var sign = rounded >= 0 ? '+' : '';
-                                label = sign + rounded + '%';
+                                // pct 끝값도 밴드를 따른다 (종전: 항상 정수)
+                                var _bp = (window._cmbAxisBandRef || {})[ds.yAxisID || 'y'] || Math.abs(val);
+                                label = (val >= 0 ? '+' : '') + fmtUniformFix(val, _bp) + '%';
                             } else {
                                 // 끝값 라벨: 정수부 4자리(>=1000)부터 소수 제외, 그 외 최대 2자리 (2026-07-16 사용자 확정)
                                 // 끝값 = 숫자만 (억원 시리즈는 축 단위(조/억)로 환산 — 단위는 축 상단 주석이 담당)
@@ -3248,9 +3254,21 @@ def _build_combined_chart_section():
                     if (u === '억원') return jo ? '(조원)' : '(억원)';
                     return '(' + u + ')';
                 }
+                // ★축 단위 주석은 perSeries 순서가 아니라 '실제 yAxisID 배정'에서 역산한다 (2026-07-28).
+                //   isForeign 은 y 로 강제되므로 순서로 매기면 데이터 없는 y1 에 단위만 뜨는 어긋남이 났다.
+                //   한 축에 서로 다른 단위가 얹히면 오표기 대신 생략한다.
+                function cmbAxisUnitFor(ax, jo) {
+                    var us = [];
+                    _axAssign.forEach(function(a) {
+                        if (a.ax !== ax) return;
+                        var u = cmbUnitLabel(a.name, jo);
+                        if (u && us.indexOf(u) < 0) us.push(u);
+                    });
+                    return us.length === 1 ? us[0] : null;
+                }
                 window._cmbAxisUnits = {
-                    y: (mode !== 'pct' && perSeries.length > 0) ? cmbUnitLabel(perSeries[0].name, yJo) : null,
-                    y1: (mode === 'raw2' && perSeries.length > 1) ? cmbUnitLabel(perSeries[1].name, y1Jo) : null
+                    y: (mode !== 'pct') ? cmbAxisUnitFor('y', yJo) : null,
+                    y1: (mode === 'raw2') ? cmbAxisUnitFor('y1', y1Jo) : null
                 };
                 // 축별 표시 환산 계수 — MA 등 파생선도 같은 축 규칙을 타도록 축 기준으로 기록
                 window._cmbAxisConv = { y: (yEok && yJo) ? 10000 : 1, y1: (y1Eok && y1Jo) ? 10000 : 1 };
@@ -3313,11 +3331,17 @@ def _build_combined_chart_section():
                     };
                 }
 
+                // 툴팁도 눈금·끝값과 같은 밴드(_cmbAxisBandRef)를 따른다 (2026-07-28).
+                // ★억원 계열의 전체형(`34조 2,669억`)만 사용자 확정 예외 — 나머지는 값에 단위를 붙이지 않는다.
                 var tooltipLabel = function(ctx) {
                     if (ctx.parsed.y === null || ctx.parsed.y === undefined) return ctx.dataset.label + ': -';
-                    if (mode === 'pct') return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '%';
-                    var _eokAx = (ctx.dataset.yAxisID || 'y') === 'y1' ? y1Eok : yEok;
-                    return ctx.dataset.label + ': ' + (_eokAx ? fmtEokFull(ctx.parsed.y) : fmtNum(ctx.parsed.y));
+                    var _tax = ctx.dataset.yAxisID || 'y';
+                    var _tb = (window._cmbAxisBandRef || {})[_tax] || 0;
+                    if (mode === 'pct') return ctx.dataset.label + ': ' + fmtUniformFix(ctx.parsed.y, _tb) + '%';
+                    var _eokAx = _tax === 'y1' ? y1Eok : yEok;
+                    if (_eokAx) return ctx.dataset.label + ': ' + fmtEokFull(ctx.parsed.y);
+                    var _tf = (window._cmbAxisConv || {})[_tax] || 1;
+                    return ctx.dataset.label + ': ' + fmtUniformFix(ctx.parsed.y / _tf, _tb / _tf);
                 };
 
                 // 우측 end-label(예: 예탁금 1,199,264) 잘림 방지 — 최장 라벨 폭만큼 오른쪽 패딩 동적 확보
