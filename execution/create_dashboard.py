@@ -3347,9 +3347,11 @@ def _build_combined_chart_section():
                             return any ? out : null;
                         };
                         var suffix = (perSeries.length > 1) ? (' ' + s.name) : '';
-                        // RoC¹ 동반은 단일 선택일 때만 — 수준×방향 판단용 기준선.
-                        // 다중 선택에서 계열마다 2줄이면 패널이 읽히지 않는다.
-                        if (perSeries.length === 1) {
+                        // RoC¹ 동반은 단일 선택 + 'level' 이 아닐 때만.
+                        //  · 다중 선택에서 계열마다 2줄이면 패널이 읽히지 않는다.
+                        //  · kind==='level'(전년동월비류)은 메인 차트가 곧 RoC¹ 이라 중복이고,
+                        //    레벨(0~6%)이 축을 지배해 RoC²(±0.5%p)가 납작해진다.
+                        if (perSeries.length === 1 && R.kind !== 'level') {
                             var d1 = proj(R.roc1);
                             if (d1) rocDatasets.push({
                                 label: 'RoC¹', data: d1,
