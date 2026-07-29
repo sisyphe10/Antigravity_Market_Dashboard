@@ -103,6 +103,22 @@ body{margin:0}
             max-width: 420px; padding: 10px 14px; border-radius: 8px; font-size: 13px;
             line-height: 1.5; background: #3a1412; border: 1px solid var(--aoe-up);
             color: #fff; box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
+  /* 태그 검색 결과 카드 (2026-07-29) */
+  .tag-head { font-size: 13px; color: var(--aoe-amber-bright); margin-bottom: 8px; }
+  .tag-card { border: 1px solid var(--aoe-border); border-radius: 8px; padding: 8px 11px;
+              margin: 6px 0; cursor: pointer; background: var(--aoe-card); }
+  .tag-card:hover { border-color: var(--aoe-amber); }
+  .tag-meta { font-size: 11.5px; color: #fff; opacity: 0.6; margin-bottom: 3px; }
+  .tag-snip { font-size: 13.5px; color: #fff; line-height: 1.55; }
+  .tag-full { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--aoe-input-border);
+              font-size: 13px; color: #fff; white-space: pre-wrap; max-height: 420px;
+              overflow-y: auto; line-height: 1.6; }
+  .tag-chip { display: inline-block; margin: 3px 5px 0 0; padding: 3px 9px; border-radius: 999px;
+              border: 1px solid var(--aoe-input-border); background: var(--aoe-card);
+              color: #fff; font-size: 12.5px; cursor: pointer; }
+  .tag-chip:hover { border-color: var(--aoe-amber); color: var(--aoe-amber-bright); }
+  #sug { max-width: 900px; margin: 0 auto 6px; display: none; }
+  #sug .tag-chip { margin-top: 0; }
 </style>
 </head>
 <body>
@@ -115,6 +131,7 @@ body{margin:0}
   <main id="main">
     <div id="chat"></div>
     <footer>
+      <div id="sug"></div>
       <form id="form">
         <textarea id="q" rows="1"></textarea>
         <button id="send" type="submit">질문</button>
@@ -191,6 +208,13 @@ form.addEventListener('submit', async (e) => {
   const question = q.value.trim();
   if (!question) return;
   q.value = '';
+  hideSug();
+  if (question.startsWith('#')) {      // 태그 검색 — LLM 호출 없이 즉시 (비용 0)
+    add('user', question);
+    runTagSearch(question);
+    q.focus();
+    return;
+  }
   // 답변을 '요청 시점의 대화'에 고정 — 대기 중 다른 대화를 열어도 엉뚱한 곳에 저장되지 않는다
   const reqConv = convId;
   const baseMsgs = history.slice();
@@ -346,6 +370,111 @@ newchatBtn.addEventListener('click', newConv);
   if (convId && list.some(c => c.id === convId)) openConv(convId);
   else if (convId) { convId = null; localStorage.removeItem('wikiConv'); }
 })();
+
+// ── 태그 검색 (인덱스 직조회, LLM 미사용 — 2026-07-29) ─────────────
+const CORPUS_LABEL = {note: '리서치노트', transcript: '콜 전문', analysis: '실적 분석'};
+
+function tagCard(r) {
+  const card = document.createElement('div');
+  card.className = 'tag-card';
+  const meta = document.createElement('div');
+  meta.className = 'tag-meta';
+  meta.textContent = [r.doc_date || '', CORPUS_LABEL[r.corpus] || r.corpus, r.title || '']
+                     .filter(Boolean).join(' · ');
+  const snip = document.createElement('div');
+  snip.className = 'tag-snip';
+  snip.textContent = r.snippet || '';
+  card.appendChild(meta);
+  card.appendChild(snip);
+  card.addEventListener('click', async () => {
+    const open = card.querySelector('.tag-full');
+    if (open) { open.remove(); return; }
+    const full = document.createElement('div');
+    full.className = 'tag-full';
+    full.textContent = '불러오는 중…';
+    card.appendChild(full);
+    try {
+      const res = await fetch('tags/doc?rel=' + encodeURIComponent(r.rel_path) +
+                              '&anchor=' + encodeURIComponent(r.anchor || ''));
+      const data = await res.json();
+      full.textContent = data.text || data.error || '(내용 없음)';
+    } catch (err) { full.textContent = '본문을 불러오지 못했습니다: ' + err.message; }
+  });
+  return card;
+}
+
+function chipRow(items, onPick) {
+  const row = document.createElement('div');
+  items.forEach(it => {
+    const c = document.createElement('span');
+    c.className = 'tag-chip';
+    c.textContent = '#' + it.label + (it.freq ? ' ' + it.freq : '');
+    c.addEventListener('click', () => onPick(it));
+    row.appendChild(c);
+  });
+  return row;
+}
+
+async function runTagSearch(query) {
+  const box = add('bot', '');
+  const bub = box.querySelector('.bubble');
+  bub.innerHTML = '<span class="thinking"><span class="think-dot"></span>태그 검색 중…</span>';
+  try {
+    const data = await (await fetch('tags/search?q=' + encodeURIComponent(query) + '&limit=30')).json();
+    bub.innerHTML = '';
+    if (data.error) { bub.textContent = data.error; return; }
+    if (!data.results || !data.results.length) {
+      const p = document.createElement('div');
+      p.textContent = query + ' 태그로 찾은 내용이 없습니다.';
+      bub.appendChild(p);
+      const sug = await (await fetch('tags/suggest?q=' + encodeURIComponent(query) + '&limit=12')).json();
+      if (sug.length) {
+        const hint = document.createElement('div');
+        hint.className = 'tag-head';
+        hint.textContent = '혹시 이건가요?';
+        bub.appendChild(hint);
+        bub.appendChild(chipRow(sug, it => { q.value = '#' + it.label; form.requestSubmit(); }));
+      }
+      return;
+    }
+    const head = document.createElement('div');
+    head.className = 'tag-head';
+    head.textContent = data.matched.map(m => '#' + m.label).join('  ') +
+                       '  —  ' + data.total + '건 중 최근 ' + data.results.length + '건';
+    bub.appendChild(head);
+    data.results.forEach(r => bub.appendChild(tagCard(r)));
+  } catch (err) {
+    bub.textContent = '태그 검색 실패: ' + err.message;
+  }
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// 입력 중 '#' 자동완성
+const sugBox = document.getElementById('sug');
+let sugTimer = null;
+
+function hideSug() { sugBox.style.display = 'none'; sugBox.innerHTML = ''; }
+
+async function showSug(prefix) {
+  try {
+    const list = await (await fetch('tags/suggest?q=' + encodeURIComponent(prefix) + '&limit=10')).json();
+    if (!list.length) { hideSug(); return; }
+    sugBox.innerHTML = '';
+    sugBox.appendChild(chipRow(list, it => {
+      q.value = q.value.replace(/(^|\s)#([^\s#]*)$/, '$1#' + it.label);
+      hideSug();
+      q.focus();
+    }));
+    sugBox.style.display = 'block';
+  } catch (err) { hideSug(); }
+}
+
+q.addEventListener('input', () => {
+  const m = q.value.match(/(^|\s)#([^\s#]*)$/);
+  clearTimeout(sugTimer);
+  if (!m) { hideSug(); return; }
+  sugTimer = setTimeout(() => showSug(m[2]), 150);
+});
 
 q.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); }

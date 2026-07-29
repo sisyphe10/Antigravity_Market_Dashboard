@@ -120,6 +120,21 @@ TOOLS = [
         },
     },
     {
+        "name": "search_tags",
+        "description": ("태그로 리서치노트·어닝콜 전문·실적 분석을 한번에 검색. 종목 티커(KLAC, 005930), "
+                        "종목명, 테마(메모리/HBM), 섹터, 기관명이 태그다. 특정 종목·주제의 최근 언급을 "
+                        "훑을 때 search_notes 보다 정확하고 빠르다. 결과의 rel_path 는 read_file 로 읽을 수 있다."),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "tag": {"type": "string", "description": "태그 (예: KLAC, 삼성전자, 메모리/HBM)"},
+                "limit": {"type": "integer", "description": "최대 결과 수 (기본 20)"},
+            },
+            "required": ["tag"],
+            "additionalProperties": False,
+        },
+    },
+    {
         "name": "list_datasets",
         "description": "데이터셋 카탈로그(INDEX.md + 각 데이터셋 스키마·기간·쿼리 예시)를 반환.",
         "input_schema": {"type": "object", "properties": {}, "required": [],
@@ -221,6 +236,9 @@ def execute_tool(name, args):
             return tool_search_notes(args["pattern"], args.get("max_results") or 40), False
         if name == "read_file":
             return tool_read_file(args["path"], args.get("offset") or 0), False
+        if name == "search_tags":
+            return json.dumps(_tag_search(args["tag"], args.get("limit") or 20),
+                              ensure_ascii=False)[:20000], False
         if name == "list_datasets":
             return tool_list_datasets(), False
         return f"ERROR: 알 수 없는 도구 {name}", True
@@ -744,6 +762,115 @@ def chat_delete(cid: str):
     finally:
         con.close()
     return JSONResponse({"ok": True})
+
+
+# ── 태그 검색 (2026-07-29) ────────────────────────────────────────────────
+# build_tag_index.py 가 만든 조회 전용 인덱스. LLM 을 부르지 않으므로 즉시·무료다.
+TAG_INDEX_PATH = os.path.join(DATALAKE_ROOT, "tag_index.sqlite")
+TAG_CORPUS_ROOTS = ("research_notes/", "transcripts/", "analyses/")
+
+
+def _tag_conn():
+    if not os.path.exists(TAG_INDEX_PATH):
+        return None
+    con = sqlite3.connect("file:%s?mode=ro" % TAG_INDEX_PATH, uri=True)
+    con.row_factory = sqlite3.Row
+    return con
+
+
+def _tag_norm(q):
+    return re.sub(r"\s+", "", (q or "").strip().lstrip("#")).lower()
+
+
+def _resolve_tags(con, q, limit=12):
+    """질의 → 실제 태그 키 목록. 정확히 일치하면 그것만, 아니면 부분 일치."""
+    key = _tag_norm(q)
+    if not key:
+        return []
+    row = con.execute("SELECT tag FROM labels WHERE tag=?", (key,)).fetchone()
+    if row:
+        return [row["tag"]]
+    like = "%" + key + "%"
+    return [r["tag"] for r in con.execute(
+        "SELECT tag FROM labels WHERE tag LIKE ? ORDER BY freq DESC LIMIT ?", (like, limit))]
+
+
+def _tag_search(q, limit=20):
+    con = _tag_conn()
+    if con is None:
+        return {"error": "태그 인덱스가 아직 생성되지 않았습니다", "matched": [], "results": []}
+    try:
+        keys = _resolve_tags(con, q)
+        if not keys:
+            return {"matched": [], "results": [], "total": 0}
+        ph = ",".join("?" * len(keys))
+        matched = [dict(r) for r in con.execute(
+            "SELECT tag, label, kind, freq FROM labels WHERE tag IN (%s)"
+            " ORDER BY freq DESC" % ph, keys)]
+        total = con.execute(
+            "SELECT count(*) FROM (SELECT 1 FROM hits WHERE tag IN (%s)"
+            " GROUP BY rel_path, anchor)" % ph, keys).fetchone()[0]
+        rows = con.execute(
+            "SELECT corpus, doc_date, rel_path, anchor, title, snippet FROM hits"
+            " WHERE tag IN (%s) GROUP BY rel_path, anchor"
+            " ORDER BY doc_date DESC, rel_path LIMIT ?" % ph,
+            keys + [max(1, min(int(limit), 100))]).fetchall()
+        return {"matched": matched, "total": total, "results": [dict(r) for r in rows]}
+    finally:
+        con.close()
+
+
+@app.get("/tags/suggest")
+def tags_suggest(q: str = "", limit: int = 10):
+    con = _tag_conn()
+    if con is None:
+        return JSONResponse([])
+    try:
+        key = _tag_norm(q)
+        like = "%" + key + "%"
+        rows = con.execute(
+            "SELECT tag, label, kind, freq FROM labels WHERE tag LIKE ?"
+            " ORDER BY (tag = ?) DESC, freq DESC LIMIT ?",
+            (like, key, max(1, min(int(limit), 30)))).fetchall()
+        return JSONResponse([dict(r) for r in rows])
+    finally:
+        con.close()
+
+
+@app.get("/tags/search")
+def tags_search(q: str = "", limit: int = 20):
+    return JSONResponse(_tag_search(q, limit))
+
+
+@app.get("/tags/doc")
+def tags_doc(rel: str, anchor: str = ""):
+    """검색 결과 카드의 본문 펼치기 — 코퍼스 3종 내부로만 제한."""
+    rel = (rel or "").replace("\\", "/")
+    if ".." in rel or not rel.startswith(TAG_CORPUS_ROOTS):
+        return JSONResponse({"error": "허용되지 않은 경로"}, status_code=400)
+    path = os.path.realpath(os.path.join(DATALAKE_ROOT, rel))
+    if not path.startswith(os.path.realpath(DATALAKE_ROOT) + os.sep) or not os.path.exists(path):
+        return JSONResponse({"error": "파일 없음"}, status_code=404)
+    raw = open(path, encoding="utf-8").read()
+    if anchor.startswith("rn-id"):
+        mid = anchor.split(":", 1)[-1].strip()
+        marker = "<!-- rn-id: %s -->" % mid
+        i = raw.find(marker)
+        if i < 0:
+            return JSONResponse({"text": raw[:8000]})
+        j = raw.find("<!-- rn-id:", i + len(marker))
+        return JSONResponse({"text": raw[i + len(marker):(j if j > 0 else len(raw))][:8000]})
+    if anchor.startswith("chunk"):
+        try:
+            no = int(anchor.split()[-1])
+        except ValueError:
+            no = 0
+        sys.path.insert(0, os.path.join(REPO, "datalake", "tagging"))
+        import tag_docs  # noqa: PLC0415
+        _fm, body = tag_docs.parse_md(raw)
+        chunks = tag_docs.split_chunks(body)
+        return JSONResponse({"text": chunks[no] if no < len(chunks) else raw[:8000]})
+    return JSONResponse({"text": raw[:8000]})
 
 
 @app.get("/")
