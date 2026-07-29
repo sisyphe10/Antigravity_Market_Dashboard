@@ -3347,19 +3347,10 @@ def _build_combined_chart_section():
                             return any ? out : null;
                         };
                         var suffix = (perSeries.length > 1) ? (' ' + s.name) : '';
-                        // RoC¹ 동반은 단일 선택 + 'level' 이 아닐 때만.
-                        //  · 다중 선택에서 계열마다 2줄이면 패널이 읽히지 않는다.
-                        //  · kind==='level'(전년동월비류)은 메인 차트가 곧 RoC¹ 이라 중복이고,
-                        //    레벨(0~6%)이 축을 지배해 RoC²(±0.5%p)가 납작해진다.
-                        if (perSeries.length === 1 && R.kind !== 'level') {
-                            var d1 = proj(R.roc1);
-                            if (d1) rocDatasets.push({
-                                label: 'RoC¹', data: d1,
-                                borderColor: cmbHexA(col, 0.42), backgroundColor: 'transparent',
-                                borderWidth: 1.6, pointRadius: 0, tension: 0.4,
-                                cubicInterpolationMode: 'monotone', spanGaps: true, _rocUnit: R.unit1
-                            });
-                        }
+                        // ★패널은 RoC² 단독 (2026-07-29). RoC¹ 동반은 시도했다가 철회했다 —
+                        //   외환보유액처럼 RoC¹(YoY ±15%)이 축을 잡으면 RoC²(±1%p)가 납작해지고,
+                        //   RoC¹ 을 우축(y1)으로 빼면 메인 차트와의 x축 픽셀 정렬이 깨진다.
+                        //   RoC¹ 계산은 RoC² 의 중간 산물이라 cmbRocCompute 안에 그대로 남아 있다.
                         var d2 = proj(R.roc2);
                         if (d2) rocDatasets.push({
                             label: 'RoC²' + suffix, data: d2,
