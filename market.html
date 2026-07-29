@@ -533,7 +533,7 @@ body{margin:0}
     <nav class="topnav"><div class="topnav-inner"><a href="index.html" class="topnav-brand">AGE OF EMERGENCE</a><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab active">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub active">Data</a><a href="universe.html" class="topnav-sub">Universe</a><a href="universe_lab.html" class="topnav-sub">Universe Lab</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
     <aside class="sidebar"><a href="market.html" class="sidebar-link active">Data</a><a href="universe.html" class="sidebar-link">Universe</a><a href="universe_lab.html" class="sidebar-link">Universe Lab</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
     <header style="margin:0;padding:8px 28px 0;text-align:right;">
-        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-07-29 15:42:52 KST</div>
+        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-07-29 15:48:05 KST</div>
     </header>
 
     <div class="mkt-subtabs">
@@ -2910,6 +2910,14 @@ if (typeof window._h2cFreeze !== 'function') {
                     } else {
                         rocPanel.style.display = 'none';
                         if (cmbRocChart) { cmbRocChart.destroy(); cmbRocChart = null; }
+                    }
+                    // 선택 시리즈 이력이 YoY lag(월 14버킷 / 주 54버킷)에 못 미치면 RoC² 자체가 안 나온다.
+                    // 패널이 조용히 사라지면 고장으로 읽히므로 버튼을 흐리게 + native title 로 사유 표시.
+                    var rocBtn = document.getElementById('cmbRocBtn');
+                    if (rocBtn) {
+                        var lack = !!window.cmbRocOn && rocDatasets.length === 0;
+                        rocBtn.style.opacity = lack ? '0.4' : '';
+                        rocBtn.title = lack ? '선택 시리즈 이력이 짧아 RoC² 를 계산할 수 없습니다 (월 기준 14개월 이상 필요)' : '';
                     }
                 }
             }

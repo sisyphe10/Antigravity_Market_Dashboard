@@ -3779,6 +3779,14 @@ def _build_combined_chart_section():
                         rocPanel.style.display = 'none';
                         if (cmbRocChart) { cmbRocChart.destroy(); cmbRocChart = null; }
                     }
+                    // 선택 시리즈 이력이 YoY lag(월 14버킷 / 주 54버킷)에 못 미치면 RoC² 자체가 안 나온다.
+                    // 패널이 조용히 사라지면 고장으로 읽히므로 버튼을 흐리게 + native title 로 사유 표시.
+                    var rocBtn = document.getElementById('cmbRocBtn');
+                    if (rocBtn) {
+                        var lack = !!window.cmbRocOn && rocDatasets.length === 0;
+                        rocBtn.style.opacity = lack ? '0.4' : '';
+                        rocBtn.title = lack ? '선택 시리즈 이력이 짧아 RoC\u00b2 를 계산할 수 없습니다 (월 기준 14개월 이상 필요)' : '';
+                    }
                 }
             }
 
