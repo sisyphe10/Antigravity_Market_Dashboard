@@ -18,6 +18,7 @@
   python3 datalake/tagging/tag_docs.py --project           # frontmatter 재투영만
 """
 import argparse
+import fcntl
 import json
 import os
 import re
@@ -27,12 +28,15 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.dirname(HERE))
 
+import sqlite3  # noqa: E402
+
 import tagging_common as tc  # noqa: E402
 import tag_worker as tw  # noqa: E402
 from dl_common import DATALAKE_ROOT  # noqa: E402
 
 DOC_TAGGER_VERSION = "1.0.0"
 STATE_DB = os.path.join(DATALAKE_ROOT, "doc_tag_state.sqlite")
+LOCK_PATH = os.path.join(DATALAKE_ROOT, "doc_tag_state.lock")
 BATCH = int(os.getenv("DOC_TAG_BATCH", "8"))
 CHUNK_CHARS = int(os.getenv("DOC_TAG_CHUNK", "4000"))
 MIN_CHUNK = 120
@@ -50,6 +54,7 @@ CREATE TABLE IF NOT EXISTS docs (
   chunk_id INTEGER PRIMARY KEY AUTOINCREMENT,
   rel_path TEXT NOT NULL, chunk_no INTEGER NOT NULL,
   kind TEXT, doc_date TEXT, ticker TEXT, title TEXT, char_len INTEGER,
+  content_hash TEXT,
   UNIQUE (rel_path, chunk_no)
 );
 CREATE INDEX IF NOT EXISTS idx_docs_path ON docs(rel_path);
@@ -125,6 +130,17 @@ def build_ticker_index(uni):
     return idx
 
 
+def _acquire_lock():
+    """프로세스 단위 배타 락. 이미 돌고 있으면 None (일일 훅↔수동 실행 이중 과금 방지)."""
+    fh = open(LOCK_PATH, "w")
+    try:
+        fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        fh.close()
+        return None
+    return fh
+
+
 # --------------------------------------------------------------------------- #
 # 대상 수집
 # --------------------------------------------------------------------------- #
@@ -138,23 +154,36 @@ def iter_docs(kinds):
                     yield kind, path, os.path.relpath(path, DATALAKE_ROOT)
 
 
-def register_chunks(st, kind, rel, fm, body, title):
-    """청크를 docs 에 등록하고 [(chunk_id, text)] 반환. 줄어든 청크는 정리."""
+def register_chunks(st, kind, rel, fm, body, title, persist=True):
+    """청크를 docs 에 등록하고 [(chunk_id, text, content_hash)] 반환.
+
+    persist=False (--dry-run) 면 **DB 를 건드리지 않는다** — 견적만 보려다 정본 태그가
+    지워지는 사고를 막기 위해서다(짧게 읽힌 문서에 dry-run 하면 stale 정리가 돌아버렸다).
+    이 경우 신규 청크의 chunk_id 는 None 이다.
+    """
     chunks = split_chunks(body)
     doc_date = (fm.get("date") or fm.get("filed_at") or "")[:10]
     ticker = (fm.get("ticker") or "").strip().upper()
     out = []
     for i, text in enumerate(chunks):
+        ch = tw.sha(text, "", "")
+        if not persist:
+            row = st.execute("SELECT chunk_id FROM docs WHERE rel_path=? AND chunk_no=?",
+                             (rel, i)).fetchone()
+            out.append((row["chunk_id"] if row else None, text, ch))
+            continue
         st.execute(
-            "INSERT INTO docs (rel_path,chunk_no,kind,doc_date,ticker,title,char_len)"
-            " VALUES (?,?,?,?,?,?,?)"
+            "INSERT INTO docs (rel_path,chunk_no,kind,doc_date,ticker,title,char_len,content_hash)"
+            " VALUES (?,?,?,?,?,?,?,?)"
             " ON CONFLICT(rel_path,chunk_no) DO UPDATE SET kind=excluded.kind,"
             " doc_date=excluded.doc_date, ticker=excluded.ticker, title=excluded.title,"
-            " char_len=excluded.char_len",
-            (rel, i, kind, doc_date, ticker, title, len(text)))
+            " char_len=excluded.char_len, content_hash=excluded.content_hash",
+            (rel, i, kind, doc_date, ticker, title, len(text), ch))
         row = st.execute("SELECT chunk_id FROM docs WHERE rel_path=? AND chunk_no=?",
                          (rel, i)).fetchone()
-        out.append((row["chunk_id"], text))
+        out.append((row["chunk_id"], text, ch))
+    if not persist:
+        return out, doc_date, ticker
     stale = st.execute("SELECT chunk_id FROM docs WHERE rel_path=? AND chunk_no>=?",
                        (rel, len(chunks))).fetchall()
     for r in stale:
@@ -195,8 +224,11 @@ def project_doc(st, rel, uni, extra, onto):
     ents = {r["entity_id"] for r in st.execute(
         "SELECT DISTINCT entity_id FROM entity_occurrences"
         " WHERE role='subject' AND message_id IN (%s)" % ph, ids)}
+    # 본문이 바뀐 뒤에도 옛 태그가 complete 로 투영되지 않도록 content_hash 까지 대조
     done = {r["message_id"] for r in st.execute(
-        "SELECT message_id FROM items WHERE status='succeeded' AND message_id IN (%s)" % ph, ids)}
+        "SELECT i.message_id FROM items i JOIN docs d ON d.chunk_id = i.message_id"
+        " WHERE i.status='succeeded' AND i.content_hash = d.content_hash"
+        " AND i.message_id IN (%s)" % ph, ids)}
 
     tickers, orgs, people, sectors = set(), set(), set(), set()
     for e in ents:
@@ -263,8 +295,22 @@ def main():
     system = tw.build_system_prompt(onto)
     prompt_hash = tw.sha(system, tw.TAGGER_VERSION, DOC_TAGGER_VERSION)
 
+    if args.max_items is not None and args.max_items <= 0:
+        raise SystemExit("--max-items 는 1 이상이어야 합니다")
+    if args.max_docs is not None and args.max_docs <= 0:
+        raise SystemExit("--max-docs 는 1 이상이어야 합니다")
+
+    lock_fh = _acquire_lock()
+    if lock_fh is None:
+        print("다른 태깅 실행이 진행 중 — 이번 실행은 건너뜁니다.")
+        return 0
+
     st = tw.open_state(STATE_DB)
     st.executescript(DOC_SCHEMA)
+    try:                                   # 구 DB 마이그레이션
+        st.execute("ALTER TABLE docs ADD COLUMN content_hash TEXT")
+    except sqlite3.OperationalError:
+        pass
 
     docs = list(iter_docs(kinds))
     if args.max_docs:
@@ -276,15 +322,16 @@ def main():
             raw = f.read()
         fm, body = parse_md(raw)
         title = doc_title(fm, body)
-        chunks, doc_date, ticker = register_chunks(st, kind, rel, fm, body, title)
-        touched.append(rel)
         subject = ticker_entity(fm, uni_index)
-        for cid, text in chunks:
-            ch = tw.sha(text, "", "")
+        chunks, doc_date, ticker = register_chunks(
+            st, kind, rel, fm, body, title, persist=not args.dry_run)
+        touched.append(rel)
+        for cid, text, ch in chunks:
+            # subject(문서 주인공 종목)도 키에 포함 — frontmatter 의 ticker 만 바꾼 경우에도 재태깅
             ck = tw.sha(ch, tw.TAGGER_VERSION, DOC_TAGGER_VERSION, prompt_hash,
-                        onto["hash"], uni["hash"], idx["hash"])
+                        onto["hash"], uni["hash"], idx["hash"], subject or "")
             cur = st.execute("SELECT cache_key,status FROM items WHERE message_id=?",
-                             (cid,)).fetchone()
+                             (cid,)).fetchone() if cid is not None else None
             if (not args.force and cur and cur["cache_key"] == ck
                     and cur["status"] == "succeeded"):
                 cached += 1
@@ -295,7 +342,8 @@ def main():
                          "forward_source": None, "timestamp": doc_date or "1970-01-01",
                          "_content_hash": ch, "_cache_key": ck, "_subject": subject,
                          "_rel": rel})
-    st.commit()
+    if not args.dry_run:
+        st.commit()
 
     if args.project:
         n = sum(1 for rel in touched if project_doc(st, rel, uni, extra, onto))
@@ -343,7 +391,12 @@ def main():
             tin += getattr(usage, "input_tokens", 0) or 0
             tout += getattr(usage, "output_tokens", 0) or 0
             tcache += getattr(usage, "cache_read_input_tokens", 0) or 0
-            by_mid = {int(r.get("message_id", -1)): r for r in (out or {}).get("results", [])}
+            by_mid = {}
+            for r in (out or {}).get("results", []):
+                try:
+                    by_mid[int(r.get("message_id", -1))] = r
+                except (TypeError, ValueError):
+                    continue
             for m, strong, weak in prepared:
                 res = by_mid.get(m["id"])
                 if res is None:
