@@ -16,6 +16,9 @@ rc=0
 echo "── 1/5 태깅 (미처리분)"
 "$PY" "$REPO/datalake/tagging/tag_worker.py" || { echo "[warn] 태깅 실패 — 태그 없이 계속"; rc=1; }
 
+echo "── 1b/5 문서 태깅 (전문·분석, 미처리분)"
+"$PY" "$REPO/datalake/tagging/tag_docs.py" || { echo "[warn] 문서 태깅 실패 — 계속"; rc=1; }
+
 echo "── 2/5 md 아카이브 (어제+오늘)"
 "$PY" "$REPO/datalake/export_research_notes.py" || { echo "[error] 아카이브 생성 실패"; exit 1; }
 
