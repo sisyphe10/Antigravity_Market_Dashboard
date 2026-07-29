@@ -46,6 +46,8 @@ FOREIGN_PRIVATE_ISSUERS: dict[str, dict] = {
     'ONON':  {'country': 'CH', 'exchange': 'NYSE',   'note': 'On Holding'},
     'SE':    {'country': 'SG', 'exchange': 'NYSE',   'note': 'Sea Ltd (ADR)'},
     'SPOT':  {'country': 'LU', 'exchange': 'NYSE',   'note': 'Spotify Technology'},
+    # 2026-07-30 추가: 20-F/6-K 전용 발행인(8-K/10-K 이력 전무) — 미등록으로 1Q27 6-K 누락 확인.
+    'ARM':   {'country': 'GB', 'exchange': 'NASDAQ', 'note': 'Arm Holdings plc (ADS)'},
 }
 
 
