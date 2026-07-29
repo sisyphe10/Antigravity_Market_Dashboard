@@ -1072,20 +1072,29 @@ def _chart_download_helper_js():
                 var DL_DPR = 4;
                 var _getCh = (window.Chart && Chart.getChart) ? function(t){ return Chart.getChart(t); } : function(){ return null; };
                 var _mainChart = _getCh(canvasId);
-                var _extraEl = extraCanvasId ? document.getElementById(extraCanvasId) : null;
-                var _extraChart = (_extraEl && _extraEl.offsetParent !== null) ? _getCh(_extraEl) : null;
+                // 보조 캔버스 다중 지원 (이격도 + RoC², 2026-07-29). 문자열 1개도 그대로 허용.
+                var _extraIds = extraCanvasId ? (Array.isArray(extraCanvasId) ? extraCanvasId : [extraCanvasId]) : [];
+                var _visibleExtras = function() {
+                    return _extraIds.map(function(id){ return document.getElementById(id); })
+                        .filter(function(el){ return el && el.offsetParent !== null && el.width; });
+                };
+                var _extraCharts = _visibleExtras().map(_getCh).filter(Boolean);
                 var _prevMainDpr = _mainChart ? (_mainChart.options.devicePixelRatio || (window.devicePixelRatio || 1)) : null;
-                var _prevExtraDpr = _extraChart ? (_extraChart.options.devicePixelRatio || (window.devicePixelRatio || 1)) : null;
+                var _prevExtraDprs = _extraCharts.map(function(c){ return c.options.devicePixelRatio || (window.devicePixelRatio || 1); });
                 if (_mainChart) { _mainChart.options.devicePixelRatio = DL_DPR; _mainChart.resize(); _mainChart.draw(); }
-                if (_extraChart) { _extraChart.options.devicePixelRatio = DL_DPR; _extraChart.resize(); _extraChart.draw(); }
+                _extraCharts.forEach(function(c){ c.options.devicePixelRatio = DL_DPR; c.resize(); c.draw(); });
                 try {
                 var w = src.width, h = src.height;
                 var scale = src.clientWidth ? (w / src.clientWidth) : 1;
 
-                // 보조 캔버스(이격도 서브패널 등) — 보이는 경우에만 메인 아래에 세로 합성
-                var extra = extraCanvasId ? document.getElementById(extraCanvasId) : null;
-                if (extra && (extra.offsetParent === null || !extra.width)) extra = null;
-                var extraH = extra ? Math.round(extra.height * (w / extra.width)) : 0;
+                // 보조 캔버스(이격도·RoC² 서브패널) — 보이는 것만 메인 아래에 순서대로 세로 합성
+                var _extras = _visibleExtras();
+                var extraH = 0;
+                var _extraHs = _extras.map(function(el){
+                    var hh = Math.round(el.height * (w / el.width));
+                    extraH += hh;
+                    return hh;
+                });
 
                 // 하단 범례 항목 수집 (컬러닷 + 라벨)
                 var legendItems = [];
@@ -1112,7 +1121,8 @@ def _chart_download_helper_js():
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(0, 0, tmp.width, tmp.height);
                 ctx.drawImage(src, 0, 0);
-                if (extra) ctx.drawImage(extra, 0, h, w, extraH);
+                var _yOff = h;
+                _extras.forEach(function(el, i) { ctx.drawImage(el, 0, _yOff, w, _extraHs[i]); _yOff += _extraHs[i]; });
 
                 if (legendItems.length) {
                     var fontPx = Math.round(13 * scale);
@@ -1162,7 +1172,7 @@ def _chart_download_helper_js():
                 document.body.removeChild(a);
                 } finally {
                     if (_mainChart) { _mainChart.options.devicePixelRatio = _prevMainDpr; _mainChart.resize(); _mainChart.draw(); }
-                    if (_extraChart) { _extraChart.options.devicePixelRatio = _prevExtraDpr; _extraChart.resize(); _extraChart.draw(); }
+                    _extraCharts.forEach(function(c, i) { c.options.devicePixelRatio = _prevExtraDprs[i]; c.resize(); c.draw(); });
                 }
             };
         }
@@ -2245,6 +2255,7 @@ def _build_combined_chart_section():
                 }
             }
             var cmbDispChart = null;
+            var cmbRocChart = null;
 
             // 십자선(crosshair) — 세로선은 메인+이격도 패널 동기(같은 날짜 index),
             // 가로선은 커서가 올라가 있는 차트에만. 두 차트가 같은 labels 배열을 공유해 x 정렬 보장.
@@ -2253,6 +2264,13 @@ def _build_combined_chart_section():
             var cmbPin = { date: null };
             // 반대편 차트에도 같은 날짜의 툴팁(데이터값) 표시.
             // tooltip.setActiveElements가 내부에서 tooltip.update까지 수행하므로 이후 draw()만 하면 됨.
+            // 크로스헤어·툴팁 동기 대상 = 자기 자신을 뺀 살아있는 cmb 차트 전부.
+            // 메인 + 이격도 + RoC² 3면 구성이 되면서 2-way 하드코딩을 배열로 일반화 (2026-07-29).
+            function cmbPeerCharts(self) {
+                return [cmbChart, cmbDispChart, cmbRocChart].filter(function(c) {
+                    return c && c !== self && c.canvas;
+                });
+            }
             function cmbSyncTooltip(other, idx) {
                 if (!other || !other.tooltip) return;
                 var els = [];
@@ -2277,7 +2295,7 @@ def _build_combined_chart_section():
                     var e = args.event;
                     var area = chart.chartArea;
                     if (!area) return;
-                    var other = (chart.canvas.id === 'cmbDynamicChart') ? cmbDispChart : cmbChart;
+                    var _peers = cmbPeerCharts(chart);
                     var inside = e.x !== null && e.y !== null &&
                         e.x >= area.left && e.x <= area.right && e.y >= area.top && e.y <= area.bottom;
                     if (e.type === 'mouseout' || !inside) {
@@ -2285,10 +2303,10 @@ def _build_combined_chart_section():
                             cmbHoverState.idx = null;
                             cmbHoverState.activeId = null;
                             args.changed = true;
-                            if (other) {
-                                cmbSyncTooltip(other, null);
-                                other.draw();
-                            }
+                            _peers.forEach(function(o) {
+                                cmbSyncTooltip(o, null);
+                                o.draw();
+                            });
                         }
                         return;
                     }
@@ -2330,10 +2348,10 @@ def _build_combined_chart_section():
                     cmbHoverState.yPx = yPx;
                     cmbHoverState.activeId = chart.canvas.id;
                     args.changed = true;
-                    if (other) {
-                        if (moved) cmbSyncTooltip(other, idx);
-                        other.draw();
-                    }
+                    _peers.forEach(function(o) {
+                        if (moved) cmbSyncTooltip(o, idx);
+                        o.draw();
+                    });
                 },
                 afterDraw: function(chart) {
                     if (cmbHoverState.idx === null) return;
@@ -2430,6 +2448,92 @@ def _build_combined_chart_section():
             };
 
             function colorForIndex(i) { return clickPalette[i % clickPalette.length]; }
+
+            // ─────────────────────────────────────────────────────────────
+            // RoC² (변화율의 변화율) — 2026-07-29
+            //  ① 기간말 리샘플(월/주)  ② RoC¹  ③ RoC² = RoC¹의 전기 차분(%p)  ④ 3기간 스무딩
+            //  ★계산은 표시 구간이 아니라 '전 기간' 원계열에서 한다 — 기본값 YTD 구간만으로
+            //    계산하면 12개월 lag 이 통째로 구간 밖이라 결과가 전부 null 이 된다.
+            //  ★RoC¹ 정의는 시리즈 성격에 따라 3갈래 (같은 %라도 의미가 다르다):
+            //     level : 이름이 이미 변화율(전년동월비/증감률) → 레벨 그대로가 1차
+            //     diff  : %·%p 인 '비율 수준'(금리·실업률·보유비중) → 전년동기 대비 %p 차분
+            //             (실업률 3%→4% 를 +33% 로 읽으면 안 되므로 비율 변화율 금지)
+            //     yoy   : 그 외 금액·수량 레벨 → 전년동기 대비 % 변화
+            // ─────────────────────────────────────────────────────────────
+            function cmbHexA(hex, a) {
+                var m = /^#?([a-fA-F0-9][a-fA-F0-9])([a-fA-F0-9][a-fA-F0-9])([a-fA-F0-9][a-fA-F0-9])$/.exec(hex || '');
+                if (!m) return hex;
+                return 'rgba(' + parseInt(m[1], 16) + ',' + parseInt(m[2], 16) + ',' + parseInt(m[3], 16) + ',' + a + ')';
+            }
+            function cmbRocMA(arr, win) {
+                var out = [];
+                for (var i = 0; i < arr.length; i++) {
+                    var sum = 0, n = 0;
+                    for (var j = i - win + 1; j <= i; j++) {
+                        if (j < 0 || arr[j] === null || arr[j] === undefined) continue;
+                        sum += arr[j]; n++;
+                    }
+                    out.push(n === win ? sum / n : null);   // 창이 덜 차면 null (앞단 왜곡 방지)
+                }
+                return out;
+            }
+            function cmbRocKind(name) {
+                if (/전년동월비|전년동기|전년비|증감률/.test(name)) return 'level';
+                var u = cmbSeriesUnit[name] || '';
+                if (u === '%' || u === '%p') return 'diff';
+                return 'yoy';
+            }
+            function cmbRocCompute(name) {
+                var arr = cmbData.data[name];
+                if (!arr) return null;
+                var freq = (window.cmbRocFreq === 'W') ? 'W' : 'M';
+                // 1) 기간말 리샘플 — 각 월(주)의 마지막 관측만 남긴다.
+                //    일별 데이터의 YoY 를 일별로 차분하면 판독 불가 수준으로 진동한다.
+                var buckets = {}, order = [];
+                for (var i = 0; i < cmbData.dates.length; i++) {
+                    var v = arr[i];
+                    if (v === null || v === undefined) continue;
+                    var d = cmbData.dates[i];
+                    var key = (freq === 'M') ? d.slice(0, 7)
+                                             : '' + Math.floor(Date.parse(d) / 604800000);
+                    if (!buckets.hasOwnProperty(key)) order.push(key);
+                    buckets[key] = { date: d, val: v };
+                }
+                var kind = cmbRocKind(name);
+                var lag = (freq === 'M') ? 12 : 52;
+                var need = (kind === 'level') ? 4 : lag + 2;
+                if (order.length < need) return null;
+                // 2) RoC¹
+                var roc1 = [], unit1;
+                if (kind === 'level') {
+                    unit1 = cmbSeriesUnit[name] || '%';
+                    for (var k = 0; k < order.length; k++) roc1.push(buckets[order[k]].val);
+                } else if (kind === 'diff') {
+                    unit1 = '%p';
+                    for (var k2 = 0; k2 < order.length; k2++) {
+                        var p2 = (k2 >= lag) ? buckets[order[k2 - lag]] : null;
+                        roc1.push(p2 ? (buckets[order[k2]].val - p2.val) : null);
+                    }
+                } else {
+                    unit1 = '%';
+                    for (var k3 = 0; k3 < order.length; k3++) {
+                        var p3 = (k3 >= lag) ? buckets[order[k3 - lag]] : null;
+                        if (!p3 || !p3.val) { roc1.push(null); continue; }
+                        var r = (buckets[order[k3]].val / p3.val - 1) * 100;
+                        roc1.push(isFinite(r) ? r : null);
+                    }
+                }
+                // 3) RoC² = 전기 대비 차분 (단위는 항상 %p)
+                var roc2 = [];
+                for (var k4 = 0; k4 < roc1.length; k4++) {
+                    var a = roc1[k4], b = (k4 > 0) ? roc1[k4 - 1] : null;
+                    roc2.push((a === null || b === null) ? null : a - b);
+                }
+                // 4) 스무딩은 RoC² 에만. RoC¹ 은 수준 판단용 기준선이라 원값 유지.
+                if (window.cmbRocSmooth !== false) roc2 = cmbRocMA(roc2, 3);
+                return { order: order, buckets: buckets, roc1: roc1, roc2: roc2,
+                         kind: kind, unit1: unit1, freq: freq };
+            }
 
             function fmtNum(v) {
                 if (v === null || v === undefined) return '-';
@@ -3219,6 +3323,52 @@ def _build_combined_chart_section():
                     }
                 };
 
+                // ── RoC² 서브패널 데이터 (범례 생성보다 앞) ──
+                var rocDatasets = [];
+                if (window.cmbRocOn) {
+                    var _rocPos = {};
+                    for (var _ri = 0; _ri < commonDates.length; _ri++) _rocPos[commonDates[_ri]] = _ri;
+                    perSeries.forEach(function(s) {
+                        var R = cmbRocCompute(s.name);
+                        if (!R) return;
+                        var _ci = cmbClickOrder.indexOf(s.name);
+                        var col = colorForIndex(_ci >= 0 ? _ci : 0);
+                        // 기간말 관측일 인덱스에만 값을 얹고 spanGaps 로 잇는다 (표시 구간 밖은 자동 절단)
+                        var proj = function(vals) {
+                            var out = [], any = false;
+                            for (var z = 0; z < commonDates.length; z++) out.push(null);
+                            for (var k = 0; k < R.order.length; k++) {
+                                var pi = _rocPos[R.buckets[R.order[k]].date];
+                                if (pi === undefined) continue;
+                                if (vals[k] === null || vals[k] === undefined) continue;
+                                out[pi] = Math.round(vals[k] * 100) / 100;
+                                any = true;
+                            }
+                            return any ? out : null;
+                        };
+                        var suffix = (perSeries.length > 1) ? (' ' + s.name) : '';
+                        // RoC¹ 동반은 단일 선택일 때만 — 수준×방향 판단용 기준선.
+                        // 다중 선택에서 계열마다 2줄이면 패널이 읽히지 않는다.
+                        if (perSeries.length === 1) {
+                            var d1 = proj(R.roc1);
+                            if (d1) rocDatasets.push({
+                                label: 'RoC¹', data: d1,
+                                borderColor: cmbHexA(col, 0.42), backgroundColor: 'transparent',
+                                borderWidth: 1.6, pointRadius: 0, tension: 0.4,
+                                cubicInterpolationMode: 'monotone', spanGaps: true, _rocUnit: R.unit1
+                            });
+                        }
+                        var d2 = proj(R.roc2);
+                        if (d2) rocDatasets.push({
+                            label: 'RoC²' + suffix, data: d2,
+                            borderColor: col, backgroundColor: 'transparent',
+                            borderWidth: 2.6, borderJoinStyle: 'round', borderCapStyle: 'round',
+                            pointRadius: 0, tension: 0.4,
+                            cubicInterpolationMode: 'monotone', spanGaps: true, _rocUnit: '%p'
+                        });
+                    });
+                }
+
                 var legendEl = document.getElementById('cmbChartLegend');
                 if (legendEl) {
                     var legendHTML = datasets.map(function(ds) {
@@ -3248,6 +3398,14 @@ def _build_combined_chart_section():
                     legendHTML += dispDatasets.map(function(ds) {
                         var vals = ds.data.filter(function(v) { return v !== null && v !== undefined && !isNaN(v); });
                         var lastStr = vals.length ? '<span>' + fmtUniformFix(vals[vals.length - 1], Math.abs(vals[vals.length - 1])) + '</span>' : '';
+                        return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:14px;">' +
+                            '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + ds.borderColor + ';"></span>' +
+                            ds.label + lastStr + '</span>';
+                    }).join('');
+                    // RoC 계열도 마지막 값 표기 (단위는 계열별 _rocUnit — RoC² 는 항상 %p)
+                    legendHTML += rocDatasets.map(function(ds) {
+                        var vals = ds.data.filter(function(v) { return v !== null && v !== undefined && !isNaN(v); });
+                        var lastStr = vals.length ? '<span>' + fmtUniformFix(vals[vals.length - 1], Math.abs(vals[vals.length - 1])) + (ds._rocUnit || '') + '</span>' : '';
                         return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:14px;">' +
                             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + ds.borderColor + ';"></span>' +
                             ds.label + lastStr + '</span>';
@@ -3542,6 +3700,86 @@ def _build_combined_chart_section():
                         if (cmbDispChart) { cmbDispChart.destroy(); cmbDispChart = null; }
                     }
                 }
+
+                // ── RoC² 서브패널 — 0 기준선 점선 + 메인 y축 폭에 맞춰 x축 정렬 ──
+                //    (이격도 패널과 동일 규격: 자기 x축 보유, 크로스헤어 동기, Download 합성 대상)
+                var rocPanel = document.getElementById('cmbRocPanel');
+                if (rocPanel) {
+                    if (rocDatasets.length > 0) {
+                        rocPanel.style.display = '';
+                        var rocYWidth = (cmbChart.scales && cmbChart.scales.y) ? cmbChart.scales.y.width : 0;
+                        var rocTip = function(ctx) {
+                            if (ctx.parsed.y === null || ctx.parsed.y === undefined) return ctx.dataset.label + ': -';
+                            return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(2) + (ctx.dataset._rocUnit || '%p');
+                        };
+                        if (cmbRocChart) {
+                            cmbRocChart.data.labels = commonDates;
+                            cmbRocChart.data.datasets = rocDatasets;
+                            cmbRocChart.options.plugins.tooltip.callbacks.label = rocTip;
+                            cmbRocChart._cmbTipLabel = rocTip;
+                            cmbRocChart.options.scales.y.afterFit = function(scale) { if (rocYWidth > 0) scale.width = rocYWidth; };
+                            cmbRocChart.update('none');
+                        } else {
+                            var roc0Plugin = {
+                                id: 'cmbRoc0',
+                                beforeDatasetsDraw: function(chart) {
+                                    var ys = chart.scales.y, area = chart.chartArea;
+                                    if (!ys || !area) return;
+                                    var y0 = ys.getPixelForValue(0);
+                                    if (y0 < area.top || y0 > area.bottom) return;
+                                    var c = chart.ctx;
+                                    c.save();
+                                    c.strokeStyle = '#666';
+                                    c.setLineDash([4, 4]);
+                                    c.lineWidth = 1.2;
+                                    c.beginPath();
+                                    c.moveTo(area.left, y0);
+                                    c.lineTo(area.right, y0);
+                                    c.stroke();
+                                    c.restore();
+                                }
+                            };
+                            cmbRocChart = new Chart(document.getElementById('cmbRocChart'), {
+                                type: 'line',
+                                data: { labels: commonDates, datasets: rocDatasets },
+                                plugins: [endLabelPlugin, roc0Plugin, cmbCrosshairPlugin],
+                                options: {
+                                    responsive: true, maintainAspectRatio: false,
+                                    devicePixelRatio: 2 * (window.devicePixelRatio || 1),
+                                    layout: { padding: { right: 60 } },
+                                    interaction: { mode: 'index', intersect: false },
+                                    plugins: {
+                                        legend: { display: false },
+                                        tooltip: { animation: false, titleFont: { size: 13 }, bodyFont: { size: 13 },
+                                            callbacks: {
+                                                title: function(cs){ return cs.length ? window.cmbXLabel(cs[0].label) : ''; },
+                                                label: rocTip
+                                            } }
+                                    },
+                                    scales: {
+                                        x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val){ return window.cmbXLabel(this.getLabelForValue(val)); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
+                                        y: {
+                                            type: 'linear',
+                                            position: 'left',
+                                            grace: '8%',
+                                            afterBuildTicks: cmbEnsureBoundTicks,
+                                            afterFit: function(scale) { if (rocYWidth > 0) scale.width = rocYWidth; },
+                                            ticks: { maxTicksLimit: 6, autoSkip: false, callback: function(v){ return (Math.round(v * 100) / 100) + '%p'; }, font: { size: 15 }, color: '#000' },
+                                            grid: { color: '#eee' },
+                                            border: { color: '#000', width: 2 }
+                                        }
+                                    }
+                                }
+                            });
+                            cmbRocChart._cmbMode = 'raw1';   // 끝값 라벨 = 원값 포맷 (이격도 패널과 동일)
+                            cmbRocChart._cmbTipLabel = rocTip;
+                            cmbRocChart.update('none');
+                        }
+                    } else {
+                        rocPanel.style.display = 'none';
+                        if (cmbRocChart) { cmbRocChart.destroy(); cmbRocChart = null; }
+                    }
+                }
             }
 
             window.toggleCmbSeries = function(el, ev) {
@@ -3571,6 +3809,40 @@ def _build_combined_chart_section():
                 el.classList.toggle('active', dispActive[slot]);
                 buildCmbChart();
             };
+            window.cmbToggleRoc = function(el) {
+                window.cmbRocOn = !window.cmbRocOn;
+                el.classList.toggle('active', !!window.cmbRocOn);
+                cmbSyncRocUI();
+                buildCmbChart();
+            };
+            window.cmbToggleRocSmooth = function(el) {
+                window.cmbRocSmooth = (window.cmbRocSmooth === false);
+                el.classList.toggle('active', window.cmbRocSmooth !== false);
+                buildCmbChart();
+            };
+            window.cmbSetRocFreq = function(f) {
+                window.cmbRocFreq = f;
+                cmbSyncRocUI();
+                buildCmbChart();
+            };
+            function cmbSyncRocUI() {
+                var opts = document.getElementById('cmbRocOpts');
+                if (opts) opts.style.display = window.cmbRocOn ? 'inline-flex' : 'none';
+                var f = window.cmbRocFreq || 'M';
+                var bm = document.getElementById('cmbRocFreqM');
+                var bw = document.getElementById('cmbRocFreqW');
+                if (bm) bm.classList.toggle('active', f === 'M');
+                if (bw) bw.classList.toggle('active', f === 'W');
+            }
+            // 테스트 게이트 (2026-07-29): ?roc2=1 일 때만 버튼 노출. 정식 배선 전 검증용이라
+            // 기본 라이브 화면은 종전과 완전히 동일하다.
+            (function() {
+                var on = /[?&]roc2=1/.test(location.search);
+                var btn = document.getElementById('cmbRocBtn');
+                if (btn && !on) btn.style.display = 'none';
+                window._cmbRocEnabled = on;
+                cmbSyncRocUI();
+            })();
             window.updateCmbChart = buildCmbChart;
             window.clearCmbSelections = function() {
                 document.querySelectorAll('.cmb-chart-item.active').forEach(function(el){ el.classList.remove('active'); });
@@ -3635,7 +3907,13 @@ def _build_combined_chart_section():
                         <input type="text" id="cmbEndDate" value="{last_date}" onchange="formatDateInput(this);updateCmbChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                         <button id="cmbLogBtn" class="cmb-ma-btn active" style="margin-left:14px;border-radius:20px;" onclick="window.cmbLogOn = (window.cmbLogOn === false); this.classList.toggle('active', window.cmbLogOn !== false); updateCmbChart();">Log</button>
                         <button id="cmbNormBtn" class="cmb-ma-btn" style="border-radius:20px;" onclick="window.cmbForceNorm = !window.cmbForceNorm; this.classList.toggle('active', !!window.cmbForceNorm); updateCmbChart();">정규화</button>
-                        <button onclick="downloadChartImage('cmbDynamicChart','AoE_Data','cmbChartLegend','cmbDispChart')" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
+                        <button id="cmbRocBtn" class="cmb-ma-btn" style="border-radius:20px;" onclick="cmbToggleRoc(this)">RoC&#178;</button>
+                        <span id="cmbRocOpts" style="display:none;gap:6px;align-items:center;">
+                            <button id="cmbRocSmoothBtn" class="cmb-ma-btn active" style="border-radius:20px;" onclick="cmbToggleRocSmooth(this)">스무딩</button>
+                            <button id="cmbRocFreqM" class="cmb-ma-btn active" onclick="cmbSetRocFreq('M')">월</button>
+                            <button id="cmbRocFreqW" class="cmb-ma-btn" onclick="cmbSetRocFreq('W')">주</button>
+                        </span>
+                        <button onclick="downloadChartImage('cmbDynamicChart','AoE_Data','cmbChartLegend',['cmbDispChart','cmbRocChart'])" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
                         <button onclick="clearCmbSelections()" style="font-family:inherit;font-size:13px;font-weight:600;padding:4px 14px;background:#f3f4f6;color:#444;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;margin-left:8px;">전체 해제</button>
                     </div>
                     <style>
@@ -3663,6 +3941,9 @@ def _build_combined_chart_section():
                         </div>
                         <div id="cmbDispPanel" style="display:none;position:relative;height:160px;margin-top:8px;">
                             <canvas id="cmbDispChart"></canvas>
+                        </div>
+                        <div id="cmbRocPanel" style="display:none;position:relative;height:200px;margin-top:8px;">
+                            <canvas id="cmbRocChart"></canvas>
                         </div>
                         <div id="cmbChartLegend" style="margin-top:12px;text-align:center;color:#222;"></div>
                     </div>
