@@ -12,7 +12,7 @@
           "sector": "반도체",
           "code": "005930",
           "name": "삼성전자",
-          "weight": 25,
+          "weight": 30,
           "baseWeight": 25,
           "reason": ""
         },
@@ -20,7 +20,7 @@
           "sector": "반도체",
           "code": "000660",
           "name": "SK하이닉스",
-          "weight": 20,
+          "weight": 25,
           "baseWeight": 20,
           "reason": ""
         },
@@ -28,17 +28,9 @@
           "sector": "기타",
           "code": "005935",
           "name": "삼성전자우",
-          "weight": 3,
+          "weight": 5,
           "baseWeight": 3,
           "reason": ""
-        },
-        {
-          "sector": "반도체",
-          "code": "080220",
-          "name": "제주반도체",
-          "weight": 0,
-          "baseWeight": 3,
-          "reason": "2분기 호실적이 기대되나 시장에서 전혀 프라이싱해주지 않고 있어 리스크 관리 차원에서 비중 축소"
         },
         {
           "sector": "소매(유통)",
@@ -57,9 +49,25 @@
           "reason": ""
         },
         {
+          "sector": "반도체",
+          "code": "080220",
+          "name": "제주반도체",
+          "weight": 0,
+          "baseWeight": 0,
+          "reason": ""
+        },
+        {
           "sector": "필수소비재",
           "code": "003230",
           "name": "삼양식품",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
           "weight": 2,
           "baseWeight": 2,
           "reason": ""
@@ -69,23 +77,15 @@
           "code": "006360",
           "name": "GS건설",
           "weight": 0,
-          "baseWeight": 2,
-          "reason": "2분기 실적발표 컨센서스 하회, 주가 급락으로 인해 리스크 관리 차원에서 전량 편출"
+          "baseWeight": 0,
+          "reason": ""
         },
         {
           "sector": "통신서비스",
           "code": "017670",
           "name": "SK텔레콤",
           "weight": 0,
-          "baseWeight": 2,
-          "reason": "시장의 관심이 데이터센터에서 다시 반도체로 이동 중, "
-        },
-        {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 2,
-          "baseWeight": 2,
+          "baseWeight": 0,
           "reason": ""
         },
         {
@@ -105,8 +105,7 @@
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-29T01:13:06.205Z",
-      "finalizedAt": "2026-07-29T10:14:43+09:00"
+      "savedAt": "2026-07-29T05:10:04.563Z"
     },
     "NH 다이내믹 밸류": {
       "targets": [
@@ -120,7 +119,7 @@
           "sector": "반도체",
           "code": "005930",
           "name": "삼성전자",
-          "weight": 25,
+          "weight": 30,
           "baseWeight": 25,
           "reason": ""
         },
@@ -128,7 +127,7 @@
           "sector": "반도체",
           "code": "000660",
           "name": "SK하이닉스",
-          "weight": 20,
+          "weight": 25,
           "baseWeight": 20,
           "reason": ""
         },
@@ -136,17 +135,9 @@
           "sector": "기타",
           "code": "005935",
           "name": "삼성전자우",
-          "weight": 3,
+          "weight": 5,
           "baseWeight": 3,
           "reason": ""
-        },
-        {
-          "sector": "반도체",
-          "code": "080220",
-          "name": "제주반도체",
-          "weight": 0,
-          "baseWeight": 3,
-          "reason": "2분기 호실적이 기대되나 시장에서 전혀 프라이싱해주지 않고 있어 리스크 관리 차원에서 비중 축소"
         },
         {
           "sector": "소매(유통)",
@@ -165,9 +156,25 @@
           "reason": ""
         },
         {
+          "sector": "반도체",
+          "code": "080220",
+          "name": "제주반도체",
+          "weight": 0,
+          "baseWeight": 0,
+          "reason": ""
+        },
+        {
           "sector": "필수소비재",
           "code": "003230",
           "name": "삼양식품",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
           "weight": 2,
           "baseWeight": 2,
           "reason": ""
@@ -177,23 +184,15 @@
           "code": "006360",
           "name": "GS건설",
           "weight": 0,
-          "baseWeight": 2,
-          "reason": "2분기 실적발표 컨센서스 하회, 주가 급락으로 인해 리스크 관리 차원에서 전량 편출"
+          "baseWeight": 0,
+          "reason": ""
         },
         {
           "sector": "통신서비스",
           "code": "017670",
           "name": "SK텔레콤",
           "weight": 0,
-          "baseWeight": 2,
-          "reason": "시장의 관심이 데이터센터에서 다시 반도체로 이동 중, "
-        },
-        {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 2,
-          "baseWeight": 2,
+          "baseWeight": 0,
           "reason": ""
         },
         {
@@ -213,8 +212,7 @@
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-29T01:13:06.205Z",
-      "finalizedAt": "2026-07-29T10:14:43+09:00"
+      "savedAt": "2026-07-29T05:10:04.563Z"
     },
     "DB 개방형": {
       "targets": [
@@ -228,7 +226,7 @@
           "sector": "반도체",
           "code": "005930",
           "name": "삼성전자",
-          "weight": 25,
+          "weight": 30,
           "baseWeight": 25,
           "reason": ""
         },
@@ -236,7 +234,7 @@
           "sector": "반도체",
           "code": "000660",
           "name": "SK하이닉스",
-          "weight": 20,
+          "weight": 25,
           "baseWeight": 20,
           "reason": ""
         },
@@ -244,17 +242,9 @@
           "sector": "기타",
           "code": "005935",
           "name": "삼성전자우",
-          "weight": 3,
+          "weight": 5,
           "baseWeight": 3,
           "reason": ""
-        },
-        {
-          "sector": "반도체",
-          "code": "080220",
-          "name": "제주반도체",
-          "weight": 0,
-          "baseWeight": 3,
-          "reason": "2분기 호실적이 기대되나 시장에서 전혀 프라이싱해주지 않고 있어 리스크 관리 차원에서 비중 축소"
         },
         {
           "sector": "소매(유통)",
@@ -273,9 +263,25 @@
           "reason": ""
         },
         {
+          "sector": "반도체",
+          "code": "080220",
+          "name": "제주반도체",
+          "weight": 0,
+          "baseWeight": 0,
+          "reason": ""
+        },
+        {
           "sector": "필수소비재",
           "code": "003230",
           "name": "삼양식품",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
           "weight": 2,
           "baseWeight": 2,
           "reason": ""
@@ -285,23 +291,15 @@
           "code": "006360",
           "name": "GS건설",
           "weight": 0,
-          "baseWeight": 2,
-          "reason": "2분기 실적발표 컨센서스 하회, 주가 급락으로 인해 리스크 관리 차원에서 전량 편출"
+          "baseWeight": 0,
+          "reason": ""
         },
         {
           "sector": "통신서비스",
           "code": "017670",
           "name": "SK텔레콤",
           "weight": 0,
-          "baseWeight": 2,
-          "reason": "시장의 관심이 데이터센터에서 다시 반도체로 이동 중, "
-        },
-        {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 2,
-          "baseWeight": 2,
+          "baseWeight": 0,
           "reason": ""
         },
         {
@@ -321,8 +319,7 @@
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-29T01:13:06.205Z",
-      "finalizedAt": "2026-07-29T10:14:43+09:00"
+      "savedAt": "2026-07-29T05:10:04.563Z"
     },
     "한투 지속형": {
       "targets": [
@@ -336,7 +333,7 @@
           "sector": "반도체",
           "code": "005930",
           "name": "삼성전자",
-          "weight": 25,
+          "weight": 30,
           "baseWeight": 25,
           "reason": ""
         },
@@ -344,7 +341,7 @@
           "sector": "반도체",
           "code": "000660",
           "name": "SK하이닉스",
-          "weight": 20,
+          "weight": 25,
           "baseWeight": 20,
           "reason": ""
         },
@@ -352,17 +349,9 @@
           "sector": "기타",
           "code": "005935",
           "name": "삼성전자우",
-          "weight": 3,
+          "weight": 5,
           "baseWeight": 3,
           "reason": ""
-        },
-        {
-          "sector": "반도체",
-          "code": "080220",
-          "name": "제주반도체",
-          "weight": 0,
-          "baseWeight": 3,
-          "reason": "2분기 호실적이 기대되나 시장에서 전혀 프라이싱해주지 않고 있어 리스크 관리 차원에서 비중 축소"
         },
         {
           "sector": "소매(유통)",
@@ -381,9 +370,25 @@
           "reason": ""
         },
         {
+          "sector": "반도체",
+          "code": "080220",
+          "name": "제주반도체",
+          "weight": 0,
+          "baseWeight": 0,
+          "reason": ""
+        },
+        {
           "sector": "필수소비재",
           "code": "003230",
           "name": "삼양식품",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
           "weight": 2,
           "baseWeight": 2,
           "reason": ""
@@ -393,23 +398,15 @@
           "code": "006360",
           "name": "GS건설",
           "weight": 0,
-          "baseWeight": 2,
-          "reason": "2분기 실적발표 컨센서스 하회, 주가 급락으로 인해 리스크 관리 차원에서 전량 편출"
+          "baseWeight": 0,
+          "reason": ""
         },
         {
           "sector": "통신서비스",
           "code": "017670",
           "name": "SK텔레콤",
           "weight": 0,
-          "baseWeight": 2,
-          "reason": "시장의 관심이 데이터센터에서 다시 반도체로 이동 중, "
-        },
-        {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 2,
-          "baseWeight": 2,
+          "baseWeight": 0,
           "reason": ""
         },
         {
@@ -429,8 +426,7 @@
           "reason": ""
         }
       ],
-      "savedAt": "2026-07-29T01:13:06.205Z",
-      "finalizedAt": "2026-07-29T10:14:43+09:00"
+      "savedAt": "2026-07-29T05:10:04.563Z"
     },
     "NH 목표전환형 5호": {
       "targets": [
@@ -444,7 +440,7 @@
           "sector": "반도체",
           "code": "005930",
           "name": "삼성전자",
-          "weight": 15,
+          "weight": 25,
           "baseWeight": 15,
           "reason": ""
         },
@@ -452,23 +448,15 @@
           "sector": "반도체",
           "code": "000660",
           "name": "SK하이닉스",
-          "weight": 15,
+          "weight": 20,
           "baseWeight": 15,
           "reason": ""
-        },
-        {
-          "sector": "반도체",
-          "code": "080220",
-          "name": "제주반도체",
-          "weight": 0,
-          "baseWeight": 3,
-          "reason": "2분기 호실적이 기대되나 시장에서 전혀 프라이싱해주지 않고 있어 리스크 관리 차원에서 비중 축소"
         },
         {
           "sector": "기타",
           "code": "005935",
           "name": "삼성전자우",
-          "weight": 3,
+          "weight": 5,
           "baseWeight": 3,
           "reason": ""
         },
@@ -489,20 +477,12 @@
           "reason": ""
         },
         {
-          "sector": "건설,건축관련",
-          "code": "006360",
-          "name": "GS건설",
+          "sector": "반도체",
+          "code": "080220",
+          "name": "제주반도체",
           "weight": 0,
-          "baseWeight": 2,
-          "reason": "2분기 실적발표 컨센서스 하회, 주가 급락으로 인해 리스크 관리 차원에서 전량 편출"
-        },
-        {
-          "sector": "통신서비스",
-          "code": "017670",
-          "name": "SK텔레콤",
-          "weight": 0,
-          "baseWeight": 2,
-          "reason": "시장의 관심이 데이터센터에서 다시 반도체로 이동 중, "
+          "baseWeight": 0,
+          "reason": ""
         },
         {
           "sector": "소프트웨어",
@@ -513,32 +493,47 @@
           "reason": ""
         },
         {
-          "sector": "은행",
-          "code": "105560",
-          "name": "KB금융",
-          "weight": 1,
+          "sector": "건설,건축관련",
+          "code": "006360",
+          "name": "GS건설",
+          "weight": 0,
           "baseWeight": 0,
-          "reason": "하반기 국내 금리 추가 인상 기대감, 적극적인 주주환원 기대"
+          "reason": ""
         },
         {
-          "sector": "은행",
-          "code": "086790",
-          "name": "하나금융지주",
-          "weight": 1,
+          "sector": "통신서비스",
+          "code": "017670",
+          "name": "SK텔레콤",
+          "weight": 0,
           "baseWeight": 0,
-          "reason": "하반기 국내 금리 추가 인상 기대감, 적극적인 주주환원 기대"
+          "reason": ""
         },
         {
           "sector": "필수소비재",
           "code": "003230",
           "name": "삼양식품",
           "weight": 2,
-          "baseWeight": 0,
-          "reason": "하반기 추가 증설 가능성 대두, 글로벌 필수소비재 순환매로 신규 편입"
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "은행",
+          "code": "105560",
+          "name": "KB금융",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
+        },
+        {
+          "sector": "은행",
+          "code": "086790",
+          "name": "하나금융지주",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
         }
       ],
-      "savedAt": "2026-07-29T01:13:06.205Z",
-      "finalizedAt": "2026-07-29T10:14:43+09:00"
+      "savedAt": "2026-07-29T05:10:04.563Z"
     },
     "DB 목표전환형 6차": {
       "targets": [
@@ -552,7 +547,7 @@
           "sector": "반도체",
           "code": "005930",
           "name": "삼성전자",
-          "weight": 15,
+          "weight": 25,
           "baseWeight": 15,
           "reason": ""
         },
@@ -560,23 +555,15 @@
           "sector": "반도체",
           "code": "000660",
           "name": "SK하이닉스",
-          "weight": 15,
+          "weight": 20,
           "baseWeight": 15,
           "reason": ""
-        },
-        {
-          "sector": "반도체",
-          "code": "080220",
-          "name": "제주반도체",
-          "weight": 0,
-          "baseWeight": 3,
-          "reason": "2분기 호실적이 기대되나 시장에서 전혀 프라이싱해주지 않고 있어 리스크 관리 차원에서 비중 축소"
         },
         {
           "sector": "기타",
           "code": "005935",
           "name": "삼성전자우",
-          "weight": 3,
+          "weight": 5,
           "baseWeight": 3,
           "reason": ""
         },
@@ -597,20 +584,12 @@
           "reason": ""
         },
         {
-          "sector": "건설,건축관련",
-          "code": "006360",
-          "name": "GS건설",
+          "sector": "반도체",
+          "code": "080220",
+          "name": "제주반도체",
           "weight": 0,
-          "baseWeight": 2,
-          "reason": "2분기 실적발표 컨센서스 하회, 주가 급락으로 인해 리스크 관리 차원에서 전량 편출"
-        },
-        {
-          "sector": "통신서비스",
-          "code": "017670",
-          "name": "SK텔레콤",
-          "weight": 0,
-          "baseWeight": 2,
-          "reason": "시장의 관심이 데이터센터에서 다시 반도체로 이동 중, "
+          "baseWeight": 0,
+          "reason": ""
         },
         {
           "sector": "소프트웨어",
@@ -621,32 +600,47 @@
           "reason": ""
         },
         {
-          "sector": "은행",
-          "code": "105560",
-          "name": "KB금융",
-          "weight": 1,
+          "sector": "건설,건축관련",
+          "code": "006360",
+          "name": "GS건설",
+          "weight": 0,
           "baseWeight": 0,
-          "reason": "하반기 국내 금리 추가 인상 기대감, 적극적인 주주환원 기대"
+          "reason": ""
         },
         {
-          "sector": "은행",
-          "code": "086790",
-          "name": "하나금융지주",
-          "weight": 1,
+          "sector": "통신서비스",
+          "code": "017670",
+          "name": "SK텔레콤",
+          "weight": 0,
           "baseWeight": 0,
-          "reason": "하반기 국내 금리 추가 인상 기대감, 적극적인 주주환원 기대"
+          "reason": ""
         },
         {
           "sector": "필수소비재",
           "code": "003230",
           "name": "삼양식품",
           "weight": 2,
-          "baseWeight": 0,
-          "reason": "하반기 추가 증설 가능성 대두, 글로벌 필수소비재 순환매로 신규 편입"
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "은행",
+          "code": "105560",
+          "name": "KB금융",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
+        },
+        {
+          "sector": "은행",
+          "code": "086790",
+          "name": "하나금융지주",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
         }
       ],
-      "savedAt": "2026-07-29T01:13:06.205Z",
-      "finalizedAt": "2026-07-29T10:14:43+09:00"
+      "savedAt": "2026-07-29T05:10:04.563Z"
     },
     "한투 성과모집형 1차": {
       "targets": [
@@ -660,7 +654,7 @@
           "sector": "반도체",
           "code": "005930",
           "name": "삼성전자",
-          "weight": 15,
+          "weight": 25,
           "baseWeight": 15,
           "reason": ""
         },
@@ -668,23 +662,15 @@
           "sector": "반도체",
           "code": "000660",
           "name": "SK하이닉스",
-          "weight": 15,
+          "weight": 20,
           "baseWeight": 15,
           "reason": ""
-        },
-        {
-          "sector": "반도체",
-          "code": "080220",
-          "name": "제주반도체",
-          "weight": 0,
-          "baseWeight": 3,
-          "reason": "2분기 호실적이 기대되나 시장에서 전혀 프라이싱해주지 않고 있어 리스크 관리 차원에서 비중 축소"
         },
         {
           "sector": "기타",
           "code": "005935",
           "name": "삼성전자우",
-          "weight": 3,
+          "weight": 5,
           "baseWeight": 3,
           "reason": ""
         },
@@ -705,20 +691,12 @@
           "reason": ""
         },
         {
-          "sector": "건설,건축관련",
-          "code": "006360",
-          "name": "GS건설",
+          "sector": "반도체",
+          "code": "080220",
+          "name": "제주반도체",
           "weight": 0,
-          "baseWeight": 2,
-          "reason": "2분기 실적발표 컨센서스 하회, 주가 급락으로 인해 리스크 관리 차원에서 전량 편출"
-        },
-        {
-          "sector": "통신서비스",
-          "code": "017670",
-          "name": "SK텔레콤",
-          "weight": 0,
-          "baseWeight": 2,
-          "reason": "시장의 관심이 데이터센터에서 다시 반도체로 이동 중, "
+          "baseWeight": 0,
+          "reason": ""
         },
         {
           "sector": "소프트웨어",
@@ -729,32 +707,47 @@
           "reason": ""
         },
         {
-          "sector": "은행",
-          "code": "105560",
-          "name": "KB금융",
-          "weight": 1,
+          "sector": "건설,건축관련",
+          "code": "006360",
+          "name": "GS건설",
+          "weight": 0,
           "baseWeight": 0,
-          "reason": "하반기 국내 금리 추가 인상 기대감, 적극적인 주주환원 기대"
+          "reason": ""
         },
         {
-          "sector": "은행",
-          "code": "086790",
-          "name": "하나금융지주",
-          "weight": 1,
+          "sector": "통신서비스",
+          "code": "017670",
+          "name": "SK텔레콤",
+          "weight": 0,
           "baseWeight": 0,
-          "reason": "하반기 국내 금리 추가 인상 기대감, 적극적인 주주환원 기대"
+          "reason": ""
         },
         {
           "sector": "필수소비재",
           "code": "003230",
           "name": "삼양식품",
           "weight": 2,
-          "baseWeight": 0,
-          "reason": "하반기 추가 증설 가능성 대두, 글로벌 필수소비재 순환매로 신규 편입"
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "은행",
+          "code": "105560",
+          "name": "KB금융",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
+        },
+        {
+          "sector": "은행",
+          "code": "086790",
+          "name": "하나금융지주",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
         }
       ],
-      "savedAt": "2026-07-29T01:13:06.205Z",
-      "finalizedAt": "2026-07-29T10:14:43+09:00"
+      "savedAt": "2026-07-29T05:10:04.563Z"
     }
   }
 }
