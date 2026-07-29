@@ -177,6 +177,22 @@ write_stamp() {
   return 0
 }
 
+# ── 게시 훅 실행: 반드시 repo 소유자 권한으로 (2026-07-29) ──────────
+#   daemon-health 는 system 도메인 kickstart 때문에 유일하게 root 로 도는 타이머다. root 가 게시기를
+#   그대로 실행하면 게시 클론(~/srv/pages_publisher/repo)과 스냅숏 릴리스에 **root 소유 파일**이 남고,
+#   그 뒤 sisyphe 로 도는 정상 게시가 rm/cp 불가(Permission denied)로 영구 고장난다
+#   — 실제로 7/26~7/29 자문지 13종·orders 4종이 root 소유로 잠겨 gh-pages 갱신이 막혔다.
+#   → root 로 실행 중일 때만 repo 소유자로 강등. 비-root 경로는 기존과 100% 동일.
+run_publish() {   # $1=스크립트 경로  $2=로그 경로
+  local script="$1" logfile="$2" owner
+  owner="$(stat -f %Su "$REPO" 2>/dev/null || true)"
+  if [ "$(id -u)" -eq 0 ] && [ -n "$owner" ] && [ "$owner" != "root" ]; then
+    sudo -n -u "$owner" -H /bin/bash "$script" >> "$logfile" 2>&1
+  else
+    /bin/bash "$script" >> "$logfile" 2>&1
+  fi
+}
+
 # ── 이름 → 실제 잡 실행. 각 분기의 exit 코드를 그대로 반환 ──────
 run_job() {
   case "$1" in
@@ -373,10 +389,10 @@ if [ "$rc" -eq 0 ]; then
     exit 70   # EX_SOFTWARE: A4 가 성공으로 오판하지 않도록 명시적 실패
   fi
   # 게시 스냅숏 갱신 (웹서빙 W5) - 실패해도 잡 rc 불변
-  /bin/bash "$REPO/scripts/publish_snapshot.sh" >> "$REPO/logs/launchd/publish.log" 2>&1 \
+  run_publish "$REPO/scripts/publish_snapshot.sh" "$REPO/logs/launchd/publish.log" \
     || echo "[run_timer_job] $NAME: publish_snapshot 실패(경고)" >&2
   # gh-pages 게시 (D-수정안 2026-07-12) - 실패해도 잡 rc 불변, 다음 성공 게시가 회복
-  /bin/bash "$REPO/scripts/publish_pages.sh" >> "$REPO/logs/launchd/publish_pages.log" 2>&1 \
+  run_publish "$REPO/scripts/publish_pages.sh" "$REPO/logs/launchd/publish_pages.log" \
     || echo "[run_timer_job] $NAME: publish_pages 실패(경고)" >&2
 else
   notify_failure "$NAME"
