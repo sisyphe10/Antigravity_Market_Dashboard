@@ -13,6 +13,8 @@ code:
   - "datalake/tagging/export_tags_parquet.py"
   - "datalake/tagging/build_theme_trends.py"
   - "datalake/tagging/recompute_rules.py"
+  - "datalake/tagging/tag_docs.py"
+  - "datalake/tagging/build_tag_index.py"
   - "datalake/tagging/daily_tag_export.sh"
   - "datalake/tagging/ontology.json"
   - "datalake/tagging/aliases_manual.csv"
@@ -22,6 +24,7 @@ reads:
   - "universe_tickers.csv"
 writes:
   - "store-research-tags"
+  - "store-tag-index"
 depends_on:
   - "infra-datalake"
   - "store-research-notes-db"
@@ -40,9 +43,13 @@ alerts: "태깅·parquet·집계 실패는 warn(아카이브는 계속) · wrapp
 - **`build_theme_trends.py`** — 월별 테마·섹터·종목 언급 추이 `theme_trends.json` 집계(절대건수 대신 count·share·unique_sources 3지표, primary/secondary 분리). `~/work/charts/260715_현선물공매도`의 관심축 차트가 소비.
 - **`recompute_rules.py`** — 별칭 사전·규칙만 고쳤을 때 LLM 재호출 없이 규칙 기반 개체 매칭만 재계산(`rule_strong`/`rule_header` 재생성 + URL 안에서만 잡히던 개체 제거). 전량 재태깅(수 시간·수 달러) 회피용 보수 도구.
 
+**코퍼스 확장(2026-07-29)**: 리서치노트 메시지뿐 아니라 어닝콜 전문·실적 분석 md까지 **같은 태그 어휘**로 태깅하고, 세 코퍼스를 한 인덱스로 합친다.
+- **`tag_docs.py`** — 어닝콜 전문([[store-transcripts-md]])·실적 분석([[store-analyses-md]]) **md 문서 태거**. 리서치노트가 텔레그램 메시지 단위인 것과 달리, 4만자를 넘는 콜 전문을 **청크 단위**(기본 4000자)로 태깅해 "#HBM 이 어느 대목이었나"를 잃지 않는다. 온톨로지·별칭·프롬프트·저장 스키마는 `tag_worker`를 그대로 재사용하고, 정본은 [[store-tag-index]]의 `doc_tag_state.sqlite`·md frontmatter(themes/tickers/sectors/orgs)는 그 투영. `--dry-run`·`--kind`·`--max-items`·`--project`(재투영만) 지원.
+- **`build_tag_index.py`** — 세 코퍼스(리서치노트·전문·분석)의 태그를 [[store-tag-index]]의 `tag_index.sqlite` 한 장부로 합치는 **통합 인덱스 빌더**. `#KLAC` 하나로 전부 훑도록 조인을 미리 펼친다. **LLM 미사용**(이미 붙은 태그 재배열)이라 무료·멱등, 매 실행 통째 재생성. [[daemon-datalake-webui]]의 `#태그` 즉시 검색 백엔드.
+
 ## 일일 실행 (`daily_tag_export.sh`)
 
-23:20 `datalake-research-export` 잡의 실체([[infra-datalake]] `run_datalake_job.sh`가 이 셸을 호출). 5단계: ① 태깅(미처리분) → ② md 아카이브(어제+오늘) → ③ parquet → ④ 추이 집계 → ⑤ 관심축 차트 빌드. **태깅을 아카이브보다 앞**에 둬 당일 md가 태그와 함께 나오게 한다. 실패 정책: 태깅·parquet·집계가 실패해도 **원문 아카이브 생성은 반드시 진행**(아카이브가 1차 산출물, 태그는 파생물) — 아카이브 실패만 exit 1.
+23:20 `datalake-research-export` 잡의 실체([[infra-datalake]] `run_datalake_job.sh`가 이 셸을 호출). 7단계: ① 태깅(미처리분) → ①b 문서 태깅(전문·분석 미처리분) → ② md 아카이브(어제+오늘) → ②b 통합 태그 인덱스 재생성(LLM 미사용) → ③ parquet → ④ 추이 집계 → ⑤ 관심축 차트 빌드. **태깅을 아카이브보다 앞**에 둬 당일 md가 태그와 함께 나오게 한다. 실패 정책: 태깅·문서 태깅·인덱스·parquet·집계가 실패해도 **원문 아카이브 생성은 반드시 진행**(아카이브가 1차 산출물, 태그는 파생물) — 아카이브 실패만 exit 1.
 
 ## Reads
 - [[store-research-notes-db]] — research_notes.db + media/ (리서치봇)
@@ -50,6 +57,7 @@ alerts: "태깅·parquet·집계 실패는 warn(아카이브는 계속) · wrapp
 
 ## Writes
 - [[store-research-tags]] — 리서치 태그 정본 (tag_state.sqlite + theme_trends.json + parquet)
+- [[store-tag-index]] — 통합 태그 인덱스 (tag_index.sqlite + doc_tag_state.sqlite)
 
 ## Depends on
 - [[infra-datalake]] — 맥미니 데이터레이크 (~/datalake + 문답 위키)
@@ -61,6 +69,8 @@ alerts: "태깅·parquet·집계 실패는 warn(아카이브는 계속) · wrapp
 - `datalake/tagging/export_tags_parquet.py`
 - `datalake/tagging/build_theme_trends.py`
 - `datalake/tagging/recompute_rules.py`
+- `datalake/tagging/tag_docs.py`
+- `datalake/tagging/build_tag_index.py`
 - `datalake/tagging/daily_tag_export.sh`
 - `datalake/tagging/ontology.json`
 - `datalake/tagging/aliases_manual.csv`

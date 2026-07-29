@@ -1,8 +1,8 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 144 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 145 components._
 
-Updated: 2026-07-28
+Updated: 2026-07-29
 
 ## By domain
 
@@ -102,7 +102,7 @@ Updated: 2026-07-28
 - [자문지 메일 발송 폴러 (send-advisory-emails 60초)](timer-advisory-emails.md) — Timer
 - [포트폴리오 표 생성 (create_portfolio_tables.py)](src-create-portfolio-tables.md) — Source
 
-### 뉴스 · 리서치 (17)
+### 뉴스 · 리서치 (18)
 - [Earnings Calendar Sync (07:00)](gha-earnings-calendar-sync.md) — GHA
 - [earnings.db (실적봇 상태)](store-earnings-db.md) — Store
 - [Generic Source Pipeline (execution/sources/)](src-generic-pipeline.md) — Source
@@ -119,6 +119,7 @@ Updated: 2026-07-28
 - [실적봇 파이프라인 (execution/earnings_bot/)](src-earnings-pipeline.md) — Source
 - [어닝콜 번역 전문 md (~/datalake/transcripts/)](store-transcripts-md.md) — Store
 - [원전 뉴스 KNA/KNEISS (sources/kna.py)](src-kna-kneiss.md) — Source
+- [통합 태그 인덱스 (tag_index.sqlite + doc_tag_state.sqlite)](store-tag-index.md) — Store
 - [해외 기업 IR/뉴스룸 (sources/foreign_ir.py)](src-foreign-ir.md) — Source
 
 ### 개인 · 가족 (5)
@@ -175,8 +176,8 @@ Updated: 2026-07-28
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — 상시 (06:00 다이제스트 등), active
 
 ### Timer (17)
-- [ETF 구성종목 수집 타이머 (etf-collect 16:30)](timer-etf-collect.md) — 16:30 매일, active
-- [ETF 수집 재시도 타이머 (etf-collect-retry 18:00)](timer-etf-collect-retry.md) — 18:00 매일, active
+- [ETF 구성종목 수집 타이머 (etf-collect 16:30)](timer-etf-collect.md) — 16:30 매일 (paused 2026-07-29), frozen
+- [ETF 수집 재시도 타이머 (etf-collect-retry 18:00)](timer-etf-collect-retry.md) — 18:00 매일 (paused 2026-07-29), frozen
 - [Featured KIS 수집 타이머 (15:50, 신고가)](timer-featured-kis.md) — 15:50 매일, active
 - [KODEX 섹터 타이머 (23:30, +KOSIS/일본capex/파생 편승)](timer-kodex-sectors.md) — 23:30 매일, active
 - [Memento 점심 텔레그램 타이머 (12:00)](timer-memento-telegram.md) — 12:00 매일, active
@@ -235,9 +236,9 @@ Updated: 2026-07-28
 - [taiwan_revenue.csv (대만 월매출)](store-taiwan-revenue-csv.md) — 23:20 갱신, active
 - [universe.json / universe_history.json](store-universe-json.md) — 18:30 / 07:00 갱신, active
 
-### Store (10)
+### Store (11)
 - [earnings.db (실적봇 상태)](store-earnings-db.md) — 08:00 갱신, active
-- [etf_data.db (ETF 구성종목 SQLite)](store-etf-db.md) — 16:30 / 18:00 갱신, active
+- [etf_data.db (ETF 구성종목 SQLite)](store-etf-db.md) — 16:30 / 18:00 갱신 (paused 2026-07-29), frozen
 - [heartbeats.json (Phase 2 워치독 인터페이스)](store-heartbeats.md) — 각 GHA 잡 성공 시, planned
 - [orders/ (pending_orders · aum_pending)](store-orders-pending.md) — 사용자 입력 + 16:00 finalize, active
 - [research_notes.db + media/ (리서치봇)](store-research-notes-db.md) — 이벤트 시, active
@@ -246,6 +247,7 @@ Updated: 2026-07-28
 - [리서치 태그 정본 (tag_state.sqlite + theme_trends.json + parquet)](store-research-tags.md) — 23:20 (datalake-research-export), active
 - [실적 분석 1-page md (~/datalake/analyses/)](store-analyses-md.md) — 08:00 (earnings-bot 타이머), active
 - [어닝콜 번역 전문 md (~/datalake/transcripts/)](store-transcripts-md.md) — 08:00 (earnings-bot 타이머), active
+- [통합 태그 인덱스 (tag_index.sqlite + doc_tag_state.sqlite)](store-tag-index.md) — 23:20 (datalake-research-export), active
 
 ### Infra (14)
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — 부팅 시 1회, planned
@@ -275,7 +277,7 @@ Updated: 2026-07-28
 - [AoE 스타일 정본 (nav_style.py)](src-nav-style.md) — import 시 (상시), active
 - [DART 공시 (fetch_disclosures.py)](src-dart-disclosures.md) — 16:30 (gha-daily-disclosures), active
 - [ECOS 한국 매크로 33종 (fetch_ecos_data.py)](src-ecos.md) — 17:40 평일 (gha-daily-ecos), active
-- [ETF 구성종목 수집 (collect_etf_daily.py)](src-etf-collect.md) — 16:30 / 18:00 (etf-collect 타이머), active
+- [ETF 구성종목 수집 (collect_etf_daily.py)](src-etf-collect.md) — 16:30 / 18:00 (etf-collect 타이머, paused 2026-07-29), frozen
 - [Featured KIS/신고가 (fetch_featured_data_kis.py + enrich)](src-featured-kis.md) — 15:50 (featured-kis 타이머), active
 - [FRED 미국 매크로 36종 (fetch_fred_data.py)](src-fred.md) — 07:50 화~토 (gha-daily-fred), active
 - [Generic Source Pipeline (execution/sources/)](src-generic-pipeline.md) — 상시 (ra-sisyphe 등록), active
@@ -336,7 +338,7 @@ Updated: 2026-07-28
 
 ## By project
 
-### antigravity (144)
+### antigravity (145)
 - [/aum — WRAP 일일 AUM 입력](cmd-aum.md) — Skill
 - [/긴급코멘트 — 급락일 시장 코멘트](cmd-urgent-comment.md) — Skill
 - [/목표전환형 — 랩 생성·청산 일괄](cmd-target-transform.md) — Skill
@@ -472,6 +474,7 @@ Updated: 2026-07-28
 - [컴퓨트 호스트 (Oracle VM → 맥미니)](infra-vm-macmini.md) — Infra
 - [크래시 루프 워처 (*/5)](daemon-crash-watcher.md) — Watcher
 - [텔레그램 (알림·상호작용 채널)](infra-telegram.md) — Infra
+- [통합 태그 인덱스 (tag_index.sqlite + doc_tag_state.sqlite)](store-tag-index.md) — Store
 - [투자유의 생성기 (create_market_alert.py)](src-create-market-alert.md) — Source
 - [투자일지 시장데이터 (fetch_journal_data.py)](src-journal-data.md) — Source
 - [투자자별 수급 (fetch_investor_trading.py)](src-investor-trading.md) — Source

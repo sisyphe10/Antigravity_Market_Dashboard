@@ -30,6 +30,7 @@ alerts: "OnFailure → sisyphe-bot-notify@etf-active-alert → 텔레그램"
 
 매일 19:00 KST 전 액티브 ETF의 전일 대비 신규편입/편출/비중급변을 계산해 구독자에게 브로드캐스트하는 타이머(`run_etf_active_alert.sh` → `execution/etf_active_alert.py`).
 
+- ★**2026-07-29 이후 입력 DB 동결**: 국내 ETF 수집 중단([[timer-etf-collect]])으로 [[store-etf-db]]에 새 날짜가 들어오지 않는다. 이 타이머는 여전히 설치·활성이나, latest 날짜가 갱신되지 않으니 dedup(키=latest 날짜)에 걸려 사실상 무발송 상태가 된다. 수집 재개 시 자동 정상화.
 - 대시보드 `etf.html` '액티브 ETF' 탭과 동일한 단일 출처 모듈(`active_etf_changes.py`)로 계산 → 숫자 일치.
 - MMF/채권 제외(주식형만, 액티브 ~313개). dedup=`.etf_active_alert_sent.json`(키=latest 날짜→휴장일 무발송).
 - 수집 16:30/재시도 18:00/etf.html 18:30 이후라 19:00 배치.

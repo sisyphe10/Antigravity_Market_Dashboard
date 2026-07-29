@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-07-28",
+  "updated": "2026-07-29",
   "projects": [
    "antigravity"
   ],
@@ -239,9 +239,9 @@
    "type": "timer",
    "name": "ETF 구성종목 수집 타이머 (etf-collect 16:30)",
    "runs_on": "vm_macmini",
-   "schedule_kst": "16:30 매일",
-   "status": "active",
-   "desc_md": "매일 16:30 KST 전체 ETF 목록 + 구성종목/비중을 수집해 `etf_data.db`에 적재하는 타이머(`run_etf_collect.sh` → `execution/etf_collector/collect_etf_daily.py`).\n\n- 원래 봇 apscheduler 잡이었으나 봇 재시작/배포가 진행 중인 수집을 죽이는 문제로 systemd 타이머로 분리(2026-06-25).\n- 성공(collection_log ok>=1000)이면 즉시 스킵하는 idempotent 설계 → 18:00 재시도와 겹쳐도 안전.\n- TimeoutStartSec=30min. 실패 시 `sisyphe-bot-notify@etf-collect`.",
+   "schedule_kst": "16:30 매일 (paused 2026-07-29)",
+   "status": "frozen",
+   "desc_md": "**★ 2026-07-29 국내 ETF 수집 중단(사용자 결정)** — `schedule.tsv`의 두 타이머 행(etf-collect·etf-collect-retry) 주석 처리 + `install_timers.sh` NAMES에서 제외, `/Library/LaunchDaemons` plist는 부팅 해제·삭제했다. plist **소스는 보존** → 재개 시 NAMES에 두 이름 복원 + schedule.tsv 주석 해제 후 `sudo ./install_timers.sh`. 매실패 텔레그램 notify와 [[daemon-daily-selfcheck]] STALE 라인도 함께 멎는다. [[store-etf-db]]는 마지막 수집분으로 동결.\n\n매일 16:30 KST 전체 ETF 목록 + 구성종목/비중을 수집해 `etf_data.db`에 적재하던 타이머(`run_etf_collect.sh` → `execution/etf_collector/collect_etf_daily.py`).\n\n- 원래 봇 apscheduler 잡이었으나 봇 재시작/배포가 진행 중인 수집을 죽이는 문제로 systemd 타이머로 분리(2026-06-25).\n- 성공(collection_log ok>=1000)이면 즉시 스킵하는 idempotent 설계 → 18:00 재시도와 겹쳐도 안전.\n- TimeoutStartSec=30min. 실패 시 `sisyphe-bot-notify@etf-collect`.",
    "code": [
     "scripts/etf-collect.timer",
     "scripts/etf-collect.service",
@@ -263,9 +263,9 @@
    "type": "timer",
    "name": "ETF 수집 재시도 타이머 (etf-collect-retry 18:00)",
    "runs_on": "vm_macmini",
-   "schedule_kst": "18:00 매일",
-   "status": "active",
-   "desc_md": "16:30 수집의 실패/부분수집을 보충하는 재시도 타이머. 같은 `etf-collect.service`를 18:00 KST에 한 번 더 발화한다.\n\n- 16:30이 성공했으면 `collect_etf_daily.py`가 즉시 스킵(idempotent no-op), 부분수집이면 already_done을 건너뛰고 나머지를 마저 수집.\n- 18:30 Featured 2차(`etf.html` 재생성) 전에 끝나도록 18:00에 배치.",
+   "schedule_kst": "18:00 매일 (paused 2026-07-29)",
+   "status": "frozen",
+   "desc_md": "**★ 2026-07-29 국내 ETF 수집 중단(사용자 결정)** — [[timer-etf-collect]]과 한 묶음으로 정지(schedule.tsv 주석 + install_timers.sh NAMES 제외 + plist 부팅 해제·삭제, 소스는 보존). 재개 절차는 [[timer-etf-collect]] 참조.\n\n16:30 수집의 실패/부분수집을 보충하던 재시도 타이머. 같은 `etf-collect.service`를 18:00 KST에 한 번 더 발화한다.\n\n- 16:30이 성공했으면 `collect_etf_daily.py`가 즉시 스킵(idempotent no-op), 부분수집이면 already_done을 건너뛰고 나머지를 마저 수집.\n- 18:30 Featured 2차(`etf.html` 재생성) 전에 끝나도록 18:00에 배치.",
    "code": [
     "scripts/etf-collect-retry.timer",
     "launchd/timers/com.antigravity.etf-collect-retry.plist"
@@ -288,7 +288,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "19:00 매일",
    "status": "active",
-   "desc_md": "매일 19:00 KST 전 액티브 ETF의 전일 대비 신규편입/편출/비중급변을 계산해 구독자에게 브로드캐스트하는 타이머(`run_etf_active_alert.sh` → `execution/etf_active_alert.py`).\n\n- 대시보드 `etf.html` '액티브 ETF' 탭과 동일한 단일 출처 모듈(`active_etf_changes.py`)로 계산 → 숫자 일치.\n- MMF/채권 제외(주식형만, 액티브 ~313개). dedup=`.etf_active_alert_sent.json`(키=latest 날짜→휴장일 무발송).\n- 수집 16:30/재시도 18:00/etf.html 18:30 이후라 19:00 배치.",
+   "desc_md": "매일 19:00 KST 전 액티브 ETF의 전일 대비 신규편입/편출/비중급변을 계산해 구독자에게 브로드캐스트하는 타이머(`run_etf_active_alert.sh` → `execution/etf_active_alert.py`).\n\n- ★**2026-07-29 이후 입력 DB 동결**: 국내 ETF 수집 중단([[timer-etf-collect]])으로 [[store-etf-db]]에 새 날짜가 들어오지 않는다. 이 타이머는 여전히 설치·활성이나, latest 날짜가 갱신되지 않으니 dedup(키=latest 날짜)에 걸려 사실상 무발송 상태가 된다. 수집 재개 시 자동 정상화.\n- 대시보드 `etf.html` '액티브 ETF' 탭과 동일한 단일 출처 모듈(`active_etf_changes.py`)로 계산 → 숫자 일치.\n- MMF/채권 제외(주식형만, 액티브 ~313개). dedup=`.etf_active_alert_sent.json`(키=latest 날짜→휴장일 무발송).\n- 수집 16:30/재시도 18:00/etf.html 18:30 이후라 19:00 배치.",
    "code": [
     "scripts/etf-active-alert.timer",
     "scripts/etf-active-alert.service",
@@ -1689,9 +1689,9 @@
    "type": "pipeline_source",
    "name": "ETF 구성종목 수집 (collect_etf_daily.py)",
    "runs_on": "vm_macmini",
-   "schedule_kst": "16:30 / 18:00 (etf-collect 타이머)",
-   "status": "active",
-   "desc_md": "전체 ETF 목록 + 구성종목/비중을 etfcheck 등에서 수집해 `etf_data.db`(SQLite)에 적재.\n\n- idempotent(성공 시 재실행 스킵). 봇에서 분리된 타이머가 소유([[timer-etf-collect]] 16:30 / [[timer-etf-collect-retry]] 18:00).\n- etf.html 액티브 탭·19:00 알림의 원천 DB.\n- ★**VM-side 수집 + 정본 병합으로 재설계(2026-07-21)**: 2026-07-11 맥미니 이전 후 맥미니 공인 IP가 한국 금융 소스에 직접 도달 불가 — etfcheck WAF가 IP 차단(정적 파일까지 403), KRX OpenAPI(Akamai)는 SSH SOCKS 터널의 MTU 문제로 타임아웃. 반면 Oracle VM([[infra-vm-macmini]])은 두 소스 모두 직결 200이라, `run_etf_collect.sh`가 **오케스트레이터**로 바뀌었다: ① 수집기 코드를 VM에 scp 동기화 → ② `make_etf_seed.py`로 정본에 이미 있는 당일 목록을 소형 전송 DB에 시드(KRX 재조회 회피 = KRX 간헐장애 내성) → ③ VM에서 `ETF_DB_PATH=전송DB collect_etf_daily.py <날짜>` 실행(구성종목만 etfcheck) + WAL 체크포인트 → ④ 전송 DB scp 회수 → ⑤ `import_etf_transfer.py --min-ok 1000`으로 완결성 검증 후 맥미니 정본(`etf_data.db` ~635M)에 원자적 병합(미달 시 정본 미변경·전송 DB 보존해 재-import 가능). `collect_etf_daily.py`는 날짜 인자와 `ETF_DB_PATH` override를 받도록 확장됐다.\n- (구 방식) 맥미니 로컬 수집 + etfcheck만 SSH SOCKS 프록시(`ETFCHECK_PROXY`)로 우회한 방식은 KRX가 계속 실패해 폐기 — `etfcheck_client.py`의 `ETFCHECK_PROXY` 지원 코드만 잔존.\n- etfcheck 내부 API 키(Checkclient 해시 시드)는 사이트가 웹팩 모듈로 옮긴 뒤 수시 로테이션(2026-07 6일새 4번) → **하드코딩 추격을 끝내고 `build.js`에서 런타임 추출**(2026-07-27, `etfcheck_client._resolve_key`). 웹팩 모듈 리터럴 `{key:\"…\"}` 유일 매칭을 뽑아 프로세스당 1회 캐시(`_KEY_TTL` 1h, build.js ~5.4MB), 매칭 2건 이상이면 구조 변경으로 보고 폴백 상수 사용, 403 만나면 force 재추출로 장중 로테이션 자가치유. 30s 인증 버킷·`Referer`·`connect.sid` 세션 쿠키는 여전히 필수. (하드코딩 키가 07-22~27 전면 403의 직접 원인이었다.)",
+   "schedule_kst": "16:30 / 18:00 (etf-collect 타이머, paused 2026-07-29)",
+   "status": "frozen",
+   "desc_md": "전체 ETF 목록 + 구성종목/비중을 etfcheck 등에서 수집해 `etf_data.db`(SQLite)에 적재.\n\n- ★**2026-07-29 수집 중단(사용자 결정)으로 이 소스는 휴면** — 소유 타이머([[timer-etf-collect]]·[[timer-etf-collect-retry]])가 정지되어 더 이상 발화하지 않는다. 코드·오케스트레이터는 보존, [[store-etf-db]]는 마지막 수집분에 동결. 재개 절차는 [[timer-etf-collect]] 참조.\n- idempotent(성공 시 재실행 스킵). 봇에서 분리된 타이머가 소유([[timer-etf-collect]] 16:30 / [[timer-etf-collect-retry]] 18:00).\n- etf.html 액티브 탭·19:00 알림의 원천 DB.\n- ★**VM-side 수집 + 정본 병합으로 재설계(2026-07-21)**: 2026-07-11 맥미니 이전 후 맥미니 공인 IP가 한국 금융 소스에 직접 도달 불가 — etfcheck WAF가 IP 차단(정적 파일까지 403), KRX OpenAPI(Akamai)는 SSH SOCKS 터널의 MTU 문제로 타임아웃. 반면 Oracle VM([[infra-vm-macmini]])은 두 소스 모두 직결 200이라, `run_etf_collect.sh`가 **오케스트레이터**로 바뀌었다: ① 수집기 코드를 VM에 scp 동기화 → ② `make_etf_seed.py`로 정본에 이미 있는 당일 목록을 소형 전송 DB에 시드(KRX 재조회 회피 = KRX 간헐장애 내성) → ③ VM에서 `ETF_DB_PATH=전송DB collect_etf_daily.py <날짜>` 실행(구성종목만 etfcheck) + WAL 체크포인트 → ④ 전송 DB scp 회수 → ⑤ `import_etf_transfer.py --min-ok 1000`으로 완결성 검증 후 맥미니 정본(`etf_data.db` ~635M)에 원자적 병합(미달 시 정본 미변경·전송 DB 보존해 재-import 가능). `collect_etf_daily.py`는 날짜 인자와 `ETF_DB_PATH` override를 받도록 확장됐다.\n- (구 방식) 맥미니 로컬 수집 + etfcheck만 SSH SOCKS 프록시(`ETFCHECK_PROXY`)로 우회한 방식은 KRX가 계속 실패해 폐기 — `etfcheck_client.py`의 `ETFCHECK_PROXY` 지원 코드만 잔존.\n- etfcheck 내부 API 키(Checkclient 해시 시드)는 사이트가 웹팩 모듈로 옮긴 뒤 수시 로테이션(2026-07 6일새 4번) → **하드코딩 추격을 끝내고 `build.js`에서 런타임 추출**(2026-07-27, `etfcheck_client._resolve_key`). 웹팩 모듈 리터럴 `{key:\"…\"}` 유일 매칭을 뽑아 프로세스당 1회 캐시(`_KEY_TTL` 1h, build.js ~5.4MB), 매칭 2건 이상이면 구조 변경으로 보고 폴백 상수 사용, 403 만나면 force 재추출로 장중 로테이션 자가치유. 30s 인증 버킷·`Referer`·`connect.sid` 세션 쿠키는 여전히 필수. (하드코딩 키가 07-22~27 전면 403의 직접 원인이었다.)",
    "code": [
     "execution/etf_collector/collect_etf_daily.py",
     "execution/etf_collector/etf_db.py",
@@ -2316,7 +2316,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "상시",
    "status": "active",
-   "desc_md": "2026-07-12 신설. 데이터레이크의 DuckDB+Claude API 자연어 문답 UI를 **상시 데몬**으로 띄우는 launchd 서비스(`com.antigravity.datalake-webui`, RunAtLoad + KeepAlive). 기존 수동 기동(`run_webui.sh`)을 데몬화해, ts.net 대시보드의 'Wiki' 탭 백엔드로 상주시킨다.\n\n- 바인딩: FastAPI 서버(`server.py`)가 `127.0.0.1:8787` 루프백 고정 — 직접 공개 노출 없음. Caddy가 `/wiki/*`를 이 포트로 리버스 프록시([[web-caddy]]) → AoE 'Wiki'·'Earnings' 탭.\n- 질의 대상 = 데이터레이크 md 코퍼스 + duckdb 샌드박스(allowed→잠금). 소스·설계 상세는 [[infra-datalake]] / `datalake/DESIGN.md`.\n- **코퍼스 확장(2026-07-21)**: SEARCH_ROOTS에 `transcripts`(어닝콜 한국어 번역 전문, [[store-transcripts-md]])를 추가하고 시스템 프롬프트에 어닝콜 전문 소스를 명시. 긴 전문 대응으로 `read_file`에 offset 페이징(1회 최대 20000자, `(truncated ... offset=)` 안내)을 도입.\n- **Earnings Library + analyses 코퍼스(2026-07-22)**: SEARCH_ROOTS에 `analyses`(실적 분석 1-page, [[store-analyses-md]])를 추가하고, 별도 열람 UI 엔드포인트 `/library`(+`/library/list`·`/library/doc`)를 신설. transcripts+analyses md를 필터·프론트매터·md 렌더로 보여주는 'Earnings Library' 페이지(터미널 블랙+앰버)로, ts.net `/wiki/library`에 리버스 프록시되고 nav 'Earnings' 탭이 여기를 가리킨다. 실적봇의 Notion 분석 퍼블리시가 md 발행으로 대체되며([[src-earnings-pipeline]]) 이 UI가 Notion 열람을 대신한다.\n- ★**nav는 손으로 맞춰야 하는 사본**(`datalake/webui/static/index.html`): 이 페이지는 스냅숏이 아니라 데몬에서 직접 서빙되므로 [[web-publish-snapshot]]의 `compose_personal_view.py` nav 주입이 **닿지 않는다**. 2026-07-16 nav 개편 때 [[daemon-watchlist-quoteboard]]와 함께 이 파일의 topnav 마크업을 따로 고쳐 통일했다(`Wiki` 탭에 `margin-left:auto`를 줘 Wiki·Architecture를 우측 그룹으로 미는 것도 여기 사본에 직접 박혀 있다). 2026-07-18 브랜드 라벨을 `AoE` → `AGE OF EMERGENCE`로 확장할 때도 이 사본을 손으로 맞췄다([[web-publish-snapshot]]). 2026-07-22 nav 재편(좌 Watchlist·Market·Journal·Weekly·Earnings·Wiki / 우 Memento·Ledger·Architecture)과 'Earnings'(`/wiki/library`) 탭 추가도 이 사본에 직접 반영했다.\n- launchd 관리: `ThrottleInterval=15`로 크래시 루프 억제, 로그는 `logs/launchd/datalake-webui.{out,err}`. 계산 잡 아님(catch-up 대상 아님).",
+   "desc_md": "2026-07-12 신설. 데이터레이크의 DuckDB+Claude API 자연어 문답 UI를 **상시 데몬**으로 띄우는 launchd 서비스(`com.antigravity.datalake-webui`, RunAtLoad + KeepAlive). 기존 수동 기동(`run_webui.sh`)을 데몬화해, ts.net 대시보드의 'Wiki' 탭 백엔드로 상주시킨다.\n\n- 바인딩: FastAPI 서버(`server.py`)가 `127.0.0.1:8787` 루프백 고정 — 직접 공개 노출 없음. Caddy가 `/wiki/*`를 이 포트로 리버스 프록시([[web-caddy]]) → AoE 'Wiki'·'Earnings' 탭.\n- 질의 대상 = 데이터레이크 md 코퍼스 + duckdb 샌드박스(allowed→잠금). 소스·설계 상세는 [[infra-datalake]] / `datalake/DESIGN.md`.\n- **코퍼스 확장(2026-07-21)**: SEARCH_ROOTS에 `transcripts`(어닝콜 한국어 번역 전문, [[store-transcripts-md]])를 추가하고 시스템 프롬프트에 어닝콜 전문 소스를 명시. 긴 전문 대응으로 `read_file`에 offset 페이징(1회 최대 20000자, `(truncated ... offset=)` 안내)을 도입.\n- **Earnings Library + analyses 코퍼스(2026-07-22)**: SEARCH_ROOTS에 `analyses`(실적 분석 1-page, [[store-analyses-md]])를 추가하고, 별도 열람 UI 엔드포인트 `/library`(+`/library/list`·`/library/doc`)를 신설. transcripts+analyses md를 필터·프론트매터·md 렌더로 보여주는 'Earnings Library' 페이지(터미널 블랙+앰버)로, ts.net `/wiki/library`에 리버스 프록시되고 nav 'Earnings' 탭이 여기를 가리킨다. 실적봇의 Notion 분석 퍼블리시가 md 발행으로 대체되며([[src-earnings-pipeline]]) 이 UI가 Notion 열람을 대신한다.\n- **통합 `#태그` 즉시 검색 + 서버측 대화 이력(2026-07-29)**: [[store-tag-index]]의 `tag_index.sqlite`를 읽어 `#KLAC` 한 번으로 리서치노트·어닝콜 전문·실적 분석 세 코퍼스를 훑는 즉시 검색을 추가(`/tags/suggest`·`/tags/search`·`/tags/doc` 엔드포인트 + Claude가 부르는 `search_tags` 도구, **LLM 미사용**이라 무료). 동시에 문답 채팅을 **리서치 애널리스트 페르소나**(결론 우선·사실/추정 구분·비교 기준 명시) 시스템 프롬프트로 바꾸고, 서버측 대화 이력 사이드바·thinking 인디케이터·답변을 그 대화에 고정(pin)·저장/삭제 실패 노출을 도입. publish 훅은 root가 아니라 레포 소유자로 실행하도록 고쳤다.\n- ★**nav는 손으로 맞춰야 하는 사본**(`datalake/webui/static/index.html`): 이 페이지는 스냅숏이 아니라 데몬에서 직접 서빙되므로 [[web-publish-snapshot]]의 `compose_personal_view.py` nav 주입이 **닿지 않는다**. 2026-07-16 nav 개편 때 [[daemon-watchlist-quoteboard]]와 함께 이 파일의 topnav 마크업을 따로 고쳐 통일했다(`Wiki` 탭에 `margin-left:auto`를 줘 Wiki·Architecture를 우측 그룹으로 미는 것도 여기 사본에 직접 박혀 있다). 2026-07-18 브랜드 라벨을 `AoE` → `AGE OF EMERGENCE`로 확장할 때도 이 사본을 손으로 맞췄다([[web-publish-snapshot]]). 2026-07-22 nav 재편(좌 Watchlist·Market·Journal·Weekly·Earnings·Wiki / 우 Memento·Ledger·Architecture)과 'Earnings'(`/wiki/library`) 탭 추가도 이 사본에 직접 반영했다.\n- launchd 관리: `ThrottleInterval=15`로 크래시 루프 억제, 로그는 `logs/launchd/datalake-webui.{out,err}`. 계산 잡 아님(catch-up 대상 아님).",
    "code": [
     "datalake/launchd/com.antigravity.datalake-webui.plist",
     "datalake/webui/run_webui.sh",
@@ -2325,7 +2325,8 @@
    "reads": [
     "infra-datalake",
     "store-transcripts-md",
-    "store-analyses-md"
+    "store-analyses-md",
+    "store-tag-index"
    ],
    "depends_on": [
     "infra-vm-macmini",
@@ -2549,6 +2550,43 @@
     "infra-laptop",
     "page-wrap"
    ]
+  },
+  {
+   "id": "src-research-tagging",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "pipeline_source",
+   "name": "Research Notes 태깅 파이프라인 (datalake/tagging/)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "23:20 (datalake-research-export)",
+   "status": "active",
+   "desc_md": "2026-07-27 신설. Research Notes 원문(`research_notes.db`)에 **테마·개체(종목/섹터/기관/인물) 태그**를 붙이는 규칙+LLM 하이브리드 파이프라인. exporter([[infra-datalake]]의 `export_research_notes.py`)와 **완전히 분리된 독립 프로세스** — exporter는 매일 어제+오늘을 통째로 재생성하는 멱등 구조라 거기에 LLM을 넣으면 같은 원문에 매일 다시 과금되고 태그가 흔들린다. 그래서 태그 정본을 [[store-research-tags]]의 `tag_state.sqlite`에 두고, Markdown은 그 캐시를 읽어 투영만 한다.\n\n- **`tagging_common.py`** — 온톨로지·개체 마스터·별칭 매칭 공용 모듈. `universe_tickers.csv`가 상장 종목 마스터의 단일 출처이고, 비상장 기업·기관·인물은 `entities_extra.csv`로 분리. 별칭은 strong/weak 2등급(strong=규칙만으로 자동 승인, weak=LLM 문맥 판정 후보). 본문 URL·도메인은 매칭 전 같은 길이 공백으로 덮어(위치 보존) 대량 오탐 차단. 마스터 해시(ontology/universe/alias)를 노출해 캐시 키에 포함.\n- **`tag_worker.py`** — 태깅 워커. ① 규칙 매칭(strong 자동 승인) → ② weak 후보 + 테마 분류만 LLM(micro-batch, `TAG_MODEL` 기본 `claude-haiku-4-5`)에 위임 → ③ 근거·content_hash와 함께 `tag_state.sqlite` 저장. 인자 없이 부르면 캐시 미스(=미태깅분) 전부가 대상이라 전날 실패분도 자동 회수. `--dry-run`(비용 견적)·`--date`·`--sample`·`--retry-failed` 지원.\n- **`export_tags_parquet.py`** — `tag_state.sqlite` → 연도별 parquet 3종(`research_items`·`research_item_themes`·`research_entity_mentions`)으로 내보내 데이터레이크 DuckDB 뷰로 노출.\n- **`build_theme_trends.py`** — 월별 테마·섹터·종목 언급 추이 `theme_trends.json` 집계(절대건수 대신 count·share·unique_sources 3지표, primary/secondary 분리). `~/work/charts/260715_현선물공매도`의 관심축 차트가 소비.\n- **`recompute_rules.py`** — 별칭 사전·규칙만 고쳤을 때 LLM 재호출 없이 규칙 기반 개체 매칭만 재계산(`rule_strong`/`rule_header` 재생성 + URL 안에서만 잡히던 개체 제거). 전량 재태깅(수 시간·수 달러) 회피용 보수 도구.\n\n**코퍼스 확장(2026-07-29)**: 리서치노트 메시지뿐 아니라 어닝콜 전문·실적 분석 md까지 **같은 태그 어휘**로 태깅하고, 세 코퍼스를 한 인덱스로 합친다.\n- **`tag_docs.py`** — 어닝콜 전문([[store-transcripts-md]])·실적 분석([[store-analyses-md]]) **md 문서 태거**. 리서치노트가 텔레그램 메시지 단위인 것과 달리, 4만자를 넘는 콜 전문을 **청크 단위**(기본 4000자)로 태깅해 \"#HBM 이 어느 대목이었나\"를 잃지 않는다. 온톨로지·별칭·프롬프트·저장 스키마는 `tag_worker`를 그대로 재사용하고, 정본은 [[store-tag-index]]의 `doc_tag_state.sqlite`·md frontmatter(themes/tickers/sectors/orgs)는 그 투영. `--dry-run`·`--kind`·`--max-items`·`--project`(재투영만) 지원.\n- **`build_tag_index.py`** — 세 코퍼스(리서치노트·전문·분석)의 태그를 [[store-tag-index]]의 `tag_index.sqlite` 한 장부로 합치는 **통합 인덱스 빌더**. `#KLAC` 하나로 전부 훑도록 조인을 미리 펼친다. **LLM 미사용**(이미 붙은 태그 재배열)이라 무료·멱등, 매 실행 통째 재생성. [[daemon-datalake-webui]]의 `#태그` 즉시 검색 백엔드.\n\n## 일일 실행 (`daily_tag_export.sh`)\n\n23:20 `datalake-research-export` 잡의 실체([[infra-datalake]] `run_datalake_job.sh`가 이 셸을 호출). 7단계: ① 태깅(미처리분) → ①b 문서 태깅(전문·분석 미처리분) → ② md 아카이브(어제+오늘) → ②b 통합 태그 인덱스 재생성(LLM 미사용) → ③ parquet → ④ 추이 집계 → ⑤ 관심축 차트 빌드. **태깅을 아카이브보다 앞**에 둬 당일 md가 태그와 함께 나오게 한다. 실패 정책: 태깅·문서 태깅·인덱스·parquet·집계가 실패해도 **원문 아카이브 생성은 반드시 진행**(아카이브가 1차 산출물, 태그는 파생물) — 아카이브 실패만 exit 1.",
+   "code": [
+    "datalake/tagging/tagging_common.py",
+    "datalake/tagging/tag_worker.py",
+    "datalake/tagging/export_tags_parquet.py",
+    "datalake/tagging/build_theme_trends.py",
+    "datalake/tagging/recompute_rules.py",
+    "datalake/tagging/tag_docs.py",
+    "datalake/tagging/build_tag_index.py",
+    "datalake/tagging/daily_tag_export.sh",
+    "datalake/tagging/ontology.json",
+    "datalake/tagging/aliases_manual.csv",
+    "datalake/tagging/entities_extra.csv"
+   ],
+   "reads": [
+    "store-research-notes-db",
+    "universe_tickers.csv"
+   ],
+   "writes": [
+    "store-research-tags",
+    "store-tag-index"
+   ],
+   "depends_on": [
+    "infra-datalake",
+    "store-research-notes-db"
+   ],
+   "alerts": "태깅·parquet·집계 실패는 warn(아카이브는 계속) · wrapper 실패 → 텔레그램"
   },
   {
    "id": "daemon-catchup",
@@ -2821,40 +2859,6 @@
    ]
   },
   {
-   "id": "src-research-tagging",
-   "project": "antigravity",
-   "domain": "news-research",
-   "type": "pipeline_source",
-   "name": "Research Notes 태깅 파이프라인 (datalake/tagging/)",
-   "runs_on": "vm_macmini",
-   "schedule_kst": "23:20 (datalake-research-export)",
-   "status": "active",
-   "desc_md": "2026-07-27 신설. Research Notes 원문(`research_notes.db`)에 **테마·개체(종목/섹터/기관/인물) 태그**를 붙이는 규칙+LLM 하이브리드 파이프라인. exporter([[infra-datalake]]의 `export_research_notes.py`)와 **완전히 분리된 독립 프로세스** — exporter는 매일 어제+오늘을 통째로 재생성하는 멱등 구조라 거기에 LLM을 넣으면 같은 원문에 매일 다시 과금되고 태그가 흔들린다. 그래서 태그 정본을 [[store-research-tags]]의 `tag_state.sqlite`에 두고, Markdown은 그 캐시를 읽어 투영만 한다.\n\n- **`tagging_common.py`** — 온톨로지·개체 마스터·별칭 매칭 공용 모듈. `universe_tickers.csv`가 상장 종목 마스터의 단일 출처이고, 비상장 기업·기관·인물은 `entities_extra.csv`로 분리. 별칭은 strong/weak 2등급(strong=규칙만으로 자동 승인, weak=LLM 문맥 판정 후보). 본문 URL·도메인은 매칭 전 같은 길이 공백으로 덮어(위치 보존) 대량 오탐 차단. 마스터 해시(ontology/universe/alias)를 노출해 캐시 키에 포함.\n- **`tag_worker.py`** — 태깅 워커. ① 규칙 매칭(strong 자동 승인) → ② weak 후보 + 테마 분류만 LLM(micro-batch, `TAG_MODEL` 기본 `claude-haiku-4-5`)에 위임 → ③ 근거·content_hash와 함께 `tag_state.sqlite` 저장. 인자 없이 부르면 캐시 미스(=미태깅분) 전부가 대상이라 전날 실패분도 자동 회수. `--dry-run`(비용 견적)·`--date`·`--sample`·`--retry-failed` 지원.\n- **`export_tags_parquet.py`** — `tag_state.sqlite` → 연도별 parquet 3종(`research_items`·`research_item_themes`·`research_entity_mentions`)으로 내보내 데이터레이크 DuckDB 뷰로 노출.\n- **`build_theme_trends.py`** — 월별 테마·섹터·종목 언급 추이 `theme_trends.json` 집계(절대건수 대신 count·share·unique_sources 3지표, primary/secondary 분리). `~/work/charts/260715_현선물공매도`의 관심축 차트가 소비.\n- **`recompute_rules.py`** — 별칭 사전·규칙만 고쳤을 때 LLM 재호출 없이 규칙 기반 개체 매칭만 재계산(`rule_strong`/`rule_header` 재생성 + URL 안에서만 잡히던 개체 제거). 전량 재태깅(수 시간·수 달러) 회피용 보수 도구.\n\n## 일일 실행 (`daily_tag_export.sh`)\n\n23:20 `datalake-research-export` 잡의 실체([[infra-datalake]] `run_datalake_job.sh`가 이 셸을 호출). 5단계: ① 태깅(미처리분) → ② md 아카이브(어제+오늘) → ③ parquet → ④ 추이 집계 → ⑤ 관심축 차트 빌드. **태깅을 아카이브보다 앞**에 둬 당일 md가 태그와 함께 나오게 한다. 실패 정책: 태깅·parquet·집계가 실패해도 **원문 아카이브 생성은 반드시 진행**(아카이브가 1차 산출물, 태그는 파생물) — 아카이브 실패만 exit 1.",
-   "code": [
-    "datalake/tagging/tagging_common.py",
-    "datalake/tagging/tag_worker.py",
-    "datalake/tagging/export_tags_parquet.py",
-    "datalake/tagging/build_theme_trends.py",
-    "datalake/tagging/recompute_rules.py",
-    "datalake/tagging/daily_tag_export.sh",
-    "datalake/tagging/ontology.json",
-    "datalake/tagging/aliases_manual.csv",
-    "datalake/tagging/entities_extra.csv"
-   ],
-   "reads": [
-    "store-research-notes-db",
-    "universe_tickers.csv"
-   ],
-   "writes": [
-    "store-research-tags"
-   ],
-   "depends_on": [
-    "infra-datalake",
-    "store-research-notes-db"
-   ],
-   "alerts": "태깅·parquet·집계 실패는 warn(아카이브는 계속) · wrapper 실패 → 텔레그램"
-  },
-  {
    "id": "store-analyses-md",
    "project": "antigravity",
    "domain": "news-research",
@@ -2917,9 +2921,9 @@
    "type": "store",
    "name": "etf_data.db (ETF 구성종목 SQLite)",
    "runs_on": "vm_macmini",
-   "schedule_kst": "16:30 / 18:00 갱신",
-   "status": "active",
-   "desc_md": "전체 ETF 목록 + 구성종목/비중을 담는 SQLite DB(~625MB, VM 로컬). etf-collect 타이머가 채운다.\n\n- etf.html 구성종목 탭 + 액티브 ETF 변동 탭 + 19:00 알림의 원천.\n- re-clone 시 백업 대상(deploy.sh BACKUP_FILES). 대용량이라 git 추적하되 주의.",
+   "schedule_kst": "16:30 / 18:00 갱신 (paused 2026-07-29)",
+   "status": "frozen",
+   "desc_md": "전체 ETF 목록 + 구성종목/비중을 담는 SQLite DB(~625MB, VM 로컬). etf-collect 타이머가 채운다.\n\n- ★**2026-07-29 국내 ETF 수집 중단(사용자 결정)으로 DB는 마지막 수집분에 동결** — [[timer-etf-collect]]·[[timer-etf-collect-retry]] 정지. 신규 쓰기는 없고, 아래 소비처는 동결 스냅숏을 계속 읽는다. 재개 절차는 [[timer-etf-collect]] 참조.\n- etf.html 구성종목 탭 + 액티브 ETF 변동 탭 + 19:00 알림의 원천.\n- re-clone 시 백업 대상(deploy.sh BACKUP_FILES). 대용량이라 git 추적하되 주의.",
    "depends_on": [
     "src-etf-collect"
    ]
@@ -3064,6 +3068,20 @@
    "desc_md": "종목코드↔종목명 마스터. Order 탭 자동완성의 소스. update_stock_master 타이머가 주간 갱신.\n\n- 코드 있는 행만 저장(이름만 입력=누락). 사명변경 미반영 시 자동완성 실패.",
    "depends_on": [
     "src-stock-master"
+   ]
+  },
+  {
+   "id": "store-tag-index",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "store",
+   "name": "통합 태그 인덱스 (tag_index.sqlite + doc_tag_state.sqlite)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "23:20 (datalake-research-export)",
+   "status": "active",
+   "desc_md": "2026-07-29 신설. 세 코퍼스(리서치노트·어닝콜 전문·실적 분석)의 태그를 한 장부로 합쳐 `#태그` 즉시 검색을 뒷받침하는 **조회 전용 데이터 계층**. 각 코퍼스의 태그 정본(리서치노트=[[store-research-tags]]의 `tag_state.sqlite`)은 그대로 두고, 여기 두 파일은 거기서 파생되는 정본/인덱스다. 경로는 `~/datalake/`(레포 외부 데이터레이크, git 미추적).\n\n- **`doc_tag_state.sqlite`** — 문서 태거([[src-research-tagging]]의 `tag_docs.py`) **정본**. 어닝콜 전문·실적 분석 md를 **청크 단위**(기본 4000자)로 태깅한 테마·개체를 근거·content_hash와 함께 저장한다. 콜 전문 한 건이 4만자를 넘어 문서당 태그 하나만 붙이면 \"#HBM 이 어느 대목이었나\"를 잃기 때문에 청크로 쪼갠다. 리서치노트 태거(`tag_worker.py`)의 온톨로지·별칭사전·프롬프트·저장 스키마를 **그대로 재사용**해 코퍼스 간 태그 어휘를 일치시킨다. md frontmatter(themes/tickers/sectors/orgs)는 이 캐시를 읽어 재투영한 사본.\n- **`tag_index.sqlite`** — **통합 조회 인덱스**([[src-research-tagging]]의 `build_tag_index.py`가 매 실행 통째 재생성). `research_notes/tag_state.sqlite`(리서치노트) + `doc_tag_state.sqlite`(전문·분석)를 조인해, `#KLAC` 하나로 세 코퍼스를 한 번에 훑도록 태그→문서 히트를 미리 펼쳐 둔다. **LLM 호출이 전혀 없다** — 이미 붙은 태그를 재배열할 뿐이라 언제 몇 번을 돌려도 무료·멱등. 정규화 키(대소문자·공백 무시)로 `#태그`와 평문을 같은 키로 묶고, 스니펫·앵커(rn-id / chunk 번호)·라벨 빈도를 담는다.\n- 소비: [[daemon-datalake-webui]]의 `#태그` 즉시 검색(`/tags/suggest`·`/tags/search`·`/tags/doc` + Claude가 부르는 `search_tags` 도구)이 이 인덱스만 읽는다.",
+   "depends_on": [
+    "src-research-tagging"
    ]
   },
   {
