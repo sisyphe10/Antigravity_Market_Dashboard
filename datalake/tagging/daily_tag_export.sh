@@ -22,6 +22,9 @@ echo "── 1b/5 문서 태깅 (전문·분석, 미처리분)"
 echo "── 2/5 md 아카이브 (어제+오늘)"
 "$PY" "$REPO/datalake/export_research_notes.py" || { echo "[error] 아카이브 생성 실패"; exit 1; }
 
+echo "── 2b/5 태그 인덱스 재생성 (LLM 미사용)"
+"$PY" "$REPO/datalake/tagging/build_tag_index.py" || { echo "[warn] 태그 인덱스 실패"; rc=1; }
+
 echo "── 3/5 parquet"
 "$PY" "$REPO/datalake/tagging/export_tags_parquet.py" || { echo "[warn] parquet 실패"; rc=1; }
 
