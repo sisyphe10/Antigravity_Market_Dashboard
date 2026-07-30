@@ -2529,6 +2529,12 @@ def _build_combined_chart_section():
                 }
                 return out;
             }
+            // 'YYYY-MM' 에서 back 개월 뒤로 이동 (달력 기준 lag 조회용)
+            function cmbMonthShift(key, back) {
+                var y = +key.slice(0, 4), m = +key.slice(5, 7) - back;
+                while (m <= 0) { m += 12; y -= 1; }
+                return y + '-' + (m < 10 ? '0' + m : '' + m);
+            }
             function cmbRocKind(name) {
                 if (/전년동월비|전년동기|전년비|증감률/.test(name)) return 'level';
                 var u = cmbSeriesUnit[name] || '';
@@ -2580,6 +2586,15 @@ def _build_combined_chart_section():
                 var lag = (freq === 'M') ? 12 : 52;
                 var need = (kind === 'level') ? 4 : lag + 2;
                 if (order.length < need) return null;
+                // ★lag·전기는 '버킷 인덱스'가 아니라 '달력' 기준으로 잡는다 (2026-07-30 교정).
+                //   order[k-12] 는 버킷이 빈틈없이 월별일 때만 12개월 전이다. 분기 시리즈(3개월 간격)
+                //   에서는 36개월 전, 국민연금 적립금(연간 이력+최근 월별)에서는 수년 전이 되어
+                //   'YoY' 라벨이 붙은 값이 실제로는 다년 변화가 되어 버린다.
+                var bucketBack = function(k, back) {
+                    var pk = (freq === 'M') ? cmbMonthShift(order[k], back)
+                                            : ('' + (parseInt(order[k], 10) - back));
+                    return buckets.hasOwnProperty(pk) ? buckets[pk] : null;
+                };
                 // 2) RoC¹
                 var roc1 = [], unit1;
                 if (kind === 'level') {
@@ -2588,13 +2603,13 @@ def _build_combined_chart_section():
                 } else if (kind === 'diff') {
                     unit1 = '%p';
                     for (var k2 = 0; k2 < order.length; k2++) {
-                        var p2 = (k2 >= lag) ? buckets[order[k2 - lag]] : null;
+                        var p2 = bucketBack(k2, lag);
                         roc1.push(p2 ? (buckets[order[k2]].val - p2.val) : null);
                     }
                 } else {
                     unit1 = '%';
                     for (var k3 = 0; k3 < order.length; k3++) {
-                        var p3 = (k3 >= lag) ? buckets[order[k3 - lag]] : null;
+                        var p3 = bucketBack(k3, lag);
                         if (!p3 || !p3.val) { roc1.push(null); continue; }
                         var r = (buckets[order[k3]].val / p3.val - 1) * 100;
                         roc1.push(isFinite(r) ? r : null);
@@ -2603,8 +2618,12 @@ def _build_combined_chart_section():
                 // 3) RoC² = 전기 대비 차분 (단위는 항상 %p)
                 var roc2 = [];
                 for (var k4 = 0; k4 < roc1.length; k4++) {
+                    // ★'전기' = 그 시리즈 자신의 직전 관측(= 직전 버킷). 분기 시리즈면 3개월 전,
+                    //   월별이면 1개월 전이다. 달력 1개월 전을 강제하면 분기 시리즈는 그 버킷이
+                    //   없어 RoC² 가 전부 null 이 된다(2026-07-30 실측: 분기 6종 5→0포인트).
+                    //   전년동기(lag)만 달력 기준 — 그쪽은 '12개월 전'이라는 절대 기준이 있다.
                     var a = roc1[k4], b = (k4 > 0) ? roc1[k4 - 1] : null;
-                    roc2.push((a === null || b === null) ? null : a - b);
+                    roc2.push((a === null || b === null || a === undefined || b === undefined) ? null : a - b);
                 }
                 // 4) 스무딩은 RoC² 에만. RoC¹ 은 수준 판단용 기준선이라 원값 유지.
                 if (window.cmbRocSmooth !== false) roc2 = cmbRocMA(roc2, 3);
@@ -2655,10 +2674,12 @@ def _build_combined_chart_section():
                 if (gap >= 2) {
                     return { ok: false, why: '분기 관측(간격 약 ' + gap + '개월)이라 월 버킷이 ' + nb + '개뿐입니다 (14개 필요)' };
                 }
+                // 필요 버킷: RoC¹ 에 lag+1, RoC² 에 +1, 3기간 MA 에 +2 → 스무딩 ON 이면 lag+4.
+                var needN = 12 + (window.cmbRocSmooth !== false ? 4 : 2);
                 if (freq === 'W') {
-                    return { ok: false, why: '이력이 짧아 계산할 수 없습니다 (주 리샘플은 54주 이상 필요)' };
+                    return { ok: false, why: '이력이 짧아 계산할 수 없습니다 (주 리샘플은 연속 ' + (52 + (window.cmbRocSmooth !== false ? 4 : 2)) + '주 필요)' };
                 }
-                return { ok: false, why: '이력이 짧아 계산할 수 없습니다 (월 버킷 ' + nb + '개 / 14개 필요)' };
+                return { ok: false, why: '이력이 짧아 계산할 수 없습니다 (연속된 월 버킷 ' + needN + '개 필요 / 현재 ' + nb + '개)' };
             }
             // 주기 버튼 가용성 — 선택 시리즈가 그 주기로 RoC² 를 낼 수 있는지 반영(흐리게 + 클릭 차단)
             function cmbSyncRocFreqAvail() {
