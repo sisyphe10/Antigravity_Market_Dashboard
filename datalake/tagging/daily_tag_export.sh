@@ -14,7 +14,14 @@ PY="$REPO/venv/bin/python3"
 rc=0
 
 echo "── 1/5 태깅 (미처리분)"
-"$PY" "$REPO/datalake/tagging/tag_worker.py" || { echo "[warn] 태깅 실패 — 태그 없이 계속"; rc=1; }
+"$PY" "$REPO/datalake/tagging/tag_worker.py" || {
+  # 실패 사유 대부분은 "missing in batch response" (배치가 커서 모델이 id 누락).
+  # 배치를 줄여 실패분만 한 번 더 돌리면 대개 회수된다 — 1건 때문에 잡 전체가
+  # 실패 알림을 내는 것을 막는다.
+  echo "[warn] 태깅 실패 — 배치 축소 재시도"
+  TAG_BATCH=4 "$PY" "$REPO/datalake/tagging/tag_worker.py" --retry-failed \
+    || { echo "[warn] 재시도도 실패 — 태그 없이 계속"; rc=1; }
+}
 
 echo "── 1b/5 문서 태깅 (전문·분석, 미처리분)"
 "$PY" "$REPO/datalake/tagging/tag_docs.py" || { echo "[warn] 문서 태깅 실패 — 계속"; rc=1; }
