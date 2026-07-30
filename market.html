@@ -533,7 +533,7 @@ body{margin:0}
     <nav class="topnav"><div class="topnav-inner"><a href="index.html" class="topnav-brand">AGE OF EMERGENCE</a><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab active">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub active">Data</a><a href="universe.html" class="topnav-sub">Universe</a><a href="universe_lab.html" class="topnav-sub">Universe Lab</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
     <aside class="sidebar"><a href="market.html" class="sidebar-link active">Data</a><a href="universe.html" class="sidebar-link">Universe</a><a href="universe_lab.html" class="sidebar-link">Universe Lab</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
     <header style="margin:0;padding:8px 28px 0;text-align:right;">
-        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-07-30 09:07:57 KST</div>
+        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-07-30 09:21:26 KST</div>
     </header>
 
     <div class="mkt-subtabs">
@@ -1617,10 +1617,11 @@ if (typeof window._h2cFreeze !== 'function') {
                 if (u === '%' || u === '%p') return 'diff';
                 return 'yoy';
             }
-            function cmbRocCompute(name) {
+            function cmbRocCompute(name, freqArg) {
                 var arr = cmbData.data[name];
                 if (!arr) return null;
-                var freq = (window.cmbRocFreq === 'W') ? 'W' : 'M';
+                // freqArg = 진단·가용성 판정용 명시 주기(미지정이면 현재 UI 상태)
+                var freq = ((freqArg || window.cmbRocFreq) === 'W') ? 'W' : 'M';
                 // 1) 기간말 리샘플 — 각 월(주)의 마지막 관측만 남긴다.
                 //    일별 데이터의 YoY 를 일별로 차분하면 판독 불가 수준으로 진동한다.
                 var buckets = {}, order = [];
@@ -1691,6 +1692,70 @@ if (typeof window._h2cFreeze !== 'function') {
                 if (window.cmbRocSmooth !== false) roc2 = cmbRocMA(roc2, 3);
                 return { order: order, buckets: buckets, roc1: roc1, roc2: roc2,
                          kind: kind, unit1: unit1, freq: freq };
+            }
+
+            // ── RoC² 불가 '사유' 진단 (2026-07-30) ─────────────────────────
+            //  ★'이력이 짧다'와 '관측주기가 안 맞다'는 다른 문제다. 국민연금·퇴직연금 적립금은
+            //    연 1회 관측이라 이력을 늘려도 12개월 lag 월 리샘플이 성립하지 않는다(월버킷 10개).
+            //    월간 시리즈에 주(W) 리샘플을 걸어도 같은 성질의 문제(주 54버킷 불가).
+            //    한 문장으로 뭉쳐 "이력이 짧습니다"라고 하면 백필하면 될 것처럼 읽혀서 오해를 부른다.
+            function cmbRocDiag(name, freq) {
+                freq = (freq === 'W') ? 'W' : 'M';
+                var R = cmbRocCompute(name, freq);
+                if (R) {
+                    for (var i = 0; i < R.roc2.length; i++) {
+                        if (R.roc2[i] !== null && R.roc2[i] !== undefined) return { ok: true, why: '' };
+                    }
+                }
+                var arr = cmbData.data[name];
+                if (!arr) return { ok: false, why: '데이터가 없습니다' };
+                var months = {};
+                for (var j = 0; j < cmbData.dates.length; j++) {
+                    if (arr[j] === null || arr[j] === undefined) continue;
+                    months[cmbData.dates[j].slice(0, 7)] = 1;
+                }
+                var Hh = cmbRocHist[name];
+                if (freq === 'M' && Hh && Hh.d) {
+                    for (var h = 0; h < Hh.d.length; h++) months[Hh.d[h].slice(0, 7)] = 1;
+                }
+                var keys = Object.keys(months).sort();
+                // 관측 주기(개월) = 월 버킷 간격의 중앙값. 일별·월별=1, 분기=3, 연간=12.
+                var gaps = [];
+                for (var g = 1; g < keys.length; g++) {
+                    var a = keys[g - 1].split('-'), b = keys[g].split('-');
+                    gaps.push((b[0] - a[0]) * 12 + (b[1] - a[1]));
+                }
+                gaps.sort(function(x, y) { return x - y; });
+                var gap = gaps.length ? gaps[Math.floor(gaps.length / 2)] : 0;
+                var nb = keys.length;
+                if (freq === 'W' && gap >= 2) {
+                    return { ok: false, why: '관측주기가 약 ' + gap + '개월이라 주(W) 리샘플이 성립하지 않습니다 — 월(M)로 보세요' };
+                }
+                if (gap >= 6) {
+                    return { ok: false, why: '연 단위 관측(간격 약 ' + gap + '개월)이라 12개월 lag 월 리샘플이 성립하지 않습니다' };
+                }
+                if (gap >= 2) {
+                    return { ok: false, why: '분기 관측(간격 약 ' + gap + '개월)이라 월 버킷이 ' + nb + '개뿐입니다 (14개 필요)' };
+                }
+                if (freq === 'W') {
+                    return { ok: false, why: '이력이 짧아 계산할 수 없습니다 (주 리샘플은 54주 이상 필요)' };
+                }
+                return { ok: false, why: '이력이 짧아 계산할 수 없습니다 (월 버킷 ' + nb + '개 / 14개 필요)' };
+            }
+            // 주기 버튼 가용성 — 선택 시리즈가 그 주기로 RoC² 를 낼 수 있는지 반영(흐리게 + 클릭 차단)
+            function cmbSyncRocFreqAvail() {
+                ['M', 'W'].forEach(function(f) {
+                    var btn = document.getElementById('cmbRocFreq' + f);
+                    if (!btn) return;
+                    var any = false;
+                    for (var i = 0; i < cmbClickOrder.length; i++) {
+                        if (cmbRocDiag(cmbClickOrder[i], f).ok) { any = true; break; }
+                    }
+                    var dis = cmbClickOrder.length > 0 && !any;
+                    btn.style.opacity = dis ? '0.4' : '';
+                    btn.style.pointerEvents = dis ? 'none' : '';
+                    btn.title = dis ? ((f === 'W' ? '주(W)' : '월(M)') + ' 리샘플로는 선택 시리즈의 RoC² 를 낼 수 없습니다') : '';
+                });
             }
 
             function fmtNum(v) {
@@ -2065,6 +2130,20 @@ if (typeof window._h2cFreeze !== 'function') {
                     if (cmbClickOrder.indexOf(n) === -1) cmbClickOrder.push(n);
                 });
                 var selected = cmbClickOrder.slice();
+                // 주기 가드 (2026-07-30) — 선택 시리즈가 주(W)로 RoC² 를 못 내면 조용히 월(M)로
+                // 되돌린다. ★여기서는 상태만 고치고 그대로 진행한다(재귀 렌더 호출 금지).
+                if (window.cmbRocOn && window.cmbRocFreq === 'W' && cmbClickOrder.length) {
+                    var _okW = false, _okM = false;
+                    for (var _gi = 0; _gi < cmbClickOrder.length; _gi++) {
+                        if (cmbRocDiag(cmbClickOrder[_gi], 'W').ok) { _okW = true; break; }
+                    }
+                    if (!_okW) {
+                        for (var _gj = 0; _gj < cmbClickOrder.length; _gj++) {
+                            if (cmbRocDiag(cmbClickOrder[_gj], 'M').ok) { _okM = true; break; }
+                        }
+                        if (_okM) { window.cmbRocFreq = 'M'; cmbSyncRocUI(); }
+                    }
+                }
                 applyMarkerColors();
                 updateCmbGroupBadges();
 
@@ -2930,14 +3009,24 @@ if (typeof window._h2cFreeze !== 'function') {
                         rocPanel.style.display = 'none';
                         if (cmbRocChart) { cmbRocChart.destroy(); cmbRocChart = null; }
                     }
-                    // 선택 시리즈 이력이 YoY lag(월 14버킷 / 주 54버킷)에 못 미치면 RoC² 자체가 안 나온다.
-                    // 패널이 조용히 사라지면 고장으로 읽히므로 버튼을 흐리게 + native title 로 사유 표시.
+                    // 선택 시리즈로 RoC² 가 안 나오면 패널이 조용히 사라져 고장으로 읽힌다.
+                    // 버튼을 흐리게 + native title 로 '실제 사유'를 표시한다 (cmbRocDiag).
                     var rocBtn = document.getElementById('cmbRocBtn');
                     if (rocBtn) {
                         var lack = !!window.cmbRocOn && rocDatasets.length === 0;
                         rocBtn.style.opacity = lack ? '0.4' : '';
-                        rocBtn.title = lack ? '선택 시리즈 이력이 짧아 RoC² 를 계산할 수 없습니다 (월 기준 14개월 이상 필요)' : '';
+                        var _why = '';
+                        if (lack) {
+                            var _f = (window.cmbRocFreq === 'W') ? 'W' : 'M';
+                            for (var _di = 0; _di < cmbClickOrder.length; _di++) {
+                                var _d = cmbRocDiag(cmbClickOrder[_di], _f);
+                                if (!_d.ok) { _why = cmbClickOrder[_di] + ' — ' + _d.why; break; }
+                            }
+                            if (!_why) _why = 'RoC² 를 계산할 수 없습니다';
+                        }
+                        rocBtn.title = _why;
                     }
+                    cmbSyncRocFreqAvail();
                 }
             }
 
@@ -2980,6 +3069,14 @@ if (typeof window._h2cFreeze !== 'function') {
                 buildCmbChart();
             };
             window.cmbSetRocFreq = function(f) {
+                // 불가한 주기로는 전환하지 않는다 — 전환 직후 빈 패널로 죽는 상태를 만들지 않기 위해.
+                if (cmbClickOrder.length) {
+                    var any = false;
+                    for (var i = 0; i < cmbClickOrder.length; i++) {
+                        if (cmbRocDiag(cmbClickOrder[i], f).ok) { any = true; break; }
+                    }
+                    if (!any) return;
+                }
                 window.cmbRocFreq = f;
                 cmbSyncRocUI();
                 buildCmbChart();
@@ -2993,13 +3090,10 @@ if (typeof window._h2cFreeze !== 'function') {
                 if (bm) bm.classList.toggle('active', f === 'M');
                 if (bw) bw.classList.toggle('active', f === 'W');
             }
-            // 테스트 게이트 (2026-07-29): ?roc2=1 일 때만 버튼 노출. 정식 배선 전 검증용이라
-            // 기본 라이브 화면은 종전과 완전히 동일하다.
+            // ★정식 배선 (2026-07-30, 사용자 승인) — `?roc2=1` 테스트 게이트 제거. 버튼 상시 노출.
+            //   게이트 시절: /[?&]roc2=1/ 이 아니면 btn.style.display='none'. 되돌릴 일이 생기면
+            //   그 분기만 복원하면 된다(미사용이던 window._cmbRocEnabled 는 함께 제거).
             (function() {
-                var on = /[?&]roc2=1/.test(location.search);
-                var btn = document.getElementById('cmbRocBtn');
-                if (btn && !on) btn.style.display = 'none';
-                window._cmbRocEnabled = on;
                 cmbSyncRocUI();
             })();
             window.updateCmbChart = buildCmbChart;
