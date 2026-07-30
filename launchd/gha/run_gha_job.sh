@@ -330,6 +330,10 @@ run_job() {
       "$PY" execution/fetch_index_returns.py || return $?
       "$PY" execution/import_memory_data.py || return $?
       "$PY" execution/market_crawler.py || return $?
+      # RoC² 월말 백필 갱신 (datalake global_markets·kr_index_ohlcv → roc_history.csv).
+      # create_dashboard 보다 앞에 둬야 market.html 이 갱신본을 싣는다. datalake 가
+      # 없거나 duckdb 가 잠겨도 대시보드를 막지 않도록 비치명 처리.
+      "$PY" datalake/build_roc_history.py || echo "RoC² 월말 백필 실패 (계속 진행)"
       "$PY" calculate_wrap_nav.py || return $?
       "$PY" calculate_returns.py || return $?
       "$PY" execution/fetch_danawa_price.py || echo "다나와 수집 실패 (계속 진행)"
@@ -346,7 +350,7 @@ run_job() {
       /bin/bash scripts/safe_commit_push.sh \
         -m "Auto-update: Market data and dashboard [skip ci]" \
         --xlsx-conflict bail \
-        -- dataset.csv charts/*.png index.html market.html wrap.html universe.html seibro.html \
+        -- dataset.csv roc_history.csv charts/*.png index.html market.html wrap.html universe.html seibro.html \
            featured.html featured_data.json portfolio_data.json contribution_data.json \
            Wrap_NAV.xlsx kodex_sectors.json seibro_tickers.json monthly_returns.json \
            index_returns.json index_history.json || return $?

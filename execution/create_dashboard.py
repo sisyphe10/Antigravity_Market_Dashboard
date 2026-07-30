@@ -1741,6 +1741,38 @@ CMB_SERIES_UNITS = {
 }
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# RoC² 월말 백필 히스토리 (roc_history.csv = datalake/build_roc_history.py 산출물)
+#   DATA 탭 RoC² 는 YoY lag 12개월 + MA3 때문에 월 14버킷을 요구한다. 그런데 dataset.csv 의
+#   일별 시장 시리즈는 이력이 12개월뿐이어서 31종(KOSPI·S&P500·환율·원자재·크립토…)이
+#   계산 불가였다 — 2026-07-29 실측 120/184종.
+#   ★일별 원계열을 dataset.csv 에 백필하지 않고 전용 채널로 뺀 이유 (2026-07-30):
+#     RoC² 는 월 버킷만 쓰는데, dataset.csv 에 월말 과거를 섞으면 메인 차트의 과거 구간이
+#     월별로 끊기고, 일별 전량(25만행)은 인라인 cmbData JSON 을 폭발시킨다.
+def _load_roc_history():
+    """roc_history.csv → {series: {'d': [날짜…], 'v': [값…]}} (날짜 오름차순)"""
+    path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                        'roc_history.csv')
+    if not os.path.exists(path):
+        return {}
+    rows = {}
+    try:
+        with open(path, encoding='utf-8-sig') as f:
+            for r in csv.DictReader(f):
+                try:
+                    rows.setdefault(r['series'], []).append((r['date'], float(r['value'])))
+                except (KeyError, TypeError, ValueError):
+                    continue
+    except OSError as e:
+        print(f'  ! roc_history.csv 읽기 실패 ({e}) — RoC² 히스토리 없이 진행')
+        return {}
+    out = {}
+    for name, obs in rows.items():
+        obs.sort()
+        out[name] = {'d': [d for d, _ in obs], 'v': [v for _, v in obs]}
+    return out
+
+
 def _build_combined_chart_section():
     """7개 카테고리(INDEX_KOREA/INDEX_US/EXCHANGE RATE/INTEREST RATES/CRYPTOCURRENCY/Memory/COMMODITIES)
     를 단일 동적 Chart.js 차트로 통합. 좌 사이드바는 카테고리 그룹 헤더 + 토글 항목,
@@ -2194,6 +2226,8 @@ def _build_combined_chart_section():
         (function() {
             var cmbData = CMB_DATA_PLACEHOLDER;
             var cmbSeriesUnit = CMB_UNIT_PLACEHOLDER;
+            // RoC² 월말 백필 히스토리 — {시리즈: {d:[날짜…], v:[값…]}} (2026-07-30)
+            var cmbRocHist = CMB_ROC_HIST_PLACEHOLDER;
             var cmbChart = null;
             var cmbAutoRangePending = false;
             var cmbClickOrder = [];
@@ -2498,6 +2532,30 @@ def _build_combined_chart_section():
                                              : '' + Math.floor(Date.parse(d) / 604800000);
                     if (!buckets.hasOwnProperty(key)) order.push(key);
                     buckets[key] = { date: d, val: v };
+                }
+                // ★월말 백필 히스토리 병합 (cmbRocHist ← roc_history.csv, 2026-07-30)
+                //  ① 월(M) 리샘플에만 적용 — history 는 월말값이라 주(W) 54버킷을 못 만든다.
+                //  ② history 가 덮는 달은 history 값으로 '덮어쓴다'(원천 단일화). dataset.csv 는
+                //     수집 시점 스냅숏이고 야후 연속선물(NG=F·SI=F…)은 롤오버로 과거가 소급
+                //     재작성되므로, 한 YoY 안에서 두 원천을 섞으면 이음매 오차가 커진다 —
+                //     2026-07-30 실측 Silver 21.8%p·VIX 6.4%p·Brent 5.3%p(지수·환율·금리는 0.6%p↓).
+                //  ③ 단 '표시 좌표'는 dataset.csv 의 그 달 마지막 관측일을 유지한다. proj() 가
+                //     commonDates 에서 위치를 찾으므로 history 의 월말일이 축에 없으면 점이
+                //     조용히 사라진다.
+                if (freq === 'M') {
+                    var H = cmbRocHist[name];
+                    if (H && H.d) {
+                        for (var hi = 0; hi < H.d.length; hi++) {
+                            var hk = H.d[hi].slice(0, 7);
+                            if (buckets.hasOwnProperty(hk)) {
+                                buckets[hk].val = H.v[hi];
+                            } else {
+                                buckets[hk] = { date: H.d[hi], val: H.v[hi] };
+                                order.push(hk);
+                            }
+                        }
+                        order.sort();   // 'YYYY-MM' 은 사전순 = 시간순
+                    }
                 }
                 var kind = cmbRocKind(name);
                 var lag = (freq === 'M') ? 12 : 52;
@@ -3889,7 +3947,7 @@ def _build_combined_chart_section():
             buildCmbChart();
         })();
         </script>
-        """.replace('CMB_DATA_PLACEHOLDER', export_json).replace('CMB_UNIT_PLACEHOLDER', json.dumps(CMB_SERIES_UNITS, ensure_ascii=False))
+        """.replace('CMB_DATA_PLACEHOLDER', export_json).replace('CMB_UNIT_PLACEHOLDER', json.dumps(CMB_SERIES_UNITS, ensure_ascii=False)).replace('CMB_ROC_HIST_PLACEHOLDER', json.dumps(_load_roc_history(), ensure_ascii=False, separators=(',', ':')))
 
         return f"""
         <div class="category-section">

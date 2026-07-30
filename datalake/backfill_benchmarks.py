@@ -39,6 +39,8 @@ BENCHMARKS = [
     ("EURUSD=X", "유로달러", "fx"),
     ("CNY=X", "달러위안", "fx"),
     ("DX-Y.NYB", "달러인덱스 DXY", "fx"),
+    ("TWD=X", "달러대만달러", "fx"),
+    ("EUR=X", "달러유로", "fx"),
     # 원자재
     ("CL=F", "WTI", "commodity"),
     ("BZ=F", "브렌트유", "commodity"),
@@ -46,12 +48,19 @@ BENCHMARKS = [
     ("SI=F", "은", "commodity"),
     ("HG=F", "구리", "commodity"),
     ("NG=F", "천연가스", "commodity"),
+    ("ZW=F", "소맥", "commodity"),
+    ("SRUUF", "우라늄 (SRUUF)", "commodity"),
     # 금리 (야후 일별 — FRED 이력과 상호 보완)
     ("^TNX", "미 국채 10Y 수익률", "rate"),
     ("^IRX", "미 T-Bill 13주 수익률", "rate"),
     ("^TYX", "미 국채 30Y 수익률", "rate"),
+    ("^FVX", "미 국채 5Y 수익률", "rate"),
     # 크립토
     ("BTC-USD", "비트코인", "crypto"),
+    ("ETH-USD", "이더리움", "crypto"),
+    ("BNB-USD", "BNB", "crypto"),
+    ("XRP-USD", "리플", "crypto"),
+    ("SOL-USD", "솔라나", "crypto"),
 ]
 
 
