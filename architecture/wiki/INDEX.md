@@ -1,8 +1,8 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 145 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 146 components._
 
-Updated: 2026-07-29
+Updated: 2026-07-30
 
 ## By domain
 
@@ -48,7 +48,7 @@ Updated: 2026-07-29
 - [파생·수급 13종 (fetch_deriv_daily.py)](src-deriv-daily.md) — Source
 - [한국 수출 매출 추정 대시보드](ext-export-dashboard.md) — External
 
-### 해외 · 매크로 (22)
+### 해외 · 매크로 (23)
 - [Daily ECOS BOK (17:40 평일)](gha-daily-ecos.md) — GHA
 - [Daily FRED US Macro (07:50 화~토)](gha-daily-fred.md) — GHA
 - [Daily Market Crawl (23:00)](gha-daily-crawl.md) — GHA
@@ -59,6 +59,7 @@ Updated: 2026-07-29
 - [FRED 미국 매크로 36종 (fetch_fred_data.py)](src-fred.md) — Source
 - [hotels.html (호텔 ADR, 동결)](page-hotels.md) — Page
 - [market.html (마켓 대시보드)](page-market.md) — Page
+- [roc_history.csv (RoC² 월말 백필)](store-roc-history.md) — Dataset
 - [taiwan.html (대만 월매출)](page-taiwan.md) — Page
 - [taiwan_revenue.csv (대만 월매출)](store-taiwan-revenue-csv.md) — Dataset
 - [universe.html (Universe)](page-universe.md) — Page
@@ -225,13 +226,14 @@ Updated: 2026-07-29
 - [universe_lab.html (Universe Lab)](page-universe-lab.md) — 생성=여러 잡, active
 - [wrap.html (WRAP 대시보드)](page-wrap.md) — 생성=여러 잡, active
 
-### Dataset (9)
+### Dataset (10)
 - [contribution_data.json](store-contribution-data.md) — 23:00 재생성, active
 - [dataset.csv (시장 시계열 통합)](store-dataset-csv.md) — 다수 잡 append, active
 - [featured_data.json / newhigh_20d.json](store-featured-data.md) — Featured 잡 + 15:50, active
 - [fee_revenue.json (수수료 매출)](store-fee-revenue.md) — 수동 입력, active
 - [landing_highlights.json](store-landing-highlights.md) — 18:45 갱신, active
 - [portfolio_data.json](store-portfolio-data.md) — 체인 재생성, active
+- [roc_history.csv (RoC² 월말 백필)](store-roc-history.md) — Daily Market Crawl + macro-update 20:50, active
 - [stock_master.json (종목마스터)](store-stock-master.md) — 토 09:00 갱신, active
 - [taiwan_revenue.csv (대만 월매출)](store-taiwan-revenue-csv.md) — 23:20 갱신, active
 - [universe.json / universe_history.json](store-universe-json.md) — 18:30 / 07:00 갱신, active
@@ -338,7 +340,7 @@ Updated: 2026-07-29
 
 ## By project
 
-### antigravity (145)
+### antigravity (146)
 - [/aum — WRAP 일일 AUM 입력](cmd-aum.md) — Skill
 - [/긴급코멘트 — 급락일 시장 코멘트](cmd-urgent-comment.md) — Skill
 - [/목표전환형 — 랩 생성·청산 일괄](cmd-target-transform.md) — Skill
@@ -405,6 +407,7 @@ Updated: 2026-07-29
 - [Research Notes 봇](bot-research-notes.md) — Bot
 - [Research Notes 태깅 파이프라인 (datalake/tagging/)](src-research-tagging.md) — Source
 - [research_notes.db + media/ (리서치봇)](store-research-notes-db.md) — Store
+- [roc_history.csv (RoC² 월말 백필)](store-roc-history.md) — Dataset
 - [SEIBro TOP50 (fetch_seibro_data.py)](src-seibro.md) — Source
 - [seibro.html (SEIBro)](page-seibro.md) — Page
 - [SemiAnalysis 소스 (sources/semianalysis.py)](src-semianalysis.md) — Source
