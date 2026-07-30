@@ -23,7 +23,7 @@
       "name": "SK하이닉스",
       "sector": "반도체",
       "market_cap": 9657109,
-      "weight": 30.0,
+      "weight": 25.0,
       "weight_prev": 25.0,
       "today_return": -5.638829407566024,
       "contribution": -14.09707351891506,
@@ -167,7 +167,7 @@
       "name": "SK스퀘어",
       "sector": "상사,자본재",
       "market_cap": 1054348,
-      "weight": 5.0,
+      "weight": 3.0,
       "weight_prev": 0.0,
       "today_return": null,
       "contribution": null,
@@ -185,7 +185,7 @@
       "name": "삼성전기",
       "sector": "IT하드웨어",
       "market_cap": 656558,
-      "weight": 3.0,
+      "weight": 1.0,
       "weight_prev": 0.0,
       "today_return": null,
       "contribution": null,
@@ -241,12 +241,12 @@
       "name": "SK하이닉스",
       "sector": "반도체",
       "market_cap": 9657109,
-      "weight": 30.0,
+      "weight": 25.0,
       "weight_prev": 20.0,
       "today_return": -5.638829407566024,
       "contribution": -11.277658815132048,
       "ytd_return": 103.07219662058374,
-      "cumulative_return": -24.76239257868078,
+      "cumulative_return": -28.31269114808147,
       "current_price": 1322000.0,
       "price_date": "2026-07-30",
       "ath_price": 2919000.0,
@@ -385,7 +385,7 @@
       "name": "SK스퀘어",
       "sector": "상사,자본재",
       "market_cap": 1054348,
-      "weight": 5.0,
+      "weight": 3.0,
       "weight_prev": 0.0,
       "today_return": null,
       "contribution": null,
@@ -403,7 +403,7 @@
       "name": "삼성전기",
       "sector": "IT하드웨어",
       "market_cap": 656558,
-      "weight": 3.0,
+      "weight": 1.0,
       "weight_prev": 0.0,
       "today_return": null,
       "contribution": null,
@@ -459,12 +459,12 @@
       "name": "SK하이닉스",
       "sector": "반도체",
       "market_cap": 9657109,
-      "weight": 30.0,
+      "weight": 25.0,
       "weight_prev": 20.0,
       "today_return": -5.638829407566024,
       "contribution": -11.277658815132048,
       "ytd_return": 103.07219662058374,
-      "cumulative_return": -24.34041091970469,
+      "cumulative_return": -27.85260538322164,
       "current_price": 1322000.0,
       "price_date": "2026-07-30",
       "ath_price": 2919000.0,
@@ -603,7 +603,7 @@
       "name": "SK스퀘어",
       "sector": "상사,자본재",
       "market_cap": 1054348,
-      "weight": 5.0,
+      "weight": 3.0,
       "weight_prev": 0.0,
       "today_return": null,
       "contribution": null,
@@ -621,7 +621,7 @@
       "name": "삼성전기",
       "sector": "IT하드웨어",
       "market_cap": 656558,
-      "weight": 3.0,
+      "weight": 1.0,
       "weight_prev": 0.0,
       "today_return": null,
       "contribution": null,
@@ -677,12 +677,12 @@
       "name": "SK하이닉스",
       "sector": "반도체",
       "market_cap": 9657109,
-      "weight": 30.0,
+      "weight": 25.0,
       "weight_prev": 25.0,
       "today_return": -5.638829407566024,
       "contribution": -14.09707351891506,
       "ytd_return": 103.07219662058374,
-      "cumulative_return": -27.989105764866085,
+      "cumulative_return": -31.80645826885381,
       "current_price": 1322000.0,
       "price_date": "2026-07-30",
       "ath_price": 2919000.0,
@@ -821,7 +821,7 @@
       "name": "SK스퀘어",
       "sector": "상사,자본재",
       "market_cap": 1054348,
-      "weight": 5.0,
+      "weight": 3.0,
       "weight_prev": 0.0,
       "today_return": null,
       "contribution": null,
@@ -839,7 +839,7 @@
       "name": "삼성전기",
       "sector": "IT하드웨어",
       "market_cap": 656558,
-      "weight": 3.0,
+      "weight": 1.0,
       "weight_prev": 0.0,
       "today_return": null,
       "contribution": null,
@@ -895,12 +895,12 @@
       "name": "SK하이닉스",
       "sector": "반도체",
       "market_cap": 9657109,
-      "weight": 30.0,
+      "weight": 25.0,
       "weight_prev": 20.0,
       "today_return": -5.638829407566024,
       "contribution": -11.277658815132048,
       "ytd_return": 103.07219662058374,
-      "cumulative_return": -21.40620665054893,
+      "cumulative_return": -24.63285597008118,
       "current_price": 1322000.0,
       "price_date": "2026-07-30",
       "ath_price": 2919000.0,
@@ -1039,7 +1039,7 @@
       "name": "SK스퀘어",
       "sector": "상사,자본재",
       "market_cap": 1054348,
-      "weight": 5.0,
+      "weight": 3.0,
       "weight_prev": 0.0,
       "today_return": null,
       "contribution": null,
@@ -1057,7 +1057,7 @@
       "name": "삼성전기",
       "sector": "IT하드웨어",
       "market_cap": 656558,
-      "weight": 3.0,
+      "weight": 1.0,
       "weight_prev": 0.0,
       "today_return": null,
       "contribution": null,
@@ -1095,11 +1095,11 @@
       "added": [
         {
           "name": "SK스퀘어",
-          "weight": 5.0
+          "weight": 3.0
         },
         {
           "name": "삼성전기",
-          "weight": 3.0
+          "weight": 1.0
         },
         {
           "name": "지엔씨에너지",
@@ -1107,11 +1107,6 @@
         }
       ],
       "changed": [
-        {
-          "name": "SK하이닉스",
-          "from": 25.0,
-          "to": 30.0
-        },
         {
           "name": "삼성전자우",
           "from": 5.0,
@@ -1125,11 +1120,11 @@
       "added": [
         {
           "name": "SK스퀘어",
-          "weight": 5.0
+          "weight": 3.0
         },
         {
           "name": "삼성전기",
-          "weight": 3.0
+          "weight": 1.0
         },
         {
           "name": "지엔씨에너지",
@@ -1145,7 +1140,7 @@
         {
           "name": "SK하이닉스",
           "from": 20.0,
-          "to": 30.0
+          "to": 25.0
         },
         {
           "name": "삼성전자우",
@@ -1160,11 +1155,11 @@
       "added": [
         {
           "name": "SK스퀘어",
-          "weight": 5.0
+          "weight": 3.0
         },
         {
           "name": "삼성전기",
-          "weight": 3.0
+          "weight": 1.0
         },
         {
           "name": "지엔씨에너지",
@@ -1180,7 +1175,7 @@
         {
           "name": "SK하이닉스",
           "from": 20.0,
-          "to": 30.0
+          "to": 25.0
         },
         {
           "name": "삼성전자우",
@@ -1195,11 +1190,11 @@
       "added": [
         {
           "name": "SK스퀘어",
-          "weight": 5.0
+          "weight": 3.0
         },
         {
           "name": "삼성전기",
-          "weight": 3.0
+          "weight": 1.0
         },
         {
           "name": "지엔씨에너지",
@@ -1207,11 +1202,6 @@
         }
       ],
       "changed": [
-        {
-          "name": "SK하이닉스",
-          "from": 25.0,
-          "to": 30.0
-        },
         {
           "name": "삼성전자우",
           "from": 5.0,
@@ -1225,11 +1215,11 @@
       "added": [
         {
           "name": "SK스퀘어",
-          "weight": 5.0
+          "weight": 3.0
         },
         {
           "name": "삼성전기",
-          "weight": 3.0
+          "weight": 1.0
         },
         {
           "name": "지엔씨에너지",
@@ -1245,7 +1235,7 @@
         {
           "name": "SK하이닉스",
           "from": 20.0,
-          "to": 30.0
+          "to": 25.0
         },
         {
           "name": "삼성전자우",
