@@ -17,7 +17,11 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from dl_common import REPO, SNAP_DIR
 
 # 덮어쓰기형(과거 유실) 산출물 화이트리스트 — 신규 산출물 생기면 여기 추가
+# ★dataset.csv 추가 (2026-07-30): "누적형은 자체 보존"이라는 가정으로 제외돼 있었지만,
+#   야후 연속선물처럼 과거 값이 소급 재작성되는 시리즈가 있다. macro_series 누적 적재는
+#   행 삭제는 막아주지만 값이 덮이면 옛 값이 남지 않으므로, 일별 gzip 으로 원본을 보존한다.
 TARGETS = [
+    "dataset.csv",
     "featured_data.json",
     "featured_news.json",
     "kodex_sectors.json",

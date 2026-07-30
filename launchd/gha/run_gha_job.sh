@@ -330,6 +330,9 @@ run_job() {
       "$PY" execution/fetch_index_returns.py || return $?
       "$PY" execution/import_memory_data.py || return $?
       "$PY" execution/market_crawler.py || return $?
+      # dataset.csv 를 datalake macro_series 로 누적 upsert (당일 수집분 즉시 보존).
+      # 20:50 macro-update 에도 같은 스텝이 있으나 멱등이라 중복 실행 무해.
+      "$PY" datalake/accumulate_macro_series.py || echo "macro_series 누적 적재 실패 (계속 진행)"
       # RoC² 월말 백필 갱신 (datalake global_markets·kr_index_ohlcv → roc_history.csv).
       # create_dashboard 보다 앞에 둬야 market.html 이 갱신본을 싣는다. datalake 가
       # 없거나 duckdb 가 잠겨도 대시보드를 막지 않도록 비치명 처리.

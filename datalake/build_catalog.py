@@ -34,7 +34,7 @@ DESCRIPTIONS = {
     "kr_macro": "ECOS 한국 매크로 33종+파생 3종 전체 이력 (기준금리·국고채·CPI·M2·BSI·수출 등, series 컬럼)",
     "us_macro": "FRED 미국 매크로 36종 전체 이력 (금리·스프레드·CPI·고용·주택 등, series 컬럼)",
     "kr_flows": "증시 수급 자금 이력 — 투자자예탁금·신용거래융자·미수금 등 (금투협, 억원 단위)",
-    "macro_series": "레포 dataset.csv 뷰 — 기존 수집기가 매일 누적하는 매크로·산업 시계열 (2021~, 지속 갱신)",
+    "macro_series": "레포 dataset.csv 누적 적재 — ECOS/FRED/KOSIS/SMP/리튬/메모리현물 등 기존 수집기가 매일 쌓는 매크로·산업 시계열 899종(series 컬럼). ★dataset.csv 는 덮어쓰기·소급 재작성이 일어나므로 (date, series) upsert 로 누적한다 — CSV 에서 행이 빠져도 레이크는 계속 보유. 적재기 accumulate_macro_series.py. 장기 이력은 kr_macro/us_macro 우선",
     "kr_short": "종목별 일별 공매도 — 거래량·거래대금·잔고수량·잔고금액 (KRX SRT30001). "
                 "거래비중=÷kr_ohlcv.volume, 잔고비중=÷kr_marcap.shares 조인 파생. 잔고는 T+2 공시. "
                 "★공매도 전면금지 2023-11-06~2025-03-30, 부분금지 2020-03-16~2021-05-02 구간 빈 값 정상",
@@ -55,6 +55,8 @@ EXAMPLE_SQL = {
     "kr_macro": "SELECT date, value FROM kr_macro WHERE series='국고채 10년' AND date>='2020-01-01' ORDER BY date;",
     "us_macro": "SELECT date, value FROM us_macro WHERE series='미 CPI 전년동월비' ORDER BY date DESC LIMIT 12;",
     "kr_flows": "SELECT date, value FROM kr_flows WHERE series='투자자예탁금' ORDER BY date DESC LIMIT 20;",
+    "macro_series": "SELECT DISTINCT dtype FROM macro_series;\n"
+                    "SELECT date, value FROM macro_series WHERE series='SMP' ORDER BY date DESC LIMIT 10;",
     "kr_short": "SELECT s.date, s.short_volume, s.short_volume/o.volume AS short_ratio, s.balance_qty\n"
                 "FROM kr_short s JOIN kr_ohlcv o USING(date, ticker)\n"
                 "WHERE s.name='삼성전자' ORDER BY s.date DESC LIMIT 20;",
@@ -153,38 +155,11 @@ def main():
                   encoding="utf-8", newline="\n") as f:
             f.write(md)
 
-    # dataset.csv (레포 누적 매크로 시계열, 2021~ 지속 갱신) → macro_series 뷰
-    # 웹 UI 샌드박스(allowed_directories=market/)를 지키기 위해 사본을 market/ 안에 둔다
-    src_csv = os.path.join(REPO, "dataset.csv")
-    if os.path.exists(src_csv):
-        import shutil
-        ms_dir = os.path.join(MARKET_DIR, "macro_series")
-        os.makedirs(ms_dir, exist_ok=True)
-        dst_csv = os.path.join(ms_dir, "dataset.csv")
-        shutil.copy2(src_csv, dst_csv)
-        csv_path = dst_csv.replace("\\", "/")
-        # strict_mode=false: dataset.csv 일부 행이 RFC4180 비준수 (실측)
-        csv_src = f"read_csv('{csv_path}', header=true, all_varchar=true, strict_mode=false)"
-        if not args.check:
-            con.execute(
-                f"""CREATE OR REPLACE VIEW macro_series AS
-                    SELECT TRY_CAST("날짜" AS DATE) AS date, "제품명" AS series,
-                           TRY_CAST(REPLACE("가격", ',', '') AS DOUBLE) AS value,
-                           "데이터 타입" AS dtype
-                    FROM {csv_src}""")
-        ms_rows = con.execute(f"SELECT COUNT(*) FROM {csv_src}").fetchone()[0]
-        index_rows.append(("macro_series", ms_rows, "2021~ (지속 갱신)"))
-        print(f"  macro_series(dataset.csv): {ms_rows:,}행")
-        if not args.check:
-            md = (
-                "# macro_series\n\n레포 dataset.csv 뷰 — ECOS/FRED/KOSIS/SMP/리튬 등 기존 수집기가 "
-                "매일 누적하는 매크로·산업 시계열 (대체로 2021~). 장기 이력은 kr_macro/us_macro 사용.\n\n"
-                "- 컬럼: date, series(제품명), value, dtype(데이터 타입)\n\n"
-                "## 쿼리 예시\n\n```sql\nSELECT DISTINCT dtype FROM macro_series;\n"
-                "SELECT date, value FROM macro_series WHERE series LIKE '%SMP%' ORDER BY date DESC LIMIT 10;\n```\n"
-            )
-            with open(os.path.join(CATALOG_DIR, "macro_series.md"), "w", encoding="utf-8", newline="\n") as f:
-                f.write(md)
+    # ★macro_series 특수처리 제거 (2026-07-30) — 종전엔 dataset.csv 를 market/ 안으로
+    #   shutil.copy2 복사하고 그 CSV 를 read_csv 하는 뷰였다. 즉 '미러'라서 dataset.csv 에서
+    #   행이 사라지면 레이크에서도 사라졌고, 데이터레이크의 목적(과거 유실 방지)을 이 900여
+    #   시리즈에 대해선 달성하지 못했다. 이제 accumulate_macro_series.py 가 연도 parquet 로
+    #   upsert 누적하므로, 위 일반 등록 루프가 다른 데이터셋과 똑같이 뷰를 만든다.
 
     # research notes 현황
     note_files = glob.glob(os.path.join(NOTES_DIR, "*", "*.md"))

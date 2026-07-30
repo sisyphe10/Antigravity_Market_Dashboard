@@ -22,6 +22,9 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 STEPS = [
+    # 레포 dataset.csv → macro_series 누적 upsert (2026-07-30). 멱등이라 순서 무관하지만
+    # build_catalog 보다 앞서야 그날 적재분이 카탈로그 행수에 반영된다.
+    ("accumulate_macro_series.py", []),
     ("backfill_ecos.py", []),
     ("backfill_fred.py", []),
     ("backfill_kofia.py", ["--pages", "1"]),
