@@ -23,7 +23,7 @@
       "name": "SK하이닉스",
       "sector": "반도체",
       "market_cap": 9657109,
-      "weight": 25.0,
+      "weight": 30.0,
       "weight_prev": 25.0,
       "today_return": -5.638829407566024,
       "contribution": -14.09707351891506,
@@ -41,12 +41,12 @@
       "name": "삼성전자우",
       "sector": "기타",
       "market_cap": 1211581,
-      "weight": 5.0,
+      "weight": 10.0,
       "weight_prev": 5.0,
       "today_return": -1.564537157757497,
       "contribution": -0.7822685788787485,
       "ytd_return": 69.28251121076232,
-      "cumulative_return": -14.371909449711929,
+      "cumulative_return": -7.742313896084852,
       "current_price": 151000.0,
       "price_date": "2026-07-30",
       "ath_price": 235000.0,
@@ -161,6 +161,42 @@
       "dd": -8.918128654970758,
       "rsi": 12.394783717521463,
       "is_today_new": false
+    },
+    {
+      "code": "402340",
+      "name": "SK스퀘어",
+      "sector": "상사,자본재",
+      "market_cap": 1054348,
+      "weight": 5.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": 117.11956521739131,
+      "cumulative_return": null,
+      "current_price": 799000.0,
+      "price_date": "2026-07-30",
+      "ath_price": 1970000.0,
+      "dd": -59.44162436548224,
+      "rsi": null,
+      "is_today_new": true
+    },
+    {
+      "code": "009150",
+      "name": "삼성전기",
+      "sector": "IT하드웨어",
+      "market_cap": 656558,
+      "weight": 3.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": 244.7058823529412,
+      "cumulative_return": null,
+      "current_price": 879000.0,
+      "price_date": "2026-07-30",
+      "ath_price": 2270000.0,
+      "dd": -61.27753303964758,
+      "rsi": null,
+      "is_today_new": true
     }
   ],
   "NH 목표전환형 5호": [
@@ -169,12 +205,12 @@
       "name": "삼성전자",
       "sector": "반도체",
       "market_cap": 12101797,
-      "weight": 25.0,
+      "weight": 30.0,
       "weight_prev": 25.0,
       "today_return": -0.7194244604316548,
       "contribution": -1.7985611510791368,
       "ytd_return": 72.64386989157632,
-      "cumulative_return": -19.148520652280055,
+      "cumulative_return": -16.483147011851727,
       "current_price": 207000.0,
       "price_date": "2026-07-30",
       "ath_price": 362500.0,
@@ -187,12 +223,12 @@
       "name": "SK하이닉스",
       "sector": "반도체",
       "market_cap": 9657109,
-      "weight": 20.0,
+      "weight": 30.0,
       "weight_prev": 20.0,
       "today_return": -5.638829407566024,
       "contribution": -11.277658815132048,
       "ytd_return": 103.07219662058374,
-      "cumulative_return": -33.051426835135345,
+      "cumulative_return": -24.76239257868078,
       "current_price": 1322000.0,
       "price_date": "2026-07-30",
       "ath_price": 2919000.0,
@@ -205,12 +241,12 @@
       "name": "삼성전자우",
       "sector": "기타",
       "market_cap": 1211581,
-      "weight": 5.0,
+      "weight": 10.0,
       "weight_prev": 5.0,
       "today_return": -1.564537157757497,
       "contribution": -0.7822685788787485,
       "ytd_return": 69.28251121076232,
-      "cumulative_return": -14.371909449711929,
+      "cumulative_return": -7.742313896084852,
       "current_price": 151000.0,
       "price_date": "2026-07-30",
       "ath_price": 235000.0,
@@ -325,6 +361,42 @@
       "dd": -8.918128654970758,
       "rsi": 4.718763176572594,
       "is_today_new": false
+    },
+    {
+      "code": "402340",
+      "name": "SK스퀘어",
+      "sector": "상사,자본재",
+      "market_cap": 1054348,
+      "weight": 5.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": 117.11956521739131,
+      "cumulative_return": null,
+      "current_price": 799000.0,
+      "price_date": "2026-07-30",
+      "ath_price": 1970000.0,
+      "dd": -59.44162436548224,
+      "rsi": null,
+      "is_today_new": true
+    },
+    {
+      "code": "009150",
+      "name": "삼성전기",
+      "sector": "IT하드웨어",
+      "market_cap": 656558,
+      "weight": 3.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": 244.7058823529412,
+      "cumulative_return": null,
+      "current_price": 879000.0,
+      "price_date": "2026-07-30",
+      "ath_price": 2270000.0,
+      "dd": -61.27753303964758,
+      "rsi": null,
+      "is_today_new": true
     }
   ],
   "DB 목표전환형 6차": [
@@ -333,12 +405,12 @@
       "name": "삼성전자",
       "sector": "반도체",
       "market_cap": 12101797,
-      "weight": 25.0,
+      "weight": 30.0,
       "weight_prev": 25.0,
       "today_return": -0.7194244604316548,
       "contribution": -1.7985611510791368,
       "ytd_return": 72.64386989157632,
-      "cumulative_return": -18.552036199095024,
+      "cumulative_return": -15.953307392996107,
       "current_price": 207000.0,
       "price_date": "2026-07-30",
       "ath_price": 362500.0,
@@ -351,12 +423,12 @@
       "name": "SK하이닉스",
       "sector": "반도체",
       "market_cap": 9657109,
-      "weight": 20.0,
+      "weight": 30.0,
       "weight_prev": 20.0,
       "today_return": -5.638829407566024,
       "contribution": -11.277658815132048,
       "ytd_return": 103.07219662058374,
-      "cumulative_return": -32.549299727033855,
+      "cumulative_return": -24.34041091970469,
       "current_price": 1322000.0,
       "price_date": "2026-07-30",
       "ath_price": 2919000.0,
@@ -369,12 +441,12 @@
       "name": "삼성전자우",
       "sector": "기타",
       "market_cap": 1211581,
-      "weight": 5.0,
+      "weight": 10.0,
       "weight_prev": 5.0,
       "today_return": -1.564537157757497,
       "contribution": -0.7822685788787485,
       "ytd_return": 69.28251121076232,
-      "cumulative_return": -14.371909449711929,
+      "cumulative_return": -7.742313896084852,
       "current_price": 151000.0,
       "price_date": "2026-07-30",
       "ath_price": 235000.0,
@@ -489,6 +561,42 @@
       "dd": -8.918128654970758,
       "rsi": 4.718763176572594,
       "is_today_new": false
+    },
+    {
+      "code": "402340",
+      "name": "SK스퀘어",
+      "sector": "상사,자본재",
+      "market_cap": 1054348,
+      "weight": 5.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": 117.11956521739131,
+      "cumulative_return": null,
+      "current_price": 799000.0,
+      "price_date": "2026-07-30",
+      "ath_price": 1970000.0,
+      "dd": -59.44162436548224,
+      "rsi": null,
+      "is_today_new": true
+    },
+    {
+      "code": "009150",
+      "name": "삼성전기",
+      "sector": "IT하드웨어",
+      "market_cap": 656558,
+      "weight": 3.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": 244.7058823529412,
+      "cumulative_return": null,
+      "current_price": 879000.0,
+      "price_date": "2026-07-30",
+      "ath_price": 2270000.0,
+      "dd": -61.27753303964758,
+      "rsi": null,
+      "is_today_new": true
     }
   ],
   "한투 지속형": [
@@ -515,12 +623,12 @@
       "name": "SK하이닉스",
       "sector": "반도체",
       "market_cap": 9657109,
-      "weight": 25.0,
+      "weight": 30.0,
       "weight_prev": 25.0,
       "today_return": -5.638829407566024,
       "contribution": -14.09707351891506,
       "ytd_return": 103.07219662058374,
-      "cumulative_return": -31.80645826885381,
+      "cumulative_return": -27.989105764866085,
       "current_price": 1322000.0,
       "price_date": "2026-07-30",
       "ath_price": 2919000.0,
@@ -533,12 +641,12 @@
       "name": "삼성전자우",
       "sector": "기타",
       "market_cap": 1211581,
-      "weight": 5.0,
+      "weight": 10.0,
       "weight_prev": 5.0,
       "today_return": -1.564537157757497,
       "contribution": -0.7822685788787485,
       "ytd_return": 69.28251121076232,
-      "cumulative_return": -14.371909449711929,
+      "cumulative_return": -7.742313896084852,
       "current_price": 151000.0,
       "price_date": "2026-07-30",
       "ath_price": 235000.0,
@@ -653,6 +761,42 @@
       "dd": -8.918128654970758,
       "rsi": 12.394783717521463,
       "is_today_new": false
+    },
+    {
+      "code": "402340",
+      "name": "SK스퀘어",
+      "sector": "상사,자본재",
+      "market_cap": 1054348,
+      "weight": 5.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": 117.11956521739131,
+      "cumulative_return": null,
+      "current_price": 799000.0,
+      "price_date": "2026-07-30",
+      "ath_price": 1970000.0,
+      "dd": -59.44162436548224,
+      "rsi": null,
+      "is_today_new": true
+    },
+    {
+      "code": "009150",
+      "name": "삼성전기",
+      "sector": "IT하드웨어",
+      "market_cap": 656558,
+      "weight": 3.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": 244.7058823529412,
+      "cumulative_return": null,
+      "current_price": 879000.0,
+      "price_date": "2026-07-30",
+      "ath_price": 2270000.0,
+      "dd": -61.27753303964758,
+      "rsi": null,
+      "is_today_new": true
     }
   ],
   "한투 성과모집형 1차": [
@@ -661,12 +805,12 @@
       "name": "삼성전자",
       "sector": "반도체",
       "market_cap": 12101797,
-      "weight": 25.0,
+      "weight": 30.0,
       "weight_prev": 25.0,
       "today_return": -0.7194244604316548,
       "contribution": -1.7985611510791368,
       "ytd_return": 72.64386989157632,
-      "cumulative_return": -16.372083627916368,
+      "cumulative_return": -14.026131348965997,
       "current_price": 207000.0,
       "price_date": "2026-07-30",
       "ath_price": 362500.0,
@@ -679,12 +823,12 @@
       "name": "SK하이닉스",
       "sector": "반도체",
       "market_cap": 9657109,
-      "weight": 20.0,
+      "weight": 30.0,
       "weight_prev": 20.0,
       "today_return": -5.638829407566024,
       "contribution": -11.277658815132048,
       "ytd_return": 103.07219662058374,
-      "cumulative_return": -29.00488695558777,
+      "cumulative_return": -21.40620665054893,
       "current_price": 1322000.0,
       "price_date": "2026-07-30",
       "ath_price": 2919000.0,
@@ -697,12 +841,12 @@
       "name": "삼성전자우",
       "sector": "기타",
       "market_cap": 1211581,
-      "weight": 5.0,
+      "weight": 10.0,
       "weight_prev": 5.0,
       "today_return": -1.564537157757497,
       "contribution": -0.7822685788787485,
       "ytd_return": 69.28251121076232,
-      "cumulative_return": -14.371909449711929,
+      "cumulative_return": -7.742313896084852,
       "current_price": 151000.0,
       "price_date": "2026-07-30",
       "ath_price": 235000.0,
@@ -817,28 +961,211 @@
       "dd": -8.918128654970758,
       "rsi": 4.718763176572594,
       "is_today_new": false
+    },
+    {
+      "code": "402340",
+      "name": "SK스퀘어",
+      "sector": "상사,자본재",
+      "market_cap": 1054348,
+      "weight": 5.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": 117.11956521739131,
+      "cumulative_return": null,
+      "current_price": 799000.0,
+      "price_date": "2026-07-30",
+      "ath_price": 1970000.0,
+      "dd": -59.44162436548224,
+      "rsi": null,
+      "is_today_new": true
+    },
+    {
+      "code": "009150",
+      "name": "삼성전기",
+      "sector": "IT하드웨어",
+      "market_cap": 656558,
+      "weight": 3.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": 244.7058823529412,
+      "cumulative_return": null,
+      "current_price": 879000.0,
+      "price_date": "2026-07-30",
+      "ath_price": 2270000.0,
+      "dd": -61.27753303964758,
+      "rsi": null,
+      "is_today_new": true
     }
   ],
-  "_portfolio_meta": {
+  "_order_changes": {
     "삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형": {
-      "nav_ytd_d1": 27.99570575517858,
-      "nav_cum_d1": 158.71900000000002
+      "date": "2026-07-31",
+      "added": [
+        {
+          "name": "SK스퀘어",
+          "weight": 5.0
+        },
+        {
+          "name": "삼성전기",
+          "weight": 3.0
+        }
+      ],
+      "changed": [
+        {
+          "name": "SK하이닉스",
+          "from": 25.0,
+          "to": 30.0
+        },
+        {
+          "name": "삼성전자우",
+          "from": 5.0,
+          "to": 10.0
+        }
+      ],
+      "removed": []
     },
     "NH 목표전환형 5호": {
-      "nav_ytd_d1": -33.378,
-      "nav_cum_d1": -33.378
+      "date": "2026-07-31",
+      "added": [
+        {
+          "name": "SK스퀘어",
+          "weight": 5.0
+        },
+        {
+          "name": "삼성전기",
+          "weight": 3.0
+        }
+      ],
+      "changed": [
+        {
+          "name": "삼성전자",
+          "from": 25.0,
+          "to": 30.0
+        },
+        {
+          "name": "SK하이닉스",
+          "from": 20.0,
+          "to": 30.0
+        },
+        {
+          "name": "삼성전자우",
+          "from": 5.0,
+          "to": 10.0
+        }
+      ],
+      "removed": []
     },
     "DB 목표전환형 6차": {
-      "nav_ytd_d1": -32.597,
-      "nav_cum_d1": -32.597
+      "date": "2026-07-31",
+      "added": [
+        {
+          "name": "SK스퀘어",
+          "weight": 5.0
+        },
+        {
+          "name": "삼성전기",
+          "weight": 3.0
+        }
+      ],
+      "changed": [
+        {
+          "name": "삼성전자",
+          "from": 25.0,
+          "to": 30.0
+        },
+        {
+          "name": "SK하이닉스",
+          "from": 20.0,
+          "to": 30.0
+        },
+        {
+          "name": "삼성전자우",
+          "from": 5.0,
+          "to": 10.0
+        }
+      ],
+      "removed": []
     },
     "한투 지속형": {
-      "nav_ytd_d1": -27.229999999999997,
-      "nav_cum_d1": -27.229999999999997
+      "date": "2026-07-31",
+      "added": [
+        {
+          "name": "SK스퀘어",
+          "weight": 5.0
+        },
+        {
+          "name": "삼성전기",
+          "weight": 3.0
+        }
+      ],
+      "changed": [
+        {
+          "name": "SK하이닉스",
+          "from": 25.0,
+          "to": 30.0
+        },
+        {
+          "name": "삼성전자우",
+          "from": 5.0,
+          "to": 10.0
+        }
+      ],
+      "removed": []
     },
     "한투 성과모집형 1차": {
-      "nav_ytd_d1": -24.261,
-      "nav_cum_d1": -24.261
+      "date": "2026-07-31",
+      "added": [
+        {
+          "name": "SK스퀘어",
+          "weight": 5.0
+        },
+        {
+          "name": "삼성전기",
+          "weight": 3.0
+        }
+      ],
+      "changed": [
+        {
+          "name": "삼성전자",
+          "from": 25.0,
+          "to": 30.0
+        },
+        {
+          "name": "SK하이닉스",
+          "from": 20.0,
+          "to": 30.0
+        },
+        {
+          "name": "삼성전자우",
+          "from": 5.0,
+          "to": 10.0
+        }
+      ],
+      "removed": []
+    }
+  },
+  "_portfolio_meta": {
+    "삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형": {
+      "nav_ytd_d1": 25.573514206133652,
+      "nav_cum_d1": 153.823
+    },
+    "NH 목표전환형 5호": {
+      "nav_ytd_d1": -34.427,
+      "nav_cum_d1": -34.427
+    },
+    "DB 목표전환형 6차": {
+      "nav_ytd_d1": -33.658,
+      "nav_cum_d1": -33.658
+    },
+    "한투 지속형": {
+      "nav_ytd_d1": -28.607000000000006,
+      "nav_cum_d1": -28.607000000000006
+    },
+    "한투 성과모집형 1차": {
+      "nav_ytd_d1": -25.452999999999992,
+      "nav_cum_d1": -25.452999999999992
     }
   },
   "_price_asof": "2026-07-30"
