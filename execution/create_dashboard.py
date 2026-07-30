@@ -2548,39 +2548,44 @@ def _build_combined_chart_section():
                 var freq = ((freqArg || window.cmbRocFreq) === 'W') ? 'W' : 'M';
                 // 1) 기간말 리샘플 — 각 월(주)의 마지막 관측만 남긴다.
                 //    일별 데이터의 YoY 를 일별로 차분하면 판독 불가 수준으로 진동한다.
+                // ★버킷 키 규칙 — dataset 과 history 가 반드시 같은 함수를 써야 한다(2026-07-30).
+                var keyOf = (freq === 'M')
+                    ? function(d) { return d.slice(0, 7); }
+                    : function(d) { return '' + Math.floor(Date.parse(d) / 604800000); };
                 var buckets = {}, order = [];
                 for (var i = 0; i < cmbData.dates.length; i++) {
                     var v = arr[i];
                     if (v === null || v === undefined) continue;
                     var d = cmbData.dates[i];
-                    var key = (freq === 'M') ? d.slice(0, 7)
-                                             : '' + Math.floor(Date.parse(d) / 604800000);
+                    var key = keyOf(d);
                     if (!buckets.hasOwnProperty(key)) order.push(key);
                     buckets[key] = { date: d, val: v };
                 }
-                // ★월말 백필 히스토리 병합 (cmbRocHist ← roc_history.csv, 2026-07-30)
-                //  ① 월(M) 리샘플에만 적용 — history 는 월말값이라 주(W) 54버킷을 못 만든다.
-                //  ② history 가 덮는 달은 history 값으로 '덮어쓴다'(원천 단일화). dataset.csv 는
+                // ★기간말 백필 히스토리 병합 (cmbRocHist ← roc_history.csv, 2026-07-30)
+                //  ① roc_history.csv 는 '월말 ∪ 주말' 관측일의 합집합이다. 위 keyOf 로 날짜순
+                //     덮어쓰면 M 은 그 달 마지막·W 는 그 주 마지막 관측이 남으므로 월·주 둘 다 쓴다
+                //     (종전엔 월말값만 있어 freq==='M' 으로 가드했고 주(W)는 전 종목 불가였다).
+                //  ② history 가 덮는 기간은 history 값으로 '덮어쓴다'(원천 단일화). dataset.csv 는
                 //     수집 시점 스냅숏이고 야후 연속선물(NG=F·SI=F…)은 롤오버로 과거가 소급
                 //     재작성되므로, 한 YoY 안에서 두 원천을 섞으면 이음매 오차가 커진다 —
                 //     2026-07-30 실측 Silver 21.8%p·VIX 6.4%p·Brent 5.3%p(지수·환율·금리는 0.6%p↓).
-                //  ③ 단 '표시 좌표'는 dataset.csv 의 그 달 마지막 관측일을 유지한다. proj() 가
-                //     commonDates 에서 위치를 찾으므로 history 의 월말일이 축에 없으면 점이
+                //  ③ 단 '표시 좌표'는 dataset.csv 의 그 기간 마지막 관측일을 유지한다. proj() 가
+                //     commonDates 에서 위치를 찾으므로 history 의 기간말일이 축에 없으면 점이
                 //     조용히 사라진다.
-                if (freq === 'M') {
-                    var H = cmbRocHist[name];
-                    if (H && H.d) {
-                        for (var hi = 0; hi < H.d.length; hi++) {
-                            var hk = H.d[hi].slice(0, 7);
-                            if (buckets.hasOwnProperty(hk)) {
-                                buckets[hk].val = H.v[hi];
-                            } else {
-                                buckets[hk] = { date: H.d[hi], val: H.v[hi] };
-                                order.push(hk);
-                            }
+                var H = cmbRocHist[name];
+                if (H && H.d) {
+                    for (var hi = 0; hi < H.d.length; hi++) {
+                        var hk = keyOf(H.d[hi]);
+                        if (buckets.hasOwnProperty(hk)) {
+                            buckets[hk].val = H.v[hi];
+                        } else {
+                            buckets[hk] = { date: H.d[hi], val: H.v[hi] };
+                            order.push(hk);
                         }
-                        order.sort();   // 'YYYY-MM' 은 사전순 = 시간순
                     }
+                    // ★주 키는 숫자 문자열이라 사전순 정렬이 틀린다('999' > '1000') → 주기별 비교자
+                    order.sort((freq === 'M') ? undefined
+                                              : function(a, b) { return parseInt(a, 10) - parseInt(b, 10); });
                 }
                 var kind = cmbRocKind(name);
                 var lag = (freq === 'M') ? 12 : 52;

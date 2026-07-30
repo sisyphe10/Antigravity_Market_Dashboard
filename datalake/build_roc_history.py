@@ -16,6 +16,7 @@ KOSPI·S&P500·환율 등 31종이 계산 불가였다(2026-07-29 실측: 120/18
 """
 import argparse
 import csv
+import datetime as _dt
 import io
 import os
 import sys
@@ -83,11 +84,32 @@ def month_end(rows):
     return out
 
 
+# JS(cmbRocCompute)의 주 버킷 키와 동일 규칙: floor(epoch_ms / 604800000)
+_EPOCH = _dt.date(1970, 1, 1)
+
+
+def _week_key(d):
+    return (_dt.date(int(d[:4]), int(d[5:7]), int(d[8:10])) - _EPOCH).days // 7
+
+
+def week_end(rows, since):
+    """[(date, value)] → {주키: (date, value)} 각 주의 마지막 관측 (since 이후만)."""
+    out = {}
+    for d, v in rows:
+        if v is None or d[:7] < since:
+            continue
+        out[_week_key(d)] = (d, float(v))
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--from', dest='since', default='1990-01',
                     help="시작 월 (기본 1990-01). 표시 구간은 dataset.csv 가 정하므로 "
                          "그 이전 이력은 RoC² 계산에도 쓰이지 않는다.")
+    ap.add_argument('--weekly-from', dest='weekly_since', default='2022-01',
+                    help="주말값을 넣기 시작할 월 (기본 2022-01). 표시 축이 2024년부터 일별이라 "
+                         "그 이전 주간 포인트는 축에 없어 그려지지 않는다 — 52주 lag 여유로 2년치만 더 둔다.")
     ap.add_argument('--out', default=os.path.join(ROOT, 'roc_history.csv'))
     ap.add_argument('--dataset', default=os.path.join(ROOT, 'dataset.csv'))
     args = ap.parse_args()
@@ -95,7 +117,8 @@ def main():
     import duckdb
     con = duckdb.connect(DUCKDB_PATH, read_only=True)
 
-    series = {}   # name -> {month: (date, val)}
+    series = {}   # name -> {월키: (date, val)}
+    raw = {}      # name -> [(date, val)]  (주말값 추출용 원계열)
     ymap = yf_map()
 
     # 1) global_markets
@@ -110,6 +133,7 @@ def main():
             'WHERE symbol = ? AND close IS NOT NULL ORDER BY date' % "'%Y-%m-%d'",
             [sym]).fetchall()
         series[name] = month_end(rows)
+        raw[name] = rows
 
     # 2) kr_index_ohlcv
     for name, code in KRX_INDEX.items():
@@ -118,6 +142,7 @@ def main():
             "WHERE index_code = ? AND close IS NOT NULL ORDER BY date",
             [code]).fetchall()
         series[name] = month_end(rows)
+        raw[name] = rows
 
     # 2-b) kr_index_ohlcv.marcap (시가총액)
     for name, code in KRX_MARCAP.items():
@@ -126,6 +151,7 @@ def main():
             "WHERE index_code = ? AND marcap IS NOT NULL AND marcap > 0 ORDER BY date",
             [code]).fetchall()
         series[name] = month_end(rows)
+        raw[name] = rows
 
     # 3) 파생 (지수 ÷ 환율) — 같은 월 버킷끼리만
     for name, (num, den) in DERIVED.items():
@@ -135,6 +161,10 @@ def main():
             if m in b and b[m][1]:
                 out[m] = (a[m][0], round(a[m][1] / b[m][1], 4))
         series[name] = out
+        # 주말값용 raw = 같은 날짜에 둘 다 있는 날만 나눈다
+        bm = dict(raw.get(den, []))
+        raw[name] = [(d, round(v / bm[d], 4)) for d, v in raw.get(num, [])
+                     if d in bm and bm[d]]
 
     # 4) dataset.csv 의 시리즈별 최초/최종 월 — 겹치는 달로 정의 일치를 검증한다.
     ds = defaultdict(dict)
@@ -174,22 +204,30 @@ def main():
 
     # 5) 기록 — dataset.csv 최초 월 '이전'만 실제로 쓰이지만, 검증·재현을 위해
     #    --from 이후 전 구간을 남긴다(JS 가 겹치는 달은 dataset.csv 우선으로 버린다).
-    n = 0
+    n = nw = 0
     tmp = args.out + '.tmp'
     with io.open(tmp, 'w', encoding='utf-8', newline='') as f:
         w = csv.writer(f, lineterminator='\n')
         w.writerow(['series', 'date', 'value'])
         for name in sorted(series):
-            for m in sorted(series[name]):
-                if m < args.since:
-                    continue
-                d, v = series[name][m]
-                w.writerow([name, d, fmt(v)])
+            # ★월말 ∪ 주말 을 날짜 기준 합집합으로 내보낸다 (JS 가 주기별로 알아서 나눈다)
+            pick = {}
+            for m in series[name]:
+                if m >= args.since:
+                    d, v = series[name][m]
+                    pick[d] = v
+            we = week_end(raw.get(name, []), args.weekly_since)
+            before = len(pick)
+            for _wk, (d, v) in we.items():
+                pick.setdefault(d, v)
+            nw += len(pick) - before
+            for d in sorted(pick):
+                w.writerow([name, d, fmt(pick[d])])
                 n += 1
     os.replace(tmp, args.out)
 
     print()
-    print(f'시리즈 {len(series)}종 / 행 {n:,} → {args.out} ({os.path.getsize(args.out):,} bytes)')
+    print(f'시리즈 {len(series)}종 / 행 {n:,} (월말 {n - nw:,} + 주말추가 {nw:,}, 주말 {args.weekly_since}~) → {args.out} ({os.path.getsize(args.out):,} bytes)')
     if missing:
         print('★ datalake 미수집: ' + ', '.join(missing))
     if warn:
