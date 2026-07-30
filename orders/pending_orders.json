@@ -1,1 +1,704 @@
-{}
+{
+  "2026-07-31": {
+    "삼성 트루밸류": {
+      "targets": [
+        {
+          "broker": "삼성",
+          "product": "트루밸류"
+        }
+      ],
+      "stocks": [
+        {
+          "sector": "반도체",
+          "code": "005930",
+          "name": "삼성전자",
+          "weight": 30,
+          "baseWeight": 30,
+          "reason": ""
+        },
+        {
+          "sector": "반도체",
+          "code": "000660",
+          "name": "SK하이닉스",
+          "weight": 30,
+          "baseWeight": 25,
+          "reason": "최근 주가 급락이 해외 헷지펀드들의 마진콜 이슈 요인이 컸던 것으로 확인, 곧 나올 주주환원 정책과 더불어 바닥권이라 생각하여 추가매수"
+        },
+        {
+          "sector": "기타",
+          "code": "005935",
+          "name": "삼성전자우",
+          "weight": 10,
+          "baseWeight": 5,
+          "reason": "최근 주가 급락이 해외 헷지펀드들의 마진콜 이슈 요인이 컸던 것으로 확인, 곧 나올 주주환원 정책과 더불어 바닥권이라 생각하여 추가매수"
+        },
+        {
+          "sector": "소매(유통)",
+          "code": "004170",
+          "name": "신세계",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "에너지",
+          "code": "010950",
+          "name": "S-Oil",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "필수소비재",
+          "code": "003230",
+          "name": "삼양식품",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "은행",
+          "code": "105560",
+          "name": "KB금융",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
+        },
+        {
+          "sector": "은행",
+          "code": "086790",
+          "name": "하나금융지주",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
+        },
+        {
+          "sector": "상사,자본재",
+          "code": "402340",
+          "name": "SK스퀘어",
+          "weight": 5,
+          "baseWeight": 0,
+          "reason": "SK하이닉스의 주주환원도 하반기 중 나올 것으로 예상, 신규 매수"
+        },
+        {
+          "sector": "IT하드웨어",
+          "code": "009150",
+          "name": "삼성전기",
+          "weight": 3,
+          "baseWeight": 0,
+          "reason": "ETF 수급으로 인해 단기에 폭등했던 주가가 회귀하였으나, MLCC 및 FC-BGA 업황은 매우 견조, 신규 매수"
+        }
+      ],
+      "savedAt": "2026-07-30T21:48:02.154Z",
+      "finalizedAt": "2026-07-31T06:50:17+09:00"
+    },
+    "NH 다이내믹 밸류": {
+      "targets": [
+        {
+          "broker": "NH",
+          "product": "Value ESG"
+        }
+      ],
+      "stocks": [
+        {
+          "sector": "반도체",
+          "code": "005930",
+          "name": "삼성전자",
+          "weight": 30,
+          "baseWeight": 30,
+          "reason": ""
+        },
+        {
+          "sector": "반도체",
+          "code": "000660",
+          "name": "SK하이닉스",
+          "weight": 30,
+          "baseWeight": 25,
+          "reason": "최근 주가 급락이 해외 헷지펀드들의 마진콜 이슈 요인이 컸던 것으로 확인, 곧 나올 주주환원 정책과 더불어 바닥권이라 생각하여 추가매수"
+        },
+        {
+          "sector": "기타",
+          "code": "005935",
+          "name": "삼성전자우",
+          "weight": 10,
+          "baseWeight": 5,
+          "reason": "최근 주가 급락이 해외 헷지펀드들의 마진콜 이슈 요인이 컸던 것으로 확인, 곧 나올 주주환원 정책과 더불어 바닥권이라 생각하여 추가매수"
+        },
+        {
+          "sector": "소매(유통)",
+          "code": "004170",
+          "name": "신세계",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "에너지",
+          "code": "010950",
+          "name": "S-Oil",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "필수소비재",
+          "code": "003230",
+          "name": "삼양식품",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "은행",
+          "code": "105560",
+          "name": "KB금융",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
+        },
+        {
+          "sector": "은행",
+          "code": "086790",
+          "name": "하나금융지주",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
+        },
+        {
+          "sector": "상사,자본재",
+          "code": "402340",
+          "name": "SK스퀘어",
+          "weight": 5,
+          "baseWeight": 0,
+          "reason": "SK하이닉스의 주주환원도 하반기 중 나올 것으로 예상, 신규 매수"
+        },
+        {
+          "sector": "IT하드웨어",
+          "code": "009150",
+          "name": "삼성전기",
+          "weight": 3,
+          "baseWeight": 0,
+          "reason": "ETF 수급으로 인해 단기에 폭등했던 주가가 회귀하였으나, MLCC 및 FC-BGA 업황은 매우 견조, 신규 매수"
+        }
+      ],
+      "savedAt": "2026-07-30T21:48:02.155Z",
+      "finalizedAt": "2026-07-31T06:50:17+09:00"
+    },
+    "DB 개방형": {
+      "targets": [
+        {
+          "broker": "DB",
+          "product": "개방형 랩"
+        }
+      ],
+      "stocks": [
+        {
+          "sector": "반도체",
+          "code": "005930",
+          "name": "삼성전자",
+          "weight": 30,
+          "baseWeight": 30,
+          "reason": ""
+        },
+        {
+          "sector": "반도체",
+          "code": "000660",
+          "name": "SK하이닉스",
+          "weight": 30,
+          "baseWeight": 25,
+          "reason": "최근 주가 급락이 해외 헷지펀드들의 마진콜 이슈 요인이 컸던 것으로 확인, 곧 나올 주주환원 정책과 더불어 바닥권이라 생각하여 추가매수"
+        },
+        {
+          "sector": "기타",
+          "code": "005935",
+          "name": "삼성전자우",
+          "weight": 10,
+          "baseWeight": 5,
+          "reason": "최근 주가 급락이 해외 헷지펀드들의 마진콜 이슈 요인이 컸던 것으로 확인, 곧 나올 주주환원 정책과 더불어 바닥권이라 생각하여 추가매수"
+        },
+        {
+          "sector": "소매(유통)",
+          "code": "004170",
+          "name": "신세계",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "에너지",
+          "code": "010950",
+          "name": "S-Oil",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "필수소비재",
+          "code": "003230",
+          "name": "삼양식품",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "은행",
+          "code": "105560",
+          "name": "KB금융",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
+        },
+        {
+          "sector": "은행",
+          "code": "086790",
+          "name": "하나금융지주",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
+        },
+        {
+          "sector": "상사,자본재",
+          "code": "402340",
+          "name": "SK스퀘어",
+          "weight": 5,
+          "baseWeight": 0,
+          "reason": "SK하이닉스의 주주환원도 하반기 중 나올 것으로 예상, 신규 매수"
+        },
+        {
+          "sector": "IT하드웨어",
+          "code": "009150",
+          "name": "삼성전기",
+          "weight": 3,
+          "baseWeight": 0,
+          "reason": "ETF 수급으로 인해 단기에 폭등했던 주가가 회귀하였으나, MLCC 및 FC-BGA 업황은 매우 견조, 신규 매수"
+        }
+      ],
+      "savedAt": "2026-07-30T21:48:02.155Z",
+      "finalizedAt": "2026-07-31T06:50:17+09:00"
+    },
+    "한투 지속형": {
+      "targets": [
+        {
+          "broker": "한투",
+          "product": "지속형"
+        }
+      ],
+      "stocks": [
+        {
+          "sector": "반도체",
+          "code": "005930",
+          "name": "삼성전자",
+          "weight": 30,
+          "baseWeight": 30,
+          "reason": ""
+        },
+        {
+          "sector": "반도체",
+          "code": "000660",
+          "name": "SK하이닉스",
+          "weight": 30,
+          "baseWeight": 25,
+          "reason": "최근 주가 급락이 해외 헷지펀드들의 마진콜 이슈 요인이 컸던 것으로 확인, 곧 나올 주주환원 정책과 더불어 바닥권이라 생각하여 추가매수"
+        },
+        {
+          "sector": "기타",
+          "code": "005935",
+          "name": "삼성전자우",
+          "weight": 10,
+          "baseWeight": 5,
+          "reason": "최근 주가 급락이 해외 헷지펀드들의 마진콜 이슈 요인이 컸던 것으로 확인, 곧 나올 주주환원 정책과 더불어 바닥권이라 생각하여 추가매수"
+        },
+        {
+          "sector": "소매(유통)",
+          "code": "004170",
+          "name": "신세계",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "에너지",
+          "code": "010950",
+          "name": "S-Oil",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "필수소비재",
+          "code": "003230",
+          "name": "삼양식품",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "은행",
+          "code": "105560",
+          "name": "KB금융",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
+        },
+        {
+          "sector": "은행",
+          "code": "086790",
+          "name": "하나금융지주",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
+        },
+        {
+          "sector": "상사,자본재",
+          "code": "402340",
+          "name": "SK스퀘어",
+          "weight": 5,
+          "baseWeight": 0,
+          "reason": "SK하이닉스의 주주환원도 하반기 중 나올 것으로 예상, 신규 매수"
+        },
+        {
+          "sector": "IT하드웨어",
+          "code": "009150",
+          "name": "삼성전기",
+          "weight": 3,
+          "baseWeight": 0,
+          "reason": "ETF 수급으로 인해 단기에 폭등했던 주가가 회귀하였으나, MLCC 및 FC-BGA 업황은 매우 견조, 신규 매수"
+        }
+      ],
+      "savedAt": "2026-07-30T21:48:02.155Z",
+      "finalizedAt": "2026-07-31T06:50:17+09:00"
+    },
+    "NH 목표전환형 5호": {
+      "targets": [
+        {
+          "broker": "NH",
+          "product": "목표전환형 5호"
+        }
+      ],
+      "stocks": [
+        {
+          "sector": "반도체",
+          "code": "005930",
+          "name": "삼성전자",
+          "weight": 30,
+          "baseWeight": 25,
+          "reason": "최근 주가 급락이 해외 헷지펀드들의 마진콜 이슈 요인이 컸던 것으로 확인, 곧 나올 주주환원 정책과 더불어 바닥권이라 생각하여 추가매수"
+        },
+        {
+          "sector": "반도체",
+          "code": "000660",
+          "name": "SK하이닉스",
+          "weight": 30,
+          "baseWeight": 20,
+          "reason": "최근 주가 급락이 해외 헷지펀드들의 마진콜 이슈 요인이 컸던 것으로 확인, 곧 나올 주주환원 정책과 더불어 바닥권이라 생각하여 추가매수"
+        },
+        {
+          "sector": "기타",
+          "code": "005935",
+          "name": "삼성전자우",
+          "weight": 10,
+          "baseWeight": 5,
+          "reason": "최근 주가 급락이 해외 헷지펀드들의 마진콜 이슈 요인이 컸던 것으로 확인, 곧 나올 주주환원 정책과 더불어 바닥권이라 생각하여 추가매수"
+        },
+        {
+          "sector": "소매(유통)",
+          "code": "004170",
+          "name": "신세계",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "에너지",
+          "code": "010950",
+          "name": "S-Oil",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "필수소비재",
+          "code": "003230",
+          "name": "삼양식품",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "은행",
+          "code": "105560",
+          "name": "KB금융",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
+        },
+        {
+          "sector": "은행",
+          "code": "086790",
+          "name": "하나금융지주",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
+        },
+        {
+          "sector": "상사,자본재",
+          "code": "402340",
+          "name": "SK스퀘어",
+          "weight": 5,
+          "baseWeight": 0,
+          "reason": "SK하이닉스의 주주환원도 하반기 중 나올 것으로 예상, 신규 매수"
+        },
+        {
+          "sector": "IT하드웨어",
+          "code": "009150",
+          "name": "삼성전기",
+          "weight": 3,
+          "baseWeight": 0,
+          "reason": "ETF 수급으로 인해 단기에 폭등했던 주가가 회귀하였으나, MLCC 및 FC-BGA 업황은 매우 견조, 신규 매수"
+        }
+      ],
+      "savedAt": "2026-07-30T21:48:02.155Z",
+      "finalizedAt": "2026-07-31T06:50:17+09:00"
+    },
+    "DB 목표전환형 6차": {
+      "targets": [
+        {
+          "broker": "DB",
+          "product": "목표전환형 6차"
+        }
+      ],
+      "stocks": [
+        {
+          "sector": "반도체",
+          "code": "005930",
+          "name": "삼성전자",
+          "weight": 30,
+          "baseWeight": 25,
+          "reason": "최근 주가 급락이 해외 헷지펀드들의 마진콜 이슈 요인이 컸던 것으로 확인, 곧 나올 주주환원 정책과 더불어 바닥권이라 생각하여 추가매수"
+        },
+        {
+          "sector": "반도체",
+          "code": "000660",
+          "name": "SK하이닉스",
+          "weight": 30,
+          "baseWeight": 20,
+          "reason": "최근 주가 급락이 해외 헷지펀드들의 마진콜 이슈 요인이 컸던 것으로 확인, 곧 나올 주주환원 정책과 더불어 바닥권이라 생각하여 추가매수"
+        },
+        {
+          "sector": "기타",
+          "code": "005935",
+          "name": "삼성전자우",
+          "weight": 10,
+          "baseWeight": 5,
+          "reason": "최근 주가 급락이 해외 헷지펀드들의 마진콜 이슈 요인이 컸던 것으로 확인, 곧 나올 주주환원 정책과 더불어 바닥권이라 생각하여 추가매수"
+        },
+        {
+          "sector": "소매(유통)",
+          "code": "004170",
+          "name": "신세계",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "에너지",
+          "code": "010950",
+          "name": "S-Oil",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "필수소비재",
+          "code": "003230",
+          "name": "삼양식품",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "은행",
+          "code": "105560",
+          "name": "KB금융",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
+        },
+        {
+          "sector": "은행",
+          "code": "086790",
+          "name": "하나금융지주",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
+        },
+        {
+          "sector": "상사,자본재",
+          "code": "402340",
+          "name": "SK스퀘어",
+          "weight": 5,
+          "baseWeight": 0,
+          "reason": "SK하이닉스의 주주환원도 하반기 중 나올 것으로 예상, 신규 매수"
+        },
+        {
+          "sector": "IT하드웨어",
+          "code": "009150",
+          "name": "삼성전기",
+          "weight": 3,
+          "baseWeight": 0,
+          "reason": "ETF 수급으로 인해 단기에 폭등했던 주가가 회귀하였으나, MLCC 및 FC-BGA 업황은 매우 견조, 신규 매수"
+        }
+      ],
+      "savedAt": "2026-07-30T21:48:02.155Z",
+      "finalizedAt": "2026-07-31T06:50:17+09:00"
+    },
+    "한투 성과모집형 1차": {
+      "targets": [
+        {
+          "broker": "한투",
+          "product": "성과모집형 1차"
+        }
+      ],
+      "stocks": [
+        {
+          "sector": "반도체",
+          "code": "005930",
+          "name": "삼성전자",
+          "weight": 30,
+          "baseWeight": 25,
+          "reason": "최근 주가 급락이 해외 헷지펀드들의 마진콜 이슈 요인이 컸던 것으로 확인, 곧 나올 주주환원 정책과 더불어 바닥권이라 생각하여 추가매수"
+        },
+        {
+          "sector": "반도체",
+          "code": "000660",
+          "name": "SK하이닉스",
+          "weight": 30,
+          "baseWeight": 20,
+          "reason": "최근 주가 급락이 해외 헷지펀드들의 마진콜 이슈 요인이 컸던 것으로 확인, 곧 나올 주주환원 정책과 더불어 바닥권이라 생각하여 추가매수"
+        },
+        {
+          "sector": "기타",
+          "code": "005935",
+          "name": "삼성전자우",
+          "weight": 10,
+          "baseWeight": 5,
+          "reason": "최근 주가 급락이 해외 헷지펀드들의 마진콜 이슈 요인이 컸던 것으로 확인, 곧 나올 주주환원 정책과 더불어 바닥권이라 생각하여 추가매수"
+        },
+        {
+          "sector": "소매(유통)",
+          "code": "004170",
+          "name": "신세계",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "에너지",
+          "code": "010950",
+          "name": "S-Oil",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "필수소비재",
+          "code": "003230",
+          "name": "삼양식품",
+          "weight": 2,
+          "baseWeight": 2,
+          "reason": ""
+        },
+        {
+          "sector": "은행",
+          "code": "105560",
+          "name": "KB금융",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
+        },
+        {
+          "sector": "은행",
+          "code": "086790",
+          "name": "하나금융지주",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
+        },
+        {
+          "sector": "상사,자본재",
+          "code": "402340",
+          "name": "SK스퀘어",
+          "weight": 5,
+          "baseWeight": 0,
+          "reason": "SK하이닉스의 주주환원도 하반기 중 나올 것으로 예상, 신규 매수"
+        },
+        {
+          "sector": "IT하드웨어",
+          "code": "009150",
+          "name": "삼성전기",
+          "weight": 3,
+          "baseWeight": 0,
+          "reason": "ETF 수급으로 인해 단기에 폭등했던 주가가 회귀하였으나, MLCC 및 FC-BGA 업황은 매우 견조, 신규 매수"
+        }
+      ],
+      "savedAt": "2026-07-30T21:48:02.155Z",
+      "finalizedAt": "2026-07-31T06:50:17+09:00"
+    }
+  }
+}
