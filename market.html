@@ -533,7 +533,7 @@ body{margin:0}
     <nav class="topnav"><div class="topnav-inner"><a href="index.html" class="topnav-brand">AGE OF EMERGENCE</a><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab active">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub active">Data</a><a href="universe.html" class="topnav-sub">Universe</a><a href="universe_lab.html" class="topnav-sub">Universe Lab</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
     <aside class="sidebar"><a href="market.html" class="sidebar-link active">Data</a><a href="universe.html" class="sidebar-link">Universe</a><a href="universe_lab.html" class="sidebar-link">Universe Lab</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
     <header style="margin:0;padding:8px 28px 0;text-align:right;">
-        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-07-30 10:00:04 KST</div>
+        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-07-30 10:31:54 KST</div>
     </header>
 
     <div class="mkt-subtabs">
@@ -2475,9 +2475,11 @@ if (typeof window._h2cFreeze !== 'function') {
                 var cmbAxisUnitPlugin = {
                     id: 'cmbAxisUnit',
                     afterDraw: function(chart) {
-                        var u = window._cmbAxisUnits;
+                        // 차트별 지정(chart._cmbAxisUnits) 우선 — 서브패널은 단위가 고정이라
+                        // 전역 _cmbAxisUnits(메인 차트용)를 그대로 쓰면 오표기가 된다.
+                        var u = chart._cmbAxisUnits || window._cmbAxisUnits;
                         if (!u) return;
-                        var ctx = chart.ctx, ty = chart.chartArea.top - 20;   // 최상단 눈금 라벨과 겹침 방지
+                        var ctx = chart.ctx, ty = chart.chartArea.top - (chart._cmbAxisUnitDy || 20);   // 최상단 눈금 라벨과 겹침 방지
                         ctx.save();
                         ctx.font = '13px sans-serif';
                         ctx.fillStyle = '#000';
@@ -2993,11 +2995,12 @@ if (typeof window._h2cFreeze !== 'function') {
                             cmbRocChart = new Chart(document.getElementById('cmbRocChart'), {
                                 type: 'line',
                                 data: { labels: commonDates, datasets: rocDatasets },
-                                plugins: [endLabelPlugin, roc0Plugin, cmbCrosshairPlugin],
+                                plugins: [endLabelPlugin, roc0Plugin, cmbCrosshairPlugin, cmbAxisUnitPlugin],
                                 options: {
                                     responsive: true, maintainAspectRatio: false,
                                     devicePixelRatio: 2 * (window.devicePixelRatio || 1),
-                                    layout: { padding: { right: 60 } },
+                                    // top = 축 위 단위 주석 자리. 패널(h=200)이라 메인(34)보다 얕게 준다.
+                                    layout: { padding: { right: 60, top: 24 } },
                                     interaction: { mode: 'index', intersect: false },
                                     plugins: {
                                         legend: { display: false },
@@ -3013,9 +3016,18 @@ if (typeof window._h2cFreeze !== 'function') {
                                             type: 'linear',
                                             position: 'left',
                                             grace: '8%',
+                                            // ★0 을 항상 축 범위에 포함 (2026-07-30 사용자 요청) — RoC² 는 부호가
+                                            //   곧 가속/감속이라 0선이 보여야 둔화를 판독할 수 있다. 종전엔 값이
+                                            //   전부 한쪽 부호면 0 이 범위 밖으로 나가 roc0Plugin 이 0선 그리기를
+                                            //   건너뛰었다(area.top~bottom 밖이면 return).
+                                            beginAtZero: true,
                                             afterBuildTicks: cmbEnsureBoundTicks,
                                             afterFit: function(scale) { if (rocYWidth > 0) scale.width = rocYWidth; },
-                                            ticks: { maxTicksLimit: 6, autoSkip: false, callback: function(v){ return (Math.round(v * 100) / 100) + '%p'; }, font: { size: 15 }, color: '#000' },
+                                            // ★눈금은 숫자만. 단위 '%p' 는 축 최상단 위에 1회 표기한다(아래 _cmbAxisUnits).
+                                            //   y축 폭은 메인 차트와의 픽셀 정렬 때문에 afterFit 으로 고정돼 있어서,
+                                            //   눈금에 단위를 붙이면 폭을 넘어가 글씨가 잘렸다(2026-07-30 사용자 지적).
+                                            //   자릿수는 사이트 표준 fmtByMag(|v|<10 둘째, 10~999 첫째, 1000+ 정수).
+                                            ticks: { maxTicksLimit: 6, autoSkip: false, callback: function(v){ return fmtByMag(v); }, font: { size: 15 }, color: '#000' },
                                             grid: { color: '#eee' },
                                             border: { color: '#000', width: 2 }
                                         }
@@ -3024,6 +3036,9 @@ if (typeof window._h2cFreeze !== 'function') {
                             });
                             cmbRocChart._cmbMode = 'raw1';   // 끝값 라벨 = 원값 포맷 (이격도 패널과 동일)
                             cmbRocChart._cmbTipLabel = rocTip;
+                            // RoC² 는 정의상 항상 %p — 축 위에 1회 표기(눈금엔 숫자만)
+                            cmbRocChart._cmbAxisUnits = { y: '(%p)', y1: null };
+                            cmbRocChart._cmbAxisUnitDy = 10;   // 패널은 여백이 얕아 메인(20)보다 가깝게
                             cmbRocChart.update('none');
                         }
                     } else {
