@@ -42,6 +42,16 @@ KRX_INDEX = {
     'KOSDAQ': '2001',
 }
 
+# dataset.csv 시리즈명 ← kr_index_ohlcv.marcap
+# ★단위는 '원' 그대로 — dataset.csv 값과 같은 스케일이라 cmbRocCompute 에서 바로 병합된다
+#   (표시용 1e12 나눗셈은 create_dashboard.py 의 seriesScale 이 담당. RoC 는 비율이라 무관).
+# ★1990년대 초 구간은 marcap 이 0 으로 채워져 있어 반드시 걸러낸다 — 0 을 분모로 쓰면
+#   YoY 가 발산하거나 null 이 되어 이력을 늘린 효과가 사라진다.
+KRX_MARCAP = {
+    'KOSPI Market Cap': '1001',
+    'KOSDAQ Market Cap': '2001',
+}
+
 # 파생 = 지수 ÷ 환율. market_crawler.py 와 동일 정의(round 4).
 DERIVED = {
     'KOSPI/USD': ('KOSPI', 'KRW/USD'),
@@ -106,6 +116,14 @@ def main():
         rows = con.execute(
             "SELECT strftime(date, '%Y-%m-%d'), close FROM kr_index_ohlcv "
             "WHERE index_code = ? AND close IS NOT NULL ORDER BY date",
+            [code]).fetchall()
+        series[name] = month_end(rows)
+
+    # 2-b) kr_index_ohlcv.marcap (시가총액)
+    for name, code in KRX_MARCAP.items():
+        rows = con.execute(
+            "SELECT strftime(date, '%Y-%m-%d'), marcap FROM kr_index_ohlcv "
+            "WHERE index_code = ? AND marcap IS NOT NULL AND marcap > 0 ORDER BY date",
             [code]).fetchall()
         series[name] = month_end(rows)
 
