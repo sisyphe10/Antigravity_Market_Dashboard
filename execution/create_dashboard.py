@@ -1773,6 +1773,24 @@ def _load_roc_history():
     return out
 
 
+def _roc_history_for(groups):
+    """roc_history.csv(csv 제품명 키) → 사이드바 표시명(display) 키로 정규화.
+
+    ★cmbData.data·cmbSeriesUnit·사이드바 data-series 는 전부 display 키다. 반면
+      roc_history.csv 는 dataset.csv 의 '제품명'(csv) 키라, 둘이 다른 시리즈에서
+      cmbRocHist[name] 이 조용히 undefined 가 되어 히스토리가 먹지 않는다
+      (실제 사례: 국채 4종 'US 5 Year Treasury Yield' ↔ 표시명 'US05Y').
+      매핑 출처는 이 함수의 groups 인자 = 통합차트 시리즈 정의 그 자체(단일 출처).
+    """
+    hist = _load_roc_history()
+    c2d = {}
+    for g in groups:
+        for sr in g.get('series', []):
+            if sr.get('csv'):
+                c2d[sr['csv']] = sr['display']
+    return {c2d.get(k, k): v for k, v in hist.items()}
+
+
 def _build_combined_chart_section():
     """7개 카테고리(INDEX_KOREA/INDEX_US/EXCHANGE RATE/INTEREST RATES/CRYPTOCURRENCY/Memory/COMMODITIES)
     를 단일 동적 Chart.js 차트로 통합. 좌 사이드바는 카테고리 그룹 헤더 + 토글 항목,
@@ -3947,7 +3965,7 @@ def _build_combined_chart_section():
             buildCmbChart();
         })();
         </script>
-        """.replace('CMB_DATA_PLACEHOLDER', export_json).replace('CMB_UNIT_PLACEHOLDER', json.dumps(CMB_SERIES_UNITS, ensure_ascii=False)).replace('CMB_ROC_HIST_PLACEHOLDER', json.dumps(_load_roc_history(), ensure_ascii=False, separators=(',', ':')))
+        """.replace('CMB_DATA_PLACEHOLDER', export_json).replace('CMB_UNIT_PLACEHOLDER', json.dumps(CMB_SERIES_UNITS, ensure_ascii=False)).replace('CMB_ROC_HIST_PLACEHOLDER', json.dumps(_roc_history_for(groups), ensure_ascii=False, separators=(',', ':')))
 
         return f"""
         <div class="category-section">
