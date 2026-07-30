@@ -197,6 +197,24 @@
       "dd": -61.27753303964758,
       "rsi": null,
       "is_today_new": true
+    },
+    {
+      "code": "119850",
+      "name": "지엔씨에너지",
+      "sector": "기계",
+      "market_cap": 4894,
+      "weight": 1.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": -3.7216828478964348,
+      "cumulative_return": null,
+      "current_price": 29750.0,
+      "price_date": "2026-07-30",
+      "ath_price": 45550.0,
+      "dd": -34.687156970362246,
+      "rsi": null,
+      "is_today_new": true
     }
   ],
   "NH 목표전환형 5호": [
@@ -395,6 +413,24 @@
       "price_date": "2026-07-30",
       "ath_price": 2270000.0,
       "dd": -61.27753303964758,
+      "rsi": null,
+      "is_today_new": true
+    },
+    {
+      "code": "119850",
+      "name": "지엔씨에너지",
+      "sector": "기계",
+      "market_cap": 4894,
+      "weight": 1.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": -3.7216828478964348,
+      "cumulative_return": null,
+      "current_price": 29750.0,
+      "price_date": "2026-07-30",
+      "ath_price": 45550.0,
+      "dd": -34.687156970362246,
       "rsi": null,
       "is_today_new": true
     }
@@ -597,6 +633,24 @@
       "dd": -61.27753303964758,
       "rsi": null,
       "is_today_new": true
+    },
+    {
+      "code": "119850",
+      "name": "지엔씨에너지",
+      "sector": "기계",
+      "market_cap": 4894,
+      "weight": 1.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": -3.7216828478964348,
+      "cumulative_return": null,
+      "current_price": 29750.0,
+      "price_date": "2026-07-30",
+      "ath_price": 45550.0,
+      "dd": -34.687156970362246,
+      "rsi": null,
+      "is_today_new": true
     }
   ],
   "한투 지속형": [
@@ -795,6 +849,24 @@
       "price_date": "2026-07-30",
       "ath_price": 2270000.0,
       "dd": -61.27753303964758,
+      "rsi": null,
+      "is_today_new": true
+    },
+    {
+      "code": "119850",
+      "name": "지엔씨에너지",
+      "sector": "기계",
+      "market_cap": 4894,
+      "weight": 1.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": -3.7216828478964348,
+      "cumulative_return": null,
+      "current_price": 29750.0,
+      "price_date": "2026-07-30",
+      "ath_price": 45550.0,
+      "dd": -34.687156970362246,
       "rsi": null,
       "is_today_new": true
     }
@@ -997,6 +1069,24 @@
       "dd": -61.27753303964758,
       "rsi": null,
       "is_today_new": true
+    },
+    {
+      "code": "119850",
+      "name": "지엔씨에너지",
+      "sector": "기계",
+      "market_cap": 4894,
+      "weight": 1.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": -3.7216828478964348,
+      "cumulative_return": null,
+      "current_price": 29750.0,
+      "price_date": "2026-07-30",
+      "ath_price": 45550.0,
+      "dd": -34.687156970362246,
+      "rsi": null,
+      "is_today_new": true
     }
   ],
   "_order_changes": {
@@ -1010,6 +1100,10 @@
         {
           "name": "삼성전기",
           "weight": 3.0
+        },
+        {
+          "name": "지엔씨에너지",
+          "weight": 1.0
         }
       ],
       "changed": [
@@ -1036,6 +1130,10 @@
         {
           "name": "삼성전기",
           "weight": 3.0
+        },
+        {
+          "name": "지엔씨에너지",
+          "weight": 1.0
         }
       ],
       "changed": [
@@ -1067,6 +1165,10 @@
         {
           "name": "삼성전기",
           "weight": 3.0
+        },
+        {
+          "name": "지엔씨에너지",
+          "weight": 1.0
         }
       ],
       "changed": [
@@ -1098,6 +1200,10 @@
         {
           "name": "삼성전기",
           "weight": 3.0
+        },
+        {
+          "name": "지엔씨에너지",
+          "weight": 1.0
         }
       ],
       "changed": [
@@ -1124,6 +1230,10 @@
         {
           "name": "삼성전기",
           "weight": 3.0
+        },
+        {
+          "name": "지엔씨에너지",
+          "weight": 1.0
         }
       ],
       "changed": [
