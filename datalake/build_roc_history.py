@@ -53,6 +53,13 @@ KRX_MARCAP = {
     'KOSDAQ Market Cap': '2001',
 }
 
+# macro_series(레이크 누적)에서 읽는 시리즈 — dataset.csv 보다 이력이 긴 것들.
+# ★datalake/backfill_macro_extra.py 가 dataset.csv 수집 시작 이전 구간을 '레이크에만' 채워 둔다.
+#   dataset.csv 에 일별 전량을 넣으면 cmbData 축이 5,000일로 늘어 인라인 JSON 이 폭발한다
+#   (축은 2024년부터만 일별). 레이크는 accumulate_macro_series.py 가 upsert 만 하고
+#   삭제하지 않으므로, dataset.csv 에 없는 이 과거 행들은 지워지지 않는다.
+MACRO_LAKE = ['SMP', 'VKOSPI']
+
 # 파생 = 지수 ÷ 환율. market_crawler.py 와 동일 정의(round 4).
 DERIVED = {
     'KOSPI/USD': ('KOSPI', 'KRW/USD'),
@@ -150,6 +157,17 @@ def main():
             "SELECT strftime(date, '%Y-%m-%d'), marcap FROM kr_index_ohlcv "
             "WHERE index_code = ? AND marcap IS NOT NULL AND marcap > 0 ORDER BY date",
             [code]).fetchall()
+        series[name] = month_end(rows)
+        raw[name] = rows
+
+    # 2-c) macro_series (레이크 누적 — dataset.csv 보다 긴 이력)
+    for name in MACRO_LAKE:
+        rows = con.execute(
+            "SELECT strftime(date, '%Y-%m-%d'), value FROM macro_series "
+            "WHERE series = ? AND value IS NOT NULL ORDER BY date", [name]).fetchall()
+        if not rows:
+            print(f'  - {name}: macro_series 에 없음 (backfill_macro_extra.py 미실행?)')
+            continue
         series[name] = month_end(rows)
         raw[name] = rows
 
