@@ -1669,6 +1669,38 @@ def _series_country(group_label, s):
 
 # DATA 차트 시리즈별 축 단위 (display명 기준; 전수 조사 2026-07-16 — 값 규모 실측 검증).
 # '억원'은 축 최대 1조 이상이면 (조원)으로 자동 승격 + 눈금/끝값 환산. 그 외는 주석만.
+# ─────────────────────────────────────────────────────────────────────────────
+# RoC² 허용 시리즈 (2026-07-30) — 판독성이 검증된 것만 남긴다.
+#   값 = (월 런, 월 AC1, 주 런, 주 AC1). 런 = RoC² 부호가 한 방향으로 유지되는 평균 기간,
+#   AC1 = lag-1 자기상관. ★무작위면 런 2.0·AC1 0 이다. 가격·지수는 전부 그 근처였다
+#   (KOSPI 2.13/0.14, S&P500 1.94/-0.01, VIX 1.61/-0.21) — 즉 2차 차분이 노이즈다.
+#   통과 기준 = 런 ≥ 2.7 AND AC1 ≥ 0.25 (월·주 중 하나라도). 재계산은
+#   `venv/bin/python3 datalake/score_roc2.py` → /tmp/roc_allow.txt 를 여기에 붙인다.
+#   ※목록이 부동산·신용/유동성·물가·심리·경기로 모이는 건 우연이 아니다 — 관성이 큰
+#     시계열에서만 '감속'이 상태로 지속되고, 랜덤워크에 가까운 가격에서는 지속되지 않는다.
+CMB_ROC_ALLOW = {
+    'KB 아파트지수 (서울)': (9.4, 0.86, 6.2, 0.83),
+    'KB 주택매매지수 (전국)': (7.83, 0.9, 5.17, 0.88),
+    'M2 전년동월비': (2.76, 0.36, 2.76, 0.36),
+    'PPI 전년동월비': (4.92, 0.62, 4.92, 0.62),
+    'SEAJ 반도체장비 판매고': (4.18, 0.36, 2.73, 0.18),
+    '가계대출 잔액': (5.11, 0.71, 4.29, 0.75),
+    '경제심리지수 ESI': (9.4, 0.88, 6.2, 0.82),
+    '미 CPI 전년동월비': (3.05, 0.36, 3.05, 0.36),
+    '미 근원 CPI 전년동월비': (2.76, 0.55, 2.76, 0.55),
+    '미 금융여건지수 NFCI': (None, None, 5.8, 0.87),
+    '미 케이스-실러 주택가격 전년동월비': (5.27, 0.91, 5.27, 0.91),
+    '미분양주택 (전국)': (3.54, 0.49, 2.73, 0.47),
+    '미시간 소비자심리': (2.88, 0.25, 2.31, 0.18),
+    '삼성전자 외국인': (None, None, 3.22, 0.27),
+    '선행지수 순환변동치': (5.11, 0.63, 4.29, 0.51),
+    '아파트 실거래지수 (서울)': (2.88, 0.71, 2.73, 0.61),
+    '아파트 실거래지수 (전국)': (3.29, 0.81, 3.33, 0.76),
+    '은행 대출금리 (신규취급)': (2.76, 0.56, 3.44, 0.53),
+    '은행 저축성수신금리 (신규취급)': (3.92, 0.54, 3.88, 0.5),
+    '정기예금 잔액': (2.88, 0.59, 4.29, 0.46),
+}
+
 CMB_SERIES_UNITS = {
     # INDEX_KOREA
     'KOSPI Market Cap': '조원', 'KOSDAQ Market Cap': '조원',
@@ -2246,6 +2278,8 @@ def _build_combined_chart_section():
             var cmbSeriesUnit = CMB_UNIT_PLACEHOLDER;
             // RoC² 월말 백필 히스토리 — {시리즈: {d:[날짜…], v:[값…]}} (2026-07-30)
             var cmbRocHist = CMB_ROC_HIST_PLACEHOLDER;
+            // RoC² 허용 시리즈 + 판독성 점수 {이름: [월런, 월AC1, 주런, 주AC1]}
+            var cmbRocAllow = CMB_ROC_ALLOW_PLACEHOLDER;
             var cmbChart = null;
             var cmbAutoRangePending = false;
             var cmbClickOrder = [];
@@ -2643,6 +2677,12 @@ def _build_combined_chart_section():
             //    한 문장으로 뭉쳐 "이력이 짧습니다"라고 하면 백필하면 될 것처럼 읽혀서 오해를 부른다.
             function cmbRocDiag(name, freq) {
                 freq = (freq === 'W') ? 'W' : 'M';
+                // ★허용 목록 밖이면 계산 가능해도 쓰지 않는다 — RoC² 부호가 매 기간 뒤집혀
+                //   판독이 안 되는 시리즈다(무작위 기대 런 2.0 근처). 사유를 숫자로 보여준다.
+                if (!cmbRocAllow[name]) {
+                    return { ok: false, why: 'RoC\u00b2 판독성 미달 — 부호가 거의 매 기간 뒤집혀 노이즈입니다 '
+                                             + '(가격·지수 계열은 대체로 여기 해당). 부동산·유동성·물가·심리 지표에서 보세요' };
+                }
                 var R = cmbRocCompute(name, freq);
                 if (R) {
                     for (var i = 0; i < R.roc2.length; i++) {
@@ -3512,6 +3552,7 @@ def _build_combined_chart_section():
                     var _rocPos = {};
                     for (var _ri = 0; _ri < commonDates.length; _ri++) _rocPos[commonDates[_ri]] = _ri;
                     perSeries.forEach(function(s) {
+                        if (!cmbRocAllow[s.name]) return;   // 판독성 미달 → 패널에 올리지 않는다
                         var R = cmbRocCompute(s.name);
                         if (!R) return;
                         var _ci = cmbClickOrder.indexOf(s.name);
@@ -3982,6 +4023,17 @@ def _build_combined_chart_section():
                                 if (!_d.ok) { _why = cmbClickOrder[_di] + ' — ' + _d.why; break; }
                             }
                             if (!_why) _why = 'RoC\u00b2 를 계산할 수 없습니다';
+                        } else if (cmbClickOrder.length) {
+                            // 정상 표시 중이면 그 시리즈의 판독성 점수를 알려준다(과신 방지)
+                            var _a = cmbRocAllow[cmbClickOrder[0]];
+                            if (_a) {
+                                var _wk = (window.cmbRocFreq === 'W');
+                                var _r = _wk ? _a[2] : _a[0], _c = _wk ? _a[3] : _a[1];
+                                if (_r !== null && _r !== undefined) {
+                                    _why = '판독성: 부호 유지 평균 ' + _r + (_wk ? '주' : '개월')
+                                         + ' · 자기상관 ' + _c + ' (무작위면 2.0 / 0)';
+                                }
+                            }
                         }
                         rocBtn.title = _why;
                     }
@@ -4100,7 +4152,7 @@ def _build_combined_chart_section():
             buildCmbChart();
         })();
         </script>
-        """.replace('CMB_DATA_PLACEHOLDER', export_json).replace('CMB_UNIT_PLACEHOLDER', json.dumps(CMB_SERIES_UNITS, ensure_ascii=False)).replace('CMB_ROC_HIST_PLACEHOLDER', json.dumps(_roc_history_for(groups), ensure_ascii=False, separators=(',', ':')))
+        """.replace('CMB_DATA_PLACEHOLDER', export_json).replace('CMB_UNIT_PLACEHOLDER', json.dumps(CMB_SERIES_UNITS, ensure_ascii=False)).replace('CMB_ROC_HIST_PLACEHOLDER', json.dumps(_roc_history_for(groups), ensure_ascii=False, separators=(',', ':'))).replace('CMB_ROC_ALLOW_PLACEHOLDER', json.dumps(CMB_ROC_ALLOW, ensure_ascii=False))
 
         return f"""
         <div class="category-section">
