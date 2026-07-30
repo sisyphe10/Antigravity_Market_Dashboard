@@ -136,6 +136,40 @@ def _register_prompt_version_once() -> str:
     return pv
 
 
+def _resolve_analysis_text(parsed) -> tuple[str, str]:
+    """분석 입력 본문 선택. primary_text 가 실적 수치를 담고 있으면 그대로 사용한다.
+
+    ARM 전례(2026-07-30): EX-99.1 이 수치 없는 짧은 커버 PR 이고 실적 본문은
+    EX-99.2 주주서한(86KB)에 있어, primary_text 만 넣으면 분석시트가 전부
+    "본문 미제공" 으로 나왔다. 강한 재무 신호가 부족할 때만 최장 EX-99 를 덧붙인다.
+
+    반환: (본문, 선택 근거) — 근거는 로그·관측용.
+    """
+    from .attachment_parser import STRONG_EARNINGS_KEYWORDS, STRONG_EARNINGS_MIN_HITS
+
+    def _hits(text: str) -> int:
+        low = (text or '').lower()
+        return sum(1 for k in STRONG_EARNINGS_KEYWORDS if k in low)
+
+    primary = parsed.primary_text or ''
+    primary_hits = _hits(primary)
+    if primary_hits >= STRONG_EARNINGS_MIN_HITS:
+        return primary, f'primary_text (신호 {primary_hits}개)'
+
+    ex99 = {k: v for k, v in (parsed.exhibits or {}).items() if k.startswith('EX-99')}
+    if not ex99:
+        return primary, f'primary_text (EX-99 없음, 신호 {primary_hits}개)'
+
+    key, text = max(ex99.items(), key=lambda kv: len(kv[1] or ''))
+    ex_hits = _hits(text)
+    if ex_hits <= primary_hits:
+        return primary, f'primary_text (폴백 미채택: {key} 신호 {ex_hits}개)'
+
+    # 커버 PR 은 제목·발표 맥락을 담고 있어 함께 보존한다.
+    merged = f'{primary}\n\n[{key}]\n{text}' if primary else text
+    return merged, f'primary_text + {key} (신호 {primary_hits} -> {ex_hits}개)'
+
+
 def process_filing(filing_id: int) -> dict:
     """filing 1건 분석. stage='fetched' → 'analyzed' 전이.
 
@@ -193,7 +227,10 @@ def process_filing(filing_id: int) -> dict:
             fy, fq = datetime.now(tz=timezone.utc).year, 1
 
     # YoY 표 (기계 산출)
-    yoy_snap = compute_yoy(filing['ticker'], fy, fq, press_release_text=parsed.primary_text)
+    analysis_text, text_source = _resolve_analysis_text(parsed)
+    logger.info(f"[{filing['ticker']}] 분석 본문 선택: {text_source} ({len(analysis_text):,}자)")
+
+    yoy_snap = compute_yoy(filing['ticker'], fy, fq, press_release_text=analysis_text)
     yoy_md = format_table(yoy_snap)
 
     # insider 부록 (±30일)
@@ -211,7 +248,7 @@ def process_filing(filing_id: int) -> dict:
         fiscal_quarter=fq,
         document_type=filing['document_type'],
         severity=filing.get('severity') or 'NORMAL',
-        primary_text=parsed.primary_text,
+        primary_text=analysis_text,
         yoy_table_md=yoy_md,
         insider_appendix_md=insider_md,
         source_url=filing.get('source_url'),
