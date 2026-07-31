@@ -296,6 +296,8 @@ SIDEBAR_CSS = (
     #   -> 스트립 42px / 링크 41px / 18px / 중앙정렬 / sticky(top=nav 54px) / 앰버 밑줄.
     # 이 상수를 소비하는 앱: quoteboard(Watchlist), datalake webui(자식 없음=무동작).
     '.sidebar{position:sticky;top:54px;z-index:90;display:flex;align-items:stretch;'
+    # margin-bottom 18px = 게시 페이지(create_dashboard .sidebar margin:0 -24px 18px)와 통일
+    'margin:0 0 18px;'
     'justify-content:center;gap:2px;padding:0 28px;height:42px;background:#161b21;'
     'border-bottom:1px solid #2a323b;overflow:hidden;box-sizing:border-box}'
     '.sidebar-link{display:inline-flex;align-items:center;padding:0 14px;height:41px;color:#9aa4ae;'

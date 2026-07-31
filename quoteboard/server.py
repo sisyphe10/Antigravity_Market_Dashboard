@@ -357,7 +357,7 @@ def _load_index():
     """index.html 네비 마커 블록을 정본(nav_style)으로 치환 후 캐시 (기동 시 1회).
     마커 미발견 시 원본 서빙 (경고 로그) — 기동 실패로 시세판을 죽이지 않는다."""
     raw = open(os.path.join(BASE, 'index.html'), encoding='utf-8').read()
-    out, ok = nav_style.materialize(raw, active='watchlist')
+    out, ok = nav_style.materialize(raw, active='watchlist', sub_active='watchlist')
     if not ok:
         logging.warning('index.html 네비 마커 미발견 — 원본 서빙')
         return raw

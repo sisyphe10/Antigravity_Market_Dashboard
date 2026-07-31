@@ -284,8 +284,14 @@ for f in glob.glob(os.path.join(REL, "*.html")):
     n, cnt = jnav_pat.subn(lambda m, a=act, su=sub: nav_style.nav_html(a, su), s, 1)
     if cnt == 0 and name in NAV_MUST_HAVE:
         fail("%s: topnav 블록 없음 — 교체 불가" % name)
-    # 하위 스트립을 정본 그룹 children 으로 교체 (자식 없는 그룹이면 스트립 제거)
-    n = sidebar_pat.sub(lambda m, a=(sub or act): nav_style.sidebar_html(a), n, 1)
+    # 하위 스트립을 정본 그룹 children 으로 교체 (자식 없는 그룹이면 스트립 제거).
+    # ★ROOT_ACTIVE 미등록 페이지는 손대지 않는다 — (None,None) 로 떨어져 멀쩡한
+    #   스트립이 삭제되는 사고 방지 (2026-07-31 적대적 검증 지적).
+    if name in ROOT_ACTIVE:
+        n = sidebar_pat.sub(lambda m, a=(sub or act): nav_style.sidebar_html(a), n, 1)
+    elif sidebar_pat.search(n):
+        sys.stderr.write('[compose] 경고: %s 는 ROOT_ACTIVE 미등록인데 스트립 보유 '
+                         '— 정본 교체 대상에서 제외됨\n' % name)
     # 구세대 주입 잔재 제거 (clean 입력이면 무동작)
     n = personal_css_pat.sub("", n)
     n = canon_pat.sub("", n)
@@ -321,16 +327,31 @@ if os.path.exists(idx):
     if 'sisyphe-tab' in t or 'topnav-sub">가계부' in t:
         fail("index.html: 구 Sisyphe 탭 잔존")
 
-# 하위 스트립 정합 검증 — 정본과 다르면 게시 중단 (2026-07-31)
+# 하위 스트립 정합 검증 (2026-07-31 적대적 검증 반영: fail-closed 화)
+#   - 스트립 2개 이상        -> 중단 (count=1 치환이라 뒤엣것이 구본으로 남는다)
+#   - 스트립 1개 & 정본 불일치 -> 중단
+#   - 그룹 children 이 없는데 스트립 존재 -> 중단
+#   - 스트립 0개             -> 통과. hotels/taiwan 처럼 애초에 스트립을 굽지 않는
+#                              페이지가 정상 존재하므로 '존재'를 강제하면 게시가 통째로
+#                              막힌다. 대신 어떤 페이지가 0개였는지 로그로 남긴다.
+_sb_none = []
 for _pg, (_a, _s) in ROOT_ACTIVE.items():
     _pp = os.path.join(REL, _pg)
     if not os.path.exists(_pp):
         continue
-    _m = sidebar_pat.search(open(_pp, encoding="utf-8").read())
-    if not _m:
+    _want = nav_style.sidebar_html(_s or _a)
+    _all = sidebar_pat.findall(open(_pp, encoding="utf-8").read())
+    if len(_all) > 1:
+        fail("%s: 하위 스트립 %d개 — 구본 잔존 가능" % (_pg, len(_all)))
+    if not _all:
+        _sb_none.append(_pg)
         continue
-    if _m.group(0) != nav_style.sidebar_html(_s or _a):
+    if not _want:
+        fail("%s: 그룹 children 이 없는데 하위 스트립 잔존" % _pg)
+    if _all[0] != _want:
         fail("%s: 하위 스트립이 정본과 불일치" % _pg)
+if _sb_none:
+    sys.stdout.write("[compose] 스트립 없음(정상 가능): %s\n" % ", ".join(_sb_none))
 
 for pg in ("market.html", "index.html"):
     pp = os.path.join(REL, pg)
