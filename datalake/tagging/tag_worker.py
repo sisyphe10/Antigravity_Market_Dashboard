@@ -43,6 +43,7 @@ TAGGER_VERSION = "1.0.0"
 MODEL = os.getenv("TAG_MODEL", "claude-haiku-4-5")
 DB_SRC = os.path.join(REPO, "execution", "research_bot", "research_notes.db")
 STATE_DB = os.path.join(DATALAKE_ROOT, "research_notes", "tag_state.sqlite")
+OCR_DB = os.path.join(DATALAKE_ROOT, "research_notes", "ocr_state.sqlite")
 
 BATCH_SIZE = int(os.getenv("TAG_BATCH", "16"))
 MAX_TEXT_CHARS = 5000
@@ -419,6 +420,19 @@ def pick_messages(src, args):
         q += " WHERE " + " AND ".join(where)
     q += " ORDER BY timestamp, id"
     rows = [dict(r) for r in src.execute(q, params)]
+    # 이미지 OCR 텍스트를 태깅 입력에 합류 — content_hash 가 바뀌므로 OCR 이
+    # 새로 생긴 메시지만 자동 재태깅된다 (ocr_worker.py 캐시가 정본).
+    if os.path.exists(OCR_DB):
+        oc = sqlite3.connect("file:%s?mode=ro" % OCR_DB, uri=True)
+        ocr = {mid: txt for mid, txt in oc.execute(
+            "SELECT message_id, ocr_text FROM ocr_items"
+            " WHERE status='succeeded' AND ocr_text IS NOT NULL AND ocr_text != ''")}
+        oc.close()
+        for r in rows:
+            t = ocr.get(r["id"])
+            if t:
+                r["text_content"] = ((r["text_content"] or "").rstrip()
+                                     + "\n\n[이미지 텍스트]\n" + t).strip()
     if args.sample:
         rows = stratified_sample(rows, args.sample)
     return rows

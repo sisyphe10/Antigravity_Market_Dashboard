@@ -13,6 +13,13 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PY="$REPO/venv/bin/python3"
 rc=0
 
+echo "── 0/5 이미지 OCR (미처리분)"
+"$PY" "$REPO/datalake/ocr_worker.py" || {
+  echo "[warn] 이미지 OCR 실패 — 실패분 재시도"
+  "$PY" "$REPO/datalake/ocr_worker.py" --retry-failed \
+    || { echo "[warn] OCR 재시도도 실패 — OCR 없이 계속"; rc=1; }
+}
+
 echo "── 1/5 태깅 (미처리분)"
 "$PY" "$REPO/datalake/tagging/tag_worker.py" || {
   # 실패 사유 대부분은 "missing in batch response" (배치가 커서 모델이 id 누락).

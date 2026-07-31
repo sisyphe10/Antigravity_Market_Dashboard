@@ -29,6 +29,8 @@ DB_PATH = os.path.join(REPO, "execution", "research_bot", "research_notes.db")
 MEDIA_OUT = os.path.join(NOTES_DIR, "media")
 # 태그 캐시 (datalake/tagging/tag_worker.py 가 만든다). 없으면 태그 없이 생성.
 TAG_DB = os.path.join(NOTES_DIR, "tag_state.sqlite")
+# OCR 캐시 (datalake/ocr_worker.py 가 만든다). 없으면 OCR 블록 없이 생성.
+OCR_DB = os.path.join(NOTES_DIR, "ocr_state.sqlite")
 TAG_SCHEMA_VERSION = 1
 
 TYPE_LABEL = {"text": "텍스트", "photo": "사진", "document": "파일"}
@@ -150,6 +152,23 @@ def load_tags(day):
     return out
 
 
+def load_ocr(day):
+    """해당 날짜 이미지 OCR 텍스트를 캐시에서 읽는다 (LLM 호출 없음)."""
+    if not os.path.exists(OCR_DB):
+        return {}
+    try:
+        conn = sqlite3.connect("file:%s?mode=ro" % OCR_DB, uri=True)
+        out = {mid: txt for mid, txt in conn.execute(
+            "SELECT message_id, ocr_text FROM ocr_items"
+            " WHERE day=? AND status='succeeded'"
+            " AND ocr_text IS NOT NULL AND ocr_text != ''", (day,))}
+        conn.close()
+        return out
+    except Exception as e:  # noqa: BLE001
+        print("  (OCR 캐시 사용 안 함: %s)" % str(e)[:120])
+        return {}
+
+
 def _item_tag_line(tag):
     """항목 바로 아래에 붙는 사람이 읽는 태그 줄."""
     parts = []
@@ -165,7 +184,7 @@ def _item_tag_line(tag):
     return " · ".join(parts)
 
 
-def render_day(day, messages, tags=None):
+def render_day(day, messages, tags=None, ocr=None):
     lines = [
         "---",
         f"date: {day}",
@@ -231,6 +250,12 @@ def render_day(day, messages, tags=None):
         if rel:
             lines.append(f"첨부: [{os.path.basename(rel)}]({rel})")
             lines.append("")
+        # 이미지 OCR 투영 — 본문 무변형 원칙의 예외가 아니라 태그줄과 같은 "부가물"
+        if ocr and m["id"] in ocr:
+            lines.append("> **이미지 텍스트(OCR)**")
+            for ln in ocr[m["id"]].splitlines():
+                lines.append(("> " + ln) if ln.strip() else ">")
+            lines.append("")
         if m.get("article_content"):
             lines.append("<details><summary>기사 본문</summary>")
             lines.append("")
@@ -250,7 +275,7 @@ def export_day(conn, day):
     path = os.path.join(out_dir, f"{day}.md")
     tmp = path + ".tmp"
     with open(tmp, "w", encoding="utf-8", newline="\n") as f:
-        f.write(render_day(day, messages, load_tags(day)))
+        f.write(render_day(day, messages, load_tags(day), load_ocr(day)))
     os.replace(tmp, path)
     return len(messages)
 
