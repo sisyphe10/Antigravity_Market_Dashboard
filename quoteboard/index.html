@@ -355,11 +355,28 @@ function render() {
   const m = DATA.meta;
   document.getElementById('meta').textContent =
     `${m.sweep_at || '-'}` + (m.fail ? ` · 수신 실패 ${m.fail}건` : '');
-  const navH = document.querySelector('nav.topnav').offsetHeight;
-  document.documentElement.style.setProperty('--nav-h', navH + 'px');
-  document.documentElement.style.setProperty('--thead-top',
-    navH + document.getElementById('topbar').offsetHeight + 'px');
+  applyStickyOffsets();
 }
+
+// ── sticky 오프셋 계산 (2026-07-31) ──────────────────
+// 하위 스트립(aside.sidebar)이 nav 아래에 sticky 로 겹쳐 서므로, topbar 는 nav 가 아니라
+// '스트립 아래'에서 고정돼야 한다. 스트립 sticky 도입 후 topbar 상단 40px 이 스트립에
+// 가려 제목줄이 사라지던 회귀의 수정. 스트립이 없거나 800px 이하에서 숨겨지면 nav 기준.
+function applyStickyOffsets(){
+  const nav = document.querySelector('nav.topnav');
+  if (!nav) return;
+  const navH = nav.offsetHeight;
+  const sb = document.querySelector('aside.sidebar');
+  const cs = sb ? getComputedStyle(sb) : null;
+  const stackH = (sb && cs.position === 'sticky' && cs.display !== 'none')
+    ? (parseFloat(cs.top) || 0) + sb.offsetHeight
+    : navH;
+  document.documentElement.style.setProperty('--nav-h', stackH + 'px');
+  const tb = document.getElementById('topbar');
+  document.documentElement.style.setProperty('--thead-top',
+    stackH + (tb ? tb.offsetHeight : 0) + 'px');
+}
+window.addEventListener('resize', applyStickyOffsets);
 
 // ── 탭 전환 (섹터: 일반 클릭=단독 표시, Ctrl/Shift/Cmd+클릭=추가·제거, 클릭 순서대로 패널 표시) ──
 document.getElementById('tabs').addEventListener('click', e => {
