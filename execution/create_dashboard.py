@@ -7446,6 +7446,10 @@ def create_order_section():
                     };
                 });
                 combined.sort(function(a, b) { return b.newWeight - a.newWeight; });
+                // 변경전·변경후 모두 0인 행 제외 — Order 매트릭스는 전 포트 코드 합집합이라
+                // 그 포트에 없는 종목이 0/0 으로 남아 저장된다(자문지에 '0.00% 유지'로 찍히던 원인).
+                // NEW 시트/portfolio_data 는 이미 0비중을 버리므로 자문지만 맞추면 된다.
+                combined = combined.filter(function(s) { return !(s.oldWeight === 0 && s.newWeight === 0); });
                 if (!combined.length) { alert('주문 종목이 없습니다. Order 탭에서 종목을 먼저 입력해 주세요.'); return; }
 
                 if (t.format === 'kis') {
