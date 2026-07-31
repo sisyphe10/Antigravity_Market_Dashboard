@@ -48,6 +48,12 @@ FOREIGN_PRIVATE_ISSUERS: dict[str, dict] = {
     'SPOT':  {'country': 'LU', 'exchange': 'NYSE',   'note': 'Spotify Technology'},
     # 2026-07-30 추가: 20-F/6-K 전용 발행인(8-K/10-K 이력 전무) — 미등록으로 1Q27 6-K 누락 확인.
     'ARM':   {'country': 'GB', 'exchange': 'NASDAQ', 'note': 'Arm Holdings plc (ADS)'},
+    # 2026-07-31 추가: universe 316종 전수 재스캔 — 6-K 전용(8-K/10-K 이력 전무) 5종 미등록 확인.
+    'CCEP':  {'country': 'GB', 'exchange': 'NASDAQ', 'note': 'Coca-Cola Europacific Partners plc'},
+    'FER':   {'country': 'NL', 'exchange': 'NASDAQ', 'note': 'Ferrovial N.V.'},
+    'NBIS':  {'country': 'NL', 'exchange': 'NASDAQ', 'note': 'Nebius Group N.V.'},
+    'PDD':   {'country': 'CN', 'exchange': 'NASDAQ', 'note': 'PDD Holdings (Temu/Pinduoduo)'},
+    'TRI':   {'country': 'CA', 'exchange': 'NYSE',   'note': 'Thomson Reuters Corp'},
 }
 
 
