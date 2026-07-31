@@ -10128,8 +10128,9 @@ def create_dashboard():
            ★#tab0 스코프 + !important 필수: 게시 다크 CSS 의 td:not([style*=color]){color:#fff!important}
              · th{color:amber!important} 가 뒤에 주입돼 색이 통째로 덮인다 (2026-07-31 실측). */
         #tab0 .uv-star, #tab0 .uv-star-th { cursor: pointer; user-select: none; color: #8a919a !important; padding-left: 0; padding-right: 0; }
-        #tab0 .uv-star.on, #tab0 .uv-star-th.on { color: #4ade80 !important; }
-        #tab0 .uv-star:hover, #tab0 .uv-star-th:hover { color: #86efac !important; }
+        #tab0 .uv-star-th { color: #f5a623 !important; }
+        #tab0 .uv-star.on, #tab0 .uv-star-th.on { color: #f5a623 !important; text-shadow: 0 0 6px rgba(245,166,35,.55); }
+        #tab0 .uv-star:hover, #tab0 .uv-star-th:hover { color: #ffc04d !important; }
         body.uv-capture .uv-star, body.uv-capture .uv-star-th { display: none; }  /* Download PNG 에는 별표 컬럼 제외 */
         /* DD 열 (1Y 오른쪽) 세로 구분선 — 종목 리스트 17번째(별표 +1), 섹터 수익률 12번째 컬럼 */
         #tab0 th:nth-child(17), #tab0 td:nth-child(17) { border-left: 2px solid #868e96; }
@@ -10158,7 +10159,7 @@ def create_dashboard():
         .uv-search svg { width: 18px; height: 18px; stroke: #fff; flex: none; }
         .uv-search input { border: none; outline: none; background: transparent; color: #fff; font-family: inherit; font-size: 14px; width: 100%; min-width: 0; }
         .uv-search input::placeholder { color: #8a919a; }
-        .filters .csel-display { color: #fff !important; }
+        .filters .csel-display { color: #fff !important; border-color: #fff !important; }
         .filters .csel-display::after { border-top-color: #fff !important; }
         footer { text-align: center; padding: 24px; color: #999; font-size: 14px; }
         TOP_NAV_CSS_PLACEHOLDER
