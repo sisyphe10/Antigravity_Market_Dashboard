@@ -271,6 +271,8 @@ def get_due_transcript_jobs(now_iso: str, limit: int = 20) -> list[dict]:
             JOIN filings f ON j.filing_id = f.id
             WHERE j.next_attempt_at <= ?
               AND j.last_status NOT IN ('success', 'gave_up', 'needs_review', 'stale_pending')
+              -- 'gate_blocked' 는 일부러 제외하지 않는다: 게이트 차단은 완료가 아니라
+              -- 실패이므로 다음 주기에 진짜 전문을 다시 찾아야 한다 (2026-07-31)
             ORDER BY j.next_attempt_at ASC
             LIMIT ?
             """,
@@ -457,6 +459,29 @@ def update_transcript_translation(transcript_id: int, *, translated_kr: str,
         conn.close()
 
 
+def requeue_gate_blocked_job(filing_id: int, next_attempt_at: str) -> None:
+    """게이트가 오염을 차단했을 때, 해당 filing 의 잡을 재수집 대상으로 되돌린다.
+
+    2026-07-31: 차단만 하고 잡을 success 로 두면 진짜 전문이 나중에 올라와도
+    영영 수집하지 않는다. 차단 = 실패이지 완료가 아니다.
+    """
+    conn = get_conn()
+    try:
+        conn.execute(
+            """
+            UPDATE transcript_jobs
+               SET last_status = 'gate_blocked',
+                   next_attempt_at = ?,
+                   last_error = 'gate reject — 재수집 대기'
+             WHERE filing_id = ?
+            """,
+            (next_attempt_at, filing_id),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
 def get_pending_translation_transcripts(limit: int = 5) -> list[dict]:
     """번역 안 된 transcripts (translated_kr IS NULL) 최신순."""
     conn = get_conn()
@@ -467,6 +492,7 @@ def get_pending_translation_transcripts(limit: int = 5) -> list[dict]:
             WHERE translated_kr IS NULL
               AND match_confidence >= 0.7
               AND prepared_remarks IS NOT NULL
+              AND COALESCE(translation_skipped, 0) = 0
             ORDER BY fetched_at DESC LIMIT ?
             """,
             (limit,),

@@ -158,7 +158,7 @@ def _process_one(job: dict, sources: Sequence[TranscriptSource]) -> None:
                 _g = check_collect(parsed.source_url, parsed.prepared_remarks,
                                    parsed.qa, filing.get('filed_at') or '')
                 if not _g.ok:
-                    last_failure_status = 'needs_review'
+                    last_failure_status = 'gate_blocked'
                     last_error = f"gate reject: {'; '.join(_g.reasons)}"
                     logger.warning(
                         f"[transcript_watch] GATE REJECT filing={filing['id']} "

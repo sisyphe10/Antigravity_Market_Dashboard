@@ -33,7 +33,10 @@ MIN_RAW_CHARS = 18_000
 URL_BLOCKLIST = ('instant-alerts/',)
 URL_DATE_TOLERANCE_DAYS = 25
 VINTAGE_TOLERANCE_MONTHS = 4          # 본문/URL 연월이 공시월과 이만큼 벌어지면 다른 분기
-MIN_TRANSLATION_RATIO = 0.25          # 한국어 길이 / 원문 길이
+# 실측(정상 106건): 최저 0.134 / 5%=0.284 / 중앙 0.461
+# 오염(거부·날조 스텁): 0.03~0.08  → 하드 임계 0.12, 0.30 미만은 경고
+MIN_TRANSLATION_RATIO = 0.12          # 한국어 길이 / 원문 길이 (하드)
+WARN_TRANSLATION_RATIO = 0.30         # 이하면 경고(차단 아님)
 SENTINEL = 'NOT_A_TRANSCRIPT'
 
 REFUSAL_MARKERS = (
@@ -62,6 +65,11 @@ _RE_CALL_PHRASE = re.compile(
 _RE_KR_SPEAKER = re.compile(r'\*\*\s*([A-Z][A-Za-z.\'-]+(?:\s+[A-Z][A-Za-z.\'-]+){0,3})\s*[-–—]')
 _RE_QUOTE_CTX = re.compile(r'["“”‘’]|\b(said|says|noted|stated|added|'
                            r'according to|commented|explained|continued)\b', re.I)
+# 화자 라인 뒤에 붙는 직함 — 로스터형("Name\nChief Executive Officer") 판별용
+_RE_TITLE_WORD = re.compile(
+    r'\s*(?:Chief|Chairman|President|Founder|Head of|Executive|Senior|Vice|Managing|'
+    r'Director|Officer|CEO|CFO|COO|CTO|EVP|SVP|VP|General Manager|Treasurer|'
+    r'Analyst|Investor Relations|Corporate|Interim|Co-)', re.I)
 
 
 def _months(y: int, m: int) -> int:
@@ -75,15 +83,17 @@ def _daynum(y: int, m: int, d: int) -> int:
 @dataclass
 class GateResult:
     ok: bool
-    reasons: list[str] = field(default_factory=list)
+    reasons: list[str] = field(default_factory=list)     # 하드 차단 사유
+    warnings: list[str] = field(default_factory=list)    # 기록만 (차단 아님)
     info: dict = field(default_factory=dict)
 
     def __bool__(self) -> bool:
         return self.ok
 
 
-def _fail(reasons, info=None) -> GateResult:
-    return GateResult(ok=not reasons, reasons=reasons, info=info or {})
+def _fail(reasons, info=None, warnings=None) -> GateResult:
+    return GateResult(ok=not reasons, reasons=reasons,
+                      warnings=warnings or [], info=info or {})
 
 
 # ── L1: 소스 URL ──────────────────────────────────────────────────
@@ -167,25 +177,43 @@ def check_translation(raw_text: str, translated_kr: str) -> GateResult:
         if mk in head:
             reasons.append(f'refusal_marker:{mk}')
             break
+    warnings: list[str] = []
     if raw_text:
         ratio = len(kr) / len(raw_text)
         info['ratio'] = round(ratio, 3)
         if ratio < MIN_TRANSLATION_RATIO:
             reasons.append(f'translation_ratio_low:{ratio:.2f}')
+        elif ratio < WARN_TRANSLATION_RATIO:
+            warnings.append(f'translation_ratio_thin:{ratio:.2f}')
 
+    # ★ 화자 귀속은 '경고'다 — 하드 차단이 아니다.
+    #   실측: 정상 106건 중 19건(18%)이 화자근거 0%. 원문에 화자 라벨이 아예 없고
+    #   IR 인사말("joined today by Elon Musk, ...")만 있는 소스가 흔하기 때문이다.
+    #   이걸로 막으면 정상 문서 22%가 사라진다. 대신 md 프론트매터·다이제스트에 남긴다.
     sp = check_speaker_attribution(raw_text, kr)
     if not sp.ok:
-        reasons.extend(sp.reasons)
+        warnings.extend(sp.reasons)
     info.update(sp.info)
-    return _fail(reasons, info)
+    return _fail(reasons, info, warnings)
 
 
 def check_speaker_attribution(raw_text: str, translated_kr: str) -> GateResult:
-    """번역본 화자 헤더의 인물이 원문에서 '실제로 말했는지' 확인.
+    """번역본 화자 헤더의 인물이 원문에서 '화자로' 등장하는지 확인.
 
-    ★ 이름 존재 여부만 보면 안 된다 — IBM 날조 케이스에서 "Arvind Krishna" 는 원문(기사)에
-      3번 나오지만 전부 "praising CEO Arvind Krishna's execution" 같은 3인칭 서술이었다.
-      이름 등장 지점 주변에 발화 근거(`이름:` 패턴 또는 인용부호/발화동사)가 있어야 한다.
+    ★ 설계 주의 (2026-07-31 1차 구현 실패에서 배운 것)
+      1차 구현은 "이름 주변에 인용부호나 발화동사(said/noted)가 있는가"를 봤다. 이건
+      **기사 판별 논리를 전문에 잘못 적용한 것**이다 — 진짜 전문은 전부 직접 발화라
+      인용부호가 없다. 실측 결과 GOOGL·TSLA·MU·ADBE·VZ 등 정상 문서가 무더기로 걸렸다.
+
+      올바른 기준은 **화자 라인 등장 여부**다. 전문에서 발화자는 항상 줄머리에
+      `Name:` / `Name --` / `Name - 직함` / `Name\\n직함`(로스터형) 형태로 나온다.
+      기사에서 언급되는 이름은 문장 한가운데에만 나온다 — 이 차이가 판별점이다.
+
+      IBM 날조 케이스: "praising CEO Arvind Krishna's execution" 처럼 문장 중간에만
+      존재 → 화자 라인 0건 → reject.
+
+    ★ 판정: 화자 라인 근거가 있는 이름의 비율이 절반 미만이면 reject.
+      "한 명이라도 있으면 통과" 는 진짜 화자 1명 + 날조 3명 조합을 통과시킨다.
 
     번역 프롬프트 규칙상 임원 이름은 영문 그대로 출력되므로 음차 문제는 없다.
     """
@@ -194,35 +222,42 @@ def check_speaker_attribution(raw_text: str, translated_kr: str) -> GateResult:
     names = []
     for m in _RE_KR_SPEAKER.finditer(kr):
         n = m.group(1).strip()
-        if n and n.lower() not in ('operator',) and n not in names:
+        if n and n.lower() not in ('operator', 'analyst') and n not in names:
             names.append(n)
     info = {'kr_speakers': names[:8], 'kr_speaker_count': len(names)}
     if not names:
         return _fail([], info)          # 화자 헤더가 없으면 이 검사는 판단 보류
 
-    attributed = 0
-    unattributed = []
+    attributed, unattributed = 0, []
     for n in names:
-        ok = False
-        for m in re.finditer(re.escape(n), raw_text):
-            after = raw_text[m.end():m.end() + 3]
-            if after.lstrip().startswith(':'):
-                ok = True
-                break
-            win = raw_text[max(0, m.start() - 150):m.end() + 150]
-            if _RE_QUOTE_CTX.search(win):
-                ok = True
-                break
-        if ok:
+        if _is_speaker_line(raw_text, n):
             attributed += 1
         else:
             unattributed.append(n)
     info['attributed'] = attributed
     info['unattributed'] = unattributed[:5]
-    # 한 명도 발화 근거가 없으면 = 원문에 발언이 존재하지 않음 → 날조
-    if attributed == 0:
-        return _fail([f'no_speaker_attribution:{",".join(names[:3])}'], info)
+    if attributed * 2 < len(names):
+        return _fail([f'speaker_not_in_source:{",".join(unattributed[:3])}'
+                      f'({attributed}/{len(names)})'], info)
     return _fail([], info)
+
+
+def _is_speaker_line(raw_text: str, name: str) -> bool:
+    """원문에서 name 이 '화자 라인'으로 등장하는가."""
+    for m in re.finditer(re.escape(name), raw_text):
+        # 줄머리(또는 마크업 직후)에서 시작하는가
+        prefix = raw_text[max(0, m.start() - 40):m.start()]
+        at_line_start = ('\n' in prefix[-3:] or m.start() == 0
+                         or prefix.rstrip().endswith(('*', '>', '|', '.', '?')))
+        tail = raw_text[m.end():m.end() + 90]
+        # Name:  /  Name --  /  Name - 직함  /  Name \n 직함
+        if re.match(r'\s*(?::|--|—|–|-\s)', tail):
+            return True
+        if at_line_start and _RE_TITLE_WORD.match(tail.lstrip('\n\r \t')):
+            return True
+        if at_line_start and re.match(r'\s*\n\s*\S', tail) and _RE_TITLE_WORD.search(tail[:90]):
+            return True
+    return False
 
 
 # ── 통합 ──────────────────────────────────────────────────────────
@@ -230,7 +265,8 @@ def check_collect(url: str, prepared: str, qa: str, filed_at: str) -> GateResult
     """수집(insert) 직전 게이트 = L1 + L2."""
     a = check_source(url, filed_at)
     b = check_body(prepared, qa, filed_at)
-    return _fail(a.reasons + b.reasons, {**a.info, **b.info})
+    return _fail(a.reasons + b.reasons, {**a.info, **b.info},
+                 a.warnings + b.warnings)
 
 
 def check_publish(url: str, prepared: str, qa: str, filed_at: str,
