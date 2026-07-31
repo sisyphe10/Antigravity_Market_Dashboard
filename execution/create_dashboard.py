@@ -10154,9 +10154,9 @@ def create_dashboard():
         /* 기업명 컬럼 + 현재 정렬 컬럼 하이라이트 (클래스 방식 — 인라인 style 금지: 게시 다크 CSS의 td[style*=background] 규칙과 충돌) */
         .col-hl { background: #14171b; }
         /* 종목 검색창 — 흰 돋보기 + 직사각형 박스 (2026-07-31) */
-        .uv-search { display: inline-flex; align-items: center; gap: 8px; border: 1px solid #fff; border-radius: 0; background: transparent; padding: 6px 12px; }
+        .uv-search { position: absolute; top: 0; left: 0; display: flex; align-items: center; gap: 6px; border: 1px solid #fff; border-radius: 0; background: transparent; padding: 5px 8px; box-sizing: border-box; }
         .uv-search svg { width: 18px; height: 18px; stroke: #fff; flex: none; }
-        .uv-search input { border: none; outline: none; background: transparent; color: #fff; font-family: inherit; font-size: 14px; width: 190px; }
+        .uv-search input { border: none; outline: none; background: transparent; color: #fff; font-family: inherit; font-size: 14px; width: 100%; min-width: 0; }
         .uv-search input::placeholder { color: #8a919a; }
         footer { text-align: center; padding: 24px; color: #999; font-size: 14px; }
         TOP_NAV_CSS_PLACEHOLDER
@@ -10185,9 +10185,11 @@ SIDEBAR_PLACEHOLDER
             <div class="csel-display" id="cselSecDisplay" onclick="toggleCselId('cselSecList')">섹터</div>
             <div class="csel-list" id="cselSecList"></div>
         </div>
-        <div class="uv-search"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.35-4.35"></path></svg><input type="text" id="uvSearch" oninput="render()"></div>
         <button onclick="downloadUniverseList()" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
         <button onclick="superDownloadUniverse()" id="superDlBtn" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#2563eb;color:#fff;border:none;border-radius:8px;cursor:pointer;margin-left:8px;">Super Download</button>
+    </div>
+    <div id="uvSearchBar" style="position:relative;height:40px;">
+        <div class="uv-search" id="uvSearchBox"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.35-4.35"></path></svg><input type="text" id="uvSearch" oninput="render()"></div>
     </div>
     <table>
         <thead><tr>
@@ -10416,7 +10418,20 @@ function render(){
     });
     if(!h)h='<tr><td colspan="17" style="padding:40px;color:#888;">데이터 없음</td></tr>';
     document.getElementById('tbody').innerHTML=h;
+    uvPlaceSearch();
 }
+// 검색창을 기업명 컬럼(6번째 th) 위에 같은 너비로 정렬 (2026-07-31)
+function uvPlaceSearch(){
+    var th=document.querySelector('#tab0 thead th:nth-child(6)');
+    var box=document.getElementById('uvSearchBox');
+    var bar=document.getElementById('uvSearchBar');
+    if(!th||!box||!bar)return;
+    var tr=th.getBoundingClientRect(), br=bar.getBoundingClientRect();
+    if(!tr.width)return;
+    box.style.left=(tr.left-br.left)+'px';
+    box.style.width=tr.width+'px';
+}
+window.addEventListener('resize',uvPlaceSearch);
 
 var _cselVal = '', _cselCurVal = '', _cselSecVal = '';
 function toggleCselId(listId) {
