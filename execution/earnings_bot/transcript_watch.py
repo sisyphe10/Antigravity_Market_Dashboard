@@ -150,6 +150,21 @@ def _process_one(job: dict, sources: Sequence[TranscriptSource]) -> None:
             parsed.match_confidence = confidence
 
             if confidence >= DEFAULT_THRESHOLD:
+                # ── 하드 게이트 (2026-07-31 오염 사고) ─────────────────────
+                # matcher 점수에는 "이게 실제 발화 기록인가"를 재는 항목이 없어
+                # 가이던스 기사·보도자료·작년 전문이 0.7 을 넘겨 통과했다.
+                # 점수와 무관하게 여기서 veto 한다.
+                from .transcript_gate import check_collect
+                _g = check_collect(parsed.source_url, parsed.prepared_remarks,
+                                   parsed.qa, filing.get('filed_at') or '')
+                if not _g.ok:
+                    last_failure_status = 'needs_review'
+                    last_error = f"gate reject: {'; '.join(_g.reasons)}"
+                    logger.warning(
+                        f"[transcript_watch] GATE REJECT filing={filing['id']} "
+                        f"ticker={filing['ticker']} source={src.name} "
+                        f"conf={confidence:.3f} reasons={_g.reasons}")
+                    continue
                 # success → DB 적재 + 잡 종료
                 db.insert_transcript(
                     filing_id=filing['id'], source=src.name,

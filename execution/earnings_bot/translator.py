@@ -376,6 +376,24 @@ def translate_transcript(transcript_id: int) -> dict:
     if not prepared and not qa:
         return {'skip': True, 'reason': 'empty content', 'transcript_id': transcript_id}
 
+    # ── 번역 전 게이트 (2026-07-31): 전문이 아닌 문서를 번역기에 넣지 않는다.
+    #    프롬프트가 "전문 형식으로 출력하라"를 강제하므로, 기사를 넣으면 모델이
+    #    발언을 만들어낼 여지가 생긴다. 입력 단계에서 끊는 게 유일한 확실한 방어.
+    from .transcript_gate import check_collect, check_translation
+    _fa = ''
+    _c = db.get_conn()
+    try:
+        _r = _c.execute('SELECT filed_at FROM filings WHERE id=?',
+                        (row.get('filing_id'),)).fetchone()
+        _fa = (dict(_r).get('filed_at') or '')[:10] if _r else ''
+    finally:
+        _c.close()
+    _g = check_collect(row.get('source_url') or '', prepared, qa, _fa)
+    if not _g.ok:
+        logger.warning(f'[translator] GATE REJECT transcript={transcript_id} {_g.reasons}')
+        return {'skip': True, 'transcript_id': transcript_id,
+                'reason': 'gate_reject', 'gate_reasons': _g.reasons}
+
     pv = transcript_translation_prompt_version()
 
     if DRY_RUN:
@@ -432,6 +450,16 @@ def translate_transcript(transcript_id: int) -> dict:
         r['input_tokens'] for r in qa_resps)
     total_output = sum(r['output_tokens'] for r in prepared_resps) + sum(
         r['output_tokens'] for r in qa_resps)
+
+    # ── 번역 후 게이트: sentinel / 거부문구 / 분량비율 / 화자 귀속 역대조
+    _og = check_translation(prepared + '\n' + qa, translated_full)
+    if not _og.ok:
+        logger.warning(
+            f'[translator] OUTPUT GATE REJECT transcript={transcript_id} '
+            f'{_og.reasons} info={_og.info}')
+        return {'transcript_id': transcript_id, 'translated': False,
+                'reason': 'output_gate_reject', 'gate_reasons': _og.reasons,
+                'gate_info': _og.info}
 
     db.update_transcript_translation(
         transcript_id=transcript_id,

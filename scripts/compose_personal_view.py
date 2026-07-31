@@ -254,6 +254,9 @@ NAV_UNIFY = (
 
 jnav_pat = re.compile(r'<nav class="topnav">.*?</nav>', re.S)
 personal_css_pat = re.compile(r'<style id="aoe-personal-nav">.*?</style>', re.S)  # 구세대 잔재 제거용
+# 하위 스트립(sub-strip)도 정본 교체 대상 (2026-07-31): 상단 드롭다운만 교체하던 탓에
+# 구 빌더가 구워둔 <aside class="sidebar"> 가 살아남아 Market 스트립에 Universe 가 잔존했다.
+sidebar_pat = re.compile(r'<aside class="sidebar">.*?</aside>', re.S)
 warm_bar_pat = re.compile(r'<style id="sisyphe-warm-bar">.*?</style>', re.S)
 
 
@@ -281,6 +284,8 @@ for f in glob.glob(os.path.join(REL, "*.html")):
     n, cnt = jnav_pat.subn(lambda m, a=act, su=sub: nav_style.nav_html(a, su), s, 1)
     if cnt == 0 and name in NAV_MUST_HAVE:
         fail("%s: topnav 블록 없음 — 교체 불가" % name)
+    # 하위 스트립을 정본 그룹 children 으로 교체 (자식 없는 그룹이면 스트립 제거)
+    n = sidebar_pat.sub(lambda m, a=(sub or act): nav_style.sidebar_html(a), n, 1)
     # 구세대 주입 잔재 제거 (clean 입력이면 무동작)
     n = personal_css_pat.sub("", n)
     n = canon_pat.sub("", n)
@@ -315,6 +320,17 @@ if os.path.exists(idx):
         fail("index.html: 탭 순서 오류 %s" % pos)
     if 'sisyphe-tab' in t or 'topnav-sub">가계부' in t:
         fail("index.html: 구 Sisyphe 탭 잔존")
+
+# 하위 스트립 정합 검증 — 정본과 다르면 게시 중단 (2026-07-31)
+for _pg, (_a, _s) in ROOT_ACTIVE.items():
+    _pp = os.path.join(REL, _pg)
+    if not os.path.exists(_pp):
+        continue
+    _m = sidebar_pat.search(open(_pp, encoding="utf-8").read())
+    if not _m:
+        continue
+    if _m.group(0) != nav_style.sidebar_html(_s or _a):
+        fail("%s: 하위 스트립이 정본과 불일치" % _pg)
 
 for pg in ("market.html", "index.html"):
     pp = os.path.join(REL, pg)

@@ -291,13 +291,19 @@ def sidebar_html(active='', href_prefix=''):
 
 # quoteboard 등 마커 소비자용 (create_dashboard 는 자체 레이아웃 CSS 를 별도 보유)
 SIDEBAR_CSS = (
-    '.sidebar{display:flex;align-items:stretch;gap:2px;padding:0 28px;background:#161b21;'
-    'border-bottom:1px solid #2a323b;overflow-x:auto;box-sizing:border-box}'
-    '.sidebar-link{display:inline-flex;align-items:center;padding:0 14px;height:38px;color:#9aa4ae;'
-    'text-decoration:none;font-size:0.85rem;font-weight:600;border-bottom:2px solid transparent;'
+    # 2026-07-31 사용자: 하위 스트립 외형을 게시 페이지(market 등)와 통일.
+    # 게시본 실제 형상 = create_dashboard 기본 CSS + compose 타이포 v2 오버라이드
+    #   -> 스트립 42px / 링크 41px / 18px / 중앙정렬 / sticky(top=nav 54px) / 앰버 밑줄.
+    # 이 상수를 소비하는 앱: quoteboard(Watchlist), datalake webui(자식 없음=무동작).
+    '.sidebar{position:sticky;top:54px;z-index:90;display:flex;align-items:stretch;'
+    'justify-content:center;gap:2px;padding:0 28px;height:42px;background:#161b21;'
+    'border-bottom:1px solid #2a323b;overflow:hidden;box-sizing:border-box}'
+    '.sidebar-link{display:inline-flex;align-items:center;padding:0 14px;height:41px;color:#9aa4ae;'
+    'text-decoration:none;font-size:18px;font-weight:600;border-bottom:2px solid transparent;'
     'white-space:nowrap;transition:all 0.12s;font-family:' + PRETENDARD_STACK + '}'
     '.sidebar-link:hover{color:#fff}'
     '.sidebar-link.active{color:#fff;font-weight:700;border-bottom-color:' + PALETTE['amber'] + '}'
+    '@media (max-width:800px){.sidebar{display:none}}'
 )
 
 SIDEBAR_MARK_BEGIN = '<!-- AOE-SIDEBAR-BEGIN (정본: execution/nav_style.py — 직접 수정 금지) -->'

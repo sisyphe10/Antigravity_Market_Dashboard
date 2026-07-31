@@ -102,6 +102,16 @@ def save_transcript_md(transcript_id: int, *, force: bool = False) -> dict:
         return {'skip': True, 'transcript_id': transcript_id, 'reason': 'already saved',
                 'md_path': row.get('md_path')}
 
+    # ── 발행 직전 최종 게이트 (2026-07-31). 앞 단계를 우회해 들어온 행도 여기서 막힌다.
+    from .transcript_gate import check_publish
+    _g = check_publish(row.get('source_url') or '', row.get('prepared_remarks') or '',
+                       row.get('qa') or '', (row.get('filed_at') or '')[:10],
+                       row.get('translated_kr') or '')
+    if not _g.ok:
+        logger.warning(f"transcript {transcript_id} 발행 게이트 차단: {_g.reasons}")
+        return {'skip': True, 'transcript_id': transcript_id,
+                'reason': 'gate_reject', 'gate_reasons': _g.reasons}
+
     relpath = _md_relpath(row)
     content = _build_md(row)
 
