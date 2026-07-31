@@ -36,7 +36,7 @@ SCHEMA = """
 CREATE TABLE IF NOT EXISTS hits (
   tag TEXT NOT NULL,          -- 정규화 키 (소문자·공백제거)
   kind TEXT NOT NULL,         -- ticker | theme | sector | org | person
-  corpus TEXT NOT NULL,       -- note | transcript | analysis
+  corpus TEXT NOT NULL,       -- note | transcript | analysis | weekly
   doc_date TEXT,
   rel_path TEXT NOT NULL,
   anchor TEXT,                -- 문서 안 위치 (rn-id / chunk 번호)
@@ -167,7 +167,7 @@ def index_docs(idx, onto, uni, extra):
                 chunk_cache[rel] = []
         chunks = chunk_cache[rel]
         snip = snippet_of(chunks[cno]) if cno < len(chunks) else ""
-        corpus = "transcript" if d["kind"] == "transcripts" else "analysis"
+        corpus = {"transcripts": "transcript", "analyses": "analysis"}.get(d["kind"], d["kind"])
         title = d["title"] or os.path.basename(rel)
         anchor = "chunk %d" % cno
         cid = d["chunk_id"]

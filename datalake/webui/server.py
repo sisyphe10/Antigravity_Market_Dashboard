@@ -767,7 +767,7 @@ def chat_delete(cid: str):
 # ── 태그 검색 (2026-07-29) ────────────────────────────────────────────────
 # build_tag_index.py 가 만든 조회 전용 인덱스. LLM 을 부르지 않으므로 즉시·무료다.
 TAG_INDEX_PATH = os.path.join(DATALAKE_ROOT, "tag_index.sqlite")
-TAG_CORPUS_ROOTS = ("research_notes/", "transcripts/", "analyses/")
+TAG_CORPUS_ROOTS = ("research_notes/", "transcripts/", "analyses/", "reports/")
 
 
 def _tag_conn():
@@ -844,7 +844,7 @@ def tags_search(q: str = "", limit: int = 20):
 
 @app.get("/tags/doc")
 def tags_doc(rel: str, anchor: str = ""):
-    """검색 결과 카드의 본문 펼치기 — 코퍼스 3종 내부로만 제한."""
+    """검색 결과 카드의 본문 펼치기 — 태그 코퍼스 내부로만 제한 (research_notes/transcripts/analyses/reports)."""
     rel = (rel or "").replace("\\", "/")
     if ".." in rel or not rel.startswith(TAG_CORPUS_ROOTS):
         return JSONResponse({"error": "허용되지 않은 경로"}, status_code=400)

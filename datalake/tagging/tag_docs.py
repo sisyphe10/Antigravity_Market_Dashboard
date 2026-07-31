@@ -45,6 +45,7 @@ MIN_CHUNK = 120
 SOURCES = {
     "transcripts": "transcripts",   # 어닝콜 한국어 번역 전문
     "analyses": "analyses",         # 분기 실적 1-page 분석
+    "weekly": "reports/weekly",     # 주간 WRAP 보고 아카이브 (Windows 스킬 Step 5 scp)
 }
 MANAGED_KEYS = ("themes", "tickers", "sectors", "orgs", "people",
                 "tag_schema_version", "tag_status")
