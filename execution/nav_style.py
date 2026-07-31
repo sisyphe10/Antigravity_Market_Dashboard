@@ -85,7 +85,7 @@ BRAND_HREF = '/index.html'   # Caddy가 /watchlist/ 로 redirect (랜딩 폐지 
 NAV_ITEMS = [
     ('watchlist',    '/watchlist/',                  'Watchlist',    False, [
         # 2026-07-31 사용자: Universe·Universe Lab 을 Market → Watchlist 하위로 이동
-        ('watchlist',    '/watchlist/',        'Watchlist'),
+        ('watchlist',    '/watchlist/',        'Quotes'),
         ('universe',     '/universe.html',     'Universe'),
         ('universe_lab', '/universe_lab.html', 'Universe Lab'),
     ]),
@@ -248,6 +248,61 @@ if (typeof window._h2cFreeze !== 'function') {
 }
 '''
 
+
+# ---- 하위 스트립(사이드바) 정본 (2026-07-31) ----
+# Market 그룹 전용 하드코딩이었던 렌더러를 NAV_ITEMS 기반 그룹 일반화로 이전.
+# 소비자: create_dashboard(생성 페이지) / quoteboard(materialize 마커 주입).
+SIDEBAR_EXCLUDE_GROUPS = ('wrap',)   # WRAP 은 전용 렌더러(wrap_top_nav_html) 사용
+
+
+def resolve_main_key(active):
+    """active 페이지 키가 속한 메인 탭 key 를 반환."""
+    for key, _href, _label, _right, children in NAV_ITEMS:
+        if key == active:
+            return key
+        for ck, _ch, _cl in (children or []):
+            if ck == active:
+                return key
+    return ''
+
+
+def group_children(active):
+    """active 가 속한 그룹의 children (없으면 None). 제외 그룹은 None."""
+    mk = resolve_main_key(active)
+    if not mk or mk in SIDEBAR_EXCLUDE_GROUPS:
+        return None
+    for key, _href, _label, _right, children in NAV_ITEMS:
+        if key == mk:
+            return children
+    return None
+
+
+def sidebar_html(active='', href_prefix=''):
+    """그룹 하위 스트립. children 없는 그룹이면 ''."""
+    children = group_children(active)
+    if not children:
+        return ''
+    links = ''.join(
+        '<a href="%s%s" class="sidebar-link%s">%s</a>'
+        % (href_prefix, href, ' active' if k == active else '', label)
+        for k, href, label in children)
+    return '<aside class="sidebar">%s</aside>' % links
+
+
+# quoteboard 등 마커 소비자용 (create_dashboard 는 자체 레이아웃 CSS 를 별도 보유)
+SIDEBAR_CSS = (
+    '.sidebar{display:flex;align-items:stretch;gap:2px;padding:0 28px;background:#161b21;'
+    'border-bottom:1px solid #2a323b;overflow-x:auto;box-sizing:border-box}'
+    '.sidebar-link{display:inline-flex;align-items:center;padding:0 14px;height:38px;color:#9aa4ae;'
+    'text-decoration:none;font-size:0.85rem;font-weight:600;border-bottom:2px solid transparent;'
+    'white-space:nowrap;transition:all 0.12s;font-family:' + PRETENDARD_STACK + '}'
+    '.sidebar-link:hover{color:#fff}'
+    '.sidebar-link.active{color:#fff;font-weight:700;border-bottom-color:' + PALETTE['amber'] + '}'
+)
+
+SIDEBAR_MARK_BEGIN = '<!-- AOE-SIDEBAR-BEGIN (정본: execution/nav_style.py — 직접 수정 금지) -->'
+SIDEBAR_MARK_END = '<!-- AOE-SIDEBAR-END -->'
+
 import re as _re  # noqa: E402
 
 _CSS_BLOCK_PAT = _re.compile(
@@ -255,6 +310,8 @@ _CSS_BLOCK_PAT = _re.compile(
 _PAL_BLOCK_PAT = _re.compile(
     _re.escape(PALETTE_MARK_BEGIN) + '.*?' + _re.escape(PALETTE_MARK_END), _re.S)
 _NAV_BLOCK_PAT = _re.compile(r'<nav class="topnav">.*?</nav>', _re.S)
+_SIDEBAR_BLOCK_PAT = _re.compile(
+    _re.escape(SIDEBAR_MARK_BEGIN) + '.*?' + _re.escape(SIDEBAR_MARK_END), _re.S)
 
 
 def materialize(html_text, active=None, sub_active=None):
@@ -263,10 +320,13 @@ def materialize(html_text, active=None, sub_active=None):
     반환 (new_text, ok). ok=False 면 마커/nav 미발견 — 호출측은 원본을 그대로 쓰되
     경고 로그를 남긴다 (기동 실패로 페이지를 죽이지 않는다).
     """
-    new_css = CSS_MARK_BEGIN + '\n' + NAV_CSS + '\n' + CSS_MARK_END
+    new_css = CSS_MARK_BEGIN + '\n' + NAV_CSS + '\n' + SIDEBAR_CSS + '\n' + CSS_MARK_END
     out, n_css = _CSS_BLOCK_PAT.subn(lambda m: new_css, html_text, 1)
     out, n_nav = _NAV_BLOCK_PAT.subn(lambda m: nav_html(active, sub_active), out, 1)
     # 팔레트 마커는 선택적 — 있으면 최신 PALETTE 로 치환 (2026-07-26 색톤 정본화)
     new_pal = PALETTE_MARK_BEGIN + '\n' + PALETTE_CSS_VARS + '\n' + PALETTE_MARK_END
     out = _PAL_BLOCK_PAT.sub(lambda m: new_pal, out, 1)
+    # 하위 스트립 마커는 선택적 — 있으면 그룹 children 으로 채운다 (2026-07-31)
+    new_sb = (SIDEBAR_MARK_BEGIN + sidebar_html(active) + SIDEBAR_MARK_END)
+    out = _SIDEBAR_BLOCK_PAT.sub(lambda m: new_sb, out, 1)
     return out, (n_css == 1 and n_nav == 1)

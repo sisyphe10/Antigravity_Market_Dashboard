@@ -32,17 +32,20 @@ TOP_NAV_MAIN = [
         ('wrap_contribution', 'wrap.html#contribution', '기여도'),
         ('wrap_fee',          'wrap.html#fee',          '수수료'),
     ]),
-    ('market',       'market.html',        'Market',       [
-        ('market',        'market.html',        'Data'),
-        ('universe',      'universe.html',      'Universe'),
-        ('universe_lab',  'universe_lab.html',  'Universe Lab'),
-        ('featured',      'featured.html',      'Featured'),
-        ('market_alert',  'market_alert.html',  '투자유의종목'),
-        ('etf',           'etf.html',           'ETF'),
-        ('seibro',        'seibro.html',        'SEIBro'),
-    ]),
-    ('architecture', 'architecture.html',  'Architecture', None),
 ]
+
+# 2026-07-31 단일 출처화: WRAP 을 제외한 탭 구성은 nav_style.NAV_ITEMS 에서 파생한다.
+# (구 리터럴이 nav_style 과 따로 놀아 상단 드롭다운과 하위 스트립이 어긋났던 사고 재발 방지)
+# href 는 이 모듈이 상대경로를 쓰므로 선행 '/' 를 제거한다.
+def _derive_top_nav():
+    from nav_style import NAV_ITEMS as _NI
+    def _rel(h):
+        return h[1:] if h.startswith('/') and not h.startswith('//') else h
+    return [(k, _rel(h), l, [(ck, _rel(ch), cl) for ck, ch, cl in (children or [])] or None)
+            for k, h, l, _right, children in _NI]
+
+
+TOP_NAV_MAIN = TOP_NAV_MAIN + _derive_top_nav()
 
 # Standard Pretendard font stack — 정본은 nav_style.py (2026-07-26 네비 통일)
 from nav_style import PRETENDARD_LINK, PRETENDARD_LINK_LOCAL, VENDOR_CHART_JS, VENDOR_HTML2CANVAS_JS, PRETENDARD_STACK, NAV_CSS as AOE_NAV_CSS, H2C_FREEZE_JS, WRAP_CSS_VARS  # noqa: E402
@@ -180,9 +183,24 @@ def _resolve_main_key(active):
     return ''
 
 
+def _group_children(active):
+    """active 가 속한 그룹의 children (없으면 None). WRAP 은 전용 렌더러라 제외."""
+    mk = _resolve_main_key(active)
+    if not mk or mk == 'wrap':
+        return None
+    for key, _href, _label, children in TOP_NAV_MAIN:
+        if key == mk:
+            return children
+    return None
+
+
 def is_market_group(active):
-    """True if the given page key belongs to the Market group (has sidebar)."""
-    return _resolve_main_key(active) == 'market'
+    """True if the page key belongs to a group that has a sub-strip (sidebar).
+
+    2026-07-31: 'market' 하드코딩 → 그룹 일반화. Universe/Universe Lab 이 Watchlist
+    그룹으로 이동하면서 상단 드롭다운과 하위 스트립이 어긋난 사고의 근본 수정.
+    """
+    return bool(_group_children(active))
 
 
 def body_class(active=''):
@@ -194,11 +212,7 @@ def sidebar_html(active=''):
     """Render the left sidebar for Market group pages. Returns '' for others."""
     if not is_market_group(active):
         return ''
-    children = None
-    for key, _, _, ch in TOP_NAV_MAIN:
-        if key == 'market':
-            children = ch
-            break
+    children = _group_children(active)
     if not children:
         return ''
     links = ''.join(
