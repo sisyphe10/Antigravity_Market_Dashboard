@@ -187,6 +187,10 @@ class MotleyFoolSource(TranscriptSource):
         prepared_remarks, qa = self._split_sections(text)
         if not prepared_remarks and not qa:
             # 섹션 분리 실패 — 폴백: 전체 본문을 prepared_remarks로
+            # 2026-07-31: marketbeat.py 와 동일한 무검증 폴백 — 구조 확인 후에만 사용.
+            from ..transcript_gate import check_body
+            if not check_body(text[:100000], '', '').ok:
+                return None
             prepared_remarks = text[:100000]
             qa = ''
 

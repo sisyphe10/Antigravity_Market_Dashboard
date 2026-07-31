@@ -125,7 +125,7 @@ def build_morning_digest(now: datetime | None = None) -> str:
         backlog_manual = conn.execute(
             """SELECT j.ticker, j.last_status, j.attempt_count, j.last_error, f.filed_at
                FROM transcript_jobs j JOIN filings f ON j.filing_id = f.id
-               WHERE j.last_status IN ('stale_pending', 'needs_review')
+               WHERE j.last_status IN ('stale_pending', 'needs_review', 'gate_blocked')
                ORDER BY f.filed_at DESC LIMIT 20""",
         ).fetchall()
         backlog_manual = [dict(r) for r in backlog_manual]

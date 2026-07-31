@@ -46,7 +46,8 @@ def build_digest(now: datetime | None = None) -> str:
             """
             SELECT j.last_status, COUNT(*) as cnt
             FROM transcript_jobs j
-            WHERE j.last_status IN ('needs_review', 'stale_pending', 'pending', 'low_confidence')
+            WHERE j.last_status IN ('needs_review', 'stale_pending', 'pending',
+                                    'low_confidence', 'gate_blocked')
             GROUP BY j.last_status
             """,
         ).fetchall()

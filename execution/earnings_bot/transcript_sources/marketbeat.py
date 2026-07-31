@@ -117,6 +117,12 @@ class MarketBeatSource(TranscriptSource):
         from .motley_fool import MotleyFoolSource
         prepared, qa = MotleyFoolSource()._split_sections(text)
         if not prepared and not qa:
+            # 2026-07-31: 섹션 분리 실패 시 페이지 전체를 그대로 본문으로 쓰던 폴백.
+            # 이 경로로 가이던스 기사·랜딩페이지가 '경영진 발표'가 됐다.
+            # 발화 구조가 없으면 폴백 자체를 포기한다 (전문 없음 > 가짜 전문).
+            from ..transcript_gate import check_body
+            if not check_body(text[:50000], '', '').ok:
+                return None
             prepared = text[:50000]
 
         from ..matcher import score_candidate
