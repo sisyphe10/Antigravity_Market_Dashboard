@@ -37,6 +37,12 @@ VINTAGE_TOLERANCE_MONTHS = 4          # 본문/URL 연월이 공시월과 이만
 # 오염(거부·날조 스텁): 0.03~0.08  → 하드 임계 0.12, 0.30 미만은 경고
 MIN_TRANSLATION_RATIO = 0.12          # 한국어 길이 / 원문 길이 (하드)
 WARN_TRANSLATION_RATIO = 0.30         # 이하면 경고(차단 아님)
+# 숫자 정합성 — 자릿수 이동 보정 후 실측(살아있는 95건):
+#   중앙 0% / 90분위 0% / 95분위 3.6% / 최대 32%
+#   상위 2건(RGTI 32%, CEG 32%)은 발표 섹션이 통째로 날조된 것으로 실물 확인됨.
+NUMERIC_MIN_SAMPLE = 10               # 번역본 수치가 이보다 적으면 판단 보류
+NUMERIC_ORPHAN_WARN = 0.05
+NUMERIC_ORPHAN_REJECT = 0.20
 SENTINEL = 'NOT_A_TRANSCRIPT'
 
 REFUSAL_MARKERS = (
@@ -66,6 +72,9 @@ _RE_KR_SPEAKER = re.compile(r'\*\*\s*([A-Z][A-Za-z.\'-]+(?:\s+[A-Z][A-Za-z.\'-]+
 _RE_QUOTE_CTX = re.compile(r'["“”‘’]|\b(said|says|noted|stated|added|'
                            r'according to|commented|explained|continued)\b', re.I)
 # 화자 라인 뒤에 붙는 직함 — 로스터형("Name\nChief Executive Officer") 판별용
+_RE_PCT_NUM = re.compile(r'(\d{1,3}(?:\.\d+)?)\s?%')
+_RE_DEC_NUM = re.compile(r'(\d{1,3}(?:,\d{3})*\.\d+)')
+_RE_ANY_NUM = re.compile(r'(\d{1,3}(?:,\d{3})*(?:\.\d+)?)')   # 원문 대조용(정수 포함)
 _RE_TITLE_WORD = re.compile(
     r'\s*(?:Chief|Chairman|President|Founder|Head of|Executive|Senior|Vice|Managing|'
     r'Director|Officer|CEO|CFO|COO|CTO|EVP|SVP|VP|General Manager|Treasurer|'
@@ -194,7 +203,55 @@ def check_translation(raw_text: str, translated_kr: str) -> GateResult:
     if not sp.ok:
         warnings.extend(sp.reasons)
     info.update(sp.info)
+
+    # 숫자 정합성 — 이건 하드 차단이다. 수치 조작은 조용히 투자판단을 망친다.
+    nf = check_numeric_fidelity(raw_text, kr)
+    reasons.extend(nf.reasons)
+    warnings.extend(nf.warnings)
+    info.update(nf.info)
     return _fail(reasons, info, warnings)
+
+
+def _digits(n: str) -> str:
+    """자릿수 이동·구분자를 무시한 유효숫자 표현. 1.34 / 134 / 1,340 → '134'."""
+    d = n.replace(',', '').replace('.', '').lstrip('0').rstrip('0')
+    return d or '0'
+
+
+def check_numeric_fidelity(raw_text: str, translated_kr: str) -> GateResult:
+    """번역본에만 있고 원문에 없는 수치(고아 수치)를 잡는다.
+
+    ★ 방향이 중요하다. "원문 수치가 번역본에 다 남아있는가"는 못 쓴다 —
+      단위 환산($19.1 billion → 191억 달러) 때문에 정상 문서 보존율이 33~100% 로
+      흩어진다(실측 12건). 반대로 **번역본에만 있는 수치**는 정상 문서에서 거의 0 이다
+      (실측: 퍼센트·소수 고아율 중앙 0%, 최대 7%).
+
+      숫자가 조작되면($2.93 → $3.93) 원문에 없는 값이 생기므로 이 방향에서 잡힌다.
+      화자 날조보다 조용하고 위험한 유형이라 별도 계층으로 둔다.
+    """
+    src = (raw_text or '').replace(' ', '')
+    kr = (translated_kr or '').replace(' ', '')
+    kp = {m.group(1) for m in _RE_PCT_NUM.finditer(kr)}
+    sp = {m.group(1) for m in _RE_PCT_NUM.finditer(src)}
+    kd = {m.group(1) for m in _RE_DEC_NUM.finditer(kr)}
+    sd = {m.group(1) for m in _RE_DEC_NUM.finditer(src)}
+    # ★ 단위 환산 보정: 원문 "$134 million" → 번역 "$1.34억" 처럼 자릿수가 이동한다.
+    #   보정 없이 보면 정상 문서가 고아 40%대로 잡힌다(ALV·SN 실측).
+    #   원문 쪽은 정수까지 모은다 — '$134 million' 은 소수점이 없어 sd 에 안 잡힌다.
+    src_digits = {_digits(m.group(1)) for m in _RE_ANY_NUM.finditer(src)}
+    orphan = sorted({n for n in (kp - sp) | (kd - sd) if _digits(n) not in src_digits})
+    total = len(kp) + len(kd)
+    info = {'numeric_total': total, 'numeric_orphan': len(orphan),
+            'numeric_orphan_sample': orphan[:6]}
+    if total < NUMERIC_MIN_SAMPLE:
+        return _fail([], info)          # 표본이 적으면 판단 보류
+    rate = len(orphan) / total
+    info['numeric_orphan_rate'] = round(rate, 3)
+    if rate > NUMERIC_ORPHAN_REJECT:
+        return _fail([f'numeric_orphan:{rate:.0%}({",".join(orphan[:4])})'], info)
+    if rate > NUMERIC_ORPHAN_WARN:
+        return _fail([], info, [f'numeric_orphan_elevated:{rate:.0%}'])
+    return _fail([], info)
 
 
 def check_speaker_attribution(raw_text: str, translated_kr: str) -> GateResult:
@@ -274,4 +331,5 @@ def check_publish(url: str, prepared: str, qa: str, filed_at: str,
     """md 발행 직전 최종 게이트 = 수집 게이트 + 번역 검증."""
     c = check_collect(url, prepared, qa, filed_at)
     t = check_translation((prepared or '') + '\n' + (qa or ''), translated_kr)
-    return _fail(c.reasons + t.reasons, {**c.info, **t.info})
+    return _fail(c.reasons + t.reasons, {**c.info, **t.info},
+                 c.warnings + t.warnings)

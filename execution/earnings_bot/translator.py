@@ -74,6 +74,11 @@ def _chunk_qa_text(qa_text: str, max_chars: int = QA_CHUNK_MAX_CHARS) -> list[st
     return _chunk_text(qa_text, max_chars, ['\nOperator:', '\n\n'])
 
 
+# 참석자 명단(200~500자)과 실제 발표(수천 자~) 사이의 경계.
+# 실측: 정상 전문의 prepared 는 최소 3,059자(ALV), 날조된 것은 231·276자였다.
+MIN_PREPARED_CHARS = 1_500
+
+
 def _chunk_prepared_text(prepared_text: str, max_chars: int = PREPARED_CHUNK_MAX_CHARS) -> list[str]:
     return _chunk_text(prepared_text, max_chars, ['\n\n'])
 from .retry_helper import api_retry
@@ -418,6 +423,13 @@ def translate_transcript(transcript_id: int) -> dict:
 
     # 1) Prepared Remarks — 길이에 따라 자동 청크 분할 (qa와 동일 max 16K output 가드)
     prepared_resps: list[dict] = []
+    # ★ stub prepared 차단 (2026-07-31): 참석자 명단만 있는 섹션을 번역시키면
+    #   모델이 발표 내용을 통째로 지어낸다(RGTI·CEG 실측). 수집 실패는 빈칸으로 둔다.
+    if prepared and len(prepared) < MIN_PREPARED_CHARS:
+        logger.warning(
+            f'[translator] transcript={transcript_id} prepared {len(prepared)}자 — '
+            f'참석자 명단 수준이라 번역하지 않음(날조 방지). Q&A 만 번역한다.')
+        prepared = ''
     prepared_chunks: list[str] = _chunk_prepared_text(prepared) if prepared else []
     for i, chunk in enumerate(prepared_chunks):
         if not chunk:

@@ -84,7 +84,7 @@ def dismiss(ticker: str) -> None:
         conn.close()
 
 
-def override(filing_id: int, url: str) -> None:
+def override(filing_id: int, url: str, *, force: bool = False) -> None:
     db.init_db()
     filing = db.get_filing_by_id(filing_id)
     if not filing:
@@ -101,6 +101,23 @@ def override(filing_id: int, url: str) -> None:
     if parsed is None:
         print(f"URL fetch 실패: {url}")
         return
+
+    # ── 게이트 (2026-07-31): 수동 주입도 검사한다.
+    #    사람이 URL 을 고르는 경로라도 잘못된 분기·기사 페이지를 집을 수 있다.
+    #    실제로 과거 수동 주입 중 오매칭이 있었다. 의도적으로 통과시키려면 --force.
+    from ..transcript_gate import check_collect
+    _g = check_collect(parsed.source_url, parsed.prepared_remarks, parsed.qa,
+                       (filing.get('filed_at') or '')[:10])
+    if not _g.ok:
+        print(f"게이트 차단: {'; '.join(_g.reasons)}")
+        print(f"  원문 {len(parsed.prepared_remarks or '')}+{len(parsed.qa or '')}자, "
+              f"url={parsed.source_url}")
+        if not force:
+            print("  → 주입 취소. 의도한 것이면 --force 를 붙여 다시 실행하십시오.")
+            return
+        print("  → --force 지정, 경고를 무시하고 주입합니다.")
+    if _g.warnings:
+        print(f"게이트 경고: {'; '.join(_g.warnings)}")
 
     transcript_id = db.insert_transcript(
         filing_id=filing_id, source=src.name,
@@ -137,6 +154,8 @@ def main() -> None:
                    help='미해결 큐 (needs_review / stale_pending / low_confidence) 출력')
     p.add_argument('--dismiss', metavar='TICKER',
                    help="해당 ticker의 미해결 잡을 'gave_up'으로 종결 (다이제스트에서 제거)")
+    p.add_argument('--force', action='store_true',
+                   help='게이트 차단을 무시하고 주입 (2026-07-31)')
     args = p.parse_args()
 
     if args.list_needs_review:
@@ -144,7 +163,7 @@ def main() -> None:
     elif args.dismiss:
         dismiss(args.dismiss)
     elif args.filing_id and args.url:
-        override(args.filing_id, args.url)
+        override(args.filing_id, args.url, force=args.force)
     else:
         p.print_help()
 
