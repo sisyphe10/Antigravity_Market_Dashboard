@@ -6064,6 +6064,29 @@ def create_order_section():
                 if (pa && pa.date === orderTodayStr() && pa.action && pa.ts) orderSessionAction = { action: pa.action, ts: pa.ts };
             } catch (e) {}
         }
+        // 주문 회차(1차/2차...) - [추가 주문] 누를 때마다 +1
+        // 2차 이상이면 자문지 메일 제목·엑셀 파일명 끝에 '_N차 주문' 접미사를 붙인다.
+        // 같은 날 재로드에 대비해 localStorage(날짜 키) 미러. 날짜가 바뀌면 자동으로 1차 복귀.
+        var ORDER_ROUND_LS = 'order_round_v1';
+        var orderRound = 1;
+        function orderLoadRound() {
+            orderRound = 1;
+            try {
+                var raw = localStorage.getItem(ORDER_ROUND_LS);
+                if (!raw) return;
+                var pr = JSON.parse(raw);
+                if (pr && pr.date === orderTodayStr() && pr.round > 1) orderRound = pr.round;
+            } catch (e) {}
+        }
+        function orderSetRound(n) {
+            orderRound = n;
+            try {
+                if (n > 1) localStorage.setItem(ORDER_ROUND_LS, JSON.stringify({ date: orderTodayStr(), round: n }));
+                else localStorage.removeItem(ORDER_ROUND_LS);
+            } catch (e) {}
+        }
+        function orderRoundSuffix() { return orderRound > 1 ? '_' + orderRound + '차 주문' : ''; }
+
         function orderTimeHM(v) {
             var d = (typeof v === 'number') ? new Date(v) : (v ? new Date(v) : null);
             if (!d || isNaN(d.getTime())) return '';
@@ -6244,6 +6267,7 @@ def create_order_section():
 
                 // 저장 상태 배지 초기화: 세션 액션(localStorage) 복원 + 각 카드 baseline = 복원 직후 상태.
                 orderLoadSessionAction();
+                orderLoadRound();
                 ORDER_PORTFOLIOS.forEach(function(p) { setOrderBaseline(p.display); });
                 renderOrderTabs();
                 switchOrderTab('Matrix');
@@ -6280,6 +6304,12 @@ def create_order_section():
                 fname = fname.replace(/_\d{8}\.xlsx$/, '_' + yyyymmdd + '.xlsx');
             } else if (/_\d{6}\.xlsx$/.test(fname)) {
                 fname = fname.replace(/_\d{6}\.xlsx$/, '_' + yymmdd + '.xlsx');
+            }
+            // 2차 이상 추가 주문이면 확장자 앞에 '_N차 주문'
+            var _rs = orderRoundSuffix();
+            if (_rs) {
+                var _dot = fname.lastIndexOf('.');
+                fname = (_dot > 0) ? (fname.slice(0, _dot) + _rs + fname.slice(_dot)) : (fname + _rs);
             }
             return fname;
         }
@@ -6384,7 +6414,7 @@ def create_order_section():
                 if (!disp && !s.unionBody) continue;
                 var atts = await _advAttachments(s.broker);
                 var body = s.unionBody ? buildComplianceUnionBody() : bodyFor(disp);
-                mails.push({ key: s.key, label: s.label, subject: s.subject, body: body, attachments: atts });
+                mails.push({ key: s.key, label: s.label, subject: s.subject + orderRoundSuffix(), body: body, attachments: atts });
             }
             return mails;
         }
@@ -7264,6 +7294,7 @@ def create_order_section():
                     setOrderBaseline(p.display);
                 });
                 orderClearSessionAction();
+                orderSetRound(1);
                 matrixNewRows = [];
                 if (orderActiveTab && orderActiveTab !== 'Email') renderOrderMatrix();
             } catch(e) {
@@ -7277,7 +7308,8 @@ def create_order_section():
         // 순수 클라이언트 상태 변경(서버 pending 미변경) — 사용자가 새 주문 입력 후 [저장]/[최종 저장] 시 갱신.
         // 전역(모든 포트폴리오)에 적용 — [최종 저장]이 전역이라 일부만 리셋하면 1번째/2번째가 섞임.
         function additionalOrder() {
-            if (!confirm('추가 주문을 시작하시겠습니까?\\n\\n현재 "변경후" 비중이 새 "변경전" 기준으로 이동하고, 추천사유가 모두 초기화됩니다.\\n이미 [최종 저장]된 주문은 그대로 기록돼 있습니다.\\n\\n추가 주문 입력 후 반드시 [임시 저장]을 눌러주세요 (임시 저장 전 새로고침 시 입력이 사라집니다).')) return;
+            var _nextRound = orderRound + 1;
+            if (!confirm(_nextRound + '차 주문을 시작하시겠습니까?\\n\\n현재 "변경후" 비중이 새 "변경전" 기준으로 이동하고, 추천사유가 모두 초기화됩니다.\\n이미 [최종 저장]된 주문은 그대로 기록돼 있습니다.\\n\\n메일 제목·자문지 파일명 끝에 _' + _nextRound + '차 주문 이 붙습니다.\\n\\n추가 주문 입력 후 반드시 [임시 저장]을 눌러주세요 (임시 저장 전 새로고침 시 입력이 사라집니다).')) return;
             ORDER_PORTFOLIOS.forEach(function(p) {
                 var pf = p.display;
                 var stocks = orderStocks[pf] || [];
@@ -7290,6 +7322,7 @@ def create_order_section():
                     st[i].reason = '';    // 추천사유 초기화
                 });
             });
+            orderSetRound(_nextRound);
             if (orderActiveTab && orderActiveTab !== 'Email') renderOrderMatrix();
         }
 
