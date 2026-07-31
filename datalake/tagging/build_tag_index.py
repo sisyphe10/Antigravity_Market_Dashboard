@@ -36,7 +36,7 @@ SCHEMA = """
 CREATE TABLE IF NOT EXISTS hits (
   tag TEXT NOT NULL,          -- 정규화 키 (소문자·공백제거)
   kind TEXT NOT NULL,         -- ticker | theme | sector | org | person
-  corpus TEXT NOT NULL,       -- note | transcript | analysis | weekly
+  corpus TEXT NOT NULL,       -- note | transcript | analysis | weekly | comment | monthly | target
   doc_date TEXT,
   rel_path TEXT NOT NULL,
   anchor TEXT,                -- 문서 안 위치 (rn-id / chunk 번호)
