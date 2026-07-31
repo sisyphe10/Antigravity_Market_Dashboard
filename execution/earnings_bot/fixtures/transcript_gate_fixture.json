@@ -1,0 +1,2588 @@
+{
+ "created": "2026-07-31",
+ "note": "게이트(transcript_gate.check_collect) 실제 판정 기준. 게이트 수정 시 REJECT 전건 차단 / PASS 전건 통과를 회귀 검증한다.",
+ "counts": {
+  "total": 199,
+  "reject": 57,
+  "pass": 142
+ },
+ "items": [
+  {
+   "transcript_id": 1,
+   "ticker": "COIN",
+   "filed_at": "2026-05-07",
+   "source": "insider_monkey",
+   "source_url": "https://www.insidermonkey.com/blog/coinbase-global-inc-nasdaqcoin-q1-2026-earnings-call-transcript-1757964/",
+   "prepared_chars": 43579,
+   "qa_chars": 0,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 2,
+   "ticker": "EOLS",
+   "filed_at": "2026-05-04",
+   "source": "insider_monkey",
+   "source_url": "https://www.insidermonkey.com/blog/evolus-inc-nasdaqeols-q1-2026-earnings-call-transcript-1754021/",
+   "prepared_chars": 463,
+   "qa_chars": 35825,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 3,
+   "ticker": "APP",
+   "filed_at": "2026-05-06",
+   "source": "insider_monkey",
+   "source_url": "https://www.insidermonkey.com/blog/applovin-corporation-nasdaqapp-q1-2026-earnings-call-transcript-1756993/",
+   "prepared_chars": 11228,
+   "qa_chars": 54798,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 4,
+   "ticker": "RDDT",
+   "filed_at": "2026-04-30",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-4-30-reddit-stock/",
+   "prepared_chars": 2990,
+   "qa_chars": 50000,
+   "match_confidence": 0.9500000000000001,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 5,
+   "ticker": "U",
+   "filed_at": "2026-05-07",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/07/unity-u-q1-2026-earnings-call-transcript/",
+   "prepared_chars": 23617,
+   "qa_chars": 33188,
+   "match_confidence": 0.7003994673768308,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 6,
+   "ticker": "SNDK",
+   "filed_at": "2026-04-30",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2025-11-6-4285541-stock/",
+   "prepared_chars": 18208,
+   "qa_chars": 46717,
+   "match_confidence": 0.9500000000000001,
+   "expected": "REJECT",
+   "reasons": [
+    "url_date_mismatch:2025-11-06",
+    "vintage_mismatch:November 6, 2025(5m)"
+   ]
+  },
+  {
+   "transcript_id": 7,
+   "ticker": "ONTO",
+   "filed_at": "2026-05-05",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/05/onto-onto-q1-2026-earnings-transcript/",
+   "prepared_chars": 17614,
+   "qa_chars": 19420,
+   "match_confidence": 0.8999999999999999,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 8,
+   "ticker": "GILD",
+   "filed_at": "2026-05-07",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-5-7-gilead-sciences-inc-stock/",
+   "prepared_chars": 2928,
+   "qa_chars": 50000,
+   "match_confidence": 0.9500000000000001,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 9,
+   "ticker": "ASPN",
+   "filed_at": "2026-05-07",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/07/aspen-aerogels-aspn-q1-2026-earnings-transcript/",
+   "prepared_chars": 25099,
+   "qa_chars": 369,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 10,
+   "ticker": "MSI",
+   "filed_at": "2026-05-07",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/08/msi-q1-2026-earnings-transcript/",
+   "prepared_chars": 8239,
+   "qa_chars": 45269,
+   "match_confidence": 0.85,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 11,
+   "ticker": "MO",
+   "filed_at": "2026-04-30",
+   "source": "globe_and_mail",
+   "source_url": "https://www.theglobeandmail.com/investing/markets/stocks/MO-N/pressreleases/1627633/altria-mo-q1-2026-earnings-call-transcript/",
+   "prepared_chars": 19582,
+   "qa_chars": 23122,
+   "match_confidence": 0.7009991673605329,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 12,
+   "ticker": "SN",
+   "filed_at": "2026-05-06",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/06/sharkninja-sn-q1-2026-earnings-call-transcript/",
+   "prepared_chars": 36037,
+   "qa_chars": 19141,
+   "match_confidence": 0.8999999999999999,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 13,
+   "ticker": "BMY",
+   "filed_at": "2026-04-30",
+   "source": "insider_monkey",
+   "source_url": "https://www.insidermonkey.com/blog/bristol-myers-squibb-company-nysebmy-q1-2026-earnings-call-transcript-1752196/",
+   "prepared_chars": 14588,
+   "qa_chars": 39359,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 14,
+   "ticker": "D",
+   "filed_at": "2026-05-01",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/01/dominion-d-q1-2026-earnings-call-transcript/",
+   "prepared_chars": 20323,
+   "qa_chars": 19571,
+   "match_confidence": 0.7004152249134947,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 15,
+   "ticker": "BWXT",
+   "filed_at": "2026-05-04",
+   "source": "insider_monkey",
+   "source_url": "https://www.insidermonkey.com/blog/bwx-technologies-inc-nysebwxt-q1-2026-earnings-call-transcript-1754747/",
+   "prepared_chars": 14755,
+   "qa_chars": 33475,
+   "match_confidence": 0.9500000000000001,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 16,
+   "ticker": "PFE",
+   "filed_at": "2026-05-05",
+   "source": "insider_monkey",
+   "source_url": "https://www.insidermonkey.com/blog/pfizer-inc-nysepfe-q1-2026-earnings-call-transcript-1754896/",
+   "prepared_chars": 18973,
+   "qa_chars": 26052,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 17,
+   "ticker": "ANET",
+   "filed_at": "2026-05-05",
+   "source": "insider_monkey",
+   "source_url": "https://www.insidermonkey.com/blog/arista-networks-inc-nyseanet-q1-2026-earnings-call-transcript-1754846/",
+   "prepared_chars": 398,
+   "qa_chars": 56905,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 18,
+   "ticker": "SYK",
+   "filed_at": "2026-04-30",
+   "source": "q4cdn",
+   "source_url": "https://s22.q4cdn.com/857738142/files/doc_financials/2026/q1/Q1-26-Earnings-Press-Release.pdf",
+   "prepared_chars": 26493,
+   "qa_chars": 0,
+   "match_confidence": 0.9,
+   "expected": "REJECT",
+   "reasons": [
+    "no_speech_structure(op=0,sp=5,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 19,
+   "ticker": "VRTX",
+   "filed_at": "2026-05-04",
+   "source": "insider_monkey",
+   "source_url": "https://www.insidermonkey.com/blog/vertex-pharmaceuticals-incorporated-nasdaqvrtx-q1-2026-earnings-call-transcript-1754014/",
+   "prepared_chars": 32469,
+   "qa_chars": 23968,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 20,
+   "ticker": "VST",
+   "filed_at": "2026-05-07",
+   "source": "insider_monkey",
+   "source_url": "https://www.insidermonkey.com/blog/vistra-corp-nysevst-q1-2026-earnings-call-transcript-1757092/",
+   "prepared_chars": 17436,
+   "qa_chars": 37108,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 22,
+   "ticker": "ZTS",
+   "filed_at": "2026-05-07",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-5-7-zoetis-inc-stock/",
+   "prepared_chars": 50000,
+   "qa_chars": 0,
+   "match_confidence": 0.9500000000000001,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 23,
+   "ticker": "CORZ",
+   "filed_at": "2026-05-06",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/06/core-scientific-corz-q1-2026-earnings-transcript/",
+   "prepared_chars": 37744,
+   "qa_chars": 173,
+   "match_confidence": 0.9,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 24,
+   "ticker": "LTH",
+   "filed_at": "2026-05-05",
+   "source": "globe_and_mail",
+   "source_url": "https://www.theglobeandmail.com/investing/markets/markets-news/Motley%20Fool/1719481/life-time-lth-q1-2026-earnings-transcript/",
+   "prepared_chars": 12154,
+   "qa_chars": 43712,
+   "match_confidence": 0.763636,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 25,
+   "ticker": "TSM",
+   "filed_at": "2026-05-15",
+   "source": "insider_monkey",
+   "source_url": "https://www.insidermonkey.com/blog/taiwan-semiconductor-manufacturing-company-limited-nysetsm-q1-2026-earnings-call-transcript-1740195/",
+   "prepared_chars": 15464,
+   "qa_chars": 31942,
+   "match_confidence": 0.9,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 26,
+   "ticker": "TLN",
+   "filed_at": "2026-05-05",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/05/talen-energy-tln-q1-2026-earnings-transcript/",
+   "prepared_chars": 7451,
+   "qa_chars": 38760,
+   "match_confidence": 0.848276,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 27,
+   "ticker": "EA",
+   "filed_at": "2026-05-05",
+   "source": "q4cdn",
+   "source_url": "https://s204.q4cdn.com/701424631/files/doc_financials/2026/q1/Q1-FY26-Earnings-Call-Transcript-Final.pdf",
+   "prepared_chars": 50037,
+   "qa_chars": 0,
+   "match_confidence": 0.857143,
+   "expected": "REJECT",
+   "reasons": [
+    "vintage_mismatch:JULY 29, 2025(10m)"
+   ]
+  },
+  {
+   "transcript_id": 28,
+   "ticker": "AAPL",
+   "filed_at": "2026-04-30",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/01/29/apple-aapl-q1-2026-earnings-call-transcript/",
+   "prepared_chars": 25111,
+   "qa_chars": 29247,
+   "match_confidence": 0.9,
+   "expected": "REJECT",
+   "reasons": [
+    "url_date_mismatch:2026-01-29"
+   ]
+  },
+  {
+   "transcript_id": 29,
+   "ticker": "LLY",
+   "filed_at": "2026-04-30",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/04/30/eli-lilly-lly-q1-2026-earnings-transcript/",
+   "prepared_chars": 29961,
+   "qa_chars": 15839,
+   "match_confidence": 0.934783,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 30,
+   "ticker": "BDX",
+   "filed_at": "2026-05-07",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/02/09/becton-dickinson-bdx-q1-2026-earnings-transcript/",
+   "prepared_chars": 24192,
+   "qa_chars": 33747,
+   "match_confidence": 0.9,
+   "expected": "REJECT",
+   "reasons": [
+    "url_date_mismatch:2026-02-09"
+   ]
+  },
+  {
+   "transcript_id": 31,
+   "ticker": "AMD",
+   "filed_at": "2026-05-05",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/06/amd-amd-q1-2026-earnings-call-transcript/",
+   "prepared_chars": 24512,
+   "qa_chars": 34069,
+   "match_confidence": 0.85,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 32,
+   "ticker": "SMR",
+   "filed_at": "2026-05-07",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/08/nuscale-smr-q1-2026-earnings-transcript/",
+   "prepared_chars": 21501,
+   "qa_chars": 36152,
+   "match_confidence": 0.801613,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 33,
+   "ticker": "BROS",
+   "filed_at": "2026-05-06",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/06/dutch-bros-bros-q1-2026-earnings-transcript/",
+   "prepared_chars": 7536,
+   "qa_chars": 47165,
+   "match_confidence": 0.9,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 34,
+   "ticker": "FSLR",
+   "filed_at": "2026-04-30",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/04/30/first-solar-fslr-q1-2026-earnings-transcript/",
+   "prepared_chars": 15095,
+   "qa_chars": 28910,
+   "match_confidence": 0.9,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 35,
+   "ticker": "MSTR",
+   "filed_at": "2026-05-05",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/05/strategy-mstr-q1-2026-earnings-transcript/",
+   "prepared_chars": 50000,
+   "qa_chars": 40197,
+   "match_confidence": 0.84,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 36,
+   "ticker": "RBLX",
+   "filed_at": "2026-04-30",
+   "source": "q4cdn",
+   "source_url": "https://s27.q4cdn.com/984876518/files/doc_financials/2026/q1/32789865_1994106683_3707346_Transcript_EditedCopy_20260430235219.pdf",
+   "prepared_chars": 48686,
+   "qa_chars": 0,
+   "match_confidence": 0.911765,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 37,
+   "ticker": "CPNG",
+   "filed_at": "2026-05-05",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/05/coupang-cpng-q1-2026-earnings-transcript/",
+   "prepared_chars": 21125,
+   "qa_chars": 19400,
+   "match_confidence": 0.85,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 38,
+   "ticker": "LEU",
+   "filed_at": "2026-05-05",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/07/centrus-energy-leu-q1-2026-earnings-transcript/",
+   "prepared_chars": 21271,
+   "qa_chars": 23987,
+   "match_confidence": 0.95,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 39,
+   "ticker": "SHOP",
+   "filed_at": "2026-05-05",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/05/shopify-shop-q1-2026-earnings-transcript/",
+   "prepared_chars": 50000,
+   "qa_chars": 0,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 40,
+   "ticker": "IONQ",
+   "filed_at": "2026-05-06",
+   "source": "q4cdn",
+   "source_url": "https://s28.q4cdn.com/828571518/files/doc_financials/2026/q1/IONQ_Q1-2026-Investor-Updates-vFINAL-VERSION-2026-05-06.pdf",
+   "prepared_chars": 21237,
+   "qa_chars": 0,
+   "match_confidence": 0.9,
+   "expected": "REJECT",
+   "reasons": [
+    "no_speech_structure(op=0,sp=1,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 41,
+   "ticker": "PYPL",
+   "filed_at": "2026-05-05",
+   "source": "q4cdn",
+   "source_url": "https://s205.q4cdn.com/875401827/files/doc_financials/2026/q1/PYPL-1Q-26-Earnings-Release.pdf",
+   "prepared_chars": 39391,
+   "qa_chars": 0,
+   "match_confidence": 0.9,
+   "expected": "REJECT",
+   "reasons": [
+    "no_speech_structure(op=0,sp=2,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 42,
+   "ticker": "FLR",
+   "filed_at": "2026-05-08",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-5-1-fluor-co-stock/",
+   "prepared_chars": 10591,
+   "qa_chars": 0,
+   "match_confidence": 0.85,
+   "expected": "REJECT",
+   "reasons": [
+    "raw_too_short:10591",
+    "no_speech_structure(op=0,sp=5,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 43,
+   "ticker": "FIS",
+   "filed_at": "2026-05-08",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-5-5-fidelity-national-information-services-inc-stock/",
+   "prepared_chars": 3303,
+   "qa_chars": 50000,
+   "match_confidence": 0.95,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 44,
+   "ticker": "SATL",
+   "filed_at": "2026-05-11",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/14/satellogic-satl-q1-2026-earnings-transcript/",
+   "prepared_chars": 32788,
+   "qa_chars": 23726,
+   "match_confidence": 0.74,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 45,
+   "ticker": "HALO",
+   "filed_at": "2026-05-11",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/11/halozyme-halo-q1-2026-earnings-transcript/",
+   "prepared_chars": 50000,
+   "qa_chars": 90,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 46,
+   "ticker": "SRFM",
+   "filed_at": "2026-05-11",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/11/srfm-q1-2026-earnings-transcript/",
+   "prepared_chars": 32459,
+   "qa_chars": 17781,
+   "match_confidence": 0.9,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 47,
+   "ticker": "CEG",
+   "filed_at": "2026-05-11",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/11/constellation-ceg-q1-2026-earnings-transcript/",
+   "prepared_chars": 276,
+   "qa_chars": 48315,
+   "match_confidence": 0.805263,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 48,
+   "ticker": "SBET",
+   "filed_at": "2026-05-11",
+   "source": "globe_and_mail",
+   "source_url": "https://www.theglobeandmail.com/investing/markets/markets-news/Motley%20Fool/1856746/sharplink-sbet-q1-2026-earnings-transcript/",
+   "prepared_chars": 27231,
+   "qa_chars": 29714,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 49,
+   "ticker": "RGTI",
+   "filed_at": "2026-05-11",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/11/rigetti-rgti-q1-2026-earnings-call-transcript/",
+   "prepared_chars": 231,
+   "qa_chars": 44033,
+   "match_confidence": 0.775,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 50,
+   "ticker": "HIMS",
+   "filed_at": "2026-05-11",
+   "source": "q4cdn",
+   "source_url": "https://s27.q4cdn.com/787306631/files/doc_financials/2026/q1/Hims-Hers-First-Quarter-2026-Earnings-Call-Transcript-doc.pdf",
+   "prepared_chars": 82960,
+   "qa_chars": 0,
+   "match_confidence": 0.95,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 51,
+   "ticker": "CRCL",
+   "filed_at": "2026-05-11",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/11/circle-crcl-q1-2026-earnings-transcript/",
+   "prepared_chars": 30413,
+   "qa_chars": 40499,
+   "match_confidence": 0.733333,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 52,
+   "ticker": "USAR",
+   "filed_at": "2026-05-13",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/14/usa-rare-earth-usar-q1-2026-earnings-transcript/",
+   "prepared_chars": 16990,
+   "qa_chars": 11303,
+   "match_confidence": 0.9,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 53,
+   "ticker": "CSCO",
+   "filed_at": "2026-05-13",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/14/cisco-csco-q3-2026-earnings-transcript/",
+   "prepared_chars": 23951,
+   "qa_chars": 33447,
+   "match_confidence": 0.766667,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 54,
+   "ticker": "AMAT",
+   "filed_at": "2026-05-14",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/15/applied-materials-amat-q2-2026-earnings-transcript/",
+   "prepared_chars": 22853,
+   "qa_chars": 35008,
+   "match_confidence": 0.9,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 55,
+   "ticker": "LUNR",
+   "filed_at": "2026-05-14",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-5-14-intuitive-machines-inc-stock/",
+   "prepared_chars": 50000,
+   "qa_chars": 6772,
+   "match_confidence": 0.95,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 56,
+   "ticker": "UMAC",
+   "filed_at": "2026-05-14",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-5-14-unusual-machines-inc-stock/",
+   "prepared_chars": 22280,
+   "qa_chars": 25687,
+   "match_confidence": 0.85,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 57,
+   "ticker": "CRWD",
+   "filed_at": "2026-03-04",
+   "source": "insider_monkey",
+   "source_url": "https://www.insidermonkey.com/blog/crowdstrike-holdings-inc-nasdaqcrwd-q4-2026-earnings-call-transcript-1709612/",
+   "prepared_chars": 30585,
+   "qa_chars": 22315,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 59,
+   "ticker": "FTNT",
+   "filed_at": "2026-05-06",
+   "source": "insider_monkey",
+   "source_url": "https://www.insidermonkey.com/blog/fortinet-inc-nasdaqftnt-q1-2026-earnings-call-transcript-1756043/",
+   "prepared_chars": 19233,
+   "qa_chars": 23275,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 60,
+   "ticker": "PANW",
+   "filed_at": "2026-02-14",
+   "source": "insider_monkey",
+   "source_url": "https://www.insidermonkey.com/blog/palo-alto-networks-inc-nasdaqpanw-q2-2026-earnings-call-transcript-1698082/",
+   "prepared_chars": 59354,
+   "qa_chars": 0,
+   "match_confidence": 0.7,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 62,
+   "ticker": "CCJ",
+   "filed_at": "2026-05-05",
+   "source": "manual_override",
+   "source_url": "https://www.cameco.com/sites/default/files/documents/CCO-transcript-2026-Q1-call.pdf",
+   "prepared_chars": 14212,
+   "qa_chars": 41014,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 63,
+   "ticker": "HD",
+   "filed_at": "2026-05-19",
+   "source": "insider_monkey",
+   "source_url": "https://www.insidermonkey.com/blog/the-home-depot-inc-nysehd-q1-2026-earnings-call-transcript-1765754/",
+   "prepared_chars": 18242,
+   "qa_chars": 33616,
+   "match_confidence": 0.7,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 64,
+   "ticker": "HAS",
+   "filed_at": "2026-05-20",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/20/hasbro-has-q1-2026-earnings-call-transcript/",
+   "prepared_chars": 18631,
+   "qa_chars": 18001,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 65,
+   "ticker": "LOW",
+   "filed_at": "2026-05-20",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/20/lowes-low-q1-2027-earnings-transcript/",
+   "prepared_chars": 30274,
+   "qa_chars": 34860,
+   "match_confidence": 0.707107,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 66,
+   "ticker": "TJX",
+   "filed_at": "2026-05-20",
+   "source": "globe_and_mail",
+   "source_url": "https://www.theglobeandmail.com/investing/markets/markets-news/motley/2044437/tjx-tjx-q1-2027-earnings-call-transcript/",
+   "prepared_chars": 5939,
+   "qa_chars": 53291,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 67,
+   "ticker": "ELF",
+   "filed_at": "2026-05-20",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/20/elf-beauty-elf-q4-2026-earnings-transcript/",
+   "prepared_chars": 28323,
+   "qa_chars": 35730,
+   "match_confidence": 0.9,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 68,
+   "ticker": "NVDA",
+   "filed_at": "2026-05-20",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-5-20-nvidia-co-stock/",
+   "prepared_chars": 2678,
+   "qa_chars": 46298,
+   "match_confidence": 0.95,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 69,
+   "ticker": "INTU",
+   "filed_at": "2026-05-20",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/20/intuit-intu-q3-2026-earnings-transcript/",
+   "prepared_chars": 6122,
+   "qa_chars": 50000,
+   "match_confidence": 0.911765,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 70,
+   "ticker": "WMT",
+   "filed_at": "2026-05-21",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/21/walmart-wmt-q1-2027-earnings-transcript/",
+   "prepared_chars": 24718,
+   "qa_chars": 37031,
+   "match_confidence": 0.821053,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 71,
+   "ticker": "RL",
+   "filed_at": "2026-05-21",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/21/ralph-lauren-rl-q4-2026-earnings-transcript/",
+   "prepared_chars": 32490,
+   "qa_chars": 30405,
+   "match_confidence": 0.948276,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 72,
+   "ticker": "DECK",
+   "filed_at": "2026-05-21",
+   "source": "q4cdn",
+   "source_url": "https://s21.q4cdn.com/706790701/files/doc_financials/2026/q4/Q4-26-Quarterly-Earnings-Deck.pdf",
+   "prepared_chars": 33302,
+   "qa_chars": 0,
+   "match_confidence": 0.75,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 73,
+   "ticker": "TTWO",
+   "filed_at": "2026-05-21",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-5-21-take-two-interactive-software-inc-stock/",
+   "prepared_chars": 3020,
+   "qa_chars": 50000,
+   "match_confidence": 0.95,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 74,
+   "ticker": "TPR",
+   "filed_at": "2026-05-07",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/07/tapestry-tpr-q3-2026-earnings-transcript/",
+   "prepared_chars": 6400,
+   "qa_chars": 50000,
+   "match_confidence": 0.9,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 75,
+   "ticker": "ZS",
+   "filed_at": "2026-05-26",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/26/zscaler-zs-q3-2026-earnings-call-transcript/",
+   "prepared_chars": 5488,
+   "qa_chars": 49724,
+   "match_confidence": 0.9,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 76,
+   "ticker": "SNPS",
+   "filed_at": "2026-05-27",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/27/synopsys-snps-q2-2026-earnings-transcript/",
+   "prepared_chars": 22380,
+   "qa_chars": 31761,
+   "match_confidence": 0.84,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 77,
+   "ticker": "CRM",
+   "filed_at": "2026-05-27",
+   "source": "q4cdn",
+   "source_url": "https://s205.q4cdn.com/626266368/files/doc_financials/2027/q1/CRM-Q1-FY27-Quarterly-Investor-Deck.pdf",
+   "prepared_chars": 22170,
+   "qa_chars": 0,
+   "match_confidence": 0.7,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 78,
+   "ticker": "COST",
+   "filed_at": "2026-05-28",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/28/costco-cost-q3-2026-earnings-transcript/",
+   "prepared_chars": 12579,
+   "qa_chars": 50000,
+   "match_confidence": 0.7125,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 79,
+   "ticker": "ADSK",
+   "filed_at": "2026-05-28",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/05/28/autodesk-adsk-q1-2027-earnings-transcript/",
+   "prepared_chars": 50000,
+   "qa_chars": 564,
+   "match_confidence": 0.9,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 80,
+   "ticker": "PANW",
+   "filed_at": "2026-06-02",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/06/02/panw-q3-2026-earnings-transcript/",
+   "prepared_chars": 7019,
+   "qa_chars": 32118,
+   "match_confidence": 0.9,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 81,
+   "ticker": "ULTA",
+   "filed_at": "2026-06-02",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/06/03/ulta-beauty-ulta-q1-2026-earnings-transcript/",
+   "prepared_chars": 30287,
+   "qa_chars": 27893,
+   "match_confidence": 0.7,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 82,
+   "ticker": "MDT",
+   "filed_at": "2026-06-03",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/stocks/NYSE/MDT/earnings/",
+   "prepared_chars": 10954,
+   "qa_chars": 0,
+   "match_confidence": 0.895455,
+   "expected": "REJECT",
+   "reasons": [
+    "raw_too_short:10954",
+    "no_speech_structure(op=0,sp=3,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 83,
+   "ticker": "AVGO",
+   "filed_at": "2026-06-03",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-6-3-broadcom-inc-stock/",
+   "prepared_chars": 15478,
+   "qa_chars": 32837,
+   "match_confidence": 0.95,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 84,
+   "ticker": "CRWD",
+   "filed_at": "2026-06-03",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-6-3-crowdstrike-holdings-inc-stock/",
+   "prepared_chars": 2900,
+   "qa_chars": 50000,
+   "match_confidence": 0.95,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 85,
+   "ticker": "UEC",
+   "filed_at": "2026-06-09",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-6-9-uranium-energy-corp-stock/",
+   "prepared_chars": 16947,
+   "qa_chars": 32380,
+   "match_confidence": 0.95,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 86,
+   "ticker": "ORCL",
+   "filed_at": "2026-06-10",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-6-10-oracle-co-stock/",
+   "prepared_chars": 24962,
+   "qa_chars": 27754,
+   "match_confidence": 0.95,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 87,
+   "ticker": "ADBE",
+   "filed_at": "2026-06-11",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-6-11-adobe-inc-stock/",
+   "prepared_chars": 50000,
+   "qa_chars": 0,
+   "match_confidence": 0.95,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 88,
+   "ticker": "LULU",
+   "filed_at": "2026-06-04",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/06/04/lululemon-lulu-q1-2026-earnings-transcript/",
+   "prepared_chars": 32189,
+   "qa_chars": 5647,
+   "match_confidence": 0.763636,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 89,
+   "ticker": "ACN",
+   "filed_at": "2026-06-18",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-6-18-accenture-plc-stock/",
+   "prepared_chars": 50000,
+   "qa_chars": 0,
+   "match_confidence": 0.95,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 90,
+   "ticker": "NKE",
+   "filed_at": "2026-06-23",
+   "source": "globe_and_mail",
+   "source_url": "https://www.theglobeandmail.com/investing/markets/stocks/NKE/pressreleases/2236280/loop-loop-q4-2026-earnings-call-transcript/",
+   "prepared_chars": 13253,
+   "qa_chars": 19391,
+   "match_confidence": 0.8,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 91,
+   "ticker": "PAYX",
+   "filed_at": "2026-06-24",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2025/06/25/paychex-payx-q4-2025-earnings-call-transcript/",
+   "prepared_chars": 20991,
+   "qa_chars": 44926,
+   "match_confidence": 0.733333,
+   "expected": "REJECT",
+   "reasons": [
+    "url_date_mismatch:2025-06-25",
+    "url_quarter_year_stale:2025",
+    "vintage_mismatch:June 25, 2025(12m)"
+   ]
+  },
+  {
+   "transcript_id": 92,
+   "ticker": "MU",
+   "filed_at": "2026-06-24",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-6-24-micron-technology-inc-stock/",
+   "prepared_chars": 28123,
+   "qa_chars": 22512,
+   "match_confidence": 0.95,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 93,
+   "ticker": "HON",
+   "filed_at": "2026-06-29",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/honeywell-international-nasdaqhon-issues-q2-2026-earnings-guidance-2026-04-23/",
+   "prepared_chars": 12196,
+   "qa_chars": 0,
+   "match_confidence": 0.95,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:12196",
+    "no_speech_structure(op=0,sp=4,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 94,
+   "ticker": "NKE",
+   "filed_at": "2026-06-30",
+   "source": "globe_and_mail",
+   "source_url": "https://www.theglobeandmail.com/investing/markets/stocks/NKE/pressreleases/2236280/loop-loop-q4-2026-earnings-call-transcript/",
+   "prepared_chars": 13253,
+   "qa_chars": 19391,
+   "match_confidence": 0.8,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 95,
+   "ticker": "TSLA",
+   "filed_at": "2026-07-02",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-22-tesla-inc-stock/",
+   "prepared_chars": 6835,
+   "qa_chars": 0,
+   "match_confidence": 0.85,
+   "expected": "REJECT",
+   "reasons": [
+    "raw_too_short:6835",
+    "no_speech_structure(op=0,sp=4,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 96,
+   "ticker": "REGN",
+   "filed_at": "2026-07-06",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-30-regeneron-pharmaceuticals-inc-stock/",
+   "prepared_chars": 7133,
+   "qa_chars": 0,
+   "match_confidence": 0.85,
+   "expected": "REJECT",
+   "reasons": [
+    "raw_too_short:7133",
+    "no_speech_structure(op=0,sp=5,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 97,
+   "ticker": "ABBV",
+   "filed_at": "2026-07-06",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/abbvie-nyseabbv-updates-q2-2026-earnings-guidance-2026-05-01/",
+   "prepared_chars": 11500,
+   "qa_chars": 0,
+   "match_confidence": 0.95,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:11500",
+    "no_speech_structure(op=0,sp=4,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 98,
+   "ticker": "IBM",
+   "filed_at": "2026-07-14",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/international-business-machines-nyseibm-updates-q2-2026-earnings-guidance-2026-07-14/",
+   "prepared_chars": 12939,
+   "qa_chars": 0,
+   "match_confidence": 0.85,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:12939"
+   ]
+  },
+  {
+   "transcript_id": 101,
+   "ticker": "ASML",
+   "filed_at": "2026-07-15",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-15-asml-holding-stock/",
+   "prepared_chars": 21820,
+   "qa_chars": 0,
+   "match_confidence": 0.776316,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 102,
+   "ticker": "ERIC",
+   "filed_at": "2026-07-14",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/07/14/ericsson-eric-q2-2026-earnings-call-transcript/",
+   "prepared_chars": 7621,
+   "qa_chars": 45693,
+   "match_confidence": 0.768182,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 103,
+   "ticker": "JNJ",
+   "filed_at": "2026-07-15",
+   "source": "q4cdn",
+   "source_url": "https://s203.q4cdn.com/636242992/files/doc_financials/2025/q2/JNJ-USQ_Transcript_2025-07-16.pdf",
+   "prepared_chars": 69328,
+   "qa_chars": 0,
+   "match_confidence": 0.9,
+   "expected": "REJECT",
+   "reasons": [
+    "vintage_mismatch:JULY 16, 2025(12m)"
+   ]
+  },
+  {
+   "transcript_id": 104,
+   "ticker": "ABT",
+   "filed_at": "2026-07-16",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/abbott-laboratories-nyseabt-updates-q2-2026-earnings-guidance-2026-04-16/",
+   "prepared_chars": 11282,
+   "qa_chars": 0,
+   "match_confidence": 0.95,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:11282",
+    "no_speech_structure(op=0,sp=5,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 105,
+   "ticker": "NFLX",
+   "filed_at": "2026-07-16",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/netflix-nasdaqnflx-issues-q2-2026-earnings-guidance-2026-04-16/",
+   "prepared_chars": 10843,
+   "qa_chars": 0,
+   "match_confidence": 0.883333,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:10843",
+    "no_speech_structure(op=0,sp=5,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 106,
+   "ticker": "TSM",
+   "filed_at": "2026-07-16",
+   "source": "globe_and_mail",
+   "source_url": "https://www.theglobeandmail.com/investing/markets/stocks/TSM/pressreleases/3328221/tsm-tsm-q2-2026-earnings-call-transcript/",
+   "prepared_chars": 6849,
+   "qa_chars": 50971,
+   "match_confidence": 0.8,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 107,
+   "ticker": "ISRG",
+   "filed_at": "2026-07-16",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-16-intuitive-surgical-inc-stock/",
+   "prepared_chars": 2864,
+   "qa_chars": 50000,
+   "match_confidence": 0.82,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 108,
+   "ticker": "ALV",
+   "filed_at": "2026-07-17",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-17-autoliv-inc-stock/",
+   "prepared_chars": 3059,
+   "qa_chars": 45730,
+   "match_confidence": 0.883333,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 109,
+   "ticker": "JPM",
+   "filed_at": "2026-07-14",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-14-jpmorgan-chase-co-stock/",
+   "prepared_chars": 8557,
+   "qa_chars": 50000,
+   "match_confidence": 0.924286,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 110,
+   "ticker": "BAC",
+   "filed_at": "2026-07-14",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-14-bank-of-america-co-stock/",
+   "prepared_chars": 50000,
+   "qa_chars": 0,
+   "match_confidence": 0.875,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 111,
+   "ticker": "WFC",
+   "filed_at": "2026-07-14",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-14-wells-fargo-company-stock/",
+   "prepared_chars": 2708,
+   "qa_chars": 50000,
+   "match_confidence": 0.860811,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 112,
+   "ticker": "HCA",
+   "filed_at": "2026-07-14",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/hca-healthcare-nysehca-releases-q2-2026-earnings-guidance-2026-07-14/",
+   "prepared_chars": 10809,
+   "qa_chars": 0,
+   "match_confidence": 0.85,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:10809",
+    "no_speech_structure(op=0,sp=5,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 113,
+   "ticker": "CTAS",
+   "filed_at": "2026-07-15",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2025/07/17/cintas-ctas-q4-2025-earnings-call-transcript/",
+   "prepared_chars": 50000,
+   "qa_chars": 303,
+   "match_confidence": 0.711765,
+   "expected": "REJECT",
+   "reasons": [
+    "url_date_mismatch:2025-07-17",
+    "url_quarter_year_stale:2025",
+    "vintage_mismatch:July 17, 2025(12m)"
+   ]
+  },
+  {
+   "transcript_id": 114,
+   "ticker": "MS",
+   "filed_at": "2026-07-15",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/07/15/morgan-stanley-ms-q2-2026-earnings-call-transcript/",
+   "prepared_chars": 23445,
+   "qa_chars": 33886,
+   "match_confidence": 0.95,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 115,
+   "ticker": "ELV",
+   "filed_at": "2026-07-15",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/07/15/elevance-health-elv-q2-2026-earnings-call-transcript/",
+   "prepared_chars": 6888,
+   "qa_chars": 50000,
+   "match_confidence": 0.85,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 116,
+   "ticker": "UNH",
+   "filed_at": "2026-07-16",
+   "source": "globe_and_mail",
+   "source_url": "https://www.theglobeandmail.com/investing/markets/stocks/UNH/pressreleases/3328224/unitedhealth-unh-q2-2026-earnings-call-transcript/",
+   "prepared_chars": 6468,
+   "qa_chars": 60646,
+   "match_confidence": 0.811765,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 117,
+   "ticker": "PLD",
+   "filed_at": "2026-07-16",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-16-prologis-inc-stock/",
+   "prepared_chars": 17308,
+   "qa_chars": 43661,
+   "match_confidence": 0.85,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 118,
+   "ticker": "FAST",
+   "filed_at": "2026-07-14",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/transcripts/",
+   "prepared_chars": 22558,
+   "qa_chars": 0,
+   "match_confidence": 0.802632,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 119,
+   "ticker": "GS",
+   "filed_at": "2026-07-14",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/transcripts/",
+   "prepared_chars": 22214,
+   "qa_chars": 0,
+   "match_confidence": 0.821429,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 120,
+   "ticker": "C",
+   "filed_at": "2026-07-14",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/transcripts/",
+   "prepared_chars": 22813,
+   "qa_chars": 0,
+   "match_confidence": 0.795455,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 123,
+   "ticker": "GM",
+   "filed_at": "2026-07-21",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-21-general-motors-stock/",
+   "prepared_chars": 4345,
+   "qa_chars": 50000,
+   "match_confidence": 0.920968,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 124,
+   "ticker": "DHR",
+   "filed_at": "2026-07-21",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/07/21/danaher-dhr-q2-2026-earnings-call-transcript/",
+   "prepared_chars": 24700,
+   "qa_chars": 28553,
+   "match_confidence": 0.775,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 125,
+   "ticker": "MSCI",
+   "filed_at": "2026-07-21",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-21-msci-inc-stock/",
+   "prepared_chars": 3107,
+   "qa_chars": 1396,
+   "match_confidence": 0.834615,
+   "expected": "REJECT",
+   "reasons": [
+    "raw_too_short:4503"
+   ]
+  },
+  {
+   "transcript_id": 126,
+   "ticker": "STLD",
+   "filed_at": "2026-07-21",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/steel-dynamics-nasdaqstld-issues-q2-2026-earnings-guidance-2026-06-17/",
+   "prepared_chars": 11116,
+   "qa_chars": 0,
+   "match_confidence": 0.9125,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:11116",
+    "no_speech_structure(op=0,sp=4,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 127,
+   "ticker": "BABA",
+   "filed_at": "2026-07-22",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2025-11-25-alibaba-group-holding-limited-stock/",
+   "prepared_chars": 3084,
+   "qa_chars": 44169,
+   "match_confidence": 0.89375,
+   "expected": "REJECT",
+   "reasons": [
+    "url_date_mismatch:2025-11-25"
+   ]
+  },
+  {
+   "transcript_id": 128,
+   "ticker": "GEV",
+   "filed_at": "2026-07-22",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-22-ge-vernova-stock/",
+   "prepared_chars": 29577,
+   "qa_chars": 23102,
+   "match_confidence": 0.89,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 129,
+   "ticker": "TEL",
+   "filed_at": "2026-07-22",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/te-connectivity-nysetel-issues-q3-2026-earnings-guidance-2026-04-22/",
+   "prepared_chars": 11409,
+   "qa_chars": 0,
+   "match_confidence": 0.914706,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:11409",
+    "no_speech_structure(op=0,sp=4,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 130,
+   "ticker": "TXN",
+   "filed_at": "2026-07-22",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/texas-instruments-nasdaqtxn-issues-q2-2026-earnings-guidance-2026-04-22/",
+   "prepared_chars": 14816,
+   "qa_chars": 0,
+   "match_confidence": 0.818421,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:14816"
+   ]
+  },
+  {
+   "transcript_id": 131,
+   "ticker": "KMI",
+   "filed_at": "2026-07-22",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/kinder-morgan-kmi-projected-to-release-quarterly-earnings-on-wednesday-2026-07-08/",
+   "prepared_chars": 13047,
+   "qa_chars": 0,
+   "match_confidence": 0.85,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:13047"
+   ]
+  },
+  {
+   "transcript_id": 134,
+   "ticker": "IBM",
+   "filed_at": "2026-07-22",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/international-business-machines-nyseibm-updates-q2-2026-earnings-guidance-2026-07-14/",
+   "prepared_chars": 13015,
+   "qa_chars": 0,
+   "match_confidence": 0.827612,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:13015"
+   ]
+  },
+  {
+   "transcript_id": 135,
+   "ticker": "NOW",
+   "filed_at": "2026-07-22",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-22-servicenow-inc-stock/",
+   "prepared_chars": 2654,
+   "qa_chars": 50000,
+   "match_confidence": 0.95,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 138,
+   "ticker": "GOOGL",
+   "filed_at": "2026-07-22",
+   "source": "manual_override",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-22-alphabet-inc-stock/",
+   "prepared_chars": 2072,
+   "qa_chars": 54388,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 139,
+   "ticker": "TSLA",
+   "filed_at": "2026-07-22",
+   "source": "manual_override",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-22-tesla-inc-stock/",
+   "prepared_chars": 1408,
+   "qa_chars": 50505,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 140,
+   "ticker": "GEHC",
+   "filed_at": "2026-07-23",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-29-ge-healthcare-technologies-inc-stock-1/",
+   "prepared_chars": 7162,
+   "qa_chars": 0,
+   "match_confidence": 0.85,
+   "expected": "REJECT",
+   "reasons": [
+    "raw_too_short:7162",
+    "no_speech_structure(op=0,sp=4,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 141,
+   "ticker": "AVB",
+   "filed_at": "2026-07-23",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/avalonbay-communities-nyseavb-issues-q2-2026-earnings-guidance-2026-04-27/",
+   "prepared_chars": 11192,
+   "qa_chars": 0,
+   "match_confidence": 0.923913,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:11192",
+    "no_speech_structure(op=0,sp=5,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 142,
+   "ticker": "HAS",
+   "filed_at": "2026-07-21",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-21-hasbro-inc-stock/",
+   "prepared_chars": 4013,
+   "qa_chars": 54047,
+   "match_confidence": 0.95,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 143,
+   "ticker": "PM",
+   "filed_at": "2026-07-22",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-22-philip-morris-international-inc-stock/",
+   "prepared_chars": 35590,
+   "qa_chars": 26468,
+   "match_confidence": 0.824576,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 144,
+   "ticker": "HON",
+   "filed_at": "2026-07-23",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/honeywell-international-nasdaqhon-issues-q2-2026-earnings-guidance-2026-04-23/",
+   "prepared_chars": 11675,
+   "qa_chars": 0,
+   "match_confidence": 0.926,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:11675",
+    "no_speech_structure(op=0,sp=5,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 145,
+   "ticker": "TMO",
+   "filed_at": "2026-07-23",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-22-thermo-fisher-scientific-inc-stock/",
+   "prepared_chars": 2674,
+   "qa_chars": 55785,
+   "match_confidence": 0.921698,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 146,
+   "ticker": "CMCSA",
+   "filed_at": "2026-07-23",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-23-comcast-co-stock/",
+   "prepared_chars": 54881,
+   "qa_chars": 6468,
+   "match_confidence": 0.871053,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 147,
+   "ticker": "ROP",
+   "filed_at": "2026-07-23",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/roper-technologies-nasdaqrop-releases-q2-2026-earnings-guidance-2026-04-23/",
+   "prepared_chars": 11163,
+   "qa_chars": 0,
+   "match_confidence": 0.92,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:11163",
+    "no_speech_structure(op=0,sp=5,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 148,
+   "ticker": "TMUS",
+   "filed_at": "2026-07-23",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-23-t-mobile-us-inc-stock/",
+   "prepared_chars": 14823,
+   "qa_chars": 48936,
+   "match_confidence": 0.95,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 149,
+   "ticker": "UNP",
+   "filed_at": "2026-07-23",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/union-pacific-unp-projected-to-release-earnings-on-thursday-2026-07-16/",
+   "prepared_chars": 12439,
+   "qa_chars": 0,
+   "match_confidence": 0.801613,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:12439"
+   ]
+  },
+  {
+   "transcript_id": 150,
+   "ticker": "LMT",
+   "filed_at": "2026-07-23",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-23-lockheed-martin-co-stock/",
+   "prepared_chars": 58243,
+   "qa_chars": 0,
+   "match_confidence": 0.907143,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 151,
+   "ticker": "FCX",
+   "filed_at": "2026-07-23",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/freeport-mcmoran-fcx-to-announce-earnings-on-wednesday-2026-07-15/",
+   "prepared_chars": 10808,
+   "qa_chars": 0,
+   "match_confidence": 0.816667,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:10808",
+    "no_speech_structure(op=0,sp=7,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 152,
+   "ticker": "PCG",
+   "filed_at": "2026-07-23",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-23-pge-co-stock/",
+   "prepared_chars": 2961,
+   "qa_chars": 49567,
+   "match_confidence": 0.834615,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 153,
+   "ticker": "INTC",
+   "filed_at": "2026-07-23",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/intel-nasdaqintc-updates-q2-2026-earnings-guidance-2026-04-23/",
+   "prepared_chars": 10652,
+   "qa_chars": 0,
+   "match_confidence": 0.85,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:10652",
+    "no_speech_structure(op=0,sp=5,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 154,
+   "ticker": "DECK",
+   "filed_at": "2026-07-23",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/deckers-outdoor-deck-to-release-quarterly-earnings-on-thursday-2026-07-16/",
+   "prepared_chars": 10541,
+   "qa_chars": 0,
+   "match_confidence": 0.807143,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:10541"
+   ]
+  },
+  {
+   "transcript_id": 155,
+   "ticker": "DLR",
+   "filed_at": "2026-07-23",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-23-digital-realty-trust-inc-stock/",
+   "prepared_chars": 2881,
+   "qa_chars": 63776,
+   "match_confidence": 0.95,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 156,
+   "ticker": "RTX",
+   "filed_at": "2026-07-23",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/07/24/rtx-rtx-q2-2026-earnings-call-transcript/",
+   "prepared_chars": 57815,
+   "qa_chars": 400,
+   "match_confidence": 0.763636,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 157,
+   "ticker": "HCA",
+   "filed_at": "2026-07-24",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/hca-healthcare-nysehca-releases-q2-2026-earnings-guidance-2026-07-14/",
+   "prepared_chars": 10907,
+   "qa_chars": 0,
+   "match_confidence": 0.85,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:10907",
+    "no_speech_structure(op=0,sp=5,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 158,
+   "ticker": "VZ",
+   "filed_at": "2026-07-24",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-24-verizon-communications-inc-stock/",
+   "prepared_chars": 31535,
+   "qa_chars": 25524,
+   "match_confidence": 0.925,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 159,
+   "ticker": "CHTR",
+   "filed_at": "2026-07-24",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/07/23/cemex-cx-q2-2026-earnings-call-transcript/",
+   "prepared_chars": 31769,
+   "qa_chars": 29019,
+   "match_confidence": 0.733333,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 160,
+   "ticker": "SLB",
+   "filed_at": "2026-07-24",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-24-schlumberger-limited-stock/",
+   "prepared_chars": 2729,
+   "qa_chars": 55692,
+   "match_confidence": 0.755882,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 161,
+   "ticker": "AXP",
+   "filed_at": "2026-07-24",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-24-american-express-stock/",
+   "prepared_chars": 3759,
+   "qa_chars": 56633,
+   "match_confidence": 0.924286,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 162,
+   "ticker": "NEE",
+   "filed_at": "2026-07-24",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-22-nextera-energy-inc-stock/",
+   "prepared_chars": 27734,
+   "qa_chars": 33316,
+   "match_confidence": 0.9125,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 163,
+   "ticker": "FANG",
+   "filed_at": "2026-07-13",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/diamondback-energy-fang-projected-to-announce-quarterly-earnings-on-monday-2026-07-27/",
+   "prepared_chars": 12655,
+   "qa_chars": 0,
+   "match_confidence": 0.85,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:12655",
+    "no_speech_structure(op=0,sp=7,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 164,
+   "ticker": "T",
+   "filed_at": "2026-07-22",
+   "source": "q4cdn",
+   "source_url": "https://s29.q4cdn.com/310188824/files/doc_financials/2026/q2/TMUS-USQ_Transcript_2026-07-23-1.pdf",
+   "prepared_chars": 66206,
+   "qa_chars": 0,
+   "match_confidence": 0.703491,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 165,
+   "ticker": "CDNS",
+   "filed_at": "2026-07-27",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/cadence-design-systems-nasdaqcdns-updates-q2-2026-earnings-guidance-2026-04-27/",
+   "prepared_chars": 11176,
+   "qa_chars": 0,
+   "match_confidence": 0.925,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:11176",
+    "no_speech_structure(op=0,sp=6,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 166,
+   "ticker": "NUE",
+   "filed_at": "2026-07-27",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/nucor-nysenue-issues-q2-2026-earnings-guidance-2026-06-17/",
+   "prepared_chars": 10595,
+   "qa_chars": 0,
+   "match_confidence": 0.85,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:10595",
+    "no_speech_structure(op=0,sp=6,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 167,
+   "ticker": "RCL",
+   "filed_at": "2026-07-28",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/royal-caribbean-cruises-nysercl-updates-q2-2026-earnings-guidance-2026-04-30/",
+   "prepared_chars": 11416,
+   "qa_chars": 0,
+   "match_confidence": 0.926,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:11416",
+    "no_speech_structure(op=0,sp=5,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 168,
+   "ticker": "HLT",
+   "filed_at": "2026-07-28",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/hilton-worldwide-hlt-projected-to-post-earnings-on-tuesday-2026-07-21/",
+   "prepared_chars": 11534,
+   "qa_chars": 0,
+   "match_confidence": 0.758696,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:11534",
+    "no_speech_structure(op=0,sp=7,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 169,
+   "ticker": "GLW",
+   "filed_at": "2026-07-28",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-28-corning-incorporated-stock/",
+   "prepared_chars": 3061,
+   "qa_chars": 54284,
+   "match_confidence": 0.840909,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 170,
+   "ticker": "STX",
+   "filed_at": "2026-07-28",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/seagate-technology-nasdaqstx-issues-q4-2026-earnings-guidance-2026-04-28/",
+   "prepared_chars": 11379,
+   "qa_chars": 0,
+   "match_confidence": 0.870408,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:11379",
+    "no_speech_structure(op=0,sp=5,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 171,
+   "ticker": "ENPH",
+   "filed_at": "2026-07-28",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-28-enphase-energy-inc-stock/",
+   "prepared_chars": 29790,
+   "qa_chars": 40804,
+   "match_confidence": 0.95,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 172,
+   "ticker": "KLAC",
+   "filed_at": "2026-07-28",
+   "source": "insider_monkey",
+   "source_url": "https://www.insidermonkey.com/blog/kla-corporation-nasdaqklac-q4-2025-earnings-call-transcript-1582684/",
+   "prepared_chars": 53130,
+   "qa_chars": 2256,
+   "match_confidence": 0.763636,
+   "expected": "REJECT",
+   "reasons": [
+    "url_quarter_year_stale:2025",
+    "vintage_mismatch:July 31, 2025(12m)"
+   ]
+  },
+  {
+   "transcript_id": 174,
+   "ticker": "WELL",
+   "filed_at": "2026-07-27",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/welltower-well-to-announce-earnings-on-monday-2026-07-20/",
+   "prepared_chars": 10531,
+   "qa_chars": 0,
+   "match_confidence": 0.784783,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:10531"
+   ]
+  },
+  {
+   "transcript_id": 175,
+   "ticker": "CORZ",
+   "filed_at": "2026-07-28",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-28-core-scientific-inc-stock/",
+   "prepared_chars": 22324,
+   "qa_chars": 38337,
+   "match_confidence": 0.85,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 176,
+   "ticker": "PYPL",
+   "filed_at": "2026-07-28",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-28-paypal-holdings-inc-stock/",
+   "prepared_chars": 30168,
+   "qa_chars": 24888,
+   "match_confidence": 0.821429,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 177,
+   "ticker": "MDLZ",
+   "filed_at": "2026-07-28",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-28-mondelez-international-inc-stock/",
+   "prepared_chars": 2886,
+   "qa_chars": 45715,
+   "match_confidence": 0.95,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 178,
+   "ticker": "PCAR",
+   "filed_at": "2026-07-28",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2026/07/28/paccar-pcar-q2-2026-earnings-call-transcript/",
+   "prepared_chars": 11777,
+   "qa_chars": 27470,
+   "match_confidence": 0.825,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 179,
+   "ticker": "NXPI",
+   "filed_at": "2026-07-28",
+   "source": "manual_override",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-28-nxp-semiconductors-stock/",
+   "prepared_chars": 17753,
+   "qa_chars": 34957,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 180,
+   "ticker": "GEHC",
+   "filed_at": "2026-07-29",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-29-ge-healthcare-technologies-inc-stock-1/",
+   "prepared_chars": 23672,
+   "qa_chars": 37355,
+   "match_confidence": 0.923684,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 181,
+   "ticker": "ODFL",
+   "filed_at": "2026-07-29",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/old-dominion-freight-line-odfl-to-announce-earnings-on-wednesday-2026-07-22/",
+   "prepared_chars": 11769,
+   "qa_chars": 0,
+   "match_confidence": 0.85,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:11769",
+    "no_speech_structure(op=0,sp=6,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 182,
+   "ticker": "TER",
+   "filed_at": "2026-07-29",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/teradyne-nasdaqter-issues-q2-2026-earnings-guidance-2026-04-28/",
+   "prepared_chars": 11451,
+   "qa_chars": 0,
+   "match_confidence": 0.95,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:11451",
+    "no_speech_structure(op=0,sp=6,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 183,
+   "ticker": "GRMN",
+   "filed_at": "2026-07-29",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-29-garmin-ltd-stock/",
+   "prepared_chars": 3153,
+   "qa_chars": 36092,
+   "match_confidence": 0.875,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 184,
+   "ticker": "CVNA",
+   "filed_at": "2026-07-29",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-29-carvana-co-stock/",
+   "prepared_chars": 64316,
+   "qa_chars": 0,
+   "match_confidence": 0.883333,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 185,
+   "ticker": "VRT",
+   "filed_at": "2026-07-29",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/vertiv-nysevrt-releases-q2-2026-earnings-guidance-2026-04-22/",
+   "prepared_chars": 14176,
+   "qa_chars": 0,
+   "match_confidence": 0.7,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:14176"
+   ]
+  },
+  {
+   "transcript_id": 186,
+   "ticker": "FLEX",
+   "filed_at": "2026-07-29",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2025/07/24/flex-flex-q1-2026-earnings-call-transcript/",
+   "prepared_chars": 4350,
+   "qa_chars": 31388,
+   "match_confidence": 0.9,
+   "expected": "REJECT",
+   "reasons": [
+    "url_date_mismatch:2025-07-24",
+    "vintage_mismatch:July 24, 2025(12m)"
+   ]
+  },
+  {
+   "transcript_id": 187,
+   "ticker": "VMC",
+   "filed_at": "2026-07-29",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-29-vulcan-materials-stock/",
+   "prepared_chars": 60938,
+   "qa_chars": 0,
+   "match_confidence": 0.824286,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 188,
+   "ticker": "EQIX",
+   "filed_at": "2026-07-29",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/equinix-eqix-projected-to-post-earnings-on-wednesday-2026-07-22/",
+   "prepared_chars": 12476,
+   "qa_chars": 0,
+   "match_confidence": 0.783333,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:12476",
+    "no_speech_structure(op=0,sp=6,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 189,
+   "ticker": "VTR",
+   "filed_at": "2026-07-29",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/ventas-vtr-expected-to-release-earnings-on-wednesday-2026-07-22/",
+   "prepared_chars": 12040,
+   "qa_chars": 0,
+   "match_confidence": 0.95,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:12040",
+    "no_speech_structure(op=0,sp=7,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 191,
+   "ticker": "OMC",
+   "filed_at": "2026-07-28",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-29-omnicom-group-inc-stock/",
+   "prepared_chars": 22604,
+   "qa_chars": 36774,
+   "match_confidence": 0.801613,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 192,
+   "ticker": "BA",
+   "filed_at": "2026-07-28",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-28-the-boeing-company-stock/",
+   "prepared_chars": 3574,
+   "qa_chars": 53331,
+   "match_confidence": 0.79,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 193,
+   "ticker": "BSX",
+   "filed_at": "2026-07-29",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/boston-scientific-nysebsx-issues-q2-2026-earnings-guidance-2026-04-22/",
+   "prepared_chars": 11173,
+   "qa_chars": 0,
+   "match_confidence": 0.911538,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:11173",
+    "no_speech_structure(op=0,sp=6,qa=False,ph=0)"
+   ]
+  },
+  {
+   "transcript_id": 194,
+   "ticker": "HUM",
+   "filed_at": "2026-07-29",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-29-humana-inc-stock/",
+   "prepared_chars": 3048,
+   "qa_chars": 48127,
+   "match_confidence": 0.875,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 195,
+   "ticker": "BE",
+   "filed_at": "2026-07-28",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-28-bloom-energy-co-stock/",
+   "prepared_chars": 15660,
+   "qa_chars": 43895,
+   "match_confidence": 0.798276,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 196,
+   "ticker": "LRCX",
+   "filed_at": "2026-07-29",
+   "source": "insider_monkey",
+   "source_url": "https://www.insidermonkey.com/blog/lam-research-corporation-nasdaqlrcx-q4-2025-earnings-call-transcript-1581820/",
+   "prepared_chars": 19044,
+   "qa_chars": 34758,
+   "match_confidence": 0.848276,
+   "expected": "REJECT",
+   "reasons": [
+    "url_quarter_year_stale:2025",
+    "vintage_mismatch:July 30, 2025(12m)"
+   ]
+  },
+  {
+   "transcript_id": 197,
+   "ticker": "PG",
+   "filed_at": "2026-07-29",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-29-the-procter-gamble-company-stock/",
+   "prepared_chars": 95656,
+   "qa_chars": 0,
+   "match_confidence": 0.924286,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 199,
+   "ticker": "META",
+   "filed_at": "2026-07-29",
+   "source": "q4cdn",
+   "source_url": "https://s21.q4cdn.com/399680738/files/doc_financials/2026/q2/META-Q2-2026-Earnings-Call-Transcript.pdf",
+   "prepared_chars": 29825,
+   "qa_chars": 32431,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 200,
+   "ticker": "VKTX",
+   "filed_at": "2026-07-29",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-29-viking-therapeutics-inc-stock/",
+   "prepared_chars": 3069,
+   "qa_chars": 63223,
+   "match_confidence": 0.95,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 201,
+   "ticker": "ADP",
+   "filed_at": "2026-07-29",
+   "source": "insider_monkey",
+   "source_url": "https://www.insidermonkey.com/blog/automatic-data-processing-inc-nasdaqadp-q4-2025-earnings-call-transcript-1580422/",
+   "prepared_chars": 14848,
+   "qa_chars": 42758,
+   "match_confidence": 0.795349,
+   "expected": "REJECT",
+   "reasons": [
+    "url_quarter_year_stale:2025",
+    "vintage_mismatch:July 30, 2025(12m)"
+   ]
+  },
+  {
+   "transcript_id": 202,
+   "ticker": "MSFT",
+   "filed_at": "2026-07-29",
+   "source": "motley_fool",
+   "source_url": "https://www.fool.com/earnings/call-transcripts/2025/08/05/microsoft-msft-q4-2025-earnings-call-transcript/",
+   "prepared_chars": 35867,
+   "qa_chars": 18339,
+   "match_confidence": 0.734783,
+   "expected": "REJECT",
+   "reasons": [
+    "url_date_mismatch:2025-08-05",
+    "url_quarter_year_stale:2025",
+    "vintage_mismatch:July 30, 2025(12m)"
+   ]
+  },
+  {
+   "transcript_id": 203,
+   "ticker": "QCOM",
+   "filed_at": "2026-07-29",
+   "source": "insider_monkey",
+   "source_url": "https://www.insidermonkey.com/blog/qualcomm-incorporated-nasdaqqcom-q3-2025-earnings-call-transcript-1581814/",
+   "prepared_chars": 15721,
+   "qa_chars": 19410,
+   "match_confidence": 0.808696,
+   "expected": "REJECT",
+   "reasons": [
+    "url_quarter_year_stale:2025",
+    "vintage_mismatch:July 30, 2025(12m)"
+   ]
+  },
+  {
+   "transcript_id": 204,
+   "ticker": "FICO",
+   "filed_at": "2026-07-29",
+   "source": "insider_monkey",
+   "source_url": "https://www.insidermonkey.com/blog/fair-isaac-corporation-nysefico-q3-2025-earnings-call-transcript-1581817/",
+   "prepared_chars": 18294,
+   "qa_chars": 34821,
+   "match_confidence": 0.84,
+   "expected": "REJECT",
+   "reasons": [
+    "url_quarter_year_stale:2025",
+    "vintage_mismatch:July 31, 2025(12m)"
+   ]
+  },
+  {
+   "transcript_id": 205,
+   "ticker": "HOOD",
+   "filed_at": "2026-07-29",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-29-robinhood-markets-inc-stock/",
+   "prepared_chars": 3117,
+   "qa_chars": 84254,
+   "match_confidence": 0.85,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 206,
+   "ticker": "SBUX",
+   "filed_at": "2026-07-29",
+   "source": "q4cdn",
+   "source_url": "https://s203.q4cdn.com/326826266/files/doc_financials/2025/q3/SBUX-3Q25-Corrected-Transcript.pdf",
+   "prepared_chars": 2046,
+   "qa_chars": 85633,
+   "match_confidence": 0.784783,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 207,
+   "ticker": "REGN",
+   "filed_at": "2026-07-30",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-30-regeneron-pharmaceuticals-inc-stock/",
+   "prepared_chars": 3107,
+   "qa_chars": 62420,
+   "match_confidence": 0.95,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 208,
+   "ticker": "MSTR",
+   "filed_at": "2026-07-30",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/earnings/reports/2026-7-30-microstrategy-incorporated-stock/",
+   "prepared_chars": 2784,
+   "qa_chars": 100000,
+   "match_confidence": 0.89,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 209,
+   "ticker": "RBLX",
+   "filed_at": "2026-07-30",
+   "source": "marketbeat",
+   "source_url": "https://www.marketbeat.com/instant-alerts/roblox-rblx-expected-to-release-earnings-on-thursday-2026-07-23/",
+   "prepared_chars": 13698,
+   "qa_chars": 0,
+   "match_confidence": 0.761765,
+   "expected": "REJECT",
+   "reasons": [
+    "url_blocklist:instant-alerts/",
+    "raw_too_short:13698"
+   ]
+  },
+  {
+   "transcript_id": 210,
+   "ticker": "AAPL",
+   "filed_at": "2026-07-30",
+   "source": "manual_override",
+   "source_url": "file://user_paste/AAPL.txt",
+   "prepared_chars": 24464,
+   "qa_chars": 25055,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 211,
+   "ticker": "AMZN",
+   "filed_at": "2026-07-30",
+   "source": "manual_override",
+   "source_url": "file://user_paste/AMZN.txt",
+   "prepared_chars": 27971,
+   "qa_chars": 20154,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 212,
+   "ticker": "ARM",
+   "filed_at": "2026-07-29",
+   "source": "manual_override",
+   "source_url": "file://user_paste/ARM.txt",
+   "prepared_chars": 12306,
+   "qa_chars": 26506,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  },
+  {
+   "transcript_id": 213,
+   "ticker": "FTNT",
+   "filed_at": "2026-07-29",
+   "source": "manual_override",
+   "source_url": "file://user_paste/FTNT.txt",
+   "prepared_chars": 19613,
+   "qa_chars": 31119,
+   "match_confidence": 1.0,
+   "expected": "PASS",
+   "reasons": []
+  }
+ ]
+}
