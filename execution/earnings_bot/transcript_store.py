@@ -65,8 +65,11 @@ def _build_md(row: dict) -> str:
         f"match_confidence: {row.get('match_confidence')}",
         f"translation_model: {row.get('translation_model') or 'haiku'}",
         f"translated_at: {row.get('translated_at') or ''}",
-        '---',
     ]
+    # 게이트 경고 — 차단 사유는 아니지만 독자가 알아야 할 품질 신호 (2026-07-31)
+    if row.get('gate_warnings'):
+        fm.append('gate_warnings: ' + '; '.join(row['gate_warnings']))
+    fm.append('---')
     body = (
         f"# {row['ticker']}{title_q} 컨퍼런스콜 전문 (한국어 번역)\n\n"
         f"{row['translated_kr']}\n\n"
@@ -111,6 +114,10 @@ def save_transcript_md(transcript_id: int, *, force: bool = False) -> dict:
         logger.warning(f"transcript {transcript_id} 발행 게이트 차단: {_g.reasons}")
         return {'skip': True, 'transcript_id': transcript_id,
                 'reason': 'gate_reject', 'gate_reasons': _g.reasons}
+
+    if _g.warnings:
+        logger.warning(f"transcript {transcript_id} 발행 경고: {_g.warnings}")
+        row['gate_warnings'] = _g.warnings
 
     relpath = _md_relpath(row)
     content = _build_md(row)

@@ -94,11 +94,18 @@ SYSTEM_TRANSLATION_TRANSCRIPT = """당신은 미국 상장사 실적 컨퍼런�
 번역을 시작하기 전에, 주어진 원문이 **실제 컨퍼런스콜 발화 기록**인지 확인하십시오.
 발화 기록이라면 Operator 안내, 발화자 전환, 질의응답 같은 구조가 있습니다.
 
+단, 사용자 메시지에 "이미 검증한 문서"라는 표기가 있으면 이 검증을 건너뛰고
+곧바로 번역만 하십시오 (청크 분할 번역의 중간 조각은 시작 구조가 없는 것이 정상입니다).
+
 원문이 발화 기록이 아니라 **뉴스 기사·실적 가이던스 공지·보도자료·IR 프레젠테이션·
 종목 요약 페이지·시세 정보**라면, 다른 어떤 것도 출력하지 말고 정확히 아래 한 줄만
 출력하십시오:
 
 NOT_A_TRANSCRIPT
+
+반대로 원문이 실제 발화 기록이 맞아 번역을 진행할 때는, NOT_A_TRANSCRIPT 라는
+문자열을 출력물 어디에도 쓰지 말고 곧바로 번역만 출력하십시오 (검증 과정이나
+판단 결과를 서술하지 마십시오).
 
 **절대 금지**: 원문에 없는 발언을 만들어내는 것. 기사 내용을 경영진 발언 형식으로
 재구성하는 것. 3인칭 서술("CEO는 ~라고 밝혔다")을 1인칭 발언("저희는 ~합니다")으로
@@ -238,7 +245,9 @@ def build_transcript_translation_messages(prepared_remarks: str, qa: str) -> lis
 def build_prepared_messages(prepared_remarks: str) -> list[dict]:
     """Prepared Remarks만 번역. max_tokens 16K 도달 회피용 분할 호출."""
     prepared = (prepared_remarks or '')[:50000]  # cutoff 늘림 — 분할이라 충분한 공간
-    user_content = f"""다음은 미국 상장사 분기 실적 컨퍼런스콜의 **Prepared Remarks (경영진 발표)** 부분입니다. 시스템 프롬프트의 규칙대로 한국어로 풀 번역하세요. 출력 시작은 `## 경영진 발표` 헤더로 시작하세요.
+    user_content = f"""※ 이 원문은 시스템이 이미 '실제 컨퍼런스콜 발화 기록'으로 검증한 문서(또는 그 일부 조각)입니다. 0단계 입력 검증을 다시 수행하지 말고, NOT_A_TRANSCRIPT 를 출력하지 말고, 곧바로 번역만 출력하세요.
+
+다음은 미국 상장사 분기 실적 컨퍼런스콜의 **Prepared Remarks (경영진 발표)** 부분입니다. 시스템 프롬프트의 규칙대로 한국어로 풀 번역하세요. 출력 시작은 `## 경영진 발표` 헤더로 시작하세요.
 
 마지막 발화자 발언으로 깔끔하게 종료하세요. "[이하 Q&A 섹션 생략됨]" 같은 메타 안내 라인을 절대 추가하지 마세요 — Q&A는 별도 출력으로 합쳐지므로 이 출력에는 무엇도 안내하지 마세요.
 
@@ -251,7 +260,9 @@ def build_prepared_messages(prepared_remarks: str) -> list[dict]:
 def build_qa_messages(qa: str) -> list[dict]:
     """Q&A만 번역 (단일 청크)."""
     qa_text = (qa or '')[:50000]
-    user_content = f"""다음은 미국 상장사 분기 실적 컨퍼런스콜의 **Q&A (애널리스트 질의응답)** 부분입니다. 시스템 프롬프트의 규칙대로 한국어로 풀 번역하세요. 출력 시작은 `## Q&A (애널리스트 질의응답)` 헤더로 시작하세요. Operator/Analyst/CEO/CFO 발화자 구분을 정확히 보존하세요.
+    user_content = f"""※ 이 원문은 시스템이 이미 '실제 컨퍼런스콜 발화 기록'으로 검증한 문서(또는 그 일부 조각)입니다. 0단계 입력 검증을 다시 수행하지 말고, NOT_A_TRANSCRIPT 를 출력하지 말고, 곧바로 번역만 출력하세요.
+
+다음은 미국 상장사 분기 실적 컨퍼런스콜의 **Q&A (애널리스트 질의응답)** 부분입니다. 시스템 프롬프트의 규칙대로 한국어로 풀 번역하세요. 출력 시작은 `## Q&A (애널리스트 질의응답)` 헤더로 시작하세요. Operator/Analyst/CEO/CFO 발화자 구분을 정확히 보존하세요.
 
 마지막 발화자 발언으로 깔끔하게 종료하세요. "[이하 생략됨]" 같은 메타 안내 라인 절대 추가 금지.
 
@@ -279,7 +290,9 @@ def build_prepared_chunk_messages(prepared_chunk: str, chunk_index: int, total_c
     else:
         position = '**중간 청크**입니다. 이전 청크에서 이어지므로 새 헤더 추가 금지. 다음 청크가 이어지므로 끝에 어떤 안내 문구도 추가 금지.'
 
-    user_content = f"""다음은 미국 상장사 분기 실적 컨퍼런스콜 **Prepared Remarks (경영진 발표)** 의 {position}
+    user_content = f"""※ 이 원문은 시스템이 이미 '실제 컨퍼런스콜 발화 기록'으로 검증한 문서(또는 그 일부 조각)입니다. 0단계 입력 검증을 다시 수행하지 말고, NOT_A_TRANSCRIPT 를 출력하지 말고, 곧바로 번역만 출력하세요.
+
+다음은 미국 상장사 분기 실적 컨퍼런스콜 **Prepared Remarks (경영진 발표)** 의 {position}
 
 [Prepared Remarks 청크 {chunk_index + 1}/{total_chunks}]
 {prepared_chunk}
@@ -305,7 +318,9 @@ def build_qa_chunk_messages(qa_chunk: str, chunk_index: int, total_chunks: int) 
     else:
         position = '**중간 청크**입니다. 이전 청크에서 이어지므로 새 헤더 추가 금지. 다음 청크가 이어지므로 끝에 어떤 안내 문구도 추가 금지.'
 
-    user_content = f"""다음은 미국 상장사 분기 실적 컨퍼런스콜 Q&A의 {position}
+    user_content = f"""※ 이 원문은 시스템이 이미 '실제 컨퍼런스콜 발화 기록'으로 검증한 문서(또는 그 일부 조각)입니다. 0단계 입력 검증을 다시 수행하지 말고, NOT_A_TRANSCRIPT 를 출력하지 말고, 곧바로 번역만 출력하세요.
+
+다음은 미국 상장사 분기 실적 컨퍼런스콜 Q&A의 {position}
 
 [Q&A 청크 {chunk_index + 1}/{total_chunks}]
 {qa_chunk}

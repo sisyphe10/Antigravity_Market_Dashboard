@@ -463,6 +463,20 @@ def translate_transcript(transcript_id: int) -> dict:
     total_output = sum(r['output_tokens'] for r in prepared_resps) + sum(
         r['output_tokens'] for r in qa_resps)
 
+    # ── 청크 단위 검사 (2026-07-31): 합본 전체 검사만으로는 한 청크의 환각·거부가
+    #    나머지 정상 청크에 희석되어 통과할 수 있다. sentinel·거부문구는 청크별로 본다.
+    from .transcript_gate import SENTINEL, REFUSAL_MARKERS
+    for _r in prepared_resps + qa_resps:
+        _t = _r.get('text') or ''
+        _ts = _t.strip()
+        if ((_ts.startswith(SENTINEL) and len(_ts) < 1200)
+                or (len(_ts) < 800 and any(mk in _ts for mk in REFUSAL_MARKERS))):
+            logger.warning(
+                f'[translator] CHUNK GATE REJECT transcript={transcript_id} — '
+                f'청크에 sentinel/거부문구: {_t[:120]!r}')
+            return {'transcript_id': transcript_id, 'translated': False,
+                    'reason': 'chunk_gate_reject', 'chunk_head': _t[:200]}
+
     # ── 번역 후 게이트: sentinel / 거부문구 / 분량비율 / 화자 귀속 역대조
     _og = check_translation(prepared + '\n' + qa, translated_full)
     if not _og.ok:

@@ -179,14 +179,17 @@ def check_translation(raw_text: str, translated_kr: str) -> GateResult:
     reasons: list[str] = []
     info = {'kr_chars': len(kr), 'raw_chars': len(raw_text)}
 
-    if SENTINEL in kr[:400]:
+    # sentinel 은 '번역 대신 단독 출력'이 규약 — 전체가 사실상 그 한 줄일 때만 거부.
+    # 정상 번역 서두에 규칙 언급으로 문자열이 섞이는 경우가 실측됨(5건) → 경고로만.
+    if kr.strip().startswith(SENTINEL) and len(kr.strip()) < 1200:
         return _fail([f'sentinel:{SENTINEL}'], info)
+    warnings0 = [f'sentinel_mentioned_in_body'] if SENTINEL in kr else []
     head = kr[:1500]
     for mk in REFUSAL_MARKERS:
         if mk in head:
             reasons.append(f'refusal_marker:{mk}')
             break
-    warnings: list[str] = []
+    warnings: list[str] = list(warnings0)
     if raw_text:
         ratio = len(kr) / len(raw_text)
         info['ratio'] = round(ratio, 3)
