@@ -10153,6 +10153,11 @@ def create_dashboard():
         .negative { color: #0055cc; font-weight: 600; }
         /* 기업명 컬럼 + 현재 정렬 컬럼 하이라이트 (클래스 방식 — 인라인 style 금지: 게시 다크 CSS의 td[style*=background] 규칙과 충돌) */
         .col-hl { background: #14171b; }
+        /* 종목 검색창 — 흰 돋보기 + 직사각형 박스 (2026-07-31) */
+        .uv-search { display: inline-flex; align-items: center; gap: 8px; border: 1px solid #fff; border-radius: 0; background: transparent; padding: 6px 12px; }
+        .uv-search svg { width: 15px; height: 15px; stroke: #fff; flex: none; }
+        .uv-search input { border: none; outline: none; background: transparent; color: #fff; font-family: inherit; font-size: 14px; width: 190px; }
+        .uv-search input::placeholder { color: #8a919a; }
         footer { text-align: center; padding: 24px; color: #999; font-size: 14px; }
         TOP_NAV_CSS_PLACEHOLDER
     </style>
@@ -10180,6 +10185,7 @@ SIDEBAR_PLACEHOLDER
             <div class="csel-display" id="cselSecDisplay" onclick="toggleCselId('cselSecList')">섹터</div>
             <div class="csel-list" id="cselSecList"></div>
         </div>
+        <div class="uv-search"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.35-4.35"></path></svg><input type="text" id="uvSearch" oninput="render()" placeholder="종목명·티커 검색"></div>
         <button onclick="downloadUniverseList()" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
         <button onclick="superDownloadUniverse()" id="superDlBtn" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#2563eb;color:#fff;border:none;border-radius:8px;cursor:pointer;margin-left:8px;">Super Download</button>
     </div>
@@ -10370,9 +10376,11 @@ function doSort(col){
 function render(){
     var fc=_cselCurVal;
     var fs=_cselSecVal;
+    var q=(document.getElementById('uvSearch')||{value:''}).value.trim().toLowerCase();
     var f=D.filter(function(r){
         if(fc&&r[1]!==fc)return false;
         if(fs&&r[2]!==fs)return false;
+        if(q&&String(r[4]||'').toLowerCase().indexOf(q)<0&&String(r[3]||'').toLowerCase().indexOf(q)<0)return false;   // 검색: 기업명·티커
         if(uvStarOnly&&!uvStars[uvTicker(r)])return false;   // 헤더 ★ = 관심종목만 보기
         return true;
     });
