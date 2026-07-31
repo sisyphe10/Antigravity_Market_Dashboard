@@ -10154,7 +10154,7 @@ def create_dashboard():
         /* 기업명 컬럼 + 현재 정렬 컬럼 하이라이트 (클래스 방식 — 인라인 style 금지: 게시 다크 CSS의 td[style*=background] 규칙과 충돌) */
         .col-hl { background: #14171b; }
         /* 종목 검색창 — 흰 돋보기 + 직사각형 박스 (2026-07-31) */
-        .uv-search { position: absolute; top: 50%; transform: translateY(-50%); left: 0; display: flex; align-items: center; gap: 6px; border: 1px solid #fff; border-radius: 0; background: transparent; padding: 5px 8px; box-sizing: border-box; }
+        .uv-search { position: absolute; top: 50%; transform: translateY(-50%); left: 0; display: flex; align-items: center; gap: 6px; border: 1.5px solid #fff; border-radius: 0; background: transparent; padding: 5px 8px; box-sizing: border-box; }
         .uv-search svg { width: 18px; height: 18px; stroke: #fff; flex: none; }
         .uv-search input { border: none; outline: none; background: transparent; color: #fff; font-family: inherit; font-size: 14px; width: 100%; min-width: 0; }
         .uv-search input::placeholder { color: #8a919a; }
