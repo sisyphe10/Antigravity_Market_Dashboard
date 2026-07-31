@@ -1,6 +1,15 @@
 {
-  "updated_at": "2026-07-31 16:30 KST",
+  "updated_at": "2026-07-31 17:00 KST",
   "items": [
+    {
+      "rcept_no": "20260731000690",
+      "code": "005930",
+      "name": "삼성전자",
+      "date": "2026-07-31",
+      "title": "임원ㆍ주요주주특정증권등소유상황보고서",
+      "summary": "",
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260731000690"
+    },
     {
       "rcept_no": "20260731000082",
       "code": "000660",
