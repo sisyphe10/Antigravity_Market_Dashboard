@@ -1,8 +1,8 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 146 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 147 components._
 
-Updated: 2026-07-30
+Updated: 2026-07-31
 
 ## By domain
 
@@ -103,7 +103,7 @@ Updated: 2026-07-30
 - [자문지 메일 발송 폴러 (send-advisory-emails 60초)](timer-advisory-emails.md) — Timer
 - [포트폴리오 표 생성 (create_portfolio_tables.py)](src-create-portfolio-tables.md) — Source
 
-### 뉴스 · 리서치 (18)
+### 뉴스 · 리서치 (19)
 - [Earnings Calendar Sync (07:00)](gha-earnings-calendar-sync.md) — GHA
 - [earnings.db (실적봇 상태)](store-earnings-db.md) — Store
 - [Generic Source Pipeline (execution/sources/)](src-generic-pipeline.md) — Source
@@ -114,6 +114,7 @@ Updated: 2026-07-30
 - [research_notes.db + media/ (리서치봇)](store-research-notes-db.md) — Store
 - [sources_state/ + kna_state.json](store-sources-state.md) — Store
 - [리서치 태그 정본 (tag_state.sqlite + theme_trends.json + parquet)](store-research-tags.md) — Store
+- [리서치노트 이미지 OCR (datalake/ocr_worker.py)](src-research-ocr.md) — Source
 - [실적 분석 1-page md (~/datalake/analyses/)](store-analyses-md.md) — Store
 - [실적 캘린더 sync (earnings_calendar_sync.py)](src-earnings-calendar-sync.md) — Source
 - [실적봇 타이머 (earnings-bot)](timer-earnings-bot.md) — Timer
@@ -275,7 +276,7 @@ Updated: 2026-07-30
 - [외부 데이터 API/소스 집합](ext-data-apis.md) — active
 - [한국 수출 매출 추정 대시보드](ext-export-dashboard.md) — planned
 
-### Source (44)
+### Source (45)
 - [AoE 스타일 정본 (nav_style.py)](src-nav-style.md) — import 시 (상시), active
 - [DART 공시 (fetch_disclosures.py)](src-dart-disclosures.md) — 16:30 (gha-daily-disclosures), active
 - [ECOS 한국 매크로 33종 (fetch_ecos_data.py)](src-ecos.md) — 17:40 평일 (gha-daily-ecos), active
@@ -301,6 +302,7 @@ Updated: 2026-07-30
 - [대만 월매출 (fetch_taiwan_revenue.py)](src-taiwan-revenue.md) — 23:20 (gha-daily-taiwan-revenue), active
 - [대시보드 생성기 (create_dashboard.py)](src-create-dashboard.md) — 체인 말단 (여러 잡), active
 - [랜딩 하이라이트 생성 (create_landing_highlights.py)](src-landing-highlights.md) — 18:45 (landing-highlights 타이머), active
+- [리서치노트 이미지 OCR (datalake/ocr_worker.py)](src-research-ocr.md) — 23:20 step 0 (datalake-research-export), active
 - [마스터 시장 크롤러 (market_crawler.py)](src-market-crawler.md) — 23:00 (daily_crawl), active
 - [수익률 계산 (calculate_returns.py)](src-calculate-returns.md) — 체인 (finalize/recalc/crawl), active
 - [실적 캘린더 sync (earnings_calendar_sync.py)](src-earnings-calendar-sync.md) — 07:00 (GHA) + 15:00 (VM cron), active
@@ -340,7 +342,7 @@ Updated: 2026-07-30
 
 ## By project
 
-### antigravity (146)
+### antigravity (147)
 - [/aum — WRAP 일일 AUM 입력](cmd-aum.md) — Skill
 - [/긴급코멘트 — 급락일 시장 코멘트](cmd-urgent-comment.md) — Skill
 - [/목표전환형 — 랩 생성·청산 일괄](cmd-target-transform.md) — Skill
@@ -444,6 +446,7 @@ Updated: 2026-07-30
 - [랜딩 하이라이트 생성 (create_landing_highlights.py)](src-landing-highlights.md) — Source
 - [랜딩 하이라이트 타이머 (18:45)](timer-landing-highlights.md) — Timer
 - [리서치 태그 정본 (tag_state.sqlite + theme_trends.json + parquet)](store-research-tags.md) — Store
+- [리서치노트 이미지 OCR (datalake/ocr_worker.py)](src-research-ocr.md) — Source
 - [마스터 시장 크롤러 (market_crawler.py)](src-market-crawler.md) — Source
 - [맥미니 데이터레이크 (~/datalake + 문답 위키)](infra-datalake.md) — Infra
 - [메모리 사이클 플랜 알림 타이머 (07:45)](timer-memory-cycle-alert.md) — Timer

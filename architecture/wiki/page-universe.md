@@ -26,6 +26,8 @@ alerts: ""
 
 - 소스: `universe.json`/`universe_history.json`(하루 2회 yfinance) + 외국인 보유비중(INDEX_KR).
 - `create_dashboard.py` 생성. 종목 추가는 `universe_tickers.csv`로.
+- **관심종목 별표 컬럼(2026-07-31)**: 종목 리스트 1열에 별표(★) 토글 — 상태는 [[daemon-watchlist-quoteboard]]의 `/watchlist/prefs`(`universe_stars_v1 = {"tickers":[순수심볼,…]}`)에 서버 공유(+localStorage 폴백). 헤더 ★ = 관심종목만 보기 필터. Download PNG에선 별표 컬럼 숨김. 정렬 헤더 화살표는 `#tab0`로 한정(기간 탭 헤더 오염 방지).
+- **nav 위치(2026-07-31)**: 상단 네비에서 Market → **Watchlist 드롭다운 하위**로 이동([[src-nav-style]] `NAV_ITEMS`).
 
 ## Reads
 - [[store-universe-json]] — universe.json / universe_history.json

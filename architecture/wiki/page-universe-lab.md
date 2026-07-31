@@ -25,6 +25,7 @@ Universe의 실험(lab) 변형 페이지. 사이드바/스타일을 Universe와 
 
 - `create_dashboard.py`의 PAGES 목록에 `('universe_lab','universe_lab.html','Universe Lab')`로 등록돼 함께 생성.
 - 소스는 Universe와 공유(universe.json 계열).
+- **nav 위치(2026-07-31)**: Universe와 함께 상단 네비 Market → **Watchlist 드롭다운 하위**로 이동([[src-nav-style]] `NAV_ITEMS`).
 
 ## Reads
 - [[store-universe-json]] — universe.json / universe_history.json

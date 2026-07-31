@@ -28,6 +28,7 @@ alerts: "OnFailure → earnings-bot-notify.service → notify_sisyphe_failure.sh
 - 한 번 호출로 캘린더 sync + EDGAR/트랜스크립트 폴링 + 번역·요약(Claude) + 노션 퍼블리시 + 아침 다이제스트를 모두 수행.
 - 실행 파이프라인 상세는 `src-earnings-pipeline` 참조.
 - TimeoutStartSec=45min. 실패 시 `earnings-bot-notify.service`(OnFailure)로 텔레그램.
+- **워치독 45→90min 상향(2026-07-31, `run_timer_job.sh` `job_timeout_seconds`=5400)**: 실적 성수기 피크일(2026-07-30 AMC 37건)에 분석 단계가 19/20에서 2700s 강제종료 → 5~9단계(전문 번역·md 발행·전문 저장·아침 다이제스트)가 통째로 미실행되고 텔레그램 다이제스트가 안 나갔다.
 - 함정: 2026-07-02 GHA calendar sync SA키 stale로 한 달 무성공 → 로컬 키 검증 후 secret 교체 복구.
 
 ## Reads
