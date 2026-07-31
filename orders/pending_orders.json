@@ -92,7 +92,7 @@
           "sector": "IT하드웨어",
           "code": "009150",
           "name": "삼성전기",
-          "weight": 1,
+          "weight": 0,
           "baseWeight": 0,
           "reason": "ETF 수급으로 인해 단기에 폭등했던 주가가 회귀하였으나, MLCC 및 FC-BGA 업황은 매우 견조, 신규 매수"
         },
@@ -103,10 +103,17 @@
           "weight": 1,
           "baseWeight": 0,
           "reason": "국내 AI DC 건설 확대를 위한 비상발전기 쇼티지, 당사 MS는 독과점에 가까울 정도로 우수, 신규 매수"
+        },
+        {
+          "sector": "IT하드웨어",
+          "code": "011070",
+          "name": "LG이노텍",
+          "weight": 1,
+          "baseWeight": 0,
+          "reason": "ETF 수급으로 인해 단기에 폭등했던 주가가 회귀하였으나, MLCC 및 FC-BGA 업황은 매우 견조, 신규 매수"
         }
       ],
-      "savedAt": "2026-07-30T23:23:36.075Z",
-      "finalizedAt": "2026-07-31T08:25:22+09:00"
+      "savedAt": "2026-07-31T00:15:05.533Z"
     },
     "NH 다이내믹 밸류": {
       "targets": [
@@ -211,10 +218,17 @@
           "weight": 1,
           "baseWeight": 0,
           "reason": "국내 AI DC 건설 확대를 위한 비상발전기 쇼티지, 당사 MS는 독과점에 가까울 정도로 우수, 신규 매수"
+        },
+        {
+          "sector": "IT하드웨어",
+          "code": "011070",
+          "name": "LG이노텍",
+          "weight": 0,
+          "baseWeight": 0,
+          "reason": ""
         }
       ],
-      "savedAt": "2026-07-30T23:23:36.075Z",
-      "finalizedAt": "2026-07-31T08:25:22+09:00"
+      "savedAt": "2026-07-31T00:15:05.533Z"
     },
     "DB 개방형": {
       "targets": [
@@ -319,10 +333,17 @@
           "weight": 1,
           "baseWeight": 0,
           "reason": "국내 AI DC 건설 확대를 위한 비상발전기 쇼티지, 당사 MS는 독과점에 가까울 정도로 우수, 신규 매수"
+        },
+        {
+          "sector": "IT하드웨어",
+          "code": "011070",
+          "name": "LG이노텍",
+          "weight": 0,
+          "baseWeight": 0,
+          "reason": ""
         }
       ],
-      "savedAt": "2026-07-30T23:23:36.075Z",
-      "finalizedAt": "2026-07-31T08:25:22+09:00"
+      "savedAt": "2026-07-31T00:15:05.533Z"
     },
     "한투 지속형": {
       "targets": [
@@ -427,10 +448,17 @@
           "weight": 1,
           "baseWeight": 0,
           "reason": "국내 AI DC 건설 확대를 위한 비상발전기 쇼티지, 당사 MS는 독과점에 가까울 정도로 우수, 신규 매수"
+        },
+        {
+          "sector": "IT하드웨어",
+          "code": "011070",
+          "name": "LG이노텍",
+          "weight": 0,
+          "baseWeight": 0,
+          "reason": ""
         }
       ],
-      "savedAt": "2026-07-30T23:23:36.075Z",
-      "finalizedAt": "2026-07-31T08:25:22+09:00"
+      "savedAt": "2026-07-31T00:15:05.533Z"
     },
     "NH 목표전환형 5호": {
       "targets": [
@@ -535,10 +563,17 @@
           "weight": 1,
           "baseWeight": 0,
           "reason": "국내 AI DC 건설 확대를 위한 비상발전기 쇼티지, 당사 MS는 독과점에 가까울 정도로 우수, 신규 매수"
+        },
+        {
+          "sector": "IT하드웨어",
+          "code": "011070",
+          "name": "LG이노텍",
+          "weight": 0,
+          "baseWeight": 0,
+          "reason": ""
         }
       ],
-      "savedAt": "2026-07-30T23:23:36.075Z",
-      "finalizedAt": "2026-07-31T08:25:22+09:00"
+      "savedAt": "2026-07-31T00:15:05.533Z"
     },
     "DB 목표전환형 6차": {
       "targets": [
@@ -643,10 +678,17 @@
           "weight": 1,
           "baseWeight": 0,
           "reason": "국내 AI DC 건설 확대를 위한 비상발전기 쇼티지, 당사 MS는 독과점에 가까울 정도로 우수, 신규 매수"
+        },
+        {
+          "sector": "IT하드웨어",
+          "code": "011070",
+          "name": "LG이노텍",
+          "weight": 0,
+          "baseWeight": 0,
+          "reason": ""
         }
       ],
-      "savedAt": "2026-07-30T23:23:36.075Z",
-      "finalizedAt": "2026-07-31T08:25:22+09:00"
+      "savedAt": "2026-07-31T00:15:05.533Z"
     },
     "한투 성과모집형 1차": {
       "targets": [
@@ -751,10 +793,17 @@
           "weight": 1,
           "baseWeight": 0,
           "reason": "국내 AI DC 건설 확대를 위한 비상발전기 쇼티지, 당사 MS는 독과점에 가까울 정도로 우수, 신규 매수"
+        },
+        {
+          "sector": "IT하드웨어",
+          "code": "011070",
+          "name": "LG이노텍",
+          "weight": 0,
+          "baseWeight": 0,
+          "reason": ""
         }
       ],
-      "savedAt": "2026-07-30T23:23:36.075Z",
-      "finalizedAt": "2026-07-31T08:25:22+09:00"
+      "savedAt": "2026-07-31T00:15:05.533Z"
     }
   }
 }
