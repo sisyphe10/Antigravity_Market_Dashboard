@@ -10100,17 +10100,25 @@ def create_dashboard():
         th { padding: 12px 6px; text-align: center; font-weight: 600; color: #000; cursor: pointer; white-space: nowrap; overflow: hidden; position: sticky; top: 0; background: #e9ecef; z-index: 10; box-shadow: inset 0 -2px 0 #000; }
         th:hover { background: #ddd; }
         td { padding: 10px 6px; border-bottom: 1px solid #dee2e6; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        /* 종목 리스트 컬럼 비율 */
-        #tab0 th:nth-child(1) { width: 3%; }
-        #tab0 th:nth-child(2) { width: 5%; }
-        #tab0 th:nth-child(3) { width: 9%; }
-        #tab0 th:nth-child(4) { width: 7%; }
-        #tab0 th:nth-child(5) { width: 12%; }
-        #tab0 th:nth-child(6) { width: 8%; }
-        #tab0 th:nth-child(7) { width: 7%; }
-        #tab0 th:nth-child(n+8) { width: 6%; }
-        /* DD 열 (1Y 오른쪽) 세로 구분선 — 종목 리스트 16번째, 섹터 수익률 12번째 컬럼 */
-        #tab0 th:nth-child(16), #tab0 td:nth-child(16) { border-left: 2px solid #868e96; }
+        /* 종목 리스트 컬럼 비율 — 1열=관심종목 별표 삽입(2026-07-31)으로 이하 nth-child 전부 +1 */
+        #tab0 th:nth-child(1) { width: 2.5%; }
+        #tab0 th:nth-child(2) { width: 3%; }
+        #tab0 th:nth-child(3) { width: 5%; }
+        #tab0 th:nth-child(4) { width: 9%; }
+        #tab0 th:nth-child(5) { width: 7%; }
+        #tab0 th:nth-child(6) { width: 12%; }
+        #tab0 th:nth-child(7) { width: 8%; }
+        #tab0 th:nth-child(8) { width: 7%; }
+        #tab0 th:nth-child(n+9) { width: 6%; }
+        /* 관심종목 별표 컬럼 — 채움=앰버, 빈별=회색. 정렬 대상 아님(헤더 ★=관심종목만 보기 토글).
+           ★#tab0 스코프 + !important 필수: 게시 다크 CSS 의 td:not([style*=color]){color:#fff!important}
+             · th{color:amber!important} 가 뒤에 주입돼 색이 통째로 덮인다 (2026-07-31 실측). */
+        #tab0 .uv-star, #tab0 .uv-star-th { cursor: pointer; user-select: none; color: #8a919a !important; padding-left: 0; padding-right: 0; }
+        #tab0 .uv-star.on, #tab0 .uv-star-th.on { color: #fb8b1e !important; }
+        #tab0 .uv-star:hover, #tab0 .uv-star-th:hover { color: #ffb45e !important; }
+        body.uv-capture .uv-star, body.uv-capture .uv-star-th { display: none; }  /* Download PNG 에는 별표 컬럼 제외 */
+        /* DD 열 (1Y 오른쪽) 세로 구분선 — 종목 리스트 17번째(별표 +1), 섹터 수익률 12번째 컬럼 */
+        #tab0 th:nth-child(17), #tab0 td:nth-child(17) { border-left: 2px solid #868e96; }
         #sectorContent th:nth-child(13), #sectorContent td:nth-child(13) { border-left: 2px solid #868e96; }
         /* 기간 수익률 탭 컬럼 비율 */
         #tab2 th:nth-child(1) { width: 4%; }
@@ -10163,6 +10171,7 @@ SIDEBAR_PLACEHOLDER
     </div>
     <table>
         <thead><tr>
+            <th class="uv-star-th" id="uvStarTh" onclick="uvToggleStarOnly()" title="관심종목만 보기">★</th>
             <th onclick="doSort(0)">#</th>
             <th onclick="doSort(1)">통화</th>
             <th onclick="doSort(2)">섹터</th>
@@ -10180,7 +10189,7 @@ SIDEBAR_PLACEHOLDER
             <th onclick="doSort(14)">1Y</th>
             <th onclick="doSort(15)">DD</th>
         </tr></thead>
-        <tbody id="tbody"><tr><td colspan="16" style="padding:40px;color:#888;">로딩 중...</td></tr></tbody>
+        <tbody id="tbody"><tr><td colspan="17" style="padding:40px;color:#888;">로딩 중...</td></tr></tbody>
     </table>
     </div>
     <div id="tab1" class="tab-content">
@@ -10269,7 +10278,7 @@ Promise.all([
         return row;
     });
     // 초기 정렬 표시(RSI 내림차순)
-    document.querySelectorAll('thead th').forEach(function(th,i){th.textContent=i===sortCol?headers[i]+' ▼':headers[i];});
+    uvSortableThs().forEach(function(th,i){th.textContent=i===sortCol?headers[i]+' ▼':headers[i];});
     var c={},sec={};
     D.forEach(function(r){if(r[1])c[r[1]]=1;if(r[2])sec[r[2]]=1;});
     var ch='<div class="csel-item selected" data-v="">통화</div>';
@@ -10294,9 +10303,53 @@ Promise.all([
 
 function pn(s){if(!s)return -Infinity;var n=parseFloat(s.replace(/,/g,'').replace(/%/g,''));return isNaN(n)?-Infinity:n;}
 
+// ── 관심종목 별표(★) — 첫 컬럼 토글. 상태 = 맥미니 서버 공유
+//    (/watchlist/prefs 의 universe_stars_v1 키, 기기 공통) + localStorage 는 즉시표시
+//    캐시·폴백(/watchlist 가 없는 공개 게시본 등). 저장 스키마 {"tickers":[순수심볼,...]}
+//    는 어닝스 봇이 전문 번역 우선순위로 읽는다 — 스키마 변경 금지.
+var UV_STAR_KEY='universe_stars_v1';
+var uvStars={},uvStarOnly=false;
+function uvTicker(r){var t=String((r&&r[3])||'');if(t.indexOf(':')>=0)t=t.split(':').pop();return t.toUpperCase();}
+function uvSortableThs(){return document.querySelectorAll('#tab0 thead th:not(.uv-star-th)');}
+try{(JSON.parse(localStorage.getItem(UV_STAR_KEY)||'[]')||[]).forEach(function(t){uvStars[String(t).toUpperCase()]=1;});}catch(e){}
+try{
+    fetch('/watchlist/prefs').then(function(r){return r.ok?r.json():null;}).then(function(p){
+        var v=p&&p[UV_STAR_KEY];
+        if(!v||!Array.isArray(v.tickers))return;
+        uvStars={};
+        v.tickers.forEach(function(t){uvStars[String(t).toUpperCase()]=1;});
+        try{localStorage.setItem(UV_STAR_KEY,JSON.stringify(Object.keys(uvStars)));}catch(e){}
+        if(uvStarOnly)render();else uvPaintStars();
+    }).catch(function(){});
+}catch(e){}
+function uvSaveStars(){
+    var arr=Object.keys(uvStars).filter(function(t){return uvStars[t];});
+    try{localStorage.setItem(UV_STAR_KEY,JSON.stringify(arr));}catch(e){}
+    try{
+        var body={};body[UV_STAR_KEY]={tickers:arr};
+        fetch('/watchlist/prefs',{method:'POST',headers:{'Content-Type':'application/json'},
+            body:JSON.stringify(body)}).catch(function(){});
+    }catch(e){}
+}
+function uvPaintStars(){
+    document.querySelectorAll('#tbody td.uv-star').forEach(function(td){
+        var on=!!uvStars[td.parentNode.getAttribute('data-tk')];
+        td.textContent=on?'★':'☆';td.classList.toggle('on',on);
+    });
+    var th=document.getElementById('uvStarTh');if(th)th.classList.toggle('on',uvStarOnly);
+}
+function uvToggleStar(td,ev){
+    if(ev)ev.stopPropagation();
+    var tk=td.parentNode.getAttribute('data-tk');if(!tk)return;
+    if(uvStars[tk])delete uvStars[tk];else uvStars[tk]=1;
+    uvSaveStars();
+    if(uvStarOnly)render();else uvPaintStars();
+}
+function uvToggleStarOnly(){uvStarOnly=!uvStarOnly;render();uvPaintStars();}   // 헤더 ★ .on 갱신
+
 function doSort(col){
     if(sortCol===col)sortAsc=!sortAsc;else{sortCol=col;sortAsc=true;}
-    document.querySelectorAll('thead th').forEach(function(th,i){th.textContent=i===col?headers[i]+(sortAsc?' ▲':' ▼'):headers[i];});
+    uvSortableThs().forEach(function(th,i){th.textContent=i===col?headers[i]+(sortAsc?' ▲':' ▼'):headers[i];});
     render();
 }
 
@@ -10306,6 +10359,7 @@ function render(){
     var f=D.filter(function(r){
         if(fc&&r[1]!==fc)return false;
         if(fs&&r[2]!==fs)return false;
+        if(uvStarOnly&&!uvStars[uvTicker(r)])return false;   // 헤더 ★ = 관심종목만 보기
         return true;
     });
     if(sortCol>=0){
@@ -10322,7 +10376,9 @@ function render(){
     }
     var h='';
     f.forEach(function(r,idx){
-        h+='<tr>';
+        var _tk=uvTicker(r),_on=!!uvStars[_tk];
+        h+='<tr data-tk="'+_tk+'">';
+        h+='<td class="uv-star'+(_on?' on':'')+'" onclick="uvToggleStar(this,event)">'+(_on?'★':'☆')+'</td>';
         var rowMkt='';
         if(r[3]){var rp=r[3].indexOf(':')>=0?r[3].split(':')[0]:'';rowMkt=INDEX_BY_PREFIX[rp]||'';}
         for(var i=0;i<16;i++){
@@ -10336,7 +10392,7 @@ function render(){
         }
         h+='</tr>';
     });
-    if(!h)h='<tr><td colspan="16" style="padding:40px;color:#888;">데이터 없음</td></tr>';
+    if(!h)h='<tr><td colspan="17" style="padding:40px;color:#888;">데이터 없음</td></tr>';
     document.getElementById('tbody').innerHTML=h;
 }
 
@@ -10703,9 +10759,11 @@ function _univCapture(node, baseName) {
         if (c && c !== 'rgba(0, 0, 0, 0)' && c !== 'transparent') return c;
         n = n.parentElement; }
         return getComputedStyle(document.body).backgroundColor || '#ffffff'; })(node);
+    document.body.classList.add('uv-capture');   // 별표 컬럼은 PNG 에서 제외
     var unfreeze = window._h2cFreeze(node);
     return html2canvas(node, { scale: 2, backgroundColor: bg, scrollX: 0, scrollY: -window.scrollY }).then(function(canvas) {
         unfreeze();
+        document.body.classList.remove('uv-capture');
         var d = new Date();
         var pad = function(n){ return n<10 ? '0'+n : ''+n; };
         var stamp = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
@@ -10715,7 +10773,8 @@ function _univCapture(node, baseName) {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-    }).catch(function(e) { unfreeze(); console.error('_univCapture:', e); });
+    }).catch(function(e) { unfreeze(); document.body.classList.remove('uv-capture');
+        console.error('_univCapture:', e); });
 }
 function downloadUniverseList() {
     var table = document.querySelector('#tab0 table');
@@ -10763,7 +10822,7 @@ function superDownloadUniverse() {
     function delay(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
     // #tab0 헤더 화살표만 갱신 (전역 thead th 오염 방지)
     function tab0Headers(col, asc){
-        document.querySelectorAll('#tab0 thead th').forEach(function(th, i){
+        uvSortableThs().forEach(function(th, i){
             th.textContent = (i === col) ? headers[i] + (asc ? ' ▲' : ' ▼') : headers[i];
         });
     }

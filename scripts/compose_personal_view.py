@@ -25,8 +25,8 @@ SISYPHE_PAGES = ("index.html", "dashboard.html", "journal.html", "memento.html",
 ROOT_ACTIVE = {  # filename -> (active, sub_active)
     'index.html':        (None, None),
     'market.html':       ('market', 'market'),
-    'universe.html':     ('market', 'universe'),
-    'universe_lab.html': ('market', 'universe_lab'),
+    'universe.html':     ('watchlist', 'universe'),        # 2026-07-31 Watchlist 하위로 이동
+    'universe_lab.html': ('watchlist', 'universe_lab'),
     'featured.html':     ('market', 'featured'),
     'market_alert.html': ('market', 'market_alert'),
     'etf.html':          ('market', 'etf'),

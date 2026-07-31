@@ -83,11 +83,14 @@ BRAND_HREF = '/index.html'   # Caddy가 /watchlist/ 로 redirect (랜딩 폐지 
 # ---- 정본 탭 구성 (2026-07-22 순서 개편 반영: 좌 Watchlist~Wiki / 우 Memento·Ledger·Arch) ----
 # (key, href, label, right_group, children[(key, href, label)])
 NAV_ITEMS = [
-    ('watchlist',    '/watchlist/',                  'Watchlist',    False, None),
-    ('market',       '/market.html',                 'Market',       False, [
-        ('market',       '/market.html',       'Data'),
+    ('watchlist',    '/watchlist/',                  'Watchlist',    False, [
+        # 2026-07-31 사용자: Universe·Universe Lab 을 Market → Watchlist 하위로 이동
+        ('watchlist',    '/watchlist/',        'Watchlist'),
         ('universe',     '/universe.html',     'Universe'),
         ('universe_lab', '/universe_lab.html', 'Universe Lab'),
+    ]),
+    ('market',       '/market.html',                 'Market',       False, [
+        ('market',       '/market.html',       'Data'),
         ('featured',     '/featured.html',     'Featured'),
         ('market_alert', '/market_alert.html', '투자유의종목'),
         ('etf',          '/etf.html',          'ETF'),
