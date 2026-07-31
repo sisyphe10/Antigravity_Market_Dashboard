@@ -482,22 +482,48 @@ def requeue_gate_blocked_job(filing_id: int, next_attempt_at: str) -> None:
         conn.close()
 
 
+def _load_starred_tickers() -> set | None:
+    """관심종목 별표(universe_stars_v1). 읽기 실패 시 None(필터 미적용)."""
+    import json
+    p = os.path.join(os.path.dirname(__file__), '..', '..', 'quoteboard', 'prefs.json')
+    try:
+        t = json.load(open(p, encoding='utf-8')).get('universe_stars_v1', {}).get('tickers')
+        return {x.upper() for x in t} if t else None
+    except Exception:
+        return None
+
+
 def get_pending_translation_transcripts(limit: int = 5) -> list[dict]:
-    """번역 안 된 transcripts (translated_kr IS NULL) 최신순."""
+    """번역 안 된 transcripts 최신순.
+
+    2026-07-31 사용자 정책: 수집은 전 종목, **번역은 별표 종목만**.
+    (백로그 62건이 하루 3건 처리량을 3주치 넘겨 적체됐던 문제의 근본 해법)
+    """
+    stars = _load_starred_tickers()
     conn = get_conn()
     try:
         rows = conn.execute(
             """
-            SELECT * FROM transcripts
-            WHERE translated_kr IS NULL
-              AND match_confidence >= 0.7
-              AND prepared_remarks IS NOT NULL
-              AND COALESCE(translation_skipped, 0) = 0
-            ORDER BY fetched_at DESC LIMIT ?
+            SELECT t.*, f.ticker AS _tk FROM transcripts t
+            JOIN filings f ON f.id = t.filing_id
+            WHERE t.translated_kr IS NULL
+              AND t.match_confidence >= 0.7
+              AND t.prepared_remarks IS NOT NULL
+              AND COALESCE(t.translation_skipped, 0) = 0
+            ORDER BY t.fetched_at DESC LIMIT ?
             """,
-            (limit,),
+            (limit * 10 if stars else limit,),
         ).fetchall()
-        return [dict(r) for r in rows]
+        out = []
+        for r in rows:
+            d = dict(r)
+            tk = d.pop('_tk', '')
+            if stars is not None and tk.upper() not in stars:
+                continue
+            out.append(d)
+            if len(out) >= limit:
+                break
+        return out
     finally:
         conn.close()
 
