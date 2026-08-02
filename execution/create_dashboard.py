@@ -1112,6 +1112,12 @@ def _chart_download_helper_js():
     return '<script>\n' + _load_aoe_core_js() + '\n        </script>'
 
 
+# 코어 무결성은 기동 시 즉시(모듈 로드) 검증한다 — 섹션 빌더의 try/except가 코어 부재를
+# 빈 섹션("")으로 삼켜 부분 페이지가 rc=0으로 게시되는 사고 방지 (2026-08-02 P1a 실사고:
+# gitignore dist/ 규칙으로 코어 미커밋 → 맥미니에서 INDICES·DATA 2,774줄 소실본 라이브 게시).
+_load_aoe_core_js()
+
+
 def _element_download_helper_js():
     """DOM 요소(테이블 등) → PNG 다운로드 (html2canvas). 페이지에 여러 번 inject되어도 1회만 등록."""
     return """

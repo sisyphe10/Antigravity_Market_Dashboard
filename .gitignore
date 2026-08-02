@@ -157,3 +157,7 @@ backups/
 # Research Notes 태깅 온톨로지·별칭 사전 (datalake/tagging)
 !datalake/tagging/*.json
 !datalake/tagging/*.csv
+
+# chart_core 산출물은 dist/ 광역 규칙에서 제외 — 코어는 반드시 추적 (2026-08-02 P1a 사고)
+!chart_core/dist/
+!chart_core/dist/**
