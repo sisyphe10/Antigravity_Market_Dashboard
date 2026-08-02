@@ -1206,8 +1206,9 @@ def _chart_download_helper_js():
                     var _btn = opts.btn;
                     if (_btn) {
                         var _orig = _btn.textContent;
-                        _pr.then(function(){ _btn.textContent = '복사됨 ✓'; }, function(e){ console.warn('clipboard copy failed:', e); _btn.textContent = '복사 실패'; });
-                        setTimeout(function(){ _btn.textContent = _orig; }, 1500);
+                        // 되돌림 타이머는 promise 확정 후에 시작 — 확정 전에 먼저 돌면 피드백이 안 보인다
+                        _pr.then(function(){ _btn.textContent = '복사됨 ✓'; }, function(e){ console.warn('clipboard copy failed:', e); _btn.textContent = '복사 실패'; })
+                           .then(function(){ setTimeout(function(){ _btn.textContent = _orig; }, 1500); });
                     }
                 } else {
                     var a = document.createElement('a');
