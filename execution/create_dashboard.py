@@ -1178,9 +1178,26 @@ def _chart_download_helper_js():
                 var d = new Date();
                 var pad = function(n){return n<10?'0'+n:''+n;};
                 var stamp = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+                // 파일명에 선택 시리즈명 포함 (2026-08-02 사용자 확정) — MA·이격도·RoC 파생선 제외,
+                // 4개 이상이면 앞 3개 + '외N'. 파일명 금지문자는 '-' 치환.
+                var _names = [];
+                if (_mainChart) {
+                    _mainChart.data.datasets.forEach(function(ds) {
+                        var l = ds.label || '';
+                        if (!l || ds._skipEndLabel) return;
+                        if (/^MA\d/.test(l) || /^이격도/.test(l) || /^RoC/.test(l)) return;
+                        if (_names.indexOf(l) < 0) _names.push(l);
+                    });
+                }
+                var _namePart = '';
+                if (_names.length) {
+                    var _shown = _names.slice(0, 3).join('·');
+                    if (_names.length > 3) _shown += ' 외' + (_names.length - 3);
+                    _namePart = '_' + _shown.replace(/[\\/:*?"<>|]/g, '-');
+                }
                 var a = document.createElement('a');
                 a.href = tmp.toDataURL('image/png');
-                a.download = (baseName || 'chart') + '_' + stamp + '.png';
+                a.download = (baseName || 'chart') + _namePart + '_' + stamp + '.png';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
