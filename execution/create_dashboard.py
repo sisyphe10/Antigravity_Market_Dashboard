@@ -1208,7 +1208,7 @@ def _chart_download_helper_js():
                     if (_btn) {
                         var _orig = _btn.textContent;
                         // 되돌림 타이머는 promise 확정 후에 시작 — 확정 전에 먼저 돌면 피드백이 안 보인다
-                        _pr.then(function(){ _btn.textContent = '복사됨 ✓'; }, function(e){ console.warn('clipboard copy failed:', e); _btn.textContent = '복사 실패'; })
+                        _pr.then(function(){ _btn.textContent = 'Copied ✓'; }, function(e){ console.warn('clipboard copy failed:', e); _btn.textContent = 'Copy failed'; })
                            .then(function(){ setTimeout(function(){ _btn.textContent = _orig; }, 1500); });
                     }
                 } else {
@@ -1672,7 +1672,7 @@ def _build_indices_chart_section(category_label='Indices'):
                         <input type="text" id="idxStartDate" value="{first_date}" onchange="formatDateInput(this);updateIdxChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                         <span style="color:#888;">~</span>
                         <input type="text" id="idxEndDate" value="{last_date}" onchange="formatDateInput(this);updateIdxChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
-                        <button onclick="copyChartImage('idxDynamicChart','idxChartLegend',null,this)" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#475569;color:#fff;border:none;border-radius:8px;cursor:pointer;">복사</button>
+                        <button onclick="copyChartImage('idxDynamicChart','idxChartLegend',null,this)" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Copy</button>
                         <button onclick="downloadChartImage('idxDynamicChart','AoE_Indice','idxChartLegend')" style="margin-left:8px;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
                     </div>
                     <div id="idxChartCard" style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
@@ -4244,7 +4244,7 @@ def _build_combined_chart_section():
                             <button id="cmbRocFreqM" class="cmb-ma-btn active" onclick="cmbSetRocFreq('M')">월</button>
                             <button id="cmbRocFreqW" class="cmb-ma-btn" onclick="cmbSetRocFreq('W')">주</button>
                         </span>
-                        <button onclick="copyChartImage('cmbDynamicChart','cmbChartLegend',['cmbDispChart','cmbRocChart'],this)" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#475569;color:#fff;border:none;border-radius:8px;cursor:pointer;">복사</button>
+                        <button onclick="copyChartImage('cmbDynamicChart','cmbChartLegend',['cmbDispChart','cmbRocChart'],this)" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Copy</button>
                         <button onclick="downloadChartImage('cmbDynamicChart','AoE_Data','cmbChartLegend',['cmbDispChart','cmbRocChart'])" style="margin-left:8px;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
                         <button onclick="clearCmbSelections()" style="font-family:inherit;font-size:13px;font-weight:600;padding:4px 14px;background:#f3f4f6;color:#444;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;margin-left:8px;">전체 해제</button>
                     </div>
