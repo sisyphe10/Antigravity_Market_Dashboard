@@ -1,5 +1,29 @@
 # -*- coding: utf-8 -*-
-"""뷰어 공통 후처리: 상단 내비바(뷰어 간 이동) + 사이즈=세미나 단일(기본 버튼 제거)."""
+"""뷰어 공통 후처리: 상단 내비바(뷰어 간 이동) + 사이즈=세미나 단일(기본 버튼 제거) + 코어 셸 로더."""
+import hashlib
+import json as _json
+import os
+
+
+def core_template():
+    """P4 코어 임베드 셸(chart_template_core.html) 로드 + 코어 JS 센티널 치환.
+
+    코어는 대시보드 repo(chart_core/dist)에서 읽고 manifest sha 를 검증한다 —
+    불일치면 예외 (코어만 고치고 build_core.py 를 안 돌린 드리프트 차단, DECISION Q1·Q2).
+    """
+    base = os.path.dirname(os.path.abspath(__file__))
+    repo = os.environ.get('DASH_REPO') or os.path.expanduser('~/Antigravity_Market_Dashboard')
+    with open(os.path.join(repo, 'chart_core', 'dist', 'aoe_chart.js'), encoding='utf-8') as f:
+        core = f.read()
+    with open(os.path.join(repo, 'chart_core', 'dist', 'aoe_chart.manifest.json'), encoding='utf-8') as f:
+        mani = _json.load(f)
+    sha = hashlib.sha256(core.encode('utf-8')).hexdigest()
+    if sha != mani['coreSha256']:
+        raise RuntimeError(
+            f"aoe_chart.js sha 불일치 ({sha[:12]} != {mani['coreSha256'][:12]}) — repo pull 후 chart_core/build_core.py 실행")
+    with open(os.path.join(base, 'chart_template_core.html'), encoding='utf-8') as f:
+        html = f.read()
+    return html.replace('__AOE_CHART_CORE__', core)
 
 _LINK = ('font-family:inherit;font-size:12.5px;text-decoration:none;padding:5px 14px;'
          'border-radius:999px;border:1px solid #d0d0d0;color:#111;background:#fff;')

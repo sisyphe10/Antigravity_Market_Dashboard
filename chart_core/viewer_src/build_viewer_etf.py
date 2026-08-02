@@ -3,11 +3,8 @@
 import sys, os, json
 sys.stdout.reconfigure(encoding='utf-8')
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from chart_common import apply_common
+from chart_common import apply_common, core_template
 BASE = os.path.dirname(os.path.abspath(__file__))
-TPL = r'C:\Users\user\.claude\skills\web-chart\assets\chart_template.html'
-if not os.path.exists(TPL):
-    TPL = os.path.join(BASE, 'chart_template.html')   # 맥미니 동봉본
 
 raw = json.load(open(os.path.join(BASE, 'etf_aum_raw.json'), encoding='utf-8'))
 px = json.load(open(os.path.join(BASE, 'underlying_px.json'), encoding='utf-8'))
@@ -115,10 +112,7 @@ CONFIG = {
     'defaultOn': ['agg|sec', 'agg|sk'],
 }
 
-with open(TPL, encoding='utf-8') as f:
-    html = f.read()
-
-# (구 metric/noRebase 자동모드 패치는 2026-07-15 템플릿 개정으로 폐기 — 원값 기본+정규화 버튼이 템플릿 내장)
+html = core_template()   # P4: AoE 코어 셸 (값 포맷·자릿수·범례·끝값 = 코어 표준)
 
 html = (html
         .replace('__TITLE__', '삼성전자 · SK하이닉스 단일종목 레버리지 ETF — AUM / NAV 추이')

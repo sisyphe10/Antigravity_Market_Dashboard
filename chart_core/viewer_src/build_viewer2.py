@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
-"""web-chart 스킬 표준 템플릿 기반 비교용 뷰어 v2 생성 (같은 데이터)"""
+"""현선물·수급·ETF 뷰어 v2 — P4(2026-08-02)부터 AoE 코어 셸(chart_template_core) 기반"""
 import sys, os, json
 sys.stdout.reconfigure(encoding='utf-8')
 BASE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BASE)
-from chart_common import apply_common
-TPL = r'C:\Users\user\.claude\skills\web-chart\assets\chart_template.html'
-if not os.path.exists(TPL):
-    TPL = os.path.join(BASE, 'chart_template.html')   # 맥미니 동봉본
+from chart_common import apply_common, core_template
 
 import pandas as pd
 from daily_common import REPO
@@ -138,16 +135,7 @@ CONFIG = {
     'defaultOn': ['삼성전자|price', 'SK하이닉스|price'],
 }
 
-with open(TPL, encoding='utf-8') as f:
-    html = f.read()
-
-# 2026-07-15 확정분(원값 기본+정규화 버튼·Log 기본 ON·조 단위 금액 포맷)은 템플릿에 내장됨.
-# usd 포맷터(DRAM·NAND 현물, 달러 소수 2자리)만 추가 패치.
-html = html.replace(
-    "  num:  v => v.toLocaleString(),",
-    "  num:  v => v.toLocaleString(),\n"
-    "  usd:  v => '$' + v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),",
-)
+html = core_template()   # 값 포맷·자릿수는 코어 표준 — usd 등 단위는 셸 UNIT 맵에 내장
 html = (html
         .replace('__TITLE__', '삼성전자 · SK하이닉스 — 현선물 격차 / 미결제약정 / 공매도 잔고 / 주가')
         .replace('__NOTE__', '')

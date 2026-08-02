@@ -40,6 +40,13 @@
 4. 뷰어 소스가 맥미니 단독(미추적)이었음 → 8/2 `chart_core/viewer_src/` 스냅샷 편입(승인). **P4까지 맥미니가 실행 정본, repo 사본은 기록용** — 이중 수정 금지, 뷰어 수정 시 맥미니 먼저→스냅샷 갱신.
 5. ~~cmb 원값 모드에서 %단위 시리즈의 범례 기간 변화율이 나눗셈 %로 계산됨 — 괴리율 0.045→-5.33이 `-1,699%`로 표기(golden `data_basis_neg_linear` 참조). 2026-07-19 확정 규격(%·%p 시리즈=레벨 차이 %p)은 pct 모드에만 적용돼 있음 → P2에서 규격 정합.~~ **해소 (2026-08-02 P2b, dc11309e — raw 모드도 레벨 차이 %p, MA 파생선은 같은 축 주 시리즈 단위 상속)**
 
+## P4 이후 상태 (2026-08-02)
+- **뷰어 정식 전환 3종**: chart_viewer2(현선물·수급·ETF)·chart_viewer_etf(레버리지ETF AUM, 실적 섹션 자체 차트는 P6 mixed 대상)·chart_viewer_construction(건설 13사, 평균 점선=`_cmbAux` 보조선 규격) — 셸 템플릿 `chart_template_core.html` + `chart_common.core_template()`(코어 sha 검증+센티널 치환). Chart.js CDN 4.4.1→4.5.1 고정.
+- 코어 P4 일반화: pct 분기=좌축 한정·y1 축=데이터셋 존재 기준·`_cmbPinSuppress`(드래그 팬 잔여 click 억제)·`_cmbAux`(범례·툴팁·핀 제외 보조선)·**로그축 경계=유효숫자 3자리 니스 라운딩**(min 내림·max 올림, 사용자 확정 8/2).
+- 전환 제외·연기: research(주별 **막대** → P6 프리셋)·FCF(자체 구현+추정 구간 표기 → P4b)·bop/pipeline/calendar(표 페이지 — 표 토큰 P7)·chart_viewer.html(구 viewer1, 상시 페이지 메모리 '삭제 금지' — 현상 유지, P7 재검토).
+- 하네스: viewer2 fixture=코어 기반으로 교체, 추출기=표준(_extract_std) 통일. 총 13 시나리오.
+- 뷰어 인프라 계약: 실행·서빙 루트=`~/work/charts/260715_현선물공매도`(Caddy /charts/*), 빌드=repo venv python3, 산출 html은 쓰는 즉시 라이브(별도 게시 없음).
+
 ## P3 이후 상태 (2026-08-02)
 - **코어 다중 인스턴스화**: 크로스헤어·핀·피어(`chart._cmbFamily`)와 축 밴드·환산·단위(`chart._cmbAxisBandRef` 등)를 window 전역에서 차트 인스턴스로 이전 — 한 페이지에 여러 표준 라인 패밀리(cmb+idx)가 공존해도 상태가 새지 않는다. `window._cmbPeerAccessor` 폐기(코어가 패밀리 자체 배선). DATA 회귀 = 하네스 diff 0 검증.
 - `cmbRenderCharts(view)` 파라미터 추가: `ids`(캔버스·범례·패널 id, 패널 null=건너뜀)·`xLabel`·`logOn`·`legendSuffix` — 기본값은 전부 cmb.
