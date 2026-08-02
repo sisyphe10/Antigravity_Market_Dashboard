@@ -665,15 +665,28 @@ function cmbPeerCharts(self) {
                         if (vals.length >= 2) {
                             var first = vals[0];
                             var last = vals[vals.length - 1];
-                            var pct;
+                            var pct, sfx = '%';
+                            // ★원값 모드의 %·%p 단위 시리즈 = 레벨 차이 %p (P2b 규격 정합, BASELINE 결함 5).
+                            //   2026-07-19 확정 규격이 pct 모드에만 적용돼 있었다 — 나눗셈 %는 0 근처
+                            //   값에서 발산한다 (괴리율 0.045→-5.33 이 -1,699% 로 표기되던 건).
+                            //   MA 파생선은 단위 미등록 → 같은 축 주 시리즈의 단위를 따른다.
+                            var _lu = cmbSeriesUnit[ds.label] || '';
+                            if (!_lu) {
+                                for (var _ai = 0; _ai < _axAssign.length; _ai++) {
+                                    if (_axAssign[_ai].ax === (ds.yAxisID || 'y')) { _lu = cmbSeriesUnit[_axAssign[_ai].name] || ''; break; }
+                                }
+                            }
                             if (mode === 'pct') {
                                 pct = last - first;
+                            } else if (_lu === '%' || _lu === '%p') {
+                                pct = last - first;
+                                sfx = '%p';
                             } else if (first !== 0) {
                                 pct = (last / first - 1) * 100;
                             } else {
                                 pct = 0;
                             }
-                            pctStr = '<span>' + (pct >= 0 ? '+' : '') + fmtUniformFix(pct, Math.abs(pct)) + '%</span>';
+                            pctStr = '<span>' + (pct >= 0 ? '+' : '') + fmtUniformFix(pct, Math.abs(pct)) + sfx + '</span>';
                         }
                         // 축 단위를 시리즈명 바로 뒤에 표기 (2026-08-02 사용자 확정 — 축 상단 주석 폐지).
                         // MA 등 파생선은 cmbSeriesUnit 미등록이라 자동으로 단위 없음.

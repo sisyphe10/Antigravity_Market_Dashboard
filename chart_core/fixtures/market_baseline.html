@@ -533,7 +533,7 @@ body{margin:0}
     <nav class="topnav"><div class="topnav-inner"><a href="index.html" class="topnav-brand">AGE OF EMERGENCE</a><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="watchlist/" class="topnav-tab">Watchlist</a><div class="topnav-dropdown"><a href="watchlist/" class="topnav-sub">Quotes</a><a href="universe.html" class="topnav-sub">Universe</a><a href="universe_lab.html" class="topnav-sub">Universe Lab</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab active">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub active">Data</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="sisyphe/journal.html" class="topnav-tab">Journal</a></div><div class="topnav-item"><a href="sisyphe/journal.html#weekly" class="topnav-tab">Weekly</a></div><div class="topnav-item"><a href="wiki/library" class="topnav-tab">Earnings</a></div><div class="topnav-item"><a href="wiki/" class="topnav-tab">Wiki</a></div><div class="topnav-item"><a href="sisyphe/memento.html" class="topnav-tab">Memento</a></div><div class="topnav-item"><a href="sisyphe/dashboard.html" class="topnav-tab">Ledger</a></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
     <aside class="sidebar"><a href="market.html" class="sidebar-link active">Data</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
     <header style="margin:0;padding:8px 28px 0;text-align:right;">
-        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-08-02 17:55:25 KST</div>
+        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-08-02 18:00:13 KST</div>
     </header>
 
     <div class="mkt-subtabs">
@@ -1628,15 +1628,28 @@ function cmbPeerCharts(self) {
                         if (vals.length >= 2) {
                             var first = vals[0];
                             var last = vals[vals.length - 1];
-                            var pct;
+                            var pct, sfx = '%';
+                            // ★원값 모드의 %·%p 단위 시리즈 = 레벨 차이 %p (P2b 규격 정합, BASELINE 결함 5).
+                            //   2026-07-19 확정 규격이 pct 모드에만 적용돼 있었다 — 나눗셈 %는 0 근처
+                            //   값에서 발산한다 (괴리율 0.045→-5.33 이 -1,699% 로 표기되던 건).
+                            //   MA 파생선은 단위 미등록 → 같은 축 주 시리즈의 단위를 따른다.
+                            var _lu = cmbSeriesUnit[ds.label] || '';
+                            if (!_lu) {
+                                for (var _ai = 0; _ai < _axAssign.length; _ai++) {
+                                    if (_axAssign[_ai].ax === (ds.yAxisID || 'y')) { _lu = cmbSeriesUnit[_axAssign[_ai].name] || ''; break; }
+                                }
+                            }
                             if (mode === 'pct') {
                                 pct = last - first;
+                            } else if (_lu === '%' || _lu === '%p') {
+                                pct = last - first;
+                                sfx = '%p';
                             } else if (first !== 0) {
                                 pct = (last / first - 1) * 100;
                             } else {
                                 pct = 0;
                             }
-                            pctStr = '<span>' + (pct >= 0 ? '+' : '') + fmtUniformFix(pct, Math.abs(pct)) + '%</span>';
+                            pctStr = '<span>' + (pct >= 0 ? '+' : '') + fmtUniformFix(pct, Math.abs(pct)) + sfx + '</span>';
                         }
                         // 축 단위를 시리즈명 바로 뒤에 표기 (2026-08-02 사용자 확정 — 축 상단 주석 폐지).
                         // MA 등 파생선은 cmbSeriesUnit 미등록이라 자동으로 단위 없음.
@@ -3983,15 +3996,28 @@ function cmbPeerCharts(self) {
                         if (vals.length >= 2) {
                             var first = vals[0];
                             var last = vals[vals.length - 1];
-                            var pct;
+                            var pct, sfx = '%';
+                            // ★원값 모드의 %·%p 단위 시리즈 = 레벨 차이 %p (P2b 규격 정합, BASELINE 결함 5).
+                            //   2026-07-19 확정 규격이 pct 모드에만 적용돼 있었다 — 나눗셈 %는 0 근처
+                            //   값에서 발산한다 (괴리율 0.045→-5.33 이 -1,699% 로 표기되던 건).
+                            //   MA 파생선은 단위 미등록 → 같은 축 주 시리즈의 단위를 따른다.
+                            var _lu = cmbSeriesUnit[ds.label] || '';
+                            if (!_lu) {
+                                for (var _ai = 0; _ai < _axAssign.length; _ai++) {
+                                    if (_axAssign[_ai].ax === (ds.yAxisID || 'y')) { _lu = cmbSeriesUnit[_axAssign[_ai].name] || ''; break; }
+                                }
+                            }
                             if (mode === 'pct') {
                                 pct = last - first;
+                            } else if (_lu === '%' || _lu === '%p') {
+                                pct = last - first;
+                                sfx = '%p';
                             } else if (first !== 0) {
                                 pct = (last / first - 1) * 100;
                             } else {
                                 pct = 0;
                             }
-                            pctStr = '<span>' + (pct >= 0 ? '+' : '') + fmtUniformFix(pct, Math.abs(pct)) + '%</span>';
+                            pctStr = '<span>' + (pct >= 0 ? '+' : '') + fmtUniformFix(pct, Math.abs(pct)) + sfx + '</span>';
                         }
                         // 축 단위를 시리즈명 바로 뒤에 표기 (2026-08-02 사용자 확정 — 축 상단 주석 폐지).
                         // MA 등 파생선은 cmbSeriesUnit 미등록이라 자동으로 단위 없음.
