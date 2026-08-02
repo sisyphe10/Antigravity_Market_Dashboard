@@ -687,6 +687,7 @@ function cmbFamilyOf(chart) {
                 var rocDatasets = view.rocDatasets;
                 var mode = view.mode;
                 var yEok = view.yEok, y1Eok = view.y1Eok;
+                var y2Eok = view.y2Eok || false;   // P5: 두 번째 우축(y2) — wrap AUM 등, y2 데이터셋이 있을 때만 활성
                 var _axAssign = view.axAssign;
                 var cmbSeriesUnit = view.unitMap;
                 var cmbChart = view.charts.main, cmbDispChart = view.charts.disp, cmbRocChart = view.charts.roc;
@@ -744,7 +745,7 @@ function cmbFamilyOf(chart) {
                         }
                         // 축 단위를 시리즈명 바로 뒤에 표기 (2026-08-02 사용자 확정 — 축 상단 주석 폐지).
                         // MA 등 파생선은 cmbSeriesUnit 미등록이라 자동으로 단위 없음.
-                        var unitStr = (mode !== 'pct') ? (cmbUnitLabel(ds.label, (ds.yAxisID === 'y1') ? y1Jo : yJo) || '') : '';
+                        var unitStr = (mode !== 'pct') ? (cmbUnitLabel(ds.label, (ds.yAxisID === 'y1') ? y1Jo : (ds.yAxisID === 'y2' ? y2Jo : yJo)) || '') : '';
                         return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:14px;">' +
                             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
                             ds.label + unitStr + pctStr + '</span>';
@@ -775,6 +776,7 @@ function cmbFamilyOf(chart) {
 
                 var _yMaxAbs = 0, _y1MaxAbs = 0, _yMinPos = Infinity, _y1MinPos = Infinity;
                 var _yHasNonPos = false, _y1HasNonPos = false;   // 음수·0 포함 축은 로그축 성립 불가 → 선형 폴백
+                var _y2MaxAbs = 0, _y2MinPos = Infinity, _y2HasNonPos = false;
                 datasets.forEach(function(ds) {
                     if (ds._skipEndLabel) return;
                     ds.data.forEach(function(v) {
@@ -784,6 +786,10 @@ function cmbFamilyOf(chart) {
                             if (a > _y1MaxAbs) _y1MaxAbs = a;
                             if (v > 0 && v < _y1MinPos) _y1MinPos = v;
                             if (v <= 0) _y1HasNonPos = true;
+                        } else if (ds.yAxisID === 'y2') {
+                            if (a > _y2MaxAbs) _y2MaxAbs = a;
+                            if (v > 0 && v < _y2MinPos) _y2MinPos = v;
+                            if (v <= 0) _y2HasNonPos = true;
                         } else {
                             if (a > _yMaxAbs) _yMaxAbs = a;
                             if (v > 0 && v < _yMinPos) _yMinPos = v;
@@ -792,6 +798,7 @@ function cmbFamilyOf(chart) {
                     });
                 });
                 var yJo = yEok && _yMaxAbs >= 10000, y1Jo = y1Eok && _y1MaxAbs >= 10000;
+                var y2Jo = y2Eok && _y2MaxAbs >= 10000;
                 // 시리즈별 단위 맵(CMB_SERIES_UNITS) 기반 축 주석 — 억원은 1조 이상 시 (조원) 승격
                 function cmbUnitLabel(name, jo) {
                     var u = cmbSeriesUnit[name];
@@ -816,31 +823,34 @@ function cmbFamilyOf(chart) {
                 //   끝값·눈금이 남의 밴드를 읽는 오염이 생긴다.
                 var _cmbAxisUnits = {
                     y: (mode !== 'pct') ? cmbAxisUnitFor('y', yJo) : null,
-                    y1: (mode === 'raw2') ? cmbAxisUnitFor('y1', y1Jo) : null
+                    y1: (mode === 'raw2') ? cmbAxisUnitFor('y1', y1Jo) : null,
+                    y2: datasets.some(function(ds){ return ds.yAxisID === 'y2'; }) ? cmbAxisUnitFor('y2', y2Jo) : null
                 };
                 cmbBuildLegend();   // 단위 인라인 표기 때문에 조원 승격(yJo/y1Jo) 판정 뒤에 렌더
                 // 축별 표시 환산 계수 — MA 등 파생선도 같은 축 규칙을 타도록 축 기준으로 기록
-                var _cmbAxisConv = { y: (yEok && yJo) ? 10000 : 1, y1: (y1Eok && y1Jo) ? 10000 : 1 };
+                var _cmbAxisConv = { y: (yEok && yJo) ? 10000 : 1, y1: (y1Eok && y1Jo) ? 10000 : 1,
+                                     y2: (y2Eok && y2Jo) ? 10000 : 1 };
                 // ★자릿수 밴드 기준 = 축의 '최종 끝값' (2026-07-28 사용자 룰 변경. 종전 = 축 최대값).
                 //   최대값 기준이면 기간에 큰 값이 한 번만 있어도 축 전체가 정수로 뭉개졌다
                 //   (예: ETS 거래대금 끝값 67.56 인데 구간 최대 225.6 -> 68 로 표시).
                 //   MA·이격도 파생선은 제외하고 축에 처음 배정된 주 시리즈의 마지막 실측값을 쓴다.
-                var _yLastAbs = null, _y1LastAbs = null;
+                var _lastAbs = { y: null, y1: null, y2: null };
                 datasets.forEach(function(ds) {
                     if (ds._skipEndLabel) return;
                     if (/^MA\d/.test(ds.label || '') || /^이격도/.test(ds.label || '')) return;
-                    var _ax = (ds.yAxisID === 'y1') ? 'y1' : 'y';
-                    if (_ax === 'y1' ? (_y1LastAbs !== null) : (_yLastAbs !== null)) return;
+                    var _ax = (ds.yAxisID === 'y1' || ds.yAxisID === 'y2') ? ds.yAxisID : 'y';
+                    if (_lastAbs[_ax] !== null) return;
                     for (var _i = ds.data.length - 1; _i >= 0; _i--) {
                         var _v = ds.data[_i];
                         if (_v === null || _v === undefined || isNaN(_v)) continue;
-                        if (_ax === 'y1') { _y1LastAbs = Math.abs(_v); } else { _yLastAbs = Math.abs(_v); }
+                        _lastAbs[_ax] = Math.abs(_v);
                         break;
                     }
                 });
                 // 끝값을 못 찾으면(전 구간 결측) 종전대로 최대값으로 폴백
-                var _cmbAxisBandRef = { y: (_yLastAbs === null ? _yMaxAbs : _yLastAbs),
-                                        y1: (_y1LastAbs === null ? _y1MaxAbs : _y1LastAbs) };
+                var _cmbAxisBandRef = { y: (_lastAbs.y === null ? _yMaxAbs : _lastAbs.y),
+                                        y1: (_lastAbs.y1 === null ? _y1MaxAbs : _lastAbs.y1),
+                                        y2: (_lastAbs.y2 === null ? _y2MaxAbs : _lastAbs.y2) };
 
                 // 음수·0 포함 시리즈(괴리율 등)는 Log 자동 무시 — 로그축에 음수가 들어가면
                 // 선·끝값 라벨이 축 하단으로 뭉개진다 (2026-08-02 실사고: 삼성전자 현선물 괴리율 -5.33).
@@ -848,6 +858,8 @@ function cmbFamilyOf(chart) {
                 var yLogPad = yType === 'logarithmic' ? cmbLogPad(_yMinPos, _yMaxAbs) : null;
                 var y1Type = (_logOn === false || _y1HasNonPos) ? 'linear' : 'logarithmic';
                 var y1LogPad = y1Type === 'logarithmic' ? cmbLogPad(_y1MinPos, _y1MaxAbs) : null;
+                var y2Type = (_logOn === false || _y2HasNonPos) ? 'linear' : 'logarithmic';
+                var y2LogPad = y2Type === 'logarithmic' ? cmbLogPad(_y2MinPos, _y2MaxAbs) : null;
                 var scalesConfig = {
                     x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ return _xLabel(this.getLabelForValue(val)); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
                     y: {
@@ -862,8 +874,22 @@ function cmbFamilyOf(chart) {
                         border: { color: '#000', width: 2 }
                     }
                 };
+                // ★P5: 두 번째 우축(y2) — wrap AUM 등. y2 데이터셋이 있을 때만 생성 (그리드 없음)
+                if (datasets.some(function(ds){ return ds.yAxisID === 'y2'; })) {
+                    scalesConfig.y2 = {
+                        type: y2Type,
+                        position: 'right',
+                        grace: '8%',
+                        min: y2LogPad ? y2LogPad.min : undefined,
+                        max: y2LogPad ? y2LogPad.max : undefined,
+                        afterBuildTicks: cmbEnsureBoundTicks,
+                        ticks: { maxTicksLimit: 6, autoSkip: false, callback: function(v){ return cmbTickFmt(v, this, y2Eok && y2Jo); }, font: { size: 15 }, color: '#000' },
+                        grid: { drawOnChartArea: false },
+                        border: { color: '#000', width: 2 }
+                    };
+                }
                 // ★P4: y1 축은 mode 무관 'y1 데이터셋 존재'로 생성 — 뷰어는 정규화(pct) 모드에도
-                //   우축 레벨 계열을 유지한다 (cmb 는 raw2 외에 y1 배정이 없어 동작 불변)
+                //   우측 레벨 계열을 유지한다 (cmb 는 raw2 외에 y1 배정이 없어 동작 불변)
                 if (datasets.some(function(ds){ return ds.yAxisID === 'y1'; })) {
                     scalesConfig.y1 = {
                         type: y1Type,
@@ -885,7 +911,7 @@ function cmbFamilyOf(chart) {
                     var _tax = ctx.dataset.yAxisID || 'y';
                     var _tb = _cmbAxisBandRef[_tax] || 0;   // 지역 클로저 캡처 (P3 — window 전역 폐기)
                     if (mode === 'pct' && _tax === 'y') return ctx.dataset.label + ': ' + fmtUniformFix(ctx.parsed.y, _tb) + '%';   // P4: pct 분기=좌축 한정
-                    var _eokAx = _tax === 'y1' ? y1Eok : yEok;
+                    var _eokAx = _tax === 'y1' ? y1Eok : (_tax === 'y2' ? y2Eok : yEok);
                     if (_eokAx) return ctx.dataset.label + ': ' + fmtEokFull(ctx.parsed.y);
                     var _tf = _cmbAxisConv[_tax] || 1;
                     return ctx.dataset.label + ': ' + fmtUniformFix(ctx.parsed.y / _tf, _tb / _tf);
@@ -903,7 +929,7 @@ function cmbFamilyOf(chart) {
                     var _lbl;
                     if (ds._isForeign) { _lbl = lv.toFixed(1) + '%'; }
                     else if (mode === 'pct') { var _r = Math.sign(lv) * Math.round(Math.abs(lv)); _lbl = (_r >= 0 ? '+' : '') + _r + '%'; }
-                    else { var _mf = (ds.yAxisID === 'y1' ? (y1Eok && y1Jo) : (yEok && yJo)) ? 10000 : 1; _lbl = fmtUniformFix(lv / _mf, (ds.yAxisID === 'y1' ? _y1MaxAbs : _yMaxAbs) / _mf); }
+                    else { var _mf = (ds.yAxisID === 'y1' ? (y1Eok && y1Jo) : (ds.yAxisID === 'y2' ? (y2Eok && y2Jo) : (yEok && yJo))) ? 10000 : 1; _lbl = fmtUniformFix(lv / _mf, (ds.yAxisID === 'y1' ? _y1MaxAbs : (ds.yAxisID === 'y2' ? _y2MaxAbs : _yMaxAbs)) / _mf); }
                     var _w = _measCtx.measureText(_lbl).width;
                     if (_w > _maxLabelW) _maxLabelW = _w;
                 });

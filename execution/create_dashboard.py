@@ -3410,7 +3410,7 @@ def _build_wrap_chart_section(category_label):
         last_date = dates[-1] if dates else ''
 
         js_code = """
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
         <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = 2 * (window.devicePixelRatio || 1); Chart.defaults.elements.line.borderJoinStyle = 'round'; Chart.defaults.elements.line.borderCapStyle = 'round'; Chart.defaults.animation = false;</script>
         <script>function formatDateInput(el){var v=el.value.replace(/[^0-9]/g,'');if(v.length===8){el.value=v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8);return;}var m=el.value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);if(m){el.value=m[1]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[3]).slice(-2);}}</script>
         <script>
@@ -3551,164 +3551,53 @@ def _build_wrap_chart_section(category_label):
                         borderColor: metricColor(chartColors[s.name] || '#888', s.metric),
                         backgroundColor: 'transparent',
                         borderWidth: s.metric === 'return' ? (isBench ? 2 : 3) : 2,
+                        borderJoinStyle: 'round',
+                        borderCapStyle: 'round',
                         pointRadius: 0,
-                        tension: s.metric === 'weight' ? 0 : 0.3,
+                        tension: s.metric === 'weight' ? 0 : 0.4,
+                        cubicInterpolationMode: s.metric === 'weight' ? undefined : 'monotone',
                         stepped: s.metric === 'weight' ? 'before' : false,
                         spanGaps: false,
-                        yAxisID: s.metric === 'weight' ? 'y1' : (s.metric === 'aum' ? 'y2' : 'y'),
-                        _mode: s.metric
+                        _axGroup: (s.metric === 'mdd') ? 'return' : s.metric,   // 수익률·MDD = 같은 %축
+                        _metric: s.metric
                     });
                 });
 
-                // ── 2026-07-16 표기 표준 헬퍼 (양식 소급 통일 — 기능 아님) ──
-                function wrapBandFix(v, maxAbs) {   // 자릿수 밴드: <10 2dp, 10~99 1dp 고정, 100+ 정수
-                    var dp = maxAbs < 10 ? 2 : (maxAbs < 100 ? 1 : 0);
-                    return Number(v).toLocaleString(undefined, { minimumFractionDigits: dp, maximumFractionDigits: dp });
-                }
-                function wrapEnsureTicks(ax) {      // 눈금 <=8 + 양끝 필수 + 최소 간격(range/9)
-                    var t = ax.ticks;
-                    if (!t || !t.length) return;
-                    var span = ax.max - ax.min;
-                    if (!(span > 0)) return;
-                    if ((t[0].value - ax.min) / span > 0.02) t.unshift({ value: ax.min }); else t[0].value = ax.min;
-                    if ((ax.max - t[t.length - 1].value) / span > 0.02) t.push({ value: ax.max }); else t[t.length - 1].value = ax.max;
-                    var MAXT = 8, lo = t[0].value, hi = t[t.length - 1].value, rng = hi - lo;
-                    if (rng > 0 && t.length > 2) {
-                        var minGap = rng / (MAXT + 1), kept = [t[0]];
-                        for (var k = 1; k < t.length - 1; k++) {
-                            if (kept.length < MAXT - 1 && t[k].value - kept[kept.length - 1].value >= minGap
-                                && hi - t[k].value >= minGap) kept.push(t[k]);
-                        }
-                        kept.push(t[t.length - 1]);
-                        ax.ticks = kept;
-                    }
-                }
-                var _wrapMaxAbs = 0, _wrapMaxAbsY1 = 0, _wrapMaxAbsY2 = 0;
-                datasets.forEach(function(ds) { ds.data.forEach(function(v) {
-                    if (v === null) return;
-                    if (ds.yAxisID === 'y1') { if (Math.abs(v) > _wrapMaxAbsY1) _wrapMaxAbsY1 = Math.abs(v); }
-                    else if (ds.yAxisID === 'y2') { if (Math.abs(v) > _wrapMaxAbsY2) _wrapMaxAbsY2 = Math.abs(v); }
-                    else if (Math.abs(v) > _wrapMaxAbs) _wrapMaxAbs = Math.abs(v);
-                }); });
-                window._wrapBandMax = _wrapMaxAbs;
-                window._wrapBandMaxY1 = _wrapMaxAbsY1;
-                window._wrapBandMaxY2 = _wrapMaxAbsY2;
-                // 지표별 값 포맷 (라벨·툴팁 공용): 수익률/MDD=부호+%, 비중=%, AUM=억
-                function fmtByMode(mode, axis, val) {
-                    if (mode === 'aum') return wrapBandFix(val, window._wrapBandMaxY2 || Math.abs(val) || 100) + '억';
-                    var bm = axis === 'y1' ? (window._wrapBandMaxY1 || 100) : (window._wrapBandMax || 100);
-                    var sign = (mode !== 'weight' && val >= 0) ? '+' : '';
-                    return sign + wrapBandFix(val, bm) + '%';
-                }
 
-                // 선 끝에 수익률 라벨을 그리는 커스텀 플러그인
-                // 끝값 라벨 (2026-07-20 개선): 항상 오른쪽 배치 — 우측 축이 있으면 축 너비 바깥(패딩 영역)에,
-                // 여러 시리즈면 세로 충돌 회피(최소 17px 간격, web-chart 표준). 점(dot)은 실제 위치 유지.
-                var endLabelPlugin = {
-                    id: 'endLabels',
-                    afterDatasetsDraw: function(chart) {
-                        var ctx = chart.ctx;
-                        var area = chart.chartArea;
-                        var rightAxesW = 0;
-                        ['y1', 'y2'].forEach(function(id) {
-                            var sc = chart.scales[id];
-                            if (sc && sc.options.display && sc.options.position === 'right') rightAxesW += sc.width;
-                        });
-                        var entries = [];
-                        chart.data.datasets.forEach(function(ds, i) {
-                            var meta = chart.getDatasetMeta(i);
-                            if (meta.hidden) return;
-                            var lastIdx = -1;
-                            for (var k = ds.data.length - 1; k >= 0; k--) {
-                                if (ds.data[k] !== null && ds.data[k] !== undefined) { lastIdx = k; break; }
-                            }
-                            if (lastIdx < 0) return;
-                            var last = meta.data[lastIdx];
-                            if (!last) return;
-                            entries.push({ x: last.x, dotY: last.y, y: last.y,
-                                           label: fmtByMode(ds._mode, ds.yAxisID, ds.data[lastIdx]),
-                                           color: ds.borderColor });
-                        });
-                        entries.sort(function(a, b) { return a.y - b.y; });
-                        for (var e = 1; e < entries.length; e++) {
-                            if (entries[e].y - entries[e - 1].y < 17) entries[e].y = entries[e - 1].y + 17;
-                        }
-                        ctx.save();
-                        ctx.font = 'bold 15px sans-serif';
-                        ctx.textBaseline = 'middle';
-                        ctx.textAlign = 'left';
-                        entries.forEach(function(en) {
-                            ctx.beginPath();
-                            ctx.arc(en.x, en.dotY, 3, 0, Math.PI * 2);
-                            ctx.fillStyle = en.color;
-                            ctx.fill();
-                            var lx = Math.max(en.x + 6, area.right + rightAxesW + 4);
-                            ctx.fillStyle = en.color;
-                            ctx.fillText(en.label, lx, en.y);
-                        });
-                        ctx.restore();
-                    }
-                };
-
-                // 하단 컬러닷 범례 (선택된 시리즈만)
-                var legendEl = document.getElementById('wrapChartLegend');
-                if (legendEl) {
-                    legendEl.innerHTML = datasets.map(function(ds) {
-                        var c = ds.borderColor;
-                        return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:15px;color:#000;">' +
-                            '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
-                            ds.label + '</span>';
-                    }).join('');
-                }
-
-                // 사용 중인 축만 표시. 좌축(y)이 비면 보조축을 좌측으로 승격 —
-                // 비중/AUM 단독 선택 시 축이 왼쪽에 오고, 우측 축과 끝값 라벨 겹침도 사라짐 (2026-07-20 fix).
-                var _useY = false, _useY1 = false, _useY2 = false;
+                // ── 지표 → 축 배정 (P5 2026-08-02): 앵커 지표 그룹이 주축(y), 나머지가 y1·y2 순.
+                //    수익률·MDD 는 같은 %축 그룹. 구 '좌측 승격'(display/position 스왑)의 일반화 —
+                //    비중·AUM 단독 선택이면 그 지표가 곧 좌축이 된다.
+                function _grpOf(mk) { return (mk === 'mdd') ? 'return' : mk; }
+                var _axGroups = [];
+                wrapMetOrder.forEach(function(mk) {
+                    if (_metricSet[mk] && _axGroups.indexOf(_grpOf(mk)) < 0) _axGroups.push(_grpOf(mk));
+                });
+                Object.keys(_metricSet).forEach(function(mk) {
+                    if (_axGroups.indexOf(_grpOf(mk)) < 0) _axGroups.push(_grpOf(mk));
+                });
+                var _axSeq = ['y', 'y1', 'y2'];
+                var _axOf = {};
+                _axGroups.forEach(function(g, i) { _axOf[g] = _axSeq[Math.min(i, 2)]; });
+                var unitMap = {};
                 datasets.forEach(function(ds) {
-                    if (ds.yAxisID === 'y1') _useY1 = true;
-                    else if (ds.yAxisID === 'y2') _useY2 = true;
-                    else _useY = true;
+                    ds.yAxisID = _axOf[ds._axGroup] || 'y';
+                    unitMap[ds.label] = (ds._metric === 'aum') ? '억원' : '%';
                 });
-                var _y1Pos = _useY ? 'right' : 'left';
-                var _y2Pos = (_useY || _useY1) ? 'right' : 'left';
-                // 동적 우측 패딩 (web-chart 표준 '+15'): 가장 긴 끝값 라벨 폭 + 여유 — 우측 축 바깥 라벨 공간 확보
-                var _mctx = document.createElement('canvas').getContext('2d');
-                _mctx.font = 'bold 15px sans-serif';
-                var _maxLblW = 0;
-                datasets.forEach(function(ds) {
-                    for (var k = ds.data.length - 1; k >= 0; k--) {
-                        if (ds.data[k] !== null && ds.data[k] !== undefined) {
-                            var w = _mctx.measureText(fmtByMode(ds._mode, ds.yAxisID, ds.data[k])).width;
-                            if (w > _maxLblW) _maxLblW = w;
-                            break;
-                        }
-                    }
-                });
-                var _padRight = Math.max(60, Math.ceil(_maxLblW) + 15);
+                var _eok = { y: false, y1: false, y2: false };
+                if (_axOf['aum']) _eok[_axOf['aum']] = true;
 
-                if (wrapChart) wrapChart.destroy();
-                wrapChart = new Chart(document.getElementById('wrapDynamicChart'), {
-                    type: 'line',
-                    data: { labels: allDates, datasets: datasets },
-                    plugins: [endLabelPlugin],
-                    options: {
-                        responsive: true, maintainAspectRatio: false,
-                        layout: { padding: { right: _padRight } },
-                        interaction: { mode: 'index', intersect: false },
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + fmtByMode(ctx.dataset._mode, ctx.dataset.yAxisID, ctx.parsed.y); } } }
-                        },
-                        scales: {
-                            x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val) { var d = this.getLabelForValue(val); if (!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
-                            y: { display: _useY, grace: '8%', afterBuildTicks: wrapEnsureTicks, ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v) { return wrapBandFix(v, window._wrapBandMax || 100) + '%'; }, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', drawOnChartArea: _useY }, border: { color: '#000', width: 2 } },
-                            // 비중 보조축 (우측 %). 주축 미사용 시 그리드 승계.
-                            y1: { display: _useY1, position: _y1Pos, min: 0, suggestedMax: 100, grace: '8%', ticks: { maxTicksLimit: 6, callback: function(v) { return wrapBandFix(v, window._wrapBandMaxY1 || 100) + '%'; }, font: { size: 15 }, color: '#666' }, grid: { color: '#eee', drawOnChartArea: !_useY }, border: { color: '#666', width: 2 } },
-                            // AUM 보조축 (우측 바깥, 억원). 주·비중축 미사용 시 그리드 승계.
-                            y2: { display: _useY2, position: _y2Pos, grace: '8%', ticks: { maxTicksLimit: 6, callback: function(v) { return wrapBandFix(v, window._wrapBandMaxY2 || 100) + '억'; }, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', drawOnChartArea: !_useY && !_useY1 }, border: { color: '#000', width: 2 } }
-                        }
-                    }
-                });
+                // ── 렌더 = 코어 표준 라인 cmbRenderCharts (P5) — 축·눈금·끝값·범례(단위+기간변화)·
+                //    툴팁·핀·크로스헤어·Download 전부 코어 표준. AUM 은 y2Eok 로 조/억 승격.
+                wrapChart = cmbRenderCharts({
+                    labels: allDates, datasets: datasets, dispDatasets: [], rocDatasets: [],
+                    mode: 'raw1', yEok: _eok.y, y1Eok: _eok.y1, y2Eok: _eok.y2,
+                    axAssign: datasets.map(function(ds) { return { name: ds.label, ax: ds.yAxisID }; }),
+                    unitMap: unitMap,
+                    charts: { main: wrapChart, disp: null, roc: null },
+                    ids: { canvas: 'wrapDynamicChart', legend: 'wrapChartLegend', dispPanel: null, rocPanel: null },
+                    xLabel: function(d) { return d ? d.slice(2, 4) + '/' + d.slice(5, 7) : ''; },
+                    logOn: false
+                }).main;
                 // ★기존 버그 수정(2026-07-16): 숨김 상태(height 0)에서 생성되면 눈금이 퇴화 —
                 // 가시화될 때까지 최대 10초 감지 후 자가 재계산 (진입 게이트·탭 순서와 무관).
                 // 폴링 상한(10s) 이후의 늦은 게이트 해제는 checkPw가 _wrapHealKick으로 직접 발동.
@@ -3886,33 +3775,7 @@ def _build_wrap_chart_section(category_label):
                 }, 80);
             });
             window.updateWrapChart = buildChart;
-            window.downloadWrapChart = function() {
-                if (!wrapChart) return;
-                var srcImg = new Image();
-                srcImg.onload = function() {
-                    var canvas = document.createElement('canvas');
-                    canvas.width = srcImg.width;
-                    canvas.height = srcImg.height;
-                    var ctx = canvas.getContext('2d');
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    ctx.drawImage(srcImg, 0, 0);
-                    ctx.strokeStyle = '#000000';
-                    ctx.lineWidth = 0.5;
-                    ctx.strokeRect(0.25, 0.25, canvas.width - 0.5, canvas.height - 0.5);
-                    canvas.toBlob(function(blob) {
-                        var url = URL.createObjectURL(blob);
-                        var a = document.createElement('a');
-                        a.href = url;
-                        a.download = 'wrap_chart_' + new Date().toISOString().slice(0,10) + '.png';
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(url);
-                    }, 'image/png');
-                };
-                srcImg.src = wrapChart.toBase64Image('image/png', 1);
-            };
+            // (구 downloadWrapChart 는 코어 Download/Copy 헬퍼로 대체 — P5)
             buildChart();
         })();
         </script>
@@ -3929,7 +3792,8 @@ def _build_wrap_chart_section(category_label):
                         <input type="text" id="wrapStartDate" value="{first_date}" onchange="formatDateInput(this);updateWrapChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid var(--wrap-border2);border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                         <span style="color:#888;">~</span>
                         <input type="text" id="wrapEndDate" value="{last_date}" onchange="formatDateInput(this);updateWrapChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid var(--wrap-border2);border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
-                        <button onclick="downloadWrapChart()" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:var(--wrap-red);color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
+                        <button onclick="copyChartImage('wrapDynamicChart','wrapChartLegend',null,this)" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#0891b2;color:#fff;border:none;border-radius:8px;cursor:pointer;">Copy</button>
+                        <button onclick="downloadChartImage('wrapDynamicChart','WRAP_Chart','wrapChartLegend')" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:var(--wrap-red);color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
                         <a href="https://raw.githubusercontent.com/sisyphe10/Antigravity_Market_Dashboard/main/Wrap_NAV.xlsx" download="Wrap_NAV.xlsx" target="_blank" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:var(--wrap-blue);color:#fff;text-decoration:none;border-radius:8px;">Raw_Data</a>
                     </div>
                     <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
@@ -3941,6 +3805,7 @@ def _build_wrap_chart_section(category_label):
                 </div>
             </div>
         </div>
+        {_chart_download_helper_js()}
         {js_code}
         """
     except Exception as e:
