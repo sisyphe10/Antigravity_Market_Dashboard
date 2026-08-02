@@ -6,10 +6,8 @@
 chart_viewer_construction.html 직접 생성(nav=True)."""
 import os, json, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from chart_common import apply_common
+from chart_common import apply_common, core_template
 BASE = os.path.dirname(os.path.abspath(__file__))
-TPL = r'C:\Users\user\.claude\skills\web-chart\assets\chart_template.html'
-if not os.path.exists(TPL): TPL = os.path.join(BASE, 'chart_template.html')
 
 daily = json.load(open(os.path.join(BASE, 'construction_daily.json'), encoding='utf-8'))
 names, colors, keys = daily['names'], daily['colors'], daily['keys']
@@ -40,26 +38,27 @@ CONFIG = {'groups': [grp('시총÷수주잔고', 'soojoo', 'mult'), grp('PBR', '
           'defaultOn': [f'pbr_{keys[n]}' for n in daily.get('default_on', names)
                         if has.get(f'pbr_{keys[n]}')]}
 
-tpl = open(TPL, encoding='utf-8').read()
-# 포매터 (mult/pbr/per)
-tpl = tpl.replace("  num:  v => v.toLocaleString(),",
-                  "  num:  v => v.toLocaleString(),\n  mult: v => v.toFixed(3) + '배',\n  pbr: v => v.toFixed(2) + '배',\n  per: v => v.toFixed(1) + '배',")
+tpl = core_template()   # P4: AoE 코어 셸
+# 단위 (mult/pbr/per = 배) — 값 포맷·자릿수는 코어 표준
+tpl = tpl.replace("man: '만', usd: '$', num: '' };",
+                  "man: '만', usd: '$', num: '', mult: '배', pbr: '배', per: '배' };")
 # 기본 기간 전체
-tpl = tpl.replace("let rangeMonths = 'ytd';   // 기본 기간 = YTD (사용자 확정 2026-07-15)",
+tpl = tpl.replace("let rangeMonths = 'ytd';   // 기본 기간 = YTD",
                   "let rangeMonths = 0;   // 기본 = 전체 (분기 밴드)")
 tpl = tpl.replace('<button class="rng active" data-rng="ytd">YTD</button>\n        <button class="rng" data-rng="0">전체</button>',
                   '<button class="rng" data-rng="ytd">YTD</button>\n        <button class="rng active" data-rng="0">전체</button>')
 # 평균 보조선 (활성 지표 계열, 표시창 기준) — 상단 '평균' 버튼으로 토글 (2026-07-26)
-avg_block = '''  if (mode === 'raw' && avgOn) {
+avg_block = '''  if (!normMode && avgOn) {
     activeItems.forEach(it => {
       if (it.axis !== 'idx') return;
       const vals = RAW.series[it.key].slice(s, e + 1).filter(v => v != null);
       if (!vals.length) return;
       const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
       const arr = labels.map(() => avg);
-      datasets.push({ label: it.fullLabel + ' 평균', data: arr, rawData: arr,
-        rawFmt: v => '평균 ' + v.toFixed(3), isAux: true,
-        borderColor: it.color, backgroundColor: it.color, borderWidth: 1.5,
+      // 코어 보조선 규격: _cmbAux(범례·툴팁·핀 제외) + _skipEndLabel(끝값 제외)
+      datasets.push({ label: it.fullLabel + ' 평균', data: arr,
+        _cmbAux: true, _skipEndLabel: true,
+        borderColor: it.color, backgroundColor: 'transparent', borderWidth: 1.5,
         borderDash: [6, 4], pointRadius: 0, pointHitRadius: 0, spanGaps: true, tension: 0,
         yAxisID: 'y' });
     });

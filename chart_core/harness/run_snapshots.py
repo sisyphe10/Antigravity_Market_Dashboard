@@ -98,26 +98,8 @@ def _extract_std(canvas_id, legend_id):
     return EXTRACT_IDX.replace('idxDynamicChart', canvas_id).replace('idxChartLegend', legend_id)
 
 
-# ── 공용 추출기: web-chart 템플릿(뷰어) ──────────────────────────────────────
-EXTRACT_VIEWER = r"""
-() => {
-  const ch = Chart.getChart(document.querySelector('canvas'));
-  if (!ch) return { error: 'no-chart' };
-  const rnd = v => (v == null || isNaN(v)) ? null : +Number(v).toPrecision(8);
-  const axes = {};
-  for (const [k, s] of Object.entries(ch.scales)) {
-    axes[k] = { type: s.type, min: rnd(s.min), max: rnd(s.max),
-                ticks: (s.ticks || []).map(t => String(t.label ?? t.value)) };
-  }
-  const datasets = ch.data.datasets.map(d => {
-    const vals = d.data.filter(v => v != null && !isNaN(v));
-    let sum = 0; vals.forEach(v => { sum += Number(v); });
-    return { label: d.label, axis: d.yAxisID || 'y', n: vals.length,
-             first: rnd(vals[0]), last: rnd(vals[vals.length - 1]), sum: rnd(sum) };
-  });
-  return { axes, datasets, legend: ch.legend.legendItems.map(li => li.text) };
-}
-"""
+# ── 뷰어 추출기 — P4 정식 전환(코어 셸)부터 표준 추출기(_extract_std) 사용 ──
+EXTRACT_VIEWER = None   # 아래 SCENARIOS 정의 시점에 _extract_std('chart', 'chartLegend') 대입
 
 CLICK_ROW = """async (pattern) => {
   const rows = Array.from(document.querySelectorAll('#cmbSideTable tbody tr'));
@@ -164,10 +146,10 @@ SCENARIOS = [
     # P3: hotels ADR 표준 라인 전환 (독립 페이지 — 로드 즉시 렌더)
     ('hotel_adr',             'hotels', [('wait', 600)], _extract_std('hotelAdrChart', 'hotelAdrLegend')),
     ('viewer2_mktcap',        'viewer2', [
-        ('js', "document.querySelector('[data-key=\"삼성전자|mktcap\"]').click()")], EXTRACT_VIEWER),
+        ('js', "document.querySelector('[data-key=\"삼성전자|mktcap\"]').click()")], _extract_std('chart', 'chartLegend')),
     ('viewer2_normalized',    'viewer2', [
         ('js', "document.querySelector('[data-key=\"삼성전자|mktcap\"]').click()"), ('wait', 400),
-        ('js', "Array.from(document.querySelectorAll('button')).find(b=>b.textContent.trim()==='정규화').click()")], EXTRACT_VIEWER),
+        ('js', "Array.from(document.querySelectorAll('button')).find(b=>b.textContent.trim()==='정규화').click()")], _extract_std('chart', 'chartLegend')),
 ]
 
 FIXTURES = {
