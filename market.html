@@ -533,7 +533,7 @@ body{margin:0}
     <nav class="topnav"><div class="topnav-inner"><a href="index.html" class="topnav-brand">AGE OF EMERGENCE</a><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="watchlist/" class="topnav-tab">Watchlist</a><div class="topnav-dropdown"><a href="watchlist/" class="topnav-sub">Quotes</a><a href="universe.html" class="topnav-sub">Universe</a><a href="universe_lab.html" class="topnav-sub">Universe Lab</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab active">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub active">Data</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="sisyphe/journal.html" class="topnav-tab">Journal</a></div><div class="topnav-item"><a href="sisyphe/journal.html#weekly" class="topnav-tab">Weekly</a></div><div class="topnav-item"><a href="wiki/library" class="topnav-tab">Earnings</a></div><div class="topnav-item"><a href="wiki/" class="topnav-tab">Wiki</a></div><div class="topnav-item"><a href="sisyphe/memento.html" class="topnav-tab">Memento</a></div><div class="topnav-item"><a href="sisyphe/dashboard.html" class="topnav-tab">Ledger</a></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
     <aside class="sidebar"><a href="market.html" class="sidebar-link active">Data</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
     <header style="margin:0;padding:8px 28px 0;text-align:right;">
-        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-08-02 17:30:18 KST</div>
+        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-08-02 17:30:25 KST</div>
     </header>
 
     <div class="mkt-subtabs">
@@ -1223,6 +1223,200 @@ if (typeof window._h2cFreeze !== 'function') {
                 return Number(v).toLocaleString(undefined, { maximumFractionDigits: dp });
             }
 
+// ── cmb(DATA) 크로스헤어·클릭핀·툴팁 동기 (P2a 이동 2026-08-02) ──
+// 피어 차트 접근자 — 페이지(클로저)가 등록: window._cmbPeerAccessor = () => [main, disp, roc]
+// (P2a: 크로스헤어·핀 상태의 코어 이관. 차트 인스턴스 변수는 페이지 클로저 소유라 접근자로만 노출)
+window._cmbPeerAccessor = window._cmbPeerAccessor || null;
+function cmbPeerCharts(self) {
+    var list = window._cmbPeerAccessor ? window._cmbPeerAccessor() : [];
+    return list.filter(function(c) {
+        return c && c !== self && c.canvas;
+    });
+}
+            // 십자선(crosshair) — 세로선은 메인+이격도 패널 동기(같은 날짜 index),
+            // 가로선은 커서가 올라가 있는 차트에만. 두 차트가 같은 labels 배열을 공유해 x 정렬 보장.
+            var cmbHoverState = { idx: null, yPx: null, activeId: null };
+
+            // 클릭 핀 상태 — 날짜 문자열로 저장 (기간/시리즈 변경 후에도 같은 날짜가 남아 있으면 유지)
+            var cmbPin = { date: null };
+
+            function cmbSyncTooltip(other, idx) {
+                if (!other || !other.tooltip) return;
+                var els = [];
+                if (idx !== null) {
+                    other.data.datasets.forEach(function(ds, di) {
+                        var v = ds.data[idx];
+                        if (v !== null && v !== undefined) els.push({ datasetIndex: di, index: idx });
+                    });
+                }
+                var area = other.chartArea;
+                var pos = { x: 0, y: 0 };
+                if (els.length && area) {
+                    pos.x = other.scales.x.getPixelForValue(idx);
+                    pos.y = (area.top + area.bottom) / 2;
+                }
+                other.tooltip.setActiveElements(els, pos);
+                if (other.setActiveElements) other.setActiveElements(els);
+            }
+
+            var cmbCrosshairPlugin = {
+                id: 'cmbCrosshair',
+                afterEvent: function(chart, args) {
+                    var e = args.event;
+                    var area = chart.chartArea;
+                    if (!area) return;
+                    var _peers = cmbPeerCharts(chart);
+                    var inside = e.x !== null && e.y !== null &&
+                        e.x >= area.left && e.x <= area.right && e.y >= area.top && e.y <= area.bottom;
+                    if (e.type === 'mouseout' || !inside) {
+                        if (cmbHoverState.idx !== null) {
+                            cmbHoverState.idx = null;
+                            cmbHoverState.activeId = null;
+                            args.changed = true;
+                            _peers.forEach(function(o) {
+                                cmbSyncTooltip(o, null);
+                                o.draw();
+                            });
+                        }
+                        return;
+                    }
+                    // 클릭 = 데이터 카드 고정(핀) — 같은 날짜 재클릭 해제, 다른 지점 클릭 이동 (2026-07-21 표준)
+                    if (e.type === 'click' && chart.canvas.id === 'cmbDynamicChart') {
+                        var pIdx = Math.round(chart.scales.x.getValueForPixel(e.x));
+                        var pMax = chart.data.labels.length - 1;
+                        if (pIdx < 0) pIdx = 0;
+                        if (pIdx > pMax) pIdx = pMax;
+                        var pDate = chart.data.labels[pIdx];
+                        cmbPin.date = (cmbPin.date === pDate) ? null : pDate;
+                        args.changed = true;
+                        return;
+                    }
+                    if (e.type !== 'mousemove') return;
+                    var idx = Math.round(chart.scales.x.getValueForPixel(e.x));
+                    var maxIdx = chart.data.labels.length - 1;
+                    if (idx < 0) idx = 0;
+                    if (idx > maxIdx) idx = maxIdx;
+                    // 약한 마그넷: 현재 날짜(idx)의 데이터 점이 커서에서 12px 이내면 가로선을 그 점에 스냅
+                    var yPx = e.y;
+                    var snapRadius = 12;
+                    var bestDist = null;
+                    chart.data.datasets.forEach(function(ds, di) {
+                        var v = ds.data[idx];
+                        if (v === null || v === undefined) return;
+                        var meta = chart.getDatasetMeta(di);
+                        if (meta.hidden || !meta.data[idx]) return;
+                        var py = meta.data[idx].y;
+                        if (py === null || py === undefined || isNaN(py)) return;
+                        var dist = Math.abs(py - e.y);
+                        if (dist <= snapRadius && (bestDist === null || dist < bestDist)) {
+                            bestDist = dist;
+                            yPx = py;
+                        }
+                    });
+                    var moved = cmbHoverState.idx !== idx;
+                    cmbHoverState.idx = idx;
+                    cmbHoverState.yPx = yPx;
+                    cmbHoverState.activeId = chart.canvas.id;
+                    args.changed = true;
+                    _peers.forEach(function(o) {
+                        if (moved) cmbSyncTooltip(o, idx);
+                        o.draw();
+                    });
+                },
+                afterDraw: function(chart) {
+                    if (cmbHoverState.idx === null) return;
+                    var area = chart.chartArea;
+                    var xs = chart.scales.x;
+                    if (!area || !xs) return;
+                    var xPx = xs.getPixelForValue(cmbHoverState.idx);
+                    if (xPx < area.left || xPx > area.right) return;
+                    var ctx = chart.ctx;
+                    ctx.save();
+                    ctx.strokeStyle = '#888';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(xPx, area.top);
+                    ctx.lineTo(xPx, area.bottom);
+                    ctx.stroke();
+                    if (cmbHoverState.activeId === chart.canvas.id &&
+                        cmbHoverState.yPx >= area.top && cmbHoverState.yPx <= area.bottom) {
+                        ctx.beginPath();
+                        ctx.moveTo(area.left, cmbHoverState.yPx);
+                        ctx.lineTo(area.right, cmbHoverState.yPx);
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+                }
+            };
+
+            // 클릭 핀 플러그인 (2026-07-21 표준): 클릭한 날짜의 세로 점선 + 데이터 카드를 캔버스에
+            // 상주로 그림 — 플러그인이 직접 그려 Download PNG에도 포함. 값 포맷은 툴팁과 공용
+            // (chart._cmbTipLabel = 빌드 시점 tooltipLabel 콜백).
+            var cmbPinPlugin = {
+                id: 'cmbPinCard',
+                afterDraw: function(chart) {
+                    if (chart.canvas.id !== 'cmbDynamicChart' || cmbPin.date === null) return;
+                    var idx = chart.data.labels.indexOf(cmbPin.date);
+                    if (idx < 0) return;   // 창 밖으로 나가면 표시만 생략 (상태는 유지)
+                    var area = chart.chartArea, xs = chart.scales.x, ctx = chart.ctx;
+                    if (!area || !xs) return;
+                    var xPx = xs.getPixelForValue(idx);
+                    if (xPx < area.left - 1 || xPx > area.right + 1) return;
+                    ctx.save();
+                    ctx.strokeStyle = 'rgba(17,17,17,0.45)';
+                    ctx.setLineDash([4, 4]);
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(xPx, area.top);
+                    ctx.lineTo(xPx, area.bottom);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    var lines = [];
+                    chart.data.datasets.forEach(function(ds, di) {
+                        var meta = chart.getDatasetMeta(di);
+                        if (meta.hidden) return;
+                        var v = ds.data[idx];
+                        if (v === null || v === undefined) return;
+                        var txt = chart._cmbTipLabel
+                            ? chart._cmbTipLabel({ dataset: ds, parsed: { y: v } })
+                            : (ds.label + ': ' + v);
+                        lines.push({ txt: txt, color: ds.borderColor });
+                    });
+                    if (!lines.length) { ctx.restore(); return; }
+                    var title = String(cmbPin.date);
+                    ctx.font = 'bold 13px sans-serif';
+                    var w = ctx.measureText(title).width;
+                    ctx.font = '13px sans-serif';
+                    lines.forEach(function(l) { var tw = ctx.measureText(l.txt).width + 14; if (tw > w) w = tw; });
+                    var pad = 10, lh = 19;
+                    var boxW = w + pad * 2, boxH = pad * 2 + lh * (lines.length + 1);
+                    var bx = xPx + 12;
+                    if (bx + boxW > area.right) bx = xPx - 12 - boxW;
+                    if (bx < area.left) bx = area.left + 4;
+                    var by = area.top + 8;
+                    ctx.fillStyle = 'rgba(0,0,0,0.8)';
+                    ctx.beginPath();
+                    ctx.roundRect(bx, by, boxW, boxH, 6);
+                    ctx.fill();
+                    ctx.textBaseline = 'middle';
+                    ctx.textAlign = 'left';
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 13px sans-serif';
+                    ctx.fillText(title, bx + pad, by + pad + lh / 2);
+                    ctx.font = '13px sans-serif';
+                    lines.forEach(function(l, li) {
+                        var ly = by + pad + lh * (li + 1) + lh / 2;
+                        ctx.fillStyle = l.color;
+                        ctx.beginPath();
+                        ctx.arc(bx + pad + 4, ly, 4, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#fff';
+                        ctx.fillText(l.txt, bx + pad + 14, ly);
+                    });
+                    ctx.restore();
+                }
+            };
+
         </script>
         
     </div>
@@ -1544,195 +1738,9 @@ if (typeof window._h2cFreeze !== 'function') {
             var cmbDispChart = null;
             var cmbRocChart = null;
 
-            // 십자선(crosshair) — 세로선은 메인+이격도 패널 동기(같은 날짜 index),
-            // 가로선은 커서가 올라가 있는 차트에만. 두 차트가 같은 labels 배열을 공유해 x 정렬 보장.
-            var cmbHoverState = { idx: null, yPx: null, activeId: null };
-            // 클릭 핀 상태 — 날짜 문자열로 저장 (기간/시리즈 변경 후에도 같은 날짜가 남아 있으면 유지)
-            var cmbPin = { date: null };
-            // 반대편 차트에도 같은 날짜의 툴팁(데이터값) 표시.
-            // tooltip.setActiveElements가 내부에서 tooltip.update까지 수행하므로 이후 draw()만 하면 됨.
-            // 크로스헤어·툴팁 동기 대상 = 자기 자신을 뺀 살아있는 cmb 차트 전부.
-            // 메인 + 이격도 + RoC² 3면 구성이 되면서 2-way 하드코딩을 배열로 일반화 (2026-07-29).
-            function cmbPeerCharts(self) {
-                return [cmbChart, cmbDispChart, cmbRocChart].filter(function(c) {
-                    return c && c !== self && c.canvas;
-                });
-            }
-            function cmbSyncTooltip(other, idx) {
-                if (!other || !other.tooltip) return;
-                var els = [];
-                if (idx !== null) {
-                    other.data.datasets.forEach(function(ds, di) {
-                        var v = ds.data[idx];
-                        if (v !== null && v !== undefined) els.push({ datasetIndex: di, index: idx });
-                    });
-                }
-                var area = other.chartArea;
-                var pos = { x: 0, y: 0 };
-                if (els.length && area) {
-                    pos.x = other.scales.x.getPixelForValue(idx);
-                    pos.y = (area.top + area.bottom) / 2;
-                }
-                other.tooltip.setActiveElements(els, pos);
-                if (other.setActiveElements) other.setActiveElements(els);
-            }
-            var cmbCrosshairPlugin = {
-                id: 'cmbCrosshair',
-                afterEvent: function(chart, args) {
-                    var e = args.event;
-                    var area = chart.chartArea;
-                    if (!area) return;
-                    var _peers = cmbPeerCharts(chart);
-                    var inside = e.x !== null && e.y !== null &&
-                        e.x >= area.left && e.x <= area.right && e.y >= area.top && e.y <= area.bottom;
-                    if (e.type === 'mouseout' || !inside) {
-                        if (cmbHoverState.idx !== null) {
-                            cmbHoverState.idx = null;
-                            cmbHoverState.activeId = null;
-                            args.changed = true;
-                            _peers.forEach(function(o) {
-                                cmbSyncTooltip(o, null);
-                                o.draw();
-                            });
-                        }
-                        return;
-                    }
-                    // 클릭 = 데이터 카드 고정(핀) — 같은 날짜 재클릭 해제, 다른 지점 클릭 이동 (2026-07-21 표준)
-                    if (e.type === 'click' && chart.canvas.id === 'cmbDynamicChart') {
-                        var pIdx = Math.round(chart.scales.x.getValueForPixel(e.x));
-                        var pMax = chart.data.labels.length - 1;
-                        if (pIdx < 0) pIdx = 0;
-                        if (pIdx > pMax) pIdx = pMax;
-                        var pDate = chart.data.labels[pIdx];
-                        cmbPin.date = (cmbPin.date === pDate) ? null : pDate;
-                        args.changed = true;
-                        return;
-                    }
-                    if (e.type !== 'mousemove') return;
-                    var idx = Math.round(chart.scales.x.getValueForPixel(e.x));
-                    var maxIdx = chart.data.labels.length - 1;
-                    if (idx < 0) idx = 0;
-                    if (idx > maxIdx) idx = maxIdx;
-                    // 약한 마그넷: 현재 날짜(idx)의 데이터 점이 커서에서 12px 이내면 가로선을 그 점에 스냅
-                    var yPx = e.y;
-                    var snapRadius = 12;
-                    var bestDist = null;
-                    chart.data.datasets.forEach(function(ds, di) {
-                        var v = ds.data[idx];
-                        if (v === null || v === undefined) return;
-                        var meta = chart.getDatasetMeta(di);
-                        if (meta.hidden || !meta.data[idx]) return;
-                        var py = meta.data[idx].y;
-                        if (py === null || py === undefined || isNaN(py)) return;
-                        var dist = Math.abs(py - e.y);
-                        if (dist <= snapRadius && (bestDist === null || dist < bestDist)) {
-                            bestDist = dist;
-                            yPx = py;
-                        }
-                    });
-                    var moved = cmbHoverState.idx !== idx;
-                    cmbHoverState.idx = idx;
-                    cmbHoverState.yPx = yPx;
-                    cmbHoverState.activeId = chart.canvas.id;
-                    args.changed = true;
-                    _peers.forEach(function(o) {
-                        if (moved) cmbSyncTooltip(o, idx);
-                        o.draw();
-                    });
-                },
-                afterDraw: function(chart) {
-                    if (cmbHoverState.idx === null) return;
-                    var area = chart.chartArea;
-                    var xs = chart.scales.x;
-                    if (!area || !xs) return;
-                    var xPx = xs.getPixelForValue(cmbHoverState.idx);
-                    if (xPx < area.left || xPx > area.right) return;
-                    var ctx = chart.ctx;
-                    ctx.save();
-                    ctx.strokeStyle = '#888';
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(xPx, area.top);
-                    ctx.lineTo(xPx, area.bottom);
-                    ctx.stroke();
-                    if (cmbHoverState.activeId === chart.canvas.id &&
-                        cmbHoverState.yPx >= area.top && cmbHoverState.yPx <= area.bottom) {
-                        ctx.beginPath();
-                        ctx.moveTo(area.left, cmbHoverState.yPx);
-                        ctx.lineTo(area.right, cmbHoverState.yPx);
-                        ctx.stroke();
-                    }
-                    ctx.restore();
-                }
-            };
+            // 피어 차트 목록을 코어(cmbPeerCharts)에 접근자로 제공 — 차트 변수는 이 클로저 소유 (P2a)
+            window._cmbPeerAccessor = function() { return [cmbChart, cmbDispChart, cmbRocChart]; };
 
-            // 클릭 핀 플러그인 (2026-07-21 표준): 클릭한 날짜의 세로 점선 + 데이터 카드를 캔버스에
-            // 상주로 그림 — 플러그인이 직접 그려 Download PNG에도 포함. 값 포맷은 툴팁과 공용
-            // (chart._cmbTipLabel = 빌드 시점 tooltipLabel 콜백).
-            var cmbPinPlugin = {
-                id: 'cmbPinCard',
-                afterDraw: function(chart) {
-                    if (chart.canvas.id !== 'cmbDynamicChart' || cmbPin.date === null) return;
-                    var idx = chart.data.labels.indexOf(cmbPin.date);
-                    if (idx < 0) return;   // 창 밖으로 나가면 표시만 생략 (상태는 유지)
-                    var area = chart.chartArea, xs = chart.scales.x, ctx = chart.ctx;
-                    if (!area || !xs) return;
-                    var xPx = xs.getPixelForValue(idx);
-                    if (xPx < area.left - 1 || xPx > area.right + 1) return;
-                    ctx.save();
-                    ctx.strokeStyle = 'rgba(17,17,17,0.45)';
-                    ctx.setLineDash([4, 4]);
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(xPx, area.top);
-                    ctx.lineTo(xPx, area.bottom);
-                    ctx.stroke();
-                    ctx.setLineDash([]);
-                    var lines = [];
-                    chart.data.datasets.forEach(function(ds, di) {
-                        var meta = chart.getDatasetMeta(di);
-                        if (meta.hidden) return;
-                        var v = ds.data[idx];
-                        if (v === null || v === undefined) return;
-                        var txt = chart._cmbTipLabel
-                            ? chart._cmbTipLabel({ dataset: ds, parsed: { y: v } })
-                            : (ds.label + ': ' + v);
-                        lines.push({ txt: txt, color: ds.borderColor });
-                    });
-                    if (!lines.length) { ctx.restore(); return; }
-                    var title = String(cmbPin.date);
-                    ctx.font = 'bold 13px sans-serif';
-                    var w = ctx.measureText(title).width;
-                    ctx.font = '13px sans-serif';
-                    lines.forEach(function(l) { var tw = ctx.measureText(l.txt).width + 14; if (tw > w) w = tw; });
-                    var pad = 10, lh = 19;
-                    var boxW = w + pad * 2, boxH = pad * 2 + lh * (lines.length + 1);
-                    var bx = xPx + 12;
-                    if (bx + boxW > area.right) bx = xPx - 12 - boxW;
-                    if (bx < area.left) bx = area.left + 4;
-                    var by = area.top + 8;
-                    ctx.fillStyle = 'rgba(0,0,0,0.8)';
-                    ctx.beginPath();
-                    ctx.roundRect(bx, by, boxW, boxH, 6);
-                    ctx.fill();
-                    ctx.textBaseline = 'middle';
-                    ctx.textAlign = 'left';
-                    ctx.fillStyle = '#fff';
-                    ctx.font = 'bold 13px sans-serif';
-                    ctx.fillText(title, bx + pad, by + pad + lh / 2);
-                    ctx.font = '13px sans-serif';
-                    lines.forEach(function(l, li) {
-                        var ly = by + pad + lh * (li + 1) + lh / 2;
-                        ctx.fillStyle = l.color;
-                        ctx.beginPath();
-                        ctx.arc(bx + pad + 4, ly, 4, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.fillStyle = '#fff';
-                        ctx.fillText(l.txt, bx + pad + 14, ly);
-                    });
-                    ctx.restore();
-                }
-            };
 
             function colorForIndex(i) { return clickPalette[i % clickPalette.length]; }
 
@@ -3536,6 +3544,200 @@ if (typeof window._h2cFreeze !== 'function') {
                 var dp = maxAbs < 10 ? 2 : (maxAbs < 100 ? 1 : 0);   // 일의자리 2dp·십의자리 1dp·백의자리+ 정수
                 return Number(v).toLocaleString(undefined, { maximumFractionDigits: dp });
             }
+
+// ── cmb(DATA) 크로스헤어·클릭핀·툴팁 동기 (P2a 이동 2026-08-02) ──
+// 피어 차트 접근자 — 페이지(클로저)가 등록: window._cmbPeerAccessor = () => [main, disp, roc]
+// (P2a: 크로스헤어·핀 상태의 코어 이관. 차트 인스턴스 변수는 페이지 클로저 소유라 접근자로만 노출)
+window._cmbPeerAccessor = window._cmbPeerAccessor || null;
+function cmbPeerCharts(self) {
+    var list = window._cmbPeerAccessor ? window._cmbPeerAccessor() : [];
+    return list.filter(function(c) {
+        return c && c !== self && c.canvas;
+    });
+}
+            // 십자선(crosshair) — 세로선은 메인+이격도 패널 동기(같은 날짜 index),
+            // 가로선은 커서가 올라가 있는 차트에만. 두 차트가 같은 labels 배열을 공유해 x 정렬 보장.
+            var cmbHoverState = { idx: null, yPx: null, activeId: null };
+
+            // 클릭 핀 상태 — 날짜 문자열로 저장 (기간/시리즈 변경 후에도 같은 날짜가 남아 있으면 유지)
+            var cmbPin = { date: null };
+
+            function cmbSyncTooltip(other, idx) {
+                if (!other || !other.tooltip) return;
+                var els = [];
+                if (idx !== null) {
+                    other.data.datasets.forEach(function(ds, di) {
+                        var v = ds.data[idx];
+                        if (v !== null && v !== undefined) els.push({ datasetIndex: di, index: idx });
+                    });
+                }
+                var area = other.chartArea;
+                var pos = { x: 0, y: 0 };
+                if (els.length && area) {
+                    pos.x = other.scales.x.getPixelForValue(idx);
+                    pos.y = (area.top + area.bottom) / 2;
+                }
+                other.tooltip.setActiveElements(els, pos);
+                if (other.setActiveElements) other.setActiveElements(els);
+            }
+
+            var cmbCrosshairPlugin = {
+                id: 'cmbCrosshair',
+                afterEvent: function(chart, args) {
+                    var e = args.event;
+                    var area = chart.chartArea;
+                    if (!area) return;
+                    var _peers = cmbPeerCharts(chart);
+                    var inside = e.x !== null && e.y !== null &&
+                        e.x >= area.left && e.x <= area.right && e.y >= area.top && e.y <= area.bottom;
+                    if (e.type === 'mouseout' || !inside) {
+                        if (cmbHoverState.idx !== null) {
+                            cmbHoverState.idx = null;
+                            cmbHoverState.activeId = null;
+                            args.changed = true;
+                            _peers.forEach(function(o) {
+                                cmbSyncTooltip(o, null);
+                                o.draw();
+                            });
+                        }
+                        return;
+                    }
+                    // 클릭 = 데이터 카드 고정(핀) — 같은 날짜 재클릭 해제, 다른 지점 클릭 이동 (2026-07-21 표준)
+                    if (e.type === 'click' && chart.canvas.id === 'cmbDynamicChart') {
+                        var pIdx = Math.round(chart.scales.x.getValueForPixel(e.x));
+                        var pMax = chart.data.labels.length - 1;
+                        if (pIdx < 0) pIdx = 0;
+                        if (pIdx > pMax) pIdx = pMax;
+                        var pDate = chart.data.labels[pIdx];
+                        cmbPin.date = (cmbPin.date === pDate) ? null : pDate;
+                        args.changed = true;
+                        return;
+                    }
+                    if (e.type !== 'mousemove') return;
+                    var idx = Math.round(chart.scales.x.getValueForPixel(e.x));
+                    var maxIdx = chart.data.labels.length - 1;
+                    if (idx < 0) idx = 0;
+                    if (idx > maxIdx) idx = maxIdx;
+                    // 약한 마그넷: 현재 날짜(idx)의 데이터 점이 커서에서 12px 이내면 가로선을 그 점에 스냅
+                    var yPx = e.y;
+                    var snapRadius = 12;
+                    var bestDist = null;
+                    chart.data.datasets.forEach(function(ds, di) {
+                        var v = ds.data[idx];
+                        if (v === null || v === undefined) return;
+                        var meta = chart.getDatasetMeta(di);
+                        if (meta.hidden || !meta.data[idx]) return;
+                        var py = meta.data[idx].y;
+                        if (py === null || py === undefined || isNaN(py)) return;
+                        var dist = Math.abs(py - e.y);
+                        if (dist <= snapRadius && (bestDist === null || dist < bestDist)) {
+                            bestDist = dist;
+                            yPx = py;
+                        }
+                    });
+                    var moved = cmbHoverState.idx !== idx;
+                    cmbHoverState.idx = idx;
+                    cmbHoverState.yPx = yPx;
+                    cmbHoverState.activeId = chart.canvas.id;
+                    args.changed = true;
+                    _peers.forEach(function(o) {
+                        if (moved) cmbSyncTooltip(o, idx);
+                        o.draw();
+                    });
+                },
+                afterDraw: function(chart) {
+                    if (cmbHoverState.idx === null) return;
+                    var area = chart.chartArea;
+                    var xs = chart.scales.x;
+                    if (!area || !xs) return;
+                    var xPx = xs.getPixelForValue(cmbHoverState.idx);
+                    if (xPx < area.left || xPx > area.right) return;
+                    var ctx = chart.ctx;
+                    ctx.save();
+                    ctx.strokeStyle = '#888';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(xPx, area.top);
+                    ctx.lineTo(xPx, area.bottom);
+                    ctx.stroke();
+                    if (cmbHoverState.activeId === chart.canvas.id &&
+                        cmbHoverState.yPx >= area.top && cmbHoverState.yPx <= area.bottom) {
+                        ctx.beginPath();
+                        ctx.moveTo(area.left, cmbHoverState.yPx);
+                        ctx.lineTo(area.right, cmbHoverState.yPx);
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+                }
+            };
+
+            // 클릭 핀 플러그인 (2026-07-21 표준): 클릭한 날짜의 세로 점선 + 데이터 카드를 캔버스에
+            // 상주로 그림 — 플러그인이 직접 그려 Download PNG에도 포함. 값 포맷은 툴팁과 공용
+            // (chart._cmbTipLabel = 빌드 시점 tooltipLabel 콜백).
+            var cmbPinPlugin = {
+                id: 'cmbPinCard',
+                afterDraw: function(chart) {
+                    if (chart.canvas.id !== 'cmbDynamicChart' || cmbPin.date === null) return;
+                    var idx = chart.data.labels.indexOf(cmbPin.date);
+                    if (idx < 0) return;   // 창 밖으로 나가면 표시만 생략 (상태는 유지)
+                    var area = chart.chartArea, xs = chart.scales.x, ctx = chart.ctx;
+                    if (!area || !xs) return;
+                    var xPx = xs.getPixelForValue(idx);
+                    if (xPx < area.left - 1 || xPx > area.right + 1) return;
+                    ctx.save();
+                    ctx.strokeStyle = 'rgba(17,17,17,0.45)';
+                    ctx.setLineDash([4, 4]);
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(xPx, area.top);
+                    ctx.lineTo(xPx, area.bottom);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    var lines = [];
+                    chart.data.datasets.forEach(function(ds, di) {
+                        var meta = chart.getDatasetMeta(di);
+                        if (meta.hidden) return;
+                        var v = ds.data[idx];
+                        if (v === null || v === undefined) return;
+                        var txt = chart._cmbTipLabel
+                            ? chart._cmbTipLabel({ dataset: ds, parsed: { y: v } })
+                            : (ds.label + ': ' + v);
+                        lines.push({ txt: txt, color: ds.borderColor });
+                    });
+                    if (!lines.length) { ctx.restore(); return; }
+                    var title = String(cmbPin.date);
+                    ctx.font = 'bold 13px sans-serif';
+                    var w = ctx.measureText(title).width;
+                    ctx.font = '13px sans-serif';
+                    lines.forEach(function(l) { var tw = ctx.measureText(l.txt).width + 14; if (tw > w) w = tw; });
+                    var pad = 10, lh = 19;
+                    var boxW = w + pad * 2, boxH = pad * 2 + lh * (lines.length + 1);
+                    var bx = xPx + 12;
+                    if (bx + boxW > area.right) bx = xPx - 12 - boxW;
+                    if (bx < area.left) bx = area.left + 4;
+                    var by = area.top + 8;
+                    ctx.fillStyle = 'rgba(0,0,0,0.8)';
+                    ctx.beginPath();
+                    ctx.roundRect(bx, by, boxW, boxH, 6);
+                    ctx.fill();
+                    ctx.textBaseline = 'middle';
+                    ctx.textAlign = 'left';
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 13px sans-serif';
+                    ctx.fillText(title, bx + pad, by + pad + lh / 2);
+                    ctx.font = '13px sans-serif';
+                    lines.forEach(function(l, li) {
+                        var ly = by + pad + lh * (li + 1) + lh / 2;
+                        ctx.fillStyle = l.color;
+                        ctx.beginPath();
+                        ctx.arc(bx + pad + 4, ly, 4, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#fff';
+                        ctx.fillText(l.txt, bx + pad + 14, ly);
+                    });
+                    ctx.restore();
+                }
+            };
 
         </script>
         
