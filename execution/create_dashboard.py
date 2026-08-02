@@ -3602,8 +3602,10 @@ def _build_combined_chart_section():
                     });
                 }
 
+                // ※범례 생성은 축 단위(yJo/y1Jo, _cmbAxisUnits) 계산 뒤로 이동 (2026-08-02) —
+                //   항목에 단위를 인라인 표기(`고객예탁금(조원) +25.4%`)하려면 조원 승격 판정이 선행돼야 함.
                 var legendEl = document.getElementById('cmbChartLegend');
-                if (legendEl) {
+                function cmbBuildLegend() {
                     var legendHTML = datasets.map(function(ds) {
                         var c = ds.borderColor;
                         // 설정 기간 변화율: pct 모드는 정규화된 값이라 last 자체가 변화율,
@@ -3623,9 +3625,12 @@ def _build_combined_chart_section():
                             }
                             pctStr = '<span>' + (pct >= 0 ? '+' : '') + fmtUniformFix(pct, Math.abs(pct)) + '%</span>';
                         }
+                        // 축 단위를 시리즈명 바로 뒤에 표기 (2026-08-02 사용자 확정 — 축 상단 주석 폐지).
+                        // MA 등 파생선은 cmbSeriesUnit 미등록이라 자동으로 단위 없음.
+                        var unitStr = (mode !== 'pct') ? (cmbUnitLabel(ds.label, (ds.yAxisID === 'y1') ? y1Jo : yJo) || '') : '';
                         return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:14px;">' +
                             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
-                            ds.label + pctStr + '</span>';
+                            ds.label + unitStr + pctStr + '</span>';
                     }).join('');
                     // 이격도는 기간 변화율 대신 마지막 값 표시 (100 기준 과열/침체 지표)
                     legendHTML += dispDatasets.map(function(ds) {
@@ -3643,7 +3648,7 @@ def _build_combined_chart_section():
                             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + ds.borderColor + ';"></span>' +
                             ds.label + lastStr + '</span>';
                     }).join('');
-                    legendEl.innerHTML = legendHTML;
+                    if (legendEl) legendEl.innerHTML = legendHTML;
                 }
 
                 var _yMaxAbs = 0, _y1MaxAbs = 0, _yMinPos = Infinity, _y1MinPos = Infinity;
@@ -3685,13 +3690,7 @@ def _build_combined_chart_section():
                     y: (mode !== 'pct') ? cmbAxisUnitFor('y', yJo) : null,
                     y1: (mode === 'raw2') ? cmbAxisUnitFor('y1', y1Jo) : null
                 };
-                // 축 단위는 하단 범례 우측에 표기 (2026-08-02 사용자 확정 — 축 상단 주석 폐지)
-                if (legendEl) {
-                    var _uParts = [];
-                    if (window._cmbAxisUnits.y) _uParts.push(window._cmbAxisUnits.y1 ? '좌 ' + window._cmbAxisUnits.y : window._cmbAxisUnits.y);
-                    if (window._cmbAxisUnits.y1) _uParts.push('우 ' + window._cmbAxisUnits.y1);
-                    if (_uParts.length) legendEl.innerHTML += '<span style="position:absolute;right:0;font-size:14px;">' + _uParts.join(' · ') + '</span>';
-                }
+                cmbBuildLegend();   // 단위 인라인 표기 때문에 조원 승격(yJo/y1Jo) 판정 뒤에 렌더
                 // 축별 표시 환산 계수 — MA 등 파생선도 같은 축 규칙을 타도록 축 기준으로 기록
                 window._cmbAxisConv = { y: (yEok && yJo) ? 10000 : 1, y1: (y1Eok && y1Jo) ? 10000 : 1 };
                 // ★자릿수 밴드 기준 = 축의 '최종 끝값' (2026-07-28 사용자 룰 변경. 종전 = 축 최대값).
@@ -4233,7 +4232,7 @@ def _build_combined_chart_section():
                         <div id="cmbRocPanel" style="display:none;position:relative;height:200px;margin-top:8px;">
                             <canvas id="cmbRocChart"></canvas>
                         </div>
-                        <div id="cmbChartLegend" style="position:relative;margin-top:12px;text-align:center;color:#222;"></div>
+                        <div id="cmbChartLegend" style="margin-top:12px;text-align:center;color:#222;"></div>
                     </div>
                 </div>
             </div>
