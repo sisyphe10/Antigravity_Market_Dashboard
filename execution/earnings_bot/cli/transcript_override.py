@@ -27,7 +27,7 @@ def list_needs_review() -> None:
                    j.last_error, f.accession_number, f.document_type, f.severity, f.filed_at
             FROM transcript_jobs j
             JOIN filings f ON j.filing_id = f.id
-            WHERE j.last_status IN ('needs_review', 'stale_pending', 'low_confidence')
+            WHERE j.last_status IN ('needs_review', 'stale_pending', 'low_confidence', 'gate_blocked')
             ORDER BY f.filed_at DESC
             LIMIT 50
             """,
@@ -47,7 +47,7 @@ def list_needs_review() -> None:
 
 
 def dismiss(ticker: str) -> None:
-    """needs_review/stale_pending/low_confidence 상태의 해당 ticker 잡을 'gave_up'으로 종결.
+    """needs_review/stale_pending/low_confidence/gate_blocked 상태의 해당 ticker 잡을 'gave_up'으로 종결.
 
     자동 해결이 불가능해 다이제스트(보류·수동대기)에 계속 노출되는 잡을 수동 정리할 때 사용.
     'gave_up'은 cleanup_stale가 retention 만료 시 부여하는 것과 동일한 종결 상태라
@@ -61,19 +61,19 @@ def dismiss(ticker: str) -> None:
             SELECT j.id, j.filing_id, j.last_status, j.attempt_count, f.filed_at
             FROM transcript_jobs j JOIN filings f ON j.filing_id = f.id
             WHERE UPPER(j.ticker) = ?
-              AND j.last_status IN ('needs_review', 'stale_pending', 'low_confidence')
+              AND j.last_status IN ('needs_review', 'stale_pending', 'low_confidence', 'gate_blocked')
             """,
             (ticker.upper(),),
         ).fetchall()
         if not rows:
-            print(f"{ticker}: needs_review/stale_pending/low_confidence 잡 없음 "
+            print(f"{ticker}: needs_review/stale_pending/low_confidence/gate_blocked 잡 없음 "
                   f"(이미 종결됐거나 미존재)")
             return
         conn.execute(
             """
             UPDATE transcript_jobs SET last_status='gave_up'
             WHERE UPPER(ticker) = ?
-              AND last_status IN ('needs_review', 'stale_pending', 'low_confidence')
+              AND last_status IN ('needs_review', 'stale_pending', 'low_confidence', 'gate_blocked')
             """,
             (ticker.upper(),),
         )
@@ -151,7 +151,7 @@ def main() -> None:
     p.add_argument('--filing-id', type=int, help='수동 주입 대상 filing_id')
     p.add_argument('--url', help='transcript URL')
     p.add_argument('--list-needs-review', action='store_true',
-                   help='미해결 큐 (needs_review / stale_pending / low_confidence) 출력')
+                   help='미해결 큐 (needs_review / stale_pending / low_confidence / gate_blocked) 출력')
     p.add_argument('--dismiss', metavar='TICKER',
                    help="해당 ticker의 미해결 잡을 'gave_up'으로 종결 (다이제스트에서 제거)")
     p.add_argument('--force', action='store_true',
