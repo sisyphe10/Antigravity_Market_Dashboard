@@ -14,7 +14,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from chart_common import nav_html  # noqa: E402
+from chart_common import core_js, nav_html  # noqa: E402
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 D = json.load(open(os.path.join(BASE, 'fcf_data.json'), encoding='utf-8'))
@@ -45,7 +45,10 @@ PAGE = r"""<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>__TITLE__</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+<script>
+__AOE_CHART_CORE__
+</script>
 <style>
   * { box-sizing: border-box; }
   body { font-family: Pretendard, -apple-system, sans-serif; color: #111;
@@ -78,16 +81,17 @@ __NAV__
     <div class="controls">
       <button class="rng active" id="btnZero">0선</button>
       <span style="margin-left:auto"></span>
+      <button class="rng" id="cp" style="background:#0891b2;color:#fff;border:none;font-weight:600">Copy</button>
       <button class="dl" id="dl">Download</button>
     </div>
-    <div class="chartbox"><div id="box" style="position:relative;height:450px"><canvas id="chart"></canvas></div></div>
+    <div class="chartbox"><div id="box" style="position:relative;height:450px"><canvas id="chart"></canvas></div><div id="chartLegend" style="margin-top:10px;text-align:center"></div></div>
   </div>
 </div>
 <script>
 const D = __DATA__;
 Chart.defaults.animation = false;
 Chart.defaults.font.family = 'Pretendard, sans-serif';
-const DPR = (window.devicePixelRatio || 1) * 2, NA = D.nActual;
+const NA = D.nActual;
 let sel = new Set(['_ALL', '_EXNA']), showZero = true;
 
 const side = document.getElementById('side');
@@ -107,165 +111,42 @@ D.groups.forEach(g => {
   });
 });
 
-const digitsFor = m => m < 10 ? 2 : (m < 100 ? 1 : 0);
-const fmt = (v, d) => v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
-
-function ticksFor(min, max) {
-  const sp = (max - min) || 1, lo = min - sp * 0.05, hi = max + sp * 0.05;
-  const raw = hi - lo, s0 = raw / 7, mag = Math.pow(10, Math.floor(Math.log10(s0)));
-  const step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(s => s >= s0) || 10 * mag;
-  const out = [];
-  for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(+v.toFixed(6));
-  const gap = raw / 9;
-  const all = [lo, ...out.filter(v => Math.abs(v - lo) > gap && Math.abs(v - hi) > gap), hi];
-  while (all.length > 8) all.splice(Math.floor(all.length / 2), 1);
-  return { lo, hi, ticks: all };
-}
-
-let cursor = null, pin = null;
-const crosshair = { id: 'ch',
-  afterEvent(c, a) {
-    const e = a.event;
-    if (e.type === 'mousemove') { cursor = { x: e.x, y: e.y }; a.changed = true; }
-    else if (e.type === 'mouseout') { cursor = null; a.changed = true; }
-    else if (e.type === 'click') {
-      const el = c.getElementsAtEventForMode(e, 'index', { intersect: false }, false);
-      const i = el.length ? el[0].index : null;
-      pin = (pin === i) ? null : i; a.changed = true;
-    }
-  },
-  afterDraw(c) {
-    const { ctx, chartArea: ca } = c;
-    if (cursor && cursor.x >= ca.left && cursor.x <= ca.right) {
-      ctx.save(); ctx.setLineDash([4, 4]); ctx.lineWidth = 1;
-      ctx.strokeStyle = 'rgba(17,17,17,0.45)';
-      ctx.beginPath(); ctx.moveTo(cursor.x, ca.top); ctx.lineTo(cursor.x, ca.bottom);
-      ctx.moveTo(ca.left, cursor.y); ctx.lineTo(ca.right, cursor.y); ctx.stroke(); ctx.restore();
-    }
-    if (pin === null) return;
-    const x = c.scales.x.getPixelForValue(pin), d = c._digits;
-    ctx.save(); ctx.setLineDash([4, 4]); ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(17,17,17,0.55)';
-    ctx.beginPath(); ctx.moveTo(x, ca.top); ctx.lineTo(x, ca.bottom); ctx.stroke(); ctx.setLineDash([]);
-    const lines = [D.years[pin]], cols = [null];
-    c.data.datasets.forEach(s => {
-      if (s._aux || s.data[pin] === null || s.data[pin] === undefined) return;
-      lines.push(s.label + '   ' + fmt(s.data[pin], d)); cols.push(s.borderColor);
-    });
-    ctx.font = '13px Pretendard, sans-serif';
-    const w = Math.max(...lines.map(t => ctx.measureText(t).width)) + 34, h = lines.length * 19 + 12;
-    let px = x + 12; const py = ca.top + 10;
-    if (px + w > ca.right) px = x - w - 12;
-    ctx.fillStyle = 'rgba(255,255,255,0.96)'; ctx.strokeStyle = '#c8c8c8'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.roundRect(px, py, w, h, 8); ctx.fill(); ctx.stroke();
-    ctx.textBaseline = 'middle';
-    lines.forEach((t, i) => {
-      const ty = py + 16 + i * 19;
-      if (cols[i]) { ctx.fillStyle = cols[i]; ctx.beginPath(); ctx.arc(px + 14, ty, 4, 0, 7); ctx.fill(); }
-      ctx.fillStyle = '#111';
-      ctx.font = (i === 0 ? '700 13px' : '13px') + ' Pretendard, sans-serif';
-      ctx.fillText(t, px + (cols[i] ? 24 : 12), ty);
-    });
-    ctx.restore();
-  }
-};
-
-const endLabels = { id: 'el',
-  afterDraw(c) {
-    const { ctx, chartArea: ca } = c, d = c._digits;
-    ctx.save();
-    ctx.font = '13px Pretendard, sans-serif'; ctx.fillStyle = '#111';
-    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
-    ctx.fillText('($B)', ca.left - 6, ca.top - 12);
-    const items = [];
-    c.data.datasets.forEach(s => {
-      if (s._aux) return;
-      let li = -1; s.data.forEach((v, i) => { if (v !== null && v !== undefined) li = i; });
-      if (li < 0) return;
-      const py = c.scales.y.getPixelForValue(s.data[li]);
-      items.push({ px: c.scales.x.getPixelForValue(li), py, y: py,
-                   t: fmt(s.data[li], d), col: s.borderColor });
-    });
-    items.sort((a, b) => a.y - b.y);
-    for (let i = 1; i < items.length; i++)
-      if (items[i].y - items[i - 1].y < 15) items[i].y = items[i - 1].y + 15;
-    for (let i = items.length - 1; i > 0; i--)
-      if (items[i].y > ca.bottom) items[i - 1].y = Math.min(items[i - 1].y, items[i].y - 15);
-    ctx.textBaseline = 'middle';
-    const lx = ca.right + 8;
-    items.forEach(it => {
-      ctx.beginPath(); ctx.arc(it.px, it.py, 3, 0, 7); ctx.fillStyle = it.col; ctx.fill();
-      if (Math.abs(it.y - it.py) > 2 || lx - it.px > 12) {
-        ctx.strokeStyle = it.col + '99'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(it.px + 4, it.py); ctx.lineTo(lx - 3, it.y); ctx.stroke();
-      }
-      ctx.fillStyle = it.col; ctx.font = '700 13px Pretendard, sans-serif';
-      ctx.fillText(it.t, lx, it.y);
-    });
-    ctx.restore();
-  }
-};
-
+// ── 렌더 = 코어 표준 라인 cmbRenderCharts (P4b 2026-08-02) — DATA(cmb) 양식 단일 정본.
+//    추정 구간 점선은 dataset.segment 로 코어에 그대로 전달(패스스루), 0선은 _cmbAux 보조 계열.
 let chart = null;
 function build() {
   const rows = D.series.filter(s => sel.has(s.ticker));
-  const dsets = rows.map(s => ({
-    label: s.name, data: s.fcf, borderColor: s.color, backgroundColor: s.color,
-    borderWidth: 2, pointRadius: 0, pointHitRadius: 6, spanGaps: true, tension: 0,
-    segment: { borderDash: c => c.p0DataIndex >= NA - 1 ? [6, 4] : undefined }
-  }));
-  if (showZero) dsets.push({ label: '0', data: D.years.map(() => 0), borderColor: '#b8bcc2',
-    borderWidth: 1.5, borderDash: [6, 4], pointRadius: 0, _aux: true, order: 99 });
-  const vals = rows.flatMap(s => s.fcf).filter(v => v !== null && v !== undefined);
-  if (showZero) vals.push(0);
-  const { lo, hi, ticks } = vals.length ? ticksFor(Math.min(...vals), Math.max(...vals))
-                                        : { lo: -1, hi: 1, ticks: [-1, 0, 1] };
-  const digits = digitsFor(Math.max(Math.abs(lo), Math.abs(hi)));
-  if (chart) chart.destroy();
-  const cx = document.getElementById('chart').getContext('2d');
-  cx.font = '700 13px Pretendard, sans-serif';
-  const padR = Math.max(...(vals.length ? vals : [0]).map(v => cx.measureText(fmt(v, digits)).width)) + 23;
-  chart = new Chart(cx, {
-    type: 'line', data: { datasets: dsets, labels: D.years },
-    options: {
-      responsive: true, maintainAspectRatio: false, devicePixelRatio: DPR,
-      layout: { padding: { right: padR, top: 24 } },
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { display: false },
-        tooltip: { mode: 'index', intersect: false, backgroundColor: 'rgba(255,255,255,0.96)',
-          titleColor: '#111', bodyColor: '#111', borderColor: '#c8c8c8', borderWidth: 1,
-          cornerRadius: 8, caretSize: 0, titleFont: { size: 13 }, bodyFont: { size: 13 },
-          filter: i => !i.dataset._aux,
-          callbacks: { label: i => ' ' + i.dataset.label + '   ' + fmt(i.parsed.y, digits) } }
-      },
-      scales: {
-        x: { grid: { display: false }, ticks: { color: '#000', font: { size: 12 } } },
-        y: { min: lo, max: hi, afterBuildTicks: a => { a.ticks = ticks.map(v => ({ value: v })); },
-             grid: { color: '#eceef0' },
-             ticks: { color: '#000', font: { size: 12 }, callback: v => fmt(v, digits) } }
-      }
-    }, plugins: [crosshair, endLabels]
+  const unitMap = {};
+  const dsets = rows.map(s => {
+    unitMap[s.name] = '$B';
+    return {
+      label: s.name, data: s.fcf, borderColor: s.color, backgroundColor: 'transparent',
+      borderWidth: 3, borderJoinStyle: 'round', borderCapStyle: 'round',
+      pointRadius: 0, tension: 0.4, cubicInterpolationMode: 'monotone', spanGaps: true,
+      yAxisID: 'y',
+      segment: { borderDash: c => c.p0DataIndex >= NA - 1 ? [6, 4] : undefined }
+    };
   });
-  chart._digits = digits;
+  if (showZero) dsets.push({ label: '0', data: D.years.map(() => 0), borderColor: '#b8bcc2',
+    borderWidth: 1.5, borderDash: [6, 4], pointRadius: 0, spanGaps: true, tension: 0,
+    _cmbAux: true, _skipEndLabel: true, order: 99, yAxisID: 'y' });
+  chart = cmbRenderCharts({
+    labels: D.years.map(String), datasets: dsets, dispDatasets: [], rocDatasets: [],
+    mode: 'raw1', yEok: false, y1Eok: false,
+    axAssign: dsets.filter(d => !d._cmbAux).map(d => ({ name: d.label, ax: 'y' })),
+    unitMap,
+    charts: { main: chart, disp: null, roc: null },
+    ids: { canvas: 'chart', legend: 'chartLegend', dispPanel: null, rocPanel: null },
+    xLabel: s => s || '',
+    logOn: false
+  }).main;
 }
 
 document.getElementById('btnZero').onclick = e => {
   showZero = !showZero; e.target.classList.toggle('active', showZero); build();
 };
-document.getElementById('dl').onclick = () => {
-  const c = chart, prev = c.options.devicePixelRatio;
-  try {
-    c.options.devicePixelRatio = 4; c.resize(); c.draw();
-    const off = document.createElement('canvas');
-    off.width = c.canvas.width; off.height = c.canvas.height;
-    const o = off.getContext('2d');
-    o.fillStyle = '#fff'; o.fillRect(0, 0, off.width, off.height);
-    o.drawImage(c.canvas, 0, 0);
-    const a = document.createElement('a');
-    a.download = 'bigtech_neocloud_FCF_' + new Date().toLocaleDateString('sv').replace(/-/g, '') + '.png';
-    a.href = off.toDataURL('image/png'); a.click();
-  } finally { c.options.devicePixelRatio = prev; c.resize(); c.draw(); }
-};
+document.getElementById('dl').onclick = () => downloadChartImage('chart', 'bigtech_neocloud_FCF', 'chartLegend');
+document.getElementById('cp').onclick = e => copyChartImage('chart', 'chartLegend', null, e.currentTarget);
 build();
 // 사이즈 = 세미나 단일 (800x450, 폴더 공통 규약)
 (function () {
@@ -279,10 +160,11 @@ build();
 </body></html>
 """
 
-out = (PAGE.replace('__TITLE__', '빅테크·네오클라우드 잉여현금흐름')
+out = (PAGE.replace('__AOE_CHART_CORE__', core_js())
+           .replace('__TITLE__', '빅테크·네오클라우드 잉여현금흐름')
            .replace('__NAV__', nav_html('chart_viewer_fcf.html'))
            .replace('__DATA__', json.dumps(payload, ensure_ascii=False)))
-for tok in ('__TITLE__', '__NAV__', '__DATA__'):
+for tok in ('__TITLE__', '__NAV__', '__DATA__', '__AOE_CHART_CORE__'):
     assert tok not in out, f'미치환 토큰 {tok}'
 
 OUT = os.path.join(BASE, 'chart_viewer_fcf.html')
