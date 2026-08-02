@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="ko">
+<!--
+  web-chart 스킬 표준 템플릿 (2026-07-15)
+  치환 토큰:
+    __TITLE__   페이지·차트 제목
+    __NOTE__    하단 설명(기간·데이터 주석·지수화·단위 — 설명류는 전부 차트 아래, 상단은 제목만)
+    __DLNAME__  다운로드 파일명 베이스 (예: samsung_hynix_chart)
+    __CONFIG__  {"groups":[{"name":"그룹명","items":[{"key":"...","label":"...","color":"#...","axis":"idx|pct","fmt":"won|won1|pct|pct2|pctlv|eok|man|num"}]}],"defaultOn":["key",...]}
+    __DATA__    {"dates":["YYYY-MM-DD",...],"series":{"key":[값|null,...]}}
+  규칙: 전 계열 실선 / Y축 5~95% 커버 / 좌축 기본 원값 + '정규화' 버튼=표시 창 시작=100 지수화(Y축 유지)
+        / Log 기본 ON / 크로스헤어+흰 데이터 카드(항상 원값) / 끝값 라벨(겹침회피+끝점 동그라미, 정규화 시 지수화 값)
+        / 기간 버튼 / 사이즈 세그 [기본|세미나=800×450 16:9](컨트롤 바 폭 동기, 전체 해제 버튼 없음)
+        / 금액 1조 이상 'N조 N,NNN억원' / Download=DPR4 재렌더+sync toDataURL+로컬날짜
+-->
+<head>
+<meta charset="utf-8">
+<title>__TITLE__</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif;
+         margin: 0; background: #fff; color: #111; }
+  .wrap { max-width: 1500px; margin: 0 auto; padding: 24px 28px; }
+  h1 { font-size: 20px; font-weight: 700; margin: 0 0 16px; }
+  .layout { display: flex; gap: 22px; align-items: flex-start; }
+  .sidebar { width: 250px; flex: none; border: 1px solid #e5e5e5; border-radius: 10px; padding: 12px; }
+  .grp h3 { font-size: 13px; margin: 6px 4px 4px; font-weight: 700; }
+  table.series { width: 100%; border-collapse: collapse; }
+  table.series td { padding: 6px 8px; font-size: 13px; cursor: pointer; user-select: none; }
+  table.series td.bar { width: 6px; padding: 0; }
+  table.series td.bar div { width: 4px; height: 18px; border-radius: 2px; }
+  tr.chart-item:hover td { background: #f4f4f4; }
+  tr.chart-item.active td { background: #222; color: #fff; }
+  .main { flex: 1; min-width: 0; }
+  .controls { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+  button.rng, button.util { font-family: inherit; font-size: 12.5px; padding: 5px 14px; border-radius: 999px;
+               border: 1px solid #d0d0d0; background: #fff; color: #111; cursor: pointer; }
+  button.rng:hover, button.util:hover { background: #f4f4f4; }
+  button.rng.active { background: #404040; color: #fff; border-color: #404040; }
+  input.dt { font-family: inherit; font-size: 12.5px; padding: 5px 10px; border-radius: 999px;
+             border: 1px solid #d0d0d0; width: 108px; text-align: center; color: #111; }
+  input.dt:focus { outline: none; border-color: #404040; }
+  button.dl { font-family: inherit; font-size: 13px; font-weight: 600; padding: 6px 14px;
+              background: #dc2626; color: #fff; border: none; border-radius: 8px; cursor: pointer; }
+  .seg { display: inline-flex; border: 1px solid #d0d0d0; border-radius: 999px; overflow: hidden; }
+  .seg button.rng { border: none; border-radius: 0; }
+  .seg button.rng:not(.active) { background: #eef0f2; }
+  .seg button.rng:not(.active):hover { background: #e2e5e9; }
+  .seg button.rng + button.rng { border-left: 1px solid #d0d0d0; }
+  .chartbox { border: 1px solid #e5e5e5; border-radius: 10px; padding: 14px 16px 8px; }
+  #chart { width: 100%; height: 560px; }
+  .note { font-size: 11.5px; color: #888; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>__TITLE__</h1>
+  <div class="layout">
+    <div class="sidebar" id="sidebar"></div>
+    <div class="main">
+      <div class="controls">
+        <button class="rng" data-rng="3">3M</button>
+        <button class="rng" data-rng="6">6M</button>
+        <button class="rng" data-rng="12">1Y</button>
+        <button class="rng active" data-rng="ytd">YTD</button>
+        <button class="rng" data-rng="0">전체</button>
+        <input class="dt" id="d-from" placeholder="YYYY-MM-DD" maxlength="10"> ~
+        <input class="dt" id="d-to" placeholder="YYYY-MM-DD" maxlength="10">
+        <button class="rng active" id="btn-log">Log</button>
+        <button class="rng" id="btn-norm">정규화</button>
+        <span class="seg" style="margin-left:auto">
+          <button class="rng active" data-size="def">기본</button>
+          <button class="rng" data-size="sem">세미나</button>
+        </span>
+        <button class="dl" id="btn-dl">Download</button>
+      </div>
+      <div class="chartbox"><canvas id="chart"></canvas></div>
+      <div class="note">__NOTE__</div>
+    </div>
+  </div>
+</div>
+<script>
+const RAW = __DATA__;
+const CONFIG = __CONFIG__;
+const DL_BASE = '__DLNAME__';
+
+// 포맷터 레지스트리 (fmt 문자열 → 함수). 금액=억원, %=소수 첫째자리 표준.
+const FMT = {
+  won:  v => Math.round(v).toLocaleString() + '원',
+  won1: v => v.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '원',   // 환율 등 소수 1자리
+  pct:  v => (v >= 0 ? '+' : '') + v.toFixed(1) + '%',
+  pct2: v => (v >= 0 ? '+' : '') + v.toFixed(2) + '%',
+  pctlv: v => v.toFixed(2) + '%',   // 레벨형 %(금리 등) — 부호 없이
+  eok:  v => { const r = Math.round(v); return r >= 10000
+    ? Math.floor(r / 10000).toLocaleString() + '조 ' + (r % 10000).toLocaleString() + '억원'
+    : r.toLocaleString() + '억원'; },
+  man:  v => Math.round(v).toLocaleString() + '만',
+  num:  v => v.toLocaleString(),
+};
+// fmt -> 하단 범례 단위 표기 — 시리즈명 뒤 1회 (2026-08-02 사용자 확정, cmb 양식 이식)
+const UNIT_LABEL = { won: "(원)", won1: "(원)", pct: "(%)", pct2: "(%)", pctlv: "(%)", eok: "(억원)", man: "(만)", usd: "($)", num: "" };
+// 같은 색(계열) 여러 계열 겹칠 때 순서대로 연하게 (점선 대신 — cmb 양식 이식 2026-07-21)
+function lightenColor(hex, amt) {
+  const m = hex.replace('#', '').match(/.{2}/g).map(x => parseInt(x, 16));
+  return '#' + m.map(v => Math.round(v + (255 - v) * amt).toString(16).padStart(2, '0')).join('');
+}
+const ITEMS = {};
+CONFIG.groups.forEach(g => g.items.forEach(it => {
+  it.fullLabel = (CONFIG.groups.length > 1 && g.prefix !== false ? g.name + ' ' : '') + it.label;   // 범례·툴팁용 그룹 접두어 (그룹에 prefix:false면 생략)
+  ITEMS[it.key] = it;
+}));
+const DEFAULT_ON = new Set(CONFIG.defaultOn || []);
+
+// ── 사이드바 (컬러바 + 행 클릭 토글) ──
+const sb = document.getElementById('sidebar');
+CONFIG.groups.forEach(g => {
+  const div = document.createElement('div'); div.className = 'grp';
+  div.innerHTML = '<h3>' + g.name + '</h3>';
+  const tb = document.createElement('table'); tb.className = 'series';
+  g.items.forEach(it => {
+    const tr = document.createElement('tr');
+    tr.className = 'chart-item' + (DEFAULT_ON.has(it.key) ? ' active' : '');
+    tr.dataset.key = it.key;
+    tr.innerHTML = '<td class="bar"><div style="background:' + it.color + '"></div></td><td>' + it.label + '</td>';
+    tr.addEventListener('click', () => { tr.classList.toggle('active'); build(); });
+    tb.appendChild(tr);
+  });
+  div.appendChild(tb);
+  sb.appendChild(div);
+});
+
+// ── 사이드바 키보드 ↑/↓ 내비게이션: 계열 간 이동(단일 선택 브라우징, 2026-07-20) ──
+let kbFocus = -1;
+document.addEventListener('keydown', ev => {
+  if (ev.key !== 'ArrowUp' && ev.key !== 'ArrowDown') return;
+  const t = document.activeElement;
+  if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;   // 날짜 입력 중엔 무시
+  const rows = [...document.querySelectorAll('#sidebar tr.chart-item')];
+  if (!rows.length) return;
+  ev.preventDefault();
+  if (kbFocus < 0) { kbFocus = rows.findIndex(r => r.classList.contains('active')); if (kbFocus < 0) kbFocus = 0; }
+  else kbFocus = (kbFocus + (ev.key === 'ArrowDown' ? 1 : -1) + rows.length) % rows.length;
+  rows.forEach((r, i) => r.classList.toggle('active', i === kbFocus));   // 방향키 = 단일 계열로 이동
+  rows[kbFocus].scrollIntoView({ block: 'nearest' });
+  build();
+});
+
+// ── 크로스헤어 (트레이딩뷰식 십자 점선) ──
+const crosshairPlugin = {
+  id: 'crosshair',
+  afterEvent(chart, args) {
+    const e = args.event;
+    chart.$cross = (args.inChartArea && (e.type === 'mousemove' || e.type === 'mouseenter'))
+      ? { x: e.x, y: e.y } : null;
+    args.changed = true;
+  },
+  afterDraw(chart) {
+    const p = chart.$cross;
+    if (!p) return;
+    const { ctx, chartArea: a } = chart;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(17,17,17,0.45)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(p.x, a.top); ctx.lineTo(p.x, a.bottom);
+    ctx.moveTo(a.left, p.y); ctx.lineTo(a.right, p.y);
+    ctx.stroke();
+    ctx.restore();
+  }
+};
+
+// ── 카드 고정(핀): 차트 클릭 → 그 날짜의 데이터 카드를 캔버스에 상주 표시 (Download PNG에 포함, 같은 날짜 재클릭=해제) ──
+let pinDate = null;
+function tipText(ds, i) {   // 툴팁·핀 카드 공용 값 포맷 (정규화 모드=%, 원값 모드=원값)
+  if (ds.endFmt) { const v = ds.data[i]; return ds.label + ': ' + (v == null ? '-' : ds.endFmt(v)); }
+  const rv = ds.rawData[i];
+  return ds.label + ': ' + (rv == null ? '-' : ds.rawFmt(rv));
+}
+const pinPlugin = {
+  id: 'pin',
+  afterDraw(chart) {
+    if (!pinDate) return;
+    const i = chart.data.labels.indexOf(pinDate);
+    if (i < 0) return;
+    const { ctx, chartArea: a } = chart;
+    const px = chart.scales.x.getPixelForValue(i);
+    const rows = chart.data.datasets
+      .map((ds, di) => ({ ds, meta: chart.getDatasetMeta(di) }))
+      .filter(o => o.meta.visible && !o.ds.isAux)
+      .map(o => ({ color: o.ds.borderColor, text: tipText(o.ds, i) }));
+    if (!rows.length) return;
+    ctx.save();
+    // 고정 세로선
+    ctx.strokeStyle = 'rgba(17,17,17,0.6)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke();
+    ctx.setLineDash([]);
+    // 카드 치수 (툴팁과 동일 룩)
+    ctx.font = 'bold 12.5px Pretendard, sans-serif';
+    let w = ctx.measureText(pinDate).width;
+    ctx.font = '12px Pretendard, sans-serif';
+    rows.forEach(r => { w = Math.max(w, ctx.measureText(r.text).width + 20); });
+    const pad = 10, lh = 17;
+    const cw = w + pad * 2, chh = pad * 2 + 16 + rows.length * lh;
+    let cx = px + 12;
+    if (cx + cw > a.right) cx = px - 12 - cw;
+    const cy = a.top + 8;
+    ctx.fillStyle = 'rgba(255,255,255,0.96)';
+    ctx.strokeStyle = '#c8c8c8'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(cx, cy, cw, chh, 8); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#111'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    ctx.font = 'bold 12.5px Pretendard, sans-serif';
+    ctx.fillText(pinDate, cx + pad, cy + pad - 2);
+    ctx.font = '12px Pretendard, sans-serif';
+    rows.forEach((r, k) => {
+      const ry = cy + pad + 16 + k * lh;
+      ctx.fillStyle = r.color;
+      ctx.fillRect(cx + pad, ry + 5, 14, 2);
+      ctx.fillStyle = '#111';
+      ctx.fillText(r.text, cx + pad + 20, ry);
+    });
+    ctx.restore();
+  }
+};
+document.getElementById('chart').addEventListener('click', ev => {
+  if (!chart) return;
+  if (didDrag) { didDrag = false; return; }   // 드래그 직후 클릭은 핀 아님
+  const rect = ev.target.getBoundingClientRect();
+  const px = ev.clientX - rect.left, py = ev.clientY - rect.top;
+  const a = chart.chartArea;
+  if (px < a.left || px > a.right || py < a.top || py > a.bottom) return;
+  const i = Math.max(0, Math.min(chart.data.labels.length - 1, Math.round(chart.scales.x.getValueForPixel(px))));
+  const d = chart.data.labels[i];
+  pinDate = (pinDate === d) ? null : d;   // 같은 날짜 재클릭 = 해제
+  chart.draw();
+});
+window.getPinDate = () => pinDate;   // 검증용
+
+// ── 끝값 라벨 (겹침회피 + 끝점 동그라미 + 리더선: 우측 여백에 세로 정렬, 원값/축값 표기) ──
+const endLabelPlugin = {
+  id: 'endLabel',
+  afterDatasetsDraw(chart) {
+    const { ctx, chartArea: area } = chart;
+    const items = [];
+    chart.data.datasets.forEach((ds, di) => {
+      const meta = chart.getDatasetMeta(di);
+      if (!meta.visible) return;
+      let li = -1;
+      for (let i = ds.data.length - 1; i >= 0; i--) if (ds.data[i] != null) { li = i; break; }
+      if (li < 0 || !meta.data[li]) return;
+      const txt = ds.endFmt ? ds.endFmt(ds.data[li]) : ds.rawFmt(ds.rawData[li]);
+      items.push({ x: meta.data[li].x, origY: meta.data[li].y, y: meta.data[li].y,
+                   color: ds.borderColor, text: txt, dot: !ds.isAux });
+    });
+    // 겹침회피: y 오름차순 → 인접 15px 확보, 하단 초과 시 역보정
+    items.sort((a, b) => a.y - b.y);
+    for (let i = 1; i < items.length; i++)
+      if (items[i].y - items[i - 1].y < 15) items[i].y = items[i - 1].y + 15;
+    const over = items.length ? items[items.length - 1].y - (area.bottom - 4) : 0;
+    if (over > 0) {
+      for (let i = items.length - 1; i >= 0; i--) {
+        items[i].y -= over;
+        if (i > 0 && items[i].y - items[i - 1].y >= 15) break;
+      }
+    }
+    const gutterX = area.right + 14;   // 라벨은 우측 여백에 세로 정렬
+    ctx.save();
+    ctx.font = 'bold 11px Pretendard, sans-serif';
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    items.forEach(it => {
+      if (it.dot) {   // 끝점 동그라미는 실제 점 위치에
+        ctx.beginPath(); ctx.fillStyle = it.color;
+        ctx.arc(it.x, it.origY, 3, 0, Math.PI * 2); ctx.fill();
+      }
+      // 리더선: 끝점 → 라벨 (얇은 선, 계열색 반투명)
+      ctx.beginPath();
+      ctx.strokeStyle = it.color; ctx.globalAlpha = 0.55; ctx.lineWidth = 1; ctx.setLineDash([]);
+      ctx.moveTo(it.x + 4, it.origY); ctx.lineTo(gutterX - 3, it.y);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = it.color;
+      ctx.fillText(it.text, gutterX, it.y);
+    });
+    ctx.restore();
+  }
+};
+
+// ── Y축 5~95% 커버 + nice 눈금(5구간·6줄, seminar-chart 양식과 동일 감각) ──
+// 데이터에 상하 5/90 여백을 준 뒤 nice 스텝으로 라운딩 → 커버리지 ~5~95% 근사 + 깔끔한 눈금값
+function niceStep(x) {
+  if (x <= 0) return 1;
+  const exp = Math.floor(Math.log10(x)), f = x / Math.pow(10, exp);
+  for (const c of [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]) if (f <= c * 1.0001) return c * Math.pow(10, exp);
+  return Math.pow(10, exp + 1);
+}
+function pad595(vals, n = 5) {
+  if (!vals.length) return {};
+  const lo = Math.min(...vals), hi = Math.max(...vals);
+  const pad = (hi - lo) * (0.05 / 0.90) || Math.abs(hi) * 0.05 || 1;
+  const step = niceStep((hi - lo + 2 * pad) / n);
+  const min = Math.floor((lo - pad) / step) * step;
+  const ticks = [];
+  let max = min;
+  while (max < hi + pad - 1e-9) max += step;
+  for (let t = min; t <= max + 1e-9; t += step) ticks.push(Math.round(t * 1e6) / 1e6);
+  return { min, max, ticks };
+}
+
+let rangeMonths = 'ytd';   // 기본 기간 = YTD (사용자 확정 2026-07-15)
+let customRange = null;   // {from, to} — 날짜 입력이 버튼보다 우선
+let logMode = true;       // 좌축 로그스케일 토글 — 기본 ON (우축 %는 항상 linear)
+let normMode = false;     // '정규화' 버튼 — ON이면 좌축 전 계열 표시 창 시작=100 지수화
+let chart = null;
+
+// 로그축 5~95% + 1·2·5 사다리 눈금 (로그 공간에서 패딩)
+function pad595Log(vals) {
+  const pos = vals.filter(v => v > 0);
+  if (!pos.length) return {};
+  const lo = Math.min(...pos), hi = Math.max(...pos);
+  const llo = Math.log10(lo), lhi = Math.log10(hi);
+  const pad = (lhi - llo) * (0.05 / 0.90) || 0.02;
+  const min = Math.pow(10, llo - pad), max = Math.pow(10, lhi + pad);
+  const ticks = [];
+  for (let k = Math.floor(Math.log10(min)); k <= Math.ceil(Math.log10(max)); k++)
+    for (const c of [1, 2, 5]) {
+      const t = c * Math.pow(10, k);
+      if (t >= min && t <= max) ticks.push(t);
+    }
+  return { min, max, ticks };
+}
+
+function visibleWindow(activeItems) {
+  const n = RAW.dates.length;
+  if (customRange) {
+    let s = 0, e = n - 1;
+    for (let i = 0; i < n; i++) if (RAW.dates[i] >= customRange.from) { s = i; break; }
+    for (let i = n - 1; i >= 0; i--) if (RAW.dates[i] <= customRange.to) { e = i; break; }
+    if (s <= e) return [s, e];
+  }
+  if (!rangeMonths) {   // 전체 → 활성 계열의 실제 데이터 구간에 맞춤 (cmb 양식 이식 2026-07-21)
+    if (activeItems && activeItems.length) {
+      let lo = n, hi = -1;
+      activeItems.forEach(it => {
+        const a = RAW.series[it.key]; if (!a) return;
+        for (let i = 0; i < n; i++) if (a[i] != null) { if (i < lo) lo = i; break; }
+        for (let j = n - 1; j >= 0; j--) if (a[j] != null) { if (j > hi) hi = j; break; }
+      });
+      if (hi >= lo) return [lo, hi];
+    }
+    return [0, n - 1];
+  }
+  let fs;
+  if (rangeMonths === 'ytd') fs = RAW.dates[n - 1].slice(0, 4) + '-01-01';
+  else {
+    const from = new Date(RAW.dates[n - 1]); from.setMonth(from.getMonth() - rangeMonths);
+    fs = from.toISOString().slice(0, 10);
+  }
+  let s = 0;
+  for (let i = 0; i < n; i++) if (RAW.dates[i] >= fs) { s = i; break; }
+  return [s, n - 1];
+}
+
+function build() {
+  const activeItems = [...document.querySelectorAll('#sidebar tr.chart-item.active')].map(tr => ITEMS[tr.dataset.key]);
+  const [s, e] = visibleWindow(activeItems);
+  const labels = RAW.dates.slice(s, e + 1);
+  // 좌축 2모드 (사용자 확정 2026-07-15 — 자동 판정 폐기):
+  //  raw    = 기본. 어떤 조합이든 원값 그대로
+  //  rebase = '정규화' 버튼 ON → 좌축 전 계열을 표시 창 시작 대비 % 수익률(시작=0%)로 (Y축 유지, 창 변경 시 재계산)
+  const mode = normMode ? 'rebase' : 'raw';
+  const datasets = [];
+  activeItems.forEach(it => {
+    const raw = RAW.series[it.key].slice(s, e + 1);
+    let data = raw;
+    if (it.axis === 'idx' && mode === 'rebase') {
+      const base = raw.find(v => v != null && v !== 0);   // 0 시작 계열(공매도 잔고 등) 가드
+      data = raw.map(v => v == null ? null : (v / base - 1) * 100);
+    }
+    datasets.push({
+      label: it.fullLabel, data, rawData: raw, rawFmt: FMT[it.fmt] || FMT.num,
+      unitLabel: (it.axis === "idx" && mode === "rebase") ? "" : (UNIT_LABEL[it.fmt] || ""),   // 정규화 모드는 %라 단위 생략
+      endFmt: (it.axis === 'idx' && mode === 'rebase') ? FMT.pct : null,   // 정규화 끝값 = 시작 대비 %
+
+      borderColor: it.color, backgroundColor: it.color,
+      borderWidth: 2, pointRadius: 0, pointHitRadius: 6, spanGaps: true, tension: 0,
+      yAxisID: it.axis === 'idx' ? 'y' : 'y1',
+    });
+  });
+  // 같은 색(계열) 여러 계열 활성 → 순서대로 연하게 (점선 대신, cmb 양식 이식 2026-07-21)
+  const _shadeCnt = {};
+  datasets.forEach(ds => {
+    if (ds.isAux) return;
+    const base = ds.borderColor;
+    const k = _shadeCnt[base] || 0;
+    _shadeCnt[base] = k + 1;
+    if (k > 0) { const lc = lightenColor(base, Math.min(0.72, k * 0.34)); ds.borderColor = lc; ds.backgroundColor = lc; }
+  });
+  const shortWin = labels.length <= 135;   // ~6개월 이하 창 → X라벨 MM/DD
+  const yVals  = datasets.filter(d => d.yAxisID === 'y').flatMap(d => d.data).filter(v => v != null);
+  const y1Vals = datasets.filter(d => d.yAxisID === 'y1').flatMap(d => d.data).filter(v => v != null);
+  const useLog = logMode && mode !== 'rebase';   // %수익률엔 음수·0이 있어 로그 무의미
+  const yPad = useLog ? pad595Log(yVals) : pad595(yVals);
+  const y1Pad = pad595(y1Vals);
+  // 우측 패딩 = 가장 긴 끝값 라벨 실측 폭 + 리더선 여백 (고정 90px이면 세미나 사이즈에서 여백 과다)
+  const mCtx = document.getElementById('chart').getContext('2d');
+  mCtx.font = 'bold 11px Pretendard, sans-serif';
+  let maxLw = 0;
+  datasets.forEach(ds => {
+    let li = -1;
+    for (let i = ds.data.length - 1; i >= 0; i--) if (ds.data[i] != null) { li = i; break; }
+    if (li < 0) return;
+    const txt = ds.endFmt ? ds.endFmt(ds.data[li]) : ds.rawFmt(ds.rawData[li]);
+    maxLw = Math.max(maxLw, mCtx.measureText(txt).width);
+  });
+  const padR = Math.ceil(maxLw) + 15;   // gutter 여백 15px (사용자 확정)
+  if (chart) chart.destroy();
+  chart = new Chart(document.getElementById('chart'), {
+    type: 'line',
+    data: { labels, datasets },
+    plugins: [endLabelPlugin, crosshairPlugin, pinPlugin],
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      layout: { padding: { right: padR } },
+      interaction: { mode: 'index', intersect: false },
+      scales: {
+        x: { grid: { color: '#eee' },
+             ticks: { color: '#111', maxTicksLimit: 10, maxRotation: 0, font: { size: 11 },
+                      callback(v) { const d = this.getLabelForValue(v);
+                        return shortWin ? d.slice(5).replace('-', '/') : d.slice(2, 7).replace('-', '/'); } },
+             border: { color: '#000' } },
+        y:  { display: yVals.length > 0, position: 'left', min: yPad.min, max: yPad.max,
+              type: useLog ? 'logarithmic' : 'linear',
+              afterBuildTicks: ax => { if (yPad.ticks) ax.ticks = yPad.ticks.map(v => ({ value: v })); },
+              grid: { color: '#eee' }, ticks: { color: '#111', font: { size: 11 },
+                      callback: v => mode === 'rebase' ? v.toLocaleString() + '%' : v.toLocaleString() }, border: { color: '#000' } },
+        y1: { display: y1Vals.length > 0, position: 'right', min: y1Pad.min, max: y1Pad.max,
+              afterBuildTicks: ax => { if (y1Pad.ticks) ax.ticks = y1Pad.ticks.map(v => ({ value: v })); },
+              grid: { drawOnChartArea: yVals.length === 0, color: '#eee' },
+              ticks: { color: '#111', font: { size: 11 }, callback: v => v.toFixed(1) + '%' }, border: { color: '#000' } },
+      },
+      plugins: {
+        legend: { position: 'bottom',
+                  labels: { color: '#111', usePointStyle: false, boxWidth: 22, boxHeight: 2, font: { size: 13.5 },
+                            filter: (li, data) => !data.datasets[li.datasetIndex].isAux,
+                            generateLabels: chart => {   // 시리즈명 뒤 단위 — 예: 시가총액(억원)
+                              const items = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+                              items.forEach(li => { const u = chart.data.datasets[li.datasetIndex].unitLabel; if (u) li.text += u; });
+                              return items;
+                            } } },
+        tooltip: {   // 데이터 카드 (흰 배경·검정 글씨·원값)
+          backgroundColor: 'rgba(255,255,255,0.96)',
+          titleColor: '#111', bodyColor: '#111',
+          borderColor: '#c8c8c8', borderWidth: 1,
+          cornerRadius: 8, padding: 10, animation: false,
+          titleFont: { weight: 'bold', size: 12.5 }, bodyFont: { size: 12 },
+          boxWidth: 14, boxHeight: 2, boxPadding: 4,
+          caretSize: 0, displayColors: true,
+          filter: c => !c.dataset.isAux,
+          callbacks: {
+            label(c) { return ' ' + tipText(c.dataset, c.dataIndex); }   // 정규화 모드=%, 원값 모드=원값 (핀 카드와 공용)
+          }
+        }
+      }
+    }
+  });
+}
+
+document.querySelectorAll('button[data-rng]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('button[data-rng]').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  rangeMonths = b.dataset.rng === 'ytd' ? 'ytd' : +b.dataset.rng;
+  customRange = null;
+  document.getElementById('d-from').value = '';
+  document.getElementById('d-to').value = '';
+  build();
+}));
+
+// ── 임의 기간: YYYY-MM-DD 입력 2칸 (자동 하이픈, 대시보드 formatDateInput 방식) ──
+function formatDateInput(el) {
+  let v = el.value.replace(/[^0-9]/g, '').slice(0, 8);
+  if (v.length > 6) v = v.slice(0, 4) + '-' + v.slice(4, 6) + '-' + v.slice(6);
+  else if (v.length > 4) v = v.slice(0, 4) + '-' + v.slice(4);
+  el.value = v;
+}
+function applyCustomRange() {
+  const f = document.getElementById('d-from').value, t = document.getElementById('d-to').value;
+  const ok = s => /^\d{4}-\d{2}-\d{2}$/.test(s);
+  if (ok(f) && ok(t) && f <= t) {
+    customRange = { from: f, to: t };
+    document.querySelectorAll('button[data-rng]').forEach(x => x.classList.remove('active'));
+    build();
+  }
+}
+['d-from', 'd-to'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('input', () => { formatDateInput(el); applyCustomRange(); });
+});
+
+// ── 내비게이션 (트레이딩뷰식, 2026-07-15 확정): 휠=시간축 이동 / Ctrl·Shift+휠=커서 기준 확대·축소 / 드래그=이동 ──
+function applyWindow(ns, ne) {
+  const n = RAW.dates.length;
+  document.querySelectorAll('button[data-rng]').forEach(x => x.classList.remove('active'));
+  if (ns === 0 && ne === n - 1) {                        // 전체 범위 도달 → 전체 버튼 상태로 복귀
+    customRange = null; rangeMonths = 0;
+    document.querySelector('button[data-rng="0"]').classList.add('active');
+    document.getElementById('d-from').value = '';
+    document.getElementById('d-to').value = '';
+  } else {
+    customRange = { from: RAW.dates[ns], to: RAW.dates[ne] };
+    document.getElementById('d-from').value = RAW.dates[ns];
+    document.getElementById('d-to').value = RAW.dates[ne];
+  }
+  build();
+}
+document.getElementById('chart').addEventListener('wheel', ev => {
+  if (!chart) return;
+  const rect = ev.target.getBoundingClientRect();
+  const px = ev.clientX - rect.left, py = ev.clientY - rect.top;
+  const a = chart.chartArea;
+  if (px < a.left || px > a.right || py < a.top || py > a.bottom) return;   // 차트 영역 밖은 페이지 스크롤 유지
+  ev.preventDefault();
+  const n = RAW.dates.length;
+  const [s, e] = visibleWindow();
+  const span = e - s;
+  if (ev.ctrlKey || ev.shiftKey) {                       // 확대/축소 = Ctrl 또는 Shift + 휠 (커서 앵커)
+    const fx = (px - a.left) / (a.right - a.left);
+    const anchor = s + fx * span;
+    const factor = ev.deltaY < 0 ? 0.8 : 1.25;           // 위로 굴리면 확대
+    let newSpan = Math.round(span * factor);
+    newSpan = Math.max(10, Math.min(n - 1, newSpan));
+    let ns = Math.round(anchor - fx * newSpan);
+    ns = Math.max(0, Math.min(ns, n - 1 - newSpan));
+    applyWindow(ns, ns + newSpan);
+  } else {                                               // 일반 휠 = 시간축 이동 (아래=미래, 위=과거)
+    if (span >= n - 1) return;
+    const step = Math.max(1, Math.round(span * 0.12)) * (ev.deltaY > 0 ? 1 : -1);
+    const ns = Math.max(0, Math.min(s + step, n - 1 - span));
+    if (ns !== s) applyWindow(ns, ns + span);
+  }
+}, { passive: false });
+
+// 클릭 드래그 = 차트 좌우 이동 (3px 이상 움직이면 드래그로 간주 → 핀 클릭 무시)
+let dragState = null;
+let didDrag = false;
+document.getElementById('chart').addEventListener('mousedown', ev => {
+  if (!chart) return;
+  const rect = ev.target.getBoundingClientRect();
+  const px = ev.clientX - rect.left, py = ev.clientY - rect.top;
+  const a = chart.chartArea;
+  if (px < a.left || px > a.right || py < a.top || py > a.bottom) return;
+  const [s, e] = visibleWindow();
+  dragState = { x0: ev.clientX, s, e, plotW: a.right - a.left };
+  didDrag = false;
+});
+window.addEventListener('mousemove', ev => {
+  if (!dragState || !chart) return;
+  const dx = ev.clientX - dragState.x0;
+  if (Math.abs(dx) > 3) didDrag = true;
+  const n = RAW.dates.length;
+  const span = dragState.e - dragState.s;
+  if (span >= n - 1) return;                             // 전체 범위면 이동할 곳 없음
+  const bars = Math.round(-dx / dragState.plotW * span); // 오른쪽으로 끌면 과거가 보임
+  const ns = Math.max(0, Math.min(dragState.s + bars, n - 1 - span));
+  const [cs] = visibleWindow();
+  if (ns !== cs) applyWindow(ns, ns + span);
+});
+window.addEventListener('mouseup', () => { dragState = null; });
+document.getElementById('btn-log').addEventListener('click', () => {
+  logMode = !logMode;
+  document.getElementById('btn-log').classList.toggle('active', logMode);
+  build();
+});
+document.getElementById('btn-norm').addEventListener('click', () => {
+  normMode = !normMode;
+  document.getElementById('btn-norm').classList.toggle('active', normMode);
+  build();
+});
+
+// ── 사이즈 토글: 기본(반응형 560px) / 세미나(800×450 = 16:9, seminar-chart SINGLE 8×4.5in 규격 — DPR4 다운로드 시 3200×1800) ──
+const SIZES = { def: { w: null, h: 560 }, sem: { w: 800, h: 450 } };
+document.querySelectorAll('button[data-size]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('button[data-size]').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  const s = SIZES[b.dataset.size];
+  const w = s.w ? (s.w + 34) + 'px' : '';   // 패딩 32 + 보더 2
+  document.querySelector('.chartbox').style.width = w;
+  document.querySelector('.controls').style.width = w;   // 컨트롤 바(사이즈·Download 우측정렬)도 차트 폭 따라 이동
+  document.getElementById('chart').style.height = s.h + 'px';
+  if (chart) chart.resize();
+}));
+
+// ── Download: 클릭 순간 DPR4 재렌더 → sync toDataURL (user activation 유지) ──
+document.getElementById('btn-dl').addEventListener('click', () => {
+  if (!chart) return;
+  const DL_DPR = 4;
+  const prev = chart.options.devicePixelRatio || (window.devicePixelRatio || 1);
+  chart.$cross = null;
+  chart.options.devicePixelRatio = DL_DPR;
+  chart.resize(); chart.draw();
+  try {
+    const src = document.getElementById('chart');
+    const c = document.createElement('canvas');
+    c.width = src.width; c.height = src.height;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.drawImage(src, 0, 0);
+    const a = document.createElement('a');
+    a.href = c.toDataURL('image/png');
+    a.download = DL_BASE + '_' + new Date().toLocaleDateString('sv').replaceAll('-', '') + '.png';
+    a.click();
+  } finally {
+    chart.options.devicePixelRatio = prev;
+    chart.resize(); chart.draw();
+  }
+});
+
+build();
+</script>
+</body>
+</html>
