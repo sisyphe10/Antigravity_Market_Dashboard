@@ -1079,7 +1079,8 @@ def _chart_download_helper_js():
     return """
         <script>
         if (typeof window.downloadChartImage !== 'function') {
-            window.downloadChartImage = function(canvasId, baseName, legendId, extraCanvasId) {
+            // opts.copy=true 면 파일 저장 대신 클립보드 복사 (2026-08-02, copyChartImage 경유)
+            window.downloadChartImage = function(canvasId, baseName, legendId, extraCanvasId, opts) {
                 var src = document.getElementById(canvasId);
                 if (!src) { console.warn('canvas not found:', canvasId); return; }
                 // ── 고해상도 저장: 클릭 순간에만 차트를 DL_DPR로 재렌더 (화면 해상도는 그대로) ──
@@ -1195,16 +1196,34 @@ def _chart_download_helper_js():
                     if (_names.length > 3) _shown += ' 외' + (_names.length - 3);
                     _namePart = '_' + _shown.replace(/[\\/:*?"<>|]/g, '-');
                 }
-                var a = document.createElement('a');
-                a.href = tmp.toDataURL('image/png');
-                a.download = (baseName || 'chart') + _namePart + '_' + stamp + '.png';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+                var _dataUrl = tmp.toDataURL('image/png');   // sync — async toBlob는 user activation 상실
+                if (opts && opts.copy) {
+                    // 클립보드 복사 — dataURL을 동기로 Blob 변환 후 write (클릭 제스처 유지)
+                    var _bin = atob(_dataUrl.split(',')[1]);
+                    var _u8 = new Uint8Array(_bin.length);
+                    for (var _bi = 0; _bi < _bin.length; _bi++) _u8[_bi] = _bin.charCodeAt(_bi);
+                    var _pr = navigator.clipboard.write([new ClipboardItem({ 'image/png': new Blob([_u8], { type: 'image/png' }) })]);
+                    var _btn = opts.btn;
+                    if (_btn) {
+                        var _orig = _btn.textContent;
+                        _pr.then(function(){ _btn.textContent = '복사됨 ✓'; }, function(e){ console.warn('clipboard copy failed:', e); _btn.textContent = '복사 실패'; });
+                        setTimeout(function(){ _btn.textContent = _orig; }, 1500);
+                    }
+                } else {
+                    var a = document.createElement('a');
+                    a.href = _dataUrl;
+                    a.download = (baseName || 'chart') + _namePart + '_' + stamp + '.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }
                 } finally {
                     if (_mainChart) { _mainChart.options.devicePixelRatio = _prevMainDpr; _mainChart.resize(); _mainChart.draw(); }
                     _extraCharts.forEach(function(c, i) { c.options.devicePixelRatio = _prevExtraDprs[i]; c.resize(); c.draw(); });
                 }
+            };
+            window.copyChartImage = function(canvasId, legendId, extraCanvasId, btn) {
+                window.downloadChartImage(canvasId, null, legendId, extraCanvasId, { copy: true, btn: btn });
             };
         }
         </script>
@@ -1651,7 +1670,8 @@ def _build_indices_chart_section(category_label='Indices'):
                         <input type="text" id="idxStartDate" value="{first_date}" onchange="formatDateInput(this);updateIdxChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
                         <span style="color:#888;">~</span>
                         <input type="text" id="idxEndDate" value="{last_date}" onchange="formatDateInput(this);updateIdxChart()" style="font-family:inherit;font-size:13px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb;color:#222;width:110px;text-align:center;" placeholder="YYYY-MM-DD">
-                        <button onclick="downloadChartImage('idxDynamicChart','AoE_Indice','idxChartLegend')" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
+                        <button onclick="copyChartImage('idxDynamicChart','idxChartLegend',null,this)" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#475569;color:#fff;border:none;border-radius:8px;cursor:pointer;">복사</button>
+                        <button onclick="downloadChartImage('idxDynamicChart','AoE_Indice','idxChartLegend')" style="margin-left:8px;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
                     </div>
                     <div id="idxChartCard" style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                         <div style="position:relative;height:500px;">
@@ -4222,7 +4242,8 @@ def _build_combined_chart_section():
                             <button id="cmbRocFreqM" class="cmb-ma-btn active" onclick="cmbSetRocFreq('M')">월</button>
                             <button id="cmbRocFreqW" class="cmb-ma-btn" onclick="cmbSetRocFreq('W')">주</button>
                         </span>
-                        <button onclick="downloadChartImage('cmbDynamicChart','AoE_Data','cmbChartLegend',['cmbDispChart','cmbRocChart'])" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
+                        <button onclick="copyChartImage('cmbDynamicChart','cmbChartLegend',['cmbDispChart','cmbRocChart'],this)" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#475569;color:#fff;border:none;border-radius:8px;cursor:pointer;">복사</button>
+                        <button onclick="downloadChartImage('cmbDynamicChart','AoE_Data','cmbChartLegend',['cmbDispChart','cmbRocChart'])" style="margin-left:8px;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
                         <button onclick="clearCmbSelections()" style="font-family:inherit;font-size:13px;font-weight:600;padding:4px 14px;background:#f3f4f6;color:#444;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;margin-left:8px;">전체 해제</button>
                     </div>
                     <style>
