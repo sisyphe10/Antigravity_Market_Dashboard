@@ -3205,8 +3205,9 @@ def _build_combined_chart_section():
                 </div>
             </div>
         </div>
-        {js_code}
+        <script>window.Chart || document.write('<script src="/assets/vendor/js/chart.umd.min.js"><\\/script>');</script>
         {_chart_download_helper_js()}
+        {js_code}
         """
     except Exception as e:
         print(f"Error building combined chart section: {e}")

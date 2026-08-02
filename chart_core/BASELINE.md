@@ -40,6 +40,10 @@
 4. 뷰어 소스가 맥미니 단독(미추적)이었음 → 8/2 `chart_core/viewer_src/` 스냅샷 편입(승인). **P4까지 맥미니가 실행 정본, repo 사본은 기록용** — 이중 수정 금지, 뷰어 수정 시 맥미니 먼저→스냅샷 갱신.
 5. ~~cmb 원값 모드에서 %단위 시리즈의 범례 기간 변화율이 나눗셈 %로 계산됨 — 괴리율 0.045→-5.33이 `-1,699%`로 표기(golden `data_basis_neg_linear` 참조). 2026-07-19 확정 규격(%·%p 시리즈=레벨 차이 %p)은 pct 모드에만 적용돼 있음 → P2에서 규격 정합.~~ **해소 (2026-08-02 P2b, dc11309e — raw 모드도 레벨 차이 %p, MA 파생선은 같은 축 주 시리즈 단위 상속)**
 
+## codex 리뷰 반영 (2026-08-02, P2b~P3 커밋 4개 대상)
+- 조치 완료: ①DATA 섹션이 자립하도록 코어 임베드+Chart.js 가드 로더를 js_code 앞에 배치(단, `<script src>` 중복이면 **Chart 클래스가 재정의돼 레지스트리가 갈라짐** — `window.Chart || document.write(...)` 조건부 로드 필수) ②legacy 롤백 시 크로스헤어·핀 불능 → 코어에 legacy 호환 심(`cmbFamilyOf`: `_cmbPeerAccessor` 등록 페이지에 전역 패밀리 배선, P7에서 legacy와 함께 제거) ③legacy 눈금 밴드 계약 → `cmbTickFmt`에 window 폴백 ④서브패널 신규 생성 시 잔여 호버 1회 재도장 ⑤legacy 픽스처(`market_legacy_baseline.html`)+시나리오 2종 상시화 → 총 15 시나리오.
+- 하네스 잔여 공백(P7 백로그): Download PNG 픽셀·합성 검증 없음(파일명만)·핀/크로스헤어 캔버스 페인팅 미검증(상태만)·USD→Local 복귀·빈 선택·호텔 3일 미만 분기 미커버.
+
 ## P4 이후 상태 (2026-08-02)
 - **뷰어 정식 전환 3종**: chart_viewer2(현선물·수급·ETF)·chart_viewer_etf(레버리지ETF AUM, 실적 섹션 자체 차트는 P6 mixed 대상)·chart_viewer_construction(건설 13사, 평균 점선=`_cmbAux` 보조선 규격) — 셸 템플릿 `chart_template_core.html` + `chart_common.core_template()`(코어 sha 검증+센티널 치환). Chart.js CDN 4.4.1→4.5.1 고정.
 - 코어 P4 일반화: pct 분기=좌축 한정·y1 축=데이터셋 존재 기준·`_cmbPinSuppress`(드래그 팬 잔여 click 억제)·`_cmbAux`(범례·툴팁·핀 제외 보조선)·**로그축 경계=유효숫자 3자리 니스 라운딩**(min 내림·max 올림, 사용자 확정 8/2).
