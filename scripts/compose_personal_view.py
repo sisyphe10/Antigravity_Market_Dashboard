@@ -124,6 +124,9 @@ AOE_DARK_CSS = (
     '.sidebar-link,.ledger-subtab,.mm-main .subtabs .subtab{height:41px!important;font-size:18px!important}'
     'button[style*="#dc2626"]{background:' + P['amber'] + '!important;color:' + P['nav-bg'] + '!important;'
     'border:1.5px solid ' + P['amber'] + '!important;border-radius:2px!important}'
+    # Copy 버튼(#0891b2) = 앰버 다음 강조색인 시안 채움 (2026-08-02 사용자 확정)
+    'button[style*="#0891b2"]{background:' + P['hl2-fg'] + '!important;color:' + P['hl2-bg'] + '!important;'
+    'border:1.5px solid ' + P['hl2-fg'] + '!important;border-radius:2px!important}'
     'button[style*="#2563eb"]{background:transparent!important;color:' + P['amber'] + '!important;'
     'border:1.5px solid ' + P['amber'] + '!important;border-radius:2px!important}'
     'button[style*="#f3f4f6"]{background:transparent!important;color:#9aa4ae!important;'
