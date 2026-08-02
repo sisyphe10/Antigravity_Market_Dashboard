@@ -533,7 +533,7 @@ body{margin:0}
     <nav class="topnav"><div class="topnav-inner"><a href="index.html" class="topnav-brand">AGE OF EMERGENCE</a><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="watchlist/" class="topnav-tab">Watchlist</a><div class="topnav-dropdown"><a href="watchlist/" class="topnav-sub">Quotes</a><a href="universe.html" class="topnav-sub">Universe</a><a href="universe_lab.html" class="topnav-sub">Universe Lab</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab active">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub active">Data</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="sisyphe/journal.html" class="topnav-tab">Journal</a></div><div class="topnav-item"><a href="sisyphe/journal.html#weekly" class="topnav-tab">Weekly</a></div><div class="topnav-item"><a href="wiki/library" class="topnav-tab">Earnings</a></div><div class="topnav-item"><a href="wiki/" class="topnav-tab">Wiki</a></div><div class="topnav-item"><a href="sisyphe/memento.html" class="topnav-tab">Memento</a></div><div class="topnav-item"><a href="sisyphe/dashboard.html" class="topnav-tab">Ledger</a></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
     <aside class="sidebar"><a href="market.html" class="sidebar-link active">Data</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
     <header style="margin:0;padding:8px 28px 0;text-align:right;">
-        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-08-02 19:07:42 KST</div>
+        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-08-02 20:03:18 KST</div>
     </header>
 
     <div class="mkt-subtabs">
@@ -917,11 +917,20 @@ if (typeof window._h2cFreeze !== 'function') {
                     }
                 };
 
+                // 로그축 경계 니스 라운딩 (2026-08-02 사용자 지적): 경계 눈금은 축 min/max 를
+                // 그대로 라벨링하는데, 패딩 원값(예: 주가 3,472,049)이 일의자리까지 노출됐다.
+                // 경계를 유효숫자 3자리로 min=내림·max=올림 — 데이터는 항상 안쪽, 라벨=실제 축값.
+                function cmbNice3(v, up) {
+                    if (!(v > 0)) return v;
+                    var e = Math.pow(10, Math.floor(Math.log10(v)) - 2);
+                    return (up ? Math.ceil(v / e - 1e-9) : Math.floor(v / e + 1e-9)) * e;
+                }
                 function cmbLogPad(minPos, maxV) {
                     if (!(minPos > 0) || !(maxV > 0) || minPos === Infinity) return null;
                     var llo = Math.log10(minPos), lhi = Math.log10(maxV);
                     var pad = (lhi - llo) * (0.05 / 0.90) || 0.02;
-                    return { min: Math.pow(10, llo - pad), max: Math.pow(10, lhi + pad) };
+                    return { min: cmbNice3(Math.pow(10, llo - pad), false),
+                             max: cmbNice3(Math.pow(10, lhi + pad), true) };
                 }
 
 // fmtUniform — fmtUniformFix가 호출하는 기저 포맷터 (P1b 후속 이동: 전역 함수는 클로저 내부를 못 본다)
@@ -993,6 +1002,9 @@ function cmbPeerCharts(self) {
                     }
                     // 클릭 = 데이터 카드 고정(핀) — 같은 날짜 재클릭 해제, 다른 지점 클릭 이동 (2026-07-21 표준)
                     if (e.type === 'click' && chart._cmbPinHost) {
+                        // P4: 드래그 팬 직후의 잔여 click 은 핀이 아니다 — 페이지(TV식 내비)가
+                        // dragend 에 chart._cmbPinSuppress = true 를 세우면 1회 무시하고 소거
+                        if (chart._cmbPinSuppress) { chart._cmbPinSuppress = false; return; }
                         var pIdx = Math.round(chart.scales.x.getValueForPixel(e.x));
                         var pMax = chart.data.labels.length - 1;
                         if (pIdx < 0) pIdx = 0;
@@ -1090,7 +1102,7 @@ function cmbPeerCharts(self) {
                     var lines = [];
                     chart.data.datasets.forEach(function(ds, di) {
                         var meta = chart.getDatasetMeta(di);
-                        if (meta.hidden) return;
+                        if (meta.hidden || ds._cmbAux) return;
                         var v = ds.data[idx];
                         if (v === null || v === undefined) return;
                         var txt = chart._cmbTipLabel
@@ -1163,8 +1175,10 @@ function cmbPeerCharts(self) {
                                 //   메인 차트만 _cmbAxisBandRef/_cmbAxisConv 보유, 서브패널은 축 기준 폴백)
                                 var _bf = (chart._cmbAxisBandRef || {})[ds.yAxisID || 'y'] || Math.abs(val);
                                 label = fmtUniformFix(val, _bf);
-                            } else if ((chart._cmbMode || 'pct') === 'pct') {
+                            } else if ((chart._cmbMode || 'pct') === 'pct' && (ds.yAxisID || 'y') === 'y') {
                                 // pct 끝값도 밴드를 따른다 (종전: 항상 정수)
+                                // ★P4: pct 분기는 좌축(y) 한정 — 뷰어 정규화 모드는 우축(y1) 레벨
+                                //   계열(괴리율 등)을 원값으로 유지한다 (cmb 는 pct 모드에 y1 없음 → 영향 0)
                                 var _bp = (chart._cmbAxisBandRef || {})[ds.yAxisID || 'y'] || Math.abs(val);
                                 label = (val >= 0 ? '+' : '') + fmtUniformFix(val, _bp) + '%';
                             } else {
@@ -1349,7 +1363,8 @@ function cmbPeerCharts(self) {
                 //   항목에 단위를 인라인 표기(`고객예탁금(조원) +25.4%`)하려면 조원 승격 판정이 선행돼야 함.
                 var legendEl = document.getElementById(_idLegend);
                 function cmbBuildLegend() {
-                    var legendHTML = datasets.map(function(ds) {
+                    // _cmbAux(P4): 평균선 등 보조 계열 — 범례·툴팁·핀 카드에서 제외 (끝값은 _skipEndLabel)
+                    var legendHTML = datasets.filter(function(ds) { return !ds._cmbAux; }).map(function(ds) {
                         var c = ds.borderColor;
                         // 설정 기간 변화율: pct 모드는 정규화된 값이라 last 자체가 변화율,
                         // raw 모드는 (last/first - 1)*100. 첫/마지막 non-null 값으로 계산.
@@ -1369,7 +1384,7 @@ function cmbPeerCharts(self) {
                                     if (_axAssign[_ai].ax === (ds.yAxisID || 'y')) { _lu = cmbSeriesUnit[_axAssign[_ai].name] || ''; break; }
                                 }
                             }
-                            if (mode === 'pct') {
+                            if (mode === 'pct' && (ds.yAxisID || 'y') === 'y') {   // P4: pct 분기=좌축 한정
                                 pct = last - first;
                             } else if (_lu === '%' || _lu === '%p') {
                                 pct = last - first;
@@ -1501,7 +1516,9 @@ function cmbPeerCharts(self) {
                         border: { color: '#000', width: 2 }
                     }
                 };
-                if (mode === 'raw2' && datasets.some(function(ds){ return ds.yAxisID === 'y1'; })) {
+                // ★P4: y1 축은 mode 무관 'y1 데이터셋 존재'로 생성 — 뷰어는 정규화(pct) 모드에도
+                //   우축 레벨 계열을 유지한다 (cmb 는 raw2 외에 y1 배정이 없어 동작 불변)
+                if (datasets.some(function(ds){ return ds.yAxisID === 'y1'; })) {
                     scalesConfig.y1 = {
                         type: y1Type,
                         position: 'right',
@@ -1521,7 +1538,7 @@ function cmbPeerCharts(self) {
                     if (ctx.parsed.y === null || ctx.parsed.y === undefined) return ctx.dataset.label + ': -';
                     var _tax = ctx.dataset.yAxisID || 'y';
                     var _tb = _cmbAxisBandRef[_tax] || 0;   // 지역 클로저 캡처 (P3 — window 전역 폐기)
-                    if (mode === 'pct') return ctx.dataset.label + ': ' + fmtUniformFix(ctx.parsed.y, _tb) + '%';
+                    if (mode === 'pct' && _tax === 'y') return ctx.dataset.label + ': ' + fmtUniformFix(ctx.parsed.y, _tb) + '%';   // P4: pct 분기=좌축 한정
                     var _eokAx = _tax === 'y1' ? y1Eok : yEok;
                     if (_eokAx) return ctx.dataset.label + ': ' + fmtEokFull(ctx.parsed.y);
                     var _tf = _cmbAxisConv[_tax] || 1;
@@ -1581,7 +1598,7 @@ function cmbPeerCharts(self) {
                                 // animation:false — 동기 툴팁이 draw()만으로 위치 갱신되도록 (애니메이션 속성이면 제자리에 멈춤)
                                 // 글씨 +1px (12→13, 2026-07-21 사용자 확정 — 클릭 핀 카드와 동일 크기)
                                 // 카드 제목 = 원본 날짜(YYYY-MM-DD) — 축약(YY/MM)은 x축 눈금 전용 (2026-08-02 사용자 확정)
-                                tooltip: { animation: false, titleFont: { size: 13 }, bodyFont: { size: 13 }, callbacks: { title: function(cs){ return cs.length ? String(cs[0].label) : ''; }, label: tooltipLabel } }
+                                tooltip: { animation: false, titleFont: { size: 13 }, bodyFont: { size: 13 }, filter: function(c){ return !c.dataset._cmbAux; }, callbacks: { title: function(cs){ return cs.length ? String(cs[0].label) : ''; }, label: tooltipLabel } }
                             },
                             scales: scalesConfig
                         }
@@ -3448,11 +3465,20 @@ function cmbPeerCharts(self) {
                     }
                 };
 
+                // 로그축 경계 니스 라운딩 (2026-08-02 사용자 지적): 경계 눈금은 축 min/max 를
+                // 그대로 라벨링하는데, 패딩 원값(예: 주가 3,472,049)이 일의자리까지 노출됐다.
+                // 경계를 유효숫자 3자리로 min=내림·max=올림 — 데이터는 항상 안쪽, 라벨=실제 축값.
+                function cmbNice3(v, up) {
+                    if (!(v > 0)) return v;
+                    var e = Math.pow(10, Math.floor(Math.log10(v)) - 2);
+                    return (up ? Math.ceil(v / e - 1e-9) : Math.floor(v / e + 1e-9)) * e;
+                }
                 function cmbLogPad(minPos, maxV) {
                     if (!(minPos > 0) || !(maxV > 0) || minPos === Infinity) return null;
                     var llo = Math.log10(minPos), lhi = Math.log10(maxV);
                     var pad = (lhi - llo) * (0.05 / 0.90) || 0.02;
-                    return { min: Math.pow(10, llo - pad), max: Math.pow(10, lhi + pad) };
+                    return { min: cmbNice3(Math.pow(10, llo - pad), false),
+                             max: cmbNice3(Math.pow(10, lhi + pad), true) };
                 }
 
 // fmtUniform — fmtUniformFix가 호출하는 기저 포맷터 (P1b 후속 이동: 전역 함수는 클로저 내부를 못 본다)
@@ -3524,6 +3550,9 @@ function cmbPeerCharts(self) {
                     }
                     // 클릭 = 데이터 카드 고정(핀) — 같은 날짜 재클릭 해제, 다른 지점 클릭 이동 (2026-07-21 표준)
                     if (e.type === 'click' && chart._cmbPinHost) {
+                        // P4: 드래그 팬 직후의 잔여 click 은 핀이 아니다 — 페이지(TV식 내비)가
+                        // dragend 에 chart._cmbPinSuppress = true 를 세우면 1회 무시하고 소거
+                        if (chart._cmbPinSuppress) { chart._cmbPinSuppress = false; return; }
                         var pIdx = Math.round(chart.scales.x.getValueForPixel(e.x));
                         var pMax = chart.data.labels.length - 1;
                         if (pIdx < 0) pIdx = 0;
@@ -3621,7 +3650,7 @@ function cmbPeerCharts(self) {
                     var lines = [];
                     chart.data.datasets.forEach(function(ds, di) {
                         var meta = chart.getDatasetMeta(di);
-                        if (meta.hidden) return;
+                        if (meta.hidden || ds._cmbAux) return;
                         var v = ds.data[idx];
                         if (v === null || v === undefined) return;
                         var txt = chart._cmbTipLabel
@@ -3694,8 +3723,10 @@ function cmbPeerCharts(self) {
                                 //   메인 차트만 _cmbAxisBandRef/_cmbAxisConv 보유, 서브패널은 축 기준 폴백)
                                 var _bf = (chart._cmbAxisBandRef || {})[ds.yAxisID || 'y'] || Math.abs(val);
                                 label = fmtUniformFix(val, _bf);
-                            } else if ((chart._cmbMode || 'pct') === 'pct') {
+                            } else if ((chart._cmbMode || 'pct') === 'pct' && (ds.yAxisID || 'y') === 'y') {
                                 // pct 끝값도 밴드를 따른다 (종전: 항상 정수)
+                                // ★P4: pct 분기는 좌축(y) 한정 — 뷰어 정규화 모드는 우축(y1) 레벨
+                                //   계열(괴리율 등)을 원값으로 유지한다 (cmb 는 pct 모드에 y1 없음 → 영향 0)
                                 var _bp = (chart._cmbAxisBandRef || {})[ds.yAxisID || 'y'] || Math.abs(val);
                                 label = (val >= 0 ? '+' : '') + fmtUniformFix(val, _bp) + '%';
                             } else {
@@ -3880,7 +3911,8 @@ function cmbPeerCharts(self) {
                 //   항목에 단위를 인라인 표기(`고객예탁금(조원) +25.4%`)하려면 조원 승격 판정이 선행돼야 함.
                 var legendEl = document.getElementById(_idLegend);
                 function cmbBuildLegend() {
-                    var legendHTML = datasets.map(function(ds) {
+                    // _cmbAux(P4): 평균선 등 보조 계열 — 범례·툴팁·핀 카드에서 제외 (끝값은 _skipEndLabel)
+                    var legendHTML = datasets.filter(function(ds) { return !ds._cmbAux; }).map(function(ds) {
                         var c = ds.borderColor;
                         // 설정 기간 변화율: pct 모드는 정규화된 값이라 last 자체가 변화율,
                         // raw 모드는 (last/first - 1)*100. 첫/마지막 non-null 값으로 계산.
@@ -3900,7 +3932,7 @@ function cmbPeerCharts(self) {
                                     if (_axAssign[_ai].ax === (ds.yAxisID || 'y')) { _lu = cmbSeriesUnit[_axAssign[_ai].name] || ''; break; }
                                 }
                             }
-                            if (mode === 'pct') {
+                            if (mode === 'pct' && (ds.yAxisID || 'y') === 'y') {   // P4: pct 분기=좌축 한정
                                 pct = last - first;
                             } else if (_lu === '%' || _lu === '%p') {
                                 pct = last - first;
@@ -4032,7 +4064,9 @@ function cmbPeerCharts(self) {
                         border: { color: '#000', width: 2 }
                     }
                 };
-                if (mode === 'raw2' && datasets.some(function(ds){ return ds.yAxisID === 'y1'; })) {
+                // ★P4: y1 축은 mode 무관 'y1 데이터셋 존재'로 생성 — 뷰어는 정규화(pct) 모드에도
+                //   우축 레벨 계열을 유지한다 (cmb 는 raw2 외에 y1 배정이 없어 동작 불변)
+                if (datasets.some(function(ds){ return ds.yAxisID === 'y1'; })) {
                     scalesConfig.y1 = {
                         type: y1Type,
                         position: 'right',
@@ -4052,7 +4086,7 @@ function cmbPeerCharts(self) {
                     if (ctx.parsed.y === null || ctx.parsed.y === undefined) return ctx.dataset.label + ': -';
                     var _tax = ctx.dataset.yAxisID || 'y';
                     var _tb = _cmbAxisBandRef[_tax] || 0;   // 지역 클로저 캡처 (P3 — window 전역 폐기)
-                    if (mode === 'pct') return ctx.dataset.label + ': ' + fmtUniformFix(ctx.parsed.y, _tb) + '%';
+                    if (mode === 'pct' && _tax === 'y') return ctx.dataset.label + ': ' + fmtUniformFix(ctx.parsed.y, _tb) + '%';   // P4: pct 분기=좌축 한정
                     var _eokAx = _tax === 'y1' ? y1Eok : yEok;
                     if (_eokAx) return ctx.dataset.label + ': ' + fmtEokFull(ctx.parsed.y);
                     var _tf = _cmbAxisConv[_tax] || 1;
@@ -4112,7 +4146,7 @@ function cmbPeerCharts(self) {
                                 // animation:false — 동기 툴팁이 draw()만으로 위치 갱신되도록 (애니메이션 속성이면 제자리에 멈춤)
                                 // 글씨 +1px (12→13, 2026-07-21 사용자 확정 — 클릭 핀 카드와 동일 크기)
                                 // 카드 제목 = 원본 날짜(YYYY-MM-DD) — 축약(YY/MM)은 x축 눈금 전용 (2026-08-02 사용자 확정)
-                                tooltip: { animation: false, titleFont: { size: 13 }, bodyFont: { size: 13 }, callbacks: { title: function(cs){ return cs.length ? String(cs[0].label) : ''; }, label: tooltipLabel } }
+                                tooltip: { animation: false, titleFont: { size: 13 }, bodyFont: { size: 13 }, filter: function(c){ return !c.dataset._cmbAux; }, callbacks: { title: function(cs){ return cs.length ? String(cs[0].label) : ''; }, label: tooltipLabel } }
                             },
                             scales: scalesConfig
                         }
