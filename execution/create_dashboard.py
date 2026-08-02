@@ -1190,11 +1190,12 @@ def _chart_download_helper_js():
                         if (_names.indexOf(l) < 0) _names.push(l);
                     });
                 }
+                // 접두어(AoE_Data 등) 없이 시리즈명부터 시작 (2026-08-02 사용자 확정) — 없을 때만 baseName 폴백
                 var _namePart = '';
                 if (_names.length) {
                     var _shown = _names.slice(0, 3).join('·');
                     if (_names.length > 3) _shown += ' 외' + (_names.length - 3);
-                    _namePart = '_' + _shown.replace(/[\\/:*?"<>|]/g, '-');
+                    _namePart = _shown.replace(/[\\/:*?"<>|]/g, '-');
                 }
                 var _dataUrl = tmp.toDataURL('image/png');   // sync — async toBlob는 user activation 상실
                 if (opts && opts.copy) {
@@ -1213,7 +1214,7 @@ def _chart_download_helper_js():
                 } else {
                     var a = document.createElement('a');
                     a.href = _dataUrl;
-                    a.download = (baseName || 'chart') + _namePart + '_' + stamp + '.png';
+                    a.download = (_namePart || baseName || 'chart') + '_' + stamp + '.png';
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
