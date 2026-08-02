@@ -13,7 +13,7 @@ import sys
 BASE = os.path.dirname(os.path.abspath(__file__))
 CORE = os.path.join(BASE, 'dist', 'aoe_chart.js')
 MANIFEST = os.path.join(BASE, 'dist', 'aoe_chart.manifest.json')
-CORE_VERSION = '0.1.0'
+CORE_VERSION = '0.2.0'   # P2b: cmb 렌더 프레임(cmbRenderCharts) 편입
 CHARTJS_VERSION = '4.5.1'   # assets/vendor/js/chart.umd.min.js — P1은 페이지 전역 로드에 의존
 
 
