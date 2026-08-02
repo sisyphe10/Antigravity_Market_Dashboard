@@ -18,10 +18,9 @@ import sys
 import duckdb
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from chart_common import apply_common  # noqa: E402
+from chart_common import apply_common, core_template  # noqa: E402
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-TPL = os.path.join(BASE, "chart_template.html")
 DUCK = "/Users/sisyphe/datalake/market/market.duckdb"
 TOP_THEMES = 20
 TOP_SECTORS = 12
@@ -102,19 +101,33 @@ def main():
                          {"name": "기준", "items": items_b, "prefix": False}],
               "defaultOn": [it["key"] for it in items_g[:5]]}
 
-    tpl = open(TPL, encoding="utf-8").read()
-    tpl = tpl.replace("  num:  v => v.toLocaleString(),",
-                      "  num:  v => v.toLocaleString(),\n  cnt: v => v.toLocaleString() + '건',")
-    # 선 → 막대
-    tpl = tpl.replace("    type: 'line',", "    type: 'bar',", 1)
-    # 건수는 음수가 없다. pad595 가 최솟값 0에도 패딩만큼 축을 내려 -20 같은 눈금을
-    # 만들므로, 이 차트에 한해 하한을 0으로 막는다 (공용 템플릿은 손대지 않음).
-    tpl = tpl.replace(
-        "  const min = Math.floor((lo - pad) / step) * step;",
-        "  let min = Math.floor((lo - pad) / step) * step;\n"
-        "  if (lo >= 0 && min < 0) min = 0;   // 건수 축은 0 아래로 내리지 않음")
+    tpl = core_template()   # P6: AoE 코어 셸 (막대는 데이터셋 type 패스스루)
+    tpl = tpl.replace("man: '만', usd: '$', num: '' };",
+                      "man: '만', usd: '$', num: '', cnt: '건' };")
+    # 표준 라인 데이터셋 속성 → 막대 (건수 주별 막대 — 코어는 type 패스스루)
+    tpl = tpl.replace("""    datasets.push({
+      label: it.fullLabel,
+      data,
+      borderColor: it.color,
+      backgroundColor: 'transparent',
+      borderWidth: 3,
+      borderJoinStyle: 'round',
+      borderCapStyle: 'round',
+      pointRadius: 0,
+      tension: 0.4,
+      cubicInterpolationMode: 'monotone',
+      spanGaps: true,
+      yAxisID: it.axis === 'idx' ? 'y' : 'y1',
+    });""", """    datasets.push({
+      label: it.fullLabel, data, type: 'bar',
+      borderColor: it.color, backgroundColor: it.color,
+      borderWidth: 0, pointRadius: 0,
+      yAxisID: it.axis === 'idx' ? 'y' : 'y1',
+    });""")
+    # 건수 축은 0 시작 (코어 beginAtZero)
+    tpl = tpl.replace("logOn: logMode", "logOn: logMode, beginAtZero: true")
     # 주 단위 축이라 기본 기간 = 전체
-    tpl = tpl.replace("let rangeMonths = 'ytd';   // 기본 기간 = YTD (사용자 확정 2026-07-15)",
+    tpl = tpl.replace("let rangeMonths = 'ytd';   // 기본 기간 = YTD",
                       "let rangeMonths = 0;   // 기본 = 전체 (수집 시작이 2026-03)")
     tpl = tpl.replace('<button class="rng active" data-rng="ytd">YTD</button>\n'
                       '        <button class="rng" data-rng="0">전체</button>',

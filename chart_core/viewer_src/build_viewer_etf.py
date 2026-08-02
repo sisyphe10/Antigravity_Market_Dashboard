@@ -142,48 +142,36 @@ EARN = {
 EARN_SECTION = (
     '<div class="wrap" style="padding-top:0">'
     '<h1 style="margin-top:4px">삼성전자 · SK하이닉스 연도별 실적 — 매출 · 영업이익 · 순이익</h1>'
-    '<div class="chartbox" style="max-width:1080px"><canvas id="earnChart" style="height:520px"></canvas></div>'
+    # 고정높이 래퍼 + 범례는 래퍼 밖 (Chart.js responsive 리사이즈 루프 방지 — 8/2 교훈)
+    '<div class="chartbox" style="max-width:1080px">'
+    '<div style="position:relative;height:520px"><canvas id="earnChart"></canvas></div>'
+    '<div id="earnLegend" style="margin-top:10px;text-align:center"></div></div>'
     '</div>'
 )
 EARN_JS = '<script>' + '''
 (function(){
   const E = __EARN__;
-  const won = v => (v==null) ? '' : (v>=0?'':'-') + Math.abs(v).toFixed(1) + '조';
-  const dss = E.sets.map(([type,label,data,color],i)=>({
-    type, label, data, order: type==='line'?0:1,
-    borderColor: color, backgroundColor: color,
-    borderWidth: type==='line'?2.5:0, pointRadius: type==='line'?3.5:0,
-    pointBackgroundColor: color, tension:0,
-    barPercentage:0.9, categoryPercentage:0.72,
-  }));
-  const unitPlugin = { id:'earnUnit', afterDraw(ch){
-    const {ctx,chartArea:a}=ch; ctx.save();
-    ctx.font='11px Pretendard, sans-serif'; ctx.fillStyle='#888';
-    ctx.textAlign='left'; ctx.textBaseline='bottom';
-    ctx.fillText('(조원)', a.left, a.top-4); ctx.restore(); } };
-  const zeroPlugin = { id:'earnZero', afterDraw(ch){
-    const y=ch.scales.y; if(!y) return; const {ctx,chartArea:a}=ch;
-    const zy=y.getPixelForValue(0); if(zy<a.top||zy>a.bottom) return;
-    ctx.save(); ctx.strokeStyle='#111'; ctx.lineWidth=1;
-    ctx.beginPath(); ctx.moveTo(a.left,zy); ctx.lineTo(a.right,zy); ctx.stroke(); ctx.restore(); } };
-  new Chart(document.getElementById('earnChart'), {
-    data: { labels: E.years, datasets: dss },
-    plugins: [unitPlugin, zeroPlugin],
-    options: {
-      responsive:true, maintainAspectRatio:false, animation:false,
-      interaction:{ mode:'index', intersect:false },
-      scales:{
-        x:{ grid:{display:false}, ticks:{ color:'#111', font:{size:12} }, border:{color:'#000'} },
-        y:{ grid:{color:'#eee'}, ticks:{ color:'#111', font:{size:11}, callback:v=>v.toLocaleString() }, border:{color:'#000'} },
-      },
-      plugins:{
-        legend:{ position:'bottom', labels:{ color:'#111', usePointStyle:true, pointStyleWidth:14, boxHeight:8, font:{size:12.5} } },
-        tooltip:{ backgroundColor:'rgba(255,255,255,0.96)', titleColor:'#111', bodyColor:'#111',
-          borderColor:'#c8c8c8', borderWidth:1, cornerRadius:8, padding:10, animation:false,
-          titleFont:{weight:'bold',size:12.5}, bodyFont:{size:12}, boxWidth:12, boxHeight:8, usePointStyle:true,
-          callbacks:{ title:it=>it[0].label+'년', label:c=>' '+c.dataset.label+': '+won(c.parsed.y) } },
-      }
-    }
+  // 렌더 = 코어 표준 (P6) — 매출 라인+이익 막대 mixed, 0선=_cmbAux, 단위(조원)=범례 인라인
+  const unitMap = {};
+  const dss = E.sets.map(([type,label,data,color])=>{
+    unitMap[label] = '조원';
+    return { type, label, data, order: type==='line'?0:1,
+      borderColor: color, backgroundColor: type==='line' ? 'transparent' : color,
+      borderWidth: type==='line'?2.5:0, pointRadius: type==='line'?3.5:0,
+      pointBackgroundColor: color, tension: 0.4, cubicInterpolationMode: 'monotone', spanGaps: true,
+      barPercentage: 0.9, categoryPercentage: 0.72, yAxisID: 'y' };
+  });
+  dss.push({ label: '0', data: E.years.map(()=>0), borderColor: '#b8bcc2', borderWidth: 1.5,
+    borderDash: [6,4], pointRadius: 0, _cmbAux: true, _skipEndLabel: true, order: 99, yAxisID: 'y' });
+  cmbRenderCharts({
+    labels: E.years.map(String), datasets: dss, dispDatasets: [], rocDatasets: [],
+    mode: 'raw1', yEok: false, y1Eok: false,
+    axAssign: dss.filter(d=>!d._cmbAux).map(d=>({ name: d.label, ax: 'y' })),
+    unitMap,
+    charts: { main: null, disp: null, roc: null },
+    ids: { canvas: 'earnChart', legend: 'earnLegend', dispPanel: null, rocPanel: null },
+    xLabel: s => s || '',
+    logOn: false, beginAtZero: true
   });
 })();
 '''.replace('__EARN__', json.dumps(EARN, ensure_ascii=False, separators=(',',':'))) + '</script>'
