@@ -4062,60 +4062,22 @@ def create_aum_table():
         <script>
         (function() {
             var aumData = AUM_DATA_PLACEHOLDER;
-            var totalLabelPlugin = {
-                id: 'totalLabels',
-                afterDatasetsDraw: function(chart) {
-                    var ctx = chart.ctx;
-                    var datasets = chart.data.datasets;
-                    var meta0 = chart.getDatasetMeta(0);
-                    for (var i = 0; i < meta0.data.length; i++) {
-                        var total = 0;
-                        for (var d = 0; d < datasets.length; d++) {
-                            if (chart.isDatasetVisible(d)) total += datasets[d].data[i] || 0;
-                        }
-                        if (total === 0) continue;
-                        var lastMeta = null;
-                        for (var dv = datasets.length - 1; dv >= 0; dv--) {
-                            if (chart.isDatasetVisible(dv)) { lastMeta = chart.getDatasetMeta(dv); break; }
-                        }
-                        if (!lastMeta) continue;
-                        var bar = lastMeta.data[i];
-                        if (!bar) continue;
-                        ctx.save();
-                        ctx.font = 'bold 11px sans-serif';
-                        ctx.fillStyle = '#000';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'bottom';
-                        ctx.fillText(Math.round(total), bar.x, bar.y - 4);
-                        ctx.restore();
-                    }
-                }
-            };
-            var aumChart = new Chart(document.getElementById('aumStackedChart'), {
-                type: 'bar',
-                data: {
-                    labels: aumData.dates.map(function(d) { return d.slice(5); }),
-                    datasets: aumData.datasets.map(function(ds) {
-                        return { label: ds.label, data: ds.data, backgroundColor: ds.backgroundColor };
-                    })
-                },
-                plugins: [totalLabelPlugin],
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    layout: { padding: { top: 20 } },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { callbacks: {
-                            title: function(ctxs) { return ctxs.length ? aumData.dates[ctxs[0].dataIndex] : ''; },
-                            label: function(ctx) { return ctx.dataset.label + ': ' + Math.round(ctx.raw) + '억'; }
-                        } }
-                    },
-                    scales: {
-                        x: { stacked: true, ticks: { font: { size: 11 }, color: '#000' }, grid: { display: false } },
-                        y: { stacked: true, ticks: { callback: function(v) { return v + '억'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' } }
-                    }
-                }
+            // 렌더 = 코어 stackedBar 프리셋 (P6 2026-08-02) — 합계 라벨·축단위 주석·눈금·툴팁(억원 전체형) 표준
+            var _unit = {};
+            var _sets = aumData.datasets.map(function(ds) {
+                _unit[ds.label] = '억원';
+                return { label: ds.label, data: ds.data, backgroundColor: ds.backgroundColor, type: 'bar' };
             });
+            var aumChart = cmbRenderCharts({
+                labels: aumData.dates, datasets: _sets, dispDatasets: [], rocDatasets: [],
+                preset: 'stackedBar', mode: 'raw1', yEok: true, y1Eok: false,
+                axAssign: _sets.map(function(ds) { return { name: ds.label, ax: 'y' }; }),
+                unitMap: _unit,
+                charts: { main: null, disp: null, roc: null },
+                ids: { canvas: 'aumStackedChart', legend: null, dispPanel: null, rocPanel: null },
+                xLabel: function(d) { return d ? d.slice(5) : ''; },
+                logOn: false, beginAtZero: true
+            }).main;
             function findAumIdx(chart, lbl) {
                 for (var i = 0; i < chart.data.datasets.length; i++) { if (chart.data.datasets[i].label === lbl) return i; }
                 return -1;
@@ -4155,6 +4117,8 @@ def create_aum_table():
                 </div>
             </div>
         </div>
+        <script>window.Chart || document.write('<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"><\\/script>');</script>
+        {_chart_download_helper_js()}
         {aum_js}"""
     except Exception as e:
         print(f"Error creating AUM table: {e}")
@@ -4430,58 +4394,22 @@ def create_cumulative_aum_chart():
         <script>
         (function() {
             var cData = __CUMULATIVE_DATA__;
-            var totalPlugin = {
-                id: 'cumulativeTotals',
-                afterDatasetsDraw: function(chart) {
-                    var ctx = chart.ctx;
-                    var ds = chart.data.datasets;
-                    var meta0 = chart.getDatasetMeta(0);
-                    for (var i = 0; i < meta0.data.length; i++) {
-                        var total = 0;
-                        for (var d = 0; d < ds.length; d++) { if (chart.isDatasetVisible(d)) total += ds[d].data[i] || 0; }
-                        if (total === 0) continue;
-                        var lastMeta = null;
-                        for (var dv = ds.length - 1; dv >= 0; dv--) {
-                            if (chart.isDatasetVisible(dv)) { lastMeta = chart.getDatasetMeta(dv); break; }
-                        }
-                        if (!lastMeta) continue;
-                        var bar = lastMeta.data[i];
-                        if (!bar) continue;
-                        ctx.save();
-                        ctx.font = 'bold 11px sans-serif';
-                        ctx.fillStyle = '#000';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'bottom';
-                        ctx.fillText(Math.round(total), bar.x, bar.y - 4);
-                        ctx.restore();
-                    }
-                }
-            };
-            var cumChart = new Chart(document.getElementById('cumulativeAumChart'), {
-                type: 'bar',
-                data: {
-                    labels: cData.dates.map(function(d) { return d.slice(5); }),
-                    datasets: cData.datasets.map(function(ds) {
-                        return { label: ds.label, data: ds.data, backgroundColor: ds.backgroundColor };
-                    })
-                },
-                plugins: [totalPlugin],
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    layout: { padding: { top: 20 } },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { callbacks: {
-                            title: function(ctxs) { return ctxs.length ? cData.dates[ctxs[0].dataIndex] : ''; },
-                            label: function(ctx) { return ctx.dataset.label + ': ' + Math.round(ctx.raw) + '억'; }
-                        } }
-                    },
-                    scales: {
-                        x: { stacked: true, ticks: { font: { size: 11 }, color: '#000' }, grid: { display: false } },
-                        y: { stacked: true, ticks: { callback: function(v) { return v + '억'; }, font: { size: 11 }, color: '#000' }, grid: { color: '#eee' } }
-                    }
-                }
+            // 렌더 = 코어 stackedBar 프리셋 (P6) — AUM 섹션과 동일 규격
+            var _unit = {};
+            var _sets = cData.datasets.map(function(ds) {
+                _unit[ds.label] = '억원';
+                return { label: ds.label, data: ds.data, backgroundColor: ds.backgroundColor, type: 'bar' };
             });
+            var cumChart = cmbRenderCharts({
+                labels: cData.dates, datasets: _sets, dispDatasets: [], rocDatasets: [],
+                preset: 'stackedBar', mode: 'raw1', yEok: true, y1Eok: false,
+                axAssign: _sets.map(function(ds) { return { name: ds.label, ax: 'y' }; }),
+                unitMap: _unit,
+                charts: { main: null, disp: null, roc: null },
+                ids: { canvas: 'cumulativeAumChart', legend: null, dispPanel: null, rocPanel: null },
+                xLabel: function(d) { return d ? d.slice(5) : ''; },
+                logOn: false, beginAtZero: true
+            }).main;
             function findCumIdx(chart, lbl) {
                 for (var i = 0; i < chart.data.datasets.length; i++) { if (chart.data.datasets[i].label === lbl) return i; }
                 return -1;
@@ -4521,6 +4449,8 @@ def create_cumulative_aum_chart():
                 </div>
             </div>
         </div>
+        <script>window.Chart || document.write('<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"><\\/script>');</script>
+        {_chart_download_helper_js()}
         {chart_js}"""
     except Exception as e:
         print(f"Error creating cumulative AUM chart: {e}")

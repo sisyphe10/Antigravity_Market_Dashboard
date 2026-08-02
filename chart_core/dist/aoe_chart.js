@@ -680,6 +680,39 @@ function cmbFamilyOf(chart) {
                                 }
                             };
 
+            // 스택 막대 합계 라벨 (P6 이동 — 구 wrap AUM totalLabelPlugin 2벌 → 코어 1벌).
+            // 보이는 스택의 꼭대기 막대 위에 합계 숫자를 그린다.
+            var cmbStackTotalPlugin = {
+                id: 'cmbStackTotals',
+                afterDatasetsDraw: function(chart) {
+                    var ctx = chart.ctx;
+                    var datasets = chart.data.datasets;
+                    var meta0 = chart.getDatasetMeta(0);
+                    if (!meta0 || !meta0.data) return;
+                    for (var i = 0; i < meta0.data.length; i++) {
+                        var total = 0;
+                        for (var d = 0; d < datasets.length; d++) {
+                            if (chart.isDatasetVisible(d)) total += datasets[d].data[i] || 0;
+                        }
+                        if (total === 0) continue;
+                        var lastMeta = null;
+                        for (var dv = datasets.length - 1; dv >= 0; dv--) {
+                            if (chart.isDatasetVisible(dv)) { lastMeta = chart.getDatasetMeta(dv); break; }
+                        }
+                        if (!lastMeta) continue;
+                        var bar = lastMeta.data[i];
+                        if (!bar) continue;
+                        ctx.save();
+                        ctx.font = 'bold 11px sans-serif';
+                        ctx.fillStyle = '#000';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'bottom';
+                        ctx.fillText(Math.round(total), bar.x, bar.y - 4);
+                        ctx.restore();
+                    }
+                }
+            };
+
             function cmbRenderCharts(view) {
                 var commonDates = view.labels;
                 var datasets = view.datasets;
@@ -697,7 +730,8 @@ function cmbFamilyOf(chart) {
                 //   xLabel: x축 눈금 포맷터 / logOn: Log 상태 / legendSuffix: 범례 끝 접미(예: '/ USD')
                 var ids = view.ids || {};
                 var _idCanvas = ids.canvas || 'cmbDynamicChart';
-                var _idLegend = ids.legend || 'cmbChartLegend';
+                // legend: null 을 명시하면 범례 없음 (P6 — 같은 페이지의 남의 범례를 만지지 않기)
+                var _idLegend = ids.hasOwnProperty('legend') ? ids.legend : 'cmbChartLegend';
                 var _idDispPanel = ids.hasOwnProperty('dispPanel') ? ids.dispPanel : 'cmbDispPanel';
                 var _idDispCanvas = ids.dispCanvas || 'cmbDispChart';
                 var _idRocPanel = ids.hasOwnProperty('rocPanel') ? ids.rocPanel : 'cmbRocPanel';
@@ -707,7 +741,7 @@ function cmbFamilyOf(chart) {
 
                 // ※범례 생성은 축 단위(yJo/y1Jo, _cmbAxisUnits) 계산 뒤로 이동 (2026-08-02) —
                 //   항목에 단위를 인라인 표기(`고객예탁금(조원) +25.4%`)하려면 조원 승격 판정이 선행돼야 함.
-                var legendEl = document.getElementById(_idLegend);
+                var legendEl = _idLegend ? document.getElementById(_idLegend) : null;
                 function cmbBuildLegend() {
                     // _cmbAux(P4): 평균선 등 보조 계열 — 범례·툴팁·핀 카드에서 제외 (끝값은 _skipEndLabel)
                     var legendHTML = datasets.filter(function(ds) { return !ds._cmbAux; }).map(function(ds) {
@@ -854,6 +888,12 @@ function cmbFamilyOf(chart) {
 
                 // 음수·0 포함 시리즈(괴리율 등)는 Log 자동 무시 — 로그축에 음수가 들어가면
                 // 선·끝값 라벨이 축 하단으로 뭉개진다 (2026-08-02 실사고: 삼성전자 현선물 괴리율 -5.33).
+                // P6 프리셋: 'line'(기본) | 'stackedBar'(스택 막대 — 합계 라벨·축단위 주석·끝값 없음)
+                //           | 'mini'(소형 — 11px 눈금·크로스헤어만·끝값 없음)
+                var _preset = view.preset || 'line';
+                var _fs = (_preset === 'mini') ? 11 : 15;
+                var _stk = (_preset === 'stackedBar') ? true : undefined;
+                var _xMaxT = (_preset === 'stackedBar') ? 100 : 6;
                 var yType = (mode === 'pct' || _yHasNonPos) ? 'linear' : (_logOn === false ? 'linear' : 'logarithmic');
                 var yLogPad = yType === 'logarithmic' ? cmbLogPad(_yMinPos, _yMaxAbs) : null;
                 var y1Type = (_logOn === false || _y1HasNonPos) ? 'linear' : 'logarithmic';
@@ -861,15 +901,17 @@ function cmbFamilyOf(chart) {
                 var y2Type = (_logOn === false || _y2HasNonPos) ? 'linear' : 'logarithmic';
                 var y2LogPad = y2Type === 'logarithmic' ? cmbLogPad(_y2MinPos, _y2MaxAbs) : null;
                 var scalesConfig = {
-                    x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ return _xLabel(this.getLabelForValue(val)); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
+                    x: { type: 'category', display: datasets.length > 0, stacked: _stk, ticks: { maxTicksLimit: _xMaxT, callback: function(val){ return _xLabel(this.getLabelForValue(val)); }, maxRotation: 0, font: { size: _fs }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
                     y: {
                         type: yType,
                         position: 'left',
+                        stacked: _stk,
+                        beginAtZero: view.beginAtZero || undefined,
                         grace: '8%',
                         min: yLogPad ? yLogPad.min : undefined,
                         max: yLogPad ? yLogPad.max : undefined,
                         afterBuildTicks: cmbEnsureBoundTicks,
-                        ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return mode === 'pct' ? v + '%' : cmbTickFmt(v, this, yEok && yJo); }, font: { size: 15 }, color: '#000' },
+                        ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return mode === 'pct' ? v + '%' : cmbTickFmt(v, this, yEok && yJo); }, font: { size: _fs }, color: '#000' },
                         grid: { color: '#eee' },
                         border: { color: '#000', width: 2 }
                     }
@@ -883,7 +925,7 @@ function cmbFamilyOf(chart) {
                         min: y2LogPad ? y2LogPad.min : undefined,
                         max: y2LogPad ? y2LogPad.max : undefined,
                         afterBuildTicks: cmbEnsureBoundTicks,
-                        ticks: { maxTicksLimit: 6, autoSkip: false, callback: function(v){ return cmbTickFmt(v, this, y2Eok && y2Jo); }, font: { size: 15 }, color: '#000' },
+                        ticks: { maxTicksLimit: 6, autoSkip: false, callback: function(v){ return cmbTickFmt(v, this, y2Eok && y2Jo); }, font: { size: _fs }, color: '#000' },
                         grid: { drawOnChartArea: false },
                         border: { color: '#000', width: 2 }
                     };
@@ -898,7 +940,7 @@ function cmbFamilyOf(chart) {
                         min: y1LogPad ? y1LogPad.min : undefined,
                         max: y1LogPad ? y1LogPad.max : undefined,
                         afterBuildTicks: cmbEnsureBoundTicks,
-                        ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return cmbTickFmt(v, this, y1Eok && y1Jo); }, font: { size: 15 }, color: '#000' },
+                        ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return cmbTickFmt(v, this, y1Eok && y1Jo); }, font: { size: _fs }, color: '#000' },
                         grid: { drawOnChartArea: false },
                         border: { color: '#000', width: 2 }
                     };
@@ -934,11 +976,17 @@ function cmbFamilyOf(chart) {
                     if (_w > _maxLabelW) _maxLabelW = _w;
                 });
                 var _rightPad = Math.max(60, Math.ceil(_maxLabelW) + 12);
+                // 프리셋별 프레임: 끝값 라벨이 없는 프리셋은 우측 패딩 최소화, 상단은 합계/단위 주석 자리
+                var _mainPlugins = (_preset === 'stackedBar') ? [cmbStackTotalPlugin, cmbAxisUnitPlugin]
+                    : ((_preset === 'mini') ? [cmbCrosshairPlugin, cmbAxisUnitPlugin]
+                    : [cmbEndLabelPlugin, cmbCrosshairPlugin, cmbPinPlugin]);
+                var _padTop = (_preset === 'stackedBar') ? 24 : ((_preset === 'mini') ? 20 : 6);
+                if (_preset !== 'line') _rightPad = 8;
 
                 if (cmbChart) {
                     // 재사용: 인스턴스 유지하고 데이터/축/툴팁만 교체 (destroy+new 멈칫 제거)
                     cmbChart.options.layout.padding.right = _rightPad;
-                    cmbChart.options.layout.padding.top = 6;
+                    cmbChart.options.layout.padding.top = _padTop;
                     cmbChart.data.labels = commonDates;
                     cmbChart.data.datasets = datasets;
                     // scales 전체 교체 — 이전 raw2의 y1축 잔재 제거 후 새 구성 적용
@@ -953,17 +1001,17 @@ function cmbFamilyOf(chart) {
                     cmbChart._cmbAxisBandRef = _cmbAxisBandRef;
                     cmbChart._cmbAxisConv = _cmbAxisConv;
                     cmbChart._cmbAxisUnits = _cmbAxisUnits;
-                    cmbChart._cmbPinHost = true;
+                    cmbChart._cmbPinHost = (_preset === 'line');   // 핀 카드는 기본 프리셋만
                     cmbChart.update('none');
                 } else {
                     cmbChart = new Chart(document.getElementById(_idCanvas), {
                         type: 'line',
                         data: { labels: commonDates, datasets: datasets },
-                        plugins: [cmbEndLabelPlugin, cmbCrosshairPlugin, cmbPinPlugin],
+                        plugins: _mainPlugins,
                         options: {
                             responsive: true, maintainAspectRatio: false,
                             devicePixelRatio: 2 * (window.devicePixelRatio || 1),
-                            layout: { padding: { right: _rightPad, top: 6 } },
+                            layout: { padding: { right: _rightPad, top: _padTop } },
                             interaction: { mode: 'index', intersect: false },
                             plugins: {
                                 legend: { display: false },
@@ -981,7 +1029,7 @@ function cmbFamilyOf(chart) {
                     cmbChart._cmbAxisBandRef = _cmbAxisBandRef;
                     cmbChart._cmbAxisConv = _cmbAxisConv;
                     cmbChart._cmbAxisUnits = _cmbAxisUnits;
-                    cmbChart._cmbPinHost = true;
+                    cmbChart._cmbPinHost = (_preset === 'line');   // 핀 카드는 기본 프리셋만
                     cmbChart.update('none');
                 }
 
