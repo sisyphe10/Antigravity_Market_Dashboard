@@ -1,8 +1,8 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 147 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 148 components._
 
-Updated: 2026-07-31
+Updated: 2026-08-02
 
 ## By domain
 
@@ -131,8 +131,9 @@ Updated: 2026-07-31
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — Bot
 - [투자일지 시장데이터 (fetch_journal_data.py)](src-journal-data.md) — Source
 
-### 운영 · 인프라 (36)
+### 운영 · 인프라 (37)
 - [AoE 스타일 정본 (nav_style.py)](src-nav-style.md) — Source
+- [AoE 차트 코어 (chart_core/aoe_chart.js)](src-chart-core.md) — Source
 - [architecture.html (아키텍처)](page-architecture.md) — Page
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — Infra
 - [Claude Code Action (@claude 이벤트)](gha-claude-code.md) — GHA
@@ -276,8 +277,9 @@ Updated: 2026-07-31
 - [외부 데이터 API/소스 집합](ext-data-apis.md) — active
 - [한국 수출 매출 추정 대시보드](ext-export-dashboard.md) — planned
 
-### Source (45)
+### Source (46)
 - [AoE 스타일 정본 (nav_style.py)](src-nav-style.md) — import 시 (상시), active
+- [AoE 차트 코어 (chart_core/aoe_chart.js)](src-chart-core.md) — 빌드타임 인라인 임베드 (상시), active
 - [DART 공시 (fetch_disclosures.py)](src-dart-disclosures.md) — 16:30 (gha-daily-disclosures), active
 - [ECOS 한국 매크로 33종 (fetch_ecos_data.py)](src-ecos.md) — 17:40 평일 (gha-daily-ecos), active
 - [ETF 구성종목 수집 (collect_etf_daily.py)](src-etf-collect.md) — 16:30 / 18:00 (etf-collect 타이머, paused 2026-07-29), frozen
@@ -342,7 +344,7 @@ Updated: 2026-07-31
 
 ## By project
 
-### antigravity (147)
+### antigravity (148)
 - [/aum — WRAP 일일 AUM 입력](cmd-aum.md) — Skill
 - [/긴급코멘트 — 급락일 시장 코멘트](cmd-urgent-comment.md) — Skill
 - [/목표전환형 — 랩 생성·청산 일괄](cmd-target-transform.md) — Skill
@@ -351,6 +353,7 @@ Updated: 2026-07-31
 - [/운용보고서 — 월간 운용보고서 4종](cmd-operating-report.md) — Skill
 - [/주간보고 — 금요일 WRAP 주간 보고](cmd-weekly-report.md) — Skill
 - [AoE 스타일 정본 (nav_style.py)](src-nav-style.md) — Source
+- [AoE 차트 코어 (chart_core/aoe_chart.js)](src-chart-core.md) — Source
 - [architecture.html (아키텍처)](page-architecture.md) — Page
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — Infra
 - [Claude Code Action (@claude 이벤트)](gha-claude-code.md) — GHA

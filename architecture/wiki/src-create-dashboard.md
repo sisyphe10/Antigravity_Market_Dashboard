@@ -29,6 +29,7 @@ writes:
 depends_on:
   - "src-calculate-returns"
   - "src-create-portfolio-tables"
+  - "src-chart-core"
 alerts: ""
 ---
 
@@ -41,6 +42,7 @@ alerts: ""
 - 생성: index/market/wrap/universe/universe_lab/seibro/featured/hotels/etf 페이지(등록표 PAGES 기반).
 - 거의 모든 GHA/VM 잡의 마지막 스텝으로 호출됨 → 데이터가 바뀌면 여기서 화면에 반영.
 - 상단 네비·다크/WRAP 팔레트·Pretendard·캡처 JS는 execution/nav_style.py 정본에서 import (2026-07-26 통일 — 수동 미러링 폐지).
+- 차트 렌더 JS는 [[src-chart-core]] `chart_core/dist/aoe_chart.js` 를 빌드타임 인라인 임베드 (2026-08-02, `_load_aoe_core_js()` — 모듈 로드 시 sha 검증, 부재/불일치는 기동 치명 실패). `AOE_CHART_LEGACY=1` 이면 동결 렌더러(execution/legacy_chart_renderers.py)로 롤백.
 - 수정 시 전체 페이지 재생성 후 일관성 확인.
 
 ## Reads
@@ -65,6 +67,7 @@ alerts: ""
 ## Depends on
 - [[src-calculate-returns]] — 수익률 계산 (calculate_returns.py)
 - [[src-create-portfolio-tables]] — 포트폴리오 표 생성 (create_portfolio_tables.py)
+- [[src-chart-core]] — AoE 차트 코어 (chart_core/aoe_chart.js)
 
 ## Code
 - `execution/create_dashboard.py`
