@@ -36,9 +36,17 @@
 ## 알려진 기준선 결함 (전환 시 해소 — "의도된 차이" 허용 목록 후보)
 1. wrap Chart.js 미고정 CDN (→ 코어 번들)
 2. RoC² 패널 `(%p)` 상단 주석 잔존 (메인 차트는 범례 인라인으로 이행 완료)
-3. endLabel·crosshair 플러그인 사본 2벌(idx/cmb) — 미세 동작 차이 가능. **cmb 쪽은 P2a·P2b에서 코어 단일화 완료, idx 사본 잔존(P3 대상)**
+3. ~~endLabel·crosshair 플러그인 사본 2벌(idx/cmb) — 미세 동작 차이 가능.~~ **해소 (P2a·P2b cmb / P3 idx — 2026-08-02). 잔존 사본은 wrap 1벌뿐(P5 대상)**
 4. 뷰어 소스가 맥미니 단독(미추적)이었음 → 8/2 `chart_core/viewer_src/` 스냅샷 편입(승인). **P4까지 맥미니가 실행 정본, repo 사본은 기록용** — 이중 수정 금지, 뷰어 수정 시 맥미니 먼저→스냅샷 갱신.
 5. ~~cmb 원값 모드에서 %단위 시리즈의 범례 기간 변화율이 나눗셈 %로 계산됨 — 괴리율 0.045→-5.33이 `-1,699%`로 표기(golden `data_basis_neg_linear` 참조). 2026-07-19 확정 규격(%·%p 시리즈=레벨 차이 %p)은 pct 모드에만 적용돼 있음 → P2에서 규격 정합.~~ **해소 (2026-08-02 P2b, dc11309e — raw 모드도 레벨 차이 %p, MA 파생선은 같은 축 주 시리즈 단위 상속)**
+
+## P3 이후 상태 (2026-08-02)
+- **코어 다중 인스턴스화**: 크로스헤어·핀·피어(`chart._cmbFamily`)와 축 밴드·환산·단위(`chart._cmbAxisBandRef` 등)를 window 전역에서 차트 인스턴스로 이전 — 한 페이지에 여러 표준 라인 패밀리(cmb+idx)가 공존해도 상태가 새지 않는다. `window._cmbPeerAccessor` 폐기(코어가 패밀리 자체 배선). DATA 회귀 = 하네스 diff 0 검증.
+- `cmbRenderCharts(view)` 파라미터 추가: `ids`(캔버스·범례·패널 id, 패널 null=건너뜀)·`xLabel`·`logOn`·`legendSuffix` — 기본값은 전부 cmb.
+- **INDICES(idx) 전환 완료**: 페이지는 데이터 준비(정규화·USD 모드)만, 렌더=코어 `mode:'pct'`. idx 전용 crosshair/endLabel/포맷터/범례 사본 삭제. 표준 획득: 끝값 공통열+리더선·핀 카드·범례 기간 변화율·`/ USD` 접미. 하네스 `idx_default`·`idx_usd`(+패밀리 격리 검증).
+- **hotels ADR 전환 완료**: 표준 라인(raw1)+코어 임베드+Copy/Download+표준 범례(`/ 천원` 접미)·Log 축. 하네스 `hotel_adr`+fixture `hotels_baseline.html`.
+- **기능표 정정(실사)**: #11 `topChart`는 featured가 아니라 **seibro의 가로 바 차트**(비시간축 랭킹) — 코어 모델 밖이라 **제외**(featured 페이지에는 차트 없음). #6 L5115 미분류 = `_build_target_transform_chart_section`(NH 목표전환형 1호) — **호출부 없는 데드 코드**, 이관 불요(정리는 P7).
+- ※P3 롤백 = git revert (legacy 플래그는 DATA 전환 전용 동결본 — idx/hotels 구 렌더러는 미포함).
 
 ## P2b 이후 상태 (2026-08-02)
 - cmb(DATA) 렌더 프레임 전체가 코어 `cmbRenderCharts(view)` 로 이관 — DATA 클로저에는 데이터·도메인 계산(MA·이격도·RoC²)·사이드바·RoC 진단 UI만 잔류, `new Chart(` 0건.

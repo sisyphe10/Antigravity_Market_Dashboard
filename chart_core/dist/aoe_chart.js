@@ -172,8 +172,12 @@
             function cmbTickFmt(v, ax, jo) {
                 var f = jo ? 10000 : 1;
                 var m;
-                if (ax.chart && ax.chart.canvas && ax.chart.canvas.id === 'cmbDynamicChart' && window._cmbAxisBandRef)
-                    m = (window._cmbAxisBandRef[ax.id] || Math.abs(ax.max || 0)) / f;
+                // ★밴드 기준 = 차트 인스턴스 _cmbAxisBandRef (cmbRenderCharts 가 메인 차트에만 부착).
+                //   P3 다중 패밀리 공존을 위해 window 전역·canvas id 판별 제거 — 서브패널은
+                //   인스턴스에 밴드가 없으므로 종전대로 축 최대값 기준(else)으로 간다.
+                var _bandRef = ax.chart && ax.chart._cmbAxisBandRef;
+                if (_bandRef)
+                    m = (_bandRef[ax.id] || Math.abs(ax.max || 0)) / f;
                 else
                     m = Math.max(Math.abs(ax.min || 0), Math.abs(ax.max || 0)) / f;
                 var _vv = v / f;
@@ -229,9 +233,9 @@
                 var cmbAxisUnitPlugin = {
                     id: 'cmbAxisUnit',
                     afterDraw: function(chart) {
-                        // 차트별 지정(chart._cmbAxisUnits) 우선 — 서브패널은 단위가 고정이라
-                        // 전역 _cmbAxisUnits(메인 차트용)를 그대로 쓰면 오표기가 된다.
-                        var u = chart._cmbAxisUnits || window._cmbAxisUnits;
+                        // 차트별 지정(chart._cmbAxisUnits)만 사용 — P3에서 window 전역 폐기
+                        // (서브패널은 단위가 고정이라 cmbRenderCharts 가 생성 시 직접 지정한다)
+                        var u = chart._cmbAxisUnits;
                         if (!u) return;
                         var ctx = chart.ctx, ty = chart.chartArea.top - (chart._cmbAxisUnitDy || 20);   // 최상단 눈금 라벨과 겹침 방지
                         ctx.save();
@@ -261,21 +265,18 @@
             }
 
 // ── cmb(DATA) 크로스헤어·클릭핀·툴팁 동기 (P2a 이동 2026-08-02) ──
-// 피어 차트 접근자 — 페이지(클로저)가 등록: window._cmbPeerAccessor = () => [main, disp, roc]
-// (P2a: 크로스헤어·핀 상태의 코어 이관. 차트 인스턴스 변수는 페이지 클로저 소유라 접근자로만 노출)
-window._cmbPeerAccessor = window._cmbPeerAccessor || null;
+// ★P3 다중 패밀리(2026-08-02): 호버·핀 상태와 피어 목록은 전역이 아니라 '패밀리'
+//   (cmbRenderCharts 1회 호출로 묶인 메인+서브패널) 단위 — 한 페이지에 cmb·idx 등
+//   여러 표준 라인 차트가 공존해도 상태가 서로 새지 않도록 chart._cmbFamily 에 배선.
+//   family = { hover: {idx,yPx,activeId}, pin: {date}, peers: [charts...] }
+//   (P2a 의 window._cmbPeerAccessor 전역 접근자는 폐기 — 패밀리가 자기 피어를 직접 안다.)
 function cmbPeerCharts(self) {
-    var list = window._cmbPeerAccessor ? window._cmbPeerAccessor() : [];
-    return list.filter(function(c) {
+    var fam = self && self._cmbFamily;
+    if (!fam) return [];
+    return fam.peers.filter(function(c) {
         return c && c !== self && c.canvas;
     });
 }
-            // 십자선(crosshair) — 세로선은 메인+이격도 패널 동기(같은 날짜 index),
-            // 가로선은 커서가 올라가 있는 차트에만. 두 차트가 같은 labels 배열을 공유해 x 정렬 보장.
-            var cmbHoverState = { idx: null, yPx: null, activeId: null };
-
-            // 클릭 핀 상태 — 날짜 문자열로 저장 (기간/시리즈 변경 후에도 같은 날짜가 남아 있으면 유지)
-            var cmbPin = { date: null };
 
             function cmbSyncTooltip(other, idx) {
                 if (!other || !other.tooltip) return;
@@ -302,6 +303,9 @@ function cmbPeerCharts(self) {
                     var e = args.event;
                     var area = chart.chartArea;
                     if (!area) return;
+                    var _fam = chart._cmbFamily;
+                    if (!_fam) return;   // 패밀리 배선 전(생성 직후 첫 draw) — 상태 없음
+                    var cmbHoverState = _fam.hover, cmbPin = _fam.pin;
                     var _peers = cmbPeerCharts(chart);
                     var inside = e.x !== null && e.y !== null &&
                         e.x >= area.left && e.x <= area.right && e.y >= area.top && e.y <= area.bottom;
@@ -318,7 +322,7 @@ function cmbPeerCharts(self) {
                         return;
                     }
                     // 클릭 = 데이터 카드 고정(핀) — 같은 날짜 재클릭 해제, 다른 지점 클릭 이동 (2026-07-21 표준)
-                    if (e.type === 'click' && chart.canvas.id === 'cmbDynamicChart') {
+                    if (e.type === 'click' && chart._cmbPinHost) {
                         var pIdx = Math.round(chart.scales.x.getValueForPixel(e.x));
                         var pMax = chart.data.labels.length - 1;
                         if (pIdx < 0) pIdx = 0;
@@ -361,6 +365,9 @@ function cmbPeerCharts(self) {
                     });
                 },
                 afterDraw: function(chart) {
+                    var _fam = chart._cmbFamily;
+                    if (!_fam) return;
+                    var cmbHoverState = _fam.hover;
                     if (cmbHoverState.idx === null) return;
                     var area = chart.chartArea;
                     var xs = chart.scales.x;
@@ -392,7 +399,9 @@ function cmbPeerCharts(self) {
             var cmbPinPlugin = {
                 id: 'cmbPinCard',
                 afterDraw: function(chart) {
-                    if (chart.canvas.id !== 'cmbDynamicChart' || cmbPin.date === null) return;
+                    if (!chart._cmbPinHost || !chart._cmbFamily) return;
+                    var cmbPin = chart._cmbFamily.pin;
+                    if (cmbPin.date === null) return;
                     var idx = chart.data.labels.indexOf(cmbPin.date);
                     if (idx < 0) return;   // 창 밖으로 나가면 표시만 생략 (상태는 유지)
                     var area = chart.chartArea, xs = chart.scales.x, ctx = chart.ctx;
@@ -480,20 +489,21 @@ function cmbPeerCharts(self) {
                             var label;
                             if (ds._isForeign) {
                                 // 값에 단위 금지 — % 는 하단 범례 우측 단위 표기가 담당 (2026-08-02 이전)
-                                var _bf = (window._cmbAxisBandRef || {})[ds.yAxisID || 'y'] || Math.abs(val);
+                                // ★밴드·환산은 차트 인스턴스에서 읽는다 (P3 다중 패밀리 — window 전역 폐기.
+                                //   메인 차트만 _cmbAxisBandRef/_cmbAxisConv 보유, 서브패널은 축 기준 폴백)
+                                var _bf = (chart._cmbAxisBandRef || {})[ds.yAxisID || 'y'] || Math.abs(val);
                                 label = fmtUniformFix(val, _bf);
                             } else if ((chart._cmbMode || 'pct') === 'pct') {
                                 // pct 끝값도 밴드를 따른다 (종전: 항상 정수)
-                                var _bp = (window._cmbAxisBandRef || {})[ds.yAxisID || 'y'] || Math.abs(val);
+                                var _bp = (chart._cmbAxisBandRef || {})[ds.yAxisID || 'y'] || Math.abs(val);
                                 label = (val >= 0 ? '+' : '') + fmtUniformFix(val, _bp) + '%';
                             } else {
                                 // 끝값 라벨: 정수부 4자리(>=1000)부터 소수 제외, 그 외 최대 2자리 (2026-07-16 사용자 확정)
                                 // 끝값 = 숫자만 (억원 시리즈는 축 단위(조/억)로 환산 — 단위는 하단 범례 우측 표기가 담당)
-                                var _f2 = (chart.canvas.id === 'cmbDynamicChart')
-                                    ? ((window._cmbAxisConv || {})[ds.yAxisID || 'y'] || 1) : 1;
+                                var _f2 = (chart._cmbAxisConv || {})[ds.yAxisID || 'y'] || 1;
                                 var _ax = chart.scales[ds.yAxisID || 'y'] || chart.scales.y;
-                                var _m2 = ((chart.canvas.id === 'cmbDynamicChart' && window._cmbAxisBandRef)
-                                    ? (window._cmbAxisBandRef[ds.yAxisID || 'y'] || 0)
+                                var _m2 = (chart._cmbAxisBandRef
+                                    ? (chart._cmbAxisBandRef[ds.yAxisID || 'y'] || 0)
                                     : Math.max(Math.abs(_ax.min || 0), Math.abs(_ax.max || 0))) / _f2;
                                 label = fmtUniformFix(val / _f2, _m2);
                             }
@@ -651,10 +661,23 @@ function cmbPeerCharts(self) {
                 var _axAssign = view.axAssign;
                 var cmbSeriesUnit = view.unitMap;
                 var cmbChart = view.charts.main, cmbDispChart = view.charts.disp, cmbRocChart = view.charts.roc;
+                // ★P3 파라미터 (기본값 = cmb/DATA — 전부 생략하면 종전과 동일):
+                //   ids: 캔버스·범례·서브패널 DOM id. 패널 id 에 null 을 주면 그 패널 프레임은 건너뜀
+                //        (한 페이지에 두 패밀리가 공존할 때 남의 패널을 만지지 않기 위한 가드).
+                //   xLabel: x축 눈금 포맷터 / logOn: Log 상태 / legendSuffix: 범례 끝 접미(예: '/ USD')
+                var ids = view.ids || {};
+                var _idCanvas = ids.canvas || 'cmbDynamicChart';
+                var _idLegend = ids.legend || 'cmbChartLegend';
+                var _idDispPanel = ids.hasOwnProperty('dispPanel') ? ids.dispPanel : 'cmbDispPanel';
+                var _idDispCanvas = ids.dispCanvas || 'cmbDispChart';
+                var _idRocPanel = ids.hasOwnProperty('rocPanel') ? ids.rocPanel : 'cmbRocPanel';
+                var _idRocCanvas = ids.rocCanvas || 'cmbRocChart';
+                var _xLabel = view.xLabel || window.cmbXLabel;
+                var _logOn = (view.logOn !== undefined) ? view.logOn : window.cmbLogOn;
 
                 // ※범례 생성은 축 단위(yJo/y1Jo, _cmbAxisUnits) 계산 뒤로 이동 (2026-08-02) —
                 //   항목에 단위를 인라인 표기(`고객예탁금(조원) +25.4%`)하려면 조원 승격 판정이 선행돼야 함.
-                var legendEl = document.getElementById('cmbChartLegend');
+                var legendEl = document.getElementById(_idLegend);
                 function cmbBuildLegend() {
                     var legendHTML = datasets.map(function(ds) {
                         var c = ds.borderColor;
@@ -711,6 +734,11 @@ function cmbPeerCharts(self) {
                             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + ds.borderColor + ';"></span>' +
                             ds.label + lastStr + '</span>';
                     }).join('');
+                    // 범례 접미 표기 (P3) — 예: INDICES USD 모드의 '/ USD'. 시리즈 항목이 아니라
+                    // 컬러닷 없는 순수 텍스트 span — Download 합성 범례에서도 접미로 인식된다.
+                    if (view.legendSuffix && datasets.length > 0) {
+                        legendHTML += '<span style="font-size:13px;color:#555;font-weight:600;margin-left:4px;">' + view.legendSuffix + '</span>';
+                    }
                     if (legendEl) legendEl.innerHTML = legendHTML;
                 }
 
@@ -752,13 +780,16 @@ function cmbPeerCharts(self) {
                     });
                     return us.length === 1 ? us[0] : null;
                 }
-                window._cmbAxisUnits = {
+                // ★P3: 축 단위·환산·밴드는 window 전역이 아니라 지역 변수로 계산해 '메인 차트
+                //   인스턴스'에 부착한다 (update 직전). 전역이면 한 페이지의 다른 패밀리(idx 등)
+                //   끝값·눈금이 남의 밴드를 읽는 오염이 생긴다.
+                var _cmbAxisUnits = {
                     y: (mode !== 'pct') ? cmbAxisUnitFor('y', yJo) : null,
                     y1: (mode === 'raw2') ? cmbAxisUnitFor('y1', y1Jo) : null
                 };
                 cmbBuildLegend();   // 단위 인라인 표기 때문에 조원 승격(yJo/y1Jo) 판정 뒤에 렌더
                 // 축별 표시 환산 계수 — MA 등 파생선도 같은 축 규칙을 타도록 축 기준으로 기록
-                window._cmbAxisConv = { y: (yEok && yJo) ? 10000 : 1, y1: (y1Eok && y1Jo) ? 10000 : 1 };
+                var _cmbAxisConv = { y: (yEok && yJo) ? 10000 : 1, y1: (y1Eok && y1Jo) ? 10000 : 1 };
                 // ★자릿수 밴드 기준 = 축의 '최종 끝값' (2026-07-28 사용자 룰 변경. 종전 = 축 최대값).
                 //   최대값 기준이면 기간에 큰 값이 한 번만 있어도 축 전체가 정수로 뭉개졌다
                 //   (예: ETS 거래대금 끝값 67.56 인데 구간 최대 225.6 -> 68 로 표시).
@@ -777,17 +808,17 @@ function cmbPeerCharts(self) {
                     }
                 });
                 // 끝값을 못 찾으면(전 구간 결측) 종전대로 최대값으로 폴백
-                window._cmbAxisBandRef = { y: (_yLastAbs === null ? _yMaxAbs : _yLastAbs),
-                                           y1: (_y1LastAbs === null ? _y1MaxAbs : _y1LastAbs) };
+                var _cmbAxisBandRef = { y: (_yLastAbs === null ? _yMaxAbs : _yLastAbs),
+                                        y1: (_y1LastAbs === null ? _y1MaxAbs : _y1LastAbs) };
 
                 // 음수·0 포함 시리즈(괴리율 등)는 Log 자동 무시 — 로그축에 음수가 들어가면
                 // 선·끝값 라벨이 축 하단으로 뭉개진다 (2026-08-02 실사고: 삼성전자 현선물 괴리율 -5.33).
-                var yType = (mode === 'pct' || _yHasNonPos) ? 'linear' : (window.cmbLogOn === false ? 'linear' : 'logarithmic');
+                var yType = (mode === 'pct' || _yHasNonPos) ? 'linear' : (_logOn === false ? 'linear' : 'logarithmic');
                 var yLogPad = yType === 'logarithmic' ? cmbLogPad(_yMinPos, _yMaxAbs) : null;
-                var y1Type = (window.cmbLogOn === false || _y1HasNonPos) ? 'linear' : 'logarithmic';
+                var y1Type = (_logOn === false || _y1HasNonPos) ? 'linear' : 'logarithmic';
                 var y1LogPad = y1Type === 'logarithmic' ? cmbLogPad(_y1MinPos, _y1MaxAbs) : null;
                 var scalesConfig = {
-                    x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ return window.cmbXLabel(this.getLabelForValue(val)); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
+                    x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ return _xLabel(this.getLabelForValue(val)); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
                     y: {
                         type: yType,
                         position: 'left',
@@ -819,11 +850,11 @@ function cmbPeerCharts(self) {
                 var tooltipLabel = function(ctx) {
                     if (ctx.parsed.y === null || ctx.parsed.y === undefined) return ctx.dataset.label + ': -';
                     var _tax = ctx.dataset.yAxisID || 'y';
-                    var _tb = (window._cmbAxisBandRef || {})[_tax] || 0;
+                    var _tb = _cmbAxisBandRef[_tax] || 0;   // 지역 클로저 캡처 (P3 — window 전역 폐기)
                     if (mode === 'pct') return ctx.dataset.label + ': ' + fmtUniformFix(ctx.parsed.y, _tb) + '%';
                     var _eokAx = _tax === 'y1' ? y1Eok : yEok;
                     if (_eokAx) return ctx.dataset.label + ': ' + fmtEokFull(ctx.parsed.y);
-                    var _tf = (window._cmbAxisConv || {})[_tax] || 1;
+                    var _tf = _cmbAxisConv[_tax] || 1;
                     return ctx.dataset.label + ': ' + fmtUniformFix(ctx.parsed.y / _tf, _tb / _tf);
                 };
 
@@ -859,9 +890,14 @@ function cmbPeerCharts(self) {
                     cmbChart.options.plugins.tooltip.callbacks.label = tooltipLabel;
                     cmbChart._cmbTipLabel = tooltipLabel;   // 클릭 핀 카드가 같은 포맷 사용
                     cmbChart._cmbMode = mode;   // update 전 대입 — 첫 draw가 endLabel에서 읽음
+                    // 밴드·환산·단위는 update 전에 인스턴스에 부착 — 눈금 빌드가 읽는다 (P3)
+                    cmbChart._cmbAxisBandRef = _cmbAxisBandRef;
+                    cmbChart._cmbAxisConv = _cmbAxisConv;
+                    cmbChart._cmbAxisUnits = _cmbAxisUnits;
+                    cmbChart._cmbPinHost = true;
                     cmbChart.update('none');
                 } else {
-                    cmbChart = new Chart(document.getElementById('cmbDynamicChart'), {
+                    cmbChart = new Chart(document.getElementById(_idCanvas), {
                         type: 'line',
                         data: { labels: commonDates, datasets: datasets },
                         plugins: [cmbEndLabelPlugin, cmbCrosshairPlugin, cmbPinPlugin],
@@ -882,11 +918,16 @@ function cmbPeerCharts(self) {
                     });
                     cmbChart._cmbMode = mode;   // 생성자 첫 draw는 mode 미설정으로 끝값이 +N% 오표기 -> 재렌더로 교정
                     cmbChart._cmbTipLabel = tooltipLabel;   // 클릭 핀 카드가 같은 포맷 사용
+                    // 생성자 첫 draw 는 밴드 미부착(폴백 자릿수)으로 지나가고, 아래 update 가 교정한다
+                    cmbChart._cmbAxisBandRef = _cmbAxisBandRef;
+                    cmbChart._cmbAxisConv = _cmbAxisConv;
+                    cmbChart._cmbAxisUnits = _cmbAxisUnits;
+                    cmbChart._cmbPinHost = true;
                     cmbChart.update('none');
                 }
 
                 // 이격도 서브패널 — 100 기준선 점선 + 메인 y축 폭에 맞춰 x축 정렬
-                var dispPanel = document.getElementById('cmbDispPanel');
+                var dispPanel = _idDispPanel ? document.getElementById(_idDispPanel) : null;
                 if (dispPanel) {
                     if (dispDatasets.length > 0) {
                         dispPanel.style.display = '';
@@ -898,7 +939,7 @@ function cmbPeerCharts(self) {
                             cmbDispChart.options.scales.y.afterFit = function(scale) { if (mainYWidth > 0) scale.width = mainYWidth; };
                             cmbDispChart.update('none');
                         } else {
-                            cmbDispChart = new Chart(document.getElementById('cmbDispChart'), {
+                            cmbDispChart = new Chart(document.getElementById(_idDispCanvas), {
                                 type: 'line',
                                 data: { labels: commonDates, datasets: dispDatasets },
                                 plugins: [cmbEndLabelPlugin, cmbDisp100Plugin, cmbDispHiLoPlugin, cmbCrosshairPlugin],
@@ -915,7 +956,7 @@ function cmbPeerCharts(self) {
                                         } } }
                                     },
                                     scales: {
-                                        x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val){ return window.cmbXLabel(this.getLabelForValue(val)); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
+                                        x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val){ return _xLabel(this.getLabelForValue(val)); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
                                         y: {
                                             type: 'linear',
                                             position: 'left',
@@ -940,7 +981,7 @@ function cmbPeerCharts(self) {
 
                 // ── RoC² 서브패널 — 0 기준선 점선 + 메인 y축 폭에 맞춰 x축 정렬 ──
                 //    (이격도 패널과 동일 규격: 자기 x축 보유, 크로스헤어 동기, Download 합성 대상)
-                var rocPanel = document.getElementById('cmbRocPanel');
+                var rocPanel = _idRocPanel ? document.getElementById(_idRocPanel) : null;
                 if (rocPanel) {
                     if (rocDatasets.length > 0) {
                         rocPanel.style.display = '';
@@ -957,7 +998,7 @@ function cmbPeerCharts(self) {
                             cmbRocChart.options.scales.y.afterFit = function(scale) { if (rocYWidth > 0) scale.width = rocYWidth; };
                             cmbRocChart.update('none');
                         } else {
-                            cmbRocChart = new Chart(document.getElementById('cmbRocChart'), {
+                            cmbRocChart = new Chart(document.getElementById(_idRocCanvas), {
                                 type: 'line',
                                 data: { labels: commonDates, datasets: rocDatasets },
                                 plugins: [cmbEndLabelPlugin, cmbRoc0Plugin, cmbCrosshairPlugin, cmbAxisUnitPlugin],
@@ -976,7 +1017,7 @@ function cmbPeerCharts(self) {
                                             } }
                                     },
                                     scales: {
-                                        x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val){ return window.cmbXLabel(this.getLabelForValue(val)); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
+                                        x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val){ return _xLabel(this.getLabelForValue(val)); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
                                         y: {
                                             type: 'linear',
                                             position: 'left',
@@ -1011,5 +1052,13 @@ function cmbPeerCharts(self) {
                         if (cmbRocChart) { cmbRocChart.destroy(); cmbRocChart = null; }
                     }
                 }
+                // ── 패밀리 배선 (P3) — 호버·핀 상태와 피어 목록을 이 호출로 묶인 차트들에 공유.
+                //    재사용 경로에서는 기존 상태 객체 유지 (핀 날짜·호버가 리빌드에도 살아남는다 —
+                //    종전 전역 상태와 동일한 수명).
+                var _fam = (view.charts.main && view.charts.main._cmbFamily)
+                    || (cmbChart && cmbChart._cmbFamily)
+                    || { hover: { idx: null, yPx: null, activeId: null }, pin: { date: null }, peers: [] };
+                _fam.peers = [cmbChart, cmbDispChart, cmbRocChart].filter(function(c) { return !!c; });
+                _fam.peers.forEach(function(c) { c._cmbFamily = _fam; });
                 return { main: cmbChart, disp: cmbDispChart, roc: cmbRocChart };
             }

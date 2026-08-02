@@ -1264,100 +1264,6 @@ def _build_indices_chart_section(category_label='Indices'):
             var idxChart = null;
             var idxMode = 'local';
 
-            // 십자선(crosshair) — 세로선은 가장 가까운 날짜(index)에 스냅, 가로선은 커서 위치.
-            // cmbCrosshairPlugin(DATA 차트)과 동일 스타일의 단일 차트 버전.
-            var idxHoverState = { idx: null, yPx: null };
-            // 스냅된 날짜의 툴팁(데이터값) 표시.
-            // tooltip.setActiveElements가 내부에서 tooltip.update까지 수행하므로 이후 draw()만 하면 됨.
-            function idxSyncTooltip(chart, idx) {
-                if (!chart || !chart.tooltip) return;
-                var els = [];
-                if (idx !== null) {
-                    chart.data.datasets.forEach(function(ds, di) {
-                        var v = ds.data[idx];
-                        if (v !== null && v !== undefined) els.push({ datasetIndex: di, index: idx });
-                    });
-                }
-                var area = chart.chartArea;
-                var pos = { x: 0, y: 0 };
-                if (els.length && area) {
-                    pos.x = chart.scales.x.getPixelForValue(idx);
-                    pos.y = (area.top + area.bottom) / 2;
-                }
-                chart.tooltip.setActiveElements(els, pos);
-                if (chart.setActiveElements) chart.setActiveElements(els);
-            }
-            var idxCrosshairPlugin = {
-                id: 'idxCrosshair',
-                afterEvent: function(chart, args) {
-                    var e = args.event;
-                    var area = chart.chartArea;
-                    if (!area) return;
-                    var inside = e.x !== null && e.y !== null &&
-                        e.x >= area.left && e.x <= area.right && e.y >= area.top && e.y <= area.bottom;
-                    if (e.type === 'mouseout' || !inside) {
-                        if (idxHoverState.idx !== null) {
-                            idxHoverState.idx = null;
-                            idxSyncTooltip(chart, null);
-                            args.changed = true;
-                            chart.draw();
-                        }
-                        return;
-                    }
-                    if (e.type !== 'mousemove') return;
-                    var idx = Math.round(chart.scales.x.getValueForPixel(e.x));
-                    var maxIdx = chart.data.labels.length - 1;
-                    if (idx < 0) idx = 0;
-                    if (idx > maxIdx) idx = maxIdx;
-                    // 약한 마그넷: 현재 날짜(idx)의 데이터 점이 커서에서 12px 이내면 가로선을 그 점에 스냅
-                    var yPx = e.y;
-                    var snapRadius = 12;
-                    var bestDist = null;
-                    chart.data.datasets.forEach(function(ds, di) {
-                        var v = ds.data[idx];
-                        if (v === null || v === undefined) return;
-                        var meta = chart.getDatasetMeta(di);
-                        if (meta.hidden || !meta.data[idx]) return;
-                        var py = meta.data[idx].y;
-                        if (py === null || py === undefined || isNaN(py)) return;
-                        var dist = Math.abs(py - e.y);
-                        if (dist <= snapRadius && (bestDist === null || dist < bestDist)) {
-                            bestDist = dist;
-                            yPx = py;
-                        }
-                    });
-                    var moved = idxHoverState.idx !== idx;
-                    idxHoverState.idx = idx;
-                    idxHoverState.yPx = yPx;
-                    args.changed = true;
-                    if (moved) idxSyncTooltip(chart, idx);
-                    chart.draw();
-                },
-                afterDraw: function(chart) {
-                    if (idxHoverState.idx === null) return;
-                    var area = chart.chartArea;
-                    var xs = chart.scales.x;
-                    if (!area || !xs) return;
-                    var xPx = xs.getPixelForValue(idxHoverState.idx);
-                    if (xPx < area.left || xPx > area.right) return;
-                    var ctx = chart.ctx;
-                    ctx.save();
-                    ctx.strokeStyle = '#888';
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(xPx, area.top);
-                    ctx.lineTo(xPx, area.bottom);
-                    ctx.stroke();
-                    if (idxHoverState.yPx >= area.top && idxHoverState.yPx <= area.bottom) {
-                        ctx.beginPath();
-                        ctx.moveTo(area.left, idxHoverState.yPx);
-                        ctx.lineTo(area.right, idxHoverState.yPx);
-                        ctx.stroke();
-                    }
-                    ctx.restore();
-                }
-            };
-
             function buildIdxChart() {
                 var selected = [];
                 document.querySelectorAll('.idx-chart-item.active').forEach(function(el){ selected.push(el.getAttribute('data-series')); });
@@ -1425,113 +1331,29 @@ def _build_indices_chart_section(category_label='Indices'):
                         borderColor: idxColors[s.name] || '#888',
                         backgroundColor: 'transparent',
                         borderWidth: 3,
+                        borderJoinStyle: 'round',
+                        borderCapStyle: 'round',
                         pointRadius: 0,
-                        tension: 0.3,
+                        tension: 0.4,
+                        cubicInterpolationMode: 'monotone',
                         spanGaps: true
                     });
                 });
 
-                // ── 2026-07-16 표기 표준 헬퍼 (양식 소급 통일 — 기능 아님) ──
-                function idxBandFix(v, maxAbs) {   // 자릿수 밴드: <10 2dp, 10~99 1dp 고정, 100+ 정수
-                    var dp = maxAbs < 10 ? 2 : (maxAbs < 100 ? 1 : 0);
-                    return Number(v).toLocaleString(undefined, { minimumFractionDigits: dp, maximumFractionDigits: dp });
-                }
-                function idxEnsureTicks(ax) {      // 눈금 <=8 + 양끝 필수 + 최소 간격(range/9)
-                    var t = ax.ticks;
-                    if (!t || !t.length) return;
-                    var span = ax.max - ax.min;
-                    if (!(span > 0)) return;
-                    if ((t[0].value - ax.min) / span > 0.02) t.unshift({ value: ax.min }); else t[0].value = ax.min;
-                    if ((ax.max - t[t.length - 1].value) / span > 0.02) t.push({ value: ax.max }); else t[t.length - 1].value = ax.max;
-                    var MAXT = 8, lo = t[0].value, hi = t[t.length - 1].value, rng = hi - lo;
-                    if (rng > 0 && t.length > 2) {
-                        var minGap = rng / (MAXT + 1), kept = [t[0]];
-                        for (var k = 1; k < t.length - 1; k++) {
-                            if (kept.length < MAXT - 1 && t[k].value - kept[kept.length - 1].value >= minGap
-                                && hi - t[k].value >= minGap) kept.push(t[k]);
-                        }
-                        kept.push(t[t.length - 1]);
-                        ax.ticks = kept;
-                    }
-                }
-                var _idxMaxAbs = 0;
-                datasets.forEach(function(ds) { ds.data.forEach(function(v) {
-                    if (v !== null && Math.abs(v) > _idxMaxAbs) _idxMaxAbs = Math.abs(v); }); });
-                window._idxBandMax = _idxMaxAbs;
-
-                var endLabelPlugin = {
-                    id: 'idxEndLabels',
-                    afterDatasetsDraw: function(chart) {
-                        var ctx = chart.ctx;
-                        chart.data.datasets.forEach(function(ds, i) {
-                            var meta = chart.getDatasetMeta(i);
-                            if (meta.hidden) return;
-                            // 끝에 null이 있을 수 있음 — 마지막 non-null 값/포인트 찾기
-                            var lastIdx = -1;
-                            for (var k = ds.data.length - 1; k >= 0; k--) {
-                                if (ds.data[k] !== null && ds.data[k] !== undefined) { lastIdx = k; break; }
-                            }
-                            if (lastIdx < 0) return;
-                            var last = meta.data[lastIdx];
-                            if (!last) return;
-                            var val = ds.data[lastIdx];
-                            var sign = val >= 0 ? '+' : '';
-                            ctx.save();
-                            // 끝점 동그라미 3px (선 색과 동일한 불투명 단색, 2026-07-12 사용자 요청)
-                            ctx.beginPath();
-                            ctx.arc(last.x, last.y, 3, 0, Math.PI * 2);
-                            ctx.fillStyle = ds.borderColor;
-                            ctx.fill();
-                            ctx.font = 'bold 15px sans-serif';
-                            ctx.fillStyle = ds.borderColor;
-                            ctx.textBaseline = 'middle';
-                            ctx.fillText(sign + idxBandFix(val, window._idxBandMax || Math.abs(val)) + '%', last.x + 7, last.y);
-                            ctx.restore();
-                        });
-                    }
-                };
-
-                // 하단 컬러닷 범례 (선택된 시리즈만)
-                var legendEl = document.getElementById('idxChartLegend');
-                if (legendEl) {
-                    var legendHTML = datasets.map(function(ds) {
-                        var c = ds.borderColor;
-                        return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:13px;">' +
-                            '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
-                            ds.label + '</span>';
-                    }).join('');
-                    if (idxMode === 'usd' && datasets.length > 0) {
-                        legendHTML += '<span style="font-size:13px;color:#555;font-weight:600;margin-left:4px;">/ USD</span>';
-                    }
-                    legendEl.innerHTML = legendHTML;
-                }
-
-                if (idxChart) {
-                    idxChart.data.labels = commonDates;
-                    idxChart.data.datasets = datasets;
-                    idxChart.options.scales.x.display = datasets.length > 0;
-                    idxChart.update('none');
-                    return;
-                }
-                idxChart = new Chart(document.getElementById('idxDynamicChart'), {
-                    type: 'line',
-                    data: { labels: commonDates, datasets: datasets },
-                    plugins: [endLabelPlugin, idxCrosshairPlugin],
-                    options: {
-                        responsive: true, maintainAspectRatio: false,
-                        layout: { padding: { right: 60 } },
-                        interaction: { mode: 'index', intersect: false },
-                        plugins: {
-                            legend: { display: false },
-                            // animation:false — 스냅 툴팁이 draw()만으로 위치 갱신되도록 (애니메이션 속성이면 제자리에 멈춤)
-                            tooltip: { animation: false, callbacks: { label: function(ctx){ return ctx.dataset.label + ': ' + (ctx.parsed.y === null ? '-' : (ctx.parsed.y >= 0 ? '+' : '') + idxBandFix(ctx.parsed.y, window._idxBandMax || 100) + '%'); } } }
-                        },
-                        scales: {
-                            x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ var d = this.getLabelForValue(val); if(!d) return ''; return d.slice(2,4) + '/' + d.slice(5,7); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
-                            y: { grace: '8%', afterBuildTicks: idxEnsureTicks, ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return (v >= 0 ? '' : '') + idxBandFix(v, window._idxBandMax || 100) + '%'; }, font: { size: 15 }, color: '#000' }, grid: { color: '#eee' }, border: { color: '#000', width: 2 } }
-                        }
-                    }
-                });
+                // ── 렌더 = 코어 표준 라인 cmbRenderCharts (P3 2026-08-02) — DATA(cmb) 양식 단일 정본.
+                //    idx 는 항상 정규화(%) 모드·단일 y축·서브패널 없음. 패널 id 에 null 을 명시해
+                //    같은 페이지의 DATA 이격도·RoC² 패널을 건드리지 않는다. 크로스헤어·핀·끝값·
+                //    범례(기간 변화율)·툴팁·Download 파일명 전부 코어 표준을 따른다.
+                idxChart = cmbRenderCharts({
+                    labels: commonDates, datasets: datasets, dispDatasets: [], rocDatasets: [],
+                    mode: 'pct', yEok: false, y1Eok: false,
+                    axAssign: datasets.map(function(ds) { return { name: ds.label, ax: 'y' }; }),
+                    unitMap: {},
+                    charts: { main: idxChart, disp: null, roc: null },
+                    ids: { canvas: 'idxDynamicChart', legend: 'idxChartLegend', dispPanel: null, rocPanel: null },
+                    xLabel: function(d) { return d ? d.slice(2, 4) + '/' + d.slice(5, 7) : ''; },
+                    legendSuffix: (idxMode === 'usd' && datasets.length > 0) ? '/ USD' : null
+                }).main;
             }
 
             window.toggleIdxSeries = function(el) { el.classList.toggle('active'); buildIdxChart(); };
@@ -1570,8 +1392,8 @@ def _build_indices_chart_section(category_label='Indices'):
                 </div>
             </div>
         </div>
-        {js_code}
         {_chart_download_helper_js()}
+        {js_code}
         """
     except Exception as e:
         print(f"Error building indices chart section: {e}")
@@ -2282,8 +2104,7 @@ def _build_combined_chart_section():
             var cmbDispChart = null;
             var cmbRocChart = null;
 
-            // 피어 차트 목록을 코어(cmbPeerCharts)에 접근자로 제공 — 차트 변수는 이 클로저 소유 (P2a)
-            window._cmbPeerAccessor = function() { return [cmbChart, cmbDispChart, cmbRocChart]; };
+            // (P2a 의 window._cmbPeerAccessor 등록은 P3에서 폐기 — 코어가 패밀리로 자체 배선)
 
 
             function colorForIndex(i) { return clickPalette[i % clickPalette.length]; }
@@ -10787,43 +10608,49 @@ def generate_hotels_html():
         ts_datasets = []
         for i, h in enumerate(ts_hotels):
             ser = pivot_ts[h]
+            # 데이터셋 속성 = 코어 표준 라인 규격 (P3 — cmb 메인과 동일)
             ts_datasets.append({
                 'label': h,
                 'data': [None if pd.isna(v) else round(float(v), 1) for v in ser],
                 'borderColor': _palette[i % len(_palette)],
-                'backgroundColor': _palette[i % len(_palette)],
-                'borderWidth': 2, 'pointRadius': 2, 'tension': 0.25, 'spanGaps': True,
+                'backgroundColor': 'transparent',
+                'borderWidth': 3, 'borderJoinStyle': 'round', 'borderCapStyle': 'round',
+                'pointRadius': 0, 'tension': 0.4, 'cubicInterpolationMode': 'monotone',
+                'spanGaps': True,
             })
         _ts_json = json.dumps({'labels': ts_labels, 'datasets': ts_datasets}, ensure_ascii=False)
+        # 렌더 = 코어 표준 라인 cmbRenderCharts (P3 2026-08-02) — DATA(cmb) 양식 단일 정본.
+        # 코어 임베드는 호출 '앞'에 둔다 (IIFE 가 즉시 렌더). 축 제목·내장 범례는 표준으로 대체
+        # (단위는 범례 접미 '/ 천원', 범례는 컬러닷+기간 변화율, 끝값·크로스헤어·핀·DL/Copy 표준).
         chart_card_html = ("""
   <div class="card">
     <h2 style="margin-top:0;font-size:1.2rem;">시계열 (lead+7일, 천원)</h2>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:8px;">
+      <button onclick="copyChartImage('hotelAdrChart','hotelAdrLegend',null,this)" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#0891b2;color:#fff;border:none;border-radius:8px;cursor:pointer;">Copy</button>
+      <button onclick="downloadChartImage('hotelAdrChart','Hotel_ADR','hotelAdrLegend')" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
+    </div>
     <div style="position:relative;height:420px;"><canvas id="hotelAdrChart"></canvas></div>
+    <div id="hotelAdrLegend" style="margin-top:12px;text-align:center;color:#222;"></div>
   </div>
   <script src="/assets/vendor/js/chart.umd.min.js"></script>
   <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = 2 * (window.devicePixelRatio || 1); Chart.defaults.elements.line.borderJoinStyle = 'round'; Chart.defaults.elements.line.borderCapStyle = 'round'; Chart.defaults.animation = false;</script>
+  __AOE_CORE_EMBED__
   <script>
   (function(){
     var D = __HOTEL_ADR_DATA__;
-    new Chart(document.getElementById('hotelAdrChart'), {
-      type: 'line',
-      data: {labels: D.labels, datasets: D.datasets},
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        interaction: {mode: 'index', intersect: false},
-        plugins: {
-          legend: {position: 'bottom', labels: {boxWidth: 12, font: {size: 12}}},
-          tooltip: {callbacks: {label: function(c){ return c.dataset.label + ': ' + (c.parsed.y == null ? '-' : c.parsed.y.toLocaleString() + '천원'); }}}
-        },
-        scales: {
-          x: {grid: {display: false}, ticks: {maxRotation: 0, autoSkip: true, color: '#000'}},
-          y: {title: {display: true, text: '1박 가격 (천원)'}, ticks: {color: '#000', callback: function(v){ return v.toLocaleString(); }}}
-        }
-      }
+    cmbRenderCharts({
+      labels: D.labels, datasets: D.datasets, dispDatasets: [], rocDatasets: [],
+      mode: 'raw1', yEok: false, y1Eok: false,
+      axAssign: D.datasets.map(function(ds) { return { name: ds.label, ax: 'y' }; }),
+      unitMap: {},
+      charts: { main: null, disp: null, roc: null },
+      ids: { canvas: 'hotelAdrChart', legend: 'hotelAdrLegend', dispPanel: null, rocPanel: null },
+      xLabel: function(d) { return d ? d.slice(2, 4) + '/' + d.slice(5, 7) : ''; },
+      legendSuffix: '/ 천원'
     });
   })();
   </script>
-""").replace('__HOTEL_ADR_DATA__', _ts_json)
+""").replace('__HOTEL_ADR_DATA__', _ts_json).replace('__AOE_CORE_EMBED__', _chart_download_helper_js())
 
     # HTML 생성
     update_time = datetime.now(KST).strftime('%Y-%m-%d %H:%M:%S')

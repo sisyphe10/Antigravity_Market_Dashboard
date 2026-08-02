@@ -62,6 +62,42 @@ EXTRACT_CMB = r"""
 }
 """
 
+# ── 공용 추출기: idx(INDICES) 차트 상태 — P3 코어 표준 라인 전환 검증 ─────────
+EXTRACT_IDX = r"""
+() => {
+  const el = document.getElementById('idxDynamicChart');
+  const ch = Chart.getChart(el);
+  if (!ch) return { error: 'no-chart' };
+  const rnd = v => (v == null || isNaN(v)) ? null : +Number(v).toPrecision(8);
+  const axes = {};
+  for (const [k, s] of Object.entries(ch.scales)) {
+    axes[k] = { type: s.type, min: rnd(s.min), max: rnd(s.max),
+                ticks: (s.ticks || []).map(t => String(t.label ?? t.value)) };
+  }
+  const datasets = ch.data.datasets.map(d => {
+    const vals = d.data.filter(v => v != null && !isNaN(v));
+    let sum = 0; vals.forEach(v => { sum += Number(v); });
+    return { label: d.label, axis: d.yAxisID || 'y', n: vals.length,
+             first: rnd(vals[0]), last: rnd(vals[vals.length - 1]), sum: rnd(sum) };
+  });
+  const legendEl = document.getElementById('idxChartLegend');
+  const fam = ch._cmbFamily;
+  return {
+    axes, datasets,
+    legend: legendEl ? legendEl.textContent.trim().replace(/\s+/g, ' ') : null,
+    mode: ch._cmbMode, pinHost: !!ch._cmbPinHost,
+    familyPeers: fam ? fam.peers.length : null,
+    // 패밀리 격리: idx 패밀리가 DATA(cmb) 차트를 피어로 물고 있으면 안 된다
+    isolated: fam ? fam.peers.every(c => c.canvas.id === 'idxDynamicChart') : null
+  };
+}
+"""
+
+def _extract_std(canvas_id, legend_id):
+    """표준 라인 추출기 — idx 추출기의 캔버스·범례 id 치환판 (P3 전환 페이지 공용)."""
+    return EXTRACT_IDX.replace('idxDynamicChart', canvas_id).replace('idxChartLegend', legend_id)
+
+
 # ── 공용 추출기: web-chart 템플릿(뷰어) ──────────────────────────────────────
 EXTRACT_VIEWER = r"""
 () => {
@@ -102,20 +138,31 @@ SCENARIOS = [
     ('data_roc2_leading_index', 'market', [('row', '선행지수'), ('wait', 600),
         ('js', "document.getElementById('cmbRocBtn').click()")], EXTRACT_CMB),
     # P2a 인터랙션: 클릭 핀 (설정→같은 좌표 재클릭 해제까지 상태 확인)
+    # ★P3: 핀·호버 상태는 전역이 아니라 chart._cmbFamily (다중 패밀리 격리) — 추출식만 변경, 의미 동일
     ('data_pin_click',        'market', [('row', '고객예탁금'), ('wait', 400),
         ('mouse', {'sel': '#cmbDynamicChart', 'rx': 0.5, 'ry': 0.5, 'action': 'click'}), ('wait', 300),
-        ('js', "window.__pin1 = cmbPin.date"),
+        ('js', "window.__pin1 = Chart.getChart(document.getElementById('cmbDynamicChart'))._cmbFamily.pin.date"),
         ('mouse', {'sel': '#cmbDynamicChart', 'rx': 0.5, 'ry': 0.5, 'action': 'click'}), ('wait', 300),
-        ('js', "window.__pin2 = cmbPin.date"),
+        ('js', "window.__pin2 = Chart.getChart(document.getElementById('cmbDynamicChart'))._cmbFamily.pin.date"),
         ('mouse', {'sel': '#cmbDynamicChart', 'rx': 0.7, 'ry': 0.5, 'action': 'click'}), ('wait', 300)],
-        r"""() => ({ pin1: window.__pin1, pin2AfterSameClick: window.__pin2, pin3: cmbPin.date,
-                     hoverIdxType: typeof cmbHoverState.idx })"""),
+        r"""() => { const f = Chart.getChart(document.getElementById('cmbDynamicChart'))._cmbFamily;
+                    return { pin1: window.__pin1, pin2AfterSameClick: window.__pin2, pin3: f.pin.date,
+                             hoverIdxType: typeof f.hover.idx }; }"""),
     # P2a 인터랙션: 크로스헤어 호버 + 마우스아웃 해제
     ('data_crosshair_hover',  'market', [('row', '고객예탁금'), ('wait', 400),
         ('mouse', {'sel': '#cmbDynamicChart', 'rx': 0.4, 'ry': 0.5, 'action': 'move'}), ('wait', 300),
-        ('js', "window.__hov = { idx: cmbHoverState.idx, active: cmbHoverState.activeId }"),
+        ('js', "var __f = Chart.getChart(document.getElementById('cmbDynamicChart'))._cmbFamily; window.__hov = { idx: __f.hover.idx, active: __f.hover.activeId }"),
         ('mouse', {'sel': 'body', 'rx': 0.01, 'ry': 0.99, 'action': 'move'}), ('wait', 300)],
-        r"""() => ({ hover: window.__hov, afterOut: cmbHoverState.idx })"""),
+        r"""() => ({ hover: window.__hov,
+                     afterOut: Chart.getChart(document.getElementById('cmbDynamicChart'))._cmbFamily.hover.idx })"""),
+    # P3: INDICES 표준 라인 전환 — 기본(7지수)·USD 모드 + 패밀리 격리.
+    # ★Indices 서브탭을 먼저 열어야 캔버스가 실측 크기로 레이아웃된다 (숨김 탭에서 만든
+    #   차트는 0×0 캔버스 눈금 — 사용자 화면과 다른 상태를 golden 으로 남기지 않기 위함)
+    ('idx_default',           'market', [('js', 'mktSwitchTab(1)'), ('wait', 700)], EXTRACT_IDX),
+    ('idx_usd',               'market', [('js', 'mktSwitchTab(1)'), ('wait', 700),
+        ('js', "document.querySelector('.idx-mode-btn[data-mode=\"usd\"]').click()"), ('wait', 400)], EXTRACT_IDX),
+    # P3: hotels ADR 표준 라인 전환 (독립 페이지 — 로드 즉시 렌더)
+    ('hotel_adr',             'hotels', [('wait', 600)], _extract_std('hotelAdrChart', 'hotelAdrLegend')),
     ('viewer2_mktcap',        'viewer2', [
         ('js', "document.querySelector('[data-key=\"삼성전자|mktcap\"]').click()")], EXTRACT_VIEWER),
     ('viewer2_normalized',    'viewer2', [
@@ -125,6 +172,7 @@ SCENARIOS = [
 
 FIXTURES = {
     'market':  '/chart_core/fixtures/market_baseline.html',
+    'hotels':  '/chart_core/fixtures/hotels_baseline.html',
     'viewer2': '/chart_core/fixtures/chart_viewer2_baseline.html',
 }
 

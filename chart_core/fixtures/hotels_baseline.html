@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>Hotel ADR - Antigravity Dashboard</title>
+<link rel="stylesheet" href="/assets/vendor/pretendard/pretendardvariable.min.css">
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; background: #f5f5f5; margin: 0; padding: 0; color: #222; }  /* nav 전폭 통일 — 여백은 .container로 이전 */
+  .home-btn { position: fixed; top: 20px; right: 20px; background: #e0e0e0; color: #222; padding: 8px 18px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 600; }
+  h1 { font-size: 1.8rem; margin-bottom: 8px; }
+  .meta { color: #888; font-size: 13px; margin-bottom: 24px; }
+  .container { max-width: 1260px; margin: 0 auto; padding: 30px; }  /* 본문 실폭 1200 유지(전역 border-box) — body padding 30 이전분 */
+  .card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 24px; }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: #222; color: #fff; padding: 10px 14px; text-align: left; font-weight: 600; font-size: 13px; }
+  td { padding: 10px 14px; border-bottom: 1px solid #eee; font-size: 14px; }
+  td.hotel-name { font-weight: 600; }
+  td.hotel-meta { color: #666; font-size: 13px; }
+  td.price { text-align: right; font-feature-settings: 'tnum'; font-weight: 500; }
+  td.price-empty { text-align: right; color: #ccc; }
+  tr:hover { background: #fafafa; }
+  .note { font-size: 13px; color: #666; margin-top: 16px; padding: 12px; background: #fff8e1; border-radius: 8px; border-left: 3px solid #ffc107; }
+  html{overflow-y:scroll}
+body{margin:0}
+.topnav{background:#101418;border-bottom:2px solid #fb8b1e;position:sticky;top:0;z-index:100}
+.topnav-inner{max-width:1400px;margin:0 auto;padding:0 28px;box-sizing:border-box;display:flex;align-items:stretch;height:54px;gap:36px}
+.topnav-brand{font-size:1.1rem;font-weight:800;letter-spacing:3.5px;color:#fff;white-space:nowrap;text-decoration:none;align-self:center;line-height:normal;font-family:'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif}
+.topnav-brand:hover{color:#fb8b1e}
+.topnav-tabs{display:flex;gap:2px;flex:1;align-items:stretch}
+.topnav-item{position:relative;display:flex;align-items:stretch}
+.topnav-tabs .topnav-item.right-group{margin-left:auto}
+.topnav-tab{box-sizing:border-box;display:inline-flex;align-items:center;gap:6px;padding:0 18px;color:#9aa4ae;text-decoration:none;font-size:1rem;font-weight:600;letter-spacing:0.3px;line-height:normal;border:none;border-radius:0;white-space:nowrap;background:transparent;transition:color 0.12s,background 0.12s;cursor:pointer;font-family:'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif}
+.topnav-tab:hover{color:#fff;background:#1a2027}
+.topnav-tab.active{color:#101418;background:#fb8b1e;font-weight:600;text-shadow:0.4px 0 currentColor,-0.4px 0 currentColor}
+.topnav-dropdown{box-sizing:border-box;position:absolute;top:100%;left:0;min-width:180px;width:max-content;background:#14181d;border:1px solid #2a323b;border-radius:0;box-shadow:0 8px 24px rgba(0,0,0,0.35);padding:4px 0;opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity 0.15s,transform 0.15s,visibility 0.15s;z-index:200}
+.topnav-item:hover .topnav-dropdown,.topnav-item:focus-within .topnav-dropdown{opacity:1;visibility:visible;transform:translateY(0)}
+.topnav-sub{display:block;padding:9px 16px;color:#b7c0c9;text-decoration:none;font-size:0.9rem;font-weight:500;border-radius:0;white-space:nowrap;text-align:center;line-height:normal;font-family:'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif}
+.topnav-sub:hover{background:#1a2027;color:#fff}
+.topnav-sub.active{background:#4a2d0a;color:#ffb45e;font-weight:700}
+@media (max-width:800px){.topnav-inner{padding:0 12px;gap:12px;height:46px}.topnav-brand{font-size:0.95rem}.topnav-tab{padding:0 12px;font-size:0.85rem;min-width:0}}
+/* ── .topnav* 정본 규칙은 위 nav_style.NAV_CSS 에서 옴 (2026-07-26 통일) — 여기 추가 금지 ── */
+
+/* Left sidebar — Market-group(+Architecture) pages. 2026-07-12 통일: topnav 는 모든
+   페이지에서 랜딩(/)과 동일(전폭·탭 좌측 28px 시작)하고, 사이드바는 topnav '아래'(top:72px)에서
+   시작한다 (기존: 사이드바가 nav 위에 얹혀 탭이 228px로 밀림 → 페이지 간 nav 점프 원인). */
+.sidebar { position: sticky; top: 54px; margin: 0 -24px 18px; display: flex; align-items: stretch; gap: 2px; padding: 0 28px; background: #161b21; border-bottom: 1px solid #2a323b; overflow-x: auto; z-index: 90; box-sizing: border-box; }  /* 배지 제거 — 링크(Data…)가 nav 바로 아래에서 시작 (2026-07-12) */
+.sidebar-brand { position: absolute; top: 0; left: 0; right: 0; height: 54px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 800; letter-spacing: 3.5px; color: #fff; border-bottom: 2px solid #2d7a3a; background: #101418; text-decoration: none; font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; }
+.sidebar-brand:hover { color: #2d7a3a; }
+.sidebar-link { display: inline-flex; align-items: center; padding: 0 14px; height: 38px; margin: 0; color: #9aa4ae; text-decoration: none; font-size: 0.85rem; font-weight: 600; border-radius: 0; border: none; border-bottom: 2px solid transparent; transition: all 0.12s; font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; white-space: nowrap; }
+.sidebar-link:hover { background: transparent; color: #fff; }
+.sidebar-link.active { background: transparent; color: #fff; font-weight: 700; border-bottom-color: #fb8b1e; }  /* 가이드: 활성=앰버 밑줄 (2026-07-27, 구 와인레드 잔재 제거) */
+/* Override per-page body styles so all sidebar pages align identically next to the sidebar */
+.has-sidebar { padding-left: 24px !important; padding-right: 24px !important; padding-top: 0 !important; padding-bottom: 24px !important; max-width: none !important; margin: 0 !important; }
+.has-sidebar .topnav { margin-left: -24px; margin-right: -24px; }
+@media (max-width: 800px) {  /* 2026-07-27: nav 정본(nav_style 800px)과 통일 — 800~900px 혼합 구간 제거 */
+    .sidebar { display: none; }
+    .has-sidebar { padding-left: 24px !important; }
+    .has-sidebar .topnav { margin-left: -24px; margin-right: -24px; }
+}
+
+</style>
+</head>
+<body>
+<nav class="topnav"><div class="topnav-inner"><a href="index.html" class="topnav-brand">AGE OF EMERGENCE</a><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="watchlist/" class="topnav-tab">Watchlist</a><div class="topnav-dropdown"><a href="watchlist/" class="topnav-sub">Quotes</a><a href="universe.html" class="topnav-sub">Universe</a><a href="universe_lab.html" class="topnav-sub">Universe Lab</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub">Data</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="sisyphe/journal.html" class="topnav-tab">Journal</a></div><div class="topnav-item"><a href="sisyphe/journal.html#weekly" class="topnav-tab">Weekly</a></div><div class="topnav-item"><a href="wiki/library" class="topnav-tab">Earnings</a></div><div class="topnav-item"><a href="wiki/" class="topnav-tab">Wiki</a></div><div class="topnav-item"><a href="sisyphe/memento.html" class="topnav-tab">Memento</a></div><div class="topnav-item"><a href="sisyphe/dashboard.html" class="topnav-tab">Ledger</a></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
+<div class="container">
+  <h1>Hotel ADR — Booking.com</h1>
+  <p class="meta">Updated: 2026-08-02 18:59:01 KST · 누적 37일 · 매일 12:00 KST 자동 수집</p>
+
+  <div class="card">
+    <h2 style="margin-top:0;font-size:1.2rem;">당일 entry 객실 가격 (체크인 lead time별)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>호텔</th><th>도시</th><th>등급</th>
+          <th style="text-align:right;">+7일</th>
+          <th style="text-align:right;">+14일</th>
+          <th style="text-align:right;">+30일</th>
+        </tr>
+      </thead>
+      <tbody><tr><td class="hotel-name">시그니엘 서울</td><td class="hotel-meta">서울</td><td class="hotel-meta">Lux</td><td class="price">₩700,000</td><td class="price">₩630,000</td><td class="price">₩665,000</td></tr>
+<tr><td class="hotel-name">그랜드 하얏트 서울</td><td class="hotel-meta">서울</td><td class="hotel-meta">5*</td><td class="price">₩399,000</td><td class="price">₩358,000</td><td class="price">₩440,000</td></tr>
+<tr><td class="hotel-name">롯데호텔 서울</td><td class="hotel-meta">서울</td><td class="hotel-meta">5*</td><td class="price">₩460,000</td><td class="price">₩480,000</td><td class="price">₩550,000</td></tr>
+<tr><td class="hotel-name">글래드 여의도</td><td class="hotel-meta">서울</td><td class="hotel-meta">4*</td><td class="price">₩199,500</td><td class="price">₩306,000</td><td class="price">₩256,666</td></tr>
+<tr><td class="hotel-name">시그니엘 부산</td><td class="hotel-meta">부산</td><td class="hotel-meta">Lux</td><td class="price">₩640,000</td><td class="price">₩490,000</td><td class="price">₩600,000</td></tr>
+<tr><td class="hotel-name">파라다이스 호텔 부산</td><td class="hotel-meta">부산</td><td class="hotel-meta">5*</td><td class="price">₩750,000</td><td class="price">₩350,000</td><td class="price-empty">-</td></tr>
+<tr><td class="hotel-name">그랜드 하얏트 제주</td><td class="hotel-meta">제주</td><td class="hotel-meta">5*</td><td class="price-empty">-</td><td class="price">₩448,000</td><td class="price">₩587,000</td></tr>
+<tr><td class="hotel-name">롯데호텔 제주</td><td class="hotel-meta">제주</td><td class="hotel-meta">5*</td><td class="price">₩450,000</td><td class="price">₩470,000</td><td class="price">₩558,000</td></tr>
+<tr><td class="hotel-name">힐튼 경주</td><td class="hotel-meta">경주</td><td class="hotel-meta">5*</td><td class="price">₩264,843</td><td class="price">₩275,430</td><td class="price">₩383,800</td></tr>
+</tbody>
+    </table>
+    <p class="note">※ 각 호텔에서 가장 저렴한 entry 객실 1박 가격 (2인, 환불가능 옵션 우선). Booking.com 기준이라 외국인 가격 포함될 수 있음.</p>
+  </div>
+
+  
+  <div class="card">
+    <h2 style="margin-top:0;font-size:1.2rem;">시계열 (lead+7일, 천원)</h2>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:8px;">
+      <button onclick="copyChartImage('hotelAdrChart','hotelAdrLegend',null,this)" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#0891b2;color:#fff;border:none;border-radius:8px;cursor:pointer;">Copy</button>
+      <button onclick="downloadChartImage('hotelAdrChart','Hotel_ADR','hotelAdrLegend')" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
+    </div>
+    <div style="position:relative;height:420px;"><canvas id="hotelAdrChart"></canvas></div>
+    <div id="hotelAdrLegend" style="margin-top:12px;text-align:center;color:#222;"></div>
+  </div>
+  <script src="/assets/vendor/js/chart.umd.min.js"></script>
+  <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = 2 * (window.devicePixelRatio || 1); Chart.defaults.elements.line.borderJoinStyle = 'round'; Chart.defaults.elements.line.borderCapStyle = 'round'; Chart.defaults.animation = false;</script>
+  <script>
+// aoe_chart.js — AoE 공용 차트 코어 (v0.2.0, P1 착수 2026-08-02 · P2b 렌더 프레임 편입)
+// 정본: chart_core/dist/aoe_chart.js — 양식 수정은 반드시 이 파일에서.
+// 소비: create_dashboard.py 가 빌드타임에 <script> 인라인 임베드 (manifest sha 검증).
+// 중복 임베드 가드: 각 블록의 typeof 체크 (한 페이지에 여러 번 들어가도 1회만 등록).
+
+        if (typeof window.downloadChartImage !== 'function') {
+            // opts.copy=true 면 파일 저장 대신 클립보드 복사 (2026-08-02, copyChartImage 경유)
+            window.downloadChartImage = function(canvasId, baseName, legendId, extraCanvasId, opts) {
+                var src = document.getElementById(canvasId);
+                if (!src) { console.warn('canvas not found:', canvasId); return; }
+                // ── 고해상도 저장: 클릭 순간에만 차트를 DL_DPR로 재렌더 (화면 해상도는 그대로) ──
+                var DL_DPR = 4;
+                var _getCh = (window.Chart && Chart.getChart) ? function(t){ return Chart.getChart(t); } : function(){ return null; };
+                var _mainChart = _getCh(canvasId);
+                // 보조 캔버스 다중 지원 (이격도 + RoC², 2026-07-29). 문자열 1개도 그대로 허용.
+                var _extraIds = extraCanvasId ? (Array.isArray(extraCanvasId) ? extraCanvasId : [extraCanvasId]) : [];
+                var _visibleExtras = function() {
+                    return _extraIds.map(function(id){ return document.getElementById(id); })
+                        .filter(function(el){ return el && el.offsetParent !== null && el.width; });
+                };
+                var _extraCharts = _visibleExtras().map(_getCh).filter(Boolean);
+                var _prevMainDpr = _mainChart ? (_mainChart.options.devicePixelRatio || (window.devicePixelRatio || 1)) : null;
+                var _prevExtraDprs = _extraCharts.map(function(c){ return c.options.devicePixelRatio || (window.devicePixelRatio || 1); });
+                if (_mainChart) { _mainChart.options.devicePixelRatio = DL_DPR; _mainChart.resize(); _mainChart.draw(); }
+                _extraCharts.forEach(function(c){ c.options.devicePixelRatio = DL_DPR; c.resize(); c.draw(); });
+                try {
+                var w = src.width, h = src.height;
+                var scale = src.clientWidth ? (w / src.clientWidth) : 1;
+
+                // 보조 캔버스(이격도·RoC² 서브패널) — 보이는 것만 메인 아래에 순서대로 세로 합성
+                var _extras = _visibleExtras();
+                var extraH = 0;
+                var _extraHs = _extras.map(function(el){
+                    var hh = Math.round(el.height * (w / el.width));
+                    extraH += hh;
+                    return hh;
+                });
+
+                // 하단 범례 항목 수집 (컬러닷 + 라벨)
+                var legendItems = [];
+                var legendSuffix = '';
+                if (legendId) {
+                    var legendEl = document.getElementById(legendId);
+                    if (legendEl) {
+                        legendEl.querySelectorAll(':scope > span').forEach(function(span) {
+                            var dot = span.querySelector('span[style*="background"]');
+                            var text = (span.textContent || '').trim();
+                            if (dot) {
+                                legendItems.push({ color: dot.style.background || dot.style.backgroundColor || '#888', text: text });
+                            } else if (text) {
+                                legendSuffix = text;  // 예: "/ USD"
+                            }
+                        });
+                    }
+                }
+
+                var legendH = legendItems.length ? Math.round(44 * scale) : 0;
+                var tmp = document.createElement('canvas');
+                tmp.width = w; tmp.height = h + extraH + legendH;
+                var ctx = tmp.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, tmp.width, tmp.height);
+                ctx.drawImage(src, 0, 0);
+                var _yOff = h;
+                _extras.forEach(function(el, i) { ctx.drawImage(el, 0, _yOff, w, _extraHs[i]); _yOff += _extraHs[i]; });
+
+                if (legendItems.length) {
+                    var fontPx = Math.round(13 * scale);
+                    var fontItem = fontPx + "px Pretendard, system-ui, sans-serif";
+                    var fontSuffix = '600 ' + fontPx + "px Pretendard, system-ui, sans-serif";
+                    ctx.textBaseline = 'middle';
+                    var dotR = Math.round(5 * scale);
+                    var gapDotText = Math.round(7 * scale);
+                    var gapItems = Math.round(18 * scale);
+                    var suffixGap = Math.round(6 * scale);
+                    var totalW = 0;
+                    ctx.font = fontItem;
+                    legendItems.forEach(function(it, i) {
+                        totalW += dotR * 2 + gapDotText + ctx.measureText(it.text).width;
+                        if (i < legendItems.length - 1) totalW += gapItems;
+                    });
+                    if (legendSuffix) { ctx.font = fontSuffix; totalW += suffixGap + ctx.measureText(legendSuffix).width; }
+                    var x = Math.max(Math.round((w - totalW) / 2), Math.round(10 * scale));
+                    var y = h + extraH + Math.round(legendH / 2);
+                    ctx.font = fontItem;
+                    legendItems.forEach(function(it, i) {
+                        ctx.beginPath();
+                        ctx.fillStyle = it.color;
+                        ctx.arc(x + dotR, y, dotR, 0, Math.PI * 2);
+                        ctx.fill();
+                        x += dotR * 2 + gapDotText;
+                        ctx.fillStyle = '#222';
+                        ctx.fillText(it.text, x, y);
+                        x += ctx.measureText(it.text).width;
+                        if (i < legendItems.length - 1) x += gapItems;
+                    });
+                    if (legendSuffix) {
+                        x += suffixGap;
+                        ctx.font = fontSuffix;
+                        ctx.fillStyle = '#555';
+                        ctx.fillText(legendSuffix, x, y);
+                    }
+                }
+                var d = new Date();
+                var pad = function(n){return n<10?'0'+n:''+n;};
+                var stamp = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+                // 파일명에 선택 시리즈명 포함 (2026-08-02 사용자 확정) — MA·이격도·RoC 파생선 제외,
+                // 4개 이상이면 앞 3개 + '외N'. 파일명 금지문자는 '-' 치환.
+                var _names = [];
+                if (_mainChart) {
+                    _mainChart.data.datasets.forEach(function(ds) {
+                        var l = ds.label || '';
+                        if (!l || ds._skipEndLabel) return;
+                        if (/^MA\d/.test(l) || /^이격도/.test(l) || /^RoC/.test(l)) return;
+                        if (_names.indexOf(l) < 0) _names.push(l);
+                    });
+                }
+                // 접두어(AoE_Data 등) 없이 시리즈명부터 시작 (2026-08-02 사용자 확정) — 없을 때만 baseName 폴백
+                var _namePart = '';
+                if (_names.length) {
+                    var _shown = _names.slice(0, 3).join('·');
+                    if (_names.length > 3) _shown += ' 외' + (_names.length - 3);
+                    _namePart = _shown.replace(/[\\/:*?"<>|]/g, '-');
+                }
+                var _dataUrl = tmp.toDataURL('image/png');   // sync — async toBlob는 user activation 상실
+                if (opts && opts.copy) {
+                    // 클립보드 복사 — dataURL을 동기로 Blob 변환 후 write (클릭 제스처 유지)
+                    var _bin = atob(_dataUrl.split(',')[1]);
+                    var _u8 = new Uint8Array(_bin.length);
+                    for (var _bi = 0; _bi < _bin.length; _bi++) _u8[_bi] = _bin.charCodeAt(_bi);
+                    var _pr = navigator.clipboard.write([new ClipboardItem({ 'image/png': new Blob([_u8], { type: 'image/png' }) })]);
+                    var _btn = opts.btn;
+                    if (_btn) {
+                        var _orig = _btn.textContent;
+                        // 되돌림 타이머는 promise 확정 후에 시작 — 확정 전에 먼저 돌면 피드백이 안 보인다
+                        _pr.then(function(){ _btn.textContent = 'Copied ✓'; }, function(e){ console.warn('clipboard copy failed:', e); _btn.textContent = 'Copy failed'; })
+                           .then(function(){ setTimeout(function(){ _btn.textContent = _orig; }, 1500); });
+                    }
+                } else {
+                    var a = document.createElement('a');
+                    a.href = _dataUrl;
+                    a.download = (_namePart || baseName || 'chart') + '_' + stamp + '.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }
+                } finally {
+                    if (_mainChart) { _mainChart.options.devicePixelRatio = _prevMainDpr; _mainChart.resize(); _mainChart.draw(); }
+                    _extraCharts.forEach(function(c, i) { c.options.devicePixelRatio = _prevExtraDprs[i]; c.resize(); c.draw(); });
+                }
+            };
+            window.copyChartImage = function(canvasId, legendId, extraCanvasId, btn) {
+                window.downloadChartImage(canvasId, null, legendId, extraCanvasId, { copy: true, btn: btn });
+            };
+        }
+
+// ── cmb(DATA) 양식 공용 블록 (P1b 이동 2026-08-02) — 포맷터·눈금 정책·축단위 플러그인 ──
+// 원래 DATA IIFE 클로저 내부였으나 순수/자립 블록이라 전역 승격 (클로저 코드는 스코프 체인으로 참조)
+            // 자릿수 원칙 (2026-07-16 사용자 확정): |v|<10 소수 둘째, 10~999 첫째, 1000+ 정수
+            function fmtByMag(v) {
+                if (v === null || v === undefined) return '-';
+                var a = Math.abs(v);
+                return Number(v).toLocaleString(undefined, { maximumFractionDigits: a < 10 ? 2 : (a < 1000 ? 1 : 0) });
+            }
+
+            function fmtUniformFix(v, maxAbs) {   // 끝값용: 축 자릿수로 패딩 (84 -> 84.0)
+                if (v === null || v === undefined) return '-';
+                var dp = maxAbs < 10 ? 2 : (maxAbs < 100 ? 1 : 0);   // 일의자리 2dp·십의자리 1dp·백의자리+ 정수
+                return Number(v).toLocaleString(undefined, { minimumFractionDigits: dp, maximumFractionDigits: dp });
+            }
+
+            function cmbTickFmt(v, ax, jo) {
+                var f = jo ? 10000 : 1;
+                var m;
+                // ★밴드 기준 = 차트 인스턴스 _cmbAxisBandRef (cmbRenderCharts 가 메인 차트에만 부착).
+                //   P3 다중 패밀리 공존을 위해 window 전역·canvas id 판별 제거 — 서브패널은
+                //   인스턴스에 밴드가 없으므로 종전대로 축 최대값 기준(else)으로 간다.
+                var _bandRef = ax.chart && ax.chart._cmbAxisBandRef;
+                if (_bandRef)
+                    m = (_bandRef[ax.id] || Math.abs(ax.max || 0)) / f;
+                else
+                    m = Math.max(Math.abs(ax.min || 0), Math.abs(ax.max || 0)) / f;
+                var _vv = v / f;
+                // 로그 축에서 대역이 넓으면 큰 눈금에 소수가 붙는다 → 1,000 이상은 정수 (2026-07-28)
+                return fmtUniform(_vv, Math.abs(_vv) >= 1000 ? 1000 : m);
+            }
+
+            function fmtEokFull(v) {   // 끝값·툴팁용: 1,537조 5,713억
+                var a = Math.abs(v), sgn = v < 0 ? '-' : '';
+                if (a >= 10000) {
+                    var jo = Math.floor(a / 10000), eok = Math.round(a % 10000);
+                    return sgn + jo.toLocaleString() + '조' + (eok ? ' ' + eok.toLocaleString() + '억' : '');
+                }
+                return sgn + Math.round(a).toLocaleString() + '억';
+            }
+
+                // Y축 시작·끝값 눈금 보장 (2026-07-16 사용자 확정) — grace로 벌어진 축 양끝에
+                // 라벨이 없던 문제. 끝 눈금이 축 경계와 2% 이내면 스냅, 멀면 경계 눈금 추가.
+                function cmbEnsureBoundTicks(ax) {
+                    var t = ax.ticks;
+                    if (!t || !t.length) return;
+                    var span = ax.max - ax.min;
+                    if (!(span > 0)) return;
+                    if ((t[0].value - ax.min) / span > 0.02) t.unshift({ value: ax.min });
+                    else t[0].value = ax.min;
+                    if ((ax.max - t[t.length - 1].value) / span > 0.02) t.push({ value: ax.max });
+                    else t[t.length - 1].value = ax.max;
+                    // 최종 선별 (2026-07-16 1안 확정): 양끝 고정 + 내부는 스케일 공간(로그축=log)
+                    // 최소 간격을 확보하며 최대 8개 — 경계·밀집 눈금의 라벨 겹침 원천 차단
+                    var MAXT = 8;
+                    var sv = function(v) { return (ax.type === 'logarithmic' && v > 0) ? Math.log(v) : v; };
+                    var lo = sv(t[0].value), hi = sv(t[t.length - 1].value), rng = hi - lo;
+                    if (rng > 0 && t.length > 2) {
+                        var minGap = rng / (MAXT + 1);
+                        var kept = [t[0]];
+                        for (var k = 1; k < t.length - 1; k++) {
+                            if (kept.length < MAXT - 1
+                                && sv(t[k].value) - sv(kept[kept.length - 1].value) >= minGap
+                                && hi - sv(t[k].value) >= minGap) kept.push(t[k]);
+                        }
+                        kept.push(t[t.length - 1]);
+                        ax.ticks = kept;
+                    }
+                }
+
+                function cmbEokTickVal(v, jo) {
+                    return fmtByMag(jo ? v / 10000 : v);
+                }
+
+                // Y축 단위 주석(서브패널 전용) — 눈금엔 숫자만, 단위는 축 최상단 위에 1회 표기.
+                // ★메인 차트는 2026-08-02부터 하단 범례 우측 표기로 전환 — 단위 유무에 따라
+                //   padding.top(34/6)이 달라져 차트 시작 높이가 들쭉날쭉하던 문제.
+                var cmbAxisUnitPlugin = {
+                    id: 'cmbAxisUnit',
+                    afterDraw: function(chart) {
+                        // 차트별 지정(chart._cmbAxisUnits)만 사용 — P3에서 window 전역 폐기
+                        // (서브패널은 단위가 고정이라 cmbRenderCharts 가 생성 시 직접 지정한다)
+                        var u = chart._cmbAxisUnits;
+                        if (!u) return;
+                        var ctx = chart.ctx, ty = chart.chartArea.top - (chart._cmbAxisUnitDy || 20);   // 최상단 눈금 라벨과 겹침 방지
+                        ctx.save();
+                        ctx.font = '13px sans-serif';
+                        ctx.fillStyle = '#000';
+                        if (u.y) { ctx.textAlign = 'right'; ctx.fillText(u.y, chart.scales.y.right + 2, ty); }
+                        if (u.y1 && chart.scales.y1) { ctx.textAlign = 'left'; ctx.fillText(u.y1, chart.scales.y1.left - 2, ty); }
+                        ctx.restore();
+                    }
+                };
+
+                function cmbLogPad(minPos, maxV) {
+                    if (!(minPos > 0) || !(maxV > 0) || minPos === Infinity) return null;
+                    var llo = Math.log10(minPos), lhi = Math.log10(maxV);
+                    var pad = (lhi - llo) * (0.05 / 0.90) || 0.02;
+                    return { min: Math.pow(10, llo - pad), max: Math.pow(10, lhi + pad) };
+                }
+
+// fmtUniform — fmtUniformFix가 호출하는 기저 포맷터 (P1b 후속 이동: 전역 함수는 클로저 내부를 못 본다)
+            // 축 자릿수 통일: 같은 축 안에서는 하나의 밴드를 따른다.
+            // ★밴드 기준 = 축의 '최종 끝값' (2026-07-28 변경. 종전 = 축 최대값)
+            //   인자명 maxAbs 는 호환 유지 — 실제로 넘어오는 값은 _cmbAxisBandRef(끝값).
+            function fmtUniform(v, maxAbs) {
+                if (v === null || v === undefined) return '-';
+                var dp = maxAbs < 10 ? 2 : (maxAbs < 100 ? 1 : 0);   // 일의자리 2dp·십의자리 1dp·백의자리+ 정수
+                return Number(v).toLocaleString(undefined, { maximumFractionDigits: dp });
+            }
+
+// ── cmb(DATA) 크로스헤어·클릭핀·툴팁 동기 (P2a 이동 2026-08-02) ──
+// ★P3 다중 패밀리(2026-08-02): 호버·핀 상태와 피어 목록은 전역이 아니라 '패밀리'
+//   (cmbRenderCharts 1회 호출로 묶인 메인+서브패널) 단위 — 한 페이지에 cmb·idx 등
+//   여러 표준 라인 차트가 공존해도 상태가 서로 새지 않도록 chart._cmbFamily 에 배선.
+//   family = { hover: {idx,yPx,activeId}, pin: {date}, peers: [charts...] }
+//   (P2a 의 window._cmbPeerAccessor 전역 접근자는 폐기 — 패밀리가 자기 피어를 직접 안다.)
+function cmbPeerCharts(self) {
+    var fam = self && self._cmbFamily;
+    if (!fam) return [];
+    return fam.peers.filter(function(c) {
+        return c && c !== self && c.canvas;
+    });
+}
+
+            function cmbSyncTooltip(other, idx) {
+                if (!other || !other.tooltip) return;
+                var els = [];
+                if (idx !== null) {
+                    other.data.datasets.forEach(function(ds, di) {
+                        var v = ds.data[idx];
+                        if (v !== null && v !== undefined) els.push({ datasetIndex: di, index: idx });
+                    });
+                }
+                var area = other.chartArea;
+                var pos = { x: 0, y: 0 };
+                if (els.length && area) {
+                    pos.x = other.scales.x.getPixelForValue(idx);
+                    pos.y = (area.top + area.bottom) / 2;
+                }
+                other.tooltip.setActiveElements(els, pos);
+                if (other.setActiveElements) other.setActiveElements(els);
+            }
+
+            var cmbCrosshairPlugin = {
+                id: 'cmbCrosshair',
+                afterEvent: function(chart, args) {
+                    var e = args.event;
+                    var area = chart.chartArea;
+                    if (!area) return;
+                    var _fam = chart._cmbFamily;
+                    if (!_fam) return;   // 패밀리 배선 전(생성 직후 첫 draw) — 상태 없음
+                    var cmbHoverState = _fam.hover, cmbPin = _fam.pin;
+                    var _peers = cmbPeerCharts(chart);
+                    var inside = e.x !== null && e.y !== null &&
+                        e.x >= area.left && e.x <= area.right && e.y >= area.top && e.y <= area.bottom;
+                    if (e.type === 'mouseout' || !inside) {
+                        if (cmbHoverState.idx !== null) {
+                            cmbHoverState.idx = null;
+                            cmbHoverState.activeId = null;
+                            args.changed = true;
+                            _peers.forEach(function(o) {
+                                cmbSyncTooltip(o, null);
+                                o.draw();
+                            });
+                        }
+                        return;
+                    }
+                    // 클릭 = 데이터 카드 고정(핀) — 같은 날짜 재클릭 해제, 다른 지점 클릭 이동 (2026-07-21 표준)
+                    if (e.type === 'click' && chart._cmbPinHost) {
+                        var pIdx = Math.round(chart.scales.x.getValueForPixel(e.x));
+                        var pMax = chart.data.labels.length - 1;
+                        if (pIdx < 0) pIdx = 0;
+                        if (pIdx > pMax) pIdx = pMax;
+                        var pDate = chart.data.labels[pIdx];
+                        cmbPin.date = (cmbPin.date === pDate) ? null : pDate;
+                        args.changed = true;
+                        return;
+                    }
+                    if (e.type !== 'mousemove') return;
+                    var idx = Math.round(chart.scales.x.getValueForPixel(e.x));
+                    var maxIdx = chart.data.labels.length - 1;
+                    if (idx < 0) idx = 0;
+                    if (idx > maxIdx) idx = maxIdx;
+                    // 약한 마그넷: 현재 날짜(idx)의 데이터 점이 커서에서 12px 이내면 가로선을 그 점에 스냅
+                    var yPx = e.y;
+                    var snapRadius = 12;
+                    var bestDist = null;
+                    chart.data.datasets.forEach(function(ds, di) {
+                        var v = ds.data[idx];
+                        if (v === null || v === undefined) return;
+                        var meta = chart.getDatasetMeta(di);
+                        if (meta.hidden || !meta.data[idx]) return;
+                        var py = meta.data[idx].y;
+                        if (py === null || py === undefined || isNaN(py)) return;
+                        var dist = Math.abs(py - e.y);
+                        if (dist <= snapRadius && (bestDist === null || dist < bestDist)) {
+                            bestDist = dist;
+                            yPx = py;
+                        }
+                    });
+                    var moved = cmbHoverState.idx !== idx;
+                    cmbHoverState.idx = idx;
+                    cmbHoverState.yPx = yPx;
+                    cmbHoverState.activeId = chart.canvas.id;
+                    args.changed = true;
+                    _peers.forEach(function(o) {
+                        if (moved) cmbSyncTooltip(o, idx);
+                        o.draw();
+                    });
+                },
+                afterDraw: function(chart) {
+                    var _fam = chart._cmbFamily;
+                    if (!_fam) return;
+                    var cmbHoverState = _fam.hover;
+                    if (cmbHoverState.idx === null) return;
+                    var area = chart.chartArea;
+                    var xs = chart.scales.x;
+                    if (!area || !xs) return;
+                    var xPx = xs.getPixelForValue(cmbHoverState.idx);
+                    if (xPx < area.left || xPx > area.right) return;
+                    var ctx = chart.ctx;
+                    ctx.save();
+                    ctx.strokeStyle = '#888';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(xPx, area.top);
+                    ctx.lineTo(xPx, area.bottom);
+                    ctx.stroke();
+                    if (cmbHoverState.activeId === chart.canvas.id &&
+                        cmbHoverState.yPx >= area.top && cmbHoverState.yPx <= area.bottom) {
+                        ctx.beginPath();
+                        ctx.moveTo(area.left, cmbHoverState.yPx);
+                        ctx.lineTo(area.right, cmbHoverState.yPx);
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+                }
+            };
+
+            // 클릭 핀 플러그인 (2026-07-21 표준): 클릭한 날짜의 세로 점선 + 데이터 카드를 캔버스에
+            // 상주로 그림 — 플러그인이 직접 그려 Download PNG에도 포함. 값 포맷은 툴팁과 공용
+            // (chart._cmbTipLabel = 빌드 시점 tooltipLabel 콜백).
+            var cmbPinPlugin = {
+                id: 'cmbPinCard',
+                afterDraw: function(chart) {
+                    if (!chart._cmbPinHost || !chart._cmbFamily) return;
+                    var cmbPin = chart._cmbFamily.pin;
+                    if (cmbPin.date === null) return;
+                    var idx = chart.data.labels.indexOf(cmbPin.date);
+                    if (idx < 0) return;   // 창 밖으로 나가면 표시만 생략 (상태는 유지)
+                    var area = chart.chartArea, xs = chart.scales.x, ctx = chart.ctx;
+                    if (!area || !xs) return;
+                    var xPx = xs.getPixelForValue(idx);
+                    if (xPx < area.left - 1 || xPx > area.right + 1) return;
+                    ctx.save();
+                    ctx.strokeStyle = 'rgba(17,17,17,0.45)';
+                    ctx.setLineDash([4, 4]);
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(xPx, area.top);
+                    ctx.lineTo(xPx, area.bottom);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    var lines = [];
+                    chart.data.datasets.forEach(function(ds, di) {
+                        var meta = chart.getDatasetMeta(di);
+                        if (meta.hidden) return;
+                        var v = ds.data[idx];
+                        if (v === null || v === undefined) return;
+                        var txt = chart._cmbTipLabel
+                            ? chart._cmbTipLabel({ dataset: ds, parsed: { y: v } })
+                            : (ds.label + ': ' + v);
+                        lines.push({ txt: txt, color: ds.borderColor });
+                    });
+                    if (!lines.length) { ctx.restore(); return; }
+                    var title = String(cmbPin.date);
+                    ctx.font = 'bold 13px sans-serif';
+                    var w = ctx.measureText(title).width;
+                    ctx.font = '13px sans-serif';
+                    lines.forEach(function(l) { var tw = ctx.measureText(l.txt).width + 14; if (tw > w) w = tw; });
+                    var pad = 10, lh = 19;
+                    var boxW = w + pad * 2, boxH = pad * 2 + lh * (lines.length + 1);
+                    var bx = xPx + 12;
+                    if (bx + boxW > area.right) bx = xPx - 12 - boxW;
+                    if (bx < area.left) bx = area.left + 4;
+                    var by = area.top + 8;
+                    ctx.fillStyle = 'rgba(0,0,0,0.8)';
+                    ctx.beginPath();
+                    ctx.roundRect(bx, by, boxW, boxH, 6);
+                    ctx.fill();
+                    ctx.textBaseline = 'middle';
+                    ctx.textAlign = 'left';
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 13px sans-serif';
+                    ctx.fillText(title, bx + pad, by + pad + lh / 2);
+                    ctx.font = '13px sans-serif';
+                    lines.forEach(function(l, li) {
+                        var ly = by + pad + lh * (li + 1) + lh / 2;
+                        ctx.fillStyle = l.color;
+                        ctx.beginPath();
+                        ctx.arc(bx + pad + 4, ly, 4, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#fff';
+                        ctx.fillText(l.txt, bx + pad + 14, ly);
+                    });
+                    ctx.restore();
+                }
+            };
+
+// ── cmb(DATA) 렌더 프레임 (P2b 이동 2026-08-02) — 끝값 라벨·서브패널 기준선 페인터·
+//    메인/이격도/RoC² 차트 생성·재사용 프레임·하단 범례·축 단위/환산·툴팁 포맷.
+//    페이지(클로저)는 데이터·도메인 계산(MA·이격도·RoC²)만 하고 cmbRenderCharts(view) 호출.
+//    view = { labels, datasets, dispDatasets, rocDatasets, mode, yEok, y1Eok,
+//             axAssign, unitMap, charts: {main, disp, roc} } → { main, disp, roc } 반환
+//    (차트 인스턴스는 페이지 클로저 소유 — _cmbPeerAccessor 와 같은 원칙, P2a 참조).
+                var cmbEndLabelPlugin = {
+                    id: 'cmbEndLabels',
+                    afterDatasetsDraw: function(chart) {
+                        var ctx = chart.ctx;
+                        var entries = [];
+                        chart.data.datasets.forEach(function(ds, i) {
+                            if (ds._skipEndLabel) return;
+                            var meta = chart.getDatasetMeta(i);
+                            if (meta.hidden) return;
+                            var lastIdx = -1;
+                            for (var k = ds.data.length - 1; k >= 0; k--) {
+                                if (ds.data[k] !== null && ds.data[k] !== undefined) { lastIdx = k; break; }
+                            }
+                            if (lastIdx < 0) return;
+                            var last = meta.data[lastIdx];
+                            if (!last) return;
+                            var val = ds.data[lastIdx];
+                            var label;
+                            if (ds._isForeign) {
+                                // 값에 단위 금지 — % 는 하단 범례 우측 단위 표기가 담당 (2026-08-02 이전)
+                                // ★밴드·환산은 차트 인스턴스에서 읽는다 (P3 다중 패밀리 — window 전역 폐기.
+                                //   메인 차트만 _cmbAxisBandRef/_cmbAxisConv 보유, 서브패널은 축 기준 폴백)
+                                var _bf = (chart._cmbAxisBandRef || {})[ds.yAxisID || 'y'] || Math.abs(val);
+                                label = fmtUniformFix(val, _bf);
+                            } else if ((chart._cmbMode || 'pct') === 'pct') {
+                                // pct 끝값도 밴드를 따른다 (종전: 항상 정수)
+                                var _bp = (chart._cmbAxisBandRef || {})[ds.yAxisID || 'y'] || Math.abs(val);
+                                label = (val >= 0 ? '+' : '') + fmtUniformFix(val, _bp) + '%';
+                            } else {
+                                // 끝값 라벨: 정수부 4자리(>=1000)부터 소수 제외, 그 외 최대 2자리 (2026-07-16 사용자 확정)
+                                // 끝값 = 숫자만 (억원 시리즈는 축 단위(조/억)로 환산 — 단위는 하단 범례 우측 표기가 담당)
+                                var _f2 = (chart._cmbAxisConv || {})[ds.yAxisID || 'y'] || 1;
+                                var _ax = chart.scales[ds.yAxisID || 'y'] || chart.scales.y;
+                                var _m2 = (chart._cmbAxisBandRef
+                                    ? (chart._cmbAxisBandRef[ds.yAxisID || 'y'] || 0)
+                                    : Math.max(Math.abs(_ax.min || 0), Math.abs(_ax.max || 0))) / _f2;
+                                label = fmtUniformFix(val / _f2, _m2);
+                            }
+                            entries.push({ dotX: last.x, origY: last.y, y: last.y, label: label, color: ds.borderColor });
+                        });
+                        if (entries.length === 0) return;
+                        // y 오름차순 정렬 후 minGap 강제 (위→아래 충돌 시 아래로 밀기)
+                        entries.sort(function(a, b) { return a.origY - b.origY; });
+                        var minGap = 14;
+                        for (var i = 1; i < entries.length; i++) {
+                            if (entries[i].y - entries[i-1].y < minGap) {
+                                entries[i].y = entries[i-1].y + minGap;
+                            }
+                        }
+                        // 차트 영역 밖으로 밀려나갔으면 위쪽으로 역보정
+                        var area = chart.chartArea;
+                        if (area) {
+                            var maxY = area.bottom - 4;
+                            for (var j = entries.length - 1; j > 0; j--) {
+                                if (entries[j].y > maxY) entries[j].y = maxY;
+                                if (entries[j-1].y > entries[j].y - minGap) entries[j-1].y = entries[j].y - minGap;
+                            }
+                        }
+                        // 라벨 x = 우측 축(y1 등) '바깥' 공통 열 (2026-07-21 사용자 확정) —
+                        // 선은 우축에 접한 채 두고, 끝값 숫자는 축 눈금 오른쪽에 그려 눈금과 겹침 원천 차단.
+                        var rightAxesW = 0;
+                        Object.keys(chart.scales).forEach(function(sid) {
+                            var sc = chart.scales[sid];
+                            if (sid !== 'x' && sc && sc.options && sc.options.position === 'right' && sc.width) rightAxesW += sc.width;
+                        });
+                        var labelX = (area ? area.right : 0) + rightAxesW + 4;
+                        ctx.save();
+                        ctx.font = 'bold 15px sans-serif';
+                        ctx.textBaseline = 'middle';
+                        ctx.textAlign = 'left';
+                        entries.forEach(function(e) {
+                            // 리더선: 끝점→라벨 (계열색 55%, web-chart 표준) — 라벨이 축 바깥·충돌회피로
+                            // 밀려도 어느 선의 값인지 읽히게. 이동량이 미미하면 생략.
+                            if (labelX - e.dotX > 10 || Math.abs(e.y - e.origY) > 1) {
+                                ctx.save();
+                                ctx.globalAlpha = 0.6;
+                                ctx.strokeStyle = e.color;
+                                ctx.lineWidth = 2;   // 2026-07-21 사용자: 리더선 더 두껍게 (1→2)
+                                ctx.beginPath();
+                                ctx.moveTo(e.dotX + 4, e.origY);
+                                ctx.lineTo(labelX - 3, e.y);
+                                ctx.stroke();
+                                ctx.restore();
+                            }
+                            ctx.fillStyle = e.color;
+                            // 끝점 동그라미 3px — 라벨은 충돌 회피로 밀릴 수 있으니 실제 점(origY)에 표시
+                            ctx.beginPath();
+                            ctx.arc(e.dotX, e.origY, 3, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.fillText(e.label, labelX, e.y);
+                        });
+                        ctx.restore();
+                    }
+                };
+
+                            var cmbDisp100Plugin = {
+                                id: 'cmbDisp100',
+                                beforeDatasetsDraw: function(chart) {
+                                    var ys = chart.scales.y;
+                                    var area = chart.chartArea;
+                                    if (!ys || !area) return;
+                                    var y100 = ys.getPixelForValue(100);
+                                    if (y100 < area.top || y100 > area.bottom) return;
+                                    var c = chart.ctx;
+                                    c.save();
+                                    c.strokeStyle = '#999';
+                                    c.setLineDash([4, 4]);
+                                    c.lineWidth = 1;
+                                    c.beginPath();
+                                    c.moveTo(area.left, y100);
+                                    c.lineTo(area.right, y100);
+                                    c.stroke();
+                                    c.restore();
+                                }
+                            };
+
+                            // 이격도 고점/저점: 극값 지점에서 오른쪽 끝까지 수평 보조선(점선) + 값 라벨
+                            var cmbDispHiLoPlugin = {
+                                id: 'cmbDispHiLo',
+                                afterDatasetsDraw: function(chart) {
+                                    var area = chart.chartArea, ys = chart.scales.y, ctx = chart.ctx;
+                                    if (!area || !ys) return;
+                                    chart.data.datasets.forEach(function(ds, di) {
+                                        var meta = chart.getDatasetMeta(di);
+                                        if (meta.hidden) return;
+                                        var maxV = -Infinity, minV = Infinity, maxI = -1, minI = -1;
+                                        for (var i = 0; i < ds.data.length; i++) {
+                                            var v = ds.data[i];
+                                            if (v === null || v === undefined || isNaN(v)) continue;
+                                            if (v > maxV) { maxV = v; maxI = i; }
+                                            if (v < minV) { minV = v; minI = i; }
+                                        }
+                                        if (maxI < 0) return;
+                                        [{ v: maxV, i: maxI, up: true }, { v: minV, i: minI, up: false }].forEach(function(pt) {
+                                            var p = meta.data[pt.i];
+                                            if (!p) return;
+                                            var py = ys.getPixelForValue(pt.v);
+                                            ctx.save();
+                                            ctx.strokeStyle = ds.borderColor;
+                                            ctx.globalAlpha = 0.55;
+                                            ctx.setLineDash([4, 3]);
+                                            ctx.lineWidth = 1;
+                                            ctx.beginPath();
+                                            ctx.moveTo(p.x, py);
+                                            ctx.lineTo(area.right, py);
+                                            ctx.stroke();
+                                            ctx.setLineDash([]);
+                                            ctx.globalAlpha = 1;
+                                            ctx.fillStyle = ds.borderColor;
+                                            ctx.beginPath();
+                                            ctx.arc(p.x, py, 2.5, 0, 2 * Math.PI);
+                                            ctx.fill();
+                                            ctx.font = 'bold 11px sans-serif';
+                                            ctx.textAlign = 'left';
+                                            ctx.textBaseline = pt.up ? 'bottom' : 'top';
+                                            ctx.fillText(pt.v.toFixed(1), area.right + 4, py + (pt.up ? -2 : 2));
+                                            ctx.restore();
+                                        });
+                                    });
+                                }
+                            };
+
+                            var cmbRoc0Plugin = {
+                                id: 'cmbRoc0',
+                                beforeDatasetsDraw: function(chart) {
+                                    var ys = chart.scales.y, area = chart.chartArea;
+                                    if (!ys || !area) return;
+                                    var y0 = ys.getPixelForValue(0);
+                                    if (y0 < area.top || y0 > area.bottom) return;
+                                    var c = chart.ctx;
+                                    c.save();
+                                    c.strokeStyle = '#666';
+                                    c.setLineDash([4, 4]);
+                                    c.lineWidth = 1.2;
+                                    c.beginPath();
+                                    c.moveTo(area.left, y0);
+                                    c.lineTo(area.right, y0);
+                                    c.stroke();
+                                    c.restore();
+                                }
+                            };
+
+            function cmbRenderCharts(view) {
+                var commonDates = view.labels;
+                var datasets = view.datasets;
+                var dispDatasets = view.dispDatasets;
+                var rocDatasets = view.rocDatasets;
+                var mode = view.mode;
+                var yEok = view.yEok, y1Eok = view.y1Eok;
+                var _axAssign = view.axAssign;
+                var cmbSeriesUnit = view.unitMap;
+                var cmbChart = view.charts.main, cmbDispChart = view.charts.disp, cmbRocChart = view.charts.roc;
+                // ★P3 파라미터 (기본값 = cmb/DATA — 전부 생략하면 종전과 동일):
+                //   ids: 캔버스·범례·서브패널 DOM id. 패널 id 에 null 을 주면 그 패널 프레임은 건너뜀
+                //        (한 페이지에 두 패밀리가 공존할 때 남의 패널을 만지지 않기 위한 가드).
+                //   xLabel: x축 눈금 포맷터 / logOn: Log 상태 / legendSuffix: 범례 끝 접미(예: '/ USD')
+                var ids = view.ids || {};
+                var _idCanvas = ids.canvas || 'cmbDynamicChart';
+                var _idLegend = ids.legend || 'cmbChartLegend';
+                var _idDispPanel = ids.hasOwnProperty('dispPanel') ? ids.dispPanel : 'cmbDispPanel';
+                var _idDispCanvas = ids.dispCanvas || 'cmbDispChart';
+                var _idRocPanel = ids.hasOwnProperty('rocPanel') ? ids.rocPanel : 'cmbRocPanel';
+                var _idRocCanvas = ids.rocCanvas || 'cmbRocChart';
+                var _xLabel = view.xLabel || window.cmbXLabel;
+                var _logOn = (view.logOn !== undefined) ? view.logOn : window.cmbLogOn;
+
+                // ※범례 생성은 축 단위(yJo/y1Jo, _cmbAxisUnits) 계산 뒤로 이동 (2026-08-02) —
+                //   항목에 단위를 인라인 표기(`고객예탁금(조원) +25.4%`)하려면 조원 승격 판정이 선행돼야 함.
+                var legendEl = document.getElementById(_idLegend);
+                function cmbBuildLegend() {
+                    var legendHTML = datasets.map(function(ds) {
+                        var c = ds.borderColor;
+                        // 설정 기간 변화율: pct 모드는 정규화된 값이라 last 자체가 변화율,
+                        // raw 모드는 (last/first - 1)*100. 첫/마지막 non-null 값으로 계산.
+                        var vals = ds.data.filter(function(v) { return v !== null && v !== undefined && !isNaN(v); });
+                        var pctStr = '';
+                        if (vals.length >= 2) {
+                            var first = vals[0];
+                            var last = vals[vals.length - 1];
+                            var pct, sfx = '%';
+                            // ★원값 모드의 %·%p 단위 시리즈 = 레벨 차이 %p (P2b 규격 정합, BASELINE 결함 5).
+                            //   2026-07-19 확정 규격이 pct 모드에만 적용돼 있었다 — 나눗셈 %는 0 근처
+                            //   값에서 발산한다 (괴리율 0.045→-5.33 이 -1,699% 로 표기되던 건).
+                            //   MA 파생선은 단위 미등록 → 같은 축 주 시리즈의 단위를 따른다.
+                            var _lu = cmbSeriesUnit[ds.label] || '';
+                            if (!_lu) {
+                                for (var _ai = 0; _ai < _axAssign.length; _ai++) {
+                                    if (_axAssign[_ai].ax === (ds.yAxisID || 'y')) { _lu = cmbSeriesUnit[_axAssign[_ai].name] || ''; break; }
+                                }
+                            }
+                            if (mode === 'pct') {
+                                pct = last - first;
+                            } else if (_lu === '%' || _lu === '%p') {
+                                pct = last - first;
+                                sfx = '%p';
+                            } else if (first !== 0) {
+                                pct = (last / first - 1) * 100;
+                            } else {
+                                pct = 0;
+                            }
+                            pctStr = '<span>' + (pct >= 0 ? '+' : '') + fmtUniformFix(pct, Math.abs(pct)) + sfx + '</span>';
+                        }
+                        // 축 단위를 시리즈명 바로 뒤에 표기 (2026-08-02 사용자 확정 — 축 상단 주석 폐지).
+                        // MA 등 파생선은 cmbSeriesUnit 미등록이라 자동으로 단위 없음.
+                        var unitStr = (mode !== 'pct') ? (cmbUnitLabel(ds.label, (ds.yAxisID === 'y1') ? y1Jo : yJo) || '') : '';
+                        return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:14px;">' +
+                            '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
+                            ds.label + unitStr + pctStr + '</span>';
+                    }).join('');
+                    // 이격도는 기간 변화율 대신 마지막 값 표시 (100 기준 과열/침체 지표)
+                    legendHTML += dispDatasets.map(function(ds) {
+                        var vals = ds.data.filter(function(v) { return v !== null && v !== undefined && !isNaN(v); });
+                        var lastStr = vals.length ? '<span>' + fmtUniformFix(vals[vals.length - 1], Math.abs(vals[vals.length - 1])) + '</span>' : '';
+                        return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:14px;">' +
+                            '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + ds.borderColor + ';"></span>' +
+                            ds.label + lastStr + '</span>';
+                    }).join('');
+                    // RoC 계열도 마지막 값 표기 (단위는 계열별 _rocUnit — RoC² 는 항상 %p)
+                    legendHTML += rocDatasets.map(function(ds) {
+                        var vals = ds.data.filter(function(v) { return v !== null && v !== undefined && !isNaN(v); });
+                        var lastStr = vals.length ? '<span>' + fmtUniformFix(vals[vals.length - 1], Math.abs(vals[vals.length - 1])) + (ds._rocUnit || '') + '</span>' : '';
+                        return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:14px;">' +
+                            '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + ds.borderColor + ';"></span>' +
+                            ds.label + lastStr + '</span>';
+                    }).join('');
+                    // 범례 접미 표기 (P3) — 예: INDICES USD 모드의 '/ USD'. 시리즈 항목이 아니라
+                    // 컬러닷 없는 순수 텍스트 span — Download 합성 범례에서도 접미로 인식된다.
+                    if (view.legendSuffix && datasets.length > 0) {
+                        legendHTML += '<span style="font-size:13px;color:#555;font-weight:600;margin-left:4px;">' + view.legendSuffix + '</span>';
+                    }
+                    if (legendEl) legendEl.innerHTML = legendHTML;
+                }
+
+                var _yMaxAbs = 0, _y1MaxAbs = 0, _yMinPos = Infinity, _y1MinPos = Infinity;
+                var _yHasNonPos = false, _y1HasNonPos = false;   // 음수·0 포함 축은 로그축 성립 불가 → 선형 폴백
+                datasets.forEach(function(ds) {
+                    if (ds._skipEndLabel) return;
+                    ds.data.forEach(function(v) {
+                        if (v === null || v === undefined) return;
+                        var a = Math.abs(v);
+                        if (ds.yAxisID === 'y1') {
+                            if (a > _y1MaxAbs) _y1MaxAbs = a;
+                            if (v > 0 && v < _y1MinPos) _y1MinPos = v;
+                            if (v <= 0) _y1HasNonPos = true;
+                        } else {
+                            if (a > _yMaxAbs) _yMaxAbs = a;
+                            if (v > 0 && v < _yMinPos) _yMinPos = v;
+                            if (v <= 0) _yHasNonPos = true;
+                        }
+                    });
+                });
+                var yJo = yEok && _yMaxAbs >= 10000, y1Jo = y1Eok && _y1MaxAbs >= 10000;
+                // 시리즈별 단위 맵(CMB_SERIES_UNITS) 기반 축 주석 — 억원은 1조 이상 시 (조원) 승격
+                function cmbUnitLabel(name, jo) {
+                    var u = cmbSeriesUnit[name];
+                    if (!u) return null;
+                    if (u === '억원') return jo ? '(조원)' : '(억원)';
+                    return '(' + u + ')';
+                }
+                // ★축 단위 주석은 perSeries 순서가 아니라 '실제 yAxisID 배정'에서 역산한다 (2026-07-28).
+                //   isForeign 은 y 로 강제되므로 순서로 매기면 데이터 없는 y1 에 단위만 뜨는 어긋남이 났다.
+                //   한 축에 서로 다른 단위가 얹히면 오표기 대신 생략한다.
+                function cmbAxisUnitFor(ax, jo) {
+                    var us = [];
+                    _axAssign.forEach(function(a) {
+                        if (a.ax !== ax) return;
+                        var u = cmbUnitLabel(a.name, jo);
+                        if (u && us.indexOf(u) < 0) us.push(u);
+                    });
+                    return us.length === 1 ? us[0] : null;
+                }
+                // ★P3: 축 단위·환산·밴드는 window 전역이 아니라 지역 변수로 계산해 '메인 차트
+                //   인스턴스'에 부착한다 (update 직전). 전역이면 한 페이지의 다른 패밀리(idx 등)
+                //   끝값·눈금이 남의 밴드를 읽는 오염이 생긴다.
+                var _cmbAxisUnits = {
+                    y: (mode !== 'pct') ? cmbAxisUnitFor('y', yJo) : null,
+                    y1: (mode === 'raw2') ? cmbAxisUnitFor('y1', y1Jo) : null
+                };
+                cmbBuildLegend();   // 단위 인라인 표기 때문에 조원 승격(yJo/y1Jo) 판정 뒤에 렌더
+                // 축별 표시 환산 계수 — MA 등 파생선도 같은 축 규칙을 타도록 축 기준으로 기록
+                var _cmbAxisConv = { y: (yEok && yJo) ? 10000 : 1, y1: (y1Eok && y1Jo) ? 10000 : 1 };
+                // ★자릿수 밴드 기준 = 축의 '최종 끝값' (2026-07-28 사용자 룰 변경. 종전 = 축 최대값).
+                //   최대값 기준이면 기간에 큰 값이 한 번만 있어도 축 전체가 정수로 뭉개졌다
+                //   (예: ETS 거래대금 끝값 67.56 인데 구간 최대 225.6 -> 68 로 표시).
+                //   MA·이격도 파생선은 제외하고 축에 처음 배정된 주 시리즈의 마지막 실측값을 쓴다.
+                var _yLastAbs = null, _y1LastAbs = null;
+                datasets.forEach(function(ds) {
+                    if (ds._skipEndLabel) return;
+                    if (/^MA\d/.test(ds.label || '') || /^이격도/.test(ds.label || '')) return;
+                    var _ax = (ds.yAxisID === 'y1') ? 'y1' : 'y';
+                    if (_ax === 'y1' ? (_y1LastAbs !== null) : (_yLastAbs !== null)) return;
+                    for (var _i = ds.data.length - 1; _i >= 0; _i--) {
+                        var _v = ds.data[_i];
+                        if (_v === null || _v === undefined || isNaN(_v)) continue;
+                        if (_ax === 'y1') { _y1LastAbs = Math.abs(_v); } else { _yLastAbs = Math.abs(_v); }
+                        break;
+                    }
+                });
+                // 끝값을 못 찾으면(전 구간 결측) 종전대로 최대값으로 폴백
+                var _cmbAxisBandRef = { y: (_yLastAbs === null ? _yMaxAbs : _yLastAbs),
+                                        y1: (_y1LastAbs === null ? _y1MaxAbs : _y1LastAbs) };
+
+                // 음수·0 포함 시리즈(괴리율 등)는 Log 자동 무시 — 로그축에 음수가 들어가면
+                // 선·끝값 라벨이 축 하단으로 뭉개진다 (2026-08-02 실사고: 삼성전자 현선물 괴리율 -5.33).
+                var yType = (mode === 'pct' || _yHasNonPos) ? 'linear' : (_logOn === false ? 'linear' : 'logarithmic');
+                var yLogPad = yType === 'logarithmic' ? cmbLogPad(_yMinPos, _yMaxAbs) : null;
+                var y1Type = (_logOn === false || _y1HasNonPos) ? 'linear' : 'logarithmic';
+                var y1LogPad = y1Type === 'logarithmic' ? cmbLogPad(_y1MinPos, _y1MaxAbs) : null;
+                var scalesConfig = {
+                    x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ return _xLabel(this.getLabelForValue(val)); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
+                    y: {
+                        type: yType,
+                        position: 'left',
+                        grace: '8%',
+                        min: yLogPad ? yLogPad.min : undefined,
+                        max: yLogPad ? yLogPad.max : undefined,
+                        afterBuildTicks: cmbEnsureBoundTicks,
+                        ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return mode === 'pct' ? v + '%' : cmbTickFmt(v, this, yEok && yJo); }, font: { size: 15 }, color: '#000' },
+                        grid: { color: '#eee' },
+                        border: { color: '#000', width: 2 }
+                    }
+                };
+                if (mode === 'raw2' && datasets.some(function(ds){ return ds.yAxisID === 'y1'; })) {
+                    scalesConfig.y1 = {
+                        type: y1Type,
+                        position: 'right',
+                        grace: '8%',
+                        min: y1LogPad ? y1LogPad.min : undefined,
+                        max: y1LogPad ? y1LogPad.max : undefined,
+                        afterBuildTicks: cmbEnsureBoundTicks,
+                        ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return cmbTickFmt(v, this, y1Eok && y1Jo); }, font: { size: 15 }, color: '#000' },
+                        grid: { drawOnChartArea: false },
+                        border: { color: '#000', width: 2 }
+                    };
+                }
+
+                // 툴팁도 눈금·끝값과 같은 밴드(_cmbAxisBandRef)를 따른다 (2026-07-28).
+                // ★억원 계열의 전체형(`34조 2,669억`)만 사용자 확정 예외 — 나머지는 값에 단위를 붙이지 않는다.
+                var tooltipLabel = function(ctx) {
+                    if (ctx.parsed.y === null || ctx.parsed.y === undefined) return ctx.dataset.label + ': -';
+                    var _tax = ctx.dataset.yAxisID || 'y';
+                    var _tb = _cmbAxisBandRef[_tax] || 0;   // 지역 클로저 캡처 (P3 — window 전역 폐기)
+                    if (mode === 'pct') return ctx.dataset.label + ': ' + fmtUniformFix(ctx.parsed.y, _tb) + '%';
+                    var _eokAx = _tax === 'y1' ? y1Eok : yEok;
+                    if (_eokAx) return ctx.dataset.label + ': ' + fmtEokFull(ctx.parsed.y);
+                    var _tf = _cmbAxisConv[_tax] || 1;
+                    return ctx.dataset.label + ': ' + fmtUniformFix(ctx.parsed.y / _tf, _tb / _tf);
+                };
+
+                // 우측 end-label(예: 예탁금 1,199,264) 잘림 방지 — 최장 라벨 폭만큼 오른쪽 패딩 동적 확보
+                var _measCtx = document.createElement('canvas').getContext('2d');
+                _measCtx.font = 'bold 15px sans-serif';
+                var _maxLabelW = 0;
+                datasets.forEach(function(ds) {
+                    if (ds._skipEndLabel) return;
+                    var lv = null;
+                    for (var _k = ds.data.length - 1; _k >= 0; _k--) { if (ds.data[_k] !== null && ds.data[_k] !== undefined) { lv = ds.data[_k]; break; } }
+                    if (lv === null) return;
+                    var _lbl;
+                    if (ds._isForeign) { _lbl = lv.toFixed(1) + '%'; }
+                    else if (mode === 'pct') { var _r = Math.sign(lv) * Math.round(Math.abs(lv)); _lbl = (_r >= 0 ? '+' : '') + _r + '%'; }
+                    else { var _mf = (ds.yAxisID === 'y1' ? (y1Eok && y1Jo) : (yEok && yJo)) ? 10000 : 1; _lbl = fmtUniformFix(lv / _mf, (ds.yAxisID === 'y1' ? _y1MaxAbs : _yMaxAbs) / _mf); }
+                    var _w = _measCtx.measureText(_lbl).width;
+                    if (_w > _maxLabelW) _maxLabelW = _w;
+                });
+                var _rightPad = Math.max(60, Math.ceil(_maxLabelW) + 12);
+
+                if (cmbChart) {
+                    // 재사용: 인스턴스 유지하고 데이터/축/툴팁만 교체 (destroy+new 멈칫 제거)
+                    cmbChart.options.layout.padding.right = _rightPad;
+                    cmbChart.options.layout.padding.top = 6;
+                    cmbChart.data.labels = commonDates;
+                    cmbChart.data.datasets = datasets;
+                    // scales 전체 교체 — 이전 raw2의 y1축 잔재 제거 후 새 구성 적용
+                    var _sc = cmbChart.options.scales;
+                    Object.keys(_sc).forEach(function(k){ delete _sc[k]; });
+                    Object.keys(scalesConfig).forEach(function(k){ _sc[k] = scalesConfig[k]; });
+                    // tooltip 콜백은 mode를 캡처하므로 매번 교체
+                    cmbChart.options.plugins.tooltip.callbacks.label = tooltipLabel;
+                    cmbChart._cmbTipLabel = tooltipLabel;   // 클릭 핀 카드가 같은 포맷 사용
+                    cmbChart._cmbMode = mode;   // update 전 대입 — 첫 draw가 endLabel에서 읽음
+                    // 밴드·환산·단위는 update 전에 인스턴스에 부착 — 눈금 빌드가 읽는다 (P3)
+                    cmbChart._cmbAxisBandRef = _cmbAxisBandRef;
+                    cmbChart._cmbAxisConv = _cmbAxisConv;
+                    cmbChart._cmbAxisUnits = _cmbAxisUnits;
+                    cmbChart._cmbPinHost = true;
+                    cmbChart.update('none');
+                } else {
+                    cmbChart = new Chart(document.getElementById(_idCanvas), {
+                        type: 'line',
+                        data: { labels: commonDates, datasets: datasets },
+                        plugins: [cmbEndLabelPlugin, cmbCrosshairPlugin, cmbPinPlugin],
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            devicePixelRatio: 2 * (window.devicePixelRatio || 1),
+                            layout: { padding: { right: _rightPad, top: 6 } },
+                            interaction: { mode: 'index', intersect: false },
+                            plugins: {
+                                legend: { display: false },
+                                // animation:false — 동기 툴팁이 draw()만으로 위치 갱신되도록 (애니메이션 속성이면 제자리에 멈춤)
+                                // 글씨 +1px (12→13, 2026-07-21 사용자 확정 — 클릭 핀 카드와 동일 크기)
+                                // 카드 제목 = 원본 날짜(YYYY-MM-DD) — 축약(YY/MM)은 x축 눈금 전용 (2026-08-02 사용자 확정)
+                                tooltip: { animation: false, titleFont: { size: 13 }, bodyFont: { size: 13 }, callbacks: { title: function(cs){ return cs.length ? String(cs[0].label) : ''; }, label: tooltipLabel } }
+                            },
+                            scales: scalesConfig
+                        }
+                    });
+                    cmbChart._cmbMode = mode;   // 생성자 첫 draw는 mode 미설정으로 끝값이 +N% 오표기 -> 재렌더로 교정
+                    cmbChart._cmbTipLabel = tooltipLabel;   // 클릭 핀 카드가 같은 포맷 사용
+                    // 생성자 첫 draw 는 밴드 미부착(폴백 자릿수)으로 지나가고, 아래 update 가 교정한다
+                    cmbChart._cmbAxisBandRef = _cmbAxisBandRef;
+                    cmbChart._cmbAxisConv = _cmbAxisConv;
+                    cmbChart._cmbAxisUnits = _cmbAxisUnits;
+                    cmbChart._cmbPinHost = true;
+                    cmbChart.update('none');
+                }
+
+                // 이격도 서브패널 — 100 기준선 점선 + 메인 y축 폭에 맞춰 x축 정렬
+                var dispPanel = _idDispPanel ? document.getElementById(_idDispPanel) : null;
+                if (dispPanel) {
+                    if (dispDatasets.length > 0) {
+                        dispPanel.style.display = '';
+                        var mainYWidth = (cmbChart.scales && cmbChart.scales.y) ? cmbChart.scales.y.width : 0;
+                        if (cmbDispChart) {
+                            // 재사용: 데이터·y축폭만 갱신
+                            cmbDispChart.data.labels = commonDates;
+                            cmbDispChart.data.datasets = dispDatasets;
+                            cmbDispChart.options.scales.y.afterFit = function(scale) { if (mainYWidth > 0) scale.width = mainYWidth; };
+                            cmbDispChart.update('none');
+                        } else {
+                            cmbDispChart = new Chart(document.getElementById(_idDispCanvas), {
+                                type: 'line',
+                                data: { labels: commonDates, datasets: dispDatasets },
+                                plugins: [cmbEndLabelPlugin, cmbDisp100Plugin, cmbDispHiLoPlugin, cmbCrosshairPlugin],
+                                options: {
+                                    responsive: true, maintainAspectRatio: false,
+                                    devicePixelRatio: 2 * (window.devicePixelRatio || 1),
+                                    layout: { padding: { right: 60 } },
+                                    interaction: { mode: 'index', intersect: false },
+                                    plugins: {
+                                        legend: { display: false },
+                                        tooltip: { animation: false, callbacks: { label: function(ctx) {
+                                            if (ctx.parsed.y === null || ctx.parsed.y === undefined) return ctx.dataset.label + ': -';
+                                            return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1);
+                                        } } }
+                                    },
+                                    scales: {
+                                        x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val){ return _xLabel(this.getLabelForValue(val)); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
+                                        y: {
+                                            type: 'linear',
+                                            position: 'left',
+                                            grace: '8%',
+                        afterBuildTicks: cmbEnsureBoundTicks,
+                                            afterFit: function(scale) { if (mainYWidth > 0) scale.width = mainYWidth; },
+                                            ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return cmbTickFmt(v, this, false); }, font: { size: 15 }, color: '#000' },
+                                            grid: { color: '#eee' },
+                                            border: { color: '#000', width: 2 }
+                                        }
+                                    }
+                                }
+                            });
+                            cmbDispChart._cmbMode = 'raw1';   // 생성자 첫 draw 전 대입 + 재렌더 (B와 동일 사유)
+                            cmbDispChart.update('none');
+                        }
+                    } else {
+                        dispPanel.style.display = 'none';
+                        if (cmbDispChart) { cmbDispChart.destroy(); cmbDispChart = null; }
+                    }
+                }
+
+                // ── RoC² 서브패널 — 0 기준선 점선 + 메인 y축 폭에 맞춰 x축 정렬 ──
+                //    (이격도 패널과 동일 규격: 자기 x축 보유, 크로스헤어 동기, Download 합성 대상)
+                var rocPanel = _idRocPanel ? document.getElementById(_idRocPanel) : null;
+                if (rocPanel) {
+                    if (rocDatasets.length > 0) {
+                        rocPanel.style.display = '';
+                        var rocYWidth = (cmbChart.scales && cmbChart.scales.y) ? cmbChart.scales.y.width : 0;
+                        var rocTip = function(ctx) {
+                            if (ctx.parsed.y === null || ctx.parsed.y === undefined) return ctx.dataset.label + ': -';
+                            return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(2) + (ctx.dataset._rocUnit || '%p');
+                        };
+                        if (cmbRocChart) {
+                            cmbRocChart.data.labels = commonDates;
+                            cmbRocChart.data.datasets = rocDatasets;
+                            cmbRocChart.options.plugins.tooltip.callbacks.label = rocTip;
+                            cmbRocChart._cmbTipLabel = rocTip;
+                            cmbRocChart.options.scales.y.afterFit = function(scale) { if (rocYWidth > 0) scale.width = rocYWidth; };
+                            cmbRocChart.update('none');
+                        } else {
+                            cmbRocChart = new Chart(document.getElementById(_idRocCanvas), {
+                                type: 'line',
+                                data: { labels: commonDates, datasets: rocDatasets },
+                                plugins: [cmbEndLabelPlugin, cmbRoc0Plugin, cmbCrosshairPlugin, cmbAxisUnitPlugin],
+                                options: {
+                                    responsive: true, maintainAspectRatio: false,
+                                    devicePixelRatio: 2 * (window.devicePixelRatio || 1),
+                                    // top = 축 위 단위 주석 자리. 패널(h=200)이라 메인(34)보다 얕게 준다.
+                                    layout: { padding: { right: 60, top: 24 } },
+                                    interaction: { mode: 'index', intersect: false },
+                                    plugins: {
+                                        legend: { display: false },
+                                        tooltip: { animation: false, titleFont: { size: 13 }, bodyFont: { size: 13 },
+                                            callbacks: {
+                                                title: function(cs){ return cs.length ? String(cs[0].label) : ''; },
+                                                label: rocTip
+                                            } }
+                                    },
+                                    scales: {
+                                        x: { type: 'category', ticks: { maxTicksLimit: 6, callback: function(val){ return _xLabel(this.getLabelForValue(val)); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
+                                        y: {
+                                            type: 'linear',
+                                            position: 'left',
+                                            grace: '8%',
+                                            // ★0 을 항상 축 범위에 포함 (2026-07-30 사용자 요청) — RoC² 는 부호가
+                                            //   곧 가속/감속이라 0선이 보여야 둔화를 판독할 수 있다. 종전엔 값이
+                                            //   전부 한쪽 부호면 0 이 범위 밖으로 나가 cmbRoc0Plugin 이 0선 그리기를
+                                            //   건너뛰었다(area.top~bottom 밖이면 return).
+                                            beginAtZero: true,
+                                            afterBuildTicks: cmbEnsureBoundTicks,
+                                            afterFit: function(scale) { if (rocYWidth > 0) scale.width = rocYWidth; },
+                                            // ★눈금은 숫자만. 단위 '%p' 는 축 최상단 위에 1회 표기한다(아래 _cmbAxisUnits).
+                                            //   y축 폭은 메인 차트와의 픽셀 정렬 때문에 afterFit 으로 고정돼 있어서,
+                                            //   눈금에 단위를 붙이면 폭을 넘어가 글씨가 잘렸다(2026-07-30 사용자 지적).
+                                            //   자릿수는 사이트 표준 fmtByMag(|v|<10 둘째, 10~999 첫째, 1000+ 정수).
+                                            ticks: { maxTicksLimit: 6, autoSkip: false, callback: function(v){ return fmtByMag(v); }, font: { size: 15 }, color: '#000' },
+                                            grid: { color: '#eee' },
+                                            border: { color: '#000', width: 2 }
+                                        }
+                                    }
+                                }
+                            });
+                            cmbRocChart._cmbMode = 'raw1';   // 끝값 라벨 = 원값 포맷 (이격도 패널과 동일)
+                            cmbRocChart._cmbTipLabel = rocTip;
+                            // RoC² 는 정의상 항상 %p — 축 위에 1회 표기(눈금엔 숫자만)
+                            cmbRocChart._cmbAxisUnits = { y: '(%p)', y1: null };
+                            cmbRocChart._cmbAxisUnitDy = 10;   // 패널은 여백이 얕아 메인(20)보다 가깝게
+                            cmbRocChart.update('none');
+                        }
+                    } else {
+                        rocPanel.style.display = 'none';
+                        if (cmbRocChart) { cmbRocChart.destroy(); cmbRocChart = null; }
+                    }
+                }
+                // ── 패밀리 배선 (P3) — 호버·핀 상태와 피어 목록을 이 호출로 묶인 차트들에 공유.
+                //    재사용 경로에서는 기존 상태 객체 유지 (핀 날짜·호버가 리빌드에도 살아남는다 —
+                //    종전 전역 상태와 동일한 수명).
+                var _fam = (view.charts.main && view.charts.main._cmbFamily)
+                    || (cmbChart && cmbChart._cmbFamily)
+                    || { hover: { idx: null, yPx: null, activeId: null }, pin: { date: null }, peers: [] };
+                _fam.peers = [cmbChart, cmbDispChart, cmbRocChart].filter(function(c) { return !!c; });
+                _fam.peers.forEach(function(c) { c._cmbFamily = _fam; });
+                return { main: cmbChart, disp: cmbDispChart, roc: cmbRocChart };
+            }
+
+        </script>
+  <script>
+  (function(){
+    var D = {"labels": ["2026-04-29", "2026-04-30", "2026-05-04", "2026-05-06", "2026-05-07", "2026-05-08", "2026-05-11", "2026-05-13", "2026-05-14", "2026-05-15", "2026-05-18", "2026-05-19", "2026-05-20", "2026-05-21", "2026-05-24", "2026-05-25", "2026-05-26", "2026-05-27", "2026-06-01", "2026-06-02", "2026-06-03", "2026-06-04", "2026-06-08", "2026-06-09", "2026-06-10", "2026-06-11", "2026-06-16", "2026-06-25", "2026-06-26", "2026-06-29", "2026-06-30", "2026-07-01", "2026-07-02", "2026-07-03", "2026-07-04", "2026-07-05", "2026-07-06"], "datasets": [{"label": "시그니엘 서울", "data": [570.0, 646.0, 570.0, 580.0, 580.0, 650.0, 630.0, 700.0, 720.0, 800.0, 850.0, 820.0, 780.0, 700.0, 700.0, 600.0, 1050.0, 570.0, 665.0, 636.5, 598.5, 630.0, 627.0, 620.0, 636.5, 722.0, 722.0, 720.0, 765.0, 1000.0, 1000.0, 945.0, 850.0, 1100.0, 1150.0, 700.0, 700.0], "borderColor": "#1428A0", "backgroundColor": "transparent", "borderWidth": 3, "borderJoinStyle": "round", "borderCapStyle": "round", "pointRadius": 0, "tension": 0.4, "cubicInterpolationMode": "monotone", "spanGaps": true}, {"label": "그랜드 하얏트 서울", "data": [null, 841.5, 371.4, 445.4, 841.5, 612.0, 382.5, 382.5, 382.5, 382.5, null, 398.6, 765.0, 739.5, 382.5, 293.2, 369.8, 280.5, 389.3, 833.0, 836.0, 704.0, 1020.0, 990.0, 990.0, 907.0, 940.0, 624.0, 698.0, 698.0, 1020.0, 914.0, 993.0, 659.0, null, 766.0, 399.0], "borderColor": "#0072CE", "backgroundColor": "transparent", "borderWidth": 3, "borderJoinStyle": "round", "borderCapStyle": "round", "pointRadius": 0, "tension": 0.4, "cubicInterpolationMode": "monotone", "spanGaps": true}, {"label": "롯데호텔 서울", "data": [540.0, 600.0, 501.5, 535.5, 544.0, 518.5, 600.0, 600.0, 590.0, 1120.0, 660.0, 640.0, 700.0, 880.0, null, 600.0, 520.0, 456.0, 590.0, 590.0, 600.0, null, 680.0, null, 600.0, 610.0, 720.0, 580.0, 680.0, 1190.0, null, null, 920.0, 1970.0, null, 500.0, 460.0], "borderColor": "#00854A", "backgroundColor": "transparent", "borderWidth": 3, "borderJoinStyle": "round", "borderCapStyle": "round", "pointRadius": 0, "tension": 0.4, "cubicInterpolationMode": "monotone", "spanGaps": true}, {"label": "글래드 여의도", "data": [176.0, 198.3, 215.8, 187.0, 270.5, 455.0, 210.0, 268.3, 373.3, 326.7, 186.7, 245.0, 245.0, 315.0, 180.8, 281.2, 221.7, 204.2, 221.7, 218.7, 213.3, 330.7, 202.7, null, 213.3, 266.7, 213.3, 730.0, 1070.0, 213.3, 196.3, 217.0, 310.0, 351.3, 382.3, 231.0, 199.5], "borderColor": "#E0001B", "backgroundColor": "transparent", "borderWidth": 3, "borderJoinStyle": "round", "borderCapStyle": "round", "pointRadius": 0, "tension": 0.4, "cubicInterpolationMode": "monotone", "spanGaps": true}, {"label": "시그니엘 부산", "data": [401.8, 343.0, 352.8, 362.6, 362.6, 460.6, 431.2, 431.2, 513.0, 540.0, 510.0, 530.0, 450.0, 400.0, 530.0, 520.0, 650.0, 500.0, null, 420.0, 470.0, 600.0, 490.0, null, 470.0, 550.0, 405.0, 338.3, 617.5, 475.0, 456.0, 390.0, 590.0, 256.7, 640.0, 630.0, 640.0], "borderColor": "#FF8200", "backgroundColor": "transparent", "borderWidth": 3, "borderJoinStyle": "round", "borderCapStyle": "round", "pointRadius": 0, "tension": 0.4, "cubicInterpolationMode": "monotone", "spanGaps": true}, {"label": "파라다이스 호텔 부산", "data": [250.0, 290.0, 250.0, 250.0, 350.0, 360.0, 620.0, 390.0, 370.0, 450.0, 370.0, 310.0, 310.0, null, 350.0, 340.0, 310.0, 330.0, 280.0, 310.0, 310.0, null, 410.0, null, 350.0, 680.0, 350.0, 670.0, 500.0, 340.0, 484.5, 310.0, 700.0, 450.0, null, 750.0, 750.0], "borderColor": "#6A1B9A", "backgroundColor": "transparent", "borderWidth": 3, "borderJoinStyle": "round", "borderCapStyle": "round", "pointRadius": 0, "tension": 0.4, "cubicInterpolationMode": "monotone", "spanGaps": true}, {"label": "그랜드 하얏트 제주", "data": [351.0, 354.0, 368.0, 368.0, 2108.0, 2208.0, 348.0, 2208.0, 485.0, 448.0, 348.0, 368.0, 428.0, 2108.0, 348.0, 558.0, 348.0, 348.0, 348.0, 328.0, 328.0, 348.0, 328.0, null, 368.0, null, 368.0, 597.0, null, 680.9, 680.9, 727.9, 587.0, 747.9, 617.0, 688.0, null], "borderColor": "#00838F", "backgroundColor": "transparent", "borderWidth": 3, "borderJoinStyle": "round", "borderCapStyle": "round", "pointRadius": 0, "tension": 0.4, "cubicInterpolationMode": "monotone", "spanGaps": true}, {"label": "롯데호텔 제주", "data": [280.0, 280.0, 280.0, null, 260.0, 310.0, 400.0, 360.0, 360.0, 380.0, 280.0, 300.0, 300.0, 320.0, 360.0, 380.0, 350.0, 340.0, 320.0, 470.0, 350.0, 690.0, 370.0, null, 370.0, 440.0, 420.0, null, 500.0, 350.0, 400.0, 500.0, 500.0, 450.0, 470.0, 450.0, 450.0], "borderColor": "#5D4037", "backgroundColor": "transparent", "borderWidth": 3, "borderJoinStyle": "round", "borderCapStyle": "round", "pointRadius": 0, "tension": 0.4, "cubicInterpolationMode": "monotone", "spanGaps": true}, {"label": "힐튼 경주", "data": [null, 187.0, 238.0, 231.2, 238.0, 235.7, 186.2, 191.2, 170.0, 289.0, 180.4, 170.0, 193.2, 195.5, 170.0, 170.0, 193.2, 193.2, 170.0, 190.0, 225.5, 256.5, 200.1, null, 226.1, 243.2, 237.5, null, 305.6, 243.9, 267.4, null, 446.3, 251.0, 398.1, 255.3, 264.8], "borderColor": "#C2185B", "backgroundColor": "transparent", "borderWidth": 3, "borderJoinStyle": "round", "borderCapStyle": "round", "pointRadius": 0, "tension": 0.4, "cubicInterpolationMode": "monotone", "spanGaps": true}, {"label": "포시즌스 호텔 서울", "data": [920.0, 930.0, 930.0, null, 930.0, 920.0, 940.0, null, 1010.0, 1190.0, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 1200.0, null], "borderColor": "#558B2F", "backgroundColor": "transparent", "borderWidth": 3, "borderJoinStyle": "round", "borderCapStyle": "round", "pointRadius": 0, "tension": 0.4, "cubicInterpolationMode": "monotone", "spanGaps": true}]};
+    cmbRenderCharts({
+      labels: D.labels, datasets: D.datasets, dispDatasets: [], rocDatasets: [],
+      mode: 'raw1', yEok: false, y1Eok: false,
+      axAssign: D.datasets.map(function(ds) { return { name: ds.label, ax: 'y' }; }),
+      unitMap: {},
+      charts: { main: null, disp: null, roc: null },
+      ids: { canvas: 'hotelAdrChart', legend: 'hotelAdrLegend', dispPanel: null, rocPanel: null },
+      xLabel: function(d) { return d ? d.slice(2, 4) + '/' + d.slice(5, 7) : ''; },
+      legendSuffix: '/ 천원'
+    });
+  })();
+  </script>
+
+</div>
+</body>
+</html>
