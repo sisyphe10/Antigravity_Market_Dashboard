@@ -533,7 +533,7 @@ body{margin:0}
     <nav class="topnav"><div class="topnav-inner"><a href="index.html" class="topnav-brand">AGE OF EMERGENCE</a><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="watchlist/" class="topnav-tab">Watchlist</a><div class="topnav-dropdown"><a href="watchlist/" class="topnav-sub">Quotes</a><a href="universe.html" class="topnav-sub">Universe</a><a href="universe_lab.html" class="topnav-sub">Universe Lab</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab active">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub active">Data</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="sisyphe/journal.html" class="topnav-tab">Journal</a></div><div class="topnav-item"><a href="sisyphe/journal.html#weekly" class="topnav-tab">Weekly</a></div><div class="topnav-item"><a href="wiki/library" class="topnav-tab">Earnings</a></div><div class="topnav-item"><a href="wiki/" class="topnav-tab">Wiki</a></div><div class="topnav-item"><a href="sisyphe/memento.html" class="topnav-tab">Memento</a></div><div class="topnav-item"><a href="sisyphe/dashboard.html" class="topnav-tab">Ledger</a></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
     <aside class="sidebar"><a href="market.html" class="sidebar-link active">Data</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
     <header style="margin:0;padding:8px 28px 0;text-align:right;">
-        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-08-02 10:45:58 KST</div>
+        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-08-02 10:56:08 KST</div>
     </header>
 
     <div class="mkt-subtabs">
@@ -2689,6 +2689,7 @@ if (typeof window._h2cFreeze !== 'function') {
                 }
 
                 var _yMaxAbs = 0, _y1MaxAbs = 0, _yMinPos = Infinity, _y1MinPos = Infinity;
+                var _yHasNonPos = false, _y1HasNonPos = false;   // 음수·0 포함 축은 로그축 성립 불가 → 선형 폴백
                 datasets.forEach(function(ds) {
                     if (ds._skipEndLabel) return;
                     ds.data.forEach(function(v) {
@@ -2697,9 +2698,11 @@ if (typeof window._h2cFreeze !== 'function') {
                         if (ds.yAxisID === 'y1') {
                             if (a > _y1MaxAbs) _y1MaxAbs = a;
                             if (v > 0 && v < _y1MinPos) _y1MinPos = v;
+                            if (v <= 0) _y1HasNonPos = true;
                         } else {
                             if (a > _yMaxAbs) _yMaxAbs = a;
                             if (v > 0 && v < _yMinPos) _yMinPos = v;
+                            if (v <= 0) _yHasNonPos = true;
                         }
                     });
                 });
@@ -2757,9 +2760,11 @@ if (typeof window._h2cFreeze !== 'function') {
                     var pad = (lhi - llo) * (0.05 / 0.90) || 0.02;
                     return { min: Math.pow(10, llo - pad), max: Math.pow(10, lhi + pad) };
                 }
-                var yType = (mode === 'pct') ? 'linear' : (window.cmbLogOn === false ? 'linear' : 'logarithmic');
+                // 음수·0 포함 시리즈(괴리율 등)는 Log 자동 무시 — 로그축에 음수가 들어가면
+                // 선·끝값 라벨이 축 하단으로 뭉개진다 (2026-08-02 실사고: 삼성전자 현선물 괴리율 -5.33).
+                var yType = (mode === 'pct' || _yHasNonPos) ? 'linear' : (window.cmbLogOn === false ? 'linear' : 'logarithmic');
                 var yLogPad = yType === 'logarithmic' ? cmbLogPad(_yMinPos, _yMaxAbs) : null;
-                var y1Type = window.cmbLogOn === false ? 'linear' : 'logarithmic';
+                var y1Type = (window.cmbLogOn === false || _y1HasNonPos) ? 'linear' : 'logarithmic';
                 var y1LogPad = y1Type === 'logarithmic' ? cmbLogPad(_y1MinPos, _y1MaxAbs) : null;
                 var scalesConfig = {
                     x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ return window.cmbXLabel(this.getLabelForValue(val)); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
