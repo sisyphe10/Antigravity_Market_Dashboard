@@ -533,7 +533,7 @@ body{margin:0}
     <nav class="topnav"><div class="topnav-inner"><a href="index.html" class="topnav-brand">AGE OF EMERGENCE</a><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="watchlist/" class="topnav-tab">Watchlist</a><div class="topnav-dropdown"><a href="watchlist/" class="topnav-sub">Quotes</a><a href="universe.html" class="topnav-sub">Universe</a><a href="universe_lab.html" class="topnav-sub">Universe Lab</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab active">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub active">Data</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="sisyphe/journal.html" class="topnav-tab">Journal</a></div><div class="topnav-item"><a href="sisyphe/journal.html#weekly" class="topnav-tab">Weekly</a></div><div class="topnav-item"><a href="wiki/library" class="topnav-tab">Earnings</a></div><div class="topnav-item"><a href="wiki/" class="topnav-tab">Wiki</a></div><div class="topnav-item"><a href="sisyphe/memento.html" class="topnav-tab">Memento</a></div><div class="topnav-item"><a href="sisyphe/dashboard.html" class="topnav-tab">Ledger</a></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
     <aside class="sidebar"><a href="market.html" class="sidebar-link active">Data</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
     <header style="margin:0;padding:8px 28px 0;text-align:right;">
-        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-08-02 18:59:00 KST</div>
+        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-08-02 19:08:51 KST</div>
     </header>
 
     <div class="mkt-subtabs">
@@ -1163,8 +1163,10 @@ function cmbPeerCharts(self) {
                                 //   메인 차트만 _cmbAxisBandRef/_cmbAxisConv 보유, 서브패널은 축 기준 폴백)
                                 var _bf = (chart._cmbAxisBandRef || {})[ds.yAxisID || 'y'] || Math.abs(val);
                                 label = fmtUniformFix(val, _bf);
-                            } else if ((chart._cmbMode || 'pct') === 'pct') {
+                            } else if ((chart._cmbMode || 'pct') === 'pct' && (ds.yAxisID || 'y') === 'y') {
                                 // pct 끝값도 밴드를 따른다 (종전: 항상 정수)
+                                // ★P4: pct 분기는 좌축(y) 한정 — 뷰어 정규화 모드는 우축(y1) 레벨
+                                //   계열(괴리율 등)을 원값으로 유지한다 (cmb 는 pct 모드에 y1 없음 → 영향 0)
                                 var _bp = (chart._cmbAxisBandRef || {})[ds.yAxisID || 'y'] || Math.abs(val);
                                 label = (val >= 0 ? '+' : '') + fmtUniformFix(val, _bp) + '%';
                             } else {
@@ -1369,7 +1371,7 @@ function cmbPeerCharts(self) {
                                     if (_axAssign[_ai].ax === (ds.yAxisID || 'y')) { _lu = cmbSeriesUnit[_axAssign[_ai].name] || ''; break; }
                                 }
                             }
-                            if (mode === 'pct') {
+                            if (mode === 'pct' && (ds.yAxisID || 'y') === 'y') {   // P4: pct 분기=좌축 한정
                                 pct = last - first;
                             } else if (_lu === '%' || _lu === '%p') {
                                 pct = last - first;
@@ -1501,7 +1503,9 @@ function cmbPeerCharts(self) {
                         border: { color: '#000', width: 2 }
                     }
                 };
-                if (mode === 'raw2' && datasets.some(function(ds){ return ds.yAxisID === 'y1'; })) {
+                // ★P4: y1 축은 mode 무관 'y1 데이터셋 존재'로 생성 — 뷰어는 정규화(pct) 모드에도
+                //   우축 레벨 계열을 유지한다 (cmb 는 raw2 외에 y1 배정이 없어 동작 불변)
+                if (datasets.some(function(ds){ return ds.yAxisID === 'y1'; })) {
                     scalesConfig.y1 = {
                         type: y1Type,
                         position: 'right',
@@ -1521,7 +1525,7 @@ function cmbPeerCharts(self) {
                     if (ctx.parsed.y === null || ctx.parsed.y === undefined) return ctx.dataset.label + ': -';
                     var _tax = ctx.dataset.yAxisID || 'y';
                     var _tb = _cmbAxisBandRef[_tax] || 0;   // 지역 클로저 캡처 (P3 — window 전역 폐기)
-                    if (mode === 'pct') return ctx.dataset.label + ': ' + fmtUniformFix(ctx.parsed.y, _tb) + '%';
+                    if (mode === 'pct' && _tax === 'y') return ctx.dataset.label + ': ' + fmtUniformFix(ctx.parsed.y, _tb) + '%';   // P4: pct 분기=좌축 한정
                     var _eokAx = _tax === 'y1' ? y1Eok : yEok;
                     if (_eokAx) return ctx.dataset.label + ': ' + fmtEokFull(ctx.parsed.y);
                     var _tf = _cmbAxisConv[_tax] || 1;
@@ -3694,8 +3698,10 @@ function cmbPeerCharts(self) {
                                 //   메인 차트만 _cmbAxisBandRef/_cmbAxisConv 보유, 서브패널은 축 기준 폴백)
                                 var _bf = (chart._cmbAxisBandRef || {})[ds.yAxisID || 'y'] || Math.abs(val);
                                 label = fmtUniformFix(val, _bf);
-                            } else if ((chart._cmbMode || 'pct') === 'pct') {
+                            } else if ((chart._cmbMode || 'pct') === 'pct' && (ds.yAxisID || 'y') === 'y') {
                                 // pct 끝값도 밴드를 따른다 (종전: 항상 정수)
+                                // ★P4: pct 분기는 좌축(y) 한정 — 뷰어 정규화 모드는 우축(y1) 레벨
+                                //   계열(괴리율 등)을 원값으로 유지한다 (cmb 는 pct 모드에 y1 없음 → 영향 0)
                                 var _bp = (chart._cmbAxisBandRef || {})[ds.yAxisID || 'y'] || Math.abs(val);
                                 label = (val >= 0 ? '+' : '') + fmtUniformFix(val, _bp) + '%';
                             } else {
@@ -3900,7 +3906,7 @@ function cmbPeerCharts(self) {
                                     if (_axAssign[_ai].ax === (ds.yAxisID || 'y')) { _lu = cmbSeriesUnit[_axAssign[_ai].name] || ''; break; }
                                 }
                             }
-                            if (mode === 'pct') {
+                            if (mode === 'pct' && (ds.yAxisID || 'y') === 'y') {   // P4: pct 분기=좌축 한정
                                 pct = last - first;
                             } else if (_lu === '%' || _lu === '%p') {
                                 pct = last - first;
@@ -4032,7 +4038,9 @@ function cmbPeerCharts(self) {
                         border: { color: '#000', width: 2 }
                     }
                 };
-                if (mode === 'raw2' && datasets.some(function(ds){ return ds.yAxisID === 'y1'; })) {
+                // ★P4: y1 축은 mode 무관 'y1 데이터셋 존재'로 생성 — 뷰어는 정규화(pct) 모드에도
+                //   우축 레벨 계열을 유지한다 (cmb 는 raw2 외에 y1 배정이 없어 동작 불변)
+                if (datasets.some(function(ds){ return ds.yAxisID === 'y1'; })) {
                     scalesConfig.y1 = {
                         type: y1Type,
                         position: 'right',
@@ -4052,7 +4060,7 @@ function cmbPeerCharts(self) {
                     if (ctx.parsed.y === null || ctx.parsed.y === undefined) return ctx.dataset.label + ': -';
                     var _tax = ctx.dataset.yAxisID || 'y';
                     var _tb = _cmbAxisBandRef[_tax] || 0;   // 지역 클로저 캡처 (P3 — window 전역 폐기)
-                    if (mode === 'pct') return ctx.dataset.label + ': ' + fmtUniformFix(ctx.parsed.y, _tb) + '%';
+                    if (mode === 'pct' && _tax === 'y') return ctx.dataset.label + ': ' + fmtUniformFix(ctx.parsed.y, _tb) + '%';   // P4: pct 분기=좌축 한정
                     var _eokAx = _tax === 'y1' ? y1Eok : yEok;
                     if (_eokAx) return ctx.dataset.label + ': ' + fmtEokFull(ctx.parsed.y);
                     var _tf = _cmbAxisConv[_tax] || 1;

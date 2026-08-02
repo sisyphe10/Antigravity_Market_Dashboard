@@ -1,7 +1,7 @@
 {
  "coreVersion": "0.2.0",
- "coreSha256": "2d4e8cbcc02c37dfb2b4fdf32aa2edb1efd6a17354dd470458af4008755871c6",
- "coreBytes": 71080,
+ "coreSha256": "f4bfdfae93031ea4c894d932e10fa6e72cc21875b67eb3b355fe4b4527f9d841",
+ "coreBytes": 71703,
  "chartJsVersion": "4.5.1",
- "sourceCommit": "0d5f9c5a"
+ "sourceCommit": "b9cf6b53"
 }

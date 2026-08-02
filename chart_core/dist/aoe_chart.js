@@ -323,6 +323,9 @@ function cmbPeerCharts(self) {
                     }
                     // 클릭 = 데이터 카드 고정(핀) — 같은 날짜 재클릭 해제, 다른 지점 클릭 이동 (2026-07-21 표준)
                     if (e.type === 'click' && chart._cmbPinHost) {
+                        // P4: 드래그 팬 직후의 잔여 click 은 핀이 아니다 — 페이지(TV식 내비)가
+                        // dragend 에 chart._cmbPinSuppress = true 를 세우면 1회 무시하고 소거
+                        if (chart._cmbPinSuppress) { chart._cmbPinSuppress = false; return; }
                         var pIdx = Math.round(chart.scales.x.getValueForPixel(e.x));
                         var pMax = chart.data.labels.length - 1;
                         if (pIdx < 0) pIdx = 0;
@@ -493,8 +496,10 @@ function cmbPeerCharts(self) {
                                 //   메인 차트만 _cmbAxisBandRef/_cmbAxisConv 보유, 서브패널은 축 기준 폴백)
                                 var _bf = (chart._cmbAxisBandRef || {})[ds.yAxisID || 'y'] || Math.abs(val);
                                 label = fmtUniformFix(val, _bf);
-                            } else if ((chart._cmbMode || 'pct') === 'pct') {
+                            } else if ((chart._cmbMode || 'pct') === 'pct' && (ds.yAxisID || 'y') === 'y') {
                                 // pct 끝값도 밴드를 따른다 (종전: 항상 정수)
+                                // ★P4: pct 분기는 좌축(y) 한정 — 뷰어 정규화 모드는 우축(y1) 레벨
+                                //   계열(괴리율 등)을 원값으로 유지한다 (cmb 는 pct 모드에 y1 없음 → 영향 0)
                                 var _bp = (chart._cmbAxisBandRef || {})[ds.yAxisID || 'y'] || Math.abs(val);
                                 label = (val >= 0 ? '+' : '') + fmtUniformFix(val, _bp) + '%';
                             } else {
@@ -699,7 +704,7 @@ function cmbPeerCharts(self) {
                                     if (_axAssign[_ai].ax === (ds.yAxisID || 'y')) { _lu = cmbSeriesUnit[_axAssign[_ai].name] || ''; break; }
                                 }
                             }
-                            if (mode === 'pct') {
+                            if (mode === 'pct' && (ds.yAxisID || 'y') === 'y') {   // P4: pct 분기=좌축 한정
                                 pct = last - first;
                             } else if (_lu === '%' || _lu === '%p') {
                                 pct = last - first;
@@ -831,7 +836,9 @@ function cmbPeerCharts(self) {
                         border: { color: '#000', width: 2 }
                     }
                 };
-                if (mode === 'raw2' && datasets.some(function(ds){ return ds.yAxisID === 'y1'; })) {
+                // ★P4: y1 축은 mode 무관 'y1 데이터셋 존재'로 생성 — 뷰어는 정규화(pct) 모드에도
+                //   우축 레벨 계열을 유지한다 (cmb 는 raw2 외에 y1 배정이 없어 동작 불변)
+                if (datasets.some(function(ds){ return ds.yAxisID === 'y1'; })) {
                     scalesConfig.y1 = {
                         type: y1Type,
                         position: 'right',
@@ -851,7 +858,7 @@ function cmbPeerCharts(self) {
                     if (ctx.parsed.y === null || ctx.parsed.y === undefined) return ctx.dataset.label + ': -';
                     var _tax = ctx.dataset.yAxisID || 'y';
                     var _tb = _cmbAxisBandRef[_tax] || 0;   // 지역 클로저 캡처 (P3 — window 전역 폐기)
-                    if (mode === 'pct') return ctx.dataset.label + ': ' + fmtUniformFix(ctx.parsed.y, _tb) + '%';
+                    if (mode === 'pct' && _tax === 'y') return ctx.dataset.label + ': ' + fmtUniformFix(ctx.parsed.y, _tb) + '%';   // P4: pct 분기=좌축 한정
                     var _eokAx = _tax === 'y1' ? y1Eok : yEok;
                     if (_eokAx) return ctx.dataset.label + ': ' + fmtEokFull(ctx.parsed.y);
                     var _tf = _cmbAxisConv[_tax] || 1;
