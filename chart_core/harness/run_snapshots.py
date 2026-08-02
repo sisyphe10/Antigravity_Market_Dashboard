@@ -101,6 +101,21 @@ SCENARIOS = [
         ('js', "Array.from(document.querySelectorAll('.cmb-ma-btn')).find(b=>b.textContent.trim()==='20'&&b.id!=='cmbRocFreqM').click()")], EXTRACT_CMB),
     ('data_roc2_leading_index', 'market', [('row', '선행지수'), ('wait', 600),
         ('js', "document.getElementById('cmbRocBtn').click()")], EXTRACT_CMB),
+    # P2a 인터랙션: 클릭 핀 (설정→같은 좌표 재클릭 해제까지 상태 확인)
+    ('data_pin_click',        'market', [('row', '고객예탁금'), ('wait', 400),
+        ('mouse', {'sel': '#cmbDynamicChart', 'rx': 0.5, 'ry': 0.5, 'action': 'click'}), ('wait', 300),
+        ('js', "window.__pin1 = cmbPin.date"),
+        ('mouse', {'sel': '#cmbDynamicChart', 'rx': 0.5, 'ry': 0.5, 'action': 'click'}), ('wait', 300),
+        ('js', "window.__pin2 = cmbPin.date"),
+        ('mouse', {'sel': '#cmbDynamicChart', 'rx': 0.7, 'ry': 0.5, 'action': 'click'}), ('wait', 300)],
+        r"""() => ({ pin1: window.__pin1, pin2AfterSameClick: window.__pin2, pin3: cmbPin.date,
+                     hoverIdxType: typeof cmbHoverState.idx })"""),
+    # P2a 인터랙션: 크로스헤어 호버 + 마우스아웃 해제
+    ('data_crosshair_hover',  'market', [('row', '고객예탁금'), ('wait', 400),
+        ('mouse', {'sel': '#cmbDynamicChart', 'rx': 0.4, 'ry': 0.5, 'action': 'move'}), ('wait', 300),
+        ('js', "window.__hov = { idx: cmbHoverState.idx, active: cmbHoverState.activeId }"),
+        ('mouse', {'sel': 'body', 'rx': 0.01, 'ry': 0.99, 'action': 'move'}), ('wait', 300)],
+        r"""() => ({ hover: window.__hov, afterOut: cmbHoverState.idx })"""),
     ('viewer2_mktcap',        'viewer2', [
         ('js', "document.querySelector('[data-key=\"삼성전자|mktcap\"]').click()")], EXTRACT_VIEWER),
     ('viewer2_normalized',    'viewer2', [
@@ -143,6 +158,13 @@ def run(update=False, only=None):
                         print(f'  ! {name}: {r}')
                 elif kind == 'js':
                     page.evaluate(f'() => {{ {arg} }}' if not arg.strip().startswith('(') else arg)
+                elif kind == 'mouse':
+                    box = page.locator(arg['sel']).bounding_box()
+                    px = box['x'] + box['width'] * arg['rx']
+                    py = box['y'] + box['height'] * arg['ry']
+                    page.mouse.move(px, py)
+                    if arg['action'] == 'click':
+                        page.mouse.click(px, py)
                 elif kind == 'wait':
                     page.wait_for_timeout(arg)
                 page.wait_for_timeout(500)
