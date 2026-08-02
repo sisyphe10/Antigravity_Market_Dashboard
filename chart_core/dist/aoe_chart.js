@@ -734,12 +734,13 @@ function cmbFamilyOf(chart) {
                             } else if (_lu === '%' || _lu === '%p') {
                                 pct = last - first;
                                 sfx = '%p';
-                            } else if (first !== 0) {
+                            } else if (first > 0) {
                                 pct = (last / first - 1) * 100;
                             } else {
-                                pct = 0;
+                                // 첫값이 0·음수인 원값 계열(FCF 등)은 비율 변화가 무의미 — 표기 생략 (P4b)
+                                pct = null;
                             }
-                            pctStr = '<span>' + (pct >= 0 ? '+' : '') + fmtUniformFix(pct, Math.abs(pct)) + sfx + '</span>';
+                            if (pct !== null) pctStr = '<span>' + (pct >= 0 ? '+' : '') + fmtUniformFix(pct, Math.abs(pct)) + sfx + '</span>';
                         }
                         // 축 단위를 시리즈명 바로 뒤에 표기 (2026-08-02 사용자 확정 — 축 상단 주석 폐지).
                         // MA 등 파생선은 cmbSeriesUnit 미등록이라 자동으로 단위 없음.
