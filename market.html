@@ -533,7 +533,7 @@ body{margin:0}
     <nav class="topnav"><div class="topnav-inner"><a href="index.html" class="topnav-brand">AGE OF EMERGENCE</a><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="watchlist/" class="topnav-tab">Watchlist</a><div class="topnav-dropdown"><a href="watchlist/" class="topnav-sub">Quotes</a><a href="universe.html" class="topnav-sub">Universe</a><a href="universe_lab.html" class="topnav-sub">Universe Lab</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab active">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub active">Data</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="sisyphe/journal.html" class="topnav-tab">Journal</a></div><div class="topnav-item"><a href="sisyphe/journal.html#weekly" class="topnav-tab">Weekly</a></div><div class="topnav-item"><a href="wiki/library" class="topnav-tab">Earnings</a></div><div class="topnav-item"><a href="wiki/" class="topnav-tab">Wiki</a></div><div class="topnav-item"><a href="sisyphe/memento.html" class="topnav-tab">Memento</a></div><div class="topnav-item"><a href="sisyphe/dashboard.html" class="topnav-tab">Ledger</a></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
     <aside class="sidebar"><a href="market.html" class="sidebar-link active">Data</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
     <header style="margin:0;padding:8px 28px 0;text-align:right;">
-        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-08-01 23:37:49 KST</div>
+        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-08-02 10:45:58 KST</div>
     </header>
 
     <div class="mkt-subtabs">
@@ -1550,7 +1550,7 @@ if (typeof window._h2cFreeze !== 'function') {
                         lines.push({ txt: txt, color: ds.borderColor });
                     });
                     if (!lines.length) { ctx.restore(); return; }
-                    var title = window.cmbXLabel ? window.cmbXLabel(String(cmbPin.date)) : String(cmbPin.date);
+                    var title = String(cmbPin.date);
                     ctx.font = 'bold 13px sans-serif';
                     var w = ctx.measureText(title).width;
                     ctx.font = '13px sans-serif';
@@ -2485,7 +2485,9 @@ if (typeof window._h2cFreeze !== 'function') {
                 function cmbEokTickVal(v, jo) {
                     return fmtByMag(jo ? v / 10000 : v);
                 }
-                // Y축 단위 주석 — 눈금엔 숫자만, 단위는 축 최상단 위에 1회 표기 (2026-07-16 사용자 확정)
+                // Y축 단위 주석(서브패널 전용) — 눈금엔 숫자만, 단위는 축 최상단 위에 1회 표기.
+                // ★메인 차트는 2026-08-02부터 하단 범례 우측 표기로 전환 — 단위 유무에 따라
+                //   padding.top(34/6)이 달라져 차트 시작 높이가 들쭉날쭉하던 문제.
                 var cmbAxisUnitPlugin = {
                     id: 'cmbAxisUnit',
                     afterDraw: function(chart) {
@@ -2522,7 +2524,7 @@ if (typeof window._h2cFreeze !== 'function') {
                             var val = ds.data[lastIdx];
                             var label;
                             if (ds._isForeign) {
-                                // 값에 단위 금지 — % 는 축 상단 주석이 담당 (2026-07-28)
+                                // 값에 단위 금지 — % 는 하단 범례 우측 단위 표기가 담당 (2026-08-02 이전)
                                 var _bf = (window._cmbAxisBandRef || {})[ds.yAxisID || 'y'] || Math.abs(val);
                                 label = fmtUniformFix(val, _bf);
                             } else if ((chart._cmbMode || 'pct') === 'pct') {
@@ -2531,7 +2533,7 @@ if (typeof window._h2cFreeze !== 'function') {
                                 label = (val >= 0 ? '+' : '') + fmtUniformFix(val, _bp) + '%';
                             } else {
                                 // 끝값 라벨: 정수부 4자리(>=1000)부터 소수 제외, 그 외 최대 2자리 (2026-07-16 사용자 확정)
-                                // 끝값 = 숫자만 (억원 시리즈는 축 단위(조/억)로 환산 — 단위는 축 상단 주석이 담당)
+                                // 끝값 = 숫자만 (억원 시리즈는 축 단위(조/억)로 환산 — 단위는 하단 범례 우측 표기가 담당)
                                 var _f2 = (chart.canvas.id === 'cmbDynamicChart')
                                     ? ((window._cmbAxisConv || {})[ds.yAxisID || 'y'] || 1) : 1;
                                 var _ax = chart.scales[ds.yAxisID || 'y'] || chart.scales.y;
@@ -2637,8 +2639,10 @@ if (typeof window._h2cFreeze !== 'function') {
                     });
                 }
 
+                // ※범례 생성은 축 단위(yJo/y1Jo, _cmbAxisUnits) 계산 뒤로 이동 (2026-08-02) —
+                //   항목에 단위를 인라인 표기(`고객예탁금(조원) +25.4%`)하려면 조원 승격 판정이 선행돼야 함.
                 var legendEl = document.getElementById('cmbChartLegend');
-                if (legendEl) {
+                function cmbBuildLegend() {
                     var legendHTML = datasets.map(function(ds) {
                         var c = ds.borderColor;
                         // 설정 기간 변화율: pct 모드는 정규화된 값이라 last 자체가 변화율,
@@ -2658,9 +2662,12 @@ if (typeof window._h2cFreeze !== 'function') {
                             }
                             pctStr = '<span>' + (pct >= 0 ? '+' : '') + fmtUniformFix(pct, Math.abs(pct)) + '%</span>';
                         }
+                        // 축 단위를 시리즈명 바로 뒤에 표기 (2026-08-02 사용자 확정 — 축 상단 주석 폐지).
+                        // MA 등 파생선은 cmbSeriesUnit 미등록이라 자동으로 단위 없음.
+                        var unitStr = (mode !== 'pct') ? (cmbUnitLabel(ds.label, (ds.yAxisID === 'y1') ? y1Jo : yJo) || '') : '';
                         return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:14px;">' +
                             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
-                            ds.label + pctStr + '</span>';
+                            ds.label + unitStr + pctStr + '</span>';
                     }).join('');
                     // 이격도는 기간 변화율 대신 마지막 값 표시 (100 기준 과열/침체 지표)
                     legendHTML += dispDatasets.map(function(ds) {
@@ -2678,7 +2685,7 @@ if (typeof window._h2cFreeze !== 'function') {
                             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + ds.borderColor + ';"></span>' +
                             ds.label + lastStr + '</span>';
                     }).join('');
-                    legendEl.innerHTML = legendHTML;
+                    if (legendEl) legendEl.innerHTML = legendHTML;
                 }
 
                 var _yMaxAbs = 0, _y1MaxAbs = 0, _yMinPos = Infinity, _y1MinPos = Infinity;
@@ -2720,6 +2727,7 @@ if (typeof window._h2cFreeze !== 'function') {
                     y: (mode !== 'pct') ? cmbAxisUnitFor('y', yJo) : null,
                     y1: (mode === 'raw2') ? cmbAxisUnitFor('y1', y1Jo) : null
                 };
+                cmbBuildLegend();   // 단위 인라인 표기 때문에 조원 승격(yJo/y1Jo) 판정 뒤에 렌더
                 // 축별 표시 환산 계수 — MA 등 파생선도 같은 축 규칙을 타도록 축 기준으로 기록
                 window._cmbAxisConv = { y: (yEok && yJo) ? 10000 : 1, y1: (y1Eok && y1Jo) ? 10000 : 1 };
                 // ★자릿수 밴드 기준 = 축의 '최종 끝값' (2026-07-28 사용자 룰 변경. 종전 = 축 최대값).
@@ -2815,7 +2823,7 @@ if (typeof window._h2cFreeze !== 'function') {
                 if (cmbChart) {
                     // 재사용: 인스턴스 유지하고 데이터/축/툴팁만 교체 (destroy+new 멈칫 제거)
                     cmbChart.options.layout.padding.right = _rightPad;
-                    cmbChart.options.layout.padding.top = (window._cmbAxisUnits.y || window._cmbAxisUnits.y1) ? 34 : 6;
+                    cmbChart.options.layout.padding.top = 6;
                     cmbChart.data.labels = commonDates;
                     cmbChart.data.datasets = datasets;
                     // scales 전체 교체 — 이전 raw2의 y1축 잔재 제거 후 새 구성 적용
@@ -2831,17 +2839,18 @@ if (typeof window._h2cFreeze !== 'function') {
                     cmbChart = new Chart(document.getElementById('cmbDynamicChart'), {
                         type: 'line',
                         data: { labels: commonDates, datasets: datasets },
-                        plugins: [endLabelPlugin, cmbAxisUnitPlugin, cmbCrosshairPlugin, cmbPinPlugin],
+                        plugins: [endLabelPlugin, cmbCrosshairPlugin, cmbPinPlugin],
                         options: {
                             responsive: true, maintainAspectRatio: false,
                             devicePixelRatio: 2 * (window.devicePixelRatio || 1),
-                            layout: { padding: { right: _rightPad, top: (window._cmbAxisUnits.y || window._cmbAxisUnits.y1) ? 34 : 6 } },
+                            layout: { padding: { right: _rightPad, top: 6 } },
                             interaction: { mode: 'index', intersect: false },
                             plugins: {
                                 legend: { display: false },
                                 // animation:false — 동기 툴팁이 draw()만으로 위치 갱신되도록 (애니메이션 속성이면 제자리에 멈춤)
                                 // 글씨 +1px (12→13, 2026-07-21 사용자 확정 — 클릭 핀 카드와 동일 크기)
-                                tooltip: { animation: false, titleFont: { size: 13 }, bodyFont: { size: 13 }, callbacks: { title: function(cs){ return cs.length ? window.cmbXLabel(cs[0].label) : ''; }, label: tooltipLabel } }
+                                // 카드 제목 = 원본 날짜(YYYY-MM-DD) — 축약(YY/MM)은 x축 눈금 전용 (2026-08-02 사용자 확정)
+                                tooltip: { animation: false, titleFont: { size: 13 }, bodyFont: { size: 13 }, callbacks: { title: function(cs){ return cs.length ? String(cs[0].label) : ''; }, label: tooltipLabel } }
                             },
                             scales: scalesConfig
                         }
@@ -3021,7 +3030,7 @@ if (typeof window._h2cFreeze !== 'function') {
                                         legend: { display: false },
                                         tooltip: { animation: false, titleFont: { size: 13 }, bodyFont: { size: 13 },
                                             callbacks: {
-                                                title: function(cs){ return cs.length ? window.cmbXLabel(cs[0].label) : ''; },
+                                                title: function(cs){ return cs.length ? String(cs[0].label) : ''; },
                                                 label: rocTip
                                             } }
                                     },
