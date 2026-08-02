@@ -64,12 +64,22 @@ def _next_attempt_iso(event_time: datetime, attempt_count: int) -> str | None:
     return next_dt.isoformat(timespec='seconds')
 
 
-def initial_enqueue(filing_id: int) -> int | None:
-    """edgar_monitor.fetched 직후 호출. event_time + 0h 시점에 첫 attempt 잡 생성."""
+def initial_enqueue(filing_id: int, force: bool = False) -> int | None:
+    """edgar_monitor.fetched 직후 호출. event_time + 0h 시점에 첫 attempt 잡 생성.
+
+    2026-08-03: 전문 수집은 별표(universe_stars_v1) 종목만 — 번역이 별표 한정이라
+    비별표 전문은 수집해도 쓰이지 않는다. 실적 공시 수집·분석시트는 전 종목 유지.
+    수동 enqueue(CLI --enqueue)는 force=True 로 필터를 우회한다.
+    별표 목록 읽기 실패(None) 시엔 필터 미적용(수집 누락보다 과수집이 안전).
+    """
     db.init_db()
     filing = db.get_filing_by_id(filing_id)
     if not filing:
         return None
+    if not force:
+        _stars = db._load_starred_tickers()
+        if _stars is not None and (filing.get('ticker') or '').upper() not in _stars:
+            return None
     if (filing.get('document_type') == 'NT 10-Q' or filing.get('document_type') == 'NT 10-K'
             or filing.get('severity') == 'INFO'):
         # NT 시그널 / INFO 등급은 transcript 없음 → enqueue 스킵
@@ -265,7 +275,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.enqueue:
-        job_id = initial_enqueue(args.enqueue)
+        job_id = initial_enqueue(args.enqueue, force=True)
         print(f"enqueued job {job_id} for filing {args.enqueue}")
     elif args.run:
         result = run_once()
