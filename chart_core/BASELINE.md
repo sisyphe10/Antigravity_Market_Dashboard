@@ -40,6 +40,12 @@
 4. 뷰어 소스가 맥미니 단독(미추적)이었음 → 8/2 `chart_core/viewer_src/` 스냅샷 편입(승인). **P4까지 맥미니가 실행 정본, repo 사본은 기록용** — 이중 수정 금지, 뷰어 수정 시 맥미니 먼저→스냅샷 갱신.
 5. ~~cmb 원값 모드에서 %단위 시리즈의 범례 기간 변화율이 나눗셈 %로 계산됨 — 괴리율 0.045→-5.33이 `-1,699%`로 표기(golden `data_basis_neg_linear` 참조). 2026-07-19 확정 규격(%·%p 시리즈=레벨 차이 %p)은 pct 모드에만 적용돼 있음 → P2에서 규격 정합.~~ **해소 (2026-08-02 P2b, dc11309e — raw 모드도 레벨 차이 %p, MA 파생선은 같은 축 주 시리즈 단위 상속)**
 
+## P6·P7 완료 — 프로젝트 종결 상태 (2026-08-02 밤)
+- **P6**: 코어 프리셋 `stackedBar`(스택 축·합계 라벨 cmbStackTotalPlugin·축단위 주석·끝값/핀 없음)·`mini`(11px·크로스헤어만) + `ids.legend: null`(범례 없음). wrap AUM·누적 AUM(스택 막대), research 주별 막대, etf 실적 mixed(매출 라인+이익 막대+0선 aux) 전환. kofia 미니 2종=미호출 데드 코드 확인(랜딩 폐지 잔재) → 삭제.
+- **P7**: legacy 일체 은퇴(플래그·동결 렌더러·코어 심·픽스처·시나리오 — 롤백=git revert), **정적 금지 검사 상시화**(build_core.py: create_dashboard의 `new Chart(` 허용 2건 초과 시 실패 — seibro 가로바·미국 ETF), 데드 코드 삭제(targetTransform·landing kofia), **표 토큰 aoe_tokens.css**(비색상 규격 — 글씨·패딩·정렬·tabular-nums·선 두께, manifest sha 검증) 신설+표 페이지 3종(bop·pipeline·calendar) 적용(렌더 보존, tabular-nums만 신규).
+- **codex 리뷰 2차(P4~P5) 반영**: 범례 단위=정규화 좌축만 생략(우축 원값 계열 단위 유지)·끝값 폭 측정 pct 분기 좌축 한정·wrap 주축=실제 앵커 페어 지표(전역 지표 순서 아님 — 라이브 재현 검증).
+- 잔여 백로그: ①벤치마크만×비중/AUM 선택=빈 차트(legacy 동작 보존 — 빈 상태 안내는 UX 개선 항목) ②하네스 공백: WRAP/FCF/y2 축 축소 재사용·Download PNG 픽셀·페인터 출력·토글 복귀 ③wrap 표·기타 페이지 표의 토큰 적용 확대 ④construction_val/wrapper 구 3사 페이지(con_*.html) 정리 여부 실사.
+
 ## P5 이후 상태 (2026-08-02)
 - **WRAP CHART 전환 완료** — 마지막 endLabel·렌더 사본 제거. 코어에 **y2 축**(두 번째 우축, y2 데이터셋 존재 시만 활성 — 밴드·환산·조/억 승격·로그패드·범례 단위·툴팁 전부 축별 확장).
 - wrap 지표→축 배정: 앵커 지표 그룹=주축(y), 이후 y1·y2 순 (수익률·MDD=같은 %축, 구 '좌측 승격' 일반화 — 비중·AUM 단독 선택 시 그 지표가 좌축). stepped 비중·지표별 명도 변형은 페이지 데이터셋 속성으로 유지.
