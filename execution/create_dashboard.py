@@ -2513,7 +2513,7 @@ def _build_combined_chart_section():
                         lines.push({ txt: txt, color: ds.borderColor });
                     });
                     if (!lines.length) { ctx.restore(); return; }
-                    var title = window.cmbXLabel ? window.cmbXLabel(String(cmbPin.date)) : String(cmbPin.date);
+                    var title = String(cmbPin.date);
                     ctx.font = 'bold 13px sans-serif';
                     var w = ctx.measureText(title).width;
                     ctx.font = '13px sans-serif';
@@ -3448,7 +3448,9 @@ def _build_combined_chart_section():
                 function cmbEokTickVal(v, jo) {
                     return fmtByMag(jo ? v / 10000 : v);
                 }
-                // Y축 단위 주석 — 눈금엔 숫자만, 단위는 축 최상단 위에 1회 표기 (2026-07-16 사용자 확정)
+                // Y축 단위 주석(서브패널 전용) — 눈금엔 숫자만, 단위는 축 최상단 위에 1회 표기.
+                // ★메인 차트는 2026-08-02부터 하단 범례 우측 표기로 전환 — 단위 유무에 따라
+                //   padding.top(34/6)이 달라져 차트 시작 높이가 들쭉날쭉하던 문제.
                 var cmbAxisUnitPlugin = {
                     id: 'cmbAxisUnit',
                     afterDraw: function(chart) {
@@ -3485,7 +3487,7 @@ def _build_combined_chart_section():
                             var val = ds.data[lastIdx];
                             var label;
                             if (ds._isForeign) {
-                                // 값에 단위 금지 — % 는 축 상단 주석이 담당 (2026-07-28)
+                                // 값에 단위 금지 — % 는 하단 범례 우측 단위 표기가 담당 (2026-08-02 이전)
                                 var _bf = (window._cmbAxisBandRef || {})[ds.yAxisID || 'y'] || Math.abs(val);
                                 label = fmtUniformFix(val, _bf);
                             } else if ((chart._cmbMode || 'pct') === 'pct') {
@@ -3494,7 +3496,7 @@ def _build_combined_chart_section():
                                 label = (val >= 0 ? '+' : '') + fmtUniformFix(val, _bp) + '%';
                             } else {
                                 // 끝값 라벨: 정수부 4자리(>=1000)부터 소수 제외, 그 외 최대 2자리 (2026-07-16 사용자 확정)
-                                // 끝값 = 숫자만 (억원 시리즈는 축 단위(조/억)로 환산 — 단위는 축 상단 주석이 담당)
+                                // 끝값 = 숫자만 (억원 시리즈는 축 단위(조/억)로 환산 — 단위는 하단 범례 우측 표기가 담당)
                                 var _f2 = (chart.canvas.id === 'cmbDynamicChart')
                                     ? ((window._cmbAxisConv || {})[ds.yAxisID || 'y'] || 1) : 1;
                                 var _ax = chart.scales[ds.yAxisID || 'y'] || chart.scales.y;
@@ -3683,6 +3685,13 @@ def _build_combined_chart_section():
                     y: (mode !== 'pct') ? cmbAxisUnitFor('y', yJo) : null,
                     y1: (mode === 'raw2') ? cmbAxisUnitFor('y1', y1Jo) : null
                 };
+                // 축 단위는 하단 범례 우측에 표기 (2026-08-02 사용자 확정 — 축 상단 주석 폐지)
+                if (legendEl) {
+                    var _uParts = [];
+                    if (window._cmbAxisUnits.y) _uParts.push(window._cmbAxisUnits.y1 ? '좌 ' + window._cmbAxisUnits.y : window._cmbAxisUnits.y);
+                    if (window._cmbAxisUnits.y1) _uParts.push('우 ' + window._cmbAxisUnits.y1);
+                    if (_uParts.length) legendEl.innerHTML += '<span style="position:absolute;right:0;font-size:14px;">' + _uParts.join(' · ') + '</span>';
+                }
                 // 축별 표시 환산 계수 — MA 등 파생선도 같은 축 규칙을 타도록 축 기준으로 기록
                 window._cmbAxisConv = { y: (yEok && yJo) ? 10000 : 1, y1: (y1Eok && y1Jo) ? 10000 : 1 };
                 // ★자릿수 밴드 기준 = 축의 '최종 끝값' (2026-07-28 사용자 룰 변경. 종전 = 축 최대값).
@@ -3778,7 +3787,7 @@ def _build_combined_chart_section():
                 if (cmbChart) {
                     // 재사용: 인스턴스 유지하고 데이터/축/툴팁만 교체 (destroy+new 멈칫 제거)
                     cmbChart.options.layout.padding.right = _rightPad;
-                    cmbChart.options.layout.padding.top = (window._cmbAxisUnits.y || window._cmbAxisUnits.y1) ? 34 : 6;
+                    cmbChart.options.layout.padding.top = 6;
                     cmbChart.data.labels = commonDates;
                     cmbChart.data.datasets = datasets;
                     // scales 전체 교체 — 이전 raw2의 y1축 잔재 제거 후 새 구성 적용
@@ -3794,17 +3803,18 @@ def _build_combined_chart_section():
                     cmbChart = new Chart(document.getElementById('cmbDynamicChart'), {
                         type: 'line',
                         data: { labels: commonDates, datasets: datasets },
-                        plugins: [endLabelPlugin, cmbAxisUnitPlugin, cmbCrosshairPlugin, cmbPinPlugin],
+                        plugins: [endLabelPlugin, cmbCrosshairPlugin, cmbPinPlugin],
                         options: {
                             responsive: true, maintainAspectRatio: false,
                             devicePixelRatio: 2 * (window.devicePixelRatio || 1),
-                            layout: { padding: { right: _rightPad, top: (window._cmbAxisUnits.y || window._cmbAxisUnits.y1) ? 34 : 6 } },
+                            layout: { padding: { right: _rightPad, top: 6 } },
                             interaction: { mode: 'index', intersect: false },
                             plugins: {
                                 legend: { display: false },
                                 // animation:false — 동기 툴팁이 draw()만으로 위치 갱신되도록 (애니메이션 속성이면 제자리에 멈춤)
                                 // 글씨 +1px (12→13, 2026-07-21 사용자 확정 — 클릭 핀 카드와 동일 크기)
-                                tooltip: { animation: false, titleFont: { size: 13 }, bodyFont: { size: 13 }, callbacks: { title: function(cs){ return cs.length ? window.cmbXLabel(cs[0].label) : ''; }, label: tooltipLabel } }
+                                // 카드 제목 = 원본 날짜(YYYY-MM-DD) — 축약(YY/MM)은 x축 눈금 전용 (2026-08-02 사용자 확정)
+                                tooltip: { animation: false, titleFont: { size: 13 }, bodyFont: { size: 13 }, callbacks: { title: function(cs){ return cs.length ? String(cs[0].label) : ''; }, label: tooltipLabel } }
                             },
                             scales: scalesConfig
                         }
@@ -3984,7 +3994,7 @@ def _build_combined_chart_section():
                                         legend: { display: false },
                                         tooltip: { animation: false, titleFont: { size: 13 }, bodyFont: { size: 13 },
                                             callbacks: {
-                                                title: function(cs){ return cs.length ? window.cmbXLabel(cs[0].label) : ''; },
+                                                title: function(cs){ return cs.length ? String(cs[0].label) : ''; },
                                                 label: rocTip
                                             } }
                                     },
@@ -4223,7 +4233,7 @@ def _build_combined_chart_section():
                         <div id="cmbRocPanel" style="display:none;position:relative;height:200px;margin-top:8px;">
                             <canvas id="cmbRocChart"></canvas>
                         </div>
-                        <div id="cmbChartLegend" style="margin-top:12px;text-align:center;color:#222;"></div>
+                        <div id="cmbChartLegend" style="position:relative;margin-top:12px;text-align:center;color:#222;"></div>
                     </div>
                 </div>
             </div>
