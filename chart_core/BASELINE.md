@@ -36,9 +36,14 @@
 ## 알려진 기준선 결함 (전환 시 해소 — "의도된 차이" 허용 목록 후보)
 1. wrap Chart.js 미고정 CDN (→ 코어 번들)
 2. RoC² 패널 `(%p)` 상단 주석 잔존 (메인 차트는 범례 인라인으로 이행 완료)
-3. endLabel·crosshair 플러그인 사본 2벌(idx/cmb) — 미세 동작 차이 가능
+3. endLabel·crosshair 플러그인 사본 2벌(idx/cmb) — 미세 동작 차이 가능. **cmb 쪽은 P2a·P2b에서 코어 단일화 완료, idx 사본 잔존(P3 대상)**
 4. 뷰어 소스가 맥미니 단독(미추적)이었음 → 8/2 `chart_core/viewer_src/` 스냅샷 편입(승인). **P4까지 맥미니가 실행 정본, repo 사본은 기록용** — 이중 수정 금지, 뷰어 수정 시 맥미니 먼저→스냅샷 갱신.
-5. cmb 원값 모드에서 %단위 시리즈의 범례 기간 변화율이 나눗셈 %로 계산됨 — 괴리율 0.045→-5.33이 `-1,699%`로 표기(golden `data_basis_neg_linear` 참조). 2026-07-19 확정 규격(%·%p 시리즈=레벨 차이 %p)은 pct 모드에만 적용돼 있음 → P2에서 규격 정합.
+5. ~~cmb 원값 모드에서 %단위 시리즈의 범례 기간 변화율이 나눗셈 %로 계산됨 — 괴리율 0.045→-5.33이 `-1,699%`로 표기(golden `data_basis_neg_linear` 참조). 2026-07-19 확정 규격(%·%p 시리즈=레벨 차이 %p)은 pct 모드에만 적용돼 있음 → P2에서 규격 정합.~~ **해소 (2026-08-02 P2b, dc11309e — raw 모드도 레벨 차이 %p, MA 파생선은 같은 축 주 시리즈 단위 상속)**
+
+## P2b 이후 상태 (2026-08-02)
+- cmb(DATA) 렌더 프레임 전체가 코어 `cmbRenderCharts(view)` 로 이관 — DATA 클로저에는 데이터·도메인 계산(MA·이격도·RoC²)·사이드바·RoC 진단 UI만 잔류, `new Chart(` 0건.
+- 롤백 주 경로: `AOE_CHART_LEGACY=1 python execution/create_dashboard.py` = 코어 이관 직전 동결 렌더러(`execution/legacy_chart_renderers.py`)+현재 데이터 재생성 (P7에서 제거).
+- golden 스냅샷은 P2b부터 git 추적 (그 전엔 `.gitignore` `*.json` 광역 규칙에 삼켜져 로컬 전용이었음).
 
 ## fixture (불변 — 갱신 시 golden 재생성 필수)
 - `fixtures/market_baseline.html` — 2026-08-02 16:45 생성본 (오늘 확정 규격 전부 반영: 툴팁 원본날짜·범례 인라인 단위·음수 선형 폴백·Copy/파일명)

@@ -1,0 +1,47 @@
+{
+ "axes": {
+  "x": {
+   "max": 142,
+   "min": 0,
+   "ticks": [
+    "25/12",
+    "26/02",
+    "26/03",
+    "26/04",
+    "26/05",
+    "26/06"
+   ],
+   "type": "category"
+  },
+  "y": {
+   "max": 150,
+   "min": -50,
+   "ticks": [
+    "-50%",
+    "0%",
+    "50%",
+    "100%",
+    "150%"
+   ],
+   "type": "linear"
+  }
+ },
+ "datasets": [
+  {
+   "axis": "y",
+   "first": 0,
+   "label": "KOSPI",
+   "last": 56.51,
+   "n": 143,
+   "sum": 7528.92
+  }
+ ],
+ "dispPanel": null,
+ "filename": "KOSPI_2026-08-02.png",
+ "legend": "KOSPI+56.5%",
+ "mainAreaL": 51,
+ "mainAreaR": 900,
+ "paddingTop": 6,
+ "rocPanel": null,
+ "tooltipTitle": "2026-07-31"
+}

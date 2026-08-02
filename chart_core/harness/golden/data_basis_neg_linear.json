@@ -1,0 +1,56 @@
+{
+ "axes": {
+  "x": {
+   "max": 142,
+   "min": 0,
+   "ticks": [
+    "25/12",
+    "26/02",
+    "26/03",
+    "26/04",
+    "26/05",
+    "26/06"
+   ],
+   "type": "category"
+  },
+  "y": {
+   "max": 4,
+   "min": -6,
+   "ticks": [
+    "-6",
+    "-4",
+    "-2",
+    "0",
+    "2",
+    "4"
+   ],
+   "type": "linear"
+  }
+ },
+ "datasets": [
+  {
+   "axis": "y",
+   "first": 0.3336,
+   "label": "삼성전자 현선물 괴리율",
+   "last": -5.3333,
+   "n": 143,
+   "sum": 27.1148
+  },
+  {
+   "axis": "y",
+   "first": 0.126995,
+   "label": "MA20",
+   "last": -0.19177,
+   "n": 143,
+   "sum": 31.196055
+  }
+ ],
+ "dispPanel": null,
+ "filename": "삼성전자 현선물 괴리율_2026-08-02.png",
+ "legend": "삼성전자 현선물 괴리율(%)-5.67%pMA20-0.32%p",
+ "mainAreaL": 30,
+ "mainAreaR": 900,
+ "paddingTop": 6,
+ "rocPanel": null,
+ "tooltipTitle": "2026-07-31"
+}

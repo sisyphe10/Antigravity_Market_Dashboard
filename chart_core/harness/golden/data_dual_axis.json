@@ -1,0 +1,57 @@
+{
+ "axes": {
+  "x": {
+   "max": 142,
+   "min": 0,
+   "ticks": [
+    "25/12",
+    "26/02",
+    "26/03",
+    "26/04",
+    "26/05",
+    "26/06"
+   ],
+   "type": "category"
+  },
+  "y": {
+   "max": 9528.65,
+   "min": 3918.398,
+   "ticks": [
+    "3,918",
+    "4,500",
+    "5,000",
+    "6,000",
+    "7,000",
+    "8,000",
+    "9,529"
+   ],
+   "type": "logarithmic"
+  }
+ },
+ "datasets": [
+  {
+   "axis": "y",
+   "first": 4214.17,
+   "label": "KOSPI",
+   "last": 6595.45,
+   "n": 143,
+   "sum": 919909.25
+  },
+  {
+   "axis": "y",
+   "first": 4096.422,
+   "label": "MA20",
+   "last": 6903.024,
+   "n": 143,
+   "sum": 896515.26
+  }
+ ],
+ "dispPanel": null,
+ "filename": "KOSPI_2026-08-02.png",
+ "legend": "KOSPI+56.5%MA20+68.5%",
+ "mainAreaL": 53,
+ "mainAreaR": 900,
+ "paddingTop": 6,
+ "rocPanel": null,
+ "tooltipTitle": "2026-07-31"
+}

@@ -161,3 +161,8 @@ backups/
 # chart_core 산출물은 dist/ 광역 규칙에서 제외 — 코어는 반드시 추적 (2026-08-02 P1a 사고)
 !chart_core/dist/
 !chart_core/dist/**
+
+# 회귀 golden 스냅샷 — *.json 광역 규칙에서 제외해 반드시 추적
+# (2026-08-02 P2b에서 발견: P0부터 ignore에 삼켜져 로컬 전용이었음. .actual은 비교 실패 산출물이라 제외 유지)
+!chart_core/harness/golden/*.json
+chart_core/harness/golden/*.actual.json

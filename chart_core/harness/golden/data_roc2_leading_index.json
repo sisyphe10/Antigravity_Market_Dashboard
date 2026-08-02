@@ -1,0 +1,63 @@
+{
+ "axes": {
+  "x": {
+   "max": 11,
+   "min": 0,
+   "ticks": [
+    "25/06",
+    "25/08",
+    "25/10",
+    "25/12",
+    "26/02",
+    "26/04"
+   ],
+   "type": "category"
+  },
+  "y": {
+   "max": 105.08306,
+   "min": 99.564414,
+   "ticks": [
+    "100",
+    "101",
+    "102",
+    "103",
+    "104",
+    "105"
+   ],
+   "type": "logarithmic"
+  }
+ },
+ "datasets": [
+  {
+   "axis": "y",
+   "first": 100,
+   "label": "선행지수 순환변동치",
+   "last": 104.8,
+   "n": 12,
+   "sum": 1223.3
+  },
+  {
+   "axis": "y",
+   "first": 99.833333,
+   "label": "MA3",
+   "last": 104.13333,
+   "n": 12,
+   "sum": 1218.5
+  }
+ ],
+ "dispPanel": null,
+ "filename": "선행지수 순환변동치_2026-08-02.png",
+ "legend": "선행지수 순환변동치+4.80%MA3+4.31%RoC²0.50%p",
+ "mainAreaL": 39,
+ "mainAreaR": 900,
+ "paddingTop": 6,
+ "rocPanel": {
+  "areaL": 39,
+  "areaR": 900,
+  "labels": [
+   "RoC²"
+  ],
+  "n": 1
+ },
+ "tooltipTitle": "2026-07-31"
+}
