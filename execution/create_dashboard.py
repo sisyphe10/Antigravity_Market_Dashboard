@@ -3652,6 +3652,7 @@ def _build_combined_chart_section():
                 }
 
                 var _yMaxAbs = 0, _y1MaxAbs = 0, _yMinPos = Infinity, _y1MinPos = Infinity;
+                var _yHasNonPos = false, _y1HasNonPos = false;   // 음수·0 포함 축은 로그축 성립 불가 → 선형 폴백
                 datasets.forEach(function(ds) {
                     if (ds._skipEndLabel) return;
                     ds.data.forEach(function(v) {
@@ -3660,9 +3661,11 @@ def _build_combined_chart_section():
                         if (ds.yAxisID === 'y1') {
                             if (a > _y1MaxAbs) _y1MaxAbs = a;
                             if (v > 0 && v < _y1MinPos) _y1MinPos = v;
+                            if (v <= 0) _y1HasNonPos = true;
                         } else {
                             if (a > _yMaxAbs) _yMaxAbs = a;
                             if (v > 0 && v < _yMinPos) _yMinPos = v;
+                            if (v <= 0) _yHasNonPos = true;
                         }
                     });
                 });
@@ -3720,9 +3723,11 @@ def _build_combined_chart_section():
                     var pad = (lhi - llo) * (0.05 / 0.90) || 0.02;
                     return { min: Math.pow(10, llo - pad), max: Math.pow(10, lhi + pad) };
                 }
-                var yType = (mode === 'pct') ? 'linear' : (window.cmbLogOn === false ? 'linear' : 'logarithmic');
+                // 음수·0 포함 시리즈(괴리율 등)는 Log 자동 무시 — 로그축에 음수가 들어가면
+                // 선·끝값 라벨이 축 하단으로 뭉개진다 (2026-08-02 실사고: 삼성전자 현선물 괴리율 -5.33).
+                var yType = (mode === 'pct' || _yHasNonPos) ? 'linear' : (window.cmbLogOn === false ? 'linear' : 'logarithmic');
                 var yLogPad = yType === 'logarithmic' ? cmbLogPad(_yMinPos, _yMaxAbs) : null;
-                var y1Type = window.cmbLogOn === false ? 'linear' : 'logarithmic';
+                var y1Type = (window.cmbLogOn === false || _y1HasNonPos) ? 'linear' : 'logarithmic';
                 var y1LogPad = y1Type === 'logarithmic' ? cmbLogPad(_y1MinPos, _y1MaxAbs) : null;
                 var scalesConfig = {
                     x: { type: 'category', display: datasets.length > 0, ticks: { maxTicksLimit: 6, callback: function(val){ return window.cmbXLabel(this.getLabelForValue(val)); }, maxRotation: 0, font: { size: 15 }, color: '#000' }, grid: { color: '#eee', display: true }, border: { color: '#000', width: 2 } },
