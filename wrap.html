@@ -328,7 +328,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
     </div>
 
     <div id="mainContent" class="pw-hidden has-sidebar">
-    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><span class="wrap-updated">Updated: 2026-08-02 22:14:00 KST</span></div></nav><div class="wrap-strip"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div>
+    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><span class="wrap-updated">Updated: 2026-08-02 22:17:23 KST</span></div></nav><div class="wrap-strip"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div>
     <aside class="sidebar wrap-sidebar" id="wrapSectionNav" aria-label="WRAP navigation"><div class="wrap-side-group on" data-side-for="dashboard"><a href="#wrap-sec-chart" onclick="wrapGoSection('wrap-sec-chart');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-chart">CHART</a><a href="#wrap-sec-return" onclick="wrapGoSection('wrap-sec-return');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-return">RETURN</a><a href="#wrap-sec-aum" onclick="wrapGoSection('wrap-sec-aum');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-aum">AUM</a><a href="#wrap-sec-portfolio" onclick="wrapGoSection('wrap-sec-portfolio');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-portfolio">Portfolio</a><a href="#wrap-sec-sector" onclick="wrapGoSection('wrap-sec-sector');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-sector">SECTOR WEIGHT</a></div><div class="wrap-side-group" data-side-for="order" id="wrapSideOrder"></div><div class="wrap-side-group" data-side-for="contribution" id="wrapSideContrib"></div><div class="wrap-side-group" data-side-for="fee"><a href="#" onclick="feeSwitchSub('rate');return false;" class="sidebar-link active" data-side-fee="rate">요율</a><a href="#" onclick="feeSwitchSub('revenue');return false;" class="sidebar-link" data-side-fee="revenue">매출</a></div></aside>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -1168,7 +1168,9 @@ function cmbPeerCharts(self) {
                         }
                         // 축 단위를 시리즈명 바로 뒤에 표기 (2026-08-02 사용자 확정 — 축 상단 주석 폐지).
                         // MA 등 파생선은 cmbSeriesUnit 미등록이라 자동으로 단위 없음.
-                        var unitStr = (mode !== 'pct') ? (cmbUnitLabel(ds.label, (ds.yAxisID === 'y1') ? y1Jo : (ds.yAxisID === 'y2' ? y2Jo : yJo)) || '') : '';
+                        // 단위 생략은 '정규화된 좌축'만 — 우축(y1·y2) 원값 계열은 pct 모드에도 단위 유지 (codex 8/2)
+                        var unitStr = (mode === 'pct' && (ds.yAxisID || 'y') === 'y') ? ''
+                            : (cmbUnitLabel(ds.label, (ds.yAxisID === 'y1') ? y1Jo : (ds.yAxisID === 'y2' ? y2Jo : yJo)) || '');
                         return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:14px;">' +
                             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
                             ds.label + unitStr + pctStr + '</span>';
@@ -1359,7 +1361,7 @@ function cmbPeerCharts(self) {
                     if (lv === null) return;
                     var _lbl;
                     if (ds._isForeign) { _lbl = lv.toFixed(1) + '%'; }
-                    else if (mode === 'pct') { var _r = Math.sign(lv) * Math.round(Math.abs(lv)); _lbl = (_r >= 0 ? '+' : '') + _r + '%'; }
+                    else if (mode === 'pct' && (ds.yAxisID || 'y') === 'y') { var _r = Math.sign(lv) * Math.round(Math.abs(lv)); _lbl = (_r >= 0 ? '+' : '') + _r + '%'; }   // pct 폭 측정도 좌축 한정 (codex 8/2)
                     else { var _mf = (ds.yAxisID === 'y1' ? (y1Eok && y1Jo) : (ds.yAxisID === 'y2' ? (y2Eok && y2Jo) : (yEok && yJo))) ? 10000 : 1; _lbl = fmtUniformFix(lv / _mf, (ds.yAxisID === 'y1' ? _y1MaxAbs : (ds.yAxisID === 'y2' ? _y2MaxAbs : _yMaxAbs)) / _mf); }
                     var _w = _measCtx.measureText(_lbl).width;
                     if (_w > _maxLabelW) _maxLabelW = _w;
@@ -1668,10 +1670,11 @@ function cmbPeerCharts(self) {
                 //   세로(날짜 컬럼) 스냅 정상화.
                 // x축 = 앵커(상품·구분 각 첫 클릭 조합, 데이터 없으면 클릭 순서대로 폴백) 페어의 유효 날짜. 전부 실패 시 합집합.
                 var allDates = null;
+                var _anchorMetric = null;   // 실제 앵커 '페어'의 지표 — 축 배정도 이걸 따른다 (codex 8/2)
                 for (var oi = 0; oi < wrapProdOrder.length && !allDates; oi++) {
                     for (var mi = 0; mi < wrapMetOrder.length && !allDates; mi++) {
                         for (var pi = 0; pi < perPair.length; pi++) {
-                            if (perPair[pi].name === wrapProdOrder[oi] && perPair[pi].metric === wrapMetOrder[mi]) { allDates = perPair[pi].dates.slice(); break; }
+                            if (perPair[pi].name === wrapProdOrder[oi] && perPair[pi].metric === wrapMetOrder[mi]) { allDates = perPair[pi].dates.slice(); _anchorMetric = perPair[pi].metric; break; }
                         }
                     }
                 }
@@ -1722,6 +1725,8 @@ function cmbPeerCharts(self) {
                 //    비중·AUM 단독 선택이면 그 지표가 곧 좌축이 된다.
                 function _grpOf(mk) { return (mk === 'mdd') ? 'return' : mk; }
                 var _axGroups = [];
+                // 주축 = 실제 앵커 페어의 지표 그룹 (전역 지표 순서보다 우선 — 벤치 제외 조합에서 어긋남 방지)
+                if (_anchorMetric) _axGroups.push(_grpOf(_anchorMetric));
                 wrapMetOrder.forEach(function(mk) {
                     if (_metricSet[mk] && _axGroups.indexOf(_grpOf(mk)) < 0) _axGroups.push(_grpOf(mk));
                 });
@@ -2834,7 +2839,9 @@ function cmbPeerCharts(self) {
                         }
                         // 축 단위를 시리즈명 바로 뒤에 표기 (2026-08-02 사용자 확정 — 축 상단 주석 폐지).
                         // MA 등 파생선은 cmbSeriesUnit 미등록이라 자동으로 단위 없음.
-                        var unitStr = (mode !== 'pct') ? (cmbUnitLabel(ds.label, (ds.yAxisID === 'y1') ? y1Jo : (ds.yAxisID === 'y2' ? y2Jo : yJo)) || '') : '';
+                        // 단위 생략은 '정규화된 좌축'만 — 우축(y1·y2) 원값 계열은 pct 모드에도 단위 유지 (codex 8/2)
+                        var unitStr = (mode === 'pct' && (ds.yAxisID || 'y') === 'y') ? ''
+                            : (cmbUnitLabel(ds.label, (ds.yAxisID === 'y1') ? y1Jo : (ds.yAxisID === 'y2' ? y2Jo : yJo)) || '');
                         return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:14px;">' +
                             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
                             ds.label + unitStr + pctStr + '</span>';
@@ -3025,7 +3032,7 @@ function cmbPeerCharts(self) {
                     if (lv === null) return;
                     var _lbl;
                     if (ds._isForeign) { _lbl = lv.toFixed(1) + '%'; }
-                    else if (mode === 'pct') { var _r = Math.sign(lv) * Math.round(Math.abs(lv)); _lbl = (_r >= 0 ? '+' : '') + _r + '%'; }
+                    else if (mode === 'pct' && (ds.yAxisID || 'y') === 'y') { var _r = Math.sign(lv) * Math.round(Math.abs(lv)); _lbl = (_r >= 0 ? '+' : '') + _r + '%'; }   // pct 폭 측정도 좌축 한정 (codex 8/2)
                     else { var _mf = (ds.yAxisID === 'y1' ? (y1Eok && y1Jo) : (ds.yAxisID === 'y2' ? (y2Eok && y2Jo) : (yEok && yJo))) ? 10000 : 1; _lbl = fmtUniformFix(lv / _mf, (ds.yAxisID === 'y1' ? _y1MaxAbs : (ds.yAxisID === 'y2' ? _y2MaxAbs : _yMaxAbs)) / _mf); }
                     var _w = _measCtx.measureText(_lbl).width;
                     if (_w > _maxLabelW) _maxLabelW = _w;
@@ -4062,7 +4069,9 @@ function cmbPeerCharts(self) {
                         }
                         // 축 단위를 시리즈명 바로 뒤에 표기 (2026-08-02 사용자 확정 — 축 상단 주석 폐지).
                         // MA 등 파생선은 cmbSeriesUnit 미등록이라 자동으로 단위 없음.
-                        var unitStr = (mode !== 'pct') ? (cmbUnitLabel(ds.label, (ds.yAxisID === 'y1') ? y1Jo : (ds.yAxisID === 'y2' ? y2Jo : yJo)) || '') : '';
+                        // 단위 생략은 '정규화된 좌축'만 — 우축(y1·y2) 원값 계열은 pct 모드에도 단위 유지 (codex 8/2)
+                        var unitStr = (mode === 'pct' && (ds.yAxisID || 'y') === 'y') ? ''
+                            : (cmbUnitLabel(ds.label, (ds.yAxisID === 'y1') ? y1Jo : (ds.yAxisID === 'y2' ? y2Jo : yJo)) || '');
                         return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:14px;">' +
                             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
                             ds.label + unitStr + pctStr + '</span>';
@@ -4253,7 +4262,7 @@ function cmbPeerCharts(self) {
                     if (lv === null) return;
                     var _lbl;
                     if (ds._isForeign) { _lbl = lv.toFixed(1) + '%'; }
-                    else if (mode === 'pct') { var _r = Math.sign(lv) * Math.round(Math.abs(lv)); _lbl = (_r >= 0 ? '+' : '') + _r + '%'; }
+                    else if (mode === 'pct' && (ds.yAxisID || 'y') === 'y') { var _r = Math.sign(lv) * Math.round(Math.abs(lv)); _lbl = (_r >= 0 ? '+' : '') + _r + '%'; }   // pct 폭 측정도 좌축 한정 (codex 8/2)
                     else { var _mf = (ds.yAxisID === 'y1' ? (y1Eok && y1Jo) : (ds.yAxisID === 'y2' ? (y2Eok && y2Jo) : (yEok && yJo))) ? 10000 : 1; _lbl = fmtUniformFix(lv / _mf, (ds.yAxisID === 'y1' ? _y1MaxAbs : (ds.yAxisID === 'y2' ? _y2MaxAbs : _yMaxAbs)) / _mf); }
                     var _w = _measCtx.measureText(_lbl).width;
                     if (_w > _maxLabelW) _maxLabelW = _w;
