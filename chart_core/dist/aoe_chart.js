@@ -247,11 +247,20 @@
                     }
                 };
 
+                // 로그축 경계 니스 라운딩 (2026-08-02 사용자 지적): 경계 눈금은 축 min/max 를
+                // 그대로 라벨링하는데, 패딩 원값(예: 주가 3,472,049)이 일의자리까지 노출됐다.
+                // 경계를 유효숫자 3자리로 min=내림·max=올림 — 데이터는 항상 안쪽, 라벨=실제 축값.
+                function cmbNice3(v, up) {
+                    if (!(v > 0)) return v;
+                    var e = Math.pow(10, Math.floor(Math.log10(v)) - 2);
+                    return (up ? Math.ceil(v / e - 1e-9) : Math.floor(v / e + 1e-9)) * e;
+                }
                 function cmbLogPad(minPos, maxV) {
                     if (!(minPos > 0) || !(maxV > 0) || minPos === Infinity) return null;
                     var llo = Math.log10(minPos), lhi = Math.log10(maxV);
                     var pad = (lhi - llo) * (0.05 / 0.90) || 0.02;
-                    return { min: Math.pow(10, llo - pad), max: Math.pow(10, lhi + pad) };
+                    return { min: cmbNice3(Math.pow(10, llo - pad), false),
+                             max: cmbNice3(Math.pow(10, lhi + pad), true) };
                 }
 
 // fmtUniform — fmtUniformFix가 호출하는 기저 포맷터 (P1b 후속 이동: 전역 함수는 클로저 내부를 못 본다)

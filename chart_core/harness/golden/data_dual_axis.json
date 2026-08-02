@@ -14,16 +14,16 @@
    "type": "category"
   },
   "y": {
-   "max": 9528.65,
-   "min": 3918.398,
+   "max": 9530,
+   "min": 3910,
    "ticks": [
-    "3,918",
+    "3,910",
     "4,500",
     "5,000",
     "6,000",
     "7,000",
     "8,000",
-    "9,529"
+    "9,530"
    ],
    "type": "logarithmic"
   }
@@ -49,7 +49,7 @@
  "dispPanel": null,
  "filename": "KOSPI_2026-08-02.png",
  "legend": "KOSPI+56.5%MA20+68.5%",
- "mainAreaL": 53,
+ "mainAreaL": 54,
  "mainAreaR": 900,
  "paddingTop": 6,
  "rocPanel": null,
