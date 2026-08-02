@@ -1,0 +1,15 @@
+/* aoe_tokens.css — AoE 표 양식 비색상 규격 토큰 (P7 2026-08-02, DECISION Q6)
+   색은 페이지/테마가 주입한다 — 여기엔 크기·간격·정렬·숫자체만 둔다.
+   다크 스킨·페이지 고유 양식은 셀렉터를 덮지 말고 이 변수만 재정의할 것.
+   기본값 = 표 페이지 표준(bop 계열, 2026-07-27 사용자 확정 양식 기준). */
+:root {
+  --aoe-t-font: 13.5px;        /* 표 본문 글씨 */
+  --aoe-t-pad-y: 6px;          /* 셀 상하 패딩 */
+  --aoe-t-pad-x: 10px;         /* 셀 좌우 패딩 */
+  --aoe-t-align: center;       /* 기본 가운데 정렬 (긴 셀만 페이지에서 left) */
+  --aoe-t-valign: middle;
+  --aoe-t-num: tabular-nums;   /* 숫자 등폭 — 열 정렬 흔들림 방지 */
+  --aoe-t-head-weight: 700;
+  --aoe-t-head-underline: 2px; /* 헤더 밑줄 두께 */
+  --aoe-t-row-line: 1px;       /* 행 구분선 두께 */
+}

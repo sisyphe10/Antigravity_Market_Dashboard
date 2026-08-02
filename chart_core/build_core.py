@@ -46,10 +46,13 @@ def main():
                                 text=True, cwd=BASE).stdout.strip()
     except Exception:
         commit = 'unknown'
+    with open(os.path.join(BASE, 'dist', 'aoe_tokens.css'), encoding='utf-8') as f:
+        tokens = f.read()
     manifest = {
         'coreVersion': CORE_VERSION,
         'coreSha256': hashlib.sha256(core.encode('utf-8')).hexdigest(),
         'coreBytes': len(core.encode('utf-8')),
+        'tokensSha256': hashlib.sha256(tokens.encode('utf-8')).hexdigest(),
         'chartJsVersion': CHARTJS_VERSION,
         'sourceCommit': commit,
     }
