@@ -533,7 +533,7 @@ body{margin:0}
     <nav class="topnav"><div class="topnav-inner"><a href="index.html" class="topnav-brand">AGE OF EMERGENCE</a><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="watchlist/" class="topnav-tab">Watchlist</a><div class="topnav-dropdown"><a href="watchlist/" class="topnav-sub">Quotes</a><a href="universe.html" class="topnav-sub">Universe</a><a href="universe_lab.html" class="topnav-sub">Universe Lab</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab active">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub active">Data</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="sisyphe/journal.html" class="topnav-tab">Journal</a></div><div class="topnav-item"><a href="sisyphe/journal.html#weekly" class="topnav-tab">Weekly</a></div><div class="topnav-item"><a href="wiki/library" class="topnav-tab">Earnings</a></div><div class="topnav-item"><a href="wiki/" class="topnav-tab">Wiki</a></div><div class="topnav-item"><a href="sisyphe/memento.html" class="topnav-tab">Memento</a></div><div class="topnav-item"><a href="sisyphe/dashboard.html" class="topnav-tab">Ledger</a></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
     <aside class="sidebar"><a href="market.html" class="sidebar-link active">Data</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
     <header style="margin:0;padding:8px 28px 0;text-align:right;">
-        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-08-02 22:00:56 KST</div>
+        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-08-02 22:09:30 KST</div>
     </header>
 
     <div class="mkt-subtabs">
@@ -845,8 +845,7 @@ if (typeof window._h2cFreeze !== 'function') {
                 // ★밴드 기준 = 차트 인스턴스 _cmbAxisBandRef (cmbRenderCharts 가 메인 차트에만 부착).
                 //   P3 다중 패밀리 공존을 위해 window 전역·canvas id 판별 제거 — 서브패널은
                 //   인스턴스에 밴드가 없으므로 종전대로 축 최대값 기준(else)으로 간다.
-                var _bandRef = ax.chart && (ax.chart._cmbAxisBandRef
-                    || (ax.chart.canvas && ax.chart.canvas.id === 'cmbDynamicChart' ? window._cmbAxisBandRef : null));   // legacy 심
+                var _bandRef = ax.chart && ax.chart._cmbAxisBandRef;   // (P7: legacy window 폴백 제거)
                 if (_bandRef)
                     m = (_bandRef[ax.id] || Math.abs(ax.max || 0)) / f;
                 else
@@ -957,19 +956,7 @@ function cmbPeerCharts(self) {
         return c && c !== self && c.canvas;
     });
 }
-// ── legacy 호환 심 (codex 지적 8/2, P7에서 legacy 와 함께 제거) ──
-// AOE_CHART_LEGACY 동결 렌더러는 P2a 계약(window._cmbPeerAccessor 등록)으로 이 플러그인들을
-// 쓴다. 패밀리 미배선 차트가 접근자 등록 페이지에서 그려지면 전역 단일 패밀리를 만들어 잇는다.
-var _cmbLegacyFam = null;
-function cmbFamilyOf(chart) {
-    if (chart._cmbFamily) return chart._cmbFamily;
-    if (!window._cmbPeerAccessor) return null;
-    if (!_cmbLegacyFam) _cmbLegacyFam = { hover: { idx: null, yPx: null, activeId: null }, pin: { date: null }, peers: [] };
-    _cmbLegacyFam.peers = window._cmbPeerAccessor().filter(function(c) { return !!c; });
-    chart._cmbFamily = _cmbLegacyFam;
-    if (chart.canvas && chart.canvas.id === 'cmbDynamicChart') chart._cmbPinHost = true;
-    return _cmbLegacyFam;
-}
+// (P7: legacy 호환 심 cmbFamilyOf 제거 — AOE_CHART_LEGACY 동결 렌더러 은퇴와 함께)
 
             function cmbSyncTooltip(other, idx) {
                 if (!other || !other.tooltip) return;
@@ -996,7 +983,7 @@ function cmbFamilyOf(chart) {
                     var e = args.event;
                     var area = chart.chartArea;
                     if (!area) return;
-                    var _fam = cmbFamilyOf(chart);
+                    var _fam = chart._cmbFamily;
                     if (!_fam) return;   // 패밀리 배선 전(생성 직후 첫 draw) — 상태 없음
                     var cmbHoverState = _fam.hover, cmbPin = _fam.pin;
                     var _peers = cmbPeerCharts(chart);
@@ -1061,7 +1048,7 @@ function cmbFamilyOf(chart) {
                     });
                 },
                 afterDraw: function(chart) {
-                    var _fam = cmbFamilyOf(chart);
+                    var _fam = chart._cmbFamily;
                     if (!_fam) return;
                     var cmbHoverState = _fam.hover;
                     if (cmbHoverState.idx === null) return;
@@ -1095,7 +1082,7 @@ function cmbFamilyOf(chart) {
             var cmbPinPlugin = {
                 id: 'cmbPinCard',
                 afterDraw: function(chart) {
-                    var _famP = cmbFamilyOf(chart);
+                    var _famP = chart._cmbFamily;
                     if (!_famP || !chart._cmbPinHost) return;
                     var cmbPin = _famP.pin;
                     if (cmbPin.date === null) return;
@@ -2385,8 +2372,7 @@ function cmbFamilyOf(chart) {
                 // ★밴드 기준 = 차트 인스턴스 _cmbAxisBandRef (cmbRenderCharts 가 메인 차트에만 부착).
                 //   P3 다중 패밀리 공존을 위해 window 전역·canvas id 판별 제거 — 서브패널은
                 //   인스턴스에 밴드가 없으므로 종전대로 축 최대값 기준(else)으로 간다.
-                var _bandRef = ax.chart && (ax.chart._cmbAxisBandRef
-                    || (ax.chart.canvas && ax.chart.canvas.id === 'cmbDynamicChart' ? window._cmbAxisBandRef : null));   // legacy 심
+                var _bandRef = ax.chart && ax.chart._cmbAxisBandRef;   // (P7: legacy window 폴백 제거)
                 if (_bandRef)
                     m = (_bandRef[ax.id] || Math.abs(ax.max || 0)) / f;
                 else
@@ -2497,19 +2483,7 @@ function cmbPeerCharts(self) {
         return c && c !== self && c.canvas;
     });
 }
-// ── legacy 호환 심 (codex 지적 8/2, P7에서 legacy 와 함께 제거) ──
-// AOE_CHART_LEGACY 동결 렌더러는 P2a 계약(window._cmbPeerAccessor 등록)으로 이 플러그인들을
-// 쓴다. 패밀리 미배선 차트가 접근자 등록 페이지에서 그려지면 전역 단일 패밀리를 만들어 잇는다.
-var _cmbLegacyFam = null;
-function cmbFamilyOf(chart) {
-    if (chart._cmbFamily) return chart._cmbFamily;
-    if (!window._cmbPeerAccessor) return null;
-    if (!_cmbLegacyFam) _cmbLegacyFam = { hover: { idx: null, yPx: null, activeId: null }, pin: { date: null }, peers: [] };
-    _cmbLegacyFam.peers = window._cmbPeerAccessor().filter(function(c) { return !!c; });
-    chart._cmbFamily = _cmbLegacyFam;
-    if (chart.canvas && chart.canvas.id === 'cmbDynamicChart') chart._cmbPinHost = true;
-    return _cmbLegacyFam;
-}
+// (P7: legacy 호환 심 cmbFamilyOf 제거 — AOE_CHART_LEGACY 동결 렌더러 은퇴와 함께)
 
             function cmbSyncTooltip(other, idx) {
                 if (!other || !other.tooltip) return;
@@ -2536,7 +2510,7 @@ function cmbFamilyOf(chart) {
                     var e = args.event;
                     var area = chart.chartArea;
                     if (!area) return;
-                    var _fam = cmbFamilyOf(chart);
+                    var _fam = chart._cmbFamily;
                     if (!_fam) return;   // 패밀리 배선 전(생성 직후 첫 draw) — 상태 없음
                     var cmbHoverState = _fam.hover, cmbPin = _fam.pin;
                     var _peers = cmbPeerCharts(chart);
@@ -2601,7 +2575,7 @@ function cmbFamilyOf(chart) {
                     });
                 },
                 afterDraw: function(chart) {
-                    var _fam = cmbFamilyOf(chart);
+                    var _fam = chart._cmbFamily;
                     if (!_fam) return;
                     var cmbHoverState = _fam.hover;
                     if (cmbHoverState.idx === null) return;
@@ -2635,7 +2609,7 @@ function cmbFamilyOf(chart) {
             var cmbPinPlugin = {
                 id: 'cmbPinCard',
                 afterDraw: function(chart) {
-                    var _famP = cmbFamilyOf(chart);
+                    var _famP = chart._cmbFamily;
                     if (!_famP || !chart._cmbPinHost) return;
                     var cmbPin = _famP.pin;
                     if (cmbPin.date === null) return;

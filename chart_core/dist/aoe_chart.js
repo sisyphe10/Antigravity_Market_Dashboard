@@ -175,8 +175,7 @@
                 // ★밴드 기준 = 차트 인스턴스 _cmbAxisBandRef (cmbRenderCharts 가 메인 차트에만 부착).
                 //   P3 다중 패밀리 공존을 위해 window 전역·canvas id 판별 제거 — 서브패널은
                 //   인스턴스에 밴드가 없으므로 종전대로 축 최대값 기준(else)으로 간다.
-                var _bandRef = ax.chart && (ax.chart._cmbAxisBandRef
-                    || (ax.chart.canvas && ax.chart.canvas.id === 'cmbDynamicChart' ? window._cmbAxisBandRef : null));   // legacy 심
+                var _bandRef = ax.chart && ax.chart._cmbAxisBandRef;   // (P7: legacy window 폴백 제거)
                 if (_bandRef)
                     m = (_bandRef[ax.id] || Math.abs(ax.max || 0)) / f;
                 else
@@ -287,19 +286,7 @@ function cmbPeerCharts(self) {
         return c && c !== self && c.canvas;
     });
 }
-// ── legacy 호환 심 (codex 지적 8/2, P7에서 legacy 와 함께 제거) ──
-// AOE_CHART_LEGACY 동결 렌더러는 P2a 계약(window._cmbPeerAccessor 등록)으로 이 플러그인들을
-// 쓴다. 패밀리 미배선 차트가 접근자 등록 페이지에서 그려지면 전역 단일 패밀리를 만들어 잇는다.
-var _cmbLegacyFam = null;
-function cmbFamilyOf(chart) {
-    if (chart._cmbFamily) return chart._cmbFamily;
-    if (!window._cmbPeerAccessor) return null;
-    if (!_cmbLegacyFam) _cmbLegacyFam = { hover: { idx: null, yPx: null, activeId: null }, pin: { date: null }, peers: [] };
-    _cmbLegacyFam.peers = window._cmbPeerAccessor().filter(function(c) { return !!c; });
-    chart._cmbFamily = _cmbLegacyFam;
-    if (chart.canvas && chart.canvas.id === 'cmbDynamicChart') chart._cmbPinHost = true;
-    return _cmbLegacyFam;
-}
+// (P7: legacy 호환 심 cmbFamilyOf 제거 — AOE_CHART_LEGACY 동결 렌더러 은퇴와 함께)
 
             function cmbSyncTooltip(other, idx) {
                 if (!other || !other.tooltip) return;
@@ -326,7 +313,7 @@ function cmbFamilyOf(chart) {
                     var e = args.event;
                     var area = chart.chartArea;
                     if (!area) return;
-                    var _fam = cmbFamilyOf(chart);
+                    var _fam = chart._cmbFamily;
                     if (!_fam) return;   // 패밀리 배선 전(생성 직후 첫 draw) — 상태 없음
                     var cmbHoverState = _fam.hover, cmbPin = _fam.pin;
                     var _peers = cmbPeerCharts(chart);
@@ -391,7 +378,7 @@ function cmbFamilyOf(chart) {
                     });
                 },
                 afterDraw: function(chart) {
-                    var _fam = cmbFamilyOf(chart);
+                    var _fam = chart._cmbFamily;
                     if (!_fam) return;
                     var cmbHoverState = _fam.hover;
                     if (cmbHoverState.idx === null) return;
@@ -425,7 +412,7 @@ function cmbFamilyOf(chart) {
             var cmbPinPlugin = {
                 id: 'cmbPinCard',
                 afterDraw: function(chart) {
-                    var _famP = cmbFamilyOf(chart);
+                    var _famP = chart._cmbFamily;
                     if (!_famP || !chart._cmbPinHost) return;
                     var cmbPin = _famP.pin;
                     if (cmbPin.date === null) return;

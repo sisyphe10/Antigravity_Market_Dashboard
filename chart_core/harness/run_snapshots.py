@@ -145,15 +145,7 @@ SCENARIOS = [
         ('js', "document.querySelector('.idx-mode-btn[data-mode=\"usd\"]').click()"), ('wait', 400)], EXTRACT_IDX),
     # P3: hotels ADR 표준 라인 전환 (독립 페이지 — 로드 즉시 렌더)
     ('hotel_adr',             'hotels', [('wait', 600)], _extract_std('hotelAdrChart', 'hotelAdrLegend')),
-    # codex 지적(8/2): legacy 롤백 경로(AOE_CHART_LEGACY=1 생성물)도 상시 검증 —
-    # 동결 렌더러가 현행 코어의 플러그인·포맷터와 계속 맞물리는지 (데이터 렌더 + 핀 상호작용)
-    ('legacy_deposit',        'legacy', [('row', '고객예탁금')], EXTRACT_CMB),
-    ('legacy_pin_click',      'legacy', [('row', '고객예탁금'), ('wait', 400),
-        ('mouse', {'sel': '#cmbDynamicChart', 'rx': 0.5, 'ry': 0.5, 'action': 'click'}), ('wait', 300)],
-        r"""() => { const ch = Chart.getChart(document.getElementById('cmbDynamicChart'));
-                    const f = ch && ch._cmbFamily;
-                    return { famType: f ? 'family' : 'no-family', pinType: f ? typeof f.pin.date : null,
-                             pinHost: !!(ch && ch._cmbPinHost) }; }"""),
+    # (P7: legacy 롤백 경로 은퇴 — legacy fixture·시나리오 제거. 롤백은 git revert)
     ('viewer2_mktcap',        'viewer2', [
         ('js', "document.querySelector('[data-key=\"삼성전자|mktcap\"]').click()")], _extract_std('chart', 'chartLegend')),
     ('viewer2_normalized',    'viewer2', [
@@ -164,7 +156,6 @@ SCENARIOS = [
 FIXTURES = {
     'market':  '/chart_core/fixtures/market_baseline.html',
     'hotels':  '/chart_core/fixtures/hotels_baseline.html',
-    'legacy':  '/chart_core/fixtures/market_legacy_baseline.html',   # AOE_CHART_LEGACY=1 생성물
     'viewer2': '/chart_core/fixtures/chart_viewer2_baseline.html',
 }
 
