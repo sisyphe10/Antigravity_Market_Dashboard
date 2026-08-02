@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ko">
+<!--
+  AoE 코어 기반 뷰어 템플릿 (P4 2026-08-02) — web-chart 템플릿의 코어 임베드 셸판.
+  렌더(축·눈금·끝값·크로스헤어·핀·범례·툴팁·Download/Copy)는 전부 aoe_chart.js 코어
+  (cmbRenderCharts) — 이 템플릿에는 데이터·창(window)·내비게이션·토글만 남는다.
+  치환 토큰:
+    __TITLE__   페이지·차트 제목
+    __NOTE__    하단 설명
+    __DLNAME__  다운로드 파일명 베이스 (코어 표준은 시리즈명 기반 — 이건 폴백)
+    __CONFIG__  {"groups":[{"name":"...","items":[{"key","label","color","axis":"idx|pct","fmt"}]}],"defaultOn":[...]}
+    __DATA__    {"dates":[...],"series":{...}}
+    __AOE_CHART_CORE__  코어 JS 바이트 (빌더가 manifest sha 검증 후 치환)
+  규칙: fmt -> 단위 문자열만 남기고(UNIT) 값 포맷·자릿수 밴드는 코어 표준(cmb 규격).
+        정규화(pct)는 좌축(idx) 계열만 지수화, 우축(pct) 계열은 레벨 유지(코어 P4 일반화).
+-->
+<head>
+<meta charset="utf-8">
+<title>__TITLE__</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+<script>
+__AOE_CHART_CORE__
+</script>
+<script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.animation = false;</script>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif;
+         margin: 0; background: #fff; color: #111; }
+  .wrap { max-width: 1500px; margin: 0 auto; padding: 24px 28px; }
+  h1 { font-size: 20px; font-weight: 700; margin: 0 0 16px; }
+  .layout { display: flex; gap: 22px; align-items: flex-start; }
+  .sidebar { width: 250px; flex: none; border: 1px solid #e5e5e5; border-radius: 10px; padding: 12px; }
+  .grp h3 { font-size: 13px; margin: 6px 4px 4px; font-weight: 700; }
+  table.series { width: 100%; border-collapse: collapse; }
+  table.series td { padding: 6px 8px; font-size: 13px; cursor: pointer; user-select: none; }
+  table.series td.bar { width: 6px; padding: 0; }
+  table.series td.bar div { width: 4px; height: 18px; border-radius: 2px; }
+  tr.chart-item:hover td { background: #f4f4f4; }
+  tr.chart-item.active td { background: #222; color: #fff; }
+  .main { flex: 1; min-width: 0; }
+  .controls { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+  button.rng, button.util { font-family: inherit; font-size: 12.5px; padding: 5px 14px; border-radius: 999px;
+               border: 1px solid #d0d0d0; background: #fff; color: #111; cursor: pointer; }
+  button.rng:hover, button.util:hover { background: #f4f4f4; }
+  button.rng.active { background: #404040; color: #fff; border-color: #404040; }
+  input.dt { font-family: inherit; font-size: 12.5px; padding: 5px 10px; border-radius: 999px;
+             border: 1px solid #d0d0d0; width: 108px; text-align: center; color: #111; }
+  input.dt:focus { outline: none; border-color: #404040; }
+  button.dl { font-family: inherit; font-size: 13px; font-weight: 600; padding: 6px 14px;
+              background: #dc2626; color: #fff; border: none; border-radius: 8px; cursor: pointer; }
+  button.cp { font-family: inherit; font-size: 13px; font-weight: 600; padding: 6px 14px;
+              background: #0891b2; color: #fff; border: none; border-radius: 8px; cursor: pointer; }
+  .seg { display: inline-flex; border: 1px solid #d0d0d0; border-radius: 999px; overflow: hidden; }
+  .seg button.rng { border: none; border-radius: 0; }
+  .seg button.rng:not(.active) { background: #eef0f2; }
+  .seg button.rng:not(.active):hover { background: #e2e5e9; }
+  .seg button.rng + button.rng { border-left: 1px solid #d0d0d0; }
+  .chartbox { border: 1px solid #e5e5e5; border-radius: 10px; padding: 14px 16px 8px; }
+  #chartwrap { position: relative; height: 560px; }
+  #chartLegend { margin: 8px 0 4px; text-align: center; color: #111; }
+  .note { font-size: 11.5px; color: #888; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>__TITLE__</h1>
+  <div class="layout">
+    <div class="sidebar" id="sidebar"></div>
+    <div class="main">
+      <div class="controls">
+        <button class="rng" data-rng="3">3M</button>
+        <button class="rng" data-rng="6">6M</button>
+        <button class="rng" data-rng="12">1Y</button>
+        <button class="rng active" data-rng="ytd">YTD</button>
+        <button class="rng" data-rng="0">전체</button>
+        <input class="dt" id="d-from" placeholder="YYYY-MM-DD" maxlength="10"> ~
+        <input class="dt" id="d-to" placeholder="YYYY-MM-DD" maxlength="10">
+        <button class="rng active" id="btn-log">Log</button>
+        <button class="rng" id="btn-norm">정규화</button>
+        <span class="seg" style="margin-left:auto">
+          <button class="rng active" data-size="def">기본</button>
+          <button class="rng" data-size="sem">세미나</button>
+        </span>
+        <button class="cp" id="btn-cp">Copy</button>
+        <button class="dl" id="btn-dl">Download</button>
+      </div>
+      <div class="chartbox"><div id="chartwrap"><canvas id="chart"></canvas></div><div id="chartLegend"></div></div>
+      <div class="note">__NOTE__</div>
+    </div>
+  </div>
+</div>
+<script>
+const RAW = __DATA__;
+const CONFIG = __CONFIG__;
+const DL_BASE = '__DLNAME__';
+
+// fmt -> 단위 문자열 (값 포맷·자릿수는 코어 담당 — 단위는 코어 하단 범례 인라인 표기)
+const UNIT = { won: '원', won1: '원', pct: '%', pct2: '%', pctlv: '%', eok: '억원', man: '만', usd: '$', num: '' };
+// 같은 색(계열) 여러 계열 겹칠 때 순서대로 연하게 (cmb 양식 이식 2026-07-21)
+function lightenColor(hex, amt) {
+  const m = hex.replace('#', '').match(/.{2}/g).map(x => parseInt(x, 16));
+  return '#' + m.map(v => Math.round(v + (255 - v) * amt).toString(16).padStart(2, '0')).join('');
+}
+const ITEMS = {};
+CONFIG.groups.forEach(g => g.items.forEach(it => {
+  it.fullLabel = (CONFIG.groups.length > 1 && g.prefix !== false ? g.name + ' ' : '') + it.label;
+  ITEMS[it.key] = it;
+}));
+const DEFAULT_ON = new Set(CONFIG.defaultOn || []);
+
+// ── 사이드바 (컬러바 + 행 클릭 토글) ──
+const sb = document.getElementById('sidebar');
+CONFIG.groups.forEach(g => {
+  const div = document.createElement('div'); div.className = 'grp';
+  div.innerHTML = '<h3>' + g.name + '</h3>';
+  const tb = document.createElement('table'); tb.className = 'series';
+  g.items.forEach(it => {
+    const tr = document.createElement('tr');
+    tr.className = 'chart-item' + (DEFAULT_ON.has(it.key) ? ' active' : '');
+    tr.dataset.key = it.key;
+    tr.innerHTML = '<td class="bar"><div style="background:' + it.color + '"></div></td><td>' + it.label + '</td>';
+    tr.addEventListener('click', () => { tr.classList.toggle('active'); build(); });
+    tb.appendChild(tr);
+  });
+  div.appendChild(tb);
+  sb.appendChild(div);
+});
+
+// ── 사이드바 키보드 ↑/↓ 내비게이션: 계열 간 이동(단일 선택 브라우징) ──
+let kbFocus = -1;
+document.addEventListener('keydown', ev => {
+  if (ev.key !== 'ArrowUp' && ev.key !== 'ArrowDown') return;
+  const t = document.activeElement;
+  if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+  const rows = [...document.querySelectorAll('#sidebar tr.chart-item')];
+  if (!rows.length) return;
+  ev.preventDefault();
+  if (kbFocus < 0) { kbFocus = rows.findIndex(r => r.classList.contains('active')); if (kbFocus < 0) kbFocus = 0; }
+  else kbFocus = (kbFocus + (ev.key === 'ArrowDown' ? 1 : -1) + rows.length) % rows.length;
+  rows.forEach((r, i) => r.classList.toggle('active', i === kbFocus));
+  rows[kbFocus].scrollIntoView({ block: 'nearest' });
+  build();
+});
+
+let rangeMonths = 'ytd';   // 기본 기간 = YTD
+let customRange = null;    // {from, to} — 날짜 입력이 버튼보다 우선
+let logMode = true;        // Log 토글 — 기본 ON (정규화 모드는 코어가 자동 linear)
+let normMode = false;      // '정규화' 버튼 — 좌축(idx) 계열만 표시 창 시작 대비 % 지수화
+let chart = null;          // 코어 표준 라인 메인 차트 (apply_common 의 resize 호환 변수명)
+
+function visibleWindow(activeItems) {
+  const n = RAW.dates.length;
+  if (customRange) {
+    let s = 0, e = n - 1;
+    for (let i = 0; i < n; i++) if (RAW.dates[i] >= customRange.from) { s = i; break; }
+    for (let i = n - 1; i >= 0; i--) if (RAW.dates[i] <= customRange.to) { e = i; break; }
+    if (s <= e) return [s, e];
+  }
+  if (!rangeMonths) {   // 전체 → 활성 계열의 실제 데이터 구간에 맞춤
+    if (activeItems && activeItems.length) {
+      let lo = n, hi = -1;
+      activeItems.forEach(it => {
+        const a = RAW.series[it.key]; if (!a) return;
+        for (let i = 0; i < n; i++) if (a[i] != null) { if (i < lo) lo = i; break; }
+        for (let j = n - 1; j >= 0; j--) if (a[j] != null) { if (j > hi) hi = j; break; }
+      });
+      if (hi >= lo) return [lo, hi];
+    }
+    return [0, n - 1];
+  }
+  let fs;
+  if (rangeMonths === 'ytd') fs = RAW.dates[n - 1].slice(0, 4) + '-01-01';
+  else {
+    const from = new Date(RAW.dates[n - 1]); from.setMonth(from.getMonth() - rangeMonths);
+    fs = from.toISOString().slice(0, 10);
+  }
+  let s = 0;
+  for (let i = 0; i < n; i++) if (RAW.dates[i] >= fs) { s = i; break; }
+  return [s, n - 1];
+}
+
+function build() {
+  const activeItems = [...document.querySelectorAll('#sidebar tr.chart-item.active')].map(tr => ITEMS[tr.dataset.key]);
+  const [s, e] = visibleWindow(activeItems);
+  const labels = RAW.dates.slice(s, e + 1);
+  const datasets = [];
+  const unitMap = {};
+  activeItems.forEach(it => {
+    const raw = RAW.series[it.key].slice(s, e + 1);
+    let data = raw;
+    if (it.axis === 'idx' && normMode) {   // 정규화 = 좌축 계열만 표시 창 시작 대비 %
+      const base = raw.find(v => v != null && v !== 0);
+      data = raw.map(v => v == null ? null : Math.round((v / base - 1) * 10000) / 100);
+    }
+    unitMap[it.fullLabel] = UNIT[it.fmt] || '';
+    datasets.push({
+      label: it.fullLabel,
+      data,
+      borderColor: it.color,
+      backgroundColor: 'transparent',
+      borderWidth: 3,
+      borderJoinStyle: 'round',
+      borderCapStyle: 'round',
+      pointRadius: 0,
+      tension: 0.4,
+      cubicInterpolationMode: 'monotone',
+      spanGaps: true,
+      yAxisID: it.axis === 'idx' ? 'y' : 'y1',
+    });
+  });
+  // 같은 색 여러 계열 → 순서대로 연하게
+  const _shadeCnt = {};
+  datasets.forEach(ds => {
+    const base = ds.borderColor;
+    const k = _shadeCnt[base] || 0;
+    _shadeCnt[base] = k + 1;
+    if (k > 0) ds.borderColor = lightenColor(base, Math.min(0.72, k * 0.34));
+  });
+  const shortWin = labels.length <= 135;   // ~6개월 이하 창 → X라벨 MM/DD
+  const hasY1 = datasets.some(ds => ds.yAxisID === 'y1');
+  const mode = normMode ? 'pct' : (hasY1 ? 'raw2' : 'raw1');
+  // 축 억원 판정: 그 축의 활성 계열이 '전부' 억원일 때만 (혼합 축은 숫자 표기 + 범례 단위로 구분)
+  const yItems = activeItems.filter(it => it.axis === 'idx');
+  const y1Items = activeItems.filter(it => it.axis !== 'idx');
+  const yEok = !normMode && yItems.length > 0 && yItems.every(it => it.fmt === 'eok');
+  const y1Eok = !normMode && y1Items.length > 0 && y1Items.every(it => it.fmt === 'eok');
+
+  const R = cmbRenderCharts({
+    labels, datasets, dispDatasets: [], rocDatasets: [],
+    mode, yEok, y1Eok,
+    axAssign: datasets.map(ds => ({ name: ds.label, ax: ds.yAxisID })),
+    unitMap,
+    charts: { main: chart, disp: null, roc: null },
+    ids: { canvas: 'chart', legend: 'chartLegend', dispPanel: null, rocPanel: null },
+    xLabel: d => !d ? '' : (shortWin ? d.slice(5).replace('-', '/') : d.slice(2, 7).replace('-', '/')),
+    logOn: logMode
+  });
+  chart = R.main;
+}
+window.getPinDate = () => (chart && chart._cmbFamily) ? chart._cmbFamily.pin.date : null;   // 검증용
+
+document.querySelectorAll('button[data-rng]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('button[data-rng]').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  rangeMonths = b.dataset.rng === 'ytd' ? 'ytd' : +b.dataset.rng;
+  customRange = null;
+  document.getElementById('d-from').value = '';
+  document.getElementById('d-to').value = '';
+  build();
+}));
+
+// ── 임의 기간: YYYY-MM-DD 입력 2칸 (자동 하이픈) ──
+function formatDateInput(el) {
+  let v = el.value.replace(/[^0-9]/g, '').slice(0, 8);
+  if (v.length > 6) v = v.slice(0, 4) + '-' + v.slice(4, 6) + '-' + v.slice(6);
+  else if (v.length > 4) v = v.slice(0, 4) + '-' + v.slice(4);
+  el.value = v;
+}
+function applyCustomRange() {
+  const f = document.getElementById('d-from').value, t = document.getElementById('d-to').value;
+  const ok = s => /^\d{4}-\d{2}-\d{2}$/.test(s);
+  if (ok(f) && ok(t) && f <= t) {
+    customRange = { from: f, to: t };
+    document.querySelectorAll('button[data-rng]').forEach(x => x.classList.remove('active'));
+    build();
+  }
+}
+['d-from', 'd-to'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('input', () => { formatDateInput(el); applyCustomRange(); });
+});
+
+// ── 내비게이션 (트레이딩뷰식): 휠=시간축 이동 / Ctrl·Shift+휠=커서 기준 확대·축소 / 드래그=이동 ──
+function applyWindow(ns, ne) {
+  const n = RAW.dates.length;
+  document.querySelectorAll('button[data-rng]').forEach(x => x.classList.remove('active'));
+  if (ns === 0 && ne === n - 1) {
+    customRange = null; rangeMonths = 0;
+    document.querySelector('button[data-rng="0"]').classList.add('active');
+    document.getElementById('d-from').value = '';
+    document.getElementById('d-to').value = '';
+  } else {
+    customRange = { from: RAW.dates[ns], to: RAW.dates[ne] };
+    document.getElementById('d-from').value = RAW.dates[ns];
+    document.getElementById('d-to').value = RAW.dates[ne];
+  }
+  build();
+}
+document.getElementById('chart').addEventListener('wheel', ev => {
+  if (!chart) return;
+  const rect = ev.target.getBoundingClientRect();
+  const px = ev.clientX - rect.left, py = ev.clientY - rect.top;
+  const a = chart.chartArea;
+  if (px < a.left || px > a.right || py < a.top || py > a.bottom) return;
+  ev.preventDefault();
+  const n = RAW.dates.length;
+  const [s, e] = visibleWindow();
+  const span = e - s;
+  if (ev.ctrlKey || ev.shiftKey) {
+    const fx = (px - a.left) / (a.right - a.left);
+    const anchor = s + fx * span;
+    const factor = ev.deltaY < 0 ? 0.8 : 1.25;
+    let newSpan = Math.round(span * factor);
+    newSpan = Math.max(10, Math.min(n - 1, newSpan));
+    let ns = Math.round(anchor - fx * newSpan);
+    ns = Math.max(0, Math.min(ns, n - 1 - newSpan));
+    applyWindow(ns, ns + newSpan);
+  } else {
+    if (span >= n - 1) return;
+    const step = Math.max(1, Math.round(span * 0.12)) * (ev.deltaY > 0 ? 1 : -1);
+    const ns = Math.max(0, Math.min(s + step, n - 1 - span));
+    if (ns !== s) applyWindow(ns, ns + span);
+  }
+}, { passive: false });
+
+// 클릭 드래그 = 차트 좌우 이동 (3px 이상 = 드래그 → 코어 핀 클릭 1회 억제)
+let dragState = null;
+let didDrag = false;
+document.getElementById('chart').addEventListener('mousedown', ev => {
+  if (!chart) return;
+  chart._cmbPinSuppress = false;   // 새 제스처 시작 — 이전 억제 잔여 해제
+  const rect = ev.target.getBoundingClientRect();
+  const px = ev.clientX - rect.left, py = ev.clientY - rect.top;
+  const a = chart.chartArea;
+  if (px < a.left || px > a.right || py < a.top || py > a.bottom) return;
+  const [s, e] = visibleWindow();
+  dragState = { x0: ev.clientX, s, e, plotW: a.right - a.left };
+  didDrag = false;
+});
+window.addEventListener('mousemove', ev => {
+  if (!dragState || !chart) return;
+  const dx = ev.clientX - dragState.x0;
+  if (Math.abs(dx) > 3) didDrag = true;
+  const n = RAW.dates.length;
+  const span = dragState.e - dragState.s;
+  if (span >= n - 1) return;
+  const bars = Math.round(-dx / dragState.plotW * span);
+  const ns = Math.max(0, Math.min(dragState.s + bars, n - 1 - span));
+  const [cs] = visibleWindow();
+  if (ns !== cs) applyWindow(ns, ns + span);
+});
+window.addEventListener('mouseup', () => {
+  if (dragState && didDrag && chart) chart._cmbPinSuppress = true;   // 드래그 직후 click = 핀 아님
+  dragState = null;
+});
+document.getElementById('btn-log').addEventListener('click', () => {
+  logMode = !logMode;
+  document.getElementById('btn-log').classList.toggle('active', logMode);
+  build();
+});
+document.getElementById('btn-norm').addEventListener('click', () => {
+  normMode = !normMode;
+  document.getElementById('btn-norm').classList.toggle('active', normMode);
+  build();
+});
+
+// ── 사이즈 토글: 기본(반응형 560px) / 세미나(800×450 = 16:9) ──
+const SIZES = { def: { w: null, h: 560 }, sem: { w: 800, h: 450 } };
+document.querySelectorAll('button[data-size]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('button[data-size]').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  const s = SIZES[b.dataset.size];
+  const w = s.w ? (s.w + 34) + 'px' : '';
+  document.querySelector('.chartbox').style.width = w;
+  document.querySelector('.controls').style.width = w;
+  document.getElementById('chartwrap').style.height = s.h + 'px';
+  if (chart) chart.resize();
+}));
+
+// ── Download / Copy — 코어 표준 (DPR4 재렌더·범례 합성·시리즈명 파일명) ──
+document.getElementById('btn-dl').addEventListener('click', () => {
+  downloadChartImage('chart', DL_BASE, 'chartLegend');
+});
+document.getElementById('btn-cp').addEventListener('click', ev => {
+  copyChartImage('chart', 'chartLegend', null, ev.currentTarget);
+});
+
+build();
+</script>
+</body>
+</html>

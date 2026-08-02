@@ -37,6 +37,16 @@ def apply_common(html, current='', nav=True):
         '        </span>',
         '        <span style="margin-left:auto"></span>')
     # 3) 로드 시 세미나(800×450) 사이즈 직접 적용
+    #    ★코어 템플릿(P4, chartwrap 고정높이 래퍼)은 래퍼 높이가 대상 — 캔버스에 직접 주면
+    #      responsive 부모(래퍼) 높이와 어긋난다 (리사이즈 루프 방지 구조).
+    if 'id="chartwrap"' in html:
+        html = html.replace(
+            'build();\n</script>',
+            'build();\n(function(){var w=(800+34)+"px",cb=document.querySelector(".chartbox");'
+            'if(cb){cb.style.width=w;document.querySelector(".controls").style.width=w;'
+            'document.getElementById("chartwrap").style.height="450px";'
+            'if(typeof chart!=="undefined"&&chart)chart.resize();}})();\n</script>')
+        return html
     html = html.replace(
         'build();\n</script>',
         'build();\n(function(){var w=(800+34)+"px",cb=document.querySelector(".chartbox");'
