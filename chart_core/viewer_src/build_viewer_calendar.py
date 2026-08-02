@@ -16,7 +16,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from chart_common import nav_html  # noqa: E402
+from chart_common import aoe_tokens_css, nav_html  # noqa: E402
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 D = json.load(open(os.path.join(BASE, 'calendar_data.json'), encoding='utf-8'))
@@ -75,6 +75,8 @@ PAGE = """<!doctype html>
 <title>__TITLE__</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
 <style>
+__AOE_TOKENS__
+  :root { --aoe-t-font: 13px; }   /* 캘린더 확정 양식(7/31) 유지 — 값만 토큰으로 외재화 */
   /* 채팅에 렌더된 마크다운 표를 그대로 옮긴 양식 — 흰 배경 · 검정 글씨, 카드 · 음영 없음. */
   * { box-sizing: border-box; }
   body { font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif;
@@ -98,7 +100,8 @@ PAGE = """<!doctype html>
   .wrap { overflow-x: auto; }
   /* 화면 폭을 다 쓰면 한 행이 너무 길어져 눈이 못 따라간다 → 표는 내용 폭으로만,
      각 열은 max-width 로 묶고 가로 · 세로 구분선을 모두 넣는다. */
-  table { border-collapse: collapse; font-size: 13px; width: auto; }
+  table { border-collapse: collapse; font-size: var(--aoe-t-font); width: auto;
+          font-variant-numeric: var(--aoe-t-num); }
   /* 표 기본 = 좌우 · 상하 모두 가운데 정렬, 글씨 순검정 · 볼드 없음, 테두리 전부 검정선.
      강조는 굵기가 아니라 행 배경색으로만 한다 (사용자 확정 2026-07-31). */
   th, td { text-align: center; vertical-align: middle; padding: 6px 10px;
@@ -193,7 +196,7 @@ PAGE = """<!doctype html>
 """
 
 out = (PAGE.replace('__TITLE__', '이벤트 캘린더')
-           .replace('__NAV__', nav_black('chart_viewer_calendar.html'))
+           .replace('__AOE_TOKENS__', aoe_tokens_css()).replace('__NAV__', nav_black('chart_viewer_calendar.html'))
            .replace('__UBODY__', up_rows(D['upcoming']))
            .replace('__PBODY__', past_rows(D['past'])))
 for tok in ('__TITLE__', '__NAV__', '__UBODY__', '__PBODY__'):

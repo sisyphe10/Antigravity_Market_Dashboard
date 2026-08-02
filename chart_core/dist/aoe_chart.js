@@ -766,7 +766,9 @@ function cmbPeerCharts(self) {
                         }
                         // 축 단위를 시리즈명 바로 뒤에 표기 (2026-08-02 사용자 확정 — 축 상단 주석 폐지).
                         // MA 등 파생선은 cmbSeriesUnit 미등록이라 자동으로 단위 없음.
-                        var unitStr = (mode !== 'pct') ? (cmbUnitLabel(ds.label, (ds.yAxisID === 'y1') ? y1Jo : (ds.yAxisID === 'y2' ? y2Jo : yJo)) || '') : '';
+                        // 단위 생략은 '정규화된 좌축'만 — 우축(y1·y2) 원값 계열은 pct 모드에도 단위 유지 (codex 8/2)
+                        var unitStr = (mode === 'pct' && (ds.yAxisID || 'y') === 'y') ? ''
+                            : (cmbUnitLabel(ds.label, (ds.yAxisID === 'y1') ? y1Jo : (ds.yAxisID === 'y2' ? y2Jo : yJo)) || '');
                         return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:14px;">' +
                             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
                             ds.label + unitStr + pctStr + '</span>';
@@ -957,7 +959,7 @@ function cmbPeerCharts(self) {
                     if (lv === null) return;
                     var _lbl;
                     if (ds._isForeign) { _lbl = lv.toFixed(1) + '%'; }
-                    else if (mode === 'pct') { var _r = Math.sign(lv) * Math.round(Math.abs(lv)); _lbl = (_r >= 0 ? '+' : '') + _r + '%'; }
+                    else if (mode === 'pct' && (ds.yAxisID || 'y') === 'y') { var _r = Math.sign(lv) * Math.round(Math.abs(lv)); _lbl = (_r >= 0 ? '+' : '') + _r + '%'; }   // pct 폭 측정도 좌축 한정 (codex 8/2)
                     else { var _mf = (ds.yAxisID === 'y1' ? (y1Eok && y1Jo) : (ds.yAxisID === 'y2' ? (y2Eok && y2Jo) : (yEok && yJo))) ? 10000 : 1; _lbl = fmtUniformFix(lv / _mf, (ds.yAxisID === 'y1' ? _y1MaxAbs : (ds.yAxisID === 'y2' ? _y2MaxAbs : _yMaxAbs)) / _mf); }
                     var _w = _measCtx.measureText(_lbl).width;
                     if (_w > _maxLabelW) _maxLabelW = _w;

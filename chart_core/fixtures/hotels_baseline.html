@@ -65,7 +65,7 @@ body{margin:0}
 <nav class="topnav"><div class="topnav-inner"><a href="index.html" class="topnav-brand">AGE OF EMERGENCE</a><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="watchlist/" class="topnav-tab">Watchlist</a><div class="topnav-dropdown"><a href="watchlist/" class="topnav-sub">Quotes</a><a href="universe.html" class="topnav-sub">Universe</a><a href="universe_lab.html" class="topnav-sub">Universe Lab</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub">Data</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="sisyphe/journal.html" class="topnav-tab">Journal</a></div><div class="topnav-item"><a href="sisyphe/journal.html#weekly" class="topnav-tab">Weekly</a></div><div class="topnav-item"><a href="wiki/library" class="topnav-tab">Earnings</a></div><div class="topnav-item"><a href="wiki/" class="topnav-tab">Wiki</a></div><div class="topnav-item"><a href="sisyphe/memento.html" class="topnav-tab">Memento</a></div><div class="topnav-item"><a href="sisyphe/dashboard.html" class="topnav-tab">Ledger</a></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a></div></div></div></nav>
 <div class="container">
   <h1>Hotel ADR — Booking.com</h1>
-  <p class="meta">Updated: 2026-08-02 22:09:30 KST · 누적 37일 · 매일 12:00 KST 자동 수집</p>
+  <p class="meta">Updated: 2026-08-02 22:15:53 KST · 누적 37일 · 매일 12:00 KST 자동 수집</p>
 
   <div class="card">
     <h2 style="margin-top:0;font-size:1.2rem;">당일 entry 객실 가격 (체크인 lead time별)</h2>
@@ -873,7 +873,9 @@ function cmbPeerCharts(self) {
                         }
                         // 축 단위를 시리즈명 바로 뒤에 표기 (2026-08-02 사용자 확정 — 축 상단 주석 폐지).
                         // MA 등 파생선은 cmbSeriesUnit 미등록이라 자동으로 단위 없음.
-                        var unitStr = (mode !== 'pct') ? (cmbUnitLabel(ds.label, (ds.yAxisID === 'y1') ? y1Jo : (ds.yAxisID === 'y2' ? y2Jo : yJo)) || '') : '';
+                        // 단위 생략은 '정규화된 좌축'만 — 우축(y1·y2) 원값 계열은 pct 모드에도 단위 유지 (codex 8/2)
+                        var unitStr = (mode === 'pct' && (ds.yAxisID || 'y') === 'y') ? ''
+                            : (cmbUnitLabel(ds.label, (ds.yAxisID === 'y1') ? y1Jo : (ds.yAxisID === 'y2' ? y2Jo : yJo)) || '');
                         return '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px;font-size:14px;">' +
                             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';"></span>' +
                             ds.label + unitStr + pctStr + '</span>';
@@ -1064,7 +1066,7 @@ function cmbPeerCharts(self) {
                     if (lv === null) return;
                     var _lbl;
                     if (ds._isForeign) { _lbl = lv.toFixed(1) + '%'; }
-                    else if (mode === 'pct') { var _r = Math.sign(lv) * Math.round(Math.abs(lv)); _lbl = (_r >= 0 ? '+' : '') + _r + '%'; }
+                    else if (mode === 'pct' && (ds.yAxisID || 'y') === 'y') { var _r = Math.sign(lv) * Math.round(Math.abs(lv)); _lbl = (_r >= 0 ? '+' : '') + _r + '%'; }   // pct 폭 측정도 좌축 한정 (codex 8/2)
                     else { var _mf = (ds.yAxisID === 'y1' ? (y1Eok && y1Jo) : (ds.yAxisID === 'y2' ? (y2Eok && y2Jo) : (yEok && yJo))) ? 10000 : 1; _lbl = fmtUniformFix(lv / _mf, (ds.yAxisID === 'y1' ? _y1MaxAbs : (ds.yAxisID === 'y2' ? _y2MaxAbs : _yMaxAbs)) / _mf); }
                     var _w = _measCtx.measureText(_lbl).width;
                     if (_w > _maxLabelW) _maxLabelW = _w;

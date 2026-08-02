@@ -15,7 +15,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from chart_common import nav_html  # noqa: E402
+from chart_common import aoe_tokens_css, nav_html  # noqa: E402
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 D = json.load(open(os.path.join(BASE, 'bop_flows.json'), encoding='utf-8'))
@@ -111,6 +111,7 @@ PAGE = """<!doctype html>
 <title>__TITLE__</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 <style>
+__AOE_TOKENS__
   * { box-sizing: border-box; }
   body { font-family: Pretendard, -apple-system, sans-serif; color: #111;
          background: #f7f8f9; margin: 0; padding: 22px 26px 40px; }
@@ -124,11 +125,12 @@ PAGE = """<!doctype html>
   .rng.active { background: #404040; color: #fff; border-color: #404040; }
   .unit { margin-left: auto; font-size: 12.5px; color: #111; padding-left: 20px; }
   .wrap { overflow-x: auto; }
-  table { border-collapse: separate; border-spacing: 0; font-size: 13.5px; }
-  th, td { text-align: center; padding: 6px 10px; white-space: nowrap;
-           border-bottom: 1px solid #ececec; }
-  thead th { position: sticky; top: 0; background: #fff; font-weight: 700;
-             border-bottom: 2px solid #111; }
+  table { border-collapse: separate; border-spacing: 0; font-size: var(--aoe-t-font);
+          font-variant-numeric: var(--aoe-t-num); }
+  th, td { text-align: var(--aoe-t-align); padding: var(--aoe-t-pad-y) var(--aoe-t-pad-x); white-space: nowrap;
+           border-bottom: var(--aoe-t-row-line) solid #ececec; }
+  thead th { position: sticky; top: 0; background: #fff; font-weight: var(--aoe-t-head-weight);
+             border-bottom: var(--aoe-t-head-underline) solid #111; }
   tbody th[scope=row] { text-align: left; padding-left: 12px; font-weight: 400;
                         position: sticky; left: 0; background: #fff; min-width: 152px; }
   tr.sec th { text-align: left; background: #f1f2f4; font-weight: 700; font-size: 12.5px;
@@ -182,7 +184,7 @@ if (document.getElementById('tbl-m')) wire('data-m', 'tbl-m', __MN__, 24);
 """
 
 out = (PAGE.replace('__TITLE__', '원화↔외화 환전 수급 (국제수지 기준)')
-           .replace('__NAV__', nav_html('chart_viewer_bop.html'))
+           .replace('__AOE_TOKENS__', aoe_tokens_css()).replace('__NAV__', nav_html('chart_viewer_bop.html'))
            .replace('__HEAD__', head)
            .replace('__BODY__', body)
            .replace('__MCARD__', mcard)

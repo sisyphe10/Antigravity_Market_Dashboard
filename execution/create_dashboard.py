@@ -3506,10 +3506,11 @@ def _build_wrap_chart_section(category_label):
                 //   세로(날짜 컬럼) 스냅 정상화.
                 // x축 = 앵커(상품·구분 각 첫 클릭 조합, 데이터 없으면 클릭 순서대로 폴백) 페어의 유효 날짜. 전부 실패 시 합집합.
                 var allDates = null;
+                var _anchorMetric = null;   // 실제 앵커 '페어'의 지표 — 축 배정도 이걸 따른다 (codex 8/2)
                 for (var oi = 0; oi < wrapProdOrder.length && !allDates; oi++) {
                     for (var mi = 0; mi < wrapMetOrder.length && !allDates; mi++) {
                         for (var pi = 0; pi < perPair.length; pi++) {
-                            if (perPair[pi].name === wrapProdOrder[oi] && perPair[pi].metric === wrapMetOrder[mi]) { allDates = perPair[pi].dates.slice(); break; }
+                            if (perPair[pi].name === wrapProdOrder[oi] && perPair[pi].metric === wrapMetOrder[mi]) { allDates = perPair[pi].dates.slice(); _anchorMetric = perPair[pi].metric; break; }
                         }
                     }
                 }
@@ -3560,6 +3561,8 @@ def _build_wrap_chart_section(category_label):
                 //    비중·AUM 단독 선택이면 그 지표가 곧 좌축이 된다.
                 function _grpOf(mk) { return (mk === 'mdd') ? 'return' : mk; }
                 var _axGroups = [];
+                // 주축 = 실제 앵커 페어의 지표 그룹 (전역 지표 순서보다 우선 — 벤치 제외 조합에서 어긋남 방지)
+                if (_anchorMetric) _axGroups.push(_grpOf(_anchorMetric));
                 wrapMetOrder.forEach(function(mk) {
                     if (_metricSet[mk] && _axGroups.indexOf(_grpOf(mk)) < 0) _axGroups.push(_grpOf(mk));
                 });

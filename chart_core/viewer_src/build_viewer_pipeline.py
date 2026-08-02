@@ -15,7 +15,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from chart_common import nav_html  # noqa: E402
+from chart_common import aoe_tokens_css, nav_html  # noqa: E402
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 D = json.load(open(os.path.join(BASE, 'pipeline_data.json'), encoding='utf-8'))
@@ -125,6 +125,8 @@ PAGE = """<!doctype html>
 <title>__TITLE__</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 <style>
+__AOE_TOKENS__
+  :root { --aoe-t-pad-y: 8px; }   /* 파이프라인 표는 행 높이 여유 (기존값 유지) */
   * { box-sizing: border-box; }
   body { font-family: Pretendard, -apple-system, sans-serif; color: #111;
          background: #f7f8f9; margin: 0; padding: 22px 26px 40px; }
@@ -148,11 +150,12 @@ PAGE = """<!doctype html>
   .card.cap .wrap { overflow: visible !important; width: max-content !important; }
   .card.cap thead th, .card.cap tbody th[scope=row] { position: static !important; }
   .wrap { overflow-x: auto; }
-  table { border-collapse: separate; border-spacing: 0; font-size: 13.5px; }
-  th, td { text-align: center; padding: 8px 10px; white-space: nowrap;
-           border-bottom: 1px solid #ececec; vertical-align: middle; }
-  thead th { position: sticky; top: 0; background: #fff; font-weight: 700;
-             border-bottom: 2px solid #111; z-index: 2; }
+  table { border-collapse: separate; border-spacing: 0; font-size: var(--aoe-t-font);
+          font-variant-numeric: var(--aoe-t-num); }
+  th, td { text-align: var(--aoe-t-align); padding: var(--aoe-t-pad-y) var(--aoe-t-pad-x); white-space: nowrap;
+           border-bottom: var(--aoe-t-row-line) solid #ececec; vertical-align: var(--aoe-t-valign); }
+  thead th { position: sticky; top: 0; background: #fff; font-weight: var(--aoe-t-head-weight);
+             border-bottom: var(--aoe-t-head-underline) solid #111; z-index: 2; }
   tbody th[scope=row] { text-align: left; padding-left: 12px; font-weight: 400;
                         position: sticky; left: 0; background: #fff; z-index: 1; }
   tbody th[scope=row] b { font-weight: 700; }
@@ -294,7 +297,7 @@ PAGE = """<!doctype html>
 """
 
 out = (PAGE.replace('__TITLE__', '리가켐바이오 ADC 파이프라인')
-           .replace('__NAV__', nav_html('chart_viewer_pipeline.html'))
+           .replace('__AOE_TOKENS__', aoe_tokens_css()).replace('__NAV__', nav_html('chart_viewer_pipeline.html'))
            .replace('__HEAD__', head)
            .replace('__CBODY__', asset_rows(D['clinical']))
            .replace('__PBODY__', asset_rows(D['preclinical']))

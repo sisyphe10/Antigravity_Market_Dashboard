@@ -20,6 +20,20 @@ def core_js():
     return core
 
 
+def aoe_tokens_css():
+    """표 양식 비색상 규격 토큰(aoe_tokens.css) 로드 — manifest sha 검증 (드리프트 차단)."""
+    repo = os.environ.get('DASH_REPO') or os.path.expanduser('~/Antigravity_Market_Dashboard')
+    with open(os.path.join(repo, 'chart_core', 'dist', 'aoe_tokens.css'), encoding='utf-8') as f:
+        css = f.read()
+    with open(os.path.join(repo, 'chart_core', 'dist', 'aoe_chart.manifest.json'), encoding='utf-8') as f:
+        mani = _json.load(f)
+    sha = hashlib.sha256(css.encode('utf-8')).hexdigest()
+    if mani.get('tokensSha256') and sha != mani['tokensSha256']:
+        raise RuntimeError(
+            f"aoe_tokens.css sha 불일치 ({sha[:12]}) — repo pull 후 chart_core/build_core.py 실행")
+    return css
+
+
 def core_template():
     """P4 코어 임베드 셸(chart_template_core.html) 로드 + 코어 JS 센티널 치환."""
     base = os.path.dirname(os.path.abspath(__file__))
