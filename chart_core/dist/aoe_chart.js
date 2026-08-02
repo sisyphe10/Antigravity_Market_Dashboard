@@ -432,7 +432,7 @@ function cmbPeerCharts(self) {
                     var lines = [];
                     chart.data.datasets.forEach(function(ds, di) {
                         var meta = chart.getDatasetMeta(di);
-                        if (meta.hidden) return;
+                        if (meta.hidden || ds._cmbAux) return;
                         var v = ds.data[idx];
                         if (v === null || v === undefined) return;
                         var txt = chart._cmbTipLabel
@@ -693,7 +693,8 @@ function cmbPeerCharts(self) {
                 //   항목에 단위를 인라인 표기(`고객예탁금(조원) +25.4%`)하려면 조원 승격 판정이 선행돼야 함.
                 var legendEl = document.getElementById(_idLegend);
                 function cmbBuildLegend() {
-                    var legendHTML = datasets.map(function(ds) {
+                    // _cmbAux(P4): 평균선 등 보조 계열 — 범례·툴팁·핀 카드에서 제외 (끝값은 _skipEndLabel)
+                    var legendHTML = datasets.filter(function(ds) { return !ds._cmbAux; }).map(function(ds) {
                         var c = ds.borderColor;
                         // 설정 기간 변화율: pct 모드는 정규화된 값이라 last 자체가 변화율,
                         // raw 모드는 (last/first - 1)*100. 첫/마지막 non-null 값으로 계산.
@@ -927,7 +928,7 @@ function cmbPeerCharts(self) {
                                 // animation:false — 동기 툴팁이 draw()만으로 위치 갱신되도록 (애니메이션 속성이면 제자리에 멈춤)
                                 // 글씨 +1px (12→13, 2026-07-21 사용자 확정 — 클릭 핀 카드와 동일 크기)
                                 // 카드 제목 = 원본 날짜(YYYY-MM-DD) — 축약(YY/MM)은 x축 눈금 전용 (2026-08-02 사용자 확정)
-                                tooltip: { animation: false, titleFont: { size: 13 }, bodyFont: { size: 13 }, callbacks: { title: function(cs){ return cs.length ? String(cs[0].label) : ''; }, label: tooltipLabel } }
+                                tooltip: { animation: false, titleFont: { size: 13 }, bodyFont: { size: 13 }, filter: function(c){ return !c.dataset._cmbAux; }, callbacks: { title: function(cs){ return cs.length ? String(cs[0].label) : ''; }, label: tooltipLabel } }
                             },
                             scales: scalesConfig
                         }
