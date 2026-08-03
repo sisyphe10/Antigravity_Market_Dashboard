@@ -125,9 +125,9 @@ AOE_DARK_CSS = (
     'h2.block-title,.wg-head .wg-title,.chart-box h3,.category-detail h3,'
     '.table-wrap h3,.pcat-head{font-size:20px!important}'
     '.section-count,.category-date{font-size:14px!important}'
-    '.sidebar,.ledger-subtabs,.mm-main .subtabs{height:42px!important;'
+    '.sidebar,.ledger-subtabs,.journal-subtabs,.mm-main .subtabs{height:42px!important;'
     'box-sizing:border-box!important;align-items:stretch!important;overflow:hidden!important}'
-    '.sidebar-link,.ledger-subtab,.mm-main .subtabs .subtab{height:41px!important;font-size:18px!important}'
+    '.sidebar-link,.ledger-subtab,.journal-subtab,.mm-main .subtabs .subtab{height:41px!important;font-size:18px!important}'
     'button[style*="#dc2626"]{background:' + P['amber'] + '!important;color:' + P['nav-bg'] + '!important;'
     'border:1.5px solid ' + P['amber'] + '!important;border-radius:2px!important}'
     # Copy 버튼(#0891b2) = 앰버 다음 강조색인 시안 채움 (2026-08-02 사용자 확정)
@@ -141,7 +141,7 @@ AOE_DARK_CSS = (
     '.node .node-type{background:#101214!important;color:#fff!important}'
     '.mm-main{padding-top:0!important}'
     '.mm-main .subtabs{margin:0 calc(50% - 50vw) 18px!important}'
-    '.ledger-subtabs{margin:0 calc(50% - 50vw) 18px!important}'
+    '.ledger-subtabs,.journal-subtabs{margin:0 calc(50% - 50vw) 18px!important}'
     # 선택행 하이라이트 (2026-08-03 개편): JS(applyMarkerColors)가 클릭 순번을
     # data-hl(1~3 순환)로 마킹 — 별표 복제 행과 원본이 항상 같은 색을 받고,
     # 순번이 차트 클릭 순서 기반이라 차트 선 색 순서와도 일치.
@@ -231,15 +231,33 @@ dark_pat = re.compile(r'<style id="aoe-terminal-dark">.*?</style>', re.S)
 ACTIVE_OF = {'journal.html': 'journal', 'dashboard.html': 'ledger', 'memento.html': 'memento',
              'checklist_test.html': None}
 # journal 페이지: 해시(#weekly)에 따라 nav 액티브를 Journal↔Weekly 로 전환 + 페이지 서브탭 동기화
+# 2026-08-03: Weekly 상단 탭 병합 — 상단 Journal 은 상시 active, 해시는 드롭다운·하위 스트립만 전환
 HASH_ACTIVE_JS = (
     '<script id="aoe-nav-hash-active">document.addEventListener("DOMContentLoaded",function(){'
-    'var nav=document.querySelector("nav.topnav");if(!nav)return;'
-    'var j=nav.querySelector(\'a[href="/sisyphe/journal.html"]\');'
-    'var w=nav.querySelector(\'a[href="/sisyphe/journal.html#weekly"]\');'
     'function u(sync){var wk=location.hash==="#weekly";'
-    'if(j)j.classList.toggle("active",!wk);if(w)w.classList.toggle("active",wk);'
+    'var all=document.querySelectorAll(".topnav-dropdown a[href*=journal], #aoeJournalStrip a");'
+    'Array.prototype.forEach.call(all,function(a){'
+    'var isW=(a.getAttribute("href")||"").indexOf("#weekly")>-1;'
+    'a.classList.toggle("active",isW===wk);});'
     'if(sync&&typeof switchTab==="function")switchTab(wk?"weekly":"journal");}'
-    'window.addEventListener("hashchange",function(){u(true)});u(false);});</script>')
+    'window.addEventListener("hashchange",function(){u(true)});u(location.hash==="#weekly");});</script>')
+
+# Journal 하위 스트립 (Ledger 서브탭 양식 이식 — sticky 42px 가로 스트립, active=앰버 밑줄)
+JOURNAL_STRIP_CSS = (
+    '<style id="aoe-journal-strip-css">'
+    '.journal-subtabs{position:sticky;top:54px;display:flex;justify-content:center;align-items:stretch;'
+    'gap:2px;margin:0 0 18px;padding:0 28px;background:#161b21;border-bottom:1px solid #2a323b;z-index:90}'
+    '.journal-subtab{display:inline-flex;align-items:center;height:38px;padding:0 14px;border:none;'
+    'border-radius:0;border-bottom:2px solid transparent;background:transparent;color:#9aa4ae;'
+    'font-family:inherit;font-size:0.85rem;font-weight:600;cursor:pointer;text-decoration:none;'
+    'transition:color 0.12s}'
+    '.journal-subtab:hover{color:#fff}'
+    '.journal-subtab.active{color:#fff;font-weight:700;border-bottom-color:' + P['amber'] + '}'
+    '</style>')
+JOURNAL_STRIP = (
+    '<div class="journal-subtabs" id="aoeJournalStrip">'
+    '<a href="#daily" class="journal-subtab active">Daily</a>'
+    '<a href="#weekly" class="journal-subtab">Weekly</a></div>')
 # 1안(2026-07-16 사용자 확정): 사이드바 전면 제거 — journal(서브내비=본문 tab-bar)·dashboard 공통.
 # 본문 좌측 오프셋도 해제. (구 JOURNAL_OFFSET·CORNER_BRAND 는 사이드바와 함께 폐기)
 NO_SIDEBAR = '<style id="aoe-nosidebar">.sidebar{display:none}.has-sidebar{padding-left:24px !important}</style>'
@@ -431,7 +449,9 @@ for name in SISYPHE_PAGES:
     if name in ("journal.html", "dashboard.html"):
         s = inject_before_head(s, NO_SIDEBAR)
     if name == "journal.html":
+        s = inject_before_head(s, JOURNAL_STRIP_CSS)
         s = inject_before_head(s, HASH_ACTIVE_JS)
+        s = s.replace('</nav>', '</nav>' + JOURNAL_STRIP, 1)   # 스트립 = nav 바로 아래
 
     open(p, "w", encoding="utf-8").write(s)
 
