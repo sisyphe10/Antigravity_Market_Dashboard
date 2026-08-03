@@ -912,7 +912,7 @@ def create_monthly_returns_table():
         return f'border-right:{right_border_for(name)};border-bottom:{bottom_style};'
 
     def th_style_for(name):
-        return (f'padding:8px 6px;background:#1a1c1f;color:#fb8b1e;font-weight:700;text-align:center;'
+        return (f'padding:8px 6px;background:#1a1c1f;color:#fb8b1e;font-weight:700;text-align:center;font-size:var(--aoe-t-head-font);'
                 f'width:{col_width_for(name)};{cell_borders(name, True)}')
 
     head_cells = f'<th style="{th_style_for("연도")}">연도</th>'
@@ -1034,7 +1034,7 @@ def create_monthly_returns_table():
                 <button onclick="downloadElementImage('mrTableWrap','Monthly_Returns')" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
             </div>
             <div id="mrTableWrap" style="overflow-x:auto;background:#101214;border:1px solid #27282b;border-radius:8px;padding:16px;width:fit-content;max-width:100%;margin:0 auto;">
-                <table style="width:1000px;max-width:100%;border-collapse:separate;border-spacing:0;font-size:var(--aoe-t-font);--aoe-t-font:14px;font-variant-numeric:var(--aoe-t-num);font-family:inherit;table-layout:fixed;margin:0 auto;border:2px solid #1f2937;box-sizing:border-box;">
+                <table style="width:1000px;max-width:100%;border-collapse:separate;border-spacing:0;font-size:var(--aoe-t-font);--aoe-t-font:14px;--aoe-t-head-font:15px;font-variant-numeric:var(--aoe-t-num);font-family:inherit;table-layout:fixed;margin:0 auto;border:2px solid #1f2937;box-sizing:border-box;">
                     <thead><tr>{head_cells}</tr></thead>
                     <tbody>
 {body_rows_html}                    </tbody>
@@ -2018,8 +2018,8 @@ def _build_combined_chart_section():
                 f'<td class="cmb-star" onclick="cmbToggleStar(this, event)" '
                 f'style="padding:6px 2px;font-size:14px;text-align:center;cursor:pointer;">☆</td>'
                 f'<td style="{cell_base}text-align:center;white-space:nowrap;">{freq}</td>'
-                f'<td style="{cell_base}text-align:center;white-space:nowrap;font-size:12px;">{country_esc}</td>'
-                f'<td style="{cell_base}text-align:center;white-space:nowrap;font-size:12px;'
+                f'<td style="{cell_base}text-align:center;white-space:nowrap;font-size:var(--aoe-t-head-font);">{country_esc}</td>'
+                f'<td style="{cell_base}text-align:center;white-space:nowrap;font-size:var(--aoe-t-head-font);'
                 f'text-transform:uppercase;letter-spacing:0.3px;">{group_label}</td>'
                 f'<td class="cmb-chart-item{active}" data-series="{display_esc}"{tooltip_attr} '
                 f'style="{cell_base}text-align:center;">'
@@ -2031,7 +2031,7 @@ def _build_combined_chart_section():
         export_json = json.dumps(export, ensure_ascii=False, separators=(',', ':'))
 
         th_base = ('position:sticky;top:0;z-index:2;background:#f0f0f0;cursor:pointer;'
-                   'user-select:none;font-weight:var(--aoe-t-head-weight);font-size:12px;color:#000;'
+                   'user-select:none;font-weight:var(--aoe-t-head-weight);font-size:var(--aoe-t-head-font);color:#000;'
                    'padding:8px 4px;text-align:var(--aoe-t-align);white-space:nowrap;'
                    'border-top:var(--aoe-t-row-line) solid #000;border-bottom:var(--aoe-t-head-underline) solid #000;')
         # 필터 ▾: 수수료 매출 테이블(rev-filter)과 동일한 엑셀식 값 체크박스 팝업
@@ -2072,7 +2072,7 @@ def _build_combined_chart_section():
             '#cmbSideTable tr.cmb-drop td{box-shadow:inset 0 -2px 0 #67e0f4;}'
             '.cmb-filter-btn:hover{color:#000;}'
             '.cmb-filter-btn.cmb-filter-on{color:#000;font-weight:900;}'
-            '#cmbSideTable{--aoe-t-font:13px;--aoe-t-pad-y:6px;--aoe-t-pad-x:8px;--aoe-t-head-underline:1px;--aoe-t-head-weight:700}'
+            '#cmbSideTable{--aoe-t-font:13px;--aoe-t-head-font:12px;--aoe-t-pad-y:6px;--aoe-t-pad-x:8px;--aoe-t-head-underline:1px;--aoe-t-head-weight:700}'
             '.cmb-filter-pop{position:absolute;z-index:30;background:#fff;border:1px solid #d8dde3;'
             'border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.13);padding:8px 12px;'
             'max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;min-width:150px;}'
@@ -7559,6 +7559,7 @@ def create_dashboard():
         }}
 
         .portfolio-table th {{
+            font-size: var(--aoe-t-head-font);
             padding: 12px var(--aoe-t-pad-x);
             text-align: left;
             font-weight: var(--aoe-t-head-weight);
@@ -8241,7 +8242,7 @@ def create_dashboard():
         {_AOE_TOKENS_CSS}
         .portfolio-table {{ width: 100%; border-collapse: collapse; font-size: var(--aoe-t-font); font-variant-numeric: var(--aoe-t-num); --aoe-t-font: 16px; --aoe-t-pad-y: 10px; --aoe-t-head-weight: 600; }}
         .portfolio-table thead {{ background-color: #e9ecef; }}
-        .portfolio-table th {{ padding: 12px var(--aoe-t-pad-x); text-align: var(--aoe-t-align); font-weight: var(--aoe-t-head-weight); color: #000; border-bottom: var(--aoe-t-head-underline) solid #000; }}
+        .portfolio-table th {{ font-size: var(--aoe-t-head-font); padding: 12px var(--aoe-t-pad-x); text-align: var(--aoe-t-align); font-weight: var(--aoe-t-head-weight); color: #000; border-bottom: var(--aoe-t-head-underline) solid #000; }}
         .portfolio-table td {{ padding: var(--aoe-t-pad-y) var(--aoe-t-pad-x); border-bottom: var(--aoe-t-row-line) solid #dee2e6; color: #333; text-align: var(--aoe-t-align); }}
         .portfolio-table tbody tr:hover {{ background-color: #f5f5f5; }}
         .portfolio-table .number {{ text-align: right; }}
@@ -8700,7 +8701,7 @@ def create_dashboard():
         .sector-group h3 { font-size: 18px; color: #2d7a3a; margin-bottom: 8px; padding: 8px 0; border-bottom: 1px solid #2d7a3a; }
         table { width: 100%; border-collapse: collapse; font-size: var(--aoe-t-font); font-variant-numeric: var(--aoe-t-num); table-layout: fixed; --aoe-t-font: 16px; --aoe-t-pad-y: 10px; --aoe-t-pad-x: 6px; --aoe-t-head-weight: 600; }
         thead { background: #e9ecef; }
-        th { padding: 12px var(--aoe-t-pad-x); text-align: var(--aoe-t-align); font-weight: var(--aoe-t-head-weight); color: #000; cursor: pointer; white-space: nowrap; overflow: hidden; position: sticky; top: 0; background: #e9ecef; z-index: 10; box-shadow: inset 0 calc(-1 * var(--aoe-t-head-underline)) 0 #000; }
+        th { font-size: var(--aoe-t-head-font); padding: 12px var(--aoe-t-pad-x); text-align: var(--aoe-t-align); font-weight: var(--aoe-t-head-weight); color: #000; cursor: pointer; white-space: nowrap; overflow: hidden; position: sticky; top: 0; background: #e9ecef; z-index: 10; box-shadow: inset 0 calc(-1 * var(--aoe-t-head-underline)) 0 #000; }
         th:hover { background: #ddd; }
         td { padding: var(--aoe-t-pad-y) var(--aoe-t-pad-x); border-bottom: var(--aoe-t-row-line) solid #dee2e6; text-align: var(--aoe-t-align); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         /* 종목 리스트 컬럼 비율 — 1열=관심종목 별표 삽입(2026-07-31)으로 이하 nth-child 전부 +1 */
@@ -9569,7 +9570,7 @@ function superDownloadUniverse() {
         {_AOE_TOKENS_CSS}
         table {{ width: 100%; border-collapse: collapse; font-size: var(--aoe-t-font); font-variant-numeric: var(--aoe-t-num); --aoe-t-font: 16px; --aoe-t-pad-x: 12px; --aoe-t-head-weight: 600; }}
         thead {{ background: #e9ecef; }}
-        th {{ padding: 10px var(--aoe-t-pad-x); text-align: var(--aoe-t-align); font-weight: var(--aoe-t-head-weight); color: #000; border-bottom: var(--aoe-t-head-underline) solid #000; }}
+        th {{ font-size: var(--aoe-t-head-font); padding: 10px var(--aoe-t-pad-x); text-align: var(--aoe-t-align); font-weight: var(--aoe-t-head-weight); color: #000; border-bottom: var(--aoe-t-head-underline) solid #000; }}
         td {{ padding: 9px var(--aoe-t-pad-x); border-bottom: var(--aoe-t-row-line) solid #dee2e6; }}
         td.name {{ text-align: left; max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
         td.num {{ text-align: right; font-variant-numeric: tabular-nums; }}
@@ -9774,9 +9775,9 @@ refresh();
         .tables {{ display: flex; gap: 24px; flex-wrap: wrap; }}
         .tables > div {{ flex: 1; min-width: 500px; }}
         {_AOE_TOKENS_CSS}
-        table {{ width: 100%; border-collapse: collapse; font-size: var(--aoe-t-font); font-variant-numeric: var(--aoe-t-num); --aoe-t-font: 16px; --aoe-t-pad-y: 6px; --aoe-t-pad-x: 6px; --aoe-t-head-weight: 600; }}
+        table {{ width: 100%; border-collapse: collapse; font-size: var(--aoe-t-font); font-variant-numeric: var(--aoe-t-num); --aoe-t-font: 16px; --aoe-t-head-font: 0.78rem; --aoe-t-pad-y: 6px; --aoe-t-pad-x: 6px; --aoe-t-head-weight: 600; }}
         thead {{ background: #e9ecef; }}
-        th {{ padding: 8px var(--aoe-t-pad-x); text-align: var(--aoe-t-align); font-weight: var(--aoe-t-head-weight); color: #000; font-size: 0.78rem; background: #e9ecef; box-shadow: inset 0 calc(-1 * var(--aoe-t-head-underline)) 0 #000; }}
+        th {{ padding: 8px var(--aoe-t-pad-x); text-align: var(--aoe-t-align); font-weight: var(--aoe-t-head-weight); color: #000; font-size: var(--aoe-t-head-font); background: #e9ecef; box-shadow: inset 0 calc(-1 * var(--aoe-t-head-underline)) 0 #000; }}
         td {{ padding: var(--aoe-t-pad-y) var(--aoe-t-pad-x); border-bottom: var(--aoe-t-row-line) solid #dee2e6; }}
         td.c {{ text-align: center; font-variant-numeric: var(--aoe-t-num); }}
         tbody tr:hover {{ background: #f5f5f5; }}
@@ -10291,7 +10292,7 @@ header h1 {{ margin: 0; font-size: 33px; color: #333; font-weight: 700; line-hei
 {_AOE_TOKENS_CSS}
 table {{ width: 100%; border-collapse: collapse; font-size: var(--aoe-t-font); font-variant-numeric: var(--aoe-t-num); --aoe-t-font: 16px; --aoe-t-pad-y: 10px; --aoe-t-pad-x: 8px; --aoe-t-head-weight: 600; }}
 thead {{ background: #e9ecef; }}
-th {{ padding: var(--aoe-t-pad-y) var(--aoe-t-pad-x); text-align: var(--aoe-t-align); font-weight: var(--aoe-t-head-weight); color: #000; cursor: pointer; white-space: nowrap; background: #e9ecef; box-shadow: inset 0 calc(-1 * var(--aoe-t-head-underline)) 0 #000; }}
+th {{ font-size: var(--aoe-t-head-font); padding: var(--aoe-t-pad-y) var(--aoe-t-pad-x); text-align: var(--aoe-t-align); font-weight: var(--aoe-t-head-weight); color: #000; cursor: pointer; white-space: nowrap; background: #e9ecef; box-shadow: inset 0 calc(-1 * var(--aoe-t-head-underline)) 0 #000; }}
 th:hover {{ background: #ddd; }}
 th .arr {{ font-size: 0.6rem; margin-left: 2px; }}
 td {{ padding: var(--aoe-t-pad-y) var(--aoe-t-pad-x); border-bottom: var(--aoe-t-row-line) solid #dee2e6; text-align: var(--aoe-t-align); }}
@@ -10304,8 +10305,8 @@ tbody tr.etf-row:hover {{ background: #f5f5f5; }}
 .etf-name {{ text-align: center; font-weight: 600; }}
 .constituents-row {{ background: #f8f9fa; }}
 .constituents-row td {{ padding: 0; }}
-.const-table {{ width: 100%; font-size: var(--aoe-t-font); --aoe-t-font: 0.78rem; --aoe-t-pad-x: 8px; }}
-.const-table th {{ background: #e9ecef; color: #000; padding: 6px var(--aoe-t-pad-x); font-size: 0.75rem; box-shadow: inset 0 calc(-1 * var(--aoe-t-head-underline)) 0 #000; }}
+.const-table {{ width: 100%; font-size: var(--aoe-t-font); --aoe-t-font: 0.78rem; --aoe-t-head-font: 0.75rem; --aoe-t-pad-x: 8px; }}
+.const-table th {{ background: #e9ecef; color: #000; padding: 6px var(--aoe-t-pad-x); font-size: var(--aoe-t-head-font); box-shadow: inset 0 calc(-1 * var(--aoe-t-head-underline)) 0 #000; }}
 .const-table td {{ padding: 5px var(--aoe-t-pad-x); border-bottom: var(--aoe-t-row-line) solid #eee; }}
 .const-table tbody tr:hover {{ background: #f5f5f5; }}
 .chg-fbtn {{ padding: 5px 16px; border: 1px solid #d1d5db; border-radius: 6px; background: #fff; font-size: 0.85rem; cursor: pointer; font-family: inherit; color: #555; }}

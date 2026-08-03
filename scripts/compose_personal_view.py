@@ -117,8 +117,9 @@ AOE_DARK_CSS = (
     '.sidebar-link.active{border-bottom-color:' + P['amber'] + '!important}'
     '.sidebar{justify-content:center!important}'
     # 타이포 정수 스케일 (2026-07-18 사용자 확정): 대제목28/섹션18/표본문16/메타13/표헤더12
-    'table,td{font-size:17px!important}'
-    'th{font-size:15px!important}'
+    # (2026-08-03 재단언 제거) 표 크기는 코어 토큰 변수만 주입 — 그리는 규칙은 코어·페이지 소유.
+    # !important = 페이지 컨테이너의 라이트 값(16px 등)보다 우선하기 위함 (변수 선언에만 사용).
+    'table{--aoe-t-font:17px!important;--aoe-t-head-font:15px!important}'
     '.category-title{font-size:30px!important}'
     '.section>h2,.section>h3,.section-title,.section-header,.sector-group h3,'
     'h2.block-title,.wg-head .wg-title,.chart-box h3,.category-detail h3,'

@@ -676,7 +676,7 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stoc
         .data-table {{
             width: 100%; border-collapse: collapse; font-size: 16px;
             font-variant-numeric: var(--aoe-t-num);
-            --aoe-t-font: 0.8rem; --aoe-t-pad-y: 6px; --aoe-t-head-weight: 600; --aoe-t-head-underline: 1px;
+            --aoe-t-font: 0.8rem; --aoe-t-head-font: 0.74rem; --aoe-t-pad-y: 6px; --aoe-t-head-weight: 600; --aoe-t-head-underline: 1px;
             table-layout: fixed;
         }}
         .data-table.tbl-warn {{ /* 투자위험/경고 공통 */ }}
@@ -712,7 +712,7 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stoc
         .data-table.tbl-shortsell td:nth-child(5) {{ width: 13%; }} /* 공시일 */
         .data-table th {{
             padding: 8px var(--aoe-t-pad-x); text-align: var(--aoe-t-align);
-            font-size: 0.74rem; font-weight: var(--aoe-t-head-weight); color: #6b7280;
+            font-size: var(--aoe-t-head-font); font-weight: var(--aoe-t-head-weight); color: #6b7280;
             border-bottom: var(--aoe-t-head-underline) solid #e5e7eb; background: #f9fafb;
             white-space: nowrap; cursor: pointer; user-select: none;
         }}

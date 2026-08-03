@@ -17,6 +17,7 @@
   --aoe-t-valign: middle;
   --aoe-t-num: tabular-nums;   /* 숫자 등폭 — 열 정렬 흔들림 방지 */
   --aoe-t-head-weight: 700;
+  --aoe-t-head-font: inherit;  /* 헤더·보조 셀 글씨 — 기본은 본문 상속, 페이지가 값 지정 */
   --aoe-t-head-underline: 2px; /* 헤더 밑줄 두께 */
   --aoe-t-row-line: 1px;       /* 행 구분선 두께 */
 }
@@ -89,12 +90,12 @@ h2.block-title { font-size: 1.4rem; color: #fb8b1e; font-weight: 800; margin-bot
 .node.node-hl { box-shadow: 0 0 0 2.5px #fb8b1e; }
 
 /* ---- skill layer: 박스 대신 표 (행이 .node 를 겸함) ---- */
-.skill-table { width: 100%; border-collapse: collapse; font-size: 15px; table-layout: auto; }
-.skill-table th { background: #1a1b1e; border: 1px solid #2a2b2e; padding: 6px 10px;
-                  font-size: 13px; font-weight: 700; color: #fb8b1e; text-align: center; white-space: nowrap; }
-.skill-table td { border: 1px solid #222326; padding: 7px 10px; color: #d9dde2; vertical-align: middle;
-                  font-size: 15px; }
-.skill-table .sk-sum, .skill-table .sk-code { font-size: 13px; }
+.skill-table { width: 100%; border-collapse: collapse; font-size: var(--aoe-t-font); font-variant-numeric: var(--aoe-t-num); table-layout: auto; --aoe-t-font: 15px; --aoe-t-head-font: 13px; --aoe-t-pad-y: 7px; }
+.skill-table th { background: #1a1b1e; border: var(--aoe-t-row-line) solid #2a2b2e; padding: 6px var(--aoe-t-pad-x);
+                  font-size: var(--aoe-t-head-font); font-weight: var(--aoe-t-head-weight); color: #fb8b1e; text-align: var(--aoe-t-align); white-space: nowrap; }
+.skill-table td { border: var(--aoe-t-row-line) solid #222326; padding: var(--aoe-t-pad-y) var(--aoe-t-pad-x); color: #d9dde2; vertical-align: var(--aoe-t-valign);
+                  font-size: var(--aoe-t-font); }
+.skill-table .sk-sum, .skill-table .sk-code { font-size: var(--aoe-t-head-font); }
 .skill-table tr.node { display: table-row; border: 0; border-radius: 0; padding: 0;
                        min-width: 0; max-width: none; background: transparent; box-shadow: none; }
 .skill-table tr.node:hover { transform: none; box-shadow: none; }
