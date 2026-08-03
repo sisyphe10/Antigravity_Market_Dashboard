@@ -51,13 +51,14 @@ TAIWAN_CSS = """
                      padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
         .tw-dl-btn:hover { background: #b91c1c; }
         .tw-container { overflow-x: auto; border: 1px solid #e5e7eb; border-radius: 12px; }
-        .tw-table { width: 100%; border-collapse: collapse; }
-        .tw-table th { position: sticky; top: 0; padding: 9px 10px; text-align: center;
-                        font-size: 0.78rem; font-weight: 600; color: #374151; background: #f9fafb;
-                        border-bottom: 1px solid #e5e7eb; white-space: nowrap; cursor: pointer; user-select: none; }
+        .tw-table { width: 100%; border-collapse: collapse; font-variant-numeric: var(--aoe-t-num);
+                     --aoe-t-font: 0.8rem; --aoe-t-pad-y: 6px; --aoe-t-head-weight: 600; }
+        .tw-table th { position: sticky; top: 0; padding: 9px var(--aoe-t-pad-x); text-align: var(--aoe-t-align);
+                        font-size: 0.78rem; font-weight: var(--aoe-t-head-weight); color: #374151; background: #f9fafb;
+                        border-bottom: var(--aoe-t-row-line) solid #e5e7eb; white-space: nowrap; cursor: pointer; user-select: none; }
         .tw-table th:hover { color: #111; }
-        .tw-table td { padding: 6px 10px; border-bottom: 1px solid #f3f4f6; color: #111;
-                        white-space: nowrap; font-size: 0.8rem; text-align: center; }
+        .tw-table td { padding: var(--aoe-t-pad-y) var(--aoe-t-pad-x); border-bottom: var(--aoe-t-row-line) solid #f3f4f6; color: #111;
+                        white-space: nowrap; font-size: var(--aoe-t-font); text-align: var(--aoe-t-align); }
         .tw-table tbody tr:last-child td { border-bottom: none; }
         .tw-table tbody tr:hover td { background: #f9fafb; }
         .tw-filter-btn { display: inline-block; margin-left: 4px; color: #9ca3af; cursor: pointer; }
