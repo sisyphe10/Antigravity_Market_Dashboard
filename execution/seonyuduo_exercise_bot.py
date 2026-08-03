@@ -470,6 +470,7 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "<code>/remind</code> — 유형·대상 골라 최근 운동 피드백 복습 (읽기 전용)\n\n"
         "<b>💊 PMS 케어</b>\n"
         "<code>/pms</code> — 5일간 매일 08·16·22시 생리통 약 리마인드 + 케어 팁\n"
+        "<code>/pms 8</code> — 오늘 08:00 복용분을 1회차로 계산 (지난 슬롯은 건너뜀)\n"
         "<code>/pms off</code> — 중단\n\n"
         "/whoami — 내 담당자(식/여니) 확인·변경",
         parse_mode='HTML')
@@ -1429,17 +1430,33 @@ def _load_pms_tips() -> list:
         return [PMS_FALLBACK_TIP]
 
 
-def _pms_gen_slots(now: datetime.datetime, n: int = PMS_SLOT_COUNT) -> list:
-    """now 이후의 08/16/22시 슬롯 n개 (KST ISO 문자열, 시간순)."""
+def _pms_gen_slots(now: datetime.datetime, n: int = PMS_SLOT_COUNT,
+                   anchor: datetime.datetime = None) -> list:
+    """08/16/22시 슬롯 n개 (KST ISO 문자열, 시간순).
+    anchor 지정 시 그 슬롯을 1회차로 포함(지난 슬롯 포함 — 활성화 때 skipped 처리),
+    미지정 시 now 이후 슬롯부터."""
     slots = []
-    day = now.date()
+    day = (anchor or now).date()
     while len(slots) < n:
         for h in PMS_SLOT_HOURS:
+            if len(slots) >= n:
+                break
             dt = datetime.datetime(day.year, day.month, day.day, h, tzinfo=KST)
-            if dt > now and len(slots) < n:
+            if (dt >= anchor) if anchor is not None else (dt > now):
                 slots.append(dt.isoformat())
         day += datetime.timedelta(days=1)
     return slots
+
+
+def _pms_parse_anchor_hour(arg: str):
+    """'8'/'08'/'8시'/'08:00'/'16'/'22' → 8/16/22, 그 외 None."""
+    s = (arg or '').strip().replace('시', '')
+    s = s.split(':', 1)[0]
+    try:
+        h = int(s)
+    except ValueError:
+        return None
+    return h if h in PMS_SLOT_HOURS else None
 
 
 def _pms_slot_deadline(slot_dt: datetime.datetime) -> datetime.datetime:
@@ -1495,19 +1512,42 @@ async def cmd_pms(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
         st['active'] = False  # 슬롯 전부 소진됐는데 active로 남은 경우 정리 후 신규 진행
 
-    slots = _pms_gen_slots(now)
-    first = datetime.datetime.fromisoformat(slots[0])
+    # 시작 슬롯 지정: /pms 8 → 오늘 08:00을 1회차로 앵커 (이미 지난 슬롯은 복용 완료로 건너뜀,
+    # 회차 번호·팁 순서는 유지 → 오늘 16시가 2/15). 인자 없으면 다음 슬롯부터.
+    anchor = None
+    if arg:
+        h = _pms_parse_anchor_hour(arg)
+        if h is None:
+            await update.message.reply_text(
+                "시작 시각은 08 / 16 / 22 중 하나로 지정해주세요.\n"
+                "예) <code>/pms 8</code> — 오늘 08:00 복용분을 1회차로 계산", parse_mode='HTML')
+            return
+        anchor = datetime.datetime(now.year, now.month, now.day, h, tzinfo=KST)
+
+    slots = _pms_gen_slots(now, anchor=anchor)
+    sent = {}
+    for s in slots:
+        sdt = datetime.datetime.fromisoformat(s)
+        if now >= _pms_slot_deadline(sdt):
+            sent[s] = {'status': 'skipped', 'ts': time.time()}  # 이미 복용한 지난 슬롯
+    remaining = [s for s in slots if s not in sent]
+    if not remaining:
+        await update.message.reply_text("지정한 시작 시각 기준으로 남은 알림이 없어요. 인자 없이 /pms 를 써보세요.")
+        return
     end = datetime.datetime.fromisoformat(slots[-1])
+    nxt = datetime.datetime.fromisoformat(remaining[0])
     _save_pms_state({'active': True, 'chat_id': update.effective_chat.id,
-                     'started': now.isoformat(), 'slots': slots, 'sent': {}})
+                     'started': now.isoformat(), 'slots': slots, 'sent': sent})
+    skipped = f"이미 지난 {len(sent)}회는 복용하신 걸로 건너뛰고, " if sent else ''
+    base = f" (기준: 오늘 {anchor.strftime('%H:%M')} = 1회차)" if anchor else ''
     warn = ''
     if context.application.job_queue is None:
         warn = '\n\n⚠️ (개발환경) JobQueue 미설치 — 실제 발송은 되지 않아요.'
     await update.message.reply_text(
-        f"💊 <b>PMS 케어 시작</b>\n"
-        f"지금부터 매일 <b>08:00 · 16:00 · 22:00</b>에 총 {PMS_SLOT_COUNT}회 알려드릴게요.\n\n"
-        f"▸ 첫 알림: {_pms_fmt_dt(first)}\n"
-        f"▸ 마지막 알림: {_pms_fmt_dt(end)}\n"
+        f"💊 <b>PMS 케어 시작</b>{base}\n"
+        f"매일 <b>08:00 · 16:00 · 22:00</b>에 알려드릴게요.\n\n"
+        f"▸ {skipped}다음 알림: {_pms_fmt_dt(nxt)} ({slots.index(remaining[0]) + 1}/{PMS_SLOT_COUNT})\n"
+        f"▸ 마지막 알림: {_pms_fmt_dt(end)} ({PMS_SLOT_COUNT}/{PMS_SLOT_COUNT})\n"
         f"▸ 중단하려면: /pms off{warn}", parse_mode='HTML')
 
 
