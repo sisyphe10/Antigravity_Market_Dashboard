@@ -130,6 +130,18 @@ def build_morning_digest(now: datetime | None = None) -> str:
         ).fetchall()
         backlog_manual = [dict(r) for r in backlog_manual]
 
+        # Section 2b. 게이트 격리 — 번역·발행 게이트가 하드 차단해 translation_skipped=1
+        # 로 격리된 행 (2026-08-03 신설). 격리 행은 pending 대기열에서 제외되므로
+        # 다이제스트에 노출하지 않으면 영구 사각지대가 된다.
+        quarantined = conn.execute(
+            """SELECT f.ticker, f.filed_at, t.id AS tid FROM transcripts t
+               JOIN filings f ON t.filing_id = f.id
+               WHERE COALESCE(t.translation_skipped, 0) = 1
+                 AND t.translated_kr IS NULL
+               ORDER BY f.filed_at DESC LIMIT 20""",
+        ).fetchall()
+        quarantined = [dict(r) for r in quarantined]
+
         # Section 3. 다음 7일 예정
         upcoming = conn.execute(
             """SELECT ticker, event_date, hour FROM earnings_calendar
@@ -194,6 +206,16 @@ def build_morning_digest(now: datetime | None = None) -> str:
             )
         if len(backlog_manual) > 12:
             lines.append(f'  ... 외 {len(backlog_manual) - 12}건')
+
+    if quarantined:
+        lines.extend(['', f'━━ 🚧 게이트 격리 ({len(quarantined)}건) ━━'])
+        for r in quarantined[:12]:
+            lines.append(
+                f"  • [{r['ticker']}] {_age_days(r['filed_at'])}일째, "
+                f"transcript_id={r['tid']} — 게이트 차단, 수동확인 필요"
+            )
+        if len(quarantined) > 12:
+            lines.append(f'  ... 외 {len(quarantined) - 12}건')
 
     lines.extend(['', f'━━ 예정 ({len(upcoming)}건) ━━'])
     if upcoming:
