@@ -1034,7 +1034,7 @@ def create_monthly_returns_table():
                 <button onclick="downloadElementImage('mrTableWrap','Monthly_Returns')" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
             </div>
             <div id="mrTableWrap" style="overflow-x:auto;background:#101214;border:1px solid #27282b;border-radius:8px;padding:16px;width:fit-content;max-width:100%;margin:0 auto;">
-                <table style="width:1000px;max-width:100%;border-collapse:separate;border-spacing:0;font-size:14px;font-family:inherit;table-layout:fixed;margin:0 auto;border:2px solid #1f2937;box-sizing:border-box;">
+                <table style="width:1000px;max-width:100%;border-collapse:separate;border-spacing:0;font-size:var(--aoe-t-font);--aoe-t-font:14px;font-variant-numeric:var(--aoe-t-num);font-family:inherit;table-layout:fixed;margin:0 auto;border:2px solid #1f2937;box-sizing:border-box;">
                     <thead><tr>{head_cells}</tr></thead>
                     <tbody>
 {body_rows_html}                    </tbody>
@@ -1075,6 +1075,29 @@ def create_sector_section_html():
 
 
 _AOE_CORE_JS_CACHE = None
+
+
+def _load_aoe_tokens_css():
+    """표 규격 토큰(chart_core/dist/aoe_tokens.css) 로드 + manifest tokensSha256 무결성 검증.
+    페이지 표 CSS는 크기·간격·정렬·숫자체를 var(--aoe-t-*)로 참조하고, 페이지 고유 값은
+    컨테이너 셀렉터에서 변수만 재정의한다(코어 원칙 — 셀렉터 덮기 금지)."""
+    _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    with open(os.path.join(_root, 'chart_core', 'dist', 'aoe_tokens.css'), encoding='utf-8') as _f:
+        _css = _f.read()
+    with open(os.path.join(_root, 'chart_core', 'dist', 'aoe_chart.manifest.json'), encoding='utf-8') as _f:
+        _mani = json.load(_f)
+    import hashlib as _hl
+    _sha = _hl.sha256(_css.encode('utf-8')).hexdigest()
+    if _sha != _mani.get('tokensSha256'):
+        raise RuntimeError(
+            f"aoe_tokens.css sha 불일치 ({_sha[:12]} != {str(_mani.get('tokensSha256'))[:12]}) "
+            "— chart_core/build_core.py 재실행")
+    if '</style>' in _css.lower():
+        raise RuntimeError('aoe_tokens.css 에 </style> 포함 — 인라인 임베드 불가')
+    return _css
+
+
+_AOE_TOKENS_CSS = _load_aoe_tokens_css()
 
 
 def _load_aoe_core_js():
@@ -1971,7 +1994,7 @@ def _build_combined_chart_section():
             decorated.append((FREQ_RANK[freq], gi, si, freq, group_label_raw, s, values))
         decorated.sort(key=lambda t: (t[0], t[1], t[2]))
 
-        cell_base = 'padding:6px 8px;font-size:13px;color:#000;'
+        cell_base = 'padding:var(--aoe-t-pad-y) var(--aoe-t-pad-x);font-size:var(--aoe-t-font);color:#000;'
         for rank, gi, si, freq, group_label_raw, s, values in decorated:
             data_export[s['display']] = values
             group_label = _html.escape(group_label_raw)
@@ -2008,9 +2031,9 @@ def _build_combined_chart_section():
         export_json = json.dumps(export, ensure_ascii=False, separators=(',', ':'))
 
         th_base = ('position:sticky;top:0;z-index:2;background:#f0f0f0;cursor:pointer;'
-                   'user-select:none;font-weight:700;font-size:12px;color:#000;'
-                   'padding:8px 4px;text-align:center;white-space:nowrap;'
-                   'border-top:1px solid #000;border-bottom:1px solid #000;')
+                   'user-select:none;font-weight:var(--aoe-t-head-weight);font-size:12px;color:#000;'
+                   'padding:8px 4px;text-align:var(--aoe-t-align);white-space:nowrap;'
+                   'border-top:var(--aoe-t-row-line) solid #000;border-bottom:var(--aoe-t-head-underline) solid #000;')
         # 필터 ▾: 수수료 매출 테이블(rev-filter)과 동일한 엑셀식 값 체크박스 팝업
         filter_btn = ('<span class="cmb-filter-btn" data-col="{col}" '
                       'onclick="cmbOpenFilter(this, event)">▾</span>')
@@ -2049,6 +2072,7 @@ def _build_combined_chart_section():
             '#cmbSideTable tr.cmb-drop td{box-shadow:inset 0 -2px 0 #67e0f4;}'
             '.cmb-filter-btn:hover{color:#000;}'
             '.cmb-filter-btn.cmb-filter-on{color:#000;font-weight:900;}'
+            '#cmbSideTable{--aoe-t-font:13px;--aoe-t-pad-y:6px;--aoe-t-pad-x:8px;--aoe-t-head-underline:1px;--aoe-t-head-weight:700}'
             '.cmb-filter-pop{position:absolute;z-index:30;background:#fff;border:1px solid #d8dde3;'
             'border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.13);padding:8px 12px;'
             'max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;min-width:150px;}'
@@ -3275,49 +3299,6 @@ def _build_combined_chart_section():
         print(f"Error building combined chart section: {e}")
         import traceback; traceback.print_exc()
         return ""
-
-
-def _build_hotel_mini_summary():
-    """DATA 카테고리용 호텔 ADR 축소 요약 — 4개 도시별 lead+7 평균 ADR 카드 + Hotels 페이지 링크."""
-    try:
-        if not os.path.exists('hotel_adr.csv'):
-            return ''
-        df = pd.read_csv('hotel_adr.csv')
-        if df.empty:
-            return ''
-        # 최신 collected_at의 lead_days=7 만 사용
-        latest = df['collected_at'].max()
-        df_latest = df[(df['collected_at'] == latest) & (df['lead_days'] == 7)]
-        if df_latest.empty:
-            return ''
-        city_avg = df_latest.groupby('city').agg(avg=('price_krw', 'mean'), n=('hotel', 'nunique'))
-        cards = ''
-        for city in ['서울', '부산', '제주', '경주']:
-            if city in city_avg.index:
-                avg = int(city_avg.loc[city, 'avg'])
-                n = int(city_avg.loc[city, 'n'])
-                cards += (
-                    '<div style="flex:1;min-width:160px;background:#fff;padding:16px 20px;'
-                    'border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,0.06);text-align:center;">'
-                    f'<div style="font-size:13px;color:#888;font-weight:600;margin-bottom:6px;">{city}</div>'
-                    f'<div style="font-size:24px;color:#111;font-weight:700;">₩{avg:,}</div>'
-                    f'<div style="font-size:11px;color:#aaa;margin-top:4px;">{n} hotels · lead+7</div>'
-                    '</div>'
-                )
-        if not cards:
-            return ''
-        return f'''
-        <div style="max-width:1800px;margin:32px auto 0;padding:0 16px;">
-            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;">
-                <h3 style="margin:0;font-size:18px;color:#333;font-weight:700;">HOTEL ADR · lead+7 평균</h3>
-                <a href="hotels.html" style="color:#2563eb;font-size:13px;text-decoration:none;font-weight:600;">Detail in Hotels →</a>
-            </div>
-            <div style="display:flex;gap:12px;flex-wrap:wrap;">{cards}</div>
-        </div>
-        '''
-    except Exception as e:
-        print(f"Hotel mini summary 생성 실패: {e}")
-        return ''
 
 
 def _build_wrap_chart_section(category_label):
@@ -7561,10 +7542,16 @@ def create_dashboard():
             padding: 15px;
         }}
 
+        {_AOE_TOKENS_CSS}
+        /* 표 토큰 배선 (2026-08-03 백로그③): 페이지 값은 컨테이너 변수로 외재화 — 렌더 보존 */
         .portfolio-table {{
+            --aoe-t-font: 16px;
+            --aoe-t-pad-y: 10px;
+            --aoe-t-head-weight: 600;
             width: 100%;
             border-collapse: collapse;
-            font-size: 16px;
+            font-size: var(--aoe-t-font);
+            font-variant-numeric: var(--aoe-t-num);
         }}
 
         .portfolio-table thead {{
@@ -7572,18 +7559,18 @@ def create_dashboard():
         }}
 
         .portfolio-table th {{
-            padding: 12px 10px;
+            padding: 12px var(--aoe-t-pad-x);
             text-align: left;
-            font-weight: 600;
+            font-weight: var(--aoe-t-head-weight);
             color: #000000;
-            border-bottom: 2px solid #000000;
+            border-bottom: var(--aoe-t-head-underline) solid #000000;
         }}
 
         .portfolio-table td {{
-            padding: 10px;
-            border-bottom: 1px solid #dee2e6;
+            padding: var(--aoe-t-pad-y) var(--aoe-t-pad-x);
+            border-bottom: var(--aoe-t-row-line) solid #dee2e6;
             color: #333333;
-            text-align: center;
+            text-align: var(--aoe-t-align);
         }}
 
         .portfolio-table th {{
@@ -8251,10 +8238,11 @@ def create_dashboard():
         .portfolio-title {{ font-size: 1.4rem; color: #333; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px solid #dee2e6; }}
         .update-time {{ font-size: 0.75rem; font-weight: bold; color: #555; }}
         .table-container {{ overflow-x: auto; background-color: var(--card-bg); border-radius: 8px; padding: 15px; }}
-        .portfolio-table {{ width: 100%; border-collapse: collapse; font-size: 16px; }}
+        {_AOE_TOKENS_CSS}
+        .portfolio-table {{ width: 100%; border-collapse: collapse; font-size: var(--aoe-t-font); font-variant-numeric: var(--aoe-t-num); --aoe-t-font: 16px; --aoe-t-pad-y: 10px; --aoe-t-head-weight: 600; }}
         .portfolio-table thead {{ background-color: #e9ecef; }}
-        .portfolio-table th {{ padding: 12px 10px; text-align: center; font-weight: 600; color: #000; border-bottom: 2px solid #000; }}
-        .portfolio-table td {{ padding: 10px; border-bottom: 1px solid #dee2e6; color: #333; text-align: center; }}
+        .portfolio-table th {{ padding: 12px var(--aoe-t-pad-x); text-align: var(--aoe-t-align); font-weight: var(--aoe-t-head-weight); color: #000; border-bottom: var(--aoe-t-head-underline) solid #000; }}
+        .portfolio-table td {{ padding: var(--aoe-t-pad-y) var(--aoe-t-pad-x); border-bottom: var(--aoe-t-row-line) solid #dee2e6; color: #333; text-align: var(--aoe-t-align); }}
         .portfolio-table tbody tr:hover {{ background-color: #f5f5f5; }}
         .portfolio-table .number {{ text-align: right; }}
         .portfolio-table th:first-child, .portfolio-table td:first-child {{ width: 50px; text-align: center; }}
@@ -8327,11 +8315,11 @@ def create_dashboard():
         .sect-detail-sep {{ color: #ccc; }}
         @media (max-width: 800px) {{ .sector-header-bar, .sector-three-panel {{ grid-template-columns: 1fr; }} }}
         /* Returns Table */
-        .rt-table {{ width:100%; border-collapse:collapse; font-size:0.9rem; }}
-        .rt-nh {{ width:130px; padding:7px 10px; text-align:center; font-weight:600; color:#111; border-bottom:2px solid #111; background:#f0f0f0; }}
-        .rt-ph {{ padding:7px 10px; text-align:center; font-weight:600; color:#111; border-bottom:2px solid #111; background:#f0f0f0; white-space:nowrap; min-width:54px; }}
-        .rt-name {{ padding:8px 10px; text-align:center; font-weight:600; border-bottom:1px solid #eee; white-space:nowrap; }}
-        .rt-cell {{ padding:8px 10px; text-align:center; border-bottom:1px solid #eee; font-variant-numeric:tabular-nums; white-space:nowrap; }}
+        .rt-table {{ width:100%; border-collapse:collapse; font-size:var(--aoe-t-font); --aoe-t-font:0.9rem; --aoe-t-pad-y:8px; --aoe-t-head-weight:600; }}
+        .rt-nh {{ width:130px; padding:7px var(--aoe-t-pad-x); text-align:var(--aoe-t-align); font-weight:var(--aoe-t-head-weight); color:#111; border-bottom:var(--aoe-t-head-underline) solid #111; background:#f0f0f0; }}
+        .rt-ph {{ padding:7px var(--aoe-t-pad-x); text-align:var(--aoe-t-align); font-weight:var(--aoe-t-head-weight); color:#111; border-bottom:var(--aoe-t-head-underline) solid #111; background:#f0f0f0; white-space:nowrap; min-width:54px; }}
+        .rt-name {{ padding:var(--aoe-t-pad-y) var(--aoe-t-pad-x); text-align:var(--aoe-t-align); font-weight:var(--aoe-t-head-weight); border-bottom:var(--aoe-t-row-line) solid #eee; white-space:nowrap; }}
+        .rt-cell {{ padding:var(--aoe-t-pad-y) var(--aoe-t-pad-x); text-align:var(--aoe-t-align); border-bottom:var(--aoe-t-row-line) solid #eee; font-variant-numeric:var(--aoe-t-num); white-space:nowrap; }}
         .rt-pos {{ color:#cc0000; font-weight:600; }}
         .rt-neg {{ color:#0055cc; font-weight:600; }}
         .rt-zero {{ color:#555; }}
@@ -8710,11 +8698,11 @@ def create_dashboard():
         .csel-item.selected { background: #2d7a3a; color: #fff; }
         .sector-group { margin-bottom: 24px; }
         .sector-group h3 { font-size: 18px; color: #2d7a3a; margin-bottom: 8px; padding: 8px 0; border-bottom: 1px solid #2d7a3a; }
-        table { width: 100%; border-collapse: collapse; font-size: 16px; table-layout: fixed; }
+        table { width: 100%; border-collapse: collapse; font-size: var(--aoe-t-font); font-variant-numeric: var(--aoe-t-num); table-layout: fixed; --aoe-t-font: 16px; --aoe-t-pad-y: 10px; --aoe-t-pad-x: 6px; --aoe-t-head-weight: 600; }
         thead { background: #e9ecef; }
-        th { padding: 12px 6px; text-align: center; font-weight: 600; color: #000; cursor: pointer; white-space: nowrap; overflow: hidden; position: sticky; top: 0; background: #e9ecef; z-index: 10; box-shadow: inset 0 -2px 0 #000; }
+        th { padding: 12px var(--aoe-t-pad-x); text-align: var(--aoe-t-align); font-weight: var(--aoe-t-head-weight); color: #000; cursor: pointer; white-space: nowrap; overflow: hidden; position: sticky; top: 0; background: #e9ecef; z-index: 10; box-shadow: inset 0 calc(-1 * var(--aoe-t-head-underline)) 0 #000; }
         th:hover { background: #ddd; }
-        td { padding: 10px 6px; border-bottom: 1px solid #dee2e6; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        td { padding: var(--aoe-t-pad-y) var(--aoe-t-pad-x); border-bottom: var(--aoe-t-row-line) solid #dee2e6; text-align: var(--aoe-t-align); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         /* 종목 리스트 컬럼 비율 — 1열=관심종목 별표 삽입(2026-07-31)으로 이하 nth-child 전부 +1 */
         #tab0 th:nth-child(1) { width: 2.5%; }
         #tab0 th:nth-child(2) { width: 3%; }
@@ -9513,6 +9501,7 @@ function superDownloadUniverse() {
                      .replace('TOPNAV_PLACEHOLDER', top_nav_html('universe'))
                      .replace('SIDEBAR_PLACEHOLDER', sidebar_html('universe'))
                      .replace('__UNIVERSE_UPDATED__', now))
+    universe_page = universe_page.replace('<style>', '<style>\n' + _AOE_TOKENS_CSS, 1)  # 표 토큰 주입 (일반 문자열 CSS 페이지)
     with open('universe.html', 'w', encoding='utf-8') as f:
         f.write(universe_page)
     print("Universe page generated: universe.html")
@@ -9783,11 +9772,12 @@ refresh();
         .date-bar label {{ color: #555; font-weight: 600; }}
         .tables {{ display: flex; gap: 24px; flex-wrap: wrap; }}
         .tables > div {{ flex: 1; min-width: 500px; }}
-        table {{ width: 100%; border-collapse: collapse; font-size: 16px; }}
+        {_AOE_TOKENS_CSS}
+        table {{ width: 100%; border-collapse: collapse; font-size: var(--aoe-t-font); font-variant-numeric: var(--aoe-t-num); --aoe-t-font: 16px; --aoe-t-pad-y: 6px; --aoe-t-pad-x: 6px; --aoe-t-head-weight: 600; }}
         thead {{ background: #e9ecef; }}
-        th {{ padding: 8px 6px; text-align: center; font-weight: 600; color: #000; font-size: 0.78rem; background: #e9ecef; box-shadow: inset 0 -2px 0 #000; }}
-        td {{ padding: 6px 6px; border-bottom: 1px solid #dee2e6; }}
-        td.c {{ text-align: center; font-variant-numeric: tabular-nums; }}
+        th {{ padding: 8px var(--aoe-t-pad-x); text-align: var(--aoe-t-align); font-weight: var(--aoe-t-head-weight); color: #000; font-size: 0.78rem; background: #e9ecef; box-shadow: inset 0 calc(-1 * var(--aoe-t-head-underline)) 0 #000; }}
+        td {{ padding: var(--aoe-t-pad-y) var(--aoe-t-pad-x); border-bottom: var(--aoe-t-row-line) solid #dee2e6; }}
+        td.c {{ text-align: center; font-variant-numeric: var(--aoe-t-num); }}
         tbody tr:hover {{ background: #f5f5f5; }}
         .section h2 {{ color: #333; padding: 8px 0; font-size: 0.95rem; text-align: center; }}
         .pos {{ color: #cc0000; font-weight: 600; }}
@@ -10161,180 +10151,6 @@ refresh();
     # ── ETF page ──
     generate_etf_html()
 
-    # ── Hotels ADR page ──
-    generate_hotels_html()
-
-
-def generate_hotels_html():
-    """Hotel ADR 페이지 생성 (Booking.com 10호텔 entry 객실 일별 가격)"""
-    import pandas as pd
-
-    csv_file = 'hotel_adr.csv'
-    if not os.path.exists(csv_file):
-        print("hotel_adr.csv not found, skipping hotels.html")
-        return
-    df = pd.read_csv(csv_file)
-    if len(df) == 0:
-        print("hotel_adr.csv empty, skipping hotels.html")
-        return
-
-    # 가장 최근 collected_at 행만 (당일 매트릭스)
-    latest = df['collected_at'].max()
-    df_latest = df[df['collected_at'] == latest]
-
-    # 호텔별 도시·등급 메타
-    meta = df_latest[['hotel', 'city', 'grade']].drop_duplicates().set_index('hotel').to_dict(orient='index')
-
-    # 매트릭스: 호텔 × lead_days
-    pivot = df_latest.pivot(index='hotel', columns='lead_days', values='price_krw')
-
-    # 행 HTML (호텔 카테고리 순으로 정렬: 서울 → 부산 → 제주 → 경주)
-    city_order = ['서울', '부산', '제주', '경주']
-    grade_order = {'Lux': 0, '5*': 1, '4*': 2}
-
-    def sort_key(hotel_name):
-        m = meta.get(hotel_name, {})
-        return (city_order.index(m.get('city', '서울')) if m.get('city') in city_order else 99,
-                grade_order.get(m.get('grade'), 99))
-
-    rows_html = ''
-    for hotel in sorted(pivot.index, key=sort_key):
-        m = meta.get(hotel, {})
-        rows_html += f'<tr><td class="hotel-name">{hotel}</td>'
-        rows_html += f'<td class="hotel-meta">{m.get("city", "")}</td>'
-        rows_html += f'<td class="hotel-meta">{m.get("grade", "")}</td>'
-        for lead in [7, 14, 30]:
-            v = pivot.loc[hotel].get(lead)
-            if v is None or pd.isna(v):
-                rows_html += '<td class="price-empty">-</td>'
-            else:
-                rows_html += f'<td class="price">₩{int(v):,}</td>'
-        rows_html += '</tr>\n'
-
-    # 데이터 누적 일수
-    unique_days = df['collected_at'].str[:10].nunique()
-
-    # 시계열 차트: lead+7 호텔별 라인 (데이터 ≥ 3일 누적 시)
-    # Chart.js로 클라이언트 렌더 — PNG를 굽지 않는다. (매 실행마다 바이너리 PNG가
-    # 새로 생성돼 working tree에 떠 git pull/merge를 막던 충돌을 근본 제거 +
-    # 대시보드 전체 차트 방식을 Chart.js로 통일.)
-    chart_card_html = '<div class="card"><p class="note">시계열 차트는 데이터 3일 이상 누적 후 표시됩니다 (현재 %d일).</p></div>' % unique_days
-    if unique_days >= 3:
-        df_lead7 = df[df['lead_days'] == 7].copy()
-        df_lead7['date'] = df_lead7['collected_at'].str[:10]
-        # 하루에 여러 번 수집된 경우 마지막 값만 (일일 최신 스냅샷 기준).
-        df_lead7 = df_lead7.sort_values('collected_at').drop_duplicates(subset=['date', 'hotel'], keep='last')
-        pivot_ts = df_lead7.pivot(index='date', columns='hotel', values='price_krw') / 1000
-        ts_labels = [str(d) for d in pivot_ts.index]
-        ts_hotels = sorted(pivot_ts.columns, key=sort_key)  # 표와 동일 정렬(도시→등급)
-        _palette = ['#1428A0', '#0072CE', '#00854A', '#E0001B', '#FF8200',
-                    '#6A1B9A', '#00838F', '#5D4037', '#C2185B', '#558B2F']
-        ts_datasets = []
-        for i, h in enumerate(ts_hotels):
-            ser = pivot_ts[h]
-            # 데이터셋 속성 = 코어 표준 라인 규격 (P3 — cmb 메인과 동일)
-            ts_datasets.append({
-                'label': h,
-                'data': [None if pd.isna(v) else round(float(v), 1) for v in ser],
-                'borderColor': _palette[i % len(_palette)],
-                'backgroundColor': 'transparent',
-                'borderWidth': 3, 'borderJoinStyle': 'round', 'borderCapStyle': 'round',
-                'pointRadius': 0, 'tension': 0.4, 'cubicInterpolationMode': 'monotone',
-                'spanGaps': True,
-            })
-        _ts_json = json.dumps({'labels': ts_labels, 'datasets': ts_datasets}, ensure_ascii=False)
-        # 렌더 = 코어 표준 라인 cmbRenderCharts (P3 2026-08-02) — DATA(cmb) 양식 단일 정본.
-        # 코어 임베드는 호출 '앞'에 둔다 (IIFE 가 즉시 렌더). 축 제목·내장 범례는 표준으로 대체
-        # (단위는 범례 접미 '/ 천원', 범례는 컬러닷+기간 변화율, 끝값·크로스헤어·핀·DL/Copy 표준).
-        chart_card_html = ("""
-  <div class="card">
-    <h2 style="margin-top:0;font-size:1.2rem;">시계열 (lead+7일, 천원)</h2>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:8px;">
-      <button onclick="copyChartImage('hotelAdrChart','hotelAdrLegend',null,this)" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#0891b2;color:#fff;border:none;border-radius:8px;cursor:pointer;">Copy</button>
-      <button onclick="downloadChartImage('hotelAdrChart','Hotel_ADR','hotelAdrLegend')" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
-    </div>
-    <div style="position:relative;height:420px;"><canvas id="hotelAdrChart"></canvas></div>
-    <div id="hotelAdrLegend" style="margin-top:12px;text-align:center;color:#222;"></div>
-  </div>
-  <script src="/assets/vendor/js/chart.umd.min.js"></script>
-  <script>Chart.defaults.font.family = "'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif"; Chart.defaults.devicePixelRatio = 2 * (window.devicePixelRatio || 1); Chart.defaults.elements.line.borderJoinStyle = 'round'; Chart.defaults.elements.line.borderCapStyle = 'round'; Chart.defaults.animation = false;</script>
-  __AOE_CORE_EMBED__
-  <script>
-  (function(){
-    var D = __HOTEL_ADR_DATA__;
-    cmbRenderCharts({
-      labels: D.labels, datasets: D.datasets, dispDatasets: [], rocDatasets: [],
-      mode: 'raw1', yEok: false, y1Eok: false,
-      axAssign: D.datasets.map(function(ds) { return { name: ds.label, ax: 'y' }; }),
-      unitMap: {},
-      charts: { main: null, disp: null, roc: null },
-      ids: { canvas: 'hotelAdrChart', legend: 'hotelAdrLegend', dispPanel: null, rocPanel: null },
-      xLabel: function(d) { return d ? d.slice(2, 4) + '/' + d.slice(5, 7) : ''; },
-      legendSuffix: '/ 천원'
-    });
-  })();
-  </script>
-""").replace('__HOTEL_ADR_DATA__', _ts_json).replace('__AOE_CORE_EMBED__', _chart_download_helper_js())
-
-    # HTML 생성
-    update_time = datetime.now(KST).strftime('%Y-%m-%d %H:%M:%S')
-    html = f"""<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="utf-8">
-<title>Hotel ADR - Antigravity Dashboard</title>
-{PRETENDARD_LINK_LOCAL}
-<style>
-  * {{ box-sizing: border-box; }}
-  body {{ font-family: 'Pretendard Variable', Pretendard, system-ui, -apple-system, sans-serif; background: #f5f5f5; margin: 0; padding: 0; color: #222; }}  /* nav 전폭 통일 — 여백은 .container로 이전 */
-  .home-btn {{ position: fixed; top: 20px; right: 20px; background: #e0e0e0; color: #222; padding: 8px 18px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 600; }}
-  h1 {{ font-size: 1.8rem; margin-bottom: 8px; }}
-  .meta {{ color: #888; font-size: 13px; margin-bottom: 24px; }}
-  .container {{ max-width: 1260px; margin: 0 auto; padding: 30px; }}  /* 본문 실폭 1200 유지(전역 border-box) — body padding 30 이전분 */
-  .card {{ background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 24px; }}
-  table {{ width: 100%; border-collapse: collapse; }}
-  th {{ background: #222; color: #fff; padding: 10px 14px; text-align: left; font-weight: 600; font-size: 13px; }}
-  td {{ padding: 10px 14px; border-bottom: 1px solid #eee; font-size: 14px; }}
-  td.hotel-name {{ font-weight: 600; }}
-  td.hotel-meta {{ color: #666; font-size: 13px; }}
-  td.price {{ text-align: right; font-feature-settings: 'tnum'; font-weight: 500; }}
-  td.price-empty {{ text-align: right; color: #ccc; }}
-  tr:hover {{ background: #fafafa; }}
-  .note {{ font-size: 13px; color: #666; margin-top: 16px; padding: 12px; background: #fff8e1; border-radius: 8px; border-left: 3px solid #ffc107; }}
-  {TOP_NAV_CSS}
-</style>
-</head>
-<body>
-{top_nav_html('')}
-<div class="container">
-  <h1>Hotel ADR — Booking.com</h1>
-  <p class="meta">Updated: {update_time} KST · 누적 {unique_days}일 · 매일 12:00 KST 자동 수집</p>
-
-  <div class="card">
-    <h2 style="margin-top:0;font-size:1.2rem;">당일 entry 객실 가격 (체크인 lead time별)</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>호텔</th><th>도시</th><th>등급</th>
-          <th style="text-align:right;">+7일</th>
-          <th style="text-align:right;">+14일</th>
-          <th style="text-align:right;">+30일</th>
-        </tr>
-      </thead>
-      <tbody>{rows_html}</tbody>
-    </table>
-    <p class="note">※ 각 호텔에서 가장 저렴한 entry 객실 1박 가격 (2인, 환불가능 옵션 우선). Booking.com 기준이라 외국인 가격 포함될 수 있음.</p>
-  </div>
-
-  {chart_card_html}
-</div>
-</body>
-</html>
-"""
-
-    with open('hotels.html', 'w', encoding='utf-8') as f:
-        f.write(html)
-    print("Hotels page generated: hotels.html")
 
 
 def generate_etf_html():
@@ -10471,12 +10287,13 @@ header h1 {{ margin: 0; font-size: 33px; color: #333; font-weight: 700; line-hei
 .section {{ background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 20px; overflow: hidden; }}
 .section-header {{ padding: 14px 20px; font-size: 1rem; font-weight: 700; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }}
 .section-header .count {{ font-size: 0.8rem; color: #888; font-weight: 400; }}
-table {{ width: 100%; border-collapse: collapse; font-size: 16px; }}
+{_AOE_TOKENS_CSS}
+table {{ width: 100%; border-collapse: collapse; font-size: var(--aoe-t-font); font-variant-numeric: var(--aoe-t-num); --aoe-t-font: 16px; --aoe-t-pad-y: 10px; --aoe-t-pad-x: 8px; --aoe-t-head-weight: 600; }}
 thead {{ background: #e9ecef; }}
-th {{ padding: 10px 8px; text-align: center; font-weight: 600; color: #000; cursor: pointer; white-space: nowrap; background: #e9ecef; box-shadow: inset 0 -2px 0 #000; }}
+th {{ padding: var(--aoe-t-pad-y) var(--aoe-t-pad-x); text-align: var(--aoe-t-align); font-weight: var(--aoe-t-head-weight); color: #000; cursor: pointer; white-space: nowrap; background: #e9ecef; box-shadow: inset 0 calc(-1 * var(--aoe-t-head-underline)) 0 #000; }}
 th:hover {{ background: #ddd; }}
 th .arr {{ font-size: 0.6rem; margin-left: 2px; }}
-td {{ padding: 10px 8px; border-bottom: 1px solid #dee2e6; text-align: center; }}
+td {{ padding: var(--aoe-t-pad-y) var(--aoe-t-pad-x); border-bottom: var(--aoe-t-row-line) solid #dee2e6; text-align: var(--aoe-t-align); }}
 tbody tr:hover {{ background: #f5f5f5; }}
 tbody tr.etf-row {{ cursor: pointer; }}
 tbody tr.etf-row:hover {{ background: #f5f5f5; }}
@@ -10486,9 +10303,9 @@ tbody tr.etf-row:hover {{ background: #f5f5f5; }}
 .etf-name {{ text-align: center; font-weight: 600; }}
 .constituents-row {{ background: #f8f9fa; }}
 .constituents-row td {{ padding: 0; }}
-.const-table {{ width: 100%; font-size: 0.78rem; }}
-.const-table th {{ background: #e9ecef; color: #000; padding: 6px 8px; font-size: 0.75rem; box-shadow: inset 0 -2px 0 #000; }}
-.const-table td {{ padding: 5px 8px; border-bottom: 1px solid #eee; }}
+.const-table {{ width: 100%; font-size: var(--aoe-t-font); --aoe-t-font: 0.78rem; --aoe-t-pad-x: 8px; }}
+.const-table th {{ background: #e9ecef; color: #000; padding: 6px var(--aoe-t-pad-x); font-size: 0.75rem; box-shadow: inset 0 calc(-1 * var(--aoe-t-head-underline)) 0 #000; }}
+.const-table td {{ padding: 5px var(--aoe-t-pad-x); border-bottom: var(--aoe-t-row-line) solid #eee; }}
 .const-table tbody tr:hover {{ background: #f5f5f5; }}
 .chg-fbtn {{ padding: 5px 16px; border: 1px solid #d1d5db; border-radius: 6px; background: #fff; font-size: 0.85rem; cursor: pointer; font-family: inherit; color: #555; }}
 .chg-fbtn:hover {{ background: #f0f0f0; }}

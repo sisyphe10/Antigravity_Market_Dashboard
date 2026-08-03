@@ -143,8 +143,6 @@ SCENARIOS = [
     ('idx_default',           'market', [('js', 'mktSwitchTab(1)'), ('wait', 700)], EXTRACT_IDX),
     ('idx_usd',               'market', [('js', 'mktSwitchTab(1)'), ('wait', 700),
         ('js', "document.querySelector('.idx-mode-btn[data-mode=\"usd\"]').click()"), ('wait', 400)], EXTRACT_IDX),
-    # P3: hotels ADR 표준 라인 전환 (독립 페이지 — 로드 즉시 렌더)
-    ('hotel_adr',             'hotels', [('wait', 600)], _extract_std('hotelAdrChart', 'hotelAdrLegend')),
     # (P7: legacy 롤백 경로 은퇴 — legacy fixture·시나리오 제거. 롤백은 git revert)
     ('viewer2_mktcap',        'viewer2', [
         ('js', "document.querySelector('[data-key=\"삼성전자|mktcap\"]').click()")], _extract_std('chart', 'chartLegend')),
@@ -155,7 +153,6 @@ SCENARIOS = [
 
 FIXTURES = {
     'market':  '/chart_core/fixtures/market_baseline.html',
-    'hotels':  '/chart_core/fixtures/hotels_baseline.html',
     'viewer2': '/chart_core/fixtures/chart_viewer2_baseline.html',
 }
 
@@ -201,6 +198,10 @@ def run(update=False, only=None):
                 page.wait_for_timeout(500)
             page.wait_for_timeout(700)
             snap = page.evaluate(extractor)
+            # 파일명 속 날짜는 실행일마다 달라지는 비결정 필드 — 마스킹 후 비교 (2026-08-03)
+            if isinstance(snap, dict) and isinstance(snap.get("filename"), str):
+                import re as _re
+                snap["filename"] = _re.sub(r"\d{4}-\d{2}-\d{2}", "DATE", snap["filename"])
             page.close()
             results[name] = snap
             gpath = os.path.join(GOLDEN, name + '.json')

@@ -34,7 +34,8 @@ import re
 import sys
 
 # AoE 상단 네비 정본 (2026-07-26 통일) — 같은 execution/ 디렉토리
-from nav_style import NAV_CSS as AOE_NAV_CSS, PRETENDARD_LINK_LOCAL, nav_html
+from nav_style import (NAV_CSS as AOE_NAV_CSS, SIDEBAR_CSS as AOE_SIDEBAR_CSS,
+                       PRETENDARD_LINK_LOCAL, nav_html, sidebar_html)
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -586,7 +587,7 @@ h2.block-title { font-size: 1.4rem; color: #111; font-weight: 800; margin-bottom
 """
 
 # 정본 네비 (2026-07-26 통일) — 탭 구성·마크업은 execution/nav_style.py 단일 출처
-TOP_NAV_HTML = nav_html('architecture')
+TOP_NAV_HTML = nav_html('architecture', 'architecture') + sidebar_html('architecture')
 
 # 사이드바 제거 (2026-07-12 사용자 확정) — Market 하위 메뉴는 이 페이지와 무관
 
@@ -1149,7 +1150,7 @@ def build_html(reg, is_real):
     out.append('<meta name="viewport" content="width=device-width, initial-scale=1.0">')
     out.append("<title>System Architecture — Age of Emergence</title>")
     out.append(PRETENDARD_LINK_LOCAL)  # 웹폰트 로드 — 네비 글꼴 전 페이지 통일 (2026-07-26)
-    out.append("<style>" + AOE_NAV_CSS + "\n" + PAGE_CSS + "</style>")
+    out.append("<style>" + AOE_NAV_CSS + AOE_SIDEBAR_CSS + "\n" + PAGE_CSS + "</style>")
     out.append("</head><body>")
     out.append(TOP_NAV_HTML)
     out.append('<div class="wrap">')
