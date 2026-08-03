@@ -41,13 +41,14 @@
   --aoe-t-valign: middle;
   --aoe-t-num: tabular-nums;   /* 숫자 등폭 — 열 정렬 흔들림 방지 */
   --aoe-t-head-weight: 700;
+  --aoe-t-head-font: inherit;  /* 헤더·보조 셀 글씨 — 기본은 본문 상속, 페이지가 값 지정 */
   --aoe-t-head-underline: 2px; /* 헤더 밑줄 두께 */
   --aoe-t-row-line: 1px;       /* 행 구분선 두께 */
 }
 
         .portfolio-table { width: 100%; border-collapse: collapse; font-size: var(--aoe-t-font); font-variant-numeric: var(--aoe-t-num); --aoe-t-font: 16px; --aoe-t-pad-y: 10px; --aoe-t-head-weight: 600; }
         .portfolio-table thead { background-color: #e9ecef; }
-        .portfolio-table th { padding: 12px var(--aoe-t-pad-x); text-align: var(--aoe-t-align); font-weight: var(--aoe-t-head-weight); color: #000; border-bottom: var(--aoe-t-head-underline) solid #000; }
+        .portfolio-table th { font-size: var(--aoe-t-head-font); padding: 12px var(--aoe-t-pad-x); text-align: var(--aoe-t-align); font-weight: var(--aoe-t-head-weight); color: #000; border-bottom: var(--aoe-t-head-underline) solid #000; }
         .portfolio-table td { padding: var(--aoe-t-pad-y) var(--aoe-t-pad-x); border-bottom: var(--aoe-t-row-line) solid #dee2e6; color: #333; text-align: var(--aoe-t-align); }
         .portfolio-table tbody tr:hover { background-color: #f5f5f5; }
         .portfolio-table .number { text-align: right; }
@@ -344,7 +345,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
     </div>
 
     <div id="mainContent" class="pw-hidden has-sidebar">
-    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><span class="wrap-updated">Updated: 2026-08-03 11:35:50 KST</span></div></nav><div class="wrap-strip"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div>
+    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><span class="wrap-updated">Updated: 2026-08-03 11:51:16 KST</span></div></nav><div class="wrap-strip"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div>
     <aside class="sidebar wrap-sidebar" id="wrapSectionNav" aria-label="WRAP navigation"><div class="wrap-side-group on" data-side-for="dashboard"><a href="#wrap-sec-chart" onclick="wrapGoSection('wrap-sec-chart');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-chart">CHART</a><a href="#wrap-sec-return" onclick="wrapGoSection('wrap-sec-return');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-return">RETURN</a><a href="#wrap-sec-aum" onclick="wrapGoSection('wrap-sec-aum');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-aum">AUM</a><a href="#wrap-sec-portfolio" onclick="wrapGoSection('wrap-sec-portfolio');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-portfolio">Portfolio</a><a href="#wrap-sec-sector" onclick="wrapGoSection('wrap-sec-sector');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-sector">SECTOR WEIGHT</a></div><div class="wrap-side-group" data-side-for="order" id="wrapSideOrder"></div><div class="wrap-side-group" data-side-for="contribution" id="wrapSideContrib"></div><div class="wrap-side-group" data-side-for="fee"><a href="#" onclick="feeSwitchSub('rate');return false;" class="sidebar-link active" data-side-fee="rate">요율</a><a href="#" onclick="feeSwitchSub('revenue');return false;" class="sidebar-link" data-side-fee="revenue">매출</a></div></aside>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
