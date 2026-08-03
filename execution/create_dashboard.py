@@ -2061,7 +2061,6 @@ def _build_combined_chart_section():
             '#cmbSideTable td.cmb-star{color:#8a9096 !important;user-select:none;}'
             '#cmbSideTable td.cmb-star.on{color:#67e0f4 !important;}'
             '#cmbSideTable #cmbStarTh{color:#67e0f4 !important;}'
-            '#cmbSideTable #cmbStarTh.on{background:rgba(103,224,244,0.25) !important;}'
             '.cmb-filter-btn{display:inline-block;margin-left:2px;color:#9aa4b0;cursor:pointer;}'
             '#cmbSearch{color:#fff!important;font-size:14px!important;}'
             '#cmbSearch::placeholder{color:#fff!important;opacity:1;}'
