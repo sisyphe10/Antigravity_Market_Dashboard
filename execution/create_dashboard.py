@@ -1568,9 +1568,8 @@ CMB_SERIES_UNITS = {
     # MEMORY
     '삼성 DDR5 소매가': '원', 'SK하이닉스 DDR5 소매가': '원',
     'DDR5 16Gb': '$', 'DDR5 16Gb Avg': '$', 'DDR4 8Gb': '$', 'DDR4 8Gb Avg': '$', 'SLC 2Gb': '$', 'SLC 1Gb': '$', 'MLC 64Gb': '$', 'MLC 32Gb': '$',
-    # CAPEX / HOTELS
+    # CAPEX
     'SEAJ 반도체장비 판매고': '억엔', 'JMTBA 공작기계 수주총액': '억엔', 'JMTBA 공작기계 외수': '억엔',
-    'Hotel 서울': '원', 'Hotel 부산': '원', 'Hotel 제주': '원', 'Hotel 경주': '원',
 }
 
 
@@ -1863,13 +1862,6 @@ def _build_combined_chart_section():
                 {'display': 'SEAJ 반도체장비 판매고', 'csv': 'SEAJ 반도체장비 판매고', 'color': '#B71C1C'},
                 {'display': 'JMTBA 공작기계 수주총액', 'csv': 'JMTBA 공작기계 수주총액', 'color': '#4E342E'},
                 {'display': 'JMTBA 공작기계 외수', 'csv': 'JMTBA 공작기계 외수', 'color': '#8D6E63'},
-            ]},
-            {'label': 'HOTELS', 'series': [
-                # hotel_adr.csv의 도시별 일별 평균 ADR (모든 호텔×lead 평균)
-                {'display': 'Hotel 서울', 'csv': 'Hotel 서울', 'color': '#1976D2'},
-                {'display': 'Hotel 부산', 'csv': 'Hotel 부산', 'color': '#388E3C'},
-                {'display': 'Hotel 제주', 'csv': 'Hotel 제주', 'color': '#F57C00'},
-                {'display': 'Hotel 경주', 'csv': 'Hotel 경주', 'color': '#7B1FA2'},
             ]},
         ]
 
@@ -4750,7 +4742,7 @@ def create_order_section():
         // 일반형 3개는 종목/비중 동일 → 한 테이블 + 3개 Download 버튼
         // 목표전환형은 주문 시점이 다를 수 있어 별도 카드 유지
         // newSheetTargets: 저장 시 Wrap_NAV.xlsx의 NEW 시트에 행을 추가할 (증권사, 상품명) 매핑
-        // 일반형 카드 → 3개 상품(삼성 트루밸류 / NH 다이내믹 밸류 / DB 개방형) 모두에 동일 종목/비중 행 추가
+        // 결합 카드 → 그룹 멤버 상품(예: NH 다이내믹 밸류·DB 개방형) 모두에 동일 종목/비중 행 추가
         // 목표전환형 카드 → 1개 상품에만 추가
         // 단일 출처: execution/wrap_config.py order_portfolios() (결합 그룹 카드 + 단독 target 카드 자동 생성)
         var ORDER_PORTFOLIOS = __ORDER_PORTFOLIOS__;
