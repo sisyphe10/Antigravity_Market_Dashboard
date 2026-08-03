@@ -433,7 +433,7 @@ main{flex:1;display:flex;min-height:0;}
 .badge{font-size:15px;font-weight:700;border-radius:2px;padding:1px 6px;vertical-align:1px;}
 .badge.transcript{background:var(--aoe-hl2-bg);color:var(--aoe-hl2-fg);}
 .badge.analysis{background:var(--aoe-hl3-bg);color:var(--aoe-hl3-fg);}
-#doc{flex:1;overflow-y:auto;padding:26px max(34px,calc((100% - 1000px)/2)) 60px;line-height:1.75;caret-color:var(--aoe-amber);color:#fff;user-select:text;}
+#doc{flex:1;overflow-y:auto;padding:26px max(34px,calc((100% - 1300px)/2)) 60px;line-height:1.75;caret-color:var(--aoe-amber);color:#fff;user-select:text;}
 #doc:focus{outline:none;}
 #doc *{-webkit-user-drag:none;}
 #doc .empty{color:var(--aoe-muted);font-size:20px;margin-top:40px;text-align:center;}
