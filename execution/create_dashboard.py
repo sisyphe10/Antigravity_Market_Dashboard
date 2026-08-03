@@ -2072,7 +2072,7 @@ def _build_combined_chart_section():
             '#cmbSideTable tr.cmb-drop td{box-shadow:inset 0 -2px 0 #67e0f4;}'
             '.cmb-filter-btn:hover{color:#000;}'
             '.cmb-filter-btn.cmb-filter-on{color:#000;font-weight:900;}'
-            '#cmbSideTable{--aoe-t-font:13px;--aoe-t-pad-y:6px;--aoe-t-pad-x:8px;--aoe-t-head-underline:1px}'
+            '#cmbSideTable{--aoe-t-font:13px;--aoe-t-pad-y:6px;--aoe-t-pad-x:8px;--aoe-t-head-underline:1px;--aoe-t-head-weight:700}'
             '.cmb-filter-pop{position:absolute;z-index:30;background:#fff;border:1px solid #d8dde3;'
             'border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.13);padding:8px 12px;'
             'max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;min-width:150px;}'
