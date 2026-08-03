@@ -222,8 +222,8 @@
         },
         {
           "sector": "IT하드웨어",
-          "code": "011070",
-          "name": "LG이노텍",
+          "code": "009150",
+          "name": "삼성전기",
           "weight": 1,
           "baseWeight": 1,
           "reason": ""
@@ -338,8 +338,8 @@
         },
         {
           "sector": "IT하드웨어",
-          "code": "011070",
-          "name": "LG이노텍",
+          "code": "009150",
+          "name": "삼성전기",
           "weight": 1,
           "baseWeight": 1,
           "reason": ""
