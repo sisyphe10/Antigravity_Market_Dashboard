@@ -169,7 +169,7 @@ def get_portfolio_holdings():
 
     2026-07-16 통합: 그룹 내 전 상품 포트 수렴(일반형 4종·전환형 전체) → 그룹당 리스트로
     반환하고 전송부가 대표 1장씩만 보낸다. 반환: (generals, targets) — 각 [(key, stocks)].
-    generals[0]=결합 일반형(트루밸류 대표), 이후 단독 일반형(한투 지속형 등).
+    generals[0]=결합 일반형(NH/DB), 이후 단독 일반형(삼성 트루밸류·한투 지속형 등).
     """
     json_path = 'portfolio_data.json'
     if not os.path.exists(json_path):
@@ -187,6 +187,7 @@ def get_portfolio_holdings():
     # 레지스트리 기준 판별. '목표전환형' substring은 레거시 페어 키 호환용으로 유지.
     target_keys = wrap_config.target_display_names()
     standalone_keys = {sg['display'] for sg in wrap_config.standalone_general_tabs()}
+    combined_keys = {g['combined'] for g in wrap_config.portfolio_groups()}
     for key, stocks in data.items():
         if not key or key.startswith('_'):
             continue
@@ -196,8 +197,8 @@ def get_portfolio_holdings():
             generals.append((key, stocks))
         elif key in target_keys or '목표전환형' in key:
             targets.append((key, stocks))
-        elif '트루밸류' in key:
-            generals.insert(0, (key, stocks))  # 결합 일반형 = 그룹 대표(맨 앞)
+        elif key in combined_keys:
+            generals.insert(0, (key, stocks))  # 결합 일반형 카드 (레지스트리 combined 키, 맨 앞)
 
     return generals, targets
 

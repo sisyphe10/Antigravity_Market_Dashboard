@@ -5670,8 +5670,11 @@ def create_order_section():
           return '<td style="padding:0;background:'+(need?'#fee2e2':'transparent')+';'+(need?'border:2px solid #fca5a5;':'')+'">'+inp(grp,val,'transparent','','')+'</td>'; }
         function _mtxColSum(pf){ var st=orderState[pf]||[], s=0; st.forEach(function(x){ s+=parseFloat(x.newWeight)||0; }); return s; }
         function _mtxColPrevSum(pf){ var a=orderStocks[pf]||[], s=0; a.forEach(function(x){ s+=parseFloat(x.weight)||0; }); return s; }
-        function _mtxTabStops(){ var g=[], t=[]; ORDER_PORTFOLIOS.forEach(function(p,ci){ if(p.general) g.push(ci); else t.push(ci); });
-          var gs=(syncGeneral&&g.length)?[g[0]]:g; var ts=(syncTarget&&t.length)?[t[0]]:t; return gs.concat(ts); }
+        function _mtxTabStops(){ var gs=[], t=[], seenSync={}; ORDER_PORTFOLIOS.forEach(function(p,ci){
+            if(!p.general){ t.push(ci); return; }
+            if(syncGeneral && p.orderSyncGroup){ if(seenSync[p.orderSyncGroup]) return; seenSync[p.orderSyncGroup]=1; gs.push(ci); }
+            else { gs.push(ci); } });
+          var ts=(syncTarget&&t.length)?[t[0]]:t; return gs.concat(ts); }
         function _mtxCell(pf,code){ var idx=_mtxFindIdx(pf,code); if(idx<0) return {held:false,color:'#000',ot:'',newWeight:null};
           var prev=parseFloat(orderStocks[pf][idx].weight)||0, nw=parseFloat(orderState[pf][idx].newWeight)||0, ot=calcOrderType(prev,nw);
           var color=(ot==='신규 편입'||ot==='비중 확대')?'#FF0000':((ot==='비중 축소'||ot==='전량 편출')?'#0070C0':'#000');
@@ -5682,7 +5685,7 @@ def create_order_section():
           var val=parseFloat(s)||0;
           if(idx>=0){ orderState[pf][idx].newWeight=val; } else { var m=rowMeta||_mtxUnion().meta[c]||{code:c,name:'',sector:''}; orderStocks[pf].push({code:c,name:m.name||'',sector:m.sector||'',weight:0,isNew:true,_mtxAdded:true}); orderState[pf].push({newWeight:val,reason:_mtxReason(c)}); } }
         function _mtxApplyCellSynced(pf,code,raw,rowMeta){ var meta=ORDER_PORTFOLIOS.filter(function(p){return p.display===pf;})[0];
-          if(syncGeneral && meta && meta.general){ GENERAL_DISPLAYS.forEach(function(d){ _mtxApplyCell(d,code,raw,rowMeta); }); }
+          if(syncGeneral && meta && meta.general && meta.orderSyncGroup){ ORDER_PORTFOLIOS.forEach(function(p){ if(p.general && p.orderSyncGroup===meta.orderSyncGroup) _mtxApplyCell(p.display,code,raw,rowMeta); }); }
           else if(syncTarget && meta && !meta.general){ TARGET_DISPLAYS.forEach(function(d){ _mtxApplyCell(d,code,raw,rowMeta); }); }
           else { _mtxApplyCell(pf,code,raw,rowMeta); } }
 
@@ -5722,7 +5725,7 @@ def create_order_section():
             +'<button class="btn green" id="btnFinal">최종 저장</button>'
             +'<button class="btn blue" id="btnAdditional">추가 주문</button>'
             +'</div></div>'
-            +'<div id="syncRow" style="position:relative;height:30px;margin-bottom:8px;"><span class="sync-toggle'+(syncGeneral?' on':'')+'" id="syncToggle" style="position:absolute;top:0;">일반형 동기화</span><span class="sync-toggle'+(syncTarget?' on':'')+'" id="syncToggleTarget" style="position:absolute;top:0;">전환형 동기화</span></div>'
+            +'<div id="syncRow" style="position:relative;height:30px;margin-bottom:8px;"><span class="sync-toggle'+(syncGeneral?' on':'')+'" id="syncToggle" style="position:absolute;top:0;">일반형 동기화(NH·DB·한투)</span><span class="sync-toggle'+(syncTarget?' on':'')+'" id="syncToggleTarget" style="position:absolute;top:0;">전환형 동기화</span></div>'
             +'<div style="overflow-x:auto;border:1px solid #000;"><table><thead><tr>'
             +'<th>#</th><th>업종</th><th>코드</th><th>종목명</th>'+head+'<th style="width:99%;">추천사유</th>'
             +'</tr></thead><tbody>'+rows

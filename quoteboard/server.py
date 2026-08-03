@@ -218,7 +218,7 @@ def build_payload():
 
 # ── 관심그룹 1·2 = 포트폴리오 자동 동기화 (10분 주기, 키워드 매칭이라 회차 변경에도 추종) ──
 PF_JSON = os.path.join(ROOT, 'portfolio_data.json')
-PF_GROUP_PATTERNS = [('트루밸류', '지속형'),          # 그룹1: 일반형/개방형/지속형
+PF_GROUP_PATTERNS = [('트루밸류', '지속형', '개방형'),   # 그룹1: 일반형/개방형/지속형
                      ('목표전환형', '성과모집형')]    # 그룹2: 목표전환형/성과모집형
 PF_SYNC_SEC = 600
 

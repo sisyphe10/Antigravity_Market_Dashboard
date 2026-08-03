@@ -8,7 +8,7 @@ broker_colors, PORTFOLIO_GROUPS, FIXED_PRODUCTS, ORDER_PORTFOLIOS, GENERAL ...)�
 설계 핵심
 ---------
 - 페어/단독 구분 폐지: 결합 표시는 `group` id 하나로 통일.
-  · 일반형 3사(→4사): 모두 group='GENERAL_OPEN' → 결합명 자동 생성.
+  · 일반형 결합(NH/DB): group='GENERAL_OPEN' → 결합명 자동 생성 (삼성 트루밸류는 2026-07-31 분리, 단독).
   · NH/DB 목표전환형 페어: 같은 group id 부여 → 결합명 자동.
   · 한투 단독 목표전환형: group=None → 개별 표시.
 - 데이터 키 분리: NH는 AUM 시트('다이내믹밸류')와 NAV/NEW 시트('Value ESG')가 다름.
@@ -53,6 +53,7 @@ class Product:
     advisory_template: str | None     # 자문지/ 경로 (Order 카드 Download)
     advisory_format: str = 'life'     # 자문지 양식 종류 ('life'=라이프자산운용 R7~ B~I | 'kis'=한투 R4~ A~H)
     group: str | None = None          # 결합 그룹 id (None=단독)
+    order_sync_group: str | None = None  # 주문 매트릭스 동기 그룹 id (데이터 group과 별개, None=단독 입력)
     active: bool = True               # 대시보드 활성 표시 여부
     keep_in_nav: bool = True          # calculate_wrap_nav portfolio_config 포함 (청산분도 컬럼 완결용 True 유지)
     end_date: str | None = None       # 청산일 ('YYYY-MM-DD'), 활성은 None
@@ -86,8 +87,9 @@ BROKERS = [
 
 # ── 결합 그룹 (동일 종목/비중 → 한 줄로 결합 표시) ──────────────────────
 # use: 결합 그룹의 대표 nav_key (데이터·수익률을 대표로 끌어옴)
+# 2026-07-31 삼성 트루밸류 분리(별도 포트폴리오) — 결합은 NH/DB 2종. 한투 지속형은 수렴 후 합류 검토.
 GROUPS = {
-    'GENERAL_OPEN': {'use': '트루밸류'},   # 일반형(영구) 결합 — 한투 지속형은 포트 수렴 후 합류 검토 (현재 단독)
+    'GENERAL_OPEN': {'use': 'Value ESG'},
 }
 
 # ── 벤치마크 (차트·수익률 표 공통) ─────────────────────────────────────
@@ -102,25 +104,25 @@ PRODUCTS = [
     Product(broker='삼성', nav_key='트루밸류', aum_name='트루밸류', ptype='general', kind_label='일반형',
             display='삼성 트루밸류', base_price=2021.31, start_date='2025-12-30', ytd_base='2025-12-30',
             color='#1428A0', advisory_template='자문지/라이프자산운용_트루밸류_260427.xlsx',
-            group='GENERAL_OPEN', keywords=('트루밸류', '삼성 트루밸류')),
+            group=None, keywords=('트루밸류', '삼성 트루밸류')),  # 2026-07-31 분리 — 단독 포트·주문 동기 제외
     # 2026-07-06 공식 리브랜딩: 표시명 'NH Value ESG' → 'NH 다이내믹 밸류'.
     # nav_key='Value ESG'는 Wrap_NAV.xlsx 기준가/수익률/NEW 시트 컬럼(데이터 조인 키)이라 유지.
     # keywords·monthly_label은 기본값(display 추종)으로 복귀 — 명시값이면 display 변경에 안 따라감.
     Product(broker='NH', nav_key='Value ESG', aum_name='다이내믹밸류', ptype='general', kind_label='일반형',
             display='NH 다이내믹 밸류', base_price=1980.49, start_date='2025-12-30', ytd_base='2025-12-30',
             color='#0072CE', advisory_template='자문지/라이프자산운용_라이프 다이내믹밸류_일반형 _2026.4.27.xlsx',
-            group='GENERAL_OPEN'),
+            group='GENERAL_OPEN', order_sync_group='GENERAL_SHARED'),
     Product(broker='DB', nav_key='개방형 랩', aum_name='개방형 랩', ptype='general', kind_label='일반형',
             display='DB 개방형', base_price=1518.52, start_date='2025-12-30', ytd_base='2025-12-30',
             color='#00854A', advisory_template='자문지/라이프자산운용_DB 개방형 랩 _2026.4.27.xlsx',
-            group='GENERAL_OPEN', report_label='DB 개방형 랩',
+            group='GENERAL_OPEN', order_sync_group='GENERAL_SHARED', report_label='DB 개방형 랩',
             keywords=('개방형', 'DB 개방형')),
     # 한투 지속형 — 2026-07-02 개시. 신규 계좌 램프업으로 개방형 3종과 포트 수렴 전 단독 표시(group=None).
     # 수렴 후 GENERAL_OPEN 합류 검토. 자문지는 한투 양식(advisory_format='kis').
     Product(broker='한투', nav_key='지속형', aum_name='지속형', ptype='general', kind_label='지속형',
             display='한투 지속형', base_price=1000.00, start_date='2026-07-02', ytd_base='2026-07-02',
             color='#F58220', advisory_template='자문지/한국투자 가치도약랩(라이프자산)_20260702.xlsx',
-            advisory_format='kis', group=None),
+            advisory_format='kis', group=None, order_sync_group='GENERAL_SHARED'),
 
     # 활성 목표전환형 (단기 랩) — NH 5호 2026-06-29 개시. 단독(group=None), DB 6차(7/1)는 별도.
     # advisory_template은 자문지 .xlsx 확보 시 경로 주입 (현재 Order 탭 직접 입력 운용).
@@ -283,18 +285,25 @@ def portfolio_tab_buttons():
 
     [{'display': 버튼 라벨, 'section_key': portfolio_data.json 섹션 키}] + {'divider': True} 1개
     순서 (2026-07-15 사용자 지정):
-    - 일반형: GENERAL_OPEN 활성 멤버(증권사순, 데이터는 결합 키 공유) → 그룹 미가입 일반형(한투 지속형 등)
+    - 일반형: 증권사순 단일 순회 (그룹 멤버=결합 section_key 공유, 단독=display)
     - {'divider': True} — 일반형 | 목표전환형 시각 구분 (target 없으면 미삽입)
     - 목표전환형(kind_label '목표전환형', start_date 내림차순: DB 6차 → NH 5호) → 기타 target(성과모집형 등)
     출시 전(사전등록) 상품은 portfolio_data.json에 섹션이 없어 렌더 단계에서 자동 제외됨.
     """
     btns = []
-    for gid in active_group_ids():
-        combined = combined_display(gid)
-        for p in group_active_members(gid):
-            btns.append({'display': p.display, 'section_key': combined})
+    done_groups = set()
+    # 2026-08-03 증권사순 단일 순회 — 그룹 우선 배치면 트루밸류 분리 시 삼성 버튼이 NH/DB 뒤로 밀림
     for p in _sorted_active(active_products()):
-        if p.ptype != 'target' and not p.group:
+        if p.ptype == 'target':
+            continue
+        if p.group:
+            if p.group in done_groups:
+                continue
+            done_groups.add(p.group)
+            combined = combined_display(p.group)
+            for m in group_active_members(p.group):
+                btns.append({'display': m.display, 'section_key': combined})
+        else:
             btns.append({'display': p.display, 'section_key': p.display})
     targets = sorted([p for p in active_products() if p.ptype == 'target'],
                      key=lambda x: x.start_date, reverse=True)
@@ -516,12 +525,14 @@ def order_matrix_columns():
     for p in generals:
         jkey = combined_by_gid.get(p.group, p.display) if p.group else p.display
         cols.append({'display': p.display, 'jsonKey': jkey,
-                     'broker': p.broker, 'product': p.nav_key, 'general': True, 'label': p.display,
+                     'broker': p.broker, 'product': p.nav_key, 'general': True,
+                     'orderSyncGroup': p.order_sync_group, 'label': p.display,
                      'templates': _tmpl(p), 'newSheetTargets': [{'broker': p.broker, 'product': p.nav_key}]})
     for p in _sorted_active(active_products()):
         if p.ptype != 'general':
             cols.append({'display': p.display, 'jsonKey': p.display,
-                         'broker': p.broker, 'product': p.nav_key, 'general': False, 'label': _short(p),
+                         'broker': p.broker, 'product': p.nav_key, 'general': False,
+                         'orderSyncGroup': None, 'label': _short(p),
                          'templates': _tmpl(p), 'newSheetTargets': [{'broker': p.broker, 'product': p.nav_key}]})
     return cols
 
@@ -604,6 +615,13 @@ def validate(today=None, nav_file='Wrap_NAV.xlsx'):
             warns.append(f'미등록 group: {p.group} ({p.nav_key})')
         if p.active and not p.keep_in_nav:
             warns.append(f'활성인데 keep_in_nav=False: {p.nav_key}')
+        if p.order_sync_group and p.ptype != 'general':
+            warns.append(f'order_sync_group은 일반형 전용: {p.nav_key}')
+    for _gid, _meta in GROUPS.items():
+        _use = _meta.get('use')
+        _member_keys = {m.nav_key for m in group_active_members(_gid)}
+        if _use and _member_keys and _use not in _member_keys:
+            warns.append(f'GROUPS[{_gid}].use={_use}가 활성 멤버 nav_key 아님')
     if today is not None:
         import os
         import pandas as pd
