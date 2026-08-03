@@ -1077,6 +1077,29 @@ def create_sector_section_html():
 _AOE_CORE_JS_CACHE = None
 
 
+def _load_aoe_tokens_css():
+    """표 규격 토큰(chart_core/dist/aoe_tokens.css) 로드 + manifest tokensSha256 무결성 검증.
+    페이지 표 CSS는 크기·간격·정렬·숫자체를 var(--aoe-t-*)로 참조하고, 페이지 고유 값은
+    컨테이너 셀렉터에서 변수만 재정의한다(코어 원칙 — 셀렉터 덮기 금지)."""
+    _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    with open(os.path.join(_root, 'chart_core', 'dist', 'aoe_tokens.css'), encoding='utf-8') as _f:
+        _css = _f.read()
+    with open(os.path.join(_root, 'chart_core', 'dist', 'aoe_chart.manifest.json'), encoding='utf-8') as _f:
+        _mani = json.load(_f)
+    import hashlib as _hl
+    _sha = _hl.sha256(_css.encode('utf-8')).hexdigest()
+    if _sha != _mani.get('tokensSha256'):
+        raise RuntimeError(
+            f"aoe_tokens.css sha 불일치 ({_sha[:12]} != {str(_mani.get('tokensSha256'))[:12]}) "
+            "— chart_core/build_core.py 재실행")
+    if '</style>' in _css.lower():
+        raise RuntimeError('aoe_tokens.css 에 </style> 포함 — 인라인 임베드 불가')
+    return _css
+
+
+_AOE_TOKENS_CSS = _load_aoe_tokens_css()
+
+
 def _load_aoe_core_js():
     """공용 차트 코어(chart_core/dist/aoe_chart.js) 로드 + manifest sha256 무결성 검증.
 
@@ -1971,7 +1994,7 @@ def _build_combined_chart_section():
             decorated.append((FREQ_RANK[freq], gi, si, freq, group_label_raw, s, values))
         decorated.sort(key=lambda t: (t[0], t[1], t[2]))
 
-        cell_base = 'padding:6px 8px;font-size:13px;color:#000;'
+        cell_base = 'padding:var(--aoe-t-pad-y) var(--aoe-t-pad-x);font-size:var(--aoe-t-font);color:#000;'
         for rank, gi, si, freq, group_label_raw, s, values in decorated:
             data_export[s['display']] = values
             group_label = _html.escape(group_label_raw)
@@ -2008,9 +2031,9 @@ def _build_combined_chart_section():
         export_json = json.dumps(export, ensure_ascii=False, separators=(',', ':'))
 
         th_base = ('position:sticky;top:0;z-index:2;background:#f0f0f0;cursor:pointer;'
-                   'user-select:none;font-weight:700;font-size:12px;color:#000;'
-                   'padding:8px 4px;text-align:center;white-space:nowrap;'
-                   'border-top:1px solid #000;border-bottom:1px solid #000;')
+                   'user-select:none;font-weight:var(--aoe-t-head-weight);font-size:12px;color:#000;'
+                   'padding:8px 4px;text-align:var(--aoe-t-align);white-space:nowrap;'
+                   'border-top:var(--aoe-t-row-line) solid #000;border-bottom:var(--aoe-t-head-underline) solid #000;')
         # 필터 ▾: 수수료 매출 테이블(rev-filter)과 동일한 엑셀식 값 체크박스 팝업
         filter_btn = ('<span class="cmb-filter-btn" data-col="{col}" '
                       'onclick="cmbOpenFilter(this, event)">▾</span>')
@@ -2049,6 +2072,7 @@ def _build_combined_chart_section():
             '#cmbSideTable tr.cmb-drop td{box-shadow:inset 0 -2px 0 #67e0f4;}'
             '.cmb-filter-btn:hover{color:#000;}'
             '.cmb-filter-btn.cmb-filter-on{color:#000;font-weight:900;}'
+            '#cmbSideTable{--aoe-t-font:13px;--aoe-t-pad-y:6px;--aoe-t-pad-x:8px;--aoe-t-head-underline:1px}'
             '.cmb-filter-pop{position:absolute;z-index:30;background:#fff;border:1px solid #d8dde3;'
             'border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.13);padding:8px 12px;'
             'max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;min-width:150px;}'
@@ -7561,10 +7585,16 @@ def create_dashboard():
             padding: 15px;
         }}
 
+        {_AOE_TOKENS_CSS}
+        /* 표 토큰 배선 (2026-08-03 백로그③): 페이지 값은 컨테이너 변수로 외재화 — 렌더 보존 */
         .portfolio-table {{
+            --aoe-t-font: 16px;
+            --aoe-t-pad-y: 10px;
+            --aoe-t-head-weight: 600;
             width: 100%;
             border-collapse: collapse;
-            font-size: 16px;
+            font-size: var(--aoe-t-font);
+            font-variant-numeric: var(--aoe-t-num);
         }}
 
         .portfolio-table thead {{
@@ -7572,18 +7602,18 @@ def create_dashboard():
         }}
 
         .portfolio-table th {{
-            padding: 12px 10px;
+            padding: 12px var(--aoe-t-pad-x);
             text-align: left;
-            font-weight: 600;
+            font-weight: var(--aoe-t-head-weight);
             color: #000000;
-            border-bottom: 2px solid #000000;
+            border-bottom: var(--aoe-t-head-underline) solid #000000;
         }}
 
         .portfolio-table td {{
-            padding: 10px;
-            border-bottom: 1px solid #dee2e6;
+            padding: var(--aoe-t-pad-y) var(--aoe-t-pad-x);
+            border-bottom: var(--aoe-t-row-line) solid #dee2e6;
             color: #333333;
-            text-align: center;
+            text-align: var(--aoe-t-align);
         }}
 
         .portfolio-table th {{
@@ -8251,10 +8281,11 @@ def create_dashboard():
         .portfolio-title {{ font-size: 1.4rem; color: #333; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px solid #dee2e6; }}
         .update-time {{ font-size: 0.75rem; font-weight: bold; color: #555; }}
         .table-container {{ overflow-x: auto; background-color: var(--card-bg); border-radius: 8px; padding: 15px; }}
-        .portfolio-table {{ width: 100%; border-collapse: collapse; font-size: 16px; }}
+        {_AOE_TOKENS_CSS}
+        .portfolio-table {{ width: 100%; border-collapse: collapse; font-size: var(--aoe-t-font); font-variant-numeric: var(--aoe-t-num); --aoe-t-font: 16px; --aoe-t-pad-y: 10px; --aoe-t-head-weight: 600; }}
         .portfolio-table thead {{ background-color: #e9ecef; }}
-        .portfolio-table th {{ padding: 12px 10px; text-align: center; font-weight: 600; color: #000; border-bottom: 2px solid #000; }}
-        .portfolio-table td {{ padding: 10px; border-bottom: 1px solid #dee2e6; color: #333; text-align: center; }}
+        .portfolio-table th {{ padding: 12px var(--aoe-t-pad-x); text-align: var(--aoe-t-align); font-weight: var(--aoe-t-head-weight); color: #000; border-bottom: var(--aoe-t-head-underline) solid #000; }}
+        .portfolio-table td {{ padding: var(--aoe-t-pad-y) var(--aoe-t-pad-x); border-bottom: var(--aoe-t-row-line) solid #dee2e6; color: #333; text-align: var(--aoe-t-align); }}
         .portfolio-table tbody tr:hover {{ background-color: #f5f5f5; }}
         .portfolio-table .number {{ text-align: right; }}
         .portfolio-table th:first-child, .portfolio-table td:first-child {{ width: 50px; text-align: center; }}
@@ -8327,11 +8358,11 @@ def create_dashboard():
         .sect-detail-sep {{ color: #ccc; }}
         @media (max-width: 800px) {{ .sector-header-bar, .sector-three-panel {{ grid-template-columns: 1fr; }} }}
         /* Returns Table */
-        .rt-table {{ width:100%; border-collapse:collapse; font-size:0.9rem; }}
-        .rt-nh {{ width:130px; padding:7px 10px; text-align:center; font-weight:600; color:#111; border-bottom:2px solid #111; background:#f0f0f0; }}
-        .rt-ph {{ padding:7px 10px; text-align:center; font-weight:600; color:#111; border-bottom:2px solid #111; background:#f0f0f0; white-space:nowrap; min-width:54px; }}
-        .rt-name {{ padding:8px 10px; text-align:center; font-weight:600; border-bottom:1px solid #eee; white-space:nowrap; }}
-        .rt-cell {{ padding:8px 10px; text-align:center; border-bottom:1px solid #eee; font-variant-numeric:tabular-nums; white-space:nowrap; }}
+        .rt-table {{ width:100%; border-collapse:collapse; font-size:var(--aoe-t-font); --aoe-t-font:0.9rem; --aoe-t-pad-y:8px; --aoe-t-head-weight:600; }}
+        .rt-nh {{ width:130px; padding:7px var(--aoe-t-pad-x); text-align:var(--aoe-t-align); font-weight:var(--aoe-t-head-weight); color:#111; border-bottom:var(--aoe-t-head-underline) solid #111; background:#f0f0f0; }}
+        .rt-ph {{ padding:7px var(--aoe-t-pad-x); text-align:var(--aoe-t-align); font-weight:var(--aoe-t-head-weight); color:#111; border-bottom:var(--aoe-t-head-underline) solid #111; background:#f0f0f0; white-space:nowrap; min-width:54px; }}
+        .rt-name {{ padding:var(--aoe-t-pad-y) var(--aoe-t-pad-x); text-align:var(--aoe-t-align); font-weight:var(--aoe-t-head-weight); border-bottom:var(--aoe-t-row-line) solid #eee; white-space:nowrap; }}
+        .rt-cell {{ padding:var(--aoe-t-pad-y) var(--aoe-t-pad-x); text-align:var(--aoe-t-align); border-bottom:var(--aoe-t-row-line) solid #eee; font-variant-numeric:var(--aoe-t-num); white-space:nowrap; }}
         .rt-pos {{ color:#cc0000; font-weight:600; }}
         .rt-neg {{ color:#0055cc; font-weight:600; }}
         .rt-zero {{ color:#555; }}

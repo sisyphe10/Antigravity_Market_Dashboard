@@ -201,6 +201,10 @@ def run(update=False, only=None):
                 page.wait_for_timeout(500)
             page.wait_for_timeout(700)
             snap = page.evaluate(extractor)
+            # 파일명 속 날짜는 실행일마다 달라지는 비결정 필드 — 마스킹 후 비교 (2026-08-03)
+            if isinstance(snap, dict) and isinstance(snap.get("filename"), str):
+                import re as _re
+                snap["filename"] = _re.sub(r"\d{4}-\d{2}-\d{2}", "DATE", snap["filename"])
             page.close()
             results[name] = snap
             gpath = os.path.join(GOLDEN, name + '.json')
