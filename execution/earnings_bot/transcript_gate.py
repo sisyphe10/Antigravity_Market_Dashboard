@@ -33,10 +33,19 @@ MIN_RAW_CHARS = 18_000
 URL_BLOCKLIST = ('instant-alerts/',)
 URL_DATE_TOLERANCE_DAYS = 25
 VINTAGE_TOLERANCE_MONTHS = 4          # 본문/URL 연월이 공시월과 이만큼 벌어지면 다른 분기
-# 실측(정상 106건): 최저 0.134 / 5%=0.284 / 중앙 0.461
-# 오염(거부·날조 스텁): 0.03~0.08  → 하드 임계 0.12, 0.30 미만은 경고
-MIN_TRANSLATION_RATIO = 0.12          # 한국어 길이 / 원문 길이 (하드)
-WARN_TRANSLATION_RATIO = 0.30         # 이하면 경고(차단 아님)
+# 2026-08-03 승격: 분할기 v1.1로 오염을 걷어낸 건강 표본(n=40, 분할 불변·번역 존재)
+# 실측 = min 0.284 / p10 0.411 / 중앙 0.472 / p90 0.545 / max 0.602.
+# CCJ 사고에서 0.19가 '경고만 내고 발행'된 것이 사용자 노출 원인 → 하드 승격.
+# (구 기준 주석 "정상 106건 최저 0.134"는 오염 시대 표본 — 그 0.134들이 바로 오염이었다)
+MIN_TRANSLATION_RATIO = 0.25          # 한국어 길이 / 원문 길이 (하드 차단)
+WARN_TRANSLATION_RATIO = 0.40         # 이하면 경고 + 구조 검사 필수 구간
+MAX_TRANSLATION_RATIO = 0.85          # 초과 시 하드 차단 (날조·중복 팽창 신호, 건강 max 0.602)
+# 섹션별 비율 하한 — 전체 비율은 한 섹션의 탈락을 긴 다른 섹션이 가릴 수 있다
+MIN_SECTION_RATIO = 0.20
+# 결정적 섹션 헤더 (translator가 코드로 조립 — 모델 출력 변형 무관)
+PREP_HEADER = '## 경영진 발표'
+QA_HEADER = '## Q&A (애널리스트 질의응답)'
+MIN_PREPARED_FOR_HEADER = 1_500       # translator.MIN_PREPARED_CHARS와 동일해야 함
 # 숫자 정합성 — 자릿수 이동 보정 후 실측(살아있는 95건):
 #   중앙 0% / 90분위 0% / 95분위 3.6% / 최대 32%
 #   상위 2건(RGTI 32%, CEG 32%)은 발표 섹션이 통째로 날조된 것으로 실물 확인됨.
@@ -171,8 +180,65 @@ def check_body(prepared: str, qa: str, filed_at: str) -> GateResult:
     return _fail(reasons, info)
 
 
+# ── L4b: 섹션 구조 정합 (2026-08-03 신설) ─────────────────────────
+def check_structure(prepared: str, qa: str, translated_kr: str) -> GateResult:
+    """번역본의 섹션 구조가 원문 분할과 정합하는지 검사.
+
+    CCJ 2Q26 사고 유형(발표부가 번역에서 통째로 탈락했는데 전체 비율 경고만 내고
+    발행)의 직접 검출기. translator가 헤더를 코드로 조립하므로(canonical),
+    헤더는 정확 문자열·정확 횟수·순서까지 요구한다.
+    """
+    import re as _re
+    prepared = (prepared or '').strip()
+    qa = (qa or '').strip()
+    kr = translated_kr or ''
+    reasons: list[str] = []
+    warnings: list[str] = []
+    info: dict = {}
+
+    prep_hits = [m.start() for m in _re.finditer(
+        r'^' + _re.escape(PREP_HEADER) + r'[ \t]*$', kr, _re.MULTILINE)]
+    qa_hits = [m.start() for m in _re.finditer(
+        r'^' + _re.escape(QA_HEADER) + r'[ \t]*$', kr, _re.MULTILINE)]
+    info['prep_headers'] = len(prep_hits)
+    info['qa_headers'] = len(qa_hits)
+
+    if qa:
+        if len(qa_hits) != 1:
+            reasons.append(f'qa_header_count:{len(qa_hits)}')
+    elif qa_hits:
+        reasons.append('qa_header_hallucinated')  # 원문 Q&A 없는데 헤더 생성
+
+    if len(prepared) >= MIN_PREPARED_FOR_HEADER:
+        if len(prep_hits) != 1:
+            reasons.append(f'prep_header_count:{len(prep_hits)}')
+    elif prep_hits and not prepared:
+        reasons.append('prep_header_hallucinated')
+
+    if prep_hits and qa_hits and prep_hits[0] > qa_hits[0]:
+        reasons.append('section_order_inverted')
+
+    # 섹션별 분량 비율 — 헤더가 정상일 때만 산출 가능
+    if len(prep_hits) == 1 and len(qa_hits) == 1 and prep_hits[0] < qa_hits[0]:
+        prep_kr = kr[prep_hits[0] + len(PREP_HEADER):qa_hits[0]]
+        qa_kr = kr[qa_hits[0] + len(QA_HEADER):]
+        if prepared:
+            rp = len(prep_kr.strip()) / len(prepared)
+            info['prep_ratio'] = round(rp, 3)
+            if rp < MIN_SECTION_RATIO:
+                reasons.append(f'prep_section_ratio_low:{rp:.2f}')
+        if qa:
+            rq = len(qa_kr.strip()) / len(qa)
+            info['qa_ratio'] = round(rq, 3)
+            if rq < MIN_SECTION_RATIO:
+                reasons.append(f'qa_section_ratio_low:{rq:.2f}')
+
+    return _fail(reasons, info, warnings)
+
+
 # ── L4: 번역 결과 ─────────────────────────────────────────────────
-def check_translation(raw_text: str, translated_kr: str) -> GateResult:
+def check_translation(raw_text: str, translated_kr: str,
+                      prepared: str | None = None, qa: str | None = None) -> GateResult:
     """sentinel / 거부문구 / 분량비율 / 화자 귀속."""
     raw_text = raw_text or ''
     kr = translated_kr or ''
@@ -197,6 +263,15 @@ def check_translation(raw_text: str, translated_kr: str) -> GateResult:
             reasons.append(f'translation_ratio_low:{ratio:.2f}')
         elif ratio < WARN_TRANSLATION_RATIO:
             warnings.append(f'translation_ratio_thin:{ratio:.2f}')
+        if ratio > MAX_TRANSLATION_RATIO:
+            reasons.append(f'translation_ratio_high:{ratio:.2f}')
+
+    # 섹션 구조 정합 — 호출자가 prepared/qa를 넘기면 검사 (translator·publish 경유)
+    if prepared is not None or qa is not None:
+        st = check_structure(prepared or '', qa or '', kr)
+        reasons.extend(st.reasons)
+        warnings.extend(st.warnings)
+        info.update(st.info)
 
     # ★ 화자 귀속은 '경고'다 — 하드 차단이 아니다.
     #   실측: 정상 106건 중 19건(18%)이 화자근거 0%. 원문에 화자 라벨이 아예 없고
@@ -333,6 +408,7 @@ def check_publish(url: str, prepared: str, qa: str, filed_at: str,
                   translated_kr: str) -> GateResult:
     """md 발행 직전 최종 게이트 = 수집 게이트 + 번역 검증."""
     c = check_collect(url, prepared, qa, filed_at)
-    t = check_translation((prepared or '') + '\n' + (qa or ''), translated_kr)
+    t = check_translation((prepared or '') + '\n' + (qa or ''), translated_kr,
+                          prepared=prepared, qa=qa)
     return _fail(c.reasons + t.reasons, {**c.info, **t.info},
                  c.warnings + t.warnings)

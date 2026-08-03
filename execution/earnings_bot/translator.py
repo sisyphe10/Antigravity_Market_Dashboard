@@ -18,6 +18,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 from datetime import date, datetime, timezone
 
 from . import db, ticker_registry
@@ -448,14 +449,24 @@ def translate_transcript(transcript_id: int) -> dict:
         resp = _call_haiku_long(msgs, SYSTEM_TRANSLATION_TRANSCRIPT, max_tokens=16000)
         qa_resps.append(resp)
 
-    # 결과 합치기
+    # 결과 합치기 — 섹션 헤더는 모델 출력에서 제거하고 **코드가 결정적으로 조립**
+    # (2026-08-03: 모델의 헤더 표기 변형·중복·누락이 구조 검증을 무력화하는 것 차단.
+    #  프롬프트의 헤더 지시는 유지 — 모델 동작 안정성 목적, 출력물은 여기서 정규화)
+    from .transcript_gate import PREP_HEADER, QA_HEADER
+
+    def _strip_headers(t: str) -> str:
+        return re.sub(r'^[ \t]*##[ \t]*(?:경영진 발표|Q\s*&\s*A[^\n]*)[ \t]*$\n?',
+                      '', t, flags=re.MULTILINE).strip()
+
+    prep_kr = '\n\n'.join(_strip_headers(r['text']) for r in prepared_resps
+                          if r.get('text') and _strip_headers(r['text']))
+    qa_kr = '\n\n'.join(_strip_headers(r['text']) for r in qa_resps
+                        if r.get('text') and _strip_headers(r['text']))
     parts = []
-    for r in prepared_resps:
-        if r.get('text'):
-            parts.append(r['text'])
-    for r in qa_resps:
-        if r.get('text'):
-            parts.append(r['text'])
+    if prep_kr:
+        parts.append(f'{PREP_HEADER}\n\n{prep_kr}')
+    if qa_kr:
+        parts.append(f'{QA_HEADER}\n\n{qa_kr}')
     translated_full = '\n\n'.join(parts)
 
     total_input = sum(r['input_tokens'] for r in prepared_resps) + sum(
@@ -477,8 +488,9 @@ def translate_transcript(transcript_id: int) -> dict:
             return {'transcript_id': transcript_id, 'translated': False,
                     'reason': 'chunk_gate_reject', 'chunk_head': _t[:200]}
 
-    # ── 번역 후 게이트: sentinel / 거부문구 / 분량비율 / 화자 귀속 역대조
-    _og = check_translation(prepared + '\n' + qa, translated_full)
+    # ── 번역 후 게이트: sentinel / 거부문구 / 분량비율 / 섹션 구조 / 화자 귀속 역대조
+    _og = check_translation(prepared + '\n' + qa, translated_full,
+                            prepared=prepared, qa=qa)
     if not _og.ok:
         logger.warning(
             f'[translator] OUTPUT GATE REJECT transcript={transcript_id} '
