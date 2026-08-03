@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-02 18:45:01 KST",
+  "updated_at": "2026-08-03 18:45:00 KST",
   "slots": [
     {
       "id": "market-1m-leader",
@@ -15,7 +15,7 @@
       "category": "Memory",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "DDR5 1W +0.8% ($67) — 관망세 지속",
+      "text": "DDR5 1W +0.8% ($67) — 박스권 유지",
       "href": "market.html",
       "spark": {
         "series": [
@@ -3166,7 +3166,7 @@
       "category": "Featured",
       "color": "#d97706",
       "tone": "fact",
-      "text": "8.2(일) 거래대금 1위: SK하이닉스 17.5조원",
+      "text": "8.3(월) 거래대금 1위: SK하이닉스 8.6조원",
       "href": "featured.html",
       "spark": null
     },
@@ -3175,7 +3175,7 @@
       "category": "Featured",
       "color": "#d97706",
       "tone": "fact",
-      "text": "8.2(일) KOSPI 상승률 1위: 두산 +30.0%",
+      "text": "8.3(월) KOSDAQ 상승률 1위: 원익홀딩스 +30.0%",
       "href": "featured.html",
       "spark": null
     },
@@ -4939,7 +4939,7 @@
       "category": "Macro",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "전산업생산 전년동월비 최신 3.25% (2026-05-31)",
+      "text": "전산업생산 전년동월비 최신 3.53% (2026-06-30)",
       "href": "market.html",
       "name": "전산업생산 전년동월비",
       "unit": "%",
@@ -5009,8 +5009,9 @@
           1.31,
           2.97,
           2.78,
-          2.52,
-          3.25
+          2.43,
+          2.98,
+          3.53
         ],
         "trend": "up",
         "dates": [
@@ -5078,12 +5079,13 @@
           "2026-02-28",
           "2026-03-31",
           "2026-04-30",
-          "2026-05-31"
+          "2026-05-31",
+          "2026-06-30"
         ]
       },
       "period": [
         "2021-01-31",
-        "2026-05-31"
+        "2026-06-30"
       ]
     },
     {
