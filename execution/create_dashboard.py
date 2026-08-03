@@ -5754,7 +5754,7 @@ def create_order_section():
             +'<button class="btn green" id="btnFinal">최종 저장</button>'
             +'<button class="btn blue" id="btnAdditional">추가 주문</button>'
             +'</div></div>'
-            +'<div id="syncRow" style="position:relative;height:30px;margin-bottom:8px;"><span class="sync-toggle'+(syncGeneral?' on':'')+'" id="syncToggle" style="position:absolute;top:0;">일반형 동기화(NH·DB·한투)</span><span class="sync-toggle'+(syncTarget?' on':'')+'" id="syncToggleTarget" style="position:absolute;top:0;">전환형 동기화</span></div>'
+            +'<div id="syncRow" style="position:relative;height:30px;margin-bottom:8px;"><span class="sync-toggle'+(syncGeneral?' on':'')+'" id="syncToggle" style="position:absolute;top:0;">일반형 동기화</span><span class="sync-toggle'+(syncTarget?' on':'')+'" id="syncToggleTarget" style="position:absolute;top:0;">전환형 동기화</span></div>'
             +'<div style="overflow-x:auto;border:1px solid #000;"><table><thead><tr>'
             +'<th>#</th><th>업종</th><th>코드</th><th>종목명</th>'+head+'<th style="width:99%;">추천사유</th>'
             +'</tr></thead><tbody>'+rows
