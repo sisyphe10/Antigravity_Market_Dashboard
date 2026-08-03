@@ -31,6 +31,8 @@ echo "── 1/5 태깅 (미처리분)"
 }
 
 echo "── 1b/5 문서 태깅 (전문·분석, 미처리분)"
+"$PY" "$REPO/datalake/notion_study_sync.py" || { echo "[warn] Notion Study 동기화 실패 — 계속"; rc=1; }
+
 "$PY" "$REPO/datalake/tagging/tag_docs.py" || { echo "[warn] 문서 태깅 실패 — 계속"; rc=1; }
 
 echo "── 2/5 md 아카이브 (어제+오늘)"
