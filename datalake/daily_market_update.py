@@ -243,7 +243,7 @@ def futures_update(stock):
 def range_update(stock):
     """지수·투자자·해외 — 최근 RANGE_DAYS 범위 재조회 upsert."""
     import pandas as pd
-    from backfill_krx import normalize
+    from backfill_krx import investor_detail_fetch, normalize
     today = date.today()
     frm = (today - timedelta(days=RANGE_DAYS)).strftime("%Y%m%d")
     to = today.strftime("%Y%m%d")
@@ -271,7 +271,7 @@ def range_update(stock):
     for mkt in ("KOSPI", "KOSDAQ"):
         time.sleep(PACE_SEC)
         try:
-            df = stock.get_market_trading_value_by_date(frm, to, mkt)
+            df = investor_detail_fetch(frm, to, mkt)
         except Exception as e:
             print(f"  ! investor {mkt}: {type(e).__name__}", flush=True)
             continue

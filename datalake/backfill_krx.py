@@ -111,14 +111,38 @@ RENAME = {
                      "기초지수": "index_value"},
     "kr_index_ohlcv": {"시가": "open", "고가": "high", "저가": "low", "종가": "close",
                        "거래량": "volume", "거래대금": "value", "상장시가총액": "marcap"},
-    "kr_investor_value": {"기관합계": "institution", "기타법인": "other_corp",
-                          "개인": "individual", "외국인합계": "foreigner", "전체": "total"},
+    "kr_investor_value": {"금융투자": "fin_invest", "보험": "insurance", "투신": "trust",
+                          "사모": "private_fund", "은행": "bank", "기타금융": "other_fin",
+                          "연기금": "pension", "기관합계": "institution",
+                          "기타법인": "other_corp", "개인": "individual",
+                          "외국인": "foreigner", "기타외국인": "other_foreign",
+                          "외국인합계": "foreigner_total", "전체": "total"},
     "kr_short": {"거래량": "short_volume", "거래대금": "short_value",
                  "잔고수량": "balance_qty", "잔고금액": "balance_value"},
     "kr_short_investor": {"기관": "institution", "개인": "individual",
                           "외국인": "foreigner", "기타": "other", "합계": "total"},
     "kr_deriv_investor": DRVINV_COL,
 }
+
+
+INVESTOR_INST_COLS = ["금융투자", "보험", "투신", "사모", "은행", "기타금융", "연기금"]
+
+
+def investor_detail_fetch(frm, to, market):
+    """투자자별 거래실적 순매수 — detail=True 세부 9종 + 합계 파생 컬럼.
+
+    2026-08-03 세부 전환: 기관합계·외국인합계는 KRX 응답에 없어 세부 합으로 파생
+    (구 스키마와 값 일치 실측 검증). foreigner=외국인, foreigner_total=외국인+기타외국인
+    — kr_deriv_investor와 명명 통일.
+    """
+    from pykrx import stock
+    df = stock.get_market_trading_value_by_date(frm, to, market, detail=True)
+    if df is None or df.empty:
+        return df
+    inst = [c for c in INVESTOR_INST_COLS if c in df.columns]
+    df["기관합계"] = df[inst].sum(axis=1)
+    df["외국인합계"] = df.get("외국인", 0) + df.get("기타외국인", 0)
+    return df
 
 
 def normalize(df, dataset, **extra_cols):
@@ -578,7 +602,7 @@ def main():
 
     if "investor" in passes:
         run_per_item("kr_investor_value", ["KOSPI", "KOSDAQ"],
-                     lambda f, t, k: stock.get_market_trading_value_by_date(f, t, k),
+                     investor_detail_fetch,
                      runner, today, ["date", "market"], lambda k: {"market": k})
 
     if "short" in passes:
