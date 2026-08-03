@@ -1450,7 +1450,7 @@ def _series_country(group_label, s):
     ov = CMB_COUNTRY_OVERRIDES.get(disp) or CMB_COUNTRY_OVERRIDES.get(csvn)
     if ov:
         return ov
-    if g in ('INDEX_KOREA', 'MACRO KOREA', 'CREDIT & HOUSING', 'HOTELS', 'DERIVATIVES KR'):
+    if g in ('INDEX_KOREA', 'MACRO KOREA', 'CREDIT & HOUSING', 'HOTELS', 'DERIVATIVES KR', 'INVESTOR FLOW'):
         return 'Korea'
     if g in ('INDEX_US', 'MACRO US', 'CREDIT & HOUSING US'):
         return 'US'
@@ -1595,6 +1595,39 @@ CMB_SERIES_UNITS = {
     'SEAJ 반도체장비 판매고': '억엔', 'JMTBA 공작기계 수주총액': '억엔', 'JMTBA 공작기계 외수': '억엔',
 }
 
+# ─────────────────────────────────────────────────────────────────────────────
+# INVESTOR FLOW (투자주체별 누적 순매수 조원, 2022 기점 — datalake/build_investor_flow.py)
+INVFLOW_MARKETS = ['KOSPI', 'KOSDAQ', 'K200선물', 'KQ150선물']
+INVFLOW_INVESTORS = ['개인', '외국인합계', '외국인', '기타외국인', '금융투자', '기관(금투제외)',
+                     '연기금', '투신', '사모', '보험', '은행', '기타금융', '기타법인']
+INVFLOW_BASE_COLORS = {
+    '개인': '#C62828', '외국인합계': '#1565C0', '외국인': '#0288D1', '기타외국인': '#455A64',
+    '금융투자': '#EF6C00', '기관(금투제외)': '#616161', '연기금': '#2E7D32', '투신': '#7B1FA2',
+    '사모': '#AD1457', '보험': '#5D4037', '은행': '#283593', '기타금융': '#9E9D24', '기타법인': '#00695C',
+}
+
+
+def _invflow_lighten(hex_color, f):
+    r, g, b = (int(hex_color[i:i + 2], 16) for i in (1, 3, 5))
+    mix = lambda c: int(round(c + (255 - c) * f))
+    return '#{:02X}{:02X}{:02X}'.format(mix(r), mix(g), mix(b))
+
+
+def _invflow_group():
+    series = []
+    for mi, m in enumerate(INVFLOW_MARKETS):
+        for inv in INVFLOW_INVESTORS:
+            if inv == '사모' and m.endswith('선물'):
+                continue  # 파생 원천에 사모 분류 없음
+            name = '{} {} 누적'.format(m, inv)
+            series.append({'display': name, 'csv': name,
+                           'color': _invflow_lighten(INVFLOW_BASE_COLORS[inv], mi * 0.18)})
+    return {'label': 'INVESTOR FLOW', 'series': series}
+
+
+CMB_SERIES_UNITS.update({'{} {} 누적'.format(m, inv): '조원'
+                         for m in INVFLOW_MARKETS for inv in INVFLOW_INVESTORS})
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # RoC² 월말 백필 히스토리 (roc_history.csv = datalake/build_roc_history.py 산출물)
@@ -1699,6 +1732,7 @@ def _build_combined_chart_section():
                 {'display': '하이닉스 시가총액',        'csv': 'SK하이닉스 시가총액',        'color': '#64748B'},
                 {'display': '하이닉스 레버리지 ETF AUM', 'csv': 'SK하이닉스 레버리지 ETF AUM', 'color': '#0F766E'},
             ]},
+            _invflow_group(),
             {'label': 'INDEX_US', 'series': [
                 {'display': 'S&P 500',            'csv': 'S&P 500',            'color': '#2E7D32'},
                 {'display': 'S&P 500 PER',        'csv': 'S&P 500 PER',        'color': '#4CAF50'},

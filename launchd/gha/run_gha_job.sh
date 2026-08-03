@@ -338,6 +338,8 @@ run_job() {
       # create_dashboard 보다 앞에 둬야 market.html 이 갱신본을 싣는다. datalake 가
       # 없거나 duckdb 가 잠겨도 대시보드를 막지 않도록 비치명 처리.
       "$PY" datalake/build_roc_history.py || echo "RoC² 월말 백필 실패 (계속 진행)"
+      # 투자주체별 누적 순매수 (datalake → dataset.csv INVESTOR_FLOW) — create_dashboard 앞, 비치명.
+      "$PY" datalake/build_investor_flow.py || echo "투자주체 수급 누적 갱신 실패 (계속 진행)"
       "$PY" calculate_wrap_nav.py || return $?
       "$PY" calculate_returns.py || return $?
       "$PY" execution/fetch_danawa_price.py || echo "다나와 수집 실패 (계속 진행)"
