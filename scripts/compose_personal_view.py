@@ -136,12 +136,13 @@ AOE_DARK_CSS = (
     '.mm-main{padding-top:0!important}'
     '.mm-main .subtabs{margin:0 calc(50% - 50vw) 18px!important}'
     '.ledger-subtabs{margin:0 calc(50% - 50vw) 18px!important}'
-    '.cmb-series-row:has(.cmb-chart-item.active) td{background:' + P['hl1-bg'] + '!important;color:' + P['hl1-fg'] + '!important;font-weight:700!important}'
-    '.cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) td{background:' + P['hl2-bg'] + '!important;color:' + P['hl2-fg'] + '!important;font-weight:700!important}'
-    '.cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) td{background:' + P['hl3-bg'] + '!important;color:' + P['hl3-fg'] + '!important;font-weight:700!important}'
-    '.cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) td{background:' + P['hl1-bg'] + '!important;color:' + P['hl1-fg'] + '!important;font-weight:700!important}'
-    '.cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) td{background:' + P['hl2-bg'] + '!important;color:' + P['hl2-fg'] + '!important;font-weight:700!important}'
-    '.cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) ~ .cmb-series-row:has(.cmb-chart-item.active) td{background:' + P['hl3-bg'] + '!important;color:' + P['hl3-fg'] + '!important;font-weight:700!important}'
+    # 선택행 하이라이트 (2026-08-03 개편): JS(applyMarkerColors)가 클릭 순번을
+    # data-hl(1~3 순환)로 마킹 — 별표 복제 행과 원본이 항상 같은 색을 받고,
+    # 순번이 차트 클릭 순서 기반이라 차트 선 색 순서와도 일치.
+    # (구) :has 형제 체인은 복제 행이 순번을 오염시켜 폐기.
+    '.cmb-series-row[data-hl="1"] td{background:' + P['hl1-bg'] + '!important;color:' + P['hl1-fg'] + '!important;font-weight:700!important}'
+    '.cmb-series-row[data-hl="2"] td{background:' + P['hl2-bg'] + '!important;color:' + P['hl2-fg'] + '!important;font-weight:700!important}'
+    '.cmb-series-row[data-hl="3"] td{background:' + P['hl3-bg'] + '!important;color:' + P['hl3-fg'] + '!important;font-weight:700!important}'
     '.today-date{color:#c9ced4!important}'
     '.qcard{background:' + P['card2'] + '!important;color:#fff!important;border-color:' + P['border'] + '!important;box-shadow:none!important}'
     '.qcard .qsrc,.qcard .qsrc .qnote{color:#fff!important}'
