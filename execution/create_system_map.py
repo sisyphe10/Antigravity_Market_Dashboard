@@ -166,16 +166,16 @@ def theme_sections():
 # amber/th/code colors carry !important so they survive the compose dark
 # injection (h2{color:#fff!important} etc.) — specificity wins among equals.
 PAGE_CSS = (
-    'body{margin:0;background:#0a0a0a;color:#d9dde2;font-family:' + nav_style.PRETENDARD_STACK +
+    'body{margin:0;background:#0a0a0a;color:#fff;font-family:' + nav_style.PRETENDARD_STACK +
     ';font-size:17px;line-height:1.55}'
     '.updated-line{max-width:1240px;margin:0 auto;text-align:right;font-size:14px;'
-    'font-style:italic;color:#8a919a;padding:6px 28px 14px;box-sizing:border-box}'
+    'font-style:italic;color:#fff;padding:6px 28px 14px;box-sizing:border-box}'
     '.smap{max-width:1240px;margin:0 auto;padding:0 24px 64px}'
     '.sec{background:#111214;border:1px solid #27282b;border-radius:8px;'
     'padding:20px 24px;margin:0 0 18px}'
     '.sec>h2{margin:0 0 14px;font-size:20px;font-weight:700;color:#fb8b1e!important}'
     '.sec p{margin:8px 0}'
-    '.sec p.meta{font-size:14px;color:#8a919a}'
+    '.sec p.meta{font-size:14px;color:#fff}'
     '.sec ul{margin:4px 0;padding-left:22px}'
     '.sec li{margin:6px 0}'
     '.smap table{width:100%;border-collapse:collapse;font-size:17px}'
@@ -187,14 +187,14 @@ PAGE_CSS = (
     'background:#14171b;border:1px solid #27282b;border-radius:4px;padding:1px 6px;'
     'color:#ffb45e!important}'
     '.smap pre{background:#0d0f12;border:1px solid #27282b;border-radius:8px;'
-    'padding:16px 20px;overflow-x:auto;font-size:14px;line-height:1.75;color:#d9dde2;margin:10px 0}'
+    'padding:16px 20px;overflow-x:auto;font-size:14px;line-height:1.75;color:#fff;margin:10px 0}'
     '.smap b{color:#fff}'
     '.swgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));'
     'gap:8px;margin:6px 0}'
     '.sw{display:flex;align-items:center;gap:8px;background:#0d0f12;'
     'border:1px solid #27282b;border-radius:6px;padding:6px 10px}'
     '.swc{width:22px;height:22px;border-radius:4px;border:1px solid #3a3b3e;flex:0 0 22px}'
-    '.swk{font-size:14px;color:#d9dde2;flex:1;text-align:left}'
+    '.swk{font-size:14px;color:#fff;flex:1;text-align:left}'
     '.sw code{font-size:13px}'
     '.swrow{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}'
     '.swpair{display:inline-flex;align-items:center;padding:6px 12px;border-radius:6px;'
