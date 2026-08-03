@@ -53,13 +53,13 @@ def collect_product(df, product_name, data_type, fetch_fn, lookback_days=180):
 
 
 def fetch_gold_volume(date_str):
-    items = fetch_api('http://data-dbg.krx.co.kr/svc/apis/gen/gold_bydd_trd', date_str)
+    items = fetch_api('https://data-dbg.krx.co.kr/svc/apis/gen/gold_bydd_trd', date_str)
     total = sum(int(item.get('ACC_TRDVAL', '0') or '0') for item in items)
     return total if total > 0 else None
 
 
 def fetch_ets_kau25_price(date_str):
-    items = fetch_api('http://data-dbg.krx.co.kr/svc/apis/gen/ets_bydd_trd', date_str)
+    items = fetch_api('https://data-dbg.krx.co.kr/svc/apis/gen/ets_bydd_trd', date_str)
     for item in items:
         if 'KAU25' in item.get('ISU_NM', ''):
             price = int(item.get('TDD_CLSPRC', '0') or '0')
@@ -68,13 +68,13 @@ def fetch_ets_kau25_price(date_str):
 
 
 def fetch_ets_volume(date_str):
-    items = fetch_api('http://data-dbg.krx.co.kr/svc/apis/gen/ets_bydd_trd', date_str)
+    items = fetch_api('https://data-dbg.krx.co.kr/svc/apis/gen/ets_bydd_trd', date_str)
     total = sum(int(item.get('ACC_TRDVAL', '0') or '0') for item in items)
     return total if total > 0 else None
 
 
 def fetch_kospi_marketcap(date_str):
-    items = fetch_api('http://data-dbg.krx.co.kr/svc/apis/idx/kospi_dd_trd', date_str)
+    items = fetch_api('https://data-dbg.krx.co.kr/svc/apis/idx/kospi_dd_trd', date_str)
     for item in items:
         if item.get('IDX_NM') == '코스피':
             mcap = int(item.get('MKTCAP', '0') or '0')
@@ -83,7 +83,7 @@ def fetch_kospi_marketcap(date_str):
 
 
 def fetch_kosdaq_marketcap(date_str):
-    items = fetch_api('http://data-dbg.krx.co.kr/svc/apis/idx/kosdaq_dd_trd', date_str)
+    items = fetch_api('https://data-dbg.krx.co.kr/svc/apis/idx/kosdaq_dd_trd', date_str)
     for item in items:
         if item.get('IDX_NM') == '코스닥':
             mcap = int(item.get('MKTCAP', '0') or '0')
