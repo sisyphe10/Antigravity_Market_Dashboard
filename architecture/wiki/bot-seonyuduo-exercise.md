@@ -14,6 +14,7 @@ code:
 reads:
   - "seonyuduo_exercise_user_map.json"
   - "seonyuduo_feedback_tips.json"
+  - "seonyuduo_pms_tips.json"
 writes: []
 depends_on:
   - "ext-google-workspace"
@@ -30,11 +31,13 @@ alerts: "OnFailure → notify_sisyphe_failure.sh seonyuduo-exercise-bot → 텔�
 
 - 06:00 다이제스트 + 운동 1시간 전 리마인드(랜덤 피드백 팁). 가계부(ledger) 조회도 지원.
 - 표기: 식/여니/듀오(내부 코드 TS/NY 유지). `/운동피드백` 커맨드.
+- **`/pms` 생리통 약 복용 리마인드(2026-08-03 신설)**: 시작 시각(앵커)부터 **8시간 간격 15회(5일)** 슬롯을 미리 확정해 상태파일에 저장하고, 케어 팁을 곁들여 알린다. `/pms YYYY-MM-DD-HH`·`/pms N`(오늘 N시)로 직접 지정하거나, 무인자 시 시작 시각을 되묻는다(질문에 답장 입력, 그룹은 reply 필수). `/pms off` 중단. 팁=`seonyuduo_pms_tips.json`(생리 전→피크→회복 단계 순 15개), 상태=`.seonyuduo_pms.json`.
 - `seonyuduo_exercise_user_map.json`, `seonyuduo_feedback_tips.json`. SeonyuDuo repo 생태계와 연동.
 
 ## Reads
 - `seonyuduo_exercise_user_map.json`
 - `seonyuduo_feedback_tips.json`
+- `seonyuduo_pms_tips.json`
 
 ## Writes
 - (none)

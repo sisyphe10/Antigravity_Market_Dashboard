@@ -1,8 +1,8 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 149 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 153 components._
 
-Updated: 2026-08-02
+Updated: 2026-08-03
 
 ## By domain
 
@@ -17,7 +17,7 @@ Updated: 2026-08-02
 - [web-chart 스킬 (웹 인터랙티브 차트 표준)](skill-web-chart.md) — Skill
 - [금융 분석 스킬 팩 (설치형 8종)](skill-finance-pack.md) — Skill
 
-### 국내 시장 (29)
+### 국내 시장 (30)
 - [Daily Disclosures DART+KIND (16:30)](gha-daily-disclosures.md) — GHA
 - [Daily KOFIA Stats + NPS (21:30 평일)](gha-daily-kofia.md) — GHA
 - [Daily KRX Index Valuation (18:30 평일)](gha-daily-krx-valuation.md) — GHA
@@ -45,6 +45,7 @@ Updated: 2026-08-02
 - [출입국 월별 통계 (fetch_immigration.py)](src-immigration.md) — Source
 - [투자유의 생성기 (create_market_alert.py)](src-create-market-alert.md) — Source
 - [투자자별 수급 (fetch_investor_trading.py)](src-investor-trading.md) — Source
+- [투자주체별 누적 순매수 (build_investor_flow.py)](src-investor-flow.md) — Source
 - [파생·수급 13종 (fetch_deriv_daily.py)](src-deriv-daily.md) — Source
 - [한국 수출 매출 추정 대시보드](ext-export-dashboard.md) — External
 
@@ -104,11 +105,13 @@ Updated: 2026-08-02
 - [자문지 메일 발송 폴러 (send-advisory-emails 60초)](timer-advisory-emails.md) — Timer
 - [포트폴리오 표 생성 (create_portfolio_tables.py)](src-create-portfolio-tables.md) — Source
 
-### 뉴스 · 리서치 (19)
+### 뉴스 · 리서치 (21)
 - [Earnings Calendar Sync (07:00)](gha-earnings-calendar-sync.md) — GHA
 - [earnings.db (실적봇 상태)](store-earnings-db.md) — Store
 - [Generic Source Pipeline (execution/sources/)](src-generic-pipeline.md) — Source
 - [Notion (실적·리서치 퍼블리시 대상)](ext-notion.md) — External
+- [Notion Study DB 동기화 (notion_study_sync.py)](src-notion-study.md) — Source
+- [Notion Study md (~/datalake/notion_study/)](store-notion-study-md.md) — Store
 - [RA_Sisyphe_bot (리서치 알림 봇)](bot-ra-sisyphe.md) — Bot
 - [Research Notes 봇](bot-research-notes.md) — Bot
 - [Research Notes 태깅 파이프라인 (datalake/tagging/)](src-research-tagging.md) — Source
@@ -132,7 +135,7 @@ Updated: 2026-08-02
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — Bot
 - [투자일지 시장데이터 (fetch_journal_data.py)](src-journal-data.md) — Source
 
-### 운영 · 인프라 (37)
+### 운영 · 인프라 (38)
 - [AoE 스타일 정본 (nav_style.py)](src-nav-style.md) — Source
 - [AoE 차트 코어 (chart_core/aoe_chart.js)](src-chart-core.md) — Source
 - [architecture.html (아키텍처)](page-architecture.md) — Page
@@ -149,6 +152,7 @@ Updated: 2026-08-02
 - [Plan API 데몬 (Sisyphe Ledger 자금계획, 127.0.0.1:8790)](daemon-plan-api.md) — Infra
 - [repo 동기화 (git-pull */5)](daemon-git-pull.md) — Watcher
 - [Sisyphe repo 클론 서빙 (시간당 pull)](daemon-sisyphe-pull.md) — Watcher
+- [system_map.html (시스템 지도)](page-system-map.md) — Page
 - [UPS (무정전 전원, 맥미니 대비)](infra-ups.md) — Infra
 - [Wrap_NAV 워처 (watch_wrap_nav.py)](watcher-wrap-nav.md) — Watcher
 - [개인 스냅숏 게시 (publish_snapshot.sh)](web-publish-snapshot.md) — Infra
@@ -215,7 +219,7 @@ Updated: 2026-08-02
 - [비활성 워크플로 (weather · calendar · portfolio-report)](gha-disabled.md) — retired
 - [휴면 push-트리거 워크플로 (backfill · merge-ddr5)](gha-dormant-push.md) — push 트리거 (사실상 휴면), frozen
 
-### Page (12)
+### Page (13)
 - [architecture.html (아키텍처)](page-architecture.md) — 생성=21:40 (architecture-daily), active
 - [etf.html (ETF 구성종목)](page-etf.md) — 생성=18:30 Featured 2차, active
 - [featured.html (Featured TOP)](page-featured.md) — 생성=Featured 잡(16:20/18:30/08:30), active
@@ -224,6 +228,7 @@ Updated: 2026-08-02
 - [market.html (마켓 대시보드)](page-market.md) — 생성=여러 잡, active
 - [market_alert.html (투자유의종목)](page-market-alert.md) — 생성=16:05 / 23:00 (sisyphe-bot), active
 - [seibro.html (SEIBro)](page-seibro.md) — 생성=여러 잡, active
+- [system_map.html (시스템 지도)](page-system-map.md) — 생성=주간 지도 잡 훅 + 수동, active
 - [taiwan.html (대만 월매출)](page-taiwan.md) — 생성=23:20 (gha-daily-taiwan-revenue) — 스텁, retired
 - [universe.html (Universe)](page-universe.md) — 생성=여러 잡, active
 - [universe_lab.html (Universe Lab)](page-universe-lab.md) — 생성=여러 잡, active
@@ -241,10 +246,11 @@ Updated: 2026-08-02
 - [taiwan_revenue.csv (대만 월매출)](store-taiwan-revenue-csv.md) — 23:20 갱신, active
 - [universe.json / universe_history.json](store-universe-json.md) — 18:30 / 07:00 갱신, active
 
-### Store (11)
+### Store (12)
 - [earnings.db (실적봇 상태)](store-earnings-db.md) — 08:00 갱신, active
 - [etf_data.db (ETF 구성종목 SQLite)](store-etf-db.md) — 16:30 / 18:00 갱신 (paused 2026-07-29), frozen
 - [heartbeats.json (Phase 2 워치독 인터페이스)](store-heartbeats.md) — 각 GHA 잡 성공 시, planned
+- [Notion Study md (~/datalake/notion_study/)](store-notion-study-md.md) — 23:20 (datalake-research-export), active
 - [orders/ (pending_orders · aum_pending)](store-orders-pending.md) — 사용자 입력 + 16:00 finalize, active
 - [research_notes.db + media/ (리서치봇)](store-research-notes-db.md) — 이벤트 시, active
 - [sources_state/ + kna_state.json](store-sources-state.md) — 소스 폴링 시, active
@@ -278,7 +284,7 @@ Updated: 2026-08-02
 - [외부 데이터 API/소스 집합](ext-data-apis.md) — active
 - [한국 수출 매출 추정 대시보드](ext-export-dashboard.md) — planned
 
-### Source (47)
+### Source (49)
 - [AoE 스타일 정본 (nav_style.py)](src-nav-style.md) — import 시 (상시), active
 - [AoE 차트 코어 (chart_core/aoe_chart.js)](src-chart-core.md) — 빌드타임 인라인 임베드 (상시), active
 - [DART 공시 (fetch_disclosures.py)](src-dart-disclosures.md) — 16:30 (gha-daily-disclosures), active
@@ -293,6 +299,7 @@ Updated: 2026-08-02
 - [KOSIS 시계열 레지스트리 (fetch_kosis_series.py)](src-kosis-series.md) — 23:30 (kodex 타이머 편승), active
 - [KPX 육지 SMP (fetch_smp_kpx.py)](src-smp-kpx.md) — 23:00 (crawler 내부), active
 - [KRX 지수 밸류에이션 (fetch_krx_valuation.py)](src-krx-valuation.md) — 18:30 평일 (gha-daily-krx-valuation), active
+- [Notion Study DB 동기화 (notion_study_sync.py)](src-notion-study.md) — 23:20 (datalake-research-export), active
 - [Research Notes 태깅 파이프라인 (datalake/tagging/)](src-research-tagging.md) — 23:20 (datalake-research-export), active
 - [SEIBro TOP50 (fetch_seibro_data.py)](src-seibro.md) — 23:00 (daily_crawl), active
 - [SemiAnalysis 소스 (sources/semianalysis.py)](src-semianalysis.md) — 09:00 / 21:00 (ra-sisyphe), active
@@ -323,6 +330,7 @@ Updated: 2026-08-02
 - [투자유의 생성기 (create_market_alert.py)](src-create-market-alert.md) — 16:05 / 23:00 (sisyphe-bot), active
 - [투자일지 시장데이터 (fetch_journal_data.py)](src-journal-data.md) — 16:10 (sisyphe-bot), active
 - [투자자별 수급 (fetch_investor_trading.py)](src-investor-trading.md) — 장 마감 후 (sisyphe-bot), active
+- [투자주체별 누적 순매수 (build_investor_flow.py)](src-investor-flow.md) — 23:00 (gha-daily-crawl), active
 - [파생·수급 13종 (fetch_deriv_daily.py)](src-deriv-daily.md) — 23:30 (kodex 타이머 편승), active
 - [포트폴리오 표 생성 (create_portfolio_tables.py)](src-create-portfolio-tables.md) — 체인 (finalize/recalc/crawl), active
 - [해외 기업 IR/뉴스룸 (sources/foreign_ir.py)](src-foreign-ir.md) — 07:30 / 20:00 (ra-sisyphe), active
@@ -346,7 +354,7 @@ Updated: 2026-08-02
 
 ## By project
 
-### antigravity (149)
+### antigravity (153)
 - [/aum — WRAP 일일 AUM 입력](cmd-aum.md) — Skill
 - [/긴급코멘트 — 급락일 시장 코멘트](cmd-urgent-comment.md) — Skill
 - [/목표전환형 — 랩 생성·청산 일괄](cmd-target-transform.md) — Skill
@@ -406,6 +414,8 @@ Updated: 2026-08-02
 - [market_alert.html (투자유의종목)](page-market-alert.md) — Page
 - [Memento 점심 텔레그램 타이머 (12:00)](timer-memento-telegram.md) — Timer
 - [Notion (실적·리서치 퍼블리시 대상)](ext-notion.md) — External
+- [Notion Study DB 동기화 (notion_study_sync.py)](src-notion-study.md) — Source
+- [Notion Study md (~/datalake/notion_study/)](store-notion-study-md.md) — Store
 - [orders/ (pending_orders · aum_pending)](store-orders-pending.md) — Store
 - [Plan API 데몬 (Sisyphe Ledger 자금계획, 127.0.0.1:8790)](daemon-plan-api.md) — Infra
 - [portfolio_data.json](store-portfolio-data.md) — Dataset
@@ -426,6 +436,7 @@ Updated: 2026-08-02
 - [Sisyphe-Bot (펀드/일상 텔레그램 봇)](bot-sisyphe.md) — Bot
 - [sources_state/ + kna_state.json](store-sources-state.md) — Store
 - [stock_master.json (종목마스터)](store-stock-master.md) — Dataset
+- [system_map.html (시스템 지도)](page-system-map.md) — Page
 - [taiwan.html (대만 월매출)](page-taiwan.md) — Page
 - [taiwan_revenue.csv (대만 월매출)](store-taiwan-revenue-csv.md) — Dataset
 - [TrendForce 소스 (sources/trendforce.py)](src-trendforce.md) — Source
@@ -490,6 +501,7 @@ Updated: 2026-08-02
 - [투자유의 생성기 (create_market_alert.py)](src-create-market-alert.md) — Source
 - [투자일지 시장데이터 (fetch_journal_data.py)](src-journal-data.md) — Source
 - [투자자별 수급 (fetch_investor_trading.py)](src-investor-trading.md) — Source
+- [투자주체별 누적 순매수 (build_investor_flow.py)](src-investor-flow.md) — Source
 - [파생·수급 13종 (fetch_deriv_daily.py)](src-deriv-daily.md) — Source
 - [포트폴리오 표 생성 (create_portfolio_tables.py)](src-create-portfolio-tables.md) — Source
 - [한국 수출 매출 추정 대시보드](ext-export-dashboard.md) — External
