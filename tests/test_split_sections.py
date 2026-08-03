@@ -90,3 +90,64 @@ def test_opening_safe_harbor_not_trimmed():
     )
     prepared, qa = MotleyFoolSource()._split_sections(text)
     assert len(prepared) > 5000  # 본문이 살아 있다
+
+
+def test_management_handoff_forward_snap():
+    """경영진 핸드오프("open the call for questions") → 다음 Operator 블록으로 스냅 (ONTO 패턴)."""
+    text = (
+        'Full Conference Call Transcript\n'
+        'Operator:\n'
+        'Welcome to the call. After the presentation there will be a question and answer session.\n'
+        'Jane Doe -- Chief Executive Officer\n'
+        + ('Solid execution. ' * 400) +
+        'And now, Terren, let us open the call for questions from our covering analysts.\n'
+        'Operator:\n'
+        'Thank you. If you would like to ask a question, please signal by pressing star 1.\n'
+        'John Analyst -- Big Bank -- Analyst\n'
+        'My question is on margins.\n'
+    )
+    prepared, qa = MotleyFoolSource()._split_sections(text)
+    assert 'open the call for questions' in prepared  # 핸드오프 문장은 발표부 마지막
+    assert qa.startswith('Operator:')
+    assert 'signal by pressing star 1' in qa
+    # 오프닝의 "question and answer session" 예고문에서 잘리지 않음
+    assert 'Solid execution' in prepared
+
+
+def test_first_question_announcement():
+    """Operator 전용 "First question comes from" — 헤더 없어도 인정 (LOW 패턴)."""
+    text = (
+        'Operator:\n'
+        'Good morning. After prepared remarks we will conduct a question and answer session.\n'
+        'Jane Doe -- Chief Executive Officer\n'
+        + ('Total Home strategy. ' * 400) +
+        'And with that, we will open it up for your questions.\n'
+        'Operator:\n'
+        '[Operator Instructions]\n'
+        'First question comes from the line of Christopher Horvers with JPMorgan.\n'
+        'Christopher Horvers:\n'
+        'I wanted to put the comp outlook into perspective.\n'
+    )
+    prepared, qa = MotleyFoolSource()._split_sections(text)
+    assert 'Total Home strategy' in prepared
+    assert 'Christopher Horvers' in qa
+    assert 'conduct a question and answer session' in prepared  # 오프닝 예고문은 무시
+
+
+def test_moderated_qa_handoff():
+    """진행자 지명형 핸드오프("now turn the call over to Mike for the Q&A") — LLY 패턴."""
+    text = (
+        'Operator:\n'
+        'Welcome to the call.\n'
+        'Dave Ricks -- Chief Executive Officer\n'
+        + ('Productive quarter. ' * 400) +
+        'I will now turn the call over to Mike for the Q&A session.\n'
+        'Mike Czapar:\n'
+        'Thank you, Dave. Please limit yourself to a single question. '
+        'Paul, please provide the instructions for how to join the queue.\n'
+        'Operator:\n'
+        'Our first question comes from David Risinger.\n'
+    )
+    prepared, qa = MotleyFoolSource()._split_sections(text)
+    assert 'Productive quarter' in prepared
+    assert qa.startswith('Mike Czapar:')

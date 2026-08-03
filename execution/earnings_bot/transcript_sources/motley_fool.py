@@ -238,21 +238,49 @@ class MotleyFoolSource(TranscriptSource):
     #  ① 독립 줄 섹션 헤더 (fool.com "QUESTIONS AND ANSWERS" 등)
     #  ② Operator 발화 블록 안의 Q&A 개시 선언 (marketbeat/Quartr verbatim 전문)
     # 확신할 경계가 없으면 분할하지 않는다 (전체 prepared — translator가 전량 번역).
+    # 주의: 마침표로 끝나는 줄은 헤더가 아니다 — 문장 줄바꿈으로 "Q&A session."이
+    # 독립 줄이 되는 오탐이 있었다(VKTX 실측). 섹션 헤더는 무부호 또는 콜론만.
     _QA_HEADER_LINE_RE = re.compile(
         r'^[ \t]*(?:questions?\s+(?:and|&)\s+answers?|q\s*&\s*a(?:\s+session)?'
-        r'|analyst\s+q\s*&\s*a)[ \t]*[:.]?[ \t]*$',
+        r'|analyst\s+q\s*&\s*a)[ \t]*:?[ \t]*$',
         re.IGNORECASE | re.MULTILINE,
     )
     _QA_TRANSITION_RE = re.compile(
         r"(?:(?:will\s+)?now\s+(?:begin|start)|beginning)\s+the\s+"
-        r"question[\s\-‐-―]+and[\s\-‐-―]+answer\s+(?:session|period|portion)"
-        r"|open\s+(?:up\s+)?the\s+(?:call|lines?|floor)\s+(?:up\s+)?for\s+questions"
-        r"|(?:our|the|your)\s+first\s+question\s+(?:today\s+)?(?:comes|is)\s+from"
-        r"|take\s+(?:our|the)\s+first\s+question",
+        r"question[\s\-‐-―]+and[\s\-‐-―]+answer\s+(?:session|period|portion)",
+        re.IGNORECASE,
+    )
+    # Operator 전용 개시 문구 — Operator만 말하는 표현이라 화자 헤더 확인 불요
+    # (실측: LOW "First question comes from the line of", PM "compile the Q&A roster")
+    _QA_FIRST_QUESTION_RE = re.compile(
+        r"(?:(?:our|the|your)\s+)?first\s+question\s+(?:today\s+)?"
+        r"(?:comes|coming|is|will\s+come)\s+from"
+        r"|take\s+(?:our|the)\s+first\s+question"
+        r"|compile\s+the\s+q\s*&\s*a\s+roster",
+        re.IGNORECASE,
+    )
+    # 경영진 핸드오프 — 발표 마지막 문장. 다음 화자 블록(Q&A 진행자)으로 스냅.
+    # (실측: ONTO "open the call for questions", LOW "open it up for your questions",
+    #  CCJ "ready to take questions", CSCO "now move into the Q&A",
+    #  LLY "now turn the call over to Mike for the Q&A")
+    _QA_HANDOFF_RE = re.compile(
+        r"open\s+(?:the\s+call|it)\s+(?:up\s+)?for\s+(?:your\s+)?questions"
+        r"|ready\s+to\s+take\s+(?:your\s+)?questions"
+        r"|now\s+move\s+in?to\s+the\s+q\s*&\s*a"
+        r"|now\s+turn\s+the\s+call\s+over\s+to\s+[^\n.]{0,50}?\s+for\s+the\s+q\s*&\s*a",
         re.IGNORECASE,
     )
     # 화자 헤더: fool.com "Operator:" / Quartr(marketbeat) "Operator\n00:13:09" / "Operator --"
     _OPERATOR_HEADER_RE = re.compile(r'(?:^|\n)Operator\s*(?::|\n|--)')
+    # 임의 화자 헤더: fool "Name:" 단독 줄 / Quartr "Name\n00:00:00"
+    _SPEAKER_HEADER_RE = re.compile(
+        r"\n(?:[A-Z][^\n]{1,70}:\s*\n|[A-Z][^\n]{1,70}\n\d\d:\d\d)")
+    # Q&A 진행 블록 신호 — 핸드오프 스냅 대상 블록이 진짜 Q&A 진행부인지 확인
+    _QA_BLOCK_SIGNAL_RE = re.compile(
+        r"press\s+star|\[operator instructions\]|\bqueue\b|\binstructions\b"
+        r"|signal\s+by\s+pressing|star\s*(?:then\s*)?(?:one|1)",
+        re.IGNORECASE,
+    )
 
     def _split_sections(self, text: str) -> tuple[str, str]:
         """Prepared Remarks / Q&A / Closing 분리 (문맥 기반, parser 1.1).
@@ -279,15 +307,21 @@ class MotleyFoolSource(TranscriptSource):
 
         m_prep = re.search(r'\bPREPARED REMARKS\b|\bPrepared Remarks\b', text)
 
-        # 본문 시작 = 첫 화자 블록(또는 PREPARED REMARKS 헤더 끝).
+        # 본문 시작 = 가장 이른 화자 블록(또는 PREPARED REMARKS 헤더 끝).
         # marketbeat 페이지 크롬(주가·EPS 표·nav)이 그 앞에 붙는 경우,
         # 크롬 안의 nav 링크("Questions & Answers" 등)를 경계 후보에서 배제한다.
-        first_speaker = self._OPERATOR_HEADER_RE.search(text)
-        body_start = 0
+        # ★Operator 헤더만 쓰면 안 됨 — 진행자(경영진) 사회 콜(LLY·CSCO)은
+        # Operator가 Q&A에서 처음 등장해 body_start가 Q&A 한복판에 찍힌다.
+        starts = []
         if m_prep:
-            body_start = m_prep.end()
-        elif first_speaker:
-            body_start = first_speaker.start()
+            starts.append(m_prep.end())
+        m_op = self._OPERATOR_HEADER_RE.search(text)
+        if m_op:
+            starts.append(m_op.start())
+        m_spk = self._SPEAKER_HEADER_RE.search(text)
+        if m_spk:
+            starts.append(m_spk.start())
+        body_start = min(starts) if starts else 0
 
         candidates = []  # (split_idx, kind)
         # ① 독립 줄 섹션 헤더 — 본문 시작 이후만
@@ -296,7 +330,7 @@ class MotleyFoolSource(TranscriptSource):
                 candidates.append((m.start(), 'header_line'))
         # ② Q&A 개시 선언 — Operator 발화 블록 안에서만 인정: 직전 300자 안에
         #    Operator 화자 헤더가 있어야 하고, 그 헤더 시작점으로 스냅.
-        #    (경영진 IR 멘트 "we will open the call for questions" 오탐 차단.
+        #    (오프닝 boilerplate "we will conduct a Q&A session" 류 오탐 차단.
         #    300자 = 개시 선언은 Operator 헤더 직후 문장이라는 실측 — CCJ 31자)
         for m in self._QA_TRANSITION_RE.finditer(text):
             if m.start() <= body_start:
@@ -306,6 +340,28 @@ class MotleyFoolSource(TranscriptSource):
             if not ops:
                 continue
             candidates.append((max(ops[-1].start(), body_start), 'operator_transition'))
+        # ③ Operator 전용 첫 질문 안내 — Operator 헤더가 근처면 스냅, 없어도 인정
+        #    (오프닝에서는 나올 수 없는 문구)
+        for m in self._QA_FIRST_QUESTION_RE.finditer(text):
+            if m.start() <= body_start:
+                continue
+            window_start = max(0, m.start() - 300)
+            ops = list(self._OPERATOR_HEADER_RE.finditer(text, window_start, m.start()))
+            split_at = ops[-1].start() if ops else m.start()
+            candidates.append((max(split_at, body_start), 'first_question'))
+        # ④ 경영진 핸드오프 → 다음 화자 블록으로 전방 스냅. 그 블록이 진짜 Q&A
+        #    진행부인지(큐 안내·[Operator Instructions] 등) 확인해야 인정 —
+        #    오프닝 IR 멘트의 유사 문구가 CEO 발표 시작점을 오분할하는 것 차단.
+        for m in self._QA_HANDOFF_RE.finditer(text):
+            if m.start() <= body_start:
+                continue
+            hdr = self._SPEAKER_HEADER_RE.search(text, m.end(), m.end() + 600)
+            if not hdr:
+                continue
+            block_head = text[hdr.start():hdr.start() + 600]
+            if not self._QA_BLOCK_SIGNAL_RE.search(block_head):
+                continue
+            candidates.append((hdr.start() + 1, 'handoff'))
 
         prepared, qa = '', ''
         prep_start = m_prep.end() if m_prep else 0
