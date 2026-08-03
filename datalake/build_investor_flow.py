@@ -20,8 +20,8 @@ BASE = "2022-01-01"
 DTYPE = "INVESTOR_FLOW"
 
 INVESTORS = [
-    ("individual", "개인"), ("foreigner_total", "외국인합계"), ("foreigner", "외국인"),
-    ("other_foreign", "기타외국인"), ("fin_invest", "금융투자"), ("inst_ex_fin", "기관(금투제외)"),
+    ("individual", "개인"), ("foreigner_total", "외국인"),  # 외국인=합계(등록+기타, 사용자 확정 명명)
+    ("fin_invest", "금융투자"), ("inst_ex_fin", "기관(금투제외)"),
     ("pension", "연기금"), ("trust", "투신"), ("private_fund", "사모"), ("insurance", "보험"),
     ("bank", "은행"), ("other_fin", "기타금융"), ("other_corp", "기타법인"),
 ]
@@ -63,7 +63,6 @@ def main():
         sub = deriv[deriv["prod_name"] == pname].copy()
         assert sub["prod"].nunique() == 1, pname + ": prod 코드 복수"
         sub["inst_ex_fin"] = sub[["insurance", "trust", "bank", "other_fin", "pension"]].sum(axis=1)
-        sub["other_foreign"] = sub["foreigner_total"] - sub["foreigner"]
         rows, last = cum_lines(sub, label, dcols)
         lines += rows
         print("{}: {}행, 최종 {}".format(label, len(rows), last.date()))
@@ -76,7 +75,7 @@ def main():
     with open(CSV, "w", encoding=enc, newline="\n") as f:
         f.write("\n".join(keep + lines) + "\n")
     print("dataset.csv: 기존 {}행 + {} {}행".format(len(keep), DTYPE, len(lines)))
-    for probe in ("KOSPI 개인 누적", "KOSPI 외국인합계 누적", "K200선물 외국인합계 누적"):
+    for probe in ("KOSPI 개인 누적", "KOSPI 외국인 누적", "K200선물 외국인 누적"):
         vals = [l.split(",")[2] for l in lines if "," + probe + "," in l]
         print("{}: 최종 {}조원 ({}포인트)".format(probe, vals[-1], len(vals)))
     # 외부 대조(세미나 자료 창): 2025-01-02~2026-06-01 코스피 주체별 순매수 합
