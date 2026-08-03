@@ -210,9 +210,10 @@ AOE_DARK_CSS = (
     # 타이포 2단 통일 (2026-07-28 사용자 지시): 본문 15px / 보조 13px.
     # 페이지가 12.5·13.1·14·14.4·15.2·17px 6종으로 난립해 구역마다 크기가 달라 보였다.
     # ★일괄 'table,td{17px!important}' 를 이겨야 하므로 여기서 !important 로 재단언한다.
-    '.skill-table td,.skill-table .sk-name,.node .node-name,.wi-name,.layer-head,'
+    # 표 부분은 재단언 대신 변수 재선언 (2026-08-03 — 전역 table 변수 주입 17/15를 아키 확정값 15/13으로 상회)
+    '.skill-table{--aoe-t-font:15px!important;--aoe-t-head-font:13px!important}'
+    '.skill-table .sk-name,.node .node-name,.wi-name,.layer-head,'
     '.card-desc,.card-desc p,.card-desc li{font-size:15px!important}'
-    '.skill-table th,.skill-table .sk-sum,.skill-table .sk-code,.skill-table .sk-code code,'
     '.node .node-sched,.layer-desc,.block-sub,.wi-sched,.wi-summary,.card-meta,'
     '.tl-label,.tl-name,.tl-band-sub,.wiki-count{font-size:13px!important}'
     '.skill-table .sk-name{font-weight:400!important}'
