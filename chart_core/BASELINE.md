@@ -99,3 +99,7 @@
 ## 표 토큰 3차 (2026-08-03, 4186477d)
 - seibro·market_alert(투자유의)·architecture(skill-table) 배선 완료. market_alert·architecture 생성기는 공용 로더 `execution/aoe_tokens_util.py`(sha 검증) 사용 — create_dashboard 자체 로더와의 통합은 후속 정리.
 - 이제 남은 미배선 표 = wrap 내 contrib-tbl/fee-table/iter-table/sector-table + 건설 con_* 페이지(백로그④)뿐. 이후 다크 스킨 크기 재단언 제거 가능.
+
+## 백로그④ 완료 — 건설 구 3사 페이지 정리 (2026-08-03)
+- 실사 결과: con_soojoo·con_pbrper(iframe 서브차트)+val/wrapper 빌더 = 구세대. 링크 0·viewer-daily 미실행(construction 계열=분기 수동)·현행 build_construction.py(13사, 코어 표준)가 동일 출력 파일명을 직접 생성하며 대체. ★wrapper 빌더는 실행 시 현행 건설 탭을 덮어쓰는 위험물이었음.
+- 조치: 4파일을 맥미니 `_retired_20260803/`로 이동(트리 git 미추적 → rm 대신 아카이브), repo viewer_src 스냅숏에서 구 빌더 2개 제거(git 복원 가능). 수주잔고 데이터·현행 페이지는 무관.
