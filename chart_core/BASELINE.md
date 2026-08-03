@@ -103,3 +103,9 @@
 ## 백로그④ 완료 — 건설 구 3사 페이지 정리 (2026-08-03)
 - 실사 결과: con_soojoo·con_pbrper(iframe 서브차트)+val/wrapper 빌더 = 구세대. 링크 0·viewer-daily 미실행(construction 계열=분기 수동)·현행 build_construction.py(13사, 코어 표준)가 동일 출력 파일명을 직접 생성하며 대체. ★wrapper 빌더는 실행 시 현행 건설 탭을 덮어쓰는 위험물이었음.
 - 조치: 4파일을 맥미니 `_retired_20260803/`로 이동(트리 git 미추적 → rm 대신 아카이브), repo viewer_src 스냅숏에서 구 빌더 2개 제거(git 복원 가능). 수주잔고 데이터·현행 페이지는 무관.
+
+## 다크 스킨 표 크기 재단언 제거 (2026-08-03, 2e36ab49·08279f05) — 표 토큰 체계 완성
+- 코어에 `--aoe-t-head-font`(헤더·보조 셀 슬롯, 기본 inherit) 신설(manifest 갱신). 다크 범위 전 표의 th·보조 셀(cmb Country/Group·arch sk-sum/sk-code·MR 헤더)을 이 슬롯으로 배선.
+- 스킨의 `table,td{17px!important}`·`th{15px!important}` 셀렉터 재단언 → `table{--aoe-t-font:17px!important;--aoe-t-head-font:15px!important}` **변수 선언으로 교체**. 아키텍처 전용 15/13 타이포 절도 표 부분은 `.skill-table` 변수 재선언으로 전환. **표 크기에 대한 스킨 셀렉터 덮어쓰기 = 0.**
+- 검증(다크 computed): market(cmb·tw·MR)·featured·etf·alert = 본문 17/헤더 15 유지, arch = 15/13(7/28 확정 규격) 유지. 의도된 변화 1건: cmb Country/Group 셀 17→15(블랭킷 룰이 뭉개던 보조 위계 복원).
+- ★함정 기록: ①7/28 "타이포 2단 통일" 절이 arch 표를 15/13으로 재단언하고 있었음 — 전역 17/15 가정으로 접근하면 회귀로 오판(실제로는 확정 규격) ②같은 시각 다른 세션이 create_architecture를 다크 네이티브로 전환(5010b462)하며 8/3 오전의 토큰 배선을 걷어냄 — 동시 세션 작업 중 재배선 필요했음. 변수 선언에도 !important 필요(페이지 컨테이너 값보다 우선하기 위함).
