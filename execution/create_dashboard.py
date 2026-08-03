@@ -1401,11 +1401,32 @@ def _build_indices_chart_section(category_label='Indices'):
         return ""
 
 
+# 시리즈 단위 Country 오버라이드 (2026-08-03 전수 조사 190계열 — 수집 소스 원산지 기준.
+# display명·csv명 둘 다 키로 인정. 그룹 기본값으로 못 가르는 혼합 그룹 예외만 등재)
+CMB_COUNTRY_OVERRIDES = {
+    'Lithium Carbonate': 'China',            # 电池级碳酸锂 현물 (CNY/톤)
+    'Lithium Hydroxide': 'China',
+    'Poly Silicon': 'China',                 # 중국 현물 (CNY/톤)
+    'SCFI': 'China',                         # 상하이발 컨테이너 운임
+    'SCFI Comprehensive Index': 'China',
+    '3-2-1 Crack Spread': 'US',              # FRED NY Harbor 정제마진
+    '미 3-2-1 크랙스프레드': 'US',
+    '삼성 DDR5 소매가': 'Korea',             # 다나와 국내 소매가
+    'SK하이닉스 DDR5 소매가': 'Korea',
+}
+
+_country_warned_groups = set()
+
+
 def _series_country(group_label, s):
-    """DATA 통합차트 사이드 테이블 Country 컬럼 값. 그룹 기본값 + 혼합 그룹(금리/환율)·
-    한국 특이 시리즈(KRX/SMP)는 series 단위로 판정. 완벽 정밀보다 필터 유용성 우선."""
+    """DATA 통합차트 사이드 테이블 Country 컬럼 값 (2026-08-03 세분화 — 전수 조사 기반).
+    판정 순서: ①CMB_COUNTRY_OVERRIDES(시리즈 명시) ②그룹 기본값 ③그룹 내 키워드.
+    새 그룹이 어느 분기에도 안 걸리면 Global 로 두되 빌드 로그에 1회 경고."""
     g = group_label
     disp, csvn = s.get('display', ''), s.get('csv', '')
+    ov = CMB_COUNTRY_OVERRIDES.get(disp) or CMB_COUNTRY_OVERRIDES.get(csvn)
+    if ov:
+        return ov
     if g in ('INDEX_KOREA', 'MACRO KOREA', 'CREDIT & HOUSING', 'HOTELS', 'DERIVATIVES KR'):
         return 'Korea'
     if g in ('INDEX_US', 'MACRO US', 'CREDIT & HOUSING US'):
@@ -1414,6 +1435,22 @@ def _series_country(group_label, s):
         return 'Japan'
     if g in ('CRYPTOCURRENCY', 'MEMORY'):
         return 'Global'
+    if g == 'COMMODITIES':
+        return 'Korea' if ('KRX' in csvn or csvn == 'SMP') else 'Global'
+    if g == 'INTEREST RATES':
+        return 'US' if (disp.startswith('미 ') or disp.startswith('US') or disp == 'SOFR'
+                     or 'CDS 5Y' in disp) else 'Korea'
+    if g == 'EXCHANGE RATE':
+        if 'KRW' in csvn: return 'Korea'
+        if 'CNY' in csvn: return 'China'
+        if 'JPY' in csvn: return 'Japan'
+        if 'TWD' in csvn: return 'Taiwan'
+        if 'EUR' in csvn: return 'Europe'
+        return 'US'  # Dollar Index (DXY), 달러인덱스 광의
+    if g not in _country_warned_groups:
+        _country_warned_groups.add(g)
+        print(f"  W Country 미분류 그룹 '{g}' → Global 기본값 (분기 추가 검토)")
+    return 'Global'
     if g == 'COMMODITIES':
         return 'Korea' if ('KRX' in csvn or csvn == 'SMP') else 'Global'
     if g == 'INTEREST RATES':
