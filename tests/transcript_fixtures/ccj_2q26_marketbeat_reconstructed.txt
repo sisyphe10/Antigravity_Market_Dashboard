@@ -1,0 +1,861 @@
+NYSE:CCJ
+Cameco  Q2 2026 Earnings Report
+$86.10
+-2.13 (-2.41%)
+Closing price 07/31/2026 03:59 PM Eastern
+Extended Trading
+$85.82
+-0.28 (-0.33%)
+As of 07/31/2026 07:59 PM Eastern
+Extended trading is trading that happens on electronic markets outside of regular trading hours. This is a fair market value extended hours price provided by Massive.
+Learn more.
+Profile
+Earnings History
+Forecast
+Cameco EPS Results
+Actual EPS
+$0.13
+Consensus EPS
+$0.26
+Beat/Miss
+Missed by
+-$0.13
+One Year Ago EPS
+$0.71
+Cameco Revenue Results
+Actual Revenue
+$573.06 million
+Expected Revenue
+$579.60 million
+Beat/Miss
+Missed by
+-$6.54 million
+YoY Revenue Growth
+-6.80%
+Cameco Announcement Details
+Quarter
+Q2 2026
+Date
+7/31/2026
+Time
+Before Market Opens
+Conference Call Date
+Friday, July 31, 2026
+Conference Call Time
+8:00AM ET
+Conference Call Resources
+Conference Call Audio
+Conference Call Transcript
+Slide Deck
+Press Release
+Earnings History
+Company Profile
+Slide Deck
+Full Screen Slide Deck
+Powered by
+Cameco Q2 2026 Earnings Call Transcript
+Provided by Quartr
+July 31, 2026
+Share
+Link copied to clipboard.
+Key Takeaways
+Positive Sentiment:
+2026 production guidance remains unchanged
+at Cameco’s share of 19.5–21.5 million pounds of U
+3
+O
+8
+, despite temporary disruptions at Key Lake, McArthur River, and Cigar Lake.
+Positive Sentiment: Uranium market conditions continued to strengthen, with long-term prices reaching decade highs and realized uranium and fuel-services prices improving. Cameco said it remains disciplined and selective, increasing contracting only where pricing and downside protection support long-term value.
+Negative Sentiment: Second-quarter and first-half financial results were below the prior year, primarily because 2025 included a significant Westinghouse payment tied to the Dukovany reactor project. Cost guidance was also raised modestly, mainly due to foreign-exchange effects on purchases.
+Positive Sentiment: Westinghouse disclosed a pipeline of
+91 potential AP1000 reactors
+and is advancing definitive agreements related to the U.S. Department of Energy’s $17.5 billion conditional commitment to support long-lead-item procurement, which could accelerate U.S. nuclear deployment.
+Positive Sentiment: Cameco highlighted its increased ownership in the high-grade Cigar Lake mine and strategic exposure to the nuclear fuel cycle through Westinghouse and Global Laser Enrichment, positioning the company to benefit from rising demand for nuclear power and fuel security.
+AI Generated. May Contain Errors.
+Conference Call Audio
+Live Call not available
+Earnings Conference Call
+Cameco Q2 2026
+00:00 / 00:00
+Speed:
+1x
+1.25x
+1.5x
+2x
+Transcript Sections
+Presentation
+Participants
+Presentation
+Skip to Participants
+Operator
+00:00:00
+Thank you for standing by. This is the conference operator. Welcome to the Cameco Corporation Second Quarter 2026 Results Conference Call. As a reminder, all participants are in a listen-only mode, and the conference is being recorded. Following the introductory remarks, there will be an opportunity to ask questions. To join the question queue, you may press star then one on your telephone keypad. Should you need assistance during the conference call, you may reach an operator by pressing star and zero. Webcast participants are asked to wait until the
+Q&A session before submitting their questions, as the information they are looking for may be provided during the presentation. The Q&A session will conclude at 9:00 A.M. Eastern Time. I would now like to turn the conference over to Cory Kos, Vice President, Investor Relations. Please go ahead.
+Cory Kos
+VP of Investor Relations at Cameco
+00:01:00
+Thank you operator. Good morning everyone. Welcome to Cameco's second quarter 2026 conference call. I would like to acknowledge that we're speaking from our corporate office in Saskatoon, Saskatchewan, Canada, which is on Treaty 6 territory, the traditional territory of the Cree people and the homeland of the MÃ©tis. With us on today's call are Tim Gitzel, Chief Executive Officer, Grant Isaac, President and Chief Operating Officer, Heidi Shockey, Senior Vice President and Chief Financial Officer, Rachelle Girard, Senior Vice President and Chief Corporate Officer, and Dominic Kieran, Global Managing Director of Cameco UK. Tim will provide some commentary to start the call. We will then open it up for your questions. Today's call will be approximately one hour, concluding at 9:00 A.M. Eastern Time.
+Cory Kos
+VP of Investor Relations at Cameco
+00:01:45
+Our goal is always to be open and transparent with our communication. If you do not have time to get into your questions during this call, or if you'd like to get into detailed financial modeling questions about the quarterly results, we'd be happy to respond and follow up to any inquiries. There are a few ways you can contact us with additional questions. You can reach out to the contacts provided in our news release. You can submit a question through the send us a message link in the Invest section of our website, or you can use the ask a question form at the bottom of the webcast screen. We will be happy to follow up after the call. If you join the conference call through our website event page, there are slides available which will be displayed during the call.
+Cory Kos
+VP of Investor Relations at Cameco
+00:02:24
+For your reference, our quarterly investor handout is also available for download in a PDF file on our website at cameco.com. Today's conference call is open to all members of the investment community, including the media. During the Q&A session, please limit yourself to two questions. Then return to the queue. Please note that this conference call will include forward-looking information, which is based on our current assumptions. Actual results could differ materially. You should not rely on forward-looking statements. We do not plan to update them after this call, except as required by law. For more information on the assumptions we've made and the risk factors involved, please see our most recent annual information form and MD&A. With that, I will turn it over to Tim.
+Tim Gitzel
+CEO at Cameco
+00:03:08
+Well, thank you Cory. Good morning everyone. Thank you for joining us to discuss Cameco's second quarter and first half 2026 results. Well, the year is flying by. It's the middle of summer here in Saskatchewan, Canada, which is really the inflection point where people here have stopped complaining about the past cold winter. They start worrying about the upcoming cold winter. As we move past the halfway point of the year, I want to start by reinforcing the consistent message you've heard from us for a while now. Our strategy is built for long-term value creation. Our decisions and activities will be centered around that strategy. As a result, we are currently on track with our expectations for the year. Year to date, we've seen the support for nuclear energy not only growing, becoming more tangible.
+Tim Gitzel
+CEO at Cameco
+00:04:05
+Around the world, governments, utilities, energy-intensive industries, and the public are recognizing that nuclear energy is essential to energy security, national security, economic competitiveness, and decarbonization objectives. We see that recognition translating into policy support, new build discussions, life extension decisions, uprates, fuel security initiatives, and improved public perception. Here in Canada, the federal government released its nuclear energy strategy in June. The strategy highlights the role that nuclear is expected to play in achieving national energy security and economic objectives while supporting emissions reduction. In the United States, the Department of Energy's conditional commitment to support deployment of AP1000 reactors is another very important indicator of the growing alignment between policy, proven and deployment-ready Gen III+ technology, and the need to execute. We've said many times that the next phase of nuclear growth will be defined by delivery.
+Tim Gitzel
+CEO at Cameco
+00:05:18
+Ambition matters, execution is what brings megawatts into the grid, important to us at Cameco, brings fuel requirements into the market. That's why we continue to believe that the value of proven technologies, experienced operators, and established supply chains will be critical to the equation as the sector moves from aspiration to implementation. For Cameco, that alignment is very constructive. We are positioned across the nuclear fuel cycle with Tier 1 uranium assets in stable jurisdictions, fuel services capabilities, strategic investments in Westinghouse and Global Laser Enrichment, and strong long-term customer relationships built over decades. On the uranium and fuel market side, conditions continued to improve in the first half of the year. The long-term uranium price strengthened to decade highs. We saw increased on-market and off-market contracting activity. Customers continued to focus on security of supply, with notable interest from both sovereign and commercial fuel buyers.
+Tim Gitzel
+CEO at Cameco
+00:06:31
+At the same time, our contracting discipline remains one of our key competitive advantages. We continue to be patient and selective in committing supply. We layer in volumes where we see contracts that support our strategy and where we believe we can incorporate an appropriate level of downside protection with exposure to improving future market conditions. That discipline matters because sustainable supply does not simply appear because demand is growing. It requires long-term contracts to back long-term investments planned by capable and experienced operators. Over the next five years, we have contracts in place for average annual deliveries of more than 28 million pounds of uranium per year. As the market continues to improve, we expect to continue layering in volumes that capture greater future upside. We continued on a positive contracting trajectory in Q2.
+Tim Gitzel
+CEO at Cameco
+00:07:34
+Quarterly results in our business will always reflect the normal variability of customer delivery schedules, product mix, and the timing of activity across the fuel cycle. The second quarter of 2026 was no exception. Our financial results were lower than the strong second quarter and first half that we reported last year, largely because 2025 included a significant contribution from Westinghouse related to its participation in the Dukovany reactor construction project in the Czech Republic. Looking past the impact of that payment, the underlying fundamentals of our business remain strong. A few of our outlook metrics changed as a result of the strength of the U.S. dollar, which drove a change to our exchange rate assumption. Average realized prices continued to improve in both our uranium and fuel services segments, our annual production outlook is unchanged.
+Tim Gitzel
+CEO at Cameco
+00:08:33
+The unchanged 2026 plan calling for our share of production to be between 19.5 and 21.5 million pounds of U3O8 is important. That's because to date in 2026, we've been reminded that safely operating complex, heavily regulated uranium mining and milling assets in remote northern Saskatchewan is never without challenges. Spring road conditions affected northern supply routes during the quarter, contributing to temporary unplanned operational disruptions at Key Lake and McArthur River. Subsequent to quarter end, we also experienced operational challenges that had Cigar Lake production suspended for a couple of weeks. While we were able to address and overcome those unexpected developments with no impact on annual outlook, they were good reminders of why we have built flexibility into our supply strategy and why operating experience, risk management, and credible teams matter so much in this industry.
+Tim Gitzel
+CEO at Cameco
+00:09:39
+Our assets are world-class, they are by no means simple assets. They require disciplined planning, technical capability, and constant attention to safety and reliability, that's what our teams across the company bring to the table every day. During the quarter, we closed our agreement to increase our ownership interest in the Cigar Lake mine. The high-grade Cigar Lake mine is one of the most important uranium mines in the world, increasing our interest reinforces our commitment to own and operate the scarce, proven Tier 1 assets that we expect will be essential in supporting the growth of nuclear energy. In our Westinghouse segment, performance in the first half was strong, as I said, once you look past the benefit that we realized related to the Dukovany project last year.
+Tim Gitzel
+CEO at Cameco
+00:10:33
+As an operating business with deep exposure across the nuclear power value chain, Westinghouse is embedded in the day-to-day needs of the global nuclear industry while also being well-positioned to drive the next wave of new nuclear capacity through its AP1000, AP300, and eVinci technologies. New nuclear capacity creates long-term demand for uranium and conversion and fuel fabrication and related services. That's why Westinghouse is so strategically important to our broader growth thesis. It gives us exposure to the full nuclear fuel cycle and to the technologies that can help shape the next era of nuclear deployment. Our message for the second half is straightforward. Our annual plan remains intact, the market continues to strengthen, Cameco's long-term strategic position is becoming even more compelling. We have flexible supply, a strong balance sheet, disciplined capital allocation, and decades of experience operating assets in jurisdictions that customers can rely on.
+Tim Gitzel
+CEO at Cameco
+00:11:44
+We believe the risks to supply continue to outweigh the risk to demand, we are not prepared to dilute the value of our assets by committing supply into contracts that do not appropriately reflect the durability of market fundamentals. With Tier 1 assets, strategic investments across the fuel and reactor life cycles, strong customer relationships, and a proven operating track record, Cameco is uniquely positioned to support the continued growth of nuclear energy while creating sustainable long-term value for our shareholders, customers, and communities. Thank you for your continued interest and support. Before moving to questions, I want to recognize Dominique MiniÃ¨re, who has stepped down from Cameco's board of directors effective July 26, 2026, to focus on his other professional commitments.
+Tim Gitzel
+CEO at Cameco
+00:12:40
+Mr. MiniÃ¨re has served as a director since 2023 and has been a member of the Human Resources and Compensation Committee, the Technical Committee, and the Safety, Health, and Environment Committee since he joined the board. On behalf of the board and management team, I want to thank Dominique for his contributions to Cameco, we wish him continued success in his many pursuits. With that, operator, we are now ready to take questions.
+Operator
+00:13:09
+We will now begin the question and answer session. In the interest of time, we ask that you limit yourself to one with one supplemental. If you have additional questions, you are welcome to rejoin the queue. To join the question queue, you may press star then one on your telephone keypad. You will hear a tone acknowledging your request. If you are using a speakerphone, please pick up your handset before pressing any keys. To withdraw your question, please press star then two. Webcast participants are welcome to submit questions through the box at the bottom of the webcast frame. The Cameco investor relations team will follow up with you by email after the call. Once again, anyone on the conference call who wishes to ask a question may press star one at this time. The first question today comes from Brian Lee with Goldman Sachs. Please go ahead.
+Brian Lee
+Analyst at Goldman Sachs
+00:14:15
+Hey, guys. Good morning. Thanks for taking the questions. Appreciate a lot of this AP1000 pipeline disclosure in the MD&A, wanted to ask first on that. Looking at this, it seems like the DOE process with the $17.5 billion loan funding from EDF, that's kind of toward the top of the stack in terms of timing potential. One, is that a fair characterization? Two, can you describe what milestones we could see on that process between now and let's say year-end, and then what kind of engagement you're seeing from the utilities since that was launched or announced a few months ago? I had a follow-up.
+Tim Gitzel
+CEO at Cameco
+00:14:53
+Thanks a lot, Brian, for your question. We have our Global Managing Director, Dominic Kieran, here with us this morning. I'm going to pass it over to Dominic to say a few words about Westinghouse. Dominic?
+Dominic Kieran
+Global Managing Director at Cameco UK
+00:15:04
+Tim, thank you. Good morning, everybody on the call. Good morning, Brian. Let me maybe just start with a comment that, as Tim mentioned, I'm very limited around what I can say about the offering that Westinghouse announced this morning. Brian, let me get into your question. In June 2026, Westinghouse announced the $17.5 billion conditional commitment from the Department of Energy Dominance Financing team. This is really to facilitate the ordering of AP1000 long lead items. Why is this important? Because this is an opportunity to really accelerate the deployment of AP1000s in the U.S. To your specific question around what are the next steps that you can see?
+Dominic Kieran
+Global Managing Director at Cameco UK
+00:16:03
+Well, the next steps are that we will move to definitive agreements, that is really the next step that you should be looking for is news from us about progressing to definitive agreements, which will involve obviously specific utilities in the U.S. as well as the Department of Energy.
+Tim Gitzel
+CEO at Cameco
+00:16:25
+Brian, I should have mentioned as well that Dominic, as probably everyone knows, is the chair of the Westinghouse board. I just wanted to put that into context. Grant's on the board, Heidi's on the board as well.
+Brian Lee
+Analyst at Goldman Sachs
+00:16:39
+All right. Yeah, appreciate the sensitivity around the different constituents involved. Fair enough. Second question, maybe just on the uranium segment. Pretty encouraging to see the realized uranium per pound ASP increased a good bit here. Curious, was that all because of the stronger market pricing, or did that have anything to do with restructuring of contracts? How should we think about pricing the construct heading into next year? I know heading into 2026, your view had been mostly flat. It's nice to see this uptick halfway through the year. Would this maybe not also be the sort of baseline to expect for trend line heading into next year as well? Just any thoughts there? Thank you.
+Tim Gitzel
+CEO at Cameco
+00:17:24
+Thanks. Grant?
+Grant Isaac
+President and COO at Cameco
+00:17:25
+Yeah, Brian, the uranium side of the market continues to move from strength to strength. In general, across the industry, I think what the most notable point to make is we are still not at replacement rate demand across the industry. We still don't have utilities coming forward and collectively buying at a volume that replaces what they consume under existing contracts. Yet we found ourselves back into a mid-'90s long-term uranium price on its way to three digits likely, and that's in the absence of replacement rate demand. As I remind folks, we've never been at this kind of uranium price on the front end of a uranium contracting cycle. We've only ever found ourselves at these prices on the back end.
+Grant Isaac
+President and COO at Cameco
+00:18:19
+This is really super constructive for the uranium space that on very little demand that underlying long-term price continues to go up, and the reason for that is very simple. Utilities and those that are concerned about future production are starting to realize that they need to pay production economic prices to ensure that supply is there in the future. That's a very good news story. Now, you spoke about our average realized price. Of course, that's derived from contracts we've already captured, from business that we've already captured for deliveries that we're just simply making, not new sales. Really that increase in the price is a function of the contracts we're delivering into the stronger pricing in the market being reflected in the market-related components, as well as some exchange rate effect, the strong U.S. dollar relative to the Canadian dollar.
+Grant Isaac
+President and COO at Cameco
+00:19:15
+This is all part of our marketing strategy of being disciplined. Those old contracts are showing that upward leverage to the market that we said they would, new contracting going forward is being done in a very constructive, stronger pricing environment. We're not even at replacement rate contracting yet. It's a very exciting segment.
+Brian Lee
+Analyst at Goldman Sachs
+00:19:37
+All right. Thanks for all the color. Appreciate it.
+Tim Gitzel
+CEO at Cameco
+00:19:40
+Thank you, Brian.
+Operator
+00:19:43
+The next question comes from Orest Wowkodaw with Scotiabank. Please go ahead.
+Orest Wowkodaw
+Analyst at Scotiabank
+00:19:49
+Hi. Good morning. A question around its disclosure around the Form S-1 with respect to potential IPO for Westinghouse. I realize there's not a lot you can say. Could you give us an idea of the strategic rationale for this? Should we think about it as getting a market value for the business outside of Cameco and Brookfield? Is this about the partners not having to put cash into the business in order to fund all the growth that's ahead of it? Just curious how to think about this.
+Tim Gitzel
+CEO at Cameco
+00:20:24
+Yeah, Orest, consistent with the U.S. SEC rules governing the process, we are extremely limited in what we can say about the offering at this time. We just can't provide any additional information on that.
+Orest Wowkodaw
+Analyst at Scotiabank
+00:20:42
+Okay. Maybe shifting gears then. Grant, could you please give us an update just where current market firms are with respect to contracting in terms of floors and ceilings? With the term price having perked up this year, I'm just curious if we're also seeing ceilings move up new contracts. Thanks.
+Grant Isaac
+President and COO at Cameco
+00:21:06
+There continues to be upward movement in the floors and the ceilings, certainly as we look to respond to utilities either on market or off market, Orest. You're familiar, and I think most people listening are familiar that there's the two components of the term contracting market, what shows up in RFPs and then what shows up bilaterally or exclusively, and we call that off market.
+Grant Isaac
+President and COO at Cameco
+00:21:35
+From our perspective, when you look at this overwhelmingly favorable supply-demand dynamic where you have a very durable demand building over 3 billion pounds of uranium that needs to be bought to run reactors on a requirements basis against a supply stack that is actually increasingly uncertain in terms of the depletion of existing assets, uncertain in terms of the restarts of existing assets that have been shut down, and of course, promises of greenfield, which seem to be sliding sideways, if not backwards. That's all very favorable for that supply-demand dynamic. What it suggests is that there should be upward pressure on that pricing dynamic, and we just talked about it with respect to Brian's question on the underlying long-term price.
+Grant Isaac
+President and COO at Cameco
+00:22:32
+Of course, when you think about market-related contracts, they don't reference the long-term price, but they generally have collars around them, floors and ceilings, as you've talked about. We are seeing the floors and ceilings increase commensurate with that underlying long-term price. I think it's not unusual to see market-related contracts now where floor prices are in the high 70s escalated and where ceiling prices are 160 escalated. I can't speak for everybody. There still seems to be some in the market willing to try to discount floors and ceilings in order to win business, but that's not what we do. We are in the business of being disciplined and looking forward to capture that long-term value with those utilities who have come to realize that security of supply is important.
+Grant Isaac
+President and COO at Cameco
+00:23:22
+As I said in my earlier answer, it is a very constructive uranium segment, and it hasn't even discovered replacement rate contracting yet. That is something that I think everybody on this call and looking at the uranium space should be focused on. These are prices that we've never seen on the front end of a contracting cycle before.
+Orest Wowkodaw
+Analyst at Scotiabank
+00:23:44
+Thanks for the color. It's appreciated.
+Tim Gitzel
+CEO at Cameco
+00:23:47
+Thanks, Orest.
+Operator
+00:23:49
+The next question comes from Alexander Pearce with BMO. Please go ahead.
+Alexander Pearce
+Analyst at BMO
+00:23:56
+Great. Thank you. In the spirit of continuing to ask questions that you may not be able to answer, is it fair to assume that the timing going forward, sorry, probably the next step would come after finalization of the DOE and DSE agreements?
+Tim Gitzel
+CEO at Cameco
+00:24:18
+Alex, I have to go back again to our compliance with SEC rules governing the process. We really can't say anything about that at this point.
+Alexander Pearce
+Analyst at BMO
+00:24:31
+Okay. I'll ask a more technical question then. You pushed up cost guidance a little bit for this year. Is it possible to just break down how much of that cost change is due to kind of on-site, maybe cost inflation, et cetera? Or is there any of the cost change just because of the purchases you've made this quarter?
+Tim Gitzel
+CEO at Cameco
+00:24:53
+That's a good question that we can answer. I'm going to ask Heidi here. Heidi Shockey, our CFO, to answer that one.
+Heidi Shockey
+SVP and CFO at Cameco
+00:24:59
+Hi there, Alex. The change in the cost going forward was really as a result of the impact of the foreign exchange, mainly on our purchases, as you noted. Any inflation we're seeing and whatnot, would've been covered by the range, and the big difference was really that FX rate.
+Alexander Pearce
+Analyst at BMO
+00:25:19
+Okay. Thank you.
+Tim Gitzel
+CEO at Cameco
+00:25:21
+Thanks, Alex.
+Operator
+00:25:23
+The next question comes from Mohamed SidibÃ© with National. Please go ahead.
+Mohamed SidibÃ©
+Analyst at National
+00:25:30
+Morning. Morning, Tim, and everyone else. Thanks for taking my question there. Appreciate the additional color provided on Westinghouse and the outlook there. Maybe just on the new pipelines or global AP1000 pipeline outlook, or call it economics that you've shared with us. We call it the better share of revenue there. I was wondering if the 91 reactors pipeline included opportunities that you would take on with the Koreans, or if that excludes that category. Thank you.
+Tim Gitzel
+CEO at Cameco
+00:26:00
+Dominic, do you want to answer that?
+Dominic Kieran
+Global Managing Director at Cameco UK
+00:26:02
+Of course. Mohamed, good morning. The pipeline, the 91 that we've sort of spelled out in our MD&A, is very specifically focused on deployment of just the AP1000 technology. We have not included in that any opportunities related to the Koreans deploying their technology globally. That is in addition to our list of 91.
+Mohamed SidibÃ©
+Analyst at National
+00:26:33
+That's great. Maybe just a follow-up to that on the second question. When you disclose the expected share project value at 40%-45%, is this something you expect to be consistently applied across jurisdictions, or does it vary drastically between, call it Europe, North America, or maybe the Middle East? Thank you.
+Dominic Kieran
+Global Managing Director at Cameco UK
+00:26:53
+Absolutely. Maybe let me just answer that with a little bit more detail around where we're at with the AP1000. We talk a lot about EPC to build reactors, engineering, procurement, construction. Of course, where we're really focused is on delivering a little bit of engineering that is site-specific engineering and the procurement of the parts to build the AP1000. Two comments on that, if I may. Firstly, we're very unique in that we have a finalized design for our reactor. That allows us to have a very specific and fixed scope of procurement. To answer your question, why we see real value and competitive advantage in the AP1000 is that there is no more design needed, and therefore the procurement is fixed, which is the majority of that scope for Westinghouse that we've listed in the table.
+Dominic Kieran
+Global Managing Director at Cameco UK
+00:28:04
+In summary, we're expecting to see very similar percentages irrespective of what jurisdiction the AP1000 is deployed in.
+Mohamed SidibÃ©
+Analyst at National
+00:28:17
+Yeah. Thanks so much for that color. Thank you.
+Tim Gitzel
+CEO at Cameco
+00:28:21
+Thanks, Mohamed.
+Operator
+00:28:24
+The next question comes from Bob Brackett with Bernstein Research. Please go ahead.
+Bob Brackett
+Analyst at Bernstein Research
+00:28:30
+Good morning. Thanks for all the Westinghouse disclosure again in the MD&A. I'd like to dig into the backlog numbers and new order numbers that you disclosed. Could I think of that backlog as the amount of business pre-2025 that sort of flows through in sort of 10 years and then becomes revenue, and that that new order line that you talked about there is a significant step up, and that was business gained in 2025? Is that the new steady state for the level at which you're capturing business?
+Tim Gitzel
+CEO at Cameco
+00:29:10
+Bob, thanks for the question. You may hear in the background a beeping noise here. We're just hearing an alarm, but we'll carry on until further notice. Dominic, over to you.
+Dominic Kieran
+Global Managing Director at Cameco UK
+00:29:20
+Absolutely. Bob, thanks for your question. Maybe let me do it in reverse order. Let me talk about new orders entered. New orders entered, and this is a point in time at the end of last year, is the cumulative number of orders entered into within last year. Now, those orders, some of those, and the smaller percentage, will have been executed and taken to revenue in the year. The larger percentage of those orders that have not been delivered on will enter backlog. Backlog then is at a point in time of December the 31st, how much contracted business does Westinghouse have for delivery and revenue recognition in the future? I hope that explains just what do we mean by backlog and new orders entered. Your second question was, are we expecting to see this as our steady state going forward?
+Dominic Kieran
+Global Managing Director at Cameco UK
+00:30:26
+What I would draw your attention to is when you look at the list of AP1000 pipelines, the 91 identified opportunities for AP1000. You can see many of those are in the future, and we're at a pretty early stage with some of those projects. While I can't give you any specific details on what we expect to happen to the backlog, I think what you can expect as we start to see the AP1000 being contracted and deployed, we are expecting to see a very positive trend on the backlog as we go forward through time.
+Bob Brackett
+Analyst at Bernstein Research
+00:31:13
+Very clear. A quick follow-up, on your Nth-of-a-kind unit economics for the AP1000, you've got a range for a two-pack of $14 billion-$17 billion. Is that a conservative number? One could imagine that Nth-of-a-kind economics could be lower than that $14 billion. How do you think about the range of outcomes of that number?
+Dominic Kieran
+Global Managing Director at Cameco UK
+00:31:40
+Well, thank you for your question. I think the honest answer is it's pragmatic, right? We've given a range because it is pragmatic. Why am I being a little vague? Because some of this also depends on sort of jurisdiction. If we think about countries that are going to deploy multiple units, we're probably at the bottom end of that range. Where countries are maybe just deploying a single unit or a twin pack, we're probably towards the top end of that range. As you say, at the moment, those are really estimates and depend on the situation. I would say that is our best view at the moment of where we could get to.
+Bob Brackett
+Analyst at Bernstein Research
+00:32:29
+Very good. I appreciate that. Thank you.
+Tim Gitzel
+CEO at Cameco
+00:32:31
+Thank you.
+Operator
+00:32:34
+The next question comes from Lawson Winder with Bank of America. Please go ahead.
+Lawson Winder
+Analyst at Bank of America
+00:32:41
+Thank you very much, operator. Good morning, Tim and Grant and team. I really appreciate the update and also echo those comments that I really appreciate the additional disclosure here on Westinghouse. When we look at the huge pipeline of 91 reactors, what percentage of those 91 units would you characterize as high-probability opportunities? Then maybe being more specific on some of the different stages, like you have front-end engineering and design projects of around 11. If you look historically, what percentage of those more advanced discussions would typically convert to a full reactor build?
+Tim Gitzel
+CEO at Cameco
+00:33:26
+Dominic, please.
+Dominic Kieran
+Global Managing Director at Cameco UK
+00:33:28
+Yeah. Thank you. Lawson, thank you for your question. We have ordered the list in terms of how close the opportunities are to making what we call final investment decisions. Obviously, the closer you are to making a final investment decision, there's a couple of things to bear in mind. One of which is there's been considerable effort to get ready for a final investment decision. A huge amount of work preparing for that. Obviously, the probability increases as you get to final investment decision. We haven't put specific probabilities on the list because, quite frankly, it's very, very difficult to estimate that. Let me make a couple of comments.
+Dominic Kieran
+Global Managing Director at Cameco UK
+00:34:13
+If we go to the bottom of the list, maybe some of our early-stage opportunities that we've listed a number of countries there, it's not that we see them as lower probability, it's just that we see them as slightly earlier in the process of getting to a final investment decision. The countries that are listed there, we are seeing very, very strong recognition of the need for nuclear in base-load energy generation. Some very, very common themes around the need for decarbonization, the need for energy security, the need for a decent proportion of base-load power on these countries' grids, which gives us really quite a high degree of confidence we will convert a significant number of these opportunities into real projects and pass through a positive final investment decision.
+Dominic Kieran
+Global Managing Director at Cameco UK
+00:35:13
+We are not really in a position to give specific numbers, but I hope that gives a little bit of color as to how we think about these opportunities.
+Lawson Winder
+Analyst at Bank of America
+00:35:21
+Yeah. That is helpful, Dominic. Thank you very much. Then AP300s and the eVinci, again, the color there is very helpful. Obviously, a huge opportunity, particularly for the AP300, but just how would you characterize the CapEx remaining for Westinghouse internally and the timeline for each of those two technologies to get to a commercial deployment level?
+Dominic Kieran
+Global Managing Director at Cameco UK
+00:35:49
+Yeah, absolutely. Let me start with the AP300. Just to be clear, what the AP300 is a scaled-down version of our very proven AP1000 technology. Why we think this is really unique and we're in a unique position is because we are basically taking the proven AP1000 technology and really just adapting it for those customers and those markets that are looking for a smaller reactor. What does that mean? That means the capital needed to bring that AP300 technology to a final design ready for deployment is actually pretty modest and I think we've put the numbers in the MD&A so they're there to read. Thereafter, of course, once you're into deployment, it is our customers, our utilities, our government CapEx as we move into deployment of that. I hope that explains the AP300.
+Dominic Kieran
+Global Managing Director at Cameco UK
+00:36:54
+As I say, we benefit from very modest amounts of capital. I'd say quite uniquely modest amounts of capital to finalize that design because of the pedigree of the AP1000. I would just draw your attention to this is not just about design, this is about ensuring there is a robust supply chain for the delivery of these reactors. Of course, the AP300 has huge commonality with the AP1000 supply chain. On eVinci, different technology. This is what we call a Generation IV technology. We're really focusing the eVinci as a much smaller reactor. It isn't 1.1 GW, 1.2 GW. It's not 330 GW. It's in the small number of megawatts range. We're very focused at the moment on some opportunities with the U.S. government. Those opportunities currently are self-funding.
+Dominic Kieran
+Global Managing Director at Cameco UK
+00:37:54
+What this presents us with is an opportunity to make decisions in the future to commit capital to these projects should we decide within our capital deployment process that they warrant additional capital.
+Lawson Winder
+Analyst at Bank of America
+00:38:11
+Okay. Thanks, Dominic. That's very helpful.
+Tim Gitzel
+CEO at Cameco
+00:38:14
+Thanks for the questions, Lawson.
+Operator
+00:38:17
+The next question comes from George Eadie with UBS. Please go ahead.
+George Eadie
+Analyst at UBS
+00:38:24
+Yeah. Hi, team. Firstly on the duration piece for the AP1000, how does last month's DOE commitment change things? Has that sort of brought forward timelines much, and is that included sort of thoroughly in the 9-10 year and 10-11 year guidance estimate?
+Dominic Kieran
+Global Managing Director at Cameco UK
+00:38:42
+Yeah, George, thank you. Good question. You will have read one of the purposes of last month's announcement is to really stand up the supply chain for AP1000 as it pertains to those items that are traditionally on the critical path. I think it's a very valid question, is this really provide an acceleration to these numbers? What we're really showing here in terms of the duration of the project, I think you can see that we've put in first projects, but also where we expect to get to with Nth-of-a-kind. We're expecting the first project to include the LLI timelines, but what we're expecting is very quickly to get to Nth-of-a-kind, very much supported by the announcement of the long lead item opportunity that we are working with the Department of Energy on.
+George Eadie
+Analyst at UBS
+00:39:57
+Yeah. Okay. I guess outside of sort of supply chain, what is the biggest headwind to getting this in production? Like, is it labor and getting the sites ready? I guess if I take the 29 units in the table, getting them all in operation in, say, 12 years from today, how confident are you that's still manageable given there's potentially another 60 in study and origination phase? I guess that's a huge profile of work to manage, but equally, the potential earnings are quite eye-watering.
+Tim Gitzel
+CEO at Cameco
+00:40:30
+Dominic?
+Dominic Kieran
+Global Managing Director at Cameco UK
+00:40:31
+Yeah. Thank you. Maybe let's break the answer into a number of different buckets, if I may. Bucket number one is, go back to what I said earlier, do we have any design to do? Well, no, we have no design to do on the reactor. There is always some design to do around the sites, but because the design of the reactor is finished, the amount of design we need to do around the sites is not expected to be significant for this technology. The second bucket is, are we well-positioned to provide the P, the procurement part of EPC? The answer is yes, we are.
+Dominic Kieran
+Global Managing Director at Cameco UK
+00:41:12
+We are very focused to make sure that we have the processes and the suppliers to stand behind the numbers that are on this table. Maybe just go back to my comment about the long lead item opportunity in the U.S. Finally, we're into sort of construction. You will see from the list, construction can be seen as a bottleneck, but you can see on the list that a number of these reactors are being deployed in different countries around the world. We don't have, outside of the U.S., a lot of perceived bottlenecks around construction. Back then, really just to sort of summarize your question is we have put this in because we have considered the sort of the risks around this.
+Dominic Kieran
+Global Managing Director at Cameco UK
+00:42:00
+It is certainly not without risks. We've been, we believe, prudent when we put this in as our view of what the potential future may look like.
+George Eadie
+Analyst at UBS
+00:42:15
+Okay. Yeah, no, that's super helpful. Thank you.
+Tim Gitzel
+CEO at Cameco
+00:42:19
+Thank you, George.
+Operator
+00:42:21
+The next question comes from Andrew Wong with RBC Capital Markets. Please go ahead.
+Andrew Wong
+Analyst at RBC Capital Markets
+00:42:29
+Hey, good morning. Just wanted to ask, with the U.S. DOE loan programs that are available for the long lead items, could that be combined in the future with the CAD 80 billion initiative from the DOC? It looks like those two programs could be really complementary to each other.
+Tim Gitzel
+CEO at Cameco
+00:42:49
+Grant, you want to take that?
+Grant Isaac
+President and COO at Cameco
+00:42:50
+Yeah, Andrew, that's probably a question for the U.S. government more than it is for us. At the moment, we treat them as two parallel projects. The DOE had a particular focus on standing up the American nuclear supply chain. That is at the heart of the long lead item program that Dominic had just explained. The Department of Commerce, you'll recall, was a different driver. That driver was to accelerate the deployment of AP1000s, really by harnessing foreign direct investment pledged in the United States. Right now they are different projects on different tracks. If they are combined, that would be under the direction of the U.S. government. I guess the point is, the reason it adds to 20 reactors is because the demand for base load 24-hour carbon-free power is massive.
+Grant Isaac
+President and COO at Cameco
+00:43:49
+Combining them and only settling with 10 reactors would not even begin to satisfy the demand that the U.S. government is seeing and trying to be in front of. We'll watch it very closely, but at the moment, they're two separate programs run by two separate departments, and both represent a very exciting opportunity for AP1000s as reflected in the updates that we've put in the MD&A.
+Andrew Wong
+Analyst at RBC Capital Markets
+00:44:16
+Okay. For sure. Yeah, I was just thinking complementary programs, it's good to get to Nth-of-a-kind as fast as possible with both programs as they work together. I want to ask about conversion.
+Grant Isaac
+President and COO at Cameco
+00:44:30
+Andrew.
+Andrew Wong
+Analyst at RBC Capital Markets
+00:44:30
+Yeah.
+Grant Isaac
+President and COO at Cameco
+00:44:31
+Andrew, just on that point, Dominic made this reference, and maybe we'll just put a finer point on it. Whether it's the DOE or the DOC moving forward or all of the programs that you see in the list of 91, it is essential to capture those three S's that we've talked about. We need to standardize, and we've standardized to a common design. The AP1000 has a unique competitive advantage as articulated in the MD&A because it's design-ready, it's fuel-ready, it's licensed, it's regulatory-ready, and it's been deployed. The standardization has been checked. I think what you were referring to was the second S, which is sequence, and it is important that you sequence properly so that these programs are complementary, so that you're not standing up a skilled or a trade workforce and they're all competing with each other at the same time.
+Grant Isaac
+President and COO at Cameco
+00:45:28
+Standardized sequence, and of course, the third S we always talk about is simplify, which doesn't mean change the design, it means learn the lessons that have come before. That is the key of good industrial practices to get to that Nth-of-a-kind as quickly as possible. To your point, I agree with you, and I hope it didn't sound like I was dismissing it. They are complementary as long as we are standardizing, sequencing, and simplifying. The two programs are different, but if we follow those three S's of good industrial practice, nobody needs to fear nuclear new build. In fact, we need to embrace it in a much more aggressive way than we have.
+Andrew Wong
+Analyst at RBC Capital Markets
+00:46:07
+Yeah, that's very much appreciated. Maybe just wanted to ask about actually conversion enrichment prices as well, that we've seen plans for new supply of both that's set to come on over the next, let's say, five years or so. When we look at prices for conversion and enrichment, they haven't really come down even with the new supply announcement. I was just curious what you make of that. Why do you think that's the case, and what kind of takeaways would you say that that could imply for the uranium markets?
+Tim Gitzel
+CEO at Cameco
+00:46:39
+Grant?
+Grant Isaac
+President and COO at Cameco
+00:46:41
+I think we've talked about a lot. I'll just remind everybody on the call that you generally buy nuclear fuel backwards. You start with how many fuel bundles do you have. If you need more, you then go to the fabricator to secure the service, then you go to the enricher, the converter in uranium. We've always talked about if you want to know where uranium is going, just look at what's happening downstream. Downstream, you're right in pointing out very strong pricing in fabrication, enrichment, and conversion. Obviously, strong pricing brings the promise of new supply. I think what you're seeing in market pricing is the utilities themselves are being very clear-eyed about some of these promises.
+Grant Isaac
+President and COO at Cameco
+00:47:28
+If it's an incumbent enricher, for example, doing an expansion at a brownfield facility, well, that's going to have a high probability of success. When it's somebody who's never been in the business before with an unknown technology promising new supply, those tend to be doubted by the utilities that have to count on that and don't want to take on that risk. I think the fact that there's been a lot of announcements but prices remain strong is just simply as fuel buyers go into security of supply mode, they are going to be very clear-eyed about who's making those promises. They're going to look at their track record and they're just going to discount some of those promises, especially the new ones on the conversion side. Those that are proven in the business will be the primary beneficiary of the higher prices.
+Grant Isaac
+President and COO at Cameco
+00:48:19
+That includes Cameco.
+Andrew Wong
+Analyst at RBC Capital Markets
+00:48:22
+Much appreciated. Thank you.
+Tim Gitzel
+CEO at Cameco
+00:48:24
+Thanks, Andrew.
+Operator
+00:48:26
+The next question comes from Brian MacArthur with Raymond James. Please go ahead.
+Brian MacArthur
+Analyst at Raymond James
+00:48:33
+Good morning, thank you for taking my question. Again, maybe it falls under the category you can't answer, but I just want to check that there's nothing changed in the partnership with the U.S. government. If you do an IPO, they had an option if they vested to participate in that IPO. Has any of that changed if the timing of this changes?
+Tim Gitzel
+CEO at Cameco
+00:48:58
+I'll just open and then I'll pass it to Grant, but I'll just say that, of course, we're restricted from discussing this, but tell you that we and Brookfield control Westinghouse today, and we don't expect that to change. Grant?
+Grant Isaac
+President and COO at Cameco
+00:49:11
+Brian, the only reminder is if you go back to that announcement about the partnership with the Department of Commerce from last fall, it had two important vesting conditions in it. The first vesting condition was that it was the responsibility of the Department of Commerce to arrange financing of a minimum CAD 80 billion to support the development of AP1000. That has not changed. That would be the trigger that we would look for under that participation interest. That has not changed.
+Brian MacArthur
+Analyst at Raymond James
+00:49:46
+Yeah, that's sort of what I was trying to read through here, but I'll leave it at that. Second question. Can I just make sure I'm understanding this chart right? Which again, thank you for all the Westinghouse information. In simple terms, you talk about concrete minus three, it looks like you get 10% of the value on a AP1000. We're talking CAD 8 billion, let's call it CAD 800 million to Westinghouse, and then you get an EBITDA margin of 20%. Am I reading the combination of those two charts properly? Again, I suspect those are averages, it may be different on a reactor basis. Is that a fair comment?
+Tim Gitzel
+CEO at Cameco
+00:50:26
+Dominic?
+Dominic Kieran
+Global Managing Director at Cameco UK
+00:50:28
+Yeah, Brian. Yeah, thanks for the question. The way to read the chart is the total sort of cash flow spend, which if you refer to the table, we're saying for what we call a pair or a twin pack is between CAD 20 billion and CAD 26 billion.
+Brian MacArthur
+Analyst at Raymond James
+00:50:45
+Yeah.
+Dominic Kieran
+Global Managing Director at Cameco UK
+00:50:45
+It's the total spend, you can see the difference there between effectively near-term build and Nth-of-a-kind, reflecting that Nth-of-a-kind, we incorporate all the learnings, which means we can go faster on the build, a higher spend sooner. To that total spend, you then apply the Westinghouse share-
+Brian MacArthur
+Analyst at Raymond James
+00:51:10
+Yeah
+Dominic Kieran
+Global Managing Director at Cameco UK
+00:51:11
+of that, which is circa the sort of 40%-45%, then to that you apply the typical corporate EBITDA margins that we've put on the table.
+Brian MacArthur
+Analyst at Raymond James
+00:51:23
+Right. Then if I look at the next chart where you show these lines where it looks like if I just use, not an Nth, a current one, it looks like at T minus four, you have zero if I'm reading this right, then at T minus two looks like I get 20%. I'd book 20% of that if it's $8 billion for an AP1000 near term, I'd book 20% of that in year T minus three if I'm reading the chart right, then get an EBITDA margin of 20%. I get it, everything's going to be different within a Â±. Is that sort of the right way to combine those two charts?
+Dominic Kieran
+Global Managing Director at Cameco UK
+00:52:07
+Yeah. Broadly, it absolutely is. I think what changes a little bit is how that 45% changes throughout the duration of the project. At an aggregate level, I think your approach is correct.
+Heidi Shockey
+SVP and CFO at Cameco
+00:52:26
+Brian, I might just add that in the first five years, we get 50% of the revenue in the initial projects, and then that speeds up, of course, as you get to Nth-of-a-kind.
+Brian MacArthur
+Analyst at Raymond James
+00:52:39
+Right. That makes good sense. Then is that normalized adjusted EBITDA of 20%, is that kind of normalized over the whole cycle? Like in the first 50%, you'd be getting 20% or would you get higher up front and get 30% and get 10% on the back end? Can you even comment on that?
+Heidi Shockey
+SVP and CFO at Cameco
+00:52:59
+Probably can't comment on that. Just average over the whole project is about 20%.
+Brian MacArthur
+Analyst at Raymond James
+00:53:05
+Fair enough. Then on top of that, do they become operating plants at that time, obviously? In addition to that, you get the 45%-60% that you're talking about at the bottom of the table?
+Heidi Shockey
+SVP and CFO at Cameco
+00:53:17
+Yeah. That's what that means. Once it goes into operation kind of on an annualized basis, we're looking at fuel, refueling, outage services, and all that. It kind of flips into our core business.
+Brian MacArthur
+Analyst at Raymond James
+00:53:32
+Right.
+Heidi Shockey
+SVP and CFO at Cameco
+00:53:34
+That's just recurring opportunity for the core business ongoing.
+Grant Isaac
+President and COO at Cameco
+00:53:39
+Brian, just on that recurring core business, we're using our interchangeably. That table refers to Westinghouse's share of the core business. It does not refer to any Cameco uranium conversion and one day enrichment that would go into that core business. That is just a Westinghouse contribution, then of course why we're putting such a shoulder into new build is because we want to create our own 80-100-year demand for Cameco's core business of uranium conversion and eventually enrichment as well.
+Brian MacArthur
+Analyst at Raymond James
+00:54:15
+Right. No, that makes sense too. That was going to be my next question. Great. Thank you very much. Again, thanks very much. I think everybody will find these tables very helpful. I just want to make sure I'm reading it right. Thank you very much.
+Tim Gitzel
+CEO at Cameco
+00:54:27
+Thanks. Thanks to you, Brian.
+Operator
+00:54:30
+The next question comes from Craig Hutchison with TD Cowen. Please go ahead.
+Craig Hutchison
+Analyst at TD Cowen
+00:54:36
+Hi. Good morning, guys. Can I just ask where things stand with regards to Department of Commerce strategic partnership? What's the next milestone that we look for with regards to getting, I guess, a definitive agreement there? Thanks.
+Tim Gitzel
+CEO at Cameco
+00:54:50
+Grant?
+Grant Isaac
+President and COO at Cameco
+00:54:51
+You'll recall, Craig, that we initially agreed to a binding term sheet with the Department of Commerce. While there is an effort to achieve definitive agreements, we still have a basis for moving forward on that program as the Department of Commerce envisioned it. What's critical there is to find the right projects that match up the interest of the Department of Commerce, the interest of the United States government in securing the 24-hour base load power that will come from the AP1000s, with those foreign investors who are interested and capable of investing in U.S.-based projects. We are free to move ahead and explore all those opportunities. That does not require the definitive agreement because it was a binding term sheet, and that work continues.
+Grant Isaac
+President and COO at Cameco
+00:55:49
+What you would watch for is any announcements with those who have pledged foreign direct investment in the United States and the Department of Commerce on moving projects forward. Like a lot of things, a lot of work and a lot of thought is going into it. We don't have any projects to point to at the moment, but as I answered earlier, these continue to run in parallel. We view them as separate projects at the moment for that reason.
+Craig Hutchison
+Analyst at TD Cowen
+00:56:18
+Great. Just in terms of potential for cost overruns, is there a thought on how that would be managed, and would there be any exposure from Westinghouse's perspective if there was cost overruns on new builds? Thanks.
+Grant Isaac
+President and COO at Cameco
+00:56:34
+The question of cost overruns has been, I think, if not the first, the second question on the minds of utilities for a while now. I think where the conversation is going is that there's actually a toolbox of investment tax credits, if they're still available, production tax credits, as well as the reality that when you deploy an AP1000, you're deploying a reactor that's no longer first of a kind. Yes, there's next of a kind, but it's no longer first of a kind. As that design certainty and fuel certainty and license and regulatory certainty is combined with the standardized sequence in Simplify, the question about managing a project with a known product actually diminishes the conversation around cost overrun. It shifts it over to what is the package of tools that are available. I already mentioned things like investment tax credits.
+Grant Isaac
+President and COO at Cameco
+00:57:36
+Then really, what is the confidence of those that are supplying long lead items as well as construction services in their own capabilities? Ultimately, what we're seeing is very fruitful conversations that utilities realize if they go with first of a kind in a brand-new design, they're probably going to need cost overrun insurance. If they go with an existing design that's already been deployed, then the tools are appropriate to manage those tail risks. That's why the conversations are accelerating to ordering long lead items, and that's why you see a very robust list of 91 reactors from front-end engineering design close to FID all the way through to origination, because it's just the reality of the competitive advantage of the AP1000. It's diminishing the need to worry about first of a kind tail risks.
+Craig Hutchison
+Analyst at TD Cowen
+00:58:32
+Thanks, Grant. Appreciate the color.
+Tim Gitzel
+CEO at Cameco
+00:58:35
+Thanks, Craig.
+Operator
+00:58:37
+The next question comes from Christopher Souther with Truist. Please go ahead.
+Christopher Souther
+Analyst at Truist
+00:58:44
+Hey, thanks so much for taking my question and all the disclosure here around Westinghouse. Could you talk a little bit around the project equity commitments that you and potential utility would be required to put up, just like from a timing perspective, if we could marry that with the revenue chart that you gave? Just from a strategic standpoint, is the plan to own projects over the long term or monetize those over time? What would be Westinghouse's plan around that?
+Grant Isaac
+President and COO at Cameco
+00:59:24
+I think you're referring to the Department of Energy program for the long lead items.
+Christopher Souther
+Analyst at Truist
+00:59:30
+Yeah. Exactly.
+Grant Isaac
+President and COO at Cameco
+00:59:30
+Yeah.
+Christopher Souther
+Analyst at Truist
+00:59:31
+Yeah.
+Grant Isaac
+President and COO at Cameco
+00:59:32
+In each of those, envision that you have something like five two-packs. Each two-pack has a special-purpose vehicle that's put together, and it's a combination of equity in the form of the utility as well as Westinghouse. For Westinghouse, it's margin that goes into that equity as opposed to putting cash in. The owners and Westinghouse themselves don't intend to do that. That SPV exists until the utility is at FID and ready to commit to a build program, at which time it's sold forward to the relevant utility. It really is an acceleration. It's to take the traditional model where you have a utility who decides on nuclear, goes through a reactor selection process, decides on a technology, then starts all the front-end engineering and design, ultimately to lead to a final investment decision, then starts ordering long lead items.
+Grant Isaac
+President and COO at Cameco
+01:00:39
+Well, if we did that's going to take a lot of time. In order to accelerate new build, we're trying to take the long lead item order and move it in front of FID and have a package of supply chain capabilities available. It really is a shift in the normal way of building nuclear, and Westinghouse, we're happy to be involved in that because when you look at a global demand stack that we now count at 91 reactors, we're pretty confident that ordering long lead items is a really low-risk thing for us to do because there's going to be demand for those products when you have 91 that are being considered.
+Christopher Souther
+Analyst at Truist
+01:01:22
+Got it. Okay. There's no equity role that you guys are looking at for long-term ownership. That makes sense. Thank you.
+Grant Isaac
+President and COO at Cameco
+01:01:28
+Nope. No.
+Tim Gitzel
+CEO at Cameco
+01:01:32
+Thanks, Chris.
+Operator
+01:01:35
+This concludes the question and answer session. I would like to turn the conference back over to Tim Gitzel for any closing remarks.
+Tim Gitzel
+CEO at Cameco
+01:01:43
+Okay, thanks, operator. Thanks to everybody who were on the call today with us. We appreciate it. Cameco remains well-placed, as you know, to support the next chapter of nuclear growth, while protecting and extending the value of our assets for shareholders, customers, and communities. Everybody have a wonderful weekend and enjoy the rest of the summer. Thanks.
+Operator
+01:02:07
+This brings to an end today's conference call. You may disconnect your lines. Thank you for participating and have a pleasant day.
+Read more
+Participants
+Executives
+Cory Kos
+VP of Investor Relations
+Tim Gitzel
+CEO
+Dominic Kieran
+Global Managing Director
+Grant Isaac
+President and COO
+Heidi Shockey
+SVP and CFO
+Analysts
+Brian Lee
+Analyst at
+Goldman Sachs
+Orest Wowkodaw
+Analyst at
+Scotiabank
+Alexander Pearce
+Analyst at
+BMO
+Mohamed SidibÃ©
+Analyst at National
+Bob Brackett
+Analyst at
+Bernstein Research
+Lawson Winder
+Analyst at
+Bank of America
+George Eadie
+Analyst at
+UBS
+Andrew Wong
+Analyst at
+RBC Capital Markets
+Brian MacArthur
+Analyst at
+Raymond James
+Craig Hutchison
+Analyst at
+TD Cowen
+Christopher Souther
+Analyst at
+Truist
+Powered by
+Earnings Documents
+Slide Deck
+Press Release
+Cameco Earnings Headlines
+Cameco Corp (CCJ) (Q2 2026) Earnings Call Highlights: Record Uranium Prices and Strategic ...
+July 31
+at
+7:05 PM  |  finance.yahoo.com
+Nuclear firm Westinghouse confidentially files for proposed IPO
+July 31
+at
+2:04 PM  |  seekingalpha.com
+Iran War Shock: What I Was Told In That Private Meeting
+You’re Being LIED To About The Iran War
+
+Forget EVERYTHING you’ve heard about the Iran war.
+
+Especially the reasons why we’re bombing the country.
+August 2
+at
+1:00 AM  |  Banyan Hill Publishing (Ad)
+Cameco (CCJ) Q2 Earnings Miss Estimates
+July 31
+at
+2:04 PM  |  finance.yahoo.com
+Cameco Corporation 2026 Q2 - Results - Earnings Call Presentation
+July 31
+at
+11:01 AM  |  seekingalpha.com
+Cameco: Q2 Earnings Snapshot
+July 31
+at
+8:46 AM  |  chron.com
+See More Cameco Headlines
+Get Earnings Announcements in your inbox
+Want to stay updated on the latest earnings announcements and upcoming reports for companies like Cameco? Sign up for
+Earnings360's daily newsletter
+to receive timely earnings updates on Cameco and other key companies, straight to your email.
+Email Address
+About Cameco
+Cameco (NYSE:CCJ)
+(NYSE: CCJ) is a leading producer of uranium and a supplier to the global nuclear power industry. Headquartered in Saskatoon, Saskatchewan, Canada, the company is engaged in the exploration, mining, milling and sale of uranium concentrate, commonly known as yellowcake, which is used as fuel for nuclear reactors. Cameco also participates in services and activities that support the front end of the nuclear fuel cycle, including processing and marketing of uranium to utilities under long‑term and spot contracts.
+The company's operations have historically centered in Canada and the United States, where it operates and develops uranium mining and processing properties. Cameco serves a worldwide customer base of electric utilities and other purchasers of nuclear fuel, supplying material and contractual fuel management solutions for nuclear power generation across North America, Europe and Asia. Its business model combines production from operating mines with development projects and a global marketing network to meet utility demand.
+Formed as a publicly traded company in the late 20th century, Cameco has grown into one of the larger publicly listed uranium companies globally and is listed on both the Toronto Stock Exchange and the New York Stock Exchange under the symbol CCJ. Over time the company has focused on balancing production with market conditions, managing a portfolio of producing assets, care and maintenance properties, and exploration and development projects to respond to changes in uranium demand and pricing.
+Cameco’s activities are subject to regulatory and environmental standards applicable to uranium mining and nuclear fuel supply, and the company emphasizes operational safety, environmental stewardship and community engagement in jurisdictions where it operates. Its core business remains supplying uranium and related services that support the continued operation and development of nuclear power as a low‑carbon energy source.
+View  Cameco Profile
+Read more
+More Earnings Resources from MarketBeat
+Earnings Tools
+Today's Earnings
+Tomorrow's Earnings
+Next Week's Earnings
+Upcoming Earnings Calls
+Earnings Newsletter
+Earnings Call Transcripts
+Earnings Beats & Misses
+Corporate Guidance
+Earnings Screener
+Latest Articles
+Strategy's Structural Strength: Hidden in a $8 Billion Illusion
+MarketBeat Week in Review – 07/27- 07/31
+Chevron’s Strong Quarter Shows Why It Still Leads the Energy Sector
+AbbVie Quietly Solved Its Biggest Problem—Now What?
+Netflix's Big Sell-Off May Be Sending the Wrong Signal
+Amazon’s Earnings Beat Shows Why AWS Is Back at the Center of the Bull Case
+Apple’s Record Quarter Could Not Outrun Its Guidance Problem
+Upcoming Earnings
+Booking
+(8/3/2026)
+Marriott International
+(8/3/2026)
+Diamondback Energy
+(8/3/2026)
+ONEOK
+(8/3/2026)
+Williams Companies
+(8/3/2026)
+Mitsubishi UFJ Financial Group
+(8/3/2026)
+Vertex Pharmaceuticals
+(8/3/2026)
+Palantir Technologies
+(8/3/2026)
+Spotify Technology
+(8/4/2026)
+SpaceX
+(8/4/2026)
+Unlock superior investment research and tools.
+Sign up for MarketBeat All Access to gain access to MarketBeat's full suite of research tools and reports.
+Get MarketBeat All Access
+MarketBeat All Access Features
+Best-in-Class Portfolio Monitoring
+Get personalized stock ideas.
+Compare portfolio to indices.
+Check stock news, ratings, SEC filings, and more.
+Stock Ideas and Recommendations
+See daily stock ideas from top analysts.
+Receive short-term trading ideas from MarketBeat.
+Identify trending stocks on social media.
+Advanced Stock Screeners and Research Tools
+Use our seven stock screeners to find suitable stocks.
+Stay informed with MarketBeat's real-time news.
+Export data to Excel for personal analysis.
+Sign in to your
+free
+account to enjoy these benefits
+In-depth profiles and analysis for 20,000 public companies.
+Real-time analyst ratings, insider transactions, earnings data, and more.
+Our daily ratings and market update email newsletter.
+Sign in to your
+free
+account to enjoy all that MarketBeat has to offer.
+Sign In
+Create Account
+Your Email Address:
+Email Address Required
+Your Password:
+Password Required
+Log In
+Email Me a Login Link
+or
+Sign in with Facebook
+Sign in with Google
+Forgot your password?
+Your Email Address:
+Please enter your email address.
+Please enter a valid email address
+Choose a Password:
+Please enter your password.
+Your password must be at least 8 characters long and contain at least 1 number, 1 letter, and 1 special character.
+Create My Account (Free)
+or
+Sign in with Facebook
+Sign in with Google
+By creating a free account, you agree to our
+terms of service.
+This site is protected by reCAPTCHA and the Google
+Privacy Policy
+and
+Terms of Service
+apply.

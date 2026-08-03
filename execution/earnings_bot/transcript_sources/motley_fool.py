@@ -79,7 +79,7 @@ def _http_get(url: str, *, timeout: int = REQ_TIMEOUT) -> str | None:
 
 class MotleyFoolSource(TranscriptSource):
     name = 'motley_fool'
-    parser_version = '1.0'
+    parser_version = '1.1'  # 2026-08-03: 문맥 기반 Q&A 경계 (CCJ 2Q26 오분할 fix)
 
     HOST = 'https://www.fool.com'
 
@@ -231,57 +231,102 @@ class MotleyFoolSource(TranscriptSource):
                         continue
         return None
 
-    def _split_sections(self, text: str) -> tuple[str, str]:
-        """Prepared Remarks / Q&A / Closing 분리.
+    # ─── Q&A 분할 신호 (parser 1.1, 2026-08-03) ───
+    # 문장 속 "Q&A" 언급은 분할 신호가 아니다 — Operator 오프닝("wait until the
+    # Q&A session")·IR 안내멘트("During the Q&A session, please limit...")에서
+    # 오분할된 실사고(CCJ 2Q26)가 있다. 신호 2종만 인정:
+    #  ① 독립 줄 섹션 헤더 (fool.com "QUESTIONS AND ANSWERS" 등)
+    #  ② Operator 발화 블록 안의 Q&A 개시 선언 (marketbeat/Quartr verbatim 전문)
+    # 확신할 경계가 없으면 분할하지 않는다 (전체 prepared — translator가 전량 번역).
+    _QA_HEADER_LINE_RE = re.compile(
+        r'^[ \t]*(?:questions?\s+(?:and|&)\s+answers?|q\s*&\s*a(?:\s+session)?'
+        r'|analyst\s+q\s*&\s*a)[ \t]*[:.]?[ \t]*$',
+        re.IGNORECASE | re.MULTILINE,
+    )
+    _QA_TRANSITION_RE = re.compile(
+        r"(?:(?:will\s+)?now\s+(?:begin|start)|beginning)\s+the\s+"
+        r"question[\s\-‐-―]+and[\s\-‐-―]+answer\s+(?:session|period|portion)"
+        r"|open\s+(?:up\s+)?the\s+(?:call|lines?|floor)\s+(?:up\s+)?for\s+questions"
+        r"|(?:our|the|your)\s+first\s+question\s+(?:today\s+)?(?:comes|is)\s+from"
+        r"|take\s+(?:our|the)\s+first\s+question",
+        re.IGNORECASE,
+    )
+    # 화자 헤더: fool.com "Operator:" / Quartr(marketbeat) "Operator\n00:13:09" / "Operator --"
+    _OPERATOR_HEADER_RE = re.compile(r'(?:^|\n)Operator\s*(?::|\n|--)')
 
-        실제 fool.com 패턴: "PREPARED REMARKS" / "QUESTIONS AND ANSWERS" / "Operator" 헤더 다양.
-        Operator 첫 등장 위치를 Q&A 시작으로 추정 (가장 안정적인 신호).
+    def _split_sections(self, text: str) -> tuple[str, str]:
+        """Prepared Remarks / Q&A / Closing 분리 (문맥 기반, parser 1.1).
+
+        구버전(≤1.0)은 루즈한 `Q&A` 정규식의 첫 매치에서 잘라 Operator 오프닝
+        boilerplate에 걸리는 오분할이 있었다 (CCJ 2Q26: 경영진 발표 전체가 qa로
+        들어가고 번역에서 유실). 이제 독립 헤더/Operator 개시 선언만 신뢰하고,
+        페이지 크롬 대비 절대 오프셋 가드는 쓰지 않는다 (본문 시작 이후 여부로 판정).
         """
-        # 끝 잘라내기 (Safe Harbor / Closing)
+        # 끝 잘라내기 (Safe Harbor / Closing) — 후반부(len//2 이후)에서만.
+        # 오프닝 Safe Harbor에 "Forward-Looking Statements"가 나오는 전문에서
+        # 본문 전체가 잘려나가는 것을 방지.
+        end_candidates = []
         for end_marker in [
             'Forward-Looking Statements',
             'This concludes today\'s conference',
             'Duration:',
         ]:
-            idx = text.find(end_marker)
+            idx = text.find(end_marker, len(text) // 2)
             if idx > 0:
-                text = text[:idx]
-                break
+                end_candidates.append(idx)
+        if end_candidates:
+            text = text[:min(end_candidates)]
 
-        prepared, qa = '', ''
-        # 1차: 명시적 Q&A 헤더
-        m_qa = re.search(
-            r'\b(Questions? and Answers?|Q&A Session|Q\s*&\s*A|Analyst Q&A|QUESTIONS AND ANSWERS)\b',
-            text, flags=re.IGNORECASE,
-        )
-        # 2차: Operator 첫 발화 (실측 fool.com 패턴: "\nOperator:\n" 형태)
-        # — Suhasini "Operator, may we..." 같은 IR 인용은 제외하기 위해 newline 직후 패턴만 매치
-        m_operator = None
-        if not m_qa:
-            m_operator = re.search(r'(?:^|\n)Operator\s*:\s*\n', text)
-            if not m_operator:
-                m_operator = re.search(
-                    r'\bOperator\b\s*[:\-]?\s*(?:Thank you|Thanks|Ladies and gentlemen|Welcome|At this time)',
-                    text, flags=re.IGNORECASE,
-                )
-
-        # Prepared / Q&A 분할
         m_prep = re.search(r'\bPREPARED REMARKS\b|\bPrepared Remarks\b', text)
 
-        split_idx = None
-        if m_qa:
-            split_idx = m_qa.start()
-        elif m_operator:
-            split_idx = m_operator.start()
+        # 본문 시작 = 첫 화자 블록(또는 PREPARED REMARKS 헤더 끝).
+        # marketbeat 페이지 크롬(주가·EPS 표·nav)이 그 앞에 붙는 경우,
+        # 크롬 안의 nav 링크("Questions & Answers" 등)를 경계 후보에서 배제한다.
+        first_speaker = self._OPERATOR_HEADER_RE.search(text)
+        body_start = 0
+        if m_prep:
+            body_start = m_prep.end()
+        elif first_speaker:
+            body_start = first_speaker.start()
 
-        if split_idx is not None:
-            prep_start = m_prep.end() if m_prep and m_prep.end() < split_idx else 0
+        candidates = []  # (split_idx, kind)
+        # ① 독립 줄 섹션 헤더 — 본문 시작 이후만
+        for m in self._QA_HEADER_LINE_RE.finditer(text):
+            if m.start() > body_start:
+                candidates.append((m.start(), 'header_line'))
+        # ② Q&A 개시 선언 — Operator 발화 블록 안에서만 인정: 직전 300자 안에
+        #    Operator 화자 헤더가 있어야 하고, 그 헤더 시작점으로 스냅.
+        #    (경영진 IR 멘트 "we will open the call for questions" 오탐 차단.
+        #    300자 = 개시 선언은 Operator 헤더 직후 문장이라는 실측 — CCJ 31자)
+        for m in self._QA_TRANSITION_RE.finditer(text):
+            if m.start() <= body_start:
+                continue
+            window_start = max(0, m.start() - 300)
+            ops = list(self._OPERATOR_HEADER_RE.finditer(text, window_start, m.start()))
+            if not ops:
+                continue
+            candidates.append((max(ops[-1].start(), body_start), 'operator_transition'))
+
+        prepared, qa = '', ''
+        prep_start = m_prep.end() if m_prep else 0
+        if candidates:
+            split_idx = min(c[0] for c in candidates)
+            if prep_start >= split_idx:
+                prep_start = 0
             prepared = text[prep_start:split_idx].strip()
             qa = text[split_idx:].strip()
         else:
-            # Q&A 시작점을 못 찾음 — 전체를 prepared로
-            prep_start = m_prep.end() if m_prep else 0
+            # 확신할 Q&A 경계 없음 — 오분할보다 무분할이 안전 (원문 손실 없음)
+            logger.warning(
+                '_split_sections: no confident Q&A boundary (len=%d) — 전체를 prepared로',
+                len(text),
+            )
             prepared = text[prep_start:].strip()
             qa = ''
 
+        if len(prepared) > 100000 or len(qa) > 100000:
+            logger.warning(
+                '_split_sections: 100K 절단 발생 (prepared=%d, qa=%d)',
+                len(prepared), len(qa),
+            )
         return prepared[:100000], qa[:100000]
