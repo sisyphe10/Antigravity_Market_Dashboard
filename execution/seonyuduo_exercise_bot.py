@@ -468,6 +468,9 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• <code>/ledger</code> 만 보내면 카테고리 목록 + 예산 소진율\n\n"
         "<b>🔁 복습</b>\n"
         "<code>/remind</code> — 유형·대상 골라 최근 운동 피드백 복습 (읽기 전용)\n\n"
+        "<b>💊 PMS 케어</b>\n"
+        "<code>/pms</code> — 5일간 매일 08·16·22시 생리통 약 리마인드 + 케어 팁\n"
+        "<code>/pms off</code> — 중단\n\n"
         "/whoami — 내 담당자(식/여니) 확인·변경",
         parse_mode='HTML')
 
@@ -1376,6 +1379,174 @@ async def cal_reminder_poll_job(context: ContextTypes.DEFAULT_TYPE):
         _save_cal_reminded(state)
 
 
+# ══════════════════════════════════════════════════════════
+# /pms — 생리통 약 복용 리마인드 (5일 × 08/16/22시 = 15회) + 케어 팁 로테이션
+# ══════════════════════════════════════════════════════════
+# 활성화 시점의 '다음 슬롯'부터 15회를 미리 확정해 상태파일에 저장하고,
+# 5분 폴링(run_repeating)이 상태파일만 보고 발송한다 — 재시작 무손실, run_daily 불필요.
+# 중복보다 누락을 감수: 발송 전에 슬롯을 claimed로 선기록해 발송 도중 죽어도 재발송하지 않는다.
+PMS_STATE_FILE = os.path.join(ROOT, '.seonyuduo_pms.json')
+PMS_TIPS_FILE = os.path.join(ROOT, 'seonyuduo_pms_tips.json')
+PMS_SLOT_HOURS = (8, 16, 22)
+PMS_SLOT_COUNT = 15                # 5일 × 3회
+PMS_POLL_INTERVAL = 300            # 초; 5분 폴링
+PMS_CATCHUP_HOURS = 2              # 슬롯별 늦은 발송 허용창. 22시 슬롯은 자정까지로 추가 제한
+PMS_SLOT_LABEL = {8: '☀️ 아침', 16: '🌤️ 오후', 22: '🌙 밤'}
+PMS_FALLBACK_TIP = '아랫배·허리를 따뜻하게 — 핫팩이나 온찜질이 통증 완화에 도움돼요'
+
+
+def _load_pms_state() -> dict:
+    try:
+        with open(PMS_STATE_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f) or {}
+    except FileNotFoundError:
+        return {}
+    except Exception as e:
+        # 파손 시 빈 상태로 덮지 않는다 — corrupt 마커로 잠가 오발송/중복을 방지 (수동 복구 대상)
+        logging.error(f"pms 상태 읽기 실패: {e}")
+        return {'corrupt': True}
+
+
+def _save_pms_state(st: dict):
+    try:
+        tmp = PMS_STATE_FILE + '.tmp'
+        with open(tmp, 'w', encoding='utf-8') as f:
+            json.dump(st, f, ensure_ascii=False, indent=2)
+        os.replace(tmp, PMS_STATE_FILE)  # 원자적 교체
+    except Exception as e:
+        logging.error(f"pms 상태 저장 실패: {e}")
+
+
+def _load_pms_tips() -> list:
+    """매 호출 디스크 재읽기 — JSON만 고치면 재배포 없이 반영 (feedback_tips 패턴)."""
+    try:
+        with open(PMS_TIPS_FILE, 'r', encoding='utf-8') as f:
+            tips = json.load(f)
+        tips = [t.strip() for t in tips if isinstance(t, str) and t.strip()]
+        return tips or [PMS_FALLBACK_TIP]
+    except Exception as e:
+        logging.warning(f"pms 팁 읽기 실패 → fallback 사용: {e}")
+        return [PMS_FALLBACK_TIP]
+
+
+def _pms_gen_slots(now: datetime.datetime, n: int = PMS_SLOT_COUNT) -> list:
+    """now 이후의 08/16/22시 슬롯 n개 (KST ISO 문자열, 시간순)."""
+    slots = []
+    day = now.date()
+    while len(slots) < n:
+        for h in PMS_SLOT_HOURS:
+            dt = datetime.datetime(day.year, day.month, day.day, h, tzinfo=KST)
+            if dt > now and len(slots) < n:
+                slots.append(dt.isoformat())
+        day += datetime.timedelta(days=1)
+    return slots
+
+
+def _pms_slot_deadline(slot_dt: datetime.datetime) -> datetime.datetime:
+    """슬롯별 늦은 발송 한계 — 기본 +2h, 단 자정을 넘기지 않음 (22시 슬롯의 새벽 발송 방지)."""
+    limit = slot_dt + datetime.timedelta(hours=PMS_CATCHUP_HOURS)
+    midnight = (slot_dt + datetime.timedelta(days=1)).replace(hour=0, minute=0,
+                                                              second=0, microsecond=0)
+    return min(limit, midnight)
+
+
+def _pms_fmt_dt(dt: datetime.datetime) -> str:
+    return f"{dt.month}/{dt.day}({'월화수목금토일'[dt.weekday()]}) {dt:%H:%M}"
+
+
+def _pms_format_message(idx: int, slot_dt: datetime.datetime, tips: list) -> str:
+    label = PMS_SLOT_LABEL.get(slot_dt.hour, '💊')
+    tip = tips[idx % len(tips)]
+    last = ' — 마지막 알림이에요!' if idx == PMS_SLOT_COUNT - 1 else ''
+    return (f"💊 <b>PMS 케어 · {label} 알림</b> ({idx + 1}/{PMS_SLOT_COUNT}){last}\n"
+            f"생리통 약 챙길 시간이에요 🙂\n\n"
+            f"💡 {html.escape(tip)}")
+
+
+async def cmd_pms(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/pms — 5일×3회 복약 리마인드 시작 · /pms off — 중단. 발동한 챗으로만 발송."""
+    st = _load_pms_state()
+    if st.get('corrupt'):
+        await update.message.reply_text("⚠️ PMS 상태파일이 손상돼 있어요. 관리자 확인이 필요해요.")
+        return
+    arg = (context.args[0].lower() if context.args else '')
+    now = datetime.datetime.now(tz=KST)
+
+    if arg in ('off', 'stop', '중단', '취소'):
+        if st.get('active'):
+            st['active'] = False
+            _save_pms_state(st)
+            await update.message.reply_text("💊 PMS 케어를 중단했어요. 다시 시작하려면 /pms")
+        else:
+            await update.message.reply_text("진행 중인 PMS 케어가 없어요. 시작하려면 /pms")
+        return
+
+    if st.get('active'):
+        # 활성 중 재발동은 멱등 — 연장/리셋하지 않고 남은 일정만 안내
+        remaining = [s for s in st.get('slots', []) if s not in st.get('sent', {})]
+        if remaining:
+            nxt = datetime.datetime.fromisoformat(remaining[0])
+            end = datetime.datetime.fromisoformat(st['slots'][-1])
+            await update.message.reply_text(
+                f"💊 이미 PMS 케어가 진행 중이에요 (남은 알림 {len(remaining)}회).\n"
+                f"▸ 다음 알림: {_pms_fmt_dt(nxt)}\n"
+                f"▸ 마지막 알림: {_pms_fmt_dt(end)}\n"
+                f"▸ 새로 시작하려면 /pms off 후 /pms", parse_mode='HTML')
+            return
+        st['active'] = False  # 슬롯 전부 소진됐는데 active로 남은 경우 정리 후 신규 진행
+
+    slots = _pms_gen_slots(now)
+    first = datetime.datetime.fromisoformat(slots[0])
+    end = datetime.datetime.fromisoformat(slots[-1])
+    _save_pms_state({'active': True, 'chat_id': update.effective_chat.id,
+                     'started': now.isoformat(), 'slots': slots, 'sent': {}})
+    warn = ''
+    if context.application.job_queue is None:
+        warn = '\n\n⚠️ (개발환경) JobQueue 미설치 — 실제 발송은 되지 않아요.'
+    await update.message.reply_text(
+        f"💊 <b>PMS 케어 시작</b>\n"
+        f"지금부터 매일 <b>08:00 · 16:00 · 22:00</b>에 총 {PMS_SLOT_COUNT}회 알려드릴게요.\n\n"
+        f"▸ 첫 알림: {_pms_fmt_dt(first)}\n"
+        f"▸ 마지막 알림: {_pms_fmt_dt(end)}\n"
+        f"▸ 중단하려면: /pms off{warn}", parse_mode='HTML')
+
+
+async def pms_poll_job(context: ContextTypes.DEFAULT_TYPE):
+    """run_repeating(5분): 활성 캠페인의 도래 슬롯 발송. 발송 전 claimed 선기록(중복 방지 우선)."""
+    st = _load_pms_state()
+    if st.get('corrupt') or not st.get('active'):
+        return
+    now = datetime.datetime.now(tz=KST)
+    tips = _load_pms_tips()
+    slots = st.get('slots', [])
+    sent = st.setdefault('sent', {})
+    for idx, slot_iso in enumerate(slots):
+        if slot_iso in sent:
+            continue
+        slot_dt = datetime.datetime.fromisoformat(slot_iso)
+        if now < slot_dt:
+            break  # 슬롯은 시간순 → 이후 슬롯도 전부 미도래
+        if now >= _pms_slot_deadline(slot_dt):
+            sent[slot_iso] = {'status': 'expired', 'ts': time.time()}
+            _save_pms_state(st)
+            continue
+        sent[slot_iso] = {'status': 'claimed', 'ts': time.time()}
+        _save_pms_state(st)  # 발송 전 선기록 — 발송 도중 죽어도 재발송 없음
+        try:
+            await context.bot.send_message(chat_id=st['chat_id'],
+                                           text=_pms_format_message(idx, slot_dt, tips),
+                                           parse_mode='HTML')
+            sent[slot_iso] = {'status': 'sent', 'ts': time.time()}
+            logging.info(f"PMS 리마인드 발송: {slot_iso} ({idx + 1}/{len(slots)})")
+        except Exception as e:
+            sent[slot_iso]['status'] = 'failed'
+            logging.error(f"PMS 발송 실패({slot_iso}): {e}")
+        _save_pms_state(st)
+    if st.get('active') and slots and all(s in sent for s in slots):
+        st['active'] = False  # 15회 소진 → 자동 종료 (마지막 메시지에 종료 문구 포함)
+        _save_pms_state(st)
+
+
 def main():
     if not TOKEN:
         print("Error: TELEGRAM_SEONYUDUO_BOT_TOKEN is missing.")
@@ -1389,6 +1560,7 @@ def main():
     application.add_handler(CommandHandler(['fit', 'log', 'ex'], cmd_log))
     application.add_handler(CommandHandler('ledger', cmd_ledger))  # 텔레그램 명령은 ASCII만 (한글 별칭 불가)
     application.add_handler(CommandHandler('remind', cmd_remind))
+    application.add_handler(CommandHandler('pms', cmd_pms))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     application.add_handler(CallbackQueryHandler(handle_callback))
 
@@ -1405,6 +1577,8 @@ def main():
         jq.run_daily(daily_cal_digest_job, time=digest_time, name='cal_daily_digest')
         jq.run_repeating(cal_reminder_poll_job, interval=CAL_POLL_INTERVAL, first=30,
                          name='cal_reminder_poll')
+        jq.run_repeating(pms_poll_job, interval=PMS_POLL_INTERVAL, first=45,
+                         name='pms_poll')
     else:
         logging.warning("JobQueue 미설치(python-telegram-bot[job-queue]) → 캘린더 잡 비활성. "
                         "봇 본기능(운동기록/remind/ledger)은 정상. VM엔 설치돼 있어 정상 동작.")

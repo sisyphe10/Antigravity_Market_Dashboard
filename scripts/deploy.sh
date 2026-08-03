@@ -23,6 +23,7 @@ BACKUP_FILES=(
     "seonyuduo_exercise_user_map.json"
     "seonyuduo_chats.json"
     ".seonyuduo_cal_reminded.json"
+    ".seonyuduo_pms.json"
     "execution/research_bot/research_notes.db"
     "etf_data.db"
     "execution/earnings_bot/earnings.db"
