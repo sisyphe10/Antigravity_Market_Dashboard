@@ -222,6 +222,7 @@ AOE_DARK_CSS = (
     '[style*="color:#888"],[style*="color: #888"],[style*="color:#999"],[style*="color: #999"],[style*="color:#aaa"],[style*="color:#555"],[style*="color: #555"],[style*="color:#9ca3af"],[style*="color: #9ca3af"]{color:#fff!important}'
     '.chart-card [style*="color:#888"],.chart-container [style*="color:#888"],.lh-card [style*="color:#888"],.chart-card [style*="color:#999"],.chart-container [style*="color:#999"],.chart-card [style*="color:#555"],.chart-container [style*="color:#555"]{color:#333!important}'
     '#cmbSelCount{color:#fff!important}'
+    '.date-bar label,.controls label,.section-header .count,.updated,.tw-foot,.tw-filter-btn{color:#fff!important}'
     '</style>')
 dark_pat = re.compile(r'<style id="aoe-terminal-dark">.*?</style>', re.S)
 
