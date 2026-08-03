@@ -1485,6 +1485,8 @@ CMB_SERIES_UNITS = {
     '회사채 3년 AA-': '%', '장단기 스프레드 10Y-3Y': '%p', '신용 스프레드 AA-3Y': '%p',
     '미 기준금리 상단': '%', '미 장단기 금리차 10Y-2Y': '%p', '미 장단기 금리차 10Y-3M': '%p',
     '미 BBB 스프레드': '%p', '미 하이일드 스프레드': '%p', '미 실질금리 10Y': '%',
+    'AI 하이퍼스케일러 CDS 5Y': 'bp', '오라클 CDS 5Y': 'bp', '아마존 CDS 5Y': 'bp',
+    '메타 CDS 5Y': 'bp', '마이크로소프트 CDS 5Y': 'bp', '알파벳 CDS 5Y': 'bp',
     '미 기대인플레 BEI 10Y': '%', '미 기대인플레 5Y5Y': '%', 'SOFR': '%',
     # MACRO KOREA
     'CPI 전년동월비': '%', 'PPI 전년동월비': '%', '기대인플레이션 1년': '%', 'M2 전년동월비': '%',
@@ -1684,6 +1686,13 @@ def _build_combined_chart_section():
                 {'display': '미 기대인플레 BEI 10Y',   'csv': '미 기대인플레 BEI 10Y',   'color': '#7986CB'},
                 {'display': '미 기대인플레 5Y5Y',      'csv': '미 기대인플레 5Y5Y',      'color': '#9FA8DA'},
                 {'display': 'SOFR',                    'csv': 'SOFR',                    'color': '#304FFE'},
+                # 하이퍼스케일러 CDS 5Y (DTCC SBSDR 체결, fetch_dtcc_cds.py — 바스켓=시총가중 빅5)
+                {'display': 'AI 하이퍼스케일러 CDS 5Y',  'csv': 'AI 하이퍼스케일러 CDS 5Y',  'color': '#404040'},
+                {'display': '오라클 CDS 5Y',             'csv': '오라클 CDS 5Y',             'color': '#DC2626'},
+                {'display': '아마존 CDS 5Y',             'csv': '아마존 CDS 5Y',             'color': '#EA580C'},
+                {'display': '메타 CDS 5Y',               'csv': '메타 CDS 5Y',               'color': '#1F4E9C'},
+                {'display': '마이크로소프트 CDS 5Y',     'csv': '마이크로소프트 CDS 5Y',     'color': '#0072CE'},
+                {'display': '알파벳 CDS 5Y',             'csv': '알파벳 CDS 5Y',             'color': '#00854A'},
             ]},
             {'label': 'MACRO KOREA', 'series': [
                 # ECOS 월별 매크로 (5년 임베드 창, fetch_ecos_data.py)

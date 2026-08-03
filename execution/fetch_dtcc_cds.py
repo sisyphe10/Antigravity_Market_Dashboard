@@ -21,9 +21,11 @@ JPAIHYRS(JPM AI 하이퍼스케일러 신용 스프레드 지수, 비공개 커�
   · 일중 집계 = 비가중 중앙값 (블록 노셔널 "5,000,000+" 캡 → 노셔널 가중 불가). sanity 5~1500bp.
   · 매칭 = 정규화 법인명 anchored alias + REDID 화이트리스트. 키워드만 맞고 alias 미일치면
     발견 리포트로 경고(자회사 오인 방지, 신규 표기 수동 승인).
-- 바스켓 'AI 하이퍼스케일러 CDS 5Y' = BASKET_MEMBERS 고정 동일가중. 주중일 그리드에서 종목별
-  ffill(상한 FFILL_CAP_BDAYS 영업일), ★전 구성원이 유효한 날만 산출(부분 재가중 금지 — 고스프레드
-  종목 과대대표 방지). 구성·상한은 백필 커버리지 실측 후 확정(빈 리스트면 미산출).
+- 바스켓 'AI 하이퍼스케일러 CDS 5Y' = BASKET_MEMBERS 고정 **시가총액 가중**(2026-08-03 사용자 지시로
+  동일가중에서 변경). 가중치 = datalake overseas_ohlcv 일별 종가 × 유효 주식수(SHARES, marketCap/price
+  기준 — GOOGL 은 A클래스 주식수만 쓰면 시총 절반 누락). 주중일 그리드에서 종목별 스프레드
+  ffill(상한 FFILL_CAP_BDAYS 영업일), ★전 구성원이 유효한 날만 산출(부분 재구성 금지).
+- 관측일 MIN_EMIT_OBS 미만 종목은 dataset.csv 미등재 (코어위브 2일 — 유동성 생기면 자동 편입).
 - 맥미니 전용: ~/datalake 부재 시 graceful skip(exit 0) — GHA workflow_dispatch 백업 러너 대응.
 
 사용:
@@ -86,10 +88,16 @@ ISSUERS = [
 ]
 BASKET_NAME = 'AI 하이퍼스케일러 CDS 5Y'
 # 2026-08-03 백필 커버리지 실측으로 확정: 빅5(JPM CDS 바스켓과 동일 구성) × cap15 → 산출일 82%
-# (cap10=63%·빅4=86%였으나 구성 대표성 우선). CRWV 는 관측 2일 → 개별 시리즈만.
+# (cap10=63%·빅4=86%였으나 구성 대표성 우선). CRWV 는 관측 2일 → MIN_EMIT_OBS 가드로 미등재.
 BASKET_MEMBERS = ['ORCL', 'AMZN', 'META', 'MSFT', 'GOOGL']
 FFILL_CAP_BDAYS = 15
 BASKET_START = '2026-04-15'     # 빅5 전 구성원 관측 개시일 (META·GOOGL 최초 관측)
+MIN_EMIT_OBS = 5                # 관측일 이 미만인 종목은 dataset.csv 미등재
+# 시총 가중 유효 주식수 = marketCap ÷ 주가 (yfinance, 2026-08-03). ★sharesOutstanding 을 쓰면
+# GOOGL(A만 5.87B ↔ 실효 12.23B)·META 가 과소 → 반드시 실효치. 분기 1회 갱신이면 충분
+# (일별 가중 변동은 종가가 만들고, 주식수 드리프트는 미미).
+SHARES = {'ORCL': 2.880e9, 'AMZN': 10.757e9, 'META': 2.548e9, 'MSFT': 7.426e9, 'GOOGL': 12.230e9}
+DUCKDB_PATH = os.path.expanduser('~/datalake/market/market.duckdb')
 
 REQUIRED_COLS = {
     'Dissemination Identifier', 'Original Dissemination Identifier', 'Action type',
@@ -348,40 +356,80 @@ def parse_archive():
     return obs, stats, discovery
 
 
+def load_daily_caps():
+    """datalake overseas_ohlcv 일별 종가 × 유효 주식수 → {key: {date: 시총}}. 실패 시 예외."""
+    import duckdb
+    start = (date.fromisoformat(BASKET_START) - timedelta(days=40)).isoformat() \
+        if BASKET_START else '2024-01-01'
+    con = duckdb.connect(DUCKDB_PATH, read_only=True)
+    try:
+        ph = ','.join('?' * len(BASKET_MEMBERS))
+        rows = con.execute(
+            f"SELECT symbol, CAST(date AS DATE), close FROM overseas_ohlcv "
+            f"WHERE symbol IN ({ph}) AND date >= ?",
+            BASKET_MEMBERS + [start]).fetchall()
+    finally:
+        con.close()
+    caps = {k: {} for k in BASKET_MEMBERS}
+    for sym, d, close in rows:
+        if close:
+            caps[sym][d] = close * SHARES[sym]
+    return caps
+
+
 def compute_series(obs):
-    """종목별 일중 중앙값 + 고정 바스켓. 반환: {표시명: {date: float}}"""
+    """종목별 일중 중앙값 + 고정 바스켓(시총 가중). 반환: {표시명: {date: float}}"""
     series = {}
     medians = {}                            # key → {date: 미반올림 중앙값}
     for s in ISSUERS:
         m = {d: statistics.median(v) for d, v in sorted(obs[s['key']].items())}
         medians[s['key']] = m
-        if m:
+        if len(m) >= MIN_EMIT_OBS:
             series[s['name']] = m
-    if BASKET_MEMBERS and all(medians.get(k) for k in BASKET_MEMBERS):
-        start = max(min(medians[k]) for k in BASKET_MEMBERS)
-        if BASKET_START:
-            start = max(start, date.fromisoformat(BASKET_START))
-        end = max(max(medians[k]) for k in BASKET_MEMBERS)
-        basket = {}
-        last = {k: (None, None) for k in BASKET_MEMBERS}   # key → (관측일, 값)
-        d = start
-        while d <= end:
-            if d.weekday() < 5:
-                vals = []
-                for k in BASKET_MEMBERS:
-                    if d in medians[k]:
-                        last[k] = (d, medians[k][d])
-                    ld, lv = last[k]
-                    if ld is not None:
-                        age = sum(1 for i in range(1, (d - ld).days + 1)
-                                  if (ld + timedelta(days=i)).weekday() < 5)
-                        if age <= FFILL_CAP_BDAYS:
-                            vals.append(lv)
-                if len(vals) == len(BASKET_MEMBERS):        # 전 구성원 유효한 날만 (재가중 금지)
-                    basket[d] = sum(vals) / len(vals)
-            d += timedelta(days=1)
-        if basket:
-            series[BASKET_NAME] = basket
+        elif m:
+            print(f"  - {s['name']}: 관측 {len(m)}일 < {MIN_EMIT_OBS} → 미등재 (원본은 보존)")
+    if not (BASKET_MEMBERS and all(medians.get(k) for k in BASKET_MEMBERS)):
+        return series
+    caps = None
+    try:
+        caps = load_daily_caps()
+        missing = [k for k in BASKET_MEMBERS if not caps.get(k)]
+        if missing:
+            print(f"  W 시총 가중치 결측 {missing} → 바스켓 미산출")
+            caps = None
+    except Exception as e:
+        print(f"  W 시총 로드 실패({type(e).__name__}) → 바스켓 미산출")
+    if caps is None:
+        return series
+    start = max(min(medians[k]) for k in BASKET_MEMBERS)
+    if BASKET_START:
+        start = max(start, date.fromisoformat(BASKET_START))
+    end = max(max(medians[k]) for k in BASKET_MEMBERS)
+    basket = {}
+    last = {k: (None, None) for k in BASKET_MEMBERS}       # key → (관측일, 스프레드)
+    lastcap = {k: None for k in BASKET_MEMBERS}            # key → 최근 시총 (종가 ffill)
+    d = start
+    while d <= end:
+        if d.weekday() < 5:
+            vals = {}
+            for k in BASKET_MEMBERS:
+                if d in caps[k]:
+                    lastcap[k] = caps[k][d]
+                if d in medians[k]:
+                    last[k] = (d, medians[k][d])
+                ld, lv = last[k]
+                if ld is not None:
+                    age = sum(1 for i in range(1, (d - ld).days + 1)
+                              if (ld + timedelta(days=i)).weekday() < 5)
+                    if age <= FFILL_CAP_BDAYS:
+                        vals[k] = lv
+            # 전 구성원의 스프레드·시총이 유효한 날만 산출 (부분 재구성 금지)
+            if len(vals) == len(BASKET_MEMBERS) and all(lastcap[k] for k in BASKET_MEMBERS):
+                tw = sum(lastcap[k] for k in BASKET_MEMBERS)
+                basket[d] = sum(lastcap[k] * vals[k] for k in BASKET_MEMBERS) / tw
+        d += timedelta(days=1)
+    if basket:
+        series[BASKET_NAME] = basket
     return series
 
 

@@ -1,6 +1,6 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 148 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 149 components._
 
 Updated: 2026-08-02
 
@@ -48,13 +48,14 @@ Updated: 2026-08-02
 - [파생·수급 13종 (fetch_deriv_daily.py)](src-deriv-daily.md) — Source
 - [한국 수출 매출 추정 대시보드](ext-export-dashboard.md) — External
 
-### 해외 · 매크로 (23)
+### 해외 · 매크로 (24)
 - [Daily ECOS BOK (17:40 평일)](gha-daily-ecos.md) — GHA
 - [Daily FRED US Macro (07:50 화~토)](gha-daily-fred.md) — GHA
 - [Daily Market Crawl (23:00)](gha-daily-crawl.md) — GHA
 - [Daily Taiwan Monthly Revenue (23:20)](gha-daily-taiwan-revenue.md) — GHA
 - [Daily Universe yfinance (18:30 + 07:00)](gha-daily-universe.md) — GHA
 - [dataset.csv (시장 시계열 통합)](store-dataset-csv.md) — Dataset
+- [DTCC 하이퍼스케일러 CDS 5Y (fetch_dtcc_cds.py)](src-dtcc-cds.md) — Source
 - [ECOS 한국 매크로 33종 (fetch_ecos_data.py)](src-ecos.md) — Source
 - [FRED 미국 매크로 36종 (fetch_fred_data.py)](src-fred.md) — Source
 - [hotels.html (호텔 ADR, 동결)](page-hotels.md) — Page
@@ -277,10 +278,11 @@ Updated: 2026-08-02
 - [외부 데이터 API/소스 집합](ext-data-apis.md) — active
 - [한국 수출 매출 추정 대시보드](ext-export-dashboard.md) — planned
 
-### Source (46)
+### Source (47)
 - [AoE 스타일 정본 (nav_style.py)](src-nav-style.md) — import 시 (상시), active
 - [AoE 차트 코어 (chart_core/aoe_chart.js)](src-chart-core.md) — 빌드타임 인라인 임베드 (상시), active
 - [DART 공시 (fetch_disclosures.py)](src-dart-disclosures.md) — 16:30 (gha-daily-disclosures), active
+- [DTCC 하이퍼스케일러 CDS 5Y (fetch_dtcc_cds.py)](src-dtcc-cds.md) — 11:30 화~토 (gha-dtcc-cds), active
 - [ECOS 한국 매크로 33종 (fetch_ecos_data.py)](src-ecos.md) — 17:40 평일 (gha-daily-ecos), active
 - [ETF 구성종목 수집 (collect_etf_daily.py)](src-etf-collect.md) — 16:30 / 18:00 (etf-collect 타이머, paused 2026-07-29), frozen
 - [Featured KIS/신고가 (fetch_featured_data_kis.py + enrich)](src-featured-kis.md) — 15:50 (featured-kis 타이머), active
@@ -344,7 +346,7 @@ Updated: 2026-08-02
 
 ## By project
 
-### antigravity (148)
+### antigravity (149)
 - [/aum — WRAP 일일 AUM 입력](cmd-aum.md) — Skill
 - [/긴급코멘트 — 급락일 시장 코멘트](cmd-urgent-comment.md) — Skill
 - [/목표전환형 — 랩 생성·청산 일괄](cmd-target-transform.md) — Skill
@@ -369,6 +371,7 @@ Updated: 2026-08-02
 - [Daily Universe yfinance (18:30 + 07:00)](gha-daily-universe.md) — GHA
 - [DART 공시 (fetch_disclosures.py)](src-dart-disclosures.md) — Source
 - [dataset.csv (시장 시계열 통합)](store-dataset-csv.md) — Dataset
+- [DTCC 하이퍼스케일러 CDS 5Y (fetch_dtcc_cds.py)](src-dtcc-cds.md) — Source
 - [Earnings Calendar Sync (07:00)](gha-earnings-calendar-sync.md) — GHA
 - [earnings.db (실적봇 상태)](store-earnings-db.md) — Store
 - [ECOS 한국 매크로 33종 (fetch_ecos_data.py)](src-ecos.md) — Source

@@ -401,11 +401,12 @@ run_job() {
 
     gha-dtcc-cds)
       # DTCC SBSDR 하이퍼스케일러 CDS 5Y (fetch_dtcc_cds.py). 무인증 소스 — skip 분기 없음.
-      # create_dashboard 미호출: CDS_SPREAD 는 CATEGORY_MAP 미등재(정식 배선 전) → HTML 불변.
+      # 2026-08-03 DATA 탭 정식 배선 → create_dashboard 재생성 포함.
       "$PY" execution/fetch_dtcc_cds.py || return $?
+      "$PY" execution/create_dashboard.py || return $?
       /bin/bash scripts/safe_commit_push.sh \
         -m "Auto-update: DTCC hyperscaler CDS spreads [skip ci]" \
-        -- dataset.csv || return $?
+        -- dataset.csv market.html || return $?
       ;;
 
     *)

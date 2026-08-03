@@ -25,6 +25,8 @@ CATEGORY_MAP = {
     'ECOS_MACRO': 'MACRO KOREA',
     'ECOS_SECTOR': 'CREDIT & HOUSING',
     'FRED_RATE': 'INTEREST RATES',
+    # DTCC SBSDR 하이퍼스케일러 CDS 5Y (fetch_dtcc_cds.py, 맥미니 gha-dtcc-cds)
+    'CDS_SPREAD': 'INTEREST RATES',
     'FRED_MACRO': 'MACRO US',
     'FRED_SECTOR': 'CREDIT & HOUSING US',
     # SiliconData Silicon Index (fetch_silicondata_index.py, 시리즈별 타입 분리)
