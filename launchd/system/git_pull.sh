@@ -78,6 +78,20 @@ main() {
     if [ -n "$before" ] && [ "$before" != "$after" ]; then
       ( nohup bash "$REPO/scripts/publish_snapshot.sh" >> "$LOGDIR/publish.log" 2>&1 & ) || true
       ( nohup bash "$REPO/scripts/publish_pages.sh" >> "$LOGDIR/publish_pages.log" 2>&1 & ) || true
+      # nav 정본(nav_style.py) 변경 감지 → 런타임 웹데몬 재시작 (2026-08-03 사용자 확정).
+      # 데몬은 기동 시 1회만 nav 를 materialize 하므로, 재시작 없이는 낡은 nav 를 계속 서빙한다.
+      # 해시 가드: 내용이 실제로 바뀐 pull 에서만 1회 재시작 (시세판 KIS 재접속 churn 방지).
+      local navsha navstamp
+      navsha="$(shasum "$REPO/execution/nav_style.py" 2>/dev/null | cut -d" " -f1)"
+      navstamp="$(cat "$LOGDIR/.nav_style.sha" 2>/dev/null || true)"
+      if [ -n "$navsha" ] && [ "$navsha" != "$navstamp" ]; then
+        printf "%s" "$navsha" > "$LOGDIR/.nav_style.sha"
+        if [ -n "$navstamp" ]; then   # 최초 실행은 시드만 (재시작 생략)
+          launchctl kickstart -k system/com.antigravity.watchlist 2>/dev/null || true
+          launchctl kickstart -k system/com.antigravity.datalake-webui 2>/dev/null || true
+          logf "nav_style changed ($navstamp -> $navsha) — web daemons kickstarted"
+        fi
+      fi
     fi
     exit 0
   fi

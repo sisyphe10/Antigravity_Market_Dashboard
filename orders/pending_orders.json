@@ -81,6 +81,14 @@
           "reason": ""
         },
         {
+          "sector": "기계",
+          "code": "119850",
+          "name": "지엔씨에너지",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
+        },
+        {
           "sector": "은행",
           "code": "105560",
           "name": "KB금융",
@@ -97,14 +105,6 @@
           "reason": ""
         },
         {
-          "sector": "기계",
-          "code": "119850",
-          "name": "지엔씨에너지",
-          "weight": 2,
-          "baseWeight": 1,
-          "reason": "SGC에너지 군산부지향으로 비상발전기 수주 공시, K-AI DC 주도주로 재확인, 비중 확대"
-        },
-        {
           "sector": "IT하드웨어",
           "code": "011070",
           "name": "LG이노텍",
@@ -113,8 +113,7 @@
           "reason": ""
         }
       ],
-      "savedAt": "2026-08-03T01:02:47.316Z",
-      "finalizedAt": "2026-08-03T10:17:47+09:00"
+      "savedAt": "2026-08-03T04:29:05.701Z"
     },
     "NH 다이내믹 밸류": {
       "targets": [
@@ -197,6 +196,14 @@
           "reason": ""
         },
         {
+          "sector": "기계",
+          "code": "119850",
+          "name": "지엔씨에너지",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
+        },
+        {
           "sector": "은행",
           "code": "105560",
           "name": "KB금융",
@@ -213,14 +220,6 @@
           "reason": ""
         },
         {
-          "sector": "기계",
-          "code": "119850",
-          "name": "지엔씨에너지",
-          "weight": 2,
-          "baseWeight": 1,
-          "reason": "SGC에너지 군산부지향으로 비상발전기 수주 공시, K-AI DC 주도주로 재확인, 비중 확대"
-        },
-        {
           "sector": "IT하드웨어",
           "code": "009150",
           "name": "삼성전기",
@@ -229,8 +228,7 @@
           "reason": ""
         }
       ],
-      "savedAt": "2026-08-03T01:02:47.316Z",
-      "finalizedAt": "2026-08-03T10:17:47+09:00"
+      "savedAt": "2026-08-03T04:29:05.701Z"
     },
     "DB 개방형": {
       "targets": [
@@ -313,6 +311,14 @@
           "reason": ""
         },
         {
+          "sector": "기계",
+          "code": "119850",
+          "name": "지엔씨에너지",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
+        },
+        {
           "sector": "은행",
           "code": "105560",
           "name": "KB금융",
@@ -329,14 +335,6 @@
           "reason": ""
         },
         {
-          "sector": "기계",
-          "code": "119850",
-          "name": "지엔씨에너지",
-          "weight": 2,
-          "baseWeight": 1,
-          "reason": "SGC에너지 군산부지향으로 비상발전기 수주 공시, K-AI DC 주도주로 재확인, 비중 확대"
-        },
-        {
           "sector": "IT하드웨어",
           "code": "009150",
           "name": "삼성전기",
@@ -345,8 +343,7 @@
           "reason": ""
         }
       ],
-      "savedAt": "2026-08-03T01:02:47.316Z",
-      "finalizedAt": "2026-08-03T10:17:47+09:00"
+      "savedAt": "2026-08-03T04:29:05.701Z"
     },
     "한투 지속형": {
       "targets": [
@@ -429,6 +426,14 @@
           "reason": ""
         },
         {
+          "sector": "기계",
+          "code": "119850",
+          "name": "지엔씨에너지",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
+        },
+        {
           "sector": "은행",
           "code": "105560",
           "name": "KB금융",
@@ -451,18 +456,9 @@
           "weight": 1,
           "baseWeight": 1,
           "reason": ""
-        },
-        {
-          "sector": "기계",
-          "code": "119850",
-          "name": "지엔씨에너지",
-          "weight": 2,
-          "baseWeight": 1,
-          "reason": "SGC에너지 군산부지향으로 비상발전기 수주 공시, K-AI DC 주도주로 재확인, 비중 확대"
         }
       ],
-      "savedAt": "2026-08-03T01:02:47.316Z",
-      "finalizedAt": "2026-08-03T10:17:47+09:00"
+      "savedAt": "2026-08-03T04:29:05.701Z"
     },
     "NH 목표전환형 5호": {
       "targets": [
@@ -545,6 +541,14 @@
           "reason": ""
         },
         {
+          "sector": "기계",
+          "code": "119850",
+          "name": "지엔씨에너지",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
+        },
+        {
           "sector": "은행",
           "code": "105560",
           "name": "KB금융",
@@ -567,18 +571,9 @@
           "weight": 1,
           "baseWeight": 1,
           "reason": ""
-        },
-        {
-          "sector": "기계",
-          "code": "119850",
-          "name": "지엔씨에너지",
-          "weight": 2,
-          "baseWeight": 1,
-          "reason": "SGC에너지 군산부지향으로 비상발전기 수주 공시, K-AI DC 주도주로 재확인, 비중 확대"
         }
       ],
-      "savedAt": "2026-08-03T01:02:47.316Z",
-      "finalizedAt": "2026-08-03T10:17:47+09:00"
+      "savedAt": "2026-08-03T04:29:05.701Z"
     },
     "DB 목표전환형 6차": {
       "targets": [
@@ -661,6 +656,14 @@
           "reason": ""
         },
         {
+          "sector": "기계",
+          "code": "119850",
+          "name": "지엔씨에너지",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
+        },
+        {
           "sector": "은행",
           "code": "105560",
           "name": "KB금융",
@@ -683,18 +686,9 @@
           "weight": 1,
           "baseWeight": 1,
           "reason": ""
-        },
-        {
-          "sector": "기계",
-          "code": "119850",
-          "name": "지엔씨에너지",
-          "weight": 2,
-          "baseWeight": 1,
-          "reason": "SGC에너지 군산부지향으로 비상발전기 수주 공시, K-AI DC 주도주로 재확인, 비중 확대"
         }
       ],
-      "savedAt": "2026-08-03T01:02:47.316Z",
-      "finalizedAt": "2026-08-03T10:17:47+09:00"
+      "savedAt": "2026-08-03T04:29:05.701Z"
     },
     "한투 성과모집형 1차": {
       "targets": [
@@ -777,6 +771,14 @@
           "reason": ""
         },
         {
+          "sector": "기계",
+          "code": "119850",
+          "name": "지엔씨에너지",
+          "weight": 1,
+          "baseWeight": 1,
+          "reason": ""
+        },
+        {
           "sector": "은행",
           "code": "105560",
           "name": "KB금융",
@@ -799,18 +801,9 @@
           "weight": 1,
           "baseWeight": 1,
           "reason": ""
-        },
-        {
-          "sector": "기계",
-          "code": "119850",
-          "name": "지엔씨에너지",
-          "weight": 2,
-          "baseWeight": 1,
-          "reason": "SGC에너지 군산부지향으로 비상발전기 수주 공시, K-AI DC 주도주로 재확인, 비중 확대"
         }
       ],
-      "savedAt": "2026-08-03T01:02:47.316Z",
-      "finalizedAt": "2026-08-03T10:17:47+09:00"
+      "savedAt": "2026-08-03T04:29:05.701Z"
     }
   }
 }

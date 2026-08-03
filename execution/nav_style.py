@@ -77,6 +77,15 @@ WRAP_CSS_VARS = ':root{' + ';'.join(
 PALETTE_CSS_VARS = ':root{' + ';'.join(
     '--aoe-%s:%s' % (k, v) for k, v in PALETTE.items()) + '}'
 
+# ★★NAV 변경 시 필수 후속 (2026-08-03 사용자 반복 지적으로 명문화) ─────────────
+#   이 파일은 정본이지만, 런타임 데몬은 기동 시 1회만 이 정본을 굽는다.
+#   NAV_ITEMS·CSS 를 바꿨으면 반드시:
+#     1) sudo launchctl kickstart -k system/com.antigravity.watchlist      (/watchlist 시세판)
+#     2) sudo launchctl kickstart -k system/com.antigravity.datalake-webui (/wiki·/wiki/library)
+#     3) bash scripts/publish_snapshot.sh                                  (스냅숏 페이지)
+#   그리고 /watchlist·/wiki·/wiki/library·본체·/sisyphe 전 표면에서 탭 구성을 실측 검증한다.
+# ──────────────────────────────────────────────────────────────────────
+
 BRAND = 'AGE OF EMERGENCE'
 BRAND_HREF = '/index.html'   # Caddy가 /watchlist/ 로 redirect (랜딩 폐지 후 동작 동일)
 
