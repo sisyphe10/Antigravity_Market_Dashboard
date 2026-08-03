@@ -10,6 +10,7 @@
   --aoe-t-valign: middle;
   --aoe-t-num: tabular-nums;   /* 숫자 등폭 — 열 정렬 흔들림 방지 */
   --aoe-t-head-weight: 700;
+  --aoe-t-head-font: inherit;  /* 헤더·보조 셀 글씨 — 기본은 본문 상속, 페이지가 값 지정 */
   --aoe-t-head-underline: 2px; /* 헤더 밑줄 두께 */
   --aoe-t-row-line: 1px;       /* 행 구분선 두께 */
 }

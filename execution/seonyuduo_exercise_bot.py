@@ -469,8 +469,9 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "<b>🔁 복습</b>\n"
         "<code>/remind</code> — 유형·대상 골라 최근 운동 피드백 복습 (읽기 전용)\n\n"
         "<b>💊 PMS 케어</b>\n"
-        "<code>/pms</code> — 5일간 매일 08·16·22시 생리통 약 리마인드 + 케어 팁 (시작 슬롯은 버튼으로 선택)\n"
-        "<code>/pms 8</code> — 버튼 없이 오늘 08:00 복용분을 1회차로 바로 시작\n"
+        "<code>/pms</code> — 생리통 약 리마인드: 시작 시각부터 <b>8시간 간격 15회(5일)</b> + 케어 팁 (시작 시각을 되물어요 — 질문에 답장으로 입력)\n"
+        "<code>/pms 2026-08-03-08</code> — 그 시각 복용분을 1회차로 바로 시작 (지난 회차는 건너뜀)\n"
+        "<code>/pms 8</code> — 오늘 08:00을 1회차로\n"
         "<code>/pms off</code> — 중단\n\n"
         "/whoami — 내 담당자(식/여니) 확인·변경",
         parse_mode='HTML')
@@ -678,6 +679,9 @@ async def _process_exercise_text(update, context, text: str):
 
 
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # /pms 시작시각 질문에 대한 답장 우선 처리 (그룹 답장·DM 텍스트 — 그룹 early-return보다 앞)
+    if await _maybe_handle_pms_reply(update, context):
+        return
     # 일반 텍스트는 1:1(DM)에서만 처리. 그룹에서는 /log 명령 사용(프라이버시·스팸 회피).
     if update.effective_chat and update.effective_chat.type != 'private':
         return
@@ -1408,19 +1412,28 @@ async def cal_reminder_poll_job(context: ContextTypes.DEFAULT_TYPE):
 
 
 # ══════════════════════════════════════════════════════════
-# /pms — 생리통 약 복용 리마인드 (5일 × 08/16/22시 = 15회) + 케어 팁 로테이션
+# /pms — 생리통 약 복용 리마인드 (시작 시각부터 8시간 간격 × 15회 = 5일) + 케어 팁 로테이션
 # ══════════════════════════════════════════════════════════
-# 활성화 시점의 '다음 슬롯'부터 15회를 미리 확정해 상태파일에 저장하고,
+# 시작 시각(앵커)부터 8시간 간격 15회를 미리 확정해 상태파일에 저장하고,
 # 5분 폴링(run_repeating)이 상태파일만 보고 발송한다 — 재시작 무손실, run_daily 불필요.
 # 중복보다 누락을 감수: 발송 전에 슬롯을 claimed로 선기록해 발송 도중 죽어도 재발송하지 않는다.
 PMS_STATE_FILE = os.path.join(ROOT, '.seonyuduo_pms.json')
 PMS_TIPS_FILE = os.path.join(ROOT, 'seonyuduo_pms_tips.json')
-PMS_SLOT_HOURS = (8, 16, 22)
-PMS_SLOT_COUNT = 15                # 5일 × 3회
+PMS_INTERVAL_H = 8                 # 복용 간격(시간)
+PMS_SLOT_COUNT = 15                # 8h × 15회 ≈ 5일
 PMS_POLL_INTERVAL = 300            # 초; 5분 폴링
-PMS_CATCHUP_HOURS = 2              # 슬롯별 늦은 발송 허용창. 22시 슬롯은 자정까지로 추가 제한
-PMS_SLOT_LABEL = {8: '☀️ 아침', 16: '🌤️ 오후', 22: '🌙 밤'}
+PMS_CATCHUP_HOURS = 2              # 슬롯별 늦은 발송 허용창(시간)
 PMS_FALLBACK_TIP = '아랫배·허리를 따뜻하게 — 핫팩이나 온찜질이 통증 완화에 도움돼요'
+
+
+def _pms_slot_label(h: int) -> str:
+    if 5 <= h < 12:
+        return '☀️ 아침'
+    if 12 <= h < 18:
+        return '🌤️ 오후'
+    if 18 <= h < 24:
+        return '🌙 밤'
+    return '🌌 새벽'
 
 
 def _load_pms_state() -> dict:
@@ -1457,41 +1470,39 @@ def _load_pms_tips() -> list:
         return [PMS_FALLBACK_TIP]
 
 
-def _pms_gen_slots(now: datetime.datetime, n: int = PMS_SLOT_COUNT,
-                   anchor: datetime.datetime = None) -> list:
-    """08/16/22시 슬롯 n개 (KST ISO 문자열, 시간순).
-    anchor 지정 시 그 슬롯을 1회차로 포함(지난 슬롯 포함 — 활성화 때 skipped 처리),
-    미지정 시 now 이후 슬롯부터."""
-    slots = []
-    day = (anchor or now).date()
-    while len(slots) < n:
-        for h in PMS_SLOT_HOURS:
-            if len(slots) >= n:
-                break
-            dt = datetime.datetime(day.year, day.month, day.day, h, tzinfo=KST)
-            if (dt >= anchor) if anchor is not None else (dt > now):
-                slots.append(dt.isoformat())
-        day += datetime.timedelta(days=1)
-    return slots
+def _pms_gen_slots(anchor: datetime.datetime, n: int = PMS_SLOT_COUNT) -> list:
+    """anchor(1회차)부터 8시간 간격 슬롯 n개 (KST ISO 문자열, 시간순)."""
+    return [(anchor + datetime.timedelta(hours=PMS_INTERVAL_H * i)).isoformat()
+            for i in range(n)]
 
 
-def _pms_parse_anchor_hour(arg: str):
-    """'8'/'08'/'8시'/'08:00'/'16'/'22' → 8/16/22, 그 외 None."""
-    s = (arg or '').strip().replace('시', '')
-    s = s.split(':', 1)[0]
-    try:
-        h = int(s)
-    except ValueError:
-        return None
-    return h if h in PMS_SLOT_HOURS else None
+def _pms_parse_anchor(arg_str: str, now: datetime.datetime):
+    """시작 시각 인자 → anchor datetime(KST) 또는 None.
+    'YYYY-MM-DD-HH' / 'YYYY-MM-DD HH' (':MM' 허용) / 'HH'(오늘 그 시각) / '지금'."""
+    s = (arg_str or '').strip().replace('시', '')
+    if s in ('지금', 'now'):
+        return now.replace(second=0, microsecond=0)
+    m = re.match(r'^(\d{4})-(\d{1,2})-(\d{1,2})[- ](\d{1,2})(?::(\d{2}))?$', s)
+    if m:
+        y, mo, d, h, mi = m.groups()
+        try:
+            return datetime.datetime(int(y), int(mo), int(d), int(h), int(mi or 0),
+                                     tzinfo=KST)
+        except ValueError:
+            return None
+    if re.match(r'^\d{1,2}(?::\d{2})?$', s):
+        h, _, mi = s.partition(':')
+        try:
+            return datetime.datetime(now.year, now.month, now.day, int(h), int(mi or 0),
+                                     tzinfo=KST)
+        except ValueError:
+            return None
+    return None
 
 
 def _pms_slot_deadline(slot_dt: datetime.datetime) -> datetime.datetime:
-    """슬롯별 늦은 발송 한계 — 기본 +2h, 단 자정을 넘기지 않음 (22시 슬롯의 새벽 발송 방지)."""
-    limit = slot_dt + datetime.timedelta(hours=PMS_CATCHUP_HOURS)
-    midnight = (slot_dt + datetime.timedelta(days=1)).replace(hour=0, minute=0,
-                                                              second=0, microsecond=0)
-    return min(limit, midnight)
+    """슬롯별 늦은 발송 한계 — 슬롯 +2h."""
+    return slot_dt + datetime.timedelta(hours=PMS_CATCHUP_HOURS)
 
 
 def _pms_fmt_dt(dt: datetime.datetime) -> str:
@@ -1499,7 +1510,7 @@ def _pms_fmt_dt(dt: datetime.datetime) -> str:
 
 
 def _pms_format_message(idx: int, slot_dt: datetime.datetime, tips: list) -> str:
-    label = PMS_SLOT_LABEL.get(slot_dt.hour, '💊')
+    label = _pms_slot_label(slot_dt.hour)
     tip = tips[idx % len(tips)]
     last = ' — 마지막 알림이에요!' if idx == PMS_SLOT_COUNT - 1 else ''
     return (f"💊 <b>PMS 케어 · {label} 알림</b> ({idx + 1}/{PMS_SLOT_COUNT}){last}\n"
@@ -1522,9 +1533,11 @@ def _pms_active_summary(st: dict) -> str:
 
 def _pms_activate(chat_id: int, now: datetime.datetime, anchor: datetime.datetime,
                   jq_missing: bool) -> str:
-    """캠페인 활성화 + 확인 텍스트 반환. anchor=None이면 다음 슬롯부터.
-    앵커의 지난 슬롯은 복용 완료(skipped)로 선기록 — 회차 번호·팁 순서 유지."""
-    slots = _pms_gen_slots(now, anchor=anchor)
+    """캠페인 활성화 + 확인 텍스트 반환. anchor(1회차 복용 시각, None=지금)부터 8시간 간격 15회.
+    이미 지난 슬롯은 복용 완료(skipped)로 선기록 — 회차 번호·팁 순서 유지."""
+    if anchor is None:
+        anchor = now.replace(second=0, microsecond=0)
+    slots = _pms_gen_slots(anchor)
     sent = {}
     for s in slots:
         sdt = datetime.datetime.fromisoformat(s)
@@ -1532,43 +1545,30 @@ def _pms_activate(chat_id: int, now: datetime.datetime, anchor: datetime.datetim
             sent[s] = {'status': 'skipped', 'ts': time.time()}
     remaining = [s for s in slots if s not in sent]
     if not remaining:
-        return "선택한 시작 시각 기준으로 남은 알림이 없어요. '다음 슬롯부터'로 시작해보세요."
+        return "그 시작 시각은 15회가 전부 지나버렸어요. 더 최근 시각으로 다시 /pms 해주세요."
     end = datetime.datetime.fromisoformat(slots[-1])
     nxt = datetime.datetime.fromisoformat(remaining[0])
     _save_pms_state({'active': True, 'chat_id': chat_id,
                      'started': now.isoformat(), 'slots': slots, 'sent': sent})
     skipped = f"이미 지난 {len(sent)}회는 복용하신 걸로 건너뛰고, " if sent else ''
-    base = f" (1회차 = {_pms_fmt_dt(datetime.datetime.fromisoformat(slots[0]))})" if anchor else ''
     warn = '\n\n⚠️ (개발환경) JobQueue 미설치 — 실제 발송은 되지 않아요.' if jq_missing else ''
-    return (f"💊 <b>PMS 케어 시작</b>{base}\n"
-            f"매일 <b>08:00 · 16:00 · 22:00</b>에 알려드릴게요.\n\n"
+    return (f"💊 <b>PMS 케어 시작</b> (1회차 = {_pms_fmt_dt(anchor)})\n"
+            f"<b>8시간마다</b> 총 {PMS_SLOT_COUNT}회 알려드릴게요.\n\n"
             f"▸ {skipped}다음 알림: {_pms_fmt_dt(nxt)} ({slots.index(remaining[0]) + 1}/{PMS_SLOT_COUNT})\n"
             f"▸ 마지막 알림: {_pms_fmt_dt(end)} ({PMS_SLOT_COUNT}/{PMS_SLOT_COUNT})\n"
             f"▸ 중단하려면: /pms off{warn}")
 
 
-def _pms_start_keyboard(now: datetime.datetime) -> InlineKeyboardMarkup:
-    """시작 슬롯 선택 버튼 — 오늘/어제 3슬롯 + 다음 슬롯부터 + 취소. 콜백 pms:s:<일오프셋>:<시>."""
-    def row(off, label):
-        return [InlineKeyboardButton(f"{label} {h:02d}시", callback_data=f"pms:s:{off}:{h}")
-                for h in PMS_SLOT_HOURS]
-    return InlineKeyboardMarkup([
-        row(0, '오늘'),
-        row(1, '어제'),
-        [InlineKeyboardButton("다음 슬롯부터 (지정 안 함)", callback_data="pms:s:next")],
-        [InlineKeyboardButton("취소", callback_data="pms:x")],
-    ])
-
-
 async def cmd_pms(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """/pms — 시작 슬롯을 버튼으로 물어본 뒤 5일×3회 복약 리마인드 · /pms off — 중단.
-    /pms 8 처럼 시각을 바로 주면 오늘 그 슬롯을 1회차로 즉시 시작."""
+    """/pms — 다음 슬롯부터 5일×3회 복약 리마인드 · /pms off — 중단.
+    /pms 2026-08-03-08 (또는 /pms 8 = 오늘) → 그 슬롯을 1회차로 시작."""
     st = _load_pms_state()
     if st.get('corrupt'):
         await update.message.reply_text("⚠️ PMS 상태파일이 손상돼 있어요. 관리자 확인이 필요해요.")
         return
     arg = (context.args[0].lower() if context.args else '')
     now = datetime.datetime.now(tz=KST)
+    context.chat_data.pop('pms_await', None)  # 이전 질문 대기 초기화
 
     if arg in ('off', 'stop', '중단', '취소'):
         if st.get('active'):
@@ -1587,22 +1587,64 @@ async def cmd_pms(update: Update, context: ContextTypes.DEFAULT_TYPE):
         st['active'] = False  # 슬롯 전부 소진됐는데 active로 남은 경우 정리 후 신규 진행
 
     jq_missing = context.application.job_queue is None
-    if arg:  # 단축 경로: /pms 8 → 오늘 08:00 = 1회차
-        h = _pms_parse_anchor_hour(arg)
-        if h is None:
+    if context.args:  # 시작 시각 직접 지정: /pms 2026-08-03-08 · /pms 8(오늘) · /pms 지금
+        anchor = _pms_parse_anchor(' '.join(context.args), now)
+        if anchor is None:
             await update.message.reply_text(
-                "시작 시각은 08 / 16 / 22 중 하나로 지정해주세요.\n"
-                "예) <code>/pms 8</code> — 오늘 08:00 복용분을 1회차로 계산", parse_mode='HTML')
+                "시작 시각 형식이 틀렸어요.\n"
+                "▸ <code>/pms 2026-08-03-08</code> — 그 시각 복용분을 1회차로\n"
+                "▸ <code>/pms 8</code> — 오늘 08:00을 1회차로", parse_mode='HTML')
             return
-        anchor = datetime.datetime(now.year, now.month, now.day, h, tzinfo=KST)
         await update.message.reply_text(_pms_activate(update.effective_chat.id, now,
                                                       anchor, jq_missing), parse_mode='HTML')
         return
 
-    await update.message.reply_text(
-        "💊 <b>PMS 케어</b> — 약 복용을 언제 시작했어요(하나요)?\n"
-        "선택한 슬롯이 1회차가 되고, 이미 지난 슬롯은 복용하신 걸로 건너뛰어요.",
-        parse_mode='HTML', reply_markup=_pms_start_keyboard(now))
+    # 무인자 → 시작 날짜·시각을 되물어 확인 (답장으로 입력받음. 그룹은 프라이버시 모드라
+    # 일반 텍스트를 못 받으므로 반드시 이 질문 메시지에 '답장'해야 봇에 도달한다.)
+    sent = await update.message.reply_text(
+        "💊 약 복용을 언제 시작하나요?\n"
+        "이 메시지에 답장으로 보내주세요.\n"
+        "예) <code>2026-08-03-08</code>", parse_mode='HTML')
+    context.chat_data['pms_await'] = {'msg_id': sent.message_id, 'ts': time.time()}
+
+
+async def _maybe_handle_pms_reply(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
+    """/pms 시작시각 질문에 대한 답장 처리. 소비했으면 True.
+    그룹=질문 메시지에 대한 답장만 인정 · DM=대기 중이면 일반 텍스트도 인정 (10분 유효)."""
+    pend = context.chat_data.get('pms_await')
+    if not pend:
+        return False
+    if time.time() - pend.get('ts', 0) > 600:
+        context.chat_data.pop('pms_await', None)
+        return False
+    msg = update.message
+    is_reply = (msg.reply_to_message is not None
+                and msg.reply_to_message.message_id == pend.get('msg_id'))
+    if not is_reply and update.effective_chat.type != 'private':
+        return False
+    text = (msg.text or '').strip()
+    if not is_reply and text and text[0] == '/':
+        return False  # DM에서 다른 명령 입력은 통과
+    now = datetime.datetime.now(tz=KST)
+    if text in ('취소', 'cancel'):
+        context.chat_data.pop('pms_await', None)
+        await msg.reply_text("취소했어요. 필요할 때 다시 /pms")
+        return True
+    anchor = _pms_parse_anchor(text, now)
+    if anchor is None:
+        await msg.reply_text(
+            "형식이 맞지 않아요. 예) <code>2026-08-03-08</code> 또는 <code>8</code>(오늘) "
+            "· <code>지금</code> · <code>취소</code>", parse_mode='HTML')
+        return True
+    context.chat_data.pop('pms_await', None)
+    st = _load_pms_state()
+    if st.get('active') and _pms_active_summary(st):
+        await msg.reply_text(_pms_active_summary(st), parse_mode='HTML')
+        return True
+    jq_missing = context.application.job_queue is None
+    await msg.reply_text(_pms_activate(update.effective_chat.id, now, anchor, jq_missing),
+                         parse_mode='HTML')
+    return True
 
 
 async def pms_poll_job(context: ContextTypes.DEFAULT_TYPE):

@@ -117,8 +117,9 @@ AOE_DARK_CSS = (
     '.sidebar-link.active{border-bottom-color:' + P['amber'] + '!important}'
     '.sidebar{justify-content:center!important}'
     # 타이포 정수 스케일 (2026-07-18 사용자 확정): 대제목28/섹션18/표본문16/메타13/표헤더12
-    'table,td{font-size:17px!important}'
-    'th{font-size:15px!important}'
+    # (2026-08-03 재단언 제거) 표 크기는 코어 토큰 변수만 주입 — 그리는 규칙은 코어·페이지 소유.
+    # !important = 페이지 컨테이너의 라이트 값(16px 등)보다 우선하기 위함 (변수 선언에만 사용).
+    'table{--aoe-t-font:17px!important;--aoe-t-head-font:15px!important}'
     '.category-title{font-size:30px!important}'
     '.section>h2,.section>h3,.section-title,.section-header,.sector-group h3,'
     'h2.block-title,.wg-head .wg-title,.chart-box h3,.category-detail h3,'
@@ -172,7 +173,9 @@ AOE_DARK_CSS = (
     # Monthly Returns = 생성기 다크 네이티브(416b0842 재복원) — 틴트 셀은 흰 글자 유지
     '#mrTableWrap td[style*=background]{color:#fff!important}'
     # 다크 네이티브 차트 예외 (사용자 지정: SEIBro 막대·Universe Lab 산점도) — id 명시도로 화이트리스트 이김
-    '.section:has(#topChart),div:has(>#topChart),.card:has(#scatter),div:has(>#scatter)'
+    '.section:has(#topChart),div:has(>#topChart),.card:has(#scatter),div:has(>#scatter),'
+    '.chart-box:has(#trendChart),div:has(>#trendChart),'
+    '.chart-box:has(#categoryChart),div:has(>#categoryChart)'
     '{background:' + P['card'] + '!important;color:' + P['text'] + '!important}'
     # 무클래스 표 캡션류(h2~h4, Featured "거래대금 TOP 30" 등) = 흰색. 앰버 섹션타이틀 규칙(.section>h2 등)이 명시도로 우선
     'h2,h3,h4{color:#fff!important}'
@@ -207,9 +210,10 @@ AOE_DARK_CSS = (
     # 타이포 2단 통일 (2026-07-28 사용자 지시): 본문 15px / 보조 13px.
     # 페이지가 12.5·13.1·14·14.4·15.2·17px 6종으로 난립해 구역마다 크기가 달라 보였다.
     # ★일괄 'table,td{17px!important}' 를 이겨야 하므로 여기서 !important 로 재단언한다.
-    '.skill-table td,.skill-table .sk-name,.node .node-name,.wi-name,.layer-head,'
+    # 표 부분은 재단언 대신 변수 재선언 (2026-08-03 — 전역 table 변수 주입 17/15를 아키 확정값 15/13으로 상회)
+    '.skill-table{--aoe-t-font:15px!important;--aoe-t-head-font:13px!important}'
+    '.skill-table .sk-name,.node .node-name,.wi-name,.layer-head,'
     '.card-desc,.card-desc p,.card-desc li{font-size:15px!important}'
-    '.skill-table th,.skill-table .sk-sum,.skill-table .sk-code,.skill-table .sk-code code,'
     '.node .node-sched,.layer-desc,.block-sub,.wi-sched,.wi-summary,.card-meta,'
     '.tl-label,.tl-name,.tl-band-sub,.wiki-count{font-size:13px!important}'
     '.skill-table .sk-name{font-weight:400!important}'

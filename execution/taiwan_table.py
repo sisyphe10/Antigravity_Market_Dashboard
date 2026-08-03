@@ -52,9 +52,9 @@ TAIWAN_CSS = """
         .tw-dl-btn:hover { background: #b91c1c; }
         .tw-container { overflow-x: auto; border: 1px solid #e5e7eb; border-radius: 12px; }
         .tw-table { width: 100%; border-collapse: collapse; font-variant-numeric: var(--aoe-t-num);
-                     --aoe-t-font: 0.8rem; --aoe-t-pad-y: 6px; --aoe-t-head-weight: 600; }
+                     --aoe-t-font: 0.8rem; --aoe-t-head-font: 0.78rem; --aoe-t-pad-y: 6px; --aoe-t-head-weight: 600; }
         .tw-table th { position: sticky; top: 0; padding: 9px var(--aoe-t-pad-x); text-align: var(--aoe-t-align);
-                        font-size: 0.78rem; font-weight: var(--aoe-t-head-weight); color: #374151; background: #f9fafb;
+                        font-size: var(--aoe-t-head-font); font-weight: var(--aoe-t-head-weight); color: #374151; background: #f9fafb;
                         border-bottom: var(--aoe-t-row-line) solid #e5e7eb; white-space: nowrap; cursor: pointer; user-select: none; }
         .tw-table th:hover { color: #111; }
         .tw-table td { padding: var(--aoe-t-pad-y) var(--aoe-t-pad-x); border-bottom: var(--aoe-t-row-line) solid #f3f4f6; color: #111;

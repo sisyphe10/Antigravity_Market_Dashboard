@@ -767,7 +767,7 @@ def chat_delete(cid: str):
 # ── 태그 검색 (2026-07-29) ────────────────────────────────────────────────
 # build_tag_index.py 가 만든 조회 전용 인덱스. LLM 을 부르지 않으므로 즉시·무료다.
 TAG_INDEX_PATH = os.path.join(DATALAKE_ROOT, "tag_index.sqlite")
-TAG_CORPUS_ROOTS = ("research_notes/", "transcripts/", "analyses/", "reports/")
+TAG_CORPUS_ROOTS = ("research_notes/", "transcripts/", "analyses/", "reports/", "notion_study/")
 
 
 def _tag_conn():
