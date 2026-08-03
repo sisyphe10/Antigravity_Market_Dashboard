@@ -9690,8 +9690,8 @@ function refresh() {{
                 tooltip: {{ callbacks: {{ label: function(ctx) {{ return getTicker(chartData[ctx.dataIndex].name) + ': ' + ctx.raw.toLocaleString() + 'M$'; }} }} }}
             }},
             scales: {{
-                x: {{ ticks: {{ callback: function(v) {{ return v.toLocaleString() + 'M$'; }}, font: {{ size: 11 }}, color: '#d9dde2' }}, grid: {{ color: '#2a2b2e' }} }},
-                y: {{ ticks: {{ font: {{ size: 11 }}, color: '#d9dde2' }}, grid: {{ display: false }} }}
+                x: {{ ticks: {{ callback: function(v) {{ return v.toLocaleString() + 'M$'; }}, font: {{ size: 11 }}, color: '#fff' }}, grid: {{ color: '#2a2b2e' }} }},
+                y: {{ ticks: {{ font: {{ size: 11 }}, color: '#fff' }}, grid: {{ display: false }} }}
             }}
         }}
     }});

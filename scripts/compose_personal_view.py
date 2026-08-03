@@ -56,27 +56,27 @@ canon_pat = re.compile(r'<style id="aoe-nav-canon">.*?</style>', re.S)
 # Sisyphe 페이지(sisyphe/)는 미적용(구역 구분 유지). v2: 스크린샷 검증 보정 6건(2026-07-18).
 AOE_DARK_CSS = (
     '<style id="aoe-terminal-dark">'
-    ':root{--bg-color:' + P['bg'] + ';--card-bg:' + P['card'] + ';--text-color:' + P['text'] + ';--category-bg:' + P['th-bg'] + '}'
-    'body{background:' + P['bg'] + '!important;color:' + P['text'] + '!important}'
+    ':root{--bg-color:' + P['bg'] + ';--card-bg:' + P['card'] + ';--text-color:#fff;--category-bg:' + P['th-bg'] + '}'
+    'body{background:' + P['bg'] + '!important;color:#fff!important}'
     # (구) nav.topnav 색·폰트 재단언 4줄 제거 (2026-07-26): 정본 aoe-nav-canon 이 이미 앰버·1rem —
     # !important 재단언은 모바일 미디어쿼리(0.85rem)까지 덮어 폭별 드리프트를 만들었다.
-    'header h1{color:#f2f4f6!important}'
-    '.last-updated{color:' + P['muted'] + '!important}'
+    'header h1{color:#fff!important}'
+    '.last-updated{color:#fff!important}'
     'header h1{display:none!important}'
     'header .subtitle,header .sub{display:none!important}'
     'header{margin:0!important;padding:0 28px!important;text-align:right!important}'
     '.last-updated{margin:0!important;font-size:0.78rem!important}'
     '.section,.mkt-panel,.table-container,.stat-card,.card,.constituents-row,'
     '.csel-display,.csel-list,.cmb-filter-pop,.tw-filter-pop,.layer,.node,.timeline'
-    '{background:' + P['card'] + '!important;color:' + P['text'] + '!important;border-color:' + P['border'] + '!important;'
+    '{background:' + P['card'] + '!important;color:#fff!important;border-color:' + P['border'] + '!important;'
     'box-shadow:none!important}'
     # 필터 팝업 항목 라벨 (2026-08-03): 원본 .cmb-filter-item/.tw-filter-item 의 color:#111 이
     # 다크 카드 배경 위에 그대로 남아 글자가 안 보였다 — 밝은 글자로 재단언 + 호버 배경 다크화.
-    '.cmb-filter-item,.tw-filter-item{color:' + P['text'] + '!important}'
+    '.cmb-filter-item,.tw-filter-item{color:#fff!important}'
     '.tw-filter-item:hover{background:' + P['hover'] + '!important}'
     '.date-bar input,.controls select,.filters select,select,textarea,input[type=date],input[type=text],'
     '.qrow,.plan-in'
-    '{background:' + P['input-bg'] + '!important;color:' + P['text'] + '!important;border-color:' + P['input-border'] + '!important}'
+    '{background:' + P['input-bg'] + '!important;color:#fff!important;border-color:' + P['input-border'] + '!important}'
     '.category-title,.section>h2,.section>h3,h2.block-title{color:' + P['amber'] + '!important;letter-spacing:1.5px}'
     'th{background:' + P['th-bg'] + '!important;color:' + P['amber'] + '!important;border-color:#2a2b2e!important}'
     'td{border-color:#222326!important}'
@@ -95,7 +95,7 @@ AOE_DARK_CSS = (
     # 인라인 밝은 배경(히트 틴트·경보 핑크) 위 글자는 어둡게 유지
     'td[style*=background],tr[style*=background] td{color:#333!important}'
     # 다크 틴트 인라인 배경(딤 앰버/딤 바이올렛 — universe RSI/YTD)은 밝은 글자 유지
-    'td[style*="241a3d"],td[style*="0a3038"]{color:#e8e8e8!important}'
+    'td[style*="241a3d"],td[style*="0a3038"]{color:#fff!important}'
     '.tabs{border-bottom-color:' + P['amber'] + '!important}'
     '.subtab,.mkt-subtab,.tab,.mbtn,.chg-fbtn,.nav-button,.tw-more-btn,.tw-dl-btn,'
     '.cmb-filter-btn,.cmb-ma-btn'
@@ -108,11 +108,11 @@ AOE_DARK_CSS = (
     '{background:' + P['amber'] + '!important;color:' + P['nav-bg'] + '!important;border-color:' + P['amber'] + '!important;'
     'font-weight:700}'
     '.stat-card{border-left-color:' + P['amber'] + '!important}'
-    '.stat-card .label{color:' + P['muted'] + '!important}'
-    '.stat-card .value{color:#f2f4f6!important}'
-    '.node .node-name{color:#f2f4f6!important}'
-    '.node .node-sched{color:' + P['muted'] + '!important}'
-    '.tl-band-count{background:' + P['th-bg'] + '!important;color:' + P['text'] + '!important}'
+    '.stat-card .label{color:#fff!important}'
+    '.stat-card .value{color:#fff!important}'
+    '.node .node-name{color:#fff!important}'
+    '.node .node-sched{color:#fff!important}'
+    '.tl-band-count{background:' + P['th-bg'] + '!important;color:#fff!important}'
     '.qrow.starred{background:' + P['hl1-bg'] + '!important}'
     '.sidebar-link.active{border-bottom-color:' + P['amber'] + '!important}'
     '.sidebar{justify-content:center!important}'
@@ -125,9 +125,9 @@ AOE_DARK_CSS = (
     'h2.block-title,.wg-head .wg-title,.chart-box h3,.category-detail h3,'
     '.table-wrap h3,.pcat-head{font-size:20px!important}'
     '.section-count,.category-date{font-size:14px!important}'
-    '.sidebar,.ledger-subtabs,.mm-main .subtabs{height:42px!important;'
+    '.sidebar,.ledger-subtabs,.journal-subtabs,.mm-main .subtabs{height:42px!important;'
     'box-sizing:border-box!important;align-items:stretch!important;overflow:hidden!important}'
-    '.sidebar-link,.ledger-subtab,.mm-main .subtabs .subtab{height:41px!important;font-size:18px!important}'
+    '.sidebar-link,.ledger-subtab,.journal-subtab,.mm-main .subtabs .subtab{height:41px!important;font-size:18px!important}'
     'button[style*="#dc2626"]{background:' + P['amber'] + '!important;color:' + P['nav-bg'] + '!important;'
     'border:1.5px solid ' + P['amber'] + '!important;border-radius:2px!important}'
     # Copy 버튼(#0891b2) = 앰버 다음 강조색인 시안 채움 (2026-08-02 사용자 확정)
@@ -135,13 +135,13 @@ AOE_DARK_CSS = (
     'border:1.5px solid ' + P['hl2-fg'] + '!important;border-radius:2px!important}'
     'button[style*="#2563eb"]{background:transparent!important;color:' + P['amber'] + '!important;'
     'border:1.5px solid ' + P['amber'] + '!important;border-radius:2px!important}'
-    'button[style*="#f3f4f6"]{background:transparent!important;color:#9aa4ae!important;'
+    'button[style*="#f3f4f6"]{background:transparent!important;color:#fff!important;'
     'border:1.5px solid ' + P['input-border'] + '!important;border-radius:2px!important}'
     '.tw-dl-btn{background:' + P['amber'] + '!important;color:' + P['nav-bg'] + '!important;border-color:' + P['amber'] + '!important}'
-    '.node .node-type{background:#101214!important;color:' + P['text'] + '!important}'
+    '.node .node-type{background:#101214!important;color:#fff!important}'
     '.mm-main{padding-top:0!important}'
     '.mm-main .subtabs{margin:0 calc(50% - 50vw) 18px!important}'
-    '.ledger-subtabs{margin:0 calc(50% - 50vw) 18px!important}'
+    '.ledger-subtabs,.journal-subtabs{margin:0 calc(50% - 50vw) 18px!important}'
     # 선택행 하이라이트 (2026-08-03 개편): JS(applyMarkerColors)가 클릭 순번을
     # data-hl(1~3 순환)로 마킹 — 별표 복제 행과 원본이 항상 같은 색을 받고,
     # 순번이 차트 클릭 순서 기반이라 차트 선 색 순서와도 일치.
@@ -149,7 +149,7 @@ AOE_DARK_CSS = (
     '.cmb-series-row[data-hl="1"] td{background:' + P['hl1-bg'] + '!important;color:' + P['hl1-fg'] + '!important;font-weight:700!important}'
     '.cmb-series-row[data-hl="2"] td{background:' + P['hl2-bg'] + '!important;color:' + P['hl2-fg'] + '!important;font-weight:700!important}'
     '.cmb-series-row[data-hl="3"] td{background:' + P['hl3-bg'] + '!important;color:' + P['hl3-fg'] + '!important;font-weight:700!important}'
-    '.today-date{color:#c9ced4!important}'
+    '.today-date{color:#fff!important}'
     '.qcard{background:' + P['card2'] + '!important;color:#fff!important;border-color:' + P['border'] + '!important;box-shadow:none!important}'
     '.qcard .qsrc,.qcard .qsrc .qnote{color:#fff!important}'
     '.plan-gcell{background:' + P['card'] + '!important}'
@@ -158,7 +158,7 @@ AOE_DARK_CSS = (
     '#etfTab3 td{color:#fff!important}'
     '#etfTab3 td.pos{color:' + P['up'] + '!important}'
     '#etfTab3 td.neg{color:' + P['down'] + '!important}'
-    '#etfTab3 td.us-mut{color:' + P['muted'] + '!important}'
+    '#etfTab3 td.us-mut{color:#fff!important}'
     '#etfTab3 td.kr-o{color:#7ec87e!important}'
     '#etfTab3 tr.us-hl td{background:' + P['hl1-bg'] + '!important}'
     '#etfTab3 td.us-hl-name{color:' + P['hl1-fg'] + '!important}'
@@ -176,34 +176,34 @@ AOE_DARK_CSS = (
     '.section:has(#topChart),div:has(>#topChart),.card:has(#scatter),div:has(>#scatter),'
     '.chart-box:has(#trendChart),div:has(>#trendChart),'
     '.chart-box:has(#categoryChart),div:has(>#categoryChart)'
-    '{background:' + P['card'] + '!important;color:' + P['text'] + '!important}'
+    '{background:' + P['card'] + '!important;color:#fff!important}'
     # 무클래스 표 캡션류(h2~h4, Featured "거래대금 TOP 30" 등) = 흰색. 앰버 섹션타이틀 규칙(.section>h2 등)이 명시도로 우선
     'h2,h3,h4{color:#fff!important}'
     # ---- architecture.html 다크 보정 (2026-07-28) ----
     # 생성기(create_architecture.py)는 라이트 전제라 도식도 밖(설명문·타임라인 라벨·위키 목록/카드)이
     # 전부 #000~#555 → 다크 배경에서 사실상 안 보였다. 페이지 고유 클래스라 여기서만 보정한다.
     '.block-sub,.layer-desc,.wiki-count,.wi-sched,.wi-caret,.card-meta,.tl-tick,.tl-band-sub'
-    '{color:' + P['muted'] + '!important}'
-    '.layer-head,.tl-band-name,.wi-name{color:#f2f4f6!important}'
-    '.tl-label,.tl-name{color:#e8ebee!important}'
-    '.tl-freq{background:' + P['input-border'] + '!important;color:' + P['text'] + '!important}'
+    '{color:#fff!important}'
+    '.layer-head,.tl-band-name,.wi-name{color:#fff!important}'
+    '.tl-label,.tl-name{color:#fff!important}'
+    '.tl-freq{background:' + P['input-border'] + '!important;color:#fff!important}'
     '.tl-axis{border-bottom-color:' + P['input-border'] + '!important}'
     '.tl-track{background:repeating-linear-gradient(90deg,#1a1b1e 0,#1a1b1e 1px,'
     'transparent 1px,transparent 12.5%)!important}'
-    '.tl-trigger{color:' + P['text'] + '!important;background:#1a1b1e!important;'
+    '.tl-trigger{color:#fff!important;background:#1a1b1e!important;'
     'border-color:' + P['input-border'] + '!important}'
     '.tl-mark{border-color:' + P['bg'] + '!important}'
     '.tl-band{background:' + P['card2'] + '!important;border-left-color:' + P['amber'] + '!important}'
-    '.tl-band-count{background:' + P['th-bg'] + '!important;color:' + P['text'] + '!important}'
+    '.tl-band-count{background:' + P['th-bg'] + '!important;color:#fff!important}'
     '.wg-head{border-bottom-color:' + P['amber'] + '!important}'
     '.wg-head .wg-title{color:' + P['amber'] + '!important}'
-    '.wg-head .g-count{background:' + P['th-bg'] + '!important;color:' + P['text'] + '!important}'
+    '.wg-head .g-count{background:' + P['th-bg'] + '!important;color:#fff!important}'
     '.wi-summary,.card-desc,.card-desc p,.card-desc li,.card-desc strong,'
     '.card-desc h4,.card-desc h5,.card-desc h6,.chip-row .chip-k'
-    '{color:' + P['text'] + '!important}'
+    '{color:#fff!important}'
     '.witem{border-bottom-color:#1f2023!important}'
     '.witem-row:hover{background:' + P['hover'] + '!important}'
-    '.wiki-search{background:' + P['input-bg'] + '!important;color:' + P['text'] + '!important;'
+    '.wiki-search{background:' + P['input-bg'] + '!important;color:#fff!important;'
     'border-color:' + P['input-border'] + '!important}'
     '.legend .sep{background:' + P['input-border'] + '!important}'
     'header.page-head{border-bottom-color:' + P['border'] + '!important}'
@@ -217,7 +217,13 @@ AOE_DARK_CSS = (
     '.node .node-sched,.layer-desc,.block-sub,.wi-sched,.wi-summary,.card-meta,'
     '.tl-label,.tl-name,.tl-band-sub,.wiki-count{font-size:13px!important}'
     '.skill-table .sk-name{font-weight:400!important}'
-    '.skill-table .sk-code code{font-family:inherit!important;color:' + P['muted'] + '!important}'
+    '.skill-table .sk-code code{font-family:inherit!important;color:#fff!important}'
+    'footer,footer a,.date-bar span,.section-count,.no-match,.note,.data-table th .sort-arrow{color:#fff!important}'
+    '[style*="color:#888"],[style*="color: #888"],[style*="color:#999"],[style*="color: #999"],[style*="color:#aaa"],[style*="color:#555"],[style*="color: #555"],[style*="color:#9ca3af"],[style*="color: #9ca3af"]{color:#fff!important}'
+    '.chart-card [style*="color:#888"],.chart-container [style*="color:#888"],.lh-card [style*="color:#888"],.chart-card [style*="color:#999"],.chart-container [style*="color:#999"],.chart-card [style*="color:#555"],.chart-container [style*="color:#555"]{color:#333!important}'
+    '#cmbSelCount{color:#fff!important}'
+    '.date-bar label,.controls label,.section-header .count,.updated,.tw-foot,.tw-filter-btn{color:#fff!important}'
+    '[style*="background:#fff"][style*="color:#"],[style*="background: #fff"][style*="color:#"],[style*="background:#f9fafb"][style*="color:#"],[style*="background:#f3f4f6"][style*="color:#"]:not(button),[style*="background:#fafafa"][style*="color:#"]{color:#333!important}'
     '</style>')
 dark_pat = re.compile(r'<style id="aoe-terminal-dark">.*?</style>', re.S)
 
@@ -228,15 +234,33 @@ dark_pat = re.compile(r'<style id="aoe-terminal-dark">.*?</style>', re.S)
 ACTIVE_OF = {'journal.html': 'journal', 'dashboard.html': 'ledger', 'memento.html': 'memento',
              'checklist_test.html': None}
 # journal 페이지: 해시(#weekly)에 따라 nav 액티브를 Journal↔Weekly 로 전환 + 페이지 서브탭 동기화
+# 2026-08-03: Weekly 상단 탭 병합 — 상단 Journal 은 상시 active, 해시는 드롭다운·하위 스트립만 전환
 HASH_ACTIVE_JS = (
     '<script id="aoe-nav-hash-active">document.addEventListener("DOMContentLoaded",function(){'
-    'var nav=document.querySelector("nav.topnav");if(!nav)return;'
-    'var j=nav.querySelector(\'a[href="/sisyphe/journal.html"]\');'
-    'var w=nav.querySelector(\'a[href="/sisyphe/journal.html#weekly"]\');'
     'function u(sync){var wk=location.hash==="#weekly";'
-    'if(j)j.classList.toggle("active",!wk);if(w)w.classList.toggle("active",wk);'
+    'var all=document.querySelectorAll(".topnav-dropdown a[href*=journal], #aoeJournalStrip a");'
+    'Array.prototype.forEach.call(all,function(a){'
+    'var isW=(a.getAttribute("href")||"").indexOf("#weekly")>-1;'
+    'a.classList.toggle("active",isW===wk);});'
     'if(sync&&typeof switchTab==="function")switchTab(wk?"weekly":"journal");}'
-    'window.addEventListener("hashchange",function(){u(true)});u(false);});</script>')
+    'window.addEventListener("hashchange",function(){u(true)});u(location.hash==="#weekly");});</script>')
+
+# Journal 하위 스트립 (Ledger 서브탭 양식 이식 — sticky 42px 가로 스트립, active=앰버 밑줄)
+JOURNAL_STRIP_CSS = (
+    '<style id="aoe-journal-strip-css">'
+    '.journal-subtabs{position:sticky;top:54px;display:flex;justify-content:center;align-items:stretch;'
+    'gap:2px;margin:0 0 18px;padding:0 28px;background:#161b21;border-bottom:1px solid #2a323b;z-index:90}'
+    '.journal-subtab{display:inline-flex;align-items:center;height:38px;padding:0 14px;border:none;'
+    'border-radius:0;border-bottom:2px solid transparent;background:transparent;color:#9aa4ae;'
+    'font-family:inherit;font-size:0.85rem;font-weight:600;cursor:pointer;text-decoration:none;'
+    'transition:color 0.12s}'
+    '.journal-subtab:hover{color:#fff}'
+    '.journal-subtab.active{color:#fff;font-weight:700;border-bottom-color:' + P['amber'] + '}'
+    '</style>')
+JOURNAL_STRIP = (
+    '<div class="journal-subtabs" id="aoeJournalStrip">'
+    '<a href="#daily" class="journal-subtab active">Daily</a>'
+    '<a href="#weekly" class="journal-subtab">Weekly</a></div>')
 # 1안(2026-07-16 사용자 확정): 사이드바 전면 제거 — journal(서브내비=본문 tab-bar)·dashboard 공통.
 # 본문 좌측 오프셋도 해제. (구 JOURNAL_OFFSET·CORNER_BRAND 는 사이드바와 함께 폐기)
 NO_SIDEBAR = '<style id="aoe-nosidebar">.sidebar{display:none}.has-sidebar{padding-left:24px !important}</style>'
@@ -428,7 +452,9 @@ for name in SISYPHE_PAGES:
     if name in ("journal.html", "dashboard.html"):
         s = inject_before_head(s, NO_SIDEBAR)
     if name == "journal.html":
+        s = inject_before_head(s, JOURNAL_STRIP_CSS)
         s = inject_before_head(s, HASH_ACTIVE_JS)
+        s = s.replace('</nav>', '</nav>' + JOURNAL_STRIP, 1)   # 스트립 = nav 바로 아래
 
     open(p, "w", encoding="utf-8").write(s)
 

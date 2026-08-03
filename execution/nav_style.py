@@ -96,8 +96,11 @@ NAV_ITEMS = [
         ('etf',          '/etf.html',          'ETF'),
         ('seibro',       '/seibro.html',       'SEIBro'),
     ]),
-    ('journal',      '/sisyphe/journal.html',        'Journal',      False, None),
-    ('weekly',       '/sisyphe/journal.html#weekly', 'Weekly',       False, None),
+    # 2026-08-03 사용자: Weekly 상단 탭을 Journal 하위로 병합 — 드롭다운·하위 스트립 = Daily/Weekly
+    ('journal',      '/sisyphe/journal.html',        'Journal',      False, [
+        ('journal_daily',  '/sisyphe/journal.html',        'Daily'),
+        ('journal_weekly', '/sisyphe/journal.html#weekly', 'Weekly'),
+    ]),
     ('earnings',     '/wiki/library',                'Earnings',     False, None),
     ('wiki',         '/wiki/',                       'Wiki',         False, None),
     ('memento',      '/sisyphe/memento.html',        'Memento',      True,  None),
