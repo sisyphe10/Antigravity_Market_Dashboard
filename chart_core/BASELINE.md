@@ -85,3 +85,8 @@
   차트 상태(축 min/max·ticks·datasets 값 해시·범례 텍스트·툴팁 제목·파일명)를 JSON 덤프
 - golden: `harness/golden/*.json` — diff 0 = 통과. 의도 변경 시 golden 갱신+사유 커밋 메시지 기록
 - 실행: `python chart_core/harness/run_snapshots.py [--update]`
+
+## 백로그 진행 (2026-08-03)
+- **③ 표 토큰 확대 — 대시보드·wrap 완료** (49d72ada·cfb52c15·4b1174d4): market/wrap 페이지에 aoe_tokens.css 임베드(tokensSha256 검증 로더 `_load_aoe_tokens_css`), `.portfolio-table` 2블록·`.rt-*`·cmb 사이드테이블(인라인 th_base/cell_base)을 var(--aoe-t-*) 배선. 페이지 고유 값은 컨테이너 셀렉터 변수 재정의로 외재화(렌더 보존 — ts.net 다크 computed 기준선 diff 0, tabular-nums만 신규·P7 전례). 다크 스킨의 크기 셀렉터 재단언(17px 등) 제거는 잔여 표(universe·seibro·featured 등) 토큰화 후 별도 단계.
+- **② 하네스 일부**: 다운로드 파일명 날짜=비결정 필드 → DATE 마스킹 후 비교(골든 재생성, EOL도 LF 정규화). **playwright+chromium 을 맥미니 repo venv에 상주 설치** — 하네스 실행 환경이 정본 기기에 고정됨.
+- ★재발 함정: market.html 재생성 후 커밋까지 6분 지연 → git_pull 5분 주기 `checkout -- *.html`에 되돌려짐(8/2 동일 사고). 재생성→어서션→커밋→게시를 **한 SSH 체인**으로 재적용해 회수.
