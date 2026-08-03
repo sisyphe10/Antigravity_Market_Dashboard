@@ -2453,47 +2453,6 @@ def _build_combined_chart_section():
                 if (th) th.classList.toggle('on', cmbStarOnly);
                 window.cmbApplyPin();
             }
-            // 고정 블록 드래그 순서 변경 (2026-07-28). 순서 정본 = cmbStarList(서버 저장 배열).
-            var _cmbDragName = null;
-            function cmbClearDrop() {
-                document.querySelectorAll('#cmbSideTable tr.cmb-drop').forEach(function(x) { x.classList.remove('cmb-drop'); });
-            }
-            function cmbBindDrag(row) {
-                if (row._cmbDrag) return;   // 중복 바인드 방지 (cmbApplyPin 은 자주 불린다)
-                row._cmbDrag = 1;
-                row.addEventListener('dragstart', function(e) {
-                    if (!row.classList.contains('cmb-pinned')) { e.preventDefault(); return; }
-                    _cmbDragName = row.getAttribute('data-name');
-                    row.classList.add('cmb-drag');
-                    try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', _cmbDragName); } catch (x) {}
-                });
-                row.addEventListener('dragover', function(e) {
-                    if (!_cmbDragName || !row.classList.contains('cmb-pinned')) return;
-                    e.preventDefault();
-                    try { e.dataTransfer.dropEffect = 'move'; } catch (x) {}
-                    if (row.getAttribute('data-name') !== _cmbDragName) { cmbClearDrop(); row.classList.add('cmb-drop'); }
-                });
-                row.addEventListener('drop', function(e) {
-                    e.preventDefault(); e.stopPropagation();
-                    cmbClearDrop();
-                    var to = row.getAttribute('data-name');
-                    if (!_cmbDragName || to === _cmbDragName) return;
-                    var from = cmbStarList.indexOf(_cmbDragName), ti = cmbStarList.indexOf(to);
-                    if (from < 0 || ti < 0) return;
-                    cmbStarList.splice(from, 1);
-                    var ni = cmbStarList.indexOf(to);
-                    cmbStarList.splice(from < ti ? ni + 1 : ni, 0, _cmbDragName);   // 아래로=뒤에, 위로=앞에
-                    cmbSaveStars();
-                    window.cmbApplyPin();
-                });
-                row.addEventListener('dragend', function() {
-                    row.classList.remove('cmb-drag');
-                    cmbClearDrop();
-                    _cmbDragName = null;
-                    window._cmbDragJustEnded = 1;   // 드롭 직후 click 이 차트 선택을 건드리지 않도록
-                    setTimeout(function() { window._cmbDragJustEnded = 0; }, 150);
-                });
-            }
             // 별표 행을 테이블 맨 위 '복제 블록'으로 고정 + 구분행 삽입 (2026-08-03 개편).
             // 원본 행은 제자리에 그대로 남고, 상단 블록은 복제본(cmb-pin-clone)으로 매번 재구성.
             // 행 핸들러가 전부 인라인 onclick 이라 cloneNode 로 동작까지 복제된다.
@@ -2511,21 +2470,20 @@ def _build_combined_chart_section():
                     var td = r.querySelector('td.cmb-star');
                     if (td && td.classList.contains('on')) pinned.push(r);
                 });
-                if (!window._cmbDragGuard) {   // 드롭 직후 잔여 click 삼키기 (캡처 단계)
-                    window._cmbDragGuard = 1;
-                    var tbl = document.getElementById('cmbSideTable');
-                    if (tbl) tbl.addEventListener('click', function(e) {
-                        if (window._cmbDragJustEnded) { e.stopPropagation(); e.preventDefault(); }
-                    }, true);
-                }
                 if (!pinned.length) return;
-                // 표시 순서 = 사용자 지정(cmbStarList). 목록에 없는 별표는 뒤로.
+                // 표시 순서 = 고정 규칙 (2026-08-03 사용자 확정: 드래그 순서 폐기).
+                // 주기(Daily>Weekly>Monthly>Quarterly) → Country(Korea>US>China>Japan>Taiwan>Europe>Global).
+                // 동순위는 테이블 원래 순서 유지(sort 안정성). cmbStarList 는 별표 집합 저장용으로만 사용.
+                var FR = { Daily: 0, Weekly: 1, Monthly: 2, Quarterly: 3 };
+                var CR = { Korea: 0, US: 1, China: 2, Japan: 3, Taiwan: 4, Europe: 5, Global: 6 };
+                function cmbPinKey(r) {
+                    var f = FR[(r.cells[1] ? r.cells[1].textContent.trim() : '')];
+                    var c = CR[r.getAttribute('data-country') || ''];
+                    return [f === undefined ? 9 : f, c === undefined ? 9 : c];
+                }
                 pinned.sort(function(a, b) {
-                    var ia = cmbStarList.indexOf(a.getAttribute('data-name'));
-                    var ib = cmbStarList.indexOf(b.getAttribute('data-name'));
-                    if (ia < 0) { ia = 9999; }
-                    if (ib < 0) { ib = 9999; }
-                    return ia - ib;
+                    var ka = cmbPinKey(a), kb = cmbPinKey(b);
+                    return (ka[0] - kb[0]) || (ka[1] - kb[1]);
                 });
                 var tr = document.createElement('tr');
                 tr.id = 'cmbPinHead';
@@ -2539,10 +2497,8 @@ def _build_combined_chart_section():
                 pinned.forEach(function(r) {
                     var c = r.cloneNode(true);   // active 클래스·틴트·tooltip 포함 복제
                     c.classList.add('cmb-pin-clone', 'cmb-pinned');
-                    c.setAttribute('draggable', 'true');
                     c.style.display = r.style.display;   // 필터 결과 미러
                     if (r.style.display !== 'none') shown++;
-                    cmbBindDrag(c);
                     if (ref === null) { tbody.insertBefore(c, tbody.firstChild); }
                     else { ref.parentNode.insertBefore(c, ref.nextSibling); }
                     ref = c;
