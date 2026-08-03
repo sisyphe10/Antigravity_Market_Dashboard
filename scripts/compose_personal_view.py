@@ -172,7 +172,9 @@ AOE_DARK_CSS = (
     # Monthly Returns = 생성기 다크 네이티브(416b0842 재복원) — 틴트 셀은 흰 글자 유지
     '#mrTableWrap td[style*=background]{color:#fff!important}'
     # 다크 네이티브 차트 예외 (사용자 지정: SEIBro 막대·Universe Lab 산점도) — id 명시도로 화이트리스트 이김
-    '.section:has(#topChart),div:has(>#topChart),.card:has(#scatter),div:has(>#scatter)'
+    '.section:has(#topChart),div:has(>#topChart),.card:has(#scatter),div:has(>#scatter),'
+    '.chart-box:has(#trendChart),div:has(>#trendChart),'
+    '.chart-box:has(#categoryChart),div:has(>#categoryChart)'
     '{background:' + P['card'] + '!important;color:' + P['text'] + '!important}'
     # 무클래스 표 캡션류(h2~h4, Featured "거래대금 TOP 30" 등) = 흰색. 앰버 섹션타이틀 규칙(.section>h2 등)이 명시도로 우선
     'h2,h3,h4{color:#fff!important}'
