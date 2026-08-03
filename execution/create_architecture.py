@@ -1507,7 +1507,7 @@ SAMPLE_REGISTRY = {
             "reads": [], "writes": ["etf_html"], "depends_on": ["vm_infra"],
         },
         {
-            "id": "vm_infra", "project": "Antigravity", "type": "infra", "name": "Oracle VM (144.24.70.224)",
+            "id": "vm_infra", "project": "Antigravity", "type": "infra", "name": "Oracle VM (은퇴 2026-08-03)",
             "runs_on": "vm_macmini", "status": "frozen",
             "desc_md": "Ubuntu VM. 봇·타이머 호스트. **맥미니(arm64)로 이전 중** (목표 2026-06).",
             "code": ["scripts/deploy.sh"], "reads": [], "writes": [], "depends_on": [],

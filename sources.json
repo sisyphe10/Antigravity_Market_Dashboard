@@ -1,5 +1,5 @@
 {
-  "_comment": "RA_Sisyphe_bot 의 사이트 등록표. enabled=true 항목을 부팅 시 자동 등록. 신규 사이트 추가: (1) execution/sources/<name>.py 작성 → (2) 여기에 entry 추가 → (3) bash scripts/deploy.sh",
+  "_comment": "RA_Sisyphe_bot 의 사이트 등록표. enabled=true 항목을 부팅 시 자동 등록. 신규 사이트 추가: (1) execution/sources/<name>.py 작성 → (2) 여기에 entry 추가 → (3) push 후 맥미니 ra-sisyphe-bot 재시작(launchctl kickstart)",
   "sources": [
     {
       "name": "kna",

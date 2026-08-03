@@ -3,7 +3,7 @@
 새 사이트 추가 절차:
   1. execution/sources/<name>.py 작성 (LABEL, ICON, fetch_new_posts, commit_state, format_message)
   2. DASHBOARD_DIR/sources.json 에 entry 한 줄 추가
-  3. bash scripts/deploy.sh
+  3. push 후 맥미니 ra-sisyphe-bot 재시작: sudo launchctl kickstart -k system/com.antigravity.ra-sisyphe-bot
 
 ra_sisyphe_bot 부팅 시 sources.json 의 enabled=true 항목을 모두 읽어
 job_queue.run_daily 로 자동 등록.

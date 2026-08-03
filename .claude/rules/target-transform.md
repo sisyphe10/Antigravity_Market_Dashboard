@@ -155,8 +155,8 @@ PYTHONIOENCODING=utf-8 python execution/create_dashboard.py
 - **로컬 작업트리는 오염/divergeed** → 항상 **origin/main 기준 격리 worktree**에서 작업: `git worktree add --detach /c/agdeploy_wt origin/main` (★`C:\Users\user` 밖이어야 함). [[project_antigravity_local_safe_push]]
 - ★★**시크릿 스캔 훅 함정**: worktree가 추가 작업디렉토리로 잡히면 그 안의 `execution/kis_token.py`가 스캔 범위에 들어와 **모든 텍스트 응답이 차단**된다(stop_secret_scan.ps1). 대응: worktree 생성 직후 또는 push 완료 후, **텍스트 응답을 내기 전에** `rm -f /c/agdeploy_wt/execution/kis_token.py` (코드 재생성에는 불필요). [[feedback_large_dump_secret_match]]
 - Push는 fast-forward 우선, origin 진행 시 `git merge --no-edit origin/main` 후 재푸시. `[skip ci]`로 장중 무거운 daily_crawl 기동 회피(단, `.claude/**`만 바뀌면 daily_crawl 트리거 안 됨).
-- 배포 금지창 **16:00~17:00 KST**(VM cron race) — VM 배포(deploy.sh) 시. 순수 push는 무관하나 라이브 검증 타이밍 유의. [[feedback_bot_deploy_safety]]
-- 로컬 시계 9h 오차 가능 → 시각 판단은 VM `TZ=Asia/Seoul date`로.
+- 봇 재시작·배포 금지창 **16:00~17:00 KST**(맥미니 finalize-orders 등 민감 잡) — 순수 push는 무관하나 라이브 검증 타이밍 유의. [[feedback_bot_deploy_safety]]
+- 로컬 시계 9h 오차 가능 → 시각 판단은 맥미니 `date`(KST)로.
 
 ## 참고 커밋·임계값
 - 추가: `7ced629e`(1호), `ca48b432`(2차), `f808da21`(1호 차트/색상)
