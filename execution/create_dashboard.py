@@ -1406,7 +1406,7 @@ def _series_country(group_label, s):
     한국 특이 시리즈(KRX/SMP)는 series 단위로 판정. 완벽 정밀보다 필터 유용성 우선."""
     g = group_label
     disp, csvn = s.get('display', ''), s.get('csv', '')
-    if g in ('INDEX_KOREA', 'MACRO KOREA', 'CREDIT & HOUSING', 'HOTELS'):
+    if g in ('INDEX_KOREA', 'MACRO KOREA', 'CREDIT & HOUSING', 'HOTELS', 'DERIVATIVES KR'):
         return 'Korea'
     if g in ('INDEX_US', 'MACRO US', 'CREDIT & HOUSING US'):
         return 'US'
@@ -1417,7 +1417,8 @@ def _series_country(group_label, s):
     if g == 'COMMODITIES':
         return 'Korea' if ('KRX' in csvn or csvn == 'SMP') else 'Global'
     if g == 'INTEREST RATES':
-        return 'US' if (disp.startswith('미 ') or disp.startswith('US') or disp == 'SOFR') else 'Korea'
+        return 'US' if (disp.startswith('미 ') or disp.startswith('US') or disp == 'SOFR'
+                     or 'CDS 5Y' in disp) else 'Korea'
     if g == 'EXCHANGE RATE':
         if 'KRW' in csvn: return 'Korea'
         if 'CNY' in csvn: return 'China'
