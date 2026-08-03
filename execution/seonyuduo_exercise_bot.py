@@ -469,8 +469,8 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "<b>🔁 복습</b>\n"
         "<code>/remind</code> — 유형·대상 골라 최근 운동 피드백 복습 (읽기 전용)\n\n"
         "<b>💊 PMS 케어</b>\n"
-        "<code>/pms</code> — 5일간 매일 08·16·22시 생리통 약 리마인드 + 케어 팁 (다음 슬롯부터)\n"
-        "<code>/pms 2026-08-03-08</code> — 그 날짜·시각 복용분을 1회차로 (지난 슬롯은 건너뜀)\n"
+        "<code>/pms</code> — 5일간 매일 08·16·22시 생리통 약 리마인드 + 케어 팁 (시작 시각을 되물어요 — 질문에 답장으로 입력)\n"
+        "<code>/pms 2026-08-03-08</code> — 그 날짜·시각 복용분을 1회차로 바로 시작 (지난 슬롯은 건너뜀)\n"
         "<code>/pms 8</code> — 오늘 08:00을 1회차로\n"
         "<code>/pms off</code> — 중단\n\n"
         "/whoami — 내 담당자(식/여니) 확인·변경",
@@ -679,6 +679,9 @@ async def _process_exercise_text(update, context, text: str):
 
 
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # /pms 시작시각 질문에 대한 답장 우선 처리 (그룹 답장·DM 텍스트 — 그룹 early-return보다 앞)
+    if await _maybe_handle_pms_reply(update, context):
+        return
     # 일반 텍스트는 1:1(DM)에서만 처리. 그룹에서는 /log 명령 사용(프라이버시·스팸 회피).
     if update.effective_chat and update.effective_chat.type != 'private':
         return
@@ -1576,6 +1579,7 @@ async def cmd_pms(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     arg = (context.args[0].lower() if context.args else '')
     now = datetime.datetime.now(tz=KST)
+    context.chat_data.pop('pms_await', None)  # 이전 질문 대기 초기화
 
     if arg in ('off', 'stop', '중단', '취소'):
         if st.get('active'):
@@ -1594,18 +1598,69 @@ async def cmd_pms(update: Update, context: ContextTypes.DEFAULT_TYPE):
         st['active'] = False  # 슬롯 전부 소진됐는데 active로 남은 경우 정리 후 신규 진행
 
     jq_missing = context.application.job_queue is None
-    anchor = None
-    if context.args:  # 시작 슬롯 지정: /pms 2026-08-03-08 · /pms 2026-08-03 08 · /pms 8(오늘)
+    if context.args:  # 시작 슬롯 직접 지정: /pms 2026-08-03-08 · /pms 2026-08-03 08 · /pms 8(오늘)
         anchor = _pms_parse_anchor(' '.join(context.args), now)
         if anchor is None:
             await update.message.reply_text(
                 "시작 시각 형식이 틀렸어요. (시각은 08/16/22만)\n"
                 "▸ <code>/pms 2026-08-03-08</code> — 그 날짜·시각 복용분을 1회차로\n"
-                "▸ <code>/pms 8</code> — 오늘 08:00을 1회차로\n"
-                "▸ <code>/pms</code> — 다음 슬롯부터", parse_mode='HTML')
+                "▸ <code>/pms 8</code> — 오늘 08:00을 1회차로", parse_mode='HTML')
             return
-    await update.message.reply_text(_pms_activate(update.effective_chat.id, now,
-                                                  anchor, jq_missing), parse_mode='HTML')
+        await update.message.reply_text(_pms_activate(update.effective_chat.id, now,
+                                                      anchor, jq_missing), parse_mode='HTML')
+        return
+
+    # 무인자 → 시작 날짜·시각을 되물어 확인 (답장으로 입력받음. 그룹은 프라이버시 모드라
+    # 일반 텍스트를 못 받으므로 반드시 이 질문 메시지에 '답장'해야 봇에 도달한다.)
+    sent = await update.message.reply_text(
+        "💊 약 복용을 언제 시작했나요(하나요)?\n"
+        "이 메시지에 <b>답장</b>으로 보내주세요.\n\n"
+        "▸ 예) <code>2026-08-03-08</code> (시각은 08·16·22)\n"
+        "▸ <code>8</code> 처럼 시각만 보내면 오늘 기준\n"
+        "▸ 지금부터면 <code>지금</code> · 그만두려면 <code>취소</code>", parse_mode='HTML')
+    context.chat_data['pms_await'] = {'msg_id': sent.message_id, 'ts': time.time()}
+
+
+async def _maybe_handle_pms_reply(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
+    """/pms 시작시각 질문에 대한 답장 처리. 소비했으면 True.
+    그룹=질문 메시지에 대한 답장만 인정 · DM=대기 중이면 일반 텍스트도 인정 (10분 유효)."""
+    pend = context.chat_data.get('pms_await')
+    if not pend:
+        return False
+    if time.time() - pend.get('ts', 0) > 600:
+        context.chat_data.pop('pms_await', None)
+        return False
+    msg = update.message
+    is_reply = (msg.reply_to_message is not None
+                and msg.reply_to_message.message_id == pend.get('msg_id'))
+    if not is_reply and update.effective_chat.type != 'private':
+        return False
+    text = (msg.text or '').strip()
+    if not is_reply and text and text[0] == '/':
+        return False  # DM에서 다른 명령 입력은 통과
+    now = datetime.datetime.now(tz=KST)
+    if text in ('취소', 'cancel'):
+        context.chat_data.pop('pms_await', None)
+        await msg.reply_text("취소했어요. 필요할 때 다시 /pms")
+        return True
+    if text in ('지금', 'now'):
+        anchor = None
+    else:
+        anchor = _pms_parse_anchor(text, now)
+        if anchor is None:
+            await msg.reply_text(
+                "형식이 맞지 않아요. 예) <code>2026-08-03-08</code> 또는 <code>8</code> "
+                "(시각은 08·16·22) · <code>지금</code> · <code>취소</code>", parse_mode='HTML')
+            return True
+    context.chat_data.pop('pms_await', None)
+    st = _load_pms_state()
+    if st.get('active') and _pms_active_summary(st):
+        await msg.reply_text(_pms_active_summary(st), parse_mode='HTML')
+        return True
+    jq_missing = context.application.job_queue is None
+    await msg.reply_text(_pms_activate(update.effective_chat.id, now, anchor, jq_missing),
+                         parse_mode='HTML')
+    return True
 
 
 async def pms_poll_job(context: ContextTypes.DEFAULT_TYPE):
