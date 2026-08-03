@@ -69,6 +69,10 @@ AOE_DARK_CSS = (
     '.csel-display,.csel-list,.cmb-filter-pop,.tw-filter-pop,.layer,.node,.timeline'
     '{background:' + P['card'] + '!important;color:' + P['text'] + '!important;border-color:' + P['border'] + '!important;'
     'box-shadow:none!important}'
+    # 필터 팝업 항목 라벨 (2026-08-03): 원본 .cmb-filter-item/.tw-filter-item 의 color:#111 이
+    # 다크 카드 배경 위에 그대로 남아 글자가 안 보였다 — 밝은 글자로 재단언 + 호버 배경 다크화.
+    '.cmb-filter-item,.tw-filter-item{color:' + P['text'] + '!important}'
+    '.tw-filter-item:hover{background:' + P['hover'] + '!important}'
     '.date-bar input,.controls select,.filters select,select,textarea,input[type=date],input[type=text],'
     '.qrow,.plan-in'
     '{background:' + P['input-bg'] + '!important;color:' + P['text'] + '!important;border-color:' + P['input-border'] + '!important}'
