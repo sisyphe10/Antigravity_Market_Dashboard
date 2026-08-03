@@ -9566,10 +9566,11 @@ function superDownloadUniverse() {
         .stat-card {{ background: #fff; border-radius: 10px; padding: 16px 20px; flex: 1; min-width: 160px; border-left: 4px solid #2d7a3a; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }}
         .stat-card .label {{ font-size: 0.8rem; color: #888; margin-bottom: 4px; }}
         .stat-card .value {{ font-size: 1.3rem; font-weight: 700; color: #333; }}
-        table {{ width: 100%; border-collapse: collapse; font-size: 16px; }}
+        {_AOE_TOKENS_CSS}
+        table {{ width: 100%; border-collapse: collapse; font-size: var(--aoe-t-font); font-variant-numeric: var(--aoe-t-num); --aoe-t-font: 16px; --aoe-t-pad-x: 12px; --aoe-t-head-weight: 600; }}
         thead {{ background: #e9ecef; }}
-        th {{ padding: 10px 12px; text-align: center; font-weight: 600; color: #000; border-bottom: 2px solid #000; }}
-        td {{ padding: 9px 12px; border-bottom: 1px solid #dee2e6; }}
+        th {{ padding: 10px var(--aoe-t-pad-x); text-align: var(--aoe-t-align); font-weight: var(--aoe-t-head-weight); color: #000; border-bottom: var(--aoe-t-head-underline) solid #000; }}
+        td {{ padding: 9px var(--aoe-t-pad-x); border-bottom: var(--aoe-t-row-line) solid #dee2e6; }}
         td.name {{ text-align: left; max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
         td.num {{ text-align: right; font-variant-numeric: tabular-nums; }}
         td.rank {{ text-align: center; font-weight: 600; }}

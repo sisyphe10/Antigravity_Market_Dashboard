@@ -25,6 +25,9 @@ _xkrx = xcals.get_calendar('XKRX')
 sys.stdout.reconfigure(encoding='utf-8')
 
 KST = timezone(timedelta(hours=9))
+from aoe_tokens_util import aoe_tokens_css as _aoe_tokens_css
+AOE_TOKENS_CSS = _aoe_tokens_css()   # 표 규격 토큰 (sha 검증, 페이지 <style>에 임베드)
+
 OUTPUT_FILE = 'market_alert.html'
 
 # 해제 최소 영업일 기준
@@ -669,8 +672,11 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stoc
             font-size: 0.75rem; color: #9ca3af; margin-top: 10px;
             line-height: 1.5;
         }}
+        {AOE_TOKENS_CSS}
         .data-table {{
             width: 100%; border-collapse: collapse; font-size: 16px;
+            font-variant-numeric: var(--aoe-t-num);
+            --aoe-t-font: 0.8rem; --aoe-t-pad-y: 6px; --aoe-t-head-weight: 600; --aoe-t-head-underline: 1px;
             table-layout: fixed;
         }}
         .data-table.tbl-warn {{ /* 투자위험/경고 공통 */ }}
@@ -705,17 +711,17 @@ def generate_html(stocks_주의, stocks_경고, stocks_위험, price_cache, stoc
         .data-table.tbl-shortsell th:nth-child(5),
         .data-table.tbl-shortsell td:nth-child(5) {{ width: 13%; }} /* 공시일 */
         .data-table th {{
-            padding: 8px 10px; text-align: center;
-            font-size: 0.74rem; font-weight: 600; color: #6b7280;
-            border-bottom: 1px solid #e5e7eb; background: #f9fafb;
+            padding: 8px var(--aoe-t-pad-x); text-align: var(--aoe-t-align);
+            font-size: 0.74rem; font-weight: var(--aoe-t-head-weight); color: #6b7280;
+            border-bottom: var(--aoe-t-head-underline) solid #e5e7eb; background: #f9fafb;
             white-space: nowrap; cursor: pointer; user-select: none;
         }}
         .data-table th:hover {{ color: #111; }}
         .data-table th .sort-arrow {{ font-size: 0.6rem; margin-left: 2px; color: #aaa; }}
         .data-table td {{
-            padding: 6px 10px; border-bottom: 1px solid #f3f4f6;
-            color: #374151; white-space: nowrap; font-size: 0.8rem;
-            text-align: center;
+            padding: var(--aoe-t-pad-y) var(--aoe-t-pad-x); border-bottom: var(--aoe-t-row-line) solid #f3f4f6;
+            color: #374151; white-space: nowrap; font-size: var(--aoe-t-font);
+            text-align: var(--aoe-t-align);
         }}
         .data-table tbody tr:last-child td {{ border-bottom: none; }}
         .data-table tbody tr:hover td {{ background: #f9fafb; }}

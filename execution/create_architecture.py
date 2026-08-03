@@ -479,11 +479,11 @@ h2.block-title { font-size: 1.4rem; color: #111; font-weight: 800; margin-bottom
 .node.node-hl { box-shadow: 0 0 0 2.5px #2d7a3a; }
 
 /* ---- skill layer: 박스 대신 표 (행이 .node 를 겸함) ---- */
-.skill-table { width: 100%; border-collapse: collapse; font-size: 15px; table-layout: auto; }
-.skill-table th { background: #f3f4f6; border: 1px solid #d1d5db; padding: 6px 10px;
-                  font-size: 13px; font-weight: 700; color: #000; text-align: center; white-space: nowrap; }
-.skill-table td { border: 1px solid #e5e7eb; padding: 7px 10px; color: #000; vertical-align: middle;
-                  font-size: 15px; }
+.skill-table { width: 100%; border-collapse: collapse; font-size: var(--aoe-t-font); font-variant-numeric: var(--aoe-t-num); table-layout: auto; --aoe-t-font: 15px; --aoe-t-pad-y: 7px; }
+.skill-table th { background: #f3f4f6; border: var(--aoe-t-row-line) solid #d1d5db; padding: 6px var(--aoe-t-pad-x);
+                  font-size: 13px; font-weight: var(--aoe-t-head-weight); color: #000; text-align: var(--aoe-t-align); white-space: nowrap; }
+.skill-table td { border: var(--aoe-t-row-line) solid #e5e7eb; padding: var(--aoe-t-pad-y) var(--aoe-t-pad-x); color: #000; vertical-align: var(--aoe-t-valign);
+                  font-size: var(--aoe-t-font); }
 .skill-table .sk-sum, .skill-table .sk-code { font-size: 13px; }
 .skill-table tr.node { display: table-row; border: 0; border-radius: 0; padding: 0;
                        min-width: 0; max-width: none; background: transparent; box-shadow: none; }
@@ -1187,6 +1187,8 @@ def build_html(reg, is_real):
     out.append("</body></html>")
 
     html_str = "\n".join(out)
+    from aoe_tokens_util import aoe_tokens_css as _aoe_tokens_css
+    html_str = html_str.replace("<style>", "<style>\n" + _aoe_tokens_css(), 1)  # 표 토큰 주입
     with open(OUT_HTML, "w", encoding="utf-8") as fh:
         fh.write(html_str)
     return html_str, edges
