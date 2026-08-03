@@ -2534,6 +2534,16 @@ def _build_combined_chart_section():
                 cmbSearchQ = (v || '').trim().toLowerCase();
                 cmbApplyFilters();
             };
+            window.cmbQuickFilter = function(btn, v) {
+                var on = btn.classList.contains('active');
+                cmbStarOnly = false;
+                delete cmbFilters['rank'];
+                if (!on) {
+                    if (v === 'star') { cmbStarOnly = true; } else { cmbFilters['rank'] = [v]; }
+                }
+                cmbPaintStars();   // 헤더 ★ 상태 동기 (내부에서 cmbApplyPin 호출)
+                cmbApplyFilters(); // 퀵버튼 active 상태는 여기서 일괄 동기
+            };
             function cmbApplyFilters() {
                 document.querySelectorAll('.cmb-series-row').forEach(function(row) {
                     var _nm = (row.getAttribute('data-name') || '').toLowerCase();
@@ -2545,6 +2555,13 @@ def _build_combined_chart_section():
                 ['rank', 'country', 'group', 'name'].forEach(function(c) {
                     var btn = document.querySelector('.cmb-filter-btn[data-col="' + c + '"]');
                     if (btn) btn.classList.toggle('cmb-filter-on', !!cmbFilters[c]);
+                });
+                var _rk = cmbFilters['rank'];
+                document.querySelectorAll('.cmb-quick-btn').forEach(function(b) {
+                    var v = b.getAttribute('data-qv');
+                    var act = (v === 'star') ? (cmbStarOnly && !_rk)
+                            : (!cmbStarOnly && !!_rk && _rk.length === 1 && _rk[0] === v);
+                    b.classList.toggle('active', act);
                 });
                 window.cmbApplyPin();
             }
@@ -3193,6 +3210,12 @@ def _build_combined_chart_section():
                 <div style="min-width:240px;position:relative;" id="cmbSideHost">
                     <div id="cmbSelCount" style="font-size:11px;color:#000;min-height:16px;margin-bottom:4px;padding-left:2px;"></div>
                     {search_box_html}
+                    <div style="display:flex;gap:6px;margin:0 0 8px;">
+                        <button class="cmb-ma-btn cmb-quick-btn" data-qv="star" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'star')">&#9733;</button>
+                        <button class="cmb-ma-btn cmb-quick-btn" data-qv="Daily" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'Daily')">Daily</button>
+                        <button class="cmb-ma-btn cmb-quick-btn" data-qv="Weekly" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'Weekly')">Weekly</button>
+                        <button class="cmb-ma-btn cmb-quick-btn" data-qv="Monthly" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'Monthly')">Monthly</button>
+                    </div>
                     <div id="cmbScrollBox" style="max-height:720px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#6b7178 #111214;">{list_html}</div>
                 </div>
                 <div style="width:1000px;">
