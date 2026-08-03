@@ -28,7 +28,7 @@ import pandas as pd
 sys.stdout.reconfigure(encoding='utf-8')
 
 KST = timezone(timedelta(hours=9))
-BASE_URL = 'http://apis.data.go.kr/1160100/service/GetKofiaStatisticsInfoService'
+BASE_URL = 'https://apis.data.go.kr/1160100/service/GetKofiaStatisticsInfoService'
 OUTPUT = 'kofia_stats.json'
 BEGIN_BAS_DT = '20250101'
 SECRETS_ENV = r'C:\Users\user\.secrets\customs_api_keys.env'

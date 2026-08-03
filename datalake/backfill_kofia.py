@@ -24,7 +24,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from dl_common import REPO, merge_into_year_files
 
 DATASET = "kr_flows"
-BASE = "http://apis.data.go.kr/1160100/service/GetKofiaStatisticsInfoService"
+BASE = "https://apis.data.go.kr/1160100/service/GetKofiaStatisticsInfoService"
 ROWS_PER_PAGE = 500
 PACE_SEC = 0.3
 EOK = 1e-8  # 원 → 억원
