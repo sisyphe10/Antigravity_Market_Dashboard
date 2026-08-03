@@ -69,22 +69,27 @@ SANITY_LO_BP, SANITY_HI_BP = 5.0, 1500.0
 # 종목 레지스트리 — alias 는 정규화(대문자, [.;,&]→공백, 공백 압축) 후 '전체 일치'만 허용
 ISSUERS = [
     dict(key='ORCL', name='오라클 CDS 5Y', kw='ORACLE',
-         aliases={'ORACLE CORPORATION', 'ORACLE CORP'}, redids={'6EC42L'}),
+         aliases={'ORACLE CORPORATION', 'ORACLE CORP',
+                  # 2026-08-03 백필 발견 리포트에서 승인한 실측 표기 변형
+                  'ORACLECORP', 'ORACLE COP-6EC42L'}, redids={'6EC42L'}),
     dict(key='AMZN', name='아마존 CDS 5Y', kw='AMAZON',
-         aliases={'AMAZON COM INC'}, redids={'0C5448'}),
+         # 'AMAZON'/'-0C5448' 변형도 백필 발견 리포트에서 승인 (AMENTUM(AMAZON HOLDCO)는 별개 법인 — 미등재 유지)
+         aliases={'AMAZON COM INC', 'AMAZON', 'AMAZON COM INC-0C5448'}, redids={'0C5448'}),
     dict(key='META', name='메타 CDS 5Y', kw='META PLATFORM',
          aliases={'META PLATFORMS INC'}, redids=set()),
     dict(key='MSFT', name='마이크로소프트 CDS 5Y', kw='MICROSOFT',
-         aliases={'MICROSOFT CORPORATION', 'MICROSOFT CORP'}, redids=set()),
+         aliases={'MICROSOFT CORPORATION', 'MICROSOFT CORP', 'MICROSOFT'}, redids=set()),
     dict(key='GOOGL', name='알파벳 CDS 5Y', kw='ALPHABET',
          aliases={'ALPHABET INC'}, redids=set()),
     dict(key='CRWV', name='코어위브 CDS 5Y', kw='COREWEAVE',
          aliases={'COREWEAVE INC'}, redids=set()),
 ]
 BASKET_NAME = 'AI 하이퍼스케일러 CDS 5Y'
-BASKET_MEMBERS = []             # ★백필 커버리지 실측 후 확정 (예: ['ORCL','AMZN','META'])
-FFILL_CAP_BDAYS = 10            # ★동상 — 실측 후 확정
-BASKET_START = None             # 'YYYY-MM-DD' 이후만 바스켓 산출 (전 구성원 관측 안정 구간)
+# 2026-08-03 백필 커버리지 실측으로 확정: 빅5(JPM CDS 바스켓과 동일 구성) × cap15 → 산출일 82%
+# (cap10=63%·빅4=86%였으나 구성 대표성 우선). CRWV 는 관측 2일 → 개별 시리즈만.
+BASKET_MEMBERS = ['ORCL', 'AMZN', 'META', 'MSFT', 'GOOGL']
+FFILL_CAP_BDAYS = 15
+BASKET_START = '2026-04-15'     # 빅5 전 구성원 관측 개시일 (META·GOOGL 최초 관측)
 
 REQUIRED_COLS = {
     'Dissemination Identifier', 'Original Dissemination Identifier', 'Action type',
