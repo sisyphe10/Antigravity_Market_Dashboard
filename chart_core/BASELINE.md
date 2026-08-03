@@ -95,3 +95,7 @@
 - 배선 추가: featured(전 표)·etf(메인+구성종목 서브표)·universe(전 표, 일반 문자열 CSS라 쓰기 지점에서 토큰 주입)·market 대만 패널(tw-table)·Monthly Returns(테이블 레벨만 — 셀 인라인은 전용 다크 커스텀 유지). 헤더 인셋 밑줄은 `inset 0 calc(-1 * var(--aoe-t-head-underline)) 0` 패턴.
 - **hotels.html 은퇴**(사용자 지시 — 수집 은퇴·DATA 라인 제거에 이은 페이지 삭제): generate_hotels_html()+미호출 데드코드 _build_hotel_mini_summary() 삭제, 하네스 hotel_adr 시나리오·fixture·golden 제거(13→12 시나리오), 라이브 404 확인. hotel_adr.csv 데이터는 보존.
 - 잔여 미배선 표: seibro(1)·market_alert(2)·architecture(1)·wrap 내 contrib-tbl/fee-table/iter-table/sector-table·건설 con_* 페이지(백로그④와 함께).
+
+## 표 토큰 3차 (2026-08-03, 4186477d)
+- seibro·market_alert(투자유의)·architecture(skill-table) 배선 완료. market_alert·architecture 생성기는 공용 로더 `execution/aoe_tokens_util.py`(sha 검증) 사용 — create_dashboard 자체 로더와의 통합은 후속 정리.
+- 이제 남은 미배선 표 = wrap 내 contrib-tbl/fee-table/iter-table/sector-table + 건설 con_* 페이지(백로그④)뿐. 이후 다크 스킨 크기 재단언 제거 가능.
