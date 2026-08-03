@@ -73,6 +73,13 @@ restore() {
 }
 
 BOTS=(sisyphe-bot research-notes-bot ra-sisyphe-bot seonyuduo-exercise-bot)
+
+# 맥미니로 이전된 봇은 VM 유닛이 stop+disable 상태다. disabled 유닛을 되살리면
+# 맥미니 상주 봇과 이중 상주 → 텔레그램 중복 발송·git push 레이스가 난다
+# (2026-08-03 실사고: deploy가 꺼둔 3개 봇을 부활시킴). disabled면 절대 restart하지 않는다.
+bot_enabled() {
+    sudo systemctl is-enabled --quiet "$1" 2>/dev/null
+}
 SCRIPTS=(execution/sisyphe_bot.py execution/research_bot/research_notes_bot.py execution/ra_sisyphe_bot.py execution/seonyuduo_exercise_bot.py)
 EARNINGS_BOT_TIMER=earnings-bot.timer
 KODEX_TIMER=kodex-sectors.timer
@@ -109,6 +116,10 @@ healthcheck() {
     sleep 5
     local rc=0
     for b in "${BOTS[@]}"; do
+        if ! bot_enabled "$b"; then
+            echo "⏭️  $b is disabled (macmini migrated) — skip"
+            continue
+        fi
         if sudo systemctl is-active --quiet "$b"; then
             echo "✅ $b is running"
         else
@@ -251,11 +262,8 @@ install_bot_units() {
         sudo systemctl daemon-reload
         echo "  ✓ daemon-reload"
     fi
-    # 신규 봇 최초 1회 enable (기존 봇은 이미 enable됨 → restart 루프가 담당)
-    if ! sudo systemctl is-enabled --quiet seonyuduo-exercise-bot 2>/dev/null; then
-        sudo systemctl enable --now seonyuduo-exercise-bot
-        echo "  ✓ seonyuduo-exercise-bot enabled + started (최초)"
-    fi
+    # (제거됨 2026-08-03) seonyuduo 자동 enable — 맥미니 이전 후 disabled 유닛을
+    # 되살리는 재발 경로였음. VM에 봇을 다시 들일 땐 수동으로 enable할 것.
 }
 
 install_landing_highlights_units() {
@@ -299,8 +307,12 @@ deploy() {
     install_etf_units
 
     for b in "${BOTS[@]}"; do
-        echo "🔄 Restarting $b..."
-        sudo systemctl restart "$b"
+        if bot_enabled "$b"; then
+            echo "🔄 Restarting $b..."
+            sudo systemctl restart "$b"
+        else
+            echo "⏭️  $b is disabled (macmini migrated) — skip"
+        fi
     done
     # earnings-bot은 timer라 restart 불필요 — 다음 OnUnitActiveSec(5분)에 자동 실행
     healthcheck
@@ -332,8 +344,12 @@ reclone() {
     install_etf_units
 
     for b in "${BOTS[@]}"; do
-        echo "🔄 Restarting $b..."
-        sudo systemctl restart "$b"
+        if bot_enabled "$b"; then
+            echo "🔄 Restarting $b..."
+            sudo systemctl restart "$b"
+        else
+            echo "⏭️  $b is disabled (macmini migrated) — skip"
+        fi
     done
     healthcheck
 }
