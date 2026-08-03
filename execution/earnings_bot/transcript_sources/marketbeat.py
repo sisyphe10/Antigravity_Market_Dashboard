@@ -22,9 +22,23 @@ logger = logging.getLogger(__name__)
 
 class MarketBeatSource(TranscriptSource):
     name = 'marketbeat'
-    parser_version = '1.0'
+    parser_version = '1.1'  # 2026-08-03: 전문 컨테이너 우선 추출 (페이지 크롬 제거)
 
     HOST = 'https://www.marketbeat.com'
+
+    @staticmethod
+    def extract_transcript_container(soup: BeautifulSoup):
+        """리포트 페이지의 전문 컨테이너만 선택 (2026-08-03).
+
+        페이지 전체 텍스트를 쓰면 주가·EPS 표·nav·AI Key Takeaways 크롬이
+        본문 앞에 붙어 ①분할 오프셋이 밀리고 ②번역 모델의 입력 검증이
+        "전문 아님"으로 거부한다(GRMN 실사고). 실측 DOM(Quartr 위젯):
+        #transcriptPresentation(=.transcript-discussion)에 콜 전체가
+        Operator 개회부터 폐회까지 크롬 없이 들어 있다.
+        """
+        return (soup.find(id='transcriptPresentation')
+                or soup.find('div', class_='transcript-discussion')
+                or soup.find(id='transcript'))
 
     def search(self, event: EarningsEvent) -> list[TranscriptCandidate]:
         """1순위: Anthropic web_search → 2순위: marketbeat 자체 검색 → 3순위: DDG HTML."""
@@ -105,14 +119,15 @@ class MarketBeatSource(TranscriptSource):
             return None
 
         soup = BeautifulSoup(html, 'html.parser')
-        article = soup.find('article') or soup.find('main') or soup.find('div', class_='content')
-        if not article:
-            article = soup.body
+        article = self.extract_transcript_container(soup)
+        if article is None:
+            # 컨테이너 없는 페이지(구 포맷·비리포트) — 기존 광역 폴백
+            article = (soup.find('article') or soup.find('main')
+                       or soup.find('div', class_='content') or soup.body)
         if not article:
             return None
 
         text = article.get_text('\n', strip=True)
-        # MarketBeat은 transcript 구조가 사이트마다 차이. 일단 본문 전체 사용.
         # 섹션 분리는 motley_fool과 동일한 로직 차용
         from .motley_fool import MotleyFoolSource
         prepared, qa = MotleyFoolSource()._split_sections(text)

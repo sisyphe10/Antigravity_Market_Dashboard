@@ -25,8 +25,11 @@ class ManualOverrideSource(TranscriptSource):
         # 본문 추출 — fool.com transcript-content 우선, 그 외 도메인은 article/main 폴백
         from bs4 import BeautifulSoup
         soup = BeautifulSoup(html, 'html.parser')
+        # marketbeat 리포트 페이지면 전문 컨테이너 우선 (크롬 제거, 2026-08-03)
+        from .marketbeat import MarketBeatSource
         article = (
-            soup.find('div', class_='transcript-content')
+            MarketBeatSource.extract_transcript_container(soup)
+            or soup.find('div', class_='transcript-content')
             or soup.find('div', class_='article-body')
             or soup.find('article')
             or soup.find('main')
