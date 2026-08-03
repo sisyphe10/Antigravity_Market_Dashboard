@@ -135,7 +135,7 @@ acquire_pipeline_lock() {
 #   제외: disclosures(concurrency 블록 없음)·earnings-calendar-sync(concurrency 없음, git push 없음)
 is_pipeline_job() {
   case "$1" in
-    gha-fred|gha-universe|gha-ecos|gha-kofia|gha-krx-valuation|gha-crawl|gha-finalize-orders|gha-taiwan-revenue) return 0 ;;
+    gha-fred|gha-universe|gha-ecos|gha-kofia|gha-krx-valuation|gha-crawl|gha-finalize-orders|gha-taiwan-revenue|gha-dtcc-cds) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -184,6 +184,7 @@ job_timeout_seconds() {
     gha-earnings-ir-day)         echo 1800 ;;   # IR Day: Finnhub 뉴스 315종목 + EDGAR 8-K (느림)
     gha-finalize-orders)         echo 1800 ;;   # finalize + calc_wrap_nav + dashboard + push
     gha-taiwan-revenue)          echo 1800 ;;   # FinMind 53종목 + crosscheck + dashboard
+    gha-dtcc-cds)                echo 900  ;;   # DTCC zip 다운로드 + 아카이브 재계산 + push
     *)                           echo 1800 ;;   # 미지정 안전 기본
   esac
 }
@@ -396,6 +397,15 @@ run_job() {
       /bin/bash scripts/safe_commit_push.sh \
         -m "Auto-update: Taiwan monthly revenue [skip ci]" \
         -- taiwan_revenue.csv market.html || return $?
+      ;;
+
+    gha-dtcc-cds)
+      # DTCC SBSDR 하이퍼스케일러 CDS 5Y (fetch_dtcc_cds.py). 무인증 소스 — skip 분기 없음.
+      # create_dashboard 미호출: CDS_SPREAD 는 CATEGORY_MAP 미등재(정식 배선 전) → HTML 불변.
+      "$PY" execution/fetch_dtcc_cds.py || return $?
+      /bin/bash scripts/safe_commit_push.sh \
+        -m "Auto-update: DTCC hyperscaler CDS spreads [skip ci]" \
+        -- dataset.csv || return $?
       ;;
 
     *)
