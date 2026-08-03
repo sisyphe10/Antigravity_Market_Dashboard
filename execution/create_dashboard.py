@@ -2465,6 +2465,7 @@ def _build_combined_chart_section():
                 tbody.querySelectorAll('tr.cmb-pin-clone').forEach(function(r) {
                     r.parentNode.removeChild(r);
                 });
+                if (window.cmbQuickActive) return;   // 퀵필터 표시 중 — 매칭 원본만 (복제 중복 방지)
                 var pinned = [];
                 tbody.querySelectorAll('tr.cmb-series-row').forEach(function(r) {
                     var td = r.querySelector('td.cmb-star');
@@ -2538,6 +2539,7 @@ def _build_combined_chart_section():
                 var on = btn.classList.contains('active');
                 cmbStarOnly = false;
                 delete cmbFilters['rank'];
+                window.cmbQuickActive = on ? null : v;   // 퀵필터 중=핀 복제 블록 숨김(중복 노출 방지)
                 if (!on) {
                     if (v === 'star') { cmbStarOnly = true; } else { cmbFilters['rank'] = [v]; }
                 }
