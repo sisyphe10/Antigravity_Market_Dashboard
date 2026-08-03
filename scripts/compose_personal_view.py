@@ -219,8 +219,9 @@ AOE_DARK_CSS = (
     '.skill-table .sk-name{font-weight:400!important}'
     '.skill-table .sk-code code{font-family:inherit!important;color:#fff!important}'
     'footer,footer a,.date-bar span,.section-count,.no-match,.note,.data-table th .sort-arrow{color:#fff!important}'
-    '[style*="color:#888"],[style*="color: #888"],[style*="color:#999"],[style*="color: #999"],[style*="color:#aaa"],[style*="color:#9ca3af"],[style*="color: #9ca3af"]{color:#fff!important}'
-    '.chart-card [style*="color:#888"],.chart-container [style*="color:#888"],.lh-card [style*="color:#888"],.chart-card [style*="color:#999"],.chart-container [style*="color:#999"]{color:#333!important}'
+    '[style*="color:#888"],[style*="color: #888"],[style*="color:#999"],[style*="color: #999"],[style*="color:#aaa"],[style*="color:#555"],[style*="color: #555"],[style*="color:#9ca3af"],[style*="color: #9ca3af"]{color:#fff!important}'
+    '.chart-card [style*="color:#888"],.chart-container [style*="color:#888"],.lh-card [style*="color:#888"],.chart-card [style*="color:#999"],.chart-container [style*="color:#999"],.chart-card [style*="color:#555"],.chart-container [style*="color:#555"]{color:#333!important}'
+    '#cmbSelCount{color:#fff!important}'
     '</style>')
 dark_pat = re.compile(r'<style id="aoe-terminal-dark">.*?</style>', re.S)
 
