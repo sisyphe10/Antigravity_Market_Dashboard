@@ -481,7 +481,7 @@ def translate_transcript(transcript_id: int) -> dict:
         _t = _r.get('text') or ''
         _ts = _t.strip()
         if ((_ts.startswith(SENTINEL) and len(_ts) < 1200)
-                or (len(_ts) < 800 and any(mk in _ts for mk in REFUSAL_MARKERS))):
+                or (len(_ts) < 1500 and any(mk in _ts for mk in REFUSAL_MARKERS))):
             logger.warning(
                 f'[translator] CHUNK GATE REJECT transcript={transcript_id} — '
                 f'청크에 sentinel/거부문구: {_t[:120]!r}')

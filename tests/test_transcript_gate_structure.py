@@ -81,3 +81,13 @@ def test_refusal_marker_in_short_output_still_blocked():
     g = check_translation(PREP_EN + '\n' + QA_EN, '번역을 포함하지 않습니다.')
     assert not g.ok
     assert any('refusal_marker' in r or 'translation_ratio_low' in r for r in g.reasons)
+
+
+def test_refusal_marker_in_tail_blocked():
+    """마지막 청크의 영어 거부문 유출 차단 (UMAC 실사고)."""
+    raw = PREP_EN + '\n' + QA_EN
+    kr = (_kr() + '\n\nIf you have an actual transcript, please paste the '
+          'Prepared Remarks section directly.')
+    g = check_translation(raw, kr, prepared=PREP_EN, qa=QA_EN)
+    assert not g.ok
+    assert any('refusal_marker_tail' in r for r in g.reasons)

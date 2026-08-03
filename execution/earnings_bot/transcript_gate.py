@@ -57,6 +57,10 @@ SENTINEL = 'NOT_A_TRANSCRIPT'
 REFUSAL_MARKERS = (
     '포함되어 있지 않습니다', '죄송하지만', '제공해주시면', '원문을 제공',
     '포함하지 않습니다', '본문 미제공', '전문이 아닙니다',
+    # 영어 거부문 (2026-08-03 UMAC 실사고: 정크 청크에 모델이 영어로 거부 →
+    # 한국어 마커만으로는 미검출, md 꼬리로 유출)
+    'please paste', 'Please provide the actual', 'I cannot translate',
+    "I'm unable to translate", 'not a transcript translation',
 )
 
 _MONTHS = ('january february march april may june july august september '
@@ -265,7 +269,14 @@ def check_translation(raw_text: str, translated_kr: str,
     # Safe Harbor 문구("...전망 정보를 포함하지 않습니다" 류)가 걸리는 오탐이
     # 실측됨(2026-08-03 TLN: ratio 0.49·구조 정상인데 하드 차단) → 분량이 정상이면
     # 경고로 강등, 짧거나 얇을 때만 하드 차단.
+    # ★머리+꼬리 양쪽 검사 (UMAC 실사고: 마지막 정크 청크의 거부문이 md 꼬리로 유출
+    #  — 머리만 보면 놓친다). 꼬리 거부문은 분량 무관 하드 차단.
     head = kr[:1500]
+    tail = kr[-1500:]
+    for mk in REFUSAL_MARKERS:
+        if mk in tail and mk not in head:
+            reasons.append(f'refusal_marker_tail:{mk}')
+            break
     for mk in REFUSAL_MARKERS:
         if mk in head:
             if len(kr.strip()) < 5000 or (ratio is not None
