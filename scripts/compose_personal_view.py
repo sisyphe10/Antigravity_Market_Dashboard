@@ -34,7 +34,8 @@ ROOT_ACTIVE = {  # filename -> (active, sub_active)
     'taiwan.html':       ('market', None),
     'hotels.html':       ('market', None),
     'gh_market.html':    ('market', None),
-    'architecture.html': ('architecture', None),
+    'architecture.html': ('architecture', 'architecture'),
+    'system_map.html':   ('architecture', 'system_map'),
 }
 NAV_MUST_HAVE = ('index.html', 'market.html', 'architecture.html')  # nav 누락 시 게시 중단
 

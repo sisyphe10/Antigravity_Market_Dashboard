@@ -102,7 +102,10 @@ NAV_ITEMS = [
     ('wiki',         '/wiki/',                       'Wiki',         False, None),
     ('memento',      '/sisyphe/memento.html',        'Memento',      True,  None),
     ('ledger',       '/sisyphe/dashboard.html',      'Ledger',       False, None),
-    ('architecture', '/architecture.html',           'Architecture', False, None),
+    ('architecture', '/architecture.html',           'Architecture', False, [
+        ('architecture', '/architecture.html', 'Architecture'),
+        ('system_map',   '/system_map.html',   'System Map'),
+    ]),
 ]
 NAV_LABELS = [it[2] for it in NAV_ITEMS]
 
