@@ -40,7 +40,7 @@ alerts: "연속 12회 실패 → notify_sisyphe_failure.sh git-pull → 텔레�
 
 ## Depends on
 - [[infra-github]] — GitHub (정본 repo · Pages · Actions)
-- [[infra-vm-macmini]] — 컴퓨트 호스트 (Oracle VM → 맥미니)
+- [[infra-vm-macmini]] — 컴퓨트 호스트 (맥미니)
 - [[web-publish-snapshot]] — 개인 스냅숏 게시 (publish_snapshot.sh)
 
 ## Code

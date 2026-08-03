@@ -8,8 +8,8 @@ runs_on: "vm_macmini"
 schedule_kst: "토 09:00"
 status: "active"
 code:
-  - "scripts/update-stock-master.timer"
-  - "scripts/update-stock-master.service"
+  - "scripts/vm_legacy/update-stock-master.timer"
+  - "scripts/vm_legacy/update-stock-master.service"
   - "scripts/run_update_stock_master.sh"
   - "launchd/timers/com.antigravity.update-stock-master.plist"
 reads: []
@@ -40,8 +40,8 @@ alerts: "OnFailure → sisyphe-bot-notify@update-stock-master → 텔레그램"
 - [[src-stock-master]] — 종목마스터 갱신 (update_stock_master.py)
 
 ## Code
-- `scripts/update-stock-master.timer`
-- `scripts/update-stock-master.service`
+- `scripts/vm_legacy/update-stock-master.timer`
+- `scripts/vm_legacy/update-stock-master.service`
 - `scripts/run_update_stock_master.sh`
 - `launchd/timers/com.antigravity.update-stock-master.plist`
 

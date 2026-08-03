@@ -36,7 +36,7 @@ alerts: ""
 - `~/srv/sisyphe_repo`
 
 ## Depends on
-- [[infra-vm-macmini]] — 컴퓨트 호스트 (Oracle VM → 맥미니)
+- [[infra-vm-macmini]] — 컴퓨트 호스트 (맥미니)
 - [[ext-sisyphe]] — Sisyphe 가계부/운동 대시보드 + 투자일지 시트
 
 ## Code

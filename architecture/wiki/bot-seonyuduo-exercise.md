@@ -9,7 +9,7 @@ schedule_kst: "상시 (06:00 다이제스트 등)"
 status: "active"
 code:
   - "execution/seonyuduo_exercise_bot.py"
-  - "scripts/seonyuduo-exercise-bot.service"
+  - "scripts/vm_legacy/seonyuduo-exercise-bot.service"
   - "launchd/bots/com.antigravity.seonyuduo-exercise-bot.plist"
 reads:
   - "seonyuduo_exercise_user_map.json"
@@ -46,7 +46,7 @@ alerts: "OnFailure → notify_sisyphe_failure.sh seonyuduo-exercise-bot → 텔�
 
 ## Code
 - `execution/seonyuduo_exercise_bot.py`
-- `scripts/seonyuduo-exercise-bot.service`
+- `scripts/vm_legacy/seonyuduo-exercise-bot.service`
 - `launchd/bots/com.antigravity.seonyuduo-exercise-bot.plist`
 
 ## Alerts

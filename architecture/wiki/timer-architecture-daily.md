@@ -38,7 +38,7 @@ alerts: "FAIL → notify_sisyphe_failure.sh architecture-daily → 텔레그램"
 - [[page-architecture]] — architecture.html (아키텍처)
 
 ## Depends on
-- [[infra-vm-macmini]] — 컴퓨트 호스트 (Oracle VM → 맥미니)
+- [[infra-vm-macmini]] — 컴퓨트 호스트 (맥미니)
 - [[infra-github]] — GitHub (정본 repo · Pages · Actions)
 - [[page-architecture]] — architecture.html (아키텍처)
 

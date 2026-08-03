@@ -8,7 +8,7 @@ runs_on: "vm_macmini"
 schedule_kst: "12:00 매일 (disabled)"
 status: "retired"
 code:
-  - "scripts/hotel-adr.timer"
+  - "scripts/vm_legacy/hotel-adr.timer"
 reads: []
 writes:
   - "hotel_adr.csv"
@@ -36,4 +36,4 @@ booking.com 호텔 ADR(lead +7/+14/+30)을 수집하던 타이머. **2026-07-06 
 - (none)
 
 ## Code
-- `scripts/hotel-adr.timer`
+- `scripts/vm_legacy/hotel-adr.timer`

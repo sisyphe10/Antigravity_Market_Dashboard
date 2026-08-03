@@ -47,7 +47,7 @@ alerts: "KeepAlive=true (launchd 자동 재기동, ThrottleInterval=15)"
 - (none)
 
 ## Depends on
-- [[infra-vm-macmini]] — 컴퓨트 호스트 (Oracle VM → 맥미니)
+- [[infra-vm-macmini]] — 컴퓨트 호스트 (맥미니)
 - [[infra-datalake]] — 맥미니 데이터레이크 (~/datalake + 문답 위키)
 
 ## Code

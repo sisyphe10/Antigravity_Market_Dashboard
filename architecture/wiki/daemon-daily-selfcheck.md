@@ -41,7 +41,7 @@ alerts: "이상(⚠️) 있을 때만 발송 → 텔레그램 · 정상일은 �
 - (none)
 
 ## Depends on
-- [[infra-vm-macmini]] — 컴퓨트 호스트 (Oracle VM → 맥미니)
+- [[infra-vm-macmini]] — 컴퓨트 호스트 (맥미니)
 - [[infra-telegram]] — 텔레그램 (알림·상호작용 채널)
 
 ## Code

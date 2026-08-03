@@ -8,8 +8,8 @@ runs_on: "vm_macmini"
 schedule_kst: "18:45 매일"
 status: "active"
 code:
-  - "scripts/landing-highlights.timer"
-  - "scripts/landing-highlights.service"
+  - "scripts/vm_legacy/landing-highlights.timer"
+  - "scripts/vm_legacy/landing-highlights.service"
   - "scripts/run_landing_highlights.sh"
   - "launchd/timers/com.antigravity.landing-highlights.plist"
 reads:
@@ -45,8 +45,8 @@ alerts: "OnFailure → landing-highlights-notify.service → 텔레그램"
 - [[src-landing-highlights]] — 랜딩 하이라이트 생성 (create_landing_highlights.py)
 
 ## Code
-- `scripts/landing-highlights.timer`
-- `scripts/landing-highlights.service`
+- `scripts/vm_legacy/landing-highlights.timer`
+- `scripts/vm_legacy/landing-highlights.service`
 - `scripts/run_landing_highlights.sh`
 - `launchd/timers/com.antigravity.landing-highlights.plist`
 

@@ -31,7 +31,7 @@ alerts: ""
 - (none)
 
 ## Depends on
-- [[infra-vm-macmini]] — 컴퓨트 호스트 (Oracle VM → 맥미니)
+- [[infra-vm-macmini]] — 컴퓨트 호스트 (맥미니)
 
 ## Code
 - (none)

@@ -11,7 +11,7 @@ code:
   - "execution/research_bot/research_notes_bot.py"
   - "execution/research_bot/summarizer.py"
   - "execution/research_bot/notion_publisher.py"
-  - "scripts/research-notes-bot.service"
+  - "scripts/vm_legacy/research-notes-bot.service"
 reads: []
 writes:
   - "store-research-notes-db"
@@ -47,7 +47,7 @@ alerts: "OnFailure → notify_sisyphe_failure.sh research-notes-bot → 텔레�
 - `execution/research_bot/research_notes_bot.py`
 - `execution/research_bot/summarizer.py`
 - `execution/research_bot/notion_publisher.py`
-- `scripts/research-notes-bot.service`
+- `scripts/vm_legacy/research-notes-bot.service`
 
 ## Alerts
 ⚠ OnFailure → notify_sisyphe_failure.sh research-notes-bot → 텔레그램

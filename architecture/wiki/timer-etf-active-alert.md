@@ -8,8 +8,8 @@ runs_on: "vm_macmini"
 schedule_kst: "19:00 매일"
 status: "active"
 code:
-  - "scripts/etf-active-alert.timer"
-  - "scripts/etf-active-alert.service"
+  - "scripts/vm_legacy/etf-active-alert.timer"
+  - "scripts/vm_legacy/etf-active-alert.service"
   - "scripts/run_etf_active_alert.sh"
   - "execution/etf_active_alert.py"
   - "launchd/timers/com.antigravity.etf-active-alert.plist"
@@ -47,8 +47,8 @@ alerts: "OnFailure → sisyphe-bot-notify@etf-active-alert → 텔레그램"
 - [[infra-telegram]] — 텔레그램 (알림·상호작용 채널)
 
 ## Code
-- `scripts/etf-active-alert.timer`
-- `scripts/etf-active-alert.service`
+- `scripts/vm_legacy/etf-active-alert.timer`
+- `scripts/vm_legacy/etf-active-alert.service`
 - `scripts/run_etf_active_alert.sh`
 - `execution/etf_active_alert.py`
 - `launchd/timers/com.antigravity.etf-active-alert.plist`

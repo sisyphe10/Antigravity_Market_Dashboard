@@ -63,7 +63,7 @@ alerts: "launchd wrapper 실패 → notify → 텔레그램"
 - [[store-roc-history]] — roc_history.csv (RoC² 월말 백필)
 
 ## Depends on
-- [[infra-vm-macmini]] — 컴퓨트 호스트 (Oracle VM → 맥미니)
+- [[infra-vm-macmini]] — 컴퓨트 호스트 (맥미니)
 - [[ext-data-apis]] — 외부 데이터 API/소스 집합
 
 ## Code

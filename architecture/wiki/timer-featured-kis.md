@@ -8,8 +8,8 @@ runs_on: "vm_macmini"
 schedule_kst: "15:50 매일"
 status: "active"
 code:
-  - "scripts/featured-kis.timer"
-  - "scripts/featured-kis.service"
+  - "scripts/vm_legacy/featured-kis.timer"
+  - "scripts/vm_legacy/featured-kis.service"
   - "launchd/timers/com.antigravity.featured-kis.plist"
 reads: []
 writes:
@@ -41,6 +41,6 @@ alerts: ""
 - [[src-featured-kis]] — Featured KIS/신고가 (fetch_featured_data_kis.py + enrich)
 
 ## Code
-- `scripts/featured-kis.timer`
-- `scripts/featured-kis.service`
+- `scripts/vm_legacy/featured-kis.timer`
+- `scripts/vm_legacy/featured-kis.service`
 - `launchd/timers/com.antigravity.featured-kis.plist`

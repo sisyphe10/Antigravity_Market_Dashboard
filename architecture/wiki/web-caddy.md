@@ -54,7 +54,7 @@ alerts: "KeepAlive=true (launchd 자동 재기동)"
 - (none)
 
 ## Depends on
-- [[infra-vm-macmini]] — 컴퓨트 호스트 (Oracle VM → 맥미니)
+- [[infra-vm-macmini]] — 컴퓨트 호스트 (맥미니)
 - [[web-publish-snapshot]] — 개인 스냅숏 게시 (publish_snapshot.sh)
 - [[daemon-sisyphe-pull]] — Sisyphe repo 클론 서빙 (시간당 pull)
 - [[daemon-datalake-webui]] — 데이터레이크 문답 웹 UI 데몬 (AoE Wiki, 127.0.0.1:8787)

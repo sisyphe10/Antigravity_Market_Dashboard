@@ -39,7 +39,7 @@ alerts: "FAIL → notify_sisyphe_failure.sh memory-cycle-alert → 텔레그램"
 - (none)
 
 ## Depends on
-- [[infra-vm-macmini]] — 컴퓨트 호스트 (Oracle VM → 맥미니)
+- [[infra-vm-macmini]] — 컴퓨트 호스트 (맥미니)
 - [[infra-telegram]] — 텔레그램 (알림·상호작용 채널)
 - [[ext-data-apis]] — 외부 데이터 API/소스 집합
 

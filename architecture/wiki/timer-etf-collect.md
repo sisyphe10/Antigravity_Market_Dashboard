@@ -8,8 +8,8 @@ runs_on: "vm_macmini"
 schedule_kst: "16:30 매일 (paused 2026-07-29)"
 status: "frozen"
 code:
-  - "scripts/etf-collect.timer"
-  - "scripts/etf-collect.service"
+  - "scripts/vm_legacy/etf-collect.timer"
+  - "scripts/vm_legacy/etf-collect.service"
   - "scripts/run_etf_collect.sh"
   - "launchd/timers/com.antigravity.etf-collect.plist"
 reads: []
@@ -42,8 +42,8 @@ alerts: "OnFailure → sisyphe-bot-notify@etf-collect → 텔레그램"
 - [[src-etf-collect]] — ETF 구성종목 수집 (collect_etf_daily.py)
 
 ## Code
-- `scripts/etf-collect.timer`
-- `scripts/etf-collect.service`
+- `scripts/vm_legacy/etf-collect.timer`
+- `scripts/vm_legacy/etf-collect.service`
 - `scripts/run_etf_collect.sh`
 - `launchd/timers/com.antigravity.etf-collect.plist`
 

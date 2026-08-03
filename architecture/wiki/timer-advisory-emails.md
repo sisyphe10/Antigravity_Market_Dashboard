@@ -44,7 +44,7 @@ alerts: "OnFailure(연속 실패 ~10분) → notify_sisyphe_failure.sh → 텔�
 - [[store-orders-pending]] — orders/ (pending_orders · aum_pending)
 
 ## Depends on
-- [[infra-vm-macmini]] — 컴퓨트 호스트 (Oracle VM → 맥미니)
+- [[infra-vm-macmini]] — 컴퓨트 호스트 (맥미니)
 - [[page-wrap]] — wrap.html (WRAP 대시보드)
 
 ## Code

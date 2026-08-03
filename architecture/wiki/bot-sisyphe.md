@@ -10,7 +10,7 @@ status: "active"
 code:
   - "execution/sisyphe_bot.py"
   - "execution/daily_portfolio_report.py"
-  - "scripts/sisyphe-bot.service"
+  - "scripts/vm_legacy/sisyphe-bot.service"
   - "launchd/bots/com.antigravity.sisyphe-bot.plist"
 reads:
   - "store-portfolio-data"
@@ -64,7 +64,7 @@ alerts: "OnFailure → notify_sisyphe_failure.sh sisyphe-bot → 텔레그램"
 ## Code
 - `execution/sisyphe_bot.py`
 - `execution/daily_portfolio_report.py`
-- `scripts/sisyphe-bot.service`
+- `scripts/vm_legacy/sisyphe-bot.service`
 - `launchd/bots/com.antigravity.sisyphe-bot.plist`
 
 ## Alerts

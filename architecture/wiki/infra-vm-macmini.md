@@ -1,6 +1,6 @@
 ---
 id: "infra-vm-macmini"
-name: "컴퓨트 호스트 (Oracle VM → 맥미니)"
+name: "컴퓨트 호스트 (맥미니)"
 domain: "ops-infra"
 project: "antigravity"
 type: "infra"
@@ -8,9 +8,8 @@ runs_on: "vm_macmini"
 schedule_kst: "상시"
 status: "active"
 code:
-  - "scripts/deploy.sh"
-  - "scripts/inventory_vm.sh"
   - "launchd/"
+  - "scripts/vm_legacy/"
 reads: []
 writes: []
 depends_on:
@@ -18,11 +17,11 @@ depends_on:
 alerts: "봇/타이머 실패 → notify_sisyphe_failure.sh → 텔레그램"
 ---
 
-# 컴퓨트 호스트 (Oracle VM → 맥미니)
+# 컴퓨트 호스트 (맥미니)
 
 **Domain:** 운영 · 인프라 · **Type:** Infra · **Runs on:** vm_macmini · **Schedule (KST):** 상시 · **Status:** active · **Project:** antigravity
 
-상시 봇 4종·타이머 10종·GHA 이관 잡·system 데몬을 돌리는 컴퓨트 호스트. **2026-07-11 Oracle VM→맥미니 컷오버 완료** — 봇 4·타이머 8·GHA 이관 잡 10종(taiwan 포함)이 전부 `/Library/LaunchDaemons` launchd로 이전됐고, Oracle VM(144.24.70.224, Ubuntu)은 은퇴 대기 상태다. 현 라이브 호스트 = 맥미니(Apple Silicon, macOS, launchd).
+상시 봇 4종·타이머 10종·GHA 이관 잡·system 데몬을 돌리는 컴퓨트 호스트. **2026-07-11 Oracle VM→맥미니 컷오버 완료** — 봇 4·타이머 8·GHA 이관 잡 10종(taiwan 포함)이 전부 `/Library/LaunchDaemons` launchd로 이전됐고, **Oracle VM(144.24.70.224)은 2026-08-03 은퇴 완료** — 인스턴스 Stop(1개월 관찰 후 Terminate), 상태 백업 3중(vm_state_260803.tar.gz)·repo 태그 `pre-vm-retirement-20260803`, VM 전용 스크립트는 `scripts/vm_legacy/` 보관. 라이브 호스트 = 맥미니(Apple Silicon, macOS, launchd) 단독.
 
 - 컷오버로 함께 신설된 계층: 웹 서빙([[web-caddy]]·[[web-publish-snapshot]]·[[web-publish-pages]]), Sisyphe 클론 서빙([[daemon-sisyphe-pull]]), 데이터레이크([[infra-datalake]]), 아키텍처 자동 최신화([[timer-architecture-daily]]).
 - 타이머는 컷오버 당시 8종 → **2026-07-16 [[timer-memento-telegram]](12:00)·[[timer-wrap-principle-check]](17:10) 추가로 10종**. 등재 단일 출처는 `launchd/timers/schedule.tsv`(셀프체크·catch-up이 이 표를 읽어 잡을 열거하므로, 여기 없는 타이머는 감시 대상도 아니다).
@@ -41,9 +40,8 @@ alerts: "봇/타이머 실패 → notify_sisyphe_failure.sh → 텔레그램"
 - [[infra-github]] — GitHub (정본 repo · Pages · Actions)
 
 ## Code
-- `scripts/deploy.sh`
-- `scripts/inventory_vm.sh`
 - `launchd/`
+- `scripts/vm_legacy/`
 
 ## Alerts
 ⚠ 봇/타이머 실패 → notify_sisyphe_failure.sh → 텔레그램

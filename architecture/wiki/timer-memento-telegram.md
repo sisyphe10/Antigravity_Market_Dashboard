@@ -36,7 +36,7 @@ alerts: "FAIL → notify_sisyphe_failure.sh memento-telegram → 텔레그램"
 - (none)
 
 ## Depends on
-- [[infra-vm-macmini]] — 컴퓨트 호스트 (Oracle VM → 맥미니)
+- [[infra-vm-macmini]] — 컴퓨트 호스트 (맥미니)
 - [[infra-telegram]] — 텔레그램 (알림·상호작용 채널)
 - [[ext-sisyphe]] — Sisyphe 가계부/운동 대시보드 + 투자일지 시트
 

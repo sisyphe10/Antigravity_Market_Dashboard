@@ -9,7 +9,7 @@ schedule_kst: "상시 (내부 잡 05:10~21:00)"
 status: "active"
 code:
   - "execution/ra_sisyphe_bot.py"
-  - "scripts/ra-sisyphe-bot.service"
+  - "scripts/vm_legacy/ra-sisyphe-bot.service"
   - "launchd/bots/com.antigravity.ra-sisyphe-bot.plist"
 reads:
   - "sources.json"
@@ -64,7 +64,7 @@ alerts: "OnFailure → notify_sisyphe_failure.sh ra-sisyphe-bot → 텔레그램
 
 ## Code
 - `execution/ra_sisyphe_bot.py`
-- `scripts/ra-sisyphe-bot.service`
+- `scripts/vm_legacy/ra-sisyphe-bot.service`
 - `launchd/bots/com.antigravity.ra-sisyphe-bot.plist`
 
 ## Alerts

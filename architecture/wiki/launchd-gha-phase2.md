@@ -50,7 +50,7 @@ GitHub Actions 스케줄 워크플로를 맥미니 launchd LaunchDaemon으로 �
 - [[store-heartbeats]] — heartbeats.json (Phase 2 워치독 인터페이스)
 
 ## Depends on
-- [[infra-vm-macmini]] — 컴퓨트 호스트 (Oracle VM → 맥미니)
+- [[infra-vm-macmini]] — 컴퓨트 호스트 (맥미니)
 - [[gha-daily-crawl]] — Daily Market Crawl (23:00)
 - [[gha-daily-fred]] — Daily FRED US Macro (07:50 화~토)
 - [[gha-daily-ecos]] — Daily ECOS BOK (17:40 평일)

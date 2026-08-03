@@ -8,8 +8,8 @@ runs_on: "vm_macmini"
 schedule_kst: "08:00 매일"
 status: "active"
 code:
-  - "scripts/earnings-bot.timer"
-  - "scripts/earnings-bot.service"
+  - "scripts/vm_legacy/earnings-bot.timer"
+  - "scripts/vm_legacy/earnings-bot.service"
   - "launchd/timers/com.antigravity.earnings-bot.plist"
 reads: []
 writes:
@@ -41,8 +41,8 @@ alerts: "OnFailure → earnings-bot-notify.service → notify_sisyphe_failure.sh
 - [[src-earnings-pipeline]] — 실적봇 파이프라인 (execution/earnings_bot/)
 
 ## Code
-- `scripts/earnings-bot.timer`
-- `scripts/earnings-bot.service`
+- `scripts/vm_legacy/earnings-bot.timer`
+- `scripts/vm_legacy/earnings-bot.service`
 - `launchd/timers/com.antigravity.earnings-bot.plist`
 
 ## Alerts

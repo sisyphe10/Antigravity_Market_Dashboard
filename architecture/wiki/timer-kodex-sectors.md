@@ -8,8 +8,8 @@ runs_on: "vm_macmini"
 schedule_kst: "23:30 매일"
 status: "active"
 code:
-  - "scripts/kodex-sectors.timer"
-  - "scripts/kodex-sectors.service"
+  - "scripts/vm_legacy/kodex-sectors.timer"
+  - "scripts/vm_legacy/kodex-sectors.service"
   - "scripts/run_kodex_sectors.sh"
   - "launchd/timers/com.antigravity.kodex-sectors.plist"
 reads: []
@@ -50,8 +50,8 @@ alerts: "OnFailure → sisyphe-bot-notify@kodex-sectors → 텔레그램"
 - [[src-deriv-daily]] — 파생·수급 13종 (fetch_deriv_daily.py)
 
 ## Code
-- `scripts/kodex-sectors.timer`
-- `scripts/kodex-sectors.service`
+- `scripts/vm_legacy/kodex-sectors.timer`
+- `scripts/vm_legacy/kodex-sectors.service`
 - `scripts/run_kodex_sectors.sh`
 - `launchd/timers/com.antigravity.kodex-sectors.plist`
 

@@ -46,7 +46,7 @@ alerts: "실패해도 잡 rc 무관 · 어떤 실패 경로에서도 기존 curr
 - `~/srv/dashboard/releases + current`
 
 ## Depends on
-- [[infra-vm-macmini]] — 컴퓨트 호스트 (Oracle VM → 맥미니)
+- [[infra-vm-macmini]] — 컴퓨트 호스트 (맥미니)
 
 ## Code
 - `scripts/publish_snapshot.sh`

@@ -166,7 +166,7 @@ Updated: 2026-08-02
 - [일일 셀프체크 다이제스트 (08:50, 이상 시에만 발송)](daemon-daily-selfcheck.md) — Timer
 - [작업용 노트북 (ASUS Vivobook, Windows)](infra-laptop.md) — Infra
 - [차트 렌더러 (draw_charts + draw_wrap_charts)](src-draw-charts.md) — Source
-- [컴퓨트 호스트 (Oracle VM → 맥미니)](infra-vm-macmini.md) — Infra
+- [컴퓨트 호스트 (맥미니)](infra-vm-macmini.md) — Infra
 - [크래시 루프 워처 (*/5)](daemon-crash-watcher.md) — Watcher
 - [텔레그램 (알림·상호작용 채널)](infra-telegram.md) — Infra
 - [휴면 push-트리거 워크플로 (backfill · merge-ddr5)](gha-dormant-push.md) — GHA
@@ -267,7 +267,7 @@ Updated: 2026-08-02
 - [맥미니 데이터레이크 (~/datalake + 문답 위키)](infra-datalake.md) — 잡별 (20:30 / 20:50 / 23:20 / 23:50 / 일 10:00 / 20분), active
 - [웹 서빙 (Caddy · com.antigravity.web)](web-caddy.md) — 상시, active
 - [작업용 노트북 (ASUS Vivobook, Windows)](infra-laptop.md) — 상시, active
-- [컴퓨트 호스트 (Oracle VM → 맥미니)](infra-vm-macmini.md) — 상시, active
+- [컴퓨트 호스트 (맥미니)](infra-vm-macmini.md) — 상시, active
 - [텔레그램 (알림·상호작용 채널)](infra-telegram.md) — 상시, active
 
 ### External (6)
@@ -483,7 +483,7 @@ Updated: 2026-08-02
 - [종목마스터 주간 갱신 타이머 (토 09:00)](timer-update-stock-master.md) — Timer
 - [차트 렌더러 (draw_charts + draw_wrap_charts)](src-draw-charts.md) — Source
 - [출입국 월별 통계 (fetch_immigration.py)](src-immigration.md) — Source
-- [컴퓨트 호스트 (Oracle VM → 맥미니)](infra-vm-macmini.md) — Infra
+- [컴퓨트 호스트 (맥미니)](infra-vm-macmini.md) — Infra
 - [크래시 루프 워처 (*/5)](daemon-crash-watcher.md) — Watcher
 - [텔레그램 (알림·상호작용 채널)](infra-telegram.md) — Infra
 - [통합 태그 인덱스 (tag_index.sqlite + doc_tag_state.sqlite)](store-tag-index.md) — Store

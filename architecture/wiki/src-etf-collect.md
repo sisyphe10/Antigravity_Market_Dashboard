@@ -44,7 +44,7 @@ alerts: ""
 
 ## Depends on
 - [[ext-data-apis]] — 외부 데이터 API/소스 집합
-- [[infra-vm-macmini]] — 컴퓨트 호스트 (Oracle VM → 맥미니)
+- [[infra-vm-macmini]] — 컴퓨트 호스트 (맥미니)
 
 ## Code
 - `execution/etf_collector/collect_etf_daily.py`

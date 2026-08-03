@@ -41,7 +41,7 @@ alerts: "kickstart 개입 시에만 텔레그램(전부 정상=무음) · 복구
 - (none)
 
 ## Depends on
-- [[infra-vm-macmini]] — 컴퓨트 호스트 (Oracle VM → 맥미니)
+- [[infra-vm-macmini]] — 컴퓨트 호스트 (맥미니)
 - [[infra-telegram]] — 텔레그램 (알림·상호작용 채널)
 - [[daemon-watchlist-quoteboard]] — 관심종목 시세판 데몬 (Watchlist, 127.0.0.1:8778)
 - [[daemon-datalake-webui]] — 데이터레이크 문답 웹 UI 데몬 (AoE Wiki, 127.0.0.1:8787)

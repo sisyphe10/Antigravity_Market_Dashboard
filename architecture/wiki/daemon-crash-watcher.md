@@ -36,7 +36,7 @@ alerts: "크래시 루프 감지 → notify_sisyphe_failure.sh <봇> → 텔레�
 - (none)
 
 ## Depends on
-- [[infra-vm-macmini]] — 컴퓨트 호스트 (Oracle VM → 맥미니)
+- [[infra-vm-macmini]] — 컴퓨트 호스트 (맥미니)
 - [[infra-telegram]] — 텔레그램 (알림·상호작용 채널)
 
 ## Code
