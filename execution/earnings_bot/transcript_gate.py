@@ -250,14 +250,9 @@ def check_translation(raw_text: str, translated_kr: str,
     if kr.strip().startswith(SENTINEL) and len(kr.strip()) < 1200:
         return _fail([f'sentinel:{SENTINEL}'], info)
     warnings0 = [f'sentinel_mentioned_in_body'] if SENTINEL in kr else []
-    head = kr[:1500]
-    for mk in REFUSAL_MARKERS:
-        if mk in head:
-            reasons.append(f'refusal_marker:{mk}')
-            break
     warnings: list[str] = list(warnings0)
-    if raw_text:
-        ratio = len(kr) / len(raw_text)
+    ratio = (len(kr) / len(raw_text)) if raw_text else None
+    if ratio is not None:
         info['ratio'] = round(ratio, 3)
         if ratio < MIN_TRANSLATION_RATIO:
             reasons.append(f'translation_ratio_low:{ratio:.2f}')
@@ -265,6 +260,20 @@ def check_translation(raw_text: str, translated_kr: str,
             warnings.append(f'translation_ratio_thin:{ratio:.2f}')
         if ratio > MAX_TRANSLATION_RATIO:
             reasons.append(f'translation_ratio_high:{ratio:.2f}')
+
+    # 거부문구 — 진짜 거부 출력은 짧거나 얇다. 건강한 분량의 번역 서두에 나오는
+    # Safe Harbor 문구("...전망 정보를 포함하지 않습니다" 류)가 걸리는 오탐이
+    # 실측됨(2026-08-03 TLN: ratio 0.49·구조 정상인데 하드 차단) → 분량이 정상이면
+    # 경고로 강등, 짧거나 얇을 때만 하드 차단.
+    head = kr[:1500]
+    for mk in REFUSAL_MARKERS:
+        if mk in head:
+            if len(kr.strip()) < 5000 or (ratio is not None
+                                          and ratio < WARN_TRANSLATION_RATIO):
+                reasons.append(f'refusal_marker:{mk}')
+            else:
+                warnings.append(f'refusal_marker_in_healthy_body:{mk}')
+            break
 
     # 섹션 구조 정합 — 호출자가 prepared/qa를 넘기면 검사 (translator·publish 경유)
     if prepared is not None or qa is not None:

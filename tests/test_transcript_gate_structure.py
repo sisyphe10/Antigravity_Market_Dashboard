@@ -65,3 +65,19 @@ def test_ratio_hard_bounds():
     g2 = check_translation(raw, bloat, prepared=PREP_EN, qa=QA_EN)
     assert any('translation_ratio_high' in r for r in g2.reasons)
     assert 0 < MIN_TRANSLATION_RATIO < MAX_TRANSLATION_RATIO
+
+
+def test_refusal_marker_in_healthy_translation_downgraded_to_warning():
+    """건강한 분량의 번역 서두 Safe Harbor 문구는 하드 차단하지 않는다 (TLN 오탐)."""
+    raw = PREP_EN + '\n' + QA_EN
+    kr = (f'{PREP_HEADER}\n\n본 콜은 전망 정보를 포함하지 않습니다. ' + PREP_KR
+          + f'\n\n{QA_HEADER}\n\n' + QA_KR)
+    g = check_translation(raw, kr, prepared=PREP_EN, qa=QA_EN)
+    assert g.ok, g.reasons
+    assert any('refusal_marker_in_healthy_body' in w for w in g.warnings)
+
+
+def test_refusal_marker_in_short_output_still_blocked():
+    g = check_translation(PREP_EN + '\n' + QA_EN, '번역을 포함하지 않습니다.')
+    assert not g.ok
+    assert any('refusal_marker' in r or 'translation_ratio_low' in r for r in g.reasons)
