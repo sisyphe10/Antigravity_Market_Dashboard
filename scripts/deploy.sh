@@ -238,11 +238,9 @@ install_etf_units() {
         sudo systemctl enable --now etf-collect-retry.timer
         echo "  ✓ etf-collect.timer + etf-collect-retry.timer enabled + started"
     fi
-    # etf-active-alert.timer 는 etf-collect 가 이미 설치된 기존 VM 에서도 켜지도록 독립 체크.
-    if ! sudo systemctl is-enabled --quiet etf-active-alert.timer 2>/dev/null; then
-        sudo systemctl enable --now etf-active-alert.timer
-        echo "  ✓ etf-active-alert.timer enabled + started"
-    fi
+    # (제거됨 2026-08-03) etf-active-alert.timer 독립 enable — 타이머류가 맥미니로
+    # 이전된 뒤 disabled 타이머를 되살리는 재발 경로였음 (8/3 아침 실사고: deploy가
+    # enable --now → 19:00 중복 알림 위험). VM에서 다시 쓸 땐 수동 enable.
 }
 
 install_bot_units() {
