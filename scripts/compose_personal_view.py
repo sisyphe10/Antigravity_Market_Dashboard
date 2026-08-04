@@ -79,7 +79,11 @@ AOE_DARK_CSS = (
     '{background:' + P['input-bg'] + '!important;color:#fff!important;border-color:' + P['input-border'] + '!important}'
     '.category-title,.section>h2,.section>h3,h2.block-title{color:' + P['amber'] + '!important;letter-spacing:1.5px}'
     'th{background:' + P['th-bg'] + '!important;color:' + P['amber'] + '!important;border-color:#2a2b2e!important}'
-    'td{border-color:#222326!important}'
+    # MR(Monthly Returns) 표 = 다크 네이티브 보더 설계(월/자산군 구분선 위계) — 일괄 덮어쓰기에서 제외 (2026-08-04)
+    'td:not(#mrTableWrap td){border-color:#222326!important}'
+    '#mrTableWrap th[style*="#7a828c"]{border-right-color:#7a828c!important}'
+    '#mrTableWrap th[style*="#5c6168"]{border-right-color:#5c6168!important}'
+    '#mrTableWrap th[style*="#3a3d42"]{border-right-color:#3a3d42!important}'
     'td:not([style*=color]){color:#fff!important}'
     # 표 셀 가운데 정렬 일괄 (인라인 text-align 지정 셀만 예외 — 긴 본문용)
     'td:not([style*=text-align]),th:not([style*=text-align]){text-align:center!important}'
