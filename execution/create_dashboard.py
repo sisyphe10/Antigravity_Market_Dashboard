@@ -899,7 +899,7 @@ def create_monthly_returns_table():
     # 2026-07-19 블룸버그 다크 전환: 다크 바탕에서는 강조 구분선일수록 밝게
     LIGHT = '1px solid #26282c'           # 가로선 (행 사이)
     LIGHT_VERT = '1px solid #3a3d42'      # 일반 세로선
-    DARK = '1.5px solid #4a4e55'          # 기존 그룹 구분
+    DARK = '2px solid #7a828c'            # 월↔KOSPI 시점/데이터 경계 (2026-08-04 사용자: 더 눈에 띄게)
     DARK_HEAVY = '2px solid #5c6168'      # 강조 그룹 구분 + 외곽
 
     def right_border_for(name):
@@ -1034,7 +1034,7 @@ def create_monthly_returns_table():
                 <button onclick="downloadElementImage('mrTableWrap','Monthly_Returns')" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
             </div>
             <div id="mrTableWrap" style="overflow-x:auto;background:#101214;border:1px solid #27282b;border-radius:8px;padding:16px;width:fit-content;max-width:100%;margin:0 auto;">
-                <table style="width:1000px;max-width:100%;border-collapse:separate;border-spacing:0;font-size:var(--aoe-t-font);--aoe-t-font:14px;--aoe-t-head-font:15px;font-variant-numeric:var(--aoe-t-num);font-family:inherit;table-layout:fixed;margin:0 auto;border:2px solid #1f2937;box-sizing:border-box;">
+                <table style="width:1000px;max-width:100%;border-collapse:separate;border-spacing:0;font-size:var(--aoe-t-font);--aoe-t-font:14px;--aoe-t-head-font:15px;font-variant-numeric:var(--aoe-t-num);font-family:inherit;table-layout:fixed;margin:0 auto;border:2px solid #5c6168;box-sizing:border-box;">
                     <thead><tr>{head_cells}</tr></thead>
                     <tbody>
 {body_rows_html}                    </tbody>
