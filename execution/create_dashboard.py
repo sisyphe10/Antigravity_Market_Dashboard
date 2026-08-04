@@ -1571,6 +1571,7 @@ CMB_SERIES_UNITS = {
     'S&P 500 거래량': '십억주', 'NASDAQ 거래량': '십억주',
     'SPY 거래대금': '십억달러', 'QQQ 거래대금': '십억달러',
     '고객예탁금': '억원', '신용잔고': '억원', '반대매매금액': '억원',
+    '코스피 신용잔고': '억원', '코스닥 신용잔고': '억원',
     'KOSPI 배당수익률': '%', 'KOSDAQ 배당수익률': '%',
     '코스피 외국인비중': '%', '코스닥 외국인비중': '%', '삼성전자 외국인': '%', '삼성전자우 외국인': '%',
     'SK하이닉스 외국인': '%', '삼성생명 외국인': '%', 'SK스퀘어 외국인': '%', '삼성물산 외국인': '%',
@@ -1782,6 +1783,9 @@ def _build_combined_chart_section():
                 # 증시 유동성 (금투협 KOFIA → dataset.csv DEPOSIT). DATA 일반 차트로 개별 시리즈 표시.
                 {'display': '고객예탁금',         'csv': '고객예탁금',         'color': '#2E7D32'},
                 {'display': '신용잔고',           'csv': '신용잔고',           'color': '#C2185B'},
+                # 신용잔고 코스피/코스닥 분리 (금투협 KOFIA getGrantingOfCreditBalanceInfo, fetch_kofia_stats.py)
+                {'display': '코스피 신용잔고',    'csv': '코스피 신용잔고',    'color': '#AD1457'},
+                {'display': '코스닥 신용잔고',    'csv': '코스닥 신용잔고',    'color': '#EC407A'},
                 # 반대매매금액 = 위탁매매 미수금 반대매매, 억원 (fetch_kofia_stats.py, 2021-10~)
                 {'display': '반대매매금액',       'csv': '반대매매금액',       'color': '#D84315'},
                 # 지수 밸류에이션 (KRX/pykrx data.krx 로그인 → KRX_VALUATION). 후행 PER/PBR/배당수익률.

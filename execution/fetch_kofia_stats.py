@@ -36,6 +36,8 @@ NUM_OF_ROWS = 1000
 DATASET = 'dataset.csv'
 BANDAE_PRODUCT = '반대매매금액'
 BANDAE_TYPE = 'DEPOSIT'
+CREDIT_KOSPI_PRODUCT = '코스피 신용잔고'
+CREDIT_KOSDAQ_PRODUCT = '코스닥 신용잔고'
 
 
 def load_api_key():
@@ -106,16 +108,18 @@ def to_series(items, fields):
     return dates, out
 
 
-def append_bandae_dataset(dates, won_values):
-    """반대매매금액(원)을 dataset.csv에 억원(소수 1자리)으로 append. 결측일만 추가(멱등)."""
+def append_series_dataset(product, dates, won_values, ndigits=1):
+    """원 단위 시계열을 dataset.csv에 억원으로 append. 결측일만 추가(멱등)."""
     df = pd.read_csv(DATASET)
-    existing = set(df[df['제품명'] == BANDAE_PRODUCT]['날짜'].values)
+    existing = set(df[df['제품명'] == product]['날짜'].values)
     new_rows = []
     for d, v in zip(dates, won_values):
         if v is None or d in existing:
             continue
-        new_rows.append({'날짜': d, '제품명': BANDAE_PRODUCT,
-                         '가격': round(v / 1e8, 1), '데이터 타입': BANDAE_TYPE})
+        eok = round(v / 1e8, ndigits)
+        new_rows.append({'날짜': d, '제품명': product,
+                         '가격': int(eok) if ndigits == 0 else eok,
+                         '데이터 타입': BANDAE_TYPE})
     if new_rows:
         pd.concat([df, pd.DataFrame(new_rows)], ignore_index=True).to_csv(
             DATASET, index=False)
@@ -125,7 +129,7 @@ def append_bandae_dataset(dates, won_values):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--dataset-begin', default=None, metavar='YYYYMMDD',
-                    help='반대매매금액 dataset.csv 백필 시작일 (기본=BEGIN_BAS_DT)')
+                    help='반대매매금액/신용잔고 분리 dataset.csv 백필 시작일 (기본=BEGIN_BAS_DT)')
     args = ap.parse_args()
 
     key = load_api_key()
@@ -136,7 +140,8 @@ def main():
     fetch_begin = min(args.dataset_begin or BEGIN_BAS_DT, BEGIN_BAS_DT)
     dep_items = fetch_all(key, 'getSecuritiesMarketTotalCapitalInfo',
                           begin=fetch_begin)
-    crd_items = fetch_all(key, 'getGrantingOfCreditBalanceInfo')
+    crd_items = fetch_all(key, 'getGrantingOfCreditBalanceInfo',
+                          begin=fetch_begin)
 
     dep_dates, dep = to_series(
         dep_items, ['invrDpsgAmt', 'brkTrdUcolMnyVsOppsTrdAmt'])
@@ -159,21 +164,31 @@ def main():
         'begin': cut,
         'deposit': {'dates': j_dates, 'values': j_values},
         'credit': {
-            'dates': crd_dates,
-            'total': crd['crdTrFingWhl'],
-            'kospi': crd['crdTrFingScrs'],
-            'kosdaq': crd['crdTrFingKosdaq'],
+            'dates': [d for d in crd_dates if d >= cut],
+            'total': [v for d, v in zip(crd_dates, crd['crdTrFingWhl'])
+                      if d >= cut],
+            'kospi': [v for d, v in zip(crd_dates, crd['crdTrFingScrs'])
+                      if d >= cut],
+            'kosdaq': [v for d, v in zip(crd_dates, crd['crdTrFingKosdaq'])
+                       if d >= cut],
         },
     }
     with open(OUTPUT, 'w', encoding='utf-8') as f:
         json.dump(payload, f, ensure_ascii=False)
 
-    added = append_bandae_dataset(dep_dates, dep['brkTrdUcolMnyVsOppsTrdAmt'])
+    added = append_series_dataset(
+        BANDAE_PRODUCT, dep_dates, dep['brkTrdUcolMnyVsOppsTrdAmt'])
+    added_ks = append_series_dataset(
+        CREDIT_KOSPI_PRODUCT, crd_dates, crd['crdTrFingScrs'], ndigits=0)
+    added_kq = append_series_dataset(
+        CREDIT_KOSDAQ_PRODUCT, crd_dates, crd['crdTrFingKosdaq'], ndigits=0)
 
     print(f'kofia_stats.json saved: deposit {len(j_dates)} days '
           f'({j_dates[0]}~{j_dates[-1]}), credit {len(crd_dates)} days '
           f'({crd_dates[0]}~{crd_dates[-1]})')
-    print(f'dataset.csv: {BANDAE_PRODUCT} {added}행 추가 '
+    print(f'dataset.csv: {BANDAE_PRODUCT} {added}행, '
+          f'{CREDIT_KOSPI_PRODUCT} {added_ks}행, '
+          f'{CREDIT_KOSDAQ_PRODUCT} {added_kq}행 추가 '
           f'(조회 {dep_dates[0]}~{dep_dates[-1]})')
     return 0
 
