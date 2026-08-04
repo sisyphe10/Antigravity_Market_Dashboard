@@ -2,6 +2,7 @@
 """위키 백엔드 A/B 평가 — 같은 질문을 API(/ask)와 headless 양쪽에 태워 비교.
 
 실행: venv/bin/python3 datalake/webui/ab_eval.py
+★2026-08-05 API 경로(/ask) 제거로 api 측은 더 이상 동작하지 않는다 — 이 스크립트는 이력 보존용.
 결과: ~/datalake/ab_eval_latest.json  (테스트 페이지 /wiki/test/headless/ab 가 읽음)
 ★API 쪽은 실제 과금된다. 문항 수를 늘리기 전에 비용을 확인할 것.
 """
