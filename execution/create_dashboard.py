@@ -5101,7 +5101,7 @@ def create_order_section():
                         // 변경전 기준선: 오늘 첫 편입(is_today_new)이면 0(출시 전), 아니면 D-1(weight_prev).
                         // 추가 주문(additionalOrder)은 변경후→변경전 스냅샷으로 이 기준선을 갱신.
                         var prevW = _orderPrevBaseline(s, _snapStale);
-                        return { code: s.code, name: s.name, sector: s.sector || '', weight: prevW };
+                        return { code: s.code, name: s.name, sector: s.sector || '', weight: prevW, market_cap: parseFloat(s.market_cap) || 0 };  // market_cap = 매트릭스 행 정렬 2차 키(동일 비중 내 시총). pending 저장은 명시 필드만 쓰므로 스키마 무관.
                     });
                     orderState[p.display] = stocks.map(function(s) {
                         return { newWeight: parseFloat(s.weight) || 0, reason: '' };
@@ -5856,6 +5856,13 @@ def create_order_section():
         // portfolio_data.json 은 편출 표시용으로 D-1 U 오늘 합집합을 담으므로, 재생성 전(오전)엔
         // 어제 전량 편출된 종목이 0/0 행으로 남는다. orderStocks/orderState·pending 저장 스키마·
         // 합계/현금 계산·자문지 엑셀 경로는 전부 불변 — 렌더 행 목록에서만 제외.
+        // 행 정렬 기준 비중 = 각 포트 '변경전'(기준) 비중의 최대값.
+        // 변경후를 키로 쓰면 한 글자 입력마다 renderOrderMatrix() 가 재실행되며 행이 튀어 편집이 어렵다.
+        // (추가 주문 시엔 변경후가 변경전으로 승격되므로 그 시점에 재정렬된다)
+        function _mtxRowWeight(code){ var c=String(code||'').trim(), w=0;
+          for(var pi=0;pi<ORDER_PORTFOLIOS.length;pi++){ var pf=ORDER_PORTFOLIOS[pi].display, idx=_mtxFindIdx(pf,c); if(idx<0) continue;
+            var v=parseFloat((orderStocks[pf][idx]||{}).weight)||0; if(v>w) w=v; }
+          return w; }
         function _mtxRowDead(code){ var seen=false, c=String(code||'').trim(); if(!c) return false;
           for(var pi=0;pi<ORDER_PORTFOLIOS.length;pi++){ var pf=ORDER_PORTFOLIOS[pi].display, idx=_mtxFindIdx(pf,c); if(idx<0) continue; seen=true;
             if((parseFloat((orderStocks[pf][idx]||{}).weight)||0)!==0) return false;
@@ -5863,8 +5870,13 @@ def create_order_section():
           return seen; }
         function _mtxUnion(){ var owned=_mtxNewRowCodes(), order=[], meta={};
           ORDER_PORTFOLIOS.forEach(function(p){ (orderStocks[p.display]||[]).forEach(function(s){ var c=String(s.code||'').trim(); if(!c||owned[c]) return;
-            if(!meta[c]){ meta[c]={code:c,name:s.name||'',sector:s.sector||''}; order.push(c); } else { if(!meta[c].name&&s.name)meta[c].name=s.name; if(!meta[c].sector&&s.sector)meta[c].sector=s.sector; } }); });
-          return {order:order.filter(function(c){ return !_mtxRowDead(c); }),meta:meta}; }
+            if(!meta[c]){ meta[c]={code:c,name:s.name||'',sector:s.sector||'',mcap:parseFloat(s.market_cap)||0}; order.push(c); } else { if(!meta[c].name&&s.name)meta[c].name=s.name; if(!meta[c].sector&&s.sector)meta[c].sector=s.sector; if(!meta[c].mcap&&s.market_cap)meta[c].mcap=parseFloat(s.market_cap)||0; } }); });
+          var keep=order.filter(function(c){ return !_mtxRowDead(c); });
+          var seq={}; keep.forEach(function(c,i){ seq[c]=i; });
+          keep.sort(function(a,b){ var wa=_mtxRowWeight(a), wb=_mtxRowWeight(b); if(wb!==wa) return wb-wa;
+            var ma=(meta[a]||{}).mcap||0, mb=(meta[b]||{}).mcap||0; if(mb!==ma) return mb-ma;
+            return seq[a]-seq[b]; });
+          return {order:keep,meta:meta}; }
         function _mtxReason(code){ var c=String(code||'').trim();
           for(var pi=0;pi<ORDER_PORTFOLIOS.length;pi++){ var pf=ORDER_PORTFOLIOS[pi].display, a=orderStocks[pf]||[], st=orderState[pf]||[];
             for(var i=0;i<a.length;i++){ if(String(a[i].code||'').trim()===c){ var r=(st[i]&&st[i].reason||'').toString(); if(r.trim()) return r; } } }
@@ -6206,7 +6218,7 @@ def create_order_section():
                     orderStocks[p.display] = stocks.map(function(s) {
                         var origW = parseFloat(s.weight) || 0;
                         var prevW = _orderPrevBaseline(s, _snapStale);
-                        return { code: s.code, name: s.name, sector: s.sector || '', weight: prevW };
+                        return { code: s.code, name: s.name, sector: s.sector || '', weight: prevW, market_cap: parseFloat(s.market_cap) || 0 };  // market_cap = 매트릭스 행 정렬 2차 키(동일 비중 내 시총). pending 저장은 명시 필드만 쓰므로 스키마 무관.
                     });
                     orderState[p.display] = stocks.map(function(s) {
                         return { newWeight: parseFloat(s.weight) || 0, reason: '' };
