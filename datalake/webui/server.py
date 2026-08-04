@@ -1031,6 +1031,7 @@ class HeadlessAskRequest(BaseModel):
     request_id: str = ""
 
 
+@app.post("/ask_job")
 @app.post("/test/headless/ask")
 def test_headless_ask(req: HeadlessAskRequest):
     """비동기 제출 — 즉시 job_id 반환(202). 결과는 폴링으로 받는다."""
@@ -1047,6 +1048,7 @@ def test_headless_ask(req: HeadlessAskRequest):
                          "queue_depth": wiki_jobs.queue_depth()}, status_code=202)
 
 
+@app.get("/jobs/{job_id}")
 @app.get("/test/headless/jobs/{job_id}")
 def test_headless_job(job_id: str):
     import wiki_jobs

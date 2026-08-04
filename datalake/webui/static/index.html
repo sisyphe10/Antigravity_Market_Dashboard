@@ -203,6 +203,38 @@ function notify(msg) {
   notify._t = setTimeout(() => { el.style.display = 'none'; }, 7000);
 }
 
+// ── headless 백엔드(구독 쿼터, 호출당 0원) — 잡 제출 후 폴링 (2026-08-05 라이브 전환)
+// 반환 형태는 기존 동기 /ask 와 동일한 {answer, steps} 라 아래 저장 로직은 그대로 쓴다.
+async function askJob(question, baseMsgs, waitEl) {
+  const r = await fetch('ask_job', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({question, history: baseMsgs,
+                          request_id: 'ui-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8)})
+  });
+  const j = await r.json();
+  if (!j.job_id) throw new Error(j.error || '잡 생성 실패');
+  const prog = document.createElement('div');
+  prog.className = 'steps';
+  waitEl.appendChild(prog);
+  const t0 = Date.now();
+  for (;;) {
+    await new Promise(res => setTimeout(res, 2000));
+    let s;
+    try {
+      s = await (await fetch('jobs/' + j.job_id)).json();
+    } catch (e) { continue; }          // 일시적 네트워크 오류는 계속 폴링
+    const secs = Math.round((Date.now() - t0) / 1000);
+    if (s.status === 'queued' || s.status === 'running') {
+      const tools = (s.steps || []).map(x => x.tool).join(' · ');
+      prog.textContent = secs + '초' + (tools ? ' · 🔧 ' + tools : '');
+      continue;
+    }
+    prog.remove();
+    if (s.status === 'succeeded') return {answer: s.answer, steps: s.steps || []};
+    throw new Error(s.error || s.status);
+  }
+}
+
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const question = q.value.trim();
@@ -223,11 +255,7 @@ form.addEventListener('submit', async (e) => {
   const wait = add('bot', '');
   startThinking(wait.querySelector('.bubble'));
   try {
-    const res = await fetch('ask', {  // 상대경로 — /wiki/ 프록시 하위에서도 동작 (2026-07-12)
-      method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({question, history: baseMsgs})
-    });
-    const data = await res.json();
+    const data = await askJob(question, baseMsgs, wait);
     const here = (reqConv === convId);   // 그 사이 대화를 바꿨는지
     wait.remove();
     const turn = [{role: 'user', content: question},
