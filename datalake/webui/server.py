@@ -1017,6 +1017,114 @@ def root():
     return HTMLResponse(_WIKI_INDEX_HTML)
 
 
+# ══════════════════════════════════════════════════════════════════
+# headless 백엔드 테스트 경로 (2026-08-05) — nav 미배선, A/B 비교 전용.
+# 기존 /ask(API 경로)는 손대지 않는다. 승인 후 라이브 전환 예정.
+# ══════════════════════════════════════════════════════════════════
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+
+class HeadlessAskRequest(BaseModel):
+    question: str
+    history: list = []
+    chat_id: str = ""
+    request_id: str = ""
+
+
+@app.post("/test/headless/ask")
+def test_headless_ask(req: HeadlessAskRequest):
+    """비동기 제출 — 즉시 job_id 반환(202). 결과는 폴링으로 받는다."""
+    import wiki_jobs
+    if not (req.question or "").strip():
+        return JSONResponse({"error": "질문이 비어 있습니다"}, status_code=400)
+    hist = [{"role": m["role"], "content": m["content"]}
+            for m in (req.history or [])[-6:]
+            if m.get("role") in ("user", "assistant") and m.get("content")]
+    job = wiki_jobs.submit(req.question.strip(), history=hist,
+                           chat_id=req.chat_id or None,
+                           request_id=req.request_id or None)
+    return JSONResponse({"job_id": job["id"], "status": job["status"],
+                         "queue_depth": wiki_jobs.queue_depth()}, status_code=202)
+
+
+@app.get("/test/headless/jobs/{job_id}")
+def test_headless_job(job_id: str):
+    import wiki_jobs
+    job = wiki_jobs.get(job_id)
+    if not job:
+        return JSONResponse({"error": "없는 잡"}, status_code=404)
+    elapsed = None
+    if job.get("started_at"):
+        elapsed = round((job.get("finished_at") or time.time()) - job["started_at"], 1)
+    return JSONResponse({
+        "job_id": job["id"], "status": job["status"],
+        "answer": job.get("answer") or "", "steps": job.get("steps") or [],
+        "error": job.get("error"), "elapsed_sec": elapsed,
+        "meta": job.get("meta") or {},
+    })
+
+
+_HEADLESS_UI = """<!doctype html><meta charset="utf-8">
+<title>위키 headless A/B 테스트</title>
+<style>
+ body{background:#12100e;color:#e8e3d9;font:15px/1.6 -apple-system,'Pretendard',sans-serif;
+      max-width:900px;margin:0 auto;padding:24px}
+ h1{font-size:17px;color:#e0a960;font-weight:600}
+ #q{width:100%;padding:10px;background:#1c1916;color:#e8e3d9;border:1px solid #3a342c;
+    border-radius:6px;font-size:15px}
+ button{margin-top:8px;padding:8px 18px;background:#e0a960;color:#12100e;border:0;
+        border-radius:6px;font-weight:600;cursor:pointer}
+ .meta{font-size:12px;color:#8d8578;margin:10px 0}
+ .steps{font-size:12px;color:#8d8578;margin-top:8px}
+ .ans{white-space:pre-wrap;background:#1c1916;border:1px solid #3a342c;border-radius:8px;
+      padding:16px;margin-top:12px}
+ .err{border-color:#a4553a;color:#e08b6f}
+</style>
+<h1>위키 headless 백엔드 — A/B 테스트 (nav 미배선)</h1>
+<div class="meta">구독 쿼터로 실행됩니다. 호출당 API 과금 0원. 기존 /wiki 는 그대로입니다.</div>
+<input id="q" placeholder="질문을 입력하고 Enter">
+<button onclick="go()">제출</button>
+<div id="out"></div>
+<script>
+const out = document.getElementById('out'), q = document.getElementById('q');
+q.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+async function go() {
+  const question = q.value.trim(); if (!question) return;
+  out.innerHTML = '<div class="meta">제출 중...</div>';
+  const r = await fetch('ask', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({question, request_id: 'ui-' + Date.now()})});
+  const j = await r.json();
+  if (!j.job_id) { out.innerHTML = '<div class="ans err">'+JSON.stringify(j)+'</div>'; return; }
+  const t0 = Date.now();
+  const timer = setInterval(async () => {
+    const s = await (await fetch('jobs/' + j.job_id)).json();
+    const secs = ((Date.now() - t0)/1000).toFixed(0);
+    if (s.status === 'queued' || s.status === 'running') {
+      out.innerHTML = '<div class="meta">' + s.status + ' · ' + secs + '초 경과' +
+        (s.steps && s.steps.length ? '<div class="steps">🔧 ' +
+          s.steps.map(x=>x.tool).join(' · ') + '</div>' : '') + '</div>';
+      return;
+    }
+    clearInterval(timer);
+    const ok = s.status === 'succeeded';
+    out.innerHTML = '<div class="meta">' + s.status + ' · ' + (s.elapsed_sec ?? secs) +
+      '초 · ' + (s.meta.num_turns ?? '?') + '턴</div>' +
+      '<div class="ans' + (ok ? '' : ' err') + '">' +
+      (ok ? s.answer : ('실패: ' + (s.error||''))) + '</div>' +
+      (s.steps && s.steps.length ? '<div class="steps">🔧 ' +
+        s.steps.map(x=>x.tool).join(' · ') + '</div>' : '') +
+      (ok ? '' : '<button onclick="go()">재시도</button>');
+  }, 2000);
+}
+</script>"""
+
+
+@app.get("/test/headless/ui")
+def test_headless_ui():
+    from fastapi.responses import HTMLResponse as _HR
+    return _HR(_HEADLESS_UI)
+
+
 if __name__ == "__main__":
     import uvicorn
     # 기본=로컬 전용. 테일넷 공개는 DATALAKE_WEBUI_HOST에 테일스케일 IP 지정
