@@ -10380,9 +10380,9 @@ refresh();
 </body>
 </html>"""
 
-    with open('featured.html', 'w', encoding='utf-8') as f:
+    with open('featured_legacy.html', 'w', encoding='utf-8') as f:
         f.write(featured_page.replace('__FEATURED_UPDATED__', now))
-    print("Featured page generated: featured.html")
+    print("Featured page generated: featured_legacy.html")
 
     # ── ETF page ──
     generate_etf_html()

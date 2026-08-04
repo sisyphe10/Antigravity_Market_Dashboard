@@ -1052,6 +1052,14 @@ async def featured_update_job(context):
         # 에러가 있더라도 대시보드 재생성 시도 (기존 데이터로라도 갱신)
         subprocess.run([sys.executable, "execution/create_dashboard.py"],
                        capture_output=True, text=True, timeout=120, cwd=dashboard_dir)
+        # Featured 페이지 정본(2026-08-05 교체) — 데이터/HTML 분리본을 여기서 생성한다.
+        v2 = subprocess.run([sys.executable, "execution/create_featured_v2.py"],
+                            capture_output=True, text=True, timeout=300, cwd=dashboard_dir)
+        if v2.returncode != 0:
+            errors.append(f"create_featured_v2 실패: {v2.stderr[-200:]}")
+            logging.warning(f"{tag} {errors[-1]}")
+        else:
+            logging.info(f"{tag} featured_v2: {v2.stdout.strip()[-160:]}")
 
         now_str = now_kst.strftime("%Y-%m-%d %H:%M")
         subprocess.run(["git", "add", "featured.html", "featured_data.json", "featured_news.json",
