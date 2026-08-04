@@ -63,6 +63,15 @@ def init_db():
             PRIMARY KEY (date, stock_code)
         );
         CREATE TABLE IF NOT EXISTS excd_map (ticker TEXT PRIMARY KEY, excd TEXT);
+
+        -- 알림 발송 이력(항목 단위) — 늦게 올라온 운용사도 다음 실행에서
+        -- '추가' 알림으로 나가되, 이미 보낸 항목은 다시 보내지 않는다.
+        CREATE TABLE IF NOT EXISTS alert_sent (
+            date TEXT NOT NULL, etf_code TEXT NOT NULL,
+            stock_code TEXT NOT NULL, kind TEXT NOT NULL,
+            sent_at TEXT,
+            PRIMARY KEY (date, etf_code, stock_code, kind)
+        );
     """)
     # 마이그레이션: 스냅숏 지문(동일 PDF 재수집 탐지용)
     cols = {r[1] for r in conn.execute('PRAGMA table_info(collection_log)')}

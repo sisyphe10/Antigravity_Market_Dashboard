@@ -24,9 +24,23 @@
         <key>LANG</key>
         <string>en_US.UTF-8</string>
     </dict>
-    <!-- KST 평일 18:20 — 운용사 PDF·KIS 확정치 이후, 16~17시 민감창 회피. 시스템 TZ=Asia/Seoul 전제. -->
+    <!-- KST 평일 09:10 / 10:10 / 18:20 (시스템 TZ=Asia/Seoul 전제).
+         ETF 자산구성내역(PDF)은 매 영업일 **장 개시 전** 공표 → 09:10 이 본 실행이고
+         가장 이르게 알 수 있는 시점이다. 10:10 은 늦게 올리는 운용사 보충,
+         18:20 은 최종 안전망. 수집은 ETF 단위 멱등이고 알림은 항목 단위 증분이라
+         (alert_sent) 중복 발송 없이 늦게 온 것만 '추가' 로 나간다. -->
     <key>StartCalendarInterval</key>
     <array>
+        <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>10</integer></dict>
+        <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>10</integer></dict>
+        <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>10</integer></dict>
+        <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>10</integer></dict>
+        <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>9</integer><key>Minute</key><integer>10</integer></dict>
+        <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>10</integer><key>Minute</key><integer>10</integer></dict>
+        <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>10</integer><key>Minute</key><integer>10</integer></dict>
+        <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>10</integer><key>Minute</key><integer>10</integer></dict>
+        <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>10</integer><key>Minute</key><integer>10</integer></dict>
+        <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>10</integer><key>Minute</key><integer>10</integer></dict>
         <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>18</integer><key>Minute</key><integer>20</integer></dict>
         <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>18</integer><key>Minute</key><integer>20</integer></dict>
         <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>18</integer><key>Minute</key><integer>20</integer></dict>

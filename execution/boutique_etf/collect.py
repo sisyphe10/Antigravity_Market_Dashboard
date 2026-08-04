@@ -46,7 +46,8 @@ def _fingerprint(rows):
     return hashlib.sha256(key.encode('utf-8')).hexdigest()[:16]
 
 
-def main():
+def main(managers=None, quiet_alert=False):
+    """managers=None 이면 전체. {'타임폴리오', ...} 를 주면 그 운용사만 수집(워처용)."""
     now = datetime.now()
     if now.weekday() >= 5:
         print('[boutique] 주말 — 스킵')
@@ -59,19 +60,31 @@ def main():
     for w in warns:
         print('[boutique][warn] %s' % w)
 
-    regs = conn.execute(
-        'SELECT * FROM etf_registry ORDER BY manager, etf_code').fetchall()
+    if managers:
+        qs = ','.join('?' * len(managers))
+        regs = conn.execute(
+            'SELECT * FROM etf_registry WHERE manager IN (%s) ORDER BY manager, etf_code' % qs,
+            tuple(managers)).fetchall()
+    else:
+        regs = conn.execute(
+            'SELECT * FROM etf_registry ORDER BY manager, etf_code').fetchall()
     fails = {}          # adapter → 연속 실패 수
     n_ok = n_fail = n_stale = 0
     for reg in regs:
         code, a = reg['etf_code'], reg['adapter']
         prior = conn.execute(
-            'SELECT status FROM collection_log WHERE date=? AND etf_code=?',
+            'SELECT status, collected_at FROM collection_log WHERE date=? AND etf_code=?',
             (date, code)).fetchone()
-        if prior and prior['status'] in ('ok', 'stale'):
+        # status='stale'(PDF 미갱신)은 재시도 대상 — 워처가 롤오버를 기다리는 근거다.
+        if prior and prior['status'] == 'ok':
             # 멱등 재실행: 구성종목은 재수집·다운그레이드 금지.
-            # 단 NAV·AUM 은 최신(장중 → 종가)으로 갱신하고 invest_amt 도 재계산한다
-            # — 첫 수집이 장중이면 AUM 이 잠정치라 다음날 매매추정액이 틀어진다.
+            # NAV·AUM 은 **장중에 잡힌 잠정치일 때만** 갱신한다.
+            #   장 개시 전 수집분(아침 워처)은 PDF(D)=전일 종가 기준 보유분과 짝이 맞는
+            #   전일 종가 NAV·AUM 을 이미 담고 있으므로 덮어쓰면 오히려 어긋난다.
+            hhmm = (prior['collected_at'] or '')[11:16]
+            if not ('09:00' <= hhmm <= '15:30'):
+                n_ok += 1
+                continue
             try:
                 time.sleep(0.12)
                 q = enrich.fetch_etf_quote(code)

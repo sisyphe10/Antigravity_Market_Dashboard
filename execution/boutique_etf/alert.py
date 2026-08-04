@@ -50,12 +50,13 @@ GAP1 = '  '
 GAP2 = ' '
 
 
-def _head(date, test=False):
+def _head(date, test=False, extra=False):
     """제목 = <b><u>8.4(화) [액티브 ETF 변동 현황]</u></b>  (사용자 확정 2026-08-04, 볼드+밑줄)"""
     from datetime import datetime
     dt = datetime.strptime(date, '%Y-%m-%d')
+    suffix = ' (테스트)' if test else (' (추가)' if extra else '')
     return '<b><u>%d.%d(%s) [액티브 ETF 변동 현황]</u></b>%s' % (
-        dt.month, dt.day, WEEKDAY[dt.weekday()], ' (테스트)' if test else '')
+        dt.month, dt.day, WEEKDAY[dt.weekday()], suffix)
 
 
 def _cells(r):
@@ -85,7 +86,7 @@ def _amt(r):
     return r.get('trade_amt') or 0
 
 
-def build_message(date, rows, test=False, layout='tree'):
+def build_message(date, rows, test=False, layout='tree', extra=False):
     """rows: [{etf, kind(in|out|spike), stock, w_prev, w_cur, trade_amt}].
 
     정렬 = 금액(마지막 칼럼) 부호 내림차순 — 유입 큰 순 → 유출 큰 순 (사용자 확정 2026-08-04).
@@ -104,7 +105,7 @@ def build_message(date, rows, test=False, layout='tree'):
             body.append('%s%s<b>%s</b>' % (BULLET1, GAP1, brand))
             for r in groups[brand]:
                 body.append('   %s%s%s | %s' % (BULLET2, GAP2, _brand(r['etf'])[1], _cells(r)))
-    return '\n'.join([_head(date, test), ''] + body)
+    return '\n'.join([_head(date, test, extra), ''] + body)
 
 
 def _chunks(text, limit=3900):
@@ -151,16 +152,31 @@ def send(text):
     return ok
 
 
-def load_changes(conn, date):
+def load_changes(conn, date, unsent_only=True):
+    """미발송 변경만 반환 — 늦게 올라온 운용사는 다음 실행에서 '추가'로 나간다."""
+    sql = ('SELECT c.*, d.name etf_name FROM etf_changes c '
+           'JOIN etf_daily d ON d.date=c.date AND d.etf_code=c.etf_code ')
+    if unsent_only:
+        sql += ('LEFT JOIN alert_sent s ON s.date=c.date AND s.etf_code=c.etf_code '
+                'AND s.stock_code=c.stock_code AND s.kind=c.kind ')
+    sql += 'WHERE c.date=? AND c.drift=0'
+    if unsent_only:
+        sql += ' AND s.date IS NULL'
     rows = []
-    for r in conn.execute(
-            'SELECT c.*, d.name etf_name FROM etf_changes c '
-            'JOIN etf_daily d ON d.date=c.date AND d.etf_code=c.etf_code '
-            'WHERE c.date=? AND c.drift=0', (date,)):
+    for r in conn.execute(sql, (date,)):
         rows.append({'etf': r['etf_name'], 'kind': r['kind'], 'stock': r['stock_name'],
                      'w_prev': r['w_prev'], 'w_cur': r['w_cur'],
-                     'trade_amt': r['trade_amt']})
+                     'trade_amt': r['trade_amt'],
+                     'etf_code': r['etf_code'], 'stock_code': r['stock_code']})
     return rows
+
+
+def mark_sent(conn, date, rows):
+    ts = __import__('datetime').datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    conn.executemany(
+        'INSERT OR REPLACE INTO alert_sent VALUES (?,?,?,?,?)',
+        [(date, r['etf_code'], r['stock_code'], r['kind'], ts) for r in rows])
+    conn.commit()
 
 
 SAMPLE = [
@@ -200,21 +216,17 @@ def main():
     if not date:
         logging.info('수집 데이터 없음 — 스킵')
         return 0
-    try:
-        state = json.load(open(STATE_FILE, encoding='utf-8'))
-    except Exception:
-        state = {}
-    if state.get('sent') == date:
-        logging.info('%s 이미 발송 — 스킵', date)
-        return 0
     rows = load_changes(conn, date)
     if not rows:
-        logging.info('%s 특이사항 없음 — 무발송', date)
+        logging.info('%s 신규 특이사항 없음 — 무발송', date)
         return 0
-    n = send(build_message(date, rows))
+    already = conn.execute(
+        'SELECT COUNT(*) c FROM alert_sent WHERE date=?', (date,)).fetchone()['c']
+    n = send(build_message(date, rows, extra=bool(already)))
     if n:
-        json.dump({'sent': date}, open(STATE_FILE, 'w', encoding='utf-8'))
-    logging.info('%s 발송 %d건 (항목 %d)', date, n, len(rows))
+        mark_sent(conn, date, rows)
+    logging.info('%s 발송 %d건 (항목 %d%s)', date, n, len(rows),
+                 ', 추가분' if already else '')
     return 0
 
 

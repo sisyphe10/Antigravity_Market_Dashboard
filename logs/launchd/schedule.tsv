@@ -31,4 +31,6 @@ gha-krx-valuation	30 18 * * 1-5	/bin/bash /Users/sisyphe/Antigravity_Market_Dash
 gha-taiwan-revenue	20 23 * * *	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/gha/run_gha_job.sh gha-taiwan-revenue
 gha-universe	0 7 * * *	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/gha/run_gha_job.sh gha-universe
 gha-dtcc-cds	30 11 * * 2-6	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/gha/run_gha_job.sh gha-dtcc-cds
+boutique-etf	10 9 * * 1-5	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/timers/run_timer_job.sh boutique-etf	
+boutique-etf	10 10 * * 1-5	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/timers/run_timer_job.sh boutique-etf	
 boutique-etf	20 18 * * 1-5	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/timers/run_timer_job.sh boutique-etf	
