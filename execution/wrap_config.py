@@ -104,7 +104,8 @@ PRODUCTS = [
     Product(broker='삼성', nav_key='트루밸류', aum_name='트루밸류', ptype='general', kind_label='일반형',
             display='삼성 트루밸류', base_price=2021.31, start_date='2025-12-30', ytd_base='2025-12-30',
             color='#1428A0', advisory_template='자문지/라이프자산운용_트루밸류_260427.xlsx',
-            group=None, keywords=('트루밸류', '삼성 트루밸류')),  # 2026-07-31 분리 — 단독 포트·주문 동기 제외
+            group=None, order_sync_group='GENERAL_SHARED',  # 포트 분리 유지, 주문 동기 2026-08-04 재합류
+            keywords=('트루밸류', '삼성 트루밸류')),  # 2026-07-31 분리 — 단독 포트
     # 2026-07-06 공식 리브랜딩: 표시명 'NH Value ESG' → 'NH 다이내믹 밸류'.
     # nav_key='Value ESG'는 Wrap_NAV.xlsx 기준가/수익률/NEW 시트 컬럼(데이터 조인 키)이라 유지.
     # keywords·monthly_label은 기본값(display 추종)으로 복귀 — 명시값이면 display 변경에 안 따라감.
