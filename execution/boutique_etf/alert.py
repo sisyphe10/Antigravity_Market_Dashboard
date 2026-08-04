@@ -45,10 +45,10 @@ WEEKDAY = '월화수목금토일'
 
 
 def _head(date, test=False):
-    """제목 = 8.4(화) [액티브 ETF 변동 현황]  (사용자 확정 2026-08-04)"""
+    """제목 = <b><u>8.4(화) [액티브 ETF 변동 현황]</u></b>  (사용자 확정 2026-08-04, 볼드+밑줄)"""
     from datetime import datetime
     dt = datetime.strptime(date, '%Y-%m-%d')
-    return '%d.%d(%s) [액티브 ETF 변동 현황]%s' % (
+    return '<b><u>%d.%d(%s) [액티브 ETF 변동 현황]</u></b>%s' % (
         dt.month, dt.day, WEEKDAY[dt.weekday()], ' (테스트)' if test else '')
 
 
@@ -69,8 +69,11 @@ def _line(r):
 
 
 def build_message(date, rows, test=False):
-    """rows: [{etf, kind(in|out|spike), stock, w_prev, w_cur, trade_amt}] — |금액| 내림차순 단일 목록."""
-    ordered = sorted(rows, key=lambda x: -abs(x.get('trade_amt') or 0))
+    """rows: [{etf, kind(in|out|spike), stock, w_prev, w_cur, trade_amt}].
+
+    정렬 = 마지막 칼럼(금액) 내림차순 — 유입 큰 순 → 유출 큰 순 (사용자 확정 2026-08-04).
+    """
+    ordered = sorted(rows, key=lambda x: -(x.get('trade_amt') or 0))
     return '\n'.join([_head(date, test), ''] + [_line(r) for r in ordered])
 
 
