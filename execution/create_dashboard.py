@@ -2119,9 +2119,12 @@ def _build_combined_chart_section():
             else:
                 _pa = abs(price_val)
                 if _pa >= 1e12:
-                    price_txt = f'{price_val / 1e12:,.0f}조'
+                    # 100조 미만(거래대금 26.3조 등)은 정수 압축이 과하다 → 소수 1자리
+                    _sv = price_val / 1e12
+                    price_txt = f'{_sv:,.0f}조' if abs(_sv) >= 100 else f'{_sv:,.1f}조'
                 elif _pa >= 1e9:
-                    price_txt = f'{price_val / 1e8:,.0f}억'
+                    _sv = price_val / 1e8
+                    price_txt = f'{_sv:,.0f}억' if abs(_sv) >= 100 else f'{_sv:,.1f}억'
                 elif _pa >= 1000:
                     price_txt = f'{price_val:,.0f}'
                 elif _pa >= 10:
@@ -2259,6 +2262,14 @@ def _build_combined_chart_section():
                                 'S&P 500 거래량': 1e9, 'NASDAQ 거래량': 1e9,
                                 'SPY 거래대금': 1e9, 'QQQ 거래대금': 1e9,
                                 '경상수지': 10, '외환보유액': 10 };   // 억달러 -> $B
+
+            // 스케일 환산 후 반올림 정밀도 (2026-08-04). 시총(2,145조)은 정수가 읽기 좋지만
+            // 거래대금(26.33조)·거래량(5.39십억주)은 정수 반올림이 최대 ±9% 오차가 된다
+            // (코스닥 거래대금 5.46조 -> 5). 환산값 1000 미만이면 소수 2자리 유지.
+            function cmbScaleRound(sv, scale) {
+                if (scale < 1e8) return sv;
+                return Math.abs(sv) >= 1000 ? Math.round(sv) : Math.round(sv * 100) / 100;
+            }
 
             // MA 슬롯(0~3) 색상. 윈도우 값은 시리즈 빈도에 따라 동적 (MA_WINDOWS).
             var MA_DEFS = [
@@ -3014,7 +3025,7 @@ def _build_combined_chart_section():
                         data = aligned.map(function(v) {
                             if (v === null) return null;
                             var sv = v / scale;
-                            return scale >= 1e8 ? Math.round(sv) : sv;
+                            return cmbScaleRound(sv, scale);
                         });
                     }
                     var yAxisID = (mode === 'raw2' && idx === 1 && !(isForeign && _sameUnit)) ? 'y1' : 'y';
@@ -3092,7 +3103,7 @@ def _build_combined_chart_section():
                                 var maVisible = filled.map(function(pt) {
                                     if (pt.ma === null || pt.ma === undefined) return null;
                                     var sv = pt.ma / scale;
-                                    return scale >= 1e8 ? Math.round(sv) : sv;
+                                    return cmbScaleRound(sv, scale);
                                 });
                                 // 전 구간 null(데이터 부족)이면 범례 유령 항목 방지를 위해 생략
                                 if (maVisible.some(function(v){ return v !== null; })) datasets.push({
