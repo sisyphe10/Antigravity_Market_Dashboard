@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.antigravity.portfolio-premarket</string>
+    <key>UserName</key>
+    <string>sisyphe</string>
+    <key>WorkingDirectory</key>
+    <string>/Users/sisyphe/Antigravity_Market_Dashboard</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/sisyphe/Antigravity_Market_Dashboard/scripts/premarket_portfolio_refresh.sh</string>
+    </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>/Users/sisyphe</string>
+        <key>PATH</key>
+        <string>/Users/sisyphe/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>LANG</key>
+        <string>en_US.UTF-8</string>
+    </dict>
+    <!-- KST 07:30 평일(월~금) — 개장 전 포트폴리오 구성 재생성. 정규 갱신 첫 발화가 09:10 이라
+         전일 편출 종목이 아침 내내 weight 0 행으로 남던 구간을 없앤다 (2026-08-05) -->
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>7</integer><key>Minute</key><integer>30</integer></dict>
+        <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>7</integer><key>Minute</key><integer>30</integer></dict>
+        <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>7</integer><key>Minute</key><integer>30</integer></dict>
+        <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>7</integer><key>Minute</key><integer>30</integer></dict>
+        <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>7</integer><key>Minute</key><integer>30</integer></dict>
+    </array>
+    <key>StandardOutPath</key>
+    <string>/Users/sisyphe/Antigravity_Market_Dashboard/logs/launchd/portfolio-premarket.out</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/sisyphe/Antigravity_Market_Dashboard/logs/launchd/portfolio-premarket.err</string>
+    <key>RunAtLoad</key>
+    <false/>
+</dict>
+</plist>
