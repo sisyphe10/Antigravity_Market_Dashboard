@@ -152,27 +152,34 @@ def fetch_truston(page_url, date_dash):
 
 
 def fetch_kis(etf_code):
-    """KIS ETF 구성종목 시세 — 상위 30종목 한도. hts_avls(시총 억원)까지 동봉."""
+    """KIS ETF 구성종목 시세 — 상위 30종목 한도. hts_avls(시총 억원)까지 동봉.
+
+    ★비중은 공식 필드 `etf_cnfg_issu_rlim`(전체 포트폴리오 기준, 합계 100)을 그대로 쓴다.
+      반환된 상위 30행의 평가액 합을 100%로 재정규화하면 잘린 ETF에서 비중이 부풀려진다
+      (2026-08-04 실측: KoAct 배당성장 57종목 중 30행만 반환 → 1위 23.51% 가 26.60% 로 +13%).
+    ★잘림 판정도 행수 30 추정이 아니라 output1 의 총 구성종목수(etf_cnfg_issu_cnt)와 대조한다
+      (DS 코스닥액티브: 총 29 인데 28행만 반환 — 30 미만이어도 잘릴 수 있다).
+    """
     j = kis_get('/uapi/etfetn/v1/quotations/inquire-component-stock-price', 'FHKST121600C0',
                 {'FID_COND_MRKT_DIV_CODE': 'J', 'FID_INPUT_ISCD': etf_code,
                  'FID_COND_SCR_DIV_CODE': '11216'})
     out = j.get('output2') or []
+    summary = j.get('output1') or {}
     rows = []
     for r in out:
         raw = str(r.get('stck_shrn_iscd') or '').strip()
         name = str(r.get('hts_kor_isnm') or '').strip()
         if _is_cash(raw, name) or _is_deriv(name):
             continue
-        qty = _num(r.get('etf_cu_unit_scrt_cnt'))
-        ev = _num(r.get('etf_cnfg_issu_avls'))
-        avls = _num(r.get('hts_avls'))
-        rows.append(_row(raw, name, qty, ev, None,
+        qty = _num(r.get('etf_cu_unit_scrt_cnt'))     # 이 행에서는 구성종목의 CU당 수량
+        ev = _num(r.get('etf_cnfg_issu_avls'))        # 현재가 기준 평가액
+        avls = _num(r.get('hts_avls'))                # 종목 시가총액(억원)
+        rows.append(_row(raw, name, qty, ev, _num(r.get('etf_cnfg_issu_rlim')),
                          _num(r.get('stck_prpr')), avls * 1e8 if avls else None))
     if not rows:
         raise RuntimeError('kis: 구성종목 0행 (%s)' % etf_code)
-    tot = sum(r['eval_cu'] or 0 for r in rows)
-    if tot:
-        for r in rows:
-            r['weight'] = round((r['eval_cu'] or 0) / tot * 100, 2)
-    return rows, {'source': 'kis', 'truncated': 1 if len(out) >= 30 else 0,
-                  'effective_date': None}
+    if sum(1 for r in rows if r['weight'] is not None) < len(rows) * 0.9:
+        raise RuntimeError('kis: 비중 필드 결측 과다 (%s)' % etf_code)
+    total_cnt = int(_num(summary.get('etf_cnfg_issu_cnt')) or 0)
+    truncated = 1 if (total_cnt and len(out) < total_cnt) else 0
+    return rows, {'source': 'kis', 'truncated': truncated, 'effective_date': None}

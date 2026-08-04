@@ -39,6 +39,31 @@ def _collect_one(reg, ymd, date_dash):
     return adapters.fetch_kis(code)
 
 
+def _merge_dupes(rows):
+    """정규화 후 같은 종목코드로 겹치는 행을 합산한다.
+
+    etf_constituents PK 가 (date, etf_code, stock_code) 라서, 한 PDF 에 같은 증권이
+    여러 행(로트·계정 분리)으로 오거나 서로 다른 raw code 가 같은 코드로 정규화되면
+    INSERT OR REPLACE 로 앞 행이 조용히 사라진다 → 비중·수량이 과소 집계된다.
+    """
+    out, seen = [], {}
+    for r in rows:
+        key = r['stock_code'] or ('RAW:' + (r['raw_code'] or r['stock_name'] or ''))
+        if key not in seen:
+            seen[key] = dict(r)
+            out.append(seen[key])
+            continue
+        t = seen[key]
+        for f in ('weight', 'qty_cu', 'eval_cu'):
+            if r.get(f) is not None:
+                t[f] = (t.get(f) or 0) + r[f]
+        if t.get('px') is None:
+            t['px'] = r.get('px')
+        if t.get('mcap_krw') is None:
+            t['mcap_krw'] = r.get('mcap_krw')
+    return out
+
+
 def _fingerprint(rows):
     """구성종목 스냅숏 지문 — 전일과 동일하면 PDF 미갱신(롤오버 전)으로 간주."""
     key = '|'.join('%s:%s:%s' % (r['raw_code'], r['qty_cu'], r['weight'])
@@ -159,7 +184,7 @@ def main(managers=None, quiet_alert=False):
         aum = quote['aum'] if quote else None
         with conn:
             conn.execute('DELETE FROM etf_constituents WHERE date=? AND etf_code=?', (date, code))
-            for r in rows:
+            for r in _merge_dupes(rows):
                 sc = r['stock_code'] or ('RAW:' + (r['raw_code'] or r['stock_name']))
                 inv = (aum * r['weight'] / 100.0) if (aum and r['weight'] is not None) else None
                 conn.execute(
@@ -192,7 +217,10 @@ def main(managers=None, quiet_alert=False):
     n_ch = conn.execute('SELECT COUNT(*) c FROM etf_changes WHERE date=?', (date,)).fetchone()['c']
     print('[boutique] %s 수집 ok=%d stale=%d fail=%d 변경=%d'
           % (date, n_ok, n_stale, n_fail, n_ch))
-    return 0 if n_ok >= 10 else 1
+    # 성공 판정은 대상 수 대비 비율로 — 고정 10건 기준은 운용사 단위 부분 실행
+    # (트러스톤 2종·DS 1종)에서 항상 실패로 잡히고, 공휴일(전 종목 stale)도 실패가 된다.
+    reached = n_ok + n_stale
+    return 0 if reached >= max(1, len(regs) * 0.5) else 1
 
 
 def _enrich_mcaps(conn, date):

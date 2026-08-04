@@ -28,7 +28,12 @@ def fetch_etf_quote(etf_code):
             return 0.0
 
     nav, lstn = f('nav'), f('lstn_stcn')
+    # ★빈 응답(장 전·조회 실패)은 전 필드가 0 으로 온다. 그대로 쓰면 AUM=0 이 되어
+    #   etf_daily 는 0 으로 덮이고 constituents 의 invest_amt 는 남아 두 표가 어긋난다.
+    if nav <= 0 or lstn <= 0:
+        raise RuntimeError('KIS ETF 시세 이상치 (nav=%s, lstn=%s)' % (nav, lstn))
     return {'close': f('stck_prpr'), 'nav': nav, 'nav_prdy_ctrt': f('nav_prdy_ctrt'),
+            'prdy_last_nav': f('prdy_last_nav'),
             'lstn_stcn': int(lstn), 'aum': nav * lstn,
             'ntas_e8': f('etf_ntas_ttam') * 1e8,
             'manager_kis': (o.get('mbcr_name') or '').strip()}

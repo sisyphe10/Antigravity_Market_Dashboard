@@ -5,6 +5,7 @@
 - dedup: .boutique_alert_sent.json (키=날짜) — 재실행 중복 발송 방지.
 - 테스트: python -m execution.boutique_etf.alert --test  (샘플 데이터로 즉시 발송)
 """
+import html
 import json
 import logging
 import os
@@ -17,6 +18,7 @@ REPO = os.path.dirname(_EXEC_DIR)
 SUBSCRIBERS_FILE = os.path.join(REPO, 'subscribers.json')
 STATE_FILE = os.path.join(REPO, '.boutique_alert_sent.json')
 TOKEN_KEY = 'TELEGRAM_' + 'SISYPHE_BOT_TOKEN'
+MAX_BACKLOG_DAYS = 3   # 전송 장애로 밀린 날짜를 몇 일치까지 따라잡을지
 
 from .db import get_conn  # noqa: E402
 
@@ -69,6 +71,13 @@ def _head(date, test=False, extra=False, page=None, pages=None):
         dt.month, dt.day, WEEKDAY[dt.weekday()], suffix)
 
 
+def _esc(s):
+    """텔레그램 HTML 파스모드 — 데이터의 & < > 는 반드시 이스케이프.
+    ★ETF·종목명에 '&' 가 실재한다(KoAct 글로벌AI&로봇, 반도체&2차전지 등).
+      그대로 넣으면 그 메시지 전체가 400 으로 실패한다."""
+    return html.escape(str(s or ''), quote=False)
+
+
 def _cells(r):
     """공통 뒷부분: 구분 | 비중 | 유입·유출 | 금액"""
     kind = r['kind']
@@ -83,7 +92,7 @@ def _cells(r):
     amt = r.get('trade_amt') or 0
     flow = '유입' if amt > 0 else ('유출' if amt < 0 else '-')
     return '<b><u>%s</u></b> | %s | %s | %s | <b><u>%s</u></b>' % (
-        r['stock'], gubun, w, flow, _fmt_eok(r.get('trade_amt')))
+        _esc(r['stock']), gubun, w, flow, _fmt_eok(r.get('trade_amt')))
 
 
 def _brand(etf):
@@ -106,16 +115,17 @@ def build_message(date, rows, test=False, layout='tree', extra=False,
     """
     ordered = sorted(rows, key=lambda x: -_amt(x))
     if layout == 'flat':
-        body = ['%s%s%s | %s' % (BULLET1, GAP1, r['etf'], _cells(r)) for r in ordered]
+        body = ['%s%s%s | %s' % (BULLET1, GAP1, _esc(r['etf']), _cells(r)) for r in ordered]
     else:
         groups = {}
         for r in ordered:
             groups.setdefault(_brand(r['etf'])[0], []).append(r)
         body = []
         for brand in sorted(groups, key=lambda b: -max(_amt(r) for r in groups[b])):
-            body.append('%s%s<b>%s</b>' % (BULLET1, GAP1, brand))
+            body.append('%s%s<b>%s</b>' % (BULLET1, GAP1, _esc(brand)))
             for r in groups[brand]:
-                body.append('   %s%s%s | %s' % (BULLET2, GAP2, _brand(r['etf'])[1], _cells(r)))
+                body.append('   %s%s%s | %s'
+                            % (BULLET2, GAP2, _esc(_brand(r['etf'])[1]), _cells(r)))
     return '\n'.join([_head(date, test, extra, page, pages), ''] + body)
 
 
@@ -234,26 +244,32 @@ def main():
         logging.info('테스트 발송 %d건', n)
         return 0
     conn = get_conn()
-    row = conn.execute("SELECT MAX(date) d FROM collection_log WHERE status='ok'").fetchone()
-    date = row['d'] if row else None
-    if not date:
-        logging.info('수집 데이터 없음 — 스킵')
+    # ★최신 날짜만 보면, 전송 장애로 못 보낸 전날 변경이 영영 방치된다.
+    #   미발송 변경이 남은 날짜를 오래된 순으로 모두 처리한다(최근 MAX_BACKLOG_DAYS 일).
+    dates = [r['d'] for r in conn.execute(
+        'SELECT DISTINCT c.date d FROM etf_changes c '
+        'LEFT JOIN alert_sent s ON s.date=c.date AND s.etf_code=c.etf_code '
+        'AND s.stock_code=c.stock_code AND s.kind=c.kind '
+        'WHERE c.drift=0 AND s.date IS NULL ORDER BY c.date')]
+    dates = dates[-MAX_BACKLOG_DAYS:]
+    if not dates:
+        logging.info('신규 특이사항 없음 — 무발송')
         return 0
-    rows = load_changes(conn, date)
-    if not rows:
-        logging.info('%s 신규 특이사항 없음 — 무발송', date)
-        return 0
-    already = conn.execute(
-        'SELECT COUNT(*) c FROM alert_sent WHERE date=?', (date,)).fetchone()['c']
-    sent_rows = 0
-    for page_rows, text in build_pages(date, rows, extra=bool(already)):
-        if not send(text):
-            logging.error('%s 페이지 발송 실패 — 남은 항목은 다음 실행에서 재시도', date)
-            break
-        mark_sent(conn, date, page_rows)   # 성공한 페이지만 기록 → 유실·중복 없음
-        sent_rows += len(page_rows)
-    logging.info('%s 발송 %d/%d 항목%s', date, sent_rows, len(rows),
-                 ' (추가분)' if already else '')
+    for date in dates:
+        rows = load_changes(conn, date)
+        if not rows:
+            continue
+        already = conn.execute(
+            'SELECT COUNT(*) c FROM alert_sent WHERE date=?', (date,)).fetchone()['c']
+        sent_rows = 0
+        for page_rows, text in build_pages(date, rows, extra=bool(already)):
+            if not send(text):
+                logging.error('%s 페이지 발송 실패 — 남은 항목은 다음 실행에서 재시도', date)
+                return 0
+            mark_sent(conn, date, page_rows)   # 성공한 페이지만 기록 → 유실·중복 없음
+            sent_rows += len(page_rows)
+        logging.info('%s 발송 %d/%d 항목%s', date, sent_rows, len(rows),
+                     ' (추가분)' if already else '')
     return 0
 
 
