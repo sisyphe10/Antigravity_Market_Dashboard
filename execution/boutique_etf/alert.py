@@ -52,8 +52,8 @@ def _head(date, test=False):
         dt.month, dt.day, WEEKDAY[dt.weekday()], ' (테스트)' if test else '')
 
 
-def _line(r):
-    """* ETF명 | <b><u>종목명</u></b> | 구분 | 비중 | 유입·유출 | 금액  (사용자 확정 2026-08-04)"""
+def _cells(r):
+    """공통 뒷부분: 구분 | 비중 | 유입·유출 | 금액"""
     kind = r['kind']
     if kind == 'in':
         gubun, w = '신규', '+%s%%' % _fmt_w(r.get('w_cur'))
@@ -64,17 +64,40 @@ def _line(r):
         w = '%s→%s%%' % (_fmt_w(r.get('w_prev')), _fmt_w(r.get('w_cur')))
     amt = r.get('trade_amt') or 0
     flow = '유입' if amt > 0 else ('유출' if amt < 0 else '-')
-    return '* %s | <b><u>%s</u></b> | %s | %s | %s | %s' % (
-        r['etf'], r['stock'], gubun, w, flow, _fmt_eok(r.get('trade_amt')))
+    return '<b><u>%s</u></b> | %s | %s | %s | %s' % (
+        r['stock'], gubun, w, flow, _fmt_eok(r.get('trade_amt')))
 
 
-def build_message(date, rows, test=False):
+def _brand(etf):
+    """'TIME 코스닥액티브' → ('TIME', '코스닥액티브')"""
+    parts = (etf or '').split(' ', 1)
+    return (parts[0], parts[1]) if len(parts) == 2 else (etf, etf)
+
+
+def _amt(r):
+    return r.get('trade_amt') or 0
+
+
+def build_message(date, rows, test=False, layout='tree'):
     """rows: [{etf, kind(in|out|spike), stock, w_prev, w_cur, trade_amt}].
 
-    정렬 = 마지막 칼럼(금액) 내림차순 — 유입 큰 순 → 유출 큰 순 (사용자 확정 2026-08-04).
+    정렬 = 금액(마지막 칼럼) 부호 내림차순 — 유입 큰 순 → 유출 큰 순 (사용자 확정 2026-08-04).
+    layout='tree'  운용사 브랜드로 묶고 하위 불릿 (기본)
+    layout='flat'  단일 목록
     """
-    ordered = sorted(rows, key=lambda x: -(x.get('trade_amt') or 0))
-    return '\n'.join([_head(date, test), ''] + [_line(r) for r in ordered])
+    ordered = sorted(rows, key=lambda x: -_amt(x))
+    if layout == 'flat':
+        body = ['* %s | %s' % (r['etf'], _cells(r)) for r in ordered]
+    else:
+        groups = {}
+        for r in ordered:
+            groups.setdefault(_brand(r['etf'])[0], []).append(r)
+        body = []
+        for brand in sorted(groups, key=lambda b: -max(_amt(r) for r in groups[b])):
+            body.append('* <b>%s</b>' % brand)
+            for r in groups[brand]:
+                body.append('   * %s | %s' % (_brand(r['etf'])[1], _cells(r)))
+    return '\n'.join([_head(date, test), ''] + body)
 
 
 def _chunks(text, limit=3900):
@@ -136,8 +159,14 @@ def load_changes(conn, date):
 SAMPLE = [
     {'etf': 'TIME 코스닥액티브', 'kind': 'in', 'stock': '삼양식품',
      'w_cur': 2.1, 'w_prev': None, 'trade_amt': 7.5e9},
+    {'etf': 'TIME 코스피액티브', 'kind': 'spike', 'stock': '삼성전자',
+     'w_prev': 23.9, 'w_cur': 25.2, 'trade_amt': 4.1e9},
+    {'etf': 'TIME K바이오액티브', 'kind': 'out', 'stock': '알테오젠',
+     'w_prev': 3.2, 'w_cur': None, 'trade_amt': -0.9e9},
     {'etf': 'KoAct 배당성장액티브', 'kind': 'out', 'stock': '한화에어로스페이스',
      'w_prev': 1.4, 'w_cur': None, 'trade_amt': -1.4e9},
+    {'etf': 'KoAct 코스닥액티브', 'kind': 'in', 'stock': '파마리서치',
+     'w_cur': 1.1, 'w_prev': None, 'trade_amt': 2.3e9},
     {'etf': 'TRUSTON 주주가치액티브', 'kind': 'spike', 'stock': 'SK하이닉스',
      'w_prev': 15.8, 'w_cur': 17.3, 'trade_amt': 1.9e9},
     {'etf': 'DS 코스닥액티브', 'kind': 'spike', 'stock': '테스',
@@ -148,7 +177,9 @@ SAMPLE = [
 def main():
     if '--test' in sys.argv:
         from datetime import datetime
-        msg = build_message(datetime.now().strftime('%Y-%m-%d'), SAMPLE, test=True)
+        layout = 'flat' if '--flat' in sys.argv else 'tree'
+        msg = build_message(datetime.now().strftime('%Y-%m-%d'), SAMPLE,
+                            test=True, layout=layout)
         print(msg)
         if '--dry' in sys.argv:  # 미리보기만 — 발송 안 함
             logging.info('dry-run (미발송)')
