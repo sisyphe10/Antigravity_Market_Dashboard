@@ -33,6 +33,9 @@ BENCHMARKS = [
     ("000001.SS", "상해종합", "index"),
     ("^STOXX50E", "유로스톡스50", "index"),
     ("^NDX", "나스닥100", "index"),
+    # 미 달러 거래대금 대용(지수 단위 거래대금 원천이 없음) — close×volume
+    ("SPY", "SPY", "etf"),
+    ("QQQ", "QQQ", "etf"),
     # 환율
     ("KRW=X", "달러원", "fx"),
     ("JPY=X", "달러엔", "fx"),

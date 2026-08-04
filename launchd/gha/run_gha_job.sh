@@ -340,6 +340,8 @@ run_job() {
       "$PY" datalake/build_roc_history.py || echo "RoC² 월말 백필 실패 (계속 진행)"
       # 투자주체별 누적 순매수 (datalake → dataset.csv INVESTOR_FLOW) — create_dashboard 앞, 비치명.
       "$PY" datalake/build_investor_flow.py || echo "투자주체 수급 누적 갱신 실패 (계속 진행)"
+      # 지수 거래대금·거래량 (datalake → dataset.csv INDEX_KR/INDEX_US) — create_dashboard 앞, 비치명.
+      "$PY" datalake/build_index_value.py || echo "지수 거래대금 갱신 실패 (계속 진행)"
       "$PY" calculate_wrap_nav.py || return $?
       "$PY" calculate_returns.py || return $?
       "$PY" execution/fetch_danawa_price.py || echo "다나와 수집 실패 (계속 진행)"

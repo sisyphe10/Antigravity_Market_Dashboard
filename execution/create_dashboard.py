@@ -1566,6 +1566,9 @@ CMB_ROC_ALLOW = {
 CMB_SERIES_UNITS = {
     # INDEX_KOREA
     'KOSPI Market Cap': '조원', 'KOSDAQ Market Cap': '조원',
+    'KOSPI 거래대금': '조원', 'KOSDAQ 거래대금': '조원',
+    'S&P 500 거래량': '십억주', 'NASDAQ 거래량': '십억주',
+    'SPY 거래대금': '십억달러', 'QQQ 거래대금': '십억달러',
     '고객예탁금': '억원', '신용잔고': '억원', '반대매매금액': '억원',
     'KOSPI 배당수익률': '%', 'KOSDAQ 배당수익률': '%',
     '코스피 외국인비중': '%', '코스닥 외국인비중': '%', '삼성전자 외국인': '%', '삼성전자우 외국인': '%',
@@ -1732,6 +1735,10 @@ def _build_combined_chart_section():
                 {'display': 'KOSDAQ',             'csv': 'KOSDAQ',             'color': '#1976D2'},
                 {'display': 'KOSDAQ/USD',         'csv': 'KOSDAQ/USD',         'color': '#5294D8'},
                 {'display': 'KOSDAQ Market Cap',  'csv': 'KOSDAQ Market Cap',  'color': '#7BAEDF'},
+                # 시장 거래대금(원) — datalake kr_index_ohlcv.value = 전 종목 거래대금 합
+                # (KRX OpenAPI ACC_TRDVAL 은 지수 구성종목 기준이라 미채택. build_index_value.py)
+                {'display': 'KOSPI 거래대금',     'csv': 'KOSPI 거래대금',     'color': '#00695C'},
+                {'display': 'KOSDAQ 거래대금',    'csv': 'KOSDAQ 거래대금',    'color': '#26A69A'},
                 # 변동성지수 (KIS 업종 U/0503 — fetch_deriv_daily.py, 2026-07-16 신설)
                 {'display': 'VKOSPI',             'csv': 'VKOSPI',             'color': '#DB2777'},
                 # 증시 유동성 (금투협 KOFIA → dataset.csv DEPOSIT). DATA 일반 차트로 개별 시리즈 표시.
@@ -1780,6 +1787,12 @@ def _build_combined_chart_section():
                 {'display': 'NASDAQ',             'csv': 'NASDAQ',             'color': '#7B1FA2'},
                 {'display': 'NASDAQ PER',         'csv': 'NASDAQ PER',         'color': '#9C27B0'},
                 {'display': 'NASDAQ PBR',         'csv': 'NASDAQ PBR',         'color': '#BA68C8'},
+                # 거래량=지수 구성종목 거래주식수 합(^GSPC/^IXIC volume).
+                # 미국은 지수 단위 '거래대금(달러)' 원천이 없어 달러 활동량은 SPY/QQQ 로 본다.
+                {'display': 'S&P 500 거래량',     'csv': 'S&P 500 거래량',     'color': '#00838F'},
+                {'display': 'NASDAQ 거래량',      'csv': 'NASDAQ 거래량',      'color': '#0097A7'},
+                {'display': 'SPY 거래대금',       'csv': 'SPY 거래대금',       'color': '#5D4037'},
+                {'display': 'QQQ 거래대금',       'csv': 'QQQ 거래대금',       'color': '#8D6E63'},
                 {'display': 'RUSSELL 2000',       'csv': 'RUSSELL 2000',       'color': '#F57C00'},
                 {'display': 'RUSSELL 2000 PER',   'csv': 'RUSSELL 2000 PER',   'color': '#FF9800'},
                 {'display': 'RUSSELL 2000 PBR',   'csv': 'RUSSELL 2000 PBR',   'color': '#FFB74D'},
@@ -2242,6 +2255,9 @@ def _build_combined_chart_section():
             // ★KRX GOLD/ETS 거래대금은 dataset.csv 는 원 단위지만 파이썬 export 단계에서 이미
             //   억원으로 환산돼 넘어온다(412.7357 / 67.5571). 여기서 또 나누면 1억배로 축소된다.
             var seriesScale = { 'KOSPI Market Cap': 1e12, 'KOSDAQ Market Cap': 1e12,
+                                'KOSPI 거래대금': 1e12, 'KOSDAQ 거래대금': 1e12,
+                                'S&P 500 거래량': 1e9, 'NASDAQ 거래량': 1e9,
+                                'SPY 거래대금': 1e9, 'QQQ 거래대금': 1e9,
                                 '경상수지': 10, '외환보유액': 10 };   // 억달러 -> $B
 
             // MA 슬롯(0~3) 색상. 윈도우 값은 시리즈 빈도에 따라 동적 (MA_WINDOWS).
