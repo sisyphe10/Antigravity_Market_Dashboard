@@ -258,6 +258,67 @@ def execute_tool(name, args):
         return f"ERROR: {type(e).__name__}: {e}", True
 
 
+def _report(usage, question):
+    """usage 요약을 로그에 남기고 응답용 dict 반환."""
+    out = dict(usage)
+    out["cost_usd"] = _cost_usd(usage)
+    total_in = (usage.get("input_tokens", 0)
+                + usage.get("cache_creation_input_tokens", 0)
+                + usage.get("cache_read_input_tokens", 0))
+    out["cache_hit_pct"] = (round(usage.get("cache_read_input_tokens", 0) * 100.0 / total_in, 1)
+                            if total_in else 0.0)
+    print("[ask][usage] in=%d cache_w=%d cache_r=%d(%.1f%%) out=%d $%.4f | %s" % (
+        usage.get("input_tokens", 0), usage.get("cache_creation_input_tokens", 0),
+        usage.get("cache_read_input_tokens", 0), out["cache_hit_pct"],
+        usage.get("output_tokens", 0), out["cost_usd"], question[:60]), flush=True)
+    return out
+
+
+def _apply_cache_breakpoints(messages, keep=2):
+    """대화 히스토리에 롤링 캐시 breakpoint를 keep개 유지.
+
+    종전엔 시스템 프롬프트(1개)에만 cache_control이 있어, 매 턴 재전송되는
+    대화 본문(read_file 결과 등)이 전부 정가로 재과금됐다. 직전 프리픽스를
+    캐시 읽기(입력가의 0.1배)로 처리시켜 입력 비용을 크게 줄인다.
+    ★assistant content는 SDK 객체라 손대지 않고 dict 블록에만 표시한다.
+    ★breakpoint 상한은 요청당 4개 — system 1 + keep 2 = 3개로 여유를 남긴다.
+    """
+    candidates = []
+    for msg in messages:
+        content = msg.get("content")
+        if not isinstance(content, list):
+            continue
+        last = None
+        for block in content:
+            if isinstance(block, dict):
+                block.pop("cache_control", None)  # 옛 breakpoint 회수
+                last = block
+        if last is not None:
+            candidates.append(last)
+    for block in candidates[-keep:]:
+        block["cache_control"] = {"type": "ephemeral"}
+
+
+def _tally(usage, resp):
+    """턴별 usage 누적 (비용 실측용)."""
+    u = getattr(resp, "usage", None)
+    if u is None:
+        return
+    for k in ("input_tokens", "output_tokens",
+              "cache_creation_input_tokens", "cache_read_input_tokens"):
+        usage[k] = usage.get(k, 0) + (getattr(u, k, 0) or 0)
+
+
+def _cost_usd(usage):
+    """Sonnet 5 도입가($2/$10 per MTok) 기준 추정 비용. 캐시 쓰기 1.25배·읽기 0.1배."""
+    IN, OUT = 2.0 / 1_000_000, 10.0 / 1_000_000
+    return round(
+        usage.get("input_tokens", 0) * IN
+        + usage.get("cache_creation_input_tokens", 0) * IN * 1.25
+        + usage.get("cache_read_input_tokens", 0) * IN * 0.1
+        + usage.get("output_tokens", 0) * OUT, 4)
+
+
 def _is_empty_result(out):
     """search_notes / search_tags 응답이 사실상 빈 결과인지."""
     s = (out or "").strip()
@@ -281,8 +342,10 @@ def ask(req: AskRequest):
 
     seen_calls = {}   # 동일 (도구, 인자) 반복 차단
     empty_streak = 0  # 연속 빈 검색 결과
+    usage = {}        # 턴별 토큰 누적 (비용 실측)
 
     for turn in range(MAX_LOOP):
+        _apply_cache_breakpoints(messages)
         response = client.messages.create(
             model=MODEL,
             max_tokens=16000,
@@ -291,11 +354,14 @@ def ask(req: AskRequest):
             tools=TOOLS,
             messages=messages,
         )
+        _tally(usage, response)
         if response.stop_reason == "refusal":
-            return JSONResponse({"answer": "요청을 처리할 수 없습니다 (안전 정책).", "steps": steps})
+            return JSONResponse({"answer": "요청을 처리할 수 없습니다 (안전 정책).",
+                                 "steps": steps, "usage": _report(usage, req.question)})
         if response.stop_reason != "tool_use":
             answer = "".join(b.text for b in response.content if b.type == "text")
-            return JSONResponse({"answer": answer, "steps": steps})
+            return JSONResponse({"answer": answer, "steps": steps,
+                                 "usage": _report(usage, req.question)})
 
         messages.append({"role": "assistant", "content": response.content})
         results = []
@@ -338,6 +404,7 @@ def ask(req: AskRequest):
                      "'미확인'으로 명시하고, 일반 지식으로 보완한 부분은 [추정]으로 표시하라. "
                      "답변을 거르지 말 것."})
     try:
+        _apply_cache_breakpoints(messages)
         final = client.messages.create(
             model=MODEL,
             max_tokens=16000,
@@ -346,14 +413,17 @@ def ask(req: AskRequest):
             tool_choice={"type": "none"},
             messages=messages,
         )
+        _tally(usage, final)
         answer = "".join(b.text for b in final.content if b.type == "text").strip()
         if answer:
-            return JSONResponse({"answer": answer, "steps": steps, "truncated": True})
+            return JSONResponse({"answer": answer, "steps": steps, "truncated": True,
+                                 "usage": _report(usage, req.question)})
     except Exception as e:
         print("[ask] 강제 종결 실패: %s: %s" % (type(e).__name__, e), flush=True)
 
     return JSONResponse({"answer": "도구 호출 한도를 초과했고 최종 답변 생성도 실패했습니다. "
-                                   "질문을 좁혀 다시 시도해 주세요.", "steps": steps})
+                                   "질문을 좁혀 다시 시도해 주세요.",
+                         "steps": steps, "usage": _report(usage, req.question)})
 
 
 # ── Earnings Library — 어닝 md 열람 (transcripts + analyses) ──────────
