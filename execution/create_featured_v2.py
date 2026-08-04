@@ -27,7 +27,8 @@ from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from krx_session import is_session
-from nav_style import PRETENDARD_LINK_LOCAL, PALETTE_CSS_VARS
+from nav_style import (PRETENDARD_LINK_LOCAL, PALETTE_CSS_VARS,
+                       NAV_CSS as AOE_NAV_CSS, SIDEBAR_CSS, nav_html, sidebar_html)
 from aoe_tokens_util import aoe_tokens_css
 
 KST = timezone(timedelta(hours=9))
@@ -42,7 +43,7 @@ STOCK_MASTER = 'stock_master.json'
 UNIVERSE_CSV = 'universe_tickers.csv'
 WATCHLISTS = os.path.join('quoteboard', 'watchlists.json')
 
-OUT_HTML = 'featured_v2_test.html'
+OUT_HTML = 'featured.html'          # Featured 자리 정본(2026-08-05 교체). 구 생성기는 featured_legacy.html
 # 기본 = featured_v2/ 디렉토리(최종안). publish_snapshot.sh 화이트리스트에 디렉토리 include
 # 한 쌍을 넣어야 게시된다. 아직 그 배포 승인 전이라, FEATURED_V2_FLAT=1 이면 루트 평면
 # 파일명(featured_v2_*.json)으로 떨어뜨려 기존 '/*.json' 와일드카드만으로 게시되게 한다.
@@ -396,7 +397,9 @@ def main():
     _write(_out('meta', 'manifest.json'), manifest)
 
     base_js = "{base: '', daily: 'featured_v2_d_', meta: 'featured_v2_'}" if FLAT         else "{base: 'featured_v2/', daily: 'featured_v2/daily/', meta: 'featured_v2/'}"
-    html = (HTML.replace('__PALETTE__', PALETTE_CSS_VARS)
+    html = (HTML.replace('__NAV__', nav_html('market', 'featured') + sidebar_html('featured'))
+                .replace('__NAVCSS__', AOE_NAV_CSS + SIDEBAR_CSS)
+                .replace('__PALETTE__', PALETTE_CSS_VARS)
                 .replace('__PATHS__', base_js)
                 .replace('__TOKENS__', aoe_tokens_css())
                 .replace('__PRETENDARD__', PRETENDARD_LINK_LOCAL)
@@ -416,7 +419,7 @@ HTML = r'''<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Featured v2 (test)</title>
+<title>Featured</title>
 __PRETENDARD__
 <style>
 __PALETTE__
@@ -473,11 +476,13 @@ td.miss { color: var(--aoe-muted); }
 th.split, td.split { border-left: 3px solid var(--aoe-muted); }
 .notable-news { font-size: 13px; color: var(--aoe-text); line-height: 1.8; text-align: left; padding-left: calc(var(--aoe-t-pad-x) + 1ch); max-width: 720px; }
 footer { text-align: center; padding: 24px; color: var(--aoe-muted); font-size: 14px; }
+__NAVCSS__
 </style>
 </head>
-<body>
+<body class="has-sidebar">
+__NAV__
 <header>
-  <h1>Featured v2 (test)</h1>
+  <h1>Featured</h1>
   <div class="last-updated">Built: __UPDATED__</div>
 </header>
 <div class="content">

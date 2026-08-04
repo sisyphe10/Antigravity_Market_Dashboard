@@ -32,6 +32,7 @@ if ! rsync -a \
   --include='/architecture/' --include='/architecture/**' \
   --include='/assets/' --include='/assets/**' \
   --include='/charts/' --include='/charts/**' \
+  --include='/featured_v2/' --include='/featured_v2/**' \
   --exclude='*' \
   "$REPO/" "$REL/"; then
   log "rsync 실패 - 세대 폐기"; rm -rf "$REL"; exit 1
