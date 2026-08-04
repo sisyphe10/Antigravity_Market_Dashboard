@@ -171,6 +171,22 @@ def main(managers=None, quiet_alert=False):
             n_fail += 1
             print('[boutique][fail] %s %s: %s' % (code, reg['name'], err))
             continue
+        # 제외(현금·채권·파생) 후 남은 종목이 없으면 유효한 스냅숏이 아니다.
+        #   채권혼합형을 KIS 폴백으로 받으면 상위 30이 전부 채권이라 0행이 될 수 있는데,
+        #   이걸 ok 로 두면 다음날 주식 편입분이 전부 '신규' 로 오탐된다.
+        if not rows:
+            if prior and prior['status'] == 'ok':
+                n_ok += 1
+                continue
+            conn.execute(
+                'INSERT OR REPLACE INTO collection_log '
+                '(date,etf_code,status,source,truncated,error_msg,collected_at,fingerprint) '
+                'VALUES (?,?,?,?,?,?,?,NULL)',
+                (date, code, 'fail', a, 0, '제외 후 잔여 종목 0', ts))
+            conn.commit()
+            n_fail += 1
+            print('[boutique][fail] %s %s: 제외 후 잔여 종목 0' % (code, reg['name']))
+            continue
         # PDF 롤오버 가드: 직전 ok 스냅숏과 지문이 같으면 미갱신 → status='stale'
         #   (변경탐지는 status='ok' 끼리만 비교하므로, 다음 갱신일에 옛 기준일과 정상 비교된다)
         fp = _fingerprint(rows)
