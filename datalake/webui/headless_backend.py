@@ -14,7 +14,11 @@
 import json
 import os
 import subprocess
+import sys
 import tempfile
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import wiki_model  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
@@ -77,6 +81,7 @@ def run_question(question, history=None, session_id=None,
             "--add-dir", DATALAKE_ROOT,
             "--add-dir", WIKI_DIR,
             "--append-system-prompt-file", SYSTEM_PROMPT_FILE,
+            "--model", wiki_model.resolve(),
             "--max-turns", str(max_turns or MAX_TURNS),
             "--output-format", "stream-json", "--verbose",
         ]
@@ -123,6 +128,7 @@ def run_question(question, history=None, session_id=None,
             elif t == "result":
                 saw_result = True
                 answer = (ev.get("result") or "").strip()
+                meta["model"] = ",".join((ev.get("modelUsage") or {}).keys())
                 meta.update(session_id=ev.get("session_id"),
                             num_turns=ev.get("num_turns"),
                             duration_ms=ev.get("duration_ms"),
