@@ -53,7 +53,7 @@ def _head(date, test=False):
 
 
 def _line(r):
-    """* ETF명 | 종목명 | 구분 | 비중 | 유입·유출 | 금액  (사용자 확정 2026-08-04)"""
+    """* ETF명 | <b><u>종목명</u></b> | 구분 | 비중 | 유입·유출 | 금액  (사용자 확정 2026-08-04)"""
     kind = r['kind']
     if kind == 'in':
         gubun, w = '신규', '+%s%%' % _fmt_w(r.get('w_cur'))
@@ -64,7 +64,7 @@ def _line(r):
         w = '%s→%s%%' % (_fmt_w(r.get('w_prev')), _fmt_w(r.get('w_cur')))
     amt = r.get('trade_amt') or 0
     flow = '유입' if amt > 0 else ('유출' if amt < 0 else '-')
-    return '* %s | %s | %s | %s | %s | %s' % (
+    return '* %s | <b><u>%s</u></b> | %s | %s | %s | %s' % (
         r['etf'], r['stock'], gubun, w, flow, _fmt_eok(r.get('trade_amt')))
 
 
