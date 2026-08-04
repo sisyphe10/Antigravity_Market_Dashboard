@@ -72,6 +72,13 @@ def load_wics_mapping():
     return data.get('mapping', {})
 
 
+def members_hash(codes):
+    """요약이 어떤 종목 집합을 설명하는지 고정하는 지문.
+    렌더러가 표의 실제 종목으로 다시 계산해 일치할 때만 요약을 보여준다."""
+    import hashlib
+    return hashlib.sha256('|'.join(sorted(codes)).encode('utf-8')).hexdigest()[:12]
+
+
 def group_by_sector(newhigh_data, wics):
     """모든 기간의 신고가 종목을 섹터별로 그룹핑"""
     all_stocks = {}
@@ -277,10 +284,26 @@ def fetch_news(target_date=None):
             logging.info(f'  요약 [{i+1}/{len(sectors_with_news)}] {sector}: {len(summary)}자')
         time.sleep(0.5)
 
+    # ★요약 결속 — 이 요약이 '어느 기간의, 어느 종목 집합'을 설명하는지 명시한다.
+    # group_by_sector 가 3기간을 union 으로 합치는데 52w⊂120d⊂20d 라 실질 기준은 20일이다.
+    # 결속이 없던 탓에 종목이 1개뿐인 120일 표에 20일 11종목 기준 요약이 붙었다(2026-08-04 확인).
+    scope_sectors = {}
+    for sector, stks in sector_stocks.items():
+        if sector not in summaries:
+            continue
+        codes = [s['code'] for s in stks]
+        scope_sectors[sector] = {'member_codes': sorted(codes),
+                                 'members_hash': members_hash(codes)}
+
     # 저장
     output = {
         'date': target_date,
-        'summaries': summaries,
+        'summaries': summaries,                 # 기존 소비자 호환(스키마 유지)
+        'summary_scope': {
+            'schema': 2,
+            'horizon': 'newhigh_20d',
+            'sectors': scope_sectors,
+        },
     }
     with open(NEWS_JSON, 'w', encoding='utf-8') as f:
         json.dump(output, f, ensure_ascii=False, indent=2)

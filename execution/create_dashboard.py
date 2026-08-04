@@ -10079,7 +10079,20 @@ function renderNotable() {{
 
             var newsHtml = '';
             var nd = newsData.date || '';
-            if (nd === e && newsData.summaries && newsData.summaries[s]) {{
+            // ★요약 결속: 요약이 만들어진 기간(horizon)과 구성 종목이 정확히 같을 때만 표시한다.
+            // 이 검사가 없으면 20일 기준 요약이 120일·52주 표에 그대로 붙어 표에 없는 종목을 설명한다.
+            var scope = newsData.summary_scope;
+            var bound;
+            if (!scope) {{
+                bound = (type === 'newhigh_20d');      // 구 산출물 폴백(실질 기준이 20일)
+            }} else if (scope.horizon === type && scope.sectors && scope.sectors[s]) {{
+                var want = scope.sectors[s].member_codes || [];
+                var have = items.map(function(r) {{ return r.code; }}).sort();
+                bound = (want.length === have.length) && want.every(function(c, i) {{ return c === have[i]; }});
+            }} else {{
+                bound = false;
+            }}
+            if (nd === e && bound && newsData.summaries && newsData.summaries[s]) {{
                 newsHtml = newsData.summaries[s].replace(/\\n\\n/g, '\\n').replace(/\\n/g, '<br>');
             }}
             if (!newsHtml) newsHtml = '<span style="color:#bbb">-</span>';
