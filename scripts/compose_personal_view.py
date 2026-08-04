@@ -98,13 +98,13 @@ AOE_DARK_CSS = (
     'td[style*="241a3d"],td[style*="0a3038"]{color:#fff!important}'
     '.tabs{border-bottom-color:' + P['amber'] + '!important}'
     '.subtab,.mkt-subtab,.tab,.mbtn,.chg-fbtn,.nav-button,.tw-more-btn,.tw-dl-btn,'
-    '.cmb-filter-btn,.cmb-ma-btn'
+    '.cmb-filter-btn,.cmb-ma-btn,.idx-mode-btn'
     '{background:' + P['input-bg'] + '!important;color:#9aa4ae!important;border:1.5px solid #565a60!important;'
     'border-radius:2px!important}'
     '.subtab:hover,.mkt-subtab:hover,.tab:hover,.mbtn:hover,.nav-button:hover'
     '{color:' + P['amber'] + '!important;border-color:' + P['amber'] + '!important}'
     '.subtab.active,.mkt-subtab.active,.tab.active,.cmb-filter-btn.active,.cmb-ma-btn.active,'
-    '.mbtn.active,.nav-button.active'
+    '.mbtn.active,.nav-button.active,.idx-mode-btn.active'
     '{background:' + P['amber'] + '!important;color:' + P['nav-bg'] + '!important;border-color:' + P['amber'] + '!important;'
     'font-weight:700}'
     '.stat-card{border-left-color:' + P['amber'] + '!important}'
@@ -146,9 +146,9 @@ AOE_DARK_CSS = (
     # data-hl(1~3 순환)로 마킹 — 별표 복제 행과 원본이 항상 같은 색을 받고,
     # 순번이 차트 클릭 순서 기반이라 차트 선 색 순서와도 일치.
     # (구) :has 형제 체인은 복제 행이 순번을 오염시켜 폐기.
-    '.cmb-series-row[data-hl="1"] td{background:' + P['hl1-bg'] + '!important;color:' + P['hl1-fg'] + '!important;font-weight:700!important}'
-    '.cmb-series-row[data-hl="2"] td{background:' + P['hl2-bg'] + '!important;color:' + P['hl2-fg'] + '!important;font-weight:700!important}'
-    '.cmb-series-row[data-hl="3"] td{background:' + P['hl3-bg'] + '!important;color:' + P['hl3-fg'] + '!important;font-weight:700!important}'
+    '.cmb-series-row[data-hl="1"] td,tr.idx-chart-item[data-hl="1"] td{background:' + P['hl1-bg'] + '!important;color:' + P['hl1-fg'] + '!important;font-weight:700!important}'
+    '.cmb-series-row[data-hl="2"] td,tr.idx-chart-item[data-hl="2"] td{background:' + P['hl2-bg'] + '!important;color:' + P['hl2-fg'] + '!important;font-weight:700!important}'
+    '.cmb-series-row[data-hl="3"] td,tr.idx-chart-item[data-hl="3"] td{background:' + P['hl3-bg'] + '!important;color:' + P['hl3-fg'] + '!important;font-weight:700!important}'
     '.today-date{color:#fff!important}'
     '.qcard{background:' + P['card2'] + '!important;color:#fff!important;border-color:' + P['border'] + '!important;box-shadow:none!important}'
     '.qcard .qsrc,.qcard .qsrc .qnote{color:#fff!important}'
@@ -164,12 +164,12 @@ AOE_DARK_CSS = (
     '#etfTab3 td.us-hl-name{color:' + P['hl1-fg'] + '!important}'
     '#etfTab3 .us-dl{background:transparent!important;color:' + P['amber'] + '!important;'
     'border:1.5px solid ' + P['amber'] + '!important}'
-    '.chart-card,.sector-card,.idx-chart-item,.lh-card,'
+    '.chart-card,.sector-card,.lh-card,'
     '.chart-container,.section:has(canvas),div:has(>canvas)'
     '{background:#fff!important;color:#333!important}'
-    # 흰 패널 내부 td 구제: 범용 td:not([style*=color])의 밝은 글자가 흰 바탕에 씻김 — Indices 사이드바
-    # (2026-07-19 0c55c2d8, 병합 유실 후 재복원)
-    'tr.idx-chart-item td{color:#333!important}'
+    # Indices 사이드바 = DATA(cmb) 사이드 테이블과 동일 다크 규격 (2026-08-04):
+    # 흰 패널 화이트리스트에서 제외(다크 행) + 선택 하이라이트는 위 data-hl 규칙에 병기.
+    'tr.idx-chart-item td{color:#fff!important}'
     # Monthly Returns = 생성기 다크 네이티브(416b0842 재복원) — 틴트 셀은 흰 글자 유지
     '#mrTableWrap td[style*=background]{color:#fff!important}'
     # 다크 네이티브 차트 예외 (사용자 지정: SEIBro 막대·Universe Lab 산점도) — id 명시도로 화이트리스트 이김

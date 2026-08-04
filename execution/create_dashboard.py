@@ -1248,15 +1248,13 @@ def _build_indices_chart_section(category_label='Indices'):
         rows_html = ''
         # 기본 선택: 전체 7개 지수 (2026-07-06 사용자 요청)
         defaults_active = {'KOSPI', 'KOSDAQ', 'NIKKEI', 'TSEC', 'S&P 500', 'NASDAQ', 'RUSSELL 2000'}
+        # 색상 막대 폐지 (2026-08-04): DATA(cmb) 사이드 테이블과 동일한 행 배경 틴트로 선택 표시
         for s in series_config:
             display = s['display']
-            color = s['color']
             active = ' active' if display in defaults_active else ''
             rows_html += (
                 f'<tr class="idx-chart-item{active}" data-series="{display}" '
                 f'onclick="toggleIdxSeries(this)">'
-                f'<td style="width:12px;padding:0;text-align:center;vertical-align:middle;">'
-                f'<div class="idx-color-bar" style="display:inline-block;width:4px;height:18px;background:{color};border-radius:2px;vertical-align:middle;"></div></td>'
                 f'<td>{display}</td></tr>\n'
             )
         mode_html = (
@@ -1270,7 +1268,7 @@ def _build_indices_chart_section(category_label='Indices'):
             '<button class="idx-mode-btn" data-mode="usd" onclick="switchIdxMode(this)">USD</button>'
             '</div>'
         )
-        list_html = mode_html + '<style>.idx-chart-item:not(.active) .idx-color-bar{visibility:hidden;}</style>' + f'<table class="portfolio-table" style="max-width:500px;margin:0 auto;"><tbody>{rows_html}</tbody></table>'
+        list_html = mode_html + '<style>.idx-chart-item{cursor:pointer;}</style>' + f'<table class="portfolio-table" style="max-width:500px;margin:0 auto;"><tbody>{rows_html}</tbody></table>'
 
         ytd_start = '2025-12-30'
         first_date = ytd_start if dates and dates[0] <= ytd_start else (dates[0] if dates else '')
@@ -1287,9 +1285,33 @@ def _build_indices_chart_section(category_label='Indices'):
             var idxChart = null;
             var idxMode = 'local';
 
+            // 선택 표시 = DATA(cmb) 사이드 테이블과 동일 규격 (2026-08-04):
+            // 라이트 = 행 배경 시리즈색 14% 틴트, 다크 = data-hl(1~3 순환) 스킨 훅.
+            var idxClickOrder = ['KOSPI', 'KOSDAQ', 'NIKKEI', 'TSEC', 'S&P 500', 'NASDAQ', 'RUSSELL 2000'];
+            function idxHexToTint(hex) {
+                var m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+                if (!m) return 'rgba(0,0,0,0.10)';
+                var n = parseInt(m[1], 16);
+                return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',0.14)';
+            }
+            function applyIdxMarkerColors() {
+                document.querySelectorAll('.idx-chart-item').forEach(function(row) {
+                    var name = row.getAttribute('data-series');
+                    var idx = idxClickOrder.indexOf(name);
+                    var tint = idx >= 0 ? idxHexToTint(idxColors[name] || '#888') : '';
+                    Array.prototype.forEach.call(row.cells, function(td) { td.style.background = tint; });
+                    if (idx >= 0) { row.setAttribute('data-hl', String(idx % 3 + 1)); }
+                    else { row.removeAttribute('data-hl'); }
+                });
+            }
+
             function buildIdxChart() {
-                var selected = [];
-                document.querySelectorAll('.idx-chart-item.active').forEach(function(el){ selected.push(el.getAttribute('data-series')); });
+                var activeSet = {};
+                document.querySelectorAll('.idx-chart-item.active').forEach(function(el){ activeSet[el.getAttribute('data-series')] = true; });
+                idxClickOrder = idxClickOrder.filter(function(n){ return activeSet[n]; });
+                Object.keys(activeSet).forEach(function(n){ if (idxClickOrder.indexOf(n) === -1) idxClickOrder.push(n); });
+                var selected = idxClickOrder.slice();
+                applyIdxMarkerColors();
                 var startDate = document.getElementById('idxStartDate').value;
                 var endDate = document.getElementById('idxEndDate').value;
                 var sourceSet = (idxMode === 'usd') ? idxData.usd : idxData.local;
@@ -1377,6 +1399,19 @@ def _build_indices_chart_section(category_label='Indices'):
                     xLabel: function(d) { return d ? d.slice(2, 4) + '/' + d.slice(5, 7) : ''; },
                     legendSuffix: (idxMode === 'usd' && datasets.length > 0) ? '/ USD' : null
                 }).main;
+
+                // 범례 한 줄 고정 (2026-08-04): USD 접미로 폭이 넘치면 줄바꿈 대신 transform 미세 축소 —
+                // Local/USD 전환 때 범례가 1줄<->2줄을 오가며 카드 높이가 20px 출렁이던 문제.
+                // transform 은 레이아웃 불변이라 카드 높이가 모드와 무관하게 고정된다.
+                var _leg = document.getElementById('idxChartLegend');
+                if (_leg) {
+                    _leg.style.whiteSpace = 'nowrap';
+                    _leg.style.transform = 'none';
+                    if (_leg.scrollWidth > _leg.clientWidth) {
+                        _leg.style.transformOrigin = 'left center';
+                        _leg.style.transform = 'scale(' + (_leg.clientWidth / _leg.scrollWidth) + ')';
+                    }
+                }
             }
 
             window.toggleIdxSeries = function(el) { el.classList.toggle('active'); buildIdxChart(); };
