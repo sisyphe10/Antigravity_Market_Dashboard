@@ -27,6 +27,8 @@ sys.stdout.reconfigure(encoding='utf-8')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s', stream=sys.stdout)
 
 from kis_token import kis_get
+from krx_session import is_session
+import newhigh_themes
 
 KST = timezone(timedelta(hours=9))
 OUTPUT = 'featured_data.json'
@@ -252,6 +254,10 @@ def rank_all(rows, date_disp):
 # ───────────────────────── KIS 가격 히스토리 누적 + 20일 신고가 ─────────────────────────
 def accumulate_kis_history(master, prices, date_disp):
     """오늘 KIS 당일고가/종가를 kis_price_history.json에 누적(오늘 것 덮어쓰기) + 오래된 날짜 prune."""
+    # 가드 2/3 — 호출부가 뚫려도 비거래일은 히스토리에 남기지 않는다(룩백 창 보호).
+    if not is_session(date_disp):
+        logging.warning('비거래일 %s 히스토리 기록 차단', date_disp)
+        return
     try:
         with open(KIS_HISTORY_FILE, encoding='utf-8') as f:
             hist = json.load(f)
@@ -309,21 +315,30 @@ def compute_newhigh_20d(master, prices, date_disp, now_iso):
         # 과거 고가 머지: 날짜별 KIS 우선, 없으면 yfinance
         yf_h = (yf_stocks.get(code) or {}).get('highs', {})
         kis_h = (kis_stocks.get(code) or {}).get('highs', {})
+        # 가드 3/3 — 이미 기록된 비거래일이 남아 있어도 판정 창에는 넣지 않는다.
+        # (읽기 필터가 있어야 과거 오염 정리 전에도 판정이 정확해진다)
         past = {}
         for d, v in yf_h.items():
-            if d < date_disp and v:
+            if d < date_disp and v and is_session(d):
                 past[d] = v
         for d, v in kis_h.items():                # KIS가 덮어씀(우선)
-            if d < date_disp and v:
+            if d < date_disp and v and is_session(d):
                 past[d] = v
         if not past:
             continue
         dates_sorted = sorted(past)
         high = p['high']
         # 3종 룩백 각각 독립 판정 (52w⊂120d⊂20d 이지만 KRX와 동일하게 타입별로 emit)
-        prev20 = max(past[d] for d in dates_sorted[-NEWHIGH_DAYS:])
-        prev120 = max(past[d] for d in dates_sorted[-NEWHIGH_120D_DAYS:])
-        prev52 = max(past[d] for d in dates_sorted[-NEWHIGH_52W_DAYS:])
+        win20 = dates_sorted[-NEWHIGH_DAYS:]
+        win120 = dates_sorted[-NEWHIGH_120D_DAYS:]
+        win52 = dates_sorted[-NEWHIGH_52W_DAYS:]
+        prev20 = max(past[d] for d in win20)
+        prev120 = max(past[d] for d in win120)
+        prev52 = max(past[d] for d in win52)
+        # 실제 사용된 창 길이 — 상장 직후 종목은 창이 짧아 '52주 신고가'가 과대 해석된다.
+        lookback = {'newhigh_20d': (len(win20), NEWHIGH_DAYS),
+                    'newhigh_120d': (len(win120), NEWHIGH_120D_DAYS),
+                    'newhigh_52w': (len(win52), NEWHIGH_52W_DAYS)}
         is_20 = high > prev20
         is_120 = high > prev120
         is_52w = high > prev52
@@ -333,11 +348,15 @@ def compute_newhigh_20d(master, prices, date_disp, now_iso):
                                 ('newhigh_120d', is_120),
                                 ('newhigh_52w', is_52w)):
             if achieved:
+                used, target = lookback[label]
                 nh_records.append({
                     'd': date_disp, 'type': label, 'rank': 0,
                     'name': m['name'], 'code': code, 'market': m['market'],
                     'trdval': p['trdval'], 'mktcap': mktcap,
                     'turnover': 0, 'chg': round(p['chg'], 2), 'price': p['price'],
+                    # 추가 필드만(기존 소비자는 무시) — 판정 신뢰도 노출
+                    'lookback_used': used, 'lookback_target': target,
+                    'history_complete': used >= target,
                 })
 
         # 텔레그램 봇용 20일 신고가 상세 리스트 (52주는 플래그)
@@ -348,16 +367,22 @@ def compute_newhigh_20d(master, prices, date_disp, now_iso):
             'sector': sector_map.get(code, '기타'),
             'price': p['price'], 'chg': round(p['chg'], 2),
             'high': high, 'prev_high': prev20, 'trdval': p['trdval'], 'mktcap': mktcap,
-            'lookback': len(dates_sorted[-NEWHIGH_DAYS:]), 'is_52w': is_52w,
-            'lookback_52w': len(dates_sorted[-NEWHIGH_52W_DAYS:]),
+            'lookback': len(win20), 'is_52w': is_52w,
+            'lookback_52w': len(win52),
+            'history_complete_52w': len(win52) >= NEWHIGH_52W_DAYS,
         })
     out20.sort(key=lambda x: x['trdval'], reverse=True)   # 거래대금순
     n52 = sum(1 for s in out20 if s['is_52w'])
+    payload = {'date': date_disp, 'ranked_at': now_iso,
+               'lookback_days': NEWHIGH_DAYS, 'lookback_52w_days': NEWHIGH_52W_DAYS,
+               'count': len(out20), 'count_52w': n52, 'stocks': out20}
+    # 16:20·18:30 재수집이 15:50 enrich 결과를 덮어쓰던 문제 — sidecar 에서 테마를 다시 입힌다.
+    # LLM·네트워크를 쓰지 않으므로 매 수집마다 호출해도 안전하다.
+    restored = newhigh_themes.hydrate(payload)
+    if restored:
+        logging.info('sidecar 테마 복원: %d종목', restored)
     with open(NEWHIGH_OUTPUT, 'w', encoding='utf-8') as f:
-        json.dump({'date': date_disp, 'ranked_at': now_iso,
-                   'lookback_days': NEWHIGH_DAYS, 'lookback_52w_days': NEWHIGH_52W_DAYS,
-                   'count': len(out20), 'count_52w': n52, 'stocks': out20},
-                  f, ensure_ascii=False)
+        json.dump(payload, f, ensure_ascii=False)
     logging.info('신고가: 20일 %d종목 (그중 52주 %d) → %s', len(out20), n52, NEWHIGH_OUTPUT)
     logging.info('신고가 featured 레코드: %d건 (20d+120d+52w 합산)', len(nh_records))
     return out20, nh_records
@@ -366,6 +391,11 @@ def compute_newhigh_20d(master, prices, date_disp, now_iso):
 def main():
     now = datetime.now(tz=KST)
     date_disp = now.strftime('%Y-%m-%d')
+    # 가드 1/3 — 비거래일이면 아무것도 쓰지 않고 정상 종료.
+    # (없을 때: 토·일·공휴일 랭킹 30행이 전일 값 그대로 누적되고 히스토리 룩백 창이 잠식됨)
+    if not is_session(date_disp):
+        logging.info('비거래일 %s — 수집 스킵(SKIPPED)', date_disp)
+        return
     logging.info('KIS Featured(전종목 배치) 수집 시작 (%s)', date_disp)
 
     master = load_master()
