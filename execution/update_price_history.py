@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
 
 API_KEY = 'E9E8B0A915D74BC59CFA41D5534CF19EF4B24C9E'
 HISTORY_FILE = 'stock_price_history.json'
-MAX_DAYS = 370  # 보관 기간 (52주 + 여유)
+MAX_DAYS = 400  # 보관 기간. 370일은 휴장 탓에 246거래일뿐이라 52주(252거래일)에 미달했다
 
 
 def main():
@@ -35,11 +35,16 @@ def main():
     KST = _dt.timezone(_dt.timedelta(hours=9))
     today = datetime.now(tz=KST).date()
 
-    # 최근 5거래일 중 누락된 날짜 수집
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from krx_session import is_session
+
+    # 기본은 최근 7일 누락분만. --backfill 이면 보관 창 전체의 누락 거래일을 메운다.
+    backfill = '--backfill' in sys.argv
+    span = MAX_DAYS if backfill else 7
     dates_to_fetch = []
-    for i in range(7):
+    for i in range(span):
         d = today - timedelta(days=i)
-        if d.weekday() < 5 and d.strftime('%Y-%m-%d') not in existing_dates:
+        if is_session(d) and d.strftime('%Y-%m-%d') not in existing_dates:
             dates_to_fetch.append(d)
 
     if not dates_to_fetch:
