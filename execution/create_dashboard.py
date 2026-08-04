@@ -5852,10 +5852,19 @@ def create_order_section():
 
         function _mtxFindIdx(pf,code){ var a=orderStocks[pf]||[], c=String(code||'').trim(); for(var i=0;i<a.length;i++){ if(String(a[i].code||'').trim()===c) return i; } return -1; }
         function _mtxNewRowCodes(){ var s={}; matrixNewRows.forEach(function(r){ var c=String(r.code||'').trim(); if(c) s[c]=true; }); return s; }
+        // 편출 잔행 숨김(표시 레이어 전용): 전 포트에서 변경전 0 && 변경후 0 인 행은 매트릭스에서 감춘다.
+        // portfolio_data.json 은 편출 표시용으로 D-1 U 오늘 합집합을 담으므로, 재생성 전(오전)엔
+        // 어제 전량 편출된 종목이 0/0 행으로 남는다. orderStocks/orderState·pending 저장 스키마·
+        // 합계/현금 계산·자문지 엑셀 경로는 전부 불변 — 렌더 행 목록에서만 제외.
+        function _mtxRowDead(code){ var seen=false, c=String(code||'').trim(); if(!c) return false;
+          for(var pi=0;pi<ORDER_PORTFOLIOS.length;pi++){ var pf=ORDER_PORTFOLIOS[pi].display, idx=_mtxFindIdx(pf,c); if(idx<0) continue; seen=true;
+            if((parseFloat((orderStocks[pf][idx]||{}).weight)||0)!==0) return false;
+            if((parseFloat((orderState[pf][idx]||{}).newWeight)||0)!==0) return false; }
+          return seen; }
         function _mtxUnion(){ var owned=_mtxNewRowCodes(), order=[], meta={};
           ORDER_PORTFOLIOS.forEach(function(p){ (orderStocks[p.display]||[]).forEach(function(s){ var c=String(s.code||'').trim(); if(!c||owned[c]) return;
             if(!meta[c]){ meta[c]={code:c,name:s.name||'',sector:s.sector||''}; order.push(c); } else { if(!meta[c].name&&s.name)meta[c].name=s.name; if(!meta[c].sector&&s.sector)meta[c].sector=s.sector; } }); });
-          return {order:order,meta:meta}; }
+          return {order:order.filter(function(c){ return !_mtxRowDead(c); }),meta:meta}; }
         function _mtxReason(code){ var c=String(code||'').trim();
           for(var pi=0;pi<ORDER_PORTFOLIOS.length;pi++){ var pf=ORDER_PORTFOLIOS[pi].display, a=orderStocks[pf]||[], st=orderState[pf]||[];
             for(var i=0;i<a.length;i++){ if(String(a[i].code||'').trim()===c){ var r=(st[i]&&st[i].reason||'').toString(); if(r.trim()) return r; } } }
