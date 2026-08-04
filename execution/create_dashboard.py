@@ -1542,15 +1542,15 @@ def _series_country(group_label, s, group_country=None):
 CMB_ROC_ALLOW = {
     'KB 아파트지수 (서울)': (9.4, 0.86, 6.2, 0.83),
     'KB 주택매매지수 (전국)': (7.83, 0.9, 5.17, 0.88),
-    'M2 전년동월비': (2.76, 0.36, 2.76, 0.36),
-    'PPI 전년동월비': (4.92, 0.62, 4.92, 0.62),
+    'M2 YoY': (2.76, 0.36, 2.76, 0.36),
+    'PPI YoY': (4.92, 0.62, 4.92, 0.62),
     'SEAJ 반도체장비 판매고': (4.18, 0.36, 2.73, 0.18),
     '가계대출 잔액': (5.11, 0.71, 4.29, 0.75),
     '경제심리지수 ESI': (9.4, 0.88, 6.2, 0.82),
-    '미 CPI 전년동월비': (3.05, 0.36, 3.05, 0.36),
-    '미 근원 CPI 전년동월비': (2.76, 0.55, 2.76, 0.55),
+    '미 CPI YoY': (3.05, 0.36, 3.05, 0.36),
+    '미 근원 CPI YoY': (2.76, 0.55, 2.76, 0.55),
     '미 금융여건지수 NFCI': (None, None, 5.8, 0.87),
-    '미 케이스-실러 주택가격 전년동월비': (5.27, 0.91, 5.27, 0.91),
+    '미 케이스-실러 주택가격 YoY': (5.27, 0.91, 5.27, 0.91),
     '미분양주택 (전국)': (3.54, 0.49, 2.73, 0.47),
     '미시간 소비자심리': (2.88, 0.25, 2.31, 0.18),
     '삼성전자 외국인': (None, None, 3.22, 0.27),
@@ -1589,10 +1589,10 @@ CMB_SERIES_UNITS = {
     '메타 CDS 5Y': 'bp', '마이크로소프트 CDS 5Y': 'bp', '알파벳 CDS 5Y': 'bp',
     '미 기대인플레 BEI 10Y': '%', '미 기대인플레 5Y5Y': '%', 'SOFR': '%',
     # MACRO KOREA
-    'CPI 전년동월비': '%', 'PPI 전년동월비': '%', '기대인플레이션 1년': '%', 'M2 전년동월비': '%',
-    '제조업 가동률': '%', '수출금액 전년동월비': '%', '경상수지': '$B', '외환보유액': '$B',
+    'CPI YoY': '%', 'PPI YoY': '%', '기대인플레이션 1년': '%', 'M2 YoY': '%',
+    '제조업 가동률': '%', '수출금액 YoY': '%', '경상수지': '$B', '외환보유액': '$B',
     '정기예금 잔액': '조원', '국민연금 적립금': '조원', '퇴직연금 적립금': '조원',
-    '전산업생산 전년동월비': '%', '실업률 (한국)': '%', '온라인쇼핑 거래액': '조원',
+    '전산업생산 YoY': '%', '실업률 (한국)': '%', '온라인쇼핑 거래액': '조원',
     '백화점 매출증감률': '%', '대형마트 매출증감률': '%', '편의점 매출증감률': '%', 'SSM 매출증감률': '%',
     # MACRO US
     # ★역레포는 FRED RRPONTSYD 원본 단위가 Billions 이고 수집기가 스케일을 적용하지 않는다
@@ -1600,9 +1600,9 @@ CMB_SERIES_UNITS = {
     '미 역레포 잔고': '$B', '미 연준 총자산': '$T',
     '미 신규 실업수당청구': '만건', '미 연속 실업수당청구': '만건', '미 JOLTS 구인': '만건',
     '미 비농업고용 증감': '천명', '미 실업률': '%',
-    '미 CPI 전년동월비': '%', '미 근원 CPI 전년동월비': '%', '미 근원 PCE 전년동월비': '%',
-    '미 PPI 전년동월비': '%', '미 시간당임금 전년동월비': '%', '미 소매판매 전년동월비': '%',
-    '미 산업생산 전년동월비': '%', '미 근원자본재 수주 전년동월비': '%',
+    '미 CPI YoY': '%', '미 근원 CPI YoY': '%', '미 근원 PCE YoY': '%',
+    '미 PPI YoY': '%', '미 시간당임금 YoY': '%', '미 소매판매 YoY': '%',
+    '미 산업생산 YoY': '%', '미 근원자본재 수주 YoY': '%',
     '미 Sahm Rule 침체지표': '%p', '미 GDPNow 성장률': '%',
     '미 은행 대출태도 (C&I)': '%',   # FRED DRTSCILM = Net Percentage of Banks Tightening
     # IMMIGRATION (출입국·체류)
@@ -1618,7 +1618,7 @@ CMB_SERIES_UNITS = {
     '가계대출 잔액': '조원', '가계신용': '조원', '미분양주택 (전국)': '호',
     # CREDIT & HOUSING US
     '미 모기지 30년 금리': '%', '미 주택착공': '만호', '미 건축허가': '만호', '미 기존주택판매': '만호',
-    '미 케이스-실러 주택가격 전년동월비': '%',
+    '미 케이스-실러 주택가격 YoY': '%',
     # CRYPTOCURRENCY
     'BTC': '$', 'ETH': '$', 'BNB': '$', 'XRP': '$', 'SOL': '$',
     # COMMODITIES
@@ -1829,24 +1829,24 @@ def _build_combined_chart_section():
             ]},
             {'label': 'MACRO', 'country': 'Korea', 'series': [
                 # ECOS 월별 매크로 (5년 임베드 창, fetch_ecos_data.py)
-                {'display': 'CPI 전년동월비',        'csv': 'CPI 전년동월비',        'color': '#004D40'},
-                {'display': 'PPI 전년동월비',        'csv': 'PPI 전년동월비',        'color': '#00695C'},
+                {'display': 'CPI YoY',        'csv': 'CPI 전년동월비',        'color': '#004D40'},
+                {'display': 'PPI YoY',        'csv': 'PPI 전년동월비',        'color': '#00695C'},
                 {'display': '기대인플레이션 1년',    'csv': '기대인플레이션 1년',    'color': '#00796B'},
-                {'display': 'M2 전년동월비',         'csv': 'M2 전년동월비',         'color': '#00897B'},
+                {'display': 'M2 YoY',         'csv': 'M2 전년동월비',         'color': '#00897B'},
                 {'display': 'BSI 업황실적 (전산업)', 'csv': 'BSI 업황실적 (전산업)', 'color': '#006064'},
                 {'display': 'BSI 업황전망 (전산업)', 'csv': 'BSI 업황전망 (전산업)', 'color': '#00838F'},
                 {'display': '소비자심리지수 CSI',    'csv': '소비자심리지수 CSI',    'color': '#0097A7'},
                 {'display': '경제심리지수 ESI',      'csv': '경제심리지수 ESI',      'color': '#00ACC1'},
                 {'display': '선행지수 순환변동치',   'csv': '선행지수 순환변동치',   'color': '#26A69A'},
                 {'display': '제조업 가동률',         'csv': '제조업 가동률',         'color': '#26C6DA'},
-                {'display': '수출금액 전년동월비',   'csv': '수출금액 전년동월비',   'color': '#00BFA5'},
+                {'display': '수출금액 YoY',   'csv': '수출금액 전년동월비',   'color': '#00BFA5'},
                 {'display': '경상수지',              'csv': '경상수지',              'color': '#4DB6AC'},
                 {'display': '외환보유액',            'csv': '외환보유액',            'color': '#4DD0E1'},
                 {'display': '정기예금 잔액',         'csv': '정기예금 잔액',         'color': '#00574B'},
                 {'display': '국민연금 적립금',       'csv': '국민연금 적립금',       'color': '#1B5E20'},
                 {'display': '퇴직연금 적립금',       'csv': '퇴직연금 적립금',       'color': '#827717'},
                 # KOSIS 실물·소비 (fetch_kosis_series.py, VM 경로)
-                {'display': '전산업생산 전년동월비', 'csv': '전산업생산 전년동월비', 'color': '#00695F'},
+                {'display': '전산업생산 YoY', 'csv': '전산업생산 전년동월비', 'color': '#00695F'},
                 {'display': '설비투자지수',          'csv': '설비투자지수',          'color': '#00796F'},
                 {'display': '실업률 (한국)',         'csv': '실업률 (한국)',         'color': '#004D45'},
                 {'display': '온라인쇼핑 거래액',     'csv': '온라인쇼핑 거래액',     'color': '#00887E'},
@@ -1869,17 +1869,17 @@ def _build_combined_chart_section():
                 {'display': '미 연속 실업수당청구',         'csv': '미 연속 실업수당청구',         'color': '#2A6BC9'},
                 {'display': '미 금융여건지수 NFCI',         'csv': '미 금융여건지수 NFCI',         'color': '#3A7BD5'},
                 {'display': '미 연준 총자산',               'csv': '미 연준 총자산',               'color': '#4A8BE0'},
-                {'display': '미 CPI 전년동월비',            'csv': '미 CPI 전년동월비',            'color': '#5B99E8'},
-                {'display': '미 근원 CPI 전년동월비',       'csv': '미 근원 CPI 전년동월비',       'color': '#6CA7EF'},
-                {'display': '미 근원 PCE 전년동월비',       'csv': '미 근원 PCE 전년동월비',       'color': '#7DB5F4'},
-                {'display': '미 PPI 전년동월비',            'csv': '미 PPI 전년동월비',            'color': '#8FC2F8'},
-                {'display': '미 시간당임금 전년동월비',     'csv': '미 시간당임금 전년동월비',     'color': '#A0CFFB'},
+                {'display': '미 CPI YoY',            'csv': '미 CPI 전년동월비',            'color': '#5B99E8'},
+                {'display': '미 근원 CPI YoY',       'csv': '미 근원 CPI 전년동월비',       'color': '#6CA7EF'},
+                {'display': '미 근원 PCE YoY',       'csv': '미 근원 PCE 전년동월비',       'color': '#7DB5F4'},
+                {'display': '미 PPI YoY',            'csv': '미 PPI 전년동월비',            'color': '#8FC2F8'},
+                {'display': '미 시간당임금 YoY',     'csv': '미 시간당임금 전년동월비',     'color': '#A0CFFB'},
                 {'display': '미 비농업고용 증감',           'csv': '미 비농업고용 증감',           'color': '#263238'},
                 {'display': '미 실업률',                    'csv': '미 실업률',                    'color': '#37474F'},
                 {'display': '미 JOLTS 구인',                'csv': '미 JOLTS 구인',                'color': '#455A64'},
-                {'display': '미 소매판매 전년동월비',       'csv': '미 소매판매 전년동월비',       'color': '#546E7A'},
-                {'display': '미 산업생산 전년동월비',       'csv': '미 산업생산 전년동월비',       'color': '#607D8B'},
-                {'display': '미 근원자본재 수주 전년동월비','csv': '미 근원자본재 수주 전년동월비','color': '#78909C'},
+                {'display': '미 소매판매 YoY',       'csv': '미 소매판매 전년동월비',       'color': '#546E7A'},
+                {'display': '미 산업생산 YoY',       'csv': '미 산업생산 전년동월비',       'color': '#607D8B'},
+                {'display': '미 근원자본재 수주 YoY','csv': '미 근원자본재 수주 전년동월비','color': '#78909C'},
                 {'display': '미시간 소비자심리',            'csv': '미시간 소비자심리',            'color': '#90A4AE'},
                 {'display': '미 Sahm Rule 침체지표',        'csv': '미 Sahm Rule 침체지표',        'color': '#A7B8C2'},
                 {'display': '미 GDPNow 성장률',             'csv': '미 GDPNow 성장률',             'color': '#BCC9D1'},
@@ -1907,7 +1907,7 @@ def _build_combined_chart_section():
                 {'display': '미 주택착공',                        'csv': '미 주택착공',                        'color': '#7A3E11'},
                 {'display': '미 건축허가',                        'csv': '미 건축허가',                        'color': '#965016'},
                 {'display': '미 기존주택판매',                    'csv': '미 기존주택판매',                    'color': '#B3621B'},
-                {'display': '미 케이스-실러 주택가격 전년동월비', 'csv': '미 케이스-실러 주택가격 전년동월비', 'color': '#CF7420'},
+                {'display': '미 케이스-실러 주택가격 YoY', 'csv': '미 케이스-실러 주택가격 전년동월비', 'color': '#CF7420'},
                 {'display': '미 은행 대출태도 (C&I)',             'csv': '미 은행 대출태도 (C&I)',             'color': '#E98A2B'},
             ]},
             {'label': 'CRYPTOCURRENCY', 'series': [
@@ -2185,6 +2185,11 @@ def _build_combined_chart_section():
             '#cmbSideTable thead th{border-top:0!important;}'
             '#cmbSideTable td.cmb-chg.pos{color:#cc0000;font-weight:600;}'
             '#cmbSideTable td.cmb-chg.neg{color:#0055cc;font-weight:600;}'
+            '#cmbSideTable thead th{font-size:11px!important;}'
+            '#cmbSideTable tbody td:nth-child(2),#cmbSideTable tbody td:nth-child(3),'
+            '#cmbSideTable tbody td:nth-child(4){font-size:11px!important;}'
+            '#cmbSideTable tbody td:nth-child(6),#cmbSideTable tbody td:nth-child(7)'
+            '{font-size:12px!important;}'
             '.cmb-filter-btn{display:inline-block;margin-left:2px;color:#9aa4b0;cursor:pointer;}'
             '#cmbSearch{color:#fff!important;font-size:14px!important;}'
             '#cmbSearch::placeholder{color:#fff!important;opacity:1;}'
@@ -2203,7 +2208,7 @@ def _build_combined_chart_section():
             'color:#111;white-space:nowrap;cursor:pointer;text-align:left;}'
             '</style>'
             f'<table id="cmbSideTable" class="portfolio-table" style="width:100%;max-width:100%;margin:0 auto;">'
-            f'<colgroup><col style="width:26px;"><col style="width:56px;"><col style="width:60px;"><col style="width:150px;"><col style="width:260px;"><col style="width:76px;"><col style="width:60px;"></colgroup>'
+            f'<colgroup><col style="width:26px;"><col style="width:52px;"><col style="width:60px;"><col style="width:104px;"><col style="width:300px;"><col style="width:70px;"><col style="width:56px;"></colgroup>'
             f'<thead><tr>'
             f'<th id="cmbStarTh" style="{th_base}" onclick="cmbToggleStarOnly(event)" title="즐겨찾기만 보기 토글">★</th>'
             f'<th style="{th_base}" onclick="sortCmbTable(\'rank\')">Freq <span id="cmbArr_rank" style="font-size:10px;">▲</span>{filter_btn.format(col="rank")}</th>'
@@ -2303,7 +2308,7 @@ def _build_combined_chart_section():
             //  ★계산은 표시 구간이 아니라 '전 기간' 원계열에서 한다 — 기본값 YTD 구간만으로
             //    계산하면 12개월 lag 이 통째로 구간 밖이라 결과가 전부 null 이 된다.
             //  ★RoC¹ 정의는 시리즈 성격에 따라 3갈래 (같은 %라도 의미가 다르다):
-            //     level : 이름이 이미 변화율(전년동월비/증감률) → 레벨 그대로가 1차
+            //     level : 이름이 이미 변화율(YoY/증감률) → 레벨 그대로가 1차
             //     diff  : %·%p 인 '비율 수준'(금리·실업률·보유비중) → 전년동기 대비 %p 차분
             //             (실업률 3%→4% 를 +33% 로 읽으면 안 되므로 비율 변화율 금지)
             //     yoy   : 그 외 금액·수량 레벨 → 전년동기 대비 % 변화
@@ -2332,7 +2337,7 @@ def _build_combined_chart_section():
                 return y + '-' + (m < 10 ? '0' + m : '' + m);
             }
             function cmbRocKind(name) {
-                if (/전년동월비|전년동기|전년비|증감률/.test(name)) return 'level';
+                if (/YoY|전년동월비|전년동기|전년비|증감률/.test(name)) return 'level';
                 var u = cmbSeriesUnit[name] || '';
                 if (u === '%' || u === '%p') return 'diff';
                 return 'yoy';
