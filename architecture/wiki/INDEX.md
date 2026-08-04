@@ -1,6 +1,6 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 153 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 154 components._
 
 Updated: 2026-08-03
 
@@ -17,7 +17,7 @@ Updated: 2026-08-03
 - [web-chart 스킬 (웹 인터랙티브 차트 표준)](skill-web-chart.md) — Skill
 - [금융 분석 스킬 팩 (설치형 8종)](skill-finance-pack.md) — Skill
 
-### 국내 시장 (30)
+### 국내 시장 (31)
 - [Daily Disclosures DART+KIND (16:30)](gha-daily-disclosures.md) — GHA
 - [Daily KOFIA Stats + NPS (21:30 평일)](gha-daily-kofia.md) — GHA
 - [Daily KRX Index Valuation (18:30 평일)](gha-daily-krx-valuation.md) — GHA
@@ -42,6 +42,7 @@ Updated: 2026-08-03
 - [외국인 보유비중 (fetch_krx_foreign.py)](src-krx-foreign.md) — Source
 - [종목마스터 갱신 (update_stock_master.py)](src-stock-master.md) — Source
 - [종목마스터 주간 갱신 타이머 (토 09:00)](timer-update-stock-master.md) — Timer
+- [지수 거래대금·거래량 (build_index_value.py)](src-index-value.md) — Source
 - [출입국 월별 통계 (fetch_immigration.py)](src-immigration.md) — Source
 - [투자유의 생성기 (create_market_alert.py)](src-create-market-alert.md) — Source
 - [투자자별 수급 (fetch_investor_trading.py)](src-investor-trading.md) — Source
@@ -284,7 +285,7 @@ Updated: 2026-08-03
 - [외부 데이터 API/소스 집합](ext-data-apis.md) — active
 - [한국 수출 매출 추정 대시보드](ext-export-dashboard.md) — planned
 
-### Source (49)
+### Source (50)
 - [AoE 스타일 정본 (nav_style.py)](src-nav-style.md) — import 시 (상시), active
 - [AoE 차트 코어 (chart_core/aoe_chart.js)](src-chart-core.md) — 빌드타임 인라인 임베드 (상시), active
 - [DART 공시 (fetch_disclosures.py)](src-dart-disclosures.md) — 16:30 (gha-daily-disclosures), active
@@ -325,6 +326,7 @@ Updated: 2026-08-03
 - [유니버스 수집 (fetch_universe.py)](src-universe.md) — 18:30 / 07:00 (gha-daily-universe), active
 - [일본 CAPEX 지표 (fetch_japan_capex.py)](src-japan-capex.md) — 23:30 (kodex 타이머 편승), active
 - [종목마스터 갱신 (update_stock_master.py)](src-stock-master.md) — 토 09:00 (update-stock-master 타이머), active
+- [지수 거래대금·거래량 (build_index_value.py)](src-index-value.md) — 23:00 (gha-daily-crawl), active
 - [차트 렌더러 (draw_charts + draw_wrap_charts)](src-draw-charts.md) — 23:00 (daily_crawl), active
 - [출입국 월별 통계 (fetch_immigration.py)](src-immigration.md) — 23:30 (kodex 타이머 편승), active
 - [투자유의 생성기 (create_market_alert.py)](src-create-market-alert.md) — 16:05 / 23:00 (sisyphe-bot), active
@@ -354,7 +356,7 @@ Updated: 2026-08-03
 
 ## By project
 
-### antigravity (153)
+### antigravity (154)
 - [/aum — WRAP 일일 AUM 입력](cmd-aum.md) — Skill
 - [/긴급코멘트 — 급락일 시장 코멘트](cmd-urgent-comment.md) — Skill
 - [/목표전환형 — 랩 생성·청산 일괄](cmd-target-transform.md) — Skill
@@ -492,6 +494,7 @@ Updated: 2026-08-03
 - [작업용 노트북 (ASUS Vivobook, Windows)](infra-laptop.md) — Infra
 - [종목마스터 갱신 (update_stock_master.py)](src-stock-master.md) — Source
 - [종목마스터 주간 갱신 타이머 (토 09:00)](timer-update-stock-master.md) — Timer
+- [지수 거래대금·거래량 (build_index_value.py)](src-index-value.md) — Source
 - [차트 렌더러 (draw_charts + draw_wrap_charts)](src-draw-charts.md) — Source
 - [출입국 월별 통계 (fetch_immigration.py)](src-immigration.md) — Source
 - [컴퓨트 호스트 (맥미니)](infra-vm-macmini.md) — Infra
