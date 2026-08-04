@@ -73,10 +73,15 @@ def main(managers=None, quiet_alert=False):
     for reg in regs:
         code, a = reg['etf_code'], reg['adapter']
         prior = conn.execute(
-            'SELECT status, collected_at FROM collection_log WHERE date=? AND etf_code=?',
-            (date, code)).fetchone()
-        # status='stale'(PDF 미갱신)은 재시도 대상 — 워처가 롤오버를 기다리는 근거다.
-        if prior and prior['status'] == 'ok':
+            'SELECT status, collected_at, source, truncated FROM collection_log '
+            'WHERE date=? AND etf_code=?', (date, code)).fetchone()
+        # status='stale'(PDF 미갱신)은 재시도 대상.
+        # ★열등 스냅숏(KIS 폴백 상위30 / 전용 어댑터가 아닌 출처)도 재시도 대상이다.
+        #   429 로 폴백된 뒤 그날 내내 잘린 데이터로 굳으면, 다음날 31위 이하가
+        #   전부 '신규편입' 으로 오인된다(2026-08-04 KoAct 9종 실제 발생).
+        degraded = bool(prior) and (
+            bool(prior['truncated']) or (a != 'kis' and prior['source'] == 'kis'))
+        if prior and prior['status'] == 'ok' and not degraded:
             # 멱등 재실행: 구성종목은 재수집·다운그레이드 금지.
             # NAV·AUM 은 **장중에 잡힌 잠정치일 때만** 갱신한다.
             #   장 개시 전 수집분(아침 워처)은 PDF(D)=전일 종가 기준 보유분과 짝이 맞는
@@ -127,6 +132,11 @@ def main(managers=None, quiet_alert=False):
             print('[boutique][warn] %s KIS 시세 실패: %s' % (code, e))
         ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         if rows is None:
+            if prior and prior['status'] == 'ok':
+                # 열등 스냅숏 재시도가 실패한 경우 — 기존 ok 를 fail 로 강등하지 않는다.
+                n_ok += 1
+                print('[boutique][warn] %s 재시도 실패, 기존 스냅숏 유지: %s' % (code, err))
+                continue
             conn.execute(
                 'INSERT OR REPLACE INTO collection_log '
                 '(date,etf_code,status,source,truncated,error_msg,collected_at,fingerprint) '

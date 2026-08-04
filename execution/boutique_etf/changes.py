@@ -14,23 +14,33 @@ TH_SPIKE = 1.0
 DRIFT_REL = 0.005
 
 
-def _prev_ok_date(conn, etf_code, date):
+def _prev_ok(conn, etf_code, date):
+    """직전 정상 수집일과 그날의 잘림 여부·출처. (date, truncated, source)"""
     r = conn.execute(
-        "SELECT MAX(date) AS d FROM collection_log WHERE etf_code=? AND date<? AND status='ok'",
-        (etf_code, date)).fetchone()
-    return r['d'] if r else None
+        "SELECT date, truncated, source FROM collection_log WHERE etf_code=? AND date<? "
+        "AND status='ok' ORDER BY date DESC LIMIT 1", (etf_code, date)).fetchone()
+    return (r['date'], bool(r['truncated']), r['source']) if r else (None, False, None)
 
 
 def compute_changes(conn, date):
     conn.execute('DELETE FROM etf_changes WHERE date=?', (date,))
     oks = conn.execute(
-        "SELECT etf_code, truncated FROM collection_log WHERE date=? AND status='ok'",
+        "SELECT etf_code, truncated, source FROM collection_log WHERE date=? AND status='ok'",
         (date,)).fetchall()
     for ok in oks:
         etf = ok['etf_code']
-        prev_d = _prev_ok_date(conn, etf, date)
+        prev_d, prev_trunc, prev_src = _prev_ok(conn, etf, date)
         if not prev_d:
             continue
+        # 잘린 스냅숏(KIS 폴백 상위30)과의 비교는 한쪽 방향만 신뢰할 수 있다.
+        #   전일이 잘렸으면 → 오늘 새로 보이는 종목은 '원래 있었는데 안 보였을' 뿐 → 편입 억제
+        #   오늘이 잘렸으면  → 오늘 안 보이는 종목은 '30위 밖으로 밀린' 것일 뿐 → 편출 억제
+        allow_in = not prev_trunc
+        allow_out = not ok['truncated']
+        # ★출처가 바뀐 날은 보유목록 자체의 범위·표기가 달라 편입·편출을 신뢰할 수 없다
+        #   (예: KIS 폴백 → 운용사 PDF 복구). 양일 공통 종목의 급변만 남긴다.
+        if prev_src and ok['source'] and prev_src != ok['source']:
+            allow_in = allow_out = False
         cur = {r['stock_code']: r for r in conn.execute(
             'SELECT * FROM etf_constituents WHERE date=? AND etf_code=?', (date, etf))
             if r['stock_code']}
@@ -41,7 +51,7 @@ def compute_changes(conn, date):
         for c, r in cur.items():
             trade, drift = None, 0
             if c not in prv:
-                if (r['weight'] or 0) >= TH_IN:
+                if allow_in and (r['weight'] or 0) >= TH_IN:
                     ch_rows.append((date, etf, c, 'in', r['stock_name'],
                                     None, r['weight'], r['invest_amt'], 0))
                 trade = r['invest_amt']
@@ -65,7 +75,7 @@ def compute_changes(conn, date):
             conn.execute(
                 'UPDATE etf_constituents SET trade_amt=?, drift=? WHERE date=? AND etf_code=? AND stock_code=?',
                 (trade, drift, date, etf, c))
-        if not ok['truncated']:
+        if allow_out:
             for c, p in prv.items():
                 if c not in cur and (p['weight'] or 0) >= TH_OUT:
                     ch_rows.append((date, etf, c, 'out', p['stock_name'],
