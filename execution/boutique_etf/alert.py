@@ -108,18 +108,26 @@ def build_message(date, rows, test=False, layout='tree', extra=False):
     return '\n'.join([_head(date, test, extra), ''] + body)
 
 
-def _chunks(text, limit=3900):
-    lines, buf, out = text.split('\n'), [], []
-    n = 0
-    for ln in lines:
-        if n + len(ln) + 1 > limit and buf:
-            out.append('\n'.join(buf))
-            buf, n = [], 0
-        buf.append(ln)
-        n += len(ln) + 1
-    if buf:
-        out.append('\n'.join(buf))
-    return out
+def build_pages(date, rows, test=False, layout='tree', extra=False, limit=3500):
+    """행을 페이지로 쪼개 [(그 페이지의 행들, 메시지 텍스트)] 반환.
+
+    ★문자열을 잘라 보내면 어느 조각이 실패했는지 알 수 없어, 한 조각만 실패해도
+      전체를 '발송됨' 으로 표시해 항목이 영영 유실된다. 그래서 **행 단위로 페이지를
+      만들고 페이지별로 발송·기록**한다. 브랜드 헤더는 페이지마다 다시 붙는다.
+    """
+    ordered = sorted(rows, key=lambda x: -_amt(x))
+    pages, cur = [], []
+    for r in ordered:
+        trial = cur + [r]
+        if cur and len(build_message(date, trial, test, layout, extra)) > limit:
+            pages.append(cur)
+            cur = [r]
+        else:
+            cur = trial
+    if cur:
+        pages.append(cur)
+    return [(p, build_message(date, p, test, layout, extra or i > 0))
+            for i, p in enumerate(pages)]
 
 
 def send(text):
@@ -139,16 +147,19 @@ def send(text):
         raise RuntimeError('subscribers.json 읽기 실패: %s' % e)
     ok = 0
     for chat_id in subs:
-        for chunk in _chunks(text):
+        try:
             r = requests.post(
                 'https://api.telegram.org/bot%s/sendMessage' % token,
-                json={'chat_id': chat_id, 'text': chunk, 'parse_mode': 'HTML',
+                json={'chat_id': chat_id, 'text': text, 'parse_mode': 'HTML',
                       'disable_web_page_preview': True}, timeout=15)
-            if r.status_code == 200:
-                ok += 1
-            else:
-                logging.error('send fail chat=%s status=%s body=%s',
-                              chat_id, r.status_code, r.text[:200])
+        except Exception as e:
+            logging.error('send error chat=%s: %s', chat_id, e)
+            continue
+        if r.status_code == 200:
+            ok += 1
+        else:
+            logging.error('send fail chat=%s status=%s body=%s',
+                          chat_id, r.status_code, r.text[:200])
     return ok
 
 
@@ -222,11 +233,15 @@ def main():
         return 0
     already = conn.execute(
         'SELECT COUNT(*) c FROM alert_sent WHERE date=?', (date,)).fetchone()['c']
-    n = send(build_message(date, rows, extra=bool(already)))
-    if n:
-        mark_sent(conn, date, rows)
-    logging.info('%s 발송 %d건 (항목 %d%s)', date, n, len(rows),
-                 ', 추가분' if already else '')
+    sent_rows = 0
+    for page_rows, text in build_pages(date, rows, extra=bool(already)):
+        if not send(text):
+            logging.error('%s 페이지 발송 실패 — 남은 항목은 다음 실행에서 재시도', date)
+            break
+        mark_sent(conn, date, page_rows)   # 성공한 페이지만 기록 → 유실·중복 없음
+        sent_rows += len(page_rows)
+    logging.info('%s 발송 %d/%d 항목%s', date, sent_rows, len(rows),
+                 ' (추가분)' if already else '')
     return 0
 
 
