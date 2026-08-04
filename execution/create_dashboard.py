@@ -5300,6 +5300,7 @@ def create_order_section():
                 cells.push(buildEmailBox(pair.broker + ' ' + mName, buildMessengerText(pair.generalKey, pair.generalLabel, tt, pair.targetLabel), '#eef2ff', '#c7d2fe', '#1f5a2a', '#4f46e5'));
             });
             STANDALONE_GENERAL.forEach(function(sg) {
+                if (sg.broker === '삼성') return;  // 삼성은 이메일만 — 메신저 박스 미생성 (2026-07-13 확정)
                 var covered = TARGET_TABS.some(function(tt) { return EMAIL_PAIR[tt] && EMAIL_PAIR[tt].generalKey === sg.display; });
                 if (covered) return;
                 var sgm = BROKER_MESSENGER[sg.broker] || '네이트온';
