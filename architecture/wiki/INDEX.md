@@ -1,8 +1,8 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 154 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 157 components._
 
-Updated: 2026-08-03
+Updated: 2026-08-04
 
 ## By domain
 
@@ -17,7 +17,8 @@ Updated: 2026-08-03
 - [web-chart 스킬 (웹 인터랙티브 차트 표준)](skill-web-chart.md) — Skill
 - [금융 분석 스킬 팩 (설치형 8종)](skill-finance-pack.md) — Skill
 
-### 국내 시장 (31)
+### 국내 시장 (34)
+- [boutique_etf.db (부티크 액티브 ETF SQLite)](store-boutique-etf-db.md) — Store
 - [Daily Disclosures DART+KIND (16:30)](gha-daily-disclosures.md) — GHA
 - [Daily KOFIA Stats + NPS (21:30 평일)](gha-daily-kofia.md) — GHA
 - [Daily KRX Index Valuation (18:30 평일)](gha-daily-krx-valuation.md) — GHA
@@ -37,6 +38,8 @@ Updated: 2026-08-03
 - [stock_master.json (종목마스터)](store-stock-master.md) — Dataset
 - [국민연금 적립금 (fetch_nps_fund.py)](src-nps-fund.md) — Source
 - [금투협 예탁금/신용잔고/반대매매 (fetch_kofia_stats.py)](src-kofia.md) — Source
+- [부티크 액티브 ETF 타이머 (09:10/10:10/18:20 평일)](timer-boutique-etf.md) — Timer
+- [부티크 액티브 ETF 팔로업 (boutique_etf collect+alert)](src-boutique-etf.md) — Source
 - [액티브 ETF 변동 (active_etf_changes.py)](src-active-etf.md) — Source
 - [액티브 ETF 변동 알림 타이머 (19:00)](timer-etf-active-alert.md) — Timer
 - [외국인 보유비중 (fetch_krx_foreign.py)](src-krx-foreign.md) — Source
@@ -184,7 +187,7 @@ Updated: 2026-08-03
 - [Sisyphe-Bot (펀드/일상 텔레그램 봇)](bot-sisyphe.md) — 상시 (내부 잡 05:00~23:00), active
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — 상시 (06:00 다이제스트 등), active
 
-### Timer (17)
+### Timer (18)
 - [ETF 구성종목 수집 타이머 (etf-collect 16:30)](timer-etf-collect.md) — 16:30 매일 (paused 2026-07-29), frozen
 - [ETF 수집 재시도 타이머 (etf-collect-retry 18:00)](timer-etf-collect-retry.md) — 18:00 매일 (paused 2026-07-29), frozen
 - [Featured KIS 수집 타이머 (15:50, 신고가)](timer-featured-kis.md) — 15:50 매일, active
@@ -194,6 +197,7 @@ Updated: 2026-08-03
 - [랜딩 하이라이트 타이머 (18:45)](timer-landing-highlights.md) — 18:45 매일, active
 - [메모리 사이클 플랜 알림 타이머 (07:45)](timer-memory-cycle-alert.md) — 07:45 매일, active
 - [미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 08:30)](timer-us-etf-collect.md) — 08:30 화~토, active
+- [부티크 액티브 ETF 타이머 (09:10/10:10/18:20 평일)](timer-boutique-etf.md) — 09:10 / 10:10 / 18:20 평일, active
 - [실적봇 타이머 (earnings-bot)](timer-earnings-bot.md) — 08:00 매일, active
 - [아키텍처 자동 최신화 타이머 (21:40, claude 헤드리스)](timer-architecture-daily.md) — 21:40 매일, active
 - [액티브 ETF 변동 알림 타이머 (19:00)](timer-etf-active-alert.md) — 19:00 매일, active
@@ -247,7 +251,8 @@ Updated: 2026-08-03
 - [taiwan_revenue.csv (대만 월매출)](store-taiwan-revenue-csv.md) — 23:20 갱신, active
 - [universe.json / universe_history.json](store-universe-json.md) — 18:30 / 07:00 갱신, active
 
-### Store (12)
+### Store (13)
+- [boutique_etf.db (부티크 액티브 ETF SQLite)](store-boutique-etf-db.md) — 09:10 / 10:10 / 18:20 갱신 (평일), active
 - [earnings.db (실적봇 상태)](store-earnings-db.md) — 08:00 갱신, active
 - [etf_data.db (ETF 구성종목 SQLite)](store-etf-db.md) — 16:30 / 18:00 갱신 (paused 2026-07-29), frozen
 - [heartbeats.json (Phase 2 워치독 인터페이스)](store-heartbeats.md) — 각 GHA 잡 성공 시, planned
@@ -285,7 +290,7 @@ Updated: 2026-08-03
 - [외부 데이터 API/소스 집합](ext-data-apis.md) — active
 - [한국 수출 매출 추정 대시보드](ext-export-dashboard.md) — planned
 
-### Source (50)
+### Source (51)
 - [AoE 스타일 정본 (nav_style.py)](src-nav-style.md) — import 시 (상시), active
 - [AoE 차트 코어 (chart_core/aoe_chart.js)](src-chart-core.md) — 빌드타임 인라인 임베드 (상시), active
 - [DART 공시 (fetch_disclosures.py)](src-dart-disclosures.md) — 16:30 (gha-daily-disclosures), active
@@ -316,6 +321,7 @@ Updated: 2026-08-03
 - [랜딩 하이라이트 생성 (create_landing_highlights.py)](src-landing-highlights.md) — 18:45 (landing-highlights 타이머), active
 - [리서치노트 이미지 OCR (datalake/ocr_worker.py)](src-research-ocr.md) — 23:20 step 0 (datalake-research-export), active
 - [마스터 시장 크롤러 (market_crawler.py)](src-market-crawler.md) — 23:00 (daily_crawl), active
+- [부티크 액티브 ETF 팔로업 (boutique_etf collect+alert)](src-boutique-etf.md) — 09:10 / 10:10 / 18:20 평일 (boutique-etf 타이머), active
 - [수익률 계산 (calculate_returns.py)](src-calculate-returns.md) — 체인 (finalize/recalc/crawl), active
 - [실적 캘린더 sync (earnings_calendar_sync.py)](src-earnings-calendar-sync.md) — 07:00 (GHA) + 15:00 (VM cron), active
 - [실적봇 파이프라인 (execution/earnings_bot/)](src-earnings-pipeline.md) — 08:00 (earnings-bot 타이머), active
@@ -356,7 +362,7 @@ Updated: 2026-08-03
 
 ## By project
 
-### antigravity (154)
+### antigravity (157)
 - [/aum — WRAP 일일 AUM 입력](cmd-aum.md) — Skill
 - [/긴급코멘트 — 급락일 시장 코멘트](cmd-urgent-comment.md) — Skill
 - [/목표전환형 — 랩 생성·청산 일괄](cmd-target-transform.md) — Skill
@@ -367,6 +373,7 @@ Updated: 2026-08-03
 - [AoE 스타일 정본 (nav_style.py)](src-nav-style.md) — Source
 - [AoE 차트 코어 (chart_core/aoe_chart.js)](src-chart-core.md) — Source
 - [architecture.html (아키텍처)](page-architecture.md) — Page
+- [boutique_etf.db (부티크 액티브 ETF SQLite)](store-boutique-etf-db.md) — Store
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — Infra
 - [Claude Code Action (@claude 이벤트)](gha-claude-code.md) — GHA
 - [contribution_data.json](store-contribution-data.md) — Dataset
@@ -470,6 +477,8 @@ Updated: 2026-08-03
 - [맥미니 데이터레이크 (~/datalake + 문답 위키)](infra-datalake.md) — Infra
 - [메모리 사이클 플랜 알림 타이머 (07:45)](timer-memory-cycle-alert.md) — Timer
 - [미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 08:30)](timer-us-etf-collect.md) — Timer
+- [부티크 액티브 ETF 타이머 (09:10/10:10/18:20 평일)](timer-boutique-etf.md) — Timer
+- [부티크 액티브 ETF 팔로업 (boutique_etf collect+alert)](src-boutique-etf.md) — Source
 - [비활성 워크플로 (weather · calendar · portfolio-report)](gha-disabled.md) — GHA
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — Bot
 - [수익률 계산 (calculate_returns.py)](src-calculate-returns.md) — Source

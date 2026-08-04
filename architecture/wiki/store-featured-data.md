@@ -23,6 +23,7 @@ alerts: ""
 Featured TOP 종목 데이터(~11MB)와 20일 신고가 데이터. Sisyphe-Bot Featured 잡 + featured-kis 타이머가 생성.
 
 - featured.html(create_dashboard)과 RA_Sisyphe 신고가 알림이 소비.
+- ★2026-08-04: `newhigh_20d.json`은 이제 수집 결과 + `newhigh_themes.json`(테마 정본 sidecar)을 합친 **materialized view** — 16:20·18:30 재수집이 테마를 날리던 문제 해결([[src-featured-kis]]). 비거래일 행은 거래일 가드로 더 이상 기록되지 않음(과거 오염분은 `repair_featured_history.py`로 정리).
 
 ## Reads
 - (none)
