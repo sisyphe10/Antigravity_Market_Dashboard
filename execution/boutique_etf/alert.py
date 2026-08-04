@@ -44,6 +44,10 @@ def _fmt_w(v):
 WEEKDAY = '월화수목금토일'
 BULLET1 = '•'  # 1단계(브랜드) — 노션식 점 크기
 BULLET2 = '◦'  # 2단계(ETF·종목) — 속 빈 점
+# ★C안 확정(2026-08-04): 텔레그램 비례폰트에서 ◦ 가 • 보다 넓게 잡혀 글자 시작 위치가 어긋난다.
+#   1단계만 불릿 뒤 공백 2칸을 줘서 두 단계의 첫 글자 위치를 맞춘다.
+GAP1 = '  '
+GAP2 = ' '
 
 
 def _head(date, test=False):
@@ -89,16 +93,16 @@ def build_message(date, rows, test=False, layout='tree'):
     """
     ordered = sorted(rows, key=lambda x: -_amt(x))
     if layout == 'flat':
-        body = ['%s %s | %s' % (BULLET1, r['etf'], _cells(r)) for r in ordered]
+        body = ['%s%s%s | %s' % (BULLET1, GAP1, r['etf'], _cells(r)) for r in ordered]
     else:
         groups = {}
         for r in ordered:
             groups.setdefault(_brand(r['etf'])[0], []).append(r)
         body = []
         for brand in sorted(groups, key=lambda b: -max(_amt(r) for r in groups[b])):
-            body.append('%s <b>%s</b>' % (BULLET1, brand))
+            body.append('%s%s<b>%s</b>' % (BULLET1, GAP1, brand))
             for r in groups[brand]:
-                body.append('   %s %s | %s' % (BULLET2, _brand(r['etf'])[1], _cells(r)))
+                body.append('   %s%s%s | %s' % (BULLET2, GAP2, _brand(r['etf'])[1], _cells(r)))
     return '\n'.join([_head(date, test), ''] + body)
 
 

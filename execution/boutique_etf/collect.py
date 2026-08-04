@@ -61,7 +61,26 @@ def main():
             'SELECT status FROM collection_log WHERE date=? AND etf_code=?',
             (date, code)).fetchone()
         if prior and prior['status'] == 'ok':
-            n_ok += 1  # 멱등 재실행: 당일 ok 는 재수집·다운그레이드 금지
+            # 멱등 재실행: 구성종목은 재수집·다운그레이드 금지.
+            # 단 NAV·AUM 은 최신(장중 → 종가)으로 갱신하고 invest_amt 도 재계산한다
+            # — 첫 수집이 장중이면 AUM 이 잠정치라 다음날 매매추정액이 틀어진다.
+            try:
+                time.sleep(0.12)
+                q = enrich.fetch_etf_quote(code)
+                with conn:
+                    conn.execute(
+                        'UPDATE etf_daily SET close=?, nav=?, nav_prdy_ctrt=?, lstn_stcn=?, aum=? '
+                        'WHERE date=? AND etf_code=?',
+                        (q['close'], q['nav'], q['nav_prdy_ctrt'], q['lstn_stcn'],
+                         q['aum'], date, code))
+                    if q['aum']:
+                        conn.execute(
+                            'UPDATE etf_constituents SET invest_amt = ? * weight / 100.0 '
+                            'WHERE date=? AND etf_code=? AND weight IS NOT NULL',
+                            (q['aum'], date, code))
+            except Exception as e:
+                print('[boutique][warn] %s NAV/AUM 갱신 실패: %s' % (code, e))
+            n_ok += 1
             continue
         rows, meta, err = None, None, None
         if fails.get(a, 0) < CIRCUIT_MAX:
