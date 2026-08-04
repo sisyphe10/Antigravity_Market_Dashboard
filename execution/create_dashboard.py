@@ -961,17 +961,17 @@ def create_monthly_returns_table():
         진행 연도 YTD와 혼동 방지 (2026-07-12 사용자 리포트: YTD 행 2개 오독)."""
         def cb(name):
             return f'border-top:{DARK};border-right:{right_border_for(name)};border-bottom:{bottom_style};'
-        c = f'<td style="padding:6px 12px;text-align:center;font-weight:700;{cb("연도")}">{year_label}</td>'
-        c += f'<td style="padding:6px 12px;text-align:center;font-weight:700;{cb("월")}">{period_label}</td>'
+        c = f'<td style="padding:6px 4px;text-align:center;font-weight:700;{cb("연도")}">{year_label}</td>'
+        c += f'<td style="padding:6px 4px;text-align:center;font-weight:700;{cb("월")}">{period_label}</td>'
         for name in indices:
             v = returns_map.get(name)
             b = cb(name)
             if v is None:
-                c += f'<td style="padding:6px 12px;text-align:center;{b}">&nbsp;</td>'
+                c += f'<td style="padding:6px 4px;text-align:center;{b}">&nbsp;</td>'
             else:
                 pct = v * 100
                 sign, bg = color_bg(pct)
-                c += (f'<td style="padding:6px 12px;text-align:center;font-weight:700;background:{bg};'
+                c += (f'<td style="padding:6px 4px;text-align:center;font-weight:700;background:{bg};'
                       f'color:#fff;font-variant-numeric:tabular-nums;{b}">{sign}{pct:.1f}%</td>')
         return f'<tr>{c}</tr>\n'
 
@@ -1008,17 +1008,17 @@ def create_monthly_returns_table():
             bottom = DARK  # 연도 경계
         else:
             bottom = LIGHT
-        cells = f'<td style="padding:6px 12px;text-align:center;font-variant-numeric:tabular-nums;{cell_borders("연도", bottom)}">{y}</td>'
-        cells += f'<td style="padding:6px 12px;text-align:center;font-variant-numeric:tabular-nums;{cell_borders("월", bottom)}">{month_label}</td>'
+        cells = f'<td style="padding:6px 4px;text-align:center;font-variant-numeric:tabular-nums;{cell_borders("연도", bottom)}">{y}</td>'
+        cells += f'<td style="padding:6px 4px;text-align:center;font-variant-numeric:tabular-nums;{cell_borders("월", bottom)}">{month_label}</td>'
         for name in indices:
             v = returns.get(name)
             borders = cell_borders(name, bottom)
             if v is None:
-                cells += f'<td style="padding:6px 12px;text-align:center;{borders}">&nbsp;</td>'
+                cells += f'<td style="padding:6px 4px;text-align:center;{borders}">&nbsp;</td>'
             else:
                 pct = v * 100
                 sign, bg = color_bg(pct)
-                cells += f'<td style="padding:6px 12px;text-align:center;background:{bg};color:#fff;font-variant-numeric:tabular-nums;{borders}">{sign}{pct:.1f}%</td>'
+                cells += f'<td style="padding:6px 4px;text-align:center;background:{bg};color:#fff;font-variant-numeric:tabular-nums;{borders}">{sign}{pct:.1f}%</td>'
         body_rows_html += f'<tr>{cells}</tr>\n'
         if annual_after is not None:
             # 완결 연도 = '연간' 라벨 (YTD와 구분), 아래 굵은 선(2px)으로 다음 연도와 분리

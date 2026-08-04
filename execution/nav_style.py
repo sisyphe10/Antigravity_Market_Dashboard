@@ -99,7 +99,7 @@ NAV_ITEMS = [
         ('universe_lab', '/universe_lab.html', 'Universe Lab'),
     ]),
     ('market',       '/market.html',                 'Market',       False, [
-        ('market',       '/market.html',       'Data'),
+        ('market',       '/market.html',       'Series'),
         ('featured',     '/featured.html',     'Featured'),
         ('market_alert', '/market_alert.html', '투자유의종목'),
         ('etf',          '/etf.html',          'ETF'),
