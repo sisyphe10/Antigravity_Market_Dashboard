@@ -6,6 +6,7 @@
 어댑터 연속 실패 3회 → 그 어댑터 회로 차단(나머지 운용사는 계속).
 주말은 스킵. 실행: venv python -m execution.boutique_etf.collect (repo 루트에서).
 """
+import hashlib
 import sys
 import time
 import traceback
@@ -38,6 +39,13 @@ def _collect_one(reg, ymd, date_dash):
     return adapters.fetch_kis(code)
 
 
+def _fingerprint(rows):
+    """구성종목 스냅숏 지문 — 전일과 동일하면 PDF 미갱신(롤오버 전)으로 간주."""
+    key = '|'.join('%s:%s:%s' % (r['raw_code'], r['qty_cu'], r['weight'])
+                   for r in sorted(rows, key=lambda x: str(x['raw_code'])))
+    return hashlib.sha256(key.encode('utf-8')).hexdigest()[:16]
+
+
 def main():
     now = datetime.now()
     if now.weekday() >= 5:
@@ -54,13 +62,13 @@ def main():
     regs = conn.execute(
         'SELECT * FROM etf_registry ORDER BY manager, etf_code').fetchall()
     fails = {}          # adapter → 연속 실패 수
-    n_ok = n_fail = 0
+    n_ok = n_fail = n_stale = 0
     for reg in regs:
         code, a = reg['etf_code'], reg['adapter']
         prior = conn.execute(
             'SELECT status FROM collection_log WHERE date=? AND etf_code=?',
             (date, code)).fetchone()
-        if prior and prior['status'] == 'ok':
+        if prior and prior['status'] in ('ok', 'stale'):
             # 멱등 재실행: 구성종목은 재수집·다운그레이드 금지.
             # 단 NAV·AUM 은 최신(장중 → 종가)으로 갱신하고 invest_amt 도 재계산한다
             # — 첫 수집이 장중이면 AUM 이 잠정치라 다음날 매매추정액이 틀어진다.
@@ -107,12 +115,24 @@ def main():
         ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         if rows is None:
             conn.execute(
-                'INSERT OR REPLACE INTO collection_log VALUES (?,?,?,?,?,?,?)',
+                'INSERT OR REPLACE INTO collection_log '
+                '(date,etf_code,status,source,truncated,error_msg,collected_at,fingerprint) '
+                'VALUES (?,?,?,?,?,?,?,NULL)',
                 (date, code, 'fail', a, 0, (err or '')[:300], ts))
             conn.commit()
             n_fail += 1
             print('[boutique][fail] %s %s: %s' % (code, reg['name'], err))
             continue
+        # PDF 롤오버 가드: 직전 ok 스냅숏과 지문이 같으면 미갱신 → status='stale'
+        #   (변경탐지는 status='ok' 끼리만 비교하므로, 다음 갱신일에 옛 기준일과 정상 비교된다)
+        fp = _fingerprint(rows)
+        prev_fp = conn.execute(
+            "SELECT fingerprint FROM collection_log WHERE etf_code=? AND date<? "
+            "AND status='ok' ORDER BY date DESC LIMIT 1", (code, date)).fetchone()
+        status = 'stale' if (prev_fp and prev_fp['fingerprint'] == fp) else 'ok'
+        if status == 'stale':
+            err = (err or '') + ' 동일 스냅숏(PDF 미갱신)'
+            n_stale += 1
         aum = quote['aum'] if quote else None
         with conn:
             conn.execute('DELETE FROM etf_constituents WHERE date=? AND etf_code=?', (date, code))
@@ -135,16 +155,20 @@ def main():
                  quote['nav_prdy_ctrt'] if quote else None,
                  quote['lstn_stcn'] if quote else None, aum))
             conn.execute(
-                'INSERT OR REPLACE INTO collection_log VALUES (?,?,?,?,?,?,?)',
-                (date, code, 'ok', meta['source'], meta['truncated'],
-                 (err or '')[:300] or None, ts))
-        n_ok += 1
+                'INSERT OR REPLACE INTO collection_log '
+                '(date,etf_code,status,source,truncated,error_msg,collected_at,fingerprint) '
+                'VALUES (?,?,?,?,?,?,?,?)',
+                (date, code, status, meta['source'], meta['truncated'],
+                 (err or '')[:300] or None, ts, fp))
+        if status == 'ok':
+            n_ok += 1
 
     _enrich_mcaps(conn, date)
     changes.compute_changes(conn, date)
 
     n_ch = conn.execute('SELECT COUNT(*) c FROM etf_changes WHERE date=?', (date,)).fetchone()['c']
-    print('[boutique] %s 수집 ok=%d fail=%d 변경=%d' % (date, n_ok, n_fail, n_ch))
+    print('[boutique] %s 수집 ok=%d stale=%d fail=%d 변경=%d'
+          % (date, n_ok, n_stale, n_fail, n_ch))
     return 0 if n_ok >= 10 else 1
 
 

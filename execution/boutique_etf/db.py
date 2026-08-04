@@ -64,5 +64,9 @@ def init_db():
         );
         CREATE TABLE IF NOT EXISTS excd_map (ticker TEXT PRIMARY KEY, excd TEXT);
     """)
+    # 마이그레이션: 스냅숏 지문(동일 PDF 재수집 탐지용)
+    cols = {r[1] for r in conn.execute('PRAGMA table_info(collection_log)')}
+    if 'fingerprint' not in cols:
+        conn.execute('ALTER TABLE collection_log ADD COLUMN fingerprint TEXT')
     conn.commit()
     return conn
