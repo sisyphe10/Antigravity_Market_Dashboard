@@ -27,6 +27,8 @@ sys.stdout.reconfigure(encoding='utf-8')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s',
                     stream=sys.stdout)
 
+import newhigh_themes
+
 KST = timezone(timedelta(hours=9))
 NEWHIGH_FILE = 'newhigh_20d.json'
 
@@ -295,8 +297,15 @@ def enrich(path=NEWHIGH_FILE):
 
     logging.info(f'신고가 {len(stocks)}종목 → 테마 부여 시작 (date={data.get("date")})')
 
+    # sidecar 복원이 먼저 — 이미 테마가 있는 종목은 뉴스·LLM 을 다시 태우지 않는다(delta enrich).
+    restored = newhigh_themes.hydrate(data)
+    if restored:
+        logging.info(f'sidecar 테마 복원: {restored}종목 (재생성 대상 제외)')
+    todo = [s for s in stocks if not s.get('theme')]
+    logging.info(f'테마 미부여 {len(todo)}종목만 신규 생성')
+
     by_sector = {}
-    for s in stocks:
+    for s in todo:
         by_sector.setdefault(s.get('sector') or '기타', []).append(s)
     for sec in by_sector:
         by_sector[sec].sort(key=lambda x: x.get('trdval', 0), reverse=True)
@@ -336,8 +345,11 @@ def enrich(path=NEWHIGH_FILE):
     for s in stocks:
         key = (s.get('sector') or '기타', s.get('name'))
         th = name_to_theme.get(key)
-        s['theme'] = th if th else ''
         if th:
+            s['theme'] = th          # 이번에 새로 생성된 것
+        else:
+            s.setdefault('theme', '')  # ★복원된 기존 테마를 빈 문자열로 덮지 않는다
+        if s.get('theme'):
             tagged += 1
 
     # 2종목 이상 묶인 테마별 줄글 설명 생성 (봇 하단 테마 블록용)
@@ -346,10 +358,21 @@ def enrich(path=NEWHIGH_FILE):
         if s.get('theme'):
             theme_to_stocks.setdefault(s['theme'], []).append(s['name'])
     multi = {t: ns for t, ns in theme_to_stocks.items() if len(ns) >= THEME_MIN_STOCKS}
-    data['theme_descriptions'] = generate_theme_descriptions(multi, news_by_name)
-    logging.info(f'테마 설명: {len(data["theme_descriptions"])}개 (≥{THEME_MIN_STOCKS}종목 테마 {len(multi)}개)')
+    # 설명은 '이번에 바뀐 테마'만 재생성하고 나머지는 복원분을 유지한다
+    # (delta 실행 때 news_by_name 에는 신규 종목 뉴스만 있어 전량 재생성하면 근거가 얇아진다)
+    kept_desc = dict(data.get('theme_descriptions') or {})
+    todo_themes = {s.get('theme') for s in todo if s.get('theme')}
+    need = {t: ns for t, ns in multi.items() if t in todo_themes or t not in kept_desc}
+    if need:
+        kept_desc.update(generate_theme_descriptions(need, news_by_name))
+    data['theme_descriptions'] = {t: kept_desc[t] for t in multi if t in kept_desc}
+    logging.info(f'테마 설명: {len(data["theme_descriptions"])}개 (신규생성 {len(need)}개 / ≥{THEME_MIN_STOCKS}종목 테마 {len(multi)}개)')
 
     data['themes_enriched_at'] = datetime.now(tz=KST).isoformat()
+    # 정본은 sidecar — 재수집이 몇 번 돌아도 테마는 여기서 살아난다
+    newhigh_themes.record(data.get('date'),
+                          {s.get('code'): s.get('theme') for s in stocks if s.get('theme')},
+                          data.get('theme_descriptions'))
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False)
     logging.info(f'테마 부여 완료: {tagged}/{len(stocks)}종목 → {path}')
