@@ -18,7 +18,7 @@ import sqlite3
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from dl_common import CATALOG_DIR, DATALAKE_ROOT, DUCKDB_PATH, REPO  # noqa: E402
+from dl_common import CATALOG_DIR, DATALAKE_ROOT, DUCKDB_PATH, MARKET_DIR, REPO  # noqa: E402
 
 WIKI_DIR = os.path.join(REPO, "architecture", "wiki")
 TAG_INDEX_PATH = os.path.join(DATALAKE_ROOT, "tag_index.sqlite")
@@ -46,6 +46,7 @@ def _sandboxed_connect():
       (끄고 나면 재활성화 불가)."""
     import duckdb
     con = duckdb.connect(DUCKDB_PATH, read_only=True)
+    con.execute("SET allowed_directories=['%s']" % MARKET_DIR)
     con.execute("SET autoinstall_known_extensions=false")
     con.execute("SET autoload_known_extensions=false")
     con.execute("SET enable_external_access=false")
