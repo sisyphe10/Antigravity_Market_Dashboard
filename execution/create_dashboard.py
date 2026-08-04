@@ -2155,7 +2155,7 @@ def _build_combined_chart_section():
         # 검색창은 스크롤 컨테이너 '밖'에 둔다 — 안에 두면 스크롤바가 표 첫 행 위까지 올라가고
         # 검색창 자체도 스크롤돼 사라진다 (2026-07-28).
         search_box_html = (
-            '<div style="display:flex;justify-content:flex-end;margin:0 0 6px 0;">'
+            '<div style="display:flex;justify-content:flex-end;margin:0 0 4px 0;">'
             '<div style="position:relative;width:220px;">'
             '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#ffffff" '
             'stroke-width="2" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);'
@@ -3339,9 +3339,9 @@ def _build_combined_chart_section():
             <h2 class="category-title">DATA</h2>
             <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;justify-content:center;">
                 <div style="min-width:240px;position:relative;" id="cmbSideHost">
-                    <div id="cmbSelCount" style="font-size:11px;color:#000;min-height:16px;margin-bottom:4px;padding-left:2px;"></div>
+                    <div id="cmbSelCount" style="font-size:11px;color:#000;min-height:16px;margin-bottom:0;padding-left:2px;"></div>
                     {search_box_html}
-                    <div style="display:flex;gap:6px;margin:0 0 8px;">
+                    <div style="display:flex;gap:6px;margin:0 0 4px;">
                         <button class="cmb-ma-btn cmb-quick-btn" data-qv="star" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'star')">&#9733;</button>
                         <button class="cmb-ma-btn cmb-quick-btn" data-qv="Daily" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'Daily')">Daily</button>
                         <button class="cmb-ma-btn cmb-quick-btn" data-qv="Weekly" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'Weekly')">Weekly</button>
@@ -3386,7 +3386,7 @@ def _build_combined_chart_section():
                         <button id="cmbDispBtn3" class="cmb-ma-btn" onclick="toggleCmbDisp(3,this)">200</button>
                         </span>
                     </div>
-                    <div id="cmbChartCard" style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                    <div id="cmbChartCard" style="background:#fff;border-radius:6px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                         <div style="position:relative;height:562px;">
                             <canvas id="cmbDynamicChart"></canvas>
                         </div>
