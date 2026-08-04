@@ -31,41 +31,47 @@ def _fmt_eok(v):
     sign = '+' if eok > 0 else ('-' if eok < 0 else '')
     a = abs(eok)
     if a >= 10000:
-        return '%s%.1f조' % (sign, a / 10000)
+        return '%s%.1f조원' % (sign, a / 10000)
     if a >= 10:
-        return '%s%d억' % (sign, round(a))
-    return '%s%.1f억' % (sign, a)
+        return '%s%d억원' % (sign, round(a))
+    return '%s%.1f억원' % (sign, a)
 
 
 def _fmt_w(v):
     return '-' if v is None else ('%.1f' % v)
 
 
+WEEKDAY = '월화수목금토일'
+
+
+def _head(date, test=False):
+    """제목 = 8.4(화) [액티브 ETF 변동 현황]  (사용자 확정 2026-08-04)"""
+    from datetime import datetime
+    dt = datetime.strptime(date, '%Y-%m-%d')
+    return '%d.%d(%s) [액티브 ETF 변동 현황]%s' % (
+        dt.month, dt.day, WEEKDAY[dt.weekday()], ' (테스트)' if test else '')
+
+
+def _line(r):
+    """* ETF명 | 종목명 | 구분 | 비중 | 유입·유출 | 금액  (사용자 확정 2026-08-04)"""
+    kind = r['kind']
+    if kind == 'in':
+        gubun, w = '신규', '+%s%%' % _fmt_w(r.get('w_cur'))
+    elif kind == 'out':
+        gubun, w = '편출', '-%s%%' % _fmt_w(r.get('w_prev'))
+    else:
+        gubun = '급변'
+        w = '%s→%s%%' % (_fmt_w(r.get('w_prev')), _fmt_w(r.get('w_cur')))
+    amt = r.get('trade_amt') or 0
+    flow = '유입' if amt > 0 else ('유출' if amt < 0 else '-')
+    return '* %s | %s | %s | %s | %s | %s' % (
+        r['etf'], r['stock'], gubun, w, flow, _fmt_eok(r.get('trade_amt')))
+
+
 def build_message(date, rows, test=False):
-    """rows: [{etf, kind(in|out|spike), stock, w_prev, w_cur, trade_amt}] — |금액| 내림차순."""
-    head = '[부티크 액티브 ETF] %s%s' % (date[5:].replace('-', '/'),
-                                    ' (테스트)' if test else '')
-    sec = {'in': [], 'out': [], 'spike': []}
-    for r in sorted(rows, key=lambda x: -abs(x.get('trade_amt') or 0)):
-        etf, stock = r['etf'], r['stock']
-        amt = r.get('trade_amt')
-        if r['kind'] == 'in':
-            sec['in'].append('· %s — %s 신규 %s%% · 유입 %s'
-                             % (etf, stock, _fmt_w(r.get('w_cur')), _fmt_eok(amt)))
-        elif r['kind'] == 'out':
-            sec['out'].append('· %s — %s %s%% → 0 · 유출 %s'
-                              % (etf, stock, _fmt_w(r.get('w_prev')), _fmt_eok(amt)))
-        else:
-            sec['spike'].append('· %s — %s %s→%s%% · %s'
-                                % (etf, stock, _fmt_w(r.get('w_prev')),
-                                   _fmt_w(r.get('w_cur')), _fmt_eok(amt)))
-    parts = [head]
-    for key, title in (('in', '편입'), ('out', '편출'), ('spike', '급변')):
-        if sec[key]:
-            parts.append('')
-            parts.append('<b><u>%s</u></b>' % title)
-            parts.extend(sec[key])
-    return '\n'.join(parts)
+    """rows: [{etf, kind(in|out|spike), stock, w_prev, w_cur, trade_amt}] — |금액| 내림차순 단일 목록."""
+    ordered = sorted(rows, key=lambda x: -abs(x.get('trade_amt') or 0))
+    return '\n'.join([_head(date, test), ''] + [_line(r) for r in ordered])
 
 
 def _chunks(text, limit=3900):
@@ -125,7 +131,7 @@ def load_changes(conn, date):
 
 
 SAMPLE = [
-    {'etf': 'TIME 코스피액티브', 'kind': 'in', 'stock': '삼양식품',
+    {'etf': 'TIME 코스닥액티브', 'kind': 'in', 'stock': '삼양식품',
      'w_cur': 2.1, 'w_prev': None, 'trade_amt': 7.5e9},
     {'etf': 'KoAct 배당성장액티브', 'kind': 'out', 'stock': '한화에어로스페이스',
      'w_prev': 1.4, 'w_cur': None, 'trade_amt': -1.4e9},
