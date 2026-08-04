@@ -62,11 +62,12 @@ def _cells(r):
     """공통 뒷부분: 구분 | 비중 | 유입·유출 | 금액"""
     kind = r['kind']
     if kind == 'in':
-        gubun, w = '신규', '+%s%%' % _fmt_w(r.get('w_cur'))
+        gubun, w = 'NEW', '+%s%%' % _fmt_w(r.get('w_cur'))       # 신규 편입
     elif kind == 'out':
-        gubun, w = '편출', '-%s%%' % _fmt_w(r.get('w_prev'))
+        gubun, w = 'X', '-%s%%' % _fmt_w(r.get('w_prev'))        # 편출
     else:
-        gubun = '급변'
+        dw = (r.get('w_cur') or 0) - (r.get('w_prev') or 0)
+        gubun = '+' if dw > 0 else '-'                            # 비중 급증 / 급감
         w = '%s→%s%%' % (_fmt_w(r.get('w_prev')), _fmt_w(r.get('w_cur')))
     amt = r.get('trade_amt') or 0
     flow = '유입' if amt > 0 else ('유출' if amt < 0 else '-')
