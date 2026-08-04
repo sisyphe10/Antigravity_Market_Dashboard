@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.antigravity.datalake-wiki-model</string>
+    <key>UserName</key>
+    <string>__MACMINI_USER__</string>
+    <key>WorkingDirectory</key>
+    <string>__REPO__</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>__REPO__/datalake/launchd/run_datalake_job.sh</string>
+        <string>datalake-wiki-model</string>
+    </array>
+    <!-- 데몬 환경 표준 (CONTRACT v3): launchd 는 로그인 환경이 없음 -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>/Users/__MACMINI_USER__</string>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>LANG</key>
+        <string>en_US.UTF-8</string>
+    </dict>
+    <!-- KST 04:40 매일 — 최신 Opus 탐침을 미리 갱신해, 캐시 만료 후 첫 질문이
+         탐침 ~20초를 떠안지 않게 한다 (시스템 TZ=Asia/Seoul 전제) -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>4</integer>
+        <key>Minute</key>
+        <integer>40</integer>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>__REPO__/logs/launchd/datalake-wiki-model.out</string>
+    <key>StandardErrorPath</key>
+    <string>__REPO__/logs/launchd/datalake-wiki-model.err</string>
+    <key>RunAtLoad</key>
+    <false/>
+</dict>
+</plist>
