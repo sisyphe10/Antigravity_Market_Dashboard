@@ -14,6 +14,7 @@ import csv
 import json
 import os
 import sys
+import time
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone, timedelta
@@ -201,7 +202,9 @@ def full_detail(state):
     return lines
 
 
-def send_telegram(text):
+def send_telegram(text, attempts=3):
+    # 2026-08-05: 텔레그램 순단(8/4 ConnectionResetError [Errno 54]로 17:10 보고 1회 유실) 대비
+    # 3회 재시도 + 5s/10s 백오프. 최종 실패에서만 False -> main() rc=1 -> run_timer_job.sh notify_failure.
     token = os.environ.get('TELEGRAM_SISYPHE_BOT_TOKEN', '')
     chat_id = os.environ.get('TELEGRAM_CHAT_ID', '')
     if not token or not chat_id:
@@ -209,9 +212,20 @@ def send_telegram(text):
         return False
     body = urllib.parse.urlencode({'chat_id': chat_id, 'text': text,
                                    'disable_web_page_preview': 'true'}).encode('utf-8')
-    req = urllib.request.Request('https://api.telegram.org/bot%s/sendMessage' % token, data=body)
-    with urllib.request.urlopen(req, timeout=30) as res:
-        return bool(json.load(res).get('ok'))
+    for i in range(attempts):
+        try:
+            req = urllib.request.Request('https://api.telegram.org/bot%s/sendMessage' % token, data=body)
+            with urllib.request.urlopen(req, timeout=30) as res:
+                if bool(json.load(res).get('ok')):
+                    return True
+            sys.stderr.write('wrap_principle_check: telegram ok=false (%d/%d)\n' % (i + 1, attempts))
+        except Exception as exc:  # 네트워크/HTTP 계열 전부 재시도 대상
+            sys.stderr.write('wrap_principle_check: telegram send fail %d/%d - %s: %s\n'
+                             % (i + 1, attempts, type(exc).__name__, exc))
+        if i < attempts - 1:
+            time.sleep(5 * (i + 1))
+    sys.stderr.write('wrap_principle_check: telegram %d회 모두 실패 - 알림 발화\n' % attempts)
+    return False
 
 
 def main():
