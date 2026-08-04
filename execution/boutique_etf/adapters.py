@@ -25,6 +25,12 @@ from kis_token import kis_get  # noqa: E402
 UA = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'}
 CASH_KW = ('현금', '예수금', '예금', 'KRW', 'CASH', '원화', '설정현금')
 DERIV_KW = ('선물', '스왑', 'SWAP', 'FUTURE')
+# 채권·현금성 파킹 수단 — 종목 선택이 아니라 잔여현금 운용이라 집계에서 통째로 뺀다
+# (사용자 확정 2026-08-04). ★'밸류체인'의 '체'(U+CCB4)는 '채'(U+CC44)와 다른 글자라
+#   아래 키워드에 걸리지 않는다 — 과거 액티브 ETF 파이프라인에서 검증된 함정.
+BOND_CASH_KW = ('통안채', '통화안정', '단기채', '회사채', '금융채', '국고채', '국채',
+                '종합채권', '채권혼합', '물가채', '전단채', '단기자금', '파킹',
+                'MMF', '머니마켓', 'CD금리', 'KOFR', 'SOFR', '머니마켓액티브')
 
 
 def _get(url, timeout=25, data=None, headers=None):
@@ -51,6 +57,16 @@ def _is_cash(raw, name):
 def _is_deriv(name):
     up = (name or '').upper()
     return any(k in up for k in DERIV_KW)
+
+
+def _is_bond_cash(name):
+    up = (name or '').upper()
+    return any(k.upper() in up for k in BOND_CASH_KW)
+
+
+def is_excluded(raw, name):
+    """구성종목 집계 제외 대상: 현금성 · 파생 · 채권/현금성 파킹 수단."""
+    return _is_cash(raw, name) or _is_deriv(name) or _is_bond_cash(name)
 
 
 def normalize_code(raw):
@@ -91,7 +107,7 @@ def fetch_timefolio(idx):
         vals = (list(r) + [None] * 5)[:5]
         raw = str(vals[0] or '').strip()
         name = str(vals[1] or '').strip()
-        if (not raw and not name) or _is_cash(raw, name) or _is_deriv(name):
+        if (not raw and not name) or is_excluded(raw, name):
             continue
         qty, ev, w = _num(vals[2]), _num(vals[3]), _num(vals[4])
         px = (ev / qty) if (ev and qty) else None
@@ -111,7 +127,7 @@ def fetch_koact(fid, ymd):
     for r in pdf.get('list') or []:
         raw = str(r.get('itmNo') or '').strip()
         name = str(r.get('secNm') or '').strip()
-        if _is_cash(raw, name) or _is_deriv(name):
+        if is_excluded(raw, name):
             continue
         qty, ev, w = _num(r.get('applyQ')), _num(r.get('evalA')), _num(r.get('ratio'))
         px = _num(r.get('curp')) or ((ev / qty) if (ev and qty) else None)
@@ -141,7 +157,7 @@ def fetch_truston(page_url, date_dash):
     for r in dd.get('pdf') or []:
         raw = str(r.get('stock_code') or '').strip()
         name = str(r.get('stock_name') or '').strip()
-        if _is_cash(raw, name) or _is_deriv(name):
+        if is_excluded(raw, name):
             continue
         qty, ev, w = _num(r.get('quantity')), _num(r.get('price')), _num(r.get('ratio'))
         px = (ev / qty) if (ev and qty) else None
@@ -169,7 +185,7 @@ def fetch_kis(etf_code):
     for r in out:
         raw = str(r.get('stck_shrn_iscd') or '').strip()
         name = str(r.get('hts_kor_isnm') or '').strip()
-        if _is_cash(raw, name) or _is_deriv(name):
+        if is_excluded(raw, name):
             continue
         qty = _num(r.get('etf_cu_unit_scrt_cnt'))     # 이 행에서는 구성종목의 CU당 수량
         ev = _num(r.get('etf_cnfg_issu_avls'))        # 현재가 기준 평가액
