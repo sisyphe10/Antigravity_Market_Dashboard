@@ -42,8 +42,8 @@ def _fmt_w(v):
 
 
 WEEKDAY = '월화수목금토일'
-BULLET1 = '●'  # ● 1단계(브랜드)
-BULLET2 = '○'  # ○ 2단계(ETF·종목)
+BULLET1 = '•'  # 1단계(브랜드) — 노션식 점 크기
+BULLET2 = '◦'  # 2단계(ETF·종목) — 속 빈 점
 
 
 def _head(date, test=False):
