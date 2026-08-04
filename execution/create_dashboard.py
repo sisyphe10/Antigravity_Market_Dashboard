@@ -1441,7 +1441,7 @@ def _build_indices_chart_section(category_label='Indices'):
                         <button onclick="copyChartImage('idxDynamicChart','idxChartLegend',null,this)" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#0891b2;color:#fff;border:none;border-radius:8px;cursor:pointer;">Copy</button>
                         <button onclick="downloadChartImage('idxDynamicChart','AoE_Indice','idxChartLegend')" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
                     </div>
-                    <div id="idxChartCard" style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                    <div id="idxChartCard" style="background:#fff;border-radius:6px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                         <div style="position:relative;height:500px;">
                             <canvas id="idxDynamicChart"></canvas>
                         </div>
