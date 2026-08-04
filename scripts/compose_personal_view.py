@@ -86,6 +86,9 @@ AOE_DARK_CSS = (
     '#cmbSideTable td.cmb-price,#cmbSideTable #cmbPriceTh{border-left-color:#8a9096!important}'
     '#cmbScrollBox{border-color:#8a9096!important}'
     '#cmbSideTable td{font-size:15px!important}#cmbSideTable th{font-size:14px!important}'
+    # 기간 날짜 입력(2026-08-04): 인라인 밝은 배경(#f9fafb) 가정의 어두운 글자 일괄 규칙이
+    # 다크로 재배경된 입력의 글자를 #333으로 남김 — 흰색 재단언
+    'input[id"StartDate"],input[id"EndDate"]{color:#fff!important}'
     '#mrTableWrap th[style*="#7a828c"]{border-right-color:#7a828c!important}'
     '#mrTableWrap th[style*="#5c6168"]{border-right-color:#5c6168!important}'
     '#mrTableWrap th[style*="#3a3d42"]{border-right-color:#3a3d42!important}'
