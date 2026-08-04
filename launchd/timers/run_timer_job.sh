@@ -139,6 +139,7 @@ job_timeout_seconds() {
     landing-highlights)   echo 300  ;;   # 원본 5min
     etf-active-alert)     echo 600  ;;   # 원본 10min
     kodex-sectors)        echo 600  ;;   # 원본 10min
+    boutique-etf)         echo 900  ;;   # 부티크 액티브 ETF 55종 수집+페이지 (신규 2026-08-04)
     earnings-bot)         echo 5400 ;;   # 45min→90min (2026-07-31: 실적 성수기 37건일에 2700s 초과 강제종료)
     update-stock-master)  echo 900  ;;   # 원본 15min
     send-advisory-emails) echo 300  ;;   # SMTP 5통 여유(신규 60초 폴러)
@@ -211,6 +212,7 @@ run_job() {
     landing-highlights)   /bin/bash scripts/run_landing_highlights.sh || return $? ;;
     etf-active-alert)     /bin/bash scripts/run_etf_active_alert.sh   || return $? ;;
     kodex-sectors)        /bin/bash scripts/run_kodex_sectors.sh      || return $? ;;
+    boutique-etf)         /bin/bash scripts/run_boutique_etf.sh       || return $? ;;
     earnings-bot)         "$PY" -m execution.earnings_bot.runner       || return $? ;;
     update-stock-master)  /bin/bash scripts/run_update_stock_master.sh || return $? ;;
     send-advisory-emails) "$PY" execution/send_advisory_emails.py || return $? ;;
