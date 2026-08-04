@@ -4,6 +4,7 @@ import glob
 import subprocess
 from datetime import datetime, timezone, timedelta
 import csv
+import re
 import json
 import html as _html
 from pathlib import Path
@@ -1722,6 +1723,43 @@ def _roc_history_for(groups):
     return {c2d.get(k, k): v for k, v in hist.items()}
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# DATA 사이드바 그룹 내 정렬 규칙 (2026-08-04)
+#   종전: 그룹 안 순서 = groups 리스트에 손으로 적은 순서(규칙 없음) — 시리즈를 추가할 때마다
+#   같은 기준자산의 지표가 흩어졌다(예: 미국 INDEX 에 거래량 4종이 NASDAQ·RUSSELL 사이에 끼임).
+#   규칙 = ① 기준자산(그룹 내 첫 등장 순) → ② 지표 종류 고정 순위 → ③ 정의 순서(동률 tie-break).
+#   기준자산 순서를 하드코딩하지 않고 '첫 등장'으로 잡으므로, 자산을 새로 넣을 때의 배치 의도는
+#   그대로 살고 지표만 제자리를 찾는다.
+CMB_METRIC_ORDER = [
+    (1, r'/USD$'),
+    (2, r'\s*(현선물\s*)?괴리율$'),
+    (3, r'\s*(Market Cap|시가총액)$'),
+    (4, r'\s*(거래대금|거래량)$'),
+    (5, r'\s*미결제약정$'),
+    (6, r'\s*미결제(약정)?\s*금액$'),
+    (7, r'\s*공매도잔고$'),
+    (8, r'\s*(레버리지\s*)?ETF\s*AUM$'),
+    (9, r'\s*PER$'),
+    (10, r'\s*PBR$'),
+    (11, r'\s*배당수익률$'),
+    (12, r'\s*외국인(비중|\s*지분율)?$'),
+    (13, r'\s+\S+\s*누적$'),
+]
+# 표기가 갈리는 기준자산 통일 (지표를 떼어낸 뒤 적용)
+CMB_ASSET_ALIASES = {'코스피': 'KOSPI', '코스닥': 'KOSDAQ', '하이닉스': 'SK하이닉스'}
+
+
+def _cmb_metric_key(display):
+    """시리즈 표시명 → (기준자산, 지표순위). 지표 키워드가 없으면 레벨(0)."""
+    for rank, pat in CMB_METRIC_ORDER:
+        m = re.search(pat, display)
+        if m:
+            asset = display[:m.start()].strip()
+            if asset:                       # 자산명이 남을 때만 지표로 인정
+                return CMB_ASSET_ALIASES.get(asset, asset), rank
+    return CMB_ASSET_ALIASES.get(display, display), 0
+
+
 def _build_combined_chart_section():
     """전 카테고리(INDEX/DERIVATIVES/INVESTOR/EXCHANGE RATE/INTEREST RATES/MACRO/CREDIT & HOUSING/CRYPTOCURRENCY/MEMORY/COMMODITIES/CAPEX)
     를 단일 동적 Chart.js 차트로 통합. 좌 사이드바는 카테고리 그룹 헤더 + 토글 항목,
@@ -1787,16 +1825,16 @@ def _build_combined_chart_section():
                 {'display': 'NASDAQ',             'csv': 'NASDAQ',             'color': '#7B1FA2'},
                 {'display': 'NASDAQ PER',         'csv': 'NASDAQ PER',         'color': '#9C27B0'},
                 {'display': 'NASDAQ PBR',         'csv': 'NASDAQ PBR',         'color': '#BA68C8'},
+                {'display': 'RUSSELL 2000',       'csv': 'RUSSELL 2000',       'color': '#F57C00'},
+                {'display': 'RUSSELL 2000 PER',   'csv': 'RUSSELL 2000 PER',   'color': '#FF9800'},
+                {'display': 'RUSSELL 2000 PBR',   'csv': 'RUSSELL 2000 PBR',   'color': '#FFB74D'},
+                {'display': 'VIX Index',          'csv': 'VIX Index',          'color': '#D32F2F'},
                 # 거래량=지수 구성종목 거래주식수 합(^GSPC/^IXIC volume).
                 # 미국은 지수 단위 '거래대금(달러)' 원천이 없어 달러 활동량은 SPY/QQQ 로 본다.
                 {'display': 'S&P 500 거래량',     'csv': 'S&P 500 거래량',     'color': '#00838F'},
                 {'display': 'NASDAQ 거래량',      'csv': 'NASDAQ 거래량',      'color': '#0097A7'},
                 {'display': 'SPY 거래대금',       'csv': 'SPY 거래대금',       'color': '#5D4037'},
                 {'display': 'QQQ 거래대금',       'csv': 'QQQ 거래대금',       'color': '#8D6E63'},
-                {'display': 'RUSSELL 2000',       'csv': 'RUSSELL 2000',       'color': '#F57C00'},
-                {'display': 'RUSSELL 2000 PER',   'csv': 'RUSSELL 2000 PER',   'color': '#FF9800'},
-                {'display': 'RUSSELL 2000 PBR',   'csv': 'RUSSELL 2000 PBR',   'color': '#FFB74D'},
-                {'display': 'VIX Index',          'csv': 'VIX Index',          'color': '#D32F2F'},
             ]},
             {'label': 'EXCHANGE RATE', 'series': [
                 {'display': 'Dollar Index (DXY)', 'csv': 'Dollar Index (DXY)', 'color': '#1565C0'},
@@ -2078,16 +2116,26 @@ def _build_combined_chart_section():
             return 'Yearly'
 
         FREQ_RANK = {'Daily': 0, 'Weekly': 1, 'Monthly': 2, 'Yearly': 3}
-        # 초기 순서: Update 주기(D→W→M) → 그룹 정의 순서 → 시리즈 정의 순서.
+        # 초기 순서: Update 주기(D→W→M) → 그룹 정의 순서 → 기준자산(첫 등장 순)
+        #            → 지표 종류(CMB_METRIC_ORDER) → 시리즈 정의 순서.
         # JS 정렬은 stable sort라 이 순서가 동률 시 2차 기준으로 유지됨.
+        # 기준자산 순서 = 그룹 내 첫 등장 순 (자산 배치 의도 보존)
+        asset_seen = {}
+        for gi, si, group_label_raw, s, values in flat_series:
+            asset, _mr = _cmb_metric_key(s['display'])
+            asset_seen.setdefault((gi, asset), si)
+
         decorated = []
         for gi, si, group_label_raw, s, values in flat_series:
             freq = _detect_update_freq(s['csv'])
-            decorated.append((FREQ_RANK[freq], gi, si, freq, group_label_raw, s, values))
-        decorated.sort(key=lambda t: (t[0], t[1], t[2]))
+            asset, mrank = _cmb_metric_key(s['display'])
+            arank = asset_seen[(gi, asset)]
+            decorated.append((FREQ_RANK[freq], gi, arank, mrank, si,
+                              freq, group_label_raw, s, values))
+        decorated.sort(key=lambda t: (t[0], t[1], t[2], t[3], t[4]))
 
         cell_base = 'padding:var(--aoe-t-pad-y) var(--aoe-t-pad-x);font-size:var(--aoe-t-font);color:#000;'
-        for rank, gi, si, freq, group_label_raw, s, values in decorated:
+        for rank, gi, arank, mrank, si, freq, group_label_raw, s, values in decorated:
             data_export[s['display']] = values
             # Chg 칼럼 (2026-08-04): 직전 유효 관측 대비. %/%p 단위는 레벨 차이 %p(범례·RoC 규칙),
             # 그 외는 % 변화율(분모 abs — 음수 레벨에서 방향 반전 방지). 관측<2·prev==0 은 결측.
