@@ -1125,6 +1125,67 @@ def test_headless_ui():
     return _HR(_HEADLESS_UI)
 
 
+@app.get("/test/headless/ab")
+def test_headless_ab():
+    """A/B 평가 결과 비교 페이지 — ab_eval.py 산출 JSON을 좌우로 렌더."""
+    import html as _html
+    from fastapi.responses import HTMLResponse as _HR
+    path = os.path.join(DATALAKE_ROOT, "ab_eval_latest.json")
+    if not os.path.exists(path):
+        return _HR("<meta charset=utf-8><p>아직 평가 결과가 없습니다. ab_eval.py 를 먼저 실행하세요.")
+    with open(path, encoding="utf-8") as fh:
+        data = json.load(fh)
+    rows = data.get("rows") or []
+    css = ("body{background:#12100e;color:#e8e3d9;font:15px/1.7 -apple-system,'Pretendard',sans-serif;"
+           "max-width:1400px;margin:0 auto;padding:24px}"
+           "h1{font-size:18px;color:#e0a960}h2{font-size:15px;color:#e0a960;margin-top:34px}"
+           ".q{background:#1c1916;border-left:3px solid #e0a960;padding:10px 14px;border-radius:4px}"
+           ".cat{display:inline-block;font-size:11px;color:#12100e;background:#e0a960;"
+           "padding:1px 8px;border-radius:10px;margin-right:8px;font-weight:600}"
+           ".pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}"
+           ".card{background:#1c1916;border:1px solid #3a342c;border-radius:8px;padding:14px;"
+           "white-space:pre-wrap;font-size:13.5px;overflow-x:auto}"
+           ".card.h{border-color:#4a7a5a}.card.a{border-color:#5a6a8a}"
+           ".hd{font-size:12px;color:#8d8578;margin-bottom:8px;font-weight:600}"
+           ".fail{border-color:#a4553a;color:#e08b6f}"
+           "table{border-collapse:collapse;margin:14px 0;font-size:13px}"
+           "th,td{border:1px solid #3a342c;padding:5px 10px;text-align:center}"
+           "th{color:#e0a960}")
+    parts = ["<!doctype html><meta charset='utf-8'><title>위키 백엔드 A/B</title>",
+             "<style>%s</style>" % css,
+             "<h1>위키 문답 백엔드 A/B — headless(구독 0원) vs API(sonnet-5 과금)</h1>"]
+    hw = sum(1 for r in rows if r["headless"]["ok"])
+    aw = sum(1 for r in rows if r["api"]["ok"])
+    hsec = [r["headless"]["elapsed"] for r in rows]
+    asec = [r["api"]["elapsed"] for r in rows]
+    parts.append(
+        "<table><tr><th></th><th>성공</th><th>평균 지연</th><th>최대 지연</th><th>비용</th></tr>"
+        "<tr><td>headless</td><td>%d/%d</td><td>%.0f초</td><td>%.0f초</td><td><b>0원</b></td></tr>"
+        "<tr><td>API</td><td>%d/%d</td><td>%.0f초</td><td>%.0f초</td><td>$%.2f</td></tr></table>"
+        % (hw, len(rows), sum(hsec)/max(1, len(hsec)), max(hsec or [0]),
+           aw, len(rows), sum(asec)/max(1, len(asec)), max(asec or [0]),
+           data.get("total_api_cost_usd") or 0))
+    for r in rows:
+        h, a = r["headless"], r["api"]
+        parts.append("<h2>%d. <span class='cat'>%s</span></h2>" % (r["n"], _html.escape(r["category"])))
+        parts.append("<div class='q'>%s</div>" % _html.escape(r["question"]))
+        parts.append("<div class='pair'>")
+        for side, d, cls in (("headless (구독 0원)", h, "h"), ("API sonnet-5", a, "a")):
+            meta = "%.0f초" % d["elapsed"]
+            if d.get("turns"):
+                meta += " · %s턴" % d["turns"]
+            if d.get("cost_usd"):
+                meta += " · $%.4f" % d["cost_usd"]
+            if d.get("steps"):
+                meta += " · 🔧 " + " ".join(d["steps"][:8])
+            body = d["answer"] if d["ok"] else ("실패: " + (d.get("error") or ""))
+            parts.append("<div class='card %s%s'><div class='hd'>%s · %s</div>%s</div>"
+                         % (cls, "" if d["ok"] else " fail", side, _html.escape(meta),
+                            _html.escape(body)))
+        parts.append("</div>")
+    return _HR("".join(parts))
+
+
 if __name__ == "__main__":
     import uvicorn
     # 기본=로컬 전용. 테일넷 공개는 DATALAKE_WEBUI_HOST에 테일스케일 IP 지정
