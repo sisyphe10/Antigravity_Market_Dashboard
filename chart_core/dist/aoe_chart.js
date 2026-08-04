@@ -731,38 +731,51 @@ function cmbPeerCharts(self) {
                 var legendEl = _idLegend ? document.getElementById(_idLegend) : null;
                 function cmbBuildLegend() {
                     // _cmbAux(P4): 평균선 등 보조 계열 — 범례·툴팁·핀 카드에서 제외 (끝값은 _skipEndLabel)
-                    var legendHTML = datasets.filter(function(ds) { return !ds._cmbAux; }).map(function(ds) {
-                        var c = ds.borderColor;
-                        // 설정 기간 변화율: pct 모드는 정규화된 값이라 last 자체가 변화율,
+                    // 설정 기간 변화율 (P2b 규격). 자릿수는 항목별 |pct| 가 아니라 범례 전체
+                    // 최대 |pct| 공유 기준으로 정한다 (2026-08-04: 주 시리즈 +95.3% 옆 MA20 이
+                    // +9.88% 로 자릿수가 어긋나던 문제 — fmtUniformFix 의 '축 공유 기준' 취지와 통일).
+                    function _legPctOf(ds) {
+                        // pct 모드는 정규화된 값이라 last-first 자체가 변화율,
                         // raw 모드는 (last/first - 1)*100. 첫/마지막 non-null 값으로 계산.
                         var vals = ds.data.filter(function(v) { return v !== null && v !== undefined && !isNaN(v); });
+                        if (vals.length < 2) return null;
+                        var first = vals[0];
+                        var last = vals[vals.length - 1];
+                        var pct, sfx = '%';
+                        // ★원값 모드의 %·%p 단위 시리즈 = 레벨 차이 %p (P2b 규격 정합, BASELINE 결함 5).
+                        //   2026-07-19 확정 규격이 pct 모드에만 적용돼 있었다 — 나눗셈 %는 0 근처
+                        //   값에서 발산한다 (괴리율 0.045→-5.33 이 -1,699% 로 표기되던 건).
+                        //   MA 파생선은 단위 미등록 → 같은 축 주 시리즈의 단위를 따른다.
+                        var _lu = cmbSeriesUnit[ds.label] || '';
+                        if (!_lu) {
+                            for (var _ai = 0; _ai < _axAssign.length; _ai++) {
+                                if (_axAssign[_ai].ax === (ds.yAxisID || 'y')) { _lu = cmbSeriesUnit[_axAssign[_ai].name] || ''; break; }
+                            }
+                        }
+                        if (mode === 'pct' && (ds.yAxisID || 'y') === 'y') {   // P4: pct 분기=좌축 한정
+                            pct = last - first;
+                        } else if (_lu === '%' || _lu === '%p') {
+                            pct = last - first;
+                            sfx = '%p';
+                        } else if (first > 0) {
+                            pct = (last / first - 1) * 100;
+                        } else {
+                            // 첫값이 0·음수인 원값 계열(FCF 등)은 비율 변화가 무의미 — 표기 생략 (P4b)
+                            pct = null;
+                        }
+                        return pct === null ? null : { pct: pct, sfx: sfx };
+                    }
+                    var _legMaxAbs = 0;
+                    datasets.filter(function(ds) { return !ds._cmbAux; }).forEach(function(ds) {
+                        var _r0 = _legPctOf(ds);
+                        if (_r0) _legMaxAbs = Math.max(_legMaxAbs, Math.abs(_r0.pct));
+                    });
+                    var legendHTML = datasets.filter(function(ds) { return !ds._cmbAux; }).map(function(ds) {
+                        var c = ds.borderColor;
                         var pctStr = '';
-                        if (vals.length >= 2) {
-                            var first = vals[0];
-                            var last = vals[vals.length - 1];
-                            var pct, sfx = '%';
-                            // ★원값 모드의 %·%p 단위 시리즈 = 레벨 차이 %p (P2b 규격 정합, BASELINE 결함 5).
-                            //   2026-07-19 확정 규격이 pct 모드에만 적용돼 있었다 — 나눗셈 %는 0 근처
-                            //   값에서 발산한다 (괴리율 0.045→-5.33 이 -1,699% 로 표기되던 건).
-                            //   MA 파생선은 단위 미등록 → 같은 축 주 시리즈의 단위를 따른다.
-                            var _lu = cmbSeriesUnit[ds.label] || '';
-                            if (!_lu) {
-                                for (var _ai = 0; _ai < _axAssign.length; _ai++) {
-                                    if (_axAssign[_ai].ax === (ds.yAxisID || 'y')) { _lu = cmbSeriesUnit[_axAssign[_ai].name] || ''; break; }
-                                }
-                            }
-                            if (mode === 'pct' && (ds.yAxisID || 'y') === 'y') {   // P4: pct 분기=좌축 한정
-                                pct = last - first;
-                            } else if (_lu === '%' || _lu === '%p') {
-                                pct = last - first;
-                                sfx = '%p';
-                            } else if (first > 0) {
-                                pct = (last / first - 1) * 100;
-                            } else {
-                                // 첫값이 0·음수인 원값 계열(FCF 등)은 비율 변화가 무의미 — 표기 생략 (P4b)
-                                pct = null;
-                            }
-                            if (pct !== null) pctStr = '<span>' + (pct >= 0 ? '+' : '') + fmtUniformFix(pct, Math.abs(pct)) + sfx + '</span>';
+                        var _r = _legPctOf(ds);
+                        if (_r) {
+                            pctStr = '<span>' + (_r.pct >= 0 ? '+' : '') + fmtUniformFix(_r.pct, _legMaxAbs) + _r.sfx + '</span>';
                         }
                         // 축 단위를 시리즈명 바로 뒤에 표기 (2026-08-02 사용자 확정 — 축 상단 주석 폐지).
                         // MA 등 파생선은 cmbSeriesUnit 미등록이라 자동으로 단위 없음.

@@ -2066,6 +2066,46 @@ def _build_combined_chart_section():
         cell_base = 'padding:var(--aoe-t-pad-y) var(--aoe-t-pad-x);font-size:var(--aoe-t-font);color:#000;'
         for rank, gi, si, freq, group_label_raw, s, values in decorated:
             data_export[s['display']] = values
+            # Chg 칼럼 (2026-08-04): 직전 유효 관측 대비. %/%p 단위는 레벨 차이 %p(범례·RoC 규칙),
+            # 그 외는 % 변화율(분모 abs — 음수 레벨에서 방향 반전 방지). 관측<2·prev==0 은 결측.
+            _cu = CMB_SERIES_UNITS.get(s['display'], '')
+            _cv = [v for v in values if v is not None]
+            chg_val = None
+            chg_suffix = '%p' if _cu in ('%', '%p') else '%'
+            if len(_cv) >= 2:
+                _last, _prev = _cv[-1], _cv[-2]
+                if _cu in ('%', '%p'):
+                    chg_val = _last - _prev
+                elif _prev != 0:
+                    chg_val = (_last - _prev) / abs(_prev) * 100.0
+            if chg_val is not None:
+                chg_val = round(chg_val, 1)
+                if chg_val == 0:
+                    chg_val = 0.0
+            if chg_val is None:
+                chg_attr, chg_cls, chg_txt = '', '', '–'
+            else:
+                chg_attr = f' data-chg="{chg_val}"'
+                chg_cls = ' pos' if chg_val > 0 else (' neg' if chg_val < 0 else '')
+                chg_txt = f'{chg_val:+.1f}{chg_suffix}' if chg_val else f'0.0{chg_suffix}'
+            # Price 칼럼: 마지막 유효 관측 원값. ≥1조=N조·≥10억=N억 압축(원 단위 시총이
+            # 칼럼 폭을 밀던 문제), 정렬용 data-price 는 원시값 유지.
+            price_val = _cv[-1] if _cv else None
+            if price_val is None:
+                price_attr, price_txt = '', '–'
+            else:
+                _pa = abs(price_val)
+                if _pa >= 1e12:
+                    price_txt = f'{price_val / 1e12:,.0f}조'
+                elif _pa >= 1e9:
+                    price_txt = f'{price_val / 1e8:,.0f}억'
+                elif _pa >= 1000:
+                    price_txt = f'{price_val:,.0f}'
+                elif _pa >= 10:
+                    price_txt = f'{price_val:,.1f}'
+                else:
+                    price_txt = f'{price_val:.2f}'
+                price_attr = f' data-price="{price_val}"'
             group_label = _html.escape(group_label_raw)
             active = ' active' if s.get('default') else ''
             # Hotel {city} 시리즈에는 수집 호텔 리스트를 native tooltip(title)으로 표시
@@ -2080,7 +2120,7 @@ def _build_combined_chart_section():
             rows_html += (
                 f'<tr class="cmb-series-row" data-group="{group_label}" '
                 f'data-country="{country_esc}" '
-                f'data-update-rank="{rank}" data-name="{display_esc}" '
+                f'data-update-rank="{rank}" data-name="{display_esc}"{price_attr}{chg_attr} '
                 f'onclick="toggleCmbSeries(this.querySelector(\'.cmb-chart-item\'), event)" '
                 f'style="cursor:pointer;">'
                 # 별표(즐겨찾기) — Watchlist 패턴 이식 (2026-07-19). 상태는 localStorage.
@@ -2091,8 +2131,14 @@ def _build_combined_chart_section():
                 f'<td style="{cell_base}text-align:center;white-space:nowrap;font-size:var(--aoe-t-head-font);'
                 f'text-transform:uppercase;letter-spacing:0.3px;">{group_label}</td>'
                 f'<td class="cmb-chart-item{active}" data-series="{display_esc}"{tooltip_attr} '
-                f'style="{cell_base}text-align:center;">'
-                f'{display_esc}</td></tr>\n'
+                f'style="{cell_base}text-align:center;font-size:var(--aoe-t-head-font);">'
+                f'{display_esc}</td>'
+                f'<td class="cmb-price" style="padding:var(--aoe-t-pad-y) 4px;'
+                f'font-size:var(--aoe-t-font);color:#000;text-align:center;white-space:nowrap;'
+                f'font-variant-numeric:tabular-nums;">{price_txt}</td>'
+                f'<td class="cmb-chg{chg_cls}" style="padding:var(--aoe-t-pad-y) 4px;'
+                f'font-size:var(--aoe-t-font);text-align:center;white-space:nowrap;'
+                f'font-variant-numeric:tabular-nums;">{chg_txt}</td></tr>\n'
             )
 
         export = {'dates': dates, 'data': data_export}
@@ -2130,6 +2176,11 @@ def _build_combined_chart_section():
             '#cmbSideTable td.cmb-star{color:#8a9096 !important;user-select:none;}'
             '#cmbSideTable td.cmb-star.on{color:#67e0f4 !important;}'
             '#cmbSideTable #cmbStarTh{color:#67e0f4 !important;}'
+            '#cmbSideTable td.cmb-price,#cmbSideTable #cmbPriceTh{border-left:2px solid #000;}'
+            '#cmbScrollBox{border:2px solid #000;}'
+            '#cmbSideTable thead th{border-top:0!important;}'
+            '#cmbSideTable td.cmb-chg.pos{color:#cc0000;font-weight:600;}'
+            '#cmbSideTable td.cmb-chg.neg{color:#0055cc;font-weight:600;}'
             '.cmb-filter-btn{display:inline-block;margin-left:2px;color:#9aa4b0;cursor:pointer;}'
             '#cmbSearch{color:#fff!important;font-size:14px!important;}'
             '#cmbSearch::placeholder{color:#fff!important;opacity:1;}'
@@ -2140,7 +2191,7 @@ def _build_combined_chart_section():
             '#cmbSideTable tr.cmb-drop td{box-shadow:inset 0 -2px 0 #67e0f4;}'
             '.cmb-filter-btn:hover{color:#000;}'
             '.cmb-filter-btn.cmb-filter-on{color:#000;font-weight:900;}'
-            '#cmbSideTable{--aoe-t-font:13px;--aoe-t-head-font:12px;--aoe-t-pad-y:6px;--aoe-t-pad-x:8px;--aoe-t-head-underline:1px;--aoe-t-head-weight:700}'
+            '#cmbSideTable{--aoe-t-font:12px;--aoe-t-head-font:11px;--aoe-t-pad-y:6px;--aoe-t-pad-x:8px;--aoe-t-head-underline:1px;--aoe-t-head-weight:700}'
             '.cmb-filter-pop{position:absolute;z-index:30;background:#fff;border:1px solid #d8dde3;'
             'border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.13);padding:8px 12px;'
             'max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;min-width:150px;}'
@@ -2148,13 +2199,15 @@ def _build_combined_chart_section():
             'color:#111;white-space:nowrap;cursor:pointer;text-align:left;}'
             '</style>'
             f'<table id="cmbSideTable" class="portfolio-table" style="width:100%;max-width:100%;margin:0 auto;">'
-            f'<colgroup><col style="width:26px;"><col style="width:56px;"><col style="width:60px;"><col style="width:150px;"><col style="width:220px;"></colgroup>'
+            f'<colgroup><col style="width:26px;"><col style="width:56px;"><col style="width:60px;"><col style="width:150px;"><col style="width:260px;"><col style="width:76px;"><col style="width:60px;"></colgroup>'
             f'<thead><tr>'
             f'<th id="cmbStarTh" style="{th_base}" onclick="cmbToggleStarOnly(event)" title="즐겨찾기만 보기 토글">★</th>'
             f'<th style="{th_base}" onclick="sortCmbTable(\'rank\')">Freq <span id="cmbArr_rank" style="font-size:10px;">▲</span>{filter_btn.format(col="rank")}</th>'
             f'<th style="{th_base}" onclick="sortCmbTable(\'country\')">Country <span id="cmbArr_country" style="font-size:10px;"></span>{filter_btn.format(col="country")}</th>'
             f'<th style="{th_base}" onclick="sortCmbTable(\'group\')">Group <span id="cmbArr_group" style="font-size:10px;"></span>{filter_btn.format(col="group")}</th>'
-            f'<th style="{th_base}" onclick="sortCmbTable(\'name\')">Data <span id="cmbArr_name" style="font-size:10px;"></span>{filter_btn.format(col="name")}</th>'
+            f'<th style="{th_base}" onclick="sortCmbTable(\'name\')">Name <span id="cmbArr_name" style="font-size:10px;"></span>{filter_btn.format(col="name")}</th>'
+            f'<th id="cmbPriceTh" style="{th_base}" onclick="sortCmbTable(\'price\')">Price <span id="cmbArr_price" style="font-size:10px;"></span></th>'
+            f'<th style="{th_base}" onclick="sortCmbTable(\'chg\')">Chg <span id="cmbArr_chg" style="font-size:10px;"></span></th>'
             f'</tr></thead>'
             f'<tbody>{rows_html}</tbody></table>'
         )
@@ -2558,7 +2611,7 @@ def _build_combined_chart_section():
                 tr.id = 'cmbPinHead';
                 tr.className = 'cmb-pin-head';
                 var td2 = document.createElement('td');
-                td2.colSpan = 5;
+                td2.colSpan = 7;
                 td2.textContent = '';   // 텍스트 없는 구분선 — 개수는 툴바 버튼이 표시
                 tr.appendChild(td2);
                 var shown = 0;
@@ -2708,18 +2761,26 @@ def _build_combined_chart_section():
             // Update 칼럼은 data-update-rank(0/1/2 = D/W/M 의미순) 숫자 비교.
             var _cmbSortKey = 'rank', _cmbSortAsc = true;
             function updateCmbSortArrows() {
-                ['rank', 'country', 'group', 'name'].forEach(function(k) {
+                ['rank', 'country', 'group', 'name', 'price', 'chg'].forEach(function(k) {
                     var sp = document.getElementById('cmbArr_' + k);
                     if (sp) sp.textContent = (k === _cmbSortKey) ? (_cmbSortAsc ? '▲' : '▼') : '';
                 });
             }
             window.sortCmbTable = function(key) {
                 if (_cmbSortKey === key) { _cmbSortAsc = !_cmbSortAsc; }
-                else { _cmbSortKey = key; _cmbSortAsc = true; }
+                else { _cmbSortKey = key; _cmbSortAsc = (key !== 'chg' && key !== 'price'); }
                 var tbody = document.querySelector('#cmbSideTable tbody');
                 if (!tbody) return;
                 var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr.cmb-series-row:not(.cmb-pin-clone)'));
                 rows.sort(function(a, b) {
+                    if (key === 'chg' || key === 'price') {
+                        var attr = 'data-' + key;
+                        var ha = a.hasAttribute(attr), hb = b.hasAttribute(attr);
+                        if (!ha || !hb) return ha === hb ? 0 : (ha ? -1 : 1);
+                        var na = +a.getAttribute(attr), nb = +b.getAttribute(attr);
+                        if (na === nb) return 0;
+                        return _cmbSortAsc ? na - nb : nb - na;
+                    }
                     var va, vb;
                     if (key === 'rank') { va = +a.getAttribute('data-update-rank'); vb = +b.getAttribute('data-update-rank'); }
                     else if (key === 'country') { va = (a.getAttribute('data-country') || '').toLowerCase(); vb = (b.getAttribute('data-country') || '').toLowerCase(); }

@@ -81,6 +81,11 @@ AOE_DARK_CSS = (
     'th{background:' + P['th-bg'] + '!important;color:' + P['amber'] + '!important;border-color:#2a2b2e!important}'
     # MR(Monthly Returns) 표 = 다크 네이티브 보더 설계(월/자산군 구분선 위계) — 일괄 덮어쓰기에서 제외 (2026-08-04)
     'td:not(#mrTableWrap td){border-color:#222326!important}'
+    # DATA 사이드테이블 Price·Chg (2026-08-04): 구분선·외곽 테두리 밝은 회색 재단언 +
+    # 표 전용 폰트 한 단계 축소(15/14). 등락색은 기존 td.pos/td.neg 규칙이 자동 적용.
+    '#cmbSideTable td.cmb-price,#cmbSideTable #cmbPriceTh{border-left-color:#8a9096!important}'
+    '#cmbScrollBox{border-color:#8a9096!important}'
+    '#cmbSideTable td{font-size:15px!important}#cmbSideTable th{font-size:14px!important}'
     '#mrTableWrap th[style*="#7a828c"]{border-right-color:#7a828c!important}'
     '#mrTableWrap th[style*="#5c6168"]{border-right-color:#5c6168!important}'
     '#mrTableWrap th[style*="#3a3d42"]{border-right-color:#3a3d42!important}'
