@@ -42,6 +42,8 @@ def _fmt_w(v):
 
 
 WEEKDAY = '월화수목금토일'
+BULLET1 = '●'  # ● 1단계(브랜드)
+BULLET2 = '○'  # ○ 2단계(ETF·종목)
 
 
 def _head(date, test=False):
@@ -64,7 +66,7 @@ def _cells(r):
         w = '%s→%s%%' % (_fmt_w(r.get('w_prev')), _fmt_w(r.get('w_cur')))
     amt = r.get('trade_amt') or 0
     flow = '유입' if amt > 0 else ('유출' if amt < 0 else '-')
-    return '<b><u>%s</u></b> | %s | %s | %s | %s' % (
+    return '<b><u>%s</u></b> | %s | %s | %s | <b><u>%s</u></b>' % (
         r['stock'], gubun, w, flow, _fmt_eok(r.get('trade_amt')))
 
 
@@ -87,16 +89,16 @@ def build_message(date, rows, test=False, layout='tree'):
     """
     ordered = sorted(rows, key=lambda x: -_amt(x))
     if layout == 'flat':
-        body = ['* %s | %s' % (r['etf'], _cells(r)) for r in ordered]
+        body = ['%s %s | %s' % (BULLET1, r['etf'], _cells(r)) for r in ordered]
     else:
         groups = {}
         for r in ordered:
             groups.setdefault(_brand(r['etf'])[0], []).append(r)
         body = []
         for brand in sorted(groups, key=lambda b: -max(_amt(r) for r in groups[b])):
-            body.append('* <b>%s</b>' % brand)
+            body.append('%s <b>%s</b>' % (BULLET1, brand))
             for r in groups[brand]:
-                body.append('   * %s | %s' % (_brand(r['etf'])[1], _cells(r)))
+                body.append('   %s %s | %s' % (BULLET2, _brand(r['etf'])[1], _cells(r)))
     return '\n'.join([_head(date, test), ''] + body)
 
 
