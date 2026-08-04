@@ -37,7 +37,7 @@ from fastapi.responses import FileResponse, JSONResponse  # noqa: E402
 from pydantic import BaseModel  # noqa: E402
 
 MODEL = "claude-sonnet-5"  # 2026-07-22 Opus 4.8 → Sonnet 5 (비용 절감, 사용자 결정)
-MAX_LOOP = 12
+MAX_LOOP = 20
 STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 WIKI_DIR = os.path.join(REPO, "architecture", "wiki")
 SEARCH_ROOTS = [
@@ -62,6 +62,17 @@ SYSTEM = """너는 자산운용사 운용역(사용자)을 지원하는 리서�
 4. 어닝콜 번역 전문 (search_notes → read_file): transcripts/YYYY/YYYY-MM-DD_티커_*.md — 미국 유니버스 종목 실적 컨퍼런스콜 한국어 번역 전문. 파일이 길면 read_file의 offset으로 이어서 읽는다.
 5. 실적 분석 시트 (search_notes → read_file): analyses/YYYY/YYYY-MM-DD_티커_*.md — 분기 실적 1-page 요약.
 
+## 탐색 규칙 (한도 관리 — 중요)
+- 도구 호출 한도는 총 20턴이다. **같은 도구를 비슷한 인자로 반복 호출하지 않는다.**
+- 검색이 2회 연속 빈 결과면 그 경로를 포기하고 전략을 바꾼다: search_tags → search_notes(정규식) →
+  run_sql → 보유 지식. **3번째 유사 검색은 금지**이며, 시스템이 중복 호출을 차단한다.
+- 코퍼스에 없을 법한 질문(아직 일어나지 않은 계약의 금액, 일반 산업 상식, 미래 가정)은
+  1~2회만 확인하고 즉시 답변 작성으로 넘어간다.
+- **"만약 ~하면 얼마냐" 류 가정형 질문**은 코퍼스에서 *비교 가능한 과거 실계약·실적 기준점*을 찾아
+  스케일링해서 답한다. 정확히 일치하는 답이 없다는 이유로 침묵하지 않는다.
+  (예: 신규 수주 금액 추정 → 유사 규모 과거 수주 계약가를 기준점으로 용량·스코프 비례 조정)
+- 남은 호출이 부족해지면 즉시 지금까지 모은 근거만으로 결론을 낸다.
+
 ## 답변 형식
 1. **결론** — 질문에 대한 직답 한두 문장.
 2. **숫자 근거** — 조회 결과를 표로. 기준일·기간을 반드시 명시하고, 계산이 들어가면 계산 기준(분모·기간)을 적는다.
@@ -77,7 +88,8 @@ SYSTEM = """너는 자산운용사 운용역(사용자)을 지원하는 리서�
 - 리서치/뉴스 맥락 질문은 search_notes로 원문을 찾고, 날짜·출처를 함께 인용한다.
 - 절대 수치만 내놓지 않는다. 비교 기준(QoQ·YoY, 섹터·지수 대비, 과거 밴드)을 함께 제시한다.
 - 매수·매도를 단정하지 않는다. "X가 유지되면 Y" 식 조건부로 서술한다.
-- 데이터에 없는 내용은 없다고 답한다. 모르면 모른다고 답한다.
+- 코퍼스에 근거가 없으면 "코퍼스에 근거 없음"이라고 밝힌 뒤, 일반 지식으로 답할 수 있는 부분은
+  **[추정]** 으로 표시해 답한다. 검색이 비었다는 이유로 답변 자체를 거르지 않는다.
 - 표기: % 는 소수점 첫째 자리, 금액은 억원(조 초과 시 NN조 N,NNN억원), 분기는 1Q26, 달러 금액은 $B/$M.
 - 표가 적합하면 markdown 표를 쓰고, 불필요한 서론·요약 반복은 넣지 않는다."""
 
@@ -246,6 +258,15 @@ def execute_tool(name, args):
         return f"ERROR: {type(e).__name__}: {e}", True
 
 
+def _is_empty_result(out):
+    """search_notes / search_tags 응답이 사실상 빈 결과인지."""
+    s = (out or "").strip()
+    if not s or s in ("[]", "{}"):
+        return True
+    low = s[:200]
+    return ("결과 없음" in low) or ("매칭 없음" in low) or ('"hits": []' in s) or ('"results": []' in s)
+
+
 class AskRequest(BaseModel):
     question: str
     history: list = []  # [{"role": "user"|"assistant", "content": "텍스트"}]
@@ -258,7 +279,10 @@ def ask(req: AskRequest):
     messages.append({"role": "user", "content": req.question})
     steps = []
 
-    for _ in range(MAX_LOOP):
+    seen_calls = {}   # 동일 (도구, 인자) 반복 차단
+    empty_streak = 0  # 연속 빈 검색 결과
+
+    for turn in range(MAX_LOOP):
         response = client.messages.create(
             model=MODEL,
             max_tokens=16000,
@@ -276,15 +300,60 @@ def ask(req: AskRequest):
         messages.append({"role": "assistant", "content": response.content})
         results = []
         for block in response.content:
-            if block.type == "tool_use":
+            if block.type != "tool_use":
+                continue
+            sig = block.name + "|" + json.dumps(block.input, ensure_ascii=False, sort_keys=True)
+            if sig in seen_calls:
+                out, is_err = (
+                    "ERROR: 이미 동일한 호출을 했고 결과는 위에 있다. 같은 검색을 반복하지 말고 "
+                    "다른 전략(태그↔정규식↔SQL)으로 바꾸거나, 지금까지 모은 근거만으로 답을 작성하라.",
+                    True,
+                )
+            else:
+                seen_calls[sig] = True
                 out, is_err = execute_tool(block.name, block.input)
-                steps.append({"tool": block.name,
-                              "input": json.dumps(block.input, ensure_ascii=False)[:300]})
-                results.append({"type": "tool_result", "tool_use_id": block.id,
-                                "content": out, "is_error": is_err})
+                if block.name in ("search_notes", "search_tags") and _is_empty_result(out):
+                    empty_streak += 1
+                    if empty_streak >= 2:
+                        out += ("\n\n[시스템] 검색이 연속으로 비었다. 이 경로를 포기하고 전략을 바꾸거나, "
+                                "코퍼스에 근거가 없음을 밝힌 뒤 보유 지식으로 [추정]을 제시하며 답을 작성하라.")
+                else:
+                    empty_streak = 0
+            steps.append({"tool": block.name,
+                          "input": json.dumps(block.input, ensure_ascii=False)[:300]})
+            results.append({"type": "tool_result", "tool_use_id": block.id,
+                            "content": out, "is_error": is_err})
+
+        remaining = MAX_LOOP - turn - 1
+        if 0 < remaining <= 3:
+            results.append({"type": "text",
+                            "text": "[시스템] 남은 도구 호출은 %d턴이다. 추가 조회를 멈추고 "
+                                    "지금까지 모은 근거로 최종 답변을 작성하라." % remaining})
         messages.append({"role": "user", "content": results})
 
-    return JSONResponse({"answer": "도구 호출 한도를 초과했습니다. 질문을 좁혀 주세요.", "steps": steps})
+    # ── 한도 소진: 모은 근거를 버리지 않고 도구 없이 강제 종결
+    messages.append({"role": "user", "content":
+                     "[시스템] 도구 호출 한도에 도달했다. 더 이상 조회할 수 없다. "
+                     "지금까지의 조회 결과만으로 최종 답변을 작성하라. 확인하지 못한 부분은 "
+                     "'미확인'으로 명시하고, 일반 지식으로 보완한 부분은 [추정]으로 표시하라. "
+                     "답변을 거르지 말 것."})
+    try:
+        final = client.messages.create(
+            model=MODEL,
+            max_tokens=16000,
+            system=[{"type": "text", "text": SYSTEM, "cache_control": {"type": "ephemeral"}}],
+            tools=TOOLS,
+            tool_choice={"type": "none"},
+            messages=messages,
+        )
+        answer = "".join(b.text for b in final.content if b.type == "text").strip()
+        if answer:
+            return JSONResponse({"answer": answer, "steps": steps, "truncated": True})
+    except Exception as e:
+        print("[ask] 강제 종결 실패: %s: %s" % (type(e).__name__, e), flush=True)
+
+    return JSONResponse({"answer": "도구 호출 한도를 초과했고 최종 답변 생성도 실패했습니다. "
+                                   "질문을 좁혀 다시 시도해 주세요.", "steps": steps})
 
 
 # ── Earnings Library — 어닝 md 열람 (transcripts + analyses) ──────────
