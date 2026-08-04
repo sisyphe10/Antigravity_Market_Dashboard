@@ -1476,7 +1476,7 @@ CMB_COUNTRY_OVERRIDES = {
 _country_warned_groups = set()
 
 
-def _series_country(group_label, s):
+def _series_country(group_label, s, group_country=None):
     """DATA 통합차트 사이드 테이블 Country 컬럼 값 (2026-08-03 세분화 — 전수 조사 기반).
     판정 순서: ①CMB_COUNTRY_OVERRIDES(시리즈 명시) ②그룹 기본값 ③그룹 내 키워드.
     새 그룹이 어느 분기에도 안 걸리면 Global 로 두되 빌드 로그에 1회 경고."""
@@ -1485,6 +1485,10 @@ def _series_country(group_label, s):
     ov = CMB_COUNTRY_OVERRIDES.get(disp) or CMB_COUNTRY_OVERRIDES.get(csvn)
     if ov:
         return ov
+    # 그룹 정의에 country 명시(2026-08-04 — Group 라벨에서 국가 접미사 제거하면서
+    # 라벨 기반 판정이 불가능해진 그룹들. 라벨 분기는 하위호환 fallback으로 유지)
+    if group_country:
+        return group_country
     if g in ('INDEX_KOREA', 'MACRO KOREA', 'CREDIT & HOUSING', 'HOTELS', 'DERIVATIVES KR', 'INVESTOR FLOW'):
         return 'Korea'
     if g in ('INDEX_US', 'MACRO US', 'CREDIT & HOUSING US'):
@@ -1657,7 +1661,7 @@ def _invflow_group():
             name = '{} {} 누적'.format(m, inv)
             series.append({'display': name, 'csv': name,
                            'color': _invflow_lighten(INVFLOW_BASE_COLORS[inv], mi * 0.18)})
-    return {'label': 'INVESTOR FLOW', 'series': series}
+    return {'label': 'INVESTOR', 'country': 'Korea', 'series': series}
 
 
 CMB_SERIES_UNITS.update({'{} {} 누적'.format(m, inv): '조원'
@@ -1715,12 +1719,12 @@ def _roc_history_for(groups):
 
 
 def _build_combined_chart_section():
-    """7개 카테고리(INDEX_KOREA/INDEX_US/EXCHANGE RATE/INTEREST RATES/CRYPTOCURRENCY/Memory/COMMODITIES)
+    """전 카테고리(INDEX/DERIVATIVES/INVESTOR/EXCHANGE RATE/INTEREST RATES/MACRO/CREDIT & HOUSING/CRYPTOCURRENCY/MEMORY/COMMODITIES/CAPEX)
     를 단일 동적 Chart.js 차트로 통합. 좌 사이드바는 카테고리 그룹 헤더 + 토글 항목,
     우는 % change 정규화 라인 차트 (Indices 패턴)."""
     try:
         groups = [
-            {'label': 'INDEX_KOREA', 'series': [
+            {'label': 'INDEX', 'country': 'Korea', 'series': [
                 {'display': 'KOSPI',              'csv': 'KOSPI',              'color': '#000000', 'default': True},
                 {'display': 'KOSPI/USD',          'csv': 'KOSPI/USD',          'color': '#444444'},
                 {'display': 'KOSPI Market Cap',   'csv': 'KOSPI Market Cap',   'color': '#888888'},
@@ -1751,7 +1755,7 @@ def _build_combined_chart_section():
                 {'display': 'SK스퀘어 외국인',     'csv': 'SK스퀘어 외국인 지분율',   'color': '#7986CB'},
                 {'display': '삼성물산 외국인',     'csv': '삼성물산 외국인 지분율',   'color': '#9FA8DA'},
             ]},
-            {'label': 'DERIVATIVES KR', 'series': [
+            {'label': 'DERIVATIVES', 'country': 'Korea', 'series': [
                 # 삼전·하이닉스 파생·수급 (fetch_deriv_daily.py — KRX 인증, 23:30 kodex 잡 편입, 2026-07-16)
                 # 단위: 괴리율=%, 미결제약정=계약, 금액·잔고·시총·AUM=억원. 공매도잔고는 T+2 공시.
                 {'display': '삼성전자 현선물 괴리율',   'csv': '삼성전자 현선물 괴리율',   'color': '#DC2626'},
@@ -1768,7 +1772,7 @@ def _build_combined_chart_section():
                 {'display': '하이닉스 레버리지 ETF AUM', 'csv': 'SK하이닉스 레버리지 ETF AUM', 'color': '#0F766E'},
             ]},
             _invflow_group(),
-            {'label': 'INDEX_US', 'series': [
+            {'label': 'INDEX', 'country': 'US', 'series': [
                 {'display': 'S&P 500',            'csv': 'S&P 500',            'color': '#2E7D32'},
                 {'display': 'S&P 500 PER',        'csv': 'S&P 500 PER',        'color': '#4CAF50'},
                 {'display': 'S&P 500 PBR',        'csv': 'S&P 500 PBR',        'color': '#81C784'},
@@ -1823,7 +1827,7 @@ def _build_combined_chart_section():
                 {'display': '마이크로소프트 CDS 5Y',     'csv': '마이크로소프트 CDS 5Y',     'color': '#0072CE'},
                 {'display': '알파벳 CDS 5Y',             'csv': '알파벳 CDS 5Y',             'color': '#00854A'},
             ]},
-            {'label': 'MACRO KOREA', 'series': [
+            {'label': 'MACRO', 'country': 'Korea', 'series': [
                 # ECOS 월별 매크로 (5년 임베드 창, fetch_ecos_data.py)
                 {'display': 'CPI 전년동월비',        'csv': 'CPI 전년동월비',        'color': '#004D40'},
                 {'display': 'PPI 전년동월비',        'csv': 'PPI 전년동월비',        'color': '#00695C'},
@@ -1857,7 +1861,7 @@ def _build_combined_chart_section():
                 {'display': '체류외국인 취업(E)',       'csv': '체류외국인 취업(E)',       'color': '#02C39A'},
                 {'display': '체류외국인 유학(D2·D4)',   'csv': '체류외국인 유학(D2·D4)',   'color': '#679436'},
             ]},
-            {'label': 'MACRO US', 'series': [
+            {'label': 'MACRO', 'country': 'US', 'series': [
                 # FRED 미국 매크로 (fetch_fred_data.py; 월·분기 FRED_MACRO는 5년 임베드 창,
                 # 일·주간 FRED_RATE는 기존 365일 창)
                 {'display': '미 역레포 잔고',               'csv': '미 역레포 잔고',               'color': '#0D47A1'},
@@ -1880,7 +1884,7 @@ def _build_combined_chart_section():
                 {'display': '미 Sahm Rule 침체지표',        'csv': '미 Sahm Rule 침체지표',        'color': '#A7B8C2'},
                 {'display': '미 GDPNow 성장률',             'csv': '미 GDPNow 성장률',             'color': '#BCC9D1'},
             ]},
-            {'label': 'CREDIT & HOUSING', 'series': [
+            {'label': 'CREDIT & HOUSING', 'country': 'Korea', 'series': [
                 # ECOS 신용·부동산 (5년 임베드 창, fetch_ecos_data.py)
                 {'display': '은행 대출금리 (신규취급)',       'csv': '은행 대출금리 (신규취급)',       'color': '#3E2723'},
                 {'display': '은행 저축성수신금리 (신규취급)', 'csv': '은행 저축성수신금리 (신규취급)', 'color': '#4E342E'},
@@ -1896,7 +1900,7 @@ def _build_combined_chart_section():
                 {'display': '아파트 실거래지수 (서울)',       'csv': '아파트 실거래지수 (서울)',       'color': '#C0CA33'},
                 {'display': '미분양주택 (전국)',              'csv': '미분양주택 (전국)',              'color': '#6D4C41'},
             ]},
-            {'label': 'CREDIT & HOUSING US', 'series': [
+            {'label': 'CREDIT & HOUSING', 'country': 'US', 'series': [
                 # FRED 미국 신용·부동산 (fetch_fred_data.py; 월·분기 FRED_SECTOR는 5년 임베드 창,
                 # 모기지(주간 FRED_RATE)는 기존 365일 창)
                 {'display': '미 모기지 30년 금리',                'csv': '미 모기지 30년 금리',                'color': '#5D2E0D'},
@@ -2116,7 +2120,7 @@ def _build_combined_chart_section():
                 if hotels:
                     tooltip_attr = f' title="{_html.escape(", ".join(hotels))}"'
             display_esc = _html.escape(s['display'])
-            country_esc = _html.escape(_series_country(group_label_raw, s))
+            country_esc = _html.escape(_series_country(group_label_raw, s, groups[gi].get('country')))
             rows_html += (
                 f'<tr class="cmb-series-row" data-group="{group_label}" '
                 f'data-country="{country_esc}" '
