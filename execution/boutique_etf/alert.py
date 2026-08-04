@@ -20,6 +20,36 @@ STATE_FILE = os.path.join(REPO, '.boutique_alert_sent.json')
 TOKEN_KEY = 'TELEGRAM_' + 'SISYPHE_BOT_TOKEN'
 MAX_BACKLOG_DAYS = 3   # 전송 장애로 밀린 날짜를 몇 일치까지 따라잡을지
 
+# ── 알림 필터 (사용자 확정 2026-08-04) ───────────────────────────
+#   신규(NEW)·편출(X)은 무조건 알린다. 급변(+/-)만 아래 둘 중 하나를 만족해야 한다.
+#     ① 매매추정액 >= MIN_AMT
+#     ② 매매추정액이 그 종목 시가총액의 MIN_MCAP_PCT% 이상 (소형주 소액 매매를 살린다)
+#   ★②는 ETF·채권형 보유분에 적용하지 않는다. 이들은 현금성 파킹이라 자기 시총 대비
+#     비율이 구조적으로 크다(실측 최대 58.6% — 통안채·단기채 ETF). 걸어두면 그것만 올라온다.
+MIN_AMT = float(os.environ.get('BOUTIQUE_ALERT_MIN_AMT') or 5e9)          # 50억원
+MIN_MCAP_PCT = float(os.environ.get('BOUTIQUE_ALERT_MIN_PCT') or 0.1)     # 시총의 0.1%
+FUND_KW = ('KODEX', 'TIGER', 'KBSTAR', 'ACE ', 'RISE', 'KIWOOM', 'SOL ', 'PLUS ',
+           'TIME ', 'KoAct', 'TRUSTON', 'ARIRANG', 'HANARO', 'ETF', 'ETN',
+           '통안채', '단기채', '회사채', '금융채', '국고채', '종합채', 'MMF')
+
+
+def _is_fund_like(name):
+    up = (name or '').upper()
+    return any(k.upper() in up for k in FUND_KW)
+
+
+def passes_filter(r):
+    """알림 대상 여부. 필터는 알림에만 적용하고 DB·뷰어에는 전량 남긴다."""
+    if r['kind'] in ('in', 'out'):
+        return True
+    amt = abs(r.get('trade_amt') or 0)
+    if amt >= MIN_AMT:
+        return True
+    m = r.get('mcap') or 0
+    if m > 0 and not _is_fund_like(r.get('stock')) and amt / m * 100 >= MIN_MCAP_PCT:
+        return True
+    return False
+
 from .db import get_conn  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format='[boutique-alert] %(message)s')
@@ -187,8 +217,10 @@ def send(text):
 
 def load_changes(conn, date, unsent_only=True):
     """미발송 변경만 반환 — 늦게 올라온 운용사는 다음 실행에서 '추가'로 나간다."""
-    sql = ('SELECT c.*, d.name etf_name FROM etf_changes c '
-           'JOIN etf_daily d ON d.date=c.date AND d.etf_code=c.etf_code ')
+    sql = ('SELECT c.*, d.name etf_name, k.mcap_krw mcap FROM etf_changes c '
+           'JOIN etf_daily d ON d.date=c.date AND d.etf_code=c.etf_code '
+           'LEFT JOIN etf_constituents k ON k.date=c.date AND k.etf_code=c.etf_code '
+           'AND k.stock_code=c.stock_code ')
     if unsent_only:
         sql += ('LEFT JOIN alert_sent s ON s.date=c.date AND s.etf_code=c.etf_code '
                 'AND s.stock_code=c.stock_code AND s.kind=c.kind ')
@@ -197,10 +229,12 @@ def load_changes(conn, date, unsent_only=True):
         sql += ' AND s.date IS NULL'
     rows = []
     for r in conn.execute(sql, (date,)):
-        rows.append({'etf': r['etf_name'], 'kind': r['kind'], 'stock': r['stock_name'],
-                     'w_prev': r['w_prev'], 'w_cur': r['w_cur'],
-                     'trade_amt': r['trade_amt'],
-                     'etf_code': r['etf_code'], 'stock_code': r['stock_code']})
+        row = {'etf': r['etf_name'], 'kind': r['kind'], 'stock': r['stock_name'],
+               'w_prev': r['w_prev'], 'w_cur': r['w_cur'],
+               'trade_amt': r['trade_amt'], 'mcap': r['mcap'],
+               'etf_code': r['etf_code'], 'stock_code': r['stock_code']}
+        if passes_filter(row):
+            rows.append(row)
     return rows
 
 
