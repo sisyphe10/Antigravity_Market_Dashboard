@@ -1,0 +1,34 @@
+# schedule.tsv — catch-up 러너(A4) 앵커 + 타이머 체인 게이트(A2b) 설정
+# 컬럼: <이름>	<KST cron(5필드)>	<실행 커맨드>	<체인 게이트(선택, 4번째)>
+# 4번째 컬럼(체인) = <선행잡>[:<타임아웃HHMM(KST)>]. ★비어 있으면 게이트 없음 = 현행과 100% 동일.
+#   활성화 예) etf-active-alert 행 4번째 컬럼에  etf-collect:1930
+#            → etf-collect 오늘 완료까지 대기, 19:30 KST 초과 시 경고+notify 후 폴백 실행(스킵 아님).
+#   전제·활성화 절차·검증·롤백: playbooks/PHASE2_RUNBOOK.md "부록 W4: 체인 활성화".
+featured-kis	50 15 * * *	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/timers/run_timer_job.sh featured-kis	
+# [PAUSED 2026-07-29] etf-collect / etf-collect-retry — 국내 ETF 수집 당분간 중단(사용자 결정).
+#   재개: 아래 두 행 주석 해제 + install_timers.sh NAMES 에 두 이름 복원 후 sudo ./install_timers.sh
+#etf-collect	30 16 * * *	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/timers/run_timer_job.sh etf-collect	
+#etf-collect-retry	0 18 * * *	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/timers/run_timer_job.sh etf-collect-retry	
+landing-highlights	45 18 * * *	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/timers/run_timer_job.sh landing-highlights	
+etf-active-alert	0 19 * * *	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/timers/run_timer_job.sh etf-active-alert	
+kodex-sectors	30 23 * * *	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/timers/run_timer_job.sh kodex-sectors	
+earnings-bot	0 8 * * *	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/timers/run_timer_job.sh earnings-bot
+us-etf-collect	30 8 * * 2-6	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/timers/run_timer_job.sh us-etf-collect
+update-stock-master	0 9 * * 6	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/timers/run_timer_job.sh update-stock-master	
+memento-telegram	0 12 * * *	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/timers/run_timer_job.sh memento-telegram
+wrap-principle-check	10 17 * * *	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/timers/run_timer_job.sh wrap-principle-check
+memory-cycle-alert	45 7 * * *	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/timers/run_timer_job.sh memory-cycle-alert
+daemon-health	0 11 * * *	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/timers/run_timer_job.sh daemon-health
+gha-crawl	0 23 * * *	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/gha/run_gha_job.sh gha-crawl
+gha-disclosures	30 16 * * *	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/gha/run_gha_job.sh gha-disclosures
+gha-earnings-calendar-sync	0 7 * * *	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/gha/run_gha_job.sh gha-earnings-calendar-sync
+gha-earnings-ir-day	15 7 * * *	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/gha/run_gha_job.sh gha-earnings-ir-day
+gha-ecos	40 17 * * 1-5	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/gha/run_gha_job.sh gha-ecos
+gha-finalize-orders	0 16 * * *	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/gha/run_gha_job.sh gha-finalize-orders
+gha-fred	50 7 * * 2-6	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/gha/run_gha_job.sh gha-fred
+gha-kofia	30 21 * * 1-5	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/gha/run_gha_job.sh gha-kofia
+gha-krx-valuation	30 18 * * 1-5	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/gha/run_gha_job.sh gha-krx-valuation
+gha-taiwan-revenue	20 23 * * *	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/gha/run_gha_job.sh gha-taiwan-revenue
+gha-universe	0 7 * * *	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/gha/run_gha_job.sh gha-universe
+gha-dtcc-cds	30 11 * * 2-6	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/gha/run_gha_job.sh gha-dtcc-cds
+boutique-etf	20 18 * * 1-5	/bin/bash /Users/sisyphe/Antigravity_Market_Dashboard/launchd/timers/run_timer_job.sh boutique-etf	
