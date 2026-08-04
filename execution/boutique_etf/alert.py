@@ -50,11 +50,21 @@ GAP1 = '  '
 GAP2 = ' '
 
 
-def _head(date, test=False, extra=False):
-    """제목 = <b><u>8.4(화) [액티브 ETF 변동 현황]</u></b>  (사용자 확정 2026-08-04, 볼드+밑줄)"""
+def _head(date, test=False, extra=False, page=None, pages=None):
+    """제목 = <b><u>8.4(화) [액티브 ETF 변동 현황]</u></b>  (사용자 확정 2026-08-04, 볼드+밑줄)
+
+    괄호 꼬리표: 테스트 / 추가(늦게 올라온 운용사) / 2·3쪽(길어서 나뉜 경우)
+    """
     from datetime import datetime
     dt = datetime.strptime(date, '%Y-%m-%d')
-    suffix = ' (테스트)' if test else (' (추가)' if extra else '')
+    tags = []
+    if test:
+        tags.append('테스트')
+    if extra:
+        tags.append('추가')
+    if pages and pages > 1:
+        tags.append('%d/%d' % (page, pages))
+    suffix = ' (%s)' % ' '.join(tags) if tags else ''
     return '<b><u>%d.%d(%s) [액티브 ETF 변동 현황]</u></b>%s' % (
         dt.month, dt.day, WEEKDAY[dt.weekday()], suffix)
 
@@ -86,7 +96,8 @@ def _amt(r):
     return r.get('trade_amt') or 0
 
 
-def build_message(date, rows, test=False, layout='tree', extra=False):
+def build_message(date, rows, test=False, layout='tree', extra=False,
+                  page=None, pages=None):
     """rows: [{etf, kind(in|out|spike), stock, w_prev, w_cur, trade_amt}].
 
     정렬 = 금액(마지막 칼럼) 부호 내림차순 — 유입 큰 순 → 유출 큰 순 (사용자 확정 2026-08-04).
@@ -105,7 +116,7 @@ def build_message(date, rows, test=False, layout='tree', extra=False):
             body.append('%s%s<b>%s</b>' % (BULLET1, GAP1, brand))
             for r in groups[brand]:
                 body.append('   %s%s%s | %s' % (BULLET2, GAP2, _brand(r['etf'])[1], _cells(r)))
-    return '\n'.join([_head(date, test, extra), ''] + body)
+    return '\n'.join([_head(date, test, extra, page, pages), ''] + body)
 
 
 def build_pages(date, rows, test=False, layout='tree', extra=False, limit=3500):
@@ -126,7 +137,8 @@ def build_pages(date, rows, test=False, layout='tree', extra=False, limit=3500):
             cur = trial
     if cur:
         pages.append(cur)
-    return [(p, build_message(date, p, test, layout, extra or i > 0))
+    n = len(pages)
+    return [(p, build_message(date, p, test, layout, extra, i + 1, n))
             for i, p in enumerate(pages)]
 
 
