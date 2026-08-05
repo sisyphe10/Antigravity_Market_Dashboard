@@ -43,6 +43,13 @@ TG_CHAT_VAR="${SELFCHECK_TG_CHAT_VAR:-TELEGRAM_CHAT_ID}"
 
 DISK_MIN_GB="${SELFCHECK_DISK_MIN_GB:-5}"      # warn if free disk < this (GB)
 BIG_LOG_MB="${SELFCHECK_BIG_LOG_MB:-50}"       # note largest log if >= this (MB)
+# Grace window after a scheduled fire during which a not-yet-stamped timer is
+# treated as "in progress" instead of STALE — but only when the PREVIOUS fire
+# was covered. Jobs stamp at COMPLETION, so a long run (earnings-bot: 08:00
+# fire, ~09:00 stamp) looked stale to the 08:50 check every single day
+# (2026-08-04~06 false alarms). A job that also missed its previous fire still
+# alerts immediately.
+TIMER_GRACE_S="${SELFCHECK_TIMER_GRACE_S:-7200}"
 
 logf() { echo "[$(date '+%Y-%m-%d %H:%M:%S %Z')] $*" >> "$LOGFILE"; }
 
@@ -150,7 +157,7 @@ main() {
   # --- timers ---------------------------------------------------------------
   local tim_summary="?" tim_stale="" tim_ok=0 tim_total=0
   if [ -f "$SCHEDULE_TSV" ] && [ -n "$PYTHON" ] && [ -f "$CRON_PREV" ]; then
-    local name cron cmd last_exp st sf
+    local name cron cmd last_exp st sf prev_exp
     while IFS=$'\t' read -r name cron cmd || [ -n "$name" ]; do
       case "$name" in ''|\#*) continue ;; esac
       name="$(echo "$name" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
@@ -165,7 +172,14 @@ main() {
       elif [ "$st" -eq 0 ]; then
         tim_stale="$tim_stale ${name}(무stamp)"
       else
-        tim_stale="$tim_stale ${name}($(human_dur $(( now - st ))))"
+        # Recently fired + previous fire covered -> assume still running (see
+        # TIMER_GRACE_S above). Otherwise it is genuinely stale.
+        prev_exp="$("$PYTHON" "$CRON_PREV" "$cron" "$(( last_exp - 60 ))" 2>/dev/null)"
+        if [ $(( now - last_exp )) -lt "$TIMER_GRACE_S" ] && [ -n "$prev_exp" ] && [ "$st" -ge "$prev_exp" ]; then
+          tim_ok=$((tim_ok+1))
+        else
+          tim_stale="$tim_stale ${name}($(human_dur $(( now - st ))))"
+        fi
       fi
     done < "$SCHEDULE_TSV"
     tim_summary="OK ${tim_ok}/${tim_total}"
