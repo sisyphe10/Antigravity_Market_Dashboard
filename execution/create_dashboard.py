@@ -1568,6 +1568,18 @@ CMB_ROC_ALLOW = {
     '정기예금 잔액': (2.88, 0.59, 4.29, 0.46),
 }
 
+# 원시 저장값 → 등록 단위 환산 제수. ★Python(Price 칼럼)·JS(차트 축) 단일 출처.
+#   종전엔 Price 가 값 크기만 보고 조/억을 붙여 단위를 오독시켰다 —
+#   'SPY 거래대금 466억'(실제 466억달러)·'NASDAQ 거래량 101억'(101억주).
+#   2026-08-05: 등록 단위로 환산하고 단위는 Unit 칼럼에 명시한다.
+CMB_SERIES_SCALE = {
+    'KOSPI 시가총액': 1e12, 'KOSDAQ 시가총액': 1e12,
+    'KOSPI 거래대금': 1e12, 'KOSDAQ 거래대금': 1e12,
+    'S&P 500 거래량': 1e9, 'NASDAQ 거래량': 1e9,
+    'SPY 거래대금': 1e9, 'QQQ 거래대금': 1e9,
+    '경상수지': 10, '외환보유액': 10,   # 억달러 -> $B
+}
+
 CMB_SERIES_UNITS = {
     # INDEX_KOREA
     'KOSPI 시가총액': '조원', 'KOSDAQ 시가총액': '조원',
@@ -2176,27 +2188,24 @@ def _build_combined_chart_section():
                 chg_attr = f' data-chg="{chg_val}"'
                 chg_cls = ' pos' if chg_val > 0 else (' neg' if chg_val < 0 else '')
                 chg_txt = f'{chg_val:+.1f}{chg_suffix}' if chg_val else f'0.0{chg_suffix}'
-            # Price 칼럼: 마지막 유효 관측 원값. ≥1조=N조·≥10억=N억 압축(원 단위 시총이
-            # 칼럼 폭을 밀던 문제), 정렬용 data-price 는 원시값 유지.
+            # Price 칼럼: 마지막 유효 관측을 **등록 단위로 환산**한 값. 단위는 Unit 칼럼.
+            # ★값 크기로 조/억을 추측하지 않는다 — 달러·주식수 계열이 억원으로 오독됐다.
             price_val = _cv[-1] if _cv else None
+            unit_txt = CMB_SERIES_UNITS.get(s['display'], '')
             if price_val is None:
                 price_attr, price_txt = '', '–'
             else:
-                _pa = abs(price_val)
-                if _pa >= 1e12:
-                    # 100조 미만(거래대금 26.3조 등)은 정수 압축이 과하다 → 소수 1자리
-                    _sv = price_val / 1e12
-                    price_txt = f'{_sv:,.0f}조' if abs(_sv) >= 100 else f'{_sv:,.1f}조'
-                elif _pa >= 1e9:
-                    _sv = price_val / 1e8
-                    price_txt = f'{_sv:,.0f}억' if abs(_sv) >= 100 else f'{_sv:,.1f}억'
-                elif _pa >= 1000:
-                    price_txt = f'{price_val:,.0f}'
+                _sv = price_val / CMB_SERIES_SCALE.get(s['display'], 1)
+                if unit_txt == '억원' and abs(_sv) >= 10000:   # 1조 이상 조원 승격(차트 규칙과 동일)
+                    _sv, unit_txt = _sv / 10000, '조원'
+                _pa = abs(_sv)
+                if _pa >= 100:
+                    price_txt = f'{_sv:,.0f}'
                 elif _pa >= 10:
-                    price_txt = f'{price_val:,.1f}'
+                    price_txt = f'{_sv:,.1f}'
                 else:
-                    price_txt = f'{price_val:.2f}'
-                price_attr = f' data-price="{price_val}"'
+                    price_txt = f'{_sv:,.2f}'
+                price_attr = f' data-price="{_sv}"'
             group_label = _html.escape(group_label_raw)
             active = ' active' if s.get('default') else ''
             # Hotel {city} 시리즈에는 수집 호텔 리스트를 native tooltip(title)으로 표시
@@ -2211,11 +2220,12 @@ def _build_combined_chart_section():
             #   Country 칼럼이 국가를 표시하므로 이름의 '미 ' 접두를 뺄 때,
             #   한국 선점명과 같아져도 키가 달라 덮이지 않는다.
             label_esc = _html.escape(s.get('label', s['display']))
+            unit_esc = _html.escape(unit_txt)
             country_esc = _html.escape(_series_country(group_label_raw, s, groups[gi].get('country')))
             rows_html += (
                 f'<tr class="cmb-series-row" data-group="{group_label}" '
                 f'data-country="{country_esc}" '
-                f'data-update-rank="{rank}" data-name="{label_esc}" data-key="{display_esc}"{price_attr}{chg_attr} '
+                f'data-update-rank="{rank}" data-name="{label_esc}" data-key="{display_esc}" data-unit="{unit_esc}"{price_attr}{chg_attr} '
                 f'onclick="toggleCmbSeries(this.querySelector(\'.cmb-chart-item\'), event)" '
                 f'style="cursor:pointer;">'
                 # 별표(즐겨찾기) — Watchlist 패턴 이식 (2026-07-19). 상태는 localStorage.
@@ -2231,6 +2241,9 @@ def _build_combined_chart_section():
                 f'<td class="cmb-price" style="padding:var(--aoe-t-pad-y) 4px;'
                 f'font-size:var(--aoe-t-font);color:#000;text-align:center;white-space:nowrap;'
                 f'font-variant-numeric:tabular-nums;">{price_txt}</td>'
+                f'<td class="cmb-unit" style="padding:var(--aoe-t-pad-y) 4px;'
+                f'font-size:var(--aoe-t-font);color:#000;text-align:center;'
+                f'white-space:nowrap;">{unit_esc}</td>'
                 f'<td class="cmb-chg{chg_cls}" style="padding:var(--aoe-t-pad-y) 4px;'
                 f'font-size:var(--aoe-t-font);text-align:center;white-space:nowrap;'
                 f'font-variant-numeric:tabular-nums;">{chg_txt}</td></tr>\n'
@@ -2294,7 +2307,7 @@ def _build_combined_chart_section():
             'color:#111;white-space:nowrap;cursor:pointer;text-align:left;}'
             '</style>'
             f'<table id="cmbSideTable" class="portfolio-table" style="width:100%;max-width:100%;margin:0 auto;">'
-            f'<colgroup><col style="width:26px;"><col style="width:52px;"><col style="width:60px;"><col style="width:104px;"><col style="width:300px;"><col style="width:70px;"><col style="width:56px;"></colgroup>'
+            f'<colgroup><col style="width:26px;"><col style="width:52px;"><col style="width:60px;"><col style="width:104px;"><col style="width:252px;"><col style="width:70px;"><col style="width:62px;"><col style="width:56px;"></colgroup>'
             f'<thead><tr>'
             f'<th id="cmbStarTh" style="{th_base}" onclick="cmbToggleStarOnly(event)" title="즐겨찾기만 보기 토글">★</th>'
             f'<th style="{th_base}" onclick="sortCmbTable(\'rank\')">Freq <span id="cmbArr_rank" style="font-size:10px;">▲</span>{filter_btn.format(col="rank")}</th>'
@@ -2302,6 +2315,7 @@ def _build_combined_chart_section():
             f'<th style="{th_base}" onclick="sortCmbTable(\'group\')">Group <span id="cmbArr_group" style="font-size:10px;"></span>{filter_btn.format(col="group")}</th>'
             f'<th style="{th_base}" onclick="sortCmbTable(\'name\')">Name <span id="cmbArr_name" style="font-size:10px;"></span>{filter_btn.format(col="name")}</th>'
             f'<th id="cmbPriceTh" style="{th_base}" onclick="sortCmbTable(\'price\')">Price <span id="cmbArr_price" style="font-size:10px;"></span></th>'
+            f'<th style="{th_base}" onclick="sortCmbTable(\'unit\')">Unit <span id="cmbArr_unit" style="font-size:10px;"></span>{filter_btn.format(col="unit")}</th>'
             f'<th style="{th_base}" onclick="sortCmbTable(\'chg\')">Chg <span id="cmbArr_chg" style="font-size:10px;"></span></th>'
             f'</tr></thead>'
             f'<tbody>{rows_html}</tbody></table>'
@@ -2326,11 +2340,7 @@ def _build_combined_chart_section():
             var clickPalette = ['#000000','#0055cc','#cc0000','#006633','#6a0dad','#cc6600','#008080','#990066'];
             // ★KRX GOLD/ETS 거래대금은 dataset.csv 는 원 단위지만 파이썬 export 단계에서 이미
             //   억원으로 환산돼 넘어온다(412.7357 / 67.5571). 여기서 또 나누면 1억배로 축소된다.
-            var seriesScale = { 'KOSPI 시가총액': 1e12, 'KOSDAQ 시가총액': 1e12,
-                                'KOSPI 거래대금': 1e12, 'KOSDAQ 거래대금': 1e12,
-                                'S&P 500 거래량': 1e9, 'NASDAQ 거래량': 1e9,
-                                'SPY 거래대금': 1e9, 'QQQ 거래대금': 1e9,
-                                '경상수지': 10, '외환보유액': 10 };   // 억달러 -> $B
+            var seriesScale = CMB_SCALE_PLACEHOLDER;   // 정본 = Python CMB_SERIES_SCALE
 
             // 스케일 환산 후 반올림 정밀도 (2026-08-04). 시총(2,145조)은 정수가 읽기 좋지만
             // 거래대금(26.33조)·거래량(5.39십억주)은 정수 반올림이 최대 ±9% 오차가 된다
@@ -2627,12 +2637,13 @@ def _build_combined_chart_section():
             var cmbFilters = {};
             function cmbRowVal(row, col) {
                 if (col === 'rank') return row.cells[1].textContent.trim();  // cells[0] = 별표
+                if (col === 'unit') return row.getAttribute('data-unit') || '';
                 if (col === 'country') return row.getAttribute('data-country') || '';
                 if (col === 'group') return row.getAttribute('data-group') || '';
                 return row.getAttribute('data-name') || '';
             }
             function cmbRowPasses(row, skipCol) {
-                return ['rank', 'country', 'group', 'name'].every(function(c) {
+                return ['rank', 'country', 'group', 'name', 'unit'].every(function(c) {
                     if (c === skipCol) return true;
                     var f = cmbFilters[c];
                     return !f || f.indexOf(cmbRowVal(row, c)) !== -1;
@@ -2717,7 +2728,7 @@ def _build_combined_chart_section():
                 tr.id = 'cmbPinHead';
                 tr.className = 'cmb-pin-head';
                 var td2 = document.createElement('td');
-                td2.colSpan = 7;
+                td2.colSpan = 8;
                 td2.textContent = '';   // 텍스트 없는 구분선 — 개수는 툴바 버튼이 표시
                 tr.appendChild(td2);
                 var shown = 0;
@@ -2781,7 +2792,7 @@ def _build_combined_chart_section():
                         (!cmbSearchQ || _nm.indexOf(cmbSearchQ) >= 0);
                     row.style.display = pass ? '' : 'none';
                 });
-                ['rank', 'country', 'group', 'name'].forEach(function(c) {
+                ['rank', 'country', 'group', 'name', 'unit'].forEach(function(c) {
                     var btn = document.querySelector('.cmb-filter-btn[data-col="' + c + '"]');
                     if (btn) btn.classList.toggle('cmb-filter-on', !!cmbFilters[c]);
                 });
@@ -2867,7 +2878,7 @@ def _build_combined_chart_section():
             // Update 칼럼은 data-update-rank(0/1/2 = D/W/M 의미순) 숫자 비교.
             var _cmbSortKey = 'rank', _cmbSortAsc = true;
             function updateCmbSortArrows() {
-                ['rank', 'country', 'group', 'name', 'price', 'chg'].forEach(function(k) {
+                ['rank', 'country', 'group', 'name', 'price', 'unit', 'chg'].forEach(function(k) {
                     var sp = document.getElementById('cmbArr_' + k);
                     if (sp) sp.textContent = (k === _cmbSortKey) ? (_cmbSortAsc ? '▲' : '▼') : '';
                 });
@@ -2891,6 +2902,7 @@ def _build_combined_chart_section():
                     if (key === 'rank') { va = +a.getAttribute('data-update-rank'); vb = +b.getAttribute('data-update-rank'); }
                     else if (key === 'country') { va = (a.getAttribute('data-country') || '').toLowerCase(); vb = (b.getAttribute('data-country') || '').toLowerCase(); }
                     else if (key === 'group') { va = (a.getAttribute('data-group') || '').toLowerCase(); vb = (b.getAttribute('data-group') || '').toLowerCase(); }
+                    else if (key === 'unit') { va = (a.getAttribute('data-unit') || '').toLowerCase(); vb = (b.getAttribute('data-unit') || '').toLowerCase(); }
                     else { va = (a.getAttribute('data-name') || '').toLowerCase(); vb = (b.getAttribute('data-name') || '').toLowerCase(); }
                     if (va < vb) return _cmbSortAsc ? -1 : 1;
                     if (va > vb) return _cmbSortAsc ? 1 : -1;
@@ -3438,7 +3450,7 @@ def _build_combined_chart_section():
         })();
         </script>
         """
-        js_code = js_code.replace('CMB_DATA_PLACEHOLDER', export_json).replace('CMB_UNIT_PLACEHOLDER', json.dumps(CMB_SERIES_UNITS, ensure_ascii=False)).replace('CMB_ROC_HIST_PLACEHOLDER', json.dumps(_roc_history_for(groups), ensure_ascii=False, separators=(',', ':'))).replace('CMB_ROC_ALLOW_PLACEHOLDER', json.dumps(CMB_ROC_ALLOW, ensure_ascii=False))
+        js_code = js_code.replace('CMB_DATA_PLACEHOLDER', export_json).replace('CMB_UNIT_PLACEHOLDER', json.dumps(CMB_SERIES_UNITS, ensure_ascii=False)).replace('CMB_ROC_HIST_PLACEHOLDER', json.dumps(_roc_history_for(groups), ensure_ascii=False, separators=(',', ':'))).replace('CMB_ROC_ALLOW_PLACEHOLDER', json.dumps(CMB_ROC_ALLOW, ensure_ascii=False)).replace('CMB_SCALE_PLACEHOLDER', json.dumps(CMB_SERIES_SCALE, ensure_ascii=False))
 
         return f"""
         <div class="category-section">
