@@ -324,7 +324,9 @@ def main():
     if args.max_docs:
         docs = docs[:args.max_docs]
 
-    epoch, added_aliases = tc.sync_cache_epoch(st, idx, persist=not args.dry_run)
+    epoch, added_aliases = tc.read_alias_state(st, idx)
+    full_pass = not (args.dry_run or args.retry_failed or args.max_items
+                     or args.max_docs or args.project)
     if added_aliases:
         print("별칭 신규 %d건 — 해당 문자열이 등장하는 청크만 재태깅: %s"
               % (len(added_aliases), ", ".join(added_aliases[:5])))
@@ -349,7 +351,7 @@ def main():
                 if cid is not None else None
             hit = bool(not args.force and cur and cur["cache_key"] == ck
                        and cur["status"] == "succeeded")
-            if (not hit and args.migrate_cache_key and cur
+            if (not hit and args.migrate_cache_key and not args.force and cur
                     and cur["status"] == "succeeded" and cur["content_hash"] == ch):
                 st.execute("UPDATE items SET cache_key=? WHERE message_id=?", (ck, cid))
                 migrated += 1
@@ -387,6 +389,8 @@ def main():
         return 0
     if not todo:
         n = sum(1 for rel in touched if project_doc(st, rel, uni, extra, onto))
+        if full_pass:
+            tc.commit_alias_state(st, idx, epoch)
         print("신규 없음 — frontmatter %d건 갱신" % n)
         return 0
 
@@ -452,8 +456,11 @@ def main():
     st.commit()
 
     projected = sum(1 for rel in sorted({m["_rel"] for m in todo}) if project_doc(st, rel, uni, extra, onto))
-    print("완료: ok=%d fail=%d / 입력 %s · 출력 %s · 캐시읽기 %s 토큰 / frontmatter %d건 갱신"
-          % (ok, fail, format(tin, ","), format(tout, ","), format(tcache, ","), projected))
+    if full_pass:
+        tc.commit_alias_state(st, idx, epoch)
+    print("완료: ok=%d fail=%d / 입력 %s · 출력 %s · 캐시읽기 %s 토큰 / frontmatter %d건 갱신%s"
+          % (ok, fail, format(tin, ","), format(tout, ","), format(tcache, ","), projected,
+             "" if full_pass else " (부분 실행 — 별칭 서명 미확정)"))
     return 0 if fail == 0 else 1
 
 

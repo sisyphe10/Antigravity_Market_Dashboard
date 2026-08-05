@@ -497,7 +497,10 @@ def main():
             "SELECT message_id FROM items WHERE status IN ('failed','dead_letter')")}
         rows = [r for r in rows if r["id"] in bad]
 
-    epoch, added_aliases = tc.sync_cache_epoch(st, idx, persist=not args.dry_run)
+    epoch, added_aliases = tc.read_alias_state(st, idx)
+    # 완주(전량 검사) 실행에서만 서명을 확정한다. 잘린 실행이 서명을 먹으면
+    # 새 별칭 대상 문서가 영구 캐시 적중이 된다.
+    full_pass = not (args.dry_run or args.retry_failed or args.max_items)
     if added_aliases:
         print("별칭 신규 %d건 — 해당 문자열이 등장하는 문서만 재태깅: %s"
               % (len(added_aliases), ", ".join(added_aliases[:5])))
@@ -512,7 +515,7 @@ def main():
                          "WHERE message_id=?", (r["id"],)).fetchone()
         hit = bool(not args.force and cur and cur["cache_key"] == ck
                    and cur["status"] == "succeeded")
-        if (not hit and args.migrate_cache_key and cur
+        if (not hit and args.migrate_cache_key and not args.force and cur
                 and cur["status"] == "succeeded" and cur["content_hash"] == ch):
             # v1→v2 이관: 본문이 그대로면 태그도 그대로 유효하므로 키만 갱신.
             st.execute("UPDATE items SET cache_key=? WHERE message_id=?", (ck, r["id"]))
@@ -537,6 +540,8 @@ def main():
     print("대상 %d건 (캐시 재사용 %d건) / 배치 %d / 추정 입력 토큰 ~%s"
           % (len(todo), cached, BATCH_SIZE, format(est_in, ",")))
     if args.dry_run or not todo:
+        if full_pass:
+            tc.commit_alias_state(st, idx, epoch)
         return 0
 
     import anthropic
@@ -592,8 +597,11 @@ def main():
                " output_tokens=?, cache_read_tokens=? WHERE run_id=?",
                (now(), ok, fail, tin, tout, tcache, run_id))
     st.commit()
-    print("완료: ok=%d fail=%d / 입력 %s · 출력 %s · 캐시읽기 %s 토큰"
-          % (ok, fail, format(tin, ","), format(tout, ","), format(tcache, ",")))
+    if full_pass:
+        tc.commit_alias_state(st, idx, epoch)
+    print("완료: ok=%d fail=%d / 입력 %s · 출력 %s · 캐시읽기 %s 토큰%s"
+          % (ok, fail, format(tin, ","), format(tout, ","), format(tcache, ","),
+             "" if full_pass else " (부분 실행 — 별칭 서명 미확정)"))
     return 0 if fail == 0 else 1
 
 

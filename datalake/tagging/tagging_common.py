@@ -12,6 +12,7 @@
 """
 import csv
 import hashlib
+import sqlite3
 import json
 import os
 import re
@@ -250,6 +251,49 @@ def alias_signature(index):
     return sorted("%s\t%s\t%s" % (e["entity_id"], nfkc(e["alias"]).lower(),
                                    e.get("strength", ""))
                   for e in index["entries"])
+
+
+def read_alias_state(conn, index):
+    """현재 alias_epoch 와 '이번에 새로 추가된 별칭'을 읽는다. **쓰기 없음.**
+
+    커밋은 commit_alias_state() 로 분리했다 — 서명을 처리 전에 커밋하면 잘린 실행
+    (--max-docs·--retry-failed·타임아웃)에서 새 별칭 대상 문서가 영구 캐시 적중이
+    되어버린다(2026-08-05 Codex 검토 지적).
+    """
+    try:
+        row = conn.execute(
+            "SELECT value FROM tag_meta WHERE key='alias_signature'").fetchone()
+    except sqlite3.OperationalError:
+        row = None                      # tag_meta 없음 = 최초 도입 (dry-run 도 생성 안 함)
+    prev = json.loads(row[0]) if row else None
+    try:
+        row = conn.execute(
+            "SELECT value FROM tag_meta WHERE key='alias_epoch'").fetchone()
+    except sqlite3.OperationalError:
+        row = None
+    epoch = int(row[0]) if row else 1
+
+    cur_sig = alias_signature(index)
+    added = []
+    if prev is not None:
+        prev_set, cur_set = set(prev), set(cur_sig)
+        if prev_set - cur_set:
+            epoch += 1                  # 삭제·변경 = 전량 무효화
+        else:
+            added = [s.split("\t")[1] for s in sorted(cur_set - prev_set)]
+    return str(epoch), added
+
+
+def commit_alias_state(conn, index, epoch):
+    """서명·epoch 확정. **전량을 빠짐없이 검사한 완주 실행에서만** 호출할 것."""
+    conn.execute("CREATE TABLE IF NOT EXISTS tag_meta ("
+                 "key TEXT PRIMARY KEY, value TEXT, updated_at TEXT)")
+    stamp = __import__("datetime").datetime.now().isoformat(timespec="seconds")
+    conn.execute("INSERT OR REPLACE INTO tag_meta VALUES ('alias_epoch',?,?)",
+                 (str(epoch), stamp))
+    conn.execute("INSERT OR REPLACE INTO tag_meta VALUES ('alias_signature',?,?)",
+                 (json.dumps(alias_signature(index), ensure_ascii=False), stamp))
+    conn.commit()
 
 
 def sync_cache_epoch(conn, index, persist=True):
