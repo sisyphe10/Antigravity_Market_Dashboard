@@ -1358,11 +1358,11 @@
    "project": "antigravity",
    "domain": "market-global",
    "type": "pipeline_source",
-   "name": "ISM 제조업 PMI (fetch_ism_pmi.py)",
+   "name": "ISM 서베이 8종 (fetch_ism_pmi.py)",
    "runs_on": "vm_macmini",
    "schedule_kst": "07:50 화~토 (gha-fred 합승)",
    "status": "active",
-   "desc_md": "미국 ISM 제조업 PMI(확산지수, 50 기준) 1종을 dataset.csv → DATA MACRO(US)에 등재. 1969-12~ 전 이력 680개월, 매 run 전 구간 upsert-heal(ISM은 매년 1월 계절조정 소급 개정).\n\n- ★원천 제약: FRED는 2016년 라이선스 회수로 ISM 계열 삭제(`NAPM` 400), DBnomics `ISM/pmi/pm`은 2025-09부터 값 오염(11.1 등)+2025-12 정지, ismworld.org는 reCAPTCHA, ECOS 국제통계 미수록, Nasdaq Data Link 차단, ForexFactory JSON은 actual 없음 → investing 이벤트차트(event 173)만이 백필·라이브를 **같은 소스**에서 제공.\n- ★날짜: 엔드포인트 timestamp = **발표일**(매월 첫 영업일 10:00 ET, 전월치 공표) → 관측월 = 발표월−1, 스탬프 = 관측월 말일. 2008-02 이전은 매월 1일 09:00 UTC 근사(규약 동일).\n- ★가드: 앵커 4건(2008-01=50.7·2008-12=32.9·2020-04=41.5·2021-03=64.7) 불일치 시 쓰지 않고 exit 1 — 발표일→관측월 규약이 뒤집히면 전 계열이 1개월 밀리는데 중복·공백 검사로는 못 잡는다. 값 범위 20~80, 관측월 중복 금지.\n- plain TLS는 403 → curl_cffi(chrome impersonate) 필수, 미설치 시 graceful skip.",
+   "desc_md": "미국 ISM 확산지수 8종 — 제조업 4종(헤드라인·신규주문·고용·가격, 1969-12~ 680개월) + 서비스업 4종(헤드라인·기업활동·신규주문·가격, 1997-07~ 348개월) — 을 dataset.csv → DATA MACRO(US)에 등재. 매 run 전 구간 upsert-heal(ISM은 매년 1월 계절조정 소급 개정).\n\n- ★원천 제약: FRED는 2016년 라이선스 회수로 ISM 계열 삭제(`NAPM` 400), DBnomics `ISM/pmi/pm`은 2025-09부터 값 오염(11.1 등)+2025-12 정지, ismworld.org는 reCAPTCHA, ECOS 국제통계 미수록, Nasdaq Data Link 차단, ForexFactory JSON은 actual 없음(단 previous는 최신월 교차검증에 유효) → investing 이벤트차트만이 백필·라이브를 **같은 소스**에서 제공.\n- ★★관측월 배정 = **인덱스 기반**. timestamp는 관측월이 아니라 발표일인데, 발표 지연·스탬프 오류로 한 달에 두 번 찍힌 달이 있어(가격 174의 2008-09→10-01) `발표월−1`을 그대로 쓰면 그 구간이 밀린다. first_ref=첫 발표월−1, span==관측수일 때만 i번째 관측=first_ref+i개월로 배정하고, 불일치 시 그 시리즈는 쓰지 않는다. 8종 전부 span==n 통과.\n- ★가드: 시리즈별 실적 앵커(제조업 2008-12=32.9·2020-04=41.5·2021-03=64.7, 가격 2008-12=18.0, 서비스업 2020-04=41.8 등) 불일치 시 해당 시리즈 skip. 규약이 뒤집히면 전 계열이 조용히 한 달 밀리는데 개수 검사로는 못 잡는다.\n- ★알려진 원천 결함: 제조업 가격 **2008-07=49.9는 원천 오류**(실제 88.5대). 개수·전후월 정상이라 배정은 안 밀리고 5년 임베드 창 밖이라 화면 미노출.\n- ★부적합 판정: S&P Global(구 Markit) 미 제조업·서비스·합성 PMI는 속보치+확정치가 같은 달에 두 번 발표돼 이 규약이 성립하지 않고(중복 5·8·3건) 이력도 19~79개월로 짧다.\n- plain TLS는 403 → curl_cffi(chrome impersonate) 필수.",
    "code": [
     "execution/fetch_ism_pmi.py"
    ],

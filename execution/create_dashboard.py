@@ -1938,6 +1938,13 @@ def _build_combined_chart_section():
                 {'display': '미 근원자본재 수주 YoY','csv': '미 근원자본재 수주 전년동월비','color': '#78909C'},
                 # ISM 제조업 PMI (fetch_ism_pmi.py, investing 이벤트차트 — 발표일→전월 매핑)
                 {'display': '미 ISM 제조업지수',            'csv': '미 ISM 제조업지수',            'color': '#EF6C00'},
+                {'display': '미 ISM 제조업 신규주문',              'csv': '미 ISM 제조업 신규주문',              'color': '#FB8C00'},
+                {'display': '미 ISM 제조업 고용',                'csv': '미 ISM 제조업 고용',                'color': '#FFA726'},
+                {'display': '미 ISM 제조업 가격',                'csv': '미 ISM 제조업 가격',                'color': '#E65100'},
+                {'display': '미 ISM 서비스업지수',                'csv': '미 ISM 서비스업지수',                'color': '#7E57C2'},
+                {'display': '미 ISM 서비스업 기업활동',             'csv': '미 ISM 서비스업 기업활동',             'color': '#9575CD'},
+                {'display': '미 ISM 서비스업 신규주문',             'csv': '미 ISM 서비스업 신규주문',             'color': '#B39DDB'},
+                {'display': '미 ISM 서비스업 가격',               'csv': '미 ISM 서비스업 가격',               'color': '#5E35B1'},
                 {'display': '미시간 소비자심리',            'csv': '미시간 소비자심리',            'color': '#90A4AE'},
                 {'display': '미 Sahm Rule 침체지표',        'csv': '미 Sahm Rule 침체지표',        'color': '#A7B8C2'},
                 {'display': '미 GDPNow 성장률',             'csv': '미 GDPNow 성장률',             'color': '#BCC9D1'},
