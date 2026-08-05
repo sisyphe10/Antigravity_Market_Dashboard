@@ -29,7 +29,21 @@ STATE_PATH = os.path.join(DATALAKE_ROOT, ".wiki_cli_state.json")
 CLAUDE_BIN = os.path.expanduser(os.getenv("WIKI_CLAUDE_BIN", "~/.local/bin/claude"))
 
 # 결정적 정답이 있는 질문 — 도구를 반드시 거쳐야 답할 수 있다
-PROBE_Q = "search_tags 도구로 삼성전자를 검색해 total 값만 숫자로 답해라. 다른 말은 하지 마라."
+PROBE_TAG = "삼성전자"
+PROBE_Q = ("search_tags 도구로 %s 를 검색해 total 값만 숫자로 답해라. "
+           "다른 말은 하지 마라." % PROBE_TAG)
+
+
+def _expected_total():
+    """정답을 코드로 직접 계산 — 모델 답과 대조하기 위함.
+
+    ★종전엔 'answer 가 비어있지 않은지'만 봐서 틀린 답도 통과했다 (codex 지적).
+    """
+    try:
+        import wiki_tools
+        return wiki_tools.tag_search(PROBE_TAG, 1).get("total")
+    except Exception:
+        return None
 
 
 def cli_version():
@@ -50,11 +64,17 @@ def _load():
 
 
 def _save(d):
+    """★임시파일 + os.replace 로 원자적 교체 (동시 실행 시 반쪽 JSON 방지)."""
+    tmp = STATE_PATH + ".tmp.%d" % os.getpid()
     try:
-        with open(STATE_PATH, "w", encoding="utf-8") as fh:
+        with open(tmp, "w", encoding="utf-8") as fh:
             json.dump(d, fh, ensure_ascii=False, indent=1)
+        os.replace(tmp, STATE_PATH)
     except OSError:
-        pass
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
 
 
 def _notify(text):
@@ -95,12 +115,25 @@ def run(daily=False):
         if not out.get("ok"):
             problems.append("종단 실행 실패: %s" % (out.get("error") or out.get("status")))
         else:
-            if not (out.get("answer") or "").strip():
+            answer = (out.get("answer") or "").strip()
+            tools = [s.get("tool") for s in out.get("steps") or []]
+            if not answer:
                 problems.append("빈 응답")
-            if not out.get("steps"):
+            if not tools:
                 problems.append("도구 호출 0건 — MCP 배선 또는 stream-json 파싱 파손 의심")
+            elif "search_tags" not in tools:
+                problems.append("search_tags 미호출 (호출된 도구: %s) — MCP 도구 배선 의심" % tools)
             if not (out.get("meta") or {}).get("model"):
                 problems.append("meta.model 없음 — result 이벤트 스키마 변경 의심")
+            # ★정답 대조 — 코드로 계산한 total 이 답변에 실제로 들어있는지
+            exp = _expected_total()
+            if exp is None:
+                notes.append("정답 대조 생략(태그 인덱스 조회 실패)")
+            elif str(exp) not in answer.replace(",", ""):
+                problems.append("정답 불일치: 기대 total=%s 인데 답변에 없음 → %r"
+                                % (exp, answer[:80]))
+            else:
+                notes.append("정답 대조 OK(total=%s)" % exp)
         notes.append("종단 %s초 · 모델 %s · 도구 %s"
                      % (elapsed, (out.get("meta") or {}).get("model"),
                         [s["tool"] for s in out.get("steps") or []]))

@@ -635,6 +635,12 @@ def root():
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 
+# 접수 상한 — 테일넷 전용이라 인증은 상위(Caddy/tailscale)에 맡기되,
+# 큐 폭주·디스크 증가·쿼터 소진은 여기서 막는다 (codex 지적).
+WIKI_MAX_Q_CHARS = int(os.getenv("WIKI_MAX_Q_CHARS", "4000"))
+WIKI_MAX_QUEUE = int(os.getenv("WIKI_MAX_QUEUE", "20"))
+
+
 class HeadlessAskRequest(BaseModel):
     question: str
     history: list = []
@@ -647,14 +653,22 @@ class HeadlessAskRequest(BaseModel):
 def test_headless_ask(req: HeadlessAskRequest):
     """비동기 제출 — 즉시 job_id 반환(202). 결과는 폴링으로 받는다."""
     import wiki_jobs
-    if not (req.question or "").strip():
+    q = (req.question or "").strip()
+    if not q:
         return JSONResponse({"error": "질문이 비어 있습니다"}, status_code=400)
-    hist = [{"role": m["role"], "content": m["content"]}
+    if len(q) > WIKI_MAX_Q_CHARS:
+        return JSONResponse({"error": "질문이 너무 깁니다 (최대 %d자)" % WIKI_MAX_Q_CHARS},
+                            status_code=413)
+    depth = wiki_jobs.queue_depth()
+    if depth >= WIKI_MAX_QUEUE:
+        return JSONResponse({"error": "대기열이 가득 찼습니다 (%d건). 잠시 후 다시 시도해 주세요." % depth},
+                            status_code=429)
+    hist = [{"role": m["role"], "content": str(m["content"])[:4000]}
             for m in (req.history or [])[-6:]
             if m.get("role") in ("user", "assistant") and m.get("content")]
-    job = wiki_jobs.submit(req.question.strip(), history=hist,
-                           chat_id=req.chat_id or None,
-                           request_id=req.request_id or None)
+    job = wiki_jobs.submit(q, history=hist,
+                           chat_id=(req.chat_id or None),
+                           request_id=(req.request_id or None))
     return JSONResponse({"job_id": job["id"], "status": job["status"],
                          "queue_depth": wiki_jobs.queue_depth()}, status_code=202)
 

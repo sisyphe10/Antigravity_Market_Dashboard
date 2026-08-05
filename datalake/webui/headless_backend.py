@@ -51,6 +51,28 @@ def _mcp_config_path():
     return path
 
 
+def _kill_tree(proc):
+    """자식이 속한 프로세스 그룹 전체를 정리 (MCP 손자 포함)."""
+    import signal
+    try:
+        pgid = os.getpgid(proc.pid)
+    except Exception:
+        pgid = None
+    for sig in (signal.SIGTERM, signal.SIGKILL):
+        try:
+            if pgid is not None:
+                os.killpg(pgid, sig)
+            else:
+                proc.send_signal(sig)
+        except Exception:
+            pass
+        try:
+            proc.wait(timeout=5)
+            return
+        except Exception:
+            continue
+
+
 def _build_prompt(question, history=None):
     """단일 프롬프트 구성. history 는 --resume 이 없을 때만 텍스트로 접어 넣는다."""
     if not history:
@@ -96,14 +118,30 @@ def run_question(question, history=None, session_id=None,
         # (버전 고정이 아니라 '이 호출 중에는 갱신 금지' — 갱신 감지는 wiki_smoke.py 담당)
         env["DISABLE_AUTOUPDATER"] = "1"
 
+        # ★start_new_session=True 로 자식에게 독립 프로세스 그룹을 준다.
+        #   claude 가 띄운 MCP 서버(손자)까지 한 번에 정리하기 위함 — 종전
+        #   subprocess.run(timeout=) 은 직계만 죽여 손자가 orphan 으로 남을 수 있었다.
+        limit = timeout_sec or TIMEOUT_SEC
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                text=True, env=env, cwd=DATALAKE_ROOT,
+                                start_new_session=True)
+        timed_out = False
         try:
-            proc = subprocess.run(cmd, capture_output=True, text=True,
-                                  timeout=timeout_sec or TIMEOUT_SEC, env=env,
-                                  cwd=DATALAKE_ROOT)
+            stdout, stderr = proc.communicate(timeout=limit)
         except subprocess.TimeoutExpired:
-            return {"ok": False, "status": "timeout", "answer": "",
-                    "steps": steps, "meta": meta,
-                    "error": "월클럭 %d초 초과" % (timeout_sec or TIMEOUT_SEC)}
+            timed_out = True
+            _kill_tree(proc)
+            try:
+                stdout, stderr = proc.communicate(timeout=20)
+            except Exception:
+                stdout, stderr = "", ""
+
+        class _P:                      # 아래 파싱 코드가 기대하는 최소 인터페이스
+            pass
+
+        p_obj = _P()
+        p_obj.stdout, p_obj.stderr, p_obj.returncode = stdout, stderr, proc.returncode
+        proc = p_obj
 
         answer, saw_result, err = "", False, None
         for line in (proc.stdout or "").splitlines():
@@ -143,8 +181,13 @@ def run_question(question, history=None, session_id=None,
         if rate_limited:
             meta["rate_limit_event"] = json.dumps(rate_limited, ensure_ascii=False)[:500]
 
+        if timed_out:
+            # 부분 출력에서 건진 steps 는 살려서 돌려준다 (진행 상황 보존)
+            return {"ok": False, "status": "timeout", "answer": answer,
+                    "steps": steps, "meta": meta,
+                    "error": "월클럭 %d초 초과 — 프로세스 그룹 종료함" % limit}
         if not saw_result:
-            tail = (proc.stderr or "")[-800:] or (proc.stdout or "")[-800:]
+            tail = (proc.stderr or "")[-500:]
             return {"ok": False, "status": "failed", "answer": "", "steps": steps,
                     "meta": meta,
                     "error": "CLI가 result 이벤트 없이 종료 (rc=%s): %s" % (proc.returncode, tail)}

@@ -18,6 +18,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DATALAKE_ROOT = os.path.expanduser(os.getenv("DATALAKE_ROOT", "~/datalake"))
 DB_PATH = os.path.join(DATALAKE_ROOT, "webui_chats.sqlite")
 
+WORKER_ID = uuid.uuid4().hex[:12]     # 이 프로세스의 워커 식별자
 _worker_thread = None
 _lock = threading.Lock()
 _wake = threading.Event()
@@ -43,9 +44,16 @@ def init_db():
                     "started_at REAL, finished_at REAL)")
         con.execute("CREATE INDEX IF NOT EXISTS ix_wiki_jobs_status"
                     " ON wiki_jobs(status, created_at)")
+        cols = [r[1] for r in con.execute("PRAGMA table_info(wiki_jobs)")]
+        if "worker" not in cols:
+            con.execute("ALTER TABLE wiki_jobs ADD COLUMN worker TEXT")
+        # ★살아있는 다른 워커의 잡까지 죽이지 않도록 '충분히 오래된 running' 만 정리한다
+        #   (codex 지적: 종전엔 무조건 전체 running 을 failed 로 덮었다)
+        cutoff = time.time() - (int(os.getenv("WIKI_TIMEOUT_SEC", "900")) + 300)
         n = con.execute(
             "UPDATE wiki_jobs SET status='failed', error='server_restart', finished_at=?"
-            " WHERE status='running'", (time.time(),)).rowcount
+            " WHERE status='running' AND (started_at IS NULL OR started_at < ?)",
+            (time.time(), cutoff)).rowcount
         con.commit()
         if n:
             print("[wiki_jobs] restart recovery: running %d -> failed" % n, flush=True)
@@ -120,15 +128,27 @@ def recent_failures(n=3):
         con.close()
 
 
-def _run_one(job):
-    import headless_backend
+def _claim_job():
+    """queued 1건을 원자적으로 running 으로 전환하고 그 행을 돌려준다.
+
+    ★종전엔 SELECT 와 UPDATE 가 분리돼 있어, 프로세스가 둘이면 같은 잡을
+      중복 실행할 수 있었다 (codex 지적). 단일 UPDATE ... RETURNING 으로 바꾼다.
+    """
     con = _con()
     try:
-        con.execute("UPDATE wiki_jobs SET status='running', started_at=? WHERE id=?",
-                    (time.time(), job["id"]))
+        row = con.execute(
+            "UPDATE wiki_jobs SET status='running', started_at=?, worker=?"
+            " WHERE id = (SELECT id FROM wiki_jobs WHERE status='queued'"
+            "             ORDER BY created_at LIMIT 1)"
+            " RETURNING *", (time.time(), WORKER_ID)).fetchone()
         con.commit()
+        return _row_to_dict(row) if row else None
     finally:
         con.close()
+
+
+def _run_one(job):
+    import headless_backend
     try:
         out = headless_backend.run_question(job["question"],
                                             history=job.get("history") or [])
@@ -204,15 +224,9 @@ def _worker_tick():
         _wake.wait(timeout=5)
         _wake.clear()
         while True:
-            con = _con()
-            try:
-                row = con.execute("SELECT * FROM wiki_jobs WHERE status='queued'"
-                                  " ORDER BY created_at LIMIT 1").fetchone()
-            finally:
-                con.close()
-            if not row:
+            job = _claim_job()
+            if not job:
                 break
-            job = _row_to_dict(row)
             try:
                 _run_one(job)
             except Exception as e:

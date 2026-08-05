@@ -25,9 +25,19 @@ PROBE_AHEAD = 3                  # 현재 메이저 위로 몇 개까지 찔러�
 
 
 def _version_key(model):
-    """'claude-opus-4-8' → (4,8) / 'claude-opus-5' → (5,). 튜플 비교로 신구 판정."""
-    nums = re.findall(r"\d+", model or "")
-    return tuple(int(n) for n in nums) or (0,)
+    """모델명 → 비교 가능한 키.
+
+    'claude-opus-4-8' → ((4,8), 0) / 'claude-opus-5' → ((5,), 0)
+    'claude-opus-5-20260701' → ((5,), 20260701)
+
+    ★날짜 접미사를 의미 버전과 섞으면 안 된다 — 종전엔 모든 숫자를 한 튜플로 비교해
+      날짜 붙은 5.0 이 5.1 보다 새 것으로 판정될 수 있었다 (codex 지적).
+      5자리 이상 숫자는 날짜로 보고 뒤로 뺀다.
+    """
+    nums = [int(n) for n in re.findall(r"\d+", model or "")]
+    sem = tuple(n for n in nums if n < 10000) or (0,)
+    dates = [n for n in nums if n >= 10000]
+    return (sem, max(dates) if dates else 0)
 
 
 def _run_probe(model):
@@ -65,12 +75,19 @@ def _read_cache():
 
 
 def _write_cache(model, probed):
+    """★임시파일 + os.replace 로 원자적 교체 — 동시 쓰기 시 파일이 반쪽으로
+       남던 문제 방지 (codex 지적)."""
+    tmp = CACHE_PATH + ".tmp.%d" % os.getpid()
     try:
-        with open(CACHE_PATH, "w", encoding="utf-8") as fh:
+        with open(tmp, "w", encoding="utf-8") as fh:
             json.dump({"model": model, "at": time.time(), "probed": probed}, fh,
                       ensure_ascii=False)
+        os.replace(tmp, CACHE_PATH)
     except OSError:
-        pass
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
 
 
 def resolve(force=False):
