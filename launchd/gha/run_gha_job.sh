@@ -401,6 +401,8 @@ run_job() {
       /bin/bash scripts/safe_commit_push.sh \
         -m "Auto-update: Taiwan monthly revenue [skip ci]" \
         -- taiwan_revenue.csv market.html || return $?
+      # 신규 발표분 텔레그램 알림 (상태파일 대조, 실패해도 잡은 성공 처리 — 다음 실행 때 자동 재시도)
+      "$PY" execution/taiwan_revenue_alert.py || echo "[gha-taiwan-revenue] telegram alert 실패(tolerated)" >&2
       ;;
 
     gha-dtcc-cds)
