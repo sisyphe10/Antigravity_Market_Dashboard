@@ -569,8 +569,8 @@ def call_llm_headless(system_rt, blocks, batch_ids, onto, model, anchor_text):
             CLAUDE_BIN, "-p",
             "--model", model,
             "--system-prompt-file", _tmpfile(".md", system_rt),
-            "--json-schema", _tmpfile(".json",
-                                      json.dumps(headless_schema(batch_ids, onto))),
+            # ★--json-schema 는 파일 경로가 아니라 JSON 문자열 인라인 (2.1.209 실측)
+            "--json-schema", json.dumps(headless_schema(batch_ids, onto)),
             "--output-format", "json",
             "--max-turns", HEADLESS_MAX_TURNS,
             "--tools", "",
