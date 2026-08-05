@@ -18,6 +18,7 @@ reads:
   - "page-market-alert"
 writes:
   - "store-sources-state"
+  - "store-news-md"
   - "subscribers_ra_sisyphe.json"
 depends_on:
   - "src-generic-pipeline"
@@ -40,6 +41,7 @@ alerts: "OnFailure → notify_sisyphe_failure.sh ra-sisyphe-bot → 텔레그램
 - **내부 스케줄(KST)**: 05:10 리서치 헤드라인 · 05:15 투자유의 요약 · 07:00~15:00 매시 + 18:00 통합 WiseReport 신규 리포트 · 16:00 20일 신고가 · 17:00 공시 수집→17:30 발송(DART+KIND) · 월 09:10 해외IR 사각지대 점검.
 - **Generic Source Pipeline**: `sources.json`을 부팅 시 로드해 소스별 잡을 등록 — SemiAnalysis(09:00/21:00), TrendForce(08:00), 해외 IR 뉴스룸(07:30/20:00), k-neiss 원전(18:00).
 - 신규 소스 추가 = `execution/sources/<name>.py` + sources.json 엔트리 + deploy.
+- **뉴스 아카이브 훅(2026-08-05)**: 각 소스 잡이 fetch 직후 `sources/archive.py`를 호출해 글 1건을 `~/datalake/news/`([[store-news-md]]) md 1개로 영속화한다(텔레그램 발송과 무관·멱등, 모든 예외를 삼켜 **발송을 절대 깨지 않음**). 이 코퍼스가 [[daemon-datalake-webui]] 위키 검색·운용보고서의 DB가 된다.
 - 구독자 `subscribers_ra_sisyphe.json`.
 
 ## Reads
@@ -50,6 +52,7 @@ alerts: "OnFailure → notify_sisyphe_failure.sh ra-sisyphe-bot → 텔레그램
 
 ## Writes
 - [[store-sources-state]] — sources_state/ + kna_state.json
+- [[store-news-md]] — 뉴스 소스 아카이브 md (~/datalake/news/)
 - `subscribers_ra_sisyphe.json`
 
 ## Depends on

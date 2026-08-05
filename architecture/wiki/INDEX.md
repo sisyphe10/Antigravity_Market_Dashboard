@@ -1,8 +1,8 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 157 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 161 components._
 
-Updated: 2026-08-04
+Updated: 2026-08-05
 
 ## By domain
 
@@ -53,7 +53,7 @@ Updated: 2026-08-04
 - [파생·수급 13종 (fetch_deriv_daily.py)](src-deriv-daily.md) — Source
 - [한국 수출 매출 추정 대시보드](ext-export-dashboard.md) — External
 
-### 해외 · 매크로 (24)
+### 해외 · 매크로 (25)
 - [Daily ECOS BOK (17:40 평일)](gha-daily-ecos.md) — GHA
 - [Daily FRED US Macro (07:50 화~토)](gha-daily-fred.md) — GHA
 - [Daily Market Crawl (23:00)](gha-daily-crawl.md) — GHA
@@ -74,6 +74,7 @@ Updated: 2026-08-04
 - [대만 월매출 (fetch_taiwan_revenue.py)](src-taiwan-revenue.md) — Source
 - [마스터 시장 크롤러 (market_crawler.py)](src-market-crawler.md) — Source
 - [미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 08:30)](timer-us-etf-collect.md) — Timer
+- [미국 ISM 서베이 8종 (fetch_ism_pmi.py)](src-ism-pmi.md) — Source
 - [월별 수익률 11지수 (fetch_monthly_returns.py)](src-monthly-returns.md) — Source
 - [유니버스 수집 (fetch_universe.py)](src-universe.md) — Source
 - [일본 CAPEX 지표 (fetch_japan_capex.py)](src-japan-capex.md) — Source
@@ -88,7 +89,7 @@ Updated: 2026-08-04
 - [다나와 DRAM 최저가 (fetch_danawa_price.py)](src-danawa.md) — Source
 - [메모리 사이클 플랜 알림 타이머 (07:45)](timer-memory-cycle-alert.md) — Timer
 
-### 포트폴리오 · WRAP (19)
+### 포트폴리오 · WRAP (20)
 - [contribution_data.json](store-contribution-data.md) — Dataset
 - [Featured KIS 수집 타이머 (15:50, 신고가)](timer-featured-kis.md) — Timer
 - [Featured KIS/신고가 (fetch_featured_data_kis.py + enrich)](src-featured-kis.md) — Source
@@ -107,9 +108,10 @@ Updated: 2026-08-04
 - [기준가 엔진 (calculate_wrap_nav.py)](src-calculate-wrap-nav.md) — Source
 - [수익률 계산 (calculate_returns.py)](src-calculate-returns.md) — Source
 - [자문지 메일 발송 폴러 (send-advisory-emails 60초)](timer-advisory-emails.md) — Timer
+- [장전 포트폴리오 재생성 타이머 (07:30 평일)](timer-portfolio-premarket.md) — Timer
 - [포트폴리오 표 생성 (create_portfolio_tables.py)](src-create-portfolio-tables.md) — Source
 
-### 뉴스 · 리서치 (21)
+### 뉴스 · 리서치 (22)
 - [Earnings Calendar Sync (07:00)](gha-earnings-calendar-sync.md) — GHA
 - [earnings.db (실적봇 상태)](store-earnings-db.md) — Store
 - [Generic Source Pipeline (execution/sources/)](src-generic-pipeline.md) — Source
@@ -121,6 +123,7 @@ Updated: 2026-08-04
 - [Research Notes 태깅 파이프라인 (datalake/tagging/)](src-research-tagging.md) — Source
 - [research_notes.db + media/ (리서치봇)](store-research-notes-db.md) — Store
 - [sources_state/ + kna_state.json](store-sources-state.md) — Store
+- [뉴스 소스 아카이브 md (~/datalake/news/)](store-news-md.md) — Store
 - [리서치 태그 정본 (tag_state.sqlite + theme_trends.json + parquet)](store-research-tags.md) — Store
 - [리서치노트 이미지 OCR (datalake/ocr_worker.py)](src-research-ocr.md) — Source
 - [실적 분석 1-page md (~/datalake/analyses/)](store-analyses-md.md) — Store
@@ -139,7 +142,7 @@ Updated: 2026-08-04
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — Bot
 - [투자일지 시장데이터 (fetch_journal_data.py)](src-journal-data.md) — Source
 
-### 운영 · 인프라 (38)
+### 운영 · 인프라 (39)
 - [AoE 스타일 정본 (nav_style.py)](src-nav-style.md) — Source
 - [AoE 차트 코어 (chart_core/aoe_chart.js)](src-chart-core.md) — Source
 - [architecture.html (아키텍처)](page-architecture.md) — Page
@@ -152,6 +155,7 @@ Updated: 2026-08-04
 - [Google Workspace (Sheets · Calendar · Drive)](ext-google-workspace.md) — External
 - [heartbeats.json (Phase 2 워치독 인터페이스)](store-heartbeats.md) — Store
 - [index.html (랜딩)](page-index.md) — Page
+- [Journal Trade API 데몬 (Escape Velocity, 127.0.0.1:8791)](daemon-journal-api.md) — Infra
 - [landing_highlights.json](store-landing-highlights.md) — Dataset
 - [Plan API 데몬 (Sisyphe Ledger 자금계획, 127.0.0.1:8790)](daemon-plan-api.md) — Infra
 - [repo 동기화 (git-pull */5)](daemon-git-pull.md) — Watcher
@@ -187,13 +191,13 @@ Updated: 2026-08-04
 - [Sisyphe-Bot (펀드/일상 텔레그램 봇)](bot-sisyphe.md) — 상시 (내부 잡 05:00~23:00), active
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — 상시 (06:00 다이제스트 등), active
 
-### Timer (18)
+### Timer (19)
 - [ETF 구성종목 수집 타이머 (etf-collect 16:30)](timer-etf-collect.md) — 16:30 매일 (paused 2026-07-29), frozen
 - [ETF 수집 재시도 타이머 (etf-collect-retry 18:00)](timer-etf-collect-retry.md) — 18:00 매일 (paused 2026-07-29), frozen
 - [Featured KIS 수집 타이머 (15:50, 신고가)](timer-featured-kis.md) — 15:50 매일, active
 - [KODEX 섹터 타이머 (23:30, +KOSIS/일본capex/파생 편승)](timer-kodex-sectors.md) — 23:30 매일, active
 - [Memento 점심 텔레그램 타이머 (12:00)](timer-memento-telegram.md) — 12:00 매일, active
-- [WRAP 원칙 점검 타이머 (17:10 평일 변화기반 + 일 20:00 전체)](timer-wrap-principle-check.md) — 17:10 평일 + 일 20:00 (주간 전체), active
+- [WRAP 원칙 점검 타이머 (17:10 평일 변화기반 + 일 20:00 전체)](timer-wrap-principle-check.md) — 17:10 평일 + 일 20:00 (주간 전체) — 타이머 제거(2026-08-05), retired
 - [랜딩 하이라이트 타이머 (18:45)](timer-landing-highlights.md) — 18:45 매일, active
 - [메모리 사이클 플랜 알림 타이머 (07:45)](timer-memory-cycle-alert.md) — 07:45 매일, active
 - [미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 08:30)](timer-us-etf-collect.md) — 08:30 화~토, active
@@ -204,6 +208,7 @@ Updated: 2026-08-04
 - [웹 데몬 헬스체크 타이머 (11:00, probe+자가복구)](timer-daemon-health.md) — 11:00 매일, active
 - [일일 셀프체크 다이제스트 (08:50, 이상 시에만 발송)](daemon-daily-selfcheck.md) — 08:50 매일, active
 - [자문지 메일 발송 폴러 (send-advisory-emails 60초)](timer-advisory-emails.md) — 60초 폴러 (상시), active
+- [장전 포트폴리오 재생성 타이머 (07:30 평일)](timer-portfolio-premarket.md) — 07:30 평일 (월~금), active
 - [종목마스터 주간 갱신 타이머 (토 09:00)](timer-update-stock-master.md) — 토 09:00, active
 - [호텔 ADR 타이머 (12:00, 은퇴)](timer-hotel-adr.md) — 12:00 매일 (disabled), retired
 
@@ -251,7 +256,7 @@ Updated: 2026-08-04
 - [taiwan_revenue.csv (대만 월매출)](store-taiwan-revenue-csv.md) — 23:20 갱신, active
 - [universe.json / universe_history.json](store-universe-json.md) — 18:30 / 07:00 갱신, active
 
-### Store (13)
+### Store (14)
 - [boutique_etf.db (부티크 액티브 ETF SQLite)](store-boutique-etf-db.md) — 09:10 / 10:10 / 18:20 갱신 (평일), active
 - [earnings.db (실적봇 상태)](store-earnings-db.md) — 08:00 갱신, active
 - [etf_data.db (ETF 구성종목 SQLite)](store-etf-db.md) — 16:30 / 18:00 갱신 (paused 2026-07-29), frozen
@@ -261,16 +266,18 @@ Updated: 2026-08-04
 - [research_notes.db + media/ (리서치봇)](store-research-notes-db.md) — 이벤트 시, active
 - [sources_state/ + kna_state.json](store-sources-state.md) — 소스 폴링 시, active
 - [Wrap_NAV.xlsx (랩 운용 원장)](store-wrap-nav-xlsx.md) — 사용자 편집 + finalize, active
+- [뉴스 소스 아카이브 md (~/datalake/news/)](store-news-md.md) — 소스 폴링 시 (아카이브 훅), active
 - [리서치 태그 정본 (tag_state.sqlite + theme_trends.json + parquet)](store-research-tags.md) — 23:20 (datalake-research-export), active
 - [실적 분석 1-page md (~/datalake/analyses/)](store-analyses-md.md) — 08:00 (earnings-bot 타이머), active
 - [어닝콜 번역 전문 md (~/datalake/transcripts/)](store-transcripts-md.md) — 08:00 (earnings-bot 타이머), active
 - [통합 태그 인덱스 (tag_index.sqlite + doc_tag_state.sqlite)](store-tag-index.md) — 23:20 (datalake-research-export), active
 
-### Infra (14)
+### Infra (15)
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — 부팅 시 1회, planned
 - [gh-pages 게시 (publish_pages.sh, 팀 WRAP 전용)](web-publish-pages.md) — push 성공 훅 / 원격변경 훅, active
 - [GHA 잡 흡수 layer (launchd Phase 2 초안)](launchd-gha-phase2.md) — 이관 완료 — 각 잡 스케줄, active
 - [GitHub (정본 repo · Pages · Actions)](infra-github.md) — 상시, active
+- [Journal Trade API 데몬 (Escape Velocity, 127.0.0.1:8791)](daemon-journal-api.md) — 상시 + 일일 18:00 (trades 추출·재생성), active
 - [Plan API 데몬 (Sisyphe Ledger 자금계획, 127.0.0.1:8790)](daemon-plan-api.md) — 상시, active
 - [UPS (무정전 전원, 맥미니 대비)](infra-ups.md) — planned
 - [개인 스냅숏 게시 (publish_snapshot.sh)](web-publish-snapshot.md) — 잡 성공 훅 (여러 잡), active
@@ -290,7 +297,7 @@ Updated: 2026-08-04
 - [외부 데이터 API/소스 집합](ext-data-apis.md) — active
 - [한국 수출 매출 추정 대시보드](ext-export-dashboard.md) — planned
 
-### Source (51)
+### Source (52)
 - [AoE 스타일 정본 (nav_style.py)](src-nav-style.md) — import 시 (상시), active
 - [AoE 차트 코어 (chart_core/aoe_chart.js)](src-chart-core.md) — 빌드타임 인라인 임베드 (상시), active
 - [DART 공시 (fetch_disclosures.py)](src-dart-disclosures.md) — 16:30 (gha-daily-disclosures), active
@@ -321,6 +328,7 @@ Updated: 2026-08-04
 - [랜딩 하이라이트 생성 (create_landing_highlights.py)](src-landing-highlights.md) — 18:45 (landing-highlights 타이머), active
 - [리서치노트 이미지 OCR (datalake/ocr_worker.py)](src-research-ocr.md) — 23:20 step 0 (datalake-research-export), active
 - [마스터 시장 크롤러 (market_crawler.py)](src-market-crawler.md) — 23:00 (daily_crawl), active
+- [미국 ISM 서베이 8종 (fetch_ism_pmi.py)](src-ism-pmi.md) — 07:50 화~토 (gha-daily-fred 편승), active
 - [부티크 액티브 ETF 팔로업 (boutique_etf collect+alert)](src-boutique-etf.md) — 09:10 / 10:10 / 18:20 평일 (boutique-etf 타이머), active
 - [수익률 계산 (calculate_returns.py)](src-calculate-returns.md) — 체인 (finalize/recalc/crawl), active
 - [실적 캘린더 sync (earnings_calendar_sync.py)](src-earnings-calendar-sync.md) — 07:00 (GHA) + 15:00 (VM cron), active
@@ -362,7 +370,7 @@ Updated: 2026-08-04
 
 ## By project
 
-### antigravity (157)
+### antigravity (161)
 - [/aum — WRAP 일일 AUM 입력](cmd-aum.md) — Skill
 - [/긴급코멘트 — 급락일 시장 코멘트](cmd-urgent-comment.md) — Skill
 - [/목표전환형 — 랩 생성·청산 일괄](cmd-target-transform.md) — Skill
@@ -412,6 +420,7 @@ Updated: 2026-08-04
 - [heartbeats.json (Phase 2 워치독 인터페이스)](store-heartbeats.md) — Store
 - [hotels.html (호텔 ADR, 동결)](page-hotels.md) — Page
 - [index.html (랜딩)](page-index.md) — Page
+- [Journal Trade API 데몬 (Escape Velocity, 127.0.0.1:8791)](daemon-journal-api.md) — Infra
 - [KIND 거래소 공시 (fetch_kind_disclosures.py)](src-kind-disclosures.md) — Source
 - [KODEX 섹터 비중 (fetch_kodex_sectors.py)](src-kodex-sectors.md) — Source
 - [KODEX 섹터 타이머 (23:30, +KOSIS/일본capex/파생 편승)](timer-kodex-sectors.md) — Timer
@@ -465,6 +474,7 @@ Updated: 2026-08-04
 - [금투협 예탁금/신용잔고/반대매매 (fetch_kofia_stats.py)](src-kofia.md) — Source
 - [기여도 데이터 (create_contribution_data.py)](src-create-contribution-data.md) — Source
 - [기준가 엔진 (calculate_wrap_nav.py)](src-calculate-wrap-nav.md) — Source
+- [뉴스 소스 아카이브 md (~/datalake/news/)](store-news-md.md) — Store
 - [다나와 DRAM 최저가 (fetch_danawa_price.py)](src-danawa.md) — Source
 - [대만 월매출 (fetch_taiwan_revenue.py)](src-taiwan-revenue.md) — Source
 - [대시보드 생성기 (create_dashboard.py)](src-create-dashboard.md) — Source
@@ -477,6 +487,7 @@ Updated: 2026-08-04
 - [맥미니 데이터레이크 (~/datalake + 문답 위키)](infra-datalake.md) — Infra
 - [메모리 사이클 플랜 알림 타이머 (07:45)](timer-memory-cycle-alert.md) — Timer
 - [미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 08:30)](timer-us-etf-collect.md) — Timer
+- [미국 ISM 서베이 8종 (fetch_ism_pmi.py)](src-ism-pmi.md) — Source
 - [부티크 액티브 ETF 타이머 (09:10/10:10/18:20 평일)](timer-boutique-etf.md) — Timer
 - [부티크 액티브 ETF 팔로업 (boutique_etf collect+alert)](src-boutique-etf.md) — Source
 - [비활성 워크플로 (weather · calendar · portfolio-report)](gha-disabled.md) — GHA
@@ -501,6 +512,7 @@ Updated: 2026-08-04
 - [일일 셀프체크 다이제스트 (08:50, 이상 시에만 발송)](daemon-daily-selfcheck.md) — Timer
 - [자문지 메일 발송 폴러 (send-advisory-emails 60초)](timer-advisory-emails.md) — Timer
 - [작업용 노트북 (ASUS Vivobook, Windows)](infra-laptop.md) — Infra
+- [장전 포트폴리오 재생성 타이머 (07:30 평일)](timer-portfolio-premarket.md) — Timer
 - [종목마스터 갱신 (update_stock_master.py)](src-stock-master.md) — Source
 - [종목마스터 주간 갱신 타이머 (토 09:00)](timer-update-stock-master.md) — Timer
 - [지수 거래대금·거래량 (build_index_value.py)](src-index-value.md) — Source

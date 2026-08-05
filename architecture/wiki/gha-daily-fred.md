@@ -15,6 +15,7 @@ writes:
   - "page-market"
 depends_on:
   - "src-fred"
+  - "src-ism-pmi"
   - "src-create-dashboard"
 alerts: "실패 자체 알림 없음 → gha-daily-health-check"
 ---
@@ -28,6 +29,7 @@ alerts: "실패 자체 알림 없음 → gha-daily-health-check"
 - 토요일 run이 금요일 밤 미국 고용보고서 등을 다음날 아침 포착. 매 run 전체 재조회.
 - `FRED_API_KEY` 미설정 시 graceful skip.
 - 함정: 주간 시리즈에 5년창 금지.
+- **ISM 서베이 편승(2026-08-05)**: FRED 조회 앞단에서 [[src-ism-pmi]] `fetch_ism_pmi.py`를 먼저 돌려 ISM 제조업·서비스업 PMI 8종을 dataset.csv에 적재한다(맥미니 launchd 미러 `gha-fred` 잡 동일). 스크래핑 원천이라 실패는 **경고만**(다음 run이 회수) — FRED 조회는 계속된다.
 
 ## Reads
 - (none)
@@ -38,6 +40,7 @@ alerts: "실패 자체 알림 없음 → gha-daily-health-check"
 
 ## Depends on
 - [[src-fred]] — FRED 미국 매크로 36종 (fetch_fred_data.py)
+- [[src-ism-pmi]] — 미국 ISM 서베이 8종 (fetch_ism_pmi.py)
 - [[src-create-dashboard]] — 대시보드 생성기 (create_dashboard.py)
 
 ## Code

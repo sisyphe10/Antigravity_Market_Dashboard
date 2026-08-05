@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-08-04",
+  "updated": "2026-08-05",
   "projects": [
    "antigravity"
   ],
@@ -128,7 +128,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "상시 (내부 잡 05:10~21:00)",
    "status": "active",
-   "desc_md": "리서치·공시·뉴스 알림 전담 봇(`execution/ra_sisyphe_bot.py`). 보유종목/시장 관련 외부 소스를 폴링해 텔레그램 다이제스트로 발송.\n\n- **내부 스케줄(KST)**: 05:10 리서치 헤드라인 · 05:15 투자유의 요약 · 07:00~15:00 매시 + 18:00 통합 WiseReport 신규 리포트 · 16:00 20일 신고가 · 17:00 공시 수집→17:30 발송(DART+KIND) · 월 09:10 해외IR 사각지대 점검.\n- **Generic Source Pipeline**: `sources.json`을 부팅 시 로드해 소스별 잡을 등록 — SemiAnalysis(09:00/21:00), TrendForce(08:00), 해외 IR 뉴스룸(07:30/20:00), k-neiss 원전(18:00).\n- 신규 소스 추가 = `execution/sources/<name>.py` + sources.json 엔트리 + deploy.\n- 구독자 `subscribers_ra_sisyphe.json`.",
+   "desc_md": "리서치·공시·뉴스 알림 전담 봇(`execution/ra_sisyphe_bot.py`). 보유종목/시장 관련 외부 소스를 폴링해 텔레그램 다이제스트로 발송.\n\n- **내부 스케줄(KST)**: 05:10 리서치 헤드라인 · 05:15 투자유의 요약 · 07:00~15:00 매시 + 18:00 통합 WiseReport 신규 리포트 · 16:00 20일 신고가 · 17:00 공시 수집→17:30 발송(DART+KIND) · 월 09:10 해외IR 사각지대 점검.\n- **Generic Source Pipeline**: `sources.json`을 부팅 시 로드해 소스별 잡을 등록 — SemiAnalysis(09:00/21:00), TrendForce(08:00), 해외 IR 뉴스룸(07:30/20:00), k-neiss 원전(18:00).\n- 신규 소스 추가 = `execution/sources/<name>.py` + sources.json 엔트리 + deploy.\n- **뉴스 아카이브 훅(2026-08-05)**: 각 소스 잡이 fetch 직후 `sources/archive.py`를 호출해 글 1건을 `~/datalake/news/`([[store-news-md]]) md 1개로 영속화한다(텔레그램 발송과 무관·멱등, 모든 예외를 삼켜 **발송을 절대 깨지 않음**). 이 코퍼스가 [[daemon-datalake-webui]] 위키 검색·운용보고서의 DB가 된다.\n- 구독자 `subscribers_ra_sisyphe.json`.",
    "code": [
     "execution/ra_sisyphe_bot.py",
     "scripts/vm_legacy/ra-sisyphe-bot.service",
@@ -142,6 +142,7 @@
    ],
    "writes": [
     "store-sources-state",
+    "store-news-md",
     "subscribers_ra_sisyphe.json"
    ],
    "depends_on": [
@@ -593,7 +594,7 @@
    "runs_on": "gha",
    "schedule_kst": "07:50 화~토",
    "status": "active",
-   "desc_md": "미국 FRED 시계열 36종(금리/매크로/신용·부동산)을 화~토 07:50 KST(=월~금 22:50 UTC) 수집해 dataset.csv→market.html DATA 재생성.\n\n- 토요일 run이 금요일 밤 미국 고용보고서 등을 다음날 아침 포착. 매 run 전체 재조회.\n- `FRED_API_KEY` 미설정 시 graceful skip.\n- 함정: 주간 시리즈에 5년창 금지.",
+   "desc_md": "미국 FRED 시계열 36종(금리/매크로/신용·부동산)을 화~토 07:50 KST(=월~금 22:50 UTC) 수집해 dataset.csv→market.html DATA 재생성.\n\n- 토요일 run이 금요일 밤 미국 고용보고서 등을 다음날 아침 포착. 매 run 전체 재조회.\n- `FRED_API_KEY` 미설정 시 graceful skip.\n- 함정: 주간 시리즈에 5년창 금지.\n- **ISM 서베이 편승(2026-08-05)**: FRED 조회 앞단에서 [[src-ism-pmi]] `fetch_ism_pmi.py`를 먼저 돌려 ISM 제조업·서비스업 PMI 8종을 dataset.csv에 적재한다(맥미니 launchd 미러 `gha-fred` 잡 동일). 스크래핑 원천이라 실패는 **경고만**(다음 run이 회수) — FRED 조회는 계속된다.",
    "code": [
     ".github/workflows/daily_fred.yml"
    ],
@@ -603,8 +604,8 @@
    ],
    "depends_on": [
     "src-fred",
-    "src-create-dashboard",
-    "src-ism-pmi"
+    "src-ism-pmi",
+    "src-create-dashboard"
    ],
    "alerts": "실패 자체 알림 없음 → gha-daily-health-check"
   },
@@ -1014,8 +1015,9 @@
    "runs_on": "github",
    "schedule_kst": "생성=Featured 잡(16:20/18:30/08:30)",
    "status": "active",
-   "desc_md": "KRX 거래대금/시총/상승률 TOP 종목 페이지(대용량 ~11MB, 종목별 뉴스/테마 임베드).\n\n- 소스: Sisyphe-Bot Featured 잡(16:20 1차/18:30 2차/08:30 익일 복구)이 KIS 배치로 `featured_data.json`을 만들고 create_dashboard로 생성.\n- 20일 신고가는 별도 `newhigh_20d.json`(15:50 타이머).\n- 18:30 2차가 etf.html도 함께 재생성.",
+   "desc_md": "KRX 거래대금/시총/상승률 TOP 종목 페이지.\n\n- **v2 생성기로 전환(2026-08-05, 12.9MB→약 25KB transferred)**: featured.html이 이제 `create_featured_v2.py`로 렌더된다. 구 생성기는 `featured_data.json` 165일치(60,377행)를 통째로 인라인 임베드해 12.9MB였는데 화면은 하루치(약 260행)만 쓴다. v2는 데이터/HTML을 분리해 `featured_v2/`(manifest.json·series.json·daily/YYYY-MM-DD.json)에 두고 HTML은 셸만 남기며, 인사이트(연속 등장·신규 진입 등)를 생성기에서 사전계산한다. `featured_v2/` 산출물은 **git 미추적**(추적하면 다시 매일 수 MB씩 히스토리에 쌓임) — `publish_snapshot.sh` 화이트리스트로 ts.net 게시, 정본 nav를 붙여 스냅숏 컴포저가 수용. 구 생성기는 롤백용 `featured_legacy.html`을 계속 쓴다.\n- 소스: Sisyphe-Bot Featured 잡(16:20 1차/18:30 2차/08:30 익일 복구)이 KIS 배치로 `featured_data.json`을 만들고 v2 생성기가 재생성.\n- 20일 신고가는 별도 `newhigh_20d.json`(15:50 타이머).\n- 18:30 2차가 etf.html도 함께 재생성.",
    "code": [
+    "execution/create_featured_v2.py",
     "execution/create_dashboard.py",
     "execution/fetch_featured_news.py"
    ],
@@ -1354,26 +1356,6 @@
    ]
   },
   {
-   "id": "src-ism-pmi",
-   "project": "antigravity",
-   "domain": "market-global",
-   "type": "pipeline_source",
-   "name": "ISM 서베이 8종 (fetch_ism_pmi.py)",
-   "runs_on": "vm_macmini",
-   "schedule_kst": "07:50 화~토 (gha-fred 합승)",
-   "status": "active",
-   "desc_md": "미국 ISM 확산지수 8종 — 제조업 4종(헤드라인·신규주문·고용·가격, 1969-12~ 680개월) + 서비스업 4종(헤드라인·기업활동·신규주문·가격, 1997-07~ 348개월) — 을 dataset.csv → DATA MACRO(US)에 등재. 매 run 전 구간 upsert-heal(ISM은 매년 1월 계절조정 소급 개정).\n\n- ★원천 제약: FRED는 2016년 라이선스 회수로 ISM 계열 삭제(`NAPM` 400), DBnomics `ISM/pmi/pm`은 2025-09부터 값 오염(11.1 등)+2025-12 정지, ismworld.org는 reCAPTCHA, ECOS 국제통계 미수록, Nasdaq Data Link 차단, ForexFactory JSON은 actual 없음(단 previous는 최신월 교차검증에 유효) → investing 이벤트차트만이 백필·라이브를 **같은 소스**에서 제공.\n- ★★관측월 배정 = **인덱스 기반**. timestamp는 관측월이 아니라 발표일인데, 발표 지연·스탬프 오류로 한 달에 두 번 찍힌 달이 있어(가격 174의 2008-09→10-01) `발표월−1`을 그대로 쓰면 그 구간이 밀린다. first_ref=첫 발표월−1, span==관측수일 때만 i번째 관측=first_ref+i개월로 배정하고, 불일치 시 그 시리즈는 쓰지 않는다. 8종 전부 span==n 통과.\n- ★가드: 시리즈별 실적 앵커(제조업 2008-12=32.9·2020-04=41.5·2021-03=64.7, 가격 2008-12=18.0, 서비스업 2020-04=41.8 등) 불일치 시 해당 시리즈 skip. 규약이 뒤집히면 전 계열이 조용히 한 달 밀리는데 개수 검사로는 못 잡는다.\n- ★알려진 원천 결함: 제조업 가격 **2008-07=49.9는 원천 오류**(실제 88.5대). 개수·전후월 정상이라 배정은 안 밀리고 5년 임베드 창 밖이라 화면 미노출.\n- ★부적합 판정: S&P Global(구 Markit) 미 제조업·서비스·합성 PMI는 속보치+확정치가 같은 달에 두 번 발표돼 이 규약이 성립하지 않고(중복 5·8·3건) 이력도 19~79개월로 짧다.\n- plain TLS는 403 → curl_cffi(chrome impersonate) 필수.",
-   "code": [
-    "execution/fetch_ism_pmi.py"
-   ],
-   "writes": [
-    "store-dataset-csv"
-   ],
-   "depends_on": [
-    "ext-data-apis"
-   ]
-  },
-  {
    "id": "src-dtcc-cds",
    "project": "antigravity",
    "domain": "market-global",
@@ -1399,7 +1381,7 @@
    "runs_on": "gha",
    "schedule_kst": "21:30 평일 (gha-daily-kofia)",
    "status": "active",
-   "desc_md": "고객예탁금/신용잔고/반대매매금액(data.go.kr 금투협 종합통계)을 수집해 `kofia_stats.json`+dataset.csv에 적재(index.html 랜딩 차트, market.html DATA).\n\n- 예탁금=invrDpsgAmt, 신용잔고=crdTrFingWhl, 반대매매금액=brkTrdUcolMnyVsOppsTrdAmt(위탁매매 미수금 반대매매, 억원, 2021-10~ 백필). 오퍼레이션 8종 검증 완료.",
+   "desc_md": "고객예탁금/신용잔고/반대매매금액(data.go.kr 금투협 종합통계)을 수집해 `kofia_stats.json`+dataset.csv에 적재(index.html 랜딩 차트, market.html DATA).\n\n- 예탁금=invrDpsgAmt, 신용잔고=crdTrFingWhl, 반대매매금액=brkTrdUcolMnyVsOppsTrdAmt(위탁매매 미수금 반대매매, 억원, 2021-10~ 백필). 오퍼레이션 8종 검증 완료.\n- **신용잔고 시장별 분리(2026-08-04)**: 전체 신용잔고 한 계열에 더해 **코스피/코스닥 신용잔고**를 별도 2계열로 쪼개 DATA 탭에 등재(2021-11~ 백필, 시장당 1,155행). dataset append를 일반화하고 json 신용창을 clip. create_dashboard가 코스피/코스닥 신용잔고 계열을 억원 단위로 배선.",
    "code": [
     "execution/fetch_kofia_stats.py"
    ],
@@ -1605,17 +1587,19 @@
    "runs_on": "gha",
    "schedule_kst": "23:20 (gha-daily-taiwan-revenue)",
    "status": "active",
-   "desc_md": "FinMind로 대만 상장 큐레이션 53종목 월매출을 수집해 `taiwan_revenue.csv` 생성. 공유 빌더 `taiwan_table.py`가 이를 `market.html` Data 페이지 'Taiwan' 패널로 렌더(독립 `create_taiwan_page.py`·taiwan.html은 은퇴 — [[page-taiwan]]).\n\n- `--crosscheck`로 공식 TWSE/TPEx 스냅샷 대조(로그만). 100일 롤링 재조회 자가치유.\n- 시크릿: FINMIND_TOKEN/USER/PASSWORD.",
+   "desc_md": "FinMind로 대만 상장 큐레이션 53종목 월매출을 수집해 `taiwan_revenue.csv` 생성. 공유 빌더 `taiwan_table.py`가 이를 `market.html` Data 페이지 'Taiwan' 패널로 렌더(독립 `create_taiwan_page.py`·taiwan.html은 은퇴 — [[page-taiwan]]).\n\n- `--crosscheck`로 공식 TWSE/TPEx 스냅샷 대조(로그만). 100일 롤링 재조회 자가치유.\n- 시크릿: FINMIND_TOKEN/USER/PASSWORD.\n- **월매출 텔레그램 알림(2026-08-05, `taiwan_revenue_alert.py`)**: 맥미니 launchd `gha-taiwan-revenue` 잡이 수집·빌드 뒤 마지막 단계로 발송(발송 실패는 tolerate — 로그만). 한국 PEER 조인을 붙이고, 처음엔 QTD vs 분기 컨센서스를 넣었으나 최종적으로 **컨센서스는 빼고 부티크 ETF 알림과 같은 불릿 스타일(PEER만)**로 정리했다.",
    "code": [
     "execution/fetch_taiwan_revenue.py",
-    "execution/taiwan_table.py"
+    "execution/taiwan_table.py",
+    "execution/taiwan_revenue_alert.py"
    ],
    "writes": [
     "store-taiwan-revenue-csv",
     "page-market"
    ],
    "depends_on": [
-    "ext-data-apis"
+    "ext-data-apis",
+    "infra-telegram"
    ]
   },
   {
@@ -1965,7 +1949,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "18:00 (ra-sisyphe)",
    "status": "active",
-   "desc_md": "세계 원전시장동향 신규 게시글을 폴링해 텔레그램 발송(18:00 KST).\n\n- 소스 k-neiss.org 회원게시판 전환(폼 로그인 KNEISS_ID/PW, 클라우드IP OK). fetcher는 `fetch_kneiss_news.py`.\n- 구 `fetch_kna_news.py`는 롤백 보존이었으나 origin에서 삭제됨(dead code 정리). 마지막 본 글 ID는 `kna_state.json`.\n- 2026-07-16 **첨부 전용 글 오판 수정**: 본문 없이 이미지+PDF 첨부로만 올라온 월간 미국시장 요약(#7919)을 파서가 페이월로 오인해 엉뚱한 '로그인 실패' 안내를 보냈다. 이제 `news_view`에 img/첨부가 있으면 페이월이 아닌 것으로 보고, **PDF 첨부는 내려받아 pypdf로 텍스트를 추출**해 본문으로 쓴다.",
+   "desc_md": "세계 원전시장동향 신규 게시글을 폴링해 텔레그램 발송(18:00 KST).\n\n- 소스 k-neiss.org 회원게시판 전환(폼 로그인 KNEISS_ID/PW, 클라우드IP OK). fetcher는 `fetch_kneiss_news.py`.\n- 구 `fetch_kna_news.py`는 롤백 보존이었으나 origin에서 삭제됨(dead code 정리). 마지막 본 글 ID는 `kna_state.json`.\n- 2026-07-16 **첨부 전용 글 오판 수정**: 본문 없이 이미지+PDF 첨부로만 올라온 월간 미국시장 요약(#7919)을 파서가 페이월로 오인해 엉뚱한 '로그인 실패' 안내를 보냈다. 이제 `news_view`에 img/첨부가 있으면 페이월이 아닌 것으로 보고, **PDF 첨부는 내려받아 pypdf로 텍스트를 추출**해 본문으로 쓴다.\n- 2026-08 **k-neiss Next.js 사이트 개편 대응**(`fetch_kneiss_news.py` 재작성): 목록은 구 `/portal/news/global/list.do`(data-req-p-idx) → **GET `/news?newsDiv=GLOBAL,US`**(href=`/news/{idx}`)로, 상세는 구 `POST view.do` → **GET `/news/{idx}`**(제목의 중첩 `[NEW]` 배지 제거)로, 로그인은 구 `/portal/knaMember/login`(TOKEN_KEY) → **POST `/api/v1/kna/auth/login` JSON `{loginId,password}`**로 이관. 첨부는 새 `file_box/file_list` 마크업이나 `download.do` 엔드포인트는 불변. 어댑터([[src-generic-pipeline]] sources/kna.py)는 게시판 링크 대신 글별 permalink `/news/{idx}`를 물린다.",
    "code": [
     "execution/sources/kna.py",
     "execution/fetch_kneiss_news.py"
@@ -2286,9 +2270,9 @@
    "type": "timer",
    "name": "WRAP 원칙 점검 타이머 (17:10 평일 변화기반 + 일 20:00 전체)",
    "runs_on": "vm_macmini",
-   "schedule_kst": "17:10 평일 + 일 20:00 (주간 전체)",
-   "status": "active",
-   "desc_md": "2026-07-16 신설. WRAP 포트폴리오의 투자원칙 준수를 점검해 **위반 상태가 변했을 때만** 텔레그램(🧭)으로 알리는 타이머(`com.antigravity.wrap-principle-check` → `execution/wrap_principle_check.py`). 16:xx 수집·리포트 잡들 뒤에 배치.\n\n- **발화 시각(2026-07-22 개정)**: plist `StartCalendarInterval`이 배열로 바뀌어 **매일 17:10**(평일 변화기반 틱) + **일요일 20:00**(주간 전체 상세)에 발화한다. 토요일은 코드가 자체 스킵, 일요일 17:10 틱도 스킵(20:00 전체 틱만 통과: `weekday==6 and hour>=19`). 종전엔 월요일 17:10이 주간 전체 리포트였다. schedule.tsv의 일일 17:10 cron은 selfcheck 계약상 유지하고 일 20:00은 plist에 추가된 별도 발화다.\n- **알림 설계(v2, 변화 기반)**: 행위 룰(당일 발생 시 항상) = 물타기 의심(원칙17)·약세장 신규 편입(원칙11). 상태 룰(변화 기반) = 계좌 MDD(원칙3)·섹터 쏠림(원칙26)·종목 DD·삥(원칙25)·종목 수 상한·단일 종목 쏠림·지수 20일선(원칙8) — 신규 진입 🆕 / 해소 ✅ 에만 상세, 지속분은 요약 1줄. **변화·행위가 없으면 평일 침묵**, **일요일 20:00은 전체 상세 리포트**.\n- 전일 상태 = `logs/wrap_principle_state.json`(diff 근거). 첫 실행은 baseline 스냅숏만 저장해 🆕 도배를 막고, `WPC_SEED` 환경변수는 무발송 시드 모드(배포 직후 상태 동기화용). 행위 룰은 `actions_sent`+날짜로 당일 재발송 차단, 종목 단위 룰은 상품 중복 없이 1회만 표기.\n- 임계값은 `config/wrap_principles_config.json`(없으면 코드의 `DEFAULTS` — 종목 수 15·최소비중 2%·섹터 65%·종목 DD -30%·NAV MDD -10% 등). 토요일은 자체 스킵.\n- 입력은 `portfolio_data.json`(보유·비중)·`Wrap_NAV.xlsx`(NAV 드로다운)·`dataset.csv`(KOSPI 20일선, 17:10 시점엔 통상 D-1 종가라 기준일을 문구에 명기). `portfolio_data.json`이 30시간보다 오래되면 갱신 지연 경고를 덧붙인다.\n- wrapper 타임아웃 300초(`run_timer_job.sh`), 설치는 `install_timers.sh` NAMES 목록.",
+   "schedule_kst": "17:10 평일 + 일 20:00 (주간 전체) — 타이머 제거(2026-08-05)",
+   "status": "retired",
+   "desc_md": "> ★ **2026-08-05 타이머 제거(retired)**: `com.antigravity.wrap-principle-check.plist`를 삭제하고 `install_timers.sh` NAMES·`schedule.tsv`에서 뺐다(커밋 `0282769e`). 잡의 정기 발화는 중단됐다. 점검 로직 `execution/wrap_principle_check.py`(당일 텔레그램 3회 재시도 보강, 커밋 `64aa311f`)와 아래 설계 기록은 롤백·참고용으로 보존한다.\n\n2026-07-16 신설. WRAP 포트폴리오의 투자원칙 준수를 점검해 **위반 상태가 변했을 때만** 텔레그램(🧭)으로 알리는 타이머(`com.antigravity.wrap-principle-check` → `execution/wrap_principle_check.py`). 16:xx 수집·리포트 잡들 뒤에 배치.\n\n- **발화 시각(2026-07-22 개정)**: plist `StartCalendarInterval`이 배열로 바뀌어 **매일 17:10**(평일 변화기반 틱) + **일요일 20:00**(주간 전체 상세)에 발화한다. 토요일은 코드가 자체 스킵, 일요일 17:10 틱도 스킵(20:00 전체 틱만 통과: `weekday==6 and hour>=19`). 종전엔 월요일 17:10이 주간 전체 리포트였다. schedule.tsv의 일일 17:10 cron은 selfcheck 계약상 유지하고 일 20:00은 plist에 추가된 별도 발화다.\n- **알림 설계(v2, 변화 기반)**: 행위 룰(당일 발생 시 항상) = 물타기 의심(원칙17)·약세장 신규 편입(원칙11). 상태 룰(변화 기반) = 계좌 MDD(원칙3)·섹터 쏠림(원칙26)·종목 DD·삥(원칙25)·종목 수 상한·단일 종목 쏠림·지수 20일선(원칙8) — 신규 진입 🆕 / 해소 ✅ 에만 상세, 지속분은 요약 1줄. **변화·행위가 없으면 평일 침묵**, **일요일 20:00은 전체 상세 리포트**.\n- 전일 상태 = `logs/wrap_principle_state.json`(diff 근거). 첫 실행은 baseline 스냅숏만 저장해 🆕 도배를 막고, `WPC_SEED` 환경변수는 무발송 시드 모드(배포 직후 상태 동기화용). 행위 룰은 `actions_sent`+날짜로 당일 재발송 차단, 종목 단위 룰은 상품 중복 없이 1회만 표기.\n- 임계값은 `config/wrap_principles_config.json`(없으면 코드의 `DEFAULTS` — 종목 수 15·최소비중 2%·섹터 65%·종목 DD -30%·NAV MDD -10% 등). 토요일은 자체 스킵.\n- 입력은 `portfolio_data.json`(보유·비중)·`Wrap_NAV.xlsx`(NAV 드로다운)·`dataset.csv`(KOSPI 20일선, 17:10 시점엔 통상 D-1 종가라 기준일을 문구에 명기). `portfolio_data.json`이 30시간보다 오래되면 갱신 지연 경고를 덧붙인다.\n- wrapper 타임아웃 300초(`run_timer_job.sh`), 설치는 `install_timers.sh` NAMES 목록.",
    "code": [
     "launchd/timers/com.antigravity.wrap-principle-check.plist",
     "execution/wrap_principle_check.py"
@@ -2370,17 +2354,25 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "상시",
    "status": "active",
-   "desc_md": "2026-07-12 신설. 데이터레이크의 DuckDB+Claude API 자연어 문답 UI를 **상시 데몬**으로 띄우는 launchd 서비스(`com.antigravity.datalake-webui`, RunAtLoad + KeepAlive). 기존 수동 기동(`run_webui.sh`)을 데몬화해, ts.net 대시보드의 'Wiki' 탭 백엔드로 상주시킨다.\n\n- 바인딩: FastAPI 서버(`server.py`)가 `127.0.0.1:8787` 루프백 고정 — 직접 공개 노출 없음. Caddy가 `/wiki/*`를 이 포트로 리버스 프록시([[web-caddy]]) → AoE 'Wiki'·'Earnings' 탭.\n- 질의 대상 = 데이터레이크 md 코퍼스 + duckdb 샌드박스(allowed→잠금). 소스·설계 상세는 [[infra-datalake]] / `datalake/DESIGN.md`.\n- **코퍼스 확장(2026-07-21)**: SEARCH_ROOTS에 `transcripts`(어닝콜 한국어 번역 전문, [[store-transcripts-md]])를 추가하고 시스템 프롬프트에 어닝콜 전문 소스를 명시. 긴 전문 대응으로 `read_file`에 offset 페이징(1회 최대 20000자, `(truncated ... offset=)` 안내)을 도입.\n- **Earnings Library + analyses 코퍼스(2026-07-22)**: SEARCH_ROOTS에 `analyses`(실적 분석 1-page, [[store-analyses-md]])를 추가하고, 별도 열람 UI 엔드포인트 `/library`(+`/library/list`·`/library/doc`)를 신설. transcripts+analyses md를 필터·프론트매터·md 렌더로 보여주는 'Earnings Library' 페이지(터미널 블랙+앰버)로, ts.net `/wiki/library`에 리버스 프록시되고 nav 'Earnings' 탭이 여기를 가리킨다. 실적봇의 Notion 분석 퍼블리시가 md 발행으로 대체되며([[src-earnings-pipeline]]) 이 UI가 Notion 열람을 대신한다.\n- **통합 `#태그` 즉시 검색 + 서버측 대화 이력(2026-07-29)**: [[store-tag-index]]의 `tag_index.sqlite`를 읽어 `#KLAC` 한 번으로 리서치노트·어닝콜 전문·실적 분석 세 코퍼스를 훑는 즉시 검색을 추가(`/tags/suggest`·`/tags/search`·`/tags/doc` 엔드포인트 + Claude가 부르는 `search_tags` 도구, **LLM 미사용**이라 무료). 동시에 문답 채팅을 **리서치 애널리스트 페르소나**(결론 우선·사실/추정 구분·비교 기준 명시) 시스템 프롬프트로 바꾸고, 서버측 대화 이력 사이드바·thinking 인디케이터·답변을 그 대화에 고정(pin)·저장/삭제 실패 노출을 도입. publish 훅은 root가 아니라 레포 소유자로 실행하도록 고쳤다.\n- **답변기 견고성·계측(2026-08-04)**: 도구 예산 소진 시 수집한 근거를 버리고 무응답으로 끝나던 문제를 없앴다 — 툴 루프 상한 `MAX_LOOP` 12→20으로 늘리고, 소진 시 `tool_choice=none` 강제 최종 호출로 지금까지 모은 근거로 답을 마무리(dead-end 금지). 동시에 대화 이력에 롤링 `cache_control` breakpoint를 얹어(종전엔 시스템 프롬프트만 캐시) 다턴 재전송 비용을 낮추고, 턴별 usage 집계로 질문당 비용($)·캐시 히트율을 로그·응답에 실었다.\n- ★**nav는 손으로 맞춰야 하는 사본**(`datalake/webui/static/index.html`): 이 페이지는 스냅숏이 아니라 데몬에서 직접 서빙되므로 [[web-publish-snapshot]]의 `compose_personal_view.py` nav 주입이 **닿지 않는다**. 2026-07-16 nav 개편 때 [[daemon-watchlist-quoteboard]]와 함께 이 파일의 topnav 마크업을 따로 고쳐 통일했다(`Wiki` 탭에 `margin-left:auto`를 줘 Wiki·Architecture를 우측 그룹으로 미는 것도 여기 사본에 직접 박혀 있다). 2026-07-18 브랜드 라벨을 `AoE` → `AGE OF EMERGENCE`로 확장할 때도 이 사본을 손으로 맞췄다([[web-publish-snapshot]]). 2026-07-22 nav 재편(좌 Watchlist·Market·Journal·Weekly·Earnings·Wiki / 우 Memento·Ledger·Architecture)과 'Earnings'(`/wiki/library`) 탭 추가도 이 사본에 직접 반영했다.\n- launchd 관리: `ThrottleInterval=15`로 크래시 루프 억제, 로그는 `logs/launchd/datalake-webui.{out,err}`. 계산 잡 아님(catch-up 대상 아님).",
+   "desc_md": "2026-07-12 신설. 데이터레이크의 DuckDB+Claude 자연어 문답 UI를 **상시 데몬**으로 띄우는 launchd 서비스(2026-08-05 백엔드를 구독 쿼터 headless Claude Code로 전환 — 아래 참조)(`com.antigravity.datalake-webui`, RunAtLoad + KeepAlive). 기존 수동 기동(`run_webui.sh`)을 데몬화해, ts.net 대시보드의 'Wiki' 탭 백엔드로 상주시킨다.\n\n- 바인딩: FastAPI 서버(`server.py`)가 `127.0.0.1:8787` 루프백 고정 — 직접 공개 노출 없음. Caddy가 `/wiki/*`를 이 포트로 리버스 프록시([[web-caddy]]) → AoE 'Wiki'·'Earnings' 탭.\n- 질의 대상 = 데이터레이크 md 코퍼스 + duckdb 샌드박스(allowed→잠금). 소스·설계 상세는 [[infra-datalake]] / `datalake/DESIGN.md`.\n- **코퍼스 확장(2026-07-21)**: SEARCH_ROOTS에 `transcripts`(어닝콜 한국어 번역 전문, [[store-transcripts-md]])를 추가하고 시스템 프롬프트에 어닝콜 전문 소스를 명시. 긴 전문 대응으로 `read_file`에 offset 페이징(1회 최대 20000자, `(truncated ... offset=)` 안내)을 도입.\n- **Earnings Library + analyses 코퍼스(2026-07-22)**: SEARCH_ROOTS에 `analyses`(실적 분석 1-page, [[store-analyses-md]])를 추가하고, 별도 열람 UI 엔드포인트 `/library`(+`/library/list`·`/library/doc`)를 신설. transcripts+analyses md를 필터·프론트매터·md 렌더로 보여주는 'Earnings Library' 페이지(터미널 블랙+앰버)로, ts.net `/wiki/library`에 리버스 프록시되고 nav 'Earnings' 탭이 여기를 가리킨다. 실적봇의 Notion 분석 퍼블리시가 md 발행으로 대체되며([[src-earnings-pipeline]]) 이 UI가 Notion 열람을 대신한다.\n- **통합 `#태그` 즉시 검색 + 서버측 대화 이력(2026-07-29)**: [[store-tag-index]]의 `tag_index.sqlite`를 읽어 `#KLAC` 한 번으로 리서치노트·어닝콜 전문·실적 분석 세 코퍼스를 훑는 즉시 검색을 추가(`/tags/suggest`·`/tags/search`·`/tags/doc` 엔드포인트 + Claude가 부르는 `search_tags` 도구, **LLM 미사용**이라 무료). 동시에 문답 채팅을 **리서치 애널리스트 페르소나**(결론 우선·사실/추정 구분·비교 기준 명시) 시스템 프롬프트로 바꾸고, 서버측 대화 이력 사이드바·thinking 인디케이터·답변을 그 대화에 고정(pin)·저장/삭제 실패 노출을 도입. publish 훅은 root가 아니라 레포 소유자로 실행하도록 고쳤다.\n- **답변기 견고성·계측(2026-08-04)**: 도구 예산 소진 시 수집한 근거를 버리고 무응답으로 끝나던 문제를 없앴다 — 툴 루프 상한 `MAX_LOOP` 12→20으로 늘리고, 소진 시 `tool_choice=none` 강제 최종 호출로 지금까지 모은 근거로 답을 마무리(dead-end 금지). 동시에 대화 이력에 롤링 `cache_control` breakpoint를 얹어(종전엔 시스템 프롬프트만 캐시) 다턴 재전송 비용을 낮추고, 턴별 usage 집계로 질문당 비용($)·캐시 히트율을 로그·응답에 실었다.\n- ★**headless 백엔드 전환·라이브(2026-08-05, 호출당 과금 0원)**: `/wiki` 문답을 Anthropic **API 루프에서 구독 쿼터의 Claude Code CLI(headless)로 이관**하고, 롤백 여지 없이 **API 경로를 완전히 제거**(제로 코스트가 구조적으로 확정). 새 `headless_backend.py`가 CLI를 `stream-json`으로 몰아 API 루프와 동일한 `{answer, steps[]}` 계약을 유지한다. 도구는 **MCP 3종(`run_sql`·`search_notes`·`search_tags`, `wiki_mcp.py`+`wiki_tools.py`) + 네이티브 Read/Glob**만 허용하고 쓰기·실행·웹 계열은 allow/deny 양쪽으로 차단. 코퍼스 SEARCH_ROOTS에 `news`([[store-news-md]])가 추가됐다.\n  - **모델 자동 추종**(`wiki_model.py`, 464f5c6e): CLI `--model opus` 별칭이 실측상 뒤처져서(별칭이 구 Opus를 가리킴) 하드코딩 대신 **상위 메이저를 직접 탐침해 더 새 Opus를 고른다**(Fable/Mythos는 사용자 지시로 제외, 탐침 결과 24h 캐시). 별칭·탐침 양쪽을 봐 CLI가 나중에 별칭을 고치면 자동 수렴. CLI 버전 변화는 핀 대신 **headless 계약을 검증**(`wiki_smoke.py`).\n  - **모델 탐침 프리웜 잡**(`com.antigravity.datalake-wiki-model.plist`, 04:40 KST 매일): 캐시 만료 후 첫 질문이 탐침 ~20초를 떠안지 않도록 새벽에 미리 최신 Opus를 갱신. `run_datalake_job.sh datalake-wiki-model`.\n  - **비동기 잡 엔드포인트 + A/B**(`wiki_jobs.py`, 2d54e8b7·abb0ff8a): 긴 headless 질의를 async job으로 돌리고, headless↔API 답을 나란히 비교하는 A/B eval harness(`ab_eval.py`)와 대조 페이지(`/wiki/test/headless/ab`)를 붙였다. duckdb 샌드박스 `allowed_directories` 보강·큐 무음 종료 방지(codex 리뷰 P0/P1).\n  - ★라우트는 `server.py`의 `__main__` 앞에 등록해야 하고, `index.html` 수정은 한 체인에서 커밋한다(스냅숏 미경유 사본 — 아래 참조).\n- ★**nav는 손으로 맞춰야 하는 사본**(`datalake/webui/static/index.html`): 이 페이지는 스냅숏이 아니라 데몬에서 직접 서빙되므로 [[web-publish-snapshot]]의 `compose_personal_view.py` nav 주입이 **닿지 않는다**. 2026-07-16 nav 개편 때 [[daemon-watchlist-quoteboard]]와 함께 이 파일의 topnav 마크업을 따로 고쳐 통일했다(`Wiki` 탭에 `margin-left:auto`를 줘 Wiki·Architecture를 우측 그룹으로 미는 것도 여기 사본에 직접 박혀 있다). 2026-07-18 브랜드 라벨을 `AoE` → `AGE OF EMERGENCE`로 확장할 때도 이 사본을 손으로 맞췄다([[web-publish-snapshot]]). 2026-07-22 nav 재편(좌 Watchlist·Market·Journal·Weekly·Earnings·Wiki / 우 Memento·Ledger·Architecture)과 'Earnings'(`/wiki/library`) 탭 추가도 이 사본에 직접 반영했다.\n- launchd 관리: `ThrottleInterval=15`로 크래시 루프 억제, 로그는 `logs/launchd/datalake-webui.{out,err}`. 계산 잡 아님(catch-up 대상 아님).",
    "code": [
     "datalake/launchd/com.antigravity.datalake-webui.plist",
+    "datalake/launchd/com.antigravity.datalake-wiki-model.plist",
     "datalake/webui/run_webui.sh",
-    "datalake/webui/server.py"
+    "datalake/webui/server.py",
+    "datalake/webui/headless_backend.py",
+    "datalake/webui/wiki_mcp.py",
+    "datalake/webui/wiki_tools.py",
+    "datalake/webui/wiki_jobs.py",
+    "datalake/webui/wiki_model.py",
+    "datalake/webui/wiki_system_prompt.md"
    ],
    "reads": [
     "infra-datalake",
     "store-transcripts-md",
     "store-analyses-md",
-    "store-tag-index"
+    "store-tag-index",
+    "store-news-md"
    ],
    "depends_on": [
     "infra-vm-macmini",
@@ -2614,7 +2606,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "23:20 (datalake-research-export)",
    "status": "active",
-   "desc_md": "2026-07-27 신설. Research Notes 원문(`research_notes.db`)에 **테마·개체(종목/섹터/기관/인물) 태그**를 붙이는 규칙+LLM 하이브리드 파이프라인. exporter([[infra-datalake]]의 `export_research_notes.py`)와 **완전히 분리된 독립 프로세스** — exporter는 매일 어제+오늘을 통째로 재생성하는 멱등 구조라 거기에 LLM을 넣으면 같은 원문에 매일 다시 과금되고 태그가 흔들린다. 그래서 태그 정본을 [[store-research-tags]]의 `tag_state.sqlite`에 두고, Markdown은 그 캐시를 읽어 투영만 한다.\n\n- **`tagging_common.py`** — 온톨로지·개체 마스터·별칭 매칭 공용 모듈. `universe_tickers.csv`가 상장 종목 마스터의 단일 출처이고, 비상장 기업·기관·인물은 `entities_extra.csv`로 분리. 별칭은 strong/weak 2등급(strong=규칙만으로 자동 승인, weak=LLM 문맥 판정 후보). 본문 URL·도메인은 매칭 전 같은 길이 공백으로 덮어(위치 보존) 대량 오탐 차단. 마스터 해시(ontology/universe/alias)를 노출해 캐시 키에 포함.\n- **`tag_worker.py`** — 태깅 워커. ① 규칙 매칭(strong 자동 승인) → ② weak 후보 + 테마 분류만 LLM(micro-batch, `TAG_MODEL` 기본 `claude-haiku-4-5`)에 위임 → ③ 근거·content_hash와 함께 `tag_state.sqlite` 저장. 인자 없이 부르면 캐시 미스(=미태깅분) 전부가 대상이라 전날 실패분도 자동 회수. `--dry-run`(비용 견적)·`--date`·`--sample`·`--retry-failed` 지원.\n- **`export_tags_parquet.py`** — `tag_state.sqlite` → 연도별 parquet 3종(`research_items`·`research_item_themes`·`research_entity_mentions`)으로 내보내 데이터레이크 DuckDB 뷰로 노출.\n- **`build_theme_trends.py`** — 월별 테마·섹터·종목 언급 추이 `theme_trends.json` 집계(절대건수 대신 count·share·unique_sources 3지표, primary/secondary 분리). `~/work/charts/260715_현선물공매도`의 관심축 차트가 소비.\n- **`recompute_rules.py`** — 별칭 사전·규칙만 고쳤을 때 LLM 재호출 없이 규칙 기반 개체 매칭만 재계산(`rule_strong`/`rule_header` 재생성 + URL 안에서만 잡히던 개체 제거). 전량 재태깅(수 시간·수 달러) 회피용 보수 도구.\n\n**코퍼스 확장(2026-07-29)**: 리서치노트 메시지뿐 아니라 어닝콜 전문·실적 분석 md까지 **같은 태그 어휘**로 태깅하고, 코퍼스를 한 인덱스로 합친다. **2026-07-31 확장**: `tag_docs.SOURCES`에 자체 산출 보고서 4종 — 주간 WRAP 보고(`reports/weekly`, kind=weekly)·긴급/스팟 시장 코멘트(`reports/comments`, comment)·월간운용보고서(`reports/monthly`, monthly)·목표달성보고서(`reports/target`, target) — 를 추가해 md 문서 코퍼스가 전문·분석 2종에서 **6종**으로 늘었다(리서치노트까지 통합 인덱스는 7 코퍼스). **2026-08-03 확장**: `SOURCES`에 Notion **Study DB** 미러([[store-notion-study-md]], kind=study — [[src-notion-study]]가 일일 동기화)를 더해 md 문서 코퍼스가 **7종**(리서치노트까지 통합 인덱스 8 코퍼스)이 됐다.\n- **`tag_docs.py`** — md 문서 태거. 어닝콜 전문([[store-transcripts-md]])·실적 분석([[store-analyses-md]]) + 자체 보고서 4종(주간/코멘트/월간/목표) + Notion Study([[store-notion-study-md]], kind=study)를 `SOURCES` 딕셔너리로 kind별 경로 매핑. 리서치노트가 텔레그램 메시지 단위인 것과 달리, 4만자를 넘는 콜 전문을 **청크 단위**(기본 4000자)로 태깅해 \"#HBM 이 어느 대목이었나\"를 잃지 않는다. 온톨로지·별칭·프롬프트·저장 스키마는 `tag_worker`를 그대로 재사용하고, 정본은 [[store-tag-index]]의 `doc_tag_state.sqlite`·md frontmatter(themes/tickers/sectors/orgs)는 그 투영. `--dry-run`·`--kind`·`--max-items`·`--project`(재투영만) 지원.\n- **`build_tag_index.py`** — 전 코퍼스(리서치노트·전문·분석·주간/코멘트/월간/목표 보고서·Notion Study)의 태그를 [[store-tag-index]]의 `tag_index.sqlite` 한 장부로 합치는 **통합 인덱스 빌더**. corpus 매핑 딕셔너리로 kind→라벨을 잇고 `#KLAC` 하나로 전부 훑도록 조인을 미리 펼친다. **LLM 미사용**(이미 붙은 태그 재배열)이라 무료·멱등, 매 실행 통째 재생성. [[daemon-datalake-webui]]의 `#태그` 즉시 검색 백엔드(`/tags/doc`이 `reports/` 경로도 허용).\n\n## 일일 실행 (`daily_tag_export.sh`)\n\n23:20 `datalake-research-export` 잡의 실체([[infra-datalake]] `run_datalake_job.sh`가 이 셸을 호출). 단계: **0 이미지 OCR([[src-research-ocr]] `ocr_worker.py`, 미처리분)** → **0b Notion Study 동기화([[src-notion-study]] `notion_study_sync.py`, 실패는 warn·계속)** → ① 태깅(미처리분) → ①b 문서 태깅(전문·분석·보고서·Study 미처리분) → ② md 아카이브(어제+오늘) → ②b 통합 태그 인덱스 재생성(LLM 미사용) → ③ parquet → ④ 추이 집계 → ⑤ 관심축 차트 빌드. **OCR·태깅을 아카이브보다 앞**에 둬 당일 md가 이미지 텍스트·태그와 함께 나오게 한다. 실패 정책: 태깅·문서 태깅·인덱스·parquet·집계가 실패해도 **원문 아카이브 생성은 반드시 진행**(아카이브가 1차 산출물, 태그는 파생물) — 아카이브 실패만 exit 1.",
+   "desc_md": "2026-07-27 신설. Research Notes 원문(`research_notes.db`)에 **테마·개체(종목/섹터/기관/인물) 태그**를 붙이는 규칙+LLM 하이브리드 파이프라인. exporter([[infra-datalake]]의 `export_research_notes.py`)와 **완전히 분리된 독립 프로세스** — exporter는 매일 어제+오늘을 통째로 재생성하는 멱등 구조라 거기에 LLM을 넣으면 같은 원문에 매일 다시 과금되고 태그가 흔들린다. 그래서 태그 정본을 [[store-research-tags]]의 `tag_state.sqlite`에 두고, Markdown은 그 캐시를 읽어 투영만 한다.\n\n- **`tagging_common.py`** — 온톨로지·개체 마스터·별칭 매칭 공용 모듈. `universe_tickers.csv`가 상장 종목 마스터의 단일 출처이고, 비상장 기업·기관·인물은 `entities_extra.csv`로 분리. 별칭은 strong/weak 2등급(strong=규칙만으로 자동 승인, weak=LLM 문맥 판정 후보). 본문 URL·도메인은 매칭 전 같은 길이 공백으로 덮어(위치 보존) 대량 오탐 차단. **캐시 키(2026-08-05 개정)**: 종전엔 universe/alias 마스터 해시를 통째로 키에 넣어 **종목 1건만 추가해도 전량 재태깅**을 유발했다(8/3 Panasonic 추가 → 3,249건 재태깅 → 야간 잡 3일 연속 타임아웃). 이를 `alias_epoch`로 대체해 **추가는 그 별칭이 등장하는 문서만 부분 재태깅**하고, 삭제·변경만 전량 무효화하도록 바꿨다(`--migrate-cache-key`로 기존 행 1회 제자리 이관).\n- **`tag_worker.py`** — 태깅 워커. ① 규칙 매칭(strong 자동 승인) → ② weak 후보 + 테마 분류만 LLM(micro-batch, `TAG_MODEL` 기본 `claude-haiku-4-5`)에 위임 → ③ 근거·content_hash와 함께 `tag_state.sqlite` 저장. 인자 없이 부르면 캐시 미스(=미태깅분) 전부가 대상이라 전날 실패분도 자동 회수. `--dry-run`(비용 견적)·`--date`·`--sample`·`--retry-failed` 지원.\n- **`export_tags_parquet.py`** — `tag_state.sqlite` → 연도별 parquet 3종(`research_items`·`research_item_themes`·`research_entity_mentions`)으로 내보내 데이터레이크 DuckDB 뷰로 노출.\n- **`build_theme_trends.py`** — 월별 테마·섹터·종목 언급 추이 `theme_trends.json` 집계(절대건수 대신 count·share·unique_sources 3지표, primary/secondary 분리). `~/work/charts/260715_현선물공매도`의 관심축 차트가 소비.\n- **`recompute_rules.py`** — 별칭 사전·규칙만 고쳤을 때 LLM 재호출 없이 규칙 기반 개체 매칭만 재계산(`rule_strong`/`rule_header` 재생성 + URL 안에서만 잡히던 개체 제거). 전량 재태깅(수 시간·수 달러) 회피용 보수 도구.\n\n**코퍼스 확장(2026-07-29)**: 리서치노트 메시지뿐 아니라 어닝콜 전문·실적 분석 md까지 **같은 태그 어휘**로 태깅하고, 코퍼스를 한 인덱스로 합친다. **2026-07-31 확장**: `tag_docs.SOURCES`에 자체 산출 보고서 4종 — 주간 WRAP 보고(`reports/weekly`, kind=weekly)·긴급/스팟 시장 코멘트(`reports/comments`, comment)·월간운용보고서(`reports/monthly`, monthly)·목표달성보고서(`reports/target`, target) — 를 추가해 md 문서 코퍼스가 전문·분석 2종에서 **6종**으로 늘었다(리서치노트까지 통합 인덱스는 7 코퍼스). **2026-08-03 확장**: `SOURCES`에 Notion **Study DB** 미러([[store-notion-study-md]], kind=study — [[src-notion-study]]가 일일 동기화)를 더해 md 문서 코퍼스가 **7종**(리서치노트까지 통합 인덱스 8 코퍼스)이 됐다.\n- **`tag_docs.py`** — md 문서 태거. 어닝콜 전문([[store-transcripts-md]])·실적 분석([[store-analyses-md]]) + 자체 보고서 4종(주간/코멘트/월간/목표) + Notion Study([[store-notion-study-md]], kind=study)를 `SOURCES` 딕셔너리로 kind별 경로 매핑. 리서치노트가 텔레그램 메시지 단위인 것과 달리, 4만자를 넘는 콜 전문을 **청크 단위**(기본 4000자)로 태깅해 \"#HBM 이 어느 대목이었나\"를 잃지 않는다. 온톨로지·별칭·프롬프트·저장 스키마는 `tag_worker`를 그대로 재사용하고, 정본은 [[store-tag-index]]의 `doc_tag_state.sqlite`·md frontmatter(themes/tickers/sectors/orgs)는 그 투영. `--dry-run`·`--kind`·`--max-items`·`--project`(재투영만) 지원.\n- **`build_tag_index.py`** — 전 코퍼스(리서치노트·전문·분석·주간/코멘트/월간/목표 보고서·Notion Study)의 태그를 [[store-tag-index]]의 `tag_index.sqlite` 한 장부로 합치는 **통합 인덱스 빌더**. corpus 매핑 딕셔너리로 kind→라벨을 잇고 `#KLAC` 하나로 전부 훑도록 조인을 미리 펼친다. **LLM 미사용**(이미 붙은 태그 재배열)이라 무료·멱등, 매 실행 통째 재생성. [[daemon-datalake-webui]]의 `#태그` 즉시 검색 백엔드(`/tags/doc`이 `reports/` 경로도 허용).\n\n## 일일 실행 (`daily_tag_export.sh`)\n\n23:20 `datalake-research-export` 잡의 실체([[infra-datalake]] `run_datalake_job.sh`가 이 셸을 호출). 단계: **0 이미지 OCR([[src-research-ocr]] `ocr_worker.py`, 미처리분)** → **0b Notion Study 동기화([[src-notion-study]] `notion_study_sync.py`, 실패는 warn·계속)** → ① 태깅(미처리분) → ①b 문서 태깅(전문·분석·보고서·Study 미처리분) → ② md 아카이브(어제+오늘) → ②b 통합 태그 인덱스 재생성(LLM 미사용) → ③ parquet → ④ 추이 집계 → ⑤ 관심축 차트 빌드. **OCR·태깅을 아카이브보다 앞**에 둬 당일 md가 이미지 텍스트·태그와 함께 나오게 한다. 실패 정책: 태깅·문서 태깅·인덱스·parquet·집계가 실패해도 **원문 아카이브 생성은 반드시 진행**(아카이브가 1차 산출물, 태그는 파생물) — 아카이브 실패만 exit 1.",
    "code": [
     "datalake/tagging/tagging_common.py",
     "datalake/tagging/tag_worker.py",
@@ -2750,6 +2742,57 @@
    "alerts": "동기화 실패는 warn (문서 태깅은 계속) → 텔레그램"
   },
   {
+   "id": "src-boutique-etf",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "pipeline_source",
+   "name": "부티크 액티브 ETF 팔로업 (boutique_etf collect+alert)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "09:10 / 10:10 / 18:20 평일 (boutique-etf 타이머)",
+   "status": "active",
+   "desc_md": "2026-08-04 신설. 부티크 액티브 ETF **56종**(타임폴리오 19·삼성 KoAct 25·트러스톤 2·DS 1·에셋플러스 9)의 NAV·AUM·편입/편출·시총대비 매매를 매 영업일 팔로업하는 독립 파이프라인. etfcheck 전수(313종) 파이프라인([[src-active-etf]]) 중단의 부분 대체 — 기존 잡·[[store-etf-db]]는 불가침.\n\n- 흐름: 레지스트리 갱신(`registry.py`, 운용사 목록 동적 반영) → ETF별 구성종목(운용사 홈페이지 어댑터, 실패 시 KIS 폴백) + KIS 시세(NAV·AUM) → 시총 보강(국내 KIS·해외 KIS×환율) → invest_amt 산출 → 변경 탐지(`changes.py`).\n- **어댑터**(`adapters.py`): 타임폴리오(`timeetf.co.kr` xlsx, 당일만)·KoAct(삼성 `samsungactive.co.kr` JSON, 과거일 가능)·트러스톤(WP admin-ajax nonce)·KIS 폴백(상위 30종 한도). 연속 실패 3회 시 그 어댑터 회로 차단.\n- **멱등성**: 수집은 ETF 단위 멱등(당일 ok 스킵)이라 하루 3회 실행해도 중복 적재 없음. NAV·AUM은 **장중(09:00~15:30) 수집분에만** 갱신(장 전 수집분은 전일 종가 NAV·전일 보유분이 짝이 맞아 덮으면 어긋남). PDF 롤오버 가드=구성종목 지문(raw_code:qty:weight 해시)이 직전 ok일과 같으면 `status='stale'` → 변경탐지 제외.\n- **알림**(`alert.py`, Sisyphe-Bot·`subscribers.json` 브로드캐스트, `run_boutique_etf.sh`에서 수집 직후 실행): 편입(NEW)/편출(X)/급변(+/-) 계층형 텔레그램. 신규·편출은 무조건, 급변만 매매추정액 ≥50억원 또는 종목 시총의 ≥0.1%. dedup=`alert_sent` 테이블(항목 단위 증분) → 늦게 온 운용사만 `(추가)`로 나감. 채권·현금성 파킹 보유분은 수집 단계에서 통째 제외(비율이 구조적으로 커 알림 오염).\n- 뷰어 재빌드=맥 `~/work/charts/260715_현선물공매도/build_viewer_boutique.py` → `/charts/test_boutique_active_etf.html`(★테스트 페이지, nav 미배선). 실행 위치=[[timer-boutique-etf]] wrapper(`run_boutique_etf.sh`)가 collect→alert→뷰어를 순차 실행하되 부분 실패해도(공휴일 전량 stale·일부 운용사 장애) 확보된 ETF의 알림·페이지는 나가도록 코드만 보관 후 반환.\n- 해외주식형 에셋플러스 3종은 KIS 구성종목 미제공 → 구조적 미커버(매일 fail 3건은 정상). 백필 안 함(첫 수집=2026-08-04).",
+   "code": [
+    "execution/boutique_etf/collect.py",
+    "execution/boutique_etf/registry.py",
+    "execution/boutique_etf/adapters.py",
+    "execution/boutique_etf/enrich.py",
+    "execution/boutique_etf/changes.py",
+    "execution/boutique_etf/alert.py",
+    "execution/boutique_etf/db.py",
+    "scripts/run_boutique_etf.sh"
+   ],
+   "writes": [
+    "store-boutique-etf-db"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ],
+   "alerts": "편입/편출·급변 텔레그램 (Sisyphe-Bot, 특이사항 없으면 무발송)"
+  },
+  {
+   "id": "timer-boutique-etf",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "timer",
+   "name": "부티크 액티브 ETF 타이머 (09:10/10:10/18:20 평일)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "09:10 / 10:10 / 18:20 평일",
+   "status": "active",
+   "desc_md": "2026-08-04 신설. 매 영업일 3회 [[src-boutique-etf]] 수집+알림+뷰어 재빌드를 실행하는 launchd 타이머(`com.antigravity.boutique-etf` → `run_timer_job.sh boutique-etf` → `run_boutique_etf.sh`).\n\n- **스케줄 근거**: ETF 자산구성내역(PDF)은 매 영업일 **장 개시 전** 공표 → **09:10**이 본 실행이자 가장 이른 인지 시점(사용자 요구=갱신 즉시). **10:10**=늦게 올리는 운용사 보충, **18:20**=최종 안전망. 수집은 ETF 단위 멱등, 알림은 항목 단위 증분(`alert_sent`)이라 3회 실행해도 중복 없이 늦게 온 것만 `(추가)`로 나감.\n- `run_timer_job.sh`가 .env 로드·락·타임아웃(900s)·stamp를 담당. `run_boutique_etf.sh`는 collect가 부분 실패해도 alert·뷰어 실행 후 코드 반환(공휴일 전량 stale·일부 운용사 장애 대응).\n- `schedule.tsv`에 3행 등재.",
+   "code": [
+    "launchd/timers/com.antigravity.boutique-etf.plist",
+    "launchd/timers/run_timer_job.sh",
+    "scripts/run_boutique_etf.sh"
+   ],
+   "writes": [
+    "store-boutique-etf-db"
+   ],
+   "depends_on": [
+    "src-boutique-etf"
+   ],
+   "alerts": "run_timer_job stamp + OnFailure 텔레그램"
+  },
+  {
    "id": "daemon-catchup",
    "project": "antigravity",
    "domain": "ops-infra",
@@ -2770,6 +2813,29 @@
    "depends_on": [
     "infra-vm-macmini"
    ]
+  },
+  {
+   "id": "daemon-journal-api",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "infra",
+   "name": "Journal Trade API 데몬 (Escape Velocity, 127.0.0.1:8791)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "상시 + 일일 18:00 (trades 추출·재생성)",
+   "status": "active",
+   "desc_md": "2026-08-05 신설. 투자일지 Escape Velocity 웹뷰(`/journal/`)의 'Trade' 탭 매매일지+사유를 양방향 서빙하는 상시 데몬(`com.antigravity.journal-api`, RunAtLoad + KeepAlive)과, 매일 18:00 KST 매매 추출·전체 페이지 재생성 타이머(`com.antigravity.journal-trades`)의 한 쌍.\n\n- 바인딩: `127.0.0.1:8791` 루프백 고정 — 직접 공개 노출 없음. Caddy가 `/journal/*`를 서빙하고 API를 이 포트로 리버스 프록시([[web-caddy]]).\n- **백엔드 코드·데이터 모두 repo 밖**: journal-api plist가 `~/Journal/scripts/journal_api.py`를 repo venv 파이썬으로 띄우고, journal-trades는 `~/Journal/scripts/daily_refresh.sh`(Trade 추출 → Escape Velocity 전체 페이지 재생성)를 돈다. Journal 자산은 맥미니 로컬 전용으로 git·게시 파이프라인과 격리(전역 규칙 Journal 섹션) → **repo가 소유하는 것은 launchd 유닛 2개뿐**. [[daemon-plan-api]]와 같은 패턴.\n- journal-api는 `run_bot.sh` 래퍼 미사용(의도) — 루프백 전용이라 네트워크 대기 불필요, 기동 120초 지연 회피. journal-trades는 standalone 타이머(`run_timer_job.sh`·`schedule.tsv` 미사용, premarket 잡과 동일 규격).\n- 일일 18:00 잡은 **구 토요일 09:30 crontab(`# journal-chart`)을 대체**한다.\n- launchd 관리: journal-api `ThrottleInterval=10`, 로그는 `logs/launchd/journal-api.{out,err}` · `journal-trades.{out,err}`. 계산 잡 아님(catch-up 대상 아님).",
+   "code": [
+    "launchd/web/com.antigravity.journal-api.plist",
+    "launchd/web/com.antigravity.journal-trades.plist"
+   ],
+   "reads": [
+    "ext-sisyphe"
+   ],
+   "depends_on": [
+    "infra-vm-macmini",
+    "ext-sisyphe"
+   ],
+   "alerts": "KeepAlive=true (launchd 자동 재기동, ThrottleInterval=10)"
   },
   {
    "id": "ext-data-apis",
@@ -2923,7 +2989,7 @@
    "runs_on": "external",
    "schedule_kst": "상시",
    "status": "active",
-   "desc_md": "모든 봇 알림과 실패 경보가 나가는 메신저 채널. 봇별 전용 토큰(Sisyphe/RA_Sisyphe/Research Notes/선유듀오)으로 분리 운용.\n\n- 다이제스트·리서치 알림·투자유의 요약·공시·실적·운동 기록 대화가 여기로 흐른다.\n- 잡 실패는 `scripts/notify_sisyphe_failure.sh`가 텔레그램으로 발송(systemd OnFailure / launchd wrapper 공통). 잡별 문구가 case로 분기하되, 모르는 잡 이름도 기본 문구로 반드시 알린다(누락 방지).\n- **자가치료 2단계 — 실패 자가진단(2026-07-16, `scripts/diagnose_failure.sh`)**: 기본 실패 알림을 보낸 뒤 `nohup` 백그라운드로 headless claude를 띄워 실패 잡의 로그와 repo 코드를 읽히고, 원인 진단·복구 명령·수리 제안을 🩺 후속 메시지로 보낸다.\n  - **어떤 파일도 수정하지 않는다 — 진단 전용**. allowedTools = Read/Glob/Grep + `git log/show/diff`(전부 읽기 전용).\n  - 가드레일: 잡당 **60분 쿨다운**(`DIAG_COOLDOWN_SEC`) — 크래시 루프가 claude 세션을 연쇄 생성하지 못하게. `--max-turns` 25(`DIAG_MAX_TURNS`), 월클럭 600초(`DIAG_WALL_SEC`). claude 미설치·토큰 부재 시 조용히 종료(기본 알림은 이미 나갔으므로 무해).\n- 맥미니 self-check(08:50)는 정상이어도 매일 1회 발송 → 침묵 자체가 dead-man's switch.",
+   "desc_md": "모든 봇 알림과 실패 경보가 나가는 메신저 채널. 봇별 전용 토큰(Sisyphe/RA_Sisyphe/Research Notes/선유듀오)으로 분리 운용.\n\n- 다이제스트·리서치 알림·투자유의 요약·공시·실적·운동 기록 대화가 여기로 흐른다.\n- 잡 실패는 `scripts/notify_sisyphe_failure.sh`가 텔레그램으로 발송(systemd OnFailure / launchd wrapper 공통). 잡별 문구가 case로 분기하되, 모르는 잡 이름도 기본 문구로 반드시 알린다(누락 방지).\n- **알림 억제 게이트(2026-08-05, `notify_sisyphe_failure.sh` 내장)**: 곧 재실행되는 고빈도 잡은 **1차 실패를 침묵**하고 **연속 2회(=최종 실패)만 발송**해, 재시도로 풀리는 순단이 매번 알림을 때리던 노이즈를 없앴다. 6시간 버스트는 쿨다운으로 묶어 합산 통지. 정책 변경은 이 스크립트 한 곳만 고친다. 견고화(codex 리뷰): **발송이 ok:true로 확인된 뒤에만** 쿨다운을 기록(전송 실패 시 알림 영구 유실 차단), 상태 저장 실패는 fail-open으로 발송, `--dry-run`은 상태 불변, curl 타임아웃+3회 재시도, 원자적 상태 기록, 시계 역행 방어. 연속실패 카운터 리셋 창엔 **1시간 하한**을 둬 고빈도 잡의 지속 장애가 매번 1차로 리셋돼 침묵하는 구멍을 막았다.\n- **자가치료 2단계 — 실패 자가진단(2026-07-16, `scripts/diagnose_failure.sh`)**: 기본 실패 알림을 보낸 뒤 `nohup` 백그라운드로 headless claude를 띄워 실패 잡의 로그와 repo 코드를 읽히고, 원인 진단·복구 명령·수리 제안을 🩺 후속 메시지로 보낸다.\n  - **어떤 파일도 수정하지 않는다 — 진단 전용**. allowedTools = Read/Glob/Grep + `git log/show/diff`(전부 읽기 전용).\n  - 가드레일: 잡당 **60분 쿨다운**(`DIAG_COOLDOWN_SEC`) — 크래시 루프가 claude 세션을 연쇄 생성하지 못하게. `--max-turns` 25(`DIAG_MAX_TURNS`), 월클럭 600초(`DIAG_WALL_SEC`). claude 미설치·토큰 부재 시 조용히 종료(기본 알림은 이미 나갔으므로 무해).\n- 맥미니 self-check(08:50)는 정상이어도 매일 1회 발송 → 침묵 자체가 dead-man's switch.",
    "code": [
     "scripts/notify_sisyphe_failure.sh",
     "scripts/diagnose_failure.sh"
@@ -3006,34 +3072,6 @@
    ]
   },
   {
-   "id": "src-boutique-etf",
-   "project": "antigravity",
-   "domain": "market-kr",
-   "type": "pipeline_source",
-   "name": "부티크 액티브 ETF 팔로업 (boutique_etf collect+alert)",
-   "runs_on": "vm_macmini",
-   "schedule_kst": "09:10 / 10:10 / 18:20 평일 (boutique-etf 타이머)",
-   "status": "active",
-   "desc_md": "2026-08-04 신설. 부티크 액티브 ETF **56종**(타임폴리오 19·삼성 KoAct 25·트러스톤 2·DS 1·에셋플러스 9)의 NAV·AUM·편입/편출·시총대비 매매를 매 영업일 팔로업하는 독립 파이프라인. etfcheck 전수(313종) 파이프라인([[src-active-etf]]) 중단의 부분 대체 — 기존 잡·[[store-etf-db]]는 불가침.\n\n- 흐름: 레지스트리 갱신(`registry.py`, 운용사 목록 동적 반영) → ETF별 구성종목(운용사 홈페이지 어댑터, 실패 시 KIS 폴백) + KIS 시세(NAV·AUM) → 시총 보강(국내 KIS·해외 KIS×환율) → invest_amt 산출 → 변경 탐지(`changes.py`).\n- **어댑터**(`adapters.py`): 타임폴리오(`timeetf.co.kr` xlsx, 당일만)·KoAct(삼성 `samsungactive.co.kr` JSON, 과거일 가능)·트러스톤(WP admin-ajax nonce)·KIS 폴백(상위 30종 한도). 연속 실패 3회 시 그 어댑터 회로 차단.\n- **멱등성**: 수집은 ETF 단위 멱등(당일 ok 스킵)이라 하루 3회 실행해도 중복 적재 없음. NAV·AUM은 **장중(09:00~15:30) 수집분에만** 갱신(장 전 수집분은 전일 종가 NAV·전일 보유분이 짝이 맞아 덮으면 어긋남). PDF 롤오버 가드=구성종목 지문(raw_code:qty:weight 해시)이 직전 ok일과 같으면 `status='stale'` → 변경탐지 제외.\n- **알림**(`alert.py`, Sisyphe-Bot·`subscribers.json` 브로드캐스트, `run_boutique_etf.sh`에서 수집 직후 실행): 편입(NEW)/편출(X)/급변(+/-) 계층형 텔레그램. 신규·편출은 무조건, 급변만 매매추정액 ≥50억원 또는 종목 시총의 ≥0.1%. dedup=`alert_sent` 테이블(항목 단위 증분) → 늦게 온 운용사만 `(추가)`로 나감. 채권·현금성 파킹 보유분은 수집 단계에서 통째 제외(비율이 구조적으로 커 알림 오염).\n- 뷰어 재빌드=맥 `~/work/charts/260715_현선물공매도/build_viewer_boutique.py` → `/charts/test_boutique_active_etf.html`(★테스트 페이지, nav 미배선). 실행 위치=[[timer-boutique-etf]] wrapper(`run_boutique_etf.sh`)가 collect→alert→뷰어를 순차 실행하되 부분 실패해도(공휴일 전량 stale·일부 운용사 장애) 확보된 ETF의 알림·페이지는 나가도록 코드만 보관 후 반환.\n- 해외주식형 에셋플러스 3종은 KIS 구성종목 미제공 → 구조적 미커버(매일 fail 3건은 정상). 백필 안 함(첫 수집=2026-08-04).",
-   "code": [
-    "execution/boutique_etf/collect.py",
-    "execution/boutique_etf/registry.py",
-    "execution/boutique_etf/adapters.py",
-    "execution/boutique_etf/enrich.py",
-    "execution/boutique_etf/changes.py",
-    "execution/boutique_etf/alert.py",
-    "execution/boutique_etf/db.py",
-    "scripts/run_boutique_etf.sh"
-   ],
-   "writes": [
-    "store-boutique-etf-db"
-   ],
-   "depends_on": [
-    "ext-data-apis"
-   ],
-   "alerts": "편입/편출·급변 텔레그램 (Sisyphe-Bot, 특이사항 없으면 무발송)"
-  },
-  {
    "id": "src-chart-core",
    "project": "antigravity",
    "domain": "ops-infra",
@@ -3047,6 +3085,26 @@
     "chart_core/dist/aoe_chart.js",
     "chart_core/build_core.py",
     "execution/legacy_chart_renderers.py"
+   ]
+  },
+  {
+   "id": "src-ism-pmi",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "pipeline_source",
+   "name": "미국 ISM 서베이 8종 (fetch_ism_pmi.py)",
+   "runs_on": "gha",
+   "schedule_kst": "07:50 화~토 (gha-daily-fred 편승)",
+   "status": "active",
+   "desc_md": "2026-08-05 신설. 미국 ISM 서베이 8종 — 제조업 4종(헤드라인·신규주문·고용·가격) + 서비스업 4종(헤드라인·기업활동·신규주문·가격) — 을 수집해 dataset.csv DATA(MACRO/US)에 적재(dtype=`ISM_MACRO`, 전부 50 기준 확산지수, 이름에 국가 접두 없음 — Country 칼럼이 표시). [[gha-daily-fred]]가 FRED 조회 앞단에서 먼저 돌린다(맥미니 launchd 미러 `gha-fred` 잡 동일).\n\n- **★원천 = investing 이벤트차트 단일**: ISM이 2016년 FRED 재배포 라이선스를 회수(`NAPM` 삭제·API 400)해 FRED·DBnomics·ismworld·ECOS·Nasdaq·EconDB가 전부 막힘/오염(2026-08-05 전수 실측). curl_cffi(chrome impersonate) 필수(plain urllib는 403). ForexFactory `previous`는 최신월 교차검증용으로만 유효.\n- **★관측월 배정 = 인덱스 기반**(release stamp 직접 사용 금지): timestamp는 관측월이 아니라 발표일(전월치를 다음 달 첫 영업일 공표)이라 `발표월−1`을 그대로 쓰면 스탬프 오류 구간이 밀린다. `first_ref = 첫 발표월−1`, `span == 관측수`일 때만 `i번째 관측 = first_ref + i개월`.\n- **★드리프트 런 검사**(codex 지적 반영): 결측 1·중복 1이 상쇄되면 개수는 맞으면서 사이 구간만 밀린다 → 각 관측의 (발표월−1)과 배정 관측월 차이의 **연속 비영(非零) 최대 길이**가 `MAX_DRIFT_RUN` 초과 시 그 시리즈 차단(정상=전부 0, 2008 스탬프 오류=런 1 통과).\n- **★앵커는 허용오차**(`ANCHOR_TOL`): ISM이 매년 1월 계절조정계수를 소급 개정하므로 완전일치 앵커는 매년 1월 거짓 실패를 낸다.\n- 실패 처리: 시리즈 단위 격리(예외 시 그 시리즈만 skip)하되 **하나라도 실패하면 exit 1**(러너가 `|| echo`로 tolerate해도 종료코드가 감시 신호). 스크래핑 원천이라 잡에선 경고만 — FRED 조회는 계속되고 다음 run이 회수.",
+   "code": [
+    "execution/fetch_ism_pmi.py"
+   ],
+   "writes": [
+    "store-dataset-csv"
+   ],
+   "depends_on": [
+    "ext-data-apis"
    ]
   },
   {
@@ -3202,6 +3260,24 @@
    "desc_md": "index.html 회전 위젯(sparkline+코멘트, 50슬롯) 데이터. landing-highlights 타이머가 생성.\n\n- 여러 산출물에서 하이라이트를 종합. index.html이 런타임 소비.",
    "depends_on": [
     "src-landing-highlights"
+   ]
+  },
+  {
+   "id": "store-news-md",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "store",
+   "name": "뉴스 소스 아카이브 md (~/datalake/news/)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "소스 폴링 시 (아카이브 훅)",
+   "status": "active",
+   "desc_md": "2026-08-05 신설. [[bot-ra-sisyphe]]의 각 소스 잡([[src-generic-pipeline]])이 fetch 직후 `execution/sources/archive.py`를 호출해 게시글 1건을 md 1개로 영속화하는 아카이브 코퍼스. 이 코퍼스가 [[daemon-datalake-webui]] 위키 검색·운용보고서의 뉴스 DB가 된다.\n\n- 경로: `~/datalake/news/<source>/<연도>/<YYYYMMDD>_<id>.md` — post id 기준 멱등(존재 시 skip). frontmatter = source/label/id/title/category/date/url/archived_at.\n- **텔레그램 발송과 완전 분리·append-only** — 아카이브는 모든 예외를 삼키고 로그만 남겨 **발송을 절대 깨지 않는다**(멱등이라 재실행 안전).\n- 소급 백필은 `datalake/backfill_news.py`(일회성·멱등, 존재 파일 skip으로 재개): kna는 목록 전체 순회(로그인 시 미국 본문 포함), trendforce는 wp-json 페이지네이션, semianalysis는 RSS 최근분, foreign_ir는 제목·링크만.\n- [[daemon-datalake-webui]] `wiki_tools.py`의 SEARCH_ROOTS에 `news`가 등재돼 `#태그`·자연어 문답이 이 코퍼스를 훑는다.",
+   "code": [
+    "execution/sources/archive.py",
+    "datalake/backfill_news.py"
+   ],
+   "depends_on": [
+    "src-generic-pipeline"
    ]
   },
   {
@@ -3388,29 +3464,6 @@
    "desc_md": "랩 상품 운용의 원장 엑셀. NEW(종목·비중)/AUM/기준가/수익률 시트로 구성. 사용자가 직접 편집하는 유일한 바이너리 데이터.\n\n- NEW/AUM은 사람(또는 finalize 잡)이 채우고, 기준가/수익률은 calculate_wrap_nav/returns가 자동 생성.\n- 워처가 저장을 감지→3-way merge→push, recalc_wrap_nav 워크플로가 라이브 반영.\n- 바이너리라 push 충돌 위험 → safe_commit_push xlsx 가드 + merge_wrap_nav 3-way 병합.\n- Excel에서 열려있으면 쓰기 PermissionError."
   },
   {
-   "id": "timer-boutique-etf",
-   "project": "antigravity",
-   "domain": "market-kr",
-   "type": "timer",
-   "name": "부티크 액티브 ETF 타이머 (09:10/10:10/18:20 평일)",
-   "runs_on": "vm_macmini",
-   "schedule_kst": "09:10 / 10:10 / 18:20 평일",
-   "status": "active",
-   "desc_md": "2026-08-04 신설. 매 영업일 3회 [[src-boutique-etf]] 수집+알림+뷰어 재빌드를 실행하는 launchd 타이머(`com.antigravity.boutique-etf` → `run_timer_job.sh boutique-etf` → `run_boutique_etf.sh`).\n\n- **스케줄 근거**: ETF 자산구성내역(PDF)은 매 영업일 **장 개시 전** 공표 → **09:10**이 본 실행이자 가장 이른 인지 시점(사용자 요구=갱신 즉시). **10:10**=늦게 올리는 운용사 보충, **18:20**=최종 안전망. 수집은 ETF 단위 멱등, 알림은 항목 단위 증분(`alert_sent`)이라 3회 실행해도 중복 없이 늦게 온 것만 `(추가)`로 나감.\n- `run_timer_job.sh`가 .env 로드·락·타임아웃(900s)·stamp를 담당. `run_boutique_etf.sh`는 collect가 부분 실패해도 alert·뷰어 실행 후 코드 반환(공휴일 전량 stale·일부 운용사 장애 대응).\n- `schedule.tsv`에 3행 등재.",
-   "code": [
-    "launchd/timers/com.antigravity.boutique-etf.plist",
-    "launchd/timers/run_timer_job.sh",
-    "scripts/run_boutique_etf.sh"
-   ],
-   "writes": [
-    "store-boutique-etf-db"
-   ],
-   "depends_on": [
-    "src-boutique-etf"
-   ],
-   "alerts": "run_timer_job stamp + OnFailure 텔레그램"
-  },
-  {
    "id": "timer-hotel-adr",
    "project": "antigravity",
    "domain": "market-global",
@@ -3426,6 +3479,33 @@
    "writes": [
     "hotel_adr.csv"
    ]
+  },
+  {
+   "id": "timer-portfolio-premarket",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "timer",
+   "name": "장전 포트폴리오 재생성 타이머 (07:30 평일)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "07:30 평일 (월~금)",
+   "status": "active",
+   "desc_md": "2026-08-05 신설. 개장 전 평일 07:30 KST에 포트폴리오 구성 표(`portfolio_data.json`)를 한 번 재생성해 기준일을 당일로 넘기는 standalone launchd 타이머(`com.antigravity.portfolio-premarket` → `scripts/premarket_portfolio_refresh.sh`).\n\n- **왜**: [[src-create-portfolio-tables]]는 행 목록을 \"D-1 구성 ∪ 오늘 구성\" 합집합으로 만든다(전일 편출 종목을 당일 편출 표시용으로 남기는 의도된 동작). 정규 갱신([[bot-sisyphe]] auto_portfolio_update)의 첫 발화가 09:10이라, 그 전 아침 시간대에 WRAP Order 매트릭스·포트 표에 전일 편출 종목이 weight 0 행으로 계속 보였다. 이 잡이 개장 전에 기준일을 당일로 넘겨 그 구간을 없앤다.\n- 체인: `git pull` → `create_portfolio_tables.py` → `create_dashboard.py` → `safe_commit_push.sh`(Darwin에서 `publish_pages.sh` 백그라운드로 gh-pages까지 반영). 커밋 메시지 `[skip ci]`.\n- `run_timer_job.sh` 래퍼·`schedule.tsv` 미사용 — [[daemon-journal-api]]의 journal-trades와 동일한 standalone plist 규격(StartCalendarInterval 평일 5행, RunAtLoad=false). 실패 시 `notify_sisyphe_failure.sh portfolio-premarket`.",
+   "code": [
+    "launchd/timers/com.antigravity.portfolio-premarket.plist",
+    "scripts/premarket_portfolio_refresh.sh"
+   ],
+   "reads": [
+    "store-wrap-nav-xlsx"
+   ],
+   "writes": [
+    "store-portfolio-data",
+    "page-wrap"
+   ],
+   "depends_on": [
+    "src-create-portfolio-tables",
+    "src-create-dashboard"
+   ],
+   "alerts": "실패 → notify_sisyphe_failure.sh portfolio-premarket → 텔레그램"
   },
   {
    "id": "web-caddy",

@@ -10,12 +10,14 @@ status: "active"
 code:
   - "execution/fetch_taiwan_revenue.py"
   - "execution/taiwan_table.py"
+  - "execution/taiwan_revenue_alert.py"
 reads: []
 writes:
   - "store-taiwan-revenue-csv"
   - "page-market"
 depends_on:
   - "ext-data-apis"
+  - "infra-telegram"
 alerts: ""
 ---
 
@@ -27,6 +29,7 @@ FinMind로 대만 상장 큐레이션 53종목 월매출을 수집해 `taiwan_re
 
 - `--crosscheck`로 공식 TWSE/TPEx 스냅샷 대조(로그만). 100일 롤링 재조회 자가치유.
 - 시크릿: FINMIND_TOKEN/USER/PASSWORD.
+- **월매출 텔레그램 알림(2026-08-05, `taiwan_revenue_alert.py`)**: 맥미니 launchd `gha-taiwan-revenue` 잡이 수집·빌드 뒤 마지막 단계로 발송(발송 실패는 tolerate — 로그만). 한국 PEER 조인을 붙이고, 처음엔 QTD vs 분기 컨센서스를 넣었으나 최종적으로 **컨센서스는 빼고 부티크 ETF 알림과 같은 불릿 스타일(PEER만)**로 정리했다.
 
 ## Reads
 - (none)
@@ -37,7 +40,9 @@ FinMind로 대만 상장 큐레이션 53종목 월매출을 수집해 `taiwan_re
 
 ## Depends on
 - [[ext-data-apis]] — 외부 데이터 API/소스 집합
+- [[infra-telegram]] — 텔레그램 (알림·상호작용 채널)
 
 ## Code
 - `execution/fetch_taiwan_revenue.py`
 - `execution/taiwan_table.py`
+- `execution/taiwan_revenue_alert.py`
