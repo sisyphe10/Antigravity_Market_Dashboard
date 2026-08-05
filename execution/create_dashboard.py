@@ -1925,10 +1925,10 @@ def _build_combined_chart_section():
                 {'display': '미 연속 실업수당청구',         'csv': '미 연속 실업수당청구',         'color': '#2A6BC9'},
                 {'display': '미 금융여건지수 NFCI',         'csv': '미 금융여건지수 NFCI',         'color': '#3A7BD5'},
                 {'display': '미 연준 총자산',               'csv': '미 연준 총자산',               'color': '#4A8BE0'},
-                {'display': '미 CPI YoY',            'csv': '미 CPI 전년동월비',            'color': '#5B99E8'},
+                {'display': '미 CPI YoY', 'label': 'CPI YoY',            'csv': '미 CPI 전년동월비',            'color': '#5B99E8'},
                 {'display': '미 근원 CPI YoY',       'csv': '미 근원 CPI 전년동월비',       'color': '#6CA7EF'},
                 {'display': '미 근원 PCE YoY',       'csv': '미 근원 PCE 전년동월비',       'color': '#7DB5F4'},
-                {'display': '미 PPI YoY',            'csv': '미 PPI 전년동월비',            'color': '#8FC2F8'},
+                {'display': '미 PPI YoY', 'label': 'PPI YoY',            'csv': '미 PPI 전년동월비',            'color': '#8FC2F8'},
                 {'display': '미 시간당임금 YoY',     'csv': '미 시간당임금 전년동월비',     'color': '#A0CFFB'},
                 {'display': '미 비농업고용 증감',           'csv': '미 비농업고용 증감',           'color': '#263238'},
                 {'display': '미 실업률',                    'csv': '미 실업률',                    'color': '#37474F'},
@@ -1937,14 +1937,14 @@ def _build_combined_chart_section():
                 {'display': '미 산업생산 YoY',       'csv': '미 산업생산 전년동월비',       'color': '#607D8B'},
                 {'display': '미 근원자본재 수주 YoY','csv': '미 근원자본재 수주 전년동월비','color': '#78909C'},
                 # ISM 제조업 PMI (fetch_ism_pmi.py, investing 이벤트차트 — 발표일→전월 매핑)
-                {'display': '미 ISM 제조업지수',            'csv': '미 ISM 제조업지수',            'color': '#EF6C00'},
-                {'display': '미 ISM 제조업 신규주문',              'csv': '미 ISM 제조업 신규주문',              'color': '#FB8C00'},
-                {'display': '미 ISM 제조업 고용',                'csv': '미 ISM 제조업 고용',                'color': '#FFA726'},
-                {'display': '미 ISM 제조업 가격',                'csv': '미 ISM 제조업 가격',                'color': '#E65100'},
-                {'display': '미 ISM 서비스업지수',                'csv': '미 ISM 서비스업지수',                'color': '#7E57C2'},
-                {'display': '미 ISM 서비스업 기업활동',             'csv': '미 ISM 서비스업 기업활동',             'color': '#9575CD'},
-                {'display': '미 ISM 서비스업 신규주문',             'csv': '미 ISM 서비스업 신규주문',             'color': '#B39DDB'},
-                {'display': '미 ISM 서비스업 가격',               'csv': '미 ISM 서비스업 가격',               'color': '#5E35B1'},
+                {'display': 'ISM 제조업지수',            'csv': 'ISM 제조업지수',            'color': '#EF6C00'},
+                {'display': 'ISM 제조업 신규주문',              'csv': 'ISM 제조업 신규주문',              'color': '#FB8C00'},
+                {'display': 'ISM 제조업 고용',                'csv': 'ISM 제조업 고용',                'color': '#FFA726'},
+                {'display': 'ISM 제조업 가격',                'csv': 'ISM 제조업 가격',                'color': '#E65100'},
+                {'display': 'ISM 서비스업지수',                'csv': 'ISM 서비스업지수',                'color': '#7E57C2'},
+                {'display': 'ISM 서비스업 기업활동',             'csv': 'ISM 서비스업 기업활동',             'color': '#9575CD'},
+                {'display': 'ISM 서비스업 신규주문',             'csv': 'ISM 서비스업 신규주문',             'color': '#B39DDB'},
+                {'display': 'ISM 서비스업 가격',               'csv': 'ISM 서비스업 가격',               'color': '#5E35B1'},
                 {'display': '미시간 소비자심리',            'csv': '미시간 소비자심리',            'color': '#90A4AE'},
                 {'display': '미 Sahm Rule 침체지표',        'csv': '미 Sahm Rule 침체지표',        'color': '#A7B8C2'},
                 {'display': '미 GDPNow 성장률',             'csv': '미 GDPNow 성장률',             'color': '#BCC9D1'},
@@ -2203,11 +2203,15 @@ def _build_combined_chart_section():
                 if hotels:
                     tooltip_attr = f' title="{_html.escape(", ".join(hotels))}"'
             display_esc = _html.escape(s['display'])
+            # ★label = 표에 보이는 글자, display = 전역 유일 내부 키(임베드·data-series).
+            #   Country 칼럼이 국가를 표시하므로 이름의 '미 ' 접두를 뺄 때,
+            #   한국 선점명과 같아져도 키가 달라 덮이지 않는다.
+            label_esc = _html.escape(s.get('label', s['display']))
             country_esc = _html.escape(_series_country(group_label_raw, s, groups[gi].get('country')))
             rows_html += (
                 f'<tr class="cmb-series-row" data-group="{group_label}" '
                 f'data-country="{country_esc}" '
-                f'data-update-rank="{rank}" data-name="{display_esc}"{price_attr}{chg_attr} '
+                f'data-update-rank="{rank}" data-name="{label_esc}"{price_attr}{chg_attr} '
                 f'onclick="toggleCmbSeries(this.querySelector(\'.cmb-chart-item\'), event)" '
                 f'style="cursor:pointer;">'
                 # 별표(즐겨찾기) — Watchlist 패턴 이식 (2026-07-19). 상태는 localStorage.
@@ -2219,7 +2223,7 @@ def _build_combined_chart_section():
                 f'text-transform:uppercase;letter-spacing:0.3px;">{group_label}</td>'
                 f'<td class="cmb-chart-item{active}" data-series="{display_esc}"{tooltip_attr} '
                 f'style="{cell_base}text-align:center;font-size:var(--aoe-t-head-font);">'
-                f'{display_esc}</td>'
+                f'{label_esc}</td>'
                 f'<td class="cmb-price" style="padding:var(--aoe-t-pad-y) 4px;'
                 f'font-size:var(--aoe-t-font);color:#000;text-align:center;white-space:nowrap;'
                 f'font-variant-numeric:tabular-nums;">{price_txt}</td>'
