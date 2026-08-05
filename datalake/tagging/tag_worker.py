@@ -540,10 +540,12 @@ def _sum_usage(model_usage):
     for u in model_usage.values():
         if not isinstance(u, dict):
             continue
-        tot["input_tokens"] += int(u.get("inputTokens") or u.get("input_tokens") or 0)
-        tot["output_tokens"] += int(u.get("outputTokens") or u.get("output_tokens") or 0)
-        tot["cache_read_tokens"] += int(u.get("cacheReadInputTokens")
-                                        or u.get("cache_read_input_tokens") or 0)
+        # 입력 대부분은 cacheCreationInputTokens 에 잡힌다 (inputTokens 는 비캐시분만,
+        # 실측 2.1.209). 캐시 쓰기도 입력 볼륨이므로 input 에 합산한다.
+        tot["input_tokens"] += (int(u.get("inputTokens") or 0)
+                                + int(u.get("cacheCreationInputTokens") or 0))
+        tot["output_tokens"] += int(u.get("outputTokens") or 0)
+        tot["cache_read_tokens"] += int(u.get("cacheReadInputTokens") or 0)
     return tot
 
 
