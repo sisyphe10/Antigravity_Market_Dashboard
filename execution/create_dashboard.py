@@ -1486,6 +1486,10 @@ def _series_country(group_label, s, group_country=None):
     ov = CMB_COUNTRY_OVERRIDES.get(disp) or CMB_COUNTRY_OVERRIDES.get(csvn)
     if ov:
         return ov
+    # ★2026-08-05 이름에서 국가 표기를 뺀 뒤로는 국가를 이름으로 추론할 수 없다.
+    #   한 국가로 묶이지 않는 그룹(INTEREST RATES 등)은 시리즈에 country 를 명시한다.
+    if s.get('country'):
+        return s['country']
     # 그룹 정의에 country 명시(2026-08-04 — Group 라벨에서 국가 접미사 제거하면서
     # 라벨 기반 판정이 불가능해진 그룹들. 라벨 분기는 하위호환 fallback으로 유지)
     if group_country:
@@ -1550,12 +1554,12 @@ CMB_ROC_ALLOW = {
     '가계대출 잔액': (5.11, 0.71, 4.29, 0.75),
     '경제심리지수 ESI': (9.4, 0.88, 6.2, 0.82),
     '미 CPI YoY': (3.05, 0.36, 3.05, 0.36),
-    '미 근원 CPI YoY': (2.76, 0.55, 2.76, 0.55),
-    '미 금융여건지수 NFCI': (None, None, 5.8, 0.87),
-    '미 케이스-실러 주택가격 YoY': (5.27, 0.91, 5.27, 0.91),
+    '근원 CPI YoY': (2.76, 0.55, 2.76, 0.55),
+    '금융여건지수 NFCI': (None, None, 5.8, 0.87),
+    '케이스-실러 주택가격 YoY': (5.27, 0.91, 5.27, 0.91),
     '미분양주택 (전국)': (3.54, 0.49, 2.73, 0.47),
     '미시간 소비자심리': (2.88, 0.25, 2.31, 0.18),
-    '삼성전자 외국인': (None, None, 3.22, 0.27),
+    '삼성전자 외국인비중': (None, None, 3.22, 0.27),
     '선행지수 순환변동치': (5.11, 0.63, 4.29, 0.51),
     '아파트 실거래지수 (서울)': (2.88, 0.71, 2.73, 0.61),
     '아파트 실거래지수 (전국)': (3.29, 0.81, 3.33, 0.76),
@@ -1566,54 +1570,54 @@ CMB_ROC_ALLOW = {
 
 CMB_SERIES_UNITS = {
     # INDEX_KOREA
-    'KOSPI Market Cap': '조원', 'KOSDAQ Market Cap': '조원',
+    'KOSPI 시가총액': '조원', 'KOSDAQ 시가총액': '조원',
     'KOSPI 거래대금': '조원', 'KOSDAQ 거래대금': '조원',
     'S&P 500 거래량': '십억주', 'NASDAQ 거래량': '십억주',
     'SPY 거래대금': '십억달러', 'QQQ 거래대금': '십억달러',
     '고객예탁금': '억원', '신용잔고': '억원', '반대매매금액': '억원',
-    '코스피 신용잔고': '억원', '코스닥 신용잔고': '억원',
+    'KOSPI 신용잔고': '억원', 'KOSDAQ 신용잔고': '억원',
     'KOSPI 배당수익률': '%', 'KOSDAQ 배당수익률': '%',
-    '코스피 외국인비중': '%', '코스닥 외국인비중': '%', '삼성전자 외국인': '%', '삼성전자우 외국인': '%',
-    'SK하이닉스 외국인': '%', '삼성생명 외국인': '%', 'SK스퀘어 외국인': '%', '삼성물산 외국인': '%',
+    'KOSPI 외국인비중': '%', 'KOSDAQ 외국인비중': '%', '삼성전자 외국인비중': '%', '삼성전자우 외국인비중': '%',
+    'SK하이닉스 외국인비중': '%', '삼성생명 외국인비중': '%', 'SK스퀘어 외국인비중': '%', '삼성물산 외국인비중': '%',
     # DERIVATIVES KR
-    '삼성전자 현선물 괴리율': '%', '하이닉스 현선물 괴리율': '%',
-    '삼성전자 미결제약정': '계약', '하이닉스 미결제약정': '계약',
-    '삼성전자 미결제 금액': '억원', '하이닉스 미결제 금액': '억원',
-    '삼성전자 공매도잔고': '억원', '하이닉스 공매도잔고': '억원',
-    '삼성전자 시가총액': '억원', '하이닉스 시가총액': '억원',
-    '삼성전자 레버리지 ETF AUM': '억원', '하이닉스 레버리지 ETF AUM': '억원',
+    '삼성전자 현선물 괴리율': '%', 'SK하이닉스 현선물 괴리율': '%',
+    '삼성전자 미결제약정': '계약', 'SK하이닉스 미결제약정': '계약',
+    '삼성전자 미결제약정 금액': '억원', 'SK하이닉스 미결제약정 금액': '억원',
+    '삼성전자 공매도잔고': '억원', 'SK하이닉스 공매도잔고': '억원',
+    '삼성전자 시가총액': '억원', 'SK하이닉스 시가총액': '억원',
+    '삼성전자 레버리지 ETF AUM': '억원', 'SK하이닉스 레버리지 ETF AUM': '억원',
     # INDEX_US
     # EXCHANGE RATE
     'KRW/USD': '원', 'CNY/USD': '위안', 'JPY/USD': '엔', 'TWD/USD': '대만달러', 'EUR/USD': '$',
     # INTEREST RATES (수익률 %, 스프레드 %p)
     'US03M': '%', 'US02Y': '%', 'US05Y': '%', 'US10Y': '%', 'US30Y': '%',
-    '한국 기준금리': '%', '국고채 3년': '%', '국고채 10년': '%', 'CD 91일': '%', 'CP 91일': '%',
+    '기준금리': '%', '국고채 3년': '%', '국고채 10년': '%', 'CD 91일': '%', 'CP 91일': '%',
     '회사채 3년 AA-': '%', '장단기 스프레드 10Y-3Y': '%p', '신용 스프레드 AA-3Y': '%p',
-    '미 기준금리 상단': '%', '미 장단기 금리차 10Y-2Y': '%p', '미 장단기 금리차 10Y-3M': '%p',
-    '미 BBB 스프레드': '%p', '미 하이일드 스프레드': '%p', '미 실질금리 10Y': '%',
+    '기준금리 상단': '%', '장단기 스프레드 10Y-2Y': '%p', '장단기 스프레드 10Y-3M': '%p',
+    'BBB 스프레드': '%p', '하이일드 스프레드': '%p', '실질금리 10Y': '%',
     'AI 하이퍼스케일러 CDS 5Y': 'bp', '오라클 CDS 5Y': 'bp', '아마존 CDS 5Y': 'bp',
     '메타 CDS 5Y': 'bp', '마이크로소프트 CDS 5Y': 'bp', '알파벳 CDS 5Y': 'bp',
-    '미 기대인플레 BEI 10Y': '%', '미 기대인플레 5Y5Y': '%', 'SOFR': '%',
+    '기대인플레 BEI 10Y': '%', '기대인플레 5Y5Y': '%', 'SOFR': '%',
     # MACRO KOREA
-    'CPI YoY': '%', 'PPI YoY': '%', '기대인플레이션 1년': '%', 'M2 YoY': '%',
+    'CPI YoY': '%', 'PPI YoY': '%', '기대인플레 1년': '%', 'M2 YoY': '%',
     '제조업 가동률': '%', '수출금액 YoY': '%', '경상수지': '$B', '외환보유액': '$B',
     '정기예금 잔액': '조원', '국민연금 적립금': '조원', '퇴직연금 적립금': '조원',
     '전산업생산 YoY': '%', '실업률 (한국)': '%', '온라인쇼핑 거래액': '조원',
-    '백화점 매출증감률': '%', '대형마트 매출증감률': '%', '편의점 매출증감률': '%', 'SSM 매출증감률': '%',
+    '백화점 매출 YoY': '%', '대형마트 매출 YoY': '%', '편의점 매출 YoY': '%', 'SSM 매출 YoY': '%',
     # MACRO US
     # ★역레포는 FRED RRPONTSYD 원본 단위가 Billions 이고 수집기가 스케일을 적용하지 않는다
     #   (연준 총자산 WALCL 만 백만→조 환산). 2026-07-28 $T 오등록 수정.
-    '미 역레포 잔고': '$B', '미 연준 총자산': '$T',
-    '미 신규 실업수당청구': '만건', '미 연속 실업수당청구': '만건', '미 JOLTS 구인': '만건',
-    '미 비농업고용 증감': '천명', '미 실업률': '%',
-    '미 CPI YoY': '%', '미 근원 CPI YoY': '%', '미 근원 PCE YoY': '%',
-    '미 PPI YoY': '%', '미 시간당임금 YoY': '%', '미 소매판매 YoY': '%',
-    '미 산업생산 YoY': '%', '미 근원자본재 수주 YoY': '%',
-    '미 Sahm Rule 침체지표': '%p', '미 GDPNow 성장률': '%',
-    '미 은행 대출태도 (C&I)': '%',   # FRED DRTSCILM = Net Percentage of Banks Tightening
+    '역레포 잔고': '$B', '연준 총자산': '$T',
+    '신규 실업수당청구': '만건', '연속 실업수당청구': '만건', 'JOLTS 구인': '만건',
+    '비농업고용 증감': '천명', '미 실업률': '%',
+    '미 CPI YoY': '%', '근원 CPI YoY': '%', '근원 PCE YoY': '%',
+    '미 PPI YoY': '%', '시간당임금 YoY': '%', '소매판매 YoY': '%',
+    '산업생산 YoY': '%', '근원자본재 수주 YoY': '%',
+    'Sahm Rule 침체지표': '%p', 'GDPNow 성장률': '%',
+    '은행 대출태도지수 (C&I)': '%',   # FRED DRTSCILM = Net Percentage of Banks Tightening
     # IMMIGRATION (출입국·체류)
     '외국인 입국자': '만명', '국민 출국자': '만명', '체류외국인 총계': '만명',
-    '체류외국인 취업(E)': '만명', '체류외국인 유학(D2·D4)': '만명',
+    '체류외국인 취업 (E)': '만명', '체류외국인 유학 (D2·D4)': '만명',
     # COMMODITIES
     '3-2-1 Crack Spread': '$/bbl',
     # SiliconData — 수집기 레지스트리(fetch_silicondata_index.py SILICONDATA_INDEXES)가 단위 정본.
@@ -1623,8 +1627,8 @@ CMB_SERIES_UNITS = {
     '은행 대출금리 (신규취급)': '%', '은행 저축성수신금리 (신규취급)': '%', '예대금리차 (신규)': '%p',
     '가계대출 잔액': '조원', '가계신용': '조원', '미분양주택 (전국)': '호',
     # CREDIT & HOUSING US
-    '미 모기지 30년 금리': '%', '미 주택착공': '만호', '미 건축허가': '만호', '미 기존주택판매': '만호',
-    '미 케이스-실러 주택가격 YoY': '%',
+    '모기지 30년 금리': '%', '주택착공': '만호', '건축허가': '만호', '기존주택판매': '만호',
+    '케이스-실러 주택가격 YoY': '%',
     # CRYPTOCURRENCY
     'BTC': '$', 'ETH': '$', 'BNB': '$', 'XRP': '$', 'SOL': '$',
     # COMMODITIES
@@ -1770,10 +1774,10 @@ def _build_combined_chart_section():
             {'label': 'INDEX', 'country': 'Korea', 'series': [
                 {'display': 'KOSPI',              'csv': 'KOSPI',              'color': '#000000', 'default': True},
                 {'display': 'KOSPI/USD',          'csv': 'KOSPI/USD',          'color': '#444444'},
-                {'display': 'KOSPI Market Cap',   'csv': 'KOSPI Market Cap',   'color': '#888888'},
+                {'display': 'KOSPI 시가총액',   'csv': 'KOSPI Market Cap',   'color': '#888888'},
                 {'display': 'KOSDAQ',             'csv': 'KOSDAQ',             'color': '#1976D2'},
                 {'display': 'KOSDAQ/USD',         'csv': 'KOSDAQ/USD',         'color': '#5294D8'},
-                {'display': 'KOSDAQ Market Cap',  'csv': 'KOSDAQ Market Cap',  'color': '#7BAEDF'},
+                {'display': 'KOSDAQ 시가총액',  'csv': 'KOSDAQ Market Cap',  'color': '#7BAEDF'},
                 # 시장 거래대금(원) — datalake kr_index_ohlcv.value = 전 종목 거래대금 합
                 # (KRX OpenAPI ACC_TRDVAL 은 지수 구성종목 기준이라 미채택. build_index_value.py)
                 {'display': 'KOSPI 거래대금',     'csv': 'KOSPI 거래대금',     'color': '#00695C'},
@@ -1784,8 +1788,8 @@ def _build_combined_chart_section():
                 {'display': '고객예탁금',         'csv': '고객예탁금',         'color': '#2E7D32'},
                 {'display': '신용잔고',           'csv': '신용잔고',           'color': '#C2185B'},
                 # 신용잔고 코스피/코스닥 분리 (금투협 KOFIA getGrantingOfCreditBalanceInfo, fetch_kofia_stats.py)
-                {'display': '코스피 신용잔고',    'csv': '코스피 신용잔고',    'color': '#AD1457'},
-                {'display': '코스닥 신용잔고',    'csv': '코스닥 신용잔고',    'color': '#EC407A'},
+                {'display': 'KOSPI 신용잔고',    'csv': '코스피 신용잔고',    'color': '#AD1457'},
+                {'display': 'KOSDAQ 신용잔고',    'csv': '코스닥 신용잔고',    'color': '#EC407A'},
                 # 반대매매금액 = 위탁매매 미수금 반대매매, 억원 (fetch_kofia_stats.py, 2021-10~)
                 {'display': '반대매매금액',       'csv': '반대매매금액',       'color': '#D84315'},
                 # 지수 밸류에이션 (KRX/pykrx data.krx 로그인 → KRX_VALUATION). 후행 PER/PBR/배당수익률.
@@ -1796,30 +1800,30 @@ def _build_combined_chart_section():
                 {'display': 'KOSDAQ PBR',         'csv': 'KOSDAQ PBR',         'color': '#0097A7'},
                 {'display': 'KOSDAQ 배당수익률',  'csv': 'KOSDAQ 배당수익률',  'color': '#26C6DA'},
                 # 외국인 보유비중/지분율 — JS isForeign 분기로 항상 레벨(%) 표시 (정규화 제외)
-                {'display': '코스피 외국인비중',   'csv': 'KOSPI 외국인 보유비중',   'color': '#E91E63'},
-                {'display': '코스닥 외국인비중',   'csv': 'KOSDAQ 외국인 보유비중',  'color': '#F06292'},
-                {'display': '삼성전자 외국인',     'csv': '삼성전자 외국인 지분율',   'color': '#1A237E'},
-                {'display': '삼성전자우 외국인',   'csv': '삼성전자우 외국인 지분율', 'color': '#3949AB'},
-                {'display': 'SK하이닉스 외국인',   'csv': 'SK하이닉스 외국인 지분율', 'color': '#283593'},
-                {'display': '삼성생명 외국인',     'csv': '삼성생명 외국인 지분율',   'color': '#5C6BC0'},
-                {'display': 'SK스퀘어 외국인',     'csv': 'SK스퀘어 외국인 지분율',   'color': '#7986CB'},
-                {'display': '삼성물산 외국인',     'csv': '삼성물산 외국인 지분율',   'color': '#9FA8DA'},
+                {'display': 'KOSPI 외국인비중',   'csv': 'KOSPI 외국인 보유비중',   'color': '#E91E63'},
+                {'display': 'KOSDAQ 외국인비중',   'csv': 'KOSDAQ 외국인 보유비중',  'color': '#F06292'},
+                {'display': '삼성전자 외국인비중',     'csv': '삼성전자 외국인 지분율',   'color': '#1A237E'},
+                {'display': '삼성전자우 외국인비중',   'csv': '삼성전자우 외국인 지분율', 'color': '#3949AB'},
+                {'display': 'SK하이닉스 외국인비중',   'csv': 'SK하이닉스 외국인 지분율', 'color': '#283593'},
+                {'display': '삼성생명 외국인비중',     'csv': '삼성생명 외국인 지분율',   'color': '#5C6BC0'},
+                {'display': 'SK스퀘어 외국인비중',     'csv': 'SK스퀘어 외국인 지분율',   'color': '#7986CB'},
+                {'display': '삼성물산 외국인비중',     'csv': '삼성물산 외국인 지분율',   'color': '#9FA8DA'},
             ]},
             {'label': 'DERIVATIVES', 'country': 'Korea', 'series': [
                 # 삼전·하이닉스 파생·수급 (fetch_deriv_daily.py — KRX 인증, 23:30 kodex 잡 편입, 2026-07-16)
                 # 단위: 괴리율=%, 미결제약정=계약, 금액·잔고·시총·AUM=억원. 공매도잔고는 T+2 공시.
                 {'display': '삼성전자 현선물 괴리율',   'csv': '삼성전자 현선물 괴리율',   'color': '#DC2626'},
                 {'display': '삼성전자 미결제약정',      'csv': '삼성전자 미결제약정',      'color': '#1B5E20'},
-                {'display': '삼성전자 미결제 금액',     'csv': '삼성전자 미결제약정 금액', 'color': '#0891B2'},
+                {'display': '삼성전자 미결제약정 금액',     'csv': '삼성전자 미결제약정 금액', 'color': '#0891B2'},
                 {'display': '삼성전자 공매도잔고',      'csv': '삼성전자 공매도잔고',      'color': '#1F4E9C'},
                 {'display': '삼성전자 시가총액',        'csv': '삼성전자 시가총액',        'color': '#A21CAF'},
                 {'display': '삼성전자 레버리지 ETF AUM', 'csv': '삼성전자 레버리지 ETF AUM', 'color': '#C2185B'},
-                {'display': '하이닉스 현선물 괴리율',   'csv': 'SK하이닉스 현선물 괴리율',   'color': '#9333EA'},
-                {'display': '하이닉스 미결제약정',      'csv': 'SK하이닉스 미결제약정',      'color': '#0072CE'},
-                {'display': '하이닉스 미결제 금액',     'csv': 'SK하이닉스 미결제약정 금액', 'color': '#713F12'},
-                {'display': '하이닉스 공매도잔고',      'csv': 'SK하이닉스 공매도잔고',      'color': '#00854A'},
-                {'display': '하이닉스 시가총액',        'csv': 'SK하이닉스 시가총액',        'color': '#64748B'},
-                {'display': '하이닉스 레버리지 ETF AUM', 'csv': 'SK하이닉스 레버리지 ETF AUM', 'color': '#0F766E'},
+                {'display': 'SK하이닉스 현선물 괴리율',   'csv': 'SK하이닉스 현선물 괴리율',   'color': '#9333EA'},
+                {'display': 'SK하이닉스 미결제약정',      'csv': 'SK하이닉스 미결제약정',      'color': '#0072CE'},
+                {'display': 'SK하이닉스 미결제약정 금액',     'csv': 'SK하이닉스 미결제약정 금액', 'color': '#713F12'},
+                {'display': 'SK하이닉스 공매도잔고',      'csv': 'SK하이닉스 공매도잔고',      'color': '#00854A'},
+                {'display': 'SK하이닉스 시가총액',        'csv': 'SK하이닉스 시가총액',        'color': '#64748B'},
+                {'display': 'SK하이닉스 레버리지 ETF AUM', 'csv': 'SK하이닉스 레버리지 ETF AUM', 'color': '#0F766E'},
             ]},
             _invflow_group(),
             {'label': 'INDEX', 'country': 'US', 'series': [
@@ -1848,7 +1852,7 @@ def _build_combined_chart_section():
                 {'display': 'TWD/USD',            'csv': 'TWD/USD',            'color': '#03A9F4'},
                 {'display': 'EUR/USD',            'csv': 'EUR/USD',            'color': '#29B6F6'},
                 # 미국 달러인덱스 광의 (FRED 일별, fetch_fred_data.py)
-                {'display': '달러인덱스 (광의)',  'csv': '달러인덱스 (광의)',  'color': '#4FC3F7'},
+                {'display': 'Dollar Index (Broad)',  'csv': '달러인덱스 (광의)',  'color': '#4FC3F7'},
             ]},
             {'label': 'INTEREST RATES', 'series': [
                 {'display': 'US03M', 'csv': 'US 13 Week Treasury Yield', 'color': '#B71C1C'},
@@ -1857,7 +1861,7 @@ def _build_combined_chart_section():
                 {'display': 'US10Y', 'csv': 'US 10 Year Treasury Yield', 'color': '#D32F2F'},
                 {'display': 'US30Y', 'csv': 'US 30 Year Treasury Yield', 'color': '#E53935'},
                 # 한국 금리 (ECOS 일별, fetch_ecos_data.py)
-                {'display': '한국 기준금리',          'csv': '한국 기준금리',          'color': '#7F0000'},
+                {'display': '기준금리',          'csv': '한국 기준금리',          'color': '#7F0000'},
                 {'display': '국고채 3년',             'csv': '국고채 3년',             'color': '#8E0000'},
                 {'display': '국고채 10년',            'csv': '국고채 10년',            'color': '#9A0007'},
                 {'display': 'CD 91일',                'csv': 'CD 91일',                'color': '#BF360C'},
@@ -1866,14 +1870,14 @@ def _build_combined_chart_section():
                 {'display': '장단기 스프레드 10Y-3Y', 'csv': '장단기 스프레드 10Y-3Y', 'color': '#F4511E'},
                 {'display': '신용 스프레드 AA-3Y',    'csv': '신용 스프레드 AA-3Y',    'color': '#FF7043'},
                 # 미국 금리·스프레드 (FRED 일별, fetch_fred_data.py)
-                {'display': '미 기준금리 상단',        'csv': '미 기준금리 상단',        'color': '#1A237E'},
-                {'display': '미 장단기 금리차 10Y-2Y', 'csv': '미 장단기 금리차 10Y-2Y', 'color': '#283593'},
-                {'display': '미 장단기 금리차 10Y-3M', 'csv': '미 장단기 금리차 10Y-3M', 'color': '#303F9F'},
-                {'display': '미 BBB 스프레드',         'csv': '미 BBB 스프레드',         'color': '#3949AB'},
-                {'display': '미 하이일드 스프레드',    'csv': '미 하이일드 스프레드',    'color': '#3F51B5'},
-                {'display': '미 실질금리 10Y',         'csv': '미 실질금리 10Y',         'color': '#5C6BC0'},
-                {'display': '미 기대인플레 BEI 10Y',   'csv': '미 기대인플레 BEI 10Y',   'color': '#7986CB'},
-                {'display': '미 기대인플레 5Y5Y',      'csv': '미 기대인플레 5Y5Y',      'color': '#9FA8DA'},
+                {'display': '기준금리 상단', 'country': 'US',        'csv': '미 기준금리 상단',        'color': '#1A237E'},
+                {'display': '장단기 스프레드 10Y-2Y', 'country': 'US', 'csv': '미 장단기 금리차 10Y-2Y', 'color': '#283593'},
+                {'display': '장단기 스프레드 10Y-3M', 'country': 'US', 'csv': '미 장단기 금리차 10Y-3M', 'color': '#303F9F'},
+                {'display': 'BBB 스프레드', 'country': 'US',         'csv': '미 BBB 스프레드',         'color': '#3949AB'},
+                {'display': '하이일드 스프레드', 'country': 'US',    'csv': '미 하이일드 스프레드',    'color': '#3F51B5'},
+                {'display': '실질금리 10Y', 'country': 'US',         'csv': '미 실질금리 10Y',         'color': '#5C6BC0'},
+                {'display': '기대인플레 BEI 10Y', 'country': 'US',   'csv': '미 기대인플레 BEI 10Y',   'color': '#7986CB'},
+                {'display': '기대인플레 5Y5Y', 'country': 'US',      'csv': '미 기대인플레 5Y5Y',      'color': '#9FA8DA'},
                 {'display': 'SOFR',                    'csv': 'SOFR',                    'color': '#304FFE'},
                 # 하이퍼스케일러 CDS 5Y (DTCC SBSDR 체결, fetch_dtcc_cds.py — 바스켓=시총가중 빅5)
                 {'display': 'AI 하이퍼스케일러 CDS 5Y',  'csv': 'AI 하이퍼스케일러 CDS 5Y',  'color': '#404040'},
@@ -1887,7 +1891,7 @@ def _build_combined_chart_section():
                 # ECOS 월별 매크로 (5년 임베드 창, fetch_ecos_data.py)
                 {'display': 'CPI YoY',        'csv': 'CPI 전년동월비',        'color': '#004D40'},
                 {'display': 'PPI YoY',        'csv': 'PPI 전년동월비',        'color': '#00695C'},
-                {'display': '기대인플레이션 1년',    'csv': '기대인플레이션 1년',    'color': '#00796B'},
+                {'display': '기대인플레 1년',    'csv': '기대인플레이션 1년',    'color': '#00796B'},
                 {'display': 'M2 YoY',         'csv': 'M2 전년동월비',         'color': '#00897B'},
                 {'display': 'BSI 업황실적 (전산업)', 'csv': 'BSI 업황실적 (전산업)', 'color': '#006064'},
                 {'display': 'BSI 업황전망 (전산업)', 'csv': 'BSI 업황전망 (전산업)', 'color': '#00838F'},
@@ -1904,38 +1908,38 @@ def _build_combined_chart_section():
                 # KOSIS 실물·소비 (fetch_kosis_series.py, VM 경로)
                 {'display': '전산업생산 YoY', 'csv': '전산업생산 전년동월비', 'color': '#00695F'},
                 {'display': '설비투자지수',          'csv': '설비투자지수',          'color': '#00796F'},
-                {'display': '실업률 (한국)',         'csv': '실업률 (한국)',         'color': '#004D45'},
+                {'display': '실업률 (한국)', 'label': '실업률',         'csv': '실업률 (한국)',         'color': '#004D45'},
                 {'display': '온라인쇼핑 거래액',     'csv': '온라인쇼핑 거래액',     'color': '#00887E'},
-                {'display': '백화점 매출증감률',     'csv': '백화점 매출증감률',     'color': '#009C8D'},
-                {'display': '대형마트 매출증감률',   'csv': '대형마트 매출증감률',   'color': '#26B0A1'},
-                {'display': '편의점 매출증감률',     'csv': '편의점 매출증감률',     'color': '#4DC4B5'},
-                {'display': 'SSM 매출증감률',        'csv': 'SSM 매출증감률',        'color': '#73D8C9'},
+                {'display': '백화점 매출 YoY',     'csv': '백화점 매출증감률',     'color': '#009C8D'},
+                {'display': '대형마트 매출 YoY',   'csv': '대형마트 매출증감률',   'color': '#26B0A1'},
+                {'display': '편의점 매출 YoY',     'csv': '편의점 매출증감률',     'color': '#4DC4B5'},
+                {'display': 'SSM 매출 YoY',        'csv': 'SSM 매출증감률',        'color': '#73D8C9'},
                 # 법무부 출입국 (fetch_immigration.py, data.go.kr — 맥미니 경로, 만명)
                 {'display': '외국인 입국자',            'csv': '외국인 입국자',            'color': '#028090'},
                 {'display': '국민 출국자',              'csv': '국민 출국자',              'color': '#05668D'},
                 {'display': '체류외국인 총계',          'csv': '체류외국인 총계',          'color': '#00A896'},
-                {'display': '체류외국인 취업(E)',       'csv': '체류외국인 취업(E)',       'color': '#02C39A'},
-                {'display': '체류외국인 유학(D2·D4)',   'csv': '체류외국인 유학(D2·D4)',   'color': '#679436'},
+                {'display': '체류외국인 취업 (E)',       'csv': '체류외국인 취업(E)',       'color': '#02C39A'},
+                {'display': '체류외국인 유학 (D2·D4)',   'csv': '체류외국인 유학(D2·D4)',   'color': '#679436'},
             ]},
             {'label': 'MACRO', 'country': 'US', 'series': [
                 # FRED 미국 매크로 (fetch_fred_data.py; 월·분기 FRED_MACRO는 5년 임베드 창,
                 # 일·주간 FRED_RATE는 기존 365일 창)
-                {'display': '미 역레포 잔고',               'csv': '미 역레포 잔고',               'color': '#0D47A1'},
-                {'display': '미 신규 실업수당청구',         'csv': '미 신규 실업수당청구',         'color': '#1A5BB8'},
-                {'display': '미 연속 실업수당청구',         'csv': '미 연속 실업수당청구',         'color': '#2A6BC9'},
-                {'display': '미 금융여건지수 NFCI',         'csv': '미 금융여건지수 NFCI',         'color': '#3A7BD5'},
-                {'display': '미 연준 총자산',               'csv': '미 연준 총자산',               'color': '#4A8BE0'},
+                {'display': '역레포 잔고',               'csv': '미 역레포 잔고',               'color': '#0D47A1'},
+                {'display': '신규 실업수당청구',         'csv': '미 신규 실업수당청구',         'color': '#1A5BB8'},
+                {'display': '연속 실업수당청구',         'csv': '미 연속 실업수당청구',         'color': '#2A6BC9'},
+                {'display': '금융여건지수 NFCI',         'csv': '미 금융여건지수 NFCI',         'color': '#3A7BD5'},
+                {'display': '연준 총자산',               'csv': '미 연준 총자산',               'color': '#4A8BE0'},
                 {'display': '미 CPI YoY', 'label': 'CPI YoY',            'csv': '미 CPI 전년동월비',            'color': '#5B99E8'},
-                {'display': '미 근원 CPI YoY',       'csv': '미 근원 CPI 전년동월비',       'color': '#6CA7EF'},
-                {'display': '미 근원 PCE YoY',       'csv': '미 근원 PCE 전년동월비',       'color': '#7DB5F4'},
+                {'display': '근원 CPI YoY',       'csv': '미 근원 CPI 전년동월비',       'color': '#6CA7EF'},
+                {'display': '근원 PCE YoY',       'csv': '미 근원 PCE 전년동월비',       'color': '#7DB5F4'},
                 {'display': '미 PPI YoY', 'label': 'PPI YoY',            'csv': '미 PPI 전년동월비',            'color': '#8FC2F8'},
-                {'display': '미 시간당임금 YoY',     'csv': '미 시간당임금 전년동월비',     'color': '#A0CFFB'},
-                {'display': '미 비농업고용 증감',           'csv': '미 비농업고용 증감',           'color': '#263238'},
-                {'display': '미 실업률',                    'csv': '미 실업률',                    'color': '#37474F'},
-                {'display': '미 JOLTS 구인',                'csv': '미 JOLTS 구인',                'color': '#455A64'},
-                {'display': '미 소매판매 YoY',       'csv': '미 소매판매 전년동월비',       'color': '#546E7A'},
-                {'display': '미 산업생산 YoY',       'csv': '미 산업생산 전년동월비',       'color': '#607D8B'},
-                {'display': '미 근원자본재 수주 YoY','csv': '미 근원자본재 수주 전년동월비','color': '#78909C'},
+                {'display': '시간당임금 YoY',     'csv': '미 시간당임금 전년동월비',     'color': '#A0CFFB'},
+                {'display': '비농업고용 증감',           'csv': '미 비농업고용 증감',           'color': '#263238'},
+                {'display': '미 실업률', 'label': '실업률',                    'csv': '미 실업률',                    'color': '#37474F'},
+                {'display': 'JOLTS 구인',                'csv': '미 JOLTS 구인',                'color': '#455A64'},
+                {'display': '소매판매 YoY',       'csv': '미 소매판매 전년동월비',       'color': '#546E7A'},
+                {'display': '산업생산 YoY',       'csv': '미 산업생산 전년동월비',       'color': '#607D8B'},
+                {'display': '근원자본재 수주 YoY','csv': '미 근원자본재 수주 전년동월비','color': '#78909C'},
                 # ISM 제조업 PMI (fetch_ism_pmi.py, investing 이벤트차트 — 발표일→전월 매핑)
                 {'display': 'ISM 제조업지수',            'csv': 'ISM 제조업지수',            'color': '#EF6C00'},
                 {'display': 'ISM 제조업 신규주문',              'csv': 'ISM 제조업 신규주문',              'color': '#FB8C00'},
@@ -1946,8 +1950,8 @@ def _build_combined_chart_section():
                 {'display': 'ISM 서비스업 신규주문',             'csv': 'ISM 서비스업 신규주문',             'color': '#B39DDB'},
                 {'display': 'ISM 서비스업 가격',               'csv': 'ISM 서비스업 가격',               'color': '#5E35B1'},
                 {'display': '미시간 소비자심리',            'csv': '미시간 소비자심리',            'color': '#90A4AE'},
-                {'display': '미 Sahm Rule 침체지표',        'csv': '미 Sahm Rule 침체지표',        'color': '#A7B8C2'},
-                {'display': '미 GDPNow 성장률',             'csv': '미 GDPNow 성장률',             'color': '#BCC9D1'},
+                {'display': 'Sahm Rule 침체지표',        'csv': '미 Sahm Rule 침체지표',        'color': '#A7B8C2'},
+                {'display': 'GDPNow 성장률',             'csv': '미 GDPNow 성장률',             'color': '#BCC9D1'},
             ]},
             {'label': 'CREDIT', 'country': 'Korea', 'series': [
                 # ECOS 신용 (5년 임베드 창, fetch_ecos_data.py)
@@ -1970,15 +1974,15 @@ def _build_combined_chart_section():
             ]},
             {'label': 'CREDIT', 'country': 'US', 'series': [
                 # FRED 미국 신용 (fetch_fred_data.py, 월·분기 FRED_SECTOR는 5년 임베드 창)
-                {'display': '미 은행 대출태도 (C&I)',             'csv': '미 은행 대출태도 (C&I)',             'color': '#E98A2B'},
+                {'display': '은행 대출태도지수 (C&I)',             'csv': '미 은행 대출태도 (C&I)',             'color': '#E98A2B'},
             ]},
             {'label': 'HOUSING', 'country': 'US', 'series': [
                 # FRED 미국 부동산 (모기지는 주간 FRED_RATE — 기존 365일 창)
-                {'display': '미 모기지 30년 금리',                'csv': '미 모기지 30년 금리',                'color': '#5D2E0D'},
-                {'display': '미 주택착공',                        'csv': '미 주택착공',                        'color': '#7A3E11'},
-                {'display': '미 건축허가',                        'csv': '미 건축허가',                        'color': '#965016'},
-                {'display': '미 기존주택판매',                    'csv': '미 기존주택판매',                    'color': '#B3621B'},
-                {'display': '미 케이스-실러 주택가격 YoY', 'csv': '미 케이스-실러 주택가격 전년동월비', 'color': '#CF7420'},
+                {'display': '모기지 30년 금리',                'csv': '미 모기지 30년 금리',                'color': '#5D2E0D'},
+                {'display': '주택착공',                        'csv': '미 주택착공',                        'color': '#7A3E11'},
+                {'display': '건축허가',                        'csv': '미 건축허가',                        'color': '#965016'},
+                {'display': '기존주택판매',                    'csv': '미 기존주택판매',                    'color': '#B3621B'},
+                {'display': '케이스-실러 주택가격 YoY', 'csv': '미 케이스-실러 주택가격 전년동월비', 'color': '#CF7420'},
             ]},
             {'label': 'CRYPTO', 'series': [
                 {'display': 'BTC', 'csv': 'BTC', 'color': '#F7931A'},
@@ -2322,7 +2326,7 @@ def _build_combined_chart_section():
             var clickPalette = ['#000000','#0055cc','#cc0000','#006633','#6a0dad','#cc6600','#008080','#990066'];
             // ★KRX GOLD/ETS 거래대금은 dataset.csv 는 원 단위지만 파이썬 export 단계에서 이미
             //   억원으로 환산돼 넘어온다(412.7357 / 67.5571). 여기서 또 나누면 1억배로 축소된다.
-            var seriesScale = { 'KOSPI Market Cap': 1e12, 'KOSDAQ Market Cap': 1e12,
+            var seriesScale = { 'KOSPI 시가총액': 1e12, 'KOSDAQ 시가총액': 1e12,
                                 'KOSPI 거래대금': 1e12, 'KOSDAQ 거래대금': 1e12,
                                 'S&P 500 거래량': 1e9, 'NASDAQ 거래량': 1e9,
                                 'SPY 거래대금': 1e9, 'QQQ 거래대금': 1e9,
