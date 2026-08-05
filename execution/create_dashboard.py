@@ -2215,7 +2215,7 @@ def _build_combined_chart_section():
             rows_html += (
                 f'<tr class="cmb-series-row" data-group="{group_label}" '
                 f'data-country="{country_esc}" '
-                f'data-update-rank="{rank}" data-name="{label_esc}"{price_attr}{chg_attr} '
+                f'data-update-rank="{rank}" data-name="{label_esc}" data-key="{display_esc}"{price_attr}{chg_attr} '
                 f'onclick="toggleCmbSeries(this.querySelector(\'.cmb-chart-item\'), event)" '
                 f'style="cursor:pointer;">'
                 # 별표(즐겨찾기) — Watchlist 패턴 이식 (2026-07-19). 상태는 localStorage.
@@ -2672,7 +2672,7 @@ def _build_combined_chart_section():
             }
             function cmbPaintStars() {
                 document.querySelectorAll('.cmb-series-row td.cmb-star').forEach(function(td) {
-                    var on = !!cmbStars[td.parentNode.getAttribute('data-name')];
+                    var on = !!cmbStars[td.parentNode.getAttribute('data-key')];
                     td.textContent = on ? '★' : '☆';
                     td.classList.toggle('on', on);
                 });
@@ -2736,7 +2736,7 @@ def _build_combined_chart_section():
             };
             window.cmbToggleStar = function(td, ev) {
                 ev.stopPropagation();
-                var name = td.parentNode.getAttribute('data-name');
+                var name = td.parentNode.getAttribute('data-key');
                 if (cmbStars[name]) {
                     delete cmbStars[name];
                     var si = cmbStarList.indexOf(name);
@@ -2777,7 +2777,7 @@ def _build_combined_chart_section():
                 document.querySelectorAll('.cmb-series-row').forEach(function(row) {
                     var _nm = (row.getAttribute('data-name') || '').toLowerCase();
                     var pass = cmbRowPasses(row, null) &&
-                        (!cmbStarOnly || cmbStars[row.getAttribute('data-name')]) &&
+                        (!cmbStarOnly || cmbStars[row.getAttribute('data-key')]) &&
                         (!cmbSearchQ || _nm.indexOf(cmbSearchQ) >= 0);
                     row.style.display = pass ? '' : 'none';
                 });
@@ -2962,7 +2962,7 @@ def _build_combined_chart_section():
                     cmbAutoRangePending = false;
                     var needStart = null;
                     selected.forEach(function(name) {
-                        var row = document.querySelector('.cmb-series-row[data-name="' + name.replace(/"/g, '\\"') + '"]');
+                        var row = document.querySelector('.cmb-series-row[data-key="' + name.replace(/"/g, '\\"') + '"]');
                         var rank = row ? +row.getAttribute('data-update-rank') : 0;
                         if (rank < 2) return;   // 0=D, 1=W는 대상 아님
                         var arr = cmbData.data[name];

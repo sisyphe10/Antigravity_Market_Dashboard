@@ -2,46 +2,42 @@
 """미국 ISM 서베이 8종 수집 → dataset.csv
 
 제조업 4종(헤드라인·신규주문·고용·가격) + 서비스업 4종(헤드라인·기업활동·신규주문·가격).
-전부 확산지수(50 기준). dtype = ISM_MACRO.
+전부 확산지수(50 기준). dtype = ISM_MACRO. 이름에 국가 접두 없음(Country 칼럼이 표시).
 
 ## ★원천 — investing 이벤트차트 외에는 전부 막혀 있다 (2026-08-05 전수 실측)
 - **FRED**: ISM이 2016년 재배포 라이선스 회수 → `NAPM` 등 삭제(API 400). 검색 0건.
 - **DBnomics `ISM/pmi/pm`**: 2025-09부터 값 오염(11.1·10.0 — 실제는 48~49대), 2025-12 정지.
 - **ismworld.org**: 전 경로 reCAPTCHA. **ECOS 국제통계**: PMI 미수록.
 - **Nasdaq Data Link**: 차단. **EconDB**: 인증 필요.
-- **ForexFactory 캘린더 JSON**: `actual` 필드 자체가 없음(실측 0/99). 단 `previous`
-  값은 **최신월 교차검증용**으로 유효 — 실제로 제조업 53.3 / 가격 73.0 / 서비스업
-  54.0 이 본 수집분과 일치함을 확인했다.
+- **ForexFactory 캘린더 JSON**: `actual` 필드가 없음(실측 0/99). 단 `previous` 는
+  **최신월 교차검증용**으로 유효 — 제조업 53.3 / 가격 73.0 / 서비스업 54.0 일치 확인.
 plain urllib/curl 은 403 → **curl_cffi(chrome impersonate) 필수**.
 
 ## ★★관측월 배정 = 인덱스 기반 (release stamp 직접 사용 금지)
-엔드포인트 timestamp 는 관측월이 아니라 **발표일**이다(ISM은 전월치를 다음 달
-첫 영업일에 공표). 그런데 발표가 밀려 **한 달에 두 번 발표되거나 stamp 자체가
-어긋난 달**이 있어 `발표월−1` 을 그대로 쓰면 그 구간이 통째로 밀린다.
-  예) 제조업 가격(174): 2008-09-02 발표분이 2008-10-01 로 잘못 찍혀 8월/9월 값이 뒤섞임.
+timestamp 는 관측월이 아니라 **발표일**이다(ISM은 전월치를 다음 달 첫 영업일 공표).
+그런데 발표 지연·스탬프 오류로 **한 달에 두 번 찍힌 달**이 있어 `발표월−1` 을 그대로
+쓰면 그 구간이 밀린다(가격 174: 2008-09-02 발표분이 2008-10-01 로 찍힘).
+→ first_ref = 첫 발표월−1, span == 관측수 일 때만 **i번째 관측 = first_ref + i개월**.
 
-→ 배정 규칙:
-  first_ref = 첫 발표월 − 1,  last_ref = 마지막 발표월 − 1
-  span = first_ref~last_ref 개월 수
-  ★ span == 관측 수 일 때만 **i번째 관측 = first_ref + i개월** 로 배정(결측 0 확인).
-  불일치하면 결측/중복이 있다는 뜻이므로 **그 시리즈는 쓰지 않고 건너뛴다.**
-dataset.csv 스탬프 = 그 관측월의 달력 말일(FRED/ECOS 월별 규약과 동일).
+### ★span==n 만으로는 부족하다 (2026-08-05 코덱스 지적 반영)
+결측 1건과 중복 1건이 서로 상쇄되면 개수가 맞으면서 **그 사이 구간만 통째로 한 달씩
+밀린다.** 값 앵커는 듬성듬성해서 앵커 사이 구간이 밀리면 못 잡는다.
+→ **드리프트 런 검사** 추가: 각 관측의 (발표월−1) 과 배정된 관측월의 차이를 구하고,
+  **0이 아닌 값이 연속으로 이어지는 최대 길이**가 MAX_DRIFT_RUN 을 넘으면 그 시리즈는
+  쓰지 않는다. 정상 = 전부 0. 알려진 2008 스탬프 오류 = 런 1(통과). 구간 밀림 = 긴 런(차단).
 
-검증: 8종 전부 span==n 통과. 값 앵커도 공표 실적과 일치 —
-제조업 2008-12=32.9·2020-04=41.5·2021-03=64.7, 신규주문 2021-03=68.0,
-고용 2020-04=27.5, 가격 2008-12=18.0·2021-03=85.6,
-서비스업 2020-04=41.8·2021-03=63.7, 기업활동 2020-04=26.0, 서비스 가격 2021-03=74.0.
+## ★앵커는 허용오차 방식
+ISM 은 **매년 1월 계절조정계수를 소급 개정**하므로 과거 값이 소폭(보통 ≤0.3) 바뀐다.
+앵커를 완전일치로 두면 매년 1월에 전 시리즈가 거짓 실패로 멈춘다 → `ANCHOR_TOL` 허용.
+한 달 밀림은 값이 이보다 훨씬 크게 벌어지고, 구조적 밀림은 위 드리프트 런이 먼저 잡는다.
 
 ## ★알려진 원천 결함
-- 제조업 가격(174) **2008-07 = 49.9 는 원천 오류**(실제 88.5대). 전후 월과 총 개수는
-  정상이라 배정은 안 밀린다. 5년 임베드 창 밖이라 화면에는 안 나온다. 교체 가능한
-  대체 원천이 없어 그대로 둔다 — RoC²·datalake 백필에 쓸 때만 유의.
+제조업 가격 **2008-07 = 49.9 는 원천 오류**(실제 88.5대, 같은 레코드 forecast 88 과 대조 시 명백).
+개수·전후월 정상이라 배정은 안 밀리고 5년 임베드 창 밖이라 화면 미노출. 대체 원천 없음.
 
-## 가드
-- ANCHORS: 시리즈별 실적 앵커 대조 → 하나라도 어긋나면 **그 시리즈 쓰지 않음**.
-  ★규약이 뒤집히면 전 계열이 조용히 밀리는데 개수 검사로는 못 잡는다. 앵커가 방어선.
-- 값 범위 이탈·span 불일치 시 해당 시리즈 skip. 다른 시리즈는 정상 진행.
-- 매 run 전 구간 upsert-heal — ISM은 매년 1월 계절조정계수를 소급 개정한다.
+## 실패 처리
+시리즈 단위로 격리(어떤 예외든 그 시리즈만 skip)하고, **하나라도 실패하면 exit 1**
+(dry-run 포함). 러너에서 `|| echo` 로 tolerate 되더라도 종료코드가 감시의 신호가 된다.
 
 사용:
   venv/bin/python3 execution/fetch_ism_pmi.py
@@ -64,8 +60,10 @@ ND = 1
 TIMEOUT = 30
 SLEEP = 1.2
 
-# event_id: investing economic-calendar 이벤트 번호
-# lo/hi: 허용 값 범위 (가격지수는 원자재 급등락으로 18~98 까지 벌어진다)
+ANCHOR_TOL = 0.5     # 연례 계절조정 소급 개정 흡수 (실측 개정폭 ≤0.3)
+MAX_DRIFT_RUN = 2    # 발표월↔배정월 불일치가 연속 3개월 이상이면 구간 밀림으로 간주
+
+# eid: investing economic-calendar 이벤트 번호 / lo·hi: 허용 값 범위
 # anchors: {관측월 말일 ISO: 값} — 공표 실적과 대조 확인된 것만
 SERIES = [
     dict(eid=173,  name='ISM 제조업지수',        lo=20, hi=80,
@@ -101,6 +99,11 @@ def add_months(y, m, k):
     return y, (m - 1) % 12 + 1
 
 
+def months_between(a, b):
+    """(y,m) 튜플 a → b 개월 수."""
+    return (b[0] - a[0]) * 12 + (b[1] - a[1])
+
+
 def fmt(v, nd):
     out = f'{v:.{nd}f}'
     if '.' in out:
@@ -126,40 +129,65 @@ def fetch(eid):
 
 
 def to_points(payload, spec):
-    """attr[] → {관측월 말일: 값}. ★인덱스 기반 배정 (docstring 참조)."""
+    """attr[] → {관측월 말일: 값}. 인덱스 기반 배정 + 드리프트 런 검사 + 앵커."""
     rows = payload.get('attr') if isinstance(payload, dict) else None
     if not rows:
         raise IsmError('attr 비어 있음')
-    obs = sorted((it for it in rows if it.get('actual') not in (None, '')),
-                 key=lambda it: it['timestamp'])
+
+    obs = []
+    for it in rows:
+        if not isinstance(it, dict):
+            raise IsmError('attr 원소가 dict 아님 (스키마 변경 의심)')
+        ts, v = it.get('timestamp'), it.get('actual')
+        if ts is None or v in (None, ''):
+            continue
+        try:
+            obs.append((int(ts), float(v)))
+        except (TypeError, ValueError):
+            raise IsmError('timestamp/actual 파싱 실패 (스키마 변경 의심)')
     if not obs:
         raise IsmError('유효 관측 0건')
+    obs.sort(key=lambda x: x[0])
 
-    def rel_ref(it):
-        d = datetime.fromtimestamp(it['timestamp'] / 1000, timezone.utc)
+    def rel_ref(ts):
+        d = datetime.fromtimestamp(ts / 1000, timezone.utc)
         return add_months(d.year, d.month, -1)
 
-    fy, fm = rel_ref(obs[0])
-    ly, lm = rel_ref(obs[-1])
-    span = (ly - fy) * 12 + (lm - fm) + 1
+    first = rel_ref(obs[0][0])
+    last = rel_ref(obs[-1][0])
+    span = months_between(first, last) + 1
     if span != len(obs):
         raise IsmError(f'월 배정 불가: 구간 {span}개월 ≠ 관측 {len(obs)}건 (결측·중복)')
 
+    # 드리프트 런 — 발표월 기준과 인덱스 배정이 연속으로 어긋나는 최대 길이
+    run = worst = 0
+    drift_at = []
     pts = {}
-    for i, it in enumerate(obs):
-        try:
-            val = float(it['actual'])
-        except (TypeError, ValueError):
-            raise IsmError(f'{i}번째 관측 값 파싱 실패')
+    for i, (ts, val) in enumerate(obs):
+        assigned = add_months(first[0], first[1], i)
+        d = months_between(assigned, rel_ref(ts))
+        if d:
+            run += 1
+            worst = max(worst, run)
+            if len(drift_at) < 5:
+                drift_at.append('%04d-%02d(%+d)' % (assigned[0], assigned[1], d))
+        else:
+            run = 0
         if not (spec['lo'] <= val <= spec['hi']):
-            raise IsmError(f'값 범위 이탈 idx{i} → {val}')
-        y, m = add_months(fy, fm, i)
-        pts[month_end(y, m)] = val
+            raise IsmError(f'값 범위 이탈 {assigned[0]}-{assigned[1]:02d} → {val}')
+        pts[month_end(*assigned)] = val
+
+    if worst > MAX_DRIFT_RUN:
+        raise IsmError(f'발표월↔배정월 불일치 {worst}개월 연속 (허용 {MAX_DRIFT_RUN}) '
+                       f'— 구간 밀림 의심 {", ".join(drift_at)}')
+    if drift_at:
+        print(f'    · 스탬프 드리프트 {len(drift_at)}건(최대 연속 {worst}): {", ".join(drift_at)}')
 
     for iso, want in spec['anchors'].items():
         got = pts.get(date.fromisoformat(iso))
-        if got is None or abs(got - want) > 1e-9:
-            raise IsmError(f'앵커 불일치 {iso}: 기대 {want}, 실제 {got} → 규약 변경 의심')
+        if got is None or abs(got - want) > ANCHOR_TOL:
+            raise IsmError(f'앵커 불일치 {iso}: 기대 {want}±{ANCHOR_TOL}, 실제 {got} '
+                           '→ 규약 변경 의심')
     return pts
 
 
@@ -189,27 +217,34 @@ def main():
         name = spec['name']
         try:
             pts = to_points(fetch(spec['eid']), spec)
-        except IsmError as e:
+        except Exception as e:      # ★어떤 예외든 그 시리즈만 격리 (스키마 드리프트 포함)
             failed.append(name)
-            print(f'  ⚠️ {name}: {e}')
+            print(f'  ⚠️ {name}: {type(e).__name__ if not isinstance(e, IsmError) else ""}{e}')
             continue
 
         added = 0
         for stamp in sorted(pts):
-            if stamp > today:
+            if stamp > today:       # 미래 스탬프 방어 (발표일 구조상 발생 불가)
                 continue
             s = fmt(pts[stamp], ND)
             k = (stamp.isoformat(), name)
             if k in index:
-                old = all_rows[index[k]][2]
-                if old != s:
+                row = all_rows[index[k]]
+                if row[2] != s:
                     try:
-                        same = abs(float(old.replace(',', '')) - float(s)) < 1e-9
+                        same = abs(float(row[2].replace(',', '')) - float(s)) < 1e-9
                     except ValueError:
                         same = False
                     if not same:
-                        all_rows[index[k]][2] = s
+                        row[2] = s
                         healed += 1
+                # dtype 도 치유 (값만 고치면 잘못된 타입 행이 영구히 남아
+                #  5년 임베드 창·PNG 제외에서 빠진다)
+                while len(row) < 4:
+                    row.append('')
+                if row[3] != DTYPE:
+                    row[3] = DTYPE
+                    healed += 1
             else:
                 row = [k[0], name, s, DTYPE]
                 all_rows.append(row)
@@ -217,30 +252,30 @@ def main():
                 new_rows.append(row)
                 added += 1
         ok += 1
-        last = max(pts)
+        shown = [d for d in pts if d <= today]
+        last = max(shown) if shown else max(pts)
         print(f'  ✓ {name}: {len(pts)}건 ({min(pts)}~{last}), 최신 {fmt(pts[last], ND)}, 신규 {added}')
 
-    print(f'\nISM 수집 완료: {ok}/{len(SERIES)} 성공, 신규 {len(new_rows)}건, 개정 {healed}건'
+    print(f'\nISM 수집: {ok}/{len(SERIES)} 성공, 신규 {len(new_rows)}건, 개정 {healed}건'
           + (' [dry-run, 미기록]' if dry else ''))
     if failed:
         print(f'실패 시리즈: {", ".join(failed)}')
-    if dry:
-        return 0
 
-    if healed:
-        with open(CSV_PATH, 'w', newline='', encoding='utf-8-sig') as f:
-            w = csv.writer(f)
-            w.writerow(header)
-            w.writerows(all_rows)
-    elif new_rows:
-        write_header = not os.path.exists(CSV_PATH)
-        with open(CSV_PATH, 'a', newline='', encoding='utf-8-sig') as f:
-            w = csv.writer(f)
-            if write_header:
+    if not dry:
+        if healed:
+            with open(CSV_PATH, 'w', newline='', encoding='utf-8-sig') as f:
+                w = csv.writer(f)
                 w.writerow(header)
-            w.writerows(new_rows)
+                w.writerows(all_rows)
+        elif new_rows:
+            write_header = not os.path.exists(CSV_PATH)
+            with open(CSV_PATH, 'a', newline='', encoding='utf-8-sig') as f:
+                w = csv.writer(f)
+                if write_header:
+                    w.writerow(header)
+                w.writerows(new_rows)
 
-    return 1 if ok == 0 else 0
+    return 1 if failed else 0     # ★부분 실패도 실패 (dry-run 포함) — 감시 신호
 
 
 if __name__ == '__main__':
