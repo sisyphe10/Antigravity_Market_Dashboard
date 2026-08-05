@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-05 14:50:44 KST",
+  "updated_at": "2026-08-05 18:45:05 KST",
   "slots": [
     {
       "id": "market-1m-leader",
@@ -15,7 +15,7 @@
       "category": "Market",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "2026-08 11개 자산 중 9/11 상승 — 위험자산 동반 강세",
+      "text": "2026-08 11개 자산 중 9/11 상승 — 시장 전반 호조",
       "href": "market.html",
       "spark": null
     },
@@ -24,7 +24,7 @@
       "category": "Memory",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "DDR5 1W +1.5% ($68) — 점진적 반등",
+      "text": "DDR5 1W +1.5% ($68) — 저점 형성 가능성",
       "href": "market.html",
       "spark": {
         "series": [
@@ -3168,7 +3168,7 @@
       "category": "Alert",
       "color": "#c2410c",
       "tone": "fact",
-      "text": "오늘 투자주의 27 · 경고 2 · 위험 2",
+      "text": "오늘 투자주의 52 · 경고 3 · 위험 3",
       "href": "market_alert.html",
       "spark": null
     },
@@ -3177,7 +3177,7 @@
       "category": "Featured",
       "color": "#d97706",
       "tone": "fact",
-      "text": "8.4(화) 거래대금 1위: SK하이닉스 8.3조원",
+      "text": "8.5(수) 거래대금 1위: SK하이닉스 6.6조원",
       "href": "featured.html",
       "spark": null
     },
@@ -3186,7 +3186,7 @@
       "category": "Featured",
       "color": "#d97706",
       "tone": "fact",
-      "text": "8.4(화) KOSDAQ 상승률 1위: 솔트룩스 +30.0%",
+      "text": "8.5(수) KOSDAQ 상승률 1위: KBI메탈 +30.0%",
       "href": "featured.html",
       "spark": null
     },
