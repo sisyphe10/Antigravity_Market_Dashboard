@@ -44,6 +44,8 @@ jobs:
             echo "FRED_SKIP=1" >> "$GITHUB_ENV"
             exit 0
           fi
+          python execution/fetch_ism_pmi.py \
+            || echo "ISM PMI fetch failed - warning only"
           python execution/fetch_fred_data.py
 
       - name: Generate Dashboard

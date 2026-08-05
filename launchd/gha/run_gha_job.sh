@@ -258,6 +258,10 @@ run_job() {
       if [ -z "${FRED_API_KEY:-}" ]; then
         echo "[gha-fred] FRED_API_KEY 미설정 → graceful skip (no failure)" >&2; return 0
       fi
+      # ISM 제조업 PMI (investing 이벤트차트, 키 불요). 스크래핑 원천이라 실패는
+      # 경고만 — 매 run 전 구간 재조회이므로 다음 run 이 회수한다.
+      "$PY" execution/fetch_ism_pmi.py \
+        || echo "[gha-fred] ISM PMI 수집 실패 → 경고만(다음 run 회수)" >&2
       "$PY" execution/fetch_fred_data.py || return $?
       "$PY" execution/create_dashboard.py || return $?
       /bin/bash scripts/safe_commit_push.sh \

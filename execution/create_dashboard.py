@@ -1936,6 +1936,8 @@ def _build_combined_chart_section():
                 {'display': '미 소매판매 YoY',       'csv': '미 소매판매 전년동월비',       'color': '#546E7A'},
                 {'display': '미 산업생산 YoY',       'csv': '미 산업생산 전년동월비',       'color': '#607D8B'},
                 {'display': '미 근원자본재 수주 YoY','csv': '미 근원자본재 수주 전년동월비','color': '#78909C'},
+                # ISM 제조업 PMI (fetch_ism_pmi.py, investing 이벤트차트 — 발표일→전월 매핑)
+                {'display': '미 ISM 제조업지수',            'csv': '미 ISM 제조업지수',            'color': '#EF6C00'},
                 {'display': '미시간 소비자심리',            'csv': '미시간 소비자심리',            'color': '#90A4AE'},
                 {'display': '미 Sahm Rule 침체지표',        'csv': '미 Sahm Rule 침체지표',        'color': '#A7B8C2'},
                 {'display': '미 GDPNow 성장률',             'csv': '미 GDPNow 성장률',             'color': '#BCC9D1'},
@@ -2067,7 +2069,7 @@ def _build_combined_chart_section():
         if '데이터 타입' in df.columns:
             long_mask = df['데이터 타입'].isin(['ECOS_MACRO', 'ECOS_SECTOR', 'FRED_MACRO', 'FRED_SECTOR',
                                                 'NPS_FUND', 'KOSIS_PENSION', 'KOSIS_MACRO', 'KOSIS_SECTOR', 'JP_CAPEX',
-                                                'IMMIGRATION'])
+                                                'IMMIGRATION', 'ISM_MACRO'])
             # 연간 시리즈(퇴직연금 등)는 5년 창이면 4점뿐 → 창 제한 없이 전체 임베드 (행 수 미미)
             full_mask = df['데이터 타입'].isin(['KOSIS_PENSION'])
         else:
