@@ -71,7 +71,7 @@ def _fmt_eok(v):
     if v is None:
         return '-'
     eok = v / 1e8
-    sign = '+' if eok > 0 else ('-' if eok < 0 else '')
+    sign = '+' if eok > 0 else ('−' if eok < 0 else '')
     a = abs(eok)
     if a >= 10000:
         return '%s%.1f조원' % (sign, a / 10000)
@@ -84,6 +84,8 @@ def _fmt_w(v):
     return '-' if v is None else ('%.1f' % v)
 
 
+# ★음수 부호 = U+2212(수학 마이너스). 하이픈 '-' 는 텔레그램 비례폰트에서
+#   '+' 보다 눈에 띄게 좁아 (-) 가 옹졸해 보인다 (사용자 지적 2026-08-05).
 WEEKDAY = '월화수목금토일'
 BULLET1 = '•'  # 1단계(브랜드) — 노션식 점 크기
 BULLET2 = '◦'  # 2단계(ETF·종목) — 속 빈 점
@@ -130,10 +132,10 @@ def _cells(r):
     if kind == 'in':
         gubun, w = 'New', '+%s%%' % _fmt_w(r.get('w_cur'))       # 신규 편입
     elif kind == 'out':
-        gubun, w = 'X', '-%s%%' % _fmt_w(r.get('w_prev'))        # 편출
+        gubun, w = 'X', '−%s%%' % _fmt_w(r.get('w_prev'))        # 편출
     else:
         dw = (r.get('w_cur') or 0) - (r.get('w_prev') or 0)
-        gubun = '(+)' if dw > 0 else '(-)'                        # 비중 급증 / 급감
+        gubun = '(+)' if dw > 0 else '(−)'                        # 비중 급증 / 급감
         w = '%s → %s%%' % (_fmt_w(r.get('w_prev')), _fmt_w(r.get('w_cur')))
     return '<b><u>%s</u></b> | %s | %s | <b><u>%s</u></b>' % (
         _esc(r['stock']), gubun, w, _fmt_eok(r.get('trade_amt')))
