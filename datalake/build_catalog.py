@@ -70,6 +70,29 @@ EXAMPLE_SQL = {
 }
 
 
+# 컬럼 단위 (2026-08-05) — 카탈로그에 단위가 없어 LLM 문답이 원/억원/조원을 오해했다(실사고).
+# 전부 실측으로 확인한 것만 적는다. 미확인 데이터셋은 넣지 않는다
+# (틀린 단위를 적는 것이 없는 것보다 나쁘다).
+UNITS = {
+    "kr_ohlcv": "가격(open/high/low/close) **원** · volume **주** · value(거래대금) **원** · change_pct **%**",
+    "kr_ohlcv_adj": "가격(adj_close 등) **원** (야후 수정주가) · volume **주**",
+    "kr_marcap": "marcap(시가총액) **원** · shares(상장주식수) **주** · volume **주** · value **원**",
+    "kr_foreign": "shares·held(보유주식수)·limit_qty **주** · ratio(보유비중)·exhaustion(소진율) **%** (51.03 = 51.03%)",
+    "kr_short": "short_volume·balance_qty **주** · short_value·balance_value **원**",
+    "kr_index_ohlcv": "가격(open/high/low/close) **지수 포인트** · volume **주** · value **원** · marcap **원**",
+    "kr_etf_ohlcv": "nav·가격 **원** · volume **주** · value **원** · index_value **지수 포인트**",
+    "kr_investor_value": "전 주체 컬럼(institution·individual·foreigner·pension 등) **원** 단위 순매수 금액. "
+                         "조원 환산 = 1e12 로 나눔, 억원 환산 = 1e8 로 나눔. "
+                         "시장 전체는 제로섬 — institution+other_corp+individual+foreigner+other_foreign = 0",
+    "kr_deriv_investor": "metric 컬럼으로 구분 — metric=value 면 **원**, metric=volume 면 **계약수**",
+    "overseas_ohlcv": "가격 **상장 통화 기준** (예: 0700.HK→HKD, AAPL→USD) · volume **주**",
+    "global_markets": "category 별 상이 — index **지수 포인트**, fx **환율**, rate **%**, commodity 각 상품 표준 단위",
+    "kr_flows": "series 별 상이 — KOFIA 원자료 단위를 그대로 유지",
+    "kr_macro": "series 별 상이 — ECOS 원자료 단위(%·지수·억원 등). 개별 series 확인 필요",
+    "us_macro": "series 별 상이 — FRED 원자료 단위. 개별 series 확인 필요",
+    "macro_series": "series 별 상이 — dataset.csv 원자료 단위. 개별 series 확인 필요",
+}
+
 def scan_datasets():
     out = {}
     if not os.path.isdir(MARKET_DIR):
@@ -133,7 +156,8 @@ def main():
                 f"- 기간: {period}\n- 행수: {rows:,}\n- 파일: `market/{name}/*.parquet` (연도 파티션)\n"
                 f"- 조회: `duckdb ~/datalake/market/market.duckdb` 후 뷰 `{name}` 사용\n\n"
                 f"## 스키마\n\n| 컬럼 | 타입 |\n|:---:|:---:|\n{col_lines}\n\n"
-                f"## 쿼리 예시\n\n```sql\n{EXAMPLE_SQL.get(name, f'SELECT * FROM {name} ORDER BY date DESC LIMIT 20;')}\n```\n"
+                + (f"## 단위\n\n{UNITS[name]}\n\n" if name in UNITS else "")
+                + f"## 쿼리 예시\n\n```sql\n{EXAMPLE_SQL.get(name, f'SELECT * FROM {name} ORDER BY date DESC LIMIT 20;')}\n```\n"
             )
             with open(os.path.join(CATALOG_DIR, f"{name}.md"), "w", encoding="utf-8", newline="\n") as f:
                 f.write(md)
