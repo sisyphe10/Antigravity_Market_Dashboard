@@ -4,9 +4,12 @@
 Runs right after fetch_taiwan_revenue.py inside launchd gha-taiwan-revenue
 (23:20 KST daily). Compares (코드, 날짜) keys in taiwan_revenue.csv against a
 local seen-state file and sends one Telegram digest for newly announced
-company-months. Each line carries the Korean-peer join (taiwan_universe.csv)
-and, when Yahoo covers the name, quarter-to-date progress vs the quarterly
-revenue consensus.
+company-months. Each stock gets a second line with the Korean-peer join
+(taiwan_universe.csv 한국PEER).
+
+Bullets follow the active-ETF alert convention (boutique_etf/alert.py C안):
+'•'+2sp for the stock line, '◦'+1sp for the sub line — proportional-font
+alignment fix. (컨센서스 대비 표시는 2026-08-05 사용자 지시로 제거.)
 
 Rules:
   - First run (no state file): seed all current keys silently, send nothing.
@@ -17,12 +20,6 @@ Rules:
     self-heals on the next daily run (duplicates possible only if a
     multi-chunk send fails midway, which is accepted).
   - Value restatements (self-heal re-fetch) do not alert; key is company-month.
-  - Consensus: Yahoo has no monthly-revenue consensus, so we show
-    QTD(발표월까지 누적 월매출) / 분기 매출 컨센서스(avg). Yahoo's "0q" row is
-    anchored to (last reported quarter + 1) — verified vs earnings dates; if
-    the announced month's quarter is beyond +1q (stale small-cap data) or the
-    fetch fails, the consensus part is silently omitted. Fetches are capped by
-    CONSENSUS_TIME_CAP so the digest never stalls the job watchdog.
 
 Env (loaded by run_gha_job.sh .env parser): TELEGRAM_SISYPHE_BOT_TOKEN,
 TELEGRAM_CHAT_ID. Missing env -> exit 0 with a log line (no hard failure).
@@ -33,7 +30,6 @@ import json
 import os
 import sys
 import tempfile
-import time
 from datetime import date
 
 import requests
@@ -45,8 +41,12 @@ STATE_PATH = os.path.join(ROOT, "logs", "launchd", "state",
                           "taiwan_revenue_alert_seen.json")
 RECENT_MONTHS = 5          # alert window for 날짜 (YYYY-MM)
 CHUNK_LIMIT = 3800         # telegram hard limit 4096, keep headroom
-CONSENSUS_TIME_CAP = 240   # sec; stop further yahoo fetches past this budget
 API = "https://api.telegram.org/bot{token}/sendMessage"
+
+BULLET1 = "•"   # • 1단계(종목) — boutique_etf/alert.py 규약 공유
+BULLET2 = "◦"   # ◦ 2단계(PEER) — 속 빈 점
+GAP1 = "  "          # ◦ 가 • 보다 넓어 1단계만 공백 2칸(첫 글자 위치 정렬)
+GAP2 = " "
 
 
 def month_key(code, ym):
@@ -93,101 +93,39 @@ def load_peers():
 PEERS = load_peers()
 
 
-def _qidx(ym):
-    """Linear quarter index of 'YYYY-MM'."""
-    y, m = ym.split("-")
-    return int(y) * 4 + (int(m) - 1) // 3
-
-
-def consensus_progress(code, market, ym, stock_rows):
-    """'분기컨센 대비 34.1% (1/3개월, 8명)' or '' when not derivable.
-
-    stock_rows: all CSV rows of this stock (QTD sum over the target quarter).
-    """
-    try:
-        import yfinance as yf
-    except ImportError:
-        return ""
-    try:
-        ticker = code + (".TW" if market == "상장" else ".TWO")
-        t = yf.Ticker(ticker)
-        qis = t.quarterly_income_stmt
-        if qis is None or qis.empty:
-            return ""
-        anchor = max(c.year * 4 + (c.month - 1) // 3 for c in qis.columns) + 1
-        off = _qidx(ym) - anchor
-        if off not in (0, 1):
-            return ""
-        est = t.revenue_estimate
-        key = "0q" if off == 0 else "+1q"
-        if est is None or est.empty or key not in est.index:
-            return ""
-        avg = est.loc[key].get("avg")
-        n = est.loc[key].get("numberOfAnalysts")
-        if avg is None or avg != avg or avg <= 0:
-            return ""
-        qtd = [r for r in stock_rows
-               if _qidx(r["날짜"]) == _qidx(ym) and r["날짜"] <= ym]
-        total = sum(float(r["매출_TWD"] or 0) for r in qtd)
-        if total <= 0:
-            return ""
-        n_txt = f", {int(n)}명" if n and n == n else ""
-        return (f"분기컨센 대비 {total / avg * 100:.1f}% "
-                f"({len(qtd)}/3개월{n_txt})")
-    except Exception as e:
-        print(f"[taiwan-alert] consensus skip {code}: {type(e).__name__} {e}",
-              file=sys.stderr)
-        return ""
-
-
-def fmt_lines(r, cons):
+def fmt_lines(r):
     name = html.escape(r["기업명"])
     cls = html.escape(r["분류"]) if r.get("분류") else ""
     try:
         rev = f'{float(r["매출_TWD"]) / 1e8:,.1f}억TWD'
     except (TypeError, ValueError):
         rev = "-"
-    parts = [f'· {name}' + (f' ({cls})' if cls else '') + f' {rev}']
+    parts = [name + (f' ({cls})' if cls else '') + f' {rev}']
     for label, col in (("YoY", "YoY(%)"), ("MoM", "MoM(%)")):
         v = (r.get(col) or "").strip()
         if v:
             parts.append(f'{label} {v}%')
-    lines = [" | ".join(parts)]
-    extras = []
+    lines = [BULLET1 + GAP1 + " | ".join(parts)]
     peer = PEERS.get(r["코드"], "")
     if peer:
-        extras.append(f'PEER {html.escape(peer)}')
-    if cons:
-        extras.append(cons)
-    if extras:
-        lines.append("   ↳ " + " · ".join(extras))
+        lines.append(BULLET2 + GAP2 + f'PEER {html.escape(peer)}')
     return lines
 
 
-def build_messages(alert_rows, all_rows):
-    """alert rows -> telegram-sized HTML chunks, grouped by month desc."""
-    by_code = {}
-    for r in all_rows:
-        by_code.setdefault(r["코드"], []).append(r)
+def build_messages(rows):
+    """rows -> list of telegram-sized HTML chunks, grouped by month desc."""
     by_month = {}
-    for r in alert_rows:
+    for r in rows:
         by_month.setdefault(r["날짜"], []).append(r)
-
-    t0 = time.monotonic()
-    blocks = [f"\U0001F1F9\U0001F1FC 대만 월매출 업데이트 ({len(alert_rows)}건)"]
+    blocks = [f"\U0001F1F9\U0001F1FC 대만 월매출 업데이트 ({len(rows)}건)"]
     for ym in sorted(by_month, reverse=True):
         month_rows = sorted(by_month[ym],
                             key=lambda r: -float(r["매출_TWD"] or 0))
         y, m = ym.split("-")
         lines = [f"<b><u>{y}년 {int(m)}월분 ({len(month_rows)}건)</u></b>"]
         for r in month_rows:
-            cons = ""
-            if time.monotonic() - t0 < CONSENSUS_TIME_CAP:
-                cons = consensus_progress(r["코드"], r.get("시장", ""),
-                                          ym, by_code.get(r["코드"], []))
-            lines += fmt_lines(r, cons)
+            lines += fmt_lines(r)
         blocks.append("\n".join(lines))
-
     msgs, cur = [], ""
     for b in blocks:
         cand = (cur + "\n\n" + b) if cur else b
@@ -246,7 +184,7 @@ def main():
               file=sys.stderr)
         return 0
 
-    msgs = build_messages(alertable, rows)
+    msgs = build_messages(alertable)
     for m in msgs:
         if not send(token, chat_id, m):
             return 1
