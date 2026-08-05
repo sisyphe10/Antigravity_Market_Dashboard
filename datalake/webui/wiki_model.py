@@ -90,8 +90,12 @@ def _write_cache(model, probed):
             pass
 
 
-def resolve(force=False):
-    """사용할 Opus 모델명을 돌려준다. env > 캐시 > 탐침 > FLOOR 순."""
+def resolve(force=False, allow_probe=True):
+    """사용할 Opus 모델명을 돌려준다. env > 캐시 > 탐침 > FLOOR 순.
+
+    allow_probe=False — 배치 잡(태깅 등)용: 캐시 miss 여도 탐침하지 않고 FLOOR 를
+    쓴다. 탐침 ~20초·쿼터 소모를 배치 잡이 떠안지 않게 하기 위함(04:40 선갱신
+    잡이 캐시를 채우므로 평상시엔 여기 도달하지 않는다)."""
     override = os.getenv("WIKI_CLAUDE_MODEL")
     if override:
         return override
@@ -99,6 +103,8 @@ def resolve(force=False):
         cached = _read_cache()
         if cached:
             return cached
+    if not allow_probe:
+        return FLOOR
 
     best, probed = FLOOR, []
 
