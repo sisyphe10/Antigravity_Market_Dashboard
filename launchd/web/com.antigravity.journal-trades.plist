@@ -3,12 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>Label</key><string>com.antigravity.journal-trades</string>
-	<!-- Trade 탭 일일 추출 — 매일 18:00 KST, order 시트 -> web/data/trades.json.
+	<!-- Escape Velocity 일일 갱신 — 매일 18:00 KST: Trade 추출 + 전체 페이지 재생성(daily_refresh.sh).
+	     구 토요일 09:30 crontab(# journal-chart)을 대체 (2026-08-05).
 	     standalone 타이머(run_timer_job.sh 래퍼·schedule.tsv 미사용, premarket 잡과 동일 규격) -->
 	<key>ProgramArguments</key>
 	<array>
-		<string>/Users/sisyphe/Antigravity_Market_Dashboard/venv/bin/python3</string>
-		<string>/Users/sisyphe/Journal/scripts/extract_trades.py</string>
+		<string>/bin/bash</string>
+		<string>/Users/sisyphe/Journal/scripts/daily_refresh.sh</string>
 	</array>
 	<key>WorkingDirectory</key><string>/Users/sisyphe/Journal</string>
 	<key>UserName</key><string>sisyphe</string>
