@@ -28,6 +28,15 @@ MAX_BACKLOG_DAYS = 3   # 전송 장애로 밀린 날짜를 몇 일치까지 따�
 #     비율이 구조적으로 크다(실측 최대 58.6% — 통안채·단기채 ETF). 걸어두면 그것만 올라온다.
 MIN_AMT = float(os.environ.get('BOUTIQUE_ALERT_MIN_AMT') or 5e9)          # 50억원
 MIN_MCAP_PCT = float(os.environ.get('BOUTIQUE_ALERT_MIN_PCT') or 0.1)     # 시총의 0.1%
+
+# ── 국내 종목만 알림 (사용자 확정 2026-08-05) ─────────────────
+#   stock_code 접두사가 정규화 결과다: KRX:=국내 상장, US:/HK:/RAW:(TT·CH·JP·선물지수)=해외.
+#   ★수집·DB·뷰어는 전량 그대로 두고 **알림에서만** 민다. env=0 으로 즉시 원복.
+DOMESTIC_ONLY = (os.environ.get('BOUTIQUE_ALERT_DOMESTIC_ONLY') or '1') != '0'
+
+
+def _is_domestic(r):
+    return str(r.get('stock_code') or '').startswith('KRX:')
 FUND_KW = ('KODEX', 'TIGER', 'KBSTAR', 'ACE ', 'RISE', 'KIWOOM', 'SOL ', 'PLUS ',
            'TIME ', 'KoAct', 'TRUSTON', 'ARIRANG', 'HANARO', 'ETF', 'ETN',
            '통안채', '단기채', '회사채', '금융채', '국고채', '종합채', 'MMF')
@@ -40,6 +49,8 @@ def _is_fund_like(name):
 
 def passes_filter(r):
     """알림 대상 여부. 필터는 알림에만 적용하고 DB·뷰어에는 전량 남긴다."""
+    if DOMESTIC_ONLY and not _is_domestic(r):
+        return False
     if r['kind'] in ('in', 'out'):
         return True
     amt = abs(r.get('trade_amt') or 0)
