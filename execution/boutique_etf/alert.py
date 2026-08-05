@@ -120,20 +120,23 @@ def _esc(s):
 
 
 def _cells(r):
-    """공통 뒷부분: 구분 | 비중 | 유입·유출 | 금액"""
+    """공통 뒷부분: 구분 | 비중 | 금액  (사용자 확정 2026-08-05)
+
+    ★유입/유출 칼럼 제거 — 마지막 금액의 부호가 이미 같은 정보를 담는다.
+    ★구분은 (+)/(-)/New/X — 맨 +,- 는 표 안에서 눈에 안 띄어 괄호로 감싼다.
+    ★비중 화살표 좌우에 공백: 29.7 → 25.1%
+    """
     kind = r['kind']
     if kind == 'in':
-        gubun, w = 'NEW', '+%s%%' % _fmt_w(r.get('w_cur'))       # 신규 편입
+        gubun, w = 'New', '+%s%%' % _fmt_w(r.get('w_cur'))       # 신규 편입
     elif kind == 'out':
         gubun, w = 'X', '-%s%%' % _fmt_w(r.get('w_prev'))        # 편출
     else:
         dw = (r.get('w_cur') or 0) - (r.get('w_prev') or 0)
-        gubun = '+' if dw > 0 else '-'                            # 비중 급증 / 급감
-        w = '%s→%s%%' % (_fmt_w(r.get('w_prev')), _fmt_w(r.get('w_cur')))
-    amt = r.get('trade_amt') or 0
-    flow = '유입' if amt > 0 else ('유출' if amt < 0 else '-')
-    return '<b><u>%s</u></b> | %s | %s | %s | <b><u>%s</u></b>' % (
-        _esc(r['stock']), gubun, w, flow, _fmt_eok(r.get('trade_amt')))
+        gubun = '(+)' if dw > 0 else '(-)'                        # 비중 급증 / 급감
+        w = '%s → %s%%' % (_fmt_w(r.get('w_prev')), _fmt_w(r.get('w_cur')))
+    return '<b><u>%s</u></b> | %s | %s | <b><u>%s</u></b>' % (
+        _esc(r['stock']), gubun, w, _fmt_eok(r.get('trade_amt')))
 
 
 def _brand(etf):
