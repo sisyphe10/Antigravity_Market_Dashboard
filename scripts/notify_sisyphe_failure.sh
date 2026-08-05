@@ -66,8 +66,12 @@ gate_decide() {   # rc 0 = 발송, rc 1 = 억제
     eval "case \"\${$v:-}\" in ''|*[!0-9]*) $v=0 ;; esac"
   done
 
-  # G2 자동 리셋
-  if [ "$gap" -gt 0 ] && [ "$last_fail" -gt 0 ] && [ $(( now - last_fail )) -gt $(( gap * 2 )) ]; then
+  # G2 자동 리셋. 창 = 2×간격, 단 하한 1시간(RESET_FLOOR).
+  # 하한이 없으면 60초 주기 잡(send-advisory-emails)처럼 실패 알림이 수 분 간격으로 오는 경우
+  # 매번 '1차'로 리셋돼 지속 장애가 영원히 침묵한다(7/13 실제 패턴).
+  local reset_sec=$(( gap * 2 ))
+  [ "$reset_sec" -lt "${NOTIFY_RESET_FLOOR:-3600}" ] && reset_sec="${NOTIFY_RESET_FLOOR:-3600}"
+  if [ "$gap" -gt 0 ] && [ "$last_fail" -gt 0 ] && [ $(( now - last_fail )) -gt "$reset_sec" ]; then
     fails=0
   fi
   fails=$(( fails + 1 ))
