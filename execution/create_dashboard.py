@@ -3476,7 +3476,7 @@ def _build_combined_chart_section():
                         <button class="cmb-ma-btn cmb-quick-btn" data-qv="Weekly" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'Weekly')">Weekly</button>
                         <button class="cmb-ma-btn cmb-quick-btn" data-qv="Monthly" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'Monthly')">Monthly</button>
                     </div>
-                    <div id="cmbScrollBox" style="flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#b6bec7 #3a3f45;">{list_html}</div>
+                    <div style="position:relative;flex:1 1 auto;min-height:0;"><div id="cmbScrollBox" style="position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#b6bec7 #3a3f45;">{list_html}</div></div>
                 </div>
                 <div style="width:1000px;">
                     <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;font-size:13px;">
