@@ -70,7 +70,7 @@ DAEMON_DIR="/Library/LaunchDaemons"
 #   plist 파일은 보존 — 재개 시 두 이름을 NAMES 에 되돌리고 schedule.tsv 주석만 풀면 된다.
 NAMES=(featured-kis landing-highlights \
        etf-active-alert kodex-sectors earnings-bot update-stock-master \
-       memento-telegram wrap-principle-check us-etf-collect memory-cycle-alert \
+       memento-telegram us-etf-collect memory-cycle-alert \
        daemon-health)
 
 # 토큰 치환 헬퍼: stdin → stdout
