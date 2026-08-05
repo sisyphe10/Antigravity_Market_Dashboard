@@ -241,6 +241,64 @@ def build_alias_index(universe=None, manual=None, extra=None):
     }
 
 
+
+# --------------------------------------------------------------------------- #
+# 캐시 무효화 정책 (2026-08-05)
+# --------------------------------------------------------------------------- #
+def alias_signature(index):
+    """별칭 인덱스를 엔트리 단위 서명으로 환원. 캐시 무효화 판정의 입력."""
+    return sorted("%s\t%s\t%s" % (e["entity_id"], nfkc(e["alias"]).lower(),
+                                   e.get("strength", ""))
+                  for e in index["entries"])
+
+
+def sync_cache_epoch(conn, index, persist=True):
+    """유니버스·별칭 변경을 태그 캐시 키에서 분리한다. 반환 (epoch:str, added:list).
+
+    universe_hash / alias_hash 를 그대로 캐시 키에 넣으면 종목 1건 추가에도 전 문서가
+    재태깅된다(load_universe 의 해시는 CSV 원문 전체의 sha라 한 줄 변경에도 바뀐다).
+    실제로 2026-08-03 종목 추가 1건이 3,249건 재태깅을 유발해 야간 잡이 3일 연속
+    타임아웃했다. 그래서 키에는 epoch 만 넣고, 변경의 '종류'로 무효화 범위를 가른다.
+
+      · 엔트리 추가만  → epoch 불변(기존 태그 유효) + 새 별칭이 등장하는 문서만 재태깅
+      · 엔트리 삭제·변경 → epoch +1 (기존 태그의 근거가 사라졌으므로 전량 무효화)
+
+    최초 1회(서명 기록 없음)는 기존 태그를 신뢰하고 서명만 심는다.
+    """
+    conn.execute("CREATE TABLE IF NOT EXISTS tag_meta ("
+                 "key TEXT PRIMARY KEY, value TEXT, updated_at TEXT)")
+    row = conn.execute("SELECT value FROM tag_meta WHERE key='alias_signature'").fetchone()
+    prev = json.loads(row[0]) if row else None
+    row = conn.execute("SELECT value FROM tag_meta WHERE key='alias_epoch'").fetchone()
+    epoch = int(row[0]) if row else 1
+
+    cur_sig = alias_signature(index)
+    added = []
+    if prev is not None:
+        prev_set, cur_set = set(prev), set(cur_sig)
+        removed = prev_set - cur_set
+        if removed:
+            epoch += 1              # 삭제·변경 = 전량 무효화
+        else:
+            added = [s.split("\t")[1] for s in sorted(cur_set - prev_set)]
+    if persist:     # --dry-run 은 서명을 심지 않는다(다음 실제 실행이 추가분을 다시 본다)
+        stamp = __import__("datetime").datetime.now().isoformat(timespec="seconds")
+        conn.execute("INSERT OR REPLACE INTO tag_meta VALUES ('alias_epoch',?,?)",
+                     (str(epoch), stamp))
+        conn.execute("INSERT OR REPLACE INTO tag_meta VALUES ('alias_signature',?,?)",
+                     (json.dumps(cur_sig, ensure_ascii=False), stamp))
+        conn.commit()
+    return str(epoch), added
+
+
+def mentions_any(aliases, *texts):
+    """새로 추가된 별칭 중 하나라도 본문에 등장하면 True (개별 재태깅 판정)."""
+    if not aliases:
+        return False
+    blob = nfkc(" ".join(t for t in texts if t)).lower()
+    return any(a and a in blob for a in aliases)
+
+
 # --------------------------------------------------------------------------- #
 # 매칭
 # --------------------------------------------------------------------------- #

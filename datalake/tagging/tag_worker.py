@@ -470,6 +470,9 @@ def main():
     ap.add_argument("--dry-run", action="store_true", help="호출 없이 대상·토큰 견적만")
     ap.add_argument("--retry-failed", action="store_true")
     ap.add_argument("--force", action="store_true", help="캐시 무시하고 재태깅")
+    ap.add_argument("--migrate-cache-key", action="store_true",
+                    help="v1(universe/alias 해시 포함) 키로 저장된 기존 행의 캐시 키를 "
+                         "재태깅 없이 v2 로 제자리 이관. 1회만 쓴다.")
     args = ap.parse_args()
 
     onto = tc.load_ontology()
@@ -494,14 +497,31 @@ def main():
             "SELECT message_id FROM items WHERE status IN ('failed','dead_letter')")}
         rows = [r for r in rows if r["id"] in bad]
 
-    todo, cached = [], 0
+    epoch, added_aliases = tc.sync_cache_epoch(st, idx, persist=not args.dry_run)
+    if added_aliases:
+        print("별칭 신규 %d건 — 해당 문자열이 등장하는 문서만 재태깅: %s"
+              % (len(added_aliases), ", ".join(added_aliases[:5])))
+
+    todo, cached, migrated = [], 0, 0
     for r in rows:
         ch = sha(r["text_content"], r["article_content"], r["forward_source"])
-        ck = sha(ch, TAGGER_VERSION, prompt_hash, onto["hash"], uni["hash"], idx["hash"])
-        cur = st.execute("SELECT cache_key,status FROM items WHERE message_id=?",
-                         (r["id"],)).fetchone()
-        if (not args.force and cur and cur["cache_key"] == ck
-                and cur["status"] == "succeeded"):
+        # 캐시 키 = 본문 + 태거/프롬프트/온톨로지 + alias_epoch.
+        # universe/alias 해시는 넣지 않는다 — 종목 1건 추가로 전량 무효화되던 원인.
+        ck = sha(ch, TAGGER_VERSION, prompt_hash, onto["hash"], epoch)
+        cur = st.execute("SELECT cache_key,status,content_hash FROM items "
+                         "WHERE message_id=?", (r["id"],)).fetchone()
+        hit = bool(not args.force and cur and cur["cache_key"] == ck
+                   and cur["status"] == "succeeded")
+        if (not hit and args.migrate_cache_key and cur
+                and cur["status"] == "succeeded" and cur["content_hash"] == ch):
+            # v1→v2 이관: 본문이 그대로면 태그도 그대로 유효하므로 키만 갱신.
+            st.execute("UPDATE items SET cache_key=? WHERE message_id=?", (ck, r["id"]))
+            migrated += 1
+            hit = True
+        if hit and tc.mentions_any(added_aliases, r["text_content"],
+                                   r["article_content"]):
+            hit = False     # 새 별칭이 본문에 있으면 그 문서만 재태깅
+        if hit:
             cached += 1
             continue
         r["_content_hash"], r["_cache_key"] = ch, ck
@@ -511,6 +531,9 @@ def main():
 
     est_in = sum(len(tc.nfkc(r["text_content"] or "")[:MAX_TEXT_CHARS]) for r in todo) // 2
     est_in += len(system) // 2 * (len(todo) // BATCH_SIZE + 1)
+    if migrated and not args.dry_run:
+        st.commit()   # --dry-run 이면 커밋하지 않아 이관도 롤백된다(견적만)
+        print("캐시 키 이관(v1→v2): %d건 — 재태깅 없음" % migrated)
     print("대상 %d건 (캐시 재사용 %d건) / 배치 %d / 추정 입력 토큰 ~%s"
           % (len(todo), cached, BATCH_SIZE, format(est_in, ",")))
     if args.dry_run or not todo:
