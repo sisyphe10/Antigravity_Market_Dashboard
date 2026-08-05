@@ -30,7 +30,8 @@ case "$NAME" in
   datalake-snapshot)        CMD=("$PY" "$REPO/datalake/snapshot_archiver.py");     TIMEOUT=600 ;;
   datalake-backup)          CMD=(/bin/bash "$REPO/datalake/backup_datalake.sh");   TIMEOUT=3600 ;;
   datalake-sheets-mirror)   CMD=("$PY" "$REPO/datalake/mirror_sheets.py");          TIMEOUT=600 ;;
-  datalake-wiki-model)      CMD=("$PY" "$REPO/datalake/webui/wiki_model.py" --force); TIMEOUT=600 ;;
+  # 최신 Opus 탐침 선갱신 + headless 계약 검증(CLI 버전 변경 감지·종단 실행)
+  datalake-wiki-model)      CMD=("$PY" "$REPO/datalake/webui/wiki_smoke.py" --daily); TIMEOUT=900 ;;
   *) echo "[datalake] 알 수 없는 잡: $NAME" >&2; exit 64 ;;
 esac
 

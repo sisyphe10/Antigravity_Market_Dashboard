@@ -92,6 +92,9 @@ def run_question(question, history=None, session_id=None,
 
         # ANTHROPIC_API_KEY 를 걷어내야 구독 로그인으로 붙는다 (API 과금 방지의 핵심)
         env = {k: v for k, v in os.environ.items() if k != "ANTHROPIC_API_KEY"}
+        # 질문 처리 도중 CLI 가 스스로 업데이트하며 계약이 바뀌는 일이 없게 한다.
+        # (버전 고정이 아니라 '이 호출 중에는 갱신 금지' — 갱신 감지는 wiki_smoke.py 담당)
+        env["DISABLE_AUTOUPDATER"] = "1"
 
         try:
             proc = subprocess.run(cmd, capture_output=True, text=True,

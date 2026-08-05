@@ -732,6 +732,24 @@ async function go() {
 </script>"""
 
 
+def _startup_smoke():
+    """기동 후 백그라운드로 계약 검증 1회. 서버 부팅을 막지 않는다."""
+    import threading
+
+    def _run():
+        time.sleep(20)          # 데몬이 포트를 잡고 안정된 뒤에
+        try:
+            import wiki_smoke
+            wiki_smoke.run()
+        except Exception as e:
+            print("[wiki_smoke] 기동 검증 예외: %s: %s" % (type(e).__name__, e), flush=True)
+
+    threading.Thread(target=_run, daemon=True, name="wiki-smoke").start()
+
+
+_startup_smoke()
+
+
 @app.get("/test/headless/ui")
 def test_headless_ui():
     from fastapi.responses import HTMLResponse as _HR
