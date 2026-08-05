@@ -7532,7 +7532,6 @@ def create_dashboard():
                     'DDR4 16Gb (1Gx16)3200',
                     'DDR4 8Gb (1Gx8) 3200',
                     'DDR4 8Gb (1Gx8) 3200 Avg',
-                    'DDR4 8Gb (512Mx16) 3200',
                     'SLC 2Gb 256MBx8',
                     'SLC 1Gb 128MBx8',
                     'MLC 64Gb 8GBx8',
