@@ -2221,6 +2221,7 @@ def _build_combined_chart_section():
             #   한국 선점명과 같아져도 키가 달라 덮이지 않는다.
             label_esc = _html.escape(s.get('label', s['display']))
             unit_esc = _html.escape(unit_txt)
+            unit_title = f' title="{unit_esc}"' if unit_esc else ''
             country_esc = _html.escape(_series_country(group_label_raw, s, groups[gi].get('country')))
             rows_html += (
                 f'<tr class="cmb-series-row" data-group="{group_label}" '
@@ -2238,7 +2239,7 @@ def _build_combined_chart_section():
                 f'<td class="cmb-chart-item{active}" data-series="{display_esc}"{tooltip_attr} '
                 f'style="{cell_base}text-align:center;font-size:var(--aoe-t-head-font);">'
                 f'{label_esc}</td>'
-                f'<td class="cmb-price" style="padding:var(--aoe-t-pad-y) 4px;'
+                f'<td class="cmb-price"{unit_title} style="padding:var(--aoe-t-pad-y) 4px;'
                 f'font-size:var(--aoe-t-font);color:#000;text-align:center;white-space:nowrap;'
                 f'font-variant-numeric:tabular-nums;">{price_txt}</td>'
                 f'<td class="cmb-unit" style="padding:var(--aoe-t-pad-y) 4px;'
@@ -2286,6 +2287,16 @@ def _build_combined_chart_section():
             '#cmbSideTable #cmbStarTh{color:#67e0f4 !important;}'
             '#cmbSideTable td.cmb-price,#cmbSideTable #cmbPriceTh{border-left:2px solid #000;}'
             '#cmbScrollBox{border:2px solid #000;}'
+            # Unit 칼럼은 **기록만 하고 화면에서는 숨긴다** (2026-08-05 사용자 요청).
+            #   값은 tr[data-unit] · td.cmb-unit 로 DOM 에 남아 있고 Price 셀 title 로도 뜬다.
+            #   다시 보이려면 이 한 줄만 지우면 된다 (정렬·필터 배선은 그대로 살아 있음).
+            '#cmbSideTable td.cmb-unit,#cmbSideTable #cmbUnitTh{display:none;}'
+            # 스크롤바: 종전 thumb #6b7178 / track #111214 는 어두워 위치가 안 보였다
+            '#cmbScrollBox::-webkit-scrollbar{width:11px;}'
+            '#cmbScrollBox::-webkit-scrollbar-track{background:#3a3f45;border-radius:6px;}'
+            '#cmbScrollBox::-webkit-scrollbar-thumb{background:#b6bec7;border-radius:6px;'
+            'border:2px solid #3a3f45;}'
+            '#cmbScrollBox::-webkit-scrollbar-thumb:hover{background:#dfe4e9;}'
             '#cmbSideTable thead th{border-top:0!important;}'
             '#cmbSideTable td.cmb-chg.pos{color:#cc0000;font-weight:600;}'
             '#cmbSideTable td.cmb-chg.neg{color:#0055cc;font-weight:600;}'
@@ -2307,7 +2318,7 @@ def _build_combined_chart_section():
             'color:#111;white-space:nowrap;cursor:pointer;text-align:left;}'
             '</style>'
             f'<table id="cmbSideTable" class="portfolio-table" style="width:100%;max-width:100%;margin:0 auto;">'
-            f'<colgroup><col style="width:26px;"><col style="width:52px;"><col style="width:60px;"><col style="width:104px;"><col style="width:252px;"><col style="width:70px;"><col style="width:62px;"><col style="width:56px;"></colgroup>'
+            f'<colgroup><col style="width:26px;"><col style="width:52px;"><col style="width:60px;"><col style="width:104px;"><col style="width:300px;"><col style="width:70px;"><col style="width:62px;"><col style="width:56px;"></colgroup>'
             f'<thead><tr>'
             f'<th id="cmbStarTh" style="{th_base}" onclick="cmbToggleStarOnly(event)" title="즐겨찾기만 보기 토글">★</th>'
             f'<th style="{th_base}" onclick="sortCmbTable(\'rank\')">Freq <span id="cmbArr_rank" style="font-size:10px;">▲</span>{filter_btn.format(col="rank")}</th>'
@@ -2315,7 +2326,7 @@ def _build_combined_chart_section():
             f'<th style="{th_base}" onclick="sortCmbTable(\'group\')">Group <span id="cmbArr_group" style="font-size:10px;"></span>{filter_btn.format(col="group")}</th>'
             f'<th style="{th_base}" onclick="sortCmbTable(\'name\')">Name <span id="cmbArr_name" style="font-size:10px;"></span>{filter_btn.format(col="name")}</th>'
             f'<th id="cmbPriceTh" style="{th_base}" onclick="sortCmbTable(\'price\')">Price <span id="cmbArr_price" style="font-size:10px;"></span></th>'
-            f'<th style="{th_base}" onclick="sortCmbTable(\'unit\')">Unit <span id="cmbArr_unit" style="font-size:10px;"></span>{filter_btn.format(col="unit")}</th>'
+            f'<th id="cmbUnitTh" style="{th_base}" onclick="sortCmbTable(\'unit\')">Unit <span id="cmbArr_unit" style="font-size:10px;"></span>{filter_btn.format(col="unit")}</th>'
             f'<th style="{th_base}" onclick="sortCmbTable(\'chg\')">Chg <span id="cmbArr_chg" style="font-size:10px;"></span></th>'
             f'</tr></thead>'
             f'<tbody>{rows_html}</tbody></table>'
@@ -3455,8 +3466,8 @@ def _build_combined_chart_section():
         return f"""
         <div class="category-section">
             <h2 class="category-title">DATA</h2>
-            <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;justify-content:center;">
-                <div style="min-width:240px;position:relative;" id="cmbSideHost">
+            <div style="display:flex;gap:16px;align-items:stretch;max-width:1800px;margin:0 auto;justify-content:center;">
+                <div style="min-width:240px;position:relative;display:flex;flex-direction:column;min-height:0;" id="cmbSideHost">
                     <div id="cmbSelCount" style="font-size:11px;color:#000;min-height:16px;margin-bottom:0;padding-left:2px;"></div>
                     {search_box_html}
                     <div style="display:flex;gap:6px;margin:0 0 4px;">
@@ -3465,7 +3476,7 @@ def _build_combined_chart_section():
                         <button class="cmb-ma-btn cmb-quick-btn" data-qv="Weekly" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'Weekly')">Weekly</button>
                         <button class="cmb-ma-btn cmb-quick-btn" data-qv="Monthly" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'Monthly')">Monthly</button>
                     </div>
-                    <div id="cmbScrollBox" style="max-height:720px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#6b7178 #111214;">{list_html}</div>
+                    <div id="cmbScrollBox" style="flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#b6bec7 #3a3f45;">{list_html}</div>
                 </div>
                 <div style="width:1000px;">
                     <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;font-size:13px;">
