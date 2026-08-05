@@ -302,16 +302,49 @@ DATA_SERIES = [
 ]
 
 
+
+_LABEL_CACHE = None
+
+
+def _data_tab_labels():
+    """dataset.csv 제품명 → DATA 탭 표시 라벨. 정본 = create_dashboard.py 의 groups.
+
+    ★랜딩 카드는 제품명(csv)으로 시계열을 조회하는데 그 문자열을 **화면에도 그대로**
+      써 왔다. 2026-08-05 DATA 탭 표시명 통일 후 12건이 어긋났다(백화점 매출증감률 ↔
+      백화점 매출 YoY, US 10 Year Treasury Yield ↔ US10Y 등). 여기에 별도 매핑 dict 를
+      두면 또 드리프트하므로 **생성기 소스를 직접 읽어** 단일 출처를 유지한다.
+      (제품명 자체는 절대 바꾸면 안 된다 — 수집기가 그 키로 쓴다.)
+      파싱 실패 시 빈 dict → 제품명 그대로 쓰는 기존 동작으로 안전 폴백.
+    """
+    global _LABEL_CACHE
+    if _LABEL_CACHE is not None:
+        return _LABEL_CACHE
+    _LABEL_CACHE = {}
+    try:
+        src = (Path(__file__).resolve().parent / 'create_dashboard.py').read_text(encoding='utf-8')
+        blk = src[src.index("        groups = ["):src.index("        all_csv_names")]
+        for disp, label, csvn in re.findall(
+                r"\{'display': '([^']+)',\s*(?:'label': '([^']+)',\s*)?"
+                r"(?:'country': '[^']+',\s*)?'csv': '([^']+)'", blk):
+            _LABEL_CACHE[csvn] = label or disp
+    except Exception as e:
+        print(f'  W DATA 탭 표시명 파싱 실패({type(e).__name__}) — 제품명 그대로 사용')
+        _LABEL_CACHE = {}
+    return _LABEL_CACHE
+
+
 def build_data_series_slots(ctx):
     out = []
+    labels = _data_tab_labels()
     for sid, cat, dtype, name, unit, kind in DATA_SERIES:
-        srs = get_series(ctx['ds'], dtype, name)
+        srs = get_series(ctx['ds'], dtype, name)   # ★조회는 제품명(csv)으로
         if not srs or len(srs['values']) < 2:
             continue
+        disp = labels.get(name, name)              # ★화면은 DATA 탭 표시명으로
         vals, dates = srs['values'], srs['dates']
-        text = f"{name} 최신 {vals[-1]:,.4g}{unit} ({dates[-1]})"
+        text = f"{disp} 최신 {vals[-1]:,.4g}{unit} ({dates[-1]})"
         out.append(slot(sid, cat, 'fact', text, 'market.html', vals,
-                        trend_idx=min(22, len(vals) - 1), name=name, unit=unit,
+                        trend_idx=min(22, len(vals) - 1), name=disp, unit=unit,
                         value_kind=kind, dates=dates))
     return out
 
