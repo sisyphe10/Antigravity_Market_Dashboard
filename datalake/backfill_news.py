@@ -161,10 +161,8 @@ def backfill_foreign_ir():
     for r in results:
         if not isinstance(r, dict):
             continue
-        comp = r.get('company') if isinstance(r.get('company'), dict) else {}
-        cname = (comp.get('name') or comp.get('id') or r.get('company_id')
-                 or r.get('name') or '')
-        for it in (r.get('items') or []):
+        cname = ' '.join(x for x in [r.get('name') or '', r.get('ticker') or ''] if x)
+        for it in (r.get('releases') or []):
             if not isinstance(it, dict):
                 continue
             post = {
