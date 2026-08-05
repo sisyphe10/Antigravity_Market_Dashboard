@@ -333,6 +333,26 @@ def _data_tab_labels():
     return _LABEL_CACHE
 
 
+
+def fmt_band(v, unit=''):
+    """랜딩 카드 숫자 — 종전 유효숫자 4자리를 유지하되 **지수 표기만 제거**한다.
+
+    ★버그: `:,.4g` 는 다섯 자리를 넘으면 지수로 넘어갔다 — NASDAQ `2.591e+04pt`,
+      삼성 DDR5 소매가 `3.538e+05원` 등 8개 카드(2026-08-05 발견).
+    ★전역 자릿수 밴드(<10 소수2 / 10~99 소수1 / 100+ 정수)를 여기에 일괄 적용하면
+      28개 카드가 바뀌면서 **오히려 나빠진다** — EUR/USD 0.8683→0.87, JPY 157.5→158,
+      KOSDAQ 780.7→781. 밴드 표준은 '같은 축·열 안에서 통일'하는 규칙이지
+      단위가 제각각인 독립 카드에 일괄 적용할 성질이 아니다.
+      → 만 단위 이상만 정수+천단위 콤마로 바꾸고 나머지는 종전 표기를 보존한다.
+    """
+    try:
+        v = float(v)
+    except (TypeError, ValueError):
+        return str(v)
+    if abs(v) >= 10000:
+        return f'{v:,.0f}'
+    return f'{v:,.4g}'
+
 def build_data_series_slots(ctx):
     out = []
     labels = _data_tab_labels()
@@ -342,7 +362,7 @@ def build_data_series_slots(ctx):
             continue
         disp = labels.get(name, name)              # ★화면은 DATA 탭 표시명으로
         vals, dates = srs['values'], srs['dates']
-        text = f"{disp} 최신 {vals[-1]:,.4g}{unit} ({dates[-1]})"
+        text = f"{disp} 최신 {fmt_band(vals[-1], unit)}{unit} ({dates[-1]})"
         out.append(slot(sid, cat, 'fact', text, 'market.html', vals,
                         trend_idx=min(22, len(vals) - 1), name=disp, unit=unit,
                         value_kind=kind, dates=dates))
