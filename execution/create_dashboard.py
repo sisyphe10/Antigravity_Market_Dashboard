@@ -2894,6 +2894,37 @@ def _build_combined_chart_section():
                     if (sp) sp.textContent = (k === _cmbSortKey) ? (_cmbSortAsc ? '▲' : '▼') : '';
                 });
             }
+
+            // ── 사이드 테이블 높이 = 오른쪽 차트 컬럼 높이 (2026-08-05) ──
+            //   ★CSS 로는 못 한다: stretch 는 244행 자연높이가 행 높이가 돼 스크롤이 죽고,
+            //     absolute 는 표가 흐름에서 빠져 사이드 '폭'이 무너진다(폭은 표가 정한다).
+            //     → 레이아웃은 그대로 두고 max-height 만 JS 로 맞춘다.
+            function cmbSyncSideHeight() {
+                var host = document.getElementById('cmbSideHost');
+                var box = document.getElementById('cmbScrollBox');
+                var card = document.getElementById('cmbChartCard');
+                if (!host || !box || !card || !card.parentNode) return;
+                var colH = card.parentNode.getBoundingClientRect().height;
+                if (!colH) return;
+                // 스크롤박스 위쪽 헤더(선택수·검색·퀵필터)가 차지한 높이를 뺀다
+                var head = box.getBoundingClientRect().top - host.getBoundingClientRect().top;
+                var avail = Math.round(colH - head);
+                if (avail > 200) box.style.maxHeight = avail + 'px';
+            }
+            window.cmbSyncSideHeight = cmbSyncSideHeight;
+            (function() {
+                var run = function() { cmbSyncSideHeight(); };
+                if (document.readyState === 'loading')
+                    document.addEventListener('DOMContentLoaded', run);
+                else run();
+                window.addEventListener('resize', run);
+                // 이격도·RoC² 패널 토글로 차트가 길어지면 자동 추종
+                if (window.ResizeObserver) {
+                    var card = document.getElementById('cmbChartCard');
+                    if (card && card.parentNode) new ResizeObserver(run).observe(card.parentNode);
+                }
+                setTimeout(run, 300);   // 폰트·차트 초기 렌더 후 보정
+            })();
             window.sortCmbTable = function(key) {
                 if (_cmbSortKey === key) { _cmbSortAsc = !_cmbSortAsc; }
                 else { _cmbSortKey = key; _cmbSortAsc = (key !== 'chg' && key !== 'price'); }
@@ -3466,8 +3497,8 @@ def _build_combined_chart_section():
         return f"""
         <div class="category-section">
             <h2 class="category-title">DATA</h2>
-            <div style="display:flex;gap:16px;align-items:stretch;max-width:1800px;margin:0 auto;justify-content:center;">
-                <div style="min-width:240px;position:relative;display:flex;flex-direction:column;min-height:0;" id="cmbSideHost">
+            <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;justify-content:center;">
+                <div style="min-width:240px;position:relative;" id="cmbSideHost">
                     <div id="cmbSelCount" style="font-size:11px;color:#000;min-height:16px;margin-bottom:0;padding-left:2px;"></div>
                     {search_box_html}
                     <div style="display:flex;gap:6px;margin:0 0 4px;">
@@ -3476,7 +3507,7 @@ def _build_combined_chart_section():
                         <button class="cmb-ma-btn cmb-quick-btn" data-qv="Weekly" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'Weekly')">Weekly</button>
                         <button class="cmb-ma-btn cmb-quick-btn" data-qv="Monthly" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'Monthly')">Monthly</button>
                     </div>
-                    <div style="position:relative;flex:1 1 auto;min-height:0;"><div id="cmbScrollBox" style="position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#b6bec7 #3a3f45;">{list_html}</div></div>
+                    <div id="cmbScrollBox" style="max-height:720px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#b6bec7 #3a3f45;">{list_html}</div>
                 </div>
                 <div style="width:1000px;">
                     <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;font-size:13px;">
