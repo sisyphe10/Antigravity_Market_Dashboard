@@ -12,6 +12,8 @@
 ★이 모듈은 MCP stdio 서버에 임포트되므로 **stdout 으로 절대 출력하지 않는다**
   (JSON-RPC 스트림이 깨진다). 진단 출력은 stderr 로만.
 """
+import csv
+import io
 import os
 import re
 import sqlite3
@@ -34,41 +36,116 @@ SEARCH_ROOTS = [
 ]
 
 # ── run_sql ────────────────────────────────────────────────────────
+MAX_ROWS = 200
+MAX_OUT_CHARS = 200000
+SQL_TIMEOUT_SEC = int(os.getenv("WIKI_SQL_TIMEOUT", "60"))
+
+# ★화이트리스트: 선행 주석·공백을 걷어낸 뒤 SELECT/WITH 로 시작해야만 통과.
+#   종전 키워드 블랙리스트는 CALL·DESCRIBE·SHOW 등을 못 막았다 (codex 지적, 실증됨).
+_SQL_ALLOWED = re.compile(r"^(?:\s|--[^\n]*\n|/\*.*?\*/)*(SELECT|WITH)\b", re.I | re.S)
+
+# ★파일접근 테이블함수 차단. allowed_directories 안이라도 파일 원문을 돌려주면 안 된다
+#   (read_blob 으로 market.duckdb 를 읽는 것이 실증됐다).
+_SQL_FILE_FN = re.compile(
+    r"\b(read_blob|read_text|read_csv\w*|read_json\w*|read_ndjson\w*|read_parquet"
+    r"|read_xlsx|parquet_scan|csv_scan|sniff_csv|glob|duckdb_settings|duckdb_extensions"
+    r"|install_extension|load_extension|postgres_scan|mysql_scan|sqlite_scan|delta_scan"
+    r"|iceberg_scan|st_read)\s*\(", re.I)
+
+# 방어 2겹째 — 화이트리스트를 뚫는 변형이 나와도 쓰기·설정 구문은 막는다
 _SQL_FORBIDDEN = re.compile(
-    r"\b(ATTACH|COPY|EXPORT|INSTALL|LOAD|CREATE|INSERT|UPDATE|DELETE|DROP|ALTER|PRAGMA|SET)\b",
-    re.I)
+    r"\b(ATTACH|DETACH|COPY|EXPORT|IMPORT|INSTALL|LOAD|CREATE|INSERT|UPDATE|DELETE"
+    r"|DROP|ALTER|PRAGMA|SET|RESET|CALL|VACUUM|CHECKPOINT)\b", re.I)
 
 
 def _sandboxed_connect():
-    """읽기전용 + 외부접근 차단. _SQL_FORBIDDEN 키워드 필터만으로는
-    read_text('/…/.env') 같은 SELECT 파일함수를 막지 못하므로 런타임 SET 으로 잠근다.
+    """읽기전용 + 외부접근 차단 + 자원 상한.
+
     ★순서 주의: allowed_directories 를 먼저 좁힌 뒤 external_access 를 끈다
-      (끄고 나면 재활성화 불가)."""
+      (끄고 나면 세션 내 재활성화 불가).
+    """
     import duckdb
     con = duckdb.connect(DUCKDB_PATH, read_only=True)
     con.execute("SET allowed_directories=['%s']" % MARKET_DIR)
     con.execute("SET autoinstall_known_extensions=false")
     con.execute("SET autoload_known_extensions=false")
+    con.execute("SET memory_limit='2GB'")
+    con.execute("SET threads=2")
     con.execute("SET enable_external_access=false")
     return con
 
 
+def _validate_sql(sql):
+    """통과하면 None, 막히면 사용자에게 보여줄 사유 문자열."""
+    q = (sql or "").strip()
+    if not q:
+        return "ERROR: 빈 쿼리입니다."
+    body = q.rstrip(";").strip()
+    if ";" in body:
+        return "ERROR: 한 번에 하나의 조회문만 실행할 수 있습니다."
+    if not _SQL_ALLOWED.match(body):
+        return "ERROR: SELECT 또는 WITH 로 시작하는 조회만 허용됩니다."
+    if _SQL_FILE_FN.search(body):
+        return "ERROR: 파일·확장 접근 함수는 사용할 수 없습니다. 등록된 뷰만 조회하세요."
+    if _SQL_FORBIDDEN.search(body):
+        return "ERROR: 조회 외 구문은 허용되지 않습니다."
+    return None
+
+
 def run_sql(sql):
-    if _SQL_FORBIDDEN.search(sql or ""):
-        return "ERROR: SELECT만 허용됩니다."
+    bad = _validate_sql(sql)
+    if bad:
+        return bad
     try:
         con = _sandboxed_connect()
     except Exception as e:
         return "ERROR: DB 연결 실패(카탈로그 갱신 중일 수 있음, 잠시 후 재시도): %s" % e
+
+    import threading
+    timed_out = {"v": False}
+
+    def _kill():
+        timed_out["v"] = True
+        try:
+            con.interrupt()
+        except Exception:
+            pass
+
+    timer = threading.Timer(SQL_TIMEOUT_SEC, _kill)
+    timer.start()
     try:
-        df = con.execute(sql).fetchdf()
+        cur = con.execute(sql.strip().rstrip(";"))
+        cols = [d[0] for d in (cur.description or [])]
+        # ★전량 materialize(fetchdf) 대신 필요한 만큼만 — 거대 결과가 메모리를 밀어내지 않게
+        rows = cur.fetchmany(MAX_ROWS + 1)
     except Exception as e:
+        if timed_out["v"]:
+            return "ERROR: 쿼리가 %d초를 넘겨 중단됐습니다. 조건을 좁혀 주세요." % SQL_TIMEOUT_SEC
         return "ERROR: %s: %s" % (type(e).__name__, e)
     finally:
-        con.close()
-    if len(df) > 200:
-        return df.head(200).to_csv(index=False) + "\n... (총 %d행 중 200행 표시)" % len(df)
-    return df.to_csv(index=False) if not df.empty else "(0행)"
+        timer.cancel()
+        try:
+            con.close()
+        except Exception:
+            pass
+
+    if not rows:
+        return "(0행)"
+    more = len(rows) > MAX_ROWS
+    rows = rows[:MAX_ROWS]
+
+    buf = io.StringIO()
+    w = csv.writer(buf, lineterminator="\n")
+    w.writerow(cols)
+    for r in rows:
+        w.writerow(["" if v is None else str(v) for v in r])
+        if buf.tell() > MAX_OUT_CHARS:
+            return (buf.getvalue()[:MAX_OUT_CHARS]
+                    + "\n... (출력이 너무 커서 잘렸습니다. 컬럼을 줄이거나 집계해 주세요)")
+    out = buf.getvalue()
+    if more:
+        out += "... (총 %d행 초과 — 상위 %d행만 표시)" % (MAX_ROWS, MAX_ROWS)
+    return out
 
 
 # ── search_notes ───────────────────────────────────────────────────

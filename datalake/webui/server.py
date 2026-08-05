@@ -700,6 +700,11 @@ _HEADLESS_UI = """<!doctype html><meta charset="utf-8">
 <div id="out"></div>
 <script>
 const out = document.getElementById('out'), q = document.getElementById('q');
+// ★모델 출력은 비신뢰 텍스트다 (코퍼스 인젝션이 그대로 흘러나올 수 있음).
+//   라이브 /wiki 는 md() 가 esc() 를 먼저 태우지만 이 테스트 페이지는 아니었다.
+const esc = s => String(s == null ? '' : s)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 q.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
 async function go() {
   const question = q.value.trim(); if (!question) return;
@@ -707,25 +712,25 @@ async function go() {
   const r = await fetch('ask', {method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({question, request_id: 'ui-' + Date.now()})});
   const j = await r.json();
-  if (!j.job_id) { out.innerHTML = '<div class="ans err">'+JSON.stringify(j)+'</div>'; return; }
+  if (!j.job_id) { out.innerHTML = '<div class="ans err">'+esc(JSON.stringify(j))+'</div>'; return; }
   const t0 = Date.now();
   const timer = setInterval(async () => {
     const s = await (await fetch('jobs/' + j.job_id)).json();
     const secs = ((Date.now() - t0)/1000).toFixed(0);
     if (s.status === 'queued' || s.status === 'running') {
-      out.innerHTML = '<div class="meta">' + s.status + ' · ' + secs + '초 경과' +
+      out.innerHTML = '<div class="meta">' + esc(s.status) + ' · ' + secs + '초 경과' +
         (s.steps && s.steps.length ? '<div class="steps">🔧 ' +
-          s.steps.map(x=>x.tool).join(' · ') + '</div>' : '') + '</div>';
+          s.steps.map(x=>esc(x.tool)).join(' · ') + '</div>' : '') + '</div>';
       return;
     }
     clearInterval(timer);
     const ok = s.status === 'succeeded';
-    out.innerHTML = '<div class="meta">' + s.status + ' · ' + (s.elapsed_sec ?? secs) +
-      '초 · ' + (s.meta.num_turns ?? '?') + '턴</div>' +
+    out.innerHTML = '<div class="meta">' + esc(s.status) + ' · ' + esc(s.elapsed_sec ?? secs) +
+      '초 · ' + esc(s.meta.num_turns ?? '?') + '턴</div>' +
       '<div class="ans' + (ok ? '' : ' err') + '">' +
-      (ok ? s.answer : ('실패: ' + (s.error||''))) + '</div>' +
+      esc(ok ? s.answer : ('실패: ' + (s.error||''))) + '</div>' +
       (s.steps && s.steps.length ? '<div class="steps">🔧 ' +
-        s.steps.map(x=>x.tool).join(' · ') + '</div>' : '') +
+        s.steps.map(x=>esc(x.tool)).join(' · ') + '</div>' : '') +
       (ok ? '' : '<button onclick="go()">재시도</button>');
   }, 2000);
 }

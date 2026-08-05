@@ -18,9 +18,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DATALAKE_ROOT = os.path.expanduser(os.getenv("DATALAKE_ROOT", "~/datalake"))
 DB_PATH = os.path.join(DATALAKE_ROOT, "webui_chats.sqlite")
 
-_worker_started = False
+_worker_thread = None
 _lock = threading.Lock()
 _wake = threading.Event()
+_db_ready = False
 
 
 def _con():
@@ -89,6 +90,7 @@ def submit(question, history=None, chat_id=None, request_id=None):
 
 
 def get(job_id):
+    init_once()          # 폴링 중 워커가 죽어 있으면 여기서 되살린다
     con = _con()
     try:
         row = con.execute("SELECT * FROM wiki_jobs WHERE id=?", (job_id,)).fetchone()
@@ -187,6 +189,17 @@ def _notify(job_id):
 
 
 def _worker():
+    # ★바깥 while 을 try 로 감싼다 — 종전엔 _con()/_notify() 예외 하나로 스레드가
+    #   조용히 죽고 큐가 영구 정지했다 (codex 지적).
+    while True:
+        try:
+            _worker_tick()
+        except Exception as e:
+            print("[wiki_jobs] worker tick 예외: %s: %s" % (type(e).__name__, e), flush=True)
+            time.sleep(3)
+
+
+def _worker_tick():
     while True:
         _wake.wait(timeout=5)
         _wake.clear()
@@ -209,10 +222,22 @@ def _worker():
 
 
 def init_once():
-    global _worker_started
+    """DB 초기화 1회 + 워커 생존 보장.
+
+    ★종전엔 플래그 하나로 '한 번 띄웠다'만 기록해서, 스레드가 죽어도 아무도 몰랐다.
+      이제 매 호출마다 살아있는지 확인하고 죽었으면 되살린다 (codex 지적).
+    """
+    global _worker_thread, _db_ready
     with _lock:
-        if _worker_started:
-            return
-        init_db()
-        threading.Thread(target=_worker, daemon=True, name="wiki-jobs").start()
-        _worker_started = True
+        if not _db_ready:
+            init_db()
+            _db_ready = True
+        if _worker_thread is None or not _worker_thread.is_alive():
+            if _worker_thread is not None:
+                print("[wiki_jobs] ★워커 스레드가 죽어 있어 재기동합니다", flush=True)
+            _worker_thread = threading.Thread(target=_worker, daemon=True, name="wiki-jobs")
+            _worker_thread.start()
+
+
+def worker_alive():
+    return _worker_thread is not None and _worker_thread.is_alive()
