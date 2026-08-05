@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key><string>com.antigravity.journal-trades</string>
+	<!-- Trade 탭 일일 추출 — 매일 18:00 KST, order 시트 -> web/data/trades.json.
+	     standalone 타이머(run_timer_job.sh 래퍼·schedule.tsv 미사용, premarket 잡과 동일 규격) -->
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Users/sisyphe/Antigravity_Market_Dashboard/venv/bin/python3</string>
+		<string>/Users/sisyphe/Journal/scripts/extract_trades.py</string>
+	</array>
+	<key>WorkingDirectory</key><string>/Users/sisyphe/Journal</string>
+	<key>UserName</key><string>sisyphe</string>
+	<key>StartCalendarInterval</key>
+	<dict>
+		<key>Hour</key><integer>18</integer>
+		<key>Minute</key><integer>0</integer>
+	</dict>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>HOME</key><string>/Users/sisyphe</string>
+		<key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+		<key>LANG</key><string>en_US.UTF-8</string>
+		<key>PYTHONIOENCODING</key><string>utf-8</string>
+	</dict>
+	<key>StandardOutPath</key><string>/Users/sisyphe/Antigravity_Market_Dashboard/logs/launchd/journal-trades.out</string>
+	<key>StandardErrorPath</key><string>/Users/sisyphe/Antigravity_Market_Dashboard/logs/launchd/journal-trades.err</string>
+</dict>
+</plist>

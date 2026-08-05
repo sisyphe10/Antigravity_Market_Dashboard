@@ -30,6 +30,15 @@ http://:8377 {
 		reverse_proxy 127.0.0.1:8778
 	}
 
+	# Journal Trade API (2026-08-05) — Trade 탭 사유(trade notes) 백엔드. journal 동일 basic_auth 경계 안.
+	#   백엔드=~/Journal/scripts/journal_api.py (127.0.0.1:8791, launchd com.antigravity.journal-api).
+	#   ★/plan-api 와 달리 basic_auth 필수 — 매매 데이터는 Journal 보안 계약을 따른다.
+	handle_path /journal/api/* {
+		import /Users/sisyphe/Journal/caddy_auth.snippet
+		header Cache-Control "no-store"
+		reverse_proxy 127.0.0.1:8791
+	}
+
 	# Journal 개인 투자일지 차트 (2026-07-13) — 테일넷+비밀번호(basic_auth) 이중.
 	#   데이터·자격증명·페이지 전부 ~/Journal 로컬 전용 — git/게시 파이프라인과 격리 (전역 CLAUDE.md Journal 섹션).
 	#   ★~/Journal/caddy_auth.snippet 없으면 caddy 기동 실패 — Journal 폴더 이동 시 이 라우트 먼저 수정.
