@@ -167,6 +167,8 @@ def build_message(date, rows, test=False, layout='tree', extra=False,
             groups.setdefault(_brand(r['etf'])[0], []).append(r)
         body = []
         for brand in sorted(groups, key=lambda b: -max(_amt(r) for r in groups[b])):
+            if body:
+                body.append('')   # 운용사 블록 사이 한 줄 띄우기 (사용자 확정 2026-08-05)
             body.append('%s%s<b>%s</b>' % (BULLET1, GAP1, _esc(brand)))
             for r in groups[brand]:
                 body.append('   %s%s%s | %s'
