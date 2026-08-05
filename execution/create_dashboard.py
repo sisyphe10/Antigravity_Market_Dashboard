@@ -2909,21 +2909,30 @@ def _build_combined_chart_section():
                 // 스크롤박스 위쪽 헤더(선택수·검색·퀵필터)가 차지한 높이를 뺀다
                 var head = box.getBoundingClientRect().top - host.getBoundingClientRect().top;
                 var avail = Math.round(colH - head);
-                if (avail > 200) box.style.maxHeight = avail + 'px';
+                if (avail > 200 && avail < 3000) box.style.maxHeight = avail + 'px';
             }
             window.cmbSyncSideHeight = cmbSyncSideHeight;
             (function() {
-                var run = function() { cmbSyncSideHeight(); };
+                // ★옵저버 부착을 run() 안에서 한다 — 이 스크립트는 사이드/차트 HTML 보다
+                //   앞에 삽입돼 파싱 시점엔 #cmbChartCard 가 없다. 밖에서 붙이면 조용히
+                //   실패해 패널 토글에 반응하지 않는다 (2026-08-05 실측 결함).
+                var _ro = null;
+                var run = function() {
+                    cmbSyncSideHeight();
+                    if (!_ro && window.ResizeObserver) {
+                        var card = document.getElementById('cmbChartCard');
+                        if (card && card.parentNode) {
+                            _ro = new ResizeObserver(function() { cmbSyncSideHeight(); });
+                            _ro.observe(card.parentNode);
+                        }
+                    }
+                };
                 if (document.readyState === 'loading')
                     document.addEventListener('DOMContentLoaded', run);
                 else run();
                 window.addEventListener('resize', run);
-                // 이격도·RoC² 패널 토글로 차트가 길어지면 자동 추종
-                if (window.ResizeObserver) {
-                    var card = document.getElementById('cmbChartCard');
-                    if (card && card.parentNode) new ResizeObserver(run).observe(card.parentNode);
-                }
-                setTimeout(run, 300);   // 폰트·차트 초기 렌더 후 보정
+                setTimeout(run, 300);    // 폰트·차트 초기 렌더 후 보정
+                setTimeout(run, 1200);   // 늦게 확정되는 레이아웃 대비(1회 폭주 관측 있었음)
             })();
             window.sortCmbTable = function(key) {
                 if (_cmbSortKey === key) { _cmbSortAsc = !_cmbSortAsc; }
@@ -3507,7 +3516,7 @@ def _build_combined_chart_section():
                         <button class="cmb-ma-btn cmb-quick-btn" data-qv="Weekly" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'Weekly')">Weekly</button>
                         <button class="cmb-ma-btn cmb-quick-btn" data-qv="Monthly" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'Monthly')">Monthly</button>
                     </div>
-                    <div id="cmbScrollBox" style="max-height:720px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#b6bec7 #3a3f45;">{list_html}</div>
+                    <div id="cmbScrollBox" style="max-height:720px;overflow-y:auto;">{list_html}</div>
                 </div>
                 <div style="width:1000px;">
                     <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;font-size:13px;">
