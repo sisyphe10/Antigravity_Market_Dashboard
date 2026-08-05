@@ -28,6 +28,7 @@ TAG_INDEX_PATH = os.path.join(DATALAKE_ROOT, "tag_index.sqlite")
 SEARCH_ROOTS = [
     os.path.join(DATALAKE_ROOT, "research_notes"),
     os.path.join(DATALAKE_ROOT, "transcripts"),
+    os.path.join(DATALAKE_ROOT, "news"),
     os.path.join(DATALAKE_ROOT, "analyses"),
     os.path.join(DATALAKE_ROOT, "notion_study"),
     os.path.join(DATALAKE_ROOT, "reports"),

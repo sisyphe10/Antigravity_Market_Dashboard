@@ -171,6 +171,55 @@ def _run_one(job):
     return out
 
 
+def _esc(s):
+    import html as _h
+    return _h.escape(str(s), quote=False)
+
+
+def _send_tg(token, chat, text, parse_mode=None):
+    """텔레그램 발송. 성공 True. 실패는 로그만 (알림은 best-effort)."""
+    try:
+        import urllib.parse
+        import urllib.request
+        payload = {"chat_id": chat, "text": text, "disable_web_page_preview": "true"}
+        if parse_mode:
+            payload["parse_mode"] = parse_mode
+        data = urllib.parse.urlencode(payload).encode()
+        urllib.request.urlopen("https://api.telegram.org/bot%s/sendMessage" % token,
+                               data=data, timeout=15).read()
+        return True
+    except Exception as e:
+        print("[wiki_jobs] telegram send 실패(parse_mode=%s): %s" % (parse_mode, e),
+              flush=True)
+        return False
+
+
+def _md_to_tg_html(md):
+    """위키 답변 마크다운 → 텔레그램 HTML. ## 제목/**굵게** → <b>, 표 → <pre> 고정폭."""
+    import re as _re
+    out, table = [], []
+
+    def _flush():
+        if table:
+            out.append("<pre>" + _esc("\n".join(table)) + "</pre>")
+            table.clear()
+
+    for ln in md.splitlines():
+        if ln.lstrip().startswith("|"):
+            table.append(ln.strip())
+            continue
+        _flush()
+        s = _esc(ln)
+        m = _re.match(r"^\s*#{1,6}\s+(.*)$", s)
+        if m:
+            out.append("<b>" + m.group(1).replace("**", "").strip() + "</b>")
+            continue
+        s = _re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", s)
+        out.append(s)
+    _flush()
+    return "\n".join(out)
+
+
 def _notify(job_id):
     """완료 알림(텔레그램). notified 플래그로 1회만 발송."""
     job = get(job_id)
@@ -191,21 +240,21 @@ def _notify(job_id):
         return
     if job["status"] == "succeeded":
         head = "📚 위키 답변 완료"
-        body = (job.get("answer") or "")[:500]
+        ans = job.get("answer") or ""
+        body = _md_to_tg_html(ans[:3000])
+        if len(ans) > 3000:
+            body += "\n…(이하 생략 — 전문은 /wiki 대화 이력)"
     else:
         head = "⚠️ 위키 답변 실패 (%s)" % job["status"]
-        body = (job.get("error") or "")[:300]
+        body = _esc((job.get("error") or "")[:300])
         if recent_failures(3):
             body += "\n\n★최근 3건 연속 실패 — 구독 쿼터 소진 의심"
-    text = "%s\n\nQ. %s\n\n%s" % (head, (job.get("question") or "")[:200], body)
-    try:
-        import urllib.parse
-        import urllib.request
-        data = urllib.parse.urlencode({"chat_id": chat, "text": text}).encode()
-        urllib.request.urlopen("https://api.telegram.org/bot%s/sendMessage" % token,
-                               data=data, timeout=15).read()
-    except Exception as e:
-        print("[wiki_jobs] telegram failed: %s" % e, flush=True)
+    text = "<b>%s</b>\n\nQ. %s\n\n%s" % (head, _esc((job.get("question") or "")[:200]), body)
+    if not _send_tg(token, chat, text, parse_mode="HTML"):
+        # HTML 파싱 거부 등 → 평문 폴백 (알림 유실 방지)
+        plain = "%s\n\nQ. %s\n\n%s" % (head, (job.get("question") or "")[:200],
+                                       (job.get("answer") or job.get("error") or "")[:3000])
+        _send_tg(token, chat, plain)
 
 
 def _worker():

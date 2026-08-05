@@ -472,6 +472,15 @@ async def _run_source_job(
             logging.info(f"{source_name}: 신규 글 없음 (알림 미발송)")
             return
 
+        # datalake/news md 아카이브 — 실패해도 발송은 계속 (방어적)
+        try:
+            from sources.archive import archive_posts
+            n_arch = archive_posts(source_name, posts, label)
+            if n_arch:
+                logging.info(f"{source_name}: {n_arch}건 datalake/news 아카이브")
+        except Exception as arch_err:
+            logging.warning(f"{source_name} 아카이브 실패(발송 계속): {arch_err}")
+
         from sources.base import split_for_telegram, sanitize_telegram_html, html_to_plain
         send_errors = []
         for p in posts:
