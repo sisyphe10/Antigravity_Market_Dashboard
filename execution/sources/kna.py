@@ -35,7 +35,7 @@ def fetch_new_posts(update_state: bool = False) -> list[dict]:
             'category': p.get('category', ''),
             'title': p['title'],
             'date': p['date'],
-            'url': _k._board_link(),
+            'url': _k._post_link(p['idx']),
             'body': p.get('body', ''),
             'paywalled': bool(p.get('paywalled')),
         })

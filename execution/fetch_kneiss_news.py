@@ -5,18 +5,25 @@
 기존 e-kna.org(fetch_kna_news.py)는 미국 글 본문이 회원가입 안내문으로 대체됨.
 k-neiss.org 회원 게시판으로 전환하여 미국 본문까지 수집한다.
 
-구조(검증 완료):
-  - 목록: GET  /portal/news/global/list.do?mid=0703000000   (비로그인 공개)
-          각 글 <a data-req-p-idx="NNNNN">, 카테고리 '미국원전시장동향'/'세계원전시장동향'
-  - 본문: POST /portal/news/global/view.do?mid=0703000000  body=idx=NNNNN
+구조(2026-08 사이트 Next.js 전면 개편 반영 — 검증 완료):
+  - 목록: GET  /news?newsDiv=GLOBAL%2CUS&page=N   (비로그인 공개, SSR HTML)
+          각 글 <a href="/news/{idx}">, 카테고리 '미국원전시장동향'/'세계원전시장동향'
+  - 본문: GET  /news/{idx}
           '세계원전시장동향' → 비로그인 공개 / '미국원전시장동향' → 로그인 세션 필요
-  - 로그인: GET  /portal/newUser/loginForm.do (TOKEN_KEY hidden 파싱)
-            POST /portal/knaMember/login  (lId/lPassword/TOKEN_KEY)
-            JSON {success, procCode, msg}, 개인회원 procCode='MEMBER_USER'
+          (비로그인 미국 글은 news_view 컨테이너 자체가 없음 → paywalled 판정)
+  - 로그인: POST /api/v1/kna/auth/login  JSON {loginId, password}
+            응답 JSON {success, data:{procCode}, message}, 개인회원 procCode='MEMBER_USER'
+            쿠키 kneiss_access_token / kna_rt. CSRF 토큰(TOKEN_KEY) 폐지됨.
             자격증명: .env 의 KNEISS_ID / KNEISS_PW
+  - 첨부: <div class="file_box"> <a href="/common/file/download.do?atchFileId=..&fileSn=..">
+          다운로드 엔드포인트는 구버전과 동일, 마크업만 변경.
+
+(구) 2026-06~07 구조: /portal/news/global/list.do + data-req-p-idx 앵커 +
+POST view.do + /portal/knaMember/login — 2026-08-05 개편으로 전부 404/폐지.
 
 state 파일: DASHBOARD_DIR/kna_state.json — 'last_seen_kneiss_idx' 저장
-  (기존 e-kna 'last_seen_num' 키는 호환을 위해 그대로 둠)
+  (기존 e-kna 'last_seen_num' 키는 호환을 위해 그대로 둠.
+   idx 채번은 개편 후에도 연속 — 21513(구) → 21517+(신))
 
 사용:
   - import 하여 fetch_new_posts() 호출 (sources/kna.py 어댑터에서 사용)
@@ -31,11 +38,8 @@ import requests
 from dotenv import load_dotenv
 
 BASE = 'https://k-neiss.org'
-MID = '0703000000'
-LIST_PATH = f'/portal/news/global/list.do?mid={MID}'
-VIEW_PATH = f'/portal/news/global/view.do?mid={MID}'
-LOGIN_FORM_PATH = '/portal/newUser/loginForm.do'
-LOGIN_POST_PATH = '/portal/knaMember/login'
+NEWS_DIV = 'GLOBAL%2CUS'  # 세계+미국 원전시장동향 통합 게시판
+LOGIN_POST_PATH = '/api/v1/kna/auth/login'
 
 DASHBOARD_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATE_FILE = os.path.join(DASHBOARD_DIR, 'kna_state.json')
@@ -60,12 +64,17 @@ class KneissLoginError(KneissError):
 # ── URL 헬퍼 ────────────────────────────────────────────────────────────────
 
 def _list_url(page=1):
-    return f'{BASE}{LIST_PATH}&page={page}'
+    return f'{BASE}/news?newsDiv={NEWS_DIV}&page={page}'
+
+
+def _post_link(idx):
+    """게시글 영구링크 (2026-08 개편으로 GET 개별 링크 생김)."""
+    return f'{BASE}/news/{idx}'
 
 
 def _board_link():
-    """게시글 개별 GET 영구링크가 없으므로(POST 전용) 게시판 목록 URL 반환."""
-    return f'{BASE}{LIST_PATH}'
+    """게시판 목록 URL (구버전 호환용 — 개별 글은 _post_link 사용)."""
+    return f'{BASE}/news'
 
 
 # ── 세션 / 로그인 ───────────────────────────────────────────────────────────
@@ -84,41 +93,22 @@ def _login(session):
     if not uid or not pw:
         raise KneissLoginError('KNEISS_ID/KNEISS_PW 환경변수 없음')
 
-    # 1) 로그인 폼 GET → TOKEN_KEY + #form 필드 수집 (CSRF 토큰은 세션별 발급)
     try:
-        r = session.get(f'{BASE}{LOGIN_FORM_PATH}', timeout=REQ_TIMEOUT)
-    except requests.RequestException as e:
-        raise KneissLoginError(f'로그인 폼 GET 실패: {e}')
-    fm = re.search(r'<form\b[^>]*id="form"[^>]*>(.*?)</form>', r.text, re.DOTALL)
-    form_html = fm.group(1) if fm else r.text
-    fields = {}
-    for m in re.finditer(r'<input\b[^>]*>', form_html):
-        name = re.search(r'name="([^"]+)"', m.group(0))
-        if not name:
-            continue
-        val = re.search(r'value="([^"]*)"', m.group(0))
-        fields[name.group(1)] = val.group(1) if val else ''
-    if 'TOKEN_KEY' not in fields:
-        raise KneissLoginError('로그인 폼에서 TOKEN_KEY 파싱 실패 (구조 변경 가능성)')
-
-    # 2) 로그인 POST (ajaxSubmit 와 동일: #form 직렬화 + lId/lPassword)
-    fields['lId'] = uid
-    fields['lPassword'] = pw
-    try:
-        r2 = session.post(
-            f'{BASE}{LOGIN_POST_PATH}', data=fields, timeout=REQ_TIMEOUT,
-            headers={'X-Requested-With': 'XMLHttpRequest',
-                     'Referer': f'{BASE}{LOGIN_FORM_PATH}'},
+        r = session.post(
+            f'{BASE}{LOGIN_POST_PATH}',
+            json={'loginId': uid, 'password': pw},
+            headers={'Accept': 'application/json', 'Referer': f'{BASE}/login'},
+            timeout=REQ_TIMEOUT,
         )
     except requests.RequestException as e:
         raise KneissLoginError(f'로그인 POST 실패: {e}')
     try:
-        j = r2.json()
+        j = r.json()
     except ValueError:
-        raise KneissLoginError(f'로그인 응답 JSON 아님 (HTTP {r2.status_code})')
-    if not j.get('success'):
-        raise KneissLoginError(f"로그인 거부: {j.get('msg') or j.get('procCode') or 'ID/PW 확인'}")
-    return j.get('procCode')
+        raise KneissLoginError(f'로그인 응답 JSON 아님 (HTTP {r.status_code})')
+    if not j.get('success') or j.get('data') is None:
+        raise KneissLoginError(f"로그인 거부: {j.get('message') or 'ID/PW 확인'}")
+    return (j.get('data') or {}).get('procCode')
 
 
 # ── 목록 파싱 ───────────────────────────────────────────────────────────────
@@ -126,17 +116,17 @@ def _login(session):
 def parse_board_list(html_text):
     """게시판 목록에서 (idx, display_no, category, 제목, 날짜) 추출. 최신순.
 
-    행 구조:
-      <td class="list-num"> 7834 </td>            게시판 번호
-      <td class="list-etc mo-tit"> 미국원전시장동향 </td>  카테고리
-      <td class="list-subj ..."><a data-req-p-idx="21347" ...>제목</a></td>
-      <td class="list-etc mo-tit"> 14 </td>       조회수
-      <td class="list-company mo-tit"> 2026-06-24 </td>  날짜
+    행 구조(2026-08 개편):
+      <td class="list-num">8002</td>                          게시판 번호
+      <td class="list-etc mo-tit">..<span>세계원전시장동향</span></td>  카테고리
+      <td class="list-subj .."><a href="/news/21521"><strong>제목</strong></a></td>
+      <td class="list-etc mo-tit">..<span>2</span></td>       조회수
+      <td class="list-company mo-tit">..<span>2026-08-05</span></td>  날짜
     """
     posts = []
     seen = set()
     for row in re.findall(r'<tr>(.*?)</tr>', html_text, re.DOTALL):
-        mi = re.search(r'data-req-p-idx="(\d+)"', row)
+        mi = re.search(r'<a href="/news/(\d+)"', row)
         if not mi:
             continue
         idx = int(mi.group(1))
@@ -147,7 +137,7 @@ def parse_board_list(html_text):
         display_no = mn.group(1) if mn else str(idx)
         mc = re.search(r'(미국원전시장동향|세계원전시장동향)', row)
         category = mc.group(1) if mc else ''
-        mt = re.search(r'data-req-p-idx="\d+"[^>]*>(.*?)</a>', row, re.DOTALL)
+        mt = re.search(r'<a href="/news/\d+"[^>]*>(.*?)</a>', row, re.DOTALL)
         title = html.unescape(re.sub(r'<[^>]+>', '', mt.group(1)).strip()) if mt else ''
         md = re.search(r'(\d{4}-\d{2}-\d{2})', row)
         date_str = md.group(1) if md else ''
@@ -182,11 +172,13 @@ def _clean_body(text):
 
 
 def parse_detail(html_text):
-    """view.do 응답에서 (제목, 날짜, 본문, paywalled) 추출.
+    """상세 페이지에서 (제목, 날짜, 본문, paywalled) 추출.
 
     paywalled=True → 회원전용 차단(news_view 컨테이너도, 본문/이미지/첨부도 없음).
     본문 텍스트가 없어도 이미지·첨부가 있으면 정상 게시글이다
-    (2026-07 월간 종합 글이 이미지+PDF 첨부 형식으로 게시됨 — #7919).
+    (월간 종합 글이 이미지+PDF 첨부 형식으로 게시됨).
+    제목 span 안에 <span class="blue bold">[NEW] </span> 배지가 중첩될 수 있어
+    바깥 span 닫힘(</span></div>)까지 잡은 뒤 태그 제거 + [NEW] 접두 제거.
     """
     nv = re.search(
         r'<div[^>]*class="[^"]*news_view[^"]*"[^>]*>(.*?)<div class="taR',
@@ -198,9 +190,12 @@ def parse_detail(html_text):
     block = nv.group(1)
 
     title = ''
-    ms = re.search(r'<span class="subject">(.*?)</span>', block, re.DOTALL)
+    ms = re.search(r'<span class="subject">(.*?)</span></div>', block, re.DOTALL)
+    if not ms:
+        ms = re.search(r'<span class="subject">(.*?)</span>', block, re.DOTALL)
     if ms:
         title = html.unescape(re.sub(r'<[^>]+>', '', ms.group(1)).strip())
+        title = re.sub(r'^\[NEW\]\s*', '', title)
 
     date_str = ''
     for md in re.finditer(r'<span class="date">(.*?)</span>', block, re.DOTALL):
@@ -228,19 +223,19 @@ def parse_detail(html_text):
 def parse_attachments(html_text):
     """첨부파일 목록 [(파일명, atchFileId, fileSn)] 추출.
 
-    마크업: <a title="첨부파일(이름.pdf) 다운로드 새창 열림" ...
-            onclick=" yhLib.file.download('ATCH_ID','FILE_SN'); ...">
+    마크업(2026-08 개편): <div class="file_box .."><ul class="file_list">
+      <li><a href="/common/file/download.do?atchFileId=HEX&amp;fileSn=HEX" ..>이름.pdf</a></li>
     """
     atts = []
     for m in re.finditer(
-        r'title="첨부파일\((.*?)\) 다운로드[^"]*"[^>]*?'
-        r"yhLib\.file\.download\('([0-9A-Fa-f]+)'\s*,\s*'([0-9A-Fa-f]+)'\)",
+        r'<a href="/common/file/download\.do\?atchFileId=([0-9A-Fa-f]+)'
+        r'&(?:amp;)?fileSn=([0-9A-Fa-f]+)"[^>]*>(.*?)</a>',
         html_text, re.DOTALL,
     ):
         atts.append({
-            'name': html.unescape(m.group(1).strip()),
-            'atch_file_id': m.group(2),
-            'file_sn': m.group(3),
+            'name': html.unescape(re.sub(r'<[^>]+>', '', m.group(3)).strip()),
+            'atch_file_id': m.group(1),
+            'file_sn': m.group(2),
         })
     return atts
 
@@ -271,16 +266,15 @@ def _fetch_pdf_text(session, att):
 
 
 def fetch_post_detail(session, idx):
-    """본문 페이지 POST → (제목, 날짜, 본문, paywalled).
+    """상세 페이지 GET → (제목, 날짜, 본문, paywalled).
 
     본문이 이미지/첨부 전용이면 PDF 첨부에서 텍스트를 추출해 본문으로 쓰고,
     추출 불가 시 첨부 안내 문구로 대체한다.
     """
-    r = session.post(
-        f'{BASE}{VIEW_PATH}',
-        data={'idx': str(idx), 'searchCondition': '', 'searchTxt': '', 'page': '1'},
+    r = session.get(
+        _post_link(idx),
         timeout=REQ_TIMEOUT,
-        headers={'Referer': f'{BASE}{LIST_PATH}'},
+        headers={'Referer': _list_url(1)},
     )
     title, date_str, body, paywalled = parse_detail(r.text)
     if not paywalled and not body:
