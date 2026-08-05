@@ -71,7 +71,7 @@ def _fmt_eok(v):
     if v is None:
         return '-'
     eok = v / 1e8
-    sign = '+' if eok > 0 else ('−' if eok < 0 else '')
+    sign = '+' if eok > 0 else ('-' if eok < 0 else '')
     a = abs(eok)
     if a >= 10000:
         return '%s%.1f조원' % (sign, a / 10000)
@@ -84,8 +84,6 @@ def _fmt_w(v):
     return '-' if v is None else ('%.1f' % v)
 
 
-# ★음수 부호 = U+2212(수학 마이너스). 하이픈 '-' 는 텔레그램 비례폰트에서
-#   '+' 보다 눈에 띄게 좁아 (-) 가 옹졸해 보인다 (사용자 지적 2026-08-05).
 WEEKDAY = '월화수목금토일'
 BULLET1 = '•'  # 1단계(브랜드) — 노션식 점 크기
 BULLET2 = '◦'  # 2단계(ETF·종목) — 속 빈 점
@@ -125,17 +123,18 @@ def _cells(r):
     """공통 뒷부분: 구분 | 비중 | 금액  (사용자 확정 2026-08-05)
 
     ★유입/유출 칼럼 제거 — 마지막 금액의 부호가 이미 같은 정보를 담는다.
-    ★구분은 (+)/(-)/New/X — 맨 +,- 는 표 안에서 눈에 안 띄어 괄호로 감싼다.
+    ★구분은 New / 유입(+) / 유출(-) / X — 기호만 두면 눈에 안 띈다는 지적으로
+      단어를 앞에 붙였다(2026-08-05). 그래서 특수 마이너스 기호는 불필요.
     ★비중 화살표 좌우에 공백: 29.7 → 25.1%
     """
     kind = r['kind']
     if kind == 'in':
         gubun, w = 'New', '+%s%%' % _fmt_w(r.get('w_cur'))       # 신규 편입
     elif kind == 'out':
-        gubun, w = 'X', '−%s%%' % _fmt_w(r.get('w_prev'))        # 편출
+        gubun, w = 'X', '-%s%%' % _fmt_w(r.get('w_prev'))        # 편출
     else:
         dw = (r.get('w_cur') or 0) - (r.get('w_prev') or 0)
-        gubun = '(+)' if dw > 0 else '(−)'                        # 비중 급증 / 급감
+        gubun = '유입(+)' if dw > 0 else '유출(-)'                        # 비중 급증 / 급감
         w = '%s → %s%%' % (_fmt_w(r.get('w_prev')), _fmt_w(r.get('w_cur')))
     return '<b><u>%s</u></b> | %s | %s | <b><u>%s</u></b>' % (
         _esc(r['stock']), gubun, w, _fmt_eok(r.get('trade_amt')))
