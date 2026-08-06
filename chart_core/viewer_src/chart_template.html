@@ -500,7 +500,7 @@ function applyCustomRange() {
   el.addEventListener('input', () => { formatDateInput(el); applyCustomRange(); });
 });
 
-// ── 내비게이션 (트레이딩뷰식, 2026-07-15 확정): 휠=시간축 이동 / Ctrl·Shift+휠=커서 기준 확대·축소 / 드래그=이동 ──
+// ── 내비게이션 (2026-08-06 표준 개정): 휠=끝 고정 확대·축소 / Ctrl·Shift+휠=커서 기준 확대·축소 / 드래그=좌우 이동 ──
 function applyWindow(ns, ne) {
   const n = RAW.dates.length;
   document.querySelectorAll('button[data-rng]').forEach(x => x.classList.remove('active'));
@@ -535,11 +535,12 @@ document.getElementById('chart').addEventListener('wheel', ev => {
     let ns = Math.round(anchor - fx * newSpan);
     ns = Math.max(0, Math.min(ns, n - 1 - newSpan));
     applyWindow(ns, ns + newSpan);
-  } else {                                               // 일반 휠 = 시간축 이동 (아래=미래, 위=과거)
-    if (span >= n - 1) return;
-    const step = Math.max(1, Math.round(span * 0.12)) * (ev.deltaY > 0 ? 1 : -1);
-    const ns = Math.max(0, Math.min(s + step, n - 1 - span));
-    if (ns !== s) applyWindow(ns, ns + span);
+  } else {                                               // 일반 휠 = 확대·축소, 끝(최신) 고정 (2026-08-06 표준 개정 — 위=확대)
+    const factor = ev.deltaY < 0 ? 0.8 : 1.25;
+    let newSpan = Math.round(span * factor);
+    newSpan = Math.max(10, Math.min(n - 1, newSpan));
+    const ns = Math.max(0, e - newSpan);
+    if (ns !== s) applyWindow(ns, ns + Math.min(newSpan, e - ns));
   }
 }, { passive: false });
 

@@ -112,3 +112,10 @@
 
 ## 범례 변화율 자릿수 통일 (2026-08-04)
 - `cmbBuildLegend` 변화율 자릿수: 항목별 `|pct|` → **범례 전체 최대 `|pct|` 공유 기준** (`_legPctOf` 분리 + `_legMaxAbs`). 주 시리즈 +95.3% 옆 MA20이 +9.88%로 어긋나던 문제 — 축 눈금·끝값의 공유 기준 방식과 통일. 이격도·RoC 마지막 값 표기는 종전(항목별) 유지.
+
+## 2026-08-06 — 휠 내비게이션 표준 개정 (전 뷰어 소급)
+사용자 재개정: **일반 휠 = X축 확대·축소(끝=최신 날짜 고정, 위=확대 0.8 / 아래=축소 1.25)**, **Ctrl·Shift+휠 = 커서 지점 앵커 확대·축소**(기존 유지), **휠 팬(시간축 이동) 폐지 — 좌우 이동은 클릭 드래그 담당**. 차트 영역 밖 휠은 페이지 스크롤 유지(`{passive:false}` + 영역 판정 후 preventDefault).
+- 적용 위치 = 뷰어 셸 템플릿 `chart_template_core.html`(실행 정본=맥미니 `~/work/charts/260715_현선물공매도/`, 본 `viewer_src/`는 기록 스냅샷). 레거시 `chart_template.html`도 동일 개정(현재 소비자 없음).
+- 재생성 완료 5종: chart_viewer2 · chart_viewer_etf · chart_viewer_dsn · chart_viewer_construction · chart_viewer_research.
+- **휠 핸들러 없음(무변경)**: create_dashboard.py 전 차트(cmb/DATA·INDICES·AUM·kofia·featured)·wrap.html — 휠 내비 자체가 미구현. bop·pipeline·calendar·fcf·boutique·nuclear·tennis 뷰어도 동일.
+- **의도적 미변경**: `chart_core/fixtures/chart_viewer2_baseline.html`(불변 동결 fixture — 갱신 시 golden 재생성 필요), `~/work/analysis/260719_메모리3사_주가실적PER`(휠=커서 앵커 줌 구현으로 이미 신표준 취지 부합), `_retired_20260803/`·`.bak_*`.
