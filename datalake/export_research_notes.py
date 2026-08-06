@@ -284,6 +284,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--all", action="store_true", help="DB 전 기간 백필")
     ap.add_argument("--date", help="특정일만 (YYYY-MM-DD)")
+    ap.add_argument("--from", dest="date_from", help="기간 시작 (YYYY-MM-DD, --to와 함께)")
+    ap.add_argument("--to", dest="date_to", help="기간 끝 (YYYY-MM-DD, 포함)")
     args = ap.parse_args()
 
     if not os.path.exists(DB_PATH):
@@ -294,6 +296,16 @@ def main():
 
     if args.all:
         days = fetch_dates(conn)
+    elif args.date_from or args.date_to:
+        if not (args.date_from and args.date_to):
+            print("ERROR: --from과 --to는 함께 지정")
+            return 1
+        d0 = datetime.strptime(args.date_from, "%Y-%m-%d").date()
+        d1 = datetime.strptime(args.date_to, "%Y-%m-%d").date()
+        if d0 > d1:
+            print("ERROR: --from이 --to보다 늦음")
+            return 1
+        days = [(d0 + timedelta(days=i)).isoformat() for i in range((d1 - d0).days + 1)]
     elif args.date:
         datetime.strptime(args.date, "%Y-%m-%d")
         days = [args.date]
