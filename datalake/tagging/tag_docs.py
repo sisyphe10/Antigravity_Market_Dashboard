@@ -49,6 +49,7 @@ SOURCES = {
     "comment": "reports/comments",  # 긴급/스팟 시장 코멘트
     "monthly": "reports/monthly",   # 월간운용보고서
     "target": "reports/target",     # 목표달성 보고서
+    "research": "reports/research", # 외부 증권사 리포트 (2026-08-07)
     "study": "notion_study",       # Notion Study DB (notion_study_sync.py 일일 동기화)
 }
 MANAGED_KEYS = ("themes", "tickers", "sectors", "orgs", "people",
