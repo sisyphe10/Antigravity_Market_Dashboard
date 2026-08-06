@@ -254,6 +254,8 @@ def main():
 
     incomplete = any(s.get("status") in ("incomplete", "missing")
                      for s in sec.values() if isinstance(s, dict))
+    if any(s.get("status") == "stale" for s in sec.values() if isinstance(s, dict)):
+        out["warnings"].append("tag_index stale — tag_search 결과에 최신 파일 누락 가능 (23:20 잡이 자동 갱신)")
     out["complete"] = not incomplete
     if incomplete:
         out["warnings"].append("불완전 섹션 있음 — 커맨드의 폴백 경로를 사용하고 degraded source 를 보고할 것")
