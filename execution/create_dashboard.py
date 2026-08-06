@@ -8992,11 +8992,15 @@ def create_dashboard():
         .csel-wrap { position: relative; display: inline-block; }
         .csel-display { padding: 8px 28px 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background: #fff; text-align: center; cursor: pointer; min-width: 100px; user-select: none; font-family: inherit; position: relative; }
         .csel-display::after { content: ''; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid #666; }
-        .csel-list { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #d1d5db; border-radius: 6px; margin-top: 2px; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+        .csel-list { display: none; position: absolute; top: 100%; left: 0; min-width: 100%; width: max-content; max-width: 340px; background: #fff; border: 1px solid #d1d5db; border-radius: 6px; margin-top: 2px; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
         .csel-list.open { display: block; }
-        .csel-item { padding: 8px 12px; text-align: center; cursor: pointer; font-size: 14px; font-family: inherit; }
+        /* 체크박스 다중 선택 (2026-08-06) — 선택 없음 = 전체 */
+        .csel-item { position: relative; padding: 8px 12px 8px 30px; text-align: left; cursor: pointer; font-size: 14px; font-family: inherit; }
         .csel-item:hover { background: #f0f7f2; }
-        .csel-item.selected { background: #2d7a3a; color: #fff; }
+        .csel-item.selected { background: #f0f7f2; }
+        .csel-cb { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; border: 1.5px solid #999; border-radius: 3px; background: #fff; }
+        .csel-item.selected .csel-cb { background: #2d7a3a; border-color: #2d7a3a; }
+        .csel-item.selected .csel-cb::after { content: ''; position: absolute; left: 3.5px; top: 0.5px; width: 4px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
         .sector-group { margin-bottom: 24px; }
         .sector-group h3 { font-size: 18px; color: #2d7a3a; margin-bottom: 8px; padding: 8px 0; border-bottom: 1px solid #2d7a3a; }
         table { width: 100%; border-collapse: collapse; font-size: var(--aoe-t-font); font-variant-numeric: var(--aoe-t-num); table-layout: fixed; --aoe-t-font: 16px; --aoe-t-pad-y: 10px; --aoe-t-pad-x: 6px; --aoe-t-head-weight: 600; }
@@ -9051,6 +9055,9 @@ def create_dashboard():
         .uv-search input::placeholder { color: #8a919a; }
         .filters .csel-display { color: #fff !important; border-color: #fff !important; border-width: 1px !important; border-radius: 0 !important; }
         .filters .csel-display::after { border-top-color: #fff !important; }
+        /* 통화·섹터 필터를 각 칼럼(3·4번째 th) 위에 같은 너비로 정렬 (2026-08-06) — 좌표·너비는 uvPlaceSearch 실측 */
+        #uvFilters .csel-wrap { position: absolute; top: 50%; transform: translateY(-50%); }
+        #uvFilters .csel-display { min-width: 0; width: 100%; }
         footer { text-align: center; padding: 24px; color: #999; font-size: 14px; }
         TOP_NAV_CSS_PLACEHOLDER
     </style>
@@ -9194,23 +9201,16 @@ Promise.all([
     uvSortableThs().forEach(function(th,i){th.textContent=i===sortCol?headers[i]+' ▼':headers[i];});
     var c={},sec={};
     D.forEach(function(r){if(r[1])c[r[1]]=1;if(r[2])sec[r[2]]=1;});
-    var ch='<div class="csel-item selected" data-v="">통화</div>';
-    Object.keys(c).sort().forEach(function(v){ch+='<div class="csel-item" data-v="'+v+'">'+v+'</div>';});
-    document.getElementById('cselCurList').innerHTML=ch;
-    document.getElementById('cselCurList').addEventListener('click',function(e){var item=e.target.closest('.csel-item');if(item)pickCselCur(item.getAttribute('data-v'),item.textContent);});
-    var sh='<div class="csel-item selected" data-v="">섹터</div>';
-    Object.keys(sec).sort().forEach(function(v){sh+='<div class="csel-item" data-v="'+v+'">'+v+'</div>';});
-    document.getElementById('cselSecList').innerHTML=sh;
-    document.getElementById('cselSecList').addEventListener('click',function(e){var item=e.target.closest('.csel-item');if(item)pickCselSec(item.getAttribute('data-v'),item.textContent);});
+    var curKeys=Object.keys(c).sort(), secKeys=Object.keys(sec).sort();
+    cselRegister('cselCurList','cselCurDisplay','통화',render);
+    cselRegister('cselSecList','cselSecDisplay','섹터',render);
     // 기간 수익률 탭 필터 (통화/섹터) — 종목 리스트 탭과 동일 옵션
-    var pch='<div class="csel-item selected" data-v="">통화</div>';
-    Object.keys(c).sort().forEach(function(v){pch+='<div class="csel-item" data-v="'+v+'">'+v+'</div>';});
-    document.getElementById('cselPerCurList').innerHTML=pch;
-    document.getElementById('cselPerCurList').addEventListener('click',function(e){var item=e.target.closest('.csel-item');if(item)pickCselPerCur(item.getAttribute('data-v'),item.textContent);});
-    var psh='<div class="csel-item selected" data-v="">섹터</div>';
-    Object.keys(sec).sort().forEach(function(v){psh+='<div class="csel-item" data-v="'+v+'">'+v+'</div>';});
-    document.getElementById('cselPerSecList').innerHTML=psh;
-    document.getElementById('cselPerSecList').addEventListener('click',function(e){var item=e.target.closest('.csel-item');if(item)pickCselPerSec(item.getAttribute('data-v'),item.textContent);});
+    cselRegister('cselPerCurList','cselPerCurDisplay','통화',renderPeriod);
+    cselRegister('cselPerSecList','cselPerSecDisplay','섹터',renderPeriod);
+    cselBuild('cselCurList',curKeys);
+    cselBuild('cselSecList',secKeys);
+    cselBuild('cselPerCurList',curKeys);
+    cselBuild('cselPerSecList',secKeys);
     render();
 });
 
@@ -9267,12 +9267,10 @@ function doSort(col){
 }
 
 function render(){
-    var fc=_cselCurVal;
-    var fs=_cselSecVal;
     var q=(document.getElementById('uvSearch')||{value:''}).value.trim().toLowerCase();
     var f=D.filter(function(r){
-        if(fc&&r[1]!==fc)return false;
-        if(fs&&r[2]!==fs)return false;
+        if(!cselPass('cselCurList',r[1]||''))return false;
+        if(!cselPass('cselSecList',r[2]||''))return false;
         if(q&&String(r[4]||'').toLowerCase().indexOf(q)<0&&String(r[3]||'').toLowerCase().indexOf(q)<0)return false;   // 검색: 기업명·티커
         if(uvStarOnly&&!uvStars[uvTicker(r)])return false;   // 헤더 ★ = 관심종목만 보기
         return true;
@@ -9311,52 +9309,55 @@ function render(){
     document.getElementById('tbody').innerHTML=h;
     uvPlaceSearch();
 }
-// 검색창을 기업명 컬럼(6번째 th) 위에 같은 너비로 정렬 (2026-07-31)
+// 검색창=기업명(6번째 th), 통화·섹터 필터=각 칼럼(3·4번째 th) 위에 같은 너비로 정렬 (2026-08-06)
 function uvPlaceSearch(){
-    var th=document.querySelector('#tab0 thead th:nth-child(6)');
-    var box=document.getElementById('uvSearchBox');
     var bar=document.getElementById('uvFilters');
-    if(!th||!box||!bar)return;
-    var tr=th.getBoundingClientRect(), br=bar.getBoundingClientRect();
-    if(!tr.width)return;
-    box.style.left=(tr.left-br.left)+'px';
-    box.style.width=tr.width+'px';
+    if(!bar)return;
+    var br=bar.getBoundingClientRect();
+    [['uvSearchBox',6],['cselCurWrap',3],['cselSecWrap',4]].forEach(function(p){
+        var box=document.getElementById(p[0]);
+        var th=document.querySelector('#tab0 thead th:nth-child('+p[1]+')');
+        if(!box||!th)return;
+        var tr=th.getBoundingClientRect();
+        if(!tr.width)return;
+        box.style.left=(tr.left-br.left)+'px';
+        box.style.width=tr.width+'px';
+    });
 }
 window.addEventListener('resize',uvPlaceSearch);
 
-var _cselVal = '', _cselCurVal = '', _cselSecVal = '';
+// ── 통화·섹터 필터: 체크박스 다중 선택 (2026-08-06). 선택 없음 = 전체 ──
+var CSEL_STATE = {};   // listId -> {sel:{}, displayId, base, onChange}
+function cselRegister(listId, displayId, base, onChange){ CSEL_STATE[listId]={sel:{},displayId:displayId,base:base,onChange:onChange}; }
+function cselSelected(listId){ var st=CSEL_STATE[listId]; if(!st)return[]; return Object.keys(st.sel).filter(function(k){return st.sel[k];}); }
+function cselPass(listId, v){ var sel=cselSelected(listId); return sel.length===0||!!CSEL_STATE[listId].sel[v]; }
+function cselBuild(listId, values){
+    var st=CSEL_STATE[listId]; if(!st)return;
+    var h='<div class="csel-item selected" data-v=""><span class="csel-cb"></span>전체</div>';
+    values.forEach(function(v){h+='<div class="csel-item" data-v="'+v+'"><span class="csel-cb"></span>'+v+'</div>';});
+    var el=document.getElementById(listId);
+    el.innerHTML=h;
+    el.addEventListener('click',function(e){
+        var item=e.target.closest('.csel-item'); if(!item)return;
+        cselToggle(listId,item.getAttribute('data-v'));
+    });
+}
+function cselToggle(listId, val){
+    var st=CSEL_STATE[listId]; if(!st)return;
+    if(val==='')st.sel={}; else st.sel[val]=!st.sel[val];
+    var sel=cselSelected(listId);
+    document.querySelectorAll('#'+listId+' .csel-item').forEach(function(el){
+        var v=el.getAttribute('data-v');
+        el.classList.toggle('selected', v===''?sel.length===0:!!st.sel[v]);
+    });
+    document.getElementById(st.displayId).textContent = sel.length===0?st.base:(sel.length===1?sel[0]:st.base+' '+sel.length);
+    st.onChange();
+}
 function toggleCselId(listId) {
     document.querySelectorAll('.csel-list').forEach(function(el) {
         if (el.id !== listId) el.classList.remove('open');
     });
     document.getElementById(listId).classList.toggle('open');
-}
-function pickCsel(val, label) {
-    _cselVal = val;
-    document.getElementById('cselDisplay').textContent = label;
-    document.getElementById('cselList').classList.remove('open');
-    document.querySelectorAll('#cselList .csel-item').forEach(function(el) {
-        el.classList.toggle('selected', el.getAttribute('data-v') === val);
-    });
-    renderSector();
-}
-function pickCselCur(val, label) {
-    _cselCurVal = val;
-    document.getElementById('cselCurDisplay').textContent = label;
-    document.getElementById('cselCurList').classList.remove('open');
-    document.querySelectorAll('#cselCurList .csel-item').forEach(function(el) {
-        el.classList.toggle('selected', el.getAttribute('data-v') === val);
-    });
-    render();
-}
-function pickCselSec(val, label) {
-    _cselSecVal = val;
-    document.getElementById('cselSecDisplay').textContent = label;
-    document.getElementById('cselSecList').classList.remove('open');
-    document.querySelectorAll('#cselSecList .csel-item').forEach(function(el) {
-        el.classList.toggle('selected', el.getAttribute('data-v') === val);
-    });
-    render();
 }
 document.addEventListener('click', function(e) {
     document.querySelectorAll('.csel-wrap').forEach(function(w) {
@@ -9380,6 +9381,7 @@ function toggleSec(idx) {
 function switchTab(idx) {
     document.querySelectorAll('.tab').forEach(function(t,i){ t.classList.toggle('active',i===idx); });
     document.querySelectorAll('.tab-content').forEach(function(t,i){ t.classList.toggle('active',i===idx); });
+    if(idx===0) uvPlaceSearch();
     if(idx===1) renderSector();
     if(idx===2) ensureHistThenRender();
 }
@@ -9391,7 +9393,6 @@ function switchTab(idx) {
 var HIST = null, IDXHIST = null, HIST_LOADING = false, perData = [];
 var perSortCol = 7, perSortAsc = false;  // 컬럼: 추이=6, 기간수익률=7(기본 내림차순), RSI=8
 var perHeaders = ['#','통화','섹터','티커','기업명','시가총액','스파크 라인','기간 수익률','RSI','기간 MDD'];
-var _cselPerCurVal = '', _cselPerSecVal = '';
 function formatDateInput(el){var v=el.value.replace(/[^0-9]/g,'');if(v.length===8){el.value=v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8);return;}var m=el.value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);if(m){el.value=m[1]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[3]).slice(-2);}}
 function ensureHistThenRender(){
     if(HIST){ renderPeriod(); return; }
@@ -9474,13 +9475,12 @@ function renderPeriod(){
     if(!D.length||!HIST) return;
     var start=document.getElementById('perStartDate').value;
     var end=document.getElementById('perEndDate').value||'9999-12-31';
-    var fc=_cselPerCurVal, fs=_cselPerSecVal;
     var idxCache={};
     function idxRet(mkt){ if(!mkt) return null; if(mkt in idxCache) return idxCache[mkt]; var v=indexPerReturn(mkt,start,end); idxCache[mkt]=v; return v; }
     perData=[];
     D.forEach(function(r){
-        if(fc&&r[1]!==fc) return;
-        if(fs&&r[2]!==fs) return;
+        if(!cselPass('cselPerCurList',r[1]||'')) return;
+        if(!cselPass('cselPerSecList',r[2]||'')) return;
         var _p=(r[3]||'').indexOf(':')>=0?r[3].split(':')[0]:'';
         var mkt=INDEX_BY_PREFIX[_p]||'';
         var ret=perReturn(r[3],start,end);
@@ -9524,25 +9524,9 @@ function doSortPer(col){
     if(perSortCol===col) perSortAsc=!perSortAsc; else { perSortCol=col; perSortAsc=(col>=5?false:true); }
     renderPeriod();
 }
-function pickCselPerCur(val,label){
-    _cselPerCurVal=val;
-    document.getElementById('cselPerCurDisplay').textContent=label;
-    document.getElementById('cselPerCurList').classList.remove('open');
-    document.querySelectorAll('#cselPerCurList .csel-item').forEach(function(el){el.classList.toggle('selected',el.getAttribute('data-v')===val);});
-    renderPeriod();
-}
-function pickCselPerSec(val,label){
-    _cselPerSecVal=val;
-    document.getElementById('cselPerSecDisplay').textContent=label;
-    document.getElementById('cselPerSecList').classList.remove('open');
-    document.querySelectorAll('#cselPerSecList .csel-item').forEach(function(el){el.classList.toggle('selected',el.getAttribute('data-v')===val);});
-    renderPeriod();
-}
-
 var _sectorInit = false;
 function renderSector() {
     if(!D.length) return;
-    var fc2 = _cselVal;
 
     // 드롭다운 초기화 (1회)
     if(!_sectorInit) {
@@ -9553,21 +9537,13 @@ function renderSector() {
             var ia=curOrder.indexOf(a),ib=curOrder.indexOf(b);
             if(ia<0)ia=99;if(ib<0)ib=99;return ia-ib;
         });
-        var lh = '<div class="csel-item selected" data-v="">통화</div>';
-        keys.forEach(function(v) {
-            lh += '<div class="csel-item" data-v="'+v+'">'+v+'</div>';
-        });
-        document.getElementById('cselList').innerHTML = lh;
-        document.getElementById('cselList').addEventListener('click', function(e) {
-            var item = e.target.closest('.csel-item');
-            if (!item) return;
-            pickCsel(item.getAttribute('data-v'), item.textContent);
-        });
+        cselRegister('cselList','cselDisplay','통화',renderSector);
+        cselBuild('cselList',keys);
         _sectorInit = true;
     }
 
     // 필터링
-    var filtered = fc2 ? D.filter(function(r){ return r[1]===fc2; }) : D;
+    var filtered = D.filter(function(r){ return cselPass('cselList', r[1]||''); });
 
     // 섹터별 집계 (시총 가중평균). row 인덱스: 7=RSI, 8=YTD, 9=1D, 10=1W, 11=1M, 12=3M, 13=6M, 14=1Y, 15=DD
     var agg = {};
