@@ -13,6 +13,7 @@ reads:
   - "store-wrap-nav-xlsx"
 writes: []
 depends_on:
+  - "src-report-context"
   - "ext-notion"
   - "infra-laptop"
 alerts: ""
@@ -34,6 +35,7 @@ alerts: ""
 - (none)
 
 ## Depends on
+- [[src-report-context]] — 보고서 컨텍스트 빌더 (build_report_context.py)
 - [[ext-notion]] — Notion (실적·리서치 퍼블리시 대상)
 - [[infra-laptop]] — 작업용 노트북 (ASUS Vivobook, Windows)
 

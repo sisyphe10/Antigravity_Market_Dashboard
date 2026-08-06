@@ -1,8 +1,8 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 161 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 162 components._
 
-Updated: 2026-08-05
+Updated: 2026-08-06
 
 ## By domain
 
@@ -111,7 +111,7 @@ Updated: 2026-08-05
 - [장전 포트폴리오 재생성 타이머 (07:30 평일)](timer-portfolio-premarket.md) — Timer
 - [포트폴리오 표 생성 (create_portfolio_tables.py)](src-create-portfolio-tables.md) — Source
 
-### 뉴스 · 리서치 (22)
+### 뉴스 · 리서치 (23)
 - [Earnings Calendar Sync (07:00)](gha-earnings-calendar-sync.md) — GHA
 - [earnings.db (실적봇 상태)](store-earnings-db.md) — Store
 - [Generic Source Pipeline (execution/sources/)](src-generic-pipeline.md) — Source
@@ -126,6 +126,7 @@ Updated: 2026-08-05
 - [뉴스 소스 아카이브 md (~/datalake/news/)](store-news-md.md) — Store
 - [리서치 태그 정본 (tag_state.sqlite + theme_trends.json + parquet)](store-research-tags.md) — Store
 - [리서치노트 이미지 OCR (datalake/ocr_worker.py)](src-research-ocr.md) — Source
+- [보고서 컨텍스트 빌더 (build_report_context.py)](src-report-context.md) — Source
 - [실적 분석 1-page md (~/datalake/analyses/)](store-analyses-md.md) — Store
 - [실적 캘린더 sync (earnings_calendar_sync.py)](src-earnings-calendar-sync.md) — Source
 - [실적봇 타이머 (earnings-bot)](timer-earnings-bot.md) — Timer
@@ -297,7 +298,7 @@ Updated: 2026-08-05
 - [외부 데이터 API/소스 집합](ext-data-apis.md) — active
 - [한국 수출 매출 추정 대시보드](ext-export-dashboard.md) — planned
 
-### Source (52)
+### Source (53)
 - [AoE 스타일 정본 (nav_style.py)](src-nav-style.md) — import 시 (상시), active
 - [AoE 차트 코어 (chart_core/aoe_chart.js)](src-chart-core.md) — 빌드타임 인라인 임베드 (상시), active
 - [DART 공시 (fetch_disclosures.py)](src-dart-disclosures.md) — 16:30 (gha-daily-disclosures), active
@@ -329,6 +330,7 @@ Updated: 2026-08-05
 - [리서치노트 이미지 OCR (datalake/ocr_worker.py)](src-research-ocr.md) — 23:20 step 0 (datalake-research-export), active
 - [마스터 시장 크롤러 (market_crawler.py)](src-market-crawler.md) — 23:00 (daily_crawl), active
 - [미국 ISM 서베이 8종 (fetch_ism_pmi.py)](src-ism-pmi.md) — 07:50 화~토 (gha-daily-fred 편승), active
+- [보고서 컨텍스트 빌더 (build_report_context.py)](src-report-context.md) — 보고서 커맨드 호출 시 (SSH 1회), active
 - [부티크 액티브 ETF 팔로업 (boutique_etf collect+alert)](src-boutique-etf.md) — 09:10 / 10:10 / 18:20 평일 (boutique-etf 타이머), active
 - [수익률 계산 (calculate_returns.py)](src-calculate-returns.md) — 체인 (finalize/recalc/crawl), active
 - [실적 캘린더 sync (earnings_calendar_sync.py)](src-earnings-calendar-sync.md) — 07:00 (GHA) + 15:00 (VM cron), active
@@ -370,7 +372,7 @@ Updated: 2026-08-05
 
 ## By project
 
-### antigravity (161)
+### antigravity (162)
 - [/aum — WRAP 일일 AUM 입력](cmd-aum.md) — Skill
 - [/긴급코멘트 — 급락일 시장 코멘트](cmd-urgent-comment.md) — Skill
 - [/목표전환형 — 랩 생성·청산 일괄](cmd-target-transform.md) — Skill
@@ -488,6 +490,7 @@ Updated: 2026-08-05
 - [메모리 사이클 플랜 알림 타이머 (07:45)](timer-memory-cycle-alert.md) — Timer
 - [미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 08:30)](timer-us-etf-collect.md) — Timer
 - [미국 ISM 서베이 8종 (fetch_ism_pmi.py)](src-ism-pmi.md) — Source
+- [보고서 컨텍스트 빌더 (build_report_context.py)](src-report-context.md) — Source
 - [부티크 액티브 ETF 타이머 (09:10/10:10/18:20 평일)](timer-boutique-etf.md) — Timer
 - [부티크 액티브 ETF 팔로업 (boutique_etf collect+alert)](src-boutique-etf.md) — Source
 - [비활성 워크플로 (weather · calendar · portfolio-report)](gha-disabled.md) — GHA

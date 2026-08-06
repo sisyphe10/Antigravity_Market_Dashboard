@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-08-05",
+  "updated": "2026-08-06",
   "projects": [
    "antigravity"
   ],
@@ -2480,6 +2480,7 @@
     "store-wrap-nav-xlsx"
    ],
    "depends_on": [
+    "src-report-context",
     "ext-notion",
     "infra-laptop"
    ]
@@ -2521,6 +2522,7 @@
     "~/.claude/commands/긴급코멘트.md"
    ],
    "depends_on": [
+    "src-report-context",
     "infra-laptop"
    ]
   },
@@ -2542,6 +2544,7 @@
     "store-wrap-nav-xlsx"
    ],
    "depends_on": [
+    "src-report-context",
     "infra-laptop"
    ]
   },
@@ -2793,28 +2796,6 @@
    "alerts": "run_timer_job stamp + OnFailure 텔레그램"
   },
   {
-   "id": "daemon-catchup",
-   "project": "antigravity",
-   "domain": "ops-infra",
-   "type": "infra",
-   "name": "catch-up 러너 (부팅 시 놓친 잡 복구)",
-   "runs_on": "vm_macmini",
-   "schedule_kst": "부팅 시 1회",
-   "status": "planned",
-   "desc_md": "맥미니 이전에서 systemd `Persistent=true`를 대체하는 launchd 데몬(`com.antigravity.catchup`, RunAtLoad=true). 부팅 시 1회, 맥이 꺼진 동안 마지막 스케줄 발화를 놓친 타이머 잡을 판정해 순차 재실행한다.\n\n- 판정: 각 `schedule.tsv` 행의 cron 직전 발화(`cron_prev.py`) vs 성공 stamp 비교 → stamp<직전발화면 재실행 큐잉.\n- 재실행은 잡 wrapper(`run_timer_job.sh`/`run_gha_job.sh`)를 통과 → 잡별 락·stamp·notify를 그대로 태움(이중실행 방어).\n- 정전/재부팅이 잦은 가정 호스팅(UPS 부재) 가용성의 핵심. **초안·검증 완료, 맥미니 컷오버 시 활성(planned).**",
-   "code": [
-    "launchd/system/catchup_runner.sh",
-    "launchd/system/cron_prev.py",
-    "launchd/system/com.antigravity.catchup.plist"
-   ],
-   "reads": [
-    "launchd/timers/schedule.tsv"
-   ],
-   "depends_on": [
-    "infra-vm-macmini"
-   ]
-  },
-  {
    "id": "daemon-journal-api",
    "project": "antigravity",
    "domain": "ops-infra",
@@ -2836,6 +2817,93 @@
     "ext-sisyphe"
    ],
    "alerts": "KeepAlive=true (launchd 자동 재기동, ThrottleInterval=10)"
+  },
+  {
+   "id": "src-ism-pmi",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "pipeline_source",
+   "name": "미국 ISM 서베이 8종 (fetch_ism_pmi.py)",
+   "runs_on": "gha",
+   "schedule_kst": "07:50 화~토 (gha-daily-fred 편승)",
+   "status": "active",
+   "desc_md": "2026-08-05 신설. 미국 ISM 서베이 8종 — 제조업 4종(헤드라인·신규주문·고용·가격) + 서비스업 4종(헤드라인·기업활동·신규주문·가격) — 을 수집해 dataset.csv DATA(MACRO/US)에 적재(dtype=`ISM_MACRO`, 전부 50 기준 확산지수, 이름에 국가 접두 없음 — Country 칼럼이 표시). [[gha-daily-fred]]가 FRED 조회 앞단에서 먼저 돌린다(맥미니 launchd 미러 `gha-fred` 잡 동일).\n\n- **★원천 = investing 이벤트차트 단일**: ISM이 2016년 FRED 재배포 라이선스를 회수(`NAPM` 삭제·API 400)해 FRED·DBnomics·ismworld·ECOS·Nasdaq·EconDB가 전부 막힘/오염(2026-08-05 전수 실측). curl_cffi(chrome impersonate) 필수(plain urllib는 403). ForexFactory `previous`는 최신월 교차검증용으로만 유효.\n- **★관측월 배정 = 인덱스 기반**(release stamp 직접 사용 금지): timestamp는 관측월이 아니라 발표일(전월치를 다음 달 첫 영업일 공표)이라 `발표월−1`을 그대로 쓰면 스탬프 오류 구간이 밀린다. `first_ref = 첫 발표월−1`, `span == 관측수`일 때만 `i번째 관측 = first_ref + i개월`.\n- **★드리프트 런 검사**(codex 지적 반영): 결측 1·중복 1이 상쇄되면 개수는 맞으면서 사이 구간만 밀린다 → 각 관측의 (발표월−1)과 배정 관측월 차이의 **연속 비영(非零) 최대 길이**가 `MAX_DRIFT_RUN` 초과 시 그 시리즈 차단(정상=전부 0, 2008 스탬프 오류=런 1 통과).\n- **★앵커는 허용오차**(`ANCHOR_TOL`): ISM이 매년 1월 계절조정계수를 소급 개정하므로 완전일치 앵커는 매년 1월 거짓 실패를 낸다.\n- 실패 처리: 시리즈 단위 격리(예외 시 그 시리즈만 skip)하되 **하나라도 실패하면 exit 1**(러너가 `|| echo`로 tolerate해도 종료코드가 감시 신호). 스크래핑 원천이라 잡에선 경고만 — FRED 조회는 계속되고 다음 run이 회수.",
+   "code": [
+    "execution/fetch_ism_pmi.py"
+   ],
+   "writes": [
+    "store-dataset-csv"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "store-news-md",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "store",
+   "name": "뉴스 소스 아카이브 md (~/datalake/news/)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "소스 폴링 시 (아카이브 훅)",
+   "status": "active",
+   "desc_md": "2026-08-05 신설. [[bot-ra-sisyphe]]의 각 소스 잡([[src-generic-pipeline]])이 fetch 직후 `execution/sources/archive.py`를 호출해 게시글 1건을 md 1개로 영속화하는 아카이브 코퍼스. 이 코퍼스가 [[daemon-datalake-webui]] 위키 검색·운용보고서의 뉴스 DB가 된다.\n\n- 경로: `~/datalake/news/<source>/<연도>/<YYYYMMDD>_<id>.md` — post id 기준 멱등(존재 시 skip). frontmatter = source/label/id/title/category/date/url/archived_at.\n- **텔레그램 발송과 완전 분리·append-only** — 아카이브는 모든 예외를 삼키고 로그만 남겨 **발송을 절대 깨지 않는다**(멱등이라 재실행 안전).\n- 소급 백필은 `datalake/backfill_news.py`(일회성·멱등, 존재 파일 skip으로 재개): kna는 목록 전체 순회(로그인 시 미국 본문 포함), trendforce는 wp-json 페이지네이션, semianalysis는 RSS 최근분, foreign_ir는 제목·링크만.\n- [[daemon-datalake-webui]] `wiki_tools.py`의 SEARCH_ROOTS에 `news`가 등재돼 `#태그`·자연어 문답이 이 코퍼스를 훑는다.",
+   "code": [
+    "execution/sources/archive.py",
+    "datalake/backfill_news.py"
+   ],
+   "depends_on": [
+    "src-generic-pipeline"
+   ]
+  },
+  {
+   "id": "timer-portfolio-premarket",
+   "project": "antigravity",
+   "domain": "portfolio-wrap",
+   "type": "timer",
+   "name": "장전 포트폴리오 재생성 타이머 (07:30 평일)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "07:30 평일 (월~금)",
+   "status": "active",
+   "desc_md": "2026-08-05 신설. 개장 전 평일 07:30 KST에 포트폴리오 구성 표(`portfolio_data.json`)를 한 번 재생성해 기준일을 당일로 넘기는 standalone launchd 타이머(`com.antigravity.portfolio-premarket` → `scripts/premarket_portfolio_refresh.sh`).\n\n- **왜**: [[src-create-portfolio-tables]]는 행 목록을 \"D-1 구성 ∪ 오늘 구성\" 합집합으로 만든다(전일 편출 종목을 당일 편출 표시용으로 남기는 의도된 동작). 정규 갱신([[bot-sisyphe]] auto_portfolio_update)의 첫 발화가 09:10이라, 그 전 아침 시간대에 WRAP Order 매트릭스·포트 표에 전일 편출 종목이 weight 0 행으로 계속 보였다. 이 잡이 개장 전에 기준일을 당일로 넘겨 그 구간을 없앤다.\n- 체인: `git pull` → `create_portfolio_tables.py` → `create_dashboard.py` → `safe_commit_push.sh`(Darwin에서 `publish_pages.sh` 백그라운드로 gh-pages까지 반영). 커밋 메시지 `[skip ci]`.\n- `run_timer_job.sh` 래퍼·`schedule.tsv` 미사용 — [[daemon-journal-api]]의 journal-trades와 동일한 standalone plist 규격(StartCalendarInterval 평일 5행, RunAtLoad=false). 실패 시 `notify_sisyphe_failure.sh portfolio-premarket`.",
+   "code": [
+    "launchd/timers/com.antigravity.portfolio-premarket.plist",
+    "scripts/premarket_portfolio_refresh.sh"
+   ],
+   "reads": [
+    "store-wrap-nav-xlsx"
+   ],
+   "writes": [
+    "store-portfolio-data",
+    "page-wrap"
+   ],
+   "depends_on": [
+    "src-create-portfolio-tables",
+    "src-create-dashboard"
+   ],
+   "alerts": "실패 → notify_sisyphe_failure.sh portfolio-premarket → 텔레그램"
+  },
+  {
+   "id": "daemon-catchup",
+   "project": "antigravity",
+   "domain": "ops-infra",
+   "type": "infra",
+   "name": "catch-up 러너 (부팅 시 놓친 잡 복구)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "부팅 시 1회",
+   "status": "planned",
+   "desc_md": "맥미니 이전에서 systemd `Persistent=true`를 대체하는 launchd 데몬(`com.antigravity.catchup`, RunAtLoad=true). 부팅 시 1회, 맥이 꺼진 동안 마지막 스케줄 발화를 놓친 타이머 잡을 판정해 순차 재실행한다.\n\n- 판정: 각 `schedule.tsv` 행의 cron 직전 발화(`cron_prev.py`) vs 성공 stamp 비교 → stamp<직전발화면 재실행 큐잉.\n- 재실행은 잡 wrapper(`run_timer_job.sh`/`run_gha_job.sh`)를 통과 → 잡별 락·stamp·notify를 그대로 태움(이중실행 방어).\n- 정전/재부팅이 잦은 가정 호스팅(UPS 부재) 가용성의 핵심. **초안·검증 완료, 맥미니 컷오버 시 활성(planned).**",
+   "code": [
+    "launchd/system/catchup_runner.sh",
+    "launchd/system/cron_prev.py",
+    "launchd/system/com.antigravity.catchup.plist"
+   ],
+   "reads": [
+    "launchd/timers/schedule.tsv"
+   ],
+   "depends_on": [
+    "infra-vm-macmini"
+   ]
   },
   {
    "id": "ext-data-apis",
@@ -3088,26 +3156,6 @@
    ]
   },
   {
-   "id": "src-ism-pmi",
-   "project": "antigravity",
-   "domain": "market-global",
-   "type": "pipeline_source",
-   "name": "미국 ISM 서베이 8종 (fetch_ism_pmi.py)",
-   "runs_on": "gha",
-   "schedule_kst": "07:50 화~토 (gha-daily-fred 편승)",
-   "status": "active",
-   "desc_md": "2026-08-05 신설. 미국 ISM 서베이 8종 — 제조업 4종(헤드라인·신규주문·고용·가격) + 서비스업 4종(헤드라인·기업활동·신규주문·가격) — 을 수집해 dataset.csv DATA(MACRO/US)에 적재(dtype=`ISM_MACRO`, 전부 50 기준 확산지수, 이름에 국가 접두 없음 — Country 칼럼이 표시). [[gha-daily-fred]]가 FRED 조회 앞단에서 먼저 돌린다(맥미니 launchd 미러 `gha-fred` 잡 동일).\n\n- **★원천 = investing 이벤트차트 단일**: ISM이 2016년 FRED 재배포 라이선스를 회수(`NAPM` 삭제·API 400)해 FRED·DBnomics·ismworld·ECOS·Nasdaq·EconDB가 전부 막힘/오염(2026-08-05 전수 실측). curl_cffi(chrome impersonate) 필수(plain urllib는 403). ForexFactory `previous`는 최신월 교차검증용으로만 유효.\n- **★관측월 배정 = 인덱스 기반**(release stamp 직접 사용 금지): timestamp는 관측월이 아니라 발표일(전월치를 다음 달 첫 영업일 공표)이라 `발표월−1`을 그대로 쓰면 스탬프 오류 구간이 밀린다. `first_ref = 첫 발표월−1`, `span == 관측수`일 때만 `i번째 관측 = first_ref + i개월`.\n- **★드리프트 런 검사**(codex 지적 반영): 결측 1·중복 1이 상쇄되면 개수는 맞으면서 사이 구간만 밀린다 → 각 관측의 (발표월−1)과 배정 관측월 차이의 **연속 비영(非零) 최대 길이**가 `MAX_DRIFT_RUN` 초과 시 그 시리즈 차단(정상=전부 0, 2008 스탬프 오류=런 1 통과).\n- **★앵커는 허용오차**(`ANCHOR_TOL`): ISM이 매년 1월 계절조정계수를 소급 개정하므로 완전일치 앵커는 매년 1월 거짓 실패를 낸다.\n- 실패 처리: 시리즈 단위 격리(예외 시 그 시리즈만 skip)하되 **하나라도 실패하면 exit 1**(러너가 `|| echo`로 tolerate해도 종료코드가 감시 신호). 스크래핑 원천이라 잡에선 경고만 — FRED 조회는 계속되고 다음 run이 회수.",
-   "code": [
-    "execution/fetch_ism_pmi.py"
-   ],
-   "writes": [
-    "store-dataset-csv"
-   ],
-   "depends_on": [
-    "ext-data-apis"
-   ]
-  },
-  {
    "id": "src-nav-style",
    "project": "antigravity",
    "domain": "ops-infra",
@@ -3119,6 +3167,27 @@
    "desc_md": "AoE 전 페이지 공통 스타일의 유일한 출처 (2026-07-26 네비 드리프트 근본해결).\n\n- 상단 네비 정본: NAV_CSS(+scoped)·nav_html(active)·materialize(마커 치환).\n- **하위 스트립(sidebar) 정본화(2026-07-31)**: 드롭다운 하위 탭을 가로로 펼치는 서브 스트립도 `NAV_ITEMS` 단일 출처로 — `sidebar_html(active)`·`SIDEBAR_CSS`·`SIDEBAR_MARK_BEGIN/END` 마커. 게시 단계에서 `compose_personal_view.py`가 소비 페이지의 `aside.sidebar`까지 이 정본으로 치환(구본 하드코딩 스트립 제거, Market 스트립에서 Universe 계열 제외)해 외형(스트립 42px·링크 41px·중앙정렬·sticky top=nav 54px·앰버 밑줄·800px 이하 숨김)을 게시본과 통일. 마커 소비 앱=[[daemon-watchlist-quoteboard]]·[[daemon-datalake-webui]](자식 없으면 무동작). create_dashboard는 자체 레이아웃 CSS 별도 보유.\n- **Universe·Universe Lab → Watchlist 하위 이동(2026-07-31)**: `NAV_ITEMS`에서 두 페이지를 Market 드롭다운에서 Watchlist 드롭다운으로 옮겼다. `compose_personal_view.py`는 두 페이지의 nav active 키를 watchlist로 재매핑([[page-universe]]·[[page-universe-lab]]).\n- 다크 PALETTE·라이트 WRAP_PALETTE: compose 주입 CSS 와 앱 3종(var(--aoe-*))·WRAP(var(--wrap-*)) 이 파생.\n- H2C_FREEZE_JS: html2canvas 캡처 색고정 (틴트 셀 #333 굳음 버그 차단).\n- **벤더 자산 셀프호스팅(2026-07-27)**: ts.net AoE 페이지의 Pretendard·Chart.js(v4.5.1 고정)·html2canvas(1.4.1)를 CDN 대신 로컬 `assets/vendor/`에서 서빙 — 상수 `VENDOR_PRETENDARD_CSS`/`VENDOR_CHART_JS`/`VENDOR_HTML2CANVAS_JS`(절대경로 `/assets/vendor/…`). `publish_snapshot.sh`가 `assets/**`를 스냅숏에 포함, webui 등 앱도 로컬 경로 사용. ★**WRAP만 CDN 유지** — gh-pages 프로젝트 사이트(`/repo/` 하위)에선 절대경로가 깨지므로 wrap 코드는 이 상수를 쓰지 않는다.\n- 소비자: create_dashboard·create_architecture(재생성 시) / webui·quoteboard 서버(기동 시 치환) / compose(publish 시 교체).\n- ★수정 규칙: 네비·색 변경은 반드시 이 파일에서만. 다크 주입 CSS 에 nav !important 재단언 금지.",
    "code": [
     "execution/nav_style.py"
+   ]
+  },
+  {
+   "id": "src-report-context",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "pipeline_source",
+   "name": "보고서 컨텍스트 빌더 (build_report_context.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "보고서 커맨드 호출 시 (SSH 1회)",
+   "status": "active",
+   "desc_md": "2026-08-06 신설. 보고서 커맨드([[cmd-operating-report]]·[[cmd-weekly-report]]·[[cmd-urgent-comment]])가 SSH 1회로 호출하는 **freshness preflight + 구조화 컨텍스트** 빌더. \"레이크가 완전한가\"를 원천 DB와 실시간 대조로 판정하고, 불완전하면 `exit 2`로 끝나 커맨드가 폴백(Notion 리서치노트·로컬 보고서 폴더)으로 넘어가게 한다.\n\n- 호출: `--kind monthly --period YYYY-MM` / `--kind weekly --date YYYY-MM-DD` / `--kind comment --date YYYY-MM-DD`. stdout에 JSON 1개(섹션별 status/count), exit 0=complete · 2=incomplete(폴백) · 1=사용 오류.\n- **freshness 게이트**: 레이크 research_notes md를 원천 [[store-research-notes-db]]와 실시간 대조(누락 시 hint로 `export_research_notes.py --from/--to` 재수출 안내), [[store-tag-index]]가 대상 기간 md보다 오래되면 `stale` 경고(23:20 [[src-research-tagging]] 잡이 자동 갱신).\n- **구조화 컨텍스트**: `datalake/reports/{monthly,weekly,comments}/`의 직전 보고서를 종류·날짜 조건으로 선별(월간=직전월 5건·주간=전주 2건·코멘트=전일 2건), 테마 빈도 집계, comment kind는 전일 리서치 메시지도 첨부.\n- **as-of 원칙**: 과거 월 재생성 시 period 말일 이후 자료는 테마 집계·직전 보고서 선정에서 제외해 look-ahead를 차단.",
+   "code": [
+    "datalake/build_report_context.py"
+   ],
+   "reads": [
+    "store-research-notes-db",
+    "store-tag-index"
+   ],
+   "depends_on": [
+    "src-research-tagging"
    ]
   },
   {
@@ -3260,24 +3329,6 @@
    "desc_md": "index.html 회전 위젯(sparkline+코멘트, 50슬롯) 데이터. landing-highlights 타이머가 생성.\n\n- 여러 산출물에서 하이라이트를 종합. index.html이 런타임 소비.",
    "depends_on": [
     "src-landing-highlights"
-   ]
-  },
-  {
-   "id": "store-news-md",
-   "project": "antigravity",
-   "domain": "news-research",
-   "type": "store",
-   "name": "뉴스 소스 아카이브 md (~/datalake/news/)",
-   "runs_on": "vm_macmini",
-   "schedule_kst": "소스 폴링 시 (아카이브 훅)",
-   "status": "active",
-   "desc_md": "2026-08-05 신설. [[bot-ra-sisyphe]]의 각 소스 잡([[src-generic-pipeline]])이 fetch 직후 `execution/sources/archive.py`를 호출해 게시글 1건을 md 1개로 영속화하는 아카이브 코퍼스. 이 코퍼스가 [[daemon-datalake-webui]] 위키 검색·운용보고서의 뉴스 DB가 된다.\n\n- 경로: `~/datalake/news/<source>/<연도>/<YYYYMMDD>_<id>.md` — post id 기준 멱등(존재 시 skip). frontmatter = source/label/id/title/category/date/url/archived_at.\n- **텔레그램 발송과 완전 분리·append-only** — 아카이브는 모든 예외를 삼키고 로그만 남겨 **발송을 절대 깨지 않는다**(멱등이라 재실행 안전).\n- 소급 백필은 `datalake/backfill_news.py`(일회성·멱등, 존재 파일 skip으로 재개): kna는 목록 전체 순회(로그인 시 미국 본문 포함), trendforce는 wp-json 페이지네이션, semianalysis는 RSS 최근분, foreign_ir는 제목·링크만.\n- [[daemon-datalake-webui]] `wiki_tools.py`의 SEARCH_ROOTS에 `news`가 등재돼 `#태그`·자연어 문답이 이 코퍼스를 훑는다.",
-   "code": [
-    "execution/sources/archive.py",
-    "datalake/backfill_news.py"
-   ],
-   "depends_on": [
-    "src-generic-pipeline"
    ]
   },
   {
@@ -3479,33 +3530,6 @@
    "writes": [
     "hotel_adr.csv"
    ]
-  },
-  {
-   "id": "timer-portfolio-premarket",
-   "project": "antigravity",
-   "domain": "portfolio-wrap",
-   "type": "timer",
-   "name": "장전 포트폴리오 재생성 타이머 (07:30 평일)",
-   "runs_on": "vm_macmini",
-   "schedule_kst": "07:30 평일 (월~금)",
-   "status": "active",
-   "desc_md": "2026-08-05 신설. 개장 전 평일 07:30 KST에 포트폴리오 구성 표(`portfolio_data.json`)를 한 번 재생성해 기준일을 당일로 넘기는 standalone launchd 타이머(`com.antigravity.portfolio-premarket` → `scripts/premarket_portfolio_refresh.sh`).\n\n- **왜**: [[src-create-portfolio-tables]]는 행 목록을 \"D-1 구성 ∪ 오늘 구성\" 합집합으로 만든다(전일 편출 종목을 당일 편출 표시용으로 남기는 의도된 동작). 정규 갱신([[bot-sisyphe]] auto_portfolio_update)의 첫 발화가 09:10이라, 그 전 아침 시간대에 WRAP Order 매트릭스·포트 표에 전일 편출 종목이 weight 0 행으로 계속 보였다. 이 잡이 개장 전에 기준일을 당일로 넘겨 그 구간을 없앤다.\n- 체인: `git pull` → `create_portfolio_tables.py` → `create_dashboard.py` → `safe_commit_push.sh`(Darwin에서 `publish_pages.sh` 백그라운드로 gh-pages까지 반영). 커밋 메시지 `[skip ci]`.\n- `run_timer_job.sh` 래퍼·`schedule.tsv` 미사용 — [[daemon-journal-api]]의 journal-trades와 동일한 standalone plist 규격(StartCalendarInterval 평일 5행, RunAtLoad=false). 실패 시 `notify_sisyphe_failure.sh portfolio-premarket`.",
-   "code": [
-    "launchd/timers/com.antigravity.portfolio-premarket.plist",
-    "scripts/premarket_portfolio_refresh.sh"
-   ],
-   "reads": [
-    "store-wrap-nav-xlsx"
-   ],
-   "writes": [
-    "store-portfolio-data",
-    "page-wrap"
-   ],
-   "depends_on": [
-    "src-create-portfolio-tables",
-    "src-create-dashboard"
-   ],
-   "alerts": "실패 → notify_sisyphe_failure.sh portfolio-premarket → 텔레그램"
   },
   {
    "id": "web-caddy",
