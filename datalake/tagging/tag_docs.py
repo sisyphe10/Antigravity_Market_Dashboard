@@ -246,7 +246,7 @@ def project_doc(st, rel, uni, extra, onto):
         elif e.startswith("person:"):
             people.add(name if name != e else e.split(":", 1)[1])
         else:
-            tickers.add(e)
+            tickers.add("%s(%s)" % (name, e) if name and name != e else e)
             if u.get("sector"):
                 sectors.add(u["sector"])
 

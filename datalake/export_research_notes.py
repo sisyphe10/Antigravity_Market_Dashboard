@@ -212,7 +212,7 @@ def render_day(day, messages, tags=None, ocr=None):
                 elif eid.startswith("private:"):
                     orgs.add(name)
                 else:
-                    tickers.add(eid)
+                    tickers.add("%s(%s)" % (name, eid) if name and name != eid else eid)
                     if sector:
                         sectors.add(sector)
         covered = sum(1 for m in messages if m["id"] in tags)
