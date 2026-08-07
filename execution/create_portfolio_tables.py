@@ -559,10 +559,12 @@ def create_portfolio_tables():
         print(f"\n2. {len(all_codes)}개 종목 시가총액/시장구분 로드 중 (KIS 우선)...")
         stock_meta = load_stock_meta(sorted(all_codes))
 
-        # 동일 비중 타이브레이크: weight_prev desc -> weight desc -> 시가총액(억원) desc
+        # 표시 정렬: weight_prev(D-1) desc -> 시가총액(억원) desc.
+        # 금일 변경후 비중(weight)은 키에서 제외 — 장중에 오늘 주문이 D-1 표시 순서에
+        # 새어 나오지 않게 하고, 마감 후 재생성 때 새 비중으로 자연 반영.
         for _cfg in portfolio_configs:
             _cfg['union_stocks'].sort(
-                key=lambda s: (s['weight_prev'], s['weight'],
+                key=lambda s: (s['weight_prev'],
                                (stock_meta.get(s['code']) or {}).get('marcap', 0) or 0),
                 reverse=True)
 
