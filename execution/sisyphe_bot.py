@@ -166,7 +166,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 • 종목별 아이디어가 Journal 페이지 Ideas 탭에 누적
 
 📏 **매매 원칙**
-/rules - 최신 주간 원칙 점검 리포트
+/rules - 매매 원칙 보기
+/review - 최신 주간 원칙 점검 리포트
 
 ⚙️ **기타**
 /start - 봇 시작 및 자동 알림 구독
@@ -2906,8 +2907,44 @@ async def handle_uncat_reply(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await msg.reply_text(f"❌ 규칙 처리 실패: {e}")
 
 
+def _format_principles():
+    """principles.md → 텔레그램 HTML (섹션=볼드밑줄, 조항 번호, 하위 a~ 들여쓰기)"""
+    import re
+    def esc(t):
+        return t.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    lines = ["<b><u>📏 매매 원칙</u></b>"]
+    with open("/Users/sisyphe/Journal/principles.md", encoding="utf-8") as f:
+        for raw in f:
+            line = raw.rstrip()
+            if not line.strip():
+                continue
+            m = re.match(r"^##\s*\((.+)\)\s*$", line)
+            if m:
+                lines.append("")
+                lines.append(f"<b><u>{esc(m.group(1).strip())}</u></b>")
+                continue
+            m = re.match(r"^(\d+)\.\s+(.*)$", line)
+            if m:
+                lines.append(f"{m.group(1)}. {esc(m.group(2).strip())}")
+                continue
+            m = re.match(r"^\s*-\s*([a-z])\.\s+(.*)$", line)
+            if m:
+                lines.append(f"   - {m.group(1)}. {esc(m.group(2).strip())}")
+                continue
+            lines.append(esc(line.strip()))
+    return "\n".join(lines)
+
+
 async def rules_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """/rules - 최신 주간 매매 원칙 점검 리포트"""
+    """/rules - 매매 원칙(principles.md) 표시"""
+    try:
+        await update.message.reply_text(_format_principles()[:3900], parse_mode="HTML")
+    except Exception as e:
+        await update.message.reply_text(f"❌ 원칙 조회 실패: {e}")
+
+
+async def review_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/review - 최신 주간 매매 원칙 점검 리포트"""
     chat_id = update.effective_chat.id
     status_msg = await update.message.reply_text("📋 최신 주간 원칙 점검을 불러오는 중...")
 
@@ -2937,7 +2974,8 @@ async def _post_init(app):
     """텔레그램 명령 메뉴 등록 — '/' 입력 시 전체 명령이 뜨도록"""
     from telegram import BotCommand
     cmds = [
-        ("rules", "최신 주간 원칙 점검 리포트"),
+        ("rules", "매매 원칙 보기"),
+        ("review", "최신 주간 원칙 점검 리포트"),
         ("portfolio", "포트폴리오 리포트"),
         ("update", "장중 시세 업데이트"),
         ("weather", "현재 날씨"),
@@ -2978,6 +3016,7 @@ if __name__ == '__main__':
     application.add_handler(CommandHandler('journal', journal_command))
     application.add_handler(CommandHandler('idea', idea_command))
     application.add_handler(CommandHandler('rules', rules_command))
+    application.add_handler(CommandHandler('review', review_command))
     application.add_handler(MessageHandler(filters.REPLY & filters.TEXT & ~filters.COMMAND, handle_uncat_reply))
     application.add_handler(CallbackQueryHandler(handle_ledger_callback, pattern=r'^ledgercat:'))
     application.add_handler(CallbackQueryHandler(handle_ledger_budget_callback, pattern=r'^ledgerbudget:'))
