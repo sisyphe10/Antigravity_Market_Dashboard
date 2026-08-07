@@ -1033,7 +1033,7 @@ async def featured_update_job(context):
         try:
             news_result = subprocess.run(
                 [sys.executable, "execution/fetch_featured_news.py"],
-                capture_output=True, text=True, timeout=120, cwd=dashboard_dir
+                capture_output=True, text=True, timeout=420, cwd=dashboard_dir
             )
             if news_result.returncode == 0:
                 logging.info(f"{tag} 뉴스 수집 완료: {news_result.stdout.strip()[-100:]}")
