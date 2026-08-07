@@ -1,8 +1,8 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 162 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 163 components._
 
-Updated: 2026-08-06
+Updated: 2026-08-07
 
 ## By domain
 
@@ -53,7 +53,7 @@ Updated: 2026-08-06
 - [파생·수급 13종 (fetch_deriv_daily.py)](src-deriv-daily.md) — Source
 - [한국 수출 매출 추정 대시보드](ext-export-dashboard.md) — External
 
-### 해외 · 매크로 (25)
+### 해외 · 매크로 (26)
 - [Daily ECOS BOK (17:40 평일)](gha-daily-ecos.md) — GHA
 - [Daily FRED US Macro (07:50 화~토)](gha-daily-fred.md) — GHA
 - [Daily Market Crawl (23:00)](gha-daily-crawl.md) — GHA
@@ -75,6 +75,7 @@ Updated: 2026-08-06
 - [마스터 시장 크롤러 (market_crawler.py)](src-market-crawler.md) — Source
 - [미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 08:30)](timer-us-etf-collect.md) — Timer
 - [미국 ISM 서베이 8종 (fetch_ism_pmi.py)](src-ism-pmi.md) — Source
+- [미국·한국 회사채 발행액 (fetch_corp_bond_issuance.py)](src-corp-bond-issuance.md) — Source
 - [월별 수익률 11지수 (fetch_monthly_returns.py)](src-monthly-returns.md) — Source
 - [유니버스 수집 (fetch_universe.py)](src-universe.md) — Source
 - [일본 CAPEX 지표 (fetch_japan_capex.py)](src-japan-capex.md) — Source
@@ -298,7 +299,7 @@ Updated: 2026-08-06
 - [외부 데이터 API/소스 집합](ext-data-apis.md) — active
 - [한국 수출 매출 추정 대시보드](ext-export-dashboard.md) — planned
 
-### Source (53)
+### Source (54)
 - [AoE 스타일 정본 (nav_style.py)](src-nav-style.md) — import 시 (상시), active
 - [AoE 차트 코어 (chart_core/aoe_chart.js)](src-chart-core.md) — 빌드타임 인라인 임베드 (상시), active
 - [DART 공시 (fetch_disclosures.py)](src-dart-disclosures.md) — 16:30 (gha-daily-disclosures), active
@@ -330,6 +331,7 @@ Updated: 2026-08-06
 - [리서치노트 이미지 OCR (datalake/ocr_worker.py)](src-research-ocr.md) — 23:20 step 0 (datalake-research-export), active
 - [마스터 시장 크롤러 (market_crawler.py)](src-market-crawler.md) — 23:00 (daily_crawl), active
 - [미국 ISM 서베이 8종 (fetch_ism_pmi.py)](src-ism-pmi.md) — 07:50 화~토 (gha-daily-fred 편승), active
+- [미국·한국 회사채 발행액 (fetch_corp_bond_issuance.py)](src-corp-bond-issuance.md) — 07:50 화~토 (gha-daily-fred 편승), active
 - [보고서 컨텍스트 빌더 (build_report_context.py)](src-report-context.md) — 보고서 커맨드 호출 시 (SSH 1회), active
 - [부티크 액티브 ETF 팔로업 (boutique_etf collect+alert)](src-boutique-etf.md) — 09:10 / 10:10 / 18:20 평일 (boutique-etf 타이머), active
 - [수익률 계산 (calculate_returns.py)](src-calculate-returns.md) — 체인 (finalize/recalc/crawl), active
@@ -372,7 +374,7 @@ Updated: 2026-08-06
 
 ## By project
 
-### antigravity (162)
+### antigravity (163)
 - [/aum — WRAP 일일 AUM 입력](cmd-aum.md) — Skill
 - [/긴급코멘트 — 급락일 시장 코멘트](cmd-urgent-comment.md) — Skill
 - [/목표전환형 — 랩 생성·청산 일괄](cmd-target-transform.md) — Skill
@@ -490,6 +492,7 @@ Updated: 2026-08-06
 - [메모리 사이클 플랜 알림 타이머 (07:45)](timer-memory-cycle-alert.md) — Timer
 - [미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 08:30)](timer-us-etf-collect.md) — Timer
 - [미국 ISM 서베이 8종 (fetch_ism_pmi.py)](src-ism-pmi.md) — Source
+- [미국·한국 회사채 발행액 (fetch_corp_bond_issuance.py)](src-corp-bond-issuance.md) — Source
 - [보고서 컨텍스트 빌더 (build_report_context.py)](src-report-context.md) — Source
 - [부티크 액티브 ETF 타이머 (09:10/10:10/18:20 평일)](timer-boutique-etf.md) — Timer
 - [부티크 액티브 ETF 팔로업 (boutique_etf collect+alert)](src-boutique-etf.md) — Source

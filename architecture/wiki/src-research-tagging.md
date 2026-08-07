@@ -19,6 +19,7 @@ code:
   - "datalake/tagging/ontology.json"
   - "datalake/tagging/aliases_manual.csv"
   - "datalake/tagging/entities_extra.csv"
+  - "datalake/tagging/search_aliases.csv"
 reads:
   - "store-research-notes-db"
   - "universe_tickers.csv"
@@ -43,9 +44,10 @@ alerts: "태깅·parquet·집계 실패는 warn(아카이브는 계속) · wrapp
 - **`build_theme_trends.py`** — 월별 테마·섹터·종목 언급 추이 `theme_trends.json` 집계(절대건수 대신 count·share·unique_sources 3지표, primary/secondary 분리). `~/work/charts/260715_현선물공매도`의 관심축 차트가 소비.
 - **`recompute_rules.py`** — 별칭 사전·규칙만 고쳤을 때 LLM 재호출 없이 규칙 기반 개체 매칭만 재계산(`rule_strong`/`rule_header` 재생성 + URL 안에서만 잡히던 개체 제거). 전량 재태깅(수 시간·수 달러) 회피용 보수 도구.
 
-**코퍼스 확장(2026-07-29)**: 리서치노트 메시지뿐 아니라 어닝콜 전문·실적 분석 md까지 **같은 태그 어휘**로 태깅하고, 코퍼스를 한 인덱스로 합친다. **2026-07-31 확장**: `tag_docs.SOURCES`에 자체 산출 보고서 4종 — 주간 WRAP 보고(`reports/weekly`, kind=weekly)·긴급/스팟 시장 코멘트(`reports/comments`, comment)·월간운용보고서(`reports/monthly`, monthly)·목표달성보고서(`reports/target`, target) — 를 추가해 md 문서 코퍼스가 전문·분석 2종에서 **6종**으로 늘었다(리서치노트까지 통합 인덱스는 7 코퍼스). **2026-08-03 확장**: `SOURCES`에 Notion **Study DB** 미러([[store-notion-study-md]], kind=study — [[src-notion-study]]가 일일 동기화)를 더해 md 문서 코퍼스가 **7종**(리서치노트까지 통합 인덱스 8 코퍼스)이 됐다.
-- **`tag_docs.py`** — md 문서 태거. 어닝콜 전문([[store-transcripts-md]])·실적 분석([[store-analyses-md]]) + 자체 보고서 4종(주간/코멘트/월간/목표) + Notion Study([[store-notion-study-md]], kind=study)를 `SOURCES` 딕셔너리로 kind별 경로 매핑. 리서치노트가 텔레그램 메시지 단위인 것과 달리, 4만자를 넘는 콜 전문을 **청크 단위**(기본 4000자)로 태깅해 "#HBM 이 어느 대목이었나"를 잃지 않는다. 온톨로지·별칭·프롬프트·저장 스키마는 `tag_worker`를 그대로 재사용하고, 정본은 [[store-tag-index]]의 `doc_tag_state.sqlite`·md frontmatter(themes/tickers/sectors/orgs)는 그 투영. `--dry-run`·`--kind`·`--max-items`·`--project`(재투영만) 지원.
-- **`build_tag_index.py`** — 전 코퍼스(리서치노트·전문·분석·주간/코멘트/월간/목표 보고서·Notion Study)의 태그를 [[store-tag-index]]의 `tag_index.sqlite` 한 장부로 합치는 **통합 인덱스 빌더**. corpus 매핑 딕셔너리로 kind→라벨을 잇고 `#KLAC` 하나로 전부 훑도록 조인을 미리 펼친다. **LLM 미사용**(이미 붙은 태그 재배열)이라 무료·멱등, 매 실행 통째 재생성. [[daemon-datalake-webui]]의 `#태그` 즉시 검색 백엔드(`/tags/doc`이 `reports/` 경로도 허용).
+**코퍼스 확장(2026-07-29)**: 리서치노트 메시지뿐 아니라 어닝콜 전문·실적 분석 md까지 **같은 태그 어휘**로 태깅하고, 코퍼스를 한 인덱스로 합친다. **2026-07-31 확장**: `tag_docs.SOURCES`에 자체 산출 보고서 4종 — 주간 WRAP 보고(`reports/weekly`, kind=weekly)·긴급/스팟 시장 코멘트(`reports/comments`, comment)·월간운용보고서(`reports/monthly`, monthly)·목표달성보고서(`reports/target`, target) — 를 추가해 md 문서 코퍼스가 전문·분석 2종에서 **6종**으로 늘었다(리서치노트까지 통합 인덱스는 7 코퍼스). **2026-08-03 확장**: `SOURCES`에 Notion **Study DB** 미러([[store-notion-study-md]], kind=study — [[src-notion-study]]가 일일 동기화)를 더해 md 문서 코퍼스가 **7종**(리서치노트까지 통합 인덱스 8 코퍼스)이 됐다. **2026-08-07 확장**: `SOURCES`에 **외부 증권사 리포트**(`reports/research`, kind=research)를 더해 md 문서 코퍼스가 **8종**(리서치노트까지 통합 인덱스 9 코퍼스)이 됐다.
+- **`tag_docs.py`** — md 문서 태거. 어닝콜 전문([[store-transcripts-md]])·실적 분석([[store-analyses-md]]) + 자체 보고서 4종(주간/코멘트/월간/목표) + Notion Study([[store-notion-study-md]], kind=study) + 외부 증권사 리포트(kind=research)를 `SOURCES` 딕셔너리로 kind별 경로 매핑. 리서치노트가 텔레그램 메시지 단위인 것과 달리, 4만자를 넘는 콜 전문을 **청크 단위**(기본 4000자)로 태깅해 "#HBM 이 어느 대목이었나"를 잃지 않는다. 온톨로지·별칭·프롬프트·저장 스키마는 `tag_worker`를 그대로 재사용하고, 정본은 [[store-tag-index]]의 `doc_tag_state.sqlite`·md frontmatter(themes/tickers/sectors/orgs)는 그 투영. `--dry-run`·`--kind`·`--max-items`·`--project`(재투영만) 지원.
+  - **증권사·저자 강제 태깅(2026-08-07)**: 증권사 리포트는 frontmatter의 `broker`/`authors`를 규칙·LLM과 무관하게 개체 태그로 강제 동기화한다(`force_frontmatter_tags`, method=`fm_meta`, 멱등). `resolve_broker_entity`가 frontmatter 증권사 문자열을 `entities_extra.csv` 개체 id로 대조(별칭은 리스트일 수 있어 정규화)하고, 미등록이면 `inst:` 접두로 임시 부여. frontmatter tickers 는 종목코드에 회사명을 함께 실어 라벨 가독성을 살린다. frontmatter 메타(`fm_meta`)만 바뀐 문서는 **콘텐츠 캐시 히트라도 재투영**해 태그가 최신 frontmatter를 따라간다. 국내 잔여+해외 증권사는 `entities_extra.csv`에 2회차로 확충했고, 검색 전용 별칭은 태깅 어휘를 오염시키지 않도록 `search_aliases.csv`(신설)로 분리 — [[store-tag-index]] `#태그` 검색에서만 확장된다.
+- **`build_tag_index.py`** — 전 코퍼스(리서치노트·전문·분석·주간/코멘트/월간/목표 보고서·Notion Study·외부 증권사 리포트)의 태그를 [[store-tag-index]]의 `tag_index.sqlite` 한 장부로 합치는 **통합 인덱스 빌더**. corpus 매핑 딕셔너리로 kind→라벨을 잇고 `#KLAC` 하나로 전부 훑도록 조인을 미리 펼친다. **LLM 미사용**(이미 붙은 태그 재배열)이라 무료·멱등, 매 실행 통째 재생성. [[daemon-datalake-webui]]의 `#태그` 즉시 검색 백엔드(`/tags/doc`이 `reports/` 경로도 허용).
 
 ## 일일 실행 (`daily_tag_export.sh`)
 
@@ -75,6 +77,7 @@ alerts: "태깅·parquet·집계 실패는 warn(아카이브는 계속) · wrapp
 - `datalake/tagging/ontology.json`
 - `datalake/tagging/aliases_manual.csv`
 - `datalake/tagging/entities_extra.csv`
+- `datalake/tagging/search_aliases.csv`
 
 ## Alerts
 ⚠ 태깅·parquet·집계 실패는 warn(아카이브는 계속) · wrapper 실패 → 텔레그램

@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-08-06",
+  "updated": "2026-08-07",
   "projects": [
    "antigravity"
   ],
@@ -93,7 +93,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "상시 (내부 잡 05:00~23:00)",
    "status": "active",
-   "desc_md": "생태계의 중심 봇. python-telegram-bot JobQueue로 하루종일 포트폴리오·시장·가계부 잡을 돌린다(`execution/sisyphe_bot.py`, 134KB).\n\n- **내부 스케줄(KST)**: 05:00 날씨 · 05:05 캘린더 · 09:10·09:30~15:35 30분 자동 포트폴리오 업데이트(거래일) · 16:05 투자유의 재생성(`src-create-market-alert`) · 16:10 투자일지(`src-journal-data`) · 16:20/18:30/08:30 Featured 1·2·3차 · 17:00 일간 리포트 publish · 20:00 백업 재시도 · 23:00 투자유의 야간.\n- **17:00 일간 리포트(`daily_portfolio_report.py`)**: 별도 잡이 아니라 **봇이 subprocess로 부르는 내부 잡** — 정기 발송은 `daily_portfolio_job`, `/portfolio` 명령은 같은 스크립트를 `--no-send`로 돌려 stdout을 답장한다(개별 카드 없이 이 봇 카드에 흡수 — `architecture/REGISTRY_NOTES.md`). 거래일만 발송하고, 당일 중복 발송은 전송일자 기록으로 차단. 16:00→17:00으로 옮긴 이유는 KIS 확정 종가 확보 후 publish하기 위함.\n- **리포트 표기 규약(2026-07-16 확정)**: 텍스트는 `기준가`+`수익률` 2블록, 종목 구성은 PNG 표로 분리 전송. **기준가=전 상품 개별 / 수익률=일반형 그룹대표+벤치마크+전환형 개별**의 비대칭이 핵심 — 수익률만 `wrap_config.report_return_products()`가 같은 `group`의 일반형을 대표 1줄(트루밸류)로 접는다(포트가 수렴해 같은 숫자라서). 순서는 **벤치마크 선두** = KOSPI → KOSDAQ → 일반형 → 목표전환형. 종목 PNG는 그룹 병합을 시도했다가(`e9289560`) 되돌려 **현재는 전체 개별**(일반형 랩 대표 + 단독 일반형 + 활성 전환형 각 1장)이고, 종목별 `YTD` 컬럼이 붙었다.\n  - ★`get_portfolio_holdings`/`format_message` docstring은 아직 \"그룹 대표 1장씩만 보낸다\"는 폐기된 설계를 기술한다(`26ed7df6`이 `_group_reps()`를 걷어냄) — **docstring이 stale**, 실제 전송부는 개별. `daily_portfolio_job` docstring의 \"오후 4시\"도 17:00 이관 전 잔재.\n- **`/update` 동일구성 그룹핑(2026-07-16)**: `format_update_summary`가 `(종목명, D-1 비중 1자리)` 시그니처가 같은 상품을 한 블록으로 묶어 **종목 기여 리스트를 1회만** 출력한다. 수렴 전·신규 출시라 구성이 어긋난 상품은 시그니처가 달라 **자동으로 별도 블록**이 되는 자기적응 구조. 상품별 YTD·누적은 `_portfolio_meta`의 D-1 값에 당일 등락을 복리 결합해 상품마다 따로 보존.\n- 가계부: Apps Script doPost가 거래를 직접 텔레그램 전송, 봇은 답장(분류/수정/제외) 처리.\n- systemd `Restart=always`(10회 실패 시 중단+알림). 맥미니에선 launchd KeepAlive + wrapper로 등가 구현.\n- 함정: JobQueue 가드/pytz 필요, 라이브 테스트는 VM 봇 중지 후.",
+   "desc_md": "생태계의 중심 봇. python-telegram-bot JobQueue로 하루종일 포트폴리오·시장·가계부 잡을 돌린다(`execution/sisyphe_bot.py`, 134KB).\n\n- **내부 스케줄(KST)**: 05:00 날씨 · 05:05 캘린더 · 09:10·09:30~15:35 30분 자동 포트폴리오 업데이트(거래일) · 16:05 투자유의 재생성(`src-create-market-alert`) · 16:10 투자일지(`src-journal-data`) · 16:20/18:30/08:30 Featured 1·2·3차 · 17:00 일간 리포트 publish · 20:00 백업 재시도 · 23:00 투자유의 야간.\n- **17:00 일간 리포트(`daily_portfolio_report.py`)**: 별도 잡이 아니라 **봇이 subprocess로 부르는 내부 잡** — 정기 발송은 `daily_portfolio_job`, `/portfolio` 명령은 같은 스크립트를 `--no-send`로 돌려 stdout을 답장한다(개별 카드 없이 이 봇 카드에 흡수 — `architecture/REGISTRY_NOTES.md`). 거래일만 발송하고, 당일 중복 발송은 전송일자 기록으로 차단. 16:00→17:00으로 옮긴 이유는 KIS 확정 종가 확보 후 publish하기 위함.\n- **리포트 표기 규약(2026-07-16 확정)**: 텍스트는 `기준가`+`수익률` 2블록, 종목 구성은 PNG 표로 분리 전송. **기준가=전 상품 개별 / 수익률=일반형 그룹대표+벤치마크+전환형 개별**의 비대칭이 핵심 — 수익률만 `wrap_config.report_return_products()`가 같은 `group`의 일반형을 대표 1줄(트루밸류)로 접는다(포트가 수렴해 같은 숫자라서). 순서는 **벤치마크 선두** = KOSPI → KOSDAQ → 일반형 → 목표전환형. 종목 PNG는 그룹 병합을 시도했다가(`e9289560`) 되돌려 **현재는 전체 개별**(일반형 랩 대표 + 단독 일반형 + 활성 전환형 각 1장)이고, 종목별 `YTD` 컬럼이 붙었다.\n  - ★`get_portfolio_holdings`/`format_message` docstring은 아직 \"그룹 대표 1장씩만 보낸다\"는 폐기된 설계를 기술한다(`26ed7df6`이 `_group_reps()`를 걷어냄) — **docstring이 stale**, 실제 전송부는 개별. `daily_portfolio_job` docstring의 \"오후 4시\"도 17:00 이관 전 잔재.\n- **`/update` 동일구성 그룹핑(2026-07-16)**: `format_update_summary`가 `(종목명, D-1 비중 1자리)` 시그니처가 같은 상품을 한 블록으로 묶어 **종목 기여 리스트를 1회만** 출력한다. 수렴 전·신규 출시라 구성이 어긋난 상품은 시그니처가 달라 **자동으로 별도 블록**이 되는 자기적응 구조. 상품별 YTD·누적은 `_portfolio_meta`의 D-1 값에 당일 등락을 복리 결합해 상품마다 따로 보존.\n- **온디맨드 원칙 커맨드(2026-08-07)**: 텔레그램 command 메뉴(`BotCommand`)를 등록하고 `/rules`=매매 원칙 보기(`~/Journal/principles.md` → HTML 포매팅 3,900자 컷)·`/review`=최신 주간 원칙 점검 리포트([[timer-wrap-principle-check]] 산출)로 분리했다(종전엔 `/rules` 하나가 점검 리포트였음).\n- 가계부: Apps Script doPost가 거래를 직접 텔레그램 전송, 봇은 답장(분류/수정/제외) 처리.\n- systemd `Restart=always`(10회 실패 시 중단+알림). 맥미니에선 launchd KeepAlive + wrapper로 등가 구현.\n- 함정: JobQueue 가드/pytz 필요, 라이브 테스트는 VM 봇 중지 후.",
    "code": [
     "execution/sisyphe_bot.py",
     "execution/daily_portfolio_report.py",
@@ -594,7 +594,7 @@
    "runs_on": "gha",
    "schedule_kst": "07:50 화~토",
    "status": "active",
-   "desc_md": "미국 FRED 시계열 36종(금리/매크로/신용·부동산)을 화~토 07:50 KST(=월~금 22:50 UTC) 수집해 dataset.csv→market.html DATA 재생성.\n\n- 토요일 run이 금요일 밤 미국 고용보고서 등을 다음날 아침 포착. 매 run 전체 재조회.\n- `FRED_API_KEY` 미설정 시 graceful skip.\n- 함정: 주간 시리즈에 5년창 금지.\n- **ISM 서베이 편승(2026-08-05)**: FRED 조회 앞단에서 [[src-ism-pmi]] `fetch_ism_pmi.py`를 먼저 돌려 ISM 제조업·서비스업 PMI 8종을 dataset.csv에 적재한다(맥미니 launchd 미러 `gha-fred` 잡 동일). 스크래핑 원천이라 실패는 **경고만**(다음 run이 회수) — FRED 조회는 계속된다.",
+   "desc_md": "미국 FRED 시계열 36종(금리/매크로/신용·부동산)을 화~토 07:50 KST(=월~금 22:50 UTC) 수집해 dataset.csv→market.html DATA 재생성.\n\n- 토요일 run이 금요일 밤 미국 고용보고서 등을 다음날 아침 포착. 매 run 전체 재조회.\n- `FRED_API_KEY` 미설정 시 graceful skip.\n- 함정: 주간 시리즈에 5년창 금지.\n- **ISM 서베이 편승(2026-08-05)**: FRED 조회 앞단에서 [[src-ism-pmi]] `fetch_ism_pmi.py`를 먼저 돌려 ISM 제조업·서비스업 PMI 8종을 dataset.csv에 적재한다(맥미니 launchd 미러 `gha-fred` 잡 동일). 스크래핑 원천이라 실패는 **경고만**(다음 run이 회수) — FRED 조회는 계속된다.\n- **회사채 발행액 편승(2026-08-07)**: 같은 앞단에서 [[src-corp-bond-issuance]] `fetch_corp_bond_issuance.py`도 함께 돌려 미국(SIFMA)·한국(금투협) 월간 회사채 발행액 2종을 dataset.csv MACRO에 적재한다(`gha-fred` 미러 동일). 마찬가지로 실패는 **경고만** — FRED 조회는 계속된다.",
    "code": [
     ".github/workflows/daily_fred.yml"
    ],
@@ -605,6 +605,7 @@
    "depends_on": [
     "src-fred",
     "src-ism-pmi",
+    "src-corp-bond-issuance",
     "src-create-dashboard"
    ],
    "alerts": "실패 자체 알림 없음 → gha-daily-health-check"
@@ -2609,7 +2610,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "23:20 (datalake-research-export)",
    "status": "active",
-   "desc_md": "2026-07-27 신설. Research Notes 원문(`research_notes.db`)에 **테마·개체(종목/섹터/기관/인물) 태그**를 붙이는 규칙+LLM 하이브리드 파이프라인. exporter([[infra-datalake]]의 `export_research_notes.py`)와 **완전히 분리된 독립 프로세스** — exporter는 매일 어제+오늘을 통째로 재생성하는 멱등 구조라 거기에 LLM을 넣으면 같은 원문에 매일 다시 과금되고 태그가 흔들린다. 그래서 태그 정본을 [[store-research-tags]]의 `tag_state.sqlite`에 두고, Markdown은 그 캐시를 읽어 투영만 한다.\n\n- **`tagging_common.py`** — 온톨로지·개체 마스터·별칭 매칭 공용 모듈. `universe_tickers.csv`가 상장 종목 마스터의 단일 출처이고, 비상장 기업·기관·인물은 `entities_extra.csv`로 분리. 별칭은 strong/weak 2등급(strong=규칙만으로 자동 승인, weak=LLM 문맥 판정 후보). 본문 URL·도메인은 매칭 전 같은 길이 공백으로 덮어(위치 보존) 대량 오탐 차단. **캐시 키(2026-08-05 개정)**: 종전엔 universe/alias 마스터 해시를 통째로 키에 넣어 **종목 1건만 추가해도 전량 재태깅**을 유발했다(8/3 Panasonic 추가 → 3,249건 재태깅 → 야간 잡 3일 연속 타임아웃). 이를 `alias_epoch`로 대체해 **추가는 그 별칭이 등장하는 문서만 부분 재태깅**하고, 삭제·변경만 전량 무효화하도록 바꿨다(`--migrate-cache-key`로 기존 행 1회 제자리 이관).\n- **`tag_worker.py`** — 태깅 워커. ① 규칙 매칭(strong 자동 승인) → ② weak 후보 + 테마 분류만 LLM(micro-batch, `TAG_MODEL` 기본 `claude-haiku-4-5`)에 위임 → ③ 근거·content_hash와 함께 `tag_state.sqlite` 저장. 인자 없이 부르면 캐시 미스(=미태깅분) 전부가 대상이라 전날 실패분도 자동 회수. `--dry-run`(비용 견적)·`--date`·`--sample`·`--retry-failed` 지원.\n- **`export_tags_parquet.py`** — `tag_state.sqlite` → 연도별 parquet 3종(`research_items`·`research_item_themes`·`research_entity_mentions`)으로 내보내 데이터레이크 DuckDB 뷰로 노출.\n- **`build_theme_trends.py`** — 월별 테마·섹터·종목 언급 추이 `theme_trends.json` 집계(절대건수 대신 count·share·unique_sources 3지표, primary/secondary 분리). `~/work/charts/260715_현선물공매도`의 관심축 차트가 소비.\n- **`recompute_rules.py`** — 별칭 사전·규칙만 고쳤을 때 LLM 재호출 없이 규칙 기반 개체 매칭만 재계산(`rule_strong`/`rule_header` 재생성 + URL 안에서만 잡히던 개체 제거). 전량 재태깅(수 시간·수 달러) 회피용 보수 도구.\n\n**코퍼스 확장(2026-07-29)**: 리서치노트 메시지뿐 아니라 어닝콜 전문·실적 분석 md까지 **같은 태그 어휘**로 태깅하고, 코퍼스를 한 인덱스로 합친다. **2026-07-31 확장**: `tag_docs.SOURCES`에 자체 산출 보고서 4종 — 주간 WRAP 보고(`reports/weekly`, kind=weekly)·긴급/스팟 시장 코멘트(`reports/comments`, comment)·월간운용보고서(`reports/monthly`, monthly)·목표달성보고서(`reports/target`, target) — 를 추가해 md 문서 코퍼스가 전문·분석 2종에서 **6종**으로 늘었다(리서치노트까지 통합 인덱스는 7 코퍼스). **2026-08-03 확장**: `SOURCES`에 Notion **Study DB** 미러([[store-notion-study-md]], kind=study — [[src-notion-study]]가 일일 동기화)를 더해 md 문서 코퍼스가 **7종**(리서치노트까지 통합 인덱스 8 코퍼스)이 됐다.\n- **`tag_docs.py`** — md 문서 태거. 어닝콜 전문([[store-transcripts-md]])·실적 분석([[store-analyses-md]]) + 자체 보고서 4종(주간/코멘트/월간/목표) + Notion Study([[store-notion-study-md]], kind=study)를 `SOURCES` 딕셔너리로 kind별 경로 매핑. 리서치노트가 텔레그램 메시지 단위인 것과 달리, 4만자를 넘는 콜 전문을 **청크 단위**(기본 4000자)로 태깅해 \"#HBM 이 어느 대목이었나\"를 잃지 않는다. 온톨로지·별칭·프롬프트·저장 스키마는 `tag_worker`를 그대로 재사용하고, 정본은 [[store-tag-index]]의 `doc_tag_state.sqlite`·md frontmatter(themes/tickers/sectors/orgs)는 그 투영. `--dry-run`·`--kind`·`--max-items`·`--project`(재투영만) 지원.\n- **`build_tag_index.py`** — 전 코퍼스(리서치노트·전문·분석·주간/코멘트/월간/목표 보고서·Notion Study)의 태그를 [[store-tag-index]]의 `tag_index.sqlite` 한 장부로 합치는 **통합 인덱스 빌더**. corpus 매핑 딕셔너리로 kind→라벨을 잇고 `#KLAC` 하나로 전부 훑도록 조인을 미리 펼친다. **LLM 미사용**(이미 붙은 태그 재배열)이라 무료·멱등, 매 실행 통째 재생성. [[daemon-datalake-webui]]의 `#태그` 즉시 검색 백엔드(`/tags/doc`이 `reports/` 경로도 허용).\n\n## 일일 실행 (`daily_tag_export.sh`)\n\n23:20 `datalake-research-export` 잡의 실체([[infra-datalake]] `run_datalake_job.sh`가 이 셸을 호출). 단계: **0 이미지 OCR([[src-research-ocr]] `ocr_worker.py`, 미처리분)** → **0b Notion Study 동기화([[src-notion-study]] `notion_study_sync.py`, 실패는 warn·계속)** → ① 태깅(미처리분) → ①b 문서 태깅(전문·분석·보고서·Study 미처리분) → ② md 아카이브(어제+오늘) → ②b 통합 태그 인덱스 재생성(LLM 미사용) → ③ parquet → ④ 추이 집계 → ⑤ 관심축 차트 빌드. **OCR·태깅을 아카이브보다 앞**에 둬 당일 md가 이미지 텍스트·태그와 함께 나오게 한다. 실패 정책: 태깅·문서 태깅·인덱스·parquet·집계가 실패해도 **원문 아카이브 생성은 반드시 진행**(아카이브가 1차 산출물, 태그는 파생물) — 아카이브 실패만 exit 1.",
+   "desc_md": "2026-07-27 신설. Research Notes 원문(`research_notes.db`)에 **테마·개체(종목/섹터/기관/인물) 태그**를 붙이는 규칙+LLM 하이브리드 파이프라인. exporter([[infra-datalake]]의 `export_research_notes.py`)와 **완전히 분리된 독립 프로세스** — exporter는 매일 어제+오늘을 통째로 재생성하는 멱등 구조라 거기에 LLM을 넣으면 같은 원문에 매일 다시 과금되고 태그가 흔들린다. 그래서 태그 정본을 [[store-research-tags]]의 `tag_state.sqlite`에 두고, Markdown은 그 캐시를 읽어 투영만 한다.\n\n- **`tagging_common.py`** — 온톨로지·개체 마스터·별칭 매칭 공용 모듈. `universe_tickers.csv`가 상장 종목 마스터의 단일 출처이고, 비상장 기업·기관·인물은 `entities_extra.csv`로 분리. 별칭은 strong/weak 2등급(strong=규칙만으로 자동 승인, weak=LLM 문맥 판정 후보). 본문 URL·도메인은 매칭 전 같은 길이 공백으로 덮어(위치 보존) 대량 오탐 차단. **캐시 키(2026-08-05 개정)**: 종전엔 universe/alias 마스터 해시를 통째로 키에 넣어 **종목 1건만 추가해도 전량 재태깅**을 유발했다(8/3 Panasonic 추가 → 3,249건 재태깅 → 야간 잡 3일 연속 타임아웃). 이를 `alias_epoch`로 대체해 **추가는 그 별칭이 등장하는 문서만 부분 재태깅**하고, 삭제·변경만 전량 무효화하도록 바꿨다(`--migrate-cache-key`로 기존 행 1회 제자리 이관).\n- **`tag_worker.py`** — 태깅 워커. ① 규칙 매칭(strong 자동 승인) → ② weak 후보 + 테마 분류만 LLM(micro-batch, `TAG_MODEL` 기본 `claude-haiku-4-5`)에 위임 → ③ 근거·content_hash와 함께 `tag_state.sqlite` 저장. 인자 없이 부르면 캐시 미스(=미태깅분) 전부가 대상이라 전날 실패분도 자동 회수. `--dry-run`(비용 견적)·`--date`·`--sample`·`--retry-failed` 지원.\n- **`export_tags_parquet.py`** — `tag_state.sqlite` → 연도별 parquet 3종(`research_items`·`research_item_themes`·`research_entity_mentions`)으로 내보내 데이터레이크 DuckDB 뷰로 노출.\n- **`build_theme_trends.py`** — 월별 테마·섹터·종목 언급 추이 `theme_trends.json` 집계(절대건수 대신 count·share·unique_sources 3지표, primary/secondary 분리). `~/work/charts/260715_현선물공매도`의 관심축 차트가 소비.\n- **`recompute_rules.py`** — 별칭 사전·규칙만 고쳤을 때 LLM 재호출 없이 규칙 기반 개체 매칭만 재계산(`rule_strong`/`rule_header` 재생성 + URL 안에서만 잡히던 개체 제거). 전량 재태깅(수 시간·수 달러) 회피용 보수 도구.\n\n**코퍼스 확장(2026-07-29)**: 리서치노트 메시지뿐 아니라 어닝콜 전문·실적 분석 md까지 **같은 태그 어휘**로 태깅하고, 코퍼스를 한 인덱스로 합친다. **2026-07-31 확장**: `tag_docs.SOURCES`에 자체 산출 보고서 4종 — 주간 WRAP 보고(`reports/weekly`, kind=weekly)·긴급/스팟 시장 코멘트(`reports/comments`, comment)·월간운용보고서(`reports/monthly`, monthly)·목표달성보고서(`reports/target`, target) — 를 추가해 md 문서 코퍼스가 전문·분석 2종에서 **6종**으로 늘었다(리서치노트까지 통합 인덱스는 7 코퍼스). **2026-08-03 확장**: `SOURCES`에 Notion **Study DB** 미러([[store-notion-study-md]], kind=study — [[src-notion-study]]가 일일 동기화)를 더해 md 문서 코퍼스가 **7종**(리서치노트까지 통합 인덱스 8 코퍼스)이 됐다. **2026-08-07 확장**: `SOURCES`에 **외부 증권사 리포트**(`reports/research`, kind=research)를 더해 md 문서 코퍼스가 **8종**(리서치노트까지 통합 인덱스 9 코퍼스)이 됐다.\n- **`tag_docs.py`** — md 문서 태거. 어닝콜 전문([[store-transcripts-md]])·실적 분석([[store-analyses-md]]) + 자체 보고서 4종(주간/코멘트/월간/목표) + Notion Study([[store-notion-study-md]], kind=study) + 외부 증권사 리포트(kind=research)를 `SOURCES` 딕셔너리로 kind별 경로 매핑. 리서치노트가 텔레그램 메시지 단위인 것과 달리, 4만자를 넘는 콜 전문을 **청크 단위**(기본 4000자)로 태깅해 \"#HBM 이 어느 대목이었나\"를 잃지 않는다. 온톨로지·별칭·프롬프트·저장 스키마는 `tag_worker`를 그대로 재사용하고, 정본은 [[store-tag-index]]의 `doc_tag_state.sqlite`·md frontmatter(themes/tickers/sectors/orgs)는 그 투영. `--dry-run`·`--kind`·`--max-items`·`--project`(재투영만) 지원.\n  - **증권사·저자 강제 태깅(2026-08-07)**: 증권사 리포트는 frontmatter의 `broker`/`authors`를 규칙·LLM과 무관하게 개체 태그로 강제 동기화한다(`force_frontmatter_tags`, method=`fm_meta`, 멱등). `resolve_broker_entity`가 frontmatter 증권사 문자열을 `entities_extra.csv` 개체 id로 대조(별칭은 리스트일 수 있어 정규화)하고, 미등록이면 `inst:` 접두로 임시 부여. frontmatter tickers 는 종목코드에 회사명을 함께 실어 라벨 가독성을 살린다. frontmatter 메타(`fm_meta`)만 바뀐 문서는 **콘텐츠 캐시 히트라도 재투영**해 태그가 최신 frontmatter를 따라간다. 국내 잔여+해외 증권사는 `entities_extra.csv`에 2회차로 확충했고, 검색 전용 별칭은 태깅 어휘를 오염시키지 않도록 `search_aliases.csv`(신설)로 분리 — [[store-tag-index]] `#태그` 검색에서만 확장된다.\n- **`build_tag_index.py`** — 전 코퍼스(리서치노트·전문·분석·주간/코멘트/월간/목표 보고서·Notion Study·외부 증권사 리포트)의 태그를 [[store-tag-index]]의 `tag_index.sqlite` 한 장부로 합치는 **통합 인덱스 빌더**. corpus 매핑 딕셔너리로 kind→라벨을 잇고 `#KLAC` 하나로 전부 훑도록 조인을 미리 펼친다. **LLM 미사용**(이미 붙은 태그 재배열)이라 무료·멱등, 매 실행 통째 재생성. [[daemon-datalake-webui]]의 `#태그` 즉시 검색 백엔드(`/tags/doc`이 `reports/` 경로도 허용).\n\n## 일일 실행 (`daily_tag_export.sh`)\n\n23:20 `datalake-research-export` 잡의 실체([[infra-datalake]] `run_datalake_job.sh`가 이 셸을 호출). 단계: **0 이미지 OCR([[src-research-ocr]] `ocr_worker.py`, 미처리분)** → **0b Notion Study 동기화([[src-notion-study]] `notion_study_sync.py`, 실패는 warn·계속)** → ① 태깅(미처리분) → ①b 문서 태깅(전문·분석·보고서·Study 미처리분) → ② md 아카이브(어제+오늘) → ②b 통합 태그 인덱스 재생성(LLM 미사용) → ③ parquet → ④ 추이 집계 → ⑤ 관심축 차트 빌드. **OCR·태깅을 아카이브보다 앞**에 둬 당일 md가 이미지 텍스트·태그와 함께 나오게 한다. 실패 정책: 태깅·문서 태깅·인덱스·parquet·집계가 실패해도 **원문 아카이브 생성은 반드시 진행**(아카이브가 1차 산출물, 태그는 파생물) — 아카이브 실패만 exit 1.",
    "code": [
     "datalake/tagging/tagging_common.py",
     "datalake/tagging/tag_worker.py",
@@ -2621,7 +2622,8 @@
     "datalake/tagging/daily_tag_export.sh",
     "datalake/tagging/ontology.json",
     "datalake/tagging/aliases_manual.csv",
-    "datalake/tagging/entities_extra.csv"
+    "datalake/tagging/entities_extra.csv",
+    "datalake/tagging/search_aliases.csv"
    ],
    "reads": [
     "store-research-notes-db",
@@ -2839,26 +2841,6 @@
    ]
   },
   {
-   "id": "src-corp-bond-issuance",
-   "project": "antigravity",
-   "domain": "market-global",
-   "type": "pipeline_source",
-   "name": "미국·한국 회사채 발행액 (fetch_corp_bond_issuance.py)",
-   "runs_on": "gha",
-   "schedule_kst": "07:50 화~토 (gha-daily-fred 편승)",
-   "status": "active",
-   "desc_md": "2026-08-07 신설. 회사채 발행액 월간 2종 — `미 회사채 발행액`($B, dtype=`BOND_ISSUANCE_US`) + `회사채 발행액`(억원, dtype=`BOND_ISSUANCE_KR`) — 을 dataset.csv DATA(MACRO/US·KOREA)에 적재. dtype 소스별 분리 = 신선도 개별 추적(SiliconData 원칙). [[gha-daily-fred]] 편승(맥미니 launchd 미러 `gha-fred` 동일).\n\n- **미국 = SIFMA US Fixed Income Statistics xlsx 직링크**(Issuance 시트 Corporates 열). ★월별은 최근 13개월 롤링 창뿐 → 매 run 창 전체 재파싱 upsert. 과거는 Wayback 스냅숏 6개(2021~2025) `--backfill` 1회 스티칭: 2019-01~ 복원, **2022-10~2023-04 7개월 아카이브 공백 = 영구 결측**. 스냅숏 구간은 당시 공표 빈티지(소급 개정 미반영). 회사채 전용 파일(1996~, IG/HY)은 HubSpot 폼 게이트라 사용 불가. 원본 xlsx는 맥미니 ~/datalake/raw/sifma/ 영구보존(GHA 러너에선 skip).\n- **한국 = 금투협 채권정보센터 발행통계 기간별**(proframe XML POST, BIS-KOFIABOND/BISIssStatisSrchSO/listTrm, 세션 불요). ★'회사채' 행 = 일반회사채(은행채·기타금융채·ABS 별도 행) — 금감원 직접금융 총계와 모집단 다름, 합산·교차앵커 금지. 이력 2006-01~. 진행월 제외 + 최근 4개 완료월 매 run self-heal. 행 판정 = 국문 '회사채'+영문 'Corporate' 동시 일치.\n- 가드: 값 범위(미 0~1,000 $B·한 0~100만 억원) + 창 축소·랙 75일 감지 + 앵커(창에 있을 때만: 미 2025-12=69.8±10%·한 2010-01=28,796±3% 등). 시트·헤더 문자열 탐색(행번호 하드코딩 금지), xlsx magic bytes 검증(폼 게이트 전환 감지). 소스 단위 격리, 하나라도 실패 시 exit 1(잡에선 경고만 tolerate).",
-   "code": [
-    "execution/fetch_corp_bond_issuance.py"
-   ],
-   "writes": [
-    "store-dataset-csv"
-   ],
-   "depends_on": [
-    "ext-data-apis"
-   ]
-  },
-  {
    "id": "store-news-md",
    "project": "antigravity",
    "domain": "news-research",
@@ -2902,6 +2884,27 @@
     "src-create-dashboard"
    ],
    "alerts": "실패 → notify_sisyphe_failure.sh portfolio-premarket → 텔레그램"
+  },
+  {
+   "id": "src-report-context",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "pipeline_source",
+   "name": "보고서 컨텍스트 빌더 (build_report_context.py)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "보고서 커맨드 호출 시 (SSH 1회)",
+   "status": "active",
+   "desc_md": "2026-08-06 신설. 보고서 커맨드([[cmd-operating-report]]·[[cmd-weekly-report]]·[[cmd-urgent-comment]])가 SSH 1회로 호출하는 **freshness preflight + 구조화 컨텍스트** 빌더. \"레이크가 완전한가\"를 원천 DB와 실시간 대조로 판정하고, 불완전하면 `exit 2`로 끝나 커맨드가 폴백(Notion 리서치노트·로컬 보고서 폴더)으로 넘어가게 한다.\n\n- 호출: `--kind monthly --period YYYY-MM` / `--kind weekly --date YYYY-MM-DD` / `--kind comment --date YYYY-MM-DD`. stdout에 JSON 1개(섹션별 status/count), exit 0=complete · 2=incomplete(폴백) · 1=사용 오류.\n- **freshness 게이트**: 레이크 research_notes md를 원천 [[store-research-notes-db]]와 실시간 대조(누락 시 hint로 `export_research_notes.py --from/--to` 재수출 안내), [[store-tag-index]]가 대상 기간 md보다 오래되면 `stale` 경고(23:20 [[src-research-tagging]] 잡이 자동 갱신).\n- **구조화 컨텍스트**: `datalake/reports/{monthly,weekly,comments}/`의 직전 보고서를 종류·날짜 조건으로 선별(월간=직전월 5건·주간=전주 2건·코멘트=전일 2건), 테마 빈도 집계, comment kind는 전일 리서치 메시지도 첨부.\n- **as-of 원칙**: 과거 월 재생성 시 period 말일 이후 자료는 테마 집계·직전 보고서 선정에서 제외해 look-ahead를 차단.",
+   "code": [
+    "datalake/build_report_context.py"
+   ],
+   "reads": [
+    "store-research-notes-db",
+    "store-tag-index"
+   ],
+   "depends_on": [
+    "src-research-tagging"
+   ]
   },
   {
    "id": "daemon-catchup",
@@ -3176,6 +3179,26 @@
    ]
   },
   {
+   "id": "src-corp-bond-issuance",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "pipeline_source",
+   "name": "미국·한국 회사채 발행액 (fetch_corp_bond_issuance.py)",
+   "runs_on": "gha",
+   "schedule_kst": "07:50 화~토 (gha-daily-fred 편승)",
+   "status": "active",
+   "desc_md": "2026-08-07 신설. 회사채 발행액 월간 2종 — `미 회사채 발행액`($B, 소수 1자리, dtype=`BOND_ISSUANCE_US`) + `회사채 발행액`(억원 정수, dtype=`BOND_ISSUANCE_KR`) — 을 dataset.csv DATA(MACRO US·KOREA)에 적재. dtype 을 소스별로 분리해 [[gha-daily-health-check]] 신선도를 개별 추적한다(SiliconData 3종과 동일 원칙 — 공유 타입이면 한 원천이 죽어도 가려진다). [[gha-daily-fred]] 편승(맥미니 launchd 미러 `gha-fred` 잡 동일).\n\n- **미국 = SIFMA US Fixed Income Securities Statistics xlsx 직링크** — Issuance 시트 Corporates 열(non-convertible/convertible debt·MTNs·Yankee bonds 합계). ★파일의 월별 데이터는 최근 13개월 롤링 창뿐 → 매 run 창 전체를 재파싱해 개정치 upsert. 과거 이력은 Wayback 스냅숏 6개(2021~2025)를 `--backfill` 로 1회 스티칭: 2019-01~ 복원, 단 **2022-10~2023-04 7개월은 아카이브 공백 = 영구 결측**. 스냅숏 구간 값은 당시 공표 빈티지(이후 소급 개정 미반영)라 2025 연간 합이 최신 공표치와 ~0.7% 어긋난다. 회사채 전용 파일(1996~, IG/HY)은 2026년 현재 HubSpot 폼 뒤 게이트라 직링크·아카이브 모두 없음. 구층 레이아웃 대응: 헤더 `Corporates`(현행)/`Corporate Debt`(2021~22).\n- **한국 = 금투협 채권정보센터 발행통계 기간별** — proframe XML POST(`BIS-KOFIABOND` / `BISIssStatisSrchSO` / `listTrm`, 세션 불필요). ★응답의 `회사채` 행 = **일반회사채**(은행채·기타금융채·ABS 는 별도 행) — 금감원 직접금융 총계(금융채·ABS 포함)와 모집단이 달라 **임의 합산·교차앵커 금지, 금감원 수치를 앵커로 쓰지 말 것**. 행 판정 = 국문 `회사채` AND 영문명 `Corporate` 동시 일치, 값=`val2`, 단위 억원. 이력 2006-01~. 진행 중인 달은 부분값이라 제외(월말 < 오늘 인 달만) + 최근 4개 완료월은 매 run 재조회해 D+1 지연·정정을 self-heal.\n- **가드**: 값 범위(미 0~1,000 $B·한 0~100만 억원) + 창 축소·랙(미 75일) 감지 + 앵커(파싱 창에 해당 월이 있을 때만 검사, 창이 지나가면 자동 소멸: 미 2025-12=69.8±10% 등). 시트·헤더는 문자열 탐색(행번호 하드코딩 금지), xlsx magic bytes 검증(폼 게이트 전환 감지). 소스 단위로 격리해 하나가 죽어도 다른 원천은 계속되고, 하나라도 실패하면 exit 1(편승 잡에선 경고만 tolerate).\n- 사용: 인자 없음=증분(매일 잡) · `--backfill`=최초 1회 전체 스티칭 · `--dry-run`.",
+   "code": [
+    "execution/fetch_corp_bond_issuance.py"
+   ],
+   "writes": [
+    "store-dataset-csv"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
    "id": "src-nav-style",
    "project": "antigravity",
    "domain": "ops-infra",
@@ -3187,27 +3210,6 @@
    "desc_md": "AoE 전 페이지 공통 스타일의 유일한 출처 (2026-07-26 네비 드리프트 근본해결).\n\n- 상단 네비 정본: NAV_CSS(+scoped)·nav_html(active)·materialize(마커 치환).\n- **하위 스트립(sidebar) 정본화(2026-07-31)**: 드롭다운 하위 탭을 가로로 펼치는 서브 스트립도 `NAV_ITEMS` 단일 출처로 — `sidebar_html(active)`·`SIDEBAR_CSS`·`SIDEBAR_MARK_BEGIN/END` 마커. 게시 단계에서 `compose_personal_view.py`가 소비 페이지의 `aside.sidebar`까지 이 정본으로 치환(구본 하드코딩 스트립 제거, Market 스트립에서 Universe 계열 제외)해 외형(스트립 42px·링크 41px·중앙정렬·sticky top=nav 54px·앰버 밑줄·800px 이하 숨김)을 게시본과 통일. 마커 소비 앱=[[daemon-watchlist-quoteboard]]·[[daemon-datalake-webui]](자식 없으면 무동작). create_dashboard는 자체 레이아웃 CSS 별도 보유.\n- **Universe·Universe Lab → Watchlist 하위 이동(2026-07-31)**: `NAV_ITEMS`에서 두 페이지를 Market 드롭다운에서 Watchlist 드롭다운으로 옮겼다. `compose_personal_view.py`는 두 페이지의 nav active 키를 watchlist로 재매핑([[page-universe]]·[[page-universe-lab]]).\n- 다크 PALETTE·라이트 WRAP_PALETTE: compose 주입 CSS 와 앱 3종(var(--aoe-*))·WRAP(var(--wrap-*)) 이 파생.\n- H2C_FREEZE_JS: html2canvas 캡처 색고정 (틴트 셀 #333 굳음 버그 차단).\n- **벤더 자산 셀프호스팅(2026-07-27)**: ts.net AoE 페이지의 Pretendard·Chart.js(v4.5.1 고정)·html2canvas(1.4.1)를 CDN 대신 로컬 `assets/vendor/`에서 서빙 — 상수 `VENDOR_PRETENDARD_CSS`/`VENDOR_CHART_JS`/`VENDOR_HTML2CANVAS_JS`(절대경로 `/assets/vendor/…`). `publish_snapshot.sh`가 `assets/**`를 스냅숏에 포함, webui 등 앱도 로컬 경로 사용. ★**WRAP만 CDN 유지** — gh-pages 프로젝트 사이트(`/repo/` 하위)에선 절대경로가 깨지므로 wrap 코드는 이 상수를 쓰지 않는다.\n- 소비자: create_dashboard·create_architecture(재생성 시) / webui·quoteboard 서버(기동 시 치환) / compose(publish 시 교체).\n- ★수정 규칙: 네비·색 변경은 반드시 이 파일에서만. 다크 주입 CSS 에 nav !important 재단언 금지.",
    "code": [
     "execution/nav_style.py"
-   ]
-  },
-  {
-   "id": "src-report-context",
-   "project": "antigravity",
-   "domain": "news-research",
-   "type": "pipeline_source",
-   "name": "보고서 컨텍스트 빌더 (build_report_context.py)",
-   "runs_on": "vm_macmini",
-   "schedule_kst": "보고서 커맨드 호출 시 (SSH 1회)",
-   "status": "active",
-   "desc_md": "2026-08-06 신설. 보고서 커맨드([[cmd-operating-report]]·[[cmd-weekly-report]]·[[cmd-urgent-comment]])가 SSH 1회로 호출하는 **freshness preflight + 구조화 컨텍스트** 빌더. \"레이크가 완전한가\"를 원천 DB와 실시간 대조로 판정하고, 불완전하면 `exit 2`로 끝나 커맨드가 폴백(Notion 리서치노트·로컬 보고서 폴더)으로 넘어가게 한다.\n\n- 호출: `--kind monthly --period YYYY-MM` / `--kind weekly --date YYYY-MM-DD` / `--kind comment --date YYYY-MM-DD`. stdout에 JSON 1개(섹션별 status/count), exit 0=complete · 2=incomplete(폴백) · 1=사용 오류.\n- **freshness 게이트**: 레이크 research_notes md를 원천 [[store-research-notes-db]]와 실시간 대조(누락 시 hint로 `export_research_notes.py --from/--to` 재수출 안내), [[store-tag-index]]가 대상 기간 md보다 오래되면 `stale` 경고(23:20 [[src-research-tagging]] 잡이 자동 갱신).\n- **구조화 컨텍스트**: `datalake/reports/{monthly,weekly,comments}/`의 직전 보고서를 종류·날짜 조건으로 선별(월간=직전월 5건·주간=전주 2건·코멘트=전일 2건), 테마 빈도 집계, comment kind는 전일 리서치 메시지도 첨부.\n- **as-of 원칙**: 과거 월 재생성 시 period 말일 이후 자료는 테마 집계·직전 보고서 선정에서 제외해 look-ahead를 차단.",
-   "code": [
-    "datalake/build_report_context.py"
-   ],
-   "reads": [
-    "store-research-notes-db",
-    "store-tag-index"
-   ],
-   "depends_on": [
-    "src-research-tagging"
    ]
   },
   {
@@ -3261,7 +3263,7 @@
    "runs_on": "github",
    "schedule_kst": "다수 잡 append",
    "status": "active",
-   "desc_md": "생태계의 시계열 데이터 통합 저장소(~1.9MB, append-only). 원자재/메모리/지수/금리/매크로/capex 등 모든 시계열이 `날짜,이름,값,타입` 형태로 쌓인다.\n\n- 기록자: market_crawler, ECOS/FRED/KOFIA/NPS/KRX/KOSIS/일본capex, SMP, SiliconData, 파생·수급([[src-deriv-daily]]) 등.\n- 소비자: create_dashboard(market.html DATA 섹션), draw_charts, [[timer-wrap-principle-check]](KOSPI 20일선).\n- append-only라 과거 잠정값 정정은 rebuild 필요. 타입→카테고리 매핑은 `config.py` CATEGORY_MAP.\n- 2026-07-16 **파생·수급 13종 추가**(삼성전자·SK하이닉스 현선물 괴리율/미결제약정/미결제약정 금액/공매도잔고/시가총액/레버리지 ETF AUM + VKOSPI) — 이력은 커밋 `19eeefcd`로 백필. 이 계열은 append-only 예외로 **최근 7일 upsert**(T+2 공시인 공매도잔고를 뒤늦게 정정하기 위함).",
+   "desc_md": "생태계의 시계열 데이터 통합 저장소(~1.9MB, append-only). 원자재/메모리/지수/금리/매크로/capex 등 모든 시계열이 `날짜,이름,값,타입` 형태로 쌓인다.\n\n- 기록자: market_crawler, ECOS/FRED/KOFIA/NPS/KRX/KOSIS/일본capex, SMP, SiliconData, 회사채 발행액([[src-corp-bond-issuance]]), 파생·수급([[src-deriv-daily]]) 등.\n- 소비자: create_dashboard(market.html DATA 섹션), draw_charts, [[timer-wrap-principle-check]](KOSPI 20일선).\n- append-only라 과거 잠정값 정정은 rebuild 필요. 타입→카테고리 매핑은 `config.py` CATEGORY_MAP.\n- 2026-07-16 **파생·수급 13종 추가**(삼성전자·SK하이닉스 현선물 괴리율/미결제약정/미결제약정 금액/공매도잔고/시가총액/레버리지 ETF AUM + VKOSPI) — 이력은 커밋 `19eeefcd`로 백필. 이 계열은 append-only 예외로 **최근 7일 upsert**(T+2 공시인 공매도잔고를 뒤늦게 정정하기 위함).",
    "code": [
     "config.py"
    ]

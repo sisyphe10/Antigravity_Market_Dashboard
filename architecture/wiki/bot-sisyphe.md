@@ -40,6 +40,7 @@ alerts: "OnFailure → notify_sisyphe_failure.sh sisyphe-bot → 텔레그램"
 - **리포트 표기 규약(2026-07-16 확정)**: 텍스트는 `기준가`+`수익률` 2블록, 종목 구성은 PNG 표로 분리 전송. **기준가=전 상품 개별 / 수익률=일반형 그룹대표+벤치마크+전환형 개별**의 비대칭이 핵심 — 수익률만 `wrap_config.report_return_products()`가 같은 `group`의 일반형을 대표 1줄(트루밸류)로 접는다(포트가 수렴해 같은 숫자라서). 순서는 **벤치마크 선두** = KOSPI → KOSDAQ → 일반형 → 목표전환형. 종목 PNG는 그룹 병합을 시도했다가(`e9289560`) 되돌려 **현재는 전체 개별**(일반형 랩 대표 + 단독 일반형 + 활성 전환형 각 1장)이고, 종목별 `YTD` 컬럼이 붙었다.
   - ★`get_portfolio_holdings`/`format_message` docstring은 아직 "그룹 대표 1장씩만 보낸다"는 폐기된 설계를 기술한다(`26ed7df6`이 `_group_reps()`를 걷어냄) — **docstring이 stale**, 실제 전송부는 개별. `daily_portfolio_job` docstring의 "오후 4시"도 17:00 이관 전 잔재.
 - **`/update` 동일구성 그룹핑(2026-07-16)**: `format_update_summary`가 `(종목명, D-1 비중 1자리)` 시그니처가 같은 상품을 한 블록으로 묶어 **종목 기여 리스트를 1회만** 출력한다. 수렴 전·신규 출시라 구성이 어긋난 상품은 시그니처가 달라 **자동으로 별도 블록**이 되는 자기적응 구조. 상품별 YTD·누적은 `_portfolio_meta`의 D-1 값에 당일 등락을 복리 결합해 상품마다 따로 보존.
+- **온디맨드 원칙 커맨드(2026-08-07)**: 텔레그램 command 메뉴(`BotCommand`)를 등록하고 `/rules`=매매 원칙 보기(`~/Journal/principles.md` → HTML 포매팅 3,900자 컷)·`/review`=최신 주간 원칙 점검 리포트([[timer-wrap-principle-check]] 산출)로 분리했다(종전엔 `/rules` 하나가 점검 리포트였음).
 - 가계부: Apps Script doPost가 거래를 직접 텔레그램 전송, 봇은 답장(분류/수정/제외) 처리.
 - systemd `Restart=always`(10회 실패 시 중단+알림). 맥미니에선 launchd KeepAlive + wrapper로 등가 구현.
 - 함정: JobQueue 가드/pytz 필요, 라이브 테스트는 VM 봇 중지 후.
