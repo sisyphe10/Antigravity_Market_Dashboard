@@ -67,3 +67,13 @@ person:donald_trump,person,트럼프,Donald Trump,,트럼프|Trump
 person:nick_timiraos,person,닉티미라오스,Nick Timiraos,,닉 티미라오스|Timiraos
 person:cc_wei,person,웨이저자,C.C. Wei,,웨이저자|C.C. Wei
 person:gavin_baker,person,개빈베이커,Gavin Baker,,개빈 베이커|Gavin Baker
+inst:korea_invest,institution,한국투자증권,Korea Investment & Securities,증권사,한국투자증권|한투증권
+inst:kb_securities,institution,KB증권,KB Securities,증권사,KB증권
+inst:shinhan_sec,institution,신한투자증권,Shinhan Securities,증권사,신한투자증권|신한증권
+inst:hana_sec,institution,하나증권,Hana Securities,증권사,하나증권
+inst:meritz_sec,institution,메리츠증권,Meritz Securities,증권사,메리츠증권
+inst:nomura,institution,노무라,Nomura,증권사,노무라|Nomura
+inst:macquarie,institution,맥쿼리,Macquarie,증권사,맥쿼리|Macquarie
+inst:jefferies,institution,제프리스,Jefferies,증권사,제프리스|Jefferies
+inst:bernstein,institution,번스타인,Bernstein,증권사,번스타인|Bernstein
+inst:deutsche_bank,institution,도이치뱅크,Deutsche Bank,증권사,도이치뱅크|도이체방크|Deutsche Bank

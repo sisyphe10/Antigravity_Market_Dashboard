@@ -48,6 +48,9 @@ CREATE TABLE IF NOT EXISTS labels (
   tag TEXT PRIMARY KEY, kind TEXT NOT NULL, label TEXT NOT NULL, freq INTEGER DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_labels_freq ON labels(freq DESC);
+CREATE TABLE IF NOT EXISTS aliases (
+  alias TEXT PRIMARY KEY, tag TEXT NOT NULL, label TEXT
+);
 CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT);
 """
 
@@ -93,6 +96,9 @@ def entity_tags(entity_id, uni, extra):
     u = uni["rows"].get(entity_id) or {}
     x = extra["rows"].get(entity_id) or {}
     name = u.get("name") or x.get("label_ko") or entity_id
+    if name == entity_id and ":" in entity_id \
+            and entity_id.split(":", 1)[0] in ("inst", "person", "private"):
+        name = entity_id.split(":", 1)[1]          # 미등록 개체는 접두어만 벗겨 표시
     if entity_id.startswith("inst:") or entity_id.startswith("private:"):
         return [(name, "org")], None
     if entity_id.startswith("person:"):
@@ -190,6 +196,25 @@ def index_docs(idx, onto, uni, extra):
     return n
 
 
+ALIAS_CSV = os.path.join(HERE, "search_aliases.csv")
+
+
+def load_search_aliases(conn):
+    """검색 전용 별칭 (#MS -> 모건스탠리). 본문 매칭 사전과 무관 — 오탐 없이 검색만 넓힌다."""
+    if not os.path.exists(ALIAS_CSV):
+        return 0
+    import csv
+    n = 0
+    with io.open(ALIAS_CSV, encoding="utf-8-sig") as f:
+        for row in csv.DictReader(f):
+            a, t = norm(row.get("alias")), norm(row.get("target"))
+            if a and t and a != t:
+                conn.execute("INSERT OR REPLACE INTO aliases (alias, tag, label) VALUES (?,?,?)",
+                             (a, t, (row.get("target") or "").strip()))
+                n += 1
+    return n
+
+
 def main():
     onto = tc.load_ontology()
     uni = tc.load_universe()
@@ -208,6 +233,8 @@ def main():
     n2 = index_docs(idx, onto, uni, extra)
     print("  전문·분석 : %s 건" % format(n2, ","))
     idx.flush_labels()
+    na = load_search_aliases(conn)
+    print("  검색 별칭 : %d 건" % na)
     conn.execute("INSERT OR REPLACE INTO meta (k,v) VALUES ('built_at', datetime('now','localtime'))")
     conn.commit()
     tags = conn.execute("SELECT count(*) FROM labels").fetchone()[0]

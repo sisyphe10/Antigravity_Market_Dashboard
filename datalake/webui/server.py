@@ -537,9 +537,14 @@ def _resolve_tags(con, q, limit=12):
     key = _tag_norm(q)
     if not key:
         return []
-    row = con.execute("SELECT tag FROM labels WHERE tag=?", (key,)).fetchone()
-    if row:
-        return [row["tag"]]
+    keys = [r["tag"] for r in con.execute("SELECT tag FROM labels WHERE tag=?", (key,))]
+    try:                                   # 검색 별칭 (#MS -> 모건스탠리) — 정확일치와 합집합
+        keys += [r["tag"] for r in con.execute(
+            "SELECT tag FROM aliases WHERE alias=?", (key,)) if r["tag"] not in keys]
+    except sqlite3.OperationalError:       # 구 인덱스에는 aliases 테이블이 없다
+        pass
+    if keys:
+        return keys
     like = "%" + key + "%"
     return [r["tag"] for r in con.execute(
         "SELECT tag FROM labels WHERE tag LIKE ? ORDER BY freq DESC LIMIT ?", (like, limit))]
@@ -582,7 +587,20 @@ def tags_suggest(q: str = "", limit: int = 10):
             "SELECT tag, label, kind, freq FROM labels WHERE tag LIKE ?"
             " ORDER BY (tag = ?) DESC, freq DESC LIMIT ?",
             (like, key, max(1, min(int(limit), 30)))).fetchall()
-        return JSONResponse([dict(r) for r in rows])
+        out = [dict(r) for r in rows]
+        try:                               # 별칭도 자동완성에 노출 (canonical 라벨로)
+            arows = con.execute(
+                "SELECT a.label AS alabel, l.tag, l.kind, l.freq FROM aliases a"
+                " JOIN labels l ON l.tag = a.tag WHERE a.alias LIKE ?"
+                " ORDER BY l.freq DESC LIMIT 10", (like,)).fetchall()
+        except sqlite3.OperationalError:
+            arows = []
+        seen = {o["tag"] for o in out}
+        for r in arows:
+            if r["tag"] not in seen:
+                out.append({"tag": r["tag"], "label": r["alabel"],
+                            "kind": r["kind"], "freq": r["freq"]})
+        return JSONResponse(out)
     finally:
         con.close()
 

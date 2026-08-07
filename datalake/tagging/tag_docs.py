@@ -242,9 +242,9 @@ def project_doc(st, rel, uni, extra, onto):
         x = extra["rows"].get(e) or {}
         name = u.get("name") or x.get("label_ko") or e
         if e.startswith("inst:") or e.startswith("private:"):
-            orgs.add(name)
+            orgs.add(name if name != e else e.split(":", 1)[1])
         elif e.startswith("person:"):
-            people.add(name)
+            people.add(name if name != e else e.split(":", 1)[1])
         else:
             tickers.add(e)
             if u.get("sector"):
@@ -274,6 +274,52 @@ def project_doc(st, rel, uni, extra, onto):
         f.write(new)
     os.replace(tmp, path)
     return True
+
+
+
+# --------------------------------------------------------------------------- #
+# frontmatter 메타 개체 강제 부여 (research 코퍼스 — 증권사·작성자, 2026-08-07)
+# --------------------------------------------------------------------------- #
+def _fm_json_list(raw):
+    try:
+        v = json.loads(raw or "[]")
+    except ValueError:
+        return []
+    return [x.strip() for x in v if isinstance(x, str) and x.strip()] if isinstance(v, list) else []
+
+
+def resolve_broker_entity(name, extra):
+    """frontmatter broker 문자열 -> entities_extra 개체 id (라벨·별칭 대조, 대소문자 무시)."""
+    key = (name or "").strip().lower()
+    if not key:
+        return None
+    for eid, row in extra["rows"].items():
+        cands = {row.get("label_ko") or "", row.get("label_en") or ""}
+        cands.update((row.get("aliases") or "").split("|"))
+        if key in {c.strip().lower() for c in cands if c and c.strip()}:
+            return eid
+    return None
+
+
+def sync_frontmatter_entities(st, fm, chunk0_id, extra):
+    """broker/authors frontmatter -> 개체 태그 강제 동기화. LLM 무관·멱등 (method=fm_meta)."""
+    if chunk0_id is None:
+        return 0
+    wanted = []
+    broker = (fm.get("broker") or "").strip()
+    if broker:
+        wanted.append(resolve_broker_entity(broker, extra) or "inst:" + broker)
+    for name in _fm_json_list(fm.get("authors")):
+        wanted.append("person:" + name)
+    st.execute("DELETE FROM entity_occurrences WHERE message_id=? AND method='fm_meta'",
+               (chunk0_id,))
+    for eid in wanted:
+        st.execute(
+            "INSERT OR REPLACE INTO entity_occurrences"
+            " (message_id, entity_id, field, span_start, span_end, surface, role, method, confidence)"
+            " VALUES (?,?,?,?,?,?,?,?,?)",
+            (chunk0_id, eid, "meta", -1, -1, eid, "subject", "fm_meta", 1.0))
+    return len(wanted)
 
 
 # --------------------------------------------------------------------------- #
@@ -342,6 +388,8 @@ def main():
         chunks, doc_date, ticker = register_chunks(
             st, kind, rel, fm, body, title, persist=not args.dry_run)
         touched.append(rel)
+        if kind == "research" and not args.dry_run and chunks:
+            sync_frontmatter_entities(st, fm, chunks[0][0], extra)
         for cid, text, ch in chunks:
             # subject(문서 주인공 종목)도 키에 포함 — frontmatter 의 ticker 만 바꾼 경우에도 재태깅
             # universe/alias 해시 대신 alias_epoch (전량 무효화 방지, tag_worker 와 동일 정책)
