@@ -77,3 +77,21 @@ inst:macquarie,institution,맥쿼리,Macquarie,증권사,맥쿼리|Macquarie
 inst:jefferies,institution,제프리스,Jefferies,증권사,제프리스|Jefferies
 inst:bernstein,institution,번스타인,Bernstein,증권사,번스타인|Bernstein
 inst:deutsche_bank,institution,도이치뱅크,Deutsche Bank,증권사,도이치뱅크|도이체방크|Deutsche Bank
+inst:ibk_sec,institution,IBK투자증권,IBK Securities,증권사,IBK투자증권
+inst:im_sec,institution,iM증권,iM Securities,증권사,iM증권|하이투자증권
+inst:heungkuk_sec,institution,흥국증권,Heungkuk Securities,증권사,흥국증권
+inst:sangsangin_sec,institution,상상인증권,SangSangIn Securities,증권사,상상인증권
+inst:cape_sec,institution,케이프투자증권,CAPE Investment & Securities,증권사,케이프투자증권
+inst:mizuho,institution,미즈호,Mizuho,증권사,미즈호|Mizuho|미즈호증권
+inst:wedbush,institution,웨드부시,Wedbush,증권사,웨드부시|Wedbush
+inst:piper_sandler,institution,파이퍼샌들러,Piper Sandler,증권사,파이퍼샌들러|파이퍼 샌들러|Piper Sandler
+inst:raymond_james,institution,레이먼드제임스,Raymond James,증권사,레이먼드제임스|레이몬드제임스|Raymond James
+inst:td_cowen,institution,TD코웬,TD Cowen,증권사,TD코웬|TD 코웬|TD Cowen|Cowen
+inst:evercore,institution,에버코어,Evercore,증권사,에버코어|Evercore|Evercore ISI
+inst:moffettnathanson,institution,모펫네이선슨,MoffettNathanson,증권사,모펫네이선슨|모펫네이슨|MoffettNathanson
+inst:needham,institution,니덤,Needham,증권사,니덤|Needham
+inst:susquehanna,institution,서스퀘하나,Susquehanna,증권사,서스퀘하나|Susquehanna
+inst:new_street,institution,뉴스트리트리서치,New Street Research,증권사,뉴스트리트리서치|뉴스트리트 리서치|New Street Research
+inst:stifel,institution,스티펠,Stifel,증권사,스티펠|Stifel
+inst:oppenheimer,institution,오펜하이머,Oppenheimer,증권사,오펜하이머|Oppenheimer
+inst:truist,institution,트루이스트,Truist,증권사,트루이스트|Truist
