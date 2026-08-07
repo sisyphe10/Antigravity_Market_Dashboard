@@ -165,6 +165,9 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 • 액션: BUY/SELL/WATCH/ADD/CUT/HOLD
 • 종목별 아이디어가 Journal 페이지 Ideas 탭에 누적
 
+📏 **매매 원칙**
+/rules - 최신 주간 원칙 점검 리포트
+
 ⚙️ **기타**
 /start - 봇 시작 및 자동 알림 구독
 /stop - 자동 알림 구독 해제
@@ -2903,13 +2906,64 @@ async def handle_uncat_reply(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await msg.reply_text(f"❌ 규칙 처리 실패: {e}")
 
 
+async def rules_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/rules - 최신 주간 매매 원칙 점검 리포트"""
+    chat_id = update.effective_chat.id
+    status_msg = await update.message.reply_text("📋 최신 주간 원칙 점검을 불러오는 중...")
+
+    def _run():
+        import subprocess
+        r = subprocess.run(
+            ["/Users/sisyphe/Antigravity_Market_Dashboard/venv/bin/python3",
+             "/Users/sisyphe/Journal/scripts/weekly_rules_review.py", "--print-latest"],
+            capture_output=True, text=True, timeout=30)
+        if r.returncode != 0:
+            raise RuntimeError((r.stderr or r.stdout or "unknown")[-200:])
+        return r.stdout.strip()
+
+    try:
+        loop = asyncio.get_running_loop()
+        text = await loop.run_in_executor(None, _run)
+        await context.bot.edit_message_text(
+            chat_id=chat_id, message_id=status_msg.message_id,
+            text=text[:3900], parse_mode="HTML")
+    except Exception as e:
+        await context.bot.edit_message_text(
+            chat_id=chat_id, message_id=status_msg.message_id,
+            text=f"❌ 원칙 점검 조회 실패: {e}")
+
+
+async def _post_init(app):
+    """텔레그램 명령 메뉴 등록 — '/' 입력 시 전체 명령이 뜨도록"""
+    from telegram import BotCommand
+    cmds = [
+        ("rules", "최신 주간 원칙 점검 리포트"),
+        ("portfolio", "포트폴리오 리포트"),
+        ("update", "장중 시세 업데이트"),
+        ("weather", "현재 날씨"),
+        ("calendar", "오늘 일정"),
+        ("ledger", "가계부 입력·카테고리"),
+        ("ledger2", "가계부 입력(양식2)"),
+        ("fitness", "운동 기록"),
+        ("journal", "투자일지 메모"),
+        ("idea", "투자 아이디어 기록"),
+        ("help", "도움말"),
+        ("start", "자동 알림 구독"),
+        ("stop", "자동 알림 해제"),
+    ]
+    try:
+        await app.bot.set_my_commands([BotCommand(c, d) for c, d in cmds])
+    except Exception as e:
+        logging.warning(f"set_my_commands 실패: {e}")
+
+
 if __name__ == '__main__':
     if not TOKEN:
         print("Error: TOKEN environment variable is missing.")
         import sys
         sys.exit(1)
 
-    application = ApplicationBuilder().token(TOKEN).build()
+    application = ApplicationBuilder().token(TOKEN).post_init(_post_init).build()
 
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CommandHandler('weather', weather_command))
@@ -2923,6 +2977,7 @@ if __name__ == '__main__':
     application.add_handler(CommandHandler('fitness', fitness_command))
     application.add_handler(CommandHandler('journal', journal_command))
     application.add_handler(CommandHandler('idea', idea_command))
+    application.add_handler(CommandHandler('rules', rules_command))
     application.add_handler(MessageHandler(filters.REPLY & filters.TEXT & ~filters.COMMAND, handle_uncat_reply))
     application.add_handler(CallbackQueryHandler(handle_ledger_callback, pattern=r'^ledgercat:'))
     application.add_handler(CallbackQueryHandler(handle_ledger_budget_callback, pattern=r'^ledgerbudget:'))
