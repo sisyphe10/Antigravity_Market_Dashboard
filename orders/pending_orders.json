@@ -33,6 +33,14 @@
           "reason": ""
         },
         {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
+          "weight": 4,
+          "baseWeight": 4,
+          "reason": ""
+        },
+        {
           "sector": "에너지",
           "code": "010950",
           "name": "S-Oil",
@@ -49,28 +57,20 @@
           "reason": ""
         },
         {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 4,
-          "baseWeight": 3,
-          "reason": "2분기 실적은 컨센서스를 하회했으나, 10월 중 엔비디아의 유상증자 대금이 납입될 것, 비중 확대"
-        },
-        {
-          "sector": "반도체",
-          "code": "131970",
-          "name": "두산테스나",
-          "weight": 0,
-          "baseWeight": 2,
-          "reason": "주가 급등 이후 지속적으로 이어나가지 못해 전량 편출, 이벤트 소멸"
-        },
-        {
           "sector": "필수소비재",
           "code": "003230",
           "name": "삼양식품",
           "weight": 3,
-          "baseWeight": 2,
-          "reason": "2분기 실적은 컨센 하회~부합 정도로 보이나, 하반기 중 증설 발표 기대"
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "196170",
+          "name": "알테오젠",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
         },
         {
           "sector": "기계",
@@ -82,23 +82,38 @@
         },
         {
           "sector": "건강관리",
-          "code": "196170",
-          "name": "알테오젠",
+          "code": "298380",
+          "name": "에이비엘바이오",
           "weight": 3,
           "baseWeight": 2,
-          "reason": "2분기 호실적 발표, 추가 매수"
+          "reason": "ABL001 연말 BLA 제출 목표 기대, 코스닥 투심 회복으로 추가 매수"
+        },
+        {
+          "sector": "반도체",
+          "code": "131970",
+          "name": "두산테스나",
+          "weight": 0,
+          "baseWeight": 0,
+          "reason": ""
+        },
+        {
+          "sector": "화학",
+          "code": "010060",
+          "name": "OCI홀딩스",
+          "weight": 3,
+          "baseWeight": 0,
+          "reason": "Section 232 확정으로 미국에 수출하는 폴리실리콘과 웨이퍼 가격 상승할 예정, 신규 매수"
         },
         {
           "sector": "건강관리",
-          "code": "298380",
-          "name": "에이비엘바이오",
-          "weight": 2,
-          "baseWeight": 2,
-          "reason": ""
+          "code": "128940",
+          "name": "한미약품",
+          "weight": 3,
+          "baseWeight": 0,
+          "reason": "에페글레나타이드 국내 허가 및 출시 기대, MASH 또한 LO 기대"
         }
       ],
-      "savedAt": "2026-08-07T04:44:05.264Z",
-      "finalizedAt": "2026-08-07T13:46:20+09:00"
+      "savedAt": "2026-08-07T05:22:47.122Z"
     },
     "NH 다이내믹 밸류": {
       "targets": [
@@ -133,6 +148,14 @@
           "reason": ""
         },
         {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
+          "weight": 4,
+          "baseWeight": 4,
+          "reason": ""
+        },
+        {
           "sector": "에너지",
           "code": "010950",
           "name": "S-Oil",
@@ -149,28 +172,20 @@
           "reason": ""
         },
         {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 4,
-          "baseWeight": 3,
-          "reason": "2분기 실적은 컨센서스를 하회했으나, 10월 중 엔비디아의 유상증자 대금이 납입될 것, 비중 확대"
-        },
-        {
-          "sector": "반도체",
-          "code": "131970",
-          "name": "두산테스나",
-          "weight": 0,
-          "baseWeight": 2,
-          "reason": "주가 급등 이후 지속적으로 이어나가지 못해 전량 편출, 이벤트 소멸"
-        },
-        {
           "sector": "필수소비재",
           "code": "003230",
           "name": "삼양식품",
           "weight": 3,
-          "baseWeight": 2,
-          "reason": "2분기 실적은 컨센 하회~부합 정도로 보이나, 하반기 중 증설 발표 기대"
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "196170",
+          "name": "알테오젠",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
         },
         {
           "sector": "기계",
@@ -182,23 +197,38 @@
         },
         {
           "sector": "건강관리",
-          "code": "196170",
-          "name": "알테오젠",
+          "code": "298380",
+          "name": "에이비엘바이오",
           "weight": 3,
           "baseWeight": 2,
-          "reason": "2분기 호실적 발표, 추가 매수"
+          "reason": "ABL001 연말 BLA 제출 목표 기대, 코스닥 투심 회복으로 추가 매수"
+        },
+        {
+          "sector": "반도체",
+          "code": "131970",
+          "name": "두산테스나",
+          "weight": 0,
+          "baseWeight": 0,
+          "reason": ""
+        },
+        {
+          "sector": "화학",
+          "code": "010060",
+          "name": "OCI홀딩스",
+          "weight": 3,
+          "baseWeight": 0,
+          "reason": "Section 232 확정으로 미국에 수출하는 폴리실리콘과 웨이퍼 가격 상승할 예정, 신규 매수"
         },
         {
           "sector": "건강관리",
-          "code": "298380",
-          "name": "에이비엘바이오",
-          "weight": 2,
-          "baseWeight": 2,
-          "reason": ""
+          "code": "128940",
+          "name": "한미약품",
+          "weight": 3,
+          "baseWeight": 0,
+          "reason": "에페글레나타이드 국내 허가 및 출시 기대, MASH 또한 LO 기대"
         }
       ],
-      "savedAt": "2026-08-07T04:44:05.264Z",
-      "finalizedAt": "2026-08-07T13:46:20+09:00"
+      "savedAt": "2026-08-07T05:22:47.122Z"
     },
     "DB 개방형": {
       "targets": [
@@ -233,6 +263,14 @@
           "reason": ""
         },
         {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
+          "weight": 4,
+          "baseWeight": 4,
+          "reason": ""
+        },
+        {
           "sector": "에너지",
           "code": "010950",
           "name": "S-Oil",
@@ -249,28 +287,20 @@
           "reason": ""
         },
         {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 4,
-          "baseWeight": 3,
-          "reason": "2분기 실적은 컨센서스를 하회했으나, 10월 중 엔비디아의 유상증자 대금이 납입될 것, 비중 확대"
-        },
-        {
-          "sector": "반도체",
-          "code": "131970",
-          "name": "두산테스나",
-          "weight": 0,
-          "baseWeight": 2,
-          "reason": "주가 급등 이후 지속적으로 이어나가지 못해 전량 편출, 이벤트 소멸"
-        },
-        {
           "sector": "필수소비재",
           "code": "003230",
           "name": "삼양식품",
           "weight": 3,
-          "baseWeight": 2,
-          "reason": "2분기 실적은 컨센 하회~부합 정도로 보이나, 하반기 중 증설 발표 기대"
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "196170",
+          "name": "알테오젠",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
         },
         {
           "sector": "기계",
@@ -282,23 +312,38 @@
         },
         {
           "sector": "건강관리",
-          "code": "196170",
-          "name": "알테오젠",
+          "code": "298380",
+          "name": "에이비엘바이오",
           "weight": 3,
           "baseWeight": 2,
-          "reason": "2분기 호실적 발표, 추가 매수"
+          "reason": "ABL001 연말 BLA 제출 목표 기대, 코스닥 투심 회복으로 추가 매수"
+        },
+        {
+          "sector": "반도체",
+          "code": "131970",
+          "name": "두산테스나",
+          "weight": 0,
+          "baseWeight": 0,
+          "reason": ""
+        },
+        {
+          "sector": "화학",
+          "code": "010060",
+          "name": "OCI홀딩스",
+          "weight": 3,
+          "baseWeight": 0,
+          "reason": "Section 232 확정으로 미국에 수출하는 폴리실리콘과 웨이퍼 가격 상승할 예정, 신규 매수"
         },
         {
           "sector": "건강관리",
-          "code": "298380",
-          "name": "에이비엘바이오",
-          "weight": 2,
-          "baseWeight": 2,
-          "reason": ""
+          "code": "128940",
+          "name": "한미약품",
+          "weight": 3,
+          "baseWeight": 0,
+          "reason": "에페글레나타이드 국내 허가 및 출시 기대, MASH 또한 LO 기대"
         }
       ],
-      "savedAt": "2026-08-07T04:44:05.264Z",
-      "finalizedAt": "2026-08-07T13:46:20+09:00"
+      "savedAt": "2026-08-07T05:22:47.122Z"
     },
     "한투 지속형": {
       "targets": [
@@ -333,6 +378,14 @@
           "reason": ""
         },
         {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
+          "weight": 4,
+          "baseWeight": 4,
+          "reason": ""
+        },
+        {
           "sector": "에너지",
           "code": "010950",
           "name": "S-Oil",
@@ -349,28 +402,20 @@
           "reason": ""
         },
         {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 4,
-          "baseWeight": 3,
-          "reason": "2분기 실적은 컨센서스를 하회했으나, 10월 중 엔비디아의 유상증자 대금이 납입될 것, 비중 확대"
-        },
-        {
-          "sector": "반도체",
-          "code": "131970",
-          "name": "두산테스나",
-          "weight": 0,
-          "baseWeight": 2,
-          "reason": "주가 급등 이후 지속적으로 이어나가지 못해 전량 편출, 이벤트 소멸"
-        },
-        {
           "sector": "필수소비재",
           "code": "003230",
           "name": "삼양식품",
           "weight": 3,
-          "baseWeight": 2,
-          "reason": "2분기 실적은 컨센 하회~부합 정도로 보이나, 하반기 중 증설 발표 기대"
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "196170",
+          "name": "알테오젠",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
         },
         {
           "sector": "기계",
@@ -382,23 +427,38 @@
         },
         {
           "sector": "건강관리",
-          "code": "196170",
-          "name": "알테오젠",
+          "code": "298380",
+          "name": "에이비엘바이오",
           "weight": 3,
           "baseWeight": 2,
-          "reason": "2분기 호실적 발표, 추가 매수"
+          "reason": "ABL001 연말 BLA 제출 목표 기대, 코스닥 투심 회복으로 추가 매수"
+        },
+        {
+          "sector": "반도체",
+          "code": "131970",
+          "name": "두산테스나",
+          "weight": 0,
+          "baseWeight": 0,
+          "reason": ""
+        },
+        {
+          "sector": "화학",
+          "code": "010060",
+          "name": "OCI홀딩스",
+          "weight": 3,
+          "baseWeight": 0,
+          "reason": "Section 232 확정으로 미국에 수출하는 폴리실리콘과 웨이퍼 가격 상승할 예정, 신규 매수"
         },
         {
           "sector": "건강관리",
-          "code": "298380",
-          "name": "에이비엘바이오",
-          "weight": 2,
-          "baseWeight": 2,
-          "reason": ""
+          "code": "128940",
+          "name": "한미약품",
+          "weight": 3,
+          "baseWeight": 0,
+          "reason": "에페글레나타이드 국내 허가 및 출시 기대, MASH 또한 LO 기대"
         }
       ],
-      "savedAt": "2026-08-07T04:44:05.264Z",
-      "finalizedAt": "2026-08-07T13:46:20+09:00"
+      "savedAt": "2026-08-07T05:22:47.122Z"
     },
     "NH 목표전환형 5호": {
       "targets": [
@@ -433,6 +493,14 @@
           "reason": ""
         },
         {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
+          "weight": 4,
+          "baseWeight": 4,
+          "reason": ""
+        },
+        {
           "sector": "에너지",
           "code": "010950",
           "name": "S-Oil",
@@ -449,28 +517,20 @@
           "reason": ""
         },
         {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 4,
-          "baseWeight": 3,
-          "reason": "2분기 실적은 컨센서스를 하회했으나, 10월 중 엔비디아의 유상증자 대금이 납입될 것, 비중 확대"
-        },
-        {
-          "sector": "반도체",
-          "code": "131970",
-          "name": "두산테스나",
-          "weight": 0,
-          "baseWeight": 2,
-          "reason": "주가 급등 이후 지속적으로 이어나가지 못해 전량 편출, 이벤트 소멸"
-        },
-        {
           "sector": "필수소비재",
           "code": "003230",
           "name": "삼양식품",
           "weight": 3,
-          "baseWeight": 2,
-          "reason": "2분기 실적은 컨센 하회~부합 정도로 보이나, 하반기 중 증설 발표 기대"
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "196170",
+          "name": "알테오젠",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
         },
         {
           "sector": "기계",
@@ -482,23 +542,38 @@
         },
         {
           "sector": "건강관리",
-          "code": "196170",
-          "name": "알테오젠",
+          "code": "298380",
+          "name": "에이비엘바이오",
           "weight": 3,
           "baseWeight": 2,
+          "reason": "ABL001 연말 BLA 제출 목표 기대, 코스닥 투심 회복으로 추가 매수"
+        },
+        {
+          "sector": "반도체",
+          "code": "131970",
+          "name": "두산테스나",
+          "weight": 0,
+          "baseWeight": 0,
           "reason": ""
         },
         {
+          "sector": "화학",
+          "code": "010060",
+          "name": "OCI홀딩스",
+          "weight": 3,
+          "baseWeight": 0,
+          "reason": "Section 232 확정으로 미국에 수출하는 폴리실리콘과 웨이퍼 가격 상승할 예정, 신규 매수"
+        },
+        {
           "sector": "건강관리",
-          "code": "298380",
-          "name": "에이비엘바이오",
-          "weight": 2,
-          "baseWeight": 2,
-          "reason": ""
+          "code": "128940",
+          "name": "한미약품",
+          "weight": 3,
+          "baseWeight": 0,
+          "reason": "에페글레나타이드 국내 허가 및 출시 기대, MASH 또한 LO 기대"
         }
       ],
-      "savedAt": "2026-08-07T04:44:05.264Z",
-      "finalizedAt": "2026-08-07T13:46:20+09:00"
+      "savedAt": "2026-08-07T05:22:47.122Z"
     },
     "DB 목표전환형 6차": {
       "targets": [
@@ -533,6 +608,14 @@
           "reason": ""
         },
         {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
+          "weight": 4,
+          "baseWeight": 4,
+          "reason": ""
+        },
+        {
           "sector": "에너지",
           "code": "010950",
           "name": "S-Oil",
@@ -549,28 +632,20 @@
           "reason": ""
         },
         {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 4,
-          "baseWeight": 3,
-          "reason": "2분기 실적은 컨센서스를 하회했으나, 10월 중 엔비디아의 유상증자 대금이 납입될 것, 비중 확대"
-        },
-        {
-          "sector": "반도체",
-          "code": "131970",
-          "name": "두산테스나",
-          "weight": 0,
-          "baseWeight": 2,
-          "reason": "주가 급등 이후 지속적으로 이어나가지 못해 전량 편출, 이벤트 소멸"
-        },
-        {
           "sector": "필수소비재",
           "code": "003230",
           "name": "삼양식품",
           "weight": 3,
-          "baseWeight": 2,
-          "reason": "2분기 실적은 컨센 하회~부합 정도로 보이나, 하반기 중 증설 발표 기대"
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "196170",
+          "name": "알테오젠",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
         },
         {
           "sector": "기계",
@@ -582,23 +657,38 @@
         },
         {
           "sector": "건강관리",
-          "code": "196170",
-          "name": "알테오젠",
+          "code": "298380",
+          "name": "에이비엘바이오",
           "weight": 3,
           "baseWeight": 2,
+          "reason": "ABL001 연말 BLA 제출 목표 기대, 코스닥 투심 회복으로 추가 매수"
+        },
+        {
+          "sector": "반도체",
+          "code": "131970",
+          "name": "두산테스나",
+          "weight": 0,
+          "baseWeight": 0,
           "reason": ""
         },
         {
+          "sector": "화학",
+          "code": "010060",
+          "name": "OCI홀딩스",
+          "weight": 3,
+          "baseWeight": 0,
+          "reason": "Section 232 확정으로 미국에 수출하는 폴리실리콘과 웨이퍼 가격 상승할 예정, 신규 매수"
+        },
+        {
           "sector": "건강관리",
-          "code": "298380",
-          "name": "에이비엘바이오",
-          "weight": 2,
-          "baseWeight": 2,
-          "reason": ""
+          "code": "128940",
+          "name": "한미약품",
+          "weight": 3,
+          "baseWeight": 0,
+          "reason": "에페글레나타이드 국내 허가 및 출시 기대, MASH 또한 LO 기대"
         }
       ],
-      "savedAt": "2026-08-07T04:44:05.264Z",
-      "finalizedAt": "2026-08-07T13:46:20+09:00"
+      "savedAt": "2026-08-07T05:22:47.122Z"
     },
     "한투 성과모집형 1차": {
       "targets": [
@@ -633,6 +723,14 @@
           "reason": ""
         },
         {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
+          "weight": 4,
+          "baseWeight": 4,
+          "reason": ""
+        },
+        {
           "sector": "에너지",
           "code": "010950",
           "name": "S-Oil",
@@ -649,28 +747,20 @@
           "reason": ""
         },
         {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 4,
-          "baseWeight": 3,
-          "reason": "2분기 실적은 컨센서스를 하회했으나, 10월 중 엔비디아의 유상증자 대금이 납입될 것, 비중 확대"
-        },
-        {
-          "sector": "반도체",
-          "code": "131970",
-          "name": "두산테스나",
-          "weight": 0,
-          "baseWeight": 2,
-          "reason": "주가 급등 이후 지속적으로 이어나가지 못해 전량 편출, 이벤트 소멸"
-        },
-        {
           "sector": "필수소비재",
           "code": "003230",
           "name": "삼양식품",
           "weight": 3,
-          "baseWeight": 2,
-          "reason": "2분기 실적은 컨센 하회~부합 정도로 보이나, 하반기 중 증설 발표 기대"
+          "baseWeight": 3,
+          "reason": ""
+        },
+        {
+          "sector": "건강관리",
+          "code": "196170",
+          "name": "알테오젠",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
         },
         {
           "sector": "기계",
@@ -682,23 +772,38 @@
         },
         {
           "sector": "건강관리",
-          "code": "196170",
-          "name": "알테오젠",
+          "code": "298380",
+          "name": "에이비엘바이오",
           "weight": 3,
           "baseWeight": 2,
+          "reason": "ABL001 연말 BLA 제출 목표 기대, 코스닥 투심 회복으로 추가 매수"
+        },
+        {
+          "sector": "반도체",
+          "code": "131970",
+          "name": "두산테스나",
+          "weight": 0,
+          "baseWeight": 0,
           "reason": ""
         },
         {
+          "sector": "화학",
+          "code": "010060",
+          "name": "OCI홀딩스",
+          "weight": 3,
+          "baseWeight": 0,
+          "reason": "Section 232 확정으로 미국에 수출하는 폴리실리콘과 웨이퍼 가격 상승할 예정, 신규 매수"
+        },
+        {
           "sector": "건강관리",
-          "code": "298380",
-          "name": "에이비엘바이오",
-          "weight": 2,
-          "baseWeight": 2,
-          "reason": ""
+          "code": "128940",
+          "name": "한미약품",
+          "weight": 3,
+          "baseWeight": 0,
+          "reason": "에페글레나타이드 국내 허가 및 출시 기대, MASH 또한 LO 기대"
         }
       ],
-      "savedAt": "2026-08-07T04:44:05.264Z",
-      "finalizedAt": "2026-08-07T13:46:20+09:00"
+      "savedAt": "2026-08-07T05:22:47.122Z"
     }
   }
 }
