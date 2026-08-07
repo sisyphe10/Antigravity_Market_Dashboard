@@ -115,7 +115,7 @@ def resolve(force=False, allow_probe=True):
         best = init
 
     # ② 현재 메이저 위쪽 메이저를 내림차순 탐침 (첫 성공에서 중단)
-    top = _version_key(best)[0]
+    top = _version_key(best)[0][0]
     for n in range(top + PROBE_AHEAD, top, -1):
         cand = "claude-opus-%d" % n
         ok, init = _run_probe(cand)
