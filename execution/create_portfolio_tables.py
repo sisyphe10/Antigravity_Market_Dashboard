@@ -512,6 +512,7 @@ def create_portfolio_tables():
                     'weight_prev': disp_comp.get(c, {}).get('weight', 0.0),  # D-1(표·메시지 표시용)
                 })
             # 표시(D-1) 기준 정렬: weight_prev desc → weight desc
+            # (동일 비중 내 시가총액 타이브레이크는 stock_meta 로드 후 재정렬로 적용)
             union_stocks.sort(key=lambda s: (s['weight_prev'], s['weight']), reverse=True)
             all_codes.update(s['code'] for s in union_stocks)
 
@@ -557,6 +558,13 @@ def create_portfolio_tables():
         # === 종목 시가총액/시장구분 로드 (KIS 우선 → FDR 리스팅 → 네이버) ===
         print(f"\n2. {len(all_codes)}개 종목 시가총액/시장구분 로드 중 (KIS 우선)...")
         stock_meta = load_stock_meta(sorted(all_codes))
+
+        # 동일 비중 타이브레이크: weight_prev desc -> weight desc -> 시가총액(억원) desc
+        for _cfg in portfolio_configs:
+            _cfg['union_stocks'].sort(
+                key=lambda s: (s['weight_prev'], s['weight'],
+                               (stock_meta.get(s['code']) or {}).get('marcap', 0) or 0),
+                reverse=True)
 
         # === 모든 종목 가격을 병렬로 조회 ===
         print(f"\n3. {len(all_codes)}개 종목 가격 병렬 조회 중...")
