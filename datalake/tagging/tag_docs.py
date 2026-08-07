@@ -295,7 +295,10 @@ def resolve_broker_entity(name, extra):
         return None
     for eid, row in extra["rows"].items():
         cands = {row.get("label_ko") or "", row.get("label_en") or ""}
-        cands.update((row.get("aliases") or "").split("|"))
+        aliases = row.get("aliases") or []
+        if isinstance(aliases, str):
+            aliases = aliases.split("|")
+        cands.update(aliases)
         if key in {c.strip().lower() for c in cands if c and c.strip()}:
             return eid
     return None
