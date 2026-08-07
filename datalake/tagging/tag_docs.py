@@ -314,6 +314,11 @@ def sync_frontmatter_entities(st, fm, chunk0_id, extra):
         wanted.append(resolve_broker_entity(broker, extra) or "inst:" + broker)
     for name in _fm_json_list(fm.get("authors")):
         wanted.append("person:" + name)
+    cur = {r["entity_id"] for r in st.execute(
+        "SELECT entity_id FROM entity_occurrences WHERE message_id=? AND method='fm_meta'",
+        (chunk0_id,))}
+    if cur == set(wanted):
+        return False                      # 변화 없음 — 재투영 불필요
     st.execute("DELETE FROM entity_occurrences WHERE message_id=? AND method='fm_meta'",
                (chunk0_id,))
     for eid in wanted:
@@ -322,7 +327,7 @@ def sync_frontmatter_entities(st, fm, chunk0_id, extra):
             " (message_id, entity_id, field, span_start, span_end, surface, role, method, confidence)"
             " VALUES (?,?,?,?,?,?,?,?,?)",
             (chunk0_id, eid, "meta", -1, -1, eid, "subject", "fm_meta", 1.0))
-    return len(wanted)
+    return True
 
 
 # --------------------------------------------------------------------------- #
@@ -382,6 +387,7 @@ def main():
               % (len(added_aliases), ", ".join(added_aliases[:5])))
 
     todo, cached, touched, migrated = [], 0, [], 0
+    fm_changed = []                       # fm_meta 가 바뀐 문서 — 캐시 적중이어도 재투영
     for kind, path, rel in docs:
         with open(path, encoding="utf-8") as f:
             raw = f.read()
@@ -392,7 +398,8 @@ def main():
             st, kind, rel, fm, body, title, persist=not args.dry_run)
         touched.append(rel)
         if kind == "research" and not args.dry_run and chunks:
-            sync_frontmatter_entities(st, fm, chunks[0][0], extra)
+            if sync_frontmatter_entities(st, fm, chunks[0][0], extra):
+                fm_changed.append(rel)
         for cid, text, ch in chunks:
             # subject(문서 주인공 종목)도 키에 포함 — frontmatter 의 ticker 만 바꾼 경우에도 재태깅
             # universe/alias 해시 대신 alias_epoch (전량 무효화 방지, tag_worker 와 동일 정책)
@@ -507,7 +514,8 @@ def main():
                (tw.now(), ok, fail, tin, tout, tcache, run_id))
     st.commit()
 
-    projected = sum(1 for rel in sorted({m["_rel"] for m in todo}) if project_doc(st, rel, uni, extra, onto))
+    projected = sum(1 for rel in sorted({m["_rel"] for m in todo} | set(fm_changed))
+                    if project_doc(st, rel, uni, extra, onto))
     if full_pass:
         tc.commit_alias_state(st, idx, epoch)
     print("완료: ok=%d fail=%d / 입력 %s · 출력 %s · 캐시읽기 %s 토큰 / frontmatter %d건 갱신%s"
