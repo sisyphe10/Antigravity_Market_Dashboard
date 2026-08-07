@@ -65,7 +65,7 @@ ROLES = ("subject", "source", "author", "comparison", "incidental")
 # --- headless(구독 Claude Code) 엔진 --------------------------------------- #
 TAG_ENGINE = os.getenv("TAG_ENGINE", "headless")      # headless | api(롤백)
 CLAUDE_BIN = os.path.expanduser(os.getenv("TAG_CLAUDE_BIN", "~/.local/bin/claude"))
-HEADLESS_MAX_TODO = int(os.getenv("TAG_HEADLESS_MAX_TODO", "48"))
+HEADLESS_MAX_TODO = int(os.getenv("TAG_HEADLESS_MAX_TODO", "120"))
 HEADLESS_MAX_CALLS = int(os.getenv("TAG_HEADLESS_MAX_CALLS", "8"))
 HEADLESS_TIMEOUT = int(os.getenv("TAG_HEADLESS_TIMEOUT", "600"))
 HEADLESS_MAX_TURNS = os.getenv("TAG_HEADLESS_MAX_TURNS", "1")
