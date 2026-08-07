@@ -188,14 +188,17 @@ def get_today_return_from_cache(price_df):
     return ((latest_price - prev_price) / prev_price) * 100
 
 
-def find_current_run_start(code, portfolio_name, nav_df):
-    """현재 연속 보유 구간(run)의 시작일 반환.
+def find_current_run_start(code, portfolio_name, nav_df, as_of=None):
+    """현재 연속 보유 구간(run)의 시작일 반환. as_of 지정 시 그 날짜까지의 스냅샷만 사용
+    (D-1 표시 뷰 — finalize 당일 편출 스냅샷이 run을 끊어 누적수익률이 사라지는 것 방지).
     NEW 시트는 리밸런싱일마다 '전체 보유 종목 스냅샷'이므로, 어떤 리밸런싱일에
     종목이 빠져 있으면(=비중 0 행이 없더라도) 그날 매도된 것으로 본다.
     명시적 비중=0 행도 부재로 처리. 따라서 '매도 후 재편입'(라운드트립) 시
     직전 보유분 매수가가 원가에 섞이지 않고, 마지막 재편입일부터 다시 측정한다."""
     try:
         port = nav_df[nav_df['상품명'] == portfolio_name]
+        if as_of is not None:
+            port = port[pd.to_datetime(port['날짜']) <= pd.Timestamp(as_of)]
         if port.empty:
             return None
         all_dates = sorted(pd.to_datetime(port['날짜'].unique()))
@@ -214,20 +217,28 @@ def find_current_run_start(code, portfolio_name, nav_df):
         return None
 
 
-def get_inclusion_date(code, portfolio_name, nav_df):
+def get_inclusion_date(code, portfolio_name, nav_df, as_of=None):
     """포트폴리오 NAV 이력에서 종목 편입일(현재 연속 보유 구간 시작일) 반환.
     RSI '편입 이후' 기준점으로 사용 — 누적수익률 기준점(run_start)과 동일.
     추적 개시 전부터 보유한 기존 종목은 NAV 첫 등장일을 자동 반환."""
-    return find_current_run_start(code, portfolio_name, nav_df)
+    return find_current_run_start(code, portfolio_name, nav_df, as_of=as_of)
 
 
-def calculate_cumulative_return(code, stock_name, portfolio_name, nav_df, price_df):
+def calculate_cumulative_return(code, stock_name, portfolio_name, nav_df, price_df, as_of=None):
     """
     종목의 누적 수익률 계산 (캐시된 데이터 사용)
     """
     try:
         # 현재 연속 보유 구간(run) 시작일 — (상품명, 코드) 단위. 포트폴리오별 편입 시점/라운드트립 반영.
-        run_start = find_current_run_start(code, portfolio_name, nav_df)
+        run_start = find_current_run_start(code, portfolio_name, nav_df, as_of=as_of)
+
+        # 오늘 처음 편입된 종목은 전체 이력 기준으로 판정 — as_of(D-1) 컷과 무관하게 today_new 유지
+        _first_buy = nav_df[(nav_df['상품명'] == portfolio_name)
+                            & (nav_df['코드'] == int(code))
+                            & (nav_df['비중'] > 0)]['날짜'].min()
+        if pd.notna(_first_buy) and pd.Timestamp(_first_buy) >= pd.Timestamp.now().normalize():
+            return {'cumulative_return': None, 'status': 'today_new', 'avg_price': None,
+                    'current_price': None, 'dd': None, 'all_time_high': None}
 
         # 편입일 이전부터 보유 중인 종목: existing_stock_basis.json 의 avg_price로 매일 재계산.
         # 단, 그 고정 basis(2026-02-12 등)는 추적 개시 전부터 '연속 보유 중'인 포트폴리오에만 유효하다.
@@ -260,6 +271,8 @@ def calculate_cumulative_return(code, stock_name, portfolio_name, nav_df, price_
 
         # 해당 포트폴리오의 해당 종목 이력
         stock_history = nav_df[(nav_df['상품명'] == portfolio_name) & (nav_df['코드'] == int(code))].copy()
+        if as_of is not None:
+            stock_history = stock_history[pd.to_datetime(stock_history['날짜']) <= pd.Timestamp(as_of)]
         stock_history = stock_history.sort_values('날짜')
 
         if stock_history.empty:
@@ -615,7 +628,8 @@ def create_portfolio_tables():
                 price_df = price_cache.get(code)
 
                 # 누적 수익률 계산 (오늘 편입 여부도 함께 확인)
-                cumulative_result = calculate_cumulative_return(code, stock_name, use_portfolio, nav_df, price_df)
+                cumulative_result = calculate_cumulative_return(code, stock_name, use_portfolio, nav_df, price_df,
+                                                                as_of=disp_date)
                 is_today_new = (cumulative_result.get('status') == 'today_new')
 
                 # 오늘 처음 편입된 종목은 수익률/기여도/누적 미표시
@@ -663,7 +677,7 @@ def create_portfolio_tables():
                 # 기준점 = 편입일(마지막 전량매도 이후 첫 비중>0 날짜) 당일 종가(on-or-before, 누적수익률과 동일).
                 # 종목·지수 모두 같은 편입일부터 현재까지 측정 → 동일 종목도 포트폴리오별 편입일 다르면 RSI 다름.
                 rsi = None
-                incl_date = None if is_today_new else get_inclusion_date(code, use_portfolio, nav_df)
+                incl_date = None if is_today_new else get_inclusion_date(code, use_portfolio, nav_df, as_of=disp_date)
                 if incl_date is not None and price_df is not None and not price_df.empty:
                     try:
                         market = str(smeta.get('market', '') or '').upper()
