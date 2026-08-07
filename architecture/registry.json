@@ -2839,6 +2839,26 @@
    ]
   },
   {
+   "id": "src-corp-bond-issuance",
+   "project": "antigravity",
+   "domain": "market-global",
+   "type": "pipeline_source",
+   "name": "미국·한국 회사채 발행액 (fetch_corp_bond_issuance.py)",
+   "runs_on": "gha",
+   "schedule_kst": "07:50 화~토 (gha-daily-fred 편승)",
+   "status": "active",
+   "desc_md": "2026-08-07 신설. 회사채 발행액 월간 2종 — `미 회사채 발행액`($B, dtype=`BOND_ISSUANCE_US`) + `회사채 발행액`(억원, dtype=`BOND_ISSUANCE_KR`) — 을 dataset.csv DATA(MACRO/US·KOREA)에 적재. dtype 소스별 분리 = 신선도 개별 추적(SiliconData 원칙). [[gha-daily-fred]] 편승(맥미니 launchd 미러 `gha-fred` 동일).\n\n- **미국 = SIFMA US Fixed Income Statistics xlsx 직링크**(Issuance 시트 Corporates 열). ★월별은 최근 13개월 롤링 창뿐 → 매 run 창 전체 재파싱 upsert. 과거는 Wayback 스냅숏 6개(2021~2025) `--backfill` 1회 스티칭: 2019-01~ 복원, **2022-10~2023-04 7개월 아카이브 공백 = 영구 결측**. 스냅숏 구간은 당시 공표 빈티지(소급 개정 미반영). 회사채 전용 파일(1996~, IG/HY)은 HubSpot 폼 게이트라 사용 불가. 원본 xlsx는 맥미니 ~/datalake/raw/sifma/ 영구보존(GHA 러너에선 skip).\n- **한국 = 금투협 채권정보센터 발행통계 기간별**(proframe XML POST, BIS-KOFIABOND/BISIssStatisSrchSO/listTrm, 세션 불요). ★'회사채' 행 = 일반회사채(은행채·기타금융채·ABS 별도 행) — 금감원 직접금융 총계와 모집단 다름, 합산·교차앵커 금지. 이력 2006-01~. 진행월 제외 + 최근 4개 완료월 매 run self-heal. 행 판정 = 국문 '회사채'+영문 'Corporate' 동시 일치.\n- 가드: 값 범위(미 0~1,000 $B·한 0~100만 억원) + 창 축소·랙 75일 감지 + 앵커(창에 있을 때만: 미 2025-12=69.8±10%·한 2010-01=28,796±3% 등). 시트·헤더 문자열 탐색(행번호 하드코딩 금지), xlsx magic bytes 검증(폼 게이트 전환 감지). 소스 단위 격리, 하나라도 실패 시 exit 1(잡에선 경고만 tolerate).",
+   "code": [
+    "execution/fetch_corp_bond_issuance.py"
+   ],
+   "writes": [
+    "store-dataset-csv"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
    "id": "store-news-md",
    "project": "antigravity",
    "domain": "news-research",

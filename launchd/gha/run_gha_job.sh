@@ -262,6 +262,9 @@ run_job() {
       # 경고만 — 매 run 전 구간 재조회이므로 다음 run 이 회수한다.
       "$PY" execution/fetch_ism_pmi.py \
         || echo "[gha-fred] ISM PMI 수집 실패 → 경고만(다음 run 회수)" >&2
+      # 회사채 발행액 (SIFMA xlsx + 금투협, 키 불요) — 같은 이유로 경고만
+      "$PY" execution/fetch_corp_bond_issuance.py \
+        || echo "[gha-fred] 회사채 발행액 수집 실패 → 경고만(다음 run 회수)" >&2
       "$PY" execution/fetch_fred_data.py || return $?
       "$PY" execution/create_dashboard.py || return $?
       /bin/bash scripts/safe_commit_push.sh \

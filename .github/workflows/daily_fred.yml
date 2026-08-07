@@ -46,6 +46,8 @@ jobs:
           fi
           python execution/fetch_ism_pmi.py \
             || echo "ISM PMI fetch failed - warning only"
+          python execution/fetch_corp_bond_issuance.py \
+            || echo "Corp bond issuance fetch failed - warning only"
           python execution/fetch_fred_data.py
 
       - name: Generate Dashboard

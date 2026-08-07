@@ -1616,6 +1616,7 @@ CMB_SERIES_UNITS = {
     '정기예금 잔액': '조원', '국민연금 적립금': '조원', '퇴직연금 적립금': '조원',
     '전산업생산 YoY': '%', '실업률 (한국)': '%', '온라인쇼핑 거래액': '조원',
     '백화점 매출 YoY': '%', '대형마트 매출 YoY': '%', '편의점 매출 YoY': '%', 'SSM 매출 YoY': '%',
+    '회사채 발행액': '억원',
     # MACRO US
     # ★역레포는 FRED RRPONTSYD 원본 단위가 Billions 이고 수집기가 스케일을 적용하지 않는다
     #   (연준 총자산 WALCL 만 백만→조 환산). 2026-07-28 $T 오등록 수정.
@@ -1626,6 +1627,7 @@ CMB_SERIES_UNITS = {
     '미 PPI YoY': '%', '시간당임금 YoY': '%', '소매판매 YoY': '%',
     '산업생산 YoY': '%', '근원자본재 수주 YoY': '%',
     'Sahm Rule 침체지표': '%p', 'GDPNow 성장률': '%',
+    '미 회사채 발행액': '$B',
     '은행 대출태도지수 (C&I)': '%',   # FRED DRTSCILM = Net Percentage of Banks Tightening
     # IMMIGRATION (출입국·체류)
     '외국인 입국자': '만명', '국민 출국자': '만명', '체류외국인 총계': '만명',
@@ -1932,6 +1934,8 @@ def _build_combined_chart_section():
                 {'display': '체류외국인 총계',          'csv': '체류외국인 총계',          'color': '#00A896'},
                 {'display': '체류외국인 취업 (E)',       'csv': '체류외국인 취업(E)',       'color': '#02C39A'},
                 {'display': '체류외국인 유학 (D2·D4)',   'csv': '체류외국인 유학(D2·D4)',   'color': '#679436'},
+                # 금투협 채권정보센터 발행통계 (fetch_corp_bond_issuance.py, 월별 억원)
+                {'display': '회사채 발행액',             'csv': '회사채 발행액',             'color': '#C62828'},
             ]},
             {'label': 'MACRO', 'country': 'US', 'series': [
                 # FRED 미국 매크로 (fetch_fred_data.py; 월·분기 FRED_MACRO는 5년 임베드 창,
@@ -1964,6 +1968,8 @@ def _build_combined_chart_section():
                 {'display': '미시간 소비자심리',            'csv': '미시간 소비자심리',            'color': '#90A4AE'},
                 {'display': 'Sahm Rule 침체지표',        'csv': '미 Sahm Rule 침체지표',        'color': '#A7B8C2'},
                 {'display': 'GDPNow 성장률',             'csv': '미 GDPNow 성장률',             'color': '#BCC9D1'},
+                # SIFMA 회사채 발행액 (fetch_corp_bond_issuance.py, 월별 $B)
+                {'display': '미 회사채 발행액', 'label': '회사채 발행액', 'csv': '미 회사채 발행액', 'color': '#C2185B'},
             ]},
             {'label': 'CREDIT', 'country': 'Korea', 'series': [
                 # ECOS 신용 (5년 임베드 창, fetch_ecos_data.py)
@@ -2092,7 +2098,8 @@ def _build_combined_chart_section():
         if '데이터 타입' in df.columns:
             long_mask = df['데이터 타입'].isin(['ECOS_MACRO', 'ECOS_SECTOR', 'FRED_MACRO', 'FRED_SECTOR',
                                                 'NPS_FUND', 'KOSIS_PENSION', 'KOSIS_MACRO', 'KOSIS_SECTOR', 'JP_CAPEX',
-                                                'IMMIGRATION', 'ISM_MACRO'])
+                                                'IMMIGRATION', 'ISM_MACRO',
+                                                'BOND_ISSUANCE_US', 'BOND_ISSUANCE_KR'])
             # 연간 시리즈(퇴직연금 등)는 5년 창이면 4점뿐 → 창 제한 없이 전체 임베드 (행 수 미미)
             full_mask = df['데이터 타입'].isin(['KOSIS_PENSION'])
         else:
