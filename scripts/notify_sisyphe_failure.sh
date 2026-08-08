@@ -6,6 +6,7 @@ ENV_FILE="${ENV_FILE:-$(cd "$(dirname "$0")/.." && pwd)/.env}"  # self-locate
 # launchd wrapper(run_timer_job.sh notify_failure / 봇 supervision)가 잡 이름을 첫 인자로 호출.
 # (구 systemd OnFailure %i 인터페이스 유지 — 2026-07-13 문구를 맥미니 launchd 기준으로 전환)
 UNIT="${1:-sisyphe-bot}"
+DETAIL="${2:-}"   # 선택 인자: 실패 사유 한 줄. 메시지 끝에 코드블록으로 덧붙인다.
 LOG_DIR='~/Antigravity_Market_Dashboard/logs/launchd'
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -182,6 +183,9 @@ case "$UNIT" in
   send-advisory-emails)
     TEXT="⚠️ <b>자문지 메일 폴러 실패</b>%0AGitHub 요청 조회 연속 실패(약 10분 지속) 또는 발송 오류입니다.%0A%0A<code>tail -n 50 ${LOG_DIR}/send-advisory-emails.err</code>"
     ;;
+  map-weekly)
+    TEXT="🗺️ <b>시스템 지도 주간 보정 실패</b>%0A일요일 22:10 crontab 잡(weekly_map_update.sh)이 중단되었습니다.%0A지도가 몇 주씩 조용히 낡는 것을 막기 위한 알림입니다.%0A%0A<code>tail -n 40 ~/tmp/map_update.log</code>"
+    ;;
   *)
     # 알 수 없는 잡 이름이라도 누락 없이 알림 (체인 게이트 'name: chain-timeout(...)' 형식 포함)
     JOB="${UNIT%%:*}"
@@ -190,6 +194,12 @@ case "$UNIT" in
 esac
 
 TEXT="${TEXT}${GATE_NOTE}${SUP_NOTE}"
+
+# 상세 사유. 본문은 x-www-form-urlencoded 로 실려가므로 & = % + # 와 HTML 꺾쇠는 제거한다.
+if [ -n "$DETAIL" ]; then
+  DETAIL_SAFE="$(printf '%s' "$DETAIL" | tr -d '&=%+#<>' | tr '\n' ' ' | cut -c1-300)"
+  [ -n "$DETAIL_SAFE" ] && TEXT="${TEXT}%0A%0A<code>${DETAIL_SAFE}</code>"
+fi
 
 if [ -n "$DRYRUN" ]; then
   echo "[notify] DRYRUN 발송(상태 불변): ${TEXT}"
