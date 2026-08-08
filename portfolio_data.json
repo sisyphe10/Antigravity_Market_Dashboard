@@ -55,6 +55,24 @@
       "is_today_new": false
     },
     {
+      "code": "035420",
+      "name": "NAVER",
+      "sector": "소프트웨어",
+      "market_cap": 329583,
+      "weight": 4.0,
+      "weight_prev": 4.0,
+      "today_return": -7.079646017699115,
+      "contribution": -2.831858407079646,
+      "ytd_return": -13.4020618556701,
+      "cumulative_return": -4.164289788933262,
+      "current_price": 210000.0,
+      "price_date": "2026-08-07",
+      "ath_price": 454000.0,
+      "dd": -53.74449339207048,
+      "rsi": 7.264225469312491,
+      "is_today_new": false
+    },
+    {
       "code": "402340",
       "name": "SK스퀘어",
       "sector": "상사,자본재",
@@ -73,21 +91,21 @@
       "is_today_new": false
     },
     {
-      "code": "035420",
-      "name": "NAVER",
-      "sector": "소프트웨어",
-      "market_cap": 329583,
-      "weight": 4.0,
+      "code": "196170",
+      "name": "알테오젠",
+      "sector": "건강관리",
+      "market_cap": 163438,
+      "weight": 3.0,
       "weight_prev": 3.0,
-      "today_return": -7.079646017699115,
-      "contribution": -2.1238938053097343,
-      "ytd_return": -13.4020618556701,
-      "cumulative_return": -5.476369092273059,
-      "current_price": 210000.0,
+      "today_return": 3.9182282793867125,
+      "contribution": 1.1754684838160139,
+      "ytd_return": -11.816068557946958,
+      "cumulative_return": 9.058402860548265,
+      "current_price": 305000.0,
       "price_date": "2026-08-07",
-      "ath_price": 454000.0,
-      "dd": -53.74449339207048,
-      "rsi": 7.264225469312491,
+      "ath_price": 430123.0,
+      "dd": -29.090050985415804,
+      "rsi": 11.915117822672471,
       "is_today_new": false
     },
     {
@@ -109,34 +127,16 @@
       "is_today_new": false
     },
     {
-      "code": "196170",
-      "name": "알테오젠",
-      "sector": "건강관리",
-      "market_cap": 163438,
-      "weight": 3.0,
-      "weight_prev": 2.0,
-      "today_return": 3.9182282793867125,
-      "contribution": 0.7836456558773425,
-      "ytd_return": -11.816068557946958,
-      "cumulative_return": 14.232209737827706,
-      "current_price": 305000.0,
-      "price_date": "2026-08-07",
-      "ath_price": 430123.0,
-      "dd": -29.090050985415804,
-      "rsi": 11.915117822672471,
-      "is_today_new": false
-    },
-    {
       "code": "003230",
       "name": "삼양식품",
       "sector": "필수소비재",
       "market_cap": 98381,
       "weight": 3.0,
-      "weight_prev": 2.0,
+      "weight_prev": 3.0,
       "today_return": 5.920519059205191,
-      "contribution": 1.184103811841038,
+      "contribution": 1.7761557177615572,
       "ytd_return": 6.092607636068248,
-      "cumulative_return": -9.24252953439889,
+      "cumulative_return": -6.35755258126196,
       "current_price": 1306000.0,
       "price_date": "2026-08-07",
       "ath_price": 1630000.0,
@@ -145,39 +145,57 @@
       "is_today_new": false
     },
     {
+      "code": "010060",
+      "name": "OCI홀딩스",
+      "sector": "화학",
+      "market_cap": 50876,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 11.68032786885246,
+      "contribution": 3.504098360655738,
+      "ytd_return": 136.54513888888889,
+      "cumulative_return": 0.0,
+      "current_price": 272500.0,
+      "price_date": "2026-08-07",
+      "ath_price": 388000.0,
+      "dd": -29.768041237113408,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
+      "code": "128940",
+      "name": "한미약품",
+      "sector": "건강관리",
+      "market_cap": 50283,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 0.3836317135549872,
+      "contribution": 0.11508951406649617,
+      "ytd_return": -13.163716814159287,
+      "cumulative_return": 0.0,
+      "current_price": 392500.0,
+      "price_date": "2026-08-07",
+      "ath_price": 681979.0,
+      "dd": -42.4469081892551,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "298380",
       "name": "에이비엘바이오",
       "sector": "건강관리",
       "market_cap": 48485,
       "weight": 3.0,
-      "weight_prev": 2.0,
+      "weight_prev": 3.0,
       "today_return": 3.961584633853541,
-      "contribution": 0.7923169267707083,
+      "contribution": 1.1884753901560623,
       "ytd_return": -56.699999999999996,
-      "cumulative_return": 7.7114427860696555,
+      "cumulative_return": 5.012126111560211,
       "current_price": 86600.0,
       "price_date": "2026-08-07",
       "ath_price": 245500.0,
       "dd": -64.72505091649694,
       "rsi": 5.394350870914422,
-      "is_today_new": false
-    },
-    {
-      "code": "131970",
-      "name": "두산테스나",
-      "sector": "반도체",
-      "market_cap": 12311,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -4.2105263157894735,
-      "contribution": -0.8421052631578948,
-      "ytd_return": 19.736842105263165,
-      "cumulative_return": -0.6240249609984372,
-      "current_price": 63700.0,
-      "price_date": "2026-08-07",
-      "ath_price": 190100.0,
-      "dd": -66.49132035770646,
-      "rsi": -11.606852570201498,
       "is_today_new": false
     },
     {
@@ -196,42 +214,6 @@
       "ath_price": 52300.0,
       "dd": 0.0,
       "rsi": 31.91334725418491,
-      "is_today_new": false
-    },
-    {
-      "code": "010060",
-      "name": "OCI홀딩스",
-      "sector": "화학",
-      "market_cap": 50876,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": 11.68032786885246,
-      "contribution": 0.0,
-      "ytd_return": 136.54513888888889,
-      "cumulative_return": null,
-      "current_price": 272500.0,
-      "price_date": "2026-08-07",
-      "ath_price": 388000.0,
-      "dd": -29.768041237113408,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "128940",
-      "name": "한미약품",
-      "sector": "건강관리",
-      "market_cap": 50283,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": 0.3836317135549872,
-      "contribution": 0.0,
-      "ytd_return": -13.163716814159287,
-      "cumulative_return": null,
-      "current_price": 392500.0,
-      "price_date": "2026-08-07",
-      "ath_price": 681979.0,
-      "dd": -42.4469081892551,
-      "rsi": null,
       "is_today_new": false
     }
   ],
@@ -291,6 +273,24 @@
       "is_today_new": false
     },
     {
+      "code": "035420",
+      "name": "NAVER",
+      "sector": "소프트웨어",
+      "market_cap": 329583,
+      "weight": 4.0,
+      "weight_prev": 4.0,
+      "today_return": -7.079646017699115,
+      "contribution": -2.831858407079646,
+      "ytd_return": -13.4020618556701,
+      "cumulative_return": -4.164289788933262,
+      "current_price": 210000.0,
+      "price_date": "2026-08-07",
+      "ath_price": 454000.0,
+      "dd": -53.74449339207048,
+      "rsi": 7.264225469312491,
+      "is_today_new": false
+    },
+    {
       "code": "402340",
       "name": "SK스퀘어",
       "sector": "상사,자본재",
@@ -309,21 +309,21 @@
       "is_today_new": false
     },
     {
-      "code": "035420",
-      "name": "NAVER",
-      "sector": "소프트웨어",
-      "market_cap": 329583,
-      "weight": 4.0,
+      "code": "196170",
+      "name": "알테오젠",
+      "sector": "건강관리",
+      "market_cap": 163438,
+      "weight": 3.0,
       "weight_prev": 3.0,
-      "today_return": -7.079646017699115,
-      "contribution": -2.1238938053097343,
-      "ytd_return": -13.4020618556701,
-      "cumulative_return": -5.476369092273059,
-      "current_price": 210000.0,
+      "today_return": 3.9182282793867125,
+      "contribution": 1.1754684838160139,
+      "ytd_return": -11.816068557946958,
+      "cumulative_return": 9.058402860548265,
+      "current_price": 305000.0,
       "price_date": "2026-08-07",
-      "ath_price": 454000.0,
-      "dd": -53.74449339207048,
-      "rsi": 7.264225469312491,
+      "ath_price": 430123.0,
+      "dd": -29.090050985415804,
+      "rsi": 11.915117822672471,
       "is_today_new": false
     },
     {
@@ -345,34 +345,16 @@
       "is_today_new": false
     },
     {
-      "code": "196170",
-      "name": "알테오젠",
-      "sector": "건강관리",
-      "market_cap": 163438,
-      "weight": 3.0,
-      "weight_prev": 2.0,
-      "today_return": 3.9182282793867125,
-      "contribution": 0.7836456558773425,
-      "ytd_return": -11.816068557946958,
-      "cumulative_return": 14.232209737827706,
-      "current_price": 305000.0,
-      "price_date": "2026-08-07",
-      "ath_price": 430123.0,
-      "dd": -29.090050985415804,
-      "rsi": 11.915117822672471,
-      "is_today_new": false
-    },
-    {
       "code": "003230",
       "name": "삼양식품",
       "sector": "필수소비재",
       "market_cap": 98381,
       "weight": 3.0,
-      "weight_prev": 2.0,
+      "weight_prev": 3.0,
       "today_return": 5.920519059205191,
-      "contribution": 1.184103811841038,
+      "contribution": 1.7761557177615572,
       "ytd_return": 6.092607636068248,
-      "cumulative_return": -9.24252953439889,
+      "cumulative_return": -6.35755258126196,
       "current_price": 1306000.0,
       "price_date": "2026-08-07",
       "ath_price": 1630000.0,
@@ -381,39 +363,57 @@
       "is_today_new": false
     },
     {
+      "code": "010060",
+      "name": "OCI홀딩스",
+      "sector": "화학",
+      "market_cap": 50876,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 11.68032786885246,
+      "contribution": 3.504098360655738,
+      "ytd_return": 136.54513888888889,
+      "cumulative_return": 0.0,
+      "current_price": 272500.0,
+      "price_date": "2026-08-07",
+      "ath_price": 388000.0,
+      "dd": -29.768041237113408,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
+      "code": "128940",
+      "name": "한미약품",
+      "sector": "건강관리",
+      "market_cap": 50283,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 0.3836317135549872,
+      "contribution": 0.11508951406649617,
+      "ytd_return": -13.163716814159287,
+      "cumulative_return": 0.0,
+      "current_price": 392500.0,
+      "price_date": "2026-08-07",
+      "ath_price": 681979.0,
+      "dd": -42.4469081892551,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "298380",
       "name": "에이비엘바이오",
       "sector": "건강관리",
       "market_cap": 48485,
       "weight": 3.0,
-      "weight_prev": 2.0,
+      "weight_prev": 3.0,
       "today_return": 3.961584633853541,
-      "contribution": 0.7923169267707083,
+      "contribution": 1.1884753901560623,
       "ytd_return": -56.699999999999996,
-      "cumulative_return": 7.7114427860696555,
+      "cumulative_return": 5.012126111560211,
       "current_price": 86600.0,
       "price_date": "2026-08-07",
       "ath_price": 245500.0,
       "dd": -64.72505091649694,
       "rsi": 5.394350870914422,
-      "is_today_new": false
-    },
-    {
-      "code": "131970",
-      "name": "두산테스나",
-      "sector": "반도체",
-      "market_cap": 12311,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -4.2105263157894735,
-      "contribution": -0.8421052631578948,
-      "ytd_return": 19.736842105263165,
-      "cumulative_return": -0.6240249609984372,
-      "current_price": 63700.0,
-      "price_date": "2026-08-07",
-      "ath_price": 190100.0,
-      "dd": -66.49132035770646,
-      "rsi": -11.606852570201498,
       "is_today_new": false
     },
     {
@@ -432,42 +432,6 @@
       "ath_price": 52300.0,
       "dd": 0.0,
       "rsi": 31.91334725418491,
-      "is_today_new": false
-    },
-    {
-      "code": "010060",
-      "name": "OCI홀딩스",
-      "sector": "화학",
-      "market_cap": 50876,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": 11.68032786885246,
-      "contribution": 0.0,
-      "ytd_return": 136.54513888888889,
-      "cumulative_return": null,
-      "current_price": 272500.0,
-      "price_date": "2026-08-07",
-      "ath_price": 388000.0,
-      "dd": -29.768041237113408,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
-      "code": "128940",
-      "name": "한미약품",
-      "sector": "건강관리",
-      "market_cap": 50283,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": 0.3836317135549872,
-      "contribution": 0.0,
-      "ytd_return": -13.163716814159287,
-      "cumulative_return": null,
-      "current_price": 392500.0,
-      "price_date": "2026-08-07",
-      "ath_price": 681979.0,
-      "dd": -42.4469081892551,
-      "rsi": null,
       "is_today_new": false
     }
   ],
@@ -527,6 +491,24 @@
       "is_today_new": false
     },
     {
+      "code": "035420",
+      "name": "NAVER",
+      "sector": "소프트웨어",
+      "market_cap": 329583,
+      "weight": 4.0,
+      "weight_prev": 4.0,
+      "today_return": -7.079646017699115,
+      "contribution": -2.831858407079646,
+      "ytd_return": -13.4020618556701,
+      "cumulative_return": -4.164289788933262,
+      "current_price": 210000.0,
+      "price_date": "2026-08-07",
+      "ath_price": 454000.0,
+      "dd": -53.74449339207048,
+      "rsi": 7.264225469312491,
+      "is_today_new": false
+    },
+    {
       "code": "402340",
       "name": "SK스퀘어",
       "sector": "상사,자본재",
@@ -545,21 +527,21 @@
       "is_today_new": false
     },
     {
-      "code": "035420",
-      "name": "NAVER",
-      "sector": "소프트웨어",
-      "market_cap": 329583,
-      "weight": 4.0,
+      "code": "196170",
+      "name": "알테오젠",
+      "sector": "건강관리",
+      "market_cap": 163438,
+      "weight": 3.0,
       "weight_prev": 3.0,
-      "today_return": -7.079646017699115,
-      "contribution": -2.1238938053097343,
-      "ytd_return": -13.4020618556701,
-      "cumulative_return": -5.476369092273059,
-      "current_price": 210000.0,
+      "today_return": 3.9182282793867125,
+      "contribution": 1.1754684838160139,
+      "ytd_return": -11.816068557946958,
+      "cumulative_return": 9.058402860548265,
+      "current_price": 305000.0,
       "price_date": "2026-08-07",
-      "ath_price": 454000.0,
-      "dd": -53.74449339207048,
-      "rsi": 7.264225469312491,
+      "ath_price": 430123.0,
+      "dd": -29.090050985415804,
+      "rsi": 11.915117822672471,
       "is_today_new": false
     },
     {
@@ -581,34 +563,16 @@
       "is_today_new": false
     },
     {
-      "code": "196170",
-      "name": "알테오젠",
-      "sector": "건강관리",
-      "market_cap": 163438,
-      "weight": 3.0,
-      "weight_prev": 2.0,
-      "today_return": 3.9182282793867125,
-      "contribution": 0.7836456558773425,
-      "ytd_return": -11.816068557946958,
-      "cumulative_return": 14.232209737827706,
-      "current_price": 305000.0,
-      "price_date": "2026-08-07",
-      "ath_price": 430123.0,
-      "dd": -29.090050985415804,
-      "rsi": 11.915117822672471,
-      "is_today_new": false
-    },
-    {
       "code": "003230",
       "name": "삼양식품",
       "sector": "필수소비재",
       "market_cap": 98381,
       "weight": 3.0,
-      "weight_prev": 2.0,
+      "weight_prev": 3.0,
       "today_return": 5.920519059205191,
-      "contribution": 1.184103811841038,
+      "contribution": 1.7761557177615572,
       "ytd_return": 6.092607636068248,
-      "cumulative_return": 7.049180327868854,
+      "cumulative_return": 4.591564335290976,
       "current_price": 1306000.0,
       "price_date": "2026-08-07",
       "ath_price": 1630000.0,
@@ -617,39 +581,57 @@
       "is_today_new": false
     },
     {
+      "code": "010060",
+      "name": "OCI홀딩스",
+      "sector": "화학",
+      "market_cap": 50876,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 11.68032786885246,
+      "contribution": 3.504098360655738,
+      "ytd_return": 136.54513888888889,
+      "cumulative_return": 0.0,
+      "current_price": 272500.0,
+      "price_date": "2026-08-07",
+      "ath_price": 388000.0,
+      "dd": -29.768041237113408,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
+      "code": "128940",
+      "name": "한미약품",
+      "sector": "건강관리",
+      "market_cap": 50283,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 0.3836317135549872,
+      "contribution": 0.11508951406649617,
+      "ytd_return": -13.163716814159287,
+      "cumulative_return": 0.0,
+      "current_price": 392500.0,
+      "price_date": "2026-08-07",
+      "ath_price": 681979.0,
+      "dd": -42.4469081892551,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "298380",
       "name": "에이비엘바이오",
       "sector": "건강관리",
       "market_cap": 48485,
       "weight": 3.0,
-      "weight_prev": 2.0,
+      "weight_prev": 3.0,
       "today_return": 3.961584633853541,
-      "contribution": 0.7923169267707083,
+      "contribution": 1.1884753901560623,
       "ytd_return": -56.699999999999996,
-      "cumulative_return": 7.7114427860696555,
+      "cumulative_return": 5.012126111560211,
       "current_price": 86600.0,
       "price_date": "2026-08-07",
       "ath_price": 245500.0,
       "dd": -64.72505091649694,
       "rsi": 5.394350870914422,
-      "is_today_new": false
-    },
-    {
-      "code": "131970",
-      "name": "두산테스나",
-      "sector": "반도체",
-      "market_cap": 12311,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -4.2105263157894735,
-      "contribution": -0.8421052631578948,
-      "ytd_return": 19.736842105263165,
-      "cumulative_return": -0.6240249609984372,
-      "current_price": 63700.0,
-      "price_date": "2026-08-07",
-      "ath_price": 190100.0,
-      "dd": -66.49132035770646,
-      "rsi": -11.606852570201498,
       "is_today_new": false
     },
     {
@@ -669,42 +651,6 @@
       "dd": 0.0,
       "rsi": 31.91334725418491,
       "is_today_new": false
-    },
-    {
-      "code": "010060",
-      "name": "OCI홀딩스",
-      "sector": "화학",
-      "market_cap": 50876,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": 136.54513888888889,
-      "cumulative_return": null,
-      "current_price": 272500.0,
-      "price_date": "2026-08-07",
-      "ath_price": 388000.0,
-      "dd": -29.768041237113408,
-      "rsi": null,
-      "is_today_new": true
-    },
-    {
-      "code": "128940",
-      "name": "한미약품",
-      "sector": "건강관리",
-      "market_cap": 50283,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": -13.163716814159287,
-      "cumulative_return": null,
-      "current_price": 392500.0,
-      "price_date": "2026-08-07",
-      "ath_price": 681979.0,
-      "dd": -42.4469081892551,
-      "rsi": null,
-      "is_today_new": true
     }
   ],
   "DB 목표전환형 6차": [
@@ -763,6 +709,24 @@
       "is_today_new": false
     },
     {
+      "code": "035420",
+      "name": "NAVER",
+      "sector": "소프트웨어",
+      "market_cap": 329583,
+      "weight": 4.0,
+      "weight_prev": 4.0,
+      "today_return": -7.079646017699115,
+      "contribution": -2.831858407079646,
+      "ytd_return": -13.4020618556701,
+      "cumulative_return": -4.164289788933262,
+      "current_price": 210000.0,
+      "price_date": "2026-08-07",
+      "ath_price": 454000.0,
+      "dd": -53.74449339207048,
+      "rsi": 7.264225469312491,
+      "is_today_new": false
+    },
+    {
       "code": "402340",
       "name": "SK스퀘어",
       "sector": "상사,자본재",
@@ -781,21 +745,21 @@
       "is_today_new": false
     },
     {
-      "code": "035420",
-      "name": "NAVER",
-      "sector": "소프트웨어",
-      "market_cap": 329583,
-      "weight": 4.0,
+      "code": "196170",
+      "name": "알테오젠",
+      "sector": "건강관리",
+      "market_cap": 163438,
+      "weight": 3.0,
       "weight_prev": 3.0,
-      "today_return": -7.079646017699115,
-      "contribution": -2.1238938053097343,
-      "ytd_return": -13.4020618556701,
-      "cumulative_return": -5.476369092273059,
-      "current_price": 210000.0,
+      "today_return": 3.9182282793867125,
+      "contribution": 1.1754684838160139,
+      "ytd_return": -11.816068557946958,
+      "cumulative_return": 9.058402860548265,
+      "current_price": 305000.0,
       "price_date": "2026-08-07",
-      "ath_price": 454000.0,
-      "dd": -53.74449339207048,
-      "rsi": 7.264225469312491,
+      "ath_price": 430123.0,
+      "dd": -29.090050985415804,
+      "rsi": 11.915117822672471,
       "is_today_new": false
     },
     {
@@ -817,34 +781,16 @@
       "is_today_new": false
     },
     {
-      "code": "196170",
-      "name": "알테오젠",
-      "sector": "건강관리",
-      "market_cap": 163438,
-      "weight": 3.0,
-      "weight_prev": 2.0,
-      "today_return": 3.9182282793867125,
-      "contribution": 0.7836456558773425,
-      "ytd_return": -11.816068557946958,
-      "cumulative_return": 14.232209737827706,
-      "current_price": 305000.0,
-      "price_date": "2026-08-07",
-      "ath_price": 430123.0,
-      "dd": -29.090050985415804,
-      "rsi": 11.915117822672471,
-      "is_today_new": false
-    },
-    {
       "code": "003230",
       "name": "삼양식품",
       "sector": "필수소비재",
       "market_cap": 98381,
       "weight": 3.0,
-      "weight_prev": 2.0,
+      "weight_prev": 3.0,
       "today_return": 5.920519059205191,
-      "contribution": 1.184103811841038,
+      "contribution": 1.7761557177615572,
       "ytd_return": 6.092607636068248,
-      "cumulative_return": 7.049180327868854,
+      "cumulative_return": 4.591564335290976,
       "current_price": 1306000.0,
       "price_date": "2026-08-07",
       "ath_price": 1630000.0,
@@ -853,39 +799,57 @@
       "is_today_new": false
     },
     {
+      "code": "010060",
+      "name": "OCI홀딩스",
+      "sector": "화학",
+      "market_cap": 50876,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 11.68032786885246,
+      "contribution": 3.504098360655738,
+      "ytd_return": 136.54513888888889,
+      "cumulative_return": 0.0,
+      "current_price": 272500.0,
+      "price_date": "2026-08-07",
+      "ath_price": 388000.0,
+      "dd": -29.768041237113408,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
+      "code": "128940",
+      "name": "한미약품",
+      "sector": "건강관리",
+      "market_cap": 50283,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 0.3836317135549872,
+      "contribution": 0.11508951406649617,
+      "ytd_return": -13.163716814159287,
+      "cumulative_return": 0.0,
+      "current_price": 392500.0,
+      "price_date": "2026-08-07",
+      "ath_price": 681979.0,
+      "dd": -42.4469081892551,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "298380",
       "name": "에이비엘바이오",
       "sector": "건강관리",
       "market_cap": 48485,
       "weight": 3.0,
-      "weight_prev": 2.0,
+      "weight_prev": 3.0,
       "today_return": 3.961584633853541,
-      "contribution": 0.7923169267707083,
+      "contribution": 1.1884753901560623,
       "ytd_return": -56.699999999999996,
-      "cumulative_return": 7.7114427860696555,
+      "cumulative_return": 5.012126111560211,
       "current_price": 86600.0,
       "price_date": "2026-08-07",
       "ath_price": 245500.0,
       "dd": -64.72505091649694,
       "rsi": 5.394350870914422,
-      "is_today_new": false
-    },
-    {
-      "code": "131970",
-      "name": "두산테스나",
-      "sector": "반도체",
-      "market_cap": 12311,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -4.2105263157894735,
-      "contribution": -0.8421052631578948,
-      "ytd_return": 19.736842105263165,
-      "cumulative_return": -0.6240249609984372,
-      "current_price": 63700.0,
-      "price_date": "2026-08-07",
-      "ath_price": 190100.0,
-      "dd": -66.49132035770646,
-      "rsi": -11.606852570201498,
       "is_today_new": false
     },
     {
@@ -905,42 +869,6 @@
       "dd": 0.0,
       "rsi": 31.91334725418491,
       "is_today_new": false
-    },
-    {
-      "code": "010060",
-      "name": "OCI홀딩스",
-      "sector": "화학",
-      "market_cap": 50876,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": 136.54513888888889,
-      "cumulative_return": null,
-      "current_price": 272500.0,
-      "price_date": "2026-08-07",
-      "ath_price": 388000.0,
-      "dd": -29.768041237113408,
-      "rsi": null,
-      "is_today_new": true
-    },
-    {
-      "code": "128940",
-      "name": "한미약품",
-      "sector": "건강관리",
-      "market_cap": 50283,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": -13.163716814159287,
-      "cumulative_return": null,
-      "current_price": 392500.0,
-      "price_date": "2026-08-07",
-      "ath_price": 681979.0,
-      "dd": -42.4469081892551,
-      "rsi": null,
-      "is_today_new": true
     }
   ],
   "한투 지속형": [
@@ -999,6 +927,24 @@
       "is_today_new": false
     },
     {
+      "code": "035420",
+      "name": "NAVER",
+      "sector": "소프트웨어",
+      "market_cap": 329583,
+      "weight": 4.0,
+      "weight_prev": 4.0,
+      "today_return": -7.079646017699115,
+      "contribution": -2.831858407079646,
+      "ytd_return": -13.4020618556701,
+      "cumulative_return": -4.164289788933262,
+      "current_price": 210000.0,
+      "price_date": "2026-08-07",
+      "ath_price": 454000.0,
+      "dd": -53.74449339207048,
+      "rsi": 7.264225469312491,
+      "is_today_new": false
+    },
+    {
       "code": "402340",
       "name": "SK스퀘어",
       "sector": "상사,자본재",
@@ -1017,21 +963,21 @@
       "is_today_new": false
     },
     {
-      "code": "035420",
-      "name": "NAVER",
-      "sector": "소프트웨어",
-      "market_cap": 329583,
-      "weight": 4.0,
+      "code": "196170",
+      "name": "알테오젠",
+      "sector": "건강관리",
+      "market_cap": 163438,
+      "weight": 3.0,
       "weight_prev": 3.0,
-      "today_return": -7.079646017699115,
-      "contribution": -2.1238938053097343,
-      "ytd_return": -13.4020618556701,
-      "cumulative_return": -5.476369092273059,
-      "current_price": 210000.0,
+      "today_return": 3.9182282793867125,
+      "contribution": 1.1754684838160139,
+      "ytd_return": -11.816068557946958,
+      "cumulative_return": 9.058402860548265,
+      "current_price": 305000.0,
       "price_date": "2026-08-07",
-      "ath_price": 454000.0,
-      "dd": -53.74449339207048,
-      "rsi": 7.264225469312491,
+      "ath_price": 430123.0,
+      "dd": -29.090050985415804,
+      "rsi": 11.915117822672471,
       "is_today_new": false
     },
     {
@@ -1053,34 +999,16 @@
       "is_today_new": false
     },
     {
-      "code": "196170",
-      "name": "알테오젠",
-      "sector": "건강관리",
-      "market_cap": 163438,
-      "weight": 3.0,
-      "weight_prev": 2.0,
-      "today_return": 3.9182282793867125,
-      "contribution": 0.7836456558773425,
-      "ytd_return": -11.816068557946958,
-      "cumulative_return": 14.232209737827706,
-      "current_price": 305000.0,
-      "price_date": "2026-08-07",
-      "ath_price": 430123.0,
-      "dd": -29.090050985415804,
-      "rsi": 11.915117822672471,
-      "is_today_new": false
-    },
-    {
       "code": "003230",
       "name": "삼양식품",
       "sector": "필수소비재",
       "market_cap": 98381,
       "weight": 3.0,
-      "weight_prev": 2.0,
+      "weight_prev": 3.0,
       "today_return": 5.920519059205191,
-      "contribution": 1.184103811841038,
+      "contribution": 1.7761557177615572,
       "ytd_return": 6.092607636068248,
-      "cumulative_return": 17.657657657657655,
+      "cumulative_return": 11.117413499716399,
       "current_price": 1306000.0,
       "price_date": "2026-08-07",
       "ath_price": 1630000.0,
@@ -1089,39 +1017,57 @@
       "is_today_new": false
     },
     {
+      "code": "010060",
+      "name": "OCI홀딩스",
+      "sector": "화학",
+      "market_cap": 50876,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 11.68032786885246,
+      "contribution": 3.504098360655738,
+      "ytd_return": 136.54513888888889,
+      "cumulative_return": 0.0,
+      "current_price": 272500.0,
+      "price_date": "2026-08-07",
+      "ath_price": 388000.0,
+      "dd": -29.768041237113408,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
+      "code": "128940",
+      "name": "한미약품",
+      "sector": "건강관리",
+      "market_cap": 50283,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 0.3836317135549872,
+      "contribution": 0.11508951406649617,
+      "ytd_return": -13.163716814159287,
+      "cumulative_return": 0.0,
+      "current_price": 392500.0,
+      "price_date": "2026-08-07",
+      "ath_price": 681979.0,
+      "dd": -42.4469081892551,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "298380",
       "name": "에이비엘바이오",
       "sector": "건강관리",
       "market_cap": 48485,
       "weight": 3.0,
-      "weight_prev": 2.0,
+      "weight_prev": 3.0,
       "today_return": 3.961584633853541,
-      "contribution": 0.7923169267707083,
+      "contribution": 1.1884753901560623,
       "ytd_return": -56.699999999999996,
-      "cumulative_return": 7.7114427860696555,
+      "cumulative_return": 5.012126111560211,
       "current_price": 86600.0,
       "price_date": "2026-08-07",
       "ath_price": 245500.0,
       "dd": -64.72505091649694,
       "rsi": 5.394350870914422,
-      "is_today_new": false
-    },
-    {
-      "code": "131970",
-      "name": "두산테스나",
-      "sector": "반도체",
-      "market_cap": 12311,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -4.2105263157894735,
-      "contribution": -0.8421052631578948,
-      "ytd_return": 19.736842105263165,
-      "cumulative_return": -0.6240249609984372,
-      "current_price": 63700.0,
-      "price_date": "2026-08-07",
-      "ath_price": 190100.0,
-      "dd": -66.49132035770646,
-      "rsi": -11.606852570201498,
       "is_today_new": false
     },
     {
@@ -1141,42 +1087,6 @@
       "dd": 0.0,
       "rsi": 31.91334725418491,
       "is_today_new": false
-    },
-    {
-      "code": "010060",
-      "name": "OCI홀딩스",
-      "sector": "화학",
-      "market_cap": 50876,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": 136.54513888888889,
-      "cumulative_return": null,
-      "current_price": 272500.0,
-      "price_date": "2026-08-07",
-      "ath_price": 388000.0,
-      "dd": -29.768041237113408,
-      "rsi": null,
-      "is_today_new": true
-    },
-    {
-      "code": "128940",
-      "name": "한미약품",
-      "sector": "건강관리",
-      "market_cap": 50283,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": -13.163716814159287,
-      "cumulative_return": null,
-      "current_price": 392500.0,
-      "price_date": "2026-08-07",
-      "ath_price": 681979.0,
-      "dd": -42.4469081892551,
-      "rsi": null,
-      "is_today_new": true
     }
   ],
   "한투 성과모집형 1차": [
@@ -1235,6 +1145,24 @@
       "is_today_new": false
     },
     {
+      "code": "035420",
+      "name": "NAVER",
+      "sector": "소프트웨어",
+      "market_cap": 329583,
+      "weight": 4.0,
+      "weight_prev": 4.0,
+      "today_return": -7.079646017699115,
+      "contribution": -2.831858407079646,
+      "ytd_return": -13.4020618556701,
+      "cumulative_return": -4.164289788933262,
+      "current_price": 210000.0,
+      "price_date": "2026-08-07",
+      "ath_price": 454000.0,
+      "dd": -53.74449339207048,
+      "rsi": 7.264225469312491,
+      "is_today_new": false
+    },
+    {
       "code": "402340",
       "name": "SK스퀘어",
       "sector": "상사,자본재",
@@ -1253,21 +1181,21 @@
       "is_today_new": false
     },
     {
-      "code": "035420",
-      "name": "NAVER",
-      "sector": "소프트웨어",
-      "market_cap": 329583,
-      "weight": 4.0,
+      "code": "196170",
+      "name": "알테오젠",
+      "sector": "건강관리",
+      "market_cap": 163438,
+      "weight": 3.0,
       "weight_prev": 3.0,
-      "today_return": -7.079646017699115,
-      "contribution": -2.1238938053097343,
-      "ytd_return": -13.4020618556701,
-      "cumulative_return": -5.476369092273059,
-      "current_price": 210000.0,
+      "today_return": 3.9182282793867125,
+      "contribution": 1.1754684838160139,
+      "ytd_return": -11.816068557946958,
+      "cumulative_return": 9.058402860548265,
+      "current_price": 305000.0,
       "price_date": "2026-08-07",
-      "ath_price": 454000.0,
-      "dd": -53.74449339207048,
-      "rsi": 7.264225469312491,
+      "ath_price": 430123.0,
+      "dd": -29.090050985415804,
+      "rsi": 11.915117822672471,
       "is_today_new": false
     },
     {
@@ -1289,34 +1217,16 @@
       "is_today_new": false
     },
     {
-      "code": "196170",
-      "name": "알테오젠",
-      "sector": "건강관리",
-      "market_cap": 163438,
-      "weight": 3.0,
-      "weight_prev": 2.0,
-      "today_return": 3.9182282793867125,
-      "contribution": 0.7836456558773425,
-      "ytd_return": -11.816068557946958,
-      "cumulative_return": 14.232209737827706,
-      "current_price": 305000.0,
-      "price_date": "2026-08-07",
-      "ath_price": 430123.0,
-      "dd": -29.090050985415804,
-      "rsi": 11.915117822672471,
-      "is_today_new": false
-    },
-    {
       "code": "003230",
       "name": "삼양식품",
       "sector": "필수소비재",
       "market_cap": 98381,
       "weight": 3.0,
-      "weight_prev": 2.0,
+      "weight_prev": 3.0,
       "today_return": 5.920519059205191,
-      "contribution": 1.184103811841038,
+      "contribution": 1.7761557177615572,
       "ytd_return": 6.092607636068248,
-      "cumulative_return": 7.049180327868854,
+      "cumulative_return": 4.591564335290976,
       "current_price": 1306000.0,
       "price_date": "2026-08-07",
       "ath_price": 1630000.0,
@@ -1325,39 +1235,57 @@
       "is_today_new": false
     },
     {
+      "code": "010060",
+      "name": "OCI홀딩스",
+      "sector": "화학",
+      "market_cap": 50876,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 11.68032786885246,
+      "contribution": 3.504098360655738,
+      "ytd_return": 136.54513888888889,
+      "cumulative_return": 0.0,
+      "current_price": 272500.0,
+      "price_date": "2026-08-07",
+      "ath_price": 388000.0,
+      "dd": -29.768041237113408,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
+      "code": "128940",
+      "name": "한미약품",
+      "sector": "건강관리",
+      "market_cap": 50283,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 0.3836317135549872,
+      "contribution": 0.11508951406649617,
+      "ytd_return": -13.163716814159287,
+      "cumulative_return": 0.0,
+      "current_price": 392500.0,
+      "price_date": "2026-08-07",
+      "ath_price": 681979.0,
+      "dd": -42.4469081892551,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "298380",
       "name": "에이비엘바이오",
       "sector": "건강관리",
       "market_cap": 48485,
       "weight": 3.0,
-      "weight_prev": 2.0,
+      "weight_prev": 3.0,
       "today_return": 3.961584633853541,
-      "contribution": 0.7923169267707083,
+      "contribution": 1.1884753901560623,
       "ytd_return": -56.699999999999996,
-      "cumulative_return": 7.7114427860696555,
+      "cumulative_return": 5.012126111560211,
       "current_price": 86600.0,
       "price_date": "2026-08-07",
       "ath_price": 245500.0,
       "dd": -64.72505091649694,
       "rsi": 5.394350870914422,
-      "is_today_new": false
-    },
-    {
-      "code": "131970",
-      "name": "두산테스나",
-      "sector": "반도체",
-      "market_cap": 12311,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -4.2105263157894735,
-      "contribution": -0.8421052631578948,
-      "ytd_return": 19.736842105263165,
-      "cumulative_return": -0.6240249609984372,
-      "current_price": 63700.0,
-      "price_date": "2026-08-07",
-      "ath_price": 190100.0,
-      "dd": -66.49132035770646,
-      "rsi": -11.606852570201498,
       "is_today_new": false
     },
     {
@@ -1377,316 +1305,32 @@
       "dd": 0.0,
       "rsi": 31.91334725418491,
       "is_today_new": false
-    },
-    {
-      "code": "010060",
-      "name": "OCI홀딩스",
-      "sector": "화학",
-      "market_cap": 50876,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": 136.54513888888889,
-      "cumulative_return": null,
-      "current_price": 272500.0,
-      "price_date": "2026-08-07",
-      "ath_price": 388000.0,
-      "dd": -29.768041237113408,
-      "rsi": null,
-      "is_today_new": true
-    },
-    {
-      "code": "128940",
-      "name": "한미약품",
-      "sector": "건강관리",
-      "market_cap": 50283,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": -13.163716814159287,
-      "cumulative_return": null,
-      "current_price": 392500.0,
-      "price_date": "2026-08-07",
-      "ath_price": 681979.0,
-      "dd": -42.4469081892551,
-      "rsi": null,
-      "is_today_new": true
     }
   ],
-  "_order_changes": {
-    "NH 다이내믹 밸류 / DB 개방형": {
-      "date": "2026-08-07",
-      "added": [
-        {
-          "name": "OCI홀딩스",
-          "weight": 3.0
-        },
-        {
-          "name": "한미약품",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "NAVER",
-          "from": 3.0,
-          "to": 4.0
-        },
-        {
-          "name": "삼양식품",
-          "from": 2.0,
-          "to": 3.0
-        },
-        {
-          "name": "알테오젠",
-          "from": 2.0,
-          "to": 3.0
-        },
-        {
-          "name": "에이비엘바이오",
-          "from": 2.0,
-          "to": 3.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "두산테스나",
-          "weight": 2.0
-        }
-      ]
-    },
-    "삼성 트루밸류": {
-      "date": "2026-08-07",
-      "added": [
-        {
-          "name": "OCI홀딩스",
-          "weight": 3.0
-        },
-        {
-          "name": "한미약품",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "NAVER",
-          "from": 3.0,
-          "to": 4.0
-        },
-        {
-          "name": "삼양식품",
-          "from": 2.0,
-          "to": 3.0
-        },
-        {
-          "name": "알테오젠",
-          "from": 2.0,
-          "to": 3.0
-        },
-        {
-          "name": "에이비엘바이오",
-          "from": 2.0,
-          "to": 3.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "두산테스나",
-          "weight": 2.0
-        }
-      ]
-    },
-    "NH 목표전환형 5호": {
-      "date": "2026-08-07",
-      "added": [
-        {
-          "name": "OCI홀딩스",
-          "weight": 3.0
-        },
-        {
-          "name": "한미약품",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "NAVER",
-          "from": 3.0,
-          "to": 4.0
-        },
-        {
-          "name": "삼양식품",
-          "from": 2.0,
-          "to": 3.0
-        },
-        {
-          "name": "알테오젠",
-          "from": 2.0,
-          "to": 3.0
-        },
-        {
-          "name": "에이비엘바이오",
-          "from": 2.0,
-          "to": 3.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "두산테스나",
-          "weight": 2.0
-        }
-      ]
-    },
-    "DB 목표전환형 6차": {
-      "date": "2026-08-07",
-      "added": [
-        {
-          "name": "OCI홀딩스",
-          "weight": 3.0
-        },
-        {
-          "name": "한미약품",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "NAVER",
-          "from": 3.0,
-          "to": 4.0
-        },
-        {
-          "name": "삼양식품",
-          "from": 2.0,
-          "to": 3.0
-        },
-        {
-          "name": "알테오젠",
-          "from": 2.0,
-          "to": 3.0
-        },
-        {
-          "name": "에이비엘바이오",
-          "from": 2.0,
-          "to": 3.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "두산테스나",
-          "weight": 2.0
-        }
-      ]
-    },
-    "한투 지속형": {
-      "date": "2026-08-07",
-      "added": [
-        {
-          "name": "OCI홀딩스",
-          "weight": 3.0
-        },
-        {
-          "name": "한미약품",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "NAVER",
-          "from": 3.0,
-          "to": 4.0
-        },
-        {
-          "name": "삼양식품",
-          "from": 2.0,
-          "to": 3.0
-        },
-        {
-          "name": "알테오젠",
-          "from": 2.0,
-          "to": 3.0
-        },
-        {
-          "name": "에이비엘바이오",
-          "from": 2.0,
-          "to": 3.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "두산테스나",
-          "weight": 2.0
-        }
-      ]
-    },
-    "한투 성과모집형 1차": {
-      "date": "2026-08-07",
-      "added": [
-        {
-          "name": "OCI홀딩스",
-          "weight": 3.0
-        },
-        {
-          "name": "한미약품",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "NAVER",
-          "from": 3.0,
-          "to": 4.0
-        },
-        {
-          "name": "삼양식품",
-          "from": 2.0,
-          "to": 3.0
-        },
-        {
-          "name": "알테오젠",
-          "from": 2.0,
-          "to": 3.0
-        },
-        {
-          "name": "에이비엘바이오",
-          "from": 2.0,
-          "to": 3.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "두산테스나",
-          "weight": 2.0
-        }
-      ]
-    }
-  },
   "_portfolio_meta": {
     "NH 다이내믹 밸류 / DB 개방형": {
-      "nav_ytd_d1": 35.76135198864927,
-      "nav_cum_d1": 168.87399999999997
+      "nav_ytd_d1": 34.02289332437931,
+      "nav_cum_d1": 165.43099999999998
     },
     "삼성 트루밸류": {
-      "nav_ytd_d1": 35.736725193067855,
-      "nav_cum_d1": 174.36599999999999
+      "nav_ytd_d1": 33.998248660522144,
+      "nav_cum_d1": 170.852
     },
     "NH 목표전환형 5호": {
-      "nav_ytd_d1": -30.825999999999997,
-      "nav_cum_d1": -30.825999999999997
+      "nav_ytd_d1": -31.711999999999996,
+      "nav_cum_d1": -31.711999999999996
     },
     "DB 목표전환형 6차": {
-      "nav_ytd_d1": -30.015000000000004,
-      "nav_cum_d1": -30.015000000000004
+      "nav_ytd_d1": -30.911,
+      "nav_cum_d1": -30.911
     },
     "한투 지속형": {
-      "nav_ytd_d1": -22.814999999999998,
-      "nav_cum_d1": -22.814999999999998
+      "nav_ytd_d1": -23.802999999999997,
+      "nav_cum_d1": -23.802999999999997
     },
     "한투 성과모집형 1차": {
-      "nav_ytd_d1": -21.360999999999997,
-      "nav_cum_d1": -21.360999999999997
+      "nav_ytd_d1": -22.368,
+      "nav_cum_d1": -22.368
     }
   },
   "_price_asof": "2026-08-07"
