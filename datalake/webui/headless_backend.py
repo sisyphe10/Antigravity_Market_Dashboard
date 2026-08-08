@@ -176,7 +176,10 @@ def run_question(question, history=None, session_id=None,
                             notional_cost_usd=ev.get("total_cost_usd"),
                             stop_reason=ev.get("stop_reason"))
                 if ev.get("is_error"):
-                    err = ev.get("subtype") or "result_error"
+                    # ★CLI는 인증 만료 같은 실패에서도 subtype='success'를 돌려준다(8/8 실측).
+                    #   그대로 쓰면 실패 알림의 사유가 "success"가 되어 정보가 0이다.
+                    sub = (ev.get("subtype") or "").strip()
+                    err = sub if sub and sub != "success" else "result_error"
 
         if rate_limited:
             meta["rate_limit_event"] = json.dumps(rate_limited, ensure_ascii=False)[:500]
@@ -192,8 +195,14 @@ def run_question(question, history=None, session_id=None,
                     "meta": meta,
                     "error": "CLI가 result 이벤트 없이 종료 (rc=%s): %s" % (proc.returncode, tail)}
         if err or not answer:
+            # 코드값만으로는 원인을 못 읽는다 — 실제 메시지(본문 첫 줄)를 사유에 붙인다.
+            lines = (answer or "").strip().splitlines()
+            detail = lines[0][:300] if lines else ""
+            msg = err or "빈 응답"
+            if detail and detail not in msg:
+                msg = "%s: %s" % (msg, detail)
             return {"ok": False, "status": "failed", "answer": answer, "steps": steps,
-                    "meta": meta, "error": err or "빈 응답"}
+                    "meta": meta, "error": msg}
         return {"ok": True, "status": "succeeded", "answer": answer,
                 "steps": steps, "meta": meta, "error": None}
     finally:

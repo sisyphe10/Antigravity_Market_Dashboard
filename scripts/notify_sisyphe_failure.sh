@@ -197,7 +197,7 @@ TEXT="${TEXT}${GATE_NOTE}${SUP_NOTE}"
 
 # 상세 사유. 본문은 x-www-form-urlencoded 로 실려가므로 & = % + # 와 HTML 꺾쇠는 제거한다.
 if [ -n "$DETAIL" ]; then
-  DETAIL_SAFE="$(printf '%s' "$DETAIL" | tr -d '&=%+#<>' | tr '\n' ' ' | cut -c1-300)"
+  DETAIL_SAFE="$(printf '%s' "$DETAIL" | tr -d '&%+<>' | tr '\n' ' ' | cut -c1-300)"
   [ -n "$DETAIL_SAFE" ] && TEXT="${TEXT}%0A%0A<code>${DETAIL_SAFE}</code>"
 fi
 
