@@ -51,6 +51,13 @@ BIG_LOG_MB="${SELFCHECK_BIG_LOG_MB:-50}"       # note largest log if >= this (MB
 # alerts immediately.
 TIMER_GRACE_S="${SELFCHECK_TIMER_GRACE_S:-7200}"
 
+# Claude 구독 인증(headless 잡 4종 공용: 위키 문답·리서치 태깅·자가치료·지도 주간보정)의
+# refresh 토큰 만료를 미리 경고한다. 2026-08-08 사고: 토큰이 07:20에 조용히 만료돼 넷이
+# 한꺼번에 죽었는데, `claude -p` 는 인증 실패에도 exit 0 이라 잡 rc 감시로는 못 잡았다.
+# 만료 시각은 파일에 적혀 있으므로 날짜로 앞질러 알린다.
+CRED_FILE="${SELFCHECK_CRED_FILE:-${REPO%/*}/.claude/.credentials.json}"
+OAUTH_WARN_DAYS="${SELFCHECK_OAUTH_WARN_DAYS:-7}"
+
 logf() { echo "[$(date '+%Y-%m-%d %H:%M:%S %Z')] $*" >> "$LOGFILE"; }
 
 # --- CONTRACT env v3 safe parser (no `set -a; source`) ------------------------
@@ -220,6 +227,28 @@ main() {
   if [ "$http_local" != "200" ]; then web_stat="DOWN"; web_warn="⚠️ Caddy 응답 ${http_local}"; fi
   if [ "$http_ts" != "200" ]; then web_stat="DOWN"; web_warn="${web_warn}"$'\n'"⚠️ ts.net 응답 ${http_ts}"; fi
 
+  # --- headless claude 인증 만료 (2026-08-08 추가) ---------------------------
+  local oauth_warn="" oauth_days="ERR"
+  if [ -n "$PYTHON" ] && [ -r "$CRED_FILE" ]; then
+    oauth_days="$("$PYTHON" -c 'import json,sys,time
+try:
+    o = json.load(open(sys.argv[1]))["claudeAiOauth"]
+    v = o.get("refreshTokenExpiresAt") or 0
+    print(int((v/1000 - time.time())//86400) if v else -999)
+except Exception:
+    print("ERR")' "$CRED_FILE" 2>/dev/null || echo ERR)"
+  fi
+  case "$oauth_days" in
+    ''|*[!0-9-]*)
+      oauth_warn="⚠️ Claude 인증 만료일 확인 불가 (${CRED_FILE})" ;;
+    *)
+      if [ "$oauth_days" -lt 0 ]; then
+        oauth_warn="⚠️ Claude 구독 인증 만료 — 위키 문답·리서치 태깅·자가치료·지도 보정 정지. 맥미니에서 claude 실행 후 /login"
+      elif [ "$oauth_days" -le "$OAUTH_WARN_DAYS" ]; then
+        oauth_warn="⚠️ Claude 구독 인증 D-${oauth_days} 만료 예정 — 미리 재로그인 필요(만료되면 headless 잡 4종 동시 정지)"
+      fi ;;
+  esac
+
   # --- assemble -------------------------------------------------------------
   local summary warn="" info=""
   summary="맥미니 셀프체크 | 봇 ${bots_up}/${bots_total} · 타이머 ${tim_summary} · 재시작 ${crash_total} · 디스크 ${disk_gb}G · HEAD ${head_age} · 웹 ${web_stat}(${snap_age})"
@@ -229,6 +258,7 @@ main() {
   [ "$gp_fail" -gt 0 ]                && warn="$warn"$'\n'"⚠️ git-pull 연속실패 ${gp_fail}회"
   [ "$disk_gb" -lt "$DISK_MIN_GB" ]   && warn="$warn"$'\n'"⚠️ 디스크 여유 ${disk_gb}G (임계 ${DISK_MIN_GB}G)"
   [ -n "$web_warn" ]                  && warn="$warn"$'\n'"$web_warn"
+  [ -n "$oauth_warn" ]                && warn="$warn"$'\n'"$oauth_warn"
   [ "$crash_total" -gt 0 ]            && info="$info"$'\n'"ℹ️ 24h 재시작:$crash_detail"
   [ "$big_kb" -ge $(( BIG_LOG_MB * 1024 )) ] && info="$info"$'\n'"ℹ️ 최대 로그 $(( big_kb / 1024 ))M: ${big_path##*/}"
 
