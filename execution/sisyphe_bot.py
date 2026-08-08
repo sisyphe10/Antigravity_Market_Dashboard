@@ -1018,6 +1018,10 @@ async def featured_update_job(context):
             out = result.stdout.strip()
             if '모든 날짜가 이미 수집됨' in out:
                 logging.info(f"{tag} Featured: 이미 최신 (추가 수집 불필요)")
+            elif 'SKIPPED' in out or '비거래일' in out:
+                # 수집기 가드 1/3(비거래일)가 아무것도 쓰지 않고 정상 종료한 경우.
+                # 완료 메시지가 없는 것은 당연하므로 실패로 세지 않는다.
+                logging.info(f"{tag} Featured: 비거래일 수집 스킵(정상)")
             elif not out:
                 errors.append("fetch_featured: stdout 비어있음 (silent failure)")
                 logging.error(f"{tag} {errors[-1]}")
