@@ -41,6 +41,7 @@ alerts: "OnFailure → notify_sisyphe_failure.sh sisyphe-bot → 텔레그램"
   - ★`get_portfolio_holdings`/`format_message` docstring은 아직 "그룹 대표 1장씩만 보낸다"는 폐기된 설계를 기술한다(`26ed7df6`이 `_group_reps()`를 걷어냄) — **docstring이 stale**, 실제 전송부는 개별. `daily_portfolio_job` docstring의 "오후 4시"도 17:00 이관 전 잔재.
 - **`/update` 동일구성 그룹핑(2026-07-16)**: `format_update_summary`가 `(종목명, D-1 비중 1자리)` 시그니처가 같은 상품을 한 블록으로 묶어 **종목 기여 리스트를 1회만** 출력한다. 수렴 전·신규 출시라 구성이 어긋난 상품은 시그니처가 달라 **자동으로 별도 블록**이 되는 자기적응 구조. 상품별 YTD·누적은 `_portfolio_meta`의 D-1 값에 당일 등락을 복리 결합해 상품마다 따로 보존.
 - **온디맨드 원칙 커맨드(2026-08-07)**: 텔레그램 command 메뉴(`BotCommand`)를 등록하고 `/rules`=매매 원칙 보기(`~/Journal/principles.md` → HTML 포매팅 3,900자 컷)·`/review`=최신 주간 원칙 점검 리포트([[timer-wrap-principle-check]] 산출)로 분리했다(종전엔 `/rules` 하나가 점검 리포트였음).
+- **Featured 잡의 비거래일 판정(2026-08-08)**: `featured_update_job`이 수집기 stdout으로 성패를 읽는데, 수집기 가드 1/3(비거래일)이 아무것도 쓰지 않고 정상 종료하면 완료 메시지가 없어 **`silent failure`로 오판**하고 실패 알림을 쐈다. `SKIPPED`·`비거래일` 신호를 정상 스킵으로 분기해 오알림을 없앴다(`이미 최신` 분기와 같은 계열). 수집기 자체는 [[src-featured-kis]].
 - 가계부: Apps Script doPost가 거래를 직접 텔레그램 전송, 봇은 답장(분류/수정/제외) 처리.
 - systemd `Restart=always`(10회 실패 시 중단+알림). 맥미니에선 launchd KeepAlive + wrapper로 등가 구현.
 - 함정: JobQueue 가드/pytz 필요, 라이브 테스트는 VM 봇 중지 후.
