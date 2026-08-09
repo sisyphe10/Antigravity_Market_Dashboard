@@ -50,6 +50,7 @@
   .exit { font-size:13px; color:#6b7280; margin-top:10px; }
   .qcap { font-size:12px; color:#9ca3af; }
   #heatmap { position:relative; overflow:hidden; background:#111214; width:100%; height:640px; }
+.cpbtn{background:#0891b2;}
 </style>
 <style>
 
@@ -116,6 +117,7 @@
     <button class="mbtn" data-m="m1">1M</button>
     <button class="mbtn" data-m="ytd">YTD</button>
     <button class="mbtn" data-m="dd">DD</button>
+    <button class="dlbtn cpbtn" onclick="copyHeatmap(this)">Copy</button>
     <button class="dlbtn" onclick="downloadHeatmap()">Download</button>
   </div>
   <div class="card">
@@ -126,6 +128,7 @@
 <!-- 1: 섹터 로테이션 -->
 <div class="panel" id="p1">
   <div class="toolbar">
+    <button class="dlbtn cpbtn" onclick="copyScatter(this)">Copy</button>
     <button class="dlbtn" onclick="downloadScatter()">Download</button>
   </div>
   <div class="card">
@@ -136,6 +139,7 @@
 <!-- 2: 순위 변화 -->
 <div class="panel" id="p2">
   <div class="toolbar">
+    <button class="dlbtn cpbtn" onclick="copyRanks(this)">Copy</button>
     <button class="dlbtn" onclick="downloadRanks()">Download</button>
   </div>
   <div id="rankCapture">
@@ -490,6 +494,30 @@ function buildRanks(uh, ih, IDX1M){
 // ── 다운로드 (PNG) ────────────────────────────────────────────────
 function _stamp(){ var d=new Date(),p=function(n){return n<10?'0'+n:''+n;}; return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
 function _savePng(dataUrl, name){ var a=document.createElement('a'); a.href=dataUrl; a.download=name+'_'+_stamp()+'.png'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
+function _copyBlobP(blobP, btn){
+  // write()는 클릭 핸들러 안에서 동기 호출 — 캡처 결과는 Promise로 넘겨 제스처 유지
+  if(!(navigator.clipboard && navigator.clipboard.write && window.ClipboardItem)){ alert('이 브라우저는 이미지 클립보드 복사를 지원하지 않습니다.'); return; }
+  var _orig = btn ? btn.textContent : null;
+  navigator.clipboard.write([new ClipboardItem({'image/png': blobP})])
+    .then(function(){ if(btn) btn.textContent='Copied ✓'; },
+          function(e){ console.warn('clipboard copy failed:', e); if(btn) btn.textContent='Copy failed'; })
+    .then(function(){ if(btn) setTimeout(function(){ btn.textContent=_orig; },1500); });
+}
+function _canvasBlob(cv){ return new Promise(function(res){ cv.toBlob(function(b){ res(b); }, 'image/png'); }); }
+function copyHeatmap(btn){
+  var node=document.getElementById('heatmap');
+  if(typeof html2canvas!=='function'){ alert('이미지 라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.'); return; }
+  _copyBlobP(html2canvas(node, {scale:2, backgroundColor:'#111214'}).then(_canvasBlob), btn);
+}
+function copyScatter(btn){
+  if(!scatterChart){ alert('차트가 아직 준비되지 않았습니다.'); return; }
+  _copyBlobP(fetch(scatterChart.toBase64Image('image/png',1)).then(function(r){ return r.blob(); }), btn);
+}
+function copyRanks(btn){
+  var node=document.getElementById('rankCapture');
+  if(typeof html2canvas!=='function'){ alert('이미지 라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.'); return; }
+  _copyBlobP(html2canvas(node, {scale:2, backgroundColor:'#111214'}).then(_canvasBlob), btn);
+}
 function downloadHeatmap(){
   var node=document.getElementById('heatmap');
   if(typeof html2canvas!=='function'){ alert('이미지 라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.'); return; }

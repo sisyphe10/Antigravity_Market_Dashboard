@@ -962,8 +962,8 @@ def create_monthly_returns_table():
         진행 연도 YTD와 혼동 방지 (2026-07-12 사용자 리포트: YTD 행 2개 오독)."""
         def cb(name):
             return f'border-top:{DARK};border-right:{right_border_for(name)};border-bottom:{bottom_style};'
-        c = f'<td style="padding:6px 4px;text-align:center;font-weight:700;{cb("연도")}">{year_label}</td>'
-        c += f'<td style="padding:6px 4px;text-align:center;font-weight:700;{cb("월")}">{period_label}</td>'
+        c = f'<td style="padding:6px 4px;text-align:center;font-weight:700;background:#262b32;{cb("연도")}">{year_label}</td>'
+        c += f'<td style="padding:6px 4px;text-align:center;font-weight:700;background:#262b32;{cb("월")}">{period_label}</td>'
         for name in indices:
             v = returns_map.get(name)
             b = cb(name)
@@ -1026,13 +1026,16 @@ def create_monthly_returns_table():
             body_rows_html += make_ytd_row(annual_after, DARK_HEAVY, year_label=str(y), period_label='연간')
 
     if ytd_returns:
-        body_rows_html += make_ytd_row(ytd_returns, LIGHT)
+        # 진행 연도 라벨 명시 — 누락 시 기본값 '-'가 찍혀 '- YTD'로 보였다 (8/9 사용자 리포트)
+        _ytd_year = str(rows[-1].get('year')) if rows else '-'
+        body_rows_html += make_ytd_row(ytd_returns, LIGHT, year_label=_ytd_year)
 
     html = f"""
         <div class="category-section">
             <h2 class="category-title">MONTHLY RETURNS</h2>
             <div style="display:flex;justify-content:flex-end;width:1000px;max-width:100%;margin:0 auto 8px;">
-                <button onclick="downloadElementImage('mrTableWrap','Monthly_Returns')" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
+                <button onclick="copyElementImage('mrTableWrap',this)" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#0891b2;color:#fff;border:none;border-radius:8px;cursor:pointer;">Copy</button>
+                <button onclick="downloadElementImage('mrTableWrap','Monthly_Returns')" style="margin-left:8px;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
             </div>
             <div id="mrTableWrap" style="overflow-x:auto;background:#101214;border:1px solid #27282b;border-radius:8px;padding:16px;width:fit-content;max-width:100%;margin:0 auto;">
                 <table style="width:1000px;max-width:100%;border-collapse:separate;border-spacing:0;font-size:var(--aoe-t-font);--aoe-t-font:14px;--aoe-t-head-font:15px;font-variant-numeric:var(--aoe-t-num);font-family:inherit;table-layout:fixed;margin:0 auto;border:2px solid #5c6168;box-sizing:border-box;">
@@ -1148,8 +1151,23 @@ def _element_download_helper_js():
         <script src="/assets/vendor/js/html2canvas.min.js"></script>
         <script>
         """ + H2C_FREEZE_JS + """
+        if (typeof window.copyElementImage !== 'function') {
+            // Download와 동일 캡처를 클립보드로 (8/9 사용자 지시)
+            window.copyElementImage = function(elementId, btn) {
+                if (!(navigator.clipboard && navigator.clipboard.write && window.ClipboardItem)) {
+                    alert('이 브라우저는 이미지 클립보드 복사를 지원하지 않습니다.'); return;
+                }
+                var blobP = window.downloadElementImage(elementId, null, { blob: true });
+                if (!blobP || typeof blobP.then !== 'function') return;
+                var _orig = btn ? btn.textContent : null;
+                navigator.clipboard.write([new ClipboardItem({ 'image/png': blobP })])
+                    .then(function(){ if (btn) btn.textContent = 'Copied ✓'; },
+                          function(e){ console.warn('clipboard copy failed:', e); if (btn) btn.textContent = 'Copy failed'; })
+                    .then(function(){ if (btn) setTimeout(function(){ btn.textContent = _orig; }, 1500); });
+            };
+        }
         if (typeof window.downloadElementImage !== 'function') {
-            window.downloadElementImage = function(elementId, baseName) {
+            window.downloadElementImage = function(elementId, baseName, opts) {
                 var el = document.getElementById(elementId);
                 if (!el) { console.warn('element not found:', elementId); return; }
                 if (typeof html2canvas !== 'function') { alert('이미지 라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.'); return; }
@@ -1161,17 +1179,21 @@ def _element_download_helper_js():
                     n = n.parentElement; }
                     return getComputedStyle(document.body).backgroundColor || '#ffffff'; })(el);
                 var unfreeze = window._h2cFreeze(el);
-                html2canvas(el, { scale: 2, backgroundColor: bg, scrollX: 0, scrollY: -window.scrollY }).then(function(canvas) {
+                return html2canvas(el, { scale: 2, backgroundColor: bg, scrollX: 0, scrollY: -window.scrollY }).then(function(canvas) {
                     unfreeze();
                     var d = new Date();
                     var pad = function(n){ return n<10 ? '0'+n : ''+n; };
                     var stamp = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
-                    var a = document.createElement('a');
-                    a.href = canvas.toDataURL('image/png');
-                    a.download = (baseName || 'table') + '_' + stamp + '.png';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
+                    if (opts && opts.blob) {
+                        return new Promise(function(res){ canvas.toBlob(function(b){ res(b); }, 'image/png'); });
+                    } else {
+                        var a = document.createElement('a');
+                        a.href = canvas.toDataURL('image/png');
+                        a.download = (baseName || 'table') + '_' + stamp + '.png';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    }
                 }).catch(function(e) { unfreeze(); console.error('downloadElementImage:', e); });
             };
         }
@@ -9054,7 +9076,7 @@ def create_dashboard():
         .positive { color: #cc0000; font-weight: 600; }
         .negative { color: #0055cc; font-weight: 600; }
         /* 기업명 컬럼 + 현재 정렬 컬럼 하이라이트 (클래스 방식 — 인라인 style 금지: 게시 다크 CSS의 td[style*=background] 규칙과 충돌) */
-        .col-hl { background: #14171b; }
+        .col-hl { background: #262b32; }   /* 8/9 사용자 지시로 상향 (구 #14171b) */
         /* 종목 검색창 — 흰 돋보기 + 직사각형 박스 (2026-07-31) */
         .uv-search { position: absolute; top: 50%; transform: translateY(-50%); left: 0; display: flex; align-items: center; gap: 6px; border: 1.5px solid #fff; border-radius: 0; background: transparent; padding: 5px 8px; box-sizing: border-box; }
         .uv-search svg { width: 18px; height: 18px; stroke: #fff; flex: none; }
@@ -9092,7 +9114,8 @@ SIDEBAR_PLACEHOLDER
             <div class="csel-display" id="cselSecDisplay" onclick="toggleCselId('cselSecList')">섹터</div>
             <div class="csel-list" id="cselSecList"></div>
         </div>
-        <button onclick="downloadUniverseList()" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
+        <button onclick="copyUniverseList(this)" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#0891b2;color:#fff;border:none;border-radius:8px;cursor:pointer;">Copy</button>
+        <button onclick="downloadUniverseList()" style="margin-left:8px;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
         <div class="uv-search" id="uvSearchBox"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.35-4.35"></path></svg><input type="text" id="uvSearch" oninput="render()"></div>
         <button onclick="superDownloadUniverse()" id="superDlBtn" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#2563eb;color:#fff;border:none;border-radius:8px;cursor:pointer;margin-left:8px;">Super Download</button>
     </div>
@@ -9125,7 +9148,8 @@ SIDEBAR_PLACEHOLDER
                 <div class="csel-display" id="cselDisplay" onclick="toggleCselId('cselList')">통화</div>
                 <div class="csel-list" id="cselList"></div>
             </div>
-            <button onclick="downloadUniverseSector()" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
+            <button onclick="copyUniverseSector(this)" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#0891b2;color:#fff;border:none;border-radius:8px;cursor:pointer;">Copy</button>
+            <button onclick="downloadUniverseSector()" style="margin-left:8px;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
         </div>
         <div id="sectorContent"><p style="padding:40px;color:#888;">로딩 중...</p></div>
     </div>
@@ -9143,7 +9167,8 @@ SIDEBAR_PLACEHOLDER
                 <div class="csel-display" id="cselPerSecDisplay" onclick="toggleCselId('cselPerSecList')">섹터</div>
                 <div class="csel-list" id="cselPerSecList"></div>
             </div>
-            <button onclick="downloadUniversePeriod()" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
+            <button onclick="copyUniversePeriod(this)" style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#0891b2;color:#fff;border:none;border-radius:8px;cursor:pointer;">Copy</button>
+            <button onclick="downloadUniversePeriod()" style="margin-left:8px;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">Download</button>
         </div>
         <table>
             <thead><tr>
@@ -9474,7 +9499,7 @@ function sparkSvg(ticker, start, end, ret){
         var y=pad+(H-2*pad)*(1-(pts[j]-min)/rng);
         str+=(j?' ':'')+x.toFixed(1)+','+y.toFixed(1);
     }
-    var col='#000';
+    var col='#10b981';   // 에메랄드 — 다크 배경에서 검정(#000)은 보이지 않음 (8/9 사용자 지시)
     return '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" style="display:block;width:100%;height:100%;">'
         +'<polyline points="'+str+'" fill="none" stroke="'+col+'" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>';
 }
@@ -9632,14 +9657,19 @@ function renderSector() {
         html += '<th'+bg+' onclick="sortSector('+i+')">' + h + (_secSortCol===i ? (_secSortAsc?' ▲':' ▼') : '') + '</th>';
     });
     html += '</tr></thead><tbody>';
+    // 섹터명(1) + 현재 정렬 컬럼 하이라이트 — 종목 리스트와 동일 규칙 (8/9 사용자 지시)
+    function sHl(ci){ return (ci===1||ci===_secSortCol) ? ' col-hl' : ''; }
     secs.forEach(function(sec,idx) {
         var g = agg[sec];
         var vals = [wavg(g.rsi),wavg(g.ytd),wavg(g.d1),wavg(g.w1),wavg(g.m1),wavg(g.m3),wavg(g.m6),wavg(g.y1),wavg(g.dd)];
         html += '<tr style="cursor:pointer" onclick="toggleSec('+idx+')">';
-        html += '<td>' + (idx+1) + '</td><td style="font-weight:600">' + sec + '</td><td>' + g.cnt + '</td><td>' + fmcap(g.mcapSum) + '</td>';
+        html += '<td class="'+sHl(0).trim()+'">' + (idx+1) + '</td>'
+             + '<td style="font-weight:600" class="'+sHl(1).trim()+'">' + sec + '</td>'
+             + '<td class="'+sHl(2).trim()+'">' + g.cnt + '</td>'
+             + '<td class="'+sHl(3).trim()+'">' + fmcap(g.mcapSum) + '</td>';
         vals.forEach(function(v,i) {
             var bg = i===0?' style="background:#241a3d"':(i===1?' style="background:#0a3038"':'');
-            html += '<td class="'+cls(v)+'"'+bg+'>' + fv(v) + '</td>';
+            html += '<td class="'+cls(v)+sHl(i+4)+'"'+bg+'>' + fv(v) + '</td>';
         });
         html += '</tr>';
         // 하위 종목 행 (숨김)
@@ -9662,7 +9692,7 @@ function renderSector() {
 
 // ── 이미지 다운로드 (html2canvas, 상위 30개) ──────────────────
 """ + H2C_FREEZE_JS + """
-function _univCapture(node, baseName) {
+function _univCapture(node, baseName, opts) {
     if (typeof html2canvas !== 'function') { alert('이미지 라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.'); return Promise.resolve(); }
     // 배경 = 요소 조상의 실제 배경색 (2026-07-26): 다크 테마 흰 배경 하드코딩 → 글자 안 보임 수정
     var bg = (function(n){ var c; while (n && n !== document.documentElement) {
@@ -9678,12 +9708,17 @@ function _univCapture(node, baseName) {
         var d = new Date();
         var pad = function(n){ return n<10 ? '0'+n : ''+n; };
         var stamp = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
-        var a = document.createElement('a');
-        a.href = canvas.toDataURL('image/png');
-        a.download = baseName + '_' + stamp + '.png';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        if (opts && opts.blob) {
+            // Blob 반환 — 호출부가 클릭 시점에 ClipboardItem(Promise)로 넘긴다
+            return new Promise(function(res){ canvas.toBlob(function(b){ res(b); }, 'image/png'); });
+        } else {
+            var a = document.createElement('a');
+            a.href = canvas.toDataURL('image/png');
+            a.download = baseName + '_' + stamp + '.png';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
     }).catch(function(e) { unfreeze(); document.body.classList.remove('uv-capture');
         console.error('_univCapture:', e); });
 }
@@ -9719,6 +9754,39 @@ function downloadUniversePeriod() {
         saved.forEach(function(p){ p[0].style.display = p[1]; });
     });
 }
+// ── Copy: Download와 동일 캡처를 클립보드로 (8/9 사용자 지시) ──
+function _uvCopy(sel, rowsSel, btn, needAlert) {
+    var table = document.querySelector(sel);
+    if (!table) { if (needAlert) alert('데이터가 아직 로딩되지 않았습니다.'); return; }
+    var saved = [];
+    if (rowsSel === 'sector') {
+        table.querySelectorAll('tbody tr:not(.sec-detail)').forEach(function(r, i){ if (i >= 30) { saved.push([r, r.style.display]); r.style.display = 'none'; } });
+        table.querySelectorAll('tbody tr.sec-detail').forEach(function(r){ saved.push([r, r.style.display]); r.style.display = 'none'; });
+    } else {
+        var rows = document.querySelectorAll(rowsSel);
+        for (var i = 30; i < rows.length; i++) { saved.push([rows[i], rows[i].style.display]); rows[i].style.display = 'none'; }
+    }
+    // write()는 클릭 핸들러 안에서 동기 호출 — Blob은 Promise로 넘긴다(제스처 유지)
+    var blobP = _univCapture(table, null, { blob: true }).then(function(blob) {
+        saved.forEach(function(p){ p[0].style.display = p[1]; });
+        return blob;
+    });
+    _uvClipWrite(blobP, btn);
+}
+function _uvClipWrite(blobP, btn) {
+    if (!(navigator.clipboard && navigator.clipboard.write && window.ClipboardItem)) {
+        alert('이 브라우저는 이미지 클립보드 복사를 지원하지 않습니다.'); return;
+    }
+    var _orig = btn ? btn.textContent : null;
+    navigator.clipboard.write([new ClipboardItem({ 'image/png': blobP })])
+        .then(function(){ if (btn) btn.textContent = 'Copied ✓'; },
+              function(e){ console.warn('clipboard copy failed:', e); if (btn) btn.textContent = 'Copy failed'; })
+        .then(function(){ if (btn) setTimeout(function(){ btn.textContent = _orig; }, 1500); });
+}
+function copyUniverseList(btn)   { _uvCopy('#tab0 table', '#tbody tr', btn, false); }
+function copyUniverseSector(btn) { _uvCopy('#sectorContent table', 'sector', btn, true); }
+function copyUniversePeriod(btn) { _uvCopy('#tab2 table', '#tbodyPer tr', btn, false); }
+
 // ── Super Download: 종목 리스트 + 섹터 수익률을 RSI(1M)↓ / 1W↓ 두 정렬로 PNG 4장 일괄 저장 ──
 function superDownloadUniverse() {
     var btn = document.getElementById('superDlBtn');
