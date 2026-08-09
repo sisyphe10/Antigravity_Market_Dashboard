@@ -77,7 +77,7 @@
       "name": "SK스퀘어",
       "sector": "상사,자본재",
       "market_cap": 1239089,
-      "weight": 3.0,
+      "weight": 0.0,
       "weight_prev": 3.0,
       "today_return": -3.1958762886597936,
       "contribution": -0.9587628865979381,
@@ -95,7 +95,7 @@
       "name": "알테오젠",
       "sector": "건강관리",
       "market_cap": 163438,
-      "weight": 3.0,
+      "weight": 5.0,
       "weight_prev": 3.0,
       "today_return": 3.9182282793867125,
       "contribution": 1.1754684838160139,
@@ -113,7 +113,7 @@
       "name": "S-Oil",
       "sector": "에너지",
       "market_cap": 154914,
-      "weight": 3.0,
+      "weight": 2.0,
       "weight_prev": 3.0,
       "today_return": 10.168134507606084,
       "contribution": 3.050440352281825,
@@ -214,6 +214,24 @@
       "ath_price": 52300.0,
       "dd": 0.0,
       "rsi": 31.91334725418491,
+      "is_today_new": false
+    },
+    {
+      "code": "034020",
+      "name": "두산에너빌리티",
+      "sector": "기계",
+      "market_cap": 493873,
+      "weight": 3.0,
+      "weight_prev": 0.0,
+      "today_return": 0.9162303664921465,
+      "contribution": 0.0,
+      "ytd_return": 2.39043824701195,
+      "cumulative_return": null,
+      "current_price": 77100.0,
+      "price_date": "2026-08-07",
+      "ath_price": 136400.0,
+      "dd": -43.475073313782985,
+      "rsi": null,
       "is_today_new": false
     }
   ],
@@ -295,7 +313,7 @@
       "name": "SK스퀘어",
       "sector": "상사,자본재",
       "market_cap": 1239089,
-      "weight": 3.0,
+      "weight": 0.0,
       "weight_prev": 3.0,
       "today_return": -3.1958762886597936,
       "contribution": -0.9587628865979381,
@@ -313,7 +331,7 @@
       "name": "알테오젠",
       "sector": "건강관리",
       "market_cap": 163438,
-      "weight": 3.0,
+      "weight": 5.0,
       "weight_prev": 3.0,
       "today_return": 3.9182282793867125,
       "contribution": 1.1754684838160139,
@@ -331,7 +349,7 @@
       "name": "S-Oil",
       "sector": "에너지",
       "market_cap": 154914,
-      "weight": 3.0,
+      "weight": 2.0,
       "weight_prev": 3.0,
       "today_return": 10.168134507606084,
       "contribution": 3.050440352281825,
@@ -433,6 +451,24 @@
       "dd": 0.0,
       "rsi": 31.91334725418491,
       "is_today_new": false
+    },
+    {
+      "code": "034020",
+      "name": "두산에너빌리티",
+      "sector": "기계",
+      "market_cap": 493873,
+      "weight": 3.0,
+      "weight_prev": 0.0,
+      "today_return": 0.9162303664921465,
+      "contribution": 0.0,
+      "ytd_return": 2.39043824701195,
+      "cumulative_return": null,
+      "current_price": 77100.0,
+      "price_date": "2026-08-07",
+      "ath_price": 136400.0,
+      "dd": -43.475073313782985,
+      "rsi": null,
+      "is_today_new": false
     }
   ],
   "NH 목표전환형 5호": [
@@ -513,7 +549,7 @@
       "name": "SK스퀘어",
       "sector": "상사,자본재",
       "market_cap": 1239089,
-      "weight": 3.0,
+      "weight": 0.0,
       "weight_prev": 3.0,
       "today_return": -3.1958762886597936,
       "contribution": -0.9587628865979381,
@@ -531,7 +567,7 @@
       "name": "알테오젠",
       "sector": "건강관리",
       "market_cap": 163438,
-      "weight": 3.0,
+      "weight": 5.0,
       "weight_prev": 3.0,
       "today_return": 3.9182282793867125,
       "contribution": 1.1754684838160139,
@@ -549,7 +585,7 @@
       "name": "S-Oil",
       "sector": "에너지",
       "market_cap": 154914,
-      "weight": 3.0,
+      "weight": 2.0,
       "weight_prev": 3.0,
       "today_return": 10.168134507606084,
       "contribution": 3.050440352281825,
@@ -651,6 +687,24 @@
       "dd": 0.0,
       "rsi": 31.91334725418491,
       "is_today_new": false
+    },
+    {
+      "code": "034020",
+      "name": "두산에너빌리티",
+      "sector": "기계",
+      "market_cap": 493873,
+      "weight": 3.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": 2.39043824701195,
+      "cumulative_return": null,
+      "current_price": 77100.0,
+      "price_date": "2026-08-07",
+      "ath_price": 136400.0,
+      "dd": -43.475073313782985,
+      "rsi": null,
+      "is_today_new": true
     }
   ],
   "DB 목표전환형 6차": [
@@ -731,7 +785,7 @@
       "name": "SK스퀘어",
       "sector": "상사,자본재",
       "market_cap": 1239089,
-      "weight": 3.0,
+      "weight": 0.0,
       "weight_prev": 3.0,
       "today_return": -3.1958762886597936,
       "contribution": -0.9587628865979381,
@@ -749,7 +803,7 @@
       "name": "알테오젠",
       "sector": "건강관리",
       "market_cap": 163438,
-      "weight": 3.0,
+      "weight": 5.0,
       "weight_prev": 3.0,
       "today_return": 3.9182282793867125,
       "contribution": 1.1754684838160139,
@@ -767,7 +821,7 @@
       "name": "S-Oil",
       "sector": "에너지",
       "market_cap": 154914,
-      "weight": 3.0,
+      "weight": 2.0,
       "weight_prev": 3.0,
       "today_return": 10.168134507606084,
       "contribution": 3.050440352281825,
@@ -869,6 +923,24 @@
       "dd": 0.0,
       "rsi": 31.91334725418491,
       "is_today_new": false
+    },
+    {
+      "code": "034020",
+      "name": "두산에너빌리티",
+      "sector": "기계",
+      "market_cap": 493873,
+      "weight": 3.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": 2.39043824701195,
+      "cumulative_return": null,
+      "current_price": 77100.0,
+      "price_date": "2026-08-07",
+      "ath_price": 136400.0,
+      "dd": -43.475073313782985,
+      "rsi": null,
+      "is_today_new": true
     }
   ],
   "한투 지속형": [
@@ -949,7 +1021,7 @@
       "name": "SK스퀘어",
       "sector": "상사,자본재",
       "market_cap": 1239089,
-      "weight": 3.0,
+      "weight": 0.0,
       "weight_prev": 3.0,
       "today_return": -3.1958762886597936,
       "contribution": -0.9587628865979381,
@@ -967,7 +1039,7 @@
       "name": "알테오젠",
       "sector": "건강관리",
       "market_cap": 163438,
-      "weight": 3.0,
+      "weight": 5.0,
       "weight_prev": 3.0,
       "today_return": 3.9182282793867125,
       "contribution": 1.1754684838160139,
@@ -985,7 +1057,7 @@
       "name": "S-Oil",
       "sector": "에너지",
       "market_cap": 154914,
-      "weight": 3.0,
+      "weight": 2.0,
       "weight_prev": 3.0,
       "today_return": 10.168134507606084,
       "contribution": 3.050440352281825,
@@ -1087,6 +1159,24 @@
       "dd": 0.0,
       "rsi": 31.91334725418491,
       "is_today_new": false
+    },
+    {
+      "code": "034020",
+      "name": "두산에너빌리티",
+      "sector": "기계",
+      "market_cap": 493873,
+      "weight": 3.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": 2.39043824701195,
+      "cumulative_return": null,
+      "current_price": 77100.0,
+      "price_date": "2026-08-07",
+      "ath_price": 136400.0,
+      "dd": -43.475073313782985,
+      "rsi": null,
+      "is_today_new": true
     }
   ],
   "한투 성과모집형 1차": [
@@ -1167,7 +1257,7 @@
       "name": "SK스퀘어",
       "sector": "상사,자본재",
       "market_cap": 1239089,
-      "weight": 3.0,
+      "weight": 0.0,
       "weight_prev": 3.0,
       "today_return": -3.1958762886597936,
       "contribution": -0.9587628865979381,
@@ -1185,7 +1275,7 @@
       "name": "알테오젠",
       "sector": "건강관리",
       "market_cap": 163438,
-      "weight": 3.0,
+      "weight": 5.0,
       "weight_prev": 3.0,
       "today_return": 3.9182282793867125,
       "contribution": 1.1754684838160139,
@@ -1203,7 +1293,7 @@
       "name": "S-Oil",
       "sector": "에너지",
       "market_cap": 154914,
-      "weight": 3.0,
+      "weight": 2.0,
       "weight_prev": 3.0,
       "today_return": 10.168134507606084,
       "contribution": 3.050440352281825,
@@ -1305,8 +1395,190 @@
       "dd": 0.0,
       "rsi": 31.91334725418491,
       "is_today_new": false
+    },
+    {
+      "code": "034020",
+      "name": "두산에너빌리티",
+      "sector": "기계",
+      "market_cap": 493873,
+      "weight": 3.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": 2.39043824701195,
+      "cumulative_return": null,
+      "current_price": 77100.0,
+      "price_date": "2026-08-07",
+      "ath_price": 136400.0,
+      "dd": -43.475073313782985,
+      "rsi": null,
+      "is_today_new": true
     }
   ],
+  "_order_changes": {
+    "NH 다이내믹 밸류 / DB 개방형": {
+      "date": "2026-08-10",
+      "added": [
+        {
+          "name": "두산에너빌리티",
+          "weight": 3.0
+        }
+      ],
+      "changed": [
+        {
+          "name": "알테오젠",
+          "from": 3.0,
+          "to": 5.0
+        },
+        {
+          "name": "S-Oil",
+          "from": 3.0,
+          "to": 2.0
+        }
+      ],
+      "removed": [
+        {
+          "name": "SK스퀘어",
+          "weight": 3.0
+        }
+      ]
+    },
+    "삼성 트루밸류": {
+      "date": "2026-08-10",
+      "added": [
+        {
+          "name": "두산에너빌리티",
+          "weight": 3.0
+        }
+      ],
+      "changed": [
+        {
+          "name": "알테오젠",
+          "from": 3.0,
+          "to": 5.0
+        },
+        {
+          "name": "S-Oil",
+          "from": 3.0,
+          "to": 2.0
+        }
+      ],
+      "removed": [
+        {
+          "name": "SK스퀘어",
+          "weight": 3.0
+        }
+      ]
+    },
+    "NH 목표전환형 5호": {
+      "date": "2026-08-10",
+      "added": [
+        {
+          "name": "두산에너빌리티",
+          "weight": 3.0
+        }
+      ],
+      "changed": [
+        {
+          "name": "알테오젠",
+          "from": 3.0,
+          "to": 5.0
+        },
+        {
+          "name": "S-Oil",
+          "from": 3.0,
+          "to": 2.0
+        }
+      ],
+      "removed": [
+        {
+          "name": "SK스퀘어",
+          "weight": 3.0
+        }
+      ]
+    },
+    "DB 목표전환형 6차": {
+      "date": "2026-08-10",
+      "added": [
+        {
+          "name": "두산에너빌리티",
+          "weight": 3.0
+        }
+      ],
+      "changed": [
+        {
+          "name": "알테오젠",
+          "from": 3.0,
+          "to": 5.0
+        },
+        {
+          "name": "S-Oil",
+          "from": 3.0,
+          "to": 2.0
+        }
+      ],
+      "removed": [
+        {
+          "name": "SK스퀘어",
+          "weight": 3.0
+        }
+      ]
+    },
+    "한투 지속형": {
+      "date": "2026-08-10",
+      "added": [
+        {
+          "name": "두산에너빌리티",
+          "weight": 3.0
+        }
+      ],
+      "changed": [
+        {
+          "name": "알테오젠",
+          "from": 3.0,
+          "to": 5.0
+        },
+        {
+          "name": "S-Oil",
+          "from": 3.0,
+          "to": 2.0
+        }
+      ],
+      "removed": [
+        {
+          "name": "SK스퀘어",
+          "weight": 3.0
+        }
+      ]
+    },
+    "한투 성과모집형 1차": {
+      "date": "2026-08-10",
+      "added": [
+        {
+          "name": "두산에너빌리티",
+          "weight": 3.0
+        }
+      ],
+      "changed": [
+        {
+          "name": "알테오젠",
+          "from": 3.0,
+          "to": 5.0
+        },
+        {
+          "name": "S-Oil",
+          "from": 3.0,
+          "to": 2.0
+        }
+      ],
+      "removed": [
+        {
+          "name": "SK스퀘어",
+          "weight": 3.0
+        }
+      ]
+    }
+  },
   "_portfolio_meta": {
     "NH 다이내믹 밸류 / DB 개방형": {
       "nav_ytd_d1": 34.02289332437931,
