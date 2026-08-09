@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-08-08",
+  "updated": "2026-08-09",
   "projects": [
    "antigravity"
   ],
@@ -878,7 +878,7 @@
    "runs_on": "github",
    "schedule_kst": "생성=여러 잡",
    "status": "active",
-   "desc_md": "시장 데이터 허브. Monthly Returns 표 + Indices/MARKET 동적 차트 + DATA 섹션(ECOS/FRED/KRX/원자재/capex 등 시계열 사이드바).\n\n- DATA 탭 사이드바 3칼럼(Update/Group/Data) 정렬+엑셀필터, 주기 자동판정, 행배경 틴트. 2026-07-16부터 **Data 서브탭이 첫 탭이자 기본값**.\n- 소스: `dataset.csv`(대부분 시계열), `monthly_returns.json`.\n- `create_dashboard.py` 생성. dataset.csv를 쓰는 거의 모든 잡이 재생성.\n- 2026-07-16 **DATA 차트 포맷 표준화**(다수 커밋): Y축 상단 단위 주석 + 눈금은 숫자만, 축 min/max 항상 라벨링에 눈금 8개 상한, 자릿수 밴드별 소수 자리 통일(10 미만 2dp / 1000 미만 1dp / 이상 정수), 금액 시계열 단위 환산(억원→조원, 달러 계열→$억/$B), log 스케일은 5–95% 로그공간 패딩, 우측 패딩=실측 라벨폭+12px. 16:9 비율·굵은 선·norm/log 토글 버튼. Indices/WRAP 차트도 같은 표준으로 retrofit.\n- '파생·수급' 그룹(삼성전자·SK하이닉스 파생·수급 + VKOSPI 13종)은 [[src-deriv-daily]]가 적재.\n- **RoC² 서브패널(2026-07-29~30)**: DATA 차트에 이격도 패널과 같은 규격으로 보조 캔버스를 추가해 '변화율의 변화율'(기간말 리샘플→RoC¹→전기 차분 %p→3기간 스무딩, RoC¹ 정의는 시리즈 성격에 따라 3갈래)을 표시. 메인+이격도+RoC² 3면 세로 합성·십자선 동기. YoY lag 12개월+MA3 요구로 dataset.csv 12개월 이력만으론 부족한 지수·환율 등은 [[store-roc-history]](월말 백필 `roc_history.csv`)로 보충하고, 판독성이 검증된 화이트리스트 시리즈(`datalake/score_roc2.py` 점수)만 노출. 주기(월/주) 버튼 가용성은 데이터 충분성에 따라 자동 판정.\n- DATA 사이드바 별표 즐겨찾기(2026-07-20)는 ts.net에서 [[daemon-watchlist-quoteboard]]의 `/stars` 엔드포인트(`market_stars.json`)에 **서버 저장**돼 기기 간 공유되고, 데몬에 못 닿는 환경(GitHub Pages)에서는 localStorage로 폴백.",
+   "desc_md": "시장 데이터 허브. Monthly Returns 표 + Indices/MARKET 동적 차트 + DATA 섹션(ECOS/FRED/KRX/원자재/capex 등 시계열 사이드바).\n\n- DATA 탭 사이드바 3칼럼(Update/Group/Data) 정렬+엑셀필터, 주기 자동판정, 행배경 틴트. 2026-07-16부터 **Data 서브탭이 첫 탭이자 기본값**.\n- 소스: `dataset.csv`(대부분 시계열), `monthly_returns.json`.\n- `create_dashboard.py` 생성. dataset.csv를 쓰는 거의 모든 잡이 재생성.\n- 2026-07-16 **DATA 차트 포맷 표준화**(다수 커밋): Y축 상단 단위 주석 + 눈금은 숫자만, 축 min/max 항상 라벨링에 눈금 8개 상한, 자릿수 밴드별 소수 자리 통일(10 미만 2dp / 1000 미만 1dp / 이상 정수), 금액 시계열 단위 환산(억원→조원, 달러 계열→$억/$B), log 스케일은 5–95% 로그공간 패딩, 우측 패딩=실측 라벨폭+12px. 16:9 비율·굵은 선·norm/log 토글 버튼. Indices/WRAP 차트도 같은 표준으로 retrofit.\n- '파생·수급' 그룹(삼성전자·SK하이닉스 파생·수급 + VKOSPI 13종)은 [[src-deriv-daily]]가 적재.\n- **RoC² 서브패널(2026-07-29~30)**: DATA 차트에 이격도 패널과 같은 규격으로 보조 캔버스를 추가해 '변화율의 변화율'(기간말 리샘플→RoC¹→전기 차분 %p→3기간 스무딩, RoC¹ 정의는 시리즈 성격에 따라 3갈래)을 표시. 메인+이격도+RoC² 3면 세로 합성·십자선 동기. YoY lag 12개월+MA3 요구로 dataset.csv 12개월 이력만으론 부족한 지수·환율 등은 [[store-roc-history]](월말 백필 `roc_history.csv`)로 보충하고, 판독성이 검증된 화이트리스트 시리즈(`datalake/score_roc2.py` 점수)만 노출. 주기(월/주) 버튼 가용성은 데이터 충분성에 따라 자동 판정.\n- **Monthly Returns 표(2026-08-09)**: Download 왼쪽에 Copy 버튼(클립보드 PNG, [[src-create-dashboard]] 캡처 헬퍼 공용). 진행 연도 YTD 행에 연도 라벨을 명시 — 기본값 `-`가 찍혀 '- YTD'로 보이던 표기 수정. 연도/월 라벨 셀 배경을 `#262b32`로 상향.\n- DATA 사이드바 별표 즐겨찾기(2026-07-20)는 ts.net에서 [[daemon-watchlist-quoteboard]]의 `/stars` 엔드포인트(`market_stars.json`)에 **서버 저장**돼 기기 간 공유되고, 데몬에 못 닿는 환경(GitHub Pages)에서는 localStorage로 폴백.",
    "code": [
     "execution/create_dashboard.py"
    ],
@@ -937,7 +937,7 @@
    "runs_on": "github",
    "schedule_kst": "생성=여러 잡",
    "status": "active",
-   "desc_md": "관심 유니버스 종목 스크리닝 페이지(시세·52주 낙폭 DD·RSI 1M·외국인 보유비중 등).\n\n- 소스: `universe.json`/`universe_history.json`(하루 2회 yfinance) + 외국인 보유비중(INDEX_KR).\n- `create_dashboard.py` 생성. 종목 추가는 `universe_tickers.csv`로.\n- **관심종목 별표 컬럼(2026-07-31)**: 종목 리스트 1열에 별표(★) 토글 — 상태는 [[daemon-watchlist-quoteboard]]의 `/watchlist/prefs`(`universe_stars_v1 = {\"tickers\":[순수심볼,…]}`)에 서버 공유(+localStorage 폴백). 헤더 ★ = 관심종목만 보기 필터. Download PNG에선 별표 컬럼 숨김. 정렬 헤더 화살표는 `#tab0`로 한정(기간 탭 헤더 오염 방지).\n- **nav 위치(2026-07-31)**: 상단 네비에서 Market → **Watchlist 드롭다운 하위**로 이동([[src-nav-style]] `NAV_ITEMS`).",
+   "desc_md": "관심 유니버스 종목 스크리닝 페이지(시세·52주 낙폭 DD·RSI 1M·외국인 보유비중 등).\n\n- 소스: `universe.json`/`universe_history.json`(하루 2회 yfinance) + 외국인 보유비중(INDEX_KR).\n- `create_dashboard.py` 생성. 종목 추가는 `universe_tickers.csv`로.\n- **관심종목 별표 컬럼(2026-07-31)**: 종목 리스트 1열에 별표(★) 토글 — 상태는 [[daemon-watchlist-quoteboard]]의 `/watchlist/prefs`(`universe_stars_v1 = {\"tickers\":[순수심볼,…]}`)에 서버 공유(+localStorage 폴백). 헤더 ★ = 관심종목만 보기 필터. Download PNG에선 별표 컬럼 숨김. 정렬 헤더 화살표는 `#tab0`로 한정(기간 탭 헤더 오염 방지).\n- **nav 위치(2026-07-31)**: 상단 네비에서 Market → **Watchlist 드롭다운 하위**로 이동([[src-nav-style]] `NAV_ITEMS`).\n- **표 캡처·가독성(2026-08-09)**: 종목 리스트·섹터·기간 3탭 모두 Download 왼쪽에 Copy 버튼(클립보드 PNG, 상위 30행만 — Download와 동일 규칙, [[src-create-dashboard]] 캡처 헬퍼 공용). 스파크라인 선색을 검정 → 에메랄드 `#10b981`(다크 배경에서 검정은 보이지 않음). 정렬 컬럼 하이라이트 `.col-hl` 배경을 `#14171b` → `#262b32`로 상향하고, 종목 리스트에만 있던 하이라이트를 **섹터 표에도 적용**(섹터명 + 현재 정렬 컬럼).",
    "code": [
     "execution/create_dashboard.py"
    ],
@@ -964,7 +964,7 @@
    "runs_on": "github",
    "schedule_kst": "생성=여러 잡",
    "status": "active",
-   "desc_md": "Universe의 실험(lab) 변형 페이지. 사이드바/스타일을 Universe와 통일해 관리.\n\n- `create_dashboard.py`의 PAGES 목록에 `('universe_lab','universe_lab.html','Universe Lab')`로 등록돼 함께 생성.\n- 소스는 Universe와 공유(universe.json 계열).\n- **nav 위치(2026-07-31)**: Universe와 함께 상단 네비 Market → **Watchlist 드롭다운 하위**로 이동([[src-nav-style]] `NAV_ITEMS`).",
+   "desc_md": "Universe의 실험(lab) 변형 페이지. 사이드바/스타일을 Universe와 통일해 관리.\n\n- `create_dashboard.py`의 PAGES 목록에 `('universe_lab','universe_lab.html','Universe Lab')`로 등록돼 함께 생성.\n- 소스는 Universe와 공유(universe.json 계열).\n- **nav 위치(2026-07-31)**: Universe와 함께 상단 네비 Market → **Watchlist 드롭다운 하위**로 이동([[src-nav-style]] `NAV_ITEMS`).\n- **Copy 버튼(2026-08-09)**: 히트맵·섹터 로테이션·순위 변화 3패널 모두 Download 왼쪽에 Copy(클립보드 PNG) 병설 — [[page-universe]]·[[page-market]]과 동일 규격(`_copyBlobP`, ClipboardItem에 Promise Blob 전달).",
    "code": [
     "execution/create_dashboard.py"
    ],
@@ -1105,7 +1105,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "체인 말단 (여러 잡)",
    "status": "active",
-   "desc_md": "생태계의 중앙 렌더러(550KB). dataset.csv·portfolio_data.json·각종 json/db를 읽어 대부분의 라이브 HTML을 한 번에 생성한다.\n\n- 생성: index/market/wrap/universe/universe_lab/seibro/featured/hotels/etf 페이지(등록표 PAGES 기반).\n- 거의 모든 GHA/VM 잡의 마지막 스텝으로 호출됨 → 데이터가 바뀌면 여기서 화면에 반영.\n- 상단 네비·다크/WRAP 팔레트·Pretendard·캡처 JS는 execution/nav_style.py 정본에서 import (2026-07-26 통일 — 수동 미러링 폐지).\n- 차트 렌더 JS는 [[src-chart-core]] `chart_core/dist/aoe_chart.js` 를 빌드타임 인라인 임베드 (2026-08-02, `_load_aoe_core_js()` — 모듈 로드 시 sha 검증, 부재/불일치는 기동 치명 실패). `AOE_CHART_LEGACY=1` 이면 동결 렌더러(execution/legacy_chart_renderers.py)로 롤백.\n- 수정 시 전체 페이지 재생성 후 일관성 확인.",
+   "desc_md": "생태계의 중앙 렌더러(550KB). dataset.csv·portfolio_data.json·각종 json/db를 읽어 대부분의 라이브 HTML을 한 번에 생성한다.\n\n- 생성: index/market/wrap/universe/universe_lab/seibro/featured/hotels/etf 페이지(등록표 PAGES 기반).\n- 거의 모든 GHA/VM 잡의 마지막 스텝으로 호출됨 → 데이터가 바뀌면 여기서 화면에 반영.\n- 상단 네비·다크/WRAP 팔레트·Pretendard·캡처 JS는 execution/nav_style.py 정본에서 import (2026-07-26 통일 — 수동 미러링 폐지).\n- 차트 렌더 JS는 [[src-chart-core]] `chart_core/dist/aoe_chart.js` 를 빌드타임 인라인 임베드 (2026-08-02, `_load_aoe_core_js()` — 모듈 로드 시 sha 검증, 부재/불일치는 기동 치명 실패). `AOE_CHART_LEGACY=1` 이면 동결 렌더러(execution/legacy_chart_renderers.py)로 롤백.\n- **표·차트 Copy 버튼(클립보드 PNG, 2026-08-09)**: Download 왼쪽에 Copy(청록 `#0891b2`) 버튼을 병설. 캡처 헬퍼(`downloadElementImage`·`_univCapture`)에 `{blob:true}` 옵션을 추가해 동일 html2canvas 결과를 Blob으로 되돌리고, `navigator.clipboard.write`에는 **Promise 상태의 Blob**을 그대로 넘겨 클릭 제스처를 유지한다(await로 Blob을 먼저 받아 write 하면 브라우저가 사용자 제스처 소실로 거부). ClipboardItem 미지원 브라우저는 alert 안내, 성공/실패는 버튼 라벨(`Copied ✓`/`Copy failed`, 1.5초 후 복원)로 표시. 소비 화면 = [[page-market]] Monthly Returns · [[page-universe]] 3탭 · [[page-universe-lab]] 3패널.\n- 수정 시 전체 페이지 재생성 후 일관성 확인.",
    "code": [
     "execution/create_dashboard.py"
    ],
