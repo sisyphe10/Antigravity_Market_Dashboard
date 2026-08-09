@@ -113,7 +113,7 @@
       "name": "S-Oil",
       "sector": "에너지",
       "market_cap": 154914,
-      "weight": 2.0,
+      "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": 10.168134507606084,
       "contribution": 3.050440352281825,
@@ -349,7 +349,7 @@
       "name": "S-Oil",
       "sector": "에너지",
       "market_cap": 154914,
-      "weight": 2.0,
+      "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": 10.168134507606084,
       "contribution": 3.050440352281825,
@@ -585,7 +585,7 @@
       "name": "S-Oil",
       "sector": "에너지",
       "market_cap": 154914,
-      "weight": 2.0,
+      "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": 10.168134507606084,
       "contribution": 3.050440352281825,
@@ -821,7 +821,7 @@
       "name": "S-Oil",
       "sector": "에너지",
       "market_cap": 154914,
-      "weight": 2.0,
+      "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": 10.168134507606084,
       "contribution": 3.050440352281825,
@@ -1057,7 +1057,7 @@
       "name": "S-Oil",
       "sector": "에너지",
       "market_cap": 154914,
-      "weight": 2.0,
+      "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": 10.168134507606084,
       "contribution": 3.050440352281825,
@@ -1293,7 +1293,7 @@
       "name": "S-Oil",
       "sector": "에너지",
       "market_cap": 154914,
-      "weight": 2.0,
+      "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": 10.168134507606084,
       "contribution": 3.050440352281825,
@@ -1429,11 +1429,6 @@
           "name": "알테오젠",
           "from": 3.0,
           "to": 5.0
-        },
-        {
-          "name": "S-Oil",
-          "from": 3.0,
-          "to": 2.0
         }
       ],
       "removed": [
@@ -1456,11 +1451,6 @@
           "name": "알테오젠",
           "from": 3.0,
           "to": 5.0
-        },
-        {
-          "name": "S-Oil",
-          "from": 3.0,
-          "to": 2.0
         }
       ],
       "removed": [
@@ -1483,11 +1473,6 @@
           "name": "알테오젠",
           "from": 3.0,
           "to": 5.0
-        },
-        {
-          "name": "S-Oil",
-          "from": 3.0,
-          "to": 2.0
         }
       ],
       "removed": [
@@ -1510,11 +1495,6 @@
           "name": "알테오젠",
           "from": 3.0,
           "to": 5.0
-        },
-        {
-          "name": "S-Oil",
-          "from": 3.0,
-          "to": 2.0
         }
       ],
       "removed": [
@@ -1537,11 +1517,6 @@
           "name": "알테오젠",
           "from": 3.0,
           "to": 5.0
-        },
-        {
-          "name": "S-Oil",
-          "from": 3.0,
-          "to": 2.0
         }
       ],
       "removed": [
@@ -1564,11 +1539,6 @@
           "name": "알테오젠",
           "from": 3.0,
           "to": 5.0
-        },
-        {
-          "name": "S-Oil",
-          "from": 3.0,
-          "to": 2.0
         }
       ],
       "removed": [
