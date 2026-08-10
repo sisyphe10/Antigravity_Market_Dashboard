@@ -2232,11 +2232,11 @@
       "domain": "tencent.com",
       "ticker": "0700",
       "exchange": "HKEX",
-      "ir_url": "https://www.tencent.com/en-us/investors/financial-news.html",
+      "ir_url": "https://www.tencent.com/investors/investor-news/",
       "rss_url": null,
       "fetch_type": "html",
       "confidence": "high",
-      "notes": "Confirmed listing visible | codex: Official Tencent investor financial news page; no working RSS endpoint found.",
+      "notes": "Confirmed listing visible | 2026-08-10: financial-news.html redirects to financial-reports after site revamp (~7/30); switched to investor-news listing (static dates).",
       "sources": [
         "claude",
         "codex"

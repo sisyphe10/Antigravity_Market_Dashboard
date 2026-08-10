@@ -375,10 +375,42 @@ def _fetch_eaton_coveo(company: dict) -> list[dict]:
     return items
 
 
+def _fetch_tencent_investor_news(company: dict) -> list[dict]:
+    """0700(Tencent) 전용: 2026-07 말 사이트 개편으로 구 financial-news.html 이
+    financial-reports 로 리디렉트되고, 후계 리스트(investor-news)는 카드 제목이
+    heading/anchor 가 아닌 <p class='entry-title'> 이라 표준 _extract_html 이 0건.
+    article.investor-news-item 카드(entry-meta=날짜, entry-title=제목, 링크=첨부 PDF)를
+    직접 파싱한다. RSS 는 WP 댓글 피드(빈 껍데기)만 있고 wp-json 은 401.
+    """
+    page = _http_get(company['ir_url'])
+    soup = BeautifulSoup(page, 'lxml')
+    items: list[dict] = []
+    for art in soup.select('article.investor-news-item'):
+        meta = art.select_one('.entry-meta')
+        title_el = art.select_one('.entry-title')
+        a = art.find('a', href=True)
+        if not (meta and title_el and a):
+            continue
+        m = _HTML_DATE_RE.search(meta.get_text(' ', strip=True))
+        if not m:
+            continue
+        date_iso = _parse_date_iso(m.group(0))
+        title = _clean_text(title_el.get_text(' ', strip=True))
+        if not title or not date_iso:
+            continue
+        url = urljoin(company['ir_url'], a['href'])
+        items.append({'id': url, 'url': url, 'title': title,
+                      'date': date_iso, 'summary': ''})
+        if len(items) >= MAX_LIST_PER_COMPANY:
+            break
+    return items
+
+
 # 표준 rss/html 파이프라인으로 못 잡는 회사의 전용 수집기 레지스트리.
 # 커스텀 실패 시 _fetch_company 가 rss/html 경로로 폴백한다.
 _CUSTOM_FETCHERS = {
     'ETN': _fetch_eaton_coveo,
+    '0700': _fetch_tencent_investor_news,
 }
 
 
