@@ -243,7 +243,7 @@ dark_pat = re.compile(r'<style id="aoe-terminal-dark">.*?</style>', re.S)
 # 구 자체 마크업(평면형 <a> 나열)은 폐기 — 루트 페이지와 동일한 DOM 계약(.topnav-item 래퍼).
 
 # checklist_test.html = 테스트 페이지(직접 URL 전용, nav 탭 없음 → active 없음)
-ACTIVE_OF = {'journal.html': 'journal', 'dashboard.html': 'ledger', 'memento.html': 'memento',
+ACTIVE_OF = {'journal.html': 'journal', 'dashboard.html': None, 'memento.html': 'memento',
              'checklist_test.html': None}
 # journal 페이지: 해시(#weekly)에 따라 nav 액티브를 Journal↔Weekly 로 전환 + 페이지 서브탭 동기화
 # 2026-08-03: Weekly 상단 탭 병합 — 상단 Journal 은 상시 active, 해시는 드롭다운·하위 스트립만 전환
