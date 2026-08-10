@@ -86,6 +86,15 @@ def build_morning_digest(now: datetime | None = None) -> str:
     today_kst = now.astimezone(KST).date()
 
     db.init_db()
+    # 2026-08-10 사용자 정책: 다이제스트 전 섹션 = 별표(universe_stars_v1) 종목만.
+    # 로드 실패 시 None → 필터 미적용(전 종목 노출)으로 안전 폴백.
+    stars = db._load_starred_tickers()
+
+    def _only_starred(rows: list[dict], key: str = 'ticker') -> list[dict]:
+        if stars is None:
+            return rows
+        return [r for r in rows if str(r.get(key, '')).upper() in stars]
+
     conn = db.get_conn()
     try:
         # Section 1. 어제 신규 발표 — accession_number 기준 dedup (한 종목이 같은 분기 여러 stage 가능)
@@ -99,7 +108,7 @@ def build_morning_digest(now: datetime | None = None) -> str:
                ORDER BY filed_at ASC""",
             (since_iso,),
         ).fetchall()
-        new_unique = [dict(r) for r in rows]
+        new_unique = _only_starred([dict(r) for r in rows])
 
         green, yellow, white = [], [], []
         for f in new_unique:
@@ -119,16 +128,16 @@ def build_morning_digest(now: datetime | None = None) -> str:
                FROM transcript_jobs j JOIN filings f ON j.filing_id = f.id
                WHERE j.last_status NOT IN ('success', 'gave_up',
                                            'stale_pending', 'needs_review')
-               ORDER BY f.filed_at DESC LIMIT 20""",
+               ORDER BY f.filed_at DESC LIMIT 200""",
         ).fetchall()
-        backlog_active = [dict(r) for r in backlog_active]
+        backlog_active = _only_starred([dict(r) for r in backlog_active])
         backlog_manual = conn.execute(
             """SELECT j.ticker, j.last_status, j.attempt_count, j.last_error, f.filed_at
                FROM transcript_jobs j JOIN filings f ON j.filing_id = f.id
                WHERE j.last_status IN ('stale_pending', 'needs_review', 'gate_blocked')
-               ORDER BY f.filed_at DESC LIMIT 20""",
+               ORDER BY f.filed_at DESC LIMIT 200""",
         ).fetchall()
-        backlog_manual = [dict(r) for r in backlog_manual]
+        backlog_manual = _only_starred([dict(r) for r in backlog_manual])
 
         # Section 2b. 게이트 격리 — 번역·발행 게이트가 하드 차단해 translation_skipped=1
         # 로 격리된 행 (2026-08-03 신설). 격리 행은 pending 대기열에서 제외되므로
@@ -138,9 +147,9 @@ def build_morning_digest(now: datetime | None = None) -> str:
                JOIN filings f ON t.filing_id = f.id
                WHERE COALESCE(t.translation_skipped, 0) = 1
                  AND t.translated_kr IS NULL
-               ORDER BY f.filed_at DESC LIMIT 20""",
+               ORDER BY f.filed_at DESC LIMIT 200""",
         ).fetchall()
-        quarantined = [dict(r) for r in quarantined]
+        quarantined = _only_starred([dict(r) for r in quarantined])
 
         # Section 3. 다음 7일 예정
         upcoming = conn.execute(
@@ -150,12 +159,13 @@ def build_morning_digest(now: datetime | None = None) -> str:
             (today_kst.isoformat(),
              (today_kst + timedelta(days=LOOKAHEAD_DAYS)).isoformat()),
         ).fetchall()
-        upcoming = [dict(r) for r in upcoming]
+        upcoming = _only_starred([dict(r) for r in upcoming])
     finally:
         conn.close()
 
     # ── 메시지 조립 (제목은 Telegram HTML bold+underline) ──
-    lines = [f"<b><u>☀️ 어닝봇 일일 다이제스트 ({today_kst.isoformat()})</u></b>", '']
+    star_tag = ' · ★별표만' if stars is not None else ''
+    lines = [f"<b><u>☀️ 어닝봇 일일 다이제스트 ({today_kst.isoformat()}{star_tag})</u></b>", '']
 
     def _format_entry(ticker: str, label: str) -> str:
         return f'  • [{ticker}] {label}'.rstrip()
