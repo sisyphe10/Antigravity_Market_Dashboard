@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-09 18:45:00 KST",
+  "updated_at": "2026-08-10 18:45:01 KST",
   "slots": [
     {
       "id": "market-1m-leader",
@@ -15,7 +15,7 @@
       "category": "Market",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "2026-08 11개 자산 중 10/11 상승 — 광범위한 상승",
+      "text": "2026-08 11개 자산 중 10/11 상승 — 위험자산 동반 강세",
       "href": "market.html",
       "spark": null
     },
@@ -24,7 +24,7 @@
       "category": "Memory",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "DDR5 1W +1.5% ($68) — 점진적 반등",
+      "text": "DDR5 1W +1.5% ($68) — 하방 압력 완화",
       "href": "market.html",
       "spark": {
         "series": [
@@ -2015,7 +2015,7 @@
       "category": "Commodity",
       "color": "#2d7a3a",
       "tone": "interpret",
-      "text": "리튬카보네이트 1M -9.9% — 공급 부담 가중",
+      "text": "리튬카보네이트 1M -9.9% — 수요 위축",
       "href": "market.html",
       "spark": {
         "series": [
@@ -3172,7 +3172,7 @@
       "category": "Alert",
       "color": "#c2410c",
       "tone": "fact",
-      "text": "오늘 투자주의 39 · 경고 3 · 위험 3",
+      "text": "오늘 투자주의 40 · 경고 5 · 위험 5",
       "href": "market_alert.html",
       "spark": null
     },
@@ -3181,7 +3181,7 @@
       "category": "Featured",
       "color": "#d97706",
       "tone": "fact",
-      "text": "8.7(금) 거래대금 1위: SK하이닉스 7.3조원",
+      "text": "8.10(월) 거래대금 1위: SK하이닉스 4.7조원",
       "href": "featured.html",
       "spark": null
     },
@@ -3190,7 +3190,7 @@
       "category": "Featured",
       "color": "#d97706",
       "tone": "fact",
-      "text": "8.7(금) KOSDAQ 상승률 1위: 동화기업 +30.0%",
+      "text": "8.10(월) KOSDAQ 상승률 1위: 비츠로넥스텍 +29.9%",
       "href": "featured.html",
       "spark": null
     },
@@ -5112,7 +5112,7 @@
       "category": "AI",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "LLM Token Index 최신 1.177$/1M tokens (2026-08-06)",
+      "text": "LLM Token Index 최신 1.163$/1M tokens (2026-08-08)",
       "href": "market.html",
       "name": "LLM Token Index",
       "unit": "$/1M tokens",
@@ -5158,7 +5158,9 @@
           1.2901,
           1.2723,
           1.1997,
-          1.1771
+          1.1771,
+          1.1692,
+          1.1635
         ],
         "trend": "down",
         "dates": [
@@ -5201,12 +5203,14 @@
           "2026-08-03",
           "2026-08-04",
           "2026-08-05",
-          "2026-08-06"
+          "2026-08-06",
+          "2026-08-07",
+          "2026-08-08"
         ]
       },
       "period": [
         "2026-06-28",
-        "2026-08-06"
+        "2026-08-08"
       ]
     },
     {
@@ -5214,7 +5218,7 @@
       "category": "AI",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "H100 GPU Rental 최신 7.19$/hr (2026-08-07)",
+      "text": "H100 GPU Rental 최신 7.19$/hr (2026-08-08)",
       "href": "market.html",
       "name": "H100 GPU Rental",
       "unit": "$/hr",
@@ -5257,6 +5261,7 @@
           7.19,
           7.19,
           7.18,
+          7.19,
           7.19,
           7.19,
           7.19,
@@ -5303,12 +5308,13 @@
           "2026-08-04",
           "2026-08-05",
           "2026-08-06",
-          "2026-08-07"
+          "2026-08-07",
+          "2026-08-08"
         ]
       },
       "period": [
         "2026-06-29",
-        "2026-08-07"
+        "2026-08-08"
       ]
     },
     {
@@ -5316,7 +5322,7 @@
       "category": "AI",
       "color": "#2d7a3a",
       "tone": "fact",
-      "text": "RAM Index 최신 17.89 (2026-08-07)",
+      "text": "RAM Index 최신 17.89 (2026-08-08)",
       "href": "market.html",
       "name": "RAM Index",
       "unit": "",
@@ -5360,6 +5366,7 @@
           17.8,
           17.8,
           17.8,
+          17.89,
           17.89,
           17.89,
           17.89,
@@ -5407,12 +5414,13 @@
           "2026-08-04",
           "2026-08-05",
           "2026-08-06",
-          "2026-08-07"
+          "2026-08-07",
+          "2026-08-08"
         ]
       },
       "period": [
         "2026-06-28",
-        "2026-08-07"
+        "2026-08-08"
       ]
     },
     {
