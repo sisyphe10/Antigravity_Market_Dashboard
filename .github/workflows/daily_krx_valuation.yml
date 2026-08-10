@@ -47,6 +47,15 @@ jobs:
           fi
           python execution/fetch_krx_valuation.py
 
+      - name: Fetch KOSDAQ leveraged ETF AUM (코스닥 레버리지 ETF AUM 합산)
+        if: env.KRX_SKIP != '1'
+        env:
+          KRX_ID: ${{ secrets.KRX_ID }}
+          KRX_PW: ${{ secrets.KRX_PW }}
+          TZ: 'Asia/Seoul'
+        run: |
+          python execution/fetch_kosdaq_lev_etf_aum.py || echo "KOSDAQ lev ETF AUM fetch failed (continuing)"
+
       - name: Generate Dashboard
         if: env.KRX_SKIP != '1'
         run: |

@@ -1436,6 +1436,26 @@
    ]
   },
   {
+   "id": "src-kosdaq-lev-etf-aum",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "pipeline_source",
+   "name": "코스닥 레버리지 ETF AUM (fetch_kosdaq_lev_etf_aum.py)",
+   "runs_on": "gha",
+   "schedule_kst": "18:30 평일 (gha-daily-krx-valuation 합승)",
+   "status": "active",
+   "desc_md": "코스닥 레버리지 ETF(날짜별 종목명 '코스닥'+'레버리지' 필터, 2026-08 기준 5종: KODEX 233740·TIGER 233160·RISE 278240·HANARO 306530·KIWOOM 291630)의 일간 순자산총액(AUM) 합산을 KRX MDCSTAT04301(ETF 전종목시세, pykrx 로그인 세션)에서 수집해 dataset.csv(dtype ETF_AUM, 원 단위 정수)에 적재. DATA(INDEX_KOREA) 노출, 표시 단위 억원(1e8 제수).\n\n- 이름 필터라서 상장·상폐·브랜드 개명이 자동 반영 — 구성 변동 점프는 보정하지 않음.\n- 백필 2015-12-17(KODEX 상장일)~. 엄격 합산: 대상 중 1종이라도 AUM 결측이면 그 날짜 미적재.",
+   "code": [
+    "execution/fetch_kosdaq_lev_etf_aum.py"
+   ],
+   "writes": [
+    "store-dataset-csv"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
    "id": "src-krx-foreign",
    "project": "antigravity",
    "domain": "market-kr",

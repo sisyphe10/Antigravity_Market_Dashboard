@@ -1600,6 +1600,7 @@ CMB_SERIES_SCALE = {
     'S&P 500 거래량': 1e9, 'NASDAQ 거래량': 1e9,
     'SPY 거래대금': 1e9, 'QQQ 거래대금': 1e9,
     '경상수지': 10, '외환보유액': 10,   # 억달러 -> $B
+    '코스닥 레버리지 ETF AUM': 1e8,   # 원 -> 억원 (축 1조 이상이면 조원 자동 승격)
 }
 
 CMB_SERIES_UNITS = {
@@ -1610,6 +1611,7 @@ CMB_SERIES_UNITS = {
     'SPY 거래대금': '십억달러', 'QQQ 거래대금': '십억달러',
     '고객예탁금': '억원', '신용잔고': '억원', '반대매매금액': '억원',
     'KOSPI 신용잔고': '억원', 'KOSDAQ 신용잔고': '억원',
+    '코스닥 레버리지 ETF AUM': '억원',
     'KOSPI 배당수익률': '%', 'KOSDAQ 배당수익률': '%',
     'KOSPI 외국인비중': '%', 'KOSDAQ 외국인비중': '%', '삼성전자 외국인비중': '%', '삼성전자우 외국인비중': '%',
     'SK하이닉스 외국인비중': '%', '삼성생명 외국인비중': '%', 'SK스퀘어 외국인비중': '%', '삼성물산 외국인비중': '%',
@@ -1835,6 +1837,8 @@ def _build_combined_chart_section():
                 {'display': 'KOSDAQ PER',         'csv': 'KOSDAQ PER',         'color': '#00838F'},
                 {'display': 'KOSDAQ PBR',         'csv': 'KOSDAQ PBR',         'color': '#0097A7'},
                 {'display': 'KOSDAQ 배당수익률',  'csv': 'KOSDAQ 배당수익률',  'color': '#26C6DA'},
+                # 코스닥 레버리지 ETF AUM 합산 (KRX MDCSTAT04301 → ETF_AUM, 원 단위 정수)
+                {'display': '코스닥 레버리지 ETF AUM', 'csv': '코스닥 레버리지 ETF AUM', 'color': '#F9A825'},
                 # 외국인 보유비중/지분율 — JS isForeign 분기로 항상 레벨(%) 표시 (정규화 제외)
                 {'display': 'KOSPI 외국인비중',   'csv': 'KOSPI 외국인 보유비중',   'color': '#E91E63'},
                 {'display': 'KOSDAQ 외국인비중',   'csv': 'KOSDAQ 외국인 보유비중',  'color': '#F06292'},
@@ -2121,7 +2125,7 @@ def _build_combined_chart_section():
             long_mask = df['데이터 타입'].isin(['ECOS_MACRO', 'ECOS_SECTOR', 'FRED_MACRO', 'FRED_SECTOR',
                                                 'NPS_FUND', 'KOSIS_PENSION', 'KOSIS_MACRO', 'KOSIS_SECTOR', 'JP_CAPEX',
                                                 'IMMIGRATION', 'ISM_MACRO',
-                                                'BOND_ISSUANCE_US', 'BOND_ISSUANCE_KR'])
+                                                'BOND_ISSUANCE_US', 'BOND_ISSUANCE_KR', 'ETF_AUM'])
             # 연간 시리즈(퇴직연금 등)는 5년 창이면 4점뿐 → 창 제한 없이 전체 임베드 (행 수 미미)
             full_mask = df['데이터 타입'].isin(['KOSIS_PENSION'])
         else:

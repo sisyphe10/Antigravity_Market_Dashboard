@@ -311,6 +311,7 @@ run_job() {
         echo "[gha-krx-valuation] KRX_ID/KRX_PW 미설정 → graceful skip (no failure)" >&2; return 0
       fi
       "$PY" execution/fetch_krx_valuation.py || return $?
+      "$PY" execution/fetch_kosdaq_lev_etf_aum.py || echo "[gha-krx-valuation] 코스닥 레버리지 ETF AUM 수집 실패 (계속 진행)" >&2
       "$PY" execution/create_dashboard.py || return $?
       /bin/bash scripts/safe_commit_push.sh \
         -m "Auto-update: KRX index valuation [skip ci]" \
