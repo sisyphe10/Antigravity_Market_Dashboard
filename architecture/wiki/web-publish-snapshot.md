@@ -36,6 +36,7 @@ alerts: "실패해도 잡 rc 무관 · 어떤 실패 경로에서도 기존 curr
   - **Sisyphe 구역 구분 완전 폐지**: 2026-07-16엔 Sisyphe 페이지를 다크 대상에서 제외해 구역을 구분했으나, 사용자 지시로 **Sisyphe 평문 페이지(index/dashboard/journal/memento)에도 동일 다크를 주입** — AoE와 Sisyphe가 시각적으로 완전 통일됐다. `wrap.html`은 여전히 라이트 예외([[page-wrap]]).
   - **브랜드 라벨 `AoE` → `AGE OF EMERGENCE`**: 원천(`create_dashboard.py`)·Sisyphe nav 교체·정적 페이지 멱등 치환 모두에서 브랜드 전체 이름으로 확장. 리버스 프록시 두 데몬 페이지의 nav 사본([[daemon-watchlist-quoteboard]]·[[daemon-datalake-webui]])도 손으로 맞춰 통일했다.
 - **2026-07-22 nav 순서 개편 + Earnings 탭**: 탭 순서를 좌 `Watchlist · Market · Journal · Weekly · Earnings · Wiki` / 우(`.right-group{margin-left:auto}`) `Memento · Ledger · Architecture`로 재편. 새 **`Earnings`** 탭은 `/wiki/library`([[daemon-datalake-webui]] Earnings Library)를 가리킨다 — 실적봇 분석의 Notion 퍼블리시가 datalake md 발행으로 대체되며 열람 UI가 여기로 옮겨졌다([[src-earnings-pipeline]]·[[store-analyses-md]]). AoE 페이지·Sisyphe 페이지 nav 교체·리버스 프록시 두 데몬 사본을 모두 이 순서로 맞췄다. (Checklist 탭은 잠시 추가됐다 라이브 nav에서 제거됨 — 직접 URL `sisyphe/checklist.html` 테스트 페이지로만 잔존.)
+- **2026-08-10 Ledger 탭 이관 — `dashboard.html` nav 소유권 은퇴**: 우측 그룹의 `Ledger` 탭이 `/sisyphe/dashboard.html` 대신 **`/journal/#ledger`**(Escape Velocity, [[daemon-journal-api]])를 가리킨다([[src-nav-style]] `NAV_ITEMS`). 합성기의 `ACTIVE_OF`에서 `dashboard.html`은 `'ledger'` → `None`이 되어, 이 페이지는 **합성·게시는 계속되지만 어떤 nav 탭도 active로 만들지 않는 직접 URL 페이지**로 격하됐다. 탭 개수·순서는 그대로라 데몬 두 곳의 nav 사본은 손댈 것이 없다.
 - mkdir 원자 락(120s)으로 게시 직렬화. 실패해도 잡 rc에 영향 없음(호출측 `|| true`).
 - 팀원용 공개 게시는 별도 경로([[web-publish-pages]], gh-pages).
 

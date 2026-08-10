@@ -25,6 +25,7 @@ alerts: ""
 - **가계부**: 카드 SMS→아이폰 단축어→Apps Script→Sheet 파이프라인. Sisyphe-Bot이 답장으로 분류/수정.
 - **서빙**: 평문 페이지가 `~/srv/sisyphe_plain` → `compose_personal_view.py` → 스냅숏 `current/sisyphe/`로 합성돼 `/sisyphe/*`로 서빙([[web-publish-snapshot]], 2026-07-13 staticrypt 암호화 폐기).
 - **2026-07-16 'Sisyphe 구역' 해체** — 전용 탭·색 테마를 없애고 개인 뷰 전체가 단일 AoE topnav로 통일됐다. 페이지들은 AoE 탭으로 승격: `Journal`(구 Invest)·`Weekly`(딥링크 `#weekly`)·`Memento`·`Ledger`. **`memento.html`은 AoE 기본 화면**(루트 302 대상, [[web-caddy]])이고, 구 진입점 `/sisyphe/index.html`은 Memento 리다이렉트 스텁으로 격하됐다.
+- **2026-08-10 Ledger 화면 이관** — AoE `Ledger` 탭이 `/sisyphe/dashboard.html`에서 **Escape Velocity `/journal/#ledger`**([[daemon-journal-api]])로 옮겨갔다. 평문 `dashboard.html`은 은퇴 상태로 합성·서빙만 유지(직접 URL 전용, nav 탭 미소유 — [[src-nav-style]]·[[web-publish-snapshot]]). 가계부 열람 정본이 Sisyphe 평문 페이지에서 `~/Journal` 로컬 뷰로 넘어간 셈이고, 수집 파이프라인(카드 SMS→Sheet)은 그대로다.
 - 파생 접점: [[timer-memento-telegram]](12:00 따끔어 텔레그램)·[[daemon-plan-api]](Ledger 'Plan' 탭 백엔드) — 둘 다 스크립트 실체는 `~/Journal` 로컬 전용이라 repo는 배선만 소유.
 
 ## Reads

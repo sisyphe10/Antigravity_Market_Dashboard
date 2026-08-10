@@ -28,6 +28,7 @@ alerts: ""
 
 - 403=핑거프린트 회전. 사각지대=월요일 다이제스트. "없음"은 침묵.
 - 사이트 개편 복구: 커스텀 fetcher(_CUSTOM_FETCHERS, 예 Coveo/RSS), id체계 바뀌면 state 시딩 필수.
+- **텐센트(0700) 사각지대 복구(2026-08-10)**: `financial-news.html`이 ~7/30부터 `financial-reports`로 리다이렉트되며 **17회 연속 무수집**. 후속 목록 `investor-news`는 제목을 `<p class='entry-title'>`로 내보내 날짜 앵커 기반 범용 추출기가 0건을 반환하고, RSS는 빈 WP 댓글 피드·wp-json은 401이라 표준 경로가 전부 막혔다 → `_fetch_tencent_investor_news` 커스텀 fetcher(`article.investor-news-item` 카드) 추가 + `foreign_ir_sources.json`의 `ir_url` 교체. ★**"조용한 0건"은 실패로 잡히지 않는다** — 이 사각지대를 드러내는 장치는 월요일 다이제스트뿐이다.
 - 소스 목록 `foreign_ir_sources.json`.
 
 ## Reads

@@ -1,8 +1,8 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 163 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 164 components._
 
-Updated: 2026-08-09
+Updated: 2026-08-10
 
 ## By domain
 
@@ -17,7 +17,7 @@ Updated: 2026-08-09
 - [web-chart 스킬 (웹 인터랙티브 차트 표준)](skill-web-chart.md) — Skill
 - [금융 분석 스킬 팩 (설치형 8종)](skill-finance-pack.md) — Skill
 
-### 국내 시장 (34)
+### 국내 시장 (35)
 - [boutique_etf.db (부티크 액티브 ETF SQLite)](store-boutique-etf-db.md) — Store
 - [Daily Disclosures DART+KIND (16:30)](gha-daily-disclosures.md) — GHA
 - [Daily KOFIA Stats + NPS (21:30 평일)](gha-daily-kofia.md) — GHA
@@ -47,6 +47,7 @@ Updated: 2026-08-09
 - [종목마스터 주간 갱신 타이머 (토 09:00)](timer-update-stock-master.md) — Timer
 - [지수 거래대금·거래량 (build_index_value.py)](src-index-value.md) — Source
 - [출입국 월별 통계 (fetch_immigration.py)](src-immigration.md) — Source
+- [코스닥 레버리지 ETF AUM (fetch_kosdaq_lev_etf_aum.py)](src-kosdaq-lev-etf-aum.md) — Source
 - [투자유의 생성기 (create_market_alert.py)](src-create-market-alert.md) — Source
 - [투자자별 수급 (fetch_investor_trading.py)](src-investor-trading.md) — Source
 - [투자주체별 누적 순매수 (build_investor_flow.py)](src-investor-flow.md) — Source
@@ -299,7 +300,7 @@ Updated: 2026-08-09
 - [외부 데이터 API/소스 집합](ext-data-apis.md) — active
 - [한국 수출 매출 추정 대시보드](ext-export-dashboard.md) — planned
 
-### Source (54)
+### Source (55)
 - [AoE 스타일 정본 (nav_style.py)](src-nav-style.md) — import 시 (상시), active
 - [AoE 차트 코어 (chart_core/aoe_chart.js)](src-chart-core.md) — 빌드타임 인라인 임베드 (상시), active
 - [DART 공시 (fetch_disclosures.py)](src-dart-disclosures.md) — 16:30 (gha-daily-disclosures), active
@@ -347,6 +348,7 @@ Updated: 2026-08-09
 - [지수 거래대금·거래량 (build_index_value.py)](src-index-value.md) — 23:00 (gha-daily-crawl), active
 - [차트 렌더러 (draw_charts + draw_wrap_charts)](src-draw-charts.md) — 23:00 (daily_crawl), active
 - [출입국 월별 통계 (fetch_immigration.py)](src-immigration.md) — 23:30 (kodex 타이머 편승), active
+- [코스닥 레버리지 ETF AUM (fetch_kosdaq_lev_etf_aum.py)](src-kosdaq-lev-etf-aum.md) — 18:30 평일 (gha-daily-krx-valuation 합승), active
 - [투자유의 생성기 (create_market_alert.py)](src-create-market-alert.md) — 16:05 / 23:00 (sisyphe-bot), active
 - [투자일지 시장데이터 (fetch_journal_data.py)](src-journal-data.md) — 16:10 (sisyphe-bot), active
 - [투자자별 수급 (fetch_investor_trading.py)](src-investor-trading.md) — 장 마감 후 (sisyphe-bot), active
@@ -374,7 +376,7 @@ Updated: 2026-08-09
 
 ## By project
 
-### antigravity (163)
+### antigravity (164)
 - [/aum — WRAP 일일 AUM 입력](cmd-aum.md) — Skill
 - [/긴급코멘트 — 급락일 시장 코멘트](cmd-urgent-comment.md) — Skill
 - [/목표전환형 — 랩 생성·청산 일괄](cmd-target-transform.md) — Skill
@@ -525,6 +527,7 @@ Updated: 2026-08-09
 - [차트 렌더러 (draw_charts + draw_wrap_charts)](src-draw-charts.md) — Source
 - [출입국 월별 통계 (fetch_immigration.py)](src-immigration.md) — Source
 - [컴퓨트 호스트 (맥미니)](infra-vm-macmini.md) — Infra
+- [코스닥 레버리지 ETF AUM (fetch_kosdaq_lev_etf_aum.py)](src-kosdaq-lev-etf-aum.md) — Source
 - [크래시 루프 워처 (*/5)](daemon-crash-watcher.md) — Watcher
 - [텔레그램 (알림·상호작용 채널)](infra-telegram.md) — Infra
 - [통합 태그 인덱스 (tag_index.sqlite + doc_tag_state.sqlite)](store-tag-index.md) — Store
