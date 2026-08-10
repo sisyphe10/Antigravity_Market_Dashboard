@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-09T18:30:02+09:00",
+  "updated": "2026-08-10T16:22:46+09:00",
   "window_short": 5,
   "window_long": 20,
   "stocks": {
@@ -102,6 +102,23 @@
         "frgn_volume": -265543,
         "inst_value_eok": 1802.1,
         "frgn_value_eok": -397.0,
+        "days_available": 20
+      }
+    },
+    "034020": {
+      "last_date": "2026.08.07",
+      "short": {
+        "inst_volume": 534368,
+        "frgn_volume": -288709,
+        "inst_value_eok": 408.5,
+        "frgn_value_eok": -221.1,
+        "days_available": 5
+      },
+      "long": {
+        "inst_volume": 1376380,
+        "frgn_volume": -15623,
+        "inst_value_eok": 985.4,
+        "frgn_value_eok": -114.0,
         "days_available": 20
       }
     },
