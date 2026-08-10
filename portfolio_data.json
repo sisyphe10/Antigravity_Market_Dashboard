@@ -55,14 +55,50 @@
       "is_today_new": false
     },
     {
+      "code": "196170",
+      "name": "알테오젠",
+      "sector": "건강관리",
+      "market_cap": 186480,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": 14.098360655737704,
+      "contribution": 7.049180327868852,
+      "ytd_return": 0.6164201371621436,
+      "cumulative_return": 13.35504885993486,
+      "current_price": 348000.0,
+      "price_date": "2026-08-10",
+      "ath_price": 430123.0,
+      "dd": -19.092910632539994,
+      "rsi": 20.89067020819735,
+      "is_today_new": false
+    },
+    {
+      "code": "034020",
+      "name": "두산에너빌리티",
+      "sector": "기계",
+      "market_cap": 511808,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 3.631647211413749,
+      "contribution": 1.0894941634241246,
+      "ytd_return": 6.108897742363872,
+      "cumulative_return": 0.0,
+      "current_price": 79900.0,
+      "price_date": "2026-08-10",
+      "ath_price": 136400.0,
+      "dd": -41.422287390029325,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "035420",
       "name": "NAVER",
       "sector": "소프트웨어",
-      "market_cap": 331937,
+      "market_cap": 332008,
       "weight": 3.0,
-      "weight_prev": 4.0,
+      "weight_prev": 3.0,
       "today_return": 0.7142857142857143,
-      "contribution": 0.28571428571428575,
+      "contribution": 0.21428571428571427,
       "ytd_return": -12.783505154639174,
       "cumulative_return": -3.479749001711352,
       "current_price": 211500.0,
@@ -70,42 +106,6 @@
       "ath_price": 454000.0,
       "dd": -53.414096916299556,
       "rsi": 7.3698757804154695,
-      "is_today_new": false
-    },
-    {
-      "code": "402340",
-      "name": "SK스퀘어",
-      "sector": "상사,자본재",
-      "market_cap": 1252285,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": 1.0649627263045793,
-      "contribution": 0.3194888178913738,
-      "ytd_return": 157.8804347826087,
-      "cumulative_return": -8.574181117533719,
-      "current_price": 949000.0,
-      "price_date": "2026-08-10",
-      "ath_price": 1970000.0,
-      "dd": -51.82741116751268,
-      "rsi": -4.08942268558442,
-      "is_today_new": false
-    },
-    {
-      "code": "196170",
-      "name": "알테오젠",
-      "sector": "건강관리",
-      "market_cap": 186480,
-      "weight": 5.0,
-      "weight_prev": 3.0,
-      "today_return": 14.098360655737704,
-      "contribution": 4.229508196721311,
-      "ytd_return": 0.6164201371621436,
-      "cumulative_return": 24.433849821215723,
-      "current_price": 348000.0,
-      "price_date": "2026-08-10",
-      "ath_price": 430123.0,
-      "dd": -19.092910632539994,
-      "rsi": 20.89067020819735,
       "is_today_new": false
     },
     {
@@ -214,24 +214,6 @@
       "ath_price": 52800.0,
       "dd": 0.0,
       "rsi": 25.546334206119713,
-      "is_today_new": false
-    },
-    {
-      "code": "034020",
-      "name": "두산에너빌리티",
-      "sector": "기계",
-      "market_cap": 511808,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": 3.631647211413749,
-      "contribution": 0.0,
-      "ytd_return": 6.108897742363872,
-      "cumulative_return": null,
-      "current_price": 79900.0,
-      "price_date": "2026-08-10",
-      "ath_price": 136400.0,
-      "dd": -41.422287390029325,
-      "rsi": null,
       "is_today_new": false
     }
   ],
@@ -291,14 +273,50 @@
       "is_today_new": false
     },
     {
+      "code": "196170",
+      "name": "알테오젠",
+      "sector": "건강관리",
+      "market_cap": 186480,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": 14.098360655737704,
+      "contribution": 7.049180327868852,
+      "ytd_return": 0.6164201371621436,
+      "cumulative_return": 13.35504885993486,
+      "current_price": 348000.0,
+      "price_date": "2026-08-10",
+      "ath_price": 430123.0,
+      "dd": -19.092910632539994,
+      "rsi": 20.89067020819735,
+      "is_today_new": false
+    },
+    {
+      "code": "034020",
+      "name": "두산에너빌리티",
+      "sector": "기계",
+      "market_cap": 511808,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 3.631647211413749,
+      "contribution": 1.0894941634241246,
+      "ytd_return": 6.108897742363872,
+      "cumulative_return": 0.0,
+      "current_price": 79900.0,
+      "price_date": "2026-08-10",
+      "ath_price": 136400.0,
+      "dd": -41.422287390029325,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "035420",
       "name": "NAVER",
       "sector": "소프트웨어",
-      "market_cap": 331937,
+      "market_cap": 332008,
       "weight": 3.0,
-      "weight_prev": 4.0,
+      "weight_prev": 3.0,
       "today_return": 0.7142857142857143,
-      "contribution": 0.28571428571428575,
+      "contribution": 0.21428571428571427,
       "ytd_return": -12.783505154639174,
       "cumulative_return": -3.479749001711352,
       "current_price": 211500.0,
@@ -306,42 +324,6 @@
       "ath_price": 454000.0,
       "dd": -53.414096916299556,
       "rsi": 7.3698757804154695,
-      "is_today_new": false
-    },
-    {
-      "code": "402340",
-      "name": "SK스퀘어",
-      "sector": "상사,자본재",
-      "market_cap": 1252285,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": 1.0649627263045793,
-      "contribution": 0.3194888178913738,
-      "ytd_return": 157.8804347826087,
-      "cumulative_return": -8.574181117533719,
-      "current_price": 949000.0,
-      "price_date": "2026-08-10",
-      "ath_price": 1970000.0,
-      "dd": -51.82741116751268,
-      "rsi": -4.08942268558442,
-      "is_today_new": false
-    },
-    {
-      "code": "196170",
-      "name": "알테오젠",
-      "sector": "건강관리",
-      "market_cap": 186480,
-      "weight": 5.0,
-      "weight_prev": 3.0,
-      "today_return": 14.098360655737704,
-      "contribution": 4.229508196721311,
-      "ytd_return": 0.6164201371621436,
-      "cumulative_return": 24.433849821215723,
-      "current_price": 348000.0,
-      "price_date": "2026-08-10",
-      "ath_price": 430123.0,
-      "dd": -19.092910632539994,
-      "rsi": 20.89067020819735,
       "is_today_new": false
     },
     {
@@ -451,24 +433,6 @@
       "dd": 0.0,
       "rsi": 25.546334206119713,
       "is_today_new": false
-    },
-    {
-      "code": "034020",
-      "name": "두산에너빌리티",
-      "sector": "기계",
-      "market_cap": 511808,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": 3.631647211413749,
-      "contribution": 0.0,
-      "ytd_return": 6.108897742363872,
-      "cumulative_return": null,
-      "current_price": 79900.0,
-      "price_date": "2026-08-10",
-      "ath_price": 136400.0,
-      "dd": -41.422287390029325,
-      "rsi": null,
-      "is_today_new": false
     }
   ],
   "NH 목표전환형 5호": [
@@ -527,14 +491,50 @@
       "is_today_new": false
     },
     {
+      "code": "196170",
+      "name": "알테오젠",
+      "sector": "건강관리",
+      "market_cap": 186480,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": 14.098360655737704,
+      "contribution": 7.049180327868852,
+      "ytd_return": 0.6164201371621436,
+      "cumulative_return": 13.35504885993486,
+      "current_price": 348000.0,
+      "price_date": "2026-08-10",
+      "ath_price": 430123.0,
+      "dd": -19.092910632539994,
+      "rsi": 20.89067020819735,
+      "is_today_new": false
+    },
+    {
+      "code": "034020",
+      "name": "두산에너빌리티",
+      "sector": "기계",
+      "market_cap": 511808,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 3.631647211413749,
+      "contribution": 1.0894941634241246,
+      "ytd_return": 6.108897742363872,
+      "cumulative_return": 0.0,
+      "current_price": 79900.0,
+      "price_date": "2026-08-10",
+      "ath_price": 136400.0,
+      "dd": -41.422287390029325,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "035420",
       "name": "NAVER",
       "sector": "소프트웨어",
-      "market_cap": 331937,
+      "market_cap": 332008,
       "weight": 3.0,
-      "weight_prev": 4.0,
+      "weight_prev": 3.0,
       "today_return": 0.7142857142857143,
-      "contribution": 0.28571428571428575,
+      "contribution": 0.21428571428571427,
       "ytd_return": -12.783505154639174,
       "cumulative_return": -3.479749001711352,
       "current_price": 211500.0,
@@ -542,42 +542,6 @@
       "ath_price": 454000.0,
       "dd": -53.414096916299556,
       "rsi": 7.3698757804154695,
-      "is_today_new": false
-    },
-    {
-      "code": "402340",
-      "name": "SK스퀘어",
-      "sector": "상사,자본재",
-      "market_cap": 1252285,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": 1.0649627263045793,
-      "contribution": 0.3194888178913738,
-      "ytd_return": 157.8804347826087,
-      "cumulative_return": -8.574181117533719,
-      "current_price": 949000.0,
-      "price_date": "2026-08-10",
-      "ath_price": 1970000.0,
-      "dd": -51.82741116751268,
-      "rsi": -4.08942268558442,
-      "is_today_new": false
-    },
-    {
-      "code": "196170",
-      "name": "알테오젠",
-      "sector": "건강관리",
-      "market_cap": 186480,
-      "weight": 5.0,
-      "weight_prev": 3.0,
-      "today_return": 14.098360655737704,
-      "contribution": 4.229508196721311,
-      "ytd_return": 0.6164201371621436,
-      "cumulative_return": 24.433849821215723,
-      "current_price": 348000.0,
-      "price_date": "2026-08-10",
-      "ath_price": 430123.0,
-      "dd": -19.092910632539994,
-      "rsi": 20.89067020819735,
       "is_today_new": false
     },
     {
@@ -687,24 +651,6 @@
       "dd": 0.0,
       "rsi": 25.546334206119713,
       "is_today_new": false
-    },
-    {
-      "code": "034020",
-      "name": "두산에너빌리티",
-      "sector": "기계",
-      "market_cap": 511808,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": 6.108897742363872,
-      "cumulative_return": null,
-      "current_price": 79900.0,
-      "price_date": "2026-08-10",
-      "ath_price": 136400.0,
-      "dd": -41.422287390029325,
-      "rsi": null,
-      "is_today_new": true
     }
   ],
   "DB 목표전환형 6차": [
@@ -763,14 +709,50 @@
       "is_today_new": false
     },
     {
+      "code": "196170",
+      "name": "알테오젠",
+      "sector": "건강관리",
+      "market_cap": 186480,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": 14.098360655737704,
+      "contribution": 7.049180327868852,
+      "ytd_return": 0.6164201371621436,
+      "cumulative_return": 13.35504885993486,
+      "current_price": 348000.0,
+      "price_date": "2026-08-10",
+      "ath_price": 430123.0,
+      "dd": -19.092910632539994,
+      "rsi": 20.89067020819735,
+      "is_today_new": false
+    },
+    {
+      "code": "034020",
+      "name": "두산에너빌리티",
+      "sector": "기계",
+      "market_cap": 511808,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 3.631647211413749,
+      "contribution": 1.0894941634241246,
+      "ytd_return": 6.108897742363872,
+      "cumulative_return": 0.0,
+      "current_price": 79900.0,
+      "price_date": "2026-08-10",
+      "ath_price": 136400.0,
+      "dd": -41.422287390029325,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "035420",
       "name": "NAVER",
       "sector": "소프트웨어",
-      "market_cap": 331937,
+      "market_cap": 332008,
       "weight": 3.0,
-      "weight_prev": 4.0,
+      "weight_prev": 3.0,
       "today_return": 0.7142857142857143,
-      "contribution": 0.28571428571428575,
+      "contribution": 0.21428571428571427,
       "ytd_return": -12.783505154639174,
       "cumulative_return": -3.479749001711352,
       "current_price": 211500.0,
@@ -778,42 +760,6 @@
       "ath_price": 454000.0,
       "dd": -53.414096916299556,
       "rsi": 7.3698757804154695,
-      "is_today_new": false
-    },
-    {
-      "code": "402340",
-      "name": "SK스퀘어",
-      "sector": "상사,자본재",
-      "market_cap": 1252285,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": 1.0649627263045793,
-      "contribution": 0.3194888178913738,
-      "ytd_return": 157.8804347826087,
-      "cumulative_return": -8.574181117533719,
-      "current_price": 949000.0,
-      "price_date": "2026-08-10",
-      "ath_price": 1970000.0,
-      "dd": -51.82741116751268,
-      "rsi": -4.08942268558442,
-      "is_today_new": false
-    },
-    {
-      "code": "196170",
-      "name": "알테오젠",
-      "sector": "건강관리",
-      "market_cap": 186480,
-      "weight": 5.0,
-      "weight_prev": 3.0,
-      "today_return": 14.098360655737704,
-      "contribution": 4.229508196721311,
-      "ytd_return": 0.6164201371621436,
-      "cumulative_return": 24.433849821215723,
-      "current_price": 348000.0,
-      "price_date": "2026-08-10",
-      "ath_price": 430123.0,
-      "dd": -19.092910632539994,
-      "rsi": 20.89067020819735,
       "is_today_new": false
     },
     {
@@ -923,24 +869,6 @@
       "dd": 0.0,
       "rsi": 25.546334206119713,
       "is_today_new": false
-    },
-    {
-      "code": "034020",
-      "name": "두산에너빌리티",
-      "sector": "기계",
-      "market_cap": 511808,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": 6.108897742363872,
-      "cumulative_return": null,
-      "current_price": 79900.0,
-      "price_date": "2026-08-10",
-      "ath_price": 136400.0,
-      "dd": -41.422287390029325,
-      "rsi": null,
-      "is_today_new": true
     }
   ],
   "한투 지속형": [
@@ -999,14 +927,50 @@
       "is_today_new": false
     },
     {
+      "code": "196170",
+      "name": "알테오젠",
+      "sector": "건강관리",
+      "market_cap": 186480,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": 14.098360655737704,
+      "contribution": 7.049180327868852,
+      "ytd_return": 0.6164201371621436,
+      "cumulative_return": 13.35504885993486,
+      "current_price": 348000.0,
+      "price_date": "2026-08-10",
+      "ath_price": 430123.0,
+      "dd": -19.092910632539994,
+      "rsi": 20.89067020819735,
+      "is_today_new": false
+    },
+    {
+      "code": "034020",
+      "name": "두산에너빌리티",
+      "sector": "기계",
+      "market_cap": 511808,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 3.631647211413749,
+      "contribution": 1.0894941634241246,
+      "ytd_return": 6.108897742363872,
+      "cumulative_return": 0.0,
+      "current_price": 79900.0,
+      "price_date": "2026-08-10",
+      "ath_price": 136400.0,
+      "dd": -41.422287390029325,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "035420",
       "name": "NAVER",
       "sector": "소프트웨어",
-      "market_cap": 331937,
+      "market_cap": 332008,
       "weight": 3.0,
-      "weight_prev": 4.0,
+      "weight_prev": 3.0,
       "today_return": 0.7142857142857143,
-      "contribution": 0.28571428571428575,
+      "contribution": 0.21428571428571427,
       "ytd_return": -12.783505154639174,
       "cumulative_return": -3.479749001711352,
       "current_price": 211500.0,
@@ -1014,42 +978,6 @@
       "ath_price": 454000.0,
       "dd": -53.414096916299556,
       "rsi": 7.3698757804154695,
-      "is_today_new": false
-    },
-    {
-      "code": "402340",
-      "name": "SK스퀘어",
-      "sector": "상사,자본재",
-      "market_cap": 1252285,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": 1.0649627263045793,
-      "contribution": 0.3194888178913738,
-      "ytd_return": 157.8804347826087,
-      "cumulative_return": -8.574181117533719,
-      "current_price": 949000.0,
-      "price_date": "2026-08-10",
-      "ath_price": 1970000.0,
-      "dd": -51.82741116751268,
-      "rsi": -4.08942268558442,
-      "is_today_new": false
-    },
-    {
-      "code": "196170",
-      "name": "알테오젠",
-      "sector": "건강관리",
-      "market_cap": 186480,
-      "weight": 5.0,
-      "weight_prev": 3.0,
-      "today_return": 14.098360655737704,
-      "contribution": 4.229508196721311,
-      "ytd_return": 0.6164201371621436,
-      "cumulative_return": 24.433849821215723,
-      "current_price": 348000.0,
-      "price_date": "2026-08-10",
-      "ath_price": 430123.0,
-      "dd": -19.092910632539994,
-      "rsi": 20.89067020819735,
       "is_today_new": false
     },
     {
@@ -1159,24 +1087,6 @@
       "dd": 0.0,
       "rsi": 25.546334206119713,
       "is_today_new": false
-    },
-    {
-      "code": "034020",
-      "name": "두산에너빌리티",
-      "sector": "기계",
-      "market_cap": 511808,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": 6.108897742363872,
-      "cumulative_return": null,
-      "current_price": 79900.0,
-      "price_date": "2026-08-10",
-      "ath_price": 136400.0,
-      "dd": -41.422287390029325,
-      "rsi": null,
-      "is_today_new": true
     }
   ],
   "한투 성과모집형 1차": [
@@ -1235,14 +1145,50 @@
       "is_today_new": false
     },
     {
+      "code": "196170",
+      "name": "알테오젠",
+      "sector": "건강관리",
+      "market_cap": 186480,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": 14.098360655737704,
+      "contribution": 7.049180327868852,
+      "ytd_return": 0.6164201371621436,
+      "cumulative_return": 13.35504885993486,
+      "current_price": 348000.0,
+      "price_date": "2026-08-10",
+      "ath_price": 430123.0,
+      "dd": -19.092910632539994,
+      "rsi": 20.89067020819735,
+      "is_today_new": false
+    },
+    {
+      "code": "034020",
+      "name": "두산에너빌리티",
+      "sector": "기계",
+      "market_cap": 511808,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 3.631647211413749,
+      "contribution": 1.0894941634241246,
+      "ytd_return": 6.108897742363872,
+      "cumulative_return": 0.0,
+      "current_price": 79900.0,
+      "price_date": "2026-08-10",
+      "ath_price": 136400.0,
+      "dd": -41.422287390029325,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "035420",
       "name": "NAVER",
       "sector": "소프트웨어",
-      "market_cap": 331937,
+      "market_cap": 332008,
       "weight": 3.0,
-      "weight_prev": 4.0,
+      "weight_prev": 3.0,
       "today_return": 0.7142857142857143,
-      "contribution": 0.28571428571428575,
+      "contribution": 0.21428571428571427,
       "ytd_return": -12.783505154639174,
       "cumulative_return": -3.479749001711352,
       "current_price": 211500.0,
@@ -1250,42 +1196,6 @@
       "ath_price": 454000.0,
       "dd": -53.414096916299556,
       "rsi": 7.3698757804154695,
-      "is_today_new": false
-    },
-    {
-      "code": "402340",
-      "name": "SK스퀘어",
-      "sector": "상사,자본재",
-      "market_cap": 1252285,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": 1.0649627263045793,
-      "contribution": 0.3194888178913738,
-      "ytd_return": 157.8804347826087,
-      "cumulative_return": -8.574181117533719,
-      "current_price": 949000.0,
-      "price_date": "2026-08-10",
-      "ath_price": 1970000.0,
-      "dd": -51.82741116751268,
-      "rsi": -4.08942268558442,
-      "is_today_new": false
-    },
-    {
-      "code": "196170",
-      "name": "알테오젠",
-      "sector": "건강관리",
-      "market_cap": 186480,
-      "weight": 5.0,
-      "weight_prev": 3.0,
-      "today_return": 14.098360655737704,
-      "contribution": 4.229508196721311,
-      "ytd_return": 0.6164201371621436,
-      "cumulative_return": 24.433849821215723,
-      "current_price": 348000.0,
-      "price_date": "2026-08-10",
-      "ath_price": 430123.0,
-      "dd": -19.092910632539994,
-      "rsi": 20.89067020819735,
       "is_today_new": false
     },
     {
@@ -1395,214 +1305,32 @@
       "dd": 0.0,
       "rsi": 25.546334206119713,
       "is_today_new": false
-    },
-    {
-      "code": "034020",
-      "name": "두산에너빌리티",
-      "sector": "기계",
-      "market_cap": 511808,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": 6.108897742363872,
-      "cumulative_return": null,
-      "current_price": 79900.0,
-      "price_date": "2026-08-10",
-      "ath_price": 136400.0,
-      "dd": -41.422287390029325,
-      "rsi": null,
-      "is_today_new": true
     }
   ],
-  "_order_changes": {
-    "NH 다이내믹 밸류 / DB 개방형": {
-      "date": "2026-08-10",
-      "added": [
-        {
-          "name": "두산에너빌리티",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "NAVER",
-          "from": 4.0,
-          "to": 3.0
-        },
-        {
-          "name": "알테오젠",
-          "from": 3.0,
-          "to": 5.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "SK스퀘어",
-          "weight": 3.0
-        }
-      ]
-    },
-    "삼성 트루밸류": {
-      "date": "2026-08-10",
-      "added": [
-        {
-          "name": "두산에너빌리티",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "NAVER",
-          "from": 4.0,
-          "to": 3.0
-        },
-        {
-          "name": "알테오젠",
-          "from": 3.0,
-          "to": 5.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "SK스퀘어",
-          "weight": 3.0
-        }
-      ]
-    },
-    "NH 목표전환형 5호": {
-      "date": "2026-08-10",
-      "added": [
-        {
-          "name": "두산에너빌리티",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "NAVER",
-          "from": 4.0,
-          "to": 3.0
-        },
-        {
-          "name": "알테오젠",
-          "from": 3.0,
-          "to": 5.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "SK스퀘어",
-          "weight": 3.0
-        }
-      ]
-    },
-    "DB 목표전환형 6차": {
-      "date": "2026-08-10",
-      "added": [
-        {
-          "name": "두산에너빌리티",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "NAVER",
-          "from": 4.0,
-          "to": 3.0
-        },
-        {
-          "name": "알테오젠",
-          "from": 3.0,
-          "to": 5.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "SK스퀘어",
-          "weight": 3.0
-        }
-      ]
-    },
-    "한투 지속형": {
-      "date": "2026-08-10",
-      "added": [
-        {
-          "name": "두산에너빌리티",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "NAVER",
-          "from": 4.0,
-          "to": 3.0
-        },
-        {
-          "name": "알테오젠",
-          "from": 3.0,
-          "to": 5.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "SK스퀘어",
-          "weight": 3.0
-        }
-      ]
-    },
-    "한투 성과모집형 1차": {
-      "date": "2026-08-10",
-      "added": [
-        {
-          "name": "두산에너빌리티",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "NAVER",
-          "from": 4.0,
-          "to": 3.0
-        },
-        {
-          "name": "알테오젠",
-          "from": 3.0,
-          "to": 5.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "SK스퀘어",
-          "weight": 3.0
-        }
-      ]
-    }
-  },
   "_portfolio_meta": {
     "NH 다이내믹 밸류 / DB 개방형": {
-      "nav_ytd_d1": 34.02289332437931,
-      "nav_cum_d1": 165.43099999999998
+      "nav_ytd_d1": 35.274603759675635,
+      "nav_cum_d1": 167.91
     },
     "삼성 트루밸류": {
-      "nav_ytd_d1": 33.99874338918822,
-      "nav_cum_d1": 170.853
+      "nav_ytd_d1": 35.24991218566178,
+      "nav_cum_d1": 173.382
     },
     "NH 목표전환형 5호": {
-      "nav_ytd_d1": -31.711999999999996,
-      "nav_cum_d1": -31.711999999999996
+      "nav_ytd_d1": -31.074,
+      "nav_cum_d1": -31.074
     },
     "DB 목표전환형 6차": {
-      "nav_ytd_d1": -30.911,
-      "nav_cum_d1": -30.911
+      "nav_ytd_d1": -30.26599999999999,
+      "nav_cum_d1": -30.26599999999999
     },
     "한투 지속형": {
-      "nav_ytd_d1": -23.802999999999997,
-      "nav_cum_d1": -23.802999999999997
+      "nav_ytd_d1": -23.092000000000002,
+      "nav_cum_d1": -23.092000000000002
     },
     "한투 성과모집형 1차": {
-      "nav_ytd_d1": -22.368,
-      "nav_cum_d1": -22.368
+      "nav_ytd_d1": -21.64299999999999,
+      "nav_cum_d1": -21.64299999999999
     }
   },
   "_price_asof": "2026-08-10"
