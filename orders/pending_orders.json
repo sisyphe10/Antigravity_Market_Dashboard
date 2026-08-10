@@ -1,5 +1,5 @@
 {
-  "2026-08-10": {
+  "2026-08-11": {
     "삼성 트루밸류": {
       "targets": [
         {
@@ -20,9 +20,9 @@
           "sector": "반도체",
           "code": "000660",
           "name": "SK하이닉스",
-          "weight": 30,
+          "weight": 25,
           "baseWeight": 30,
-          "reason": ""
+          "reason": "계속되는 자금조달 이슈 및 주주환원책 발표 지연으로 비중 축소"
         },
         {
           "sector": "기타",
@@ -33,28 +33,28 @@
           "reason": ""
         },
         {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 3,
-          "baseWeight": 4,
-          "reason": "포트폴리오 비중 조절 차원에서의 매도"
-        },
-        {
-          "sector": "상사,자본재",
-          "code": "402340",
-          "name": "SK스퀘어",
-          "weight": 0,
-          "baseWeight": 3,
-          "reason": "SK하이닉스의 주주환원 정책이 기대보다 약할 가능성이 있어 편출"
-        },
-        {
           "sector": "건강관리",
           "code": "196170",
           "name": "알테오젠",
           "weight": 5,
+          "baseWeight": 5,
+          "reason": ""
+        },
+        {
+          "sector": "기계",
+          "code": "034020",
+          "name": "두산에너빌리티",
+          "weight": 3,
           "baseWeight": 3,
-          "reason": "경쟁사 할로자임의 실적 써프라이즈 이후 주가 급등, 알테오젠과의 시가총액 역전, 그러나 특허 기간이 알테오젠이 더 유리"
+          "reason": ""
+        },
+        {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
         },
         {
           "sector": "에너지",
@@ -73,9 +73,9 @@
           "reason": ""
         },
         {
-          "sector": "건강관리",
-          "code": "128940",
-          "name": "한미약품",
+          "sector": "화학",
+          "code": "010060",
+          "name": "OCI홀딩스",
           "weight": 3,
           "baseWeight": 3,
           "reason": ""
@@ -89,9 +89,9 @@
           "reason": ""
         },
         {
-          "sector": "화학",
-          "code": "010060",
-          "name": "OCI홀딩스",
+          "sector": "건강관리",
+          "code": "128940",
+          "name": "한미약품",
           "weight": 3,
           "baseWeight": 3,
           "reason": ""
@@ -100,21 +100,21 @@
           "sector": "기계",
           "code": "119850",
           "name": "지엔씨에너지",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "주가 단기 급등으로 수익 실현"
         },
         {
-          "sector": "기계",
-          "code": "034020",
-          "name": "두산에너빌리티",
-          "weight": 3,
+          "sector": "반도체",
+          "code": "131290",
+          "name": "티에스이",
+          "weight": 5,
           "baseWeight": 0,
-          "reason": "하반기부터 미국의 AP1000 프로젝트 개시가 본격화될 전망, 미국 원전 업체들도 주가 반등 중으로 신규 매수"
+          "reason": "중국향 프로브카드 공급 등으로 2분기 호실적 예상, 하반기 및 내년 실적 전망도 안정적으로 판단, 신규 매수"
         }
       ],
-      "savedAt": "2026-08-10T00:46:11.756Z",
-      "finalizedAt": "2026-08-10T16:00:00+09:00"
+      "savedAt": "2026-08-10T23:20:07.320Z",
+      "finalizedAt": "2026-08-11T08:21:59+09:00"
     },
     "NH 다이내믹 밸류": {
       "targets": [
@@ -136,9 +136,9 @@
           "sector": "반도체",
           "code": "000660",
           "name": "SK하이닉스",
-          "weight": 30,
+          "weight": 25,
           "baseWeight": 30,
-          "reason": ""
+          "reason": "계속되는 자금조달 이슈 및 주주환원책 발표 지연으로 비중 축소"
         },
         {
           "sector": "기타",
@@ -149,28 +149,28 @@
           "reason": ""
         },
         {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 3,
-          "baseWeight": 4,
-          "reason": "포트폴리오 비중 조절 차원에서의 매도"
-        },
-        {
-          "sector": "상사,자본재",
-          "code": "402340",
-          "name": "SK스퀘어",
-          "weight": 0,
-          "baseWeight": 3,
-          "reason": "SK하이닉스의 주주환원 정책이 기대보다 약할 가능성이 있어 편출"
-        },
-        {
           "sector": "건강관리",
           "code": "196170",
           "name": "알테오젠",
           "weight": 5,
+          "baseWeight": 5,
+          "reason": ""
+        },
+        {
+          "sector": "기계",
+          "code": "034020",
+          "name": "두산에너빌리티",
+          "weight": 3,
           "baseWeight": 3,
-          "reason": "경쟁사 할로자임의 실적 써프라이즈 이후 주가 급등, 알테오젠과의 시가총액 역전, 그러나 특허 기간이 알테오젠이 더 유리"
+          "reason": ""
+        },
+        {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
         },
         {
           "sector": "에너지",
@@ -189,9 +189,9 @@
           "reason": ""
         },
         {
-          "sector": "건강관리",
-          "code": "128940",
-          "name": "한미약품",
+          "sector": "화학",
+          "code": "010060",
+          "name": "OCI홀딩스",
           "weight": 3,
           "baseWeight": 3,
           "reason": ""
@@ -205,9 +205,9 @@
           "reason": ""
         },
         {
-          "sector": "화학",
-          "code": "010060",
-          "name": "OCI홀딩스",
+          "sector": "건강관리",
+          "code": "128940",
+          "name": "한미약품",
           "weight": 3,
           "baseWeight": 3,
           "reason": ""
@@ -216,21 +216,21 @@
           "sector": "기계",
           "code": "119850",
           "name": "지엔씨에너지",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "주가 단기 급등으로 수익 실현"
         },
         {
-          "sector": "기계",
-          "code": "034020",
-          "name": "두산에너빌리티",
-          "weight": 3,
+          "sector": "반도체",
+          "code": "131290",
+          "name": "티에스이",
+          "weight": 5,
           "baseWeight": 0,
-          "reason": "하반기부터 미국의 AP1000 프로젝트 개시가 본격화될 전망, 미국 원전 업체들도 주가 반등 중으로 신규 매수"
+          "reason": "중국향 프로브카드 공급 등으로 2분기 호실적 예상, 하반기 및 내년 실적 전망도 안정적으로 판단, 신규 매수"
         }
       ],
-      "savedAt": "2026-08-10T00:46:11.756Z",
-      "finalizedAt": "2026-08-10T16:00:00+09:00"
+      "savedAt": "2026-08-10T23:20:07.321Z",
+      "finalizedAt": "2026-08-11T08:21:59+09:00"
     },
     "DB 개방형": {
       "targets": [
@@ -252,9 +252,9 @@
           "sector": "반도체",
           "code": "000660",
           "name": "SK하이닉스",
-          "weight": 30,
+          "weight": 25,
           "baseWeight": 30,
-          "reason": ""
+          "reason": "계속되는 자금조달 이슈 및 주주환원책 발표 지연으로 비중 축소"
         },
         {
           "sector": "기타",
@@ -265,28 +265,28 @@
           "reason": ""
         },
         {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 3,
-          "baseWeight": 4,
-          "reason": "포트폴리오 비중 조절 차원에서의 매도"
-        },
-        {
-          "sector": "상사,자본재",
-          "code": "402340",
-          "name": "SK스퀘어",
-          "weight": 0,
-          "baseWeight": 3,
-          "reason": "SK하이닉스의 주주환원 정책이 기대보다 약할 가능성이 있어 편출"
-        },
-        {
           "sector": "건강관리",
           "code": "196170",
           "name": "알테오젠",
           "weight": 5,
+          "baseWeight": 5,
+          "reason": ""
+        },
+        {
+          "sector": "기계",
+          "code": "034020",
+          "name": "두산에너빌리티",
+          "weight": 3,
           "baseWeight": 3,
-          "reason": "경쟁사 할로자임의 실적 써프라이즈 이후 주가 급등, 알테오젠과의 시가총액 역전, 그러나 특허 기간이 알테오젠이 더 유리"
+          "reason": ""
+        },
+        {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
         },
         {
           "sector": "에너지",
@@ -305,9 +305,9 @@
           "reason": ""
         },
         {
-          "sector": "건강관리",
-          "code": "128940",
-          "name": "한미약품",
+          "sector": "화학",
+          "code": "010060",
+          "name": "OCI홀딩스",
           "weight": 3,
           "baseWeight": 3,
           "reason": ""
@@ -321,9 +321,9 @@
           "reason": ""
         },
         {
-          "sector": "화학",
-          "code": "010060",
-          "name": "OCI홀딩스",
+          "sector": "건강관리",
+          "code": "128940",
+          "name": "한미약품",
           "weight": 3,
           "baseWeight": 3,
           "reason": ""
@@ -332,21 +332,21 @@
           "sector": "기계",
           "code": "119850",
           "name": "지엔씨에너지",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "주가 단기 급등으로 수익 실현"
         },
         {
-          "sector": "기계",
-          "code": "034020",
-          "name": "두산에너빌리티",
-          "weight": 3,
+          "sector": "반도체",
+          "code": "131290",
+          "name": "티에스이",
+          "weight": 5,
           "baseWeight": 0,
-          "reason": "하반기부터 미국의 AP1000 프로젝트 개시가 본격화될 전망, 미국 원전 업체들도 주가 반등 중으로 신규 매수"
+          "reason": "중국향 프로브카드 공급 등으로 2분기 호실적 예상, 하반기 및 내년 실적 전망도 안정적으로 판단, 신규 매수"
         }
       ],
-      "savedAt": "2026-08-10T00:46:11.756Z",
-      "finalizedAt": "2026-08-10T16:00:00+09:00"
+      "savedAt": "2026-08-10T23:20:07.321Z",
+      "finalizedAt": "2026-08-11T08:21:59+09:00"
     },
     "한투 지속형": {
       "targets": [
@@ -368,9 +368,9 @@
           "sector": "반도체",
           "code": "000660",
           "name": "SK하이닉스",
-          "weight": 30,
+          "weight": 25,
           "baseWeight": 30,
-          "reason": ""
+          "reason": "계속되는 자금조달 이슈 및 주주환원책 발표 지연으로 비중 축소"
         },
         {
           "sector": "기타",
@@ -381,28 +381,28 @@
           "reason": ""
         },
         {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 3,
-          "baseWeight": 4,
-          "reason": "포트폴리오 비중 조절 차원에서의 매도"
-        },
-        {
-          "sector": "상사,자본재",
-          "code": "402340",
-          "name": "SK스퀘어",
-          "weight": 0,
-          "baseWeight": 3,
-          "reason": "SK하이닉스의 주주환원 정책이 기대보다 약할 가능성이 있어 편출"
-        },
-        {
           "sector": "건강관리",
           "code": "196170",
           "name": "알테오젠",
           "weight": 5,
+          "baseWeight": 5,
+          "reason": ""
+        },
+        {
+          "sector": "기계",
+          "code": "034020",
+          "name": "두산에너빌리티",
+          "weight": 3,
           "baseWeight": 3,
-          "reason": "경쟁사 할로자임의 실적 써프라이즈 이후 주가 급등, 알테오젠과의 시가총액 역전, 그러나 특허 기간이 알테오젠이 더 유리"
+          "reason": ""
+        },
+        {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
         },
         {
           "sector": "에너지",
@@ -421,9 +421,9 @@
           "reason": ""
         },
         {
-          "sector": "건강관리",
-          "code": "128940",
-          "name": "한미약품",
+          "sector": "화학",
+          "code": "010060",
+          "name": "OCI홀딩스",
           "weight": 3,
           "baseWeight": 3,
           "reason": ""
@@ -437,9 +437,9 @@
           "reason": ""
         },
         {
-          "sector": "화학",
-          "code": "010060",
-          "name": "OCI홀딩스",
+          "sector": "건강관리",
+          "code": "128940",
+          "name": "한미약품",
           "weight": 3,
           "baseWeight": 3,
           "reason": ""
@@ -448,21 +448,21 @@
           "sector": "기계",
           "code": "119850",
           "name": "지엔씨에너지",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "주가 단기 급등으로 수익 실현"
         },
         {
-          "sector": "기계",
-          "code": "034020",
-          "name": "두산에너빌리티",
-          "weight": 3,
+          "sector": "반도체",
+          "code": "131290",
+          "name": "티에스이",
+          "weight": 5,
           "baseWeight": 0,
-          "reason": "하반기부터 미국의 AP1000 프로젝트 개시가 본격화될 전망, 미국 원전 업체들도 주가 반등 중으로 신규 매수"
+          "reason": "중국향 프로브카드 공급 등으로 2분기 호실적 예상, 하반기 및 내년 실적 전망도 안정적으로 판단, 신규 매수"
         }
       ],
-      "savedAt": "2026-08-10T00:46:11.756Z",
-      "finalizedAt": "2026-08-10T16:00:00+09:00"
+      "savedAt": "2026-08-10T23:20:07.321Z",
+      "finalizedAt": "2026-08-11T08:21:59+09:00"
     },
     "NH 목표전환형 5호": {
       "targets": [
@@ -484,9 +484,9 @@
           "sector": "반도체",
           "code": "000660",
           "name": "SK하이닉스",
-          "weight": 30,
+          "weight": 25,
           "baseWeight": 30,
-          "reason": ""
+          "reason": "계속되는 자금조달 이슈 및 주주환원책 발표 지연으로 비중 축소"
         },
         {
           "sector": "기타",
@@ -497,28 +497,28 @@
           "reason": ""
         },
         {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 3,
-          "baseWeight": 4,
-          "reason": "포트폴리오 비중 조절 차원에서의 매도"
-        },
-        {
-          "sector": "상사,자본재",
-          "code": "402340",
-          "name": "SK스퀘어",
-          "weight": 0,
-          "baseWeight": 3,
-          "reason": "SK하이닉스의 주주환원 정책이 기대보다 약할 가능성이 있어 편출"
-        },
-        {
           "sector": "건강관리",
           "code": "196170",
           "name": "알테오젠",
           "weight": 5,
+          "baseWeight": 5,
+          "reason": ""
+        },
+        {
+          "sector": "기계",
+          "code": "034020",
+          "name": "두산에너빌리티",
+          "weight": 3,
           "baseWeight": 3,
-          "reason": "경쟁사 할로자임의 실적 써프라이즈 이후 주가 급등, 알테오젠과의 시가총액 역전, 그러나 특허 기간이 알테오젠이 더 유리"
+          "reason": ""
+        },
+        {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
         },
         {
           "sector": "에너지",
@@ -537,9 +537,9 @@
           "reason": ""
         },
         {
-          "sector": "건강관리",
-          "code": "128940",
-          "name": "한미약품",
+          "sector": "화학",
+          "code": "010060",
+          "name": "OCI홀딩스",
           "weight": 3,
           "baseWeight": 3,
           "reason": ""
@@ -553,9 +553,9 @@
           "reason": ""
         },
         {
-          "sector": "화학",
-          "code": "010060",
-          "name": "OCI홀딩스",
+          "sector": "건강관리",
+          "code": "128940",
+          "name": "한미약품",
           "weight": 3,
           "baseWeight": 3,
           "reason": ""
@@ -564,21 +564,21 @@
           "sector": "기계",
           "code": "119850",
           "name": "지엔씨에너지",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "주가 단기 급등으로 수익 실현"
         },
         {
-          "sector": "기계",
-          "code": "034020",
-          "name": "두산에너빌리티",
-          "weight": 3,
+          "sector": "반도체",
+          "code": "131290",
+          "name": "티에스이",
+          "weight": 5,
           "baseWeight": 0,
-          "reason": "하반기부터 미국의 AP1000 프로젝트 개시가 본격화될 전망, 미국 원전 업체들도 주가 반등 중으로 신규 매수"
+          "reason": "중국향 프로브카드 공급 등으로 2분기 호실적 예상, 하반기 및 내년 실적 전망도 안정적으로 판단, 신규 매수"
         }
       ],
-      "savedAt": "2026-08-10T00:46:11.756Z",
-      "finalizedAt": "2026-08-10T16:00:00+09:00"
+      "savedAt": "2026-08-10T23:20:07.321Z",
+      "finalizedAt": "2026-08-11T08:21:59+09:00"
     },
     "DB 목표전환형 6차": {
       "targets": [
@@ -600,9 +600,9 @@
           "sector": "반도체",
           "code": "000660",
           "name": "SK하이닉스",
-          "weight": 30,
+          "weight": 25,
           "baseWeight": 30,
-          "reason": ""
+          "reason": "계속되는 자금조달 이슈 및 주주환원책 발표 지연으로 비중 축소"
         },
         {
           "sector": "기타",
@@ -613,28 +613,28 @@
           "reason": ""
         },
         {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 3,
-          "baseWeight": 4,
-          "reason": "포트폴리오 비중 조절 차원에서의 매도"
-        },
-        {
-          "sector": "상사,자본재",
-          "code": "402340",
-          "name": "SK스퀘어",
-          "weight": 0,
-          "baseWeight": 3,
-          "reason": "SK하이닉스의 주주환원 정책이 기대보다 약할 가능성이 있어 편출"
-        },
-        {
           "sector": "건강관리",
           "code": "196170",
           "name": "알테오젠",
           "weight": 5,
+          "baseWeight": 5,
+          "reason": ""
+        },
+        {
+          "sector": "기계",
+          "code": "034020",
+          "name": "두산에너빌리티",
+          "weight": 3,
           "baseWeight": 3,
-          "reason": "경쟁사 할로자임의 실적 써프라이즈 이후 주가 급등, 알테오젠과의 시가총액 역전, 그러나 특허 기간이 알테오젠이 더 유리"
+          "reason": ""
+        },
+        {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
         },
         {
           "sector": "에너지",
@@ -653,9 +653,9 @@
           "reason": ""
         },
         {
-          "sector": "건강관리",
-          "code": "128940",
-          "name": "한미약품",
+          "sector": "화학",
+          "code": "010060",
+          "name": "OCI홀딩스",
           "weight": 3,
           "baseWeight": 3,
           "reason": ""
@@ -669,9 +669,9 @@
           "reason": ""
         },
         {
-          "sector": "화학",
-          "code": "010060",
-          "name": "OCI홀딩스",
+          "sector": "건강관리",
+          "code": "128940",
+          "name": "한미약품",
           "weight": 3,
           "baseWeight": 3,
           "reason": ""
@@ -680,21 +680,21 @@
           "sector": "기계",
           "code": "119850",
           "name": "지엔씨에너지",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "주가 단기 급등으로 수익 실현"
         },
         {
-          "sector": "기계",
-          "code": "034020",
-          "name": "두산에너빌리티",
-          "weight": 3,
+          "sector": "반도체",
+          "code": "131290",
+          "name": "티에스이",
+          "weight": 5,
           "baseWeight": 0,
-          "reason": "하반기부터 미국의 AP1000 프로젝트 개시가 본격화될 전망, 미국 원전 업체들도 주가 반등 중으로 신규 매수"
+          "reason": "중국향 프로브카드 공급 등으로 2분기 호실적 예상, 하반기 및 내년 실적 전망도 안정적으로 판단, 신규 매수"
         }
       ],
-      "savedAt": "2026-08-10T00:46:11.756Z",
-      "finalizedAt": "2026-08-10T16:00:00+09:00"
+      "savedAt": "2026-08-10T23:20:07.321Z",
+      "finalizedAt": "2026-08-11T08:21:59+09:00"
     },
     "한투 성과모집형 1차": {
       "targets": [
@@ -716,9 +716,9 @@
           "sector": "반도체",
           "code": "000660",
           "name": "SK하이닉스",
-          "weight": 30,
+          "weight": 25,
           "baseWeight": 30,
-          "reason": ""
+          "reason": "계속되는 자금조달 이슈 및 주주환원책 발표 지연으로 비중 축소"
         },
         {
           "sector": "기타",
@@ -729,28 +729,28 @@
           "reason": ""
         },
         {
-          "sector": "소프트웨어",
-          "code": "035420",
-          "name": "NAVER",
-          "weight": 3,
-          "baseWeight": 4,
-          "reason": "포트폴리오 비중 조절 차원에서의 매도"
-        },
-        {
-          "sector": "상사,자본재",
-          "code": "402340",
-          "name": "SK스퀘어",
-          "weight": 0,
-          "baseWeight": 3,
-          "reason": "SK하이닉스의 주주환원 정책이 기대보다 약할 가능성이 있어 편출"
-        },
-        {
           "sector": "건강관리",
           "code": "196170",
           "name": "알테오젠",
           "weight": 5,
+          "baseWeight": 5,
+          "reason": ""
+        },
+        {
+          "sector": "기계",
+          "code": "034020",
+          "name": "두산에너빌리티",
+          "weight": 3,
           "baseWeight": 3,
-          "reason": "경쟁사 할로자임의 실적 써프라이즈 이후 주가 급등, 알테오젠과의 시가총액 역전, 그러나 특허 기간이 알테오젠이 더 유리"
+          "reason": ""
+        },
+        {
+          "sector": "소프트웨어",
+          "code": "035420",
+          "name": "NAVER",
+          "weight": 3,
+          "baseWeight": 3,
+          "reason": ""
         },
         {
           "sector": "에너지",
@@ -769,9 +769,9 @@
           "reason": ""
         },
         {
-          "sector": "건강관리",
-          "code": "128940",
-          "name": "한미약품",
+          "sector": "화학",
+          "code": "010060",
+          "name": "OCI홀딩스",
           "weight": 3,
           "baseWeight": 3,
           "reason": ""
@@ -785,9 +785,9 @@
           "reason": ""
         },
         {
-          "sector": "화학",
-          "code": "010060",
-          "name": "OCI홀딩스",
+          "sector": "건강관리",
+          "code": "128940",
+          "name": "한미약품",
           "weight": 3,
           "baseWeight": 3,
           "reason": ""
@@ -796,21 +796,21 @@
           "sector": "기계",
           "code": "119850",
           "name": "지엔씨에너지",
-          "weight": 2,
+          "weight": 0,
           "baseWeight": 2,
-          "reason": ""
+          "reason": "주가 단기 급등으로 수익 실현"
         },
         {
-          "sector": "기계",
-          "code": "034020",
-          "name": "두산에너빌리티",
-          "weight": 3,
+          "sector": "반도체",
+          "code": "131290",
+          "name": "티에스이",
+          "weight": 5,
           "baseWeight": 0,
-          "reason": "하반기부터 미국의 AP1000 프로젝트 개시가 본격화될 전망, 미국 원전 업체들도 주가 반등 중으로 신규 매수"
+          "reason": "중국향 프로브카드 공급 등으로 2분기 호실적 예상, 하반기 및 내년 실적 전망도 안정적으로 판단, 신규 매수"
         }
       ],
-      "savedAt": "2026-08-10T00:46:11.756Z",
-      "finalizedAt": "2026-08-10T16:00:00+09:00"
+      "savedAt": "2026-08-10T23:20:07.321Z",
+      "finalizedAt": "2026-08-11T08:21:59+09:00"
     }
   }
 }

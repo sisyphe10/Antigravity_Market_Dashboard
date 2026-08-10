@@ -23,7 +23,7 @@
       "name": "SK하이닉스",
       "sector": "반도체",
       "market_cap": 10372992,
-      "weight": 30.0,
+      "weight": 25.0,
       "weight_prev": 30.0,
       "today_return": -0.14064697609001406,
       "contribution": -0.4219409282700422,
@@ -203,7 +203,7 @@
       "name": "지엔씨에너지",
       "sector": "기계",
       "market_cap": 8685,
-      "weight": 2.0,
+      "weight": 0.0,
       "weight_prev": 2.0,
       "today_return": 0.9560229445506693,
       "contribution": 0.19120458891013384,
@@ -215,6 +215,24 @@
       "dd": 0.0,
       "rsi": 25.546334206119713,
       "is_today_new": false
+    },
+    {
+      "code": "131290",
+      "name": "티에스이",
+      "sector": "반도체",
+      "market_cap": 25109,
+      "weight": 5.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": 294.09722222222223,
+      "cumulative_return": null,
+      "current_price": 227000.0,
+      "price_date": "2026-08-10",
+      "ath_price": 284500.0,
+      "dd": -20.210896309314585,
+      "rsi": null,
+      "is_today_new": true
     }
   ],
   "삼성 트루밸류": [
@@ -241,7 +259,7 @@
       "name": "SK하이닉스",
       "sector": "반도체",
       "market_cap": 10372992,
-      "weight": 30.0,
+      "weight": 25.0,
       "weight_prev": 30.0,
       "today_return": -0.14064697609001406,
       "contribution": -0.4219409282700422,
@@ -421,7 +439,7 @@
       "name": "지엔씨에너지",
       "sector": "기계",
       "market_cap": 8685,
-      "weight": 2.0,
+      "weight": 0.0,
       "weight_prev": 2.0,
       "today_return": 0.9560229445506693,
       "contribution": 0.19120458891013384,
@@ -433,6 +451,24 @@
       "dd": 0.0,
       "rsi": 25.546334206119713,
       "is_today_new": false
+    },
+    {
+      "code": "131290",
+      "name": "티에스이",
+      "sector": "반도체",
+      "market_cap": 25109,
+      "weight": 5.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": 294.09722222222223,
+      "cumulative_return": null,
+      "current_price": 227000.0,
+      "price_date": "2026-08-10",
+      "ath_price": 284500.0,
+      "dd": -20.210896309314585,
+      "rsi": null,
+      "is_today_new": true
     }
   ],
   "NH 목표전환형 5호": [
@@ -459,7 +495,7 @@
       "name": "SK하이닉스",
       "sector": "반도체",
       "market_cap": 10372992,
-      "weight": 30.0,
+      "weight": 25.0,
       "weight_prev": 30.0,
       "today_return": -0.14064697609001406,
       "contribution": -0.4219409282700422,
@@ -639,7 +675,7 @@
       "name": "지엔씨에너지",
       "sector": "기계",
       "market_cap": 8685,
-      "weight": 2.0,
+      "weight": 0.0,
       "weight_prev": 2.0,
       "today_return": 0.9560229445506693,
       "contribution": 0.19120458891013384,
@@ -651,6 +687,24 @@
       "dd": 0.0,
       "rsi": 25.546334206119713,
       "is_today_new": false
+    },
+    {
+      "code": "131290",
+      "name": "티에스이",
+      "sector": "반도체",
+      "market_cap": 25109,
+      "weight": 5.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": 294.09722222222223,
+      "cumulative_return": null,
+      "current_price": 227000.0,
+      "price_date": "2026-08-10",
+      "ath_price": 284500.0,
+      "dd": -20.210896309314585,
+      "rsi": null,
+      "is_today_new": true
     }
   ],
   "DB 목표전환형 6차": [
@@ -677,7 +731,7 @@
       "name": "SK하이닉스",
       "sector": "반도체",
       "market_cap": 10372992,
-      "weight": 30.0,
+      "weight": 25.0,
       "weight_prev": 30.0,
       "today_return": -0.14064697609001406,
       "contribution": -0.4219409282700422,
@@ -857,7 +911,7 @@
       "name": "지엔씨에너지",
       "sector": "기계",
       "market_cap": 8685,
-      "weight": 2.0,
+      "weight": 0.0,
       "weight_prev": 2.0,
       "today_return": 0.9560229445506693,
       "contribution": 0.19120458891013384,
@@ -869,6 +923,24 @@
       "dd": 0.0,
       "rsi": 25.546334206119713,
       "is_today_new": false
+    },
+    {
+      "code": "131290",
+      "name": "티에스이",
+      "sector": "반도체",
+      "market_cap": 25109,
+      "weight": 5.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": 294.09722222222223,
+      "cumulative_return": null,
+      "current_price": 227000.0,
+      "price_date": "2026-08-10",
+      "ath_price": 284500.0,
+      "dd": -20.210896309314585,
+      "rsi": null,
+      "is_today_new": true
     }
   ],
   "한투 지속형": [
@@ -895,7 +967,7 @@
       "name": "SK하이닉스",
       "sector": "반도체",
       "market_cap": 10372992,
-      "weight": 30.0,
+      "weight": 25.0,
       "weight_prev": 30.0,
       "today_return": -0.14064697609001406,
       "contribution": -0.4219409282700422,
@@ -1075,7 +1147,7 @@
       "name": "지엔씨에너지",
       "sector": "기계",
       "market_cap": 8685,
-      "weight": 2.0,
+      "weight": 0.0,
       "weight_prev": 2.0,
       "today_return": 0.9560229445506693,
       "contribution": 0.19120458891013384,
@@ -1087,6 +1159,24 @@
       "dd": 0.0,
       "rsi": 25.546334206119713,
       "is_today_new": false
+    },
+    {
+      "code": "131290",
+      "name": "티에스이",
+      "sector": "반도체",
+      "market_cap": 25109,
+      "weight": 5.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": 294.09722222222223,
+      "cumulative_return": null,
+      "current_price": 227000.0,
+      "price_date": "2026-08-10",
+      "ath_price": 284500.0,
+      "dd": -20.210896309314585,
+      "rsi": null,
+      "is_today_new": true
     }
   ],
   "한투 성과모집형 1차": [
@@ -1113,7 +1203,7 @@
       "name": "SK하이닉스",
       "sector": "반도체",
       "market_cap": 10372992,
-      "weight": 30.0,
+      "weight": 25.0,
       "weight_prev": 30.0,
       "today_return": -0.14064697609001406,
       "contribution": -0.4219409282700422,
@@ -1293,7 +1383,7 @@
       "name": "지엔씨에너지",
       "sector": "기계",
       "market_cap": 8685,
-      "weight": 2.0,
+      "weight": 0.0,
       "weight_prev": 2.0,
       "today_return": 0.9560229445506693,
       "contribution": 0.19120458891013384,
@@ -1305,8 +1395,160 @@
       "dd": 0.0,
       "rsi": 25.546334206119713,
       "is_today_new": false
+    },
+    {
+      "code": "131290",
+      "name": "티에스이",
+      "sector": "반도체",
+      "market_cap": 25109,
+      "weight": 5.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": 294.09722222222223,
+      "cumulative_return": null,
+      "current_price": 227000.0,
+      "price_date": "2026-08-10",
+      "ath_price": 284500.0,
+      "dd": -20.210896309314585,
+      "rsi": null,
+      "is_today_new": true
     }
   ],
+  "_order_changes": {
+    "NH 다이내믹 밸류 / DB 개방형": {
+      "date": "2026-08-11",
+      "added": [
+        {
+          "name": "티에스이",
+          "weight": 5.0
+        }
+      ],
+      "changed": [
+        {
+          "name": "SK하이닉스",
+          "from": 30.0,
+          "to": 25.0
+        }
+      ],
+      "removed": [
+        {
+          "name": "지엔씨에너지",
+          "weight": 2.0
+        }
+      ]
+    },
+    "삼성 트루밸류": {
+      "date": "2026-08-11",
+      "added": [
+        {
+          "name": "티에스이",
+          "weight": 5.0
+        }
+      ],
+      "changed": [
+        {
+          "name": "SK하이닉스",
+          "from": 30.0,
+          "to": 25.0
+        }
+      ],
+      "removed": [
+        {
+          "name": "지엔씨에너지",
+          "weight": 2.0
+        }
+      ]
+    },
+    "NH 목표전환형 5호": {
+      "date": "2026-08-11",
+      "added": [
+        {
+          "name": "티에스이",
+          "weight": 5.0
+        }
+      ],
+      "changed": [
+        {
+          "name": "SK하이닉스",
+          "from": 30.0,
+          "to": 25.0
+        }
+      ],
+      "removed": [
+        {
+          "name": "지엔씨에너지",
+          "weight": 2.0
+        }
+      ]
+    },
+    "DB 목표전환형 6차": {
+      "date": "2026-08-11",
+      "added": [
+        {
+          "name": "티에스이",
+          "weight": 5.0
+        }
+      ],
+      "changed": [
+        {
+          "name": "SK하이닉스",
+          "from": 30.0,
+          "to": 25.0
+        }
+      ],
+      "removed": [
+        {
+          "name": "지엔씨에너지",
+          "weight": 2.0
+        }
+      ]
+    },
+    "한투 지속형": {
+      "date": "2026-08-11",
+      "added": [
+        {
+          "name": "티에스이",
+          "weight": 5.0
+        }
+      ],
+      "changed": [
+        {
+          "name": "SK하이닉스",
+          "from": 30.0,
+          "to": 25.0
+        }
+      ],
+      "removed": [
+        {
+          "name": "지엔씨에너지",
+          "weight": 2.0
+        }
+      ]
+    },
+    "한투 성과모집형 1차": {
+      "date": "2026-08-11",
+      "added": [
+        {
+          "name": "티에스이",
+          "weight": 5.0
+        }
+      ],
+      "changed": [
+        {
+          "name": "SK하이닉스",
+          "from": 30.0,
+          "to": 25.0
+        }
+      ],
+      "removed": [
+        {
+          "name": "지엔씨에너지",
+          "weight": 2.0
+        }
+      ]
+    }
+  },
   "_portfolio_meta": {
     "NH 다이내믹 밸류 / DB 개방형": {
       "nav_ytd_d1": 35.274603759675635,
