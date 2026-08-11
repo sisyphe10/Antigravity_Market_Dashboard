@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-08-10",
+  "updated": "2026-08-11",
   "projects": [
    "antigravity"
   ],
@@ -2757,7 +2757,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "09:10 / 10:10 / 18:20 평일 (boutique-etf 타이머)",
    "status": "active",
-   "desc_md": "2026-08-04 신설. 부티크 액티브 ETF **56종**(타임폴리오 19·삼성 KoAct 25·트러스톤 2·DS 1·에셋플러스 9)의 NAV·AUM·편입/편출·시총대비 매매를 매 영업일 팔로업하는 독립 파이프라인. etfcheck 전수(313종) 파이프라인([[src-active-etf]]) 중단의 부분 대체 — 기존 잡·[[store-etf-db]]는 불가침.\n\n- 흐름: 레지스트리 갱신(`registry.py`, 운용사 목록 동적 반영) → ETF별 구성종목(운용사 홈페이지 어댑터, 실패 시 KIS 폴백) + KIS 시세(NAV·AUM) → 시총 보강(국내 KIS·해외 KIS×환율) → invest_amt 산출 → 변경 탐지(`changes.py`).\n- **어댑터**(`adapters.py`): 타임폴리오(`timeetf.co.kr` xlsx, 당일만)·KoAct(삼성 `samsungactive.co.kr` JSON, 과거일 가능)·트러스톤(WP admin-ajax nonce)·KIS 폴백(상위 30종 한도). 연속 실패 3회 시 그 어댑터 회로 차단.\n- **멱등성**: 수집은 ETF 단위 멱등(당일 ok 스킵)이라 하루 3회 실행해도 중복 적재 없음. NAV·AUM은 **장중(09:00~15:30) 수집분에만** 갱신(장 전 수집분은 전일 종가 NAV·전일 보유분이 짝이 맞아 덮으면 어긋남). PDF 롤오버 가드=구성종목 지문(raw_code:qty:weight 해시)이 직전 ok일과 같으면 `status='stale'` → 변경탐지 제외.\n- **알림**(`alert.py`, Sisyphe-Bot·`subscribers.json` 브로드캐스트, `run_boutique_etf.sh`에서 수집 직후 실행): 편입(NEW)/편출(X)/급변(+/-) 계층형 텔레그램. 신규·편출은 무조건, 급변만 매매추정액 ≥50억원 또는 종목 시총의 ≥0.1%. dedup=`alert_sent` 테이블(항목 단위 증분) → 늦게 온 운용사만 `(추가)`로 나감. 채권·현금성 파킹 보유분은 수집 단계에서 통째 제외(비율이 구조적으로 커 알림 오염).\n- 뷰어 재빌드=맥 `~/work/charts/260715_현선물공매도/build_viewer_boutique.py` → `/charts/test_boutique_active_etf.html`(★테스트 페이지, nav 미배선). 실행 위치=[[timer-boutique-etf]] wrapper(`run_boutique_etf.sh`)가 collect→alert→뷰어를 순차 실행하되 부분 실패해도(공휴일 전량 stale·일부 운용사 장애) 확보된 ETF의 알림·페이지는 나가도록 코드만 보관 후 반환.\n- 해외주식형 에셋플러스 3종은 KIS 구성종목 미제공 → 구조적 미커버(매일 fail 3건은 정상). 백필 안 함(첫 수집=2026-08-04).",
+   "desc_md": "2026-08-04 신설. 부티크 액티브 ETF **56종**(타임폴리오 19·삼성 KoAct 25·트러스톤 2·DS 1·에셋플러스 9)의 NAV·AUM·편입/편출·시총대비 매매를 매 영업일 팔로업하는 독립 파이프라인. etfcheck 전수(313종) 파이프라인([[src-active-etf]]) 중단의 부분 대체 — 기존 잡·[[store-etf-db]]는 불가침.\n\n- 흐름: 레지스트리 갱신(`registry.py`, 운용사 목록 동적 반영) → ETF별 구성종목(운용사 홈페이지 어댑터, 실패 시 KIS 폴백) + KIS 시세(NAV·AUM) → 시총 보강(국내 KIS·해외 KIS×환율) → invest_amt 산출 → 변경 탐지(`changes.py`).\n- **어댑터**(`adapters.py`): 타임폴리오(`timeetf.co.kr` xlsx, 당일만)·KoAct(삼성 `samsungactive.co.kr` JSON, 과거일 가능)·트러스톤(WP admin-ajax nonce)·KIS 폴백(상위 30종 한도). 연속 실패 3회 시 그 어댑터 회로 차단.\n- **멱등성**: 수집은 ETF 단위 멱등(당일 ok 스킵)이라 하루 3회 실행해도 중복 적재 없음. NAV·AUM은 **장중(09:00~15:30) 수집분에만** 갱신(장 전 수집분은 전일 종가 NAV·전일 보유분이 짝이 맞아 덮으면 어긋남). PDF 롤오버 가드=구성종목 지문(raw_code:qty:weight 해시)이 직전 ok일과 같으면 `status='stale'` → 변경탐지 제외.\n- **알림**(`alert.py`, Sisyphe-Bot·`subscribers.json` 브로드캐스트, `run_boutique_etf.sh`에서 수집 직후 실행): 편입/편출/급변 계층형 텔레그램. 구분 라벨은 `신규(New)`/`편출(X)`/`증가(+)`/`감소(-)`(2026-08-11 한글 통일 — 기호만으론 눈에 안 띈다는 지적). 행 정렬=매매추정액 desc, 유입→유출 부호가 바뀌는 경계에 실선 구분선(U+2500×17, 2026-08-11). 신규·편출은 무조건, 급변만 매매추정액 ≥50억원 또는 종목 시총의 ≥0.1%. dedup=`alert_sent` 테이블(항목 단위 증분) → 늦게 온 운용사만 `(추가)`로 나감. 채권·현금성 파킹 보유분은 수집 단계에서 통째 제외(비율이 구조적으로 커 알림 오염).\n- 뷰어 재빌드=맥 `~/work/charts/260715_현선물공매도/build_viewer_boutique.py` → `/charts/test_boutique_active_etf.html`(★테스트 페이지, nav 미배선). 실행 위치=[[timer-boutique-etf]] wrapper(`run_boutique_etf.sh`)가 collect→alert→뷰어를 순차 실행하되 부분 실패해도(공휴일 전량 stale·일부 운용사 장애) 확보된 ETF의 알림·페이지는 나가도록 코드만 보관 후 반환.\n- 해외주식형 에셋플러스 3종은 KIS 구성종목 미제공 → 구조적 미커버(매일 fail 3건은 정상). 백필 안 함(첫 수집=2026-08-04).",
    "code": [
     "execution/boutique_etf/collect.py",
     "execution/boutique_etf/registry.py",
@@ -2920,6 +2920,26 @@
    "desc_md": "2026-08-07 신설. 회사채 발행액 월간 2종 — `미 회사채 발행액`($B, 소수 1자리, dtype=`BOND_ISSUANCE_US`) + `회사채 발행액`(억원 정수, dtype=`BOND_ISSUANCE_KR`) — 을 dataset.csv DATA(MACRO US·KOREA)에 적재. dtype 을 소스별로 분리해 [[gha-daily-health-check]] 신선도를 개별 추적한다(SiliconData 3종과 동일 원칙 — 공유 타입이면 한 원천이 죽어도 가려진다). [[gha-daily-fred]] 편승(맥미니 launchd 미러 `gha-fred` 잡 동일).\n\n- **미국 = SIFMA US Fixed Income Securities Statistics xlsx 직링크** — Issuance 시트 Corporates 열(non-convertible/convertible debt·MTNs·Yankee bonds 합계). ★파일의 월별 데이터는 최근 13개월 롤링 창뿐 → 매 run 창 전체를 재파싱해 개정치 upsert. 과거 이력은 Wayback 스냅숏 6개(2021~2025)를 `--backfill` 로 1회 스티칭: 2019-01~ 복원, 단 **2022-10~2023-04 7개월은 아카이브 공백 = 영구 결측**. 스냅숏 구간 값은 당시 공표 빈티지(이후 소급 개정 미반영)라 2025 연간 합이 최신 공표치와 ~0.7% 어긋난다. 회사채 전용 파일(1996~, IG/HY)은 2026년 현재 HubSpot 폼 뒤 게이트라 직링크·아카이브 모두 없음. 구층 레이아웃 대응: 헤더 `Corporates`(현행)/`Corporate Debt`(2021~22).\n- **한국 = 금투협 채권정보센터 발행통계 기간별** — proframe XML POST(`BIS-KOFIABOND` / `BISIssStatisSrchSO` / `listTrm`, 세션 불필요). ★응답의 `회사채` 행 = **일반회사채**(은행채·기타금융채·ABS 는 별도 행) — 금감원 직접금융 총계(금융채·ABS 포함)와 모집단이 달라 **임의 합산·교차앵커 금지, 금감원 수치를 앵커로 쓰지 말 것**. 행 판정 = 국문 `회사채` AND 영문명 `Corporate` 동시 일치, 값=`val2`, 단위 억원. 이력 2006-01~. 진행 중인 달은 부분값이라 제외(월말 < 오늘 인 달만) + 최근 4개 완료월은 매 run 재조회해 D+1 지연·정정을 self-heal.\n- **가드**: 값 범위(미 0~1,000 $B·한 0~100만 억원) + 창 축소·랙(미 75일) 감지 + 앵커(파싱 창에 해당 월이 있을 때만 검사, 창이 지나가면 자동 소멸: 미 2025-12=69.8±10% 등). 시트·헤더는 문자열 탐색(행번호 하드코딩 금지), xlsx magic bytes 검증(폼 게이트 전환 감지). 소스 단위로 격리해 하나가 죽어도 다른 원천은 계속되고, 하나라도 실패하면 exit 1(편승 잡에선 경고만 tolerate).\n- 사용: 인자 없음=증분(매일 잡) · `--backfill`=최초 1회 전체 스티칭 · `--dry-run`.",
    "code": [
     "execution/fetch_corp_bond_issuance.py"
+   ],
+   "writes": [
+    "store-dataset-csv"
+   ],
+   "depends_on": [
+    "ext-data-apis"
+   ]
+  },
+  {
+   "id": "src-kosdaq-lev-etf-aum",
+   "project": "antigravity",
+   "domain": "market-kr",
+   "type": "pipeline_source",
+   "name": "코스닥 레버리지 ETF AUM (fetch_kosdaq_lev_etf_aum.py)",
+   "runs_on": "gha",
+   "schedule_kst": "18:30 평일 (gha-daily-krx-valuation 합승)",
+   "status": "active",
+   "desc_md": "코스닥 레버리지 ETF의 일간 순자산총액(AUM) 합산을 KRX MDCSTAT04301(ETF 전종목시세)에서 날짜당 1콜로 수집해 dataset.csv에 적재(2026-08-10 신설). 시리즈 1개 — `코스닥 레버리지 ETF AUM`, dtype `ETF_AUM`, 값=원 단위 정수.\n\n- **대상 선정은 종목 마스터가 아니라 날짜별 종목명 필터**(\"코스닥\"+\"레버리지\", 공백 정규화) — 상장·상폐·브랜드 개명(KBSTAR→RISE 등)이 자동 반영된다. 2026-08 기준 5종(KODEX 233740·TIGER 233160·RISE 278240·HANARO 306530·KIWOOM 291630). 구성 변동으로 생기는 점프는 신호의 일부로 보고 **보정·평활화하지 않는다**.\n- **엄격 합산**: 대상 중 한 종목이라도 AUM 파싱 불가면 그 날짜는 통째로 미적재(조용한 과소계상 방지). 전 종목이 `-`면 비거래일로 보고 skip.\n- 증분 = 기존 max 날짜 − lookback 10일 재조회 후 (날짜, 제품명) upsert. `--backfill`은 2015-12-17(KODEX 233740 상장일)부터 평일 순회하며 콜 간 0.5~0.8초 랜덤 sleep + 신규 50행마다 체크포인트 append(중단 재개 가능). 최초 백필 2015-12-17~2026-08-07 2,608행(`aa0510ab`).\n- 로그인은 [[src-krx-valuation]]과 동일 경로(pykrx 패치판이 import 시 env `KRX_ID`/`KRX_PW`로 로그인, 세션은 `get_auth_session()`). ★**프로세스당 1회, 실패해도 재시도하지 않는다** — KRX는 로그인 5회 실패 시 계정 잠금. 자격증명 값은 어떤 경로로도 출력하지 않는다.\n- 소비: market.html DATA 탭 INDEX_KOREA 패널에 배선(표시 단위 **억원**, `CMB_SERIES_SCALE` 1e8 제수 — 축이 1조를 넘으면 조원으로 자동 승격). `ETF_AUM`은 create_dashboard의 **5년 창(long_mask)** 대상이라 기본 2년 창보다 긴 이력이 임베드되고, draw_charts의 `ETF_` 프리픽스 제외 규칙에 걸려 **PNG는 만들지 않는다**(동적 차트 전용).",
+   "code": [
+    "execution/fetch_kosdaq_lev_etf_aum.py"
    ],
    "writes": [
     "store-dataset-csv"
@@ -3198,26 +3218,6 @@
     "chart_core/dist/aoe_chart.js",
     "chart_core/build_core.py",
     "execution/legacy_chart_renderers.py"
-   ]
-  },
-  {
-   "id": "src-kosdaq-lev-etf-aum",
-   "project": "antigravity",
-   "domain": "market-kr",
-   "type": "pipeline_source",
-   "name": "코스닥 레버리지 ETF AUM (fetch_kosdaq_lev_etf_aum.py)",
-   "runs_on": "gha",
-   "schedule_kst": "18:30 평일 (gha-daily-krx-valuation 합승)",
-   "status": "active",
-   "desc_md": "코스닥 레버리지 ETF의 일간 순자산총액(AUM) 합산을 KRX MDCSTAT04301(ETF 전종목시세)에서 날짜당 1콜로 수집해 dataset.csv에 적재(2026-08-10 신설). 시리즈 1개 — `코스닥 레버리지 ETF AUM`, dtype `ETF_AUM`, 값=원 단위 정수.\n\n- **대상 선정은 종목 마스터가 아니라 날짜별 종목명 필터**(\"코스닥\"+\"레버리지\", 공백 정규화) — 상장·상폐·브랜드 개명(KBSTAR→RISE 등)이 자동 반영된다. 2026-08 기준 5종(KODEX 233740·TIGER 233160·RISE 278240·HANARO 306530·KIWOOM 291630). 구성 변동으로 생기는 점프는 신호의 일부로 보고 **보정·평활화하지 않는다**.\n- **엄격 합산**: 대상 중 한 종목이라도 AUM 파싱 불가면 그 날짜는 통째로 미적재(조용한 과소계상 방지). 전 종목이 `-`면 비거래일로 보고 skip.\n- 증분 = 기존 max 날짜 − lookback 10일 재조회 후 (날짜, 제품명) upsert. `--backfill`은 2015-12-17(KODEX 233740 상장일)부터 평일 순회하며 콜 간 0.5~0.8초 랜덤 sleep + 신규 50행마다 체크포인트 append(중단 재개 가능). 최초 백필 2015-12-17~2026-08-07 2,608행(`aa0510ab`).\n- 로그인은 [[src-krx-valuation]]과 동일 경로(pykrx 패치판이 import 시 env `KRX_ID`/`KRX_PW`로 로그인, 세션은 `get_auth_session()`). ★**프로세스당 1회, 실패해도 재시도하지 않는다** — KRX는 로그인 5회 실패 시 계정 잠금. 자격증명 값은 어떤 경로로도 출력하지 않는다.\n- 소비: market.html DATA 탭 INDEX_KOREA 패널에 배선(표시 단위 **억원**, `CMB_SERIES_SCALE` 1e8 제수 — 축이 1조를 넘으면 조원으로 자동 승격). `ETF_AUM`은 create_dashboard의 **5년 창(long_mask)** 대상이라 기본 2년 창보다 긴 이력이 임베드되고, draw_charts의 `ETF_` 프리픽스 제외 규칙에 걸려 **PNG는 만들지 않는다**(동적 차트 전용).",
-   "code": [
-    "execution/fetch_kosdaq_lev_etf_aum.py"
-   ],
-   "writes": [
-    "store-dataset-csv"
-   ],
-   "depends_on": [
-    "ext-data-apis"
    ]
   },
   {
