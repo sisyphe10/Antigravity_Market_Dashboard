@@ -146,6 +146,9 @@ def _brand(etf):
     return (parts[0], parts[1]) if len(parts) == 2 else (etf, etf)
 
 
+SIGN_SEP = '-----'   # 그룹 안 정렬(금액 desc)에서 + → - 부호가 바뀌는 경계에 넣는 가로선
+
+
 def _amt(r):
     return r.get('trade_amt') or 0
 
@@ -160,7 +163,13 @@ def build_message(date, rows, test=False, layout='tree', extra=False,
     """
     ordered = sorted(rows, key=lambda x: -_amt(x))
     if layout == 'flat':
-        body = ['%s%s%s | %s' % (BULLET1, GAP1, _esc(r['etf']), _cells(r)) for r in ordered]
+        body = []
+        prev = None
+        for r in ordered:
+            if prev is not None and prev >= 0 > _amt(r):
+                body.append(SIGN_SEP)   # 유입 → 유출 경계 가로선 (사용자 확정 2026-08-11)
+            body.append('%s%s%s | %s' % (BULLET1, GAP1, _esc(r['etf']), _cells(r)))
+            prev = _amt(r)
     else:
         groups = {}
         for r in ordered:
@@ -170,9 +179,13 @@ def build_message(date, rows, test=False, layout='tree', extra=False,
             if body:
                 body.append('')   # 운용사 블록 사이 한 줄 띄우기 (사용자 확정 2026-08-05)
             body.append('%s%s<b>%s</b>' % (BULLET1, GAP1, _esc(brand)))
+            prev = None
             for r in groups[brand]:
+                if prev is not None and prev >= 0 > _amt(r):
+                    body.append('   ' + SIGN_SEP)   # 유입 → 유출 경계 가로선 (2026-08-11)
                 body.append('   %s%s%s | %s'
                             % (BULLET2, GAP2, _esc(_brand(r['etf'])[1]), _cells(r)))
+                prev = _amt(r)
     return '\n'.join([_head(date, test, extra, page, pages), ''] + body)
 
 
