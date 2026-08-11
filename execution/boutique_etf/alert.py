@@ -146,7 +146,7 @@ def _brand(etf):
     return (parts[0], parts[1]) if len(parts) == 2 else (etf, etf)
 
 
-SIGN_SEP = '-----'   # 그룹 안 정렬(금액 desc)에서 + → - 부호가 바뀌는 경계에 넣는 가로선
+SIGN_SEP = '─' * 17   # + → - 경계 가로선. 끊긴 하이픈 말고 이어진 실선(U+2500), 길게 (2026-08-11)
 
 
 def _amt(r):
