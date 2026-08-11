@@ -24,9 +24,9 @@
       "sector": "반도체",
       "market_cap": 10409516,
       "weight": 25.0,
-      "weight_prev": 30.0,
+      "weight_prev": 25.0,
       "today_return": 0.35211267605633806,
-      "contribution": 1.0563380281690142,
+      "contribution": 0.8802816901408452,
       "ytd_return": 118.89400921658986,
       "cumulative_return": 386.23310301580193,
       "current_price": 1425000.0,
@@ -70,6 +70,24 @@
       "ath_price": 430123.0,
       "dd": -23.858989172864508,
       "rsi": 12.78111475319239,
+      "is_today_new": false
+    },
+    {
+      "code": "131290",
+      "name": "티에스이",
+      "sector": "반도체",
+      "market_cap": 27045,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": 7.709251101321586,
+      "contribution": 3.8546255506607934,
+      "ytd_return": 324.4791666666667,
+      "cumulative_return": 0.0,
+      "current_price": 244500.0,
+      "price_date": "2026-08-11",
+      "ath_price": 284500.0,
+      "dd": -14.059753954305798,
+      "rsi": 0.0,
       "is_today_new": false
     },
     {
@@ -197,42 +215,6 @@
       "dd": -63.706720977596746,
       "rsi": 0.9428342456178962,
       "is_today_new": false
-    },
-    {
-      "code": "119850",
-      "name": "지엔씨에너지",
-      "sector": "기계",
-      "market_cap": 8208,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -5.492424242424242,
-      "contribution": -1.0984848484848484,
-      "ytd_return": 61.48867313915858,
-      "cumulative_return": 13.667425968109349,
-      "current_price": 49900.0,
-      "price_date": "2026-08-11",
-      "ath_price": 52800.0,
-      "dd": -5.492424242424243,
-      "rsi": 17.15462531226255,
-      "is_today_new": false
-    },
-    {
-      "code": "131290",
-      "name": "티에스이",
-      "sector": "반도체",
-      "market_cap": 27045,
-      "weight": 5.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": 324.4791666666667,
-      "cumulative_return": null,
-      "current_price": 244500.0,
-      "price_date": "2026-08-11",
-      "ath_price": 284500.0,
-      "dd": -14.059753954305798,
-      "rsi": null,
-      "is_today_new": true
     }
   ],
   "삼성 트루밸류": [
@@ -260,9 +242,9 @@
       "sector": "반도체",
       "market_cap": 10409516,
       "weight": 25.0,
-      "weight_prev": 30.0,
+      "weight_prev": 25.0,
       "today_return": 0.35211267605633806,
-      "contribution": 1.0563380281690142,
+      "contribution": 0.8802816901408452,
       "ytd_return": 118.89400921658986,
       "cumulative_return": 386.23310301580193,
       "current_price": 1425000.0,
@@ -306,6 +288,24 @@
       "ath_price": 430123.0,
       "dd": -23.858989172864508,
       "rsi": 12.78111475319239,
+      "is_today_new": false
+    },
+    {
+      "code": "131290",
+      "name": "티에스이",
+      "sector": "반도체",
+      "market_cap": 27045,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": 7.709251101321586,
+      "contribution": 3.8546255506607934,
+      "ytd_return": 324.4791666666667,
+      "cumulative_return": 0.0,
+      "current_price": 244500.0,
+      "price_date": "2026-08-11",
+      "ath_price": 284500.0,
+      "dd": -14.059753954305798,
+      "rsi": 0.0,
       "is_today_new": false
     },
     {
@@ -433,42 +433,6 @@
       "dd": -63.706720977596746,
       "rsi": 0.9428342456178962,
       "is_today_new": false
-    },
-    {
-      "code": "119850",
-      "name": "지엔씨에너지",
-      "sector": "기계",
-      "market_cap": 8208,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -5.492424242424242,
-      "contribution": -1.0984848484848484,
-      "ytd_return": 61.48867313915858,
-      "cumulative_return": 13.667425968109349,
-      "current_price": 49900.0,
-      "price_date": "2026-08-11",
-      "ath_price": 52800.0,
-      "dd": -5.492424242424243,
-      "rsi": 17.15462531226255,
-      "is_today_new": false
-    },
-    {
-      "code": "131290",
-      "name": "티에스이",
-      "sector": "반도체",
-      "market_cap": 27045,
-      "weight": 5.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": 324.4791666666667,
-      "cumulative_return": null,
-      "current_price": 244500.0,
-      "price_date": "2026-08-11",
-      "ath_price": 284500.0,
-      "dd": -14.059753954305798,
-      "rsi": null,
-      "is_today_new": true
     }
   ],
   "NH 목표전환형 5호": [
@@ -496,9 +460,9 @@
       "sector": "반도체",
       "market_cap": 10409516,
       "weight": 25.0,
-      "weight_prev": 30.0,
+      "weight_prev": 25.0,
       "today_return": 0.35211267605633806,
-      "contribution": 1.0563380281690142,
+      "contribution": 0.8802816901408452,
       "ytd_return": 118.89400921658986,
       "cumulative_return": -24.567254248054628,
       "current_price": 1425000.0,
@@ -545,6 +509,24 @@
       "is_today_new": false
     },
     {
+      "code": "131290",
+      "name": "티에스이",
+      "sector": "반도체",
+      "market_cap": 27045,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": 7.709251101321586,
+      "contribution": 3.8546255506607934,
+      "ytd_return": 324.4791666666667,
+      "cumulative_return": 0.0,
+      "current_price": 244500.0,
+      "price_date": "2026-08-11",
+      "ath_price": 284500.0,
+      "dd": -14.059753954305798,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "034020",
       "name": "두산에너빌리티",
       "sector": "기계",
@@ -669,42 +651,6 @@
       "dd": -63.706720977596746,
       "rsi": 0.9428342456178962,
       "is_today_new": false
-    },
-    {
-      "code": "119850",
-      "name": "지엔씨에너지",
-      "sector": "기계",
-      "market_cap": 8208,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -5.492424242424242,
-      "contribution": -1.0984848484848484,
-      "ytd_return": 61.48867313915858,
-      "cumulative_return": 13.667425968109349,
-      "current_price": 49900.0,
-      "price_date": "2026-08-11",
-      "ath_price": 52800.0,
-      "dd": -5.492424242424243,
-      "rsi": 17.15462531226255,
-      "is_today_new": false
-    },
-    {
-      "code": "131290",
-      "name": "티에스이",
-      "sector": "반도체",
-      "market_cap": 27045,
-      "weight": 5.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": 324.4791666666667,
-      "cumulative_return": null,
-      "current_price": 244500.0,
-      "price_date": "2026-08-11",
-      "ath_price": 284500.0,
-      "dd": -14.059753954305798,
-      "rsi": null,
-      "is_today_new": true
     }
   ],
   "DB 목표전환형 6차": [
@@ -732,9 +678,9 @@
       "sector": "반도체",
       "market_cap": 10409516,
       "weight": 25.0,
-      "weight_prev": 30.0,
+      "weight_prev": 25.0,
       "today_return": 0.35211267605633806,
-      "contribution": 1.0563380281690142,
+      "contribution": 0.8802816901408452,
       "ytd_return": 118.89400921658986,
       "cumulative_return": -24.17389453519928,
       "current_price": 1425000.0,
@@ -781,6 +727,24 @@
       "is_today_new": false
     },
     {
+      "code": "131290",
+      "name": "티에스이",
+      "sector": "반도체",
+      "market_cap": 27045,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": 7.709251101321586,
+      "contribution": 3.8546255506607934,
+      "ytd_return": 324.4791666666667,
+      "cumulative_return": 0.0,
+      "current_price": 244500.0,
+      "price_date": "2026-08-11",
+      "ath_price": 284500.0,
+      "dd": -14.059753954305798,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "034020",
       "name": "두산에너빌리티",
       "sector": "기계",
@@ -905,42 +869,6 @@
       "dd": -63.706720977596746,
       "rsi": 0.9428342456178962,
       "is_today_new": false
-    },
-    {
-      "code": "119850",
-      "name": "지엔씨에너지",
-      "sector": "기계",
-      "market_cap": 8208,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -5.492424242424242,
-      "contribution": -1.0984848484848484,
-      "ytd_return": 61.48867313915858,
-      "cumulative_return": 13.667425968109349,
-      "current_price": 49900.0,
-      "price_date": "2026-08-11",
-      "ath_price": 52800.0,
-      "dd": -5.492424242424243,
-      "rsi": 17.15462531226255,
-      "is_today_new": false
-    },
-    {
-      "code": "131290",
-      "name": "티에스이",
-      "sector": "반도체",
-      "market_cap": 27045,
-      "weight": 5.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": 324.4791666666667,
-      "cumulative_return": null,
-      "current_price": 244500.0,
-      "price_date": "2026-08-11",
-      "ath_price": 284500.0,
-      "dd": -14.059753954305798,
-      "rsi": null,
-      "is_today_new": true
     }
   ],
   "한투 지속형": [
@@ -968,9 +896,9 @@
       "sector": "반도체",
       "market_cap": 10409516,
       "weight": 25.0,
-      "weight_prev": 30.0,
+      "weight_prev": 25.0,
       "today_return": 0.35211267605633806,
-      "contribution": 1.0563380281690142,
+      "contribution": 0.8802816901408452,
       "ytd_return": 118.89400921658986,
       "cumulative_return": -25.072298659188498,
       "current_price": 1425000.0,
@@ -1014,6 +942,24 @@
       "ath_price": 430123.0,
       "dd": -23.858989172864508,
       "rsi": 12.78111475319239,
+      "is_today_new": false
+    },
+    {
+      "code": "131290",
+      "name": "티에스이",
+      "sector": "반도체",
+      "market_cap": 27045,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": 7.709251101321586,
+      "contribution": 3.8546255506607934,
+      "ytd_return": 324.4791666666667,
+      "cumulative_return": 0.0,
+      "current_price": 244500.0,
+      "price_date": "2026-08-11",
+      "ath_price": 284500.0,
+      "dd": -14.059753954305798,
+      "rsi": 0.0,
       "is_today_new": false
     },
     {
@@ -1141,42 +1087,6 @@
       "dd": -63.706720977596746,
       "rsi": 0.9428342456178962,
       "is_today_new": false
-    },
-    {
-      "code": "119850",
-      "name": "지엔씨에너지",
-      "sector": "기계",
-      "market_cap": 8208,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -5.492424242424242,
-      "contribution": -1.0984848484848484,
-      "ytd_return": 61.48867313915858,
-      "cumulative_return": 13.667425968109349,
-      "current_price": 49900.0,
-      "price_date": "2026-08-11",
-      "ath_price": 52800.0,
-      "dd": -5.492424242424243,
-      "rsi": 17.15462531226255,
-      "is_today_new": false
-    },
-    {
-      "code": "131290",
-      "name": "티에스이",
-      "sector": "반도체",
-      "market_cap": 27045,
-      "weight": 5.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": 324.4791666666667,
-      "cumulative_return": null,
-      "current_price": 244500.0,
-      "price_date": "2026-08-11",
-      "ath_price": 284500.0,
-      "dd": -14.059753954305798,
-      "rsi": null,
-      "is_today_new": true
     }
   ],
   "한투 성과모집형 1차": [
@@ -1204,9 +1114,9 @@
       "sector": "반도체",
       "market_cap": 10409516,
       "weight": 25.0,
-      "weight_prev": 30.0,
+      "weight_prev": 25.0,
       "today_return": 0.35211267605633806,
-      "contribution": 1.0563380281690142,
+      "contribution": 0.8802816901408452,
       "ytd_return": 118.89400921658986,
       "cumulative_return": -21.447208849362397,
       "current_price": 1425000.0,
@@ -1250,6 +1160,24 @@
       "ath_price": 430123.0,
       "dd": -23.858989172864508,
       "rsi": 12.78111475319239,
+      "is_today_new": false
+    },
+    {
+      "code": "131290",
+      "name": "티에스이",
+      "sector": "반도체",
+      "market_cap": 27045,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": 7.709251101321586,
+      "contribution": 3.8546255506607934,
+      "ytd_return": 324.4791666666667,
+      "cumulative_return": 0.0,
+      "current_price": 244500.0,
+      "price_date": "2026-08-11",
+      "ath_price": 284500.0,
+      "dd": -14.059753954305798,
+      "rsi": 0.0,
       "is_today_new": false
     },
     {
@@ -1377,202 +1305,32 @@
       "dd": -63.706720977596746,
       "rsi": 0.9428342456178962,
       "is_today_new": false
-    },
-    {
-      "code": "119850",
-      "name": "지엔씨에너지",
-      "sector": "기계",
-      "market_cap": 8208,
-      "weight": 0.0,
-      "weight_prev": 2.0,
-      "today_return": -5.492424242424242,
-      "contribution": -1.0984848484848484,
-      "ytd_return": 61.48867313915858,
-      "cumulative_return": 13.667425968109349,
-      "current_price": 49900.0,
-      "price_date": "2026-08-11",
-      "ath_price": 52800.0,
-      "dd": -5.492424242424243,
-      "rsi": 17.15462531226255,
-      "is_today_new": false
-    },
-    {
-      "code": "131290",
-      "name": "티에스이",
-      "sector": "반도체",
-      "market_cap": 27045,
-      "weight": 5.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": 324.4791666666667,
-      "cumulative_return": null,
-      "current_price": 244500.0,
-      "price_date": "2026-08-11",
-      "ath_price": 284500.0,
-      "dd": -14.059753954305798,
-      "rsi": null,
-      "is_today_new": true
     }
   ],
-  "_order_changes": {
-    "NH 다이내믹 밸류 / DB 개방형": {
-      "date": "2026-08-11",
-      "added": [
-        {
-          "name": "티에스이",
-          "weight": 5.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "SK하이닉스",
-          "from": 30.0,
-          "to": 25.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "지엔씨에너지",
-          "weight": 2.0
-        }
-      ]
-    },
-    "삼성 트루밸류": {
-      "date": "2026-08-11",
-      "added": [
-        {
-          "name": "티에스이",
-          "weight": 5.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "SK하이닉스",
-          "from": 30.0,
-          "to": 25.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "지엔씨에너지",
-          "weight": 2.0
-        }
-      ]
-    },
-    "NH 목표전환형 5호": {
-      "date": "2026-08-11",
-      "added": [
-        {
-          "name": "티에스이",
-          "weight": 5.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "SK하이닉스",
-          "from": 30.0,
-          "to": 25.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "지엔씨에너지",
-          "weight": 2.0
-        }
-      ]
-    },
-    "DB 목표전환형 6차": {
-      "date": "2026-08-11",
-      "added": [
-        {
-          "name": "티에스이",
-          "weight": 5.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "SK하이닉스",
-          "from": 30.0,
-          "to": 25.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "지엔씨에너지",
-          "weight": 2.0
-        }
-      ]
-    },
-    "한투 지속형": {
-      "date": "2026-08-11",
-      "added": [
-        {
-          "name": "티에스이",
-          "weight": 5.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "SK하이닉스",
-          "from": 30.0,
-          "to": 25.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "지엔씨에너지",
-          "weight": 2.0
-        }
-      ]
-    },
-    "한투 성과모집형 1차": {
-      "date": "2026-08-11",
-      "added": [
-        {
-          "name": "티에스이",
-          "weight": 5.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "SK하이닉스",
-          "from": 30.0,
-          "to": 25.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "지엔씨에너지",
-          "weight": 2.0
-        }
-      ]
-    }
-  },
   "_portfolio_meta": {
     "NH 다이내믹 밸류 / DB 개방형": {
-      "nav_ytd_d1": 35.27409883412691,
-      "nav_cum_d1": 167.909
+      "nav_ytd_d1": 36.79140010805406,
+      "nav_cum_d1": 170.91399999999996
     },
     "삼성 트루밸류": {
-      "nav_ytd_d1": 35.24991218566178,
-      "nav_cum_d1": 173.382
+      "nav_ytd_d1": 36.76675027581125,
+      "nav_cum_d1": 176.44799999999998
     },
     "NH 목표전환형 5호": {
-      "nav_ytd_d1": -31.074,
-      "nav_cum_d1": -31.074
+      "nav_ytd_d1": -30.301000000000002,
+      "nav_cum_d1": -30.301000000000002
     },
     "DB 목표전환형 6차": {
-      "nav_ytd_d1": -30.26599999999999,
-      "nav_cum_d1": -30.26599999999999
+      "nav_ytd_d1": -29.483999999999998,
+      "nav_cum_d1": -29.483999999999998
     },
     "한투 지속형": {
-      "nav_ytd_d1": -23.092000000000002,
-      "nav_cum_d1": -23.092000000000002
+      "nav_ytd_d1": -22.229,
+      "nav_cum_d1": -22.229
     },
     "한투 성과모집형 1차": {
-      "nav_ytd_d1": -21.64299999999999,
-      "nav_cum_d1": -21.64299999999999
+      "nav_ytd_d1": -20.763999999999992,
+      "nav_cum_d1": -20.763999999999992
     }
   },
   "_price_asof": "2026-08-11"
