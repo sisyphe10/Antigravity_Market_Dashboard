@@ -156,6 +156,11 @@ def aggregate(rows):
             return None, None, f'parse:{t}'
         if v < 0:
             return None, None, f'neg:{t}'
+        if v == 0:
+            # ★당일 저녁 KRX는 미확정 AUM을 '-' 대신 0으로 반환(8/10·8/11 실측)
+            #   — 실존 ETF의 AUM 0은 불가능하므로 결측으로 취급 (전 종목 0 = holiday skip)
+            dashes += 1
+            continue
         total += v
     if dashes == len(targets):
         return None, None, 'holiday'          # 전 종목 미표시 = 비거래일
