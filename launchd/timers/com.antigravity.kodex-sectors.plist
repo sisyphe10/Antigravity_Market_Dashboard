@@ -24,14 +24,25 @@
         <key>LANG</key>
         <string>en_US.UTF-8</string>
     </dict>
-    <!-- KST 23:30 매일 (원본: OnCalendar=*-*-* 23:30:00 Asia/Seoul). 시스템 TZ=Asia/Seoul 전제. -->
+    <!-- KST 23:30 매일 (원본: OnCalendar=*-*-* 23:30:00 Asia/Seoul). 시스템 TZ=Asia/Seoul 전제.
+         + 08:10 아침 실행(2026-08-12): KRX ETF 순자산총액(AUM)은 전일 확정치가 밤사이 공표됨
+           — deriv AUM(삼성전자·SK하이닉스) 전일치를 아침에 백필. 08:20 gha-krx-valuation 과
+           KRX 로그인 직렬화(10분 간격). catch-up 앵커(schedule.tsv)는 23:30 본 실행만 유지. -->
     <key>StartCalendarInterval</key>
-    <dict>
-        <key>Hour</key>
-        <integer>23</integer>
-        <key>Minute</key>
-        <integer>30</integer>
-    </dict>
+    <array>
+        <dict>
+            <key>Hour</key>
+            <integer>8</integer>
+            <key>Minute</key>
+            <integer>10</integer>
+        </dict>
+        <dict>
+            <key>Hour</key>
+            <integer>23</integer>
+            <key>Minute</key>
+            <integer>30</integer>
+        </dict>
+    </array>
     <key>StandardOutPath</key>
     <string>__REPO__/logs/launchd/kodex-sectors.out</string>
     <key>StandardErrorPath</key>

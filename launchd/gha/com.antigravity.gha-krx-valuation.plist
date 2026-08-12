@@ -27,8 +27,36 @@
     </dict>
     <!-- KST 18:30 평일(월~금) (원본 cron '30 9 * * 1-5' UTC = 09:30 월~금 → +9h = 18:30 당일, 요일 불변).
          launchd Weekday: 1=월 2=화 3=수 4=목 5=금. 시스템 TZ=Asia/Seoul 전제. -->
+    <!-- + 평일 08:20 아침 실행(2026-08-12): 코스닥 레버리지 ETF AUM 전일 확정치(밤사이 공표)를
+         아침에 반영 — 당일 18:30 실행은 미확정(0/-)이라 skip 되므로 이 실행이 D-1 을 넣는다.
+         kodex-sectors 08:10 과 KRX 로그인 직렬화(10분 간격). -->
     <key>StartCalendarInterval</key>
     <array>
+        <dict>
+            <key>Weekday</key><integer>1</integer>
+            <key>Hour</key><integer>8</integer>
+            <key>Minute</key><integer>20</integer>
+        </dict>
+        <dict>
+            <key>Weekday</key><integer>2</integer>
+            <key>Hour</key><integer>8</integer>
+            <key>Minute</key><integer>20</integer>
+        </dict>
+        <dict>
+            <key>Weekday</key><integer>3</integer>
+            <key>Hour</key><integer>8</integer>
+            <key>Minute</key><integer>20</integer>
+        </dict>
+        <dict>
+            <key>Weekday</key><integer>4</integer>
+            <key>Hour</key><integer>8</integer>
+            <key>Minute</key><integer>20</integer>
+        </dict>
+        <dict>
+            <key>Weekday</key><integer>5</integer>
+            <key>Hour</key><integer>8</integer>
+            <key>Minute</key><integer>20</integer>
+        </dict>
         <dict>
             <key>Weekday</key><integer>1</integer>
             <key>Hour</key><integer>18</integer>
