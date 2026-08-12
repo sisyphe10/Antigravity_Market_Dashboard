@@ -2,7 +2,7 @@
 
 _Generated from `architecture/registry.json` · projects: antigravity · v1 — 164 components._
 
-Updated: 2026-08-11
+Updated: 2026-08-12
 
 ## By domain
 
@@ -21,7 +21,7 @@ Updated: 2026-08-11
 - [boutique_etf.db (부티크 액티브 ETF SQLite)](store-boutique-etf-db.md) — Store
 - [Daily Disclosures DART+KIND (16:30)](gha-daily-disclosures.md) — GHA
 - [Daily KOFIA Stats + NPS (21:30 평일)](gha-daily-kofia.md) — GHA
-- [Daily KRX Index Valuation (18:30 평일)](gha-daily-krx-valuation.md) — GHA
+- [Daily KRX Index Valuation (18:30 + 08:20 평일)](gha-daily-krx-valuation.md) — GHA
 - [DART 공시 (fetch_disclosures.py)](src-dart-disclosures.md) — Source
 - [ETF 구성종목 수집 (collect_etf_daily.py)](src-etf-collect.md) — Source
 - [ETF 구성종목 수집 타이머 (etf-collect 16:30)](timer-etf-collect.md) — Timer
@@ -84,7 +84,7 @@ Updated: 2026-08-11
 
 ### 반도체 · 테크 (7)
 - [KODEX 섹터 비중 (fetch_kodex_sectors.py)](src-kodex-sectors.md) — Source
-- [KODEX 섹터 타이머 (23:30, +KOSIS/일본capex/파생 편승)](timer-kodex-sectors.md) — Timer
+- [KODEX 섹터 타이머 (23:30 + 08:10, +KOSIS/일본capex/파생 편승)](timer-kodex-sectors.md) — Timer
 - [SemiAnalysis 소스 (sources/semianalysis.py)](src-semianalysis.md) — Source
 - [SiliconData 지수 3종 (fetch_silicondata_index.py)](src-silicondata.md) — Source
 - [TrendForce 소스 (sources/trendforce.py)](src-trendforce.md) — Source
@@ -178,7 +178,7 @@ Updated: 2026-08-11
 - [외부 데이터 API/소스 집합](ext-data-apis.md) — External
 - [웹 데몬 헬스체크 타이머 (11:00, probe+자가복구)](timer-daemon-health.md) — Timer
 - [웹 서빙 (Caddy · com.antigravity.web)](web-caddy.md) — Infra
-- [일일 셀프체크 다이제스트 (08:50, 이상 시에만 발송)](daemon-daily-selfcheck.md) — Timer
+- [일일 셀프체크 다이제스트 (08:50, 변화 시에만 발송)](daemon-daily-selfcheck.md) — Timer
 - [작업용 노트북 (ASUS Vivobook, Windows)](infra-laptop.md) — Infra
 - [차트 렌더러 (draw_charts + draw_wrap_charts)](src-draw-charts.md) — Source
 - [컴퓨트 호스트 (맥미니)](infra-vm-macmini.md) — Infra
@@ -198,7 +198,7 @@ Updated: 2026-08-11
 - [ETF 구성종목 수집 타이머 (etf-collect 16:30)](timer-etf-collect.md) — 16:30 매일 (paused 2026-07-29), frozen
 - [ETF 수집 재시도 타이머 (etf-collect-retry 18:00)](timer-etf-collect-retry.md) — 18:00 매일 (paused 2026-07-29), frozen
 - [Featured KIS 수집 타이머 (15:50, 신고가)](timer-featured-kis.md) — 15:50 매일, active
-- [KODEX 섹터 타이머 (23:30, +KOSIS/일본capex/파생 편승)](timer-kodex-sectors.md) — 23:30 매일, active
+- [KODEX 섹터 타이머 (23:30 + 08:10, +KOSIS/일본capex/파생 편승)](timer-kodex-sectors.md) — 23:30 매일 + 08:10 매일(D-1 AUM 확정 백필), active
 - [Memento 점심 텔레그램 타이머 (12:00)](timer-memento-telegram.md) — 12:00 매일, active
 - [WRAP 원칙 점검 타이머 (17:10 평일 변화기반 + 일 20:00 전체)](timer-wrap-principle-check.md) — 17:10 평일 + 일 20:00 (주간 전체) — 타이머 제거(2026-08-05), retired
 - [랜딩 하이라이트 타이머 (18:45)](timer-landing-highlights.md) — 18:45 매일, active
@@ -209,7 +209,7 @@ Updated: 2026-08-11
 - [아키텍처 자동 최신화 타이머 (21:40, claude 헤드리스)](timer-architecture-daily.md) — 21:40 매일, active
 - [액티브 ETF 변동 알림 타이머 (19:00)](timer-etf-active-alert.md) — 19:00 매일, active
 - [웹 데몬 헬스체크 타이머 (11:00, probe+자가복구)](timer-daemon-health.md) — 11:00 매일, active
-- [일일 셀프체크 다이제스트 (08:50, 이상 시에만 발송)](daemon-daily-selfcheck.md) — 08:50 매일, active
+- [일일 셀프체크 다이제스트 (08:50, 변화 시에만 발송)](daemon-daily-selfcheck.md) — 08:50 매일, active
 - [자문지 메일 발송 폴러 (send-advisory-emails 60초)](timer-advisory-emails.md) — 60초 폴러 (상시), active
 - [장전 포트폴리오 재생성 타이머 (07:30 평일)](timer-portfolio-premarket.md) — 07:30 평일 (월~금), active
 - [종목마스터 주간 갱신 타이머 (토 09:00)](timer-update-stock-master.md) — 토 09:00, active
@@ -222,7 +222,7 @@ Updated: 2026-08-11
 - [Daily ECOS BOK (17:40 평일)](gha-daily-ecos.md) — 17:40 평일, active
 - [Daily FRED US Macro (07:50 화~토)](gha-daily-fred.md) — 07:50 화~토, active
 - [Daily KOFIA Stats + NPS (21:30 평일)](gha-daily-kofia.md) — 21:30 평일, active
-- [Daily KRX Index Valuation (18:30 평일)](gha-daily-krx-valuation.md) — 18:30 평일, active
+- [Daily KRX Index Valuation (18:30 + 08:20 평일)](gha-daily-krx-valuation.md) — 18:30 평일 + 08:20 평일(D-1 ETF AUM 확정 백필), active
 - [Daily Market Crawl (23:00)](gha-daily-crawl.md) — 23:00 매일 (+ execution/** push 트리거), active
 - [Daily Taiwan Monthly Revenue (23:20)](gha-daily-taiwan-revenue.md) — 23:20 매일, active
 - [Daily Universe yfinance (18:30 + 07:00)](gha-daily-universe.md) — 18:30 / 07:00 매일, active
@@ -348,12 +348,12 @@ Updated: 2026-08-11
 - [지수 거래대금·거래량 (build_index_value.py)](src-index-value.md) — 23:00 (gha-daily-crawl), active
 - [차트 렌더러 (draw_charts + draw_wrap_charts)](src-draw-charts.md) — 23:00 (daily_crawl), active
 - [출입국 월별 통계 (fetch_immigration.py)](src-immigration.md) — 23:30 (kodex 타이머 편승), active
-- [코스닥 레버리지 ETF AUM (fetch_kosdaq_lev_etf_aum.py)](src-kosdaq-lev-etf-aum.md) — 18:30 평일 (gha-daily-krx-valuation 합승), active
+- [코스닥 레버리지 ETF AUM (fetch_kosdaq_lev_etf_aum.py)](src-kosdaq-lev-etf-aum.md) — 18:30 + 08:20 평일 (gha-daily-krx-valuation 합승), active
 - [투자유의 생성기 (create_market_alert.py)](src-create-market-alert.md) — 16:05 / 23:00 (sisyphe-bot), active
 - [투자일지 시장데이터 (fetch_journal_data.py)](src-journal-data.md) — 16:10 (sisyphe-bot), active
 - [투자자별 수급 (fetch_investor_trading.py)](src-investor-trading.md) — 장 마감 후 (sisyphe-bot), active
 - [투자주체별 누적 순매수 (build_investor_flow.py)](src-investor-flow.md) — 23:00 (gha-daily-crawl), active
-- [파생·수급 13종 (fetch_deriv_daily.py)](src-deriv-daily.md) — 23:30 (kodex 타이머 편승), active
+- [파생·수급 13종 (fetch_deriv_daily.py)](src-deriv-daily.md) — 23:30 + 08:10 (kodex 타이머 편승), active
 - [포트폴리오 표 생성 (create_portfolio_tables.py)](src-create-portfolio-tables.md) — 체인 (finalize/recalc/crawl), active
 - [해외 기업 IR/뉴스룸 (sources/foreign_ir.py)](src-foreign-ir.md) — 07:30 / 20:00 (ra-sisyphe), active
 
@@ -396,7 +396,7 @@ Updated: 2026-08-11
 - [Daily ECOS BOK (17:40 평일)](gha-daily-ecos.md) — GHA
 - [Daily FRED US Macro (07:50 화~토)](gha-daily-fred.md) — GHA
 - [Daily KOFIA Stats + NPS (21:30 평일)](gha-daily-kofia.md) — GHA
-- [Daily KRX Index Valuation (18:30 평일)](gha-daily-krx-valuation.md) — GHA
+- [Daily KRX Index Valuation (18:30 + 08:20 평일)](gha-daily-krx-valuation.md) — GHA
 - [Daily Market Crawl (23:00)](gha-daily-crawl.md) — GHA
 - [Daily Taiwan Monthly Revenue (23:20)](gha-daily-taiwan-revenue.md) — GHA
 - [Daily Universe yfinance (18:30 + 07:00)](gha-daily-universe.md) — GHA
@@ -429,7 +429,7 @@ Updated: 2026-08-11
 - [Journal Trade API 데몬 (Escape Velocity, 127.0.0.1:8791)](daemon-journal-api.md) — Infra
 - [KIND 거래소 공시 (fetch_kind_disclosures.py)](src-kind-disclosures.md) — Source
 - [KODEX 섹터 비중 (fetch_kodex_sectors.py)](src-kodex-sectors.md) — Source
-- [KODEX 섹터 타이머 (23:30, +KOSIS/일본capex/파생 편승)](timer-kodex-sectors.md) — Timer
+- [KODEX 섹터 타이머 (23:30 + 08:10, +KOSIS/일본capex/파생 편승)](timer-kodex-sectors.md) — Timer
 - [KOSIS 시계열 레지스트리 (fetch_kosis_series.py)](src-kosis-series.md) — Source
 - [KPX 육지 SMP (fetch_smp_kpx.py)](src-smp-kpx.md) — Source
 - [KRX 지수 밸류에이션 (fetch_krx_valuation.py)](src-krx-valuation.md) — Source
@@ -517,7 +517,7 @@ Updated: 2026-08-11
 - [웹 서빙 (Caddy · com.antigravity.web)](web-caddy.md) — Infra
 - [유니버스 수집 (fetch_universe.py)](src-universe.md) — Source
 - [일본 CAPEX 지표 (fetch_japan_capex.py)](src-japan-capex.md) — Source
-- [일일 셀프체크 다이제스트 (08:50, 이상 시에만 발송)](daemon-daily-selfcheck.md) — Timer
+- [일일 셀프체크 다이제스트 (08:50, 변화 시에만 발송)](daemon-daily-selfcheck.md) — Timer
 - [자문지 메일 발송 폴러 (send-advisory-emails 60초)](timer-advisory-emails.md) — Timer
 - [작업용 노트북 (ASUS Vivobook, Windows)](infra-laptop.md) — Infra
 - [장전 포트폴리오 재생성 타이머 (07:30 평일)](timer-portfolio-premarket.md) — Timer

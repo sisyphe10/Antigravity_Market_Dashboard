@@ -28,6 +28,8 @@ alerts: "FAIL → notify_sisyphe_failure.sh wrap-principle-check → 텔레그�
 **Domain:** 포트폴리오 · WRAP · **Type:** Timer · **Runs on:** vm_macmini · **Schedule (KST):** 17:10 평일 + 일 20:00 (주간 전체) — 타이머 제거(2026-08-05) · **Status:** retired · **Project:** antigravity
 
 > ★ **2026-08-05 타이머 제거(retired)**: `com.antigravity.wrap-principle-check.plist`를 삭제하고 `install_timers.sh` NAMES·`schedule.tsv`에서 뺐다(커밋 `0282769e`). 잡의 정기 발화는 중단됐다. 점검 로직 `execution/wrap_principle_check.py`(당일 텔레그램 3회 재시도 보강, 커밋 `64aa311f`)와 아래 설계 기록은 롤백·참고용으로 보존한다.
+>
+> ★ **2026-08-12 잔재 정리**: 설치본 `logs/launchd/schedule.tsv`에는 17:10 행이 남아 있었고, [[daemon-daily-selfcheck]]이 그 표를 감시 대상 목록으로 읽는 탓에 **발화하지 않는 잡의 STALE 오탐**이 8/7~8/12 매일 알림을 만들었다. 행을 제거(`3930367c`)해 해소했고, 같은 오탐이 셀프체크의 변화 기반 알림 게이트 도입 계기가 됐다. 교훈: **타이머를 은퇴시킬 땐 `schedule.tsv` 등재까지 같이 지운다** — 그 표가 곧 감시망이다.
 
 2026-07-16 신설. WRAP 포트폴리오의 투자원칙 준수를 점검해 **위반 상태가 변했을 때만** 텔레그램(🧭)으로 알리는 타이머(`com.antigravity.wrap-principle-check` → `execution/wrap_principle_check.py`). 16:xx 수집·리포트 잡들 뒤에 배치.
 

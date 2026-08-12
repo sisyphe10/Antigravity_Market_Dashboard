@@ -24,6 +24,7 @@ alerts: ""
 
 - 16:00 finalize 워크플로가 이를 Wrap_NAV.xlsx NEW/AUM 시트에 확정 반영 후 비운다.
 - 최종저장 후 새로고침 입력소실 방지: pending을 Pages(빌드지연) 대신 Contents API 우선 read.
+- ★**쓰기 우선순위 = 사용자 저장(2026-08-12)**: 이 두 파일은 finalize 잡이 도는 중에도 사용자가 브라우저에서 덮어쓸 수 있어, [[gha-finalize-orders]]의 safe_push가 `--prefer-remote-pending`으로 **원격(사용자) 쪽을 정본**으로 채택한다. 잡의 확정 결과(`finalizedAt` 스탬프)가 밀리면 Order 탭이 `(임시 저장됨)`으로 남아 재확정을 유도한다.
 - **`orders/email_send_request.json`**(2026-07-13): Email 탭 [메일 발송 요청]이 Contents API로 기록하는 자문지 메일 발송 요청(첨부 base64 포함). [[timer-advisory-emails]] 60초 폴러가 감지·발송하고 처리 결과·멱등 스탬프를 `orders/email_send_result.json`에 기록.
 
 ## Reads

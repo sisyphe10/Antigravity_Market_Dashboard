@@ -56,7 +56,7 @@ GitHub Actions 스케줄 워크플로를 맥미니 launchd LaunchDaemon으로 �
 - [[gha-daily-ecos]] — Daily ECOS BOK (17:40 평일)
 - [[gha-daily-kofia]] — Daily KOFIA Stats + NPS (21:30 평일)
 - [[gha-daily-universe]] — Daily Universe yfinance (18:30 + 07:00)
-- [[gha-daily-krx-valuation]] — Daily KRX Index Valuation (18:30 평일)
+- [[gha-daily-krx-valuation]] — Daily KRX Index Valuation (18:30 + 08:20 평일)
 - [[gha-daily-disclosures]] — Daily Disclosures DART+KIND (16:30)
 - [[gha-earnings-calendar-sync]] — Earnings Calendar Sync (07:00)
 - [[gha-finalize-orders]] — Finalize Pending Orders + AUM (16:00)

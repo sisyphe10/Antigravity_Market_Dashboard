@@ -26,6 +26,7 @@ alerts: ""
 - **GitHub Pages = 팀원 WRAP 전용으로 축소**: `wrap.html` + wrap이 fetch하는 데이터(JSON + orders/)만 게시, 루트(`/`)는 wrap 리다이렉트. 개인 페이지는 공개 안 함.
 - 모든 수집 잡은 산출물을 커밋→push하고, 맥미니는 `*/5` git-pull로 받아 동기화한다(단일 워킹트리 정합).
 - push 레이스는 `scripts/safe_commit_push.sh`(fetch+merge+재시도)가 자가복구, xlsx 바이너리 충돌만 가드로 막는다. **push 성공 훅에서 [[web-publish-pages]]를 호출**해 gh-pages를 갱신한다.
+- **merge 시 어느 쪽이 이기나 = 파일별 정책 플래그**(기본은 OURS=방금 생성한 산출물): `--prefer-remote-portfolio`는 `portfolio_data.json`을 원격(VM 실시간 시세)에 양보하고, `--prefer-remote-pending`(2026-08-12 추가)은 `orders/pending_orders.json`·`orders/aum_pending.json`을 원격(사용자 브라우저 저장)에 양보한다 — 잡이 도는 중의 사용자 입력이 조용히 사라지지 않도록([[gha-finalize-orders]]).
 - 실패해도 워크플로가 green일 수 있어(개별 시리즈 stale) 신선도 감시(`gha-daily-health-check`)가 별도로 존재한다.
 - 운영 팁: `execution/**` push는 장중 `gha-daily-crawl`을 트리거하므로 커밋 메시지에 `[skip ci]` 필수.
 
