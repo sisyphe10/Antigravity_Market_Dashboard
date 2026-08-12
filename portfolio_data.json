@@ -127,6 +127,24 @@
       "is_today_new": false
     },
     {
+      "code": "017670",
+      "name": "SK텔레콤",
+      "sector": "통신서비스",
+      "market_cap": 188586,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 2.0930232558139537,
+      "contribution": 0.627906976744186,
+      "ytd_return": 64.11214953271028,
+      "cumulative_return": 0.0,
+      "current_price": 87800.0,
+      "price_date": "2026-08-12",
+      "ath_price": 125200.0,
+      "dd": -29.872204472843457,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "010950",
       "name": "S-Oil",
       "sector": "에너지",
@@ -214,24 +232,6 @@
       "ath_price": 388000.0,
       "dd": -34.02061855670103,
       "rsi": -11.172185501231269,
-      "is_today_new": false
-    },
-    {
-      "code": "017670",
-      "name": "SK텔레콤",
-      "sector": "통신서비스",
-      "market_cap": 188586,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": 2.0930232558139537,
-      "contribution": 0.0,
-      "ytd_return": 64.11214953271028,
-      "cumulative_return": null,
-      "current_price": 87800.0,
-      "price_date": "2026-08-12",
-      "ath_price": 125200.0,
-      "dd": -29.872204472843457,
-      "rsi": null,
       "is_today_new": false
     }
   ],
@@ -363,6 +363,24 @@
       "is_today_new": false
     },
     {
+      "code": "017670",
+      "name": "SK텔레콤",
+      "sector": "통신서비스",
+      "market_cap": 188586,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 2.0930232558139537,
+      "contribution": 0.627906976744186,
+      "ytd_return": 64.11214953271028,
+      "cumulative_return": 0.0,
+      "current_price": 87800.0,
+      "price_date": "2026-08-12",
+      "ath_price": 125200.0,
+      "dd": -29.872204472843457,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "010950",
       "name": "S-Oil",
       "sector": "에너지",
@@ -451,24 +469,6 @@
       "dd": -34.02061855670103,
       "rsi": -11.172185501231269,
       "is_today_new": false
-    },
-    {
-      "code": "017670",
-      "name": "SK텔레콤",
-      "sector": "통신서비스",
-      "market_cap": 188586,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": 2.0930232558139537,
-      "contribution": 0.0,
-      "ytd_return": 64.11214953271028,
-      "cumulative_return": null,
-      "current_price": 87800.0,
-      "price_date": "2026-08-12",
-      "ath_price": 125200.0,
-      "dd": -29.872204472843457,
-      "rsi": null,
-      "is_today_new": false
     }
   ],
   "NH 목표전환형 5호": [
@@ -527,6 +527,42 @@
       "is_today_new": false
     },
     {
+      "code": "035420",
+      "name": "NAVER",
+      "sector": "소프트웨어",
+      "market_cap": 338287,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": 0.7009345794392523,
+      "contribution": 0.3504672897196262,
+      "ytd_return": -11.134020618556706,
+      "cumulative_return": -0.9991960491558483,
+      "current_price": 215500.0,
+      "price_date": "2026-08-12",
+      "ath_price": 454000.0,
+      "dd": -52.5330396475771,
+      "rsi": 5.251403655813903,
+      "is_today_new": false
+    },
+    {
+      "code": "017670",
+      "name": "SK텔레콤",
+      "sector": "통신서비스",
+      "market_cap": 188586,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": 2.0930232558139537,
+      "contribution": 1.046511627906977,
+      "ytd_return": 64.11214953271028,
+      "cumulative_return": 0.0,
+      "current_price": 87800.0,
+      "price_date": "2026-08-12",
+      "ath_price": 125200.0,
+      "dd": -29.872204472843457,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "196170",
       "name": "알테오젠",
       "sector": "건강관리",
@@ -581,24 +617,6 @@
       "is_today_new": false
     },
     {
-      "code": "035420",
-      "name": "NAVER",
-      "sector": "소프트웨어",
-      "market_cap": 338287,
-      "weight": 5.0,
-      "weight_prev": 3.0,
-      "today_return": 0.7009345794392523,
-      "contribution": 0.2102803738317757,
-      "ytd_return": -11.134020618556706,
-      "cumulative_return": -1.65430690245294,
-      "current_price": 215500.0,
-      "price_date": "2026-08-12",
-      "ath_price": 454000.0,
-      "dd": -52.5330396475771,
-      "rsi": 5.251403655813903,
-      "is_today_new": false
-    },
-    {
       "code": "010950",
       "name": "S-Oil",
       "sector": "에너지",
@@ -614,42 +632,6 @@
       "ath_price": 151200.0,
       "dd": -6.415343915343918,
       "rsi": 1.19517807934868,
-      "is_today_new": false
-    },
-    {
-      "code": "003230",
-      "name": "삼양식품",
-      "sector": "필수소비재",
-      "market_cap": 90698,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": -3.9872408293460926,
-      "contribution": -1.1961722488038278,
-      "ytd_return": -2.1933387489845635,
-      "cumulative_return": -3.5771489588894867,
-      "current_price": 1204000.0,
-      "price_date": "2026-08-12",
-      "ath_price": 1630000.0,
-      "dd": -26.134969325153378,
-      "rsi": -17.482430552122096,
-      "is_today_new": false
-    },
-    {
-      "code": "128940",
-      "name": "한미약품",
-      "sector": "건강관리",
-      "market_cap": 50732,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": -4.116222760290557,
-      "contribution": -1.2348668280871673,
-      "ytd_return": -12.389380530973447,
-      "cumulative_return": 0.8917197452229297,
-      "current_price": 396000.0,
-      "price_date": "2026-08-12",
-      "ath_price": 681979.0,
-      "dd": -41.93369590559241,
-      "rsi": -4.225419884448711,
       "is_today_new": false
     },
     {
@@ -671,58 +653,22 @@
       "is_today_new": false
     },
     {
-      "code": "010060",
-      "name": "OCI홀딩스",
-      "sector": "화학",
-      "market_cap": 47796,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": -6.39853747714808,
-      "contribution": -1.919561243144424,
-      "ytd_return": 122.22222222222223,
-      "cumulative_return": -6.055045871559628,
-      "current_price": 256000.0,
-      "price_date": "2026-08-12",
-      "ath_price": 388000.0,
-      "dd": -34.02061855670103,
-      "rsi": -11.172185501231269,
-      "is_today_new": false
-    },
-    {
-      "code": "017670",
-      "name": "SK텔레콤",
-      "sector": "통신서비스",
-      "market_cap": 188586,
-      "weight": 5.0,
-      "weight_prev": 0.0,
-      "today_return": 2.0930232558139537,
-      "contribution": 0.0,
-      "ytd_return": 64.11214953271028,
-      "cumulative_return": null,
-      "current_price": 87800.0,
-      "price_date": "2026-08-12",
-      "ath_price": 125200.0,
-      "dd": -29.872204472843457,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
       "code": "041510",
       "name": "에스엠",
       "sector": "미디어,교육",
       "market_cap": 17285,
       "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 3.0,
+      "today_return": -1.0484927916120577,
+      "contribution": -0.31454783748361725,
       "ytd_return": -44.074074074074076,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 75500.0,
       "price_date": "2026-08-12",
       "ath_price": 158500.0,
       "dd": -52.365930599369094,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
   "DB 목표전환형 6차": [
@@ -781,6 +727,42 @@
       "is_today_new": false
     },
     {
+      "code": "035420",
+      "name": "NAVER",
+      "sector": "소프트웨어",
+      "market_cap": 338287,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": 0.7009345794392523,
+      "contribution": 0.3504672897196262,
+      "ytd_return": -11.134020618556706,
+      "cumulative_return": -0.9991960491558483,
+      "current_price": 215500.0,
+      "price_date": "2026-08-12",
+      "ath_price": 454000.0,
+      "dd": -52.5330396475771,
+      "rsi": 5.251403655813903,
+      "is_today_new": false
+    },
+    {
+      "code": "017670",
+      "name": "SK텔레콤",
+      "sector": "통신서비스",
+      "market_cap": 188586,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": 2.0930232558139537,
+      "contribution": 1.046511627906977,
+      "ytd_return": 64.11214953271028,
+      "cumulative_return": 0.0,
+      "current_price": 87800.0,
+      "price_date": "2026-08-12",
+      "ath_price": 125200.0,
+      "dd": -29.872204472843457,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "196170",
       "name": "알테오젠",
       "sector": "건강관리",
@@ -835,24 +817,6 @@
       "is_today_new": false
     },
     {
-      "code": "035420",
-      "name": "NAVER",
-      "sector": "소프트웨어",
-      "market_cap": 338287,
-      "weight": 5.0,
-      "weight_prev": 3.0,
-      "today_return": 0.7009345794392523,
-      "contribution": 0.2102803738317757,
-      "ytd_return": -11.134020618556706,
-      "cumulative_return": -1.65430690245294,
-      "current_price": 215500.0,
-      "price_date": "2026-08-12",
-      "ath_price": 454000.0,
-      "dd": -52.5330396475771,
-      "rsi": 5.251403655813903,
-      "is_today_new": false
-    },
-    {
       "code": "010950",
       "name": "S-Oil",
       "sector": "에너지",
@@ -868,42 +832,6 @@
       "ath_price": 151200.0,
       "dd": -6.415343915343918,
       "rsi": 1.19517807934868,
-      "is_today_new": false
-    },
-    {
-      "code": "003230",
-      "name": "삼양식품",
-      "sector": "필수소비재",
-      "market_cap": 90698,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": -3.9872408293460926,
-      "contribution": -1.1961722488038278,
-      "ytd_return": -2.1933387489845635,
-      "cumulative_return": -3.5771489588894867,
-      "current_price": 1204000.0,
-      "price_date": "2026-08-12",
-      "ath_price": 1630000.0,
-      "dd": -26.134969325153378,
-      "rsi": -17.482430552122096,
-      "is_today_new": false
-    },
-    {
-      "code": "128940",
-      "name": "한미약품",
-      "sector": "건강관리",
-      "market_cap": 50732,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": -4.116222760290557,
-      "contribution": -1.2348668280871673,
-      "ytd_return": -12.389380530973447,
-      "cumulative_return": 0.8917197452229297,
-      "current_price": 396000.0,
-      "price_date": "2026-08-12",
-      "ath_price": 681979.0,
-      "dd": -41.93369590559241,
-      "rsi": -4.225419884448711,
       "is_today_new": false
     },
     {
@@ -925,58 +853,22 @@
       "is_today_new": false
     },
     {
-      "code": "010060",
-      "name": "OCI홀딩스",
-      "sector": "화학",
-      "market_cap": 47796,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": -6.39853747714808,
-      "contribution": -1.919561243144424,
-      "ytd_return": 122.22222222222223,
-      "cumulative_return": -6.055045871559628,
-      "current_price": 256000.0,
-      "price_date": "2026-08-12",
-      "ath_price": 388000.0,
-      "dd": -34.02061855670103,
-      "rsi": -11.172185501231269,
-      "is_today_new": false
-    },
-    {
-      "code": "017670",
-      "name": "SK텔레콤",
-      "sector": "통신서비스",
-      "market_cap": 188586,
-      "weight": 5.0,
-      "weight_prev": 0.0,
-      "today_return": 2.0930232558139537,
-      "contribution": 0.0,
-      "ytd_return": 64.11214953271028,
-      "cumulative_return": null,
-      "current_price": 87800.0,
-      "price_date": "2026-08-12",
-      "ath_price": 125200.0,
-      "dd": -29.872204472843457,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
       "code": "041510",
       "name": "에스엠",
       "sector": "미디어,교육",
       "market_cap": 17285,
       "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 3.0,
+      "today_return": -1.0484927916120577,
+      "contribution": -0.31454783748361725,
       "ytd_return": -44.074074074074076,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 75500.0,
       "price_date": "2026-08-12",
       "ath_price": 158500.0,
       "dd": -52.365930599369094,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
   "한투 지속형": [
@@ -1107,6 +999,24 @@
       "is_today_new": false
     },
     {
+      "code": "017670",
+      "name": "SK텔레콤",
+      "sector": "통신서비스",
+      "market_cap": 188586,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 2.0930232558139537,
+      "contribution": 0.627906976744186,
+      "ytd_return": 64.11214953271028,
+      "cumulative_return": 0.0,
+      "current_price": 87800.0,
+      "price_date": "2026-08-12",
+      "ath_price": 125200.0,
+      "dd": -29.872204472843457,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "010950",
       "name": "S-Oil",
       "sector": "에너지",
@@ -1195,24 +1105,6 @@
       "dd": -34.02061855670103,
       "rsi": -11.172185501231269,
       "is_today_new": false
-    },
-    {
-      "code": "017670",
-      "name": "SK텔레콤",
-      "sector": "통신서비스",
-      "market_cap": 188586,
-      "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": 2.0930232558139537,
-      "contribution": 0.0,
-      "ytd_return": 64.11214953271028,
-      "cumulative_return": null,
-      "current_price": 87800.0,
-      "price_date": "2026-08-12",
-      "ath_price": 125200.0,
-      "dd": -29.872204472843457,
-      "rsi": null,
-      "is_today_new": false
     }
   ],
   "한투 성과모집형 1차": [
@@ -1271,6 +1163,42 @@
       "is_today_new": false
     },
     {
+      "code": "035420",
+      "name": "NAVER",
+      "sector": "소프트웨어",
+      "market_cap": 338287,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": 0.7009345794392523,
+      "contribution": 0.3504672897196262,
+      "ytd_return": -11.134020618556706,
+      "cumulative_return": -0.9991960491558483,
+      "current_price": 215500.0,
+      "price_date": "2026-08-12",
+      "ath_price": 454000.0,
+      "dd": -52.5330396475771,
+      "rsi": 5.251403655813903,
+      "is_today_new": false
+    },
+    {
+      "code": "017670",
+      "name": "SK텔레콤",
+      "sector": "통신서비스",
+      "market_cap": 188586,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": 2.0930232558139537,
+      "contribution": 1.046511627906977,
+      "ytd_return": 64.11214953271028,
+      "cumulative_return": 0.0,
+      "current_price": 87800.0,
+      "price_date": "2026-08-12",
+      "ath_price": 125200.0,
+      "dd": -29.872204472843457,
+      "rsi": 0.0,
+      "is_today_new": false
+    },
+    {
       "code": "196170",
       "name": "알테오젠",
       "sector": "건강관리",
@@ -1325,24 +1253,6 @@
       "is_today_new": false
     },
     {
-      "code": "035420",
-      "name": "NAVER",
-      "sector": "소프트웨어",
-      "market_cap": 338287,
-      "weight": 5.0,
-      "weight_prev": 3.0,
-      "today_return": 0.7009345794392523,
-      "contribution": 0.2102803738317757,
-      "ytd_return": -11.134020618556706,
-      "cumulative_return": -1.65430690245294,
-      "current_price": 215500.0,
-      "price_date": "2026-08-12",
-      "ath_price": 454000.0,
-      "dd": -52.5330396475771,
-      "rsi": 5.251403655813903,
-      "is_today_new": false
-    },
-    {
       "code": "010950",
       "name": "S-Oil",
       "sector": "에너지",
@@ -1358,42 +1268,6 @@
       "ath_price": 151200.0,
       "dd": -6.415343915343918,
       "rsi": 1.19517807934868,
-      "is_today_new": false
-    },
-    {
-      "code": "003230",
-      "name": "삼양식품",
-      "sector": "필수소비재",
-      "market_cap": 90698,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": -3.9872408293460926,
-      "contribution": -1.1961722488038278,
-      "ytd_return": -2.1933387489845635,
-      "cumulative_return": -3.5771489588894867,
-      "current_price": 1204000.0,
-      "price_date": "2026-08-12",
-      "ath_price": 1630000.0,
-      "dd": -26.134969325153378,
-      "rsi": -17.482430552122096,
-      "is_today_new": false
-    },
-    {
-      "code": "128940",
-      "name": "한미약품",
-      "sector": "건강관리",
-      "market_cap": 50732,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": -4.116222760290557,
-      "contribution": -1.2348668280871673,
-      "ytd_return": -12.389380530973447,
-      "cumulative_return": 0.8917197452229297,
-      "current_price": 396000.0,
-      "price_date": "2026-08-12",
-      "ath_price": 681979.0,
-      "dd": -41.93369590559241,
-      "rsi": -4.225419884448711,
       "is_today_new": false
     },
     {
@@ -1415,221 +1289,48 @@
       "is_today_new": false
     },
     {
-      "code": "010060",
-      "name": "OCI홀딩스",
-      "sector": "화학",
-      "market_cap": 47796,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": -6.39853747714808,
-      "contribution": -1.919561243144424,
-      "ytd_return": 122.22222222222223,
-      "cumulative_return": -6.055045871559628,
-      "current_price": 256000.0,
-      "price_date": "2026-08-12",
-      "ath_price": 388000.0,
-      "dd": -34.02061855670103,
-      "rsi": -11.172185501231269,
-      "is_today_new": false
-    },
-    {
-      "code": "017670",
-      "name": "SK텔레콤",
-      "sector": "통신서비스",
-      "market_cap": 188586,
-      "weight": 5.0,
-      "weight_prev": 0.0,
-      "today_return": 2.0930232558139537,
-      "contribution": 0.0,
-      "ytd_return": 64.11214953271028,
-      "cumulative_return": null,
-      "current_price": 87800.0,
-      "price_date": "2026-08-12",
-      "ath_price": 125200.0,
-      "dd": -29.872204472843457,
-      "rsi": null,
-      "is_today_new": false
-    },
-    {
       "code": "041510",
       "name": "에스엠",
       "sector": "미디어,교육",
       "market_cap": 17285,
       "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 3.0,
+      "today_return": -1.0484927916120577,
+      "contribution": -0.31454783748361725,
       "ytd_return": -44.074074074074076,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 75500.0,
       "price_date": "2026-08-12",
       "ath_price": 158500.0,
       "dd": -52.365930599369094,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
-  "_order_changes": {
-    "NH 다이내믹 밸류 / DB 개방형": {
-      "date": "2026-08-12",
-      "added": [
-        {
-          "name": "SK텔레콤",
-          "weight": 3.0
-        }
-      ],
-      "changed": [],
-      "removed": []
-    },
-    "삼성 트루밸류": {
-      "date": "2026-08-12",
-      "added": [
-        {
-          "name": "SK텔레콤",
-          "weight": 3.0
-        }
-      ],
-      "changed": [],
-      "removed": []
-    },
-    "NH 목표전환형 5호": {
-      "date": "2026-08-12",
-      "added": [
-        {
-          "name": "SK텔레콤",
-          "weight": 5.0
-        },
-        {
-          "name": "에스엠",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "NAVER",
-          "from": 3.0,
-          "to": 5.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "삼양식품",
-          "weight": 3.0
-        },
-        {
-          "name": "OCI홀딩스",
-          "weight": 3.0
-        },
-        {
-          "name": "한미약품",
-          "weight": 3.0
-        }
-      ]
-    },
-    "DB 목표전환형 6차": {
-      "date": "2026-08-12",
-      "added": [
-        {
-          "name": "SK텔레콤",
-          "weight": 5.0
-        },
-        {
-          "name": "에스엠",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "NAVER",
-          "from": 3.0,
-          "to": 5.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "삼양식품",
-          "weight": 3.0
-        },
-        {
-          "name": "OCI홀딩스",
-          "weight": 3.0
-        },
-        {
-          "name": "한미약품",
-          "weight": 3.0
-        }
-      ]
-    },
-    "한투 지속형": {
-      "date": "2026-08-12",
-      "added": [
-        {
-          "name": "SK텔레콤",
-          "weight": 3.0
-        }
-      ],
-      "changed": [],
-      "removed": []
-    },
-    "한투 성과모집형 1차": {
-      "date": "2026-08-12",
-      "added": [
-        {
-          "name": "SK텔레콤",
-          "weight": 5.0
-        },
-        {
-          "name": "에스엠",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "NAVER",
-          "from": 3.0,
-          "to": 5.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "삼양식품",
-          "weight": 3.0
-        },
-        {
-          "name": "OCI홀딩스",
-          "weight": 3.0
-        },
-        {
-          "name": "한미약품",
-          "weight": 3.0
-        }
-      ]
-    }
-  },
   "_portfolio_meta": {
     "NH 다이내믹 밸류 / DB 개방형": {
-      "nav_ytd_d1": 36.79140010805406,
-      "nav_cum_d1": 170.91399999999996
+      "nav_ytd_d1": 41.27261435301364,
+      "nav_cum_d1": 179.789
     },
     "삼성 트루밸류": {
-      "nav_ytd_d1": 36.76675027581125,
-      "nav_cum_d1": 176.44799999999998
+      "nav_ytd_d1": 41.24750780434472,
+      "nav_cum_d1": 185.50500000000002
     },
     "NH 목표전환형 5호": {
-      "nav_ytd_d1": -30.301000000000002,
-      "nav_cum_d1": -30.301000000000002
+      "nav_ytd_d1": -28.016999999999992,
+      "nav_cum_d1": -28.016999999999992
     },
     "DB 목표전환형 6차": {
-      "nav_ytd_d1": -29.483999999999998,
-      "nav_cum_d1": -29.483999999999998
+      "nav_ytd_d1": -27.174,
+      "nav_cum_d1": -27.174
     },
     "한투 지속형": {
-      "nav_ytd_d1": -22.229,
-      "nav_cum_d1": -22.229
+      "nav_ytd_d1": -19.682,
+      "nav_cum_d1": -19.682
     },
     "한투 성과모집형 1차": {
-      "nav_ytd_d1": -20.763999999999992,
-      "nav_cum_d1": -20.763999999999992
+      "nav_ytd_d1": -18.167999999999996,
+      "nav_cum_d1": -18.167999999999996
     }
   },
   "_price_asof": "2026-08-12"
