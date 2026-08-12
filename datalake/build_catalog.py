@@ -44,9 +44,11 @@ DESCRIPTIONS = {
     "kr_deriv_investor": "파생상품 투자자별 수급 일별 (KRX [13106] MDCSTAT13103) — 선물 7상품+K200옵션+"
                          "선물/옵션 전체, metric=volume(계약)|value(원), side=ask(매도)|bid(매수)|net(순매수). "
                          "세부 주체 9종(금융투자~외국인), 기관합계=fin_invest+insurance+trust+bank+other_fin+pension",
+    "kr_index_constituents": "KOSPI200·KOSDAQ150 구성 종목 스냅샷 (pykrx 지수코드 1028/2203, index_name=kospi200|kosdaq150). (date,index_name,ticker) upsert — 재실행 시 이력 누적, 최신 구성=MAX(date) 필터. 적재기 fetch_index_constituents.py",
 }
 
 EXAMPLE_SQL = {
+    "kr_index_constituents": "SELECT index_name, ticker, name FROM kr_index_constituents WHERE date=(SELECT max(date) FROM kr_index_constituents) ORDER BY index_name, ticker;",
     "kr_ohlcv": "SELECT date, close, value FROM kr_ohlcv WHERE name='삼성전자' ORDER BY date DESC LIMIT 20;",
     "kr_ohlcv_adj": "SELECT date, adj_close FROM kr_ohlcv_adj WHERE name='삼성전자' AND date>='2015-01-01' ORDER BY date;",
     "kr_investor_value": "SELECT date, foreigner, institution, individual FROM kr_investor_value WHERE market='KOSPI' ORDER BY date DESC LIMIT 10;",
