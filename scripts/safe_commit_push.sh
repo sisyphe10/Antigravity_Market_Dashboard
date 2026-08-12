@@ -32,6 +32,11 @@
 #   --prefer-remote-portfolio: on merge, keep the REMOTE portfolio_data.json
 #       (VM live prices are authoritative). Default keeps OURS (e.g. finalize,
 #       whose regenerated portfolio_data.json reflects freshly finalized orders).
+#   --prefer-remote-pending: on merge, if origin advanced orders/pending_orders.json
+#       or orders/aum_pending.json since merge-base, keep the REMOTE version —
+#       a user save racing this job is authoritative (2026-08-12 finalize 유실 사고).
+#       Our finalizedAt-stamped copy is dropped, so the Order tab shows (임시 저장됨)
+#       and the user naturally re-finalizes.
 #
 set -uo pipefail
 
@@ -68,6 +73,7 @@ restore_dirty() {
 
 XLSX_CONFLICT="bail"
 PREFER_REMOTE_PORTFOLIO=0
+PREFER_REMOTE_PENDING=0
 MSG=""
 FILES=()
 PUSH_HEAD=0   # --push-head: push an already-made HEAD commit (VM 호출처가 add+commit 직접 수행)
@@ -77,6 +83,7 @@ while [[ $# -gt 0 ]]; do
     -m)                        MSG="$2"; shift 2 ;;
     --xlsx-conflict)           XLSX_CONFLICT="$2"; shift 2 ;;
     --prefer-remote-portfolio) PREFER_REMOTE_PORTFOLIO=1; shift ;;
+    --prefer-remote-pending)   PREFER_REMOTE_PENDING=1; shift ;;
     --push-head)               PUSH_HEAD=1; shift ;;
     --)                        shift; FILES=("$@"); break ;;
     *) echo "safe_push: unknown argument: $1" >&2; exit 2 ;;
@@ -88,7 +95,7 @@ if [[ "$PUSH_HEAD" == "1" ]]; then
     echo "safe_push: --push-head는 -m/파일 인자를 받지 않습니다 (기존 HEAD 커밋을 push)" >&2; exit 2
   fi
 elif [[ -z "$MSG" || ${#FILES[@]} -eq 0 ]]; then
-  echo "safe_push: usage: -m <msg> [--xlsx-conflict bail|fail] [--prefer-remote-portfolio] -- <files...>" >&2
+  echo "safe_push: usage: -m <msg> [--xlsx-conflict bail|fail] [--prefer-remote-portfolio] [--prefer-remote-pending] -- <files...>" >&2
   exit 2
 fi
 if [[ "$XLSX_CONFLICT" != "bail" && "$XLSX_CONFLICT" != "fail" ]]; then
@@ -234,9 +241,21 @@ for attempt in 1 2 3 4 5; do
   fi
 
   for f in "${OUR_CHANGED[@]}"; do
+    _pending_hit=0
+    if [[ "$PREFER_REMOTE_PENDING" == "1" ]]; then
+      case "$f" in
+        orders/pending_orders.json|orders/aum_pending.json) _pending_hit=1 ;;
+      esac
+    fi
     if [[ "$f" == "$PORTFOLIO_JSON" && "$PREFER_REMOTE_PORTFOLIO" == "1" ]] \
        && ! git diff --quiet "$base" "origin/${BRANCH}" -- "$f"; then
       # VM also changed portfolio_data.json -> its live prices win.
+      git checkout "origin/${BRANCH}" -- "$f" 2>/dev/null || true
+    elif [[ "$_pending_hit" == "1" ]] \
+       && ! git diff --quiet "$base" "origin/${BRANCH}" -- "$f"; then
+      # 사용자 저장이 이 잡과 레이스 → 사용자(원격) 쪽이 정본. finalizedAt 스탬프는
+      # 함께 버려지므로 Order 탭 배지가 (임시 저장됨)으로 남아 재확정 필요가 드러난다.
+      echo "safe_push: ${f} — origin(user save) advanced during job; keeping REMOTE (재확정 필요)."
       git checkout "origin/${BRANCH}" -- "$f" 2>/dev/null || true
     else
       # Our freshly regenerated version wins. HEAD (not OUR_COMMIT) so retry

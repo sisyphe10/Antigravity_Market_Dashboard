@@ -398,6 +398,7 @@ run_job() {
       /bin/bash scripts/safe_commit_push.sh \
         -m "Auto: finalize ORDER/AUM + Dashboard regenerate [skip ci]" \
         --xlsx-conflict fail \
+        --prefer-remote-pending \
         -- Wrap_NAV.xlsx orders/pending_orders.json orders/aum_pending.json portfolio_data.json \
            index.html market.html wrap.html universe.html seibro.html featured.html hotels.html || return $?
       ;;
