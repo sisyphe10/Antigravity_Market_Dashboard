@@ -1,6 +1,51 @@
 {
-  "updated_at": "2026-08-14 16:30 KST",
+  "updated_at": "2026-08-14 17:00 KST",
   "items": [
+    {
+      "rcept_no": "20260814802986",
+      "code": "000660",
+      "name": "SK하이닉스",
+      "date": "2026-08-14",
+      "title": "파생상품거래손실발생",
+      "summary": "",
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814802986"
+    },
+    {
+      "rcept_no": "20260814003747",
+      "code": "005930",
+      "name": "삼성전자",
+      "date": "2026-08-14",
+      "title": "[기재정정]임원ㆍ주요주주특정증권등소유상황보고서",
+      "summary": "",
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814003747"
+    },
+    {
+      "rcept_no": "20260814003672",
+      "code": "005930",
+      "name": "삼성전자",
+      "date": "2026-08-14",
+      "title": "[기재정정]임원ㆍ주요주주특정증권등소유상황보고서",
+      "summary": "",
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814003672"
+    },
+    {
+      "rcept_no": "20260814003549",
+      "code": "005930",
+      "name": "삼성전자",
+      "date": "2026-08-14",
+      "title": "동일인등출자계열회사와의상품ㆍ용역거래변경",
+      "summary": "",
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814003549"
+    },
+    {
+      "rcept_no": "20260814003509",
+      "code": "000660",
+      "name": "SK하이닉스",
+      "date": "2026-08-14",
+      "title": "반기보고서 (2026.06)",
+      "summary": "",
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260814003509"
+    },
     {
       "rcept_no": "20260814003180",
       "code": "034020",
