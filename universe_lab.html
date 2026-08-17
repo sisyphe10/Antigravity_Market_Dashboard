@@ -27,8 +27,6 @@
   .toolbar .lbl { font-size:13px; font-weight:600; color:#374151; margin-right:4px; }
   .mbtn { font-family:inherit; font-size:13px; font-weight:600; padding:7px 14px; background:#fff; color:#374151; border:1px solid #d1d5db; border-radius:7px; cursor:pointer; }
   .mbtn.active { background:#2563eb; color:#fff; border-color:#2563eb; }
-  .dlbtn { font-family:inherit; font-size:13px; font-weight:600; padding:7px 14px; background:#fb8b1e; color:#101418; border:1px solid #fb8b1e; border-radius:8px; cursor:pointer; }
-  .dlbtn:hover { background:#e07a10; }
   .card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:14px; }
   .legend { display:flex; align-items:center; gap:6px; font-size:12px; color:#111827; font-weight:600; margin-top:8px; }
   .legend .bar { width:160px; height:12px; border-radius:3px; background:linear-gradient(90deg,#16a34a,#1a1c1f,#dc2626); }
@@ -117,7 +115,7 @@
     <button class="mbtn" data-m="ytd">YTD</button>
     <button class="mbtn" data-m="dd">DD</button>
     <button onclick="copyHeatmap(this)" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#0891b2;color:#fff;border:none;border-radius:8px;cursor:pointer;">Copy</button>
-    <button class="dlbtn" onclick="downloadHeatmap()">Download</button>
+    <button style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;" onclick="downloadHeatmap()">Download</button>
   </div>
   <div class="card">
     <div id="heatmap"></div>
@@ -128,7 +126,7 @@
 <div class="panel" id="p1">
   <div class="toolbar">
     <button onclick="copyScatter(this)" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#0891b2;color:#fff;border:none;border-radius:8px;cursor:pointer;">Copy</button>
-    <button class="dlbtn" onclick="downloadScatter()">Download</button>
+    <button style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;" onclick="downloadScatter()">Download</button>
   </div>
   <div class="card">
     <div style="height:600px;"><canvas id="scatter"></canvas></div>
@@ -139,7 +137,7 @@
 <div class="panel" id="p2">
   <div class="toolbar">
     <button onclick="copyRanks(this)" style="margin-left:auto;font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#0891b2;color:#fff;border:none;border-radius:8px;cursor:pointer;">Copy</button>
-    <button class="dlbtn" onclick="downloadRanks()">Download</button>
+    <button style="font-family:inherit;font-size:13px;font-weight:600;padding:6px 14px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;" onclick="downloadRanks()">Download</button>
   </div>
   <div id="rankCapture">
     <div class="rk2col">
