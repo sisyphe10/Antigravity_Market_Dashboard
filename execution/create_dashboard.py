@@ -2259,7 +2259,8 @@ def _build_combined_chart_section():
                     price_txt = f'{_sv:,.2f}'
                 price_attr = f' data-price="{_sv}"'
             # 최근 업데이트 배지: 마지막 유효 관측(날짜·값)이 직전 빌드와 다르면 c=오늘.
-            # 표시는 Monthly(분기 포함, rank>=2) + 변동 7일 이내만 — 즐겨찾기 시안이 항상 우선.
+            # 표시는 Weekly·Monthly(분기 포함, rank>=1) + 변동 7일 이내만 — 즐겨찾기 시안이 항상 우선.
+            # (8/17 사용자 확정: 주간 포함. 주간은 주기 특성상 배지가 거의 상시 점등될 수 있음)
             _li = next((i for i in range(len(values) - 1, -1, -1) if values[i] is not None), None)
             _ld = dates[_li] if _li is not None else None
             _lv = values[_li] if _li is not None else None
@@ -2277,7 +2278,7 @@ def _build_combined_chart_section():
                 _uc = upd_today_str   # 기존 상태가 있는데 처음 보는 키 = 신규 시리즈
             new_upd_state[s['display']] = {'d': _ld, 'v': _lv, 'c': _uc}
             _upd_on = False
-            if _uc and rank >= 2:
+            if _uc and rank >= 1:
                 try:
                     _upd_on = (upd_today - datetime.strptime(_uc, '%Y-%m-%d')).days < 7
                 except ValueError:
@@ -2309,7 +2310,7 @@ def _build_combined_chart_section():
                 f'onclick="toggleCmbSeries(this.querySelector(\'.cmb-chart-item\'), event)" '
                 f'style="cursor:pointer;">'
                 # 별표(즐겨찾기) — Watchlist 패턴 이식 (2026-07-19). 상태는 localStorage.
-                # .upd = 최근 1주 업데이트(월간) — 즐겨찾기 아니어도 ★를 에메랄드그린으로 표시.
+                # .upd = 최근 1주 업데이트(주간·월간) — 즐겨찾기 아니어도 ★를 에메랄드그린으로 표시.
                 f'<td class="cmb-star{_upd_cls}" onclick="cmbToggleStar(this, event)"{_upd_title} '
                 f'style="padding:6px 2px;font-size:14px;text-align:center;cursor:pointer;">☆</td>'
                 f'<td style="{cell_base}text-align:center;white-space:nowrap;">{freq}</td>'
@@ -2755,7 +2756,7 @@ def _build_combined_chart_section():
                 cmbStarList.forEach(function(n) { cmbStars[n] = 1; });
             } catch (e) { cmbStarList = []; }
             var cmbStarOnly = false;
-            var cmbUpdOnly = false;   // update ★ 퀵필터 — 최근 1주 업데이트(월간)만 보기
+            var cmbUpdOnly = false;   // update ★ 퀵필터 — 최근 1주 업데이트(주간·월간)만 보기
             try {
                 fetch('/watchlist/stars').then(function(r) { return r.ok ? r.json() : null; }).then(function(a) {
                     if (!Array.isArray(a)) return;
@@ -3024,6 +3025,59 @@ def _build_combined_chart_section():
                 window.addEventListener('resize', run);
                 setTimeout(run, 300);    // 폰트·차트 초기 렌더 후 보정
                 setTimeout(run, 1200);   // 늦게 확정되는 레이아웃 대비(1회 폭주 관측 있었음)
+            })();
+            // ── 사이드 표 폭 고정 (2026-08-17): table-layout:auto 는 행 표시/숨김마다
+            //    칼럼·호스트 폭을 재계산해 퀵필터 토글 시 표가 미세하게 움직인다(실측 817→803px).
+            //    → 전체 행이 보이는 상태에서 실측 폭을 colgroup 에 박고 fixed 로 전환해 고정.
+            //    재측정(리사이즈·폰트 로드)은 필터가 없을 때만 — 숨은 행 기준 폭이 박히는 걸 방지.
+            window.cmbFreezeSideLayout = function() {
+                var tbl = document.getElementById('cmbSideTable');
+                var host = document.getElementById('cmbSideHost');
+                if (!tbl || !host) return;
+                var cols = tbl.querySelectorAll('colgroup col');
+                var ths = tbl.querySelectorAll('thead th');
+                if (!cols.length || cols.length !== ths.length) return;
+                cols.forEach(function(c) {   // 원래 힌트 폭 보존(재측정 시 복원용)
+                    if (c.dataset.w0 === undefined) c.dataset.w0 = c.style.width || '';
+                });
+                tbl.style.tableLayout = '';
+                host.style.width = '';
+                cols.forEach(function(c) { c.style.width = c.dataset.w0; });
+                var hw = host.getBoundingClientRect().width;
+                var ws = [];
+                ths.forEach(function(t) { ws.push(t.getBoundingClientRect().width); });
+                if (hw < 300 || ws[4] < 50) return;   // 탭 숨김 등 미측정 상태 — 고정 보류
+                ths.forEach(function(t, i) { cols[i].style.width = ws[i] + 'px'; });
+                host.style.width = hw + 'px';
+                tbl.style.tableLayout = 'fixed';
+            };
+            (function() {
+                var _t = null;
+                var kick = function() {
+                    clearTimeout(_t);
+                    _t = setTimeout(function() {
+                        var tbl = document.getElementById('cmbSideTable');
+                        if (!tbl) return;
+                        var filtered = window.cmbQuickActive || cmbStarOnly || cmbUpdOnly ||
+                            cmbSearchQ || Object.keys(cmbFilters).length;
+                        if (!filtered || tbl.style.tableLayout !== 'fixed') window.cmbFreezeSideLayout();
+                    }, 150);
+                };
+                window.addEventListener('resize', kick);
+                if (document.fonts && document.fonts.ready) document.fonts.ready.then(kick);
+                if (document.readyState === 'loading')
+                    document.addEventListener('DOMContentLoaded', kick);
+                else kick();
+                setTimeout(kick, 400);   // 폰트·초기 렌더 후 보정
+                if (window.ResizeObserver) {
+                    // 탭이 숨겨진 채 로드되면 폭 0 → 표시되는 순간 폭 변화로 재시도
+                    var _ro2 = new ResizeObserver(function() {
+                        var tbl = document.getElementById('cmbSideTable');
+                        if (tbl && tbl.style.tableLayout !== 'fixed') kick();
+                    });
+                    var _h2 = document.getElementById('cmbSideHost');
+                    if (_h2) _ro2.observe(_h2);
+                }
             })();
             window.sortCmbTable = function(key) {
                 if (_cmbSortKey === key) { _cmbSortAsc = !_cmbSortAsc; }
@@ -3604,7 +3658,7 @@ def _build_combined_chart_section():
                     {search_box_html}
                     <div style="display:flex;gap:6px;margin:0 0 4px;">
                         <button class="cmb-ma-btn cmb-quick-btn" data-qv="star" style="border-radius:20px;" title="즐겨찾기(watchlist)만 보기" onclick="cmbQuickFilter(this, 'star')">&#9733;</button>
-                        <button class="cmb-ma-btn cmb-quick-btn" data-qv="upd" style="border-radius:20px;" title="최근 1주 업데이트된 월간 시리즈만 보기" onclick="cmbQuickFilter(this, 'upd')">&#9733;</button>
+                        <button class="cmb-ma-btn cmb-quick-btn" data-qv="upd" style="border-radius:20px;" title="최근 1주 업데이트된 주간·월간 시리즈만 보기" onclick="cmbQuickFilter(this, 'upd')">&#9733;</button>
                         <button class="cmb-ma-btn cmb-quick-btn" data-qv="Daily" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'Daily')">Daily</button>
                         <button class="cmb-ma-btn cmb-quick-btn" data-qv="Weekly" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'Weekly')">Weekly</button>
                         <button class="cmb-ma-btn cmb-quick-btn" data-qv="Monthly" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'Monthly')">Monthly</button>
