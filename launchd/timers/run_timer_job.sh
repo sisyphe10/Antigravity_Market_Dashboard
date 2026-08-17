@@ -141,6 +141,7 @@ job_timeout_seconds() {
     kodex-sectors)        echo 600  ;;   # 원본 10min
     boutique-etf)         echo 900  ;;   # 부티크 액티브 ETF 55종 수집+페이지 (신규 2026-08-04)
     earnings-bot)         echo 5400 ;;   # 45min→90min (2026-07-31: 실적 성수기 37건일에 2700s 초과 강제종료)
+    earnings-night-llm)   echo 17700 ;;  # 새벽 02:30 headless LLM 배치 — 07:25 하드컷(내부 데드라인 06:30, 2026-08-18)
     update-stock-master)  echo 900  ;;   # 원본 15min
     send-advisory-emails) echo 300  ;;   # SMTP 5통 여유(신규 60초 폴러)
     memento-telegram)     echo 120  ;;   # 텔레그램 1통(따끔어)
@@ -214,6 +215,7 @@ run_job() {
     kodex-sectors)        /bin/bash scripts/run_kodex_sectors.sh      || return $? ;;
     boutique-etf)         /bin/bash scripts/run_boutique_etf.sh       || return $? ;;
     earnings-bot)         "$PY" -m execution.earnings_bot.runner       || return $? ;;
+    earnings-night-llm)   "$PY" -m execution.earnings_bot.night_llm    || return $? ;;
     update-stock-master)  /bin/bash scripts/run_update_stock_master.sh || return $? ;;
     send-advisory-emails) "$PY" execution/send_advisory_emails.py || return $? ;;
     memento-telegram)     "$PY" "$HOME/Journal/scripts/memento_telegram.py" || return $? ;;

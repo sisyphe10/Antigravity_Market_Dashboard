@@ -23,6 +23,9 @@ def get_conn() -> sqlite3.Connection:
     conn = sqlite3.connect(DB_PATH)
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA foreign_keys=ON")
+    # 2026-08-18: 새벽 LLM 배치와 08:00 러너의 짧은 write 겹침 시 즉시 'database is locked'
+    # 로 죽지 않게 5초 대기 (WAL은 writer 직렬화를 막지 않는다 — codex 검토 C5)
+    conn.execute("PRAGMA busy_timeout=5000")
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -437,7 +440,11 @@ def update_transcript_translation(transcript_id: int, *, translated_kr: str,
                                    translation_model: str,
                                    translation_input_tokens: int | None,
                                    translation_output_tokens: int | None) -> None:
-    """transcript 한국어 번역 결과 in-place 업데이트."""
+    """transcript 한국어 번역 결과 in-place 업데이트.
+
+    2026-08-18: md_saved_at/md_path 를 무효화한다 — 재번역 시 stale md 가
+    라이브에 남는 사고 차단 (codex C5). save_pending 이 다음 사이클에 재저장.
+    """
     conn = get_conn()
     try:
         conn.execute(
@@ -448,7 +455,9 @@ def update_transcript_translation(transcript_id: int, *, translated_kr: str,
               translation_model = ?,
               translation_input_tokens = ?,
               translation_output_tokens = ?,
-              translated_at = datetime('now')
+              translated_at = datetime('now'),
+              md_saved_at = NULL,
+              md_path = NULL
             WHERE id = ?
             """,
             (translated_kr, prompt_version_translation, translation_model,
@@ -493,27 +502,32 @@ def _load_starred_tickers() -> set | None:
         return None
 
 
-def get_pending_translation_transcripts(limit: int = 5) -> list[dict]:
-    """번역 안 된 transcripts 최신순.
+def get_pending_translation_transcripts(limit: int = 5, oldest_first: bool = False) -> list[dict]:
+    """번역 안 된 transcripts. 기본 최신순 / oldest_first=True 는 새벽 백로그용 오래된 순.
 
     2026-07-31 사용자 정책: 수집은 전 종목, **번역은 별표 종목만**.
     (백로그 62건이 하루 3건 처리량을 3주치 넘겨 적체됐던 문제의 근본 해법)
+    2026-08-18: oldest_first 는 SQL LIMIT 없이 전량 조회 후 별표 필터 —
+    limit*10 창 밖의 오래된 별표 pending 을 놓치는 기아를 차단 (codex C9).
     """
     stars = _load_starred_tickers()
     conn = get_conn()
     try:
-        rows = conn.execute(
-            """
+        order = 'ASC' if oldest_first else 'DESC'
+        sql = f"""
             SELECT t.*, f.ticker AS _tk FROM transcripts t
             JOIN filings f ON f.id = t.filing_id
             WHERE t.translated_kr IS NULL
               AND t.match_confidence >= 0.7
               AND t.prepared_remarks IS NOT NULL
               AND COALESCE(t.translation_skipped, 0) = 0
-            ORDER BY t.fetched_at DESC LIMIT ?
-            """,
-            (limit * 10 if stars else limit,),
-        ).fetchall()
+            ORDER BY t.fetched_at {order}
+            """
+        if oldest_first:
+            rows = conn.execute(sql).fetchall()
+        else:
+            rows = conn.execute(sql + ' LIMIT ?',
+                                (limit * 10 if stars else limit,)).fetchall()
         out = []
         for r in rows:
             d = dict(r)

@@ -21,7 +21,7 @@ import os
 import re
 from datetime import date, datetime, timezone
 
-from . import db, ticker_registry
+from . import db, headless_llm, ticker_registry
 from .insider_signal import fetch_insider_window, format_appendix
 from .prompt_builder import (ANALYSIS_MODEL, SYSTEM_ANALYSIS, SYSTEM_TRANSLATION,
                              SYSTEM_TRANSLATION_TRANSCRIPT, TRANSLATION_MODEL,
@@ -90,9 +90,28 @@ logger = logging.getLogger(__name__)
 DRY_RUN = os.getenv('EARNINGS_BOT_DRY_RUN', '').lower() in ('1', 'true', 'yes')
 
 
-@api_retry
+# ── 백엔드 스위치 (2026-08-18 headless 이관, 설계 v2) ─────────────
+#   'api'(기본) = 기존 Anthropic API 경로 그대로 / 'headless' = 구독 claude CLI (0원).
+#   env는 호출 시점에 읽는다 — .env 전환·롤백이 재기동 없이 다음 배치부터 적용되게.
+def _analysis_backend() -> str:
+    return os.getenv('EARNINGS_ANALYSIS_BACKEND', 'api').strip().lower()
+
+
+def _translate_backend() -> str:
+    return os.getenv('EARNINGS_TRANSLATE_BACKEND', 'api').strip().lower()
+
+
 def _call_sonnet(messages: list[dict]) -> dict:
-    """Sonnet 4.5 호출. system= 파라미터 필수. dict 반환 (text + usage).
+    """분석시트 호출 — 백엔드 디스패치. headless는 stamina를 타지 않는다(설계 C4:
+    쿼터 메시지의 'rate limit' 문자열이 transient로 오판돼 5회 재시도되는 사고 차단)."""
+    if _analysis_backend() == 'headless':
+        return headless_llm.call_with_retry(SYSTEM_ANALYSIS, messages)
+    return _call_sonnet_api(messages)
+
+
+@api_retry
+def _call_sonnet_api(messages: list[dict]) -> dict:
+    """Sonnet API 호출. system= 파라미터 필수. dict 반환 (text + usage).
 
     모델 ID는 prompt_builder.ANALYSIS_MODEL 참조 (현재: claude-sonnet-4-5-20250929).
     """
@@ -283,6 +302,11 @@ def process_filing(filing_id: int) -> dict:
     sonnet_resp = _call_sonnet(messages)
     analysis_text = sonnet_resp['text']
 
+    # 생성 주체 이력 (설계 C1/C2): prompt_version은 내용 해시로 불변,
+    # 백엔드·실사용 모델은 행 단위 model 필드에 '@headless' 접미로 기록
+    _model_label = (f"{sonnet_resp.get('resolved_model', '')}@headless"
+                    if sonnet_resp.get('backend') == 'headless' else ANALYSIS_MODEL)
+
     # 분석 결과는 filing_analyses 전용 테이블에 저장 (Codex 권고)
     # INSERT OR IGNORE 가 None 반환 시 = 동일 (filing_id, prompt_version) 중복 → analyzed stage 진행 X
     analysis_row_id = db.insert_analysis(
@@ -291,7 +315,7 @@ def process_filing(filing_id: int) -> dict:
         yoy_md=yoy_md,
         insider_md=insider_md,
         prompt_version=pv,
-        analysis_model=ANALYSIS_MODEL,
+        analysis_model=_model_label,
         input_tokens=sonnet_resp['input_tokens'],
         output_tokens=sonnet_resp['output_tokens'],
         cache_read_tokens=sonnet_resp['cache_read_input_tokens'],
@@ -337,9 +361,17 @@ def process_filing(filing_id: int) -> dict:
     }
 
 
-# ─── Phase 6: transcript 풀 번역 (Haiku 4.5) ───
-@api_retry
+# ─── Phase 6: transcript 풀 번역 (Haiku 4.5 / headless Sonnet) ───
 def _call_haiku_long(messages: list[dict], system_prompt: str, max_tokens: int = 16000) -> dict:
+    """전문 청크 번역 호출 — 백엔드 디스패치 (headless는 stamina 미적용, 설계 C4).
+    headless엔 max_tokens 제어가 없다 — 입력 기준 청크 분할(22K자)이 출력 길이를 가드."""
+    if _translate_backend() == 'headless':
+        return headless_llm.call_with_retry(system_prompt, messages)
+    return _call_haiku_long_api(messages, system_prompt, max_tokens)
+
+
+@api_retry
+def _call_haiku_long_api(messages: list[dict], system_prompt: str, max_tokens: int = 16000) -> dict:
     """Haiku 4.5 풀 번역용 — max_tokens 16K (Haiku 4.5 한도)."""
     client = get_anthropic_client()
     resp = client.messages.create(
@@ -469,8 +501,13 @@ def translate_transcript(transcript_id: int) -> dict:
         parts.append(f'{QA_HEADER}\n\n{qa_kr}')
     translated_full = '\n\n'.join(parts)
 
-    total_input = sum(r['input_tokens'] for r in prepared_resps) + sum(
-        r['input_tokens'] for r in qa_resps)
+    # 입력 토큰 = 직접 입력 + 캐시 생성/히트 합산 (2026-08-18: headless CLI는 입력을
+    # 프롬프트 캐시로 계상해 inputTokens가 1로 나온다 — 실측. API 경로는 캐시 키 없음→0)
+    def _in_tokens(r: dict) -> int:
+        return (r['input_tokens'] + r.get('cache_creation_input_tokens', 0)
+                + r.get('cache_read_input_tokens', 0))
+
+    total_input = sum(_in_tokens(r) for r in prepared_resps + qa_resps)
     total_output = sum(r['output_tokens'] for r in prepared_resps) + sum(
         r['output_tokens'] for r in qa_resps)
 
@@ -499,11 +536,17 @@ def translate_transcript(transcript_id: int) -> dict:
                 'reason': 'output_gate_reject', 'gate_reasons': _og.reasons,
                 'gate_info': _og.info}
 
+    # 생성 주체 이력 (설계 C1/C2) — headless면 '실사용모델@headless'로 기록
+    _all_resps = prepared_resps + qa_resps
+    _tm_label = TRANSLATION_MODEL
+    if _all_resps and _all_resps[0].get('backend') == 'headless':
+        _tm_label = f"{_all_resps[0].get('resolved_model', '')}@headless"
+
     db.update_transcript_translation(
         transcript_id=transcript_id,
         translated_kr=translated_full,
         prompt_version_translation=pv,
-        translation_model=TRANSLATION_MODEL,
+        translation_model=_tm_label,
         translation_input_tokens=total_input,
         translation_output_tokens=total_output,
     )
@@ -529,28 +572,39 @@ def translate_transcript(transcript_id: int) -> dict:
     }
 
 
-def translate_pending_transcripts(limit: int = 3) -> list[dict]:
-    """미번역 transcripts 일괄 처리. 비용 보호용 limit 작게."""
+def translate_pending_transcripts(limit: int = 3, oldest_first: bool = False) -> list[dict]:
+    """미번역 transcripts 일괄 처리. 비용 보호용 limit 작게.
+
+    oldest_first=True = 새벽 백로그 모드 (설계 C9 기아 방지).
+    ★Auth/Quota 터미널 예외는 삼키지 않고 재전파한다 (설계 C4) —
+      삼키면 다음 항목도 계속 호출해 쿼터 소진 상태에서 헛돈다.
+    """
     db.init_db()
-    rows = db.get_pending_translation_transcripts(limit=limit)
+    rows = db.get_pending_translation_transcripts(limit=limit, oldest_first=oldest_first)
     results = []
     for r in rows:
         try:
             results.append(translate_transcript(r['id']))
+        except (headless_llm.HeadlessAuthError, headless_llm.HeadlessQuotaError):
+            raise
         except Exception as e:
             logger.error(f'transcript {r["id"]} 번역 실패: {e}')
             results.append({'transcript_id': r['id'], 'error': str(e)})
     return results
 
 
-def process_pending(limit: int = 5) -> list[dict]:
-    """stage='fetched'인 filings 중 분석 필요한 것들 처리."""
+def process_pending(limit: int = 5, oldest_first: bool = False) -> list[dict]:
+    """stage='fetched'인 filings 중 분석 필요한 것들 처리.
+
+    oldest_first=True = 새벽 백로그 모드 (설계 C9). 터미널 예외 재전파는 위와 동일.
+    """
     db.init_db()
+    order = 'ASC' if oldest_first else 'DESC'
     conn = db.get_conn()
     try:
         # severity != INFO 인 fetched filings 중 아직 analyzed 단계 없는 것
         rows = conn.execute(
-            """
+            f"""
             SELECT f.id FROM filings f
             WHERE f.stage = 'fetched'
               AND f.severity IN ('CRITICAL', 'HIGH', 'NORMAL')
@@ -561,7 +615,7 @@ def process_pending(limit: int = 5) -> list[dict]:
                   AND f2.document_type = f.document_type
                   AND f2.stage = 'analyzed'
               )
-            ORDER BY f.filed_at DESC LIMIT ?
+            ORDER BY f.filed_at {order} LIMIT ?
             """,
             (limit,),
         ).fetchall()
@@ -572,6 +626,8 @@ def process_pending(limit: int = 5) -> list[dict]:
     for r in rows:
         try:
             results.append(process_filing(r['id']))
+        except (headless_llm.HeadlessAuthError, headless_llm.HeadlessQuotaError):
+            raise
         except Exception as e:
             logger.error(f"filing {r['id']} 분석 실패: {e}")
             results.append({'filing_id': r['id'], 'error': str(e)})

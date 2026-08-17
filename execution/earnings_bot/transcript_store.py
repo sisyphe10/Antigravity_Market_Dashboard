@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import logging
 import os
+import tempfile
 
 from . import db
 
@@ -128,8 +129,19 @@ def save_transcript_md(transcript_id: int, *, force: bool = False) -> dict:
 
     abspath = os.path.join(_datalake_root(), relpath)
     os.makedirs(os.path.dirname(abspath), exist_ok=True)
-    with open(abspath, 'w', encoding='utf-8') as f:
-        f.write(content)
+    # 원자적 쓰기 (2026-08-18, codex C5): 직접 덮어쓰기는 동시 실행·크래시 시
+    # 반쪽 파일이 라이브(Library os.walk)에 노출된다 → 같은 디렉토리 tempfile + replace
+    fd, tmp_path = tempfile.mkstemp(dir=os.path.dirname(abspath), suffix='.tmp')
+    try:
+        with os.fdopen(fd, 'w', encoding='utf-8') as f:
+            f.write(content)
+        os.replace(tmp_path, abspath)
+    except BaseException:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
     db.mark_transcript_md_saved(transcript_id, relpath)
     logger.info(f"transcript {transcript_id} ({row['ticker']}) → {relpath} ({len(content)} chars)")
     return {'transcript_id': transcript_id, 'ticker': row['ticker'],

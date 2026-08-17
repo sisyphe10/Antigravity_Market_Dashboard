@@ -82,9 +82,12 @@ def run_pipeline() -> dict:
     summary.append(_safe('translator.process_pending',
                          lambda: translator.process_pending(limit=20)))
 
-    # 5) translator (transcript 풀 번역, Haiku 분할) — 비용 발생. limit 3.
+    # 5) translator (transcript 풀 번역) — 기본 limit 3.
+    #    2026-08-18: 새벽 headless 배치(night_llm, 02:30) 가동 시 .env 에서
+    #    EARNINGS_MORNING_TRANSLATE_LIMIT=0 으로 아침 번역을 스킵한다 (설계 v2 §2).
+    _mt_limit = int(os.getenv('EARNINGS_MORNING_TRANSLATE_LIMIT', '3'))
     summary.append(_safe('translator.translate_pending_transcripts',
-                         lambda: translator.translate_pending_transcripts(limit=3)))
+                         lambda: translator.translate_pending_transcripts(limit=_mt_limit)))
 
     # 6) analysis_store (분석 md 발행 — 2026-07-22 Notion publish 대체, 구 코드는 롤백용 잔존)
     summary.append(_safe('analysis_store.publish_pending',

@@ -151,6 +151,27 @@ def build_morning_digest(now: datetime | None = None) -> str:
         ).fetchall()
         quarantined = _only_starred([dict(r) for r in quarantined])
 
+        # Section 2c. 전일 번역 완료 (2026-08-18 새벽 headless 배치 도입 대응):
+        # 번역이 새벽 02:30 배치로 이동하면 완료 시점에 filing 이 신규 24h 창 밖이라
+        # 🟢 전환이 한 번도 표시되지 않는다 → md_saved_at 기준 별도 섹션으로 보존 (codex C8)
+        done_recent = conn.execute(
+            """SELECT f.ticker, date(f.filed_at) AS fd, t.id AS tid
+               FROM transcripts t JOIN filings f ON t.filing_id = f.id
+               WHERE t.md_saved_at >= datetime('now', '-1 day')
+               ORDER BY t.md_saved_at DESC LIMIT 100""",
+        ).fetchall()
+        done_recent = _only_starred([dict(r) for r in done_recent])
+
+        # 번역 백로그 잔량 (다음 새벽 배치 대상)
+        backlog_rows = conn.execute(
+            """SELECT f.ticker FROM transcripts t JOIN filings f ON f.id = t.filing_id
+               WHERE t.translated_kr IS NULL
+                 AND t.match_confidence >= 0.7
+                 AND t.prepared_remarks IS NOT NULL
+                 AND COALESCE(t.translation_skipped, 0) = 0""",
+        ).fetchall()
+        translate_backlog = len(_only_starred([dict(r) for r in backlog_rows]))
+
         # Section 3. 다음 7일 예정
         upcoming = conn.execute(
             """SELECT ticker, event_date, hour FROM earnings_calendar
@@ -184,6 +205,16 @@ def build_morning_digest(now: datetime | None = None) -> str:
         sub_blocks.append('\n'.join(blk))
     if sub_blocks:
         lines.append('\n\n'.join(sub_blocks))
+
+    # 전일 번역 완료 + 번역 백로그 (2026-08-18 새벽 배치 도입 — 위 Section 2c 참조)
+    if done_recent:
+        lines.extend(['', f'━━ 🌙 번역 완료·전일 ({len(done_recent)}건) ━━'])
+        for r in done_recent[:12]:
+            lines.append(f"  • [{r['ticker']}] {r['fd']} 공시분, transcript_id={r['tid']}")
+        if len(done_recent) > 12:
+            lines.append(f'  ... 외 {len(done_recent) - 12}건')
+    if translate_backlog:
+        lines.extend(['', f'🌙 번역 백로그 {translate_backlog}건 — 다음 새벽 02:30 배치에서 소화'])
 
     def _age_days(filed_at):
         try:

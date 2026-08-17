@@ -71,7 +71,7 @@ DAEMON_DIR="/Library/LaunchDaemons"
 NAMES=(featured-kis landing-highlights \
        etf-active-alert kodex-sectors earnings-bot update-stock-master \
        memento-telegram us-etf-collect memory-cycle-alert \
-       daemon-health)
+       daemon-health earnings-night-llm)
 
 # 토큰 치환 헬퍼: stdin → stdout
 render() {
