@@ -119,6 +119,12 @@ AOE_DARK_CSS = (
     '.mbtn.active,.nav-button.active,.idx-mode-btn.active'
     '{background:' + P['amber'] + '!important;color:' + P['nav-bg'] + '!important;border-color:' + P['amber'] + '!important;'
     'font-weight:700}'
+    # DATA ★ 퀵필터 색 구분 (2026-08-17): watchlist=시안(hl2) 채움, update=에메랄드그린(hl3) 채움.
+    # 항상 채움(식별용)이라 active 는 흰 테두리+볼드로 구분 — 위 일괄 pill 규칙보다 뒤라 우선.
+    '.cmb-quick-btn[data-qv="star"]{background:' + P['hl2-fg'] + '!important;color:' + P['hl2-bg'] + '!important;border-color:' + P['hl2-fg'] + '!important}'
+    '.cmb-quick-btn[data-qv="upd"]{background:' + P['hl3-fg'] + '!important;color:' + P['hl3-bg'] + '!important;border-color:' + P['hl3-fg'] + '!important}'
+    '.cmb-quick-btn[data-qv="star"].active,.cmb-quick-btn[data-qv="upd"].active'
+    '{border-color:#fff!important;box-shadow:inset 0 0 0 1px #fff;font-weight:700}'
     '.stat-card{border-left-color:' + P['amber'] + '!important}'
     '.stat-card .label{color:#fff!important}'
     '.stat-card .value{color:#fff!important}'

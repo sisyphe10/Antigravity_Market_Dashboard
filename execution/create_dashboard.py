@@ -2196,6 +2196,25 @@ def _build_combined_chart_section():
                               freq, group_label_raw, s, values))
         decorated.sort(key=lambda t: (t[0], t[1], t[2], t[3], t[4]))
 
+        # ── 최근 업데이트 추적 (2026-08-17): 직전 market.html 임베드 상태(cmbUpdState)와
+        #    마지막 유효 관측(날짜·값)을 비교해 '데이터가 실제로 들어온 날'(c)을 기록.
+        #    상태는 market.html 자체에 실려 다니므로(수집 잡들이 market.html 을 커밋,
+        #    잡 시작은 reset --hard) 별도 상태 파일·워크플로 수정이 필요 없다.
+        #    첫 빌드(상태 없음)는 전량 무배지로 시작해 다음 변동부터 표시된다.
+        prev_upd_state = {}
+        try:
+            if os.path.exists(OUTPUT_FILE):
+                with open(OUTPUT_FILE, encoding='utf-8') as _pf:
+                    _pm = re.search(r'<script id="cmbUpdState" type="application/json">(.*?)</script>',
+                                    _pf.read(), re.S)
+                if _pm:
+                    prev_upd_state = json.loads(_pm.group(1))
+        except Exception as _pe:
+            print(f"  Warning: cmbUpdState 파싱 실패 (무배지로 진행): {_pe}")
+        upd_today = datetime.now()
+        upd_today_str = upd_today.strftime('%Y-%m-%d')
+        new_upd_state = {}
+
         cell_base = 'padding:var(--aoe-t-pad-y) var(--aoe-t-pad-x);font-size:var(--aoe-t-font);color:#000;'
         for rank, gi, arank, mrank, si, freq, group_label_raw, s, values in decorated:
             data_export[s['display']] = values
@@ -2239,6 +2258,33 @@ def _build_combined_chart_section():
                 else:
                     price_txt = f'{_sv:,.2f}'
                 price_attr = f' data-price="{_sv}"'
+            # 최근 업데이트 배지: 마지막 유효 관측(날짜·값)이 직전 빌드와 다르면 c=오늘.
+            # 표시는 Monthly(분기 포함, rank>=2) + 변동 7일 이내만 — 즐겨찾기 시안이 항상 우선.
+            _li = next((i for i in range(len(values) - 1, -1, -1) if values[i] is not None), None)
+            _ld = dates[_li] if _li is not None else None
+            _lv = values[_li] if _li is not None else None
+            _pu = prev_upd_state.get(s['display'])
+            _uc = None
+            if _pu:
+                _uc = _pu.get('c')
+                _pv = _pu.get('v')
+                _same_v = (_lv is None and _pv is None) or (
+                    _lv is not None and _pv is not None
+                    and abs(_lv - _pv) <= 1e-9 * max(1.0, abs(_pv)))
+                if _ld != _pu.get('d') or not _same_v:
+                    _uc = upd_today_str
+            elif prev_upd_state:
+                _uc = upd_today_str   # 기존 상태가 있는데 처음 보는 키 = 신규 시리즈
+            new_upd_state[s['display']] = {'d': _ld, 'v': _lv, 'c': _uc}
+            _upd_on = False
+            if _uc and rank >= 2:
+                try:
+                    _upd_on = (upd_today - datetime.strptime(_uc, '%Y-%m-%d')).days < 7
+                except ValueError:
+                    _upd_on = False
+            _upd_attr = f' data-upd="{_uc}"' if _upd_on else ''
+            _upd_cls = ' upd' if _upd_on else ''
+            _upd_title = f' title="{_uc[5:]} 업데이트"' if _upd_on else ''
             group_label = _html.escape(group_label_raw)
             active = ' active' if s.get('default') else ''
             # Hotel {city} 시리즈에는 수집 호텔 리스트를 native tooltip(title)으로 표시
@@ -2259,11 +2305,12 @@ def _build_combined_chart_section():
             rows_html += (
                 f'<tr class="cmb-series-row" data-group="{group_label}" '
                 f'data-country="{country_esc}" '
-                f'data-update-rank="{rank}" data-name="{label_esc}" data-key="{display_esc}" data-unit="{unit_esc}"{price_attr}{chg_attr} '
+                f'data-update-rank="{rank}" data-name="{label_esc}" data-key="{display_esc}" data-unit="{unit_esc}"{price_attr}{chg_attr}{_upd_attr} '
                 f'onclick="toggleCmbSeries(this.querySelector(\'.cmb-chart-item\'), event)" '
                 f'style="cursor:pointer;">'
                 # 별표(즐겨찾기) — Watchlist 패턴 이식 (2026-07-19). 상태는 localStorage.
-                f'<td class="cmb-star" onclick="cmbToggleStar(this, event)" '
+                # .upd = 최근 1주 업데이트(월간) — 즐겨찾기 아니어도 ★를 에메랄드그린으로 표시.
+                f'<td class="cmb-star{_upd_cls}" onclick="cmbToggleStar(this, event)"{_upd_title} '
                 f'style="padding:6px 2px;font-size:14px;text-align:center;cursor:pointer;">☆</td>'
                 f'<td style="{cell_base}text-align:center;white-space:nowrap;">{freq}</td>'
                 f'<td style="{cell_base}text-align:center;white-space:nowrap;font-size:var(--aoe-t-head-font);">{country_esc}</td>'
@@ -2286,6 +2333,8 @@ def _build_combined_chart_section():
         export = {'dates': dates, 'data': data_export}
         # compact separators: 시리즈 92개 × 날짜 414개 기준 공백만 ~38KB 절약
         export_json = json.dumps(export, ensure_ascii=False, separators=(',', ':'))
+        # 다음 빌드가 읽을 업데이트 추적 상태 — 반환 HTML 에 <script id="cmbUpdState"> 로 임베드
+        upd_state_json = json.dumps(new_upd_state, ensure_ascii=False, separators=(',', ':'))
 
         th_base = ('position:sticky;top:0;z-index:2;background:#f0f0f0;cursor:pointer;'
                    'user-select:none;font-weight:var(--aoe-t-head-weight);font-size:var(--aoe-t-head-font);color:#000;'
@@ -2316,6 +2365,8 @@ def _build_combined_chart_section():
             # 별표 색: AoE 다크 스킨이 .cmb-series-row td / 선택행 td를 !important로 덮으므로
             # (선택행은 앰버 #ffb45e) 더 높은 명시도 + !important 필수. 켜짐 = Watchlist 시안.
             '#cmbSideTable td.cmb-star{color:#8a9096 !important;user-select:none;}'
+            # 최근 1주 업데이트(월간) = 에메랄드그린 hl3 — .on(즐겨찾기 시안)이 뒤에 와 항상 우선
+            '#cmbSideTable td.cmb-star.upd{color:#4ade80 !important;}'
             '#cmbSideTable td.cmb-star.on{color:#67e0f4 !important;}'
             '#cmbSideTable #cmbStarTh{color:#67e0f4 !important;}'
             '#cmbSideTable td.cmb-price,#cmbSideTable #cmbPriceTh{border-left:2px solid #000;}'
@@ -2704,6 +2755,7 @@ def _build_combined_chart_section():
                 cmbStarList.forEach(function(n) { cmbStars[n] = 1; });
             } catch (e) { cmbStarList = []; }
             var cmbStarOnly = false;
+            var cmbUpdOnly = false;   // update ★ 퀵필터 — 최근 1주 업데이트(월간)만 보기
             try {
                 fetch('/watchlist/stars').then(function(r) { return r.ok ? r.json() : null; }).then(function(a) {
                     if (!Array.isArray(a)) return;
@@ -2728,7 +2780,8 @@ def _build_combined_chart_section():
             function cmbPaintStars() {
                 document.querySelectorAll('.cmb-series-row td.cmb-star').forEach(function(td) {
                     var on = !!cmbStars[td.parentNode.getAttribute('data-key')];
-                    td.textContent = on ? '★' : '☆';
+                    // .upd(최근 업데이트) 행은 즐겨찾기 아니어도 ★ 글리프 유지(색은 CSS가 결정)
+                    td.textContent = (on || td.classList.contains('upd')) ? '★' : '☆';
                     td.classList.toggle('on', on);
                 });
                 var th = document.getElementById('cmbStarTh');
@@ -2820,10 +2873,13 @@ def _build_combined_chart_section():
             window.cmbQuickFilter = function(btn, v) {
                 var on = btn.classList.contains('active');
                 cmbStarOnly = false;
+                cmbUpdOnly = false;
                 delete cmbFilters['rank'];
                 window.cmbQuickActive = on ? null : v;   // 퀵필터 중=핀 복제 블록 숨김(중복 노출 방지)
                 if (!on) {
-                    if (v === 'star') { cmbStarOnly = true; } else { cmbFilters['rank'] = [v]; }
+                    if (v === 'star') { cmbStarOnly = true; }
+                    else if (v === 'upd') { cmbUpdOnly = true; }
+                    else { cmbFilters['rank'] = [v]; }
                 }
                 cmbPaintStars();   // 헤더 ★ 상태 동기 (내부에서 cmbApplyPin 호출)
                 cmbApplyFilters(); // 퀵버튼 active 상태는 여기서 일괄 동기
@@ -2833,6 +2889,7 @@ def _build_combined_chart_section():
                     var _nm = (row.getAttribute('data-name') || '').toLowerCase();
                     var pass = cmbRowPasses(row, null) &&
                         (!cmbStarOnly || cmbStars[row.getAttribute('data-key')]) &&
+                        (!cmbUpdOnly || row.hasAttribute('data-upd')) &&
                         (!cmbSearchQ || _nm.indexOf(cmbSearchQ) >= 0);
                     row.style.display = pass ? '' : 'none';
                 });
@@ -2844,7 +2901,8 @@ def _build_combined_chart_section():
                 document.querySelectorAll('.cmb-quick-btn').forEach(function(b) {
                     var v = b.getAttribute('data-qv');
                     var act = (v === 'star') ? (cmbStarOnly && !_rk)
-                            : (!cmbStarOnly && !!_rk && _rk.length === 1 && _rk[0] === v);
+                            : (v === 'upd') ? (cmbUpdOnly && !_rk)
+                            : (!cmbStarOnly && !cmbUpdOnly && !!_rk && _rk.length === 1 && _rk[0] === v);
                     b.classList.toggle('active', act);
                 });
                 window.cmbApplyPin();
@@ -3539,12 +3597,14 @@ def _build_combined_chart_section():
         return f"""
         <div class="category-section">
             <h2 class="category-title">DATA</h2>
+            <script id="cmbUpdState" type="application/json">{upd_state_json}</script>
             <div style="display:flex;gap:16px;align-items:flex-start;max-width:1800px;margin:0 auto;justify-content:center;">
                 <div style="min-width:240px;position:relative;" id="cmbSideHost">
                     <div id="cmbSelCount" style="font-size:11px;color:#000;min-height:16px;margin-bottom:0;padding-left:2px;"></div>
                     {search_box_html}
                     <div style="display:flex;gap:6px;margin:0 0 4px;">
-                        <button class="cmb-ma-btn cmb-quick-btn" data-qv="star" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'star')">&#9733;</button>
+                        <button class="cmb-ma-btn cmb-quick-btn" data-qv="star" style="border-radius:20px;" title="즐겨찾기(watchlist)만 보기" onclick="cmbQuickFilter(this, 'star')">&#9733;</button>
+                        <button class="cmb-ma-btn cmb-quick-btn" data-qv="upd" style="border-radius:20px;" title="최근 1주 업데이트된 월간 시리즈만 보기" onclick="cmbQuickFilter(this, 'upd')">&#9733;</button>
                         <button class="cmb-ma-btn cmb-quick-btn" data-qv="Daily" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'Daily')">Daily</button>
                         <button class="cmb-ma-btn cmb-quick-btn" data-qv="Weekly" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'Weekly')">Weekly</button>
                         <button class="cmb-ma-btn cmb-quick-btn" data-qv="Monthly" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'Monthly')">Monthly</button>
@@ -3573,6 +3633,11 @@ def _build_combined_chart_section():
                         .cmb-ma-btn {{ font-family:inherit;font-size:12px;font-weight:600;padding:4px 12px;border:1px solid #d1d5db;border-radius:20px;background:#f3f4f6;color:#888;cursor:pointer; }}
                         .cmb-ma-btn.active {{ background:#222;color:#fff;border-color:#222; }}
                         .cmb-ma-disabled .cmb-ma-btn {{ opacity:0.35;pointer-events:none; }}
+                        /* ★ 퀵필터 색 구분 (2026-08-17): watchlist=시안 채움, update=에메랄드그린 채움.
+                           항상 채움(식별용) — active 는 진한 테두리+볼드로 구분. .cmb-ma-btn.active 뒤라 우선. */
+                        .cmb-quick-btn[data-qv="star"] {{ background:#67e0f4;color:#0a3038;border-color:#67e0f4; }}
+                        .cmb-quick-btn[data-qv="upd"] {{ background:#4ade80;color:#10301c;border-color:#4ade80; }}
+                        .cmb-quick-btn[data-qv="star"].active,.cmb-quick-btn[data-qv="upd"].active {{ border-color:#222;box-shadow:inset 0 0 0 1px #222;font-weight:700; }}
                     </style>
                     <div id="cmbMaRow" style="display:flex;gap:6px;align-items:center;margin-bottom:12px;font-size:13px;">
                         <span style="color:#555;font-weight:600;">이동평균</span>
