@@ -2372,6 +2372,8 @@ def _build_combined_chart_section():
             '#cmbSideTable #cmbStarTh{color:#67e0f4 !important;}'
             '#cmbSideTable td.cmb-price,#cmbSideTable #cmbPriceTh{border-left:2px solid #000;}'
             '#cmbScrollBox{border:2px solid #000;}'
+            # 스크롤바 유무로 내부 폭이 ±11px 출렁여 필터 토글 시 표가 움직임 → 거터 상시 확보
+            '#cmbScrollBox{scrollbar-gutter:stable;}'
             # Unit 칼럼은 **기록만 하고 화면에서는 숨긴다** (2026-08-05 사용자 요청).
             #   값은 tr[data-unit] · td.cmb-unit 로 DOM 에 남아 있고 Price 셀 title 로도 뜬다.
             #   다시 보이려면 이 한 줄만 지우면 된다 (정렬·필터 배선은 그대로 살아 있음).
@@ -3028,28 +3030,28 @@ def _build_combined_chart_section():
             })();
             // ── 사이드 표 폭 고정 (2026-08-17): table-layout:auto 는 행 표시/숨김마다
             //    칼럼·호스트 폭을 재계산해 퀵필터 토글 시 표가 미세하게 움직인다(실측 817→803px).
-            //    → 전체 행이 보이는 상태에서 실측 폭을 colgroup 에 박고 fixed 로 전환해 고정.
+            //    해법 = auto 레이아웃 유지 + 전체 행 실측 폭을 colgroup 에 '최소폭'으로 주입
+            //    (auto 에서 col 폭은 최소폭으로 작동 → 행이 숨어도 칼럼이 줄지 않는다).
+            //    스크롤바 유무에 따른 ±11px 는 CSS scrollbar-gutter:stable 이 막는다.
+            //    ★fixed 전환은 금지 — display:none 셀(Unit)이 col 매핑을 한 칸 밀어
+            //    Chg 칼럼이 0px 로 붕괴한다(2026-08-17 실측 후 폐기).
             //    재측정(리사이즈·폰트 로드)은 필터가 없을 때만 — 숨은 행 기준 폭이 박히는 걸 방지.
             window.cmbFreezeSideLayout = function() {
                 var tbl = document.getElementById('cmbSideTable');
                 var host = document.getElementById('cmbSideHost');
                 if (!tbl || !host) return;
+                var cols = Array.prototype.slice.call(tbl.querySelectorAll('colgroup col'));
                 var ths = Array.prototype.slice.call(tbl.querySelectorAll('thead th'));
-                if (ths.length < 5) return;
-                tbl.style.tableLayout = '';
-                host.style.width = '';
-                ths.forEach(function(t) { t.style.width = ''; });
+                if (cols.length < 5 || cols.length !== ths.length) return;
+                cols.forEach(function(c) {   // 원래 힌트 폭 보존(재측정 시 복원용)
+                    if (c.dataset.w0 === undefined) c.dataset.w0 = c.style.width || '';
+                });
+                cols.forEach(function(c) { c.style.width = c.dataset.w0; });
                 var hw = host.getBoundingClientRect().width;
                 var ws = ths.map(function(t) { return t.getBoundingClientRect().width; });
                 if (hw < 300 || ws[4] < 50) return;   // 탭 숨김 등 미측정 상태 — 고정 보류
-                // ★fixed 레이아웃은 display:none 셀(Unit)이 col 매핑을 한 칸 밀어낸다
-                //   (실측: Chg 칼럼이 Unit 의 0px 를 받아 붕괴) → colgroup 이 아니라
-                //   '보이는 th 자신'에 border-box 실측 폭을 박는다(첫 행 셀 폭 = 칼럼 폭).
-                ths.forEach(function(t, i) {
-                    if (ws[i] > 0) { t.style.boxSizing = 'border-box'; t.style.width = ws[i] + 'px'; }
-                });
-                host.style.width = hw + 'px';
-                tbl.style.tableLayout = 'fixed';
+                ths.forEach(function(t, i) { if (ws[i] > 0) cols[i].style.width = ws[i] + 'px'; });
+                tbl.dataset.frozen = '1';
             };
             (function() {
                 var _t = null;
@@ -3060,7 +3062,7 @@ def _build_combined_chart_section():
                         if (!tbl) return;
                         var filtered = window.cmbQuickActive || cmbStarOnly || cmbUpdOnly ||
                             cmbSearchQ || Object.keys(cmbFilters).length;
-                        if (!filtered || tbl.style.tableLayout !== 'fixed') window.cmbFreezeSideLayout();
+                        if (!filtered || tbl.dataset.frozen !== '1') window.cmbFreezeSideLayout();
                     }, 150);
                 };
                 window.addEventListener('resize', kick);
@@ -3073,7 +3075,7 @@ def _build_combined_chart_section():
                     // 탭이 숨겨진 채 로드되면 폭 0 → 표시되는 순간 폭 변화로 재시도
                     var _ro2 = new ResizeObserver(function() {
                         var tbl = document.getElementById('cmbSideTable');
-                        if (tbl && tbl.style.tableLayout !== 'fixed') kick();
+                        if (tbl && tbl.dataset.frozen !== '1') kick();
                     });
                     var _h2 = document.getElementById('cmbSideHost');
                     if (_h2) _ro2.observe(_h2);
