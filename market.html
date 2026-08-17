@@ -557,7 +557,7 @@ body{margin:0}
     <nav class="topnav"><div class="topnav-inner"><a href="index.html" class="topnav-brand">AGE OF EMERGENCE</a><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="watchlist/" class="topnav-tab">Watchlist</a><div class="topnav-dropdown"><a href="watchlist/" class="topnav-sub">Quotes</a><a href="universe.html" class="topnav-sub">Universe</a><a href="universe_lab.html" class="topnav-sub">Universe Lab</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab active">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub active">Series</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="sisyphe/journal.html" class="topnav-tab">Journal</a><div class="topnav-dropdown"><a href="sisyphe/journal.html" class="topnav-sub">Daily</a><a href="sisyphe/journal.html#weekly" class="topnav-sub">Weekly</a></div></div><div class="topnav-item"><a href="wiki/library" class="topnav-tab">Earnings</a></div><div class="topnav-item"><a href="wiki/" class="topnav-tab">Wiki</a></div><div class="topnav-item"><a href="sisyphe/memento.html" class="topnav-tab">Memento</a></div><div class="topnav-item"><a href="journal/#ledger" class="topnav-tab">Ledger</a></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a><div class="topnav-dropdown"><a href="architecture.html" class="topnav-sub">Architecture</a><a href="system_map.html" class="topnav-sub">System Map</a></div></div></div></div></nav>
     <aside class="sidebar"><a href="market.html" class="sidebar-link active">Series</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
     <header style="margin:0;padding:8px 28px 0;text-align:right;">
-        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-08-17 11:34:31 KST</div>
+        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-08-17 11:37:49 KST</div>
     </header>
 
     <div class="mkt-subtabs">
@@ -4157,20 +4157,20 @@ function cmbPeerCharts(self) {
                 var tbl = document.getElementById('cmbSideTable');
                 var host = document.getElementById('cmbSideHost');
                 if (!tbl || !host) return;
-                var cols = tbl.querySelectorAll('colgroup col');
-                var ths = tbl.querySelectorAll('thead th');
-                if (!cols.length || cols.length !== ths.length) return;
-                cols.forEach(function(c) {   // 원래 힌트 폭 보존(재측정 시 복원용)
-                    if (c.dataset.w0 === undefined) c.dataset.w0 = c.style.width || '';
-                });
+                var ths = Array.prototype.slice.call(tbl.querySelectorAll('thead th'));
+                if (ths.length < 5) return;
                 tbl.style.tableLayout = '';
                 host.style.width = '';
-                cols.forEach(function(c) { c.style.width = c.dataset.w0; });
+                ths.forEach(function(t) { t.style.width = ''; });
                 var hw = host.getBoundingClientRect().width;
-                var ws = [];
-                ths.forEach(function(t) { ws.push(t.getBoundingClientRect().width); });
+                var ws = ths.map(function(t) { return t.getBoundingClientRect().width; });
                 if (hw < 300 || ws[4] < 50) return;   // 탭 숨김 등 미측정 상태 — 고정 보류
-                ths.forEach(function(t, i) { cols[i].style.width = ws[i] + 'px'; });
+                // ★fixed 레이아웃은 display:none 셀(Unit)이 col 매핑을 한 칸 밀어낸다
+                //   (실측: Chg 칼럼이 Unit 의 0px 를 받아 붕괴) → colgroup 이 아니라
+                //   '보이는 th 자신'에 border-box 실측 폭을 박는다(첫 행 셀 폭 = 칼럼 폭).
+                ths.forEach(function(t, i) {
+                    if (ws[i] > 0) { t.style.boxSizing = 'border-box'; t.style.width = ws[i] + 'px'; }
+                });
                 host.style.width = hw + 'px';
                 tbl.style.tableLayout = 'fixed';
             };
