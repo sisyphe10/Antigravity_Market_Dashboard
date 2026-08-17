@@ -557,7 +557,7 @@ body{margin:0}
     <nav class="topnav"><div class="topnav-inner"><a href="index.html" class="topnav-brand">AGE OF EMERGENCE</a><div class="topnav-tabs"><div class="topnav-item"><a href="wrap.html" class="topnav-tab">WRAP</a><div class="topnav-dropdown"><a href="wrap.html#dashboard" class="topnav-sub">Dashboard</a><a href="wrap.html#order" class="topnav-sub">Order</a><a href="wrap.html#disclosures" class="topnav-sub">공시</a><a href="wrap.html#contribution" class="topnav-sub">기여도</a><a href="wrap.html#fee" class="topnav-sub">수수료</a></div></div><div class="topnav-item"><a href="watchlist/" class="topnav-tab">Watchlist</a><div class="topnav-dropdown"><a href="watchlist/" class="topnav-sub">Quotes</a><a href="universe.html" class="topnav-sub">Universe</a><a href="universe_lab.html" class="topnav-sub">Universe Lab</a></div></div><div class="topnav-item"><a href="market.html" class="topnav-tab active">Market</a><div class="topnav-dropdown"><a href="market.html" class="topnav-sub active">Series</a><a href="featured.html" class="topnav-sub">Featured</a><a href="market_alert.html" class="topnav-sub">투자유의종목</a><a href="etf.html" class="topnav-sub">ETF</a><a href="seibro.html" class="topnav-sub">SEIBro</a></div></div><div class="topnav-item"><a href="sisyphe/journal.html" class="topnav-tab">Journal</a><div class="topnav-dropdown"><a href="sisyphe/journal.html" class="topnav-sub">Daily</a><a href="sisyphe/journal.html#weekly" class="topnav-sub">Weekly</a></div></div><div class="topnav-item"><a href="wiki/library" class="topnav-tab">Earnings</a></div><div class="topnav-item"><a href="wiki/" class="topnav-tab">Wiki</a></div><div class="topnav-item"><a href="sisyphe/memento.html" class="topnav-tab">Memento</a></div><div class="topnav-item"><a href="journal/#ledger" class="topnav-tab">Ledger</a></div><div class="topnav-item"><a href="architecture.html" class="topnav-tab">Architecture</a><div class="topnav-dropdown"><a href="architecture.html" class="topnav-sub">Architecture</a><a href="system_map.html" class="topnav-sub">System Map</a></div></div></div></div></nav>
     <aside class="sidebar"><a href="market.html" class="sidebar-link active">Series</a><a href="featured.html" class="sidebar-link">Featured</a><a href="market_alert.html" class="sidebar-link">투자유의종목</a><a href="etf.html" class="sidebar-link">ETF</a><a href="seibro.html" class="sidebar-link">SEIBro</a></aside>
     <header style="margin:0;padding:8px 28px 0;text-align:right;">
-        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-08-17 10:52:42 KST</div>
+        <div class="last-updated" style="margin:0;font-size:0.78rem;">Updated: 2026-08-17 11:34:31 KST</div>
     </header>
 
     <div class="mkt-subtabs">
@@ -2054,7 +2054,7 @@ function cmbPeerCharts(self) {
                     <div style="display:flex;justify-content:flex-end;margin:0 0 4px 0;"><div style="position:relative;width:220px;"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#ffffff" stroke-width="2" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);pointer-events:none;"><circle cx="7" cy="7" r="4.5"></circle><line x1="10.5" y1="10.5" x2="14.5" y2="14.5" stroke-linecap="round"></line></svg><input id="cmbSearch" type="text" placeholder="검색" autocomplete="off" oninput="cmbApplySearch(this.value)" style="width:100%;box-sizing:border-box;padding:6px 8px 6px 30px;font-family:inherit;font-size:14px;border:1px solid #d1d5db;border-radius:4px;background:#fff;color:#111;"></div></div>
                     <div style="display:flex;gap:6px;margin:0 0 4px;">
                         <button class="cmb-ma-btn cmb-quick-btn" data-qv="star" style="border-radius:20px;" title="즐겨찾기(watchlist)만 보기" onclick="cmbQuickFilter(this, 'star')">&#9733;</button>
-                        <button class="cmb-ma-btn cmb-quick-btn" data-qv="upd" style="border-radius:20px;" title="최근 1주 업데이트된 월간 시리즈만 보기" onclick="cmbQuickFilter(this, 'upd')">&#9733;</button>
+                        <button class="cmb-ma-btn cmb-quick-btn" data-qv="upd" style="border-radius:20px;" title="최근 1주 업데이트된 주간·월간 시리즈만 보기" onclick="cmbQuickFilter(this, 'upd')">&#9733;</button>
                         <button class="cmb-ma-btn cmb-quick-btn" data-qv="Daily" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'Daily')">Daily</button>
                         <button class="cmb-ma-btn cmb-quick-btn" data-qv="Weekly" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'Weekly')">Weekly</button>
                         <button class="cmb-ma-btn cmb-quick-btn" data-qv="Monthly" style="border-radius:20px;" onclick="cmbQuickFilter(this, 'Monthly')">Monthly</button>
@@ -3879,7 +3879,7 @@ function cmbPeerCharts(self) {
                 cmbStarList.forEach(function(n) { cmbStars[n] = 1; });
             } catch (e) { cmbStarList = []; }
             var cmbStarOnly = false;
-            var cmbUpdOnly = false;   // update ★ 퀵필터 — 최근 1주 업데이트(월간)만 보기
+            var cmbUpdOnly = false;   // update ★ 퀵필터 — 최근 1주 업데이트(주간·월간)만 보기
             try {
                 fetch('/watchlist/stars').then(function(r) { return r.ok ? r.json() : null; }).then(function(a) {
                     if (!Array.isArray(a)) return;
@@ -4148,6 +4148,59 @@ function cmbPeerCharts(self) {
                 window.addEventListener('resize', run);
                 setTimeout(run, 300);    // 폰트·차트 초기 렌더 후 보정
                 setTimeout(run, 1200);   // 늦게 확정되는 레이아웃 대비(1회 폭주 관측 있었음)
+            })();
+            // ── 사이드 표 폭 고정 (2026-08-17): table-layout:auto 는 행 표시/숨김마다
+            //    칼럼·호스트 폭을 재계산해 퀵필터 토글 시 표가 미세하게 움직인다(실측 817→803px).
+            //    → 전체 행이 보이는 상태에서 실측 폭을 colgroup 에 박고 fixed 로 전환해 고정.
+            //    재측정(리사이즈·폰트 로드)은 필터가 없을 때만 — 숨은 행 기준 폭이 박히는 걸 방지.
+            window.cmbFreezeSideLayout = function() {
+                var tbl = document.getElementById('cmbSideTable');
+                var host = document.getElementById('cmbSideHost');
+                if (!tbl || !host) return;
+                var cols = tbl.querySelectorAll('colgroup col');
+                var ths = tbl.querySelectorAll('thead th');
+                if (!cols.length || cols.length !== ths.length) return;
+                cols.forEach(function(c) {   // 원래 힌트 폭 보존(재측정 시 복원용)
+                    if (c.dataset.w0 === undefined) c.dataset.w0 = c.style.width || '';
+                });
+                tbl.style.tableLayout = '';
+                host.style.width = '';
+                cols.forEach(function(c) { c.style.width = c.dataset.w0; });
+                var hw = host.getBoundingClientRect().width;
+                var ws = [];
+                ths.forEach(function(t) { ws.push(t.getBoundingClientRect().width); });
+                if (hw < 300 || ws[4] < 50) return;   // 탭 숨김 등 미측정 상태 — 고정 보류
+                ths.forEach(function(t, i) { cols[i].style.width = ws[i] + 'px'; });
+                host.style.width = hw + 'px';
+                tbl.style.tableLayout = 'fixed';
+            };
+            (function() {
+                var _t = null;
+                var kick = function() {
+                    clearTimeout(_t);
+                    _t = setTimeout(function() {
+                        var tbl = document.getElementById('cmbSideTable');
+                        if (!tbl) return;
+                        var filtered = window.cmbQuickActive || cmbStarOnly || cmbUpdOnly ||
+                            cmbSearchQ || Object.keys(cmbFilters).length;
+                        if (!filtered || tbl.style.tableLayout !== 'fixed') window.cmbFreezeSideLayout();
+                    }, 150);
+                };
+                window.addEventListener('resize', kick);
+                if (document.fonts && document.fonts.ready) document.fonts.ready.then(kick);
+                if (document.readyState === 'loading')
+                    document.addEventListener('DOMContentLoaded', kick);
+                else kick();
+                setTimeout(kick, 400);   // 폰트·초기 렌더 후 보정
+                if (window.ResizeObserver) {
+                    // 탭이 숨겨진 채 로드되면 폭 0 → 표시되는 순간 폭 변화로 재시도
+                    var _ro2 = new ResizeObserver(function() {
+                        var tbl = document.getElementById('cmbSideTable');
+                        if (tbl && tbl.style.tableLayout !== 'fixed') kick();
+                    });
+                    var _h2 = document.getElementById('cmbSideHost');
+                    if (_h2) _ro2.observe(_h2);
+                }
             })();
             window.sortCmbTable = function(key) {
                 if (_cmbSortKey === key) { _cmbSortAsc = !_cmbSortAsc; }
