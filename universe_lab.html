@@ -163,7 +163,7 @@
 
 <script>
 // ── 공통 ──────────────────────────────────────────────────────────
-var INDEX_BY_PREFIX={'KRX':'KOSPI','KOSDAQ':'KOSDAQ','NASDAQ':'NASDAQ','NYSE':'S&P 500','NYSEAMERICAN':'S&P 500','TPE':'TSEC','TYO':'NIKKEI','TSE':'TSX','HKG':'HSI','AMS':'STOXX','ETR':'STOXX','EPA':'STOXX'};
+var INDEX_BY_PREFIX={'KRX':'KOSPI','KOSDAQ':'KOSDAQ','NASDAQ':'NASDAQ','NYSE':'S&P 500','NYSEAMERICAN':'S&P 500','TPE':'TSEC','TYO':'NIKKEI','TSE':'TSX','HKG':'HSI','AMS':'STOXX','ETR':'STOXX','EPA':'STOXX','SHA':'CSI 300','SHE':'CSI 300'};
 function pfx(tk){ return (tk && tk.indexOf(':')>=0) ? tk.split(':')[0] : ''; }
 function pnum(s){ if(s===null||s===undefined||s==='') return null; var n=parseFloat(String(s).replace(/,/g,'').replace(/%/g,'')); return isNaN(n)?null:n; }
 function shortName(tk,name,cur){ var t=(tk&&tk.indexOf(':')>=0)?tk.split(':').pop():tk; return (cur==='KRW'||cur==='JPY')?name:t; }
