@@ -3030,26 +3030,38 @@ def _build_combined_chart_section():
             })();
             // ── 사이드 표 폭 고정 (2026-08-17): table-layout:auto 는 행 표시/숨김마다
             //    칼럼·호스트 폭을 재계산해 퀵필터 토글 시 표가 미세하게 움직인다(실측 817→803px).
-            //    해법 = auto 레이아웃 유지 + 전체 행 실측 폭을 '보이는 th 자신'에 지정
-            //    (auto 에서 셀 지정폭 = 칼럼 선호폭 → 행이 숨어도 칼럼이 줄지 않는다).
-            //    스크롤바 유무에 따른 ±11px 는 CSS scrollbar-gutter:stable 이 막는다.
-            //    ★실측 폐기 이력 2건: ①fixed 전환 = display:none 셀(Unit)이 col 매핑을
-            //    한 칸 밀어 Chg 가 0px 붕괴 ②colgroup 최소폭 = Chrome auto 가 col width 를
-            //    무시(Chg 73.5→62 실측, 7/28 메모리와 일치). th 지정폭만 확실히 반영된다.
+            //    해법(라이브 실험으로 확정, 드리프트 0) = 자연 상태 실측 후 table-layout:fixed
+            //    전환 + 실측 폭을 colgroup 에 '보이는 순서로 압축' 배정 + 테이블·호스트 폭 px 고정.
+            //    ★압축 배정 이유: fixed 는 display:none 셀(Unit)이 col 매핑을 한 칸 밀어
+            //    보이는 k번째 칼럼이 cols[k]를 받는다(정직 배정 시 Chg 가 Unit 의 0px 로 붕괴).
+            //    ★auto 유지 대안 2종은 실측 폐기: colgroup 최소폭 = Chrome auto 가 col width 무시
+            //    (7/28 메모리와 일치) / th 지정폭 = 여분 폭 재분배가 콘텐츠 의존이라 ±2px 잔여 드리프트.
             //    재측정(리사이즈·폰트 로드)은 필터가 없을 때만 — 숨은 행 기준 폭이 박히는 걸 방지.
             window.cmbFreezeSideLayout = function() {
                 var tbl = document.getElementById('cmbSideTable');
                 var host = document.getElementById('cmbSideHost');
                 if (!tbl || !host) return;
                 var ths = Array.prototype.slice.call(tbl.querySelectorAll('thead th'));
-                if (ths.length < 5) return;
-                ths.forEach(function(t) { t.style.width = ''; });   // 재측정용 해제
+                var cols = Array.prototype.slice.call(tbl.querySelectorAll('colgroup col'));
+                if (ths.length < 5 || cols.length !== ths.length) return;
+                cols.forEach(function(c) {   // 원래 힌트 폭 보존(재측정 시 복원용)
+                    if (c.dataset.w0 === undefined) c.dataset.w0 = c.style.width || '';
+                });
+                // 자연 상태로 복원 후 실측 (테이블 인라인 width 원본 = 100%)
+                ths.forEach(function(t) { t.style.width = ''; });
+                cols.forEach(function(c) { c.style.width = c.dataset.w0; });
+                tbl.style.tableLayout = '';
+                tbl.style.width = '100%';
+                host.style.width = '';
                 var hw = host.getBoundingClientRect().width;
+                var natW = tbl.getBoundingClientRect().width;
                 var ws = ths.map(function(t) { return t.getBoundingClientRect().width; });
                 if (hw < 300 || ws[4] < 50) return;   // 탭 숨김 등 미측정 상태 — 고정 보류
-                ths.forEach(function(t, i) {
-                    if (ws[i] > 0) { t.style.boxSizing = 'border-box'; t.style.width = ws[i] + 'px'; }
-                });
+                var vis = ws.filter(function(w) { return w > 0; });
+                cols.forEach(function(c, i) { c.style.width = (i < vis.length ? vis[i] : 0) + 'px'; });
+                tbl.style.width = natW + 'px';
+                host.style.width = hw + 'px';
+                tbl.style.tableLayout = 'fixed';
                 tbl.dataset.frozen = '1';
             };
             (function() {
