@@ -3034,20 +3034,20 @@ def _build_combined_chart_section():
                 var tbl = document.getElementById('cmbSideTable');
                 var host = document.getElementById('cmbSideHost');
                 if (!tbl || !host) return;
-                var cols = tbl.querySelectorAll('colgroup col');
-                var ths = tbl.querySelectorAll('thead th');
-                if (!cols.length || cols.length !== ths.length) return;
-                cols.forEach(function(c) {   // 원래 힌트 폭 보존(재측정 시 복원용)
-                    if (c.dataset.w0 === undefined) c.dataset.w0 = c.style.width || '';
-                });
+                var ths = Array.prototype.slice.call(tbl.querySelectorAll('thead th'));
+                if (ths.length < 5) return;
                 tbl.style.tableLayout = '';
                 host.style.width = '';
-                cols.forEach(function(c) { c.style.width = c.dataset.w0; });
+                ths.forEach(function(t) { t.style.width = ''; });
                 var hw = host.getBoundingClientRect().width;
-                var ws = [];
-                ths.forEach(function(t) { ws.push(t.getBoundingClientRect().width); });
+                var ws = ths.map(function(t) { return t.getBoundingClientRect().width; });
                 if (hw < 300 || ws[4] < 50) return;   // 탭 숨김 등 미측정 상태 — 고정 보류
-                ths.forEach(function(t, i) { cols[i].style.width = ws[i] + 'px'; });
+                // ★fixed 레이아웃은 display:none 셀(Unit)이 col 매핑을 한 칸 밀어낸다
+                //   (실측: Chg 칼럼이 Unit 의 0px 를 받아 붕괴) → colgroup 이 아니라
+                //   '보이는 th 자신'에 border-box 실측 폭을 박는다(첫 행 셀 폭 = 칼럼 폭).
+                ths.forEach(function(t, i) {
+                    if (ws[i] > 0) { t.style.boxSizing = 'border-box'; t.style.width = ws[i] + 'px'; }
+                });
                 host.style.width = hw + 'px';
                 tbl.style.tableLayout = 'fixed';
             };
