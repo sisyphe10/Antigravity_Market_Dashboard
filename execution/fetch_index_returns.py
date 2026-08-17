@@ -13,6 +13,7 @@ universe.html의 RSI(1M) 컬럼이 사용. 각 종목 1M 수익률에서 해당 
   TYO           → NIKKEI      (^N225)
   TSE           → TSX         (^GSPTSE, S&P/TSX Composite — Toronto SE)
   HKG           → HSI         (^HSI)
+  SHA, SHE      → CSI 300     (텐센트 sh000300 — 야후 000300.SS는 일봉 결측 구간)
   AMS, ETR, EPA → STOXX       (^STOXX50E)
 
 1M 수익률 정의: 최근 거래일 종가 vs 21 거래일 전 종가.
@@ -26,6 +27,7 @@ import sys
 from datetime import datetime, timezone, timedelta
 
 import pandas as pd
+import requests
 import yfinance as yf
 
 if hasattr(sys.stdout, 'reconfigure'):
@@ -49,6 +51,12 @@ INDICES = [
     ('HSI',     '^HSI'),
     ('STOXX',   '^STOXX50E'),
 ]
+
+# 중국 A주(SHA/SHE) 벤치마크 = CSI 300 (沪深300, 상하이+선전 대형주 300).
+# 야후 000300.SS는 일봉이 통째로 비는 구간이 관측돼(2026-08 실측: 7/17 다음 봉이 8/17)
+# 부적합 — fetch_universe.py A주 primary와 동일하게 텐센트 gtimg 일봉을 사용한다.
+TENCENT_INDICES = {'CSI 300': 'sh000300'}
+INDICES.append(('CSI 300', 'sh000300'))
 
 LOOKBACK_DAYS = 21  # 거래일
 
@@ -78,10 +86,32 @@ def load_nav_kr_indices() -> dict:
         return {}
 
 
+def fetch_tencent_index_closes(ticker: str, n: int = 400) -> 'pd.Series | None':
+    """텐센트 gtimg 지수 일봉 종가 Series (날짜 오름차순). 실패 시 None."""
+    url = ('https://web.ifzq.gtimg.cn/appstock/app/fqkline/get'
+           f'?param={ticker},day,,,{n},qfq')
+    try:
+        r = requests.get(url, timeout=15)
+        r.raise_for_status()
+        data = r.json()['data'][ticker]
+        rows = data.get('qfqday') or data.get('day') or []
+        closes = {row[0]: float(row[2]) for row in rows if len(row) >= 3}
+        if not closes:
+            return None
+        ser = pd.Series(closes)
+        ser.index = pd.to_datetime(ser.index)
+        return ser.sort_index()
+    except Exception as e:
+        print(f'  ⚠️ 텐센트 지수 {ticker} 실패: {e}')
+        return None
+
+
 def fetch_1m_return(name: str, ticker: str, nav_kr: dict) -> float | None:
     closes = None
     if name in nav_kr:
         closes = nav_kr[name]
+    elif name in TENCENT_INDICES:
+        closes = fetch_tencent_index_closes(ticker)
     else:
         today = datetime.now(tz=KST).date()
         start = today - timedelta(days=60)
@@ -104,6 +134,8 @@ def fetch_history(name: str, ticker: str, nav_kr: dict) -> dict:
     closes = None
     if name in nav_kr:
         closes = nav_kr[name]
+    elif name in TENCENT_INDICES:
+        closes = fetch_tencent_index_closes(ticker)
     else:
         try:
             hist = yf.Ticker(ticker).history(period='1y', auto_adjust=False)
