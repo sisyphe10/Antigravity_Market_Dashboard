@@ -2,7 +2,7 @@
 
 _Generated from `architecture/registry.json` · projects: antigravity · v1 — 164 components._
 
-Updated: 2026-08-12
+Updated: 2026-08-17
 
 ## By domain
 
@@ -244,7 +244,7 @@ Updated: 2026-08-12
 - [system_map.html (시스템 지도)](page-system-map.md) — 생성=주간 지도 잡 훅 + 수동, active
 - [taiwan.html (대만 월매출)](page-taiwan.md) — 생성=23:20 (gha-daily-taiwan-revenue) — 스텁, retired
 - [universe.html (Universe)](page-universe.md) — 생성=여러 잡, active
-- [universe_lab.html (Universe Lab)](page-universe-lab.md) — 생성=여러 잡, active
+- [universe_lab.html (Universe Lab)](page-universe-lab.md) — active
 - [wrap.html (WRAP 대시보드)](page-wrap.md) — 생성=여러 잡, active
 
 ### Dataset (10)
