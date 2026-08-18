@@ -15,7 +15,7 @@ MEDIA_TYPES = {'.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png',
                '.gif': 'image/gif', '.webp': 'image/webp'}
 MAX_IMAGE_BYTES = 8 * 1024 * 1024      # 개당 8MB
 MAX_TOTAL_IMAGE_BYTES = 32 * 1024 * 1024
-MAX_IMAGES = 20
+MAX_IMAGES = 40   # 20에서 상향(2026-08-19) — 바쁜 날 이미지 31장에서 초과분 제외 발생. 총량 32MB 가드는 별도 유지
 
 
 def _encode_image(file_path):
