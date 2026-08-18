@@ -29,6 +29,7 @@ alerts: "OnFailure → earnings-bot-notify.service → notify_sisyphe_failure.sh
 - 실행 파이프라인 상세는 `src-earnings-pipeline` 참조.
 - TimeoutStartSec=45min. 실패 시 `earnings-bot-notify.service`(OnFailure)로 텔레그램.
 - **워치독 45→90min 상향(2026-07-31, `run_timer_job.sh` `job_timeout_seconds`=5400)**: 실적 성수기 피크일(2026-07-30 AMC 37건)에 분석 단계가 19/20에서 2700s 강제종료 → 5~9단계(전문 번역·md 발행·전문 저장·아침 다이제스트)가 통째로 미실행되고 텔레그램 다이제스트가 안 나갔다.
+- **대량 LLM 작업 분리(2026-08-18)**: 번역·분석이 구독 쿼터([[infra-headless-llm]])를 쓰게 되면서 백로그 소화는 새벽 [[timer-earnings-night-llm]](02:30)으로 넘어갔고, 이 08:00 러너는 **`EARNINGS_MORNING_TRANSLATE_LIMIT`(기본 3)만큼 보충 번역**만 한다(새벽에 못 소화한 소량 보전). 0으로 두면 아침 번역을 아예 건너뛴다 — 러너의 나머지 단계(수집·매칭·발행·다이제스트)는 불변.
 - 함정: 2026-07-02 GHA calendar sync SA키 stale로 한 달 무성공 → 로컬 키 검증 후 secret 교체 복구.
 
 ## Reads

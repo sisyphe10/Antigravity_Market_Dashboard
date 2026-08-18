@@ -1,8 +1,8 @@
 # Architecture Wiki Index
 
-_Generated from `architecture/registry.json` · projects: antigravity · v1 — 164 components._
+_Generated from `architecture/registry.json` · projects: antigravity · v1 — 166 components._
 
-Updated: 2026-08-17
+Updated: 2026-08-18
 
 ## By domain
 
@@ -113,7 +113,7 @@ Updated: 2026-08-17
 - [장전 포트폴리오 재생성 타이머 (07:30 평일)](timer-portfolio-premarket.md) — Timer
 - [포트폴리오 표 생성 (create_portfolio_tables.py)](src-create-portfolio-tables.md) — Source
 
-### 뉴스 · 리서치 (23)
+### 뉴스 · 리서치 (24)
 - [Earnings Calendar Sync (07:00)](gha-earnings-calendar-sync.md) — GHA
 - [earnings.db (실적봇 상태)](store-earnings-db.md) — Store
 - [Generic Source Pipeline (execution/sources/)](src-generic-pipeline.md) — Source
@@ -131,6 +131,7 @@ Updated: 2026-08-17
 - [보고서 컨텍스트 빌더 (build_report_context.py)](src-report-context.md) — Source
 - [실적 분석 1-page md (~/datalake/analyses/)](store-analyses-md.md) — Store
 - [실적 캘린더 sync (earnings_calendar_sync.py)](src-earnings-calendar-sync.md) — Source
+- [실적봇 새벽 LLM 배치 타이머 (earnings-night-llm 02:30)](timer-earnings-night-llm.md) — Timer
 - [실적봇 타이머 (earnings-bot)](timer-earnings-bot.md) — Timer
 - [실적봇 파이프라인 (execution/earnings_bot/)](src-earnings-pipeline.md) — Source
 - [어닝콜 번역 전문 md (~/datalake/transcripts/)](store-transcripts-md.md) — Store
@@ -145,7 +146,7 @@ Updated: 2026-08-17
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — Bot
 - [투자일지 시장데이터 (fetch_journal_data.py)](src-journal-data.md) — Source
 
-### 운영 · 인프라 (39)
+### 운영 · 인프라 (40)
 - [AoE 스타일 정본 (nav_style.py)](src-nav-style.md) — Source
 - [AoE 차트 코어 (chart_core/aoe_chart.js)](src-chart-core.md) — Source
 - [architecture.html (아키텍처)](page-architecture.md) — Page
@@ -168,6 +169,7 @@ Updated: 2026-08-17
 - [Wrap_NAV 워처 (watch_wrap_nav.py)](watcher-wrap-nav.md) — Watcher
 - [개인 스냅숏 게시 (publish_snapshot.sh)](web-publish-snapshot.md) — Infra
 - [관심종목 시세판 데몬 (Watchlist, 127.0.0.1:8778)](daemon-watchlist-quoteboard.md) — Infra
+- [구독 LLM 백엔드 (headless claude · codex 폴백)](infra-headless-llm.md) — Infra
 - [대시보드 생성기 (create_dashboard.py)](src-create-dashboard.md) — Source
 - [데이터레이크 문답 웹 UI 데몬 (AoE Wiki, 127.0.0.1:8787)](daemon-datalake-webui.md) — Infra
 - [랜딩 하이라이트 생성 (create_landing_highlights.py)](src-landing-highlights.md) — Source
@@ -190,11 +192,11 @@ Updated: 2026-08-17
 
 ### Bot (4)
 - [RA_Sisyphe_bot (리서치 알림 봇)](bot-ra-sisyphe.md) — 상시 (내부 잡 05:10~21:00), active
-- [Research Notes 봇](bot-research-notes.md) — 상시 (이벤트 드리븐), active
+- [Research Notes 봇](bot-research-notes.md) — 상시 (이벤트 드리븐) + 23:00 일일 요약, active
 - [Sisyphe-Bot (펀드/일상 텔레그램 봇)](bot-sisyphe.md) — 상시 (내부 잡 05:00~23:00), active
 - [선유듀오 운동봇 (@SeonyuDuo_bot)](bot-seonyuduo-exercise.md) — 상시 (06:00 다이제스트 등), active
 
-### Timer (19)
+### Timer (20)
 - [ETF 구성종목 수집 타이머 (etf-collect 16:30)](timer-etf-collect.md) — 16:30 매일 (paused 2026-07-29), frozen
 - [ETF 수집 재시도 타이머 (etf-collect-retry 18:00)](timer-etf-collect-retry.md) — 18:00 매일 (paused 2026-07-29), frozen
 - [Featured KIS 수집 타이머 (15:50, 신고가)](timer-featured-kis.md) — 15:50 매일, active
@@ -205,6 +207,7 @@ Updated: 2026-08-17
 - [메모리 사이클 플랜 알림 타이머 (07:45)](timer-memory-cycle-alert.md) — 07:45 매일, active
 - [미국 ETF NAV·AUM 수집 타이머 (us-etf-collect 화~토 08:30)](timer-us-etf-collect.md) — 08:30 화~토, active
 - [부티크 액티브 ETF 타이머 (09:10/10:10/18:20 평일)](timer-boutique-etf.md) — 09:10 / 10:10 / 18:20 평일, active
+- [실적봇 새벽 LLM 배치 타이머 (earnings-night-llm 02:30)](timer-earnings-night-llm.md) — 02:30 매일, active
 - [실적봇 타이머 (earnings-bot)](timer-earnings-bot.md) — 08:00 매일, active
 - [아키텍처 자동 최신화 타이머 (21:40, claude 헤드리스)](timer-architecture-daily.md) — 21:40 매일, active
 - [액티브 ETF 변동 알림 타이머 (19:00)](timer-etf-active-alert.md) — 19:00 매일, active
@@ -275,7 +278,7 @@ Updated: 2026-08-17
 - [어닝콜 번역 전문 md (~/datalake/transcripts/)](store-transcripts-md.md) — 08:00 (earnings-bot 타이머), active
 - [통합 태그 인덱스 (tag_index.sqlite + doc_tag_state.sqlite)](store-tag-index.md) — 23:20 (datalake-research-export), active
 
-### Infra (15)
+### Infra (16)
 - [catch-up 러너 (부팅 시 놓친 잡 복구)](daemon-catchup.md) — 부팅 시 1회, planned
 - [gh-pages 게시 (publish_pages.sh, 팀 WRAP 전용)](web-publish-pages.md) — push 성공 훅 / 원격변경 훅, active
 - [GHA 잡 흡수 layer (launchd Phase 2 초안)](launchd-gha-phase2.md) — 이관 완료 — 각 잡 스케줄, active
@@ -285,6 +288,7 @@ Updated: 2026-08-17
 - [UPS (무정전 전원, 맥미니 대비)](infra-ups.md) — planned
 - [개인 스냅숏 게시 (publish_snapshot.sh)](web-publish-snapshot.md) — 잡 성공 훅 (여러 잡), active
 - [관심종목 시세판 데몬 (Watchlist, 127.0.0.1:8778)](daemon-watchlist-quoteboard.md) — 상시 (스윕 장중 2s · 장외 60s), active
+- [구독 LLM 백엔드 (headless claude · codex 폴백)](infra-headless-llm.md) — 상시 (호출 시), active
 - [데이터레이크 문답 웹 UI 데몬 (AoE Wiki, 127.0.0.1:8787)](daemon-datalake-webui.md) — 상시, active
 - [맥미니 데이터레이크 (~/datalake + 문답 위키)](infra-datalake.md) — 잡별 (20:30 / 20:50 / 23:20 / 23:50 / 일 10:00 / 20분), active
 - [웹 서빙 (Caddy · com.antigravity.web)](web-caddy.md) — 상시, active
@@ -337,7 +341,7 @@ Updated: 2026-08-17
 - [부티크 액티브 ETF 팔로업 (boutique_etf collect+alert)](src-boutique-etf.md) — 09:10 / 10:10 / 18:20 평일 (boutique-etf 타이머), active
 - [수익률 계산 (calculate_returns.py)](src-calculate-returns.md) — 체인 (finalize/recalc/crawl), active
 - [실적 캘린더 sync (earnings_calendar_sync.py)](src-earnings-calendar-sync.md) — 07:00 (GHA) + 15:00 (VM cron), active
-- [실적봇 파이프라인 (execution/earnings_bot/)](src-earnings-pipeline.md) — 08:00 (earnings-bot 타이머), active
+- [실적봇 파이프라인 (execution/earnings_bot/)](src-earnings-pipeline.md) — 02:30 (night-llm 배치) + 08:00 (earnings-bot 타이머), active
 - [액티브 ETF 변동 (active_etf_changes.py)](src-active-etf.md) — 19:00 (etf-active-alert) / 18:30 (etf.html), active
 - [외국인 보유비중 (fetch_krx_foreign.py)](src-krx-foreign.md) — 23:00 (daily_crawl), active
 - [원전 뉴스 KNA/KNEISS (sources/kna.py)](src-kna-kneiss.md) — 18:00 (ra-sisyphe), active
@@ -376,7 +380,7 @@ Updated: 2026-08-17
 
 ## By project
 
-### antigravity (164)
+### antigravity (166)
 - [/aum — WRAP 일일 AUM 입력](cmd-aum.md) — Skill
 - [/긴급코멘트 — 급락일 시장 코멘트](cmd-urgent-comment.md) — Skill
 - [/목표전환형 — 랩 생성·청산 일괄](cmd-target-transform.md) — Skill
@@ -475,6 +479,7 @@ Updated: 2026-08-17
 - [Wrap_NAV.xlsx (랩 운용 원장)](store-wrap-nav-xlsx.md) — Store
 - [개인 스냅숏 게시 (publish_snapshot.sh)](web-publish-snapshot.md) — Infra
 - [관심종목 시세판 데몬 (Watchlist, 127.0.0.1:8778)](daemon-watchlist-quoteboard.md) — Infra
+- [구독 LLM 백엔드 (headless claude · codex 폴백)](infra-headless-llm.md) — Infra
 - [국민연금 적립금 (fetch_nps_fund.py)](src-nps-fund.md) — Source
 - [금융 분석 스킬 팩 (설치형 8종)](skill-finance-pack.md) — Skill
 - [금투협 예탁금/신용잔고/반대매매 (fetch_kofia_stats.py)](src-kofia.md) — Source
@@ -503,6 +508,7 @@ Updated: 2026-08-17
 - [수익률 계산 (calculate_returns.py)](src-calculate-returns.md) — Source
 - [실적 분석 1-page md (~/datalake/analyses/)](store-analyses-md.md) — Store
 - [실적 캘린더 sync (earnings_calendar_sync.py)](src-earnings-calendar-sync.md) — Source
+- [실적봇 새벽 LLM 배치 타이머 (earnings-night-llm 02:30)](timer-earnings-night-llm.md) — Timer
 - [실적봇 타이머 (earnings-bot)](timer-earnings-bot.md) — Timer
 - [실적봇 파이프라인 (execution/earnings_bot/)](src-earnings-pipeline.md) — Source
 - [아키텍처 자동 최신화 타이머 (21:40, claude 헤드리스)](timer-architecture-daily.md) — Timer

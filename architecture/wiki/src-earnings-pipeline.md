@@ -5,10 +5,12 @@ domain: "news-research"
 project: "antigravity"
 type: "pipeline_source"
 runs_on: "vm_macmini"
-schedule_kst: "08:00 (earnings-bot 타이머)"
+schedule_kst: "02:30 (night-llm 배치) + 08:00 (earnings-bot 타이머)"
 status: "active"
 code:
   - "execution/earnings_bot/runner.py"
+  - "execution/earnings_bot/night_llm.py"
+  - "execution/earnings_bot/headless_llm.py"
   - "execution/earnings_bot/morning_digest.py"
   - "execution/earnings_bot/edgar_monitor.py"
   - "execution/earnings_bot/transcript_watch.py"
@@ -29,6 +31,7 @@ writes:
   - "store-analyses-md"
 depends_on:
   - "src-earnings-calendar-sync"
+  - "infra-headless-llm"
   - "ext-notion"
   - "ext-data-apis"
   - "infra-telegram"
@@ -37,7 +40,7 @@ alerts: "타이머 OnFailure → 텔레그램"
 
 # 실적봇 파이프라인 (execution/earnings_bot/)
 
-**Domain:** 뉴스 · 리서치 · **Type:** Source · **Runs on:** vm_macmini · **Schedule (KST):** 08:00 (earnings-bot 타이머) · **Status:** active · **Project:** antigravity
+**Domain:** 뉴스 · 리서치 · **Type:** Source · **Runs on:** vm_macmini · **Schedule (KST):** 02:30 (night-llm 배치) + 08:00 (earnings-bot 타이머) · **Status:** active · **Project:** antigravity
 
 미국 실적/IR Day를 번역·요약해 datalake md로 발행 + 아침 다이제스트를 만드는 다단 파이프라인(`earnings_bot.runner`).
 
@@ -51,6 +54,10 @@ alerts: "타이머 OnFailure → 텔레그램"
 - **다이제스트 별표 한정(2026-08-10)**: morning_digest의 **전 섹션**(신규·재시도·보류·게이트 격리·예정)을 별표(`universe_stars_v1`) 종목만 표시하도록 좁혔다 — 번역 큐에 이어 열람 면까지 관심종목 기준으로 통일. `prefs.json` 로드 실패 시 전 종목 폴백(fail-open) — 이때 폴백이 조용히 일어나지 않도록 **다이제스트 제목의 `★별표만` 태그가 사라지는 것**으로 필터 적용 여부를 드러낸다. 필터 후에도 표시분을 확보하려고 조회 SQL LIMIT을 20→200으로 올렸다(표시 상한이 아니라 필터 전 후보 풀).
 - **오탐 차단(2026-07-15)**: matcher는 company_name 스코어링에서 맨 티커를 제외하고 티커 언급을 word-boundary로 잡는다(타사 트랜스크립트의 인명 'Eric Mendelson'이 ERIC에 0.8로 매칭되던 HEICO 케이스 → 0.577 < 0.7). attachment_parser는 HK FF305 'Next Day Disclosure Return'·월간 자사주 매입 양식을 실적 신호 규칙보다 **먼저** `6-K_EVENT`로 분류(BABA 자사주 표의 'per share'가 `6-K_QUARTERLY`/HIGH를 유발하던 건).
 - **파서·본문선택 견고화(2026-07-30, ARM 1Q27 계기)**: ① `attachment_parser`의 6-K 분기 분류가 재무 신호를 종전 8000자 창 안에서만 찾다 짧은 커버 PR + 초대형 주주서한(EX-99.2) 구조를 놓치던 문제를, 전체 exhibit 텍스트에서 **강한 재무 신호(`STRONG_EARNINGS_KEYWORDS`) 3개 이상 또는 실적 제목 패턴**을 요구하는 심층 판정을 더해 해결(약한 신호 per share/diluted는 제외해 CCJ M&A 오탐 회피). ② `translator`에 `_resolve_analysis_text`를 추가 — `primary_text`가 강한 재무 신호를 담고 있으면 그대로 쓰고, 부족할 때만 첨부 중 **가장 긴 EX-99**를 분석 본문으로 덧붙인다(ARM은 2,842자 커버 PR → EX-99.2 89,073자로 확장, BABA는 폴백 미채택). 프롬프트 빌더는 손대지 않아 prompt version hash는 불변.
+- ★**LLM 호출 구독 이관 + 새벽 배치 분리(2026-08-18)**: 전문 번역·분석 시트 생성을 종량 Anthropic API에서 **구독 headless CLI**([[infra-headless-llm]])로 옮겼다 — 크레딧 고갈로 파이프라인이 통째로 멈추는 사고가 3회 반복된 게 계기(비용 0원화보다 **정지 위험 제거**가 목적). translator의 저수준 호출 2곳(`_call_sonnet`=분석, `_call_haiku_long`=전문 청크)이 백엔드 디스패치를 타고, 실사용 모델은 행 단위 `model` 필드에 `claude-sonnet-5@headless` 형태로 기록돼 **어느 백엔드가 만든 산출물인지 사후 판별**된다. 전환은 env 스위치(`EARNINGS_ANALYSIS_BACKEND`·`EARNINGS_TRANSLATE_BACKEND`, **코드 기본값은 `api`**)라 롤백=env 제거.
+  - 대량 소화는 08:00 러너에서 떼어내 **새벽 02:30 배치**([[timer-earnings-night-llm]], `night_llm.py`)로 옮겼다 — 구독 쿼터가 사용자 오전 사용분과 경합하는 것을 피하는 분업. 08:00 러너는 `EARNINGS_MORNING_TRANSLATE_LIMIT`(기본 3)만큼만 **보충 번역**한다.
+  - 동반 견고화: `db.py`에 busy_timeout + **oldest-first 무기아 pending 쿼리**(새벽 배치가 최신 것만 집어 오래된 항목이 영구 후순위가 되는 것 차단), 재번역 시 기존 md 무효화, `transcript_store` **원자적 md 쓰기**(배치 중 강제종료로 반쯤 쓰인 md가 남지 않도록).
+  - 다이제스트에 `🌙 번역 완료·전일` / `🌙 번역 백로그 N건` 섹션 추가 — 완료 전환이 24h 창 밖(새벽)에서 일어나면서 기존 창 기준 섹션에서 통째로 빠지던 유실을 메운다.
 - 상태 DB=`earnings.db`. 예정 포맷=`티커/발표일자`(기업명 없음 확정). `--dismiss` CLI.
 - 캘린더는 `gha-earnings-calendar-sync`가 채우고 이 파이프라인이 소비.
 
@@ -64,12 +71,15 @@ alerts: "타이머 OnFailure → 텔레그램"
 
 ## Depends on
 - [[src-earnings-calendar-sync]] — 실적 캘린더 sync (earnings_calendar_sync.py)
+- [[infra-headless-llm]] — 구독 LLM 백엔드 (headless claude · codex 폴백)
 - [[ext-notion]] — Notion (실적·리서치 퍼블리시 대상)
 - [[ext-data-apis]] — 외부 데이터 API/소스 집합
 - [[infra-telegram]] — 텔레그램 (알림·상호작용 채널)
 
 ## Code
 - `execution/earnings_bot/runner.py`
+- `execution/earnings_bot/night_llm.py`
+- `execution/earnings_bot/headless_llm.py`
 - `execution/earnings_bot/morning_digest.py`
 - `execution/earnings_bot/edgar_monitor.py`
 - `execution/earnings_bot/transcript_watch.py`
