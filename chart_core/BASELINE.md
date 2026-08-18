@@ -119,3 +119,7 @@
 - 재생성 완료 5종: chart_viewer2 · chart_viewer_etf · chart_viewer_dsn · chart_viewer_construction · chart_viewer_research.
 - **휠 핸들러 없음(무변경)**: create_dashboard.py 전 차트(cmb/DATA·INDICES·AUM·kofia·featured)·wrap.html — 휠 내비 자체가 미구현. bop·pipeline·calendar·fcf·boutique·nuclear·tennis 뷰어도 동일.
 - **의도적 미변경**: `chart_core/fixtures/chart_viewer2_baseline.html`(불변 동결 fixture — 갱신 시 golden 재생성 필요), `~/work/analysis/260719_메모리3사_주가실적PER`(휠=커서 앵커 줌 구현으로 이미 신표준 취지 부합), `_retired_20260803/`·`.bak_*`.
+
+## 축 단위 주석 잘림 fix + 15px 승급 (2026-08-19)
+- wrap AUM(stackedBar)에서 Y축 (억원) 주석 상단이 잘림(사용자 지적). padTop 24가 주석 기준선을 캔버스 y=4에 놓아 13px 글씨 윗부분이 캔버스 밖이었다.
+- 조치: ①stackedBar padding.top 24→34 ②cmbAxisUnitPlugin 기준선 하한 클램프(ty<14→14 — mini 등 얕은 프레임 안전망) ③주석 폰트 13→15px(축 눈금 15px와 통일 — 서브패널 (%p)·(조원) 주석 포함 전역 적용).

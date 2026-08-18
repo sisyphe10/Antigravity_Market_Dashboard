@@ -238,8 +238,9 @@
                         var u = chart._cmbAxisUnits;
                         if (!u) return;
                         var ctx = chart.ctx, ty = chart.chartArea.top - (chart._cmbAxisUnitDy || 20);   // 최상단 눈금 라벨과 겹침 방지
+                        if (ty < 14) ty = 14;   // 캔버스 상단 잘림 방지 — 얕은 프레임에서 주석 윗부분이 캔버스 밖으로 나갔다 (2026-08-19)
                         ctx.save();
-                        ctx.font = '13px sans-serif';
+                        ctx.font = '15px sans-serif';
                         ctx.fillStyle = '#000';
                         if (u.y) { ctx.textAlign = 'right'; ctx.fillText(u.y, chart.scales.y.right + 2, ty); }
                         if (u.y1 && chart.scales.y1) { ctx.textAlign = 'left'; ctx.fillText(u.y1, chart.scales.y1.left - 2, ty); }
@@ -982,7 +983,7 @@ function cmbPeerCharts(self) {
                 var _mainPlugins = (_preset === 'stackedBar') ? [cmbStackTotalPlugin, cmbAxisUnitPlugin]
                     : ((_preset === 'mini') ? [cmbCrosshairPlugin, cmbAxisUnitPlugin]
                     : [cmbEndLabelPlugin, cmbCrosshairPlugin, cmbPinPlugin]);
-                var _padTop = (_preset === 'stackedBar') ? 24 : ((_preset === 'mini') ? 20 : 6);
+                var _padTop = (_preset === 'stackedBar') ? 34 : ((_preset === 'mini') ? 20 : 6);   // 34 = 15px 축단위 주석+합계 라벨 자리 (24는 (억원) 상단 잘림, 2026-08-19)
                 if (_preset !== 'line') _rightPad = 8;
 
                 if (cmbChart) {
