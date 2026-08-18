@@ -6,9 +6,9 @@
       "sector": "반도체",
       "market_cap": 15697258,
       "weight": 25.0,
-      "weight_prev": 30.0,
+      "weight_prev": 25.0,
       "today_return": -2.185792349726776,
-      "contribution": -6.557377049180329,
+      "contribution": -5.464480874316941,
       "ytd_return": 123.93661384487072,
       "cumulative_return": 351.0078639982007,
       "current_price": 268500.0,
@@ -24,9 +24,9 @@
       "sector": "반도체",
       "market_cap": 12140783,
       "weight": 20.0,
-      "weight_prev": 25.0,
+      "weight_prev": 20.0,
       "today_return": 1.033434650455927,
-      "contribution": 2.5835866261398177,
+      "contribution": 2.066869300911854,
       "ytd_return": 155.2995391705069,
       "cumulative_return": 467.10134541211426,
       "current_price": 1662000.0,
@@ -70,24 +70,6 @@
       "ath_price": 430123.0,
       "dd": -30.717492438209536,
       "rsi": 4.760399792297743,
-      "is_today_new": false
-    },
-    {
-      "code": "131290",
-      "name": "티에스이",
-      "sector": "반도체",
-      "market_cap": 29755,
-      "weight": 3.0,
-      "weight_prev": 5.0,
-      "today_return": 3.4615384615384617,
-      "contribution": 1.730769230769231,
-      "ytd_return": 367.0138888888889,
-      "cumulative_return": 10.020449897750506,
-      "current_price": 269000.0,
-      "price_date": "2026-08-18",
-      "ath_price": 284500.0,
-      "dd": -5.448154657293502,
-      "rsi": 12.77620854738214,
       "is_today_new": false
     },
     {
@@ -235,22 +217,40 @@
       "is_today_new": false
     },
     {
+      "code": "131290",
+      "name": "티에스이",
+      "sector": "반도체",
+      "market_cap": 29755,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 3.4615384615384617,
+      "contribution": 1.0384615384615385,
+      "ytd_return": 367.0138888888889,
+      "cumulative_return": 10.020449897750506,
+      "current_price": 269000.0,
+      "price_date": "2026-08-18",
+      "ath_price": 284500.0,
+      "dd": -5.448154657293502,
+      "rsi": 12.77620854738214,
+      "is_today_new": false
+    },
+    {
       "code": "041510",
       "name": "에스엠",
       "sector": "미디어,교육",
       "market_cap": 16255,
       "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 3.0,
+      "today_return": -3.2697547683923704,
+      "contribution": -0.9809264305177111,
       "ytd_return": -47.40740740740741,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 71000.0,
       "price_date": "2026-08-18",
       "ath_price": 158500.0,
       "dd": -55.20504731861199,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
   "삼성 트루밸류": [
@@ -260,9 +260,9 @@
       "sector": "반도체",
       "market_cap": 15697258,
       "weight": 25.0,
-      "weight_prev": 30.0,
+      "weight_prev": 25.0,
       "today_return": -2.185792349726776,
-      "contribution": -6.557377049180329,
+      "contribution": -5.464480874316941,
       "ytd_return": 123.93661384487072,
       "cumulative_return": 351.0078639982007,
       "current_price": 268500.0,
@@ -278,9 +278,9 @@
       "sector": "반도체",
       "market_cap": 12140783,
       "weight": 20.0,
-      "weight_prev": 25.0,
+      "weight_prev": 20.0,
       "today_return": 1.033434650455927,
-      "contribution": 2.5835866261398177,
+      "contribution": 2.066869300911854,
       "ytd_return": 155.2995391705069,
       "cumulative_return": 467.10134541211426,
       "current_price": 1662000.0,
@@ -324,24 +324,6 @@
       "ath_price": 430123.0,
       "dd": -30.717492438209536,
       "rsi": 4.760399792297743,
-      "is_today_new": false
-    },
-    {
-      "code": "131290",
-      "name": "티에스이",
-      "sector": "반도체",
-      "market_cap": 29755,
-      "weight": 3.0,
-      "weight_prev": 5.0,
-      "today_return": 3.4615384615384617,
-      "contribution": 1.730769230769231,
-      "ytd_return": 367.0138888888889,
-      "cumulative_return": 10.020449897750506,
-      "current_price": 269000.0,
-      "price_date": "2026-08-18",
-      "ath_price": 284500.0,
-      "dd": -5.448154657293502,
-      "rsi": 12.77620854738214,
       "is_today_new": false
     },
     {
@@ -489,22 +471,40 @@
       "is_today_new": false
     },
     {
+      "code": "131290",
+      "name": "티에스이",
+      "sector": "반도체",
+      "market_cap": 29755,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 3.4615384615384617,
+      "contribution": 1.0384615384615385,
+      "ytd_return": 367.0138888888889,
+      "cumulative_return": 10.020449897750506,
+      "current_price": 269000.0,
+      "price_date": "2026-08-18",
+      "ath_price": 284500.0,
+      "dd": -5.448154657293502,
+      "rsi": 12.77620854738214,
+      "is_today_new": false
+    },
+    {
       "code": "041510",
       "name": "에스엠",
       "sector": "미디어,교육",
       "market_cap": 16255,
       "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 3.0,
+      "today_return": -3.2697547683923704,
+      "contribution": -0.9809264305177111,
       "ytd_return": -47.40740740740741,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 71000.0,
       "price_date": "2026-08-18",
       "ath_price": 158500.0,
       "dd": -55.20504731861199,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
   "NH 목표전환형 5호": [
@@ -514,9 +514,9 @@
       "sector": "반도체",
       "market_cap": 15697258,
       "weight": 25.0,
-      "weight_prev": 30.0,
+      "weight_prev": 25.0,
       "today_return": -2.185792349726776,
-      "contribution": -6.557377049180329,
+      "contribution": -5.464480874316941,
       "ytd_return": 123.93661384487072,
       "cumulative_return": 4.43237987197147,
       "current_price": 268500.0,
@@ -532,9 +532,9 @@
       "sector": "반도체",
       "market_cap": 12140783,
       "weight": 20.0,
-      "weight_prev": 25.0,
+      "weight_prev": 20.0,
       "today_return": 1.033434650455927,
-      "contribution": 2.5835866261398177,
+      "contribution": 2.066869300911854,
       "ytd_return": 155.2995391705069,
       "cumulative_return": -12.021597586152133,
       "current_price": 1662000.0,
@@ -563,6 +563,24 @@
       "is_today_new": false
     },
     {
+      "code": "034020",
+      "name": "두산에너빌리티",
+      "sector": "기계",
+      "market_cap": 498997,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": -5.690072639225181,
+      "contribution": -2.845036319612591,
+      "ytd_return": 3.452855245683928,
+      "cumulative_return": -1.5170670037926715,
+      "current_price": 77900.0,
+      "price_date": "2026-08-18",
+      "ath_price": 136400.0,
+      "dd": -42.88856304985337,
+      "rsi": -11.553934827648693,
+      "is_today_new": false
+    },
+    {
       "code": "035420",
       "name": "NAVER",
       "sector": "소프트웨어",
@@ -599,6 +617,24 @@
       "is_today_new": false
     },
     {
+      "code": "010950",
+      "name": "S-Oil",
+      "sector": "에너지",
+      "market_cap": 172927,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": 4.0650406504065035,
+      "contribution": 2.0325203252032518,
+      "ytd_return": 85.06024096385542,
+      "cumulative_return": 3.267446551028641,
+      "current_price": 153600.0,
+      "price_date": "2026-08-18",
+      "ath_price": 153600.0,
+      "dd": 0.0,
+      "rsi": 5.282356779477415,
+      "is_today_new": false
+    },
+    {
       "code": "196170",
       "name": "알테오젠",
       "sector": "건강관리",
@@ -617,75 +653,21 @@
       "is_today_new": false
     },
     {
-      "code": "131290",
-      "name": "티에스이",
-      "sector": "반도체",
-      "market_cap": 29755,
-      "weight": 3.0,
+      "code": "010060",
+      "name": "OCI홀딩스",
+      "sector": "화학",
+      "market_cap": 50876,
+      "weight": 5.0,
       "weight_prev": 5.0,
-      "today_return": 3.4615384615384617,
-      "contribution": 1.730769230769231,
-      "ytd_return": 367.0138888888889,
-      "cumulative_return": 10.020449897750506,
-      "current_price": 269000.0,
+      "today_return": -2.3297491039426523,
+      "contribution": -1.1648745519713262,
+      "ytd_return": 136.54513888888889,
+      "cumulative_return": 0.0,
+      "current_price": 272500.0,
       "price_date": "2026-08-18",
-      "ath_price": 284500.0,
-      "dd": -5.448154657293502,
-      "rsi": 12.77620854738214,
-      "is_today_new": false
-    },
-    {
-      "code": "034020",
-      "name": "두산에너빌리티",
-      "sector": "기계",
-      "market_cap": 498997,
-      "weight": 5.0,
-      "weight_prev": 3.0,
-      "today_return": -5.690072639225181,
-      "contribution": -1.7070217917675543,
-      "ytd_return": 3.452855245683928,
-      "cumulative_return": -2.5031289111389188,
-      "current_price": 77900.0,
-      "price_date": "2026-08-18",
-      "ath_price": 136400.0,
-      "dd": -42.88856304985337,
-      "rsi": -11.553934827648693,
-      "is_today_new": false
-    },
-    {
-      "code": "010950",
-      "name": "S-Oil",
-      "sector": "에너지",
-      "market_cap": 172927,
-      "weight": 5.0,
-      "weight_prev": 3.0,
-      "today_return": 4.0650406504065035,
-      "contribution": 1.219512195121951,
-      "ytd_return": 85.06024096385542,
-      "cumulative_return": 5.567010309278353,
-      "current_price": 153600.0,
-      "price_date": "2026-08-18",
-      "ath_price": 153600.0,
-      "dd": 0.0,
-      "rsi": 5.282356779477415,
-      "is_today_new": false
-    },
-    {
-      "code": "298380",
-      "name": "에이비엘바이오",
-      "sector": "건강관리",
-      "market_cap": 44678,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": -5.112960760998811,
-      "contribution": -1.5338882282996433,
-      "ytd_return": -60.099999999999994,
-      "cumulative_return": -3.233629749393696,
-      "current_price": 79800.0,
-      "price_date": "2026-08-18",
-      "ath_price": 245500.0,
-      "dd": -67.4949083503055,
-      "rsi": -7.596355755804451,
+      "ath_price": 388000.0,
+      "dd": -29.768041237113408,
+      "rsi": 0.0,
       "is_today_new": false
     },
     {
@@ -694,11 +676,11 @@
       "sector": "미디어,교육",
       "market_cap": 16255,
       "weight": 5.0,
-      "weight_prev": 3.0,
+      "weight_prev": 5.0,
       "today_return": -3.2697547683923704,
-      "contribution": -0.9809264305177111,
+      "contribution": -1.6348773841961852,
       "ytd_return": -47.40740740740741,
-      "cumulative_return": -5.960264900662249,
+      "cumulative_return": -3.663500678426057,
       "current_price": 71000.0,
       "price_date": "2026-08-18",
       "ath_price": 158500.0,
@@ -707,21 +689,21 @@
       "is_today_new": false
     },
     {
-      "code": "010060",
-      "name": "OCI홀딩스",
-      "sector": "화학",
-      "market_cap": 50876,
-      "weight": 5.0,
-      "weight_prev": 0.0,
-      "today_return": -2.3297491039426523,
-      "contribution": -0.0,
-      "ytd_return": 136.54513888888889,
-      "cumulative_return": null,
-      "current_price": 272500.0,
+      "code": "131290",
+      "name": "티에스이",
+      "sector": "반도체",
+      "market_cap": 29755,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 3.4615384615384617,
+      "contribution": 1.0384615384615385,
+      "ytd_return": 367.0138888888889,
+      "cumulative_return": 10.020449897750506,
+      "current_price": 269000.0,
       "price_date": "2026-08-18",
-      "ath_price": 388000.0,
-      "dd": -29.768041237113408,
-      "rsi": null,
+      "ath_price": 284500.0,
+      "dd": -5.448154657293502,
+      "rsi": 12.77620854738214,
       "is_today_new": false
     }
   ],
@@ -732,9 +714,9 @@
       "sector": "반도체",
       "market_cap": 15697258,
       "weight": 25.0,
-      "weight_prev": 30.0,
+      "weight_prev": 25.0,
       "today_return": -2.185792349726776,
-      "contribution": -6.557377049180329,
+      "contribution": -5.464480874316941,
       "ytd_return": 123.93661384487072,
       "cumulative_return": 5.070927767813482,
       "current_price": 268500.0,
@@ -750,9 +732,9 @@
       "sector": "반도체",
       "market_cap": 12140783,
       "weight": 20.0,
-      "weight_prev": 25.0,
+      "weight_prev": 20.0,
       "today_return": 1.033434650455927,
-      "contribution": 2.5835866261398177,
+      "contribution": 2.066869300911854,
       "ytd_return": 155.2995391705069,
       "cumulative_return": -11.56281594210611,
       "current_price": 1662000.0,
@@ -781,6 +763,24 @@
       "is_today_new": false
     },
     {
+      "code": "034020",
+      "name": "두산에너빌리티",
+      "sector": "기계",
+      "market_cap": 498997,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": -5.690072639225181,
+      "contribution": -2.845036319612591,
+      "ytd_return": 3.452855245683928,
+      "cumulative_return": -1.5170670037926715,
+      "current_price": 77900.0,
+      "price_date": "2026-08-18",
+      "ath_price": 136400.0,
+      "dd": -42.88856304985337,
+      "rsi": -11.553934827648693,
+      "is_today_new": false
+    },
+    {
       "code": "035420",
       "name": "NAVER",
       "sector": "소프트웨어",
@@ -817,6 +817,24 @@
       "is_today_new": false
     },
     {
+      "code": "010950",
+      "name": "S-Oil",
+      "sector": "에너지",
+      "market_cap": 172927,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": 4.0650406504065035,
+      "contribution": 2.0325203252032518,
+      "ytd_return": 85.06024096385542,
+      "cumulative_return": 3.267446551028641,
+      "current_price": 153600.0,
+      "price_date": "2026-08-18",
+      "ath_price": 153600.0,
+      "dd": 0.0,
+      "rsi": 5.282356779477415,
+      "is_today_new": false
+    },
+    {
       "code": "196170",
       "name": "알테오젠",
       "sector": "건강관리",
@@ -835,75 +853,21 @@
       "is_today_new": false
     },
     {
-      "code": "131290",
-      "name": "티에스이",
-      "sector": "반도체",
-      "market_cap": 29755,
-      "weight": 3.0,
+      "code": "010060",
+      "name": "OCI홀딩스",
+      "sector": "화학",
+      "market_cap": 50876,
+      "weight": 5.0,
       "weight_prev": 5.0,
-      "today_return": 3.4615384615384617,
-      "contribution": 1.730769230769231,
-      "ytd_return": 367.0138888888889,
-      "cumulative_return": 10.020449897750506,
-      "current_price": 269000.0,
+      "today_return": -2.3297491039426523,
+      "contribution": -1.1648745519713262,
+      "ytd_return": 136.54513888888889,
+      "cumulative_return": 0.0,
+      "current_price": 272500.0,
       "price_date": "2026-08-18",
-      "ath_price": 284500.0,
-      "dd": -5.448154657293502,
-      "rsi": 12.77620854738214,
-      "is_today_new": false
-    },
-    {
-      "code": "034020",
-      "name": "두산에너빌리티",
-      "sector": "기계",
-      "market_cap": 498997,
-      "weight": 5.0,
-      "weight_prev": 3.0,
-      "today_return": -5.690072639225181,
-      "contribution": -1.7070217917675543,
-      "ytd_return": 3.452855245683928,
-      "cumulative_return": -2.5031289111389188,
-      "current_price": 77900.0,
-      "price_date": "2026-08-18",
-      "ath_price": 136400.0,
-      "dd": -42.88856304985337,
-      "rsi": -11.553934827648693,
-      "is_today_new": false
-    },
-    {
-      "code": "010950",
-      "name": "S-Oil",
-      "sector": "에너지",
-      "market_cap": 172927,
-      "weight": 5.0,
-      "weight_prev": 3.0,
-      "today_return": 4.0650406504065035,
-      "contribution": 1.219512195121951,
-      "ytd_return": 85.06024096385542,
-      "cumulative_return": 5.567010309278353,
-      "current_price": 153600.0,
-      "price_date": "2026-08-18",
-      "ath_price": 153600.0,
-      "dd": 0.0,
-      "rsi": 5.282356779477415,
-      "is_today_new": false
-    },
-    {
-      "code": "298380",
-      "name": "에이비엘바이오",
-      "sector": "건강관리",
-      "market_cap": 44678,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": -5.112960760998811,
-      "contribution": -1.5338882282996433,
-      "ytd_return": -60.099999999999994,
-      "cumulative_return": -3.233629749393696,
-      "current_price": 79800.0,
-      "price_date": "2026-08-18",
-      "ath_price": 245500.0,
-      "dd": -67.4949083503055,
-      "rsi": -7.596355755804451,
+      "ath_price": 388000.0,
+      "dd": -29.768041237113408,
+      "rsi": 0.0,
       "is_today_new": false
     },
     {
@@ -912,11 +876,11 @@
       "sector": "미디어,교육",
       "market_cap": 16255,
       "weight": 5.0,
-      "weight_prev": 3.0,
+      "weight_prev": 5.0,
       "today_return": -3.2697547683923704,
-      "contribution": -0.9809264305177111,
+      "contribution": -1.6348773841961852,
       "ytd_return": -47.40740740740741,
-      "cumulative_return": -5.960264900662249,
+      "cumulative_return": -3.663500678426057,
       "current_price": 71000.0,
       "price_date": "2026-08-18",
       "ath_price": 158500.0,
@@ -925,21 +889,21 @@
       "is_today_new": false
     },
     {
-      "code": "010060",
-      "name": "OCI홀딩스",
-      "sector": "화학",
-      "market_cap": 50876,
-      "weight": 5.0,
-      "weight_prev": 0.0,
-      "today_return": -2.3297491039426523,
-      "contribution": -0.0,
-      "ytd_return": 136.54513888888889,
-      "cumulative_return": null,
-      "current_price": 272500.0,
+      "code": "131290",
+      "name": "티에스이",
+      "sector": "반도체",
+      "market_cap": 29755,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 3.4615384615384617,
+      "contribution": 1.0384615384615385,
+      "ytd_return": 367.0138888888889,
+      "cumulative_return": 10.020449897750506,
+      "current_price": 269000.0,
       "price_date": "2026-08-18",
-      "ath_price": 388000.0,
-      "dd": -29.768041237113408,
-      "rsi": null,
+      "ath_price": 284500.0,
+      "dd": -5.448154657293502,
+      "rsi": 12.77620854738214,
       "is_today_new": false
     }
   ],
@@ -950,9 +914,9 @@
       "sector": "반도체",
       "market_cap": 15697258,
       "weight": 25.0,
-      "weight_prev": 30.0,
+      "weight_prev": 25.0,
       "today_return": -2.185792349726776,
-      "contribution": -6.557377049180329,
+      "contribution": -5.464480874316941,
       "ytd_return": 123.93661384487072,
       "cumulative_return": 0.16263158046232462,
       "current_price": 268500.0,
@@ -968,9 +932,9 @@
       "sector": "반도체",
       "market_cap": 12140783,
       "weight": 20.0,
-      "weight_prev": 25.0,
+      "weight_prev": 20.0,
       "today_return": 1.033434650455927,
-      "contribution": 2.5835866261398177,
+      "contribution": 2.066869300911854,
       "ytd_return": 155.2995391705069,
       "cumulative_return": -12.610638857243007,
       "current_price": 1662000.0,
@@ -1014,24 +978,6 @@
       "ath_price": 430123.0,
       "dd": -30.717492438209536,
       "rsi": 4.760399792297743,
-      "is_today_new": false
-    },
-    {
-      "code": "131290",
-      "name": "티에스이",
-      "sector": "반도체",
-      "market_cap": 29755,
-      "weight": 3.0,
-      "weight_prev": 5.0,
-      "today_return": 3.4615384615384617,
-      "contribution": 1.730769230769231,
-      "ytd_return": 367.0138888888889,
-      "cumulative_return": 10.020449897750506,
-      "current_price": 269000.0,
-      "price_date": "2026-08-18",
-      "ath_price": 284500.0,
-      "dd": -5.448154657293502,
-      "rsi": 12.77620854738214,
       "is_today_new": false
     },
     {
@@ -1179,22 +1125,40 @@
       "is_today_new": false
     },
     {
+      "code": "131290",
+      "name": "티에스이",
+      "sector": "반도체",
+      "market_cap": 29755,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 3.4615384615384617,
+      "contribution": 1.0384615384615385,
+      "ytd_return": 367.0138888888889,
+      "cumulative_return": 10.020449897750506,
+      "current_price": 269000.0,
+      "price_date": "2026-08-18",
+      "ath_price": 284500.0,
+      "dd": -5.448154657293502,
+      "rsi": 12.77620854738214,
+      "is_today_new": false
+    },
+    {
       "code": "041510",
       "name": "에스엠",
       "sector": "미디어,교육",
       "market_cap": 16255,
       "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 3.0,
+      "today_return": -3.2697547683923704,
+      "contribution": -0.9809264305177111,
       "ytd_return": -47.40740740740741,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 71000.0,
       "price_date": "2026-08-18",
       "ath_price": 158500.0,
       "dd": -55.20504731861199,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
   "한투 성과모집형 1차": [
@@ -1204,9 +1168,9 @@
       "sector": "반도체",
       "market_cap": 15697258,
       "weight": 25.0,
-      "weight_prev": 30.0,
+      "weight_prev": 25.0,
       "today_return": -2.185792349726776,
-      "contribution": -6.557377049180329,
+      "contribution": -5.464480874316941,
       "ytd_return": 123.93661384487072,
       "cumulative_return": 7.391050745771177,
       "current_price": 268500.0,
@@ -1222,9 +1186,9 @@
       "sector": "반도체",
       "market_cap": 12140783,
       "weight": 20.0,
-      "weight_prev": 25.0,
+      "weight_prev": 20.0,
       "today_return": 1.033434650455927,
-      "contribution": 2.5835866261398177,
+      "contribution": 2.066869300911854,
       "ytd_return": 155.2995391705069,
       "cumulative_return": -8.382639373782663,
       "current_price": 1662000.0,
@@ -1250,6 +1214,24 @@
       "ath_price": 235000.0,
       "dd": -19.87234042553192,
       "rsi": 3.764249252284446,
+      "is_today_new": false
+    },
+    {
+      "code": "034020",
+      "name": "두산에너빌리티",
+      "sector": "기계",
+      "market_cap": 498997,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": -5.690072639225181,
+      "contribution": -2.845036319612591,
+      "ytd_return": 3.452855245683928,
+      "cumulative_return": -1.5170670037926715,
+      "current_price": 77900.0,
+      "price_date": "2026-08-18",
+      "ath_price": 136400.0,
+      "dd": -42.88856304985337,
+      "rsi": -11.553934827648693,
       "is_today_new": false
     },
     {
@@ -1289,6 +1271,24 @@
       "is_today_new": false
     },
     {
+      "code": "010950",
+      "name": "S-Oil",
+      "sector": "에너지",
+      "market_cap": 172927,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": 4.0650406504065035,
+      "contribution": 2.0325203252032518,
+      "ytd_return": 85.06024096385542,
+      "cumulative_return": 3.267446551028641,
+      "current_price": 153600.0,
+      "price_date": "2026-08-18",
+      "ath_price": 153600.0,
+      "dd": 0.0,
+      "rsi": 5.282356779477415,
+      "is_today_new": false
+    },
+    {
       "code": "196170",
       "name": "알테오젠",
       "sector": "건강관리",
@@ -1307,75 +1307,21 @@
       "is_today_new": false
     },
     {
-      "code": "131290",
-      "name": "티에스이",
-      "sector": "반도체",
-      "market_cap": 29755,
-      "weight": 3.0,
+      "code": "010060",
+      "name": "OCI홀딩스",
+      "sector": "화학",
+      "market_cap": 50876,
+      "weight": 5.0,
       "weight_prev": 5.0,
-      "today_return": 3.4615384615384617,
-      "contribution": 1.730769230769231,
-      "ytd_return": 367.0138888888889,
-      "cumulative_return": 10.020449897750506,
-      "current_price": 269000.0,
+      "today_return": -2.3297491039426523,
+      "contribution": -1.1648745519713262,
+      "ytd_return": 136.54513888888889,
+      "cumulative_return": 0.0,
+      "current_price": 272500.0,
       "price_date": "2026-08-18",
-      "ath_price": 284500.0,
-      "dd": -5.448154657293502,
-      "rsi": 12.77620854738214,
-      "is_today_new": false
-    },
-    {
-      "code": "034020",
-      "name": "두산에너빌리티",
-      "sector": "기계",
-      "market_cap": 498997,
-      "weight": 5.0,
-      "weight_prev": 3.0,
-      "today_return": -5.690072639225181,
-      "contribution": -1.7070217917675543,
-      "ytd_return": 3.452855245683928,
-      "cumulative_return": -2.5031289111389188,
-      "current_price": 77900.0,
-      "price_date": "2026-08-18",
-      "ath_price": 136400.0,
-      "dd": -42.88856304985337,
-      "rsi": -11.553934827648693,
-      "is_today_new": false
-    },
-    {
-      "code": "010950",
-      "name": "S-Oil",
-      "sector": "에너지",
-      "market_cap": 172927,
-      "weight": 5.0,
-      "weight_prev": 3.0,
-      "today_return": 4.0650406504065035,
-      "contribution": 1.219512195121951,
-      "ytd_return": 85.06024096385542,
-      "cumulative_return": 5.567010309278353,
-      "current_price": 153600.0,
-      "price_date": "2026-08-18",
-      "ath_price": 153600.0,
-      "dd": 0.0,
-      "rsi": 5.282356779477415,
-      "is_today_new": false
-    },
-    {
-      "code": "298380",
-      "name": "에이비엘바이오",
-      "sector": "건강관리",
-      "market_cap": 44678,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": -5.112960760998811,
-      "contribution": -1.5338882282996433,
-      "ytd_return": -60.099999999999994,
-      "cumulative_return": -3.233629749393696,
-      "current_price": 79800.0,
-      "price_date": "2026-08-18",
-      "ath_price": 245500.0,
-      "dd": -67.4949083503055,
-      "rsi": -7.596355755804451,
+      "ath_price": 388000.0,
+      "dd": -29.768041237113408,
+      "rsi": 0.0,
       "is_today_new": false
     },
     {
@@ -1384,11 +1330,11 @@
       "sector": "미디어,교육",
       "market_cap": 16255,
       "weight": 5.0,
-      "weight_prev": 3.0,
+      "weight_prev": 5.0,
       "today_return": -3.2697547683923704,
-      "contribution": -0.9809264305177111,
+      "contribution": -1.6348773841961852,
       "ytd_return": -47.40740740740741,
-      "cumulative_return": -5.960264900662249,
+      "cumulative_return": -3.663500678426057,
       "current_price": 71000.0,
       "price_date": "2026-08-18",
       "ath_price": 158500.0,
@@ -1397,272 +1343,48 @@
       "is_today_new": false
     },
     {
-      "code": "010060",
-      "name": "OCI홀딩스",
-      "sector": "화학",
-      "market_cap": 50876,
-      "weight": 5.0,
-      "weight_prev": 0.0,
-      "today_return": -2.3297491039426523,
-      "contribution": -0.0,
-      "ytd_return": 136.54513888888889,
-      "cumulative_return": null,
-      "current_price": 272500.0,
+      "code": "131290",
+      "name": "티에스이",
+      "sector": "반도체",
+      "market_cap": 29755,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": 3.4615384615384617,
+      "contribution": 1.0384615384615385,
+      "ytd_return": 367.0138888888889,
+      "cumulative_return": 10.020449897750506,
+      "current_price": 269000.0,
       "price_date": "2026-08-18",
-      "ath_price": 388000.0,
-      "dd": -29.768041237113408,
-      "rsi": null,
+      "ath_price": 284500.0,
+      "dd": -5.448154657293502,
+      "rsi": 12.77620854738214,
       "is_today_new": false
     }
   ],
-  "_order_changes": {
-    "NH 다이내믹 밸류 / DB 개방형": {
-      "date": "2026-08-18",
-      "added": [
-        {
-          "name": "에스엠",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "삼성전자",
-          "from": 30.0,
-          "to": 25.0
-        },
-        {
-          "name": "SK하이닉스",
-          "from": 25.0,
-          "to": 20.0
-        },
-        {
-          "name": "티에스이",
-          "from": 5.0,
-          "to": 3.0
-        }
-      ],
-      "removed": []
-    },
-    "삼성 트루밸류": {
-      "date": "2026-08-18",
-      "added": [
-        {
-          "name": "에스엠",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "삼성전자",
-          "from": 30.0,
-          "to": 25.0
-        },
-        {
-          "name": "SK하이닉스",
-          "from": 25.0,
-          "to": 20.0
-        },
-        {
-          "name": "티에스이",
-          "from": 5.0,
-          "to": 3.0
-        }
-      ],
-      "removed": []
-    },
-    "NH 목표전환형 5호": {
-      "date": "2026-08-18",
-      "added": [
-        {
-          "name": "OCI홀딩스",
-          "weight": 5.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "삼성전자",
-          "from": 30.0,
-          "to": 25.0
-        },
-        {
-          "name": "SK하이닉스",
-          "from": 25.0,
-          "to": 20.0
-        },
-        {
-          "name": "티에스이",
-          "from": 5.0,
-          "to": 3.0
-        },
-        {
-          "name": "두산에너빌리티",
-          "from": 3.0,
-          "to": 5.0
-        },
-        {
-          "name": "S-Oil",
-          "from": 3.0,
-          "to": 5.0
-        },
-        {
-          "name": "에스엠",
-          "from": 3.0,
-          "to": 5.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "에이비엘바이오",
-          "weight": 3.0
-        }
-      ]
-    },
-    "DB 목표전환형 6차": {
-      "date": "2026-08-18",
-      "added": [
-        {
-          "name": "OCI홀딩스",
-          "weight": 5.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "삼성전자",
-          "from": 30.0,
-          "to": 25.0
-        },
-        {
-          "name": "SK하이닉스",
-          "from": 25.0,
-          "to": 20.0
-        },
-        {
-          "name": "티에스이",
-          "from": 5.0,
-          "to": 3.0
-        },
-        {
-          "name": "두산에너빌리티",
-          "from": 3.0,
-          "to": 5.0
-        },
-        {
-          "name": "S-Oil",
-          "from": 3.0,
-          "to": 5.0
-        },
-        {
-          "name": "에스엠",
-          "from": 3.0,
-          "to": 5.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "에이비엘바이오",
-          "weight": 3.0
-        }
-      ]
-    },
-    "한투 지속형": {
-      "date": "2026-08-18",
-      "added": [
-        {
-          "name": "에스엠",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "삼성전자",
-          "from": 30.0,
-          "to": 25.0
-        },
-        {
-          "name": "SK하이닉스",
-          "from": 25.0,
-          "to": 20.0
-        },
-        {
-          "name": "티에스이",
-          "from": 5.0,
-          "to": 3.0
-        }
-      ],
-      "removed": []
-    },
-    "한투 성과모집형 1차": {
-      "date": "2026-08-18",
-      "added": [
-        {
-          "name": "OCI홀딩스",
-          "weight": 5.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "삼성전자",
-          "from": 30.0,
-          "to": 25.0
-        },
-        {
-          "name": "SK하이닉스",
-          "from": 25.0,
-          "to": 20.0
-        },
-        {
-          "name": "티에스이",
-          "from": 5.0,
-          "to": 3.0
-        },
-        {
-          "name": "두산에너빌리티",
-          "from": 3.0,
-          "to": 5.0
-        },
-        {
-          "name": "S-Oil",
-          "from": 3.0,
-          "to": 5.0
-        },
-        {
-          "name": "에스엠",
-          "from": 3.0,
-          "to": 5.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "에이비엘바이오",
-          "weight": 3.0
-        }
-      ]
-    }
-  },
   "_portfolio_meta": {
     "NH 다이내믹 밸류 / DB 개방형": {
-      "nav_ytd_d1": 50.321385111765274,
-      "nav_cum_d1": 197.71
+      "nav_ytd_d1": 48.53596837146361,
+      "nav_cum_d1": 194.17399999999998
     },
     "삼성 트루밸류": {
-      "nav_ytd_d1": 50.29362146330845,
-      "nav_cum_d1": 203.79
+      "nav_ytd_d1": 48.508640436152795,
+      "nav_cum_d1": 200.18200000000004
     },
     "NH 목표전환형 5호": {
-      "nav_ytd_d1": -23.505,
-      "nav_cum_d1": -23.505
+      "nav_ytd_d1": -24.598,
+      "nav_cum_d1": -24.598
     },
     "DB 목표전환형 6차": {
-      "nav_ytd_d1": -22.609,
-      "nav_cum_d1": -22.609
+      "nav_ytd_d1": -23.714999999999996,
+      "nav_cum_d1": -23.714999999999996
     },
     "한투 지속형": {
-      "nav_ytd_d1": -14.536000000000005,
-      "nav_cum_d1": -14.536000000000005
+      "nav_ytd_d1": -15.552,
+      "nav_cum_d1": -15.552
     },
     "한투 성과모집형 1차": {
-      "nav_ytd_d1": -13.037999999999993,
-      "nav_cum_d1": -13.037999999999993
+      "nav_ytd_d1": -14.280999999999999,
+      "nav_cum_d1": -14.280999999999999
     }
   },
   "_price_asof": "2026-08-18"
