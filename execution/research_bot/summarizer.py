@@ -1,6 +1,22 @@
-import os
+"""일일 리서치노트 요약 — 입력 조립 + LLM 백엔드 체인 위임 (2026-08-18 설계 v3).
+
+v0(유료 API 직접 호출)에서 변경: LLM 호출은 llm_backends 체인(headless→codex→API)으로,
+이 모듈은 프롬프트·이미지 manifest 조립과 결과 파싱만 담당한다.
+프롬프트 본문·content 블록 구조는 v0과 동일 (요약 품질 회귀 방지).
+"""
 import base64
-import anthropic
+import logging
+import os
+
+logger = logging.getLogger(__name__)
+
+IMG_EXTS = ('.jpg', '.jpeg', '.png', '.gif', '.webp')
+MEDIA_TYPES = {'.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png',
+               '.gif': 'image/gif', '.webp': 'image/webp'}
+MAX_IMAGE_BYTES = 8 * 1024 * 1024      # 개당 8MB
+MAX_TOTAL_IMAGE_BYTES = 32 * 1024 * 1024
+MAX_IMAGES = 20
+
 
 def _encode_image(file_path):
     """이미지 파일을 base64로 인코딩"""
@@ -8,21 +24,24 @@ def _encode_image(file_path):
         with open(file_path, 'rb') as f:
             data = base64.standard_b64encode(f.read()).decode('utf-8')
         ext = os.path.splitext(file_path)[1].lower()
-        media_types = {'.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.gif': 'image/gif', '.webp': 'image/webp'}
-        return data, media_types.get(ext, 'image/jpeg')
-    except:
+        return data, MEDIA_TYPES.get(ext, 'image/jpeg')
+    except Exception:
         return None, None
 
 
-def summarize_daily_notes(messages, date_str):
-    """Claude API로 하루치 리서치 노트를 주제별로 정리/요약 (이미지 분석 포함)"""
-    api_key = os.getenv("ANTHROPIC_API_KEY")
-    if not api_key:
-        raise RuntimeError("ANTHROPIC_API_KEY not set")
+def build_inputs(messages, date_str):
+    """메시지 → (prompt, all_content, manifest, warnings).
 
-    # 메시지들을 Claude API content 블록으로 조합
-    content_blocks = []
+    manifest = [{'index': 메시지번호(1-base), 'path', 'media_type', 'size'}] —
+    사전검증(존재·확장자·크기 상한) 통과분만. 탈락은 warnings에 사유 기록
+    (설계 v3 [2차 #4.3] — 조용한 부분 강등 금지).
+    all_content = v0과 동일 구조의 API user content 블록(프롬프트 텍스트 + 이미지들).
+    """
+    warnings = []
+    manifest = []
+    total_bytes = 0
     notes_parts = []
+    content_blocks = []
 
     for i, msg in enumerate(messages, 1):
         parts = [f"[{i}] ({msg['timestamp'][:16]})"]
@@ -36,24 +55,39 @@ def summarize_daily_notes(messages, date_str):
             parts.append(f"[기사 본문]\n{msg['article_content']}")
         notes_parts.append('\n'.join(parts))
 
-        # 이미지가 있으면 Vision용 블록 추가 (이미지 파일만, PDF 등 제외)
-        img_exts = ('.jpg', '.jpeg', '.png', '.gif', '.webp')
-        if msg.get('media_path') and msg['message_type'] in ('photo', 'document') and msg['media_path'].lower().endswith(img_exts):
-            img_data, media_type = _encode_image(msg['media_path'])
-            if img_data:
-                notes_parts.append(f"[이미지 {i} 첨부 - 아래 참조]")
-                content_blocks.append({
-                    "type": "text",
-                    "text": f"\n--- 이미지 {i} (메시지 [{i}]의 첨부) ---"
-                })
-                content_blocks.append({
-                    "type": "image",
-                    "source": {"type": "base64", "media_type": media_type, "data": img_data}
-                })
+        # 이미지 사전검증 → manifest (이미지 파일만, PDF 등 제외)
+        mp = msg.get('media_path')
+        if not (mp and msg['message_type'] in ('photo', 'document')
+                and mp.lower().endswith(IMG_EXTS)):
+            continue
+        if len(manifest) >= MAX_IMAGES:
+            warnings.append(f'이미지 [{i}] 제외: 최대 {MAX_IMAGES}장 초과')
+            continue
+        if not os.path.exists(mp):
+            warnings.append(f'이미지 [{i}] 제외: 파일 없음')
+            continue
+        size = os.path.getsize(mp)
+        if size > MAX_IMAGE_BYTES:
+            warnings.append(f'이미지 [{i}] 제외: {size/1e6:.1f}MB 과대')
+            continue
+        if total_bytes + size > MAX_TOTAL_IMAGE_BYTES:
+            warnings.append(f'이미지 [{i}] 제외: 총량 상한 초과')
+            continue
+        img_data, media_type = _encode_image(mp)
+        if not img_data:
+            warnings.append(f'이미지 [{i}] 제외: 인코딩 실패')
+            continue
+        total_bytes += size
+        manifest.append({'index': i, 'path': mp, 'media_type': media_type, 'size': size})
+        notes_parts.append(f"[이미지 {i} 첨부 - 아래 참조]")
+        content_blocks.append({"type": "text",
+                               "text": f"\n--- 이미지 {i} (메시지 [{i}]의 첨부) ---"})
+        content_blocks.append({"type": "image",
+                               "source": {"type": "base64", "media_type": media_type,
+                                          "data": img_data}})
 
     notes_text = '\n\n---\n\n'.join(notes_parts)
 
-    # 프롬프트 텍스트
     prompt = f"""너는 월스트리트 IB의 최고 유능한 애널리스트 RA다. 꼼꼼하고 재능이 넘치며 열정과 야망이 넘친다. 다음은 {date_str}에 수집한 리서치 노트이다. 이 노트들을 주제별로 분류하고, 핵심 내용을 정리해라.
 
 ## 작성 규칙
@@ -83,28 +117,21 @@ def summarize_daily_notes(messages, date_str):
 ## 수집된 노트 ({len(messages)}건)
 {notes_text}"""
 
-    # content 블록 조합: 프롬프트 텍스트 먼저, 이미지 블록 뒤에
     all_content = [{"type": "text", "text": prompt}] + content_blocks
+    return prompt, all_content, manifest, warnings
 
-    client = anthropic.Anthropic(api_key=api_key)
 
-    # 재시도 로직 (529 Overloaded / 429 Rate Limit 대응)
-    import time
-    for attempt in range(3):
-        try:
-            response = client.messages.create(
-                model="claude-sonnet-4-6",
-                max_tokens=16384,
-                messages=[{"role": "user", "content": all_content}]
-            )
-            return response.content[0].text
-        except Exception as e:
-            err_str = str(e).lower()
-            if '529' in str(e) or 'overloaded' in err_str or '429' in str(e) or 'rate_limit' in err_str:
-                if attempt < 2:
-                    time.sleep(300)  # 5분 대기 후 재시도
-                    continue
-            raise
+def summarize_daily_notes(messages, date_str):
+    """하루치 리서치 노트 요약 — llm_backends 체인 위임. 반환 = BackendResult
+    (.text 요약 본문 / .provenance 처리 백엔드 / .warnings 알림용 / .manifest 이미지).
+    v0의 문자열 반환에서 변경 — 호출자(research_notes_bot)와 동시 개정 (2026-08-18)."""
+    import llm_backends
+    prompt, all_content, manifest, input_warnings = build_inputs(messages, date_str)
+    result = llm_backends.summarize(prompt, all_content, manifest, date_str)
+    result.warnings = input_warnings + result.warnings
+    logger.info(f"summarize_daily_notes: backend={result.provenance.get('backend')} "
+                f"model={result.provenance.get('model')} images={len(manifest)}")
+    return result
 
 
 def extract_topics(summary_text):
@@ -131,7 +158,8 @@ def extract_stocks(summary_text):
 
 
 def extract_image_indices(summary_text):
-    """요약 텍스트에서 이미지 번호 추출"""
+    """(구) 메타 '이미지:' 라인 파싱 — 2026-08-18 설계 v3에서 게시 경로는 본문 [IMG:n]
+    ∩ manifest로 단일화되어 봇에서는 미사용. 하위호환용으로만 유지."""
     for line in summary_text.split('\n'):
         stripped = line.strip()
         if stripped.startswith('이미지:') or stripped.startswith('이미지 :'):
@@ -140,6 +168,6 @@ def extract_image_indices(summary_text):
                 return []
             try:
                 return [int(x.strip()) for x in raw.split(',') if x.strip().isdigit()]
-            except:
+            except Exception:
                 return []
     return []

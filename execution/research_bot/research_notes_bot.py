@@ -1,6 +1,10 @@
+import asyncio
+import hashlib
+import json
 import logging
 import datetime
 import os
+import re
 import sys
 import fcntl
 
@@ -244,11 +248,12 @@ async def cmd_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def cmd_summary(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """수동 요약 실행"""
+    """수동 요약 실행 (/summary force = 완료된 날짜 강제 재실행)"""
     if update.effective_chat.id != ALLOWED_CHAT_ID:
         return
+    force = bool(context.args) and context.args[0].lower() == 'force'
     await update.message.reply_text("⏳ 요약 중...")
-    await run_daily_summary(context, today_str())
+    await run_daily_summary(context, today_str(), force=force)
 
 
 async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -258,49 +263,129 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "텍스트, 링크, 사진, 파일, 전달 메시지 모두 가능.\n\n"
         "<b>명령어</b>\n"
         "/status - 오늘 수집 현황\n"
-        "/summary - 수동 요약 실행\n"
+        "/summary - 수동 요약 실행 (force = 강제 재실행)\n"
         "/help - 이 도움말",
         parse_mode='HTML'
     )
 
 
 # ============================================================
-# 일일 요약 작업
+# 일일 요약 작업 (2026-08-18 설계 v3 — headless 체인·상태 분리·single-flight)
 # ============================================================
-async def run_daily_summary(context, date_str):
-    """하루치 메시지를 Claude로 요약 → Notion에 게시"""
+STATE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'media', 'summaries')
+_running_dates = set()   # 날짜별 single-flight (같은 이벤트 루프 내라 set으로 충분)
+
+
+def _state_path(date_str):
+    return os.path.join(STATE_DIR, f'{date_str}.state.json')
+
+
+def _load_state(date_str):
+    try:
+        with open(_state_path(date_str), encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _save_state(date_str, state):
+    """sidecar 상태 저장 — 임시파일 + atomic replace"""
+    os.makedirs(STATE_DIR, exist_ok=True)
+    tmp = _state_path(date_str) + '.tmp'
+    with open(tmp, 'w', encoding='utf-8') as f:
+        json.dump(state, f, ensure_ascii=False)
+    os.replace(tmp, _state_path(date_str))
+
+
+def _input_hash(messages):
+    key = json.dumps([[m.get('telegram_message_id'), m.get('timestamp'),
+                       len(m.get('text_content') or '')] for m in messages])
+    return hashlib.sha256(key.encode()).hexdigest()[:16]
+
+
+async def _notify(context, text):
+    """알림 발송 — 실패는 ERROR 로그만 (작업 성패와 분리, 설계 v3 [2차 #16])"""
+    try:
+        await context.bot.send_message(chat_id=ALLOWED_CHAT_ID, text=text)
+    except Exception as e:
+        logging.error(f'텔레그램 알림 발송 실패: {e}')
+
+
+async def run_daily_summary(context, date_str, force=False):
+    """하루치 메시지를 LLM 체인(headless→codex→API)으로 요약 → Notion 게시"""
+    if date_str in _running_dates:
+        await _notify(context, f"⏳ {date_str} 요약이 이미 실행 중입니다.")
+        return
+    _running_dates.add(date_str)
+    try:
+        await _run_daily_summary_inner(context, date_str, force)
+    finally:
+        _running_dates.discard(date_str)
+
+
+async def _run_daily_summary_inner(context, date_str, force):
     messages = get_messages_by_date(date_str)
 
     if not messages:
-        try:
-            await context.bot.send_message(
-                chat_id=ALLOWED_CHAT_ID,
-                text=f"📝 {date_str}: 수집된 리서치 노트가 없습니다."
-            )
-        except:
-            pass
+        await _notify(context, f"📝 {date_str}: 수집된 리서치 노트가 없습니다.")
         logging.info(f"No messages for {date_str}")
         return
 
+    state = _load_state(date_str)
+    if state.get('status') == 'completed' and not force:
+        await _notify(context, f"ℹ️ {date_str}은 이미 처리 완료된 날짜입니다. "
+                               f"재실행: /summary force")
+        return
+    if force:
+        state = {}
+
+    ihash = _input_hash(messages)
     try:
-        # 1. Claude API 요약
-        from summarizer import summarize_daily_notes, extract_topics, extract_stocks, extract_image_indices
-        summary = summarize_daily_notes(messages, date_str)
+        from summarizer import summarize_daily_notes, extract_topics, extract_stocks
+
+        # 1. LLM 요약 — generated 상태 + 입력 불변이면 재사용 (중복 호출 방지)
+        if state.get('summary') and state.get('input_hash') == ihash:
+            summary = state['summary']
+            warnings = []
+            provenance = state.get('provenance', {})
+            manifest_indices = set(state.get('manifest_indices', []))
+            logging.info(f"{date_str}: 저장된 generated 요약 재사용 (LLM 재호출 생략)")
+        else:
+            result = await asyncio.to_thread(summarize_daily_notes, messages, date_str)
+            summary = result.text
+            warnings = list(result.warnings)
+            provenance = result.provenance
+            manifest_indices = {m['index'] for m in result.manifest}
+            state = {'status': 'generated', 'input_hash': ihash, 'summary': summary,
+                     'provenance': provenance,
+                     'manifest_indices': sorted(manifest_indices)}
+            _save_state(date_str, state)
+
         topics = extract_topics(summary)
         stocks = extract_stocks(summary)
-        image_indices = extract_image_indices(summary)
 
-        # 이미지 파일 경로 수집
+        # 이미지 = 본문 [IMG:n] ∩ manifest (진실원 단일화, 설계 v3 [2차 #2])
         images = []
-        for idx in image_indices:
+        seen = set()
+        for m in re.finditer(r'^\s*\[IMG:(\d+)\]\s*$', summary, re.M):
+            idx = int(m.group(1))
+            if idx in seen or idx not in manifest_indices:
+                continue
             if 1 <= idx <= len(messages):
                 msg = messages[idx - 1]
                 if msg.get('media_path') and os.path.exists(msg['media_path']):
                     images.append((msg['media_path'], idx))
+                    seen.add(idx)
 
-        # 2. Notion에 게시
-        from notion_publisher import publish_to_notion
-        publish_to_notion(summary, date_str, topics, stocks, images)
+        # 2. Notion에 게시 (published 상태면 중복 게시 방지)
+        if state.get('notion_published'):
+            logging.info(f"{date_str}: Notion 기게시 — 게시 단계 생략")
+        else:
+            from notion_publisher import publish_to_notion
+            await asyncio.to_thread(publish_to_notion, summary, date_str, topics, stocks, images)
+            state['status'] = 'published'
+            state['notion_published'] = True
+            _save_state(date_str, state)
 
         # 2-1. 헤더 + 첫 불릿 추출 → research_headlines.json 저장 (아침 알림용)
         headlines = []
@@ -323,41 +408,41 @@ async def run_daily_summary(context, date_str):
         # __file__ = .../execution/research_bot/research_bot.py → 3단계 상위 = repo root
         headlines_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'research_headlines.json')
         try:
-            import json as _json
-            _json.dump({'date': date_str, 'headlines': headlines}, open(headlines_file, 'w', encoding='utf-8'), ensure_ascii=False)
+            tmp = headlines_file + '.tmp'
+            with open(tmp, 'w', encoding='utf-8') as f:
+                json.dump({'date': date_str, 'headlines': headlines}, f, ensure_ascii=False)
+            os.replace(tmp, headlines_file)
             logging.info(f"Headlines saved: {len(headlines)}건")
         except Exception as he:
             logging.warning(f"Headlines 저장 실패: {he}")
 
         # 3. 처리 완료 표시
         mark_processed(date_str)
+        state['status'] = 'completed'
+        _save_state(date_str, state)
 
-        # 4. 텔레그램 알림
+        # 4. 텔레그램 알림 (+ 체인 warnings)
         topic_str = ', '.join(topics) if topics else '없음'
         stock_str = ', '.join(stocks) if stocks else '없음'
-        await context.bot.send_message(
-            chat_id=ALLOWED_CHAT_ID,
-            text=f"✅ {date_str} 리서치 노트 정리 완료!\n"
-                 f"📊 {len(messages)}건 → Notion 게시됨\n"
-                 f"🏷️ 토픽: {topic_str}\n"
-                 f"📈 종목: {stock_str}",
-            parse_mode='HTML'
-        )
-        logging.info(f"Daily summary done: {len(messages)} messages, topics: {topics}")
+        backend = provenance.get('backend', '?')
+        await _notify(context,
+                      f"✅ {date_str} 리서치 노트 정리 완료!\n"
+                      f"📊 {len(messages)}건 → Notion 게시됨 (LLM: {backend})\n"
+                      f"🏷️ 토픽: {topic_str}\n"
+                      f"📈 종목: {stock_str}")
+        if warnings:
+            await _notify(context, '\n'.join(warnings[:8]))
+        logging.info(f"Daily summary done: {len(messages)} messages, "
+                     f"backend={backend}, topics: {topics}")
 
     except Exception as e:
-        logging.error(f"Daily summary failed: {e}")
-        try:
-            await context.bot.send_message(
-                chat_id=ALLOWED_CHAT_ID,
-                text=f"❌ {date_str} 요약 실패: {str(e)}"
-            )
-        except:
-            pass
+        logging.exception(f"Daily summary failed for {date_str}")
+        short = str(e)[:400]
+        await _notify(context, f"❌ {date_str} 요약 실패: {short}")
 
 
 async def daily_summary_job(context: ContextTypes.DEFAULT_TYPE):
-    """매일 23:30 KST 자동 실행"""
+    """매일 23:00 KST 자동 실행"""
     logging.info("Daily summary job started")
     await run_daily_summary(context, today_str())
 

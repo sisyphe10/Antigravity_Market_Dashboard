@@ -255,3 +255,119 @@ def call_with_retry(system_prompt: str, messages: list[dict], *, model: str | No
         logger.warning(f'[headless_llm] transient 실패, 1회 재시도: {e}')
         time.sleep(5)
         return call(system_prompt, messages, model=model, timeout_sec=timeout_sec)
+
+
+def call_multimodal(system_prompt: str, content: list, *, model: str | None = None,
+                    timeout_sec: int | None = None) -> dict:
+    """이미지 포함 1회 호출 — --input-format stream-json (2026-08-18, 리서치노트 봇 전용).
+
+    content = API user content 블록 리스트(text / base64 image만 허용).
+    봉인 스택·사후검증·오류 위계·반환 계약은 call()과 동일하며, call() 경로는
+    바이트 무변경으로 유지한다 (설계 v3 [C#2] — 텍스트 경로 회귀 0 원칙).
+    2026-08-18 macmini 스모크 실측: stream-json 입력의 image 블록 정상 처리 확인.
+    """
+    model = model or HEADLESS_MODEL
+    mcp_cfg = _ensure_home()
+    limit = timeout_sec if timeout_sec is not None else TIMEOUT_SEC
+    if limit <= 0:
+        raise HeadlessError('예산 소진 (timeout<=0) — 호출 전 skip 해야 한다')
+
+    approx_chars = 0
+    for b in content:
+        if not isinstance(b, dict) or b.get('type') not in ('text', 'image'):
+            bt = b.get('type') if isinstance(b, dict) else type(b).__name__
+            raise HeadlessError(f'지원하지 않는 content 블록: {bt}')
+        if b['type'] == 'text':
+            approx_chars += len(b.get('text') or '')
+    if approx_chars == 0:
+        raise HeadlessError('빈 content')
+
+    event = json.dumps({'type': 'user', 'message': {'role': 'user', 'content': content}},
+                       ensure_ascii=False)
+
+    cmd = [
+        CLAUDE_BIN, '-p',
+        '--input-format', 'stream-json',
+        '--output-format', 'stream-json', '--verbose',
+        '--model', model,
+        '--system-prompt', system_prompt,
+        '--safe-mode',
+        '--tools', '',
+        '--disallowedTools', '*',
+        '--strict-mcp-config', '--mcp-config', mcp_cfg,
+        '--no-session-persistence',
+        '--max-turns', '1',
+    ]
+    t0 = time.time()
+    proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE, cwd=WORK_HOME, env=_clean_env(),
+                            text=True, encoding='utf-8', start_new_session=True)
+    try:
+        out, err = proc.communicate(input=event + '\n', timeout=limit)
+    except subprocess.TimeoutExpired:
+        _kill_group(proc)
+        raise HeadlessError(f'timeout {limit}s (모델={model}, 텍스트 {approx_chars:,}자 멀티모달)')
+
+    events = _events_from(out)
+    result = next((e for e in events if e.get('type') == 'result'), None)
+    rl_dump = json.dumps([e for e in events if 'rate_limit' in str(e.get('type', ''))])
+
+    if result is None:
+        if '"rejected"' in rl_dump or '"blocked"' in rl_dump:
+            raise HeadlessQuotaError(f'쿼터 소진 추정 (result 없음): {rl_dump[:200]}')
+        raise HeadlessError(f'result 이벤트 없음 rc={proc.returncode} stderr={err[:200]!r}')
+
+    text = (result.get('result') or '').strip()
+    low = text.lower()
+
+    if 'failed to authenticate' in low:
+        raise HeadlessAuthError(text[:200])
+
+    if result.get('is_error'):
+        if (any(m in low for m in QUOTA_TEXT_MARKERS)
+                or '"rejected"' in rl_dump or '"blocked"' in rl_dump):
+            raise HeadlessQuotaError(text[:200] or rl_dump[:200])
+        raise HeadlessError(f"result error: {result.get('subtype')} {text[:200]!r}")
+
+    if result.get('permission_denials'):
+        raise HeadlessError(f"permission denial 발생 — 봉인 구성 오류: "
+                            f"{str(result['permission_denials'])[:200]}")
+
+    tool_uses = 0
+    for e in events:
+        if e.get('type') == 'assistant':
+            for b in (e.get('message', {}).get('content') or []):
+                if isinstance(b, dict) and b.get('type') == 'tool_use':
+                    tool_uses += 1
+    if tool_uses:
+        raise HeadlessError(f'tool_use {tool_uses}건 혼입 — 도구 봉인 실패')
+
+    mu = result.get('modelUsage') or {}
+    resolved = None
+    if model in mu:
+        resolved = model
+    else:
+        for k in mu:
+            if k.startswith(model):
+                resolved = k
+                break
+    if mu and resolved is None:
+        raise HeadlessError(f'모델 불일치: 요청 {model} vs 실사용 {sorted(mu.keys())}')
+
+    if not text:
+        raise HeadlessError('빈 result 본문')
+
+    usage = mu.get(resolved, {}) if resolved else {}
+    sys_ev = next((e for e in events if e.get('type') == 'system'), {})
+    return {
+        'text': text,
+        'input_tokens': usage.get('inputTokens', 0),
+        'output_tokens': usage.get('outputTokens', 0),
+        'cache_read_input_tokens': usage.get('cacheReadInputTokens', 0),
+        'cache_creation_input_tokens': usage.get('cacheCreationInputTokens', 0),
+        'stop_reason': result.get('stop_reason') or 'end_turn',
+        'resolved_model': resolved or model,
+        'backend': 'headless',
+        'cli_version': sys_ev.get('claude_code_version', ''),
+        'elapsed_s': round(time.time() - t0, 1),
+    }
