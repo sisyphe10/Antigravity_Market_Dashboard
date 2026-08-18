@@ -21,7 +21,9 @@ logger = logging.getLogger(__name__)
 
 CODEX_BIN = os.getenv('RESEARCH_CODEX_BIN', '/opt/homebrew/bin/codex')
 CODEX_HOME = os.path.expanduser(os.getenv('RESEARCH_CODEX_HOME', '~/.research_codex_home'))
-CODEX_MODEL = os.getenv('RESEARCH_CODEX_MODEL', 'gpt-5')
+# 빈 값 = codex 기본 모델 사용 (ChatGPT 계정은 명시 모델 다수 거부 — 2026-08-18 실측:
+# 'gpt-5' 지정 시 400 "not supported when using Codex with a ChatGPT account")
+CODEX_MODEL = os.getenv('RESEARCH_CODEX_MODEL', '')
 WORK_DIR = os.path.join(CODEX_HOME, 'work')
 
 
@@ -82,11 +84,12 @@ def call(prompt: str, image_paths: list[str], *, timeout_sec: int) -> dict:
     t0 = time.time()
     try:
         cmd = [CODEX_BIN, 'exec',
-               '--model', CODEX_MODEL,
                '--sandbox', 'read-only',
                '--skip-git-repo-check',
                '--cd', WORK_DIR,
                '--output-last-message', out_path]
+        if CODEX_MODEL:
+            cmd += ['--model', CODEX_MODEL]
         for p in image_paths:
             cmd += ['--image', p]
         cmd += ['-']    # 프롬프트 = stdin
@@ -111,8 +114,8 @@ def call(prompt: str, image_paths: list[str], *, timeout_sec: int) -> dict:
         if not text:
             raise CodexError('빈 출력 (exit 0이지만 last-message 없음)')
 
-        return {'text': text, 'resolved_model': CODEX_MODEL, 'backend': 'codex',
-                'elapsed_s': round(time.time() - t0, 1)}
+        return {'text': text, 'resolved_model': CODEX_MODEL or 'codex-default',
+                'backend': 'codex', 'elapsed_s': round(time.time() - t0, 1)}
     finally:
         try:
             os.remove(out_path)
