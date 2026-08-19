@@ -24,7 +24,7 @@ alerts: ""
 
 - 실적봇: ~~번역·요약된 미국 실적/IR Day 노트를 실적 DB에 페이지로 생성~~ → **2026-07-22 datalake md 발행으로 대체**됐다. 분석 1-page는 [[store-analyses-md]](`~/datalake/analyses/`), 어닝콜 전문은 [[store-transcripts-md]](2026-07-21)가 정본이며, 기존 Notion 분석 페이지는 `backfill_analyses_md.py`로 md 백필 후 Notion은 동결 아카이브로 남는다(구 `notion_publisher.py`는 롤백용 잔존). [[src-earnings-pipeline]] 참조.
 - 리서치노트봇: 텔레그램 리서치 메시지를 요약→노션 페이지(엄중/중요 표시는 빨간색 텍스트) — 계속 활성.
-- 이미지는 GitHub에 올린 뒤 URL로 삽입.
+- 이미지는 GitHub에 올린 뒤 URL로 삽입 — 경로가 날짜·인덱스로 결정되므로 **요약 재실행 시 같은 경로 재업로드가 422**가 된다. 이 경우 기존 파일을 GET 해 `download_url`을 재사용한다(2026-08-19, 재실행 멱등). [[bot-research-notes]] 참조.
 
 ## Reads
 - (none)

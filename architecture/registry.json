@@ -1,6 +1,6 @@
 {
  "meta": {
-  "updated": "2026-08-18",
+  "updated": "2026-08-19",
   "projects": [
    "antigravity"
   ],
@@ -166,7 +166,7 @@
    "runs_on": "vm_macmini",
    "schedule_kst": "상시 (이벤트 드리븐) + 23:00 일일 요약",
    "status": "active",
-   "desc_md": "텔레그램으로 들어온 리서치 메시지(텍스트+이미지)를 LLM으로 상세 요약해 노션에 퍼블리시하는 봇(`execution/research_bot/research_notes_bot.py`). 수집은 상시(이벤트 드리븐), 요약·게시는 매일 **23:00 KST** 잡(`/summary`로 수동 실행, `force`로 강제 재실행).\n\n- 요약 규칙: 토픽별 불릿 8~12개+, 이미 불릿이면 원문 유지, 모든 이미지 첨부, 엄중/중요 표시는 {RED} 태그→노션 빨간색.\n- 메시지·미디어는 로컬 SQLite(`research_notes.db`) + `media/`에 보관 후 노션 페이지로.\n- RA_Sisyphe_bot의 05:10 헤드라인이 이 봇이 쌓은 `research_headlines.json`을 읽어 아침 요약을 만든다.\n- ★**일일 요약 LLM 백엔드 체인 전환(2026-08-18)**: 유료 API 단일 경로가 크레딧 고갈로 요약을 통째로 날린 사고 2회(7/21·8/17) 뒤, **1차 headless Claude(구독) → 2차 codex exec(ChatGPT 구독) → 3차 유료 API** 체인으로 바꿨다([[infra-headless-llm]]). **3차는 기본 잠김**(`RESEARCH_ALLOW_PAID_FALLBACK=1`일 때만)이라 평시 크레딧 소비는 0이고, 롤백은 `RESEARCH_LLM=api`(+봇 재시작)로 v0 유료 경로 복원. 이미지가 섞인 요약은 headless `call_multimodal`(stream-json 이미지 블록)로 넘어간다.\n- **재실행 안전(같은 전환의 일부)**: 날짜별 single-flight + `media/summaries/<date>.state.json` **사이드카 상태**(generated→published→completed). 입력 해시가 같으면 LLM을 다시 부르지 않고 저장된 요약을 재사용하며, 게시 단계가 분리돼 **재시도가 노션 중복 페이지를 만들지 않는다**(체인이 25분 예산 안에서 여러 백엔드를 시도하는 구조라 중간 실패·재실행이 상시 가능하다는 전제). 블로킹 LLM·노션 호출은 `asyncio.to_thread`로 빼 봇 이벤트 루프를 막지 않는다.\n- **게시 이미지의 단일 출처는 본문 `[IMG:n]`** — 종전 메타 '이미지:' 라인은 폐기하고, 본문이 실제로 참조한 인덱스 ∩ 입력 manifest만 붙인다(모델이 없는 이미지 번호를 만들어 붙이거나, 첨부만 되고 본문에 안 나오는 이미지가 섞이던 어긋남 차단).",
+   "desc_md": "텔레그램으로 들어온 리서치 메시지(텍스트+이미지)를 LLM으로 상세 요약해 노션에 퍼블리시하는 봇(`execution/research_bot/research_notes_bot.py`). 수집은 상시(이벤트 드리븐), 요약·게시는 매일 **23:00 KST** 잡(`/summary`로 수동 실행, `force`로 강제 재실행).\n\n- 요약 규칙: 토픽별 불릿 8~12개+, 이미 불릿이면 원문 유지, 모든 이미지 첨부, 엄중/중요 표시는 {RED} 태그→노션 빨간색.\n- 메시지·미디어는 로컬 SQLite(`research_notes.db`) + `media/`에 보관 후 노션 페이지로.\n- RA_Sisyphe_bot의 05:10 헤드라인이 이 봇이 쌓은 `research_headlines.json`을 읽어 아침 요약을 만든다.\n- ★**일일 요약 LLM 백엔드 체인 전환(2026-08-18)**: 유료 API 단일 경로가 크레딧 고갈로 요약을 통째로 날린 사고 2회(7/21·8/17) 뒤, **1차 headless Claude(구독) → 2차 codex exec(ChatGPT 구독) → 3차 유료 API** 체인으로 바꿨다([[infra-headless-llm]]). **3차는 기본 잠김**(`RESEARCH_ALLOW_PAID_FALLBACK=1`일 때만)이라 평시 크레딧 소비는 0이고, 롤백은 `RESEARCH_LLM=api`(+봇 재시작)로 v0 유료 경로 복원. 이미지가 섞인 요약은 headless `call_multimodal`(stream-json 이미지 블록)로 넘어간다.\n- **재실행 안전(같은 전환의 일부)**: 날짜별 single-flight + `media/summaries/<date>.state.json` **사이드카 상태**(generated→published→completed). 입력 해시가 같으면 LLM을 다시 부르지 않고 저장된 요약을 재사용하며, 게시 단계가 분리돼 **재시도가 노션 중복 페이지를 만들지 않는다**(체인이 25분 예산 안에서 여러 백엔드를 시도하는 구조라 중간 실패·재실행이 상시 가능하다는 전제). 블로킹 LLM·노션 호출은 `asyncio.to_thread`로 빼 봇 이벤트 루프를 막지 않는다. **이미지 업로드도 같은 멱등 원칙(2026-08-19)** — 재실행은 같은 GitHub 경로로 다시 PUT 해 422가 나므로, 그 경우 기존 파일을 GET 해 `download_url`을 재사용한다(GET 응답은 PUT과 달리 파일 객체가 최상위라 `['download_url']`로 읽는다). 실패해도 `None` 반환으로 그 이미지만 빠지고 게시 자체는 진행.\n- **요약 첨부 이미지 상한 40장** (`summarizer.MAX_IMAGES`, 2026-08-19 20→40 상향) — 바쁜 날 31장이 들어와 초과분이 **경고 없이 요약에서 누락**됐다. 개당 8MB·총량 32MB 가드는 그대로 유지되므로 상한은 장수 기준일 뿐이다.\n- **게시 이미지의 단일 출처는 본문 `[IMG:n]`** — 종전 메타 '이미지:' 라인은 폐기하고, 본문이 실제로 참조한 인덱스 ∩ 입력 manifest만 붙인다(모델이 없는 이미지 번호를 만들어 붙이거나, 첨부만 되고 본문에 안 나오는 이미지가 섞이던 어긋남 차단).",
    "code": [
     "execution/research_bot/research_notes_bot.py",
     "execution/research_bot/summarizer.py",
@@ -2959,6 +2959,35 @@
    ]
   },
   {
+   "id": "timer-earnings-night-llm",
+   "project": "antigravity",
+   "domain": "news-research",
+   "type": "timer",
+   "name": "실적봇 새벽 LLM 배치 타이머 (earnings-night-llm 02:30)",
+   "runs_on": "vm_macmini",
+   "schedule_kst": "02:30 매일",
+   "status": "active",
+   "desc_md": "2026-08-18 신설. [[src-earnings-pipeline]]의 무거운 LLM 작업(분석 시트·전문 번역)만 떼어 새벽에 돌리는 launchd 타이머(`com.antigravity.earnings-night-llm` → `run_timer_job.sh earnings-night-llm` → `python -m execution.earnings_bot.night_llm`).\n\n- **분리 이유**: 번역·분석이 [[infra-headless-llm]] 구독 쿼터를 쓰게 되면서, 08:00 러너와 같은 창에서 대량 배치를 돌리면 사용자 오전 사용분과 쿼터가 경합한다. 대량 소화는 새벽으로 밀고 08:00 러너는 소량 보충만 맡는 분업.\n- **순서가 곧 정책**: ① 분석 백로그 먼저 → ② 전문 번역(둘 다 `oldest_first` — 번역이 쿼터를 다 먹어 분석이 영구 후순위가 되는 역전, 그리고 오래된 항목의 기아를 동시에 차단). ③ 발행·md 저장은 `finally`에서 실행돼 중간 실패와 무관하게 남는다.\n- **정지 조건 3종**: 내부 데드라인 `NIGHT_LLM_DEADLINE`(기본 06:30 — 쿼터 창이 사용자 오전과 겹치는 꼬리를 자르고 08:00 러너와 간격 확보) · 상한 `NIGHT_LLM_MAX_ITEMS`(기본 60, 분석+번역 합산) · 쿼터 소진. **쿼터 소진은 정상 종료(exit 0, partial)** 로 잔여를 pending 그대로 다음 새벽에 이월하고, **인증 실패만 exit 1**로 래퍼 notify를 태운다.\n- 래퍼 워치독 `job_timeout_seconds`=**17700s(07:25 하드컷)** — 내부 데드라인(06:30)이 1차, 워치독이 2차 방어선. 잡 락·.env 로드·stamp·실패 알림은 `run_timer_job.sh`가 담당하고 배치는 exit 코드만 정직하게 돌려준다.\n- **캐치업 안전**: 02:30을 놓쳐 [[daemon-catchup]]이 낮에 재기동해도 데드라인 검사가 먼저 걸려 LLM 루프를 통째로 스킵한다 — 주간 쿼터 오발화 없음.\n- `schedule.tsv`에 1행 등재 → [[daemon-daily-selfcheck]] stamp 신선도 감시에 자동 편입.\n- 소화 결과는 다음 아침 다이제스트의 `🌙 번역 완료·전일` / `🌙 번역 백로그 N건` 섹션으로 드러난다(24h 창 밖에서 일어난 완료 전환이 유실되지 않도록 morning_digest에 추가된 섹션).",
+   "code": [
+    "launchd/timers/com.antigravity.earnings-night-llm.plist",
+    "launchd/timers/run_timer_job.sh",
+    "execution/earnings_bot/night_llm.py"
+   ],
+   "reads": [
+    "store-earnings-db"
+   ],
+   "writes": [
+    "store-earnings-db",
+    "store-transcripts-md",
+    "store-analyses-md"
+   ],
+   "depends_on": [
+    "src-earnings-pipeline",
+    "infra-headless-llm"
+   ],
+   "alerts": "run_timer_job stamp + OnFailure → notify_sisyphe_failure.sh earnings-night-llm → 텔레그램"
+  },
+  {
    "id": "daemon-catchup",
    "project": "antigravity",
    "domain": "ops-infra",
@@ -3018,7 +3047,7 @@
    "name": "Notion (실적·리서치 퍼블리시 대상)",
    "runs_on": "external",
    "status": "active",
-   "desc_md": "리서치노트봇이 요약 결과를 퍼블리시하는 노션 워크스페이스(NOTION_API_KEY / NOTION_EARNINGS_DATABASE_ID 등). 실적봇에겐 **동결 아카이브**다.\n\n- 실적봇: ~~번역·요약된 미국 실적/IR Day 노트를 실적 DB에 페이지로 생성~~ → **2026-07-22 datalake md 발행으로 대체**됐다. 분석 1-page는 [[store-analyses-md]](`~/datalake/analyses/`), 어닝콜 전문은 [[store-transcripts-md]](2026-07-21)가 정본이며, 기존 Notion 분석 페이지는 `backfill_analyses_md.py`로 md 백필 후 Notion은 동결 아카이브로 남는다(구 `notion_publisher.py`는 롤백용 잔존). [[src-earnings-pipeline]] 참조.\n- 리서치노트봇: 텔레그램 리서치 메시지를 요약→노션 페이지(엄중/중요 표시는 빨간색 텍스트) — 계속 활성.\n- 이미지는 GitHub에 올린 뒤 URL로 삽입.",
+   "desc_md": "리서치노트봇이 요약 결과를 퍼블리시하는 노션 워크스페이스(NOTION_API_KEY / NOTION_EARNINGS_DATABASE_ID 등). 실적봇에겐 **동결 아카이브**다.\n\n- 실적봇: ~~번역·요약된 미국 실적/IR Day 노트를 실적 DB에 페이지로 생성~~ → **2026-07-22 datalake md 발행으로 대체**됐다. 분석 1-page는 [[store-analyses-md]](`~/datalake/analyses/`), 어닝콜 전문은 [[store-transcripts-md]](2026-07-21)가 정본이며, 기존 Notion 분석 페이지는 `backfill_analyses_md.py`로 md 백필 후 Notion은 동결 아카이브로 남는다(구 `notion_publisher.py`는 롤백용 잔존). [[src-earnings-pipeline]] 참조.\n- 리서치노트봇: 텔레그램 리서치 메시지를 요약→노션 페이지(엄중/중요 표시는 빨간색 텍스트) — 계속 활성.\n- 이미지는 GitHub에 올린 뒤 URL로 삽입 — 경로가 날짜·인덱스로 결정되므로 **요약 재실행 시 같은 경로 재업로드가 422**가 된다. 이 경우 기존 파일을 GET 해 `download_url`을 재사용한다(2026-08-19, 재실행 멱등). [[bot-research-notes]] 참조.",
    "code": [
     "execution/earnings_bot/notion_publisher.py",
     "execution/research_bot/notion_publisher.py"
@@ -3585,35 +3614,6 @@
    "schedule_kst": "사용자 편집 + finalize",
    "status": "active",
    "desc_md": "랩 상품 운용의 원장 엑셀. NEW(종목·비중)/AUM/기준가/수익률 시트로 구성. 사용자가 직접 편집하는 유일한 바이너리 데이터.\n\n- NEW/AUM은 사람(또는 finalize 잡)이 채우고, 기준가/수익률은 calculate_wrap_nav/returns가 자동 생성.\n- 워처가 저장을 감지→3-way merge→push, recalc_wrap_nav 워크플로가 라이브 반영.\n- 바이너리라 push 충돌 위험 → safe_commit_push xlsx 가드 + merge_wrap_nav 3-way 병합.\n- Excel에서 열려있으면 쓰기 PermissionError."
-  },
-  {
-   "id": "timer-earnings-night-llm",
-   "project": "antigravity",
-   "domain": "news-research",
-   "type": "timer",
-   "name": "실적봇 새벽 LLM 배치 타이머 (earnings-night-llm 02:30)",
-   "runs_on": "vm_macmini",
-   "schedule_kst": "02:30 매일",
-   "status": "active",
-   "desc_md": "2026-08-18 신설. [[src-earnings-pipeline]]의 무거운 LLM 작업(분석 시트·전문 번역)만 떼어 새벽에 돌리는 launchd 타이머(`com.antigravity.earnings-night-llm` → `run_timer_job.sh earnings-night-llm` → `python -m execution.earnings_bot.night_llm`).\n\n- **분리 이유**: 번역·분석이 [[infra-headless-llm]] 구독 쿼터를 쓰게 되면서, 08:00 러너와 같은 창에서 대량 배치를 돌리면 사용자 오전 사용분과 쿼터가 경합한다. 대량 소화는 새벽으로 밀고 08:00 러너는 소량 보충만 맡는 분업.\n- **순서가 곧 정책**: ① 분석 백로그 먼저 → ② 전문 번역(둘 다 `oldest_first` — 번역이 쿼터를 다 먹어 분석이 영구 후순위가 되는 역전, 그리고 오래된 항목의 기아를 동시에 차단). ③ 발행·md 저장은 `finally`에서 실행돼 중간 실패와 무관하게 남는다.\n- **정지 조건 3종**: 내부 데드라인 `NIGHT_LLM_DEADLINE`(기본 06:30 — 쿼터 창이 사용자 오전과 겹치는 꼬리를 자르고 08:00 러너와 간격 확보) · 상한 `NIGHT_LLM_MAX_ITEMS`(기본 60, 분석+번역 합산) · 쿼터 소진. **쿼터 소진은 정상 종료(exit 0, partial)** 로 잔여를 pending 그대로 다음 새벽에 이월하고, **인증 실패만 exit 1**로 래퍼 notify를 태운다.\n- 래퍼 워치독 `job_timeout_seconds`=**17700s(07:25 하드컷)** — 내부 데드라인(06:30)이 1차, 워치독이 2차 방어선. 잡 락·.env 로드·stamp·실패 알림은 `run_timer_job.sh`가 담당하고 배치는 exit 코드만 정직하게 돌려준다.\n- **캐치업 안전**: 02:30을 놓쳐 [[daemon-catchup]]이 낮에 재기동해도 데드라인 검사가 먼저 걸려 LLM 루프를 통째로 스킵한다 — 주간 쿼터 오발화 없음.\n- `schedule.tsv`에 1행 등재 → [[daemon-daily-selfcheck]] stamp 신선도 감시에 자동 편입.\n- 소화 결과는 다음 아침 다이제스트의 `🌙 번역 완료·전일` / `🌙 번역 백로그 N건` 섹션으로 드러난다(24h 창 밖에서 일어난 완료 전환이 유실되지 않도록 morning_digest에 추가된 섹션).",
-   "code": [
-    "launchd/timers/com.antigravity.earnings-night-llm.plist",
-    "launchd/timers/run_timer_job.sh",
-    "execution/earnings_bot/night_llm.py"
-   ],
-   "reads": [
-    "store-earnings-db"
-   ],
-   "writes": [
-    "store-earnings-db",
-    "store-transcripts-md",
-    "store-analyses-md"
-   ],
-   "depends_on": [
-    "src-earnings-pipeline",
-    "infra-headless-llm"
-   ],
-   "alerts": "run_timer_job stamp + OnFailure → notify_sisyphe_failure.sh earnings-night-llm → 텔레그램"
   },
   {
    "id": "timer-hotel-adr",
