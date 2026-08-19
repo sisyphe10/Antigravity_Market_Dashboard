@@ -167,7 +167,7 @@ def upload_image_to_github(file_path, date_str, img_idx):
                     headers={'Authorization': f'token {pat}',
                              'Accept': 'application/vnd.github.v3+json'})
                 with urllib.request.urlopen(get_req, timeout=30) as resp:
-                    return json.loads(resp.read().decode())['content']['download_url']
+                    return json.loads(resp.read().decode())['download_url']   # GET은 파일 객체가 최상위(PUT 응답과 다름)
             except Exception as e2:
                 import logging
                 logging.error(f"Image reuse fetch failed: {e2}")
