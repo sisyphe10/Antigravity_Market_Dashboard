@@ -127,6 +127,7 @@ def upload_image_to_github(file_path, date_str, img_idx):
     import base64
     import json
     import urllib.request
+    import urllib.error
 
     try:
         pat = os.getenv('GH_PAT')
@@ -157,6 +158,23 @@ def upload_image_to_github(file_path, date_str, img_idx):
         with urllib.request.urlopen(req, timeout=30) as resp:
             result = json.loads(resp.read().decode())
             return result['content']['download_url']
+    except urllib.error.HTTPError as e:
+        if e.code == 422:
+            # 동일 경로 파일이 이미 있음(요약 재실행) — 기존 업로드본 URL 재사용
+            try:
+                get_req = urllib.request.Request(
+                    f"https://api.github.com/repos/sisyphe10/Antigravity_Market_Dashboard/contents/{gh_path}",
+                    headers={'Authorization': f'token {pat}',
+                             'Accept': 'application/vnd.github.v3+json'})
+                with urllib.request.urlopen(get_req, timeout=30) as resp:
+                    return json.loads(resp.read().decode())['content']['download_url']
+            except Exception as e2:
+                import logging
+                logging.error(f"Image reuse fetch failed: {e2}")
+                return None
+        import logging
+        logging.error(f"Image upload to GitHub failed: {e}")
+        return None
     except Exception as e:
         import logging
         logging.error(f"Image upload to GitHub failed: {e}")
