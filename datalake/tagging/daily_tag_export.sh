@@ -57,7 +57,12 @@ if [ "$doc_rc" -eq 1 ]; then
 elif [ "$doc_rc" -eq 75 ]; then
   echo "[warn] 문서 태깅 엔진 장애(쿼터/인증/CLI) — 재시도 없이 계속, 내일 자연 회수"; rc=1
 elif [ "$doc_rc" -eq 78 ]; then
-  echo "[warn] 문서 태깅 정책 차단(캐시 드리프트/상한) — 수동 확인 필요"; rc=1
+  if crontab -l 2>/dev/null | grep -q "tagdocs-backlog-260820"; then
+    # 백로그 야간 회수 진행 중 = 의도된 차단 — cron 이 자가 제거되면 자동으로 경보 복귀
+    echo "[info] 문서 태깅 정책 차단(78) — 백로그 회수 진행 중(정상), 알림 억제"
+  else
+    echo "[warn] 문서 태깅 정책 차단(캐시 드리프트/상한) — 수동 확인 필요"; rc=1
+  fi
 elif [ "$doc_rc" -ne 0 ]; then
   echo "[warn] 문서 태깅 실패 rc=$doc_rc"; rc=1
 fi
