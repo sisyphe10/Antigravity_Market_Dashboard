@@ -38,6 +38,9 @@ DOC_TAGGER_VERSION = "1.0.0"
 STATE_DB = os.path.join(DATALAKE_ROOT, "doc_tag_state.sqlite")
 LOCK_PATH = os.path.join(DATALAKE_ROOT, "doc_tag_state.lock")
 BATCH = int(os.getenv("DOC_TAG_BATCH", "8"))
+# 문서 전용 headless 폭주 가드 — 노트 태거(TAG_HEADLESS_*)와 분리 (2026-08-20 설계 v2)
+HL_MAX_TODO = int(os.getenv("DOC_TAG_HEADLESS_MAX_TODO", "120"))
+HL_MAX_CALLS = int(os.getenv("DOC_TAG_HEADLESS_MAX_CALLS", "15"))
 CHUNK_CHARS = int(os.getenv("DOC_TAG_CHUNK", "4000"))
 MIN_CHUNK = 120
 
@@ -330,6 +333,23 @@ def sync_frontmatter_entities(st, fm, chunk0_id, extra):
     return True
 
 
+def _auth_preflight():
+    """claude auth status 로 구독 인증 선확인 — H7 OAuth 만료를 배치 호출 전에 감지
+    (어닝봇 headless_llm.preflight 패턴, 2026-08-18)."""
+    import subprocess
+    try:
+        p = subprocess.run([tw.CLAUDE_BIN, "auth", "status"], capture_output=True,
+                           text=True, timeout=60, env=tw._headless_env())
+        j = json.loads(p.stdout)
+    except Exception as e:  # noqa: BLE001
+        print("[warn] auth status 확인 실패: %s" % str(e)[:120])
+        return False
+    if not (j.get("loggedIn") and j.get("authMethod") == "claude.ai"):
+        print("[warn] 구독 인증 아님: %s" % json.dumps(j, ensure_ascii=False)[:200])
+        return False
+    return True
+
+
 # --------------------------------------------------------------------------- #
 # main
 # --------------------------------------------------------------------------- #
@@ -348,7 +368,15 @@ def main():
     ap.add_argument("--retry-failed", action="store_true")
     args = ap.parse_args()
 
-    kinds = args.kind or sorted(SOURCES)
+    engine = tw.TAG_ENGINE
+    if engine not in ("headless", "api"):
+        raise SystemExit("TAG_ENGINE=%s 지원 안 함 (headless|api)" % engine)
+    if engine == "headless" and not args.dry_run and (args.force or args.migrate_cache_key):
+        # 대량 재태깅·키 이관은 API 엔진 전용 — 구독 쿼터 보호 (tag_worker 와 동일)
+        print("[차단] --force/--migrate-cache-key 는 TAG_ENGINE=api 전용")
+        return tw.EXIT_POLICY
+
+    kinds = list(dict.fromkeys(args.kind or sorted(SOURCES)))
     onto = tc.load_ontology()
     uni = tc.load_universe()
     extra = tc.load_entities_extra()
@@ -386,7 +414,7 @@ def main():
         print("별칭 신규 %d건 — 해당 문자열이 등장하는 청크만 재태깅: %s"
               % (len(added_aliases), ", ".join(added_aliases[:5])))
 
-    todo, cached, touched, migrated = [], 0, [], 0
+    todo, cached, touched, migrated, key_drift = [], 0, [], 0, 0
     fm_changed = []                       # fm_meta 가 바뀐 문서 — 캐시 적중이어도 재투영
     for kind, path, rel in docs:
         with open(path, encoding="utf-8") as f:
@@ -415,6 +443,10 @@ def main():
                 st.execute("UPDATE items SET cache_key=? WHERE message_id=?", (ck, cid))
                 migrated += 1
                 hit = True
+            if (not hit and cur and cur["status"] == "succeeded"
+                    and cur["content_hash"] == ch and not args.force):
+                # 본문 그대로인데 키만 불일치 = 캐시 공식 드리프트 (tag_worker 와 동일 검출)
+                key_drift += 1
             if hit and tc.mentions_any(added_aliases, text):
                 hit = False
             if hit:
@@ -442,8 +474,11 @@ def main():
     if migrated and not args.dry_run:
         st.commit()   # --dry-run 이면 커밋하지 않아 이관도 롤백된다(견적만)
         print("캐시 키 이관(v1→v2): %d건 — 재태깅 없음" % migrated)
-    print("문서 %d건 / 청크 대상 %d개 (캐시 재사용 %d) / 배치 %d / 추정 입력 토큰 ~%s"
-          % (len(docs), len(todo), cached, BATCH, format(est_in, ",")))
+    print("문서 %d건 / 청크 대상 %d개 (캐시 재사용 %d) / 배치 %d / 엔진 %s / 추정 입력 토큰 ~%s"
+          % (len(docs), len(todo), cached, BATCH, engine, format(est_in, ",")))
+    if key_drift:
+        print("[주의] 캐시 키 드리프트 %d건 — 본문 동일·키 불일치"
+              " (프롬프트/온톨로지/epoch 변경 신호)" % key_drift)
     if args.dry_run:
         return 0
     if not todo:
@@ -453,19 +488,53 @@ def main():
         print("신규 없음 — frontmatter %d건 갱신" % n)
         return 0
 
-    import anthropic
-    client = anthropic.Anthropic(api_key=tw.load_env_key())
+    if engine == "headless":
+        # ★폭주 가드 — 통과 못 하면 LLM 호출 0회로 종료 (tag_worker 와 동일 정책)
+        calls = (len(todo) + BATCH - 1) // BATCH
+        guard = None
+        if key_drift:
+            guard = ("캐시 드리프트 %d건 — 전량 재태깅 위험. 원인 확인 후 필요하면"
+                     " TAG_ENGINE=api 로" % key_drift)
+        elif len(todo) > HL_MAX_TODO:
+            guard = "대상 %d건 > 상한 %d — 대량 무효화 의심" % (len(todo), HL_MAX_TODO)
+        elif calls > HL_MAX_CALLS:
+            guard = "호출 %d회 > 상한 %d" % (calls, HL_MAX_CALLS)
+        if guard:
+            print("[차단] %s" % guard)
+            return tw.EXIT_POLICY
+        try:
+            model = tw.resolve_tag_model()
+            system_rt = tw.runtime_system(system, engine)
+        except SystemExit as e:
+            print("[차단] %s" % e)
+            return tw.EXIT_POLICY
+        if not _auth_preflight():
+            print("[중단] headless 인증 preflight 실패 — H7: ssh -t macmini claude /login")
+            return tw.EXIT_TRANSIENT
+        client = None
+        anchor_text, anchor_hash = tw.build_anchor(st)
+        run_meta = {"engine": engine, "model": model, "cli_version": tw._cli_version(),
+                    "anchor_hash": anchor_hash, "batch_size": BATCH}
+    else:
+        import anthropic
+        client = anthropic.Anthropic(api_key=tw.load_env_key())
+        model, system_rt, anchor_text = tw.MODEL, system, ""
+        run_meta = {"engine": engine, "model": model, "batch_size": BATCH}
+
     cur = st.execute(
         "INSERT INTO tag_runs (started_at,model,tagger_version,prompt_hash,ontology_version,"
-        "ontology_hash,universe_hash,alias_hash,items_total) VALUES (?,?,?,?,?,?,?,?,?)",
-        (tw.now(), tw.MODEL, "%s+doc%s" % (tw.TAGGER_VERSION, DOC_TAGGER_VERSION),
-         prompt_hash, onto["version"], onto["hash"], uni["hash"], idx["hash"], len(todo)))
+        "ontology_hash,universe_hash,alias_hash,items_total,run_meta_json)"
+        " VALUES (?,?,?,?,?,?,?,?,?,?)",
+        (tw.now(), model, "%s+doc%s" % (tw.TAGGER_VERSION, DOC_TAGGER_VERSION),
+         prompt_hash, onto["version"], onto["hash"], uni["hash"], idx["hash"], len(todo),
+         json.dumps(run_meta, ensure_ascii=False)))
     run_id = cur.lastrowid
     st.commit()
 
     ok = fail = tin = tout = tcache = 0
-    exc_streak = 0       # 연속 배치 예외 — 3회면 계정·인증·망 장애로 보고 조기 중단
+    exc_streak = 0       # 연속 배치 예외 조기 중단 — API 경로 한정 (headless 는 EngineError)
     aborted = False
+    engine_down = None
     for i in range(0, len(todo), BATCH):
         batch = todo[i:i + BATCH]
         prepared = []
@@ -478,11 +547,18 @@ def main():
             prepared.append((m, strong, weak))
         blocks = [tw.render_message_block(m, weak, uni, extra) for m, _, weak in prepared]
         try:
-            out, usage = tw.call_llm(client, system, blocks)
+            if engine == "headless":
+                out, usage_d, _hmeta = tw.call_llm_headless(
+                    system_rt, blocks, [m["id"] for m in batch], onto, model, anchor_text)
+                tin += usage_d["input_tokens"]
+                tout += usage_d["output_tokens"]
+                tcache += usage_d["cache_read_tokens"]
+            else:
+                out, usage = tw.call_llm(client, system, blocks)
+                tin += getattr(usage, "input_tokens", 0) or 0
+                tout += getattr(usage, "output_tokens", 0) or 0
+                tcache += getattr(usage, "cache_read_input_tokens", 0) or 0
             exc_streak = 0
-            tin += getattr(usage, "input_tokens", 0) or 0
-            tout += getattr(usage, "output_tokens", 0) or 0
-            tcache += getattr(usage, "cache_read_input_tokens", 0) or 0
             by_mid = {}
             for r in (out or {}).get("results", []):
                 try:
@@ -501,6 +577,11 @@ def main():
                                m["_content_hash"], run_id, strong, weak, res)
                 ok += 1
             st.commit()
+        except tw.EngineError as e:
+            # 쿼터·인증·CLI 장애 — 항목 실패로 기록하지 않고 즉시 중단 (내일 자연 회수)
+            engine_down = str(e)
+            print("  [중단] 엔진 장애: %s" % engine_down[:200])
+            break
         except Exception as e:  # noqa: BLE001
             for m, _, _ in prepared:
                 tw.mark_failed(st, m, m["timestamp"][:10], m["_cache_key"],
@@ -508,33 +589,39 @@ def main():
             fail += len(prepared)
             st.commit()
             print("  배치 실패 (%d건): %s" % (len(prepared), str(e)[:160]))
-            exc_streak += 1
-            if exc_streak >= 3:
-                aborted = True
-                print("  배치 예외 %d연속 — 엔진 장애(크레딧·인증·망)로 판단, 조기 중단"
-                      " (남은 %d건은 다음 실행에서 자연 회수)"
-                      % (exc_streak, len(todo) - i - len(batch)))
-                break
+            if engine == "api":
+                exc_streak += 1
+                if exc_streak >= 3:
+                    aborted = True
+                    print("  배치 예외 %d연속 — 엔진 장애(크레딧·인증·망)로 판단, 조기 중단"
+                          " (남은 %d건은 다음 실행에서 자연 회수)"
+                          % (exc_streak, len(todo) - i - len(batch)))
+                    break
         print("  %d/%d  ok=%d fail=%d  in=%s out=%s cache=%s"
               % (min(i + BATCH, len(todo)), len(todo), ok, fail,
                  format(tin, ","), format(tout, ","), format(tcache, ",")), flush=True)
 
     st.execute("UPDATE tag_runs SET finished_at=?, items_ok=?, items_failed=?, input_tokens=?,"
-               " output_tokens=?, cache_read_tokens=? WHERE run_id=?",
-               (tw.now(), ok, fail, tin, tout, tcache, run_id))
+               " output_tokens=?, cache_read_tokens=?, note=? WHERE run_id=?",
+               (tw.now(), ok, fail, tin, tout, tcache,
+                ("engine_down: " + engine_down[:300]) if engine_down else None, run_id))
     st.commit()
 
     projected = sum(1 for rel in sorted({m["_rel"] for m in todo} | set(fm_changed))
                     if project_doc(st, rel, uni, extra, onto))
-    if full_pass and not aborted:
+    if full_pass and not aborted and not engine_down:
         # 잘린 실행이 별칭 서명을 확정하면 새 별칭 대상 문서가 영구 캐시 적중이 된다
         # (tag_worker engine_down 처리와 동일 정책)
         tc.commit_alias_state(st, idx, epoch)
     print("완료: ok=%d fail=%d / 입력 %s · 출력 %s · 캐시읽기 %s 토큰 / frontmatter %d건 갱신%s"
           % (ok, fail, format(tin, ","), format(tout, ","), format(tcache, ","), projected,
              "" if full_pass else " (부분 실행 — 별칭 서명 미확정)"))
+    if engine_down:
+        print("엔진 장애 종료: ok=%d / 미처리 %d건은 다음 실행에서 자연 회수"
+              % (ok, len(todo) - ok - fail))
+        return tw.EXIT_TRANSIENT
     if aborted:
-        return 75    # 엔진 장애 — daily_tag_export 는 warn-continue, 미처리분은 익일 회수
+        return tw.EXIT_TRANSIENT   # API 연속 예외 조기 중단 — 익일 자연 회수
     return 0 if fail == 0 else 1
 
 

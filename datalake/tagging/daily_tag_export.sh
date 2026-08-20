@@ -42,7 +42,19 @@ fi
 echo "── 1b/5 문서 태깅 (전문·분석, 미처리분)"
 "$PY" "$REPO/datalake/notion_study_sync.py" || { echo "[warn] Notion Study 동기화 실패 — 계속"; rc=1; }
 
-"$PY" "$REPO/datalake/tagging/tag_docs.py" || { echo "[warn] 문서 태깅 실패 — 계속"; rc=1; }
+"$PY" "$REPO/datalake/tagging/tag_docs.py"
+doc_rc=$?
+if [ "$doc_rc" -eq 1 ]; then
+  echo "[warn] 문서 태깅 실패 — 배치 축소 재시도"
+  DOC_TAG_BATCH=4 "$PY" "$REPO/datalake/tagging/tag_docs.py" --retry-failed \
+    || { echo "[warn] 문서 재시도도 실패 — 계속"; rc=1; }
+elif [ "$doc_rc" -eq 75 ]; then
+  echo "[warn] 문서 태깅 엔진 장애(쿼터/인증/CLI) — 재시도 없이 계속, 내일 자연 회수"; rc=1
+elif [ "$doc_rc" -eq 78 ]; then
+  echo "[warn] 문서 태깅 정책 차단(캐시 드리프트/상한) — 수동 확인 필요"; rc=1
+elif [ "$doc_rc" -ne 0 ]; then
+  echo "[warn] 문서 태깅 실패 rc=$doc_rc"; rc=1
+fi
 
 echo "── 2/5 md 아카이브 (어제+오늘)"
 "$PY" "$REPO/datalake/export_research_notes.py" || { echo "[error] 아카이브 생성 실패"; exit 1; }
