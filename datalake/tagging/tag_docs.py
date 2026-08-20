@@ -526,7 +526,9 @@ def main():
 
     projected = sum(1 for rel in sorted({m["_rel"] for m in todo} | set(fm_changed))
                     if project_doc(st, rel, uni, extra, onto))
-    if full_pass:
+    if full_pass and not aborted:
+        # 잘린 실행이 별칭 서명을 확정하면 새 별칭 대상 문서가 영구 캐시 적중이 된다
+        # (tag_worker engine_down 처리와 동일 정책)
         tc.commit_alias_state(st, idx, epoch)
     print("완료: ok=%d fail=%d / 입력 %s · 출력 %s · 캐시읽기 %s 토큰 / frontmatter %d건 갱신%s"
           % (ok, fail, format(tin, ","), format(tout, ","), format(tcache, ","), projected,
