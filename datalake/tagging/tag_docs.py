@@ -464,6 +464,8 @@ def main():
     st.commit()
 
     ok = fail = tin = tout = tcache = 0
+    exc_streak = 0       # 연속 배치 예외 — 3회면 계정·인증·망 장애로 보고 조기 중단
+    aborted = False
     for i in range(0, len(todo), BATCH):
         batch = todo[i:i + BATCH]
         prepared = []
@@ -477,6 +479,7 @@ def main():
         blocks = [tw.render_message_block(m, weak, uni, extra) for m, _, weak in prepared]
         try:
             out, usage = tw.call_llm(client, system, blocks)
+            exc_streak = 0
             tin += getattr(usage, "input_tokens", 0) or 0
             tout += getattr(usage, "output_tokens", 0) or 0
             tcache += getattr(usage, "cache_read_input_tokens", 0) or 0
@@ -505,6 +508,13 @@ def main():
             fail += len(prepared)
             st.commit()
             print("  배치 실패 (%d건): %s" % (len(prepared), str(e)[:160]))
+            exc_streak += 1
+            if exc_streak >= 3:
+                aborted = True
+                print("  배치 예외 %d연속 — 엔진 장애(크레딧·인증·망)로 판단, 조기 중단"
+                      " (남은 %d건은 다음 실행에서 자연 회수)"
+                      % (exc_streak, len(todo) - i - len(batch)))
+                break
         print("  %d/%d  ok=%d fail=%d  in=%s out=%s cache=%s"
               % (min(i + BATCH, len(todo)), len(todo), ok, fail,
                  format(tin, ","), format(tout, ","), format(tcache, ",")), flush=True)
@@ -521,6 +531,8 @@ def main():
     print("완료: ok=%d fail=%d / 입력 %s · 출력 %s · 캐시읽기 %s 토큰 / frontmatter %d건 갱신%s"
           % (ok, fail, format(tin, ","), format(tout, ","), format(tcache, ","), projected,
              "" if full_pass else " (부분 실행 — 별칭 서명 미확정)"))
+    if aborted:
+        return 75    # 엔진 장애 — daily_tag_export 는 warn-continue, 미처리분은 익일 회수
     return 0 if fail == 0 else 1
 
 
