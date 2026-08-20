@@ -366,6 +366,9 @@ def main():
                     help="v1(universe/alias 해시 포함) 키로 저장된 기존 행의 캐시 키를 "
                          "재태깅 없이 v2 로 제자리 이관. 1회만 쓴다.")
     ap.add_argument("--retry-failed", action="store_true")
+    ap.add_argument("--migrate-only", action="store_true",
+                    help="드리프트(본문 동일·succeeded) 행 키 이관만(무LLM) 하고 종료 — "
+                         "별칭 서명 미확정. headless 에서도 허용(호출 0회)")
     args = ap.parse_args()
 
     engine = tw.TAG_ENGINE
@@ -409,7 +412,7 @@ def main():
 
     epoch, added_aliases = tc.read_alias_state(st, idx)
     full_pass = not (args.dry_run or args.retry_failed or args.max_items
-                     or args.max_docs or args.project)
+                     or args.max_docs or args.project or args.migrate_only)
     if added_aliases:
         print("별칭 신규 %d건 — 해당 문자열이 등장하는 청크만 재태깅: %s"
               % (len(added_aliases), ", ".join(added_aliases[:5])))
@@ -438,7 +441,8 @@ def main():
                 if cid is not None else None
             hit = bool(not args.force and cur and cur["cache_key"] == ck
                        and cur["status"] == "succeeded")
-            if (not hit and args.migrate_cache_key and not args.force and cur
+            if (not hit and (args.migrate_cache_key or args.migrate_only)
+                    and not args.force and cur
                     and cur["status"] == "succeeded" and cur["content_hash"] == ch):
                 st.execute("UPDATE items SET cache_key=? WHERE message_id=?", (ck, cid))
                 migrated += 1
@@ -479,6 +483,9 @@ def main():
     if key_drift:
         print("[주의] 캐시 키 드리프트 %d건 — 본문 동일·키 불일치"
               " (프롬프트/온톨로지/epoch 변경 신호)" % key_drift)
+    if args.migrate_only:
+        print("이관 전용 종료 — LLM 호출 0회·별칭 서명 미확정 (이관 %d건)" % migrated)
+        return 0
     if args.dry_run:
         return 0
     if not todo:
