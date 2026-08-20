@@ -14,6 +14,7 @@ code:
   - "execution/earnings_bot/morning_digest.py"
   - "execution/earnings_bot/edgar_monitor.py"
   - "execution/earnings_bot/transcript_watch.py"
+  - "execution/earnings_bot/transcript_sources/search_provider.py"
   - "execution/earnings_bot/transcript_gate.py"
   - "execution/earnings_bot/prompt_builder.py"
   - "execution/earnings_bot/translator.py"
@@ -58,6 +59,9 @@ alerts: "타이머 OnFailure → 텔레그램"
   - 대량 소화는 08:00 러너에서 떼어내 **새벽 02:30 배치**([[timer-earnings-night-llm]], `night_llm.py`)로 옮겼다 — 구독 쿼터가 사용자 오전 사용분과 경합하는 것을 피하는 분업. 08:00 러너는 `EARNINGS_MORNING_TRANSLATE_LIMIT`(기본 3)만큼만 **보충 번역**한다.
   - 동반 견고화: `db.py`에 busy_timeout + **oldest-first 무기아 pending 쿼리**(새벽 배치가 최신 것만 집어 오래된 항목이 영구 후순위가 되는 것 차단), 재번역 시 기존 md 무효화, `transcript_store` **원자적 md 쓰기**(배치 중 강제종료로 반쯤 쓰인 md가 남지 않도록).
   - 다이제스트에 `🌙 번역 완료·전일` / `🌙 번역 백로그 N건` 섹션 추가 — 완료 전환이 24h 창 밖(새벽)에서 일어나면서 기존 창 기준 섹션에서 통째로 빠지던 유실을 메운다.
+- ★**전문 탐색 web_search도 구독 이관(2026-08-20, `transcript_sources/search_provider.py`)**: 8/18에 번역·분석은 구독으로 옮겼지만 **전문 URL을 찾는 web_search만 종량 API에 남아** 있었다 — 크레딧이 마르면 번역할 전문 자체가 안 들어오므로 여기가 마지막 종량 의존점이었다. 이제 `claude -p`에 **WebSearch 도구만 허용**하고 `--json-schema`로 `{results:[{url,title}]}`를 강제해 받는다(`EARNINGS_SEARCH_BACKEND`, 기본 `headless`·롤백 `api`). 도구를 여는 만큼 [[infra-headless-llm]] 봉인 코어를 쓰지 않고 이 모듈이 CLI를 직접 띄우되, **환경 격리·전용 홈·프로세스그룹 종료는 코어 헬퍼를 재사용**한다.
+  - API의 `allowed_domains`에 대응하는 **도메인 경계 사후 필터**(`host == site` 또는 `.site`로 끝날 때만 채택) + 중복 제거를 파이썬 쪽에 둔다 — CLI에는 도메인 제한 인자가 없어 모델의 자율 검색 결과를 그대로 믿으면 site 한정이 사실상 풀린다. 프롬프트도 "실제로 찾은 URL만, 없으면 빈 목록"으로 날조를 막는다.
+  - **인증 실패는 raise, 그 외 실패·0건은 빈 리스트**: 조용한 영구 0건(무경보로 전문 수집이 말라붙는 실패 모드)을 막으려는 구분이고, 기존 API 경로의 `AuthenticationError` re-raise 정책을 그대로 승계했다. ★**유료 API 자동 폴백은 두지 않는다**(2026-08-20 사용자 규칙 — 유료 전환은 사전 승인 사항). `--max-turns`는 비용 상한이 아니라 폭주 방지용일 뿐, API의 `max_uses=1`과 동등하지 않다.
 - 상태 DB=`earnings.db`. 예정 포맷=`티커/발표일자`(기업명 없음 확정). `--dismiss` CLI.
 - 캘린더는 `gha-earnings-calendar-sync`가 채우고 이 파이프라인이 소비.
 
@@ -83,6 +87,7 @@ alerts: "타이머 OnFailure → 텔레그램"
 - `execution/earnings_bot/morning_digest.py`
 - `execution/earnings_bot/edgar_monitor.py`
 - `execution/earnings_bot/transcript_watch.py`
+- `execution/earnings_bot/transcript_sources/search_provider.py`
 - `execution/earnings_bot/transcript_gate.py`
 - `execution/earnings_bot/prompt_builder.py`
 - `execution/earnings_bot/translator.py`

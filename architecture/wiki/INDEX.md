@@ -2,7 +2,7 @@
 
 _Generated from `architecture/registry.json` · projects: antigravity · v1 — 166 components._
 
-Updated: 2026-08-19
+Updated: 2026-08-20
 
 ## By domain
 
