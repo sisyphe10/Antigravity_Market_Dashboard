@@ -30,6 +30,27 @@ load_dotenv()
 NAVER_CLIENT_ID = os.environ.get('NAVER_CLIENT_ID', '')
 NAVER_CLIENT_SECRET = os.environ.get('NAVER_CLIENT_SECRET', '')
 ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
+# headless(구독)가 기본 — API 는 백업(FEATURED_NEWS_LLM=api, 유료 = 사전 승인 필수, 8/20)
+FEATURED_NEWS_LLM = os.environ.get('FEATURED_NEWS_LLM', 'headless')
+FEATURED_NEWS_HEADLESS_MODEL = os.environ.get('FEATURED_NEWS_HEADLESS_MODEL', 'claude-haiku-4-5')
+FN_LLM_SYSTEM = '너는 한국 주식 섹터 뉴스를 지시된 형식 그대로 요약하는 도우미다.'
+
+
+def _llm_text(prompt, max_tokens):
+    """백엔드 디스패치 — headless 는 max_tokens 계약 없음(출력 통제=프롬프트, 20K자 슬라이스)."""
+    if FEATURED_NEWS_LLM == 'headless':
+        hd = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'earnings_bot')
+        if hd not in sys.path:
+            sys.path.insert(0, hd)
+        import headless_llm as hl
+        res = hl.call_with_retry(FN_LLM_SYSTEM, [{'role': 'user', 'content': prompt}],
+                                 model=FEATURED_NEWS_HEADLESS_MODEL, timeout_sec=120)
+        return res['text'][:20000]
+    import anthropic
+    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+    resp = client.messages.create(model='claude-haiku-4-5-20251001', max_tokens=max_tokens,
+                                  messages=[{'role': 'user', 'content': prompt}])
+    return resp.content[0].text
 
 
 def load_newhigh_stocks(target_date):
@@ -174,11 +195,9 @@ def fix_stock_names(text, correct_names):
 
 def summarize_sector_news(sector, stocks_with_news):
     """Claude API로 섹터별 뉴스 종합 요약"""
-    if not ANTHROPIC_API_KEY:
+    if FEATURED_NEWS_LLM != 'headless' and not ANTHROPIC_API_KEY:
         logging.warning('ANTHROPIC_API_KEY 미설정, 요약 건너뜀')
         return ''
-
-    import anthropic
 
     correct_names = [name for name, _, _ in stocks_with_news]
 
@@ -210,16 +229,9 @@ def summarize_sector_news(sector, stocks_with_news):
 - 강조할 종목명은 <b>태그</b>로 감싸기
 - 제목/헤더 넣지 말 것, 바로 본문부터 시작"""
 
-    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-
     for attempt in range(2):
         try:
-            response = client.messages.create(
-                model="claude-haiku-4-5-20251001",
-                max_tokens=512,
-                messages=[{"role": "user", "content": prompt}]
-            )
-            text = response.content[0].text.strip()
+            text = _llm_text(prompt, 512).strip()
             # 깨진 유니코드 문자 제거
             text = text.encode('utf-8', errors='ignore').decode('utf-8')
             text = re.sub(r'[\ufffd\udcff-\udfff]', '', text)

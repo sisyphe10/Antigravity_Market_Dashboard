@@ -46,6 +46,34 @@ ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
 
 HAIKU_MODEL = 'claude-haiku-4-5-20251001'
 
+# headless(구독)가 기본 — API 는 백업(NEWHIGH_LLM=api, 유료 = 사전 승인 필수, 8/20)
+NEWHIGH_LLM = os.environ.get('NEWHIGH_LLM', 'headless')
+NEWHIGH_HEADLESS_MODEL = os.environ.get('NEWHIGH_HEADLESS_MODEL', 'claude-haiku-4-5')
+try:
+    NEWHIGH_DEADLINE = int(os.environ.get('NEWHIGH_DEADLINE', '480'))
+except ValueError:
+    NEWHIGH_DEADLINE = 480
+_START_TS = time.time()
+LLM_SYSTEM = '너는 한국 주식 뉴스에서 촉매 키워드를 뽑아 지시대로 JSON만 출력하는 분류기다.'
+
+
+def _llm_text(prompt, max_tokens):
+    """백엔드 디스패치. headless 는 max_tokens 계약이 없다 — 출력 통제는 프롬프트+파서,
+    응답은 20K자 슬라이스. 실패는 예외로 전파(호출부의 기존 try/except 가 스킵 처리)."""
+    if NEWHIGH_LLM == 'headless':
+        hd = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'earnings_bot')
+        if hd not in sys.path:
+            sys.path.insert(0, hd)
+        import headless_llm as hl
+        res = hl.call_with_retry(LLM_SYSTEM, [{'role': 'user', 'content': prompt}],
+                                 model=NEWHIGH_HEADLESS_MODEL, timeout_sec=120)
+        return res['text'][:20000]
+    import anthropic
+    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+    resp = client.messages.create(model=HAIKU_MODEL, max_tokens=max_tokens,
+                                  messages=[{'role': 'user', 'content': prompt}])
+    return resp.content[0].text
+
 
 def _clean(text):
     text = re.sub(r'<.*?>', '', text)
@@ -88,13 +116,11 @@ def assign_sector_themes(sector, stocks_with_news):
     stocks_with_news: [(name, chg, [news_items]), ...]
     반환: {name: theme}  (라벨 없으면 키 생략)
     """
-    if not ANTHROPIC_API_KEY:
+    if NEWHIGH_LLM != 'headless' and not ANTHROPIC_API_KEY:
         logging.warning('ANTHROPIC_API_KEY 미설정, 테마 건너뜀')
         return {}
     if not stocks_with_news:
         return {}
-
-    import anthropic
 
     names = [n for n, _, _ in stocks_with_news]
 
@@ -125,15 +151,9 @@ def assign_sector_themes(sector, stocks_with_news):
 출력: 아래 JSON만 출력. 코드블록·설명·마크다운 금지.
 {{{', '.join(f'"{n}": "라벨"' for n in names)}}}"""
 
-    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
     for attempt in range(2):
         try:
-            resp = client.messages.create(
-                model=HAIKU_MODEL,
-                max_tokens=1024,
-                messages=[{"role": "user", "content": prompt}],
-            )
-            text = resp.content[0].text.strip()
+            text = _llm_text(prompt, 1024).strip()
             text = text.encode('utf-8', errors='ignore').decode('utf-8')
             # 코드블록/잡텍스트 제거 → 첫 { ~ 마지막 } 추출
             m = re.search(r'\{.*\}', text, re.DOTALL)
@@ -198,12 +218,11 @@ def semantic_merge_themes(name_to_theme):
     Claude Haiku 1회 호출로 묶어 대표 라벨로 통일.
     예) '젠슨황방한'/'젠슨황 AI협력'/'젠슨황효과'/'엔비디아 옴니버스' → '젠슨황 방한'.
     애매하면 분리 유지(구체성 보존). 키 없거나 실패 시 원본 그대로."""
-    if not ANTHROPIC_API_KEY:
+    if NEWHIGH_LLM != 'headless' and not ANTHROPIC_API_KEY:
         return name_to_theme
     labels = sorted({v for v in name_to_theme.values() if v})
     if len(labels) < 2:
         return name_to_theme
-    import anthropic
     label_list = '\n'.join('- ' + l for l in labels)
     prompt = f"""다음은 오늘 신고가 종목들에 부여된 '구체 촉매' 테마 라벨 목록입니다.
 이 중 **의미가 사실상 동일한**(같은 사건·촉매를 가리키는) 라벨들을 한 그룹으로 묶고,
@@ -220,10 +239,7 @@ def semantic_merge_themes(name_to_theme):
 - 묶이지 않는 라벨도 자기 자신을 대표로 그대로 포함.
 출력: 모든 입력 라벨을 키로 갖는 JSON {{"원본라벨":"대표라벨", ...}}만. 코드블록·설명 금지."""
     try:
-        client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-        resp = client.messages.create(model=HAIKU_MODEL, max_tokens=2048,
-                                       messages=[{"role": "user", "content": prompt}])
-        text = resp.content[0].text.strip().encode('utf-8', 'ignore').decode('utf-8')
+        text = _llm_text(prompt, 2048).strip().encode('utf-8', 'ignore').decode('utf-8')
         m = re.search(r'\{.*\}', text, re.DOTALL)
         if not m:
             logging.warning('  의미통합 JSON 미발견 → 스킵')
@@ -249,9 +265,10 @@ def generate_theme_descriptions(theme_to_stocks, news_by_name):
     """2종목 이상 묶인 각 테마에 대해 '왜 함께 신고가인지' 한 줄(줄글) 설명 생성.
     소속 종목명 + 수집해둔 뉴스 헤드라인을 근거로 Claude Haiku 1회 배치 호출.
     반환: {테마: 설명}. 키 없거나 실패 시 빈 dict."""
-    if not ANTHROPIC_API_KEY or not theme_to_stocks:
+    if NEWHIGH_LLM != 'headless' and not ANTHROPIC_API_KEY:
         return {}
-    import anthropic
+    if not theme_to_stocks:
+        return {}
     blocks = []
     for th, names in theme_to_stocks.items():
         heads = []
@@ -272,10 +289,7 @@ def generate_theme_descriptions(theme_to_stocks, news_by_name):
 - 종목 나열·등락률 반복 금지(설명에 집중). 한 문장.
 출력: {{"테마명":"설명", ...}} 형태의 JSON만. 입력 테마 전부 포함. 코드블록·설명문 금지."""
     try:
-        client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-        resp = client.messages.create(model=HAIKU_MODEL, max_tokens=2048,
-                                       messages=[{"role": "user", "content": prompt}])
-        text = resp.content[0].text.strip().encode('utf-8', 'ignore').decode('utf-8')
+        text = _llm_text(prompt, 2048).strip().encode('utf-8', 'ignore').decode('utf-8')
         m = re.search(r'\{.*\}', text, re.DOTALL)
         if not m:
             logging.warning('  테마 설명 JSON 미발견 → 스킵')
@@ -314,6 +328,9 @@ def enrich(path=NEWHIGH_FILE):
     news_by_name = {}      # 테마 설명 생성에 재사용 (종목명 → 뉴스 리스트)
     sec_order = sorted(by_sector, key=lambda k: -len(by_sector[k]))
     for sec in sec_order:
+        if time.time() - _START_TS > NEWHIGH_DEADLINE:
+            logging.warning(f'  마감 예산 {NEWHIGH_DEADLINE}s 초과 — 잔여 섹터 스킵(테마 없이 진행)')
+            break
         group = by_sector[sec]
         if len(group) < MIN_SECTOR_SIZE:
             continue

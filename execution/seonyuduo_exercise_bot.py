@@ -57,6 +57,9 @@ KST = datetime.timezone(datetime.timedelta(hours=9))
 SEONYUDUO_SHEET_ID = '1w6q3UwUER7oINuk50LyMzgF2K0Fbt2wgSVJ34vImo0g'
 SHEET_TAB = '운동'
 HAIKU_MODEL = 'claude-haiku-4-5-20251001'
+# headless(구독)가 기본 — API 는 백업(SEONYUDUO_LLM=api, 유료 = 사전 승인 필수, 8/20)
+SEONYUDUO_LLM = os.getenv('SEONYUDUO_LLM', 'headless')
+SEONYUDUO_HEADLESS_MODEL = os.getenv('SEONYUDUO_HEADLESS_MODEL', 'claude-haiku-4-5')
 USER_MAP_FILE = os.path.join(ROOT, 'seonyuduo_exercise_user_map.json')
 
 TENNIS_CATEGORIES = ['포핸드', '백핸드', '슬라이스', '포발리', '백발리', '서브', '공통']
@@ -320,19 +323,33 @@ def _validate_batch(data: dict) -> dict:
     }
 
 
-def classify(text: str):
-    """자연어 → 검증된 batch dict. 실패 시 None."""
+def _llm_classify_text(text: str) -> str:
+    """백엔드 디스패치 — headless(기본, 구독 0원·~10~20s) | api(백업). run_in_executor
+    스레드에서 실행되므로 블로킹해도 이벤트 루프는 안전. 재시도는 classify 의 기존
+    루프가 담당 — 여기서는 hl.call(단발, timeout 60s)만 쓴다."""
+    if SEONYUDUO_LLM == 'headless':
+        hd = os.path.join(ROOT, 'execution', 'earnings_bot')
+        if hd not in sys.path:
+            sys.path.insert(0, hd)
+        import headless_llm as hl
+        res = hl.call(build_system_prompt(), [{"role": "user", "content": text}],
+                      model=SEONYUDUO_HEADLESS_MODEL, timeout_sec=60)
+        return res['text']
     client = _get_anthropic()
     if not client:
-        logging.error('ANTHROPIC_API_KEY 미설정')
-        return None
+        raise RuntimeError('ANTHROPIC_API_KEY 미설정')
+    resp = client.messages.create(
+        model=HAIKU_MODEL, max_tokens=1024,
+        system=build_system_prompt(),
+        messages=[{"role": "user", "content": text}])
+    return resp.content[0].text
+
+
+def classify(text: str):
+    """자연어 → 검증된 batch dict. 실패 시 None."""
     for attempt in range(2):
         try:
-            resp = client.messages.create(
-                model=HAIKU_MODEL, max_tokens=1024,
-                system=build_system_prompt(),
-                messages=[{"role": "user", "content": text}])
-            raw = resp.content[0].text.strip().encode('utf-8', 'ignore').decode('utf-8')
+            raw = _llm_classify_text(text).strip().encode('utf-8', 'ignore').decode('utf-8')
             m = re.search(r'\{.*\}', raw, re.DOTALL)
             if not m:
                 logging.warning(f'JSON 미발견: {raw[:120]}')
