@@ -14,11 +14,17 @@ PY="$REPO/venv/bin/python3"
 rc=0
 
 echo "── 0/5 이미지 OCR (미처리분)"
-"$PY" "$REPO/datalake/ocr_worker.py" || {
+"$PY" "$REPO/datalake/ocr_worker.py"
+ocr_rc=$?
+if [ "$ocr_rc" -eq 75 ]; then
+  echo "[warn] OCR 엔진 장애(쿼터/인증) — 재시도 없이 계속, 내일 자연 회수"; rc=1
+elif [ "$ocr_rc" -eq 78 ]; then
+  echo "[warn] OCR 정책 차단(상한 초과) — 수동 확인 필요"; rc=1
+elif [ "$ocr_rc" -ne 0 ]; then
   echo "[warn] 이미지 OCR 실패 — 실패분 재시도"
   "$PY" "$REPO/datalake/ocr_worker.py" --retry-failed \
     || { echo "[warn] OCR 재시도도 실패 — OCR 없이 계속"; rc=1; }
-}
+fi
 
 echo "── 1/5 태깅 (미처리분)"
 # 엔진: headless(구독 Opus, 0원). 롤백은 TAG_ENGINE=api 를 launchd env 로 주입.

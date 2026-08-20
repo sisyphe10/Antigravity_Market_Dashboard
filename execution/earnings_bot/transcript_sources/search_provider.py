@@ -24,6 +24,103 @@ SEARCH_MODEL = 'claude-haiku-4-5'
 # URL은 server tool block에서 오므로 model 출력 토큰과 무관하지만 방어용으로 상향.
 DEFAULT_MAX_TOKENS = 512
 
+# headless(구독) 검색이 기본 — API 는 백업(EARNINGS_SEARCH_BACKEND=api, 유료 = 사전 승인 필수, 8/20)
+SEARCH_BACKEND = os.getenv('EARNINGS_SEARCH_BACKEND', 'headless')   # headless | api(롤백)
+HEADLESS_SEARCH_MODEL = os.getenv('EARNINGS_SEARCH_MODEL', 'claude-haiku-4-5')
+try:
+    HEADLESS_SEARCH_TIMEOUT = int(os.getenv('EARNINGS_SEARCH_TIMEOUT', '120'))
+except ValueError:
+    HEADLESS_SEARCH_TIMEOUT = 120
+_RESULTS_SCHEMA = {
+    'type': 'object',
+    'properties': {'results': {'type': 'array', 'maxItems': 8, 'items': {
+        'type': 'object',
+        'properties': {'url': {'type': 'string'}, 'title': {'type': 'string'}},
+        'required': ['url']}}},
+    'required': ['results'],
+}
+
+
+def _filter_candidates(pairs, site, max_results):
+    """scheme·도메인 경계(host==site or host.endswith('.'+site))·중복 제거 — API allowed_domains 동등성."""
+    from urllib.parse import urlparse
+    out, seen = [], set()
+    for url, title in pairs:
+        try:
+            pr = urlparse(url)
+        except ValueError:
+            continue
+        if pr.scheme not in ('http', 'https') or not pr.hostname:
+            continue
+        if site:
+            host, sl = pr.hostname.lower(), site.lower()
+            if not (host == sl or host.endswith('.' + sl)):
+                continue
+        if url in seen:
+            continue
+        seen.add(url)
+        out.append(TranscriptCandidate(url=url, title=title or '', snippet='',
+                                       source='headless_web_search'))
+        if len(out) >= max_results:
+            break
+    return out
+
+
+def _headless_web_search(query, site, max_results):
+    """claude -p + WebSearch 도구 + --json-schema (2026-08-20 macmini 스모크 실측 성공).
+
+    구독 쿼터 사용(0원). 인증 실패는 raise(무경보 영구 0건 방지 — API AuthenticationError
+    re-raise 정책 승계), 그 외 실패·0건은 [] 로 소스 자체 폴백에 맡긴다. 유료 API 자동
+    폴백은 두지 않는다(8/20 사용자 규칙). --max-turns 4 는 비용 상한일 뿐 API 의
+    max_uses=1 과 동등하지 않다(초과 검색해도 구독 쿼터 외 비용 0)."""
+    import json
+    import subprocess
+    import sys
+    earn = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if earn not in sys.path:
+        sys.path.insert(0, earn)
+    import headless_llm as hl
+
+    q = f'{query} site:{site}' if site else query
+    prompt = (f'Search the web for: {q}\n'
+              'Run one web search and return only the result URLs you actually found. '
+              'Never invent or guess URLs. If nothing relevant is found, return an empty results list.')
+    mcp_cfg = hl._ensure_home()
+    cmd = [hl.CLAUDE_BIN, '-p',
+           '--model', HEADLESS_SEARCH_MODEL,
+           '--tools', 'WebSearch',
+           '--allowedTools', 'WebSearch',
+           '--output-format', 'json',
+           '--max-turns', '4',
+           '--json-schema', json.dumps(_RESULTS_SCHEMA),
+           '--no-session-persistence',
+           '--strict-mcp-config', '--mcp-config', mcp_cfg]
+    proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE, cwd=hl.WORK_HOME, env=hl._clean_env(),
+                            text=True, encoding='utf-8', start_new_session=True)
+    try:
+        out, err = proc.communicate(input=prompt, timeout=HEADLESS_SEARCH_TIMEOUT)
+    except subprocess.TimeoutExpired:
+        hl._kill_group(proc)
+        logger.warning('headless web_search timeout %ss', HEADLESS_SEARCH_TIMEOUT)
+        return []
+    try:
+        ev = json.loads((out or '').strip() or '{}')
+    except ValueError:
+        logger.warning('headless web_search: stdout JSON 아님: %r', (out or '')[:150])
+        return []
+    text = str(ev.get('result') or '')
+    if 'failed to authenticate' in text.lower():
+        logger.error('headless web_search 구독 인증 실패 (H7)')
+        raise RuntimeError('headless 구독 인증 실패 (H7): ' + text[:150])
+    if ev.get('is_error'):
+        logger.warning('headless web_search result error: %s', str(ev.get('subtype'))[:120])
+        return []
+    items = (ev.get('structured_output') or {}).get('results') or []
+    pairs = [(str(it.get('url') or ''), str(it.get('title') or ''))
+             for it in items if isinstance(it, dict) and it.get('url')]
+    return _filter_candidates(pairs, site, max_results)
+
 
 def anthropic_web_search(query: str, *, site: str | None = None,
                          max_results: int = 5) -> list[TranscriptCandidate]:
@@ -37,6 +134,9 @@ def anthropic_web_search(query: str, *, site: str | None = None,
     Returns:
         TranscriptCandidate 리스트. ANTHROPIC_API_KEY 미설정·API 오류 시 빈 리스트.
     """
+    if SEARCH_BACKEND == 'headless':
+        return _headless_web_search(query, site, max_results)
+
     if not os.getenv('ANTHROPIC_API_KEY'):
         logger.warning('ANTHROPIC_API_KEY 미설정 — web_search 스킵')
         return []

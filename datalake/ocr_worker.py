@@ -37,11 +37,28 @@ LOCK_PATH = os.path.join(NOTES_DIR, "ocr_state.lock")
 MODEL = os.getenv("OCR_MODEL", "claude-haiku-4-5")
 PROMPT_VER = "ocr-v1"
 MAX_ATTEMPTS = 3
+
+
+def _env_int(name, default):
+    try:
+        return int(os.getenv(name, str(default)))
+    except ValueError:
+        return default
+
+
+# headless(구독 Claude Code) 엔진 — API 는 백업(OCR_ENGINE=api, 유료 = 사전 승인 필수, 8/20)
+OCR_ENGINE = os.getenv("OCR_ENGINE", "headless")            # headless | api(롤백)
+OCR_HEADLESS_MODEL = os.getenv("OCR_HEADLESS_MODEL", "claude-sonnet-5")
+OCR_HEADLESS_TIMEOUT = _env_int("OCR_HEADLESS_TIMEOUT", 180)
+OCR_HEADLESS_MAX_ITEMS = _env_int("OCR_HEADLESS_MAX_ITEMS", 200)
+MAX_B64_CHARS = 7_000_000   # stream-json 페이로드 가드 (~5MB 원본 상당)
+OCR_SYSTEM = "당신은 이미지 속 텍스트를 정확히 옮겨 적는 OCR 도우미다. 사용자 지시를 그대로 따른다."
 MAX_EDGE = 1568                       # 비전 다운스케일 상한 (초과분만 축소)
 IMG_EXTS = (".jpg", ".jpeg", ".png", ".gif", ".webp")
 MEDIA_TYPES = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
                ".gif": "image/gif", ".webp": "image/webp"}
 
+# ★PROMPT(지시) 변경 시 PROMPT_VER 를 반드시 bump — 캐시 키 v2 에서 모델명은 제거됨
 PROMPT = (
     "이미지는 한국 주식 리서치 텔레그램 채널에 공유된 자료다.\n"
     "1) 이미지 안에 텍스트가 있으면 그대로 옮겨 적어라 (요약 금지, 표는 마크다운 표로).\n"
@@ -154,6 +171,33 @@ def open_state():
     return st
 
 
+def _headless():
+    """어닝봇 headless 어댑터 재사용 (8/18 검증분 — call_multimodal·preflight·예외 위계)."""
+    hd = os.path.join(REPO, "execution", "earnings_bot")
+    if hd not in sys.path:
+        sys.path.insert(0, hd)
+    import headless_llm
+    return headless_llm
+
+
+def migrate_cache_keys_v2(st):
+    """v1 키 sha(file_sha, PROMPT_VER, model) → v2 sha(file_sha, PROMPT_VER) 무LLM 제자리 이관.
+    정확한 v1 기대키가 일치하는 succeeded 행만 갱신 — 재OCR 0건. 멱등."""
+    n = 0
+    rows = st.execute("SELECT message_id, file_sha, cache_key, model FROM ocr_items"
+                      " WHERE status='succeeded'").fetchall()
+    for r in rows:
+        base_model = (r["model"] or "").split("@", 1)[0]
+        if r["cache_key"] == sha(r["file_sha"], PROMPT_VER, base_model):
+            st.execute("UPDATE ocr_items SET cache_key=? WHERE message_id=?",
+                       (sha(r["file_sha"], PROMPT_VER), r["message_id"]))
+            n += 1
+    if n:
+        st.commit()
+        print("캐시 키 이관(v1→v2): %d건 — 재OCR 없음" % n)
+    return n
+
+
 def pick_targets(src, args):
     q = ("SELECT id, timestamp, media_path FROM messages"
          " WHERE message_type IN ('photo','document') AND media_path IS NOT NULL")
@@ -174,6 +218,9 @@ def main():
     ap.add_argument("--retry-failed", action="store_true")
     args = ap.parse_args()
 
+    if OCR_ENGINE not in ("headless", "api"):
+        sys.exit("OCR_ENGINE=%s 지원 안 함 (headless|api)" % OCR_ENGINE)
+
     lock = _acquire_lock()
     if lock is None:
         sys.exit("다른 ocr_worker 가 실행 중 — 종료")
@@ -181,6 +228,8 @@ def main():
     src = sqlite3.connect("file:%s?mode=ro" % DB_SRC, uri=True)
     src.row_factory = sqlite3.Row
     st = open_state()
+    if not args.dry_run:
+        migrate_cache_keys_v2(st)   # --dry-run 은 무부작용 계약 — 이관도 하지 않는다
 
     rows = pick_targets(src, args)
     if args.retry_failed:
@@ -195,7 +244,8 @@ def main():
             missing += 1
             continue
         fs = file_sha(path)
-        ck = sha(fs, PROMPT_VER, MODEL)
+        # 캐시 키 v2 — 모델명 제거 (엔진 전환이 캐시를 무효화하지 않게, tag_worker 8/5 정책 승계)
+        ck = sha(fs, PROMPT_VER)
         cur = st.execute("SELECT cache_key,status FROM ocr_items WHERE message_id=?",
                          (r["id"],)).fetchone()
         if cur and cur["cache_key"] == ck and cur["status"] == "succeeded":
@@ -206,22 +256,60 @@ def main():
     if args.max_items:
         todo = todo[:args.max_items]
 
-    print("대상 %d건 (캐시 재사용 %d · 파일 없음 %d) / 모델 %s"
-          % (len(todo), cached, missing, MODEL))
+    print("대상 %d건 (캐시 재사용 %d · 파일 없음 %d) / 엔진 %s / 모델 %s"
+          % (len(todo), cached, missing, OCR_ENGINE,
+             OCR_HEADLESS_MODEL if OCR_ENGINE == "headless" else MODEL))
     if args.dry_run or not todo:
         # --retry-failed 대상 0건 등은 정상 종료 (일일 잡 rc 오염 방지)
         return
 
-    import anthropic
-    client = anthropic.Anthropic(api_key=load_env_key())
+    if OCR_ENGINE == "headless":
+        if len(todo) > OCR_HEADLESS_MAX_ITEMS:
+            print("[차단] 대상 %d건 > 상한 %d — 대량 무효화 의심"
+                  " (해제는 OCR_HEADLESS_MAX_ITEMS 상향으로만)"
+                  % (len(todo), OCR_HEADLESS_MAX_ITEMS))
+            sys.exit(78)
+        hl = _headless()
+        try:
+            hl.preflight()
+        except Exception as e:  # HeadlessAuthError 포함 — 호출 0회로 즉시 중단
+            print("[중단] headless 인증 preflight 실패 — H7: %s" % str(e)[:160])
+            sys.exit(75)
+        client = None
+        engine_errors = (hl.HeadlessAuthError, hl.HeadlessQuotaError)
+        fail_model = OCR_HEADLESS_MODEL + "@headless"
+    else:
+        import anthropic
+        client = anthropic.Anthropic(api_key=load_env_key())
+        hl = None
+        engine_errors = ()
+        fail_model = MODEL
     ok = fail = tin = tout = 0
+    engine_down = False
     for i, r in enumerate(todo, 1):
         day = r["timestamp"][:10]
         try:
             b64, mt = encode_image(r["_path"])
-            text, usage = call_ocr(client, b64, mt)
-            tin += usage.input_tokens
-            tout += usage.output_tokens
+            if len(b64) > MAX_B64_CHARS:
+                raise ValueError("이미지 페이로드 과대 (b64 %d chars)" % len(b64))
+            if hl is not None:
+                res = hl.call_multimodal(
+                    OCR_SYSTEM,
+                    [{"type": "image",
+                      "source": {"type": "base64", "media_type": mt, "data": b64}},
+                     {"type": "text", "text": PROMPT}],
+                    model=OCR_HEADLESS_MODEL, timeout_sec=OCR_HEADLESS_TIMEOUT)
+                text = res["text"]
+                # 실입력 대부분은 cacheCreationInputTokens 에 계상 (8/18 실측)
+                in_tok = res["input_tokens"] + res["cache_creation_input_tokens"]
+                out_tok = res["output_tokens"]
+                used_model = res["resolved_model"] + "@headless"
+            else:
+                text, usage = call_ocr(client, b64, mt)
+                in_tok, out_tok = usage.input_tokens, usage.output_tokens
+                used_model = MODEL
+            tin += in_tok
+            tout += out_tok
             st.execute(
                 "INSERT INTO ocr_items (message_id,day,media_file,file_sha,cache_key,"
                 " status,ocr_text,error,attempts,model,in_tokens,out_tokens,updated_at)"
@@ -233,8 +321,13 @@ def main():
                 " model=excluded.model, in_tokens=excluded.in_tokens,"
                 " out_tokens=excluded.out_tokens, updated_at=excluded.updated_at",
                 (r["id"], day, os.path.basename(r["_path"]), r["_fs"], r["_ck"],
-                 text, MODEL, usage.input_tokens, usage.output_tokens, now()))
+                 text, used_model, in_tok, out_tok, now()))
             ok += 1
+        except engine_errors as e:
+            # 인증·쿼터 장애 — 항목 실패로 기록하지 않고 즉시 중단 (다음 실행에서 자연 회수)
+            print("  [중단] 엔진 장애: %s" % str(e)[:180])
+            engine_down = True
+            break
         except Exception as e:  # noqa: BLE001
             st.execute(
                 "INSERT INTO ocr_items (message_id,day,media_file,file_sha,cache_key,"
@@ -245,7 +338,7 @@ def main():
                 " status=CASE WHEN attempts+1>=%d THEN 'dead_letter' ELSE 'failed' END"
                 % MAX_ATTEMPTS,
                 (r["id"], day, os.path.basename(r["_path"]), r["_fs"], r["_ck"],
-                 str(e)[:500], MODEL, now()))
+                 str(e)[:500], fail_model, now()))
             fail += 1
         st.commit()
         if i % 25 == 0 or i == len(todo):
@@ -254,6 +347,8 @@ def main():
         time.sleep(0.2)
 
     print("완료: ok=%d fail=%d / 입력 %s · 출력 %s 토큰" % (ok, fail, f"{tin:,}", f"{tout:,}"))
+    if engine_down:
+        sys.exit(75)
     if fail:
         sys.exit(1)
 
