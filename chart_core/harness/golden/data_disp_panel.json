@@ -47,7 +47,7 @@
   }
  ],
  "dispPanel": {
-  "areaL": 58,
+  "areaL": 60,
   "areaR": 900,
   "labels": [
    "이격도20"
@@ -56,7 +56,7 @@
  },
  "filename": "고객예탁금_DATE.png",
  "legend": "고객예탁금(조원)+19.9%MA20+27.5%이격도20101",
- "mainAreaL": 58,
+ "mainAreaL": 60,
  "mainAreaR": 900,
  "paddingTop": 6,
  "rocPanel": null,
