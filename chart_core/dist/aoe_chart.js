@@ -703,7 +703,7 @@ function cmbPeerCharts(self) {
             // âYì¶ ììì  íµì¼ í­ (2026-08-21 ì¬ì©ì íì ): 5ìë¦¬ ë¼ë²¨(ì: Poly Silicon 46,200)ì´
             //   ë¤ì´ê°ë í­. view.yUniformWidth ê° ì°¸ì´ë©´ ë©ì¸ yì¶ í­ì ì´ ê°ì¼ë¡ í´ë¨í(ìì°í­ì´
             //   ë í¬ë©´ ìì°í­ ì ì§ â ë¼ë²¨ ìë¦¼ ë°©ì§). ìë¸í¨ëì mainYWidth ë¡ ìë ì¶ì¢.
-            var CMB_Y_UNIFORM_W = 55;   // 5자리 최악 라벨 advance 49.4px + pad3 + tick3 (2026-08-21 2차 조정 58→55)
+            var CMB_Y_UNIFORM_W = 58;   // 5자리 라벨의 Chart.js 자연폭 57.6px 실측 — 55는 Poly만 58로 남아 통일 깨짐 (2026-08-21)
             function cmbRenderCharts(view) {
                 var commonDates = view.labels;
                 var datasets = view.datasets;
