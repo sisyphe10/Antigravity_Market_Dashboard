@@ -123,3 +123,10 @@
 ## 축 단위 주석 잘림 fix + 15px 승급 (2026-08-19)
 - wrap AUM(stackedBar)에서 Y축 (억원) 주석 상단이 잘림(사용자 지적). padTop 24가 주석 기준선을 캔버스 y=4에 놓아 13px 글씨 윗부분이 캔버스 밖이었다.
 - 조치: ①stackedBar padding.top 24→34 ②cmbAxisUnitPlugin 기준선 하한 클램프(ty<14→14 — mini 등 얕은 프레임 안전망) ③주석 폰트 13→15px(축 눈금 15px와 통일 — 서브패널 (%p)·(조원) 주석 포함 전역 적용).
+
+## Y축 눈금 자릿수 = 끝값 패딩 통일 (2026-08-21)
+- 사용자 지적: MLC 64Gb 끝점 55.0 인데 눈금이 6.2·9·15·…·61.7 로 제각각, SLC 2Gb 끝점 4.70 인데 눈금 1.9·2.5·3·4·4.93.
+- 조치: `fmtUniform` 을 `fmtUniformFix`(min=max FractionDigits 패딩) 위임으로 교체 — 눈금도 끝값 라벨과 동일한 축 밴드 자릿수(<10=2dp, <100=1dp, 이상=정수)로 패딩. RoC² 서브패널 눈금도 fmtByMag(항목별) → cmbTickFmt(축 밴드) 전환. pct 모드 눈금(`v+'%'`)·1,000 이상 정수 규칙은 종전 유지.
+- 하네스: fixture(market_baseline.html)를 신규 빌드로 갱신(구 fixture=8/2 동결이라 데이터 drift 동반), golden 12종 재기록 후 12/12 통과. 시나리오 행 매칭을 textContent → **data-name 우선**으로 수정(가격·별표 컬럼 추가로 'KOSPI$' 앵커가 깨져 있었음).
+- 라이브 실측(게시 스냅숏, 실브라우저): MLC 64Gb = 6.2/9.0/15.0/20.0/30.0/40.0/61.7 · SLC 2Gb = 1.90/2.50/3.00/4.00/4.93 — 끝점 자릿수와 일치.
+- ★함정 재확인: chart_core/fixtures/*.html 도 5분 주기 `git checkout -- "*.html"` 대상 — fixture 갱신은 **즉시 commit** 안 하면 원복되어 하네스가 구 fixture 로 허위 통과한다(이번 세션 실제 발생).
