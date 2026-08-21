@@ -51,11 +51,11 @@
  "filename": "선행지수 순환변동치_DATE.png",
  "legend": "선행지수 순환변동치+5.17%MA3+4.76%RoC²0.56%p",
  "mainAreaL": 60,
- "mainAreaR": 900,
+ "mainAreaR": 910,
  "paddingTop": 6,
  "rocPanel": {
   "areaL": 60,
-  "areaR": 900,
+  "areaR": 910,
   "labels": [
    "RoC²"
   ],
