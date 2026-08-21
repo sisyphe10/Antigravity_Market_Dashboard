@@ -1,4 +1,4 @@
-// aoe_chart.js — AoE 공용 차트 코어 (v0.2.0, P1 착수 2026-08-02 · P2b 렌더 프레임 편입)
+// aoe_chart.js — AoE 공용 차트 코어 (v0.2.0, P1 착수 2026-08-02 · P2b 렌더 프레임 편입 · 2026-08-21 눈금=끝값 자릿수 패딩)
 // 정본: chart_core/dist/aoe_chart.js — 양식 수정은 반드시 이 파일에서.
 // 소비: create_dashboard.py 가 빌드타임에 <script> 인라인 임베드 (manifest sha 검증).
 // 중복 임베드 가드: 각 블록의 typeof 체크 (한 페이지에 여러 번 들어가도 1회만 등록).
@@ -264,15 +264,14 @@
                              max: cmbNice3(Math.pow(10, lhi + pad), true) };
                 }
 
-// fmtUniform — fmtUniformFix가 호출하는 기저 포맷터 (P1b 후속 이동: 전역 함수는 클로저 내부를 못 본다)
+// fmtUniform — 눈금용 포맷터 (P1b 후속 이동: 전역 함수는 클로저 내부를 못 본다)
             // 축 자릿수 통일: 같은 축 안에서는 하나의 밴드를 따른다.
             // ★밴드 기준 = 축의 '최종 끝값' (2026-07-28 변경. 종전 = 축 최대값)
             //   인자명 maxAbs 는 호환 유지 — 실제로 넘어오는 값은 _cmbAxisBandRef(끝값).
-            function fmtUniform(v, maxAbs) {
-                if (v === null || v === undefined) return '-';
-                var dp = maxAbs < 10 ? 2 : (maxAbs < 100 ? 1 : 0);   // 일의자리 2dp·십의자리 1dp·백의자리+ 정수
-                return Number(v).toLocaleString(undefined, { maximumFractionDigits: dp });
-            }
+            // ★2026-08-21 사용자 확정: 눈금 자릿수도 끝값 라벨과 동일하게 패딩(55.0 축에서 9 → 9.0,
+            //   4.70 축에서 3 → 3.00) — fmtUniformFix 위임. 종전 maximumFractionDigits 만으로는
+            //   정수 눈금이 끝값과 자릿수가 어긋났다.
+            function fmtUniform(v, maxAbs) { return fmtUniformFix(v, maxAbs); }
 
 // ── cmb(DATA) 크로스헤어·클릭핀·툴팁 동기 (P2a 이동 2026-08-02) ──
 // ★P3 다중 패밀리(2026-08-02): 호버·핀 상태와 피어 목록은 전역이 아니라 '패밀리'
@@ -1142,8 +1141,8 @@ function cmbPeerCharts(self) {
                                             // ★눈금은 숫자만. 단위 '%p' 는 축 최상단 위에 1회 표기한다(아래 _cmbAxisUnits).
                                             //   y축 폭은 메인 차트와의 픽셀 정렬 때문에 afterFit 으로 고정돼 있어서,
                                             //   눈금에 단위를 붙이면 폭을 넘어가 글씨가 잘렸다(2026-07-30 사용자 지적).
-                                            //   자릿수는 사이트 표준 fmtByMag(|v|<10 둘째, 10~999 첫째, 1000+ 정수).
-                                            ticks: { maxTicksLimit: 6, autoSkip: false, callback: function(v){ return fmtByMag(v); }, font: { size: 15 }, color: '#000' },
+                                            //   자릿수는 축 밴드 패딩 cmbTickFmt(2026-08-21 끝값·눈금 자릿수 통일, 종전 fmtByMag).
+                                            ticks: { maxTicksLimit: 6, autoSkip: false, callback: function(v){ return cmbTickFmt(v, this, false); }, font: { size: 15 }, color: '#000' },
                                             grid: { color: '#eee' },
                                             border: { color: '#000', width: 2 }
                                         }
