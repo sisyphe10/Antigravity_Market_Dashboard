@@ -3720,7 +3720,7 @@ def _build_combined_chart_section():
                         <button id="cmbDispBtn3" class="cmb-ma-btn" onclick="toggleCmbDisp(3,this)">200</button>
                         </span>
                     </div>
-                    <div id="cmbChartCard" style="background:#fff;border-radius:6px;padding:20px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                    <div id="cmbChartCard" style="background:#fff;border-radius:6px;padding:20px 20px 20px 10px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
                         <div style="position:relative;height:562px;">
                             <canvas id="cmbDynamicChart"></canvas>
                         </div>
