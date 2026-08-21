@@ -103,7 +103,9 @@ EXTRACT_VIEWER = None   # 아래 SCENARIOS 정의 시점에 _extract_std('chart'
 
 CLICK_ROW = """async (pattern) => {
   const rows = Array.from(document.querySelectorAll('#cmbSideTable tbody tr'));
-  const r = rows.find(x => new RegExp(pattern).test(x.textContent));
+  // data-name 우선 매칭 (2026-08-21) — 가격·별표 컬럼 추가로 textContent 끝이 값이 되어
+  // 'KOSPI$' 류 앵커 패턴이 깨짐. 라벨 정본은 data-name, 없는 행만 textContent 폴백.
+  const r = rows.find(x => new RegExp(pattern).test(x.dataset.name || x.textContent));
   if (!r) return 'ROW_NOT_FOUND:' + pattern;
   r.click(); return 'ok';
 }"""
