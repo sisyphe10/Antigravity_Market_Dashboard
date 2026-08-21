@@ -1,14 +1,14 @@
 {
  "axes": {
   "x": {
-   "max": 152,
+   "max": 166,
    "min": 0,
    "ticks": [
     "25/12",
     "26/02",
     "26/03",
     "26/04",
-    "26/05",
+    "26/06",
     "26/07"
    ],
    "type": "category"
@@ -31,62 +31,62 @@
    "axis": "y",
    "first": 0,
    "label": "KOSPI",
-   "last": 56.51,
-   "n": 153,
-   "sum": 8047.6
+   "last": 62.61,
+   "n": 167,
+   "sum": 8829.7
   },
   {
    "axis": "y",
    "first": 0,
    "label": "KOSDAQ",
-   "last": -22.23,
-   "n": 153,
-   "sum": 1883.31
+   "last": -9.14,
+   "n": 167,
+   "sum": 1734.52
   },
   {
    "axis": "y",
    "first": 0,
    "label": "NIKKEI",
-   "last": 27.86,
-   "n": 153,
-   "sum": 2837.05
+   "last": 31.54,
+   "n": 167,
+   "sum": 3288.52
   },
   {
    "axis": "y",
    "first": 0,
    "label": "TSEC",
-   "last": 50.21,
-   "n": 153,
-   "sum": 4956.84
+   "last": 56.52,
+   "n": 167,
+   "sum": 5745.13
   },
   {
    "axis": "y",
    "first": 0,
    "label": "S&P 500",
-   "last": 8.61,
-   "n": 153,
-   "sum": 475.99
+   "last": 11.77,
+   "n": 167,
+   "sum": 644.9
   },
   {
    "axis": "y",
    "first": 0,
    "label": "NASDAQ",
-   "last": 8.35,
-   "n": 153,
-   "sum": 572.98
+   "last": 12.43,
+   "n": 167,
+   "sum": 755.73
   },
   {
    "axis": "y",
    "first": 0,
    "label": "RUSSELL 2000",
-   "last": 17.23,
-   "n": 153,
-   "sum": 1524.55
+   "last": 21.29,
+   "n": 167,
+   "sum": 1821.23
   }
  ],
  "familyPeers": 1,
  "isolated": true,
- "legend": "KOSPI+56.5%KOSDAQ-22.2%NIKKEI+27.9%TSEC+50.2%S&P 500+8.61%NASDAQ+8.35%RUSSELL 2000+17.2%",
+ "legend": "KOSPI+62.6%KOSDAQ-9.1%NIKKEI+31.5%TSEC+56.5%S&P 500+11.8%NASDAQ+12.4%RUSSELL 2000+21.3%",
  "mode": "pct",
  "pinHost": true
 }

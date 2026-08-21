@@ -1,15 +1,15 @@
 {
  "axes": {
   "x": {
-   "max": 142,
+   "max": 155,
    "min": 0,
    "ticks": [
     "25/12",
     "26/02",
     "26/03",
     "26/04",
-    "26/05",
-    "26/06"
+    "26/06",
+    "26/07"
    ],
    "type": "category"
   },
@@ -31,14 +31,14 @@
    "axis": "y",
    "first": 0,
    "label": "KOSPI",
-   "last": 56.51,
-   "n": 143,
-   "sum": 7528.92
+   "last": 62.61,
+   "n": 156,
+   "sum": 8245.44
   }
  ],
  "dispPanel": null,
  "filename": "KOSPI_DATE.png",
- "legend": "KOSPI+56.5%",
+ "legend": "KOSPI+62.6%",
  "mainAreaL": 51,
  "mainAreaR": 900,
  "paddingTop": 6,
