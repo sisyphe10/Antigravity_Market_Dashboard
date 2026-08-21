@@ -1,8 +1,8 @@
 {
  "coreVersion": "0.2.0",
- "coreSha256": "b3c16265248af3f38c02d80beadee7fb0fe387172bba719600b51a1805852238",
- "coreBytes": 80037,
+ "coreSha256": "8ea9c2be9813a5b5a11256cdb86fe281991619c34b7ce637f0a1d62253ce2648",
+ "coreBytes": 80866,
  "tokensSha256": "30048cc1d1ce9b7705408d796feeab570d9bfb78f130757b85845b706eb48c5a",
  "chartJsVersion": "4.5.1",
- "sourceCommit": "5f3019948"
+ "sourceCommit": "266273b37"
 }

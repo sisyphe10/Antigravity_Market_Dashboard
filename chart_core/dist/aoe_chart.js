@@ -700,6 +700,10 @@ function cmbPeerCharts(self) {
                 }
             };
 
+            // âYì¶ ììì  íµì¼ í­ (2026-08-21 ì¬ì©ì íì ): 5ìë¦¬ ë¼ë²¨(ì: Poly Silicon 46,200)ì´
+            //   ë¤ì´ê°ë í­. view.yUniformWidth ê° ì°¸ì´ë©´ ë©ì¸ yì¶ í­ì ì´ ê°ì¼ë¡ í´ë¨í(ìì°í­ì´
+            //   ë í¬ë©´ ìì°í­ ì ì§ â ë¼ë²¨ ìë¦¼ ë°©ì§). ìë¸í¨ëì mainYWidth ë¡ ìë ì¶ì¢.
+            var CMB_Y_UNIFORM_W = 58;
             function cmbRenderCharts(view) {
                 var commonDates = view.labels;
                 var datasets = view.datasets;
@@ -913,8 +917,9 @@ function cmbPeerCharts(self) {
                         min: yLogPad ? yLogPad.min : undefined,
                         max: yLogPad ? yLogPad.max : undefined,
                         afterBuildTicks: cmbEnsureBoundTicks,
+                        afterFit: view.yUniformWidth ? function(scale){ if (scale.width < CMB_Y_UNIFORM_W) scale.width = CMB_Y_UNIFORM_W; } : undefined,
                         ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return mode === 'pct' ? v + '%' : cmbTickFmt(v, this, yEok && yJo); }, font: { size: _fs }, color: '#000' },
-                        grid: { color: '#eee' },
+                        grid: { color: '#eee', tickLength: view.yUniformWidth ? 3 : 8 },
                         border: { color: '#000', width: 2 }
                     }
                 };
@@ -1073,7 +1078,7 @@ function cmbPeerCharts(self) {
                         afterBuildTicks: cmbEnsureBoundTicks,
                                             afterFit: function(scale) { if (mainYWidth > 0) scale.width = mainYWidth; },
                                             ticks: { maxTicksLimit: 8, autoSkip: false, callback: function(v){ return cmbTickFmt(v, this, false); }, font: { size: 15 }, color: '#000' },
-                                            grid: { color: '#eee' },
+                                            grid: { color: '#eee', tickLength: 3 },
                                             border: { color: '#000', width: 2 }
                                         }
                                     }
@@ -1143,7 +1148,7 @@ function cmbPeerCharts(self) {
                                             //   눈금에 단위를 붙이면 폭을 넘어가 글씨가 잘렸다(2026-07-30 사용자 지적).
                                             //   자릿수는 축 밴드 패딩 cmbTickFmt(2026-08-21 끝값·눈금 자릿수 통일, 종전 fmtByMag).
                                             ticks: { maxTicksLimit: 6, autoSkip: false, callback: function(v){ return cmbTickFmt(v, this, false); }, font: { size: 15 }, color: '#000' },
-                                            grid: { color: '#eee' },
+                                            grid: { color: '#eee', tickLength: 3 },
                                             border: { color: '#000', width: 2 }
                                         }
                                     }

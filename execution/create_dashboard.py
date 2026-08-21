@@ -3490,7 +3490,7 @@ def _build_combined_chart_section():
                 var _R = cmbRenderCharts({
                     labels: commonDates, datasets: datasets, dispDatasets: dispDatasets,
                     rocDatasets: rocDatasets, mode: mode, yEok: yEok, y1Eok: y1Eok,
-                    axAssign: _axAssign, unitMap: cmbSeriesUnit,
+                    axAssign: _axAssign, unitMap: cmbSeriesUnit, yUniformWidth: true,
                     charts: { main: cmbChart, disp: cmbDispChart, roc: cmbRocChart }
                 });
                 cmbChart = _R.main; cmbDispChart = _R.disp; cmbRocChart = _R.roc;
