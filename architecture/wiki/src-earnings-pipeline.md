@@ -18,6 +18,8 @@ code:
   - "execution/earnings_bot/transcript_gate.py"
   - "execution/earnings_bot/prompt_builder.py"
   - "execution/earnings_bot/translator.py"
+  - "execution/earnings_bot/db.py"
+  - "execution/earnings_bot/tests_poison_loop.py"
   - "execution/earnings_bot/ticker_registry.py"
   - "execution/earnings_bot/cli/transcript_override.py"
   - "execution/earnings_bot/notion_publisher.py"
@@ -62,6 +64,10 @@ alerts: "타이머 OnFailure → 텔레그램"
 - ★**전문 탐색 web_search도 구독 이관(2026-08-20, `transcript_sources/search_provider.py`)**: 8/18에 번역·분석은 구독으로 옮겼지만 **전문 URL을 찾는 web_search만 종량 API에 남아** 있었다 — 크레딧이 마르면 번역할 전문 자체가 안 들어오므로 여기가 마지막 종량 의존점이었다. 이제 `claude -p`에 **WebSearch 도구만 허용**하고 `--json-schema`로 `{results:[{url,title}]}`를 강제해 받는다(`EARNINGS_SEARCH_BACKEND`, 기본 `headless`·롤백 `api`). 도구를 여는 만큼 [[infra-headless-llm]] 봉인 코어를 쓰지 않고 이 모듈이 CLI를 직접 띄우되, **환경 격리·전용 홈·프로세스그룹 종료는 코어 헬퍼를 재사용**한다.
   - API의 `allowed_domains`에 대응하는 **도메인 경계 사후 필터**(`host == site` 또는 `.site`로 끝날 때만 채택) + 중복 제거를 파이썬 쪽에 둔다 — CLI에는 도메인 제한 인자가 없어 모델의 자율 검색 결과를 그대로 믿으면 site 한정이 사실상 풀린다. 프롬프트도 "실제로 찾은 URL만, 없으면 빈 목록"으로 날조를 막는다.
   - **인증 실패는 raise, 그 외 실패·0건은 빈 리스트**: 조용한 영구 0건(무경보로 전문 수집이 말라붙는 실패 모드)을 막으려는 구분이고, 기존 API 경로의 `AuthenticationError` re-raise 정책을 그대로 승계했다. ★**유료 API 자동 폴백은 두지 않는다**(2026-08-20 사용자 규칙 — 유료 전환은 사전 승인 사항). `--max-turns`는 비용 상한이 아니라 폭주 방지용일 뿐, API의 `max_uses=1`과 동등하지 않다.
+- ★**새벽 배치 독약 루프 차단 + 인덱스 URL 게이트(2026-08-22)**: 오수집 전문 1건(tid 284)이 매번 청크 게이트에 걸리는데도 다음 루프에서 계속 다시 뽑혀 [[timer-earnings-night-llm]] 배치가 **이틀 연속 60슬롯을 전부 소진**했다 — 게이트는 정상 작동했고 **실패 항목을 재선택에서 빼는 로직 부재**가 원인이라, 검사기가 맞아도 큐가 같은 것을 다시 집으면 처리량이 0이 된다는 구조적 결함이었다.
+  - ① `night_llm`이 실행 내 실패 id(filing/transcript)를 모아 `exclude_ids`로 넘기고, `db.get_pending_translation_transcripts`·`translator.process_pending`·`translate_pending_transcripts`가 이를 받는다. id를 알 수 없는 실패는 무한 재시도 대신 **해당 단계를 방어적으로 종료**. ★`exclude_ids`는 전량 조회하는 `oldest_first` 경로 전용 — 기본 DESC(최신순)는 SQL LIMIT 창 안에서만 걸러 제외가 창 밖 항목을 끌어오지 못한다. 실패 귀속용 id 보강(`setdefault`)도 exclude 모드에서만 해 주간 러너 결과 형태는 불변.
+  - ② **결정적 거부만 영구 격리**: 번역 진입부의 URL·본문 기반 collect 게이트 거부는 `translation_skipped=1`로 격리(`db.mark_translation_skipped`)하고, 같은 filing에 정상 번역본이 없으면(`db.filing_has_translated_transcript`) 진짜 전문이 나중에 게재될 수 있으니 filing을 D+1 `gate_blocked`로 재큐잉한다. 반대로 **모델 출력에 의존하는 청크·출력 게이트 거부는 확률적이라 재시도 가치가 있어 격리하지 않는다** — 결정적/확률적 구분이 이 수정의 핵심이다. 격리분은 아침 다이제스트 '게이트 격리' 섹션으로 드러나 수동 확인 대상이 된다.
+  - ③ 게이트 L1에 `url_index_page` 규칙 추가([[store-transcripts-md]] 오염 차단) — marketbeat **전문 허브**(`/earnings/transcripts/`)와 **종목 랜딩**(`/stocks/<거래소>/<티커>/earnings/`)은 필터 메뉴 텍스트만으로 26K자를 넘겨 길이 게이트를 통과하고 matcher conf 0.81까지 받았다(ADI 실사고, GOOGL·TSLA 2026-07-23 동형 전례). 정상 수집 URL은 전부 `/earnings/reports/<slug>/`라 미충돌. 회귀 테스트 `tests_poison_loop.py` 신설(codex 검토 반영), 게이트 fixture의 tid 118~120은 같은 허브 목록 쓰레기였음이 확인돼 2026-07-31 캘리브레이션의 PASS 판정을 **REJECT로 재심**했다(새 규칙이 정확히 잡아냄).
 - 상태 DB=`earnings.db`. 예정 포맷=`티커/발표일자`(기업명 없음 확정). `--dismiss` CLI.
 - 캘린더는 `gha-earnings-calendar-sync`가 채우고 이 파이프라인이 소비.
 
@@ -91,6 +97,8 @@ alerts: "타이머 OnFailure → 텔레그램"
 - `execution/earnings_bot/transcript_gate.py`
 - `execution/earnings_bot/prompt_builder.py`
 - `execution/earnings_bot/translator.py`
+- `execution/earnings_bot/db.py`
+- `execution/earnings_bot/tests_poison_loop.py`
 - `execution/earnings_bot/ticker_registry.py`
 - `execution/earnings_bot/cli/transcript_override.py`
 - `execution/earnings_bot/notion_publisher.py`

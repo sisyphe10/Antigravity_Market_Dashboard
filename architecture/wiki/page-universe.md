@@ -28,6 +28,7 @@ alerts: ""
 - `create_dashboard.py` 생성. 종목 추가는 `universe_tickers.csv`로.
 - **관심종목 별표 컬럼(2026-07-31)**: 종목 리스트 1열에 별표(★) 토글 — 상태는 [[daemon-watchlist-quoteboard]]의 `/watchlist/prefs`(`universe_stars_v1 = {"tickers":[순수심볼,…]}`)에 서버 공유(+localStorage 폴백). 헤더 ★ = 관심종목만 보기 필터. Download PNG에선 별표 컬럼 숨김. 정렬 헤더 화살표는 `#tab0`로 한정(기간 탭 헤더 오염 방지).
 - **nav 위치(2026-07-31)**: 상단 네비에서 Market → **Watchlist 드롭다운 하위**로 이동([[src-nav-style]] `NAV_ITEMS`).
+- **암호화폐 3종 표시(2026-08-22)**: BTC·ETH·SOL이 `암호화폐` 섹터로 종목 리스트·섹터 표에 함께 뜬다 — 주식이 아닌 자산군이 처음 들어온 사례라 섹터 필터 선택지에도 추가된다. RSI(1M)은 지수 대신 **BTC 대비**로 계산되므로(BTC 자신은 0 부근) 다른 행과 기준이 다르다([[src-universe]]).
 - **표 캡처·가독성(2026-08-09)**: 종목 리스트·섹터·기간 3탭 모두 Download 왼쪽에 Copy 버튼(클립보드 PNG, 상위 30행만 — Download와 동일 규칙, [[src-create-dashboard]] 캡처 헬퍼 공용). 스파크라인 선색을 검정 → 에메랄드 `#10b981`(다크 배경에서 검정은 보이지 않음). 정렬 컬럼 하이라이트 `.col-hl` 배경을 `#14171b` → `#262b32`로 상향하고, 종목 리스트에만 있던 하이라이트를 **섹터 표에도 적용**(섹터명 + 현재 정렬 컬럼).
 
 ## Reads
