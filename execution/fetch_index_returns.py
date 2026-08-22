@@ -14,6 +14,7 @@ universe.html의 RSI(1M) 컬럼이 사용. 각 종목 1M 수익률에서 해당 
   TSE           → TSX         (^GSPTSE, S&P/TSX Composite — Toronto SE)
   HKG           → HSI         (^HSI)
   SHA, SHE      → CSI 300     (텐센트 sh000300 — 야후 000300.SS는 일봉 결측 구간)
+  CRYPTO        → BTC         (BTC-USD)
   AMS, ETR, EPA → STOXX       (^STOXX50E)
 
 1M 수익률 정의: 최근 거래일 종가 vs 21 거래일 전 종가.
@@ -57,6 +58,9 @@ INDICES = [
 # 부적합 — fetch_universe.py A주 primary와 동일하게 텐센트 gtimg 일봉을 사용한다.
 TENCENT_INDICES = {'CSI 300': 'sh000300'}
 INDICES.append(('CSI 300', 'sh000300'))
+
+# 암호화폐(CRYPTO prefix) 벤치마크 = BTC (사용자 확정 2026-08-23). yfinance BTC-USD 일봉.
+INDICES.append(('BTC', 'BTC-USD'))
 
 LOOKBACK_DAYS = 21  # 거래일
 

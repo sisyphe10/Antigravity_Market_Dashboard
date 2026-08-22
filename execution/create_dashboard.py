@@ -9293,7 +9293,7 @@ var numCols=[0,5,6,7,8,9,10,11,12,13,14,15];
 var pctCols=[7,8,9,10,11,12,13,14,15];
 // 티커 prefix → 시장 지수 매핑 (우선순위: KOSPI > KOSDAQ > NASDAQ > S&P 500 > TSEC > NIKKEI > TSX > HSI > STOXX > CSI 300)
 // TYO = Tokyo SE (Japan → NIKKEI). TSE = Toronto SE (Canada → TSX, S&P/TSX Composite).
-var INDEX_BY_PREFIX={'KRX':'KOSPI','KOSDAQ':'KOSDAQ','NASDAQ':'NASDAQ','NYSE':'S&P 500','NYSEAMERICAN':'S&P 500','TPE':'TSEC','TYO':'NIKKEI','TSE':'TSX','HKG':'HSI','AMS':'STOXX','ETR':'STOXX','EPA':'STOXX','SHA':'CSI 300','SHE':'CSI 300'};
+var INDEX_BY_PREFIX={'KRX':'KOSPI','KOSDAQ':'KOSDAQ','NASDAQ':'NASDAQ','NYSE':'S&P 500','NYSEAMERICAN':'S&P 500','TPE':'TSEC','TYO':'NIKKEI','TSE':'TSX','HKG':'HSI','AMS':'STOXX','ETR':'STOXX','EPA':'STOXX','SHA':'CSI 300','SHE':'CSI 300','CRYPTO':'BTC'};
 var INDEX_1M={};
 function rsiOf(r){
     var tk=r[3]||'';var p=tk.indexOf(':')>=0?tk.split(':')[0]:'';
