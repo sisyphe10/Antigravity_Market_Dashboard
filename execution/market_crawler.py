@@ -493,6 +493,8 @@ def crawl_global_indices():
 #   201102250059 = 电池级碳酸锂 (Battery-Grade Lithium Carbonate)
 #   202106020003 = 电池级氢氧化锂(微粉) (Battery-Grade Lithium Hydroxide, Micro Powder)
 SMM_LITHIUM_URL = 'https://hq.smm.cn/h5/Li2CO3-battery-price'
+# SMM 탄산리튬 지수(202212050001)/스팟 평균 비율 — 2026-08-22 검증: 21일 겹침 평균 +1.00%, std 0.18%p
+SMM_INDEX_SPOT_RATIO = 1.0100
 SMM_LITHIUM_PRODUCTS = {
     '201102250059': 'Lithium Carbonate',
     '202106020003': 'Lithium Hydroxide',
@@ -532,8 +534,28 @@ def crawl_smm_lithium():
             continue
         high, low, avg, renew_date = m.groups()
         avg_val = float(avg)
+        if avg_val <= 0:
+            print(f"\u26a0\ufe0f {save_name} (id={pid}) \uac12 \uc228\uae40(hide_data) \u2014 \uc2a4\ud0b5")
+            continue
         collected_data.append((renew_date, save_name, avg_val, 'BATTERY_METAL'))
         print(f"✓ {save_name} ({renew_date}): avg {avg_val:,.0f} CNY/톤 (L {low} ~ H {high})")
+
+    # 폴백: 스팟 시세가 숨김(hide_data, 2026-08-21~)이면 SMM 전지급 탄산리튬 지수로 승계.
+    # 지수 히스토리(약 1개월 롤링)를 보정(÷SMM_INDEX_SPOT_RATIO)해 전량 append — save_to_csv가
+    # (날짜, 제품명) 중복을 걸러주므로 기존 스팟 값은 보존되고 빈 날짜만 채워진다.
+    if not any(name == 'Lithium Carbonate' for _, name, _, _ in collected_data):
+        hist = re.findall(
+            r'"product_id":"202212050001","average":([0-9.]+),"renew_date":"(\d{4}-\d{2}-\d{2})"',
+            html,
+        )
+        for avg, renew_date in hist:
+            adj = float(round(float(avg) / SMM_INDEX_SPOT_RATIO))
+            collected_data.append((renew_date, 'Lithium Carbonate', adj, 'BATTERY_METAL'))
+        if hist:
+            latest = max(hist, key=lambda x: x[1])
+            print(f"↪️ 탄산리튬 지수 승계 {len(hist)}건 (최신 {latest[1]}: {float(latest[0]):,.0f} → 보정 {float(latest[0]) / SMM_INDEX_SPOT_RATIO:,.0f})")
+        else:
+            print("⚠️ 탄산리튬 지수 히스토리도 미발견 — 승계 실패")
 
     if collected_data:
         save_to_csv(collected_data)
