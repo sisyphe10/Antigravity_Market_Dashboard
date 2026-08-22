@@ -47,6 +47,7 @@ RETRY_SLEEP = 60                                 # 재시도 라운드 전 대�
 # 티커 prefix → yfinance suffix + 통화 매핑
 PREFIX_MAP = {
     'KRX':         {'suffix': '.KS', 'currency': 'KRW'},   # KOSPI
+    'CRYPTO':      {'suffix': '',    'currency': 'USD'},   # 암호화폐 (yfinance BTC-USD 등)
     'KOSDAQ':      {'suffix': '.KQ', 'currency': 'KRW'},
     'NASDAQ':      {'suffix': '',    'currency': 'USD'},
     'NYSE':        {'suffix': '',    'currency': 'USD'},
@@ -69,7 +70,7 @@ ALLOWED_SECTORS = {
     '반도체와반도체장비', '보험', '부동산', '상업서비스와공급품', '소매(유통)', '소재',
     '소프트웨어와서비스', '식품과기본식료품소매', '식품,음료,담배', '에너지', '운송',
     '유틸리티', '은행', '자동차와부품', '자본재', '전기통신서비스', '제약과생물공학',
-    '증권', '호텔,레스토랑,레저등',
+    '증권', '호텔,레스토랑,레저등', '암호화폐',
 }
 
 # 통화 → KRW 환율 fetch (yfinance Forex 페어). 시가총액 KRW 환산용.
