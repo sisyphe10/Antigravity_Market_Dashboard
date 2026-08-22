@@ -429,6 +429,18 @@ def translate_transcript(transcript_id: int) -> dict:
     _g = check_collect(row.get('source_url') or '', prepared, qa, _fa)
     if not _g.ok:
         logger.warning(f'[translator] GATE REJECT transcript={transcript_id} {_g.reasons}')
+        # 2026-08-22 (codex 검토 반영): 결정적(URL·본문) 게이트 거부는 영구 격리 —
+        # 반환만 하면 다음 배치가 같은 행을 다시 뽑아 슬롯을 소모한다(독약 루프).
+        # 격리 행은 아침 다이제스트 '게이트 격리' 섹션에 노출돼 수동확인 대상.
+        # 청크·출력 게이트(모델 출력 의존, 확률적)는 재시도 가치가 있어 격리하지 않는다.
+        if not DRY_RUN:
+            db.mark_translation_skipped(transcript_id, 1)
+            _fid = row.get('filing_id')
+            if _fid and not db.filing_has_translated_transcript(_fid):
+                # 진짜 전문이 나중에 게재될 수 있으니 재수집 대상으로 (2026-07-31 의미론)
+                from datetime import datetime, timedelta, timezone
+                _nxt = (datetime.now(timezone.utc) + timedelta(days=1)).isoformat(timespec='seconds')
+                db.requeue_gate_blocked_job(_fid, _nxt)
         return {'skip': True, 'transcript_id': transcript_id,
                 'reason': 'gate_reject', 'gate_reasons': _g.reasons}
 
@@ -572,19 +584,26 @@ def translate_transcript(transcript_id: int) -> dict:
     }
 
 
-def translate_pending_transcripts(limit: int = 3, oldest_first: bool = False) -> list[dict]:
+def translate_pending_transcripts(limit: int = 3, oldest_first: bool = False,
+                                  exclude_ids: set[int] | None = None) -> list[dict]:
     """미번역 transcripts 일괄 처리. 비용 보호용 limit 작게.
 
     oldest_first=True = 새벽 백로그 모드 (설계 C9 기아 방지).
+    exclude_ids = 같은 실행에서 실패한 항목 재선택 제외 (2026-08-22 독약 루프 차단).
     ★Auth/Quota 터미널 예외는 삼키지 않고 재전파한다 (설계 C4) —
       삼키면 다음 항목도 계속 호출해 쿼터 소진 상태에서 헛돈다.
     """
     db.init_db()
-    rows = db.get_pending_translation_transcripts(limit=limit, oldest_first=oldest_first)
+    rows = db.get_pending_translation_transcripts(limit=limit, oldest_first=oldest_first,
+                                                  exclude_ids=exclude_ids)
     results = []
     for r in rows:
         try:
-            results.append(translate_transcript(r['id']))
+            res = translate_transcript(r['id'])
+            # 실패 귀속용 id 보강은 exclude 모드에서만 — 주간 러너(미지정) 결과는 불변
+            if exclude_ids is not None and isinstance(res, dict):
+                res.setdefault('transcript_id', r['id'])
+            results.append(res)
         except (headless_llm.HeadlessAuthError, headless_llm.HeadlessQuotaError):
             raise
         except Exception as e:
@@ -593,13 +612,20 @@ def translate_pending_transcripts(limit: int = 3, oldest_first: bool = False) ->
     return results
 
 
-def process_pending(limit: int = 5, oldest_first: bool = False) -> list[dict]:
+def process_pending(limit: int = 5, oldest_first: bool = False,
+                    exclude_ids: set[int] | None = None) -> list[dict]:
     """stage='fetched'인 filings 중 분석 필요한 것들 처리.
 
     oldest_first=True = 새벽 백로그 모드 (설계 C9). 터미널 예외 재전파는 위와 동일.
+    exclude_ids = 같은 실행에서 실패한 filing 재선택 제외 (2026-08-22 독약 루프 차단).
     """
     db.init_db()
     order = 'ASC' if oldest_first else 'DESC'
+    excl_sql = ''
+    excl_params: list[int] = []
+    if exclude_ids:
+        excl_sql = f"AND f.id NOT IN ({','.join('?' * len(exclude_ids))})"
+        excl_params = sorted(exclude_ids)
     conn = db.get_conn()
     try:
         # severity != INFO 인 fetched filings 중 아직 analyzed 단계 없는 것
@@ -615,9 +641,10 @@ def process_pending(limit: int = 5, oldest_first: bool = False) -> list[dict]:
                   AND f2.document_type = f.document_type
                   AND f2.stage = 'analyzed'
               )
+              {excl_sql}
             ORDER BY f.filed_at {order} LIMIT ?
             """,
-            (limit,),
+            (*excl_params, limit),
         ).fetchall()
     finally:
         conn.close()
@@ -625,7 +652,11 @@ def process_pending(limit: int = 5, oldest_first: bool = False) -> list[dict]:
     results = []
     for r in rows:
         try:
-            results.append(process_filing(r['id']))
+            res = process_filing(r['id'])
+            # 실패 귀속용 id 보강은 exclude 모드에서만 — 주간 러너(미지정) 결과는 불변
+            if exclude_ids is not None and isinstance(res, dict):
+                res.setdefault('filing_id', r['id'])
+            results.append(res)
         except (headless_llm.HeadlessAuthError, headless_llm.HeadlessQuotaError):
             raise
         except Exception as e:

@@ -44,29 +44,50 @@ def main() -> int:
     rc = 0
     items = 0
     try:
+        # 실행 내 실패 항목 재선택 제외 — 독약 1건이 배치 전체를 소진하는 루프 차단
+        # (2026-08-22 실사고: 오수집 tid 284가 청크 게이트에 매번 걸리며 이틀 연속
+        #  60슬롯 전부 소진. 게이트는 정상 작동, 재선택 로직 부재가 원인)
+        failed_filings: set[int] = set()
+        failed_tids: set[int] = set()
+
         # ① 분석 백로그 (오래된 것 먼저)
         while not _deadline_passed() and items < MAX_ITEMS:
-            batch = translator.process_pending(limit=1, oldest_first=True)
+            batch = translator.process_pending(limit=1, oldest_first=True,
+                                               exclude_ids=failed_filings)
             if not batch:
                 break
             items += 1
-            r = batch[0]
-            ok = isinstance(r, dict) and not r.get('error') and not r.get('skip')
+            r = batch[0] if isinstance(batch[0], dict) else {}
+            ok = bool(r) and not r.get('error') and not r.get('skip')
             stats['analysis_ok' if ok else 'analysis_fail'] += 1
             logger.info(f"[night_llm] 분석 {r.get('ticker', r.get('filing_id'))}: "
                         f"{'OK' if ok else r.get('error') or r.get('reason')}")
+            if not ok:
+                fid = r.get('filing_id')
+                if fid is None:
+                    # id 미상이면 제외가 불가능 → 같은 항목 무한 재시도 방지 위해 단계 종료
+                    logger.error('[night_llm] 분석 실패 항목 filing_id 미상 — 분석 단계 중단')
+                    break
+                failed_filings.add(fid)
 
         # ② 대량 번역 (오래된 것 먼저)
         while not _deadline_passed() and items < MAX_ITEMS:
-            batch = translator.translate_pending_transcripts(limit=1, oldest_first=True)
+            batch = translator.translate_pending_transcripts(limit=1, oldest_first=True,
+                                                             exclude_ids=failed_tids)
             if not batch:
                 break
             items += 1
-            r = batch[0]
-            ok = isinstance(r, dict) and r.get('translated')
+            r = batch[0] if isinstance(batch[0], dict) else {}
+            ok = bool(r.get('translated'))
             stats['translate_ok' if ok else 'translate_fail'] += 1
             logger.info(f"[night_llm] 번역 tid={r.get('transcript_id')}: "
                         f"{'OK' if ok else r.get('error') or r.get('reason')}")
+            if not ok:
+                tid = r.get('transcript_id')
+                if tid is None:
+                    logger.error('[night_llm] 번역 실패 항목 transcript_id 미상 — 번역 단계 중단')
+                    break
+                failed_tids.add(tid)
 
         if _deadline_passed():
             stats['partial'] = True

@@ -33,6 +33,13 @@ from dataclasses import dataclass, field
 # ── 임계값 ────────────────────────────────────────────────────────
 MIN_RAW_CHARS = 15_000   # 2026-08-17 18_000→15_000: 소형주 정상 짧은 콜(LTBR 17,205자) 실전 오차단. 의심 41/46건은 14,816자 이하라 차단 유지
 URL_BLOCKLIST = ('instant-alerts/',)
+# 목록·허브·랜딩 페이지 — 전문 상세가 아닌 인덱스 URL (2026-08-22 ADI 실사고:
+# matcher가 marketbeat.com/earnings/transcripts/ 허브(필터 메뉴 텍스트 26K자)를
+# conf 0.81로 통과시킴. 랜딩 /stocks/<exch>/<tick>/earnings/ 도 동형 사고 전례
+# (GOOGL·TSLA 7/23). 정상 수집 URL은 전부 /earnings/reports/<slug>/ 라 미충돌.
+_RE_URL_INDEX = re.compile(
+    r'(?:^|[./])marketbeat\.com/(?:earnings(?:/transcripts)?|stocks/[^/]+/[^/]+/earnings)'
+    r'/?(?:[?#].*)?$', re.I)
 URL_DATE_TOLERANCE_DAYS = 25
 VINTAGE_TOLERANCE_MONTHS = 4          # 본문/URL 연월이 공시월과 이만큼 벌어지면 다른 분기
 # 2026-08-03 승격: 분할기 v1.1로 오염을 걷어낸 건강 표본(n=40, 분할 불변·번역 존재)
@@ -129,6 +136,8 @@ def check_source(url: str, filed_at: str) -> GateResult:
     for bad in URL_BLOCKLIST:
         if bad in low:
             reasons.append(f'url_blocklist:{bad}')
+    if _RE_URL_INDEX.search(low):
+        reasons.append('url_index_page')
     if not filed_at:
         return _fail(reasons)
     fy, fm, fd = int(filed_at[:4]), int(filed_at[5:7]), int(filed_at[8:10])

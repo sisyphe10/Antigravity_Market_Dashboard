@@ -491,6 +491,33 @@ def requeue_gate_blocked_job(filing_id: int, next_attempt_at: str) -> None:
         conn.close()
 
 
+def mark_translation_skipped(transcript_id: int, value: int = 1) -> None:
+    """번역 부적격 마킹 — 1=게이트 격리 / 2=superseded (2026-08-03 의미론).
+
+    2026-08-22: 번역 진입부의 결정적 게이트 거부를 영구 격리하기 위해 신설 —
+    마킹 없이 반환만 하면 다음 배치가 같은 행을 다시 뽑아 슬롯을 소모한다.
+    """
+    conn = get_conn()
+    try:
+        conn.execute("UPDATE transcripts SET translation_skipped = ? WHERE id = ?",
+                     (value, transcript_id))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def filing_has_translated_transcript(filing_id: int) -> bool:
+    """해당 filing 에 정상 번역본이 하나라도 있는가 (격리 시 재수집 필요 판단용)."""
+    conn = get_conn()
+    try:
+        r = conn.execute(
+            "SELECT 1 FROM transcripts WHERE filing_id = ? AND translated_kr IS NOT NULL LIMIT 1",
+            (filing_id,)).fetchone()
+        return bool(r)
+    finally:
+        conn.close()
+
+
 def _load_starred_tickers() -> set | None:
     """관심종목 별표(universe_stars_v1). 읽기 실패 시 None(필터 미적용)."""
     import json
@@ -502,13 +529,17 @@ def _load_starred_tickers() -> set | None:
         return None
 
 
-def get_pending_translation_transcripts(limit: int = 5, oldest_first: bool = False) -> list[dict]:
+def get_pending_translation_transcripts(limit: int = 5, oldest_first: bool = False,
+                                        exclude_ids: set[int] | None = None) -> list[dict]:
     """번역 안 된 transcripts. 기본 최신순 / oldest_first=True 는 새벽 백로그용 오래된 순.
 
     2026-07-31 사용자 정책: 수집은 전 종목, **번역은 별표 종목만**.
     (백로그 62건이 하루 3건 처리량을 3주치 넘겨 적체됐던 문제의 근본 해법)
     2026-08-18: oldest_first 는 SQL LIMIT 없이 전량 조회 후 별표 필터 —
     limit*10 창 밖의 오래된 별표 pending 을 놓치는 기아를 차단 (codex C9).
+    2026-08-22: exclude_ids = 같은 실행에서 이미 실패한 transcript 재선택 제외
+    (night_llm 독약 루프 차단). ★DESC(최신순) 경로는 SQL LIMIT 창 안에서만
+    걸러지므로 exclude_ids 는 oldest_first(전량 조회) 경로에서만 쓸 것.
     """
     stars = _load_starred_tickers()
     conn = get_conn()
@@ -532,6 +563,8 @@ def get_pending_translation_transcripts(limit: int = 5, oldest_first: bool = Fal
         for r in rows:
             d = dict(r)
             tk = d.pop('_tk', '')
+            if exclude_ids and d['id'] in exclude_ids:
+                continue
             if stars is not None and tk.upper() not in stars:
                 continue
             out.append(d)
