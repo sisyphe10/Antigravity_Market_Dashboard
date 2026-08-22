@@ -1487,6 +1487,7 @@ def _build_indices_chart_section(category_label='Indices'):
 CMB_COUNTRY_OVERRIDES = {
     'Lithium Carbonate': 'China',            # 电池级碳酸锂 현물 (CNY/톤)
     'Lithium Hydroxide': 'China',
+    'Lithium Hydroxide Sunsirs': 'China',  # Sunsirs 현물 (2026-08-22 신설, SMM 숨김 대체)
     'Poly Silicon': 'China',                 # 중국 현물 (CNY/톤)
     'SCFI': 'China',                         # 상하이발 컨테이너 운임
     'SCFI Comprehensive Index': 'China',
@@ -1672,7 +1673,7 @@ CMB_SERIES_UNITS = {
     # COMMODITIES
     'Gold': '$/oz', 'Silver': '$/oz', 'Copper': '$/lb', 'WTI': '$/bbl', 'Brent': '$/bbl',
     'Natural Gas': '$/MMBtu', 'Wheat': '¢/bu', 'Uranium': '$/lb',
-    'Lithium Carbonate': '위안/톤', 'Lithium Hydroxide': '위안/톤', 'Poly Silicon': '위안/톤',
+    'Lithium Carbonate': '위안/톤', 'Lithium Hydroxide': '위안/톤', 'Lithium Hydroxide Sunsirs': '위안/톤', 'Poly Silicon': '위안/톤',
     'KRX GOLD Trading Volume': '억원', 'KRX ETS Trading Volume': '억원',
     'KRX ETS (KAU25)': '원/톤', 'SMP': '원/kWh', 'H100 GPU Rental': '$/h',
     # MEMORY
@@ -2048,7 +2049,7 @@ def _build_combined_chart_section():
                 {'display': 'Wheat',                      'csv': 'Wheat',                      'color': '#F39C12'},
                 {'display': 'Uranium',                    'csv': 'Uranium',                    'color': '#27AE60'},
                 {'display': 'Lithium Carbonate',          'csv': 'Lithium Carbonate',          'color': '#8E44AD'},
-                {'display': 'Lithium Hydroxide',          'csv': 'Lithium Hydroxide',          'color': '#9B59B6'},
+                {'display': 'Lithium Hydroxide',          'csv': 'Lithium Hydroxide Sunsirs',  'color': '#9B59B6'},  # 2026-08-22 소스 교체(SMM 숨김) — 롤백=csv를 'Lithium Hydroxide'로
                 {'display': 'Poly Silicon',               'csv': 'Poly Silicon',               'color': '#3498DB'},
                 {'display': 'SCFI',                       'csv': 'SCFI Comprehensive Index',   'color': '#E74C3C'},
                 {'display': 'KRX ETS (KAU25)',            'csv': 'KRX ETS (KAU25)',            'color': '#1ABC9C'},
@@ -7694,6 +7695,7 @@ def create_dashboard():
                     'Uranium',
                     'Lithium Carbonate',
                     'Lithium Hydroxide',
+                    'Lithium Hydroxide Sunsirs',
                     'Poly Silicon',
                     'SCFI Comprehensive Index',
                     'KRX ETS  KAU25',

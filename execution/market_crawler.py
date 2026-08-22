@@ -639,6 +639,71 @@ def crawl_sunsirs_polysilicon():
 # ==========================================
 # Main Execution
 # ==========================================
+
+# ==========================================
+# 7b. [BATTERY_METAL] Sunsirs — 수산화리튬 현물 (CNY/톤, daily)
+# SMM 전지급 수산화리튬이 2026-08-21부로 숨김(hide_data) 처리되어 신규 시리즈로 대체.
+# 구 'Lithium Hydroxide'(SMM) 시리즈는 2026-08-20에서 동결 — 스프레드 불안정(-2.4~-4.8%)으로 승계 안 함.
+# ==========================================
+SUNSIRS_LIOH_URL = 'https://www.sunsirs.com/uk/prodetail-1368.html'
+
+def crawl_sunsirs_lithium_hydroxide():
+    """Sunsirs 수산화리튬 현물 가격 수집 (CNY/톤). HW_CHECK cookie 2단계는 폴리실리콘과 동일."""
+    print(f"\n🔋 Sunsirs 수산화리튬 크롤링 시작")
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36',
+    }
+    try:
+        r1 = requests.get(SUNSIRS_LIOH_URL, headers=headers, timeout=30)
+        if r1.status_code != 200:
+            print(f"❌ Sunsirs LiOH 1차 응답 오류: HTTP {r1.status_code}")
+            return
+        m_cookie = re.search(r'var\s+_0x2\s*=\s*"([a-f0-9]+)"', r1.text)
+        if m_cookie:
+            r2 = requests.get(
+                SUNSIRS_LIOH_URL,
+                headers=headers,
+                cookies={'HW_CHECK': m_cookie.group(1)},
+                timeout=30,
+            )
+            if r2.status_code != 200:
+                print(f"❌ Sunsirs LiOH 2차 응답 오류: HTTP {r2.status_code}")
+                return
+            html = r2.text
+        else:
+            html = r1.text
+    except Exception as e:
+        print(f"❌ Sunsirs LiOH 요청 실패: {e}")
+        return
+
+    rows = re.findall(
+        r'<td>Lithium hydroxide</td><td>[^<]*</td><td>([\d.]+)</td><td>(\d{4}-\d{2}-\d{2})</td>',
+        html,
+    )
+    if not rows:
+        print("⚠️ Sunsirs LiOH 매칭 실패 — 페이지 구조 변경 가능성")
+        return
+
+    collected_data = []
+    for val, d in rows:
+        try:
+            price = float(val)
+            weekday = datetime.strptime(d, '%Y-%m-%d').weekday()
+        except ValueError:
+            continue
+        # 주말 행은 금요일 값 이월이므로 제외 (구 SMM 시리즈와 동일하게 거래일만 적재)
+        if price <= 0 or weekday >= 5:
+            continue
+        collected_data.append((d, 'Lithium Hydroxide Sunsirs', price, 'BATTERY_METAL'))
+
+    if collected_data:
+        save_to_csv(collected_data)
+        latest = max(collected_data, key=lambda x: x[0])
+        print(f"✓ Lithium Hydroxide Sunsirs: {len(collected_data)}건 (최신 {latest[0]}: {latest[2]:,.0f} CNY/톤)")
+    else:
+        print("⚠️ Sunsirs LiOH 수집 결과 없음")
+
+
 def main():
     print("🚀 전체 크롤링 시작")
     setup_csv()
@@ -654,6 +719,7 @@ def main():
     crawl_global_indices()
     crawl_smm_lithium()
     crawl_sunsirs_polysilicon()
+    crawl_sunsirs_lithium_hydroxide()
 
     # KPX 육지 SMP (한국 도매 전기 가격, 가중평균 원/kWh)
     try:
