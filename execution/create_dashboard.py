@@ -2791,10 +2791,8 @@ def _build_combined_chart_section():
                 if (th) th.classList.toggle('on', cmbStarOnly);
                 window.cmbApplyPin();
             }
-            // 별표 행을 테이블 맨 위 '복제 블록'으로 고정 + 구분행 삽입 (2026-08-03 개편).
-            // 원본 행은 제자리에 그대로 남고, 상단 블록은 복제본(cmb-pin-clone)으로 매번 재구성.
-            // 행 핸들러가 전부 인라인 onclick 이라 cloneNode 로 동작까지 복제된다.
-            // 상태를 DOM(td.cmb-star.on)에서 읽으므로 정렬·필터 어느 경로에서 불러도 동작한다.
+            // (2026-08-22) 상단 별표 복제 블록 폐지 — 별표 모아보기는 ★ 퀵필터 전용.
+            // cmbApplyPin 은 과거 복제본·구분행 청소만 수행 (호출부 호환 유지).
             window.cmbApplyPin = function() {
                 var tbody = document.querySelector('#cmbSideTable tbody');
                 if (!tbody) return;
@@ -2803,47 +2801,6 @@ def _build_combined_chart_section():
                 tbody.querySelectorAll('tr.cmb-pin-clone').forEach(function(r) {
                     r.parentNode.removeChild(r);
                 });
-                if (window.cmbQuickActive) return;   // 퀵필터 표시 중 — 매칭 원본만 (복제 중복 방지)
-                var pinned = [];
-                tbody.querySelectorAll('tr.cmb-series-row').forEach(function(r) {
-                    var td = r.querySelector('td.cmb-star');
-                    if (td && td.classList.contains('on')) pinned.push(r);
-                });
-                if (!pinned.length) return;
-                // 표시 순서 = 고정 규칙 (2026-08-03 사용자 확정: 드래그 순서 폐기).
-                // 주기(Daily>Weekly>Monthly>Quarterly) → Country(Korea>US>China>Japan>Taiwan>Europe>Global).
-                // 동순위는 테이블 원래 순서 유지(sort 안정성). cmbStarList 는 별표 집합 저장용으로만 사용.
-                var FR = { Daily: 0, Weekly: 1, Monthly: 2, Quarterly: 3 };
-                var CR = { Korea: 0, US: 1, China: 2, Japan: 3, Taiwan: 4, Europe: 5, Global: 6 };
-                function cmbPinKey(r) {
-                    var f = FR[(r.cells[1] ? r.cells[1].textContent.trim() : '')];
-                    var c = CR[r.getAttribute('data-country') || ''];
-                    return [f === undefined ? 9 : f, c === undefined ? 9 : c];
-                }
-                pinned.sort(function(a, b) {
-                    var ka = cmbPinKey(a), kb = cmbPinKey(b);
-                    return (ka[0] - kb[0]) || (ka[1] - kb[1]);
-                });
-                var tr = document.createElement('tr');
-                tr.id = 'cmbPinHead';
-                tr.className = 'cmb-pin-head';
-                var td2 = document.createElement('td');
-                td2.colSpan = 8;
-                td2.textContent = '';   // 텍스트 없는 구분선 — 개수는 툴바 버튼이 표시
-                tr.appendChild(td2);
-                var shown = 0;
-                var ref = null;
-                pinned.forEach(function(r) {
-                    var c = r.cloneNode(true);   // active 클래스·틴트·tooltip 포함 복제
-                    c.classList.add('cmb-pin-clone', 'cmb-pinned');
-                    c.style.display = r.style.display;   // 필터 결과 미러
-                    if (r.style.display !== 'none') shown++;
-                    if (ref === null) { tbody.insertBefore(c, tbody.firstChild); }
-                    else { ref.parentNode.insertBefore(c, ref.nextSibling); }
-                    ref = c;
-                });
-                tr.style.display = shown ? '' : 'none';
-                if (ref) ref.parentNode.insertBefore(tr, ref.nextSibling);
             };
             window.cmbToggleStar = function(td, ev) {
                 ev.stopPropagation();
