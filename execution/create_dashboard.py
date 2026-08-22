@@ -2370,6 +2370,7 @@ def _build_combined_chart_section():
             '#cmbSideTable td.cmb-star.upd{color:#4ade80 !important;}'
             '#cmbSideTable td.cmb-star.on{color:#67e0f4 !important;}'
             '#cmbSideTable #cmbStarTh{color:#67e0f4 !important;}'
+            '#cmbSideTable #cmbStarTh.upd-on{color:#4ade80 !important;}'
             '#cmbSideTable td.cmb-price,#cmbSideTable #cmbPriceTh{border-left:2px solid #000;}'
             '#cmbScrollBox{border:2px solid #000;}'
             # 스크롤바 유무로 내부 폭이 ±11px 출렁여 필터 토글 시 표가 움직임 → 거터 상시 확보
@@ -2788,7 +2789,10 @@ def _build_combined_chart_section():
                     td.classList.toggle('on', on);
                 });
                 var th = document.getElementById('cmbStarTh');
-                if (th) th.classList.toggle('on', cmbStarOnly);
+                if (th) {
+                    th.classList.toggle('on', cmbStarOnly);
+                    th.classList.toggle('upd-on', cmbUpdOnly);   // upd 퀵필터 중 = 헤더 ★ 에메랄드
+                }
                 window.cmbApplyPin();
             }
             // (2026-08-22) 상단 별표 복제 블록 폐지 — 별표 모아보기는 ★ 퀵필터 전용.
@@ -3657,11 +3661,12 @@ def _build_combined_chart_section():
                         .cmb-ma-btn {{ font-family:inherit;font-size:12px;font-weight:600;padding:4px 12px;border:1px solid #d1d5db;border-radius:20px;background:#f3f4f6;color:#888;cursor:pointer; }}
                         .cmb-ma-btn.active {{ background:#222;color:#fff;border-color:#222; }}
                         .cmb-ma-disabled .cmb-ma-btn {{ opacity:0.35;pointer-events:none; }}
-                        /* ★ 퀵필터 색 구분 (2026-08-17): watchlist=시안 채움, update=에메랄드그린 채움.
-                           항상 채움(식별용) — active 는 진한 테두리+볼드로 구분. .cmb-ma-btn.active 뒤라 우선. */
-                        .cmb-quick-btn[data-qv="star"] {{ background:#67e0f4;color:#0a3038;border-color:#67e0f4; }}
-                        .cmb-quick-btn[data-qv="upd"] {{ background:#4ade80;color:#10301c;border-color:#4ade80; }}
-                        .cmb-quick-btn[data-qv="star"].active,.cmb-quick-btn[data-qv="upd"].active {{ border-color:#222;box-shadow:inset 0 0 0 1px #222;font-weight:700; }}
+                        /* ★ 퀵필터 (2026-08-22 개편): 안 누름=색 테두리+색 별(빈 배경), 누름=색 채움.
+                           .cmb-ma-btn.active 뒤라 우선. */
+                        .cmb-quick-btn[data-qv="star"] {{ background:#f3f4f6;color:#67e0f4;border-color:#67e0f4; }}
+                        .cmb-quick-btn[data-qv="upd"] {{ background:#f3f4f6;color:#4ade80;border-color:#4ade80; }}
+                        .cmb-quick-btn[data-qv="star"].active {{ background:#67e0f4;color:#0a3038;border-color:#67e0f4;font-weight:700; }}
+                        .cmb-quick-btn[data-qv="upd"].active {{ background:#4ade80;color:#10301c;border-color:#4ade80;font-weight:700; }}
                     </style>
                     <div id="cmbMaRow" style="display:flex;gap:6px;align-items:center;margin-bottom:12px;font-size:13px;">
                         <span style="color:#555;font-weight:600;">이동평균</span>
