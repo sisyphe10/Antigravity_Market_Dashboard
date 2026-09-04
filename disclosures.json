@@ -1,6 +1,15 @@
 {
-  "updated_at": "2026-09-04 16:30 KST",
+  "updated_at": "2026-09-04 17:45 KST",
   "items": [
+    {
+      "rcept_no": "20260904800642",
+      "code": "000660",
+      "name": "SK하이닉스",
+      "date": "2026-09-04",
+      "title": "풍문또는보도에대한해명(미확정)",
+      "summary": "",
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260904800642"
+    },
     {
       "rcept_no": "20260904800020",
       "code": "000720",
