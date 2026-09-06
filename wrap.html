@@ -345,7 +345,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
     </div>
 
     <div id="mainContent" class="pw-hidden has-sidebar">
-    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><span class="wrap-updated">Updated: 2026-09-07 08:20:24 KST</span></div></nav><div class="wrap-strip"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div>
+    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><span class="wrap-updated">Updated: 2026-09-07 08:24:51 KST</span></div></nav><div class="wrap-strip"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div>
     <aside class="sidebar wrap-sidebar" id="wrapSectionNav" aria-label="WRAP navigation"><div class="wrap-side-group on" data-side-for="dashboard"><a href="#wrap-sec-chart" onclick="wrapGoSection('wrap-sec-chart');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-chart">CHART</a><a href="#wrap-sec-return" onclick="wrapGoSection('wrap-sec-return');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-return">RETURN</a><a href="#wrap-sec-aum" onclick="wrapGoSection('wrap-sec-aum');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-aum">AUM</a><a href="#wrap-sec-portfolio" onclick="wrapGoSection('wrap-sec-portfolio');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-portfolio">Portfolio</a><a href="#wrap-sec-sector" onclick="wrapGoSection('wrap-sec-sector');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-sector">SECTOR WEIGHT</a></div><div class="wrap-side-group" data-side-for="order" id="wrapSideOrder"></div><div class="wrap-side-group" data-side-for="contribution" id="wrapSideContrib"></div><div class="wrap-side-group" data-side-for="fee"><a href="#" onclick="feeSwitchSub('rate');return false;" class="sidebar-link active" data-side-fee="rate">요율</a><a href="#" onclick="feeSwitchSub('revenue');return false;" class="sidebar-link" data-side-fee="revenue">매출</a></div></aside>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -1150,6 +1150,43 @@ function cmbPeerCharts(self) {
                     ctx.restore();
                 }
             };
+            // 이벤트 세로선 (2026-09-07, 사용자 지시): 데이터셋 `_cmbEvents` = [{date:'YYYY-MM-DD', label, color}]
+            //   그 날짜(휴일이면 7일 이내 다음 관측일) 위치에 색 점선 + 상단 라벨. 표시 구간 밖이면 안 그린다.
+            //   첫 소비자 = DATA 'KRX ETS (KAU 연속)' 매년 9/1 만기 전환. `_cmbEvents` 없는 데이터셋엔 무영향.
+            var cmbEventLinePlugin = {
+                id: 'cmbEventLine',
+                afterDatasetsDraw: function(chart) {
+                    var labels = chart.data.labels || [], xs = chart.scales.x, area = chart.chartArea;
+                    if (!xs || !area || !labels.length) return;
+                    var ctx = chart.ctx, drawn = {};
+                    (chart.data.datasets || []).forEach(function(ds, di) {
+                        if (!ds._cmbEvents || !chart.isDatasetVisible(di)) return;
+                        ds._cmbEvents.forEach(function(ev) {
+                            var key = ev.date + '|' + (ev.label || '');
+                            if (drawn[key]) return;
+                            var idx = -1;
+                            for (var i = 0; i < labels.length; i++) { if (String(labels[i]) >= ev.date) { idx = i; break; } }
+                            if (idx < 0) return;
+                            var gap = (new Date(String(labels[idx])) - new Date(ev.date)) / 864e5;
+                            if (!(gap >= 0 && gap <= 7)) return;
+                            drawn[key] = true;
+                            var x = xs.getPixelForValue(idx), col = ev.color || '#E67E22';
+                            ctx.save();
+                            ctx.strokeStyle = col; ctx.setLineDash([6, 4]); ctx.lineWidth = 1.6;
+                            ctx.beginPath(); ctx.moveTo(x, area.top); ctx.lineTo(x, area.bottom); ctx.stroke();
+                            if (ev.label) {
+                                ctx.setLineDash([]);
+                                ctx.font = 'bold ' + window._aoeFpx(11) + 'px sans-serif';
+                                ctx.fillStyle = col; ctx.textBaseline = 'top';
+                                var tw = ctx.measureText(ev.label).width;
+                                var tx = (x + 5 + tw > area.right) ? x - 5 - tw : x + 5;
+                                ctx.fillText(ev.label, tx, area.top + 3);
+                            }
+                            ctx.restore();
+                        });
+                    });
+                }
+            };
             var cmbStackTotalPlugin = {
                 id: 'cmbStackTotals',
                 afterDatasetsDraw: function(chart) {
@@ -1471,7 +1508,7 @@ function cmbPeerCharts(self) {
                 var _mainPlugins = _isBY ? [cmbCrosshairPlugin, cmbAxisUnitPlugin, cmbYearLinePlugin]
                     : (_preset === 'stackedBar') ? [cmbStackTotalPlugin, cmbAxisUnitPlugin]
                     : ((_preset === 'mini') ? [cmbCrosshairPlugin, cmbAxisUnitPlugin]
-                    : [cmbEndLabelPlugin, cmbCrosshairPlugin, cmbPinPlugin]);
+                    : [cmbEndLabelPlugin, cmbCrosshairPlugin, cmbPinPlugin, cmbEventLinePlugin]);   // +이벤트 세로선 (2026-09-07)
                 var _padTop = _isBY ? 26 : (_preset === 'stackedBar') ? 34 : ((_preset === 'mini') ? 20 : 6);   // 34 = 15px 축단위 주석+합계 라벨 자리 (24는 (억원) 상단 잘림, 2026-08-19)
                 if (_preset !== 'line') _rightPad = 8;
 
@@ -2986,6 +3023,43 @@ function cmbPeerCharts(self) {
                     ctx.restore();
                 }
             };
+            // 이벤트 세로선 (2026-09-07, 사용자 지시): 데이터셋 `_cmbEvents` = [{date:'YYYY-MM-DD', label, color}]
+            //   그 날짜(휴일이면 7일 이내 다음 관측일) 위치에 색 점선 + 상단 라벨. 표시 구간 밖이면 안 그린다.
+            //   첫 소비자 = DATA 'KRX ETS (KAU 연속)' 매년 9/1 만기 전환. `_cmbEvents` 없는 데이터셋엔 무영향.
+            var cmbEventLinePlugin = {
+                id: 'cmbEventLine',
+                afterDatasetsDraw: function(chart) {
+                    var labels = chart.data.labels || [], xs = chart.scales.x, area = chart.chartArea;
+                    if (!xs || !area || !labels.length) return;
+                    var ctx = chart.ctx, drawn = {};
+                    (chart.data.datasets || []).forEach(function(ds, di) {
+                        if (!ds._cmbEvents || !chart.isDatasetVisible(di)) return;
+                        ds._cmbEvents.forEach(function(ev) {
+                            var key = ev.date + '|' + (ev.label || '');
+                            if (drawn[key]) return;
+                            var idx = -1;
+                            for (var i = 0; i < labels.length; i++) { if (String(labels[i]) >= ev.date) { idx = i; break; } }
+                            if (idx < 0) return;
+                            var gap = (new Date(String(labels[idx])) - new Date(ev.date)) / 864e5;
+                            if (!(gap >= 0 && gap <= 7)) return;
+                            drawn[key] = true;
+                            var x = xs.getPixelForValue(idx), col = ev.color || '#E67E22';
+                            ctx.save();
+                            ctx.strokeStyle = col; ctx.setLineDash([6, 4]); ctx.lineWidth = 1.6;
+                            ctx.beginPath(); ctx.moveTo(x, area.top); ctx.lineTo(x, area.bottom); ctx.stroke();
+                            if (ev.label) {
+                                ctx.setLineDash([]);
+                                ctx.font = 'bold ' + window._aoeFpx(11) + 'px sans-serif';
+                                ctx.fillStyle = col; ctx.textBaseline = 'top';
+                                var tw = ctx.measureText(ev.label).width;
+                                var tx = (x + 5 + tw > area.right) ? x - 5 - tw : x + 5;
+                                ctx.fillText(ev.label, tx, area.top + 3);
+                            }
+                            ctx.restore();
+                        });
+                    });
+                }
+            };
             var cmbStackTotalPlugin = {
                 id: 'cmbStackTotals',
                 afterDatasetsDraw: function(chart) {
@@ -3307,7 +3381,7 @@ function cmbPeerCharts(self) {
                 var _mainPlugins = _isBY ? [cmbCrosshairPlugin, cmbAxisUnitPlugin, cmbYearLinePlugin]
                     : (_preset === 'stackedBar') ? [cmbStackTotalPlugin, cmbAxisUnitPlugin]
                     : ((_preset === 'mini') ? [cmbCrosshairPlugin, cmbAxisUnitPlugin]
-                    : [cmbEndLabelPlugin, cmbCrosshairPlugin, cmbPinPlugin]);
+                    : [cmbEndLabelPlugin, cmbCrosshairPlugin, cmbPinPlugin, cmbEventLinePlugin]);   // +이벤트 세로선 (2026-09-07)
                 var _padTop = _isBY ? 26 : (_preset === 'stackedBar') ? 34 : ((_preset === 'mini') ? 20 : 6);   // 34 = 15px 축단위 주석+합계 라벨 자리 (24는 (억원) 상단 잘림, 2026-08-19)
                 if (_preset !== 'line') _rightPad = 8;
 
@@ -4299,6 +4373,43 @@ function cmbPeerCharts(self) {
                     ctx.restore();
                 }
             };
+            // 이벤트 세로선 (2026-09-07, 사용자 지시): 데이터셋 `_cmbEvents` = [{date:'YYYY-MM-DD', label, color}]
+            //   그 날짜(휴일이면 7일 이내 다음 관측일) 위치에 색 점선 + 상단 라벨. 표시 구간 밖이면 안 그린다.
+            //   첫 소비자 = DATA 'KRX ETS (KAU 연속)' 매년 9/1 만기 전환. `_cmbEvents` 없는 데이터셋엔 무영향.
+            var cmbEventLinePlugin = {
+                id: 'cmbEventLine',
+                afterDatasetsDraw: function(chart) {
+                    var labels = chart.data.labels || [], xs = chart.scales.x, area = chart.chartArea;
+                    if (!xs || !area || !labels.length) return;
+                    var ctx = chart.ctx, drawn = {};
+                    (chart.data.datasets || []).forEach(function(ds, di) {
+                        if (!ds._cmbEvents || !chart.isDatasetVisible(di)) return;
+                        ds._cmbEvents.forEach(function(ev) {
+                            var key = ev.date + '|' + (ev.label || '');
+                            if (drawn[key]) return;
+                            var idx = -1;
+                            for (var i = 0; i < labels.length; i++) { if (String(labels[i]) >= ev.date) { idx = i; break; } }
+                            if (idx < 0) return;
+                            var gap = (new Date(String(labels[idx])) - new Date(ev.date)) / 864e5;
+                            if (!(gap >= 0 && gap <= 7)) return;
+                            drawn[key] = true;
+                            var x = xs.getPixelForValue(idx), col = ev.color || '#E67E22';
+                            ctx.save();
+                            ctx.strokeStyle = col; ctx.setLineDash([6, 4]); ctx.lineWidth = 1.6;
+                            ctx.beginPath(); ctx.moveTo(x, area.top); ctx.lineTo(x, area.bottom); ctx.stroke();
+                            if (ev.label) {
+                                ctx.setLineDash([]);
+                                ctx.font = 'bold ' + window._aoeFpx(11) + 'px sans-serif';
+                                ctx.fillStyle = col; ctx.textBaseline = 'top';
+                                var tw = ctx.measureText(ev.label).width;
+                                var tx = (x + 5 + tw > area.right) ? x - 5 - tw : x + 5;
+                                ctx.fillText(ev.label, tx, area.top + 3);
+                            }
+                            ctx.restore();
+                        });
+                    });
+                }
+            };
             var cmbStackTotalPlugin = {
                 id: 'cmbStackTotals',
                 afterDatasetsDraw: function(chart) {
@@ -4620,7 +4731,7 @@ function cmbPeerCharts(self) {
                 var _mainPlugins = _isBY ? [cmbCrosshairPlugin, cmbAxisUnitPlugin, cmbYearLinePlugin]
                     : (_preset === 'stackedBar') ? [cmbStackTotalPlugin, cmbAxisUnitPlugin]
                     : ((_preset === 'mini') ? [cmbCrosshairPlugin, cmbAxisUnitPlugin]
-                    : [cmbEndLabelPlugin, cmbCrosshairPlugin, cmbPinPlugin]);
+                    : [cmbEndLabelPlugin, cmbCrosshairPlugin, cmbPinPlugin, cmbEventLinePlugin]);   // +이벤트 세로선 (2026-09-07)
                 var _padTop = _isBY ? 26 : (_preset === 'stackedBar') ? 34 : ((_preset === 'mini') ? 20 : 6);   // 34 = 15px 축단위 주석+합계 라벨 자리 (24는 (억원) 상단 잘림, 2026-08-19)
                 if (_preset !== 'line') _rightPad = 8;
 
