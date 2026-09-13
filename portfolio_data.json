@@ -113,7 +113,7 @@
       "name": "에스엠",
       "sector": "미디어,교육",
       "market_cap": 19232,
-      "weight": 5.0,
+      "weight": 0.0,
       "weight_prev": 5.0,
       "today_return": 3.8318912237330034,
       "contribution": 1.9159456118665017,
@@ -331,7 +331,7 @@
       "name": "에스엠",
       "sector": "미디어,교육",
       "market_cap": 19232,
-      "weight": 5.0,
+      "weight": 0.0,
       "weight_prev": 5.0,
       "today_return": 3.8318912237330034,
       "contribution": 1.9159456118665017,
@@ -567,7 +567,7 @@
       "name": "에스엠",
       "sector": "미디어,교육",
       "market_cap": 19232,
-      "weight": 5.0,
+      "weight": 0.0,
       "weight_prev": 5.0,
       "today_return": 3.8318912237330034,
       "contribution": 1.9159456118665017,
@@ -767,7 +767,7 @@
       "name": "에스엠",
       "sector": "미디어,교육",
       "market_cap": 19232,
-      "weight": 5.0,
+      "weight": 0.0,
       "weight_prev": 5.0,
       "today_return": 3.8318912237330034,
       "contribution": 1.9159456118665017,
@@ -895,7 +895,7 @@
       "name": "에스엠",
       "sector": "미디어,교육",
       "market_cap": 19232,
-      "weight": 6.0,
+      "weight": 0.0,
       "weight_prev": 6.0,
       "today_return": 3.8318912237330034,
       "contribution": 2.299134734239802,
@@ -1113,7 +1113,7 @@
       "name": "에스엠",
       "sector": "미디어,교육",
       "market_cap": 19232,
-      "weight": 6.0,
+      "weight": 0.0,
       "weight_prev": 6.0,
       "today_return": 3.8318912237330034,
       "contribution": 2.299134734239802,
@@ -1253,6 +1253,74 @@
       "is_today_new": false
     }
   ],
+  "_order_changes": {
+    "NH 다이내믹 밸류 / DB 개방형": {
+      "date": "2026-09-14",
+      "added": [],
+      "changed": [],
+      "removed": [
+        {
+          "name": "에스엠",
+          "weight": 5.0
+        }
+      ]
+    },
+    "삼성 트루밸류": {
+      "date": "2026-09-14",
+      "added": [],
+      "changed": [],
+      "removed": [
+        {
+          "name": "에스엠",
+          "weight": 5.0
+        }
+      ]
+    },
+    "NH 목표전환형 5호": {
+      "date": "2026-09-14",
+      "added": [],
+      "changed": [],
+      "removed": [
+        {
+          "name": "에스엠",
+          "weight": 5.0
+        }
+      ]
+    },
+    "DB 목표전환형 6차": {
+      "date": "2026-09-14",
+      "added": [],
+      "changed": [],
+      "removed": [
+        {
+          "name": "에스엠",
+          "weight": 5.0
+        }
+      ]
+    },
+    "한투 지속형": {
+      "date": "2026-09-14",
+      "added": [],
+      "changed": [],
+      "removed": [
+        {
+          "name": "에스엠",
+          "weight": 6.0
+        }
+      ]
+    },
+    "한투 성과모집형 1차": {
+      "date": "2026-09-14",
+      "added": [],
+      "changed": [],
+      "removed": [
+        {
+          "name": "에스엠",
+          "weight": 6.0
+        }
+      ]
+    }
+  },
   "_portfolio_meta": {
     "NH 다이내믹 밸류 / DB 개방형": {
       "nav_ytd_d1": 50.92224651475139,
