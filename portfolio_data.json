@@ -23,7 +23,7 @@
       "name": "SK하이닉스",
       "sector": "반도체",
       "market_cap": 13236522,
-      "weight": 15.0,
+      "weight": 10.0,
       "weight_prev": 15.0,
       "today_return": -2.212628170534269,
       "contribution": -3.318942255801403,
@@ -241,7 +241,7 @@
       "name": "SK하이닉스",
       "sector": "반도체",
       "market_cap": 13236522,
-      "weight": 15.0,
+      "weight": 10.0,
       "weight_prev": 15.0,
       "today_return": -2.212628170534269,
       "contribution": -3.318942255801403,
@@ -459,7 +459,7 @@
       "name": "SK하이닉스",
       "sector": "반도체",
       "market_cap": 13236522,
-      "weight": 15.0,
+      "weight": 10.0,
       "weight_prev": 15.0,
       "today_return": -2.212628170534269,
       "contribution": -3.318942255801403,
@@ -659,7 +659,7 @@
       "name": "SK하이닉스",
       "sector": "반도체",
       "market_cap": 13236522,
-      "weight": 15.0,
+      "weight": 10.0,
       "weight_prev": 15.0,
       "today_return": -2.212628170534269,
       "contribution": -3.318942255801403,
@@ -1257,7 +1257,13 @@
     "NH 다이내믹 밸류 / DB 개방형": {
       "date": "2026-09-14",
       "added": [],
-      "changed": [],
+      "changed": [
+        {
+          "name": "SK하이닉스",
+          "from": 15.0,
+          "to": 10.0
+        }
+      ],
       "removed": [
         {
           "name": "에스엠",
@@ -1268,7 +1274,13 @@
     "삼성 트루밸류": {
       "date": "2026-09-14",
       "added": [],
-      "changed": [],
+      "changed": [
+        {
+          "name": "SK하이닉스",
+          "from": 15.0,
+          "to": 10.0
+        }
+      ],
       "removed": [
         {
           "name": "에스엠",
@@ -1279,7 +1291,13 @@
     "NH 목표전환형 5호": {
       "date": "2026-09-14",
       "added": [],
-      "changed": [],
+      "changed": [
+        {
+          "name": "SK하이닉스",
+          "from": 15.0,
+          "to": 10.0
+        }
+      ],
       "removed": [
         {
           "name": "에스엠",
@@ -1290,7 +1308,13 @@
     "DB 목표전환형 6차": {
       "date": "2026-09-14",
       "added": [],
-      "changed": [],
+      "changed": [
+        {
+          "name": "SK하이닉스",
+          "from": 15.0,
+          "to": 10.0
+        }
+      ],
       "removed": [
         {
           "name": "에스엠",
