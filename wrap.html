@@ -345,7 +345,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
     </div>
 
     <div id="mainContent" class="pw-hidden has-sidebar">
-    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><span class="wrap-updated">Updated: 2026-09-14 08:01:49 KST</span></div></nav><div class="wrap-strip"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div>
+    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><span class="wrap-updated">Updated: 2026-09-14 08:04:32 KST</span></div></nav><div class="wrap-strip"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div>
     <aside class="sidebar wrap-sidebar" id="wrapSectionNav" aria-label="WRAP navigation"><div class="wrap-side-group on" data-side-for="dashboard"><a href="#wrap-sec-chart" onclick="wrapGoSection('wrap-sec-chart');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-chart">CHART</a><a href="#wrap-sec-return" onclick="wrapGoSection('wrap-sec-return');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-return">RETURN</a><a href="#wrap-sec-aum" onclick="wrapGoSection('wrap-sec-aum');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-aum">AUM</a><a href="#wrap-sec-portfolio" onclick="wrapGoSection('wrap-sec-portfolio');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-portfolio">Portfolio</a><a href="#wrap-sec-sector" onclick="wrapGoSection('wrap-sec-sector');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-sector">SECTOR WEIGHT</a></div><div class="wrap-side-group" data-side-for="order" id="wrapSideOrder"></div><div class="wrap-side-group" data-side-for="contribution" id="wrapSideContrib"></div><div class="wrap-side-group" data-side-for="fee"><a href="#" onclick="feeSwitchSub('rate');return false;" class="sidebar-link active" data-side-fee="rate">요율</a><a href="#" onclick="feeSwitchSub('revenue');return false;" class="sidebar-link" data-side-fee="revenue">매출</a></div></aside>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -7891,7 +7891,7 @@ function cmbPeerCharts(self) {
         // per-portfolio orderStocks/orderState 위의 VIEW. 저장/복원/finalize/email/download 무수정 재사용.
         var GENERAL_DISPLAYS = ORDER_PORTFOLIOS.filter(function(p){return p.general;}).map(function(p){return p.display;});
         var TARGET_DISPLAYS = ORDER_PORTFOLIOS.filter(function(p){return !p.general;}).map(function(p){return p.display;});
-        var matrixNewRows = [], _mtxSeq = 0, syncGeneral = true, syncTarget = true;
+        var matrixNewRows = [], _mtxSeq = 0, syncGeneral = true, syncTarget = true, syncKis = true;
 
         function _mtxFindIdx(pf,code){ var a=orderStocks[pf]||[], c=String(code||'').trim(); for(var i=0;i<a.length;i++){ if(String(a[i].code||'').trim()===c) return i; } return -1; }
         function _mtxNewRowCodes(){ var s={}; matrixNewRows.forEach(function(r){ var c=String(r.code||'').trim(); if(c) s[c]=true; }); return s; }
@@ -7944,11 +7944,14 @@ function cmbPeerCharts(self) {
           return '<td style="padding:0;background:'+(need?'#fee2e2':'transparent')+';'+(need?'border:2px solid #fca5a5;':'')+'">'+inp(grp,val,'transparent','','')+'</td>'; }
         function _mtxColSum(pf){ var st=orderState[pf]||[], s=0; st.forEach(function(x){ s+=parseFloat(x.newWeight)||0; }); return s; }
         function _mtxColPrevSum(pf){ var a=orderStocks[pf]||[], s=0; a.forEach(function(x){ s+=parseFloat(x.weight)||0; }); return s; }
-        function _mtxTabStops(){ var gs=[], t=[], seenSync={}; ORDER_PORTFOLIOS.forEach(function(p,ci){
-            if(!p.general){ if(syncTarget && p.orderSyncGroup){ if(seenSync[p.orderSyncGroup]) return; seenSync[p.orderSyncGroup]=1; } t.push(ci); return; }
-            if(syncGeneral && p.orderSyncGroup){ if(seenSync[p.orderSyncGroup]) return; seenSync[p.orderSyncGroup]=1; gs.push(ci); }
-            else { gs.push(ci); } });
-          return gs.concat(t).sort(function(a,b){ return a-b; }); }
+        function _mtxSyncKey(p){
+          if(p.broker==='한투') return syncKis?'KIS_SHARED':null;
+          return (p.general?syncGeneral:syncTarget) && p.orderSyncGroup
+            ? (p.general?'general:':'target:')+p.orderSyncGroup : null;
+        }
+        function _mtxTabStops(){ var stops=[], seenSync={}; ORDER_PORTFOLIOS.forEach(function(p,ci){
+          var key=_mtxSyncKey(p); if(key){ if(seenSync[key]) return; seenSync[key]=true; }
+          stops.push(ci); }); return stops; }
         function _mtxCell(pf,code){ var idx=_mtxFindIdx(pf,code); if(idx<0) return {held:false,color:'#000',ot:'',newWeight:null};
           var prev=parseFloat(orderStocks[pf][idx].weight)||0, nw=parseFloat(orderState[pf][idx].newWeight)||0, ot=calcOrderType(prev,nw);
           var color=(ot==='신규 편입'||ot==='비중 확대')?'#FF0000':((ot==='비중 축소'||ot==='전량 편출')?'#0070C0':'#000');
@@ -7959,8 +7962,8 @@ function cmbPeerCharts(self) {
           var val=parseFloat(s)||0;
           if(idx>=0){ orderState[pf][idx].newWeight=val; } else { var m=rowMeta||_mtxUnion().meta[c]||{code:c,name:'',sector:''}; orderStocks[pf].push({code:c,name:m.name||'',sector:m.sector||'',weight:0,isNew:true,_mtxAdded:true}); orderState[pf].push({newWeight:val,reason:_mtxReason(c)}); } }
         function _mtxApplyCellSynced(pf,code,raw,rowMeta){ var meta=ORDER_PORTFOLIOS.filter(function(p){return p.display===pf;})[0];
-          if(syncGeneral && meta && meta.general && meta.orderSyncGroup){ ORDER_PORTFOLIOS.forEach(function(p){ if(p.general && p.orderSyncGroup===meta.orderSyncGroup) _mtxApplyCell(p.display,code,raw,rowMeta); }); }
-          else if(syncTarget && meta && !meta.general && meta.orderSyncGroup){ ORDER_PORTFOLIOS.forEach(function(p){ if(!p.general && p.orderSyncGroup===meta.orderSyncGroup) _mtxApplyCell(p.display,code,raw,rowMeta); }); }
+          var key=meta?_mtxSyncKey(meta):null;
+          if(key){ ORDER_PORTFOLIOS.forEach(function(p){ if(_mtxSyncKey(p)===key) _mtxApplyCell(p.display,code,raw,rowMeta); }); }
           else { _mtxApplyCell(pf,code,raw,rowMeta); } }
 
         function _mtxColClass(p){ return (p.general?'grp-general':'grp-target')+(p.broker==='한투'?' mtx-independent':''); }
@@ -7990,8 +7993,8 @@ function cmbPeerCharts(self) {
           pfs.forEach(function(pf,ci){ var d=Number((_mtxColSum(pf)-_mtxColPrevSum(pf)).toFixed(1)); var gen=ORDER_PORTFOLIOS[ci].general;
             var dc='var(--wrap-order-head-color)'; diff+='<td class="wcol '+_mtxColClass(ORDER_PORTFOLIOS[ci])+'" style="color:'+dc+';">'+(d>0?'+':'')+d+'%</td>'; });
           var head='';
-          var _fg=true, _ft=true;
-          ORDER_PORTFOLIOS.forEach(function(p){ var _m=(p.general&&_fg)?' data-firstgen="1"':''; if(p.general)_fg=false; var _mt=(!p.general&&_ft)?' data-firsttarget="1"':''; if(!p.general)_ft=false; head+='<th class="wcol '+_mtxColClass(p)+'"'+_m+_mt+' title="'+escapeHtml(p.display)+'" style="min-width:64px;">'+escapeHtml(p.label)+'</th>'; });
+          var _fg=true, _ft=true, _fk=true;
+          ORDER_PORTFOLIOS.forEach(function(p){ var _m=(p.general&&_fg)?' data-firstgen="1"':''; if(p.general)_fg=false; var _mt=(!p.general&&_ft)?' data-firsttarget="1"':''; if(!p.general)_ft=false; var _mk=(p.broker==='한투'&&_fk)?' data-firstkis="1"':''; if(p.broker==='한투')_fk=false; head+='<th class="wcol '+_mtxColClass(p)+'"'+_m+_mt+_mk+' title="'+escapeHtml(p.display)+'" style="min-width:64px;">'+escapeHtml(p.label)+'</th>'; });
           var html='<div class="toolbar">'
             +'<span id="orderSaveBadgeSlot" style="display:inline-flex;">'+buildOrderSaveBadgeGlobal()+'</span>'
             +'<div style="margin-left:auto;display:flex;gap:8px;">'
@@ -8000,7 +8003,7 @@ function cmbPeerCharts(self) {
             +'<button class="btn green" id="btnFinal">최종 저장</button>'
             +'<button class="btn blue" id="btnAdditional">추가 주문</button>') : '<span style="font-size:12px;color:#888;align-self:center;">열람 전용 — 저장은 ts.net 에서</span>')
             +'</div></div>'
-            +'<div id="syncRow" style="position:relative;height:30px;margin-bottom:8px;"><span class="sync-toggle'+(syncGeneral?' on':'')+'" id="syncToggle" style="position:absolute;top:0;">일반형 동기화</span><span class="sync-toggle'+(syncTarget?' on':'')+'" id="syncToggleTarget" style="position:absolute;top:0;">전환형 동기화</span></div>'
+            +'<div id="syncRow" style="position:relative;height:30px;margin-bottom:8px;"><span class="sync-toggle'+(syncGeneral?' on':'')+'" id="syncToggle" style="position:absolute;top:0;">일반형 동기화</span><span class="sync-toggle'+(syncTarget?' on':'')+'" id="syncToggleTarget" style="position:absolute;top:0;">전환형 동기화</span><button type="button" class="sync-toggle'+(syncKis?' on':'')+'" id="syncToggleKis" aria-pressed="'+syncKis+'" style="position:absolute;top:0;font-family:inherit;">한투 동기화</button></div>'
             +'<div style="overflow-x:auto;border:1px solid #000;"><table><thead><tr>'
             +'<th>#</th><th>업종</th><th>코드</th><th>종목명</th>'+head+'<th style="width:99%;">추천사유</th>'
             +'</tr></thead><tbody>'+rows
@@ -8015,9 +8018,11 @@ function cmbPeerCharts(self) {
         function bindMatrixHandlers(){
           document.getElementById('syncToggle').addEventListener('click', function(){ syncGeneral=!syncGeneral; renderOrderMatrix(); });
           var _stt=document.getElementById('syncToggleTarget'); if(_stt) _stt.addEventListener('click', function(){ syncTarget=!syncTarget; renderOrderMatrix(); });
+          var _stk=document.getElementById('syncToggleKis'); if(_stk) _stk.addEventListener('click', function(){ syncKis=!syncKis; renderOrderMatrix(); });
           (function(){ var oc=document.getElementById('orderContent'); if(!oc) return; var ocL=oc.getBoundingClientRect().left;
             var fg=document.querySelector('#orderContent th[data-firstgen]'), _s1=document.getElementById('syncToggle'); if(fg&&_s1){ _s1.style.left=Math.max(0,fg.getBoundingClientRect().left-ocL)+'px'; }
-            var ft=document.querySelector('#orderContent th[data-firsttarget]'), _s2=document.getElementById('syncToggleTarget'); if(ft&&_s2){ _s2.style.left=Math.max(0,ft.getBoundingClientRect().left-ocL)+'px'; } })();
+            var ft=document.querySelector('#orderContent th[data-firsttarget]'), _s2=document.getElementById('syncToggleTarget'); if(ft&&_s2){ _s2.style.left=Math.max(0,ft.getBoundingClientRect().left-ocL)+'px'; }
+            var fk=document.querySelector('#orderContent th[data-firstkis]'), _s3=document.getElementById('syncToggleKis'); if(fk&&_s3){ _s3.style.left=Math.max(0,fk.getBoundingClientRect().left-ocL)+'px'; } })();
           (function(){ var oc=document.getElementById('orderContent'); if(!oc) return;
             function focusCol(tr,col){ if(!tr) return false; var el=tr.querySelector('input.mtx-w[data-col="'+col+'"]'); if(el){ el.focus(); try{el.select();}catch(_){} return true; } return false; }
             function rowHasW(tr){ return !!(tr&&tr.querySelector&&tr.querySelector('input.mtx-w')); }
