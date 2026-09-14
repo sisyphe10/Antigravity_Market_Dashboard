@@ -4,7 +4,7 @@
       "code": "005930",
       "name": "삼성전자",
       "sector": "반도체",
-      "market_cap": 14528002,
+      "market_cap": 14557234,
       "weight": 15.0,
       "weight_prev": 15.0,
       "today_return": -4.238921001926782,
@@ -22,7 +22,7 @@
       "code": "000660",
       "name": "SK하이닉스",
       "sector": "반도체",
-      "market_cap": 12294187,
+      "market_cap": 12396455,
       "weight": 15.0,
       "weight_prev": 15.0,
       "today_return": -7.119205298013245,
@@ -40,7 +40,7 @@
       "code": "005935",
       "name": "삼성전자우",
       "sector": "기타",
-      "market_cap": 1469944,
+      "market_cap": 1471549,
       "weight": 15.0,
       "weight_prev": 15.0,
       "today_return": -5.225038799793068,
@@ -58,7 +58,7 @@
       "code": "196170",
       "name": "알테오젠",
       "sector": "건강관리",
-      "market_cap": 179710,
+      "market_cap": 181103,
       "weight": 5.0,
       "weight_prev": 5.0,
       "today_return": -3.731343283582089,
@@ -76,7 +76,7 @@
       "code": "010950",
       "name": "S-Oil",
       "sector": "에너지",
-      "market_cap": 163808,
+      "market_cap": 167298,
       "weight": 5.0,
       "weight_prev": 5.0,
       "today_return": -3.0,
@@ -94,7 +94,7 @@
       "code": "128940",
       "name": "한미약품",
       "sector": "건강관리",
-      "market_cap": 60019,
+      "market_cap": 60724,
       "weight": 5.0,
       "weight_prev": 5.0,
       "today_return": 0.9698275862068966,
@@ -112,7 +112,7 @@
       "code": "041510",
       "name": "에스엠",
       "sector": "미디어,교육",
-      "market_cap": 19804,
+      "market_cap": 20147,
       "weight": 5.0,
       "weight_prev": 5.0,
       "today_return": 3.0952380952380953,
@@ -130,7 +130,7 @@
       "code": "034020",
       "name": "두산에너빌리티",
       "sector": "기계",
-      "market_cap": 548320,
+      "market_cap": 557288,
       "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": -5.726872246696035,
@@ -148,7 +148,7 @@
       "code": "035420",
       "name": "NAVER",
       "sector": "소프트웨어",
-      "market_cap": 308752,
+      "market_cap": 310273,
       "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": -1.694915254237288,
@@ -166,7 +166,7 @@
       "code": "000720",
       "name": "현대건설",
       "sector": "건설,건축관련",
-      "market_cap": 139751,
+      "market_cap": 142758,
       "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": -6.968124536693847,
@@ -184,7 +184,7 @@
       "code": "003230",
       "name": "삼양식품",
       "sector": "필수소비재",
-      "market_cap": 97553,
+      "market_cap": 98682,
       "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": 1.330203442879499,
@@ -199,39 +199,21 @@
       "is_today_new": false
     },
     {
-      "code": "010060",
-      "name": "OCI홀딩스",
-      "sector": "화학",
-      "market_cap": 37994,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": -6.864988558352403,
-      "contribution": -2.059496567505721,
-      "ytd_return": 76.64930555555556,
-      "cumulative_return": -25.321100917431195,
-      "current_price": 203500.0,
-      "price_date": "2026-09-14",
-      "ath_price": 388000.0,
-      "dd": -47.551546391752574,
-      "rsi": -32.12115907582332,
-      "is_today_new": false
-    },
-    {
       "code": "082740",
       "name": "한화엔진",
       "sector": "산업재",
-      "market_cap": 41974,
+      "market_cap": 42224,
       "weight": 3.0,
-      "weight_prev": 0.0,
+      "weight_prev": 3.0,
       "today_return": 0.0,
       "contribution": 0.0,
       "ytd_return": 17.11292200232828,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 50300.0,
       "price_date": "2026-09-14",
       "ath_price": 89500.0,
       "dd": -43.798882681564244,
-      "rsi": null,
+      "rsi": 0.0,
       "is_today_new": false
     }
   ],
@@ -240,7 +222,7 @@
       "code": "005930",
       "name": "삼성전자",
       "sector": "반도체",
-      "market_cap": 14528002,
+      "market_cap": 14557234,
       "weight": 15.0,
       "weight_prev": 15.0,
       "today_return": -4.238921001926782,
@@ -258,7 +240,7 @@
       "code": "000660",
       "name": "SK하이닉스",
       "sector": "반도체",
-      "market_cap": 12294187,
+      "market_cap": 12396455,
       "weight": 15.0,
       "weight_prev": 15.0,
       "today_return": -7.119205298013245,
@@ -276,7 +258,7 @@
       "code": "005935",
       "name": "삼성전자우",
       "sector": "기타",
-      "market_cap": 1469944,
+      "market_cap": 1471549,
       "weight": 15.0,
       "weight_prev": 15.0,
       "today_return": -5.225038799793068,
@@ -294,7 +276,7 @@
       "code": "196170",
       "name": "알테오젠",
       "sector": "건강관리",
-      "market_cap": 179710,
+      "market_cap": 181103,
       "weight": 5.0,
       "weight_prev": 5.0,
       "today_return": -3.731343283582089,
@@ -312,7 +294,7 @@
       "code": "010950",
       "name": "S-Oil",
       "sector": "에너지",
-      "market_cap": 163808,
+      "market_cap": 167298,
       "weight": 5.0,
       "weight_prev": 5.0,
       "today_return": -3.0,
@@ -330,7 +312,7 @@
       "code": "128940",
       "name": "한미약품",
       "sector": "건강관리",
-      "market_cap": 60019,
+      "market_cap": 60724,
       "weight": 5.0,
       "weight_prev": 5.0,
       "today_return": 0.9698275862068966,
@@ -348,7 +330,7 @@
       "code": "041510",
       "name": "에스엠",
       "sector": "미디어,교육",
-      "market_cap": 19804,
+      "market_cap": 20147,
       "weight": 5.0,
       "weight_prev": 5.0,
       "today_return": 3.0952380952380953,
@@ -366,7 +348,7 @@
       "code": "034020",
       "name": "두산에너빌리티",
       "sector": "기계",
-      "market_cap": 548320,
+      "market_cap": 557288,
       "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": -5.726872246696035,
@@ -384,7 +366,7 @@
       "code": "035420",
       "name": "NAVER",
       "sector": "소프트웨어",
-      "market_cap": 308752,
+      "market_cap": 310273,
       "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": -1.694915254237288,
@@ -402,7 +384,7 @@
       "code": "000720",
       "name": "현대건설",
       "sector": "건설,건축관련",
-      "market_cap": 139751,
+      "market_cap": 142758,
       "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": -6.968124536693847,
@@ -420,7 +402,7 @@
       "code": "003230",
       "name": "삼양식품",
       "sector": "필수소비재",
-      "market_cap": 97553,
+      "market_cap": 98682,
       "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": 1.330203442879499,
@@ -435,39 +417,21 @@
       "is_today_new": false
     },
     {
-      "code": "010060",
-      "name": "OCI홀딩스",
-      "sector": "화학",
-      "market_cap": 37994,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": -6.864988558352403,
-      "contribution": -2.059496567505721,
-      "ytd_return": 76.64930555555556,
-      "cumulative_return": -25.321100917431195,
-      "current_price": 203500.0,
-      "price_date": "2026-09-14",
-      "ath_price": 388000.0,
-      "dd": -47.551546391752574,
-      "rsi": -32.12115907582332,
-      "is_today_new": false
-    },
-    {
       "code": "082740",
       "name": "한화엔진",
       "sector": "산업재",
-      "market_cap": 41974,
+      "market_cap": 42224,
       "weight": 3.0,
-      "weight_prev": 0.0,
+      "weight_prev": 3.0,
       "today_return": 0.0,
       "contribution": 0.0,
       "ytd_return": 17.11292200232828,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 50300.0,
       "price_date": "2026-09-14",
       "ath_price": 89500.0,
       "dd": -43.798882681564244,
-      "rsi": null,
+      "rsi": 0.0,
       "is_today_new": false
     }
   ],
@@ -476,7 +440,7 @@
       "code": "005930",
       "name": "삼성전자",
       "sector": "반도체",
-      "market_cap": 14528002,
+      "market_cap": 14557234,
       "weight": 15.0,
       "weight_prev": 15.0,
       "today_return": -4.238921001926782,
@@ -494,7 +458,7 @@
       "code": "000660",
       "name": "SK하이닉스",
       "sector": "반도체",
-      "market_cap": 12294187,
+      "market_cap": 12396455,
       "weight": 15.0,
       "weight_prev": 15.0,
       "today_return": -7.119205298013245,
@@ -512,7 +476,7 @@
       "code": "005935",
       "name": "삼성전자우",
       "sector": "기타",
-      "market_cap": 1469944,
+      "market_cap": 1471549,
       "weight": 15.0,
       "weight_prev": 15.0,
       "today_return": -5.225038799793068,
@@ -527,28 +491,10 @@
       "is_today_new": false
     },
     {
-      "code": "035420",
-      "name": "NAVER",
-      "sector": "소프트웨어",
-      "market_cap": 308752,
-      "weight": 3.0,
-      "weight_prev": 5.0,
-      "today_return": -1.694915254237288,
-      "contribution": -0.8474576271186441,
-      "ytd_return": -16.288659793814432,
-      "cumulative_return": -6.741702078787181,
-      "current_price": 203000.0,
-      "price_date": "2026-09-14",
-      "ath_price": 454000.0,
-      "dd": -55.2863436123348,
-      "rsi": -1.9145857615736617,
-      "is_today_new": false
-    },
-    {
       "code": "196170",
       "name": "알테오젠",
       "sector": "건강관리",
-      "market_cap": 179710,
+      "market_cap": 181103,
       "weight": 5.0,
       "weight_prev": 5.0,
       "today_return": -3.731343283582089,
@@ -566,7 +512,7 @@
       "code": "010950",
       "name": "S-Oil",
       "sector": "에너지",
-      "market_cap": 163808,
+      "market_cap": 167298,
       "weight": 5.0,
       "weight_prev": 5.0,
       "today_return": -3.0,
@@ -584,7 +530,7 @@
       "code": "128940",
       "name": "한미약품",
       "sector": "건강관리",
-      "market_cap": 60019,
+      "market_cap": 60724,
       "weight": 5.0,
       "weight_prev": 5.0,
       "today_return": 0.9698275862068966,
@@ -602,7 +548,7 @@
       "code": "041510",
       "name": "에스엠",
       "sector": "미디어,교육",
-      "market_cap": 19804,
+      "market_cap": 20147,
       "weight": 5.0,
       "weight_prev": 5.0,
       "today_return": 3.0952380952380953,
@@ -620,7 +566,7 @@
       "code": "034020",
       "name": "두산에너빌리티",
       "sector": "기계",
-      "market_cap": 548320,
+      "market_cap": 557288,
       "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": -5.726872246696035,
@@ -635,10 +581,28 @@
       "is_today_new": false
     },
     {
+      "code": "035420",
+      "name": "NAVER",
+      "sector": "소프트웨어",
+      "market_cap": 310273,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": -1.694915254237288,
+      "contribution": -0.5084745762711864,
+      "ytd_return": -16.288659793814432,
+      "cumulative_return": -6.741702078787181,
+      "current_price": 203000.0,
+      "price_date": "2026-09-14",
+      "ath_price": 454000.0,
+      "dd": -55.2863436123348,
+      "rsi": -1.9145857615736617,
+      "is_today_new": false
+    },
+    {
       "code": "000720",
       "name": "현대건설",
       "sector": "건설,건축관련",
-      "market_cap": 139751,
+      "market_cap": 142758,
       "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": -6.968124536693847,
@@ -653,40 +617,22 @@
       "is_today_new": false
     },
     {
-      "code": "010060",
-      "name": "OCI홀딩스",
-      "sector": "화학",
-      "market_cap": 37994,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": -6.864988558352403,
-      "contribution": -2.059496567505721,
-      "ytd_return": 76.64930555555556,
-      "cumulative_return": -25.321100917431195,
-      "current_price": 203500.0,
-      "price_date": "2026-09-14",
-      "ath_price": 388000.0,
-      "dd": -47.551546391752574,
-      "rsi": -22.621470795579558,
-      "is_today_new": false
-    },
-    {
       "code": "082740",
       "name": "한화엔진",
       "sector": "산업재",
-      "market_cap": 41974,
+      "market_cap": 42224,
       "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 3.0,
+      "today_return": 0.0,
+      "contribution": 0.0,
       "ytd_return": 17.11292200232828,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 50300.0,
       "price_date": "2026-09-14",
       "ath_price": 89500.0,
       "dd": -43.798882681564244,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
   "DB 목표전환형 6차": [
@@ -694,7 +640,7 @@
       "code": "005930",
       "name": "삼성전자",
       "sector": "반도체",
-      "market_cap": 14528002,
+      "market_cap": 14557234,
       "weight": 15.0,
       "weight_prev": 15.0,
       "today_return": -4.238921001926782,
@@ -712,7 +658,7 @@
       "code": "000660",
       "name": "SK하이닉스",
       "sector": "반도체",
-      "market_cap": 12294187,
+      "market_cap": 12396455,
       "weight": 15.0,
       "weight_prev": 15.0,
       "today_return": -7.119205298013245,
@@ -730,7 +676,7 @@
       "code": "005935",
       "name": "삼성전자우",
       "sector": "기타",
-      "market_cap": 1469944,
+      "market_cap": 1471549,
       "weight": 15.0,
       "weight_prev": 15.0,
       "today_return": -5.225038799793068,
@@ -745,28 +691,10 @@
       "is_today_new": false
     },
     {
-      "code": "035420",
-      "name": "NAVER",
-      "sector": "소프트웨어",
-      "market_cap": 308752,
-      "weight": 3.0,
-      "weight_prev": 5.0,
-      "today_return": -1.694915254237288,
-      "contribution": -0.8474576271186441,
-      "ytd_return": -16.288659793814432,
-      "cumulative_return": -6.741702078787181,
-      "current_price": 203000.0,
-      "price_date": "2026-09-14",
-      "ath_price": 454000.0,
-      "dd": -55.2863436123348,
-      "rsi": -1.9145857615736617,
-      "is_today_new": false
-    },
-    {
       "code": "196170",
       "name": "알테오젠",
       "sector": "건강관리",
-      "market_cap": 179710,
+      "market_cap": 181103,
       "weight": 5.0,
       "weight_prev": 5.0,
       "today_return": -3.731343283582089,
@@ -784,7 +712,7 @@
       "code": "010950",
       "name": "S-Oil",
       "sector": "에너지",
-      "market_cap": 163808,
+      "market_cap": 167298,
       "weight": 5.0,
       "weight_prev": 5.0,
       "today_return": -3.0,
@@ -802,7 +730,7 @@
       "code": "128940",
       "name": "한미약품",
       "sector": "건강관리",
-      "market_cap": 60019,
+      "market_cap": 60724,
       "weight": 5.0,
       "weight_prev": 5.0,
       "today_return": 0.9698275862068966,
@@ -820,7 +748,7 @@
       "code": "041510",
       "name": "에스엠",
       "sector": "미디어,교육",
-      "market_cap": 19804,
+      "market_cap": 20147,
       "weight": 5.0,
       "weight_prev": 5.0,
       "today_return": 3.0952380952380953,
@@ -838,7 +766,7 @@
       "code": "034020",
       "name": "두산에너빌리티",
       "sector": "기계",
-      "market_cap": 548320,
+      "market_cap": 557288,
       "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": -5.726872246696035,
@@ -853,10 +781,28 @@
       "is_today_new": false
     },
     {
+      "code": "035420",
+      "name": "NAVER",
+      "sector": "소프트웨어",
+      "market_cap": 310273,
+      "weight": 3.0,
+      "weight_prev": 3.0,
+      "today_return": -1.694915254237288,
+      "contribution": -0.5084745762711864,
+      "ytd_return": -16.288659793814432,
+      "cumulative_return": -6.741702078787181,
+      "current_price": 203000.0,
+      "price_date": "2026-09-14",
+      "ath_price": 454000.0,
+      "dd": -55.2863436123348,
+      "rsi": -1.9145857615736617,
+      "is_today_new": false
+    },
+    {
       "code": "000720",
       "name": "현대건설",
       "sector": "건설,건축관련",
-      "market_cap": 139751,
+      "market_cap": 142758,
       "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": -6.968124536693847,
@@ -871,40 +817,22 @@
       "is_today_new": false
     },
     {
-      "code": "010060",
-      "name": "OCI홀딩스",
-      "sector": "화학",
-      "market_cap": 37994,
-      "weight": 0.0,
-      "weight_prev": 3.0,
-      "today_return": -6.864988558352403,
-      "contribution": -2.059496567505721,
-      "ytd_return": 76.64930555555556,
-      "cumulative_return": -25.321100917431195,
-      "current_price": 203500.0,
-      "price_date": "2026-09-14",
-      "ath_price": 388000.0,
-      "dd": -47.551546391752574,
-      "rsi": -22.621470795579558,
-      "is_today_new": false
-    },
-    {
       "code": "082740",
       "name": "한화엔진",
       "sector": "산업재",
-      "market_cap": 41974,
+      "market_cap": 42224,
       "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 3.0,
+      "today_return": 0.0,
+      "contribution": 0.0,
       "ytd_return": 17.11292200232828,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 50300.0,
       "price_date": "2026-09-14",
       "ath_price": 89500.0,
       "dd": -43.798882681564244,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
   "한투 지속형": [
@@ -912,7 +840,7 @@
       "code": "005930",
       "name": "삼성전자",
       "sector": "반도체",
-      "market_cap": 14528002,
+      "market_cap": 14557234,
       "weight": 15.0,
       "weight_prev": 15.0,
       "today_return": -4.238921001926782,
@@ -930,7 +858,7 @@
       "code": "000660",
       "name": "SK하이닉스",
       "sector": "반도체",
-      "market_cap": 12294187,
+      "market_cap": 12396455,
       "weight": 7.0,
       "weight_prev": 7.0,
       "today_return": -7.119205298013245,
@@ -948,7 +876,7 @@
       "code": "007340",
       "name": "DN오토모티브",
       "sector": "자동차",
-      "market_cap": 26710,
+      "market_cap": 27120,
       "weight": 7.0,
       "weight_prev": 7.0,
       "today_return": -2.4572649572649574,
@@ -966,7 +894,7 @@
       "code": "041510",
       "name": "에스엠",
       "sector": "미디어,교육",
-      "market_cap": 19804,
+      "market_cap": 20147,
       "weight": 6.0,
       "weight_prev": 6.0,
       "today_return": 3.0952380952380953,
@@ -981,10 +909,28 @@
       "is_today_new": false
     },
     {
+      "code": "005935",
+      "name": "삼성전자우",
+      "sector": "기타",
+      "market_cap": 1471549,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": -5.225038799793068,
+      "contribution": -2.612519399896534,
+      "ytd_return": 105.38116591928252,
+      "cumulative_return": -1.7229244511075104,
+      "current_price": 183200.0,
+      "price_date": "2026-09-14",
+      "ath_price": 235000.0,
+      "dd": -22.042553191489368,
+      "rsi": 3.653984445319991,
+      "is_today_new": false
+    },
+    {
       "code": "316140",
       "name": "우리금융지주",
       "sector": "은행",
-      "market_cap": 271137,
+      "market_cap": 271506,
       "weight": 5.0,
       "weight_prev": 5.0,
       "today_return": 4.843304843304843,
@@ -1002,7 +948,7 @@
       "code": "010950",
       "name": "S-Oil",
       "sector": "에너지",
-      "market_cap": 163808,
+      "market_cap": 167298,
       "weight": 5.0,
       "weight_prev": 5.0,
       "today_return": -3.0,
@@ -1020,7 +966,7 @@
       "code": "128940",
       "name": "한미약품",
       "sector": "건강관리",
-      "market_cap": 60019,
+      "market_cap": 60724,
       "weight": 5.0,
       "weight_prev": 5.0,
       "today_return": 0.9698275862068966,
@@ -1035,28 +981,10 @@
       "is_today_new": false
     },
     {
-      "code": "005935",
-      "name": "삼성전자우",
-      "sector": "기타",
-      "market_cap": 1469944,
-      "weight": 5.0,
-      "weight_prev": 4.0,
-      "today_return": -5.225038799793068,
-      "contribution": -2.0900155199172272,
-      "ytd_return": 105.38116591928252,
-      "cumulative_return": -2.1444188845603174,
-      "current_price": 183200.0,
-      "price_date": "2026-09-14",
-      "ath_price": 235000.0,
-      "dd": -22.042553191489368,
-      "rsi": 3.653984445319991,
-      "is_today_new": false
-    },
-    {
       "code": "034020",
       "name": "두산에너빌리티",
       "sector": "기계",
-      "market_cap": 548320,
+      "market_cap": 557288,
       "weight": 4.0,
       "weight_prev": 4.0,
       "today_return": -5.726872246696035,
@@ -1074,7 +1002,7 @@
       "code": "000720",
       "name": "현대건설",
       "sector": "건설,건축관련",
-      "market_cap": 139751,
+      "market_cap": 142758,
       "weight": 4.0,
       "weight_prev": 4.0,
       "today_return": -6.968124536693847,
@@ -1092,7 +1020,7 @@
       "code": "138930",
       "name": "BNK금융지주",
       "sector": "은행",
-      "market_cap": 49217,
+      "market_cap": 49125,
       "weight": 4.0,
       "weight_prev": 4.0,
       "today_return": 0.6905210295040803,
@@ -1110,7 +1038,7 @@
       "code": "003230",
       "name": "삼양식품",
       "sector": "필수소비재",
-      "market_cap": 97553,
+      "market_cap": 98682,
       "weight": 3.0,
       "weight_prev": 3.0,
       "today_return": 1.330203442879499,
@@ -1128,19 +1056,19 @@
       "code": "082740",
       "name": "한화엔진",
       "sector": "산업재",
-      "market_cap": 41974,
+      "market_cap": 42224,
       "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 3.0,
+      "today_return": 0.0,
+      "contribution": 0.0,
       "ytd_return": 17.11292200232828,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 50300.0,
       "price_date": "2026-09-14",
       "ath_price": 89500.0,
       "dd": -43.798882681564244,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
   "한투 성과모집형 1차": [
@@ -1148,7 +1076,7 @@
       "code": "005930",
       "name": "삼성전자",
       "sector": "반도체",
-      "market_cap": 14528002,
+      "market_cap": 14557234,
       "weight": 15.0,
       "weight_prev": 15.0,
       "today_return": -4.238921001926782,
@@ -1166,7 +1094,7 @@
       "code": "000660",
       "name": "SK하이닉스",
       "sector": "반도체",
-      "market_cap": 12294187,
+      "market_cap": 12396455,
       "weight": 7.0,
       "weight_prev": 7.0,
       "today_return": -7.119205298013245,
@@ -1184,7 +1112,7 @@
       "code": "007340",
       "name": "DN오토모티브",
       "sector": "자동차",
-      "market_cap": 26710,
+      "market_cap": 27120,
       "weight": 7.0,
       "weight_prev": 7.0,
       "today_return": -2.4572649572649574,
@@ -1202,7 +1130,7 @@
       "code": "041510",
       "name": "에스엠",
       "sector": "미디어,교육",
-      "market_cap": 19804,
+      "market_cap": 20147,
       "weight": 6.0,
       "weight_prev": 6.0,
       "today_return": 3.0952380952380953,
@@ -1217,10 +1145,28 @@
       "is_today_new": false
     },
     {
+      "code": "005935",
+      "name": "삼성전자우",
+      "sector": "기타",
+      "market_cap": 1471549,
+      "weight": 5.0,
+      "weight_prev": 5.0,
+      "today_return": -5.225038799793068,
+      "contribution": -2.612519399896534,
+      "ytd_return": 105.38116591928252,
+      "cumulative_return": -1.7229244511075104,
+      "current_price": 183200.0,
+      "price_date": "2026-09-14",
+      "ath_price": 235000.0,
+      "dd": -22.042553191489368,
+      "rsi": 3.653984445319991,
+      "is_today_new": false
+    },
+    {
       "code": "316140",
       "name": "우리금융지주",
       "sector": "은행",
-      "market_cap": 271137,
+      "market_cap": 271506,
       "weight": 5.0,
       "weight_prev": 5.0,
       "today_return": 4.843304843304843,
@@ -1238,7 +1184,7 @@
       "code": "010950",
       "name": "S-Oil",
       "sector": "에너지",
-      "market_cap": 163808,
+      "market_cap": 167298,
       "weight": 5.0,
       "weight_prev": 5.0,
       "today_return": -3.0,
@@ -1256,7 +1202,7 @@
       "code": "128940",
       "name": "한미약품",
       "sector": "건강관리",
-      "market_cap": 60019,
+      "market_cap": 60724,
       "weight": 5.0,
       "weight_prev": 5.0,
       "today_return": 0.9698275862068966,
@@ -1271,28 +1217,10 @@
       "is_today_new": false
     },
     {
-      "code": "005935",
-      "name": "삼성전자우",
-      "sector": "기타",
-      "market_cap": 1469944,
-      "weight": 5.0,
-      "weight_prev": 4.0,
-      "today_return": -5.225038799793068,
-      "contribution": -2.0900155199172272,
-      "ytd_return": 105.38116591928252,
-      "cumulative_return": -2.1444188845603174,
-      "current_price": 183200.0,
-      "price_date": "2026-09-14",
-      "ath_price": 235000.0,
-      "dd": -22.042553191489368,
-      "rsi": 3.653984445319991,
-      "is_today_new": false
-    },
-    {
       "code": "034020",
       "name": "두산에너빌리티",
       "sector": "기계",
-      "market_cap": 548320,
+      "market_cap": 557288,
       "weight": 4.0,
       "weight_prev": 4.0,
       "today_return": -5.726872246696035,
@@ -1310,7 +1238,7 @@
       "code": "000720",
       "name": "현대건설",
       "sector": "건설,건축관련",
-      "market_cap": 139751,
+      "market_cap": 142758,
       "weight": 4.0,
       "weight_prev": 4.0,
       "today_return": -6.968124536693847,
@@ -1328,7 +1256,7 @@
       "code": "138930",
       "name": "BNK금융지주",
       "sector": "은행",
-      "market_cap": 49217,
+      "market_cap": 49125,
       "weight": 4.0,
       "weight_prev": 4.0,
       "today_return": 0.6905210295040803,
@@ -1346,157 +1274,45 @@
       "code": "082740",
       "name": "한화엔진",
       "sector": "산업재",
-      "market_cap": 41974,
+      "market_cap": 42224,
       "weight": 3.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
+      "weight_prev": 3.0,
+      "today_return": 0.0,
+      "contribution": 0.0,
       "ytd_return": 17.11292200232828,
-      "cumulative_return": null,
+      "cumulative_return": 0.0,
       "current_price": 50300.0,
       "price_date": "2026-09-14",
       "ath_price": 89500.0,
       "dd": -43.798882681564244,
-      "rsi": null,
-      "is_today_new": true
+      "rsi": 0.0,
+      "is_today_new": false
     }
   ],
-  "_order_changes": {
-    "NH 다이내믹 밸류 / DB 개방형": {
-      "date": "2026-09-14",
-      "added": [
-        {
-          "name": "한화엔진",
-          "weight": 3.0
-        }
-      ],
-      "changed": [],
-      "removed": [
-        {
-          "name": "OCI홀딩스",
-          "weight": 3.0
-        }
-      ]
-    },
-    "삼성 트루밸류": {
-      "date": "2026-09-14",
-      "added": [
-        {
-          "name": "한화엔진",
-          "weight": 3.0
-        }
-      ],
-      "changed": [],
-      "removed": [
-        {
-          "name": "OCI홀딩스",
-          "weight": 3.0
-        }
-      ]
-    },
-    "NH 목표전환형 5호": {
-      "date": "2026-09-14",
-      "added": [
-        {
-          "name": "한화엔진",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "NAVER",
-          "from": 5.0,
-          "to": 3.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "OCI홀딩스",
-          "weight": 3.0
-        }
-      ]
-    },
-    "DB 목표전환형 6차": {
-      "date": "2026-09-14",
-      "added": [
-        {
-          "name": "한화엔진",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "NAVER",
-          "from": 5.0,
-          "to": 3.0
-        }
-      ],
-      "removed": [
-        {
-          "name": "OCI홀딩스",
-          "weight": 3.0
-        }
-      ]
-    },
-    "한투 지속형": {
-      "date": "2026-09-14",
-      "added": [
-        {
-          "name": "한화엔진",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "삼성전자우",
-          "from": 4.0,
-          "to": 5.0
-        }
-      ],
-      "removed": []
-    },
-    "한투 성과모집형 1차": {
-      "date": "2026-09-14",
-      "added": [
-        {
-          "name": "한화엔진",
-          "weight": 3.0
-        }
-      ],
-      "changed": [
-        {
-          "name": "삼성전자우",
-          "from": 4.0,
-          "to": 5.0
-        }
-      ],
-      "removed": []
-    }
-  },
   "_portfolio_meta": {
     "NH 다이내믹 밸류 / DB 개방형": {
-      "nav_ytd_d1": 50.92174158920266,
-      "nav_cum_d1": 198.89899999999997
+      "nav_ytd_d1": 46.055269150563745,
+      "nav_cum_d1": 189.26100000000002
     },
     "삼성 트루밸류": {
-      "nav_ytd_d1": 50.893727335243,
-      "nav_cum_d1": 205.00300000000001
+      "nav_ytd_d1": 46.02807090451242,
+      "nav_cum_d1": 195.16799999999995
     },
     "NH 목표전환형 5호": {
-      "nav_ytd_d1": -24.185000000000002,
-      "nav_cum_d1": -24.185000000000002
+      "nav_ytd_d1": -26.686,
+      "nav_cum_d1": -26.686
     },
     "DB 목표전환형 6차": {
-      "nav_ytd_d1": -23.297,
-      "nav_cum_d1": -23.297
+      "nav_ytd_d1": -25.826999999999998,
+      "nav_cum_d1": -25.826999999999998
     },
     "한투 지속형": {
-      "nav_ytd_d1": -14.195000000000002,
-      "nav_cum_d1": -14.195000000000002
+      "nav_ytd_d1": -15.598999999999997,
+      "nav_cum_d1": -15.598999999999997
     },
     "한투 성과모집형 1차": {
-      "nav_ytd_d1": -13.809000000000005,
-      "nav_cum_d1": -13.809000000000005
+      "nav_ytd_d1": -15.252999999999995,
+      "nav_cum_d1": -15.252999999999995
     }
   },
   "_price_asof": "2026-09-14"
