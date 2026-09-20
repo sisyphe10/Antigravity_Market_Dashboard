@@ -841,7 +841,7 @@
       "name": "삼성전자",
       "sector": "반도체",
       "market_cap": 15258787,
-      "weight": 15.0,
+      "weight": 11.0,
       "weight_prev": 15.0,
       "today_return": 1.5625,
       "contribution": 2.34375,
@@ -859,7 +859,7 @@
       "name": "SK하이닉스",
       "sector": "반도체",
       "market_cap": 13565243,
-      "weight": 7.0,
+      "weight": 2.0,
       "weight_prev": 7.0,
       "today_return": 4.699886749716875,
       "contribution": 3.2899207248018123,
@@ -877,7 +877,7 @@
       "name": "DN오토모티브",
       "sector": "자동차",
       "market_cap": 28846,
-      "weight": 7.0,
+      "weight": 8.0,
       "weight_prev": 7.0,
       "today_return": 2.904564315352697,
       "contribution": 2.033195020746888,
@@ -913,7 +913,7 @@
       "name": "삼성전자우",
       "sector": "기타",
       "market_cap": 1573450,
-      "weight": 5.0,
+      "weight": 6.0,
       "weight_prev": 5.0,
       "today_return": 0.407955124936257,
       "contribution": 0.20397756246812854,
@@ -967,7 +967,7 @@
       "name": "한미약품",
       "sector": "건강관리",
       "market_cap": 64439,
-      "weight": 5.0,
+      "weight": 6.0,
       "weight_prev": 5.0,
       "today_return": -1.9417475728155338,
       "contribution": -0.970873786407767,
@@ -1077,7 +1077,7 @@
       "name": "삼성전자",
       "sector": "반도체",
       "market_cap": 15258787,
-      "weight": 15.0,
+      "weight": 11.0,
       "weight_prev": 15.0,
       "today_return": 1.5625,
       "contribution": 2.34375,
@@ -1095,7 +1095,7 @@
       "name": "SK하이닉스",
       "sector": "반도체",
       "market_cap": 13565243,
-      "weight": 7.0,
+      "weight": 2.0,
       "weight_prev": 7.0,
       "today_return": 4.699886749716875,
       "contribution": 3.2899207248018123,
@@ -1113,7 +1113,7 @@
       "name": "DN오토모티브",
       "sector": "자동차",
       "market_cap": 28846,
-      "weight": 7.0,
+      "weight": 8.0,
       "weight_prev": 7.0,
       "today_return": 2.904564315352697,
       "contribution": 2.033195020746888,
@@ -1149,7 +1149,7 @@
       "name": "삼성전자우",
       "sector": "기타",
       "market_cap": 1573450,
-      "weight": 5.0,
+      "weight": 6.0,
       "weight_prev": 5.0,
       "today_return": 0.407955124936257,
       "contribution": 0.20397756246812854,
@@ -1203,7 +1203,7 @@
       "name": "한미약품",
       "sector": "건강관리",
       "market_cap": 64439,
-      "weight": 5.0,
+      "weight": 6.0,
       "weight_prev": 5.0,
       "today_return": -1.9417475728155338,
       "contribution": -0.970873786407767,
@@ -1289,30 +1289,96 @@
       "is_today_new": false
     }
   ],
-  "_portfolio_meta": {
-    "NH 다이내믹 밸류 / DB 개방형": {
-      "nav_ytd_d1": 51.181273321248774,
-      "nav_cum_d1": 199.413
-    },
-    "삼성 트루밸류": {
-      "nav_ytd_d1": 51.152965156260045,
-      "nav_cum_d1": 205.52700000000002
-    },
-    "NH 목표전환형 5호": {
-      "nav_ytd_d1": -24.11,
-      "nav_cum_d1": -24.11
-    },
-    "DB 목표전환형 6차": {
-      "nav_ytd_d1": -23.221000000000004,
-      "nav_cum_d1": -23.221000000000004
-    },
+  "_order_changes": {
     "한투 지속형": {
-      "nav_ytd_d1": -13.511000000000006,
-      "nav_cum_d1": -13.511000000000006
+      "date": "2026-09-21",
+      "added": [],
+      "changed": [
+        {
+          "name": "삼성전자",
+          "from": 15.0,
+          "to": 11.0
+        },
+        {
+          "name": "SK하이닉스",
+          "from": 7.0,
+          "to": 2.0
+        },
+        {
+          "name": "DN오토모티브",
+          "from": 7.0,
+          "to": 8.0
+        },
+        {
+          "name": "삼성전자우",
+          "from": 5.0,
+          "to": 6.0
+        },
+        {
+          "name": "한미약품",
+          "from": 5.0,
+          "to": 6.0
+        }
+      ],
+      "removed": []
     },
     "한투 성과모집형 1차": {
-      "nav_ytd_d1": -13.161000000000001,
-      "nav_cum_d1": -13.161000000000001
+      "date": "2026-09-21",
+      "added": [],
+      "changed": [
+        {
+          "name": "삼성전자",
+          "from": 15.0,
+          "to": 11.0
+        },
+        {
+          "name": "SK하이닉스",
+          "from": 7.0,
+          "to": 2.0
+        },
+        {
+          "name": "DN오토모티브",
+          "from": 7.0,
+          "to": 8.0
+        },
+        {
+          "name": "삼성전자우",
+          "from": 5.0,
+          "to": 6.0
+        },
+        {
+          "name": "한미약품",
+          "from": 5.0,
+          "to": 6.0
+        }
+      ],
+      "removed": []
+    }
+  },
+  "_portfolio_meta": {
+    "NH 다이내믹 밸류 / DB 개방형": {
+      "nav_ytd_d1": 51.067160147236294,
+      "nav_cum_d1": 199.187
+    },
+    "삼성 트루밸류": {
+      "nav_ytd_d1": 51.038682834399474,
+      "nav_cum_d1": 205.29600000000002
+    },
+    "NH 목표전환형 5호": {
+      "nav_ytd_d1": -24.173999999999996,
+      "nav_cum_d1": -24.173999999999996
+    },
+    "DB 목표전환형 6차": {
+      "nav_ytd_d1": -23.287000000000003,
+      "nav_cum_d1": -23.287000000000003
+    },
+    "한투 지속형": {
+      "nav_ytd_d1": -13.664999999999994,
+      "nav_cum_d1": -13.664999999999994
+    },
+    "한투 성과모집형 1차": {
+      "nav_ytd_d1": -13.324000000000002,
+      "nav_cum_d1": -13.324000000000002
     }
   },
   "_price_asof": "2026-09-18"
