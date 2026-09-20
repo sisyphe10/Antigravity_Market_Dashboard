@@ -895,7 +895,7 @@
       "name": "에스엠",
       "sector": "미디어,교육",
       "market_cap": 18476,
-      "weight": 6.0,
+      "weight": 5.0,
       "weight_prev": 6.0,
       "today_return": -0.9708737864077669,
       "contribution": -0.5825242718446602,
@@ -1131,7 +1131,7 @@
       "name": "에스엠",
       "sector": "미디어,교육",
       "market_cap": 18476,
-      "weight": 6.0,
+      "weight": 5.0,
       "weight_prev": 6.0,
       "today_return": -0.9708737864077669,
       "contribution": -0.5825242718446602,
@@ -1310,6 +1310,11 @@
           "to": 8.0
         },
         {
+          "name": "에스엠",
+          "from": 6.0,
+          "to": 5.0
+        },
+        {
           "name": "삼성전자우",
           "from": 5.0,
           "to": 6.0
@@ -1340,6 +1345,11 @@
           "name": "DN오토모티브",
           "from": 7.0,
           "to": 8.0
+        },
+        {
+          "name": "에스엠",
+          "from": 6.0,
+          "to": 5.0
         },
         {
           "name": "삼성전자우",
