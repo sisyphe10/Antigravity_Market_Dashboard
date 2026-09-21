@@ -113,7 +113,7 @@
       "name": "에스엠",
       "sector": "미디어,교육",
       "market_cap": 19140,
-      "weight": 5.0,
+      "weight": 3.0,
       "weight_prev": 5.0,
       "today_return": 2.2058823529411766,
       "contribution": 1.1029411764705885,
@@ -331,7 +331,7 @@
       "name": "에스엠",
       "sector": "미디어,교육",
       "market_cap": 19140,
-      "weight": 5.0,
+      "weight": 3.0,
       "weight_prev": 5.0,
       "today_return": 2.2058823529411766,
       "contribution": 1.1029411764705885,
@@ -549,7 +549,7 @@
       "name": "에스엠",
       "sector": "미디어,교육",
       "market_cap": 19140,
-      "weight": 5.0,
+      "weight": 3.0,
       "weight_prev": 5.0,
       "today_return": 2.2058823529411766,
       "contribution": 1.1029411764705885,
@@ -749,7 +749,7 @@
       "name": "에스엠",
       "sector": "미디어,교육",
       "market_cap": 19140,
-      "weight": 5.0,
+      "weight": 3.0,
       "weight_prev": 5.0,
       "today_return": 2.2058823529411766,
       "contribution": 1.1029411764705885,
@@ -949,7 +949,7 @@
       "name": "에스엠",
       "sector": "미디어,교육",
       "market_cap": 19140,
-      "weight": 5.0,
+      "weight": 3.0,
       "weight_prev": 5.0,
       "today_return": 2.2058823529411766,
       "contribution": 1.1029411764705885,
@@ -1185,7 +1185,7 @@
       "name": "에스엠",
       "sector": "미디어,교육",
       "market_cap": 19140,
-      "weight": 5.0,
+      "weight": 3.0,
       "weight_prev": 5.0,
       "today_return": 2.2058823529411766,
       "contribution": 1.1029411764705885,
@@ -1289,30 +1289,104 @@
       "is_today_new": false
     }
   ],
-  "_portfolio_meta": {
+  "_order_changes": {
     "NH 다이내믹 밸류 / DB 개방형": {
-      "nav_ytd_d1": 54.828855485258686,
-      "nav_cum_d1": 206.637
+      "date": "2026-09-22",
+      "added": [],
+      "changed": [
+        {
+          "name": "에스엠",
+          "from": 5.0,
+          "to": 3.0
+        }
+      ],
+      "removed": []
     },
     "삼성 트루밸류": {
-      "nav_ytd_d1": 54.79961015381114,
-      "nav_cum_d1": 212.898
+      "date": "2026-09-22",
+      "added": [],
+      "changed": [
+        {
+          "name": "에스엠",
+          "from": 5.0,
+          "to": 3.0
+        }
+      ],
+      "removed": []
     },
     "NH 목표전환형 5호": {
-      "nav_ytd_d1": -22.253,
-      "nav_cum_d1": -22.253
+      "date": "2026-09-22",
+      "added": [],
+      "changed": [
+        {
+          "name": "에스엠",
+          "from": 5.0,
+          "to": 3.0
+        }
+      ],
+      "removed": []
     },
     "DB 목표전환형 6차": {
-      "nav_ytd_d1": -21.34299999999999,
-      "nav_cum_d1": -21.34299999999999
+      "date": "2026-09-22",
+      "added": [],
+      "changed": [
+        {
+          "name": "에스엠",
+          "from": 5.0,
+          "to": 3.0
+        }
+      ],
+      "removed": []
     },
     "한투 지속형": {
-      "nav_ytd_d1": -12.183,
-      "nav_cum_d1": -12.183
+      "date": "2026-09-22",
+      "added": [],
+      "changed": [
+        {
+          "name": "에스엠",
+          "from": 5.0,
+          "to": 3.0
+        }
+      ],
+      "removed": []
     },
     "한투 성과모집형 1차": {
-      "nav_ytd_d1": -11.799000000000003,
-      "nav_cum_d1": -11.799000000000003
+      "date": "2026-09-22",
+      "added": [],
+      "changed": [
+        {
+          "name": "에스엠",
+          "from": 5.0,
+          "to": 3.0
+        }
+      ],
+      "removed": []
+    }
+  },
+  "_portfolio_meta": {
+    "NH 다이내믹 밸류 / DB 개방형": {
+      "nav_ytd_d1": 54.121454791491,
+      "nav_cum_d1": 205.23600000000002
+    },
+    "삼성 트루밸류": {
+      "nav_ytd_d1": 54.092148161340916,
+      "nav_cum_d1": 211.468
+    },
+    "NH 목표전환형 5호": {
+      "nav_ytd_d1": -22.599000000000004,
+      "nav_cum_d1": -22.599000000000004
+    },
+    "DB 목표전환형 6차": {
+      "nav_ytd_d1": -21.694000000000003,
+      "nav_cum_d1": -21.694000000000003
+    },
+    "한투 지속형": {
+      "nav_ytd_d1": -12.409999999999998,
+      "nav_cum_d1": -12.409999999999998
+    },
+    "한투 성과모집형 1차": {
+      "nav_ytd_d1": -12.015999999999993,
+      "nav_cum_d1": -12.015999999999993
     }
   },
   "_price_asof": "2026-09-21"
