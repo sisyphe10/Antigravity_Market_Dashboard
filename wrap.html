@@ -345,7 +345,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
     </div>
 
     <div id="mainContent" class="pw-hidden has-sidebar">
-    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><span class="wrap-updated">Updated: 2026-09-22 14:00:12 KST</span></div></nav><div class="wrap-strip"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div>
+    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><span class="wrap-updated">Updated: 2026-09-22 14:21:12 KST</span></div></nav><div class="wrap-strip"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div>
     <aside class="sidebar wrap-sidebar" id="wrapSectionNav" aria-label="WRAP navigation"><div class="wrap-side-group on" data-side-for="dashboard"><a href="#wrap-sec-chart" onclick="wrapGoSection('wrap-sec-chart');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-chart">CHART</a><a href="#wrap-sec-return" onclick="wrapGoSection('wrap-sec-return');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-return">RETURN</a><a href="#wrap-sec-aum" onclick="wrapGoSection('wrap-sec-aum');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-aum">AUM</a><a href="#wrap-sec-portfolio" onclick="wrapGoSection('wrap-sec-portfolio');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-portfolio">Portfolio</a><a href="#wrap-sec-sector" onclick="wrapGoSection('wrap-sec-sector');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-sector">SECTOR WEIGHT</a></div><div class="wrap-side-group" data-side-for="order" id="wrapSideOrder"></div><div class="wrap-side-group" data-side-for="contribution" id="wrapSideContrib"></div><div class="wrap-side-group" data-side-for="fee"><a href="#" onclick="feeSwitchSub('rate');return false;" class="sidebar-link active" data-side-fee="rate">요율</a><a href="#" onclick="feeSwitchSub('revenue');return false;" class="sidebar-link" data-side-fee="revenue">매출</a></div></aside>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -7108,7 +7108,7 @@ function cmbPeerCharts(self) {
         <style>:root{--wrap-order-head-color:#000;--wrap-order-divider-color:#555;--wrap-order-independent-bg:rgba(245,130,32,0.10);}#orderContent table{width:100%;border-collapse:collapse;font-size:14px;}#orderContent thead th{padding:8px 12px;text-align:center;border-bottom:2px solid var(--wrap-border);color:var(--wrap-order-head-color);background:var(--wrap-neutral);white-space:nowrap;}#orderContent thead th,#orderContent tbody td{border:1px solid #d9d9d9;white-space:nowrap;}#orderContent tbody td{padding:6px 12px;text-align:center;color:var(--wrap-order-head-color);}#orderContent thead th.grp-general,#orderContent tbody td.grp-general{background:rgba(130,185,115,0.07);}#orderContent thead th.grp-target,#orderContent tbody td.grp-target{background:rgba(242,120,162,0.07);}#orderContent input.cell{width:100%;box-sizing:border-box;text-align:center;padding:4px;border:none;background:transparent;border-radius:0;font-family:inherit;font-size:15px;font-weight:600;}#orderContent input.meta{text-align:center;padding:4px 6px;border:none;background:transparent;border-radius:0;font-family:inherit;font-size:14px;}#orderContent input.reason{width:100%;box-sizing:border-box;padding:10px 6px 10px 14px;border:none;background:transparent;border-radius:0;font-family:inherit;font-size:14px;text-align:left;}#orderContent input.cell:focus,#orderContent input.meta:focus,#orderContent input.reason:focus{outline:2px solid #94a3b8;outline-offset:-2px;background:#fff;}#orderContent .totals td{border-top:2px solid #374151;background:var(--wrap-neutral);font-weight:700;padding:8px 4px;}#orderContent .cashrow td{background:#eff6ff;font-weight:700;padding:8px 4px;}#orderContent .diffrow td{font-weight:700;padding:8px 4px;}#orderContent .toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;}#orderContent .sync-toggle{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;cursor:pointer;user-select:none;padding:6px 12px;border:1.5px solid #737B86;border-radius:8px;background:#fff;color:#000;}#orderContent #syncToggle{--sync-active-bg:#DCEBD8;--sync-active-border:#548448;}#orderContent #syncToggleTarget{--sync-active-bg:#FCE0E9;--sync-active-border:#B85578;}#orderContent #syncToggleKis{--sync-active-bg:#FDE6CF;--sync-active-border:#B96A24;}#orderContent .sync-toggle.on{border-color:var(--sync-active-border);background:var(--sync-active-bg);color:#000;}#orderContent .btn{font-family:inherit;font-size:14px;font-weight:600;padding:6px 14px;border-radius:8px;cursor:pointer;border:1px solid var(--wrap-border2);background:var(--wrap-neutral);color:#222;}#orderContent .btn.red{background:var(--wrap-red);color:#fff;border:none;}#orderContent .btn.green{background:#16a34a;color:#fff;border:none;}#orderContent .btn.blue{background:var(--wrap-blue);color:#fff;border:none;}#orderContent .del-btn{background:none;border:none;cursor:pointer;color:var(--wrap-red);font-size:20px;line-height:1;padding:0 6px;font-weight:bold;}#orderContent .addrow td{background:#fff;}#orderContent thead th.mtx-independent,#orderContent tbody td.mtx-independent{background:var(--wrap-order-independent-bg);}#orderContent .diffrow td,#orderContent .totals td,#orderContent .cashrow td{color:var(--wrap-order-head-color);}#orderContent thead th{border-bottom-color:var(--wrap-order-divider-color);}#orderContent tbody tr:first-child > td{border-top-color:var(--wrap-order-divider-color)!important;}#orderContent tr > :not(.mtx-independent):has(+ .mtx-independent){border-right-color:var(--wrap-order-divider-color);}#orderContent tr > :not(.mtx-independent) + .mtx-independent{border-left-color:var(--wrap-order-divider-color);}#orderContent tr > .mtx-independent:has(+ :not(.mtx-independent)){border-right-color:var(--wrap-order-divider-color);}#orderContent tr > .mtx-independent + :not(.mtx-independent){border-left-color:var(--wrap-order-divider-color)!important;}</style>
         <div id="orderTabs" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;"></div>
         <div id="orderContent"><div style="text-align:center;color:#888;padding:40px;">로딩 중...</div></div>
-        <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js" integrity="sha384-Pqp51FUN2/qzfxZxBCtF0stpc9ONI6MYZpVqmo8m20SoaQCzf+arZvACkLkirlPz" crossorigin="anonymous"></script>
         <script>
         // 일반형 3개는 종목/비중 동일 → 한 테이블 + 3개 Download 버튼
         // 목표전환형은 주문 시점이 다를 수 있어 별도 카드 유지
@@ -7233,17 +7233,24 @@ function cmbPeerCharts(self) {
         // pending_orders.json 취득 — Contents API 우선(커밋 즉시 반영, Pages 빌드지연 우회)
         //   → Pages 폴백 → localStorage 미러(원격 이중장애 시). 모두 실패 시 {} (복원 없음, 무해).
         // repo가 PUBLIC이라 Contents API raw 미디어타입을 비인증으로 읽음(60req/시, 소진 시 폴백).
-        async function fetchPendingOrdersJson() {
+        var orderPendingRevision = null, orderLoadedPending = null;
+        async function fetchPendingOrdersJson(forSave) {
+            if (WRAP_API && forSave) {
+                if (!orderPendingRevision || !orderLoadedPending) throw new Error('최신 주문을 먼저 불러오세요. 저장 기준 버전이 없습니다.');
+                return JSON.parse(JSON.stringify(orderLoadedPending));
+            }
             // ★2026-09-01 Phase1: ts.net(wrap-api) 에서는 같은 origin 스냅숏(orders/pending_orders.json) → localStorage 미러 순.
             //   (GitHub Contents API 경유 없음. 저장 잡이 게시까지 마친 뒤 응답하므로 스냅숏이 정본)
             if (WRAP_API) {
-                try {
-                    var rs = await fetch('orders/pending_orders.json?_=' + Date.now(), { cache: 'no-store' });
-                    if (rs.ok) return await rs.json();
-                    if (rs.status === 404) return {};
-                } catch(e) { /* 스냅숏 실패 → 미러 */ }
-                try { var mm = localStorage.getItem('pending_orders_mirror'); if (mm) return JSON.parse(mm); } catch(e) {}
-                return {};
+                orderPendingRevision = null; orderLoadedPending = null;
+                var tok = getWrapToken();
+                if (!tok) throw new Error('주문 조회 인증이 필요합니다.');
+                var rs = await fetch(WRAP_API + '/orders/pending', {cache:'no-store', headers:{'X-Wrap-Token':tok}});
+                if (!rs.ok) throw new Error('주문 조회 실패: ' + rs.status);
+                var snapshot = await rs.json();
+                orderPendingRevision = snapshot.revision;
+                orderLoadedPending = JSON.parse(JSON.stringify(snapshot.pending));
+                return snapshot.pending;
             }
             var apiUrl = 'https://api.github.com/repos/' + ORDER_REPO
                 + '/contents/orders/pending_orders.json?ref=main';
@@ -7403,7 +7410,7 @@ function cmbPeerCharts(self) {
         // - YYMMDD 패턴 (예: _260427.xlsx)
         // - YYYY.M.D 패턴 (예: _2026.4.27.xlsx)
         // - YYYYMMDD 패턴 (예: _20260702.xlsx, 한투 양식)
-        function buildOutFilename(template, date) {
+        function buildOutFilename(template, date, roundSuffix) {
             var fname = template.file.split('/').pop();
             var yy = (date.getFullYear() % 100).toString().padStart(2, '0');
             var mm = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -7420,7 +7427,7 @@ function cmbPeerCharts(self) {
                 fname = fname.replace(/_\d{6}\.xlsx$/, '_' + yymmdd + '.xlsx');
             }
             // 2차 이상 추가 주문이면 확장자 앞에 '_N차 주문'
-            var _rs = orderRoundSuffix();
+            var _rs = roundSuffix == null ? orderRoundSuffix() : roundSuffix;
             if (_rs) {
                 var _dot = fname.lastIndexOf('.');
                 fname = (_dot > 0) ? (fname.slice(0, _dot) + _rs + fname.slice(_dot)) : (fname + _rs);
@@ -7478,7 +7485,7 @@ function cmbPeerCharts(self) {
         }
 
         // 브로커별 자문지 첨부 생성 (해당 증권사 컬럼들의 templates → downloadOrderExcel base64)
-        async function _advAttachments(broker) {
+        async function _advAttachments(broker, snapshot) {
             if (!broker) return [];
             var atts = [];
             var cols = ORDER_PORTFOLIOS.filter(function(p) { return p.broker === broker; });
@@ -7486,11 +7493,11 @@ function cmbPeerCharts(self) {
                 var p = cols[ci];
                 if (!_mtxCanOrder(p)) continue;
                 var tpls = p.templates || [];
-                if (!tpls.length && (orderState[p.display] || []).some(function(s) { return (parseFloat(s.newWeight) || 0) > 0; })) {
+                if (!tpls.length && ((snapshot.state[p.display] || []).some(function(s) { return Number(s.newWeight) > 0; }) || (snapshot.stocks[p.display] || []).some(function(s) { return Number(s.weight) > 0; }))) {
                     throw new Error(p.display + ' 자문지 양식 등록이 필요합니다.');
                 }
                 for (var ti = 0; ti < tpls.length; ti++) {
-                    var r = await downloadOrderExcel(p.display, ti, true);   // returnB64=true
+                    var r = await downloadOrderExcel(p.display, ti, true, snapshot);   // returnB64=true
                     if (r && r.content_b64) atts.push(r);
                 }
             }
@@ -7499,12 +7506,13 @@ function cmbPeerCharts(self) {
 
         // 5통 조립 (본문=buildOrderEmailText+서명, 첨부=브라우저 생성 base64). async — 첨부 생성 때문.
         async function buildAdvisoryMails(onlyKeys) {
-            var d = new Date();
+            var snapshot = { stocks: JSON.parse(JSON.stringify(orderStocks)), state: JSON.parse(JSON.stringify(orderState)), date: new Date(), roundSuffix: orderRoundSuffix() };
+            var d = snapshot.date;
             function findCol(broker, isGen) {
                 return ORDER_PORTFOLIOS.filter(function(p) { return p.broker === broker && (!!p.general) === isGen; })[0];
             }
             function bodyFor(disp) {
-                return buildOrderEmailText(disp, orderStocks[disp] || [], orderState[disp] || []) + ADVISORY_SIGNATURE;
+                return buildOrderEmailText(disp, snapshot.stocks[disp] || [], snapshot.state[disp] || [], snapshot) + ADVISORY_SIGNATURE;
             }
             var genSamsung = findCol('삼성', true);
             var specs = [
@@ -7530,9 +7538,9 @@ function cmbPeerCharts(self) {
                 if (onlyKeys && onlyKeys.indexOf(s.key) < 0) continue;
                 var disp = s.bodyDisp || (s.col && s.col.display);
                 if (!disp && !s.unionBody) continue;
-                var atts = await _advAttachments(s.broker);
-                var body = s.unionBody ? buildComplianceUnionBody() : bodyFor(disp);
-                mails.push({ key: s.key, label: s.label, subject: s.subject + orderRoundSuffix(), body: body, attachments: atts });
+                var atts = await _advAttachments(s.broker, snapshot);
+                var body = s.unionBody ? buildComplianceUnionBody(snapshot) : bodyFor(disp);
+                mails.push({ key: s.key, label: s.label, subject: s.subject + snapshot.roundSuffix, body: body, attachments: atts });
             }
             return mails;
         }
@@ -7819,7 +7827,9 @@ function cmbPeerCharts(self) {
             return lines;
         }
 
-        function buildOrderEmailText(pfName, stocks, st) {
+        function buildOrderEmailText(pfName, stocks, st, snapshot) {
+            var bodyStocks = snapshot ? snapshot.stocks : orderStocks;
+            var bodyState = snapshot ? snapshot.state : orderState;
             // 목표전환형 이메일 = 같은 증권사 일반형 섹션 + 목표전환형 섹션 (EMAIL_PAIR, wrap_config.email_pair_map)
             var TARGET_TABS = ["NH 목표전환형 5호", "DB 목표전환형 6차", "한투 성과모집형 1차", "한투 성과모집형 2차"];
             var GENERAL = "삼성 트루밸류";
@@ -7835,17 +7845,17 @@ function cmbPeerCharts(self) {
             if (TARGET_TABS.indexOf(pfName) >= 0) {
                 var pair = EMAIL_PAIR[pfName] || { generalKey: GENERAL, generalLabel: '일반형', targetLabel: '목표전환형' };
                 if (pair.generalKey) {
-                    var generalChanges = buildOrderChanges(orderStocks[pair.generalKey] || [], orderState[pair.generalKey] || []);
+                    var generalChanges = buildOrderChanges(bodyStocks[pair.generalKey] || [], bodyState[pair.generalKey] || []);
                     lines = lines.concat(buildEmailSectionLines(generalChanges, pair.generalLabel));
                     lines.push('');
                 }
                 var peers = TARGET_TABS.filter(function(key) {
                     var col = ORDER_PORTFOLIOS.find(function(p) { return p.display === key; });
-                    return EMAIL_PAIR[key] && EMAIL_PAIR[key].broker === pair.broker && (!col || _mtxCanOrder(col));
+                    return EMAIL_PAIR[key] && EMAIL_PAIR[key].broker === pair.broker && (!col || (_mtxCanOrder(col) && ((col.templates || []).length || (bodyStocks[key] || []).some(function(s) { return Number(s.weight) > 0; }) || (bodyState[key] || []).some(function(s) { return Number(s.newWeight) > 0; }))));
                 });
                 peers.forEach(function(key, i) {
                     if (i) lines.push('');
-                    var changes = buildOrderChanges(orderStocks[key] || [], orderState[key] || []);
+                    var changes = buildOrderChanges(bodyStocks[key] || [], bodyState[key] || []);
                     lines = lines.concat(buildEmailSectionLines(changes, EMAIL_PAIR[key].targetLabel));
                 });
             } else {
@@ -7860,12 +7870,14 @@ function cmbPeerCharts(self) {
         // 컴플라이언스 메일 본문 = Order 탭 전 포트폴리오(일반형+목표전환형) 변경분의 합집합.
         // 개별 증권사 메일은 각 포트 기준이지만, 컴플은 전 상품 변경을 단일 [주요 내용]으로 취합해야
         // 특정 포트 단독 변경(예: 한투 지속형만 삼성전자/SK하이닉스 축소)이 누락되지 않는다.
-        function buildComplianceUnionBody() {
+        function buildComplianceUnionBody(snapshot) {
+            var bodyStocks = snapshot ? snapshot.stocks : orderStocks;
+            var bodyState = snapshot ? snapshot.state : orderState;
             var acc = { newBuy: [], inc: [], dec: [], out: [] };
             var seen = { newBuy: {}, inc: {}, dec: {}, out: {} };
             ORDER_PORTFOLIOS.forEach(function(p) {
                 var disp = p.display;
-                var ch = buildOrderChanges(orderStocks[disp] || [], orderState[disp] || []);
+                var ch = buildOrderChanges(bodyStocks[disp] || [], bodyState[disp] || []);
                 ['newBuy', 'inc', 'dec', 'out'].forEach(function(k) {
                     ch[k].forEach(function(nm) { if (nm && !seen[k][nm]) { seen[k][nm] = 1; acc[k].push(nm); } });
                 });
@@ -8140,7 +8152,7 @@ function cmbPeerCharts(self) {
         function _mtxCodeChanged(code){ for(var pi=0;pi<ORDER_PORTFOLIOS.length;pi++){ var c=_mtxCell(ORDER_PORTFOLIOS[pi].display,code); if(c.held&&c.ot&&c.ot!=='유지') return true; } return false; }
         function _mtxApplyCell(pf,code,raw,rowMeta){ var product=ORDER_PORTFOLIOS.find(function(p){return p.display===pf;}); if(product&&!_mtxCanOrder(product))return; var c=String(code||'').trim(); if(!c) return; var idx=_mtxFindIdx(pf,c); var s=raw==null?'':String(raw).trim();
           if(s===''){ if(idx>=0){ var stk=orderStocks[pf][idx]; if(stk._mtxAdded&&(parseFloat(stk.weight)||0)===0){ orderStocks[pf].splice(idx,1); orderState[pf].splice(idx,1); } else { orderState[pf][idx].newWeight=0; } } return; }
-          var val=parseFloat(s)||0;
+          var val=Number(s); if(!Number.isFinite(val)||val<0||val>100){alert('비중은 0~100의 숫자로 입력하세요.');return;}
           if(idx>=0){ orderState[pf][idx].newWeight=val; } else { var m=rowMeta||_mtxUnion().meta[c]||{code:c,name:'',sector:''}; orderStocks[pf].push({code:c,name:m.name||'',sector:m.sector||'',weight:0,isNew:true,_mtxAdded:true}); orderState[pf].push({newWeight:val,reason:_mtxReason(c)}); } }
         function _mtxApplyCellSynced(pf,code,raw,rowMeta){ var meta=ORDER_PORTFOLIOS.filter(function(p){return p.display===pf;})[0];
           var key=meta?_mtxSyncKey(meta):null;
@@ -8301,7 +8313,15 @@ function cmbPeerCharts(self) {
             while (Date.now() - t0 < timeoutMs) {
                 try {
                     var r = await fetch(WRAP_API + '/jobs/' + jobId, { cache: 'no-store', headers: { 'X-Wrap-Token': tok } });
-                    if (r.ok) { var j = await r.json(); if (j && (j.state === 'done' || j.state === 'failed' || j.state === 'skipped')) return j; }
+                    if (r.ok) { var j = await r.json(); if (j && (j.state === 'done' || j.state === 'failed' || j.state === 'skipped')) {
+                        if (j.state === 'done' && j.revision) {
+                            var rr = await fetch(WRAP_API + '/orders/pending', {cache:'no-store', headers:{'X-Wrap-Token':tok}});
+                            if (rr.ok) { var snap = await rr.json();
+                                if (snap.revision === j.revision) { orderPendingRevision = snap.revision; orderLoadedPending = JSON.parse(JSON.stringify(snap.pending)); }
+                            }
+                        }
+                        return j;
+                    } }
                 } catch(e) {}
                 await new Promise(function(res) { setTimeout(res, 3000); });
             }
@@ -8312,7 +8332,7 @@ function cmbPeerCharts(self) {
         function _wrapBuildPending(existing, todayStr) {
             if (!existing || typeof existing !== 'object' || Array.isArray(existing)) existing = {};
             if (!existing[todayStr]) existing[todayStr] = {};
-            var totalRows = 0, savedPfs = [];
+            var totalRows = 0, savedPfs = [], signatures = {};
             ORDER_PORTFOLIOS.forEach(function(p) {
                 if (p.startDate && p.startDate > todayStr) return;
                 var pfName = p.display;
@@ -8322,7 +8342,8 @@ function cmbPeerCharts(self) {
                 var st = orderState[pfName] || [];
                 var validRows = [];
                 stocks.forEach(function(s, i) {
-                    var newW = parseFloat(st[i].newWeight) || 0;
+                    var newW = Number(st[i].newWeight);
+                    if (!Number.isFinite(newW) || newW < 0 || newW > 100) throw new Error(pfName + ' 비중은 0~100의 숫자여야 합니다.');
                     if (s.code) {
                         validRows.push({ sector: s.sector || '', code: String(s.code), name: s.name || '', weight: newW,
                             baseWeight: parseFloat(s.weight) || 0, reason: (st[i].reason || '').toString() });
@@ -8331,21 +8352,21 @@ function cmbPeerCharts(self) {
                 if (validRows.length === 0) return;
                 existing[todayStr][pfName] = { targets: targets, stocks: validRows, savedAt: new Date().toISOString() };
                 totalRows += validRows.length;
-                savedPfs.push(pfName);
+                savedPfs.push(pfName); signatures[pfName] = orderStateSignature(pfName);
             });
-            return { existing: existing, savedPfs: savedPfs, totalRows: totalRows };
+            return { existing: existing, savedPfs: savedPfs, totalRows: totalRows, signatures: signatures };
         }
         async function saveAllPendingOrdersViaApi(silent) {
             var todayStr = _wrapTodayStr();
             try {
-                var existing = await fetchPendingOrdersJson();
+                var existing = await fetchPendingOrdersJson(true);
                 var b = _wrapBuildPending(existing, todayStr);
                 if (b.savedPfs.length === 0) { alert('저장할 종목이 없습니다.'); return null; }
-                var res = await wrapApiPost('/orders/pending', { pending: b.existing,
+                var res = await wrapApiPost('/orders/pending', { pending: b.existing, base_revision: orderPendingRevision,
                     message: 'ORDER pending: ' + b.savedPfs.length + ' pf (' + todayStr + ', ' + b.totalRows + ' stocks) via wrap-api [skip ci]' });
                 try { localStorage.setItem('pending_orders_mirror', JSON.stringify(b.existing)); } catch(e) {}
                 b.savedPfs.forEach(function(pf) {
-                    setOrderBaseline(pf);
+                    orderSavedBaseline[pf] = b.signatures[pf];
                     var svAt = (b.existing[todayStr][pf] && b.existing[todayStr][pf].savedAt) || new Date().toISOString();
                     orderCardServer[pf] = { hasPending: true, finalizedAt: null, savedAt: svAt };
                 });
@@ -8364,11 +8385,11 @@ function cmbPeerCharts(self) {
             }
         }
         async function _wrapCancelPending(todayStr) {
-            var existing = await fetchPendingOrdersJson();
+            var existing = await fetchPendingOrdersJson(true);
             if (!existing || typeof existing !== 'object' || Array.isArray(existing)) existing = {};
             if (existing[todayStr]) {
                 delete existing[todayStr];
-                var res = await wrapApiPost('/orders/pending', { pending: existing, message: 'ORDER cancel: 전체 취소 (' + todayStr + ') via wrap-api [skip ci]' });
+                var res = await wrapApiPost('/orders/pending', { pending: existing, base_revision: orderPendingRevision, message: 'ORDER cancel: 전체 취소 (' + todayStr + ') via wrap-api [skip ci]' });
                 await wrapApiWaitJob(res.job_id, 120000);
             }
             try { localStorage.setItem('pending_orders_mirror', JSON.stringify(existing)); } catch(e) {}
@@ -8378,17 +8399,17 @@ function cmbPeerCharts(self) {
             var todayStr = _wrapTodayStr();
             var b;
             try {
-                var existing = await fetchPendingOrdersJson();
+                var existing = await fetchPendingOrdersJson(true);
                 b = _wrapBuildPending(existing, todayStr);
                 if (b.savedPfs.length === 0) { alert('저장할 종목이 없습니다.'); return; }
-                var res = await wrapApiPost('/orders/finalize', { pending: b.existing });
+                var res = await wrapApiPost('/orders/finalize', { pending: b.existing, base_revision: orderPendingRevision });
                 try { localStorage.setItem('pending_orders_mirror', JSON.stringify(b.existing)); } catch(e) {}
-                b.savedPfs.forEach(function(pf) { setOrderBaseline(pf); });
-                orderSetSessionAction('finalized');
+                b.savedPfs.forEach(function(pf) { orderSavedBaseline[pf] = b.signatures[pf]; });
+                orderSetSessionAction('pending');
                 if (orderActiveTab && orderActiveTab !== 'Email') refreshOrderSaveBadge();
                 alert('✅ 최종 저장 접수 (' + res.job_id + ')\n\n맥미니 처리 중 — 완료되면 이 창에 알림이 뜹니다(1~3분). 실패 시 텔레그램.');
                 wrapApiWaitJob(res.job_id, 1200000).then(function(job) {
-                    if (job && job.state === 'done') alert('✅ 최종 저장 완료 — Wrap_NAV.xlsx NEW 시트 + 대시보드 반영됨.');
+                    if (job && job.state === 'done') { orderSetSessionAction('finalized'); refreshOrderSaveBadge(); alert('✅ 최종 저장 완료 — Wrap_NAV.xlsx NEW 시트 + 대시보드 반영됨.'); }
                     else alert('❌ 최종 저장 처리 ' + (job ? job.state : '확인 시간 초과') + ' (' + res.job_id + ')\n' + (job && job.detail ? job.detail.slice(-300) : ''));
                 });
             } catch(e) {
@@ -8737,18 +8758,26 @@ function cmbPeerCharts(self) {
             }
         }
 
-        async function downloadOrderExcel(pfName, templateIdx, returnB64) {
+        var _advisoryTemplateCache = new Map();
+        async function _advisoryTemplateBytes(url) {
+            if (!_advisoryTemplateCache.has(url)) {
+                _advisoryTemplateCache.set(url, fetch(url).then(function(resp) {
+                    if (!resp.ok) throw new Error('템플릿 fetch 실패: HTTP ' + resp.status);
+                    return resp.arrayBuffer();
+                }).catch(function(error) { _advisoryTemplateCache.delete(url); throw error; }));
+            }
+            return (await _advisoryTemplateCache.get(url)).slice(0);
+        }
+        async function downloadOrderExcel(pfName, templateIdx, returnB64, snapshot) {
             var p = ORDER_PORTFOLIOS.find(function(x) { return x.display === pfName; });
             if (!p) { alert('포트폴리오 매핑 누락: ' + pfName); return; }
             if (typeof ExcelJS === 'undefined') { alert('ExcelJS 라이브러리 로드 실패. 새로고침 해주세요.'); return; }
             var t = p.templates[templateIdx];
             if (!t) { alert('템플릿 매핑 누락: ' + templateIdx); return; }
-            var stocks = orderStocks[pfName];
-            var st = orderState[pfName];
+            var stocks = JSON.parse(JSON.stringify(snapshot ? snapshot.stocks[pfName] : orderStocks[pfName]));
+            var st = JSON.parse(JSON.stringify(snapshot ? snapshot.state[pfName] : orderState[pfName]));
             try {
-                var resp = await fetch(t.file);
-                if (!resp.ok) throw new Error('템플릿 fetch 실패: HTTP ' + resp.status + ' (' + t.file + ')');
-                var buf = await resp.arrayBuffer();
+                var buf = await _advisoryTemplateBytes(t.file);
                 var wb = new ExcelJS.Workbook();
                 await wb.xlsx.load(buf);
                 var ws = wb.worksheets[0];
@@ -8867,7 +8896,7 @@ function cmbPeerCharts(self) {
                     for (var _o = 0; _o < _bytes.length; _o += 0x8000) {
                         _bin += String.fromCharCode.apply(null, _bytes.subarray(_o, _o + 0x8000));
                     }
-                    return { filename: buildOutFilename(t, new Date()), content_b64: btoa(_bin) };
+                    return { filename: buildOutFilename(t, snapshot ? snapshot.date : new Date(), snapshot ? snapshot.roundSuffix : undefined), content_b64: btoa(_bin) };
                 }
                 var blob = new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
                 var url = URL.createObjectURL(blob);
@@ -8879,6 +8908,7 @@ function cmbPeerCharts(self) {
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
             } catch(e) {
+                if (returnB64) throw e;
                 alert('자문지 송출 실패: ' + e.message);
                 console.error('downloadOrderExcel error:', e);
             }
