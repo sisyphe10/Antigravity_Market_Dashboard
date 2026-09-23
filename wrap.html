@@ -345,7 +345,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
     </div>
 
     <div id="mainContent" class="pw-hidden has-sidebar">
-    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><span class="wrap-updated">Updated: 2026-09-23 09:34:54 KST</span></div></nav><div class="wrap-strip"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div>
+    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><span class="wrap-updated">Updated: 2026-09-23 09:49:30 KST</span></div></nav><div class="wrap-strip"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div>
     <aside class="sidebar wrap-sidebar" id="wrapSectionNav" aria-label="WRAP navigation"><div class="wrap-side-group on" data-side-for="dashboard"><a href="#wrap-sec-chart" onclick="wrapGoSection('wrap-sec-chart');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-chart">CHART</a><a href="#wrap-sec-return" onclick="wrapGoSection('wrap-sec-return');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-return">RETURN</a><a href="#wrap-sec-aum" onclick="wrapGoSection('wrap-sec-aum');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-aum">AUM</a><a href="#wrap-sec-portfolio" onclick="wrapGoSection('wrap-sec-portfolio');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-portfolio">Portfolio</a><a href="#wrap-sec-sector" onclick="wrapGoSection('wrap-sec-sector');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-sector">SECTOR WEIGHT</a></div><div class="wrap-side-group" data-side-for="order" id="wrapSideOrder"></div><div class="wrap-side-group" data-side-for="contribution" id="wrapSideContrib"></div><div class="wrap-side-group" data-side-for="fee"><a href="#" onclick="feeSwitchSub('rate');return false;" class="sidebar-link active" data-side-fee="rate">요율</a><a href="#" onclick="feeSwitchSub('revenue');return false;" class="sidebar-link" data-side-fee="revenue">매출</a></div></aside>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -7846,63 +7846,90 @@ function cmbPeerCharts(self) {
             return '<div style="font-family:굴림,Gulim,sans-serif;font-size:12px;line-height:1.6;color:#000;">' + esc + (mi >= 0 ? ADVISORY_SIG_HTML : '') + '</div>';
         }
 
-        // 브로커별 자문지 첨부 생성 (해당 증권사 컬럼들의 templates → downloadOrderExcel base64)
-        async function _advAttachments(broker, snapshot) {
-            if (!broker) return [];
-            var atts = [];
-            var cols = ORDER_PORTFOLIOS.filter(function(p) { return p.broker === broker; });
-            for (var ci = 0; ci < cols.length; ci++) {
-                var p = cols[ci];
-                if (!_mtxCanOrder(p)) continue;
-                var tpls = p.templates || [];
-                if (!tpls.length && ((snapshot.state[p.display] || []).some(function(s) { return Number(s.newWeight) > 0; }) || (snapshot.stocks[p.display] || []).some(function(s) { return Number(s.weight) > 0; }))) {
-                    throw new Error(p.display + ' 자문지 양식 등록이 필요합니다.');
+        // 주문 판정은 저장 여부가 아닌 현재 회차의 변경전/변경후 비중 차이.
+        function _advWeightTicks(value) {
+            if (value == null || typeof value === 'boolean' || (typeof value === 'string' && !value.trim())) throw new Error('주문 비중을 입력해 주세요.');
+            var n = Number(value), ticks = Math.round(n * 10);
+            if (!Number.isFinite(n) || n < 0 || n > 100) throw new Error('주문 비중은 0~100의 숫자여야 합니다.');
+            if (Math.abs(n * 10 - ticks) > 1e-7) throw new Error('주문 비중은 소수점 첫째 자리까지 입력해 주세요.');
+            return ticks;
+        }
+        function _advChangedProducts(snapshot) {
+            return ORDER_PORTFOLIOS.filter(function(p) {
+                var stocks = snapshot.stocks[p.display] || [], state = snapshot.state[p.display] || [];
+                if (stocks.length !== state.length) throw new Error(p.display + ' 주문 종목과 비중을 다시 확인해 주세요.');
+                var changed = false, seen = {};
+                stocks.forEach(function(s, i) {
+                    var code = String(s.code || '');
+                    if (!/^\d{6}$/.test(code) || seen[code]) throw new Error(p.display + ' 종목코드를 확인해 주세요.');
+                    seen[code] = true;
+                    var oldTicks = _advWeightTicks(s.weight), newTicks = _advWeightTicks(state[i] && state[i].newWeight);
+                    s.weight = oldTicks / 10; state[i].newWeight = newTicks / 10;
+                    if (oldTicks !== newTicks) changed = true;
+                });
+                if (changed && p.startDate && p.startDate > snapshot.day) throw new Error(p.display + ' 상품 개시 전 주문입니다.');
+                return changed;
+            });
+        }
+        function _advPreviewSignature() {
+            return JSON.stringify([orderStocks, orderState, _wrapTodayStr(), orderRoundSuffix()]);
+        }
+        function _advValidatePreview(mails) {
+            if (!mails.length) throw new Error('발송할 주문이 없습니다.');
+            mails.forEach(function(m) {
+                if (m.key !== 'compliance' && m.previewSignature !== _advPreviewSignature())
+                    throw new Error('주문이 변경됐습니다. 메일 미리보기를 다시 열어 주세요.');
+            });
+        }
+        function _advBrokerBody(cols, snapshot) {
+            var pairs = {"NH 목표전환형 5호": {"broker": "NH", "generalKey": "NH 다이내믹 밸류", "generalLabel": "일반형", "targetLabel": "목표전환형"}, "DB 목표전환형 6차": {"broker": "DB", "generalKey": "DB 개방형", "generalLabel": "개방형", "targetLabel": "목표전환형"}, "한투 성과모집형 1차": {"broker": "한투", "generalKey": "한투 지속형", "generalLabel": "지속형", "targetLabel": "성과모집형 1차"}, "한투 성과모집형 2차": {"broker": "한투", "generalKey": "한투 지속형", "generalLabel": "지속형", "targetLabel": "성과모집형 2차"}};
+            var hasTarget = cols.some(function(p) { return !p.general; });
+            var lines = ['안녕하십니까.', '라이프자산운용 김태식입니다.', '', '랩 자문지 보내드립니다.', '주요 변경 내용은 다음과 같습니다.', ''];
+            cols.forEach(function(p, i) {
+                var label = null;
+                if (hasTarget) {
+                    label = p.general ? ({'DB':'개방형', 'NH':'일반형', '삼성':'일반형', '한투':'지속형'}[p.broker]) : (pairs[p.display] && pairs[p.display].targetLabel);
+                    if (!label) throw new Error(p.display + ' 메일 상품명 매핑이 없습니다.');
                 }
+                if (i) lines.push('');
+                lines = lines.concat(buildEmailSectionLines(buildOrderChanges(snapshot.stocks[p.display] || [], snapshot.state[p.display] || []), label));
+            });
+            return lines.concat(['', '감사합니다.']).join('\n') + ADVISORY_SIGNATURE;
+        }
+        async function _advAttachments(cols, snapshot) {
+            var atts = [];
+            for (var ci = 0; ci < cols.length; ci++) {
+                var p = cols[ci], tpls = p.templates || [];
+                if (!tpls.length) throw new Error(p.display + ' 자문지 양식 등록이 필요합니다.');
                 for (var ti = 0; ti < tpls.length; ti++) {
-                    var r = await downloadOrderExcel(p.display, ti, true, snapshot);   // returnB64=true
-                    if (r && r.content_b64) atts.push(r);
+                    var r = await downloadOrderExcel(p.display, ti, true, snapshot);
+                    if (!r || !r.content_b64) throw new Error(p.display + ' 자문지 생성에 실패했습니다.');
+                    atts.push(r);
                 }
             }
             return atts;
         }
-
-        // 5통 조립 (본문=buildOrderEmailText+서명, 첨부=브라우저 생성 base64). async — 첨부 생성 때문.
         async function buildAdvisoryMails(onlyKeys) {
-            var snapshot = { stocks: JSON.parse(JSON.stringify(orderStocks)), state: JSON.parse(JSON.stringify(orderState)), date: new Date(), roundSuffix: orderRoundSuffix() };
+            var signature = _advPreviewSignature();
+            var snapshot = { stocks: JSON.parse(JSON.stringify(orderStocks)), state: JSON.parse(JSON.stringify(orderState)), date: new Date(), day: _wrapTodayStr(), roundSuffix: orderRoundSuffix() };
             var d = snapshot.date;
-            function findCol(broker, isGen) {
-                return ORDER_PORTFOLIOS.filter(function(p) { return p.broker === broker && (!!p.general) === isGen; })[0];
-            }
-            function bodyFor(disp) {
-                return buildOrderEmailText(disp, snapshot.stocks[disp] || [], snapshot.state[disp] || [], snapshot) + ADVISORY_SIGNATURE;
-            }
-            var genSamsung = findCol('삼성', true);
+            var changed = onlyKeys && onlyKeys.length === 1 && onlyKeys[0] === 'compliance' ? [] : _advChangedProducts(snapshot);
             var specs = [
-                { key: 'compliance', label: '컴플라이언스', broker: null,
-                  subject: '[라이프자산운용] 자문형 랩 : ' + _advMD(d) + ' 자문지 송부의 건',
-                  unionBody: true },
-                { key: 'samsung', label: '삼성', broker: '삼성',
-                  subject: '[라이프자산운용_트루밸류] 라이프자산운용_트루밸류 ' + _advMDJ(d) + ' 자문지 보내드립니다.',
-                  bodyDisp: genSamsung && genSamsung.display },
-                { key: 'nh', label: 'NH', broker: 'NH',
-                  subject: '[라이프자산운용] NH랩 라이프 다이내믹밸류: ' + _advMDJ(d) + ' 자문지 보내드립니다.',
-                  col: findCol('NH', false) },
-                { key: 'db', label: 'DB', broker: 'DB',
-                  subject: '[라이프자산운용] DB 랩 : ' + _advMD(d) + ' 자문지 보내드립니다.',
-                  col: findCol('DB', false) },
-                { key: 'kis', label: '한투', broker: '한투',
-                  subject: '[라이프자산운용]_한국투자 가치도약랩 자문지_' + _advYMD(d),
-                  col: findCol('한투', false) }
+                {key:'compliance', label:'컴플라이언스', broker:null, subject:'[라이프자산운용] 자문형 랩 : ' + _advMD(d) + ' 자문지 송부의 건'},
+                {key:'samsung', label:'삼성', broker:'삼성', subject:'[라이프자산운용_트루밸류] 라이프자산운용_트루밸류 ' + _advMDJ(d) + ' 자문지 보내드립니다.'},
+                {key:'nh', label:'NH', broker:'NH', subject:'[라이프자산운용] NH랩 라이프 다이내믹밸류: ' + _advMDJ(d) + ' 자문지 보내드립니다.'},
+                {key:'db', label:'DB', broker:'DB', subject:'[라이프자산운용] DB 랩 : ' + _advMD(d) + ' 자문지 보내드립니다.'},
+                {key:'kis', label:'한투', broker:'한투', subject:'[라이프자산운용]_한국투자 가치도약랩 자문지_' + _advYMD(d)}
             ];
             var mails = [];
             for (var i = 0; i < specs.length; i++) {
                 var s = specs[i];
                 if (onlyKeys && onlyKeys.indexOf(s.key) < 0) continue;
-                var disp = s.bodyDisp || (s.col && s.col.display);
-                if (!disp && !s.unionBody) continue;
-                var atts = await _advAttachments(s.broker, snapshot);
-                var body = s.unionBody ? buildComplianceUnionBody(snapshot) : bodyFor(disp);
-                mails.push({ key: s.key, label: s.label, subject: s.subject + snapshot.roundSuffix, body: body, attachments: atts });
+                var cols = changed.filter(function(p) { return p.broker === s.broker; });
+                if (s.broker && !cols.length) continue;
+                var atts = s.broker ? await _advAttachments(cols, snapshot) : [];
+                var body = s.broker ? _advBrokerBody(cols, snapshot) : buildComplianceUnionBody(snapshot);
+                mails.push({key:s.key, label:s.label, subject:s.subject + snapshot.roundSuffix, body:body, attachments:atts, previewSignature:signature});
             }
             return mails;
         }
@@ -7941,6 +7968,7 @@ function cmbPeerCharts(self) {
             try { mails = await buildAdvisoryMails(keys); sent = await fetchSentToday(); }
             catch (e) { alert('미리보기 생성 실패: ' + e.message); if (trigger) { trigger.disabled = false; trigger.textContent = btnLabel; } return; }
             if (trigger) { trigger.disabled = false; trigger.textContent = btnLabel; }
+            if (!isComp && !mails.length) { alert('발송할 주문이 없습니다.'); return; }
             var complianceDone = !!sent['compliance'];
             closeSendModal();
             var cards = mails.map(function(m, idx) {
@@ -7996,6 +8024,7 @@ function cmbPeerCharts(self) {
         function openBrokersModal() { return _openSendModal('brokers'); }
 
         async function submitSendRequest(mails, tag) {
+            try { _advValidatePreview(mails); } catch (e) { alert(e.message); return; }
             var msg = document.getElementById('advSendMsg');
             if (msg) msg.textContent = tag + ' 기록 중...';
             if (WRAP_API) return submitSendRequestViaApi(mails, tag);   // 2026-09-01 Phase1
@@ -8780,6 +8809,7 @@ function cmbPeerCharts(self) {
             }
         }
         async function submitSendRequestViaApi(mails, tag) {
+            try { _advValidatePreview(mails); } catch (e) { alert(e.message); return; }
             var msg = document.getElementById('advSendMsg');
             var todayStr = _wrapTodayStr();
             var payload = { date: todayStr, ts: new Date().toISOString(), mode: 'test',
