@@ -913,7 +913,7 @@
       "name": "삼성전자",
       "sector": "반도체",
       "market_cap": 16691125,
-      "weight": 11.0,
+      "weight": 12.0,
       "weight_prev": 11.0,
       "today_return": 3.2432432432432434,
       "contribution": 3.567567567567568,
@@ -931,7 +931,7 @@
       "name": "DN오토모티브",
       "sector": "자동차",
       "market_cap": 28027,
-      "weight": 8.0,
+      "weight": 7.0,
       "weight_prev": 8.0,
       "today_return": -3.5389282103134483,
       "contribution": -2.8311425682507587,
@@ -949,7 +949,7 @@
       "name": "삼성전자우",
       "sector": "기타",
       "market_cap": 1765217,
-      "weight": 6.0,
+      "weight": 7.0,
       "weight_prev": 6.0,
       "today_return": 4.470588235294118,
       "contribution": 2.682352941176471,
@@ -985,7 +985,7 @@
       "name": "두산에너빌리티",
       "sector": "기계",
       "market_cap": 523338,
-      "weight": 5.0,
+      "weight": 4.0,
       "weight_prev": 5.0,
       "today_return": -4.503464203233257,
       "contribution": -2.2517321016166285,
@@ -1039,7 +1039,7 @@
       "name": "현대건설",
       "sector": "건설,건축관련",
       "market_cap": 134852,
-      "weight": 5.0,
+      "weight": 3.0,
       "weight_prev": 5.0,
       "today_return": -7.207890743550835,
       "contribution": -3.6039453717754175,
@@ -1093,7 +1093,7 @@
       "name": "한화엔진",
       "sector": "산업재",
       "market_cap": 39721,
-      "weight": 3.0,
+      "weight": 2.0,
       "weight_prev": 3.0,
       "today_return": -2.631578947368421,
       "contribution": -0.7894736842105262,
@@ -1129,7 +1129,7 @@
       "name": "에스엠",
       "sector": "미디어,교육",
       "market_cap": 18911,
-      "weight": 3.0,
+      "weight": 2.0,
       "weight_prev": 3.0,
       "today_return": 0.48543689320388345,
       "contribution": 0.14563106796116504,
@@ -1167,7 +1167,7 @@
       "name": "삼성전자",
       "sector": "반도체",
       "market_cap": 16691125,
-      "weight": 11.0,
+      "weight": 12.0,
       "weight_prev": 11.0,
       "today_return": 3.2432432432432434,
       "contribution": 3.567567567567568,
@@ -1185,7 +1185,7 @@
       "name": "DN오토모티브",
       "sector": "자동차",
       "market_cap": 28027,
-      "weight": 8.0,
+      "weight": 7.0,
       "weight_prev": 8.0,
       "today_return": -3.5389282103134483,
       "contribution": -2.8311425682507587,
@@ -1203,7 +1203,7 @@
       "name": "삼성전자우",
       "sector": "기타",
       "market_cap": 1765217,
-      "weight": 6.0,
+      "weight": 7.0,
       "weight_prev": 6.0,
       "today_return": 4.470588235294118,
       "contribution": 2.682352941176471,
@@ -1239,7 +1239,7 @@
       "name": "두산에너빌리티",
       "sector": "기계",
       "market_cap": 523338,
-      "weight": 5.0,
+      "weight": 4.0,
       "weight_prev": 5.0,
       "today_return": -4.503464203233257,
       "contribution": -2.2517321016166285,
@@ -1293,7 +1293,7 @@
       "name": "현대건설",
       "sector": "건설,건축관련",
       "market_cap": 134852,
-      "weight": 5.0,
+      "weight": 3.0,
       "weight_prev": 5.0,
       "today_return": -7.207890743550835,
       "contribution": -3.6039453717754175,
@@ -1329,7 +1329,7 @@
       "name": "한화엔진",
       "sector": "산업재",
       "market_cap": 39721,
-      "weight": 3.0,
+      "weight": 2.0,
       "weight_prev": 3.0,
       "today_return": -2.631578947368421,
       "contribution": -0.7894736842105262,
@@ -1365,7 +1365,7 @@
       "name": "에스엠",
       "sector": "미디어,교육",
       "market_cap": 18911,
-      "weight": 3.0,
+      "weight": 2.0,
       "weight_prev": 3.0,
       "today_return": 0.48543689320388345,
       "contribution": 0.14563106796116504,
@@ -1395,6 +1395,24 @@
       "dd": -36.17677286742035,
       "rsi": -7.9712401186167625,
       "is_today_new": false
+    },
+    {
+      "code": "003230",
+      "name": "삼양식품",
+      "sector": "필수소비재",
+      "market_cap": 91526,
+      "weight": 3.0,
+      "weight_prev": 0.0,
+      "today_return": -2.8708133971291865,
+      "contribution": -0.0,
+      "ytd_return": -1.0560519902518273,
+      "cumulative_return": null,
+      "current_price": 1218000.0,
+      "price_date": "2026-09-23",
+      "ath_price": 1630000.0,
+      "dd": -25.2760736196319,
+      "rsi": null,
+      "is_today_new": false
     }
   ],
   "한투 성과모집형 2차": [
@@ -1403,7 +1421,7 @@
       "name": "삼성전자",
       "sector": "반도체",
       "market_cap": 16691125,
-      "weight": 11.0,
+      "weight": 12.0,
       "weight_prev": 11.0,
       "today_return": 3.2432432432432434,
       "contribution": 3.567567567567568,
@@ -1421,7 +1439,7 @@
       "name": "DN오토모티브",
       "sector": "자동차",
       "market_cap": 28027,
-      "weight": 8.0,
+      "weight": 7.0,
       "weight_prev": 8.0,
       "today_return": -3.5389282103134483,
       "contribution": -2.8311425682507587,
@@ -1439,7 +1457,7 @@
       "name": "삼성전자우",
       "sector": "기타",
       "market_cap": 1765217,
-      "weight": 6.0,
+      "weight": 7.0,
       "weight_prev": 6.0,
       "today_return": 4.470588235294118,
       "contribution": 2.682352941176471,
@@ -1475,7 +1493,7 @@
       "name": "두산에너빌리티",
       "sector": "기계",
       "market_cap": 523338,
-      "weight": 5.0,
+      "weight": 4.0,
       "weight_prev": 5.0,
       "today_return": -4.503464203233257,
       "contribution": -2.2517321016166285,
@@ -1529,7 +1547,7 @@
       "name": "현대건설",
       "sector": "건설,건축관련",
       "market_cap": 134852,
-      "weight": 5.0,
+      "weight": 3.0,
       "weight_prev": 5.0,
       "today_return": -7.207890743550835,
       "contribution": -3.6039453717754175,
@@ -1565,7 +1583,7 @@
       "name": "한화엔진",
       "sector": "산업재",
       "market_cap": 39721,
-      "weight": 3.0,
+      "weight": 2.0,
       "weight_prev": 3.0,
       "today_return": -2.631578947368421,
       "contribution": -0.7894736842105262,
@@ -1601,7 +1619,7 @@
       "name": "에스엠",
       "sector": "미디어,교육",
       "market_cap": 18911,
-      "weight": 3.0,
+      "weight": 2.0,
       "weight_prev": 3.0,
       "today_return": 0.48543689320388345,
       "contribution": 0.14563106796116504,
@@ -1631,8 +1649,164 @@
       "dd": -36.17677286742035,
       "rsi": 0.0,
       "is_today_new": false
+    },
+    {
+      "code": "003230",
+      "name": "삼양식품",
+      "sector": "필수소비재",
+      "market_cap": 91526,
+      "weight": 3.0,
+      "weight_prev": 0.0,
+      "today_return": null,
+      "contribution": null,
+      "ytd_return": -1.0560519902518273,
+      "cumulative_return": null,
+      "current_price": 1218000.0,
+      "price_date": "2026-09-23",
+      "ath_price": 1630000.0,
+      "dd": -25.2760736196319,
+      "rsi": null,
+      "is_today_new": true
     }
   ],
+  "_order_changes": {
+    "한투 지속형": {
+      "date": "2026-09-28",
+      "added": [],
+      "changed": [
+        {
+          "name": "삼성전자",
+          "from": 11.0,
+          "to": 12.0
+        },
+        {
+          "name": "DN오토모티브",
+          "from": 8.0,
+          "to": 7.0
+        },
+        {
+          "name": "삼성전자우",
+          "from": 6.0,
+          "to": 7.0
+        },
+        {
+          "name": "두산에너빌리티",
+          "from": 5.0,
+          "to": 4.0
+        },
+        {
+          "name": "현대건설",
+          "from": 5.0,
+          "to": 3.0
+        },
+        {
+          "name": "한화엔진",
+          "from": 3.0,
+          "to": 2.0
+        },
+        {
+          "name": "에스엠",
+          "from": 3.0,
+          "to": 2.0
+        }
+      ],
+      "removed": []
+    },
+    "한투 성과모집형 1차": {
+      "date": "2026-09-28",
+      "added": [
+        {
+          "name": "삼양식품",
+          "weight": 3.0
+        }
+      ],
+      "changed": [
+        {
+          "name": "삼성전자",
+          "from": 11.0,
+          "to": 12.0
+        },
+        {
+          "name": "DN오토모티브",
+          "from": 8.0,
+          "to": 7.0
+        },
+        {
+          "name": "삼성전자우",
+          "from": 6.0,
+          "to": 7.0
+        },
+        {
+          "name": "두산에너빌리티",
+          "from": 5.0,
+          "to": 4.0
+        },
+        {
+          "name": "현대건설",
+          "from": 5.0,
+          "to": 3.0
+        },
+        {
+          "name": "한화엔진",
+          "from": 3.0,
+          "to": 2.0
+        },
+        {
+          "name": "에스엠",
+          "from": 3.0,
+          "to": 2.0
+        }
+      ],
+      "removed": []
+    },
+    "한투 성과모집형 2차": {
+      "date": "2026-09-28",
+      "added": [
+        {
+          "name": "삼양식품",
+          "weight": 3.0
+        }
+      ],
+      "changed": [
+        {
+          "name": "삼성전자",
+          "from": 11.0,
+          "to": 12.0
+        },
+        {
+          "name": "DN오토모티브",
+          "from": 8.0,
+          "to": 7.0
+        },
+        {
+          "name": "삼성전자우",
+          "from": 6.0,
+          "to": 7.0
+        },
+        {
+          "name": "두산에너빌리티",
+          "from": 5.0,
+          "to": 4.0
+        },
+        {
+          "name": "현대건설",
+          "from": 5.0,
+          "to": 3.0
+        },
+        {
+          "name": "한화엔진",
+          "from": 3.0,
+          "to": 2.0
+        },
+        {
+          "name": "에스엠",
+          "from": 3.0,
+          "to": 2.0
+        }
+      ],
+      "removed": []
+    }
+  },
   "_portfolio_meta": {
     "NH 다이내믹 밸류 / DB 개방형": {
       "nav_ytd_d1": 54.751096950754594,
