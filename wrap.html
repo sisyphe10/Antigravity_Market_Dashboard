@@ -345,7 +345,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
     </div>
 
     <div id="mainContent" class="pw-hidden has-sidebar">
-    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><span class="wrap-updated">Updated: 2026-09-28 07:59:11 KST</span></div></nav><div class="wrap-strip"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div>
+    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><span class="wrap-updated">Updated: 2026-09-28 08:05:22 KST</span></div></nav><div class="wrap-strip"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div>
     <aside class="sidebar wrap-sidebar" id="wrapSectionNav" aria-label="WRAP navigation"><div class="wrap-side-group on" data-side-for="dashboard"><a href="#wrap-sec-chart" onclick="wrapGoSection('wrap-sec-chart');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-chart">CHART</a><a href="#wrap-sec-return" onclick="wrapGoSection('wrap-sec-return');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-return">RETURN</a><a href="#wrap-sec-aum" onclick="wrapGoSection('wrap-sec-aum');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-aum">AUM</a><a href="#wrap-sec-portfolio" onclick="wrapGoSection('wrap-sec-portfolio');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-portfolio">Portfolio</a><a href="#wrap-sec-sector" onclick="wrapGoSection('wrap-sec-sector');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-sector">SECTOR WEIGHT</a></div><div class="wrap-side-group" data-side-for="order" id="wrapSideOrder"></div><div class="wrap-side-group" data-side-for="contribution" id="wrapSideContrib"></div><div class="wrap-side-group" data-side-for="fee"><a href="#" onclick="feeSwitchSub('rate');return false;" class="sidebar-link active" data-side-fee="rate">요율</a><a href="#" onclick="feeSwitchSub('revenue');return false;" class="sidebar-link" data-side-fee="revenue">매출</a></div></aside>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -7122,9 +7122,9 @@ function cmbPeerCharts(self) {
                             <tbody>
                     <tr>
                         <td class="sect-name">전기·전자</td>
-                        <td class="sect-num">47.0%</td>
+                        <td class="sect-num">42.0%</td>
                         <td class="sect-num">62.2%</td>
-                        <td class="sect-diff">-15.2%</td>
+                        <td class="sect-diff">-20.2%</td>
                         <td class="sect-diff sect-over">+4.0%</td>
                     </tr>
                     <tr class="sect-detail-row">
@@ -8597,6 +8597,7 @@ function cmbPeerCharts(self) {
             +'<tr class="cashrow"><td colspan="4" style="text-align:center;color:var(--wrap-order-head-color);">현금</td>'+cash+'<td></td></tr></tbody></table></div>';
           document.getElementById('orderContent').innerHTML=html;
           bindMatrixHandlers();
+          reasonBindControls();
         }
 
         function bindMatrixHandlers(){
@@ -9305,7 +9306,127 @@ function cmbPeerCharts(self) {
                 console.error('downloadOrderExcel error:', e);
             }
         }
-        </script>
+        
+var reasonBusy = false, reasonEvidence = {}, reasonEditEpoch = 0;
+document.addEventListener('input', function(e) {
+    if (e.target.closest('#orderContent')) reasonEditEpoch++;
+});
+document.addEventListener('click', function(e) {
+    if (e.target.closest('#btnSave,#btnFinal,#btnCancel,#btnAdditional,#btnAdd,.del-btn')) reasonEditEpoch++;
+});
+function reasonEnabled() { return !!WRAP_API && !window.WRAP_PUBLIC_VIEW; }
+function reasonSnapshot(code, group) {
+    var rows = ORDER_PORTFOLIOS.map(function(p) {
+        var idx = _mtxFindIdx(p.display, code);
+        return [p.display, idx < 0 ? null : orderStocks[p.display][idx],
+            idx < 0 ? null : orderState[p.display][idx]];
+    });
+    return JSON.stringify([rows, matrixNewRows, orderRound, _wrapTodayStr(), reasonEditEpoch]);
+}
+function reasonCanApply(target) {
+    return target.snapshot === reasonSnapshot(target.code, target.group);
+}
+function reasonRefreshButtons() {
+    document.querySelectorAll('[data-reason-action]').forEach(function(b) {
+        b.disabled = reasonBusy;
+    });
+    var b = document.getElementById('btnReasons');
+    if (b) b.textContent = reasonBusy ? '추천사유 작성 중…' : '추천사유 작성';
+}
+function reasonBindControls() {
+    if (!reasonEnabled()) return;
+    var bar = document.querySelector('#orderContent .toolbar');
+    if (!bar) return;
+    var batch = document.createElement('button');
+    batch.className = 'btn'; batch.id = 'btnReasons'; batch.dataset.reasonAction = 'batch';
+    batch.textContent = '추천사유 작성'; batch.onclick = function() { reasonStart(); };
+    bar.insertBefore(batch, bar.lastElementChild);
+    document.querySelectorAll('#orderContent input.mtx-reason').forEach(function(input) {
+        var code = input.dataset.code, group = input.dataset.group;
+        if (!code || (group !== 'red' && group !== 'blue')) return;
+        var wrap = document.createElement('span');
+        wrap.style.cssText = 'display:flex;align-items:center;flex:1;min-width:0;';
+        input.parentNode.insertBefore(wrap, input); wrap.appendChild(input);
+        var button = document.createElement('button');
+        button.type = 'button'; button.className = 'btn'; button.dataset.reasonAction = 'one';
+        button.textContent = input.value.trim() ? '재작성' : '작성';
+        button.style.cssText = 'font-size:12px;padding:3px 5px;white-space:nowrap;';
+        button.onclick = function() { reasonStart(code, group); };
+        wrap.appendChild(button);
+        var evidence = reasonEvidence[code + ':' + group];
+        if (evidence && evidence.reason === input.value && evidence.evidence.length) {
+            var source = document.createElement('button'); source.type = 'button';
+            source.className = 'btn'; source.textContent = '근거';
+            source.style.cssText = 'font-size:12px;padding:3px 5px;';
+            source.onclick = function() {
+                alert(evidence.evidence.map(function(s) {
+                    return s.date + ' · ' + s.title + '\n' + s.quote;
+                }).join('\n\n'));
+            };
+            wrap.appendChild(source);
+        }
+    });
+    reasonRefreshButtons();
+}
+async function reasonStart(onlyCode, onlyGroup) {
+    if (reasonBusy || !reasonEnabled()) return;
+    var targets = [], seen = {};
+    document.querySelectorAll('#orderContent input.mtx-reason').forEach(function(input) {
+        var code = input.dataset.code, group = input.dataset.group;
+        if (!code || (group !== 'red' && group !== 'blue')) return;
+        if (onlyCode && (code !== onlyCode || group !== onlyGroup)) return;
+        if (!onlyCode && input.value.trim()) return;
+        var key = code + ':' + group;
+        if (seen[key]) return;
+        seen[key] = true;
+        var meta = _mtxUnion().meta[code] || matrixNewRows.find(function(r) { return r.code === code; });
+        if (!meta || !meta.name) return;
+        targets.push({code:code, name:meta.name, direction:group === 'red' ? 'buy' : 'sell',
+            group:group, previous:input.value, snapshot:reasonSnapshot(code, group)});
+    });
+    if (!targets.length) { alert('작성할 빈 추천사유가 없습니다. 비중과 종목을 먼저 입력해 주세요.'); return; }
+    if (targets.length > 30) { alert('한 번에 30개까지 작성할 수 있습니다. 종목별 작성을 이용해 주세요.'); return; }
+    reasonBusy = true; reasonRefreshButtons();
+    try {
+        var accepted = await wrapApiPost('/orders/reasons', {items: targets.map(function(t) {
+            return {code:t.code, name:t.name, direction:t.direction};
+        })});
+        var started = Date.now(), job = null;
+        while (Date.now() - started < 270000) {
+            await new Promise(function(resolve) { setTimeout(resolve, 1500); });
+            var resp = await fetch(WRAP_API + '/orders/reasons/' + encodeURIComponent(accepted.job_id), {
+                cache:'no-store', headers:{'X-Wrap-Token':getWrapToken()}
+            });
+            if (!resp.ok) throw new Error('작성 상태 조회 실패: ' + resp.status);
+            job = await resp.json();
+            if (job.state === 'done') break;
+        }
+        if (!job || job.state !== 'done') throw new Error('작성 시간이 초과됐습니다. 잠시 후 다시 눌러 주세요.');
+        var applied = 0, notices = [], ready = [];
+        targets.forEach(function(t) {
+            var result = job.results.find(function(r) { return r.code === t.code && r.direction === t.direction; });
+            if (!result || result.status !== 'draft') {
+                var label = result && result.status === 'conflict' ? '주문 방향과 근거 확인 필요' :
+                    result && result.status === 'insufficient' ? '근거 부족' : '작성 실패';
+                notices.push(t.name + ': ' + label); return;
+            }
+            if (!reasonCanApply(t)) { notices.push(t.name + ': 입력이 변경되어 적용 보류'); return; }
+            ready.push({target:t, result:result});
+        });
+        ready.forEach(function(entry) {
+            var t = entry.target, result = entry.result;
+            if (t.previous.trim() && !confirm(t.name + '\n\n' + result.reason + '\n\n이 문구로 바꾸시겠습니까?')) return;
+            _mtxSetReasonGroup(t.code, t.group, result.reason);
+            reasonEvidence[t.code + ':' + t.group] = result;
+            applied++;
+        });
+        if (orderActiveTab && orderActiveTab !== 'Email') renderOrderMatrix();
+        refreshOrderSaveBadge();
+        if (notices.length) alert(applied + '개 작성\n\n' + notices.join('\n'));
+    } catch(e) { alert('추천사유 작성: ' + e.message); }
+    finally { reasonBusy = false; reasonRefreshButtons(); }
+}
+</script>
     
     </div>
 

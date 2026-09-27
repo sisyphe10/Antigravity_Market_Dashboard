@@ -233,24 +233,6 @@
       "dd": -47.7602523659306,
       "rsi": 15.38739992098359,
       "is_today_new": false
-    },
-    {
-      "code": "011070",
-      "name": "LG이노텍",
-      "sector": "IT하드웨어",
-      "market_cap": 126619,
-      "weight": 5.0,
-      "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": 97.78597785977861,
-      "cumulative_return": null,
-      "current_price": 536000.0,
-      "price_date": "2026-09-23",
-      "ath_price": 1530000.0,
-      "dd": -64.9673202614379,
-      "rsi": null,
-      "is_today_new": true
     }
   ],
   "삼성 트루밸류": [
@@ -487,24 +469,6 @@
       "dd": -47.7602523659306,
       "rsi": 15.38739992098359,
       "is_today_new": false
-    },
-    {
-      "code": "011070",
-      "name": "LG이노텍",
-      "sector": "IT하드웨어",
-      "market_cap": 126619,
-      "weight": 5.0,
-      "weight_prev": 0.0,
-      "today_return": -0.7407407407407408,
-      "contribution": -0.0,
-      "ytd_return": 97.78597785977861,
-      "cumulative_return": null,
-      "current_price": 536000.0,
-      "price_date": "2026-09-23",
-      "ath_price": 1530000.0,
-      "dd": -64.9673202614379,
-      "rsi": null,
-      "is_today_new": false
     }
   ],
   "NH 목표전환형 5호": [
@@ -725,22 +689,22 @@
       "is_today_new": false
     },
     {
-      "code": "011070",
-      "name": "LG이노텍",
-      "sector": "IT하드웨어",
-      "market_cap": 126619,
-      "weight": 5.0,
+      "code": "003230",
+      "name": "삼양식품",
+      "sector": "필수소비재",
+      "market_cap": 91526,
+      "weight": 3.0,
       "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": 97.78597785977861,
+      "today_return": -2.8708133971291865,
+      "contribution": -0.0,
+      "ytd_return": -1.0560519902518273,
       "cumulative_return": null,
-      "current_price": 536000.0,
+      "current_price": 1218000.0,
       "price_date": "2026-09-23",
-      "ath_price": 1530000.0,
-      "dd": -64.9673202614379,
+      "ath_price": 1630000.0,
+      "dd": -25.2760736196319,
       "rsi": null,
-      "is_today_new": true
+      "is_today_new": false
     }
   ],
   "DB 목표전환형 6차": [
@@ -961,22 +925,22 @@
       "is_today_new": false
     },
     {
-      "code": "011070",
-      "name": "LG이노텍",
-      "sector": "IT하드웨어",
-      "market_cap": 126619,
-      "weight": 5.0,
+      "code": "003230",
+      "name": "삼양식품",
+      "sector": "필수소비재",
+      "market_cap": 91526,
+      "weight": 3.0,
       "weight_prev": 0.0,
-      "today_return": null,
-      "contribution": null,
-      "ytd_return": 97.78597785977861,
+      "today_return": -2.8708133971291865,
+      "contribution": -0.0,
+      "ytd_return": -1.0560519902518273,
       "cumulative_return": null,
-      "current_price": 536000.0,
+      "current_price": 1218000.0,
       "price_date": "2026-09-23",
-      "ath_price": 1530000.0,
-      "dd": -64.9673202614379,
+      "ath_price": 1630000.0,
+      "dd": -25.2760736196319,
       "rsi": null,
-      "is_today_new": true
+      "is_today_new": false
     }
   ],
   "한투 지속형": [
@@ -1742,34 +1706,12 @@
     }
   ],
   "_order_changes": {
-    "NH 다이내믹 밸류 / DB 개방형": {
-      "date": "2026-09-28",
-      "added": [
-        {
-          "name": "LG이노텍",
-          "weight": 5.0
-        }
-      ],
-      "changed": [],
-      "removed": []
-    },
-    "삼성 트루밸류": {
-      "date": "2026-09-28",
-      "added": [
-        {
-          "name": "LG이노텍",
-          "weight": 5.0
-        }
-      ],
-      "changed": [],
-      "removed": []
-    },
     "NH 목표전환형 5호": {
       "date": "2026-09-28",
       "added": [
         {
-          "name": "LG이노텍",
-          "weight": 5.0
+          "name": "삼양식품",
+          "weight": 3.0
         }
       ],
       "changed": [],
@@ -1779,8 +1721,8 @@
       "date": "2026-09-28",
       "added": [
         {
-          "name": "LG이노텍",
-          "weight": 5.0
+          "name": "삼양식품",
+          "weight": 3.0
         }
       ],
       "changed": [],
