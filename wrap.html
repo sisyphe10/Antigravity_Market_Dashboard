@@ -345,7 +345,7 @@ body { padding: 0; }  /* body 여백 전면 제거 — 상단 20px는 sticky nav
     </div>
 
     <div id="mainContent" class="pw-hidden has-sidebar">
-    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><span class="wrap-updated">Updated: 2026-09-28 15:35:15 KST</span></div></nav><div class="wrap-strip"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div>
+    <nav class="topnav wrap-topnav"><div class="topnav-inner"><a href="wrap.html" class="topnav-brand">Life WRAP</a><span class="wrap-updated">Updated: 2026-09-28 16:00:52 KST</span></div></nav><div class="wrap-strip"><a href="#dashboard" onclick="wrapSwitchTab('dashboard');return false;" data-wrap-tab="dashboard" class="topnav-tab active" aria-current="page">Dashboard</a><a href="#order" onclick="wrapSwitchTab('order');return false;" data-wrap-tab="order" class="topnav-tab">Order</a><a href="#disclosures" onclick="wrapSwitchTab('disclosures');return false;" data-wrap-tab="disclosures" class="topnav-tab">공시</a><a href="#contribution" onclick="wrapSwitchTab('contribution');return false;" data-wrap-tab="contribution" class="topnav-tab">기여도</a><a href="#fee" onclick="wrapSwitchTab('fee');return false;" data-wrap-tab="fee" class="topnav-tab">수수료</a></div>
     <aside class="sidebar wrap-sidebar" id="wrapSectionNav" aria-label="WRAP navigation"><div class="wrap-side-group on" data-side-for="dashboard"><a href="#wrap-sec-chart" onclick="wrapGoSection('wrap-sec-chart');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-chart">CHART</a><a href="#wrap-sec-return" onclick="wrapGoSection('wrap-sec-return');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-return">RETURN</a><a href="#wrap-sec-aum" onclick="wrapGoSection('wrap-sec-aum');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-aum">AUM</a><a href="#wrap-sec-portfolio" onclick="wrapGoSection('wrap-sec-portfolio');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-portfolio">Portfolio</a><a href="#wrap-sec-sector" onclick="wrapGoSection('wrap-sec-sector');return false;" class="sidebar-link" data-wrap-sec="wrap-sec-sector">SECTOR WEIGHT</a></div><div class="wrap-side-group" data-side-for="order" id="wrapSideOrder"></div><div class="wrap-side-group" data-side-for="contribution" id="wrapSideContrib"></div><div class="wrap-side-group" data-side-for="fee"><a href="#" onclick="feeSwitchSub('rate');return false;" class="sidebar-link active" data-side-fee="rate">요율</a><a href="#" onclick="feeSwitchSub('revenue');return false;" class="sidebar-link" data-side-fee="revenue">매출</a></div></aside>
 
     <div id="wrapPanelDashboard" style="padding-top:24px;">
@@ -961,12 +961,15 @@ function cmbPeerCharts(self) {
                             for (var k = ds.data.length - 1; k >= 0; k--) {
                                 if (ds.data[k] !== null && ds.data[k] !== undefined) { lastIdx = k; break; }
                             }
+                            if (ds._cmbEndLabel) lastIdx = chart.data.labels.indexOf(ds._cmbEndLabel.date);
                             if (lastIdx < 0) return;
                             var last = meta.data[lastIdx];
                             if (!last) return;
                             var val = ds.data[lastIdx];
                             var label;
-                            if (ds._isForeign) {
+                            if (ds._cmbEndLabel && Number.isFinite(ds._cmbEndLabel.pct)) {
+                                label = (ds._cmbEndLabel.pct >= 0 ? '+' : '') + ds._cmbEndLabel.pct.toFixed(1) + '%';
+                            } else if (ds._isForeign) {
                                 // 값에 단위 금지 — % 는 하단 범례 우측 단위 표기가 담당 (2026-08-02 이전)
                                 // ★밴드·환산은 차트 인스턴스에서 읽는다 (P3 다중 패밀리 — window 전역 폐기.
                                 //   메인 차트만 _cmbAxisBandRef/_cmbAxisConv 보유, 서브패널은 축 기준 폴백)
@@ -1154,6 +1157,31 @@ function cmbPeerCharts(self) {
             // 이벤트 세로선 (2026-09-07, 사용자 지시): 데이터셋 `_cmbEvents` = [{date:'YYYY-MM-DD', color, label?, dash?}]
             //   그 날짜(휴일이면 7일 이내 다음 관측일) 위치에 색 실선(dash 주면 점선) + label 있을 때만 상단 라벨. 표시 구간 밖이면 안 그린다.
             //   첫 소비자 = DATA 'KRX ETS (KAU 연속)' 매년 9/1 만기 전환. `_cmbEvents` 없는 데이터셋엔 무영향.
+            var cmbHoldingShadePlugin = {
+                id: 'cmbHoldingShade',
+                beforeDraw: function(chart) {
+                    var ds = chart.data.datasets.find(function(d) { return d._cmbHoldingPeriod; });
+                    if (!ds || !chart.chartArea) return;
+                    var period = ds._cmbHoldingPeriod, labels = chart.data.labels;
+                    var area = chart.chartArea, x = chart.scales.x, ctx = chart.ctx;
+                    var first = labels.findIndex(function(d) { return d >= period.from; });
+                    var last = -1;
+                    for (var i = labels.length - 1; i >= 0; i--) {
+                        if (labels[i] <= period.to) { last = i; break; }
+                    }
+                    ctx.save();
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.07)';
+                    if (first < 0 || last < 0) ctx.fillRect(area.left, area.top, area.right-area.left, area.bottom-area.top);
+                    else {
+                        var left = Math.max(area.left, Math.min(area.right, x.getPixelForValue(first)));
+                        var right = Math.max(area.left, Math.min(area.right, x.getPixelForValue(last)));
+                        if (first > 0) ctx.fillRect(area.left, area.top, left-area.left, area.bottom-area.top);
+                        if (last < labels.length-1) ctx.fillRect(right, area.top, area.right-right, area.bottom-area.top);
+                    }
+                    ctx.restore();
+                }
+            };
+
             var cmbEventLinePlugin = {
                 id: 'cmbEventLine',
                 afterDatasetsDraw: function(chart) {
@@ -1300,6 +1328,7 @@ function cmbPeerCharts(self) {
                     function _legPctOf(ds) {
                         // Optional consumer-supplied return for a fixed investment period.
                         // Unspecified datasets retain visible-window return semantics.
+                        if (ds._cmbLegendReturn === false) return null;
                         if (ds._cmbLegendReturn && Number.isFinite(ds._cmbLegendReturn.pct)) {
                             return { pct: ds._cmbLegendReturn.pct, sfx: '%', fixed: true };
                         }
@@ -1496,7 +1525,7 @@ function cmbPeerCharts(self) {
                         type: y2Type,
                         position: 'right',
                         grace: '8%',
-                        min: y2LogPad ? y2LogPad.min : undefined,
+                        min: Number.isFinite(view.y2Min) ? view.y2Min : (y2LogPad ? y2LogPad.min : undefined),
                         max: y2LogPad ? y2LogPad.max : undefined,
                         afterBuildTicks: cmbEnsureBoundTicks,
                         ticks: { maxTicksLimit: 6, autoSkip: false, callback: function(v){ return cmbTickFmt(v, this, y2Eok && y2Jo); }, font: { size: _fs }, color: '#000' },
@@ -1543,7 +1572,8 @@ function cmbPeerCharts(self) {
                     for (var _k = ds.data.length - 1; _k >= 0; _k--) { if (ds.data[_k] !== null && ds.data[_k] !== undefined) { lv = ds.data[_k]; break; } }
                     if (lv === null) return;
                     var _lbl;
-                    if (ds._isForeign) { _lbl = lv.toFixed(1) + '%'; }
+                    if (ds._cmbEndLabel && Number.isFinite(ds._cmbEndLabel.pct)) { _lbl = (ds._cmbEndLabel.pct >= 0 ? '+' : '') + ds._cmbEndLabel.pct.toFixed(1) + '%'; }
+                    else if (ds._isForeign) { _lbl = lv.toFixed(1) + '%'; }
                     else if (mode === 'pct' && (ds.yAxisID || 'y') === 'y') { _lbl = (lv >= 0 ? '+' : '') + fmtUniformFix(lv, _cmbAxisBandRef.y || Math.abs(lv)) + '%'; }   // pct 폭 측정도 좌축 한정 (codex 8/2) · 2026-08-25 그리는 라벨(밴드 소수)과 동일 규칙 — 정수 측정은 '.9' 만큼 과소
                     else { var _mf = (ds.yAxisID === 'y1' ? (y1Eok && y1Jo) : (ds.yAxisID === 'y2' ? (y2Eok && y2Jo) : (yEok && yJo))) ? 10000 : 1; _lbl = fmtUniformFix(lv / _mf, (ds.yAxisID === 'y1' ? _y1MaxAbs : (ds.yAxisID === 'y2' ? _y2MaxAbs : _yMaxAbs)) / _mf); }
                     var _w = _measCtx.measureText(_lbl).width;
@@ -1554,9 +1584,14 @@ function cmbPeerCharts(self) {
                 var _mainPlugins = _isBY ? [cmbCrosshairPlugin, cmbAxisUnitPlugin, cmbYearLinePlugin]
                     : (_preset === 'stackedBar') ? [cmbStackTotalPlugin, cmbAxisUnitPlugin]
                     : ((_preset === 'mini') ? [cmbCrosshairPlugin, cmbAxisUnitPlugin, cmbEventLinePlugin]   // mini 도 이벤트 세로선 (WATCH 탭, 2026-09-07)
-                    : [cmbEndLabelPlugin, cmbCrosshairPlugin, cmbPinPlugin, cmbEventLinePlugin, cmbTradeMarkerPlugin]);   // +이벤트 세로선 (2026-09-07)
+                    : [cmbHoldingShadePlugin, cmbEndLabelPlugin, cmbCrosshairPlugin, cmbPinPlugin, cmbEventLinePlugin, cmbTradeMarkerPlugin]);   // +이벤트 세로선 (2026-09-07)
                 var _padTop = _isBY ? 26 : (_preset === 'stackedBar') ? 34 : ((_preset === 'mini') ? 20 : 6);   // 34 = 15px 축단위 주석+합계 라벨 자리 (24는 (억원) 상단 잘림, 2026-08-19)
                 if (_preset !== 'line') _rightPad = 8;
+                if (view.alignTo && view.alignTo.chartArea) {
+                    var parentChart = view.alignTo;
+                    _rightPad = parentChart.width - parentChart.chartArea.right;
+                    scalesConfig.y.afterFit = function(scale) { scale.width = parentChart.chartArea.left; };
+                }
 
                 if (cmbChart) {
                     // 재사용: 인스턴스 유지하고 데이터/축/툴팁만 교체 (destroy+new 멈칫 제거)
@@ -1737,10 +1772,12 @@ function cmbPeerCharts(self) {
                 // ── 패밀리 배선 (P3) — 호버·핀 상태와 피어 목록을 이 호출로 묶인 차트들에 공유.
                 //    재사용 경로에서는 기존 상태 객체 유지 (핀 날짜·호버가 리빌드에도 살아남는다 —
                 //    종전 전역 상태와 동일한 수명).
-                var _fam = (view.charts.main && view.charts.main._cmbFamily)
+                var _fam = (view.alignTo && view.alignTo._cmbFamily)
+                    || (view.charts.main && view.charts.main._cmbFamily)
                     || (cmbChart && cmbChart._cmbFamily)
                     || { hover: { idx: null, yPx: null, activeId: null }, pin: { date: null }, peers: [] };
                 _fam.peers = [cmbChart, cmbDispChart, cmbRocChart].filter(function(c) { return !!c; });
+                if (view.alignTo) _fam.peers.unshift(view.alignTo);
                 _fam.peers.forEach(function(c) { c._cmbFamily = _fam; });
                 // 새로 생긴 서브패널이 진행 중인 호버를 즉시 반영하도록 1회 재도장 (codex 지적 8/2)
                 if (_fam.hover.idx !== null) _fam.peers.forEach(function(c) { c.draw(); });
@@ -2881,12 +2918,15 @@ function cmbPeerCharts(self) {
                             for (var k = ds.data.length - 1; k >= 0; k--) {
                                 if (ds.data[k] !== null && ds.data[k] !== undefined) { lastIdx = k; break; }
                             }
+                            if (ds._cmbEndLabel) lastIdx = chart.data.labels.indexOf(ds._cmbEndLabel.date);
                             if (lastIdx < 0) return;
                             var last = meta.data[lastIdx];
                             if (!last) return;
                             var val = ds.data[lastIdx];
                             var label;
-                            if (ds._isForeign) {
+                            if (ds._cmbEndLabel && Number.isFinite(ds._cmbEndLabel.pct)) {
+                                label = (ds._cmbEndLabel.pct >= 0 ? '+' : '') + ds._cmbEndLabel.pct.toFixed(1) + '%';
+                            } else if (ds._isForeign) {
                                 // 값에 단위 금지 — % 는 하단 범례 우측 단위 표기가 담당 (2026-08-02 이전)
                                 // ★밴드·환산은 차트 인스턴스에서 읽는다 (P3 다중 패밀리 — window 전역 폐기.
                                 //   메인 차트만 _cmbAxisBandRef/_cmbAxisConv 보유, 서브패널은 축 기준 폴백)
@@ -3074,6 +3114,31 @@ function cmbPeerCharts(self) {
             // 이벤트 세로선 (2026-09-07, 사용자 지시): 데이터셋 `_cmbEvents` = [{date:'YYYY-MM-DD', color, label?, dash?}]
             //   그 날짜(휴일이면 7일 이내 다음 관측일) 위치에 색 실선(dash 주면 점선) + label 있을 때만 상단 라벨. 표시 구간 밖이면 안 그린다.
             //   첫 소비자 = DATA 'KRX ETS (KAU 연속)' 매년 9/1 만기 전환. `_cmbEvents` 없는 데이터셋엔 무영향.
+            var cmbHoldingShadePlugin = {
+                id: 'cmbHoldingShade',
+                beforeDraw: function(chart) {
+                    var ds = chart.data.datasets.find(function(d) { return d._cmbHoldingPeriod; });
+                    if (!ds || !chart.chartArea) return;
+                    var period = ds._cmbHoldingPeriod, labels = chart.data.labels;
+                    var area = chart.chartArea, x = chart.scales.x, ctx = chart.ctx;
+                    var first = labels.findIndex(function(d) { return d >= period.from; });
+                    var last = -1;
+                    for (var i = labels.length - 1; i >= 0; i--) {
+                        if (labels[i] <= period.to) { last = i; break; }
+                    }
+                    ctx.save();
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.07)';
+                    if (first < 0 || last < 0) ctx.fillRect(area.left, area.top, area.right-area.left, area.bottom-area.top);
+                    else {
+                        var left = Math.max(area.left, Math.min(area.right, x.getPixelForValue(first)));
+                        var right = Math.max(area.left, Math.min(area.right, x.getPixelForValue(last)));
+                        if (first > 0) ctx.fillRect(area.left, area.top, left-area.left, area.bottom-area.top);
+                        if (last < labels.length-1) ctx.fillRect(right, area.top, area.right-right, area.bottom-area.top);
+                    }
+                    ctx.restore();
+                }
+            };
+
             var cmbEventLinePlugin = {
                 id: 'cmbEventLine',
                 afterDatasetsDraw: function(chart) {
@@ -3220,6 +3285,7 @@ function cmbPeerCharts(self) {
                     function _legPctOf(ds) {
                         // Optional consumer-supplied return for a fixed investment period.
                         // Unspecified datasets retain visible-window return semantics.
+                        if (ds._cmbLegendReturn === false) return null;
                         if (ds._cmbLegendReturn && Number.isFinite(ds._cmbLegendReturn.pct)) {
                             return { pct: ds._cmbLegendReturn.pct, sfx: '%', fixed: true };
                         }
@@ -3416,7 +3482,7 @@ function cmbPeerCharts(self) {
                         type: y2Type,
                         position: 'right',
                         grace: '8%',
-                        min: y2LogPad ? y2LogPad.min : undefined,
+                        min: Number.isFinite(view.y2Min) ? view.y2Min : (y2LogPad ? y2LogPad.min : undefined),
                         max: y2LogPad ? y2LogPad.max : undefined,
                         afterBuildTicks: cmbEnsureBoundTicks,
                         ticks: { maxTicksLimit: 6, autoSkip: false, callback: function(v){ return cmbTickFmt(v, this, y2Eok && y2Jo); }, font: { size: _fs }, color: '#000' },
@@ -3463,7 +3529,8 @@ function cmbPeerCharts(self) {
                     for (var _k = ds.data.length - 1; _k >= 0; _k--) { if (ds.data[_k] !== null && ds.data[_k] !== undefined) { lv = ds.data[_k]; break; } }
                     if (lv === null) return;
                     var _lbl;
-                    if (ds._isForeign) { _lbl = lv.toFixed(1) + '%'; }
+                    if (ds._cmbEndLabel && Number.isFinite(ds._cmbEndLabel.pct)) { _lbl = (ds._cmbEndLabel.pct >= 0 ? '+' : '') + ds._cmbEndLabel.pct.toFixed(1) + '%'; }
+                    else if (ds._isForeign) { _lbl = lv.toFixed(1) + '%'; }
                     else if (mode === 'pct' && (ds.yAxisID || 'y') === 'y') { _lbl = (lv >= 0 ? '+' : '') + fmtUniformFix(lv, _cmbAxisBandRef.y || Math.abs(lv)) + '%'; }   // pct 폭 측정도 좌축 한정 (codex 8/2) · 2026-08-25 그리는 라벨(밴드 소수)과 동일 규칙 — 정수 측정은 '.9' 만큼 과소
                     else { var _mf = (ds.yAxisID === 'y1' ? (y1Eok && y1Jo) : (ds.yAxisID === 'y2' ? (y2Eok && y2Jo) : (yEok && yJo))) ? 10000 : 1; _lbl = fmtUniformFix(lv / _mf, (ds.yAxisID === 'y1' ? _y1MaxAbs : (ds.yAxisID === 'y2' ? _y2MaxAbs : _yMaxAbs)) / _mf); }
                     var _w = _measCtx.measureText(_lbl).width;
@@ -3474,9 +3541,14 @@ function cmbPeerCharts(self) {
                 var _mainPlugins = _isBY ? [cmbCrosshairPlugin, cmbAxisUnitPlugin, cmbYearLinePlugin]
                     : (_preset === 'stackedBar') ? [cmbStackTotalPlugin, cmbAxisUnitPlugin]
                     : ((_preset === 'mini') ? [cmbCrosshairPlugin, cmbAxisUnitPlugin, cmbEventLinePlugin]   // mini 도 이벤트 세로선 (WATCH 탭, 2026-09-07)
-                    : [cmbEndLabelPlugin, cmbCrosshairPlugin, cmbPinPlugin, cmbEventLinePlugin, cmbTradeMarkerPlugin]);   // +이벤트 세로선 (2026-09-07)
+                    : [cmbHoldingShadePlugin, cmbEndLabelPlugin, cmbCrosshairPlugin, cmbPinPlugin, cmbEventLinePlugin, cmbTradeMarkerPlugin]);   // +이벤트 세로선 (2026-09-07)
                 var _padTop = _isBY ? 26 : (_preset === 'stackedBar') ? 34 : ((_preset === 'mini') ? 20 : 6);   // 34 = 15px 축단위 주석+합계 라벨 자리 (24는 (억원) 상단 잘림, 2026-08-19)
                 if (_preset !== 'line') _rightPad = 8;
+                if (view.alignTo && view.alignTo.chartArea) {
+                    var parentChart = view.alignTo;
+                    _rightPad = parentChart.width - parentChart.chartArea.right;
+                    scalesConfig.y.afterFit = function(scale) { scale.width = parentChart.chartArea.left; };
+                }
 
                 if (cmbChart) {
                     // 재사용: 인스턴스 유지하고 데이터/축/툴팁만 교체 (destroy+new 멈칫 제거)
@@ -3657,10 +3729,12 @@ function cmbPeerCharts(self) {
                 // ── 패밀리 배선 (P3) — 호버·핀 상태와 피어 목록을 이 호출로 묶인 차트들에 공유.
                 //    재사용 경로에서는 기존 상태 객체 유지 (핀 날짜·호버가 리빌드에도 살아남는다 —
                 //    종전 전역 상태와 동일한 수명).
-                var _fam = (view.charts.main && view.charts.main._cmbFamily)
+                var _fam = (view.alignTo && view.alignTo._cmbFamily)
+                    || (view.charts.main && view.charts.main._cmbFamily)
                     || (cmbChart && cmbChart._cmbFamily)
                     || { hover: { idx: null, yPx: null, activeId: null }, pin: { date: null }, peers: [] };
                 _fam.peers = [cmbChart, cmbDispChart, cmbRocChart].filter(function(c) { return !!c; });
+                if (view.alignTo) _fam.peers.unshift(view.alignTo);
                 _fam.peers.forEach(function(c) { c._cmbFamily = _fam; });
                 // 새로 생긴 서브패널이 진행 중인 호버를 즉시 반영하도록 1회 재도장 (codex 지적 8/2)
                 if (_fam.hover.idx !== null) _fam.peers.forEach(function(c) { c.draw(); });
@@ -4276,12 +4350,15 @@ function cmbPeerCharts(self) {
                             for (var k = ds.data.length - 1; k >= 0; k--) {
                                 if (ds.data[k] !== null && ds.data[k] !== undefined) { lastIdx = k; break; }
                             }
+                            if (ds._cmbEndLabel) lastIdx = chart.data.labels.indexOf(ds._cmbEndLabel.date);
                             if (lastIdx < 0) return;
                             var last = meta.data[lastIdx];
                             if (!last) return;
                             var val = ds.data[lastIdx];
                             var label;
-                            if (ds._isForeign) {
+                            if (ds._cmbEndLabel && Number.isFinite(ds._cmbEndLabel.pct)) {
+                                label = (ds._cmbEndLabel.pct >= 0 ? '+' : '') + ds._cmbEndLabel.pct.toFixed(1) + '%';
+                            } else if (ds._isForeign) {
                                 // 값에 단위 금지 — % 는 하단 범례 우측 단위 표기가 담당 (2026-08-02 이전)
                                 // ★밴드·환산은 차트 인스턴스에서 읽는다 (P3 다중 패밀리 — window 전역 폐기.
                                 //   메인 차트만 _cmbAxisBandRef/_cmbAxisConv 보유, 서브패널은 축 기준 폴백)
@@ -4469,6 +4546,31 @@ function cmbPeerCharts(self) {
             // 이벤트 세로선 (2026-09-07, 사용자 지시): 데이터셋 `_cmbEvents` = [{date:'YYYY-MM-DD', color, label?, dash?}]
             //   그 날짜(휴일이면 7일 이내 다음 관측일) 위치에 색 실선(dash 주면 점선) + label 있을 때만 상단 라벨. 표시 구간 밖이면 안 그린다.
             //   첫 소비자 = DATA 'KRX ETS (KAU 연속)' 매년 9/1 만기 전환. `_cmbEvents` 없는 데이터셋엔 무영향.
+            var cmbHoldingShadePlugin = {
+                id: 'cmbHoldingShade',
+                beforeDraw: function(chart) {
+                    var ds = chart.data.datasets.find(function(d) { return d._cmbHoldingPeriod; });
+                    if (!ds || !chart.chartArea) return;
+                    var period = ds._cmbHoldingPeriod, labels = chart.data.labels;
+                    var area = chart.chartArea, x = chart.scales.x, ctx = chart.ctx;
+                    var first = labels.findIndex(function(d) { return d >= period.from; });
+                    var last = -1;
+                    for (var i = labels.length - 1; i >= 0; i--) {
+                        if (labels[i] <= period.to) { last = i; break; }
+                    }
+                    ctx.save();
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.07)';
+                    if (first < 0 || last < 0) ctx.fillRect(area.left, area.top, area.right-area.left, area.bottom-area.top);
+                    else {
+                        var left = Math.max(area.left, Math.min(area.right, x.getPixelForValue(first)));
+                        var right = Math.max(area.left, Math.min(area.right, x.getPixelForValue(last)));
+                        if (first > 0) ctx.fillRect(area.left, area.top, left-area.left, area.bottom-area.top);
+                        if (last < labels.length-1) ctx.fillRect(right, area.top, area.right-right, area.bottom-area.top);
+                    }
+                    ctx.restore();
+                }
+            };
+
             var cmbEventLinePlugin = {
                 id: 'cmbEventLine',
                 afterDatasetsDraw: function(chart) {
@@ -4615,6 +4717,7 @@ function cmbPeerCharts(self) {
                     function _legPctOf(ds) {
                         // Optional consumer-supplied return for a fixed investment period.
                         // Unspecified datasets retain visible-window return semantics.
+                        if (ds._cmbLegendReturn === false) return null;
                         if (ds._cmbLegendReturn && Number.isFinite(ds._cmbLegendReturn.pct)) {
                             return { pct: ds._cmbLegendReturn.pct, sfx: '%', fixed: true };
                         }
@@ -4811,7 +4914,7 @@ function cmbPeerCharts(self) {
                         type: y2Type,
                         position: 'right',
                         grace: '8%',
-                        min: y2LogPad ? y2LogPad.min : undefined,
+                        min: Number.isFinite(view.y2Min) ? view.y2Min : (y2LogPad ? y2LogPad.min : undefined),
                         max: y2LogPad ? y2LogPad.max : undefined,
                         afterBuildTicks: cmbEnsureBoundTicks,
                         ticks: { maxTicksLimit: 6, autoSkip: false, callback: function(v){ return cmbTickFmt(v, this, y2Eok && y2Jo); }, font: { size: _fs }, color: '#000' },
@@ -4858,7 +4961,8 @@ function cmbPeerCharts(self) {
                     for (var _k = ds.data.length - 1; _k >= 0; _k--) { if (ds.data[_k] !== null && ds.data[_k] !== undefined) { lv = ds.data[_k]; break; } }
                     if (lv === null) return;
                     var _lbl;
-                    if (ds._isForeign) { _lbl = lv.toFixed(1) + '%'; }
+                    if (ds._cmbEndLabel && Number.isFinite(ds._cmbEndLabel.pct)) { _lbl = (ds._cmbEndLabel.pct >= 0 ? '+' : '') + ds._cmbEndLabel.pct.toFixed(1) + '%'; }
+                    else if (ds._isForeign) { _lbl = lv.toFixed(1) + '%'; }
                     else if (mode === 'pct' && (ds.yAxisID || 'y') === 'y') { _lbl = (lv >= 0 ? '+' : '') + fmtUniformFix(lv, _cmbAxisBandRef.y || Math.abs(lv)) + '%'; }   // pct 폭 측정도 좌축 한정 (codex 8/2) · 2026-08-25 그리는 라벨(밴드 소수)과 동일 규칙 — 정수 측정은 '.9' 만큼 과소
                     else { var _mf = (ds.yAxisID === 'y1' ? (y1Eok && y1Jo) : (ds.yAxisID === 'y2' ? (y2Eok && y2Jo) : (yEok && yJo))) ? 10000 : 1; _lbl = fmtUniformFix(lv / _mf, (ds.yAxisID === 'y1' ? _y1MaxAbs : (ds.yAxisID === 'y2' ? _y2MaxAbs : _yMaxAbs)) / _mf); }
                     var _w = _measCtx.measureText(_lbl).width;
@@ -4869,9 +4973,14 @@ function cmbPeerCharts(self) {
                 var _mainPlugins = _isBY ? [cmbCrosshairPlugin, cmbAxisUnitPlugin, cmbYearLinePlugin]
                     : (_preset === 'stackedBar') ? [cmbStackTotalPlugin, cmbAxisUnitPlugin]
                     : ((_preset === 'mini') ? [cmbCrosshairPlugin, cmbAxisUnitPlugin, cmbEventLinePlugin]   // mini 도 이벤트 세로선 (WATCH 탭, 2026-09-07)
-                    : [cmbEndLabelPlugin, cmbCrosshairPlugin, cmbPinPlugin, cmbEventLinePlugin, cmbTradeMarkerPlugin]);   // +이벤트 세로선 (2026-09-07)
+                    : [cmbHoldingShadePlugin, cmbEndLabelPlugin, cmbCrosshairPlugin, cmbPinPlugin, cmbEventLinePlugin, cmbTradeMarkerPlugin]);   // +이벤트 세로선 (2026-09-07)
                 var _padTop = _isBY ? 26 : (_preset === 'stackedBar') ? 34 : ((_preset === 'mini') ? 20 : 6);   // 34 = 15px 축단위 주석+합계 라벨 자리 (24는 (억원) 상단 잘림, 2026-08-19)
                 if (_preset !== 'line') _rightPad = 8;
+                if (view.alignTo && view.alignTo.chartArea) {
+                    var parentChart = view.alignTo;
+                    _rightPad = parentChart.width - parentChart.chartArea.right;
+                    scalesConfig.y.afterFit = function(scale) { scale.width = parentChart.chartArea.left; };
+                }
 
                 if (cmbChart) {
                     // 재사용: 인스턴스 유지하고 데이터/축/툴팁만 교체 (destroy+new 멈칫 제거)
@@ -5052,10 +5161,12 @@ function cmbPeerCharts(self) {
                 // ── 패밀리 배선 (P3) — 호버·핀 상태와 피어 목록을 이 호출로 묶인 차트들에 공유.
                 //    재사용 경로에서는 기존 상태 객체 유지 (핀 날짜·호버가 리빌드에도 살아남는다 —
                 //    종전 전역 상태와 동일한 수명).
-                var _fam = (view.charts.main && view.charts.main._cmbFamily)
+                var _fam = (view.alignTo && view.alignTo._cmbFamily)
+                    || (view.charts.main && view.charts.main._cmbFamily)
                     || (cmbChart && cmbChart._cmbFamily)
                     || { hover: { idx: null, yPx: null, activeId: null }, pin: { date: null }, peers: [] };
                 _fam.peers = [cmbChart, cmbDispChart, cmbRocChart].filter(function(c) { return !!c; });
+                if (view.alignTo) _fam.peers.unshift(view.alignTo);
                 _fam.peers.forEach(function(c) { c._cmbFamily = _fam; });
                 // 새로 생긴 서브패널이 진행 중인 호버를 즉시 반영하도록 1회 재도장 (codex 지적 8/2)
                 if (_fam.hover.idx !== null) _fam.peers.forEach(function(c) { c.draw(); });
@@ -5102,7 +5213,7 @@ function cmbPeerCharts(self) {
                 <div class="portfolio-section-wrapper">
                     <div style="display:flex;align-items:stretch;gap:10px;justify-content:center;"><div style="display:flex;flex-direction:column;gap:4px;"><div style="text-align:center;font-weight:700;font-size:0.9rem;color:#111;">일반형/개방형/지속형</div><div class="fee-subtabs" style="flex-wrap:nowrap;max-width:none;margin:0;"><button class="fee-subtab active" data-pf-btn="0" style="padding:9px 16px;white-space:nowrap;" onclick="pfSwitchTab(0)">삼성 트루밸류</button><button class="fee-subtab" data-pf-btn="1" style="padding:9px 16px;white-space:nowrap;" onclick="pfSwitchTab(1)">NH 다이내믹 밸류</button><button class="fee-subtab" data-pf-btn="2" style="padding:9px 16px;white-space:nowrap;" onclick="pfSwitchTab(2)">DB 개방형</button><button class="fee-subtab" data-pf-btn="3" style="padding:9px 16px;white-space:nowrap;" onclick="pfSwitchTab(3)">한투 지속형</button></div></div><span style="align-self:center;color:#adb5bd;font-weight:600;padding:0 2px;">|</span><div style="display:flex;flex-direction:column;gap:4px;"><div style="text-align:center;font-weight:700;font-size:0.9rem;color:#111;">목표전환형/성과모집형</div><div class="fee-subtabs" style="flex-wrap:nowrap;max-width:none;margin:0;"><button class="fee-subtab" data-pf-btn="4" style="padding:9px 16px;white-space:nowrap;" onclick="pfSwitchTab(4)">DB 목표전환형 6차</button><button class="fee-subtab" data-pf-btn="5" style="padding:9px 16px;white-space:nowrap;" onclick="pfSwitchTab(5)">NH 목표전환형 5호</button><button class="fee-subtab" data-pf-btn="6" style="padding:9px 16px;white-space:nowrap;" onclick="pfSwitchTab(6)">한투 성과모집형 2차</button><button class="fee-subtab" data-pf-btn="7" style="padding:9px 16px;white-space:nowrap;" onclick="pfSwitchTab(7)">한투 성과모집형 1차</button></div></div></div>
             <div class="portfolio-section" data-pf-sec="0" style="">
-                <h3 class="portfolio-title">삼성 트루밸류 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-09-28 15:35)</span></h3>
+                <h3 class="portfolio-title">삼성 트루밸류 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-09-28 16:00)</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table holdings-table" style="table-layout:fixed;">
                         <colgroup>
@@ -5132,10 +5243,10 @@ function cmbPeerCharts(self) {
                                 <td>005930</td>
                                 <td>삼성전자</td>
                                 <td>반도체</td>
-                                <td>1,578조4,952억</td>
+                                <td>1,581조4,184억</td>
                                 <td>15%</td>
-                                <td class="negative">-5.4%</td>
-                                <td class="negative">-8.1</td>
+                                <td class="negative">-5.8%</td>
+                                <td class="negative">-8.6</td>
                                 <td class="positive">+353.5%</td>
                                 <td style="border-left:2px solid #000;">270,000</td>
                                 <td>362,500</td>
@@ -5150,8 +5261,8 @@ function cmbPeerCharts(self) {
                                 <td>기타</td>
                                 <td>166조908억</td>
                                 <td>15%</td>
-                                <td class="negative">-5.9%</td>
-                                <td class="negative">-8.9</td>
+                                <td class="negative">-6.8%</td>
+                                <td class="negative">-10.1</td>
                                 <td class="positive">+10.6%</td>
                                 <td style="border-left:2px solid #000;">207,000</td>
                                 <td>235,000</td>
@@ -5164,9 +5275,9 @@ function cmbPeerCharts(self) {
                                 <td>000660</td>
                                 <td>SK하이닉스</td>
                                 <td>반도체</td>
-                                <td>1,291조5,105억</td>
+                                <td>1,294조4,325억</td>
                                 <td>12%</td>
-                                <td class="negative">-5.0%</td>
+                                <td class="negative">-5.1%</td>
                                 <td class="negative">-6.1</td>
                                 <td class="positive">+503.3%</td>
                                 <td style="border-left:2px solid #000;">1,768,000</td>
@@ -5182,8 +5293,8 @@ function cmbPeerCharts(self) {
                                 <td>에너지</td>
                                 <td>18조2,609억</td>
                                 <td>6%</td>
-                                <td class="positive">+4.2%</td>
-                                <td class="positive">+2.5</td>
+                                <td class="positive">+3.6%</td>
+                                <td class="positive">+2.2</td>
                                 <td class="positive">+9.3%</td>
                                 <td style="border-left:2px solid #000;">162,200</td>
                                 <td>165,900</td>
@@ -5196,10 +5307,10 @@ function cmbPeerCharts(self) {
                                 <td>034020</td>
                                 <td>두산에너빌리티</td>
                                 <td>기계</td>
-                                <td>52조5,260억</td>
+                                <td>52조3,338억</td>
                                 <td>5%</td>
-                                <td class="positive">+0.4%</td>
-                                <td class="positive">+0.2</td>
+                                <td class="negative">-0.8%</td>
+                                <td class="negative">-0.4</td>
                                 <td class="negative">-0.7%</td>
                                 <td style="border-left:2px solid #000;">82,000</td>
                                 <td>136,400</td>
@@ -5214,8 +5325,8 @@ function cmbPeerCharts(self) {
                                 <td>건강관리</td>
                                 <td>17조5,879억</td>
                                 <td>5%</td>
-                                <td class="positive">+1.0%</td>
-                                <td class="positive">+0.5</td>
+                                <td class="positive">+0.4%</td>
+                                <td class="positive">+0.2</td>
                                 <td class="negative">-17.8%</td>
                                 <td style="border-left:2px solid #000;">252,500</td>
                                 <td>430,123</td>
@@ -5230,8 +5341,8 @@ function cmbPeerCharts(self) {
                                 <td>건설,건축관련</td>
                                 <td>13조8,749억</td>
                                 <td>5%</td>
-                                <td class="positive">+2.9%</td>
-                                <td class="positive">+1.4</td>
+                                <td class="positive">+1.9%</td>
+                                <td class="positive">+0.9</td>
                                 <td class="negative">-0.7%</td>
                                 <td style="border-left:2px solid #000;">124,600</td>
                                 <td>188,700</td>
@@ -5246,8 +5357,8 @@ function cmbPeerCharts(self) {
                                 <td>건강관리</td>
                                 <td>6조4,567억</td>
                                 <td>5%</td>
-                                <td class="negative">-3.1%</td>
-                                <td class="negative">-1.5</td>
+                                <td class="negative">-2.9%</td>
+                                <td class="negative">-1.4</td>
                                 <td class="positive">+15.3%</td>
                                 <td style="border-left:2px solid #000;">504,000</td>
                                 <td>681,979</td>
@@ -5262,8 +5373,8 @@ function cmbPeerCharts(self) {
                                 <td>건설,건축관련</td>
                                 <td>3조424억</td>
                                 <td>5%</td>
-                                <td class="positive">+2.8%</td>
-                                <td class="positive">+1.4</td>
+                                <td class="positive">+2.3%</td>
+                                <td class="positive">+1.2</td>
                                 <td class="negative">-5.2%</td>
                                 <td style="border-left:2px solid #000;">35,550</td>
                                 <td>54,700</td>
@@ -5276,10 +5387,10 @@ function cmbPeerCharts(self) {
                                 <td>035420</td>
                                 <td>NAVER</td>
                                 <td>소프트웨어</td>
-                                <td>30조691억</td>
+                                <td>29조9,018억</td>
                                 <td>3%</td>
-                                <td class="positive">+1.5%</td>
-                                <td class="positive">+0.5</td>
+                                <td class="positive">+0.9%</td>
+                                <td class="positive">+0.3</td>
                                 <td class="negative">-9.8%</td>
                                 <td style="border-left:2px solid #000;">197,700</td>
                                 <td>454,000</td>
@@ -5294,8 +5405,8 @@ function cmbPeerCharts(self) {
                                 <td>필수소비재</td>
                                 <td>9조1,526억</td>
                                 <td>3%</td>
-                                <td class="">+0.0%</td>
-                                <td class="">+0.0</td>
+                                <td class="negative">-0.2%</td>
+                                <td class="negative">-0.1</td>
                                 <td class="negative">-12.9%</td>
                                 <td style="border-left:2px solid #000;">1,215,000</td>
                                 <td>1,630,000</td>
@@ -5308,10 +5419,10 @@ function cmbPeerCharts(self) {
                                 <td>082740</td>
                                 <td>한화엔진</td>
                                 <td>산업재</td>
-                                <td>3조9,763억</td>
+                                <td>3조9,804억</td>
                                 <td>3%</td>
-                                <td class="positive">+0.1%</td>
-                                <td class="positive">+0.0</td>
+                                <td class="negative">-0.9%</td>
+                                <td class="negative">-0.3</td>
                                 <td class="negative">-5.3%</td>
                                 <td style="border-left:2px solid #000;">47,650</td>
                                 <td>89,500</td>
@@ -5326,8 +5437,8 @@ function cmbPeerCharts(self) {
                                 <td>미디어,교육</td>
                                 <td>1조8,842억</td>
                                 <td>3%</td>
-                                <td class="negative">-0.4%</td>
-                                <td class="negative">-0.1</td>
+                                <td class="negative">-0.6%</td>
+                                <td class="negative">-0.2</td>
                                 <td class="positive">+13.6%</td>
                                 <td style="border-left:2px solid #000;">82,300</td>
                                 <td>158,500</td>
@@ -5338,8 +5449,8 @@ function cmbPeerCharts(self) {
                             <tr class="total-row">
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
                                 <td style="font-weight: 600;">85%</td>
-                                <td class="negative" style="font-weight: 600;">-1.8%</td>
-                                <td class="negative" style="font-weight: 600;">-18.2</td>
+                                <td class="negative" style="font-weight: 600;">-2.3%</td>
+                                <td class="negative" style="font-weight: 600;">-22.6</td>
                                 <td style="font-weight: 600;">-</td>
                                 <td style="border-left:2px solid #000;">-</td>
                                 <td>-</td>
@@ -5352,7 +5463,7 @@ function cmbPeerCharts(self) {
             </div>
             
             <div class="portfolio-section" data-pf-sec="1" style="display:none;">
-                <h3 class="portfolio-title">NH 다이내믹 밸류 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-09-28 15:35)</span></h3>
+                <h3 class="portfolio-title">NH 다이내믹 밸류 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-09-28 16:00)</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table holdings-table" style="table-layout:fixed;">
                         <colgroup>
@@ -5382,10 +5493,10 @@ function cmbPeerCharts(self) {
                                 <td>005930</td>
                                 <td>삼성전자</td>
                                 <td>반도체</td>
-                                <td>1,578조4,952억</td>
+                                <td>1,581조4,184억</td>
                                 <td>15%</td>
-                                <td class="negative">-5.4%</td>
-                                <td class="negative">-8.1</td>
+                                <td class="negative">-5.8%</td>
+                                <td class="negative">-8.6</td>
                                 <td class="positive">+353.5%</td>
                                 <td style="border-left:2px solid #000;">270,000</td>
                                 <td>362,500</td>
@@ -5400,8 +5511,8 @@ function cmbPeerCharts(self) {
                                 <td>기타</td>
                                 <td>166조908억</td>
                                 <td>15%</td>
-                                <td class="negative">-5.9%</td>
-                                <td class="negative">-8.9</td>
+                                <td class="negative">-6.8%</td>
+                                <td class="negative">-10.1</td>
                                 <td class="positive">+10.6%</td>
                                 <td style="border-left:2px solid #000;">207,000</td>
                                 <td>235,000</td>
@@ -5414,9 +5525,9 @@ function cmbPeerCharts(self) {
                                 <td>000660</td>
                                 <td>SK하이닉스</td>
                                 <td>반도체</td>
-                                <td>1,291조5,105억</td>
+                                <td>1,294조4,325억</td>
                                 <td>12%</td>
-                                <td class="negative">-5.0%</td>
+                                <td class="negative">-5.1%</td>
                                 <td class="negative">-6.1</td>
                                 <td class="positive">+503.3%</td>
                                 <td style="border-left:2px solid #000;">1,768,000</td>
@@ -5432,8 +5543,8 @@ function cmbPeerCharts(self) {
                                 <td>에너지</td>
                                 <td>18조2,609억</td>
                                 <td>6%</td>
-                                <td class="positive">+4.2%</td>
-                                <td class="positive">+2.5</td>
+                                <td class="positive">+3.6%</td>
+                                <td class="positive">+2.2</td>
                                 <td class="positive">+9.3%</td>
                                 <td style="border-left:2px solid #000;">162,200</td>
                                 <td>165,900</td>
@@ -5446,10 +5557,10 @@ function cmbPeerCharts(self) {
                                 <td>034020</td>
                                 <td>두산에너빌리티</td>
                                 <td>기계</td>
-                                <td>52조5,260억</td>
+                                <td>52조3,338억</td>
                                 <td>5%</td>
-                                <td class="positive">+0.4%</td>
-                                <td class="positive">+0.2</td>
+                                <td class="negative">-0.8%</td>
+                                <td class="negative">-0.4</td>
                                 <td class="negative">-0.7%</td>
                                 <td style="border-left:2px solid #000;">82,000</td>
                                 <td>136,400</td>
@@ -5464,8 +5575,8 @@ function cmbPeerCharts(self) {
                                 <td>건강관리</td>
                                 <td>17조5,879억</td>
                                 <td>5%</td>
-                                <td class="positive">+1.0%</td>
-                                <td class="positive">+0.5</td>
+                                <td class="positive">+0.4%</td>
+                                <td class="positive">+0.2</td>
                                 <td class="negative">-17.8%</td>
                                 <td style="border-left:2px solid #000;">252,500</td>
                                 <td>430,123</td>
@@ -5480,8 +5591,8 @@ function cmbPeerCharts(self) {
                                 <td>건설,건축관련</td>
                                 <td>13조8,749억</td>
                                 <td>5%</td>
-                                <td class="positive">+2.9%</td>
-                                <td class="positive">+1.4</td>
+                                <td class="positive">+1.9%</td>
+                                <td class="positive">+0.9</td>
                                 <td class="negative">-0.7%</td>
                                 <td style="border-left:2px solid #000;">124,600</td>
                                 <td>188,700</td>
@@ -5496,8 +5607,8 @@ function cmbPeerCharts(self) {
                                 <td>건강관리</td>
                                 <td>6조4,567억</td>
                                 <td>5%</td>
-                                <td class="negative">-3.1%</td>
-                                <td class="negative">-1.5</td>
+                                <td class="negative">-2.9%</td>
+                                <td class="negative">-1.4</td>
                                 <td class="positive">+15.3%</td>
                                 <td style="border-left:2px solid #000;">504,000</td>
                                 <td>681,979</td>
@@ -5512,8 +5623,8 @@ function cmbPeerCharts(self) {
                                 <td>건설,건축관련</td>
                                 <td>3조424억</td>
                                 <td>5%</td>
-                                <td class="positive">+2.8%</td>
-                                <td class="positive">+1.4</td>
+                                <td class="positive">+2.3%</td>
+                                <td class="positive">+1.2</td>
                                 <td class="negative">-5.2%</td>
                                 <td style="border-left:2px solid #000;">35,550</td>
                                 <td>54,700</td>
@@ -5526,10 +5637,10 @@ function cmbPeerCharts(self) {
                                 <td>035420</td>
                                 <td>NAVER</td>
                                 <td>소프트웨어</td>
-                                <td>30조691억</td>
+                                <td>29조9,018억</td>
                                 <td>3%</td>
-                                <td class="positive">+1.5%</td>
-                                <td class="positive">+0.5</td>
+                                <td class="positive">+0.9%</td>
+                                <td class="positive">+0.3</td>
                                 <td class="negative">-9.8%</td>
                                 <td style="border-left:2px solid #000;">197,700</td>
                                 <td>454,000</td>
@@ -5544,8 +5655,8 @@ function cmbPeerCharts(self) {
                                 <td>필수소비재</td>
                                 <td>9조1,526억</td>
                                 <td>3%</td>
-                                <td class="">+0.0%</td>
-                                <td class="">+0.0</td>
+                                <td class="negative">-0.2%</td>
+                                <td class="negative">-0.1</td>
                                 <td class="negative">-12.9%</td>
                                 <td style="border-left:2px solid #000;">1,215,000</td>
                                 <td>1,630,000</td>
@@ -5558,10 +5669,10 @@ function cmbPeerCharts(self) {
                                 <td>082740</td>
                                 <td>한화엔진</td>
                                 <td>산업재</td>
-                                <td>3조9,763억</td>
+                                <td>3조9,804억</td>
                                 <td>3%</td>
-                                <td class="positive">+0.1%</td>
-                                <td class="positive">+0.0</td>
+                                <td class="negative">-0.9%</td>
+                                <td class="negative">-0.3</td>
                                 <td class="negative">-5.3%</td>
                                 <td style="border-left:2px solid #000;">47,650</td>
                                 <td>89,500</td>
@@ -5576,8 +5687,8 @@ function cmbPeerCharts(self) {
                                 <td>미디어,교육</td>
                                 <td>1조8,842억</td>
                                 <td>3%</td>
-                                <td class="negative">-0.4%</td>
-                                <td class="negative">-0.1</td>
+                                <td class="negative">-0.6%</td>
+                                <td class="negative">-0.2</td>
                                 <td class="positive">+13.6%</td>
                                 <td style="border-left:2px solid #000;">82,300</td>
                                 <td>158,500</td>
@@ -5588,8 +5699,8 @@ function cmbPeerCharts(self) {
                             <tr class="total-row">
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
                                 <td style="font-weight: 600;">85%</td>
-                                <td class="negative" style="font-weight: 600;">-1.8%</td>
-                                <td class="negative" style="font-weight: 600;">-18.2</td>
+                                <td class="negative" style="font-weight: 600;">-2.3%</td>
+                                <td class="negative" style="font-weight: 600;">-22.6</td>
                                 <td style="font-weight: 600;">-</td>
                                 <td style="border-left:2px solid #000;">-</td>
                                 <td>-</td>
@@ -5602,7 +5713,7 @@ function cmbPeerCharts(self) {
             </div>
             
             <div class="portfolio-section" data-pf-sec="2" style="display:none;">
-                <h3 class="portfolio-title">DB 개방형 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-09-28 15:35)</span></h3>
+                <h3 class="portfolio-title">DB 개방형 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-09-28 16:00)</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table holdings-table" style="table-layout:fixed;">
                         <colgroup>
@@ -5632,10 +5743,10 @@ function cmbPeerCharts(self) {
                                 <td>005930</td>
                                 <td>삼성전자</td>
                                 <td>반도체</td>
-                                <td>1,578조4,952억</td>
+                                <td>1,581조4,184억</td>
                                 <td>15%</td>
-                                <td class="negative">-5.4%</td>
-                                <td class="negative">-8.1</td>
+                                <td class="negative">-5.8%</td>
+                                <td class="negative">-8.6</td>
                                 <td class="positive">+353.5%</td>
                                 <td style="border-left:2px solid #000;">270,000</td>
                                 <td>362,500</td>
@@ -5650,8 +5761,8 @@ function cmbPeerCharts(self) {
                                 <td>기타</td>
                                 <td>166조908억</td>
                                 <td>15%</td>
-                                <td class="negative">-5.9%</td>
-                                <td class="negative">-8.9</td>
+                                <td class="negative">-6.8%</td>
+                                <td class="negative">-10.1</td>
                                 <td class="positive">+10.6%</td>
                                 <td style="border-left:2px solid #000;">207,000</td>
                                 <td>235,000</td>
@@ -5664,9 +5775,9 @@ function cmbPeerCharts(self) {
                                 <td>000660</td>
                                 <td>SK하이닉스</td>
                                 <td>반도체</td>
-                                <td>1,291조5,105억</td>
+                                <td>1,294조4,325억</td>
                                 <td>12%</td>
-                                <td class="negative">-5.0%</td>
+                                <td class="negative">-5.1%</td>
                                 <td class="negative">-6.1</td>
                                 <td class="positive">+503.3%</td>
                                 <td style="border-left:2px solid #000;">1,768,000</td>
@@ -5682,8 +5793,8 @@ function cmbPeerCharts(self) {
                                 <td>에너지</td>
                                 <td>18조2,609억</td>
                                 <td>6%</td>
-                                <td class="positive">+4.2%</td>
-                                <td class="positive">+2.5</td>
+                                <td class="positive">+3.6%</td>
+                                <td class="positive">+2.2</td>
                                 <td class="positive">+9.3%</td>
                                 <td style="border-left:2px solid #000;">162,200</td>
                                 <td>165,900</td>
@@ -5696,10 +5807,10 @@ function cmbPeerCharts(self) {
                                 <td>034020</td>
                                 <td>두산에너빌리티</td>
                                 <td>기계</td>
-                                <td>52조5,260억</td>
+                                <td>52조3,338억</td>
                                 <td>5%</td>
-                                <td class="positive">+0.4%</td>
-                                <td class="positive">+0.2</td>
+                                <td class="negative">-0.8%</td>
+                                <td class="negative">-0.4</td>
                                 <td class="negative">-0.7%</td>
                                 <td style="border-left:2px solid #000;">82,000</td>
                                 <td>136,400</td>
@@ -5714,8 +5825,8 @@ function cmbPeerCharts(self) {
                                 <td>건강관리</td>
                                 <td>17조5,879억</td>
                                 <td>5%</td>
-                                <td class="positive">+1.0%</td>
-                                <td class="positive">+0.5</td>
+                                <td class="positive">+0.4%</td>
+                                <td class="positive">+0.2</td>
                                 <td class="negative">-17.8%</td>
                                 <td style="border-left:2px solid #000;">252,500</td>
                                 <td>430,123</td>
@@ -5730,8 +5841,8 @@ function cmbPeerCharts(self) {
                                 <td>건설,건축관련</td>
                                 <td>13조8,749억</td>
                                 <td>5%</td>
-                                <td class="positive">+2.9%</td>
-                                <td class="positive">+1.4</td>
+                                <td class="positive">+1.9%</td>
+                                <td class="positive">+0.9</td>
                                 <td class="negative">-0.7%</td>
                                 <td style="border-left:2px solid #000;">124,600</td>
                                 <td>188,700</td>
@@ -5746,8 +5857,8 @@ function cmbPeerCharts(self) {
                                 <td>건강관리</td>
                                 <td>6조4,567억</td>
                                 <td>5%</td>
-                                <td class="negative">-3.1%</td>
-                                <td class="negative">-1.5</td>
+                                <td class="negative">-2.9%</td>
+                                <td class="negative">-1.4</td>
                                 <td class="positive">+15.3%</td>
                                 <td style="border-left:2px solid #000;">504,000</td>
                                 <td>681,979</td>
@@ -5762,8 +5873,8 @@ function cmbPeerCharts(self) {
                                 <td>건설,건축관련</td>
                                 <td>3조424억</td>
                                 <td>5%</td>
-                                <td class="positive">+2.8%</td>
-                                <td class="positive">+1.4</td>
+                                <td class="positive">+2.3%</td>
+                                <td class="positive">+1.2</td>
                                 <td class="negative">-5.2%</td>
                                 <td style="border-left:2px solid #000;">35,550</td>
                                 <td>54,700</td>
@@ -5776,10 +5887,10 @@ function cmbPeerCharts(self) {
                                 <td>035420</td>
                                 <td>NAVER</td>
                                 <td>소프트웨어</td>
-                                <td>30조691억</td>
+                                <td>29조9,018억</td>
                                 <td>3%</td>
-                                <td class="positive">+1.5%</td>
-                                <td class="positive">+0.5</td>
+                                <td class="positive">+0.9%</td>
+                                <td class="positive">+0.3</td>
                                 <td class="negative">-9.8%</td>
                                 <td style="border-left:2px solid #000;">197,700</td>
                                 <td>454,000</td>
@@ -5794,8 +5905,8 @@ function cmbPeerCharts(self) {
                                 <td>필수소비재</td>
                                 <td>9조1,526억</td>
                                 <td>3%</td>
-                                <td class="">+0.0%</td>
-                                <td class="">+0.0</td>
+                                <td class="negative">-0.2%</td>
+                                <td class="negative">-0.1</td>
                                 <td class="negative">-12.9%</td>
                                 <td style="border-left:2px solid #000;">1,215,000</td>
                                 <td>1,630,000</td>
@@ -5808,10 +5919,10 @@ function cmbPeerCharts(self) {
                                 <td>082740</td>
                                 <td>한화엔진</td>
                                 <td>산업재</td>
-                                <td>3조9,763억</td>
+                                <td>3조9,804억</td>
                                 <td>3%</td>
-                                <td class="positive">+0.1%</td>
-                                <td class="positive">+0.0</td>
+                                <td class="negative">-0.9%</td>
+                                <td class="negative">-0.3</td>
                                 <td class="negative">-5.3%</td>
                                 <td style="border-left:2px solid #000;">47,650</td>
                                 <td>89,500</td>
@@ -5826,8 +5937,8 @@ function cmbPeerCharts(self) {
                                 <td>미디어,교육</td>
                                 <td>1조8,842억</td>
                                 <td>3%</td>
-                                <td class="negative">-0.4%</td>
-                                <td class="negative">-0.1</td>
+                                <td class="negative">-0.6%</td>
+                                <td class="negative">-0.2</td>
                                 <td class="positive">+13.6%</td>
                                 <td style="border-left:2px solid #000;">82,300</td>
                                 <td>158,500</td>
@@ -5838,8 +5949,8 @@ function cmbPeerCharts(self) {
                             <tr class="total-row">
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
                                 <td style="font-weight: 600;">85%</td>
-                                <td class="negative" style="font-weight: 600;">-1.8%</td>
-                                <td class="negative" style="font-weight: 600;">-18.2</td>
+                                <td class="negative" style="font-weight: 600;">-2.3%</td>
+                                <td class="negative" style="font-weight: 600;">-22.6</td>
                                 <td style="font-weight: 600;">-</td>
                                 <td style="border-left:2px solid #000;">-</td>
                                 <td>-</td>
@@ -5852,7 +5963,7 @@ function cmbPeerCharts(self) {
             </div>
             
             <div class="portfolio-section" data-pf-sec="3" style="display:none;">
-                <h3 class="portfolio-title">한투 지속형 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-09-28 15:35)</span></h3>
+                <h3 class="portfolio-title">한투 지속형 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-09-28 16:00)</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table holdings-table" style="table-layout:fixed;">
                         <colgroup>
@@ -5882,10 +5993,10 @@ function cmbPeerCharts(self) {
                                 <td>005930</td>
                                 <td>삼성전자</td>
                                 <td>반도체</td>
-                                <td>1,578조4,952억</td>
+                                <td>1,581조4,184억</td>
                                 <td>11%</td>
-                                <td class="negative">-5.4%</td>
-                                <td class="negative">-6.0</td>
+                                <td class="negative">-5.8%</td>
+                                <td class="negative">-6.3</td>
                                 <td class="positive">+0.7%</td>
                                 <td style="border-left:2px solid #000;">270,000</td>
                                 <td>362,500</td>
@@ -5900,8 +6011,8 @@ function cmbPeerCharts(self) {
                                 <td>자동차</td>
                                 <td>2조9,665억</td>
                                 <td>8%</td>
-                                <td class="positive">+5.8%</td>
-                                <td class="positive">+4.7</td>
+                                <td class="positive">+6.3%</td>
+                                <td class="positive">+5.0</td>
                                 <td class="positive">+7.7%</td>
                                 <td style="border-left:2px solid #000;">50,700</td>
                                 <td>62,800</td>
@@ -5916,8 +6027,8 @@ function cmbPeerCharts(self) {
                                 <td>기타</td>
                                 <td>166조908억</td>
                                 <td>6%</td>
-                                <td class="negative">-5.9%</td>
-                                <td class="negative">-3.5</td>
+                                <td class="negative">-6.8%</td>
+                                <td class="negative">-4.1</td>
                                 <td class="positive">+8.7%</td>
                                 <td style="border-left:2px solid #000;">207,000</td>
                                 <td>235,000</td>
@@ -5932,8 +6043,8 @@ function cmbPeerCharts(self) {
                                 <td>건강관리</td>
                                 <td>6조4,567억</td>
                                 <td>6%</td>
-                                <td class="negative">-3.1%</td>
-                                <td class="negative">-1.8</td>
+                                <td class="negative">-2.9%</td>
+                                <td class="negative">-1.7</td>
                                 <td class="positive">+12.4%</td>
                                 <td style="border-left:2px solid #000;">504,000</td>
                                 <td>681,979</td>
@@ -5946,10 +6057,10 @@ function cmbPeerCharts(self) {
                                 <td>034020</td>
                                 <td>두산에너빌리티</td>
                                 <td>기계</td>
-                                <td>52조5,260억</td>
+                                <td>52조3,338억</td>
                                 <td>5%</td>
-                                <td class="positive">+0.4%</td>
-                                <td class="positive">+0.2</td>
+                                <td class="negative">-0.8%</td>
+                                <td class="negative">-0.4</td>
                                 <td class="negative">-1.7%</td>
                                 <td style="border-left:2px solid #000;">82,000</td>
                                 <td>136,400</td>
@@ -5964,8 +6075,8 @@ function cmbPeerCharts(self) {
                                 <td>은행</td>
                                 <td>26조8,190억</td>
                                 <td>5%</td>
-                                <td class="positive">+3.0%</td>
-                                <td class="positive">+1.5</td>
+                                <td class="positive">+2.5%</td>
+                                <td class="positive">+1.3</td>
                                 <td class="positive">+3.7%</td>
                                 <td style="border-left:2px solid #000;">36,400</td>
                                 <td>40,800</td>
@@ -5980,8 +6091,8 @@ function cmbPeerCharts(self) {
                                 <td>에너지</td>
                                 <td>18조2,609억</td>
                                 <td>5%</td>
-                                <td class="positive">+4.2%</td>
-                                <td class="positive">+2.1</td>
+                                <td class="positive">+3.6%</td>
+                                <td class="positive">+1.8</td>
                                 <td class="positive">+10.1%</td>
                                 <td style="border-left:2px solid #000;">162,200</td>
                                 <td>165,900</td>
@@ -5996,8 +6107,8 @@ function cmbPeerCharts(self) {
                                 <td>건설,건축관련</td>
                                 <td>13조8,749억</td>
                                 <td>5%</td>
-                                <td class="positive">+2.9%</td>
-                                <td class="positive">+1.4</td>
+                                <td class="positive">+1.9%</td>
+                                <td class="positive">+0.9</td>
                                 <td class="negative">-1.2%</td>
                                 <td style="border-left:2px solid #000;">124,600</td>
                                 <td>188,700</td>
@@ -6012,8 +6123,8 @@ function cmbPeerCharts(self) {
                                 <td>은행</td>
                                 <td>5조751억</td>
                                 <td>4%</td>
-                                <td class="positive">+3.6%</td>
-                                <td class="positive">+1.4</td>
+                                <td class="positive">+4.1%</td>
+                                <td class="positive">+1.6</td>
                                 <td class="positive">+3.8%</td>
                                 <td style="border-left:2px solid #000;">16,540</td>
                                 <td>22,650</td>
@@ -6028,8 +6139,8 @@ function cmbPeerCharts(self) {
                                 <td>필수소비재</td>
                                 <td>9조1,526억</td>
                                 <td>3%</td>
-                                <td class="">+0.0%</td>
-                                <td class="">+0.0</td>
+                                <td class="negative">-0.2%</td>
+                                <td class="negative">-0.1</td>
                                 <td class="positive">+3.4%</td>
                                 <td style="border-left:2px solid #000;">1,215,000</td>
                                 <td>1,630,000</td>
@@ -6042,10 +6153,10 @@ function cmbPeerCharts(self) {
                                 <td>082740</td>
                                 <td>한화엔진</td>
                                 <td>산업재</td>
-                                <td>3조9,763억</td>
+                                <td>3조9,804억</td>
                                 <td>3%</td>
-                                <td class="positive">+0.1%</td>
-                                <td class="positive">+0.0</td>
+                                <td class="negative">-0.9%</td>
+                                <td class="negative">-0.3</td>
                                 <td class="negative">-5.3%</td>
                                 <td style="border-left:2px solid #000;">47,650</td>
                                 <td>89,500</td>
@@ -6060,8 +6171,8 @@ function cmbPeerCharts(self) {
                                 <td>건설,건축관련</td>
                                 <td>3조424억</td>
                                 <td>3%</td>
-                                <td class="positive">+2.8%</td>
-                                <td class="positive">+0.8</td>
+                                <td class="positive">+2.3%</td>
+                                <td class="positive">+0.7</td>
                                 <td class="negative">-5.2%</td>
                                 <td style="border-left:2px solid #000;">35,550</td>
                                 <td>54,700</td>
@@ -6076,8 +6187,8 @@ function cmbPeerCharts(self) {
                                 <td>미디어,교육</td>
                                 <td>1조8,842억</td>
                                 <td>3%</td>
-                                <td class="negative">-0.4%</td>
-                                <td class="negative">-0.1</td>
+                                <td class="negative">-0.6%</td>
+                                <td class="negative">-0.2</td>
                                 <td class="positive">+10.7%</td>
                                 <td style="border-left:2px solid #000;">82,300</td>
                                 <td>158,500</td>
@@ -6090,9 +6201,9 @@ function cmbPeerCharts(self) {
                                 <td>000660</td>
                                 <td>SK하이닉스</td>
                                 <td>반도체</td>
-                                <td>1,291조5,105억</td>
+                                <td>1,294조4,325억</td>
                                 <td>2%</td>
-                                <td class="negative">-5.0%</td>
+                                <td class="negative">-5.1%</td>
                                 <td class="negative">-1.0</td>
                                 <td class="negative">-7.0%</td>
                                 <td style="border-left:2px solid #000;">1,768,000</td>
@@ -6104,8 +6215,8 @@ function cmbPeerCharts(self) {
                             <tr class="total-row">
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
                                 <td style="font-weight: 600;">69%</td>
-                                <td class="negative" style="font-weight: 600;">-0.0%</td>
-                                <td class="negative" style="font-weight: 600;">-0.3</td>
+                                <td class="negative" style="font-weight: 600;">-0.3%</td>
+                                <td class="negative" style="font-weight: 600;">-2.7</td>
                                 <td style="font-weight: 600;">-</td>
                                 <td style="border-left:2px solid #000;">-</td>
                                 <td>-</td>
@@ -6118,7 +6229,7 @@ function cmbPeerCharts(self) {
             </div>
             
             <div class="portfolio-section" data-pf-sec="4" style="display:none;">
-                <h3 class="portfolio-title">DB 목표전환형 6차 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-09-28 15:35)</span></h3>
+                <h3 class="portfolio-title">DB 목표전환형 6차 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-09-28 16:00)</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table holdings-table" style="table-layout:fixed;">
                         <colgroup>
@@ -6148,10 +6259,10 @@ function cmbPeerCharts(self) {
                                 <td>005930</td>
                                 <td>삼성전자</td>
                                 <td>반도체</td>
-                                <td>1,578조4,952억</td>
+                                <td>1,581조4,184억</td>
                                 <td>15%</td>
-                                <td class="negative">-5.4%</td>
-                                <td class="negative">-8.1</td>
+                                <td class="negative">-5.8%</td>
+                                <td class="negative">-8.6</td>
                                 <td class="positive">+5.7%</td>
                                 <td style="border-left:2px solid #000;">270,000</td>
                                 <td>362,500</td>
@@ -6164,9 +6275,9 @@ function cmbPeerCharts(self) {
                                 <td>000660</td>
                                 <td>SK하이닉스</td>
                                 <td>반도체</td>
-                                <td>1,291조5,105억</td>
+                                <td>1,294조4,325억</td>
                                 <td>15%</td>
-                                <td class="negative">-5.0%</td>
+                                <td class="negative">-5.1%</td>
                                 <td class="negative">-7.6</td>
                                 <td class="negative">-5.9%</td>
                                 <td style="border-left:2px solid #000;">1,768,000</td>
@@ -6182,8 +6293,8 @@ function cmbPeerCharts(self) {
                                 <td>기타</td>
                                 <td>166조908억</td>
                                 <td>15%</td>
-                                <td class="negative">-5.9%</td>
-                                <td class="negative">-8.9</td>
+                                <td class="negative">-6.8%</td>
+                                <td class="negative">-10.1</td>
                                 <td class="positive">+10.6%</td>
                                 <td style="border-left:2px solid #000;">207,000</td>
                                 <td>235,000</td>
@@ -6198,8 +6309,8 @@ function cmbPeerCharts(self) {
                                 <td>에너지</td>
                                 <td>18조2,609억</td>
                                 <td>6%</td>
-                                <td class="positive">+4.2%</td>
-                                <td class="positive">+2.5</td>
+                                <td class="positive">+3.6%</td>
+                                <td class="positive">+2.2</td>
                                 <td class="positive">+8.1%</td>
                                 <td style="border-left:2px solid #000;">162,200</td>
                                 <td>165,900</td>
@@ -6212,10 +6323,10 @@ function cmbPeerCharts(self) {
                                 <td>034020</td>
                                 <td>두산에너빌리티</td>
                                 <td>기계</td>
-                                <td>52조5,260억</td>
+                                <td>52조3,338억</td>
                                 <td>5%</td>
-                                <td class="positive">+0.4%</td>
-                                <td class="positive">+0.2</td>
+                                <td class="negative">-0.8%</td>
+                                <td class="negative">-0.4</td>
                                 <td class="negative">-0.5%</td>
                                 <td style="border-left:2px solid #000;">82,000</td>
                                 <td>136,400</td>
@@ -6230,8 +6341,8 @@ function cmbPeerCharts(self) {
                                 <td>건강관리</td>
                                 <td>17조5,879억</td>
                                 <td>5%</td>
-                                <td class="positive">+1.0%</td>
-                                <td class="positive">+0.5</td>
+                                <td class="positive">+0.4%</td>
+                                <td class="positive">+0.2</td>
                                 <td class="negative">-17.8%</td>
                                 <td style="border-left:2px solid #000;">252,500</td>
                                 <td>430,123</td>
@@ -6246,8 +6357,8 @@ function cmbPeerCharts(self) {
                                 <td>건설,건축관련</td>
                                 <td>13조8,749억</td>
                                 <td>5%</td>
-                                <td class="positive">+2.9%</td>
-                                <td class="positive">+1.4</td>
+                                <td class="positive">+1.9%</td>
+                                <td class="positive">+0.9</td>
                                 <td class="negative">-0.7%</td>
                                 <td style="border-left:2px solid #000;">124,600</td>
                                 <td>188,700</td>
@@ -6262,8 +6373,8 @@ function cmbPeerCharts(self) {
                                 <td>건강관리</td>
                                 <td>6조4,567억</td>
                                 <td>5%</td>
-                                <td class="negative">-3.1%</td>
-                                <td class="negative">-1.5</td>
+                                <td class="negative">-2.9%</td>
+                                <td class="negative">-1.4</td>
                                 <td class="positive">+2.3%</td>
                                 <td style="border-left:2px solid #000;">504,000</td>
                                 <td>681,979</td>
@@ -6278,8 +6389,8 @@ function cmbPeerCharts(self) {
                                 <td>건설,건축관련</td>
                                 <td>3조424억</td>
                                 <td>5%</td>
-                                <td class="positive">+2.8%</td>
-                                <td class="positive">+1.4</td>
+                                <td class="positive">+2.3%</td>
+                                <td class="positive">+1.2</td>
                                 <td class="negative">-5.2%</td>
                                 <td style="border-left:2px solid #000;">35,550</td>
                                 <td>54,700</td>
@@ -6292,10 +6403,10 @@ function cmbPeerCharts(self) {
                                 <td>035420</td>
                                 <td>NAVER</td>
                                 <td>소프트웨어</td>
-                                <td>30조691억</td>
+                                <td>29조9,018억</td>
                                 <td>3%</td>
-                                <td class="positive">+1.5%</td>
-                                <td class="positive">+0.5</td>
+                                <td class="positive">+0.9%</td>
+                                <td class="positive">+0.3</td>
                                 <td class="negative">-9.2%</td>
                                 <td style="border-left:2px solid #000;">197,700</td>
                                 <td>454,000</td>
@@ -6308,10 +6419,10 @@ function cmbPeerCharts(self) {
                                 <td>082740</td>
                                 <td>한화엔진</td>
                                 <td>산업재</td>
-                                <td>3조9,763억</td>
+                                <td>3조9,804억</td>
                                 <td>3%</td>
-                                <td class="positive">+0.1%</td>
-                                <td class="positive">+0.0</td>
+                                <td class="negative">-0.9%</td>
+                                <td class="negative">-0.3</td>
                                 <td class="negative">-5.3%</td>
                                 <td style="border-left:2px solid #000;">47,650</td>
                                 <td>89,500</td>
@@ -6326,8 +6437,8 @@ function cmbPeerCharts(self) {
                                 <td>미디어,교육</td>
                                 <td>1조8,842억</td>
                                 <td>3%</td>
-                                <td class="negative">-0.4%</td>
-                                <td class="negative">-0.1</td>
+                                <td class="negative">-0.6%</td>
+                                <td class="negative">-0.2</td>
                                 <td class="positive">+11.7%</td>
                                 <td style="border-left:2px solid #000;">82,300</td>
                                 <td>158,500</td>
@@ -6338,8 +6449,8 @@ function cmbPeerCharts(self) {
                             <tr class="total-row">
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
                                 <td style="font-weight: 600;">85%</td>
-                                <td class="negative" style="font-weight: 600;">-2.0%</td>
-                                <td class="negative" style="font-weight: 600;">-19.7</td>
+                                <td class="negative" style="font-weight: 600;">-2.4%</td>
+                                <td class="negative" style="font-weight: 600;">-24.0</td>
                                 <td style="font-weight: 600;">-</td>
                                 <td style="border-left:2px solid #000;">-</td>
                                 <td>-</td>
@@ -6352,7 +6463,7 @@ function cmbPeerCharts(self) {
             </div>
             
             <div class="portfolio-section" data-pf-sec="5" style="display:none;">
-                <h3 class="portfolio-title">NH 목표전환형 5호 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-09-28 15:35)</span></h3>
+                <h3 class="portfolio-title">NH 목표전환형 5호 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-09-28 16:00)</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table holdings-table" style="table-layout:fixed;">
                         <colgroup>
@@ -6382,10 +6493,10 @@ function cmbPeerCharts(self) {
                                 <td>005930</td>
                                 <td>삼성전자</td>
                                 <td>반도체</td>
-                                <td>1,578조4,952억</td>
+                                <td>1,581조4,184억</td>
                                 <td>15%</td>
-                                <td class="negative">-5.4%</td>
-                                <td class="negative">-8.1</td>
+                                <td class="negative">-5.8%</td>
+                                <td class="negative">-8.6</td>
                                 <td class="positive">+5.0%</td>
                                 <td style="border-left:2px solid #000;">270,000</td>
                                 <td>362,500</td>
@@ -6398,9 +6509,9 @@ function cmbPeerCharts(self) {
                                 <td>000660</td>
                                 <td>SK하이닉스</td>
                                 <td>반도체</td>
-                                <td>1,291조5,105억</td>
+                                <td>1,294조4,325억</td>
                                 <td>15%</td>
-                                <td class="negative">-5.0%</td>
+                                <td class="negative">-5.1%</td>
                                 <td class="negative">-7.6</td>
                                 <td class="negative">-6.4%</td>
                                 <td style="border-left:2px solid #000;">1,768,000</td>
@@ -6416,8 +6527,8 @@ function cmbPeerCharts(self) {
                                 <td>기타</td>
                                 <td>166조908억</td>
                                 <td>15%</td>
-                                <td class="negative">-5.9%</td>
-                                <td class="negative">-8.9</td>
+                                <td class="negative">-6.8%</td>
+                                <td class="negative">-10.1</td>
                                 <td class="positive">+10.6%</td>
                                 <td style="border-left:2px solid #000;">207,000</td>
                                 <td>235,000</td>
@@ -6432,8 +6543,8 @@ function cmbPeerCharts(self) {
                                 <td>에너지</td>
                                 <td>18조2,609억</td>
                                 <td>6%</td>
-                                <td class="positive">+4.2%</td>
-                                <td class="positive">+2.5</td>
+                                <td class="positive">+3.6%</td>
+                                <td class="positive">+2.2</td>
                                 <td class="positive">+8.1%</td>
                                 <td style="border-left:2px solid #000;">162,200</td>
                                 <td>165,900</td>
@@ -6446,10 +6557,10 @@ function cmbPeerCharts(self) {
                                 <td>034020</td>
                                 <td>두산에너빌리티</td>
                                 <td>기계</td>
-                                <td>52조5,260억</td>
+                                <td>52조3,338억</td>
                                 <td>5%</td>
-                                <td class="positive">+0.4%</td>
-                                <td class="positive">+0.2</td>
+                                <td class="negative">-0.8%</td>
+                                <td class="negative">-0.4</td>
                                 <td class="negative">-0.5%</td>
                                 <td style="border-left:2px solid #000;">82,000</td>
                                 <td>136,400</td>
@@ -6464,8 +6575,8 @@ function cmbPeerCharts(self) {
                                 <td>건강관리</td>
                                 <td>17조5,879억</td>
                                 <td>5%</td>
-                                <td class="positive">+1.0%</td>
-                                <td class="positive">+0.5</td>
+                                <td class="positive">+0.4%</td>
+                                <td class="positive">+0.2</td>
                                 <td class="negative">-17.8%</td>
                                 <td style="border-left:2px solid #000;">252,500</td>
                                 <td>430,123</td>
@@ -6480,8 +6591,8 @@ function cmbPeerCharts(self) {
                                 <td>건설,건축관련</td>
                                 <td>13조8,749억</td>
                                 <td>5%</td>
-                                <td class="positive">+2.9%</td>
-                                <td class="positive">+1.4</td>
+                                <td class="positive">+1.9%</td>
+                                <td class="positive">+0.9</td>
                                 <td class="negative">-0.7%</td>
                                 <td style="border-left:2px solid #000;">124,600</td>
                                 <td>188,700</td>
@@ -6496,8 +6607,8 @@ function cmbPeerCharts(self) {
                                 <td>건강관리</td>
                                 <td>6조4,567억</td>
                                 <td>5%</td>
-                                <td class="negative">-3.1%</td>
-                                <td class="negative">-1.5</td>
+                                <td class="negative">-2.9%</td>
+                                <td class="negative">-1.4</td>
                                 <td class="positive">+2.3%</td>
                                 <td style="border-left:2px solid #000;">504,000</td>
                                 <td>681,979</td>
@@ -6512,8 +6623,8 @@ function cmbPeerCharts(self) {
                                 <td>건설,건축관련</td>
                                 <td>3조424억</td>
                                 <td>5%</td>
-                                <td class="positive">+2.8%</td>
-                                <td class="positive">+1.4</td>
+                                <td class="positive">+2.3%</td>
+                                <td class="positive">+1.2</td>
                                 <td class="negative">-5.2%</td>
                                 <td style="border-left:2px solid #000;">35,550</td>
                                 <td>54,700</td>
@@ -6526,10 +6637,10 @@ function cmbPeerCharts(self) {
                                 <td>035420</td>
                                 <td>NAVER</td>
                                 <td>소프트웨어</td>
-                                <td>30조691억</td>
+                                <td>29조9,018억</td>
                                 <td>3%</td>
-                                <td class="positive">+1.5%</td>
-                                <td class="positive">+0.5</td>
+                                <td class="positive">+0.9%</td>
+                                <td class="positive">+0.3</td>
                                 <td class="negative">-9.2%</td>
                                 <td style="border-left:2px solid #000;">197,700</td>
                                 <td>454,000</td>
@@ -6542,10 +6653,10 @@ function cmbPeerCharts(self) {
                                 <td>082740</td>
                                 <td>한화엔진</td>
                                 <td>산업재</td>
-                                <td>3조9,763억</td>
+                                <td>3조9,804억</td>
                                 <td>3%</td>
-                                <td class="positive">+0.1%</td>
-                                <td class="positive">+0.0</td>
+                                <td class="negative">-0.9%</td>
+                                <td class="negative">-0.3</td>
                                 <td class="negative">-5.3%</td>
                                 <td style="border-left:2px solid #000;">47,650</td>
                                 <td>89,500</td>
@@ -6560,8 +6671,8 @@ function cmbPeerCharts(self) {
                                 <td>미디어,교육</td>
                                 <td>1조8,842억</td>
                                 <td>3%</td>
-                                <td class="negative">-0.4%</td>
-                                <td class="negative">-0.1</td>
+                                <td class="negative">-0.6%</td>
+                                <td class="negative">-0.2</td>
                                 <td class="positive">+11.7%</td>
                                 <td style="border-left:2px solid #000;">82,300</td>
                                 <td>158,500</td>
@@ -6572,8 +6683,8 @@ function cmbPeerCharts(self) {
                             <tr class="total-row">
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
                                 <td style="font-weight: 600;">85%</td>
-                                <td class="negative" style="font-weight: 600;">-2.0%</td>
-                                <td class="negative" style="font-weight: 600;">-19.7</td>
+                                <td class="negative" style="font-weight: 600;">-2.4%</td>
+                                <td class="negative" style="font-weight: 600;">-24.0</td>
                                 <td style="font-weight: 600;">-</td>
                                 <td style="border-left:2px solid #000;">-</td>
                                 <td>-</td>
@@ -6586,7 +6697,7 @@ function cmbPeerCharts(self) {
             </div>
             
             <div class="portfolio-section" data-pf-sec="6" style="display:none;">
-                <h3 class="portfolio-title">한투 성과모집형 2차 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-09-28 15:35)</span></h3>
+                <h3 class="portfolio-title">한투 성과모집형 2차 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-09-28 16:00)</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table holdings-table" style="table-layout:fixed;">
                         <colgroup>
@@ -6616,10 +6727,10 @@ function cmbPeerCharts(self) {
                                 <td>005930</td>
                                 <td>삼성전자</td>
                                 <td>반도체</td>
-                                <td>1,578조4,952억</td>
+                                <td>1,581조4,184억</td>
                                 <td>11%</td>
-                                <td class="negative">-5.4%</td>
-                                <td class="negative">-6.0</td>
+                                <td class="negative">-5.8%</td>
+                                <td class="negative">-6.3</td>
                                 <td class="negative">-5.8%</td>
                                 <td style="border-left:2px solid #000;">270,000</td>
                                 <td>362,500</td>
@@ -6634,8 +6745,8 @@ function cmbPeerCharts(self) {
                                 <td>자동차</td>
                                 <td>2조9,665억</td>
                                 <td>8%</td>
-                                <td class="positive">+5.8%</td>
-                                <td class="positive">+4.7</td>
+                                <td class="positive">+6.3%</td>
+                                <td class="positive">+5.0</td>
                                 <td class="positive">+6.3%</td>
                                 <td style="border-left:2px solid #000;">50,700</td>
                                 <td>62,800</td>
@@ -6650,8 +6761,8 @@ function cmbPeerCharts(self) {
                                 <td>기타</td>
                                 <td>166조908억</td>
                                 <td>6%</td>
-                                <td class="negative">-5.9%</td>
-                                <td class="negative">-3.5</td>
+                                <td class="negative">-6.8%</td>
+                                <td class="negative">-4.1</td>
                                 <td class="negative">-6.8%</td>
                                 <td style="border-left:2px solid #000;">207,000</td>
                                 <td>235,000</td>
@@ -6666,8 +6777,8 @@ function cmbPeerCharts(self) {
                                 <td>건강관리</td>
                                 <td>6조4,567억</td>
                                 <td>6%</td>
-                                <td class="negative">-3.1%</td>
-                                <td class="negative">-1.8</td>
+                                <td class="negative">-2.9%</td>
+                                <td class="negative">-1.7</td>
                                 <td class="negative">-2.9%</td>
                                 <td style="border-left:2px solid #000;">504,000</td>
                                 <td>681,979</td>
@@ -6680,10 +6791,10 @@ function cmbPeerCharts(self) {
                                 <td>034020</td>
                                 <td>두산에너빌리티</td>
                                 <td>기계</td>
-                                <td>52조5,260억</td>
+                                <td>52조3,338억</td>
                                 <td>5%</td>
-                                <td class="positive">+0.4%</td>
-                                <td class="positive">+0.2</td>
+                                <td class="negative">-0.8%</td>
+                                <td class="negative">-0.4</td>
                                 <td class="negative">-0.8%</td>
                                 <td style="border-left:2px solid #000;">82,000</td>
                                 <td>136,400</td>
@@ -6698,8 +6809,8 @@ function cmbPeerCharts(self) {
                                 <td>은행</td>
                                 <td>26조8,190억</td>
                                 <td>5%</td>
-                                <td class="positive">+3.0%</td>
-                                <td class="positive">+1.5</td>
+                                <td class="positive">+2.5%</td>
+                                <td class="positive">+1.3</td>
                                 <td class="positive">+2.5%</td>
                                 <td style="border-left:2px solid #000;">36,400</td>
                                 <td>40,800</td>
@@ -6714,8 +6825,8 @@ function cmbPeerCharts(self) {
                                 <td>에너지</td>
                                 <td>18조2,609억</td>
                                 <td>5%</td>
-                                <td class="positive">+4.2%</td>
-                                <td class="positive">+2.1</td>
+                                <td class="positive">+3.6%</td>
+                                <td class="positive">+1.8</td>
                                 <td class="positive">+3.6%</td>
                                 <td style="border-left:2px solid #000;">162,200</td>
                                 <td>165,900</td>
@@ -6730,8 +6841,8 @@ function cmbPeerCharts(self) {
                                 <td>건설,건축관련</td>
                                 <td>13조8,749억</td>
                                 <td>5%</td>
-                                <td class="positive">+2.9%</td>
-                                <td class="positive">+1.4</td>
+                                <td class="positive">+1.9%</td>
+                                <td class="positive">+0.9</td>
                                 <td class="positive">+1.9%</td>
                                 <td style="border-left:2px solid #000;">124,600</td>
                                 <td>188,700</td>
@@ -6746,8 +6857,8 @@ function cmbPeerCharts(self) {
                                 <td>은행</td>
                                 <td>5조751억</td>
                                 <td>4%</td>
-                                <td class="positive">+3.6%</td>
-                                <td class="positive">+1.4</td>
+                                <td class="positive">+4.1%</td>
+                                <td class="positive">+1.6</td>
                                 <td class="positive">+4.1%</td>
                                 <td style="border-left:2px solid #000;">16,540</td>
                                 <td>22,650</td>
@@ -6760,10 +6871,10 @@ function cmbPeerCharts(self) {
                                 <td>082740</td>
                                 <td>한화엔진</td>
                                 <td>산업재</td>
-                                <td>3조9,763억</td>
+                                <td>3조9,804억</td>
                                 <td>3%</td>
-                                <td class="positive">+0.1%</td>
-                                <td class="positive">+0.0</td>
+                                <td class="negative">-0.9%</td>
+                                <td class="negative">-0.3</td>
                                 <td class="negative">-0.9%</td>
                                 <td style="border-left:2px solid #000;">47,650</td>
                                 <td>89,500</td>
@@ -6778,8 +6889,8 @@ function cmbPeerCharts(self) {
                                 <td>건설,건축관련</td>
                                 <td>3조424억</td>
                                 <td>3%</td>
-                                <td class="positive">+2.8%</td>
-                                <td class="positive">+0.8</td>
+                                <td class="positive">+2.3%</td>
+                                <td class="positive">+0.7</td>
                                 <td class="positive">+2.3%</td>
                                 <td style="border-left:2px solid #000;">35,550</td>
                                 <td>54,700</td>
@@ -6794,8 +6905,8 @@ function cmbPeerCharts(self) {
                                 <td>미디어,교육</td>
                                 <td>1조8,842억</td>
                                 <td>3%</td>
-                                <td class="negative">-0.4%</td>
-                                <td class="negative">-0.1</td>
+                                <td class="negative">-0.6%</td>
+                                <td class="negative">-0.2</td>
                                 <td class="negative">-0.6%</td>
                                 <td style="border-left:2px solid #000;">82,300</td>
                                 <td>158,500</td>
@@ -6808,9 +6919,9 @@ function cmbPeerCharts(self) {
                                 <td>000660</td>
                                 <td>SK하이닉스</td>
                                 <td>반도체</td>
-                                <td>1,291조5,105억</td>
+                                <td>1,294조4,325억</td>
                                 <td>2%</td>
-                                <td class="negative">-5.0%</td>
+                                <td class="negative">-5.1%</td>
                                 <td class="negative">-1.0</td>
                                 <td class="negative">-5.1%</td>
                                 <td style="border-left:2px solid #000;">1,768,000</td>
@@ -6822,8 +6933,8 @@ function cmbPeerCharts(self) {
                             <tr class="total-row">
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
                                 <td style="font-weight: 600;">66%</td>
-                                <td class="negative" style="font-weight: 600;">-0.0%</td>
-                                <td class="negative" style="font-weight: 600;">-0.3</td>
+                                <td class="negative" style="font-weight: 600;">-0.3%</td>
+                                <td class="negative" style="font-weight: 600;">-2.6</td>
                                 <td style="font-weight: 600;">-</td>
                                 <td style="border-left:2px solid #000;">-</td>
                                 <td>-</td>
@@ -6836,7 +6947,7 @@ function cmbPeerCharts(self) {
             </div>
             
             <div class="portfolio-section" data-pf-sec="7" style="display:none;">
-                <h3 class="portfolio-title">한투 성과모집형 1차 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-09-28 15:35)</span></h3>
+                <h3 class="portfolio-title">한투 성과모집형 1차 <span style="font-size:0.9rem;font-weight:400;color:#000;">(2026-09-28 16:00)</span></h3>
                 <div class="table-container">
                     <table class="portfolio-table holdings-table" style="table-layout:fixed;">
                         <colgroup>
@@ -6866,10 +6977,10 @@ function cmbPeerCharts(self) {
                                 <td>005930</td>
                                 <td>삼성전자</td>
                                 <td>반도체</td>
-                                <td>1,578조4,952억</td>
+                                <td>1,581조4,184억</td>
                                 <td>11%</td>
-                                <td class="negative">-5.4%</td>
-                                <td class="negative">-6.0</td>
+                                <td class="negative">-5.8%</td>
+                                <td class="negative">-6.3</td>
                                 <td class="positive">+8.0%</td>
                                 <td style="border-left:2px solid #000;">270,000</td>
                                 <td>362,500</td>
@@ -6884,8 +6995,8 @@ function cmbPeerCharts(self) {
                                 <td>자동차</td>
                                 <td>2조9,665억</td>
                                 <td>8%</td>
-                                <td class="positive">+5.8%</td>
-                                <td class="positive">+4.7</td>
+                                <td class="positive">+6.3%</td>
+                                <td class="positive">+5.0</td>
                                 <td class="positive">+7.7%</td>
                                 <td style="border-left:2px solid #000;">50,700</td>
                                 <td>62,800</td>
@@ -6900,8 +7011,8 @@ function cmbPeerCharts(self) {
                                 <td>기타</td>
                                 <td>166조908억</td>
                                 <td>6%</td>
-                                <td class="negative">-5.9%</td>
-                                <td class="negative">-3.5</td>
+                                <td class="negative">-6.8%</td>
+                                <td class="negative">-4.1</td>
                                 <td class="positive">+8.7%</td>
                                 <td style="border-left:2px solid #000;">207,000</td>
                                 <td>235,000</td>
@@ -6916,8 +7027,8 @@ function cmbPeerCharts(self) {
                                 <td>건강관리</td>
                                 <td>6조4,567억</td>
                                 <td>6%</td>
-                                <td class="negative">-3.1%</td>
-                                <td class="negative">-1.8</td>
+                                <td class="negative">-2.9%</td>
+                                <td class="negative">-1.7</td>
                                 <td class="positive">+1.9%</td>
                                 <td style="border-left:2px solid #000;">504,000</td>
                                 <td>681,979</td>
@@ -6930,10 +7041,10 @@ function cmbPeerCharts(self) {
                                 <td>034020</td>
                                 <td>두산에너빌리티</td>
                                 <td>기계</td>
-                                <td>52조5,260억</td>
+                                <td>52조3,338억</td>
                                 <td>5%</td>
-                                <td class="positive">+0.4%</td>
-                                <td class="positive">+0.2</td>
+                                <td class="negative">-0.8%</td>
+                                <td class="negative">-0.4</td>
                                 <td class="negative">-1.5%</td>
                                 <td style="border-left:2px solid #000;">82,000</td>
                                 <td>136,400</td>
@@ -6948,8 +7059,8 @@ function cmbPeerCharts(self) {
                                 <td>은행</td>
                                 <td>26조8,190억</td>
                                 <td>5%</td>
-                                <td class="positive">+3.0%</td>
-                                <td class="positive">+1.5</td>
+                                <td class="positive">+2.5%</td>
+                                <td class="positive">+1.3</td>
                                 <td class="positive">+3.7%</td>
                                 <td style="border-left:2px solid #000;">36,400</td>
                                 <td>40,800</td>
@@ -6964,8 +7075,8 @@ function cmbPeerCharts(self) {
                                 <td>에너지</td>
                                 <td>18조2,609억</td>
                                 <td>5%</td>
-                                <td class="positive">+4.2%</td>
-                                <td class="positive">+2.1</td>
+                                <td class="positive">+3.6%</td>
+                                <td class="positive">+1.8</td>
                                 <td class="positive">+8.7%</td>
                                 <td style="border-left:2px solid #000;">162,200</td>
                                 <td>165,900</td>
@@ -6980,8 +7091,8 @@ function cmbPeerCharts(self) {
                                 <td>건설,건축관련</td>
                                 <td>13조8,749억</td>
                                 <td>5%</td>
-                                <td class="positive">+2.9%</td>
-                                <td class="positive">+1.4</td>
+                                <td class="positive">+1.9%</td>
+                                <td class="positive">+0.9</td>
                                 <td class="negative">-1.2%</td>
                                 <td style="border-left:2px solid #000;">124,600</td>
                                 <td>188,700</td>
@@ -6996,8 +7107,8 @@ function cmbPeerCharts(self) {
                                 <td>은행</td>
                                 <td>5조751억</td>
                                 <td>4%</td>
-                                <td class="positive">+3.6%</td>
-                                <td class="positive">+1.4</td>
+                                <td class="positive">+4.1%</td>
+                                <td class="positive">+1.6</td>
                                 <td class="positive">+3.8%</td>
                                 <td style="border-left:2px solid #000;">16,540</td>
                                 <td>22,650</td>
@@ -7010,10 +7121,10 @@ function cmbPeerCharts(self) {
                                 <td>082740</td>
                                 <td>한화엔진</td>
                                 <td>산업재</td>
-                                <td>3조9,763억</td>
+                                <td>3조9,804억</td>
                                 <td>3%</td>
-                                <td class="positive">+0.1%</td>
-                                <td class="positive">+0.0</td>
+                                <td class="negative">-0.9%</td>
+                                <td class="negative">-0.3</td>
                                 <td class="negative">-5.3%</td>
                                 <td style="border-left:2px solid #000;">47,650</td>
                                 <td>89,500</td>
@@ -7028,8 +7139,8 @@ function cmbPeerCharts(self) {
                                 <td>건설,건축관련</td>
                                 <td>3조424억</td>
                                 <td>3%</td>
-                                <td class="positive">+2.8%</td>
-                                <td class="positive">+0.8</td>
+                                <td class="positive">+2.3%</td>
+                                <td class="positive">+0.7</td>
                                 <td class="negative">-5.2%</td>
                                 <td style="border-left:2px solid #000;">35,550</td>
                                 <td>54,700</td>
@@ -7044,8 +7155,8 @@ function cmbPeerCharts(self) {
                                 <td>미디어,교육</td>
                                 <td>1조8,842억</td>
                                 <td>3%</td>
-                                <td class="negative">-0.4%</td>
-                                <td class="negative">-0.1</td>
+                                <td class="negative">-0.6%</td>
+                                <td class="negative">-0.2</td>
                                 <td class="positive">+9.1%</td>
                                 <td style="border-left:2px solid #000;">82,300</td>
                                 <td>158,500</td>
@@ -7058,9 +7169,9 @@ function cmbPeerCharts(self) {
                                 <td>000660</td>
                                 <td>SK하이닉스</td>
                                 <td>반도체</td>
-                                <td>1,291조5,105억</td>
+                                <td>1,294조4,325억</td>
                                 <td>2%</td>
-                                <td class="negative">-5.0%</td>
+                                <td class="negative">-5.1%</td>
                                 <td class="negative">-1.0</td>
                                 <td class="negative">-2.5%</td>
                                 <td style="border-left:2px solid #000;">1,768,000</td>
@@ -7072,8 +7183,8 @@ function cmbPeerCharts(self) {
                             <tr class="total-row">
                                 <td colspan="5" style="text-align: right; font-weight: 600;">합계</td>
                                 <td style="font-weight: 600;">66%</td>
-                                <td class="negative" style="font-weight: 600;">-0.0%</td>
-                                <td class="negative" style="font-weight: 600;">-0.3</td>
+                                <td class="negative" style="font-weight: 600;">-0.3%</td>
+                                <td class="negative" style="font-weight: 600;">-2.6</td>
                                 <td style="font-weight: 600;">-</td>
                                 <td style="border-left:2px solid #000;">-</td>
                                 <td>-</td>
