@@ -1,6 +1,15 @@
 {
-  "updated_at": "2026-09-29 16:30 KST",
+  "updated_at": "2026-09-29 17:45 KST",
   "items": [
+    {
+      "rcept_no": "20260929000668",
+      "code": "128940",
+      "name": "한미약품",
+      "date": "2026-09-29",
+      "title": "주식등의대량보유상황보고서(일반)",
+      "summary": "",
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20260929000668"
+    },
     {
       "rcept_no": "20260929000085",
       "code": "128940",
