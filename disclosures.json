@@ -1,6 +1,15 @@
 {
-  "updated_at": "2026-10-02 16:30 KST",
+  "updated_at": "2026-10-02 17:45 KST",
   "items": [
+    {
+      "rcept_no": "20261002800981",
+      "code": "005930",
+      "name": "삼성전자",
+      "date": "2026-10-02",
+      "title": "최대주주등소유주식변동신고서",
+      "summary": "",
+      "url": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261002800981"
+    },
     {
       "rcept_no": "20261002800669",
       "code": "138930",
